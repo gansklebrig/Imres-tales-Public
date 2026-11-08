@@ -1,0 +1,1390 @@
+{
+ "vorab:0": {
+  "marken": [
+   {
+    "nach": "oder gar ausgelassen …",
+    "min": 0.9,
+    "art": "pointe",
+    "warum": "Gag-Steigerung ausklingen lassen"
+   },
+   {
+    "nach": "kennt die wahre Geschichte …",
+    "min": 0.9,
+    "art": "spannung",
+    "warum": "geheimnisvoller Moment vor dem Schlusssatz"
+   }
+  ],
+  "ende": 1.8
+ },
+ "I:1": {
+  "marken": [
+   {
+    "nach": "und spürte:",
+    "min": 0.6,
+    "art": "spannung",
+    "warum": "Atemholen vor dem großen Satz"
+   }
+  ],
+  "ende": 1.3
+ },
+ "I:2": {
+  "marken": [
+   {
+    "nach": "bereit für jeden Streit.",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "trockener Kommentar"
+   },
+   {
+    "nach": "was in ihm vorging …",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "Geheimnis um den Darkin"
+   }
+  ],
+  "ende": 1.2
+ },
+ "I:3": {
+  "marken": [
+   {
+    "nach": "bei den Worten „magische Schmiede“.",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "Gag mit Zwergenstimme"
+   },
+   {
+    "nach": "grimmige Züge auf.",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "Vorbereitung der Pointe"
+   }
+  ],
+  "ende": 1.2
+ },
+ "I:5": {
+  "marken": [],
+  "ende": 1.8
+ },
+ "I:8": {
+  "marken": [
+   {
+    "nach": "über langweilige Reisen zu dichten.",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "Gag vor dem Umschwung"
+   },
+   {
+    "nach": "mit großer Überzeugung ins Leere.",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "Pointe vor Nachklapp"
+   },
+   {
+    "nach": "Meine eingeschlossen.",
+    "min": 0.9,
+    "art": "pointe",
+    "warum": "Nachklapp-Gag"
+   }
+  ],
+  "ende": 1.8
+ },
+ "I:12": {
+  "marken": [],
+  "ende": 1.0
+ },
+ "I:13": {
+  "marken": [
+   {
+    "nach": "teils mit allem anderen als Zurückhaltung.",
+    "min": 0.6,
+    "art": "pointe",
+    "warum": "Kontrast wirken lassen"
+   },
+   {
+    "nach": "lasse ich lieber offen.",
+    "min": 0.9,
+    "art": "pointe",
+    "warum": "Augenzwinkern"
+   }
+  ],
+  "ende": 1.8
+ },
+ "I:16": {
+  "marken": [
+   {
+    "nach": "ab in die Taverne!",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "Gag"
+   },
+   {
+    "nach": "und schnell war klar:",
+    "min": 0.6,
+    "art": "spannung",
+    "warum": "vor der Erkenntnis"
+   }
+  ],
+  "ende": 1.3
+ },
+ "I:17": {
+  "marken": [
+   {
+    "nach": "brachte, natürlich, ich.",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "eitle Pointe"
+   },
+   {
+    "nach": "gleich am Rand des Dorfes.",
+    "min": 0.8,
+    "art": "enthuellung",
+    "warum": "Enthüllung sacken lassen"
+   }
+  ],
+  "ende": 1.2
+ },
+ "I:18": {
+  "marken": [
+   {
+    "nach": "und vielleicht ein bisschen herablassend …",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "Untertreibungs-Gag"
+   }
+  ],
+  "ende": 1.8
+ },
+ "I:21": {
+  "marken": [
+   {
+    "nach": "in das alte, mit Ranken umwachsene Schloss verdanken wir",
+    "min": 0.6,
+    "art": "spannung",
+    "warum": "vor der Enthüllung Rex"
+   },
+   {
+    "nach": "und wir hatten unseren Eingang.",
+    "min": 1.0,
+    "art": "pointe",
+    "warum": "Aufzählungs-Pointe, danach Stimmungswechsel"
+   }
+  ],
+  "ende": 1.1
+ },
+ "I:22": {
+  "marken": [
+   {
+    "nach": "nicht weiter aufgefallen wäre.",
+    "min": 0.9,
+    "art": "pointe",
+    "warum": "trockener Gag"
+   }
+  ],
+  "ende": 1.0
+ },
+ "I:23": {
+  "marken": [
+   {
+    "nach": "stieß ich jedoch gegen einen der Schränke,",
+    "min": 0.6,
+    "art": "spannung",
+    "warum": "Schreckmoment anbahnen"
+   }
+  ],
+  "ende": 1.5
+ },
+ "I:24": {
+  "marken": [
+   {
+    "nach": "der Anführer der Roten Roben!",
+    "min": 0.9,
+    "art": "enthuellung",
+    "warum": "Auftritt Glasstab"
+   },
+   {
+    "nach": "bereit wären für Arbeit …",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "glaubt er es?"
+   }
+  ],
+  "ende": 1.1
+ },
+ "I:25": {
+  "marken": [
+   {
+    "nach": "wohl wie zwölf aussahen,",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "Gag vor dem Umschwung"
+   }
+  ],
+  "ende": 1.0
+ },
+ "I:26": {
+  "marken": [],
+  "ende": 1.3
+ },
+ "I:28": {
+  "marken": [
+   {
+    "nach": "Glasstab von einer gewissen",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "vor dem Wort Spinne"
+   },
+   {
+    "nach": "eine geheime Organisation?",
+    "min": 0.9,
+    "art": "spannung",
+    "warum": "Rätsel wirken lassen"
+   }
+  ],
+  "ende": 1.2
+ },
+ "I:29": {
+  "marken": [
+   {
+    "nach": "und keine war gut.",
+    "min": 0.9,
+    "art": "pointe",
+    "warum": "trockene Pointe"
+   }
+  ],
+  "ende": 1.4
+ },
+ "I:31": {
+  "marken": [
+   {
+    "nach": "Sagen wir so:",
+    "min": 0.6,
+    "art": "spannung",
+    "warum": "Setup"
+   }
+  ],
+  "ende": 1.8
+ },
+ "I:33": {
+  "marken": [
+   {
+    "nach": "ist ein wenig …",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "vor nebelig"
+   },
+   {
+    "nach": "nebelig.",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "Pointe"
+   }
+  ],
+  "ende": 1.2
+ },
+ "I:36": {
+  "marken": [
+   {
+    "nach": "Nichts regte sich.",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "Stille hörbar machen"
+   }
+  ],
+  "ende": 1.2
+ },
+ "I:37": {
+  "marken": [
+   {
+    "nach": "der offenbar etwas bewachte.",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "Spannung vor dem Weiterschleichen"
+   }
+  ],
+  "ende": 1.0
+ },
+ "I:38": {
+  "marken": [
+   {
+    "nach": "mit sicherem Blick zu,",
+    "min": 0.7,
+    "art": "spannung",
+    "warum": "Moment vor dem Aufstoßen"
+   }
+  ],
+  "ende": 1.3
+ },
+ "I:39": {
+  "marken": [
+   {
+    "nach": "die uns offenbar erwartet hatte …",
+    "min": 1.0,
+    "art": "enthuellung",
+    "warum": "Schock: Falle"
+   },
+   {
+    "nach": "eine sah aus wie",
+    "min": 0.7,
+    "art": "spannung",
+    "warum": "vor Gundren"
+   },
+   {
+    "nach": "Gundren?!",
+    "min": 1.0,
+    "art": "enthuellung",
+    "warum": "Überraschung sacken lassen"
+   }
+  ],
+  "ende": 1.1
+ },
+ "I:41": {
+  "marken": [
+   {
+    "nach": "ein dumpfes Knurren.",
+    "min": 0.9,
+    "art": "spannung",
+    "warum": "vor dem Bugbear"
+   }
+  ],
+  "ende": 1.1
+ },
+ "I:43": {
+  "marken": [
+   {
+    "nach": "ohnehin schon blutiges Bein.",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "Rex-Gag"
+   }
+  ],
+  "ende": 1.1
+ },
+ "I:44": {
+  "marken": [
+   {
+    "nach": "Die Krallen blitzten kurz im Fackelschein",
+    "min": 0.7,
+    "art": "spannung",
+    "warum": "Zeitlupe vor dem Treffer"
+   }
+  ],
+  "ende": 1.2
+ },
+ "I:45": {
+  "marken": [
+   {
+    "nach": "und den anderen tief in den Rücken!",
+    "min": 1.0,
+    "art": "enthuellung",
+    "warum": "Schlag wirken lassen"
+   }
+  ],
+  "ende": 1.2
+ },
+ "I:46": {
+  "marken": [
+   {
+    "nach": "„Die Spinne wird euch kriegen …“,",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "Drohung wirken lassen"
+   }
+  ],
+  "ende": 1.3
+ },
+ "I:48": {
+  "marken": [
+   {
+    "nach": "als Gundrens Zwillingsbruder",
+    "min": 0.6,
+    "art": "spannung",
+    "warum": "vor der Enthüllung"
+   },
+   {
+    "nach": "und tragen sogar dieselbe Kleidung.",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "Gag"
+   }
+  ]
+ },
+ "I:50": {
+  "marken": [],
+  "ende": 1.8
+ },
+ "I:52": {
+  "marken": [
+   {
+    "nach": "auf den alles hinausgelaufen war:",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "vor dem Auftrag"
+   }
+  ],
+  "ende": 1.4
+ },
+ "I:54": {
+  "marken": [
+   {
+    "nach": "Wie viele es genau waren?",
+    "min": 0.6,
+    "art": "spannung",
+    "warum": "Setup"
+   },
+   {
+    "nach": "Sehr viele.",
+    "min": 0.8,
+    "art": "aufzaehlung",
+    "warum": "Aufzählungs-Steigerung"
+   }
+  ],
+  "ende": 1.3
+ },
+ "I:55": {
+  "marken": [
+   {
+    "nach": "eine alte Bekannte:",
+    "min": 0.7,
+    "art": "spannung",
+    "warum": "vor Nezna"
+   },
+   {
+    "nach": "sich in Neznas Rücken schob.",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "Spannung vor dem Stich"
+   },
+   {
+    "nach": "seinen Dolch tief in den Rücken!",
+    "min": 1.0,
+    "art": "enthuellung",
+    "warum": "Schockmoment"
+   }
+  ],
+  "ende": 1.4
+ },
+ "I:56": {
+  "marken": [],
+  "ende": 1.2
+ },
+ "I:57": {
+  "marken": [
+   {
+    "nach": "doch am Ende standen wir vor ihr:",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "vor der Schmiede"
+   },
+   {
+    "nach": "umgeben von leuchtenden Runen.",
+    "min": 1.0,
+    "art": "emotion",
+    "warum": "Ehrfurcht"
+   },
+   {
+    "nach": "etwas Kluges zu sagen.",
+    "min": 0.9,
+    "art": "emotion",
+    "warum": "Stille wirken lassen"
+   }
+  ],
+  "ende": 1.3
+ },
+ "I:58": {
+  "marken": [],
+  "ende": 1.2
+ },
+ "I:59": {
+  "marken": [
+   {
+    "nach": "noch nie etwas habe anfassen sehen.",
+    "min": 0.9,
+    "art": "pointe",
+    "warum": "vor dem Nachklapp"
+   }
+  ],
+  "ende": 1.5
+ },
+ "I:62": {
+  "marken": [],
+  "ende": 1.8
+ },
+ "I:64": {
+  "marken": [],
+  "ende": 1.0
+ },
+ "I:65": {
+  "marken": [
+   {
+    "nach": "Ganz nach Protokoll lief das nicht.",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "trockener Einstieg"
+   }
+  ],
+  "ende": 1.0
+ },
+ "I:66": {
+  "marken": [],
+  "ende": 1.0
+ },
+ "I:67": {
+  "marken": [],
+  "ende": 1.8
+ },
+ "I:69": {
+  "marken": [
+   {
+    "nach": "Ein Barde in den Reihen der Lords.",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "Barradin genießt"
+   }
+  ],
+  "ende": 1.5
+ },
+ "I:71": {
+  "marken": [],
+  "ende": 1.0
+ },
+ "I:72": {
+  "marken": [
+   {
+    "nach": "sofort unter die Haut kroch:",
+    "min": 0.7,
+    "art": "spannung",
+    "warum": "vor dem Anblick"
+   }
+  ],
+  "ende": 1.8
+ },
+ "I:74": {
+  "marken": [
+   {
+    "nach": "was sie dort erwarten sollte …",
+    "min": 0.9,
+    "art": "spannung",
+    "warum": "Aufstieg"
+   },
+   {
+    "nach": "auf dem Plateau landete …",
+    "min": 0.9,
+    "art": "spannung",
+    "warum": "vor dem Drachen"
+   },
+   {
+    "nach": "darauf warteten, uns zu zerfetzen …",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "vor dem Namen"
+   }
+  ],
+  "ende": 1.3
+ },
+ "I:75": {
+  "marken": [
+   {
+    "nach": "Dann kam mein großer Moment:",
+    "min": 0.6,
+    "art": "pointe",
+    "warum": "eitles Setup"
+   },
+   {
+    "nach": "verpasste ihm so den finalen Stoß!",
+    "min": 1.0,
+    "art": "enthuellung",
+    "warum": "Sieg wirken lassen"
+   }
+  ],
+  "ende": 1.1
+ },
+ "I:76": {
+  "marken": [
+   {
+    "nach": "und dann natürlich die Beute einzusammeln.",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "vor dem Echo-Gag"
+   }
+  ],
+  "ende": 1.8
+ },
+ "I:80": {
+  "marken": [
+   {
+    "nach": "Er erkannte darin seinen Onkel.",
+    "min": 1.0,
+    "art": "enthuellung",
+    "warum": "Enthüllung"
+   },
+   {
+    "nach": "Mehr hat er dazu nicht gesagt …",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "vor dem Nachklapp"
+   }
+  ],
+  "ende": 1.4
+ },
+ "I:82": {
+  "marken": [
+   {
+    "nach": "stellten sich uns Blights in den Weg!",
+    "min": 0.8,
+    "art": "enthuellung",
+    "warum": "Auftritt der Blights"
+   }
+  ]
+ },
+ "I:83": {
+  "marken": [
+   {
+    "nach": "noch mehr Blights …",
+    "min": 0.9,
+    "art": "pointe",
+    "warum": "Aufzählungs-Pointe"
+   },
+   {
+    "nach": "in Asche verwandelten.",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "vor dem Nachklapp"
+   }
+  ],
+  "ende": 1.2
+ },
+ "I:86": {
+  "marken": [
+   {
+    "nach": "Keiner von uns ahnte etwas Böses,",
+    "min": 0.7,
+    "art": "spannung",
+    "warum": "Vorahnung"
+   }
+  ],
+  "ende": 2.2
+ },
+ "II:2": {
+  "marken": [
+   {
+    "nach": "mir wurde schwarz vor Augen.",
+    "min": 1.0,
+    "art": "szene",
+    "warum": "Ohnmacht, Zeitsprung"
+   },
+   {
+    "nach": "sollten wir erst später sehen:",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "vor der Enthüllung"
+   }
+  ],
+  "ende": 1.6
+ },
+ "II:4": {
+  "marken": [],
+  "ende": 1.0
+ },
+ "II:5": {
+  "marken": [
+   {
+    "nach": "mein Kopf begann zu schmerzen.",
+    "min": 0.8,
+    "art": "emotion",
+    "warum": "Schmerz sacken lassen"
+   }
+  ]
+ },
+ "II:7": {
+  "marken": [],
+  "ende": 1.6
+ },
+ "II:9": {
+  "marken": [
+   {
+    "nach": "in der riesigen Höhle widerhallte.",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "trockener Gag vor dem Umschwung"
+   }
+  ],
+  "ende": 1.2
+ },
+ "II:10": {
+  "marken": [
+   {
+    "nach": "anschwellendes Summen zu hören.",
+    "min": 0.7,
+    "art": "spannung",
+    "warum": "Bedrohung kommt"
+   }
+  ],
+  "ende": 1.1
+ },
+ "II:12": {
+  "marken": [
+   {
+    "nach": "einzigen, gewaltigen Stich …",
+    "min": 1.2,
+    "art": "enthuellung",
+    "warum": "Schock: Friedrich getroffen"
+   }
+  ],
+  "ende": 1.5
+ },
+ "II:13": {
+  "marken": [
+   {
+    "nach": "Doch die Klingen glitten am Chitinpanzer ab.",
+    "min": 0.6,
+    "art": "spannung",
+    "warum": "Rückschlag"
+   }
+  ]
+ },
+ "II:14": {
+  "marken": [
+   {
+    "nach": "– unglaublich!",
+    "min": 0.8,
+    "art": "emotion",
+    "warum": "Staunen"
+   }
+  ],
+  "ende": 1.2
+ },
+ "II:15": {
+  "marken": [
+   {
+    "nach": "Auseinandersetzung im Gange …",
+    "min": 0.8,
+    "art": "szene",
+    "warum": "Zeitsprung"
+   }
+  ],
+  "ende": 1.0
+ },
+ "II:17": {
+  "marken": [
+   {
+    "nach": "als ich dahinter Ilvara erkannte,",
+    "min": 0.7,
+    "art": "enthuellung",
+    "warum": "Wiedererkennen"
+   }
+  ],
+  "ende": 1.0
+ },
+ "II:19": {
+  "marken": [
+   {
+    "nach": "gelandet und entkommen.",
+    "min": 0.9,
+    "art": "enthuellung",
+    "warum": "Flucht sacken lassen"
+   },
+   {
+    "nach": "Schon wieder diese Spinne.",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "vor dem Nachklapp"
+   }
+  ],
+  "ende": 1.3
+ },
+ "II:20": {
+  "marken": [
+   {
+    "nach": "und ähnliche Schmierereien.",
+    "min": 0.9,
+    "art": "pointe",
+    "warum": "Gag"
+   },
+   {
+    "nach": "Befreiend?",
+    "min": 0.6,
+    "art": "aufzaehlung",
+    "warum": "vor der Schlusspointe"
+   }
+  ],
+  "ende": 1.8
+ },
+ "II:22": {
+  "marken": [],
+  "ende": 1.1
+ },
+ "II:24": {
+  "marken": [
+   {
+    "nach": "wartete eine Überraschung:",
+    "min": 0.7,
+    "art": "spannung",
+    "warum": "vor Fagas"
+   }
+  ]
+ },
+ "II:25": {
+  "marken": [
+   {
+    "nach": "einer längst vergangenen Hochkultur.",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "vor dem Echo-Gag"
+   }
+  ],
+  "ende": 1.8
+ },
+ "II:27": {
+  "marken": [
+   {
+    "nach": "vergaß ich fast, wo wir waren.",
+    "min": 1.0,
+    "art": "emotion",
+    "warum": "Schönheit wirken lassen"
+   }
+  ]
+ },
+ "II:28": {
+  "marken": [
+   {
+    "nach": "hielten diese letzten Häuser noch fest.",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "Abgrund"
+   }
+  ],
+  "ende": 1.2
+ },
+ "II:30": {
+  "marken": [],
+  "ende": 1.2
+ },
+ "II:31": {
+  "marken": [
+   {
+    "nach": "Mir lief es eiskalt den Rücken hinunter.",
+    "min": 0.7,
+    "art": "emotion",
+    "warum": "Gänsehaut"
+   },
+   {
+    "nach": "ist bis heute ein Geheimnis.",
+    "min": 0.9,
+    "art": "spannung",
+    "warum": "Rätsel"
+   }
+  ],
+  "ende": 1.0
+ },
+ "II:32": {
+  "marken": [
+   {
+    "nach": "einen furchterregenden Gegner:",
+    "min": 0.7,
+    "art": "spannung",
+    "warum": "vor dem Wraith"
+   },
+   {
+    "nach": "einen Wraith.",
+    "min": 0.9,
+    "art": "enthuellung",
+    "warum": "Gegner sacken lassen"
+   },
+   {
+    "nach": "von der schon Legenden erzählen:",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "vor Dawnbringer"
+   }
+  ],
+  "ende": 1.4
+ },
+ "II:33": {
+  "marken": [
+   {
+    "nach": "sonst so regungslosen Gesicht lesen:",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "vor Vorfreude"
+   },
+   {
+    "nach": "Vorfreude.",
+    "min": 0.7,
+    "art": "emotion",
+    "warum": "Wort wirken lassen"
+   }
+  ],
+  "ende": 1.9
+ },
+ "II:36": {
+  "marken": [
+   {
+    "nach": "ein Erzpriester. Ploopploopeen.",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "Fischstimme"
+   },
+   {
+    "nach": "Er hat es mir nicht übelgenommen.",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "vor dem Nachklapp"
+   },
+   {
+    "nach": "Glaube ich.",
+    "min": 1.0,
+    "art": "pointe",
+    "warum": "Pointe"
+   },
+   {
+    "nach": "bete einen falschen Gott an:",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "vor Demogorgon"
+   },
+   {
+    "nach": "an: Demogorgon.",
+    "min": 1.0,
+    "art": "enthuellung",
+    "warum": "Name sacken lassen"
+   }
+  ],
+  "ende": 1.1
+ },
+ "II:37": {
+  "marken": [
+   {
+    "nach": "bis wir das Stadtzentrum erreichten.",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "trockener Bruch"
+   }
+  ],
+  "ende": 1.8
+ },
+ "II:39": {
+  "marken": [
+   {
+    "nach": "herrschte das reinste Chaos.",
+    "min": 0.9,
+    "art": "szene",
+    "warum": "Stimmungswechsel"
+   },
+   {
+    "nach": "In diesem Chaos verloren wir Fagas.",
+    "min": 1.0,
+    "art": "emotion",
+    "warum": "Verlust"
+   }
+  ],
+  "ende": 1.6
+ },
+ "II:41": {
+  "marken": [],
+  "ende": 1.0
+ },
+ "II:43": {
+  "marken": [
+   {
+    "nach": "Dann stieg etwas aus dem See empor:",
+    "min": 0.9,
+    "art": "spannung",
+    "warum": "vor dem Namen"
+   },
+   {
+    "nach": "empor: Demogorgon.",
+    "min": 1.1,
+    "art": "enthuellung",
+    "warum": "Schock"
+   },
+   {
+    "nach": "und uns schlotterten die Knie.",
+    "min": 0.9,
+    "art": "pointe",
+    "warum": "vor dem Barradin-Gag"
+   }
+  ],
+  "ende": 1.4
+ },
+ "II:44": {
+  "marken": [
+   {
+    "nach": "Die Wirkung:",
+    "min": 0.7,
+    "art": "spannung",
+    "warum": "Setup"
+   },
+   {
+    "nach": "Absolut keine.",
+    "min": 0.9,
+    "art": "pointe",
+    "warum": "Pointe vor Nachklapp"
+   }
+  ],
+  "ende": 1.3
+ },
+ "II:46": {
+  "marken": [
+   {
+    "nach": "Dann fiel ein Tentakel,",
+    "min": 0.7,
+    "art": "spannung",
+    "warum": "vor dem Schlag"
+   },
+   {
+    "nach": "und der Tempel war nicht mehr da.",
+    "min": 1.2,
+    "art": "emotion",
+    "warum": "Verlust"
+   },
+   {
+    "nach": "Ich hatte ihm noch ein Lied versprochen.",
+    "min": 1.0,
+    "art": "emotion",
+    "warum": "vor dem Schlusssatz"
+   }
+  ],
+  "ende": 2.2
+ },
+ "II:49": {
+  "marken": [
+   {
+    "nach": "zu einem atemberaubenden Anblick:",
+    "min": 0.6,
+    "art": "spannung",
+    "warum": "vor dem Anblick"
+   }
+  ],
+  "ende": 1.8
+ },
+ "II:52": {
+  "marken": [
+   {
+    "nach": "ließen sie uns ohne Weiteres passieren.",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "vor dem Nachklapp"
+   }
+  ],
+  "ende": 1.3
+ },
+ "II:54": {
+  "marken": [
+   {
+    "nach": "auf unseren Tisch zu und salutierten.",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "vor wem?"
+   },
+   {
+    "nach": "Vor Kardal.",
+    "min": 0.9,
+    "art": "enthuellung",
+    "warum": "Überraschung"
+   },
+   {
+    "nach": "der Sohn des Königs!",
+    "min": 1.0,
+    "art": "enthuellung",
+    "warum": "Enthüllung"
+   },
+   {
+    "nach": "Ich hatte es ja geahnt.",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "vor dem Nachklapp"
+   }
+  ],
+  "ende": 1.8
+ },
+ "II:57": {
+  "marken": [],
+  "ende": 1.2
+ },
+ "II:60": {
+  "marken": [
+   {
+    "nach": "Wolken und Sterne hätten sein sollen.",
+    "min": 0.9,
+    "art": "emotion",
+    "warum": "Sehnsucht"
+   }
+  ],
+  "ende": 1.8
+ },
+ "II:62": {
+  "marken": [
+   {
+    "nach": "in einer fremden Stadt?",
+    "min": 0.6,
+    "art": "pointe",
+    "warum": "Setup"
+   },
+   {
+    "nach": "Richtig: einkaufen.",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "Pointe"
+   },
+   {
+    "nach": "fand das weniger lustig als ich.",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "trockener Gag"
+   }
+  ],
+  "ende": 1.8
+ },
+ "II:65": {
+  "marken": [],
+  "ende": 1.0
+ },
+ "II:66": {
+  "marken": [
+   {
+    "nach": "Stimmen im Kopf …",
+    "min": 0.6,
+    "art": "pointe",
+    "warum": "Setup"
+   }
+  ],
+  "ende": 1.2
+ },
+ "II:67": {
+  "marken": [],
+  "ende": 1.8
+ },
+ "II:69": {
+  "marken": [
+   {
+    "nach": "(die Einzelheiten erspare ich der Nachwelt)",
+    "min": 0.6,
+    "art": "pointe",
+    "warum": "Einschub-Gag"
+   }
+  ],
+  "ende": 1.0
+ },
+ "II:70": {
+  "marken": [
+   {
+    "nach": "bei jedem einzelnen Händler versucht.",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "Gag"
+   },
+   {
+    "nach": "und sehr weit nach unten.",
+    "min": 1.1,
+    "art": "pointe",
+    "warum": "Bild wirken lassen"
+   },
+   {
+    "nach": "Die Antwort war nein.",
+    "min": 1.0,
+    "art": "pointe",
+    "warum": "Pointe vor Stimmungswechsel"
+   }
+  ],
+  "ende": 1.8
+ },
+ "II:72": {
+  "marken": [
+   {
+    "nach": "und der Stein schreit.",
+    "min": 1.0,
+    "art": "spannung",
+    "warum": "unheilvolle Prophezeiung"
+   },
+   {
+    "nach": "Ich kenne das.",
+    "min": 0.6,
+    "art": "pointe",
+    "warum": "Setup"
+   },
+   {
+    "nach": "Ich nenne es Lyrik.",
+    "min": 0.9,
+    "art": "pointe",
+    "warum": "Pointe"
+   }
+  ],
+  "ende": 1.3
+ },
+ "II:73": {
+  "marken": [
+   {
+    "nach": "ein Bild von Ezekiels Onkel gezeigt.",
+    "min": 0.9,
+    "art": "pointe",
+    "warum": "Callback-Gag"
+   }
+  ],
+  "ende": 1.0
+ },
+ "II:74": {
+  "marken": [
+   {
+    "nach": "an einem Marktstand gekauft hatten.",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "vor der Pointe"
+   }
+  ],
+  "ende": 1.8
+ },
+ "II:76": {
+  "marken": [
+   {
+    "nach": "oder ein sehr großes Ego.",
+    "min": 0.9,
+    "art": "pointe",
+    "warum": "Gag"
+   },
+   {
+    "nach": "Wie sich herausstellte:",
+    "min": 0.7,
+    "art": "spannung",
+    "warum": "Setup"
+   }
+  ],
+  "ende": 1.8
+ },
+ "II:78": {
+  "marken": [],
+  "ende": 1.0
+ },
+ "II:79": {
+  "marken": [
+   {
+    "nach": "Sogar ein goldener Hund war darunter.",
+    "min": 0.6,
+    "art": "pointe",
+    "warum": "Setup Rex"
+   },
+   {
+    "nach": "sehr lange und sehr misstrauisch angesehen.",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "Rex-Gag"
+   },
+   {
+    "nach": "Man sah es an seinen Lippen.",
+    "min": 0.6,
+    "art": "pointe",
+    "warum": "Setup"
+   }
+  ],
+  "ende": 1.2
+ },
+ "II:80": {
+  "marken": [
+   {
+    "nach": "Dann hörten wir es:",
+    "min": 0.6,
+    "art": "spannung",
+    "warum": "Lauschen"
+   },
+   {
+    "nach": "Etwas Großes kam näher.",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "Bedrohung"
+   }
+  ],
+  "ende": 1.4
+ },
+ "II:82": {
+  "marken": [
+   {
+    "nach": "vor uns auf seinem Schatz:",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "vor dem Drachen"
+   },
+   {
+    "nach": "ein Drache!",
+    "min": 1.0,
+    "art": "enthuellung",
+    "warum": "Enthüllung"
+   }
+  ],
+  "ende": 1.8
+ },
+ "II:84": {
+  "marken": [
+   {
+    "nach": "unsere Ankunft in Gracklstugh.",
+    "min": 0.8,
+    "art": "aufzaehlung",
+    "warum": "Ende der langen Aufzählung"
+   },
+   {
+    "nach": "eine natürliche Zwanzig.",
+    "min": 0.9,
+    "art": "pointe",
+    "warum": "Gag"
+   },
+   {
+    "nach": "vernichtete uns jedenfalls nicht.",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "vor dem Nachklapp"
+   }
+  ],
+  "ende": 1.3
+ },
+ "II:85": {
+  "marken": [
+   {
+    "nach": "fragte den Drachen,",
+    "min": 0.6,
+    "art": "spannung",
+    "warum": "Setup"
+   },
+   {
+    "nach": "ob er zufällig Gundren kenne.",
+    "min": 1.3,
+    "art": "pointe",
+    "warum": "Schock-Gag, Stille"
+   },
+   {
+    "nach": "Themberchaud übrigens auch nicht.",
+    "min": 0.9,
+    "art": "pointe",
+    "warum": "Gag"
+   }
+  ],
+  "ende": 1.3
+ },
+ "II:86": {
+  "marken": [],
+  "ende": 1.8
+ },
+ "II:89": {
+  "marken": [
+   {
+    "nach": "Jemand hat ein Drachenei gestohlen!",
+    "min": 0.9,
+    "art": "enthuellung",
+    "warum": "Enthüllung"
+   }
+  ],
+  "ende": 1.0
+ },
+ "II:90": {
+  "marken": [],
+  "ende": 1.0
+ },
+ "II:91": {
+  "marken": [
+   {
+    "nach": "und wir mittendrin.",
+    "min": 0.9,
+    "art": "pointe",
+    "warum": "Aufzählungs-Pointe"
+   }
+  ],
+  "ende": 2.0
+ }
+}
