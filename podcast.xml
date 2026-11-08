@@ -6,7 +6,7 @@
     <atom:link href="https://imrestales.de/podcast.xml" rel="self" type="application/rss+xml"/>
     <language>de</language>
     <copyright>© Imres Tales – kostenloser Fan-Podcast</copyright>
-    <description><![CDATA[Das Hörspiel zu unserer Pen-&amp;-Paper-Kampagne. Barradin – Barde, Pfeifenraucher und bescheidenster Held aller Zeiten (sagt er) – erzählt, wie ein Brief von Gundren vier Abenteurer und einen Hund zusammenführt: über die Straße nach Phandalin, durch Goblinhöhlen und Drachentürme, bis in die Gefangenschaft der Drow und die Tiefen des Unterreichs. Mit Geräuschkulisse, Musik und sehr viel Übertreibung. Mehr Geschichten, Karten und Spiele auf <a href="https://imrestales.de">imrestales.de</a>.<br><br>Sprecher: Helmut (ElevenLabs). Musik und Geräusche: Versilian Community Sample Library (CC0), Fluid R3 GM von Frank Wen (CC BY 3.0), Kenney und OpenGameArt (CC0), Freesound: alex36917 „Rain“, Digifish Music „Storm“, Luftrum „Waves“ (CC BY) u. a. – Liste auf imrestales.de. Inoffizieller Fan-Inhalt nach der Fan Content Policy von Wizards of the Coast; nicht von Wizards genehmigt oder unterstützt. Teile der Inhalte sind Eigentum von Wizards of the Coast. ©Wizards of the Coast LLC.]]></description>
+    <description><![CDATA[Das Hörspiel zu unserer Pen-&amp;-Paper-Kampagne. Barradin – Barde, Pfeifenraucher und bescheidenster Held aller Zeiten (sagt er) – erzählt, wie ein Brief von Gundren vier Abenteurer und einen Hund zusammenführt: über die Straße nach Phandalin, durch Goblinhöhlen und Drachentürme, bis in die Gefangenschaft der Drow und die Tiefen des Unterreichs. Mit Geräuschkulisse, Musik und sehr viel Übertreibung. Mehr Geschichten, Karten und Spiele auf <a href="https://imrestales.de">imrestales.de</a>.<br><br>Erzähler: Helmut; weitere Stimmen: Gregory Grumble (Gundren), Ben (Friedrich), Leo (Echo), Valerian (Ezekiel), Grimble, Moreana, Mordran Doomforge, Azrak, Kermy (alle ElevenLabs). Musik und Geräusche: Versilian Community Sample Library (CC0), Fluid R3 GM von Frank Wen (CC BY 3.0), Kenney und OpenGameArt (CC0), Freesound: alex36917 „Rain“, Digifish Music „Storm“, Luftrum „Waves“ (CC BY) u. a. – Liste auf imrestales.de. Inoffizieller Fan-Inhalt nach der Fan Content Policy von Wizards of the Coast; nicht von Wizards genehmigt oder unterstützt. Teile der Inhalte sind Eigentum von Wizards of the Coast. ©Wizards of the Coast LLC.]]></description>
     <itunes:summary>Das Hörspiel zu unserer D&amp;D-Kampagne: Barradin, der eitelste Barde der Schwertküste, erzählt, wie vier Abenteurer und ein Hund vom Hafen Neverwinters bis tief ins Unterreich stolpern.</itunes:summary>
     <itunes:author>Barradin (Imres Tales)</itunes:author>
     <itunes:owner><itunes:name>Barradin (Imres Tales)</itunes:name><itunes:email>BardeBarradin@gmail.com</itunes:email></itunes:owner>
@@ -27,10 +27,10 @@
       <itunes:episodeType>full</itunes:episodeType>
       <guid isPermaLink="false">imrestales-chronik-de-folge-6</guid>
       <pubDate>Sat, 07 Nov 2026 12:05:00 +0100</pubDate>
-      <description><![CDATA[Einkaufen in Gracklstugh, ein rasender Riese, das Dorf der Riesen und ein Steinsprecher. Ein Besuch in der Schenke, die Bewahrer der Flamme – und dann steht die Gruppe vor Themberchaud. Und da ist noch das gestohlene Ei.<br><br>Sprecher: Helmut (ElevenLabs). Musik und Geräusche: Versilian Community Sample Library (CC0), Fluid R3 GM von Frank Wen (CC BY 3.0), Kenney und OpenGameArt (CC0), Freesound: alex36917 „Rain“, Digifish Music „Storm“, Luftrum „Waves“ (CC BY) u. a. – Liste auf imrestales.de. Inoffizieller Fan-Inhalt nach der Fan Content Policy von Wizards of the Coast; nicht von Wizards genehmigt oder unterstützt. Teile der Inhalte sind Eigentum von Wizards of the Coast. ©Wizards of the Coast LLC.]]></description>
+      <description><![CDATA[Einkaufen in Gracklstugh, ein rasender Riese, das Dorf der Riesen und ein Steinsprecher. Ein Besuch in der Schenke, die Bewahrer der Flamme – und dann steht die Gruppe vor Themberchaud. Und da ist noch das gestohlene Ei.<br><br>Erzähler: Helmut; weitere Stimmen: Gregory Grumble (Gundren), Ben (Friedrich), Leo (Echo), Valerian (Ezekiel), Grimble, Moreana, Mordran Doomforge, Azrak, Kermy (alle ElevenLabs). Musik und Geräusche: Versilian Community Sample Library (CC0), Fluid R3 GM von Frank Wen (CC BY 3.0), Kenney und OpenGameArt (CC0), Freesound: alex36917 „Rain“, Digifish Music „Storm“, Luftrum „Waves“ (CC BY) u. a. – Liste auf imrestales.de. Inoffizieller Fan-Inhalt nach der Fan Content Policy von Wizards of the Coast; nicht von Wizards genehmigt oder unterstützt. Teile der Inhalte sind Eigentum von Wizards of the Coast. ©Wizards of the Coast LLC.]]></description>
       <itunes:summary>Einkaufen in Gracklstugh, ein rasender Riese, ein Steinsprecher – und Themberchaud auf seinem Gold.</itunes:summary>
-      <enclosure url="https://imrestales.de/podcast/folge-06-themberchaud.mp3" length="9678834" type="audio/mpeg"/>
-      <itunes:duration>0:10:05</itunes:duration>
+      <enclosure url="https://imrestales.de/podcast/folge-06-themberchaud.mp3" length="10197940" type="audio/mpeg"/>
+      <itunes:duration>0:10:37</itunes:duration>
       <itunes:image href="https://imrestales.de/podcast/cover.jpg"/>
       <link>https://imrestales.de/#chronik</link>
       <podcast:chapters url="https://imrestales.de/podcast/folge-06-kapitel.json" type="application/json+chapters"/>
@@ -44,10 +44,10 @@
       <itunes:episodeType>full</itunes:episodeType>
       <guid isPermaLink="false">imrestales-chronik-de-folge-5</guid>
       <pubDate>Sat, 07 Nov 2026 12:04:00 +0100</pubDate>
-      <description><![CDATA[Im Grab einer Magierin, an einem unterirdischen See und dann: Demogorgon. Wer das überlebt, landet in der Duergar-Stadt Gracklstugh – beim Sohn des Königs und am Hof von König Horga.<br><br>Sprecher: Helmut (ElevenLabs). Musik und Geräusche: Versilian Community Sample Library (CC0), Fluid R3 GM von Frank Wen (CC BY 3.0), Kenney und OpenGameArt (CC0), Freesound: alex36917 „Rain“, Digifish Music „Storm“, Luftrum „Waves“ (CC BY) u. a. – Liste auf imrestales.de. Inoffizieller Fan-Inhalt nach der Fan Content Policy von Wizards of the Coast; nicht von Wizards genehmigt oder unterstützt. Teile der Inhalte sind Eigentum von Wizards of the Coast. ©Wizards of the Coast LLC.]]></description>
+      <description><![CDATA[Im Grab einer Magierin, an einem unterirdischen See und dann: Demogorgon. Wer das überlebt, landet in der Duergar-Stadt Gracklstugh – beim Sohn des Königs und am Hof von König Horga.<br><br>Erzähler: Helmut; weitere Stimmen: Gregory Grumble (Gundren), Ben (Friedrich), Leo (Echo), Valerian (Ezekiel), Grimble, Moreana, Mordran Doomforge, Azrak, Kermy (alle ElevenLabs). Musik und Geräusche: Versilian Community Sample Library (CC0), Fluid R3 GM von Frank Wen (CC BY 3.0), Kenney und OpenGameArt (CC0), Freesound: alex36917 „Rain“, Digifish Music „Storm“, Luftrum „Waves“ (CC BY) u. a. – Liste auf imrestales.de. Inoffizieller Fan-Inhalt nach der Fan Content Policy von Wizards of the Coast; nicht von Wizards genehmigt oder unterstützt. Teile der Inhalte sind Eigentum von Wizards of the Coast. ©Wizards of the Coast LLC.]]></description>
       <itunes:summary>Das Grab einer Magierin, ein unterirdischer See, aus dem etwas sehr Großes steigt – und der Hof von König Horga.</itunes:summary>
-      <enclosure url="https://imrestales.de/podcast/folge-05-demogorgon.mp3" length="9665878" type="audio/mpeg"/>
-      <itunes:duration>0:10:04</itunes:duration>
+      <enclosure url="https://imrestales.de/podcast/folge-05-demogorgon.mp3" length="10031592" type="audio/mpeg"/>
+      <itunes:duration>0:10:27</itunes:duration>
       <itunes:image href="https://imrestales.de/podcast/cover.jpg"/>
       <link>https://imrestales.de/#chronik</link>
       <podcast:chapters url="https://imrestales.de/podcast/folge-05-kapitel.json" type="application/json+chapters"/>
@@ -61,10 +61,10 @@
       <itunes:episodeType>full</itunes:episodeType>
       <guid isPermaLink="false">imrestales-chronik-de-folge-4</guid>
       <pubDate>Sat, 07 Nov 2026 12:03:00 +0100</pubDate>
-      <description><![CDATA[Kapitel II beginnt mit einem seltsamen Kräuternebel. Die Helden erwachen gefangen bei den Drow, wagen den Ausbruch und fliehen durch die Spinnweben ins Unterreich.<br><br>Sprecher: Helmut (ElevenLabs). Musik und Geräusche: Versilian Community Sample Library (CC0), Fluid R3 GM von Frank Wen (CC BY 3.0), Kenney und OpenGameArt (CC0), Freesound: alex36917 „Rain“, Digifish Music „Storm“, Luftrum „Waves“ (CC BY) u. a. – Liste auf imrestales.de. Inoffizieller Fan-Inhalt nach der Fan Content Policy von Wizards of the Coast; nicht von Wizards genehmigt oder unterstützt. Teile der Inhalte sind Eigentum von Wizards of the Coast. ©Wizards of the Coast LLC.]]></description>
+      <description><![CDATA[Kapitel II beginnt mit einem seltsamen Kräuternebel. Die Helden erwachen gefangen bei den Drow, wagen den Ausbruch und fliehen durch die Spinnweben ins Unterreich.<br><br>Erzähler: Helmut; weitere Stimmen: Gregory Grumble (Gundren), Ben (Friedrich), Leo (Echo), Valerian (Ezekiel), Grimble, Moreana, Mordran Doomforge, Azrak, Kermy (alle ElevenLabs). Musik und Geräusche: Versilian Community Sample Library (CC0), Fluid R3 GM von Frank Wen (CC BY 3.0), Kenney und OpenGameArt (CC0), Freesound: alex36917 „Rain“, Digifish Music „Storm“, Luftrum „Waves“ (CC BY) u. a. – Liste auf imrestales.de. Inoffizieller Fan-Inhalt nach der Fan Content Policy von Wizards of the Coast; nicht von Wizards genehmigt oder unterstützt. Teile der Inhalte sind Eigentum von Wizards of the Coast. ©Wizards of the Coast LLC.]]></description>
       <itunes:summary>Ein seltsamer Kräuternebel – und die Helden erwachen in den Kerkern der Drow. Zeit für einen Ausbruch.</itunes:summary>
-      <enclosure url="https://imrestales.de/podcast/folge-04-gefangen-bei-den-drow.mp3" length="9919579" type="audio/mpeg"/>
-      <itunes:duration>0:10:20</itunes:duration>
+      <enclosure url="https://imrestales.de/podcast/folge-04-gefangen-bei-den-drow.mp3" length="10056669" type="audio/mpeg"/>
+      <itunes:duration>0:10:29</itunes:duration>
       <itunes:image href="https://imrestales.de/podcast/cover.jpg"/>
       <link>https://imrestales.de/#chronik</link>
       <podcast:chapters url="https://imrestales.de/podcast/folge-04-kapitel.json" type="application/json+chapters"/>
@@ -78,10 +78,10 @@
       <itunes:episodeType>full</itunes:episodeType>
       <guid isPermaLink="false">imrestales-chronik-de-folge-3</guid>
       <pubDate>Sat, 07 Nov 2026 12:02:00 +0100</pubDate>
-      <description><![CDATA[Endlich die magische Schmiede. Danach geht es zurück nach Neverwinter vor die Allianz der Lords – und weiter nach Donnerbaum, wo im Turm ein Drache wartet. Das Kapitel endet in einem verlassenen Dorf.<br><br>Sprecher: Helmut (ElevenLabs). Musik und Geräusche: Versilian Community Sample Library (CC0), Fluid R3 GM von Frank Wen (CC BY 3.0), Kenney und OpenGameArt (CC0), Freesound: alex36917 „Rain“, Digifish Music „Storm“, Luftrum „Waves“ (CC BY) u. a. – Liste auf imrestales.de. Inoffizieller Fan-Inhalt nach der Fan Content Policy von Wizards of the Coast; nicht von Wizards genehmigt oder unterstützt. Teile der Inhalte sind Eigentum von Wizards of the Coast. ©Wizards of the Coast LLC.]]></description>
+      <description><![CDATA[Endlich die magische Schmiede. Danach geht es zurück nach Neverwinter vor die Allianz der Lords – und weiter nach Donnerbaum, wo im Turm ein Drache wartet. Das Kapitel endet in einem verlassenen Dorf.<br><br>Erzähler: Helmut; weitere Stimmen: Gregory Grumble (Gundren), Ben (Friedrich), Leo (Echo), Valerian (Ezekiel), Grimble, Moreana, Mordran Doomforge, Azrak, Kermy (alle ElevenLabs). Musik und Geräusche: Versilian Community Sample Library (CC0), Fluid R3 GM von Frank Wen (CC BY 3.0), Kenney und OpenGameArt (CC0), Freesound: alex36917 „Rain“, Digifish Music „Storm“, Luftrum „Waves“ (CC BY) u. a. – Liste auf imrestales.de. Inoffizieller Fan-Inhalt nach der Fan Content Policy von Wizards of the Coast; nicht von Wizards genehmigt oder unterstützt. Teile der Inhalte sind Eigentum von Wizards of the Coast. ©Wizards of the Coast LLC.]]></description>
       <itunes:summary>Die magische Schmiede, die Allianz der Lords in Neverwinter und ein Drache im Turm von Donnerbaum.</itunes:summary>
-      <enclosure url="https://imrestales.de/podcast/folge-03-die-magische-schmiede.mp3" length="11185577" type="audio/mpeg"/>
-      <itunes:duration>0:11:39</itunes:duration>
+      <enclosure url="https://imrestales.de/podcast/folge-03-die-magische-schmiede.mp3" length="11570100" type="audio/mpeg"/>
+      <itunes:duration>0:12:03</itunes:duration>
       <itunes:image href="https://imrestales.de/podcast/cover.jpg"/>
       <link>https://imrestales.de/#chronik</link>
       <podcast:chapters url="https://imrestales.de/podcast/folge-03-kapitel.json" type="application/json+chapters"/>
@@ -95,10 +95,10 @@
       <itunes:episodeType>full</itunes:episodeType>
       <guid isPermaLink="false">imrestales-chronik-de-folge-2</guid>
       <pubDate>Sat, 07 Nov 2026 12:01:00 +0100</pubDate>
-      <description><![CDATA[Die Spur führt zu einem Wachturm, in dem jemand gefangen gehalten wird. Danach kommt ein Wiedersehen, auf das die Gruppe lange gewartet hat: Gundrens Bruder.<br><br>Sprecher: Helmut (ElevenLabs). Musik und Geräusche: Versilian Community Sample Library (CC0), Fluid R3 GM von Frank Wen (CC BY 3.0), Kenney und OpenGameArt (CC0), Freesound: alex36917 „Rain“, Digifish Music „Storm“, Luftrum „Waves“ (CC BY) u. a. – Liste auf imrestales.de. Inoffizieller Fan-Inhalt nach der Fan Content Policy von Wizards of the Coast; nicht von Wizards genehmigt oder unterstützt. Teile der Inhalte sind Eigentum von Wizards of the Coast. ©Wizards of the Coast LLC.]]></description>
+      <description><![CDATA[Die Spur führt zu einem Wachturm, in dem jemand gefangen gehalten wird. Danach kommt ein Wiedersehen, auf das die Gruppe lange gewartet hat: Gundrens Bruder.<br><br>Erzähler: Helmut; weitere Stimmen: Gregory Grumble (Gundren), Ben (Friedrich), Leo (Echo), Valerian (Ezekiel), Grimble, Moreana, Mordran Doomforge, Azrak, Kermy (alle ElevenLabs). Musik und Geräusche: Versilian Community Sample Library (CC0), Fluid R3 GM von Frank Wen (CC BY 3.0), Kenney und OpenGameArt (CC0), Freesound: alex36917 „Rain“, Digifish Music „Storm“, Luftrum „Waves“ (CC BY) u. a. – Liste auf imrestales.de. Inoffizieller Fan-Inhalt nach der Fan Content Policy von Wizards of the Coast; nicht von Wizards genehmigt oder unterstützt. Teile der Inhalte sind Eigentum von Wizards of the Coast. ©Wizards of the Coast LLC.]]></description>
       <itunes:summary>Ein Wachturm, ein Gefangener – und endlich ein Wiedersehen mit Gundrens Bruder.</itunes:summary>
-      <enclosure url="https://imrestales.de/podcast/folge-02-der-gefangene-im-wachturm.mp3" length="8219321" type="audio/mpeg"/>
-      <itunes:duration>0:08:34</itunes:duration>
+      <enclosure url="https://imrestales.de/podcast/folge-02-der-gefangene-im-wachturm.mp3" length="8398625" type="audio/mpeg"/>
+      <itunes:duration>0:08:45</itunes:duration>
       <itunes:image href="https://imrestales.de/podcast/cover.jpg"/>
       <link>https://imrestales.de/#chronik</link>
       <podcast:chapters url="https://imrestales.de/podcast/folge-02-kapitel.json" type="application/json+chapters"/>
@@ -112,10 +112,10 @@
       <itunes:episodeType>full</itunes:episodeType>
       <guid isPermaLink="false">imrestales-chronik-de-folge-1</guid>
       <pubDate>Sat, 07 Nov 2026 12:00:00 +0100</pubDate>
-      <description><![CDATA[Es beginnt mit einem Brief: Gundren lädt vier Fremde an den Hafen von Neverwinter – einen pfeiferauchenden Barden, einen Waldläufer mit Hund, einen gehörnten Druiden und einen schweigsamen Darkin in scharlachroter Rüstung. Auf der Straße nach Phandalin warten ein Hinterhalt, die Goblinhöhle, die Roten Roben – und Schloss Crackmore.<br><br>Sprecher: Helmut (ElevenLabs). Musik und Geräusche: Versilian Community Sample Library (CC0), Fluid R3 GM von Frank Wen (CC BY 3.0), Kenney und OpenGameArt (CC0), Freesound: alex36917 „Rain“, Digifish Music „Storm“, Luftrum „Waves“ (CC BY) u. a. – Liste auf imrestales.de. Inoffizieller Fan-Inhalt nach der Fan Content Policy von Wizards of the Coast; nicht von Wizards genehmigt oder unterstützt. Teile der Inhalte sind Eigentum von Wizards of the Coast. ©Wizards of the Coast LLC.]]></description>
+      <description><![CDATA[Es beginnt mit einem Brief: Gundren lädt vier Fremde an den Hafen von Neverwinter – einen pfeiferauchenden Barden, einen Waldläufer mit Hund, einen gehörnten Druiden und einen schweigsamen Darkin in scharlachroter Rüstung. Auf der Straße nach Phandalin warten ein Hinterhalt, die Goblinhöhle, die Roten Roben – und Schloss Crackmore.<br><br>Erzähler: Helmut; weitere Stimmen: Gregory Grumble (Gundren), Ben (Friedrich), Leo (Echo), Valerian (Ezekiel), Grimble, Moreana, Mordran Doomforge, Azrak, Kermy (alle ElevenLabs). Musik und Geräusche: Versilian Community Sample Library (CC0), Fluid R3 GM von Frank Wen (CC BY 3.0), Kenney und OpenGameArt (CC0), Freesound: alex36917 „Rain“, Digifish Music „Storm“, Luftrum „Waves“ (CC BY) u. a. – Liste auf imrestales.de. Inoffizieller Fan-Inhalt nach der Fan Content Policy von Wizards of the Coast; nicht von Wizards genehmigt oder unterstützt. Teile der Inhalte sind Eigentum von Wizards of the Coast. ©Wizards of the Coast LLC.]]></description>
       <itunes:summary>Ein Brief, ein Hafen und vier Fremde: Gundren schickt die Gruppe mit einem Karren nach Phandalin – mitten in einen Goblinhinterhalt.</itunes:summary>
-      <enclosure url="https://imrestales.de/podcast/folge-01-ein-brief-von-gundren.mp3" length="11528722" type="audio/mpeg"/>
-      <itunes:duration>0:12:01</itunes:duration>
+      <enclosure url="https://imrestales.de/podcast/folge-01-ein-brief-von-gundren.mp3" length="11884823" type="audio/mpeg"/>
+      <itunes:duration>0:12:23</itunes:duration>
       <itunes:image href="https://imrestales.de/podcast/cover.jpg"/>
       <link>https://imrestales.de/#chronik</link>
       <podcast:chapters url="https://imrestales.de/podcast/folge-01-kapitel.json" type="application/json+chapters"/>
