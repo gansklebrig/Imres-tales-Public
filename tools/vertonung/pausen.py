@@ -226,12 +226,12 @@ def main():
         if not os.path.exists(quelle):
             os.makedirs(os.path.dirname(quelle), exist_ok=True); shutil.copy2(datei, quelle)
         if nur and sch not in nur: continue
-        shutil.copy2(quelle, datei)    # immer vom Original aus
+        if not trocken: shutil.copy2(quelle, datei)    # immer vom Original aus
         nxt = folge[n + 1][1] if n + 1 < len(folge) else None
         na = vorne_stille(os.path.join(orig, os.path.relpath(nxt["datei"], "audio/chronik/de"))) if nxt and os.path.exists(os.path.join(orig, os.path.relpath(nxt["datei"], "audio/chronik/de"))) else (vorne_stille(os.path.join(WURZEL, nxt["datei"])) if nxt else 0)
         m = marken.get(sch, {})
         r = rk.get(kap, {}).get(str(e["i"]), {}).get("regie", "")
-        ein, plus, fehl, guete, D = bearbeiten(sch, datei, r, zeiten.get(rel, []), m.get("marken", []), m.get("ende"), e.get("titel"), na, trocken, ew_alle.get(sch, []))
+        ein, plus, fehl, guete, D = bearbeiten(sch, quelle if trocken else datei, r, zeiten.get(rel, []), m.get("marken", []), m.get("ende"), e.get("titel"), na, trocken, ew_alle.get(sch, []))
         bericht["eingefuegt"] += len(ein); bericht["sekunden"] += sum(d for _, d in ein) + plus
         bericht["fehlend"] += [(sch, f) for f in fehl]
         print(f"{sch:8s} {D:6.1f}s  Übereinstimmung {guete:.2f}  +{len(ein)} Pausen (+{sum(d for _, d in ein):.1f}s)  Ende +{plus:.2f}s" + (f"  FEHLT: {fehl}" if fehl else ""))
