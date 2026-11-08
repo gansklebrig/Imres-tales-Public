@@ -19,6 +19,12 @@
  "I:1": {
   "marken": [
    {
+    "nach": "das Juwel des Nordens!",
+    "min": 0.6,
+    "art": "emotion",
+    "warum": "Staunen über die Stadt"
+   },
+   {
     "nach": "und spürte:",
     "min": 0.6,
     "art": "spannung",
@@ -30,22 +36,46 @@
  "I:2": {
   "marken": [
    {
-    "nach": "bereit für jeden Streit.",
+    "nach": "Kurz: umwerfend.",
     "min": 0.7,
     "art": "pointe",
-    "warum": "trockener Kommentar"
+    "warum": "eitle Selbstkrönung"
    },
    {
-    "nach": "was in ihm vorging …",
+    "nach": "Zweimal.",
+    "min": 0.9,
+    "art": "pointe",
+    "warum": "Nachklapp-Gag"
+   },
+   {
+    "nach": "Er hatte nicht unrecht.",
     "min": 0.8,
-    "art": "spannung",
-    "warum": "Geheimnis um den Darkin"
+    "art": "pointe",
+    "warum": "trockener Nachsatz zu Rex"
+   },
+   {
+    "nach": "meine Finger bei mir zu behalten.",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "Echos Drohung eingelöst"
+   },
+   {
+    "nach": "nicht einmal ein Nicken.",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "Ezekiels Schweigen wirken lassen"
    }
   ],
   "ende": 1.2
  },
  "I:3": {
   "marken": [
+   {
+    "nach": "in der Höhle des Wellenechos.",
+    "min": 0.6,
+    "art": "enthuellung",
+    "warum": "Name der Mine, gleich der Echo-Gag"
+   },
    {
     "nach": "bei den Worten „magische Schmiede“.",
     "min": 0.7,
@@ -57,21 +87,52 @@
     "min": 0.8,
     "art": "pointe",
     "warum": "Vorbereitung der Pointe"
+   },
+   {
+    "nach": "Ezekiel nickte.",
+    "min": 0.5,
+    "art": "pointe",
+    "warum": "Pause vor 'Einmal.'"
+   },
+   {
+    "nach": "Einmal.",
+    "min": 0.6,
+    "art": "pointe",
+    "warum": "Pause vor dem Schluss-Gag"
    }
   ],
   "ende": 1.2
  },
  "I:5": {
-  "marken": [],
+  "marken": [
+   {
+    "nach": "ein persönlicher Rekord.",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "Echo grinst zum zweiten Mal"
+   },
+   {
+    "nach": "Oder in Edelsteine.",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "Nachklapp, dann Aufbruch"
+   }
+  ],
   "ende": 1.8
  },
  "I:8": {
   "marken": [
    {
-    "nach": "über langweilige Reisen zu dichten.",
-    "min": 0.8,
+    "nach": "einen Reim auf „Ochse“.",
+    "min": 0.9,
     "art": "pointe",
     "warum": "Gag vor dem Umschwung"
+   },
+   {
+    "nach": "kein Wind.",
+    "min": 0.7,
+    "art": "spannung",
+    "warum": "Stille vor dem Hinterhalt"
    },
    {
     "nach": "mit großer Überzeugung ins Leere.",
@@ -84,16 +145,58 @@
     "min": 0.9,
     "art": "pointe",
     "warum": "Nachklapp-Gag"
+   },
+   {
+    "nach": "dennoch niederstrecken.",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "Atem vor dem Lied-Nachklapp"
    }
   ],
   "ende": 1.8
  },
+ "I:11": {
+  "marken": [
+   {
+    "nach": "Echo wusste es.",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "Callback Goldgier"
+   }
+  ],
+  "ende": 1.0
+ },
  "I:12": {
-  "marken": [],
+  "marken": [
+   {
+    "nach": "deutlich kürzerem Auftritt.",
+    "min": 0.6,
+    "art": "pointe",
+    "warum": "Bühnenbild-Gag"
+   },
+   {
+    "nach": "beide als Erster.",
+    "min": 0.6,
+    "art": "pointe",
+    "warum": "Pause vor dem Eingeständnis"
+   },
+   {
+    "nach": "aus nächster Nähe.",
+    "min": 0.9,
+    "art": "pointe",
+    "warum": "Fallen-Gag sacken lassen"
+   }
+  ],
   "ende": 1.0
  },
  "I:13": {
   "marken": [
+   {
+    "nach": "wie es hätte sein sollen:",
+    "min": 0.5,
+    "art": "spannung",
+    "warum": "Benebelungs-Gag, dann Kampf"
+   },
    {
     "nach": "teils mit allem anderen als Zurückhaltung.",
     "min": 0.6,
@@ -112,13 +215,31 @@
  "I:16": {
   "marken": [
    {
+    "nach": "nur angehört.",
+    "min": 0.6,
+    "art": "pointe",
+    "warum": "Karren-Gag"
+   },
+   {
+    "nach": "auffällig großen Bogen machten.",
+    "min": 0.6,
+    "art": "spannung",
+    "warum": "erste Andeutung der Bedrohung"
+   },
+   {
     "nach": "ab in die Taverne!",
     "min": 0.7,
     "art": "pointe",
     "warum": "Gag"
    },
    {
-    "nach": "und schnell war klar:",
+    "nach": "ein großes Lob ist.",
+    "min": 0.6,
+    "art": "pointe",
+    "warum": "Echos Bierurteil"
+   },
+   {
+    "nach": "Schnell war klar:",
     "min": 0.6,
     "art": "spannung",
     "warum": "vor der Erkenntnis"
@@ -135,6 +256,12 @@
     "warum": "eitle Pointe"
    },
    {
+    "nach": "sonst wird es hart!“",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "Liedzeile ausklingen lassen"
+   },
+   {
     "nach": "gleich am Rand des Dorfes.",
     "min": 0.8,
     "art": "enthuellung",
@@ -146,10 +273,28 @@
  "I:18": {
   "marken": [
    {
+    "nach": "„selbstverständlich“ begann.",
+    "min": 0.6,
+    "art": "pointe",
+    "warum": "Bürgermeister-Porträt"
+   },
+   {
     "nach": "und vielleicht ein bisschen herablassend …",
     "min": 0.8,
     "art": "pointe",
-    "warum": "Untertreibungs-Gag"
+    "warum": "Untertreibung"
+   },
+   {
+    "nach": "auch besser so.",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "Benebelungs-Gag"
+   },
+   {
+    "nach": "Beinahe flogen die Fäuste.",
+    "min": 0.6,
+    "art": "pointe",
+    "warum": "kurzer Schlag vor dem Ausgang"
    }
   ],
   "ende": 1.8
@@ -160,13 +305,19 @@
     "nach": "in das alte, mit Ranken umwachsene Schloss verdanken wir",
     "min": 0.6,
     "art": "spannung",
-    "warum": "vor der Enthüllung Rex"
+    "warum": "Rex als Überraschung"
    },
    {
     "nach": "und wir hatten unseren Eingang.",
     "min": 1.0,
     "art": "pointe",
-    "warum": "Aufzählungs-Pointe, danach Stimmungswechsel"
+    "warum": "Kaninchen-Pointe"
+   },
+   {
+    "nach": "lieber umkehren.",
+    "min": 0.6,
+    "art": "pointe",
+    "warum": "Fackel-Gag, dann Spannung"
    }
   ],
   "ende": 1.1
@@ -174,10 +325,22 @@
  "I:22": {
   "marken": [
    {
+    "nach": "nicht meine Farbe.",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "Eitelkeit"
+   },
+   {
     "nach": "nicht weiter aufgefallen wäre.",
     "min": 0.9,
     "art": "pointe",
-    "warum": "trockener Gag"
+    "warum": "Ezekiel-Gag"
+   },
+   {
+    "nach": "mit der Rolle einverstanden.",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "Rex-Gag vor der Spannung"
    }
   ],
   "ende": 1.0
@@ -185,10 +348,10 @@
  "I:23": {
   "marken": [
    {
-    "nach": "stieß ich jedoch gegen einen der Schränke,",
+    "nach": "ein Schrank in den Weg,",
     "min": 0.6,
     "art": "spannung",
-    "warum": "Schreckmoment anbahnen"
+    "warum": "Schuld beim Möbel, dann das Unglück"
    }
   ],
   "ende": 1.5
@@ -199,10 +362,10 @@
     "nach": "der Anführer der Roten Roben!",
     "min": 0.9,
     "art": "enthuellung",
-    "warum": "Auftritt Glasstab"
+    "warum": "Glasstab erscheint"
    },
    {
-    "nach": "bereit wären für Arbeit …",
+    "nach": "aber bereit für jede Arbeit.“",
     "min": 0.8,
     "art": "spannung",
     "warum": "glaubt er es?"
@@ -213,16 +376,29 @@
  "I:25": {
   "marken": [
    {
-    "nach": "wohl wie zwölf aussahen,",
+    "nach": "Mit Absicht, natürlich.",
     "min": 0.7,
     "art": "pointe",
-    "warum": "Gag vor dem Umschwung"
+    "warum": "eitle Ausrede"
+   },
+   {
+    "nach": "wohl wie zwölf aussahen,",
+    "min": 0.5,
+    "art": "pointe",
+    "warum": "Gag, dann der Becher"
    }
   ],
   "ende": 1.0
  },
  "I:26": {
-  "marken": [],
+  "marken": [
+   {
+    "nach": "Ein Sirren,",
+    "min": 0.5,
+    "art": "spannung",
+    "warum": "der Pfeil fliegt"
+   }
+  ],
   "ende": 1.3
  },
  "I:28": {
@@ -231,13 +407,19 @@
     "nach": "Glasstab von einer gewissen",
     "min": 0.8,
     "art": "spannung",
-    "warum": "vor dem Wort Spinne"
+    "warum": "Spinne als Enthüllung"
+   },
+   {
+    "nach": "dann kam nichts mehr.",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "letzte Worte verklingen"
    },
    {
     "nach": "eine geheime Organisation?",
     "min": 0.9,
     "art": "spannung",
-    "warum": "Rätsel wirken lassen"
+    "warum": "offene Frage"
    }
   ],
   "ende": 1.2
@@ -248,7 +430,13 @@
     "nach": "und keine war gut.",
     "min": 0.9,
     "art": "pointe",
-    "warum": "trockene Pointe"
+    "warum": "Theorie-Gag"
+   },
+   {
+    "nach": "natürlich nur Saft.",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "Pause vor 'Ehrenwort.'"
    }
   ],
   "ende": 1.4
@@ -256,10 +444,22 @@
  "I:31": {
   "marken": [
    {
+    "nach": "wie beim ersten Besuch.",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "Callback erster Besuch"
+   },
+   {
     "nach": "Sagen wir so:",
     "min": 0.6,
     "art": "spannung",
-    "warum": "Setup"
+    "warum": "vor der Pointe"
+   },
+   {
+    "nach": "nicht wieder einladen.",
+    "min": 0.8,
+    "art": "pointe",
+    "warum": "Pointe vor dem Aufbruch"
    }
   ],
   "ende": 1.8
@@ -270,16 +470,50 @@
     "nach": "ist ein wenig …",
     "min": 0.8,
     "art": "spannung",
-    "warum": "vor nebelig"
+    "warum": "vor dem Geständnis"
    },
    {
     "nach": "nebelig.",
     "min": 0.7,
     "art": "pointe",
     "warum": "Pointe"
+   },
+   {
+    "nach": "gestochen scharf.",
+    "min": 0.7,
+    "art": "spannung",
+    "warum": "Wechsel zur klaren Nacht"
+   },
+   {
+    "nach": "aus dem Kopf gebrüllt.",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "Bugbear-Vorgriff"
    }
   ],
   "ende": 1.2
+ },
+ "I:34": {
+  "marken": [
+   {
+    "nach": "in diesem Nebel.",
+    "min": 0.6,
+    "art": "pointe",
+    "warum": "Benebelung als Ausrede"
+   }
+  ],
+  "ende": null
+ },
+ "I:35": {
+  "marken": [
+   {
+    "nach": "keine Bewegung.",
+    "min": 0.7,
+    "art": "spannung",
+    "warum": "verlassenes Gebäude"
+   }
+  ],
+  "ende": null
  },
  "I:36": {
   "marken": [
@@ -295,10 +529,10 @@
  "I:37": {
   "marken": [
    {
-    "nach": "der offenbar etwas bewachte.",
+    "nach": "der etwas bewachte.",
     "min": 0.8,
     "art": "spannung",
-    "warum": "Spannung vor dem Weiterschleichen"
+    "warum": "Wache entdeckt"
    }
   ],
   "ende": 1.0
@@ -351,10 +585,22 @@
  "I:43": {
   "marken": [
    {
+    "nach": "gute Beleidigung vorbereitet.",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "unterbrochener Barde"
+   },
+   {
+    "nach": "offenbar Standard.",
+    "min": 0.7,
+    "art": "pointe",
+    "warum": "Running Gag zwischen die Augen"
+   },
+   {
     "nach": "ohnehin schon blutiges Bein.",
     "min": 0.7,
     "art": "pointe",
-    "warum": "Rex-Gag"
+    "warum": "Rex-Moment"
    }
   ],
   "ende": 1.1
@@ -373,10 +619,10 @@
  "I:45": {
   "marken": [
    {
-    "nach": "und den anderen tief in den Rücken!",
+    "nach": "einer tief in den Rücken!",
     "min": 1.0,
     "art": "enthuellung",
-    "warum": "Schlag wirken lassen"
+    "warum": "Ezekiels Stoß"
    }
   ],
   "ende": 1.2
@@ -464,7 +710,14 @@
   "ende": 1.4
  },
  "I:56": {
-  "marken": [],
+  "marken": [
+   {
+    "nach": "kalten Höhlenboden.",
+    "min": 0.8,
+    "art": "spannung",
+    "warum": "Kampfende vor dem Spinnen-Gag"
+   }
+  ],
   "ende": 1.2
  },
  "I:57": {
@@ -506,7 +759,14 @@
   "ende": 1.5
  },
  "I:62": {
-  "marken": [],
+  "marken": [
+   {
+    "nach": "Die Schmiede ist gefunden.",
+    "min": 0.6,
+    "art": "pointe",
+    "warum": "gute Nachricht vor dem Nachklapp"
+   }
+  ],
   "ende": 1.8
  },
  "I:64": {
@@ -601,13 +861,30 @@
  "I:76": {
   "marken": [
    {
-    "nach": "und dann natürlich die Beute einzusammeln.",
+    "nach": "In genau dieser Reihenfolge.",
+    "min": 0.6,
+    "art": "pointe",
+    "warum": "Prioritätenliste"
+   },
+   {
+    "nach": "Dann die Beute.",
     "min": 0.8,
     "art": "pointe",
-    "warum": "vor dem Echo-Gag"
+    "warum": "Liste ausspielen"
    }
   ],
   "ende": 1.8
+ },
+ "I:79": {
+  "marken": [
+   {
+    "nach": "hatten sie keine Chance.",
+    "min": 0.6,
+    "art": "pointe",
+    "warum": "vor dem Zombie-Witz"
+   }
+  ],
+  "ende": null
  },
  "I:80": {
   "marken": [
@@ -682,18 +959,32 @@
   "ende": 1.6
  },
  "II:4": {
-  "marken": [],
+  "marken": [
+   {
+    "nach": "die Beleidigungen der Wachen.",
+    "min": 0.6,
+    "art": "pointe",
+    "warum": "vor 'Fachlich.'"
+   }
+  ],
   "ende": 1.0
  },
  "II:5": {
   "marken": [
    {
-    "nach": "mein Kopf begann zu schmerzen.",
+    "nach": "mit einem Fluch.",
+    "min": 0.5,
+    "art": "pointe",
+    "warum": "Parallelbau vorbereiten"
+   },
+   {
+    "nach": "mit einem Knüppel.",
     "min": 0.8,
     "art": "emotion",
-    "warum": "Schmerz sacken lassen"
+    "warum": "Schlag sitzen lassen"
    }
-  ]
+  ],
+  "ende": null
  },
  "II:7": {
   "marken": [],
@@ -745,7 +1036,13 @@
  "II:14": {
   "marken": [
    {
-    "nach": "– unglaublich!",
+    "nach": "Mitten ins Auge.",
+    "min": 0.5,
+    "art": "emotion",
+    "warum": "Staunen"
+   },
+   {
+    "nach": "Unglaublich.",
     "min": 0.8,
     "art": "emotion",
     "warum": "Staunen"
@@ -1214,10 +1511,10 @@
  "II:73": {
   "marken": [
    {
-    "nach": "ein Bild von Ezekiels Onkel gezeigt.",
+    "nach": "vor der Statue seines Onkels.",
     "min": 0.9,
     "art": "pointe",
-    "warum": "Callback-Gag"
+    "warum": "Callback Onkel-Statue"
    }
   ],
   "ende": 1.0

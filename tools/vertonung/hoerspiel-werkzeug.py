@@ -306,15 +306,15 @@ def A(k, i, *e, ort=None): P[(k, i)] = {"e": list(e), "ort": ort}
 
 A("vorab", 0, ort="erzaehler")
 # ---- KAPITEL I ----
-A("I", 1, ("papier", "Brief.", "auf", .55), ("knarren", "Knarrende Stege", "bei", .5), ("moewe", "Salz und Teer", "nach", .5))
+A("I", 1, ("papier", "Brief.", "auf", .55), ("knarren", "Knarrende Stege", "bei", .5), ("moewe", "um jeden Fischkopf zankten", "auf", .5))
 A("I", 2, ("hund", "mit Bogen und Hund", "auf", .35, {"fern": 1}))
 A("I", 3, ("muenzen", "stattliche Belohnung", "nach", .45))
 A("I", 5, ("muenze", "Extraportion Gold", "nach", .55))
-A("I", 8, ("karren", "rollte der Karren", "bei", .45), ("goblin", "Goblins aus dem Wald", "auf", .6),
+A("I", 8, ("karren", "rollte der Karren", "bei", .45), ("goblin", "mit schartigen Klingen aus dem Wald", "auf", .6),
    ("schwertziehen", "kampfbereit", "bei", .55), ("klingen", "trat den Goblins entgegen", "nach", .65),
    ("fehlschlag", "ins Leere", "bei", .5), ("goblin_tod", "niederstrecken", "nach", .5))
 A("I", 11, ort="wald")
-A("I", 12, ("klingen", "schneller ihr Ende fanden", "nach", .5, {"n": 1}), ("goblin_tod", "schneller ihr Ende fanden", "nach", .35, {"dt": .6}), ort="wald")
+A("I", 12, ("klingen", "deutlich kürzerem Auftritt", "nach", .5, {"n": 1}), ("goblin_tod", "deutlich kürzerem Auftritt", "nach", .35, {"dt": .6}), ort="wald")
 A("I", 13, ("wolf", "Ihr Winseln", "bei", .35, {"rate": 1.15}), ("kette", "befreiten wir sie", "auf", .45),
    ("klingen", "Zurückhaltung", "nach", .55), ("goblin", "Zurückhaltung", "nach", .4, {"dt": .9, "fern": 1}),
    ("ort", "traten wieder ans Tageslicht", "bei", "wald"))
@@ -323,24 +323,24 @@ A("I", 16, ("ort", "ab in die Taverne", "bei", "taverne"), ("tuer_auf", "ab in d
    ("ort", "Erst danach", "bei", "dorf"), ort="dorf")
 A("I", 17, ("stueck", "stimmte ich ein Lied an", "auf", "lied", .5), ort="taverne")
 A("I", 18, ("klopfen", "einen Besuch ab", "nach", .5), ("ort", "einen Besuch ab", "nach", "amtsstube"),
-   ("wucht", "Beinahe wäre", "bei", .45, {"rate": 1.1}))
+   ("wucht", "Beinahe flogen die Fäuste", "bei", .45, {"rate": 1.1}))
 A("I", 21, ("laub", "verschwand kopfüber in einem Gebüsch", "bei", .5), ("hund", "Rex beleidigt", "bei", .3),
-   ("ort", "stiegen wir hinab", "bei", "gewoelbe"), ("hieb", "Wachen überwältigen", "bei", .5), ("aufprall", "Wachen überwältigen", "auf", .45),
-   ("kette", "verschleppt wurden", "nach", .45))
+   ("ort", "stiegen wir hinab", "bei", "gewoelbe"), ("hieb", "Wachen waren schnell überwältigt", "bei", .5), ("aufprall", "Wachen waren schnell überwältigt", "auf", .45),
+   ("kette", "die Gefangenen frei", "auf", .45))
 A("I", 22, ("steinschritte", "drangen immer tiefer", "bei", .35), ("herzschlag", "Herz bei jedem Schritt", "bei", .55), ort="gewoelbe")
 A("I", 23, ("tuer_knarren", "Hinter einer geschlossenen Tür", "bei", .45), ("ort", "Hinter einer geschlossenen Tür", "bei", "labor"),
    ("glas", "Phiolen fiel herunter", "nach", .85))
 A("I", 24, ("tuer_auf", "öffnete sich die andere Tür", "bei", .55), ort="labor")
 A("I", 25, ("ort", "Im Nebenraum", "bei", "taverne"), ("wuerfel", "Würfelspiel spielten", "auf", .5), ("einschenken", "noch mehr Alkohol", "bei", .4),
-   ("dolch", "stach Ezekiel den ersten Gegner", "bei", .55), ("klingen", "die restlichen zu töten", "nach", .55), ("tod", "die restlichen zu töten", "nach", .4, {"dt": 1.1}))
+   ("dolch", "stach er den ersten Gegner", "bei", .55), ("klingen", "für die übrigen drei", "bei", .55), ("tod", "ebenfalls vorbei", "nach", .4, {"dt": .6}))
 A("I", 26, ("ort", "Danach ging es Glasstab", "bei", "labor"), ("erloeschen", "lächerlichen Angriff", "auf", .45), ("steintor", "durch einen Geheimgang", "auf", .35),
    ("rennen", "Ich sprintete", "bei", .35), ("pfeil", "perfekt platzierten Pfeil", "bei", .6), ("pfeiltreffer", "zwischen die Augen", "bei", .55), ("tod", "niederzustrecken", "nach", .45))
 A("I", 28, ("geist", "einer gewissen Spinne", "nach", .3, {"hall": .5}), ort="labor")
-A("I", 29, ("ort", "Zurück in Phandalin", "bei", "dorf"), ("ort", "Also feierten wir", "bei", "feier"), ("jubel", "bis tief in die Nacht", "nach", .4))
+A("I", 29, ("ort", "Zurück in Phandalin", "bei", "dorf"), ("ort", "Also feierten wir", "bei", "feier"), ("jubel", "unter dem Jubel des ganzen Dorfes", "auf", .4))
 A("I", 31, ("klopfen", "zum Bürgermeister", "auf", .4), ("tuer_zu", "nicht wieder einladen", "nach", .65), ort="amtsstube")
 A("I", 35, ("eule", "sternklaren Nacht", "nach", .35, {"fern": 1}))
 A("I", 36, ("zauber", "nutzte seine Magie", "auf", .4), ("stille", "Nichts regte sich", "bei", 6))
-A("I", 37, ("fackel", "Licht einer Fackel", "auf", .4, {"fern": 1}))
+A("I", 37, ("fackel", "fahles Fackellicht", "auf", .4, {"fern": 1}))
 A("I", 38, ("tuer_krach", "stieß Friedrich die alte Tür auf", "auf", .9), ("ort", "stieß Friedrich die alte Tür auf", "auf", "turm"))
 A("I", 39, ("goblin", "überrumpelt zur Seite", "bei", .45), ("schwertziehen", "zog einen Krummsäbel", "bei", .7), ort="turm")
 A("I", 41, ("knurren", "dumpfes Knurren", "bei", .6), ("monster", "jeden Moment auf uns stürzen", "nach", .55, {"rate": .9}), ort="turm")
@@ -348,8 +348,8 @@ A("I", 42, ("pfeil", "Sein Pfeil streifte", "bei", .55), ("frau_aua", "schmerzer
 A("I", 43, ("monster", "Angriffsschrei", "bei", .65), ("pfeil", "gekonnten Schuss", "bei", .5), ("aufprall", "tot nach hinten um", "auf", .5),
    ("hund", "glücklich bellend", "bei", .5), ("frau_aua", "Schmerzensschrei", "bei", .5), ("dunkel", "Gedanken mit Angst", "auf", .5), ort="turm")
 A("I", 44, ("klauen", "schnitten dann direkt", "bei", .6), ("elf_aua", "Blut spritzte", "bei", .5), ort="turm")
-A("I", 45, ("stich", "stach sein Schwert", "bei", .55), ("dolch", "stieß seine zwei Dolche", "bei", .6), ("monster", "Der behaarte Hüne erschlaffte", "bei", .4, {"rate": .7}),
-   ("wucht", "regungslos aufschlug", "bei", .7), ort="turm")
+A("I", 45, ("stich", "stach sein Schwert", "bei", .55), ("dolch", "Zwei Dolche", "bei", .6), ("monster", "Der behaarte Hüne erschlaffte", "bei", .4, {"rate": .7}),
+   ("wucht", "Als er aufschlug", "bei", .7), ort="turm")
 A("I", 46, ("fledermaus", "kleine Fledermaus", "auf", .5), ("lachen_boese", "lauten Lachen verschwand", "nach", .55, {"hall": .4}), ort="turm")
 A("I", 48, ("heilung", "seine Wunden zu heilen", "auf", .45), ("kette", "die beiden Gefangenen los", "auf", .35), ort="turm")
 A("I", 50, ort="stube")
@@ -373,21 +373,21 @@ A("I", 72, ("windstoss", "Stille", "auf", .4), ("kraehe", "halb verfallener Wach
 A("I", 74, ("steinschritte", "Stufe um Stufe", "bei", .4), ("drache", "markerschütternden Aufschrei", "auf", .65, {"fern": 1}), ("fluegel", "schnell auf uns zuflog", "bei", .6),
    ("wucht", "auf dem Plateau landete", "auf", .55), ("drache", "Ein Venomfang!", "nach", .85, {"warte": 1.2}))
 A("I", 75, ("gift", "ersten Giftstrahl", "auf", .55), ("gift", "Giftodem Echo", "bei", .55), ("verzaubern", "hypnotischen Bann", "auf", .5),
-   ("klingen", "auf das furchtbare Biest zu stürzen", "bei", .55), ("klauen", "schlugen die Krallen des Drachen", "bei", .55), ("pfeil", "gezielten Pfeil", "bei", .5),
+   ("klingen", "auf das furchtbare Biest einzudreschen", "bei", .55), ("klauen", "schlugen die Krallen des Drachen", "bei", .55), ("pfeil", "gezielten Pfeil", "bei", .5),
    ("drache_tod", "den finalen Stoß", "nach", .7))
 A("I", 76, ("muenzen", "besonders gründlich", "nach", .55))
-A("I", 79, ("untot", "ächzend und stöhnend", "bei", .5), ("klingen", "problemlos ausschalten", "nach", .5))
+A("I", 79, ("untot", "ächzend und stöhnend", "bei", .5), ("klingen", "hatten sie keine Chance", "nach", .5))
 A("I", 80, ("geist", "seinen Onkel", "nach", .2))
 A("I", 82, ("knarren", "Ächzen von Holz", "bei", .45), ("laub", "Rascheln von Blättern", "bei", .4), ("tuer_auf", "die Tür öffneten", "auf", .45),
    ("baumwesen", "Blights in den Weg", "auf", .55), ("klingen", "wenigen Angriffen", "nach", .5))
 A("I", 83, ("spinne", "zwei riesige Spinnen", "auf", .5), ("feuerball", "gewaltigen Feuerball", "auf", .75), ("flamme", "in Asche verwandelten", "bei", .45))
-A("I", 85, ("ort", "Im letzten Haus", "bei", "kraeuterhaus"), ("spatz", "kleinen Spatz", "auf", .35))
+A("I", 85, ("ort", "Vor dem letzten Haus", "bei", "kraeuterhaus"), ("spatz", "kleinen Spatz", "auf", .35))
 A("I", 86, ("tuer_zu", "ende", "ende", .5, {"fern": 1, "warte": 1.5}), ort="kraeuterhaus")
 # ---- KAPITEL II ----
 A("II", 2, ("zischen", "giftiger Dampf", "auf", .45), ("aufprall", "sanken die Helden zu Boden", "bei", .4), ("herzschlag", "schwarz vor Augen", "bei", .5),
    ("stille", "schwarz vor Augen", "nach", 3), ("lachen_boese", "eine Drow.", "nach", .45, {"hall": .4}))
 A("II", 4, ("kette", "lag in Fesseln", "auf", .45), ("riegel", "Schloss und Riegel", "auf", .45), ("lachen", "Sie lachten über uns", "bei", .4, {"fern": 1}))
-A("II", 5, ("keule", "Knüppel einer Wache", "auf", .65), ("aua", "Knüppel einer Wache", "auf", .45, {"dt": .35}))
+A("II", 5, ("keule", "mit einem Knüppel", "auf", .65), ("aua", "mit einem Knüppel", "auf", .45, {"dt": .35}))
 A("II", 7, ("ratte", "in eine Ratte", "auf", .45), ("ratte", "nagte uns", "bei", .4), ("kettenhemd", "schaffte er alles zurück", "bei", .35))
 A("II", 9, ("hieb", "in unseren Hinterhalt", "auf", .55), ("schrei", "schrie leider so laut", "bei", .55, {"hall": .9}),
    ("rennen", "von Schritten und Stimmen", "bei", .3, {"fern": 1}), ("zank", "von Schritten und Stimmen", "bei", .3, {"fern": 1, "dt": .8}))
@@ -462,56 +462,71 @@ E("vorab", 0, ("knistern", "Diese Chronik", "bei", .3), ("zauber", "trotzdem ver
 # ---- KAPITEL I ----
 E("I", 1, ("papier", "erhielt eine Einladung", "auf", .3), ("holzschritte", "Treffpunkt war der Hafen", "bei", .3),
   ("ruder", "Fischerboote", "auf", .3, {"fern": 1}), ("volk", "Händler und Matrosen", "auf", .3, {"fern": 1}),
-  ("ausatmen", "die Pfeife im Mundwinkel", "auf", .3))
-E("I", 2, ("ausatmen", "pfeiferauchende Barde", "auf", .25), ("hecheln", "dessen grünliches Gewand", "bei", .25),
-  ("ruestung", "scharlachroter Rüstung", "auf", .35))
-E("I", 3, ("papier", "Der schwarzbärtige Zwerg erzählte", "bei", .3), ("amboss", "magische Schmiede zu finden", "auf", .25, {"fern": 1, "hall": .5}))
-E("I", 5, ("karren", "einen Karren mit Waren", "auf", .3), ("ochse", "sicher nach Phandalin bringen", "nach", .3, {"fern": 1}),
-  ("fackel", "heller als jede Fackel", "auf", .25))
-E("I", 8, ("ochse", "friedlich dahin", "auf", .3), ("knarren", "ein Lied über langweilige", "bei", .25),
-  ("knistern", "halb niedergebrannter Wagen", "auf", .3), ("kraehe", "etwas faul war", "nach", .3, {"fern": 1}),
+  ("ausatmen", "die Pfeife im Mundwinkel", "auf", .3), ("welle", "ins Meer mündet", "auf", .25, {"fern": 1}))
+E("I", 2, ("ausatmen", "umweht von einer Wolke", "auf", .25), ("tuch", "und verbeugte mich", "auf", .2),
+  ("hecheln", "dessen grünliches Gewand", "bei", .25), ("schnueffeln", "gründlicher beschnuppert", "bei", .3),
+  ("moewe", "zu laut kreischte", "auf", .3), ("ruestung", "scharlachroter Rüstung", "auf", .35))
+E("I", 3, ("holzschlag", "auf ein Fass", "auf", .25), ("moewe", "nur Möwen lauschten", "auf", .25, {"fern": 1}),
+  ("amboss", "magische Schmiede zu finden", "auf", .25, {"fern": 1, "hall": .5}))
+E("I", 5, ("karren", "einen Karren mit Waren", "auf", .3), ("knarren", "dass die Achsen ächzten", "auf", .25),
+  ("edelstein", "Oder in Edelsteine", "auf", .2), ("tor", "durch das Stadttor", "auf", .3),
+  ("ochse", "zwei Ochsen vor dem Karren", "auf", .3, {"fern": 1}), ("hund", "bellte jeden Meilenstein an", "auf", .3))
+E("I", 8, ("ochse", "friedlich dahin", "auf", .3), ("knarren", "knarrte bei jedem Schlagloch", "bei", .25),
+  ("hecheln", "Rex jagte jeden Schmetterling", "bei", .25), ("knistern", "Abends am Feuer", "auf", .25),
+  ("knistern", "halb niedergebrannter Wagen", "auf", .3), ("stille", "im Wald war es mit einem Mal sehr still", "bei", 4),
   ("laub", "sprang, stand", "auf", .35), ("kampfruf", "Goblins entgegen", "bei", .35), ("schild", "härter als erwartet", "auf", .4),
   ("goblin", "dennoch niederstrecken", "bei", .35))
 E("I", 11, ("ochse", "Statt einfach weiterzufahren", "bei", .25, {"fern": 1}), ("schleichen", "den Spuren in den Wald", "bei", .35),
-  ("ast", "in den Wald zu folgen", "nach", .3))
-E("I", 12, ("goblin", "weitere Goblins", "auf", .35), ("schleichen", "den Spuren der Banditen", "bei", .3),
-  ("laub", "durch den Wald folgen", "bei", .3), ("windstoss", "düsteren Felsspalt", "auf", .3),
-  ("tropfen", "düsteren Felsspalt", "nach", .3, {"hall": .4, "dt": .5}))
-E("I", 13, ("wolf", "angebundene Wölfe", "auf", .35), ("schleichen", "teils lautlos aus dem Schatten", "bei", .35),
+  ("ast", "in den Wald zu folgen", "nach", .3), ("muenzen", "ihre Beute horteten", "auf", .2))
+E("I", 12, ("goblin", "weitere Goblins", "auf", .35), ("schnueffeln", "roch an der feuchten Erde", "bei", .3),
+  ("schleichen", "stapfte los", "bei", .3), ("laub", "durch dichtes Unterholz", "bei", .3),
+  ("ast", "eine Schlinge und eine Grube", "auf", .3), ("windstoss", "düsteren Felsspalt", "auf", .3),
+  ("tropfen", "floss ein kalter Bach", "auf", .3, {"hall": .4}))
+E("I", 13, ("wolf", "angebundene Wölfe", "auf", .35), ("kette", "an kurzen Ketten", "auf", .25),
+  ("tropfen", "Wasser tropfte von der Decke", "bei", .3, {"hall": .4}), ("schleichen", "teils lautlos aus dem Schatten", "bei", .35),
+  ("welle", "rauschte sogar eine Flutwelle", "auf", .5),
   ("aufprall", "seine gesamte Bande am Boden", "auf", .35), ("hecheln", "samt Hund", "auf", .3), ("vogel", "ans Tageslicht", "nach", .3))
-E("I", 16, ("karren", "erreichte unser Karren", "bei", .35), ("huhn", "ein kleines Dorf", "nach", .3),
-  ("trinken", "bis keiner mehr konnte", "bei", .3),
-  ("muenzen", "auf äußerst günstige Zimmer", "auf", .3), ("kiesschritte", "streiften durch die Gassen", "bei", .3),
-  ("tuer_schliessen", "wichen unseren Blicken aus", "auf", .3, {"fern": 1}))
-E("I", 17, ("applaus", "in meinen Bann gezogen hatte", "nach", .3), ("raunen", "Nun lösten sich die Zungen", "auf", .3),
+E("I", 16, ("karren", "erreichte unser Karren", "bei", .35), ("huhn", "und Mist", "auf", .3),
+  ("hammer", "irgendwo hämmerte jemand", "auf", .3, {"fern": 1}), ("trinken", "bis keiner mehr konnte", "bei", .3),
+  ("muenzen", "auf einen Spottpreis", "auf", .3), ("kiesschritte", "streiften durch die Gassen", "bei", .3),
+  ("tuer_schliessen", "Fensterläden klappten zu", "auf", .3, {"fern": 1}))
+E("I", 17, ("applaus", "in meinen Bann gezogen hatte", "nach", .3), ("geschirr", "seinen Krug ab", "auf", .3),
+  ("raunen", "Nun lösten sich die Zungen", "auf", .3),
   ("muenze", "presst den Bewohnern Schutzgeld ab", "auf", .25), ("holzschlag", "machte mich wütend", "auf", .35))
 E("I", 18, ("kiesschritte", "stattete unsere Truppe", "bei", .3), ("stuhl", "eine saftige Belohnung", "bei", .25),
-  ("papier", "Unsere Forderungen", "bei", .3), ("stuhl", "handfesten Streit", "auf", .35), ("tuer_schliessen", "weiterziehen", "auf", .3))
-E("I", 21, ("hecheln", "jagte er einem Kaninchen", "bei", .3), ("rex", "einem Kaninchen hinterher", "auf", .35),
+  ("papier", "Unsere Forderungen", "bei", .3), ("stuhl", "Beinahe flogen die Fäuste", "auf", .35), ("tuer_schliessen", "zogen wir trotzdem weiter", "auf", .3))
+E("I", 21, ("kraehe", "Krähen auf jedem Mauerrest", "auf", .3, {"fern": 1}),
+  ("hecheln", "jagte er einem Kaninchen", "bei", .3), ("rex", "einem Kaninchen hinterher", "auf", .35),
   ("geroell", "halb verschütteten Gang", "auf", .3), ("steinschritte", "stiegen wir hinab", "auf", .3),
-  ("stoehnen", "mehrere Geiseln", "auf", .25, {"fern": 1}), ("schluessel", "befreiten jene", "bei", .35))
+  ("fackel", "unsere Fackel flackerte", "auf", .25),
+  ("stoehnen", "Zelle voller Geiseln", "auf", .25, {"fern": 1}), ("schluessel", "die Gefangenen frei", "bei", .35))
 E("I", 22, ("tuch", "roten Roben ab", "auf", .35), ("ruestung", "scharlachroten Rüstung", "auf", .3),
-  ("tropfen", "in das Gemäuer vor", "auf", .3, {"hall": .4}))
-E("I", 23, ("blubb", "in einer Flüssigkeit treibend", "auf", .3), ("knistern", "Feuer in der Luft", "auf", .25),
-  ("schleichen", "den Raum heimlich zu erkunden", "bei", .3), ("holzschlag", "gegen einen der Schränke", "bei", .45))
-E("I", 24, ("steinschritte", "vor uns stand Glasstab", "bei", .3), ("steinschritte", "schickte uns weg", "nach", .3))
+  ("hecheln", "Rex schien mit der Rolle", "bei", .25), ("tropfen", "in das Gemäuer vor", "auf", .3, {"hall": .4}))
+E("I", 23, ("blubb", "In Glaskolben blubberte", "bei", .3), ("knistern", "Feuer in der Luft", "auf", .25),
+  ("schleichen", "den Raum heimlich zu erkunden", "bei", .3), ("holzschlag", "stellte sich mir ein Schrank", "bei", .45))
+E("I", 24, ("steinschritte", "vor uns stand Glasstab", "bei", .3), ("tuch", "verbeugte mich tief", "auf", .25),
+  ("steinschritte", "schickte uns weg", "nach", .3))
 E("I", 25, ("wuerfel_schuetteln", "Würfelspiel", "bei", .35), ("stubenlachen", "ausgelassen tranken", "auf", .3),
   ("trinken", "Alkohol zu trinken", "auf", .3), ("ruelpsen", "noch mehr Alkohol zu trinken", "nach", .35),
-  ("sterben", "gekonnt mit seinem Dolch nieder", "auf", .35), ("stuhl", "Überraschungsmoment", "auf", .35))
+  ("wuerfel_einzeln", "Ich verlor ein paar Runden", "auf", .3),
+  ("sterben", "gekonnt mit seinem Dolch nieder", "auf", .35), ("stuhl", "für die übrigen drei", "auf", .35))
 E("I", 26, ("tuer_oeffnen", "stellten ihn in seinem", "bei", .35), ("kampflaut", "mit aller Kraft", "bei", .35),
-  ("aufprall", "zurück in den Raum zerren", "auf", .35))
+  ("aufprall", "zurück in den Raum", "auf", .35), ("pfeilflug", "Ein Sirren", "auf", .35))
 E("I", 28, ("stoehnen", "letzten Atemzug", "auf", .3))
 E("I", 29, ("volk", "verbreiteten die Helden", "bei", .3), ("raunen", "wurde lange diskutiert", "auf", .3),
-  ("stubenlachen", "befreiten Gefangenen", "auf", .3), ("einschenken", "anderen Dorfbewohnern", "auf", .3))
-E("I", 31, ("kiesschritte", "Nach der Feier ging es", "bei", .3), ("muenzen", "die Belohnung abzuholen", "auf", .35))
+  ("stubenlachen", "befreiten Gefangenen", "auf", .3), ("einschenken", "anderen Dorfbewohnern", "auf", .3),
+  ("feuer_an", "loderte ein Feuer", "auf", .3), ("stueck", "ich spielte auf", "auf", "lied", .4),
+  ("flamme", "mit brennenden Fackeln", "auf", .3))
+E("I", 31, ("kiesschritte", "Nach der Feier ging es", "bei", .3), ("muenzen", "die Belohnung abzuholen", "auf", .35),
+  ("muenze", "Münze für Münze", "auf", .35))
 E("I", 33, ("knistern", "An dieser Stelle", "bei", .25), ("ausatmen", "Krauts in meiner Pfeife", "auf", .3))
 E("I", 34, ("riemen", "keine Zeit verstreichen", "auf", .3), ("grasschritte", "nächsten Auftrag auf", "auf", .3))
 E("I", 35, ("grasschritte", "Wir erreichten das Gebäude", "bei", .3), ("windstoss", "kleine Scheibe über uns", "auf", .25),
-  ("ast", "die Grünfläche", "auf", .25, {"fern": 1}), ("glocke", "Alarm zu schlagen", "auf", .2, {"fern": 1, "hall": .5}))
+  ("ast", "die Grünfläche", "auf", .25, {"fern": 1}))
 E("I", 36, ("schleichen", "Wir schlichen näher heran", "bei", .3), ("laub", "dicht gewachsenen Büschen", "auf", .3))
 E("I", 37, ("schleichen", "Dicht an die kalte", "bei", .3), ("tropfen", "feuchte Mauer", "auf", .25),
-  ("unhold", "bewaffneten Goblin", "auf", .25, {"fern": 1}), ("schleichen", "umrundeten wir den Turm", "bei", .25),
-  ("kette", "heruntergelassenen Zugbrücke", "auf", .25, {"fern": 1}), ("holztritt", "der alten Holzbrücke", "bei", .2, {"fern": 1}))
+  ("unhold", "bewaffneter Goblin", "auf", .25, {"fern": 1}), ("schleichen", "als wir ins Innere schlichen", "bei", .25),
+  ("kette", "heruntergelassenen Zugbrücke", "auf", .25, {"fern": 1}), ("holztritt", "nicht ein einziges Brett", "bei", .2, {"fern": 1}))
 E("I", 38, ("schleichen", "Wir positionierten uns", "bei", .3), ("klinge_ziehen", "nickten uns noch einmal", "bei", .3))
 E("I", 39, ("kiste", "überrumpelt zur Seite", "auf", .35), ("leder", "leichte, komplett schwarze Rüstung", "auf", .3),
   ("stuhl", "an ihre Stühle gebunden", "auf", .3), ("stoehnen", "lange verhört worden", "auf", .25))
@@ -521,9 +536,9 @@ E("I", 43, ("stampfen", "auf uns zustürmte", "bei", .4), ("biss", "verbiss sich
 E("I", 44, ("stampfen", "näher gekommen", "auf", .35), ("schwung", "mit seiner Pranke", "auf", .35))
 E("I", 45, ("schwung", "gewaltigen Satz", "auf", .35), ("unhold", "pelzige Seite", "auf", .4),
   ("aufprall", "den Waldläufer von sich", "auf", .4), ("schatten", "wie aus dem Nichts", "auf", .35))
-E("I", 46, ("verwandlung", "verwandelte sie sich", "bei", .4))
+E("I", 46, ("verwandlung", "Sie verwandelte sich", "bei", .4))
 E("I", 47, ("steinschritte", "Echo wollte ihr schon nachsetzen", "bei", .3), ("elf_aua", "blutverschmierte Schulter", "auf", .25))
-E("I", 48, ("dolch_ziehen", "schnitt Friedrich", "bei", .35), ("stuhl", "sehr glücklich aus", "bei", .3))
+E("I", 48, ("dolch_ziehen", "schnitt Friedrich", "bei", .35), ("stuhl", "sichtlich erleichtert", "bei", .3))
 E("I", 50, ("tuer_oeffnen", "kehrten wir zu Gundren zurück", "auf", .3), ("tuch", "überglücklich in die Arme", "auf", .3),
   ("knistern", "warm ums Herz", "auf", .25))
 E("I", 52, ("papier", "Gundren gab uns den Auftrag", "auf", .3), ("amboss", "magische Schmiede finden", "nach", .25, {"hall": .6, "fern": 1}))
@@ -538,7 +553,7 @@ E("I", 57, ("steinschritte", "Wir gingen noch tiefer", "bei", .3))
 E("I", 58, ("wucht", "räumte unsere Gruppe", "auf", .35), ("lachen", "endlich uns", "nach", .3, {"dt": 1.0}))
 E("I", 59, ("tropfen", "Es roch nach kaltem Metall", "bei", .25, {"hall": .5}))
 E("I", 60, ("feuer_an", "Wir schlugen unser Lager auf", "auf", .35), ("knistern", "weiter vorgehen wollten", "nach", .3))
-E("I", 62, ("riemen", "Letztlich ging es zurück", "bei", .3))
+E("I", 62, ("riemen", "Dann ging es zurück", "bei", .3))
 E("I", 64, ("volk", "in der großen Stadt", "auf", .3), ("muenzen", "Gasthof gesichert", "auf", .3), ("klopfen", "um eine Audienz", "auf", .3))
 E("I", 65, ("tuer_oeffnen", "geradewegs zum Leiter", "bei", .35), ("stuhl", "nicht gerade erfreut", "auf", .3), ("lachen", "merklich", "nach", .25))
 E("I", 66, ("papier", "vertröstete er uns", "auf", .3), ("tuer_schliessen", "erst später Zeit", "nach", .3))
@@ -552,16 +567,16 @@ E("I", 72, ("tuer_knarren", "verlassen wirkten", "auf", .25, {"fern": 1}))
 E("I", 74, ("schleichen", "Die Gefährten schlichen", "bei", .3), ("windstoss", "schlug das Schicksal zu", "auf", .35),
   ("drachenlaut", "riesigen Krallen und Zähnen", "auf", .4))
 E("I", 75, ("husten", "mit voller Wucht", "auf", .4), ("drachenlaut", "letzten tosenden Aufbäumen", "bei", .45),
-  ("schwung", "verfehlten seinen Kopf", "bei", .4), ("husten", "Meine Lunge brannte", "auf", .35))
-E("I", 76, ("ausatmen", "erst einmal durchzuatmen", "auf", .35), ("tuch", "um die Wunden zu kümmern", "auf", .3),
-  ("leder", "meine Pfeife zu stopfen", "auf", .25))
+  ("schwung", "verfehlten ihn knapp", "bei", .4), ("husten", "Meine Lunge brannte", "auf", .35))
+E("I", 76, ("ausatmen", "durchatmen", "auf", .35), ("tuch", "Wunden versorgen", "auf", .3),
+  ("leder", "Pfeife stopfen", "auf", .25), ("knistern", "eine lange Rast", "auf", .25))
 E("I", 79, ("tuer_knarren", "vermeintlich leeren Häuser", "auf", .3), ("ghul", "auf uns zustolperten", "auf", .35),
-  ("hieb", "mehrere von ihnen", "auf", .4), ("aufprall", "problemlos ausschalten", "nach", .35, {"dt": .8}))
+  ("hieb", "hatten sie keine Chance", "auf", .4), ("aufprall", "hatten sie keine Chance", "nach", .35, {"dt": .5}))
 E("I", 80, ("kiesschritte", "Vor einem der Häuser", "bei", .25), ("windstoss", "innehielt", "auf", .25))
-E("I", 82, ("ast", "anthropomorphe Körper", "auf", .3), ("laub", "aus einem Hinterhalt anspringen", "auf", .35), ("hieb", "überlegen", "auf", .35))
+E("I", 82, ("ast", "knorrigem Holz", "auf", .3), ("laub", "aus einem Hinterhalt anspringen", "auf", .35), ("hieb", "überlegen", "auf", .35))
 E("I", 83, ("klingen", "entbrannten weitere Kämpfe", "auf", .4, {"n": 1}), ("baumwesen", "gegen etliche Blights", "auf", .35))
-E("I", 85, ("tuer_oeffnen", "Im letzten Haus", "auf", .3), ("fuchs", "einen Fuchs auf den Schultern", "auf", .3),
-  ("brutzeln", "köchelnden Topf", "auf", .35), ("blubb", "warme Speise", "auf", .25), ("buch", "handschriftlichen Notizen", "auf", .3))
+E("I", 85, ("tuer_oeffnen", "durch die offene Tür", "auf", .3), ("fuchs", "einen Fuchs auf den Schultern", "auf", .3),
+  ("brutzeln", "köchelnden Topf", "auf", .35), ("blubb", "warme Speise", "auf", .25), ("buch", "handschriftliche Notizen", "auf", .3))
 E("I", 86, ("holztritt", "Keiner von uns", "bei", .25))
 # ---- KAPITEL II ----
 E("II", 2, ("husten", "Einer nach dem anderen", "bei", .4), ("verwandlung", "Gestaltwandlerin", "auf", .3), ("tuch", "verschleppte uns alle", "auf", .3))
@@ -950,8 +965,7 @@ def untermalung_stueck(stimmung, k):
         s = t * 3; bass, ak = AKK[name]
         b_lo = bass + 12 if bass + 12 <= 52 else bass
         # Bett: Grundton (Cello/Horn/Tremolo) und – falls vorhanden – Chor auf den oberen Akkordtönen
-        bi = st["bett"][0]
-        bett.append([s, b_lo if bi != "cello" or b_lo >= 36 else b_lo + 12, 3, _r(.36 + rnd.random() * .06), {"ein": .35}])
+        bett.append([s, b_lo, 3, _r(.36 + rnd.random() * .06), {"ein": .35}])
         if len(st["bett"]) > 1 and t % 2 == 0:
             bett2.append([s, [ak[1], ak[2]], 3, _r(.3 + rnd.random() * .05), {"ein": .6}])
         # Begleitung
@@ -1242,17 +1256,33 @@ def kompressor(x, schwelle=-18.0, ratio=3.0, fenster=.05):
     return x * 10 ** (-red / 20)
 
 def begrenzer(x, decke_db, halten=.02):
-    """Vorausschauender Brickwall-Begrenzer: kein Abtastwert über decke_db (Anstieg/Abfall ~20 ms, Vorlauf = halten)"""
+    """Vorausschauender Brickwall-Begrenzer: kein Abtastwert über decke_db (Anstieg/Abfall ~20 ms, Vorlauf = halten).
+    decke_db: Zahl oder Verlauf je Abtastwert (z. B. tiefere Decke, solange die Stimme spricht)"""
     from scipy.ndimage import minimum_filter1d, uniform_filter1d
-    decke = 10 ** (decke_db / 20)
+    decke = 10 ** (np.asarray(decke_db, dtype=float) / 20)
+    if decke.ndim: decke = decke[:x.shape[1]]
     pk = np.abs(x).max(axis=0)
-    if pk.max() <= decke: return x
+    if np.all(pk <= decke): return x
     g = np.minimum(1.0, decke / np.maximum(pk, 1e-12))
     h = max(1, int(halten * SR))
     g = minimum_filter1d(g, size=2 * h + 1, mode="nearest")
     g = uniform_filter1d(g, size=h, mode="nearest")
     y = x * g
     return np.clip(y, -decke, decke)
+
+def decke_verlauf(plan, n, pg):
+    """Decke des Hörspiel-Begrenzers: pegel.grenze (+0,5 dB Überschwingen wie im Browser), solange die Stimme spricht
+    pegel.grenzeSprache – damit Stimme + Hörspiel zusammen nicht über 0 dBFS kommen (die Stimme läuft am Begrenzer vorbei)"""
+    d = np.full(n, pg.get("grenze", -4) + .5)
+    gs = pg.get("grenzeSprache")
+    if gs is None: return d
+    for (t0, k, i, info) in plan:
+        a, b = int(t0 * SR), int((t0 + info["d"]) * SR)
+        r = int(.25 * SR)
+        d[max(0, a - r):a] = np.minimum(d[max(0, a - r):a], np.linspace(d[0], gs + .5, len(d[max(0, a - r):a])))
+        d[a:b] = gs + .5
+        e = d[b:b + r]; d[b:b + r] = np.minimum(e, np.linspace(gs + .5, pg.get("grenze", -4) + .5, len(e)))
+    return d
 
 # ---------- Untermalung offline: dieselben Regeln wie unterStarten()/unterPlanen() in hoerspiel.js ----------
 def variante(daten, stimmung, rnd, letzt=None):
@@ -1401,10 +1431,11 @@ def partitur():
         "sprache": "de",
         "hinweis": "Erzeugt von chronik/hoerspiel-werkzeug.py – dort bearbeiten, nicht hier.",
         # summe: feste Aufholverstärkung nach dem Bus-Kompressor (ersetzt die automatische des Browsers, +7 dB);
-        # grenze: Begrenzer-Schwelle in dB (Decke des Hörspiels ≈ −3,5 dBFS); musik: Zwischenspiele ~3 LU unter der Stimme;
+        # grenze: Begrenzer-Schwelle in dB (Decke des Hörspiels ≈ −3,5 dBFS), grenzeSprache: dieselbe, solange die Stimme
+        # spricht (≈ −9,5 dBFS – Stimme + Hörspiel bleiben so unter 0 dBFS); musik: Zwischenspiele ~3 LU unter der Stimme;
         # unter*: Untermalung (Stärke, unter der Stimme, in Sprechpausen, zwischen Absätzen)
-        "pegel": {"atmo": .8, "atmoSprache": .34, "atmoPause": 1.0, "fx": 1.1, "musik": .5, "hall": .22,
-                  "summe": 2.23, "grenze": -4, "unter": .35, "unterSprache": .55, "unterLuecke": .8, "unterPause": 1.0},
+        "pegel": {"atmo": .8, "atmoSprache": .34, "atmoPause": 1.0, "fx": 1.1, "musik": .4, "hall": .22,
+                  "summe": 2.23, "grenze": -4, "grenzeSprache": -10, "unter": .6, "unterSprache": .55, "unterLuecke": .8, "unterPause": 1.0},
         "abschnitte": abschnitte,
         "orte": ORTE,
         "arten": ARTEN,
@@ -1599,7 +1630,7 @@ def probe(ausgabe, spec, mit_ende=False, mit_start=True):
     hall = np.stack([fftconvolve(hall_send[c], ir[c])[:hall_send.shape[1]] for c in range(2)]) * pg["hall"] * .08
     hs = atmo + fx + mus + hall
     # Summenbus wie im Browser: Kompressor (−18 dB, 3:1) → feste Aufholverstärkung → Brickwall-Begrenzer
-    hs = begrenzer(kompressor(hs) * pg.get("summe", 1.0), pg.get("grenze", -4) + .5)
+    hs = begrenzer(kompressor(hs) * pg.get("summe", 1.0), decke_verlauf(plan, hs.shape[1], pg))
     gesamt = stimme + hs
     if os.environ.get("HS_STEMS"):
         s_ = pg.get("summe", 1.0)

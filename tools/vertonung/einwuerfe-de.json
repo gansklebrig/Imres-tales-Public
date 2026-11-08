@@ -9,12 +9,28 @@
       "warum": "Gundrens Brief als Händler-Versprechen; dramatische Ironie, zahlt auf jeden späteren Beinahe-Tod ein"
     },
     {
+      "id": "I-02-b",
+      "absatz": "I:2",
+      "nach": "sofort als Waldläufer erkennbar machte.",
+      "rolle": "friedrich",
+      "text": "[warmly] Friedrich, aus den Wäldern. [short pause] Das ist Rex, [amused] er ist der Freundlichere von uns beiden. [short pause] Ich rede lieber zuerst. [pause] [mischievously] Und wenn Reden nicht hilft, [short pause] treffe ich.",
+      "warum": "Friedrichs Selbstvorstellung: freundlich, verschmitzt, Waldläufer mit Rex – erst reden, dann treffen (Heldenseite)"
+    },
+    {
+      "id": "I-02-c",
+      "absatz": "I:2",
+      "nach": "bereit für jeden Streit.",
+      "rolle": "echo",
+      "text": "[gruffly] Echo. [short pause] Druide. [grumbles] Die Hörner sind echt, und wer sie anfasst, verliert einen Finger. [short pause] Ich komme aus dem tiefen Wald, da redet man nicht viel. [pause] [greedily] Was ich mag: [short pause] Gold, Edelsteine, alles, was glänzt. [short pause] [growls] Und wer mir dumm kommt, der brennt.",
+      "warum": "Echos Selbstvorstellung: wild, mürrisch, goldgierig, Feuerball statt Verhandlung (Heldenseite); Barradin antwortet mit der Möwe und seinen Fingern"
+    },
+    {
       "id": "I-02-a",
       "absatz": "I:2",
-      "nach": "Die Vorstellungsrunde verlief, vorsichtig gesagt, etwas holprig.",
+      "nach": "was in ihm vorging …",
       "rolle": "ezekiel",
       "text": "[coldly] Ezekiel. [pause] The Destroyer.",
-      "warum": "Seine komplette Vorstellung – illustriert 'holprig'; Auftakt des Running Gags"
+      "warum": "Seine komplette Vorstellung direkt nach Barradins Beschreibung – danach 'Das war alles.'; Auftakt des Running Gags"
     },
     {
       "id": "I-03-a",
@@ -61,10 +77,10 @@
     {
       "id": "I-25-a",
       "absatz": "I:25",
-      "nach": "dass wir für sie wohl wie zwölf aussahen,",
+      "nach": "hob Ezekiel seinen Becher.",
       "rolle": "ezekiel",
       "text": "[coldly] Prost.",
-      "warum": "Ein Wort vor dem ersten Dolchstoß"
+      "warum": "Ein Wort, Becher erhoben – direkt vor dem ersten Dolchstoß"
     },
     {
       "id": "I-39-a",
