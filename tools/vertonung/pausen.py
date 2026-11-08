@@ -17,7 +17,8 @@ SATZ_MIN = 0.42      # Grundpause nach jedem Satzende (. ! ? …)
 DOPPEL_MIN = 0.30    # nach Doppelpunkt / Gedankenstrich
 ABSATZ_MIN = 0.85    # Stille zwischen zwei Absätzen (Ende dieses + Anfang des nächsten)
 TITEL_MIN = 1.0      # nach einer Überschrift
-SCHWELLE = 10 ** (-42 / 20)
+SCHWELLE = 10 ** (-42 / 20)   # echte Stille
+LEISE = 10 ** (-30 / 20)      # Atmer/Ausklang zählen als Pause
 
 TAG = re.compile(r"\[[^\]]*\]")
 def klartext(r): return re.sub(r"\s+", " ", TAG.sub(" ", r)).strip()
@@ -35,17 +36,25 @@ def huelle(x, f=0.01):
     n = int(f * SR); m = len(x) // n
     return np.sqrt(np.mean(x[: m * n].reshape(m, n) ** 2, axis=1) + 1e-12), n
 
-def stille_bei(h, n, a, b):
-    """längste stille Strecke (in Samples) im Fenster [a,b] Sekunden → (start, ende) oder None"""
-    i0, i1 = max(0, int(a * SR / n)), min(len(h), int(b * SR / n) + 1)
+def strecke(h, i0, i1, grenze):
     best, cur = None, None
     for i in range(i0, i1):
-        if h[i] < SCHWELLE:
+        if h[i] < grenze:
             cur = (cur[0], i + 1) if cur else (i, i + 1)
             if best is None or cur[1] - cur[0] > best[1] - best[0]: best = cur
         else: cur = None
-    return (best[0] * n, best[1] * n) if best else None
+    return best
 
+def stille_bei(h, n, a, b):
+    """gefühlte Pause im Fenster [a,b] s → (Länge in s, Einfügepunkt in Samples) oder None.
+    Länge = längste leise Strecke (Atmer zählen mit); eingefügt wird mitten in der stillsten Stelle darin."""
+    i0, i1 = max(0, int(a * SR / n)), min(len(h), int(b * SR / n) + 1)
+    p = strecke(h, i0, i1, LEISE)
+    if not p: return None
+    q = strecke(h, p[0], p[1], SCHWELLE)
+    if q: at = (q[0] + q[1]) // 2
+    else: at = p[0] + int(np.argmin(h[p[0]:p[1]]))
+    return (p[1] - p[0]) * n / SR, at * n + n // 2
 def ausrichten(text, worte):
     """Textwörter → Index des passenden Whisper-Worts"""
     tw = [(m.start(), m.end(), norm(m.group())) for m in re.finditer(r"\S+", text)]
@@ -90,9 +99,9 @@ def bearbeiten(schluessel, datei, regie, worte, marken, ende_min, titel, naechst
         a, b = worte[j][2], worte[j + 1][1]
         st = stille_bei(h, n, min(a, b) - .25, max(a, b) + .25)
         if not st: protokoll.append((j, soll, None)); continue
-        ist = (st[1] - st[0]) / SR
+        ist, at = st
         if ist + .03 < soll:
-            einfuegen.append(((st[0] + st[1]) // 2, soll - ist))
+            einfuegen.append((at, soll - ist))
             protokoll.append((j, soll, round(ist, 2)))
     # Ende: Reststille hinten + Stille vorne im nächsten Absatz
     hinten = 0
@@ -104,8 +113,11 @@ def bearbeiten(schluessel, datei, regie, worte, marken, ende_min, titel, naechst
     plus_ende = max(0.0, ziel_ende - hinten - naechster_anfang)
     if trocken: return einfuegen, plus_ende, fehlend, guete, D
     teile, pos = [], 0
+    F = int(.006 * SR); rampe = np.linspace(1, 0, F, dtype=np.float32)
     for at, dauer in sorted(einfuegen):
-        teile.append(x[pos:at]); teile.append(np.zeros(int(dauer * SR), np.float32)); pos = at
+        a = x[pos:at].copy(); a[-F:] *= rampe[-len(a[-F:]):] if len(a) else 1
+        teile.append(a); teile.append(np.zeros(int(dauer * SR), np.float32))
+        x[at:at + F] *= rampe[::-1][:len(x[at:at + F])]; pos = at
     teile.append(x[pos:]); teile.append(np.zeros(int(plus_ende * SR), np.float32))
     schreibe(np.concatenate(teile), datei)
     return einfuegen, plus_ende, fehlend, guete, D

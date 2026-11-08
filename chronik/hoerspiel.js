@@ -444,7 +444,7 @@
     if (!laeuft()) return 0;
     const a = absatz(x), j = ctx.currentTime;
     duckAuf(P.pegel.atmoPause, j + .05, .35);
-    let warte = .75;
+    let warte = .2;   /* Grundpause steckt jetzt in den Aufnahmen (tools/vertonung/pausen.py) */
     if (a && a.e) a.e.forEach(e => {
       if (e.t <= a.d - .02) return;
       const wann = j + Math.max(0, e.t - a.d);
