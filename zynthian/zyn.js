@@ -151,6 +151,8 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
 .zyn-menue h3 { margin: 0 0 4px; font-size: 19px; color: #e0a046; letter-spacing: .04em; }
 .zyn-menue .reihe { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; width: min(760px, 100%); }
 .zyn-menue .reihe.drei { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* jedes Menü scrollt, sobald es höher als der Bildschirm wird – die Auswahl wandert sichtbar mit */
+.zyn-menue .reihe { max-height: calc(100vh - 92px); overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; }
 .zyn-menue button { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(224,160,70,.35); background: rgba(235,226,204,.05);
   color: inherit; font: 600 17px/1.2 system-ui, sans-serif; text-align: left; cursor: pointer; }
 .zyn-menue button small { font-weight: 400; font-size: 13px; color: #a89f8f; }
@@ -1598,7 +1600,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const GPU = { an: false, text: "" };
   (() => { let r = ""; try { const gl = document.createElement("canvas").getContext("webgl"), e = gl && gl.getExtension("WEBGL_debug_renderer_info"); r = gl ? String(e ? gl.getParameter(e.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)) : ""; } catch (_) {}
     const sw = !r || /swiftshader|llvmpipe|software/i.test(r);
-    GPU.text = W("zeichnet gerade mit: ", "drawing with: ") + (r ? r.replace(/\(.*?\)/g, "").trim().slice(0, 40) : "?") + (sw ? W(" – Prozessor", " – CPU") : W(" – Grafikchip", " – GPU"));
+    GPU.text = W("zeichnet gerade mit: ", "drawing with: ") + (() => { if (!r) return "?"; const t = r.replace(/^ANGLE \((.*)\)$/, "$1").split(",").map(x => x.replace(/\(.*?\)|0x[0-9a-f]+/gi, "").trim()).filter(Boolean); return (t.find(x => /v3d|videocore|swiftshader|llvmpipe|mali|intel|nvidia|geforce|radeon|apple/i.test(x)) || t[0] || "?").slice(0, 32); })() + (sw ? W(" – Prozessor", " – CPU") : W(" – Grafikchip", " – GPU"));
     fetch("/zyn/grafik").then(x => x.json()).then(j => { GPU.an = !!j.an; if (j.zurueckgenommen) GPU.text += W(" · letzter Test stürzte ab, zurückgenommen", " · last test crashed, reverted"); }).catch(() => {}); })();
   function hgLage() {
     try {
