@@ -79,14 +79,31 @@ def bearbeiten(schluessel, datei, regie, worte, marken, ende_min, titel, naechst
     text = klartext(regie)
     tw, zu, guete = ausrichten(text, worte)
     wunsch = {}   # Wortindex (Whisper) → Mindestpause
-    def setze(k_text, s):
-        if k_text not in zu: return
-        j = zu[k_text]
-        if j < len(worte) - 1: wunsch[j] = max(wunsch.get(j, 0), s)
+    def schluss(w): m_ = re.search(r"([.!?…:,;–—])[“”\"«»)]*$", w.strip()); return m_.group(1) if m_ else ""
+    def finde(k_text):
+        """Whisper-Wort zum Textwort k – nur wenn Wort oder Satzzeichen wirklich passen (sonst lieber keine Pause,
+        damit nie mitten in ein Wort oder einen Satzfluss geschnitten wird)"""
+        if k_text not in zu: return None
+        j0, ziel = zu[k_text], tw[k_text][2]
+        nxt = tw[k_text + 1][2] if k_text + 1 < len(tw) else ""
+        sz = schluss(text[tw[k_text][0]:tw[k_text][1]])
+        kand = [j for j in range(max(0, j0 - 4), min(len(worte) - 1, j0 + 5)) if norm(worte[j][0]) == ziel]
+        if kand:
+            gut = [j for j in kand if nxt and norm(worte[j + 1][0])[:3] == nxt[:3]] or kand
+            return min(gut, key=lambda j: abs(j - j0))
+        if sz:   # Name zerstückelt o. Ä.: Whisper-Wort mit demselben Satzzeichen in der Nähe
+            kand = [j for j in range(max(0, j0 - 3), min(len(worte) - 1, j0 + 4)) if schluss(worte[j][0]) == sz]
+            if kand: return min(kand, key=lambda j: abs(j - j0))
+        return None
+    def setze(k_text, s, satz=False):
+        j = finde(k_text)
+        if j is None or j >= len(worte) - 1: return
+        if satz and schluss(worte[j][0]) not in ".!?…": return   # Whisper hört kein Satzende → Erzähler liest durch, so lassen
+        wunsch[j] = max(wunsch.get(j, 0), s)
+        if not schluss(text[tw[k_text][0]:tw[k_text][1]]): mitte.add(j)
+    mitte = set()   # Pausen mitten im Satz (vor einer Enthüllung): nur verlängern, wo Helmut ohnehin kurz absetzt
     for k, (a, b, w) in enumerate(tw[:-1]):
-        roh = text[a:b]
-        if re.search(r"[.!?…](?:[“”\"«»)])?$", roh): setze(k, SATZ_MIN)
-        elif re.search(r"[:–—]$", roh) or text[b:b + 3].strip() in ("–", "—"): setze(k, DOPPEL_MIN)
+        if re.search(r"[.!?…](?:[“”\"«»)])?$", text[a:b]): setze(k, SATZ_MIN, satz=True)
     fehlend = []
     for m in marken:
         s = m["nach"].strip(); p = text.find(s)
@@ -132,9 +149,14 @@ def bearbeiten(schluessel, datei, regie, worte, marken, ende_min, titel, naechst
         st = stille_bei(h, n, min(a, b) - .25, max(a, b) + .25)
         if not st: protokoll.append((j, soll, None)); continue
         ist, at = st
+        if ist < .12 and soll < .75: continue      # keine echte Pause da → nicht aufreißen
+        if j in mitte:
+            if ist < .2: continue                      # Satz fließt → kein Loch hineinschneiden
+            soll = min(soll, ist + .3)
         if ist + .03 < soll:
             einfuegen.append((at, np.zeros(int((soll - ist) * SR), np.float32), at))
             protokoll.append((j, soll, round(ist, 2)))
+            if os.environ.get("PROTOKOLL"): print(f"   {schluessel} …{' '.join(w[0] for w in worte[max(0, j - 3):j + 1])} | {' '.join(w[0] for w in worte[j + 1:j + 3])}  ist {ist:.2f} → {soll:.2f}  @{at / SR:.2f}s")
     # Ende: Reststille hinten + Stille vorne im nächsten Absatz
     hinten = 0
     for v in h[::-1]:
