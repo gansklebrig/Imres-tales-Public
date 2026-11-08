@@ -391,6 +391,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       '<button type="button" data-zm="start">🔌 ' + W("Beim Einschalten: ", "At power-on: ") + "<b>" + W("Barden Beats", "Barden Beats") + "</b><small>" + W("so startet das Gerät ab jetzt", "the device starts like this from now on") + "</small></button>" +
       '<button type="button" data-zm="startz">🔌 ' + W("Beim Einschalten: ", "At power-on: ") + "<b>Zynthian</b></button>" +
       '<button type="button" data-zm="neu">🔄 ' + W("Seite neu laden", "Reload page") + "</button>" +
+      '<button type="button" data-zm="hg">⏱ ' + W("Hänger-Protokoll", "Hang log") + "<small>" + W("wann es gehakt hat – Ton, Bedienung, Prozessor, Hitze", "when it stuttered – audio, controls, CPU, heat") + "</small></button>" +
       '<button type="button" data-zm="diag">🩺 ' + W("Diagnose anzeigen", "Show diagnostics") + "<small>" + W("♫-Knopf, Touch, Ton, Update – zum Abfotografieren", "♫ button, touch, sound, update – to take a photo") + "</small></button>" +
       '<button type="button" data-zm="zurueck">↺ ' + W("Vorige Version zurückholen", "Restore previous version") + "<small>" + W("falls nach einem Update etwas nicht stimmt (die letzten 5 werden aufgehoben)", "if an update broke something (last 5 are kept)") + "</small></button>" +
       '<button type="button" data-zm="neustart">↻ ' + W("Zynthian neu starten", "Restart Zynthian") + "</button>" +
@@ -398,6 +399,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       '<button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>", {
       zyn: () => { zeige("🎛 " + W("Zynthian startet …", "Zynthian is starting …")); post("zynthian"); },
       upd: () => { menueZu(); zeige("⬇ " + W("Barden Beats wird aktualisiert …", "Updating Barden Beats …"), null, W("dauert bis zu einer Minute, danach startet die Bühne neu", "takes up to a minute, then the stage restarts")); post("aktualisieren"); updateVerfolgen(); },
+      hg: () => haengerMenue(),
       diag: () => { menue('<h3>🩺 Diagnose</h3><pre style="font-size:11px;line-height:1.25;white-space:pre-wrap;max-height:330px;overflow:auto;margin:0">⏳</pre><div class="reihe"><button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>", { zu: menueZu });
         fetch("/zyn/diagnose").then(r => r.json()).then(j => { const pre = $(".zyn-menue pre"); if (pre) pre.textContent = j.text || "–"; }).catch(() => { const pre = $(".zyn-menue pre"); if (pre) pre.textContent = W("Brücke nicht erreichbar", "bridge unreachable"); }); },
       zurueck: () => { menueZu(); zeige("↺ " + W("Vorige Version wird geholt …", "Restoring previous version …")); post("zurueck"); updateVerfolgen(); },
@@ -827,8 +829,12 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (SEITE === "welten") { const a = $(".welt.an"); text = a ? "🌿 " + kurzName(a) : W("still", "silent"); }
     else if (z) text = (z.laeuft ? "🎵 " + stimmName(z.stimmung) : "🎵 –") + " · " + (z.kulLaeuft ? "🌲 " + kulName(z.kulisse) : "🌲 –");
     let fern = null; try { fern = fernBericht(); } catch (_) {}
-    fetch("/zyn/zustand", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ seite: SEITE, modus, text, fern }) }).catch(() => {});
+    /* nur schicken, wenn sich etwas geändert hat (sonst alle 10 s ein Lebenszeichen) */
+    const body = JSON.stringify({ seite: SEITE, modus, text, fern }), j = Date.now();
+    if (body === fernLetzt && j - fernLetztT < 10000) return; fernLetzt = body; fernLetztT = j;
+    fetch("/zyn/zustand", { method: "POST", headers: { "Content-Type": "application/json" }, body }).catch(() => {});
   }
+  let fernLetzt = "", fernLetztT = 0;
   setInterval(fernMelden, 1500);
   /* Befehle der Fernbedienung */
   function fernBefehl(e) {
@@ -1580,7 +1586,46 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
 
   /* ===================== Auslastung des Pi ===================== */
   let lastInfo = null, lagMax = 0, lagT = performance.now();
-  setInterval(() => { const j = performance.now(), d = j - lagT - 100; lagT = j; if (d > lagMax) lagMax = d; }, 100);
+  setInterval(() => { const j = performance.now(), d = j - lagT - 100; lagT = j; if (d > lagMax) lagMax = d; if (d > 250 && !document.hidden) hgMerken("ui", d); }, 100);
+  /* ===================== ⏱ Hänger-Rekorder =====================
+     „ui“: die Bedienung stand (Browser beschäftigt) · „ton“: der Ton im Browser kam nicht hinterher (seine Uhr lief langsamer als die echte)
+     – beides geht mit Uhrzeit und Lage an die Brücke, die dazu JACK-Aussetzer, Prozessorlast, Hitze und Unterspannung festhält. */
+  const HG = { neu: [], uhrT: 0, uhrP: 0, ab: performance.now() + 15000 };
+  function hgLage() {
+    try {
+      if (SEITE === "welten") { const m = wMix(); return "Klangwelt " + (m && m.welt && m.laeuft ? m.welt.name : "still") + " · " + zpSeite + (zpRuhe ? " · Ruhebild" : ""); }
+      const z = pz(); return (z ? (z.laeuft ? "Stimmung " + stimmName(z.stimmung) : "Musik aus") + (z.kulLaeuft ? " · " + kulName(z.kulisse) : "") : "") + " · " + (mischAktiv() ? "Mischer" : spurAktiv() ? "Spuren" : zpSeite) + (zpRuhe ? " · Ruhebild" : "");
+    } catch (_) { return ""; }
+  }
+  function hgMerken(art, ms, info) { if (performance.now() < HG.ab) return; HG.neu.push({ t: Date.now() / 1000, art, ms: Math.round(ms), info: info || hgLage() }); if (HG.neu.length > 60) HG.neu.shift(); }
+  setInterval(() => {
+    /* Uhr des Tons gegen die echte Zeit */
+    const P = SEITE === "welten" ? window.ImresWelten : window.ImresPult; let u = null; try { u = P && P.uhr ? P.uhr() : null; } catch (_) {}
+    const j = performance.now();
+    if (u && u.an && HG.uhrP && !document.hidden) { const dp = j - HG.uhrP, da = (u.t - HG.uhrT) * 1000, weg = dp - da; if (dp < 3000 && weg > 60) hgMerken("ton", weg); }
+    HG.uhrT = u ? u.t : 0; HG.uhrP = u && u.an ? j : 0;
+  }, 1000);
+  setInterval(() => { if (!HG.neu.length) return; const neu = HG.neu.splice(0); fetch("/zyn/haenger", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ neu }) }).catch(() => {}); }, 5000);
+  const HG_ART = { xrun: ["🔊", W("Audio-Aussetzer (JACK)", "Audio dropout (JACK)")], ton: ["🎵", W("Ton im Browser stockte", "Browser audio stalled")], ui: ["🖐", W("Bedienung hing", "Controls froze")],
+    kern: ["🔥", W("Prozessor voll", "CPU maxed")], pi: ["🌡", W("Pi", "Pi")], info: ["·", ""] };
+  function haengerMenue() {
+    const zz = (id, t, u) => '<button type="button" data-zm="' + id + '">' + t + (u ? "<small>" + u + "</small>" : "") + "</button>";
+    menue('<h3>⏱ ' + W("Hänger-Protokoll", "Hang log") + '</h3><div class="zyn-hg">⏳</div><div class="reihe">' + zz("neu", "🔄 " + W("Aktualisieren", "Refresh")) + zz("leeren", "🧹 " + W("Protokoll leeren", "Clear log"), W("danach neu beobachten", "then watch again")) + zz("zu", "✕ " + W("Schließen", "Close")) + "</div>",
+      { zu: menueZu, neu: () => haengerMenue(), leeren: () => fetch("/zyn/haenger", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ leeren: true }) }).then(() => haengerMenue()).catch(() => {}) });
+    menueArt = "haenger";
+    fetch("/zyn/haenger").then(r => r.json()).then(d => {
+      const el = $(".zyn-menue .zyn-hg"); if (!el) return; const L = (d.liste || []).slice().reverse(), jetzt = d.jetzt || Date.now() / 1000, sy = d.sys || {};
+      const vor = t => { const s = Math.max(0, Math.round(jetzt - t)); return s < 60 ? s + " s" : s < 3600 ? Math.round(s / 60) + " min" : Math.round(s / 3600) + " h"; };
+      const zaehl = a => L.filter(x => x.art === a && jetzt - x.t < 3600).length;
+      let h = '<p class="hinweis">' + W("Jetzt: ", "Now: ") + (sy.kern != null ? "⚙ " + sy.kern + " % · " : "") + (sy.temp != null ? "🌡 " + sy.temp + " °C" : "") + (sy.drossel ? " · ⚠ " + esc2(sy.drossel) : "") +
+        "<br>" + W("Letzte Stunde: ", "Last hour: ") + "🔊 " + zaehl("xrun") + " · 🎵 " + zaehl("ton") + " · 🖐 " + zaehl("ui") + " · 🔥 " + zaehl("kern") + "</p>";
+      h += L.length ? '<div class="zyn-hg-l">' + L.slice(0, 40).map(x => { const a = HG_ART[x.art] || ["?", x.art];
+        return '<div class="' + (x.art === "info" ? "i" : "") + '"><b>' + vor(x.t) + "</b><span>" + a[0] + " " + esc2(a[1] + (x.ms != null && x.art !== "info" ? " " + x.ms + " ms" : "") + (a[1] && x.info ? " · " : "") + (x.info || "")) +
+          (x.cpu != null && x.art !== "info" ? " <i>⚙" + x.cpu + "% 🌡" + (x.temp != null ? x.temp : "–") + (x.drossel ? " ⚠" + esc2(x.drossel) : "") + "</i>" : "") + "</span></div>"; }).join("") + "</div>"
+        : '<p class="hinweis">' + W("Noch nichts aufgefallen. Lass die Bühne laufen – sobald es hakt, steht es hier mit Uhrzeit.", "Nothing yet. Let it play – any hiccup shows up here with its time.") + "</p>";
+      el.innerHTML = h;
+    }).catch(() => { const el = $(".zyn-menue .zyn-hg"); if (el) el.textContent = W("Brücke nicht erreichbar", "bridge unreachable"); });
+  }
   setInterval(() => {
     if (document.hidden) return;
     fetch("/zyn/last").then(r => r.json()).then(j => { lastInfo = Object.assign(j || {}, { lag: Math.round(lagMax) }); lagMax = 0; })
@@ -2916,6 +2961,9 @@ html.zyn-ruhe .zp-ruhe { display: block; }
 .zp-k.vor { border-style: dashed !important; border-color: var(--f) !important; animation: zpblink 1s steps(2) infinite; }
 .zp-k.cur { outline: 3px solid #f4c45a; outline-offset: 1px; }
 .zp-k.lauf { overflow: hidden; }
+.zyn-hg-l { max-height: 250px; overflow: auto; font-size: 12px; line-height: 1.3; }
+.zyn-hg-l div { display: flex; gap: 8px; padding: 3px 2px; border-bottom: 1px solid #2c2436; } .zyn-hg-l div.i { opacity: .55; }
+.zyn-hg-l b { flex: none; width: 52px; color: #ffc830; text-align: right; } .zyn-hg-l i { color: #b8a8c8; font-style: normal; font-size: 11px; }
 .zp-mitte.zr-m { grid-template-rows: minmax(0, 1fr); }
 .zr-raum { position: relative; height: 100%; min-height: 0; border-radius: 14px; overflow: hidden; background: #0e0a14; touch-action: none; }
 .zr-raum canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }

@@ -8313,6 +8313,11 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     const aktiv = ctx && b && !document.hidden && (laeuft || klassikLauf || performance.now() < fxBis || orchGlatt > .02 || pegelGlatt > .02 || anzeige.length || geistQ.length || gastQ.length || kapQ.length || root.querySelector('.lw-gast.da'));
     if (!aktiv) { malt = false; if (b) b.classList.remove("spielt"); return; }
     const jetzt = ctx.currentTime;
+    if (!buehneSicht && document.documentElement.classList.contains("zyn-pult") && !document.documentElement.classList.contains("zyn-ruhe")) {
+      /* Zynthian-Pult: Bühne und Raster sind verdeckt – nur die Warteschlangen leeren, 4 Mal pro Sekunde, ohne die Seite anzufassen */
+      while (anzeige.length && anzeige[0].zeit <= jetzt) anzeige.shift(); klassikQ.length = 0; geistQ.length = 0; gastQ.length = 0; kapQ.length = 0;
+      setTimeout(malen, 250); return;
+    }
     while (anzeige.length && anzeige[0].zeit <= jetzt) {
       const ev = anzeige.shift(), sp = ev.spuren;
       teilAnzeige(ev.teil);
@@ -13656,6 +13661,8 @@ registerProcessor("imres-glitch", ImresGlitch);`;
     /* Spitzenpegel vor dem Gain (0 … 1) und wie oft er zuletzt an die Grenze stieß */
     kanalRoh(i) { const k = EIN.k[i]; if (!k || !k.roh) return null; const d = k._rohPuf || (k._rohPuf = new Float32Array(k.roh.fftSize)); k.roh.getFloatTimeDomainData(d);
       let m = 0, n = 0; for (let x = 0; x < d.length; x++) { const a = Math.abs(d[x]); if (a > m) m = a; if (a > .985) n++; } k.clip = k.clip * .9 + (n > 2 ? 1 : 0); return { spitze: m, clip: k.clip > .3 }; },
+    /* Uhr des Tons (für den Hänger-Rekorder: läuft sie langsamer als die echte Zeit, hat der Ton ausgesetzt) */
+    uhr() { return ctx ? { t: ctx.currentTime, an: ctx.state === "running" } : null; },
     /* Spitzenpegel der Mischer-Wege nach dem Regler (1 = Vollaussteuerung) – die Messpunkte entstehen erst beim ersten Abfragen.
        begrenzt: wie viele dB der Limiter am Ende gerade wegnimmt */
     pegel() {

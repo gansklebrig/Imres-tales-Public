@@ -299,6 +299,8 @@ Mit Internet: **MENU → F4 System → ⬇ Bühne aktualisieren** (oder Fernbedi
 
 ## Wenn etwas nicht geht
 
+- **Kurze Hänger / Aussetzer:** MENU → F4 System → **⏱ Hänger-Protokoll**. Es läuft immer mit und zeigt mit Uhrzeit, *was* gehakt hat: 🔊 Audio-Aussetzer im Zynthian (JACK), 🎵 Ton im Browser kam nicht hinterher, 🖐 Bedienung hing, 🔥 Prozessor voll, 🌡 Hitze oder ⚠ Unterspannung (zu schwaches Netzteil) – jeweils mit Last, Temperatur und was gerade lief. Davon ein Foto schicken, dann lässt sich die Ursache gezielt beheben.
+
 - **Kein Ton:** Läuft der Zynthian-Ton sonst? Die Bühne nutzt JACK (wie der Zynthian). Einmal `imres-modus zynthian`, dann wieder `imres-modus imres`.
 - **Tasten reagieren nicht:** `journalctl -u imres-buehne -n 50` zeigt, was los ist. Die Fernbedienung am Handy funktioniert trotzdem.
 - **Läuft nicht im Takt / hinkt hinterher:** Optionen → Versatz erhöhen (z. B. 30 ms). Bei der TR-8S prüfen, ob „Clock Out“ an ist.
