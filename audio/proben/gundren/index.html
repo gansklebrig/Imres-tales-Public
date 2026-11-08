@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Besetzung · Hörspiel-Stimmen</title>
+<style>
+:root { --night:#100e15; --hall:#19161f; --vellum:#ebe2cc; --ash:#a89f8f; --ember:#e0a046; --line:rgba(224,160,70,.28); }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--night); color:var(--vellum); font:1rem/1.5 Georgia, serif; }
+.wrap { max-width:46rem; margin:0 auto; padding:1.2rem 16px 4rem; }
+h1 { font-weight:400; font-size:1.8rem; margin:.2rem 0 .3rem; }
+p.k { color:var(--ash); margin:0 0 1.5rem; }
+section { border-top:1px solid var(--line); padding:1rem 0; }
+h2 { font-weight:400; font-size:1.25rem; margin:0 0 .2rem; color:var(--ember); }
+.text { color:var(--ash); font-style:italic; font-size:.92rem; margin:0 0 .6rem; }
+.st { display:grid; grid-template-columns:2rem minmax(0,1fr); gap:.2rem .6rem; align-items:center; margin:.5rem 0; }
+.st b { font-size:1.1rem; color:var(--ember); text-align:center; }
+.st span { font-size:.9rem; }
+.st audio { grid-column:2; width:100%; height:2.4rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Gundren: neue Stimme</h1>
+  <p class="k">Vier mächtige Zwergenstimmen ohne Dialekt. Sag einfach die Nummer.</p>
+  <div id="liste"></div>
+</div>
+<script>
+Promise.all([fetch("liste.json").then(r => r.json()), fetch("manifest.json").then(r => r.json())]).then(([liste, man]) => {
+  const roh = {}; fetch("../../../tools/vertonung/gundren-proben.json").then(r => r.json()).catch(() => null).then(q => {
+    const ziel = document.getElementById("liste"), rollen = {};
+    liste.forEach(l => (rollen[l.rolle] = rollen[l.rolle] || { titel: l.titel, st: [] }).st.push(l));
+    Object.entries(rollen).forEach(([r, x]) => {
+      const s = document.createElement("section");
+      const h = document.createElement("h2"); h.textContent = x.titel; s.appendChild(h);
+      const t = q && q.zeilen[r + "-1"]; if (t) { const p = document.createElement("p"); p.className = "text"; p.textContent = "„" + t.text.replace(/\[[^\]]*\]\s*/g, "") + "“"; s.appendChild(p); }
+      x.st.forEach((l, i) => {
+        const d = document.createElement("div"); d.className = "st";
+        d.innerHTML = "<b></b><span></span>"; d.querySelector("b").textContent = i + 1; d.querySelector("span").textContent = l.name;
+        if (man[l.id]) { const a = document.createElement("audio"); a.controls = true; a.preload = "none"; a.src = man[l.id].replace("audio/proben/gundren/", ""); d.appendChild(a); }
+        s.appendChild(d);
+      });
+      ziel.appendChild(s);
+    });
+  });
+});
+</script>
+</body>
+</html>
