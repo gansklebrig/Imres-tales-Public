@@ -846,6 +846,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     },
     /* Probe: das Geräusch einmal an seinem Platz erklingen lassen */
     raumProbe(art) { if (aktiv && aktiv.welt && EV[art]) { const x = (aktiv.welt.ereignisse || []).find(y => y[0] === art); ereignis(aktiv.welt, [art, null, x ? x[2] : .5, 0, {}]); } },
+    uhr() { return ctx ? { t: ctx.currentTime, an: ctx.state === "running" } : null; },
     /* Spitzenpegel (1 = Vollaussteuerung) je Weg und je Schicht der laufenden Welt */
     pegel() {
       if (!ctx) return null; const M = this._m || (this._m = {}), r = {};

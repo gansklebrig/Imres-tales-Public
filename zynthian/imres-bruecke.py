@@ -402,6 +402,8 @@ class Handler(SimpleHTTPRequestHandler):
             return self.json_antwort(dict(OPT))
         if p == "/zyn/last":
             return self.json_antwort(last_messen())
+        if p == "/zyn/haenger":
+            return self.json_antwort(haenger_stand())
         if p == "/zyn/update":
             return self.json_antwort(update_stand())
         if p == "/zyn/diagnose":
@@ -485,6 +487,16 @@ class Handler(SimpleHTTPRequestHandler):
         d = self.koerper(8 * 1024 * 1024 if p == "/zyn/sicherung" else 65536)
         if p == "/zyn/sicherung":
             return self.json_antwort(sicherung(d if isinstance(d, dict) else {}))
+        if p == "/zyn/haenger":
+            if isinstance(d, dict) and d.get("leeren"):
+                with haenger_sperre:
+                    del haenger[:]
+                    _hg_geaendert[0] = True
+            elif isinstance(d, dict):
+                for e in (d.get("neu") or [])[:60]:
+                    if isinstance(e, dict):
+                        haenger_merken(str(e.get("art", "?"))[:12], e.get("ms"), e.get("info", ""), e.get("t"))
+            return self.json_antwort({"ok": True})
         if p == "/zyn/hw":
             # von imres-tasten.py: Tasten, Drehregler, MIDI
             if isinstance(d, dict):
@@ -581,7 +593,9 @@ class Handler(SimpleHTTPRequestHandler):
 _last_vorher = {}
 
 
-def last_messen():
+def last_messen(vorher=None):
+    if vorher is None:
+        vorher = _last_vorher
     erg = {"cpu": None, "kern": None, "temp": None}
     try:
         with open("/proc/stat") as f:
@@ -590,8 +604,8 @@ def last_messen():
         for z in zeilen:
             zahlen = list(map(int, z[1:9]))
             leer, gesamt = zahlen[3] + zahlen[4], sum(zahlen)
-            alt = _last_vorher.get(z[0])
-            _last_vorher[z[0]] = (leer, gesamt)
+            alt = vorher.get(z[0])
+            vorher[z[0]] = (leer, gesamt)
             if alt and gesamt > alt[1]:
                 werte.append((z[0], 100.0 * (1 - (leer - alt[0]) / (gesamt - alt[1]))))
         for name, w in werte:
@@ -627,6 +641,133 @@ def _lauf(befehl, zeit=15, eingabe=None):
     except subprocess.TimeoutExpired:
         return 124, "Zeitüberschreitung"
 
+# ---------- ⏱ Hänger-Rekorder ----------
+# Hält mit Uhrzeit fest, wann es hakt: Audio-Aussetzer von JACK (Xruns), Aussetzer im Browser-Ton und in der Bedienung
+# (meldet das Pult), volle Prozessorkerne, Hitze und Unterspannung des Pi – dazu, was die Brücke selbst gerade im Hintergrund tat.
+HAENGER_DATEI = os.path.join(os.path.dirname(SEITE), "haenger.json")
+haenger = []
+haenger_sperre = threading.Lock()
+_hg_sys = {"cpu": None, "kern": None, "temp": None, "drossel": ""}
+_hg_geaendert = [False]
+
+
+def _hg_laden():
+    global haenger
+    try:
+        with open(HAENGER_DATEI, encoding="utf-8") as f:
+            d = json.load(f)
+        if isinstance(d, list):
+            haenger = d[-300:]
+    except (OSError, ValueError):
+        haenger = []
+
+
+def haenger_merken(art, ms=None, info="", t=None):
+    with haenger_sperre:
+        haenger.append({"t": round(t or time.time(), 2), "art": art, "ms": None if ms is None else round(ms), "info": str(info)[:160],
+                        "cpu": _hg_sys.get("kern"), "temp": _hg_sys.get("temp"), "drossel": _hg_sys.get("drossel", "")})
+        del haenger[:-300]
+        _hg_geaendert[0] = True
+
+
+def _hg_drossel():
+    """vcgencmd get_throttled → was gerade (nicht irgendwann seit dem Start) bremst"""
+    c, t = _lauf(["vcgencmd", "get_throttled"], 4)
+    m = re.search(r"0x([0-9a-fA-F]+)", t or "")
+    if c != 0 or not m:
+        return ""
+    w = int(m.group(1), 16)
+    namen = []
+    if w & 0x1:
+        namen.append("Unterspannung")
+    if w & 0x2:
+        namen.append("Takt begrenzt")
+    if w & 0x4:
+        namen.append("gedrosselt")
+    if w & 0x8:
+        namen.append("Hitzegrenze")
+    return ", ".join(namen)
+
+
+def _hg_system():
+    vorher = {}
+    letzt_voll = 0
+    letzt_dr = ""
+    n = 0
+    while True:
+        try:
+            m = last_messen(vorher)
+            _hg_sys.update(m)
+            if n % 5 == 0:
+                dr = _hg_drossel()
+                _hg_sys["drossel"] = dr
+                if dr and dr != letzt_dr:
+                    haenger_merken("pi", info=dr)
+                letzt_dr = dr
+            if m.get("kern") is not None and m["kern"] >= 97 and time.time() - letzt_voll > 20:
+                letzt_voll = time.time()
+                haenger_merken("kern", info="ein Prozessorkern voll ausgelastet (%s %%)" % m["kern"])
+            if m.get("temp") is not None and m["temp"] >= 80 and n % 15 == 0:
+                haenger_merken("pi", info="heiß: %s °C" % m["temp"])
+            if _hg_geaendert[0] and n % 15 == 0:
+                _hg_geaendert[0] = False
+                with haenger_sperre:
+                    kopie = list(haenger)
+                try:
+                    neu = HAENGER_DATEI + ".neu"
+                    with open(neu, "w", encoding="utf-8") as f:
+                        json.dump(kopie, f, ensure_ascii=False)
+                    os.replace(neu, HAENGER_DATEI)
+                except OSError:
+                    pass
+        except Exception as e:
+            print("Hänger-Rekorder:", e)
+        n += 1
+        time.sleep(2)
+
+
+def _hg_xruns():
+    """JACK meldet jeden Audio-Aussetzer (Xrun) – über das Python-Modul „jack“ (liegt beim Zynthian in dessen venv)"""
+    import glob
+    try:
+        import jack  # noqa: F401
+    except ImportError:
+        for pfad in glob.glob("/zynthian/venv/lib/python3*/site-packages"):
+            if pfad not in sys.path:
+                sys.path.append(pfad)
+    try:
+        import jack
+    except ImportError:
+        print("Hänger-Rekorder: Python-Modul jack fehlt – Xruns werden nicht mitgezählt")
+        return
+    while True:
+        try:
+            cl = jack.Client("imres-xrun", no_start_server=True)
+            letzt = [0.0]
+
+            def xrun(verz):
+                j = time.time()
+                if j - letzt[0] > .5:
+                    letzt[0] = j
+                    haenger_merken("xrun", ms=(verz or 0) / 1000.0, info="JACK-Aussetzer")
+            weg = threading.Event()
+            cl.set_xrun_callback(xrun)
+            cl.set_shutdown_callback(lambda *a: weg.set())
+            cl.activate()
+            haenger_merken("info", info="Hänger-Rekorder hört JACK mit")
+            weg.wait()
+            haenger_merken("info", info="JACK neu gestartet")
+        except Exception as e:
+            print("Hänger-Rekorder (JACK):", e)
+        time.sleep(20)
+
+
+def haenger_stand():
+    with haenger_sperre:
+        return {"ok": True, "liste": list(haenger[-120:]), "sys": dict(_hg_sys), "jetzt": time.time()}
+
+
+
 # ---------- eigener WLAN-Speicher ----------
 # Der Zynthian verliert manchmal seine WLAN-Profile oder die Passwörter darin. Darum merkt sich die Brücke jedes Netz, mit dem er
 # einmal verbunden war (Name + Passwort, nur für root lesbar, im Datenordner – überlebt Updates), legt verlorene Profile in
@@ -634,6 +775,7 @@ def _lauf(befehl, zeit=15, eingabe=None):
 WLAN_DATEI = os.path.join(os.path.dirname(SEITE), "wlan.json")
 WLAN_LOG = os.path.join(os.path.dirname(SEITE), "wlan.log")
 wlan_sperre = threading.Lock()
+_wlan_suche = {"letzt": 0.0, "n": 0}
 
 
 def _wlan_log(text):
@@ -740,9 +882,17 @@ def _wlan_pruefen():
         return
     c, t = _lauf(["nmcli", "-t", "-f", "TYPE,STATE", "dev"], 8)
     if any(z.startswith("wifi:connected") for z in t.splitlines()) or not any(z.startswith("wifi:") for z in t.splitlines()):
+        _wlan_suche["n"] = 0
         return
     if not gemerkt:
         return
+    # nach Netzen suchen kann auf dem Pi kurz den Ton stören – darum selten: anfangs alle 3, später alle 15 Minuten
+    j = time.time()
+    if j - _wlan_suche["letzt"] < (180 if _wlan_suche["n"] < 3 else 900):
+        return
+    _wlan_suche["letzt"] = j
+    _wlan_suche["n"] += 1
+    haenger_merken("info", info="WLAN-Suche (nicht verbunden)")
     c, t = _lauf(["nmcli", "-t", "-f", "SSID,SIGNAL", "dev", "wifi", "list", "--rescan", "yes"], 25)
     sicht = []
     for z in t.splitlines():
@@ -756,6 +906,7 @@ def _wlan_pruefen():
             c, t = _lauf(["nmcli", "con", "up", "id", name], 40)
             _wlan_log(("verbunden: " if c == 0 else "Verbinden fehlgeschlagen: ") + ssid + ("" if c == 0 else " – " + t.strip()[:120]))
             if c == 0:
+                _wlan_suche["n"] = 0
                 return
 
 
@@ -1080,6 +1231,9 @@ def main():
     if not ARGS.test:
         threading.Thread(target=_ausgang_schleife, daemon=True).start()
         threading.Thread(target=_wlan_wache, daemon=True).start()
+        threading.Thread(target=_hg_xruns, daemon=True).start()
+    _hg_laden()
+    threading.Thread(target=_hg_system, daemon=True).start()
     srv = ThreadingHTTPServer(("0.0.0.0", ARGS.port), Handler)
     srv.daemon_threads = True
     print("Imres-Brücke auf Port", ARGS.port, "– Seite:", SEITE)
