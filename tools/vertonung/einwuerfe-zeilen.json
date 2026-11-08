@@ -1,0 +1,161 @@
+{
+ "ziel": "audio/chronik/de/stimmen",
+ "zeilen": {
+  "I-01-a": {
+   "text": "[reading aloud] Bringt eure Waffen mit. Und Durst.",
+   "stimme": "8TMmdpPgqHKvDOGYP2lN"
+  },
+  "I-02-a": {
+   "text": "[coldly] Ezekiel. [pause] The Destroyer.",
+   "stimme": "um6p7QUWG1g5HBE5RxEo"
+  },
+  "I-03-a": {
+   "text": "[gruffly] Geschäftsgeheimnis, Jungs.",
+   "stimme": "8TMmdpPgqHKvDOGYP2lN"
+  },
+  "I-08-a": {
+   "text": "[shrieking] Hey! Ihr solltet doch überrascht sein!",
+   "stimme": "j9qIyycr9PcZ7d4yj21f"
+  },
+  "I-08-b": {
+   "text": "[laughs] Deine besonders.",
+   "stimme": "aTTiK3YzK3dXETpuDE2h"
+  },
+  "I-13-a": {
+   "text": "[panicking] Boss! Die Großen sind drin!",
+   "stimme": "j9qIyycr9PcZ7d4yj21f"
+  },
+  "I-13-b": {
+   "text": "[mutters] Der laute Teil.",
+   "stimme": "czb8zR3V35utWZxvKd9a"
+  },
+  "I-25-a": {
+   "text": "[coldly] Prost.",
+   "stimme": "um6p7QUWG1g5HBE5RxEo"
+  },
+  "I-39-a": {
+   "text": "[squealing] Nicht hauen! Nicht hauen!",
+   "stimme": "j9qIyycr9PcZ7d4yj21f"
+  },
+  "I-46-a": {
+   "text": "[mocking] Die Spinne wird euch kriegen … [laughs]",
+   "stimme": "biwlandiCGYv7Xk4PEUf"
+  },
+  "I-48-a": {
+   "text": "[gruffly] Und dieselbe Stimme haben wir auch.",
+   "stimme": "8TMmdpPgqHKvDOGYP2lN"
+  },
+  "I-50-a": {
+   "text": "[choked up] Bruderherz! [sniffs] Du stinkst wie ein Goblin.",
+   "stimme": "8TMmdpPgqHKvDOGYP2lN"
+  },
+  "I-52-a": {
+   "text": "[gruffly] Und fasst nichts an, was glüht.",
+   "stimme": "8TMmdpPgqHKvDOGYP2lN"
+  },
+  "I-54-a": {
+   "text": "[dryly] Es waren drei.",
+   "stimme": "aTTiK3YzK3dXETpuDE2h"
+  },
+  "I-55-a": {
+   "text": "[gasping] Die Spinne … wird euch … holen …",
+   "stimme": "biwlandiCGYv7Xk4PEUf"
+  },
+  "I-75-a": {
+   "text": "[offended] Die Frisur sitzt aber noch.",
+   "stimme": "aTTiK3YzK3dXETpuDE2h"
+  },
+  "I-76-a": {
+   "text": "[greedily] Der Zahn gehört mir. Und der. Und der.",
+   "stimme": "czb8zR3V35utWZxvKd9a"
+  },
+  "I-80-a": {
+   "text": "[flatly] Onkel.",
+   "stimme": "um6p7QUWG1g5HBE5RxEo"
+  },
+  "I-83-a": {
+   "text": "[roaring] Brennt, ihr Zahnstocher!",
+   "stimme": "czb8zR3V35utWZxvKd9a"
+  },
+  "I-86-a": {
+   "text": "[sweetly] Kommt herein. Die Suppe ist gleich fertig.",
+   "stimme": "biwlandiCGYv7Xk4PEUf"
+  },
+  "II-07-a": {
+   "text": "[grumpy] Bäh. Schmeckt nach Elf.",
+   "stimme": "czb8zR3V35utWZxvKd9a"
+  },
+  "II-12-a": {
+   "text": "[weakly] Das … war unhöflich.",
+   "stimme": "aTTiK3YzK3dXETpuDE2h"
+  },
+  "II-19-a": {
+   "text": "[shouting] Die Spinne wird euch alle kriegen!",
+   "stimme": "biwlandiCGYv7Xk4PEUf"
+  },
+  "II-22-a": {
+   "text": "[straining] Elf, du musst weniger essen!",
+   "stimme": "aTTiK3YzK3dXETpuDE2h"
+  },
+  "II-31-a": {
+   "text": "[desperate whisper] Helft mir … bitte … holt mich hier raus …",
+   "stimme": "j9qIyycr9PcZ7d4yj21f"
+  },
+  "II-33-a": {
+   "text": "[coldly] Jeden.",
+   "stimme": "um6p7QUWG1g5HBE5RxEo"
+  },
+  "II-36-a": {
+   "text": "[warmly] Blublupin. Klingt hübsch. Darfst du behalten.",
+   "stimme": "fO96OTVqTn6bBvyybd7U"
+  },
+  "II-37-a": {
+   "text": "[cheerfully] Nur ein bisschen gefesselt. Ganz locker, Freunde!",
+   "stimme": "fO96OTVqTn6bBvyybd7U"
+  },
+  "II-44-a": {
+   "text": "[smug] Und er hat geblinzelt.",
+   "stimme": "aTTiK3YzK3dXETpuDE2h"
+  },
+  "II-46-a": {
+   "text": "[defiant] Zurück in die Tiefe, falscher Gott!",
+   "stimme": "fO96OTVqTn6bBvyybd7U"
+  },
+  "II-57-a": {
+   "text": "[rumbling] Bleibt. Aber das Singen lasst ihr.",
+   "stimme": "h9Fo3jDhxmIiiLrhx14A"
+  },
+  "II-66-a": {
+   "text": "[whispers madly] Zerschlag sie … zerschlag alles …",
+   "stimme": "j9qIyycr9PcZ7d4yj21f"
+  },
+  "II-70-a": {
+   "text": "[shouting] Gundren! Zwerg! Schwarzer Bart! Ungefähr knöchelhoch!",
+   "stimme": "czb8zR3V35utWZxvKd9a"
+  },
+  "II-76-a": {
+   "text": "[low growl] Mitkommen. Sofort.",
+   "stimme": "h9Fo3jDhxmIiiLrhx14A"
+  },
+  "II-79-a": {
+   "text": "[whispering] Dreihunderttausend … vierhunderttausend …",
+   "stimme": "czb8zR3V35utWZxvKd9a"
+  },
+  "II-82-a": {
+   "text": "[yawns] Oh. Das Abendessen ist da.",
+   "stimme": "GSg9QvjLdHGJoVVCDWGu"
+  },
+  "II-84-a": {
+   "text": "[bored] Der dritte Vers war schwach.",
+   "stimme": "GSg9QvjLdHGJoVVCDWGu"
+  },
+  "II-86-a": {
+   "text": "[yawns] Versagt, und ihr seid Nachtisch.",
+   "stimme": "GSg9QvjLdHGJoVVCDWGu"
+  },
+  "II-89-a": {
+   "text": "[growls] Bringt das Ei. Mit Drokey macht, was ihr wollt.",
+   "stimme": "h9Fo3jDhxmIiiLrhx14A"
+  }
+ }
+}

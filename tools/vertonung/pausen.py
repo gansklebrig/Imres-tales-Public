@@ -114,14 +114,26 @@ def bearbeiten(schluessel, datei, regie, worte, marken, ende_min, titel, naechst
         else:
             ist, at = 2 * hinten_n / SR, len(x) - hinten_n // 2
         z = lambda d: np.zeros(int(max(0.0, d) * SR), np.float32)
-        einfuegen.append((at, np.concatenate([z(ew.get("vor", .32) - ist / 2), ew["clip"], z(ew.get("danach", .45) - ist / 2)])))
+        bis, ist2 = at, ist
+        if ew.get("ersetzt"):   # Zitat des Erzählers herausschneiden, die Figur spricht es selbst
+            q = text.find(ew["ersetzt"].strip(), p_)
+            k2 = max([i for i, t in enumerate(tw) if t[1] <= q + len(ew["ersetzt"].strip()) + 2], default=None) if q >= 0 else None
+            j2 = zu.get(k2) if k2 is not None else None
+            if j2 is None or j2 <= j: fehlend.append("ERSETZT " + ew["ersetzt"]); continue
+            if j2 < len(worte) - 1:
+                a, b = worte[j2][2], worte[j2 + 1][1]
+                st2 = stille_bei(h, n, min(a, b) - .25, max(a, b) + .25)
+                if not st2: fehlend.append("ERSETZT (keine Pause) " + ew["ersetzt"]); continue
+                ist2, bis = st2; wunsch.pop(j2, None)
+            else: ist2, bis = 2 * hinten_n / SR, len(x) - hinten_n // 2
+        einfuegen.append((at, np.concatenate([z(ew.get("vor", .32) - ist / 2), ew["clip"], z(ew.get("danach", .45) - ist2 / 2)]), bis))
     for j, soll in sorted(wunsch.items()):
         a, b = worte[j][2], worte[j + 1][1]
         st = stille_bei(h, n, min(a, b) - .25, max(a, b) + .25)
         if not st: protokoll.append((j, soll, None)); continue
         ist, at = st
         if ist + .03 < soll:
-            einfuegen.append((at, np.zeros(int((soll - ist) * SR), np.float32)))
+            einfuegen.append((at, np.zeros(int((soll - ist) * SR), np.float32), at))
             protokoll.append((j, soll, round(ist, 2)))
     # Ende: Reststille hinten + Stille vorne im nächsten Absatz
     hinten = 0
@@ -131,16 +143,17 @@ def bearbeiten(schluessel, datei, regie, worte, marken, ende_min, titel, naechst
     hinten /= SR
     ziel_ende = max(TITEL_MIN if titel else ABSATZ_MIN, ende_min or 0)
     plus_ende = max(0.0, ziel_ende - hinten - naechster_anfang)
-    if trocken: return [(a, len(q) / SR) for a, q in einfuegen], plus_ende, fehlend, guete, D
+    if trocken: return [(a, len(q) / SR) for a, q, _ in einfuegen], plus_ende, fehlend, guete, D
     teile, pos = [], 0
     F = int(.006 * SR); rampe = np.linspace(1, 0, F, dtype=np.float32)
-    for at, stueck in sorted(einfuegen, key=lambda q: q[0]):
+    for at, stueck, bis in sorted(einfuegen, key=lambda q: q[0]):
+        if at < pos: continue
         a = x[pos:at].copy(); a[-F:] *= rampe[-len(a[-F:]):] if len(a) else 1
         teile.append(a); teile.append(stueck)
-        x[at:at + F] *= rampe[::-1][:len(x[at:at + F])]; pos = at
+        x[bis:bis + F] *= rampe[::-1][:len(x[bis:bis + F])]; pos = bis
     teile.append(x[pos:]); teile.append(np.zeros(int(plus_ende * SR), np.float32))
     schreibe(np.concatenate(teile), datei)
-    return [(a, len(q) / SR) for a, q in einfuegen], plus_ende, fehlend, guete, D
+    return [(a, len(q) / SR) for a, q, _ in einfuegen], plus_ende, fehlend, guete, D
 
 ROLLEN_FX = {   # Klang je Figur (ffmpeg-Filter)
     "themberchaud": "asetrate=44100*0.86,aresample=44100,atempo=1.163,aecho=0.8:0.7:70|130:0.3|0.18,lowpass=f=9000",

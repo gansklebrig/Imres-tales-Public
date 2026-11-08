@@ -1,0 +1,319 @@
+{
+  "einwuerfe": [
+    {
+      "id": "I-01-a",
+      "absatz": "I:1",
+      "nach": "Jeder von uns erhielt eine Einladung von Gundren!",
+      "rolle": "gundren",
+      "text": "[reading aloud] Bringt eure Waffen mit. Und Durst.",
+      "warum": "Gundren liest eine Zeile seines Briefs vor"
+    },
+    {
+      "id": "I-02-a",
+      "absatz": "I:2",
+      "nach": "Die Vorstellungsrunde verlief, vorsichtig gesagt, etwas holprig.",
+      "rolle": "ezekiel",
+      "text": "[coldly] Ezekiel. [pause] The Destroyer.",
+      "warum": "Seine komplette Vorstellung – illustriert 'holprig'; Auftakt des Running Gags"
+    },
+    {
+      "id": "I-03-a",
+      "absatz": "I:3",
+      "nach": "Wie genau, behielt er für sich.",
+      "rolle": "gundren",
+      "text": "[gruffly] Geschäftsgeheimnis, Jungs.",
+      "warum": "Gundren wimmelt ab"
+    },
+    {
+      "id": "I-08-a",
+      "absatz": "I:8",
+      "nach": "und trat den Goblins entgegen.",
+      "rolle": "goblin",
+      "text": "[shrieking] Hey! Ihr solltet doch überrascht sein!",
+      "warum": "Hinterhalt, der keiner war"
+    },
+    {
+      "id": "I-08-b",
+      "absatz": "I:8",
+      "nach": "Meine eingeschlossen.",
+      "rolle": "friedrich",
+      "text": "[laughs] Deine besonders.",
+      "warum": "Friedrich stichelt gegen den Erzähler"
+    },
+    {
+      "id": "I-13-a",
+      "absatz": "I:13",
+      "nach": "teils mit allem anderen als Zurückhaltung.",
+      "rolle": "goblin",
+      "text": "[panicking] Boss! Die Großen sind drin!",
+      "warum": "Panik im Goblinnest"
+    },
+    {
+      "id": "I-13-b",
+      "absatz": "I:13",
+      "nach": "lasse ich lieber offen.",
+      "rolle": "echo",
+      "text": "[mutters] Der laute Teil.",
+      "warum": "Echo beantwortet Barradins offene Frage"
+    },
+    {
+      "id": "I-25-a",
+      "absatz": "I:25",
+      "nach": "dass wir für sie wohl wie zwölf aussahen,",
+      "rolle": "ezekiel",
+      "text": "[coldly] Prost.",
+      "warum": "Ein Wort vor dem ersten Dolchstoß"
+    },
+    {
+      "id": "I-39-a",
+      "absatz": "I:39",
+      "nach": "und er sprang komplett überrumpelt zur Seite.",
+      "rolle": "goblin",
+      "text": "[squealing] Nicht hauen! Nicht hauen!",
+      "warum": "Überrumpelter Wach-Goblin"
+    },
+    {
+      "id": "I-46-a",
+      "absatz": "I:46",
+      "nach": "Höhnisch rief sie:",
+      "rolle": "drow",
+      "text": "[mocking] Die Spinne wird euch kriegen … [laughs]",
+      "ersetzt": "Die Spinne wird euch kriegen …",
+      "warum": "Nezna spricht ihr Zitat selbst; Lachen leitet zu 'mit einem lauten Lachen' über"
+    },
+    {
+      "id": "I-48-a",
+      "absatz": "I:48",
+      "nach": "tragen sogar dieselbe Kleidung.",
+      "rolle": "gundren",
+      "text": "[gruffly] Und dieselbe Stimme haben wir auch.",
+      "warum": "Nundro, Gundrens Zwilling – Gag: gleiche Stimme wie Gundren"
+    },
+    {
+      "id": "I-50-a",
+      "absatz": "I:50",
+      "nach": "schloss seinen Bruder überglücklich in die Arme.",
+      "rolle": "gundren",
+      "text": "[choked up] Bruderherz! [sniffs] Du stinkst wie ein Goblin.",
+      "warum": "Rau-warme Wiedersehensfreude"
+    },
+    {
+      "id": "I-52-a",
+      "absatz": "I:52",
+      "nach": "Wir sollten die magische Schmiede finden.",
+      "rolle": "gundren",
+      "text": "[gruffly] Und fasst nichts an, was glüht.",
+      "warum": "Auftrag mit Warnung; zahlt auf Echo am Amboss ein"
+    },
+    {
+      "id": "I-54-a",
+      "absatz": "I:54",
+      "nach": "an zwei Händen abzählen kann, glaube ich.",
+      "rolle": "friedrich",
+      "text": "[dryly] Es waren drei.",
+      "warum": "Friedrich korrigiert die Barden-Übertreibung"
+    },
+    {
+      "id": "I-55-a",
+      "absatz": "I:55",
+      "nach": "Mit letzter Kraft röchelte sie:",
+      "rolle": "drow",
+      "text": "[gasping] Die Spinne … wird euch … holen …",
+      "ersetzt": "Die Spinne wird euch holen",
+      "warum": "Neznas letzte Worte selbst gesprochen"
+    },
+    {
+      "id": "I-75-a",
+      "absatz": "I:75",
+      "nach": "von einer Kralle skalpiert worden.",
+      "rolle": "friedrich",
+      "text": "[offended] Die Frisur sitzt aber noch.",
+      "warum": "Friedrichs Eitelkeit nach Beinahe-Skalpierung"
+    },
+    {
+      "id": "I-76-a",
+      "absatz": "I:76",
+      "nach": "Echo war dabei, wie man sich denken kann, besonders gründlich.",
+      "rolle": "echo",
+      "text": "[greedily] Der Zahn gehört mir. Und der. Und der.",
+      "warum": "Echo plündert den Venomfang"
+    },
+    {
+      "id": "I-80-a",
+      "absatz": "I:80",
+      "nach": "Er erkannte darin seinen Onkel.",
+      "rolle": "ezekiel",
+      "text": "[flatly] Onkel.",
+      "warum": "Ein Wort – danach 'Mehr hat er dazu nicht gesagt'"
+    },
+    {
+      "id": "I-83-a",
+      "absatz": "I:83",
+      "nach": "bis Echo einen gewaltigen Feuerball losließ,",
+      "rolle": "echo",
+      "text": "[roaring] Brennt, ihr Zahnstocher!",
+      "warum": "Echo wild beim Feuerball auf die Blights"
+    },
+    {
+      "id": "I-86-a",
+      "absatz": "I:86",
+      "nach": "als sie uns in ihr Haus bat …",
+      "rolle": "drow",
+      "text": "[sweetly] Kommt herein. Die Suppe ist gleich fertig.",
+      "warum": "Ilvara noch in Verkleidung – Cliffhanger vor dem Kräuternebel"
+    },
+    {
+      "id": "II-07-a",
+      "absatz": "II:7",
+      "nach": "nach dem anderen die Fesseln durch.",
+      "rolle": "echo",
+      "text": "[grumpy] Bäh. Schmeckt nach Elf.",
+      "warum": "Echo als Ratte über Barradins Fesseln"
+    },
+    {
+      "id": "II-12-a",
+      "absatz": "II:12",
+      "nach": "spiegelten Ungläubigkeit und Überraschung wider.",
+      "rolle": "friedrich",
+      "text": "[weakly] Das … war unhöflich.",
+      "warum": "Friedrich bleibt locker, während er umkippt"
+    },
+    {
+      "id": "II-19-a",
+      "absatz": "II:19",
+      "nach": "Sie rannte einfach auf das Geländer zu und sprang in den Abgrund.",
+      "rolle": "drow",
+      "text": "[shouting] Die Spinne wird euch alle kriegen!",
+      "ersetzt": "Die Spinne wird euch alle kriegen!",
+      "warum": "Ilvaras Schrei im Fall; Erzähler sagt danach 'hallte es von der Höhlendecke'"
+    },
+    {
+      "id": "II-22-a",
+      "absatz": "II:22",
+      "nach": "die mich vor dem Fallen bewahrte!",
+      "rolle": "friedrich",
+      "text": "[straining] Elf, du musst weniger essen!",
+      "warum": "Friedrich hält Barradin über der Schlucht"
+    },
+    {
+      "id": "II-31-a",
+      "absatz": "II:31",
+      "nach": "eine Stimme in unseren Köpfen und flehte um Hilfe.",
+      "rolle": "gefangener",
+      "text": "[desperate whisper] Helft mir … bitte … holt mich hier raus …",
+      "warum": "Die flehende Stimme im Grab"
+    },
+    {
+      "id": "II-33-a",
+      "absatz": "II:33",
+      "nach": "der sich uns in den Weg stellt.",
+      "rolle": "ezekiel",
+      "text": "[coldly] Jeden.",
+      "warum": "Ezekiel mit Dawnbringer"
+    },
+    {
+      "id": "II-36-a",
+      "absatz": "II:36",
+      "nach": "Ich hatte ihn eine ganze Weile Blublupin genannt.",
+      "rolle": "ploop",
+      "text": "[warmly] Blublupin. Klingt hübsch. Darfst du behalten.",
+      "warum": "Ploop nimmt den Spitznamen liebevoll an – vor 'Er hat es mir nicht übelgenommen'"
+    },
+    {
+      "id": "II-37-a",
+      "absatz": "II:37",
+      "nach": "und so in die Stadt schmuggeln.",
+      "rolle": "ploop",
+      "text": "[cheerfully] Nur ein bisschen gefesselt. Ganz locker, Freunde!",
+      "warum": "Ploop beruhigt beim Schein-Fesseln"
+    },
+    {
+      "id": "II-44-a",
+      "absatz": "II:44",
+      "nach": "er habe einen Gott geboxt.",
+      "rolle": "friedrich",
+      "text": "[smug] Und er hat geblinzelt.",
+      "warum": "Friedrich verteidigt seinen Gottesschlag"
+    },
+    {
+      "id": "II-46-a",
+      "absatz": "II:46",
+      "nach": "als könnte er den Dämon mit einem Gebet aufhalten.",
+      "rolle": "ploop",
+      "text": "[defiant] Zurück in die Tiefe, falscher Gott!",
+      "warum": "Ploops letztes Gebet, bevor der Tentakel fällt"
+    },
+    {
+      "id": "II-57-a",
+      "absatz": "II:57",
+      "nach": "Der König gewährte uns, in der Stadt zu verweilen.",
+      "rolle": "horga",
+      "text": "[rumbling] Bleibt. Aber das Singen lasst ihr.",
+      "warum": "Horga über Barradins Gesang"
+    },
+    {
+      "id": "II-66-a",
+      "absatz": "II:66",
+      "nach": "Offenbar hatten ihn Stimmen in seinem Kopf dazu getrieben.",
+      "rolle": "gefangener",
+      "text": "[whispers madly] Zerschlag sie … zerschlag alles …",
+      "warum": "Die Stimmen im Kopf des Riesen"
+    },
+    {
+      "id": "II-70-a",
+      "absatz": "II:70",
+      "nach": "ob er Gundren kenne.",
+      "rolle": "echo",
+      "text": "[shouting] Gundren! Zwerg! Schwarzer Bart! Ungefähr knöchelhoch!",
+      "warum": "Echo brüllt zum Riesen hinauf"
+    },
+    {
+      "id": "II-76-a",
+      "absatz": "II:76",
+      "nach": "und uns zu einem Gespräch baten.",
+      "rolle": "horga",
+      "text": "[low growl] Mitkommen. Sofort.",
+      "warum": "Die Bewahrer der Flamme 'bitten' zum Gespräch"
+    },
+    {
+      "id": "II-79-a",
+      "absatz": "II:79",
+      "nach": "was er sich davon alles kaufen könnte.",
+      "rolle": "echo",
+      "text": "[whispering] Dreihunderttausend … vierhunderttausend …",
+      "warum": "Echo rechnet lautlos – vor 'Man sah es an seinen Lippen'"
+    },
+    {
+      "id": "II-82-a",
+      "absatz": "II:82",
+      "nach": "ein Drache! Themberchaud.",
+      "rolle": "themberchaud",
+      "text": "[yawns] Oh. Das Abendessen ist da.",
+      "warum": "Themberchauds erster Satz, träge und bedrohlich"
+    },
+    {
+      "id": "II-84-a",
+      "absatz": "II:84",
+      "nach": "eine natürliche Zwanzig.",
+      "rolle": "themberchaud",
+      "text": "[bored] Der dritte Vers war schwach.",
+      "warum": "Der eitle Drache als Kritiker"
+    },
+    {
+      "id": "II-86-a",
+      "absatz": "II:86",
+      "nach": "von Gartokkar unterweisen zu lassen.",
+      "rolle": "themberchaud",
+      "text": "[yawns] Versagt, und ihr seid Nachtisch.",
+      "warum": "Gegähnte Drohung, Callback auf 'Abendessen'"
+    },
+    {
+      "id": "II-89-a",
+      "absatz": "II:89",
+      "nach": "einer Diebesgilde aus den Slums von Gracklstugh.",
+      "rolle": "horga",
+      "text": "[growls] Bringt das Ei. Mit Drokey macht, was ihr wollt.",
+      "warum": "Gartokkar (Duergar-Hohepriester) erteilt den Auftrag"
+    }
+  ]
+}
