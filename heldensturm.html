@@ -31085,7 +31085,7 @@ const LF_FE={
 const LF_FE_IDS=Object.keys(LF_FE);
 const LF_AK=['','wirbel','hammer','sprung','linie','kegel','netz','hagel','welle','ruf','wachsen'];
 const LF_AW={wirbel:0.8,hammer:1.0,sprung:0.8,linie:0.75,kegel:0.75,netz:0.7,hagel:0.85,welle:0.8,ruf:0.9,wachsen:0.7};
-const LFF={HPK:[0,7,8.5,10],FLK:[0,1.6,1.9,1.5],DMK:[0,1.45,1.6,1.75],CD:[0,5.6,4.9,4.3],flieht:0.5,chance:[0.25,0.45,1],stufeP:0.55};
+const LFF={HPK:[0,15,19,26],FLK:[0,3.2,4,4.6],DMK:[0,3,3.6,4.4],CD:[0,3.7,3.1,2.5],AWK:[0,0.88,0.82,0.76],SPK:[0,1.12,1.2,1.28],flieht:0.5,chance:[0.25,0.45,1],stufeP:0.55};
 LFW.LFF=LFF;LFW.FE=LF_FE;LFW.EV=LF_EV;
 const lfFeCode=(id,enc)=>(LF_FE_IDS.indexOf(id)+1)*4+(enc|0);
 const lfFeVon=code=>{const i=(code>>2)-1;return i>=0&&i<LF_FE_IDS.length?LF_FE_IDS[i]:null};
@@ -31121,7 +31121,7 @@ function lfFeOrt(){const L=lfLeben();const q=L[Math.floor(Math.random()*L.length
 function lfFeAuftritt(id){const F=LF_FE[id],m=lfMemF(id),enc=Math.min(3,m.n+1),B=FOES[F.base];if(!B)return null;const R=lfRun(),fe=R.fe;
  const o=lfFeOrt();const e=spawnEnemy(B,o.x,o.y,{});if(!e)return null;
  const base=e.maxHp;let hp=base*LFF.HPK[enc];try{hp=Math.max(hp,guardFloor(false)*LFF.FLK[enc])}catch(x){}
- e.hp=e.maxHp=hp;e.dmg*=LFF.DMK[enc];e.r=Math.max(17,12*(F.sz||B.size||1)*1.3);e.sp=Math.min(132,(B.sp||80)*1.05);
+ e.hp=e.maxHp=hp;e.dmg*=LFF.DMK[enc];e.r=Math.max(17,12*(F.sz||B.size||1)*1.3);e.sp=Math.min(160,(B.sp||80)*LFF.SPK[enc]);
  e.elite=true;e.rare=true;e.champ=false;e.affix={};e.affixNames='';e.lfF=lfFeCode(id,enc);e.lfFe=id;e.lfEnc=enc;e.lfCd=2.6;e.lfW=0;e.lfK=0;e.lfFl=0;e.lfA=null;e.lfLast='';e.lfGr=0;e.lfR0=e.r;
  e.atkCd=1.5;e.hitCd=0.8;
  const C={id,enc,e,t0:G.time,ende:0};fe.cur=C;fe.done=1;m.k=Math.min(999,(m.k|0)+1);const M=lfMem();M.r=0;lfSave();LF.n.fehde++;
@@ -31145,7 +31145,7 @@ function lfFeAI(e,dt){if(e.lfFl){/* Flucht: weg vom nächsten Helden, dann versc
  const C=L.filter(k=>k!==e.lfLast&&lfAtkOk(e,k,d));const k=C.length?C[Math.floor(Math.random()*C.length)]:L.find(k=>lfAtkOk(e,k,d));if(!k){e.lfCd=0.5;return}
  lfAtkStart(e,k,q)}
 function lfAtkOk(e,k,d){if(k==='wirbel'||k==='hammer')return d<e.r*2.4+110;if(k==='ruf')return G.enemies.length<46;if(k==='wachsen')return!e.lfGr&&d<300;if(k==='kegel')return d<260;return d<520}
-function lfAtkStart(e,k,q){const F=LF_FE[e.lfFe],w=LF_AW[k]*(e.lfEnc===3?0.92:1),col=F.col,dm=e.dmg;const A={k,t:0,w,T:[],a:Math.atan2(q.y-e.y,q.x-e.x),x:q.x,y:q.y,fx:0};e.lfA=A;e.lfLast=k;
+function lfAtkStart(e,k,q){const F=LF_FE[e.lfFe],w=LF_AW[k]*(LFF.AWK[e.lfEnc]||1),col=F.col,dm=e.dmg;const A={k,t:0,w,T:[],a:Math.atan2(q.y-e.y,q.x-e.x),x:q.x,y:q.y,fx:0};e.lfA=A;e.lfLast=k;
  e.lfW=Math.max(G.time,0.001);e.lfK=LF_AK.indexOf(k)*32+Math.min(31,Math.round(w*10));e.faceX=q.x;
  const T=o=>{const z=tele(o);A.T.push(z);return z};
  if(k==='wirbel')T({k:'circle',x:e.x,y:e.y,r:e.r*2.4+50,delay:w,dmg:dm*2.4,c:col});
