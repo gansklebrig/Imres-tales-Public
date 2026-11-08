@@ -264,6 +264,7 @@ def chronik(sprache, stimme, grenze):
     # alte Dateien, die nicht mehr gebraucht werden, entfernen
     genutzt = {e["datei"] for l in manifest["kapitel"].values() for e in l}
     for wurzel, _, dateien in os.walk(basis):
+        if os.path.exists(os.path.join(wurzel, "manifest.json")) and os.path.abspath(wurzel) != os.path.abspath(basis): continue   # eigene Sammlung (z. B. stimmen/)
         for f in dateien:
             if f.endswith(".mp3"):
                 rel = os.path.relpath(os.path.join(wurzel, f), WURZEL)
