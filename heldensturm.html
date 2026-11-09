@@ -36332,7 +36332,7 @@ function zlHudTakt(){const el=zlHudEl();if(!el)return;const B=G.state==='play'&&
 const ZPL={on:0,max:0,b:0,t:0};
 (()=>{try{const c=CanvasRenderingContext2D.prototype;for(const m of['roundRect','rect']){const f=c[m];if(typeof f!=='function')continue;c[m]=function(x,y,w,h){if(ZPL.on)try{const t=this.getTransform?this.getTransform():null,d=typeof DPR==='number'&&DPR>0?DPR:1;const yy=t?((y+h)*t.d+t.f)/d:y+h;if(yy>ZPL.max&&yy<innerHeight*0.9)ZPL.max=yy}catch(e){}return f.apply(this,arguments)}}}catch(e){zlErr(e)}})();
 if(typeof drawPills==='function'){const dp=drawPills;drawPills=function(){ZPL.on=1;ZPL.max=0;try{return dp.apply(this,arguments)}finally{ZPL.on=0;let k=1;try{k=txtHz()}catch(e){}const top=typeof PILLTOP==='number'?PILLTOP:0;const ob=ZPL.b;if(ZPL.max>0){ZPL.b=Math.ceil(ZPL.max);ZPL.t=performance.now();ZPL.z=0}else ZPL.z=(ZPL.z|0)+1;if(ZPL.b!==ob&&!G.bot)try{const el=document.getElementById('zlHud');if(el&&!el.hidden){ZL.lageT=0;zlHudLage(el)}}catch(e){}}}}
-function zlLinksUnten(){let b=0;try{if(ZPL.b&&(performance.now()-ZPL.t<1600||(ZPL.z|0)<4))b=ZPL.b;if(SAVE.perf&&typeof PERF!=='undefined'&&PERF){const y0=(typeof PILLTOP!=='undefined'?PILLTOP:120)+30;b=Math.max(b,y0+(4+(typeof SWR!=='undefined'&&SWR?1:0))*15+8)}}catch(e){}return b}
+function zlLinksUnten(){let b=0;try{if(ZPL.b&&(performance.now()-ZPL.t<1600||(ZPL.z|0)<4))b=ZPL.b;if(SAVE.perf&&typeof PERF!=='undefined'&&PERF){if(typeof window.__perfAnzUnten==='function'){const u=window.__perfAnzUnten();if(u)b=Math.max(b,u)}else{const y0=(typeof PILLTOP!=='undefined'?PILLTOP:120)+30;b=Math.max(b,y0+(4+(typeof SWR!=='undefined'&&SWR?1:0))*15+8)}}}catch(e){}return b}
 function zlHudLage(el){const now=performance.now();let lu=zlLinksUnten();let fs='';try{const F=document.getElementById('feed'),q2=document.getElementById('qa2lane');fs=(document.querySelector('.erzSub.an:not(.pz)')?1:0)+'|'+(document.querySelector('.tutk.ein')?1:0)+'|'+(F?F.children.length:0)+'|'+(q2?q2.children.length:0)+'|'+document.querySelectorAll('#toast>*').length}catch(e){}const lk=lu+'|'+fs;if(now-(ZL.lageT||0)<(ZL.lageK===ZL.hudK&&ZL.lageU===lk?(innerHeight<560?500:1500):120))return;ZL.lageT=now;ZL.lageK=ZL.hudK;ZL.lageU=lk;const top=document.querySelector('#hud .top');if(!top)return;const r=top.getBoundingClientRect();
  let hz=1;try{hz=parseFloat(getComputedStyle(el).zoom)||1}catch(e){}const T=Math.round(Math.max(r.bottom+6,lu?lu+6:0)/hz),Lf=Math.round(r.left/hz);if(el._zt!==T){el._zt=T;el.style.top=T+'px'}if(el._zl!==Lf){el._zl=Lf;el.style.left=Lf+'px'}
  /* Platz nach unten: Zeilen, die in den Erzähler-Untertitel, Randmeldungen oder die Einführung ragen würden, werden ausgeblendet */
@@ -36856,6 +36856,43 @@ try{if(typeof RG2!=='undefined'&&RG2&&typeof RG2.gapFix==='function'){const _gf=
 window.__hsCTLT={ctlSofort,ctlFokus,ctlMorph,ctlKids,treeLive};
 }catch(e){console.error('ctl',e);window.__hsCTL.err=String(e&&e.message||e)}})();
 
+/* ================= Paket „perfanz“: Leistungsanzeige gut lesbar (auch UWQHD) und mit Aufschlüsselung – window.__hsPERFANZ =================
+   Vorher: Die Anzeige wurde mit 11 px in die Spielfläche gemalt. Auf großen Bildschirmen rechnet das Spiel die Fläche oft verkleinert
+   (z. B. 50 %) und zieht sie hoch – die Schrift wurde dadurch winzig und verwaschen.
+   Jetzt: eigene, gestochen scharfe Textbox über der Spielfläche, Schriftgröße wächst mit dem Bildschirm (wie die übrige Schrift, txtHz).
+   Neu: Aufschlüsselung der Rechenzeit (Spiel / Bild / Oberfläche) und die Zeit außerhalb der Spiel-Rechnung (Browser, Grafikkarte) –
+   so lässt sich sehen, wo ein Ruckeln herkommt. Die Messung kostet je Bild nur drei Zeitstempel. */
+(function(){try{window.__hsPERFANZ={v:1};
+const PA={u:0,r:0,h:0,n:0,el:null,txt:'',top:-1,fs:-1,an:false,aufg:null,bot:0};
+const jetzt=()=>performance.now();
+{const f=update;update=function(){const a=jetzt();try{return f.apply(this,arguments)}finally{PA.u+=jetzt()-a}}}
+{const f=render;render=function(){const a=jetzt();try{return f.apply(this,arguments)}finally{PA.r+=jetzt()-a;PA.n++;if(PA.an&&(G.state!=='play'||!SAVE.perf))paAus()}}}
+{const f=hudUpdate;hudUpdate=function(){const a=jetzt();try{return f.apply(this,arguments)}finally{PA.h+=jetzt()-a}}}
+/* je Auswertung von fpsWatch (alle ~2 s) die Mittelwerte festhalten */
+{const f=fpsWatch;fpsWatch=function(){const alt=PERF;const r=f.apply(this,arguments);if(PERF&&PERF!==alt){const n=Math.max(1,PA.n);PA.aufg={u:PA.u/n,r:PA.r/n,h:PA.h/n};PA.u=PA.r=PA.h=0;PA.n=0}return r}}
+function paEl(){if(PA.el&&PA.el.isConnected)return PA.el;const d=document.createElement('div');d.id='perfAnz';d.setAttribute('aria-hidden','true');
+ d.style.cssText='position:fixed;left:8px;top:0;z-index:6;pointer-events:none;white-space:pre;font:700 12px/1.3 ui-monospace,Menlo,Consolas,monospace;background:rgba(10,6,4,.78);border:1px solid rgba(232,195,106,.35);border-radius:6px;padding:4px 8px;display:none;text-shadow:0 1px 0 #000';
+ document.body.appendChild(d);PA.el=d;PA.txt='';PA.top=-1;PA.fs=-1;PA.an=false;return d}
+function paAus(){if(PA.el&&PA.an){PA.el.style.display='none';PA.an=false}PA.bot=0}
+drawPerf=function(){try{if(!SAVE.perf||!PERF||G.state!=='play'){paAus();return}const d=paEl();
+ const k=(typeof txtHz==='function'?txtHz():1),fs=Math.round(12*Math.max(1,k)*10)/10;
+ const A=PA.aufg,fremd=Math.max(0,1000/Math.max(1,PERF.fps)-PERF.js);
+ const L=[`${PERF.fps} FPS · Bildschirm ${PERF.hz} Hz · verpasst ${PERF.miss} %`,
+  `Rechenzeit ⌀ ${PERF.js.toFixed(1)} ms · max ${PERF.jsM.toFixed(1)} ms`];
+ if(A)L.push(`  Spiel ${A.u.toFixed(1)} · Bild ${A.r.toFixed(1)} · Oberfläche ${A.h.toFixed(1)} ms`);
+ L.push(`Browser/Grafikkarte ≈ ${fremd.toFixed(0)} ms je Bild`);
+ L.push(`Grafik: ${GFX[PERF.lv].n} · ${cv.width}×${cv.height}${RSC<1?' · '+Math.round(RSC*100)+' %':''}`);
+ if(SWR)L.push('⚠ Grafikbeschleunigung des Browsers aus');
+ const t=L.join('\n');if(t!==PA.txt){PA.txt=t;d.textContent=t;d.style.color=PERF.miss>10||PERF.fps<30?'#ff9a7a':'#c8f0b0'}
+ if(fs!==PA.fs){PA.fs=fs;d.style.fontSize=fs+'px';d.style.borderRadius=Math.round(6*k)+'px'}
+ const top=Math.round((typeof PILLTOP!=='undefined'?PILLTOP:120)+30*Math.max(1,k));if(top!==PA.top){PA.top=top;d.style.top=top+'px'}
+ if(!PA.an){d.style.display='block';PA.an=true}
+ PA.bot=top+L.length*fs*1.3+10}catch(e){}};
+/* Ende der Box (CSS-Pixel) für die Zielzeile des Pakets „ziele“ */
+window.__perfAnzUnten=()=>PA.an?PA.bot:0;
+/* außerhalb des Spiels (Titel, Lager, Menüs) ausblenden */
+{const f=showScreen;showScreen=function(){const r=f.apply(this,arguments);try{if(G.state!=='play')paAus()}catch(e){}return r}}
+}catch(e){console.error('perfanz',e);window.__hsPERFANZ.err=String(e&&e.stack||e)}})();
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
