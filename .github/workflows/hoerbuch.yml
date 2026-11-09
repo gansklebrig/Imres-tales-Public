@@ -1,0 +1,39 @@
+name: Hörbuch aufnehmen
+on:
+  workflow_dispatch:
+    inputs:
+      kapitel: { description: "Kapitel, z. B. vorab,I", default: "vorab,I" }
+      grenze: { description: "höchstens so viele Zeichen neu aufnehmen (Abbruch vorher, wenn mehr nötig)", default: "0" }
+      nachholen: { description: "Zeichen-Budget für automatische Neuaufnahmen nach der Hörprüfung", default: "3000" }
+      trocken: { description: "1 = nur prüfen, nichts aufnehmen", default: "0" }
+      whisper: { description: "Whisper-Modell für die Hörprüfung", default: "medium" }
+      bis: { description: "Probelauf: nur die ersten N Absätze je Kapitel (0 = alle)", default: "0" }
+permissions:
+  contents: write
+concurrency:
+  group: vertonung
+  cancel-in-progress: false
+jobs:
+  aufnehmen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: ffmpeg und Whisper
+        run: |
+          which ffmpeg || (sudo apt-get update -q && sudo apt-get install -y -q ffmpeg)
+          pip install -q faster-whisper==1.0.3 requests
+      - name: Aufnehmen und prüfen
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          KAPITEL: ${{ inputs.kapitel }}
+          GRENZE: ${{ inputs.grenze }}
+          NACHHOLEN: ${{ inputs.nachholen }}
+          WHISPER: ${{ inputs.whisper }}
+          BIS: ${{ inputs.bis }}
+        run: |
+          git config user.name "Hörbuch"
+          git config user.email "actions@users.noreply.github.com"
+          if [ "${{ inputs.trocken }}" = "1" ]; then python3 tools/hoerbuch/aufnahme.py --trocken; else python3 tools/hoerbuch/aufnahme.py; fi
