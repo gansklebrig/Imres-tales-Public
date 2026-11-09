@@ -39,7 +39,7 @@ Promise.all([fetch("liste.json").then(r => r.json()), fetch("manifest.json").the
       x.st.forEach((l, i) => {
         const d = document.createElement("div"); d.className = "st";
         d.innerHTML = "<b></b><span></span>"; d.querySelector("b").textContent = i + 1; d.querySelector("span").textContent = l.name;
-        if (man[l.id]) { const a = document.createElement("audio"); a.controls = true; a.preload = "none"; a.src = man[l.id].replace("audio/proben/gundren/", ""); d.appendChild(a); }
+        if (man[l.id]) { const a = document.createElement("audio"); a.controls = true; a.preload = "none"; a.src = "/" + man[l.id]; d.appendChild(a); }
         s.appendChild(d);
       });
       ziel.appendChild(s);

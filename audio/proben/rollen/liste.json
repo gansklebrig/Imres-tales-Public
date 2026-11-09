@@ -1,0 +1,434 @@
+[
+ {
+  "id": "glasstab-1",
+  "rolle": "glasstab",
+  "titel": "Glasstab",
+  "info": "Anführer der Roten Roben, schneidend",
+  "text": "[furious] Wer wagt es, in meinem Labor herumzupoltern?! [pause] [coldly] Nun gut. Ich bin Glasstab, euer Anführer. Und jetzt raus mit euch, allesamt!",
+  "voice": "xWY1l40tqoiPeKEuBpJV",
+  "name": "Viktor – hinterhältig, näselnd"
+ },
+ {
+  "id": "glasstab-2",
+  "rolle": "glasstab",
+  "titel": "Glasstab",
+  "info": "Anführer der Roten Roben, schneidend",
+  "text": "[furious] Wer wagt es, in meinem Labor herumzupoltern?! [pause] [coldly] Nun gut. Ich bin Glasstab, euer Anführer. Und jetzt raus mit euch, allesamt!",
+  "voice": "VvmLPzhPQHSqLOL9D1R7",
+  "name": "Tyrax – sarkastisch, gefährlich"
+ },
+ {
+  "id": "glasstab-3",
+  "rolle": "glasstab",
+  "titel": "Glasstab",
+  "info": "Anführer der Roten Roben, schneidend",
+  "text": "[furious] Wer wagt es, in meinem Labor herumzupoltern?! [pause] [coldly] Nun gut. Ich bin Glasstab, euer Anführer. Und jetzt raus mit euch, allesamt!",
+  "voice": "M9PBBTZ5jyknwzAesEA3",
+  "name": "Lazarus – rauchig, abgebrüht"
+ },
+ {
+  "id": "ilvara-1",
+  "rolle": "ilvara",
+  "titel": "Ilvara",
+  "info": "Drow, erst freundliche Druidin, dann eiskalt",
+  "text": "[warmly] Wanderer! Ihr seht hungrig aus. Kommt herein, die Suppe ist gleich fertig. [long pause] [coldly, quietly] Schlaft nur, kleine Helden.",
+  "voice": "biwlandiCGYv7Xk4PEUf",
+  "name": "Moreana – verführerisch, dunkel (bisherige Drow-Stimme)"
+ },
+ {
+  "id": "ilvara-2",
+  "rolle": "ilvara",
+  "titel": "Ilvara",
+  "info": "Drow, erst freundliche Druidin, dann eiskalt",
+  "text": "[warmly] Wanderer! Ihr seht hungrig aus. Kommt herein, die Suppe ist gleich fertig. [long pause] [coldly, quietly] Schlaft nur, kleine Helden.",
+  "voice": "Qbw4VpyUrHEG7NigKzty",
+  "name": "Kristen – kalte Königin"
+ },
+ {
+  "id": "ilvara-3",
+  "rolle": "ilvara",
+  "titel": "Ilvara",
+  "info": "Drow, erst freundliche Druidin, dann eiskalt",
+  "text": "[warmly] Wanderer! Ihr seht hungrig aus. Kommt herein, die Suppe ist gleich fertig. [long pause] [coldly, quietly] Schlaft nur, kleine Helden.",
+  "voice": "BMLpHVZqLTDQfQalqMJJ",
+  "name": "Morgaine – tief, dramatisch"
+ },
+ {
+  "id": "nezna-1",
+  "rolle": "nezna",
+  "titel": "Nezna",
+  "info": "Drow aus dem Wachturm, Kriegerin",
+  "text": "[coldly, smiling] Wie schön. Ihr habt hergefunden. [pause] [mocking] Die Spinne wird euch kriegen …",
+  "voice": "Zcmn5ok6KSaf2Tikziif",
+  "name": "Juliet – kalt, kontrolliert"
+ },
+ {
+  "id": "nezna-2",
+  "rolle": "nezna",
+  "titel": "Nezna",
+  "info": "Drow aus dem Wachturm, Kriegerin",
+  "text": "[coldly, smiling] Wie schön. Ihr habt hergefunden. [pause] [mocking] Die Spinne wird euch kriegen …",
+  "voice": "T6NabghTdZ1K1TRF4KuA",
+  "name": "Lena – tief, unheimlich"
+ },
+ {
+  "id": "nezna-3",
+  "rolle": "nezna",
+  "titel": "Nezna",
+  "info": "Drow aus dem Wachturm, Kriegerin",
+  "text": "[coldly, smiling] Wie schön. Ihr habt hergefunden. [pause] [mocking] Die Spinne wird euch kriegen …",
+  "voice": "KzAyD2tTf9r77ytc2bYC",
+  "name": "Lola – kämpferisch"
+ },
+ {
+  "id": "harbin-1",
+  "rolle": "harbin",
+  "titel": "Harbin",
+  "info": "Bürgermeister von Phandalin, aufgeblasen",
+  "text": "[pompous] Selbstverständlich wäre die Gemeinde Euch zu tiefstem Dank verpflichtet. Aber was erwartet Ihr von mir? [short pause] Selbstverständlich gibt es dafür kein Geld.",
+  "voice": "89gcX1AeMGgcsN8ypHLu",
+  "name": "Rupert – korrekt, steif"
+ },
+ {
+  "id": "harbin-2",
+  "rolle": "harbin",
+  "titel": "Harbin",
+  "info": "Bürgermeister von Phandalin, aufgeblasen",
+  "text": "[pompous] Selbstverständlich wäre die Gemeinde Euch zu tiefstem Dank verpflichtet. Aber was erwartet Ihr von mir? [short pause] Selbstverständlich gibt es dafür kein Geld.",
+  "voice": "YgfD7xnpDbkAqDwKKlOz",
+  "name": "Horst – schmierig, Onkel-Typ"
+ },
+ {
+  "id": "harbin-3",
+  "rolle": "harbin",
+  "titel": "Harbin",
+  "info": "Bürgermeister von Phandalin, aufgeblasen",
+  "text": "[pompous] Selbstverständlich wäre die Gemeinde Euch zu tiefstem Dank verpflichtet. Aber was erwartet Ihr von mir? [short pause] Selbstverständlich gibt es dafür kein Geld.",
+  "voice": "L5Oo1OjjHdbIvJDQFgmN",
+  "name": "Bartholomeus – flatterig, nervös"
+ },
+ {
+  "id": "dolgrimson-1",
+  "rolle": "dolgrimson",
+  "titel": "Dolgrimson",
+  "info": "Captain der Allianz der Lords, streng",
+  "text": "[sternly] Wer hat euch denn hereingelassen? [pause] [gruffly] Willkommen in der Allianz der Lords. Enttäuscht mich nicht.",
+  "voice": "87AwpS6yC86wa2WglbsK",
+  "name": "Michael Danisch – tief, ruhig"
+ },
+ {
+  "id": "dolgrimson-2",
+  "rolle": "dolgrimson",
+  "titel": "Dolgrimson",
+  "info": "Captain der Allianz der Lords, streng",
+  "text": "[sternly] Wer hat euch denn hereingelassen? [pause] [gruffly] Willkommen in der Allianz der Lords. Enttäuscht mich nicht.",
+  "voice": "aDYxt2YzboRX5QmntZNE",
+  "name": "Marcus – hochdeutsch, förmlich"
+ },
+ {
+  "id": "dolgrimson-3",
+  "rolle": "dolgrimson",
+  "titel": "Dolgrimson",
+  "info": "Captain der Allianz der Lords, streng",
+  "text": "[sternly] Wer hat euch denn hereingelassen? [pause] [gruffly] Willkommen in der Allianz der Lords. Enttäuscht mich nicht.",
+  "voice": "TVGn2JVJHeMuzxos8a3h",
+  "name": "Peter – tief, erfahren"
+ },
+ {
+  "id": "fagas-1",
+  "rolle": "fagas",
+  "titel": "Fagas",
+  "info": "Gnom aus dem Spinnenkokon",
+  "text": "[muffled, panicked] Hallo? Ist da wer? Bitte nicht fressen! Ich schmecke furchtbar! [pause] [relieved, fast] Fagas! Ich heiße Fagas. Danke, danke. Ihr seid keine Spinnen.",
+  "voice": "JSV4pJFuHRMCWZTxkpoQ",
+  "name": "Snorre – nervös, schnell"
+ },
+ {
+  "id": "fagas-2",
+  "rolle": "fagas",
+  "titel": "Fagas",
+  "info": "Gnom aus dem Spinnenkokon",
+  "text": "[muffled, panicked] Hallo? Ist da wer? Bitte nicht fressen! Ich schmecke furchtbar! [pause] [relieved, fast] Fagas! Ich heiße Fagas. Danke, danke. Ihr seid keine Spinnen.",
+  "voice": "o7bn7T3k6h58H9hn9j3y",
+  "name": "Álfwyn – klein, piepsig"
+ },
+ {
+  "id": "fagas-3",
+  "rolle": "fagas",
+  "titel": "Fagas",
+  "info": "Gnom aus dem Spinnenkokon",
+  "text": "[muffled, panicked] Hallo? Ist da wer? Bitte nicht fressen! Ich schmecke furchtbar! [pause] [relieved, fast] Fagas! Ich heiße Fagas. Danke, danke. Ihr seid keine Spinnen.",
+  "voice": "Sg8zw6Na9OqprPcNwJo1",
+  "name": "Tobi – tollpatschig"
+ },
+ {
+  "id": "kardal-1",
+  "rolle": "kardal",
+  "titel": "Kardal",
+  "info": "Duergar-Prinz, gibt sich als Späher aus",
+  "text": "[breathless, excited] Kardal! Ich bin Kardal, ein Späher meiner Stadt! Gebt mir irgendwas, eine Axt, einen Stock, egal! [long pause] [sheepish] Ah. Ja. Darüber wollte ich noch mit euch reden.",
+  "voice": "c46FXHKyrgHrLKKtjiy2",
+  "name": "Jack – frech, flott"
+ },
+ {
+  "id": "kardal-2",
+  "rolle": "kardal",
+  "titel": "Kardal",
+  "info": "Duergar-Prinz, gibt sich als Späher aus",
+  "text": "[breathless, excited] Kardal! Ich bin Kardal, ein Späher meiner Stadt! Gebt mir irgendwas, eine Axt, einen Stock, egal! [long pause] [sheepish] Ah. Ja. Darüber wollte ich noch mit euch reden.",
+  "voice": "SfAtBxtKeIJ5PJmhPaty",
+  "name": "Chris Beck – witzig, hell"
+ },
+ {
+  "id": "kardal-3",
+  "rolle": "kardal",
+  "titel": "Kardal",
+  "info": "Duergar-Prinz, gibt sich als Späher aus",
+  "text": "[breathless, excited] Kardal! Ich bin Kardal, ein Späher meiner Stadt! Gebt mir irgendwas, eine Axt, einen Stock, egal! [long pause] [sheepish] Ah. Ja. Darüber wollte ich noch mit euch reden.",
+  "voice": "CVcPLXStXPeDxhrSflDZ",
+  "name": "Jantosch – charmant"
+ },
+ {
+  "id": "horga-1",
+  "rolle": "horga",
+  "titel": "König Horga",
+  "info": "Duergar-König, Stimme wie Steinschlag",
+  "text": "[slowly, heavy] Ihr habt meinen Sohn zurückgebracht. [long pause] Bleibt.",
+  "voice": "h9Fo3jDhxmIiiLrhx14A",
+  "name": "Mordran Doomforge – Kriegsherr (bisherige Horga-Stimme)"
+ },
+ {
+  "id": "horga-2",
+  "rolle": "horga",
+  "titel": "König Horga",
+  "info": "Duergar-König, Stimme wie Steinschlag",
+  "text": "[slowly, heavy] Ihr habt meinen Sohn zurückgebracht. [long pause] Bleibt.",
+  "voice": "5KvpaGteYkNayiswuX2h",
+  "name": "Helmut (nicht der Erzähler) – rau, markant"
+ },
+ {
+  "id": "horga-3",
+  "rolle": "horga",
+  "titel": "König Horga",
+  "info": "Duergar-König, Stimme wie Steinschlag",
+  "text": "[slowly, heavy] Ihr habt meinen Sohn zurückgebracht. [long pause] Bleibt.",
+  "voice": "picHqyHNqhfEq8cHUtCG",
+  "name": "Frederick – episch, tief"
+ },
+ {
+  "id": "hgraam-1",
+  "rolle": "hgraam",
+  "titel": "Hgraam",
+  "info": "alter Steinsprecher der Riesen",
+  "text": "[very slow, deep] Etwas Böses regt sich. Etwas Unersättliches. [pause] Und der Stein … schreit.",
+  "voice": "2HmIg4yvRgcH2ZDgiwGz",
+  "name": "Elderbark – uralt, verwurzelt"
+ },
+ {
+  "id": "hgraam-2",
+  "rolle": "hgraam",
+  "titel": "Hgraam",
+  "info": "alter Steinsprecher der Riesen",
+  "text": "[very slow, deep] Etwas Böses regt sich. Etwas Unersättliches. [pause] Und der Stein … schreit.",
+  "voice": "bFrjFL4nlpeYNwNRhXxq",
+  "name": "Mossbeard – knarzend, urtümlich"
+ },
+ {
+  "id": "hgraam-3",
+  "rolle": "hgraam",
+  "titel": "Hgraam",
+  "info": "alter Steinsprecher der Riesen",
+  "text": "[very slow, deep] Etwas Böses regt sich. Etwas Unersättliches. [pause] Und der Stein … schreit.",
+  "voice": "uYBtrwzOqK8qaectN0V2",
+  "name": "Nikolaus – grollend, gutmütig"
+ },
+ {
+  "id": "riesen-1",
+  "rolle": "riesen",
+  "titel": "Riesen",
+  "info": "der rasende Riese und die anderen Riesen",
+  "text": "[roaring] ZERSCHLAGEN! ALLES ZERSCHLAGEN! [long pause] [slow, gentle] Danke … kleine Leute. Er ist … nicht so. Nie.",
+  "voice": "pfvZahoGcT3NdpxRuNkg",
+  "name": "Bruno – groß, gutmütig"
+ },
+ {
+  "id": "riesen-2",
+  "rolle": "riesen",
+  "titel": "Riesen",
+  "info": "der rasende Riese und die anderen Riesen",
+  "text": "[roaring] ZERSCHLAGEN! ALLES ZERSCHLAGEN! [long pause] [slow, gentle] Danke … kleine Leute. Er ist … nicht so. Nie.",
+  "voice": "XQSEqtl2af3AAUCwmX7b",
+  "name": "Gorak – tief, wuchtig"
+ },
+ {
+  "id": "riesen-3",
+  "rolle": "riesen",
+  "titel": "Riesen",
+  "info": "der rasende Riese und die anderen Riesen",
+  "text": "[roaring] ZERSCHLAGEN! ALLES ZERSCHLAGEN! [long pause] [slow, gentle] Danke … kleine Leute. Er ist … nicht so. Nie.",
+  "voice": "LcVcltBiweqv2E4ipKan",
+  "name": "Raging Rex – Brüllen, Raserei"
+ },
+ {
+  "id": "gartokkar-1",
+  "rolle": "gartokkar",
+  "titel": "Gartokkar",
+  "info": "Hohepriester der Bewahrer der Flamme",
+  "text": "[hushed, glancing around] Der Meister empfängt euch. Sprecht nur, wenn er euch fragt. [pause] Jemand hat ein Drachenei gestohlen.",
+  "voice": "3SS1Mem5uFQXQc0kb54t",
+  "name": "Gottfried – dunkel, gefährlich ruhig"
+ },
+ {
+  "id": "gartokkar-2",
+  "rolle": "gartokkar",
+  "titel": "Gartokkar",
+  "info": "Hohepriester der Bewahrer der Flamme",
+  "text": "[hushed, glancing around] Der Meister empfängt euch. Sprecht nur, wenn er euch fragt. [pause] Jemand hat ein Drachenei gestohlen.",
+  "voice": "DUAKkudcC2PI6KEqJ60K",
+  "name": "Haunting-Hector – unheilvoll"
+ },
+ {
+  "id": "gartokkar-3",
+  "rolle": "gartokkar",
+  "titel": "Gartokkar",
+  "info": "Hohepriester der Bewahrer der Flamme",
+  "text": "[hushed, glancing around] Der Meister empfängt euch. Sprecht nur, wenn er euch fragt. [pause] Jemand hat ein Drachenei gestohlen.",
+  "voice": "UFO0Yv86wqRxAt1DmXUu",
+  "name": "Mordred – sarkastisch, schillernd"
+ },
+ {
+  "id": "themberchaud-1",
+  "rolle": "themberchaud",
+  "titel": "Themberchaud",
+  "info": "fetter, eitler roter Drache",
+  "text": "[yawning, lazy] Oh. Das Abendessen ist da. [long pause] [bored] Der dritte Vers war schwach.",
+  "voice": "GSg9QvjLdHGJoVVCDWGu",
+  "name": "Azrak – Monster (bisherige Stimme)"
+ },
+ {
+  "id": "themberchaud-2",
+  "rolle": "themberchaud",
+  "titel": "Themberchaud",
+  "info": "fetter, eitler roter Drache",
+  "text": "[yawning, lazy] Oh. Das Abendessen ist da. [long pause] [bored] Der dritte Vers war schwach.",
+  "voice": "xsiB5fGhEtknnqzudCO6",
+  "name": "Smoke – der Drache"
+ },
+ {
+  "id": "themberchaud-3",
+  "rolle": "themberchaud",
+  "titel": "Themberchaud",
+  "info": "fetter, eitler roter Drache",
+  "text": "[yawning, lazy] Oh. Das Abendessen ist da. [long pause] [bored] Der dritte Vers war schwach.",
+  "voice": "HAvvFKatz0uu0Fv55Riy",
+  "name": "Matthew Schmitz – uralter Drache"
+ },
+ {
+  "id": "venomfang-1",
+  "rolle": "venomfang",
+  "titel": "Venomfang",
+  "info": "junger grüner Drache, zischend",
+  "text": "[hissing, slow] Frisches Fleisch … [pause] auf meinem Turm.",
+  "voice": "A921zklid24OpyVy1Elb",
+  "name": "Dracon – wild, dämonisch"
+ },
+ {
+  "id": "venomfang-2",
+  "rolle": "venomfang",
+  "titel": "Venomfang",
+  "info": "junger grüner Drache, zischend",
+  "text": "[hissing, slow] Frisches Fleisch … [pause] auf meinem Turm.",
+  "voice": "vfaqCOvlrKi4Zp7C2IAm",
+  "name": "Malyx – hallend, dämonisch"
+ },
+ {
+  "id": "venomfang-3",
+  "rolle": "venomfang",
+  "titel": "Venomfang",
+  "info": "junger grüner Drache, zischend",
+  "text": "[hissing, slow] Frisches Fleisch … [pause] auf meinem Turm.",
+  "voice": "ysswSXp8U9dFpzPJqFje",
+  "name": "Azazel – kratzig, finster"
+ },
+ {
+  "id": "zilda-1",
+  "rolle": "zilda",
+  "titel": "Zilda",
+  "info": "Söldnerin, arbeitet für Gundren",
+  "text": "[tired but firm] Zilda. Söldnerin. Ich arbeite für Gundren. [pause] Von mir haben sie nichts erfahren.",
+  "voice": "KzAyD2tTf9r77ytc2bYC",
+  "name": "Lola – kämpferisch"
+ },
+ {
+  "id": "zilda-2",
+  "rolle": "zilda",
+  "titel": "Zilda",
+  "info": "Söldnerin, arbeitet für Gundren",
+  "text": "[tired but firm] Zilda. Söldnerin. Ich arbeite für Gundren. [pause] Von mir haben sie nichts erfahren.",
+  "voice": "3t6439mGAsHvQFPpoPdf",
+  "name": "Raya – laut, warm"
+ },
+ {
+  "id": "zilda-3",
+  "rolle": "zilda",
+  "titel": "Zilda",
+  "info": "Söldnerin, arbeitet für Gundren",
+  "text": "[tired but firm] Zilda. Söldnerin. Ich arbeite für Gundren. [pause] Von mir haben sie nichts erfahren.",
+  "voice": "vPFocGjG5CEBbSByU2UY",
+  "name": "Klara – kraftvoll"
+ },
+ {
+  "id": "dorf-1",
+  "rolle": "dorf",
+  "titel": "Dorfbewohner",
+  "info": "alter Mann, Wirt, Händler, Goldschmied",
+  "text": "[quietly, glancing at the door] Ihr wollt wissen, was hier los ist? [pause] Die Roten Roben. Die nehmen sich, was sie wollen. Und wer nicht zahlt …",
+  "voice": "R3XXDwKMU2YHwBcuYUH3",
+  "name": "Opa Johann – sanft, alt"
+ },
+ {
+  "id": "dorf-2",
+  "rolle": "dorf",
+  "titel": "Dorfbewohner",
+  "info": "alter Mann, Wirt, Händler, Goldschmied",
+  "text": "[quietly, glancing at the door] Ihr wollt wissen, was hier los ist? [pause] Die Roten Roben. Die nehmen sich, was sie wollen. Und wer nicht zahlt …",
+  "voice": "YyYOpSknZlewhHezK5bv",
+  "name": "Oswald – ruhig, verwittert"
+ },
+ {
+  "id": "dorf-3",
+  "rolle": "dorf",
+  "titel": "Dorfbewohner",
+  "info": "alter Mann, Wirt, Händler, Goldschmied",
+  "text": "[quietly, glancing at the door] Ihr wollt wissen, was hier los ist? [pause] Die Roten Roben. Die nehmen sich, was sie wollen. Und wer nicht zahlt …",
+  "voice": "LRpNiUBlcqgIsKUzcrlN",
+  "name": "Georg – zittrig, komisch"
+ },
+ {
+  "id": "schlaeger-1",
+  "rolle": "schlaeger",
+  "titel": "Schläger und Wachen",
+  "info": "Rote Roben, Drow-Wachen, Bewahrer",
+  "text": "[drunk, slurring] Schöner Hund. Wem gehört'n der? [long pause] [mocking] Na, ausgeschlafen, Spitzohr? Du hast geschnarcht wie ein Troll.",
+  "voice": "BDqe1qZiwPi7xspRxTgh",
+  "name": "Roderich – rau, rücksichtslos"
+ },
+ {
+  "id": "schlaeger-2",
+  "rolle": "schlaeger",
+  "titel": "Schläger und Wachen",
+  "info": "Rote Roben, Drow-Wachen, Bewahrer",
+  "text": "[drunk, slurring] Schöner Hund. Wem gehört'n der? [long pause] [mocking] Na, ausgeschlafen, Spitzohr? Du hast geschnarcht wie ein Troll.",
+  "voice": "eWmswbut7I70CIuRsFwP",
+  "name": "Frankie Slim – schmierig, frech"
+ },
+ {
+  "id": "schlaeger-3",
+  "rolle": "schlaeger",
+  "titel": "Schläger und Wachen",
+  "info": "Rote Roben, Drow-Wachen, Bewahrer",
+  "text": "[drunk, slurring] Schöner Hund. Wem gehört'n der? [long pause] [mocking] Na, ausgeschlafen, Spitzohr? Du hast geschnarcht wie ein Troll.",
+  "voice": "Z2yQ1EdlDmcIgh9Pn4Lw",
+  "name": "Commander Blake – Soldat"
+ }
+]

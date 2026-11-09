@@ -1,0 +1,197 @@
+{
+ "ziel": "audio/proben/rollen",
+ "zeilen": {
+  "glasstab-1": {
+   "text": "[furious] Wer wagt es, in meinem Labor herumzupoltern?! [pause] [coldly] Nun gut. Ich bin Glasstab, euer Anführer. Und jetzt raus mit euch, allesamt!",
+   "stimme": "xWY1l40tqoiPeKEuBpJV"
+  },
+  "glasstab-2": {
+   "text": "[furious] Wer wagt es, in meinem Labor herumzupoltern?! [pause] [coldly] Nun gut. Ich bin Glasstab, euer Anführer. Und jetzt raus mit euch, allesamt!",
+   "stimme": "VvmLPzhPQHSqLOL9D1R7"
+  },
+  "glasstab-3": {
+   "text": "[furious] Wer wagt es, in meinem Labor herumzupoltern?! [pause] [coldly] Nun gut. Ich bin Glasstab, euer Anführer. Und jetzt raus mit euch, allesamt!",
+   "stimme": "M9PBBTZ5jyknwzAesEA3"
+  },
+  "ilvara-1": {
+   "text": "[warmly] Wanderer! Ihr seht hungrig aus. Kommt herein, die Suppe ist gleich fertig. [long pause] [coldly, quietly] Schlaft nur, kleine Helden.",
+   "stimme": "biwlandiCGYv7Xk4PEUf"
+  },
+  "ilvara-2": {
+   "text": "[warmly] Wanderer! Ihr seht hungrig aus. Kommt herein, die Suppe ist gleich fertig. [long pause] [coldly, quietly] Schlaft nur, kleine Helden.",
+   "stimme": "Qbw4VpyUrHEG7NigKzty"
+  },
+  "ilvara-3": {
+   "text": "[warmly] Wanderer! Ihr seht hungrig aus. Kommt herein, die Suppe ist gleich fertig. [long pause] [coldly, quietly] Schlaft nur, kleine Helden.",
+   "stimme": "BMLpHVZqLTDQfQalqMJJ"
+  },
+  "nezna-1": {
+   "text": "[coldly, smiling] Wie schön. Ihr habt hergefunden. [pause] [mocking] Die Spinne wird euch kriegen …",
+   "stimme": "Zcmn5ok6KSaf2Tikziif"
+  },
+  "nezna-2": {
+   "text": "[coldly, smiling] Wie schön. Ihr habt hergefunden. [pause] [mocking] Die Spinne wird euch kriegen …",
+   "stimme": "T6NabghTdZ1K1TRF4KuA"
+  },
+  "nezna-3": {
+   "text": "[coldly, smiling] Wie schön. Ihr habt hergefunden. [pause] [mocking] Die Spinne wird euch kriegen …",
+   "stimme": "KzAyD2tTf9r77ytc2bYC"
+  },
+  "harbin-1": {
+   "text": "[pompous] Selbstverständlich wäre die Gemeinde Euch zu tiefstem Dank verpflichtet. Aber was erwartet Ihr von mir? [short pause] Selbstverständlich gibt es dafür kein Geld.",
+   "stimme": "89gcX1AeMGgcsN8ypHLu"
+  },
+  "harbin-2": {
+   "text": "[pompous] Selbstverständlich wäre die Gemeinde Euch zu tiefstem Dank verpflichtet. Aber was erwartet Ihr von mir? [short pause] Selbstverständlich gibt es dafür kein Geld.",
+   "stimme": "YgfD7xnpDbkAqDwKKlOz"
+  },
+  "harbin-3": {
+   "text": "[pompous] Selbstverständlich wäre die Gemeinde Euch zu tiefstem Dank verpflichtet. Aber was erwartet Ihr von mir? [short pause] Selbstverständlich gibt es dafür kein Geld.",
+   "stimme": "L5Oo1OjjHdbIvJDQFgmN"
+  },
+  "dolgrimson-1": {
+   "text": "[sternly] Wer hat euch denn hereingelassen? [pause] [gruffly] Willkommen in der Allianz der Lords. Enttäuscht mich nicht.",
+   "stimme": "87AwpS6yC86wa2WglbsK"
+  },
+  "dolgrimson-2": {
+   "text": "[sternly] Wer hat euch denn hereingelassen? [pause] [gruffly] Willkommen in der Allianz der Lords. Enttäuscht mich nicht.",
+   "stimme": "aDYxt2YzboRX5QmntZNE"
+  },
+  "dolgrimson-3": {
+   "text": "[sternly] Wer hat euch denn hereingelassen? [pause] [gruffly] Willkommen in der Allianz der Lords. Enttäuscht mich nicht.",
+   "stimme": "TVGn2JVJHeMuzxos8a3h"
+  },
+  "fagas-1": {
+   "text": "[muffled, panicked] Hallo? Ist da wer? Bitte nicht fressen! Ich schmecke furchtbar! [pause] [relieved, fast] Fagas! Ich heiße Fagas. Danke, danke. Ihr seid keine Spinnen.",
+   "stimme": "JSV4pJFuHRMCWZTxkpoQ"
+  },
+  "fagas-2": {
+   "text": "[muffled, panicked] Hallo? Ist da wer? Bitte nicht fressen! Ich schmecke furchtbar! [pause] [relieved, fast] Fagas! Ich heiße Fagas. Danke, danke. Ihr seid keine Spinnen.",
+   "stimme": "o7bn7T3k6h58H9hn9j3y"
+  },
+  "fagas-3": {
+   "text": "[muffled, panicked] Hallo? Ist da wer? Bitte nicht fressen! Ich schmecke furchtbar! [pause] [relieved, fast] Fagas! Ich heiße Fagas. Danke, danke. Ihr seid keine Spinnen.",
+   "stimme": "Sg8zw6Na9OqprPcNwJo1"
+  },
+  "kardal-1": {
+   "text": "[breathless, excited] Kardal! Ich bin Kardal, ein Späher meiner Stadt! Gebt mir irgendwas, eine Axt, einen Stock, egal! [long pause] [sheepish] Ah. Ja. Darüber wollte ich noch mit euch reden.",
+   "stimme": "c46FXHKyrgHrLKKtjiy2"
+  },
+  "kardal-2": {
+   "text": "[breathless, excited] Kardal! Ich bin Kardal, ein Späher meiner Stadt! Gebt mir irgendwas, eine Axt, einen Stock, egal! [long pause] [sheepish] Ah. Ja. Darüber wollte ich noch mit euch reden.",
+   "stimme": "SfAtBxtKeIJ5PJmhPaty"
+  },
+  "kardal-3": {
+   "text": "[breathless, excited] Kardal! Ich bin Kardal, ein Späher meiner Stadt! Gebt mir irgendwas, eine Axt, einen Stock, egal! [long pause] [sheepish] Ah. Ja. Darüber wollte ich noch mit euch reden.",
+   "stimme": "CVcPLXStXPeDxhrSflDZ"
+  },
+  "horga-1": {
+   "text": "[slowly, heavy] Ihr habt meinen Sohn zurückgebracht. [long pause] Bleibt.",
+   "stimme": "h9Fo3jDhxmIiiLrhx14A"
+  },
+  "horga-2": {
+   "text": "[slowly, heavy] Ihr habt meinen Sohn zurückgebracht. [long pause] Bleibt.",
+   "stimme": "5KvpaGteYkNayiswuX2h"
+  },
+  "horga-3": {
+   "text": "[slowly, heavy] Ihr habt meinen Sohn zurückgebracht. [long pause] Bleibt.",
+   "stimme": "picHqyHNqhfEq8cHUtCG"
+  },
+  "hgraam-1": {
+   "text": "[very slow, deep] Etwas Böses regt sich. Etwas Unersättliches. [pause] Und der Stein … schreit.",
+   "stimme": "2HmIg4yvRgcH2ZDgiwGz"
+  },
+  "hgraam-2": {
+   "text": "[very slow, deep] Etwas Böses regt sich. Etwas Unersättliches. [pause] Und der Stein … schreit.",
+   "stimme": "bFrjFL4nlpeYNwNRhXxq"
+  },
+  "hgraam-3": {
+   "text": "[very slow, deep] Etwas Böses regt sich. Etwas Unersättliches. [pause] Und der Stein … schreit.",
+   "stimme": "uYBtrwzOqK8qaectN0V2"
+  },
+  "riesen-1": {
+   "text": "[roaring] ZERSCHLAGEN! ALLES ZERSCHLAGEN! [long pause] [slow, gentle] Danke … kleine Leute. Er ist … nicht so. Nie.",
+   "stimme": "pfvZahoGcT3NdpxRuNkg"
+  },
+  "riesen-2": {
+   "text": "[roaring] ZERSCHLAGEN! ALLES ZERSCHLAGEN! [long pause] [slow, gentle] Danke … kleine Leute. Er ist … nicht so. Nie.",
+   "stimme": "XQSEqtl2af3AAUCwmX7b"
+  },
+  "riesen-3": {
+   "text": "[roaring] ZERSCHLAGEN! ALLES ZERSCHLAGEN! [long pause] [slow, gentle] Danke … kleine Leute. Er ist … nicht so. Nie.",
+   "stimme": "LcVcltBiweqv2E4ipKan"
+  },
+  "gartokkar-1": {
+   "text": "[hushed, glancing around] Der Meister empfängt euch. Sprecht nur, wenn er euch fragt. [pause] Jemand hat ein Drachenei gestohlen.",
+   "stimme": "3SS1Mem5uFQXQc0kb54t"
+  },
+  "gartokkar-2": {
+   "text": "[hushed, glancing around] Der Meister empfängt euch. Sprecht nur, wenn er euch fragt. [pause] Jemand hat ein Drachenei gestohlen.",
+   "stimme": "DUAKkudcC2PI6KEqJ60K"
+  },
+  "gartokkar-3": {
+   "text": "[hushed, glancing around] Der Meister empfängt euch. Sprecht nur, wenn er euch fragt. [pause] Jemand hat ein Drachenei gestohlen.",
+   "stimme": "UFO0Yv86wqRxAt1DmXUu"
+  },
+  "themberchaud-1": {
+   "text": "[yawning, lazy] Oh. Das Abendessen ist da. [long pause] [bored] Der dritte Vers war schwach.",
+   "stimme": "GSg9QvjLdHGJoVVCDWGu"
+  },
+  "themberchaud-2": {
+   "text": "[yawning, lazy] Oh. Das Abendessen ist da. [long pause] [bored] Der dritte Vers war schwach.",
+   "stimme": "xsiB5fGhEtknnqzudCO6"
+  },
+  "themberchaud-3": {
+   "text": "[yawning, lazy] Oh. Das Abendessen ist da. [long pause] [bored] Der dritte Vers war schwach.",
+   "stimme": "HAvvFKatz0uu0Fv55Riy"
+  },
+  "venomfang-1": {
+   "text": "[hissing, slow] Frisches Fleisch … [pause] auf meinem Turm.",
+   "stimme": "A921zklid24OpyVy1Elb"
+  },
+  "venomfang-2": {
+   "text": "[hissing, slow] Frisches Fleisch … [pause] auf meinem Turm.",
+   "stimme": "vfaqCOvlrKi4Zp7C2IAm"
+  },
+  "venomfang-3": {
+   "text": "[hissing, slow] Frisches Fleisch … [pause] auf meinem Turm.",
+   "stimme": "ysswSXp8U9dFpzPJqFje"
+  },
+  "zilda-1": {
+   "text": "[tired but firm] Zilda. Söldnerin. Ich arbeite für Gundren. [pause] Von mir haben sie nichts erfahren.",
+   "stimme": "KzAyD2tTf9r77ytc2bYC"
+  },
+  "zilda-2": {
+   "text": "[tired but firm] Zilda. Söldnerin. Ich arbeite für Gundren. [pause] Von mir haben sie nichts erfahren.",
+   "stimme": "3t6439mGAsHvQFPpoPdf"
+  },
+  "zilda-3": {
+   "text": "[tired but firm] Zilda. Söldnerin. Ich arbeite für Gundren. [pause] Von mir haben sie nichts erfahren.",
+   "stimme": "vPFocGjG5CEBbSByU2UY"
+  },
+  "dorf-1": {
+   "text": "[quietly, glancing at the door] Ihr wollt wissen, was hier los ist? [pause] Die Roten Roben. Die nehmen sich, was sie wollen. Und wer nicht zahlt …",
+   "stimme": "R3XXDwKMU2YHwBcuYUH3"
+  },
+  "dorf-2": {
+   "text": "[quietly, glancing at the door] Ihr wollt wissen, was hier los ist? [pause] Die Roten Roben. Die nehmen sich, was sie wollen. Und wer nicht zahlt …",
+   "stimme": "YyYOpSknZlewhHezK5bv"
+  },
+  "dorf-3": {
+   "text": "[quietly, glancing at the door] Ihr wollt wissen, was hier los ist? [pause] Die Roten Roben. Die nehmen sich, was sie wollen. Und wer nicht zahlt …",
+   "stimme": "LRpNiUBlcqgIsKUzcrlN"
+  },
+  "schlaeger-1": {
+   "text": "[drunk, slurring] Schöner Hund. Wem gehört'n der? [long pause] [mocking] Na, ausgeschlafen, Spitzohr? Du hast geschnarcht wie ein Troll.",
+   "stimme": "BDqe1qZiwPi7xspRxTgh"
+  },
+  "schlaeger-2": {
+   "text": "[drunk, slurring] Schöner Hund. Wem gehört'n der? [long pause] [mocking] Na, ausgeschlafen, Spitzohr? Du hast geschnarcht wie ein Troll.",
+   "stimme": "eWmswbut7I70CIuRsFwP"
+  },
+  "schlaeger-3": {
+   "text": "[drunk, slurring] Schöner Hund. Wem gehört'n der? [long pause] [mocking] Na, ausgeschlafen, Spitzohr? Du hast geschnarcht wie ein Troll.",
+   "stimme": "Z2yQ1EdlDmcIgh9Pn4Lw"
+  }
+ }
+}
