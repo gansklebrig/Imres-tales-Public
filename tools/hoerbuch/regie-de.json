@@ -1,0 +1,3190 @@
+{
+"vorab-df2b8d70": {
+"t": "[warmly] Diese Chronik erzähle ich euch, Barradin! [mischievously] Wie es sich für einen Barden gehört, erinnere ich mich nicht an jedes Detail ganz genau. Und weil meine Gefährten bei jeder Erzählung danebensitzen, mischen sie sich gelegentlich ein. [smug] Das eine oder andere habe ich vielleicht ein klein wenig schöngedichtet …",
+"p": 0.0
+},
+"vorab-5a0f7e83": {
+"t": "[dryly] Ein klein wenig?",
+"p": 0.6
+},
+"vorab-5200f049": {
+"t": "[sheepish] Na gut. Oder komplett übertrieben. [dryly] Danke, Friedrich. [hushed] Imre allein kennt die wahre Geschichte … [warmly] Diese hier wird euch hoffentlich trotzdem verzaubern!",
+"p": 0.0
+},
+"I-f2e82989": {
+"t": "[nostalgic] Es begann mit einem Brief. Jeder von uns erhielt eine Einladung von Gundren! Er war ein Zwerg und Händler aus der Stadt Neverwinter und kannte wohl jeden, der etwas zu sagen hat. [dryly] Das Siegel war aus dunklem Wachs, die Handschrift so kantig wie ein Zwergenschild und der Ton so knapp, dass man ihm nicht widersprechen mochte.",
+"p": 0.0
+},
+"I-ca09c2b3": {
+"t": "[gruffly] Treffpunkt: der Hafen. Gute Bezahlung. Kaum Gefahr. Ehrenwort.",
+"p": 0.7
+},
+"I-25ba46b4": {
+"t": "[awed] Der Hafen von Neverwinter, dem Juwel des Nordens! [warmly] Schon von dort aus sieht man, warum man die Stadt so nennt: Hinter den Lagerhäusern ragen die Türme auf, und über dem Fluss, der hier ins Meer mündet, liegt ein feiner, warmer Dunst. Man sagt, der Fluss friere selbst im härtesten Winter nicht zu, und an diesem Morgen glaubte ich es sofort. [cheerful] Knarrende Stege, Fischerboote, Händler und Matrosen, Möwen, die um jeden Fischkopf zankten, und über allem der Geruch von Salz und Teer. Ein Fischweib pries lautstark Heringe an, zwei Hafenarbeiter stritten über ein Fass, und ein zerzaust aussehender Junge bot mir an, meinen Mantel für eine Kupfermünze zu bürsten. [short pause] [dryly] Ich gab ihm zwei. Man muss sein Publikum pflegen. [nostalgic] Ich weiß noch, wie ich dort stand, die Pfeife im Mundwinkel, den Mantel vorteilhaft im Wind, und spürte: [awed] Hier beginnt etwas Großes.",
+"p": 1.8
+},
+"I-9999b193": {
+"t": "[amused] Da standen wir nun beieinander, vier Fremde auf einem Steg, die sich musterten wie Händler auf dem Pferdemarkt. Jeder hatte seinen Brief noch in der Hand, und jeder hielt ihn ein bisschen so, als könnte der andere ihn stehlen. [proudly] Ich machte den Anfang, wie es sich gehört. Pfeife im Mundwinkel, umweht von einer Wolke aus duftendem Kraut, gelockte, kurz abstehende Haare und ein Grinsen, das schon ganze Marktplätze erobert hat. [smug] Kurz: umwerfend. [theatrical] Ich trat vor, verbeugte mich und sprach:",
+"p": 0.0
+},
+"I-fb6186b5": {
+"t": "[theatrical] Barradin! Elfischer Barde, genannt die goldene Zunge, Bezwinger der Marktplätze und Liebling der Musen!",
+"p": 0.4
+},
+"I-c6bc728a": {
+"t": "[dryly] Drei Titel, die ich mir zum Teil selbst verliehen hatte. [smug] Dass ich brennende Fackeln jongliere, Saltos schlage und mit bloßen Worten schon mehr Feinde zu Fall gebracht habe als manch einer mit dem Schwert, erwähnte ich nur ganz nebenbei. [deadpan] Zweimal. [warmly] Daneben stand ein verschmitzt grinsender Mensch mit Bogen und Hund, dessen grünliches Gewand ihn sofort als Waldläufer erkennbar machte. Moos an den Stiefeln, ein Blatt im Haar, das er offenbar nicht bemerkt hatte, und ein Blick, der freundlich war und trotzdem alles sah. Er nickte uns zu:",
+"p": 0.0
+},
+"I-e67fa6e6": {
+"t": "[warmly] Ich bin Friedrich, aus den Wäldern. Das ist Rex, er ist der Freundlichere von uns beiden. Ich diskutiere lieber zuerst. [dryly] Und wenn Reden nicht hilft, treffe ich.",
+"p": 0.35
+},
+"I-70a973d5": {
+"t": "[amused] Dabei zog er seinen Bogen. Ein Mann, der lieber redet: Ich mochte ihn sofort, und ich ließ es ihn gleich wissen:",
+"p": 0.6
+},
+"I-979f7777": {
+"t": "[excited] Friedrich? Wie lieblich! Ein ehrlicher, guter Name. [mischievously] Ich werde weitere Reime darauf finden, wie niedlich.",
+"p": 0.35
+},
+"I-675eafde": {
+"t": "[deadpan] Bitte nicht.",
+"p": 0.6
+},
+"I-9757a4aa": {
+"t": "[amused] Rex hatte inzwischen jeden von uns gründlicher beschnuppert als jede Stadtwache, und dann setzte er sich, sehr zufrieden mit sich, auf meinen linken Stiefel. [dryly] Friedrich versuchte es mit Autorität:",
+"p": 0.0
+},
+"I-7d691f59": {
+"t": "[firm] Rex. Runter. Rex. [sheepish] Er mag dich. Das ist ein gutes Zeichen. Meistens.",
+"p": 0.35
+},
+"I-cf0a976b": {
+"t": "[curious] Dann ein gehörnter Druide in langen weißen Roben und mit grimmigem Blick. Die Hörner wuchsen ihm aus der Stirn wie bei einem jungen Hirsch, [dryly] nur dass ein Hirsch freundlicher schaut. Er sah aus, als wäre er bereit für jeden Streit, und knurrte uns an, statt sich vorzustellen. Jedenfalls klang es so:",
+"p": 1.2
+},
+"I-79c018cc": {
+"t": "[gruffly] Echo. Druide. Die Hörner sind echt, und wer sie anfasst, verliert einen Finger. Ich komme aus dem tiefen Wald, da redet man nicht viel. Was ich mag: Gold, Edelsteine, alles, was glänzt. [menacing] Und wer mir dumm kommt, der brennt.",
+"p": 0.35
+},
+"I-e2ef5117": {
+"t": "[amused] Eine Möwe, die neben ihm zu laut kreischte, starrte er so lange an, bis sie davonflog. [dryly] Ich beschloss, meine Finger bei mir zu behalten. Seine Augen blieben trotzdem an den goldenen Knöpfen meines Mantels hängen, und zwar etwas zu lange. Er brummte:",
+"p": 0.0
+},
+"I-e941d7bb": {
+"t": "[curious] Echtes Gold?",
+"p": 0.35
+},
+"I-558bca51": {
+"t": "[firm] Die bleiben, wo sie sind.",
+"p": 0.4
+},
+"I-f9ae5a56": {
+"t": "[serious] Der Vierte, den Gundren eingeladen hatte, war ein Darkin in glühender scharlachroter Rüstung. [quietly] Unter seiner Kapuze ragten Hörner hervor, an seinem Gürtel hingen zwei Klingen, und seine regungslose Mimik ließ nicht durchblicken, was in ihm vorging … [dryly] Selbst die Möwen machten einen Bogen um ihn. Er sagte nur:",
+"p": 0.0
+},
+"I-d7060813": {
+"t": "[coldly] Ezekiel. The Destroyer.",
+"p": 0.5
+},
+"I-40382535": {
+"t": "[dryly] Friedrich versuchte es freundlich:",
+"p": 0.8
+},
+"I-92180273": {
+"t": "[hesitant] Und was … zerstörst du so?",
+"p": 0.35
+},
+"I-17253697": {
+"t": "[deadpan] Keine Antwort. Das war alles: ein Name, ein Beiname, keine Verbeugung, nicht einmal ein Nicken. Rex legte den Kopf schief. Echo schnaubte. [sheepish] Und ich stand da, mit einem Lächeln, das mitten im Gesicht festgefroren war. [dryly] Die Vorstellungsrunde verlief, vorsichtig gesagt, etwas holprig.",
+"p": 2.0
+},
+"I-6c44a9c9": {
+"t": "[warmly] Gundren kam deshalb schnell zur Sache. Der schwarzbärtige Zwerg, den Bart zu zwei dicken Zöpfen geflochten, stützte seine schwieligen Hände auf ein Fass, das ihm als Tisch diente, [hushed] und senkte die Stimme, obwohl ringsum nur Möwen lauschten.",
+"p": 0.0
+},
+"I-82178113": {
+"t": "[hushed] In einer alten, verlassenen Mine, Freunde, liegt eine magische Schmiede. [awed] Ein vergessener Ort, an dem früher Kostbarkeiten von besonderer Macht hergestellt wurden.",
+"p": 0.6
+},
+"I-d77f158d": {
+"t": "[warmly] In der Schmiede wurden dereinst magische Gegenstände geschaffen, und als Gundren davon sprach, glänzten seine Augen wie frisch poliertes Messing. Er zählte es an seinen dicken Fingern ab:",
+"p": 0.0
+},
+"I-51c523fc": {
+"t": "[enthusiastic] Klingen, die nicht stumpf werden. Ringe mit Kräften, von denen ihr nur träumen könnt. Rüstungen, die mehr aushalten als ihr Träger.",
+"p": 0.35
+},
+"I-225d3bd5": {
+"t": "[amused] Einige mächtige Lords interessierten sich brennend dafür, und Gundren witterte die Chance, sein Exportgeschäft kräftig zu erweitern. Er rieb sich die Hände:",
+"p": 0.6
+},
+"I-a90dcd07": {
+"t": "[mischievously] Die feinen Herren in Neverwinter würden ihr letztes Hemd dafür geben.",
+"p": 0.35
+},
+"I-1bf977b1": {
+"t": "[dryly] Friedrich, ganz der Vorsichtige, hatte eine andere Frage:",
+"p": 0.6
+},
+"I-95a72dfa": {
+"t": "[suspicious] Ihr kennt doch jeden, der in Neverwinter etwas zu sagen hat. Warum ausgerechnet wir?",
+"p": 0.35
+},
+"I-14a7f69a": {
+"t": "[gruffly] Eben drum. Die kennen alle mich. Euch kennt noch keiner.",
+"p": 0.5
+},
+"I-ae3dab77": {
+"t": "[excited] Mich hatte er ohnehin schon bei den Worten „magische Schmiede“. [wistful] Ich sah mich bereits mit einer Laute, die sich von selbst stimmt, und mit einem Hut, der bei jedem Applaus ein kleines bisschen funkelt. [warmly] Und dann versprach Gundren uns auch noch eine stattliche Belohnung. Echo beugte sich vor:",
+"p": 0.0
+},
+"I-4014510a": {
+"t": "[gruffly] Wie viel Gold?",
+"p": 0.35
+},
+"I-914b59e0": {
+"t": "[deadpan] Gundren sah ihn starr an:",
+"p": 0.5
+},
+"I-52ab0d9a": {
+"t": "[firm] Viel!",
+"p": 0.6
+},
+"I-d573d4a1": {
+"t": "[dryly] Das genügte. Selbst Echos grimmige Züge tauten auf. [amused] Er grinste sogar! [deadpan] Ezekiel nickte. Einmal. [short pause] Ich beschloss, das als Begeisterung zu werten.",
+"p": 0.0
+},
+"I-f9fdb3b7": {
+"t": "[warmly] Unser erster Auftrag klang harmlos: einen Karren mit Waren sicher nach Phandalin bringen, Bergbauwerkzeug und Vorräte, so schwer beladen, dass die Achsen ächzten. Spitzhacken, Seile, Laternen, Säcke mit Mehl und ein Fass, von dem Gundren behauptete, es enthalte Nägel. [deadpan] Es gluckerte. [amused] Echo klopfte dagegen und schnupperte:",
+"p": 0.0
+},
+"I-16a9dcbf": {
+"t": "[suspicious] Nägel gluckern nicht.",
+"p": 0.4
+},
+"I-e16aab8a": {
+"t": "[gruffly] Die hier schon. Finger weg, Druide.",
+"p": 0.3
+},
+"I-93e2c210": {
+"t": "[nostalgic] Am nächsten Morgen, im Morgengrauen, rollten wir durch das Stadttor, [dryly] zwei Ochsen vor dem Karren, die das Wort Eile nicht kannten. Friedrich hatte die Zügel, weil er als Einziger wusste, wie man mit Ochsen redet. [amused] Echo saß hinten auf den Vorratssäcken wie ein Drache auf seinem Hort, und Ezekiel ging neben dem Karren her, lautlos, als hätte er beschlossen, dass Fahren unter seiner Würde sei. [proudly] Ich selbst saß auf dem Kutschbock und probte, wie man von dort oben möglichst heldenhaft winkt. [amused] Rex lief vorneweg und bellte jeden Meilenstein an, als hätte der ihn persönlich beleidigt, [wistful] und hinter uns versank Neverwinter im Dunst.",
+"p": 1.8
+},
+"I-cc2d0564": {
+"t": "[warmly] Wir zogen die High Road hinab nach Süden, das Meer anfangs direkt zu unserer Rechten, dann bald hinter grünen Hügeln verborgen. Irgendwann bog Friedrich ins Landesinnere ab, Richtung Phandalin. [amused] Mehrere Tage lang rollte der Karren friedlich dahin und knarrte bei jedem Schlagloch, als wolle er sich beschweren. Friedrich las die Fährten am Wegrand wie andere Leute Aushänge. Ab und zu deutete er auf einen Abdruck im Schlamm und sagte Dinge wie:",
+"p": 0.0
+},
+"I-78a7eaee": {
+"t": "[serious] Wildschwein. Zwei Tage alt. Hinkt ein bisschen links.",
+"p": 0.35
+},
+"I-fa1e6869": {
+"t": "[curious] Ich fragte ihn, woher er das mit dem Hinken wisse:",
+"p": 0.6
+},
+"I-96bc96aa": {
+"t": "[warmly] Der linke Abdruck ist flacher. Siehst du?",
+"p": 0.35
+},
+"I-f876a28a": {
+"t": "[curious] Und dass er zwei Tage alt ist?",
+"p": 0.4
+},
+"I-6be5b88c": {
+"t": "[deadpan] Geraten.",
+"p": 0.7
+},
+"I-d39e058a": {
+"t": "[dryly] Ich habe danach nie wieder nachgefragt. Es klang jedenfalls immer sehr überzeugend. [amused] Rex jagte jeden Schmetterling bis zur nächsten Biegung und kam stolz und mit leeren Pfoten zurück. Echo zählte zweimal täglich die Vorräte nach, [dryly] nicht weil er dem Händler misstraute, sondern weil er grundsätzlich jedem misstraute, der nicht er selbst war.",
+"p": 0.0
+},
+"I-595d925b": {
+"t": "[warmly] Abends am Feuer gab ich Kostproben meines Repertoires, [quietly] und Ezekiel saß dabei immer ein Stück außerhalb des Lichtscheins. Ganz verschwunden war er nie. Man sah das Glimmen seiner Rüstung, und manchmal das Blitzen einer Klinge, die er schärfte, obwohl sie längst scharf war. [warmly] Am dritten Abend fasste ich mir ein Herz und rief in die Dunkelheit hinüber:",
+"p": 1.5
+},
+"I-b8e07627": {
+"t": "[curious] Sag mal, Ezekiel. Woher hast du eigentlich den Beinamen? The Destroyer?",
+"p": 0.35
+},
+"I-a8abd105": {
+"t": "[coldly] Von früher.",
+"p": 0.7
+},
+"I-c205651b": {
+"t": "[hesitant] Und früher war …?",
+"p": 0.4
+},
+"I-44b0d6fb": {
+"t": "[coldly] Vorbei.",
+"p": 0.6
+},
+"I-bb37b5de": {
+"t": "[quietly] Das Feuer knackte. [amused] Echo lachte so laut, dass ein Ochse aufschreckte.",
+"p": 0.0
+},
+"I-2930ec40": {
+"t": "[laughs] Gib's auf, Barde. Aus dem kriegst du nicht mehr raus.",
+"p": 0.3
+},
+"I-9812503d": {
+"t": "[dryly] Ich gab es auf. Für diesen Abend. [amused] Stattdessen versuchte ich es bei Echo, der gerade zum dritten Mal seinen Anteil des Vorschusses zählte. Ich wollte wissen, was er mit all dem Gold eigentlich vorhabe:",
+"p": 0.0
+},
+"I-7c0f27eb": {
+"t": "[gruffly] Haben.",
+"p": 0.4
+},
+"I-deb05de3": {
+"t": "[confused] Nur haben?",
+"p": 0.4
+},
+"I-a27d3397": {
+"t": "[gruffly] Haben. Anschauen. Nochmal zählen.",
+"p": 0.4
+},
+"I-9280444d": {
+"t": "[warmly] Friedrich lachte leise und bat mich um etwas Ruhiges zum Einschlafen. [mischievously] Ich erklärte ihm, ein Barde spiele nicht leise, sondern Laute, [warmly] und begann dann lachend eine sanfte Melodie zu spielen. Bevor wir uns hinlegten, teilte Friedrich die Wachen ein:",
+"p": 0.0
+},
+"I-bab43903": {
+"t": "[tired] Ich nehme die erste Wache, Echo die zweite, Barradin die dritte, Ezekiel die vierte.",
+"p": 0.35
+},
+"I-43c4f385": {
+"t": "[coldly] Ich nehme alle.",
+"p": 0.6
+},
+"I-f4a8ac67": {
+"t": "[surprised] Alle? Du musst auch mal schlafen.",
+"p": 0.4
+},
+"I-541b524b": {
+"t": "[quietly] Muss ich?",
+"p": 0.7
+},
+"I-356c3b90": {
+"t": "[dryly] Darauf wusste keiner von uns eine Antwort. Echo schlief in dieser Nacht auf seinem Geldbeutel, ich auf meinem Mantel, und Ezekiel, soweit ich weiß, überhaupt nicht. [softly] Später, als alle schliefen oder so taten, sah ich, wie Ezekiel ein Stück Trockenfleisch aus seinem Beutel nahm und es Rex hinhielt, ohne hinzusehen. Rex nahm es sehr behutsam. [amused] Am nächsten Tag hatte ich kurz nach dem Aufbruch begonnen, ein Lied über langweilige Reisen zu dichten, und suchte gerade verzweifelt einen Reim auf „Ochse“. Echo brummte von den Vorratssäcken herüber:",
+"p": 0.0
+},
+"I-e66eb216": {
+"t": "[grumpy] Dass ich nicht kotze.",
+"p": 0.4
+},
+"I-b62d9a04": {
+"t": "[amused] Er lachte herzhaft, als Friedrich den Ochsen ein Stopp zurief und der Wagen stehen blieb. [quietly] Das Ächzen der Räder verstummte, und wir sahen alle verwundert zu Friedrich.",
+"p": 0.0
+},
+"I-797fe6a2": {
+"t": "[serious] Der Weg ist versperrt.",
+"p": 1.6
+},
+"I-b9573770": {
+"t": "[quietly] Er sah mit fokussiertem Blick nach vorn: Ein überfallener, halb niedergebrannter Wagen lag quer auf der Straße. Ein Rad war gebrochen, die Plane verkohlt, und von den Pferden, die ihn gezogen hatten, fehlte jede Spur. Es roch nach kaltem Rauch und verbranntem Leder, [hushed] und im Wald war es mit einem Mal sehr still. Kein Vogel, kein Wind. Rex knurrte leise, das Fell im Nacken gesträubt. Ezekiel sprach als Erster, ganz leise:",
+"p": 0.0
+},
+"I-f8301b42": {
+"t": "[whispers] Links. Im Unterholz.",
+"p": 0.5
+},
+"I-075a5969": {
+"t": "[hushed] Jeder von uns ahnte sofort, dass hier etwas faul war. Friedrich legte einen Pfeil auf die Sehne, ohne den Blick vom Waldrand zu nehmen. Echo ließ die Fingerknöchel knacken. [dramatic] Als kurz darauf eine Handvoll Goblins kreischend und mit schartigen Klingen aus dem Wald sprang, stand unsere kleine Truppe längst kampfbereit und trat den Goblins entgegen. [amused] Einer von ihnen blieb so abrupt stehen, dass der hinter ihm in ihn hineinlief, und kreischte empört:",
+"p": 0.0
+},
+"I-a5d387f0": {
+"t": "[annoyed] Hey! Ihr solltet doch überrascht sein!",
+"p": 0.3
+},
+"I-a2434de1": {
+"t": "[proudly] Ich antwortete, wie es sich für einen Barden gehört, mit der ersten Waffe, die ich zur Hand hatte:",
+"p": 0.6
+},
+"I-e50f79bf": {
+"t": "[mocking] Das nennt ihr einen Hinterhalt? Ich hab Hühner gesehen, die sich besser verstecken!",
+"p": 0.35
+},
+"I-6a6f6163": {
+"t": "[quickly] Friedrich rief seinem Hund zu:",
+"p": 1.2
+},
+"I-41711fee": {
+"t": "[shouting] Rex! Hinter mich!",
+"p": 0.3
+},
+"I-143fabf0": {
+"t": "[quickly] Und Echo brüllte, schon mitten unter ihnen:",
+"p": 0.3
+},
+"I-ef68eb71": {
+"t": "[shouting] Der Große gehört mir!",
+"p": 0.3
+},
+"I-12b5826a": {
+"t": "[dramatic] Der Kampf war härter als erwartet. Goblins sind klein, aber sie sind schnell, gemein und haben keinerlei Sinn für einen fairen Zweikampf. [sheepish] Ich will niemanden beim Namen nennen, aber einige unserer Angriffe gingen mit großer Überzeugung ins Leere. [short pause] Meine eingeschlossen. [dryly] Friedrich sagt dazu jedes Mal, wenn ich die Geschichte erzähle:",
+"p": 0.0
+},
+"I-87dbdd81": {
+"t": "[dryly] Vor allem deine.",
+"p": 0.5
+},
+"I-330ff4f4": {
+"t": "[exhausted] Am Ende konnten wir die Goblins dennoch niederstrecken. Schwer atmend standen wir zwischen ihnen, [amused] Rex sprang aufgeregt um uns herum, und Echo durchsuchte bereits den ersten Goblin, bevor der richtig aufgehört hatte zu zucken. [dryly] Das Lied über langweilige Reisen habe ich danach nie fertig geschrieben.",
+"p": 0.0
+},
+"I-d7a3ad85": {
+"t": "[curious] Ich weiß nicht, ob wir direkt Blut geleckt hatten oder uns die Hoffnung auf eine Belohnung antrieb … [dryly] Echo wusste es. [warmly] Jeder von uns hatte da so seine eigene Frage. Friedrich zuerst, über den ausgebrannten Wagen gebeugt:",
+"p": 0.0
+},
+"I-fa7b01f2": {
+"t": "[serious] Wem gehörte der Wagen? Und haben sie jemanden verschleppt?",
+"p": 0.35
+},
+"I-98dea484": {
+"t": "[dryly] Und Echo, über den nächsten Goblin gebeugt:",
+"p": 0.6
+},
+"I-a3d8de95": {
+"t": "[gruffly] Wo horten die kleinen Biester ihre Beute?",
+"p": 0.35
+},
+"I-6293ce1a": {
+"t": "[warmly] Ich wiederum wollte vor allem eine Geschichte, die sich zu erzählen lohnt. [quietly] Ezekiel wollte, soweit ich das beurteilen konnte, gar nichts, aber er war schon ein paar Schritte in Richtung Wald gegangen und hielt die Dolche weiterhin kampfbereit gezückt. [warmly] Anstatt einfach weiterzufahren, beschloss unsere neu gefundene Heldengruppe also, den Spuren in den Wald zu folgen. [dryly] Den Karren schoben wir ein Stück ins Gebüsch und hofften das Beste.",
+"p": 0.0
+},
+"I-936cb983": {
+"t": "[warmly] Auf einer nahe gelegenen Lichtung fanden wir eine weitere kleine Gruppe von Goblins. Dank unseres Überraschungsmoments gelang es uns diesmal deutlich leichter, die kleinen grünen Räuber auszuschalten. Auf der Lichtung las Echo die Spuren: Er kniete sich hin, roch an der feuchten Erde, grummelte etwas Unverständliches und stapfte los Richtung Wald, [amused] und wir hinterher, durch dichtes Unterholz, in dem jeder Dorn es auf meine gute Kleidung abgesehen hatte. Friedrich und Echo lasen den Wald auf völlig verschiedene Weise. Friedrich schaute, Echo schnüffelte. Und zu meinem Erstaunen kamen beide jedes Mal zum selben Ergebnis. [proudly] Zweimal lagen Fallen auf dem Pfad, eine Schlinge und eine Grube. Ich entdeckte beide als Erster. [short pause] [dryly] Sagen wir: aus nächster Nähe. Friedrich klopfte mir danach auf die Schulter:",
+"p": 1.5
+},
+"I-d882b0b1": {
+"t": "[dryly] Danke fürs Testen.",
+"p": 0.35
+},
+"I-2dfe9e79": {
+"t": "[amused] Echo brummte im Vorbeigehen:",
+"p": 0.6
+},
+"I-142dbf13": {
+"t": "[gruffly] Hätt ich dir sagen können.",
+"p": 0.3
+},
+"I-7ddc6c52": {
+"t": "[annoyed] Und warum hast du nicht?",
+"p": 0.35
+},
+"I-210b5a6d": {
+"t": "[mischievously] Wollt sehen, ob du's merkst.",
+"p": 0.5
+},
+"I-3188ab9f": {
+"t": "[quietly] Am Ende führten uns die Spuren zu einer Höhle in einem düsteren Felsspalt, halb verborgen hinter Dornengestrüpp, und aus ihrem Maul floss ein kalter Bach.",
+"p": 0.0
+},
+"I-c3c1dbcf": {
+"t": "[sad] Am Eingang der Höhle erwarteten uns mehrere angebundene Wölfe, mager, an kurzen Ketten, und es roch nach nassem Fell. Man sah ihre Rippen, und an den Hälsen hatten die Ketten das Fell weggescheuert. Ihr Winseln ging mir durch Mark und Bein. [softly] Friedrich war schon bei ihnen, bevor ich etwas sagen konnte. Er kniete sich hin, Handfläche nach oben, und sprach leise auf sie ein:",
+"p": 1.5
+},
+"I-4929095f": {
+"t": "[softly] Ganz ruhig. Wir tun euch nichts. Gleich seid ihr frei.",
+"p": 0.5
+},
+"I-e1e2cf0b": {
+"t": "[tenderly] Rex stand daneben und wedelte so vorsichtig, wie ich ihn nie wieder habe wedeln sehen. [warmly] Und so befreiten wir die Wölfe kurzerhand. Echo hockte sich zu ihnen, legte einem die Hand auf den Kopf und begann selbst wie ein Wolf zu heulen. [awed] Scheinbar konnte er mit den Wölfen reden, und er fragte sie, wer ihnen das angetan hatte. [quietly] Sie antworteten wohl, denn kurz danach knurrte er leise, fast zärtlich:",
+"p": 0.0
+},
+"I-f8d8fb2d": {
+"t": "[quietly] Lauft. [gruffly] Und fresst ein paar Goblins für mich.",
+"p": 0.5
+},
+"I-f21b5f9d": {
+"t": "[tenderly] Einer von ihnen leckte Friedrich die Hand, bevor er im Wald verschwand. Ich hätte schwören können, dass Friedrich sich danach schnell über die Augen wischte. [amused] Er selbst behauptet bis heute, das sei der Rauch gewesen.",
+"p": 0.0
+},
+"I-9c15ab63": {
+"t": "[hushed] Dann ging es hinein ins Goblinnest: Wasser tropfte von der Decke, beißender Rauch von Goblinfeuern hing in der Luft, dazu ein Gestank, den ich hier nicht beschreiben möchte, und jeder Schritt hallte von den Wänden wider. [mischievously] Wie genau es dort drinnen zuging, verschwimmt mir ein wenig, also erzähle ich es so, wie es hätte sein sollen: teils lautlos aus dem Schatten, teils mit allem anderen als Zurückhaltung. [smug] Welcher Teil davon meiner war, lasse ich lieber offen. [dryly] Echo meint dazu bis heute nur:",
+"p": 2.0
+},
+"I-4965ff42": {
+"t": "[gruffly] Der laute Teil. [laughs]",
+"p": 0.5
+},
+"I-ec2ddf32": {
+"t": "[hushed] Ganz hinten in der Höhle grollte es. Dort wartete der Anführer der Goblins: [amused] ein größerer Goblin mit einem Ritterhelm auf dem Kopf, den er wohl jemandem geklaut hatte. Er fuchtelte mit seiner Klinge und keifte:",
+"p": 1.2
+},
+"I-a8ae6687": {
+"t": "[furious] Meine Höhle! Mein Gold! Raus hier!",
+"p": 0.3
+},
+"I-7496b1fd": {
+"t": "[dryly] Er war nichts Besonderes. [quickly] Ein paar Hiebe, ein paar Pfeile, und sein Helm schepperte über den Boden. [curious] Hinter ihm stand eine Truhe. Echo war als Erster dran und riss den Deckel auf:",
+"p": 0.0
+},
+"I-ddbeaabd": {
+"t": "[grumpy] Ein Wolfspelz. Und ein paar Goldstücke.",
+"p": 0.5
+},
+"I-ad696247": {
+"t": "[deadpan] Ein Wolfspelz.",
+"p": 0.7
+},
+"I-6a9b18e0": {
+"t": "[dryly] Die Goldstücke verschwanden trotzdem in Echos Beutel. [warmly] Dann machten wir uns auf den Rückweg. Vier verschwitzte, ziemlich zufriedene Abenteurer samt Hund traten wieder ans Tageslicht und folgten den eigenen Spuren zurück durch den Wald, zu unserem Karren.",
+"p": 0.0
+},
+"I-18eec0dd": {
+"t": "[warmly] Der Karren stand noch genau da, wo wir ihn zurückgelassen hatten, unversehrt. [dryly] Die Ochsen kauten. Ich glaube, sie hatten nicht einmal bemerkt, dass wir weg gewesen waren. [warmly] Die letzte Etappe verging ohne Zwischenfälle, und schließlich erreichte unser Karren Phandalin. [amused] Wer sich ein Städtchen mit Mauer und Glockenturm vorstellt, wird enttäuscht: [nostalgic] Phandalin ist eine Siedlung am Rand der Welt, ein paar Dutzend Häuser aus frischem Holz, gebaut zwischen den Steinruinen eines viel älteren Ortes, über die längst Gras und Brombeeren gewachsen sind. Es gab einen kleinen Schrein, ein paar Läden und eine Schänke namens „Zum schlafenden Riesen“. Es roch nach Sägespänen und Holzrauch, und irgendwo hämmerte jemand.",
+"p": 0.0
+},
+"I-91f293fa": {
+"t": "[cheerful] Das Wichtigste zuerst: Es wurde gegessen und getrunken, bis keiner mehr konnte: dampfender Eintopf, dunkles Brot und ein Bier, [dryly] über das Echo nach dem ersten Schluck sein Urteil fällte:",
+"p": 1.5
+},
+"I-844688ba": {
+"t": "[gruffly] Ehrlich.",
+"p": 0.6
+},
+"I-09efa70a": {
+"t": "[dryly] Aus seinem Mund ist das ein großes Lob. [warmly] Friedrich schob Rex unter dem Tisch die Hälfte seines Eintopfs zu und der Hund verspeiste ihn genüsslich. [quietly] Ezekiel saß mit dem Rücken zur Wand, wie immer, und trank Wasser. [amused] Echo prostete ihm zu:",
+"p": 0.0
+},
+"I-02200b45": {
+"t": "[mocking] Nie etwas Stärkeres, Ezekiel?",
+"p": 0.35
+},
+"I-ec0436de": {
+"t": "[coldly] Nein.",
+"p": 0.4
+},
+"I-98f300d1": {
+"t": "[curious] Warum nicht?",
+"p": 0.35
+},
+"I-891f239a": {
+"t": "[quietly] Ich will mich an alles erinnern.",
+"p": 0.9
+},
+"I-e919ed2b": {
+"t": "[softly] Er sah nicht in unsere Richtung, sondern starrte dabei auf irgendeinen Punkt weit hinter der Wand. Ich hatte das Gefühl, er meinte nicht diesen Abend. [pause] [mischievously] Beim Wirt handelten wir dann die Zimmer auf einen Spottpreis herunter. Ich übernahm das Reden, Echo übernahm das Starren:",
+"p": 0.0
+},
+"I-7fa96c1e": {
+"t": "[bored] Fünf Silber die Nacht. Pro Kopf.",
+"p": 0.35
+},
+"I-8fc4e8bc": {
+"t": "[warmly] Für vier müde Reisende, die Eure Gäste morgen Abend kostenlos unterhalten?",
+"p": 0.35
+},
+"I-3bc0c546": {
+"t": "[deadpan] Echo starrte. Lange. Ohne zu blinzeln. Ezekiel knackte im Hintergrund mit den Knöcheln. [dryly] Der Wirt schluckte:",
+"p": 0.6
+},
+"I-c427200b": {
+"t": "[nervous] Zwei. Zwei Silber. Für alle.",
+"p": 0.5
+},
+"I-13b5402d": {
+"t": "[warmly] Am nächsten Morgen begann die Suche nach Informationen. Wir streiften durch die Gassen, sprachen mit den Bewohnern und versuchten herauszufinden, was hier vor sich ging. [serious] Doch die Leute blieben wortkarg. Eine Frau, die gerade Wäsche aufhängte, murmelte nur:",
+"p": 0.0
+},
+"I-5986c13d": {
+"t": "[nervous] Wir wissen nichts. Schönen Tag noch.",
+"p": 0.35
+},
+"I-6fc7e3b0": {
+"t": "[quietly] Dann nahm sie ihren halb vollen Korb und ging ins Haus. Fensterläden klappten zu, wenn wir vorbeigingen, und wer uns ansah, sah schnell wieder weg. [serious] Friedrich blieb stehen und sah sich um:",
+"p": 0.0
+},
+"I-40176615": {
+"t": "[serious] Die haben keine Angst vor uns. Die haben Angst, mit uns gesehen zu werden.",
+"p": 0.4
+},
+"I-a444df17": {
+"t": "[mischievously] Dann brauchen sie einen Grund, mit uns gesehen werden zu wollen. Heute Abend. In der Taverne. [smug] Lasst mich nur machen.",
+"p": 0.5
+},
+"I-f36d4bf2": {
+"t": "[dryly] Echo verdrehte die Augen.",
+"p": 0.0
+},
+"I-7fbe0b45": {
+"t": "[proudly] Den Durchbruch brachte, natürlich, ich. [warmly] Am Abend, zurück in der Taverne, stellte ich mich auf einen Stuhl und stimmte mit meiner Laute ein Lied an. [amused] Ich sang etwas Heiteres über einen rauchenden, klagenden Zwerg:",
+"p": 0.0
+},
+"I-f3ac79f9": {
+"t": "[cheerful] Nimm mir das Gold und nimm mir den Bart, doch lass mir mein Kraut, sonst wird es hart!",
+"p": 0.4
+},
+"I-1f8a804c": {
+"t": "[proudly] Ich sang, bis ich die Einheimischen ganz in meinen Bann gezogen hatte. [cheerful] Beim dritten Refrain klopften die ersten mit den Krügen den Takt, beim fünften sang der Wirt mit, falsch, aber mit Inbrunst. Sogar Echo wippte mit dem Fuß. [dryly] Er bestreitet das. [quietly] Irgendwann stellte ein alter Mann seinen Krug ab, sah sich zur Tür um und fing leise an zu erzählen:",
+"p": 1.8
+},
+"I-374db1ba": {
+"t": "[hushed] Ihr wollt wissen, was hier los ist? Die Roten Roben. Die nehmen sich, was sie wollen. [scared] Und wer nicht zahlt …",
+"p": 0.5
+},
+"I-4192e30e": {
+"t": "[quietly] Er sprach den Satz nicht zu Ende. Friedrich setzte sich zu ihm und fragte ruhig:",
+"p": 0.9
+},
+"I-65065c2c": {
+"t": "[softly] Wer sind sie? Und wo finden wir sie?",
+"p": 0.35
+},
+"I-c3422412": {
+"t": "[hushed] Eine Bande. Schläger in roten Umhängen. Jeden Monat wollen sie Geld, damit einem nichts zustößt. Sie hocken oben in Schloss Crackmore, gleich am Rand des Dorfes. [sorrowful] Und wer sich wehrt, der ist irgendwann einfach nicht mehr da.",
+"p": 0.6
+},
+"I-c95b9807": {
+"t": "[serious] Nun lösten sich die Zungen. Die Roten Roben, so nennt sich diese Bande, pressen den Bewohnern Schutzgeld ab und haben sich in der Ruine verschanzt. Sie stolzieren durch die Gassen, als gehöre ihnen der Ort. [sad] Einer erzählte von seinem demolierten Laden, ein anderer von seinem Sohn, den er seit Tagen nicht gesehen hatte. [angry] Die Angst in ihren Stimmen machte mich wütend. Und ich war nicht der Einzige. [quietly] Friedrich hatte aufgehört zu essen, und Ezekiels Hand lag auf dem Griff einer Klinge, ganz ruhig, als hätte sie dort schon immer gelegen.",
+"p": 0.0
+},
+"I-627c0eec": {
+"t": "[warmly] Bevor es gegen die Bande ging, stattete unsere Truppe noch dem Bürgermeister von Phandalin einen Besuch ab. [dryly] Harbin, so hieß er, empfing uns in seiner Amtsstube hinter einem Schreibtisch, der größer war als sein Mut: [mocking] ein rundlicher, aufgeblasener Mann mit Schweißperlen auf der Stirn, goldenen Ringen und einer Kette, der jeden zweiten Satz mit „selbstverständlich“ begann. Er faltete die Hände über dem Bauch und verkündete:",
+"p": 0.0
+},
+"I-29cfee7a": {
+"t": "[pompous] Selbstverständlich wäre die Gemeinde Euch zu tiefstem Dank verpflichtet. Aber was erwartet Ihr von mir? Selbstverständlich gibt es dafür kein Geld, das ist doch lediglich Zivilcourage.",
+"p": 0.35
+},
+"I-c9aa0ba7": {
+"t": "[dryly] Unser Ziel war es eigentlich nur, eine saftige Belohnung auszuhandeln. Ich versuchte es zunächst diplomatisch:",
+"p": 0.7
+},
+"I-735b34a8": {
+"t": "[mischievously] Wir dachten eher an etwas … Klingendes.",
+"p": 0.35
+},
+"I-c240d3db": {
+"t": "[pompous] Selbstverständlich! Die Dankbarkeit der Gemeinde wird laut und lange klingen.",
+"p": 0.4
+},
+"I-ea01fd14": {
+"t": "[dryly] Echo brachte es dann weniger diplomatisch auf den Punkt:",
+"p": 0.6
+},
+"I-635bfae3": {
+"t": "[growls] Von Dank kauft man kein Bier.",
+"p": 0.35
+},
+"I-fee9547a": {
+"t": "[amused] Friedrich hob beschwichtigend die Hände:",
+"p": 0.5
+},
+"I-9608a448": {
+"t": "[firm] Leute. Leute.",
+"p": 0.3
+},
+"I-f8d98af0": {
+"t": "[sheepish] Danach eskalierte das Gespräch recht schnell … Unsere Forderungen waren, vorsichtig gesagt, übertrieben und vielleicht ein bisschen herablassend … [dryly] Was genau wir gefordert haben, weiß ich nicht mehr, und das ist vermutlich auch besser so. [amused] Ich weiß nur noch, dass Friedrich dieses „Leute“ noch ein paarmal sagte, in einem Ton, mit dem man sonst Pferde beruhigt, und dass Rex unter dem Schreibtisch an Harbins Schuhen kaute. Beinahe flogen die Fäuste. [warmly] Am Ende zogen wir trotzdem weiter, mit dem Versprechen einer Belohnung, falls wir die Bande zerschlagen. [dryly] Harbin rief uns noch hinterher:",
+"p": 0.0
+},
+"I-185cec26": {
+"t": "[pompous] Selbstverständlich erst danach!",
+"p": 0.4
+},
+"I-9e7015de": {
+"t": "[amused] Von außen sah Schloss Crackmore aus wie ein Gebiss mit fehlenden Zähnen: eingestürzte Zinnen, Krähen auf jedem Mauerrest. [warmly] Das Aufspüren des geheimen Wegs in das alte, mit Ranken umwachsene Schloss verdanken wir Rex. [dryly] Während wir noch berieten, wie wir am besten hineinkämen, kam von Echo der erste Vorschlag:",
+"p": 1.6
+},
+"I-f7576cf4": {
+"t": "[mischievously] Ich zünd das Tor an.",
+"p": 0.35
+},
+"I-c876b0b0": {
+"t": "[firm] Nein.",
+"p": 0.3
+},
+"I-0f4ea3b0": {
+"t": "[grumpy] Nur ein bisschen.",
+"p": 0.5
+},
+"I-b09294b2": {
+"t": "[dryly] Während wir also weiter berieten und Echo zum dritten Mal denselben Vorschlag machte, [amused] jagte Rex einem Kaninchen hinterher und verschwand kopfüber in einem Gebüsch an der Schlossmauer. Friedrich rief ihm nach:",
+"p": 0.0
+},
+"I-cb2e471e": {
+"t": "[annoyed] Rex! Raus da!",
+"p": 0.3
+},
+"I-5133b8ee": {
+"t": "[surprised] Als wir ihn wieder herausziehen wollten, entdeckten wir dahinter einen halb verschütteten Gang. [dryly] Das Kaninchen war weg, Rex beleidigt, und wir hatten unseren Eingang.",
+"p": 0.0
+},
+"I-598a91d5": {
+"t": "[hushed] Über teils eingefallene, staubige Tunnel stiegen wir hinab. Wurzeln hingen von der Decke, die Luft roch nach Moder, und unsere Fackel flackerte, als wolle sie lieber umkehren. [dryly] Ich stieß mir zweimal den Kopf. Ezekiel, der größer ist als ich, kein einziges Mal. Ich weiß bis heute nicht, wie er das macht. [quietly] Unter dem Anwesen öffnete sich eine Höhle. Als wir immer tiefer hineinschlichen, fanden wir dort die ersten drei Gegner, die vor einer Zelle Wache standen. Eine Zelle voller Geiseln aus dem Dorf. [quickly] Ezekiel und Echo überwältigten die Wachen mit Leichtigkeit, [warmly] und im Anschluss befreiten wir die Gefangenen: eine Handvoll erschöpfter, verdreckter Menschen, die uns ansahen, als wären wir vom Himmel gefallen. Ein junger Bursche flüsterte:",
+"p": 1.6
+},
+"I-59fe0cbd": {
+"t": "[whispers] Ihr … ihr gehört nicht zu denen? [relieved] Den Göttern sei Dank!",
+"p": 0.4
+},
+"I-5359b7d3": {
+"t": "[warmly] Einer von ihnen drückte mir so fest die Hand, dass ich beinahe meine Laute fallen ließ. Friedrich kniete sich zu ihnen:",
+"p": 0.6
+},
+"I-c68ee885": {
+"t": "[softly] Ihr seid frei. Kann jemand laufen? Wir bringen euch hier raus, sobald es sicher ist.",
+"p": 0.35
+},
+"I-e91b2e5f": {
+"t": "[warmly] Er verteilte, was er an Wasser und Brot dabeihatte, und Echo, [short pause] man glaubt es kaum, [tenderly] gab einem kleinen Mädchen ohne ein Wort seinen Umhang.",
+"p": 0.0
+},
+"I-9709c512": {
+"t": "[mischievously] Wir nahmen den Gegnern ihre roten Roben ab, um uns so getarnt weiter in die Schlossruine vorzuwagen. [pompous] Meine kratzte, roch nach fremdem Schweiß, und Rot ist, bei aller Bescheidenheit, einfach nicht meine Farbe. [dryly] Echo lachte dreckig:",
+"p": 0.0
+},
+"I-c2850398": {
+"t": "[mocking] Steht dir. [laughs]",
+"p": 0.35
+},
+"I-c3b96c8b": {
+"t": "[amused] Seine eigene Robe war ihm übrigens zu kurz, und unten schauten die weißen Druidengewänder heraus. Dann musterte er Ezekiel, der keine Anstalten machte, sich umzuziehen:",
+"p": 0.0
+},
+"I-b6ec7d7e": {
+"t": "[gruffly] Und du? Keine Robe?",
+"p": 0.35
+},
+"I-d68e94ba": {
+"t": "[deadpan] Bin schon rot.",
+"p": 0.6
+},
+"I-d3deaa09": {
+"t": "[dryly] Dagegen ließ sich wenig sagen. Ezekiel wäre in seiner scharlachroten Rüstung vermutlich auch vorher schon nicht weiter aufgefallen. [amused] Für Rex fand sich keine Robe in seiner Größe. Friedrich hatte die Lösung:",
+"p": 0.0
+},
+"I-12781afb": {
+"t": "[dryly] Wenn einer fragt: Das ist unser Wachhund.",
+"p": 0.35
+},
+"I-a59ba433": {
+"t": "[amused] Rex schien mit der Rolle einverstanden. Er trabte mit erhobenem Kopf voran und sah so grimmig aus, wie ein Hund eben aussehen kann, der sich gerade für den wichtigsten Wachhund der Welt hält. [hushed] Wir drangen immer tiefer in das Gemäuer vor, das Herz bei jedem Schritt im Hals.",
+"p": 0.0
+},
+"I-f46d0e8f": {
+"t": "[hushed] Hinter einer geschlossenen Tür fanden wir einen Raum, der einem Alchemisten gehören musste, denn die Wände waren voll mit verschiedenen Kräutern, die zum Trocknen aufgehängt waren. In Glaskolben blubberte es leise, und ein grünliches Licht lag über allem. [nervous] In einigen Schränken und einer Vitrine befanden sich Gläser mit irgendwelchen gefangenen Wesen, teils lebendig, teils tot in einer Flüssigkeit treibend. Augen und Zungen, nicht auszumalen, was hier alles zu finden war. [short pause] Eines der Augen drehte sich, als ich vorbeiging. [dryly] Ich habe beschlossen, dass ich mir das eingebildet habe. [quietly] Echo klopfte gegen ein Glas und flüsterte:",
+"p": 1.5
+},
+"I-9fefb798": {
+"t": "[whispers] Was so ein Auge wohl kostet?",
+"p": 0.4
+},
+"I-2988fcbc": {
+"t": "[whispers] Nicht anfassen.",
+"p": 0.3
+},
+"I-eb958e28": {
+"t": "[quietly] Außerdem hing ein starker Geruch von einem Feuer in der Luft. Ich versuchte, den Raum heimlich zu erkunden. [sheepish] Leider stellte sich mir ein Schrank in den Weg, und eine der Phiolen fiel herunter.",
+"p": 0.0
+},
+"I-7c744361": {
+"t": "[hushed] Das Klirren hallte durch die Stille wie ein Gong … Friedrich zischte:",
+"p": 1.2
+},
+"I-0afb3ff7": {
+"t": "[whispers] Pass doch auf!",
+"p": 0.3
+},
+"I-3a64ae9c": {
+"t": "[dramatic] Daraufhin öffnete sich die andere Tür, und vor uns stand ein Mann! [serious] Er war hager, in eine tiefrote Robe gehüllt, mit stechendem Blick und einem Stab aus Glas in der Hand, in dem sich das grüne Licht brach. Er war äußerst erzürnt über den Lärm:",
+"p": 1.0
+},
+"I-9f486bfc": {
+"t": "[furious] Wer wagt es, in meinem Labor herumzupoltern?!",
+"p": 0.35
+},
+"I-b46b99c2": {
+"t": "[serious] Seine Stimme war so schneidend wie die Scherben am Boden. [hushed] Hinter mir spürte ich, wie Ezekiel sein Gewicht verlagerte, ganz leicht, wie eine Katze vor dem Sprung. [quickly] Ich musste schneller sein als er. Ich verbeugte mich tief und sagte:",
+"p": 0.0
+},
+"I-88b692d8": {
+"t": "[sheepish] Verzeiht! Wir sind die Neuen. [cheerful] Ein bisschen übereifrig, aber bereit für jede Arbeit.",
+"p": 0.3
+},
+"I-ebca7fae": {
+"t": "[relieved] Es kostete mich große Mühe, aber zum Glück glaubte er uns und schickte uns weg. Er deutete mit dem gläsernen Stab zur Tür:",
+"p": 0.7
+},
+"I-411d6b1c": {
+"t": "[pompous] Nun gut. Ich bin Glasstab, euer Anführer. [impatient] Und jetzt raus mit euch, allesamt! Fragt die anderen nebenan, wie ihr helfen könnt!",
+"p": 0.35
+},
+"I-020ff6bb": {
+"t": "[dryly] Das ließen wir uns nicht zweimal sagen. Draußen auf dem Gang raunte Echo mir zu:",
+"p": 0.6
+},
+"I-c3be97fd": {
+"t": "[mocking] Erbärmlicher Kriecher.",
+"p": 0.35
+},
+"I-6c604800": {
+"t": "[smug] Danke.",
+"p": 0.6
+},
+"I-22405e82": {
+"t": "[amused] Im Nebenraum fanden wir eine Gruppe von vier Anhängern der Roten Roben, die dort ausgelassen tranken und ein Würfelspiel spielten. [mischievously] Wir mischten uns unter sie und brachten die Gegner dazu, noch mehr Alkohol zu trinken … [cheerful] Ich erzählte Witze, Friedrich schenkte nach, und Rex ließ sich von allen kraulen. [amused] Einer der Schläger kraulte ihn besonders ausgiebig und lallte:",
+"p": 1.6
+},
+"I-3f7b6f68": {
+"t": "[drunk] Schöner Hund. Wem gehört'n der?",
+"p": 0.35
+},
+"I-08ff965f": {
+"t": "[dryly] Friedrich antwortete, ohne mit der Wimper zu zucken:",
+"p": 0.5
+},
+"I-b8584386": {
+"t": "[deadpan] Unser Wachhund.",
+"p": 0.3
+},
+"I-18558cf7": {
+"t": "[drunk] Der beißt doch nicht?",
+"p": 0.35
+},
+"I-d86babe1": {
+"t": "[deadpan] Nur Fremde.",
+"p": 0.6
+},
+"I-580a22bc": {
+"t": "[amused] Der Schläger lachte und kraulte weiter. Kurz darauf grölte er:",
+"p": 0.8
+},
+"I-4d3ea4c8": {
+"t": "[drunk] Noch 'ne Runde! Los, ihr Neuen, schenkt aus!",
+"p": 0.3
+},
+"I-8142e632": {
+"t": "[smug] Ich verlor ein paar Runden. [dryly] Mit Absicht, natürlich. [amused] Echo dagegen behielt jeden Einsatz auf dem Tisch so fest im Blick, als gehöre er schon ihm. Ich hörte ihn murmeln:",
+"p": 0.0
+},
+"I-aeb6c206": {
+"t": "[growls] Bald.",
+"p": 0.4
+},
+"I-11bfac55": {
+"t": "[amused] Als sie alle so betrunken waren, dass wir für sie wohl wie zwölf aussahen, [quietly] hob Ezekiel seinen Becher. Zum ersten Mal an diesem Abend sagte er etwas:",
+"p": 0.7
+},
+"I-9a80866f": {
+"t": "[coldly] Prost.",
+"p": 0.5
+},
+"I-2fe250bd": {
+"t": "[dramatic] Dann stach er den ersten Gegner gekonnt mit seinem Dolch nieder, und für die übrigen drei war das Würfelspiel kurz darauf ebenfalls vorbei. [dryly] Echo strich die Münzen vom Tisch, alle auf einmal, mit einer einzigen, geübten Bewegung.",
+"p": 0.0
+},
+"I-ae56413a": {
+"t": "[serious] Danach ging es Glasstab an den Kragen, und wir stellten ihn in seinem abgeschiedenen Labor. [dryly] Diesmal ohne Verbeugung. [dramatic] Er erkannte sofort, dass er seinem Schicksal gegenüberstand, und sein Gesicht wurde so rot wie sein Gewand:",
+"p": 0.0
+},
+"I-7bc23c79": {
+"t": "[furious] Ihr! Ihr Narren habt keine Ahnung, mit wem ihr euch anlegt!",
+"p": 0.35
+},
+"I-f20628c8": {
+"t": "[quickly] Er rief nach seinen Leuten:",
+"p": 0.5
+},
+"I-60e65293": {
+"t": "[panicked] Wachen! WACHEN!",
+"p": 0.3
+},
+"I-6d2e980e": {
+"t": "[dryly] Dann merkte er, dass niemand mehr kam, versuchte noch einen lächerlichen Angriff gegen uns [quickly] und floh durch einen Geheimgang am Ende seines Raums.",
+"p": 0.0
+},
+"I-2a6a3ca8": {
+"t": "[quickly] Ich sprintete ihm hinterher und bekam ihn im entscheidenden Moment am Kragen zu packen. [amused] Ich rief, so heldenhaft es mitten im Sprint eben geht:",
+"p": 1.0
+},
+"I-e1988822": {
+"t": "[shouting] Hiergeblieben!",
+"p": 0.3
+},
+"I-12399a49": {
+"t": "[dramatic] Mit aller Kraft zerrte ich ihn zurück in den Raum. Ein Sirren, und Friedrich hatte die Chance genutzt, um ihn mit einem perfekt platzierten Pfeil zwischen die Augen niederzustrecken!",
+"p": 0.0
+},
+"I-2719db17": {
+"t": "[hushed] Mit seinem letzten Atemzug keuchte Glasstab:",
+"p": 0.0
+},
+"I-8dc6d918": {
+"t": "[pained] Die Spinne … wird euch …",
+"p": 0.5
+},
+"I-d3aeae8a": {
+"t": "[solemn] Dann sackte er tot zusammen, und der Duft von Eisen mischte sich mit dem der Kräuter. [amused] Rex sprang vor und wollte mit dem gefallenen Anführer spielen und war kurz davor, sein Gesicht abzuschlecken, doch Friedrich konnte ihn gerade noch zurückrufen:",
+"p": 0.0
+},
+"I-d24454b9": {
+"t": "[firm] Stopp, Rex! Komm her!",
+"p": 0.3
+},
+"I-d7f5132f": {
+"t": "[curious] Echo und Ezekiel begannen, den Raum abzusuchen, durchwühlten die Schränke, den Schreibtisch und schauten unter das Bett. [dryly] Ob es ihnen dabei um mehr Informationen über die Spinne oder einfach nur um Gold ging …",
+"p": 0.0
+},
+"I-e99df49b": {
+"t": "[tired] Wir halfen den Dorfbewohnern, die verschleppt worden waren, aus den Höhlen und brachten sie zurück nach Phandalin. [warmly] Auf dem Weg diskutierten wir. Friedrich sprach:",
+"p": 1.5
+},
+"I-2cc83683": {
+"t": "[curious] Ist es eine Person, eine Macht oder eine geheime Organisation? Was ist die Spinne?",
+"p": 0.35
+},
+"I-4872bb4d": {
+"t": "[amused] Echo winkte lachend ab:",
+"p": 0.6
+},
+"I-c476b857": {
+"t": "[laughs] Was kümmert es uns? Hauptsache, wir werden bezahlt, wenn wir sie zerquetschen.",
+"p": 0.3
+},
+"I-249cd356": {
+"t": "[quietly] Ezekiel zückte einen Dolch und sagte:",
+"p": 0.6
+},
+"I-ad3b5bfe": {
+"t": "[coldly] Genau. Letztlich bluten sie alle gleich.",
+"p": 0.5
+},
+"I-9e2363a3": {
+"t": "[dryly] Friedrich seufzte:",
+"p": 0.8
+},
+"I-1682c413": {
+"t": "[sighs] Leute, ernsthaft, wir sollten aufpassen, dass wir ihr nicht ins Netz gehen!",
+"p": 0.3
+},
+"I-dab1226e": {
+"t": "[cheerful] Zurück im Dorf verbreiteten wir die frohe Kunde vom Ende der Roten Roben, und wir feierten ausgelassen bis tief in die Nacht. [proudly] Auf dem Dorfplatz loderte ein Feuer, ich erzählte Geschichten und spielte auf, bis mir die Finger glühten und meine Kehle heiser wurde. [amused] Friedrich tanzte mit einer Bäuerin, die ihm kaum bis zur Schulter reichte, und Rex tanzte mit allen. Echo saß an einem Tisch mit drei Holzfällern und gewann gerade ihr Bier im Armdrücken. [dryly] Und Ezekiel lehnte, natürlich, im Schatten einer Hauswand. [warmly] Ein Junge aus dem Dorf schlich sich zu ihm, starrte die Hörner an und fragte schließlich:",
+"p": 1.8
+},
+"I-55141732": {
+"t": "[curious] Bist du auch einer von den Helden?",
+"p": 0.4
+},
+"I-ec0436de-2": {
+"t": "[coldly] Nein.",
+"p": 0.4
+},
+"I-7865b4b0": {
+"t": "[amused] Ich rief über den Platz:",
+"p": 0.5
+},
+"I-0a626c81": {
+"t": "[cheerful] Doch, ist er!",
+"p": 0.3
+},
+"I-55643b1a": {
+"t": "[amused] Der Junge sah von mir zu Ezekiel und wieder zurück und fragte:",
+"p": 0.5
+},
+"I-ff2d9876": {
+"t": "[curious] Und was kannst du so?",
+"p": 0.35
+},
+"I-8328da86": {
+"t": "[quietly] Ezekiel zuckte kurz auf den Jungen zu:",
+"p": 0.7
+},
+"I-0852ac2a": {
+"t": "[menacing] Buh!",
+"p": 0.3
+},
+"I-07cd90a9": {
+"t": "[amused] Das erschreckte ihn ziemlich. Der Junge rannte zurück zu seinen Freunden, gestikulierte wild und zeigte dann auf den Assassinen in scharlachrot glühender Rüstung. [softly] Ezekiel sah mich an, und ich schwöre, dass es unter der Kapuze kurz zuckte, etwas, das bei jedem anderen ein Lächeln gewesen wäre. [pause] [triumphant] Als Höhepunkt jonglierte ich mit brennenden Fackeln, unter dem Jubel des ganzen Dorfes!",
+"p": 0.0
+},
+"I-32b39bcd": {
+"t": "[warmly] Nach der Feier ging es zum Bürgermeister, um die Belohnung abzuholen. [dryly] Harbin legte sie uns in einem kleinen Lederbeutel auf den Tisch, so widerwillig, als würde er jede Münze einzeln beerdigen. [amused] Echo zählte sie direkt vor Harbins Nase nach, Münze für Münze, und ließ sich dabei viel Zeit:",
+"p": 0.0
+},
+"I-131d4af6": {
+"t": "[slowly] Siebenundvierzig … achtundvierzig … [suspicious] Die hier ist angebissen.",
+"p": 0.4
+},
+"I-7e6d516d": {
+"t": "[dryly] Harbin presste hervor:",
+"p": 0.6
+},
+"I-ba2d62f0": {
+"t": "[annoyed] Selbstverständlich … ist sie das nicht.",
+"p": 0.3
+},
+"I-a00f076e": {
+"t": "[deadpan] Echo biss zur Sicherheit noch einmal selbst hinein, nickte und steckte sie ein. [amused] Dann begann er von vorn:",
+"p": 0.7
+},
+"I-df139d70": {
+"t": "[slowly] Eins … zwei …",
+"p": 0.4
+},
+"I-2c1cc1ef": {
+"t": "[dryly] Es lief ungefähr so gut wie beim ersten Besuch. Sagen wir so: Er wird uns so schnell nicht wieder einladen. [wistful] Lange hielt es uns danach ohnehin nicht mehr in Phandalin.",
+"p": 0.0
+},
+"I-19a36d0b": {
+"t": "[sheepish] An dieser Stelle muss ich gestehen: Meine Erinnerung an die folgenden Tage ist ein wenig … [short pause] nebelig. [amused] Wahrscheinlich lag es am regen Genuss des wundervollen Krauts in meiner Pfeife. [serious] Doch die eine Nacht, von der ich jetzt erzähle, hat sich gestochen scharf in meine Erinnerung gebrannt.",
+"p": 0.0
+},
+"I-3dba7c73": {
+"t": "[warmly] Nach dem Sieg über die Roten Roben ließen wir jedenfalls keine Zeit verstreichen und brachen direkt zu unserem nächsten Auftrag auf. [dryly] Woher wir den Auftrag hatten und wer uns von dem Gefangenen erzählt hatte, ist nicht so wichtig. [firm] Aber ich weiß noch mit Sicherheit, dass wir einen Gefangenen aus einem Wachturm befreien wollten.",
+"p": 0.0
+},
+"I-6bb12960": {
+"t": "[quietly] Der Weg zum Wachturm führte uns durch eine lange, kühle Nacht. Wir gingen ohne Fackel, damit uns niemand von Weitem sah, und für eine Weile sprach keiner. Dann fragte Friedrich in die Dunkelheit:",
+"p": 1.5
+},
+"I-be46af0a": {
+"t": "[hushed] Glaubt ihr, die Spinne weiß schon von uns?",
+"p": 0.4
+},
+"I-77450f6e": {
+"t": "[smug] Nach meinem Auftritt in Phandalin? Jeder weiß von uns.",
+"p": 0.5
+},
+"I-69a17da9": {
+"t": "[dryly] Echo schnaubte:",
+"p": 0.6
+},
+"I-f0c2df05": {
+"t": "[growls] Dann soll sie kommen. [mischievously] Spinnen brennen gut.",
+"p": 0.3
+},
+"I-807d5611": {
+"t": "[serious] Ich mein es ernst. Glasstab hatte Angst vor ihr. Mehr als vor uns. Das gefällt mir nicht.",
+"p": 0.6
+},
+"I-918a81f3": {
+"t": "[quietly] Darauf sagte eine Weile niemand etwas. Bis Ezekiel, irgendwo vor uns in der Finsternis, ein einziges Wort zurückwarf:",
+"p": 0.9
+},
+"I-da92d34c": {
+"t": "[whispers] Leise.",
+"p": 0.4
+},
+"I-a3c971b4": {
+"t": "[dryly] Wir waren leise. [short pause] Es war nur noch Rex zu hören, der ab und zu im Gras nieste.",
+"p": 0.0
+},
+"I-05cc979d": {
+"t": "[quietly] Wir erreichten das Ziel kurz darauf. Die Nacht war sternklar. Der Mond leuchtete als kleine Scheibe über uns, und es war gerade hell genug, um das Wachhaus mit dem angebauten Turm und die Grünfläche, die es umgab, zu erkennen. [hushed] Ein alter Vorposten mit dicken Steinmauern, und kein Licht, keine Bewegung. Das Gras war nass vom Tau und kühlte durch die Stiefel. [serious] Rex hob die Nase in den Wind und rührte sich nicht mehr, und wenn Rex still ist, weiß man, dass etwas nicht stimmt. [hushed] Echo schnupperte ebenfalls und knurrte leise:",
+"p": 1.5
+},
+"I-a24a3790": {
+"t": "[growls] Verdächtig.",
+"p": 0.4
+},
+"I-2235d44f": {
+"t": "[whispers] Was riechst du?",
+"p": 0.3
+},
+"I-25f8d72d": {
+"t": "[gruffly] Ärger.",
+"p": 0.6
+},
+"I-1cdc924b": {
+"t": "[hushed] Er winkte uns dicht zu sich heran und flüsterte:",
+"p": 0.5
+},
+"I-5ac8ff79": {
+"t": "[whispers] Stillhalten. Und Ruhe.",
+"p": 0.3
+},
+"I-273291d1": {
+"t": "[hushed] Er murmelte ein paar Worte in einer Sprache, die nach Rinde und Regen klang, und seine Magie tarnte uns und dämpfte die Geräusche unserer Schritte. [quietly] Wir schlichen näher an den Turm heran und suchten Deckung hinter einigen dicht gewachsenen Büschen und Sträuchern. Von dort spähten wir hinüber. [short pause] Nichts regte sich. Nicht einmal eine Grille zirpte.",
+"p": 1.8
+},
+"I-6a1fd3ba": {
+"t": "[hushed] Dicht an die kalte, feuchte Mauer gepresst schlichen wir um den Turm. Der Stein roch nach Moos und altem Regen. Durch einen Riss im Stein fiel fahles Fackellicht. Dahinter: ein bewaffneter Goblin, der etwas bewachte. [dryly] Er kratzte sich gerade ausgiebig am Ohr. [quietly] Der Eingang lag hinter einer heruntergelassenen Zugbrücke, und dank Echos Zauber knarzte nicht ein einziges Brett, als wir ins Innere schlichen.",
+"p": 0.0
+},
+"I-62c7986b": {
+"t": "[quietly] Wir positionierten uns vor der Tür, hinter der wir den Wachturm vermuteten, und nickten uns noch einmal mit sicherem Blick zu. Friedrich verteilte flüsternd die Aufgaben:",
+"p": 0.0
+},
+"I-5caddd8c": {
+"t": "[whispers] Ich gehe zuerst rein. Echo, du hältst mir den Rücken frei. Barradin, du …",
+"p": 0.35
+},
+"I-869c86a7": {
+"t": "[smug] Ich rede.",
+"p": 0.25
+},
+"I-5cd70015": {
+"t": "[dryly] Du redest.",
+"p": 0.5
+},
+"I-4f6bfe64": {
+"t": "[hushed] Friedrich hatte die Hand am Türgriff, Echo die Finger gespreizt, und ich ging im Kopf meine besten Beleidigungen durch. Ezekiel hauchte nur ein Wort:",
+"p": 0.8
+},
+"I-4fa92604": {
+"t": "[whispers] Jetzt.",
+"p": 0.6
+},
+"I-56c24f57": {
+"t": "[dramatic] Friedrich stieß die alte Tür auf und trat hinein!",
+"p": 1.0
+},
+"I-e6e5bb90": {
+"t": "[quickly] Hinter der Tür war der Goblin, den wir von außen gesehen hatten, und er sprang komplett überrumpelt zur Seite und quiekte:",
+"p": 0.0
+},
+"I-508b939c": {
+"t": "[panicked] Herrin! Besuch!",
+"p": 0.3
+},
+"I-929d579b": {
+"t": "[serious] Er war nicht allein, denn inmitten des Raumes stand eine Drow, die uns offenbar schon erwartet hatte … [quietly] Sie lächelte kalt:",
+"p": 0.5
+},
+"I-52f19e93": {
+"t": "[coldly] Wie schön. Ihr habt hergefunden.",
+"p": 0.4
+},
+"I-de4e0460": {
+"t": "[serious] Sie trug eine leichte, komplett schwarze Rüstung, zog einen Krummsäbel aus der Scheide an ihrem Gürtel und streckte uns diesen kampfbereit entgegen. [surprised] Neben ihr saßen zwei gefesselte Gestalten auf Stühlen, eine sah aus wie Gundren?! Derselbe schwarze Bart, dieselbe breite Nase, dieselbe Weste. [serious] Neben ihm saß eine Kriegerin in Rüstung. Beide hatten die Hände auf dem Rücken gefesselt, waren außerdem an ihre Stühle gebunden und schauten überrascht in unsere Richtung. [softly] Die Erschöpfung stand ihnen ins Gesicht geschrieben.",
+"p": 0.0
+},
+"I-73c1ed86": {
+"t": "[quietly] Und das war noch nicht alles, denn nur Augenblicke später bewegte sich etwas im anderen Teil des Wachturms, und wir vernahmen ein dumpfes Knurren. [dramatic] Dort richtete sich gerade ein Bugbear zu seiner vollen Größe auf, ein gewaltiger Verwandter der Goblins mit gelblichem Fell und langen Krallen, und sah uns grimmig entgegen. [dryly] Er musste den Kopf einziehen, um nicht an die Decke zu stoßen. [serious] In seinen Augen lag derselbe stumpfe Kampfeswille wie bei seinen kleinen Vettern, und es war klar, dass er sich jeden Moment auf uns stürzen würde.",
+"p": 1.6
+},
+"I-bcfa2c8c": {
+"t": "[quickly] Friedrich zögerte keinen Moment. Sein Pfeil streifte den Oberschenkel der Drow, und noch während sie schmerzerfüllt aufschrie und sich ungläubig an die Wunde griff, sprang Echo vor und ließ einen Fächer aus Eis auf sie und den Goblin zuschießen. Der Goblin bekam die volle Ladung ab, die Drow konnte trotz ihres verwundeten Beins zurückweichen und wurde nur gestreift. [awed] Raureif kroch über den Boden, und unser Atem stand plötzlich als weiße Wolke in der Luft.",
+"p": 1.4
+},
+"I-29dc04e0": {
+"t": "[proudly] Ich spitzte gerade meine Lippen, um die Drow mit einem verbalen Angriff zu bedrohen:",
+"p": 0.0
+},
+"I-dd6087fa": {
+"t": "[theatrical] Hör gut zu, du Fledermaus in Trauerkleidung, du …",
+"p": 0.35
+},
+"I-a238ea9b": {
+"t": "[dramatic] Da stürmte der Bugbear auf uns zu, und sein Angriffsschrei übertönte alles andere! [quickly] Zum Glück stand er weit abseits und erreichte uns nicht, bevor Ezekiel mit einem gekonnten Schuss aus seinem Bogen dem eisbedeckten Goblin einen Pfeil genau zwischen die Augen schoss, und dieser fiel sofort tot nach hinten um. [amused] Rex, der das alles wohl für ein Spiel hielt, sprang glücklich bellend auf die Drow zu und verbiss sich in ihr ohnehin schon blutiges Bein. [menacing] Ihr Schmerzensschrei war noch nicht verklungen, da flutete ich ihre Gedanken mit Angst, und aus dem Schmerz wurde Panik.",
+"p": 1.5
+},
+"I-6b706a51": {
+"t": "[dramatic] Der Bugbear war inzwischen näher gekommen und schlug mit seiner Pranke nach Echo. Die Krallen blitzten kurz im Fackelschein und schnitten dann direkt durch den Arm unseres Druiden, und Blut spritzte durch den Raum! [quickly] Friedrich schrie auf:",
+"p": 0.0
+},
+"I-52dc0dd6": {
+"t": "[shouting] Echo!",
+"p": 0.3
+},
+"I-11dbbd1e": {
+"t": "[dramatic] Echo brüllte vor Schmerz und Wut:",
+"p": 0.4
+},
+"I-f4911af0": {
+"t": "[furious] Du räudiger Bettvorleger!",
+"p": 0.3
+},
+"I-a8969dd5": {
+"t": "[quickly] Friedrich sah das, sprang mit einem gewaltigen Satz auf den Bugbear zu und stach sein Schwert in dessen pelzige Seite. Er musste ihn gut getroffen haben, aber trotz verwundeter Flanke schubste der Bugbear den Waldläufer von sich und drehte sich gerade wütend zu Echo um, um diesen ein weiteres Mal zu attackieren. [hushed] Doch da war Ezekiel schon neben ihm, wie aus dem Nichts. [dramatic] Zwei Dolche, einer in die bereits verwundete Flanke, einer tief in den Rücken! [slowly] Der behaarte Hüne erschlaffte und fiel zu Boden.",
+"p": 0.0
+},
+"I-6513165f": {
+"t": "[serious] Als er aufschlug, bebte der Steinboden. [quietly] Ezekiel zog seine Dolche heraus und sah auf ihn hinab:",
+"p": 1.3
+},
+"I-abb63f43": {
+"t": "[coldly] Bleib liegen.",
+"p": 0.5
+},
+"I-1a808250": {
+"t": "[deadpan] Er blieb liegen.",
+"p": 0.0
+},
+"I-08764b2e": {
+"t": "[smug] Ob es an meiner Stimme in ihrem Kopf lag -- ich denke schon -- oder ob sie einfach realisierte, dass ihre einzige Chance die Flucht war: [quickly] Sie wich zu dem kleinen Spalt in der Turmmauer zurück, durch den wir anfangs den Fackelschein gesehen hatten, und rief höhnisch:",
+"p": 0.0
+},
+"I-e19e789f": {
+"t": "[mocking] Die Spinne wird euch kriegen …",
+"p": 0.35
+},
+"I-b748e679": {
+"t": "[quickly] Dann verwandelte sie sich in eine kleine Fledermaus und flatterte blitzschnell durch den Spalt. [quietly] Ihr Lachen verhallte draußen in der Nacht.",
+"p": 1.5
+},
+"I-c91c34e9": {
+"t": "[quickly] Echo wollte ihr schon nachsetzen und die Verfolgung beginnen. Er war schon halb am Mauerspalt:",
+"p": 0.0
+},
+"I-91907eb0": {
+"t": "[angry] Die gehört mir!",
+"p": 0.3
+},
+"I-8fed1a8e": {
+"t": "[warmly] Doch ich hielt ihn zurück und deutete auf seinen blutverschmierten Arm und danach in Richtung der beiden Gefangenen. [dryly] Echo winkte ab:",
+"p": 0.5
+},
+"I-2afe86df": {
+"t": "[grumpy] Nur ein Kratzer.",
+"p": 0.3
+},
+"I-9f277997": {
+"t": "[dryly] Ich zeigte auf die Tropfen, die sich unter ihm auf dem Boden sammelten:",
+"p": 0.5
+},
+"I-90828a76": {
+"t": "[deadpan] Dein Kratzer tropft.",
+"p": 0.4
+},
+"I-6b4c162c": {
+"t": "[warmly] Während Echo anfing, seine Wunden zu heilen, grünes Licht zwischen seinen Fingern und ein Geruch nach frischem Laub, schnitt Friedrich die beiden Gefangenen los. Die beiden waren sichtlich erleichtert, und der Zwerg fand als Erster die Sprache wieder:",
+"p": 0.0
+},
+"I-a38742c8": {
+"t": "[exhausted] Tage! Tagelang haben sie uns hier festgehalten und ausgequetscht. [gruffly] Über meinen Bruder Gundren. Über die Allianz der Lords.",
+"p": 0.35
+},
+"I-4f898aa8": {
+"t": "[surprised] Sein Bruder? [warmly] Der Gefangene stellte sich als Gundrens Zwillingsbruder Nundro heraus. Die beiden sehen wirklich exakt gleich aus und tragen sogar dieselbe Kleidung. [dryly] Nundro rieb sich die Handgelenke und fügte hinzu:",
+"p": 0.0
+},
+"I-48928d47": {
+"t": "[smug] Ich bin übrigens der Hübschere.",
+"p": 0.5
+},
+"I-e4be6fe7": {
+"t": "[warmly] Auch die Kriegerin stellte sich vor, noch etwas wacklig auf den Beinen, aber mit festem Händedruck:",
+"p": 0.9
+},
+"I-ad2b9641": {
+"t": "[firm] Zilda. Söldnerin. Ich arbeite für Gundren. Sie wollten wissen, was er vorhat und was die Allianz plant. [proudly] Von mir haben sie nichts erfahren.",
+"p": 0.35
+},
+"I-74c86134": {
+"t": "[dryly] Nundro brummte von seinem Stuhl aus:",
+"p": 0.6
+},
+"I-e5b63b11": {
+"t": "[gruffly] Von mir auch nicht. [deadpan] Ich wusste ja nichts.",
+"p": 0.35
+},
+"I-0957c370": {
+"t": "[amused] Rex beschnupperte beide ausgiebig, nieste einmal und erklärte sie damit offenbar für unbedenklich.",
+"p": 0.0
+},
+"I-26035548": {
+"t": "[warmly] Gemeinsam mit Nundro kehrten wir nach Neverwinter zurück, zu Gundren in den Hafen, und der schloss seinen Bruder überglücklich in die Arme. [amused] Zwei schwarze Bärte verhakten sich ineinander, und für einen Moment konnte keiner sagen, wo der eine Zwerg aufhörte und der andere anfing. Gundren brummte:",
+"p": 0.0
+},
+"I-d0de3593": {
+"t": "[warmly] Bruderherz! [gruffly] Du stinkst nach Goblin.",
+"p": 0.35
+},
+"I-bd46c3c8": {
+"t": "[amused] Nundro schniefte zurück:",
+"p": 0.5
+},
+"I-bddf6a55": {
+"t": "[sniffs] Und du nach Hafen.",
+"p": 0.3
+},
+"I-65cea32e": {
+"t": "[tenderly] Ich gebe zu, bei diesem Anblick wurde selbst mir ein wenig warm ums Herz. [amused] Friedrich räusperte sich auffällig oft. Echo sah demonstrativ aufs Wasser. [softly] Und Ezekiel … stand da und sah zu. Länger, als er sonst bei irgendetwas zusieht. [warmly] Dann löste sich Gundren von seinem Bruder, wischte sich mit dem Ärmel über die Augen und packte jeden von uns an den Unterarmen:",
+"p": 0.0
+},
+"I-cf9da60c": {
+"t": "[warmly] Ihr habt mir meinen Bruder zurückgebracht. Das vergesse ich euch nicht.",
+"p": 0.4
+},
+"I-361ec03e": {
+"t": "[dryly] Echo hatte eine Rückfrage:",
+"p": 0.7
+},
+"I-aef6a087": {
+"t": "[curious] Nicht vergessen wie? In Gold?",
+"p": 0.3
+},
+"I-cceeca92": {
+"t": "[amused] In Gold, Druide. In Gold.",
+"p": 0.5
+},
+"I-caf74729": {
+"t": "[serious] Dann wurde es ernst. Gundren breitete eine alte, fleckige Karte auf seinem Fass aus und gab uns den Auftrag, auf den alles hinausgelaufen war:",
+"p": 0.0
+},
+"I-68d3c988": {
+"t": "[solemn] Findet die magische Schmiede. Und nehmt sie ein.",
+"p": 0.4
+},
+"I-606dc431": {
+"t": "[dryly] Echo beugte sich über die Karte:",
+"p": 0.7
+},
+"I-daeae454": {
+"t": "[curious] Was ist so eine Schmiede wert?",
+"p": 0.3
+},
+"I-3ddc456f": {
+"t": "[amused] Mehr, als du tragen kannst, Druide.",
+"p": 0.4
+},
+"I-3a6da4b4": {
+"t": "[mischievously] Ich kann wirklich viel tragen … [laughs]",
+"p": 0.5
+},
+"I-49b58b54": {
+"t": "[awed] Der Weg führte uns in einen alten, verlassenen Stollen, in dem die Schmiede verborgen sein sollte. [quietly] Wir fanden unseren Weg durch die riesige Höhle, kletterten Schluchten hinab und schlichen durch bröcklige, spinnwebenverhangene Gänge, die vor langer Zeit gebaut worden waren. Alte Grubenwagen standen verrostet auf ihren Schienen, und an den Wänden waren noch die Spuren von Spitzhacken zu sehen. [hushed] Irgendwo in der Tiefe rauschte es, gleichmäßig, wie Wellen an einem Strand, der hier unten gar nicht sein konnte. [mischievously] Irgendwann konnte ich nicht anders. Ich formte die Hände zum Trichter und rief in die Dunkelheit:",
+"p": 2.0
+},
+"I-7f986492": {
+"t": "[shouting] Echo!",
+"p": 0.4
+},
+"I-d029f8ae": {
+"t": "[deadpan] Direkt neben mir knurrte es:",
+"p": 0.8
+},
+"I-4ee5132a": {
+"t": "[grumpy] Was?",
+"p": 0.3
+},
+"I-bb3301bf": {
+"t": "[warmly] Beim Klettern hielt Friedrich das Seil, Rex wartete oben an jeder Kante und winselte, bis Friedrich ihn nachholte, [dryly] und Ezekiel kletterte ohne Seil, weil Ezekiel eben ohne Seil klettert. Ich hielt es ihm trotzdem jedes Mal hin, aus Höflichkeit:",
+"p": 0.0
+},
+"I-68430e92": {
+"t": "[cheerful] Seil?",
+"p": 0.35
+},
+"I-ec0436de-3": {
+"t": "[coldly] Nein.",
+"p": 0.4
+},
+"I-90536245": {
+"t": "[dryly] Echo trug den Proviant und behauptete, er habe nur zufällig auch den Beutel mit den Münzen erwischt. [smug] Ich trug die Stimmung. [short pause] Das ist schwerer, als es klingt.",
+"p": 0.0
+},
+"I-552a9282": {
+"t": "[dramatic] Gegner um Gegner stellte sich uns in den Weg, doch wir konnten sowohl die alten, klapprigen Skelette, die sich knacksend aufrichteten, als auch die fledermausähnlichen Kreaturen, die uns von der Decke aus ansprangen, erschlagen. [amused] Rex brachte nach einem dieser Kämpfe stolz einen Oberschenkelknochen mit und war schwer beleidigt, als Friedrich ihn ihm wieder abnahm. [serious] Einige dieser Kämpfe waren richtig hart. [theatrical] Wie viele es genau waren? Viele. Sehr viele. Mehr als ich an zwei Händen abzählen kann, glaube ich. [dryly] Friedrich korrigiert mich da bis heute:",
+"p": 1.6
+},
+"I-81866d4b": {
+"t": "[deadpan] Es waren vier.",
+"p": 0.5
+},
+"I-77396f26": {
+"t": "[serious] Am Ende eines dieser Gänge wartete eine alte Bekannte: [short pause] Nezna, die Drow, die uns im Wachturm als kleines Tier entwischt war. [dryly] Ihr Bein war verbunden, ihr Blick nicht freundlicher geworden. Sie sprach zuerst:",
+"p": 0.0
+},
+"I-89ec4382": {
+"t": "[coldly] Ihr. Schon wieder.",
+"p": 0.4
+},
+"I-7a38b420": {
+"t": "[amused] Ich winkte ihr zu:",
+"p": 0.6
+},
+"I-5d77aec0": {
+"t": "[cheerful] Wir haben dich auch vermisst.",
+"p": 0.3
+},
+"I-08204415": {
+"t": "[firm] Ein zweites Mal ließen wir uns nicht von ihr austricksen. [quickly] Während mein Zauber Nezna daran hinderte, uns aus der Ferne anzugreifen, schlug Echos Blitz zwischen ihr und ihren beiden Söldnern ein, und sie überlebten nur knapp. Der erste Söldner fiel sofort unter Friedrichs Pfeil, der zweite hatte alle Hände voll mit Rex zu tun, der sich in sein Bein verbissen hatte. [hushed] Niemand achtete mehr auf den Schatten, der sich in Neznas Rücken schob. [dramatic] Ezekiel stach ihr seinen Dolch tief in den Rücken! [slowly] Blut gurgelnd ging Nezna auf die Knie, ihre Hände ungläubig auf die Stelle an ihrer Brust gepresst, an der sie der Dolch durchbohrt hatte und die sich schnell scharlachrot verfärbte … [quietly] Mit letzter Kraft röchelte sie:",
+"p": 1.5
+},
+"I-845ce9ca": {
+"t": "[pained] Die Spinne … wird euch … holen …",
+"p": 0.6
+},
+"I-c6064429": {
+"t": "[quietly] Dann brach sie endgültig zusammen.",
+"p": 0.0
+},
+"I-876b18db": {
+"t": "[serious] Der letzte Söldner wehrte sich nur noch panisch. Kurz darauf lag er neben seiner Auftraggeberin auf dem kalten Höhlenboden. [quietly] Friedrich kniete sich neben Nezna und sah lange auf sie hinab. Ich wusste, woran er dachte. Wir alle wussten es. [dryly] Nur Echo sprach es aus, während er ihren Gürtel nach Münzen abtastete:",
+"p": 0.0
+},
+"I-d70735da": {
+"t": "[annoyed] Schon wieder Spinne. Langsam nervt die.",
+"p": 0.4
+},
+"I-8168b7ad": {
+"t": "[quietly] Wir gingen noch tiefer, auf der Suche nach unserem Ziel, dachten kurzzeitig schon, es wäre alles nur ein Mythos, doch am Ende standen wir vor ihr: [awed] der magischen Schmiede, umgeben von dunklen Runen. Für einen Moment war es ganz still, und wir sahen ehrfürchtig zu der riesigen alten Konstruktion, die immer noch erhaben aussah. [hushed] Wie viele Generationen hatten hier wohl schon magische Gegenstände geschaffen, wie viele Schlachten wurden gekämpft, um sie unter ihre Kontrolle zu bringen?",
+"p": 2.0
+},
+"I-adc82593": {
+"t": "[awed] Sie ist echt.",
+"p": 0.9
+},
+"I-169b9a65": {
+"t": "[quietly] Und Echo, kaum hörbar:",
+"p": 0.6
+},
+"I-24b7a896": {
+"t": "[whispers] Gehört die jetzt uns?",
+"p": 0.35
+},
+"I-0c1d1d77": {
+"t": "[coldly] Noch nicht ganz.",
+"p": 0.7
+},
+"I-edd8b2c1": {
+"t": "[dryly] Dabei deutete er auf ein paar knochige Wächter.",
+"p": 0.0
+},
+"I-444cee97": {
+"t": "[quickly] Die letzten verbliebenen Bewacher der Schmiede waren eine Handvoll unterschiedlich großer untoter Skelette. Sie fielen schnell, einer nach dem anderen, durch die gekonnten Angriffe unserer Helden. [triumphant] Nun gehörte die Schmiede endlich uns! [proudly] Ich stieg auf den nächstbesten Felsen und breitete die Arme aus, für das Gemälde, das irgendwann davon gemalt werden wird. [deadpan] Es hat noch niemand gemalt. Aber das wird schon.",
+"p": 0.0
+},
+"I-b36987ac": {
+"t": "[awed] Die Runen an den Wänden glommen auf, eine nach der anderen, als hätte die Schmiede uns erwartet. Es roch nach kaltem Metall und nach etwas Älterem, das ich nicht benennen konnte. [softly] Echo strich mit den Fingern über den Amboss, so behutsam, wie ich ihn noch nie etwas habe anfassen sehen. [dryly] Nicht einmal Gold.",
+"p": 0.0
+},
+"I-b2b0f980": {
+"t": "[warmly] Wir schlugen unser Lager auf und überlegten, wie wir weiter vorgehen wollten. [dryly] Echo hatte da eine klare Vorstellung:",
+"p": 1.6
+},
+"I-8331a9be": {
+"t": "[excited] Wer kriegt den ersten Ring?",
+"p": 0.35
+},
+"I-0dea4ade": {
+"t": "[dryly] Friedrich schüttelte den Kopf:",
+"p": 0.5
+},
+"I-a2390158": {
+"t": "[firm] Erst mal kriegt Gundren Bescheid.",
+"p": 0.3
+},
+"I-08b04b7e": {
+"t": "[nostalgic] Später, als das Feuer heruntergebrannt war und die Runen über uns schimmerten wie ein fremder Sternenhimmel, kamen wir doch noch ins Träumen. Was würde man hier schmieden, wenn man dürfte? [proudly] Ich wusste es sofort: eine Laute, die sich selbst stimmt. [amused] Echo wollte etwas Goldenes. Was genau, war ihm egal, Hauptsache golden und groß. [softly] Friedrich überlegte lange und sagte dann:",
+"p": 0.0
+},
+"I-74e187c5": {
+"t": "[tenderly] Ein Halsband für Rex. Eins, mit dem ich ihn immer wiederfinde.",
+"p": 0.6
+},
+"I-feea2c8e": {
+"t": "[softly] Rex schlug zweimal mit dem Schwanz auf den Boden, ohne aufzuwachen. [quietly] Dann sahen wir alle zu Ezekiel. Er saß wie immer am Rand des Lichts. Friedrich fragte vorsichtig:",
+"p": 0.0
+},
+"I-8f740aff": {
+"t": "[hesitant] Und du, Ezekiel?",
+"p": 0.35
+},
+"I-aa03aa99": {
+"t": "[coldly] Einen Gehörschutz. Gegen eure ewige Fragerei.",
+"p": 0.7
+},
+"I-5f51a87d": {
+"t": "[dryly] Dann drehte er sich zur Wand. [short pause] Keiner von uns wagte, nochmals nachzufragen.",
+"p": 0.0
+},
+"I-73129af3": {
+"t": "[cheerful] Dann ging es zurück nach Neverwinter, zu Gundren, mit der besten Nachricht, die ein Händler bekommen kann: Die Schmiede ist gefunden, die Wächter sind erschlagen, und wir sind erfolgreich wieder da. [amused] Gundren schlug so fest auf sein Fass, dass der Deckel absprang:",
+"p": 0.0
+},
+"I-d8f6c2c7": {
+"t": "[triumphant] Ha! Ich wusste, dass ihr die Richtigen seid!",
+"p": 0.3
+},
+"I-9ec6b0a4": {
+"t": "[dryly] Ich erinnerte ihn vorsichtshalber an die stattliche Belohnung. [short pause] Echo erinnerte ihn weniger vorsichtig.",
+"p": 0.0
+},
+"I-1e777d15": {
+"t": "[nostalgic] Diesmal blieben wir ein paar Tage in Neverwinter, der Stadt, in deren Hafen alles begonnen hatte. Dieselben Möwen, derselbe Geruch nach Salz und Teer, [warmly] aber wir waren nicht mehr dieselben vier Fremden auf einem Steg, sondern Gefährten.",
+"p": 1.8
+},
+"I-31471dfd": {
+"t": "[proudly] Wer große Taten vollbringt, sollte schließlich auch davon erzählen, und wo ginge das besser als in der großen Stadt? [mischievously] Kaum hatten wir uns ein Zimmer in einem Gasthof gesichert, baten wir -- sagen wir: nachdrücklich -- um eine Audienz bei der Allianz der Lords.",
+"p": 0.0
+},
+"I-b098a90f": {
+"t": "[dryly] Ganz nach Protokoll lief das nicht. Etwas plump und ziemlich forsch marschierten wir an den Wachen vor der Burg vorbei, dem Hauptquartier der Allianz. [serious] Geradewegs zu ihrem Leiter, Captain Dolgrimson. Ein breitschultriger Mann mit grauen Schläfen und strengem Schnurrbart. Er sah von seinen Papieren auf:",
+"p": 0.0
+},
+"I-73a3e617": {
+"t": "[sternly] Wer hat euch denn hereingelassen?",
+"p": 0.4
+},
+"I-6d2363c9": {
+"t": "[dryly] Echo zuckte mit den Schultern:",
+"p": 0.5
+},
+"I-f2f78585": {
+"t": "[bored] Keiner.",
+"p": 0.3
+},
+"I-9d841b63": {
+"t": "[dryly] Der Captain war nicht gerade erfreut. [quickly] Ich trat schnell vor:",
+"p": 0.7
+},
+"I-cf92a624": {
+"t": "[theatrical] Captain! Wir kommen im Auftrag von Gundren. [proudly] Wir haben die magische Schmiede gefunden. Und befreit.",
+"p": 0.3
+},
+"I-4a386f74": {
+"t": "[dryly] Dolgrimson hob eine Augenbraue:",
+"p": 0.6
+},
+"I-a42913b8": {
+"t": "[suspicious] Die Schmiede? Ihr vier?",
+"p": 0.3
+},
+"I-296c479a": {
+"t": "[amused] Rex bellte. Friedrich korrigierte:",
+"p": 0.5
+},
+"I-6391bf4d": {
+"t": "[dryly] Wir fünf.",
+"p": 0.35
+},
+"I-7f1be630": {
+"t": "[amused] Dolgrimsons Stimmung verbesserte sich merklich. Er legte die Feder weg.",
+"p": 0.0
+},
+"I-4497a1ef": {
+"t": "[dryly] Trotzdem vertröstete er uns auf den darauffolgenden Tag:",
+"p": 0.0
+},
+"I-605e9365": {
+"t": "[impatient] Kommt morgen wieder. Heute hab ich keine Zeit.",
+"p": 0.35
+},
+"I-0b691782": {
+"t": "[warmly] Also ging es auf eigene Faust durch die Straßen von Neverwinter. Wir lauschten in Tavernen und auf Marktplätzen, versuchten, Gerüchte aufzuschnappen, und wollten nebenbei noch etwas Geld verdienen … [amused] Ich spielte an einer Straßenecke, Friedrich kaufte Rex eine Wurst, und Echo stand eine geschlagene Stunde vor dem Schaufenster eines Goldschmieds. Irgendwann kam der Ladenbesitzer heraus:",
+"p": 0.0
+},
+"I-39463167": {
+"t": "[pompous] Möchte der Herr etwas kaufen?",
+"p": 0.4
+},
+"I-305204c9": {
+"t": "[mischievously] Möchte der Herr etwas verschenken?",
+"p": 0.6
+},
+"I-6832de75": {
+"t": "[dryly] Kurz darauf drohte der Mann mit der Wache, und wir zogen weiter. [tired] Was die Gerüchte anging, hatten wir keinen Erfolg, und abends kehrten wir zu unserem Gasthof zurück.",
+"p": 0.0
+},
+"I-0cbed691": {
+"t": "[nostalgic] Bevor wir uns hinlegten, zog es mich noch einmal hinunter zum Hafen, auf denselben Steg, auf dem wir uns zum ersten Mal begegnet waren. [warmly] Ich war nicht lange allein. Friedrich kam mit Rex, kurz darauf Echo, und irgendwann stand auch Ezekiel am Ende des Stegs. Friedrich lehnte sich an einen Pfahl:",
+"p": 1.8
+},
+"I-d25891cf": {
+"t": "[nostalgic] Hier hat alles angefangen.",
+"p": 0.4
+},
+"I-0fcad6dc": {
+"t": "[amused] Mit einer Möwe, die vor Echo geflohen ist.",
+"p": 0.5
+},
+"I-24a3883e": {
+"t": "[deadpan] Sie hatte recht.",
+"p": 0.5
+},
+"I-c244abe0": {
+"t": "[laughs] Wir lachten, Echo am lautesten. [warmly] Ich drehte mich zu Ezekiel um:",
+"p": 0.9
+},
+"I-2013f7b4": {
+"t": "[mischievously] Und, Ezekiel? Bereust du es schon?",
+"p": 0.4
+},
+"I-ead6f2ab": {
+"t": "[quietly] Noch nicht.",
+"p": 0.7
+},
+"I-d8dff478": {
+"t": "[tenderly] Er blieb bei uns stehen, bis es ganz dunkel war.",
+"p": 0.0
+},
+"I-2d044e5f": {
+"t": "[warmly] Zurück im Gasthof gab es noch ein paar Getränke an der Bar, dann fielen wir in unsere Betten. Nach Wochen auf der Straße fühlte sich ein gepolstertes, sauberes Bett an wie ein Geschenk der Götter. [dryly] Echo schnarchte durch zwei Wände.",
+"p": 0.0
+},
+"I-0284e601": {
+"t": "[warmly] Am nächsten Morgen ging es zurück zur Allianz. [dryly] Diesmal klopften wir sogar an. Es wurde ein langes Gespräch. Friedrich stellte ein paar vernünftige Fragen, Echo nur eine:",
+"p": 0.0
+},
+"I-ba88d23c": {
+"t": "[gruffly] Was zahlt die Allianz?",
+"p": 0.35
+},
+"I-93ab116d": {
+"t": "[dryly] Genug.",
+"p": 0.5
+},
+"I-e5913bdb": {
+"t": "[annoyed] Genug ist keine Zahl.",
+"p": 0.3
+},
+"I-ad4b01e9": {
+"t": "[dryly] Dolgrimson ging darüber hinweg, stand auf und reichte jedem von uns die Hand:",
+"p": 0.8
+},
+"I-f0e46ca3": {
+"t": "[solemn] Willkommen in der Allianz der Lords. [sternly] Enttäuscht mich nicht.",
+"p": 0.4
+},
+"I-c3049faf": {
+"t": "[proudly] Der Entschluss stand fest: Unsere Heldengruppe würde der Allianz der Lords beitreten und ihre Kräfte stärken. Ein Barde in den Reihen der Lords. [softly] Ich sprach es mir leise vor:",
+"p": 0.0
+},
+"I-a375992e": {
+"t": "[quietly] Barradin, von der Allianz der Lords.",
+"p": 0.5
+},
+"I-da5743ad": {
+"t": "[smug] Mir gefiel, wie das klang.",
+"p": 0.0
+},
+"I-1592eea2": {
+"t": "[warmly] Kaum waren wir Mitglieder der Allianz, wartete auch schon der erste Auftrag. Captain Dolgrimson schickte uns nach Donnerbaum, einem kleinen, verlassenen Dorf etwas östlich von Neverwinter. [dryly] Seine Anweisung war knapp:",
+"p": 0.0
+},
+"I-ed5ebe75": {
+"t": "[sternly] Seht dort nach dem Rechten.",
+"p": 0.35
+},
+"I-1dd4a33a": {
+"t": "[deadpan] Klang harmlos …",
+"p": 0.0
+},
+"I-e537f26c": {
+"t": "[quietly] Donnerbaum empfing uns mit einer Stille, die mir sofort unter die Haut kroch: ein paar Häuser, die verlassen wirkten, und über allem ein großer, halb verfallener Wachturm, an dessen Mauern Moos und Moder nagten. [hushed] In den Gärten wucherte das Unkraut, an einer Wäscheleine hing noch ein einzelnes Hemd und bewegte sich im Wind. Rex blieb dicht an Friedrichs Bein. Friedrich flüsterte:",
+"p": 1.8
+},
+"I-1e232a3f": {
+"t": "[whispers] Kein Rauch aus den Kaminen. Keine Hühner. Hier stimmt was nicht.",
+"p": 0.35
+},
+"I-7fc55abc": {
+"t": "[hushed] Wir schlichen durch den Turm nach oben. Stufe um Stufe, gespannt, was uns dort erwarten sollte … Friedrich ging voran, einen Pfeil auf der Sehne. [dramatic] Auf dem höchsten Plateau schlug das Schicksal zu: Zuerst hörten wir nur einen kreischenden, markerschütternden Aufschrei aus dem anliegenden Wald,",
+"p": 1.6
+},
+"I-9d8c9db2": {
+"t": "[dramatic] dann wurde plötzlich eine Kreatur sichtbar, die schnell auf uns zuflog und schließlich auf dem Plateau landete … [awed] Ein junger grüner Drache griff an, ein giftspeiendes Ungetüm mit riesigen Krallen und Zähnen, die nur darauf warteten, uns zu zerfetzen … [quietly] Seine Schuppen glänzten wie nasses Laub, und sein Atem roch nach faulem Sumpf. [dramatic] Ein Venomfang! Er zischte:",
+"p": 2.0
+},
+"I-7f38839b": {
+"t": "[menacing] Frisches Fleisch … auf meinem Turm.",
+"p": 0.4
+},
+"I-0ffd0e46": {
+"t": "[dryly] Echo starrte auf seine Schuppen und murmelte:",
+"p": 0.6
+},
+"I-6f3ef6c2": {
+"t": "[curious] Was die wohl wert sind?",
+"p": 0.3
+},
+"I-257b82e6": {
+"t": "[shouting] Später, Echo!",
+"p": 0.25
+},
+"I-0c1dd0cb": {
+"t": "[dramatic] Der Kampf war brutal. [quickly] Der Drache spuckte einen Giftstrahl nach Ezekiel, der sich gerade noch zur Seite warf und nur gestreift wurde. Dann holte er ein zweites Mal Luft, und diesmal traf es Echo mit voller Wucht. Echo hustete und fluchte:",
+"p": 1.4
+},
+"I-d7900fc6": {
+"t": "[coughs] Du … stinkende … [furious] Eidechse!",
+"p": 0.3
+},
+"I-5df14e1e": {
+"t": "[quickly] Friedrich rief, während er hinter einer Zinne in Deckung sprang:",
+"p": 0.4
+},
+"I-358d8f9e": {
+"t": "[shouting] Barradin! Mach irgendwas!",
+"p": 0.3
+},
+"I-b2cc7f8d": {
+"t": "[proudly] Dann kam mein großer Moment: Ich zog den Drachen mit meiner Magie in einen hypnotischen Bann. [softly] Ich sang ihm leise entgegen, und seine gelben Augen folgten jeder meiner Bewegungen:",
+"p": 0.0
+},
+"I-8ea018d1": {
+"t": "[softly] Sieh mich an … nur mich … ganz ruhig …",
+"p": 0.5
+},
+"I-5d0c51b9": {
+"t": "[dramatic] Meine Gefährten nutzten die Gelegenheit, um mit vereinten Kräften auf das furchtbare Biest einzudreschen. In einem letzten tosenden Aufbäumen schlugen die Krallen des Drachen nach Friedrich und verfehlten ihn knapp. [triumphant] Ezekiel nutzte die Chance, die sich auftat, schoss einen gezielten Pfeil auf den Kopf des Drachen und verpasste ihm so den finalen Stoß!",
+"p": 0.0
+},
+"I-baad6d06": {
+"t": "[relieved] Wir gingen als glückliche Sieger aus dem Kampf hervor, allerdings hatte uns sein Giftatem übel zugesetzt. [tired] Meine Lunge brannte noch Stunden danach, Ezekiel war angeschlagen, Echo stark verletzt und Friedrich wäre beinahe von einer Kralle skalpiert worden. [dryly] Er tastete nach seinem Kopf:",
+"p": 1.6
+},
+"I-8202d6bc": {
+"t": "[deadpan] Neuer Scheitel. Gratis.",
+"p": 0.5
+},
+"I-a12568b2": {
+"t": "[tired] Wir überlebten also nur knapp. [dryly] Erst einmal: durchatmen, Wunden versorgen, Pfeife stopfen. In genau dieser Reihenfolge. [amused] Dann die Beute. Echo war dabei, wie man sich denken kann, besonders gründlich. Er kniete am Kopf des Drachen und zählte:",
+"p": 0.0
+},
+"I-3d5b697f": {
+"t": "[smug] Der Zahn gehört mir. Und der. Und der.",
+"p": 0.4
+},
+"I-c0ed4162": {
+"t": "[warmly] Danach gönnten wir uns eine lange Rast, und die hatten wir uns verdient. Ich lag auf dem Rücken, die Pfeife im Mund, und sah den Wolken zu. [amused] Rex hatte sich seinen Anteil an der Beute längst gesichert und kaute zufrieden darauf herum. [quietly] Ezekiel saß an der Brüstung und reinigte seinen Bogen. Ich setzte mich zu ihm:",
+"p": 0.0
+},
+"I-6dde3c68": {
+"t": "[warmly] Verdammt guter Schuss, Ezekiel.",
+"p": 0.4
+},
+"I-82abaa0f": {
+"t": "[deadpan] Ich weiß.",
+"p": 0.6
+},
+"I-23303144": {
+"t": "[softly] Dann reichte er mir seine Wasserflasche.",
+"p": 0.0
+},
+"I-6e951d50": {
+"t": "[serious] Dann war der Rest des Dorfes an der Reihe. [dramatic] In einigen der vermeintlich leeren Häuser lauerten Zombies, die laut ächzend und stöhnend auf uns zustolperten. Grau, aufgedunsen, in den Kleidern der Leute, die hier einmal gewohnt hatten. [mischievously] Ich konnte mir einen Kommentar nicht verkneifen:",
+"p": 1.8
+},
+"I-b9b5d49c": {
+"t": "[mocking] Ihr schlurft wie mein Publikum nach der dritten Zugabe!",
+"p": 0.35
+},
+"I-9c5e2443": {
+"t": "[smug] Ausgeruht, wie wir waren, hatten sie keine Chance. [dryly] Tot waren sie danach nicht mehr als vorher, nur deutlich ruhiger.",
+"p": 0.0
+},
+"I-a17076f6": {
+"t": "[quietly] Vor einem der Häuser stand eine Statue, bei deren Anblick Ezekiel innehielt. Mitten im Schritt. Er sagte nur ein Wort:",
+"p": 0.0
+},
+"I-7d6f56d4": {
+"t": "[hushed] Onkel.",
+"p": 0.7
+},
+"I-fadc5cf2": {
+"t": "[softly] Friedrich hakte vorsichtig nach:",
+"p": 0.8
+},
+"I-0da9c021": {
+"t": "[hesitant] Dein Onkel? Was macht der hier?",
+"p": 0.35
+},
+"I-790ec70d": {
+"t": "[quietly] Ezekiel antwortete nicht. Er schüttelte nur leicht den Kopf, ohne den Blick von der Statue zu nehmen.",
+"p": 0.0
+},
+"I-e1991ae7": {
+"t": "[hushed] In einem anderen Haus in der Ortsmitte vernahmen wir von draußen ein Ächzen von Holz und das Rascheln von Blättern, und als wir die Tür öffneten, [dramatic] stellten sich uns Blights in den Weg! Kleine Gestalten aus Wurzeln und knorrigem Holz, fast wie Menschen geformt, mit rubinrot glühenden Augen. [quickly] Friedrich rief:",
+"p": 1.6
+},
+"I-878efae3": {
+"t": "[shouting] Vorsicht! [dryly] Für altes Holz sind die ziemlich schnell!",
+"p": 0.3
+},
+"I-bad27ef3": {
+"t": "[quickly] Sie waren flinker als gedacht und konnten einen leicht aus einem Hinterhalt anspringen, jedoch war ihnen unsere Heldengruppe überlegen, und wir besiegten sie mit nur wenigen Angriffen. [amused] Rex schnappte sich einen von ihnen wie einen Stock und brachte ihn stolz zu Friedrich. [dryly] Zumindest das, was von ihm übrig war.",
+"p": 0.0
+},
+"I-1e45d3d9": {
+"t": "[dramatic] Beim weiteren Durchsuchen des Dorfes entbrannten weitere Kämpfe gegen etliche Blights, gegen zwei riesige Spinnen [dryly] und gegen, wer hätte es gedacht, noch mehr Blights … Als die zweite Spinne tot vor uns lag, murmelte Friedrich:",
+"p": 0.0
+},
+"I-8d5c55d3": {
+"t": "[tired] Spinnen. Natürlich Spinnen.",
+"p": 0.4
+},
+"I-135de042": {
+"t": "[dryly] Dann platzte Echo der Kragen:",
+"p": 0.6
+},
+"I-fd551625": {
+"t": "[furious] Kaminholz!",
+"p": 0.3
+},
+"I-bd9cdc50": {
+"t": "[dramatic] Ein gewaltiger Feuerball löste das Problem auf seine Weise, und die verbliebenen Wurzelmonster verwandelten sich in Asche. [awed] Die Hitze spüre ich heute noch im Gesicht. [amused] Echo stand mitten im Rauch, die Hörner rußgeschwärzt, und grinste.",
+"p": 1.5
+},
+"I-cf96b274": {
+"t": "[warmly] Vor dem letzten Haus wartete schließlich eine Druidin, die sich als Ilvara vorstellte. Ganz in Grün gekleidet, einen Fuchs auf den Schultern und einen kleinen Spatz auf dem Fuß, wirkte sie wie eine Hüterin des Waldes. Sie lächelte uns an:",
+"p": 1.6
+},
+"I-940c3869": {
+"t": "[warmly] Wanderer! Ihr seht hungrig aus.",
+"p": 0.35
+},
+"I-e1e8ba40": {
+"t": "[warmly] Es roch nach Essen, und durch die offene Tür sahen wir einen köchelnden Topf und hofften auf eine warme Speise. Dahinter stapelten sich Kräuter, Tinkturen und handschriftliche Notizen über die Tiere des Waldes. [amused] Echo nickte anerkennend beim Anblick der Kräuter und brummte:",
+"p": 0.0
+},
+"I-a4c5c604": {
+"t": "[gruffly] Du bist also auch gerne im Wald?",
+"p": 0.35
+},
+"I-77363c44": {
+"t": "[cheerful] Natürlich. Nur dort gibt es frische Kräuter.",
+"p": 0.4
+},
+"I-28a591ec": {
+"t": "[curious] Friedrich sah sich in dem leeren Dorf um und fragte:",
+"p": 0.6
+},
+"I-3252d051": {
+"t": "[curious] Und Ihr lebt hier ganz allein? Nach allem, was hier herumläuft?",
+"p": 0.35
+},
+"I-3b8fcda2": {
+"t": "[warmly] Allein? Ich habe doch meine Tiere.",
+"p": 0.5
+},
+"I-5329ff13": {
+"t": "[warmly] Der Fuchs auf ihrer Schulter gähnte. Friedrich entspannte sich zum ersten Mal seit Tagen. [dryly] Und mein Magen knurrte.",
+"p": 0.0
+},
+"I-ae9e2404": {
+"t": "[quietly] Keiner von uns ahnte etwas Böses, als sie uns in ihr Haus bat:",
+"p": 0.0
+},
+"I-b6e1b181": {
+"t": "[warmly] Kommt herein. Die Suppe ist gleich fertig.",
+"p": 0.4
+},
+"II-876ae8f9": {
+"t": "[warmly] Kaum hatten wir Ilvaras Haus betreten, lag plötzlich ein süßlicher Dampf in der Luft. [curious] Thymian, Honig, und darunter etwas Schweres, das nicht in eine Küche gehörte. [dryly] Friedrich zog die Nase kraus.",
+"p": 1.2
+},
+"II-f6c36b90": {
+"t": "[suspicious] Riecht ihr das auch? Das ist kein Suppenkraut.",
+"p": 0.3
+},
+"II-07cbc7c9": {
+"t": "[quietly] Echo schnupperte, und seine Augen wurden schmal.",
+"p": 0.0
+},
+"II-917a7d1d": {
+"t": "[growls] Scheiße … [angry] Gift!",
+"p": 0.4
+},
+"II-ff3ee303": {
+"t": "[dryly] Zu spät. Rex legte sich als Erster hin, ganz ordentlich, die Schnauze auf den Pfoten. [slowly] Dann knickten Friedrich die Knie weg. [tired] Ezekiel griff noch nach seinem Dolch und bekam ihn nicht mehr aus der Scheide.",
+"p": 0.0
+},
+"II-96e2b276": {
+"t": "[coldly] … Falle.",
+"p": 0.5
+},
+"II-0b465883": {
+"t": "[tired] Einer nach dem anderen sanken wir zu Boden, und mir wurde schwarz vor Augen. [hushed] Das Letzte, was ich hörte, war die Stimme der Druidin, auf einmal gar nicht mehr freundlich:",
+"p": 0.0
+},
+"II-7e8f334f": {
+"t": "[coldly] Schlaft nur, kleine Helden.",
+"p": 0.4
+},
+"II-dfc6bfd0": {
+"t": "[serious] Sie war in Wahrheit eine Gestaltwandlerin, die uns mit einem Kräuternebel betäubt hatte, und sie verschleppte uns alle. [menacing] Ihr wahres Gesicht sollten wir erst später sehen: Ilvara, eine Drow.",
+"p": 1.8
+},
+"II-e3edcbe3": {
+"t": "[tired] Wie viel Zeit vergangen war, wusste keiner von uns, als wir wieder zu uns kamen. Ein paar Stunden? Tage? [quietly] Ich fühlte mich immer noch benebelt. Zuerst kam das Rauschen, dann der kalte Stein unter meiner Wange, dann die Erkenntnis, dass ich meine Hände nicht bewegen konnte. [softly] Neben mir regte sich Friedrich:",
+"p": 2.0
+},
+"II-1e253f6a": {
+"t": "[anxious] Rex? Rex, bist du da?",
+"p": 0.4
+},
+"II-0f0a7712": {
+"t": "[softly] Ein Winseln aus der Ecke, ein Schwanz, der zweimal auf den Boden klopfte. [dryly] Echo tastete mit gefesselten Händen nach seinem Gürtel, und dann hallte es durch den Raum:",
+"p": 0.0
+},
+"II-dd474cbb": {
+"t": "[confused] Mein Beutel. [shouting] MEIN GOLD IST WEG!",
+"p": 0.4
+},
+"II-161a6767": {
+"t": "[serious] Die ganze Truppe lag in Fesseln, in einem gefängnisartigen Raum hinter Schloss und Riegel. Vor den Gitterstäben standen zwei Wachen und starrten grimmig herein. [dryly] Dann lachten sie, und einer beugte sich zu mir herunter:",
+"p": 0.0
+},
+"II-b24ff24e": {
+"t": "[mocking] Na, ausgeschlafen, Spitzohr? Du hast geschnarcht wie ein Troll.",
+"p": 0.3
+},
+"II-a358d617": {
+"t": "[quietly] Außer ihren höhnischen Stimmen durchschnitt nur dieses ferne Rauschen die Stille. Was es war, wusste ich nicht. [dryly] Mich interessierten ohnehin eher die Beleidigungen der Wachen. [deadpan] Fachlich.",
+"p": 0.0
+},
+"II-56648d5e": {
+"t": "[dryly] Ich antwortete mit einem Fluch.",
+"p": 0.0
+},
+"II-f1ba4ae3": {
+"t": "[pompous] Ich schnarche nicht. Ich summe. [smug] Und deine Mutter …",
+"p": 0.4
+},
+"II-02f4289c": {
+"t": "[deadpan] Die Wache antwortete mit einem Knüppel. [dryly] Friedrich robbte ein Stück näher:",
+"p": 1.0
+},
+"II-99235d0b": {
+"t": "[hushed] Klappe, Barradin. Nur atmen.",
+"p": 0.3
+},
+"II-efc89d0e": {
+"t": "[dryly] Die Wachen lachten und drehten uns wieder den Rücken zu.",
+"p": 0.0
+},
+"II-13be3dff": {
+"t": "[quietly] Von der anderen Seite kam Ezekiels Stimme, kaum hörbar. Er lag gefesselt am Boden und hatte trotzdem schon seine Fassung wiedererlangt:",
+"p": 0.0
+},
+"II-d5a153a1": {
+"t": "[whispers] Es sind nur zwei.",
+"p": 0.4
+},
+"II-c3e55f6e": {
+"t": "[mischievously] Dann hatte Echo eine Idee. Er schloss die Augen und knurrte:",
+"p": 0.6
+},
+"II-be734101": {
+"t": "[gruffly] Stillhalten.",
+"p": 0.3
+},
+"II-3c289717": {
+"t": "[amused] Wo eben noch ein gehörnter Druide gelegen hatte, saß plötzlich eine Ratte. [dryly] Eine ziemlich große, zerzauste Ratte mit sehr mürrischem Blick. [quickly] Echo huschte von einem zum anderen und nagte uns die Fesseln durch. [deadpan] Bei mir zuletzt. Als er fertig war, spuckte er aus.",
+"p": 1.2
+},
+"II-efe3fdae": {
+"t": "[hushed] Dann schlüpfte er zwischen den Gitterstäben hindurch, direkt an den Stiefeln der Wachen vorbei, und fand in einem Nebenraum unsere Ausrüstung. Immer noch in Tiergestalt schaffte er alles zurück zu uns. [amused] Stück für Stück, Dolch für Dolch. [deadpan] Und seinen Beutel zuerst. Friedrich hob eine Augenbraue:",
+"p": 0.0
+},
+"II-7195bd30": {
+"t": "[dryly] Erst das Gold, dann die Waffen?",
+"p": 0.3
+},
+"II-093b7c73": {
+"t": "[gruffly] Prioritäten.",
+"p": 0.5
+},
+"II-f3029406": {
+"t": "[mischievously] Kaum hielten alle wieder ihre Waffen in den Händen, trat ich an die Gitterstäbe und beleidigte die verdammten Wachen hemmungslos:",
+"p": 0.0
+},
+"II-f03b8ba6": {
+"t": "[theatrical] He, ihr zwei! Ich hab lange überlegt, wem ihr ähnlich seht. [mocking] Jetzt weiß ich's: dem Arsch eines Höhlenbären. Nur dass der besser riecht!",
+"p": 0.3
+},
+"II-3612b6e0": {
+"t": "[amused] Der Größere der beiden lief rot an.",
+"p": 0.0
+},
+"II-4c335cf2": {
+"t": "[angry] Was hast du gesagt, Elf?",
+"p": 0.3
+},
+"II-8fec64b6": {
+"t": "[mocking] Soll ich's langsamer sagen? Für euch zwei reicht's ja nur für einen Gedanken.",
+"p": 0.3
+},
+"II-52e14e93": {
+"t": "[quickly] Sie stürmten herein, um mich zu bestrafen, und liefen geradewegs in unseren Hinterhalt! [excited] Friedrich gab das Zeichen:",
+"p": 0.6
+},
+"II-17d9533f": {
+"t": "[shouting] Jetzt!",
+"p": 0.3
+},
+"II-748fc077": {
+"t": "[quickly] Es ging schnell. [dryly] Leider nicht schnell genug: Einer von den beiden schrie so laut, dass es noch eine Weile in der riesigen Höhle widerhallte.",
+"p": 1.2
+},
+"II-18e88dca": {
+"t": "[shouting] ALAAARM!",
+"p": 0.3
+},
+"II-7ea3242f": {
+"t": "[anxious] Sofort wurde die Festung durchströmt von Schritten und Stimmen, die auf direktem Weg zu uns drängten … [dryly] Echo warf mir einen finsteren Blick zu.",
+"p": 0.0
+},
+"II-c169526f": {
+"t": "[sarcastic] Gut gemacht, Barde.",
+"p": 0.4
+},
+"II-265a2ae9": {
+"t": "[smug] Publikum, Echo. Das nennt man Publikum.",
+"p": 0.4
+},
+"II-328b07ee": {
+"t": "[anxious] Und dann, wie aus dem Nichts, war auf einmal ein lautes, unangenehm anschwellendes Summen zu hören. Es kam näher und näher und übertönte die Schritte und Stimmen aus der Festung. [hushed] Friedrich hob die Hand und lauschte.",
+"p": 1.5
+},
+"II-67ce0323": {
+"t": "[serious] Das sind keine Wachen.",
+"p": 0.6
+},
+"II-e0412db2": {
+"t": "[dramatic] Außerdem hallte plötzlich ein raubvogelähnlicher Schrei durch die Höhle, gefolgt von einem zerschmetternden Aufschlag und dem Schreien von Wachen aus einem nahe gelegenen Hof, der wohl hinter dem Wachturm lag.",
+"p": 1.6
+},
+"II-df70be4f": {
+"t": "[anxious] Wir hatten jedoch nicht lange Zeit, uns darüber Gedanken zu machen, denn [dramatic] fast zeitgleich stürzte sich mit ohrenbetäubendem Surren ein riesiges, wespenähnliches Monster mit langem Saugstachel auf uns! Facettenaugen so groß wie Schilde, Flügel, die die Luft zerhackten. [quickly] Echo brüllte:",
+"p": 0.0
+},
+"II-1b5fe44b": {
+"t": "[shouting] Eine Chasme! Ein Dämon! Weg von dem Stachel!",
+"p": 0.3
+},
+"II-f8fd089b": {
+"t": "[dramatic] Die Warnung des Druiden kam jedoch zu spät. [quickly] Die Chasme stürzte sich mit voller Wucht auf Friedrich und traf ihn mit einem einzigen, gewaltigen Stich …",
+"p": 0.0
+},
+"II-df98affb": {
+"t": "[sorrowful] Fassungslos sah ich Friedrich zu Boden gehen, sah, wie er langsam auf die Knie sank. Seine Gesichtszüge spiegelten Ungläubigkeit und Überraschung wider.",
+"p": 1.2
+},
+"II-68c46cd5": {
+"t": "[confused] Was … ?",
+"p": 0.6
+},
+"II-17c3e72d": {
+"t": "[quietly] Dann kippte er zur Seite. [sad] Rex bellte, hoch und panisch, und stellte sich breitbeinig über ihn.",
+"p": 1.2
+},
+"II-0c8ada0a": {
+"t": "[dramatic] Mit einem wuterfüllten Schrei sprang Ezekiel aus seiner Deckung.",
+"p": 0.0
+},
+"II-2c306dc4": {
+"t": "[furious] Stirb!",
+"p": 0.3
+},
+"II-3718996d": {
+"t": "[dramatic] Er stieß beide Dolche auf den Dämon nieder, der gerade seinen Freund gefällt hatte!",
+"p": 0.0
+},
+"II-9595980f": {
+"t": "[dramatic] Doch die Klingen glitten am Chitinpanzer ab. [quickly] Hinter ihm knisterte es schon zwischen Echos Fingern.",
+"p": 1.0
+},
+"II-7513953c": {
+"t": "[angry] Aus dem Weg!",
+"p": 0.3
+},
+"II-ec0f8c9a": {
+"t": "[dramatic] Echos Blitz traf dort, wo die Dolche versagt hatten, und brannte sich in den Panzer, [angry] während ich meinen ganzen angestauten Zorn in den Geist des Monsters schleuderte:",
+"p": 1.0
+},
+"II-e55b4a3d": {
+"t": "[furious] Du fettes, hässliches Mistvieh! Niemand sticht unseren Waldläufer!",
+"p": 0.3
+},
+"II-5ef19540": {
+"t": "[dramatic] Das verdammte Biest stach noch mal mit seinem riesigen Stachel zu und traf Ezekiel. Er schrie auf, begleitet vom aggressiven Summen, und ich sah das Blut spritzen, als sich der Stachel tief in sein Fleisch bohrte. [awed] Ich weiß nicht, wie er es schaffte, auf den Beinen zu bleiben. [triumphant] Doch Ezekiel rammte seinen Dolch genau in das Auge der Bestie, und sein zweiter Angriff schnitt in den Körper der Chasme.",
+"p": 0.0
+},
+"II-220d27ac": {
+"t": "[coldly] Ruhe.",
+"p": 0.5
+},
+"II-46d9fa11": {
+"t": "[relieved] Daraufhin verstummte das Summen endlich, und die Chasme lag regungslos auf dem Boden vor der Gefängniszelle. [awed] Mitten ins Auge. Unglaublich.",
+"p": 1.2
+},
+"II-7dacbc93": {
+"t": "[anxious] Echo und ich eilten dem ohnmächtigen Friedrich und dem schwer verletzten Ezekiel zu Hilfe, wirkten Heilzauber und verteilten Heiltränke. [tenderly] Ich kniete neben Friedrich und summte die Heilmelodie, während Rex ihm unablässig übers Gesicht leckte. [relieved] Endlich flatterten seine Lider, und er lachte erschöpft:",
+"p": 0.0
+},
+"II-8a42723f": {
+"t": "[tired] Rex … halt, stopp. [amused] Ich leb ja noch. Hab ich was verpasst?",
+"p": 0.4
+},
+"II-2123706c": {
+"t": "[dryly] Echo, der gerade Ezekiel verband, sah nicht einmal auf:",
+"p": 0.6
+},
+"II-66610abe": {
+"t": "[grumpy] Ezekiel hat dem Vieh ins Auge gestochen. Und du hast gepennt.",
+"p": 0.3
+},
+"II-8dd75d02": {
+"t": "[dryly] Ezekiel lehnte an der Wand, presste die Hand auf die Wunde und zuckte bei jedem Handgriff zurück.",
+"p": 0.0
+},
+"II-920f22be": {
+"t": "[annoyed] Halt still, verdammt!",
+"p": 0.4
+},
+"II-6eb4de5e": {
+"t": "[coldly] Mach schneller.",
+"p": 0.4
+},
+"II-f47e8523": {
+"t": "[serious] Im Nebenhof waren immer noch Kampfgeräusche zu hören. Offenbar war dort eine blutige Auseinandersetzung im Gange … [quietly] Einigermaßen erholt und mit verbundenen Wunden stiegen wir eine der Treppen empor und konnten zum ersten Mal in den Nebenhof sehen.",
+"p": 0.0
+},
+"II-aed340d9": {
+"t": "[dramatic] Dort herrschte das absolute Chaos. Zerstörte Tische und tote Soldaten waren über den Boden verteilt, und ein geierartiger Dämon mit zerzausten Schwingen kreiste über ihnen und attackierte die verbliebenen Gegner. [serious] Es stank nach Blut und nassen Federn. Er stieß gerade mit einem lauten, krächzenden Aufschrei auf eine der Wachen nieder, [angry] als ich dahinter Ilvara erkannte, die Gestaltwandlerin, die uns betäubt und hierher verschleppt hatte. Mit grimmigem Gesichtsausdruck schoss die Drow Pfeile auf den Dämon, der durch ihre Festung wütete, und schrie ihre Leute an:",
+"p": 1.6
+},
+"II-ceb2a147": {
+"t": "[furious] Haltet die Stellung! Holt ihn runter, ihr Nichtsnutze!",
+"p": 0.3
+},
+"II-a5b5ab94": {
+"t": "[wistful] Woher die Dämonen kamen und warum sie ausgerechnet Ilvaras Festung angriffen, ist mir bis heute ein Rätsel.",
+"p": 0.0
+},
+"II-85e63e55": {
+"t": "[warmly] Friedrich hatte den Bogen schon in der Hand, noch ein wenig blass um die Nase, und nickte Ezekiel zu:",
+"p": 0.0
+},
+"II-2fbcc370": {
+"t": "[firm] Die zwei links.",
+"p": 0.3
+},
+"II-900bae8c": {
+"t": "[proudly] Von der Treppe aus erledigten Friedrich und Ezekiel mit gezielten Schüssen die letzten Wachen, blutverschmiert und trotzdem treffsicher wie eh und je, während Echo den Dämon, den er als Vrock erkannte, ins Visier nahm.",
+"p": 1.2
+},
+"II-b3433fa5": {
+"t": "[shouting] Runter mit dir, du Aasgeier!",
+"p": 0.3
+},
+"II-e7d2ba2a": {
+"t": "[dramatic] Ein gleißender Blitz holte ihn vom Himmel. Noch knisternd vor Spannung schlug das Geiermonster hart auf dem Boden auf, [dryly] und ein paar Federn segelten langsam hinterher.",
+"p": 1.2
+},
+"II-ce929a88": {
+"t": "[mischievously] Auf der gegnerischen Seite war nur noch die Drow verblieben, und ich fing an, ihr Schimpftiraden und heftige Beleidigungen entgegenzuschmettern:",
+"p": 0.0
+},
+"II-7952833d": {
+"t": "[theatrical] Ilvara! Deine Gastfreundschaft ist mies, deine Kräuter stinken, und deine Festung fällt gerade wegen zwei Vögeln und einem Barden auseinander!",
+"p": 0.3
+},
+"II-2149fbb1": {
+"t": "[dryly] Friedrich murmelte neben mir:",
+"p": 0.5
+},
+"II-69c3cbf4": {
+"t": "[deadpan] Einer davon war eine Wespe.",
+"p": 0.3
+},
+"II-63f38ad0": {
+"t": "[theatrical] Wegen einem Vogel, einer Wespe und einem Barden!",
+"p": 0.3
+},
+"II-ccdfca06": {
+"t": "[smug] Ich denke, sie hat den Ernst ihrer Lage kapiert. Sie sah den toten Vrock an, sah ihre toten Wachen an, und flüchtete. [surprised] Sie rannte einfach auf das Geländer zu und sprang in den Abgrund. Im Fallen schrie sie noch:",
+"p": 0.0
+},
+"II-53509e3d": {
+"t": "[shouting] Die Spinne wird euch alle kriegen!",
+"p": 0.3
+},
+"II-d89cfa73": {
+"t": "[dramatic] Ihr Schrei hallte von der Höhlendecke, kurz gefolgt von einem Platschen: Sie war in dem laut rauschenden Fluss unter der Feste gelandet und entkommen. [dryly] Echo starrte über das Geländer in die Tiefe und knurrte:",
+"p": 1.4
+},
+"II-c24c23c5": {
+"t": "[grumpy] Immer dasselbe Gerede. [mocking] Haben diese Diener der ach so großen Spinne nicht mehr zu sagen?",
+"p": 0.4
+},
+"II-fe93d7ec": {
+"t": "[amused] Danach wurde der Unterschlupf unserer Entführer gründlich durchsucht, Echo natürlich vorneweg. Er klopfte Wände ab, drehte jeden Krug um und schüttelte sogar die Stiefel der toten Wachen aus:",
+"p": 0.0
+},
+"II-b89db0a2": {
+"t": "[grumpy] Silber. Silber. [deadpan] Ein Zahn.",
+"p": 0.3
+},
+"II-213f69bc": {
+"t": "[curious] Etwas Beute kam zusammen. Außerdem fanden wir eine Spinnenstatue: acht steinerne Beine und ein glatter, glänzender Leib. [dryly] Ich legte den Kopf schief.",
+"p": 0.0
+},
+"II-8158507e": {
+"t": "[deadpan] Der fehlt ein Bart.",
+"p": 0.5
+},
+"II-d8853aee": {
+"t": "[mischievously] Echo grinste breit und zeigte etwas weiter nach unten.",
+"p": 0.0
+},
+"II-de5172fd": {
+"t": "[mischievously] Und da fehlt auch noch was.",
+"p": 0.4
+},
+"II-90e5b925": {
+"t": "[amused] Sie bekam von uns eine neue Bemalung, zuerst nur mit einem zusätzlichen Bart, doch schnell wurden daraus Phallussymbole und ähnliche Schmierereien. [dryly] Friedrich seufzte so tief, dass Rex ihn besorgt ansah:",
+"p": 0.0
+},
+"II-aee27ad5": {
+"t": "[sighs] Wir stehen mitten in einer Feindesfestung … [deadpan] und ihr malt Pimmel an eine Statue.",
+"p": 0.3
+},
+"II-c1602272": {
+"t": "[slowly] Ezekiel betrachtete unser Werk lange und schweigend.",
+"p": 0.0
+},
+"II-556c8b32": {
+"t": "[deadpan] Der ist schief.",
+"p": 0.8
+},
+"II-2d0b45ca": {
+"t": "[dryly] Kindisch? Vielleicht. [amused] Befreiend? Absolut.",
+"p": 0.0
+},
+"II-13ff1295": {
+"t": "[hushed] Immer tiefer führte der Weg ins Unterreich. Dichte Spinnweben, dick wie Taue und grau vom Staub, versperrten uns teilweise den Weg. [serious] Es gab hier jedoch auch so tiefe Schluchten, dass wir ohne die Spinnweben niemals von der einen zur anderen Seite gekommen wären. [quietly] Es war ein ziemlicher Balanceakt, und wir mussten uns sehr konzentrieren, dabei keine neuen Spinnen auf uns aufmerksam zu machen. Friedrich flüsterte:",
+"p": 1.6
+},
+"II-5699d9a2": {
+"t": "[whispers] Nicht auf die dicken Fäden treten. Die zittern bis zum Nest.",
+"p": 0.3
+},
+"II-3f718c71": {
+"t": "[nervous] Wegen der klebrigen Fäden hätte ich beinahe einen Sprung zum nächsten Felsvorsprung nicht geschafft: [dryly] Mein Stiefel blieb hängen, mein Gleichgewicht nicht.",
+"p": 0.0
+},
+"II-cb2d263a": {
+"t": "[panicked] Oh nein. Oh nein, nein, nein …",
+"p": 0.3
+},
+"II-dc9bc8d4": {
+"t": "[breathless] Und es war nur Friedrichs Hand, die mich vor dem Fallen bewahrte! [dryly] Da hing ich nun über dem Nichts, und er sah mit zusammengebissenen Zähnen zu mir herunter:",
+"p": 0.4
+},
+"II-574f50ff": {
+"t": "[dryly] Dafür will ich ein Lied. Über mich.",
+"p": 0.3
+},
+"II-e121d8d2": {
+"t": "[pompous] Eine Strophe.",
+"p": 0.3
+},
+"II-655d1030": {
+"t": "[deadpan] Ich kann auch loslassen.",
+"p": 0.4
+},
+"II-d1dcde9d": {
+"t": "[panicked] Drei Strophen! Mit Refrain!",
+"p": 0.2
+},
+"II-8ff3c847": {
+"t": "[quietly] Ein paar Spinnen stellten sich uns trotz aller Mühe, unerkannt zu bleiben, doch in den Weg. [hushed] Erst ein Zittern im Netz, dann ein Klicken, dann kamen sie: haarig, schnell und mit zu vielen Augen. [dryly] Echo verzog das Gesicht:",
+"p": 1.4
+},
+"II-a976c856": {
+"t": "[grumpy] Acht Beine. Wozu braucht irgendwer acht Beine?",
+"p": 0.3
+},
+"II-93af624b": {
+"t": "[proudly] Ezekiel und Friedrich sorgten mit einigen perfekten Treffern schnell für den Sieg über die Achtbeiner. Pfeil, Dolch, Pfeil. [amused] Rex bellte jede tote Spinne noch einmal an, sicherheitshalber.",
+"p": 0.0
+},
+"II-3b8ea7c9": {
+"t": "[hushed] Unterwegs hingen Kokons in den Netzen, groß wie Weinfässer, die meisten still. [quietly] Einer nicht. [amused] Aus seinem Inneren drang eine gedämpfte, ziemlich hohe Stimme:",
+"p": 0.0
+},
+"II-bf21ea0e": {
+"t": "[panicked] Hallo? Ist da wer? Bitte nicht fressen! Ich schmecke furchtbar!",
+"p": 0.3
+},
+"II-7012517c": {
+"t": "[deadpan] Sagen sie alle.",
+"p": 0.6
+},
+"II-8bec0e90": {
+"t": "[amused] Wir schnitten den Kokon auf, und heraus purzelte, verklebt von Kopf bis Fuß, ein Gnom: gefangen, aber noch am Leben.",
+"p": 0.0
+},
+"II-d4710c72": {
+"t": "[breathless] Fagas! Ich heiße Fagas. Danke, danke. [relieved] Ihr seid keine Spinnen. Das ist schon mal sehr gut.",
+"p": 0.4
+},
+"II-cbda2905": {
+"t": "[warmly] Er erzählte uns, dass er und sein Trupp ausgesandt worden waren, um ein Grab zu finden. Arafil, einer der Magier des Roten Sitzes, hatte ihnen den Auftrag erteilt.",
+"p": 0.0
+},
+"II-4b289e4c": {
+"t": "[curious] Es handelte sich, so erzählte Fagas weiter, um ein ganz besonderes Grab, [hushed] und dabei senkte er die Stimme:",
+"p": 0.0
+},
+"II-cf7f377c": {
+"t": "[hushed] Die Ruhestätte der Magierin Khaem. Eine Netherese! Vor dreitausend Jahren hat sie gelebt. [awed] Eine Meisterin des magischen Fadens, aus einer Hochkultur, die längst vergangen ist.",
+"p": 0.4
+},
+"II-f77a3797": {
+"t": "[dryly] Echo witterte sofort einen Schatz.",
+"p": 0.0
+},
+"II-962289b5": {
+"t": "[curious] Dreitausend Jahre. Mit Grabbeigaben?",
+"p": 0.3
+},
+"II-0b3da7f1": {
+"t": "[hesitant] Ähm … vermutlich?",
+"p": 0.5
+},
+"II-b4ed5d9e": {
+"t": "[firm] Du kommst mit.",
+"p": 0.4
+},
+"II-e780059a": {
+"t": "[warmly] Und so schloss sich Fagas uns an. [dryly] Kurzzeitig zumindest.",
+"p": 0.0
+},
+"II-01954eb7": {
+"t": "[awed] Der Weg durch das Unterreich zeigte sich nun von einer überraschend schönen Seite: funkelnde Flüsse, leuchtende Pilze in Violett und Grün, ein ganzes Reich in sanftem Licht. [softly] Friedrich blieb stehen:",
+"p": 1.4
+},
+"II-f65c3bb3": {
+"t": "[awed] Wer hätte gedacht, dass es so was hier unten gibt.",
+"p": 0.4
+},
+"II-9fd13e02": {
+"t": "[dryly] Echo hatte nur eine Warnung für uns:",
+"p": 0.6
+},
+"II-68c5715b": {
+"t": "[grumpy] Fasst die Pilze nicht an. Die Hälfte davon frisst euch.",
+"p": 0.3
+},
+"II-7615740c": {
+"t": "[wistful] Für einen Augenblick vergaß ich fast, wo wir waren. [serious] Es dauerte jedoch nicht lange, bis sich uns zuerst Spinnenmonster und später auch noch Ettercaps in den Weg stellten: bucklige Spinnenwesen mit Giftklauen. [dramatic] Wir erschlugen sie alle und kämpften uns unseren Weg tiefer in die Unterwelt.",
+"p": 0.0
+},
+"II-1dad8fcc": {
+"t": "[serious] Einer der Kämpfe fand in einer Ruine statt: einer halb eingebrochenen Siedlung, die bis auf die letzten Häuser im tiefen Schwarz des Abgrunds verschwunden war. Nur dicke Spinnennetze hielten diese letzten Häuser noch fest. [nervous] Bei jedem Schritt knarrte das Holz, bei jedem Hieb schwankte das ganze Haus. [quickly] Friedrich rief:",
+"p": 1.4
+},
+"II-23d54ac3": {
+"t": "[shouting] Nicht alle auf eine Seite! Verteilt euch!",
+"p": 0.3
+},
+"II-174935be": {
+"t": "[annoyed] Sag das den Ettercaps!",
+"p": 0.2
+},
+"II-c9a1cd53": {
+"t": "[hushed] Ein falscher Schritt, und es wäre hinab ins Nichts gegangen.",
+"p": 0.0
+},
+"II-58b0b07c": {
+"t": "[curious] In einem tempelähnlichen Haus entdeckte unsere Truppe eine weitere Spinnenstatue. [mischievously] Ich sah Echo an. Echo sah mich an.",
+"p": 0.0
+},
+"II-23fc267e": {
+"t": "[mischievously] Du weißt, was zu tun ist.",
+"p": 0.6
+},
+"II-5c7daf73": {
+"t": "[amused] Und als auch diese Statue ihr neues Make-up bekam, [surprised] tat sich ganz zufällig ein Geheimgang auf!",
+"p": 0.0
+},
+"II-a7b91130": {
+"t": "[smug] Seht ihr? Kunst öffnet Türen.",
+"p": 1.0
+},
+"II-2130eebd": {
+"t": "[deadpan] Du hast auf einen Mechanismus gedrückt, Barradin.",
+"p": 0.5
+},
+"II-18ed65cd": {
+"t": "[quietly] Kaum hatten wir den Gang betreten, erklang eine Stimme. [hushed] Nicht in den Ohren. In unseren Köpfen.",
+"p": 1.5
+},
+"II-a5d88671": {
+"t": "[whispers] Helft mir … bitte … [desperate] holt mich hier raus …",
+"p": 0.8
+},
+"II-47fdcbb7": {
+"t": "[hushed] Friedrich blieb wie angewurzelt stehen.",
+"p": 0.0
+},
+"II-43223139": {
+"t": "[nervous] Habt ihr das auch gehört?",
+"p": 0.4
+},
+"II-6c226bb3": {
+"t": "[quietly] Ezekiel nickte. Nach einer Weile:",
+"p": 0.6
+},
+"II-4fbc6a3f": {
+"t": "[whispers] Ja.",
+"p": 0.8
+},
+"II-ffe3ec31": {
+"t": "[quietly] Mir lief es eiskalt den Rücken hinunter. Wessen Stimme das war, ist bis heute ein Geheimnis. [curious] Der magische Faden, so schien es, war an diesem Ort verdreht. Ich spürte es in den Fingerspitzen, wie eine Saite, die falsch gestimmt ist und trotzdem weiterklingt. [hushed] Vorsichtig ging es tiefer in das verzauberte Grab, bis hinter einer Statue ein versteckter Schalter auftauchte. [dryly] Echo hatte die Hand schon ausgestreckt.",
+"p": 0.0
+},
+"II-9da89d7f": {
+"t": "[anxious] Echo, warte …",
+"p": 0.3
+},
+"II-c81bb293": {
+"t": "[deadpan] Zu spät. [scared] Eine geisterhafte Gestalt erschien, bleich und durchscheinend, und sprach in unverständlichen Worten.",
+"p": 1.2
+},
+"II-dd02182f": {
+"t": "[scared] Dann formte unheilige Energie einen furchterregenden Gegner: einen Wraith, einen Schatten mit Krallen, kälter als jedes Grab. [quickly] Echo schrie:",
+"p": 1.6
+},
+"II-941cd514": {
+"t": "[shouting] Lasst euch nicht berühren! Der saugt euch das Leben aus!",
+"p": 0.3
+},
+"II-29814e65": {
+"t": "[dramatic] Noch bevor jemand reagieren konnte, wirbelte der Wraith herum, auf Fagas zu, und rammte dem kleinen Gnom seine Krallen in den Bauch. [sorrowful] Fagas sackte zu Boden. Mit letzter Kraft röchelte er:",
+"p": 1.2
+},
+"II-1e261a3b": {
+"t": "[pained] Das … Grab …",
+"p": 0.6
+},
+"II-203a8d5e": {
+"t": "[sorrowful] Dann fiel er flach auf den Steinboden und rührte sich nicht mehr. [quietly] Sekunden später breitete sich eine Lache aus Blut unter ihm aus.",
+"p": 1.5
+},
+"II-b61eb6ca": {
+"t": "[desperate] Wir griffen den Wraith an, mit Magie und mit unseren Waffen, doch keiner unserer Angriffe zeigte wirklich Wirkung.",
+"p": 0.0
+},
+"II-a25f833d": {
+"t": "[sad] Fagas' letzte Worte ließen mich nicht los. [excited] Das Grab! Das musste einen Grund haben! [quickly] Im Nebenraum sah ich ein großes Grab und rannte darauf zu. Ich stemmte den schweren Deckel des Steinsargs zur Seite. [awed] Im Inneren lag ein altes Skelett, und in seinem toten Griff ein prächtiges Schwert.",
+"p": 0.0
+},
+"II-a9a8f2e9": {
+"t": "[quickly] Ich riss es ihm aus den Knochenfingern:",
+"p": 1.4
+},
+"II-01f04ecb": {
+"t": "[shouting] Ezekiel! Fang!",
+"p": 0.3
+},
+"II-8b3f0bdf": {
+"t": "[quickly] Ich warf es ihm zu. Ezekiel fing es am Griff, holte im selben Atemzug aus und schlug nach dem Geist.",
+"p": 0.0
+},
+"II-78daab82": {
+"t": "[dramatic] Wo die Klinge durch die gespenstischen Fetzen schnitt, schoss ein Lichtstrahl hervor. [quickly] Der Wraith schrie und schlug nach Ezekiel, doch der tauchte gekonnt unter dem Angriff weg und traf ihn mit einem zweiten Schlag in den Rücken. [triumphant] Der Wraith zuckte panisch, und mit einem letzten, markerschütternden Schrei verpuffte er.",
+"p": 1.2
+},
+"II-f78e7a11": {
+"t": "[awed] Als Ezekiel das Schwert emporhob, um es genauer zu betrachten, wurde es hell im Grab. Kein Fackelschein, sondern ein warmes Licht wie ein Sonnenaufgang, mitten im Unterreich, wo seit Jahrtausenden keine Sonne geschienen hatte. [softly] Rex blinzelte. [sad] Ich sah zu Fagas hinüber. Er hätte das sehen sollen. [dryly] Echo trat einen halben Schritt näher:",
+"p": 2.2
+},
+"II-561beaa0": {
+"t": "[mischievously] Wenn du's nicht willst …",
+"p": 0.4
+},
+"II-3adb30d1": {
+"t": "[coldly] Ich will es.",
+"p": 0.6
+},
+"II-cd2f472f": {
+"t": "[reverent] Ehrfürchtig strich er mit den Fingern über die Klinge und entdeckte eine kleine Gravur mit dem Namen des Schwertes: [awed] Dawnbringer.",
+"p": 0.0
+},
+"II-c1cdab02": {
+"t": "[curious] Zum ersten Mal konnte ich in Ezekiels sonst so regungslosem Gesicht etwas lesen: Vorfreude. [hesitant] Friedrich fragte vorsichtig:",
+"p": 0.0
+},
+"II-45086648": {
+"t": "[hesitant] Und gegen wen willst du es führen?",
+"p": 0.4
+},
+"II-1cdbadeb": {
+"t": "[coldly] Jeden.",
+"p": 0.9
+},
+"II-4417802a": {
+"t": "[quietly] Dann lachte er. [hushed] Leise. [awed] Ich hatte ihn noch nie lachen hören.",
+"p": 1.5
+},
+"II-84e36f31": {
+"t": "[hushed] Nachdem wir das Grab verlassen hatten, ging es über weitere Spinnweben noch tiefer in die Höhlen hinein, bis sich vor uns ein unterirdischer See auftat, schwarz und still, das andere Ufer im Dunkel verschwunden. Es roch nach Algen und nassem Stein. [curious] Am Ufer begegnete die Gruppe einigen Kuo-Toa, einem Volk von Fischmenschen: glänzende Schuppen, große, starre Augen und Speere in den Händen. [quietly] Ezekiels Hand wanderte zum Schwertgriff. Echo hob langsam die Hände.",
+"p": 1.5
+},
+"II-b3e373ed": {
+"t": "[gruffly] Ruhig. Die sind nervöser als wir.",
+"p": 0.6
+},
+"II-7adf05fc": {
+"t": "[curious] Ihr Anführer trat vor, in einer Robe, die einmal prächtig gewesen sein musste, mit einem Stab, an dem Muscheln klapperten. [amused] Seine Stimme klang, als spräche er durch einen Eimer Wasser, und sie war voller Wärme:",
+"p": 0.0
+},
+"II-6e9eb3bd": {
+"t": "[warmly] Fürchtet euch nicht, Fremde. Ploopploopeen grüßt euch, Erzpriester dieses Volkes.",
+"p": 0.4
+},
+"II-21489ef1": {
+"t": "[warmly] So lernten wir Ploopploopeen kennen. [proudly] Ich verbeugte mich, wie es sich gehört:",
+"p": 0.6
+},
+"II-fb87ad9b": {
+"t": "[theatrical] Barradin, Barde, zu Euren Diensten, Blublupin.",
+"p": 0.35
+},
+"II-8760c991": {
+"t": "[slowly] Ploop … ploop … een.",
+"p": 0.5
+},
+"II-b8c2c26e": {
+"t": "[cheerful] Genau. Blublupin.",
+"p": 0.4
+},
+"II-b8ddfec4": {
+"t": "[dryly] Ich habe ihn eine ganze Weile Blublupin genannt. Er hat es mir nicht übelgenommen. [deadpan] Glaube ich. [sad] Dann bat er uns um Hilfe, und seine großen Augen wurden traurig:",
+"p": 0.9
+},
+"II-2c3fe942": {
+"t": "[sorrowful] Meine Stadt liegt am Rand des Sees. Ein Teil meines Volkes betet einen falschen Gott an. [hushed] Demogorgon.",
+"p": 0.4
+},
+"II-2a7bdedd": {
+"t": "[hushed] Der Name hing über dem Wasser wie Nebel. [dryly] Dann folgte, was bei uns immer folgt: eine Diskussion.",
+"p": 1.4
+},
+"II-85a66bbf": {
+"t": "[grumpy] Und was springt für uns raus?",
+"p": 0.6
+},
+"II-10b706ed": {
+"t": "[firm] Er bittet um Hilfe, Echo.",
+"p": 0.35
+},
+"II-74ed1d89": {
+"t": "[quietly] Ezekiel legte die Hand an Dawnbringer.",
+"p": 0.0
+},
+"II-2b68e23b": {
+"t": "[coldly] Und wenn er lügt?",
+"p": 0.5
+},
+"II-41473a3e": {
+"t": "[warmly] Schau ihn dir an. Der lügt nicht.",
+"p": 0.5
+},
+"II-4c07c095": {
+"t": "[amused] Ploopploopeen wartete geduldig, und seine großen Augen wanderten von einem zum anderen. Nach einiger Diskussion stand fest: Wir vertrauen ihm. [warmly] Er klatschte in seine Schwimmhände:",
+"p": 0.0
+},
+"II-dbcf2091": {
+"t": "[excited] Gut! Sehr gut! Freunde!",
+"p": 0.35
+},
+"II-e3b761c9": {
+"t": "[mischievously] Ploopploopeens Plan war so einfach wie gewagt: Er wollte uns zum Schein fesseln und so in die Stadt schmuggeln. [amused] Als die Seile saßen, betrachtete er uns prüfend:",
+"p": 0.6
+},
+"II-c364cccf": {
+"t": "[cheerful] Und jetzt alle: traurig gucken.",
+"p": 0.4
+},
+"II-14d37efb": {
+"t": "[deadpan] Ich guck immer so.",
+"p": 0.6
+},
+"II-1ef42a31": {
+"t": "[amused] Rex ließ sofort die Ohren hängen.",
+"p": 0.9
+},
+"II-6130ba67": {
+"t": "[quietly] Der Plan ging auf, zumindest bis wir das Stadtzentrum erreichten. Schiefe Hütten aus Treibholz und Muschelkalk, Netze überall, und überall diese Augen, die uns anstarrten. [dryly] Gefesselt durch eine fremde Stadt zu laufen, ist übrigens kein Vergnügen, selbst wenn die Fesseln nur gespielt sind. [hushed] Ich raunte nach vorne:",
+"p": 1.5
+},
+"II-838cdd99": {
+"t": "[whispers] Blublupin, wie weit noch?",
+"p": 0.35
+},
+"II-d2a553e7": {
+"t": "[warmly] Ploopploopeen. Nicht mehr weit, Freund.",
+"p": 0.5
+},
+"II-1d8a979c": {
+"t": "[curious] Kurz vor dem Zentrum der Stadt stand eine Statue: ein mächtig aussehender Kuo-Toa, der einen Speer in die Höhe reckte. [dryly] Jeder Kuo-Toa, der an ihr vorbeiging, würgte und spuckte einen Schwall Erbrochenes vor ihre Füße. [amused] Friedrich ahnte schon, was jetzt kam:",
+"p": 0.0
+},
+"II-7313def6": {
+"t": "[sighs] Barradin … nein.",
+"p": 0.4
+},
+"II-e799f3fd": {
+"t": "[proudly] Ich zögerte keinen Moment, tat es den einheimischen Fischwesen gleich [deadpan] und kotzte die Statue an.",
+"p": 0.8
+},
+"II-a4b6d9ae": {
+"t": "[dryly] Die Kuo-Toa beachteten es nicht weiter und brachten uns auf einen großen Platz in der Stadt. Nur ein Gebäude trennte uns vom See. Es roch stark nach altem Fisch und Algen, und überall blubberte und platschte es, wenn die Fischwesen miteinander sprachen.",
+"p": 1.0
+},
+"II-8b1e38b8": {
+"t": "[suspicious] Auf dem Platz standen sich Ploopploopeen und die falsche Erzpriesterin gegenüber, beide umringt von ihren Anhängern, die sich mit bösen, starren Augen ansahen.",
+"p": 0.0
+},
+"II-47f5db4e": {
+"t": "[quickly] Es dauerte nur Augenblicke, bis ein Kampf ausbrach. Die falsche Erzpriesterin kreischte:",
+"p": 1.2
+},
+"II-f3212c21": {
+"t": "[shouting] Verräter! Ergreift sie! Für Demogorgon!",
+"p": 0.3
+},
+"II-68369687": {
+"t": "[shouting] Jetzt, Freunde! Die Fesseln!",
+"p": 0.3
+},
+"II-3ea84e6c": {
+"t": "[dramatic] Die falsche Erzpriesterin griff Ploopploopeen an, weitere Fischmenschen mischten sich ein, und im Nu herrschte das reinste Chaos: Speere, Netze, glitschige Leiber, und mittendrin wir, die Seile noch halb an den Handgelenken. [amused] Echo brüllte vor Freude:",
+"p": 0.0
+},
+"II-e09acefd": {
+"t": "[triumphant] Endlich!",
+"p": 0.3
+},
+"II-943ce5e3": {
+"t": "[quickly] Mitten im Getümmel tauchte zwischen den Gegnern ein gefesselter Zwerg auf, [amused] verschnürt wie ein Räucherfisch. Friedrich sah ihn zuerst:",
+"p": 0.5
+},
+"II-46161736": {
+"t": "[shouting] Da! Ein Gefangener! Ezekiel, die Seile!",
+"p": 0.3
+},
+"II-4dbbcec4": {
+"t": "[quickly] Noch während des Kampfes gelang es uns, ihn zu befreien, und kaum waren die Seile durch, sprudelte es aus ihm heraus:",
+"p": 0.5
+},
+"II-3c01ba23": {
+"t": "[breathless] Kardal! Ich bin Kardal, ein Späher meiner Stadt! Diese Fischköpfe haben mich gefangen! Gebt mir irgendwas, eine Axt, einen Stock, egal!",
+"p": 0.3
+},
+"II-a41679a1": {
+"t": "[dryly] Ein ganz einfacher Späher, behauptete er. [short pause] [mischievously] Merkt euch das.",
+"p": 1.0
+},
+"II-aad9c84c": {
+"t": "[hushed] Und dann begann der See zu kochen. Erst Blasen, dann Wellen, die gegen die Stege schlugen, dann ein Grollen, das man nicht nur mit den Ohren hörte, sondern auch im Bauch spürte. [quietly] Selbst die Kuo-Toa hielten inne. Neben mir flüsterte Ploopploopeen:",
+"p": 2.0
+},
+"II-2ec39573": {
+"t": "[whispers] Nein … nein, nein …",
+"p": 0.4
+},
+"II-42936f1a": {
+"t": "[awed] Dann stieg etwas aus dem See empor: [pause] [hushed] Demogorgon. [awed] Ein Dämonenfürst, ein wahrhaftiger Dämonengott. Zwei Köpfe, zwei Arme mit je zwei Tentakeln, ein langer Schwanz und zwei Beine, die die Erde erzittern ließen.",
+"p": 1.5
+},
+"II-31da5712": {
+"t": "[dramatic] Er stieß einen gottlos lauten, grauenhaften Schrei aus, alle Magie erlosch, und uns schlotterten die Knie. [quietly] Echo starrte auf seine Hände, in denen eben noch Blitze geknistert hatten:",
+"p": 2.0
+},
+"II-14661a07": {
+"t": "[hushed] Weg. Einfach weg.",
+"p": 0.5
+},
+"II-836347dd": {
+"t": "[sheepish] Ich gebe zu: Meine Knie schlotterten auch. [short pause] [proudly] Aber nur aus Solidarität.",
+"p": 1.0
+},
+"II-2071b680": {
+"t": "[proudly] Friedrich ließ sich davon nicht beirren. Er zog einen Pfeil aus dem Köcher, als stünde er auf einer Waldlichtung.",
+"p": 0.9
+},
+"II-a0eb7bdc": {
+"t": "[dryly] Na gut. Dann eben so.",
+"p": 0.5
+},
+"II-8ed26031": {
+"t": "[dramatic] Er legte an und schoss einen Pfeil auf Demogorgon. [short pause] [deadpan] Die Wirkung: keine. Absolut keine. [amused] Trotzdem behauptet Friedrich seitdem steif und fest, er habe einen Gott geboxt.",
+"p": 1.2
+},
+"II-8fc4d4eb": {
+"t": "[proudly] Er hat gezuckt. Und vor Schmerz geblinzelt.",
+"p": 0.6
+},
+"II-f8afedd0": {
+"t": "[grumpy] Er hat zwei Köpfe, Friedrich. Einer blinzelt immer.",
+"p": 0.4
+},
+"II-578bea10": {
+"t": "[dramatic] Das Ungeheuer machte sich daran, die Stadt zu zerstören. Mit seinen Tentakelarmen zermalmte es Gebäude, Gegner und Verbündete gleichermaßen. Hütten aus Treibholz zerbarsten wie trockenes Laub. [quickly] Echo brüllte:",
+"p": 1.5
+},
+"II-3d1f5a05": {
+"t": "[shouting] Weg hier! Da vorne, Boote!",
+"p": 0.3
+},
+"II-8d39c45f": {
+"t": "[panicked] Rex! Lauf, Junge, lauf!",
+"p": 0.25
+},
+"II-a489e48a": {
+"t": "[breathless] Wir rannten, wie ich noch nie gerannt bin, über Stege und Netze, und erreichten mit viel Glück ein Boot. [relieved] Kardal entkam mit uns.",
+"p": 0.0
+},
+"II-198d7339": {
+"t": "[quietly] Vom Boot aus sah ich zurück. Ploopploopeen stand noch auf den Stufen seines Tempels, die Arme erhoben, als könnte er den Dämon mit einem Gebet aufhalten. [solemn] Seine Stimme trug über das Wasser:",
+"p": 1.0
+},
+"II-1ee75e4f": {
+"t": "[shouting] Zurück in die Tiefe, falscher Gott!",
+"p": 0.5
+},
+"II-51d407fa": {
+"t": "[quietly] Dann fiel ein Tentakel, [short pause] und der Tempel war nicht mehr da.",
+"p": 1.2
+},
+"II-4047c01c": {
+"t": "[sad] Ich hörte mich selbst flüstern:",
+"p": 2.5
+},
+"II-0d180693": {
+"t": "[whispers] Ploopploopeen.",
+"p": 0.6
+},
+"II-1c58b1cb": {
+"t": "[sorrowful] Zum ersten Mal sprach ich seinen Namen richtig aus. Von seinem Volk und ihrer Stadt blieben nur Ruinen, die langsam im aufgewühlten See versanken. [quietly] Niemand im Boot sagte etwas. Friedrich legte mir die Hand auf die Schulter. Echo starrte aufs Wasser. Rex drückte sich an meine Beine. [sad] Ich hatte ihm noch ein Lied versprochen. [pause] Es wurde ein Klagelied.",
+"p": 2.0
+},
+"II-c7b8f146": {
+"t": "[tired] Die Flucht über den See dauerte lange. [hopeful] Irgendwann hörte Kardal auf, sich umzusehen, und zeigte nach vorne:",
+"p": 2.0
+},
+"II-4bd62b96": {
+"t": "[relieved] Seht ihr die Lichter? Das ist Gracklstugh.",
+"p": 0.4
+},
+"II-47979a43": {
+"t": "[awed] Vor uns lag ein atemberaubender Anblick: eine in den Fels gehauene Festung, die hinter gewaltigen Stadtmauern über der Stadt Gracklstugh emporragte. Hunderte Feuer glommen in der Felswand, und von weit her hörte man das Hämmern, gleichmäßig wie ein Herzschlag. [dryly] Echo brummte nur:",
+"p": 0.8
+},
+"II-73ae050a": {
+"t": "[grumpy] Noch mehr Stein.",
+"p": 0.4
+},
+"II-b7da853f": {
+"t": "[wistful] Nach allem, was hinter uns lag, war es fast zu schön, um wahr zu sein.",
+"p": 0.9
+},
+"II-45e569b5": {
+"t": "[curious] Am Stadttor standen grimmige Wachen, grau und gedrungen, mit Bärten wie Stahlwolle und Blicken, die Fremde nicht mochten. Sie hoben die Hellebarden, [suspicious] doch dann trat Kardal vor und wechselte ein paar leise Worte mit ihnen. Danach ließen sie uns ohne Weiteres passieren. Eine Wache nickte sogar, fast ehrfürchtig. [dryly] Schon das hätte mich stutzig machen sollen. Friedrich flüsterte mir zu:",
+"p": 0.0
+},
+"II-5c5e2a23": {
+"t": "[whispers] Für einen einfachen Späher hat der aber gute Freunde.",
+"p": 0.35
+},
+"II-3dc9e9fd": {
+"t": "[cheerful] Hinter dem Tor lag ein Marktplatz, einer der großen Handelsplätze der Stadt: Ambosse, Klingen, Ketten, Erz in Körben, und über allem der Geruch von heißem Metall. [amused] Echo blieb an jedem Stand stehen und fragte jeden Händler dasselbe:",
+"p": 1.4
+},
+"II-0a46df4a": {
+"t": "[gruffly] Gundren! Kennst du einen Gundren? Zwerg, schwarzer Bart?",
+"p": 0.35
+},
+"II-39187f78": {
+"t": "[bored] Nein.",
+"p": 0.5
+},
+"II-ae9b74f7": {
+"t": "[amused] Friedrich zog ihn am Ärmel:",
+"p": 0.5
+},
+"II-101466cc": {
+"t": "[dryly] Echo. Gundren ist in Neverwinter.",
+"p": 0.3
+},
+"II-d778c76e": {
+"t": "[grumpy] Weiß ich.",
+"p": 0.5
+},
+"II-70726918": {
+"t": "[amused] Dann lachte er dreckig und ging zum nächsten Stand.",
+"p": 0.6
+},
+"II-babe005e": {
+"t": "[warmly] Lange hielten wir uns dort nicht auf, sondern steuerten geradewegs eine Taverne an und aßen erst einmal ausgiebig und richtig lecker: Pilzbraten und schwarzes Brot. [amused] Echo und Friedrich tranken ein Bier, so dunkel und dick, dass der Löffel fast darin stehen blieb. Ich ließ mir einen Saft aus gepressten, mit Honig gesüßten Algen schmecken, [dryly] und Ezekiel trank wie immer Wasser. [warmly] Rex bekam unter dem Tisch mehr ab als jeder von uns. Echo sprach mit vollem Mund:",
+"p": 1.5
+},
+"II-6a5e81e8": {
+"t": "[gruffly] Was auch immer das ist … noch eins.",
+"p": 0.35
+},
+"II-8e809f2e": {
+"t": "[warmly] Nach Fischmenschen, Dämonengott und Flucht über den See hatten wir uns das redlich verdient.",
+"p": 0.8
+},
+"II-ea8bff65": {
+"t": "[surprised] Mitten im Essen traten plötzlich vier gerüstete Gestalten ein. [hushed] Die ganze Taverne wurde still. Sie marschierten auf unseren Tisch zu, Ezekiel hatte die Hand schon am Dolch, [short pause] und dann salutierten sie. [deadpan] Vor Kardal. [amused] Der legte seinen Löffel hin und räusperte sich:",
+"p": 1.5
+},
+"II-402fbe29": {
+"t": "[sheepish] Ah. Ja. Darüber wollte ich noch mit euch reden.",
+"p": 0.4
+},
+"II-a0272ff8": {
+"t": "[theatrical] Da kam die Wahrheit ans Licht: Unser bescheidener Späher ist in Wahrheit der Sohn des Königs! Ein Prinz. [smug] Ich hatte es ja geahnt.",
+"p": 0.8
+},
+"II-367687a9": {
+"t": "[deadpan] Hattest du nicht.",
+"p": 0.5
+},
+"II-88f94103": {
+"t": "[sheepish] Also, fast.",
+"p": 0.8
+},
+"II-ad2b70d8": {
+"t": "[awed] Die Soldaten brachten uns in eine Feste, durch Hallen, deren Decken das Fackellicht nicht erreichte, vor König Horga Stahl den Fünften. [dryly] Kardal kniete vor seinem Vater nieder, und wir versuchten, nicht allzu staubig auszusehen. [proudly] Wie es sich für einen Barden gehört, stimmte ich einen Gesang an und erzählte dem König von Demogorgon und davon, wie wir seinen Sohn gerettet hatten:",
+"p": 1.5
+},
+"II-31272315": {
+"t": "[theatrical] Aus schwarzem See stieg der Gott, voll Tentakeln und Grauen, doch Euer Sohn ward gerettet von Helden, die sich was trauen!",
+"p": 0.4
+},
+"II-2b84853c": {
+"t": "[dryly] Der König hörte zu, ohne eine Miene zu verziehen. [serious] Dann erlaubte er uns, in der Stadt zu bleiben, mit einer Stimme wie Steinschlag:",
+"p": 0.9
+},
+"II-e521ec2e": {
+"t": "[solemn] Ihr habt meinen Sohn zurückgebracht. Bleibt.",
+"p": 0.4
+},
+"II-8cfadc35": {
+"t": "[mischievously] Ob das am Gesang lag oder an der Rettung seines Sohnes, lassen wir einfach offen.",
+"p": 0.9
+},
+"II-7066061d": {
+"t": "[tired] Leicht fiel uns der Aufenthalt allerdings nicht. Die Luft hier unten setzte uns zu, schwer und warm und so dick, dass man sie fast kauen konnte. Vor allem Echo. [dryly] Er wachte mit deutlichen Zeichen von Erschöpfung auf: Ringe unter den Augen und eine Laune, die selbst für seine Verhältnisse finster war. Friedrich musterte ihn:",
+"p": 0.0
+},
+"II-b6d42552": {
+"t": "[dryly] Echo? Du siehst scheiße aus.",
+"p": 0.35
+},
+"II-ff5e1c03": {
+"t": "[grumpy] Danke. Du auch.",
+"p": 0.4
+},
+"II-3d2045f2": {
+"t": "[wistful] Unserem Druiden fehlte der Himmel. Beim Frühstück saß er am Fenster und starrte hinauf zur Felsdecke, wo eigentlich Wolken und Sterne hätten sein sollen. [quietly] Einmal hörte ich ihn murmeln:",
+"p": 1.0
+},
+"II-99c8841f": {
+"t": "[sad] Kein Wind. Kein Regen. Nur Stein.",
+"p": 0.5
+},
+"II-7c79398e": {
+"t": "[tired] Dazu kam der Gestank der Stadt: Ruß und Schwefel aus unzähligen Schmieden, der in jeder Gasse hing und den er einfach nicht mehr aus der Nase bekam. [tenderly] Rex legte sich zu ihm, den Kopf auf seinem Knie, und Echo schob ihn nicht weg. [wistful] Ein Druide ohne Himmel und frische Luft, das ist wie ein Barde ohne Publikum.",
+"p": 1.4
+},
+"II-2002cb2f": {
+"t": "[mischievously] Was tut eine Heldengruppe in einer fremden Stadt? [short pause] [cheerful] Richtig: einkaufen.",
+"p": 0.0
+},
+"II-05747f8a": {
+"t": "[enthusiastic] Wir gingen zum Markt der Klingen, dem größten Marktplatz der Stadt. Hier tummelten sich die unterschiedlichsten Händler mit allerlei Waren. Bei einem standen Fläschchen in allen Farben, dazu Kräuter und getrocknete Pilze an Schnüren. [awed] Bei einem anderen hingen unzählige Waffen in Halterungen und Ständern, deren Klingen sogar im fahlen Licht der Unterwelt blitzten. [excited] Ein dritter verkaufte Musikinstrumente. Hier gab es wirklich alles!",
+"p": 1.2
+},
+"II-51096905": {
+"t": "[proudly] Wir deckten uns mit Heiltränken ein, und ich erstand eine Flöte der Illusionen. Echo und Friedrich kauften ein paar Zaubertränke. [dryly] Ich hatte die Flöte kaum in der Hand, da kam schon Friedrich:",
+"p": 0.0
+},
+"II-3066aa22": {
+"t": "[sternly] Barradin. Nicht hier drin.",
+"p": 0.3
+},
+"II-fd52ff65": {
+"t": "[mischievously] Natürlich konnte ich nicht widerstehen und spielte noch am Stand darauf: [amused] Über der Auslage erschien ein winziger Demogorgon, kaum größer als meine Hand, der eine Miniaturstadt in Schutt und Asche legte. Echo lachte dreckig:",
+"p": 1.5
+},
+"II-bf3356e5": {
+"t": "[laughs] Ha! Lass ihn den Händler fressen!",
+"p": 0.3
+},
+"II-86c55450": {
+"t": "[deadpan] Der Händler verzog keine Miene.",
+"p": 0.7
+},
+"II-4673cd45": {
+"t": "[bored] Kaufen oder raus.",
+"p": 0.4
+},
+"II-4e0f8f38": {
+"t": "[smug] Man weiß eben nie, wann man ein Publikum verzaubern muss. [short pause] [mischievously] Oder einen Gegner.",
+"p": 1.0
+},
+"II-1b9593b0": {
+"t": "[amused] Die Waffenhändler konnten ihren Blick kaum von Ezekiels Schwertgriff nehmen, der auf seinem Rücken aus der Scheide ragte, [quietly] doch keiner traute sich, den grimmigen Darkin anzusprechen.",
+"p": 0.0
+},
+"II-9fba0ec1": {
+"t": "[cheerful] Wir schlenderten gerade weiter über den Markt der Klingen. Friedrich hatte an einem Stand ein weiteres Fläschchen mit irgendeiner magischen Tinktur gekauft, [surprised] als plötzlich Schreie und das Krachen von Häusern von der anderen Seite des Platzes zu hören waren. [dramatic] Der Boden bebte, und der Lärm wurde immer lauter.",
+"p": 1.4
+},
+"II-255ca4ae": {
+"t": "[dramatic] Und schon stand ein Riese vor uns, groß wie ein Haus, die Augen weit aufgerissen, und schlug blindlings um sich:",
+"p": 1.4
+},
+"II-f4c13d6b": {
+"t": "[furious] ZERSCHLAGEN! ALLES ZERSCHLAGEN!",
+"p": 0.3
+},
+"II-5861e348": {
+"t": "[growls] Den mach ich zu Asche!",
+"p": 0.3
+},
+"II-abd269ff": {
+"t": "[shouting] Nein! Nicht töten! Der ist nicht bei sich!",
+"p": 0.25
+},
+"II-0348cad3": {
+"t": "[dramatic] Mit vereinten Kräften gelang es uns, den Koloss in Schach zu halten. Friedrich träufelte den Trank, den er kurz zuvor gekauft hatte, über sein Schwert und schlug damit nach dem Riesen. Der schrie wütend auf und wollte gerade nach dem Druiden schlagen, [slowly] als seine Bewegungen langsamer wurden. Immer langsamer. [amused] Dann kippte er um wie ein gefällter Baum und riss dabei noch einen Stand voller Schöpfkellen mit.",
+"p": 0.0
+},
+"II-0c19cf2f": {
+"t": "[quickly] Ezekiel und ich verschwendeten keine Zeit und begannen sofort, den schlafenden Riesen mit einem Bootstau zu fesseln.",
+"p": 1.5
+},
+"II-2e1b268d": {
+"t": "[nervous] Kurz darauf bebte der Boden erneut, und schon erschien ein zweiter Riese. Echo hob schon die Hände, [warmly] doch dieser Riese kniete sich hin, ganz langsam, damit er niemanden zertrat, und dankte uns:",
+"p": 0.0
+},
+"II-292951f7": {
+"t": "[slowly] Danke … kleine Leute. Er ist … nicht so. Nie.",
+"p": 0.5
+},
+"II-f590dcbf": {
+"t": "[curious] Den Ausfall seines Artgenossen konnte er sich nicht erklären. Offenbar hatten ihn Stimmen in seinem Kopf dazu getrieben. [hushed] Stimmen im Kopf … Das kam mir unangenehm bekannt vor. Friedrich dachte offenbar dasselbe:",
+"p": 0.7
+},
+"II-0ee9feed": {
+"t": "[quietly] Wie im Grab.",
+"p": 0.4
+},
+"II-b5817e62": {
+"t": "[warmly] Der Riese erhob sich wieder und sprach langsam, als müsste er jedes Wort erst aus dem Fels hauen:",
+"p": 0.7
+},
+"II-85baf96b": {
+"t": "[slowly] Kommt. Der Steinsprecher … soll euch sehen.",
+"p": 0.4
+},
+"II-7d19d574": {
+"t": "[dryly] Es folgten ein paar weitere Plänkeleien in unserer Gruppe.",
+"p": 0.0
+},
+"II-96d9e3cd": {
+"t": "[grumpy] Ich sag ja nur …",
+"p": 0.5
+},
+"II-22e9757b": {
+"t": "[firm] Echo.",
+"p": 0.3
+},
+"II-2301f417": {
+"t": "[dryly] Die Einzelheiten erspare ich der Nachwelt. [warmly] Am Ende beschlossen wir, der Einladung zu folgen. Kardal führte uns in das Dorf der Riesen, eine eigene kleine Welt am Rand von Gracklstugh. [awed] Hier wird Stein gebrochen: Riesen schieben gewaltige Wagen voller Gestein und Erz durch die Gassen, als wären es Schubkarren, und jeder ihrer Schritte ließ den Boden unter unseren Stiefeln zittern.",
+"p": 0.8
+},
+"II-600ce33f": {
+"t": "[awed] Ich komm mir zum ersten Mal im Leben klein vor.",
+"p": 1.4
+},
+"II-c669e015": {
+"t": "[deadpan] Zum ersten Mal?",
+"p": 0.6
+},
+"II-c4f518b3": {
+"t": "[amused] Echo nutzte die Gelegenheit, den nächstbesten Riesen zu fragen, ob er Gundren kenne. Er stellte sich breitbeinig vor ihn, legte den Kopf in den Nacken und brüllte hinauf:",
+"p": 0.9
+},
+"II-e554e8c0": {
+"t": "[shouting] Gundren! Zwerg! Schwarzer Bart! Ungefähr knöchelhoch!",
+"p": 0.35
+},
+"II-7d52f93b": {
+"t": "[deadpan] Der Riese sah sehr lange und sehr weit nach unten.",
+"p": 0.8
+},
+"II-b8175b9a": {
+"t": "[slowly] … Nein.",
+"p": 0.9
+},
+"II-fde0dccd": {
+"t": "[warmly] Dafür bemerkte er, wie Rex neugierig an seinem Zeh schnupperte, der fast so groß war wie Rex selbst, und streichelte ihn daraufhin interessiert und liebevoll. [short pause] Mit einem Finger. [amused] Rex legte sich sofort auf den Rücken.",
+"p": 0.8
+},
+"II-a8cf60a4": {
+"t": "[tenderly] Guter … kleiner … Hund.",
+"p": 0.5
+},
+"II-1856c048": {
+"t": "[dryly] Rex hat in Gracklstugh offenbar mehr Freunde als wir alle zusammen.",
+"p": 0.9
+},
+"II-671c263f": {
+"t": "[reverent] Kaum waren wir in der Siedlung der Riesen angekommen, empfing uns schon der Steinsprecher Hgraam, älter als die anderen Riesen, die Haut wie verwitterter Granit. [serious] Er erzählte von einem alten Pakt zwischen den Riesen und dem König:",
+"p": 1.5
+},
+"II-a8da9540": {
+"t": "[solemn] Man lässt einander in Ruhe. Man achtet die Grenzen. Die Riesen in ihrem Teil. Die Zwerge in ihrem.",
+"p": 0.4
+},
+"II-8009cda9": {
+"t": "[curious] Die Riesen leben zwar in einer Enklave der Stadt, bleiben aber lieber unter sich. Mehr wollte Hgraam dazu nicht sagen. [serious] Dann wurde er ernst:",
+"p": 0.6
+},
+"II-b7b541e7": {
+"t": "[hushed] Etwas Böses regt sich. Etwas Unersättliches. [solemn] Und der Stein schreit.",
+"p": 0.4
+},
+"II-5bd694ba": {
+"t": "[proudly] Ich verneigte mich:",
+"p": 0.8
+},
+"II-ebc24d6e": {
+"t": "[curious] Verzeiht, ehrwürdiger Hgraam. Was genau regt sich? Und wo? Und warum schreit der Stein?",
+"p": 0.3
+},
+"II-e301700d": {
+"t": "[solemn] Der Stein … schreit.",
+"p": 0.8
+},
+"II-e40978a2": {
+"t": "[dryly] Mehr war aus ihm nicht herauszubekommen, denn Steinsprecher reden offenbar grundsätzlich in Rätseln. [smug] Ich kenne das. Ich nenne es Lyrik. [amused] Ein schreiender Stein, ein Riese mit Stimmen im Kopf … ganz schön laut bei diesen Riesen.",
+"p": 1.0
+},
+"II-0fa2df7f": {
+"t": "[serious] In einem letzten Versuch griff ich zu meiner Flöte der Illusionen.",
+"p": 0.0
+},
+"II-b5471348": {
+"t": "[dramatic] Ich ließ ein weiteres Mal Demogorgon erscheinen, diesmal in voller Größe und mit allen Tentakeln, damit Hgraam begreift, mit welcher Art von Gefahr wir es hier unten zu tun haben könnten. Selbst Rex klemmte den Schwanz ein. [dryly] Der Steinsprecher betrachtete den Dämon, nickte vage und sprach weiter in Rätseln. [deadpan] Ungefähr so gesprächig wie Ezekiel, wenn man ihn nach früher fragt.",
+"p": 1.8
+},
+"II-88ad812a": {
+"t": "[dryly] Hgraam war offenbar mit seinen eigenen Sorgen beschäftigt. Oder Riesen erschrecken einfach nicht so leicht. [sighs] Neue Antworten bekamen wir jedenfalls keine.",
+"p": 0.8
+},
+"II-859dfc0b": {
+"t": "[warmly] Zum Abschied sprach Hgraam noch einmal, und diesmal ganz ohne Rätsel:",
+"p": 0.0
+},
+"II-c6456adc": {
+"t": "[warmly] Ihr habt ihn aufgehalten. Und ihm nichts getan. Das vergessen Riesen nicht.",
+"p": 0.4
+},
+"II-77976bd8": {
+"t": "[awed] Dann schenkte uns Hgraam einen Steinsprecher-Kristall. [warmly] Die Ehre gebührt übrigens Friedrich: Er hatte den Rasenden mit dem Betäubungstrank ruhiggestellt, den er kurz vorher am Marktstand gekauft hatte. [amused] Darauf angesprochen, zuckte er nur mit den Schultern:",
+"p": 1.2
+},
+"II-cd725598": {
+"t": "[dryly] Stand ja drauf.",
+"p": 0.4
+},
+"II-60a3b670": {
+"t": "[grumpy] Ich hätte ihn angezündet.",
+"p": 0.5
+},
+"II-550e6f4f": {
+"t": "[deadpan] Ich weiß. Deswegen war ich ja schneller.",
+"p": 0.5
+},
+"II-77137f7d": {
+"t": "[amused] Manchmal ist Einkaufen eben doch eine Heldentat.",
+"p": 1.0
+},
+"II-b89d9226": {
+"t": "[mischievously] Zurück in der Schenke nahmen wir Kardal ins Verhör. Wir setzten ihn in die Mitte, Echo links, Ezekiel rechts. [menacing] Ezekiel ließ die Knöchel knacken.",
+"p": 1.2
+},
+"II-b35fdfde": {
+"t": "[smug] So, Prinz. Keine Geheimnisse mehr. Was müssen wir über diese Stadt wissen?",
+"p": 0.6
+},
+"II-40bf6d80": {
+"t": "[serious] Dass sie nicht nur aus Festung und Markt besteht. Ganz unten, in den Slums, da hausen die Ärmsten. [hushed] Wenn ihr wirklich wissen wollt …",
+"p": 0.5
+},
+"II-e920e3c7": {
+"t": "[suspicious] Weiter kam er nicht. Zwei Duergar-Priester in roten Roben traten an unseren Tisch und baten uns zu einem Gespräch. [dryly] Es klang nicht wie eine Bitte:",
+"p": 0.3
+},
+"II-b62a04c2": {
+"t": "[coldly] Wir sind die Bewahrer der Flamme. Wir dienen dem Meister der Flammen. Er will euch sehen.",
+"p": 0.4
+},
+"II-22b50562": {
+"t": "[gruffly] Und wenn wir nicht wollen?",
+"p": 0.5
+},
+"II-b2c17d71": {
+"t": "[threatening] Mitkommen.",
+"p": 0.6
+},
+"II-a4034891": {
+"t": "[dryly] Wer sich Meister der Flammen nennt, hat entweder einen sehr großen Ofen oder ein sehr großes Ego. [short pause] [deadpan] Wie sich herausstellte: beides.",
+"p": 1.0
+},
+"II-f9c0d09e": {
+"t": "[curious] Sie führten uns zu einem großen Stein, hinter dem sich ein geheimer Eingang verbarg. [amused] Mit jedem Schritt wurde es wärmer: erst angenehm, dann wie in einem Badehaus, dann wie in einem Backofen. Rex hechelte, Friedrich wischte sich den Schweiß von der Stirn. [serious] Schließlich standen wir vor Gartokkar, dem Hohepriester der Bewahrer und ersten Diener ihres Meisters. Er musterte uns:",
+"p": 1.4
+},
+"II-d849c77e": {
+"t": "[pompous] Der Meister empfängt euch. Sprecht nur, wenn er euch fragt.",
+"p": 0.4
+},
+"II-a5184430": {
+"t": "[dryly] Echo sah mich von der Seite an:",
+"p": 0.6
+},
+"II-3fc9a077": {
+"t": "[mocking] Das schafft der Barde nie.",
+"p": 0.3
+},
+"II-a27031b0": {
+"t": "[awed] Gartokkar geleitete uns in eine riesige, quadratische Halle, getaucht in ein lodernd rotes Licht wie aus dem Inneren eines Vulkans. Entlang der Wände und um alle Ecken floss ein unaufhörlicher Strom aus Lava, zäh und blubbernd, und die Luft darüber flimmerte. [hushed] Und in der Mitte erhob sich ein Berg aus Gold: Münzen über Münzen, Edelsteine, halb geschmolzene Kostbarkeiten und Tiere aus purem Gold. [amused] Sogar ein goldener Hund war darunter. Rex hat ihn sehr lange und sehr misstrauisch angesehen. Wir standen alle mit offenem Mund davor. [dryly] Echo rechnete im Kopf schon nach, wie viel das wohl wäre und was er sich davon alles kaufen könnte. Man sah es an seinen Lippen:",
+"p": 1.6
+},
+"II-e4f6abf7": {
+"t": "[whispers] Dreihunderttausend … vierhunderttausend … plus Hund …",
+"p": 0.4
+},
+"II-49d5e4d7": {
+"t": "[firm] Echo. Hände. Wo ich sie sehen kann.",
+"p": 0.35
+},
+"II-d09c51d2": {
+"t": "[sheepish] Ich zähl ja nur.",
+"p": 0.4
+},
+"II-5fda31f8": {
+"t": "[hushed] Dann hörten wir es: ein Rauschen, das immer lauter wurde, wie von gewaltigen Schwingen. Ezekiel hob als Erster den Kopf.",
+"p": 1.8
+},
+"II-a7f66770": {
+"t": "[coldly] Da kommt was.",
+"p": 0.5
+},
+"II-d9099463": {
+"t": "[quietly] Etwas Großes kam näher. [short pause] Sehr Großes.",
+"p": 0.8
+},
+"II-5b256c8c": {
+"t": "[dramatic] Mit einem tosenden Brausen landete der Meister der Flammen höchstpersönlich vor uns auf seinem Schatz. Münzen rutschten in Kaskaden den Berg hinunter, eine rollte bis vor Echos Stiefel und blieb dort liegen. [deadpan] Echo rührte sich nicht. [awed] Ein Drache! Themberchaud. Rot glühende Schuppen, ein Bauch, der sich über das Gold wölbte wie ein zweiter Hügel, und kleine, satte Augen, die uns einen nach dem anderen musterten. [quietly] Dann gähnte er:",
+"p": 2.0
+},
+"II-c73ed0d0": {
+"t": "[lazy] Oh. Das Abendessen ist da.",
+"p": 0.6
+},
+"II-99f08ffd": {
+"t": "[proudly] Ich tat, was ich am besten kann. Ich trat vor und verbeugte mich so tief, dass meine Locken fast das Gold berührten. [amused] Friedrich flüsterte entsetzt:",
+"p": 1.2
+},
+"II-1cfe361c": {
+"t": "[whispers] Barradin. Was machst du da?",
+"p": 0.3
+},
+"II-8c0d7c75": {
+"t": "[smug] Meine Arbeit.",
+"p": 0.5
+},
+"II-da283361": {
+"t": "[proudly] Und ich stimmte ein Lied an:",
+"p": 0.6
+},
+"II-577c7525": {
+"t": "[theatrical] Aus Donnerbaum verschleppt, in Fesseln erwacht, so stiegen wir hinab in die ewige Nacht!",
+"p": 0.4
+},
+"II-3149aff2": {
+"t": "[proudly] In Reimen besang ich unsere ganze Reise durch die Unterwelt, unsere Entführung in Donnerbaum, den Kampf gegen die Drow, die Spinnen und alles dazwischen, die Schlacht in der Stadt der Kuo-Toa, das Erscheinen Demogorgons, unsere Flucht und schließlich unsere Ankunft in Gracklstugh. [smug] Es war, das darf ich in aller Bescheidenheit sagen, eine natürliche Zwanzig. [dryly] Der Drache sah das ein wenig anders:",
+"p": 0.8
+},
+"II-fa7cd1f8": {
+"t": "[bored] Der dritte Vers war schwach.",
+"p": 0.6
+},
+"II-4aaf54c6": {
+"t": "[dryly] Themberchaud vernichtete uns jedenfalls trotzdem nicht. [proudly] Ich verbuche das als meinen bisher größten Erfolg vor Publikum.",
+"p": 1.0
+},
+"II-ddae95ac": {
+"t": "[nervous] Kaum war der letzte Ton verklungen, trat Echo vor. [short pause] Vor einen Drachen. [short pause] Auf einem Berg aus Gold.",
+"p": 0.0
+},
+"II-642957ba": {
+"t": "[gruffly] Sag mal, Drache. Kennst du zufällig Gundren? Zwerg. Schwarzer Bart.",
+"p": 0.5
+},
+"II-193ccabe": {
+"t": "[hushed] Ich habe in diesem Moment nicht geatmet. [dryly] Themberchaud übrigens auch nicht. Dann hat er einfach weitergeredet. [deadpan] Die Antwort war also vermutlich nein.",
+"p": 1.4
+},
+"II-a2b88182": {
+"t": "[suspicious] Stattdessen erzählte uns der Drache, ohne jede Eile, dass er seinem eigenen Hohepriester misstraut. [serious] Und dann befahl er uns, etwas für ihn zu erledigen:",
+"p": 0.0
+},
+"II-5604aa17": {
+"t": "[lazy] Ihr werdet etwas für mich tun. Gartokkar wird euch unterweisen. [menacing] Versagt, und ihr seid Nachtisch.",
+"p": 0.4
+},
+"II-11dc47e7": {
+"t": "[dryly] Dann schloss er die Augen, und die Audienz war beendet.",
+"p": 1.0
+},
+"II-5e5e42fb": {
+"t": "[relieved] Erst als wir die Halle des Drachen wieder verließen und vor dem Ausgang auf Gartokkar trafen, rückte dieser mit der Sprache heraus. [hushed] Er sah sich um, als könnten die Wände zuhören:",
+"p": 1.2
+},
+"II-f3b033e3": {
+"t": "[whispers] Jemand hat ein Drachenei gestohlen.",
+"p": 0.4
+},
+"II-b9b68feb": {
+"t": "[surprised] Wer klaut denn ein Drachenei?",
+"p": 0.6
+},
+"II-d0185f9c": {
+"t": "[amused] Echo pfiff leise durch die Zähne.",
+"p": 0.7
+},
+"II-cff5ec7c": {
+"t": "[awed] Respekt.",
+"p": 0.5
+},
+"II-8b6443d2": {
+"t": "[serious] Einem geheimen Hinweis zufolge verdächtigt Gartokkar einen gewissen Drokey, angeblich ein Mitglied der Grauen Geister, einer Diebesgilde aus den Slums von Gracklstugh. [curious] Genau den Slums, von denen Kardal uns gerade hatte erzählen wollen.",
+"p": 0.9
+},
+"II-80c49def": {
+"t": "[solemn] Zum Abschluss überreichte er uns ein Abzeichen, als Zeichen, dass wir im Namen der Flamme handeln: eine faustgroße Goldmünze mit einem Drachenkopf darauf.",
+"p": 0.0
+},
+"II-bb123dc5": {
+"t": "[amused] Echo nahm sie schneller entgegen, als ich schauen konnte, wog sie in der Hand und biss hinein.",
+"p": 1.0
+},
+"II-4e00f63d": {
+"t": "[smug] Echt.",
+"p": 0.6
+},
+"II-ac1efad6": {
+"t": "[sternly] Das ist ein Abzeichen, Echo. Kein Lohn.",
+"p": 0.4
+},
+"II-2c2e465f": {
+"t": "[mischievously] Noch nicht.",
+"p": 0.6
+},
+"II-fb17d461": {
+"t": "[dryly] Ein Drache, der seinem Priester nicht traut, ein Priester, der Diebe verdächtigt, und wir mittendrin. [short pause] [warmly] Ich spüre ein neues Lied.",
+"p": 1.0
+}
+}

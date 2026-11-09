@@ -41,9 +41,13 @@ def saetze(t): return [x for x in re.split(r"(?<=[.!?…])\s+(?=(?:\[[^\]]*\]\s*
 def einheiten(kapitel):
     st, regie, rec, bes = J("tools/hoerbuch/struktur-de.json"), J("tools/hoerbuch/regie-de.json", {}), J("tools/hoerbuch/recycling-de.json", {}), J("tools/hoerbuch/besetzung.json")
     fehler, out = [], []
+    bis = int(os.environ.get("BIS") or 0)   # nur die ersten BIS Textblöcke je Kapitel (Probelauf)
     for kap in kapitel:
+        nb = 0
         for b in st[kap]:
             if b.get("typ", "text") != "text": continue
+            nb += 1
+            if bis and nb > bis: break
             for s in b["segmente"]:
                 r = regie.get(s["id"])
                 if not r: fehler.append(f"{s['id']}: keine Regie"); continue
