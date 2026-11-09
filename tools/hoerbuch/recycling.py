@@ -63,7 +63,7 @@ def zeiten(lauf, alt):
     # Ränder: nicht in Nachbarwörter schneiden
     vor = W[s - 1][2] if s > 0 else 0.0
     nach = W[e + 1][1] if e + 1 < len(W) else t1 + .4
-    return max(vor + .02, t0 - .06), min(nach - .02, t1 + .12)
+    return max(vor + .03, t0 - .08), min(nach - .04, t1 + .35)
 
 def plan():
     st = J("tools/hoerbuch/struktur-de.json"); alte = alte_absaetze()
@@ -120,7 +120,7 @@ def main():
                 if "quelle" not in t: continue
                 k += 1; datei = f"audio/hoerbuch/alt/{sid}-{k}.mp3"
                 subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", str(t["von"]), "-to", str(t["bis"]), "-i", t["quelle"],
-                                "-af", "afade=t=in:d=0.015,areverse,afade=t=in:d=0.04,areverse", "-ar", "44100", "-b:a", "160k",
+                                "-af", "afade=t=in:d=0.015,areverse,afade=t=in:d=0.1,areverse", "-ar", "44100", "-b:a", "160k",
                                 os.path.join(WURZEL, datei)], check=True)
                 t["alt"] = datei; t.pop("quelle")
     json.dump(erg, open(os.path.join(HIER, "recycling-de.json"), "w"), ensure_ascii=False, indent=1)

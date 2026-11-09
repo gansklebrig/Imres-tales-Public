@@ -129,7 +129,11 @@ def main():
         mp3 = vertonen.tts(e["stimme"], e["text"], modell="eleven_v3", einstellung=einstellung(e, bes))
         open(os.path.join(WURZEL, datei(e, bes)), "wb").write(mp3)
     for n, e in enumerate(fehlend, 1):
-        aufnehmen(e); print(f"{n}/{len(fehlend)} {datei(e, bes)}", flush=True)
+        try:
+            aufnehmen(e)
+        except BaseException as ex:   # z. B. Guthaben aufgebraucht: Bisheriges sichern und prüfen
+            print(f"Aufnahme abgebrochen bei {n}/{len(fehlend)}: {ex}", flush=True); break
+        print(f"{n}/{len(fehlend)} {datei(e, bes)}", flush=True)
         if n % 40 == 0: sichern(f"Hörbuch: {n} Aufnahmen")
     sichern(f"Hörbuch: {len(fehlend)} Aufnahmen ({kosten} Zeichen)")
     # Hörprüfung (auch recycelte Stücke)
@@ -140,12 +144,15 @@ def main():
         pruef += [(t["alt"], t["text"], None) for t in teile if t.get("alt")]
     verbraucht = 0
     for f, ziel, e in pruef:
+        if not os.path.exists(os.path.join(WURZEL, f)): continue
         if f in qa and qa[f].get("ok") is not None and "woerter" in qa[f]: continue
         q = pruefen(wm, f, ziel)
         versuche = 0
         while e and not q["ok"] and versuche < 2 and verbraucht + len(e["text"]) <= nachholen:
             print(f"NEU: {f} ratio={q['ratio']} verrat={q['verrat']} dauer={q['dauer']}/{q['erwartet']}\n  hörte: {q['hyp'][:160]}", flush=True)
-            aufnehmen(e); verbraucht += len(e["text"]); versuche += 1
+            try: aufnehmen(e)
+            except BaseException as ex: print("Neuaufnahme nicht möglich:", ex); break
+            verbraucht += len(e["text"]); versuche += 1
             q = pruefen(wm, f, ziel)
         q["nachgeholt"] = versuche; qa[f] = q
         if not q["ok"]: print(f"WEITER AUFFÄLLIG: {f} ratio={q['ratio']} verrat={q['verrat']} hörte: {q['hyp'][:160]}", flush=True)

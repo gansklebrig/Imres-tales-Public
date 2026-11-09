@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.join(WURZEL, "tools/hoerbuch"))
 import aufnahme as A
 SR = 44100
 SATZ, ABSATZ_MIN, TEIL = .45, .0, .5
-STILLE_DB = -48
+STILLE_DB = -52
 
 def J(p, std=None):
     p = os.path.join(WURZEL, p)
@@ -27,17 +27,21 @@ def lade(f):
     raw = subprocess.check_output(["ffmpeg", "-v", "error", "-i", os.path.join(WURZEL, f), "-ac", "1", "-ar", str(SR), "-f", "f32le", "pipe:1"])
     return np.frombuffer(raw, dtype=np.float32).copy()
 
+def db_fenster(x, w=int(.01 * SR)):
+    n = len(x) // w
+    if n == 0: return np.array([-120.0])
+    return 20 * np.log10(np.sqrt(np.mean(x[:n * w].reshape(n, w) ** 2, axis=1) + 1e-12))
+
 def schneide_stille(x):
-    """Anfang/Ende bis zur ersten Stelle über der Schwelle (10 ms Fenster), mit kleinem Polster."""
-    w = int(.01 * SR); n = len(x) // w
-    if n == 0: return x, 0
-    e = np.sqrt(np.mean(x[:n * w].reshape(n, w) ** 2, axis=1) + 1e-12)
-    db = 20 * np.log10(e)
+    """Anfang/Ende bis zur ersten Stelle über der Schwelle, mit großzügigem Polster und weichen Blenden,
+    damit Ausklang, Atem und Hall nie abgeschnitten werden (keine „Kurzstopper“)."""
+    w = int(.01 * SR); db = db_fenster(x, w)
     laut = np.where(db > STILLE_DB)[0]
     if len(laut) == 0: return x, 0
-    a = max(0, laut[0] * w - int(.03 * SR)); b = min(len(x), (laut[-1] + 1) * w + int(.12 * SR))
+    a = max(0, laut[0] * w - int(.06 * SR)); b = min(len(x), (laut[-1] + 1) * w + int(.28 * SR))
     y = x[a:b].copy()
-    f = int(.008 * SR); y[:f] *= np.linspace(0, 1, f); y[-int(.03 * SR):] *= np.linspace(1, 0, int(.03 * SR))
+    fi, fo = min(len(y), int(.015 * SR)), min(len(y), int(.15 * SR))
+    y[:fi] *= np.linspace(0, 1, fi); y[-fo:] *= np.linspace(1, 0, fo) ** 2
     return y, a / SR
 
 def satzpausen(x, woerter, versatz):
@@ -52,7 +56,14 @@ def satzpausen(x, woerter, versatz):
         naechst = woerter[k + 1][1]
         luecke = naechst - b
         if luecke >= SATZ or luecke < 0: continue
-        schnitt = int((b - versatz + min(.05, luecke / 2)) * SR)
+        # an der leisesten Stelle der Lücke einfügen – und nur, wenn dort wirklich Stille ist
+        a0, a1 = int((b - versatz) * SR), int((naechst - versatz) * SR)
+        if a1 - a0 < int(.03 * SR): continue
+        w = int(.01 * SR); fen = x[max(0, a0):max(0, a1)]
+        if len(fen) < w: continue
+        dbs = db_fenster(fen, w); k_min = int(np.argmin(dbs))
+        if dbs[k_min] > -45: continue
+        schnitt = max(0, a0) + k_min * w + w // 2
         if schnitt <= pos or schnitt >= len(x): continue
         teile.append(x[pos:schnitt]); teile.append(np.zeros(int((SATZ - luecke) * SR), np.float32)); pos = schnitt
         ein.append((schnitt / SR, SATZ - luecke))
@@ -60,6 +71,14 @@ def satzpausen(x, woerter, versatz):
     return np.concatenate(teile), ein
 
 def stille(s): return np.zeros(int(max(0, s) * SR), np.float32)
+
+NAHT = []
+def naht_pruefen(x, name):
+    """Meldet harte Abbrüche: hoher Pegel direkt vor einem Sprung in Stille (innerhalb 20 ms)."""
+    w = int(.005 * SR); db = db_fenster(x, w)
+    for k in range(4, len(db) - 4):
+        if db[k] < -75 and db[k - 1] > -40:
+            NAHT.append((name, round(k * w / SR, 2), round(float(db[k - 1]), 1)))
 
 def block_audio(b, regie, rec, qa, bes):
     E = {e["uid"]: e for e in A.einheiten_alle}
@@ -118,6 +137,7 @@ def main():
                 x, mk = block_audio(b, regie, rec, qa, bes)
             except (FileNotFoundError, subprocess.CalledProcessError, KeyError) as e:
                 print("fehlt:", kap, i, e); continue
+            naht_pruefen(x, f"{kap}:{i}")
             h = hashlib.sha1(x.tobytes()).hexdigest()[:10]
             ziel = f"audio/chronik/de/{kap}/{i:03d}-{h}.mp3"
             if not os.path.exists(os.path.join(WURZEL, ziel)): schreibe(x, ziel)
@@ -129,6 +149,7 @@ def main():
         for f in os.listdir(d):
             if f.endswith(".mp3") and f"audio/chronik/de/{kap}/{f}" not in genutzt: os.remove(os.path.join(d, f))
         print(kap, len(liste), "Dateien")
+    print("Nahtprüfung:", len(NAHT), "harte Abbrüche", NAHT[:20])
     json.dump(neu, open(os.path.join(WURZEL, "audio/chronik/de/manifest.json"), "w"), ensure_ascii=False, indent=0)
     alle = {e["datei"] for l in neu["kapitel"].values() for e in l}
     json.dump({k: v for k, v in zeitmarken.items() if k in alle}, open(os.path.join(WURZEL, "tools/vertonung/zeitmarken-de.json"), "w"), ensure_ascii=False)
