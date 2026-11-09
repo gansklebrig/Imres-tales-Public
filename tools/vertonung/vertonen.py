@@ -292,7 +292,9 @@ def zeilen(quelle, stimme, grenze):
         datei = f"{ziel}/{name}-{h}.mp3"; manifest[zid] = datei
         if os.path.exists(os.path.join(WURZEL, datei)): continue
         if grenze and kosten + len(text) > grenze: print("Grenze erreicht."); manifest.pop(zid); break
-        open(os.path.join(WURZEL, datei), "wb").write(tts(st, text, einstellung=ein)); kosten += len(text); neu += 1
+        try: mp3 = tts(st, text, einstellung=ein)
+        except BaseException as e: print("Übersprungen:", zid, e); manifest.pop(zid); continue
+        open(os.path.join(WURZEL, datei), "wb").write(mp3); kosten += len(text); neu += 1
         print(f"{datei} ({len(text)} Zeichen, gesamt {kosten})")
         if neu % 40 == 0:
             json.dump(manifest, open(os.path.join(basis, "manifest.json"), "w"), ensure_ascii=False, indent=0); git_sichern(f"Vertonung {ziel}: {neu} Zeilen")
