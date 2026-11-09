@@ -36893,6 +36893,194 @@ window.__perfAnzUnten=()=>PA.an?PA.bot:0;
 /* außerhalb des Spiels (Titel, Lager, Menüs) ausblenden */
 {const f=showScreen;showScreen=function(){const r=f.apply(this,arguments);try{if(G.state!=='play')paAus()}catch(e){}return r}}
 }catch(e){console.error('perfanz',e);window.__hsPERFANZ.err=String(e&&e.stack||e)}})();
+/* ================= Paket „gpu“: weniger Arbeit für die Grafikkarte beim Zeichnen – gleiche Optik – window.__hsGPU =================
+   Befund (Messung mit Zählern, Pixel-Arbeit je Zeichenbefehl und Chromium mit Grafikkarten-Rastern über ANGLE/SwiftShader):
+   Das Zeichnen ist fast nur noch Füllarbeit großer Flächen. Je Bild wurden ~25 Bildschirmflächen gefüllt, davon allein
+   · Nebel (oaNebel): 45–65 große, weiche Schwaden direkt auf das Spielbild = 5,5–7 Bildschirmflächen,
+   · Licht (drawLighting): drei Vollbild-Tönungen (Ort, Wetter, Tageszeit) nacheinander + eine Lichtebene, die auf großen
+     Bildschirmen mit verkleinerter Auflösung (z. B. 3440×1280, 50 %) FEINER war als das Spielbild selbst (2064×768 statt 1720×640),
+   · Gegner-Sprites: jeder Neubau legte drei neue Leinwände an (zwei davon auf der Grafikkarte).
+   Maßnahmen (alle ohne sichtbaren Unterschied, siehe Pixelvergleich im Bericht):
+   1) Tönungen: die bis zu drei Vollbild-Tönungen werden zu einer Farbe zusammengerechnet (gleiche Mischung, Rundung ±1) –
+      ein Vollbild-Durchgang statt drei.
+   2) Lichtebene (Dunkelheit mit weich ausgestanzten Lichtkreisen – nur weiche Verläufe) in halber Auflösung des bisherigen Werts
+      und nie feiner als das Spielbild: min(Stufenwert, Spielbild) × 0,5 – ein Viertel der Bildpunkte oder weniger
+      (vorher auf großen Bildschirmen bis 1,44× so viele Bildpunkte wie das Spielbild selbst).
+   3) Nebel in eine Ebene mit halber Auflösung des Spielbilds, dann einmal hochgezogen (die Schwaden sind ohnehin weiche,
+      stark vergrößerte Verläufe) – statt 5–7 nur noch ~2,5 Bildschirmflächen.
+   4) Gegner-Sprite-Neubau: Arbeits- und Umriss-Leinwand werden wiederverwendet und bleiben im Prozessor-Speicher;
+      je Neubau entsteht nur noch die eine Leinwand, die im Zwischenspeicher bleibt.
+   Schalter für Tests: __hsGPU.aus=true (alles aus) bzw. __hsGPU.an.{tint,cap,nebel,kg}=0. Zähler: __hsGPU.st */
+(function(){try{window.__hsGPU={v:1};
+const GP=window.__hsGPU;GP.aus=false;GP.an={tint:1,cap:1,nebel:1,kg:1};GP.k={lc:0.5,nebel:0.5};GP.st={tint:0,cap:0,nebel:0,kg:0};GP.err=[];
+const gErr=(k,e)=>{if(GP.err.length<8)GP.err.push(k+': '+(e&&e.message||e));};
+
+/* ---------- 1) + 2) Licht: Tönungen zusammenfassen, Lichtebene begrenzen ---------- */
+const TCACHE=new Map();
+function gpRgba(s){let r=TCACHE.get(s);if(r!==undefined)return r;r=null;
+ try{const m=/^\s*rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*(?:,\s*([\d.]+)\s*)?\)\s*$/i.exec(String(s));
+  if(m)r=[+m[1],+m[2],+m[3],m[4]===undefined?1:+m[4]];
+  else{const h=/^#([0-9a-f]{6})$/i.exec(String(s));if(h){const n=parseInt(h[1],16);r=[n>>16,(n>>8)&255,n&255,1]}}}catch(e){r=null}
+ if(TCACHE.size>64)TCACHE.clear();TCACHE.set(s,r);return r}
+/* mehrere Farben nacheinander „source-over“ = eine Farbe mit Gesamtdeckkraft A und vormultiplizierter Summe */
+function gpMisch(L){let A=0,pr=0,pg=0,pb=0;for(const c of L){const a=Math.round(Math.max(0,Math.min(1,c[3]))*255)/255;/* wie die Leinwand: Deckkraft in 1/255-Stufen */pr=c[0]*a+pr*(1-a);pg=c[1]*a+pg*(1-a);pb=c[2]*a+pb*(1-a);A=a+A*(1-a)}
+ if(A<=0)return null;return'rgba('+(pr/A).toFixed(3)+','+(pg/A).toFixed(3)+','+(pb/A).toFixed(3)+','+A.toFixed(5)+')'}
+{const _dl=drawLighting;drawLighting=function(camX,camY,t){
+ if(GP.aus||!G||!G.theme||(window.__hsULTRA&&__hsULTRA.on))return _dl.apply(this,arguments);
+ const T=G.theme,x=WX(),wo=x&&WETTER[x.w],zo=x&&ZEITEN[x.z];let gf=null,lr0=0,weg=null;
+ try{
+  /* 2) Lichtebene: min(Stufenwert, Spielbild) × GP.k.lc */
+  if(GP.an.cap){gf=GF();lr0=gf.lr;const lr1=Math.min(lr0,DPR)*GP.k.lc;if(gf&&isFinite(lr0)&&DPR>0&&lr1<lr0){gf.lr=lr1;GP.st.cap++}else gf=null}
+  /* 1) Tönungen */
+  if(GP.an.tint&&cx.globalAlpha===1&&cx.globalCompositeOperation==='source-over'){
+   const S=[[T,'tint'],[wo,'tint'],[zo,'tint']].filter(q=>q[0]&&q[0].tint);
+   if(S.length>1){const P=S.map(q=>gpRgba(q[0].tint));
+    if(P.every(Boolean)){const col=gpMisch(P);if(col){weg=S.map(q=>[q[0],q[0].tint]);for(const q of S)q[0].tint='';cx.fillStyle=col;cx.fillRect(0,0,W,H);GP.st.tint++}}}}
+ }catch(e){gErr('licht',e);if(weg){for(const q of weg)q[0].tint=q[1];weg=null}}
+ try{return _dl.apply(this,arguments)}
+ finally{if(gf)gf.lr=lr0;if(weg)for(const q of weg)q[0].tint=q[1]}}}
+
+/* ---------- 3) Nebel in halber Auflösung ---------- */
+const NB={c:null,g:null};
+{const _nb=oaNebel;oaNebel=function(camX,camY,t,dt){
+ if(GP.aus||!GP.an.nebel||!OA.cfg||!OA.cfg.fog||!cx||cx.canvas!==cv||!(DPR>0))return _nb.apply(this,arguments);
+ const lw=Math.max(2,Math.ceil(cv.width*GP.k.nebel)),lh=Math.max(2,Math.ceil(cv.height*GP.k.nebel));
+ if(!NB.c){NB.c=document.createElement('canvas');NB.g=NB.c.getContext('2d')}const C=NB.c,g=NB.g;if(C.width!==lw||C.height!==lh){C.width=lw;C.height=lh}
+ g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.clearRect(0,0,lw,lh);
+ const c0=cx,d0=DPR,sm=c0.imageSmoothingEnabled;let r;cx=g;DPR=d0*lw/cv.width;
+ try{r=_nb.apply(this,arguments)}finally{cx=c0;DPR=d0}
+ c0.setTransform(1,0,0,1,0,0);c0.globalAlpha=1;c0.globalCompositeOperation='source-over';c0.imageSmoothingEnabled=true;c0.drawImage(C,0,0,lw,lh,0,0,cv.width,cv.height);
+ c0.setTransform(DPR,0,0,DPR,0,0);c0.imageSmoothingEnabled=sm;GP.st.nebel++;return r}}
+
+/* ---------- 4) Gegner-Sprites: Arbeits-/Umriss-Leinwand wiederverwenden (Prozessor-Speicher) ---------- */
+const KGA={a:null,ag:null,s:null,sg:null,busy:0};
+function kgArb(w,h){if(!KGA.a){KGA.a=document.createElement('canvas');try{KGA.ag=KGA.a.getContext('2d',{willReadFrequently:true})}catch(e){KGA.ag=KGA.a.getContext('2d')}}
+ /* Größe immer neu setzen: leert die Leinwand und setzt den Zeichenzustand vollständig zurück (wie eine neue) */
+ KGA.a.width=Math.max(1,w|0);KGA.a.height=Math.max(1,h|0);return KGA.ag}
+function kgUmr(w,h){if(!KGA.s){KGA.s=document.createElement('canvas');try{KGA.sg=KGA.s.getContext('2d',{willReadFrequently:true})}catch(e){KGA.sg=KGA.s.getContext('2d')}}
+ KGA.s.width=Math.max(1,w|0);KGA.s.height=Math.max(1,h|0);return KGA.sg}
+{const _ks=kgSprite;kgSprite=function(key,sc,fl,box,draw,ol,rot){if(GP.aus||!GP.an.kg||KGA.busy)return _ks.apply(this,arguments);KGA.busy=1;try{return kgSpr2(key,sc,fl,box,draw,ol,rot)}finally{KGA.busy=0}};
+ function kgSpr2(key,sc,fl,box,draw,ol,rot){
+ rot=rot||0;const K=key+'|'+sc+'|'+fl+(rot?'|r'+rot.toFixed(3):'');let s=KG.m.get(K);if(s){s.lu=KG.fc;return s}
+ if(KG.lim){if(KG.bud<=0)return null;KG.bud--}
+ const ex=rot?Math.abs(rot)*26+1:0,o=ol===0?0:Math.max(1,sc*0.6),pad=Math.ceil(o)+2;let x0=(fl>0?box[0]:-box[2])-ex,x1=(fl>0?box[2]:-box[0])+ex,y0=box[1]-ex,y1=box[3]+ex;
+ if(Math.abs(rot)>0.3){const R=Math.max(-box[0],box[2],-box[1],box[3])+1;x0=y0=-R;x1=y1=R}
+ const w=Math.ceil((x1-x0)*sc)+pad*2,h=Math.ceil((y1-y0)*sc)+pad*2,g=kgArb(w,h),A=KGA.a;
+ const bx=pad-x0*sc,by=pad-y0*sc;g.setTransform(sc,0,0,sc,bx,by);if(rot)g.rotate(rot);g.scale(fl,1);g.lineCap='round';g.lineJoin='round';
+ const P={fl,sc,shade(k){g.save();g.setTransform(sc,0,0,sc,bx,by);g.globalCompositeOperation='source-atop';const gr=g.createLinearGradient(-9,-20,9,14);k=k||1;gr.addColorStop(0,'rgba(255,246,226,'+(0.26*k)+')');gr.addColorStop(0.42,'rgba(255,255,255,0)');gr.addColorStop(0.58,'rgba(0,0,0,0)');gr.addColorStop(1,'rgba(12,6,22,'+(0.42*k)+')');g.fillStyle=gr;g.fillRect(x0-2,y0-2,x1-x0+4,y1-y0+4);g.restore()}};
+ try{draw(g,P)}catch(er){}
+ const m=Math.ceil(o)+1;let tx=0,ty=0,tw=w,th=h;try{const D=g.getImageData(0,0,w,h).data;let a0=w,a1=-1,b0=h,b1=-1;for(let y=0;y<h;y++){const r=y*w*4;for(let x=0;x<w;x++)if(D[r+x*4+3]>4){if(x<a0)a0=x;if(x>a1)a1=x;if(y<b0)b0=y;b1=y}}
+  if(a1>=a0){tx=Math.max(0,a0-m);ty=Math.max(0,b0-m);tw=Math.min(w,a1+1+m)-tx;th=Math.min(h,b1+1+m)-ty}}catch(er){}
+ const B=kgCv(tw,th),bg=B.getContext('2d');
+ if(o){const sg=kgUmr(tw,th),S=KGA.s;sg.drawImage(A,-tx,-ty);sg.globalCompositeOperation='source-in';sg.fillStyle=ol||KG.ol;sg.fillRect(0,0,tw,th);for(let i=0;i<8;i++){const a=i*Math.PI/4;bg.drawImage(S,Math.cos(a)*o,Math.sin(a)*o)}}
+ bg.drawImage(A,-tx,-ty);
+ /* Arbeitsflächen klein machen (kein großer Speicher bleibt liegen) */
+ try{A.width=1;A.height=1;if(KGA.s){KGA.s.width=1;KGA.s.height=1}}catch(er){}
+ s={cv:B,x:x0-(pad-tx)/sc,y:y0-(pad-ty)/sc,w:tw/sc,h:th/sc,K,b:tw*th*4,sc,lu:KG.fc};kgPut(K,s);KG.mk++;GP.st.kg++;return s}}
+
+}catch(e){console.error('gpu',e);window.__hsGPU.err=String(e&&e.stack||e)}})();
+
+/* ================= Paket „sweep“: Grafik-Automatik am PC + CPU-Funde aus der Großprüfung – window.__hsSWEEP =================
+   Wird als LETZTES Paket eingefügt (nach geheim, ziele, fov, beute, bosshp, ctl, perfanz, gpu). Hängt nicht von „gpu“ ab und fasst keine Zeichenfunktion an.
+
+   1) Grafik-Automatik am PC (nicht Handy/Handheld/Ultra/ohne Grafikbeschleunigung – dort bleibt alles wie bisher)
+   Befund: Die Automatik konnte am PC nie höher als „Hoch“ (GAUTO=GCEIL=3) – „Episch“ in der Anzeige heißt also immer:
+   SAVE.gfx steht FEST auf 4 (z. B. einmal den Regler nach rechts geschoben oder alte Einstellung fx:'hi' → 4 übernommen).
+   Bei fester Stufe senkt das Spiel nur die Auflösung (bis 50 %), die Stufe selbst bleibt – daher 14 FPS bei „Episch · 50 %“.
+   Zusätzlich: „Bildschirm-Hz“ und „verpasst“ wurden am langsamsten 20-%-Intervall des Fensters gemessen – bei dauerhaft 14 FPS
+   also „14 Hz · 0 % verpasst“; auf 120/144-Hz-Schirmen dagegen zählten 90 FPS als „verpasst“ (unnötiges Herunterschalten).
+   Jetzt (Automatik am PC):
+     - Startet auf Episch (sieht am PC am besten aus), bleibt dort, solange es flüssig ist (≥ 42 FPS).
+     - Leiter, Schritt für Schritt nur so weit wie nötig:
+         Episch 100 % → Episch 85 % → Episch 75 % → Hoch 75 % (ohne Bloom/Leichenflug) → Mittel 75 % → Mittel 60 % → Mittel 50 % → Niedrig 50 % → Minimal 50 %
+       (bei fester Auflösung in den Einstellungen nur die Stufe).
+     - Herunter: 2 schlechte Messfenster (je ~2 s) hintereinander = 1 Schritt; sehr langsam (< 24 FPS) schon nach 1 Fenster.
+       „Schlecht“ = unter 42 FPS oder (über 20 % verpasste Bilder und unter 50 FPS).
+     - Wieder hinauf: 5 gute Fenster (≥ 55 FPS, kaum verpasst) = 1 Schritt, aber nicht zurück auf die Stufe, an der es geruckelt hat –
+       erst nach 60 s ohne Ruckeln (oder in einer neuen Stufe/Szene) wird diese wieder versucht; schlägt der Versuch fehl,
+       wartet die Automatik beim nächsten Mal doppelt so lange (60 s, 2, 4, 8 … höchstens 16 min).
+     - Bringt das Absenken nichts (nach 3 Schritten < 15 % mehr Bilder, z. B. weil der Prozessor bremst), kommt die volle Optik
+       zurück und es wird 3 Minuten nicht weiter abgesenkt – keine schlechtere Optik ohne Gewinn.
+     - Gemessen wird nur im laufenden Spiel (nicht Pause, Menü, verborgenes Fenster); das erste Fenster nach Stufenwechsel zählt nicht (Ladehänger).
+     - Bildschirm-Hz = schnellstes je gemessenes Bildintervall der Sitzung (auch Titel/Lager), „verpasst“ relativ dazu.
+   Einmalige Umstellung: ein gespeichertes festes „Episch“ (ohne bewusste Wahl seit diesem Paket) wird am PC zu „Auto“ –
+   da Auto am PC auf Episch startet und bleibt, solange es flüssig ist, sieht es gleich aus, schaltet aber bei Ruckeln herunter.
+   Wer danach den Regler bewegt, wählt bewusst fest (SAVE.gfxWahl) – das bleibt dann so.
+   Leistungsanzeige: hinter der Stufe steht „(Auto)“ oder „(fest)“.
+*/
+(function(){try{window.__hsSWEEP={v:1};
+const SW=window.__hsSWEEP;
+Object.assign(SW,{anker:null,halt:0,retry:60000,lastUp:-1e9,pcTest:window.__swPcTest!=null?window.__swPcTest:null,step:0,ce:0,bad:0,good:0,skip:1,key:'',lastDown:-1e9,refMin:1e9,log:[],mig:0});
+const swAuto=()=>SAVE.gfx==='auto'||SAVE.gfx===undefined;
+function swPc(){if(SW.pcTest!=null)return !!SW.pcTest;try{const ul=window.__hsULTRA&&window.__hsULTRA.on,weak=typeof RG2!=='undefined'&&RG2.weak;return !MOBIL&&!SWR&&!ul&&!weak}catch(e){return false}}
+const SW_L=[[4,1],[4,0.85],[4,0.75],[3,0.75],[2,0.75],[2,0.6],[2,0.5],[1,0.5],[0,0.5]];
+/* Leiter je nach fester Auflösung: ohne Auflösungsschritte */
+function swLeiter(){const f=resFest();if(!f)return SW_L;return [[4,f],[3,f],[2,f],[1,f],[0,f]]}
+function swAnwenden(){const L=swLeiter();SW.step=Math.max(0,Math.min(L.length-1,SW.step));SW.ce=Math.max(0,Math.min(SW.step,SW.ce));const s=L[SW.step];
+ GAUTO=s[0];GCEIL=s[0];const r=resFest()||s[1];if(RSC!==r||true){RSC=r}RSLOW=RSOK=0;try{resize()}catch(e){}}
+SW.anwenden=swAnwenden;SW.leiter=swLeiter;
+/* Start: am PC mit Automatik auf Episch */
+function swStart(){if(!swPc()||!swAuto())return;SW.step=0;SW.ce=0;SW.bad=SW.good=0;SW.skip=1;swAnwenden()}
+/* einmalige Umstellung „fest Episch“ → Auto (nur am PC, nur ohne bewusste Wahl) */
+{const gm=gfxMigrate;gfxMigrate=function(){const r=gm.apply(this,arguments);try{
+  if(!SAVE.gfxMig){SAVE.gfxMig=1;if(swPc()&&!SAVE.gfxWahl&&+SAVE.gfx===4&&SAVE.gfx!=='auto'){SAVE.gfx='auto';SW.mig=1}try{persist()}catch(e){}}
+  swStart()}catch(e){}return r}}
+/* bewusste Wahl merken (Regler) – „Automatisch anpassen“ setzt die Wahl zurück */
+{const gs=gfxSet;gfxSet=function(v,soft){try{if(v==='auto'){delete SAVE.gfxWahl}else SAVE.gfxWahl=1}catch(e){}const r=gs.apply(this,arguments);try{if(v==='auto'&&swPc()){SW.step=Math.min(SW.step,SW.ce);swAnwenden()}}catch(e){}return r}}
+/* Auswertung */
+function swEval(iv){
+ const n=iv.length;if(!n)return;const avg=iv.reduce((a,b)=>a+b,0)/n,fps=1000/avg,s=iv.slice().sort((a,b)=>a-b),ref=Math.max(4,s[Math.floor(n*0.2)]);
+ if(ref<SW.refMin)SW.refMin=ref;const rm=SW.refMin,miss=iv.filter(x=>x>rm*1.6).length/n;
+ if(PERF){PERF.hz=Math.round(1000/rm);PERF.miss=Math.round(miss*100)}
+ if(!(swPc()&&swAuto()))return;
+ if(G.state!=="play"||G.paused||document.hidden||G.overlay){SW.skip=Math.max(SW.skip,1);return}
+ const key=G.runId+'|'+G.stage+'|'+(G.room?1:0)+'|'+(G.mode||'');
+ if(key!==SW.key){SW.key=key;SW.skip=2;SW.anker=null;if(SW.ce>0&&performance.now()-SW.lastDown>SW.retry)SW.ce--}
+ if(SW.skip>0){SW.skip--;SW.bad=SW.good=0;return}
+ const L=swLeiter(),now=performance.now(),bad=fps<42||(miss>0.2&&fps<50),good=fps>=55&&(miss<0.05||fps>=80);
+ let d=0;
+ if(bad){SW.good=0;SW.bad++;if(fps<24||SW.bad>=2)d=1}
+ else if(good){SW.bad=0;SW.anker=null;++SW.good;
+  /* lange ruhig an der Grenze: nach 60 s (bei jedem erneuten Fehlschlag doppelt so lange) die Grenze eine Stufe höher wieder erlauben */
+  if(SW.step>0&&SW.step===SW.ce&&SW.good>=5&&now-SW.lastDown>SW.retry&&now-SW.lastUp>SW.retry){SW.ce--}
+  if(SW.good>=5&&SW.step>SW.ce){d=-1}}
+ else{SW.bad=0;SW.good=0}
+ /* nutzlos? Nach ≥ 3 Schritten hinab ohne spürbaren Gewinn (< 12 %) liegt es nicht an der Grafik (z. B. Prozessor) –
+    dann die Optik zurückholen und 3 Minuten nicht weiter absenken */
+ if(d>0&&SW.anker&&SW.step-SW.anker.step>=3&&fps<SW.anker.fps*1.15){SW.log.push(['nutzlos',SW.step,SW.anker.step,Math.round(fps)]);SW.step=SW.anker.step;SW.ce=SW.step;SW.halt=performance.now()+180000;SW.anker=null;SW.bad=SW.good=0;SW.skip=1;swAnwenden();d=0}
+ if(d>0&&performance.now()<SW.halt)d=0;
+ if(d>0&&SW.step<L.length-1){const a=SW.step;if(!SW.anker)SW.anker={step:a,fps};SW.step=Math.min(L.length-1,SW.step+d);SW.ce=Math.max(SW.ce,a+1);SW.bad=0;SW.good=0;SW.lastDown=now;if(now-SW.lastUp<20000)SW.retry=Math.min(SW.retry*2,960000);SW.skip=1;swAnwenden();SW.log.push(['ab',a,SW.step,Math.round(fps)])}
+ else if(d<0){const a=SW.step;SW.step--;SW.good=0;SW.skip=1;SW.lastUp=now;swAnwenden();SW.log.push(['auf',a,SW.step,Math.round(fps)])}
+ if(SW.log.length>40)SW.log.splice(0,20);
+ if(PERF){PERF.lv=gfxL();PERF.rs=RSC}}
+SW.eval=swEval;
+{const fw=fpsWatch;fpsWatch=function(dt,raw,js){
+  const wird=FW.t+raw>=2000;if(!wird)return fw.apply(this,arguments);
+  const iv=FW.iv.concat([raw]);const meins=swPc()&&swAuto();let r;
+  /* am PC mit Automatik entscheidet swEval: die alte Regel sieht dieses eine Bild als „Pause“ (misst und zeigt trotzdem) */
+  if(meins&&G.state==='play'&&!G.paused){G.paused=true;try{r=fw.apply(this,arguments)}finally{G.paused=false}}else r=fw.apply(this,arguments);
+  try{swEval(iv)}catch(e){}return r}}
+/* Leistungsanzeige: „(Auto)“ bzw. „(fest)“ hinter der Stufe */
+{const dp=drawPerf;let el=null;drawPerf=function(){const r=dp.apply(this,arguments);try{if(!el||!el.isConnected)el=document.getElementById('perfAnz');
+  if(el&&el.style.display!=='none'){const t=el.textContent,m=t.indexOf('\nGrafik: ');if(m>=0&&t.indexOf(' (Auto)',m)<0&&t.indexOf(' (fest)',m)<0){const e=t.indexOf(' ·',m+9);if(e>0)el.textContent=t.slice(0,e)+(swAuto()?' (Auto)':' (fest)')+t.slice(e)}}}catch(e){}return r}}
+/* ---------- 2) Mehrspieler, Gastgeber: Welt-Paket nur für Sichtbares aufbereiten ----------
+   Befund (Profil Gastgeber + 1 Gast, Stufe 17): netHostTick 4–8 ms je Bild, davon ~75 % nRec – bei jedem Senden (~20×/s)
+   wurden ALLE Gegner/Objekte/Geschosse … der Stufe (oft 400–600) vollständig kodiert und erst danach je Gast auf dessen Sicht
+   gefiltert (netFilter: |x−Gast.x| < Sichtbreite/2+260 usw., Bosse/Wächter immer). Jetzt erhält ein Objekt, das garantiert
+   außerhalb JEDER Gast-Sicht liegt (gleiche Rundung und Grenzen wie netFilter, kein Boss/Wächter), nur {x,y} – netFilter
+   verwirft es danach genauso wie vorher. Was beim Gast ankommt, ist Byte für Byte gleich; die Kennungen (nid) bleiben gleich. */
+{const nr=nRec;nRec=function(o,W,BL){if(SW.nvOn&&W&&o){const x=o.x,y=o.y;
+   if(typeof x==='number'&&typeof y==='number'&&isFinite(x)&&isFinite(y)&&!o.boss&&!o.guard){let R=SW.nvR;
+    if(!R){R=SW.nvR=[];for(const g of NET.guests){if(g.gone||!g.p||!PL.includes(g.p))continue;const p=g.p;R.push(p.x,p.y,(p.vw||1400)/2+260,(p.vh||900)/2+260)}}
+    const rx=Math.round(x*100)/100,ry=Math.round(y*100)/100;let vis=false;for(let i=0;i<R.length;i+=4){if(Math.abs(rx-R[i])<R[i+2]&&Math.abs(ry-R[i+1])<R[i+3]){vis=true;break}}
+    if(!vis){SW.netSkip=(SW.netSkip||0)+1;return{x:rx,y:ry}}}}
+  return nr.apply(this,arguments)}}
+{const nw=netWorld;netWorld=function(){SW.nvOn=SW.netAus?0:1;SW.nvR=null;try{return nw.apply(this,arguments)}finally{SW.nvOn=0;SW.nvR=null}}}
+/* ---------- 3) Farbton-Zwischenspeicher bT (BTN) wächst ohne Grenze ----------
+   Schlüssel = Farbe + stufenloser Aufhellwert; nach 40 Spielminuten ~5 200 Einträge (anfangs 19), wächst weiter.
+   Ab 4 000 Einträgen wird er geleert (Ergebnis identisch, wird bei Bedarf neu berechnet). Prüfung nur alle ~2 s. */
+{const fw=fpsWatch;fpsWatch=function(dt,raw){if(FW.t+raw>=2000){try{if(typeof BTN!=='undefined'&&BTN.size>4000)BTN.clear()}catch(e){}}return fw.apply(this,arguments)}}
+}catch(e){console.error('sweep',e);window.__hsSWEEP.err=String(e&&e.stack||e)}})();
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
