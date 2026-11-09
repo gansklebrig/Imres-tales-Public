@@ -41,8 +41,10 @@ def schneide_stille(x):
     return y, a / SR
 
 def satzpausen(x, woerter, versatz):
-    """Nach Wörtern mit Satzende-Zeichen die Pause bis SATZ verlängern (Einfügen in der Stille nach dem Wort)."""
-    if not woerter: return x
+    """Nach Wörtern mit Satzende-Zeichen die Pause bis SATZ verlängern (Einfügen in der Stille nach dem Wort).
+    Gibt (audio, [(zeitpunkt_im_original, eingefügte_sekunden), …]) zurück."""
+    ein = []
+    if not woerter: return x, ein
     teile, pos = [], 0
     for k in range(len(woerter) - 1):
         w, a, b = woerter[k]
@@ -53,30 +55,39 @@ def satzpausen(x, woerter, versatz):
         schnitt = int((b - versatz + min(.05, luecke / 2)) * SR)
         if schnitt <= pos or schnitt >= len(x): continue
         teile.append(x[pos:schnitt]); teile.append(np.zeros(int((SATZ - luecke) * SR), np.float32)); pos = schnitt
+        ein.append((schnitt / SR, SATZ - luecke))
     teile.append(x[pos:])
-    return np.concatenate(teile)
+    return np.concatenate(teile), ein
 
 def stille(s): return np.zeros(int(max(0, s) * SR), np.float32)
 
 def block_audio(b, regie, rec, qa, bes):
     E = {e["uid"]: e for e in A.einheiten_alle}
-    stuecke = []
+    stuecke, marken, t = [], [], 0.0
+    def an(y):
+        nonlocal t
+        stuecke.append(y); t += len(y) / SR
     for k, s in enumerate(b["segmente"]):
         p = float((regie.get(s["id"]) or {}).get("p", 0) or 0)
         if k == 0: p = max(p, ABSATZ_MIN)
-        stuecke.append(stille(p if k else min(p, 2.5)))
+        an(stille(p if k else min(p, 2.5)))
         teile = rec.get(s["id"]) or [{"neu": None}]
-        for j, t in enumerate(teile):
-            if j: stuecke.append(stille(TEIL))
-            if t.get("alt"):
-                f = t["alt"]
+        for j, teil in enumerate(teile):
+            if j: an(stille(TEIL))
+            if teil.get("alt"):
+                f = teil["alt"]
             else:
-                uid = s["id"] if t.get("neu") is None else f"{s['id']}-n{t['neu']}"
+                uid = s["id"] if teil.get("neu") is None else f"{s['id']}-n{teil['neu']}"
                 f = A.datei(E[uid], bes)
             x = lade(f); x, versatz = schneide_stille(x)
-            if s["rolle"] == "erzaehler": x = satzpausen(x, (qa.get(f) or {}).get("woerter"), versatz)
-            stuecke.append(x)
-    return np.concatenate(stuecke)
+            ws = (qa.get(f) or {}).get("woerter") or []
+            ein = []
+            if s["rolle"] == "erzaehler": x, ein = satzpausen(x, ws, versatz)
+            for w, a, b2 in ws:
+                d = sum(e for z, e in ein if z <= a - versatz)
+                marken.append([w, round(t + a - versatz + d, 3), round(t + b2 - versatz + d, 3)])
+            an(x)
+    return np.concatenate(stuecke), marken
 
 def schreibe(x, ziel):
     os.makedirs(os.path.dirname(os.path.join(WURZEL, ziel)), exist_ok=True)
@@ -90,14 +101,9 @@ def main():
     A.einheiten_alle, fehler, _ = A.einheiten(["vorab", "I", "II"])
     alt = J("audio/chronik/de/manifest.json")
     altregie = J("tools/vertonung/regie-de.json")
-    # alte Titel-Aufnahmen nach Titeltext
-    titel_alt = {}
-    for kap, liste in alt["kapitel"].items():
-        for e in liste:
-            if e.get("titel"):
-                t = A.klar(altregie["kapitel"][kap][str(e["i"])]["regie"]).rstrip(".").strip()
-                titel_alt[t] = e["datei"]
+    titel_alt = J("tools/hoerbuch/titel-de.json")   # Überschriften: bisherige Aufnahmen
     neu = {"sprache": "de", "stimme": bes["rollen"]["erzaehler"][0], "modell": bes["modell"], "kapitel": dict(alt["kapitel"])}
+    zeitmarken = J("tools/vertonung/zeitmarken-de.json", {})
     for kap in kapitel:
         liste = []
         bloecke = st[kap]
@@ -109,13 +115,13 @@ def main():
                 continue
             if b.get("typ") == "bild": continue
             try:
-                x = block_audio(b, regie, rec, qa, bes)
+                x, mk = block_audio(b, regie, rec, qa, bes)
             except (FileNotFoundError, subprocess.CalledProcessError, KeyError) as e:
                 print("fehlt:", kap, i, e); continue
             h = hashlib.sha1(x.tobytes()).hexdigest()[:10]
             ziel = f"audio/chronik/de/{kap}/{i:03d}-{h}.mp3"
             if not os.path.exists(os.path.join(WURZEL, ziel)): schreibe(x, ziel)
-            liste.append({"i": i, "datei": ziel, "titel": False})
+            liste.append({"i": i, "datei": ziel, "titel": False}); zeitmarken[ziel] = mk
         neu["kapitel"][kap] = liste
         # nicht mehr benutzte Dateien des Kapitels entfernen
         genutzt = {e["datei"] for e in liste}
@@ -124,6 +130,8 @@ def main():
             if f.endswith(".mp3") and f"audio/chronik/de/{kap}/{f}" not in genutzt: os.remove(os.path.join(d, f))
         print(kap, len(liste), "Dateien")
     json.dump(neu, open(os.path.join(WURZEL, "audio/chronik/de/manifest.json"), "w"), ensure_ascii=False, indent=0)
+    alle = {e["datei"] for l in neu["kapitel"].values() for e in l}
+    json.dump({k: v for k, v in zeitmarken.items() if k in alle}, open(os.path.join(WURZEL, "tools/vertonung/zeitmarken-de.json"), "w"), ensure_ascii=False)
 
 if __name__ == "__main__":
     main()

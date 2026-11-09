@@ -73,6 +73,8 @@ def lesen():
         if hinweise: seg["geraeusch"] = hinweise; hinweise = []
         block["segmente"].append(seg); letzte = "erz"
     schliessen()
+    if len(aus["vorab"]) > 1:   # Vorwort ist auf der Seite ein einziger Absatz
+        aus["vorab"] = [{"typ": "text", "segmente": [s for b in aus["vorab"] for s in b["segmente"]]}]
     return aus
 
 def lesetext(block):

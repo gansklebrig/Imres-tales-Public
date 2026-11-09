@@ -102,7 +102,7 @@ window.INHALT = {
     name: "Barradin",
     bild: "barradin.jpg",
     label: "Ein Wort vorab",
-    text: "Diese Chronik erzähle ich euch, Barradin! Wie es sich für einen Barden gehört, erinnere ich mich nicht an jedes Detail ganz genau. Und weil meine Gefährten bei jeder Erzählung danebensitzen, mischen sie sich gelegentlich ein. Das eine oder andere habe ich vielleicht ein klein wenig schöngedichtet ...<br>„Ein klein wenig?“"
+    text: "Diese Chronik erzähle ich euch, Barradin! Wie es sich für einen Barden gehört, erinnere ich mich nicht an jedes Detail ganz genau. Und weil meine Gefährten bei jeder Erzählung danebensitzen, mischen sie sich gelegentlich ein. Das eine oder andere habe ich vielleicht ein klein wenig schöngedichtet ...<br>„Ein klein wenig?“<br>Na gut. Oder komplett übertrieben. Danke, Friedrich. Imre allein kennt die wahre Geschichte ... Diese hier wird euch hoffentlich trotzdem verzaubern!"
   },
 
   /* ---------- DIE CHRONIK ----------
