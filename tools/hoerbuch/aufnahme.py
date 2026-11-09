@@ -101,7 +101,7 @@ def pruefen(modell, f, ziel):
     woerter = [[w.word.strip(), round(w.start, 3), round(w.end, 3)] for s in seg for w in s.words]
     hyp = " ".join(w[0] for w in woerter)
     a, b = vergleich(ziel), vergleich(hyp)
-    ratio = difflib.SequenceMatcher(None, a, b).ratio()
+    ratio = difflib.SequenceMatcher(None, a, b, autojunk=False).ratio()
     verrat = [w for w in b.split() if w in VERRAT]
     d = dauer(f); erwartet = len(klar(ziel)) / 14.5 + .6
     lang = len(b) > len(a) * 1.25 + 8
