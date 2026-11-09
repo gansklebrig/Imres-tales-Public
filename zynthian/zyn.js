@@ -718,6 +718,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   }
   function dreh(nr, d) {
     if (PULT && zpAktiv()) return;
+    if (PULT && !$(".zyn-menue")) tourMelde("dreh" + nr);
     if (fokusRegler && nr === 3 && document.contains(fokusRegler)) {
       const el = fokusRegler, st = +(el.step || 1) || 1, lo = +el.min || 0, hi = +(el.max || 100);
       el.value = String(Math.max(lo, Math.min(hi, +el.value + d * st))); el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true }));
@@ -1219,7 +1220,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const panelAktiv = () => mischAktiv() || spurAktiv();
   const panelReihe = () => (reiheTipp != null ? reiheTipp : alt) ? 1 : 0;
   function mischer(an) {
-    mischAn = an == null ? !mischAn : an; if (mischAn) spurAn = false; if (mischAn && typeof karteLaden === "function") karteLaden(true);
+    mischAn = an == null ? !mischAn : an; if (mischAn) spurAn = false; else tourMelde("mischer-zu"); if (mischAn && typeof karteLaden === "function") karteLaden(true);
     if (mischAn) zeige("🎚 " + W("Mischpult", "Mixer") + " · " + MX_AB_NAME[mxAbAkt()], null, W("Tippen: sanft aus/an · halten: Solo · ziehen: Lautstärke · ◀ ▶: Mischung A/B", "tap: fade out/in · hold: solo · drag: level · ◀ ▶: mix A/B"));
     zpZeichnen(true); ledsMelden();
   }
@@ -1410,7 +1411,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
 
   /* ----- Seiten wechseln ----- */
   function zpSeiteSetzen(id) {
-    if (!ZP_SEITEN.some(x => x.id === id)) return;
+    if (!ZP_SEITEN.some(x => x.id === id)) return; tourMelde("tab:" + id);
     zpSeite = id; schreib("imres-zp-seite-" + SEITE, id); zpCursor = -1; zpZeichnen(true); ledsMelden();
   }
   /* Modus wechseln: Bühnen-Pult · Klangwelten · Beat-Builder (alle Regler der Webseite) */
@@ -1447,7 +1448,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (j >= 0) { l.splice(j, 1); zeige("☆ " + it.name, null, W("kein Favorit mehr", "no longer a favourite")); } else { l.push(it.key); zeige("★ " + it.name, null, W("Favorit – steht jetzt vorne", "favourite – now shown first")); }
     FAV[zpSeite] = l; schreib("imres-zp-fav", JSON.stringify(FAV)); zpBlatt[zpSeite] = 0; zpCursor = -1; zpZeichnen(true); ledsMelden();
   }
-  function zpAusloesen(i) { const it = zpBlattJetzt()[i]; if (!it) return; if (autoModus !== "aus" && (zpSeite === "stimmung" || zpSeite === "set")) autoPlanen("st"); try { it.los(); } catch (e) { console.warn(e); } setTimeout(() => { zpZeichnen(true); ledsMelden(); }, 120); }
+  function zpAusloesen(i) { const it = zpBlattJetzt()[i]; if (!it) return; tourMelde("kachel"); if (autoModus !== "aus" && (zpSeite === "stimmung" || zpSeite === "set")) autoPlanen("st"); try { it.los(); } catch (e) { console.warn(e); } setTimeout(() => { zpZeichnen(true); ledsMelden(); }, 120); }
   function zpCursorBewegen(r) {
     if (zpCursor < 0) { zpCursor = 0; zpZeichnen(true); return; }
     let c = zpCursor % 4, z = zpCursor >= 4 ? 1 : 0;
@@ -2290,7 +2291,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   function zpEinstellungen(fokusK) {
     const zz = (id, t, w, u) => '<button type="button" data-zm="' + id + '">' + t + (w != null ? "<b>" + w + "</b>" : "") + (u ? "<small>" + u + "</small>" : "") + "</button>";
     const neu = id => () => { zpEinstellungen(id); };
-    const a = { zu: menueZu, hilfe: zpHilfe, sicher: () => sicherMenue(), mischer: () => mxMenue(), ueb: () => { const P = window.ImresPult, l = [1, 2, 4, 6, 8], v = P.uebergang(); P.uebergang(l[(l.findIndex(x => x >= v) + 1) % l.length] || 1); neu("ueb")(); }, beleg: () => belegMenue(), wlan: () => wlanMenue(true), bt: () => btMenue(false),
+    const a = { zu: menueZu, hilfe: zpHilfe, sicher: () => sicherMenue(), mischer: () => mxMenue(), tour: () => { menueZu(); tourStart(); }, ueb: () => { const P = window.ImresPult, l = [1, 2, 4, 6, 8], v = P.uebergang(); P.uebergang(l[(l.findIndex(x => x >= v) + 1) % l.length] || 1); neu("ueb")(); }, beleg: () => belegMenue(), wlan: () => wlanMenue(true), bt: () => btMenue(false),
       leistung: () => { const l = ["voll", "mittel", "leicht", "spar"], n = l[(l.indexOf(leistung()) + 1) % l.length]; schreib("imres-lw-mittel", n === "mittel" ? "1" : "0"); schreib("imres-lw-leicht", n === "leicht" || n === "spar" ? "1" : "0"); schreib("imres-lw-spar", n === "spar" ? "1" : "0"); schreib("imres-zp-leistung-gewaehlt", "1"); zeige("⚡ " + LEISTUNG_NAME[n], null, W("lädt neu …", "reloading …")); setTimeout(() => location.reload(), 500); },
       hell: () => { const v = LED_STUFEN[(LED_STUFEN.indexOf(ledHell()) + 1) % LED_STUFEN.length]; schreib("imres-zp-hell", String(v)); ledMerk = ""; ledsMelden(); neu("hell")(); },
       looplen: () => { const l = [1, 2, 4, 8], v = l[(l.indexOf(loopTakte()) + 1) % l.length]; schreib("imres-zp-looplen", String(v)); neu("looplen")(); },
@@ -2307,6 +2308,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       zz("looplen", "⟳ " + W("Regler-Loop: ", "Knob loop: "), loopTakte() + W(" Takte", " bars"), W("ALT + Regler drücken: aufnehmen / Loop aus", "ALT + push knob: record / loop off")) +
       zz("mischer", "🎚 " + W("Mischer", "Mixer"), null, W("dB/%, Blendzeit, Mischungen A/B, Obergrenzen", "dB/%, fade time, mixes A/B, upper limits")) +
       zz("beleg", "🎛 " + W("Belegung ändern", "Change mapping"), null, W("Drehregler, Effekte und Tasten selbst belegen", "assign knobs, effects and buttons")) +
+      zz("tour", "👋 " + W("Begrüßung noch einmal", "Show the welcome again"), null, W("die kurze Einführung zum Mitmachen", "the short hands-on intro")) +
       zz("sicher", "💾 " + W("Sicherung", "Backup"), null, W("Einstellungen auf der SD-Karte sichern / zurückholen", "save / restore settings on the SD card")) +
       zz("hilfe", "❔ " + W("Tastenbelegung", "Button map"), null) +
       '<button type="button" data-zm="zu">✕ ' + W("Fertig", "Done") + "</button></div>", a);
@@ -2472,7 +2474,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const kach = Array.from({ length: 8 }, (_, i) => { const it = blatt[i];
       const f = '<span class="zp-f' + (i < 4 ? "" : " alt") + '">' + (i < 4 ? "" : "ALT ") + "F" + (i % 4 + 1) + "</span>";
       if (!it) return '<div class="zp-k leer">' + f + "</div>";
-      return '<button type="button" class="zp-k' + (it.an ? " an" : "") + (it.vor ? " vor" : "") + (it.fav ? " fav" : "") + (i === zpCursor ? " cur" : "") + (it.p != null ? " lauf" : "") + '" data-zp-k="' + i + '"' + (it.p != null ? ' style="--p:' + it.p + '%"' : "") + '>' + f + (it.fav ? '<span class="zp-stern">★</span>' : "") + (it.still ? '<span class="zp-still" title="' + W("mit Stille", "brings a hush") + '">🤫</span>' : "") + '<span class="zp-s">' + esc2(it.sym || d.sym) + '</span><span class="zp-n">' + esc2(it.name) + "</span>" + (it.vor ? '<span class="zp-v">' + W("am Taktende", "at bar end") + "</span>" : "") + (it.info ? '<span class="zp-v zp-dauer">' + esc2(it.info) + "</span>" : "") + "</button>"; }).join("");
+      return '<button type="button" class="zp-k' + (it.an ? " an" : "") + (it.vor ? " vor" : "") + (it.fav ? " fav" : "") + (i === zpCursor ? " cur" : "") + (it.p != null ? " lauf" : "") + '" data-zp-k="' + i + '" style="--k:' + kachelFarbe(it) + (it.p != null ? ";--p:" + it.p + "%" : "") + '">' + f + (it.fav ? '<span class="zp-stern">★</span>' : "") + (it.still ? '<span class="zp-still" title="' + W("mit Stille", "brings a hush") + '">🤫</span>' : "") + kachelBild(it, it.sym || d.sym) + (it.an && SEITE === "buehne" && z.laeuft ? '<span class="zp-eq"><i></i><i></i><i></i></span>' : "") + '<span class="zp-n">' + esc2(it.name) + "</span>" + (it.vor ? '<span class="zp-v">' + W("am Taktende", "at bar end") + "</span>" : "") + (it.info ? '<span class="zp-v zp-dauer">' + esc2(it.info) + "</span>" : "") + "</button>"; }).join("");
     const gr = blatt[0] ? blatt[0].gruppe : (SEITE === "buehne" && !(window.ImresPult && window.ImresPult.listen) ? "⏳ " + W("Bühne lädt …", "Stage loading …") + " " + Math.round(performance.now() / 1000) + " s" : "");
     const kopf = '<div class="zp-gruppe"><span data-zp-gruppe="1">' + esc2(gr || d.name) + (zpGruppen.length > 1 ? ' <small>▸ ' + W("ALT + ▲ ▼: andere Gruppe", "ALT + ▲ ▼: other group") + "</small>" : "") + "</span>" + (n > 1 ? '<span class="zp-blatt"><button type="button" data-zp-blatt="-1">◀</button>' + (n <= 9 ? Array.from({ length: n }, (_, i) => "<i" + (i === bi ? ' class="an"' : "") + "></i>").join("") : "<em>" + (bi + 1) + " / " + n + "</em>") + '<button type="button" data-zp-blatt="1">▶</button></span>' : "") + "</div>";
     const bk = mischAktiv() ? "MIX" : spurAktiv() ? "SPUR" : SEITE === "welten" ? (bank ? "B" : "A") : bankName(), bf = BANK_FARBE[bk] || BANK_FARBE.A;
@@ -2486,7 +2488,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       (panelAktiv() ? '<div class="zp-mitte" style="--f:' + bf + '">' + mischHTML() + "</div>" : zpSeite === "beats" ? '<div class="zp-mitte" style="--f:' + d.farbe + '">' + beatsKopf() + beatsHTML() + "</div>" : zpSeite === "raum" && SEITE === "welten" ? '<div class="zp-mitte zr-m" style="--f:' + d.farbe + '">' + raumHTML() + "</div>" : '<div class="zp-mitte" style="--f:' + d.farbe + '">' + kopf + '<div class="zp-kacheln">' + kach + "</div></div>") +
       '<div class="zp-regler" style="--b:' + bf + '"><div class="zp-bank">⟲ ' + W("Bank ", "Bank ") + bk + (SEITE !== "welten" && !spurAktiv() && (mischAktiv() || !(zpSeite === "beats" && bank < 2)) ? '<small>' + W("drücken+drehen ⇄", "push+turn ⇄") + "</small>" : "") + "</div>" + regler + "</div>" + '<div class="zp-fuss">' + fuss + "</div>";
     if (html === zpMerk || (zpZeiger && !sofort)) return;
-    zpMerk = html; zpEl.innerHTML = html;
+    zpMerk = html; zpEl.innerHTML = html; pulsSync(true); tourKlassen();
   }
   function mxDruckText(i, r) {
     if (mischAktiv()) { const k = mixKeys()[panelReihe() * 4 + i]; if (MX_QUELLEN.includes(k)) return W("drücken: stumm · lang: Solo", "push: mute · hold: solo"); if (MX_STUMMBAR.includes(k)) return W("drücken: stumm", "push: mute"); }
@@ -2645,6 +2647,113 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     else if (!z.zieht && it && it.typ === "e" && a && a.raumProbe) a.raumProbe(it.art);
     zpReglerAnzeige(); };
   document.addEventListener("pointerup", rmLos, true); document.addEventListener("pointercancel", () => { RM.zieh = null; }, true);
+  /* ===================== 💓 Takt-Leuchten =====================
+     Die laufende Stimmungs-Kachel glimmt im Schlag, darin tanzen drei Balken, und rechts blinkt ein Punkt im Takt. Alles reine
+     CSS-Animationen (Deckkraft/Größe – das macht der Grafikteil); das Skript stellt nur ab und zu Länge und Phase nach. */
+  const PULS = { bd: 0, t: 0 };
+  function pulsSync(neu) {
+    if (!zpEl) return; let tp = null;
+    if (SEITE === "buehne" && !zpRuhe) { try { tp = window.ImresPult && window.ImresPult.taktPhase ? window.ImresPult.taktPhase() : null; } catch (_) {} }
+    const welt = SEITE === "welten" && !zpRuhe && !!(wMix() || {}).laeuft;
+    zpEl.classList.toggle("takt", !!tp); zpEl.classList.toggle("atem", welt);
+    if (!tp) { PULS.bd = 0; return; }
+    const j = performance.now(), neuesTempo = Math.abs(tp.bd - PULS.bd) > .002;
+    if (!neu && !neuesTempo && j - PULS.t < 6000) return;
+    if (neuesTempo) zpEl.style.setProperty("--bd", tp.bd.toFixed(4) + "s");
+    PULS.bd = tp.bd; PULS.t = j;
+    /* Phase nachstellen: alle Takt-Animationen auf „so weit im Schlag sind wir gerade“ setzen */
+    const ms = tp.ph * tp.bd * 1000;
+    try { zpEl.getAnimations({ subtree: true }).forEach(a => { if (a.animationName && /^zpt(glow|eq)$/.test(a.animationName)) a.currentTime = ms; }); } catch (_) {}
+  }
+  setInterval(() => pulsSync(false), 2000);
+  /* ===================== 👋 Begrüßung beim ersten Start ===================== */
+  const TOUR_SCHRITTE = {
+    buehne: [
+      { warte: "dreh0", t: W("🎚 Dreh am <b>Regler 1</b>", "🎚 Turn <b>knob 1</b>"), u: W("Damit wird die Musik lauter oder leiser.", "That makes the music louder or softer.") },
+      { warte: "kachel", t: W("👆 Tipp auf eine <b>Kachel</b>", "👆 Tap a <b>tile</b>"), u: W("Die Musik wechselt in diese Stimmung – einfach ausprobieren.", "The music changes to that mood – just try.") },
+      { warte: "mischer", t: W("🎚 Drück <b>CTRL</b>", "🎚 Press <b>CTRL</b>"), u: W("Das Mischpult geht auf: Musik, Hintergrund, Instrumente fein einstellen. Nochmal CTRL schließt es.", "The mixer opens. CTRL again closes it.") },
+      { warte: "wisch", t: W("↔ <b>Wisch</b> mit dem Finger zur Seite", "↔ <b>Swipe</b> sideways"), u: W("Nächste Leiste. Mit zwei Fingern (oder über die Reiter oben): Stimmung → Ort → Momente …", "Next row. Two fingers (or on the tabs): next window.") },
+      { warte: null, t: W("✨ <b>Fertig!</b>", "✨ <b>Done!</b>"), u: W("MENU öffnet alles Weitere – Autopilot, Optionen, System. Viel Spaß!", "MENU opens everything else. Have fun!") }
+    ],
+    welten: [
+      { warte: "kachel", t: W("👆 Tipp auf eine <b>Klangwelt</b>", "👆 Tap a <b>soundscape</b>"), u: W("Taverne, Wald, Küste … – sie umhüllt dich sofort.", "Tavern, forest, coast … – it surrounds you at once.") },
+      { warte: "dreh0", t: W("🎚 Dreh am <b>Regler 1</b>", "🎚 Turn <b>knob 1</b>"), u: W("Damit wird sie lauter oder leiser.", "Louder or softer.") },
+      { warte: "tab:raum", t: W("🧭 Tipp oben auf <b>Raum</b>", "🧭 Tap <b>Space</b> at the top"), u: W("Dort stellst du jedes Geräusch an seinen Platz – nah, fern, links, rechts.", "Place every sound around you.") },
+      { warte: "mischer", t: W("🎚 Drück <b>CTRL</b>", "🎚 Press <b>CTRL</b>"), u: W("Das Mischpult der Klangwelt. Nochmal CTRL schließt es.", "The soundscape mixer. CTRL again closes it.") },
+      { warte: null, t: W("✨ <b>Fertig!</b>", "✨ <b>Done!</b>"), u: W("MENU öffnet alles Weitere. Viel Spaß!", "MENU opens everything else. Have fun!") }
+    ]
+  };
+  const TOUR = { an: false, i: 0, el: null, l: null };
+  function tourKlassen() { if (!zpEl) return; [...zpEl.classList].filter(c => /^tour-/.test(c)).forEach(c => zpEl.classList.remove(c)); if (TOUR.an && TOUR.l[TOUR.i] && TOUR.l[TOUR.i].warte) zpEl.classList.add("tour-" + TOUR.l[TOUR.i].warte.replace(/[^a-z0-9]/gi, "")); }
+  function tourZeichnen() {
+    if (!TOUR.an) { if (TOUR.el) TOUR.el.remove(); TOUR.el = null; tourKlassen(); return; }
+    if (!TOUR.el) { TOUR.el = document.createElement("div"); TOUR.el.className = "zp-tour"; document.body.appendChild(TOUR.el);
+      TOUR.el.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; if (b.dataset.zt === "ueber" || b.dataset.zt === "los") tourEnde(); else if (b.dataset.zt === "weiter") tourWeiter(); }); }
+    const s = TOUR.l[TOUR.i], letzt = TOUR.i === TOUR.l.length - 1;
+    TOUR.el.innerHTML = '<div class="zt-t">' + s.t + '</div><div class="zt-u">' + s.u + '</div><div class="zt-f"><span class="zt-p">' + TOUR.l.map((_, k) => "<i" + (k <= TOUR.i ? ' class="an"' : "") + "></i>").join("") + "</span>" +
+      (letzt ? '<button type="button" class="los" data-zt="los">' + W("Los geht's", "Let's go") + "</button>" : '<button type="button" data-zt="weiter">' + W("weiter ›", "next ›") + '</button><button type="button" data-zt="ueber">' + W("Überspringen", "Skip") + "</button>") + "</div>";
+    tourKlassen();
+  }
+  function tourStart() { const l = TOUR_SCHRITTE[SEITE]; if (!l) return; TOUR.l = l; TOUR.i = 0; TOUR.an = true; tourZeichnen(); }
+  function tourWeiter() { if (!TOUR.an) return; TOUR.i++; if (TOUR.i >= TOUR.l.length) { tourEnde(); return; } tourZeichnen(); }
+  function tourEnde() { TOUR.an = false; schreib("imres-zp-tour-" + SEITE, "1"); tourZeichnen(); }
+  /* was gerade passiert ist – passt es zum Schritt, geht es weiter */
+  function tourMelde(art) {
+    if (!TOUR.an) return; const s = TOUR.l[TOUR.i]; if (!s || !s.warte) return;
+    const ok = s.warte === "mischer" ? art === "mischer-zu" : s.warte === art;
+    if (ok) setTimeout(tourWeiter, s.warte === "kachel" ? 900 : 350);
+  }
+  setTimeout(() => { if (!lies("imres-zp-tour-" + SEITE, "") && zpEl && !$(".zyn-menue") && !TOUR.an) tourStart(); }, 4000);
+  /* ===================== 🎨 Kachelbilder: gezeichnete Medaillons für die Stimmungen, Farbwelten für alles andere =====================
+     Jede Stimmung hat ein eigenes Linienbild (24er-Raster) und eine Farbe; alle anderen Kacheln bekommen ihr Symbol in einem
+     Medaillon in einer passenden Farbwelt (nach Name/Gruppe – nie Blau). */
+  const ST_BILD = {
+    trinklied: ["#ffb030", '<g transform="rotate(-12 8 14)"><path d="M3.5 9h7v9.5a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2z"/><path d="M3.5 11H2.2a1.8 1.8 0 0 0 0 3.6h1.3"/><path d="M3.5 9c0-1.8 1.4-2.8 3.5-2.8s3.5 1 3.5 2.8" class="f"/></g><g transform="rotate(12 16 14)"><path d="M13.5 9h7v9.5a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2z"/><path d="M20.5 11h1.3a1.8 1.8 0 0 1 0 3.6h-1.3"/><path d="M13.5 9c0-1.8 1.4-2.8 3.5-2.8s3.5 1 3.5 2.8" class="f"/></g><path d="M12 2.5v2M9.5 3.5l.8 1.4M14.5 3.5l-.8 1.4"/>'],
+    reise: ["#e0a050", '<path d="M3 6.5l6-2.2 6 2.2 6-2.2v13.4l-6 2.2-6-2.2-6 2.2z"/><path d="M9 4.3v13.4M15 6.5v13.4" class="d"/><path d="M5.5 15.5c2-1 2.8-3.8 5.6-3.8 2.6 0 2.8 1.9 5 1.1" stroke-dasharray="1.4 1.8"/><path d="M16.3 7.3l2.4 2.4M18.7 7.3l-2.4 2.4"/>'],
+    kampf: ["#ff4a2a", '<path d="M4 4l11 11M13 17l4-4M16 16l3 3"/><circle cx="19.8" cy="19.8" r="1"/><path d="M20 4L9 15M11 17l-4-4M8 16l-3 3"/><circle cx="4.2" cy="19.8" r="1"/>'],
+    spannung: ["#a8c040", '<path d="M2 12s3.8-6.5 10-6.5S22 12 22 12s-3.8 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3.4"/><ellipse cx="12" cy="12" rx="1" ry="2.6" class="v"/><path d="M12 3.2v1.6M7.2 4.4l.8 1.4M16.8 4.4l-.8 1.4" class="d"/>'],
+    rast: ["#ff7a20", '<path d="M4 20.5l16-4M4 16.5l16 4"/><path d="M12 3c1 3 4.2 4.4 4.2 8.2a4.2 4.2 0 0 1-8.4 0c0-2 1-3.1 2-4.1 0 2 1 3.2 2.1 3.2 0-3-1-5.2.1-7.3z" class="f"/>'],
+    sieg: ["#ffd040", '<path d="M7 4h10v4.5a5 5 0 0 1-10 0z" class="f"/><path d="M7 6H4.2a3 3 0 0 0 3.2 4.2M17 6h2.8a3 3 0 0 1-3.2 4.2"/><path d="M12 13.5V17M8.5 20.5h7M9.5 17h5v3.5h-5z"/><path d="M12 6.3l.7 1.4 1.5.2-1.1 1 .3 1.5-1.4-.7-1.4.7.3-1.5-1.1-1 1.5-.2z" class="v"/>'],
+    klage: ["#c08aa0", '<path d="M10.5 21c0-6 1.2-9.3 5-11.6"/><path d="M15.5 9.4c2.2-.3 3.9 1.3 3.5 3.5-.4 1.9-2.7 2.8-4.2 1.7-1.4-1-1.5-3.3.7-5.2z" class="f"/><path d="M11 16.2c-3.2 0-5.3-2-5.3-4.3 3.2 0 5.3 1.6 5.3 4.3z"/><path d="M18.2 18.6c.8-.6 1.9-.4 2.1.4-.8.6-1.9.4-2.1-.4zM15.8 20.6c.6-.5 1.5-.3 1.7.3-.6.5-1.5.3-1.7-.3z" class="d"/>'],
+    grusel: ["#9a80c0", '<path d="M6 20.5V11a6 6 0 0 1 12 0v9.5l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5z" class="f"/><circle cx="10" cy="11" r="1.1" class="v"/><circle cx="14" cy="11" r="1.1" class="v"/><ellipse cx="12" cy="14.6" rx="1.2" ry="1.5"/><path d="M3 7.5c.8-.6 1.6-.6 2.4 0M18.6 5.5c.8-.6 1.6-.6 2.4 0" class="d"/>'],
+    boss: ["#e02a3a", '<path d="M7.2 13.2a4.8 4.8 0 0 1 9.6 0v2.3l-1.5 1.1V20H8.7v-3.4l-1.5-1.1z" class="f"/><path d="M9 12.6l2 .9M15 12.6l-2 .9"/><circle cx="10" cy="14.4" r="1.1" class="v"/><circle cx="14" cy="14.4" r="1.1" class="v"/><path d="M7.8 11.2C4.6 11.4 2.6 9.2 2.2 6.4c1.8.9 3.6 1.4 5.8 1.2.4.8.4 2.2-.2 3.6zM16.2 11.2c3.2.2 5.2-2 5.6-4.8-1.8.9-3.6 1.4-5.8 1.2-.4.8-.4 2.2.2 3.6z"/><path d="M10.8 20v-1.8M13.2 20v-1.8"/><path d="M12 5.2l.8-1.8.8 1.8M10.6 6.6L10 4.6M13.4 6.6l.6-2" class="d"/>'],
+    verfolgung: ["#ff6a30", '<path d="M8.5 3.5c2 0 2.6 2 2.4 4.5S10 12.5 8.5 12.5 6.2 10.5 6.2 8 6.5 3.5 8.5 3.5z" class="f"/><ellipse cx="8.5" cy="15" rx="1.6" ry="1.2"/><path d="M15.5 8.5c2 0 2.6 2 2.4 4.5s-.9 4.5-2.4 4.5-2.3-2-2.3-4.5.3-4.5 2.3-4.5z" class="f"/><ellipse cx="15.5" cy="20" rx="1.6" ry="1.2"/><path d="M2 7h2.2M2 10.5h3M19.5 4h2.5M20.5 7.3h1.5" class="d"/>'],
+    unterreich: ["#b060e0", '<path d="M12 9.2c-1 0-1.6.6-2 1.4C8.7 8.8 6.4 8.2 3 9.2c1.2 1 1.6 2.4 1.5 4 1.4-.8 2.8-.8 4 .3.5-.9 1.5-1.3 2.4-1 .3.9.6 1.6 1.1 2.2.5-.6.8-1.3 1.1-2.2.9-.3 1.9.1 2.4 1 1.2-1.1 2.6-1.1 4-.3-.1-1.6.3-3 1.5-4-3.4-1-5.7-.4-7 1.4-.4-.8-1-1.4-2-1.4z" class="f"/><path d="M11 9.5l-.6-1.7M13 9.5l.6-1.7"/><path d="M6 18.5l1 2 1-2M16 18l1 2 1-2M11.2 19.5l.8 1.6.8-1.6" class="d"/>'],
+    ruinen: ["#d8b880", '<path d="M4.5 20.5V8.5M8.5 20.5V8.5M3.5 8.5h6M3.5 20.5h6M3 6.5l3.5-2 3.5 2"/><path d="M15 20.5v-6.8l1-1.4 1 .9 1.2-1.3v8.6M14 20.5h6"/><path d="M11.5 20.5l1.5-2.4 2 .9" class="d"/><rect x="10.5" y="17.8" width="3" height="2.7" rx=".4" class="f"/>'],
+    reiter: ["#c89048", '<path d="M5 20v-8.5a7 7 0 0 1 14 0V20"/><path d="M9 20v-8.5a3 3 0 0 1 6 0V20"/><path d="M4.5 20h5M14.5 20h5"/><circle cx="7" cy="14" r=".7" class="v"/><circle cx="7" cy="17.3" r=".7" class="v"/><circle cx="17" cy="14" r=".7" class="v"/><circle cx="17" cy="17.3" r=".7" class="v"/><circle cx="8.6" cy="8.4" r=".7" class="v"/><circle cx="15.4" cy="8.4" r=".7" class="v"/>'],
+    heldenlied: ["#ffb040", '<path d="M12 3l7 3v5.2c0 5-3 8-7 9.8-4-1.8-7-4.8-7-9.8V6z" class="f"/><path d="M12 7.6l1.2 2.5 2.7.3-2 1.8.6 2.7-2.5-1.3-2.5 1.3.6-2.7-2-1.8 2.7-.3z" class="v"/>'],
+    kamin: ["#ff9a40", '<path d="M3 21h18M4 21V8.5h16V21M2.8 8.5h18.4V5.5H2.8z"/><path d="M8 21v-5a4 4 0 0 1 8 0v5"/><path d="M12 20.2c-1.5 0-2.3-1-2.3-2.2 0-1.4 1.3-2 1.6-3.6.8.7 1.2 1.5 1.2 2.3.4-.4.6-.9.7-1.5.8.8 1.1 1.8 1.1 2.8 0 1.2-1 2.2-2.3 2.2z" class="f"/><path d="M7 5.5V3.5h3v2" class="d"/>'],
+    auenland: ["#7ad050", '<path d="M2 17.5C4.5 10.5 19.5 10.5 22 17.5"/><path d="M1.5 20.5h21"/><path d="M8.7 20.5v-2.4a3.3 3.3 0 0 1 6.6 0v2.4" class="f"/><path d="M12 14.8v5.7" class="d"/><circle cx="13.4" cy="18.4" r=".5" class="v"/><circle cx="17.8" cy="16.2" r="1"/><path d="M17.8 15.2v2M16.8 16.2h2" class="d"/><path d="M6 13.3l-.6-1.7M8.3 11.9l-.3-1.7M16.2 11.6l.3-1.7M18.6 12.8l.5-1.6"/><path d="M5 20.5c.6-1.2 1.6-1.6 2.4-1.2M19 20.5c-.5-1-1.4-1.4-2.2-1.1" class="d"/>'],
+    elben: ["#c8f0b0", '<path d="M4.5 19.5C4.5 10.5 10.5 5 19 5c0 8.5-5.5 14.5-14.5 14.5z" class="f"/><path d="M4.5 19.5L15 9M9 15l-.3-3M11.6 12.4l-.2-2.6M9 15l3 .2M11.6 12.4l2.6.1" class="d"/><path d="M18.5 13.5v5M16 16h5"/><path d="M5 4.5v3M3.5 6h3" class="d"/>'],
+    fey: ["#e090e0", '<path d="M4 12.2a8 6.2 0 0 1 16 0z" class="f"/><path d="M9.5 12.2v6.3a2.5 2.1 0 0 0 5 0v-6.3"/><circle cx="9" cy="9.4" r="1.1" class="v"/><circle cx="14" cy="8.2" r="1.3" class="v"/><circle cx="16.8" cy="10.8" r=".8" class="v"/><path d="M4 3.5v3M2.5 5h3M20 2.5v2.6M18.7 3.8h2.6M19.5 17v2.4M18.3 18.2h2.4" class="d"/>'],
+    zwerge: ["#d07a3a", '<path d="M3.5 9C7.5 4.5 16.5 4.5 20.5 9" /><path d="M3.5 9l2-.4M20.5 9l-2-.4"/><path d="M12 6v15.5"/><rect x="10.3" y="4.8" width="3.4" height="3" rx=".5" class="f"/><path d="M9.5 21.5h5" class="d"/>'],
+    dorffest: ["#ff8a70", '<path d="M2 5c6 4.2 14 4.2 20 0"/><path d="M4 6.3l3 1.1-1.7 4.1z" class="f"/><path d="M10.5 7.9h3L12 12.3z" class="f"/><path d="M17 7.4l3-1.1-1.3 5.2z" class="f"/><path d="M5 15.5l.9.9M9 18l.7-1.2M13.5 16l1.1.4M18 18.5l.4-1.2M7 20.5l1-.6M16 21l.9.5" class="d"/>'],
+    marktplatz: ["#f0b830", '<path d="M3 9l2-5h14l2 5"/><path d="M3 9a2.25 2 0 0 0 4.5 0 2.25 2 0 0 0 4.5 0 2.25 2 0 0 0 4.5 0 2.25 2 0 0 0 4.5 0" class="f"/><path d="M5 11v10M19 11v10M2.5 21h19M5 16.5h14"/><circle cx="8.5" cy="15" r="1.3" class="v"/><circle cx="12" cy="15" r="1.3" class="v"/><circle cx="15.5" cy="15" r="1.3" class="v"/>'],
+    hof: ["#e0b040", '<path d="M3.5 17L2.5 8l5 4 4.5-7 4.5 7 5-4-1 9z" class="f"/><path d="M4 20.5h16"/><circle cx="12" cy="13.5" r="1.1" class="v"/><circle cx="7.5" cy="14.5" r=".8" class="v"/><circle cx="16.5" cy="14.5" r=".8" class="v"/><circle cx="2.5" cy="7.5" r=".9"/><circle cx="12" cy="4.4" r=".9"/><circle cx="21.5" cy="7.5" r=".9"/>'],
+    shanty: ["#52b878", '<circle cx="12" cy="4.8" r="2"/><path d="M12 6.8v14.4M8 10h8"/><path d="M4.8 14c0 4 3.2 7.2 7.2 7.2s7.2-3.2 7.2-7.2"/><path d="M3.3 15.6L4.8 13.6l1.8 1.8M20.7 15.6L19.2 13.6l-1.8 1.8"/>'],
+    pilger: ["#f0e0b0", '<path d="M12 20L4 11.2a8 7.2 0 0 1 16 0z" class="f"/><path d="M12 20L8.2 6.4M12 20V5.8M12 20l3.8-13.6M12 20L5.4 9M12 20l6.6-11" class="d"/><path d="M10.2 20h3.6l-.9 1.8h-1.8z"/>']
+  };
+  /* Farbwelten der übrigen Kacheln – Schlagwörter aus Name, Schlüssel und Gruppe */
+  const FARBWELT = [
+    [/feuer|glut|schmiede|lager|kamin|flamm|esse|fackel/, "#ff7a20"], [/schlacht|krieg|kampf|hieb|klinge|schwert|duell|wucht|tod|sterben|blut|aua|schmerz|block|pfeil|bogen|armbrust|speer|schleuder|schläger|rauf|prügel|keile/, "#e8462a"],
+    [/spuk|geist|grusel|fluch|gruft|kerker|düster|nacht|unheim|schrei|kette|untot|skelett|ruine/, "#9a80c0"], [/zauber|magie|labor|alchem|segen|trank|fee|feen|arkan|rune/, "#c070e0"],
+    [/drache|ungeheuer|wesen|monster|riese|troll|wolf|bär|wild|tier|eule|hirsch/, "#d0603a"], [/wald|auen|elb|sumpf|natur|wiese|garten|frosch|vogel|hof|bauern|kuh|schaf|huhn|ziege/, "#6cc860"],
+    [/wasser|meer|küste|see|fluss|ufer|regen|hafen|schiff|deck|unterwasser|wasserfall|bach|welle|tropf|shanty/, "#52b878"], [/tempel|pilger|kirche|bibliothek|heilig|chor|glocke|kloster|gong/, "#f0d080"],
+    [/taverne|trink|bier|jubel|fest|markt|dorf|musik|tanz|würfel|leute|menschen|stadt|straße|strasse|unterwegs/, "#ffb030"], [/höhle|hoehle|mine|zwerg|stein|berg|gebirge|unterreich|fels/, "#c08a50"],
+    [/wetter|donner|blitz|sturm|wind|schnee|eis|frost|nebel/, "#e8d070"], [/behaglich|kerze|warm|ruhe|schlaf/, "#ffc890"]
+  ];
+  const FW_REST = ["#ffc830", "#ff9a60", "#e0a050", "#d08ab0", "#a0c860", "#c8a0e0", "#f0b070"];
+  function kachelFarbe(it) {
+    const k = (it.key || "") + " " + (it.name || "") + " " + (it.gruppe || ""), t = k.toLowerCase();
+    const m = /^st:(\w+)/.exec(it.key || ""); if (m && ST_BILD[m[1]]) return ST_BILD[m[1]][0];
+    for (const [re, f] of FARBWELT) if (re.test(t)) return f;
+    let h = 0; for (let i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) >>> 0; return FW_REST[h % FW_REST.length];
+  }
+  function kachelBild(it, sym) {
+    const m = /^st:(\w+)/.exec(it.key || ""), b = m && ST_BILD[m[1]];
+    if (b) return '<span class="zp-s zp-med zp-gem"><svg viewBox="0 0 24 24" aria-hidden="true">' + b[1] + "</svg></span>";
+    return '<span class="zp-s zp-med"><span class="zp-emo">' + esc2(sym) + "</span></span>";
+  }
   /* ===================== 🌄 Ruhebild der Klangwelten: eine kleine lebende Landschaft je Welt =====================
      Jede Schicht der Welt ist ein Lichtband, das mit ihrem Pegel atmet; dazu Glut, Glühwürmchen, Funken, Blasen … je nach Welt
      und das Wetter darüber. Läuft nur, solange das Ruhebild zu sehen ist (30 Bilder/s, alles Statische vorgezeichnet). */
@@ -2815,6 +2924,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const vg = x.createLinearGradient(0, h * .7, 0, h); vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.55)"); x.fillStyle = vg; x.fillRect(0, h * .7, w, h * .3);
   }
   function zpRuheAn() {
+    if (TOUR.an) return;
     if (zpRuhe || $(".zyn-menue")) return; zpRuhe = true; document.documentElement.classList.add("zyn-ruhe"); zpRuheZeichnen(); ledsMelden(); if (SEITE === "welten") wbStart();
   }
   function zpRuheAus() { zpRuhe = false; wbStop(); document.documentElement.classList.remove("zyn-ruhe"); if (zpRuheEl) zpRuheEl.innerHTML = ""; zpZeichnen(true); ledsMelden(); }
@@ -2886,7 +2996,7 @@ html.zyn-pult, html.zyn-pult body { overflow: hidden !important; }
 html.zyn-pult body *:not(.lw-buehne, .lw-buehne *, .zp, .zp *, .zp-ruhe, .zp-ruhe *, .zyn-osd, .zyn-osd *, .zyn-menue, .zyn-menue *) { animation: none !important; transition: none !important; }
 html.zyn-pult body canvas:not(.lw-buehne canvas), html.zyn-pult body video { display: none !important; }
 html.zyn-pult body .zr-raum canvas#zr-c { display: block !important; }
-html.zyn-pult body > *:not(.zp, .zp-ruhe, .zp-weltbild, .zyn-osd, .zyn-menue, .zyn-update, #imres-logo, script, style) { content-visibility: hidden; }
+html.zyn-pult body > *:not(.zp, .zp-ruhe, .zp-weltbild, .zyn-osd, .zyn-menue, .zyn-update, .zp-tour, #imres-logo, script, style) { content-visibility: hidden; }
 html.zyn-pult.zyn-bb body > *:has(.lw-buehne), html.zyn-pult.zyn-ruhe body > *:has(.lw-buehne) { content-visibility: visible !important; } /* !important: die Regel darüber ist durch #imres-logo in :not() spezifischer */
 html.zyn-pult .zyn-leiste { display: none !important; }
 /* Bühnenbild: hinter dem Pult (gedimmt) und als Ruhebild */
@@ -2894,7 +3004,7 @@ html.zyn-pult .zyn-leiste { display: none !important; }
 html.zyn-pult.zyn-bb body *, html.zyn-pult.zyn-ruhe body * { visibility: hidden !important; }
 html.zyn-pult.zyn-pult body .lw-buehne, html.zyn-pult.zyn-pult body .lw-buehne *,
 html.zyn-pult.zyn-pult body .zp, html.zyn-pult.zyn-pult body .zp *, html.zyn-pult.zyn-pult body .zp-ruhe, html.zyn-pult.zyn-pult body .zp-ruhe *,
-html.zyn-pult.zyn-pult body .zp-weltbild, html.zyn-pult.zyn-pult body .zyn-osd, html.zyn-pult.zyn-pult body .zyn-osd *, html.zyn-pult.zyn-pult body .zyn-menue, html.zyn-pult.zyn-pult body .zyn-menue *, html.zyn-pult.zyn-pult body .zyn-update, html.zyn-pult.zyn-pult body .zyn-update * { visibility: visible !important; }
+html.zyn-pult.zyn-pult body .zp-weltbild, html.zyn-pult.zyn-pult body .zyn-osd, html.zyn-pult.zyn-pult body .zyn-osd *, html.zyn-pult.zyn-pult body .zyn-menue, html.zyn-pult.zyn-pult body .zyn-menue *, html.zyn-pult.zyn-pult body .zyn-update, html.zyn-pult.zyn-pult body .zyn-update *, html.zyn-pult.zyn-pult body .zp-tour, html.zyn-pult.zyn-pult body .zp-tour * { visibility: visible !important; }
 html.zyn-pult.zyn-bb body::before, html.zyn-pult.zyn-bb body::after, html.zyn-pult.zyn-ruhe body::before, html.zyn-pult.zyn-ruhe body::after { display: none !important; }
 html.zyn-pult.zyn-ruhe body, html.zyn-pult.zyn-bb body { background: #0d0a10 !important; }
 html.zyn-pult.zyn-pult.zyn-bb #lautenwerk .lw-buehne.lw-buehne, html.zyn-pult.zyn-pult.zyn-ruhe #lautenwerk .lw-buehne.lw-buehne {
@@ -2980,6 +3090,37 @@ html.zyn-ruhe .zp-ruhe { display: block; }
 .zp-k.cur { outline: 3px solid #f4c45a; outline-offset: 1px; }
 .zp-k.lauf { overflow: hidden; }
 .zp { touch-action: pan-y; } .zp .zp-kopf { touch-action: none; }
+/* Kachelbilder: Medaillon in der Farbwelt der Kachel (--k) */
+.zp .zp-mitte .zp-k:not(.leer):not(.an) { background: radial-gradient(120% 95% at 50% 16%, color-mix(in srgb, var(--k, #2a2134) 17%, #241c2e), #17121f 72%) !important; border-color: color-mix(in srgb, var(--k, #3a2f48) 26%, #3a2f48) !important; }
+.zp .zp-mitte .zp-k.an { background: radial-gradient(120% 95% at 50% 16%, color-mix(in srgb, var(--k) 36%, #241c2e), color-mix(in srgb, var(--k) 12%, #17121f) 75%) !important; border-color: var(--k) !important; box-shadow: 0 0 16px color-mix(in srgb, var(--k) 45%, transparent); }
+.zp-k .zp-s.zp-med { width: clamp(34px, 46cqh, 74px); height: clamp(34px, 46cqh, 74px); flex: none; border-radius: 50%; display: grid; place-items: center; font-size: inherit; filter: none;
+  background: radial-gradient(circle at 36% 30%, color-mix(in srgb, var(--k) 62%, #fff4dc 8%), color-mix(in srgb, var(--k) 34%, #1a1422) 72%);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--k) 60%, #fff4dc 25%), inset 0 -4px 8px rgba(0, 0, 0, .3), 0 2px 7px rgba(0, 0, 0, .45); margin-bottom: 2px; }
+.zp-k .zp-med .zp-emo { font-size: clamp(19px, 26cqh, 42px); line-height: 1; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .55)); }
+.zp-k .zp-med.zp-gem { background: radial-gradient(circle at 36% 28%, color-mix(in srgb, var(--k) 70%, #fff4dc 10%), color-mix(in srgb, var(--k) 30%, #120d18) 78%); }
+.zp-k .zp-med svg { width: 68%; height: 68%; fill: none; stroke: #fff8ea; stroke-width: 1.65; stroke-linecap: round; stroke-linejoin: round; overflow: visible; }
+.zp-k .zp-med svg .f { fill: rgba(255, 248, 234, .2); } .zp-k .zp-med svg .v { fill: #fff8ea; stroke: none; } .zp-k .zp-med svg .d { opacity: .6; }
+.zp-k.an .zp-med { box-shadow: inset 0 0 0 2px #fff4dc, 0 0 12px color-mix(in srgb, var(--k) 70%, transparent); }
+/* Takt-Leuchten (nur Deckkraft/Größe – das rechnet der Grafikteil, nicht das Skript) */
+.zp.takt .zp-mitte .zp-k.an::after, .zp.atem .zp-mitte .zp-k.an::after { content: ""; position: absolute; inset: -3px; border-radius: 16px; border: 2px solid var(--k, var(--f)); box-shadow: 0 0 18px var(--k, var(--f)); opacity: 0; pointer-events: none; }
+.zp.takt .zp-mitte .zp-k.an::after { animation: zptglow var(--bd, .5s) ease-out infinite; }
+.zp.atem .zp-mitte .zp-k.an::after { animation: zptatem 4.8s ease-in-out infinite; }
+@keyframes zptglow { 0% { opacity: .9; } 55%, 100% { opacity: 0; } }
+@keyframes zptatem { 0%, 100% { opacity: 0; } 50% { opacity: .55; } }
+.zp-eq { position: absolute; left: 9px; bottom: 8px; display: flex; gap: 2px; align-items: flex-end; height: 15px; pointer-events: none; }
+.zp-eq i { width: 3px; height: 15px; background: var(--k, var(--f)); border-radius: 1px; transform-origin: 50% 100%; transform: scaleY(.3); opacity: .9; }
+.zp.takt .zp-eq i { animation: zpteq var(--bd, .5s) ease-out infinite; }
+.zp.takt .zp-eq i:nth-child(2) { animation-duration: calc(var(--bd, .5s) * 2); } .zp.takt .zp-eq i:nth-child(3) { animation-duration: calc(var(--bd, .5s) / 2); }
+@keyframes zpteq { 0% { transform: scaleY(1); } 75%, 100% { transform: scaleY(.25); } }
+.zp.takt .zp-bank::after { content: ""; display: inline-block; width: 7px; height: 7px; margin-left: 6px; border-radius: 50%; background: #ffc830; vertical-align: middle; opacity: .15; animation: zptglow var(--bd, .5s) ease-out infinite; }
+/* Begrüßung */
+.zp-tour { position: fixed; left: 50%; bottom: 44px; transform: translateX(-50%); z-index: 2147482700; width: 470px; max-width: 94vw; background: #1d1626; border: 2px solid #ffc830; border-radius: 16px; padding: 12px 16px 10px; color: #f4ead4; font: 600 15px/1.3 system-ui, sans-serif; box-shadow: 0 10px 34px rgba(0, 0, 0, .65); }
+.zp-tour b { color: #ffc830; } .zp-tour .zt-t { font-size: 18px; } .zp-tour .zt-u { color: #cbbfa8; font-size: 13.5px; margin-top: 3px; }
+.zp-tour .zt-f { display: flex; align-items: center; gap: 8px; margin-top: 9px; } .zp-tour .zt-p { display: flex; gap: 5px; flex: 1; } .zp-tour .zt-p i { width: 8px; height: 8px; border-radius: 50%; background: #4a3e58; } .zp-tour .zt-p i.an { background: #ffc830; }
+.zp-tour button { font: 700 13px system-ui, sans-serif; padding: 6px 12px; border-radius: 9px; border: 1px solid #5a4c68; background: #2a2134; color: #e8dcc4; } .zp-tour button.los { background: #ffc830; color: #1a1206; border-color: #ffc830; }
+.zp.tour-dreh0 .zp-r[data-zp-r="0"] { outline: 3px solid #ffc830; outline-offset: -2px; border-radius: 10px; animation: zptatem 1.6s ease-in-out infinite; }
+.zp.tour-kachel .zp-mitte .zp-k:not(.leer) { outline: 2px dashed color-mix(in srgb, #ffc830 70%, transparent); outline-offset: 2px; }
+.zp.tour-tabraum [data-zp-tab="raum"] { outline: 3px solid #ffc830; outline-offset: 1px; }
 .zyn-hg-l { max-height: 250px; overflow: auto; font-size: 12px; line-height: 1.3; }
 .zyn-hg-l div { display: flex; gap: 8px; padding: 3px 2px; border-bottom: 1px solid #2c2436; } .zyn-hg-l div.i { opacity: .55; }
 .zyn-hg-l b { flex: none; width: 52px; color: #ffc830; text-align: right; } .zyn-hg-l i { color: #b8a8c8; font-style: normal; font-size: 11px; }
@@ -3064,9 +3205,9 @@ html.zyn-ruhe .zp-ruhe { display: block; }
       const dx = l.reduce((a, x) => a + (x.x - x.x0), 0) / l.length, dy = l.reduce((a, x) => a + (x.y - x.y0), 0) / l.length;
       if (Math.abs(dx) < 55 || Math.abs(dx) < 1.6 * Math.abs(dy) || dauer > 900 || $(".zyn-menue")) return;
       const z = WI.ziel && WI.ziel.closest ? WI.ziel : null, s = dx < 0 ? 1 : -1;
-      if (zwei || (z && z.closest(".zp-kopf"))) { WI.sperreBis = performance.now() + 400; zpSeiteSchritt(s); const d = ZP_SEITEN.find(x => x.id === zpSeite); if (d) zeige(d.sym + " " + d.name); return; }
+      if (zwei || (z && z.closest(".zp-kopf"))) { WI.sperreBis = performance.now() + 400; tourMelde("wisch"); zpSeiteSchritt(s); const d = ZP_SEITEN.find(x => x.id === zpSeite); if (d) zeige(d.sym + " " + d.name); return; }
       if (!z || panelAktiv() || zpSeite === "beats" || z.closest(".zr-raum, .zp-r, .zp-mf") || !z.closest(".zp-mitte")) return;
-      WI.sperreBis = performance.now() + 400;
+      WI.sperreBis = performance.now() + 400; tourMelde("wisch");
       if (!zpBlaettern(s)) zeige("↔ " + W("nur eine Leiste", "only one row"), null, W("mit zwei Fingern: nächstes Fenster", "two fingers: next window"));
     };
     zpEl.addEventListener("pointerup", wischEnde, true); zpEl.addEventListener("pointercancel", wischEnde, true);
@@ -3166,5 +3307,5 @@ html.zyn-ruhe .zp-ruhe { display: block; }
   if (SEITE === "buehne") setTimeout(() => { const r = $("#lautenwerk"); if (r) r.scrollIntoView({ block: "start" }); }, 600);
   fetch("/zyn/status").then(r => r.json()).then(j => { aufnahmeAn = !!j.aufnahme; leisteZeichnen(); }).catch(() => {});
   leisteZeichnen(); ledsMelden();
-  window.ImresZyn = { _test: { ruhe: () => zpRuheAn(), tonhoehe, tonartErkennen, stimmgeraet, get opt() { return OPT; }, autoSofort(art) { if (art === "mom") autoMom = 1; else if (art === "sp") autoSp = 1; else autoSt = 1; }, autoSetzen: m => autoSetzen(m) }, messer: MESSER, taste, dreh, midi, modusSetzen, optSetzen, get modus() { return modus; }, get opt() { return Object.assign({}, OPT); } };
+  window.ImresZyn = { _test: { ruhe: () => zpRuheAn(), gruppen: () => zpInhalt().map(g => ({ titel: g.titel, items: g.l.map(x => ({ key: x.key, sym: x.sym, name: x.name })) })), tonhoehe, tonartErkennen, stimmgeraet, get opt() { return OPT; }, autoSofort(art) { if (art === "mom") autoMom = 1; else if (art === "sp") autoSp = 1; else autoSt = 1; }, autoSetzen: m => autoSetzen(m) }, messer: MESSER, taste, dreh, midi, modusSetzen, optSetzen, get modus() { return modus; }, get opt() { return Object.assign({}, OPT); } };
 })();

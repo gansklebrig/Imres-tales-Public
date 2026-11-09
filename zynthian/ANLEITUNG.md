@@ -40,6 +40,8 @@ Der Bildschirm zeigt ein eigenes Pult für 800 × 480 – nichts scrollt, alles 
 - **Oben:** die Seiten des Modus (wechseln mit **CTRL**, zurück mit **ZS3**, oder antippen) und was gerade läuft.
 - **Mitte:** 8 Kacheln – **F1–F4** obere Reihe, **ALT + F1–F4** untere Reihe. Orange = läuft, gestrichelt/blinkend = kommt am Taktende. **◀ ▶** blättert weiter, **ALT + ▲ ▼** springt zur nächsten Gruppe (z. B. Wetter, Effekte, Szenen, Geräusche).
 - **Wischen:** mit einem Finger links/rechts über die Kacheln = nächste/vorige Leiste (wie ◀ ▶). Mit **zwei Fingern** – oder mit einem Finger über die Reiter oben – zum nächsten Fenster (Stimmung → Ort → Momente …).
+- **Kacheln:** Jede Stimmung hat ihr eigenes Bild, alle anderen Kacheln ein Medaillon in ihrer Farbwelt. Die laufende Stimmung leuchtet im Takt (mit kleinen Balken), rechts neben „Bank“ blinkt ein Punkt im Schlag; eine laufende Klangwelt atmet langsam.
+- **👋 Begrüßung:** Beim ersten Start zeigt eine kurze Einführung zum Mitmachen die wichtigsten Griffe (Regler, Kachel, CTRL, Wischen). Noch einmal: MENU → Einstellungen → „Begrüßung noch einmal“.
 - **Rechts:** was die vier Drehregler gerade tun – direkt neben dem echten Knopf. Drücken: siehe kleine Schrift. **MIXER** schaltet auf Reglerbank B (Tempo, Hall, Effekte, Echos Hall).
 - **Unten:** PLAY Musik · STOP alles aus · PAD ⚡ Etwas passiert · REC 🤫 Stille · TEMPO 🎲 Neu besetzen.
 - **MENU:** Spielabend, Optionen, Tastenbelegung, System (dort auch **⬇ Bühne aktualisieren** – ohne Terminal).

@@ -13702,6 +13702,12 @@ registerProcessor("imres-glitch", ImresGlitch);`;
       let m = 0, n = 0; for (let x = 0; x < d.length; x++) { const a = Math.abs(d[x]); if (a > m) m = a; if (a > .985) n++; } k.clip = k.clip * .9 + (n > 2 ? 1 : 0); return { spitze: m, clip: k.clip > .3 }; },
     /* Uhr des Tons (für den Hänger-Rekorder: läuft sie langsamer als die echte Zeit, hat der Ton ausgesetzt) */
     uhr() { return ctx ? { t: ctx.currentTime, an: ctx.state === "running" } : null; },
+    /* Takt fürs Pult-Leuchten: Länge eines Schlags (s) und wo im Schlag wir gerade hörbar sind (0 … 1) */
+    taktPhase() {
+      if (!ctx || !laeuft || pausiert) return null; const L = taktL(), sd = schrittDauer(), spb = L % 4 === 0 ? 4 : L % 3 === 0 ? 3 : L, bd = spb * sd;
+      const kb = Math.ceil(schritt / spb) * spb, tb = naechste + (kb - schritt) * sd, jetzt = ctx.currentTime - (ctx.outputLatency || 0) - (ctx.baseLatency || 0);
+      let ph = ((jetzt - tb) / bd) % 1; if (ph < 0) ph += 1; return { bd, ph, schlaege: Math.round(L / spb) };
+    },
     /* nur für Tests: wo steht ein laufender Wechsel? */
     _wechselInfo() { return ctx ? { jetzt: ctx.currentTime, wechselAb, abschnitt, schritt, ablauf: S.ablauf.length, takt: taktL() * schrittDauer(), fl: fliessend ? Object.assign({}, fliessend) : null, brueckeBis, gain: master ? master.gain.value : null, lp: uebLp ? uebLp.frequency.value : null, wechsel: !!wechsel, stimmung: S.stimmung } : null; },
     /* Spitzenpegel der Mischer-Wege nach dem Regler (1 = Vollaussteuerung) – die Messpunkte entstehen erst beim ersten Abfragen.
