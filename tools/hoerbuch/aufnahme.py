@@ -76,8 +76,11 @@ def einheiten(kapitel):
                     out.append({"uid": s["id"], "sid": s["id"], "rolle": s["rolle"], "stimme": stimme, "text": t, "ziel": s["text"]})
     return out, fehler, bes
 
+def einstellung(e, bes):
+    return bes["einstellung_erzaehler"] if e["rolle"] in ("erzaehler", "barradin") else bes["einstellung"]
+
 def datei(e, bes):
-    h = hashlib.sha1((e["stimme"] + "|" + bes["modell"] + "|" + json.dumps(bes["einstellung"], sort_keys=True) + "|" + e["text"]).encode()).hexdigest()[:8]
+    h = hashlib.sha1((e["stimme"] + "|" + bes["modell"] + "|" + json.dumps(einstellung(e, bes), sort_keys=True) + "|" + e["text"]).encode()).hexdigest()[:8]
     return f"audio/hoerbuch/seg/{e['uid']}-{h}.mp3"
 
 def sichern(nachricht):
@@ -123,7 +126,7 @@ def main():
     os.makedirs(os.path.join(WURZEL, "audio/hoerbuch/seg"), exist_ok=True)
     qa = J("tools/hoerbuch/qa-de.json", {})
     def aufnehmen(e):
-        mp3 = vertonen.tts(e["stimme"], e["text"], modell="eleven_v3", einstellung=bes["einstellung"])
+        mp3 = vertonen.tts(e["stimme"], e["text"], modell="eleven_v3", einstellung=einstellung(e, bes))
         open(os.path.join(WURZEL, datei(e, bes)), "wb").write(mp3)
     for n, e in enumerate(fehlend, 1):
         aufnehmen(e); print(f"{n}/{len(fehlend)} {datei(e, bes)}", flush=True)

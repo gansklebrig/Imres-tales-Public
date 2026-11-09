@@ -10,7 +10,7 @@ Na gut. Oder komplett übertrieben. Danke, Friedrich. Imre allein kennt die wahr
 
 ### Die Einladung
 
-Es begann mit einem Brief. Jeder von uns erhielt eine Einladung von Gundren! Er war ein Zwerg und Händler aus der Stadt Neverwinter und kannte wohl jeden, der etwas zu sagen hat. Das Siegel war aus dunklem Wachs, die Handschrift so kantig wie ein Zwergenschild und der Ton so knapp, dass man ihm nicht widersprechen mochte.
+Es begann mit einem Brief. Jeder von uns erhielt eine Einladung von Gundren! Er war ein Zwerg und Händler aus der Stadt Neverwinter und kannte wohl jeden, der etwas zu sagen hat. Das Siegel war aus dunklem Wachs, die Handschrift so kantig wie ein Zwergenschild und der Ton so knapp, dass man ihm nicht widersprechen mochte. Darin stand nur:
 
 **Gundren:** „Treffpunkt: der Hafen. Gute Bezahlung. Kaum Gefahr. Ehrenwort.“
 

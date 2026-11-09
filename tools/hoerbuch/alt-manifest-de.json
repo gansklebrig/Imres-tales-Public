@@ -1,0 +1,783 @@
+{
+ "sprache": "de",
+ "stimme": "g1jpii0iyvtRs8fqXsd1",
+ "modell": "eleven_v3",
+ "kapitel": {
+  "vorab": [
+   {
+    "i": 0,
+    "datei": "audio/chronik/de/vorab/000-2ca280ba07.mp3",
+    "titel": false
+   }
+  ],
+  "I": [
+   {
+    "i": 0,
+    "datei": "audio/chronik/de/I/000-876c416b37.mp3",
+    "titel": true
+   },
+   {
+    "i": 1,
+    "datei": "audio/chronik/de/I/001-e5fa364928.mp3",
+    "titel": false
+   },
+   {
+    "i": 2,
+    "datei": "audio/chronik/de/I/002-7ac546b504.mp3",
+    "titel": false
+   },
+   {
+    "i": 3,
+    "datei": "audio/chronik/de/I/003-2c06f05476.mp3",
+    "titel": false
+   },
+   {
+    "i": 5,
+    "datei": "audio/chronik/de/I/005-99d38af0dc.mp3",
+    "titel": false
+   },
+   {
+    "i": 7,
+    "datei": "audio/chronik/de/I/007-a545a98240.mp3",
+    "titel": true
+   },
+   {
+    "i": 8,
+    "datei": "audio/chronik/de/I/008-43577b34ae.mp3",
+    "titel": false
+   },
+   {
+    "i": 10,
+    "datei": "audio/chronik/de/I/010-4fbb2d45e9.mp3",
+    "titel": true
+   },
+   {
+    "i": 11,
+    "datei": "audio/chronik/de/I/011-1c8586e2da.mp3",
+    "titel": false
+   },
+   {
+    "i": 12,
+    "datei": "audio/chronik/de/I/012-5fc3022303.mp3",
+    "titel": false
+   },
+   {
+    "i": 13,
+    "datei": "audio/chronik/de/I/013-f60818963b.mp3",
+    "titel": false
+   },
+   {
+    "i": 15,
+    "datei": "audio/chronik/de/I/015-7a42a68c0f.mp3",
+    "titel": true
+   },
+   {
+    "i": 16,
+    "datei": "audio/chronik/de/I/016-0e7d58154e.mp3",
+    "titel": false
+   },
+   {
+    "i": 17,
+    "datei": "audio/chronik/de/I/017-dcc6b48ea5.mp3",
+    "titel": false
+   },
+   {
+    "i": 18,
+    "datei": "audio/chronik/de/I/018-180c22eb0c.mp3",
+    "titel": false
+   },
+   {
+    "i": 20,
+    "datei": "audio/chronik/de/I/020-42fae760c2.mp3",
+    "titel": true
+   },
+   {
+    "i": 21,
+    "datei": "audio/chronik/de/I/021-cb9ceaca98.mp3",
+    "titel": false
+   },
+   {
+    "i": 22,
+    "datei": "audio/chronik/de/I/022-2535f12e60.mp3",
+    "titel": false
+   },
+   {
+    "i": 23,
+    "datei": "audio/chronik/de/I/023-9ed653460e.mp3",
+    "titel": false
+   },
+   {
+    "i": 24,
+    "datei": "audio/chronik/de/I/024-b721d9f176.mp3",
+    "titel": false
+   },
+   {
+    "i": 25,
+    "datei": "audio/chronik/de/I/025-c0a676274d.mp3",
+    "titel": false
+   },
+   {
+    "i": 26,
+    "datei": "audio/chronik/de/I/026-2edc5a128e.mp3",
+    "titel": false
+   },
+   {
+    "i": 28,
+    "datei": "audio/chronik/de/I/028-755be91cf4.mp3",
+    "titel": false
+   },
+   {
+    "i": 29,
+    "datei": "audio/chronik/de/I/029-0ee3e52724.mp3",
+    "titel": false
+   },
+   {
+    "i": 31,
+    "datei": "audio/chronik/de/I/031-8cab0b91c9.mp3",
+    "titel": false
+   },
+   {
+    "i": 32,
+    "datei": "audio/chronik/de/I/032-4d65c19159.mp3",
+    "titel": true
+   },
+   {
+    "i": 33,
+    "datei": "audio/chronik/de/I/033-43672a3e6b.mp3",
+    "titel": false
+   },
+   {
+    "i": 34,
+    "datei": "audio/chronik/de/I/034-6fcb77d1ac.mp3",
+    "titel": false
+   },
+   {
+    "i": 35,
+    "datei": "audio/chronik/de/I/035-8e85fddeb9.mp3",
+    "titel": false
+   },
+   {
+    "i": 36,
+    "datei": "audio/chronik/de/I/036-0d459db432.mp3",
+    "titel": false
+   },
+   {
+    "i": 37,
+    "datei": "audio/chronik/de/I/037-9bf81bd16f.mp3",
+    "titel": false
+   },
+   {
+    "i": 38,
+    "datei": "audio/chronik/de/I/038-0f1d945a6b.mp3",
+    "titel": false
+   },
+   {
+    "i": 39,
+    "datei": "audio/chronik/de/I/039-b5828b9a0b.mp3",
+    "titel": false
+   },
+   {
+    "i": 41,
+    "datei": "audio/chronik/de/I/041-cccb821d8d.mp3",
+    "titel": false
+   },
+   {
+    "i": 42,
+    "datei": "audio/chronik/de/I/042-18cc3883fd.mp3",
+    "titel": false
+   },
+   {
+    "i": 43,
+    "datei": "audio/chronik/de/I/043-a1f38295ea.mp3",
+    "titel": false
+   },
+   {
+    "i": 44,
+    "datei": "audio/chronik/de/I/044-9c0d7ba72e.mp3",
+    "titel": false
+   },
+   {
+    "i": 45,
+    "datei": "audio/chronik/de/I/045-bee0b263a5.mp3",
+    "titel": false
+   },
+   {
+    "i": 46,
+    "datei": "audio/chronik/de/I/046-9805ccbc9c.mp3",
+    "titel": false
+   },
+   {
+    "i": 47,
+    "datei": "audio/chronik/de/I/047-249b46d2d9.mp3",
+    "titel": false
+   },
+   {
+    "i": 48,
+    "datei": "audio/chronik/de/I/048-afa853bb85.mp3",
+    "titel": false
+   },
+   {
+    "i": 49,
+    "datei": "audio/chronik/de/I/049-84f043810a.mp3",
+    "titel": true
+   },
+   {
+    "i": 50,
+    "datei": "audio/chronik/de/I/050-78ea580652.mp3",
+    "titel": false
+   },
+   {
+    "i": 51,
+    "datei": "audio/chronik/de/I/051-5914378edb.mp3",
+    "titel": true
+   },
+   {
+    "i": 52,
+    "datei": "audio/chronik/de/I/052-024747ee4f.mp3",
+    "titel": false
+   },
+   {
+    "i": 53,
+    "datei": "audio/chronik/de/I/053-cacc4cc651.mp3",
+    "titel": false
+   },
+   {
+    "i": 54,
+    "datei": "audio/chronik/de/I/054-9b68bc4b11.mp3",
+    "titel": false
+   },
+   {
+    "i": 55,
+    "datei": "audio/chronik/de/I/055-40357e9810.mp3",
+    "titel": false
+   },
+   {
+    "i": 56,
+    "datei": "audio/chronik/de/I/056-7087ce7b9e.mp3",
+    "titel": false
+   },
+   {
+    "i": 57,
+    "datei": "audio/chronik/de/I/057-29151fe6eb.mp3",
+    "titel": false
+   },
+   {
+    "i": 58,
+    "datei": "audio/chronik/de/I/058-406c55a866.mp3",
+    "titel": false
+   },
+   {
+    "i": 59,
+    "datei": "audio/chronik/de/I/059-bd50da2b42.mp3",
+    "titel": false
+   },
+   {
+    "i": 60,
+    "datei": "audio/chronik/de/I/060-a59ab8f3b7.mp3",
+    "titel": false
+   },
+   {
+    "i": 62,
+    "datei": "audio/chronik/de/I/062-dda5da7e85.mp3",
+    "titel": false
+   },
+   {
+    "i": 63,
+    "datei": "audio/chronik/de/I/063-eb78634379.mp3",
+    "titel": true
+   },
+   {
+    "i": 64,
+    "datei": "audio/chronik/de/I/064-32755f19fc.mp3",
+    "titel": false
+   },
+   {
+    "i": 65,
+    "datei": "audio/chronik/de/I/065-3bdce4bbd8.mp3",
+    "titel": false
+   },
+   {
+    "i": 66,
+    "datei": "audio/chronik/de/I/066-0c0fbba3a7.mp3",
+    "titel": false
+   },
+   {
+    "i": 67,
+    "datei": "audio/chronik/de/I/067-46c02fded7.mp3",
+    "titel": false
+   },
+   {
+    "i": 68,
+    "datei": "audio/chronik/de/I/068-5bd69b7a8a.mp3",
+    "titel": true
+   },
+   {
+    "i": 69,
+    "datei": "audio/chronik/de/I/069-f3eee1f5eb.mp3",
+    "titel": false
+   },
+   {
+    "i": 70,
+    "datei": "audio/chronik/de/I/070-5903afe36a.mp3",
+    "titel": true
+   },
+   {
+    "i": 71,
+    "datei": "audio/chronik/de/I/071-f22ecc13f1.mp3",
+    "titel": false
+   },
+   {
+    "i": 72,
+    "datei": "audio/chronik/de/I/072-72b3a02bb3.mp3",
+    "titel": false
+   },
+   {
+    "i": 73,
+    "datei": "audio/chronik/de/I/073-9bbeb4462a.mp3",
+    "titel": true
+   },
+   {
+    "i": 74,
+    "datei": "audio/chronik/de/I/074-bdf152a340.mp3",
+    "titel": false
+   },
+   {
+    "i": 75,
+    "datei": "audio/chronik/de/I/075-29b02c0d42.mp3",
+    "titel": false
+   },
+   {
+    "i": 76,
+    "datei": "audio/chronik/de/I/076-b334cd4f0e.mp3",
+    "titel": false
+   },
+   {
+    "i": 78,
+    "datei": "audio/chronik/de/I/078-89f06d185f.mp3",
+    "titel": true
+   },
+   {
+    "i": 79,
+    "datei": "audio/chronik/de/I/079-144f0f7215.mp3",
+    "titel": false
+   },
+   {
+    "i": 80,
+    "datei": "audio/chronik/de/I/080-627b2ad280.mp3",
+    "titel": false
+   },
+   {
+    "i": 82,
+    "datei": "audio/chronik/de/I/082-b9a4e4da62.mp3",
+    "titel": false
+   },
+   {
+    "i": 83,
+    "datei": "audio/chronik/de/I/083-f88e2cd46f.mp3",
+    "titel": false
+   },
+   {
+    "i": 85,
+    "datei": "audio/chronik/de/I/085-daa3aec3cf.mp3",
+    "titel": false
+   },
+   {
+    "i": 86,
+    "datei": "audio/chronik/de/I/086-fd47edaf99.mp3",
+    "titel": false
+   }
+  ],
+  "II": [
+   {
+    "i": 0,
+    "datei": "audio/chronik/de/II/000-3284708dc2.mp3",
+    "titel": true
+   },
+   {
+    "i": 2,
+    "datei": "audio/chronik/de/II/002-7c1e88b7d4.mp3",
+    "titel": false
+   },
+   {
+    "i": 3,
+    "datei": "audio/chronik/de/II/003-5a4171a3ad.mp3",
+    "titel": true
+   },
+   {
+    "i": 4,
+    "datei": "audio/chronik/de/II/004-dac611891d.mp3",
+    "titel": false
+   },
+   {
+    "i": 5,
+    "datei": "audio/chronik/de/II/005-bc70dc78b8.mp3",
+    "titel": false
+   },
+   {
+    "i": 7,
+    "datei": "audio/chronik/de/II/007-c5efc9dd59.mp3",
+    "titel": false
+   },
+   {
+    "i": 8,
+    "datei": "audio/chronik/de/II/008-8e147de3b7.mp3",
+    "titel": true
+   },
+   {
+    "i": 9,
+    "datei": "audio/chronik/de/II/009-b5bdbf4386.mp3",
+    "titel": false
+   },
+   {
+    "i": 10,
+    "datei": "audio/chronik/de/II/010-d894529b05.mp3",
+    "titel": false
+   },
+   {
+    "i": 12,
+    "datei": "audio/chronik/de/II/012-f01761af90.mp3",
+    "titel": false
+   },
+   {
+    "i": 13,
+    "datei": "audio/chronik/de/II/013-eff94f82bb.mp3",
+    "titel": false
+   },
+   {
+    "i": 14,
+    "datei": "audio/chronik/de/II/014-c40e470c48.mp3",
+    "titel": false
+   },
+   {
+    "i": 15,
+    "datei": "audio/chronik/de/II/015-92e51eadb7.mp3",
+    "titel": false
+   },
+   {
+    "i": 17,
+    "datei": "audio/chronik/de/II/017-e91bcef494.mp3",
+    "titel": false
+   },
+   {
+    "i": 18,
+    "datei": "audio/chronik/de/II/018-fa78b5268a.mp3",
+    "titel": false
+   },
+   {
+    "i": 19,
+    "datei": "audio/chronik/de/II/019-f080120397.mp3",
+    "titel": false
+   },
+   {
+    "i": 20,
+    "datei": "audio/chronik/de/II/020-c965b0f929.mp3",
+    "titel": false
+   },
+   {
+    "i": 21,
+    "datei": "audio/chronik/de/II/021-eb5472ef4f.mp3",
+    "titel": true
+   },
+   {
+    "i": 22,
+    "datei": "audio/chronik/de/II/022-03bc51cc35.mp3",
+    "titel": false
+   },
+   {
+    "i": 23,
+    "datei": "audio/chronik/de/II/023-c15db6705d.mp3",
+    "titel": false
+   },
+   {
+    "i": 24,
+    "datei": "audio/chronik/de/II/024-8b3706e5d7.mp3",
+    "titel": false
+   },
+   {
+    "i": 25,
+    "datei": "audio/chronik/de/II/025-b4ea5a5274.mp3",
+    "titel": false
+   },
+   {
+    "i": 26,
+    "datei": "audio/chronik/de/II/026-c1945b293a.mp3",
+    "titel": true
+   },
+   {
+    "i": 27,
+    "datei": "audio/chronik/de/II/027-ee02bbc9d1.mp3",
+    "titel": false
+   },
+   {
+    "i": 28,
+    "datei": "audio/chronik/de/II/028-b45ccf642f.mp3",
+    "titel": false
+   },
+   {
+    "i": 30,
+    "datei": "audio/chronik/de/II/030-157f2d4d7a.mp3",
+    "titel": false
+   },
+   {
+    "i": 31,
+    "datei": "audio/chronik/de/II/031-88c1b23c9a.mp3",
+    "titel": false
+   },
+   {
+    "i": 32,
+    "datei": "audio/chronik/de/II/032-8c6f1a13fa.mp3",
+    "titel": false
+   },
+   {
+    "i": 33,
+    "datei": "audio/chronik/de/II/033-c56be52ed6.mp3",
+    "titel": false
+   },
+   {
+    "i": 34,
+    "datei": "audio/chronik/de/II/034-cc0615ef76.mp3",
+    "titel": true
+   },
+   {
+    "i": 35,
+    "datei": "audio/chronik/de/II/035-00ff9688c5.mp3",
+    "titel": false
+   },
+   {
+    "i": 36,
+    "datei": "audio/chronik/de/II/036-147489affb.mp3",
+    "titel": false
+   },
+   {
+    "i": 37,
+    "datei": "audio/chronik/de/II/037-c9fe275c40.mp3",
+    "titel": false
+   },
+   {
+    "i": 38,
+    "datei": "audio/chronik/de/II/038-23c1e3fddd.mp3",
+    "titel": true
+   },
+   {
+    "i": 39,
+    "datei": "audio/chronik/de/II/039-9a2d4053a5.mp3",
+    "titel": false
+   },
+   {
+    "i": 41,
+    "datei": "audio/chronik/de/II/041-3f1e4c6344.mp3",
+    "titel": false
+   },
+   {
+    "i": 43,
+    "datei": "audio/chronik/de/II/043-e04355a061.mp3",
+    "titel": false
+   },
+   {
+    "i": 44,
+    "datei": "audio/chronik/de/II/044-605116f03e.mp3",
+    "titel": false
+   },
+   {
+    "i": 45,
+    "datei": "audio/chronik/de/II/045-281e1ad51b.mp3",
+    "titel": false
+   },
+   {
+    "i": 46,
+    "datei": "audio/chronik/de/II/046-975adcb421.mp3",
+    "titel": false
+   },
+   {
+    "i": 48,
+    "datei": "audio/chronik/de/II/048-9fc445ab0b.mp3",
+    "titel": true
+   },
+   {
+    "i": 49,
+    "datei": "audio/chronik/de/II/049-720a2af8be.mp3",
+    "titel": false
+   },
+   {
+    "i": 51,
+    "datei": "audio/chronik/de/II/051-8ca61bb493.mp3",
+    "titel": true
+   },
+   {
+    "i": 52,
+    "datei": "audio/chronik/de/II/052-0d40ad8acf.mp3",
+    "titel": false
+   },
+   {
+    "i": 53,
+    "datei": "audio/chronik/de/II/053-dcd604eefb.mp3",
+    "titel": false
+   },
+   {
+    "i": 54,
+    "datei": "audio/chronik/de/II/054-07d7ce2ef4.mp3",
+    "titel": false
+   },
+   {
+    "i": 55,
+    "datei": "audio/chronik/de/II/055-5ea15ae01f.mp3",
+    "titel": true
+   },
+   {
+    "i": 57,
+    "datei": "audio/chronik/de/II/057-36522321d5.mp3",
+    "titel": false
+   },
+   {
+    "i": 59,
+    "datei": "audio/chronik/de/II/059-6e9ea213c5.mp3",
+    "titel": false
+   },
+   {
+    "i": 60,
+    "datei": "audio/chronik/de/II/060-b114d0ca2b.mp3",
+    "titel": false
+   },
+   {
+    "i": 61,
+    "datei": "audio/chronik/de/II/061-96183023d3.mp3",
+    "titel": true
+   },
+   {
+    "i": 62,
+    "datei": "audio/chronik/de/II/062-68a3850436.mp3",
+    "titel": false
+   },
+   {
+    "i": 63,
+    "datei": "audio/chronik/de/II/063-d870442d8a.mp3",
+    "titel": true
+   },
+   {
+    "i": 65,
+    "datei": "audio/chronik/de/II/065-2eefbf94ed.mp3",
+    "titel": false
+   },
+   {
+    "i": 66,
+    "datei": "audio/chronik/de/II/066-860b1111ae.mp3",
+    "titel": false
+   },
+   {
+    "i": 67,
+    "datei": "audio/chronik/de/II/067-ee5cd1eab4.mp3",
+    "titel": false
+   },
+   {
+    "i": 68,
+    "datei": "audio/chronik/de/II/068-71b538737b.mp3",
+    "titel": true
+   },
+   {
+    "i": 69,
+    "datei": "audio/chronik/de/II/069-277c55c77a.mp3",
+    "titel": false
+   },
+   {
+    "i": 70,
+    "datei": "audio/chronik/de/II/070-0dd51f6b4c.mp3",
+    "titel": false
+   },
+   {
+    "i": 71,
+    "datei": "audio/chronik/de/II/071-c2bef090a6.mp3",
+    "titel": true
+   },
+   {
+    "i": 72,
+    "datei": "audio/chronik/de/II/072-3633e25e81.mp3",
+    "titel": false
+   },
+   {
+    "i": 73,
+    "datei": "audio/chronik/de/II/073-348931f9ca.mp3",
+    "titel": false
+   },
+   {
+    "i": 74,
+    "datei": "audio/chronik/de/II/074-190a4613d4.mp3",
+    "titel": false
+   },
+   {
+    "i": 75,
+    "datei": "audio/chronik/de/II/075-d734f1dc39.mp3",
+    "titel": true
+   },
+   {
+    "i": 76,
+    "datei": "audio/chronik/de/II/076-a9cb380046.mp3",
+    "titel": false
+   },
+   {
+    "i": 77,
+    "datei": "audio/chronik/de/II/077-b9d3609831.mp3",
+    "titel": true
+   },
+   {
+    "i": 78,
+    "datei": "audio/chronik/de/II/078-3770a634dc.mp3",
+    "titel": false
+   },
+   {
+    "i": 79,
+    "datei": "audio/chronik/de/II/079-eb4acb4ea4.mp3",
+    "titel": false
+   },
+   {
+    "i": 80,
+    "datei": "audio/chronik/de/II/080-098f6058b0.mp3",
+    "titel": false
+   },
+   {
+    "i": 82,
+    "datei": "audio/chronik/de/II/082-94d3db59cf.mp3",
+    "titel": false
+   },
+   {
+    "i": 83,
+    "datei": "audio/chronik/de/II/083-f9473817b4.mp3",
+    "titel": true
+   },
+   {
+    "i": 84,
+    "datei": "audio/chronik/de/II/084-2d57a16aa8.mp3",
+    "titel": false
+   },
+   {
+    "i": 85,
+    "datei": "audio/chronik/de/II/085-78f56b335b.mp3",
+    "titel": false
+   },
+   {
+    "i": 86,
+    "datei": "audio/chronik/de/II/086-4f35044111.mp3",
+    "titel": false
+   },
+   {
+    "i": 87,
+    "datei": "audio/chronik/de/II/087-b9ed41ff33.mp3",
+    "titel": true
+   },
+   {
+    "i": 89,
+    "datei": "audio/chronik/de/II/089-db3f5a8cac.mp3",
+    "titel": false
+   },
+   {
+    "i": 90,
+    "datei": "audio/chronik/de/II/090-bdc309327f.mp3",
+    "titel": false
+   },
+   {
+    "i": 91,
+    "datei": "audio/chronik/de/II/091-1d5d83bcb4.mp3",
+    "titel": false
+   }
+  ]
+ }
+}

@@ -1,8 +1,8 @@
 {
- "_hinweis": "Stimmen für das Hörbuch (Georgs Wahl vom 9.11.2026). Modell immer eleven_v3.",
+ "_hinweis": "Stimmen für das Hörbuch (Georgs Wahl vom 9.11.2026). Modell immer eleven_v3. Erzähler/Barradin mit den Einstellungen der alten Chronik-Aufnahmen (damit Recycling nahtlos passt), Figuren stabil (Georg: gleichmäßiger).",
  "modell": "eleven_v3",
  "einstellung": {
-  "stability": 0.5,
+  "stability": 1.0,
   "similarity_boost": 0.85,
   "style": 0.3,
   "use_speaker_boost": true
@@ -29,12 +29,12 @@
    "Vincent Crowe"
   ],
   "gundren": [
-   "uVKHymY7OYMd6OailpG5",
-   "Frederick"
+   "2OcnG4mH3jIMtWz3vKus",
+   "Wolf Spencer"
   ],
   "nundro": [
-   "uVKHymY7OYMd6OailpG5",
-   "Frederick"
+   "2OcnG4mH3jIMtWz3vKus",
+   "Wolf Spencer"
   ],
   "glasstab": [
    "M9PBBTZ5jyknwzAesEA3",
@@ -128,5 +128,12 @@
    "tIsjSw3zL3puN5800Bxh",
    "Prinz"
   ]
+ },
+ "einstellung_erzaehler": {
+  "stability": 0.5,
+  "similarity_boost": 0.88,
+  "style": 0.25,
+  "use_speaker_boost": true,
+  "speed": 0.93
  }
 }

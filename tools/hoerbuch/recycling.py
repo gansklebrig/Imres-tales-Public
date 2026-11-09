@@ -28,7 +28,7 @@ def wnorm(w): return re.sub(r"[^a-zäöüß0-9]", "", w.lower())
 def saetze(t): return [x for x in re.split(r"(?<=[.!?…])\s+(?=[A-ZÄÖÜ„\"])", t.strip()) if x]
 
 def alte_absaetze():
-    r, m, z = J("tools/vertonung/regie-de.json"), J("audio/chronik/de/manifest.json"), J("tools/vertonung/zeitmarken-de.json")
+    r, m, z = J("tools/vertonung/regie-de.json"), J("tools/hoerbuch/alt-manifest-de.json"), J("tools/hoerbuch/alt-zeitmarken-de.json")
     out = []
     for kap, liste in m["kapitel"].items():
         for e in liste:
