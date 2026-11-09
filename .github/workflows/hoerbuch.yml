@@ -37,3 +37,13 @@ jobs:
           git config user.name "Hörbuch"
           git config user.email "actions@users.noreply.github.com"
           if [ "${{ inputs.trocken }}" = "1" ]; then python3 tools/hoerbuch/aufnahme.py --trocken; else python3 tools/hoerbuch/aufnahme.py; fi
+      - name: Aufnahmen sichern (auch bei Fehler)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hoerbuch-aufnahmen
+          path: |
+            audio/hoerbuch/seg
+            tools/hoerbuch/qa-de.json
+          if-no-files-found: ignore
+          retention-days: 30

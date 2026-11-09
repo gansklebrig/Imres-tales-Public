@@ -81,7 +81,8 @@ def datei(e, bes):
     return f"audio/hoerbuch/seg/{e['uid']}-{h}.mp3"
 
 def sichern(nachricht):
-    subprocess.run(["git", "add", "audio/hoerbuch", "tools/hoerbuch/qa-de.json"], cwd=WURZEL, check=True)
+    pfade = [p for p in ("audio/hoerbuch", "tools/hoerbuch/qa-de.json") if os.path.exists(os.path.join(WURZEL, p))]
+    subprocess.run(["git", "add", "--"] + pfade, cwd=WURZEL, check=True)
     if subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=WURZEL).returncode == 0: return
     subprocess.run(["git", "commit", "-q", "-m", nachricht], cwd=WURZEL, check=True)
     for _ in range(4):
