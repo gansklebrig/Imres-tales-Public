@@ -34953,6 +34953,8 @@ function ghRexFund(p){const il=scale().il;const r=Math.random();try{puffs(p.x,p.
  for(const q of ghLeben())withP(q,()=>dropItem(p.x+rnd(-50,50),p.y+rnd(20,50),randomItem(il+2,1,r<0.25?3:2)));if(r<0.35)ghGeruechtNeu('rex',1);if(!G.bot)word(p.x,p.y-40,'Rex hat etwas ausgegraben!','#e8c890')}
 /* Händlerin: auf eine Ware stellen (1,2 s) und kaufen */
 function ghWareTouch(p){}
+/* Paket „beute“ v2: legendäre Händlerware ist „Episch, mit Glück legendär“ (außer Götterdämmerung) */
+function ghWareEpi(){try{return !!(window.__hsBEUTE&&__hsBEUTE.v>=2&&!(G&&(G.diff|0)>=4))}catch(e){return false}}
 function ghWareTick(dt){for(const p of G.props){if(p.k!=='gh_ware'||p.dead||p.act)continue;const z=ghNah(p,p.r+20);if(z){p.prog=Math.min(1,p.prog+dt/1.2);if(p.prog>=1){if(SAVE.gold<p.price){p.prog=0;if(G.time>(p._nT||0)){p._nT=G.time+3;try{if(!G.bot)word(p.x,p.y-50,'Zu wenig Gold!','#ff9a7a')}catch(e){}}continue}
    SAVE.gold-=p.price;p.act=1;p.dead=true;const lab=p.lab;try{sfx('buy')}catch(e){}
    if(lab.indexOf('u:')===0)ghEinzel(lab.slice(2),p.x,p.y+30);else if(lab==='g'){ghGeruechtNeu('haendler',1,'Ysolde')}else withP(z,()=>dropItem(p.x,p.y+30,randomItem(scale().il+3,2,4)));
@@ -34965,9 +34967,9 @@ hook('kill',e=>{try{if(!e||!e.def||!e.def.ghGold||G.netGuestRun)return;const x=e
 /* ---------- Zeichnen: Momente, Ware, Kapitel-Requisiten, Boss-Raum-Ausstattung ---------- */
 function ghDrawSonder(p,t){const c=cx,q=ghQ(),ty=p.type;
  if(p.k==='gh_ware'){ell(c,p.x,p.y+4,22,7,'rgba(0,0,0,.35)');c.fillStyle='#5a4028';c.fillRect(p.x-18,p.y-14,36,16);c.fillStyle='#7a5a38';c.fillRect(p.x-20,p.y-18,40,5);
-  c.save();c.translate(p.x,p.y-30+Math.sin(t*2.5+p.x)*2);if(p.lab.indexOf('u:')===0)ghEinzelIcon(c,p.lab.slice(2),1);else if(p.lab==='g'){c.fillStyle='#e8dcc0';c.fillRect(-8,-6,16,12);ln(c,'#8a3a2a',1.2,-8,-6,0,0);ln(c,'#8a3a2a',1.2,8,-6,0,0)}else itemIcon(c,'ring',RARCOL[4],'Ring');c.restore();
+  c.save();c.translate(p.x,p.y-30+Math.sin(t*2.5+p.x)*2);if(p.lab.indexOf('u:')===0)ghEinzelIcon(c,p.lab.slice(2),1);else if(p.lab==='g'){c.fillStyle='#e8dcc0';c.fillRect(-8,-6,16,12);ln(c,'#8a3a2a',1.2,-8,-6,0,0);ln(c,'#8a3a2a',1.2,8,-6,0,0)}else itemIcon(c,'ring',RARCOL[ghWareEpi()?3:4],'Ring');c.restore();
   if(p.prog>0){c.strokeStyle='#e8c060';c.lineWidth=2;c.beginPath();c.arc(p.x,p.y+12,14,-Math.PI/2,-Math.PI/2+p.prog*TAU);c.stroke()}
-  const nm=p.lab.indexOf('u:')===0?(GH_U[p.lab.slice(2)]||{}).n||'Einzelstück':p.lab==='g'?'Ein Gerücht':'Legendäres';const T=ghNameSpr('w2:'+p.lab+':'+p.price,nm+' · '+fmt(p.price)+' Gold',p.lab==='g'?'#e8dcc4':'#ffb04a');c.drawImage(T.cv,p.x-T.w/2,p.y+8,T.w,T.h);return}
+  const nm=p.lab.indexOf('u:')===0?(GH_U[p.lab.slice(2)]||{}).n||'Einzelstück':p.lab==='g'?'Ein Gerücht':ghWareEpi()?'Episch, mit Glück legendär':'Legendäres';const T=ghNameSpr('w2:'+p.lab+':'+p.price,nm+' · '+fmt(p.price)+' Gold',p.lab==='g'?'#e8dcc4':'#ffb04a');c.drawImage(T.cv,p.x-T.w/2,p.y+8,T.w,T.h);return}
  if(p.k==='gh_kap'){ghDrawKapProp(p,t);return}
  if(ty==='haendlerin'){const S=ghSpr('haendlerin',70,90,35,84,g=>{gSchatten(g,22,6);gP(g,'#6a3a2a',-12,0,-9,-34,9,-34,12,0);gE(g,0,-40,8,8,'#d8b090');gP(g,'#4a2a20',-10,-40,0,-54,10,-40,6,-44,-6,-44);gC(g,-3,-41,0.9,'#2a1a10');gC(g,3,-41,0.9,'#2a1a10');gQ(g,'#c8c8c0',1.4,-4,-36,0,-34,4,-36);
    gE(g,-14,-34,13,13,'#4a4a4a');gE(g,-14,-34,10,10,'#3a3a3a');gL(g,'#2a2a2a',2,-24,-44,-6,-44);gL(g,'#5a4a3a',2,10,-30,18,-6);gC(g,18,-6,2,'#6a5a4a')});ghBlit(c,S,p.x,p.y);
@@ -36538,13 +36540,17 @@ window.__fovT={sync:fovSync,st:()=>({n:FOVS.n,k:FOVS.k,rc:FOVS.rc})};
    4. Pech-Schutz deutlich später (B2.pity).
    Gäste online würfeln nichts selbst (Beute kommt vom Gastgeber) – hier wird nur beim Gastgeber/allein gerechnet. */
 const BT={
- ramp:[0.15,0.15,0.45,0.7,1],   /* Faktor je Fortschritt (Stufe 0,1,2,3,4+): auf Legendär-Gewicht, kleine Chancen, Set-Teile, Boss-Zusatzchance */
+ ramp:[0,0,0,0.3,0.55,0.8,1],   /* Faktor je Fortschritt (G.stage 0,1,2,3,…,6+): auf Legendär-Gewicht, kleine Chancen, Set-Teile, Boss-Zusatzchance.
+                                   Die ersten drei Stufen eines Laufs: gar nichts Legendäres und keine Set-Teile (erste Freude frühestens ab Stufe 4) */
+ ab:3,                          /* ab diesem Fortschritt überhaupt Legendäres/Set-Teile (auch Pech-Schutz, Einzelstücke, Händler) */
+ setMax:p=>p<3?0:Math.floor((p-1)/2), /* höchstens so viele Set-Teile je Lauf und Spieler bis zu diesem Fortschritt (Stufe 4: 1, 6: 2, 8: 3, 10: 4) */
+ kaufKlein:0.2,                 /* Händler: „Episch, mit Glück legendär“ – Chance auf Legendär (× Rampe × Dämpfung) */
+ kaufP:0.75,                    /* Händler: Preis der ehemals legendären Ware (jetzt Episch+) relativ zum alten Preis */
  legW:0.6,                      /* Legendär-Gewicht bei voller Rampe (bal2: 0.42 ohne Rampe) */
  klein:0.12,                    /* kleine Chance auf Legendär bei ehemals garantierten Quellen (× Rampe × Dämpfung je Stufe) */
  setF:1,                        /* Anteil der Set-Teile, die bei voller Rampe bleiben (zusätzlich zu bal2 setKeep) */
  bossLeg:0.05,                  /* bal2-Zusatzchance beim Boss, jetzt × Rampe */
  pity:260,                      /* Pech-Schutz: Würfe ohne Legendäres (vorher 150) */
- kaufF:1.6,                     /* Preisaufschlag für legendäre Waren und Einzelstücke beim Händler */
  tagVor:2,                      /* Tagesmodus: nur vier, dafür schwere Stufen – Rampe beginnt zwei Stufen weiter */
  endAb:4                        /* ab dieser Schwierigkeit (Götterdämmerung) gelten die alten Regeln */
 };
@@ -36552,7 +36558,8 @@ const BTS={klein:0,kleinN:0,setWeg:0,setN:0,erlaubt:0,einzel:0,kauf:0};
 const btAus=()=>!G||G.netGuestRun||(G.diff|0)>=BT.endAb;
 function btProg(){if(!G)return 0;let p=G.stage|0;if(G.mode==='taeglich')p+=BT.tagVor;return Math.max(0,p)}
 function btRamp(){const R=BT.ramp;return R[Math.min(R.length-1,btProg())]}
-function btKlein(){let d=1;try{d=legDaempf()}catch(e){}return BT.klein*btRamp()*d*RLDROP()}
+function btKlein(k){let d=1;try{d=legDaempf()}catch(e){}return (k||BT.klein)*btRamp()*d*RLDROP()}
+function btFrueh(){return btProg()<BT.ab}
 function btStack(){const l=Error.stackTraceLimit;Error.stackTraceLimit=30;try{return new Error().stack||''}finally{Error.stackTraceLimit=l}}
 function btLegZaehl(){try{if(!G.bot)beuteB().leg++}catch(e){}}
 B2.pity=BT.pity;
@@ -36562,37 +36569,44 @@ B2.pity=BT.pity;
 const BTK={lf:0,kauf:0};
 {const ke=killEnemy;killEnemy=function(e){if(!e||e.dead||btAus())return ke.apply(this,arguments);const lf=BTK.lf,bl=B2.bossLeg;BTK.lf=e.lfF?1:0;B2.bossLeg=BT.bossLeg*btRamp();
   try{return ke.apply(this,arguments)}finally{BTK.lf=lf;B2.bossLeg=bl}}}
-{const pt=propTouch2;propTouch2=function(p){const k=BTK.kauf;BTK.kauf=p&&p.k==='ware'?1:0;try{return pt.apply(this,arguments)}finally{BTK.kauf=k}}}
+{const pt=propTouch2;propTouch2=function(p){const k=BTK.kauf;BTK.kauf=p&&p.k==='ware'?(p.btC?2:1):0;try{return pt.apply(this,arguments)}finally{BTK.kauf=k}}}
 function btErlaubt(st){
+ if(btFrueh()&&!(BTK.lf&&st.indexOf('hookRun')>=0&&!/lfRacheLohn|zlLohn|openChest|ghLoese/.test(st)))return 0; /* frühe Stufen: nur die Erzfeind-Trophäe */
  if(G.b2LegOk)return 1;                                          /* bal2-Zusatzchance beim Boss (schon eine Chance, mit Rampe) */
- if(BTK.kauf||st.indexOf('ghWareTick')>=0)return 1;               /* Kauf beim Händler – bewusste Ausgabe */
  if(BTK.lf&&st.indexOf('hookRun')>=0&&!/lfRacheLohn|zlLohn|openChest|ghLoese/.test(st))return 1; /* Erzfeind-Trophäe beim endgültigen Sieg */
  return 0}
 /* 2. „Garantiert legendär“ → Episch, mit kleiner Chance auf Legendär. Gold-Aushang (Episch oder Legendär) gilt genauso. */
-{const ri=randomItem;randomItem=function(il,bonus,minR){if(btAus()||!(minR>=3))return ri.apply(this,arguments);
-  const st=minR>=4||minR===3?btStack():'';const aus=st.indexOf('zlLohn')>=0;
+{const ri=randomItem;randomItem=function(il,bonus,minR){if(!btAus()&&G&&!G.bot&&btFrueh()&&(G.pityN||0)>=97){G.pityN=97;G.b2Pity=0} /* kein Pech-Schutz-Legendär in frühen Stufen */
+  if(btAus()||!(minR>=3))return ri.apply(this,arguments);
+  const st=minR>=4||minR===3?btStack():'';const kauf=BTK.kauf===2||st.indexOf('ghWareTick')>=0;const aus=st.indexOf('zlLohn')>=0||(kauf&&minR===3&&BTK.kauf===2);
   if(minR>=4||aus){if(minR>=4&&btErlaubt(st)){BTS.erlaubt++;const o=G.b2LegOk;G.b2LegOk=1;try{const it=ri.call(this,il,bonus,minR);if(it&&typeof it==='object')it.b2ok=1;return it}finally{G.b2LegOk=o}}
-   BTS.kleinN++;if(Math.random()<btKlein()){BTS.klein++;const o=G.b2LegOk;G.b2LegOk=1;try{const it=ri.call(this,il,bonus,4);if(it&&typeof it==='object')it.b2ok=1;btLegZaehl();return it}finally{G.b2LegOk=o}}
+   BTS.kleinN++;if(kauf)BTS.kauf++;if(Math.random()<btKlein(kauf?BT.kaufKlein:0)){BTS.klein++;const o=G.b2LegOk;G.b2LegOk=1;try{const it=ri.call(this,il,bonus,4);if(it&&typeof it==='object')it.b2ok=1;btLegZaehl();return it}finally{G.b2LegOk=o}}
    return ri.call(this,il,bonus,3)}
   return ri.apply(this,arguments)}}
 /* Einzelstücke (geheim): nur geheime Bosse und das verborgene Kapitel behalten Legendär; sonst Episch mit kleiner Chance (eine Entscheidung je Fund) */
 const BTE={t:-1,v:0};
 {const mk=makeItem;makeItem=function(slot,il,rar){if(rar===4&&!btAus()){const st=btStack();
-  if(st.indexOf('ghMachEinzel')>=0&&!/ghBossBesiegt|ghKapTouch|ghWareTick/.test(st)){if(BTE.t!==G.time){BTE.t=G.time;BTE.v=Math.random()<btKlein()?1:0;BTS.einzel++;if(BTE.v)btLegZaehl()}
+  const geh=/ghBossBesiegt|ghKapTouch/.test(st),wa=st.indexOf('ghWareTick')>=0;
+  if(st.indexOf('ghMachEinzel')>=0&&(!geh||btFrueh())){if(BTE.t!==G.time){BTE.t=G.time;BTE.v=Math.random()<btKlein(wa?BT.kaufKlein:geh?1:0)?1:0;BTS.einzel++;if(BTE.v)btLegZaehl()}
    if(!BTE.v){const a=Array.prototype.slice.call(arguments);a[2]=3;return mk.apply(this,a)}}}
   return mk.apply(this,arguments)}}
 /* 3. Set-Teile: aus jeder Quelle nur noch mit Rampe × setF */
 const BTSET=new WeakSet();
-{const di=dropItem;dropItem=function(x,y,it){if(it&&it.set&&!it.b2ok&&!btAus()&&!BTSET.has(it)){BTSET.add(it);BTS.setN++;if(Math.random()>=BT.setF*btRamp()){BTS.setWeg++;return}}
+{const di=dropItem;dropItem=function(x,y,it){if(it&&it.set&&!it.b2ok&&!btAus()&&!BTSET.has(it)){BTSET.add(it);BTS.setN++;
+   const n=G.btSetN|0,np=Math.max(1,(typeof PL!=='undefined'&&PL&&PL.length)|0);if(n>=BT.setMax(btProg())*np){BTS.setWeg++;BTS.setCap=(BTS.setCap|0)+1;return}
+   if(Math.random()>=BT.setF*btRamp()){BTS.setWeg++;return}G.btSetN=n+1}
   return di.apply(this,arguments)}}
 /* 4. Händler: legendäre Waren und Einzelstücke teurer; Pakt-Altar ehrlich beschriften */
 const BTW=new WeakSet();
 function btWaren(){if(!G||!G.props||G.netGuestRun)return;for(const p of G.props){if(!p||BTW.has(p))continue;
-  if(p.k==='ware'&&p.minR>=4&&p.price){BTW.add(p);p.price=Math.round(p.price*BT.kaufF);BTS.kauf++}
-  else if(p.k==='gh_ware'&&typeof p.lab==='string'&&(p.lab==='l'||p.lab.indexOf('u:')===0)&&p.price){BTW.add(p);p.price=Math.round(p.price*BT.kaufF);BTS.kauf++}
+  if(p.k==='ware'&&p.minR>=4&&p.price){BTW.add(p);p.price=Math.round(p.price*BT.kaufP);p.minR=3;p.btC=1}
+  else if(p.k==='gh_ware'&&typeof p.lab==='string'&&(p.lab==='l'||p.lab.indexOf('u:')===0)&&p.price){BTW.add(p);p.price=Math.round(p.price*BT.kaufP)}
   else if(p.k==='altar'&&p.pakt&&typeof p.desc==='string'){BTW.add(p);p.desc=p.desc.replace('Ein legendärer Gegenstand','Ein epischer Gegenstand, mit Glück legendär')}}}
 {const up=update;let t=0;update=function(dt){const r=up.apply(this,arguments);try{if(G&&G.state==='play'&&(G.time||0)>t){t=(G.time||0)+0.25;btWaren()}if(G&&G.time<t-1)t=0}catch(e){}return r}}
-window.__hsBEUTE={v:1,BT,BTS,ramp:btRamp,prog:btProg,klein:btKlein};
+/* Händler-Ware „Episch, mit Glück legendär“: violetter Rahmen (Episch) mit kleinem goldenen Funken als Hinweis auf die Chance */
+{const dp=drawProp2;drawProp2=function(p,t){const r=dp.apply(this,arguments);try{if(p&&p.k==='ware'&&p.btC&&!p.used){const c=cx;c.save();c.translate(p.x+14,p.y-36);c.rotate((t||0)*0.8);c.shadowColor=RARCOL[4];c.shadowBlur=8;c.fillStyle=RARCOL[4];c.beginPath();
+  for(let i=0;i<8;i++){const a=i*Math.PI/4,q=i%2?2.2:6;c.lineTo(Math.cos(a)*q,Math.sin(a)*q)}c.closePath();c.fill();c.restore()}}catch(e){}return r}}
+window.__hsBEUTE={v:2,BT,BTS,ramp:btRamp,prog:btProg,klein:btKlein};
 
 /* ================= Paket „bosshp“: Boss-Leben nach der tatsächlichen Stärke der Gruppe ================= */
 window.__hsBOSSHP={v:1};
