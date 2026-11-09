@@ -1,0 +1,132 @@
+{
+ "_hinweis": "Stimmen für das Hörbuch (Georgs Wahl vom 9.11.2026). Modell immer eleven_v3.",
+ "modell": "eleven_v3",
+ "einstellung": {
+  "stability": 0.5,
+  "similarity_boost": 0.85,
+  "style": 0.3,
+  "use_speaker_boost": true
+ },
+ "rollen": {
+  "erzaehler": [
+   "g1jpii0iyvtRs8fqXsd1",
+   "Helmut"
+  ],
+  "barradin": [
+   "g1jpii0iyvtRs8fqXsd1",
+   "Helmut"
+  ],
+  "friedrich": [
+   "aTTiK3YzK3dXETpuDE2h",
+   "Ben"
+  ],
+  "echo": [
+   "czb8zR3V35utWZxvKd9a",
+   "Leo"
+  ],
+  "ezekiel": [
+   "18X2yBovneA0q06wd8E9",
+   "Vincent Crowe"
+  ],
+  "gundren": [
+   "uVKHymY7OYMd6OailpG5",
+   "Frederick"
+  ],
+  "nundro": [
+   "uVKHymY7OYMd6OailpG5",
+   "Frederick"
+  ],
+  "glasstab": [
+   "M9PBBTZ5jyknwzAesEA3",
+   "Lazarus"
+  ],
+  "ilvara": [
+   "ahuwlnygfGOZ2gufNQh7",
+   "Moriana"
+  ],
+  "nezna": [
+   "KzAyD2tTf9r77ytc2bYC",
+   "Lola"
+  ],
+  "harbin": [
+   "89gcX1AeMGgcsN8ypHLu",
+   "Rupert"
+  ],
+  "dolgrimson": [
+   "87AwpS6yC86wa2WglbsK",
+   "Michael Danisch"
+  ],
+  "fagas": [
+   "o7bn7T3k6h58H9hn9j3y",
+   "Álfwyn"
+  ],
+  "kardal": [
+   "CVcPLXStXPeDxhrSflDZ",
+   "Jantosch"
+  ],
+  "horga": [
+   "h9Fo3jDhxmIiiLrhx14A",
+   "Mordran Doomforge"
+  ],
+  "hgraam": [
+   "bFrjFL4nlpeYNwNRhXxq",
+   "Mossbeard"
+  ],
+  "riese": [
+   "pfvZahoGcT3NdpxRuNkg",
+   "Bruno"
+  ],
+  "gartokkar": [
+   "UFO0Yv86wqRxAt1DmXUu",
+   "Mordred"
+  ],
+  "themberchaud": [
+   "xsiB5fGhEtknnqzudCO6",
+   "Smoke"
+  ],
+  "venomfang": [
+   "A921zklid24OpyVy1Elb",
+   "Dracon"
+  ],
+  "zilda": [
+   "3t6439mGAsHvQFPpoPdf",
+   "Raya"
+  ],
+  "ploop": [
+   "fO96OTVqTn6bBvyybd7U",
+   "Kermy"
+  ],
+  "goblin": [
+   "j9qIyycr9PcZ7d4yj21f",
+   "Grimble"
+  ],
+  "schlaeger": [
+   "eWmswbut7I70CIuRsFwP",
+   "Frankie Slim"
+  ],
+  "dorf": [
+   "YyYOpSknZlewhHezK5bv",
+   "Oswald"
+  ],
+  "frau": [
+   "vPFocGjG5CEBbSByU2UY",
+   "Klara"
+  ],
+  "junge": [
+   "KP4GbmyDmwaoy5dUlvZY",
+   "Manni"
+  ],
+  "erzpriesterin": [
+   "Qbw4VpyUrHEG7NigKzty",
+   "Kristen"
+  ],
+  "gefangener": [
+   "SR5PqrZCNyNgSyTEWnLu",
+   "Niklas"
+  ],
+  "fluestern": [
+   "tIsjSw3zL3puN5800Bxh",
+   "Prinz"
+  ]
+ }
+}
