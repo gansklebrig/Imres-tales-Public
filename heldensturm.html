@@ -37913,6 +37913,247 @@ function knopf(){try{if(G.overlay!=='diag')return;const c=document.querySelector
 document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest?ev.target.closest('[data-act="diag-send"]'):null;if(!b)return;ev.stopPropagation();ev.preventDefault();try{sfx('ui')}catch(e){}oeffnen()},true);
 window.__hsDIAGSEND.url=url;
 }catch(e){console.error('diagsend',e);window.__hsDIAGSEND.err=String(e&&e.stack||e)}})();
+/* ================= Paket „sicht“: echte Sichtlinie, Erkundungsgedächtnis und Wände, die wirklich trennen (Innenstufen) – window.__hsSICHT =================
+   Nutzerwunsch: In Dungeons sah man durch Wände und konnte (z. B. Echo als Bär) durch Wände angreifen. Gewünscht: nur sichtbar, was man
+   wirklich sieht; Gänge decken sich beim Durchlaufen auf, kein Gesamtbild; Gegner springen um die Ecke.
+   Ursache: Die Kartenmassen (k:'kamasse', die Wände aller Karten-Stufen) warfen absichtlich keinen Sichtschatten (fsKeile-Hülle im Paket
+   „karte“), der Schatten in Dungeons war nur 50 % dunkel, und Ziele wurden nur über den Mittelpunkt vom Betrachter aus geprüft.
+   Innenstufen (SI.orte): alle bisherigen Sichtfeld-Orte (FOV_ORTE: hoehle, tunnel, mine, minenetz, spinnweben, pilze, kerker, grab,
+   gracklstugh, glutgang, hort, kuostadt, flucht) + Hallen/Gebäude/Unterreich: schloss, labor, schmiede, turm, wachhaus, see, ruine, steinbruch.
+   Außen (strasse, wald, dorf, nacht, geisterdorf, wurzeldorf, hof, teich, slums, markt …) und Kammern (G.room) bleiben unverändert.
+   1) Sichtpolygon: je Betrachter (alle Helden der Gruppe + Rex) Strahlen (720, leicht 360, Ultra/Handheld 240) über das vorhandene
+      8-px-Raster der blickdichten Hindernisse (DW.o aus Paket „dungwand“), exakte Rasterdurchquerung, neu nur bei Bewegung/Änderung.
+      Sichtweite SI.R (620 px, in Boss-/Wächternähe ×1,45), weicher Rand (Verlauf ab 70 %), Wände sind bis SI.E px tief mit sichtbar.
+   2) Gedächtnis: 16-px-Raster je Stufe; gesehen = stark abgedunkelt (nur Boden/Wände/Deko, keine Gegner/Geschosse/Beute/Effekte),
+      nie gesehen = schwarz. Minikarte zeigt nur Gesehenes (WLMM.fog = Gedächtnisbild, WLMM.rev daraus), Kartograph-Erfolg zählt nur
+      begehbare Kartenteile. Betritt man eine Boss-Arena (Gastgeber/allein), ist die ganze Arena sofort bekannt.
+   3) Ziele: fovVersteckt = nicht im Sichtpolygon der Gruppe; außerhalb des Zeichnens zusätzlich freie Linie vom handelnden Helden
+      (solide Hindernisse) → targetable/nearest/prioTarget/coneTarget/bTarget/aimPoint/Auto-Wirken wählen nichts hinter Wänden.
+      cone() und aoe(): Treffer nur mit freier Linie vom Zentrum (vorher: cone ohne Prüfung bis e.r+20 px, aoe nur bis Radius 280).
+   4) Gegner (Gastgeber/allein): wache Gegner merken sich die letzte gesehene Heldenposition (Sicht ≤ 760 px mit freier blickdichter
+      Linie, Geräusch ≤ 150 px, Treffer). Nach 1,6 s ohne Sicht laufen sie dorthin und suchen kurz, schießen/zaubern nicht ohne Sicht.
+      Bosse/Wächter/Zusätze/Stillstehende/Diebe unverändert. Gezeichnet werden nur sichtbare Gegner, Geschosse, Telegrafien (oder die, die
+      einen Helden gleich treffen), Feindzonen, Effekte, Zahlen, Partikel, Beute, Lichter; Augen glimmen nur bei freier Linie im Dunkeln.
+   5) Online: Gäste rechnen dieselbe Vereinigung aller Helden aus G.blk und den Heldenpositionen; der Gastgeber schickt Gegner außerhalb
+      der Gruppensicht (+120 px Rand, Bosse/Wächter immer) gar nicht erst (netFilter-Hülle). Geteilter Bildschirm: jeder Ausschnitt zeigt
+      die gemeinsame Sicht.
+   Hüllen: renderWorld, render, drawLighting, fsKeile, fsSeher, fovRahmen, fovVersteckt, drawProj, drawTele, drawTeleFx, drawEZone,
+   drawFx, drawPartsNormal, drawPartsAdd, drawNums, drawProjGlow, drawPropGlow, drawLootBeams, drawLootIcons, cone, aoe, dealDmg,
+   updEnemy, wlMiniNebel, erfKarte, spKarte, netFilter. Schalter: __hsSICHT.aus=true. Zähler: __hsSICHT.st */
+(function(){try{window.__hsSICHT={v:2};
+const SI=window.__hsSICHT;SI.aus=false;
+SI.orte=new Set(['schloss','labor','schmiede','turm','wachhaus','see','ruine','steinbruch']);try{for(const k of FOV_ORTE)SI.orte.add(k)}catch(e){}
+SI.R=620;SI.E=34;SI.E2=44;SI.boss=1.45;SI.mem=0.64;SI.erk=760;SI.ohr=150;SI.verlier=1.6;SI.such=5;
+SI.st={cast:0,ray:0,mark:0,put:0,hid:0,netWeg:0,blkH:0,lost:0,maske:0,selbst:0,err:0};SI.errs=[];
+const sErr=(k,e)=>{SI.st.err++;if(SI.errs.length<10)SI.errs.push(k+': '+String(e&&e.message||e))};
+const TAB={};function siTab(N){let T=TAB[N];if(!T){T={c:new Float32Array(N),s:new Float32Array(N)};for(let i=0;i<N;i++){const a=i/N*TAU;T.c[i]=Math.cos(a);T.s[i]=Math.sin(a)}TAB[N]=T}return T}
+const C8=8,MZ=16;
+function siThema(){try{return G.themeKey||(STAGES[G.stage]||{}).theme||''}catch(e){return''}}
+/* aktiv: Innenstufe im Spiel, keine Kammer, Hindernisse vorhanden, kein Testbot; Grafik-Schalter „Sichtfeld“ (SAVE.fov) gilt weiter */
+function siAn(){if(SI.aus||!G||!G.ground||G.room||G.bot||!G.blkG||!G.blk||!G.blk.length||SAVE.fov===false)return false;if(G.state!=='play')return false;return SI.orte.has(siThema())}
+SI.an=siAn;
+function siGast(){return (typeof NET!=='undefined'&&NET.role==='guest')||!!G.netGuestRun}
+function siLeicht(){try{if(typeof UL!=='undefined'&&UL.on)return 2;if(typeof RG2!=='undefined'&&RG2.hh)return 2;return GF().lite?1:0}catch(e){return 0}}
+/* Betrachter: alle Helden der Gruppe (auch beim Gast: PL ist gespiegelt) + Rex */
+function siSeher(){const L=[];for(const q of mpL()){if(q&&!q.netGone&&isFinite(q.x)&&isFinite(q.y))L.push(q)}if(!L.length&&P)L.push(P);
+ try{for(const a of G.allies)if(a&&a.kind==='rex'&&!a.dead&&isFinite(a.x))L.push(a)}catch(e){}return L}
+
+/* ---------- Gedächtnis (16-px-Raster je Stufe) ---------- */
+const M={key:'',n:0,a:null,img:null,cv:null,g:null,d:[1e9,1e9,-1,-1],rev:0,are:{},mmAll:0,flo:null};SI.M=M;
+function siMemKey(){return [G.runId,G.stage,G.themeKey,WORLD].join('|')}
+function siMemPruef(){const k=siMemKey();if(k===M.key&&M.a)return;M.key=k;const n=Math.ceil(WORLD/MZ);M.n=n;M.a=new Uint8Array(n*n);M.are={};M.mmAll=0;M.flo=null;
+ if(!M.cv){M.cv=document.createElement('canvas')}M.cv.width=n;M.cv.height=n;M.g=M.cv.getContext('2d');M.img=M.g.createImageData(n,n);const D=M.img.data;for(let i=0;i<D.length;i+=4){D[i]=2;D[i+1]=1;D[i+2]=4;D[i+3]=255}
+ M.g.putImageData(M.img,0,0);M.d=[1e9,1e9,-1,-1];SI.C.clear();try{if(typeof WLMM!=='undefined'){WLMM.fog=M.cv;if(WLMM.rev)WLMM.rev.fill(0)}}catch(e){}}
+function siMark(m,i,j){M.a[m]=1;M.img.data[m*4+3]=0;const d=M.d;if(i<d[0])d[0]=i;if(j<d[1])d[1]=j;if(i>d[2])d[2]=i;if(j>d[3])d[3]=j;SI.st.mark++;
+ try{const R=WLMM.rev;if(R){const k=Math.floor(j*MZ*52/WORLD)*52+Math.floor(i*MZ*52/WORLD);if(k>=0&&k<R.length)R[k]=1}}catch(e){}}
+function siMemFlush(){const d=M.d;if(d[2]<0)return;try{M.g.putImageData(M.img,0,0,d[0],d[1],d[2]-d[0]+1,d[3]-d[1]+1);SI.st.put++}catch(e){sErr('put',e)}M.d=[1e9,1e9,-1,-1]}
+function siMarkW(x,y){const n=M.n,i=Math.floor(x/MZ),j=Math.floor(y/MZ);if(i<0||j<0||i>=n||j>=n)return;const m=j*n+i;if(!M.a[m])siMark(m,i,j)}
+/* Boss-Arena (Karten-Abschnitt art 'arena'): beim Betreten vollständig bekannt */
+function siArena(q){const K=G.ka;if(!K||!K.sec||typeof kaSecAt!=='function')return;const s=kaSecAt(q.x,q.y);if(s===255||!K.sec[s]||K.sec[s].art!=='arena'||M.are[s])return;M.are[s]=1;
+ const n=K.n,Z=K.Z;for(let c=0;c<n*n;c++){if(K.sid[c]!==s)continue;const x0=(c%n)*Z,y0=((c/n)|0)*Z;for(let y=y0-MZ;y<y0+Z+MZ;y+=MZ)for(let x=x0-MZ;x<x0+Z+MZ;x+=MZ)siMarkW(x+MZ/2,y+MZ/2)}}
+
+/* ---------- Strahlen ---------- */
+SI.C=new Map();
+function siCast(c,vx,vy,R,N){dwBau();const O=DW.o,n=DW.n,E=SI.E,T=siTab(N),A=M.a,mn=M.n;if(!c.raw||c.raw.length!==N){c.raw=new Float32Array(N);c.ext=new Float32Array(N)}
+ const ci0=Math.floor(vx/C8),cj0=Math.floor(vy/C8),inW=ci0>=0&&cj0>=0&&ci0<n&&cj0<n&&O[cj0*n+ci0]?20:0;
+ if(A){const i=ci0>>1,j=cj0>>1;if(i>=0&&j>=0&&i<mn&&j<mn&&!A[j*mn+i])siMark(j*mn+i,i,j)}
+ let steps=0;
+ for(let r=0;r<N;r++){const dx=T.c[r],dy=T.s[r],adx=dx<0?-dx:dx,ady=dy<0?-dy:dy,si=dx>0?1:-1,sj=dy>0?1:-1;let ci=ci0,cj=cj0;
+  const tdx=adx>1e-7?C8/adx:1e9,tdy=ady>1e-7?C8/ady:1e9;let tx=adx>1e-7?((si>0?(ci+1)*C8-vx:vx-ci*C8)/adx):1e9,ty=ady>1e-7?((sj>0?(cj+1)*C8-vy:vy-cj*C8)/ady):1e9;
+  let hit=-1,ein=0,t=0;
+  for(let k=0;k<3000;k++){if(tx<ty){ci+=si;t=tx;tx+=tdx}else{cj+=sj;t=ty;ty+=tdy}steps++;
+   if(hit<0){if(t>R)break}else if(t>ein)break;
+   if(ci<0||cj<0||ci>=n||cj>=n){if(hit<0)hit=t;break}
+   if(hit<0&&O[cj*n+ci]&&t>inW){hit=t;ein=Math.min(t+E+SI.E2,R+E+SI.E2)}
+   if(A){const m=(cj>>1)*mn+(ci>>1);if(!A[m])siMark(m,ci>>1,cj>>1)}}
+  c.raw[r]=hit<0?R:hit;c.ext[r]=hit<0?R:Math.min(hit+E,R+E)}
+ c.x=vx;c.y=vy;c.R=R;c.N=N;SI.st.cast++;SI.st.ray+=steps}
+let UT=-1,UF=-1;SI.fr=0;SI.gen=0;
+function siBossNah(q){for(const e of G.enemies){if(e.dead||!(e.boss||e.guard))continue;const dx=e.x-q.x,dy=e.y-q.y;if(dx*dx+dy*dy<1100*1100)return true}return false}
+function siUpd(){if(UT===G.time&&UF===SI.fr){let still=true;const Lq=SI.Lq;if(Lq)for(let i=0;i<Lq.length;i++){const q=Lq[i],c=SI.C.get(q);if(c&&(Math.abs(c.x-q.x)>6||Math.abs(c.y-q.y)>6)){still=false;break}}if(still)return}UT=G.time;UF=SI.fr;siMemPruef();const L=siSeher();SI.Lq=L;const lz=siLeicht(),N=lz===2?240:lz===1?360:720,th=lz?6:3,bv=(DW.bv||0)+'|'+(G.blk?G.blk.length:0);
+ const V=[];let neu=0;
+ for(const q of L){let c=SI.C.get(q);if(!c){c={};SI.C.set(q,c)}const R=SI.R*(siBossNah(q)?SI.boss:1);
+  if(!c.raw||c.N!==N||c.R!==R||c.bv!==bv||Math.abs(c.x-q.x)>th||Math.abs(c.y-q.y)>th){siCast(c,q.x,q.y,R,N);c.bv=bv;neu=1}
+  if(!siGast()&&q.hero)try{siArena(q)}catch(e){}
+  V.push(c)}
+ SI.V=V;if(neu)SI.gen++;siMemFlush();
+ if(SI.C.size>12){for(const k of SI.C.keys())if(!L.includes(k))SI.C.delete(k)}}
+/* Punkt sichtbar (Vereinigung aller Betrachter); tol = Körperradius */
+function siSicht(x,y,tol){siUpd();tol=tol||0;const V=SI.V;if(!V)return true;
+ for(let i=0;i<V.length;i++){const c=V[i],dx=x-c.x,dy=y-c.y,dd=dx*dx+dy*dy,Rt=c.R+tol;if(dd>Rt*Rt)continue;if(dd<(tol+24)*(tol+24))return true;
+  let a=Math.atan2(dy,dx);if(a<0)a+=TAU;const N=c.N,f=a/TAU*N,i0=Math.floor(f)%N,i1=(i0+1)%N,d=Math.sqrt(dd)-tol-2;
+  if(d<=c.raw[i0]||d<=c.raw[i1])return true}return false}
+SI.sicht=(x,y,t)=>siSicht(x,y,t);
+/* Augen: freie blickdichte Linie, aber jenseits der Sichtweite */
+function siAugeOk(e){if((e.siEyT||0)>G.time)return e.siEyV;e.siEyT=G.time+0.25+Math.random()*0.15;let v=false;
+ for(const c of SI.V||[]){const dx=e.x-c.x,dy=e.y-c.y,dd=dx*dx+dy*dy;if(dd<c.R*c.R||dd>(c.R*1.6)**2)continue;if(dwFreiO({x:c.x,y:c.y},e)){v=true;break}}e.siEyV=v;return v}
+
+/* ---------- Sichtbarkeit von Gegnern (zeichnen) und Zielwahl (handeln) ---------- */
+SI.inR=0;
+function siTol(e){return e.boss||e.guard?(e.r||20)*1.2+20:Math.min(e.r||12,16)+4}
+function siEVis(e){return siSicht(e.x,e.y,siTol(e))}
+function siZielOk(e){if(!siEVis(e))return false;if(e.boss||e.guard)return true;const q=P;if(!q||!q.hero||G.room)return true;const dx=e.x-q.x,dy=e.y-q.y,m=(e.r||12)+(q.r||12)+8;if(dx*dx+dy*dy<m*m)return true;return dwFreiS(q,e)}
+{const f=fovVersteckt;fovVersteckt=function(e){if(!e||!siAn())return f.apply(this,arguments);try{
+  if(SI.inR){if(e.siRg===SI.gen&&e.siRf===SI.fr&&e.siRx===e.x&&e.siRy===e.y)return e.siRv;const v=!siEVis(e);e.siRg=SI.gen;e.siRf=SI.fr;e.siRx=e.x;e.siRy=e.y;e.siRv=v;return v}
+  siUpd();const px=P?P.x:0,py=P?P.y:0;if(e.siUt===G.time&&e.siUp===P&&e.siUg===SI.gen&&e.siUx===px&&e.siUy===py&&e.siUex===e.x&&e.siUey===e.y)return e.siUv;const v=!siZielOk(e);e.siUt=G.time;e.siUp=P;e.siUg=SI.gen;e.siUx=px;e.siUy=py;e.siUex=e.x;e.siUey=e.y;e.siUv=v;if(v)SI.st.hid++;return v}catch(er){sErr('fovV',er);return f.apply(this,arguments)}}}
+SI.zielOk=e=>!fovVersteckt(e);
+{const f=fovRahmen;fovRahmen=function(){const r=f.apply(this,arguments);try{if(siAn()){FOV.on=true;FOV.sicht=SI.R}}catch(e){}return r}}
+{const f=fsSeher;fsSeher=function(){const L=f.apply(this,arguments);try{if(siAn()&&L&&L.length>1)return [L[0]]}catch(e){}return L}}
+
+/* ---------- Maske (läuft in der Sichtschatten-Ebene; verträgt sich mit licht2/Ultra) ---------- */
+SI.rw=0;SI.mf=-1;
+function siMaske(g,camX,camY,m,lw,lh,vw,vh){siUpd();g.save();g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';
+ g.fillStyle=`rgba(3,2,6,${SI.mem})`;g.fillRect(0,0,lw,lh);
+ const X=x=>(x-camX)*m,Y=y=>(y-camY)*m;
+ {const n=M.n,s0x=Math.max(0,camX/MZ),s0y=Math.max(0,camY/MZ),s1x=Math.min(n,(camX+vw)/MZ),s1y=Math.min(n,(camY+vh)/MZ);
+  if(s1x>s0x&&s1y>s0y){const dx=X(s0x*MZ),dy=Y(s0y*MZ),dw=(s1x-s0x)*MZ*m,dh=(s1y-s0y)*MZ*m;
+   if(siLeicht()){g.imageSmoothingEnabled=true;g.drawImage(M.cv,s0x,s0y,s1x-s0x,s1y-s0y,dx,dy,dw,dh)}
+   else{/* weich: zweimal um eine halbe Zelle versetzt, Deckkraft aufaddiert (lighter) = Kastenfilter */
+    if(!U.c){U.c=document.createElement('canvas');U.g=U.c.getContext('2d')}if(U.c.width!==lw||U.c.height!==lh){U.c.width=lw;U.c.height=lh}const u=U.g;u.setTransform(1,0,0,1,0,0);u.globalAlpha=1;u.imageSmoothingEnabled=true;u.globalAlpha=0.5;const o=MZ*m*0.6;
+    u.globalCompositeOperation='copy';u.drawImage(M.cv,s0x,s0y,s1x-s0x,s1y-s0y,dx-o,dy-o*0.4,dw,dh);u.globalCompositeOperation='lighter';u.drawImage(M.cv,s0x,s0y,s1x-s0x,s1y-s0y,dx+o,dy+o*0.4,dw,dh);
+    u.globalAlpha=1;u.globalCompositeOperation='source-over';g.drawImage(U.c,0,0)}}}
+ g.fillStyle='rgb(3,2,6)';if(camX<0)g.fillRect(0,0,X(0),lh);if(camY<0)g.fillRect(0,0,lw,Y(0));if(camX+vw>WORLD)g.fillRect(X(WORLD),0,lw,lh);if(camY+vh>WORLD)g.fillRect(0,Y(WORLD),lw,lh);
+ g.globalCompositeOperation='destination-out';
+ for(const c of SI.V||[]){const x0=X(c.x),y0=Y(c.y),R=c.R*m;if(x0<-R-60||y0<-R-60||x0>lw+R+60||y0>lh+R+60)continue;const gr=g.createRadialGradient(x0,y0,R*0.7,x0,y0,R);gr.addColorStop(0,'rgba(0,0,0,1)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;
+  const T=siTab(c.N),E=c.ext,pf=(z,a)=>{g.globalAlpha=a;g.beginPath();g.moveTo(x0+T.c[0]*(E[0]+(E[0]<c.R?z:0))*m,y0+T.s[0]*(E[0]+(E[0]<c.R?z:0))*m);for(let i=1;i<c.N;i++){const d=E[i]+(E[i]<c.R?z:0);g.lineTo(x0+T.c[i]*d*m,y0+T.s[i]*d*m)}g.closePath();g.fill()};
+  if(siLeicht())pf(0,1);else{pf(-6,1);pf(8,0.5)}}
+ g.globalAlpha=1;
+ g.restore();SI.mf=SI.rw;SI.st.maske++}
+try{const f=fsKeile;fsKeile=function(g,V,camX,camY,m,vw,vh,lite){if(!siAn())return f.apply(this,arguments);try{const C=g.canvas;
+  if(SI.mf===SI.rw&&typeof FSV!=='undefined'&&g===FSV.g2){g.save();g.setTransform(1,0,0,1,0,0);g.globalCompositeOperation='source-over';g.fillStyle='#000';g.fillRect(0,0,C.width,C.height);g.restore();return}/* zweiter Betrachter-Durchgang (destination-in) – nichts ändern */
+  siMaske(g,camX,camY,m,C.width,C.height,vw,vh)}catch(e){sErr('maske',e);return f.apply(this,arguments)}}}catch(e){sErr('fsKeile',e)}
+const SC={c:null,g:null},U={c:null,g:null};
+function siSelbst(camX,camY){const s=siLeicht()?0.2:0.3,lw=Math.max(2,Math.ceil(W*s)),lh=Math.max(2,Math.ceil(H*s));if(!SC.c){SC.c=document.createElement('canvas');SC.g=SC.c.getContext('2d')}
+ if(SC.c.width!==lw||SC.c.height!==lh){SC.c.width=lw;SC.c.height=lh}SC.g.setTransform(1,0,0,1,0,0);SC.g.clearRect(0,0,lw,lh);siMaske(SC.g,camX,camY,ZOOM*s,lw,lh,W/ZOOM,H/ZOOM);
+ const c=cx;c.save();c.setTransform(DPR,0,0,DPR,0,0);c.globalAlpha=1;c.globalCompositeOperation='source-over';c.imageSmoothingEnabled=true;c.drawImage(SC.c,0,0,lw,lh,0,0,W,H);c.restore();SI.st.selbst++}
+/* Augen im Dunkeln: nur bei freier Linie jenseits der Sichtweite (nie durch Wände) */
+function siAugen(camX,camY,t){if(siLeicht()||!SI.aug||!SI.aug.length)return;const c=cx;c.save();c.setTransform(DPR,0,0,DPR,0,0);c.globalCompositeOperation='lighter';
+ for(const e of SI.aug){const ph=Math.sin(t*0.9+(e.id||e.x)*0.37);if(ph<0.5)continue;const a=Math.min(1,(ph-0.5)/0.2)*0.85,x=(e.x-camX)*ZOOM,y=(e.y-e.r*0.55-camY)*ZOOM,w=Math.max(2.4,e.r*0.32*ZOOM);
+  c.globalAlpha=a;c.fillStyle=e.elite?'#ffb030':'#ff3020';c.beginPath();c.arc(x-w,y,1.5*ZOOM,0,TAU);c.arc(x+w,y,1.5*ZOOM,0,TAU);c.fill();try{glow(x,y,9*ZOOM,'#ff3020',a*0.35,true)}catch(er){}}
+ c.restore();c.globalAlpha=1;c.globalCompositeOperation='source-over'}
+
+/* ---------- Zeichnen: nur Sichtbares ---------- */
+const SW={l:null,o:null};
+function swZurueck(){for(const k of ['l','o']){const s=SW[k];if(!s)continue;SW[k]=null;const key=k==='l'?'lights':'orbs',A=s[0],B=s[1],n=s[2],cur=G[key];
+  if(cur===B){for(let i=n;i<B.length;i++)A.push(B[i]);G[key]=A}else if(Array.isArray(cur)){const S=new Set(B);for(const o of A)if(!S.has(o)&&cur.indexOf(o)<0)cur.push(o)}}}
+{const f=renderWorld;renderWorld=function(dt){if(!siAn())return f.apply(this,arguments);SI.rw++;let A=null,B=null;
+  try{siUpd();A=G.enemies;B=[];const aug=SI.aug=[];for(const e of A){if(e.dead||siEVis(e))B.push(e);else if(aug.length<14&&!siLeicht()&&siAugeOk(e))aug.push(e)}G.enemies=B}catch(e){sErr('rw',e);if(A)G.enemies=A;A=null}
+  SI.inR++;try{return f.apply(this,arguments)}finally{SI.inR--;swZurueck();if(A){const cur=G.enemies;if(cur===B)G.enemies=A;else if(Array.isArray(cur)){const S=new Set(B);for(const e of A)if(!S.has(e)&&cur.indexOf(e)<0)cur.push(e)}}}}}
+{const f=render;render=function(){SI.fr++;SI.inR++;try{return f.apply(this,arguments)}finally{SI.inR--}}}
+{const f=drawLighting;drawLighting=function(camX,camY,t){const r=f.apply(this,arguments);if(!siAn())return r;
+  try{if(SI.mf!==SI.rw)siSelbst(camX,camY);siAugen(camX,camY,t)}catch(e){sErr('licht',e)}
+  try{FOV.aug.length=0}catch(e){}
+  try{if(!SW.l&&G.lights&&G.lights.length){const A=G.lights,B=A.filter(L=>siSicht(L.x,L.y,Math.min(60,(L.r||40)*0.4)));if(B.length!==A.length){SW.l=[A,B,B.length];G.lights=B}}
+   if(!SW.o&&G.orbs&&G.orbs.length){const A=G.orbs,B=A.filter(o=>siSicht(o.x,o.y,8));if(B.length!==A.length){SW.o=[A,B,B.length];G.orbs=B}}}catch(e){sErr('sw',e)}
+  return r}}
+const sv=(x,y,t)=>siSicht(x,y,t);
+/* Helden in Reichweite einer Telegrafie/Zone (die trifft gleich) */
+function siTrifftHeld(k){try{for(const q of mpL()){if(!q||q.netGone||q.down)continue;if(k.k==='circle'||k.k==='cone'||k.k==='line'){if(teleHits(k,q))return true}else if(k.k==='beam'){if(teleHits(k,q))return true}else if(k.r&&d2(k,q)<(k.r+20)*(k.r+20))return true}}catch(e){}return false}
+function siTeleOk(k){if(k.screen)return true;if(k.k==='circle')return sv(k.x,k.y,(k.r||30)*0.8)||siTrifftHeld(k);
+ if(k.k==='line'||k.k==='beam'||k.k==='cone'){const L=k.len||0;for(const u of [0,0.35,0.7,1])if(sv(k.x+Math.cos(k.a||0)*L*u,k.y+Math.sin(k.a||0)*L*u,(k.w||20)/2))return true;return siTrifftHeld(k)}
+ if(k.x==null)return true;return sv(k.x,k.y,k.r||30)||siTrifftHeld(k)}
+{const f=drawTele;drawTele=function(k,t){if(!siAn()||siTeleOk(k))return f.apply(this,arguments)}}
+{const f=drawTeleFx;drawTeleFx=function(k,t){if(!siAn()||siTeleOk(k))return f.apply(this,arguments)}}
+{const f=drawEZone;drawEZone=function(z,t){if(!siAn()||sv(z.x,z.y,(z.r||30)*0.75)||(z.r&&mpL().some(q=>q&&!q.down&&d2(z,q)<(z.r+16)*(z.r+16))))return f.apply(this,arguments)}}
+{const f=drawProj;drawProj=function(p,t){if(!siAn()||sv(p.x,p.y,(p.r||6)+4))return f.apply(this,arguments)}}
+{const f=drawFx;drawFx=function(fx,t){if(!siAn()||!fx||fx.x==null||!isFinite(fx.x))return f.apply(this,arguments);const tol=Math.min(140,(fx.r||fx.R||30));
+  if(sv(fx.x,fx.y,tol)||(fx.x2!=null&&sv(fx.x2,fx.y2,20)))return f.apply(this,arguments);
+  if(fx.r&&fx.r>60&&mpL().some(q=>q&&d2(fx,q)<fx.r*fx.r))return f.apply(this,arguments)}}
+function arrF(key,fn,tol){return function(){if(!siAn())return fn.apply(this,arguments);const A=G[key];if(!A||!A.length)return fn.apply(this,arguments);const B=A.filter(o=>o.x==null||sv(o.x,o.y,tol));if(B.length===A.length)return fn.apply(this,arguments);
+  const n0=B.length;G[key]=B;try{return fn.apply(this,arguments)}finally{if(G[key]===B){for(let i=n0;i<B.length;i++)A.push(B[i]);G[key]=A}}}}
+{const f=drawPartsNormal;drawPartsNormal=arrF('parts',f,6)}
+{const f=drawPartsAdd;drawPartsAdd=arrF('parts',f,6)}
+{const f=drawNums;drawNums=arrF('nums',f,14)}
+const iv2=(inView,tol)=>(x,y,m)=>inView(x,y,m)&&sv(x,y,tol);
+{const f=drawProjGlow;drawProjGlow=function(inView){try{swZurueck()}catch(e){}if(!siAn())return f.apply(this,arguments);return f.call(this,iv2(inView,8))}}
+{const f=drawPropGlow;drawPropGlow=function(inView,t){if(!siAn())return f.apply(this,arguments);return f.call(this,iv2(inView,20),t)}}
+{const f=drawLootBeams;drawLootBeams=function(inView,t){if(!siAn())return f.apply(this,arguments);return f.call(this,iv2(inView,10),t)}}
+{const f=drawLootIcons;drawLootIcons=function(inView,t){if(!siAn())return f.apply(this,arguments);return f.call(this,iv2(inView,10),t)}}
+
+/* ---------- Treffer nicht durch Wände (Flächen und Kegel: freie Linie vom Zentrum) ---------- */
+const AO=[];
+function siTrefferOk(e){const c=AO[AO.length-1];if(!c||e.boss||e.guard)return true;const dx=e.x-c.x,dy=e.y-c.y,m=(e.r||12)+4;if(dx*dx+dy*dy<m*m)return true;if(dwFreiS(c,e)&&(!c.s||dwFreiS(c.s,e)))return true;SI.st.blkH++;return false}
+/* Grundregel (v2): Schaden/Zustände nur an Gegnern, zu denen ein Held der Gruppe (oder Rex) eine freie Linie hat.
+   Ausnahmen: laufende DoT-Ticks (o.dot), Bosse/Wächter (ignorieren Wände). Deckt Projektile (auch Abpraller/Durchschlag), Begleiter,
+   Zonen, Ketten, Nachbilder, Explosionen u. a. ab, egal welche Quelle. */
+function siLinie(e){if(e.siLt===G.time&&e.siLg===SI.gen&&e.siLx===e.x&&e.siLy===e.y)return e.siLv;let v=false;const L=SI.Lq||siSeher();
+ for(const q of L){const dx=e.x-q.x,dy=e.y-q.y,m=(e.r||12)+(q.r||12)+10;if(dx*dx+dy*dy<m*m||dwFreiS(q,e)){v=true;break}}e.siLt=G.time;e.siLg=SI.gen;e.siLx=e.x;e.siLy=e.y;e.siLv=v;return v}
+function siSchadenOk(e,o){if(!e||e.boss||e.guard||e.dead||(o&&o.dot)||!siAn()||siGast())return true;if(!G.enemies.includes(e))return true;siUpd();if(siLinie(e))return true;SI.st.blkH++;return false}
+{const f=dealDmg;dealDmg=function(e,base,o){if(AO.length&&e&&!siTrefferOk(e))return 0;if(!siSchadenOk(e,o))return 0;return f.apply(this,arguments)}}
+{const f=dot;dot=function(e){if(!siSchadenOk(e,null))return;return f.apply(this,arguments)}}
+/* Bodenziele (Maus, Stick-Richtung, Ersatzpunkt vor dem Helden) nicht hinter Wände legen: auf den letzten freien Punkt der Linie ziehen */
+{const f=aimPoint;aimPoint=function(range){const p=f.apply(this,arguments);try{if(p&&P&&siAn()&&!dwFreiS(P,p)){dwBau();const t=dwStrahl(P.x,P.y,p.x,p.y,DW.s);if(t>=0){const dx=p.x-P.x,dy=p.y-P.y,d=Math.hypot(dx,dy)||1,u=Math.max(0,t-14/d);SI.st.zielZug=(SI.st.zielZug||0)+1;return {x:P.x+dx*u,y:P.y+dy*u}}}}catch(e){}return p}}
+/* Zentrum hinter einer Wand (z. B. Urbestie des Bären 55 px vor Echo, Hieb-Flächen): dann zählt die Linie von der Quelle (fx/fy bzw. Held bei Nahkampf) */
+{const f=aoe;aoe=function(x,y,R,amt,o){if(!siAn()||o&&o.durch)return f.apply(this,arguments);let c={x,y};
+  try{const sx=o&&o.fx!=null?o.fx:(o&&o.melee&&P?P.x:null),sy=o&&o.fy!=null?o.fy:(o&&o.melee&&P?P.y:null);if(sx!=null&&isFinite(sx)&&(Math.abs(sx-x)>2||Math.abs(sy-y)>2)){const q={x:sx,y:sy};if(!dwFreiS(q,c))c=q;else if(o.melee)c={x,y,s:q}}
+   if(!c.s&&c.x===x&&c.y===y&&P&&P.hero&&!dwFreiS(P,c)&&!siSicht(x,y,0))c={x,y,s:{x:P.x,y:P.y}}}catch(e){}
+  AO.push(c);try{return f.apply(this,arguments)}finally{AO.pop()}}}
+{const f=cone;cone=function(x,y,a,arc,R,amt,o){if(!siAn())return f.apply(this,arguments);AO.push({x,y});try{return f.apply(this,arguments)}finally{AO.pop()}}}
+
+/* ---------- Gegner: nur mit Sicht verfolgen, hinter Ecken verlieren ---------- */
+function siEKann(e){return !(e.boss||e.guard||e.add||e.dead||e.wlZz||e.flying||!e.def||e.def.k==='still'||e.def.k==='thief'||e.objDieb)}
+/* wer ist bemerkt? los = freie blickdichte Linie (nur dann Fernangriffe), sonst nur gehört (≤ SI.ohr) */
+const ENT={q:null,los:false};
+function siEntdeckt(e){const R2=SI.erk*SI.erk,O2=SI.ohr*SI.ohr;let best=null,bd=1e18,los=false;
+ for(const q of mpL()){if(!q||q.down||q.netGone)continue;const dx=q.x-e.x,dy=q.y-e.y,dd=dx*dx+dy*dy;if(dd>R2)continue;if(q.stealthT>0&&dd>60*60)continue;const l=dwFreiO(e,q);if(l||dd<O2){if(l&&!los||(l===los&&dd<bd)){bd=dd;best=q;los=l}}}
+ if(!best)for(const a of G.allies){if(!a||a.dead||!(a.kind==='rex'||a.kind==='pet'||a.kind==='obj'||a.kind==='ill'))continue;const dd=d2(e,a);if(dd<300*300){const l=dwFreiO(e,a);if(l||dd<O2){best=a;los=l;break}}}
+ ENT.q=best;ENT.los=los;return best}
+{const f=updEnemy;updEnemy=function(e,dt){if(!e||siGast()||!siAn()||!siEKann(e))return f.apply(this,arguments);
+  const A=e.siA||(e.siA={ck:0,lt:G.time,x:e.x,y:e.y,hp:e.hp,s:1,sx:0,sy:0,sT:0,st:0});
+  if(A.ck===0){const q=nearestP(e.x,e.y);if(q){A.x=q.x;A.y=q.y}}
+  if(e.hp<A.hp-0.01){const q=nearestP(e.x,e.y);if(q){A.x=q.x;A.y=q.y}A.lt=G.time;A.s=1;A.st=0}A.hp=e.hp;
+  if(A.ck<=G.time){A.ck=G.time+0.18+Math.random()*0.12;const h=siEntdeckt(e);if(h){A.x=h.x;A.y=h.y;A.lt=G.time;A.s=1;A.st=0;A.los=ENT.los}else{A.s=0;A.los=false}}
+  const k=e.def.k,fern=k==='ranged'||k==='caster'||k==='netter'||k==='charger'||k==='diver'||e.def.kite;
+  if(fern&&!A.los)e.atkCd=Math.max(e.atkCd||0,0.25);
+  if(A.s)return f.apply(this,arguments);
+  if(G.time-A.lt<SI.verlier)return f.apply(this,arguments);
+  /* verloren: zur letzten bekannten Stelle, dort kurz suchen, dann stehen und lauschen */
+  if(!A.st){A.st=1;A.sx=A.x;A.sy=A.y;A.sT=G.time;SI.st.lost++}
+  e.atkCd=Math.max(e.atkCd||0,0.3);e.wlLosT=G.time+0.5;e.wlNv=false;e.dwNo=0;e.peek=0;
+  const x0=e.x,y0=e.y,kx=(e.kx||0)*dt,ky=(e.ky||0)*dt;const r=f.apply(this,arguments);if(e.dead)return r;
+  const mx=e.x-x0-kx,my=e.y-y0-ky,mv=Math.hypot(mx,my);
+  if(mv>0.01){const sc=G.time-A.sT>SI.such+6?0:0.75;let dx=A.sx-x0,dy=A.sy-y0,d=Math.hypot(dx,dy);
+   if(d<26){if(G.time-A.sT<SI.such){let ok=0;for(let t=0;t<6&&!ok;t++){const a=rnd(TAU),dd=rnd(70,190),p={x:A.x+Math.cos(a)*dd,y:A.y+Math.sin(a)*dd};if(p.x>40&&p.y>40&&p.x<WORLD-40&&p.y<WORLD-40&&!blkPunkt(p.x,p.y,16)&&dwFreiS(e,p)){A.sx=p.x;A.sy=p.y;ok=1}}if(!ok){A.sx=x0;A.sy=y0}}else{A.sx=x0;A.sy=y0}dx=A.sx-x0;dy=A.sy-y0;d=Math.hypot(dx,dy)}
+   const s=d>1?mv*sc:0;e.x=x0+kx+(d>1?dx/d*Math.min(s,d):0);e.y=y0+ky+(d>1?dy/d*Math.min(s,d):0);e.mv=s>0?1:0;if(d>1&&Math.abs(dx)>2)e.faceX=e.x+dx}
+  return r}}
+
+/* ---------- Minikarte: nur Gesehenes ---------- */
+try{const f=wlMiniNebel;wlMiniNebel=function(neu){if(!siAn())return f.apply(this,arguments);try{siMemPruef();
+  if(neu||!WLMM.rev||WLMM.fog!==M.cv){f.call(this,true);const R=WLMM.rev;R.fill(0);const n=M.n,A=M.a;for(let j=0;j<n;j++)for(let i=0;i<n;i++)if(A[j*n+i]){const k=Math.floor(j*MZ*52/WORLD)*52+Math.floor(i*MZ*52/WORLD);if(k>=0&&k<R.length)R[k]=1}WLMM.fog=M.mmAll?SI.leer():M.cv}
+  else if(M.mmAll&&WLMM.fog===M.cv)WLMM.fog=SI.leer()}catch(e){sErr('mini',e);return f.apply(this,arguments)}}}catch(e){sErr('mini0',e)}
+SI.leer=()=>{if(!SI._leer){SI._leer=document.createElement('canvas');SI._leer.width=SI._leer.height=2}return SI._leer};
+try{const f=spKarte;spKarte=function(){const r=f.apply(this,arguments);try{if(siAn()){M.mmAll=1;if(WLMM.rev)WLMM.rev.fill(1);WLMM.fog=SI.leer()}}catch(e){}return r}}catch(e){}
+/* Kartograph: Anteil nur über begehbare Kartenteile (Felsmassen kann man nicht „aufdecken“) */
+try{const f=erfKarte;erfKarte=function(){try{if(SI.orte.has(siThema())&&WLMM.rev&&G.blkG&&!G.room&&M.a){dwBau();if(!M.flo||M.floK!==M.key){const n=52,Z=WORLD/n,O=DW.s,dn=DW.n,fl=new Uint8Array(n*n);
+    for(let j=0;j<n;j++)for(let i=0;i<n;i++){let frei=0;for(let y=j*Z+4;y<(j+1)*Z&&!frei;y+=16)for(let x=i*Z+4;x<(i+1)*Z;x+=16){const a=Math.floor(x/8),b=Math.floor(y/8);if(a<dn&&b<dn&&!O[b*dn+a]){frei=1;break}}fl[j*n+i]=frei}M.flo=fl;M.floK=M.key}
+   const R=WLMM.rev,F=M.flo;let a=0,b=0;for(let i=0;i<F.length;i++)if(F[i]){b++;if(R[i])a++}return b?Math.round(a/b*100):0}}catch(e){}return f.apply(this,arguments)}}catch(e){}
+
+/* ---------- Online: Gegner außerhalb der Gruppensicht gar nicht erst schicken ---------- */
+try{const f=netFilter;netFilter=function(W_,p){const o=f.apply(this,arguments);try{if(siAn()&&o&&o.enemies instanceof Map){const E=o.enemies,M2=new Map();
+   for(const [id,r] of E){if(!r||r.boss||r.guard||r.dead||!isFinite(r.x)||siSicht(r.x,r.y,120))M2.set(id,r);else SI.st.netWeg++}o.enemies=M2}}catch(e){sErr('net',e)}return o}}catch(e){sErr('net0',e)}
+
+window.__siT={upd:siUpd,sicht:siSicht,zielOk:e=>siZielOk(e),eVis:e=>siEVis(e),an:siAn,M,C:SI.C,seher:siSeher,entdeckt:siEntdeckt};
+}catch(e){console.error('sicht',e);window.__hsSICHT.err=String(e&&e.stack||e)}})();
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
