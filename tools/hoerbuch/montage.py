@@ -129,7 +129,15 @@ def main():
         for i, b in enumerate(bloecke):
             if b.get("typ") == "titel":
                 t = b["text"][3:].strip()
-                if t in titel_alt: liste.append({"i": i, "datei": titel_alt[t], "titel": True})
+                tu = A.titel_uid(kap, t); te = next((e for e in A.einheiten_alle if e["uid"] == tu), None)
+                f = A.datei(te, bes) if te else None
+                if f and os.path.exists(os.path.join(WURZEL, f)):
+                    x, _ = schneide_stille(lade(f)); h = hashlib.sha1(x.tobytes()).hexdigest()[:10]
+                    ziel = f"audio/chronik/de/{kap}/{i:03d}-{h}.mp3"
+                    if not os.path.exists(os.path.join(WURZEL, ziel)): schreibe(x, ziel)
+                    liste.append({"i": i, "datei": ziel, "titel": True})
+                    zeitmarken[ziel] = [[w, a - 0, b2] for w, a, b2 in ((qa.get(f) or {}).get("woerter") or [])]
+                elif t in titel_alt: liste.append({"i": i, "datei": titel_alt[t], "titel": True})
                 else: print("Titel ohne Aufnahme:", t)
                 continue
             if b.get("typ") == "bild": continue

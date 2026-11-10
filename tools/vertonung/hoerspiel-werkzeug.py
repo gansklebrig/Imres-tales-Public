@@ -1865,7 +1865,7 @@ def probe(ausgabe, spec, mit_ende=False, mit_start=True):
         i = e["i"]; info = daten["absaetze"][kap + ":" + str(i)]
         if n == 0 and mit_start and i == erste:
             musik_ev.append((t, "thema")); t += daten["musik"]["thema"]["ende"] - daten["musik"]["thema"]["ueber"]
-        elif e["titel"] and n > 0:
+        elif e["titel"] and abschnitt_von(i) and (n > 0 or not mit_start):   # Zwischenspiel vor jedem Abschnitt – auch am Anfang einer Abschnitts-Spur
             st = variante(daten, abschnitt_von(i)["stimmung"], rnd_m); musik_ev.append((t + .3, st)); t += .3 + daten["musik"][st]["ende"] - daten["musik"][st]["ueber"]
         if i in schnitt: info = dict(info, d=schnitt[i], e=[q for q in info.get("e", []) if q["t"] < schnitt[i] - .5], schnitt=True)
         plan.append((t, kap, i, info)); t += info["d"]

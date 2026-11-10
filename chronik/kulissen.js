@@ -651,7 +651,7 @@
     },
 
     wiedersehen: {
-      name: { de: "Wiedersehen der Zwillinge", en: "The Twins Reunited" },
+      name: { de: "Ein Wiedersehen", en: "A Reunion" },
       himmel: "radial-gradient(ellipse 55% 50% at 85% 85%, rgba(240,150,70,.3), transparent 70%), radial-gradient(ellipse 40% 40% at 12% 50%, rgba(240,180,100,.14), transparent 70%), linear-gradient(180deg, #140f0d 0%, #1d1510 60%, #22180f 100%)",
       farben: { fern: "#24190f", licht: "#f2b56a" },
       fern: (b, W, H, c) => FERN.innen(b, W, H, c),
@@ -876,7 +876,7 @@
 
     /* ---------------- Kapitel II ---------------- */
     kraeuternebel: {
-      name: { de: "Ilvaras Haus", en: "Ilvara's House" },
+      name: { de: "Ein Haus am Waldrand", en: "A House by the Woods" },
       himmel: "radial-gradient(ellipse 60% 55% at 70% 50%, rgba(170,120,200,.24), transparent 70%), radial-gradient(ellipse 50% 50% at 20% 70%, rgba(140,190,120,.18), transparent 70%), linear-gradient(180deg, #120f16 0%, #18141c 60%, #161319 100%)",
       farben: { fern: "#1e1822", licht: "#c8a0e0" },
       fern: (b, W, H, c) => FERN.innen(b, W, H, c),
@@ -1053,7 +1053,7 @@
     },
 
     demogorgon: {
-      name: { de: "Der See bebt", en: "The Lake Trembles" },
+      name: { de: "Am Seeufer", en: "On the Lakeshore" },
       himmel: "radial-gradient(ellipse 50% 45% at 78% 45%, rgba(200,60,80,.22), transparent 70%), radial-gradient(ellipse 45% 40% at 15% 40%, rgba(160,70,170,.16), transparent 70%), linear-gradient(180deg, #0e090d 0%, #160e14 55%, #0e0c0e 100%)",
       farben: { fern: "#1a1218", fern2: "#22161e", licht: "#e06070", wasser: "#22403c", glanz: "#d8a0a8" },
       fern: (b, W, H, c) => FERN.see(b, W, H, c, { wild: true }),
@@ -1336,7 +1336,7 @@
     },
 
     drachenei: {
-      name: { de: "Das gestohlene Ei", en: "The Stolen Egg" },
+      name: { de: "Die Glutkammer", en: "The Ember Chamber" },
       himmel: "radial-gradient(ellipse 45% 45% at 82% 60%, rgba(250,170,70,.24), transparent 70%), radial-gradient(ellipse 45% 40% at 12% 40%, rgba(140,130,150,.12), transparent 70%), linear-gradient(180deg, #0e0a0b 0%, #17100e 55%, #1c120c 100%)",
       farben: { fern: "#1e1512", fern2: "#271b16", licht: "#f0a050" },
       fern: (b, W, H, c) => FERN.festung(b, W, H, c),

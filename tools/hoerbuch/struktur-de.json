@@ -27,7 +27,7 @@
  "I": [
   {
    "typ": "titel",
-   "text": "## Die Einladung"
+   "text": "## Tinte und Wachs"
   },
   {
    "typ": "text",
@@ -366,7 +366,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Hinterhalt auf der Straße"
+   "text": "## Stille im Gebüsch"
   },
   {
    "typ": "text",
@@ -683,7 +683,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Die Goblinhöhle"
+   "text": "## Spuren im Moos"
   },
   {
    "typ": "text",
@@ -908,7 +908,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Phandalin und die Roten Roben"
+   "text": "## Geschlossene Fensterläden"
   },
   {
    "typ": "text",
@@ -1210,7 +1210,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Schloss Crackmore"
+   "text": "## Eisen und Kräuter"
   },
   {
    "typ": "text",
@@ -1910,7 +1910,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Der Gefangene im Wachturm"
+   "text": "## Fackelschein im Spalt"
   },
   {
    "typ": "text",
@@ -2442,7 +2442,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Gundrens Bruder"
+   "text": "## Ein vertrautes Gesicht"
   },
   {
    "typ": "text",
@@ -2510,7 +2510,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Die magische Schmiede"
+   "text": "## Wo das Feuer schläft"
   },
   {
    "typ": "text",
@@ -2904,7 +2904,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Neverwinter"
+   "text": "## Möwen und Laternen"
   },
   {
    "typ": "text",
@@ -3132,7 +3132,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Die Allianz der Lords"
+   "text": "## Hinter schweren Türen"
   },
   {
    "typ": "text",
@@ -3205,7 +3205,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Donnerbaum"
+   "text": "## Kein Rauch aus den Kaminen"
   },
   {
    "typ": "text",
@@ -3257,7 +3257,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Der Drache im Turm"
+   "text": "## Stufe um Stufe"
   },
   {
    "typ": "text",
@@ -3448,7 +3448,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Das verlassene Dorf"
+   "text": "## Suppe für Wanderer"
   },
   {
    "typ": "text",
@@ -3696,7 +3696,7 @@
  "II": [
   {
    "typ": "titel",
-   "text": "## Der Kräuternebel"
+   "text": "## Schwere Lider"
   },
   {
    "typ": "bild",
@@ -3789,7 +3789,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Gefangen"
+   "text": "## Kaltes Gestein"
   },
   {
    "typ": "text",
@@ -3971,7 +3971,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Der Ausbruch"
+   "text": "## Kleine Zähne"
   },
   {
    "typ": "text",
@@ -4583,7 +4583,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Durch die Spinnweben"
+   "text": "## Fäden, die zittern"
   },
   {
    "typ": "text",
@@ -4793,7 +4793,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Das Grab der Magierin"
+   "text": "## Dreitausend Jahre Staub"
   },
   {
    "typ": "text",
@@ -5193,7 +5193,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Der unterirdische See"
+   "text": "## Schwarzes Wasser"
   },
   {
    "typ": "text",
@@ -5441,7 +5441,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Demogorgon"
+   "text": "## Was unter der Oberfläche wartet"
   },
   {
    "typ": "text",
@@ -5736,7 +5736,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Gracklstugh"
+   "text": "## Stadt aus Ruß"
   },
   {
    "typ": "text",
@@ -5792,7 +5792,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Der Sohn des Königs"
+   "text": "## Kleine Lügen"
   },
   {
    "typ": "text",
@@ -5947,7 +5947,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Am Hof von König Horga"
+   "text": "## Eine Stimme wie Steinschlag"
   },
   {
    "typ": "bild",
@@ -6056,7 +6056,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Einkaufen in Gracklstugh"
+   "text": "## Flöten und Fläschchen"
   },
   {
    "typ": "text",
@@ -6161,7 +6161,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Der rasende Riese"
+   "text": "## Wenn der Boden bebt"
   },
   {
    "typ": "bild",
@@ -6286,7 +6286,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Das Dorf der Riesen"
+   "text": "## Große Leute"
   },
   {
    "typ": "text",
@@ -6401,7 +6401,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Der Steinsprecher"
+   "text": "## Der Stein schreit"
   },
   {
    "typ": "text",
@@ -6562,7 +6562,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Besuch in der Schenke"
+   "text": "## Ein Tisch im Halbdunkel"
   },
   {
    "typ": "text",
@@ -6627,7 +6627,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Die Bewahrer der Flamme"
+   "text": "## Hitze von unten"
   },
   {
    "typ": "text",
@@ -6750,7 +6750,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Themberchaud"
+   "text": "## Ein Lied für den Gastgeber"
   },
   {
    "typ": "text",
@@ -6873,7 +6873,7 @@
   },
   {
    "typ": "titel",
-   "text": "## Das gestohlene Ei"
+   "text": "## Nachtisch"
   },
   {
    "typ": "bild",

@@ -8,7 +8,7 @@ Diese Chronik erzähle ich euch, Barradin! Wie es sich für einen Barden gehört
 
 Na gut. Oder komplett übertrieben. Danke, Friedrich. Imre allein kennt die wahre Geschichte ... Diese hier wird euch hoffentlich trotzdem verzaubern!
 
-### Die Einladung
+### Tinte und Wachs
 
 Es begann mit einem Brief. Jeder von uns erhielt eine Einladung von Gundren! Er war ein Zwerg und Händler aus der Stadt Neverwinter und kannte wohl jeden, der etwas zu sagen hat. Das Siegel war aus dunklem Wachs, die Handschrift so kantig wie ein Zwergenschild und der Ton so knapp, dass man ihm nicht widersprechen mochte. Darin stand nur:
 
@@ -98,7 +98,7 @@ Unser erster Auftrag klang harmlos: einen Karren mit Waren sicher nach Phandalin
 
 Am nächsten Morgen, im Morgengrauen, rollten wir durch das Stadttor, zwei Ochsen vor dem Karren, die das Wort Eile nicht kannten. Friedrich hatte die Zügel, weil er als Einziger wusste, wie man mit Ochsen redet. Echo saß hinten auf den Vorratssäcken wie ein Drache auf seinem Hort, und Ezekiel ging neben dem Karren her, lautlos, als hätte er beschlossen, dass Fahren unter seiner Würde sei. Ich selbst saß auf dem Kutschbock und probte, wie man von dort oben möglichst heldenhaft winkt. Rex lief vorneweg und bellte jeden Meilenstein an, als hätte der ihn persönlich beleidigt, und hinter uns versank Neverwinter im Dunst.
 
-### Hinterhalt auf der Straße
+### Stille im Gebüsch
 
 Wir zogen die High Road hinab nach Süden, das Meer anfangs direkt zu unserer Rechten, dann bald hinter grünen Hügeln verborgen. Irgendwann bog Friedrich ins Landesinnere ab, Richtung Phandalin. Mehrere Tage lang rollte der Karren friedlich dahin und knarrte bei jedem Schlagloch, als wolle er sich beschweren. Friedrich las die Fährten am Wegrand wie andere Leute Aushänge. Ab und zu deutete er auf einen Abdruck im Schlamm und sagte Dinge wie:
 
@@ -186,7 +186,7 @@ Der Kampf war härter als erwartet. Goblins sind klein, aber sie sind schnell, g
 
 Am Ende konnten wir die Goblins dennoch niederstrecken. Schwer atmend standen wir zwischen ihnen, Rex sprang aufgeregt um uns herum, und Echo durchsuchte bereits den ersten Goblin, bevor der richtig aufgehört hatte zu zucken. Das Lied über langweilige Reisen habe ich danach nie fertig geschrieben.
 
-### Die Goblinhöhle
+### Spuren im Moos
 
 Ich weiß nicht, ob wir direkt Blut geleckt hatten oder uns die Hoffnung auf eine Belohnung antrieb ... Echo wusste es. Jeder von uns hatte da so seine eigene Frage. Friedrich zuerst, über den ausgebrannten Wagen gebeugt:
 
@@ -246,7 +246,7 @@ Er war nichts Besonderes. Ein paar Hiebe, ein paar Pfeile, und sein Helm scheppe
 
 Die Goldstücke verschwanden trotzdem in Echos Beutel. Dann machten wir uns auf den Rückweg. Vier verschwitzte, ziemlich zufriedene Abenteurer samt Hund traten wieder ans Tageslicht und folgten den eigenen Spuren zurück durch den Wald, zu unserem Karren.
 
-### Phandalin und die Roten Roben
+### Geschlossene Fensterläden
 
 Der Karren stand noch genau da, wo wir ihn zurückgelassen hatten, unversehrt. Die Ochsen kauten. Ich glaube, sie hatten nicht einmal bemerkt, dass wir weg gewesen waren. Die letzte Etappe verging ohne Zwischenfälle, und schließlich erreichte unser Karren Phandalin. Wer sich ein Städtchen mit Mauer und Glockenturm vorstellt, wird enttäuscht: Phandalin ist eine Siedlung am Rand der Welt, ein paar Dutzend Häuser aus frischem Holz, gebaut zwischen den Steinruinen eines viel älteren Ortes, über die längst Gras und Brombeeren gewachsen sind. Es gab einen kleinen Schrein, ein paar Läden und eine Schänke namens „Zum schlafenden Riesen“. Es roch nach Sägespänen und Holzrauch, und irgendwo hämmerte jemand.
 
@@ -328,7 +328,7 @@ Danach eskalierte das Gespräch recht schnell ... Unsere Forderungen waren, vors
 
 **Harbin:** „Selbstverständlich erst danach!“
 
-### Schloss Crackmore
+### Eisen und Kräuter
 
 *(Geräusch: Krähen, Wind in Ranken, bröckelnder Stein)*
 
@@ -520,7 +520,7 @@ Echo biss zur Sicherheit noch einmal selbst hinein, nickte und steckte sie ein. 
 
 Es lief ungefähr so gut wie beim ersten Besuch. Sagen wir so: Er wird uns so schnell nicht wieder einladen. Lange hielt es uns danach ohnehin nicht mehr in Phandalin.
 
-### Der Gefangene im Wachturm
+### Fackelschein im Spalt
 
 An dieser Stelle muss ich gestehen: Meine Erinnerung an die folgenden Tage ist ein wenig ... nebelig. Wahrscheinlich lag es am regen Genuss des wundervollen Krauts in meiner Pfeife. Doch die eine Nacht, von der ich jetzt erzähle, hat sich gestochen scharf in meine Erinnerung gebrannt.
 
@@ -664,7 +664,7 @@ Nundro brummte von seinem Stuhl aus:
 
 Rex beschnupperte beide ausgiebig, nieste einmal und erklärte sie damit offenbar für unbedenklich.
 
-### Gundrens Bruder
+### Ein vertrautes Gesicht
 
 Gemeinsam mit Nundro kehrten wir nach Neverwinter zurück, zu Gundren in den Hafen, und der schloss seinen Bruder überglücklich in die Arme. Zwei schwarze Bärte verhakten sich ineinander, und für einen Moment konnte keiner sagen, wo der eine Zwerg aufhörte und der andere anfing. Gundren brummte:
 
@@ -684,7 +684,7 @@ Echo hatte eine Rückfrage:
 
 **Gundren:** „In Gold, Druide. In Gold.“
 
-### Die magische Schmiede
+### Wo das Feuer schläft
 
 Dann wurde es ernst. Gundren breitete eine alte, fleckige Karte auf seinem Fass aus und gab uns den Auftrag, auf den alles hinausgelaufen war:
 
@@ -788,7 +788,7 @@ Dann ging es zurück nach Neverwinter, zu Gundren, mit der besten Nachricht, die
 
 Ich erinnerte ihn vorsichtshalber an die stattliche Belohnung. Echo erinnerte ihn weniger vorsichtig.
 
-### Neverwinter
+### Möwen und Laternen
 
 *(Geräusch: große Stadt -- Glocken, Marktrufe, Hufschläge auf Pflaster, Möwen)*
 
@@ -850,7 +850,7 @@ Er blieb bei uns stehen, bis es ganz dunkel war.
 
 Zurück im Gasthof gab es noch ein paar Getränke an der Bar, dann fielen wir in unsere Betten. Nach Wochen auf der Straße fühlte sich ein gepolstertes, sauberes Bett an wie ein Geschenk der Götter. Echo schnarchte durch zwei Wände.
 
-### Die Allianz der Lords
+### Hinter schweren Türen
 
 Am nächsten Morgen ging es zurück zur Allianz. Diesmal klopften wir sogar an. Es wurde ein langes Gespräch. Friedrich stellte ein paar vernünftige Fragen, Echo nur eine:
 
@@ -870,7 +870,7 @@ Der Entschluss stand fest: Unsere Heldengruppe würde der Allianz der Lords beit
 
 Mir gefiel, wie das klang.
 
-### Donnerbaum
+### Kein Rauch aus den Kaminen
 
 Kaum waren wir Mitglieder der Allianz, wartete auch schon der erste Auftrag. Captain Dolgrimson schickte uns nach Donnerbaum, einem kleinen, verlassenen Dorf etwas östlich von Neverwinter. Seine Anweisung war knapp:
 
@@ -884,7 +884,7 @@ Donnerbaum empfing uns mit einer Stille, die mir sofort unter die Haut kroch: ei
 
 **Friedrich:** „Kein Rauch aus den Kaminen. Keine Hühner. Hier stimmt was nicht.“
 
-### Der Drache im Turm
+### Stufe um Stufe
 
 *(Geräusch: enge Wendeltreppe, Schritte auf Stein, Wind pfeift durch Schießscharten)*
 
@@ -936,7 +936,7 @@ Danach gönnten wir uns eine lange Rast, und die hatten wir uns verdient. Ich la
 
 Dann reichte er mir seine Wasserflasche.
 
-### Das verlassene Dorf
+### Suppe für Wanderer
 
 *(Geräusch: Ächzen und Stöhnen aus dunklen Häusern, schlurfende Schritte)*
 
@@ -1002,7 +1002,7 @@ Keiner von uns ahnte etwas Böses, als sie uns in ihr Haus bat:
 
 # Kapitel II
 
-### Der Kräuternebel
+### Schwere Lider
 
 *(Geräusch: Holztür knarrt, ein Kessel blubbert leise)*
 
@@ -1026,7 +1026,7 @@ Einer nach dem anderen sanken wir zu Boden, und mir wurde schwarz vor Augen. Das
 
 Sie war in Wahrheit eine Gestaltwandlerin, die uns mit einem Kräuternebel betäubt hatte, und sie verschleppte uns alle. Ihr wahres Gesicht sollten wir erst später sehen: Ilvara, eine Drow.
 
-### Gefangen
+### Kaltes Gestein
 
 *(Geräusch: fernes Rauschen von Wasser, einzelne Tropfen)*
 
@@ -1074,7 +1074,7 @@ Dann schlüpfte er zwischen den Gitterstäben hindurch, direkt an den Stiefeln d
 
 **Echo:** „Prioritäten.“
 
-### Der Ausbruch
+### Kleine Zähne
 
 Kaum hielten alle wieder ihre Waffen in den Händen, trat ich an die Gitterstäbe und beleidigte die verdammten Wachen hemmungslos:
 
@@ -1232,7 +1232,7 @@ Ezekiel betrachtete unser Werk lange und schweigend.
 
 Kindisch? Vielleicht. Befreiend? Absolut.
 
-### Durch die Spinnweben
+### Fäden, die zittern
 
 *(Geräusch: Wind aus der Tiefe, leises Knistern klebriger Fäden)*
 
@@ -1288,7 +1288,7 @@ Echo witterte sofort einen Schatz.
 
 Und so schloss sich Fagas uns an. Kurzzeitig zumindest.
 
-### Das Grab der Magierin
+### Dreitausend Jahre Staub
 
 *(Geräusch: plätschernde Wasserläufe, Tropfen)*
 
@@ -1394,7 +1394,7 @@ Zum ersten Mal konnte ich in Ezekiels sonst so regungslosem Gesicht etwas lesen:
 
 Dann lachte er. Leise. Ich hatte ihn noch nie lachen hören.
 
-### Der unterirdische See
+### Schwarzes Wasser
 
 *(Geräusch: weite, stille Wasserfläche, Plätschern an Steinufer)*
 
@@ -1462,7 +1462,7 @@ Die Kuo-Toa beachteten es nicht weiter und brachten uns auf einen großen Platz 
 
 Auf dem Platz standen sich Ploopploopeen und die falsche Erzpriesterin gegenüber, beide umringt von ihren Anhängern, die sich mit bösen, starren Augen ansahen.
 
-### Demogorgon
+### Was unter der Oberfläche wartet
 
 *(Geräusch: schrilles Kreischen, klappernde Speere)*
 
@@ -1538,7 +1538,7 @@ Ich hörte mich selbst flüstern:
 
 Zum ersten Mal sprach ich seinen Namen richtig aus. Von seinem Volk und ihrer Stadt blieben nur Ruinen, die langsam im aufgewühlten See versanken. Niemand im Boot sagte etwas. Friedrich legte mir die Hand auf die Schulter. Echo starrte aufs Wasser. Rex drückte sich an meine Beine. Ich hatte ihm noch ein Lied versprochen. Es wurde ein Klagelied.
 
-### Gracklstugh
+### Stadt aus Ruß
 
 *(Geräusch: Ruderschläge, dann fernes, rhythmisches Hämmern)*
 
@@ -1552,7 +1552,7 @@ Vor uns lag ein atemberaubender Anblick: eine in den Fels gehauene Festung, die 
 
 Nach allem, was hinter uns lag, war es fast zu schön, um wahr zu sein.
 
-### Der Sohn des Königs
+### Kleine Lügen
 
 Am Stadttor standen grimmige Wachen, grau und gedrungen, mit Bärten wie Stahlwolle und Blicken, die Fremde nicht mochten. Sie hoben die Hellebarden, doch dann trat Kardal vor und wechselte ein paar leise Worte mit ihnen. Danach ließen sie uns ohne Weiteres passieren. Eine Wache nickte sogar, fast ehrfürchtig. Schon das hätte mich stutzig machen sollen. Friedrich flüsterte mir zu:
 
@@ -1594,7 +1594,7 @@ Da kam die Wahrheit ans Licht: Unser bescheidener Späher ist in Wahrheit der So
 
 Also, fast.
 
-### Am Hof von König Horga
+### Eine Stimme wie Steinschlag
 
 *(Geräusch: großer Saal, Hall, knisterndes Feuer)*
 
@@ -1622,7 +1622,7 @@ Unserem Druiden fehlte der Himmel. Beim Frühstück saß er am Fenster und starr
 
 Dazu kam der Gestank der Stadt: Ruß und Schwefel aus unzähligen Schmieden, der in jeder Gasse hing und den er einfach nicht mehr aus der Nase bekam. Rex legte sich zu ihm, den Kopf auf seinem Knie, und Echo schob ihn nicht weg. Ein Druide ohne Himmel und frische Luft, das ist wie ein Barde ohne Publikum.
 
-### Einkaufen in Gracklstugh
+### Flöten und Fläschchen
 
 Was tut eine Heldengruppe in einer fremden Stadt? Richtig: einkaufen.
 
@@ -1648,7 +1648,7 @@ Man weiß eben nie, wann man ein Publikum verzaubern muss. Oder einen Gegner.
 
 Die Waffenhändler konnten ihren Blick kaum von Ezekiels Schwertgriff nehmen, der auf seinem Rücken aus der Scheide ragte, doch keiner traute sich, den grimmigen Darkin anzusprechen.
 
-### Der rasende Riese
+### Wenn der Boden bebt
 
 *(Geräusch: Marktlärm, dann Krachen und Schreie)*
 
@@ -1682,7 +1682,7 @@ Der Riese erhob sich wieder und sprach langsam, als müsste er jedes Wort erst a
 
 **Riese:** „Kommt. Der Steinsprecher ... soll euch sehen.“
 
-### Das Dorf der Riesen
+### Große Leute
 
 Es folgten ein paar weitere Plänkeleien in unserer Gruppe.
 
@@ -1712,7 +1712,7 @@ Dafür bemerkte er, wie Rex neugierig an seinem Zeh schnupperte, der fast so gro
 
 Rex hat in Gracklstugh offenbar mehr Freunde als wir alle zusammen.
 
-### Der Steinsprecher
+### Der Stein schreit
 
 *(Geräusch: tiefes Mahlen von Stein, Hall)*
 
@@ -1756,7 +1756,7 @@ Dann schenkte uns Hgraam einen Steinsprecher-Kristall. Die Ehre gebührt übrige
 
 Manchmal ist Einkaufen eben doch eine Heldentat.
 
-### Besuch in der Schenke
+### Ein Tisch im Halbdunkel
 
 *(Geräusch: Schenke, gedämpfte Gespräche)*
 
@@ -1776,7 +1776,7 @@ Weiter kam er nicht. Zwei Duergar-Priester in roten Roben traten an unseren Tisc
 
 Wer sich Meister der Flammen nennt, hat entweder einen sehr großen Ofen oder ein sehr großes Ego. Wie sich herausstellte: beides.
 
-### Die Bewahrer der Flamme
+### Hitze von unten
 
 *(Geräusch: Stein schabt beiseite, dann zunehmendes Brodeln)*
 
@@ -1812,7 +1812,7 @@ Mit einem tosenden Brausen landete der Meister der Flammen höchstpersönlich vo
 
 **Themberchaud:** „Oh. Das Abendessen ist da.“
 
-### Themberchaud
+### Ein Lied für den Gastgeber
 
 Ich tat, was ich am besten kann. Ich trat vor und verbeugte mich so tief, dass meine Locken fast das Gold berührten. Friedrich flüsterte entsetzt:
 
@@ -1842,7 +1842,7 @@ Stattdessen erzählte uns der Drache, ohne jede Eile, dass er seinem eigenen Hoh
 
 Dann schloss er die Augen, und die Audienz war beendet.
 
-### Das gestohlene Ei
+### Nachtisch
 
 *(Geräusch: schwere Tür, dahinter gedämpftes Brodeln)*
 

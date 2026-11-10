@@ -38,6 +38,17 @@ def vergleich(s):
     return re.sub(r"\s+", " ", s).strip()
 def saetze(t): return [x for x in re.split(r"(?<=[.!?…])\s+(?=(?:\[[^\]]*\]\s*)*[A-ZÄÖÜ„\"])", t.strip()) if x]
 
+def titel_uid(kap, t): return f"{kap}-titel-" + hashlib.sha1(t.encode()).hexdigest()[:8]
+TITEL_TON = {   # Tonfall der gesprochenen Überschriften
+    "Tinte und Wachs": "warmly", "Stille im Gebüsch": "hushed", "Spuren im Moos": "curious", "Geschlossene Fensterläden": "hushed",
+    "Eisen und Kräuter": "serious", "Fackelschein im Spalt": "hushed", "Ein vertrautes Gesicht": "warmly", "Wo das Feuer schläft": "awed",
+    "Möwen und Laternen": "nostalgic", "Hinter schweren Türen": "serious", "Kein Rauch aus den Kaminen": "hushed", "Stufe um Stufe": "dramatic",
+    "Suppe für Wanderer": "warmly", "Schwere Lider": "tired", "Kaltes Gestein": "serious", "Kleine Zähne": "mischievously",
+    "Fäden, die zittern": "hushed", "Dreitausend Jahre Staub": "awed", "Schwarzes Wasser": "hushed", "Was unter der Oberfläche wartet": "dramatic",
+    "Stadt aus Ruß": "serious", "Kleine Lügen": "dryly", "Eine Stimme wie Steinschlag": "solemn", "Flöten und Fläschchen": "cheerful",
+    "Wenn der Boden bebt": "dramatic", "Große Leute": "warmly", "Der Stein schreit": "solemn", "Ein Tisch im Halbdunkel": "hushed",
+    "Hitze von unten": "serious", "Ein Lied für den Gastgeber": "mischievously", "Nachtisch": "dryly"}
+
 def einheiten(kapitel):
     st, regie, rec, bes = J("tools/hoerbuch/struktur-de.json"), J("tools/hoerbuch/regie-de.json", {}), J("tools/hoerbuch/recycling-de.json", {}), J("tools/hoerbuch/besetzung.json")
     fehler, out = [], []
@@ -46,6 +57,11 @@ def einheiten(kapitel):
     for kap in kapitel:
         nb = 0
         for b in st[kap]:
+            if b.get("typ") == "titel":   # Abschnittsüberschrift: vom Erzähler gesprochen
+                t = b["text"][3:].strip(); stimme, _ = bes["rollen"]["erzaehler"]
+                tag = TITEL_TON.get(t, "warmly")
+                out.append({"uid": titel_uid(kap, t), "sid": titel_uid(kap, t), "rolle": "erzaehler", "stimme": stimme, "text": f"[{tag}] {t}.", "ziel": t})
+                continue
             if b.get("typ", "text") != "text": continue
             nb += 1
             if bis and nb > bis: break
