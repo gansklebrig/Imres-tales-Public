@@ -278,6 +278,9 @@ def zeilen(quelle, stimme, grenze):
     """QUELLE = JSON {"ziel": "audio/heldensturm/de", "zeilen": {"id": "Text mit Regie-Tags", …}}
        → <ziel>/<id>-<hash>.mp3 und <ziel>/manifest.json {id: datei}. Vorhandenes wird übersprungen."""
     Q = json.load(open(os.path.join(WURZEL, quelle)))
+    alle = json.dumps(Q["zeilen"], ensure_ascii=False)
+    if "[" in alle and MODELL != "eleven_v3":   # nur eleven_v3 versteht Regie-Tags, alle anderen lesen sie vor
+        raise SystemExit(f"Abbruch: Regie-Tags im Text, aber Modell {MODELL} – bitte modell=eleven_v3 angeben.")
     ziel = Q.get("ziel") or "audio/zeilen"
     basis = os.path.join(WURZEL, ziel); os.makedirs(basis, exist_ok=True)
     manifest = {}; kosten = 0; neu = 0

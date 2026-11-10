@@ -1,0 +1,55 @@
+{
+ "ziel": "audio/proben/friedrich",
+ "zeilen": {
+  "friedrich-1": {
+   "text": "[warmly] Ich bin Friedrich, aus den Wäldern. Das ist Rex, er ist der Freundlichere von uns beiden. [long pause] [shouting] Vorsicht! [dryly] Für altes Holz sind die ziemlich schnell! [long pause] [tenderly] Ein Halsband für Rex. Eins, mit dem ich ihn immer wiederfinde.",
+   "stimme": "aTTiK3YzK3dXETpuDE2h",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.3,
+    "use_speaker_boost": true
+   }
+  },
+  "friedrich-2": {
+   "text": "[warmly] Ich bin Friedrich, aus den Wäldern. Das ist Rex, er ist der Freundlichere von uns beiden. [long pause] [shouting] Vorsicht! [dryly] Für altes Holz sind die ziemlich schnell! [long pause] [tenderly] Ein Halsband für Rex. Eins, mit dem ich ihn immer wiederfinde.",
+   "stimme": "aTTiK3YzK3dXETpuDE2h",
+   "einstellung": {
+    "stability": 1.0,
+    "similarity_boost": 0.85,
+    "style": 0.3,
+    "use_speaker_boost": true
+   }
+  },
+  "friedrich-3": {
+   "text": "[warmly] Ich bin Friedrich, aus den Wäldern. Das ist Rex, er ist der Freundlichere von uns beiden. [long pause] [shouting] Vorsicht! [dryly] Für altes Holz sind die ziemlich schnell! [long pause] [tenderly] Ein Halsband für Rex. Eins, mit dem ich ihn immer wiederfinde.",
+   "stimme": "lx8LAX2EUAKftVz0Dk5z",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.3,
+    "use_speaker_boost": true
+   }
+  },
+  "friedrich-4": {
+   "text": "[warmly] Ich bin Friedrich, aus den Wäldern. Das ist Rex, er ist der Freundlichere von uns beiden. [long pause] [shouting] Vorsicht! [dryly] Für altes Holz sind die ziemlich schnell! [long pause] [tenderly] Ein Halsband für Rex. Eins, mit dem ich ihn immer wiederfinde.",
+   "stimme": "K5ZVtkkBnuPY6YqXs70E",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.3,
+    "use_speaker_boost": true
+   }
+  },
+  "friedrich-5": {
+   "text": "[warmly] Ich bin Friedrich, aus den Wäldern. Das ist Rex, er ist der Freundlichere von uns beiden. [long pause] [shouting] Vorsicht! [dryly] Für altes Holz sind die ziemlich schnell! [long pause] [tenderly] Ein Halsband für Rex. Eins, mit dem ich ihn immer wiederfinde.",
+   "stimme": "IeQubAjK1ujbppIdhJw4",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.3,
+    "use_speaker_boost": true
+   }
+  }
+ }
+}

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Sprecher-Casting · Hörbuch</title>
+<style>
+:root { --night:#100e15; --hall:#19161f; --vellum:#ebe2cc; --ash:#a89f8f; --ember:#e0a046; --moss:#8fb069; --line:rgba(224,160,70,.28); }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--night); color:var(--vellum); font:1rem/1.5 Georgia, serif; }
+.wrap { max-width:46rem; margin:0 auto; padding:1.2rem 16px 9rem; }
+h1 { font-weight:400; font-size:1.8rem; margin:.2rem 0 .3rem; }
+p.k { color:var(--ash); margin:0 0 1.2rem; }
+section { border-top:1px solid var(--line); padding:1rem 0; }
+h2 { font-weight:400; font-size:1.3rem; margin:0; color:var(--ember); }
+.info { color:var(--ash); font-size:.9rem; margin:0 0 .3rem; }
+.text { color:var(--ash); font-style:italic; font-size:.92rem; margin:0 0 .6rem; }
+label.st { display:grid; grid-template-columns:1.6rem 2rem minmax(0,1fr); gap:.2rem .5rem; align-items:center; margin:.55rem 0; padding:.35rem .4rem; border-radius:.5rem; cursor:pointer; }
+label.st:has(input:checked) { background:rgba(143,176,105,.14); outline:1px solid rgba(143,176,105,.5); }
+label.st input { accent-color:var(--moss); width:1.1rem; height:1.1rem; margin:0; }
+label.st b { font-size:1.1rem; color:var(--ember); text-align:center; }
+label.st span { font-size:.92rem; }
+label.st audio { grid-column:2 / 4; width:100%; height:2.4rem; }
+.fehlt { grid-column:2 / 4; color:var(--ash); font-size:.85rem; }
+.leiste { position:fixed; left:0; right:0; bottom:0; background:var(--hall); border-top:1px solid var(--line); padding:.7rem 16px calc(.7rem + env(safe-area-inset-bottom)); }
+.leiste .in { max-width:46rem; margin:0 auto; display:flex; gap:.6rem; align-items:center; }
+.leiste code { flex:1; min-width:0; font:.82rem/1.35 ui-monospace, monospace; color:var(--vellum); white-space:pre-wrap; max-height:4.2em; overflow:auto; }
+.leiste button { background:var(--ember); color:#1a1208; border:0; border-radius:.5rem; padding:.55rem .9rem; font:inherit; cursor:pointer; flex:none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Friedrich – neue Stimmprobe</h1>
+  <p class="k">Alle Proben mit dem richtigen Modell (eleven_v3), also so, wie es im Hörbuch klingt. Drei echte Zeilen aus Kapitel I.</p>
+  <div id="liste"></div>
+</div>
+<div class="leiste"><div class="in"><code id="wahl">Noch nichts gewählt.</code><button id="kopie" type="button">Kopieren</button></div></div>
+<script>
+const QUELLEN = [ { dir: "./", titel: null, info: null } ];
+const laden = u => fetch(u).then(r => r.ok ? r.json() : null).catch(() => null);
+let wahl = {}; try { wahl = JSON.parse(localStorage.getItem("friedrich-wahl") || "{}"); } catch (e) {}
+const ordnung = [];
+function zeigeWahl() {
+  const z = ordnung.filter(r => wahl[r.key]).map(r => r.titel + ": " + wahl[r.key]);
+  document.getElementById("wahl").textContent = z.length ? z.join(", ") : "Noch nichts gewählt.";
+  try { localStorage.setItem("friedrich-wahl", JSON.stringify(wahl)); } catch (e) {}
+}
+Promise.all(QUELLEN.map(q => Promise.all([laden(q.dir + "liste.json"), laden(q.dir + "manifest.json")]).then(([l, m]) => ({ q, l: l || [], m: m || {} })))).then(teile => {
+  const ziel = document.getElementById("liste");
+  teile.forEach(({ q, l, m }) => {
+    const rollen = {};
+    l.forEach(x => (rollen[x.rolle] = rollen[x.rolle] || { titel: q.titel || x.titel, info: q.info || x.info, text: x.text, st: [] }).st.push(x));
+    Object.entries(rollen).forEach(([rid, r]) => {
+      const key = rid; ordnung.push({ key, titel: r.titel });
+      const s = document.createElement("section");
+      s.innerHTML = "<h2></h2><p class='info'></p>";
+      s.querySelector("h2").textContent = r.titel; s.querySelector(".info").textContent = r.info || "";
+      if (r.text) { const p = document.createElement("p"); p.className = "text"; p.textContent = "„" + r.text.replace(/\[[^\]]*\]\s*/g, "") + "“"; s.appendChild(p); }
+      r.st.forEach((x, i) => {
+        const lab = document.createElement("label"); lab.className = "st";
+        lab.innerHTML = "<input type='radio'><b></b><span></span>";
+        const inp = lab.querySelector("input"); inp.name = key; inp.checked = wahl[key] === i + 1;
+        inp.addEventListener("change", () => { wahl[key] = i + 1; zeigeWahl(); });
+        lab.querySelector("b").textContent = i + 1; lab.querySelector("span").textContent = x.name;
+        if (m[x.id]) { const a = document.createElement("audio"); a.controls = true; a.preload = "none"; a.src = "/" + m[x.id]; lab.appendChild(a); }
+        else { const f = document.createElement("div"); f.className = "fehlt"; f.textContent = "Aufnahme folgt gleich."; lab.appendChild(f); }
+        s.appendChild(lab);
+      });
+      ziel.appendChild(s);
+    });
+  });
+  zeigeWahl();
+});
+document.getElementById("kopie").addEventListener("click", () => {
+  const t = document.getElementById("wahl").textContent;
+  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { document.getElementById("kopie").textContent = "Kopiert"; }).catch(() => {});
+});
+</script>
+</body>
+</html>
