@@ -37477,8 +37477,9 @@ M.fn={sig,endlage,speichern,laden};
 /* ================= Paket „dmtab“: Reiter-Name im Pausemenü, wenn die Karte „Schadensquellen“ da ist – window.__hsDMTAB =================
    Vorher hieß der Reiter „SchadensquellenWer macht w…“ (Überschrift + Untertitel der aufklappbaren Karte zusammengeklebt).
    Außerdem landeten die Pause-Einstellungen (Karte .ups) ohne eigene Überschrift auf der Seite davor (meist „Kombos“).
-   Jetzt: Reiter „Schadensquellen“ und eigener Reiter „Einstellungen“. */
-(function(){try{window.__hsDMTAB={v:3};
+   Jetzt: Reiter „Schadensquellen“ und eigener Reiter „Einstellungen“ direkt nach „Mitspieler & Online“;
+   die überschriftlose Karte oben (Schriftrollen) heißt „Schriftrollen“ und steht am Ende. */
+(function(){try{window.__hsDMTAB={v:4};
 {const f=cpGroups;cpGroups=function(tab,tb){const r=f.apply(this,arguments);try{if(!r||!r.groups)return r;const out=[];
  for(const g of r.groups){const k=g.els.findIndex(e=>e.matches&&e.matches('.dmDet'));if(k<0){out.push(g);continue}
   const d=g.els[k],eb=d.querySelector('summary .eyebrow'),nm=(eb&&eb.textContent.trim())||'Schadensquellen';
@@ -37488,6 +37489,10 @@ M.fn={sig,endlage,speichern,laden};
   if(nach.length)out.push({n:CP_FIRST[tab]||'Einstellungen',els:nach})}
  if(tab==='pause'){const o2=[];for(const g of out){const k=g.els.findIndex(e=>e.matches&&e.matches('.card.ups'));
   if(k>0){o2.push({n:g.n,els:g.els.slice(0,k)});o2.push({n:'Einstellungen',els:g.els.slice(k)})}else o2.push(g)}out.length=0;out.push(...o2)}
+ if(tab==='pause'){const hatUps=g=>g.els.some(e=>e.matches&&(e.matches('.card.ups')||e.querySelector('.card.ups')));
+  for(const g of out)if(g.n===(CP_FIRST[tab]||'Einstellungen')&&!hatUps(g)){g.n=g.els.some(e=>e.matches&&(e.matches('[data-act="rolle-liste"]')||e.querySelector('[data-act="rolle-liste"]')))?'Schriftrollen':'Übersicht';g.spaet=1}
+  const mit=out.filter(g=>/^Mitspieler/.test(g.n)),ein=out.filter(g=>!g.spaet&&g.n==='Einstellungen'),spaet=out.filter(g=>g.spaet),rest=out.filter(g=>!mit.includes(g)&&!ein.includes(g)&&!g.spaet);
+  out.length=0;out.push(...mit,...ein,...rest,...spaet)}
  r.groups=out}catch(e){}return r}}
 }catch(e){console.error('dmtab',e);window.__hsDMTAB.err=String(e&&e.stack||e)}})();
 /* ================= Paket „licht2“: Firefox – Spielleinwand auf der Grafikkarte halten; Bildschirm-Hz robust – window.__hsLICHT2 =================
@@ -37602,6 +37607,18 @@ function diagDaten(d){
 try{diagHaken()}catch(e){lErr('diaghaken',e)}
 
 }catch(e){console.error('licht2',e);window.__hsLICHT2.err=String(e&&e.stack||e)}})();
+/* ================= Paket „laufri“: Ansturm-Attacken in Laufrichtung – window.__hsLAUFRI =================
+   Wunsch: Charge-Attacken gehen in die Richtung, in die der Held zuletzt gelaufen ist – nicht dahin, wo zuletzt gezielt/angegriffen wurde.
+   Betrifft: Echo „Wilder Ansturm“ (e_charge) und „Ansturm“ der Bärenleiste, Barradin „Gleitender Schwung“, Ezekiels Griff-Vorstoß (zdGriff).
+   Umsetzung: Während dieser Fähigkeiten liefert aimAng() die letzte Laufrichtung (P.mvA); hat sich der Held noch nie bewegt, gilt das alte Zielen. */
+(function(){try{window.__hsLAUFRI={v:1,n:0};
+const mitLauf=f=>function(){const a0=aimAng;aimAng=function(R){if(P&&P.mvA!=null&&isFinite(P.mvA)){__hsLAUFRI.n++;return P.mvA}return a0.apply(this,arguments)};
+ try{return f.apply(this,arguments)}finally{aimAng=a0}};
+const knoten=(held,id)=>{const H=HEROES[held];const n=H&&H.tree&&H.tree.find(x=>x.id===id);if(!n)return;for(const k of['cast','tlCast'])if(typeof n[k]==='function')n[k]=mitLauf(n[k])};
+knoten('echo','e_charge');knoten('barradin','b_k_fleche');
+if(typeof emAnsturm==='function')emAnsturm=mitLauf(emAnsturm);
+if(typeof zdGriff==='function')zdGriff=mitLauf(zdGriff);
+}catch(e){console.error('laufri',e);window.__hsLAUFRI.err=String(e&&e.stack||e)}})();
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
