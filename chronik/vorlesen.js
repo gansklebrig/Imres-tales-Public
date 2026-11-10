@@ -123,6 +123,32 @@
     const H = HSP();
     return !!(mix && H && H.an() && Math.abs(H.kulisse() - 1) < .01 && Math.abs(H.musik() - 1) < .01 && liste.length && liste.every(x => mix[x.kap + ":" + x.i]));
   }
+  let mixVersuche = 0, mixWacheUhr = null, mixLetzteZeit = -1;
+  function mixWache() {
+    clearTimeout(mixWacheUhr);
+    const t0 = audio ? audio.currentTime : 0;
+    mixWacheUhr = setTimeout(() => { if (mixLaeuft && spielt && audio && Math.abs(audio.currentTime - t0) < .2) mixRetten("hängt"); }, 7000);
+  }
+  /* Spur an derselben Stelle neu laden – bevorzugt aus der schon komplett geladenen Kopie (dann ohne Netz) */
+  function mixRetten(grund) {
+    if (!audio || !mixDatei) return;
+    const t = audio.currentTime || 0, v = vorrat.get(mixDatei);
+    mixVersuche++;
+    const quelle = v && v.url ? v.url : mixDatei + "?neu=" + Date.now();
+    audio.src = quelle + "#t=" + t.toFixed(2);
+    audio.playbackRate = tempo;
+    audio.play().catch(() => {});
+    if (!(v && v.url)) { holen(mixDatei); clearTimeout(mixWacheUhr); mixWacheUhr = setTimeout(() => { if (mixLaeuft && spielt && audio && audio.paused) mixRetten("nochmal"); }, Math.min(30000, 3000 * mixVersuche)); }
+  }
+  /* Läuft die Spur noch übers Netz und ist die Kopie inzwischen komplett da → in der nächsten Sprechpause umschalten,
+     danach spielt der Abschnitt ganz ohne Verbindung weiter */
+  function mixAufKopie() {
+    const v = vorrat.get(mixDatei);
+    if (!v || !v.url || !audio || audio.src.indexOf("blob:") === 0) return;
+    const t = audio.currentTime;
+    audio.src = v.url + "#t=" + t.toFixed(2); audio.playbackRate = tempo;
+    if (spielt) audio.play().catch(() => {});
+  }
   function listeBauen() {
     liste = [];
     const K = (manifest && manifest.kapitel) || {};
@@ -165,7 +191,9 @@
   function holen(datei) {
     if (!datei || vorrat.has(datei)) return;
     const e = { url: null };
-    e.p = fetch(datei).then(r => r.ok ? r.blob() : Promise.reject(r.status)).then(b => (e.url = URL.createObjectURL(b))).catch(() => (e.url = null));
+    const versuch = n => fetch(datei).then(r => r.ok ? r.blob() : Promise.reject(r.status))
+      .catch(err => n > 0 ? new Promise(ok => setTimeout(ok, 4000)).then(() => versuch(n - 1)) : Promise.reject(err));   /* schwaches Netz: nochmal versuchen */
+    e.p = versuch(3).then(b => (e.url = URL.createObjectURL(b))).catch(() => { e.url = null; vorrat.delete(datei); });
     vorrat.set(datei, e);
   }
   function vorratAufraeumen() {
@@ -201,7 +229,10 @@
       audio = new Audio(); audio.preload = "auto";
       audio.addEventListener("ended", beiEnde);
       audio.addEventListener("timeupdate", fortschritt);
-      audio.addEventListener("error", () => { if (pos >= 0) setTimeout(() => spielen(pos + 1, "weiter"), 300); });
+      audio.addEventListener("error", () => { if (pos < 0) return; if (mixLaeuft) mixRetten("Fehler"); else setTimeout(() => spielen(pos + 1, "weiter"), 300); });
+      /* Verbindung hängt (z. B. Funkloch, gesperrtes Handy): nach ein paar Sekunden ohne Fortschritt selbst neu ansetzen */
+      ["waiting", "stalled"].forEach(ev => audio.addEventListener(ev, () => { if (mixLaeuft && spielt) mixWache(); }));
+      audio.addEventListener("playing", () => { mixVersuche = 0; });
       audio.addEventListener("playing", () => { const h = HSP(); if (h && pos >= 0 && !mixLaeuft) h.sprache(liste[pos], audio); medienStatus(); zeichnen(); });
       audio.addEventListener("pause", () => { const h = HSP(); if (h && !audio.ended && !wartet && !mixLaeuft) h.pause(); medienStatus(); zeichnen(); });
       audio.addEventListener("ratechange", () => { const h = HSP(); if (h && !audio.paused && pos >= 0 && !mixLaeuft) h.sprache(liste[pos], audio); });
@@ -220,6 +251,7 @@
       else if (art !== "weiter") { try { audio.currentTime = m.ab; } catch (_) {} }
       /* nächste Spur im Hintergrund komplett laden, damit der Abschnittswechsel auch bei schwachem Netz nahtlos ist */
       const naechste = liste.slice(pos + 1).map(y => mix[y.kap + ":" + y.i]).find(y => y && y.datei !== m.datei);
+      holen(m.datei);   /* auch die laufende Spur komplett laden → übersteht Verbindungsabbrüche */
       if (naechste) holen(naechste.datei);
       vorrat.forEach((e, d) => { if (d.indexOf("/mix/") >= 0 && d !== m.datei && (!naechste || d !== naechste.datei)) { if (e.url) URL.revokeObjectURL(e.url); vorrat.delete(d); } });
       quelleSofort = true; audio.playbackRate = tempo; spielt = true;
@@ -307,6 +339,7 @@
     pos++;
     schreib("imres-vorlesen-pos", JSON.stringify({ sp: mSprache, kap: n.kap, i: n.i }));
     markieren(); zeichnen(); medienInfo();
+    mixAufKopie();
   }
 
   /* ---------- Spieler-Leiste ---------- */
