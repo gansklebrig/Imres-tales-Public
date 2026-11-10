@@ -214,7 +214,8 @@
       if (mixDatei !== m.datei) {
         mixDatei = m.datei;
         const v = vorrat.get(m.datei);   /* schon vorab geladen → sofort, ohne Netz-Pause zwischen den Abschnitten */
-        audio.src = (v && v.url ? v.url : m.datei) + (m.ab > .5 ? "#t=" + m.ab : "");
+        /* nahtlos weiter → Spur von vorn (mit Zwischenspiel); Sprung → direkt an den Absatz */
+        audio.src = (v && v.url ? v.url : m.datei) + (m.ab > .5 && art !== "weiter" ? "#t=" + m.ab : "");
       }
       else if (art !== "weiter") { try { audio.currentTime = m.ab; } catch (_) {} }
       /* nächste Spur im Hintergrund komplett laden, damit der Abschnittswechsel auch bei schwachem Netz nahtlos ist */
