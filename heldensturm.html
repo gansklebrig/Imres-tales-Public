@@ -37610,15 +37610,206 @@ try{diagHaken()}catch(e){lErr('diaghaken',e)}
 /* ================= Paket „laufri“: Ansturm-Attacken in Laufrichtung – window.__hsLAUFRI =================
    Wunsch: Charge-Attacken gehen in die Richtung, in die der Held zuletzt gelaufen ist – nicht dahin, wo zuletzt gezielt/angegriffen wurde.
    Betrifft: Echo „Wilder Ansturm“ (e_charge) und „Ansturm“ der Bärenleiste, Barradin „Gleitender Schwung“, Ezekiels Griff-Vorstoß (zdGriff).
-   Umsetzung: Während dieser Fähigkeiten liefert aimAng() die letzte Laufrichtung (P.mvA); hat sich der Held noch nie bewegt, gilt das alte Zielen. */
-(function(){try{window.__hsLAUFRI={v:1,n:0};
-const mitLauf=f=>function(){const a0=aimAng;aimAng=function(R){if(P&&P.mvA!=null&&isFinite(P.mvA)){__hsLAUFRI.n++;return P.mvA}return a0.apply(this,arguments)};
+   Umsetzung: Während dieser Fähigkeiten liefert aimAng() die letzte Laufrichtung (P.mvA) – aber NUR bei Controller/Handheld/Touch ohne
+   aktives Zielen: Mit Maus zielt weiter der Cursor, wer den rechten Stick (bzw. Touch-Zug) gerade hält, zielt damit, und automatisches
+   Wirken nimmt weiter das Ziel. Hat sich der Held noch nie bewegt, gilt das alte Zielen. */
+(function(){try{window.__hsLAUFRI={v:2,n:0};
+const mitLauf=f=>function(){const a0=aimAng;aimAng=function(R){if(P&&P.mvA!=null&&isFinite(P.mvA)&&!G.auCast&&!mouseAim()&&!P.padHeld&&!(P.netIn&&P.padAim!=null)){__hsLAUFRI.n++;return P.mvA}return a0.apply(this,arguments)};
  try{return f.apply(this,arguments)}finally{aimAng=a0}};
 const knoten=(held,id)=>{const H=HEROES[held];const n=H&&H.tree&&H.tree.find(x=>x.id===id);if(!n)return;for(const k of['cast','tlCast'])if(typeof n[k]==='function')n[k]=mitLauf(n[k])};
 knoten('echo','e_charge');knoten('barradin','b_k_fleche');
 if(typeof emAnsturm==='function')emAnsturm=mitLauf(emAnsturm);
 if(typeof zdGriff==='function')zdGriff=mitLauf(zdGriff);
 }catch(e){console.error('laufri',e);window.__hsLAUFRI.err=String(e&&e.stack||e)}})();
+/* ================= Paket „kartgr“: Größe der Minikarte einstellbar – window.__hsKARTGR =================
+   Einstellungen → Grafikqualität: Zeile „Karte“ mit Klein · Normal · Groß · Sehr groß · Riesig.
+   Normal = bisherige Größe (Standard). Groß und darüber wachsen zusätzlich mit dem Bildschirm (wie die Schrift, txtHz). Gespeichert in SAVE.kartGr.
+   Alle Zusatz-Zeichnungen auf der Karte lesen WLMM.box und wachsen automatisch mit. */
+(function(){try{window.__hsKARTGR={v:2};
+const STU=[['k','Klein',0.75],['n','Normal',1],['g','Groß',1.6],['s','Sehr groß',2.3],['r','Riesig',3.2]];
+const hz=()=>{try{return typeof txtHz==='function'?txtHz():1}catch(e){return 1}};
+const fak=()=>{const v=SAVE.kartGr||'n';const s=STU.find(x=>x[0]===v);if(!s)return 1;return s[2]>1?s[2]*hz():s[2]};
+{const mo=wlMiniOrt;wlMiniOrt=function(){const b=mo.apply(this,arguments);try{if(!b||b.__kgr)return b;const f=fak();
+  const S2=Math.round(Math.max(60,Math.min(b.S*f,W*0.34,H*0.5)));const nb={x:b.x+b.S-S2,y:b.y,S:S2,__kgr:1};
+  if(nb.y+S2>H-60)nb.y=Math.max(8,H-60-S2);WLMM.box=nb;return nb}catch(e){return b}}}
+const zeile=()=>{const v=SAVE.kartGr||'n';return`<div class="row" data-kgr-row style="margin-top:6px;align-items:center"><span class="muted" style="margin-right:4px">Karte:</span>${STU.map(s=>`<button class="btn small ${v===s[0]?'gold':''}" data-act="kgr" data-v="${s[0]}" title="Größe der Karte oben rechts (M blendet sie ein/aus)">${s[1]}</button>`).join('')}</div>`};
+let plan=false;
+function einsetzen(){plan=false;try{for(const box of document.querySelectorAll('#gfxBox')){const alt=box.querySelector('[data-kgr-row]');if(alt){alt.outerHTML=zeile();continue}
+  const p=box.querySelector('[data-act="perf"]');const r=p&&p.closest('.row');if(r)r.insertAdjacentHTML('afterend',zeile())}}catch(e){}}
+if(typeof ulKnopf==='function'){const _uk=ulKnopf;ulKnopf=function(){const r=_uk.apply(this,arguments);try{if(!plan){plan=true;Promise.resolve().then(einsetzen)}}catch(e){}return r}}
+document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest?ev.target.closest('[data-act="kgr"]'):null;if(!b)return;ev.stopPropagation();ev.preventDefault();
+ try{sfx('ui')}catch(e){}SAVE.kartGr=b.dataset.v;try{persist()}catch(e){}try{WLMM.boxT=0;WLMM.box=null}catch(e){}
+ const fo=document.activeElement===b;einsetzen();if(fo){const n=document.querySelector(`[data-act="kgr"][data-v="${SAVE.kartGr}"]`);if(n)try{n.focus({preventScroll:true});n.classList.add('padf')}catch(e){}}},true);
+window.__hsKARTGR.fak=fak;
+}catch(e){console.error('kartgr',e);window.__hsKARTGR.err=String(e&&e.stack||e)}})();
+/* ================= Paket „spoiler“: keine Story-Vorgriffe in Sprüchen – window.__hsSPOILER =================
+   Wunsch: Zufällige Sprüche der Helden (und im Lager) greifen der Geschichte nicht vor. Friedrich erzählt erst vom
+   „geboxten Gott“, wenn Demogorgon überstanden ist, Barradin übt das Lied für Blublupin erst danach usw.
+   Kein Text wird geändert oder gelöscht – Zeilen mit Story-Bezug werden nur so lange herausgefiltert, bis der Spieler
+   die zugehörige Stelle der Kampagne erlebt hat. Zeitlose Zeilen und Zeilen zum aktuellen Moment bleiben immer.
+
+   Zeitachse K = Index der weitesten erlebten Kampagnenstufe (CAMP_STAGES, 0 … 35); „nach X“ = Stufe von X geschafft.
+     K = max( gespeicherter Fortschritt, aktueller Kampagnenlauf )
+     gespeichert: SAVE.heroes[*].best2 (≥100 = Kampagne beendet, sonst %100 = erreichte Stufe), Roguelite-Startpunkte
+                  SAVE.heroes[*].rl.cp, geschaffte Orte SAVE.lager.o, offene Kampagnenläufe SAVE.run / SAVE.mpRun.
+     aktueller Lauf: nur im Modus Kampagne – Stufenindex, +1 sobald die Stufe geschafft ist (Portal/Boss/Wächter).
+     Abstieg, Täglich, Boss-Rausch: nur der gespeicherte Kampagnenfortschritt.
+     Online-Gastgeber: Minimum aus eigenem und dem gespeicherten Fortschritt der verbundenen Gäste (ihre Heldenstände
+     g.hsAll), mindestens aber der gemeinsame aktuelle Lauf – Sprechblasen gehen an alle, also darf niemand gespoilert werden.
+   Gefiltert: SAY, BANTER, BAN_SOLO (in place, Original bleibt in SPX.orig), Weg-Momente (Neckerei, Drachenschatten),
+     Leerlauf-Sprüche (dtSag), Ereignis „Pilger aus Sloobludop“ (when), Lagerfiguren (NPCS.say, LS_TXT), Gerüchte (GH_GER).
+     Letztes Netz: banBub/dtSag sagen eine gesperrte Zeile nie. Ist ein Vorrat leer: nichts sagen.
+   Abschalten: window.__hsSPOILER.aus=1 (stellt alle Vorräte wieder her). */
+(function(){window.__hsSPOILER={v:1,aus:0};try{
+const SPX=window.__hsSPOILER;
+/* ---------- Story-Zeitpunkte (aus den Spieldaten berechnet) ---------- */
+function spEv(){const C=CAMP_STAGES,fi=f=>{for(let i=0;i<C.length;i++)if(f(C[i]))return i;return -1};
+ const nach=id=>{const i=fi(s=>s.boss===id||s.guard===id);return i<0?1e9:i+1};
+ const ab=o=>{const i=fi(s=>s.ort===o);return i<0?1e9:i};
+ return{
+  woelfe:nach('hoehlenwache'),     /* Wölfe am Felsspalt losgebunden */
+  roben:ab(2),                     /* Phandalin, Rote Roben */
+  crackmore:ab(3),                 /* Schloss Crackmore, Rex’ Kaninchen, Glasstab */
+  nundro:nach('bugbear'),          /* Nundro aus dem Wachturm befreit */
+  mine:ab(5),                      /* die alte Mine */
+  schmiede:nach('schmiedewaechter'),/* Schmiede gewonnen; danach Neverwinter/Allianz der Lords */
+  donnerbaum:ab(6),
+  unterreich:ab(8),                /* Kapitel II */
+  chasme:nach('chasme'),
+  fluss:nach('vrock'),             /* Ilvara stürzt in den Fluss, Spinnenstatue bemalt */
+  fagas:nach('brutmutter'),        /* Fagas aus dem Kokon */
+  grab:nach('spinnenstatue'),      /* Geheimgang zum Grab der Magierin */
+  ploop:ab(11),                    /* Ploopploopeen / Blublupin */
+  gott:nach('demogorgon'),         /* Demogorgon überstanden: „Gott geboxt“, Ploopploopeens Fall, Lied-Versprechen */
+  grack:ab(12),                    /* Gracklstugh, Duergar */
+  floete:nach('duergarHuene'),     /* Flöte der Illusionen gekauft (Schmiedegassen) */
+  meister:ab(13),                  /* Meister der Flammen, Graue Geister */
+  themb:ab(14)}}                   /* Themberchaud beim Namen */
+/* ---------- Zeilen mit Story-Bezug → Zeitpunkt (Wortlaut exakt wie im Spiel) ---------- */
+const SP_Z=[
+ /* Sprechblasen (SAY) */
+ ['Ich hab mal einen Gott geboxt. Das hier schaff ich.','gott'],['Ich hab schon einen Gott geboxt!','gott'],['Und wieder einen Gott geboxt!','gott'],
+ /* Wortwechsel (BANTER) */
+ ['F:Weißt du noch, als ich einen Gott geboxt habe?|B:Jeden Tag, Friedrich. Du erzählst es jeden Tag.','gott'],
+ ['B:Ich schulde Blublupin noch ein Lied.|E:Ploopploopeen hat es verdient. Er war mutig.|B:Dann wird es ein schönes.','gott'],
+ ['Z:Verflucht.|F:Wir hatten schon schlimmere Tage. Weißt du noch, die Chasme?|Z:Ich weiß es noch.','chasme'],
+ ['E:Ilvara. Die Druidin, die den Wald verraten hat.|B:Sie hat den Sturz in den Fluss überlebt? Respekt.|E:Nicht diesmal.','fluss'],
+ /* beim ersten Demogorgon-Kampf hat Friedrich ihn noch nicht „geboxt“ */
+ ['F:Demogorgon. Den hab ich schon mal geboxt.|B:Friedrich, du hast ihn mit einem PFEIL getroffen.|F:Geboxt.','gott'],
+ ['B:Ein Gott! Das wird die Ballade meines Lebens!|F:Ich box ihn nochmal. Für die Ballade.','gott'],
+ ['B:Ich glaube, sie hat mehr Gold als Themberchaud.|E:Und eine bessere Sonnenbrille.|F:Rex, NICHT jagen.','themb'],
+ /* allein unterwegs (BAN_SOLO) */
+ ['F:Ich hab einen Gott geboxt. Dich box ich auch.','gott'],['B:Ich übe schon mal das Lied für Blublupin.','gott'],
+ /* Weg-Momente (WG_TX): Neckerei allein / zu zweit (Schlüssel = erste Zeile), Drachenschatten in Gracklstugh */
+ ['Ich hab mal einen Gott geboxt. Hier ist es ruhiger.','gott'],['Friedrich, wie war das mit dem Gott?','gott'],
+ ['Themberchaud?!','themb'],['Der Meister der Flammen?','meister'],
+ /* Leerlauf (dtSag) */
+ ['Die Flöte aus Gracklstugh – nur ein ganz kleiner Demogorgon.','floete'],
+ /* Lagerfiguren (NPCS.say, LS_TXT) – Rex wird nur gefiltert, nie verändert */
+ ['Eine magische Schmiede, stellt euch das vor! Die Lords reißen sich darum.','schmiede'],
+ ['Rex schnarcht am Feuer. Im Traum jagt er ein Kaninchen – vermutlich das von Schloss Crackmore.','crackmore'],
+ ['*schnarcht am Feuer. Im Traum jagt er ein Kaninchen – vermutlich das von Schloss Crackmore.*','crackmore'],
+ ['Die Schmiede, die Straße, das Lager … manchmal denke ich, der Brief, den ich euch geschrieben habe, war das beste Geschäft meines Lebens.','schmiede'],
+ ['Nundro und ich haben gestern die Ware gezählt. Zweimal. Er kam auf eine andere Zahl. Wie immer.','nundro'],
+ ['Du bist mehr als ein Geschäftspartner. Du bist Familie. Nundro sieht das genauso – das sagt er nur nicht, weil er sonst weinen müsste.','nundro'],
+ ['In der Schmiede klingt der Amboss wie früher in Zuhause. Das tut gut.','schmiede'],
+ ['Brr! Bei solchem Wetter vermisse ich die warme Schmiede der Mine. Fast.','schmiede'],
+ /* Gerüchte (GH_GER: Lagerfiguren, Lagerfeuer, Händler, Tafel, Zettel, Rabe) */
+ ['Die Wölfe aus der Goblinhöhle schnüffeln manchmal an Spuren, die im Kreis laufen – und winseln dann. Rex weiß mehr, als er zugibt.','woelfe'],
+ ['Bei Vollmond heulen die befreiten Wölfe immer in dieselbe Richtung. Zum Wald hin.','woelfe'],
+ ['In Phandalin gibt es einen Brunnen, der seit Jahren trocken ist. Trotzdem holten die Roten Roben dort nachts „Wasser“.','roben'],
+ ['Glasstab hat sich selbst malen lassen. Das Bild hängt noch in Crackmore – und es schaut zurück.','crackmore'],
+ ['In der Mine gibt es einen Riss, in den der Wind hineinweht statt heraus. Ein Fass Pulver, und ihr wisst warum.','mine'],
+ ['Drei Teile öffnen die Erste Esse: eine Rune aus der Mine, eine Glyphe aus einem Grab und eine Glut aus Gracklstugh.','grack'],
+ ['Im Wachturm habe ich es gehört: In alten Kerkern klopft es manchmal dreimal. Wer stillhält, hört die Antwort.','nundro'],
+ ['Spinnenstatuen mögen Bärte. Glaubt mir. Ich habe Erfahrung.','fluss'],
+ ['Lolths Statuen sind nicht nur Stein. Wer sie … verschönert, öffnet Türen. Ihr wisst ja.','fluss'],
+ ['Wer drei Spinnenstatuen verschönert, sollte sich vor der vierten in Acht nehmen. Sie soll … nachtragend sein.','fluss'],
+ ['Ploopploopeen hat am See einen stillen Ort, an dem er allein betet. Nur seine Muschel kennt den Weg.','ploop'],
+ ['Im Grab der Magierin gab es einen Schalter hinter einer Statue. Ich glaube, es gibt noch mehr davon – überall dort, wo der Faden verdreht ist.','grab'],
+ ['Die Grauen Geister zahlen ihre Ratten in Gold. Wo eine Drachenmünze liegt, ist ihr Versteck nicht weit.','meister'],
+ ['Ich war nicht allein, als die Spinnen kamen. Wir waren eine Seilschaft. Fünf. Ihr habt nur mich gefunden.','fagas'],
+ ['Ein Goblin ist in Glasstabs Goldtrank gefallen. Seitdem glänzt er, rennt durch die Lande und verliert Münzen.','crackmore'],
+ ['Wenn ein Stern fällt, lauft hin. Wünsche verfallen schneller als Milch in Gracklstugh.','grack'],
+ ['Im Turm von Donnerbaum gibt es eine Treppe, die ins Nichts führt. Wer sie hinaufsteigt, ist sofort reich.','donnerbaum'],
+ ['Wer im Unterreich laut singt, findet schneller den Ausgang. Barradin singt seitdem lauter.','unterreich'],
+ ['Duergar-Hämmer klingen falsch, wenn unter dem Amboss ein Schatz liegt. Sagen Leute, die nie einen Hammer gehoben haben.','grack']];
+/* Ereignisse (EV2L) mit Story-Bezug: id → Zeitpunkt */
+const SP_EVT={kuotoa:'ploop'};
+SPX.zeilen=SP_Z;SPX.evt=SP_EVT;
+let EVI=null,MAP=null;
+function spMap(){if(MAP)return MAP;EVI=spEv();MAP=new Map();for(const z of SP_Z)MAP.set(z[0],EVI[z[1]]);SPX.ev=EVI;return MAP}
+const spReq=t=>{const r=spMap().get(String(t));return r===undefined?0:r};
+/* ---------- Fortschritt ---------- */
+const N=()=>CAMP_STAGES.length;
+function spOrtEnde(o){let j=-1;for(let i=0;i<CAMP_STAGES.length;i++)if(CAMP_STAGES[i].ort===o)j=i;return j}
+function spKHelden(H){let k=0;if(!H||typeof H!=='object')return 0;for(const id in H){const h=H[id];if(!h||typeof h!=='object')continue;
+  const b=+h.best2||0;if(b>=100||(+h.clears||0)>0)k=Math.max(k,N());else if(b>0)k=Math.max(k,b%100);
+  const cp=h.rl&&h.rl.cp;if(cp&&typeof cp==='object')for(const d in cp){const v=+cp[d]||0;if(v>0)k=Math.max(k,ortStart(v))}}
+ return k}
+function spKSave(S){S=S||SAVE;let k=spKHelden(S.heroes);
+ try{const L=S.lager;if(L&&Array.isArray(L.o))for(const o of L.o){const j=spOrtEnde(o);if(j>=0)k=Math.max(k,j+1)}}catch(e){}
+ for(const R of [S.run,S.mpRun])if(R&&typeof R==='object'&&(!R.mode||R.mode==='kampagne')&&!Array.isArray(R.stages))k=Math.max(k,Math.min(N(),Math.max(0,(+R.stage|0))));
+ return Math.min(k,N())}
+function spKLauf(){try{if(!G||G.mode!=='kampagne')return 0;const i=CAMP_STAGES.indexOf(STAGES[G.stage]);if(i<0)return 0;return i+(G.portal||G.bossDone||G.guardDone?1:0)}catch(e){return 0}}
+function spKGaeste(){let k=1e9;try{if(typeof NET!=='undefined'&&NET.role==='host'&&NET.guests)for(const g of NET.guests){if(!g||g.gone||!(g.p||g.hero||g.want))continue;k=Math.min(k,spKHelden(g.hsAll))}}catch(e){}return k}
+function spK(){let s=spKSave();const g=spKGaeste();if(g<s)s=g;return Math.max(s,spKLauf())}
+SPX.K=spK;SPX.kSave=spKSave;SPX.kLauf=spKLauf;SPX.kGaeste=spKGaeste;SPX.req=spReq;
+/* ---------- Vorräte in place filtern ---------- */
+const POOLS=[];SPX.pools=POOLS;
+function spReg(o,key,keyFn){const a=o&&o[key];if(!Array.isArray(a))return;const kf=keyFn||(x=>x);if(!a.some(x=>spMap().has(String(kf(x)))))return;POOLS.push({o,key,a,all:a.slice(),kf})}
+function spRegAll(){spMap();
+ for(const h in SAY)for(const k in SAY[h])spReg(SAY[h],k);
+ for(const k in BANTER)spReg(BANTER,k);for(const k in BAN_SOLO)spReg(BAN_SOLO,k);
+ try{for(const n of NPCS)spReg(n,'say')}catch(e){}
+ try{const T=spLsTxt();if(T)for(const id in T)for(const k in T[id])spReg(T[id],k)}catch(e){}}
+/* Lager- und Geheim-Paket kapseln ihre Daten: Zugriff über die Schnittstellen window.__hsLAGER / window.__hsGEHEIM */
+function spLsTxt(){const L=window.__hsLAGER;return L&&L.LS_TXT&&typeof L.LS_TXT==='object'?L.LS_TXT:null}
+function spGer(){const H=window.__hsGEHEIM;return H&&Array.isArray(H.GH_GER)?H.GH_GER:null}
+let LASTK=null;SPX.k=null;
+const spOkK=(t,k)=>{const r=spReq(t);return!r||k>=r};
+function spApply(k){for(const P0 of POOLS){const f=k<0?P0.all:P0.all.filter(x=>spOkK(P0.kf(x),k));
+  if(f.length){P0.a.length=0;for(const x of f)P0.a.push(x);if(P0.o[P0.key]!==P0.a)P0.o[P0.key]=P0.a}else{P0.a.length=0;delete P0.o[P0.key]}}}
+function spSync(){let k;try{k=SPX.aus?-1:spK()}catch(e){k=-1}SPX.k=k;if(k!==LASTK){LASTK=k;try{spApply(k)}catch(e){console.error('spoiler apply',e)}}return k}
+const spOk=t=>{const k=SPX.k==null?spSync():SPX.k;return k<0||spOkK(t,k)};
+SPX.sync=spSync;SPX.ok=t=>{spSync();return spOk(t)};SPX.apply=spApply;
+spRegAll();
+/* ---------- Auslöser: vor jeder Auswahl abgleichen ---------- */
+{const f=say;say=function(){spSync();return f.apply(this,arguments)}}
+{const f=banter;banter=function(){spSync();return f.apply(this,arguments)}}
+{const f=banPair;banPair=function(){spSync();return f.apply(this,arguments)}}
+/* letztes Netz für alle Helden-Sprechblasen (Wortwechsel, Rufe, q4, dtSag): eine gesperrte Zeile wird nie gesagt */
+{const f=banBub;banBub=function(id,txt){if(txt!=null&&!SPX.aus){spSync();if(!spOk(txt))return}return f.apply(this,arguments)}}
+{const f=dtSag;dtSag=function(id,txt){if(txt&&!SPX.aus){spSync();if(!spOk(txt))return}return f.apply(this,arguments)}}
+{const f=showLager;showLager=function(){spSync();return f.apply(this,arguments)}}
+/* lsKommentar ist im Lager-Paket gekapselt: dort reicht der Abgleich über showLager und den Takt unten */
+setInterval(()=>{try{spSync()}catch(e){}},1500);
+/* Weg-Momente: Neckerei (gesperrte Zeilen für die Dauer der Auswahl als „schon gesagt“ markieren – Indizes bleiben stabil) */
+try{if(typeof WG_SZENE!=='undefined'&&WG_SZENE.neck){const f=WG_SZENE.neck;WG_SZENE.neck=function(){spSync();if(SPX.aus)return f.apply(this,arguments);
+  const M=wgMem(),gesetzt=[];const mark=k=>{if(!M.v[k]){M.v[k]=1;gesetzt.push(k)}};
+  try{const D=WG_TX.neck.duo;for(let i=0;i<D.length;i++)if(!spOk(D[i][2]))mark('neckd:'+i);
+   const S=WG_TX.neck.solo;for(const id in S){const L=S[id];for(let i=0;i<L.length;i++)if(!spOk(L[i]))mark('necks:'+id+i)}}catch(e){}
+  try{return f.apply(this,arguments)}finally{for(const k of gesetzt)delete M.v[k]}}}
+ if(typeof WG_SZENE!=='undefined'&&WG_SZENE.drache){const f=WG_SZENE.drache;WG_SZENE.drache=function(L,v){spSync();
+  try{if(!SPX.aus&&WG_GRACK.includes(wgTh())){const T=WG_TX.drache_grack,j=((v|0)%3+3)%3;if(T[j]&&!spOk(T[j][0])){const ok=[];for(let i=0;i<T.length;i++)if(spOk(T[i][0]))ok.push(i);if(!ok.length)return false;v=ok[Math.floor(Math.random()*ok.length)]}}}catch(e){}
+  return f.call(this,L,v)}}}catch(e){console.warn('spoiler weg',e)}
+/* Ereignisse */
+try{for(const e of EV2L){const ev=SP_EVT[e.id];if(!ev)continue;const w0=e.when;e.when=function(){spSync();if(SPX.k>=0&&SPX.k<(spEvI()[ev]))return false;return w0?w0.apply(this,arguments):true}}}catch(e){console.warn('spoiler ev',e)}
+function spEvI(){spMap();return EVI}
+/* Gerüchte: GH_GER wird per Index angesprochen und ist im Geheim-Paket gekapselt. Die einzige Auswahl (ghGeruechtWahl)
+   nutzt GH_GER.filter/.slice – diese beiden bekommen am Array selbst eine Fassung, die gesperrte Gerüchte nicht sieht. */
+try{const A=spGer();if(A){const AF=Array.prototype.filter,AS=Array.prototype.slice,okR=r=>!r||SPX.aus||(spSync(),spOk(r.t));
+  Object.defineProperty(A,'filter',{configurable:true,writable:true,enumerable:false,value:function(fn,th){return AF.call(this,function(r,i,a){return okR(r)&&fn.call(th,r,i,a)})}});
+  Object.defineProperty(A,'slice',{configurable:true,writable:true,enumerable:false,value:function(){return arguments.length?AS.apply(this,arguments):AF.call(this,okR)}})}}catch(e){console.warn('spoiler ger',e)}
+/* Selbstprüfung: jede Zeile der Tabelle muss es im Spiel geben (sonst stimmt der Wortlaut nicht mehr) */
+SPX.fehlend=(function(){const da=new Set();const add=x=>{if(typeof x==='string')da.add(x)};
+ for(const P0 of POOLS)for(const x of P0.all)add(P0.kf(x));
+ try{for(const d of WG_TX.neck.duo)add(d[2]);for(const id in WG_TX.neck.solo)WG_TX.neck.solo[id].forEach(add);WG_TX.drache_grack.forEach(p=>add(p[0]))}catch(e){}
+ try{for(const r of spGer()||[])add(r.t)}catch(e){}
+ const src=String(dtIdleUpd);for(const z of SP_Z)if(src.indexOf(z[0])>=0)da.add(z[0]);
+ return SP_Z.map(z=>z[0]).filter(t=>!da.has(t))})();
+if(SPX.fehlend.length)console.warn('spoiler: Zeilen nicht gefunden',SPX.fehlend);
+}catch(e){console.error('spoiler',e);window.__hsSPOILER.err=String(e&&e.stack||e)}})();
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
