@@ -37081,6 +37081,415 @@ SW.eval=swEval;
    Ab 4 000 Einträgen wird er geleert (Ergebnis identisch, wird bei Bedarf neu berechnet). Prüfung nur alle ~2 s. */
 {const fw=fpsWatch;fpsWatch=function(dt,raw){if(FW.t+raw>=2000){try{if(typeof BTN!=='undefined'&&BTN.size>4000)BTN.clear()}catch(e){}}return fw.apply(this,arguments)}}
 }catch(e){console.error('sweep',e);window.__hsSWEEP.err=String(e&&e.stack||e)}})();
+/* ================= Paket „diag“: Diagnose für Spieler – window.__hsDIAG =================
+   Wofür: Wenn das Spiel bei jemandem ruckelt, soll ein kurzer, einfügbarer Bericht zeigen, WO die Zeit bleibt
+   (Prozessor, Zeichnen, Grafikkarte/Browser, einzelne Zeichenbereiche) und auf welcher Hardware.
+   Start: Einstellungen → Grafikqualität → bei eingeschalteter Leistungsanzeige erscheint „Diagnose (10 s)“
+   (im Pausemenü unter „Einstellungen“ und im Online-Menü des Gasts; Maus, Tastatur, Touch und Controller).
+   Ablauf: Menü schließt, Hinweis „10 s normal weiterspielen“, es wird 10 s laufendes Spiel gemessen (Pause/Menüs zählen nicht,
+   kein Anhalten des Spiels), danach öffnet sich ein Fenster mit dem Bericht und „Kopieren“.
+   Kosten: Solange keine Diagnose läuft, hängt nichts im Bildablauf (nur ein Knopf im Einstellungs-Menü und zwei Ereignis-Lauscher).
+   Während der Messung werden ein paar Zeichenfunktionen mit Zeitstempeln umhüllt (exklusive Zeit je Bereich), danach wieder entfernt.
+   Keine persönlichen Daten: kein Name, kein Spielstand-Inhalt, keine Adresse – nur Technik, Einstellungen und die Szene.
+   Test-Schnittstelle: __hsDIAG.start(ms), .stop(), .letzter (Text), .daten (Objekt), .on, .umhuellt() */
+(function(){try{window.__hsDIAG={v:1};
+const DG=window.__hsDIAG;DG.on=false;DG.letzter='';DG.daten=null;DG.err=[];
+const dErr=(k,e)=>{if(DG.err.length<10)DG.err.push(k+': '+(e&&e.message||e))};
+const now=()=>performance.now();
+const SKRIPT=document.currentScript||null;
+/* Zeichenbereiche: globale Funktion → Bereichsname (exklusive Zeit, verschachtelte Aufrufe werden abgezogen) */
+/* Funktionen sind Bindungen im Skript (nicht window.*) – daher je Name ein Lese-/Schreibzugriff */
+const BEREICHE=[
+ ['update','#Spiel',()=>update,f=>{update=f}],['render','#Bild',()=>render,f=>{render=f}],['hudUpdate','#Oberfläche',()=>hudUpdate,f=>{hudUpdate=f}],
+ ['drawLighting','Licht',()=>drawLighting,f=>{drawLighting=f}],['oaNebel','Nebel',()=>oaNebel,f=>{oaNebel=f}],['drawWeather','Wetter',()=>drawWeather,f=>{drawWeather=f}],
+ ['bloomDo','Bloom',()=>bloomDo,f=>{bloomDo=f}],['vignette','Vignette',()=>vignette,f=>{vignette=f}],['drawDeco','Deko',()=>drawDeco,f=>{drawDeco=f}],
+ ['drawRoomWalls','Wände',()=>drawRoomWalls,f=>{drawRoomWalls=f}],['drawDecals','Boden',()=>drawDecals,f=>{drawDecals=f}],['fovSchatten','Sichtschatten',()=>fovSchatten,f=>{fovSchatten=f}],
+ ['drawEnemy','Gegner',()=>drawEnemy,f=>{drawEnemy=f}],['kgSprite','Sprite-Bau',()=>kgSprite,f=>{kgSprite=f}],['drawPlayer','Held',()=>drawPlayer,f=>{drawPlayer=f}],
+ ['drawCorpses','Leichen',()=>drawCorpses,f=>{drawCorpses=f}],['drawProp','Objekte',()=>drawProp,f=>{drawProp=f}],['drawPropGlow','Objekte',()=>drawPropGlow,f=>{drawPropGlow=f}],
+ ['drawPartsNormal','Partikel',()=>drawPartsNormal,f=>{drawPartsNormal=f}],['drawPartsAdd','Partikel',()=>drawPartsAdd,f=>{drawPartsAdd=f}],['drawAmb','Umgebung',()=>drawAmb,f=>{drawAmb=f}],
+ ['drawProj','Geschosse',()=>drawProj,f=>{drawProj=f}],['drawProjGlow','Geschosse',()=>drawProjGlow,f=>{drawProjGlow=f}],['drawFx','Effekte',()=>drawFx,f=>{drawFx=f}],
+ ['drawZone','Zonen',()=>drawZone,f=>{drawZone=f}],['drawEZone','Zonen',()=>drawEZone,f=>{drawEZone=f}],['drawGhosts','Geister',()=>drawGhosts,f=>{drawGhosts=f}],
+ ['drawLootBeams','Beute',()=>drawLootBeams,f=>{drawLootBeams=f}],['drawLootIcons','Beute',()=>drawLootIcons,f=>{drawLootIcons=f}],['drawNums','Zahlen',()=>drawNums,f=>{drawNums=f}],
+ ['drawBubbles','Zahlen',()=>drawBubbles,f=>{drawBubbles=f}],['drawPills','Bild-Anzeigen',()=>drawPills,f=>{drawPills=f}],['drawCombo','Bild-Anzeigen',()=>drawCombo,f=>{drawCombo=f}],
+ ['drawMpHud','Bild-Anzeigen',()=>drawMpHud,f=>{drawMpHud=f}],['drawBanner','Bild-Anzeigen',()=>drawBanner,f=>{drawBanner=f}],['wlMini','Karte',()=>wlMini,f=>{wlMini=f}]];
+const M={hooks:[],proto:[],stk:[],cur:{},tot:{},iv:[],lt:0,aktiv:0,ziel:10000,t0:0,lt0:0,lang:[],obs:null,el:null,txt:'',raf:0,mem0:null,cnt:{gid:0,cv:0,kg:0},cntT:{gid:0,cv:0,kg:0},fertig:false};
+const istGast=()=>{try{return NET.role==='guest'&&!!G.netGuestRun}catch(e){return false}};
+const laeuft=()=>{try{return G.state==='play'&&!G.paused&&!G.overlay&&!document.hidden&&(!scr||scr.hidden)}catch(e){return false}};
+/* ---------- Umhüllen nur während der Messung ---------- */
+function huelle(B,vor){const [name,lab,get,set]=B;let o;try{o=get()}catch(e){return}if(typeof o!=='function'||o.__dgW)return;
+ const w=function(){if(!DG.on)return o.apply(this,arguments);if(vor)vor(arguments);const a=now();M.stk.push(0);
+  try{return o.apply(this,arguments)}finally{const t=now()-a,k=M.stk.pop();const e=M.cur[lab]||(M.cur[lab]=[0,0]);e[0]+=t-k;e[1]++;if(M.stk.length)M.stk[M.stk.length-1]+=t}};
+ w.__dgW=1;try{set(w);if(get()===w)M.hooks.push([B,w,o])}catch(e){dErr('hülle '+name,e)}}
+function protoHuelle(obj,name,mk){const o=obj[name];if(typeof o!=='function')return;const w=mk(o);try{obj[name]=w;M.proto.push([obj,name,w,o])}catch(e){dErr('proto '+name,e)}}
+function anlegen(){M.hooks.length=0;M.proto.length=0;
+ /* Gesamt: Spiel / Bild / Oberfläche (Bild = render ohne die Bereiche darunter → „übriges Bild“) */
+ /* Sprite-Neubau zählen: der Zeichen-Rückruf (5. Argument) von kgSprite läuft nur bei einem Zwischenspeicher-Fehlgriff */
+ const kgVor=A=>{const d0=A[4];if(typeof d0==='function')A[4]=function(){M.cnt.kg++;return d0.apply(this,arguments)}};
+ for(const B of BEREICHE)huelle(B,B[0]==='kgSprite'?kgVor:null);
+ protoHuelle(CanvasRenderingContext2D.prototype,'getImageData',o=>function(){if(DG.on)M.cnt.gid++;return o.apply(this,arguments)});
+ protoHuelle(Document.prototype,'createElement',o=>function(t){if(DG.on&&typeof t==='string'&&t.toLowerCase()==='canvas')M.cnt.cv++;return o.apply(this,arguments)});
+ try{if(window.PerformanceObserver){M.obs=new PerformanceObserver(l=>{try{if(!DG.on)return;for(const e of l.getEntries())if(M.lang.length<400)M.lang.push(e.duration)}catch(e){}});M.obs.observe({entryTypes:['longtask']})}}catch(e){M.obs=null}}
+function abbauen(){for(const [B,w,o] of M.hooks){try{if(B[2]()===w)B[3](o)}catch(e){}}
+ for(const [obj,n,w,o] of M.proto){try{if(obj[n]===w)obj[n]=o}catch(e){}}
+ M.hooks.length=0;M.proto.length=0;try{if(M.obs)M.obs.disconnect()}catch(e){}M.obs=null}
+/* ---------- Bildtakt ---------- */
+function tick(t){if(!DG.on)return;try{
+ if(!SAVE.perf){stop(true);return}
+ const ak=laeuft();
+ if(ak&&M.lt&&M.vor){const iv=t-M.lt;if(iv>0&&iv<1000){M.iv.push(iv);M.aktiv+=iv;
+   for(const k in M.cur){const e=M.tot[k]||(M.tot[k]=[0,0]);e[0]+=M.cur[k][0];e[1]+=M.cur[k][1]}
+   for(const k in M.cnt)M.cntT[k]+=M.cnt[k]}}
+ for(const k in M.cur){M.cur[k][0]=0;M.cur[k][1]=0}for(const k in M.cnt)M.cnt[k]=0;
+ M.vor=ak;M.lt=t;hinweis(ak);
+ if(M.aktiv>=M.ziel&&!M.fertig){M.fertig=true;M.mem1=memMB()}
+ if(M.fertig){if(laeuft()||(G.state==='play'&&!G.overlay&&(!scr||scr.hidden))){stop(false);return}}
+ if(now()-M.t0>180000){stop(true);try{toast('Diagnose abgebrochen – es lief zu wenig Spiel.','#ff9a7a')}catch(e){}return}
+}catch(e){dErr('tick',e)}M.raf=requestAnimationFrame(tick)}
+function memMB(){try{const m=performance.memory;return m?{u:Math.round(m.usedJSHeapSize/1048576),l:Math.round(m.jsHeapSizeLimit/1048576)}:null}catch(e){return null}}
+/* ---------- Hinweis während der Messung ---------- */
+function hinweisEl(){if(M.el&&M.el.isConnected)return M.el;const d=document.createElement('div');d.id='diagHinweis';d.setAttribute('aria-live','polite');
+ d.style.cssText='position:fixed;left:50%;transform:translateX(-50%);top:0;z-index:7;pointer-events:none;white-space:nowrap;font:700 13px/1.3 "Alegreya Sans",sans-serif;color:#f3dca0;background:rgba(10,6,4,.82);border:1px solid rgba(232,195,106,.45);border-radius:8px;padding:5px 12px;text-shadow:0 1px 0 #000;display:none';
+ document.body.appendChild(d);M.el=d;M.txt='';return d}
+function hinweis(ak){const d=hinweisEl();const zu=!scr||!scr.hidden||!!G.overlay;
+ if(zu){if(d.style.display!=='none')d.style.display='none';return}
+ const rest=Math.max(0,Math.ceil((M.ziel-M.aktiv)/1000));
+ const t=M.fertig?'Diagnose fertig – Bericht öffnet sich …':ak?`Diagnose läuft – bitte normal weiterspielen · noch ${rest} s`:`Diagnose wartet, bis das Spiel weiterläuft · noch ${rest} s`;
+ if(t!==M.txt){M.txt=t;d.textContent=t}
+ let k=1;try{k=Math.max(1,txtHz())}catch(e){}const fs=Math.round(13*k*10)/10;if(d.__fs!==fs){d.__fs=fs;d.style.fontSize=fs+'px';d.style.padding=Math.round(5*k)+'px '+Math.round(12*k)+'px'}
+ let top=70;try{top=Math.round((typeof PILLTOP==='number'?PILLTOP:70)+4*k)}catch(e){}if(d.__top!==top){d.__top=top;d.style.top=top+'px'}
+ if(d.style.display==='none')d.style.display='block'}
+function hinweisAus(){if(M.el){M.el.style.display='none'}}
+/* ---------- Start / Ende ---------- */
+function menueZu(){try{if(istGast()){if(G.overlay==='netmenu')netMenuClose();else if(G.overlay==='diag')schliessen();return}if(G.overlay)closeOverlay()}catch(e){dErr('menüzu',e)}}
+function start(ms){if(DG.on)return false;try{if(G.state!=='play'){try{toast('Die Diagnose misst im laufenden Spiel – erst eine Stufe starten.','#ff9a7a')}catch(e){}return false}
+ if(!SAVE.perf){SAVE.perf=true;try{persist()}catch(e){}}
+ menueZu();
+ Object.assign(M,{cur:{},tot:{},iv:[],lt:0,vor:false,aktiv:0,ziel:+ms>0?+ms:10000,t0:now(),lang:[],fertig:false,cnt:{gid:0,cv:0,kg:0},cntT:{gid:0,cv:0,kg:0},mem0:memMB(),mem1:null});M.stk.length=0;
+ DG.on=true;anlegen();M.raf=requestAnimationFrame(tick);return true}catch(e){dErr('start',e);DG.on=false;abbauen();return false}}
+function stop(abbruch){DG.on=false;try{cancelAnimationFrame(M.raf)}catch(e){}abbauen();hinweisAus();M.stk.length=0;
+ if(abbruch)return;try{const d=auswerten();DG.daten=d;DG.letzter=text(d);berichtZeigen();hzMessen(d)}catch(e){dErr('bericht',e)}}
+/* Bildschirm-Hz: bei offenem Bericht steht das Spielbild – die Abstände der Bildaufrufe zeigen dann die echte Bildwiederholrate
+   (die Sitzungs-Schätzung kann durch einzelne sehr kurze Abstände zu hoch liegen). Danach Bericht nachführen. */
+function hzMessen(d){const L=[];let lt=0,n=0;const f=t=>{if(lt)L.push(t-lt);lt=t;if(++n<48&&G.overlay==='diag')requestAnimationFrame(f);else fertig()};
+ const fertig=()=>{try{if(L.length<12)return;const s=L.slice(4).sort((a,b)=>a-b),med=s[s.length>>1];if(!(med>2))return;const hz=Math.round(1000/med);
+  if(Math.abs(hz-d.hz)<=Math.max(2,d.hz*0.04))return;d.hzSitzung=d.hz;d.hz=hz;const per=1000/hz;d.miss=d.n?M.ivK.filter(x=>x>per*1.5).length/d.n*100:0;
+  DG.letzter=text(d);const p=document.getElementById('diagTxt');if(p&&G.overlay==='diag')p.textContent=DG.letzter}catch(e){dErr('hz',e)}};
+ requestAnimationFrame(f)}
+DG.start=start;DG.stop=()=>{if(DG.on)stop(true)};DG.fertig=()=>{if(DG.on){M.fertig=true;M.mem1=memMB();stop(false)}};
+/* ---------- Auswertung ---------- */
+let BUILD='';
+function buildId(){if(BUILD)return BUILD;try{const s=SKRIPT&&SKRIPT.textContent||'';let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}
+ BUILD=(h>>>0).toString(16).padStart(8,'0')+' · '+Math.round(s.length/1024)+' KB'}catch(e){BUILD='?'}return BUILD}
+function browser(){const u=navigator.userAgent||'';let m,b='';
+ if((m=u.match(/Edg\/([\d.]+)/)))b='Edge '+m[1];else if((m=u.match(/OPR\/([\d.]+)/)))b='Opera '+m[1];else if((m=u.match(/Firefox\/([\d.]+)/)))b='Firefox '+m[1];
+ else if((m=u.match(/SamsungBrowser\/([\d.]+)/)))b='Samsung Internet '+m[1];else if((m=u.match(/(?:Chrome|CriOS)\/([\d.]+)/)))b='Chrome '+m[1];else if((m=u.match(/Version\/([\d.]+).*Safari/)))b='Safari '+m[1];else b=u.slice(0,60);
+ let os='';if((m=u.match(/Windows NT ([\d.]+)/)))os='Windows '+({'10.0':'10/11','6.3':'8.1','6.1':'7'}[m[1]]||m[1]);else if((m=u.match(/Android ([\d.]+)/)))os='Android '+m[1];
+ else if(/iPhone|iPad/.test(u))os='iOS';else if(/Mac OS X/.test(u))os='macOS';else if(/CrOS/.test(u))os='ChromeOS';else if(/Linux/.test(u))os='Linux';
+ return[b,os].filter(Boolean).join(' · ')}
+function webgl(){const r={ren:'',ven:'',ver:''};try{const c=document.createElement('canvas');const g=c.getContext('webgl')||c.getContext('experimental-webgl');if(!g){r.ren='kein WebGL';return r}
+ const e=g.getExtension('WEBGL_debug_renderer_info');r.ren=String(e?g.getParameter(e.UNMASKED_RENDERER_WEBGL):g.getParameter(g.RENDERER));r.ven=String(e?g.getParameter(e.UNMASKED_VENDOR_WEBGL):g.getParameter(g.VENDOR));
+ r.ver=String(g.getParameter(g.VERSION)||'');const l=g.getExtension('WEBGL_lose_context');if(l)l.loseContext()}catch(e){r.ren=r.ren||'Fehler: '+(e&&e.message||e)}return r}
+const f1=x=>(isFinite(x)?x:0).toFixed(1);
+function auswerten(){const iv=M.iv.slice();M.ivK=iv;const n=iv.length,sek=M.aktiv/1000,d={n,sek};
+ const s=iv.slice().sort((a,b)=>a-b),avg=n?M.aktiv/n:0;d.fps=avg?1000/avg:0;
+ const w=Math.max(1,Math.ceil(n*0.01)),worst=s.slice(n-w);d.low=worst.length?1000/(worst.reduce((a,b)=>a+b,0)/worst.length):0;
+ d.ivMax=n?s[n-1]:0;
+ let hz=0;try{hz=PERF&&PERF.hz||0}catch(e){}if(!hz&&n){hz=Math.round(1000/Math.max(4,s[Math.floor(n*0.05)]))}d.hz=hz;
+ const per=hz?1000/hz:16.7;d.miss=n?iv.filter(x=>x>per*1.5).length/n*100:0;
+ const T=M.tot,pro=k=>T[k]&&n?T[k][0]/n:0;
+ d.spiel=pro('#Spiel');d.ober=pro('#Oberfläche');let bildEx=pro('#Bild');
+ const ber={};for(const k in T){if(k[0]==='#')continue;ber[k]=(ber[k]||0)+T[k][0]/n}
+ let summe=0;for(const k in ber)summe+=ber[k];
+ /* Bild gesamt = render inkl. aller Bereiche; Bereiche, die außerhalb von render liefen (z. B. Karte in der Oberfläche), sind darin mit enthalten – vernachlässigbar */
+ d.bild=bildEx+summe;d.ber=Object.entries(ber).sort((a,b)=>b[1]-a[1]);d.uebrig=bildEx;
+ d.rest=Math.max(0,avg-d.spiel-d.bild-d.ober);
+ d.js=d.spiel+d.bild+d.ober;
+ d.cnt={gid:M.cntT.gid/Math.max(0.1,sek),cv:M.cntT.cv/Math.max(0.1,sek),kg:M.cntT.kg/Math.max(0.1,sek)};
+ d.lang={n:M.lang.length,max:M.lang.length?Math.max.apply(null,M.lang):0,obs:!!window.PerformanceObserver};
+ d.mem=M.mem1||memMB();
+ /* Szene */
+ try{const S=(typeof STAGES!=='undefined'&&STAGES[G.stage])||null,O=S&&typeof ORTE!=='undefined'?ORTE[S.ort]:null;
+  d.modus=({kampagne:'Kampagne',taeglich:'Täglich',abstieg:'Abstieg',bossrausch:'Bossrausch'})[G.mode]||G.mode||'';d.ort=O&&O.name||'';d.stufe=S&&S.name||'';d.stNr=G.stage;
+  const x=typeof WX==='function'?WX():null;d.wetter=x?[WETTER[x.w]&&WETTER[x.w].n,ZEITEN[x.z]&&ZEITEN[x.z].n].filter(Boolean).join(', '):'';
+  d.diff=typeof DIFFS!=='undefined'&&DIFFS[G.diff]!=null?DIFFS[G.diff]:String(G.diff);
+  d.held=P&&P.hero&&P.hero.name||P&&P.id||'';d.lvl=P&&P.level||0;d.theme=G.themeKey||'';
+  const L=a=>Array.isArray(a)?a.length:0;let lebend=0,sicht=0;
+  const vw=W/(ZOOM||1),vh=H/(ZOOM||1),cxm=G.cam?G.cam.x:0,cym=G.cam?G.cam.y:0;
+  for(const e of G.enemies||[])if(!e.dead){lebend++;if(Math.abs(e.x-cxm)<vw/2+40&&Math.abs(e.y-cym)<vh/2+40)sicht++}
+  d.obj={gegner:lebend,sicht,deko:L(G.deco),props:L(G.props),parts:L(G.parts),proj:L(G.projs),fx:L(G.fxs),leichen:L(G.corpses)};
+  d.online=(typeof NET!=='undefined'&&NET.role)?(NET.role==='host'?'Gastgeber':NET.role==='guest'?'Gast':NET.role):'';d.spieler=G.mp&&typeof PL!=='undefined'?PL.length:1}catch(e){dErr('szene',e)}
+ /* Technik */
+ d.ver=typeof HS_VERSION!=='undefined'?HS_VERSION:'?';d.build=buildId();
+ const pk=[];for(const k of ['perfanz','gpu','sweep','kachel','diag','menue','ultra'])try{const o=window['__hs'+k.toUpperCase()];if(o&&o.v)pk.push(k+o.v+(o.err&&(typeof o.err==='string'||o.err.length)?'!':''))}catch(e){}d.pakete=pk.join(' ');
+ d.browser=browser();d.kerne=navigator.hardwareConcurrency||0;d.ram=navigator.deviceMemory||0;d.gl=webgl();
+ try{d.swr=!!SWR}catch(e){d.swr=null}
+ d.dpr=window.devicePixelRatio||1;d.fenster=innerWidth+'×'+innerHeight;d.schirm=(screen&&screen.width?screen.width+'×'+screen.height:'?');
+ try{d.lw=cv.width+'×'+cv.height;d.rsc=RSC}catch(e){}
+ try{d.vollbild=!!(document.fullscreenElement||document.webkitFullscreenElement)}catch(e){}
+ try{const auto=SAVE.gfx==='auto'||SAVE.gfx===undefined;d.gfx=GFX[gfxL()].n+(auto?' (Auto)':' (fest)');d.res=resFest()?Math.round(resFest()*100)+' % fest':'Auto';
+  d.ultra=!!(window.__hsULTRA&&__hsULTRA.on);d.fx=typeof HSFX!=='undefined'&&HSFX.name?(HSFX.auto()?'Auto ('+HSFX.name()+')':HSFX.name()):'';
+  d.bloom=typeof BLOFF!=='undefined'&&BLOFF?'aus (zu langsam)':gfxL()>=3?'an':'aus';d.sicht=SAVE.fov!==false;d.mobil=typeof MOBIL!=='undefined'&&!!MOBIL}catch(e){dErr('gfx',e)}
+ return d}
+function text(d){const L=[];
+ L.push(`Heldensturm-Diagnose · Version ${d.ver} · Build ${d.build}${d.pakete?' · '+d.pakete:''}`);
+ L.push(`Browser: ${d.browser}${d.kerne?' · '+d.kerne+' Kerne':''}${d.ram?' · ≥'+d.ram+' GB':''}${d.mobil?' · Mobilgerät':''}`);
+ L.push(`WebGL: ${d.gl.ren}${d.gl.ven&&d.gl.ven!==d.gl.ren?' · '+d.gl.ven:''}`);
+ L.push(`2D-Leinwand: ${d.swr?'⚠ wahrscheinlich Software (ohne Grafikbeschleunigung)':d.swr===false?'wahrscheinlich Grafikkarte':'unbekannt'}`);
+ L.push(`Anzeige: Fenster ${d.fenster} · DPR ${+d.dpr.toFixed(2)} · Schirm ${d.schirm} · Leinwand ${d.lw} (${Math.round((d.rsc||1)*100)} %)${d.vollbild?' · Vollbild':''}`);
+ L.push(`Grafik: ${d.gfx} · Auflösung ${d.res} · Effekte ${d.fx||'?'} · Bloom ${d.bloom} · Sichtschatten ${d.sicht?'an':'aus'}${d.ultra?' · Ultra leicht':''}`);
+ L.push(`Messung: ${f1(d.sek)} s · ${d.n} Bilder · ${f1(d.fps)} FPS ⌀ · 1%-Tief ${f1(d.low)} FPS · längstes ${Math.round(d.ivMax)} ms · Bildschirm ${d.hz} Hz${d.hzSitzung?' (Sitzung '+d.hzSitzung+')':''} · verpasst ${Math.round(d.miss)} %`);
+ L.push(`Rechenzeit je Bild (ms): Spiel ${f1(d.spiel)} · Bild ${f1(d.bild)} · Oberfläche ${f1(d.ober)} · ${d.hz&&d.fps>=d.hz*0.9?'Rest (Leerlauf bis zum nächsten Bild)':'Rest (Browser/Grafikkarte)'} ${f1(d.rest)}`);
+ const top=d.ber.filter(b=>b[1]>=0.05).slice(0,7).map(b=>`${b[0]} ${f1(b[1])}`);
+ L.push(`Bild teuerste (ms): ${top.length?top.join(' · '):'–'} · übriges ${f1(d.uebrig)}`);
+ L.push(`Je s: neue Leinwände ${Math.round(d.cnt.cv)} · getImageData ${Math.round(d.cnt.gid)} · Sprite-Neubau ${Math.round(d.cnt.kg)} · lange Aufgaben ${d.lang.obs?d.lang.n+(d.lang.n?' (max '+Math.round(d.lang.max)+' ms)':''):'n/v'}`);
+ L.push(`Szene: ${d.modus} · ${d.ort?d.ort+' / ':''}${d.stufe} (Nr. ${d.stNr}) · ${d.wetter||'kein Wetter'} · ${d.diff} · ${d.held} St. ${d.lvl}${d.online?' · online '+d.online+', '+d.spieler+' Spieler':d.spieler>1?' · '+d.spieler+' Spieler':''}`);
+ const o=d.obj||{};L.push(`Objekte: Gegner ${o.gegner} (im Bild ${o.sicht}) · Deko ${o.deko} · Dinge ${o.props} · Partikel ${o.parts} · Geschosse ${o.proj} · Effekte ${o.fx} · Leichen ${o.leichen}`);
+ L.push(`Speicher: ${d.mem?'JS '+d.mem.u+' MB von '+d.mem.l+' MB':'n/v'}`);
+ return L.join('\n')}
+/* ---------- Bericht-Fenster ---------- */
+const esc2=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function cssEinmal(){if(document.getElementById('diagCss'))return;const st=document.createElement('style');st.id='diagCss';
+ st.textContent='#scr .wrap.diagw{display:block;max-width:1100px;margin:0 auto;padding:10px 12px;text-align:left}#scr .wrap.diagw .diagk{display:flex;align-items:center;margin:0 0 4px;min-height:40px}'+
+ '#scr .wrap.diagw .diagk h2{margin:0;font-size:26px}#scr .wrap.diagw .diagb{display:flex;flex-wrap:wrap;align-items:center;margin:8px 0 0}#scr .wrap.diagw .diagb .btn{margin:0 8px 4px 0}'+
+ '#scr .wrap.diagw .diagt{margin:0 0 6px;font-size:13px;color:#cdb98e}#scr .wrap.diagw pre{margin:0;white-space:pre-wrap;word-break:break-word;font:600 12.5px/1.4 ui-monospace,Menlo,Consolas,monospace;color:#f0dfb4;background:rgba(10,6,4,.82);border:1px solid rgba(232,195,106,.35);border-radius:6px;padding:7px 9px;user-select:text;-webkit-user-select:text;text-shadow:0 1px 0 #000}'+
+ '#scr .wrap.diagw .diagm{font-size:13px;color:#e8c36a;margin:0 0 4px}@media (max-width:760px),(max-height:460px){#scr .wrap.diagw{padding:4px 6px}#scr .wrap.diagw .diagk{min-height:30px;margin:0 0 2px}#scr .wrap.diagw .diagk h2{font-size:19px}#scr .wrap.diagw pre{font-size:10px;line-height:1.28;padding:4px 6px}#scr .wrap.diagw .diagt{font-size:11px;margin:0 0 3px}#scr .wrap.diagw .diagm{font-size:11px}#scr .wrap.diagw .diagb{margin:5px 0 0}}';
+ document.head.appendChild(st)}
+function berichtHtml(){return`<div class="wrap diagw" role="dialog" aria-label="Diagnose"><div class="diagk"><h2>Diagnose</h2><button class="btn small" data-act="close">Schließen</button></div>`+
+ `<p class="diagt">Leistungsbericht der letzten ${f1(DG.daten?DG.daten.sek:0)} s – ohne persönliche Daten. „Kopieren“ und im Chat einfügen.</p>`+
+ `<pre id="diagTxt">${esc2(DG.letzter)}</pre><div class="diagb"><button class="btn small gold" data-act="diag-copy">Kopieren</button><button class="btn small" data-act="diag-neu">Neu messen</button><span class="diagm" id="diagMsg"></span></div></div>`}
+function berichtZeigen(){cssEinmal();const html=berichtHtml();
+ try{if(istGast()){G.overlay='diag'}else{G.paused=true;G.resumeT=0;G.overlay='diag'}
+  hud.hidden=true;joy=null;for(const k in keys)keys[k]=false;showScreen(html);
+  const b=scr.querySelector('[data-act="diag-copy"]');if(b&&PADNAV.on){try{padMark(b,true)}catch(e){}}}catch(e){dErr('zeigen',e)}}
+function schliessen(){try{if(istGast()){G.overlay=null;hideScreen();hud.hidden=false;try{netBarSet()}catch(e){}}else closeOverlay()}catch(e){dErr('schließen',e)}}
+function meldung(t){const m=document.getElementById('diagMsg');if(m)m.textContent=t}
+function markieren(){try{const p=document.getElementById('diagTxt');if(!p)return;const r=document.createRange();r.selectNodeContents(p);const s=getSelection();s.removeAllRanges();s.addRange(r)}catch(e){}}
+function kopieren(btn){const t=DG.letzter;if(!t)return;let ok=false;
+ const fertig=ok=>{if(ok){meldung('Kopiert ✓ – jetzt im Chat einfügen (Strg+V).');if(btn)btn.textContent='Kopiert ✓'}else{markieren();meldung('Automatisches Kopieren geht hier nicht – der Text ist markiert: Strg+C (bzw. lange tippen → Kopieren).')}};
+ try{const ae=document.activeElement;const ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;left:-9999px;top:0;opacity:0;width:10px;height:10px';
+  document.body.appendChild(ta);ta.focus({preventScroll:true});ta.select();try{ta.setSelectionRange(0,t.length)}catch(e){}ok=!!document.execCommand('copy');ta.remove();
+  if(ae&&ae.focus)try{ae.focus({preventScroll:true})}catch(e){}}catch(e){ok=false}
+ if(ok){fertig(true);return}
+ try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(()=>fertig(true),()=>fertig(false));return}}catch(e){}
+ fertig(false)}
+DG.kopieren=kopieren;DG.umhuellt=()=>{const r=[];for(const B of BEREICHE){try{const f=B[2]();if(f&&f.__dgW)r.push(B[0])}catch(e){}}return r};DG.schliessen=schliessen;
+/* ---------- Knopf im Einstellungs-Menü (neben „Leistungsanzeige: an“) ---------- */
+const knopfOk=()=>{try{return !!SAVE.perf&&G.state==='play'&&!(typeof NET!=='undefined'&&NET.vm)}catch(e){return false}};
+function knopfHtml(){return`<button class="btn small" data-act="diag-start" title="Misst 10 s laufendes Spiel und zeigt einen kurzen Bericht zum Kopieren (Browser, Grafikkarte, Bildrate, wo die Rechenzeit bleibt)">Diagnose (10 s)</button>`}
+let plan=false;
+function knopfEinsetzen(){plan=false;try{if(!knopfOk())return;for(const box of document.querySelectorAll('#gfxBox')){if(box.querySelector('[data-act="diag-start"]'))continue;
+  const p=box.querySelector('[data-act="perf"]');if(!p)continue;p.insertAdjacentHTML('afterend',knopfHtml())}}catch(e){dErr('knopf',e)}}
+/* gfxInner ist eine Konstante; ulKnopf wird bei jedem Aufbau der Zeile aufgerufen → danach (Mikroaufgabe, vor dem Zeichnen) einsetzen */
+if(typeof ulKnopf==='function'){const _uk=ulKnopf;ulKnopf=function(){const r=_uk.apply(this,arguments);try{if(!plan&&knopfOk()){plan=true;Promise.resolve().then(knopfEinsetzen)}}catch(e){}return r}}
+/* ---------- Eingaben ---------- */
+document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest?ev.target.closest('[data-act]'):null;if(!b||b.disabled)return;const a=b.dataset.act;
+ if(a==='close'&&G.overlay==='diag'&&istGast()){ev.stopPropagation();ev.preventDefault();schliessen();return}
+ if(a!=='diag-start'&&a!=='diag-copy'&&a!=='diag-neu')return;ev.stopPropagation();ev.preventDefault();try{sfx('ui')}catch(e){}
+ if(a==='diag-start')start();else if(a==='diag-copy')kopieren(b);else if(a==='diag-neu'){schliessen();start()}},true);
+/* Esc beim Gast (dessen closeOverlay schließt nur das Online-Menü) */
+addEventListener('keydown',ev=>{if(G.overlay!=='diag'||!istGast())return;if(ev.code==='Escape'){ev.stopImmediatePropagation();ev.preventDefault();schliessen()}},true);
+}catch(e){console.error('diag',e);window.__hsDIAG.err=String(e&&e.stack||e)}})();
+/* ================= Paket „menue“: Menüs öffnen schneller – das Einpassen merkt sich seine Messwerte =================
+   Befund: menuFit → mfFit/campFit/fitZ/mfPaginate/cp… (und zwFit) messen das Layout in Schleifen (scrollHeight, getBoundingClientRect,
+   getComputedStyle, innerWidth …) und ändern dazwischen Zoom/Klassen/Seiten – jede Messung erzwingt ein neues Layout bzw. neue Stile
+   (Pause 60–500, Lauf-Menü bis 2500 Layouts je Öffnen; 3–6 Einpassungen je Öffnen).
+   Lösung ohne anderes Ergebnis: Einpassen ist eine feste Rechnung aus Ausgangszustand + Messwerten. Beim ersten Mal werden alle Messwerte
+   der Reihe nach mitgeschrieben – je Signatur aus Fenster, Größe, Seitenstil (html/body, Stylesheets, Schriften), Einpass-Gedächtnis
+   (MF.cfg/MF.cache/CP), Fokus, Rollpositionen, Ladezustand von Bildern/Videos und Inhalt (innerHTML, Zahlen in Texten neutralisiert). Kommt derselbe Ausgangszustand wieder,
+   läuft genau derselbe Originalcode, bekommt aber die gemerkten Werte statt neu zu messen: gleiche DOM-Änderungen ohne Zwischen-Layouts.
+   Absicherung: jede Messung wird gegen Art + Element (Tag/id/Klassen) geprüft (kleine Verschiebungen werden nachgeführt, sonst ab da echt);
+   am Ende echter Abgleich der Endlage (Hülle, Kinder, Enkel: Klassen, Inline-Stile, Lage ohne Transformationen) – passt er nicht oder
+   lädt im Fenster noch ein Bild/Video, wird mit dem alten Einpass-Gedächtnis echt neu eingepasst (wie das Original).
+   Zeichenflächen (Canvas) und das Mittig-Rollen der Reiterleiste messen immer echt (Bühnenbild beim Abspielen einmal am Ende).
+   Ergebnisse, bei denen am Ende noch ein Bild/Video lädt, werden nicht gemerkt (sie hängen vom Ladezeitpunkt ab).
+   Gleicher Aufbau mit anderen Texten (grobe Signatur): nur übernommen, wenn die Endlage jeder Seite gleich ist; sonst für diesen Aufbau gesperrt.
+   scrollTop/scrollLeft = 0 auf ein sicher ungerolltes Element wird übersprungen (ändert nichts, spart ein erzwungenes Layout).
+   Über Sitzungen: bis ~600 KB in localStorage („hsMenueMess“, Vorrang: erstes Öffnen), ungültig bei anderer Spiel-/Paketversion.
+   Schalter: window.__hsMENUE.aus=true (alles wie vorher), __hsMENUE.speicher=false (nichts speichern). Zähler: __hsMENUE.st. Chromium 77: ES2017. */
+window.__hsMENUE={v:9};
+(()=>{try{
+const M=window.__hsMENUE;M.aus=false;M.st={rec:0,hit:0,grob:0,grobNein:0,div:0,bad:0,durch:0,voll:0,sprung:0,extra:0};M.max=90;M.speicher=true;
+const EP=Element.prototype,HP=HTMLElement.prototype;
+const gd=(o,k)=>Object.getOwnPropertyDescriptor(o,k);
+/* Messgrößen, die ein Layout erzwingen */
+const PROPS=[[EP,'scrollHeight'],[EP,'scrollWidth'],[EP,'clientHeight'],[EP,'clientWidth'],[EP,'clientTop'],[EP,'clientLeft'],[HP,'offsetWidth'],[HP,'offsetHeight'],[HP,'offsetTop'],[HP,'offsetLeft']];
+let modus=0;/* 0 aus, 1 aufzeichnen, 2 abspielen */let LOG=null,pos=0,abw=0,extra=0;
+const kenn=el=>{if(!el)return'WIN';const c=el.getAttribute?el.getAttribute('class'):'';return el.tagName+(el.id?'#'+el.id:'')+'.'+(c||'')};
+function abweichung(e,k,kk){abw=1;modus=0;try{nachholen()}catch(x){}M.st.div++;M.letzte={pos,n:LOG.length,erw:e?e[0]+' '+e[1]:'-',ist:k+' '+kk}}
+/* kleine Abweichungen im Ablauf (z. B. Bühnenbild, das je nach Zeitpunkt schon gezeichnet wird): einige gemerkte Messungen überspringen
+   bzw. eine zusätzliche Messung echt ausführen (der Zustand ist bis dahin derselbe, der echte Wert also richtig) */
+function nimm(k,el,echt){return nimmK(k,kenn(el),echt)}
+function nimmK(k,kk,echt){
+ if(modus===2){let e=LOG[pos];if(e&&e[0]===k&&e[1]===kk){pos++;return e[2]}
+  for(let j=1;j<=6&&pos+j<LOG.length;j++){e=LOG[pos+j];if(e[0]===k&&e[1]===kk){pos+=j+1;M.st.sprung++;return e[2]}}
+  if(++extra>8){abweichung(LOG[pos],k,kk);return echt()}M.st.extra++;return echt()}
+ const v=echt();if(modus===1)LOG.push([k,kk,v]);return v}
+/* Zeichenflächen (Bühnenbild, Heldensymbole) lesen ihre Größe fürs Zeichnen in der Auflösung – das bleibt immer echt und zählt nicht
+   zum gemerkten Ablauf (sonst könnte ein Symbol die Größe eines anderen bekommen und unscharf gezeichnet werden) */
+for(let i=0;i<PROPS.length;i++){const [o,k]=PROPS[i];const d=gd(o,k);if(!d||!d.get)continue;const g=d.get;
+ Object.defineProperty(o,k,{configurable:true,enumerable:d.enumerable,get(){if(!modus||this.nodeName==='CANVAS')return g.call(this);const self=this;return nimm(i,self,()=>g.call(self))}})}
+const gBCR=EP.getBoundingClientRect,gCR=EP.getClientRects;
+const R=a=>{const x=a[0],y=a[1],w=a[2],h=a[3];return{x,y,width:w,height:h,left:w<0?x+w:x,top:h<0?y+h:y,right:w<0?x:x+w,bottom:h<0?y:y+h,toJSON(){return this}}};
+EP.getBoundingClientRect=function(){if(!modus||this.nodeName==='CANVAS')return gBCR.call(this);const self=this;
+ const a=nimm(20,self,()=>{const r=gBCR.call(self);return[r.x,r.y,r.width,r.height]});return R(a)};
+EP.getClientRects=function(){if(!modus||this.nodeName==='CANVAS')return gCR.call(this);const self=this;
+ const a=nimm(21,self,()=>{const L=gCR.call(self),o=[];for(let i=0;i<L.length;i++){const r=L[i];o.push([r.x,r.y,r.width,r.height])}return o});
+ const o=a.map(R);o.item=i=>o[i]||null;return o};
+
+/* Fenstergröße: innerWidth/innerHeight erzwingen im alten Chromium (Handy-Viewport) ebenfalls ein Layout – beim Einpassen gemerkt wie oben.
+   Für die Signatur gilt die zuletzt bekannte Größe (resize); ein Irrtum fiele beim Abgleich der Endlage auf. */
+const WD={};for(const [k,i] of [['innerWidth',30],['innerHeight',31]]){const d=gd(window,k);if(!d||!d.get||!d.configurable)continue;WD[k]=d.get;
+ Object.defineProperty(window,k,{configurable:true,enumerable:d.enumerable,get(){if(!modus)return d.get.call(window);return nimmK(i,'WIN',()=>d.get.call(window))},set(v){if(d.set)d.set.call(window,v)}})}
+let VW=innerWidth,VH=innerHeight;const vwNeu=()=>{try{VW=WD.innerWidth?WD.innerWidth.call(window):innerWidth;VH=WD.innerHeight?WD.innerHeight.call(window):innerHeight}catch(e){}};
+addEventListener('resize',vwNeu,true);try{if(window.visualViewport)visualViewport.addEventListener('resize',vwNeu)}catch(e){}
+/* Berechnete Stile (getComputedStyle): Werte werden erst beim Lesen geholt (live wie das Original) – beim Abspielen aus dem Gedächtnis,
+   damit kein Stil neu berechnet werden muss */
+const GCS=window.getComputedStyle;
+window.getComputedStyle=function(el,ps){if(!modus||!el||el.nodeName==='CANVAS'||typeof Proxy!=='function')return GCS.apply(window,arguments);
+ let real=null;const R=()=>real||(real=GCS.call(window,el,ps));const kk=kenn(el)+(ps?'::'+ps:'');
+ return new Proxy({},{get(t,p){if(typeof p!=='string')return undefined;
+  if(p==='getPropertyValue')return n=>{if(!modus)return R().getPropertyValue(n);return nimmK(40,kk+'|'+n,()=>R().getPropertyValue(n))};
+  if(!modus){const v=R()[p];return typeof v==='function'?v.bind(R()):v}
+  const v0=nimmK(41,kk+'|'+p,()=>{const v=R()[p];return typeof v==='function'?'§f':v});return v0==='§f'?R()[p].bind(R()):v0}})};
+
+/* Rollpositionen: Lage-Messungen in gerollten Behältern hängen von scrollTop/scrollLeft ab – das steht nicht im innerHTML. Deshalb werden
+   alle Elemente, die je gerollt wurden (Rollereignis oder Setzen per Code), gemerkt und ihre Rollposition gehört zur Signatur. */
+/* NZ: Richtungen, die vielleicht nicht 0 sind (1 = senkrecht, 2 = waagrecht); neue Elemente stehen auf 0 – ohne Layout bekannt */
+const ROLL=new Set(),NZ=new WeakMap();const rollt=(el,b,an)=>{if(!el||el.nodeType!==1)return;ROLL.add(el);const n=NZ.get(el)||0;NZ.set(el,an?n|b:n&~b);
+ if(ROLL.size>300){for(const x of ROLL)if(!x.isConnected)ROLL.delete(x)}};
+document.addEventListener('scroll',e=>{const el=e.target;if(!el||el.nodeType!==1)return;try{rollt(el,1,!!el.scrollTop);rollt(el,2,!!el.scrollLeft)}catch(x){rollt(el,3,true)}},true);
+/* Auf 0 setzen, was sicher schon 0 ist, ändert nichts – spart aber ein erzwungenes Layout (showScreen, Einpassen setzen scrollTop=0) */
+for(const [k,b] of [['scrollTop',1],['scrollLeft',2]]){const d=gd(EP,k);if(!d||!d.set)continue;Object.defineProperty(EP,k,{configurable:true,enumerable:d.enumerable,
+ get(){if(modus&&!((NZ.get(this)||0)&b)&&this!==document.documentElement&&this!==document.body)return 0;return d.get.call(this)},
+ set(v){if(+v===0&&!M.aus&&!((NZ.get(this)||0)&b)&&this!==document.documentElement&&this!==document.body){M.st.roll0=(M.st.roll0||0)+1;return}rollt(this,b,+v!==0);return d.set.call(this,v)}})}
+{const f=HTMLElement.prototype.focus;if(typeof f==='function')HTMLElement.prototype.focus=function(o){if(!(o&&o.preventScroll))for(let e=this.parentElement;e&&e!==document.body;e=e.parentElement)rollt(e,3,true);return f.apply(this,arguments)}}
+for(const k of ['scrollTo','scrollBy']){const f=EP[k];if(typeof f!=='function')continue;EP[k]=function(){rollt(this,3,true);return f.apply(this,arguments)}}
+{const f=EP.scrollIntoView;if(typeof f==='function')EP.scrollIntoView=function(){for(let e=this.parentElement;e&&e!==document.body;e=e.parentElement)rollt(e,3,true);return f.apply(this,arguments)}}
+function rollSig(h){let o='';for(const el of ROLL){if(!el.isConnected){ROLL.delete(el);continue}if(!NZ.get(el))continue;if(el!==h&&!h.contains(el))continue;
+ const t=el.scrollTop,l=el.scrollLeft;NZ.set(el,(t?1:0)|(l?2:0));if(t||l)o+=kenn(el)+':'+t+','+l+';'}return o}
+/* Leiste der Reiter-Seiten mittig rollen (cpCenter) rechnet mit der aktuellen Rollposition – immer sofort und echt messen, nicht mitschreiben
+   (ein späterer Aufruf ergäbe bei laufendem weichem Rollen eine andere Endposition). */
+const NACH=new Map();let cpF=null;
+try{if(typeof cpCenter==='function'){cpF=cpCenter;cpCenter=function(tb){const m=modus;modus=0;try{return cpF.apply(this,arguments)}finally{modus=m}}}}catch(e){}
+/* Bühnenbild (drawStage, liest die Canvas-Größe und zeichnet): beim Abspielen einmal am Ende des Einpassens (nicht erst im nächsten Bild –
+   beim Öffnen per Controller läuft das Öffnen selbst in einem Bild-Rückruf, das Bühnenbild fehlte dann ein Bild lang) */
+let dsF=null,dsNach=0;try{if(typeof drawStage==='function'){dsF=drawStage;drawStage=function(){if(modus===2){dsNach=1;return}if(dsNach)dsNach=0;return dsF.apply(this,arguments)}}}catch(e){}
+function nachholen(){const L=[...NACH.values()];NACH.clear();for(const a of L){try{cpF.apply(null,a)}catch(e){}}if(dsNach){dsNach=0;try{dsF()}catch(e){}}}
+
+/* Bilder und Videos ohne feste Größe ändern das Layout, sobald sie geladen sind (z. B. Vorschauvideo im Talentbaum) – Ladezustand in die Signatur */
+function medienSig(h){let o='';const L=h.getElementsByTagName('video');for(let i=0;i<L.length;i++){const v=L[i];o+=v.readyState>=1?v.videoWidth+'x'+v.videoHeight+';':'n;'}
+ const I=h.getElementsByTagName('img');for(let i=0;i<I.length;i++){const m=I[i];o+=m.complete&&m.naturalWidth?m.naturalWidth+'x'+m.naturalHeight+';':'n;'}return o}
+
+/* Signatur: Fenster, Größe, Einpass-Zustand, Inhalt (Hash über innerHTML) */
+const IHg=gd(EP,'innerHTML').get;
+/* ein Durchgang, zwei Kennungen: grob (ohne Texte zwischen > und <) und fein (alles) – je zwei 32-Bit-Hashes */
+function hash2(s){let a=0x811c9dc5|0,b=0x9e3779b1|0,c=0x811c9dc5|0,d=0x9e3779b1|0,txt=false,n=0;
+ for(let i=0;i<s.length;i++){const x=s.charCodeAt(i);a=Math.imul(a^x,16777619);b=Math.imul(b^x,0x5bd1e995);b^=b>>>13;
+  if(x===60)txt=false;if(!txt){n++;c=Math.imul(c^x,16777619);d=Math.imul(d^x,0x5bd1e995);d^=d>>>13}if(x===62)txt=true}
+ return(c>>>0).toString(36)+'.'+(d>>>0).toString(36)+'.'+n+'§'+(a>>>0).toString(36)+'.'+(b>>>0).toString(36)+'.'+s.length}
+const GEN=new WeakMap();/* wurde der Inhalt dieses Fensters (erstes Kind) schon eingepasst (gemerkte Hilfswerte an den Elementen) */
+function js(o){try{return JSON.stringify(o)}catch(e){return'?'}}
+/* nur die gemerkten Einpass-Werte, die dieses Einpassen lesen kann (gleiches Fenster, gleicher Zustand, gleiche Größe); die Reiter-Seiten (CP)
+   gibt es nur in Pause und Titel/Lager – sonst zählen sie nicht (ihre Rollpositionen ändern sich laufend) */
+function mfTeil(h,o){if(!o)return'';const a=(h===scr?'s':'p'+(h._mfid||''))+'|'+(G.overlay||G.state)+'|'+(G.campTab||'')+'|',e='|'+VW+'x'+VH;let r='';
+ for(const k in o)if(k.indexOf(a)===0&&k.slice(-e.length)===e)r+=k+'='+js(o[k])+';';return r}
+/* Inhalt: Zahlen in Texten und Kennungen (FPS, Zeiten, Gold, Verlaufs-IDs der Symbole …) zählen nicht – nur in Attributen, die die Größe
+   bestimmen (style, width, height, viewBox …). Ändern Zahlen doch etwas an der Lage, fängt das der Abgleich am Ende. */
+const ZAHL=/ (?:style|width|height|viewBox|colspan|rowspan|size|cols|rows|span)="[^"]*"|\d+/g;const ohneZahl=m=>m.charCodeAt(0)===32?m:'#';
+/* Seitenweite Einflüsse aufs Layout: Klassen/Stile an html und body (Menü-Zoom --mz, Ultra …), Stylesheets, Schriften */
+function welt(){const de=document.documentElement,b=document.body;let n=0;const S=document.querySelectorAll('style,link[rel="stylesheet"]');for(let i=0;i<S.length;i++)n+=S[i].tagName==='STYLE'?S[i].textContent.length:1;
+ return[de.className,de.getAttribute('style')||'',b?b.className:'',b?b.getAttribute('style')||'':'',S.length,n,document.fonts?document.fonts.status:''].join('¦')}
+/* zweite, gröbere Signatur ohne Texte: gleicher Aufbau, andere Texte (Ziele des Laufs, Namen …) – dann wird nur nach Abgleich der Endlage übernommen */
+function grob(k){const i=k.lastIndexOf('§');return k.slice(0,i)}
+function sig(h){const k=h.firstElementChild;let ae='';try{const a=document.activeElement;if(a&&a!==document.body&&h.contains(a))ae=(a.outerHTML||'').slice(0,120)}catch(e){}
+ let pn='';try{pn=PADNAV.on?'1'+PADNAV.sig:'0'}catch(e){}
+ let st='';try{st=[G.overlay,G.state,G.campTab,G.sel,typeof SPL!=='undefined'?SPL.view:'',NET.role,!!NET.vm,LM.sig,LM.cur?1:0,MF.sbOpen?1:0,mfTeil(h,MF.cfg),mfTeil(h,MF.cache),typeof CP!=='undefined'&&(G.overlay==='pause'||G.state==='title')?js(CP.idx)+js(CP.st):''].join('|')}catch(e){st='?'}
+ let mob='';try{mob=(matchMedia('(pointer:coarse)').matches||VW<700)?'m':'d'}catch(e){}
+ return[welt(),h===scr?'s':'p'+(h._mfid||''),VW,VH,devicePixelRatio,mob,h.className,h.getAttribute('style')||'',k&&GEN.get(k)?1:0,pn,ae,st,rollSig(h),medienSig(h),hash2(IHg.call(h).replace(ZAHL,ohneZahl))].join('§')}
+/* Endlage: Hülle, ihre Kinder und Enkel – Klassen und Inline-Stile (Zoom, Höhen, Ränder, die das Einpassen setzt – exakt) und Lage ohne
+   Transformationen (offset…; laufende Einblend-Animationen stören so nicht); SVG u. Ä. über getBoundingClientRect (¼ px). Ein Layout,
+   direkt nach dem Einpassen (später ändert anderer Code noch Texte – ein Vergleich im nächsten Bild wäre nicht mehr aussagekräftig). */
+const OW=gd(HP,'offsetWidth').get,OH=gd(HP,'offsetHeight').get,OT=gd(HP,'offsetTop').get,OL=gd(HP,'offsetLeft').get;
+function domSig(h){const o=[h.className,h.getAttribute('style')||''];let n=0;
+ for(const c of h.children){o.push(c.getAttribute('class')||'',c.getAttribute('style')||'');for(const d of c.children){if(++n>400)break;o.push(d.getAttribute('class')||'',d.getAttribute('style')||'')}}return o.join('\u0001')}
+function lage(h){const o=[h.clientHeight,h.clientWidth];let n=0;
+ const add=c=>{if(c instanceof HTMLElement){o.push(OL.call(c),OT.call(c),OW.call(c),OH.call(c));return}const r=gBCR.call(c);o.push(Math.round(r.x*4),Math.round(r.y*4),Math.round(r.width*4),Math.round(r.height*4))};
+ for(const c of h.children){add(c);for(const d of c.children){if(++n>400)break;add(d)}}return o.join(',')}
+function endlage(h){return domSig(h)+'\u0002'+lage(h)}
+/* Seiten (Blättern): Endlage jeder Seite – nur für Übernahmen über die grobe Signatur nötig (verdeckte Seiten könnten andere Texte haben) */
+function seitenLage(h){const S=h._mf;if(!S||!S.pages||S.pages.length<2||typeof mfApply!=='function')return'';const cur=S.idx,o=[];
+ try{for(let q=0;q<S.pages.length;q++){mfApply(h,q,0,1);o.push(endlage(h))}}finally{mfApply(h,cur,0,1)}return o.join('|')}
+const C=new Map(),CG=new Map(),NEIN=new Set(),PERS=new Map();M.C=C;
+function merke(k,v){C.delete(k);C.set(k,v);CG.set(grob(k),k);while(C.size>M.max){const a=C.keys().next().value;C.delete(a);if(CG.get(grob(a))===a)CG.delete(grob(a))}}
+function vergiss(k){C.delete(k);PERS.delete(k);if(CG.get(grob(k))===k)CG.delete(grob(k))}
+/* Über Sitzungen merken (localStorage, klein gehalten): das erste Öffnen nach dem Laden ist dann auch schnell.
+   Kennung = Paketversion + Länge des Spiels; alles Weitere steckt in der Signatur (Stylesheets, Schriften, Größe …). */
+const LS='hsMenueMess',LSMAX=600000;let geladen=false,neu=0,spT=0;
+let KEN='';function kennung(){if(KEN)return KEN;let n=0;try{for(const x of document.scripts)n+=x.textContent.length}catch(e){}return KEN=M.v+':'+n}
+/* PERS: was gespeichert wird (auch, was aus dem Arbeitsgedächtnis C schon verdrängt ist). Vorrang beim Speichern: Einträge vom ersten Öffnen
+   (noch kein Einpass-Gedächtnis für dieses Menü – genau die braucht der Neustart), dann die zuletzt benutzten. */
+function laden(){if(geladen)return;geladen=true;try{const t=localStorage.getItem(LS);if(!t)return;const d=JSON.parse(t);if(!d||d.k!==kennung()||!Array.isArray(d.e))return;
+  for(const [k,end,cl,fl,seiten,erst] of d.e){const log=[];for(let i=0;i<fl.length;i+=3)log.push([fl[i],cl[fl[i+1]],fl[i+2]]);const v={log,end,seiten:seiten||'',erst:!!erst};PERS.set(k,v);if(!C.has(k))merke(k,v)}M.st.geladen=d.e.length}catch(e){M.st.ladeFehler=String(e).slice(0,80)}}
+function speichern(){spT=0;if(!neu)return;neu=0;try{const e=[];let bytes=0;const L=[...PERS.entries()].reverse();L.sort((a,b)=>(b[1].erst?1:0)-(a[1].erst?1:0));
+  for(const [k,v] of L){const ci=new Map(),cl=[],fl=[];for(const x of v.log){let j=ci.get(x[1]);if(j==null){j=cl.length;ci.set(x[1],j);cl.push(x[1])}fl.push(x[0],j,x[2])}
+   const z=[k,v.end,cl,fl,v.seiten||'',v.erst?1:0];const len=JSON.stringify(z).length;if(bytes+len>LSMAX){PERS.delete(k);continue}bytes+=len;e.push(z)}
+  e.reverse();localStorage.setItem(LS,JSON.stringify({k:kennung(),e}));M.st.gespeichert=e.length}catch(x){M.st.speicherFehler=String(x).slice(0,80);try{localStorage.removeItem(LS)}catch(y){}}}
+function pers(k,v){PERS.delete(k);PERS.set(k,v);if(M.speicher)spaeter()}
+function spaeter(){neu=1;if(spT)return;spT=setTimeout(()=>{try{if(window.requestIdleCallback)requestIdleCallback(speichern,{timeout:4000});else speichern()}catch(e){spT=0}},2500)}
+addEventListener('pagehide',()=>{try{if(neu)speichern()}catch(e){}});
+/* Zustand, den das Einpassen liest und schreibt (MF.cfg/MF.cache, Seiten der Reiter): sichern bzw. zurückholen */
+function zustand(z){try{if(!z)return{cfg:Object.assign({},MF.cfg||{}),cache:Object.assign({},MF.cache||{}),cpi:typeof CP!=='undefined'?Object.assign({},CP.idx):null,cps:typeof CP!=='undefined'?Object.assign({},CP.st):null,sb:MF.sbOpen};
+ if(MF.cfg){for(const k in MF.cfg)delete MF.cfg[k];Object.assign(MF.cfg,z.cfg)}else if(Object.keys(z.cfg).length)MF.cfg=Object.assign({},z.cfg);
+ for(const k in MF.cache)delete MF.cache[k];Object.assign(MF.cache,z.cache);if(z.cpi){for(const k in CP.idx)delete CP.idx[k];Object.assign(CP.idx,z.cpi);for(const k in CP.st)delete CP.st[k];Object.assign(CP.st,z.cps)}MF.sbOpen=z.sb}catch(e){}}
+let tief=0;
+/* Hülle um eine Einpass-Funktion: name kommt in die Signatur, wirt(arg) liefert das Fenster */
+function huelle(name,mfAlt,wirt){return function(a){const h=wirt(a);
+ if(M.aus||tief||!h||h.hidden||MF.busy||!h.isConnected){M.st.durch++;return mfAlt.apply(this,arguments)}
+ tief=1;let k='';try{k=name+'§'+sig(h)}catch(e){k=''}
+ const kid=h.firstElementChild;
+ try{
+  if(M.speicher&&!geladen)laden();let E=k&&C.get(k),gr=0;
+  if(k&&!E&&!NEIN.has(k)&&!NEIN.has('g'+grob(k))){const k2=CG.get(grob(k));if(k2){E=C.get(k2);gr=k2}}
+  if(E){/* abspielen */const z0=zustand();LOG=E.log;pos=0;abw=0;extra=0;modus=2;
+   try{mfAlt.apply(this,arguments)}finally{modus=0;nachholen()}
+   const fertig=!abw;let ok=fertig;
+   /* nach dem Abspielen noch ladende Bilder/Videos: die gemerkten Werte galten für geladene – dann wie das Original echt einpassen */
+   if(ok){try{if(medienSig(h).indexOf('n;')>=0){ok=false;M.st.laedt=(M.st.laedt||0)+1}}catch(e){}}
+   if(ok){try{ok=endlage(h)===E.end&&(!gr||seitenLage(h)===(E.seiten||''))
+     if(!ok&&M.dbg)M.endDiff=[gr?'grob':'dom',E.end.length]}catch(e){ok=false}}
+   if(ok){if(gr){M.st.grob++;const v={log:E.log,end:E.end,seiten:E.seiten,erst:E.erst};merke(k,v);pers(k,v)}else{M.st.hit++;merke(k,E);if(PERS.has(k)){PERS.delete(k);PERS.set(k,E)}}}
+   else{try{M.log=(M.log||[]).slice(-11);M.log.push((gr?'grob ':fertig?'end ':'abw ')+[G.state,G.overlay||'',G.campTab||'',VW+'x'+VH,h.className].join('|'))}catch(e){}
+    if(gr){M.st.grobNein++;if(NEIN.size>400)NEIN.clear();NEIN.add(k);NEIN.add('g'+grob(k))/* dieser Aufbau hängt an den Texten: hier nicht mehr grob übernehmen */}else{if(fertig)M.st.bad++;vergiss(k);neu=1;if(M.speicher)spaeter()}M.st.voll++;
+    /* gemerkte Einpass-Werte wie vor dem Abspielen (sonst ginge der falsche Zoom in das echte Einpassen ein) */zustand(z0);
+    /* echt neu einpassen (vom jetzigen Stand aus – wird nicht gemerkt; beim nächsten Mal wird dieser Zustand normal aufgezeichnet) */mfAlt.apply(this,arguments)}}
+  else{/* aufzeichnen */let erst=false;try{erst=!mfTeil(h,MF.cfg)&&!mfTeil(h,MF.cache)}catch(e){}LOG=[];modus=k?1:0;
+   try{mfAlt.apply(this,arguments)}finally{modus=0}
+   /* noch nicht geladene Bilder/Videos (z. B. beim Einpassen eingefügtes Vorschauvideo): dieses Ergebnis nicht merken – es hinge vom Ladezeitpunkt ab */
+   let laedt=false;try{laedt=medienSig(h).indexOf('n;')>=0}catch(e){}if(laedt)M.st.laedt=(M.st.laedt||0)+1;
+   if(k&&!laedt){let end='',seiten='';try{end=endlage(h);seiten=seitenLage(h)}catch(e){}if(end){const v={log:LOG,end,seiten,erst};merke(k,v);pers(k,v);M.st.rec++}}}
+ }finally{modus=0;LOG=null;tief=0;if(kid)GEN.set(kid,(GEN.get(kid)||0)+1);const k2=h.firstElementChild;if(k2&&k2!==kid)GEN.set(k2,(GEN.get(k2)||0)+1)}}}
+const mfAlt=menuFit;M.alt=mfAlt;menuFit=huelle('m',mfAlt,h=>h||scr);
+/* zwFit (Zwischenmenüs mittig einpassen; im alten Chromium zuvor RG2.gapFix über alle Elemente) – gleiches Verfahren */
+if(typeof zwFit==='function'){const zwAlt=zwFit;M.zwAlt=zwAlt;zwFit=huelle('z',zwAlt,()=>scr)}
+
+M.fn={sig,endlage,speichern,laden};
+}catch(e){console.error('menue',e);window.__hsMENUE.err=String(e&&e.stack||e)}})();
+/* ================= Paket „dmtab“: Reiter-Name im Pausemenü, wenn die Karte „Schadensquellen“ da ist – window.__hsDMTAB =================
+   Vorher hieß der Reiter „SchadensquellenWer macht w…“ (Überschrift + Untertitel der aufklappbaren Karte zusammengeklebt).
+   Außerdem landeten die Pause-Einstellungen (Karte .ups) ohne eigene Überschrift auf der Seite davor (meist „Kombos“).
+   Jetzt: Reiter „Schadensquellen“ und eigener Reiter „Einstellungen“. */
+(function(){try{window.__hsDMTAB={v:3};
+{const f=cpGroups;cpGroups=function(tab,tb){const r=f.apply(this,arguments);try{if(!r||!r.groups)return r;const out=[];
+ for(const g of r.groups){const k=g.els.findIndex(e=>e.matches&&e.matches('.dmDet'));if(k<0){out.push(g);continue}
+  const d=g.els[k],eb=d.querySelector('summary .eyebrow'),nm=(eb&&eb.textContent.trim())||'Schadensquellen';
+  const vor=g.els.slice(0,k),nach=g.els.slice(k+1);
+  if(vor.length)out.push({n:g.n===cpName(d)?(CP_FIRST[tab]||'Übersicht'):g.n,els:vor});
+  out.push({n:nm,els:[d]});
+  if(nach.length)out.push({n:CP_FIRST[tab]||'Einstellungen',els:nach})}
+ if(tab==='pause'){const o2=[];for(const g of out){const k=g.els.findIndex(e=>e.matches&&e.matches('.card.ups'));
+  if(k>0){o2.push({n:g.n,els:g.els.slice(0,k)});o2.push({n:'Einstellungen',els:g.els.slice(k)})}else o2.push(g)}out.length=0;out.push(...o2)}
+ r.groups=out}catch(e){}return r}}
+}catch(e){console.error('dmtab',e);window.__hsDMTAB.err=String(e&&e.stack||e)}})();
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
