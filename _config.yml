@@ -1,0 +1,5 @@
+# GitHub Pages: Arbeitsdateien des Hörbuchs nicht mit veröffentlichen (Rohaufnahmen, Werkzeuge)
+exclude:
+  - audio/hoerbuch
+  - tools/hoerbuch
+  - README.md
