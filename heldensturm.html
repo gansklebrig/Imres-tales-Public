@@ -1,7 +1,21 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Heldensturm – das Roguelike zu Imres Tales: Barradin, Echo, Friedrich und Ezekiel kämpfen sich durch die ganze Kampagne.">
+<meta name="theme-color" content="#100c12">
+<link rel="manifest" href="heldensturm.webmanifest">
+<link rel="apple-touch-icon" href="heldensturm-icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta property="og:title" content="Heldensturm">
+<meta property="og:description" content="Das Roguelike zu Imres Tales: 15 Orte der Kampagne, Wetter und Tageszeiten, Wächter, Bosse, Beute und Talente – allein, zu viert am selben Bildschirm oder online.">
+<meta property="og:image" content="https://imrestales.de/vorschau.jpg">
+<style>[hidden]{display:none!important}body{margin:0}</style>
 <title>Heldensturm</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Alegreya+Sans:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="schriften/schriften.css">
 <style>
 /* Layout: Vollbild-Canvas als Spielwelt, darüber ein schlankes HUD und Pergament-dunkle Menüs. Eine einzige, bewusst dunkle Welt. */
 :root{
@@ -340,6 +354,8 @@ details.stats .stat{padding:0 12px 12px}
 .fire-wrap{min-height:70vh;justify-content:center;gap:8px}.fire-cv,.lager-cv{width:100%;max-width:640px;height:230px;border-radius:14px;border:1px solid rgba(229,180,84,.25);box-shadow:0 0 40px rgba(255,140,50,.12) inset;display:block;margin:6px auto;background:#0b0d1c}.lager-cv{height:260px;cursor:pointer}.fire-stats{margin:4px 0 0;font-size:14px;color:var(--muted,#b8a99a)}.fire-stats b{color:var(--text,#f4e9d8)}.fire-mvp{margin:0;font-size:14px}.fire-imre{margin:6px 0 0;font-style:italic;line-height:1.45;max-width:560px}.fire-imre span{font-style:normal;font-weight:800;color:#e5b454;letter-spacing:.04em}.fire-neu{margin:0;color:#ffd04a;font-size:14px}.npc-row{display:block;width:100%;max-width:520px;height:96px;margin:2px auto -4px}.fire-next{margin:0;font-size:13.5px}.lager-say{min-height:2.8em;margin:4px 0 6px;line-height:1.45}.lager-chips{justify-content:center}@media (max-width:520px){.fire-cv{height:190px}.lager-cv{height:220px}}
 </style>
 
+</head>
+<body>
 <canvas id="cv" aria-label="Spielfeld"></canvas>
 <div id="hud" hidden>
   <div class="top">
@@ -5111,7 +5127,7 @@ function showTitle(keep){unseedRng();if(CLOUD.pend&&!$('cloudAsk'))setTimeout(()
   :tab==='hilfe'?`<div class="facts"><div><span>Handy</span>Linke Bildschirmhälfte gedrückt halten und ziehen zum Laufen. Fähigkeiten unten rechts antippen, daneben Sprinten (verbraucht Ausdauer) und Heiltrank (füllt sich durch Kills wieder auf). Angriffe zielen automatisch – nah dran kämpft dein Held im Nahkampf, weiter weg auf Distanz.</div><div><span>PC</span>WASD oder Pfeiltasten, Shift = Sprinten, Leertaste = Ausweichrolle, Q = Heiltrank, Fähigkeiten 1–6, I = Beutel, T = Talente, M = Karte, Esc = Pause.</div><div style="grid-template-columns:minmax(0,1fr) auto;align-items:center"><div><span>Mit der Maus zielen</span>Angriffe und gerichtete Fähigkeiten fliegen zum Mauszeiger.</div><button class="btn ${SAVE.aim?'gold':''}" data-act="aim">${SAVE.aim?'An':'Aus'}</button></div><div><span>Entdecken</span>Leuchtende Schreine geben 30 Sekunden lang besondere Kraft. Rote Fässer explodieren – lauf dagegen, um sie in Gegner zu kicken. Truhen bergen Beute (manche beißen!), goldene Geheimgänge führen in Schatzkammern, und Schatzgoblins fliehen mit ihrer Beute. Zwischen den Stufen warten Würfel-Ereignisse und der Schmied, der Gegenstände aufwertet und Edelsteine einsetzt.</div><div><span>Fortschritt</span>Die Kampagne führt durch ${ORTE.length} Orte mit ${STAGES.length} Stufen. Jede Stufe endet mit einem Wächter, jeder Ort mit seinem Boss. Der Lauf wird zu Beginn jeder Stufe gespeichert. Gold bleibt immer erhalten. Im Roguelite behält jeder Held Stufe, Talente und Ausrüstung, und jeder besiegte Ort-Boss öffnet ein Portal als neuen Startpunkt. Im Hardcore beginnt jeder Lauf von vorn – dafür zählt er für die Bestenliste. Wer die ganze Kampagne schafft, schaltet die nächste Schwierigkeit frei.</div><div><span>Abspann</span>Musik und Klänge: Barradins Lautenwerk von imrestales.de mit Aufnahmen der VSCO 2 Community Edition von Versilian Studios (CC0). Laute, Dudelsack, Panflöte, Okarina und Gesang stammen aus dem Klangsatz „Fluid R3“ von Frank Wen, aufbereitet von Benjamin Gleitzman (CC BY 3.0). Die Orgel nahm Simon Dalzell (Ivy Audio) auf. Welt und Geschichte: Imre.</div></div><div class="card"><div class="eyebrow">Cloud-Spielstand</div><div id="cloudBox" style="display:flex;flex-direction:column;gap:10px">${cloudInner()}</div></div><div class="card ups"><div class="eyebrow">Einstellungen</div>${gfxRow()}${volRows()}</div><div class="card ups"><div class="eyebrow">Controller &amp; Mehrspieler</div><div class="ctlBox" style="display:flex;flex-direction:column;gap:8px">${ctlRows()}</div></div><p class="muted" style="font-size:12px;text-align:center;margin:4px 0 0">Spielversion ${HS_VERSION}</p>`
   :`${modeCard()}${astWahlHtml(sel)}<p class="lead">${H.blurb}</p><div class="facts"><div><span>Kampfstil</span>${ATKSTYLE[sel]}</div><div><span>Bester Lauf</span>${best}</div></div>`;
  showScreen(`<div class="camp" style="--hc:${HCOL[sel]}">
-  <header class="camp-top"><div><a class="back" href="https://imrestales.de/#taverne" target="_top">← Imres Tales</a><h1>Heldensturm</h1></div><div class="gold-pill" title="Gold"><i></i>${fmt(SAVE.gold)}</div></header>
+  <header class="camp-top"><div><a class="back" href="./#taverne">← Imres Tales</a><h1>Heldensturm</h1></div><div class="gold-pill" title="Gold"><i></i>${fmt(SAVE.gold)}</div></header>
   ${runBanner}
   <nav class="picker" aria-label="Held wählen">${picks}</nav>
   <div class="camp-main">
@@ -7068,7 +7084,7 @@ function nDec(v,res){if(typeof v==='string'){if(v[0]==='$')return netReg().get(v
 const nSame=(a,b)=>a===b||(a&&b&&typeof a==='object'&&typeof b==='object'&&JSON.stringify(a)===JSON.stringify(b));
 
 /* ---------- Transport ---------- */
-function netLib(){if(typeof window.Peer==='function')return Promise.resolve();return new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';s.integrity='sha384-nlUQ8ZqCbvStErob+biJNzSgltf6urV3VGqhfIfzhmg9RXmpeRm76ELw0pYnKlTR';s.crossOrigin='anonymous';s.onload=()=>typeof window.Peer==='function'?ok():no(new Error('lib'));s.onerror=()=>no(new Error('lib'));document.head.appendChild(s)})}
+function netLib(){if(typeof window.Peer==='function')return Promise.resolve();return new Promise((ok,no)=>{const s=document.createElement('script');s.src='vendor/peerjs.min.js';s.integrity='sha384-nlUQ8ZqCbvStErob+biJNzSgltf6urV3VGqhfIfzhmg9RXmpeRm76ELw0pYnKlTR';s.crossOrigin='anonymous';s.onload=()=>typeof window.Peer==='function'?ok():no(new Error('lib'));s.onerror=()=>no(new Error('lib'));document.head.appendChild(s)})}
 function netCfg(){return Object.assign({debug:0,config:{iceServers:[{urls:'stun:stun.cloudflare.com:3478'},{urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'],username:'peerjs',credential:'peerjsp'}]}},window.__netcfg||{})}
 /* Eigener Kanal ohne Neuversand: verlorene Pakete stören nicht, das nächste ersetzt sie ohnehin */
 function netU(conn,onMsg){try{const pc=conn.peerConnection;if(!pc)return null;const u=pc.createDataChannel('hsu',{negotiated:true,id:77,ordered:false,maxRetransmits:0});u.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(er){return}onMsg(m)};return u}catch(e){return null}}
@@ -37924,3 +37940,6 @@ window.__hs={get G(){return G},stil(){return{makeItem,makeSetItem,itemDelta,meis
  step(n,dt){for(let i=0;i<n;i++){if(G.state==='between'){if(G.stage<STAGES.length-1&&G.portal){setupStage(G.stage+1);G.state='play';hideScreen();hud.hidden=false}else if(!G.portal){hideScreen();hud.hidden=false;G.state='play'}}if(G.state!=='play')break;update(dt||1/30)}},render(){render(0.016);hudUpdate()},SAVE:()=>SAVE,stage(i){setupStage(i);hideScreen();hud.hidden=false;G.state='play';G.paused=false},MUSIK,MOUSE,pack(x,y){spawnPack(pickFoe(0.5),x,y)},kill(e){killEnemy(e,{})},dmg(e,v,o){return dealDmg(e,v,o||{})},drop(r,dx,dy){dropItem(P.x+dx,P.y+dy,randomItem(P.level+2,0,r))},xp(v){gainXp(v)},net(){return NET},netFns(){return{netHost,netJoin,netJoinScreen,netAction,netGuestReset,netCloseRoom,netWorld,netDiff,mpSlots}},fn(){return{dmSum,ccZaeh,CCZ,dmEndHtml,dmPauseHtml,LPOW,mouseAim,dealDmg,GFX,drawHero,openOverlay,recalc,spawnEnemy,makeElite,AFFIX,FOES,CURSES,WETTER,wxFor,makeItem,itemLines,showStageIntro,SETS,setsHtml,setLines,setFound,maybeEvent,renderEvent,chooseEvent,renderSmith,showTitle,startRun,enterSecret,leaveSecret,spawnThief,useShrine,openChest,makeSetItem,dailyInfo,endRun,showStageIntro,showChapterDone,breakProp,makeProps,say,setStages,CAMP_STAGES,EVENTS,smithAct,STAGES,doNextStage,enterPortal,gainXp,withP,rareStart,saeuleTreffer,teamKombo,zielTest:(k)=>{const S=STAGES[G.stage];G.allies=G.allies.filter(a=>a.kind==="rex");G.props=G.props.filter(p=>p.k!=="okaefig");const r=Math.random;Math.random=()=>0.01;try{zielWahl(S,Math.max(1,G.stage))}finally{Math.random=r}if(G.obj&&k&&G.obj.k!==k){const Z=ZIELE[k];G.obj={k,n:Z.n,d:Z.d,c:Z.c,done:0,fail:0,fr:0,txt:Z.n,t:0};if(k==="flucht"||k==="eskorte"){Math.random=()=>0.01;G.obj=null;let tries=0;while((!G.obj||G.obj.k!==k)&&tries++<60){Math.random=r;zielWahl(S,Math.max(1,G.stage));if(G.obj&&G.obj.k!==k)G.obj=null;Math.random=()=>0.01}Math.random=r}}zielProps();zielStart();return G.obj},portal2,leuchterSetzen,legS,makeAnc,ancRoll,dropItem,mpRemove,mpAddPlayer,groupRoll,musAk:a=>musAk(a),aktivSperre,ambiW:()=>ambiWunsch(),addMod,ambi:()=>JSON.stringify(Object.fromEntries(Object.entries(AMBI.el).map(([k,a])=>[k,{p:a.paused,bad:!!a._bad,g:a._g?+a._g.gain.value.toFixed(3):null}]))),lootBlocked,teleHits:typeof teleHits!=='undefined'?teleHits:null}},snd(){audioInit();return Object.keys(SND)},async sndLevel(n){const real=AC,realB=SFXB;const oc=new OfflineAudioContext(2,44100*3,44100);AC=oc;SFXB=oc.createGain();SFXB.connect(oc.destination);let err='';try{SND[n]()}catch(e){err=e.message}AC=real;SFXB=realB;const buf=await oc.startRendering();let pk=0,ss=0;const d=buf.getChannelData(0);for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);if(v>pk)pk=v;ss+=v*v}return{n,pk:+pk.toFixed(3),rms:+Math.sqrt(ss/d.length).toFixed(4),err}},item(r){return randomItem(P.level+2,0,r)},draw:{drawHero,drawRex,drawNpc:(c,n,x,y,t,s)=>drawNpc(c,n,x,y,t,s),NPCS,drawEnemy,FOES,GUARDS,BOSSES,setCx(c){cx=c}}};
 })();
 </script>
+
+</body>
+</html>
