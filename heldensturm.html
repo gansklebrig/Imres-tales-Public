@@ -37490,6 +37490,118 @@ M.fn={sig,endlage,speichern,laden};
   if(k>0){o2.push({n:g.n,els:g.els.slice(0,k)});o2.push({n:'Einstellungen',els:g.els.slice(k)})}else o2.push(g)}out.length=0;out.push(...o2)}
  r.groups=out}catch(e){}return r}}
 }catch(e){console.error('dmtab',e);window.__hsDMTAB.err=String(e&&e.stack||e)}})();
+/* ================= Paket „licht2“: Firefox – Spielleinwand auf der Grafikkarte halten; Bildschirm-Hz robust – window.__hsLICHT2 =================
+   Befund (Diagnose des Nutzers: Firefox 159 / Windows / RTX 3070, Bild 72 ms; derselbe PC in Edge: 3 ms):
+   Firefox rastert die 2D-Leinwand mit „Accelerated Canvas2D“ (DrawTargetWebgl) auf der Grafikkarte – aber nur, solange keine
+   Zeichenoperation vorkommt, die es dort nicht kann. Nicht unterstützt sind u. a. alle Mischmodi außer source-over, destination-over,
+   lighter, destination-out, source-atop, copy, multiply, screen. Jede andere Operation erzwingt einen vollständigen Rückfall
+   (Rücklesen der Leinwand in den Prozessor) und das Bild gilt als „fehlgeschlagen“. Sind nach 10 Bildern mehr als 30 % der Bilder
+   fehlgeschlagen, schaltet Firefox die Leinwand für den Rest der Sitzung DAUERHAFT auf Software (mAllowAcceleration=false) –
+   danach kostet jede große Fläche (Licht, Nebel, Vignette …) volle Prozessorzeit, auch nach dem Herunterschalten der Grafikstufe.
+   Das Spiel hatte genau EINE solche Operation, und zwar in jedem Bild ab Grafikstufe „Mittel“: die Farbstimmung
+   („Weichlicht“, oaGradLage: ein 160×90-Verlauf mit 'soft-light' über die ganze Leinwand). Nachgeprüft mit einer Nachbildung
+   der Firefox-Regeln (test/licht2/ffcheck.mjs) in allen Messszenen: sonst kein Rückfall auf der Spielleinwand.
+   Maßnahme 1 (nur Firefox, Chrome/Edge bleiben unverändert): Die Weichlicht-Ebene wird nicht mehr in die Leinwand gemalt, sondern
+   als eigene kleine Leinwand (160×90) direkt über der Spielleinwand gezeigt und vom Compositor (WebRender, Grafikkarte) mit
+   CSS mix-blend-mode: soft-light und gleicher Deckkraft gemischt – gleiche Mischformel, nur liegt sie jetzt über allem, was danach
+   in die Leinwand gemalt wird (Nebel, Funken, Effekte); Text der Text-Ebene und die Oberfläche liegen weiterhin darüber.
+   Wo das nicht passt (geteilter Bildschirm, Ausschnitte), nimmt Firefox die flache Variante (wie bei „Niedrig“) – nie soft-light.
+   Maßnahme 2: Bildschirm-Hz robust (Firefox rundet Zeitstempel teils grob): Sitzungswert = Median der schnellsten Messfenster statt
+   Minimum, Rundung auf übliche Bildwiederholraten; die Nachmessung der Diagnose überschreibt den Sitzungswert nicht mehr,
+   wenn das Spiel währenddessen weiter rechnete (Firefox: Bericht offen, Bild läuft weiter → „16 Hz“ statt 110 Hz).
+   Maßnahme 3: Diagnose nennt bei Firefox, dass der WebGL-Name nur eine „ähnliche“ Karte ist.
+   Schalter: __hsLICHT2.aus=true (alles aus), __hsLICHT2.modus='auto'|'an'|'aus' (Weichlicht-Ebene: auto = nur Firefox). Zähler: __hsLICHT2.st */
+(function(){try{window.__hsLICHT2={v:1};
+const L2=window.__hsLICHT2;L2.aus=false;L2.modus='auto';L2.st={ebene:0,flach:0,orig:0,hzFix:0,diagHz:0};L2.err=[];
+const lErr=(k,e)=>{if(L2.err.length<8)L2.err.push(k+': '+(e&&e.message||e))};
+const UA=String(navigator.userAgent||'');
+L2.firefox=/Firefox\/\d+/.test(UA)&&!/Seamonkey|Chrome\//.test(UA);
+const aktiv=()=>!L2.aus&&(L2.modus==='an'||(L2.modus==='auto'&&L2.firefox));
+L2.aktiv=aktiv;
+
+/* ---------- 1) Weichlicht als Compositor-Ebene ---------- */
+const EB={el:[null,null],src:[null,null],op:['',''],vis:[false,false],w:'',h:'',n:0,frame:[],inR:0,dom:false};
+L2.eb=EB;
+function ebEl(i){let c=EB.el[i];if(c&&c.isConnected)return c;
+ const base=document.getElementById('cv');if(!base||!base.parentNode)return null;
+ c=c||document.createElement('canvas');c.className='l2grad';c.setAttribute('aria-hidden','true');c.width=160;c.height=90;
+ c.style.cssText='position:fixed;left:0;top:0;pointer-events:none;mix-blend-mode:soft-light;image-rendering:auto;display:none;opacity:0';
+ /* direkt über der Spielleinwand: vor der Text-Ebene (#txtov, z-index 1) und allen übrigen Ebenen */
+ let ref=base.nextSibling;while(ref&&ref.classList&&ref.classList.contains('l2grad'))ref=ref.nextSibling;
+ base.parentNode.insertBefore(c,ref);EB.el[i]=c;EB.src[i]=null;EB.op[i]='';EB.vis[i]=false;return c}
+function ebZeig(i,A,k){const c=ebEl(i);if(!c)return false;
+ if(EB.src[i]!==A){const g=c.getContext('2d');if(c.width!==A.width||c.height!==A.height){c.width=A.width;c.height=A.height}
+  g.globalCompositeOperation='copy';g.globalAlpha=1;g.drawImage(A,0,0);g.globalCompositeOperation='source-over';EB.src[i]=A}
+ const w=(typeof W==='number'?W:innerWidth)+'px',h=(typeof H==='number'?H:innerHeight)+'px';
+ if(c.style.width!==w)c.style.width=w;if(c.style.height!==h)c.style.height=h;
+ const o=String(Math.round(Math.max(0,Math.min(1,k))*1000)/1000);if(EB.op[i]!==o){EB.op[i]=o;c.style.opacity=o}
+ if(!EB.vis[i]){EB.vis[i]=true;c.style.display='block'}return true}
+function ebAus(i){const c=EB.el[i];if(c&&EB.vis[i]){c.style.display='none';EB.vis[i]=false}}
+function ebAlleAus(){ebAus(0);ebAus(1)}
+L2.ebAus=ebAlleAus;
+function standard(c){try{if(!cv||c!==cv.getContext('2d'))return false;if(G.vp||(typeof splitOn==='function'&&splitOn()))return false;
+  const m=c.getTransform();return Math.abs(m.a-DPR)<1e-6&&Math.abs(m.d-DPR)<1e-6&&!m.b&&!m.c&&!m.e&&!m.f}catch(e){return false}}
+{const _gl=oaGradLage;oaGradLage=function(c,A,k,s){
+ if(!aktiv()||!A||!(s>=2)||OA.ul)return _gl.apply(this,arguments);
+ try{if(EB.inR&&standard(c)&&A.sl&&EB.frame.length<2){EB.frame.push([A.sl,k]);L2.st.ebene++;return}}catch(e){lErr('ebene',e)}
+ /* Firefox, aber keine passende Lage: flache Variante – nie 'soft-light' auf der Spielleinwand */
+ L2.st.flach++;return _gl.call(this,c,A,k,1)}}
+{const _r=render;render=function(){EB.inR++;if(EB.inR===1)EB.frame.length=0;let ok=false;
+ try{const r=_r.apply(this,arguments);ok=true;return r}
+ finally{EB.inR--;if(EB.inR===0){try{if(aktiv()&&EB.frame.length){const F=EB.frame;for(let i=0;i<2;i++){if(i<F.length)ebZeig(i,F[i][0],F[i][1]);else ebAus(i)}}else ebAlleAus()}catch(e){lErr('zeigen',e);ebAlleAus()}}}}}
+/* Bildschirm wechselt in Titel/Lager/Menü ohne Spielbild: Ebene weg */
+{const _sh=showScreen;showScreen=function(){const r=_sh.apply(this,arguments);try{if(!G||G.state!=='play')ebAlleAus()}catch(e){}return r}}
+
+/* ---------- 2) Bildschirm-Hz robust ---------- */
+const HZR=[60,72,75,85,90,100,110,120,144,155,160,165,170,175,180,200,240,280,300,360];
+function hzRund(hz){if(!(hz>0))return 0;let best=Math.round(hz),bd=1e9;for(const r of HZR){const d=Math.abs(hz-r)/r;if(d<bd){bd=d;best=r}}return bd<=0.04?best:Math.round(hz)}
+L2.hzRund=hzRund;
+/* Zeitgeber-Körnung (Firefox: 1 ms, mit „resistFingerprinting“ bis 16,7 ms) */
+let KORN=0;try{let a=performance.now(),mi=1e9,n=0;for(let i=0;i<300000&&n<4;i++){const b=performance.now();if(b!==a){if(n)mi=Math.min(mi,b-a);a=b;n++}}KORN=n>=2?mi:16.7}catch(e){}
+L2.korn=KORN;
+const HZ={win:[],raw:[],rnd:[]};L2.hz=HZ;
+function hzSchaetzen(){/* je Fenster: 20-%-Perzentil des Bildabstands (≥ 2,5 ms) und mittlerer Abstand; robust = Median der 3 schnellsten Fenster */
+ const W1=HZ.win.filter(x=>x.p>=2.5);if(!W1.length)return 0;
+ if(KORN>=4){/* grobe Zeitstempel: Perzentile unbrauchbar – mittlerer Abstand der schnellsten Fenster */
+  const m=W1.map(x=>x.m).sort((a,b)=>a-b).slice(0,3);return 1000/m[m.length>>1]}
+ const p=W1.map(x=>x.p).sort((a,b)=>a-b).slice(0,3);return 1000/p[p.length>>1]}
+{const fw=fpsWatch;fpsWatch=function(dt,raw,js){if(L2.aus)return fw.apply(this,arguments);
+ try{if(raw>0&&raw<1000)HZ.raw.push(raw)}catch(e){}const alt=PERF;const r=fw.apply(this,arguments);
+ try{if(PERF&&PERF!==alt&&HZ.raw.length>=8){const s=HZ.raw.slice().sort((a,b)=>a-b),p=s[Math.floor(s.length*0.2)],m=HZ.raw.reduce((a,b)=>a+b,0)/HZ.raw.length;
+   HZ.win.push({p,m});if(HZ.win.length>40)HZ.win.shift();HZ.raw.length=0;
+   const hz=hzRund(hzSchaetzen());if(hz>0){const per=1000/hz;const alt2=PERF.hz;PERF.hz=hz;
+    /* „verpasst“ relativ zur robusten Rate (gleiche Regel wie sweep: > 1,6 Bildabstände) */
+    PERF.miss=Math.round(s.filter(x=>x>per*1.6).length/s.length*100);if(alt2!==hz)L2.st.hzFix++;
+    try{const SW=window.__hsSWEEP;if(SW&&isFinite(SW.refMin))SW.refMin=per}catch(e){}}}
+  else if(PERF&&PERF!==alt)HZ.raw.length=0}catch(e){lErr('hz',e)}return r}}
+/* Arbeitszeit je Bild (für die Diagnose-Nachmessung): Ringpuffer der render-Dauer */
+const RB={t:new Float32Array(64),i:0,n:0};
+{const _r=render;render=function(){const a=performance.now();try{return _r.apply(this,arguments)}finally{RB.t[RB.i]=performance.now()-a;RB.i=(RB.i+1)&63;if(RB.n<64)RB.n++}}}
+function arbeitMedian(n){const k=Math.min(n,RB.n);if(!k)return 0;const a=[];for(let j=1;j<=k;j++)a.push(RB.t[(RB.i-j+64)&63]);a.sort((x,y)=>x-y);return a[a.length>>1]}
+/* Zählt render-Aufrufe seit Beginn der Nachmessung (läuft das Spielbild weiter, ist der gemessene Abstand keine Bildschirm-Rate) */
+let RN=0;{const _r=render;render=function(){RN++;return _r.apply(this,arguments)}}
+
+/* ---------- 3) Diagnose: Hz-Nachmessung absichern, Firefox-Hinweis zur Grafikkarte, Paket nennen ---------- */
+function diagHaken(){const DG=window.__hsDIAG;if(!DG||DG.__l2)return;DG.__l2=1;let wert=DG.daten;
+ Object.defineProperty(DG,'daten',{configurable:true,enumerable:true,get(){return wert},set(d){wert=d;try{if(d&&typeof d==='object'&&!L2.aus)diagDaten(d)}catch(e){lErr('diag',e)}}})}
+function diagDaten(d){
+ try{if(L2.firefox&&d.gl&&d.gl.ren&&!/ähnliche/.test(d.gl.ren))d.gl.ren+=' (Firefox meldet nur eine ähnliche Karte)'}catch(e){}
+ try{if(typeof d.pakete==='string'&&d.pakete.indexOf('licht2')<0)d.pakete+=(d.pakete?' ':'')+'licht2'+L2.v+(aktiv()?'(Ebene '+(L2.st.ebene>0?'an':'bereit')+')':'')}catch(e){}
+ try{if(d.hz>0){const r=hzRund(d.hz);if(r)d.hz=r}}catch(e){}
+ /* Nachmessung (diag: hzMessen) setzt nacheinander hzSitzung, hz, miss. Nur annehmen, wenn das Spielbild in der Zeit ruhte
+    (kaum render-Aufrufe bzw. kurze Arbeitszeit) – sonst gilt weiter der Sitzungswert. */
+ let hz=d.hz,hs=d.hzSitzung,miss=d.miss,sperre=false;const rn0=RN,t0=performance.now();
+ Object.defineProperty(d,'hzSitzung',{configurable:true,enumerable:true,get(){return hs},set(v){hs=v}});
+ Object.defineProperty(d,'hz',{configurable:true,enumerable:true,get(){return hz},set(v){
+   const dauer=Math.max(1,performance.now()-t0),bilder=RN-rn0,iv=v>0?1000/v:0,arbeit=arbeitMedian(Math.max(1,Math.min(48,bilder)));
+   /* render lief in mehr als der Hälfte der Bildaufrufe und brauchte ≥ 35 % des Abstands → Messung ungültig */
+   const lief=bilder>Math.max(4,dauer/Math.max(1,iv)*0.5)&&arbeit>=iv*0.35;
+   if(lief&&v<hz){sperre=true;hs=undefined;L2.st.diagHz++;return}
+   sperre=false;hz=hzRund(v)||v}});
+ Object.defineProperty(d,'miss',{configurable:true,enumerable:true,get(){return miss},set(v){if(sperre)return;miss=v}})}
+try{diagHaken()}catch(e){lErr('diaghaken',e)}
+
+}catch(e){console.error('licht2',e);window.__hsLICHT2.err=String(e&&e.stack||e)}})();
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
