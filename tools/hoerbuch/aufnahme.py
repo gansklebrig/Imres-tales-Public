@@ -143,7 +143,12 @@ def main():
     os.makedirs(os.path.join(WURZEL, "audio/hoerbuch/seg"), exist_ok=True)
     qa = J("tools/hoerbuch/qa-de.json", {})
     def aufnehmen(e):
-        mp3 = vertonen.tts(e["stimme"], e["text"], modell="eleven_v3", einstellung=einstellung(e, bes))
+        daten = {"text": e["text"], "model_id": "eleven_v3", "voice_settings": einstellung(e, bes), "language_code": "de"}
+        try:   # Sprache erzwingen: kurze Zeilen englischsprachiger Stimmen kippen sonst ins Englische
+            mp3 = vertonen.veredeln(vertonen.anfrage(f"/v1/text-to-speech/{e['stimme']}?output_format=mp3_44100_128", daten, roh=True))
+        except SystemExit as ex:
+            if "language" not in str(ex).lower(): raise
+            mp3 = vertonen.tts(e["stimme"], e["text"], modell="eleven_v3", einstellung=einstellung(e, bes))
         open(os.path.join(WURZEL, datei(e, bes)), "wb").write(mp3)
     for n, e in enumerate(fehlend, 1):
         try:
