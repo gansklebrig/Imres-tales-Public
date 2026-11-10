@@ -96,6 +96,18 @@ def sichern(nachricht):
 def dauer(f):
     return float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", os.path.join(WURZEL, f)]).strip())
 
+NAMEN = ["Rex", "Echo", "Friedrich", "Ezekiel", "Gundren", "Nundro", "Barradin", "Glasstab", "Fagas", "Kardal", "Harbin", "Zilda"]
+def namen_fehlen(ziel, hyp):
+    """Eigennamen, die gesprochen werden sollten, aber nicht (oder als anderes Wort) zu hören sind – z. B. „Reich“ statt „Rex“."""
+    hw = [re.sub(r"[^a-zäöüß]", "", w.lower()) for w in hyp.split()]
+    fehlt = []
+    for n in NAMEN:
+        soll = len(re.findall(r"\b%s\b" % n, klar(ziel)))
+        if not soll: continue
+        ist = sum(1 for w in hw if difflib.SequenceMatcher(None, n.lower(), w).ratio() >= .7 or n.lower() in w)
+        if ist < soll: fehlt.append(n)
+    return fehlt
+
 def pruefen(modell, f, ziel):
     seg, _ = modell.transcribe(os.path.join(WURZEL, f), language="de", word_timestamps=True, vad_filter=False, beam_size=5, condition_on_previous_text=False)
     woerter = [[w.word.strip(), round(w.start, 3), round(w.end, 3)] for s in seg for w in s.words]
@@ -106,8 +118,9 @@ def pruefen(modell, f, ziel):
     d = dauer(f); erwartet = len(klar(ziel)) / 14.5 + .6
     lang = len(b) > len(a) * 1.25 + 8
     grenze = .78 if len(a) < 30 else .86
-    ok = ratio >= grenze and not verrat and not lang and erwartet * .45 < d < erwartet * 2.4 + 2
-    return {"ok": ok, "ratio": round(ratio, 3), "verrat": verrat, "dauer": round(d, 2), "erwartet": round(erwartet, 2), "hyp": hyp, "woerter": woerter}
+    namen = namen_fehlen(ziel, hyp)
+    ok = ratio >= grenze and not verrat and not lang and not namen and erwartet * .45 < d < erwartet * 2.4 + 2
+    return {"ok": ok, "ratio": round(ratio, 3), "verrat": verrat, "namen": namen, "dauer": round(d, 2), "erwartet": round(erwartet, 2), "hyp": hyp, "woerter": woerter}
 
 def main():
     kapitel = (os.environ.get("KAPITEL") or "vorab,I").split(",")
