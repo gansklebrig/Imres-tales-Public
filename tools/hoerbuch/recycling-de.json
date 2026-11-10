@@ -1620,5 +1620,73 @@
    "bis": 12.51,
    "text": "Ein Drache, der seinem Priester nicht traut, ein Priester, der Diebe verdächtigt, und wir mittendrin. Ich spüre ein neues Lied."
   }
+ ],
+ "I-59fe0cbd": [
+  {
+   "neu": 0,
+   "text": "Ihr ... ihr gehört nicht zu denen?"
+  },
+  {
+   "neu": 1,
+   "text": "Den Göttern sei Dank!"
+  }
+ ],
+ "I-5ac8ff79": [
+  {
+   "neu": 0,
+   "text": "Stillhalten."
+  },
+  {
+   "neu": 1,
+   "text": "Und Ruhe."
+  }
+ ],
+ "I-5caddd8c": [
+  {
+   "neu": 0,
+   "text": "Ich gehe zuerst rein."
+  },
+  {
+   "neu": 1,
+   "text": "Echo, du hältst mir den Rücken frei."
+  },
+  {
+   "neu": 2,
+   "text": "Barradin, du ..."
+  }
+ ],
+ "I-1e232a3f": [
+  {
+   "neu": 0,
+   "text": "Kein Rauch aus den Kaminen."
+  },
+  {
+   "neu": 1,
+   "text": "Keine Hühner."
+  },
+  {
+   "neu": 2,
+   "text": "Hier stimmt was nicht."
+  }
+ ],
+ "II-5699d9a2": [
+  {
+   "neu": 0,
+   "text": "Nicht auf die dicken Fäden treten."
+  },
+  {
+   "neu": 1,
+   "text": "Die zittern bis zum Nest."
+  }
+ ],
+ "II-1cfe361c": [
+  {
+   "neu": 0,
+   "text": "Barradin."
+  },
+  {
+   "neu": 1,
+   "text": "Was machst du da?"
+  }
  ]
 }
