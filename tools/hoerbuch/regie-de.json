@@ -284,7 +284,7 @@
 "p": 0.0
 },
 "I-f8301b42": {
-"t": "[whispers] Links. Im Unterholz.",
+"t": "[whispers] Links. [whispers] Im Unterholz.",
 "p": 0.5
 },
 "I-075a5969": {
@@ -616,7 +616,7 @@
 "p": 1.6
 },
 "I-59fe0cbd": {
-"t": "[whispers] Ihr … ihr gehört nicht zu denen? [relieved] Den Göttern sei Dank!",
+"t": "[whispers] Ihr … [whispers] ihr gehört nicht zu denen? [whispers] [relieved] Den Göttern sei Dank!",
 "p": 0.4
 },
 "I-5359b7d3": {
@@ -992,7 +992,7 @@
 "p": 0.5
 },
 "I-5ac8ff79": {
-"t": "[whispers] Stillhalten. Und Ruhe.",
+"t": "[whispers] Stillhalten. [whispers] Und Ruhe.",
 "p": 0.3
 },
 "I-273291d1": {
@@ -1008,7 +1008,7 @@
 "p": 0.0
 },
 "I-5caddd8c": {
-"t": "[whispers] Ich gehe zuerst rein. Echo, du hältst mir den Rücken frei. Barradin, du …",
+"t": "[whispers] Ich gehe zuerst rein. [whispers] Echo, du hältst mir den Rücken frei. [whispers] Barradin, du …",
 "p": 0.35
 },
 "I-869c86a7": {
@@ -1560,7 +1560,7 @@
 "p": 1.8
 },
 "I-1e232a3f": {
-"t": "[whispers] Kein Rauch aus den Kaminen. Keine Hühner. Hier stimmt was nicht.",
+"t": "[whispers] Kein Rauch aus den Kaminen. [whispers] Keine Hühner. [whispers] Hier stimmt was nicht.",
 "p": 0.35
 },
 "I-7fc55abc": {
@@ -2144,7 +2144,7 @@
 "p": 1.6
 },
 "II-5699d9a2": {
-"t": "[whispers] Nicht auf die dicken Fäden treten. Die zittern bis zum Nest.",
+"t": "[whispers] Nicht auf die dicken Fäden treten. [whispers] Die zittern bis zum Nest.",
 "p": 0.3
 },
 "II-3f718c71": {
@@ -2300,7 +2300,7 @@
 "p": 1.5
 },
 "II-a5d88671": {
-"t": "[whispers] Helft mir … bitte … [desperate] holt mich hier raus …",
+"t": "[whispers] Helft mir … [whispers] bitte … [whispers] [desperate] holt mich hier raus …",
 "p": 0.8
 },
 "II-47fdcbb7": {
@@ -2377,7 +2377,7 @@
 },
 "II-f78e7a11": {
 "t": "[awed] Als Ezekiel das Schwert emporhob, um es genauer zu betrachten, wurde es hell im Grab. Kein Fackelschein, sondern ein warmes Licht wie ein Sonnenaufgang, mitten im Unterreich, wo seit Jahrtausenden keine Sonne geschienen hatte. [softly] Rex blinzelte. [sad] Ich sah zu Fagas hinüber. Er hätte das sehen sollen. [dryly] Echo trat einen halben Schritt näher:",
-"p": 2.2
+"p": 2.0
 },
 "II-561beaa0": {
 "t": "[mischievously] Wenn du's nicht willst …",
@@ -2572,7 +2572,7 @@
 "p": 2.0
 },
 "II-2ec39573": {
-"t": "[whispers] Nein … nein, nein …",
+"t": "[whispers] Nein … [whispers] nein, nein …",
 "p": 0.4
 },
 "II-42936f1a": {
@@ -2641,7 +2641,7 @@
 },
 "II-4047c01c": {
 "t": "[sad] Ich hörte mich selbst flüstern:",
-"p": 2.5
+"p": 2.0
 },
 "II-0d180693": {
 "t": "[whispers] Ploopploopeen.",
@@ -3052,7 +3052,7 @@
 "p": 1.6
 },
 "II-e4f6abf7": {
-"t": "[whispers] Dreihunderttausend … vierhunderttausend … plus Hund …",
+"t": "[whispers] Dreihunderttausend … [whispers] vierhunderttausend … [whispers] plus Hund …",
 "p": 0.4
 },
 "II-49d5e4d7": {
@@ -3088,7 +3088,7 @@
 "p": 1.2
 },
 "II-1cfe361c": {
-"t": "[whispers] Barradin. Was machst du da?",
+"t": "[whispers] Barradin. [whispers] Was machst du da?",
 "p": 0.3
 },
 "II-8c0d7c75": {

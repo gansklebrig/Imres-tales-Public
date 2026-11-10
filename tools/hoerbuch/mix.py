@@ -14,6 +14,7 @@ import hashlib, json, os, re, subprocess, sys
 WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ZIEL = "audio/chronik/de/mix"
 TMP = os.environ.get("TMPDIR", "/tmp")
+NACHLAUF = 1.4   # Sekunden Ausklang nach dem letzten Absatz einer Spur
 
 def main():
     kapitel = sys.argv[1:] or ["vorab", "I", "II"]
@@ -44,6 +45,17 @@ def main():
                 open(log, "w").write(r.stdout + r.stderr)
                 if r.returncode or not os.path.exists(os.path.join(WURZEL, datei)): sys.exit(f"Fehler bei {spec}:\n{r.stdout[-800:]}{r.stderr[-800:]}")
             zeiten = [(mm.group(1), float(mm.group(2)), float(mm.group(3))) for mm in re.finditer(r"Absatz (\S+) ab\s+([\d.]+)s \(\s*([\d.]+)s\)", open(log).read())]
+            # Spur-Ende kürzen: nach dem letzten Wort höchstens NACHLAUF s (sonst summiert sich mit dem Anfang der
+            # nächsten Spur eine zu lange Pause zwischen den Abschnitten); das Kapitelende (Cliffhanger) bleibt ganz
+            if "--ende" not in flags and zeiten:
+                ende = zeiten[-1][1] + zeiten[-1][2] + NACHLAUF
+                pfad = os.path.join(WURZEL, datei)
+                dauer = float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", pfad]))
+                if dauer > ende + .3:
+                    tmp = pfad + ".tmp.mp3"
+                    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", pfad, "-t", f"{ende:.2f}", "-af", f"afade=t=out:st={ende - 1.0:.2f}:d=1.0",
+                                    "-b:a", "128k", tmp], check=True)
+                    os.replace(tmp, pfad)
             for j, (key, ab, d) in enumerate(zeiten):
                 bis = zeiten[j + 1][1] if j + 1 < len(zeiten) else ab + d + 30
                 absaetze[key] = {"datei": datei, "ab": round(ab, 2), "bis": round(bis, 2)}

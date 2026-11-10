@@ -211,8 +211,16 @@
       const m = mix[x.kap + ":" + x.i];
       if (!mixLaeuft && H) H.stopp();          /* Live-Mischung aus, die Spur bringt alles mit */
       mixLaeuft = true;
-      if (mixDatei !== m.datei) { mixDatei = m.datei; audio.src = m.datei + (m.ab > .5 ? "#t=" + m.ab : ""); }
+      if (mixDatei !== m.datei) {
+        mixDatei = m.datei;
+        const v = vorrat.get(m.datei);   /* schon vorab geladen → sofort, ohne Netz-Pause zwischen den Abschnitten */
+        audio.src = (v && v.url ? v.url : m.datei) + (m.ab > .5 ? "#t=" + m.ab : "");
+      }
       else if (art !== "weiter") { try { audio.currentTime = m.ab; } catch (_) {} }
+      /* nächste Spur im Hintergrund komplett laden, damit der Abschnittswechsel auch bei schwachem Netz nahtlos ist */
+      const naechste = liste.slice(pos + 1).map(y => mix[y.kap + ":" + y.i]).find(y => y && y.datei !== m.datei);
+      if (naechste) holen(naechste.datei);
+      vorrat.forEach((e, d) => { if (d.indexOf("/mix/") >= 0 && d !== m.datei && (!naechste || d !== naechste.datei)) { if (e.url) URL.revokeObjectURL(e.url); vorrat.delete(d); } });
       quelleSofort = true; audio.playbackRate = tempo; spielt = true;
       schreib("imres-vorlesen-pos", JSON.stringify({ sp: mSprache, kap: x.kap, i: x.i }));
       markieren(); zeichnen(); medienInfo(); los(); return;

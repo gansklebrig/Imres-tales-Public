@@ -1820,7 +1820,7 @@ def partitur():
         # grenze: Begrenzer-Schwelle in dB (Decke des Hörspiels ≈ −3,5 dBFS), grenzeSprache: dieselbe, solange die Stimme
         # spricht (≈ −9,5 dBFS – Stimme + Hörspiel bleiben so unter 0 dBFS); musik: Zwischenspiele ~3 LU unter der Stimme;
         # unter*: Untermalung (Stärke, unter der Stimme, in Sprechpausen, zwischen Absätzen)
-        "pegel": {"atmo": .8, "atmoSprache": .34, "atmoPause": 1.0, "fx": 1.1, "musik": .4, "hall": .22,
+        "pegel": {"atmo": .74, "atmoSprache": .34, "atmoPause": 1.0, "fx": 1.1, "musik": .4, "hall": .22,
                   "summe": 2.23, "grenze": -4, "grenzeSprache": -8, "unter": .6, "unterSprache": .55, "unterLuecke": .8, "unterPause": 1.0},
         "abschnitte": abschnitte,
         "orte": ORTE,
