@@ -2209,10 +2209,10 @@ const HEROES={
       later(0.15+i*0.09,()=>{const t=k==='draht'?fstDraht(x,y,a+Math.PI/2,rr,du,1):k==='schlinge'?fstSchlinge(x,y,rr,du,1):fstSpreng(x,y,rr,du,1);fstBau(t.x,t.y);if(i%2===0)sfxAt('holz',x,y)})}
      G.fxs.push({k:'ring',x:p.x,y:p.y,r:R,c:'#d8463a',t:0,life:0.7,w:4});sfx('ult');sfx('bark')}}
   ]},
- ezekiel:{name:'Ezekiel',cls:'Darkin-Schurke',role:'Nah- & Fernkampf',dm:1.15,hp:105,dmg:11,rate:1.55,speed:178,range:400,sig:'z_cleave',
+ ezekiel:{name:'Ezekiel',cls:'Goliath-Schurke',role:'Nah- & Fernkampf',dm:1.15,hp:105,dmg:11,rate:1.55,speed:178,range:400,sig:'z_cleave',
   blurb:'„The Destroyer“. Zerlegt alles in Reichweite mit Klingen, führt Dawnbringer, wirft Dolche auf den Rest und taucht im Schatten genau dort auf, wo es wehtut.',
-  branches:['Klingen','Darkin','Schatten','Dieb','Phantom'],
-  meleeW:[{n:'Dolchpaar',r:1.2,d:0.85},{n:'Krummschwert',r:1,d:1},{n:'Darkin-Klinge',r:0.82,d:1.32,imp:['ls',2]}],rangedW:[{n:'Wurfmesser',r:1.1,d:0.95,imp:['crit',5]},{n:'Wurfsterne',r:1.3,d:0.76},{n:'Schattendolche',r:0.88,d:1.2,imp:['ls',1.5]}],
+  branches:['Klingen','Goliath','Schatten','Dieb','Phantom'],
+  meleeW:[{n:'Dolchpaar',r:1.2,d:0.85},{n:'Krummschwert',r:1,d:1},{n:'Goliath-Klinge',r:0.82,d:1.32,imp:['ls',2]}],rangedW:[{n:'Wurfmesser',r:1.1,d:0.95,imp:['crit',5]},{n:'Wurfsterne',r:1.3,d:0.76},{n:'Schattendolche',r:0.88,d:1.2,imp:['ls',1.5]}],
   basic(){const wh=rank('z_whirl');const ring8=()=>{if(wh&&Math.random()<0.05*wh)daggerRing(8,P.st.dmg*0.6)};
    return basicStd({meleeR:100,arc:1.9,mm:1.3,mc:'#ff5a5a',mopt:{onHit:ring8},
     ranged:(a)=>{shoot({x:P.x,y:P.y-4,a,spd:680,dmg:P.st.dmg*0.85,r:6,pierce:0,kind:'dagger',c:'#d8dde3',basic:1,hit:ring8});sfx('throw')}})},
@@ -2228,17 +2228,17 @@ const HEROES={
     cast(r){startChan({t:2.5+0.3*r,every:0.2,move:1,spin:1,fn:()=>{const R=115*P.st.area;aoe(P.x,P.y,R,sk(0.65+0.14*r),{knock:60,melee:1});G.fxs.push({k:'spin',x:P.x,y:P.y,r:R,t:0,life:0.2});sfx('slash')}})}},
    {id:'z_lotus',b:0,row:5,a:1,ult:1,ic:'❃',name:'Todeslotus',cd:()=>45,d:r=>`2,5 s lang schleudert Ezekiel Dolche in alle Richtungen – ${40+10*r} Dolche, je ${pc(1.2+0.35*r)} Schaden.`,
     cast(r){const n=40+10*r,ev=2.5/n;let k=0;startChan({t:2.5,every:ev,move:0,spin:1,fn:()=>{const a=k++*2.39;shoot({x:P.x,y:P.y-4,a,spd:640,dmg:sk(1.2+0.35*r),r:7,pierce:1,kind:'dagger',c:'#ff8a8a',life:0.9});if(k%4===0)sfx('throw')}})}},
-   {id:'z_cleave',b:1,row:0,a:1,ic:'⌒',name:'Darkin-Schnitt',cd:()=>5,d:r=>`Ein gewaltiger, gefächerter Hieb trifft alle Gegner vor Ezekiel: ${pc(2.15+0.5*r)} Schaden und Rückstoß.`,
+   {id:'z_cleave',b:1,row:0,a:1,ic:'⌒',name:'Goliath-Schnitt',cd:()=>5,d:r=>`Ein gewaltiger, gefächerter Hieb trifft alle Gegner vor Ezekiel: ${pc(2.15+0.5*r)} Schaden und Rückstoß.`,
     cast(r){const a=aimAng(400),R=(175+10*r)*P.st.area;faceA(a);cone(P.x,P.y,a,2.45,R,sk(2.15+0.5*r),{knock:300,melee:1});slash(P.x,P.y,a,2.45,R,'#ff3b4a',0.35,1);G.shake+=3;sfx('cleave')}},
-   {id:'z_wrath',b:1,row:1,ic:'✹',name:'Darkin-Zorn',d:r=>`Je 10% fehlendem Leben +${f1(1.5*r)}% Schaden. +${f1(1.5*r)}% Lebensraub.`,mod:(s,r)=>{s.ls+=0.015*r}},
+   {id:'z_wrath',b:1,row:1,ic:'✹',name:'Goliath-Zorn',d:r=>`Je 10% fehlendem Leben +${f1(1.5*r)}% Schaden. +${f1(1.5*r)}% Lebensraub.`,mod:(s,r)=>{s.ls+=0.015*r}},
    {id:'z_frenzy',b:1,row:2,a:1,ic:'✷',name:'Blutrausch',cd:()=>18,d:r=>`6 s lang +${40+8*r}% Angriffstempo, +15% Bewegungstempo und +8% Lebensraub. Mitspieler in der Nähe erhalten 8% Lebensraub.`,
     cast(r){P.buffs.frenzy=6;teamBuff('frenzyG',6);recalc();ring(P.x,P.y,55,'#ff3b4a',0.5,5);burst(P.x,P.y,'#ff3b4a',18,160);sfx('roar')}},
    {id:'z_dawn',b:1,row:3,c:0,a:1,ic:'☼',name:'Dawnbringer',cd:()=>7,d:r=>`Ein Hieb aus Sonnenlicht in weitem Bogen: ${pc(2.5+0.55*r)} Schaden, die Getroffenen brennen. Untote und Dämonen erleiden doppelten Schaden.`,
     cast(r){const a=aimAng(380),R=(200+10*r)*P.st.area;faceA(a);cone(P.x,P.y,a,2,R,sk(2.5+0.55*r),{holy:1,melee:1,onHit:e=>dot(e,'burn',sk(0.4+0.1*r),3)});slash(P.x,P.y,a,2,R,'#ffe08a',0.4,1);burst(P.x+Math.cos(a)*R*0.6,P.y+Math.sin(a)*R*0.6,'#fff0b0',20,200);sfx('cleave')}},
-   {id:'z_pact',b:1,row:3,c:1,ic:'♥',name:'Blutpakt',d:r=>`Unter 50% Leben – oder wenn ein Mitspieler in der Nähe unter 30% fällt – erwacht der Pakt: +${3*r}% Lebensraub, +${6*r}% Schaden, und jeder Treffer heilt diesen Mitspieler um ${f1(1.5*r)}% des Schadens. Einmal pro Stufe weigert sich der Darkin zu sterben: Ein tödlicher Treffer lässt Ezekiel mit ${10+4*r}% Leben und 1,5 s unverwundbar zurück.`},
-   {id:'z_leap',b:1,row:4,a:1,ic:'⤊',name:'Darkin-Sprung',cd:()=>8,d:r=>`Ezekiel springt zum Ziel und schlägt ein: ${pc(2.2+0.5*r)} Schaden im Umkreis und 1 s Betäubung.`,
+   {id:'z_pact',b:1,row:3,c:1,ic:'♥',name:'Blutpakt',d:r=>`Unter 50% Leben – oder wenn ein Mitspieler in der Nähe unter 30% fällt – erwacht der Pakt: +${3*r}% Lebensraub, +${6*r}% Schaden, und jeder Treffer heilt diesen Mitspieler um ${f1(1.5*r)}% des Schadens. Einmal pro Stufe weigert sich der Goliath zu sterben: Ein tödlicher Treffer lässt Ezekiel mit ${10+4*r}% Leben und 1,5 s unverwundbar zurück.`},
+   {id:'z_leap',b:1,row:4,a:1,ic:'⤊',name:'Goliath-Sprung',cd:()=>8,d:r=>`Ezekiel springt zum Ziel und schlägt ein: ${pc(2.2+0.5*r)} Schaden im Umkreis und 1 s Betäubung.`,
     cast(r){const p=aimPoint(420),a=ang(P,p),dist=Math.max(40,Math.sqrt(d2(P,p)));P.leap={t:0.32,T:0.32};dash(a,dist,0.32,0,{},()=>{const R=120*P.st.area;aoe(P.x,P.y,R,sk(2.2+0.5*r),{stun:1,knock:200,fx:P.x,fy:P.y});ring(P.x,P.y,R,'#ff3b4a',0.5,6);burst(P.x,P.y,'#a89a8a',20,240);G.shake+=6;sfx('boom')});sfx('roar')}},
-   {id:'z_ascend',b:1,row:5,a:1,ult:1,ic:'♆',name:'Erwachter Darkin',cd:()=>50,d:r=>`${8+2*r} s lang erwacht der Darkin in Ezekiel: +${40+15*r}% Schaden, +30% Wirkungsbereich, +10% Lebensraub, immun gegen Betäubung, Fesseln und Verlangsamung.`,
+   {id:'z_ascend',b:1,row:5,a:1,ult:1,ic:'♆',name:'Erwachter Goliath',cd:()=>50,d:r=>`${8+2*r} s lang erwacht der Goliath in Ezekiel: +${40+15*r}% Schaden, +30% Wirkungsbereich, +10% Lebensraub, immun gegen Betäubung, Fesseln und Verlangsamung.`,
     cast(r){P.buffs.ascend=8+2*r;P.ascendR=r;recalc();ring(P.x,P.y,120,'#ff3b4a',0.8,8);burst(P.x,P.y,'#ff3b4a',40,260);G.shake+=6;sfx('boss')}},
    {id:'z_step',b:2,row:0,a:1,ic:'⇝',name:'Schattenschritt',cd:r=>Math.max(3,6.5-0.4*r),d:r=>`Ezekiel teleportiert sich mitten unter die Gegner und verursacht dort ${pc(0.9+0.2*r)} Schaden. Kurz unverwundbar.`,
     cast(r){const p=aimPoint(430);smoke(P.x,P.y);P.x=clamp(p.x,20,WORLD-20);P.y=clamp(p.y,20,WORLD-20);P.inv=Math.max(P.inv,0.5);const as=rank('z_assassin');if(as)P.ambush=Math.max(P.ambush||0,0.5*as);
@@ -2259,8 +2259,8 @@ const HEROES={
     cast(r){return zdOel(r)}},
    {id:'z_d_kraehe',b:3,row:3,c:0,a:1,ic:'⁂',name:'Krähenfüße',cd:()=>9,d:r=>`Ezekiel springt zurück und streut dabei Krähenfüße (5 s): Gegner darauf werden um 50% verlangsamt und erleiden insgesamt ${pc(2.5+0.6*r)} Schaden. Der Sprung macht kurz unverwundbar.`,
     cast(r){return zdKraehe(r)}},
-   {id:'z_d_hehler',b:3,row:3,c:1,ic:'⚖',name:'Hehlerware',d:r=>`Ezekiel trägt bis zu 3 gestohlene Kräfte gleichzeitig (statt 2), und sie wirken ${10*r}% stärker. Jede gestohlene Kraft lädt einen halben Darkin-Blutstropfen.`},
-   {id:'z_d_raub',b:3,row:4,a:1,ic:'⚓',name:'Kraftraub',cd:()=>12,d:r=>`Ein Enterhaken packt den stärksten Gegner: ${pc(2.5+0.6*r)} Schaden, 0,8 s Betäubung, und Ezekiel reißt ihn zu sich heran. Champions verlieren ALLE Eigenschaften an Ezekiel, Bosse und Wächter ihren Riesenzorn, alle anderen ihren Mumm. Abschluss: verbraucht Darkin-Blut – jeder Tropfen lässt die geraubten Kräfte 1 s länger halten.`,
+   {id:'z_d_hehler',b:3,row:3,c:1,ic:'⚖',name:'Hehlerware',d:r=>`Ezekiel trägt bis zu 3 gestohlene Kräfte gleichzeitig (statt 2), und sie wirken ${10*r}% stärker. Jede gestohlene Kraft lädt einen halben Goliath-Blutstropfen.`},
+   {id:'z_d_raub',b:3,row:4,a:1,ic:'⚓',name:'Kraftraub',cd:()=>12,d:r=>`Ein Enterhaken packt den stärksten Gegner: ${pc(2.5+0.6*r)} Schaden, 0,8 s Betäubung, und Ezekiel reißt ihn zu sich heran. Champions verlieren ALLE Eigenschaften an Ezekiel, Bosse und Wächter ihren Riesenzorn, alle anderen ihren Mumm. Abschluss: verbraucht Goliath-Blut – jeder Tropfen lässt die geraubten Kräfte 1 s länger halten.`,
     cast(r){return zdRaub(r)}},
    {id:'z_d_coup',b:3,row:5,a:1,ult:1,ic:'♛',name:'Der große Coup',cd:()=>40,d:r=>`Ezekiel verschwindet in einem Münzwirbel und huscht nacheinander zu bis zu ${6+r} Gegnern – je ${pc(3.5+0.9*r)} Schaden, und jeder wird bestohlen. Dann reißt er den Beutel auf: ${pc(6+1.5*r)} Schaden ringsum, und alle gestohlenen Kräfte halten 6 s länger. Währenddessen ist er unverwundbar.`,
     cast(r){return zdCoup(r)}},
@@ -2271,7 +2271,7 @@ const HEROES={
    {id:'z_p_gang',b:4,row:3,c:0,a:1,ic:'❖',name:'Geisterhafter Gang',cd:()=>12,d:r=>`${f1(3+0.3*r)} s lang wird Ezekiel körperlos: +35% Lauftempo, 50% weniger erlittener Schaden, und er gleitet durch Gegner hindurch – jeder durchquerte erleidet ${pc(1.2+0.3*r)} Schaden und wird 1 s verlangsamt.`,
     cast(r){return zpGang(r)}},
    {id:'z_p_wache',b:4,row:3,c:1,ic:'⛨',name:'Totenwache',d:r=>`Die kreisenden Seelen wachen über Ezekiel: Alle ${f1(4-0.4*r)} s fängt eine Seele ein feindliches Geschoss ab und schleudert es als Geisterecho auf den nächsten Gegner (${pc(1+0.25*r)} Schaden). Die Seele bleibt erhalten.`},
-   {id:'z_p_ernte',b:4,row:4,a:1,ic:'⚚',name:'Seelenernte',cd:()=>9,d:r=>`Ezekiel lässt alle Seelen los (zwei Geister erscheinen auch ohne): Jede stürzt sich heulend auf einen Gegner – je ${pc(1.6+0.4*r)} Schaden – und heilt Ezekiel um 2% Leben. Abschluss: verbraucht Darkin-Blut.`,
+   {id:'z_p_ernte',b:4,row:4,a:1,ic:'⚚',name:'Seelenernte',cd:()=>9,d:r=>`Ezekiel lässt alle Seelen los (zwei Geister erscheinen auch ohne): Jede stürzt sich heulend auf einen Gegner – je ${pc(1.6+0.4*r)} Schaden – und heilt Ezekiel um 2% Leben. Abschluss: verbraucht Goliath-Blut.`,
     cast(r){return zpErnte(r)}},
    {id:'z_p_schrei',b:4,row:5,a:1,ult:1,ic:'☊',name:'Todesschrei',cd:()=>35,d:r=>`Ein Schrei aus dem Grab: ${pc(12+3*r)} Schaden ringsum, und die Gegner fliehen 2 s in Furcht. Danach ist Ezekiel ${8+2*r} s lang ein Freund des Todes: Jeder Kill fängt sicher eine Seele, bis zu 3 Seelen mehr kreisen um ihn, und jeder Treffer hallt als Wehklagen nach (mindestens 30%).`,
     cast(r){return zpSchrei(r)}},
@@ -2288,7 +2288,7 @@ const RARCOL=['#c4bcae','#ff8cc6','#f2d24c','#bf7dff','#ff8d2e','#3fdc6a'];
 const RARB=[1,1.08,1.16,1.26,1.42,1.34];
 const BASES={helm:['Lederkappe','Eisenhelm','Hörnerhelm','Kapuze','Stirnreif','Topfhelm'],armor:['Wams','Kettenhemd','Schuppenpanzer','Robe','Brigantine','Lederrüstung'],gloves:['Lederhandschuhe','Panzerhandschuhe','Fingerlinge','Armschienen','Kampfhandschuhe'],ring:['Ring','Siegelring','Band','Reif','Knochenring']};
 const SUFFIX=['des Bären','der Wölfe','des Sturms','der Schatten','des Morgenrots','der Ranken','des Hains','des Mondes','der Glut','des Wanderers','der Krähen','des Abgrunds','der Tiefe','des Liedes','der Taverne','des Zwielichts'];
-const LEGEND={weapon:{barradin:['Klinge der tausend Lügen','Imres Rapier'],echo:['Wurzel der Welt','Echos Hortwächter'],friedrich:['Rex’ Lieblingsstock','Letzter Atemzug'],ezekiel:['Darkin-Erbe','Klinge des Zerstörers']},ranged:{barradin:['Sternensaiten','Imres Ballade','Laute der tausend Lügen'],echo:['Horn des Uralthains','Dornen des Uralthains'],friedrich:['Wolfsgeheul','Sehne des Ersten Jägers'],ezekiel:['Blutdurst','Dornen der Nacht']},
+const LEGEND={weapon:{barradin:['Klinge der tausend Lügen','Imres Rapier'],echo:['Wurzel der Welt','Echos Hortwächter'],friedrich:['Rex’ Lieblingsstock','Letzter Atemzug'],ezekiel:['Goliath-Erbe','Klinge des Zerstörers']},ranged:{barradin:['Sternensaiten','Imres Ballade','Laute der tausend Lügen'],echo:['Horn des Uralthains','Dornen des Uralthains'],friedrich:['Wolfsgeheul','Sehne des Ersten Jägers'],ezekiel:['Blutdurst','Dornen der Nacht']},
  helm:['Krone des Sturmkönigs','Maske der Stille','Hörner des Ersten Druiden'],armor:['Haut des Demogorgon','Mantel der Sterne','Panzer des Goblinkönigs'],gloves:['Griff des Henkers','Hände des Meisterdiebs','Fäustlinge der Flut'],ring:['Imres Siegel','Ring der Ewigen Taverne','Auge des Abgrunds','Ring der Natürlichen Zwanzig']};
 const AFF={
  hp:{f:v=>`+${fmt(v)} Leben`,roll:il=>Math.round((6+il*3.2)*rnd(0.7,1.2))},
@@ -2391,7 +2391,7 @@ const LPOW={
  blutnebel:{n:'Blutnebel',d:'Besiegte Gegner hinterlassen mit 25% Chance einen Blutnebel, der Gegner verletzt und dich heilt.'},
  dawnlicht:{n:'Sonnenaufgang',d:'+50% Schaden gegen Untote und Dämonen. Sonnenlicht verbrennt Gegner um dich herum.'}
 };
-const POWNAME={'Klinge der tausend Lügen':'phiole','Imres Rapier':'d20','Dornen des Uralthains':'kraeuter','Sehne des Ersten Jägers':'giftzahn','Dornen der Nacht':'giftzahn','Ring der Natürlichen Zwanzig':'d20','Imres Siegel':'d20','Haut des Demogorgon':'demohaut','Krone des Sturmkönigs':'sturmkrone','Horn des Uralthains':'uralt','Blutdurst':'blutdurst','Ring der Ewigen Taverne':'taverne','Rex’ Lieblingsstock':'rexstock','Dawnbringer':'dawnlicht','Auge des Abgrunds':'kraeuter','Maske der Stille':'fledermaus','Fäustlinge der Flut':'blase','Wolfsgeheul':'giftzahn','Griff des Henkers':'blutdurst','Mantel der Sterne':'blase','Panzer des Goblinkönigs':'demohaut','Hände des Meisterdiebs':'giftzahn','Hörner des Ersten Druiden':'uralt','Sternensaiten':'sturmkrone','Laute der tausend Lügen':'phiole','Wurzel der Welt':'kraeuter','Klinge des Zerstörers':'phiole','Darkin-Erbe':'blutdurst','Imres Ballade':'d20','Echos Hortwächter':'taverne','Letzter Atemzug':'giftzahn'};
+const POWNAME={'Klinge der tausend Lügen':'phiole','Imres Rapier':'d20','Dornen des Uralthains':'kraeuter','Sehne des Ersten Jägers':'giftzahn','Dornen der Nacht':'giftzahn','Ring der Natürlichen Zwanzig':'d20','Imres Siegel':'d20','Haut des Demogorgon':'demohaut','Krone des Sturmkönigs':'sturmkrone','Horn des Uralthains':'uralt','Blutdurst':'blutdurst','Ring der Ewigen Taverne':'taverne','Rex’ Lieblingsstock':'rexstock','Dawnbringer':'dawnlicht','Auge des Abgrunds':'kraeuter','Maske der Stille':'fledermaus','Fäustlinge der Flut':'blase','Wolfsgeheul':'giftzahn','Griff des Henkers':'blutdurst','Mantel der Sterne':'blase','Panzer des Goblinkönigs':'demohaut','Hände des Meisterdiebs':'giftzahn','Hörner des Ersten Druiden':'uralt','Sternensaiten':'sturmkrone','Laute der tausend Lügen':'phiole','Wurzel der Welt':'kraeuter','Klinge des Zerstörers':'phiole','Goliath-Erbe':'blutdurst','Imres Ballade':'d20','Echos Hortwächter':'taverne','Letzter Atemzug':'giftzahn'};
 const LP=id=>!!(P&&P.lp&&P.lp.has(id));
 function legendTick(dt){
  if(LP('uralt')){P.uraltT=(P.uraltT||4)-dt;if(P.uraltT<=0){P.uraltT=4;const e=nearest(P.x,P.y,420);if(e){bolt(e.x,e.y);dealDmg(e,sk(3),{lightning:1,stun:0.3});sfx('thunder')}}}
@@ -3975,7 +3975,7 @@ function skTick(dt){
  if(rank('z_pact')){let w=null,wf=0.3;for(const q of teamNear(P,420)){const f=q.hp/q.st.maxHp;if(f<wf){wf=f;w=q}}P.pactAlly=w}}
 function pactOn(){return rank('z_pact')&&(P.hp<P.st.maxHp*0.5||!!P.pactAlly)}
 function pactSave(){const pa=rank('z_pact'),key=(G.runId||0)+':'+G.stage+':'+(G.room?'r':'');if(!pa||P.pactUsed===key)return false;P.pactUsed=key;P.pactCd=G.time+1;P.hp=P.st.maxHp*(0.1+0.04*pa);P.inv=Math.max(P.inv,1.5);
- ring(P.x,P.y,90,'#ff3b4a',0.8,6);sparks(P.x,P.y-20,'#ff3b4a',24,380,1);light(P.x,P.y,260,'#ff3b4a',1,1);word(P.x,P.y-60,'Der Darkin weigert sich!','#ff5a5a');sfx('roar');return true}
+ ring(P.x,P.y,90,'#ff3b4a',0.8,6);sparks(P.x,P.y-20,'#ff3b4a',24,380,1);light(P.x,P.y,260,'#ff3b4a',1,1);word(P.x,P.y-60,'Der Goliath weigert sich!','#ff5a5a');sfx('roar');return true}
 function skKill(e){const zd=rank('z_destroyer');if(zd){P.zdN=Math.min(10,(P.zdN||0)+1);P.zdT=G.time+8;if(P.zdN===10&&!P.zdW){P.zdW=1;word(P.x,P.y-60,'Zerstörer!','#ff5a5a')}}}
 function greedPick(){const g=rank('e_greed');if(!g||Math.random()>=0.04*g)return;P.buffs.goldrausch=5;P.goldR=g;teamBuff('goldrausch',5,q=>{q.goldR=g});recalc();word(P.x,P.y-56,'Goldrausch!','#ffd04a');sparks(P.x,P.y-20,'#ffd04a',16,300,1);sfx('coin')}
 function rexGuard(victim){if(!G.allies)return;for(const a of G.allies){if(a.kind!=='rex'||a.dead)continue;const own=a.own||(G.mp?null:P);if(!own)continue;
@@ -4922,7 +4922,7 @@ function setH(k,v){if(HC[k]!==v){HC[k]=v;hEl[k].innerHTML=v}}
 function setW(k,v){v=Math.round(clamp(v,0,1)*400)/4;if(HC[k+'w']!==v){HC[k+'w']=v;hEl[k].style.width=v+'%'}}
 function hudUpdate(){if(G.state==='title'||G.state==='camp'||!P)return;
  {const n=performance.now();if(P.skBtns&&n-(G._kt||0)>800){G._kt=n;P.skBtns.forEach((b,i)=>{const k=b.el.querySelector('.key'),t=skKey(i);if(k&&k.textContent!==t)k.textContent=t})}}
- setT('hName',P.hero.name);setT('hLvl',P.mzLv?P.level+' ⇡'+P.mzLv:P.level>=LEG_CAP&&legS(P.id).lv?P.level+'✦'+legS(P.id).lv:String(P.level));setT('hForm',P.form==='bear'?'Bär':P.form==='rat'?'Ratte':P.stealthT>0?'Unsichtbar':P.buffs.ascend>0?'Darkin':'');setW('hpFill',P.hp/P.st.maxHp);setT('hpTxt',fmt(Math.max(0,P.hp))+' / '+fmt(P.st.maxHp));setW('xpFill',P.level>=LEG_CAP?legS(P.id).xp/legNeed(legS(P.id).lv):P.xp/xpNeed(P.level));
+ setT('hName',P.hero.name);setT('hLvl',P.mzLv?P.level+' ⇡'+P.mzLv:P.level>=LEG_CAP&&legS(P.id).lv?P.level+'✦'+legS(P.id).lv:String(P.level));setT('hForm',P.form==='bear'?'Bär':P.form==='rat'?'Ratte':P.stealthT>0?'Unsichtbar':P.buffs.ascend>0?'Goliath':'');setW('hpFill',P.hp/P.st.maxHp);setT('hpTxt',fmt(Math.max(0,P.hp))+' / '+fmt(P.st.maxHp));setW('xpFill',P.level>=LEG_CAP?legS(P.id).xp/legNeed(legS(P.id).lv):P.xp/xpNeed(P.level));
  {const S=STAGES[G.stage]||{name:''};setH('stName',`<small>${esc(stageTag(S))} · ${esc(diffNm())}</small>${esc(String(S.name||'').replace(/^Tiefe \d+ · /,''))}`)}
  {const pb=G.boss||G.guardE;
  if(pb){let fr=pb.hp/pb.maxHp,txt=pb.def.n;if(pb.survive>0){fr=pb.survive/(pb.survive0||pb.def.survive);txt=`Überlebe noch ${Math.ceil(pb.survive)} s!`}else if(pb.def.survive&&G.portal)txt='Zum Boot – schnell!';setW('progFill',fr);setT('progTxt',txt+(pb.ccI>0?' · Unbeugsam!':''));ccBossBar(pb);if(!HC.bossbar){HC.bossbar=1;hEl.progBar.classList.add('boss')}}
@@ -5692,12 +5692,12 @@ function legend2Kill(e){if(LP('blutnebel')&&Math.random()<0.25){heal(P.st.maxHp*
 function blkFind(x,y,r){const L=blkBei(x,y);if(!L)return null;for(const b of L){if(b.t==='c'){const dx=x-b.x,dy=y-b.y,m=b.r+r;if(dx*dx+dy*dy<m*m)return b}else if(x>b.x-r&&x<b.x+b.w+r&&y>b.y-r&&y<b.y+b.h+r)return b}return null}
 /* ================= Eigene Spielweise je Held: Wann und in welcher Reihenfolge zählt mehr als wie oft =================
    Barradin: im Takt der Musik – Strophe und Refrain.        Echo: Naturvorrat, Gestaltwechsel mit Übergängen, Goldgier.
-   Friedrich: Rex packt zu und markiert, ruhige Hand für Volltreffer.   Ezekiel: Darkin-Blut, Abschlüsse, Rückenstiche, Schattensprung. */
+   Friedrich: Rex packt zu und markiert, ruhige Hand für Volltreffer.   Ezekiel: Goliath-Blut, Abschlüsse, Rückenstiche, Schattensprung. */
 const HMECH={
  barradin:'Spielweise: Jeder Kampf ist ein Auftritt. Fähigkeiten genau auf dem Schlag der Musik sind stärker und laden schneller – drück, wenn sich die zwei Punkte unter Barradin in der Mitte treffen. Vier im Takt ergeben einen Refrain. Abwechslung und Takt füllen den Applaus-Bogen vor der Bühne, dieselbe Fähigkeit zweimal hintereinander erntet Buhrufe. Ist er voll, ruft das Publikum „Zugabe!“: Die nächste Fähigkeit kostet keine Abklingzeit und trifft härter. Statt zu rollen, verschwindet Barradin mit einem Bühnentrick und lässt ein Trugbild zurück.',
  echo:'Spielweise: Zauber füllen den Naturvorrat. Der Wechsel in Bär oder Ratte löst damit einen Übergang aus, als Bär verstärkt er die Prankenhiebe, das Zurückverwandeln heilt. Gold lädt die Meisterfähigkeit.',
  friedrich:'Spielweise: Friedrich jagt. Jede Stufe wählt er die stärkste Beute – Randpfeil und Pfotenspuren führen hin; gegen sie treffen er und Rex härter, ihr Tod verkürzt die Abklingzeiten, und Rex apportiert etwas. Pfeile treffen auf Distanz härter, aus nächster Nähe schwächer. Wen deine Fähigkeiten treffen, den packt Rex; Gefesselte beißt er besonders hart, und wirst du bedrängt, hält er Wache. Still stehen spannt den Bogen für einen Volltreffer – wer länger reglos bleibt (im Grün schneller), tarnt sich, und der erste Schuss wird ein Hinterhalt mit sicherem Krit. Die Ausweichrolle ist ein Rückwärtssalto mit Schuss.',
- ezekiel:'Spielweise: Treffer sammeln Darkin-Blut. Darkin-Schnitt, Darkin-Sprung und Todesmal verbrauchen es für verheerende Abschlüsse. Angriffe von hinten sind Rückenstiche, nach einem Kill springst du mit Sprint durch die Schatten.'};
+ ezekiel:'Spielweise: Treffer sammeln Goliath-Blut. Goliath-Schnitt, Goliath-Sprung und Todesmal verbrauchen es für verheerende Abschlüsse. Angriffe von hinten sind Rückenstiche, nach einem Kill springst du mit Sprint durch die Schatten.'};
 for(const id in HMECH)if(HEROES[id]&&HEROES[id].blurb.indexOf('Spielweise')<0)HEROES[id].blurb+=' '+HMECH[id];
 const Z_FIN=new Set(['z_cleave','z_leap','z_mark']);
 /* ---------- Takt ---------- */
@@ -5708,7 +5708,7 @@ function heroPreCast(n){const id=P.id,ctx={};P.skMul=1;
  if(id==='barradin'&&!n.ult){const q=netIs(P.dev)?{ok:P.beatQ===1}:taktUrteil();P.beatQ=0;ctx.beat=q.ok;
   if(q.ok){P.skMul=1.5;ctx.cdF=0.7;P.str=(P.str||0)+1;word(P.x,P.y-70,P.str>=REFN()?'Refrain!':'♪ Im Takt','#f6d77c');sparks(P.x,P.y-30,'#f6d77c',6,200,1)}
   else{if((P.str||0)>0)word(P.x,P.y-70,'Aus dem Takt','#c8bca8');P.str=0}}
- if(id==='ezekiel'&&Z_FIN.has(n.id)){const db=P.db||0;ctx.fin=db;P.skMul=1+0.35*db;if(db>=3)word(P.x,P.y-70,db>=5?'Darkin-Ernte!':'Abschluss ×'+db,'#ff3b4a')}
+ if(id==='ezekiel'&&Z_FIN.has(n.id)){const db=P.db||0;ctx.fin=db;P.skMul=1+0.35*db;if(db>=3)word(P.x,P.y-70,db>=5?'Goliath-Ernte!':'Abschluss ×'+db,'#ff3b4a')}
  if(id==='echo')ctx.form0=P.form||null;hookRun('precast',n,ctx);
  return ctx}
 function heroPostCast(n,ctx){const id=P.id;stilPostCast(n,ctx);hookRun('cast',n,ctx);
@@ -6011,7 +6011,7 @@ const SETS={
  f_jaeger:{n:'Ausrüstung des Fallenstellers',hero:'friedrich',st:'Jäger',pieces:{weapon:'% des Fallenstellers',armor:'Tarnmantel aus Laub',gloves:'Fallenstellerhandschuhe',ring:'Ring der Fährte'},
   b2:'+15% Schaden, +15 Rüstung',b4:'Alle 4 s schnappt eine Bärenfalle unter einem nahen Gegner zu. Nahkampftreffer machen Gegner 20% verwundbarer.',s2:s=>{s.dmgP+=0.15;s.armor+=15}},
  /* ---- Ezekiel ---- */
- ezekiel:{n:'Erbe der Darkin',hero:'ezekiel',st:'Darkin',pieces:{helm:'Blutkrone',armor:'Panzer des Gefallenen',gloves:'Klauen der Darkin',ring:'Siegel der Leere'},
+ ezekiel:{n:'Erbe der Goliath',hero:'ezekiel',st:'Goliath',pieces:{helm:'Blutkrone',armor:'Panzer des Gefallenen',gloves:'Klauen der Goliath',ring:'Siegel der Leere'},
   b2:'+20% Schaden, +3% Lebensraub',b4:'Jeder 20. Kill entfesselt einen Blutsturm: gewaltiger Schaden ringsum und 15% Leben zurück.',s2:s=>{s.dmgP+=0.2;s.ls+=0.03}},
  z_klingen:{n:'Gurt der tausend Klingen',hero:'ezekiel',st:'Klingen',pieces:{ranged:'% der tausend Klingen',armor:'Messergurt',gloves:'Fingerlose Werferhandschuhe',ring:'Ring des Jongleurs'},
   b2:'+20% Angriffstempo, +10% kritische Trefferchance',b4:'Jeder Kill schleudert einen Ring aus sechs Dolchen (höchstens alle 0,5 s).',s2:s=>{s.rateP+=0.2;s.crit+=0.1}},
@@ -7875,7 +7875,7 @@ const ROLLEN=[
  {id:'r9a',ort:9,t:'Fagas’ Expeditionsnotizen',art:'Notizbuch',x:'Auftrag von Arafil vom Roten Sitz: das Grab der Khaem finden, einer Netherese, rund 3000 Jahre alt. Der Trupp ist tapfer, die Netze sind dicker als gedacht. Falls jemand diese Seite findet: Wir folgen den Schluchten nach Osten. Ich bin klein, aber ich bin zäh.'},
  {id:'r9b',ort:9,t:'Merkvers für Spinnweben',art:'Barradins Liedfetzen',x:'Tritt nicht auf den dicken Faden,\ndenn der Faden bringt dir Schaden.\nHalt dich fest an Friedrichs Hand,\ndie hält fester als das Band.\nUnd raschelt’s oben, lieber Freund –\ndann lauf, solang die Spinne träumt.'},
  {id:'r10a',ort:10,t:'Inschrift der Khaem',art:'Grabinschrift',x:'„Ich, Khaem, Hüterin des Fadens, lege meine Klinge in die Dunkelheit, auf dass sie nur erhebe, wem das Licht nicht fremd ist. Wer Unheil sucht, findet hier nur Unheil.“ Am Rand eine Übersetzung in kleiner, sorgfältiger Gnomenschrift.'},
- {id:'r10b',ort:10,t:'Die flehende Stimme',art:'Notizbuch',x:'Mit zittriger Hand notiert: Im Geheimgang spricht etwas in unseren Köpfen. Es bittet um Hilfe, aber es sagt nicht, wer es ist. Der Faden ist hier verdreht, ich spüre es bis in die Zähne. Der Darkin hat nicht einmal gezuckt. – Fagas'},
+ {id:'r10b',ort:10,t:'Die flehende Stimme',art:'Notizbuch',x:'Mit zittriger Hand notiert: Im Geheimgang spricht etwas in unseren Köpfen. Es bittet um Hilfe, aber es sagt nicht, wer es ist. Der Faden ist hier verdreht, ich spüre es bis in die Zähne. Der Goliath hat nicht einmal gezuckt. – Fagas'},
  {id:'r11a',ort:11,t:'Gebet an die Meeresmutter',art:'Muschelplatte',x:'Meeresmutter, die du im dunklen Wasser wohnst: Halte deine Hand über mein Volk, auch über jene, die sich verirrt haben. Schick uns Fremde mit ehrlichem Herzen. Und gib, dass die Stadt am Ufer wieder dir allein singt. – Ploopploopeen, Erzpriester'},
  {id:'r11b',ort:11,t:'Fagas’ letzter Eintrag',art:'Notizbuch',x:'Das Seeufer! Die Fischmenschen sind seltsam, aber ihr Erzpriester hat gütige Augen. Die Gefährten vertrauen ihm, also tue ich es auch. Wenn wir zurück sind, erzähle ich Arafil vom Licht im Grab. Und der Barde schuldet mir noch ein Lied über mich. Ein heldenhaftes, bitte.'},
  {id:'r12a',ort:12,t:'Erlass von König Horga Stahl V.',art:'Erlass',x:'Die Fremden, die meinen Sohn Kardal aus den Netzen der Fischmenschen befreiten, stehen unter dem Schutz der Krone. Wer ihnen Schaden zufügt, bezahlt mit seinem Bart. Das gilt ausdrücklich auch dann, wenn der Barde wieder singt.'},
@@ -8110,7 +8110,7 @@ const SAY={
   guard:['Aus dem Weg.','Ein Hindernis. Kurz.'],
   elite:['Zu langsam.','Nur ein Schatten mehr.','Still.'],
   low:['Blut … meins, leider.','Die Klinge braucht mehr.','Ich falle nicht. Nicht heute.'],
-  level:['Das Erbe der Darkin erwacht.','Mehr. Ich will mehr.'],
+  level:['Das Erbe der Goliath erwacht.','Mehr. Ich will mehr.'],
   loot:['Nützlich.','Das gehört jetzt mir.','Ein Fund aus den Schatten.'],
   streak:['Ein Blutbad.','Keiner bleibt stehen.','Die Klinge singt.'],
   shrine:['Fremde Götter. Ihre Macht nehme ich trotzdem.'],
@@ -8356,12 +8356,12 @@ const STIL={
  barradin:{'Verzauberung':{nah:.35,fk:.75,w:{ctrl:.55,takt:.35}},'Ranken':{nah:.4,fk:.6,hp:.5,w:{ctrl:.45,takt:.3}},'Illusion':{nah:.3,fk:.65,w:{pet:.6,takt:.35}}},
  echo:{'Sturm':{nah:.3,fk:.75,w:{nv:.45}},'Wildgestalt':{nah:.9,fk:.3,hp:.55,w:{form:.55,nv:.35}},'Natur & Gier':{nah:.5,fk:.55,w:{nv:.4,gold:.25}}},
  friedrich:{'Schützenkunst':{nah:.1,fk:.35,cr:.7,w:{ruhe:.55}},'Jäger':{nah:.6,fk:.45,w:{ctrl:.4,ruhe:.15}},'Rex':{nah:.3,fk:.45,w:{pet:.75}}},
- ezekiel:{'Klingen':{nah:.85,fk:.35,w:{blut:.45}},'Darkin':{nah:.7,fk:.55,hp:.4,w:{blut:.55}},'Schatten':{nah:.75,fk:.5,cr:.55,w:{rueck:.6}}}};
+ ezekiel:{'Klingen':{nah:.85,fk:.35,w:{blut:.45}},'Goliath':{nah:.7,fk:.55,hp:.4,w:{blut:.55}},'Schatten':{nah:.75,fk:.5,cr:.55,w:{rueck:.6}}}};
 const MEIST={
  barradin:{'Verzauberung':'Zauber im Takt betäuben Gegner in deiner Nähe.','Ranken':'Der Refrain lässt ringsum Dornenranken aus dem Boden brechen, die fesseln und vergiften.','Illusion':'Zauberst du im Takt, schlagen deine Trugbilder mit einer Klangwelle zu.'},
  echo:{'Sturm':'Blitztreffer füllen den Naturvorrat.','Wildgestalt':'Bärengestalt hält 50% länger, der Erdstoß kostet nur 20 Vorrat.','Natur & Gier':'Jede aufgesammelte Münze gibt 3 Naturvorrat.'},
  friedrich:{'Schützenkunst':'Die ruhige Hand spannt doppelt so schnell.','Jäger':'Nahkampftreffer markieren Gegner wie Rex (+60% Schaden).','Rex':'Rex packt doppelt so oft zu, seine Markierung hält länger.'},
- ezekiel:{'Klingen':'Treffer geben doppelt so viel Darkin-Blut.','Darkin':'Bis zu 7 Blutstropfen – die Darkin-Ernte bei 7 wird gewaltig.','Schatten':'Der Schattensprung bleibt 3 s bereit und macht länger unsichtbar.'}};
+ ezekiel:{'Klingen':'Treffer geben doppelt so viel Goliath-Blut.','Goliath':'Bis zu 7 Blutstropfen – die Goliath-Ernte bei 7 wird gewaltig.','Schatten':'Der Schattensprung bleibt 3 s bereit und macht länger unsichtbar.'}};
 function astPunkte(b,q){q=q||P;let n=0;for(const t of q.hero.tree)if(t.b===b)n+=(q.ranks&&q.ranks[t.id])||0;return n}
 function meist(name,q){q=q||P;if(!q||!q.hero||!q.ranks)return false;const b=q.hero.branches.indexOf(name);return b>=0&&astPunkte(b,q)>=MEIST_N}
 function stilProfil(){const H=P.hero,B=H.branches,inv=B.map(()=>0);for(const n of H.tree)inv[n.b]+=rank(n.id);
@@ -8392,7 +8392,7 @@ Object.assign(STLBL,{pet:['Begleiterschaden',v=>'+'+v+'%'],ctrl:['Kontrolldauer'
 function stilLines(st){const L=[];for(const k of ['pet','ctrl','rueck','blut','form','nv','takt','ruhe']){const v=st[k+'P'];if(v>0)L.push([STLBL[k][0],'+'+Math.round(v*100)+'%'])}return L}
 
 /* ---------- Mechanik-Helfer ---------- */
-const DBMAX=q=>meist('Darkin',q)?7:5;
+const DBMAX=q=>meist('Goliath',q)?7:5;
 const REFN=()=>LP('metronom')?3:4;
 function blutAdd(x,hit){let k=1+((P.st&&P.st.blutP)||0);if(hit&&meist('Klingen'))k*=2;P.db=Math.min(DBMAX(),(P.db||0)+x*k)}
 function nvAdd(x){P.nv=Math.min(100,(P.nv||0)+x*(1+((P.st&&P.st.nvP)||0))*(LP('wildherz')?0.5:1))}
@@ -8421,7 +8421,7 @@ Object.assign(LPOW,{
  metronom:{n:'Metronom des Barden',d:'Barradin: Der Refrain kommt schon nach 3 Zaubern im Takt – dafür ist das Taktfenster 25% enger.'},
  wildherz:{n:'Herz der Wildnis',d:'Echo: Gestaltwechsel kosten keinen Naturvorrat und die Heilwelle heilt doppelt – dafür füllt sich der Vorrat nur halb so schnell.'},
  falke:{n:'Auge des Falken',d:'Friedrich: Die ruhige Hand spannt 80% schneller, Volltreffer spalten sich in drei Pfeile.'},
- blutkelch:{n:'Kelch des Blutes',d:'Ezekiel: Abschlüsse verbrauchen nur die Hälfte des Darkin-Bluts. Bei vollem Blut heilt jeder Treffer 0,5% Leben.'}});
+ blutkelch:{n:'Kelch des Blutes',d:'Ezekiel: Abschlüsse verbrauchen nur die Hälfte des Goliath-Bluts. Bei vollem Blut heilt jeder Treffer 0,5% Leben.'}});
 LEGEND.ranged.barradin.push('Metronom des Barden');LEGEND.weapon.echo.push('Herz der Wildnis');LEGEND.ranged.friedrich.push('Auge des Falken');LEGEND.weapon.ezekiel.push('Kelch des Blutes');
 Object.assign(POWNAME,{'Metronom des Barden':'metronom','Herz der Wildnis':'wildherz','Auge des Falken':'falke','Kelch des Blutes':'blutkelch'});
 const STILPOW={metronom:'barradin',wildherz:'echo',falke:'friedrich',blutkelch:'ezekiel'};
@@ -8651,7 +8651,7 @@ const WSTIL={
  'Waldaxt':{n:'Axthieb',d:'breiter Hieb, spaltet Gruppen',arc:1.4,reach:1.08,mopt:{knock:120}},
  'Dolchpaar':{n:'Doppelstich',d:'zwei schnelle Stiche hintereinander',arc:0.8,doppelt:1},
  'Krummschwert':{n:'Säbelhieb',d:'weiter Bogen',arc:1.25},
- 'Darkin-Klinge':{n:'Darkin-Schwung',d:'gewaltiger Bogen, wirft zurück',arc:1.45,reach:1.12,mopt:{knock:180}},
+ 'Goliath-Klinge':{n:'Goliath-Schwung',d:'gewaltiger Bogen, wirft zurück',arc:1.45,reach:1.12,mopt:{knock:180}},
  'Laute':{n:'Klangnoten',d:'ausgewogen, durchdringt zwei Gegner'},
  'Flöte':{n:'Flötentriller',d:'schnelle, flinke Töne, treffen nur einen',spd:1.45,pierce:-2,r:0.8},
  'Harfe':{n:'Harfenwelle',d:'langsame große Welle, durchdringt alle',spd:0.75,pierce:6,r:1.5},
@@ -8983,7 +8983,7 @@ z_fan:()=>{const L=[S(C.br,3.5,g=>{g.moveTo(88,52);g.quadraticCurveTo(94,92,58,9
 z_poison:()=>[...dagger(40,64,0.6,1.05,'#c0e098'),F(C.po,g=>{drop(g,74,44,5.5);drop(g,80,64,4.5);drop(g,70,82,4)})],
 z_spin:()=>{const bl=g=>{g.moveTo(4,-3);g.quadraticCurveTo(22,-18,44,-6);g.quadraticCurveTo(26,-6,6,6);g.closePath()};return[S(C.br,3,g=>{for(let i=0;i<3;i++)a_(g,50,50,45,i*T/3+0.5,i*T/3+1.7)},{no:1,a:.7}),F(C.st,g=>{for(let i=0;i<3;i++)xf(50,50,i*T/3,1,bl)(g)}),F(C.bd,g=>c_(g,50,50,9),{ol:1}),FL(C.br,g=>c_(g,50,50,3.5),{no:1})]},
 z_lotus:()=>[GL(C.br,50,50,50,.6),F(C.st,g=>{for(let i=0;i<8;i++){const a=i*T/8;leaf(g,50+Math.cos(a)*8,50+Math.sin(a)*8,50+Math.cos(a)*46,50+Math.sin(a)*46,6.5)}}),F(C.br,g=>{for(let i=0;i<8;i++){const a=i*T/8+T/16;leaf(g,50+Math.cos(a)*6,50+Math.sin(a)*6,50+Math.cos(a)*30,50+Math.sin(a)*30,5.5)}}),F(C.bd,g=>c_(g,50,50,10),{ol:1}),FL('#ffd0d0',g=>c_(g,50,50,4),{no:1})],
-/* --- Ezekiel: Darkin --- */
+/* --- Ezekiel: Goliath --- */
 z_cleave:()=>[GL(C.br,54,46,46,.45),F(C.br,g=>cres(g,50,54,40,37,13,2.2)),FL(C.bd,g=>{drop(g,82,78,4.5);drop(g,70,88,3.5)}),FL('#ffe0e0',g=>star(g,84,30,4,7,2),{no:1})],
 z_wrath:()=>[F(C.bd,g=>star(g,50,54,10,46,30)),F(C.br,g=>drop(g,50,58,19)),FL('#ffd0d0',g=>e_(g,43,56,4,7,0.3),{no:1})],
 z_frenzy:()=>[S(C.br,5,g=>a_(g,50,52,37,-2.4,1.0)),F(C.br,g=>head(g,50+37*Math.cos(1.0),52+37*Math.sin(1.0),1.0+PI/2,11)),F(C.br,g=>drop(g,50,56,14),{ol:1}),FL('#ffd0d0',g=>e_(g,45,54,3,5,0.3),{no:1}),F(C.bd,g=>{drop(g,22,28,6);drop(g,80,22,5)})],
@@ -9054,7 +9054,7 @@ const IART={
  Armbrust:rc=>{const R=fn=>xf(50,52,PI/4,1,fn);return[F(WD,R(g=>p_(g,-5,-28,5,-28,6,26,8,40,-8,40,-6,26))),S(STD,6,R(g=>{g.moveTo(-32,-18);g.quadraticCurveTo(0,-36,32,-18)})),S(CRM,1.4,R(g=>l_(g,-32,-18,0,-4,32,-18)),{no:1}),S('#6a4a2a',3,R(g=>l_(g,0,-4,0,-40))),F(STL,R(g=>head(g,0,-48,-PI/2,8))),S(STD,2.5,R(g=>{g.moveTo(3,14);g.quadraticCurveTo(10,18,6,24)})),F(rc,R(g=>c_(g,0,8,4.5)),{ol:1})]},
  Dolchpaar:rc=>[...dagger(30,70,0.6,1.2,STL,rc,'#2a1a20'),...dagger(70,70,-0.6,1.2,STL,rc,'#2a1a20')],
  Krummschwert:rc=>[F(STL,AX(g=>{g.moveTo(22,-4.5);g.quadraticCurveTo(58,-8,92,-26);g.quadraticCurveTo(82,-2,58,4.5);g.quadraticCurveTo(40,7,22,4.5);g.closePath()})),S('#ffffff',1.4,AX(g=>{g.moveTo(26,-3);g.quadraticCurveTo(58,-6,88,-22)}),{no:1,a:.6}),F(LTD,AX(g=>p_(g,6,-3.4,20,-3.4,20,3.4,6,3.4))),F(GLD,AX(g=>{g.moveTo(18,-13);g.quadraticCurveTo(27,-10,23,0);g.quadraticCurveTo(27,10,18,13);g.lineTo(21,0);g.closePath()}),{ol:1}),F(rc,AX(g=>c_(g,3.5,0,5.2)),{ol:1})],
- 'Darkin-Klinge':rc=>[GL('#ff3b4a',56,44,46,.45),F('#3a1a22',AX(g=>p_(g,24,-9,64,-12,80,-8,96,0,80,8,64,12,24,9))),S('#ff3b4a',2.4,AX(g=>l_(g,26,-8,64,-11,80,-7,94,0,80,7,64,11,26,8)),{no:1}),S('#ff7a7a',2,AX(g=>l_(g,30,0,78,0)),{no:1,a:.8}),F('#1e1418',AX(g=>p_(g,6,-3.8,22,-3.8,22,3.8,6,3.8))),F('#6a1018',AX(g=>{g.moveTo(18,-17);g.quadraticCurveTo(29,-12,27,0);g.quadraticCurveTo(29,12,18,17);g.quadraticCurveTo(22,0,18,-17);g.closePath()}),{ol:1}),F('#ff3b4a',AX(g=>e_(g,24,0,3.2,4.6)),{ol:1}),FL('#1a0a0e',AX(g=>e_(g,24,0,1,3.6)),{no:1}),F(rc,AX(g=>c_(g,3.5,0,5.2)),{ol:1})],
+ 'Goliath-Klinge':rc=>[GL('#ff3b4a',56,44,46,.45),F('#3a1a22',AX(g=>p_(g,24,-9,64,-12,80,-8,96,0,80,8,64,12,24,9))),S('#ff3b4a',2.4,AX(g=>l_(g,26,-8,64,-11,80,-7,94,0,80,7,64,11,26,8)),{no:1}),S('#ff7a7a',2,AX(g=>l_(g,30,0,78,0)),{no:1,a:.8}),F('#1e1418',AX(g=>p_(g,6,-3.8,22,-3.8,22,3.8,6,3.8))),F('#6a1018',AX(g=>{g.moveTo(18,-17);g.quadraticCurveTo(29,-12,27,0);g.quadraticCurveTo(29,12,18,17);g.quadraticCurveTo(22,0,18,-17);g.closePath()}),{ol:1}),F('#ff3b4a',AX(g=>e_(g,24,0,3.2,4.6)),{ol:1}),FL('#1a0a0e',AX(g=>e_(g,24,0,1,3.6)),{no:1}),F(rc,AX(g=>c_(g,3.5,0,5.2)),{ol:1})],
  Wurfmesser:rc=>{const K=(x,y,a)=>{const t=fn=>xf(x,y,a,0.95,fn);return[F(STL,t(g=>p_(g,0,-38,6.5,-17,0,-10,-6.5,-17))),F('#2a1a20',t(g=>p_(g,-2.6,-10,2.6,-10,2.6,8,-2.6,8))),S(rc,2.4,t(g=>{for(let i=0;i<3;i++)l_(g,-3,-6+i*5,3,-4+i*5)}),{no:1}),S(STD,2.8,t(g=>c_(g,0,12.5,4)))]};return[...K(28,74,-0.5),...K(72,74,0.5),...K(50,70,0)]},
  Wurfsterne:rc=>[F(STD,g=>star(g,28,72,4,18,5.5,0.4)),FL('#1a1418',g=>c_(g,28,72,3),{no:1}),F(STL,g=>star(g,58,42,4,34,8.5,0.2)),F(rc,g=>c_(g,58,42,7.5),{ol:1}),FL('#1a1418',g=>c_(g,58,42,3),{no:1})],
  Schattendolche:rc=>{const kr=g=>{const o=[];for(let x=24;x<=80;x+=4)o.push(x,-5.2+3.2*Math.sin((x-24)*0.17));o.push(94,0);for(let x=80;x>=24;x-=4)o.push(x,5.2+3.2*Math.sin((x-24)*0.17));p_(g,...o)};
@@ -10442,7 +10442,7 @@ const AST_N=3;
 const ASTINFO={barradin:{'Verzauberung':'Halten, verspotten, betäuben','Ranken':'Fesseln, Dornenwälle, Wucherwald','Illusion':'Trugbilder, Gaukelei, Dimensionstür','Klingentanz':'Kolleg der Schwerter, des Tanzes und der Tapferkeit'},
  echo:{'Sturm':'Blitz, Feuer und Eis','Wildgestalt':'Bär, Ratte und Urgebrüll','Natur & Gier':'Schwärme, Mondlicht und Gold'},
  friedrich:{'Schützenkunst':'Pfeilhagel und Präzision','Jäger':'Fallen, Schwert und ruhige Hand','Rex':'Rex und das Rudel'},
- ezekiel:{'Klingen':'Dolche, Fächer und Gift','Darkin':'Darkin-Blut und Raserei','Schatten':'Schattenschritte und Meuchelmord'}};
+ ezekiel:{'Klingen':'Dolche, Fächer und Gift','Goliath':'Goliath-Blut und Raserei','Schatten':'Schattenschritte und Meuchelmord'}};
 for(const id of HERO_IDS)for(const n of HEROES[id].tree){if(!n.max)n.max=n.ult?3:5;if(n.c===undefined)n.c=0}
 function astOk(id,a){const H=HEROES[id];if(!H||!Array.isArray(a)||a.length!==AST_N)return false;if(new Set(a).size!==AST_N)return false;
  return a.every(b=>Number.isInteger(b)&&b>=0&&b<H.branches.length&&H.tree.some(n=>n.b===b))}
@@ -11663,12 +11663,12 @@ function echoAstOben(t,inView){inView=inView||(()=>true);const c=cx,L=G.mp?PL:[P
 {const st1=showTitle;showTitle=function(keep){const r=st1.apply(this,arguments);try{if(!SAVE.astTipEcho&&SAVE.astTip&&G.state==='title'&&!G.netJoin&&!G.bot){SAVE.astTipEcho=1;persist();setTimeout(()=>{if(G.state==='title')toast('Neu für Echo: Sternenkreis und Sporenkreis – wähle sie bei den Talentästen!','#cfe0ff')},2600)}}catch(e){}return r}}
 window.__hsE={ico:n=>skIco(n,'node'),esBild,esWahl,ES_SB,epDienerN,esFormCast:r=>esFormCast(r)};
 
-/* ================= Ezekiel · Heldenmechanik 2 (Paket „mech_ezekiel“): Blutpreis, Haltungen Darkin ↔ Schatten, Schattenschritt-Rolle =================
-   Blutpreis: Darkin-Ast-Fähigkeiten und Z_FIN-Abschlüsse kosten Leben (nie tödlich, bleibt bei 1 LP). Dafür füllt sich ein Blutdurst-Vorrat
+/* ================= Ezekiel · Heldenmechanik 2 (Paket „mech_ezekiel“): Blutpreis, Haltungen Goliath ↔ Schatten, Schattenschritt-Rolle =================
+   Blutpreis: Goliath-Ast-Fähigkeiten und Z_FIN-Abschlüsse kosten Leben (nie tödlich, bleibt bei 1 LP). Dafür füllt sich ein Blutdurst-Vorrat
      (P.zmPool, 4 s P.zmBdT), aus dem Treffer Leben saugen – je weniger Leben, desto mehr. Rote Blutfäden (HFX zm_faden).
    Haltungen (P.zmH 'd'|'s'): ZM_ART ordnet jede aktive Fähigkeit aller fünf Äste zu. Die Fähigkeit setzt die Haltung; die nächsten zwei
-     Fähigkeiten derselben Art +10 %, ein Wechsel +20 % auf die wechselnde Fähigkeit und einen Wechsel-Effekt (Darkin: Blutpanzer, Schatten: kurz unsichtbar).
-     Darkin: +12 % Fläche, 12 % weniger erlittener Schaden, −5 % Lauftempo, rotes Glühen. Schatten: +8 % Lauf-, +6 % Angriffstempo, Rückenstiche +20 %, violetter Rauch.
+     Fähigkeiten derselben Art +10 %, ein Wechsel +20 % auf die wechselnde Fähigkeit und einen Wechsel-Effekt (Goliath: Blutpanzer, Schatten: kurz unsichtbar).
+     Goliath: +12 % Fläche, 12 % weniger erlittener Schaden, −5 % Lauftempo, rotes Glühen. Schatten: +8 % Lauf-, +6 % Angriffstempo, Rückenstiche +20 %, violetter Rauch.
    Schattenschritt (Hook „roll“): gleiche Taste/Kosten/Unverwundbarkeit; huscht hinter einen nahen Gegner in Laufrichtung (0,6 s Rückenstich-Fenster),
      sonst kurzer Schattensprung. Flinke Finger (zdRoll) bestiehlt weiter (der Weg führt durch den Gegner).
    Funktionen: zmArt, zmPreis, zmSaug, zmSetH, zmRoll, zmFaden · Felder: P.zmH P.zmN P.zmHT P.zmWT P.zmPzT P.zmBdT P.zmPool P.zmPreisT, e.zmRsT */
@@ -11687,7 +11687,7 @@ function zmPreis(n){const k=zmPreisK(n);if(!k||P.down)return;const M=P.st.maxHp,
  P.zmPool=Math.min(M*0.2,(P.zmPool||0)+M*k*(1.5+2*miss));P.zmBdT=4;
  if((P.zmPreisT||0)<G.time){P.zmPreisT=G.time+0.45;word(P.x+30,P.y-26,'−'+Math.round(k*100)+'% ♥',ZM.dun)}
  if(fxOk())G.fxs.push({k:'zm_preis',x:P.x,y:P.y-12,t:0,life:0.55,s:Math.random()*9});
- if(!G.bot&&!SAVE.zmBlutTip){SAVE.zmBlutTip=1;later(0.6,()=>toast('Blutpreis: Darkin-Fähigkeiten und Abschlüsse kosten etwas Leben – nie das letzte. Danach saugen deine Treffer es über rote Blutfäden zurück, umso stärker, je tiefer du blutest.','#ff5a6a'))}}
+ if(!G.bot&&!SAVE.zmBlutTip){SAVE.zmBlutTip=1;later(0.6,()=>toast('Blutpreis: Goliath-Fähigkeiten und Abschlüsse kosten etwas Leben – nie das letzte. Danach saugen deine Treffer es über rote Blutfäden zurück, umso stärker, je tiefer du blutest.','#ff5a6a'))}}
 /* Lebensraub aus dem Blutdurst-Vorrat */
 function zmSaug(e,o,amt){if(!(P.zmBdT>0)||!(P.zmPool>0)||P.down||!(amt>0))return;const M=P.st.maxHp,miss=Math.max(0,1-P.hp/M);if(miss<=0.001)return;
  const h=Math.min(P.zmPool,amt*(0.08+0.22*miss),M*(0.012+0.02*miss),M-P.hp);if(h<=0)return;P.zmPool-=h;heal(h);P.zmSgT=0.25;
@@ -11697,9 +11697,9 @@ function zmFaden(e){G.fxs.push({k:'zm_faden',x:e.x,y:e.y-(e.r||14)*0.4,x2:P.x,y2
 function zmSetH(h,wechsel){const alt=P.zmH;P.zmH=h;P.zmHT=0.6;if(alt!==h)P.zmN=0;else P.zmN=(P.zmN||0)+1;
  if(wechsel){P.zmWT=0.7;if(h==='s'){P.stealthT=Math.max(P.stealthT||0,0.5);smoke(P.x,P.y);puffs(P.x,P.y+6,'#2a1040',8,70,18);ring(P.x,P.y,70,ZM.vio,0.4,3)}
   else{P.zmPzT=2.5;ring(P.x,P.y,80,ZM.rot,0.45,5);sparks(P.x,P.y-10,'#ff6a4a',10,220,1);G.shake=Math.min(12,G.shake+2)}
-  word(P.x,P.y-86,h==='d'?'Darkin-Haltung!':'Schatten-Haltung!',h==='d'?ZM.rot:ZM.vio)}
+  word(P.x,P.y-86,h==='d'?'Goliath-Haltung!':'Schatten-Haltung!',h==='d'?ZM.rot:ZM.vio)}
  if(alt!==h)recalc();
- if(!G.bot&&!SAVE.zmHaltTip){SAVE.zmHaltTip=1;later(1.2,()=>toast('Haltung: Wuchtige Fähigkeiten rufen die Darkin-Haltung (rot: mehr Fläche, weniger Schaden), flinke die Schatten-Haltung (violett: schneller, härtere Rückenstiche). Abwechseln gibt einen Haltungswechsel-Bonus.','#d08cff'))}}
+ if(!G.bot&&!SAVE.zmHaltTip){SAVE.zmHaltTip=1;later(1.2,()=>toast('Haltung: Wuchtige Fähigkeiten rufen die Goliath-Haltung (rot: mehr Fläche, weniger Schaden), flinke die Schatten-Haltung (violett: schneller, härtere Rückenstiche). Abwechseln gibt einen Haltungswechsel-Bonus.','#d08cff'))}}
 /* vor / nach der Fähigkeit */
 hook('precast',(n,ctx)=>{const a=zmArt(n.id);if(!a)return;ctx.zmA=a;const h=P.zmH;
  if(h&&h!==a){ctx.zmW=1;P.skMul*=1.2}else if(h===a&&(P.zmN||0)<2)P.skMul*=1.1},'ezekiel');
@@ -11763,10 +11763,10 @@ hook('draw',(t,c)=>{const h=P.zmH;
 
 /* ---------- Texte ---------- */
 {const H=HEROES.ezekiel,alt=HMECH.ezekiel;
- HMECH.ezekiel='Spielweise: Treffer sammeln Darkin-Blut, Abschlüsse wie Darkin-Schnitt oder Todesmal verbrauchen es. Blutpreis: Darkin-Fähigkeiten und Abschlüsse kosten etwas Leben – danach saugen deine Treffer es zurück, umso stärker, je tiefer du blutest. Wuchtige Fähigkeiten rufen die Darkin-Haltung, flinke die Schatten-Haltung; wer abwechselt, trifft härter. Die Ausweichrolle ist ein Schattenschritt hinter den nächsten Gegner, nach einem Kill springst du mit Sprint durch die Schatten. Als Dieb stiehlst du Kräfte, als Phantom sammelst du Seelen.';
+ HMECH.ezekiel='Spielweise: Treffer sammeln Goliath-Blut, Abschlüsse wie Goliath-Schnitt oder Todesmal verbrauchen es. Blutpreis: Goliath-Fähigkeiten und Abschlüsse kosten etwas Leben – danach saugen deine Treffer es zurück, umso stärker, je tiefer du blutest. Wuchtige Fähigkeiten rufen die Goliath-Haltung, flinke die Schatten-Haltung; wer abwechselt, trifft härter. Die Ausweichrolle ist ein Schattenschritt hinter den nächsten Gegner, nach einem Kill springst du mit Sprint durch die Schatten. Als Dieb stiehlst du Kräfte, als Phantom sammelst du Seelen.';
  if(H.blurb.indexOf(alt)>=0)H.blurb=H.blurb.replace(alt,HMECH.ezekiel);
  for(const n of H.tree){if(!n.a)continue;const a=zmArt(n.id),k=zmPreisK(n);if(!a&&!k)continue;const d0=n.d;
-  const tag=(a?(a==='d'?'Darkin-Haltung':'Schatten-Haltung'):'')+(k?(a?' · ':'')+'Blutpreis '+Math.round(k*100)+'% Leben':'');n.d=r=>d0(r)+' ['+tag+']'}}
+  const tag=(a?(a==='d'?'Goliath-Haltung':'Schatten-Haltung'):'')+(k?(a?' · ':'')+'Blutpreis '+Math.round(k*100)+'% Leben':'');n.d=r=>d0(r)+' ['+tag+']'}}
 window.__hsZM={ZM_ART,zmArt,zmPreis,zmPreisK,zmSaug,zmSetH,zmRoll,zmAstFix:(...a)=>zmAstFix(...a),zmMigSave:()=>zmMigSave(),zmMigRun:o=>zmMigRun(o)};
 
 /* ---------- Ast „Draufgänger“ entfällt (jeder Held hat genau 5 Äste): alte Astwahlen und Ränge sauber umstellen ----------
@@ -16095,7 +16095,7 @@ function erfolgNeu(d){if(!d||!d.id||ERF_ID[d.id])return null;d.r=ERF_RAR[d.r]?d.
  A('held','b','ratte','Klein, aber oho','Echo hat sich in eine Ratte verwandelt.','ratte');
  A('held','b','rex25','Guter Junge!','Rex hat 25 Gegner erledigt.','pfote',{z:'rex',ziel:25});
  A('held','g','rex1000','Der beste Hund von Faerûn','Rex hat 1.000 Gegner erledigt.','pfote',{z:'rex',ziel:1000});
- A('held','s','haltung50','Haltungsfrage','Ezekiel hat 50-mal zwischen Darkin und Schatten gewechselt.','dolch',{z:'haltung',ziel:50});
+ A('held','s','haltung50','Haltungsfrage','Ezekiel hat 50-mal zwischen Goliath und Schatten gewechselt.','dolch',{z:'haltung',ziel:50});
  A('held','g','lv150','Legende','Einen Helden auf Stufe 150 gebracht.','stern');
  A('held','b','bruecke','Brückenbauer','Das erste Brückentalent im Sternbild gelernt.','bruecke');
  A('held','s','meist','Meisterschaft','In einem Ast die Meisterschaft erreicht.','stern');
@@ -16604,7 +16604,7 @@ const TLP={
   {b:4,id:'f_t_bauer',ic:'⚒',name:'Fallenbauer',d:r=>`Fallen verursachen ${6*r}% mehr Schaden, und Fesselungen durch Friedrich halten ${5*r}% länger.`,mod:(s,r)=>{s.ctrlP+=0.05*r}}],
  ezekiel:[
   {b:0,id:'z_t_scharf',ic:'⟋',name:'Messerscharf',d:r=>`Jede Klinge frisch geschliffen: +${3*r}% Kritische Trefferchance, +${5*r}% Angriffstempo und normale Angriffe +${4*r}% Schaden.`,mod:(s,r)=>{s.crit+=0.03*r;s.rateP+=0.05*r;s.meleeP+=0.04*r}},
-  {b:1,id:'z_t_durst',ic:'❥',name:'Blutdurst',d:r=>`Darkin-Blut sammelt sich ${8*r}% schneller, und Ezekiel hat +${r}% Lebensraub.`,mod:(s,r)=>{s.blutP+=0.08*r;s.ls+=0.01*r}},
+  {b:1,id:'z_t_durst',ic:'❥',name:'Blutdurst',d:r=>`Goliath-Blut sammelt sich ${8*r}% schneller, und Ezekiel hat +${r}% Lebensraub.`,mod:(s,r)=>{s.blutP+=0.08*r;s.ls+=0.01*r}},
   {b:2,id:'z_t_meuchel',ic:'◐',name:'Meuchelkunst',d:r=>`Rückenstiche treffen noch härter (+${12*r}% Rückenstich-Schaden), und Ezekiel läuft ${2*r}% schneller.`,mod:(s,r)=>{s.rueckP+=0.12*r;s.speedP+=0.02*r}},
   {b:3,id:'z_t_lang',ic:'⛀',name:'Langfinger',d:r=>`+${6*r}% Gold, +${2*r}% Angriffstempo und +${2*r}% Lauftempo – wer stiehlt, muss schnell sein.`,mod:(s,r)=>{s.gold+=0.06*r;s.rateP+=0.02*r;s.speedP+=0.02*r}},
   {b:4,id:'z_t_kaelte',ic:'☠',name:'Grabeskälte',d:r=>`Fliehende Gegner erleiden ${6*r}% mehr Schaden von Ezekiel, und die Kälte des Grabes schenkt +${3*r}% Leben.`,mod:(s,r)=>{s.hpP+=0.03*r}}]};
@@ -17786,7 +17786,7 @@ Object.assign(HFX,{
   if(f.big){c.lineCap='round';c.strokeStyle='#e0ecc8';c.lineWidth=1.3;for(let i=0;i<9;i++){const a=i*TAU/9+f.s,L=R*Math.min(1,k*3);c.globalAlpha=(1-k)*0.7;c.beginPath();c.moveTo(f.x,f.y+4);c.quadraticCurveTo(f.x+Math.cos(a+0.5)*L*0.5,f.y+4+Math.sin(a+0.5)*L*0.25,f.x+Math.cos(a)*L,f.y+4+Math.sin(a)*L*0.5);c.stroke()}}
   for(let i=0;i<(f.big?8:4);i++){const a=i*2.4+f.s,d=R*0.4*e*(0.5+veR(i+f.s)),x=f.x+Math.cos(a)*d,y=f.y-10-e*20*veR(i+3)+Math.sin(a)*d*0.4;glow(x,y,(f.big?7:5)*(1-k*0.5),i%2?'#bfe27a':'#c8a0f0',(1-k)*0.8,true)}c.globalCompositeOperation='source-over';c.globalAlpha=1}});
 /* ================= Ezekiel · Effekt-Feinschliff (Paket „vfx_ezekiel“) =================
-   Nur Darstellung – keine Spielwerte. Bildsprache: Darkin-Blutrot/Karmesin, Stahl (Klingen), Schattenviolett, Sonnengold (Dawnbringer, Dieb), Geist-Grünweiß (Phantom) – kein Blau.
+   Nur Darstellung – keine Spielwerte. Bildsprache: Goliath-Blutrot/Karmesin, Stahl (Klingen), Schattenviolett, Sonnengold (Dawnbringer, Dieb), Geist-Grünweiß (Phantom) – kein Blau.
    Fähigkeiten werden zur Laufzeit umhüllt (vzWrap: n.cast), Effekte gehen als flache Daten in G.fxs (Online-Gast zeichnet mit denselben HFX),
    Auren laufen über Countdown-Felder am Spieler (P.vzSpinT, P.vzLotT, P.vzMkT …) im draw-Haken – der läuft auch beim Gast.
    Zu Passiven gewandelte Fähigkeiten (Blutrausch, Todesmal, Ölflasche) werden über n.tlCast umhüllt; neue Passive (z_t_*) und Brücken (z_st_*) zeigen kleine Auslöse-Effekte.
@@ -17832,7 +17832,7 @@ Object.assign(HFX,{
   c.globalCompositeOperation='lighter';glow(f.x,f.y,r*1.05,f.c,0.22*a,true);c.save();c.translate(f.x,f.y);c.scale(1,0.5);c.rotate((f.rs||1)*t);
   c.globalAlpha=0.75*a;c.strokeStyle=f.c;c.lineWidth=3;c.beginPath();c.arc(0,0,r,0,TAU);c.stroke();c.globalAlpha=0.5*a;c.lineWidth=2;c.setLineDash([10,8]);c.beginPath();c.arc(0,0,r*0.76,0,TAU);c.stroke();c.setLineDash([]);
   const n=f.n||6;c.globalAlpha=0.9*a;c.fillStyle=lite(f.c);for(let i=0;i<n;i++){c.rotate(TAU/n);c.beginPath();c.moveTo(r*0.82,0);c.lineTo(r*0.95,-6);c.lineTo(r*1.1,0);c.lineTo(r*0.95,6);c.closePath();c.fill()}c.restore()},
- /* Darkin-Schwingen, die sich hinter Ezekiel entfalten */
+ /* Goliath-Schwingen, die sich hinter Ezekiel entfalten */
  vz_wings(f,k,c,t){const o=Math.min(1,k/0.25),fade=(k<0.55?1:1-(k-0.55)/0.45)*(f.a||1),s=f.s||1,sp=0.3+0.7*(1-Math.pow(1-o,3)),fl=Math.sin(t*6)*0.05;if(fade<0.02)return;
   c.save();c.translate(f.x,f.y-18*s);for(const sd of [-1,1]){c.save();c.scale(sd*s,s);c.rotate(-0.55*(1-sp)+fl);vzWing(c,sp);c.globalAlpha=0.6*fade;c.fillStyle='#16040a';c.fill();
    c.globalCompositeOperation='lighter';c.globalAlpha=0.85*fade;c.strokeStyle=f.c||VZ.rot;c.lineWidth=2.4/s;c.stroke();c.globalAlpha=0.3*fade;c.lineWidth=7/s;c.stroke();c.globalCompositeOperation='source-over';c.restore()}c.restore();
@@ -17845,7 +17845,7 @@ Object.assign(HFX,{
  /* aufsteigende Dolche (Dolchregen: Ezekiel wirft sie in den Himmel) */
  vz_up(f,k,c){const n=f.n||6,al=1-k*k;for(let i=0;i<n;i++){const sp=1+((i*37)%5)*0.08,dx=(i-(n-1)/2)*10*(1+k*2.5),x=f.x+dx,y=f.y-22-k*300*sp;
    c.globalAlpha=al;c.save();c.translate(x,y);c.rotate(-Math.PI/2+dx*0.004);vzDag(c,17);c.restore();c.globalCompositeOperation='lighter';c.globalAlpha=al*0.55;ln(c,VZ.rotL,2.2,x,y+8,x-dx*0.08,y+46);c.globalCompositeOperation='source-over'}},
- /* Sprungbahn des Darkin-Sprungs (Bogen mit Kopf, der in f.dur Sekunden landet) */
+ /* Sprungbahn des Goliath-Sprungs (Bogen mit Kopf, der in f.dur Sekunden landet) */
  vz_arc(f,k,c){const T=f.dur/f.life,u1=Math.min(1,k/T),u0=Math.max(0,u1-0.55),fade=k<T?1:1-(k-T)/(1-T);if(fade<0.02||u1<=0)return;const N=12,P0=u=>[f.x+(f.x2-f.x)*u,f.y+(f.y2-f.y)*u-f.h*4*u*(1-u)];
   c.globalCompositeOperation='lighter';c.lineCap='round';for(let pass=0;pass<2;pass++){c.beginPath();for(let i=0;i<=N;i++){const u=u0+(u1-u0)*i/N,p=P0(u);i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1])}
    c.globalAlpha=fade*(pass?0.9:0.35);c.strokeStyle=pass?VZ.rotL:VZ.rot;c.lineWidth=pass?3:12;c.stroke()}
@@ -17898,7 +17898,7 @@ vzWrap('z_lotus',(r,v)=>{const ch=P.chan;if(!ch)return;const q=P;q.vzLotT=ch.t;v
   vzFx({k:'vz_spikes',x,y:y+4,r:R*0.55,n:vzHi()?14:8,s:rnd(9),life:0.9});light(x,y,R*1.8,VZ.rot,0.6,1);sparks(x,y,'#ffe0e0',vzHi()?22:10,620);vzShake(6);zpunch(0.05);vzStop(0.05);sfx('boom')}catch(e){}}});
 {const _dr=daggerRing;daggerRing=function(n,amt){const res=_dr.apply(this,arguments);try{if(vzOk()&&P){G.fxs.push({k:'ring',x:P.x,y:P.y-4,r:70,c:VZ.stahl,t:0,life:0.25,w:3});vzFx({k:'vz_cres',x:P.x,y:P.y-4,a:rnd(TAU),arc:5.2,r:44,w:9,c:'#f2ece2',c2:'#2a2220',life:0.22,sw:0.55})}}catch(e){}return res}}
 
-/* ---------- DARKIN ---------- */
+/* ---------- GOLIATH ---------- */
 vzWrap('z_cleave',(r,v)=>{const a=P.face,R=(175+10*r)*P.st.area;vzFx({k:'vz_cres',x:P.x,y:P.y,a,arc:2.45,r:R*0.78,w:34,c:VZ.rot,c2:'#2a020a',life:0.34,sw:0.32});
  vzFx({k:'vz_cres',x:P.x,y:P.y,a,arc:2.1,r:R*0.5,w:16,c:'#ff7a7a',c2:'#2a020a',life:0.3,sw:0.38,t:-0.04});
  const hx=P.x+Math.cos(a)*R*0.6,hy=P.y+Math.sin(a)*R*0.6;G.fxs.push({k:'flash',x:hx,y:hy,r:R*0.45,c:VZ.rot,t:0,life:0.22});light(hx,hy,R*1.5,VZ.rot,0.3,0.8);
@@ -18011,7 +18011,7 @@ hook('draw',(t,c)=>{if(G.bot||fxQ()<1)return;const hi=vzHi(),x=P.x,y=P.y;
  /* Blutrausch: Blutstropfen steigen auf, pochender Schein */
  if(P.buffs&&P.buffs.frenzy>0){const a=Math.min(1,P.buffs.frenzy*2),pul=0.5+0.5*Math.sin(t*10);c.globalCompositeOperation='lighter';glow(x,y-4,38+6*pul,VZ.rot,(0.18+0.12*pul)*a,true);
   if(hi)for(let i=0;i<5;i++){const q=(t*0.9+i/5)%1,aa=i*2.4+t*0.5,px=x+Math.cos(aa)*20*(1-q*0.4),py=y+8-q*44;glow(px,py,5+3*(1-q),'#ff4a5a',a*(1-q)*0.9)}c.globalCompositeOperation='source-over'}
- /* Erwachter Darkin: dunkle Flammen, Runenkreis, Schwingen-Schatten */
+ /* Erwachter Goliath: dunkle Flammen, Runenkreis, Schwingen-Schatten */
  if(P.buffs&&P.buffs.ascend>0){const a=Math.min(1,P.buffs.ascend*1.5),fl=0.75+0.25*Math.sin(t*13)*Math.sin(t*7.3);
   if(hi){c.save();c.translate(x,y-26);for(const sd of [-1,1]){c.save();c.scale(sd*1.35,1.35);c.rotate(-0.15+Math.sin(t*3)*0.08);vzWing(c,1);c.globalAlpha=0.3*a;c.fillStyle='#16040a';c.fill();c.globalCompositeOperation='lighter';c.globalAlpha=0.35*a;c.strokeStyle=VZ.rot;c.lineWidth=1.6;c.stroke();c.restore()}c.restore()}
   c.globalCompositeOperation='lighter';glow(x,y-14,60*fl,'#ff2a3a',0.32*a,true);glow(x,y-20,26*fl,'#ffb0a0',0.28*a);
@@ -18870,14 +18870,14 @@ z_d_griff:'Huscht 208 Schritt durch Gegner: 200% Schaden an allen auf dem Weg. C
 z_d_finger:'+3% Angriffstempo. Normale Angriffe stehlen mit 4% Chance; eine Ausweichrolle an Gegnern vorbei bestiehlt bis zu zwei. Gestohlene Kräfte halten 8,6 s.',
 z_d_oel:'Auslöser: Gegner in Reichweite (höchstens alle 11,2 s, 80% Stärke) – Öllache −45% Tempo, dann 5 s Brand (insgesamt 370%, Gegner bleiben verlangsamt).',
 z_d_kraehe:'Rücksprung (kurz unverwundbar), Krähenfüße 5 s: −50% Tempo, insgesamt 310% Schaden.',
-z_d_hehler:'Bis zu 3 gestohlene Kräfte zugleich (statt 2), 10% stärker. Jede gestohlene Kraft lädt einen halben Darkin-Blutstropfen.',
-z_d_raub:'Enterhaken zieht den stärksten Gegner heran: 310% Schaden, 0,8 s Betäubung. Raubt Champions ALLE Eigenschaften, Bossen/Wächtern den Riesenzorn, anderen den Mumm. Jeder Darkin-Blutstropfen: +1 s Kraftdauer.',
+z_d_hehler:'Bis zu 3 gestohlene Kräfte zugleich (statt 2), 10% stärker. Jede gestohlene Kraft lädt einen halben Goliath-Blutstropfen.',
+z_d_raub:'Enterhaken zieht den stärksten Gegner heran: 310% Schaden, 0,8 s Betäubung. Raubt Champions ALLE Eigenschaften, Bossen/Wächtern den Riesenzorn, anderen den Mumm. Jeder Goliath-Blutstropfen: +1 s Kraftdauer.',
 z_d_coup:'Huscht zu bis zu 7 Gegnern (je 440%, jeder bestohlen), dann 750% ringsum; gestohlene Kräfte +6 s. Dabei unverwundbar.',
 z_p_klage:'Geisterschädel: 250% Schaden, Heulen mit halber Stärke ringsum, springt weiter (60%). Mit Seele: springt auf drei Gegner über (verbraucht sie).',
 z_p_troph:'Stirbt ein Gegner nahe Ezekiel: 35% Chance auf seine Seele (Champions, Wächter, Bosse: immer). Bis 5 Seelen, je +1,4% Schaden.',
 z_p_gang:'3,3 s körperlos: +35% Lauftempo, 50% weniger erlittener Schaden; durchquerte Gegner erleiden 150% und sind 1 s verlangsamt.',
 z_p_wache:'Alle 3,6 s fängt eine Seele ein feindliches Geschoss ab und schleudert es auf den nächsten Gegner (125%). Die Seele bleibt.',
-z_p_ernte:'Alle Seelen (mindestens zwei Geister) stürzen sich auf Gegner: je 200% Schaden, heilen je 2% Leben. Abschluss: verbraucht Darkin-Blut.',
+z_p_ernte:'Alle Seelen (mindestens zwei Geister) stürzen sich auf Gegner: je 200% Schaden, heilen je 2% Leben. Abschluss: verbraucht Goliath-Blut.',
 z_p_schrei:'1500% Schaden ringsum, Gegner fliehen 2 s. Danach 10 s lang: Jeder Kill fängt eine Seele, bis zu 3 Seelen mehr, Treffer hallen nach (mindestens 30%).',
 z_t_scharf:'+3% Kritische Trefferchance, +5% Angriffstempo, normale Angriffe +4% Schaden.',
 z_t_lang:'+6% Gold, +2% Angriffstempo, +2% Lauftempo.',
@@ -18905,7 +18905,7 @@ function tdKurz(n,r){const sp=tdSplit(tdPlain(n.d(r))),C=tdComp(n);
 function tdLang(n,r){return tdSplit(tdPlain(n.d(r)))}
 /* dezente Hervorhebung: Zahlen (mit Vorzeichen und Einheit), Ressourcen/Zustände, Ziele */
 const TD_UNIT=/^(%|\s(?:s|Schritt|Rüstung|Reichweite)(?![\wäöüß]))/;
-const TD_KW=new RegExp('(?<![\\wäöüÄÖÜß-])('+['Kritische[rn]? Trefferchance','Kritische[rn]? Schaden','Fertigkeitsschaden','Rückenstich-Schaden','Blitzschaden','Schadens?','Schutzleben','Lebensraub','Lebens','Leben','Schild','Lauftempo','Angriffstempo','Bewegungstempo','Tempo','Abklingzeiten','Abklingzeit','Rüstung','Wirkungsbereich','Reichweite','Naturvorrat','Darkin-Blut(?:stropfen)?','Seelen?','Gold','Beute',
+const TD_KW=new RegExp('(?<![\\wäöüÄÖÜß-])('+['Kritische[rn]? Trefferchance','Kritische[rn]? Schaden','Fertigkeitsschaden','Rückenstich-Schaden','Blitzschaden','Schadens?','Schutzleben','Lebensraub','Lebens','Leben','Schild','Lauftempo','Angriffstempo','Bewegungstempo','Tempo','Abklingzeiten','Abklingzeit','Rüstung','Wirkungsbereich','Reichweite','Naturvorrat','Goliath-Blut(?:stropfen)?','Seelen?','Gold','Beute',
  'betäub(?:t|en)','Betäubung(?:en)?','gefesselt','Fesselung(?:en)?','fesseln','verlangsamt','fliehen','Flucht','geblendet','blendet','blenden','unverwundbar','unsichtbar','körperlos','befallen','Brand','Bewunderer[ns]?','Trugbild(?:er)?','heil(?:t|en)','Heilung'].join('|')+')(?![\\wäöüß])','g');
 const TD_ZIEL=/(?<![\wäöüÄÖÜß-])([Ee]r und (?:seine )?(?:Verbündete|Mitspieler)n?(?: in der Nähe)?|(?:Barradin|Echo|Friedrich|Ezekiel|Rex)(?: und (?:seine )?(?:Verbündete|Mitspieler)n?)?|Mitspieler(?:n)?(?: in der Nähe)?|Verbündete(?:n)?|(?:den |der )?stärkste[n]? Gegner|alle Gegner(?: ringsum| im Umkreis| in der Nähe)?)(?![\wäöüß])/g;
 const TD_AUS=/^(Auslöser:)/;
@@ -19790,7 +19790,7 @@ const EV2L=[
   {l:'Kurz hinhören',r:1,lohn:'gut',skill:'Willenskraft',dc:6,bonus:{ezekiel:2},win:'Talentsplitter',lose:'Blutzoll',ok(){exSplit(1);return 'Ein Geheimnis, ganz leise. Ihr wisst jetzt etwas, das ihr nicht wissen solltet.'},fail(){exFx('ev_blut',1);return 'Die Stimme nimmt einen Schluck von euch. Nur einen kleinen.'}},
   {l:'Einen kleinen Pakt',r:2,lohn:'groß',win:'+40% Schaden · 2 Ebenen',lose:'Preis: Gegner +30% · 2 Ebenen',ok(){exFx('ev_pakt',2);exFx('ev_paktpreis',2);return 'Ein Kribbeln, ein Brennen. Der Preis steht im Kleingedruckten.'}},
   {l:'Die Stimme herausfordern',r:3,lohn:'episch',skill:'Willenskraft',dc:14,bonus:{ezekiel:4},win:'Talentpunkt + Splitter',lose:'−1 Heiltrank (Lauf) + Schwäche',ok(){exSP(1);exSplit(1);return 'Die Stimme verstummt. Ihre Macht bleibt – bei euch.'},fail(){exPot(-1);exFx('ev_schwaeche',1);return 'Sie nimmt sich ihren Teil. Und noch ein bisschen.'}},
-  {l:'Die Darkin-Klinge antworten lassen',hero:'ezekiel',r:2,lohn:'groß',skill:'Willenskraft',dc:12,bonus:{ezekiel:3},win:'Pakt ohne Preis + Splitter',lose:'Verwundbar 2 Ebenen',ok(){exFx('ev_pakt',2);exSplit(1);return 'Die Klinge lacht. Die Stimme verstummt. Wer hier wen frisst, ist geklärt.'},fail(){exFx('ev_verwundbar',2);return 'Die Klinge und die Stimme verstehen sich prächtig. Leider gegen euch.'}},
+  {l:'Die Goliath-Klinge antworten lassen',hero:'ezekiel',r:2,lohn:'groß',skill:'Willenskraft',dc:12,bonus:{ezekiel:3},win:'Pakt ohne Preis + Splitter',lose:'Verwundbar 2 Ebenen',ok(){exFx('ev_pakt',2);exSplit(1);return 'Die Klinge lacht. Die Stimme verstummt. Wer hier wen frisst, ist geklärt.'},fail(){exFx('ev_verwundbar',2);return 'Die Klinge und die Stimme verstehen sich prächtig. Leider gegen euch.'}},
   {l:'Weghören'}]},
  {id:'geist',t:'Der Geisterritter',txt:'Ein durchscheinender Ritter versperrt den Weg. „Beweist mir, dass ihr würdig seid.“',opts:[
   {l:'Ehrerbietung',r:1,lohn:'klein',skill:'Religion',dc:6,win:'Erfahrung',lose:'nichts',ok(){exXp(0.35);return 'Er salutiert knapp.'},fail(){return 'Er schaut durch euch hindurch. Wörtlich.'}},
@@ -21496,7 +21496,7 @@ function dtIdleUpd(dt){if(G.bot)return;if(G.state==='play'&&NET.role!=='guest'){
  if(q.id==='barradin'&&m.s>DT_IDLE&&dtWelt()){m.pt=(m.pt||0)-dt;if(m.pt<=0){m.pt=dtRn(0.35,0.55);const fl=q.flip||1;if(dtR()<0.2)dtP({k:'rring',x:q.x+fl*10,y:q.y-15,dx:fl*6,vx:0,vy:0,life:2.2});else dtP({k:'rauch',x:q.x+fl*10,y:q.y-15,vx:fl*dtRn(2,6),vy:dtRn(-22,-14),s:2.4,a:0.4,c:'#d8d4cc',life:dtRn(1.4,2)})}
   if(m.s>18&&!m.demoDone&&NET.role!=='guest'){m.demoDone=1;if(dtR()<0.5){m.demo=G.time;dtSag('barradin',dtPk(['Kleine Vorstellung gefällig?','Die Flöte aus Gracklstugh – nur ein ganz kleiner Demogorgon.','Ein Lied für das Publikum!']))}}}
  if(q.id==='echo'&&!m.zaehl&&m.s>24&&NET.role!=='guest'){m.zaehl=1;if(dtR()<0.5)dtSag('echo',dtPk(['Einundvierzig … zweiundvierzig … wer hat mich unterbrochen?','Ich zähle nur kurz die Beute. Für die Gruppe.']))}
- if(q.id==='ezekiel'&&m.s>24&&!m.schweig&&NET.role!=='guest'){m.schweig=1;if(dtR()<0.35)dtSag('ezekiel',dtPk(['…','Ruhe. Ich höre etwas.','Der Darkin wird ungeduldig.']))}}
+ if(q.id==='ezekiel'&&m.s>24&&!m.schweig&&NET.role!=='guest'){m.schweig=1;if(dtR()<0.35)dtSag('ezekiel',dtPk(['…','Ruhe. Ich höre etwas.','Der Goliath wird ungeduldig.']))}}
  /* Rex buddelt und bringt einen Stock */
  const rex=G.allies.find(a=>a.kind==='rex'&&!a.dead);if(!rex){DT.rex=null;return}let R=DT.rex;if(!R||R.a!==rex)R=DT.rex={a:rex,x:rex.x,y:rex.y,s:0,dig:0,stock:0};
  const mv=Math.abs(rex.x-R.x)+Math.abs(rex.y-R.y)>1.2;R.x=rex.x;R.y=rex.y;let nah=false;for(const e of G.enemies)if(!e.dead&&!e.wlZz&&Math.abs(e.x-rex.x)<400&&Math.abs(e.y-rex.y)<400){nah=true;break}
@@ -24525,7 +24525,7 @@ Object.assign(HFX,{
 /* Pausenmenü: Kombo-Liste der Gruppe (nur Mehrspieler bzw. Friedrich mit Rex) */
 function swKoHtml(){try{const L=mpL().filter(Boolean);const ids=new Set(L.map(q=>q.id));let list=SW_KO.filter(C=>ids.has(C.a)&&ids.has(C.b));if(L.length<=1&&ids.has('friedrich'))list=[SW_KO_REX];if(!list.length)return'';
  const cnt=id=>L.reduce((m,q)=>Math.max(m,q.swKo&&(G.netGuestRun||q.swKoR===G.runId)?q.swKo[id]||0:0),0),HN=id=>id==='rex'?'Rex':esc(HEROES[id]?HEROES[id].name:id);
- const kn=k=>({lied:'Lied',klinge:'Klinge',fessel:'Fessel',sturm:'Sturm',feuer:'Feuer/Mond',natur:'Natur',tier:'Tiergestalt',pfeil:'Schuss',falle:'Falle',rudel:'Rudel',dolch:'Dolche',darkin:'Darkin',schatten:'Schatten',dieb:'Diebeskunst'})[k]||k;
+ const kn=k=>({lied:'Lied',klinge:'Klinge',fessel:'Fessel',sturm:'Sturm',feuer:'Feuer/Mond',natur:'Natur',tier:'Tiergestalt',pfeil:'Schuss',falle:'Falle',rudel:'Rudel',dolch:'Dolche',darkin:'Goliath',schatten:'Schatten',dieb:'Diebeskunst'})[k]||k;
  return`<div class="card swKo"><div class="eyebrow">Kombos (${list.filter(C=>cnt(C.id)>0).length}/${list.length})</div><div class="swKoL">${list.map(C=>`<div class="swKoR${cnt(C.id)?' on':''}"><span class="swKoI" style="color:${C.c}">${C.ic}</span><span><b>${esc(C.n)}</b> <span class="muted">${HN(C.a)}${C.ka?' ('+C.ka.map(kn).join('/')+')':''} + ${HN(C.b)}${C.kb?' ('+C.kb.map(kn).join('/')+')':''}</span><br><span class="swKoD">${esc(C.d)}</span></span></div>`).join('')}</div></div>`}catch(e){return''}}
 {const rp=renderPause;renderPause=function(keep){let h='';try{h=swKoHtml();if(h)swCss()}catch(x){h=''}if(!h)return rp.apply(this,arguments);const ss=showScreen;
  showScreen=function(x){try{if(typeof x==='string'&&x.indexOf('swKo')<0){const i=x.indexOf('<div class="card ups">');x=i>=0?x.slice(0,i)+h+x.slice(i):x}}catch(er){}const A=[].slice.call(arguments);A[0]=x;return ss.apply(this,A)};try{return rp.apply(this,arguments)}finally{showScreen=ss}}}
@@ -24660,7 +24660,7 @@ const FK_DEF=[
  {id:'z_blut',h:'ezekiel',r:'e',n:'Blutmagie',ic:'♦',c:'#ff4a5a',art:'flamme',d:'+20 % Fähigkeitsschaden, jede kostet 1 % Leben.',ld:'Fähigkeiten verursachen 20 % mehr Schaden, jede kostet 1 % Leben (nie unter 10 %).'},
  {id:'z_ader',h:'ezekiel',r:'s',n:'Aderlass',ic:'♆',c:'#e05060',art:'splitter',d:'Krits lassen bluten, Blutende heilen dich beim Tod.',ld:'Kritische Treffer lassen 3 s bluten (40 % Schaden pro Sekunde); stirbt ein Blutender, heilst du 1,5 %.'},
  {id:'z_lang',h:'ezekiel',r:'s',n:'Langfinger',ic:'❖',c:'#ffd04a',art:'kreis',d:'+20 % Gold, besiegte Eliten heilen dich um 10 %.',ld:'+20 % Gold; jede besiegte Elite heilt dich um 10 % Leben.'},
- {id:'z_hunger',h:'ezekiel',r:'s',n:'Darkin-Hunger',ic:'☽',c:'#ff3b4a',art:'rauch',d:'Unter 40 % Leben: +25 % Angriffstempo, Lebensraub.',ld:'Unter 40 % Leben: +25 % Angriffstempo und +4 % Lebensraub.'},
+ {id:'z_hunger',h:'ezekiel',r:'s',n:'Goliath-Hunger',ic:'☽',c:'#ff3b4a',art:'rauch',d:'Unter 40 % Leben: +25 % Angriffstempo, Lebensraub.',ld:'Unter 40 % Leben: +25 % Angriffstempo und +4 % Lebensraub.'},
  /* Allgemein */
  {id:'a_druck',r:'s',n:'Krit-Druckwelle',ic:'✺',c:'#ffe6a0',art:'strahl',d:'Krits lösen eine kleine Druckwelle aus.',ld:'Kritische Treffer lösen eine Druckwelle aus (60 % Schaden an bis zu 4 Gegnern ringsum, höchstens jede Sekunde).'},
  {id:'a_gold',r:'s',n:'Goldmagnet',ic:'◎',c:'#ffd04a',art:'kreis',d:'Beute fliegt von weit her zu dir, +25 % Gold.',ld:'Gold, Erfahrung und Edelsteine fliegen aus dreifacher Entfernung zu dir; +25 % Gold.'},
@@ -24692,7 +24692,7 @@ const FK_VB=[
  {id:'alpha',a:'f_rex',b:'f_rudel',n:'Alphatier',d:'Rex-Sprung trifft alle Gegner ringsum.'},
  {id:'splitterkonter',a:'f_konter',b:'f_splitter',n:'Splitterkonter',d:'Konterschüsse zersplittern immer.'},
  {id:'blutschatten',a:'z_schatten',b:'z_blut',n:'Blutschatten',d:'Schatten hält 6 s, seine Hiebe heilen dich.'},
- {id:'blutdurst',a:'z_ader',b:'z_hunger',n:'Blutdurst',d:'Darkin-Hunger schon unter 55 % Leben.'},
+ {id:'blutdurst',a:'z_ader',b:'z_hunger',n:'Blutdurst',d:'Goliath-Hunger schon unter 55 % Leben.'},
  {id:'drachenhort',a:'a_gold',b:'z_lang',n:'Drachenhort',d:'Eliten lassen viel mehr Gold fallen.'},
  {id:'kopfgeld',a:'a_druck',b:'a_elite',n:'Kopfgeld',d:'Druckwellen treffen Eliten doppelt.'},
  {id:'unbeugsam',a:'a_leben',b:'a_eisen',n:'Unbeugsam',d:'Zweites Leben stellt 60 % wieder her.'},
@@ -24987,7 +24987,7 @@ hook('tick',dt=>{const q=P;if(!q||!q.karten||!q.karten.length||fkAus()||G.state!
   G.fkZ=G.fkZ.filter(z=>z.t<z.dur)}
  /* Doppelgänger */
  const D=q.fkDg;if(D){if(G.time>D.t)q.fkDg=null;else{D.h-=dt;if(D.h<=0){D.h=0.5;const t=fkNah(D.x,D.y,170,1)[0];if(t){fkDmg(t,q.st.dmg*0.8,'z_schatten',{noCrit:1});fkFx({k:'fk_hieb',x:t.x,y:t.y-8,a:Math.atan2(t.y-D.y,t.x-D.x),c:fkVb(q,'blutschatten')?'#ff4a5a':'#c08cff',life:0.25});if(fkVb(q,'blutschatten'))heal(q.st.maxHp*0.004)}}}}
- /* Darkin-Hunger */
+ /* Goliath-Hunger */
  if(H('z_hunger')){const on=q.hp>0&&q.hp<q.st.maxHp*(fkVb(q,'blutdurst')?0.55:0.4);if(on!==!!q.fkHg){q.fkHg=on;recalc();if(on){fkProc(q,'z_hunger');if(!G.bot)word(q.x,q.y-62,'Hunger!','#ff3b4a')}}}
  /* Zeitlich begrenzter Schub */
  if(q.fkB&&q.fkB.t<=G.time){q.fkB=null;recalc()}
@@ -26770,7 +26770,7 @@ const NEU=[
  {id:'f_wache',h:'friedrich',r:'s',n:'Treuer Wächter',ic:'⛨',c:'#d8c08a',art:'kreis',d:'Alle 5 s fängt Rex einen Treffer für dich ab.',ld:'Alle 5 s wirft sich Rex in einen Treffer: du erleidest 85 % weniger Schaden davon, Gegner ringsum sind kurz betäubt.'},
  /* Ezekiel */
  {id:'z_klingen',h:'ezekiel',r:'s',req:'dolch',n:'Klingenecho',ic:'†',c:'#d8b0ff',art:'splitter',d:'Dolche +25 % Schaden und fünf Schattendolche.',ld:'Dolch-Fähigkeiten verursachen 25 % mehr Schaden; danach fliegen fünf Schattendolche auf Gegner ringsum (je 100 % Fähigkeitsschaden).'},
- {id:'z_glut',h:'ezekiel',r:'e',req:'darkin',n:'Darkinglut',ic:'✷',c:'#ff5a4a',art:'flamme',d:'Darkin-Fähigkeiten reißen eine Blutfontäne auf.',ld:'Darkin-Fähigkeiten lassen um dich eine Blutfontäne aufsteigen (50 % Fähigkeitsschaden); je getroffenem Gegner heilst du 0,2 % (bis 0,8 %).'},
+ {id:'z_glut',h:'ezekiel',r:'e',req:'darkin',n:'Goliathglut',ic:'✷',c:'#ff5a4a',art:'flamme',d:'Goliath-Fähigkeiten reißen eine Blutfontäne auf.',ld:'Goliath-Fähigkeiten lassen um dich eine Blutfontäne aufsteigen (50 % Fähigkeitsschaden); je getroffenem Gegner heilst du 0,2 % (bis 0,8 %).'},
  {id:'z_raub',h:'ezekiel',r:'s',req:'dieb',n:'Diebesbeute',ic:'◈',c:'#ffd04a',art:'kreis',d:'Dieb-Fähigkeiten stehlen Kraft: +10 % Schaden.',ld:'Jede Dieb-Fähigkeit stiehlt Kraft: 6 s lang +10 % Schaden, bis zu zweimal.'},
  {id:'z_fluch',h:'ezekiel',r:'s',req:'schatten',n:'Seelenfluch',ic:'☠',c:'#c08cff',art:'rauch',d:'Schatten-Fähigkeiten verfluchen: +35 % Schaden.',ld:'Schatten-Fähigkeiten verfluchen alle Gegner im weiten Umkreis 10 s lang: sie erleiden 35 % mehr Schaden von dir.'},
  {id:'z_erst',h:'ezekiel',r:'s',n:'Erster Stich',ic:'♠',c:'#ff8a8a',art:'splitter',d:'+20 % Schaden gegen unverletzte Gegner.',ld:'Gegen Gegner mit mehr als 90 % Leben verursachst du 20 % mehr Schaden.'},
@@ -26790,7 +26790,7 @@ const VBN=[
  {id:'hochspannung',a:'e_kugel',b:'e_gewitter',n:'Hochspannung',d:'Kugelblitze springen auf 5 Gegner.'},
  {id:'jagdrudel',a:'f_geist',b:'f_rudel',n:'Jagdrudel',d:'Der Geisterwolf zählt als Rex: stärker, heilt dich.'},
  {id:'wildfaehrte',a:'f_fallen',b:'f_mal',n:'Wildfährte',d:'Stachelfelder zeichnen alle Gegner darin.'},
- {id:'blutquell',a:'z_glut',b:'z_blut',n:'Blutquell',d:'Darkinglut heilt doppelt.'},
+ {id:'blutquell',a:'z_glut',b:'z_blut',n:'Blutquell',d:'Goliathglut heilt doppelt.'},
  {id:'schattenreigen',a:'z_fluch',b:'z_schatten',n:'Schattenreigen',d:'Der Doppelgänger verflucht seine Ziele.'},
  {id:'wirbelwind',a:'a_fuss',b:'a_sichel',n:'Wirbelwind',d:'Ausweichen ruft sofort die Mondsichel.'},
  {id:'stachelpanzer',a:'a_dorn',b:'a_eisen',n:'Stachelpanzer',d:'Dornen treffen doppelt hart.'}];
@@ -28569,7 +28569,7 @@ const WART={
  komposit:{g:'r',sp:1,n:'Reflexbogen – Wuchtpfeil'},armbrust:{g:'r',sp:2,n:'Rückstoß + Nachladen – Bolzen'},
  wmesser:{g:'r',sp:1,n:'Überkopfwurf – Drehmesser'},sterne:{g:'r',sp:0,n:'Seitwurf – Wurfsterne'},sdolch:{g:'r',sp:1,n:'Schattenstoß – Schattendolch'}};
 const WBASE={Rapier:'rapier',Degen:'degen',Stockdegen:'stock',Druidenstab:'stab',Sichel:'sichel',Totemkeule:'keule',Jagdmesser:'messer',Kurzschwert:'schwert',
- Waldaxt:'axt',Dolchpaar:'dolche',Krummschwert:'krumm','Darkin-Klinge':'darkin',Laute:'laute','Flöte':'floete',Harfe:'harfe',Mistelzweig:'mistel',
+ Waldaxt:'axt',Dolchpaar:'dolche',Krummschwert:'krumm','Goliath-Klinge':'darkin',Laute:'laute','Flöte':'floete',Harfe:'harfe',Mistelzweig:'mistel',
  Dornenzweig:'dorn',Eichenrute:'eiche',Langbogen:'langbogen',Kurzbogen:'kurzbogen',Kompositbogen:'komposit',Armbrust:'armbrust',Wurfmesser:'wmesser',
  Wurfsterne:'sterne',Schattendolche:'sdolch'};
 const WDEF={barradin:{m:'rapier',r:'laute'},echo:{m:'stab',r:'mistel'},friedrich:{m:'messer',r:'langbogen'},ezekiel:{m:'krumm',r:'wmesser'}};
@@ -30027,7 +30027,7 @@ const RU_ARM_B={Wams:'wams',Kettenhemd:'kette',Schuppenpanzer:'schuppen',Robe:'r
 const RU_GLO_N=[[/Klauen|Krallen|Pranken/,'kralle'],[/Eisenfäuste|Henker/,'panzer'],[/Sehnenschoner/,'schiene'],[/Fingerlos|Schützen|Meisterdieb/,'finger']];
 const RU_GLO_B={Lederhandschuhe:'leder',Panzerhandschuhe:'panzer',Fingerlinge:'finger',Armschienen:'schiene',Kampfhandschuhe:'kampf'};
 /* Farbschlüssel aus dem Namen (Set/Legendär/Suffix) */
-const RU_CK=[[/Samt|Blutgräfin/,'samt'],[/Spitzen/,'spitze'],[/Schatten|Lautlos|Nacht|Maske|Leere/,'schatten'],[/Blut|Darkin|Gefallen/,'blut'],[/Glück|Gold|Pfau/,'gold'],
+const RU_CK=[[/Samt|Blutgräfin/,'samt'],[/Spitzen/,'spitze'],[/Schatten|Lautlos|Nacht|Maske|Leere/,'schatten'],[/Blut|Goliath|Gefallen/,'blut'],[/Glück|Gold|Pfau/,'gold'],
  [/Moos|Laub|Ranken|Wurzel|Hain|Tarn|Wildbühne|Brombeer/,'moos'],[/Rinde/,'rinde'],[/Sterne|Sternen|Arkan|Erzmagier|Rune/,'stern'],[/Flamm|Phönix|Glimm|Asche|Glut|Morgenrot/,'glut'],
  [/Kupfer|Donner|Gewitter|Funken/,'kupfer'],[/Tiefenstahl|Zwerg|Eisen|Bollwerk/,'stahl'],[/Goblin/,'goblin'],[/Demogorgon/,'demo'],[/Flut/,'flut'],[/Mond|Frost|Winter/,'mond'],
  [/Barden|Virtuos|Zugabe|Applaus/,'barde'],[/Hofnarr|tausend Rollen|Flicken/,'narr'],[/Wappen|Banner|Gefährten|Bund|Eid/,'wappen'],[/Tänzer|Seid/,'seide'],[/Grenzwacht|Späher/,'wacht'],
@@ -31488,7 +31488,7 @@ const LF_TROPH={b:['dein Federhut','deinen Federhut','Federhut'],e:['dein Geweih
 const LF_EL=['','Feuer','Gift','Frost','Blitz'],LF_ELF=['','#ff7a2a','#9ad84a','#ece6f4','#ffe066'],LF_ELADJ=['','Feuerschutz','Giftschutz','Frostschutz','Blitzschutz'];
 /* Waffenart → [Geschlecht m|f|n|p, Name, Dativ-Plural] für „dein/deine/deinem/deiner …“ */
 const LF_WG={rapier:['n','Rapier'],degen:['m','Degen'],stock:['m','Stockdegen'],stab:['m','Stab'],sichel:['f','Sichel'],keule:['f','Keule'],messer:['n','Jagdmesser'],schwert:['n','Kurzschwert'],
- axt:['f','Axt'],dolche:['p','Dolche','Dolchen'],krumm:['n','Krummschwert'],darkin:['f','Darkin-Klinge'],laute:['f','Laute'],floete:['f','Flöte'],harfe:['f','Harfe'],mistel:['m','Mistelzweig'],
+ axt:['f','Axt'],dolche:['p','Dolche','Dolchen'],krumm:['n','Krummschwert'],darkin:['f','Goliath-Klinge'],laute:['f','Laute'],floete:['f','Flöte'],harfe:['f','Harfe'],mistel:['m','Mistelzweig'],
  dorn:['m','Dornenzweig'],eiche:['f','Eichenrute'],langbogen:['m','Langbogen'],kurzbogen:['m','Kurzbogen'],komposit:['m','Kompositbogen'],armbrust:['f','Armbrust'],
  wmesser:['p','Wurfmesser','Wurfmessern'],sterne:['p','Wurfsterne','Wurfsternen'],sdolch:['p','Schattendolche','Schattendolchen']};
 function lfWaffe(art){const g=LF_WG[art]||['f','Waffe'];const n=g[1],dp=g[2]||n;
@@ -32670,7 +32670,7 @@ const RX_KOPF=[
  {n:'Pilzkappe',a:'pilz',c:['#b84a3a','#7a2a20','#f4ead8'],u:{f:'fagas',n:2},t:'Ein leuchtender Hut aus dem Unterreich. Fagas schwört, er sei nicht giftig. Meistens.'},
  {n:'Winterschal',a:'schal',c:['#a8302a','#e5b454','#f4e8d0'],u:{w:1},t:'Gestrickt in einer langen Winternacht am Lagerfeuer.'},
  {n:'Pappkrone',a:'krone',c:['#e5b454','#a8781e','#d84a3a'],u:{q:1},t:'„König der Apporte“. Gundren hat die Krone gebastelt, Echo die Edelsteine aufgemalt.'},
- {n:'Darkin-Hörnchen',a:'hoerner',c:['#4a1a1e','#24080a','#ff5050'],u:{c:'zR',n:2},t:'Ezekiel hat sie geschnitzt. Er bestreitet es. Die Späne lagen in seiner Kapuze.'},
+ {n:'Goliath-Hörnchen',a:'hoerner',c:['#4a1a1e','#24080a','#ff5050'],u:{c:'zR',n:2},t:'Ezekiel hat sie geschnitzt. Er bestreitet es. Die Späne lagen in seiner Kapuze.'},
  {n:'Brombeerkranz',a:'kranz',c:['#3e6a2a','#24401a','#6a2a5a'],u:{c:'eR',n:2},t:'Echo hat ihn geflochten – und die Hälfte der Beeren vorher gegessen.'},
  {n:'Flammenstirnband',a:'stirn',c:['#8a2018','#4a0e0a','#ffb04a'],u:{f:'gartokkar',n:2},t:'Ein Zeichen der Bewahrer der Flamme. Rex schnüffelt misstrauisch daran.'},
  {n:'Barden-Barett',a:'barett',c:['#2e5a3a','#183424','#e5b454'],u:{c:'bR',n:4},t:'Für einen Hund, der bei jedem Lied mitheult. Barradin nennt es „Duett“.'}];
@@ -33097,7 +33097,7 @@ const LS_AU=[
  {id:'spaeher',von:'kardal',t:'Das Versteck eines Spähers',art:'ort',ev:'lg_spaeher',txt:'Ein echter Späher meines Vaters hat unterwegs ein Versteck angelegt. Ein echter, nicht so einer wie ich damals. Holt seine Nachricht.',ok:'Die Nachricht meines Vaters … er lässt euch grüßen. Und fragt, ob Barradin wieder singt.',lohn:{v:6,f:4,rx:'h'}},
  {id:'grau',von:'kardal',t:'Graue Zwerge',art:'kill',fam:'duergar',n:20,txt:'Nicht alle Duergar sind meinem Vater treu. Zwanzig Abtrünnige weniger – und Gracklstugh schläft ruhiger.',ok:'Zwanzig. Mein Vater wird es nicht offiziell bestätigen. Inoffiziell lädt er euch zum Essen ein.',lohn:{v:7,f:3,dk:'eisenfigur'}},
  {id:'glut',von:'gartokkar',t:'Glut für den Meister',art:'ort',ev:'lg_glut',txt:'Unterwegs glimmt manchmal eine alte Glutschale. Holt mir ihre Glut. Fragt nicht, wofür. Fragt nie, wofür.',ok:'Die Glut lebt. Gut. Der Meister wird … nein, sagen wir einfach: Gut.',lohn:{v:6,f:4,dk:'flammenschale'}},
- {id:'feuerprobe',von:'gartokkar',t:'Die Feuerprobe',art:'held',held:'ezekiel',n:2,txt:'Ich will sehen, ob der Darkin dem Feuer standhält. Besiegt mit Ezekiel zwei Wächter in einem Lauf.',ok:'Er hat nicht gezuckt. Kein einziges Mal. Das Feuer respektiert ihn. Ich auch – ein wenig.',lohn:{v:6,f:4,rx:'k'}},
+ {id:'feuerprobe',von:'gartokkar',t:'Die Feuerprobe',art:'held',held:'ezekiel',n:2,txt:'Ich will sehen, ob der Goliath dem Feuer standhält. Besiegt mit Ezekiel zwei Wächter in einem Lauf.',ok:'Er hat nicht gezuckt. Kein einziges Mal. Das Feuer respektiert ihn. Ich auch – ein wenig.',lohn:{v:6,f:4,rx:'k'}},
  {id:'rexheld',von:'rex',t:'Rex will helfen',art:'rettung',n:1,txt:'*Rex legt dir einen alten Strick vor die Füße und schaut dich auffordernd an. Er will jemanden retten.*',ok:'*Rex sitzt aufrecht wie ein kleiner Wachposten und wedelt. Er weiß genau, was er getan hat.*',lohn:{v:4,f:6,rx:'t'}},
  {id:'wolfsjagd',von:'woelfe',t:'Das Rudel ruft',art:'bell',n:5,txt:'*Die Wölfe heulen in Richtung Wald. Rex spitzt die Ohren – er soll Wache halten und warnen, fünfmal.*',ok:'*Die Wölfe stupsen Rex an. Er ist jetzt offiziell Teil des Rudels.*',lohn:{v:4,f:5,rx:'s'}}];
 /* Ereignis-Orte der Aufträge (für __hsLAUF.EV; gleiche Form wie dort: t, ic, art, reg, sz, o) */
@@ -35649,14 +35649,14 @@ const ZT={
   t:[g=>`Lande ${g.p} Pfeiltreffer aus über 360 Schritt`,g=>`Aus dem Gebüsch: ${g.p} weite Treffer`],
   on:{hit(g,e,o,a,c,q){if(q&&q.id==='friedrich'&&(o.arrow||o.basic)&&!o.dot&&!o.pet&&d2(e,q)>360*360)zAdd(g,1)}}},
  /* ---------- Ezekiel ---------- */
- ernte:{k:'Darkin-Ernte',ic:'☾',h:'ezekiel',w:1,can:()=>true,gen:(tr,c,o)=>({p:zOrt(o,T3(tr,5,6,10)),x:T3(tr,3,5,5)}),
+ ernte:{k:'Goliath-Ernte',ic:'☾',h:'ezekiel',w:1,can:()=>true,gen:(tr,c,o)=>({p:zOrt(o,T3(tr,5,6,10)),x:T3(tr,3,5,5)}),
   t:[g=>`${g.p} Abschlüsse mit mindestens ${g.x} Blut`,g=>`Die Klinge hat Durst: ${g.p} Abschlüsse ab ${g.x} Blut`],
   on:{cast(g,q,n,ctx){if(q.id==='ezekiel'&&ctx&&(ctx.fin|0)>=g.x)zAdd(g,1)}}},
  schatten:{k:'Schattenschritt',ic:'◐',h:'ezekiel',w:0.9,can:()=>true,gen:(tr,c,o)=>({p:zOrt(o,T3(tr,5,12,22))}),
   t:[g=>`Springe ${g.p} Mal mit dem Schattenschritt`,g=>`Aus dem Nichts: ${g.p} Schattenschritte`],
   on:{schatten(g){zAdd(g,1)}}},
  blutrausch:{k:'Im Blutrausch',ic:'♦',h:'ezekiel',w:0.9,can:()=>true,gen:(tr,c,o)=>({p:zOrt(o,T3(tr,25,60,100))}),
-  t:[g=>`Besiege ${g.p} Gegner, während Ezekiel mindestens halb voll Blut ist`,g=>`Darkin-Hunger: ${g.p} Gegner mit halbvoller Blutladung`],
+  t:[g=>`Besiege ${g.p} Gegner, während Ezekiel mindestens halb voll Blut ist`,g=>`Goliath-Hunger: ${g.p} Gegner mit halbvoller Blutladung`],
   on:{kill(g,e,o,q){if(q&&q.id==='ezekiel'){let m=5;try{m=DBMAX()}catch(x){}if((q.db||0)>=m*0.5)zAdd(g,1)}}}},
  /* ---------- Gelegenheiten (nur als Ortsauftrag, wenn es passt) ---------- */
  g_erzfeind:{k:'Erzfeind',ic:'☠',gel:1,w:0,can:()=>false,gen:()=>({p:1}),
@@ -35917,7 +35917,7 @@ const WPD={
  splitter:{n:'Köcher der Sternsplitter',h:'friedrich',c:'#ffe08a',kurz:'Pfeile zersplittern beim Treffer in zwei Sternsplitter.',
   d:'Trifft ein Pfeil, bricht er in zwei funkelnde Splitter, die schräg weiterfliegen und weitere Gegner treffen.',
   fl:'Die Spitzen sind aus einem gefallenen Stern geschliffen. Friedrich behauptet, er habe ihn selbst gefangen.'},
- spaltzauber:{n:'Darkin-Spaltung',h:'ezekiel',c:'#ff3b4a',kurz:'Jede Fähigkeit spaltet sich in drei Blutklingen.',
+ spaltzauber:{n:'Goliath-Spaltung',h:'ezekiel',c:'#ff3b4a',kurz:'Jede Fähigkeit spaltet sich in drei Blutklingen.',
   d:'Nach jeder Fähigkeit lösen sich drei Klingen aus geronnenem Blut von Ezekiel und fliegen fächerförmig auf die Gegner zu.',
   fl:'Die Klinge erinnert sich an jeden Hieb. Jetzt wiederholt sie ihn – dreimal.'},
  schattenklon:{n:'Schleier des Doppelgängers',h:'ezekiel',c:'#c0405a',kurz:'Rolle und Schattenschritt lassen ein explodierendes Trugbild zurück.',
@@ -35925,7 +35925,7 @@ const WPD={
   fl:'Einer von beiden ist der echte. Die Gegner raten meistens falsch.'},
  blutmond:{n:'Sichel des Blutmonds',h:'ezekiel',c:'#ff4a5a',kurz:'Abschlüsse schleudern eine Blutsichel durch alle Gegner.',
   d:'Jeder Abschluss mit mindestens drei Blut entfesselt eine rote Mondsichel, die durch alle Gegner schneidet – je mehr Blut, desto härter – und Ezekiel für jeden Treffer ein wenig heilt.',
-  fl:'Unter rotem Mond ist der Darkin am stärksten. Jetzt trägt er ihn bei sich.'},
+  fl:'Unter rotem Mond ist der Goliath am stärksten. Jetzt trägt er ihn bei sich.'},
  echostein:{n:'Nachhallstein',h:null,c:'#e8d8b0',kurz:'Jeder vierte Treffer hallt als zweiter Treffer nach.',
   d:'Jeder vierte direkte Treffer erzeugt ein Echo: Einen halben Herzschlag später trifft dasselbe Ziel noch einmal mit gut der Hälfte der Wucht.',
   fl:'Ein runder Stein aus der Tiefe des Unterreichs. Wer hineinruft, hört sich zweimal.'},

@@ -70,7 +70,7 @@
       ezekielStumm: ["…", "Hm."],
       geschafft: "Stufe geschafft", beute: "Beute", ungesehen: "Ungesehen", ungesehenBonus: n => "Ungesehen: +" + n,
       nachtGeschafft: n => "Nacht " + n + " überstanden.", alleGeschafft: "Alle Nächte überstanden! Neue folgen, sobald die Gruppe weiterzieht – bis dahin nimmt die Nacht kein Ende …",
-      zorn: "THE DESTROYER!", zornBereit: "Darkin-Zorn bereit!", zornKnopf: "Darkin-Zorn entfesseln", zornTipp: "Darkin-Zorn ist voll: Tippe unten auf 😈, um für ein paar Sekunden zum Destroyer zu werden.",
+      zorn: "THE DESTROYER!", zornBereit: "Goliath-Zorn bereit!", zornKnopf: "Goliath-Zorn entfesseln", zornTipp: "Goliath-Zorn ist voll: Tippe unten auf 😈, um für ein paar Sekunden zum Destroyer zu werden.",
       zahm: "Braver Hund.", knurr: "Grrr!", keinHund: "Ezekiel tut keinem Hund was.",
       fauch: "Fauch!", fauchDrow: "Du schon wieder!", entlarvt: "Nezna entlarvt!", spinne: "„Die Spinne wird euch holen …“",
       neznaHinweis: "Gerücht: Eine schwarze Katze mit violetten Augen streift hier herum. Fang sie von hinten.", neznaDrow: "Nezna ist hier – diesmal ohne Verkleidung. Ezekiel kennt ihren Rücken.",
@@ -184,10 +184,10 @@
         klinge: [["Stille Klinge", "Ausschalten macht keinen Lärm mehr."]],
         schritt: [["Schattenschritt", "Einmal pro Stufe entwischst du, wenn sie dich packen."]],
         ranken: [["Echos Ranken", "Wurzeln bremsen alle Wachen."], ["Dichte Ranken", "Die Wachen werden noch langsamer."]],
-        sinne: [["Darkin-Sinne", "Du spürst immer, wer den Schlüssel trägt."]],
+        sinne: [["Goliath-Sinne", "Du spürst immer, wer den Schlüssel trägt."]],
         lied: [["Barradins Ballade", "Barradin besingt dich überall: Aufsehen verfliegt mit der Zeit."]],
         rast: [["Heiltrank", "+1 Leben."]],
-        blutdurst: [["Blutdurst", "Darkin-Zorn füllt sich schneller und hält länger."]]
+        blutdurst: [["Blutdurst", "Goliath-Zorn füllt sich schneller und hält länger."]]
       },
       ende: "Ezekiel wurde gefasst", punkte: "Gold",
       wert: { stufe: "Erreicht", bestohlen: "Bestohlen", aus: "Ausgeschaltet", geist: "Ungesehen", auftraege: "Aufträge", meister: "Meistergriffe" },
@@ -241,7 +241,7 @@
       ezekielStumm: ["…", "Hm."],
       geschafft: "Stage cleared", beute: "Loot", ungesehen: "Unseen", ungesehenBonus: n => "Unseen: +" + n,
       nachtGeschafft: n => "Night " + n + " survived.", alleGeschafft: "All nights survived! More follow as the party moves on – until then, the night never ends …",
-      zorn: "THE DESTROYER!", zornBereit: "Darkin rage ready!", zornKnopf: "Unleash Darkin rage", zornTipp: "Darkin rage is full: tap 😈 below to become the Destroyer for a few seconds.",
+      zorn: "THE DESTROYER!", zornBereit: "Goliath rage ready!", zornKnopf: "Unleash Goliath rage", zornTipp: "Goliath rage is full: tap 😈 below to become the Destroyer for a few seconds.",
       zahm: "Good dog.", knurr: "Grrr!", keinHund: "Ezekiel would never hurt a dog.",
       fauch: "Hiss!", fauchDrow: "You again!", entlarvt: "Nezna unmasked!", spinne: "\"The spider will come for you …\"",
       neznaHinweis: "Rumour: a black cat with violet eyes prowls here. Catch her from behind.", neznaDrow: "Nezna is here – this time without disguise. Ezekiel knows her back.",
@@ -353,10 +353,10 @@
         klinge: [["Silent blade", "Takedowns no longer make noise."]],
         schritt: [["Shadow step", "Once per stage you slip away when they grab you."]],
         ranken: [["Echo's vines", "Roots slow down all guards."], ["Dense vines", "The guards get even slower."]],
-        sinne: [["Darkin senses", "You always sense who carries the key."]],
+        sinne: [["Goliath senses", "You always sense who carries the key."]],
         lied: [["Barradin's ballad", "Barradin sings of you everywhere: attention fades over time."]],
         rast: [["Healing potion", "+1 life."]],
-        blutdurst: [["Bloodlust", "Darkin rage fills faster and lasts longer."]]
+        blutdurst: [["Bloodlust", "Goliath rage fills faster and lasts longer."]]
       },
       ende: "Ezekiel was caught", punkte: "gold",
       wert: { stufe: "Reached", bestohlen: "Pickpocketed", aus: "Taken down", geist: "Unseen", auftraege: "Side quests", meister: "Master grabs" },
@@ -1111,7 +1111,7 @@
     const ok = klauOk(p);
     if (!ok && !sofort && p.wachsam <= 0) { E.lauer = { ref: p, t: 0 }; return; } // kurz abwarten, bis er wegschaut
     if (ok) {
-      /* Taschen mit Gold: kurzer Griff mit Timing (im Darkin-Zorn geht es ohne) */
+      /* Taschen mit Gold: kurzer Griff mit Timing (im Goliath-Zorn geht es ohne) */
       if (p.gold > 0 && S.zornT <= 0) { griffStart(p); return; }
       beuteNehmen(p, 0);
     } else ertappt(p, 12);
@@ -1209,7 +1209,7 @@
     maskeKnopf.classList.toggle("an", an);
     maskeKnopf.style.setProperty("--f", an ? Math.round(S.maskeT / MASKE_DAUER * 100) + "%" : "0%");
   }
-  /* ---------- Darkin-Zorn ---------- */
+  /* ---------- Goliath-Zorn ---------- */
   function zornPlus(n) {
     const vorher = S.zorn;
     S.zorn = Math.min(1, S.zorn + n);

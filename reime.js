@@ -188,7 +188,7 @@ window.BARRADIN_REIME = {
       ezekiel: {
         paare: {
           hoch: [
-            "Er stach der Chasme ins Auge, und sie fiel –\nein Hoch auf den Darkin mit Stil: Ezekiel!",
+            "Er stach der Chasme ins Auge, und sie fiel –\nein Hoch auf den Goliath mit Stil: Ezekiel!",
             "Ein Schatten, ein Dolch, ein lautloses Spiel –\nund schon ist es vorbei: Ezekiel!",
             "Sein Dolch trifft immer und überall sein Ziel –\ndas ist der Destroyer: Ezekiel!",
             "Glühende Augen, die Rüstung subtil …\nna gut, nicht subtil. Doch mit Stil: Ezekiel!"
@@ -199,7 +199,7 @@ window.BARRADIN_REIME = {
         },
         hoch: [
           "sein Dolch trifft immer jedes Ziel!",
-          "der Darkin mit dem meisten Stil!",
+          "der Goliath mit dem meisten Stil!",
           "für ihn ist jeder Kampf ein Spiel!",
           "der Chasme stach er ins Auge – sie fiel!",
           "kein Schatten ist ihm zu subtil!"
@@ -688,7 +688,7 @@ window.BARRADIN_REIME = {
       ezekiel: {
         paare: {
           hoch: [
-            "He stabbed the chasme with deadly zeal –\nthe Darkin blade: Ezekiel!",
+            "He stabbed the chasme with deadly zeal –\nthe Goliath blade: Ezekiel!",
             "Where shadows fall, as cold as steel,\nthere lurks the Destroyer: Ezekiel!",
             "One shadow, one dagger, one silent deal –\nand it's over: Ezekiel!"
           ],
@@ -698,7 +698,7 @@ window.BARRADIN_REIME = {
         },
         hoch: [
           "his dagger strikes with deadly zeal!",
-          "a Darkin heart of burning steel!",
+          "a Goliath heart of burning steel!",
           "one silent stab – and that's the deal!",
           "the foes all tremble, the cowards kneel!"
         ],

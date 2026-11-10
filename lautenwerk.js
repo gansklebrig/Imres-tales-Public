@@ -7985,7 +7985,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
    <path class="maul" d="M18 50 Q24 53 30 50" fill="none" stroke="#111" stroke-width="1.3"/>
   </g>
  </svg>
- <!-- Ezekiel: Darkin mit gehörnter scharlachroter Kapuze, glühenden Augen, Stachelrüstung -->
+ <!-- Ezekiel: Goliath mit gehörnter scharlachroter Kapuze, glühenden Augen, Stachelrüstung -->
  <svg x="530" y="10" width="130" height="200" viewBox="0 0 130 200" class="ezekiel" overflow="visible">
   <ellipse cx="64" cy="192" rx="50" ry="5" fill="rgba(0,0,0,.45)"/>
   <path d="M26 100 Q14 150 18 192 L30 184 L36 192 L44 180 L52 190 L58 180 Q40 150 40 104 Z M102 100 Q114 150 112 192 L102 184 L96 192 L88 180 L80 190 L74 180 Q90 150 88 104 Z" fill="#7a1712" stroke="#3a0806" stroke-width="1"/>

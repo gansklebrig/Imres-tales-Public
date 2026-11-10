@@ -27,7 +27,7 @@ window.INHALT_EN = {
       absaetze: [
         "Wherever the elven bard Barradin turns up, things do not stay quiet. He sings ballads, whirls burning torches through the air and turns somersaults until the crowd cheers. He knows he is good, and his self-confidence is contagious.",
         "His sharpest weapon is his tongue. With mockery and wit he throws opponents off balance, and many a foe has quite literally collapsed under his insults. That he, clumsy as ever, sometimes trips over his own feet in the heat of battle is all part of his charm.",
-        "Barradin grew up in the house of his father, a zealous member of the <em>Alternative for Elves</em>. Today he deliberately walks a different path. At the side of a human, a druid, a Darkin and a dog, he has learned that origin says nothing about a companion's worth, and he stands up for that with his full voice.",
+        "Barradin grew up in the house of his father, a zealous member of the <em>Alternative for Elves</em>. Today he deliberately walks a different path. At the side of a human, a druid, a Goliath and a dog, he has learned that origin says nothing about a companion's worth, and he stands up for that with his full voice.",
         "You will usually find him pipe in hand, surrounded by a cloud of fragrant herb and with a broad grin on his face."
       ]
     },
@@ -85,7 +85,7 @@ window.INHALT_EN = {
       bildtext: "What Ezekiel is thinking, only Ezekiel knows.",
       fries: "50% 20%",
       absaetze: [
-        "Ezekiel is the party's rogue and a man of few words. He watches, he waits, and he strikes when no one expects it. Beneath his hood hides a Darkin whose thoughts remain an eternal riddle to his companions.",
+        "Ezekiel is the party's rogue and a man of few words. He watches, he waits, and he strikes when no one expects it. Beneath his hood hides a Goliath whose thoughts remain an eternal riddle to his companions.",
         "One moment he surprises the party with an unexpectedly kind gesture, the next he shows the ice-cold calm of an assassin. That is exactly what makes him so valuable: his enemies never know what is coming. His companions, on the other hand, have learned that they can rely on him when it truly matters.",
         "Many foes have already tasted his cold steel. They will not be the last."
       ],
@@ -116,7 +116,7 @@ window.INHALT_EN = {
         "By now Rex had sniffed each of us more thoroughly than any city guard, and then he sat down, very pleased with himself, on my left boot. Friedrich tried authority: “Rex. Off. Rex. He likes you. That's a good sign. Usually.”",
         "Then a horned druid in long white robes with a grim stare. The horns grew from his forehead like a young stag's, except that a stag looks friendlier. He looked ready for any fight, and growled at us instead of introducing himself. At least that's what it sounded like: “Echo. Druid. The horns are real, and whoever touches them loses a finger. I come from the deep forest, we don't talk much there. What I like: gold, gems, anything that shines. And whoever crosses me burns.”",
         "A gull that shrieked too loudly next to him got stared at until it flew off. I decided to keep my fingers to myself. His eyes, however, lingered on the golden buttons of my coat, and for a little too long. He grunted: “Real gold?”<br>“They're staying where they are.”",
-        "The fourth person Gundren had invited was a Darkin in glowing scarlet armour. Horns jutted from beneath his hood, two blades hung at his belt, and his motionless face gave away nothing of what was going on inside him … Even the gulls gave him a wide berth. All he said was: “Ezekiel. The Destroyer.”<br>Friedrich tried being friendly: “And what … do you destroy, usually?”",
+        "The fourth person Gundren had invited was a Goliath in glowing scarlet armour. Horns jutted from beneath his hood, two blades hung at his belt, and his motionless face gave away nothing of what was going on inside him … Even the gulls gave him a wide berth. All he said was: “Ezekiel. The Destroyer.”<br>Friedrich tried being friendly: “And what … do you destroy, usually?”",
         "No answer. That was all: a name, an epithet, no bow, not even a nod. Rex tilted his head. Echo snorted. And I stood there with a smile frozen in the middle of my face. The round of introductions went, to put it gently, a little bumpily.",
         "So Gundren got straight to the point. The black-bearded dwarf, his beard woven into two thick braids, propped his calloused hands on a barrel that served as his table and lowered his voice, even though only gulls were listening.<br>“In an old, abandoned mine, friends, lies a magic forge. A forgotten place where treasures of rare power were once made.”",
         "Long ago, magic items were created in that forge, and as Gundren spoke of it his eyes gleamed like freshly polished brass. He counted on his thick fingers: “Blades that never dull. Rings with powers you can only dream of. Armour that can take more than the one wearing it.”<br>Several powerful lords were burning with interest, and Gundren smelled a chance to expand his export business considerably. He rubbed his hands: “The fine gentlemen of Neverwinter would give the shirts off their backs for it.”<br>Friedrich, ever the cautious one, had a different question: “You know everyone who matters in Neverwinter. Why us, of all people?”<br>“That's exactly why. They all know me. Nobody knows you yet.”",
@@ -300,7 +300,7 @@ window.INHALT_EN = {
       kulissen: ["hafen", "waldstrasse", "goblinhoehle", "phandalin", "crackmore", "wachturm", "wiedersehen", "schmiede", "neverwinter", "allianz", "donnerbaum", "drachenturm", "geisterdorf"],
       /* "Previously" in 60 seconds: abschnitt = heading that "Go there" jumps to */
       rueckblick: [
-        { abschnitt: "Ink and Wax", bild: "gundren-treffen.jpg", titel: "A letter, a harbour, a dwarf", text: "Gundren invited us to Neverwinter harbour: me, Friedrich with Rex, grim Echo and Ezekiel, the inscrutable Darkin. The round of introductions? Bumpy. The offer: a lost magic forge and a handsome reward." },
+        { abschnitt: "Ink and Wax", bild: "gundren-treffen.jpg", titel: "A letter, a harbour, a dwarf", text: "Gundren invited us to Neverwinter harbour: me, Friedrich with Rex, grim Echo and Ezekiel, the inscrutable Goliath. The round of introductions? Bumpy. The offer: a lost magic forge and a handsome reward." },
         { abschnitt: "Silence in the Thicket", bild: "hinterhalt-sieg.jpg", titel: "Goblins by the roadside", text: "On the road to Phandalin, goblins leapt out of the woods. Some of our attacks missed with great conviction, mine included. Afterwards we stormed their cave and freed the wolves tied up at the entrance." },
         { abschnitt: "Iron and Herbs", bild: "glasstab-besiegt.jpg", titel: "The Red Robes", text: "Phandalin was paying protection money to the Red Robes. Rex found the secret way into the castle while chasing a rabbit, we slipped into red robes, and Friedrich's arrow ended Glasstaff's escape. His last words: the Spider." },
         { abschnitt: "Torchlight Through the Crack", bild: "bugbear.jpg", titel: "Bugbear, drow and a twin", text: "On a starry night we stormed a watchtower. Ezekiel's daggers felled the bugbear, the drow escaped as a bat. The prisoner? Nundro, Gundren's twin brother, and with him the mercenary Zilda." },
@@ -464,7 +464,7 @@ window.INHALT_EN = {
         "Naturally I couldn't resist and played it right there at the stall: above the display appeared a tiny Demogorgon, barely bigger than my hand, reducing a miniature town to rubble and ashes. Echo gave a dirty laugh: “Ha! Make it eat the trader!”",
         "The trader didn't bat an eyelid.<br>“Buy or get out.”",
         "You never know when you'll need to enchant an audience. Or an enemy.",
-        "The weapon dealers could hardly take their eyes off the hilt of Ezekiel's sword, which jutted from the scabbard on his back, but none of them dared speak to the grim Darkin.",
+        "The weapon dealers could hardly take their eyes off the hilt of Ezekiel's sword, which jutted from the scabbard on his back, but none of them dared speak to the grim Goliath.",
         "## When the Ground Shakes",
         "!riese.webp|The giant, shortly before we calmed him down. Judging by his look, he still hears the voices.|frei",
         "We were just strolling on across the Market of Blades. Friedrich had bought another little bottle of some magic tincture at a stall when suddenly screams and the crash of houses could be heard from the other side of the square. The ground shook, and the noise grew louder and louder.",
