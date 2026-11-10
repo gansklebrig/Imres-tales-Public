@@ -42,6 +42,7 @@ def einheiten(kapitel):
     st, regie, rec, bes = J("tools/hoerbuch/struktur-de.json"), J("tools/hoerbuch/regie-de.json", {}), J("tools/hoerbuch/recycling-de.json", {}), J("tools/hoerbuch/besetzung.json")
     fehler, out = [], []
     bis = int(os.environ.get("BIS") or 0)   # nur die ersten BIS Textblöcke je Kapitel (Probelauf)
+    ohne = set(filter(None, (os.environ.get("OHNE") or "").split(",")))   # Rollen, die (noch) nicht aufgenommen werden
     for kap in kapitel:
         nb = 0
         for b in st[kap]:
@@ -71,8 +72,10 @@ def einheiten(kapitel):
                             if not txt.startswith("["):
                                 vor = [TAG.findall(x) for x in ts[:k - n]]; vor = [y for z in vor for y in z]
                                 txt = f"[{vor[-1] if vor else 'warmly'}] " + txt
+                            if s["rolle"] in ohne: continue
                             out.append({"uid": f"{s['id']}-n{teil['neu']}", "sid": s["id"], "rolle": s["rolle"], "stimme": stimme, "text": txt, "ziel": teil["text"]})
                 else:
+                    if s["rolle"] in ohne: continue
                     out.append({"uid": s["id"], "sid": s["id"], "rolle": s["rolle"], "stimme": stimme, "text": t, "ziel": s["text"]})
     return out, fehler, bes
 

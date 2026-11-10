@@ -8,6 +8,7 @@ on:
       trocken: { description: "1 = nur prüfen, nichts aufnehmen", default: "0" }
       whisper: { description: "Whisper-Modell für die Hörprüfung", default: "medium" }
       bis: { description: "Probelauf: nur die ersten N Absätze je Kapitel (0 = alle)", default: "0" }
+      ohne: { description: "Rollen auslassen, z. B. friedrich", default: "" }
 permissions:
   contents: write
 concurrency:
@@ -33,6 +34,7 @@ jobs:
           NACHHOLEN: ${{ inputs.nachholen }}
           WHISPER: ${{ inputs.whisper }}
           BIS: ${{ inputs.bis }}
+          OHNE: ${{ inputs.ohne }}
         run: |
           git config user.name "Hörbuch"
           git config user.email "actions@users.noreply.github.com"
