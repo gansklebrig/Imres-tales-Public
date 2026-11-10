@@ -78,6 +78,17 @@
 @keyframes vlWelle { 50% { height: 100%; } }
 @media (max-width: 520px) { .vl-info b { max-width: 7.5rem; } .vl-leiste .vl-tempo { display: none; } .vl-leiste { gap: .15rem; } .vl-leiste button { width: 2.25rem; height: 2.25rem; } .vl-leiste .vl-haupt { width: 2.6rem; height: 2.6rem; } }
 .vl-mond { color: var(--ember, #e0a046); margin-left: .4rem; letter-spacing: 0; }
+/* Melden: fehlerhafte Stellen beim Hören markieren (nur mit ?melden=1 freigeschaltet) */
+.vl-leiste .vl-flagge { position: relative; color: var(--ember, #e0a046); font-size: 1.05rem; }
+.vl-leiste .vl-flagge sup { position: absolute; top: .05rem; right: .05rem; font-size: .6rem; line-height: 1; padding: .08rem .22rem; border-radius: 999px; background: var(--ember, #e0a046); color: #1a1208; }
+.vl-leiste .vl-flagge sup:empty { display: none; }
+.vl-leiste .vl-flagge.blitz { animation: vlBlitz .6s ease-out; }
+@keyframes vlBlitz { 0% { transform: scale(1.5); } 100% { transform: scale(1); } }
+.vl-meld { border-top: 1px solid rgba(224,160,70,.25); padding-top: .55rem; display: grid; gap: .45rem; max-height: 40vh; overflow: auto; }
+.vl-meld ol { margin: 0; padding-left: 1.2rem; display: grid; gap: .45rem; font-size: .78rem; }
+.vl-meld li span { display: block; color: var(--ash, #b8a998); }
+.vl-meld input { width: 100%; margin-top: .2rem; padding: .3rem .45rem; border-radius: 8px; border: 1px solid rgba(224,160,70,.35); background: rgba(0,0,0,.25); color: var(--vellum, #ebe2cc); font: inherit; font-size: .8rem; }
+@media (prefers-reduced-motion: reduce) { .vl-leiste .vl-flagge.blitz { animation: none; } }
 @media (max-width: 520px) { .vl-info small:has(.vl-mond) .vl-spr { display: none; } }
 .vl-schlaf { display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; }
 /* Hörspiel-Schalter und kleines Mischpult */
@@ -122,6 +133,50 @@
   function mixModus() {
     const H = HSP();
     return !!(mix && H && H.an() && Math.abs(H.kulisse() - 1) < .01 && Math.abs(H.musik() - 1) < .01 && liste.length && liste.every(x => mix[x.kap + ":" + x.i]));
+  }
+  /* ---------- Melden: Stellen beim Hören markieren und gesammelt weitergeben ---------- */
+  const MELDEN = (() => {
+    try {
+      const q = new URLSearchParams(location.search).get("melden");
+      if (q === "1") localStorage.setItem("imres-melden", "1");
+      if (q === "0") localStorage.removeItem("imres-melden");
+      return localStorage.getItem("imres-melden") === "1";
+    } catch (_) { return false; }
+  })();
+  let meldungen = []; try { meldungen = JSON.parse(localStorage.getItem("imres-meldungen") || "[]"); } catch (_) {}
+  let wortZeiten = null;
+  function meldSpeichern() { try { localStorage.setItem("imres-meldungen", JSON.stringify(meldungen)); } catch (_) {} meldZeichnen(); }
+  function melden() {
+    const x = liste[pos]; if (!x || !audio) return;
+    let t = audio.currentTime || 0;
+    if (mixLaeuft && mix[x.kap + ":" + x.i]) t -= mix[x.kap + ":" + x.i].ab;
+    t = Math.max(0, t - 1.5);   /* Reaktionszeit: man drückt meist kurz nach der Stelle */
+    const e = { kap: x.kap, i: x.i, t: +t.toFixed(1), stelle: "", notiz: "", wann: new Date().toISOString() };
+    meldungen.push(e); meldSpeichern();
+    const b = leiste && leiste.querySelector(".vl-flagge"); if (b) { b.classList.remove("blitz"); void b.offsetWidth; b.classList.add("blitz"); }
+    (wortZeiten ? Promise.resolve(wortZeiten) : fetch("tools/vertonung/zeitmarken-de.json").then(r => r.json()).then(z => (wortZeiten = z)))
+      .then(z => {
+        const w = (z && z[x.datei]) || [];
+        const um = w.filter(q => q[2] >= t - 3 && q[1] <= t + 3).map(q => q[0]);
+        e.stelle = um.length ? um.join(" ") : "";
+        meldSpeichern();
+      }).catch(() => {});
+  }
+  function meldText() {
+    return meldungen.map((m, n) => (n + 1) + ". Kapitel " + m.kap + ", Absatz " + m.i + ", bei " + m.t + " s" + (m.stelle ? ": „…" + m.stelle + "…“" : "") + (m.notiz ? " – " + m.notiz : "")).join("\n");
+  }
+  function meldZeichnen() {
+    const sup = leiste && leiste.querySelector(".vl-flagge sup"); if (sup) sup.textContent = meldungen.length || "";
+    const box = pult && pult.querySelector(".vl-meld"); if (!box) return;
+    const ol = box.querySelector("ol"); ol.innerHTML = "";
+    meldungen.forEach((m, n) => {
+      const li = document.createElement("li");
+      const sp = document.createElement("span"); sp.textContent = m.kap + ":" + m.i + " · " + m.t + " s" + (m.stelle ? " · „…" + m.stelle + "…“" : "");
+      const inp = document.createElement("input"); inp.type = "text"; inp.placeholder = de() ? "Was stimmt nicht? (optional)" : "What's wrong? (optional)"; inp.value = m.notiz || "";
+      inp.addEventListener("change", () => { m.notiz = inp.value; meldSpeichern(); });
+      li.appendChild(sp); li.appendChild(inp); ol.appendChild(li);
+    });
+    box.querySelector(".vl-meld-n").textContent = (de() ? "Markierte Stellen: " : "Flagged spots: ") + meldungen.length;
   }
   let mixVersuche = 0, mixWacheUhr = null, mixLetzteZeit = -1;
   function mixWache() {
@@ -347,14 +402,16 @@
     if (leiste) return;
     leiste = document.createElement("div"); leiste.className = "vl-leiste"; leiste.setAttribute("role", "region");
     leiste.innerHTML = '<button type="button" class="vl-zurueck">' + ZURUECK + '</button><button type="button" class="vl-haupt">' + PAUSE + '</button><button type="button" class="vl-vor">' + VOR + '</button>' +
-      '<div class="vl-info"><b></b><small></small><div class="vl-balken"><i></i></div></div><button type="button" class="vl-tempo"></button><button type="button" class="vl-hs" aria-haspopup="true" aria-expanded="false">' + HS + '</button><button type="button" class="vl-zu">✕</button>';
+      '<div class="vl-info"><b></b><small></small><div class="vl-balken"><i></i></div></div><button type="button" class="vl-tempo"></button>' + (MELDEN ? '<button type="button" class="vl-flagge" aria-label="Stelle markieren" title="Stelle markieren">⚑<sup></sup></button>' : '') + '<button type="button" class="vl-hs" aria-haspopup="true" aria-expanded="false">' + HS + '</button><button type="button" class="vl-zu">✕</button>';
     document.body.appendChild(leiste);
+    if (MELDEN) setTimeout(meldZeichnen, 0);
     leiste.addEventListener("click", e => {
       const b = e.target.closest("button, .vl-info"); if (!b) return;
       if (b.classList.contains("vl-haupt")) umschalten();
       else if (b.classList.contains("vl-vor")) { const h = HSP(); if (h) h.ein(); spielen(pos + 1, "sprung"); }
       else if (b.classList.contains("vl-zurueck")) { const h = HSP(); if (h) h.ein(); spielen(audio && (mixLaeuft && liste[pos] ? audio.currentTime - mix[liste[pos].kap + ":" + liste[pos].i].ab : audio.currentTime) > 3 && !wartet ? pos : Math.max(0, pos - 1), "sprung"); }
       else if (b.classList.contains("vl-hs")) pultUmschalten();
+      else if (b.classList.contains("vl-flagge")) melden();
       else if (b.classList.contains("vl-zu")) stopp(false);
       else if (b.classList.contains("vl-tempo")) { const st = [1, 1.15, 1.3, 0.9]; tempoSetzen(st[(st.indexOf(tempo) + 1) % st.length] || 1); }
       else if (b.classList.contains("vl-info")) { letztesScrollen = 0; markieren(); }
@@ -370,7 +427,8 @@
       '<label class="vl-regler"><span class="vl-l-kul"></span><small class="vl-w-kul"></small><input type="range" min="0" max="150" step="5" class="vl-kul"></label>' +
       '<label class="vl-regler"><span class="vl-l-mus"></span><small class="vl-w-mus"></small><input type="range" min="0" max="150" step="5" class="vl-mus"></label>' +
       '<div class="vl-reihe"><small class="vl-l-tempo"></small></div>' +
-      '<div class="vl-reihe vl-schlaf"><small class="vl-l-schlaf"></small></div>';
+      '<div class="vl-reihe vl-schlaf"><small class="vl-l-schlaf"></small></div>' +
+      (MELDEN ? '<div class="vl-meld"><div class="vl-reihe"><small class="vl-meld-n"></small><button type="button" class="vl-meld-kopie">Alle kopieren</button><button type="button" class="vl-meld-leer">Leeren</button></div><ol></ol></div>' : '');
     document.body.appendChild(pult);
     const reihe = pult.querySelector(".vl-reihe");
     [0.9, 1, 1.15, 1.3].forEach(v => { const b = document.createElement("button"); b.type = "button"; b.dataset.tempo = v; reihe.appendChild(b); });
@@ -388,7 +446,13 @@
       const b = e.target.closest("[data-tempo]"); if (b) tempoSetzen(+b.dataset.tempo);
       const sb = e.target.closest("[data-schlaf]"); if (sb) schlafSetzen(sb.dataset.schlaf);
       if (e.target.closest(".vl-schalter")) hsUmschalten();
+      if (e.target.closest(".vl-meld-kopie")) {
+        const txt = meldText(), k = e.target.closest(".vl-meld-kopie");
+        (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => { k.textContent = "Kopiert ✓"; setTimeout(() => (k.textContent = "Alle kopieren"), 1800); }).catch(() => { window.prompt && window.prompt("Kopieren:", txt); });
+      }
+      if (e.target.closest(".vl-meld-leer") && meldungen.length && (!window.confirm || window.confirm("Alle markierten Stellen löschen?"))) { meldungen = []; meldSpeichern(); }
     });
+    if (MELDEN) meldZeichnen();
     document.addEventListener("click", e => { if (pult && !pult.hidden && !e.target.closest(".vl-pult, .vl-hs")) pultZu(); });
     document.addEventListener("keydown", e => { if (e.key === "Escape" && pult && !pult.hidden) { pultZu(); const k = leiste && leiste.querySelector(".vl-hs"); if (k) k.focus(); } });
   }
