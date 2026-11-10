@@ -151,6 +151,7 @@ def main():
             mp3 = vertonen.tts(e["stimme"], e["text"], modell="eleven_v3", einstellung=einstellung(e, bes))
         open(os.path.join(WURZEL, datei(e, bes)), "wb").write(mp3)
     for n, e in enumerate(fehlend, 1):
+        qa.pop(datei(e, bes), None)   # neue Aufnahme → neu prüfen
         try:
             aufnehmen(e)
         except BaseException as ex:   # z. B. Guthaben aufgebraucht: Bisheriges sichern und prüfen
