@@ -1301,7 +1301,7 @@ def pfad(name):
 def lade(datei, sr=SR):
     if datei in _cache: return _cache[datei]
     roh = subprocess.check_output(["ffmpeg", "-v", "error", "-i", datei, "-ac", "1", "-ar", str(sr), "-f", "f32le", "-"])
-    x = np.frombuffer(roh, dtype=np.float32).astype(np.float64)
+    x = np.frombuffer(roh, dtype=np.float32)
     _cache[datei] = x
     return x
 
@@ -1510,7 +1510,7 @@ def mische(buf, x, t, g=1.0, pan=0.0):
 def stueck_rendern(st, dauer=None):
     spb = 60 / st["bpm"]
     L = dauer or st["ende"] + 1
-    buf = np.zeros((2, int(L * SR) + SR))
+    buf = np.zeros((2, int(L * SR) + SR), np.float32)
     for sp in st["spuren"]:
         ins = INSTR[sp["i"]]
         liste = proben_liste(ins["p"]) if ins["p"] else None
@@ -1609,7 +1609,7 @@ def untermalung_gruppen(daten, plan):
 
 def untermalung_rendern(daten, gruppen, laenge, rnd):
     """Stereo-Puffer der Untermalung (Ein-/Ausblenden eingerechnet, Ducking noch nicht)"""
-    out = np.zeros((2, int(laenge * SR) + SR))
+    out = np.zeros((2, int(laenge * SR) + SR), np.float32)
     namen = daten.get("untermalung", {}).get("stimmungen", {})
     for (ta, tf0, tf1, st, _id) in gruppen:
         seg = np.zeros_like(out); t, letzt = ta, None
@@ -1620,7 +1620,7 @@ def untermalung_rendern(daten, gruppen, laenge, rnd):
             i0 = int(t * SR); n_ = min(b.shape[1], seg.shape[1] - i0)
             if n_ > 0: seg[:, i0:i0 + n_] += b[:, :n_]
             t += S["ende"] - S["ueber"]
-        tv = np.arange(seg.shape[1]) / SR
+        tv = np.arange(seg.shape[1], dtype=np.float32) / SR
         huelle = np.clip((tv - ta) / 4.0, 0, 1) * np.clip((tf1 - tv) / max(.1, tf1 - tf0), 0, 1)
         out += seg * huelle
     return out
@@ -1628,7 +1628,7 @@ def untermalung_rendern(daten, gruppen, laenge, rnd):
 def untermalung_ducking(plan, laenge, pg):
     """Hüllkurve: unter der Stimme leise (unterSprache), in Sprechpausen etwas lauter (unterLuecke), zwischen Absätzen unterPause"""
     us, ul, up_ = pg.get("unterSprache", .55), pg.get("unterLuecke", .8), pg.get("unterPause", 1.0)
-    h = np.full(int(laenge * SR) + SR, up_)
+    h = np.full(int(laenge * SR) + SR, up_, np.float32)
     def rampe(a, b, v0, v1):
         ia, ib = max(0, int(a * SR)), min(len(h), int(b * SR))
         if ib > ia: h[ia:ib] = np.linspace(v0, v1, ib - ia)
@@ -1851,7 +1851,7 @@ def probe(ausgabe, spec, mit_ende=False, mit_start=True):
         k_, rest = teil.split(":"); i_ = int(rest.split("@")[0])
         eintr.append([e for e in manifest["kapitel"][k_] if e["i"] == i_][0]); kap = k_
         if "@" in rest: schnitt[i_] = float(rest.split("@")[1])
-    abschn = daten["abschnitte"][kap]
+    abschn = daten["abschnitte"].get(kap, [])
     def abschnitt_von(i):
         a = None
         for s in abschn:
@@ -1874,7 +1874,7 @@ def probe(ausgabe, spec, mit_ende=False, mit_start=True):
     if mit_ende:
         musik_ev.append((t, "cliff")); t += daten["musik"]["cliff"]["ende"]
     L = t + 2.5
-    stimme = np.zeros((2, int(L * SR) + SR)); atmo = np.zeros_like(stimme); fx = np.zeros_like(stimme); mus = np.zeros_like(stimme); hall_send = np.zeros_like(stimme)
+    stimme = np.zeros((2, int(L * SR) + SR), np.float32); atmo = np.zeros_like(stimme); fx = np.zeros_like(stimme); mus = np.zeros_like(stimme); hall_send = np.zeros_like(stimme)
     # Stimme
     for (t0, k, i, info) in plan:
         e = [x for x in manifest["kapitel"][k] if x["i"] == i][0]
@@ -2012,8 +2012,8 @@ def probe(ausgabe, spec, mit_ende=False, mit_start=True):
     # Hall: synthetische Impulsantwort (2,2 s), wie im Browser
     ir_len = int(2.2 * SR); r = np.random.default_rng(3)
     ir = np.stack([r.standard_normal(ir_len), r.standard_normal(ir_len)]) * np.exp(-np.arange(ir_len) / SR * 3.2)
-    from scipy.signal import fftconvolve
-    hall = np.stack([fftconvolve(hall_send[c], ir[c])[:hall_send.shape[1]] for c in range(2)]) * pg["hall"] * .08
+    from scipy.signal import oaconvolve   # Overlap-Add: gleiches Ergebnis, aber wenig Speicher bei langen Abschnitten
+    hall = np.stack([oaconvolve(hall_send[c], ir[c].astype(np.float32))[:hall_send.shape[1]].astype(np.float32) for c in range(2)]) * pg["hall"] * .08
     hs = atmo + fx + mus + hall
     # Summenbus wie im Browser: Kompressor (−18 dB, 3:1) → feste Aufholverstärkung → Brickwall-Begrenzer
     hs = begrenzer(kompressor(hs) * pg.get("summe", 1.0), decke_verlauf(plan, hs.shape[1], pg))
@@ -2027,7 +2027,7 @@ def probe(ausgabe, spec, mit_ende=False, mit_start=True):
     for g_ in gruppen: print("  Untermalung %6.1f–%6.1fs %s (%s)" % (g_[0], g_[2], g_[3], g_[4]))
     tmp = ausgabe + ".wav"
     schreibe_wav(gesamt, tmp)
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", tmp, "-codec:a", "libmp3lame", "-b:a", "160k", ausgabe], check=True)
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", tmp, "-codec:a", "libmp3lame", "-b:a", os.environ.get("MIX_BITRATE", "160k"), ausgabe], check=True)
     os.remove(tmp)
     print("Probe:", ausgabe, round(L, 1), "s · LUFS gesamt", lufs(ausgabe))
     for (tm, nm) in musik_ev: print("  Musik %6.1fs %s" % (tm, nm))

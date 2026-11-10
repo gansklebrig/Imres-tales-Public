@@ -111,9 +111,18 @@
     const sp = de() ? "de" : "en";
     if (mSprache === sp) return Promise.resolve(manifest);
     mSprache = sp; manifest = null;
+    mix = null;
+    fetch("audio/chronik/" + sp + "/mix/manifest.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null).then(m => { if (mSprache === sp) mix = m && m.absaetze; });
     return fetch("audio/chronik/" + sp + "/manifest.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null).then(m => { if (mSprache === sp) manifest = m; return manifest; });
   }
   const absatzEl = (kap, i) => { const art = document.getElementById("kapitel-" + kap); const pr = art && art.querySelector(".prose"); return pr ? pr.children[i] || null : null; };
+  /* Fertig gemischte Spuren je Abschnitt (audio/chronik/<sp>/mix): laufen auch bei gesperrtem Handy ruckelfrei,
+     weil der Browser dann nichts mehr live mischen muss. Genutzt, solange das Hörspiel mit Standard-Pegeln läuft. */
+  let mix = null, mixLaeuft = false, mixDatei = "";
+  function mixModus() {
+    const H = HSP();
+    return !!(mix && H && H.an() && Math.abs(H.kulisse() - 1) < .01 && Math.abs(H.musik() - 1) < .01 && liste.length && liste.every(x => mix[x.kap + ":" + x.i]));
+  }
   function listeBauen() {
     liste = [];
     const K = (manifest && manifest.kapitel) || {};
@@ -179,7 +188,7 @@
     warteAbbrechen();
     const H = HSP();
     if (i < 0 || i >= liste.length) {
-      if (art === "weiter" && H && H.an() && pos >= 0) {
+      if (art === "weiter" && H && H.an() && pos >= 0 && !mixLaeuft) {
         const tok = wartTok; wartet = true; zeichnen();
         H.kapitelEnde().then(ms => { if (tok !== wartTok) return; wartUhr = setTimeout(() => { if (tok === wartTok) { wartet = false; stopp(true); } }, ms); });
         return;
@@ -193,11 +202,22 @@
       audio.addEventListener("ended", beiEnde);
       audio.addEventListener("timeupdate", fortschritt);
       audio.addEventListener("error", () => { if (pos >= 0) setTimeout(() => spielen(pos + 1, "weiter"), 300); });
-      audio.addEventListener("playing", () => { const h = HSP(); if (h && pos >= 0) h.sprache(liste[pos], audio); medienStatus(); zeichnen(); });
-      audio.addEventListener("pause", () => { const h = HSP(); if (h && !audio.ended && !wartet) h.pause(); medienStatus(); zeichnen(); });
-      audio.addEventListener("ratechange", () => { const h = HSP(); if (h && !audio.paused && pos >= 0) h.sprache(liste[pos], audio); });
-      audio.addEventListener("seeked", () => { const h = HSP(); if (h && !audio.paused && pos >= 0) h.sprache(liste[pos], audio); });
+      audio.addEventListener("playing", () => { const h = HSP(); if (h && pos >= 0 && !mixLaeuft) h.sprache(liste[pos], audio); medienStatus(); zeichnen(); });
+      audio.addEventListener("pause", () => { const h = HSP(); if (h && !audio.ended && !wartet && !mixLaeuft) h.pause(); medienStatus(); zeichnen(); });
+      audio.addEventListener("ratechange", () => { const h = HSP(); if (h && !audio.paused && pos >= 0 && !mixLaeuft) h.sprache(liste[pos], audio); });
+      audio.addEventListener("seeked", () => { const h = HSP(); if (h && !audio.paused && pos >= 0 && !mixLaeuft) h.sprache(liste[pos], audio); });
     }
+    if (mixModus()) {
+      const m = mix[x.kap + ":" + x.i];
+      if (!mixLaeuft && H) H.stopp();          /* Live-Mischung aus, die Spur bringt alles mit */
+      mixLaeuft = true;
+      if (mixDatei !== m.datei) { mixDatei = m.datei; audio.src = m.datei + (m.ab > .5 ? "#t=" + m.ab : ""); }
+      else if (art !== "weiter") { try { audio.currentTime = m.ab; } catch (_) {} }
+      quelleSofort = true; audio.playbackRate = tempo; spielt = true;
+      schreib("imres-vorlesen-pos", JSON.stringify({ sp: mSprache, kap: x.kap, i: x.i }));
+      markieren(); zeichnen(); medienInfo(); los(); return;
+    }
+    if (mixLaeuft) { mixLaeuft = false; mixDatei = ""; }
     const src = x.datei;
     quelleBereit = quelleSetzen(src, art !== "weiter");
     audio.playbackRate = tempo;
@@ -232,6 +252,7 @@
   }
   function beiEnde() {
     if (pos < 0) return;
+    if (mixLaeuft) { spielen(pos + 1, "weiter"); return; }   /* Spur zu Ende → nächste Spur, ohne Timer (Sperrbildschirm) */
     const H = HSP();
     const ms = H && H.an() ? H.absatzEnde(liste[pos]) : 0;
     if (!(ms > 0)) { spielen(pos + 1, "weiter"); return; }
@@ -245,14 +266,14 @@
       warteAbbrechen(); spielt = false; if (H) H.pause(); zeichnen(); medienStatus(); return;
     }
     if (audio.paused) {
-      if (H) { H.ein(); H.weiter(); }
+      if (H && !mixLaeuft) { H.ein(); H.weiter(); }
       if (audio.ended) { spielen(pos + 1, "weiter"); return; }
       los();
     } else { audio.pause(); spielt = false; }
     zeichnen();
   }
   function stopp(fertig) {
-    warteAbbrechen();
+    warteAbbrechen(); mixLaeuft = false; mixDatei = "";
     if (audio) audio.pause(); spielt = false;
     const H = HSP(); if (H) H.stopp();
     document.querySelectorAll("#chapters .vl-aktiv").forEach(e => e.classList.remove("vl-aktiv"));
@@ -261,7 +282,23 @@
     if (fertig) pos = -1;
     medienStatus();
   }
-  function fortschritt() { if (!leiste || !audio) return; const b = leiste.querySelector(".vl-balken i"); const ges = liste.length || 1; b.style.width = (((pos + (audio.duration ? audio.currentTime / audio.duration : 0)) / ges) * 100).toFixed(2) + "%"; }
+  function fortschritt() {
+    if (mixLaeuft && pos >= 0) mixWeiter();
+    if (!leiste || !audio) return; const b = leiste.querySelector(".vl-balken i"); const ges = liste.length || 1;
+    let anteil = audio.duration ? audio.currentTime / audio.duration : 0;
+    if (mixLaeuft && liste[pos]) { const m = mix[liste[pos].kap + ":" + liste[pos].i]; anteil = Math.max(0, Math.min(1, (audio.currentTime - m.ab) / Math.max(.1, m.bis - m.ab))); }
+    b.style.width = (((pos + anteil) / ges) * 100).toFixed(2) + "%";
+  }
+  /* In der Spur: nächster Absatz erreicht → Markierung, Anzeige und Merkposten nachziehen (der Ton läuft einfach weiter) */
+  function mixWeiter() {
+    const x = liste[pos], n = liste[pos + 1]; if (!x || !n) return;
+    const m = mix[x.kap + ":" + x.i], mn = mix[n.kap + ":" + n.i];
+    if (!mn || mn.datei !== m.datei || audio.currentTime < mn.ab - .05) return;
+    if (schlafGrenze(pos + 1)) { schlafAnhalten(); return; }
+    pos++;
+    schreib("imres-vorlesen-pos", JSON.stringify({ sp: mSprache, kap: n.kap, i: n.i }));
+    markieren(); zeichnen(); medienInfo();
+  }
 
   /* ---------- Spieler-Leiste ---------- */
   function leisteBauen() {
@@ -274,7 +311,7 @@
       const b = e.target.closest("button, .vl-info"); if (!b) return;
       if (b.classList.contains("vl-haupt")) umschalten();
       else if (b.classList.contains("vl-vor")) { const h = HSP(); if (h) h.ein(); spielen(pos + 1, "sprung"); }
-      else if (b.classList.contains("vl-zurueck")) { const h = HSP(); if (h) h.ein(); spielen(audio && audio.currentTime > 3 && !wartet ? pos : Math.max(0, pos - 1), "sprung"); }
+      else if (b.classList.contains("vl-zurueck")) { const h = HSP(); if (h) h.ein(); spielen(audio && (mixLaeuft && liste[pos] ? audio.currentTime - mix[liste[pos].kap + ":" + liste[pos].i].ab : audio.currentTime) > 3 && !wartet ? pos : Math.max(0, pos - 1), "sprung"); }
       else if (b.classList.contains("vl-hs")) pultUmschalten();
       else if (b.classList.contains("vl-zu")) stopp(false);
       else if (b.classList.contains("vl-tempo")) { const st = [1, 1.15, 1.3, 0.9]; tempoSetzen(st[(st.indexOf(tempo) + 1) % st.length] || 1); }
@@ -301,6 +338,8 @@
       const H = window.ImresHoerspiel; if (!H) return;
       if (e.target.classList.contains("vl-kul")) H.kulisse(e.target.value / 100);
       if (e.target.classList.contains("vl-mus")) H.musik(e.target.value / 100);
+      /* Regler weg vom Standard → live mischen (Feinmischung); zurück auf 100 % → wieder fertige Spur */
+      if (pos >= 0 && spielt && mixLaeuft !== mixModus()) { const p = pos; if (audio) audio.pause(); if (mixLaeuft) { mixLaeuft = false; mixDatei = ""; } spielen(p, "sprung"); }
       pultZeichnen();
     });
     pult.addEventListener("click", e => {
@@ -314,8 +353,11 @@
   /* Hörspiel an/aus – läuft gerade ein Zwischenspiel, geht es beim Ausschalten sofort mit der Stimme weiter */
   function hsUmschalten() {
     const H = window.ImresHoerspiel; if (!H) return;
+    const warMix = mixLaeuft;
     H.setAn(!H.an());
-    if (!H.an() && wartet) { warteAbbrechen(); if (pos >= 0 && audio && !audio.ended) los(); else if (pos >= 0) spielen(pos + 1, "weiter"); }
+    if (warMix && pos >= 0) { if (audio) audio.pause(); mixLaeuft = false; mixDatei = ""; if (spielt) spielen(pos, "sprung"); }
+    else if (H.an() && pos >= 0 && spielt && mixModus()) { if (audio) audio.pause(); spielen(pos, "sprung"); }
+    else if (!H.an() && wartet) { warteAbbrechen(); if (pos >= 0 && audio && !audio.ended) los(); else if (pos >= 0) spielen(pos + 1, "weiter"); }
     pultZeichnen(); zeichnen();
   }
   function pultZeichnen() {
@@ -473,5 +515,5 @@
   window.addEventListener("resize", () => { if (pos >= 0) untenAbstand(); });
   aufbauen();
   window.ImresVorlesen = { spielen: (kap, i) => { listeBauen(); const H = HSP(); if (H) H.ein(); const s = liste.findIndex(x => x.kap === String(kap) && x.i >= (i || 0)); pos = -1; spielen(s < 0 ? 0 : s, "start"); }, stopp: () => stopp(true),
-    zustand: () => ({ pos, laenge: liste.length, spielt: !!(audio && !audio.paused), wartet, absatz: pos >= 0 && liste[pos] ? liste[pos].kap + ":" + liste[pos].i : null, zeit: audio ? audio.currentTime : 0 }), audio: () => audio };
+    zustand: () => ({ pos, laenge: liste.length, spielt: !!(audio && !audio.paused), wartet, absatz: pos >= 0 && liste[pos] ? liste[pos].kap + ":" + liste[pos].i : null, zeit: audio ? audio.currentTime : 0, mix: mixLaeuft }), audio: () => audio };
 })();
