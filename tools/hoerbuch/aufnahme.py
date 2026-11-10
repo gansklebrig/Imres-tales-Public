@@ -80,6 +80,7 @@ def einheiten(kapitel):
     return out, fehler, bes
 
 def einstellung(e, bes):
+    if e["rolle"] in bes.get("einstellung_rollen", {}): return bes["einstellung_rollen"][e["rolle"]]
     return bes["einstellung_erzaehler"] if e["rolle"] in ("erzaehler", "barradin") else bes["einstellung"]
 
 def datei(e, bes):
