@@ -37875,6 +37875,28 @@ SPX.fehlend=(function(){const da=new Set();const add=x=>{if(typeof x==='string')
  return SP_Z.map(z=>z[0]).filter(t=>!da.has(t))})();
 if(SPX.fehlend.length)console.warn('spoiler: Zeilen nicht gefunden',SPX.fehlend);
 }catch(e){console.error('spoiler',e);window.__hsSPOILER.err=String(e&&e.stack||e)}})();
+/* ================= Paket „diagsend“: Diagnose-Bericht per Knopf an GitHub übermitteln – window.__hsDIAGSEND =================
+   Im Diagnose-Fenster neben „Kopieren“: „An GitHub senden“. Öffnet ein vorausgefülltes Issue im privaten Repo
+   gansklebrig/imres-tales (Label „diagnose“) – absenden mit einem Klick, wenn man bei GitHub angemeldet ist.
+   Kein Schlüssel/Token im Spiel; der Bericht enthält keine persönlichen Daten. */
+(function(){try{window.__hsDIAGSEND={v:1};
+const REPO='gansklebrig/imres-tales';
+function url(){const DG=window.__hsDIAG;const t=(DG&&DG.letzter)||'';const L=t.split('\n');
+ const br=((L.find(l=>/^Browser:/.test(l))||'').replace(/^Browser:\s*/,'').split('·')[0]||'').trim();
+ const fps=((L.find(l=>/^Messung:/.test(l))||'').match(/([\d.,]+)\s*FPS/)||[])[1]||'?';
+ const ort=((L.find(l=>/^Szene:/.test(l))||'').split('·')[1]||'').trim();
+ const titel=`Diagnose: ${br||'Browser?'} · ${fps} FPS${ort?' · '+ort:''}`.slice(0,200);
+ const body='```\n'+t.slice(0,6000)+'\n```\n';
+ return`https://github.com/${REPO}/issues/new?labels=diagnose&title=${encodeURIComponent(titel)}&body=${encodeURIComponent(body)}`}
+function oeffnen(){const u=url();let ok=false;try{const w=window.open(u,'_blank');if(w){try{w.opener=null}catch(e){}ok=true}}catch(e){}
+ if(!ok){try{const a=document.createElement('a');a.href=u;a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();ok=true}catch(e){}}
+ const m=document.getElementById('diagMsg');if(m)m.textContent=ok?'GitHub geöffnet – dort „Submit new issue“ drücken.':'Konnte GitHub nicht öffnen – bitte „Kopieren“ nutzen.'}
+function knopf(){try{if(G.overlay!=='diag')return;const c=document.querySelector('#scr [data-act="diag-copy"]');if(!c||document.querySelector('#scr [data-act="diag-send"]'))return;
+ c.insertAdjacentHTML('afterend','<button class="btn small" data-act="diag-send" title="Öffnet ein vorausgefülltes GitHub-Issue (privates Repo, Anmeldung bei GitHub nötig)">An GitHub senden</button>')}catch(e){}}
+{const s0=showScreen;showScreen=function(){const r=s0.apply(this,arguments);knopf();return r}}
+document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest?ev.target.closest('[data-act="diag-send"]'):null;if(!b)return;ev.stopPropagation();ev.preventDefault();try{sfx('ui')}catch(e){}oeffnen()},true);
+window.__hsDIAGSEND.url=url;
+}catch(e){console.error('diagsend',e);window.__hsDIAGSEND.err=String(e&&e.stack||e)}})();
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
