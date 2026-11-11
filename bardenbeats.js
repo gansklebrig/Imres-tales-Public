@@ -223,7 +223,7 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
     unterTitel.textContent = modus === "klang" ? (z.kulLaeuft && kulN ? "🌲 " + kulN : W("Wähle einen Ort", "Pick a place")) :
       (z.laeuft && stN ? "🎵 " + stN + (modus === "buehne" && z.kulLaeuft && kulN ? " · 🌲 " + kulN : "") : W("Wähle eine Stimmung", "Pick a mood"));
     if (modus === "klang") h += playKnopf(z.kulLaeuft);
-    else h += '<div class="bb-oben">' + playKnopf(z.laeuft, z.laeuft && stN ? (L.st.find(x => x.k === z.stimmung) || {}).s + " " + stN : W("Dreh die Uhr auf eine Stimmung", "Turn the dial to a mood")) + uhrHtml() + "</div>";
+    else h += '<div class="bb-oben">' + playKnopf(z.laeuft, z.laeuft && stN ? (L.st.find(x => x.k === z.stimmung) || {}).s + " " + (z.lied ? "„" + z.lied + "“" : stN) : W("Dreh die Uhr auf eine Stimmung", "Turn the dial to a mood")) + uhrHtml() + "</div>";
     if (modus === "klang") h += '<div class="bb-zeile"><button type="button" class="bb-blitz" data-bb="blitz">⚡ ' + W("Etwas passiert", "Something happens") + '</button><button type="button" class="bb-ueber" data-bb="ueber">🎲 ' + W("Überrasch mich", "Surprise me") + "</button></div>";
     else { if (modus === "buehne") h += '<div class="bb-zeile"><button type="button" class="bb-blitz" data-bb="blitz">⚡ ' + W("Etwas passiert", "Something happens") + "</button></div>"; }
     const kulAktiv = z.kulLaeuft ? (z.kulisse === "waldnacht" ? "wald" : z.kulisse) : null;
@@ -282,6 +282,7 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
     dorffest: [.2, 1], trinklied: [.05, .9], marktplatz: [-.15, .7], shanty: [.35, .68], auenland: [-.38, .76], sieg: [.52, .82],
     heldenlied: [.56, .45], hof: [-.22, .46], reise: [.12, .36], reiter: [.62, .3], zwerge: [.36, .16], rast: [0, .14], kamin: [-.2, .02],
     verfolgung: [.82, .06], kampf: [.96, -.06], boss: [.86, -.42], spannung: [.42, -.34],
+    heimweh: [.12, -.6], letztesgefecht: [.58, -.62], kriegstrommeln: [.92, -.24], gaukler: [-.55, .62], sternenhimmel: [-.88, -.14],
     elben: [-.9, .18], fey: [-.8, .5], unterreich: [-.6, -.34], grusel: [-.42, -.6], ruinen: [-.62, -.62], pilger: [-.24, -.62], klage: [0, -.95]
   };
   const POLE = { o: ["😄", W("fröhlich", "happy")], r: ["😠", W("wild", "fierce")], u: ["😢", W("traurig", "sad")], l: ["😮", W("verwundert", "wondrous")] };
@@ -411,7 +412,7 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
   let merk = "";
   setInterval(() => {
     if (bb.hidden || ansicht !== "spiel" || padZieht || Date.now() - reglerAktiv < 1500) return;
-    const z = Z(), s = SEITE === "welten" ? String(weltAn()) + welten().length : z ? [z.laeuft, z.stimmung, z.naechste, z.kulisse, z.kulLaeuft, z.master, z.kulisseVol].join("|") : "";
+    const z = Z(), s = SEITE === "welten" ? String(weltAn()) + welten().length : z ? [z.laeuft, z.stimmung, z.naechste, z.kulisse, z.kulLaeuft, z.master, z.kulisseVol, z.lied].join("|") : "";
     if (s !== merk) { merk = s; spielZeichnen(); }
   }, 600);
 

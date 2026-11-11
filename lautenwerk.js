@@ -687,6 +687,38 @@
   Object.keys(STIL_NEU).forEach(i => STIL_NEU[i].forEach(k => { const st = STIL[k]; if (st && Array.isArray(st.instrument) && !st.instrument.includes(i)) st.instrument.push(i); }));
   Object.keys(BAND_NEU).forEach(sp => Object.keys(BAND_NEU[sp]).forEach(i => BAND_NEU[sp][i].forEach(k => { const st = STIL[k]; if (st && st.band && Array.isArray(st.band[sp]) && !st.band[sp].includes(i)) st.band[sp].push(i); })));
 
+  /* ---------- Neue Zwischenstimmungen (für die Stimmungs-Uhr von Barden Beats) ----------
+     Jede erbt Klangbild, Besetzung und Kapelle von einer verwandten Stimmung und bekommt eigene Tonarten, Tempo und Charakter. */
+  const NEUE_STIMMUNGEN = {
+    heimweh: { vater: "kamin", nach: "klage", kul: "regen", de: "🌧 Heimweh", en: "🌧 Homesick",
+      stil: { dreier: undefined, modus: ["aeolisch", "dorisch"], tempo: [64, 74], swing: 0, bordun: 1, dichte: .6, echo: "lang",
+        instrument: ["laute", "harfe", "fidel", "zither", "psalter", "handpan"], band: { trommel: ["bodhran", "pauke"], floete: ["gesang", "okarina", "englischhorn", "bratsche", "shakuhachi"], ketten: ["schnipsen", "windspiel", "triangel"] } } },
+    letztesgefecht: { vater: "heldenlied", nach: "boss", kul: "schlacht", de: "🏴 Letztes Gefecht", en: "🏴 Last Stand",
+      stil: { fanfare: 1, modus: ["aeolisch", "phrygisch", "dorisch"], tempo: [120, 134], transpose: [-2, 0], swing: 0, bordun: 1, variation: 1, dichte: 1,
+        instrument: ["fidel", "drehleier", "dudelsack", "laute"], band: { trommel: ["pauke", "taiko", "marsch"], floete: ["horn", "oohchor", "gesang"], ketten: ["stampfen", "kriegstrommel", "ketten"] } } },
+    kriegstrommeln: { vater: "kampf", nach: "kampf", kul: "schlacht", de: "🥁 Kriegstrommeln", en: "🥁 War Drums",
+      stil: { modus: ["phrygisch", "aeolisch"], tempo: [128, 140], transpose: [-2, -4, 0], bordun: 1, dichte: .9,
+        instrument: ["drehleier", "dudelsack", "fidel", "schalmei"], band: { trommel: ["taiko", "pauke", "marsch"], floete: ["horn", "oohchor"], ketten: ["kriegstrommel", "stampfen", "ketten"] } } },
+    gaukler: { vater: "fey", nach: "marktplatz", kul: "markt", de: "🎪 Gauklerzelt", en: "🎪 Jugglers' Tent",
+      stil: { modus: ["lydisch", "mixolydisch", "ionisch"], tempo: [112, 124], swing: 1, dichte: .95,
+        instrument: ["hackbrett", "mandoline", "akkordeon", "glocken", "balafon", "cembalo"], band: { trommel: ["tamburin", "bongos", "darbuka"], floete: ["piccolo", "klarinette", "pfeife", "okarina"], ketten: ["schellen", "rassel", "klatschen", "triangel"] } } },
+    sternenhimmel: { vater: "elben", nach: "ruinen", kul: "wald", de: "🌌 Sternenhimmel", en: "🌌 Starry Sky",
+      stil: { modus: ["lydisch", "ionisch", "dorisch"], tempo: [58, 66], dichte: .5, echo: "lang",
+        instrument: ["harfe", "glocken", "illusion", "handpan", "psalter", "zither"], band: { trommel: ["pauke"], floete: ["oohchor", "shakuhachi", "gesang", "okarina"], ketten: ["windspiel", "triangel", "schnipsen"] } } }
+  };
+  const NACH_STIMMUNG = { heimweh: "klage", letztesgefecht: "boss", kriegstrommeln: "kampf", gaukler: "fey", sternenhimmel: "elben" };
+  Object.keys(NEUE_STIMMUNGEN).forEach(k => {
+    const n = NEUE_STIMMUNGEN[k], v = STIL[n.vater]; if (!v || STIL[k]) return;
+    const neu = JSON.parse(JSON.stringify(v)); Object.keys(n.stil).forEach(x => { if (n.stil[x] === undefined) delete neu[x]; else neu[x] = JSON.parse(JSON.stringify(n.stil[x])); });
+    delete neu.lieder; STIL[k] = neu;
+    const hinter = NACH_STIMMUNG[k], einf = (l, x) => { if (l.includes(k)) return; const i = l.indexOf(x); i >= 0 ? l.splice(i + 1, 0, k) : l.push(k); };
+    einf(STIMMUNGEN, hinter); einf(KAPELLE_NAMEN, hinter);
+    if (!KULISSE_ZU[k]) KULISSE_ZU[k] = n.kul || KULISSE_ZU[n.vater];
+    TX.de.vorlagen[k] = n.de; TX.en.vorlagen[k] = n.en;
+  });
+  /* die übrigen Tabellen (Hall, Orchester, Kapelle …) erben später, sobald sie angelegt sind */
+  function neueStimmungenErben(tabelle) { Object.keys(NEUE_STIMMUNGEN).forEach(k => { const v = NEUE_STIMMUNGEN[k].vater; if (tabelle[v] !== undefined && tabelle[k] === undefined) tabelle[k] = JSON.parse(JSON.stringify(tabelle[v])); }); }
+
   const zwischen = ([a, b]) => a + Math.floor(Math.random() * ((b - a) / 2 + 1)) * 2;
   const akkordToene = bassZeile => { const d = BASS_STUFEN[bassZeile]; return [d % 7, (d + 2) % 7, (d + 4) % 7]; };
   const naechsterTon = (ziel, erlaubt) => {
@@ -1282,13 +1314,20 @@
   function stimmungLied(k, behalten, stufe, neueForm) {
     const roh = STIL[k], ist = stufe != null ? stufe : (typeof S.intensitaet === "number" ? S.intensitaet : 5), st = mitIntensitaet(roh, ist);
     /* Stimmungen mit handgeschriebenen Themen (Kampf, Endgegner): ein Thema wählen – beim neuen Lied ein anderes */
-    if (roh.lieder && roh.lieder.length) {
-      const alt = behalten && S.stimmung === k && Number.isInteger(S.liedNr) ? S.liedNr : -1;
-      let nr = alt >= 0 && !neueForm ? alt : Math.floor(Math.random() * roh.lieder.length);
-      if (neueForm && roh.lieder.length > 1) while (nr === alt) nr = Math.floor(Math.random() * roh.lieder.length);
-      const v = liedVonNoten(roh.lieder[nr]), gleich = behalten && S.stimmung === k;
-      return pruefen({ tempo: tempoFuer(roh, ist), transpose: gleich ? S.transpose : zufall(roh.transpose), modus: v.modus, instrument: gleich ? S.instrument : v.instrument,
-        band: gleich ? S.band : Object.assign(BAND_START(), v.band), ablauf: v.ablauf, rollen: v.rollen, swing: v.swing || 0, bordun: v.bordun, takt: 16, liedNr: nr,
+    const altNr = behalten && S.stimmung === k && Number.isInteger(S.liedNr) ? S.liedNr : -1;
+    /* Stimmungen, die früher nur frei komponiert wurden: ab und zu (und wenn das gleiche Stück bleiben soll) weiter frei erfinden */
+    const frei = roh.liederFrei && (altNr === -2 && !neueForm || (altNr !== -2 || neueForm) && Math.random() < .18);
+    if (roh.lieder && roh.lieder.length && !frei) {
+      const alt = altNr;
+      const nr = alt >= 0 && !neueForm ? alt : liedNrWaehlen(k, roh.lieder.length, alt);
+      const v = liedVonNoten(roh.lieder[nr]), gleich = behalten && S.stimmung === k, d = roh.lieder[nr];
+      const bandZuf = () => ({ trommel: zufall(st.band.trommel), floete: zufall(st.band.floete), ketten: zufall(st.band.ketten) });
+      const inst = gleich ? S.instrument : v.instrument || zufall(st.instrument);
+      let band = gleich ? S.band : Object.assign(BAND_START(), v.band ? v.band : bandZuf());
+      if (!gleich && !v.band && (FAMILIE[inst] || []).includes(band.floete)) band.floete = echoWahl(st.band.floete, inst);
+      const tm = d.tempo ? Math.round(d.tempo + (tempoFuer(roh, ist) - tempoFuer(roh, 5))) : tempoFuer(roh, ist);
+      return pruefen({ tempo: tm, transpose: gleich ? S.transpose : zufall(roh.transpose), modus: v.modus, instrument: inst,
+        band, ablauf: v.ablauf, rollen: v.rollen, swing: v.swing || 0, bordun: v.bordun, takt: d.takt === 12 ? 12 : 16, liedNr: nr,
         arrSeed: Math.random() < .5 ? 0 : 1, kapWahl: gleich && Array.isArray(S.kapWahl) && S.kapWahl.length ? S.kapWahl.slice() : kapelleWaehlen(k),
         variation: v.variation, teile: Object.fromEntries(TEILE.map(p => [p, v[p] || teilLeer()])), vol: S.vol, mute: S.mute, stimmung: k, intensitaet: ist });
     }
@@ -1306,7 +1345,7 @@
     basis.kapWahl = behalten && !neueForm && S.stimmung === k && Array.isArray(S.kapWahl) && S.kapWahl.length ? S.kapWahl.slice() : kapelleWaehlen(k);
     try { teile = liedTeile(st, basis.modus, form.rollen, basis.takt); basis.ablauf = form.ablauf; basis.rollen = form.rollen; }
     catch (_) { teile = stimmungTeile(st, basis.modus); if (!/^[ABCD]+$/.test(basis.ablauf)) basis.ablauf = zufall(roh.ablauf); delete basis.rollen; }
-    return pruefen(Object.assign(basis, { variation: st.variation, teile, vol: S.vol, mute: S.mute, stimmung: k, intensitaet: ist }));
+    return pruefen(Object.assign(basis, { variation: st.variation, teile, vol: S.vol, mute: S.mute, stimmung: k, intensitaet: ist, liedNr: roh.lieder ? -2 : undefined }));
   }
 
   const kopie = o => JSON.parse(JSON.stringify(o));
@@ -1567,6 +1606,56 @@
     ]
   });
   Object.keys(KAMPF_LIEDER).forEach(k => { if (STIL[k]) STIL[k].lieder = KAMPF_LIEDER[k]; });
+  /* ---------- Liedersammlung (lieder.js): viele ausgeschriebene Stücke je Stimmung ----------
+     Jedes Stück: Intro, 4 Takte Strophe, 4 Takte Refrain, 2 Takte Brücke, Refrain mit Terzstimme und Schluss.
+     Besetzung offen gelassen = Barradin, Echo & Co. greifen zu einem der Instrumente, die zur Stimmung passen. */
+  const SCHLAG_VORLAGEN = {
+    keiner: {},
+    ruhig: { s: { trommel: [0] }, r: { trommel: [0, 8] }, b: {}, h: { trommel: [0, 8], ketten: [4, 12] } },
+    sanft: { s: { trommel: [0, 8], ketten: [12] }, r: { trommel: [0, 6, 8], ketten: [4, 12] }, b: { trommel: [0] }, h: { trommel: [0, 6, 8, 14], ketten: [4, 12] } },
+    tanz: { i: { trommel: [0, 8] }, s: { trommel: [0, 6, 8, 14], klopf: [0, 8], schelle: [4, 12] }, r: { trommel: [0, 3, 6, 8, 11, 14], klopf: [0, 4, 8, 12], schelle: [2, 6, 10, 14], ketten: [4, 12] },
+      b: { trommel: [0] }, h: { trommel: [0, 3, 6, 8, 10, 11, 12, 14], klopf: [0, 4, 8, 12], schelle: [2, 6, 10, 14], ketten: [4, 12] } },
+    marsch: { i: { trommel: [12, 13, 14, 15] }, s: { trommel: [0, 8], klopf: [4, 12] }, r: { trommel: [0, 4, 8, 10, 12], klopf: [4, 12], schelle: [0, 4, 8, 12] }, b: { trommel: [0, 8] },
+      h: { trommel: [0, 2, 4, 8, 10, 12, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [4, 12] } },
+    treibend: { i: { trommel: [0, 8, 12, 14] }, s: { trommel: [0, 3, 8, 11], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14] }, r: { trommel: [0, 3, 6, 8, 11, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [4, 12] },
+      b: { trommel: [0, 8], ketten: [4, 12] }, h: { trommel: [0, 2, 3, 6, 8, 10, 11, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [4, 12] } },
+    schleichend: { s: { trommel: [0], ketten: [10] }, r: { trommel: [0, 7], klopf: [12] }, b: {}, h: { trommel: [0, 3, 8, 11], ketten: [6, 14] } },
+    walzer: { i: { trommel: [0] }, s: { trommel: [0], klopf: [4, 8] }, r: { trommel: [0], klopf: [4, 8], schelle: [2, 6, 10] }, b: { trommel: [0] }, h: { trommel: [0, 8], klopf: [4, 8], ketten: [4, 8] } },
+    jig: { i: { trommel: [0, 6] }, s: { trommel: [0, 6], klopf: [3, 9] }, r: { trommel: [0, 3, 6, 9], klopf: [0, 6], schelle: [2, 5, 8, 11] }, b: { trommel: [0] },
+      h: { trommel: [0, 2, 3, 6, 8, 9], klopf: [0, 6], schelle: [2, 5, 8, 11], ketten: [3, 9] } },
+    kampf: KAMPF_SCHLAG, boss: BOSS_SCHLAG, verfolgung: VERF_SCHLAG, spannung: SPANN_SCHLAG, reiter: REIT_SCHLAG, sieg: SIEG_SCHLAG, markt: MARKT_SCHLAG
+  };
+  const LIED_ABLAUF = "ABCDEFGHIBCDEFGHIJKLMNO";
+  function liedAusSammlung(t) {
+    const fl = (x, d) => x == null ? d : x, takte = [[t.intro[0], t.intro[1] || "", fl(t.intro[2], "")]];
+    const pad = a => { a = String(a || "0000"); while (a.length < 4) a += a[a.length - 1] || "0"; return a.slice(0, 4); };
+    t.strophe.forEach(b => takte.push([b[0], b[1], fl(b[2], "echo")]));
+    t.refrain.forEach(b => takte.push([b[0], b[1], fl(b[2], "lang")]));
+    t.bruecke.forEach(b => takte.push([b[0], b[1], fl(b[2], "")]));
+    const r2 = t.refrain2 || t.refrain;
+    r2.forEach((b, i) => takte.push(i === 3 && t.schluss ? [t.schluss[0], t.schluss[1], fl(t.schluss[2], "terz")] : [b[0], b[1], fl(t.refrain2 ? b[2] : null, "terz")]));
+    const b = t.bass || {}, bs = typeof b === "string" ? { i: b, s: b, r: b, b: b, h: b } : b;
+    takte.forEach(z => { z[0] = pad(z[0]); });
+    return { titel: t.titel, instrument: t.instrument, band: t.band, modus: t.modus, bordun: t.bordun || 0, variation: t.variation == null ? 1 : t.variation, swing: t.swing || 0,
+      tempo: t.tempo, takt: t.takt === 12 ? 12 : 16, ablauf: t.ablauf || LIED_ABLAUF, schlag: SCHLAG_VORLAGEN[t.schlag] || SCHLAG_VORLAGEN.sanft,
+      bass: Object.assign({ i: "orgel", s: "halbe", r: "viertel", b: "halbe", h: "viertel" }, bs), takte };
+  }
+  const LIED_SAMMLUNG = (typeof window !== "undefined" && window.IMRES_LIEDER) || {};
+  Object.keys(LIED_SAMMLUNG).forEach(k => {
+    const st = STIL[k]; if (!st || !Array.isArray(LIED_SAMMLUNG[k])) return;
+    const neu = []; LIED_SAMMLUNG[k].forEach(t => { try { if (t && t.strophe && t.refrain) neu.push(liedAusSammlung(t)); } catch (_) {} });
+    if (!neu.length) return;
+    if (!st.lieder) st.liederFrei = true; /* hatte vorher keine geschriebenen Stücke: der Komponist darf ab und zu weiter frei erfinden */
+    st.lieder = (st.lieder || []).concat(neu);
+  });
+  /* welche Stücke zuletzt liefen – damit man lange zuhört, bevor eines wiederkommt */
+  const liedVerlauf = {};
+  function liedNrWaehlen(k, n, ausser) {
+    const v = liedVerlauf[k] = liedVerlauf[k] || [], sperr = Math.min(n - 1, Math.max(1, Math.floor(n * .7)));
+    const frei = []; for (let i = 0; i < n; i++) if (i !== ausser && !v.slice(0, sperr).includes(i)) frei.push(i);
+    const nr = frei.length ? frei[Math.floor(Math.random() * frei.length)] : (ausser >= 0 && n > 1 ? (ausser + 1 + Math.floor(Math.random() * (n - 1))) % n : Math.floor(Math.random() * n));
+    v.unshift(nr); v.length = Math.min(v.length, n); return nr;
+  }
 
   const ausVorlage = (k, mix) => {
     const v = kopie(VORLAGEN[k]);
@@ -8774,6 +8863,8 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     strum: [["trinklied", "umpa", "s"], ["dorffest", "arp", "s"], ["shanty", "umpa", "s"], ["reise", "arp", "s"], ["auenland", "arp", "s"], ["rast", "arp", "b"], ["marktplatz", "ostinato", "s"], ["zwerge", "umpa", "s"], ["reiter", "ostinato", "s"]] };
   Object.keys(KAP_NEU).forEach(inst => KAP_NEU[inst].forEach(([k, ...e]) => { (KAP_MEHR[k] = KAP_MEHR[k] || []).push([inst, ...e]); }));
   Object.keys(KAP_MEHR).forEach(k => { if (KAPELLE[k]) KAP_MEHR[k].forEach(e => { if (!KAPELLE[k].some(x => x[0] === e[0] && x[1] === e[1])) KAPELLE[k].push(e); }); });
+  [WENDUNG, HALL_STIMMUNG, TAKT_ECHO, ORCH, ORCH_FARBEN, PUB_STIMMUNG, KAPELLE].forEach(t => { try { neueStimmungenErben(t); } catch (_) {} });
+  Object.assign(DRAMA, { letztesgefecht: 2, kriegstrommeln: 2, heimweh: 0, gaukler: 0, sternenhimmel: 0 });
   function kapelleWaehlen(k) {
     const pool = KAPELLE[k]; if (!pool) return [];
     /* Kampfmusik: Bläser und Taiko sind immer dabei */
@@ -10439,6 +10530,10 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
       heldenlied: "A great moment for the heroes", sieg: "Done it! Loot and cheers", rast: "Campfire, rest, conversations", trinklied: "Arriving at the tavern, ale and laughter", kamin: "A quiet evening by the fire",
       klage: "Grief, farewell, a loss", auenland: "Peaceful village, green hills", elben: "Elven splendour, ancient forests", fey: "Enchanted wood, fey and will-o'-wisps", zwerge: "Dwarven halls, hammers and ore",
       dorffest: "Dancing and feasting in the village", marktplatz: "Trading and haggling in town", hof: "An audience with the king", shanty: "At sea, on deck", pilger: "Monastery, temple, quiet prayer" } });
+  Object.assign(TX.de.stBsp, { heimweh: "Regen, Ferne, Sehnsucht nach Zuhause", letztesgefecht: "Umzingelt – ein letztes Mal die Klingen heben", kriegstrommeln: "Ein Heer marschiert auf",
+    gaukler: "Gaukler, Feuerspucker, Zauberkunststücke", sternenhimmel: "Nachts unter den Sternen, ein uraltes Geheimnis" });
+  Object.assign(TX.en.stBsp, { heimweh: "Rain, distance, longing for home", letztesgefecht: "Surrounded – raise the blades one last time", kriegstrommeln: "An army marches",
+    gaukler: "Jugglers, fire-breathers, conjuring tricks", sternenhimmel: "At night under the stars, an ancient secret" });
   /* Abend-Sets: passende Stimmungen und Effekte für einen ganzen Spielabend */
   const ABEND_SETS = {
     dungeon: { sym: "🕯", st: ["spannung", "unterreich", "ruinen", "grusel", "kampf", "boss", "rast", "sieg"], fx: ["tuer", "schwert", "hieb", "falle", "truhe", "schluessel", "zauber", "drache"] },
@@ -13559,7 +13654,9 @@ registerProcessor("imres-glitch", ImresGlitch);`;
         tempo: S.tempo, tempoJetzt: laeuft ? (tempoJetzt || S.tempo) : S.tempo, hall: S.hall, fxVol: S.fxVol, echoHall: S.echoHall, spannung: leben.spannung, neuBesetzen: !!neuBesetzen,
         transpose: S.transpose, modus: S.modus, stimmungen: STIMMUNGEN.filter(k => STIL[k]), kulissen: KUL_ZEIGEN.slice(),
         setStimmungen: abendSet && ABEND_SETS[abendSet] ? ABEND_SETS[abendSet].st.slice() : null,
-        naechste: wechsel ? (wechsel.stimmung || wechsel.besetzung || null) : null, abendSet: abendSet || "" };
+        naechste: wechsel ? (wechsel.stimmung || wechsel.besetzung || null) : null, abendSet: abendSet || "",
+        liedNr: Number.isInteger(S.liedNr) ? S.liedNr : null, lied: S.stimmung && STIL[S.stimmung] && STIL[S.stimmung].lieder && S.liedNr >= 0 && STIL[S.stimmung].lieder[S.liedNr] ? STIL[S.stimmung].lieder[S.liedNr].titel || null : null,
+        lieder: S.stimmung && STIL[S.stimmung] && STIL[S.stimmung].lieder ? STIL[S.stimmung].lieder.length : 0 };
     },
     /* Zynthian-Pult: feste Listen (ohne Umsortieren nach Nutzung) und Namen */
     /* Spuren des Ortes fürs Pult: jede Schicht der Kulisse, die Einzelgeräusche und laufende Zusätze (Wetter …) – 1 = 100 % */
@@ -13585,10 +13682,10 @@ registerProcessor("imres-glitch", ImresGlitch);`;
       const HELL = { lydisch: 3, ionisch: 2, mixolydisch: 1.5, dorisch: 0, aeolisch: -1, phrygisch: -2 };
       const hell = st => { const m = st.modus || []; return m.length ? m.reduce((x, y) => x + (HELL[y] || 0), 0) / m.length : 0; };
       const tempo = st => st.tempo ? (st.tempo[0] + st.tempo[1]) / 2 : 100;
-      const FAM = { natur: ["elben", "fey", "auenland", "pilger", "rast", "kamin", "reise"], ruhig: ["rast", "kamin", "pilger", "klage", "elben", "ruinen"],
-        dunkel: ["unterreich", "grusel", "spannung", "ruinen", "klage", "boss"], kampf: ["kampf", "boss", "verfolgung", "reiter"],
-        fest: ["dorffest", "trinklied", "marktplatz", "shanty", "sieg", "auenland"], episch: ["heldenlied", "hof", "sieg", "reise", "zwerge", "reiter"],
-        reise: ["reise", "reiter", "shanty", "pilger", "zwerge"], heim: ["kamin", "rast", "trinklied", "auenland"] };
+      const FAM = { natur: ["elben", "fey", "auenland", "pilger", "rast", "kamin", "reise", "sternenhimmel", "gaukler"], ruhig: ["rast", "kamin", "pilger", "klage", "elben", "ruinen", "heimweh", "sternenhimmel"],
+        dunkel: ["unterreich", "grusel", "spannung", "ruinen", "klage", "boss", "letztesgefecht", "kriegstrommeln"], kampf: ["kampf", "boss", "verfolgung", "reiter", "letztesgefecht", "kriegstrommeln"],
+        fest: ["dorffest", "trinklied", "marktplatz", "shanty", "sieg", "auenland", "gaukler"], episch: ["heldenlied", "hof", "sieg", "reise", "zwerge", "reiter"],
+        reise: ["reise", "reiter", "shanty", "pilger", "zwerge"], heim: ["kamin", "rast", "trinklied", "auenland", "heimweh"] };
       let gemeinsam = 0; Object.values(FAM).forEach(l => { if (l.includes(A) && l.includes(B)) gemeinsam++; });
       return Math.min(2, gemeinsam) * 3 - Math.abs(tempo(sa) - tempo(sb)) / 18 - Math.abs(hell(sa) - hell(sb)) * .8 - Math.abs((DRAMA[A] || 0) - (DRAMA[B] || 0)) * 1.2;
     },

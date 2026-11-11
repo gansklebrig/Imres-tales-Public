@@ -1,0 +1,297 @@
+/* Gruppe „fest“: trinklied, dorffest, marktplatz, shanty, auenland */
+module.exports = {
+  trinklied: [
+    // Krug-Heben: Jig-Motiv steigt zur Oktave, Refrain kreist mitgrölbar um die hohe Quinte
+    { titel: "Noch ein Krug, Wirtin!", modus: "mixolydisch", takt: 12, tempo: 112, schlag: "jig", bass: { i: "orgel", s: "viertel", r: "viertel", b: "orgel", h: "galopp" },
+      intro: ["000", "0.24.47.47.."],
+      strophe: [["000", "4.24.27.44.2"], ["666", "6.56.53.36.5"], ["000", "4.24.27.97.4"], ["444", "6.54.21.1..."]],
+      refrain: [["000", "b.9b.97..9.b"], ["333", "c.ac.a7.7a.."], ["000", "b.9b.97..9.b"], ["640", "a.98.64.7..."]],
+      bruecke: [["666", "a.....d.....", "6.86.8a.86.8"], ["444", "b.....8.....", "4.64.68.64.6"]],
+      schluss: ["440", "b.9b.98..7.."] },
+    // Stampf-Lied: punktierter Schritt in der Strophe, „Hey-ho“-Quarte im Refrain
+    { titel: "Der Wirt hat keinen Boden mehr", modus: "ionisch", tempo: 116, swing: 1, schlag: "tanz", bass: { i: "orgel", s: "viertel", r: "viertel", b: "halbe", h: "puls" },
+      intro: ["0044", "0...4...7...4..."],
+      strophe: [["0000", "4..42...4..57..."], ["3344", "5..53...4..21..."], ["0000", "4..47...9..74..."], ["4444", "6..54...1..24..."]],
+      refrain: [["0000", "7...b...b.a.9.7."], ["3333", "a...c...c.b.a.7."], ["0000", "7...b...b.a.9.b."], ["4400", "d.c.b.9.7......."]],
+      bruecke: [["5555", "c.......9.......", "5.7.9.7.5.7.9.7."], ["4444", "b.......8...6.8.", "4.6.8.6.4.6.8.6."]],
+      schluss: ["3400", "a...b...e......."] },
+    // Dudelsack-Jig über Bordun, der Schwenk auf die tiefe Septime (bVII) gibt den Kneipen-Schwung
+    { titel: "Krüge hoch, der Kessel kocht", modus: "mixolydisch", takt: 12, tempo: 110, schlag: "jig", bordun: 1, instrument: "dudelsack", bass: "halbe",
+      intro: ["000", "0..0..4..7.."],
+      strophe: [["000", "7.47.49.74.2"], ["666", "6.86.8a.86.3"], ["000", "7.47.49.b9.7"], ["666", "8.a8.63.6..."]],
+      refrain: [["000", "b..b.9b.97.."], ["666", "a..a.8a.86.."], ["000", "b..b.9b.9e.."], ["640", "d.ba.86.7..."]],
+      bruecke: [["333", "c.....a.....", "3.53.57.57.5"], ["444", "b.....d.....", "4.64.68.64.6"]],
+      schluss: ["440", "b.9b.98.7..."] },
+    // Schunkel-Marsch: Refrain als fallende Tonleiter vom Gipfel, Schluss im Chor-Unisono
+    { titel: "Lied vom leeren Fass", modus: "ionisch", tempo: 108, schlag: "marsch", bass: { i: "orgel", s: "halbe", r: "viertel", b: "orgel", h: "viertel" }, band: { trommel: "trommel", floete: "pfeife", ketten: "krug" },
+      intro: ["0000", "7.7.7...4.4.4..."],
+      strophe: [["0000", "2.3.4...4.3.2..."], ["4444", "4.5.6...6.5.4..."], ["0033", "2.3.4...5.4.3..."], ["4444", "4.5.6...8.6.4..."]],
+      refrain: [["3300", "c.b.a.9.7...9..."], ["4400", "d.c.b.a.9...7..."], ["3300", "c.b.a.9.7.9.b..."], ["3400", "a.a.b.b.e......."]],
+      bruecke: [["5555", "9.......c.......", "5.2.0.2.5.2.0.2."], ["1144", "8.......b.......", "1.3.5.3.4.6.8.6."]],
+      schluss: ["4400", "b.9.8.6.7......."] },
+    // Schunkelwalzer: Strophe wiegt zwischen Terz und Quinte, Refrain mit großem Sextsprung
+    { titel: "Drei Schwestern im Goldenen Hahn", modus: "mixolydisch", takt: 12, tempo: 114, schlag: "walzer", bass: { i: "orgel", s: "halbe", r: "viertel", b: "orgel", h: "viertel" },
+      intro: ["000", "0...4...4..."],
+      strophe: [["000", "2...4...4.2."], ["666", "3...1...3.4."], ["000", "4...7...7.4."], ["444", "6...8...6..."]],
+      refrain: [["000", "4...b...9.7."], ["333", "a...7...5..."], ["000", "4...b...b.c."], ["640", "a...8...7..."]],
+      bruecke: [["333", "c.......a...", "3.5.7.5.3.5."], ["444", "b.......8...", "4.6.8.6.4.6."]],
+      schluss: ["440", "b...8...7..."] },
+    // Klatsch-Refrain: synkopiertes „.7.7..9.“ zum Mitklatschen, Strophe als fallende Sequenz
+    { titel: "Hopfen, Malz und Heldenmut", modus: "ionisch", tempo: 118, schlag: "tanz", bass: "puls", band: { trommel: "tamburin", floete: "gesang", ketten: "klatschen" },
+      intro: ["0000", "4.4.4.4.7.7.7.7."],
+      strophe: [["0000", "4.5.4.2.4...7..."], ["5555", "5.6.5.4.5...2..."], ["3333", "3.5.3.2.3...5..."], ["4444", "4.4.6.4.8...6..."]],
+      refrain: [["0000", ".7.7..9.b...9..."], ["3333", ".a.a..c.c...a.7."], ["0000", ".7.7..9.b...e.b."], ["4400", ".b.b..9.7......."]],
+      bruecke: [["1111", "8.......a.......", "1.3.5.8.5.3.1.3."], ["4444", "b.......d...b...", "4.6.8.b.8.6.4.6."]],
+      schluss: ["4400", ".b.b..9.7...e..."] },
+    // Erzähl-Strophe auf einem Ton wie ein Bänkelsänger, Refrain als Sequenz Tonika – bVII
+    { titel: "Der Barde zahlt die Runde", modus: "mixolydisch", tempo: 112, swing: 1, schlag: "tanz", bass: { i: "orgel", s: "halbe", r: "viertel", b: "halbe", h: "galopp" },
+      intro: ["0060", "7...6...4...7..."],
+      strophe: [["0000", "4.4.4.4.4.2.4..."], ["0000", "4.4.4.4.7.4.2..."], ["6666", "3.3.3.3.3.1.3..."], ["4444", "4.4.6.6.8...1..."]],
+      refrain: [["0000", "9...9.b.b...9.7."], ["6666", "8...8.a.a...8.6."], ["0000", "9...9.b.b...e.c."], ["6600", "d...a...7......."]],
+      bruecke: [["3333", "a.......c.......", "3.5.7.5.3.5.7.a."], ["4444", "b.......8.......", "4.6.8.6.4.6.8.b."]],
+      schluss: ["6600", "d...a...e......."] },
+    // Kutscher-Jig in durchlaufenden Achteln, Refrain klettert die Tonleiter hinauf
+    { titel: "Bierkutscher-Jig", modus: "ionisch", takt: 12, tempo: 108, schlag: "jig", bass: "viertel", band: { trommel: "bodhran", floete: "blockfloete", ketten: "loeffel" },
+      intro: ["000", "024024047..."],
+      strophe: [["000", "742742974..."], ["333", "a75a75c75..."], ["000", "742742b97..."], ["444", "864864b86..."]],
+      refrain: [["000", "789b.9b.97.."], ["333", "a9ac.ac.a7.."], ["000", "789b.9b.9e.."], ["440", "dcbb.98.7..."]],
+      bruecke: [["555", "c.....9.....", "5.7957.c9.75"], ["444", "b.....8.....", "4.6846.b8.64"]],
+      schluss: ["440", "dcb98.b.7..."] }
+  ],
+
+  dorffest: [
+    // Kreistanz: dreimal derselbe Hüpfton, dann der Sprung – wie ein Bändertanz um den Baum
+    { titel: "Bänderbaum im Wind", modus: "ionisch", tempo: 124, schlag: "tanz", bass: { i: "orgel", s: "viertel", r: "viertel", b: "halbe", h: "puls" },
+      intro: ["0000", "7.4.7.4.7.4.9.b."],
+      strophe: [["0000", "4.4.4.7.4.2.0..."], ["4444", "4.4.4.8.6.4.1..."], ["0000", "4.4.4.7.9.7.4..."], ["4444", "6.6.6.8.b...8..."]],
+      refrain: [["0000", "b.b.b.9.7...9.b."], ["5555", "c.c.c.9.7...9.c."], ["0000", "b.b.b.9.7...b.e."], ["4400", "d.d.b.8.7......."]],
+      bruecke: [["3333", "a.......c...a...", "3.5.7.a.7.5.3.5."], ["4444", "b.......d...b...", "4.6.8.b.8.6.4.6."]],
+      schluss: ["4400", "d.c.b.8.e......."] },
+    // Drehleier-Jig über Bordun, das Motiv kreist um die kleine Septime
+    { titel: "Erntekrone", modus: "mixolydisch", takt: 12, tempo: 122, schlag: "jig", bordun: 1, instrument: "drehleier", bass: "viertel",
+      intro: ["000", "0.00.04.47.."],
+      strophe: [["000", "7.67.64.24.."], ["666", "8.68.63.13.."], ["000", "7.67.69.79.."], ["666", "a.8a.86.8..."]],
+      refrain: [["000", "b.9b.9d.b9.."], ["666", "a.8a.8d.a8.."], ["000", "b.9b.9d.be.."], ["640", "d.ba.98.7..."]],
+      bruecke: [["333", "a.....c.....", "3.57.5a.75.3"], ["444", "b.....8.....", "4.68.6b.86.4"]],
+      schluss: ["640", "d.ba.98.e..."] },
+    // Polka-Hüpfer: gebrochene Akkorde über I-vi-IV-V, Refrain stürzt von der Doppeloktave herab
+    { titel: "Der Schmied tanzt mit der Müllerin", modus: "ionisch", tempo: 128, schlag: "tanz", bass: "puls",
+      intro: ["0000", "0.4.7.4.0.4.7.4."],
+      strophe: [["0000", "7.4.2.4.7...2..."], ["5555", "9.5.2.5.9...5..."], ["3333", "a.7.5.7.a...7..."], ["4444", "b.8.6.8.b...8..."]],
+      refrain: [["0000", "e...b.c.b...9.7."], ["5555", "c...9.a.9...7.5."], ["0000", "e...b.c.b...e.c."], ["3400", "a...b...7......."]],
+      bruecke: [["1111", "8...a...c...a...", "1.5.8.5.1.5.8.5."], ["4444", "b...d...b...8...", "4.8.b.8.4.8.b.8."]],
+      schluss: ["3400", "a...b...e......."] },
+    // Hüpf-Motiv „7..9“ punktiert, mit Piccolo und Schellen als Sequenz durch die Akkorde
+    { titel: "Sackhüpfen am Dorfteich", modus: "mixolydisch", tempo: 126, swing: 1, schlag: "tanz", bass: { i: "orgel", s: "viertel", r: "galopp", b: "orgel", h: "galopp" }, band: { trommel: "tamburin", floete: "piccolo", ketten: "schellen" },
+      intro: ["0000", "7..9b..97..9b..."],
+      strophe: [["0000", "4..24..27..4...."], ["6666", "3..13..16..3...."], ["0000", "4..24..29..7...."], ["4444", "6..46..48..6...."]],
+      refrain: [["0000", "7..9b..97..9b..."], ["6666", "6..8a..86..8a..."], ["0000", "7..9b..9e..cb..."], ["6400", "a..8b..97......."]],
+      bruecke: [["3333", "c.......a.......", "3..57..53..57..5"], ["6666", "d.......a.......", "6..8a..86..8a..8"]],
+      schluss: ["6600", "a..8d..ce......."] },
+    // Ländlicher Jig: tiefe Strophe, Refrain ruft von der Quinte zur Oktave hinauf
+    { titel: "Lindenwirtin hat Geburtstag", modus: "ionisch", takt: 12, tempo: 120, schlag: "jig", bass: { i: "orgel", s: "halbe", r: "viertel", b: "orgel", h: "viertel" },
+      intro: ["000", "4..4..7..7.."],
+      strophe: [["000", "2.32.34.24.."], ["444", "1.21.24.14.."], ["000", "2.32.34.74.."], ["444", "4.54.56.86.."]],
+      refrain: [["000", "b..e..b.9b.."], ["333", "a..c..a.7a.."], ["000", "b..e..b.9e.."], ["440", "d..b..8.7..."]],
+      bruecke: [["555", "9.....c.....", "5.75.70.c0.7"], ["444", "8.....b.....", "4.64.68.b8.6"]],
+      schluss: ["440", "b..d..b.e..."] },
+    // Fidel-Reel in durchlaufenden Achteln, Refrain pendelt zwischen Tonika und bVII
+    { titel: "Feuertanz um den Maibaum", modus: "mixolydisch", tempo: 130, schlag: "treibend", bass: "puls", instrument: "fidel",
+      intro: ["0606", "0.2.4.2.0.2.4.6."],
+      strophe: [["0000", "4.5.4.2.0.2.4.7."], ["6666", "8.6.3.6.8.6.3.1."], ["0000", "4.5.4.2.4.7.9.7."], ["6644", "8.a.8.6.4.6.8.b."]],
+      refrain: [["0066", "b.9.7.9.a...8..."], ["0066", "9.7.4.7.8...6..."], ["0066", "b.9.7.9.a...d..."], ["4400", "b.a.8.6.7......."]],
+      bruecke: [["3333", "c.......a.......", "7.5.3.5.7.a.c.a."], ["4444", "b.......d.......", "4.6.8.6.4.6.8.b."]],
+      schluss: ["6600", "a.8.6.8.7.9.b.e."] },
+    // Festlicher Einzug: Fanfaren-Dreiklang aufwärts, Refrain in breiten, stolzen Halben
+    { titel: "Hochzeit auf dem Hügelhof", modus: "ionisch", tempo: 120, schlag: "marsch", bass: { i: "orgel", s: "halbe", r: "halbe", b: "orgel", h: "viertel" }, band: { trommel: "marsch", floete: "horn", ketten: "klatschen" },
+      intro: ["0000", "0...4...7...4..."],
+      strophe: [["0000", "0..24...7...4..."], ["3333", "3..57...a...7..."], ["4444", "4..68...b...8..."], ["0000", "7...4...2...4..."]],
+      refrain: [["0000", "b.......9...b..."], ["3344", "c.......b...8..."], ["0000", "b.......9...e..."], ["3400", "c...b...e......."]],
+      bruecke: [["5555", "c.......9.......", "5.7.9.c.9.7.5.7."], ["2244", "b.......d.......", "2.4.6.9.4.6.8.b."]],
+      schluss: ["3400", "a...b...7......."] },
+    // Akkordeon-Polka: Melodie ruft, das Echo antwortet in den Pausen; Strophe wandert 0-6-3-4
+    { titel: "Kirmes im Krähenwinkel", modus: "mixolydisch", tempo: 124, schlag: "tanz", bass: "viertel", instrument: "akkordeon",
+      intro: ["0000", "7.7.6.4.7.7.6.4."],
+      strophe: [["0000", "2.4.7...2.4.7..."], ["6666", "1.3.6...1.3.6..."], ["3333", "3.5.7...a.7.5..."], ["4400", "4.6.8...7.4.2..."]],
+      refrain: [["0000", "9.9.b...9.7.....", "echo"], ["6666", "8.8.a...8.6.....", "echo"], ["0000", "9.9.b...9.b.e..."], ["6400", "a.a.b...7......."]],
+      bruecke: [["3333", "a.......c.......", "3.5.7.5.a.7.5.3."], ["6666", "d.......a.......", "6.8.a.8.d.a.8.6."]],
+      schluss: ["6600", "a.a.d...e......."] }
+  ],
+
+  marktplatz: [
+    // Gewürz-Ostinato 4-3-2-0, die dorische Sexte als Würze, Refrain schaukelt über bVII
+    { titel: "Gewürze aus dem Süden", modus: "dorisch", tempo: 104, schlag: "markt", instrument: "sitar", bass: { i: "orgel", s: "viertel", r: "viertel", b: "orgel", h: "puls" }, band: { trommel: "darbuka", floete: "oboe", ketten: "schellen" },
+      intro: ["0000", "0.2.3.4.3.2.0..."],
+      strophe: [["0000", "4.3.2.0.4...2..."], ["0000", "4.5.4.2.4...7..."], ["6666", "3.1.6.1.3...8..."], ["3344", "5.3.0.3.4...1..."]],
+      refrain: [["0000", "9.a.b.a.9...7..."], ["6666", "8.a.8.6.d...a..."], ["0000", "9.a.b.a.9...e..."], ["4400", "b.a.8.6.7......."]],
+      bruecke: [["2222", "9.......b.......", "2.4.6.9.6.4.2.4."], ["3333", "a.......c.......", "3.5.7.a.7.5.3.5."]],
+      schluss: ["4400", "d.c.b.a.7......."] },
+    // Feilschen im Halbton: 7-8-7 fragt, die Sequenz antwortet; phrygische Kadenz bII → i
+    { titel: "Der Teppichhändler feilscht", modus: "phrygisch", tempo: 100, schlag: "markt", instrument: "hackbrett", bass: { i: "orgel", s: "halbe", r: "viertel", b: "orgel", h: "viertel" },
+      intro: ["0000", "7.8.7...7.8.7..."],
+      strophe: [["0000", "7.8.7...4.2.4..."], ["1111", "8.a.8...5.3.5..."], ["0000", "7.8.7...9.8.7..."], ["1100", "8...5...7......."]],
+      refrain: [["0000", "b.c.b...9.8.7..."], ["5555", "c.e.c...9.7.5..."], ["0000", "b.c.b...e.c.b..."], ["1100", "a.8.a.8.7......."]],
+      bruecke: [["3333", "a.......c.......", "3.5.7.5.3.5.7.a."], ["2222", "9.......b.......", "2.4.6.9.6.4.2.1."]],
+      schluss: ["1100", "a.8.a.8.e......."] },
+    // Händlerruf: dorischer Wechsel i–IV, Refrain springt eine Quarte hinauf wie ein Marktschreier
+    { titel: "Gauklergold und Silberlinge", modus: "dorisch", tempo: 108, swing: 1, schlag: "tanz", bass: "puls",
+      intro: ["0303", "0...3...4...5..."],
+      strophe: [["0033", "4.2.4.7.5.3.5..."], ["0033", "4.2.4.7.a.7.5..."], ["0033", "2.0.2.4.3.5.7..."], ["4444", "6.4.6.8.b...8..."]],
+      refrain: [["0033", "7...b.9.a...c.a."], ["0033", "9...7.4.5...7..."], ["0033", "7...b.9.a...e.c."], ["4400", "8...b.8.7......."]],
+      bruecke: [["6666", "a.......8.......", "6.8.a.d.a.8.6.3."], ["2222", "9.......b.......", "2.4.6.9.b.9.6.4."]],
+      schluss: ["4400", "8...b.8.e......."] },
+    // Schlangenlinie: die Melodie windet sich in Halbtönen um den Ton, Refrain steigt in Wellen
+    { titel: "Schlangenbeschwörer am Brunnen", modus: "phrygisch", tempo: 102, schlag: "markt", instrument: "schalmei", bass: { i: "orgel", s: "orgel", r: "viertel", b: "orgel", h: "puls" },
+      intro: ["0000", "0.1.0.1.2.1.0..."],
+      strophe: [["0000", "4.3.4.5.4.3.2.1."], ["6666", "3.1.3.4.3.1.6..."], ["0000", "4.3.4.5.7.5.4.2."], ["1100", "3.5.3.1.2......."]],
+      refrain: [["0000", "7.8.9.8.b.a.9.8."], ["3333", "a.b.c.b.a.8.7..."], ["0000", "7.8.9.8.b.c.e..."], ["1100", "c.a.8.a.7......."]],
+      bruecke: [["5555", "c.......9.......", "5.7.5.0.5.7.9.7."], ["6666", "a.......d.......", "6.8.6.3.6.8.a.8."]],
+      schluss: ["1100", "c.a.8.a.e......."] },
+    // Lampen-Basar: synkopierter Ruf auf der Dur-Sexte über der IV, Brücke schwebt über bIII
+    { titel: "Basar der tausend Lampen", modus: "dorisch", tempo: 106, schlag: "markt", bass: { i: "orgel", s: "viertel", r: "puls", b: "orgel", h: "puls" }, band: { trommel: "darbuka", floete: "panfloete", ketten: "rassel" },
+      intro: ["0000", "0..2..4.7..4..2."],
+      strophe: [["0000", "7..4..2.4...0..."], ["3333", "7..5..3.5...3..."], ["0000", "7..4..2.4...7..."], ["4444", "8..6..4.6...4..."]],
+      refrain: [["3333", "a.c.c..ac...a..."], ["0000", "b.9.9..79...7..."], ["3333", "a.c.c..ac...e..."], ["4400", "b.8.8..67......."]],
+      bruecke: [["2222", "9.......b.......", "2..4..6.9..6..4."], ["6666", "8.......a.......", "1..3..6.8..6..3."]],
+      schluss: ["4400", "d.b.8..67......."] },
+    // Händler-Patter auf Tonwiederholungen, die Strophe steigt Stufe für Stufe (i-bII-bIII)
+    { titel: "Feigen, Datteln, Safran", modus: "phrygisch", tempo: 110, schlag: "tanz", instrument: "balafon", bass: "puls",
+      intro: ["0000", "7.7.7.7.8.8.7..."],
+      strophe: [["0000", "4.4.4.2.4.4.4.2."], ["1111", "5.5.5.3.5.5.5.3."], ["2222", "6.6.6.4.6.6.6.4."], ["1100", "5.3.5.3.4...2..."]],
+      refrain: [["0000", "b...9.7.9.b.9..."], ["1111", "a...8.c.a.8.5..."], ["0000", "b...9.7.9.b.e..."], ["1100", "a...8...7......."]],
+      bruecke: [["5555", "c.......e.......", "5.7.9.c.9.7.5.2."], ["6666", "d.......a.......", "6.8.a.d.a.8.6.3."]],
+      schluss: ["1100", "a.c.a.8.7......."] },
+    // Zelt der Wahrsagerin: lange lockende Töne, Refrain fällt in Terzen und dreht sich zur IV
+    { titel: "Wahrsagerin im roten Zelt", modus: "dorisch", tempo: 100, schlag: "markt", instrument: "zither", bass: "halbe",
+      intro: ["0000", "0.......5...4..."],
+      strophe: [["0000", "4.......2.3.4..."], ["3333", "5.......3.5.7..."], ["0000", "4.......7.5.4..."], ["4444", "6.......4.6.8..."]],
+      refrain: [["0033", "9.7.4...a.7.5..."], ["6644", "8.6.3...b.8.6..."], ["0033", "9.7.4...a.c.e..."], ["4400", "b.8.6...7......."]],
+      bruecke: [["2222", "9.......b.......", "2.6.9.6.2.6.9.6."], ["3333", "a.......c.......", "3.7.a.7.3.7.a.7."]],
+      schluss: ["4400", "d.b.8...7......."] },
+    // Karawanenschritt: schaukelnde punktierte Figur über Bordun, Refrain greift nach der Dur-Sexte
+    { titel: "Kamelkarawane erreicht das Tor", modus: "dorisch", tempo: 102, bordun: 1, schlag: "markt", bass: "orgel", band: { trommel: "darbuka", floete: "englischhorn", ketten: "schellen" },
+      intro: ["0000", "0..0..0.0...0..."],
+      strophe: [["0000", "7..64...2..47..."], ["6666", "8..63...1..36..."], ["0000", "7..64...9..b9..."], ["4400", "8..64...7......."]],
+      refrain: [["0033", "b..c9...a..c7..."], ["6600", "a..86...7..97..."], ["0033", "b..c9...a..ce..."], ["4400", "b..a8...7......."]],
+      bruecke: [["3333", "c.......a.......", "3..5..7.a..7..5."], ["2222", "b.......9.......", "2..4..6.9..6..4."]],
+      schluss: ["4400", "d..cb...e......."] }
+  ],
+
+  shanty: [
+    // Vorsänger und Chor: Ruf in der Strophe, schwere „Hau-ruck“-Viertel im Refrain
+    { titel: "Hiev an, ihr Hunde!", modus: "aeolisch", tempo: 96, schlag: "marsch", bass: { i: "orgel", s: "halbe", r: "viertel", b: "orgel", h: "viertel" }, band: { trommel: "bodhran", floete: "gesang", ketten: "stampfen" },
+      intro: ["0000", "0...0...4...7..."],
+      strophe: [["0000", "4.4.7.4.2.......", "echo"], ["6666", "3.3.6.3.1.......", "echo"], ["5555", "2.2.5.7.9.......", "echo"], ["4444", "8.6.4.6.8.......", "echo"]],
+      refrain: [["0000", "b...b...9.7.9..."], ["6666", "a...a...8.6.8..."], ["0000", "b...b...9.b.e..."], ["4400", "b...8...7......."]],
+      bruecke: [["2222", "9.......b.......", "2.4.6.4.2.4.6.9."], ["3333", "a.......c.......", "3.5.7.5.3.5.7.a."]],
+      schluss: ["4400", "d...b...e......."] },
+    // Dünungs-Jig: Melodie hebt und senkt sich wie Wellen, Refrain beginnt hell auf der dorischen IV
+    { titel: "Die Witwe von Kap Nebel", modus: "dorisch", takt: 12, tempo: 98, schlag: "jig", instrument: "akkordeon", bass: "halbe",
+      intro: ["000", "0.24.27.42.."],
+      strophe: [["000", "4.24.27.42.."], ["666", "3.13.16.31.."], ["333", "5.35.37.53.."], ["444", "6.46.48.64.."]],
+      refrain: [["333", "a.ca.ce.ca.."], ["000", "9.79.7b.97.."], ["333", "a.ca.ce.ce.."], ["440", "b.8b.86.7..."]],
+      bruecke: [["666", "a.....d.....", "6.86.8a.86.8"], ["222", "b.....9.....", "2.42.46.42.4"]],
+      schluss: ["440", "d.bd.b8.e..."] },
+    // Moll-Shanty mit Dur-Aufhellung: Refrain steigt über bVI und bVII, punktierte Seemannsfigur
+    { titel: "Salz auf den Lippen", modus: "aeolisch", tempo: 94, swing: 1, schlag: "tanz", bass: { i: "orgel", s: "viertel", r: "viertel", b: "halbe", h: "galopp" },
+      intro: ["0000", "7..64..20......."],
+      strophe: [["0000", "4..24..72......."], ["3333", "5..35..a7......."], ["0000", "4..24..79......."], ["4444", "6..46..b8......."]],
+      refrain: [["5566", "c..9c...a..8a..."], ["0000", "9..79...7..49..."], ["5566", "c..9c...d..ad..."], ["4400", "b..ab...e......."]],
+      bruecke: [["2222", "b.......9.......", "2..42..69..64..2"], ["6666", "a.......d.......", "6..86..a3..1a..6"]],
+      schluss: ["4400", "b..ab...7......."] },
+    // Frecher Hornpipe-Jig: Wechselton 7-6-7, Refrain springt zur Quinte und purzelt herab
+    { titel: "Rum für die Wache", modus: "dorisch", takt: 12, tempo: 100, schlag: "jig", bass: { i: "orgel", s: "viertel", r: "viertel", b: "orgel", h: "galopp" }, band: { trommel: "bodhran", floete: "pfeife", ketten: "krug" },
+      intro: ["000", "7.67.64.24.."],
+      strophe: [["000", "7.67.64.47.."], ["444", "8.68.61.18.."], ["000", "7.67.69.b9.."], ["440", "8.68.6b.7..."]],
+      refrain: [["000", "b..9.7b..9.7"], ["333", "c..a.7c..a.7"], ["000", "b..9.7b..e.b"], ["640", "a..8.6b..7.."]],
+      bruecke: [["222", "9.....b.....", "2.42.46.49.6"], ["666", "8.....a.....", "6.86.8a.83.1"]],
+      schluss: ["640", "a..8.6b..e.."] },
+    // Gangspill-Lied: lange „Hooo“-Rufe auf der Quinte über Bordun, kurze Antworten dazwischen
+    { titel: "Ankerlichten im Morgengrauen", modus: "aeolisch", tempo: 92, schlag: "sanft", bordun: 1, instrument: "drehleier", bass: { i: "orgel", s: "orgel", r: "halbe", b: "orgel", h: "viertel" },
+      intro: ["0000", "4..............."],
+      strophe: [["0000", "4.......2.4.0...", "echo"], ["3333", "5.......3.5.7...", "echo"], ["6666", "6.......3.1.3...", "echo"], ["4444", "4.......6.8.4...", "echo"]],
+      refrain: [["0000", "b.......9.7.9...", "lang"], ["5555", "c.......9.7.5...", "lang"], ["0000", "b.......9.b.e...", "lang"], ["4400", "b...8...7......."]],
+      bruecke: [["6666", "d.......a.......", "6.8.a.8.6.8.a.d."], ["2222", "b.......9.......", "2.4.6.9.6.4.2.4."]],
+      schluss: ["4400", "d...b...e......."] },
+    // Verschmitzter Reel: die dorische Sexte zwinkert auf Zählzeit 2, Refrain als Sequenz abwärts
+    { titel: "Klabautermanns Tanz", modus: "dorisch", tempo: 98, swing: 1, schlag: "tanz", bass: "viertel", band: { trommel: "tamburin", floete: "piccolo", ketten: "loeffel" },
+      intro: ["0303", "0.2.4.5.4.2.0..."],
+      strophe: [["0033", "4.5.4.2.5.7.5.3."], ["0033", "4.5.4.2.0.3.5.7."], ["6644", "3.1.3.6.4.6.8.6."], ["4400", "6.8.6.4.7......."]],
+      refrain: [["3333", "c.a.c.e.c...a..."], ["2222", "b.9.b.d.b...9..."], ["3333", "c.a.c.e.c...e..."], ["4400", "b.a.8.6.7......."]],
+      bruecke: [["6666", "a.......8.......", "6.8.a.8.6.3.1.3."], ["4444", "8.......b.......", "4.6.8.6.4.1.4.6."]],
+      schluss: ["3400", "c.a.b.8.7......."] },
+    // Walfänger-Sehnsucht: Strophe tief über i–bVII, Refrain öffnet sich hell auf bIII
+    { titel: "Nordwärts, Brüder, nordwärts", modus: "aeolisch", takt: 12, tempo: 94, schlag: "jig", bass: { i: "orgel", s: "viertel", r: "viertel", b: "orgel", h: "galopp" },
+      intro: ["000", "0..2..4..7.."],
+      strophe: [["000", "2.02.04.24.."], ["666", "1.61.63.13.."], ["000", "2.02.04.74.."], ["666", "3.13.16.86.."]],
+      refrain: [["222", "9.b9.bd.b9.."], ["666", "8.a8.ad.a8.."], ["222", "9.b9.bd.be.."], ["440", "b.8b.86.7..."]],
+      bruecke: [["555", "c.....9.....", "5.75.70.75.2"], ["333", "a.....c.....", "3.53.57.5a.7"]],
+      schluss: ["440", "d.bd.b8.7..."] },
+    // Sturm-Shanty: drängende Tonwiederholung, im Refrain der Oktavruf gegen den Wind
+    { titel: "Sturm über der Klippenbucht", modus: "dorisch", tempo: 100, schlag: "treibend", bass: { i: "puls", s: "puls", r: "galopp", b: "orgel", h: "galopp" }, band: { trommel: "pauke", floete: "horn", ketten: "stampfen" },
+      intro: ["0000", "0.0.0.0.2.2.4.4."],
+      strophe: [["0000", "4.4.4.4.2.4.7..."], ["0033", "4.4.4.4.5.4.3..."], ["6666", "3.3.3.3.1.3.6..."], ["4444", "4.4.6.6.8...b..."]],
+      refrain: [["0000", "7.......e...b...", "lang"], ["6666", "a...8...6...8..."], ["0000", "7.......e...e.c.", "lang"], ["4400", "b...b.8.7......."]],
+      bruecke: [["2222", "9.......b.......", "9.6.4.6.9.6.4.6."], ["3333", "a.......c.......", "a.7.5.7.a.7.5.3."]],
+      schluss: ["4400", "b...d.c.e......."] }
+  ],
+
+  auenland: [
+    // Gemütliche Pentatonik mit punktiertem Schlenker, wie ein Lied auf der Gartenbank
+    { titel: "Grüne Hügel, runde Türen", modus: "ionisch", tempo: 108, schlag: "sanft", bass: { i: "orgel", s: "halbe", r: "halbe", b: "orgel", h: "viertel" }, band: { trommel: "bodhran", floete: "blockfloete", ketten: "triangel" },
+      intro: ["0000", "0...2...4...7..."],
+      strophe: [["0000", "4..2.0..2...4..."], ["5555", "5..4.2..0...2..."], ["0000", "4..2.4..7...9..."], ["4444", "8..7.5..4...8..."]],
+      refrain: [["0000", "9..b.9..7...4..."], ["3333", "c..a.8..7...5..."], ["0000", "9..b.9..7...9.b."], ["4400", "8...b...7......."]],
+      bruecke: [["5555", "c.......9.......", "5.7.9.7.5.2.0.2."], ["1144", "8.......b.......", "1.5.8.5.4.8.b.8."]],
+      schluss: ["4400", "8...b.9.7......."] },
+    // Verspielter Mandolinen-Jig: kleines Motiv 7-9-7 wandert über die Akkorde, bVII bäuerlich
+    { titel: "Pfeifenkraut und Pilzpastete", modus: "mixolydisch", takt: 12, tempo: 110, schlag: "jig", instrument: "mandoline", bass: "viertel",
+      intro: ["000", "7.97.94.27.."],
+      strophe: [["000", "4.54.52.04.."], ["666", "3.43.41.63.."], ["000", "4.54.57.94.."], ["444", "6.86.84.16.."]],
+      refrain: [["000", "7.97.9b.97.."], ["666", "6.86.8a.86.."], ["000", "7.97.9b.9e.."], ["640", "8.a8.6b.7..."]],
+      bruecke: [["333", "a.....c.....", "3.53.57.a7.5"], ["444", "b.....8.....", "4.64.6b.86.4"]],
+      schluss: ["640", "8.a8.6b.e..."] },
+    // Mittagsschlaf: wiegende Viertel, Refrain mit gähnendem Sextaufschwung und sanftem Abstieg
+    { titel: "Ein Nickerchen unterm Apfelbaum", modus: "ionisch", tempo: 104, schlag: "sanft", bass: "orgel", instrument: "harfe",
+      intro: ["0000", "0...4...2...4..."],
+      strophe: [["0000", "2...4...2.1.0..."], ["4444", "1...4...6.5.4..."], ["0000", "2...4...7.5.4..."], ["4444", "6...4...1...4..."]],
+      refrain: [["0000", "2...9.......7..."], ["3333", "a.9.7...5...7..."], ["0000", "2...9.......b..."], ["4400", "b.a.8...7......."]],
+      bruecke: [["5555", "9.......c.......", "5.7.9.7.c.9.7.9."], ["3344", "a.......b.......", "3.5.7.5.4.6.8.6."]],
+      schluss: ["4400", "b.a.8...e......."] },
+    // Hüpftanz mit Synkope vor jedem Taktwechsel, Strophe wandert 0-bVII-IV-v
+    { titel: "Erntedank am Mühlbach", modus: "mixolydisch", tempo: 112, swing: 1, schlag: "tanz", bass: { i: "orgel", s: "viertel", r: "viertel", b: "halbe", h: "puls" }, band: { trommel: "tamburin", floete: "okarina", ketten: "klatschen" },
+      intro: ["0000", "0.2.4..7.4.2.0.."],
+      strophe: [["0000", "4.2.4..74.2.0..2"], ["6666", "3.1.3..63.1.6..8"], ["3333", "5.3.5..a7.5.3..4"], ["4444", "6.4.6..b8.6.4..."]],
+      refrain: [["0000", "7.9.b..97.....9."], ["6666", "8.a.d..a8.....6."], ["0000", "7.9.b..9e.....c."], ["6400", "a.8.b..87......."]],
+      bruecke: [["3333", "c.......a.......", "3.5.7.a.c.a.7.5."], ["6666", "d.......a.......", "6.8.a.d.a.8.6.3."]],
+      schluss: ["6600", "a.8.d..ce......."] },
+    // Gemächlicher Akkordeon-Jig mit Haltetönen, Refrain beginnt warm auf der Subdominante
+    { titel: "Die Laterne am Gartentor", modus: "ionisch", takt: 12, tempo: 104, schlag: "jig", instrument: "akkordeon", bass: "halbe",
+      intro: ["000", "4..2..0..2.."],
+      strophe: [["000", "4.54..2..4.."], ["333", "5.75..3..5.."], ["000", "4.54..7..9.."], ["444", "8.98..6..4.."]],
+      refrain: [["333", "a..c..a..7.."], ["000", "9..b..9..7.."], ["333", "a..c..e..c.."], ["440", "b..8..b.7..."]],
+      bruecke: [["555", "9.....c.....", "5..7..9..7.."], ["444", "8.....b.....", "4..6..8..b.."]],
+      schluss: ["440", "b..8..d.e..."] },
+    // Abzählreim: Tonleiter 0-1-2-4 wie Kinderzählen, Refrain mit Tonwiederholung und bVII-Schlenker
+    { titel: "Kuchenwettbewerb in Wiesengrund", modus: "mixolydisch", tempo: 106, schlag: "tanz", bass: "viertel",
+      intro: ["0000", "0.1.2.4.0.1.2.4."],
+      strophe: [["0000", "0.1.2.4.7...4..."], ["6666", "1.2.3.4.6...3..."], ["0000", "2.3.4.5.7...9..."], ["4444", "4.5.6.7.8...6..."]],
+      refrain: [["0000", "9.9.9.7.b...9..."], ["6666", "8.8.8.6.a...d..."], ["0000", "9.9.9.7.b...e..."], ["6600", "a.a.a.8.7......."]],
+      bruecke: [["3333", "a.......c.......", "3.4.5.7.a.7.5.4."], ["4444", "b.......8.......", "4.5.6.8.b.8.6.5."]],
+      schluss: ["6600", "a.a.d.c.e......."] },
+    // Perlender Jig aus gebrochenen Dreiklängen, Refrain-Motiv mit kleinem Wechselton b-c-b
+    { titel: "Morgentau auf dem Kleefeld", modus: "ionisch", takt: 12, tempo: 108, schlag: "jig", bass: { i: "orgel", s: "viertel", r: "viertel", b: "orgel", h: "galopp" }, band: { trommel: "bodhran", floete: "floete", ketten: "windspiel" },
+      intro: ["000", "024024047..."],
+      strophe: [["000", "024742024..."], ["444", "146864146..."], ["555", "259c95257..."], ["444", "468b86468..."]],
+      refrain: [["000", "bcb9.7bcb9.."], ["333", "cdca.7cdca.."], ["000", "bcb9.7bcbe.."], ["440", "dcb8.6b.7..."]],
+      bruecke: [["555", "c.....9.....", "579c97579c97"], ["444", "b.....8.....", "468b86468b86"]],
+      schluss: ["440", "dcb8.6b.e..."] },
+    // Zufriedener Heimweg: Strophe schlendert in Achteln abwärts, Refrain ruft fröhlich die Terz 9-7
+    { titel: "Heimweg mit vollen Taschen", modus: "mixolydisch", tempo: 104, schlag: "sanft", bordun: 1, instrument: "glocken", bass: { i: "orgel", s: "halbe", r: "viertel", b: "orgel", h: "viertel" },
+      intro: ["0000", "7.6.4.2.0......."],
+      strophe: [["0000", "7.6.4.2.4...2..."], ["6666", "8.6.3.1.3...6..."], ["0000", "9.7.4.2.4...7..."], ["4444", "8.6.4.1.4...6..."]],
+      refrain: [["0000", "9...7...9.b.9..."], ["6666", "8...6...8.a.8..."], ["0000", "9...7...9.b.e..."], ["4400", "b...8...7......."]],
+      bruecke: [["3333", "a.......c.......", "7.a.c.a.7.5.3.5."], ["4444", "b.......d.......", "8.6.4.6.8.b.d.b."]],
+      schluss: ["6600", "a...d...e......."] }
+  ]
+};
