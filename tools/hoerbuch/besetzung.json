@@ -1,5 +1,5 @@
 {
- "_hinweis": "Stimmen für das Hörbuch (Georgs Wahl vom 9.11.2026). Modell immer eleven_v3. Erzähler/Barradin mit den Einstellungen der alten Chronik-Aufnahmen (damit Recycling nahtlos passt), Figuren stabil (Georg: gleichmäßiger). Friedrich = Juan, lebendiger eingestellt (Georg, 10.11.).",
+ "_hinweis": "Stimmen für das Hörbuch (Georgs Wahl vom 9.11.2026). Modell immer eleven_v3. Erzähler/Barradin mit den Einstellungen der alten Chronik-Aufnahmen (damit Recycling nahtlos passt), Figuren stabil (Georg: gleichmäßiger). Friedrich = Juan, lebendiger eingestellt (Georg, 10.11.). Glasstab und Ilvara ausdrucksstärker (Georg 11.11.: böser), Dolgrimson neu (Stotterer).",
  "modell": "eleven_v3",
  "einstellung": {
   "stability": 1.0,
@@ -142,6 +142,25 @@
    "similarity_boost": 0.85,
    "style": 0.3,
    "use_speaker_boost": true
+  },
+  "glasstab": {
+   "stability": 0.5,
+   "similarity_boost": 0.85,
+   "style": 0.5,
+   "use_speaker_boost": true
+  },
+  "ilvara": {
+   "stability": 0.5,
+   "similarity_boost": 0.85,
+   "style": 0.5,
+   "use_speaker_boost": true
+  },
+  "dolgrimson": {
+   "stability": 1.0,
+   "similarity_boost": 0.85,
+   "style": 0.3,
+   "use_speaker_boost": true,
+   "speed": 0.97
   }
  }
 }
