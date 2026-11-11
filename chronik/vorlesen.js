@@ -16,8 +16,8 @@
   "use strict";
   const de = () => (document.documentElement.lang || "de").slice(0, 2) !== "en";
   const TX = {
-    de: { kapitel: n => "Kapitel " + n + " vorlesen", kurz: "Vorlesen", abHier: "Ab hier vorlesen", spielen: "Weiter", pause: "Pause", zurueck: "Absatz zurück", vor: "Absatz vor", m30: "30 Sekunden zurück", p30: "30 Sekunden vor", zu: "Vorlesen beenden", sprecher: "Helmut & Ensemble", tempo: "Tempo", vorab: "Ein Wort vorab", hoerspiel: "Hörspiel", hsLang: "Hörspiel: Geräusche & Musik", hsKulisse: "Kulisse", hsMusik: "Musik & Effekte", hsAn: "an", hsAus: "aus", schlaf: "Schlummer-Timer", schlafAus: "Aus", schlafAbschnitt: "Abschnittsende", schlafKapitel: "Kapitelende", schlafNoch: "noch" },
-    en: { kapitel: n => "Listen to chapter " + n, kurz: "Listen", abHier: "Listen from here", spielen: "Play", pause: "Pause", zurueck: "Previous paragraph", vor: "Next paragraph", m30: "Back 30 seconds", p30: "Forward 30 seconds", zu: "Stop listening", sprecher: "Helmut & cast", tempo: "Speed", vorab: "A word first", hoerspiel: "Radio play", hsLang: "Radio play: sounds & music", hsKulisse: "Ambience", hsMusik: "Music & effects", hsAn: "on", hsAus: "off", schlaf: "Sleep timer", schlafAus: "Off", schlafAbschnitt: "End of section", schlafKapitel: "End of chapter", schlafNoch: "" }
+    de: { kapitel: n => "Kapitel " + n + " vorlesen", kurz: "Vorlesen", abHier: "Ab hier vorlesen", spielen: "Weiter", pause: "Pause", zurueck: "Absatz zurück", vor: "Absatz vor", zu: "Vorlesen beenden", sprecher: "Helmut & Ensemble", tempo: "Tempo", vorab: "Ein Wort vorab", hoerspiel: "Hörspiel", hsLang: "Hörspiel: Geräusche & Musik", hsKulisse: "Kulisse", hsMusik: "Musik & Effekte", hsAn: "an", hsAus: "aus", schlaf: "Schlummer-Timer", schlafAus: "Aus", schlafAbschnitt: "Abschnittsende", schlafKapitel: "Kapitelende", schlafNoch: "noch" },
+    en: { kapitel: n => "Listen to chapter " + n, kurz: "Listen", abHier: "Listen from here", spielen: "Play", pause: "Pause", zurueck: "Previous paragraph", vor: "Next paragraph", zu: "Stop listening", sprecher: "Helmut & cast", tempo: "Speed", vorab: "A word first", hoerspiel: "Radio play", hsLang: "Radio play: sounds & music", hsKulisse: "Ambience", hsMusik: "Music & effects", hsAn: "on", hsAus: "off", schlaf: "Sleep timer", schlafAus: "Off", schlafAbschnitt: "End of section", schlafKapitel: "End of chapter", schlafNoch: "" }
   };
   const t = () => TX[de() ? "de" : "en"];
   const lies = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : v; } catch (_) { return d; } };
@@ -29,8 +29,6 @@
   const PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>';
   const PAUSE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z" fill="currentColor"/></svg>';
   const ZURUECK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2v14H6zM20 5.5v13L9.5 12z" fill="currentColor"/></svg>';
-  const M30 = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.6 9.2A8 8 0 1 1 4 13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M3.6 4.6v5h5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><text x="12.4" y="16" text-anchor="middle" font-size="7.4" font-weight="700" font-family="system-ui,sans-serif" fill="currentColor">30</text></svg>';
-  const P30 = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 9.2A8 8 0 1 0 20 13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M20.4 4.6v5h-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><text x="11.6" y="16" text-anchor="middle" font-size="7.4" font-weight="700" font-family="system-ui,sans-serif" fill="currentColor">30</text></svg>';
   const VOR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 5h2v14h-2zM4 5.5v13L14.5 12z" fill="currentColor"/></svg>';
   const OHR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13v-1a8 8 0 0 1 16 0v1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="3.2" y="12.5" width="4.6" height="7" rx="1.6" fill="currentColor"/><rect x="16.2" y="12.5" width="4.6" height="7" rx="1.6" fill="currentColor"/></svg>';
   const HS = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17.5V6l10-2v11.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="6.6" cy="17.6" r="2.5" fill="currentColor"/><circle cx="16.6" cy="15.6" r="2.5" fill="currentColor"/><path d="M2.5 9.5c1.2-1 1.2-2.6 0-3.6M4.8 11.2c2.2-2 2.2-5 0-7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
@@ -69,7 +67,7 @@
 .vl-leiste .vl-haupt svg { width: 1.35rem; height: 1.35rem; }
 .vl-info { min-width: 0; display: grid; gap: .1rem; padding: 0 .35rem; cursor: pointer; }
 .vl-info b { font-family: var(--name, serif); font-weight: 400; font-size: .98rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 15rem; }
-.vl-info small { font-size: .7rem; letter-spacing: .08em; color: var(--ash, #b8a998); white-space: nowrap;  overflow: hidden; text-overflow: ellipsis; }
+.vl-info small { font-size: .7rem; letter-spacing: .08em; color: var(--ash, #b8a998); white-space: nowrap; }
 .vl-balken { height: 3px; border-radius: 3px; background: rgba(235,226,204,.15); overflow: hidden; margin-top: .15rem; }
 .vl-balken i { display: block; height: 100%; width: 0; background: var(--ember, #e0a046); }
 .vl-leiste .vl-tempo { width: auto; padding: 0 .55rem; font: inherit; font-size: .78rem; border-radius: 999px; color: var(--ash, #b8a998); }
@@ -78,7 +76,7 @@
 .vl-welle i { width: 2px; background: var(--ember, #e0a046); border-radius: 1px; height: 30%; }
 .vl-leiste.spielt .vl-welle i { animation: vlWelle 1s ease-in-out infinite; } .vl-welle i:nth-child(2) { animation-delay: -.3s !important; } .vl-welle i:nth-child(3) { animation-delay: -.6s !important; }
 @keyframes vlWelle { 50% { height: 100%; } }
-@media (max-width: 520px) { .vl-leiste .vl-info { flex: 1 1 auto; } .vl-info b { max-width: 7.5rem; } .vl-leiste .vl-tempo { display: none; } .vl-leiste { gap: .15rem; } .vl-leiste button { width: 2.25rem; height: 2.25rem; } .vl-leiste .vl-haupt { width: 2.6rem; height: 2.6rem; } }
+@media (max-width: 520px) { .vl-info b { max-width: 7.5rem; } .vl-leiste .vl-tempo { display: none; } .vl-leiste { gap: .15rem; } .vl-leiste button { width: 2.25rem; height: 2.25rem; } .vl-leiste .vl-haupt { width: 2.6rem; height: 2.6rem; } }
 .vl-mond { color: var(--ember, #e0a046); margin-left: .4rem; letter-spacing: 0; }
 /* Melden: fehlerhafte Stellen beim Hören markieren (nur mit ?melden=1 freigeschaltet) */
 .vl-leiste .vl-flagge { position: relative; color: var(--ember, #e0a046); font-size: 1.05rem; }
@@ -92,7 +90,6 @@
 .vl-meld input { width: 100%; margin-top: .2rem; padding: .3rem .45rem; border-radius: 8px; border: 1px solid rgba(224,160,70,.35); background: rgba(0,0,0,.25); color: var(--vellum, #ebe2cc); font: inherit; font-size: .8rem; }
 @media (prefers-reduced-motion: reduce) { .vl-leiste .vl-flagge.blitz { animation: none; } }
 @media (max-width: 520px) { .vl-info small:has(.vl-mond) .vl-spr { display: none; } }
-@media (max-width: 420px) { .vl-leiste { padding-left: .3rem; padding-right: .3rem; } .vl-leiste button { width: 2.05rem; height: 2.05rem; } .vl-leiste .vl-haupt { width: 2.5rem; height: 2.5rem; } .vl-leiste .vl-zu { width: 1.8rem; } .vl-info { padding: 0 .2rem; } .vl-info b { font-size: .9rem; } .vl-spr { display: none; } }
 .vl-schlaf { display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; }
 /* Hörspiel-Schalter und kleines Mischpult */
 .vl-leiste .vl-hs { position: relative; color: var(--ash, #b8a998); }
@@ -400,59 +397,11 @@
     mixAufKopie();
   }
 
-  /* ---------- ±30 Sekunden (Leiste und Sperrbildschirm) ----------
-     In einer Mix-Spur liegen mehrere Absätze: innerhalb der Spur einfach die Zeit verschieben und den Absatz
-     nachziehen; über das Spurende hinaus in die nächste/vorige Spur. Ohne Mix: innerhalb der Absatz-Datei,
-     sonst in den Nachbarabsatz (rückwärts ans passende Stück vor dessen Ende). */
-  function absatzBeiZeit(t) {
-    let k = pos;
-    const d = mix[liste[pos].kap + ":" + liste[pos].i].datei;
-    while (k + 1 < liste.length && mix[liste[k + 1].kap + ":" + liste[k + 1].i] && mix[liste[k + 1].kap + ":" + liste[k + 1].i].datei === d && mix[liste[k + 1].kap + ":" + liste[k + 1].i].ab <= t + .05) k++;
-    while (k > 0 && mix[liste[k - 1].kap + ":" + liste[k - 1].i] && mix[liste[k - 1].kap + ":" + liste[k - 1].i].datei === d && mix[liste[k].kap + ":" + liste[k].i].ab > t + .05) k--;
-    return k;
-  }
-  function nachLaden(fn) {
-    const f = () => { audio.removeEventListener("loadedmetadata", f); try { fn(); } catch (_) {} };
-    if (audio.readyState >= 1 && audio.duration) f(); else audio.addEventListener("loadedmetadata", f);
-  }
-  function springen(delta) {
-    if (!audio || pos < 0) return;
-    if (wartet) { warteAbbrechen(); los(); }
-    const dauer = audio.duration || 0, t = audio.currentTime + delta;
-    if (mixLaeuft && liste[pos]) {
-      const d = mix[liste[pos].kap + ":" + liste[pos].i].datei;
-      if (t >= 0 && (!dauer || t < dauer - .3)) {
-        audio.currentTime = t;
-        const k = absatzBeiZeit(t);
-        if (k !== pos) { pos = k; const x = liste[pos]; schreib("imres-vorlesen-pos", JSON.stringify({ sp: mSprache, kap: x.kap, i: x.i })); markieren(); zeichnen(); medienInfo(); }
-        if (audio.paused && spielt) los();
-        return;
-      }
-      if (t >= 0) {   /* über das Spurende → Anfang der nächsten Spur, Rest der Sekunden dort */
-        const n = liste.findIndex((y, j) => j > pos && mix[y.kap + ":" + y.i] && mix[y.kap + ":" + y.i].datei !== d);
-        if (n < 0) return;
-        const rest = t - dauer, ab = mix[liste[n].kap + ":" + liste[n].i].ab;
-        spielen(n, "sprung"); nachLaden(() => { audio.currentTime = ab + Math.max(0, rest); const k = absatzBeiZeit(audio.currentTime); if (k !== pos) { pos = k; markieren(); zeichnen(); medienInfo(); } });
-        return;
-      }
-      /* vor den Spuranfang → vorige Spur, entsprechend weit vor ihrem Ende */
-      const erster = liste.findIndex(y => mix[y.kap + ":" + y.i] && mix[y.kap + ":" + y.i].datei === d);
-      if (erster <= 0) { audio.currentTime = 0; pos = Math.max(0, erster); markieren(); zeichnen(); medienInfo(); return; }
-      spielen(erster - 1, "sprung");
-      nachLaden(() => { audio.currentTime = Math.max(0, audio.duration + t); const k = absatzBeiZeit(audio.currentTime); if (k !== pos) { pos = k; markieren(); zeichnen(); medienInfo(); } });
-      return;
-    }
-    if (t >= 0 && (!dauer || t < dauer - .3)) { audio.currentTime = t; if (audio.paused && spielt) los(); return; }
-    if (t >= 0) { if (pos + 1 < liste.length) { spielen(pos + 1, "sprung"); const rest = t - dauer; nachLaden(() => { if (rest < audio.duration) audio.currentTime = rest; }); } return; }
-    if (pos === 0) { audio.currentTime = 0; return; }
-    spielen(pos - 1, "sprung"); nachLaden(() => { audio.currentTime = Math.max(0, audio.duration + t); });
-  }
-
   /* ---------- Spieler-Leiste ---------- */
   function leisteBauen() {
     if (leiste) return;
     leiste = document.createElement("div"); leiste.className = "vl-leiste"; leiste.setAttribute("role", "region");
-    leiste.innerHTML = '<button type="button" class="vl-zurueck">' + ZURUECK + '</button><button type="button" class="vl-m30">' + M30 + '</button><button type="button" class="vl-haupt">' + PAUSE + '</button><button type="button" class="vl-p30">' + P30 + '</button><button type="button" class="vl-vor">' + VOR + '</button>' +
+    leiste.innerHTML = '<button type="button" class="vl-zurueck">' + ZURUECK + '</button><button type="button" class="vl-haupt">' + PAUSE + '</button><button type="button" class="vl-vor">' + VOR + '</button>' +
       '<div class="vl-info"><b></b><small></small><div class="vl-balken"><i></i></div></div><button type="button" class="vl-tempo"></button>' + (MELDEN ? '<button type="button" class="vl-flagge" aria-label="Stelle markieren" title="Stelle markieren">⚑<sup></sup></button>' : '') + '<button type="button" class="vl-hs" aria-haspopup="true" aria-expanded="false">' + HS + '</button><button type="button" class="vl-zu">✕</button>';
     document.body.appendChild(leiste);
     if (MELDEN) setTimeout(meldZeichnen, 0);
@@ -461,8 +410,6 @@
       if (b.classList.contains("vl-haupt")) umschalten();
       else if (b.classList.contains("vl-vor")) { const h = HSP(); if (h) h.ein(); spielen(pos + 1, "sprung"); }
       else if (b.classList.contains("vl-zurueck")) { const h = HSP(); if (h) h.ein(); spielen(audio && (mixLaeuft && liste[pos] ? audio.currentTime - mix[liste[pos].kap + ":" + liste[pos].i].ab : audio.currentTime) > 3 && !wartet ? pos : Math.max(0, pos - 1), "sprung"); }
-      else if (b.classList.contains("vl-m30")) springen(-30);
-      else if (b.classList.contains("vl-p30")) springen(30);
       else if (b.classList.contains("vl-hs")) pultUmschalten();
       else if (b.classList.contains("vl-flagge")) melden();
       else if (b.classList.contains("vl-zu")) stopp(false);
@@ -595,7 +542,6 @@
     const h = leiste.querySelector(".vl-haupt");
     h.innerHTML = an ? PAUSE : PLAY; h.setAttribute("aria-label", an ? T.pause : T.spielen);
     leiste.querySelector(".vl-zurueck").setAttribute("aria-label", T.zurueck); leiste.querySelector(".vl-vor").setAttribute("aria-label", T.vor); leiste.querySelector(".vl-zu").setAttribute("aria-label", T.zu);
-    leiste.querySelector(".vl-m30").setAttribute("aria-label", T.m30); leiste.querySelector(".vl-p30").setAttribute("aria-label", T.p30);
     leiste.querySelector(".vl-info b").textContent = x ? (x.kap === "vorab" ? T.vorab : abschnittVon(x.kap, x.i)) : "";
     leiste.querySelector(".vl-info small").innerHTML = esc(x && x.kap !== "vorab" ? (de() ? "Kapitel " : "Chapter ") + x.kap + " · " : "") + '<span class="vl-spr">' + esc(T.sprecher) + '</span><span class="vl-welle"><i></i><i></i><i></i></span>' +
       (schlafModus ? '<span class="vl-mond" title="' + esc(T.schlaf) + '">☾ ' + esc(schlafEnde ? Math.max(1, Math.ceil((schlafEnde - Date.now()) / 60000)) + " min" : (schlafModus === "kapitel" ? T.schlafKapitel : T.schlafAbschnitt)) + '</span>' : "");
@@ -610,8 +556,6 @@
     try {
       navigator.mediaSession.metadata = new MediaMetadata({ title: abschnittVon(x.kap, x.i), artist: "Barradin – " + t().sprecher, album: "Imres Tales · Chronik", artwork: [{ src: "barradin.jpg", sizes: "512x512", type: "image/jpeg" }] });
       navigator.mediaSession.setActionHandler("play", umschalten); navigator.mediaSession.setActionHandler("pause", umschalten);
-      navigator.mediaSession.setActionHandler("seekbackward", () => springen(-30));
-      navigator.mediaSession.setActionHandler("seekforward", () => springen(30));
       navigator.mediaSession.setActionHandler("nexttrack", () => spielen(pos + 1, "sprung")); navigator.mediaSession.setActionHandler("previoustrack", () => spielen(Math.max(0, pos - 1), "sprung"));
     } catch (_) {}
     medienStatus();
