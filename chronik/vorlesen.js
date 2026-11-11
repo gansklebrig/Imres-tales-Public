@@ -67,7 +67,7 @@
 .vl-leiste .vl-haupt svg { width: 1.35rem; height: 1.35rem; }
 .vl-info { min-width: 0; display: grid; gap: .1rem; padding: 0 .35rem; cursor: pointer; }
 .vl-info b { font-family: var(--name, serif); font-weight: 400; font-size: .98rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 15rem; }
-.vl-info small { font-size: .7rem; letter-spacing: .08em; color: var(--ash, #b8a998); white-space: nowrap; }
+.vl-info small { font-size: .7rem; letter-spacing: .08em; color: var(--ash, #b8a998); white-space: nowrap;  overflow: hidden; text-overflow: ellipsis; }
 .vl-balken { height: 3px; border-radius: 3px; background: rgba(235,226,204,.15); overflow: hidden; margin-top: .15rem; }
 .vl-balken i { display: block; height: 100%; width: 0; background: var(--ember, #e0a046); }
 .vl-leiste .vl-tempo { width: auto; padding: 0 .55rem; font: inherit; font-size: .78rem; border-radius: 999px; color: var(--ash, #b8a998); }
@@ -76,7 +76,7 @@
 .vl-welle i { width: 2px; background: var(--ember, #e0a046); border-radius: 1px; height: 30%; }
 .vl-leiste.spielt .vl-welle i { animation: vlWelle 1s ease-in-out infinite; } .vl-welle i:nth-child(2) { animation-delay: -.3s !important; } .vl-welle i:nth-child(3) { animation-delay: -.6s !important; }
 @keyframes vlWelle { 50% { height: 100%; } }
-@media (max-width: 520px) { .vl-info b { max-width: 7.5rem; } .vl-leiste .vl-tempo { display: none; } .vl-leiste { gap: .15rem; } .vl-leiste button { width: 2.25rem; height: 2.25rem; } .vl-leiste .vl-haupt { width: 2.6rem; height: 2.6rem; } }
+@media (max-width: 520px) { .vl-leiste .vl-info { flex: 1 1 auto; } .vl-info b { max-width: 7.5rem; } .vl-leiste .vl-tempo { display: none; } .vl-leiste { gap: .15rem; } .vl-leiste button { width: 2.25rem; height: 2.25rem; } .vl-leiste .vl-haupt { width: 2.6rem; height: 2.6rem; } }
 .vl-mond { color: var(--ember, #e0a046); margin-left: .4rem; letter-spacing: 0; }
 /* Melden: fehlerhafte Stellen beim Hören markieren (nur mit ?melden=1 freigeschaltet) */
 .vl-leiste .vl-flagge { position: relative; color: var(--ember, #e0a046); font-size: 1.05rem; }
@@ -90,6 +90,7 @@
 .vl-meld input { width: 100%; margin-top: .2rem; padding: .3rem .45rem; border-radius: 8px; border: 1px solid rgba(224,160,70,.35); background: rgba(0,0,0,.25); color: var(--vellum, #ebe2cc); font: inherit; font-size: .8rem; }
 @media (prefers-reduced-motion: reduce) { .vl-leiste .vl-flagge.blitz { animation: none; } }
 @media (max-width: 520px) { .vl-info small:has(.vl-mond) .vl-spr { display: none; } }
+@media (max-width: 420px) { .vl-leiste { padding-left: .3rem; padding-right: .3rem; } .vl-leiste button { width: 2.1rem; height: 2.1rem; } .vl-leiste .vl-haupt { width: 2.5rem; height: 2.5rem; } .vl-leiste .vl-zu { width: 1.8rem; } .vl-info { padding: 0 .2rem; } .vl-info b { font-size: .92rem; } .vl-spr { display: none; } }
 .vl-schlaf { display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; }
 /* Hörspiel-Schalter und kleines Mischpult */
 .vl-leiste .vl-hs { position: relative; color: var(--ash, #b8a998); }
