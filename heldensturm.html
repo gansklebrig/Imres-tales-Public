@@ -38707,6 +38707,32 @@ function diagHaken(){const DG=window.__hsDIAG;if(!DG||DG.__cr)return;DG.__cr=1;
 try{diagHaken()}catch(e){cErr('diaghaken',e)}
 
 }catch(e){console.error('cpuras',e);window.__hsCPURAS.err=String(e&&e.stack||e)}})();
+/* ================= Paket „neustart“: kein Geister-Spielstand beim ersten Start – window.__hsNEUSTART =================
+   kein Geister-Spielstand beim ersten Start.
+   Beim allerersten Start legte die Titel-Bühne einen leeren Heldeneintrag an ({up:{},best:-1,runs:0,clears:0}); die Migration
+   hielt das für einen alten Stand und erzeugte Platz 1 „Mein Abenteuer“ → „Fortsetzen“ mit Zufallsheld Stufe 1.
+   Jetzt zählen nur echte Fortschritte; ein solcher leerer Migrationsplatz wird entfernt (auch bei bestehenden Geräten). */
+window.__hsNEUSTART={v:1,weg:0};
+(function(){try{
+ const leerH=x=>{if(!isObj(x))return true;for(const k of Object.keys(x)){const v=x[k];
+  if(k==='up'){if(isObj(v)&&Object.keys(v).length)return false;continue}
+  if(k==='best'){if((+v)>-1)return false;continue}
+  if(k==='runs'||k==='clears'){if((+v||0)>0)return false;continue}
+  if(v==null||v===0||v===false||v==='')continue;return false}return true};
+ const echt=S=>{if(!S)return false;if((+S.gold||0)>0||S.run||S.mpRun||(+S.maxDiff||0)>0)return true;if(Array.isArray(S.truhe)&&S.truhe.length)return true;
+  if(isObj(S.heroes))for(const id in S.heroes)if(!leerH(S.heroes[id]))return true;return false};
+ try{slHas=echt}catch(e){}
+ function aufraeumen(){try{if(!SAVE||!isObj(SAVE.slots))return false;let weg=false;
+  for(const k of Object.keys(SAVE.slots)){const n=+k,e=SAVE.slots[k];if(!e||!e.m)continue;const m=e.m;
+   if(m.n!=='Mein Abenteuer'||m.mode!=='mix'||(+m.pt||0)>0)continue;
+   const D=n===SAVE.slot?SAVE:(e.d||{});if(echt(D))continue;
+   if(SAVE.slot===n){for(const x of SLK)if(x!=='heroes')delete SAVE[x];SAVE.slot=0;try{SPL.in=false}catch(_){}}
+   delete SAVE.slots[k];weg=true;__hsNEUSTART.weg++}
+  if(weg){delete SAVE.slMig;try{saveFix(SAVE)}catch(_){}try{persist()}catch(_){}
+   try{if(G.state==='title'){SPL.view='main';SPL.sel=0;showTitle()}}catch(_){}}
+  return weg}catch(e){console.error('neustart',e);return false}}
+ __hsNEUSTART.aufraeumen=aufraeumen;aufraeumen();
+}catch(e){console.error('neustart',e);window.__hsNEUSTART.err=String(e&&e.stack||e)}})();
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
