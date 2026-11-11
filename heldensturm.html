@@ -8599,8 +8599,11 @@ function kulSpiel(x,v){const D=KULD,e=D.EV[x[0]];if(!e)return true;const bufs=e.
  let pn=null;if(AC.createStereoPanner){pn=AC.createStereoPanner();const p0=rnd(-0.85,0.85);pn.pan.value=p0;if(wand){const p1=-Math.sign(p0||1)*rnd(0.4,0.85);pn.pan.setValueAtTime(p0,now);pn.pan.linearRampToValueAtTime(p1,now+dauer)}ziel.connect(pn);pn.connect(MASTER)}else ziel.connect(MASTER);
  let t=now;for(let i=0;i<n;i++){const b=bufs[Math.floor(Math.random()*bufs.length)],s=AC.createBufferSource();s.buffer=b;s.playbackRate.value=e.t?rnd(e.t[0],e.t[1]):rnd(0.95,1.05);s.connect(g);s.start(t);t+=e.q?rnd(e.q[2],e.q[3]):0}
  KUL.n=(KUL.n||0)+1;KUL.last=x[0];return true}
+/* Hall je nach Ort (wie auf der Bühne): Höhle und Tempel hallen, Wald und Straße sind offen */
+const ORT_HALL={taverne:4,wald:2,waldnacht:2,feuer:2,regen:2,hoehle:7,markt:2,strasse:2,schlacht:3,meer:2,schiff:3,wasserfall:4,unterreich:8,kerker:6,sumpf:3,unterwasser:6,schmiede:4,labor:4,bibliothek:4,tempel:7,dorf:2,hafen:2,gebirge:5,mine:6,burg:6,ufer:2,schlaegerei:4,duell:3};
+function ortHall(k){if(!hallIn||!AC)return;const h=k&&ORT_HALL[k]!=null?ORT_HALL[k]:4;hallIn.gain.setTargetAtTime(.22*Math.max(.35,Math.pow(h/4,.85)),AC.currentTime,.8)}
 function kulTick(v){if(!KULD||!AC||G.bot)return;const sp=kulSpec();const id=sp?sp.id+'|'+(sp.k||''):'';const now=AC.currentTime;
- if(id!==KUL.id){KUL.id=id;KUL.t0=now;KUL.ph=rnd(0,TAU);KUL.ev=sp?kulEvListe(sp):[];KUL.next=KUL.ev.map((x,i)=>now+10+i*rnd(5,9)+rnd(x[1][0]*0.5,x[1][1])*(MOBIL?1.5:1));KUL.lastT=now;for(const x of KUL.ev){const e=KULD.EV[x[0]];if(e)e.f.slice(0,2).forEach(kulLaden)}}
+ if(id!==KUL.id){ortHall(sp&&sp.k);KUL.id=id;KUL.t0=now;KUL.ph=rnd(0,TAU);KUL.ev=sp?kulEvListe(sp):[];KUL.next=KUL.ev.map((x,i)=>now+10+i*rnd(5,9)+rnd(x[1][0]*0.5,x[1][1])*(MOBIL?1.5:1));KUL.lastT=now;for(const x of KUL.ev){const e=KULD.EV[x[0]];if(e)e.f.slice(0,2).forEach(kulLaden)}}
  if(!sp||G.paused||G.state!=='play'&&!(G.state==='title'&&G.camp)&&G.state!=='camp'||!SAVE.sound||SAVE.amb===false||v<=0)return;
  const ein=Math.min(1,Math.max(0.08,(now-(KUL.t0||0))/45)),akt=0.4+0.6*(0.5+0.5*Math.sin(now/100*TAU+(KUL.ph||0)));
  KUL.ev.forEach((x,i)=>{if(now<KUL.next[i])return;if(now-(KUL.lastT||0)<2.5){KUL.next[i]=now+rnd(1.5,3.5);return}if(Math.random()>akt){KUL.next[i]=now+rnd(x[1][0],x[1][1])*0.5;return}let ok=true;try{ok=kulSpiel(x,v*ein)}catch(e){}if(ok)KUL.lastT=now;KUL.next[i]=now+(ok?rnd(x[1][0],x[1][1])*(MOBIL?1.5:1):1.5)})}

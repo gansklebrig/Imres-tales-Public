@@ -809,6 +809,10 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   /* ---------- Audio ---------- */
   let endKnoten = null, aufnahme = null;
   let ctx = null, gesamt, trocken, hallEin, hall, hallNass, aktiv = null, timer = 0, stumm = null;
+  /* wie viel Hall je Welt, wenn man nichts verstellt: Höhle, Tempel, Unterreich hallen, Wald und Straße sind offen, die Taverne mittel */
+  const RAUM_STD = { taverne: 40, lagerfeuer: 30, waldtag: 30, waldnacht: 35, zelt: 22, hoehle: 72, unterreich: 78, kerker: 62, kueste: 30, schiff: 28, fluss: 32, schmiede: 42,
+    labor: 40, bibliothek: 52, tempel: 72, sumpf: 34, unterwasser: 62, dorf: 30, markt: 30, hafen: 34, gebirge: 56, mine: 62, strasse: 28, burg: 56, ufer: 30, kriegsschauplatz: 30, schlaegerei: 36, duell: 34 };
+  const raumStd = w => (w && RAUM_STD[w.id]) || 50;
   /* Zynthian-Steuerung (zynthian/zyn.js): Pumpen auf einen Kick von außen, leiser werden, wenn die Band spielt */
   let zynKnoten = null, zynFaktor = 1;
   const zynAn = () => { if (!ctx || !endKnoten) return null; if (!zynKnoten) { zynKnoten = ctx.createGain(); try { endKnoten.disconnect(ctx.destination); } catch (_) {} endKnoten.connect(zynKnoten); zynKnoten.connect(ctx.destination); } return zynKnoten; };
@@ -821,7 +825,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
       const w = aktiv ? aktiv.welt : WELTEN.find(x => x.id === merk.welt), m = w ? merk.mix[w.id] || {} : {};
       return { welt: w ? { id: w.id, name: w.name, sym: w.sym, episch: !!w.episch } : null, laeuft: !!aktiv,
         betten: w ? w.betten.map((x, i) => ({ name: x[2], v: Math.round(wert(m.b && m.b[i], 1) * 100), ruht: !!(aktiv && aktiv.welt === w && aktiv.betten[i] && aktiv.betten[i].ruht) })) : [],
-        leben: Math.round(wert(m.leben, 1) * 100), raum: wert(m.raum, 50), ehall: wert(merk.ehall, 75), eweite: wert(merk.eweite, 45),
+        leben: Math.round(wert(m.leben, 1) * 100), raum: wert(m.raum, raumStd(w)), ehall: wert(merk.ehall, 75), eweite: wert(merk.eweite, 45),
         gesamt: wert(merk.gesamt, 70), ger: wert(merk.gLaut, 100), sz: wert(merk.szLaut, 100), wetter: merk.wetter || null, wlaut: wert(merk.wLaut, 100), spannung: wert(merk.spannung, 0) };
     },
     regler(k, v) {
@@ -2446,7 +2450,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     if (!ortF) return;
     const st = STANDORT[belebt.standort] || STANDORT.mitten, j = ctx.currentTime;
     ortF.frequency.setTargetAtTime(st.f, j, tau == null ? .4 : tau); ortG.gain.setTargetAtTime(st.g, j, tau == null ? .4 : tau);
-    if (aktiv && !aktiv.welt.episch) { const m = merk.mix[aktiv.welt.id] || {}; hallNass.gain.setTargetAtTime((m.raum != null ? m.raum : 50) / 100 * 1.2 * st.raum, j, .4); }
+    if (aktiv && !aktiv.welt.episch) { const m = merk.mix[aktiv.welt.id] || {}; hallNass.gain.setTargetAtTime((m.raum != null ? m.raum : raumStd(aktiv.welt)) / 100 * 1.2 * st.raum, j, .4); }
   }
   const pos3d = (p, az, el, d, t, rampe) => ort3d(p, d * Math.sin(grad(az)) * Math.cos(grad(el)), d * Math.sin(grad(el)), -d * Math.cos(grad(az)) * Math.cos(grad(el)), t, rampe);
   const ortAz = a0 => aktiv && aktiv.gang ? wanderAz(a0, aktiv.gang) : a0;
@@ -2716,7 +2720,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
     }
     const uebernommen = new Set();
     if (welt.episch) epischStart();
-    else { raumSetzen(welt.raum); hallNass.gain.setTargetAtTime((m.raum != null ? m.raum : 50) / 100 * 1.2, ctx.currentTime, .3); }
+    else { raumSetzen(welt.raum); hallNass.gain.setTargetAtTime((m.raum != null ? m.raum : raumStd(welt)) / 100 * 1.2, ctx.currentTime, .3); }
     /* auf dem Handy spielen höchstens die sieben stärksten Schichten (im Sparmodus vier) – mehr bringt das Gerät ins Stocken */
     const kappe = welt.episch ? 99 : merk.spar ? 4 : mobil ? 7 : 99;
     const spielen = new Set(welt.betten.map((x, i) => [x[1], i]).sort((a, b) => b[0] - a[0]).slice(0, kappe).map(x => x[1]));
@@ -2802,7 +2806,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
       w.betten.map((x, i) => regler("b" + i, x[2] + (aktiv && aktiv.welt === w && aktiv.betten[i] && aktiv.betten[i].ruht ? " · " + T.ruht : ""), Math.round(wert(m.b && m.b[i], 1) * 100), 0, 150)).join("") +
       '<hr class="trenn">' + regler("leben", T.leben, Math.round(wert(m.leben, 1) * 100), 0, 200) +
       '<label class="spar"><input type="checkbox" id="bass"' + (bassSchutzAn() ? " checked" : "") + "> " + esc(T.bassSchutz) + "</label>" +
-      (w.episch ? regler("ehall", T.ehall, wert(merk.ehall, 75), 0, 100) + regler("eweite", T.eweite, wert(merk.eweite, 45), 0, 100) : regler("raum", T.raum, wert(m.raum, 50), 0, 100)) +
+      (w.episch ? regler("ehall", T.ehall, wert(merk.ehall, 75), 0, 100) + regler("eweite", T.eweite, wert(merk.eweite, 45), 0, 100) : regler("raum", T.raum, wert(m.raum, raumStd(w)), 0, 100)) +
       '<p class="tipp">' + esc(w.episch ? T.tippEpisch + " " + T.tippMisch : T.tippMisch) + "</p>";
   }
   /* Dateiname nur aus einfachen Zeichen – manche Browser verwerfen sonst den Namen */
@@ -3139,7 +3143,7 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
   const funkLink = () => location.origin + location.pathname + "?lauschen=" + raumCode();
   function zustand() {
     const w = aktiv ? aktiv.welt : null, m = w ? merk.mix[w.id] || {} : {};
-    return { welt: w ? w.id : null, laeuft: !!aktiv, mix: { b: m.b || [], leben: m.leben != null ? m.leben : 1, raum: m.raum != null ? m.raum : 50 },
+    return { welt: w ? w.id : null, laeuft: !!aktiv, mix: { b: m.b || [], leben: m.leben != null ? m.leben : 1, raum: m.raum != null ? m.raum : raumStd(w) },
       ehall: wert(merk.ehall, 75), eweite: wert(merk.eweite, 45), szenen: [...laufend.values()].filter(l => !l.aus).map(l => ({ id: l.s.id, nr: l.nr })),
       wetter: merk.wetter || null, wlaut: wert(merk.wLaut, 100), spannung: wert(merk.spannung, 0), gewaehlt: merk.welt || null, gesamt: wert(merk.gesamt, 70), glaut: wert(merk.gLaut, 100), szlaut: wert(merk.szLaut, 100), spar: !!merk.spar };
   }
