@@ -37024,7 +37024,7 @@ function kgUmr(w,h){if(!KGA.s){KGA.s=document.createElement('canvas');try{KGA.sg
    Wer danach den Regler bewegt, wählt bewusst fest (SAVE.gfxWahl) – das bleibt dann so.
    Leistungsanzeige: hinter der Stufe steht „(Auto)“ oder „(fest)“.
 */
-(function(){try{window.__hsSWEEP={v:1};
+(function(){try{window.__hsSWEEP={v:2};
 const SW=window.__hsSWEEP;
 Object.assign(SW,{anker:null,halt:0,retry:60000,lastUp:-1e9,pcTest:window.__swPcTest!=null?window.__swPcTest:null,step:0,ce:0,bad:0,good:0,skip:1,key:'',lastDown:-1e9,refMin:1e9,log:[],mig:0});
 const swAuto=()=>SAVE.gfx==='auto'||SAVE.gfx===undefined;
@@ -37050,10 +37050,12 @@ function swEval(iv){
  if(PERF){PERF.hz=Math.round(1000/rm);PERF.miss=Math.round(miss*100)}
  if(!(swPc()&&swAuto()))return;
  if(G.state!=="play"||G.paused||document.hidden||G.overlay){SW.skip=Math.max(SW.skip,1);return}
+ /* Firefox-Test schaltet absichtlich Teile ab und zeichnet ohne WebGL-Welt – solange nicht bewerten */
+ try{const L2=window.__hsLICHT2;if(L2&&L2.bi&&L2.bi.on){SW.skip=Math.max(SW.skip,2);SW.bad=SW.good=0;return}}catch(e){}
  const key=G.runId+'|'+G.stage+'|'+(G.room?1:0)+'|'+(G.mode||'');
  if(key!==SW.key){SW.key=key;SW.skip=2;SW.anker=null;if(SW.ce>0&&performance.now()-SW.lastDown>SW.retry)SW.ce--}
  if(SW.skip>0){SW.skip--;SW.bad=SW.good=0;return}
- const L=swLeiter(),now=performance.now(),bad=fps<42||(miss>0.2&&fps<50),good=fps>=55&&(miss<0.05||fps>=80);
+ const L=swLeiter(),now=performance.now(),bad=fps<42||(miss>0.2&&fps<50),good=fps>=55&&(miss<0.05||fps>=80||(window.__hsGLWELT&&__hsGLWELT.api&&__hsGLWELT.api.EB&&__hsGLWELT.api.EB.an&&fps>=58));
  let d=0;
  if(bad){SW.good=0;SW.bad++;if(fps<24||SW.bad>=2)d=1}
  else if(good){SW.bad=0;SW.anker=null;++SW.good;
