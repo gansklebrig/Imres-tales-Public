@@ -11,30 +11,6 @@
    "text": "Imre allein kennt die wahre Geschichte ... Diese hier wird euch hoffentlich trotzdem verzaubern!"
   }
  ],
- "I-eabae297": [
-  {
-   "alt": "audio/hoerbuch/alt/I-eabae297-1.mp3",
-   "von": 0.03,
-   "bis": 22.35,
-   "text": "Es begann mit einem Brief. Jeder von uns erhielt eine Einladung von Gundren! Er war ein Zwerg und Händler aus der Stadt Neverwinter und kannte wohl jeden, der etwas zu sagen hat. Das Siegel war aus dunklem Wachs, die Handschrift so kantig wie ein Zwergenschild und der Ton so knapp, dass man ihm nicht widersprechen mochte."
-  },
-  {
-   "neu": 0,
-   "text": "Darin stand nur:"
-  }
- ],
- "I-225d3bd5": [
-  {
-   "alt": "audio/hoerbuch/alt/I-225d3bd5-1.mp3",
-   "von": 43.7,
-   "bis": 52.93,
-   "text": "Einige mächtige Lords interessierten sich brennend dafür, und Gundren witterte die Chance, sein Exportgeschäft kräftig zu erweitern."
-  },
-  {
-   "neu": 0,
-   "text": "Er rieb sich die Hände:"
-  }
- ],
  "I-ae3dab77": [
   {
    "alt": "audio/hoerbuch/alt/I-ae3dab77-1.mp3",
@@ -169,18 +145,6 @@
    "text": "Friedrich kniete sich zu ihnen:"
   }
  ],
- "I-9709c512": [
-  {
-   "alt": "audio/hoerbuch/alt/I-9709c512-1.mp3",
-   "von": 0.03,
-   "bis": 16.55,
-   "text": "Wir nahmen den Gegnern ihre roten Roben ab, um uns so getarnt weiter in die Schlossruine vorzuwagen. Meine kratzte, roch nach fremdem Schweiß, und Rot ist, bei aller Bescheidenheit, einfach nicht meine Farbe."
-  },
-  {
-   "neu": 0,
-   "text": "Echo lachte dreckig:"
-  }
- ],
  "I-a59ba433": [
   {
    "neu": 0,
@@ -191,22 +155,6 @@
    "von": 35.36,
    "bis": 40.87,
    "text": "Wir drangen immer tiefer in das Gemäuer vor, das Herz bei jedem Schritt im Hals."
-  }
- ],
- "I-f46d0e8f": [
-  {
-   "neu": 0,
-   "text": "Hinter einer geschlossenen Tür fanden wir einen Raum, der einem Alchemisten gehören musste, denn die Wände waren voll mit verschiedenen Kräutern, die zum Trocknen aufgehängt waren."
-  },
-  {
-   "alt": "audio/hoerbuch/alt/I-f46d0e8f-1.mp3",
-   "von": 7.82,
-   "bis": 29.79,
-   "text": "In Glaskolben blubberte es leise, und ein grünliches Licht lag über allem. In einigen Schränken und einer Vitrine befanden sich Gläser mit irgendwelchen gefangenen Wesen, teils lebendig, teils tot in einer Flüssigkeit treibend. Augen und Zungen, nicht auszumalen, was hier alles zu finden war."
-  },
-  {
-   "neu": 1,
-   "text": "Eines der Augen drehte sich, als ich vorbeiging. Ich habe beschlossen, dass ich mir das eingebildet habe. Echo klopfte gegen ein Glas und flüsterte:"
   }
  ],
  "I-8142e632": [
@@ -231,18 +179,6 @@
   {
    "neu": 0,
    "text": "Zum ersten Mal an diesem Abend sagte er etwas:"
-  }
- ],
- "I-2fe250bd": [
-  {
-   "alt": "audio/hoerbuch/alt/I-2fe250bd-1.mp3",
-   "von": 35.22,
-   "bis": 44.41,
-   "text": "Dann stach er den ersten Gegner gekonnt mit seinem Dolch nieder, und für die übrigen drei war das Würfelspiel kurz darauf ebenfalls vorbei."
-  },
-  {
-   "neu": 0,
-   "text": "Echo strich die Münzen vom Tisch, alle auf einmal, mit einer einzigen, geübten Bewegung."
   }
  ],
  "I-32b39bcd": [
@@ -325,18 +261,6 @@
    "text": "In den Gärten wucherte das Unkraut, an einer Wäscheleine hing noch ein einzelnes Hemd und bewegte sich im Wind. Rex blieb dicht an Friedrichs Bein. Friedrich flüsterte:"
   }
  ],
- "I-baad6d06": [
-  {
-   "alt": "audio/hoerbuch/alt/I-baad6d06-1.mp3",
-   "von": 40.52,
-   "bis": 47.2,
-   "text": "Wir gingen als glückliche Sieger aus dem Kampf hervor, allerdings hatte uns sein Giftatem übel zugesetzt."
-  },
-  {
-   "neu": 0,
-   "text": "Meine Lunge brannte noch Stunden danach, Ezekiel war angeschlagen, Echo stark verletzt und Friedrich wäre beinahe von einer Kralle skalpiert worden. Er tastete nach seinem Kopf:"
-  }
- ],
  "II-e3edcbe3": [
   {
    "alt": "audio/hoerbuch/alt/II-e3edcbe3-1.mp3",
@@ -373,18 +297,6 @@
    "text": "Friedrich gab das Zeichen:"
   }
  ],
- "II-7dacbc93": [
-  {
-   "alt": "audio/hoerbuch/alt/II-7dacbc93-1.mp3",
-   "von": 0.03,
-   "bis": 9.13,
-   "text": "Echo und ich eilten dem ohnmächtigen Friedrich und dem schwer verletzten Ezekiel zu Hilfe, wirkten Heilzauber und verteilten Heiltränke."
-  },
-  {
-   "neu": 0,
-   "text": "Ich kniete neben Friedrich und summte die Heilmelodie, während Rex ihm unablässig übers Gesicht leckte. Endlich flatterten seine Lider, und er lachte erschöpft:"
-  }
- ],
  "II-a5b5ab94": [
   {
    "alt": "audio/hoerbuch/alt/II-a5b5ab94-1.mp3",
@@ -407,18 +319,6 @@
   {
    "neu": 1,
    "text": "Im Fallen schrie sie noch:"
-  }
- ],
- "II-fe93d7ec": [
-  {
-   "alt": "audio/hoerbuch/alt/II-fe93d7ec-1.mp3",
-   "von": 0.03,
-   "bis": 6.61,
-   "text": "Danach wurde der Unterschlupf unserer Entführer gründlich durchsucht, Echo natürlich vorneweg."
-  },
-  {
-   "neu": 0,
-   "text": "Er klopfte Wände ab, drehte jeden Krug um und schüttelte sogar die Stiefel der toten Wachen aus:"
   }
  ],
  "II-58b0b07c": [
@@ -471,18 +371,6 @@
   {
    "neu": 0,
    "text": "Schiefe Hütten aus Treibholz und Muschelkalk, Netze überall, und überall diese Augen, die uns anstarrten. Gefesselt durch eine fremde Stadt zu laufen, ist übrigens kein Vergnügen, selbst wenn die Fesseln nur gespielt sind. Ich raunte nach vorne:"
-  }
- ],
- "II-578bea10": [
-  {
-   "alt": "audio/hoerbuch/alt/II-578bea10-1.mp3",
-   "von": 0.03,
-   "bis": 9.93,
-   "text": "Das Ungeheuer machte sich daran, die Stadt zu zerstören. Mit seinen Tentakelarmen zermalmte es Gebäude, Gegner und Verbündete gleichermaßen."
-  },
-  {
-   "neu": 0,
-   "text": "Hütten aus Treibholz zerbarsten wie trockenes Laub. Echo brüllte:"
   }
  ],
  "II-198d7339": [
@@ -649,28 +537,6 @@
    "text": "Was machst du da?"
   }
  ],
- "I-69ff69df": [
-  {
-   "alt": "audio/hoerbuch/alt/I-69ff69df-w1.mp3",
-   "von": 0.03,
-   "bis": 24.43,
-   "text": "Der Hafen von Neverwinter, dem Juwel des Nordens! Schon von dort aus sieht man, warum man die Stadt so nennt: Hinter den Lagerhäusern ragen die Türme auf, und über dem Fluss, der hier ins Meer mündet, liegt ein feiner, warmer Dunst. Man sagt, der Fluss friere selbst im härtesten Winter nicht zu, und an diesem Morgen glaubte ich es sofort."
-  },
-  {
-   "neu": 0,
-   "text": "Knarrende Stege, Fischerboote, Händler und Matrosen, Möwen, die um jeden Fischkopf zankten, und über allem der Geruch von Salz und Teer."
-  },
-  {
-   "alt": "audio/hoerbuch/alt/I-69ff69df-w2.mp3",
-   "von": 0.03,
-   "bis": 16.77,
-   "text": "Ein Fischweib pries lautstark Heringe an, zwei Hafenarbeiter stritten über ein Fass, und ein zerzaust aussehender Junge bot mir an, meinen Mantel für eine Kupfermünze zu bürsten. Ich gab ihm zwei. Man muss sein Publikum pflegen."
-  },
-  {
-   "neu": 1,
-   "text": "Ich weiß noch, wie ich dort stand, den Mantel vorteilhaft im Wind, und spürte: Hier beginnt etwas Großes."
-  }
- ],
  "I-1f89428c": [
   {
    "alt": "audio/hoerbuch/alt/I-1f89428c-w1.mp3",
@@ -721,24 +587,6 @@
    "von": 7.22,
    "bis": 14.71,
    "text": "Er sah aus, als wäre er bereit für jeden Streit, und knurrte uns an, statt sich vorzustellen. Jedenfalls klang es so:"
-  }
- ],
- "I-3a5c8384": [
-  {
-   "neu": 0,
-   "text": "Mehr kam nicht. Ein Name, ein Beiname und ein Satz, bei dem keiner von uns genauer wissen wollte, wie er gemeint war."
-  },
-  {
-   "alt": "audio/hoerbuch/alt/I-3a5c8384-w1.mp3",
-   "von": 5.8,
-   "bis": 18.63,
-   "text": "Keine Verbeugung, nicht einmal ein Nicken. Rex legte den Kopf schief. Echo schnaubte. Und ich stand da, mit einem Lächeln, das mitten im Gesicht festgefroren war."
-  },
-  {
-   "alt": "audio/hoerbuch/alt/I-3a5c8384-w2.mp3",
-   "von": 0.03,
-   "bis": 6.33,
-   "text": "Die Vorstellungsrunde verlief, vorsichtig gesagt, etwas holprig."
   }
  ],
  "I-0ebedc57": [
@@ -857,60 +705,6 @@
    "von": 15.16,
    "bis": 36.95,
    "text": "Einer erzählte von seinem demolierten Laden, ein anderer von seinem Sohn, den er seit Tagen nicht gesehen hatte. Die Angst in ihren Stimmen machte mich wütend. Und ich war nicht der Einzige. Friedrich hatte aufgehört zu essen, und Ezekiels Hand lag auf dem Griff einer Klinge, ganz ruhig, als hätte sie dort schon immer gelegen."
-  }
- ],
- "I-a172b522": [
-  {
-   "alt": "audio/hoerbuch/alt/I-a172b522-w1.mp3",
-   "von": 0.03,
-   "bis": 6.29,
-   "text": "Bevor es gegen die Bande ging, stattete unsere Truppe noch dem Bürgermeister von Phandalin einen Besuch ab."
-  },
-  {
-   "neu": 0,
-   "text": "Harbin, so hieß er, empfing uns in seiner Amtsstube hinter einem Schreibtisch, der größer war als sein Mut: ein rundlicher, aufgeblasener Mann mit grauem, zurückgekämmtem Haar und Schweißperlen auf der Stirn, in einem roten Mantel mit Pelzkragen und Goldstickerei, darunter eine grüne Weste und ein weißer Rüschenkragen, dazu goldene Ringe und eine Kette. Jeden zweiten Satz begann er mit „selbstverständlich“. Er faltete die Hände über dem Bauch und verkündete:"
-  }
- ],
- "I-68e8e18b": [
-  {
-   "neu": 0,
-   "text": "Durch teils eingefallene, staubige Tunnel stiegen wir hinab."
-  },
-  {
-   "alt": "audio/hoerbuch/alt/I-68e8e18b-w1.mp3",
-   "von": 0.03,
-   "bis": 7.49,
-   "text": "Wurzeln hingen von der Decke, die Luft roch nach Moder, und unsere Fackel flackerte, als wolle sie lieber umkehren."
-  },
-  {
-   "neu": 1,
-   "text": "Ich stieß mir zweimal den Kopf. Ezekiel, der mich um gut zwei Köpfe überragt, kein einziges Mal."
-  },
-  {
-   "alt": "audio/hoerbuch/alt/I-68e8e18b-w2.mp3",
-   "von": 6.88,
-   "bis": 24.79,
-   "text": "Ich weiß bis heute nicht, wie er das macht. Unter dem Anwesen öffnete sich eine Höhle. Als wir immer tiefer hineinschlichen, fanden wir dort die ersten drei Gegner, die vor einer Zelle Wache standen. Eine Zelle voller Geiseln aus dem Dorf."
-  },
-  {
-   "neu": 2,
-   "text": "Die anderen blieben im Dunkel. Ich trat ins Fackellicht, breitete die Arme aus und schmetterte ein Marschlied, wie ein frischer Rekrut an seinem ersten Tag:"
-  }
- ],
- "I-3428bb9c": [
-  {
-   "neu": 0,
-   "text": "Im Nebenraum fanden wir eine Gruppe von vier Anhängern der Roten Roben, die dort ausgelassen tranken und würfelten. Wir mischten uns unter sie und brachten sie dazu, noch mehr zu trinken ..."
-  },
-  {
-   "alt": "audio/hoerbuch/alt/I-3428bb9c-w1.mp3",
-   "von": 0.03,
-   "bis": 5.74,
-   "text": "Ich erzählte Witze, Friedrich schenkte nach, und Rex ließ sich von allen kraulen."
-  },
-  {
-   "neu": 1,
-   "text": "Einer der Schläger kraulte ihn besonders ausgiebig und lallte:"
   }
  ],
  "I-332ac0a5": [
@@ -1509,18 +1303,6 @@
    "text": "Wir versuchten, nicht allzu staubig auszusehen. Wie es sich für einen Barden gehört, stimmte ich einen Gesang an und erzählte dem König von Demogorgon und davon, wie wir seinen Sohn gerettet hatten:"
   }
  ],
- "II-3c1c504f": [
-  {
-   "alt": "audio/hoerbuch/alt/II-3c1c504f-w1.mp3",
-   "von": 0.03,
-   "bis": 12.87,
-   "text": "Leicht fiel uns der Aufenthalt allerdings nicht. Die Luft hier unten setzte uns zu, schwer und warm und so dick, dass man sie fast kauen konnte. Vor allem Echo."
-  },
-  {
-   "neu": 0,
-   "text": "Er wachte völlig erschöpft auf: Ringe unter den Augen und eine Laune, die selbst für seine Verhältnisse finster war. Friedrich musterte ihn:"
-  }
- ],
  "II-cc016485": [
   {
    "alt": "audio/hoerbuch/alt/II-cc016485-w1.mp3",
@@ -1913,14 +1695,6 @@
    "text": "Links hinter dem Tor lag ein großer Saal für Feste und Besprechungen, mit einem langen Tisch, an dem fünfzehn Leute Platz gehabt hätten. Es saß aber nur einer daran: der Leiter der Allianz, Captain Dolgrimson. Ein breitschultriger Mann mit grauen Schläfen und strengem Schnurrbart, über einen Stapel Papiere gebeugt. Wir platzten mitten in seine Arbeit und stellten uns ans Fußende des Tisches. Er sah von seinen Papieren auf:"
   }
  ],
- "I-d2b11818": [
-  {
-   "alt": "audio/hoerbuch/alt/I-d2b11818-w1.mp3",
-   "von": 2.83,
-   "bis": 10.55,
-   "text": "Wir zogen weiter. Was die Gerüchte anging, hatten wir keinen Erfolg, und abends kehrten wir zu unserem Gasthof zurück."
-  }
- ],
  "I-f4707851": [
   {
    "alt": "audio/hoerbuch/alt/I-f4707851-w1.mp3",
@@ -1961,6 +1735,342 @@
   {
    "neu": 0,
    "text": "Möglich gemacht hat das, das sei hier einmal deutlich gesagt, allein mein Bann, der den Drachen so lange –"
+  }
+ ],
+ "I-9734046b": [
+  {
+   "alt": "audio/hoerbuch/alt/I-9734046b-w1.mp3",
+   "von": 0.03,
+   "bis": 24.39,
+   "text": "Der Hafen von Neverwinter, dem Juwel des Nordens! Schon von dort aus sieht man, warum man die Stadt so nennt: Hinter den Lagerhäusern ragen die Türme auf, und über dem Fluss, der hier ins Meer mündet, liegt ein feiner, warmer Dunst. Man sagt, der Fluss friere selbst im härtesten Winter nicht zu, und an diesem Morgen glaubte ich es sofort."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/I-9734046b-w2.mp3",
+   "von": 0.03,
+   "bis": 11.19,
+   "text": "Knarrende Stege, Fischerboote, Händler und Matrosen, Möwen, die um jeden Fischkopf zankten, und über allem der Geruch von Salz und Teer."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/I-9734046b-w3.mp3",
+   "von": 0.03,
+   "bis": 16.75,
+   "text": "Ein Fischweib pries lautstark Heringe an, zwei Hafenarbeiter stritten über ein Fass, und ein zerzaust aussehender Junge bot mir an, meinen Mantel für eine Kupfermünze zu bürsten. Ich gab ihm zwei. Man muss sein Publikum pflegen."
+  },
+  {
+   "neu": 0,
+   "text": "Ich weiß noch, wie ich mich so in den Wind stellte, dass der Mantel richtig schön wehte, die Sonne mir ins Gesicht schien und ich sofort wusste: Hier beginnt etwas Großes."
+  }
+ ],
+ "I-d9990ee8": [
+  {
+   "alt": "audio/hoerbuch/alt/I-d9990ee8-w1.mp3",
+   "von": 0.03,
+   "bis": 11.13,
+   "text": "Rex war ein mittelgroßer Hütehund mit dichtem, zotteligem Fell, schwarz, weiß und kupferbraun gesprenkelt, als hätte jemand drei Farbtöpfe über ihm verschüttet."
+  },
+  {
+   "neu": 0,
+   "text": "Die Brust schneeweiß wie ein Lätzchen, dazu bernsteinfarbene Augen, die einen liebevoll anschauten, bereit für jeden Unfug, und jederzeit nach dem nächsten Spiel suchten."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/I-d9990ee8-w2.mp3",
+   "von": 23.24,
+   "bis": 36.39,
+   "text": "Er hatte inzwischen jeden von uns gründlicher beschnuppert als jede Stadtwache, und dann setzte er sich, sehr zufrieden mit sich, auf meinen linken Stiefel. Friedrich versuchte es mit Autorität:"
+  }
+ ],
+ "I-1c7ec449": [
+  {
+   "alt": "audio/hoerbuch/alt/I-1c7ec449-w1.mp3",
+   "von": 0.03,
+   "bis": 9.17,
+   "text": "Mehr kam nicht. Ein Name, ein Beiname und ein Satz, bei dem keiner von uns genauer wissen wollte, wie er gemeint war."
+  },
+  {
+   "neu": 0,
+   "text": "Keine Verbeugung, nicht einmal ein Nicken. Rex legte den Kopf schief. Echo schnaubte. Und ich stand da, mit einem Lächeln, das mitten im Gesicht festgefroren war. Unser erstes Kennenlernen verlief, vorsichtig gesagt, etwas holprig. Im ersten Moment war sich keiner von uns sicher, wie wir als Gruppe zusammenpassen sollten."
+  }
+ ],
+ "I-cd14a531": [
+  {
+   "alt": "audio/hoerbuch/alt/I-cd14a531-w1.mp3",
+   "von": 0.03,
+   "bis": 16.49,
+   "text": "Ich wiederum wollte vor allem eine Geschichte, die sich zu erzählen lohnt. Ezekiel wollte, soweit ich das beurteilen konnte, gar nichts, aber er war schon ein paar Schritte in Richtung Wald gegangen und hielt die Dolche weiterhin kampfbereit gezückt."
+  },
+  {
+   "neu": 0,
+   "text": "Anstatt einfach weiterzufahren, folgten wir also, frisch gebackene Helden, die wir waren, den Spuren in den Wald."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/I-cd14a531-w2.mp3",
+   "von": 25.03,
+   "bis": 29.67,
+   "text": "Den Karren schoben wir ein Stück ins Gebüsch und hofften das Beste."
+  }
+ ],
+ "I-8fce7bed": [
+  {
+   "neu": 0,
+   "text": "Bevor es gegen die Bande ging, schauten wir noch beim Bürgermeister von Phandalin vorbei."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/I-8fce7bed-w1.mp3",
+   "von": 0.03,
+   "bis": 32.21,
+   "text": "Harbin, so hieß er, empfing uns in seiner Amtsstube hinter einem Schreibtisch, der größer war als sein Mut: ein rundlicher, aufgeblasener Mann mit grauem, zurückgekämmtem Haar und Schweißperlen auf der Stirn, in einem roten Mantel mit Pelzkragen und Goldstickerei, darunter eine grüne Weste und ein weißer Rüschenkragen, dazu goldene Ringe und eine Kette. Jeden zweiten Satz begann er mit „selbstverständlich“. Er faltete die Hände über dem Bauch und verkündete:"
+  }
+ ],
+ "I-9ab81dfc": [
+  {
+   "alt": "audio/hoerbuch/alt/I-9ab81dfc-w1.mp3",
+   "von": 0.03,
+   "bis": 4.39,
+   "text": "Durch teils eingefallene, staubige Tunnel stiegen wir hinab."
+  },
+  {
+   "neu": 0,
+   "text": "Wurzeln hingen von der Decke, die Luft roch nach Moder, und unsere Fackel flackerte, als wolle sie lieber umkehren. Ich stieß mir zweimal den Kopf."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/I-9ab81dfc-w2.mp3",
+   "von": 2.74,
+   "bis": 7.21,
+   "text": "Ezekiel, der mich um gut zwei Köpfe überragt, kein einziges Mal."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/I-9ab81dfc-w3.mp3",
+   "von": 0.03,
+   "bis": 6.67,
+   "text": "Ich weiß bis heute nicht, wie er das macht. Unter dem Anwesen öffnete sich eine Höhle."
+  },
+  {
+   "neu": 1,
+   "text": "Als wir immer tiefer hineinschlichen, fanden wir dort die ersten drei Wachen, die vor einer Zelle standen. Eine Zelle voller Geiseln aus dem Dorf."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/I-9ab81dfc-w4.mp3",
+   "von": 0.03,
+   "bis": 11.73,
+   "text": "Die anderen blieben im Dunkel. Ich trat ins Fackellicht, breitete die Arme aus und schmetterte ein Marschlied, wie ein frischer Rekrut an seinem ersten Tag:"
+  }
+ ],
+ "I-0affe030": [
+  {
+   "alt": "audio/hoerbuch/alt/I-0affe030-w1.mp3",
+   "von": 0.03,
+   "bis": 11.43,
+   "text": "Hinter einer geschlossenen Tür fanden wir einen Raum, der einem Alchemisten gehören musste, denn die Wände waren voll mit verschiedenen Kräutern, die zum Trocknen aufgehängt waren."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/I-0affe030-w2.mp3",
+   "von": 0.03,
+   "bis": 5.31,
+   "text": "In Glaskolben blubberte es leise, und ein grünliches Licht lag über allem."
+  },
+  {
+   "neu": 0,
+   "text": "In den Schränken und in einer Vitrine standen Gläser mit irgendwelchen gefangenen Wesen, teils lebendig, teils tot in einer Flüssigkeit treibend. Augen, Zungen und Dinge, für die selbst ich keinen Reim habe."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/I-0affe030-w3.mp3",
+   "von": 0.03,
+   "bis": 9.99,
+   "text": "Eines der Augen drehte sich, als ich vorbeiging. Ich habe beschlossen, dass ich mir das eingebildet habe. Echo klopfte gegen ein Glas und flüsterte:"
+  }
+ ],
+ "I-1024c94e": [
+  {
+   "neu": 0,
+   "text": "Im Nebenraum fanden wir vier Rotroben beim Würfeln und Saufen."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/I-1024c94e-w1.mp3",
+   "von": 7.9,
+   "bis": 12.65,
+   "text": "Wir mischten uns unter sie und brachten sie dazu, noch mehr zu trinken ..."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/I-1024c94e-w2.mp3",
+   "von": 0.03,
+   "bis": 5.61,
+   "text": "Ich erzählte Witze, Friedrich schenkte nach, und Rex ließ sich von allen kraulen."
+  },
+  {
+   "neu": 1,
+   "text": "Einer der Schläger kraulte ihn besonders ausgiebig und lallte:"
+  }
+ ],
+ "I-b3fa3a11": [
+  {
+   "neu": 0,
+   "text": "Dann stach er den ersten Schläger gekonnt mit seinem Dolch nieder, und für die übrigen drei war das Würfelspiel kurz darauf ebenfalls vorbei."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/I-b3fa3a11-w1.mp3",
+   "von": 0.03,
+   "bis": 6.39,
+   "text": "Echo strich die Münzen vom Tisch, alle auf einmal, mit einer einzigen, geübten Bewegung."
+  }
+ ],
+ "I-f8e1ff55": [
+  {
+   "alt": "audio/hoerbuch/alt/I-f8e1ff55-w1.mp3",
+   "von": 0.03,
+   "bis": 58.77,
+   "text": "Sie war riesig. Laufbänder aus Eisen zogen sich durch die Halle, die einst Erzbrocken in einen gewaltigen Schmelzkessel geworfen hatten, und darunter lief ein zweites Band mit Gussformen, Reihe um Reihe, als hätte man hier nicht ein Schwert geschmiedet, sondern hundert auf einmal. Gelaufen war hier allerdings schon lange nichts mehr. Die Bänder waren rostrot und an vielen Stellen gerissen, ganze Glieder hingen schlaff herab oder lagen verbogen am Boden. Durch den Schmelzkessel zog sich ein Riss, breit genug für meine Hand, Staub lag fingerdick auf allem, und von der Decke waren Steine gestürzt und hatten eine der Werkbänke unter sich begraben. Und doch: Alle Bänder führten in die Mitte, zu einem gigantischen Amboss, über und über mit Runen bedeckt, und die glommen noch immer in einem tiefen, kalten Blau, als hätte die Schmiede nur die Augen geschlossen."
+  },
+  {
+   "neu": 0,
+   "text": "Ringsum Hebel und Schalter, mit denen man den Stücken wohl Steine, Zauber und Verzierungen verpasste."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/I-f8e1ff55-w2.mp3",
+   "von": 71.24,
+   "bis": 97.55,
+   "text": "Weiter hinten standen Werkbänke, an den Wänden hing Werkzeug, längst verrostet, und überall im uralten Gemäuer fand man Zeichen und Insignien, die man erst beim zweiten Hinsehen bemerkte. Man musste sich nur den Staub wegdenken und den Lärm dazu: das Zischen, das Hämmern, das Glühen. Dann ahnte man, wie prächtig und mächtig das alles einmal gewesen war."
+  },
+  {
+   "neu": 1,
+   "text": "Wie viele Generationen hatten hier wohl schon Wunder geschmiedet?"
+  }
+ ],
+ "I-4daab48c": [
+  {
+   "alt": "audio/hoerbuch/alt/I-4daab48c-w1.mp3",
+   "von": 0.03,
+   "bis": 10.09,
+   "text": "Ich nutzte die Gelegenheit und erzählte, in aller gebotenen Ausführlichkeit, von unseren Heldentaten, und dass wir bereit waren, noch viel mehr für die Allianz zu tun."
+  },
+  {
+   "neu": 0,
+   "text": "Dolgrimsons Schnurrbart entspannte sich sichtlich. Er legte die Feder weg. Trotzdem vertröstete er uns:"
+  }
+ ],
+ "I-da78cf2f": [
+  {
+   "neu": 0,
+   "text": "Wir hatten gewonnen. Gut ging es uns trotzdem nicht."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/I-da78cf2f-w1.mp3",
+   "von": 0.03,
+   "bis": 12.75,
+   "text": "Meine Lunge brannte noch Stunden danach, Ezekiel war angeschlagen, Echo stark verletzt und Friedrich wäre beinahe von einer Kralle skalpiert worden. Er tastete nach seinem Kopf:"
+  }
+ ],
+ "I-f6968300": [
+  {
+   "neu": 0,
+   "text": "Viel Gegenwehr leisteten sie nicht: ein paar Hiebe, und es war nur noch Kleinholz übrig."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/I-f6968300-w1.mp3",
+   "von": 6.12,
+   "bis": 24.95,
+   "text": "Rex schnappte sich einen von ihnen wie einen Stock und brachte ihn stolz zu Friedrich. Zumindest das, was von ihm übrig war. Friedrich steckte ihn ohne ein Wort in seinen Rucksack, zu dem Oberschenkelknochen und dem Stück Drachenschwanz. Rex hatte angefangen zu sammeln."
+  }
+ ],
+ "I-043efa00": [
+  {
+   "neu": 0,
+   "text": "Es roch nach Essen, und durch die offene Tür sahen wir einen köchelnden Topf, und unsere Mägen hofften schon."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/I-043efa00-w1.mp3",
+   "von": 7.48,
+   "bis": 17.83,
+   "text": "Dahinter stapelten sich Kräuter, Tinkturen und handschriftliche Notizen über die Tiere des Waldes. Echo nickte anerkennend und brummte:"
+  }
+ ],
+ "II-68df5c07": [
+  {
+   "neu": 0,
+   "text": "Echo und ich eilten dem ohnmächtigen Friedrich und dem schwer verletzten Ezekiel zu Hilfe. Echo legte sein grünes Licht auf die Wunden, und die Heiltränke machten die Runde."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/II-68df5c07-w1.mp3",
+   "von": 0.03,
+   "bis": 11.83,
+   "text": "Ich kniete neben Friedrich und summte die Heilmelodie, während Rex ihm unablässig übers Gesicht leckte. Endlich flatterten seine Lider, und er lachte erschöpft:"
+  }
+ ],
+ "II-96ccea66": [
+  {
+   "neu": 0,
+   "text": "Danach stellten wir den Unterschlupf unserer Entführer auf den Kopf, Echo natürlich vorneweg."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/II-96ccea66-w1.mp3",
+   "von": 0.03,
+   "bis": 6.53,
+   "text": "Er klopfte Wände ab, drehte jeden Krug um und schüttelte sogar die Stiefel der toten Wachen aus:"
+  }
+ ],
+ "II-437e480f": [
+  {
+   "neu": 0,
+   "text": "Ezekiel und Friedrich machten mit den Achtbeinern kurzen Prozess. Pfeil, Dolch, Pfeil."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/II-437e480f-w1.mp3",
+   "von": 9.56,
+   "bis": 13.67,
+   "text": "Rex bellte jede tote Spinne noch einmal an, sicherheitshalber."
+  }
+ ],
+ "II-b7c7d3cb": [
+  {
+   "neu": 0,
+   "text": "Gemütlich war es in Gracklstugh allerdings nicht. Die Luft hier unten setzte uns zu, schwer und warm und so dick, dass man sie fast kauen konnte. Vor allem Echo."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/II-b7c7d3cb-w1.mp3",
+   "von": 0.03,
+   "bis": 10.29,
+   "text": "Er wachte völlig erschöpft auf: Ringe unter den Augen und eine Laune, die selbst für seine Verhältnisse finster war. Friedrich musterte ihn:"
+  }
+ ],
+ "II-03b9f34b": [
+  {
+   "alt": "audio/hoerbuch/alt/II-03b9f34b-w1.mp3",
+   "von": 0.03,
+   "bis": 4.41,
+   "text": "Wir gingen zum Markt der Klingen, dem größten Marktplatz der Stadt."
+  },
+  {
+   "neu": 0,
+   "text": "Hier wurde gefeilscht, gebrüllt und betrogen, was das Zeug hielt."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/II-03b9f34b-w2.mp3",
+   "von": 8.76,
+   "bis": 29.49,
+   "text": "Bei einem standen Fläschchen in allen Farben, dazu Kräuter und getrocknete Pilze an Schnüren. Bei einem anderen hingen unzählige Waffen in Halterungen und Ständern, deren Klingen sogar im fahlen Licht der Unterwelt blitzten. Ein dritter verkaufte Musikinstrumente. Hier gab es wirklich alles!"
+  }
+ ],
+ "II-eee314b9": [
+  {
+   "neu": 0,
+   "text": "Warum sein Vetter so gewütet hatte, wusste er selbst nicht."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/II-eee314b9-w1.mp3",
+   "von": 4.16,
+   "bis": 15.29,
+   "text": "Offenbar hatten ihn Stimmen in seinem Kopf dazu getrieben. Stimmen im Kopf ... Das kam mir unangenehm bekannt vor. Friedrich dachte dasselbe:"
+  }
+ ],
+ "II-e99e62b8": [
+  {
+   "neu": 0,
+   "text": "Er behauptete, jemand habe ihm etwas zugeflüstert: Der Verdacht fiel auf einen gewissen Drokey, angeblich ein Mitglied der Grauen Geister, einer Diebesgilde aus den Slums von Gracklstugh."
+  },
+  {
+   "alt": "audio/hoerbuch/alt/II-e99e62b8-w1.mp3",
+   "von": 12.04,
+   "bis": 16.49,
+   "text": "Genau den Slums, von denen Kardal uns gerade hatte erzählen wollen."
   }
  ]
 }

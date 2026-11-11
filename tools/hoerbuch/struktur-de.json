@@ -33,10 +33,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-eabae297",
+     "id": "I-36925317",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Es begann mit einem Brief. Jeder von uns erhielt eine Einladung von Gundren! Er war ein Zwerg und Händler aus der Stadt Neverwinter und kannte wohl jeden, der etwas zu sagen hat. Das Siegel war aus dunklem Wachs, die Handschrift so kantig wie ein Zwergenschild und der Ton so knapp, dass man ihm nicht widersprechen mochte. Darin stand nur:"
+     "text": "Es begann mit einem Brief. Jeder von uns erhielt eine Einladung von Gundren! Er war ein Zwerg, ein Händler aus Neverwinter und einer von denen, die die halbe Welt kennen und überall ihre Finger im Spiel haben. Das Siegel war aus dunklem Wachs, die Handschrift so kantig wie ein Zwergenschild und der Ton so knapp, dass man ihm nicht widersprechen mochte. Darin stand nur:"
     },
     {
      "id": "I-ca09c2b3",
@@ -50,10 +50,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-69ff69df",
+     "id": "I-9734046b",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Der Hafen von Neverwinter, dem Juwel des Nordens! Schon von dort aus sieht man, warum man die Stadt so nennt: Hinter den Lagerhäusern ragen die Türme auf, und über dem Fluss, der hier ins Meer mündet, liegt ein feiner, warmer Dunst. Man sagt, der Fluss friere selbst im härtesten Winter nicht zu, und an diesem Morgen glaubte ich es sofort. Knarrende Stege, Fischerboote, Händler und Matrosen, Möwen, die um jeden Fischkopf zankten, und über allem der Geruch von Salz und Teer. Ein Fischweib pries lautstark Heringe an, zwei Hafenarbeiter stritten über ein Fass, und ein zerzaust aussehender Junge bot mir an, meinen Mantel für eine Kupfermünze zu bürsten. Ich gab ihm zwei. Man muss sein Publikum pflegen. Ich weiß noch, wie ich dort stand, den Mantel vorteilhaft im Wind, und spürte: Hier beginnt etwas Großes.",
+     "text": "Der Hafen von Neverwinter, dem Juwel des Nordens! Schon von dort aus sieht man, warum man die Stadt so nennt: Hinter den Lagerhäusern ragen die Türme auf, und über dem Fluss, der hier ins Meer mündet, liegt ein feiner, warmer Dunst. Man sagt, der Fluss friere selbst im härtesten Winter nicht zu, und an diesem Morgen glaubte ich es sofort. Knarrende Stege, Fischerboote, Händler und Matrosen, Möwen, die um jeden Fischkopf zankten, und über allem der Geruch von Salz und Teer. Ein Fischweib pries lautstark Heringe an, zwei Hafenarbeiter stritten über ein Fass, und ein zerzaust aussehender Junge bot mir an, meinen Mantel für eine Kupfermünze zu bürsten. Ich gab ihm zwei. Man muss sein Publikum pflegen. Ich weiß noch, wie ich mich so in den Wind stellte, dass der Mantel richtig schön wehte, die Sonne mir ins Gesicht schien und ich sofort wusste: Hier beginnt etwas Großes.",
      "geraeusch": [
       "Hafen am Morgen -- Möwen, Wellen gegen Holzpfähle, knarrende Stege, ferne Rufe von Matrosen"
      ]
@@ -116,10 +116,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-518c7fed",
+     "id": "I-d9990ee8",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Rex war ein mittelgroßer Hütehund mit dichtem, zotteligem Fell, schwarz, weiß und kupferbraun gesprenkelt, als hätte jemand drei Farbtöpfe über ihm verschüttet. Die Brust schneeweiß wie ein Lätzchen, dazu bernsteinfarbene Augen, die einen liebevoll, aber ohne viel Verstand anschauten und jederzeit nach dem nächsten Spiel suchten. Er hatte inzwischen jeden von uns gründlicher beschnuppert als jede Stadtwache, und dann setzte er sich, sehr zufrieden mit sich, auf meinen linken Stiefel. Friedrich versuchte es mit Autorität:"
+     "text": "Rex war ein mittelgroßer Hütehund mit dichtem, zotteligem Fell, schwarz, weiß und kupferbraun gesprenkelt, als hätte jemand drei Farbtöpfe über ihm verschüttet. Die Brust schneeweiß wie ein Lätzchen, dazu bernsteinfarbene Augen, die einen liebevoll anschauten, bereit für jeden Unfug, und jederzeit nach dem nächsten Spiel suchten. Er hatte inzwischen jeden von uns gründlicher beschnuppert als jede Stadtwache, und dann setzte er sich, sehr zufrieden mit sich, auf meinen linken Stiefel. Friedrich versuchte es mit Autorität:"
     },
     {
      "id": "I-7d691f59",
@@ -233,10 +233,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-3a5c8384",
+     "id": "I-1c7ec449",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Mehr kam nicht. Ein Name, ein Beiname und ein Satz, bei dem keiner von uns genauer wissen wollte, wie er gemeint war. Keine Verbeugung, nicht einmal ein Nicken. Rex legte den Kopf schief. Echo schnaubte. Und ich stand da, mit einem Lächeln, das mitten im Gesicht festgefroren war. Die Vorstellungsrunde verlief, vorsichtig gesagt, etwas holprig.",
+     "text": "Mehr kam nicht. Ein Name, ein Beiname und ein Satz, bei dem keiner von uns genauer wissen wollte, wie er gemeint war. Keine Verbeugung, nicht einmal ein Nicken. Rex legte den Kopf schief. Echo schnaubte. Und ich stand da, mit einem Lächeln, das mitten im Gesicht festgefroren war. Unser erstes Kennenlernen verlief, vorsichtig gesagt, etwas holprig. Im ersten Moment war sich keiner von uns sicher, wie wir als Gruppe zusammenpassen sollten.",
      "geraeusch": [
       "Stille, nur Wellen und eine einzelne Möwe"
      ]
@@ -271,10 +271,10 @@
      "text": "Klingen, die nicht stumpf werden. Ringe mit Kräften, von denen ihr nur träumen könnt. Rüstungen, die mehr aushalten als ihr Träger."
     },
     {
-     "id": "I-225d3bd5",
+     "id": "I-2198046e",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Einige mächtige Lords interessierten sich brennend dafür, und Gundren witterte die Chance, sein Exportgeschäft kräftig zu erweitern. Er rieb sich die Hände:"
+     "text": "Einige mächtige Lords interessierten sich brennend dafür, und Gundren roch das Gold schon, bevor es überhaupt geschmiedet war. Er rieb sich die Hände:"
     },
     {
      "id": "I-a90dcd07",
@@ -784,10 +784,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-6293ce1a",
+     "id": "I-cd14a531",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Ich wiederum wollte vor allem eine Geschichte, die sich zu erzählen lohnt. Ezekiel wollte, soweit ich das beurteilen konnte, gar nichts, aber er war schon ein paar Schritte in Richtung Wald gegangen und hielt die Dolche weiterhin kampfbereit gezückt. Anstatt einfach weiterzufahren, beschloss unsere neu gefundene Heldengruppe also, den Spuren in den Wald zu folgen. Den Karren schoben wir ein Stück ins Gebüsch und hofften das Beste."
+     "text": "Ich wiederum wollte vor allem eine Geschichte, die sich zu erzählen lohnt. Ezekiel wollte, soweit ich das beurteilen konnte, gar nichts, aber er war schon ein paar Schritte in Richtung Wald gegangen und hielt die Dolche weiterhin kampfbereit gezückt. Anstatt einfach weiterzufahren, folgten wir also, frisch gebackene Helden, die wir waren, den Spuren in den Wald. Den Karren schoben wir ein Stück ins Gebüsch und hofften das Beste."
     }
    ]
   },
@@ -1206,10 +1206,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-13b5402d",
+     "id": "I-a6cc6391",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Am nächsten Morgen begann die Suche nach Informationen. Wir streiften durch die Gassen, sprachen mit den Bewohnern und versuchten herauszufinden, was hier vor sich ging. Doch die Leute blieben wortkarg. Eine Frau, die gerade Wäsche aufhängte, murmelte nur:"
+     "text": "Am nächsten Morgen machten wir uns daran, dem Dorf seine Geheimnisse zu entlocken. Doch das gestaltete sich schwerer als erwartet. Wir streiften durch die Gassen und sprachen mit den Bewohnern, aber die Leute blieben wortkarg. Eine Frau, die gerade Wäsche aufhängte, murmelte nur:"
     },
     {
      "id": "I-5986c13d",
@@ -1360,10 +1360,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-a172b522",
+     "id": "I-8fce7bed",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Bevor es gegen die Bande ging, stattete unsere Truppe noch dem Bürgermeister von Phandalin einen Besuch ab. Harbin, so hieß er, empfing uns in seiner Amtsstube hinter einem Schreibtisch, der größer war als sein Mut: ein rundlicher, aufgeblasener Mann mit grauem, zurückgekämmtem Haar und Schweißperlen auf der Stirn, in einem roten Mantel mit Pelzkragen und Goldstickerei, darunter eine grüne Weste und ein weißer Rüschenkragen, dazu goldene Ringe und eine Kette. Jeden zweiten Satz begann er mit „selbstverständlich“. Er faltete die Hände über dem Bauch und verkündete:"
+     "text": "Bevor es gegen die Bande ging, schauten wir noch beim Bürgermeister von Phandalin vorbei. Harbin, so hieß er, empfing uns in seiner Amtsstube hinter einem Schreibtisch, der größer war als sein Mut: ein rundlicher, aufgeblasener Mann mit grauem, zurückgekämmtem Haar und Schweißperlen auf der Stirn, in einem roten Mantel mit Pelzkragen und Goldstickerei, darunter eine grüne Weste und ein weißer Rüschenkragen, dazu goldene Ringe und eine Kette. Jeden zweiten Satz begann er mit „selbstverständlich“. Er faltete die Hände über dem Bauch und verkündete:"
     },
     {
      "id": "I-29cfee7a",
@@ -1414,10 +1414,10 @@
      "text": "Leute. Leute."
     },
     {
-     "id": "I-4056827a",
+     "id": "I-fee55605",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Danach eskalierte das Gespräch recht schnell. Echo legte unsere erste Forderung auf den Tisch:"
+     "text": "Danach ging es mit dem Gespräch rasch bergab. Echo legte unsere erste Forderung auf den Tisch:"
     },
     {
      "id": "I-f2763067",
@@ -1586,10 +1586,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-68e8e18b",
+     "id": "I-9ab81dfc",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Durch teils eingefallene, staubige Tunnel stiegen wir hinab. Wurzeln hingen von der Decke, die Luft roch nach Moder, und unsere Fackel flackerte, als wolle sie lieber umkehren. Ich stieß mir zweimal den Kopf. Ezekiel, der mich um gut zwei Köpfe überragt, kein einziges Mal. Ich weiß bis heute nicht, wie er das macht. Unter dem Anwesen öffnete sich eine Höhle. Als wir immer tiefer hineinschlichen, fanden wir dort die ersten drei Gegner, die vor einer Zelle Wache standen. Eine Zelle voller Geiseln aus dem Dorf. Die anderen blieben im Dunkel. Ich trat ins Fackellicht, breitete die Arme aus und schmetterte ein Marschlied, wie ein frischer Rekrut an seinem ersten Tag:",
+     "text": "Durch teils eingefallene, staubige Tunnel stiegen wir hinab. Wurzeln hingen von der Decke, die Luft roch nach Moder, und unsere Fackel flackerte, als wolle sie lieber umkehren. Ich stieß mir zweimal den Kopf. Ezekiel, der mich um gut zwei Köpfe überragt, kein einziges Mal. Ich weiß bis heute nicht, wie er das macht. Unter dem Anwesen öffnete sich eine Höhle. Als wir immer tiefer hineinschlichen, fanden wir dort die ersten drei Wachen, die vor einer Zelle standen. Eine Zelle voller Geiseln aus dem Dorf. Die anderen blieben im Dunkel. Ich trat ins Fackellicht, breitete die Arme aus und schmetterte ein Marschlied, wie ein frischer Rekrut an seinem ersten Tag:",
      "geraeusch": [
       "enger Tunnel, rieselnde Erde, flackernde Fackel, gedämpfte Stimmen"
      ]
@@ -1663,10 +1663,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-9709c512",
+     "id": "I-3d3eecfe",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Wir nahmen den Gegnern ihre roten Roben ab, um uns so getarnt weiter in die Schlossruine vorzuwagen. Meine kratzte, roch nach fremdem Schweiß, und Rot ist, bei aller Bescheidenheit, einfach nicht meine Farbe. Echo lachte dreckig:"
+     "text": "Wir nahmen den Wachen ihre roten Roben ab, um uns so getarnt weiter in die Schlossruine vorzuwagen. Meine kratzte, roch nach fremdem Schweiß, und Rot ist, bei aller Bescheidenheit, einfach nicht meine Farbe. Echo lachte dreckig:"
     },
     {
      "id": "I-c2850398",
@@ -1726,10 +1726,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-f46d0e8f",
+     "id": "I-0affe030",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Hinter einer geschlossenen Tür fanden wir einen Raum, der einem Alchemisten gehören musste, denn die Wände waren voll mit verschiedenen Kräutern, die zum Trocknen aufgehängt waren. In Glaskolben blubberte es leise, und ein grünliches Licht lag über allem. In einigen Schränken und einer Vitrine befanden sich Gläser mit irgendwelchen gefangenen Wesen, teils lebendig, teils tot in einer Flüssigkeit treibend. Augen und Zungen, nicht auszumalen, was hier alles zu finden war. Eines der Augen drehte sich, als ich vorbeiging. Ich habe beschlossen, dass ich mir das eingebildet habe. Echo klopfte gegen ein Glas und flüsterte:",
+     "text": "Hinter einer geschlossenen Tür fanden wir einen Raum, der einem Alchemisten gehören musste, denn die Wände waren voll mit verschiedenen Kräutern, die zum Trocknen aufgehängt waren. In Glaskolben blubberte es leise, und ein grünliches Licht lag über allem. In den Schränken und in einer Vitrine standen Gläser mit irgendwelchen gefangenen Wesen, teils lebendig, teils tot in einer Flüssigkeit treibend. Augen, Zungen und Dinge, für die selbst ich keinen Reim habe. Eines der Augen drehte sich, als ich vorbeiging. Ich habe beschlossen, dass ich mir das eingebildet habe. Echo klopfte gegen ein Glas und flüsterte:",
      "geraeusch": [
       "Blubbern von Glaskolben, leises Zischen, ferne Schritte"
      ]
@@ -1878,10 +1878,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-3428bb9c",
+     "id": "I-1024c94e",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Im Nebenraum fanden wir eine Gruppe von vier Anhängern der Roten Roben, die dort ausgelassen tranken und würfelten. Wir mischten uns unter sie und brachten sie dazu, noch mehr zu trinken ... Ich erzählte Witze, Friedrich schenkte nach, und Rex ließ sich von allen kraulen. Einer der Schläger kraulte ihn besonders ausgiebig und lallte:",
+     "text": "Im Nebenraum fanden wir vier Rotroben beim Würfeln und Saufen. Wir mischten uns unter sie und brachten sie dazu, noch mehr zu trinken ... Ich erzählte Witze, Friedrich schenkte nach, und Rex ließ sich von allen kraulen. Einer der Schläger kraulte ihn besonders ausgiebig und lallte:",
      "geraeusch": [
       "Würfel auf Holztisch, Gelächter, Krüge, Grölen"
      ]
@@ -1963,10 +1963,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-2fe250bd",
+     "id": "I-b3fa3a11",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Dann stach er den ersten Gegner gekonnt mit seinem Dolch nieder, und für die übrigen drei war das Würfelspiel kurz darauf ebenfalls vorbei. Echo strich die Münzen vom Tisch, alle auf einmal, mit einer einzigen, geübten Bewegung."
+     "text": "Dann stach er den ersten Schläger gekonnt mit seinem Dolch nieder, und für die übrigen drei war das Würfelspiel kurz darauf ebenfalls vorbei. Echo strich die Münzen vom Tisch, alle auf einmal, mit einer einzigen, geübten Bewegung."
     }
    ]
   },
@@ -2140,10 +2140,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-e99df49b",
+     "id": "I-480a01ce",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Wir halfen den Dorfbewohnern, die verschleppt worden waren, aus den Höhlen und brachten sie zurück nach Phandalin. Auf dem Weg diskutierten wir. Friedrich sprach:",
+     "text": "Wir halfen den Dorfbewohnern, die verschleppt worden waren, aus den Höhlen und brachten sie zurück nach Phandalin. Unterwegs stritten wir darüber, wer oder was diese Spinne war und wie gefährlich sie wirklich sein konnte. Friedrich fing an:",
      "geraeusch": [
       "Schritte auf einem Feldweg, erschöpfte Stimmen, Abendvögel"
      ]
@@ -2155,16 +2155,16 @@
      "text": "Ist es eine Person, eine Macht oder eine geheime Organisation? Was ist die Spinne?"
     },
     {
-     "id": "I-4872bb4d",
+     "id": "I-a280420e",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Echo winkte lachend ab:"
+     "text": "Echo lachte trocken:"
     },
     {
-     "id": "I-c476b857",
+     "id": "I-a362ad35",
      "rolle": "echo",
      "figur": "Echo",
-     "text": "Was kümmert es uns? Hauptsache, wir werden bezahlt, wenn wir sie zerquetschen."
+     "text": "Wenn die Spinne mit so einem Stümper von Alchemisten zusammenarbeitet, kann sie so mächtig nicht sein. Hauptsache, wir werden bezahlt, wenn wir sie zerquetschen."
     },
     {
      "id": "I-249cd356",
@@ -2476,10 +2476,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-05317eee",
+     "id": "I-979cdf20",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Wir positionierten uns vor der Tür, hinter der wir den Turmraum vermuteten, und nickten uns noch einmal mit sicherem Blick zu. Friedrich verteilte flüsternd die Aufgaben:"
+     "text": "Wir drückten uns neben der Tür, hinter der wir den Turmraum vermuteten, an die Wand und nickten uns noch einmal mit sicherem Blick zu. Friedrich verteilte flüsternd die Aufgaben:"
     },
     {
      "id": "I-5caddd8c",
@@ -2608,10 +2608,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-08e0b66d",
+     "id": "I-ca11fa15",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Ich spitzte gerade meine Lippen, um die Drow verbal anzugreifen:"
+     "text": "Ich spitzte gerade meine Lippen, um der Drow ein paar Worte um die Ohren zu hauen:"
     },
     {
      "id": "I-dd6087fa",
@@ -2710,10 +2710,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-08764b2e",
+     "id": "I-1f32b812",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Ob es an meiner Stimme in ihrem Kopf lag -- ich denke schon -- oder ob sie einfach realisierte, dass ihre einzige Chance die Flucht war: Sie wich zu dem kleinen Spalt in der Turmmauer zurück, durch den wir anfangs den Fackelschein gesehen hatten, und rief höhnisch:"
+     "text": "Ob es an meiner Stimme in ihrem Kopf lag -- ich denke schon -- oder ob sie einfach begriff, dass ihre einzige Chance die Flucht war: Sie wich zu dem kleinen Spalt in der Turmmauer zurück, durch den wir anfangs den Fackelschein gesehen hatten, und rief höhnisch:"
     },
     {
      "id": "I-e19e789f",
@@ -2794,10 +2794,10 @@
      "text": "Tage! Tagelang haben sie uns hier festgehalten und ausgequetscht. Über meinen Bruder Gundren. Über die Allianz der Lords."
     },
     {
-     "id": "I-ca8fb855",
+     "id": "I-66d1c11e",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Sein Bruder? Der Gefangene stellte sich als Gundrens Zwillingsbruder Nundro heraus. Nundro rieb sich die Handgelenke und fügte hinzu:"
+     "text": "Sein Bruder? Und tatsächlich: Vor uns saß Gundrens Zwillingsbruder Nundro. Nundro rieb sich die Handgelenke und fügte hinzu:"
     },
     {
      "id": "I-48928d47",
@@ -3343,10 +3343,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-50f732b7",
+     "id": "I-f8e1ff55",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Sie war riesig. Laufbänder aus Eisen zogen sich durch die Halle, die einst Erzbrocken in einen gewaltigen Schmelzkessel geworfen hatten, und darunter lief ein zweites Band mit Gussformen, Reihe um Reihe, als hätte man hier nicht ein Schwert geschmiedet, sondern hundert auf einmal. Gelaufen war hier allerdings schon lange nichts mehr. Die Bänder waren rostrot und an vielen Stellen gerissen, ganze Glieder hingen schlaff herab oder lagen verbogen am Boden. Durch den Schmelzkessel zog sich ein Riss, breit genug für meine Hand, Staub lag fingerdick auf allem, und von der Decke waren Steine gestürzt und hatten eine der Werkbänke unter sich begraben. Und doch: Alle Bänder führten in die Mitte, zu einem gigantischen Amboss, über und über mit Runen bedeckt, und die glommen noch immer in einem tiefen, kalten Blau, als hätte die Schmiede nur die Augen geschlossen. Ringsum Hebel und Schalter, mit denen man die Stücke wohl weiterbearbeiten konnte: Steine einsetzen, Verzauberungen einarbeiten, Verzierungen anbringen. Weiter hinten standen Werkbänke, an den Wänden hing Werkzeug, längst verrostet, und überall im uralten Gemäuer fand man Zeichen und Insignien, die man erst beim zweiten Hinsehen bemerkte. Man musste sich nur den Staub wegdenken und den Lärm dazu: das Zischen, das Hämmern, das Glühen. Dann ahnte man, wie prächtig und mächtig das alles einmal gewesen war. Wie viele Generationen hatten hier wohl schon magische Gegenstände geschaffen?"
+     "text": "Sie war riesig. Laufbänder aus Eisen zogen sich durch die Halle, die einst Erzbrocken in einen gewaltigen Schmelzkessel geworfen hatten, und darunter lief ein zweites Band mit Gussformen, Reihe um Reihe, als hätte man hier nicht ein Schwert geschmiedet, sondern hundert auf einmal. Gelaufen war hier allerdings schon lange nichts mehr. Die Bänder waren rostrot und an vielen Stellen gerissen, ganze Glieder hingen schlaff herab oder lagen verbogen am Boden. Durch den Schmelzkessel zog sich ein Riss, breit genug für meine Hand, Staub lag fingerdick auf allem, und von der Decke waren Steine gestürzt und hatten eine der Werkbänke unter sich begraben. Und doch: Alle Bänder führten in die Mitte, zu einem gigantischen Amboss, über und über mit Runen bedeckt, und die glommen noch immer in einem tiefen, kalten Blau, als hätte die Schmiede nur die Augen geschlossen. Ringsum Hebel und Schalter, mit denen man den Stücken wohl Steine, Zauber und Verzierungen verpasste. Weiter hinten standen Werkbänke, an den Wänden hing Werkzeug, längst verrostet, und überall im uralten Gemäuer fand man Zeichen und Insignien, die man erst beim zweiten Hinsehen bemerkte. Man musste sich nur den Staub wegdenken und den Lärm dazu: das Zischen, das Hämmern, das Glühen. Dann ahnte man, wie prächtig und mächtig das alles einmal gewesen war. Wie viele Generationen hatten hier wohl schon Wunder geschmiedet?"
     },
     {
      "id": "I-adc82593",
@@ -3670,10 +3670,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-0f44e7c8",
+     "id": "I-4daab48c",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Ich nutzte die Gelegenheit und erzählte, in aller gebotenen Ausführlichkeit, von unseren Heldentaten, und dass wir bereit waren, noch viel mehr für die Allianz zu tun. Dolgrimsons Stimmung verbesserte sich merklich. Er legte die Feder weg. Trotzdem vertröstete er uns:"
+     "text": "Ich nutzte die Gelegenheit und erzählte, in aller gebotenen Ausführlichkeit, von unseren Heldentaten, und dass wir bereit waren, noch viel mehr für die Allianz zu tun. Dolgrimsons Schnurrbart entspannte sich sichtlich. Er legte die Feder weg. Trotzdem vertröstete er uns:"
     },
     {
      "id": "I-605e9365",
@@ -3769,10 +3769,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-d2b11818",
+     "id": "I-d9150111",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Wir zogen weiter. Was die Gerüchte anging, hatten wir keinen Erfolg, und abends kehrten wir zu unserem Gasthof zurück."
+     "text": "Wir zogen weiter. Gerüchte hörten wir an diesem Tag keine, darum gibt es darüber auch keine Reime. Abends kehrten wir zu unserem Gasthof zurück."
     }
    ]
   },
@@ -3988,17 +3988,12 @@
      "rolle": "dolgrimson",
      "figur": "Dolgrimson",
      "text": "Willkommen in der Allianz der Lords. Enttäuscht mich nicht."
-    }
-   ]
-  },
-  {
-   "typ": "text",
-   "segmente": [
+    },
     {
-     "id": "I-e5c3efde",
+     "id": "I-f1ec3aa2",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Der Entschluss stand fest: Unsere Heldengruppe würde der Allianz beitreten und ihre Kräfte stärken. Ein Barde in den Reihen der Lords. Ich sprach es laut aus, ein wenig ehrfürchtig:"
+     "text": "Damit war es amtlich: Wir gehörten zur Allianz. Ein Barde in den Reihen der Lords. Ich sprach es laut aus, ein wenig ehrfürchtig:"
     },
     {
      "id": "I-b017e7e9",
@@ -4221,10 +4216,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-baad6d06",
+     "id": "I-da78cf2f",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Wir gingen als glückliche Sieger aus dem Kampf hervor, allerdings hatte uns sein Giftatem übel zugesetzt. Meine Lunge brannte noch Stunden danach, Ezekiel war angeschlagen, Echo stark verletzt und Friedrich wäre beinahe von einer Kralle skalpiert worden. Er tastete nach seinem Kopf:",
+     "text": "Wir hatten gewonnen. Gut ging es uns trotzdem nicht. Meine Lunge brannte noch Stunden danach, Ezekiel war angeschlagen, Echo stark verletzt und Friedrich wäre beinahe von einer Kralle skalpiert worden. Er tastete nach seinem Kopf:",
      "geraeusch": [
       "Drache sackt zusammen, Turmplateau bebt, dann nur noch Wind"
      ]
@@ -4402,10 +4397,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-d242006f",
+     "id": "I-f6968300",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Doch unsere Heldengruppe war ihnen überlegen, und wir besiegten sie mit wenigen Hieben. Rex schnappte sich einen von ihnen wie einen Stock und brachte ihn stolz zu Friedrich. Zumindest das, was von ihm übrig war. Friedrich steckte ihn ohne ein Wort in seinen Rucksack, zu dem Oberschenkelknochen und dem Stück Drachenschwanz. Rex hatte angefangen zu sammeln."
+     "text": "Viel Gegenwehr leisteten sie nicht: ein paar Hiebe, und es war nur noch Kleinholz übrig. Rex schnappte sich einen von ihnen wie einen Stock und brachte ihn stolz zu Friedrich. Zumindest das, was von ihm übrig war. Friedrich steckte ihn ohne ein Wort in seinen Rucksack, zu dem Oberschenkelknochen und dem Stück Drachenschwanz. Rex hatte angefangen zu sammeln."
     }
    ]
   },
@@ -4468,10 +4463,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-6bb4d5f5",
+     "id": "I-043efa00",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Es roch nach Essen, und durch die offene Tür sahen wir einen köchelnden Topf und hofften auf eine warme Speise. Dahinter stapelten sich Kräuter, Tinkturen und handschriftliche Notizen über die Tiere des Waldes. Echo nickte anerkennend und brummte:"
+     "text": "Es roch nach Essen, und durch die offene Tür sahen wir einen köchelnden Topf, und unsere Mägen hofften schon. Dahinter stapelten sich Kräuter, Tinkturen und handschriftliche Notizen über die Tiere des Waldes. Echo nickte anerkennend und brummte:"
     },
     {
      "id": "I-a4c5c604",
@@ -5176,10 +5171,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-7dacbc93",
+     "id": "II-68df5c07",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Echo und ich eilten dem ohnmächtigen Friedrich und dem schwer verletzten Ezekiel zu Hilfe, wirkten Heilzauber und verteilten Heiltränke. Ich kniete neben Friedrich und summte die Heilmelodie, während Rex ihm unablässig übers Gesicht leckte. Endlich flatterten seine Lider, und er lachte erschöpft:"
+     "text": "Echo und ich eilten dem ohnmächtigen Friedrich und dem schwer verletzten Ezekiel zu Hilfe. Echo legte sein grünes Licht auf die Wunden, und die Heiltränke machten die Runde. Ich kniete neben Friedrich und summte die Heilmelodie, während Rex ihm unablässig übers Gesicht leckte. Endlich flatterten seine Lider, und er lachte erschöpft:"
     },
     {
      "id": "II-8a42723f",
@@ -5291,10 +5286,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-900bae8c",
+     "id": "II-63dfa4c6",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Von der Treppe aus erledigten Friedrich und Ezekiel mit gezielten Schüssen die letzten Wachen, blutverschmiert und trotzdem treffsicher wie eh und je, während Echo den Dämon, den er als Vrock erkannte, ins Visier nahm.",
+     "text": "Von der Treppe aus erledigten Friedrich und Ezekiel mit gezielten Schüssen die letzten Wachen, blutverschmiert und trotzdem treffsicher wie eh und je, während Echo den Dämon anvisierte. Einen Vrock nannte er ihn, und es klang wie ein Schimpfwort:",
      "geraeusch": [
       "zwei Bogensehnen kurz hintereinander"
      ]
@@ -5397,10 +5392,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-fe93d7ec",
+     "id": "II-96ccea66",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Danach wurde der Unterschlupf unserer Entführer gründlich durchsucht, Echo natürlich vorneweg. Er klopfte Wände ab, drehte jeden Krug um und schüttelte sogar die Stiefel der toten Wachen aus:"
+     "text": "Danach stellten wir den Unterschlupf unserer Entführer auf den Kopf, Echo natürlich vorneweg. Er klopfte Wände ab, drehte jeden Krug um und schüttelte sogar die Stiefel der toten Wachen aus:"
     },
     {
      "id": "II-b89db0a2",
@@ -5448,10 +5443,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-d5bf2a2a",
+     "id": "II-b2853932",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Sie bekam von uns eine neue Bemalung, zuerst nur mit einem Bart, doch schnell wurden daraus Phallussymbole und ähnliche Schmierereien. Friedrich seufzte so tief, dass Rex ihn besorgt ansah:"
+     "text": "Sie bekam von uns eine neue Bemalung, zuerst nur einen Bart, doch schnell wurden daraus allerlei Schmierereien und Verunstaltungen. Am Ende sah die Statue wirklich lächerlich aus. Friedrich seufzte so tief, dass Rex ihn besorgt ansah:"
     },
     {
      "id": "II-aee27ad5",
@@ -5607,10 +5602,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-93af624b",
+     "id": "II-437e480f",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Ezekiel und Friedrich sorgten mit einigen perfekten Treffern schnell für den Sieg über die Achtbeiner. Pfeil, Dolch, Pfeil. Rex bellte jede tote Spinne noch einmal an, sicherheitshalber."
+     "text": "Ezekiel und Friedrich machten mit den Achtbeinern kurzen Prozess. Pfeil, Dolch, Pfeil. Rex bellte jede tote Spinne noch einmal an, sicherheitshalber."
     }
    ]
   },
@@ -5692,10 +5687,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-0ce9fe39",
+     "id": "II-f524f45b",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Es handelte sich, fuhr Fagas fort, um ein ganz besonderes Grab, und dabei senkte er die Stimme:"
+     "text": "Und es war nicht irgendein Grab, flüsterte Fagas:"
     },
     {
      "id": "II-cf7f377c",
@@ -5759,10 +5754,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-01954eb7",
+     "id": "II-963c80ab",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Der Weg durch das Unterreich zeigte sich nun von einer überraschend schönen Seite: funkelnde Flüsse, leuchtende Pilze in Violett und Grün, ein ganzes Reich in sanftem Licht. Friedrich blieb stehen:",
+     "text": "Und dann erstrahlte das Unterreich plötzlich in ungeahnter Schönheit: funkelnde Flüsse, leuchtende Pilze in Violett und Grün, ein ganzes Reich in sanftem Licht. Friedrich blieb stehen:",
      "geraeusch": [
       "plätschernde Wasserläufe, Tropfen"
      ]
@@ -6012,10 +6007,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-dd02182f",
+     "id": "II-967f189c",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Dann formte unheilige Energie einen furchterregenden Gegner: einen Wraith, einen Schatten mit Krallen, kälter als jedes Grab. Echo schrie:",
+     "text": "Dann ballte sich etwas Kaltes zu einer Gestalt zusammen: ein Wraith, ein Schatten mit Krallen, kälter als jedes Grab. Echo schrie:",
      "geraeusch": [
       "geisterhaftes, unverständliches Murmeln"
      ]
@@ -6063,10 +6058,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-b61eb6ca",
+     "id": "II-6b287847",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Wir griffen den Wraith an, mit Magie und mit unseren Waffen, doch keiner unserer Angriffe zeigte wirklich Wirkung."
+     "text": "Wir griffen den Wraith an, mit Magie und mit unseren Waffen, aber er lachte nur über unsere Klingen."
     }
    ]
   },
@@ -6663,10 +6658,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-578bea10",
+     "id": "II-9aee262a",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Das Ungeheuer machte sich daran, die Stadt zu zerstören. Mit seinen Tentakelarmen zermalmte es Gebäude, Gegner und Verbündete gleichermaßen. Hütten aus Treibholz zerbarsten wie trockenes Laub. Echo brüllte:",
+     "text": "Das Ungeheuer machte sich daran, die Stadt zu zerstören. Mit seinen Tentakelarmen zermalmte es Häuser, Freund und Feind, ohne einen Unterschied zu machen. Hütten aus Treibholz zerbarsten wie trockenes Laub. Echo brüllte:",
      "geraeusch": [
       "berstendes Holz, Schreie, schwappendes Wasser"
      ]
@@ -7202,10 +7197,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-3c1c504f",
+     "id": "II-b7c7d3cb",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Leicht fiel uns der Aufenthalt allerdings nicht. Die Luft hier unten setzte uns zu, schwer und warm und so dick, dass man sie fast kauen konnte. Vor allem Echo. Er wachte völlig erschöpft auf: Ringe unter den Augen und eine Laune, die selbst für seine Verhältnisse finster war. Friedrich musterte ihn:"
+     "text": "Gemütlich war es in Gracklstugh allerdings nicht. Die Luft hier unten setzte uns zu, schwer und warm und so dick, dass man sie fast kauen konnte. Vor allem Echo. Er wachte völlig erschöpft auf: Ringe unter den Augen und eine Laune, die selbst für seine Verhältnisse finster war. Friedrich musterte ihn:"
     },
     {
      "id": "II-b6d42552",
@@ -7342,10 +7337,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-05747f8a",
+     "id": "II-03b9f34b",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Wir gingen zum Markt der Klingen, dem größten Marktplatz der Stadt. Hier tummelten sich die unterschiedlichsten Händler mit allerlei Waren. Bei einem standen Fläschchen in allen Farben, dazu Kräuter und getrocknete Pilze an Schnüren. Bei einem anderen hingen unzählige Waffen in Halterungen und Ständern, deren Klingen sogar im fahlen Licht der Unterwelt blitzten. Ein dritter verkaufte Musikinstrumente. Hier gab es wirklich alles!",
+     "text": "Wir gingen zum Markt der Klingen, dem größten Marktplatz der Stadt. Hier wurde gefeilscht, gebrüllt und betrogen, was das Zeug hielt. Bei einem standen Fläschchen in allen Farben, dazu Kräuter und getrocknete Pilze an Schnüren. Bei einem anderen hingen unzählige Waffen in Halterungen und Ständern, deren Klingen sogar im fahlen Licht der Unterwelt blitzten. Ein dritter verkaufte Musikinstrumente. Hier gab es wirklich alles!",
      "geraeusch": [
       "Marktlärm, klirrendes Glas"
      ]
@@ -7552,10 +7547,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-4fbb7449",
+     "id": "II-eee314b9",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Den Ausfall seines Artgenossen konnte er sich nicht erklären. Offenbar hatten ihn Stimmen in seinem Kopf dazu getrieben. Stimmen im Kopf ... Das kam mir unangenehm bekannt vor. Friedrich dachte dasselbe:"
+     "text": "Warum sein Vetter so gewütet hatte, wusste er selbst nicht. Offenbar hatten ihn Stimmen in seinem Kopf dazu getrieben. Stimmen im Kopf ... Das kam mir unangenehm bekannt vor. Friedrich dachte dasselbe:"
     },
     {
      "id": "II-0ee9feed",
@@ -8260,10 +8255,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-8b6443d2",
+     "id": "II-e99e62b8",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Einem geheimen Hinweis zufolge verdächtigt Gartokkar einen gewissen Drokey, angeblich ein Mitglied der Grauen Geister, einer Diebesgilde aus den Slums von Gracklstugh. Genau den Slums, von denen Kardal uns gerade hatte erzählen wollen."
+     "text": "Er behauptete, jemand habe ihm etwas zugeflüstert: Der Verdacht fiel auf einen gewissen Drokey, angeblich ein Mitglied der Grauen Geister, einer Diebesgilde aus den Slums von Gracklstugh. Genau den Slums, von denen Kardal uns gerade hatte erzählen wollen."
     }
    ]
   },
@@ -8271,10 +8266,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-4e45344d",
+     "id": "II-d270fd8e",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Zum Abschluss überreichte er uns ein Abzeichen, zum Beweis, dass wir im Namen der Flamme handeln: eine faustgroße Goldmünze mit einem Drachenkopf darauf."
+     "text": "Dann drückte er uns noch ein Abzeichen in die Hand, zum Beweis, dass wir im Namen der Flamme handeln: eine faustgroße Goldmünze mit einem Drachenkopf darauf."
     }
    ]
   },
