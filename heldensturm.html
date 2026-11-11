@@ -38294,6 +38294,419 @@ try{const f=netFilter;netFilter=function(W_,p){const o=f.apply(this,arguments);t
 
 window.__siT={upd:siUpd,sicht:siSicht,zielOk:e=>siZielOk(e),eVis:e=>siEVis(e),an:siAn,M,C:SI.C,seher:siSeher,entdeckt:siEntdeckt};
 }catch(e){console.error('sicht',e);window.__hsSICHT.err=String(e&&e.stack||e)}})();
+/* ================= Paket „cpuras“: Boden, Wände und ruhende Deko als vorgezeichnete Kacheln, wenn die Spielleinwand im Prozessor gerastert wird – window.__hsCPURAS =================
+   Befund (Handy, Firefox 159 Android, Diagnose): die Spielleinwand wird im Prozessor gerastert (licht2-Sonde 14,8 ms/MPx); teuerste Bereiche
+   Wände 6,9 · Boden 5,8 ms. Nachgestellt in Chromium ohne Grafikbeschleunigung bei Handy-Größe (270×565, 4× gedrosselt): Bodenmuster (Vollbild-
+   Füllung mit Muster) ~4,2 ms, Straße ~1,7, Kartenkacheln (hochskaliert gezeichnet) ~3,5, Deko (100+ Pfade) ~4,4 ms je Bild – alles Dinge, die
+   sich innerhalb einer Stufe nicht ändern.
+   Maßnahmen (nur im Prozessor-Pfad; auf Grafikkarten-Pfaden bleibt alles unverändert):
+   1) Boden-Ebene: Bodenmuster, Straße, Abdunklung außerhalb der Welt und die ruhenden Teile der drawRoomWalls-Kette (Kammerwände, Hausböden, Plätze,
+      Abgründe, ruhende Areale, Arena-Boden, Kartenkacheln mit Fels/Wald/Mauern/Häusern/Flussbetten, Kammerböden) werden in deckende Kacheln
+      (256×256 Bildpunkte, im Bildraster der Kamera) gezeichnet – mit genau denselben Zeichenbefehlen, nur um ganze Bildpunkte verschoben – und jedes
+      Bild nur noch 1:1 aufgelegt (reines Kopieren, keine Skalierung, kein Muster).
+      Bewegtes bleibt live in richtiger Reihenfolge: Teiche/Lava (wlBoden), bewegte Areale, Fallen, Druckplatten, Runen-/Lava-Arena, Wächter-Kampfplatz
+      werden in einem „Live-Rest“ gezeichnet: die vollständige Kette läuft weiter in jedem Bild (alle Nebenwirkungen/Zustände wie bisher), aber nur
+      innerhalb eines Ausschnitts (Rechtecke um die bewegten Teile und um noch fehlende Kacheln) – außerhalb wird nichts gerastert.
+      Brücken mit Glanzlichtern und der Arena-Rand laufen danach live (wie im Original zuletzt in der Kette). Zeichenzustand nach der Kette wird übernommen.
+   2) Deko-Ebene: jede Deko-Art wird geprüft (Aufzeichnung der Zeichenbefehle zu mehreren Zeitpunkten mit gefälschter Uhr/Zufall); nur nachweislich
+      ruhende Deko kommt in durchsichtige Kacheln (Reihenfolge bleibt: überlappt eine bewegte Deko davor eine ruhende, bleibt auch die ruhende live).
+      Stichproben-Nachprüfung im laufenden Spiel; Änderungen an G.deco werden erkannt (aus Paket „kachel“ übernommen, Speicher jetzt fest).
+   3) Minikarte: wird höchstens jedes 2. Bild neu gezeichnet (in eine kleine Leinwand, Größe aus dem aufgezeichneten Umriss) und dazwischen 1:1
+      aufgelegt – Karte mit 30 statt 60 Bildern/s, bei geänderter Anzeige (Menü, HUD, Größe, Banner) sofort; nur wenn die Karte normal mischt.
+   2b) Handheld-Sparbetrieb: statt der rg2-Deko-Kacheln (je Bild skaliert, geglättet, ~2,3-fach überdeckt) dieselben Bilder 1:1 aus Bildpunkt-Kacheln;
+      die Boden-Ebene ersetzt dort das vorgerenderte Bodenbild (PFS) – Boden/Straße damit wie ohne Sparbetrieb (PFS war leicht neu abgetastet).
+   4) Sprite-Leinwände (Gegner, Leuchten, Kartenkacheln) werden im Prozessor-Pfad als Prozessor-Leinwand angelegt (willReadFrequently) – in Firefox
+      sonst womöglich Grafikkarten-Leinwände, die beim Zeichnen auf die Prozessor-Spielleinwand zurückgelesen werden müssen.
+   Speicher: fester Vorrat je Ebene (Zahl aus Leinwandgröße + Rand, Obergrenze nach Gerätespeicher), LRU, keine Neuanlage/kein Größenwechsel je Bild,
+   Neubau verteilt (höchstens 2 Kacheln je Bild + 1 Randkachel). Fehlt eine Kachel, wird genau deren Fläche live gezeichnet.
+   Nachprüfung Boden: alle ~2 s wird eine sichtbare Kachel neu gezeichnet und Bildpunkt für Bildpunkt verglichen (Prozessor-Leinwand: billig) –
+   bei Abweichung werden alle Kacheln verworfen (Zähler st.pruefFehl).
+   Erkennung (modus 'auto'): licht2-Sonde meldet „Prozessor“ (Firefox), sonst WebGL nur in Software (SWR) oder Handheld-Sparbetrieb.
+   Nie: Ultra leicht (eigener Hintergrund), geteilter Bildschirm, Firefox mit Sonde „Grafikkarte“, Chrome/Edge/Firefox mit Grafikkarte.
+   Schalter: __hsCPURAS.aus=true, __hsCPURAS.modus='auto'|'an'|'aus' (auch ?cpuras=an|aus in der Adresse), __hsCPURAS.k.{boden,deko,karte,leinw,pruef}=0.
+   Zähler: __hsCPURAS.st, Diagnose-Zeile „CPU-Kacheln: …“. Chromium 77: ES2017, kein ?. ?? */
+(function(){try{window.__hsCPURAS={v:1};
+const CR=window.__hsCPURAS;CR.aus=false;CR.modus='auto';
+try{const m=/[?&]cpuras=(an|aus|auto)\b/.exec(location.search||'');if(m)CR.modus=m[1]}catch(e){}
+CR.k={boden:1,deko:1,karte:1,leinw:1,pruef:1};CR.TS=256;CR.TSD=256;CR.A=32;CR.bud=2;CR.ms=4;CR.stab=3;CR.pruefAlle=120;CR.dq=4;
+CR.st={f:0,bB:0,bTeil:0,bLive:0,bBau:0,dB:0,dL:0,dBau:0,klass:0,fest:0,live:0,dyn:0,nachpruef:0,neuArt:0,pruef:0,pruefFehl:0,dynR:0,kN:0,kNeu:0,kLive:0,kAlt:0,neuCv:0,fehler:0};CR.err=[];
+const cErr=(k,e)=>{CR.st.fehler++;if(CR.err.length<12)CR.err.push(k+': '+(e&&e.message||e))};
+const now=()=>performance.now();
+
+/* ---------- Erkennung ---------- */
+function ulAn(){try{return !!(window.__hsULTRA&&__hsULTRA.on)}catch(e){return false}}
+function grund(){if(CR.aus||CR.modus==='aus')return '';if(ulAn())return '';if(CR.modus==='an')return 'erzwungen';
+ try{const L2=window.__hsLICHT2;if(L2&&!L2.aus&&L2.aktiv&&L2.aktiv()&&L2.sonde){if(L2.sonde.art==='Prozessor')return 'Firefox-Sonde: Prozessor';if(L2.sonde.art==='Grafikkarte')return ''}}catch(e){}
+ try{if(SWR)return 'ohne Grafikbeschleunigung'}catch(e){}
+ try{if(RG2.spar)return 'Handheld-Sparbetrieb'}catch(e){}
+ return ''}
+CR.grund=grund;CR.an=()=>!!grund();
+function spar(){try{return !!RG2.spar}catch(e){return false}}
+function rahmenOk(){try{if(!G||!G.ground||G.vp||!cx||!(DPR>0))return false;if(typeof splitOn==='function'&&splitOn())return false;if(ulAn())return false;
+ const c=cx.canvas;return c===cv||!!(c&&c.className==='l2cv')}catch(e){return false}}
+
+/* ---------- Speicher und Leinwand-Vorrat (fest) ---------- */
+function gMem(){let m=0;try{m=+navigator.deviceMemory||0}catch(e){}return m}
+function cap(){const m=gMem();return (m>=8?64:m>=4?40:m>0?24:40)*1048576}
+const OPT={alpha:true,willReadFrequently:true};
+function neueLw(n,deckend){const c=document.createElement('canvas');c.width=n;c.height=n;c.__crK=1;let g=null;try{g=c.getContext('2d',{alpha:!deckend,willReadFrequently:true})}catch(e){}if(!g)g=c.getContext('2d');CR.st.neuCv++;return{cv:c,g}}
+function Vorrat(n,deckend){return{n,deckend,alle:[],frei:[],m:new Map(),key:'',gen:0,ziel:0}}
+const VB=Vorrat(CR.TS,true),VD=Vorrat(CR.TSD+2*CR.A,false);
+CR.VB=VB;CR.VD=VD;
+function vBytes(V){return V.alle.length*V.n*V.n*4}
+CR.mb=()=>Math.round((vBytes(VB)+vBytes(VD)+(MK.c?MK.c.width*MK.c.height*4:0))/104857.6)/10;
+/* Zielgröße: sichtbare Kacheln + Rand, höchstens Anteil an der Obergrenze; 0 = Ebene passt nicht */
+function vZiel(V,TS,anteil){const cw=cv.width,ch=cv.height,vis=(Math.ceil(cw/TS)+1)*(Math.ceil(ch/TS)+1),rand=2*(Math.ceil(cw/TS)+Math.ceil(ch/TS))+8,per=V.n*V.n*4,max=Math.floor(cap()*anteil/per);
+ if(vis+2>max)return 0;return Math.min(max,vis+rand)}
+function vHolen(V,f){/* eine Leinwand: frei → neu (bis Ziel) → älteste nicht in diesem Bild benutzte */
+ if(V.frei.length)return V.frei.pop();if(V.alle.length<V.ziel){const L=neueLw(V.n,V.deckend);V.alle.push(L);return L}
+ let ak=null,ae=null;for(const [k,e] of V.m){if(!e.L||e.lu===f)continue;if(!ae||e.lu<ae.lu){ae=e;ak=k}}if(!ae)return null;V.m.delete(ak);const L=ae.L;ae.L=null;return L}
+function vLeeren(V){for(const e of V.m.values())if(e.L)V.frei.push(e.L);V.m.clear()}
+function vKuerzen(V){/* Ziel kleiner geworden (Fenster verkleinert): überzählige Leinwände freigeben */
+ while(V.alle.length>V.ziel){let L=V.frei.pop();if(!L){let ak=null,ae=null;for(const [k,e] of V.m){if(!e.L)continue;if(!ae||e.lu<ae.lu){ae=e;ak=k}}if(!ae)break;V.m.delete(ak);L=ae.L}
+  const i=V.alle.indexOf(L);if(i>=0)V.alle.splice(i,1);try{L.cv.width=1;L.cv.height=1}catch(e){}}}
+function vAlleFrei(V){vLeeren(V);for(const L of V.alle){try{L.cv.width=1;L.cv.height=1}catch(e){}}V.alle.length=0;V.frei.length=0;V.key=''}
+/* ungenutzt (Menü, Lager, Titel, Grafikkarte) → nach 8 s alles freigeben */
+CR.last=0;
+setInterval(()=>{try{if(CR.last&&now()-CR.last>8000){vAlleFrei(VB);vAlleFrei(VD);if(MK.c){MK.c.width=1;MK.c.height=1;MK.c=null}CR.last=0}}catch(e){}},4000);
+
+/* ---------- Hilfen ---------- */
+const OID=new WeakMap();let oidN=0;const oid=o=>{if(!o||typeof o!=='object')return String(o);let v=OID.get(o);if(!v){v=++oidN;OID.set(o,v)}return v};
+function trans(){let m;try{m=cx.getTransform()}catch(e){return null}if(m.b!==0||m.c!==0||m.a!==m.d||!(m.a>0.05)||m.e!==Math.round(m.e)||m.f!==Math.round(m.f))return null;return m}
+function sicht(m,TS){return{i0:Math.floor(-m.e/TS),i1:Math.floor((cv.width-1-m.e)/TS),j0:Math.floor(-m.f/TS),j1:Math.floor((cv.height-1-m.f)/TS)}}
+const ZS=['lineCap','lineJoin','miterLimit','lineWidth','font','textAlign','textBaseline','imageSmoothingEnabled','imageSmoothingQuality','fillStyle','strokeStyle','lineDashOffset','direction'];
+function zustandUebernehmen(g){for(const k of ZS){try{if(k in cx&&g[k]!==cx[k])g[k]=cx[k]}catch(e){}}try{g.setLineDash(cx.getLineDash())}catch(e){}g.globalAlpha=1;g.globalCompositeOperation='source-over';
+ try{if(g.filter!=='none')g.filter='none'}catch(e){}g.shadowBlur=0;g.shadowColor='rgba(0,0,0,0)';g.shadowOffsetX=0;g.shadowOffsetY=0}
+const ZL=ZS.concat(['globalAlpha','globalCompositeOperation','shadowBlur','shadowColor','shadowOffsetX','shadowOffsetY']);
+function zustandLesen(c){const z={};for(const k of ZL){try{z[k]=c[k]}catch(e){}}try{z.dash=c.getLineDash()}catch(e){}try{z.m=c.getTransform()}catch(e){}return z}
+function zustandSchreiben(c,z){for(const k of ZL){try{if(z[k]!==undefined&&c[k]!==z[k])c[k]=z[k]}catch(e){}}try{if(z.dash)c.setLineDash(z.dash)}catch(e){}try{const m=z.m;if(m)c.setTransform(m.a,m.b,m.c,m.d,m.e,m.f)}catch(e){}}
+/* Maßstab muss einige Bilder stabil sein, bevor gebaut wird (Zoom-Stoß, Kampf-Zoom) */
+const SS={s:0,n:0,f:-1};
+function stabil(s){if(SS.f!==CR.st.f){SS.f=CR.st.f;if(s===SS.s)SS.n++;else{SS.s=s;SS.n=0}}return SS.n>=CR.stab}
+
+/* ---------- Boden wie in renderWorld (Boden, Straße, Abdunklung) ---------- */
+function strasse(c,R){if(!R)return;c.lineJoin='round';c.lineCap='round';c.beginPath();R.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.strokeStyle='#40352a';c.lineWidth=150;c.stroke();c.strokeStyle='#5c4c38';c.lineWidth=120;c.stroke();
+ for(const o of[-24,24]){c.beginPath();R.forEach((p,i)=>i?c.lineTo(p[0],p[1]+o):c.moveTo(p[0],p[1]+o));c.strokeStyle='rgba(40,30,20,.45)';c.lineWidth=5;c.stroke()}}
+function bodenRechteck(c,gr,R,X0,Y0,X1,Y1){/* Rechteck X0..X1 × Y0..Y1 (Welt) wie renderWorld mit camX=X0, vw=X1-X0 */
+ const vw=X1-X0,vh=Y1-Y0;c.fillStyle=gr;c.fillRect(X0-20,Y0-20,vw+40,vh+40);strasse(c,R);c.fillStyle='rgba(6,4,8,.78)';
+ if(X0<0)c.fillRect(X0-20,Y0-20,-X0+20,vh+40);if(Y0<0)c.fillRect(X0-20,Y0-20,vw+40,-Y0+20);
+ if(X0+vw>WORLD)c.fillRect(WORLD,Y0-20,X0+vw-WORLD+20,vh+40);if(Y0+vh>WORLD)c.fillRect(X0-20,WORLD,vw+40,Y0+vh-WORLD+20)}
+function bodenLive(gr,R){const vw=W/ZOOM,vh=H/ZOOM,camX=G.cam.x-vw/2,camY=G.cam.y-vh/2;bodenRechteck(cx,gr,R,camX,camY,camX+vw,camY+vh)}
+
+/* ---------- Statische Kette: bewegte Teile während des Kachelbaus weglassen ---------- */
+CR.bau=0;CR.ohneSuffix=0;
+const AR_FEST=new Set(['erde','lichtung','fliesen','seide','friedhof','asche']);
+const WL_DYN=k=>k==='wasser'||k==='lava';
+const WLS={ref:null,n:-1,L:null};
+function wlStatL(L){if(WLS.ref!==L||WLS.n!==L.length){WLS.ref=L;WLS.n=L.length;WLS.L=L.filter(o=>!(o.t==='c'&&WL_DYN(o.k)))}return WLS.L}
+function arenaInfo(){const K=G.ka;if(!K||!K.sec)return null;const A=K.sec.find(s=>s.art==='arena');let dyn=false;
+ try{const D=K.arDef||(typeof kaArenaDef==='function'?kaArenaDef():null);if(!D||D.bd==='runen')dyn=true}catch(e){dyn=true}
+ try{if(G.wl&&G.wl.lo)for(const o of G.wl.lo)if(o.k==='ka_lavarand'){dyn=true;break}}catch(e){}
+ return{A,dyn,kp:K.kampfP||null}}
+try{const f=kaBruecken;kaBruecken=function(){if(CR.bau||CR.ohneSuffix)return;return f.apply(this,arguments)}}catch(e){cErr('haken kaBruecken',e)}
+try{const f=kaArenaRand;kaArenaRand=function(){if(CR.bau||CR.ohneSuffix)return;return f.apply(this,arguments)}}catch(e){cErr('haken kaArenaRand',e)}
+try{const f=arBoden;arBoden=function(t){if(!CR.bau)return f.apply(this,arguments);
+  /* Kachelbau: nur ruhende Areale (keine Fallen, keine Druckplatten) */
+  if(G.room||!G.arN||!G.arN.length)return;const V=wlSicht();for(const a of G.arN)if(AR_FEST.has(a.b)&&a.x>V.x0-a.r&&a.x<V.x1+a.r&&a.y>V.y0-a.r&&a.y<V.y1+a.r)arBodenAreal(a,t)}}catch(e){cErr('haken arBoden',e)}
+try{const f=wlBoden;wlBoden=function(t){if(!CR.bau)return f.apply(this,arguments);const Wd=G.wl;if(!Wd||!Wd.lo)return f.apply(this,arguments);const L=Wd.lo;Wd.lo=wlStatL(L);try{return f.apply(this,arguments)}finally{Wd.lo=L}}}catch(e){cErr('haken wlBoden',e)}
+try{const f=kaArenaBoden;kaArenaBoden=function(t){if(!CR.bau)return f.apply(this,arguments);const I=arenaInfo();if(!I||I.dyn)return;const K=G.ka,kp=K.kampfP;K.kampfP=null;try{return f.apply(this,arguments)}finally{K.kampfP=kp}}}catch(e){cErr('haken kaArenaBoden',e)}
+
+/* ---------- Bewegte Teile der Kette: Rechtecke (Welt) für den Live-Rest ---------- */
+const PB=new Map();/* Umriss je Falle/Platte (Aufzeichnung), 20 Bilder gültig */
+function propUmriss(p,fn,t){let e=PB.get(p);if(e&&CR.st.f-e.f<20)return e.b;let b=null;try{const r=aufnehmen(()=>fn(p,t));b=r.bb}catch(er){b=null}
+ if(!b)b={x0:p.x-200,y0:p.y-200,x1:p.x+200,y1:p.y+200};PB.set(p,{b,f:CR.st.f});if(PB.size>400){for(const k of PB.keys()){PB.delete(k);if(PB.size<300)break}}return b}
+function dynRechtecke(add){if(G.room)return;let V;try{V=wlSicht()}catch(e){return}const t=G.time;
+ const Wd=G.wl;if(Wd&&Wd.an&&Wd.lo)for(const o of Wd.lo){if(o.t!=='c'||!WL_DYN(o.k))continue;const r=o.r*1.5+28;if(o.x+r>V.x0&&o.x-r<V.x1&&o.y+r>V.y0&&o.y-r<V.y1)add(o.x-r,o.y-r,o.x+r,o.y+r)}
+ if(G.arN&&(G.arN.length||G.props.length)){for(const a of G.arN){if(AR_FEST.has(a.b))continue;const r=a.r+16;if(a.x>V.x0-a.r&&a.x<V.x1+a.r&&a.y>V.y0-a.r&&a.y<V.y1+a.r)add(a.x-r,a.y-r,a.x+r,a.y+r)}
+  for(const p of G.props){if(p.k==='falle'&&!p.dead&&p.x>V.x0-180&&p.x<V.x1+180&&p.y>V.y0-180&&p.y<V.y1+180){const b=propUmriss(p,arFalleBoden,t);add(b.x0-6,b.y0-6,b.x1+6,b.y1+6)}
+   else if(p.k==='ar_platte'&&p.x>V.x0-40&&p.x<V.x1+40&&p.y>V.y0-40&&p.y<V.y1+40){const b=propUmriss(p,arPlatteDraw,t);add(b.x0-6,b.y0-6,b.x1+6,b.y1+6)}}}
+ if(G.ka){const I=arenaInfo();if(I){const A=I.A;if(I.dyn&&A&&!(A.x1<V.x0||A.x0>V.x1||A.y1<V.y0||A.y0>V.y1)){const K=G.ka,g_=K.arG;let x0=A.x0,y0=A.y0,x1=A.x1,y1=A.y1;
+    if(g_){x0=Math.min(x0,g_.cx-g_.rx);x1=Math.max(x1,g_.cx+g_.rx);y0=Math.min(y0,g_.cy-g_.ry);y1=Math.max(y1,g_.cy+g_.ry)}add(x0-80,y0-80,x1+80,y1+80);
+    try{for(const o of G.wl.lo)if(o.k==='ka_lavarand'){const r=Math.max(o.w,o.h)*0.7+16;add(o.x+o.w/2-r,o.y+o.h/2-r,o.x+o.w/2+r,o.y+o.h/2+r)}}catch(e){}}
+   const kp=I.kp;if(kp&&!(kp.x<V.x0-300||kp.x>V.x1+300||kp.y<V.y0-300||kp.y>V.y1+300))add(kp.x-262,kp.y-200,kp.x+262,kp.y+200)}}}
+
+/* ---------- Boden-Ebene ---------- */
+CR.rw=null;CR.inRW=0;
+let RW0=null;/* drawRoomWalls-Kette vor diesem Paket */
+function bgBasis(){const K=G.ka;let tp=0;try{if(K&&K.tore)for(const T of K.tore)tp+=((T.prop&&T.prop.prog||0)>=0.999?2:0)+(T.zu?1:0)}catch(e){}
+ const R=CR.rw?CR.rw.rd:G.road,gr=CR.rw?CR.rw.gr:G.ground,r=G.room;let ks='';try{ks=KAT.key+'/'+KAT.sc}catch(e){}let th='';try{th=(G.theme&&(G.theme.base+'/'+G.theme.dark))+'/'+(typeof CU==='function'&&CU('nacht')?1:0)}catch(e){}
+ return [G.runId,G.stage,G.themeKey,WORLD,oid(gr),R?oid(R)+'/'+R.length+'/'+R[0][0]+'/'+R[0][1]:0,ks,K?K.v+'/'+oid(K):0,tp,G.blkV||0,G.wl&&G.wl.lo?G.wl.lo.length+'/'+G.wl.haus.length:0,G.arN?G.arN.length:0,
+  r?[r.type,r.x0,r.y0,r.x1,r.y1].join(','):'',th,cx.imageSmoothingEnabled,cx.imageSmoothingQuality,(function(){try{return gfxL()+'/'+fxQ()}catch(e){return''}})()].join('|')}
+function bgBauIn(L,i,j,s){const TS=CR.TS,g=L.g;g.setTransform(1,0,0,1,0,0);zustandUebernehmen(g);g.setTransform(s,0,0,s,-i*TS,-j*TS);
+ const X0=i*TS/s,Y0=j*TS/s,X1=(i+1)*TS/s,Y1=(j+1)*TS/s;const R=CR.rw;bodenRechteck(g,R.gr,R.rd,X0,Y0,X1,Y1);
+ /* Kette mit einer Sicht so groß wie die Kachel (Rand für Teile, die hineinragen, legt die Kette selbst an) */
+ const c0=cx,W0=W,H0=H,cam0=G.cam,ism=g.imageSmoothingEnabled;cx=g;W=(X1-X0)*ZOOM;H=(Y1-Y0)*ZOOM;G.cam={x:(X0+X1)/2,y:(Y0+Y1)/2};CR.bau++;
+ try{RW0()}finally{cx=c0;W=W0;H=H0;G.cam=cam0;CR.bau--}g.globalAlpha=1;g.globalCompositeOperation='source-over';g.imageSmoothingEnabled=ism}
+function bgBau(i,j,s,k,f){const T0=now();const V=VB;let e=V.m.get(k);let L=e&&e.L;if(!L){L=vHolen(V,f);if(!L)return null}
+ if(!e){e={L,gen:-1,lu:f,i,j,s};V.m.set(k,e)}else e.L=L;
+ try{bgBauIn(L,i,j,s);e.gen=V.gen;e.lu=f;CR.st.bBau++}catch(er){cErr('bgbau',er);e.gen=-1}CR.bt+=now()-T0;return e}
+/* Nachprüfung: eine sichtbare Kachel neu zeichnen und vergleichen */
+let PRL=null;
+function bgPruef(e,k){if(!CR.k.pruef)return;try{if(!PRL)PRL=neueLw(CR.TS,true);bgBauIn(PRL,e.i,e.j,e.s);const TS=CR.TS;
+ const a=new Uint32Array(PRL.g.getImageData(0,0,TS,TS).data.buffer),b=new Uint32Array(e.L.g.getImageData(0,0,TS,TS).data.buffer);let n=0;for(let q=0;q<a.length;q++)if(a[q]!==b[q])n++;
+ CR.st.pruef++;if(n){CR.st.pruefFehl++;CR.pruefInfo={k,n,stufe:G.stage,f:CR.st.f};VB.gen++}}catch(er){cErr('prüf',er)}}
+CR.dbgRechtecke=[];
+function bgBild(){const R=CR.rw;CR.rw=null;G.ground=R.gr;G.road=R.rd;
+ const m=trans();if(!m||!CR.k.boden){CR.st.bLive++;bodenLive(R.gr,R.rd);return RW0()}
+ /* in Kammern mit (noch) sichtbarem Arena-Rand: ganz live (Reihenfolge Rand/Kammerboden) */
+ try{if(G.room&&G.ka&&(G.ka.arA||0)>0.001){CR.st.bLive++;bodenLive(R.gr,R.rd);return RW0()}}catch(e){}
+ const s=m.a,TS=CR.TS,V=VB,f=CR.st.f;CR.rw=R;const key=bgBasis();CR.rw=null;
+ if(V.key!==key){vLeeren(V);V.key=key;V.gen++}
+ V.ziel=vZiel(V,TS,0.4);if(V.alle.length>V.ziel)vKuerzen(V);
+ if(!V.ziel){CR.st.bLive++;bodenLive(R.gr,R.rd);return RW0()}
+ const S=sicht(m,TS),st=stabil(s),pre=s+'|';let fehlt=[];CR.rw=R;
+ try{for(let j=S.j0;j<=S.j1;j++)for(let i=S.i0;i<=S.i1;i++){const k=pre+i+','+j;let e=V.m.get(k);
+   if(!e||e.gen!==V.gen||!e.L){if(st&&CR.b0>0&&!(CR.bt>CR.ms&&CR.b1)){CR.b0--;CR.b1=1;e=bgBau(i,j,s,k,f)}else e=null;if(!e||e.gen!==V.gen){fehlt.push([i,j]);continue}}e.lu=f}}
+ finally{CR.rw=null}
+ const nVis=(S.i1-S.i0+1)*(S.j1-S.j0+1);
+ if(fehlt.length>=nVis){CR.st.bLive++;bodenLive(R.gr,R.rd);ringBau(S,s,pre,st,R);return RW0()}
+ /* Kacheln 1:1 auflegen */
+ cx.save();cx.setTransform(1,0,0,1,0,0);cx.globalAlpha=1;cx.globalCompositeOperation='source-over';
+ for(let j=S.j0;j<=S.j1;j++)for(let i=S.i0;i<=S.i1;i++){const e=V.m.get(pre+i+','+j);if(!e||e.gen!==V.gen||!e.L)continue;cx.drawImage(e.L.cv,i*TS+m.e,j*TS+m.f)}cx.restore();
+ /* Live-Rest: ganze Kette, aber nur in den Rechtecken der bewegten Teile und fehlenden Kacheln gerastert */
+ const RE=[];const cw=cv.width,ch=cv.height;
+ const addD=(x0,y0,x1,y1)=>{const a=Math.max(0,Math.floor(x0)),b=Math.max(0,Math.floor(y0)),c=Math.min(cw,Math.ceil(x1)),d=Math.min(ch,Math.ceil(y1));if(c>a&&d>b)RE.push([a,b,c-a,d-b])};
+ for(const q of fehlt)addD(q[0]*TS+m.e,q[1]*TS+m.f,(q[0]+1)*TS+m.e,(q[1]+1)*TS+m.f);
+ try{dynRechtecke((x0,y0,x1,y1)=>addD(x0*s+m.e,y0*s+m.f,x1*s+m.e,y1*s+m.f))}catch(er){cErr('dyn',er);RE.length=0;RE.push([0,0,cw,ch])}
+ CR.st.dynR+=RE.length;if(CR.dbg)CR.dbgRechtecke=RE.slice();
+ cx.save();cx.setTransform(1,0,0,1,0,0);cx.beginPath();if(RE.length)for(const r of RE)cx.rect(r[0],r[1],r[2],r[3]);else cx.rect(0,0,0,0);cx.clip();cx.setTransform(m.a,m.b,m.c,m.d,m.e,m.f);
+ let z=null;CR.ohneSuffix=1;
+ try{bodenLive(R.gr,R.rd);RW0()}catch(er){cErr('rest',er)}finally{CR.ohneSuffix=0;z=zustandLesen(cx);cx.restore();zustandSchreiben(cx,z)}
+ if(fehlt.length)CR.st.bTeil++;else CR.st.bB++;
+ /* zuletzt in der Kette: Brücken (Glanzlichter) und Arena-Rand live */
+ try{kaBruecken(G.time)}catch(er){}try{kaArenaRand()}catch(er){}
+ ringBau(S,s,pre,st,R);
+ if(CR.k.pruef&&f%CR.pruefAlle===37){const L=[];for(let j=S.j0;j<=S.j1;j++)for(let i=S.i0;i<=S.i1;i++){const k=pre+i+','+j,e=V.m.get(k);if(e&&e.gen===V.gen&&e.L)L.push([k,e])}if(L.length){const q=L[(f/CR.pruefAlle|0)%L.length];CR.rw=R;try{bgPruef(q[1],q[0])}finally{CR.rw=null}}}}
+/* Randkacheln vorbauen (eine je Bild, nur wenn Zeit übrig) */
+function ringBau(S,s,pre,st,R){const V=VB,f=CR.st.f;if(!st||CR.b0<=0||CR.bt>CR.ms*0.5)return;CR.rw=R;
+ try{for(let j=S.j0-1;j<=S.j1+1;j++)for(let i=S.i0-1;i<=S.i1+1;i++){if(j>=S.j0&&j<=S.j1&&i>=S.i0&&i<=S.i1)continue;const k=pre+i+','+j,e=V.m.get(k);if(e&&e.gen===V.gen&&e.L){e.lu=f;continue}
+   if(V.alle.length>=V.ziel&&!V.frei.length){/* nur alte Kacheln dürfen verdrängt werden */let alt=false;for(const q of V.m.values())if(q.lu<f-1){alt=true;break}if(!alt)return}
+   CR.b0--;bgBau(i,j,s,k,f);return}}finally{CR.rw=null}}
+
+/* ---------- Deko: Aufzeichnungs-Leinwand (aus Paket „kachel“) ---------- */
+const ST0={fillStyle:'#000000',strokeStyle:'#000000',lineWidth:1,lineCap:'butt',lineJoin:'miter',miterLimit:10,globalAlpha:1,globalCompositeOperation:'source-over',font:'10px sans-serif',textAlign:'start',textBaseline:'alphabetic',
+ direction:'ltr',filter:'none',shadowBlur:0,shadowColor:'rgba(0,0,0,0)',shadowOffsetX:0,shadowOffsetY:0,imageSmoothingEnabled:true,imageSmoothingQuality:'low',lineDashOffset:0};
+function Rec(){this.reset()}
+const RP=Rec.prototype;
+RP.reset=function(){this.L=[];this.m=[1,0,0,1,0,0];this.S=[];this.s=Object.assign({},ST0);this.dash=[];this.pb=null;this.bb=[Infinity,Infinity,-Infinity,-Infinity];this.mix=0;this.txt=0;this.gid=0;this.canvas={width:4096,height:4096}};
+const rv=(r,v)=>v&&typeof v==='object'?(v.__rk?v.__rk:'o'+oid(v)):typeof v==='number'?String(v):JSON.stringify(v);
+for(const k in ST0)Object.defineProperty(RP,k,{configurable:true,get(){return this.s[k]},set(v){this.s[k]=v;this.L.push(k+'='+rv(this,v));if(k==='globalCompositeOperation'&&v!=='source-over')this.mix=1;if(k==='filter'&&v&&v!=='none')this.mix=1}});
+RP.log=function(n,a){let t=n+'(';for(let i=0;i<a.length;i++)t+=(i?',':'')+rv(this,a[i]);this.L.push(t+')')};
+RP.mul=function(a,b,c,d,e,f){const m=this.m;this.m=[m[0]*a+m[2]*b,m[1]*a+m[3]*b,m[0]*c+m[2]*d,m[1]*c+m[3]*d,m[0]*e+m[2]*f+m[4],m[1]*e+m[3]*f+m[5]]};
+RP.pt=function(x,y,r){const m=this.m;r=r||0;const X=m[0]*x+m[2]*y+m[4],Y=m[1]*x+m[3]*y+m[5],k=r*Math.max(Math.hypot(m[0],m[1]),Math.hypot(m[2],m[3]));let b=this.pb;if(!b)b=this.pb=[Infinity,Infinity,-Infinity,-Infinity];
+ if(X-k<b[0])b[0]=X-k;if(Y-k<b[1])b[1]=Y-k;if(X+k>b[2])b[2]=X+k;if(Y+k>b[3])b[3]=Y+k};
+RP.sk=function(){const m=this.m;return Math.max(Math.hypot(m[0],m[1]),Math.hypot(m[2],m[3]))};
+RP.add=function(b,ex){if(!b||!(b[2]>=b[0]))return;const s=this.s,sh=(s.shadowBlur>0||s.shadowOffsetX||s.shadowOffsetY)?s.shadowBlur*2+Math.abs(s.shadowOffsetX)+Math.abs(s.shadowOffsetY):0;ex=(ex||0)+sh+1;const B=this.bb;
+ if(b[0]-ex<B[0])B[0]=b[0]-ex;if(b[1]-ex<B[1])B[1]=b[1]-ex;if(b[2]+ex>B[2])B[2]=b[2]+ex;if(b[3]+ex>B[3])B[3]=b[3]+ex};
+RP.save=function(){this.log('save',[]);this.S.push([this.m.slice(),Object.assign({},this.s),this.dash.slice()])};
+RP.restore=function(){this.log('restore',[]);const q=this.S.pop();if(q){this.m=q[0];this.s=q[1];this.dash=q[2]}};
+RP.translate=function(x,y){this.log('tr',arguments);this.mul(1,0,0,1,+x,+y)};
+RP.scale=function(x,y){this.log('sc',arguments);this.mul(+x,0,0,+y,0,0)};
+RP.rotate=function(a){this.log('ro',arguments);const c=Math.cos(a),s=Math.sin(a);this.mul(c,s,-s,c,0,0)};
+RP.transform=function(a,b,c,d,e,f){this.log('tf',arguments);this.mul(+a,+b,+c,+d,+e,+f)};
+RP.setTransform=function(a,b,c,d,e,f){this.log('st',arguments);if(a&&typeof a==='object'){const o=a;this.m=[o.a,o.b,o.c,o.d,o.e,o.f]}else if(arguments.length>=6)this.m=[+a,+b,+c,+d,+e,+f];else this.m=[1,0,0,1,0,0]};
+RP.resetTransform=function(){this.log('rt',[]);this.m=[1,0,0,1,0,0]};
+RP.getTransform=function(){const m=this.m;return{a:m[0],b:m[1],c:m[2],d:m[3],e:m[4],f:m[5],is2D:true,isIdentity:false}};
+RP.beginPath=function(){this.log('bp',[]);this.pb=null};
+RP.closePath=function(){this.log('cp',[])};
+RP.moveTo=function(x,y){this.log('mt',arguments);this.pt(x,y)};
+RP.lineTo=function(x,y){this.log('lt',arguments);this.pt(x,y)};
+RP.quadraticCurveTo=function(a,b,x,y){this.log('qc',arguments);this.pt(a,b);this.pt(x,y)};
+RP.bezierCurveTo=function(a,b,c,d,x,y){this.log('bc',arguments);this.pt(a,b);this.pt(c,d);this.pt(x,y)};
+RP.arcTo=function(a,b,c,d,r){this.log('at',arguments);this.pt(a,b,r);this.pt(c,d,r)};
+RP.arc=function(x,y,r){this.log('ar',arguments);this.pt(x,y,Math.abs(r))};
+RP.ellipse=function(x,y,rx,ry){this.log('el',arguments);this.pt(x,y,Math.max(Math.abs(rx),Math.abs(ry)))};
+RP.rect=function(x,y,w,h){this.log('re',arguments);this.pt(x,y);this.pt(x+w,y);this.pt(x,y+h);this.pt(x+w,y+h)};
+RP.fill=function(){this.log('fi',[]);this.add(this.pb,0)};
+RP.stroke=function(){this.log('sk',[]);const s=this.s;this.add(this.pb,(s.lineWidth/2)*this.sk()*(s.lineJoin==='miter'?Math.max(1,s.miterLimit):1.5)+1)};
+RP.clip=function(){this.log('cl',arguments)};
+RP.rbb=function(x,y,w,h){const o=this.pb;this.pb=null;this.pt(x,y);this.pt(x+w,y);this.pt(x,y+h);this.pt(x+w,y+h);const b=this.pb;this.pb=o;return b};
+RP.fillRect=function(x,y,w,h){this.log('fr',arguments);this.add(this.rbb(x,y,w,h),0)};
+RP.strokeRect=function(x,y,w,h){this.log('sr',arguments);const s=this.s;this.add(this.rbb(x,y,w,h),(s.lineWidth/2)*this.sk()*Math.max(1,s.miterLimit)+1)};
+RP.clearRect=function(){this.log('cr',arguments);this.mix=1};
+RP.drawImage=function(img){this.log('di',arguments);const a=arguments;let x,y,w,h;const iw=img&&(img.width||img.videoWidth)||0,ih=img&&(img.height||img.videoHeight)||0;
+ if(a.length<=3){x=a[1];y=a[2];w=iw;h=ih}else if(a.length<=5){x=a[1];y=a[2];w=a[3];h=a[4]}else{x=a[5];y=a[6];w=a[7];h=a[8]}this.add(this.rbb(+x,+y,+w,+h),0)};
+RP.fillText=function(){this.log('ft',arguments);this.txt=1;const s=this.s;const fs=parseFloat((/(\d+(?:\.\d+)?)px/.exec(s.font)||[0,10])[1]);const a=arguments,w=String(a[0]).length*fs;this.add(this.rbb(+a[1]-w,+a[2]-fs*1.5,w*2,fs*2.5),2)};
+RP.strokeText=function(){this.log('stx',arguments);this.txt=1;const s=this.s;const fs=parseFloat((/(\d+(?:\.\d+)?)px/.exec(s.font)||[0,10])[1]);const a=arguments,w=String(a[0]).length*fs;this.add(this.rbb(+a[1]-w,+a[2]-fs*1.5,w*2,fs*2.5),s.lineWidth+2)};
+RP.measureText=function(t){this.txt=1;return{width:String(t).length*6}};
+RP.getImageData=function(){this.txt=1;return{data:new Uint8ClampedArray(4),width:1,height:1}};RP.putImageData=function(){this.txt=1};RP.createImageData=function(){this.txt=1;return{data:new Uint8ClampedArray(4),width:1,height:1}};
+RP.setLineDash=function(a){this.log('ld',[JSON.stringify(a)]);this.dash=Array.isArray(a)?a.slice():[]};RP.getLineDash=function(){return this.dash.slice()};
+RP.isPointInPath=function(){this.txt=1;return false};RP.isPointInStroke=function(){this.txt=1;return false};
+RP.grad=function(n,a){const r=this,id='g'+(++this.gid);this.log(n,a);return{__rk:id,addColorStop(o,c){r.L.push(id+'.cs('+o+','+c+')')}}};
+RP.createLinearGradient=function(){return this.grad('clg',arguments)};RP.createRadialGradient=function(){return this.grad('crg',arguments)};RP.createConicGradient=function(){return this.grad('ccg',arguments)};
+RP.createPattern=function(){const id='p'+(++this.gid);this.log('cpt',arguments);return{__rk:id,setTransform(){}}};
+const REC=new Rec();CR.Rec=Rec;
+/* beliebigen Zeichenaufruf aufzeichnen (Umriss in Zielkoordinaten bei Einheitsmatrix = Weltkoordinaten) */
+function aufnehmen(fn){const R=REC;R.reset();const c0=cx;try{cx=R;fn()}finally{cx=c0}const B=R.bb;return{bb:B[2]>=B[0]?{x0:B[0],y0:B[1],x1:B[2],y1:B[3]}:null,mix:R.mix,n:R.L.length}}
+const PR={rn:0};
+let prRnd=12345;function prRandom(){prRnd=(prRnd*1103515245+12345)&0x7fffffff;PR.rn++;return prRnd/0x7fffffff}
+let _dd1=null;/* drawDeco-Kette vor diesem Paket */
+function probe(d,t,seed){const R=REC;R.reset();
+ const c0=cx,pn=performance.now,dn=Date.now,mr=Math.random,gt=G.time,L=[G.fxs,G.parts,G.lights,G.nums,G.zones,G.decals,G.ezones].map(a=>Array.isArray(a)?[a,a.length]:null);let ne=0;
+ const fake=1e6+seed*1777.7;prRnd=(seed*7919+13)&0x7fffffff;PR.rn=0;
+ try{cx=R;CR.dbau++;performance.now=function(){return fake};Date.now=function(){return 1.7e12+fake};Math.random=prRandom;G.time=t;try{_dd1(d,t)}catch(e){ne=1}}
+ finally{cx=c0;CR.dbau--;performance.now=pn;Date.now=dn;Math.random=mr;G.time=gt;for(const q of L)if(q&&q[0].length!==q[1]){if(q[0].length>q[1])q[0].length=q[1];ne=1}}
+ const B=R.bb;return{L:R.L.join('|'),bb:B[2]>=B[0]?{x0:B[0],y0:B[1],x1:B[2],y1:B[3]}:null,ne,mix:R.mix,txt:R.txt,rn:PR.rn,n:R.L.length}}
+const TT=[0.37,2.91,6.13,13.6,21.7];
+function ruhig(d,nT,r0){const a=r0||probe(d,TT[0],1);if(a.ne||a.mix||a.txt||a.rn)return false;for(let q=1;q<nT;q++){const b=probe(d,TT[q],q+1);if(b.ne||b.rn||b.L!==a.L)return false}return true}
+const KL={arr:null,len:0,env:'',idx:0,arten:new Map(),info:[],fertig:0,gen:0,sx:null,sy:null,sk:null,ss:null,sv:null,fest:new Set(),grid:new Map(),GC:128,ext:0};
+CR.KL=KL;CR.dbau=0;
+function env(){const a=[];const p=f=>{try{a.push(f())}catch(e){a.push('?')}};
+ p(()=>gfxL());p(()=>fxQ());p(()=>OA.s);p(()=>OA.ul?1:0);p(()=>G.themeKey);p(()=>G.runId);p(()=>G.stage);p(()=>G.room?(G.room.type||'r')+G.room.x0+','+G.room.y0:'');
+ p(()=>{const x=WX();return x?x.w+'/'+x.z:''});p(()=>NET.role||'');p(()=>CU('nacht')?1:0);p(()=>WF.aus.farbe?1:0);p(()=>G.theme&&G.theme.rune||'');return a.join('|')}
+function sig(){const D=G.deco;KL.arr=D;KL.len=D.length;const n=D.length;KL.sx=new Float64Array(n);KL.sy=new Float64Array(n);KL.ss=new Float64Array(n);KL.sv=new Float64Array(n);KL.sk=new Array(n);
+ for(let i=0;i<n;i++){const d=D[i];KL.sx[i]=+d.x;KL.sy[i]=+d.y;KL.ss[i]=+d.s;KL.sv[i]=+d.v;KL.sk[i]=d.k}}
+function sigOk(){const D=G.deco;if(D!==KL.arr||D.length!==KL.len)return false;const n=D.length,lim=Math.min(n,3000);let i0=0;if(n>lim){i0=KL.rot=((KL.rot||0)+lim)%n}const eq=Object.is;
+ for(let q=0;q<lim;q++){const i=(i0+q)%n,d=D[i];if(!d||!eq(+d.x,KL.sx[i])||!eq(+d.y,KL.sy[i])||d.k!==KL.sk[i]||!eq(+d.s,KL.ss[i])||!eq(+d.v,KL.sv[i]))return false}return true}
+function neuKlass(){sig();KL.env=env();KL.idx=0;KL.info=new Array(KL.len);KL.fertig=0;KL.arten=new Map();KL.fest.clear();KL.grid=new Map();KL.gen++;vLeeren(VD);VD.key='';CR.st.klass++}
+function klassSchritt(){const D=KL.arr,t0=now();
+ while(KL.idx<KL.len){if(now()-t0>CR.ms&&KL.idx>0)return false;const i=KL.idx++,d=D[i];if(!d||typeof d!=='object'){KL.info[i]={i,bb:null};continue}
+  let A=KL.arten.get(d.k);if(!A){A={n:0,ruhig:true,bsp:[]};KL.arten.set(d.k,A)}
+  const r=probe(d,TT[0],1);let bb=r.bb?Object.assign({},r.bb):{leer:1,x0:d.x,y0:d.y,x1:d.x,y1:d.y};if(r.ne)bb.ne=1;
+  const ru=A.ruhig?ruhig(d,A.n<4?5:2,r):false;if(A.n<4){A.n++;A.bsp.push(d)}if(!ru){A.ruhig=false;if(!bb.leer||r.n){for(let q=1;q<5;q++){const b=probe(d,TT[q],q+11).bb;if(b){if(bb.leer){bb={x0:b.x0,y0:b.y0,x1:b.x1,y1:b.y1};continue}bb.x0=Math.min(bb.x0,b.x0);bb.y0=Math.min(bb.y0,b.y0);bb.x1=Math.max(bb.x1,b.x1);bb.y1=Math.max(bb.y1,b.y1)}}}}
+  KL.info[i]={bb,i}}
+ return true}
+function klassAbschluss(){const D=KL.arr,G2=new Map(),GC=KL.GC;let nf=0,nl=0,nd=0,ext=0;
+ const addBox=(M,b,v)=>{for(let y=Math.floor(b.y0/GC);y<=Math.floor(b.y1/GC);y++)for(let x=Math.floor(b.x0/GC);x<=Math.floor(b.x1/GC);x++){const k=x+','+y;let L=M.get(k);if(!L)M.set(k,L=[]);L.push(v)}};
+ const hit=(b)=>{for(let y=Math.floor(b.y0/GC);y<=Math.floor(b.y1/GC);y++)for(let x=Math.floor(b.x0/GC);x<=Math.floor(b.x1/GC);x++){const L=G2.get(x+','+y);if(L)for(const q of L)if(q.x0<b.x1&&q.x1>b.x0&&q.y0<b.y1&&q.y1>b.y0)return true}return false};
+ for(let i=0;i<KL.len;i++){const I=KL.info[i],d=D[i];if(!I||!I.bb){nl++;continue}const b=I.bb,A=KL.arten.get(d.k);
+  if(b.leer){if(!A||!A.ruhig||b.ne){nl++;const g={x0:d.x-200,y0:d.y-200,x1:d.x+200,y1:d.y+200};addBox(G2,g,g)}continue}
+  const M=54;/* Sichtrand 70 minus Wackeln */const passt=b.x0>=d.x-M&&b.x1<=d.x+M&&b.y0>=d.y-M&&b.y1<=d.y+M;
+  let live=!A||!A.ruhig||!passt||b.ne;if(!A||!A.ruhig)nd++;
+  if(!live&&hit(b))live=true;
+  if(live){nl++;const g=b.ne?{x0:d.x-600,y0:d.y-600,x1:d.x+600,y1:d.y+600}:{x0:b.x0-12,y0:b.y0-12,x1:b.x1+12,y1:b.y1+12};addBox(G2,g,g)}
+  else{nf++;KL.fest.add(d);addBox(KL.grid,b,I);ext=Math.max(ext,b.x1-b.x0,b.y1-b.y0)}}
+ KL.ext=ext;KL.fertig=1;CR.st.fest=nf;CR.st.live=nl;CR.st.dyn=nd}
+function nachpruef(){if(!CR.k.pruef||!KL.fertig||CR.st.f%10)return;const L=[...KL.arten.entries()].filter(e=>e[1].ruhig&&e[1].bsp.length);if(!L.length)return;const z=CR.st.f/10|0,e=L[z%L.length],A=e[1],d=A.bsp[z%A.bsp.length];
+ if(!d)return;CR.st.nachpruef++;const t1=(G.time||0)%97+0.5;const a=probe(d,t1,(z%977)+31),b=probe(d,t1+7.77,(z%977)+47);
+ const ok=!a.ne&&!b.ne&&!a.mix&&!a.txt&&!a.rn&&!b.rn&&a.L===b.L;
+ if(!ok){A.ruhig=false;CR.st.neuArt++;KL.fest.clear();KL.grid=new Map();KL.gen++;vLeeren(VD);VD.key='';klassAbschluss()}}
+
+/* ---------- Deko-Kacheln: 256er Raster, Leinwand mit festem Rand 32 (kleine Deko über der Kachelkante liegt ganz in der Leinwand) ---------- */
+function dekoBau(i,j,s,k,f){const T0=now();const V=VD;let e=V.m.get(k);try{return dekoBau0(i,j,s,k,f,e)}finally{CR.bt+=now()-T0}}
+function dekoBau0(i,j,s,k,f,e){const TS=CR.TSD,A=CR.A,N=TS+2*A,X0=i*TS/s,Y0=j*TS/s,X1=(i+1)*TS/s,Y1=(j+1)*TS/s,GC=KL.GC,seen=new Set(),L=[],V=VD;
+ for(let y=Math.floor(Y0/GC);y<=Math.floor(Y1/GC);y++)for(let x=Math.floor(X0/GC);x<=Math.floor(X1/GC);x++){const Q=KL.grid.get(x+','+y);if(Q)for(const I of Q){if(seen.has(I))continue;seen.add(I);const b=I.bb;if(b.x0<X1&&b.x1>X0&&b.y0<Y1&&b.y1>Y0)L.push(I)}}
+ CR.st.dBau++;if(!e){e={L:null,gen:V.gen,lu:f,r:[]};V.m.set(k,e)}e.gen=V.gen;e.lu=f;e.r=[];
+ if(!L.length){if(e.L){V.frei.push(e.L);e.L=null}return e}
+ if(!e.L){e.L=vHolen(V,f);if(!e.L){V.m.delete(k);return null}}
+ L.sort((a,b)=>a.i-b.i);const g=e.L.g;g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,N,N);zustandUebernehmen(g);g.setTransform(s,0,0,s,A-i*TS,A-j*TS);
+ const NQ=CR.dq,H2=TS/NQ,Q=[];for(let q=0;q<NQ*NQ;q++)Q.push([TS,TS,0,0]);const c0=cx,mr=Math.random,t=G.time;
+ try{cx=g;CR.dbau++;Math.random=prRandom;for(const I of L){const d=KL.arr[I.i];try{_dd1(d,t)}catch(er){}const b=I.bb,x0=b.x0*s-i*TS,y0=b.y0*s-j*TS,x1=b.x1*s-i*TS,y1=b.y1*s-j*TS;
+   for(let q=0;q<Q.length;q++){const qx=(q%NQ)*H2,qy=Math.floor(q/NQ)*H2,R=Q[q];const a0=Math.max(qx,x0),b0=Math.max(qy,y0),a1=Math.min(qx+H2,x1),b1=Math.min(qy+H2,y1);if(a1<=a0||b1<=b0)continue;R[0]=Math.min(R[0],a0);R[1]=Math.min(R[1],b0);R[2]=Math.max(R[2],a1);R[3]=Math.max(R[3],b1)}}}
+ finally{cx=c0;CR.dbau--;Math.random=mr}
+ for(let q=0;q<Q.length;q++){const R=Q[q],qx=(q%NQ)*H2,qy=Math.floor(q/NQ)*H2;if(R[2]<=R[0])continue;const x0=Math.max(qx,Math.floor(R[0])-1),y0=Math.max(qy,Math.floor(R[1])-1),x1=Math.min(qx+H2,Math.ceil(R[2])+1),y1=Math.min(qy+H2,Math.ceil(R[3])+1);if(x1>x0&&y1>y0)e.r.push([x0,y0,x1-x0,y1-y0])}
+ if(!e.r.length){V.frei.push(e.L);e.L=null}return e}
+CR.dOn=0;
+function dekoBild(){CR.dOn=0;const V=VD;
+ if(spar()||!CR.k.deko){return}
+ if(!KL.arr||!sigOk()||KL.env!==env())neuKlass();
+ if(!KL.fertig){if(!klassSchritt()){CR.st.dL++;return}klassAbschluss()}
+ if(!KL.fest.size){CR.st.dL++;return}
+ const m=trans();if(!m){CR.st.dL++;return}
+ const s=m.a,TS=CR.TSD,A=CR.A,key=KL.gen+'|'+TS;if(V.key!==key){vLeeren(V);V.key=key;V.gen++}
+ V.ziel=vZiel(V,TS,0.55);if(V.alle.length>V.ziel)vKuerzen(V);if(!V.ziel){CR.st.dL++;return}
+ const S=sicht(m,TS),st=stabil(s),pre=s+'|',f=CR.st.f;let fehlt=0;
+ for(let j=S.j0;j<=S.j1;j++)for(let i=S.i0;i<=S.i1;i++){const k=pre+i+','+j;let e=V.m.get(k);
+  if(!e||e.gen!==V.gen){if(!st||CR.b0<=0||(CR.bt>CR.ms&&CR.b1)){fehlt++;continue}CR.b0--;CR.b1=1;e=dekoBau(i,j,s,k,f);if(!e){fehlt++;continue}}e.lu=f}
+ if(fehlt){CR.st.dL++;dRing(S,s,pre,st);return}
+ cx.save();cx.setTransform(1,0,0,1,0,0);cx.globalAlpha=1;cx.globalCompositeOperation='source-over';
+ for(let j=S.j0;j<=S.j1;j++)for(let i=S.i0;i<=S.i1;i++){const e=V.m.get(pre+i+','+j);if(!e||!e.L)continue;const ox=i*TS+m.e,oy=j*TS+m.f;for(const q of e.r){if(ox+q[0]>=cv.width||oy+q[1]>=cv.height||ox+q[0]+q[2]<=0||oy+q[1]+q[3]<=0)continue;cx.drawImage(e.L.cv,q[0]+A,q[1]+A,q[2],q[3],ox+q[0],oy+q[1],q[2],q[3])}}
+ cx.restore();CR.dOn=1;CR.st.dB++;dRing(S,s,pre,st);
+ try{nachpruef()}catch(e){cErr('nachprüf',e)}}
+function dRing(S,s,pre,st){const V=VD,f=CR.st.f;if(!st||CR.b0<=0||CR.bt>CR.ms*0.5)return;
+ for(let j=S.j0-1;j<=S.j1+1;j++)for(let i=S.i0-1;i<=S.i1+1;i++){if(j>=S.j0&&j<=S.j1&&i>=S.i0&&i<=S.i1)continue;const k=pre+i+','+j,e=V.m.get(k);if(e&&e.gen===V.gen){e.lu=f;continue}
+  if(V.alle.length>=V.ziel&&!V.frei.length){let alt=false;for(const q of V.m.values())if(q.L&&q.lu<f-1){alt=true;break}if(!alt)return}
+  CR.b0--;dekoBau(i,j,s,k,f);return}}
+
+/* ---------- Sparbetrieb (Handheld): die rg2-Deko-Kacheln (512er Welt-Kacheln mit 128 Rand, je Bild skaliert und geglättet gezeichnet,
+   ~2,3-fache Überdeckung) werden 1:1 in Bildpunkt-Kacheln übertragen – gleiche Bilder, gleiche Umrechnung, nur um ganze Bildpunkte verschoben.
+   Welche rg2-Kacheln gebaut/gezeichnet/als „ok“ markiert werden, folgt genau der rg2-Schleife; diese sieht danach eine leere Liste. ---------- */
+const RK={on:0};CR.RK=RK;
+function rgSig(i,j,s){const TS=CR.TSD,CS=RGDK_CS,PD=RGDK_PAD,X0=i*TS/s,Y0=j*TS/s,X1=(i+1)*TS/s,Y1=(j+1)*TS/s;let r='';
+ for(let cy=Math.floor((Y0-PD)/CS);cy<=Math.floor((Y1+PD)/CS);cy++)for(let cx_=Math.floor((X0-PD)/CS);cx_<=Math.floor((X1+PD)/CS);cx_++){const ch=RGDK.m.get(cx_+','+cy);if(ch&&ch.cv&&ch.ok)r+=cx_+','+cy+':'+oid(ch.cv)+';'}return r}
+function rgBau(i,j,s,k,f,sg){const T0=now();const V=VD;let e=V.m.get(k);try{
+  if(!e){e={L:null,gen:V.gen,lu:f,sg:''};V.m.set(k,e)}if(!e.L){e.L=vHolen(V,f);if(!e.L){V.m.delete(k);return null}}
+  const TS=CR.TSD,A=CR.A,N=TS+2*A,g=e.L.g,CS=RGDK_CS,PD=RGDK_PAD;g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,N,N);zustandUebernehmen(g);g.setTransform(s,0,0,s,A-i*TS,A-j*TS);
+  for(const ch of RGDK.m.values()){if(!ch.cv||!ch.ok)continue;const x0=ch.x-PD,y0=ch.y-PD,x1=ch.x+CS+PD,y1=ch.y+CS+PD;if(x1*s<i*TS||x0*s>(i+1)*TS||y1*s<j*TS||y0*s>(j+1)*TS)continue;g.drawImage(ch.cv,x0,y0,CS+2*PD,CS+2*PD)}
+  e.gen=V.gen;e.lu=f;e.sg=sg;CR.st.dBau++;return e}finally{CR.bt+=now()-T0}}
+function rgTiles(){const m=trans();if(!m)return false;const s=m.a,TS=CR.TSD,A=CR.A,V=VD,f=CR.st.f;
+ const vw=W/ZOOM,vh=H/ZOOM,camX=G.cam.x-vw/2,camY=G.cam.y-vh/2,inV=(x,y,mm)=>x>camX-mm&&x<camX+vw+mm&&y>camY-mm&&y<camY+vh+mm;
+ /* wie die rg2-Schleife: bauen (1 je Bild), ok/lu setzen */
+ const sc=Math.round(DPR*ZOOM*20)/20;let bud=1;const CS=RGDK_CS,PD=RGDK_PAD;
+ for(const ch of RGDK.m.values()){if(!inV(ch.x+CS/2,ch.y+CS/2,CS/2+PD))continue;if(!ch.cv||Math.abs(ch.sc/sc-1)>0.12){if(bud>0||!ch.cv){if(bud-->0)rgDkBau(ch,sc);else continue}}ch.ok=1;ch.lu=++RGDK.fc}
+ const key='rg|'+RGDK.key+'|'+TS;if(V.key!==key){vLeeren(V);V.key=key;V.gen++}
+ V.ziel=vZiel(V,TS,0.55);if(V.alle.length>V.ziel)vKuerzen(V);if(!V.ziel)return false;
+ const S=sicht(m,TS),st=stabil(s),pre=s+'|';let fehlt=0;const L=[];
+ for(let j=S.j0;j<=S.j1;j++)for(let i=S.i0;i<=S.i1;i++){const k=pre+i+','+j,sg=rgSig(i,j,s);let e=V.m.get(k);
+  if(!e||e.gen!==V.gen||e.sg!==sg){if(!st||CR.b0<=0||(CR.bt>CR.ms&&CR.b1)){fehlt++;continue}CR.b0--;CR.b1=1;e=rgBau(i,j,s,k,f,sg);if(!e){fehlt++;continue}}e.lu=f;L.push([i,j,e])}
+ if(fehlt){CR.st.dL++;return false}
+ cx.save();cx.setTransform(1,0,0,1,0,0);cx.globalAlpha=1;cx.globalCompositeOperation='source-over';for(const q of L){if(q[2].sg)cx.drawImage(q[2].L.cv,A,A,TS,TS,q[0]*TS+m.e,q[1]*TS+m.f,TS,TS)}cx.restore();
+ CR.st.dB++;return true}
+try{const f=rgDkPrep;rgDkPrep=function(){const r=f.apply(this,arguments);
+  try{if(CR.inRW&&!CR.bau&&!CR.dbau&&!RGDK.bau&&CR.k.deko&&spar()&&!G.room&&grund()&&rgTiles()){const M=RGDK.m;RK.M=M;RGDK.m=RK.P={values(){RGDK.m=M;return [][Symbol.iterator]()},get(k){return M.get(k)},set(k,v){return M.set(k,v)},clear(){return M.clear()},get size(){return M.size}}}}catch(e){cErr('rgdk',e)}
+  return r}}catch(e){cErr('haken rgDkPrep',e)}
+
+/* ---------- Minikarte: alle 100 ms neu, dazwischen 1:1 auflegen ---------- */
+const MK={c:null,g:null,x:0,y:0,w:0,h:0,sig:'',rf:-1e9,bf:-1e9,ok:0,mix:0,leer:0};CR.MK=MK;
+function mkSetT(g,ox,oy){const P=CanvasRenderingContext2D.prototype;g.setTransform=function(a,b,c,d,e,f){if(a&&typeof a==='object'){const o=a;return P.setTransform.call(g,o.a,o.b,o.c,o.d,o.e-ox,o.f-oy)}if(arguments.length<6)return P.setTransform.call(g,1,0,0,1,-ox,-oy);return P.setTransform.call(g,a,b,c,d,e-ox,f-oy)};
+ g.resetTransform=function(){return P.setTransform.call(g,1,0,0,1,-ox,-oy)};
+ g.getTransform=function(){const m=P.getTransform.call(g);try{return new DOMMatrix([m.a,m.b,m.c,m.d,m.e+ox,m.f+oy])}catch(e){return{a:m.a,b:m.b,c:m.c,d:m.d,e:m.e+ox,f:m.f+oy}}}}
+function karteBauen(prev,args){const x0=MK.bx0,y0=MK.by0,w=MK.bw,h=MK.bh;
+ if(!MK.c||MK.c.width<w||MK.c.height<h){const nw=Math.max(w,MK.c?MK.c.width:0),nh=Math.max(h,MK.c?MK.c.height:0);if(!MK.c){MK.c=document.createElement('canvas');MK.c.__crK=1;CR.st.neuCv++}MK.c.width=nw;MK.c.height=nh;
+  try{MK.g=MK.c.getContext('2d',{willReadFrequently:true})}catch(e){MK.g=MK.c.getContext('2d')}}
+ const g=MK.g;CanvasRenderingContext2D.prototype.setTransform.call(g,1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.clearRect(0,0,MK.c.width,MK.c.height);
+ zustandUebernehmen(g);try{g.globalAlpha=cx.globalAlpha}catch(e){}mkSetT(g,x0,y0);try{const m=cx.getTransform();g.setTransform(m.a,m.b,m.c,m.d,m.e,m.f)}catch(e){}
+ const c0=cx;try{cx=g;prev.apply(null,args)}finally{cx=c0}
+ Object.assign(MK,{x:x0,y:y0,w,h,ok:1});CR.st.kNeu++}
+/* Karte höchstens jedes 2. Bild neu zeichnen (in eine kleine Leinwand), dazwischen 1:1 auflegen. Umriss und Mischmodi werden durch Aufzeichnen
+   (ohne Rastern) bestimmt: beim ersten Mal, bei geänderter Anzeige (mkSig) und sonst jede Sekunde. Nur normal mischende Karten. */
+function mkSig(){let b='';try{const B=G.banner;b=B?(B.small?1:0)+'/'+(B.bars?1:0)+'/'+(B.y?1:0):''}catch(e){}
+ return [hud.hidden?1:0,G.state,SAVE.wlMini===false?0:1,G.room?1:0,b,innerWidth,innerHeight,W,H,DPR,cv.width,cv.height,G.stage,G.runId,G.overlay||'',G.paused?1:0,typeof NET!=='undefined'&&NET.role||'',G.mp?PL.length:1].join('|')}
+CR.karteJe=2;
+{const f=wlMini;wlMini=function(){
+  if(!CR.k.karte||!grund()||!rahmenOk())return f.apply(this,arguments);
+  const fr=CR.st.f,sg=mkSig();
+  try{if(sg!==MK.sig||fr-MK.rf>=60||fr<MK.rf){const r=aufnehmen(()=>f.apply(null,arguments));MK.sig=sg;MK.rf=fr;MK.mix=r.mix;MK.ok=0;
+    if(!r.bb){MK.leer=1}else{MK.leer=0;const b=r.bb;MK.bx0=Math.max(0,Math.floor(b.x0)-4);MK.by0=Math.max(0,Math.floor(b.y0)-4);const x1=Math.min(cv.width,Math.ceil(b.x1)+4),y1=Math.min(cv.height,Math.ceil(b.y1)+4);MK.bw=x1-MK.bx0;MK.bh=y1-MK.by0;if(MK.bw<=0||MK.bh<=0)MK.leer=1}}}
+  catch(e){cErr('karte',e);MK.mix=1}
+  if(MK.mix){CR.st.kLive++;return f.apply(this,arguments)}
+  if(MK.leer){CR.st.kN++;return}
+  if(!MK.ok||fr-MK.bf>=CR.karteJe||fr<MK.bf){try{karteBauen(f,arguments);MK.bf=fr}catch(e){cErr('karte',e);MK.ok=0;return f.apply(this,arguments)}}else CR.st.kAlt++;
+  CR.st.kN++;const c=cx;c.save();c.setTransform(1,0,0,1,0,0);c.globalAlpha=1;c.globalCompositeOperation='source-over';c.drawImage(MK.c,0,0,MK.w,MK.h,MK.x,MK.y,MK.w,MK.h);c.restore()}}
+
+/* ---------- Sprite-Leinwände im Prozessor-Pfad als Prozessor-Leinwand ---------- */
+function cpuCtx(c){try{if(CR.k.leinw&&grund()&&c&&c.getContext)c.getContext('2d',{willReadFrequently:true})}catch(e){}return c}
+try{const f=kgCv;kgCv=function(){return cpuCtx(f.apply(this,arguments))}}catch(e){cErr('haken kgCv',e)}
+
+/* ---------- Einhängen ---------- */
+RW0=drawRoomWalls;_dd1=drawDeco;
+CR.b0=0;CR.bt=0;CR.b1=0;
+{const _rw=renderWorld;renderWorld=function(dt){const g=grund();if(!g||!rahmenOk())return _rw.apply(this,arguments);
+  CR.st.f++;CR.b0=CR.bud;CR.bt=0;CR.b1=0;CR.last=now();CR.inRW=1;CR.dOn=0;let R=null,pfs=null,pa;
+  if(CR.k.boden&&G.ground){R={gr:G.ground,rd:G.road};CR.rw=R;G.ground='rgba(0,0,0,0)';G.road=null}
+  try{pfs=window.__hsPERF&&__hsPERF.str;if(pfs){pa=pfs.aus;pfs.aus=true}}catch(e){pfs=null}
+  try{return _rw.apply(this,arguments)}
+  finally{if(pfs)pfs.aus=pa;if(R){if(CR.rw===R){CR.rw=null;G.ground=R.gr;G.road=R.rd;CR.k.boden=0;cErr('boden','drawRoomWalls nicht erreicht – Boden-Ebene aus')}else{G.ground=R.gr;G.road=R.rd}}CR.inRW=0;CR.dOn=0}}}
+{const _w=drawRoomWalls;drawRoomWalls=function(){if(CR.inRW&&CR.rw&&!CR.bau){try{return bgBild()}catch(e){cErr('boden',e);const R=CR.rw;if(R){CR.rw=null;G.ground=R.gr;G.road=R.rd;try{bodenLive(R.gr,R.rd)}catch(e2){}}return _w.apply(this,arguments)}}
+  return _w.apply(this,arguments)}}
+{const _dc=drawDecals;drawDecals=function(inView){let r;try{r=_dc.apply(this,arguments)}finally{try{if(RK.P&&RGDK.m===RK.P)RGDK.m=RK.M;RK.P=null;RK.M=null}catch(e){}}if(CR.inRW&&!CR.dbau&&!CR.bau){try{dekoBild()}catch(e){CR.dOn=0;cErr('deko',e)}}return r}}
+drawDeco=function(d,t){if(CR.dOn&&!CR.dbau&&KL.fest.has(d))return;return _dd1.apply(this,arguments)};
+CR.dbg={probe,ruhig,aufnehmen,bgBasis:()=>bgBasis(),VB,VD};
+
+/* ---------- Diagnose-Zeile ---------- */
+function zeile(){const g=grund();const nb=VB.alle.length,nd=VD.alle.length;
+ if(!g)return 'CPU-Kacheln: aus'+(CR.modus!=='auto'?' (Schalter '+CR.modus+')':'');
+ const s=CR.st,bt=s.bB+s.bTeil+s.bLive;
+ return `CPU-Kacheln: an (${g}) · Boden ${nb} Kacheln (${bt?Math.round((s.bB+s.bTeil)/bt*100):0} % Bilder aus Kacheln) · Deko ${nd} Kacheln (${spar()?'rg2-Bilder 1:1':KL.fest.size+' ruhend'}) · ${String(CR.mb()).replace('.',',')} MB · Karte ${s.kN?'zwischengespeichert':'live'} · Neubau ${s.bBau+s.dBau} · Prüfungen ${s.pruef}${s.pruefFehl?' ⚠ '+s.pruefFehl+' Abweichungen':''}${s.fehler?' · Fehler '+s.fehler:''}`}
+CR.diagZeile=zeile;
+function diagHaken(){const DG=window.__hsDIAG;if(!DG||DG.__cr)return;DG.__cr=1;
+ try{const d0=Object.getOwnPropertyDescriptor(DG,'letzter');let lz=DG.letzter;const get=d0&&d0.get?d0.get:()=>lz,set=d0&&d0.set?d0.set:(v)=>{lz=v};
+  Object.defineProperty(DG,'letzter',{configurable:true,enumerable:true,get(){return get.call(DG)},set(v){try{if(typeof v==='string'&&v&&v.indexOf('CPU-Kacheln:')<0)v=v+'\n'+zeile()}catch(e){}set.call(DG,v)}})}catch(e){cErr('diag letzter',e)}
+ try{const d0=Object.getOwnPropertyDescriptor(DG,'daten');let wt=DG.daten;const get=d0&&d0.get?d0.get:()=>wt,set=d0&&d0.set?d0.set:(v)=>{wt=v};
+  Object.defineProperty(DG,'daten',{configurable:true,enumerable:true,get(){return get.call(DG)},set(d){try{if(d&&typeof d==='object'&&typeof d.pakete==='string'&&d.pakete.indexOf('cpuras')<0)d.pakete+=(d.pakete?' ':'')+'cpuras'+CR.v+(grund()?'(an)':'')}catch(e){}set.call(DG,d)}})}catch(e){cErr('diag daten',e)}}
+try{diagHaken()}catch(e){cErr('diaghaken',e)}
+
+}catch(e){console.error('cpuras',e);window.__hsCPURAS.err=String(e&&e.stack||e)}})();
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
