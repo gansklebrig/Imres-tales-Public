@@ -1,7 +1,21 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Heldensturm – das Roguelike zu Imres Tales: Barradin, Echo, Friedrich und Ezekiel kämpfen sich durch die ganze Kampagne.">
+<meta name="theme-color" content="#100c12">
+<link rel="manifest" href="heldensturm.webmanifest">
+<link rel="apple-touch-icon" href="heldensturm-icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta property="og:title" content="Heldensturm">
+<meta property="og:description" content="Das Roguelike zu Imres Tales: 15 Orte der Kampagne, Wetter und Tageszeiten, Wächter, Bosse, Beute und Talente – allein, zu viert am selben Bildschirm oder online.">
+<meta property="og:image" content="https://imrestales.de/vorschau.jpg">
+<style>[hidden]{display:none!important}body{margin:0}</style>
 <title>Heldensturm</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Alegreya+Sans:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="schriften/schriften.css">
 <style>
 /* Layout: Vollbild-Canvas als Spielwelt, darüber ein schlankes HUD und Pergament-dunkle Menüs. Eine einzige, bewusst dunkle Welt. */
 :root{
@@ -340,6 +354,8 @@ details.stats .stat{padding:0 12px 12px}
 .fire-wrap{min-height:70vh;justify-content:center;gap:8px}.fire-cv,.lager-cv{width:100%;max-width:640px;height:230px;border-radius:14px;border:1px solid rgba(229,180,84,.25);box-shadow:0 0 40px rgba(255,140,50,.12) inset;display:block;margin:6px auto;background:#0b0d1c}.lager-cv{height:260px;cursor:pointer}.fire-stats{margin:4px 0 0;font-size:14px;color:var(--muted,#b8a99a)}.fire-stats b{color:var(--text,#f4e9d8)}.fire-mvp{margin:0;font-size:14px}.fire-imre{margin:6px 0 0;font-style:italic;line-height:1.45;max-width:560px}.fire-imre span{font-style:normal;font-weight:800;color:#e5b454;letter-spacing:.04em}.fire-neu{margin:0;color:#ffd04a;font-size:14px}.npc-row{display:block;width:100%;max-width:520px;height:96px;margin:2px auto -4px}.fire-next{margin:0;font-size:13.5px}.lager-say{min-height:2.8em;margin:4px 0 6px;line-height:1.45}.lager-chips{justify-content:center}@media (max-width:520px){.fire-cv{height:190px}.lager-cv{height:220px}}
 </style>
 
+</head>
+<body>
 <canvas id="cv" aria-label="Spielfeld"></canvas>
 <div id="hud" hidden>
   <div class="top">
@@ -5111,7 +5127,7 @@ function showTitle(keep){unseedRng();if(CLOUD.pend&&!$('cloudAsk'))setTimeout(()
   :tab==='hilfe'?`<div class="facts"><div><span>Handy</span>Linke Bildschirmhälfte gedrückt halten und ziehen zum Laufen. Fähigkeiten unten rechts antippen, daneben Sprinten (verbraucht Ausdauer) und Heiltrank (füllt sich durch Kills wieder auf). Angriffe zielen automatisch – nah dran kämpft dein Held im Nahkampf, weiter weg auf Distanz.</div><div><span>PC</span>WASD oder Pfeiltasten, Shift = Sprinten, Leertaste = Ausweichrolle, Q = Heiltrank, Fähigkeiten 1–6, I = Beutel, T = Talente, M = Karte, Esc = Pause.</div><div style="grid-template-columns:minmax(0,1fr) auto;align-items:center"><div><span>Mit der Maus zielen</span>Angriffe und gerichtete Fähigkeiten fliegen zum Mauszeiger.</div><button class="btn ${SAVE.aim?'gold':''}" data-act="aim">${SAVE.aim?'An':'Aus'}</button></div><div><span>Entdecken</span>Leuchtende Schreine geben 30 Sekunden lang besondere Kraft. Rote Fässer explodieren – lauf dagegen, um sie in Gegner zu kicken. Truhen bergen Beute (manche beißen!), goldene Geheimgänge führen in Schatzkammern, und Schatzgoblins fliehen mit ihrer Beute. Zwischen den Stufen warten Würfel-Ereignisse und der Schmied, der Gegenstände aufwertet und Edelsteine einsetzt.</div><div><span>Fortschritt</span>Die Kampagne führt durch ${ORTE.length} Orte mit ${STAGES.length} Stufen. Jede Stufe endet mit einem Wächter, jeder Ort mit seinem Boss. Der Lauf wird zu Beginn jeder Stufe gespeichert. Gold bleibt immer erhalten. Im Roguelite behält jeder Held Stufe, Talente und Ausrüstung, und jeder besiegte Ort-Boss öffnet ein Portal als neuen Startpunkt. Im Hardcore beginnt jeder Lauf von vorn – dafür zählt er für die Bestenliste. Wer die ganze Kampagne schafft, schaltet die nächste Schwierigkeit frei.</div><div><span>Abspann</span>Musik und Klänge: Barradins Lautenwerk von imrestales.de mit Aufnahmen der VSCO 2 Community Edition von Versilian Studios (CC0). Laute, Dudelsack, Panflöte, Okarina und Gesang stammen aus dem Klangsatz „Fluid R3“ von Frank Wen, aufbereitet von Benjamin Gleitzman (CC BY 3.0). Die Orgel nahm Simon Dalzell (Ivy Audio) auf. Welt und Geschichte: Imre.</div></div><div class="card"><div class="eyebrow">Cloud-Spielstand</div><div id="cloudBox" style="display:flex;flex-direction:column;gap:10px">${cloudInner()}</div></div><div class="card ups"><div class="eyebrow">Einstellungen</div>${gfxRow()}${volRows()}</div><div class="card ups"><div class="eyebrow">Controller &amp; Mehrspieler</div><div class="ctlBox" style="display:flex;flex-direction:column;gap:8px">${ctlRows()}</div></div><p class="muted" style="font-size:12px;text-align:center;margin:4px 0 0">Spielversion ${HS_VERSION}</p>`
   :`${modeCard()}${astWahlHtml(sel)}<p class="lead">${H.blurb}</p><div class="facts"><div><span>Kampfstil</span>${ATKSTYLE[sel]}</div><div><span>Bester Lauf</span>${best}</div></div>`;
  showScreen(`<div class="camp" style="--hc:${HCOL[sel]}">
-  <header class="camp-top"><div><a class="back" href="https://imrestales.de/#taverne" target="_top">← Imres Tales</a><h1>Heldensturm</h1></div><div class="gold-pill" title="Gold"><i></i>${fmt(SAVE.gold)}</div></header>
+  <header class="camp-top"><div><a class="back" href="./#taverne">← Imres Tales</a><h1>Heldensturm</h1></div><div class="gold-pill" title="Gold"><i></i>${fmt(SAVE.gold)}</div></header>
   ${runBanner}
   <nav class="picker" aria-label="Held wählen">${picks}</nav>
   <div class="camp-main">
@@ -7068,7 +7084,7 @@ function nDec(v,res){if(typeof v==='string'){if(v[0]==='$')return netReg().get(v
 const nSame=(a,b)=>a===b||(a&&b&&typeof a==='object'&&typeof b==='object'&&JSON.stringify(a)===JSON.stringify(b));
 
 /* ---------- Transport ---------- */
-function netLib(){if(typeof window.Peer==='function')return Promise.resolve();return new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';s.integrity='sha384-nlUQ8ZqCbvStErob+biJNzSgltf6urV3VGqhfIfzhmg9RXmpeRm76ELw0pYnKlTR';s.crossOrigin='anonymous';s.onload=()=>typeof window.Peer==='function'?ok():no(new Error('lib'));s.onerror=()=>no(new Error('lib'));document.head.appendChild(s)})}
+function netLib(){if(typeof window.Peer==='function')return Promise.resolve();return new Promise((ok,no)=>{const s=document.createElement('script');s.src='vendor/peerjs.min.js';s.integrity='sha384-nlUQ8ZqCbvStErob+biJNzSgltf6urV3VGqhfIfzhmg9RXmpeRm76ELw0pYnKlTR';s.crossOrigin='anonymous';s.onload=()=>typeof window.Peer==='function'?ok():no(new Error('lib'));s.onerror=()=>no(new Error('lib'));document.head.appendChild(s)})}
 function netCfg(){return Object.assign({debug:0,config:{iceServers:[{urls:'stun:stun.cloudflare.com:3478'},{urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'],username:'peerjs',credential:'peerjsp'}]}},window.__netcfg||{})}
 /* Eigener Kanal ohne Neuversand: verlorene Pakete stören nicht, das nächste ersetzt sie ohnehin */
 function netU(conn,onMsg){try{const pc=conn.peerConnection;if(!pc)return null;const u=pc.createDataChannel('hsu',{negotiated:true,id:77,ordered:false,maxRetransmits:0});u.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(er){return}onMsg(m)};return u}catch(e){return null}}
@@ -37516,13 +37532,19 @@ M.fn={sig,endlage,speichern,laden};
    wenn das Spiel währenddessen weiter rechnete (Firefox: Bericht offen, Bild läuft weiter → „16 Hz“ statt 110 Hz).
    Maßnahme 3: Diagnose nennt bei Firefox, dass der WebGL-Name nur eine „ähnliche“ Karte ist.
    Schalter: __hsLICHT2.aus=true (alles aus), __hsLICHT2.modus='auto'|'an'|'aus' (Weichlicht-Ebene: auto = nur Firefox). Zähler: __hsLICHT2.st */
-(function(){try{window.__hsLICHT2={v:2};
-const L2=window.__hsLICHT2;L2.aus=false;L2.modus='auto';L2.k={flach:1,dk:1,sonde:1,takt:1,bloom:1};L2.st={ebene:0,flach:0,flachEbene:0,dk:0,orig:0,hzFix:0,diagHz:0,sonde:0};L2.err=[];
+(function(){try{window.__hsLICHT2={v:3};
+const L2=window.__hsLICHT2;L2.aus=false;L2.modus='auto';L2.k={flach:1,dk:1,sonde:1,takt:1,bloom:1,schutz:1,frisch:1,heilen:1};L2.st={ebene:0,flach:0,flachEbene:0,dk:0,orig:0,hzFix:0,diagHz:0,sonde:0};L2.err=[];
 const lErr=(k,e)=>{if(L2.err.length<8)L2.err.push(k+': '+(e&&e.message||e))};
 const UA=String(navigator.userAgent||'');
 L2.firefox=/Firefox\/\d+/.test(UA)&&!/Seamonkey|Chrome\//.test(UA);
 const aktiv=()=>!L2.aus&&(L2.modus==='an'||(L2.modus==='auto'&&L2.firefox));
 L2.aktiv=aktiv;
+
+/* Aktive Spielleinwand (v3: in Firefox ggf. eine frisch angelegte Leinwand über #cv, siehe 1e) */
+const FL={T:null,g:null,n:0,log:[],heil:0,lastHeil:-1e9,grund:'',art0:''};L2.fl=FL;
+const CV0=(()=>{try{return cv.getContext('2d')}catch(e){return null}})();
+function spielCtx(){return FL.g||CV0}
+L2.spielCtx=spielCtx;
 
 /* ---------- 1) Weichlicht als Compositor-Ebene ---------- */
 const EB={el:[null,null],src:[null,null],op:['',''],mm:['',''],vis:[false,false],w:'',h:'',n:0,frame:[],inR:0,dom:false};
@@ -37532,7 +37554,7 @@ function ebEl(i){let c=EB.el[i];if(c&&c.isConnected)return c;
  c=c||document.createElement('canvas');c.className='l2grad';c.setAttribute('aria-hidden','true');c.width=160;c.height=90;
  c.style.cssText='position:fixed;left:0;top:0;pointer-events:none;mix-blend-mode:soft-light;image-rendering:auto;display:none;opacity:0';
  /* direkt über der Spielleinwand: vor der Text-Ebene (#txtov, z-index 1) und allen übrigen Ebenen */
- let ref=base.nextSibling;while(ref&&ref.classList&&ref.classList.contains('l2grad'))ref=ref.nextSibling;
+ let ref=base.nextSibling;while(ref&&ref.classList&&(ref.classList.contains('l2grad')||ref.classList.contains('l2cv')))ref=ref.nextSibling;
  base.parentNode.insertBefore(c,ref);EB.el[i]=c;EB.src[i]=null;EB.op[i]='';EB.mm[i]='';EB.vis[i]=false;return c}
 function ebZeig(i,A,k,mm){const c=ebEl(i);if(!c)return false;mm=mm||'soft-light';if(EB.mm[i]!==mm){EB.mm[i]=mm;c.style.mixBlendMode=mm}
  if(EB.src[i]!==A){const g=c.getContext('2d');if(c.width!==A.width||c.height!==A.height){c.width=A.width;c.height=A.height}
@@ -37544,7 +37566,7 @@ function ebZeig(i,A,k,mm){const c=ebEl(i);if(!c)return false;mm=mm||'soft-light'
 function ebAus(i){const c=EB.el[i];if(c&&EB.vis[i]){c.style.display='none';EB.vis[i]=false}}
 function ebAlleAus(){ebAus(0);ebAus(1)}
 L2.ebAus=ebAlleAus;
-function standard(c){try{if(!cv||c!==cv.getContext('2d'))return false;if(G.vp||(typeof splitOn==='function'&&splitOn()))return false;
+function standard(c){try{if(!cv||c!==spielCtx())return false;if(G.vp||(typeof splitOn==='function'&&splitOn()))return false;
   const m=c.getTransform();return Math.abs(m.a-DPR)<1e-6&&Math.abs(m.d-DPR)<1e-6&&!m.b&&!m.c&&!m.e&&!m.f}catch(e){return false}}
 {const _gl=oaGradLage;oaGradLage=function(c,A,k,s){
  if(!aktiv()||!A||OA.ul)return _gl.apply(this,arguments);
@@ -37565,7 +37587,7 @@ function standard(c){try{if(!cv||c!==cv.getContext('2d'))return false;if(G.vp||(
    aufeinander – beides normale Mischung. Statt zweier Vollbild-Durchgänge werden beide zuerst in eine Ebene mit der Auflösung der
    Sichtschatten (0,2×) gezeichnet und diese einmal hochgezogen (source-over ist assoziativ; die Dunkelheit ist ein weicher Verlauf). */
 const DK={c:null,g:null,pend:null};L2.dk=DK;
-const dkBereit=()=>{try{return aktiv()&&L2.k.dk&&EB.inR&&!!cx&&cx===cv.getContext('2d')&&standard(cx)&&!!GF().lite&&fsAktiv()&&fsSeher().length>0&&!(FOV.aug&&FOV.aug.length)}catch(e){return false}};
+const dkBereit=()=>{try{return aktiv()&&L2.k.dk&&EB.inR&&!!cx&&cx===spielCtx()&&standard(cx)&&!!GF().lite&&fsAktiv()&&fsSeher().length>0&&!(FOV.aug&&FOV.aug.length)}catch(e){return false}};
 const _ldO=liteDark;
 liteDark=function(camX,camY,dark){if(DK.pend||!dkBereit())return _ldO.apply(this,arguments);DK.pend=[camX,camY,dark];return};
 {const _fz=fsZeichne;fsZeichne=function(camX,camY){const p=DK.pend;DK.pend=null;if(!p)return _fz.apply(this,arguments);
@@ -37584,12 +37606,12 @@ liteDark=function(camX,camY,dark){if(DK.pend||!dkBereit())return _ldO.apply(this
    zeichnen und die Zeit messen: im Prozessor ≈ 1–4 ms je Million Bildpunkte, auf der Grafikkarte (Firefox nimmt nur auf) ≈ 0.
    Ergebnis in __hsLICHT2.sonde und im Diagnosebericht – entscheidet, ob weitere Prozessor-Sparmaßnahmen nötig sind. */
 const SO={k:0,v:[],art:'',msMpx:0,c:null};L2.sonde=SO;
-function sondeMessen(){try{if(!L2.k.sonde||!aktiv()||!G||G.state!=='play'||!G.ground||G.vp||G.ultra||(typeof splitOn==='function'&&splitOn())||!cx||cx!==cv.getContext('2d'))return;
-  if((SO.k++)%30!==7)return;const mpx=cv.width*cv.height/1e6;if(mpx<0.15)return;
+function sondeMessen(){try{if(!L2.k.sonde||!aktiv()||!G||G.state!=='play'||!G.ground||G.vp||G.ultra||(typeof splitOn==='function'&&splitOn())||!cx||cx!==spielCtx())return;
+  if((SO.k++)%(BI.on?4:30)!==(BI.on?0:7))return;const mpx=cv.width*cv.height/1e6;if(mpx<0.15)return;
   if(!SO.c){SO.c=document.createElement('canvas');SO.c.width=SO.c.height=256;const g=SO.c.getContext('2d');const gr=g.createLinearGradient(0,0,256,256);gr.addColorStop(0,'#201810');gr.addColorStop(1,'#403020');g.fillStyle=gr;g.fillRect(0,0,256,256)}
   const c=cx;c.save();c.setTransform(1,0,0,1,0,0);c.globalAlpha=1;c.globalCompositeOperation='source-over';c.imageSmoothingEnabled=true;
   const a=performance.now();c.drawImage(SO.c,0,0,256,256,0,0,cv.width,cv.height);const d=performance.now()-a;c.restore();
-  SO.v.push(d/mpx);if(SO.v.length>15)SO.v.shift();L2.st.sonde++;
+  SO.v.push(d/mpx);if(SO.v.length>15)SO.v.shift();if(BI.on&&BI.cur)BI.cur.p.push([BI.cur.f,Math.round(d/mpx*100)/100]);L2.st.sonde++;
   if(SO.v.length>=5){const s=SO.v.slice().sort((x,y)=>x-y),m=s[s.length>>1];SO.msMpx=Math.round(m*100)/100;SO.art=m>=0.6?'Prozessor':m<=0.15?'Grafikkarte':'unklar'}}catch(e){lErr('sonde',e)}}
 {const _r=render;render=function(){if(EB.inR===0)sondeMessen();return _r.apply(this,arguments)}}
 
@@ -37608,6 +37630,136 @@ const BL2={a:null,ga:null,b:null,gb:null};
  a.globalCompositeOperation='copy';a.drawImage(BL2.b,0,0,bw,bh,0,0,bw,bh);a.globalCompositeOperation='multiply';a.drawImage(BL2.b,0,0,bw,bh,0,0,bw,bh);
  a.globalCompositeOperation='source-over';b.globalCompositeOperation='source-over';
  cx.save();cx.setTransform(DPR,0,0,DPR,0,0);cx.imageSmoothingEnabled=true;cx.globalCompositeOperation='lighter';cx.globalAlpha=0.55;cx.drawImage(BL2.a,0,0,bw,bh,-W*0.01,-H*0.01,W*1.02,H*1.02);cx.restore();L2.st.bloom=(L2.st.bloom||0)+1}}
+
+/* ---------- 1e) Firefox: Spielleinwand vor dem Rückfall auf Software schützen (v3) ----------
+   Befund (Firefox-Quellen DrawTargetWebgl + Nachbildung test/licht2/ffmodell.mjs, vom Nutzer bestätigt: mit
+   profile-fallback-ratio=1 bleibt die Leinwand auf der Grafikkarte, 67 statt 9–13 FPS):
+   Firefox wertet die Leinwand dauerhaft auf Software ab, wenn > 30 % der Bilder einen „vollständigen Rückfall“ hatten. Auslöser im Spiel:
+   · Striche (stroke) mit anderer Mischung als source-over/copy (z. B. 'lighter' bei Schockwellen-Ringen, Zauber-Effekten), deren
+     sichtbare Box größer als ¼ der Leinwand ist: Firefox kann solche Striche nicht auf der Grafikkarte zeichnen („AAStroke“ nur für
+     source-over) und fällt für das ganze Bild in den Prozessor zurück;
+   · Füllungen mit Verlauf (radial, oder linear auf Pfad) bei anderer Mischung als source-over (z. B. icefan) – ebenfalls Rückfall;
+     mit source-over eine teure „Ebene“, nach der in einer deckenden Leinwand jeder Text einen Rückfall auslöst.
+   Maßnahme: Solche Befehle werden auf eine durchsichtige Hilfsleinwand (gleiche Größe) mit source-over gezeichnet und von dort
+   mit der ursprünglichen Mischung als Bild aufgetragen – rechnerisch gleich (ein einzelner Strich/eine Füllung), für Firefox aber
+   „Bild zeichnen“, was die Grafikkarte immer kann. Nur Firefox; nur die Spielleinwand. */
+const SCH={S:null,g:null,n:0,st:{strich:0,verlauf:0,rect:0,ohnePfad:0}};L2.schutz=SCH;
+const OK_OP={'source-over':1,'copy':1};
+function schS(w,h){if(!SCH.S){SCH.S=document.createElement('canvas');SCH.S.__l2dyn=1;SCH.g=SCH.S.getContext('2d')}if(SCH.S.width!==w||SCH.S.height!==h){SCH.S.width=w;SCH.S.height=h}return SCH.g}
+const ST_P=['fillStyle','strokeStyle','lineWidth','lineCap','lineJoin','miterLimit','lineDashOffset','globalAlpha','imageSmoothingEnabled'];
+function schAuftragen(c,box,zeichne){const C=c.canvas,w=C.width,h=C.height;let x0=Math.max(0,Math.floor(box[0])),y0=Math.max(0,Math.floor(box[1])),x1=Math.min(w,Math.ceil(box[2])),y1=Math.min(h,Math.ceil(box[3]));
+ if(x1<=x0||y1<=y0)return;if(SCH.dbg)try{SCH.dbg(c,[x0,y0,x1,y1])}catch(e){}const g=schS(w,h);g.setTransform(1,0,0,1,0,0);g.globalCompositeOperation='source-over';g.globalAlpha=1;g.clearRect(x0,y0,x1-x0,y1-y0);
+ g.save();for(const k of ST_P){try{if(g[k]!==c[k])g[k]=c[k]}catch(e){}}try{g.setLineDash(c.getLineDash())}catch(e){}try{g.shadowColor=c.shadowColor;g.shadowBlur=c.shadowBlur;g.shadowOffsetX=c.shadowOffsetX;g.shadowOffsetY=c.shadowOffsetY}catch(e){}
+ g.globalCompositeOperation='source-over';try{zeichne(g)}finally{g.restore()}
+ c.save();try{c.setTransform(1,0,0,1,0,0);c.globalAlpha=1;c.shadowBlur=0;c.shadowColor='rgba(0,0,0,0)';c.imageSmoothingEnabled=false;c.__l2drawImage(SCH.S,x0,y0,x1-x0,y1-y0,x0,y0,x1-x0,y1-y0)}finally{c.restore()}SCH.n++}
+function schutzAn(c){if(!c||c.__l2schutz)return;c.__l2schutz=1;const P=CanvasRenderingContext2D.prototype;const PF=['moveTo','lineTo','quadraticCurveTo','bezierCurveTo','arc','arcTo','ellipse','rect','closePath'];
+ c.__l2drawImage=function(){return P.drawImage.apply(c,arguments)};
+ let rec=null;const T4=(m,x,y)=>[m.a*x+m.c*y+m.e,m.b*x+m.d*y+m.f];
+ c.beginPath=function(){rec=null;return P.beginPath.apply(c,arguments)};
+ /* Pfad immer mitschreiben (Ring: erst source-over, dann derselbe Pfad mit 'lighter'); Transformation nur bei Änderung neu lesen */
+ let tv=1,tm=null,tmv=0;for(const n of ['setTransform','resetTransform','transform','translate','scale','rotate','save','restore']){const f=P[n];if(!f)continue;c[n]=function(){tv++;return f.apply(c,arguments)}}
+ for(const n of PF){const f=P[n];c[n]=function(){if(!rec)rec=[];if(rec.length<3000){if(tmv!==tv){const m=c.getTransform();tm=[m.a,m.b,m.c,m.d,m.e,m.f];tmv=tv}rec.push([n,Array.prototype.slice.call(arguments),tm])}else rec.push(null);return f.apply(c,arguments)}}
+ const box=(L,lw)=>{let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;const pt=(x,y)=>{if(x<x0)x0=x;if(y<y0)y0=y;if(x>x1)x1=x;if(y>y1)y1=y};
+  for(const r of L){const [n,a,mm]=r,m={a:mm[0],b:mm[1],c:mm[2],d:mm[3],e:mm[4],f:mm[5]};
+   if(n==='arc'||n==='ellipse'){const rx=a[2],ry=n==='arc'?a[2]:a[3];for(const [dx,dy] of [[-rx,-ry],[rx,-ry],[rx,ry],[-rx,ry]]){const p=T4(m,a[0]+dx,a[1]+dy);pt(p[0],p[1])}}
+   else if(n==='rect'){for(const [dx,dy] of [[0,0],[a[2],0],[a[2],a[3]],[0,a[3]]]){const p=T4(m,a[0]+dx,a[1]+dy);pt(p[0],p[1])}}
+   else for(let i=0;i+1<a.length&&i<6;i+=2){const p=T4(m,a[i],a[i+1]);pt(p[0],p[1])}}
+  const m=c.getTransform(),s=Math.max(Math.hypot(m.a,m.b),Math.hypot(m.c,m.d))*(lw||0)/2+2;return [x0-s,y0-s,x1+s,y1+s]};
+ const nachspielen=(g,L)=>{g.beginPath();for(const r of L){const mm=r[2];g.setTransform(mm[0],mm[1],mm[2],mm[3],mm[4],mm[5]);g[r[0]].apply(g,r[1])}const m=c.getTransform();g.setTransform(m.a,m.b,m.c,m.d,m.e,m.f)};
+ const grosser=(b)=>{const C=c.canvas,w=Math.max(0,Math.min(C.width,b[2])-Math.max(0,b[0])),h=Math.max(0,Math.min(C.height,b[3])-Math.max(0,b[1]));return w*h>C.width*C.height*0.2};
+ c.stroke=function(path){try{if(aktiv()&&L2.k.schutz&&c===spielCtx()){const op=c.globalCompositeOperation,gr=typeof c.strokeStyle!=='string';
+   if(!OK_OP[op]||gr||c.getLineDash().length){if(path&&typeof path==='object'){const m=c.getTransform();SCH.st.strich++;schAuftragen(c,[0,0,c.canvas.width,c.canvas.height],g=>{g.setTransform(m.a,m.b,m.c,m.d,m.e,m.f);g.stroke(path)});return}
+    if(rec&&rec.indexOf(null)<0&&rec.length){const b=box(rec,c.lineWidth);if(grosser(b)||!OK_OP[op]&&gr){const L=rec;SCH.st.strich++;schAuftragen(c,b,g=>{nachspielen(g,L);g.stroke()});return}}
+    else if(!rec||rec.indexOf(null)>=0)SCH.st.ohnePfad++}}}catch(e){lErr('schutz-strich',e)}
+  return P.stroke.apply(c,arguments)};
+ c.fill=function(a,b2){try{if(aktiv()&&L2.k.schutz&&c===spielCtx()&&typeof c.fillStyle!=='string'&&window.CanvasGradient&&c.fillStyle instanceof CanvasGradient){
+   const args=arguments;if(a&&typeof a==='object'){const m=c.getTransform();SCH.st.verlauf++;schAuftragen(c,[0,0,c.canvas.width,c.canvas.height],g=>{g.setTransform(m.a,m.b,m.c,m.d,m.e,m.f);g.fill.apply(g,args)});return}
+   if(rec&&rec.length&&rec.indexOf(null)<0){const L=rec;SCH.st.verlauf++;schAuftragen(c,box(L,0),g=>{nachspielen(g,L);g.fill.apply(g,args)});return}SCH.st.ohnePfad++}}catch(e){lErr('schutz-fill',e)}
+  return P.fill.apply(c,arguments)};
+ c.fillRect=function(x,y,w,h){try{if(aktiv()&&L2.k.schutz&&c===spielCtx()&&typeof c.fillStyle!=='string'&&window.CanvasGradient&&c.fillStyle instanceof CanvasGradient&&!(c.fillStyle.__lin&&OK_OP[c.globalCompositeOperation]==1&&c.globalCompositeOperation==='source-over')){
+   const m=c.getTransform(),L=[['rect',[x,y,w,h],[m.a,m.b,m.c,m.d,m.e,m.f]]];SCH.st.rect++;schAuftragen(c,box(L,0),g=>{g.setTransform(m.a,m.b,m.c,m.d,m.e,m.f);g.fillRect(x,y,w,h)});return}}catch(e){lErr('schutz-rect',e)}
+  return P.fillRect.apply(c,arguments)}}
+{const P=CanvasRenderingContext2D.prototype,f=P.createLinearGradient;P.createLinearGradient=function(){const g=f.apply(this,arguments);try{g.__lin=1}catch(e){}return g}}
+
+/* Nebel in halber Auflösung auch auf der frischen Leinwand (Paket gpu prüft cx.canvas===cv und würde sonst voll auflösend zeichnen):
+   gleiche Logik wie dort – Schwaden in eine Ebene mit halber Auflösung, einmal hochziehen. */
+const NB2={c:null,g:null};
+{const _nb=oaNebel;oaNebel=function(camX,camY,t,dt){const G0=window.__hsGPU;
+ if(!FL.T||cx!==FL.g||!G0||G0.aus||!G0.an||!G0.an.nebel||!OA.cfg||!OA.cfg.fog||!(DPR>0))return _nb.apply(this,arguments);
+ const T=FL.T,k=(G0.k&&G0.k.nebel)||0.5,lw=Math.max(2,Math.ceil(T.width*k)),lh=Math.max(2,Math.ceil(T.height*k));
+ if(!NB2.c){NB2.c=document.createElement('canvas');NB2.c.__l2dyn=1;NB2.g=NB2.c.getContext('2d')}const C=NB2.c,g=NB2.g;if(C.width!==lw||C.height!==lh){C.width=lw;C.height=lh}
+ g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.clearRect(0,0,lw,lh);
+ const c0=cx,d0=DPR,sm=c0.imageSmoothingEnabled;let r;cx=g;DPR=d0*lw/T.width;
+ try{r=_nb.apply(this,arguments)}finally{cx=c0;DPR=d0}
+ c0.setTransform(1,0,0,1,0,0);c0.globalAlpha=1;c0.globalCompositeOperation='source-over';c0.imageSmoothingEnabled=true;c0.drawImage(C,0,0,lw,lh,0,0,T.width,T.height);
+ c0.setTransform(DPR,0,0,DPR,0,0);c0.imageSmoothingEnabled=sm;return r}}
+
+/* ---------- 1f) Firefox: frische Spielleinwand (Selbstheilung, Firefox-Test) ----------
+   Hat Firefox eine Leinwand einmal abgewertet, bleibt sie bis zum Neuladen im Prozessor. Eine neu angelegte Leinwand hat ein frisches
+   Profil. Sie liegt deckungsgleich direkt über #cv (Eingaben gehen weiter an #cv), das Spiel zeichnet über die Variable cx dorthin.
+   Sie ist nicht „deckend“ angelegt (alpha:true): Firefox darf Text dort ohne Subpixel-Glättung zeichnen – dann löst Text nach einer
+   Ebene keinen Rückfall aus. #cv bleibt darunter stehen; toDataURL/toBlob von #cv liefern das Bild der aktiven Leinwand. */
+function flSync(){const T=FL.T;if(!T)return;if(cv.nextSibling!==T&&cv.parentNode){try{cv.parentNode.insertBefore(T,cv.nextSibling)}catch(e){}}if(T.width!==cv.width||T.height!==cv.height){const sm=FL.g.imageSmoothingEnabled;T.width=cv.width;T.height=cv.height;FL.g.imageSmoothingEnabled=sm}
+ const w=cv.style.width,h=cv.style.height;if(T.style.width!==w)T.style.width=w;if(T.style.height!==h)T.style.height=h;
+ if((FL.n++)%60===0){try{const ir=getComputedStyle(cv).imageRendering;if(T.style.imageRendering!==ir)T.style.imageRendering=ir}catch(e){}}}
+function frischeLeinwand(grund){try{if(EB.inR)return false;const alt=FL.T;const T=document.createElement('canvas');T.className='l2cv';T.__l2dyn=1;T.setAttribute('aria-hidden','true');
+  T.style.cssText='position:fixed;left:0;top:0;display:block;pointer-events:none;touch-action:none';T.width=cv.width;T.height=cv.height;T.style.width=cv.style.width||innerWidth+'px';T.style.height=cv.style.height||innerHeight+'px';
+  const g=T.getContext('2d',{alpha:true});if(!g)return false;
+  if(alt&&alt.parentNode)alt.parentNode.replaceChild(T,alt);else cv.parentNode.insertBefore(T,cv.nextSibling);
+  const vor=cx;try{g.imageSmoothingEnabled=vor.imageSmoothingEnabled}catch(e){}
+  FL.T=T;FL.g=g;if(vor===CV0||vor===(alt&&alt.__g)||!vor||vor.canvas===cv||vor.canvas===alt)cx=g;T.__g=g;schutzAn(g);
+  /* Bild sofort übernehmen, damit nichts aufblitzt (einmaliges Kopieren) */
+  try{g.drawImage(alt||cv,0,0)}catch(e){}
+  if(!cv.__l2tdu){cv.__l2tdu=1;const td=HTMLCanvasElement.prototype.toDataURL,tb=HTMLCanvasElement.prototype.toBlob;
+   cv.toDataURL=function(){return FL.T?td.apply(FL.T,arguments):td.apply(cv,arguments)};cv.toBlob=function(){return FL.T?tb.apply(FL.T,arguments):tb.apply(cv,arguments)}}
+  FL.log.push({t:Math.round(performance.now()/1000),grund});if(FL.log.length>12)FL.log.shift();return true}catch(e){lErr('frisch',e);return false}}
+L2.frisch=frischeLeinwand;
+function frischZurueck(){try{if(!FL.T||EB.inR)return;const T=FL.T;if(cx===FL.g)cx=CV0;FL.T=null;FL.g=null;if(T.parentNode)T.parentNode.removeChild(T)}catch(e){lErr('zurück',e)}}
+L2.frischZurueck=frischZurueck;
+try{if(CV0)schutzAn(CV0)}catch(e){lErr('schutz',e)}
+/* vor jedem Bild: Größe abgleichen; in Firefox einmal zu Beginn frisch (nicht deckend) anlegen; Selbstheilung nach Abwertung */
+function flVorBild(){try{if(!aktiv())return;if(L2.k.frisch&&!FL.T&&!FL.aus&&G&&G.state){frischeLeinwand('Start')}
+  flSync();if(cx===CV0&&FL.g&&!FL.aus)cx=FL.g;
+  if(L2.k.heilen&&FL.T&&SO.art==='Prozessor'&&FL.art0==='Grafikkarte'&&FL.heil<5&&performance.now()-FL.lastHeil>30000){FL.heil++;FL.lastHeil=performance.now();SO.v.length=0;SO.art='';FL.art0='';frischeLeinwand('Selbstheilung '+FL.heil+' (Sonde: Prozessor)')}
+  if(SO.art==='Grafikkarte')FL.art0='Grafikkarte'}catch(e){lErr('vorbild',e)}}
+{const _r=render;render=function(){if(EB.inR===0)flVorBild();return _r.apply(this,arguments)}}
+
+/* ---------- 1g) Firefox-Test (≈ 60 s): welche Zeichengruppe lässt Firefox die Leinwand abwerten? ----------
+   Je Phase (~6 s laufendes Spiel) eine frische Leinwand und eine Gruppe aus; die Sonde misst jedes 4. Bild. Kippt sie von
+   „schnell“ (Grafikkarte) auf „langsam“ (Prozessor), wird Bild und Zeit festgehalten. Danach öffnet sich der Diagnosebericht
+   (3 s Messung) mit dem Testergebnis am Ende. Knopf „Firefox-Test (60 s)“ neben „Diagnose (10 s)“, nur in Firefox. */
+const BI={on:false,i:-1,cur:null,res:[],gesp:[],txt:'',tLauf:0,last:0};L2.bi=BI;
+const BG=[['Basis (alles an)',[]],['ohne Wände',['drawRoomWalls']],['ohne Licht',['drawLighting']],['ohne Nebel/Wetter',['oaNebel','drawWeather']],['ohne Vignette/Bloom',['vignette','bloom']],
+ ['ohne Effekte/Partikel',['drawFx','drawPartsNormal','drawPartsAdd','drawAmb']],['ohne Deko/Leichen',['drawDeco','drawCorpses','drawDecals']],['ohne Gegner',['drawEnemy']],['ohne Text/Karte',['drawNums','drawBubbles','wlMini','drawPills']],['ohne Schutz (Vergleich)',[],1]];
+const BF={drawRoomWalls:[()=>drawRoomWalls,f=>{drawRoomWalls=f}],drawLighting:[()=>drawLighting,f=>{drawLighting=f}],oaNebel:[()=>oaNebel,f=>{oaNebel=f}],drawWeather:[()=>drawWeather,f=>{drawWeather=f}],
+ vignette:[()=>vignette,f=>{vignette=f}],bloom:[()=>bloom,f=>{bloom=f}],drawFx:[()=>drawFx,f=>{drawFx=f}],drawPartsNormal:[()=>drawPartsNormal,f=>{drawPartsNormal=f}],drawPartsAdd:[()=>drawPartsAdd,f=>{drawPartsAdd=f}],
+ drawAmb:[()=>drawAmb,f=>{drawAmb=f}],drawDeco:[()=>drawDeco,f=>{drawDeco=f}],drawCorpses:[()=>drawCorpses,f=>{drawCorpses=f}],drawDecals:[()=>drawDecals,f=>{drawDecals=f}],drawEnemy:[()=>drawEnemy,f=>{drawEnemy=f}],
+ drawNums:[()=>drawNums,f=>{drawNums=f}],drawBubbles:[()=>drawBubbles,f=>{drawBubbles=f}],wlMini:[()=>wlMini,f=>{wlMini=f}],drawPills:[()=>drawPills,f=>{drawPills=f}]};
+const biLaeuft=()=>{try{return G.state==='play'&&!G.paused&&!G.overlay&&!document.hidden&&(!scr||scr.hidden)}catch(e){return false}};
+function biAus(){for(const [n,f] of BI.gesp){try{BF[n][1](f)}catch(e){}}BI.gesp.length=0;L2.k.schutz=1}
+function biPhase(i){biAus();BI.i=i;if(i>=BG.length){biEnde();return}const [name,fns,ohneSchutz]=BG[i];
+ for(const n of fns){try{const o=BF[n][0]();BI.gesp.push([n,o]);BF[n][1](function(){})}catch(e){}}if(ohneSchutz)L2.k.schutz=0;
+ BI.cur={name,f:0,t:0,p:[],sch0:SCH.n};SO.v.length=0;frischeLeinwand('Test: '+name)}
+function biBild(){if(!BI.on)return;const now=performance.now(),dt=Math.min(100,now-(BI.last||now));BI.last=now;if(!biLaeuft())return;const c=BI.cur;if(!c)return;c.f++;c.t+=dt;
+ if(c.t>=6000){c.sch=SCH.n-c.sch0;BI.res.push(c);BI.cur=null;biPhase(BI.i+1)}}
+function biText(){const L=['Firefox-Test (je Phase frische Leinwand, Sonde ms/MPx: ≤0,15 Grafikkarte, ≥0,6 Prozessor):'];
+ for(const r of BI.res){const p=r.p,schnell=p.filter(q=>q[1]<=0.15).length,langsam=p.filter(q=>q[1]>=0.6).length;let kipp='';
+  for(let j=2;j<p.length;j++){if(p[j][1]>=0.6&&p[j-1][1]>=0.6&&p.slice(0,j-1).some(q=>q[1]<=0.15)){kipp=' · kippt bei Bild '+p[j-1][0];break}}
+  const zust=!p.length?'keine Messung':langsam===0?'Grafikkarte':schnell===0?'Prozessor (von Anfang an)':kipp?'Grafikkarte → Prozessor':'gemischt';
+  L.push(`  ${r.name}: ${r.f} Bilder · ${zust}${kipp} · Sonde ${p.length?p[0][1]+'→'+p[p.length-1][1]:'–'} · Umleitungen ${r.sch||0}`)}
+ return L.join('\n')}
+function biEnde(){BI.on=false;biAus();BI.txt=biText();frischeLeinwand('nach Test');try{const DG=window.__hsDIAG;if(DG&&DG.start)DG.start(3000)}catch(e){lErr('bi-diag',e)}}
+function biStart(){if(BI.on||!aktiv())return false;try{if(G.state!=='play'){try{toast('Der Firefox-Test misst im laufenden Spiel – erst eine Stufe starten.','#ff9a7a')}catch(e){}return false}
+  if(!SAVE.perf){SAVE.perf=true;try{persist()}catch(e){}}try{if(G.overlay)closeOverlay()}catch(e){}
+  BI.on=true;BI.res=[];BI.txt='';BI.last=0;try{toast('Firefox-Test läuft (~60 s) – bitte normal weiterspielen. Teile des Bildes fehlen kurzzeitig.','#e8c36a')}catch(e){}
+  setTimeout(()=>{if(BI.on&&BI.i<0)biPhase(0)},0);BI.i=-1;biPhase(0);return true}catch(e){lErr('bi',e);BI.on=false;biAus();return false}}
+L2.ffTest=biStart;
+{const _r=render;render=function(){const r=_r.apply(this,arguments);try{biBild()}catch(e){lErr('bi-bild',e)}return r}}
+/* Knopf neben „Diagnose (10 s)“ (nur Firefox bzw. modus 'an') */
+function biKnopf(){try{if(!aktiv())return;for(const b of document.querySelectorAll('#gfxBox [data-act="diag-start"]')){if(b.parentNode.querySelector('[data-act="l2-fftest"]'))continue;
+  b.insertAdjacentHTML('afterend','<button class="btn small" data-act="l2-fftest" title="Findet heraus, welche Zeichengruppe Firefox dazu bringt, die Spielleinwand auf den Prozessor umzustellen (je Phase frische Leinwand, ~60 s)">Firefox-Test (60 s)</button>')}}catch(e){}}
+if(typeof ulKnopf==='function'){const _uk=ulKnopf;ulKnopf=function(){const r=_uk.apply(this,arguments);try{Promise.resolve().then(()=>Promise.resolve()).then(biKnopf)}catch(e){}return r}}
+document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest?ev.target.closest('[data-act="l2-fftest"]'):null;if(!b||b.disabled)return;ev.stopPropagation();ev.preventDefault();try{sfx('ui')}catch(e){}biStart()},true);
 
 /* ---------- 2) Bildschirm-Hz robust ---------- */
 const HZR=[60,72,75,85,90,100,110,120,144,155,160,165,170,175,180,200,240,280,300,360];
@@ -37651,7 +37803,11 @@ function arbeitMedian(n){const k=Math.min(n,RB.n);if(!k)return 0;const a=[];for(
 let RN=0;{const _r=render;render=function(){RN++;return _r.apply(this,arguments)}}
 
 /* ---------- 3) Diagnose: Hz-Nachmessung absichern, Firefox-Hinweis zur Grafikkarte, Paket nennen ---------- */
+function ffZeilen(){if(!aktiv())return'';const L=[];const nt=FL.log.filter(x=>x.grund.indexOf('Test')<0&&x.grund.indexOf('nach Test')<0),nT=FL.log.length-nt.length,fr=nt.map(x=>x.grund+' ('+x.t+' s)').join(', ')+(nT?(nt.length?', ':'')+'Firefox-Test '+nT+'×':'');
+ L.push(`Firefox-Leinwand: ${FL.T?'frisch':'#cv'} · Neuanlagen: ${fr||'–'} · Umleitungen ${SCH.n} (Striche ${SCH.st.strich}, Verläufe ${SCH.st.verlauf+SCH.st.rect}, ohne Pfad ${SCH.st.ohnePfad})`);
+ if(BI.txt)L.push(BI.txt);return L.join('\n')}
 function diagHaken(){const DG=window.__hsDIAG;if(!DG||DG.__l2)return;DG.__l2=1;let wert=DG.daten;
+ {let lz=DG.letzter;Object.defineProperty(DG,'letzter',{configurable:true,enumerable:true,get(){return lz},set(v){lz=v;try{const z=ffZeilen();if(z&&typeof v==='string'&&v&&v.indexOf('Firefox-Leinwand:')<0)lz=v+'\n'+z}catch(e){}}})}
  Object.defineProperty(DG,'daten',{configurable:true,enumerable:true,get(){return wert},set(d){wert=d;try{if(d&&typeof d==='object'&&!L2.aus)diagDaten(d)}catch(e){lErr('diag',e)}}})}
 function diagDaten(d){
  try{if(L2.firefox&&d.gl&&d.gl.ren&&!/ähnliche/.test(d.gl.ren))d.gl.ren+=' (Firefox meldet nur eine ähnliche Karte)'}catch(e){}
@@ -37875,6 +38031,708 @@ SPX.fehlend=(function(){const da=new Set();const add=x=>{if(typeof x==='string')
  return SP_Z.map(z=>z[0]).filter(t=>!da.has(t))})();
 if(SPX.fehlend.length)console.warn('spoiler: Zeilen nicht gefunden',SPX.fehlend);
 }catch(e){console.error('spoiler',e);window.__hsSPOILER.err=String(e&&e.stack||e)}})();
+/* ================= Paket „diagsend“: Diagnose-Bericht per Knopf an GitHub übermitteln – window.__hsDIAGSEND =================
+   Im Diagnose-Fenster neben „Kopieren“: „An GitHub senden“. Öffnet ein vorausgefülltes Issue im privaten Repo
+   gansklebrig/imres-tales (Label „diagnose“) – absenden mit einem Klick, wenn man bei GitHub angemeldet ist.
+   Kein Schlüssel/Token im Spiel; der Bericht enthält keine persönlichen Daten. */
+(function(){try{window.__hsDIAGSEND={v:1};
+const REPO='gansklebrig/imres-tales';
+function url(){const DG=window.__hsDIAG;const t=(DG&&DG.letzter)||'';const L=t.split('\n');
+ const br=((L.find(l=>/^Browser:/.test(l))||'').replace(/^Browser:\s*/,'').split('·')[0]||'').trim();
+ const fps=((L.find(l=>/^Messung:/.test(l))||'').match(/([\d.,]+)\s*FPS/)||[])[1]||'?';
+ const ort=((L.find(l=>/^Szene:/.test(l))||'').split('·')[1]||'').trim();
+ const titel=`Diagnose: ${br||'Browser?'} · ${fps} FPS${ort?' · '+ort:''}`.slice(0,200);
+ const body='```\n'+t.slice(0,6000)+'\n```\n';
+ return`https://github.com/${REPO}/issues/new?labels=diagnose&title=${encodeURIComponent(titel)}&body=${encodeURIComponent(body)}`}
+function oeffnen(){const u=url();let ok=false;try{const w=window.open(u,'_blank');if(w){try{w.opener=null}catch(e){}ok=true}}catch(e){}
+ if(!ok){try{const a=document.createElement('a');a.href=u;a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();ok=true}catch(e){}}
+ const m=document.getElementById('diagMsg');if(m)m.textContent=ok?'GitHub geöffnet – dort „Submit new issue“ drücken.':'Konnte GitHub nicht öffnen – bitte „Kopieren“ nutzen.'}
+function knopf(){try{if(G.overlay!=='diag')return;const c=document.querySelector('#scr [data-act="diag-copy"]');if(!c||document.querySelector('#scr [data-act="diag-send"]'))return;
+ c.insertAdjacentHTML('afterend','<button class="btn small" data-act="diag-send" title="Öffnet ein vorausgefülltes GitHub-Issue (privates Repo, Anmeldung bei GitHub nötig)">An GitHub senden</button>')}catch(e){}}
+{const s0=showScreen;showScreen=function(){const r=s0.apply(this,arguments);knopf();return r}}
+document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest?ev.target.closest('[data-act="diag-send"]'):null;if(!b)return;ev.stopPropagation();ev.preventDefault();try{sfx('ui')}catch(e){}oeffnen()},true);
+window.__hsDIAGSEND.url=url;
+}catch(e){console.error('diagsend',e);window.__hsDIAGSEND.err=String(e&&e.stack||e)}})();
+/* ================= Paket „sicht“: echte Sichtlinie, Erkundungsgedächtnis und Wände, die wirklich trennen (Innenstufen) – window.__hsSICHT =================
+   Nutzerwunsch: In Dungeons sah man durch Wände und konnte (z. B. Echo als Bär) durch Wände angreifen. Gewünscht: nur sichtbar, was man
+   wirklich sieht; Gänge decken sich beim Durchlaufen auf, kein Gesamtbild; Gegner springen um die Ecke.
+   Ursache: Die Kartenmassen (k:'kamasse', die Wände aller Karten-Stufen) warfen absichtlich keinen Sichtschatten (fsKeile-Hülle im Paket
+   „karte“), der Schatten in Dungeons war nur 50 % dunkel, und Ziele wurden nur über den Mittelpunkt vom Betrachter aus geprüft.
+   Innenstufen (SI.orte): alle bisherigen Sichtfeld-Orte (FOV_ORTE: hoehle, tunnel, mine, minenetz, spinnweben, pilze, kerker, grab,
+   gracklstugh, glutgang, hort, kuostadt, flucht) + Hallen/Gebäude/Unterreich: schloss, labor, schmiede, turm, wachhaus, see, ruine, steinbruch.
+   Außen (strasse, wald, dorf, nacht, geisterdorf, wurzeldorf, hof, teich, slums, markt …) und Kammern (G.room) bleiben unverändert.
+   1) Sichtpolygon: je Betrachter (alle Helden der Gruppe + Rex) Strahlen (720, leicht 360, Ultra/Handheld 240) über das vorhandene
+      8-px-Raster der blickdichten Hindernisse (DW.o aus Paket „dungwand“), exakte Rasterdurchquerung, neu nur bei Bewegung/Änderung.
+      Sichtweite SI.R (620 px, in Boss-/Wächternähe ×1,45), weicher Rand (Verlauf ab 70 %), Wände sind bis SI.E px tief mit sichtbar.
+   2) Gedächtnis: 16-px-Raster je Stufe; gesehen = stark abgedunkelt (nur Boden/Wände/Deko, keine Gegner/Geschosse/Beute/Effekte),
+      nie gesehen = schwarz. Minikarte zeigt nur Gesehenes (WLMM.fog = Gedächtnisbild, WLMM.rev daraus), Kartograph-Erfolg zählt nur
+      begehbare Kartenteile. Betritt man eine Boss-Arena (Gastgeber/allein), ist die ganze Arena sofort bekannt.
+   3) Ziele: fovVersteckt = nicht im Sichtpolygon der Gruppe; außerhalb des Zeichnens zusätzlich freie Linie vom handelnden Helden
+      (solide Hindernisse) → targetable/nearest/prioTarget/coneTarget/bTarget/aimPoint/Auto-Wirken wählen nichts hinter Wänden.
+      cone() und aoe(): Treffer nur mit freier Linie vom Zentrum (vorher: cone ohne Prüfung bis e.r+20 px, aoe nur bis Radius 280).
+   4) Gegner (Gastgeber/allein): wache Gegner merken sich die letzte gesehene Heldenposition (Sicht ≤ 760 px mit freier blickdichter
+      Linie, Geräusch ≤ 150 px, Treffer). Nach 1,6 s ohne Sicht laufen sie dorthin und suchen kurz, schießen/zaubern nicht ohne Sicht.
+      Bosse/Wächter/Zusätze/Stillstehende/Diebe unverändert. Gezeichnet werden nur sichtbare Gegner, Geschosse, Telegrafien (oder die, die
+      einen Helden gleich treffen), Feindzonen, Effekte, Zahlen, Partikel, Beute, Lichter; Augen glimmen nur bei freier Linie im Dunkeln.
+   5) Online: Gäste rechnen dieselbe Vereinigung aller Helden aus G.blk und den Heldenpositionen; der Gastgeber schickt Gegner außerhalb
+      der Gruppensicht (+120 px Rand, Bosse/Wächter immer) gar nicht erst (netFilter-Hülle). Geteilter Bildschirm: jeder Ausschnitt zeigt
+      die gemeinsame Sicht.
+   Hüllen: renderWorld, render, drawLighting, fsKeile, fsSeher, fovRahmen, fovVersteckt, drawProj, drawTele, drawTeleFx, drawEZone,
+   drawFx, drawPartsNormal, drawPartsAdd, drawNums, drawProjGlow, drawPropGlow, drawLootBeams, drawLootIcons, cone, aoe, dealDmg,
+   updEnemy, wlMiniNebel, erfKarte, spKarte, netFilter. Schalter: __hsSICHT.aus=true. Zähler: __hsSICHT.st */
+(function(){try{window.__hsSICHT={v:2};
+const SI=window.__hsSICHT;SI.aus=false;
+SI.orte=new Set(['schloss','labor','schmiede','turm','wachhaus','see','ruine','steinbruch']);try{for(const k of FOV_ORTE)SI.orte.add(k)}catch(e){}
+SI.R=620;SI.E=34;SI.E2=44;SI.boss=1.45;SI.mem=0.64;SI.erk=760;SI.ohr=150;SI.verlier=1.6;SI.such=5;
+SI.st={cast:0,ray:0,mark:0,put:0,hid:0,netWeg:0,blkH:0,lost:0,maske:0,selbst:0,err:0};SI.errs=[];
+const sErr=(k,e)=>{SI.st.err++;if(SI.errs.length<10)SI.errs.push(k+': '+String(e&&e.message||e))};
+const TAB={};function siTab(N){let T=TAB[N];if(!T){T={c:new Float32Array(N),s:new Float32Array(N)};for(let i=0;i<N;i++){const a=i/N*TAU;T.c[i]=Math.cos(a);T.s[i]=Math.sin(a)}TAB[N]=T}return T}
+const C8=8,MZ=16;
+function siThema(){try{return G.themeKey||(STAGES[G.stage]||{}).theme||''}catch(e){return''}}
+/* aktiv: Innenstufe im Spiel, keine Kammer, Hindernisse vorhanden, kein Testbot; Grafik-Schalter „Sichtfeld“ (SAVE.fov) gilt weiter */
+function siAn(){if(SI.aus||!G||!G.ground||G.room||G.bot||!G.blkG||!G.blk||!G.blk.length||SAVE.fov===false)return false;if(G.state!=='play')return false;return SI.orte.has(siThema())}
+SI.an=siAn;
+function siGast(){return (typeof NET!=='undefined'&&NET.role==='guest')||!!G.netGuestRun}
+function siLeicht(){try{if(typeof UL!=='undefined'&&UL.on)return 2;if(typeof RG2!=='undefined'&&RG2.hh)return 2;return GF().lite?1:0}catch(e){return 0}}
+/* Betrachter: alle Helden der Gruppe (auch beim Gast: PL ist gespiegelt) + Rex */
+function siSeher(){const L=[];for(const q of mpL()){if(q&&!q.netGone&&isFinite(q.x)&&isFinite(q.y))L.push(q)}if(!L.length&&P)L.push(P);
+ try{for(const a of G.allies)if(a&&a.kind==='rex'&&!a.dead&&isFinite(a.x))L.push(a)}catch(e){}return L}
+
+/* ---------- Gedächtnis (16-px-Raster je Stufe) ---------- */
+const M={key:'',n:0,a:null,img:null,cv:null,g:null,d:[1e9,1e9,-1,-1],rev:0,are:{},mmAll:0,flo:null};SI.M=M;
+function siMemKey(){return [G.runId,G.stage,G.themeKey,WORLD].join('|')}
+function siMemPruef(){const k=siMemKey();if(k===M.key&&M.a)return;M.key=k;const n=Math.ceil(WORLD/MZ);M.n=n;M.a=new Uint8Array(n*n);M.are={};M.mmAll=0;M.flo=null;
+ if(!M.cv){M.cv=document.createElement('canvas')}M.cv.width=n;M.cv.height=n;M.g=M.cv.getContext('2d');M.img=M.g.createImageData(n,n);const D=M.img.data;for(let i=0;i<D.length;i+=4){D[i]=2;D[i+1]=1;D[i+2]=4;D[i+3]=255}
+ M.g.putImageData(M.img,0,0);M.d=[1e9,1e9,-1,-1];SI.C.clear();try{if(typeof WLMM!=='undefined'){WLMM.fog=M.cv;if(WLMM.rev)WLMM.rev.fill(0)}}catch(e){}}
+function siMark(m,i,j){M.a[m]=1;M.img.data[m*4+3]=0;const d=M.d;if(i<d[0])d[0]=i;if(j<d[1])d[1]=j;if(i>d[2])d[2]=i;if(j>d[3])d[3]=j;SI.st.mark++;
+ try{const R=WLMM.rev;if(R){const k=Math.floor(j*MZ*52/WORLD)*52+Math.floor(i*MZ*52/WORLD);if(k>=0&&k<R.length)R[k]=1}}catch(e){}}
+function siMemFlush(){const d=M.d;if(d[2]<0)return;try{M.g.putImageData(M.img,0,0,d[0],d[1],d[2]-d[0]+1,d[3]-d[1]+1);SI.st.put++}catch(e){sErr('put',e)}M.d=[1e9,1e9,-1,-1]}
+function siMarkW(x,y){const n=M.n,i=Math.floor(x/MZ),j=Math.floor(y/MZ);if(i<0||j<0||i>=n||j>=n)return;const m=j*n+i;if(!M.a[m])siMark(m,i,j)}
+/* Boss-Arena (Karten-Abschnitt art 'arena'): beim Betreten vollständig bekannt */
+function siArena(q){const K=G.ka;if(!K||!K.sec||typeof kaSecAt!=='function')return;const s=kaSecAt(q.x,q.y);if(s===255||!K.sec[s]||K.sec[s].art!=='arena'||M.are[s])return;M.are[s]=1;
+ const n=K.n,Z=K.Z;for(let c=0;c<n*n;c++){if(K.sid[c]!==s)continue;const x0=(c%n)*Z,y0=((c/n)|0)*Z;for(let y=y0-MZ;y<y0+Z+MZ;y+=MZ)for(let x=x0-MZ;x<x0+Z+MZ;x+=MZ)siMarkW(x+MZ/2,y+MZ/2)}}
+
+/* ---------- Strahlen ---------- */
+SI.C=new Map();
+function siCast(c,vx,vy,R,N){dwBau();const O=DW.o,n=DW.n,E=SI.E,T=siTab(N),A=M.a,mn=M.n;if(!c.raw||c.raw.length!==N){c.raw=new Float32Array(N);c.ext=new Float32Array(N)}
+ const ci0=Math.floor(vx/C8),cj0=Math.floor(vy/C8),inW=ci0>=0&&cj0>=0&&ci0<n&&cj0<n&&O[cj0*n+ci0]?20:0;
+ if(A){const i=ci0>>1,j=cj0>>1;if(i>=0&&j>=0&&i<mn&&j<mn&&!A[j*mn+i])siMark(j*mn+i,i,j)}
+ let steps=0;
+ for(let r=0;r<N;r++){const dx=T.c[r],dy=T.s[r],adx=dx<0?-dx:dx,ady=dy<0?-dy:dy,si=dx>0?1:-1,sj=dy>0?1:-1;let ci=ci0,cj=cj0;
+  const tdx=adx>1e-7?C8/adx:1e9,tdy=ady>1e-7?C8/ady:1e9;let tx=adx>1e-7?((si>0?(ci+1)*C8-vx:vx-ci*C8)/adx):1e9,ty=ady>1e-7?((sj>0?(cj+1)*C8-vy:vy-cj*C8)/ady):1e9;
+  let hit=-1,ein=0,t=0;
+  for(let k=0;k<3000;k++){if(tx<ty){ci+=si;t=tx;tx+=tdx}else{cj+=sj;t=ty;ty+=tdy}steps++;
+   if(hit<0){if(t>R)break}else if(t>ein)break;
+   if(ci<0||cj<0||ci>=n||cj>=n){if(hit<0)hit=t;break}
+   if(hit<0&&O[cj*n+ci]&&t>inW){hit=t;ein=Math.min(t+E+SI.E2,R+E+SI.E2)}
+   if(A){const m=(cj>>1)*mn+(ci>>1);if(!A[m])siMark(m,ci>>1,cj>>1)}}
+  c.raw[r]=hit<0?R:hit;c.ext[r]=hit<0?R:Math.min(hit+E,R+E)}
+ c.x=vx;c.y=vy;c.R=R;c.N=N;SI.st.cast++;SI.st.ray+=steps}
+let UT=-1,UF=-1;SI.fr=0;SI.gen=0;
+function siBossNah(q){for(const e of G.enemies){if(e.dead||!(e.boss||e.guard))continue;const dx=e.x-q.x,dy=e.y-q.y;if(dx*dx+dy*dy<1100*1100)return true}return false}
+function siUpd(){if(UT===G.time&&UF===SI.fr){let still=true;const Lq=SI.Lq;if(Lq)for(let i=0;i<Lq.length;i++){const q=Lq[i],c=SI.C.get(q);if(c&&(Math.abs(c.x-q.x)>6||Math.abs(c.y-q.y)>6)){still=false;break}}if(still)return}UT=G.time;UF=SI.fr;siMemPruef();const L=siSeher();SI.Lq=L;const lz=siLeicht(),N=lz===2?240:lz===1?360:720,th=lz?6:3,bv=(DW.bv||0)+'|'+(G.blk?G.blk.length:0);
+ const V=[];let neu=0;
+ for(const q of L){let c=SI.C.get(q);if(!c){c={};SI.C.set(q,c)}const R=SI.R*(siBossNah(q)?SI.boss:1);
+  if(!c.raw||c.N!==N||c.R!==R||c.bv!==bv||Math.abs(c.x-q.x)>th||Math.abs(c.y-q.y)>th){siCast(c,q.x,q.y,R,N);c.bv=bv;neu=1}
+  if(!siGast()&&q.hero)try{siArena(q)}catch(e){}
+  V.push(c)}
+ SI.V=V;if(neu)SI.gen++;siMemFlush();
+ if(SI.C.size>12){for(const k of SI.C.keys())if(!L.includes(k))SI.C.delete(k)}}
+/* Punkt sichtbar (Vereinigung aller Betrachter); tol = Körperradius */
+function siSicht(x,y,tol){siUpd();tol=tol||0;const V=SI.V;if(!V)return true;
+ for(let i=0;i<V.length;i++){const c=V[i],dx=x-c.x,dy=y-c.y,dd=dx*dx+dy*dy,Rt=c.R+tol;if(dd>Rt*Rt)continue;if(dd<(tol+24)*(tol+24))return true;
+  let a=Math.atan2(dy,dx);if(a<0)a+=TAU;const N=c.N,f=a/TAU*N,i0=Math.floor(f)%N,i1=(i0+1)%N,d=Math.sqrt(dd)-tol-2;
+  if(d<=c.raw[i0]||d<=c.raw[i1])return true}return false}
+SI.sicht=(x,y,t)=>siSicht(x,y,t);
+/* Augen: freie blickdichte Linie, aber jenseits der Sichtweite */
+function siAugeOk(e){if((e.siEyT||0)>G.time)return e.siEyV;e.siEyT=G.time+0.25+Math.random()*0.15;let v=false;
+ for(const c of SI.V||[]){const dx=e.x-c.x,dy=e.y-c.y,dd=dx*dx+dy*dy;if(dd<c.R*c.R||dd>(c.R*1.6)**2)continue;if(dwFreiO({x:c.x,y:c.y},e)){v=true;break}}e.siEyV=v;return v}
+
+/* ---------- Sichtbarkeit von Gegnern (zeichnen) und Zielwahl (handeln) ---------- */
+SI.inR=0;
+function siTol(e){return e.boss||e.guard?(e.r||20)*1.2+20:Math.min(e.r||12,16)+4}
+function siEVis(e){return siSicht(e.x,e.y,siTol(e))}
+function siZielOk(e){if(!siEVis(e))return false;if(e.boss||e.guard)return true;const q=P;if(!q||!q.hero||G.room)return true;const dx=e.x-q.x,dy=e.y-q.y,m=(e.r||12)+(q.r||12)+8;if(dx*dx+dy*dy<m*m)return true;return dwFreiS(q,e)}
+{const f=fovVersteckt;fovVersteckt=function(e){if(!e||!siAn())return f.apply(this,arguments);try{
+  if(SI.inR){if(e.siRg===SI.gen&&e.siRf===SI.fr&&e.siRx===e.x&&e.siRy===e.y)return e.siRv;const v=!siEVis(e);e.siRg=SI.gen;e.siRf=SI.fr;e.siRx=e.x;e.siRy=e.y;e.siRv=v;return v}
+  siUpd();const px=P?P.x:0,py=P?P.y:0;if(e.siUt===G.time&&e.siUp===P&&e.siUg===SI.gen&&e.siUx===px&&e.siUy===py&&e.siUex===e.x&&e.siUey===e.y)return e.siUv;const v=!siZielOk(e);e.siUt=G.time;e.siUp=P;e.siUg=SI.gen;e.siUx=px;e.siUy=py;e.siUex=e.x;e.siUey=e.y;e.siUv=v;if(v)SI.st.hid++;return v}catch(er){sErr('fovV',er);return f.apply(this,arguments)}}}
+SI.zielOk=e=>!fovVersteckt(e);
+{const f=fovRahmen;fovRahmen=function(){const r=f.apply(this,arguments);try{if(siAn()){FOV.on=true;FOV.sicht=SI.R}}catch(e){}return r}}
+{const f=fsSeher;fsSeher=function(){const L=f.apply(this,arguments);try{if(siAn()&&L&&L.length>1)return [L[0]]}catch(e){}return L}}
+
+/* ---------- Maske (läuft in der Sichtschatten-Ebene; verträgt sich mit licht2/Ultra) ---------- */
+SI.rw=0;SI.mf=-1;
+function siMaske(g,camX,camY,m,lw,lh,vw,vh){siUpd();g.save();g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';
+ g.fillStyle=`rgba(3,2,6,${SI.mem})`;g.fillRect(0,0,lw,lh);
+ const X=x=>(x-camX)*m,Y=y=>(y-camY)*m;
+ {const n=M.n,s0x=Math.max(0,camX/MZ),s0y=Math.max(0,camY/MZ),s1x=Math.min(n,(camX+vw)/MZ),s1y=Math.min(n,(camY+vh)/MZ);
+  if(s1x>s0x&&s1y>s0y){const dx=X(s0x*MZ),dy=Y(s0y*MZ),dw=(s1x-s0x)*MZ*m,dh=(s1y-s0y)*MZ*m;
+   if(siLeicht()){g.imageSmoothingEnabled=true;g.drawImage(M.cv,s0x,s0y,s1x-s0x,s1y-s0y,dx,dy,dw,dh)}
+   else{/* weich: zweimal um eine halbe Zelle versetzt, Deckkraft aufaddiert (lighter) = Kastenfilter */
+    if(!U.c){U.c=document.createElement('canvas');U.g=U.c.getContext('2d')}if(U.c.width!==lw||U.c.height!==lh){U.c.width=lw;U.c.height=lh}const u=U.g;u.setTransform(1,0,0,1,0,0);u.globalAlpha=1;u.imageSmoothingEnabled=true;u.globalAlpha=0.5;const o=MZ*m*0.6;
+    u.globalCompositeOperation='copy';u.drawImage(M.cv,s0x,s0y,s1x-s0x,s1y-s0y,dx-o,dy-o*0.4,dw,dh);u.globalCompositeOperation='lighter';u.drawImage(M.cv,s0x,s0y,s1x-s0x,s1y-s0y,dx+o,dy+o*0.4,dw,dh);
+    u.globalAlpha=1;u.globalCompositeOperation='source-over';g.drawImage(U.c,0,0)}}}
+ g.fillStyle='rgb(3,2,6)';if(camX<0)g.fillRect(0,0,X(0),lh);if(camY<0)g.fillRect(0,0,lw,Y(0));if(camX+vw>WORLD)g.fillRect(X(WORLD),0,lw,lh);if(camY+vh>WORLD)g.fillRect(0,Y(WORLD),lw,lh);
+ g.globalCompositeOperation='destination-out';
+ for(const c of SI.V||[]){const x0=X(c.x),y0=Y(c.y),R=c.R*m;if(x0<-R-60||y0<-R-60||x0>lw+R+60||y0>lh+R+60)continue;const gr=g.createRadialGradient(x0,y0,R*0.7,x0,y0,R);gr.addColorStop(0,'rgba(0,0,0,1)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;
+  const T=siTab(c.N),E=c.ext,pf=(z,a)=>{g.globalAlpha=a;g.beginPath();g.moveTo(x0+T.c[0]*(E[0]+(E[0]<c.R?z:0))*m,y0+T.s[0]*(E[0]+(E[0]<c.R?z:0))*m);for(let i=1;i<c.N;i++){const d=E[i]+(E[i]<c.R?z:0);g.lineTo(x0+T.c[i]*d*m,y0+T.s[i]*d*m)}g.closePath();g.fill()};
+  if(siLeicht())pf(0,1);else{pf(-6,1);pf(8,0.5)}}
+ g.globalAlpha=1;
+ g.restore();SI.mf=SI.rw;SI.st.maske++}
+try{const f=fsKeile;fsKeile=function(g,V,camX,camY,m,vw,vh,lite){if(!siAn())return f.apply(this,arguments);try{const C=g.canvas;
+  if(SI.mf===SI.rw&&typeof FSV!=='undefined'&&g===FSV.g2){g.save();g.setTransform(1,0,0,1,0,0);g.globalCompositeOperation='source-over';g.fillStyle='#000';g.fillRect(0,0,C.width,C.height);g.restore();return}/* zweiter Betrachter-Durchgang (destination-in) – nichts ändern */
+  siMaske(g,camX,camY,m,C.width,C.height,vw,vh)}catch(e){sErr('maske',e);return f.apply(this,arguments)}}}catch(e){sErr('fsKeile',e)}
+const SC={c:null,g:null},U={c:null,g:null};
+function siSelbst(camX,camY){const s=siLeicht()?0.2:0.3,lw=Math.max(2,Math.ceil(W*s)),lh=Math.max(2,Math.ceil(H*s));if(!SC.c){SC.c=document.createElement('canvas');SC.g=SC.c.getContext('2d')}
+ if(SC.c.width!==lw||SC.c.height!==lh){SC.c.width=lw;SC.c.height=lh}SC.g.setTransform(1,0,0,1,0,0);SC.g.clearRect(0,0,lw,lh);siMaske(SC.g,camX,camY,ZOOM*s,lw,lh,W/ZOOM,H/ZOOM);
+ const c=cx;c.save();c.setTransform(DPR,0,0,DPR,0,0);c.globalAlpha=1;c.globalCompositeOperation='source-over';c.imageSmoothingEnabled=true;c.drawImage(SC.c,0,0,lw,lh,0,0,W,H);c.restore();SI.st.selbst++}
+/* Augen im Dunkeln: nur bei freier Linie jenseits der Sichtweite (nie durch Wände) */
+function siAugen(camX,camY,t){if(siLeicht()||!SI.aug||!SI.aug.length)return;const c=cx;c.save();c.setTransform(DPR,0,0,DPR,0,0);c.globalCompositeOperation='lighter';
+ for(const e of SI.aug){const ph=Math.sin(t*0.9+(e.id||e.x)*0.37);if(ph<0.5)continue;const a=Math.min(1,(ph-0.5)/0.2)*0.85,x=(e.x-camX)*ZOOM,y=(e.y-e.r*0.55-camY)*ZOOM,w=Math.max(2.4,e.r*0.32*ZOOM);
+  c.globalAlpha=a;c.fillStyle=e.elite?'#ffb030':'#ff3020';c.beginPath();c.arc(x-w,y,1.5*ZOOM,0,TAU);c.arc(x+w,y,1.5*ZOOM,0,TAU);c.fill();try{glow(x,y,9*ZOOM,'#ff3020',a*0.35,true)}catch(er){}}
+ c.restore();c.globalAlpha=1;c.globalCompositeOperation='source-over'}
+
+/* ---------- Zeichnen: nur Sichtbares ---------- */
+const SW={l:null,o:null};
+function swZurueck(){for(const k of ['l','o']){const s=SW[k];if(!s)continue;SW[k]=null;const key=k==='l'?'lights':'orbs',A=s[0],B=s[1],n=s[2],cur=G[key];
+  if(cur===B){for(let i=n;i<B.length;i++)A.push(B[i]);G[key]=A}else if(Array.isArray(cur)){const S=new Set(B);for(const o of A)if(!S.has(o)&&cur.indexOf(o)<0)cur.push(o)}}}
+{const f=renderWorld;renderWorld=function(dt){if(!siAn())return f.apply(this,arguments);SI.rw++;let A=null,B=null;
+  try{siUpd();A=G.enemies;B=[];const aug=SI.aug=[];for(const e of A){if(e.dead||siEVis(e))B.push(e);else if(aug.length<14&&!siLeicht()&&siAugeOk(e))aug.push(e)}G.enemies=B}catch(e){sErr('rw',e);if(A)G.enemies=A;A=null}
+  SI.inR++;try{return f.apply(this,arguments)}finally{SI.inR--;swZurueck();if(A){const cur=G.enemies;if(cur===B)G.enemies=A;else if(Array.isArray(cur)){const S=new Set(B);for(const e of A)if(!S.has(e)&&cur.indexOf(e)<0)cur.push(e)}}}}}
+{const f=render;render=function(){SI.fr++;SI.inR++;try{return f.apply(this,arguments)}finally{SI.inR--}}}
+{const f=drawLighting;drawLighting=function(camX,camY,t){const r=f.apply(this,arguments);if(!siAn())return r;
+  try{if(SI.mf!==SI.rw)siSelbst(camX,camY);siAugen(camX,camY,t)}catch(e){sErr('licht',e)}
+  try{FOV.aug.length=0}catch(e){}
+  try{if(!SW.l&&G.lights&&G.lights.length){const A=G.lights,B=A.filter(L=>siSicht(L.x,L.y,Math.min(60,(L.r||40)*0.4)));if(B.length!==A.length){SW.l=[A,B,B.length];G.lights=B}}
+   if(!SW.o&&G.orbs&&G.orbs.length){const A=G.orbs,B=A.filter(o=>siSicht(o.x,o.y,8));if(B.length!==A.length){SW.o=[A,B,B.length];G.orbs=B}}}catch(e){sErr('sw',e)}
+  return r}}
+const sv=(x,y,t)=>siSicht(x,y,t);
+/* Helden in Reichweite einer Telegrafie/Zone (die trifft gleich) */
+function siTrifftHeld(k){try{for(const q of mpL()){if(!q||q.netGone||q.down)continue;if(k.k==='circle'||k.k==='cone'||k.k==='line'){if(teleHits(k,q))return true}else if(k.k==='beam'){if(teleHits(k,q))return true}else if(k.r&&d2(k,q)<(k.r+20)*(k.r+20))return true}}catch(e){}return false}
+function siTeleOk(k){if(k.screen)return true;if(k.k==='circle')return sv(k.x,k.y,(k.r||30)*0.8)||siTrifftHeld(k);
+ if(k.k==='line'||k.k==='beam'||k.k==='cone'){const L=k.len||0;for(const u of [0,0.35,0.7,1])if(sv(k.x+Math.cos(k.a||0)*L*u,k.y+Math.sin(k.a||0)*L*u,(k.w||20)/2))return true;return siTrifftHeld(k)}
+ if(k.x==null)return true;return sv(k.x,k.y,k.r||30)||siTrifftHeld(k)}
+{const f=drawTele;drawTele=function(k,t){if(!siAn()||siTeleOk(k))return f.apply(this,arguments)}}
+{const f=drawTeleFx;drawTeleFx=function(k,t){if(!siAn()||siTeleOk(k))return f.apply(this,arguments)}}
+{const f=drawEZone;drawEZone=function(z,t){if(!siAn()||sv(z.x,z.y,(z.r||30)*0.75)||(z.r&&mpL().some(q=>q&&!q.down&&d2(z,q)<(z.r+16)*(z.r+16))))return f.apply(this,arguments)}}
+{const f=drawProj;drawProj=function(p,t){if(!siAn()||sv(p.x,p.y,(p.r||6)+4))return f.apply(this,arguments)}}
+{const f=drawFx;drawFx=function(fx,t){if(!siAn()||!fx||fx.x==null||!isFinite(fx.x))return f.apply(this,arguments);const tol=Math.min(140,(fx.r||fx.R||30));
+  if(sv(fx.x,fx.y,tol)||(fx.x2!=null&&sv(fx.x2,fx.y2,20)))return f.apply(this,arguments);
+  if(fx.r&&fx.r>60&&mpL().some(q=>q&&d2(fx,q)<fx.r*fx.r))return f.apply(this,arguments)}}
+function arrF(key,fn,tol){return function(){if(!siAn())return fn.apply(this,arguments);const A=G[key];if(!A||!A.length)return fn.apply(this,arguments);const B=A.filter(o=>o.x==null||sv(o.x,o.y,tol));if(B.length===A.length)return fn.apply(this,arguments);
+  const n0=B.length;G[key]=B;try{return fn.apply(this,arguments)}finally{if(G[key]===B){for(let i=n0;i<B.length;i++)A.push(B[i]);G[key]=A}}}}
+{const f=drawPartsNormal;drawPartsNormal=arrF('parts',f,6)}
+{const f=drawPartsAdd;drawPartsAdd=arrF('parts',f,6)}
+{const f=drawNums;drawNums=arrF('nums',f,14)}
+const iv2=(inView,tol)=>(x,y,m)=>inView(x,y,m)&&sv(x,y,tol);
+{const f=drawProjGlow;drawProjGlow=function(inView){try{swZurueck()}catch(e){}if(!siAn())return f.apply(this,arguments);return f.call(this,iv2(inView,8))}}
+{const f=drawPropGlow;drawPropGlow=function(inView,t){if(!siAn())return f.apply(this,arguments);return f.call(this,iv2(inView,20),t)}}
+{const f=drawLootBeams;drawLootBeams=function(inView,t){if(!siAn())return f.apply(this,arguments);return f.call(this,iv2(inView,10),t)}}
+{const f=drawLootIcons;drawLootIcons=function(inView,t){if(!siAn())return f.apply(this,arguments);return f.call(this,iv2(inView,10),t)}}
+
+/* ---------- Treffer nicht durch Wände (Flächen und Kegel: freie Linie vom Zentrum) ---------- */
+const AO=[];
+function siTrefferOk(e){const c=AO[AO.length-1];if(!c||e.boss||e.guard)return true;const dx=e.x-c.x,dy=e.y-c.y,m=(e.r||12)+4;if(dx*dx+dy*dy<m*m)return true;if(dwFreiS(c,e)&&(!c.s||dwFreiS(c.s,e)))return true;SI.st.blkH++;return false}
+/* Grundregel (v2): Schaden/Zustände nur an Gegnern, zu denen ein Held der Gruppe (oder Rex) eine freie Linie hat.
+   Ausnahmen: laufende DoT-Ticks (o.dot), Bosse/Wächter (ignorieren Wände). Deckt Projektile (auch Abpraller/Durchschlag), Begleiter,
+   Zonen, Ketten, Nachbilder, Explosionen u. a. ab, egal welche Quelle. */
+function siLinie(e){if(e.siLt===G.time&&e.siLg===SI.gen&&e.siLx===e.x&&e.siLy===e.y)return e.siLv;let v=false;const L=SI.Lq||siSeher();
+ for(const q of L){const dx=e.x-q.x,dy=e.y-q.y,m=(e.r||12)+(q.r||12)+10;if(dx*dx+dy*dy<m*m||dwFreiS(q,e)){v=true;break}}e.siLt=G.time;e.siLg=SI.gen;e.siLx=e.x;e.siLy=e.y;e.siLv=v;return v}
+function siSchadenOk(e,o){if(!e||e.boss||e.guard||e.dead||(o&&o.dot)||!siAn()||siGast())return true;if(!G.enemies.includes(e))return true;siUpd();if(siLinie(e))return true;SI.st.blkH++;return false}
+{const f=dealDmg;dealDmg=function(e,base,o){if(AO.length&&e&&!siTrefferOk(e))return 0;if(!siSchadenOk(e,o))return 0;return f.apply(this,arguments)}}
+{const f=dot;dot=function(e){if(!siSchadenOk(e,null))return;return f.apply(this,arguments)}}
+/* Bodenziele (Maus, Stick-Richtung, Ersatzpunkt vor dem Helden) nicht hinter Wände legen: auf den letzten freien Punkt der Linie ziehen */
+{const f=aimPoint;aimPoint=function(range){const p=f.apply(this,arguments);try{if(p&&P&&siAn()&&!dwFreiS(P,p)){dwBau();const t=dwStrahl(P.x,P.y,p.x,p.y,DW.s);if(t>=0){const dx=p.x-P.x,dy=p.y-P.y,d=Math.hypot(dx,dy)||1,u=Math.max(0,t-14/d);SI.st.zielZug=(SI.st.zielZug||0)+1;return {x:P.x+dx*u,y:P.y+dy*u}}}}catch(e){}return p}}
+/* Zentrum hinter einer Wand (z. B. Urbestie des Bären 55 px vor Echo, Hieb-Flächen): dann zählt die Linie von der Quelle (fx/fy bzw. Held bei Nahkampf) */
+{const f=aoe;aoe=function(x,y,R,amt,o){if(!siAn()||o&&o.durch)return f.apply(this,arguments);let c={x,y};
+  try{const sx=o&&o.fx!=null?o.fx:(o&&o.melee&&P?P.x:null),sy=o&&o.fy!=null?o.fy:(o&&o.melee&&P?P.y:null);if(sx!=null&&isFinite(sx)&&(Math.abs(sx-x)>2||Math.abs(sy-y)>2)){const q={x:sx,y:sy};if(!dwFreiS(q,c))c=q;else if(o.melee)c={x,y,s:q}}
+   if(!c.s&&c.x===x&&c.y===y&&P&&P.hero&&!dwFreiS(P,c)&&!siSicht(x,y,0))c={x,y,s:{x:P.x,y:P.y}}}catch(e){}
+  AO.push(c);try{return f.apply(this,arguments)}finally{AO.pop()}}}
+{const f=cone;cone=function(x,y,a,arc,R,amt,o){if(!siAn())return f.apply(this,arguments);AO.push({x,y});try{return f.apply(this,arguments)}finally{AO.pop()}}}
+
+/* ---------- Gegner: nur mit Sicht verfolgen, hinter Ecken verlieren ---------- */
+function siEKann(e){return !(e.boss||e.guard||e.add||e.dead||e.wlZz||e.flying||!e.def||e.def.k==='still'||e.def.k==='thief'||e.objDieb)}
+/* wer ist bemerkt? los = freie blickdichte Linie (nur dann Fernangriffe), sonst nur gehört (≤ SI.ohr) */
+const ENT={q:null,los:false};
+function siEntdeckt(e){const R2=SI.erk*SI.erk,O2=SI.ohr*SI.ohr;let best=null,bd=1e18,los=false;
+ for(const q of mpL()){if(!q||q.down||q.netGone)continue;const dx=q.x-e.x,dy=q.y-e.y,dd=dx*dx+dy*dy;if(dd>R2)continue;if(q.stealthT>0&&dd>60*60)continue;const l=dwFreiO(e,q);if(l||dd<O2){if(l&&!los||(l===los&&dd<bd)){bd=dd;best=q;los=l}}}
+ if(!best)for(const a of G.allies){if(!a||a.dead||!(a.kind==='rex'||a.kind==='pet'||a.kind==='obj'||a.kind==='ill'))continue;const dd=d2(e,a);if(dd<300*300){const l=dwFreiO(e,a);if(l||dd<O2){best=a;los=l;break}}}
+ ENT.q=best;ENT.los=los;return best}
+{const f=updEnemy;updEnemy=function(e,dt){if(!e||siGast()||!siAn()||!siEKann(e))return f.apply(this,arguments);
+  const A=e.siA||(e.siA={ck:0,lt:G.time,x:e.x,y:e.y,hp:e.hp,s:1,sx:0,sy:0,sT:0,st:0});
+  if(A.ck===0){const q=nearestP(e.x,e.y);if(q){A.x=q.x;A.y=q.y}}
+  if(e.hp<A.hp-0.01){const q=nearestP(e.x,e.y);if(q){A.x=q.x;A.y=q.y}A.lt=G.time;A.s=1;A.st=0}A.hp=e.hp;
+  if(A.ck<=G.time){A.ck=G.time+0.18+Math.random()*0.12;const h=siEntdeckt(e);if(h){A.x=h.x;A.y=h.y;A.lt=G.time;A.s=1;A.st=0;A.los=ENT.los}else{A.s=0;A.los=false}}
+  const k=e.def.k,fern=k==='ranged'||k==='caster'||k==='netter'||k==='charger'||k==='diver'||e.def.kite;
+  if(fern&&!A.los)e.atkCd=Math.max(e.atkCd||0,0.25);
+  if(A.s)return f.apply(this,arguments);
+  if(G.time-A.lt<SI.verlier)return f.apply(this,arguments);
+  /* verloren: zur letzten bekannten Stelle, dort kurz suchen, dann stehen und lauschen */
+  if(!A.st){A.st=1;A.sx=A.x;A.sy=A.y;A.sT=G.time;SI.st.lost++}
+  e.atkCd=Math.max(e.atkCd||0,0.3);e.wlLosT=G.time+0.5;e.wlNv=false;e.dwNo=0;e.peek=0;
+  const x0=e.x,y0=e.y,kx=(e.kx||0)*dt,ky=(e.ky||0)*dt;const r=f.apply(this,arguments);if(e.dead)return r;
+  const mx=e.x-x0-kx,my=e.y-y0-ky,mv=Math.hypot(mx,my);
+  if(mv>0.01){const sc=G.time-A.sT>SI.such+6?0:0.75;let dx=A.sx-x0,dy=A.sy-y0,d=Math.hypot(dx,dy);
+   if(d<26){if(G.time-A.sT<SI.such){let ok=0;for(let t=0;t<6&&!ok;t++){const a=rnd(TAU),dd=rnd(70,190),p={x:A.x+Math.cos(a)*dd,y:A.y+Math.sin(a)*dd};if(p.x>40&&p.y>40&&p.x<WORLD-40&&p.y<WORLD-40&&!blkPunkt(p.x,p.y,16)&&dwFreiS(e,p)){A.sx=p.x;A.sy=p.y;ok=1}}if(!ok){A.sx=x0;A.sy=y0}}else{A.sx=x0;A.sy=y0}dx=A.sx-x0;dy=A.sy-y0;d=Math.hypot(dx,dy)}
+   const s=d>1?mv*sc:0;e.x=x0+kx+(d>1?dx/d*Math.min(s,d):0);e.y=y0+ky+(d>1?dy/d*Math.min(s,d):0);e.mv=s>0?1:0;if(d>1&&Math.abs(dx)>2)e.faceX=e.x+dx}
+  return r}}
+
+/* ---------- Minikarte: nur Gesehenes ---------- */
+try{const f=wlMiniNebel;wlMiniNebel=function(neu){if(!siAn())return f.apply(this,arguments);try{siMemPruef();
+  if(neu||!WLMM.rev||WLMM.fog!==M.cv){f.call(this,true);const R=WLMM.rev;R.fill(0);const n=M.n,A=M.a;for(let j=0;j<n;j++)for(let i=0;i<n;i++)if(A[j*n+i]){const k=Math.floor(j*MZ*52/WORLD)*52+Math.floor(i*MZ*52/WORLD);if(k>=0&&k<R.length)R[k]=1}WLMM.fog=M.mmAll?SI.leer():M.cv}
+  else if(M.mmAll&&WLMM.fog===M.cv)WLMM.fog=SI.leer()}catch(e){sErr('mini',e);return f.apply(this,arguments)}}}catch(e){sErr('mini0',e)}
+SI.leer=()=>{if(!SI._leer){SI._leer=document.createElement('canvas');SI._leer.width=SI._leer.height=2}return SI._leer};
+try{const f=spKarte;spKarte=function(){const r=f.apply(this,arguments);try{if(siAn()){M.mmAll=1;if(WLMM.rev)WLMM.rev.fill(1);WLMM.fog=SI.leer()}}catch(e){}return r}}catch(e){}
+/* Kartograph: Anteil nur über begehbare Kartenteile (Felsmassen kann man nicht „aufdecken“) */
+try{const f=erfKarte;erfKarte=function(){try{if(SI.orte.has(siThema())&&WLMM.rev&&G.blkG&&!G.room&&M.a){dwBau();if(!M.flo||M.floK!==M.key){const n=52,Z=WORLD/n,O=DW.s,dn=DW.n,fl=new Uint8Array(n*n);
+    for(let j=0;j<n;j++)for(let i=0;i<n;i++){let frei=0;for(let y=j*Z+4;y<(j+1)*Z&&!frei;y+=16)for(let x=i*Z+4;x<(i+1)*Z;x+=16){const a=Math.floor(x/8),b=Math.floor(y/8);if(a<dn&&b<dn&&!O[b*dn+a]){frei=1;break}}fl[j*n+i]=frei}M.flo=fl;M.floK=M.key}
+   const R=WLMM.rev,F=M.flo;let a=0,b=0;for(let i=0;i<F.length;i++)if(F[i]){b++;if(R[i])a++}return b?Math.round(a/b*100):0}}catch(e){}return f.apply(this,arguments)}}catch(e){}
+
+/* ---------- Online: Gegner außerhalb der Gruppensicht gar nicht erst schicken ---------- */
+try{const f=netFilter;netFilter=function(W_,p){const o=f.apply(this,arguments);try{if(siAn()&&o&&o.enemies instanceof Map){const E=o.enemies,M2=new Map();
+   for(const [id,r] of E){if(!r||r.boss||r.guard||r.dead||!isFinite(r.x)||siSicht(r.x,r.y,120))M2.set(id,r);else SI.st.netWeg++}o.enemies=M2}}catch(e){sErr('net',e)}return o}}catch(e){sErr('net0',e)}
+
+window.__siT={upd:siUpd,sicht:siSicht,zielOk:e=>siZielOk(e),eVis:e=>siEVis(e),an:siAn,M,C:SI.C,seher:siSeher,entdeckt:siEntdeckt};
+}catch(e){console.error('sicht',e);window.__hsSICHT.err=String(e&&e.stack||e)}})();
+/* ================= Paket „cpuras“: Boden, Wände und ruhende Deko als vorgezeichnete Kacheln, wenn die Spielleinwand im Prozessor gerastert wird – window.__hsCPURAS =================
+   Befund (Handy, Firefox 159 Android, Diagnose): die Spielleinwand wird im Prozessor gerastert (licht2-Sonde 14,8 ms/MPx); teuerste Bereiche
+   Wände 6,9 · Boden 5,8 ms. Nachgestellt in Chromium ohne Grafikbeschleunigung bei Handy-Größe (270×565, 4× gedrosselt): Bodenmuster (Vollbild-
+   Füllung mit Muster) ~4,2 ms, Straße ~1,7, Kartenkacheln (hochskaliert gezeichnet) ~3,5, Deko (100+ Pfade) ~4,4 ms je Bild – alles Dinge, die
+   sich innerhalb einer Stufe nicht ändern.
+   Maßnahmen (nur im Prozessor-Pfad; auf Grafikkarten-Pfaden bleibt alles unverändert):
+   1) Boden-Ebene: Bodenmuster, Straße, Abdunklung außerhalb der Welt und die ruhenden Teile der drawRoomWalls-Kette (Kammerwände, Hausböden, Plätze,
+      Abgründe, ruhende Areale, Arena-Boden, Kartenkacheln mit Fels/Wald/Mauern/Häusern/Flussbetten, Kammerböden) werden in deckende Kacheln
+      (256×256 Bildpunkte, im Bildraster der Kamera) gezeichnet – mit genau denselben Zeichenbefehlen, nur um ganze Bildpunkte verschoben – und jedes
+      Bild nur noch 1:1 aufgelegt (reines Kopieren, keine Skalierung, kein Muster).
+      Bewegtes bleibt live in richtiger Reihenfolge: Teiche/Lava (wlBoden), bewegte Areale, Fallen, Druckplatten, Runen-/Lava-Arena, Wächter-Kampfplatz
+      werden in einem „Live-Rest“ gezeichnet: die vollständige Kette läuft weiter in jedem Bild (alle Nebenwirkungen/Zustände wie bisher), aber nur
+      innerhalb eines Ausschnitts (Rechtecke um die bewegten Teile und um noch fehlende Kacheln) – außerhalb wird nichts gerastert.
+      Brücken mit Glanzlichtern und der Arena-Rand laufen danach live (wie im Original zuletzt in der Kette). Zeichenzustand nach der Kette wird übernommen.
+   2) Deko-Ebene: jede Deko-Art wird geprüft (Aufzeichnung der Zeichenbefehle zu mehreren Zeitpunkten mit gefälschter Uhr/Zufall); nur nachweislich
+      ruhende Deko kommt in durchsichtige Kacheln (Reihenfolge bleibt: überlappt eine bewegte Deko davor eine ruhende, bleibt auch die ruhende live).
+      Stichproben-Nachprüfung im laufenden Spiel; Änderungen an G.deco werden erkannt (aus Paket „kachel“ übernommen, Speicher jetzt fest).
+   3) Minikarte: wird höchstens jedes 2. Bild neu gezeichnet (in eine kleine Leinwand, Größe aus dem aufgezeichneten Umriss) und dazwischen 1:1
+      aufgelegt – Karte mit 30 statt 60 Bildern/s, bei geänderter Anzeige (Menü, HUD, Größe, Banner) sofort; nur wenn die Karte normal mischt.
+   2b) Handheld-Sparbetrieb: statt der rg2-Deko-Kacheln (je Bild skaliert, geglättet, ~2,3-fach überdeckt) dieselben Bilder 1:1 aus Bildpunkt-Kacheln;
+      die Boden-Ebene ersetzt dort das vorgerenderte Bodenbild (PFS) – Boden/Straße damit wie ohne Sparbetrieb (PFS war leicht neu abgetastet).
+   4) Sprite-Leinwände (Gegner, Leuchten, Kartenkacheln) werden im Prozessor-Pfad als Prozessor-Leinwand angelegt (willReadFrequently) – in Firefox
+      sonst womöglich Grafikkarten-Leinwände, die beim Zeichnen auf die Prozessor-Spielleinwand zurückgelesen werden müssen.
+   Speicher: fester Vorrat je Ebene (Zahl aus Leinwandgröße + Rand, Obergrenze nach Gerätespeicher), LRU, keine Neuanlage/kein Größenwechsel je Bild,
+   Neubau verteilt (höchstens 2 Kacheln je Bild + 1 Randkachel). Fehlt eine Kachel, wird genau deren Fläche live gezeichnet.
+   Nachprüfung Boden: alle ~2 s wird eine sichtbare Kachel neu gezeichnet und Bildpunkt für Bildpunkt verglichen (Prozessor-Leinwand: billig) –
+   bei Abweichung werden alle Kacheln verworfen (Zähler st.pruefFehl).
+   Erkennung (modus 'auto'): licht2-Sonde meldet „Prozessor“ (Firefox), sonst WebGL nur in Software (SWR) oder Handheld-Sparbetrieb.
+   Nie: Ultra leicht (eigener Hintergrund), geteilter Bildschirm, Firefox mit Sonde „Grafikkarte“, Chrome/Edge/Firefox mit Grafikkarte.
+   Schalter: __hsCPURAS.aus=true, __hsCPURAS.modus='auto'|'an'|'aus' (auch ?cpuras=an|aus in der Adresse), __hsCPURAS.k.{boden,deko,karte,leinw,pruef}=0.
+   Zähler: __hsCPURAS.st, Diagnose-Zeile „CPU-Kacheln: …“. Chromium 77: ES2017, kein ?. ?? */
+(function(){try{window.__hsCPURAS={v:1};
+const CR=window.__hsCPURAS;CR.aus=false;CR.modus='auto';
+try{const m=/[?&]cpuras=(an|aus|auto)\b/.exec(location.search||'');if(m)CR.modus=m[1]}catch(e){}
+CR.k={boden:1,deko:1,karte:1,leinw:1,pruef:1};CR.TS=256;CR.TSD=256;CR.A=32;CR.bud=2;CR.ms=4;CR.stab=3;CR.pruefAlle=120;CR.dq=4;
+CR.st={f:0,bB:0,bTeil:0,bLive:0,bBau:0,dB:0,dL:0,dBau:0,klass:0,fest:0,live:0,dyn:0,nachpruef:0,neuArt:0,pruef:0,pruefFehl:0,dynR:0,kN:0,kNeu:0,kLive:0,kAlt:0,neuCv:0,fehler:0};CR.err=[];
+const cErr=(k,e)=>{CR.st.fehler++;if(CR.err.length<12)CR.err.push(k+': '+(e&&e.message||e))};
+const now=()=>performance.now();
+
+/* ---------- Erkennung ---------- */
+function ulAn(){try{return !!(window.__hsULTRA&&__hsULTRA.on)}catch(e){return false}}
+function grund(){if(CR.aus||CR.modus==='aus')return '';if(ulAn())return '';if(CR.modus==='an')return 'erzwungen';
+ try{const L2=window.__hsLICHT2;if(L2&&!L2.aus&&L2.aktiv&&L2.aktiv()&&L2.sonde){if(L2.sonde.art==='Prozessor')return 'Firefox-Sonde: Prozessor';if(L2.sonde.art==='Grafikkarte')return ''}}catch(e){}
+ try{if(SWR)return 'ohne Grafikbeschleunigung'}catch(e){}
+ try{if(RG2.spar)return 'Handheld-Sparbetrieb'}catch(e){}
+ return ''}
+CR.grund=grund;CR.an=()=>!!grund();
+function spar(){try{return !!RG2.spar}catch(e){return false}}
+function rahmenOk(){try{if(!G||!G.ground||G.vp||!cx||!(DPR>0))return false;if(typeof splitOn==='function'&&splitOn())return false;if(ulAn())return false;
+ const c=cx.canvas;return c===cv||!!(c&&c.className==='l2cv')}catch(e){return false}}
+
+/* ---------- Speicher und Leinwand-Vorrat (fest) ---------- */
+function gMem(){let m=0;try{m=+navigator.deviceMemory||0}catch(e){}return m}
+function cap(){const m=gMem();return (m>=8?64:m>=4?40:m>0?24:40)*1048576}
+const OPT={alpha:true,willReadFrequently:true};
+function neueLw(n,deckend){const c=document.createElement('canvas');c.width=n;c.height=n;c.__crK=1;let g=null;try{g=c.getContext('2d',{alpha:!deckend,willReadFrequently:true})}catch(e){}if(!g)g=c.getContext('2d');CR.st.neuCv++;return{cv:c,g}}
+function Vorrat(n,deckend){return{n,deckend,alle:[],frei:[],m:new Map(),key:'',gen:0,ziel:0}}
+const VB=Vorrat(CR.TS,true),VD=Vorrat(CR.TSD+2*CR.A,false);
+CR.VB=VB;CR.VD=VD;
+function vBytes(V){return V.alle.length*V.n*V.n*4}
+CR.mb=()=>Math.round((vBytes(VB)+vBytes(VD)+(MK.c?MK.c.width*MK.c.height*4:0))/104857.6)/10;
+/* Zielgröße: sichtbare Kacheln + Rand, höchstens Anteil an der Obergrenze; 0 = Ebene passt nicht */
+function vZiel(V,TS,anteil){const cw=cv.width,ch=cv.height,vis=(Math.ceil(cw/TS)+1)*(Math.ceil(ch/TS)+1),rand=2*(Math.ceil(cw/TS)+Math.ceil(ch/TS))+8,per=V.n*V.n*4,max=Math.floor(cap()*anteil/per);
+ if(vis+2>max)return 0;return Math.min(max,vis+rand)}
+function vHolen(V,f){/* eine Leinwand: frei → neu (bis Ziel) → älteste nicht in diesem Bild benutzte */
+ if(V.frei.length)return V.frei.pop();if(V.alle.length<V.ziel){const L=neueLw(V.n,V.deckend);V.alle.push(L);return L}
+ let ak=null,ae=null;for(const [k,e] of V.m){if(!e.L||e.lu===f)continue;if(!ae||e.lu<ae.lu){ae=e;ak=k}}if(!ae)return null;V.m.delete(ak);const L=ae.L;ae.L=null;return L}
+function vLeeren(V){for(const e of V.m.values())if(e.L)V.frei.push(e.L);V.m.clear()}
+function vKuerzen(V){/* Ziel kleiner geworden (Fenster verkleinert): überzählige Leinwände freigeben */
+ while(V.alle.length>V.ziel){let L=V.frei.pop();if(!L){let ak=null,ae=null;for(const [k,e] of V.m){if(!e.L)continue;if(!ae||e.lu<ae.lu){ae=e;ak=k}}if(!ae)break;V.m.delete(ak);L=ae.L}
+  const i=V.alle.indexOf(L);if(i>=0)V.alle.splice(i,1);try{L.cv.width=1;L.cv.height=1}catch(e){}}}
+function vAlleFrei(V){vLeeren(V);for(const L of V.alle){try{L.cv.width=1;L.cv.height=1}catch(e){}}V.alle.length=0;V.frei.length=0;V.key=''}
+/* ungenutzt (Menü, Lager, Titel, Grafikkarte) → nach 8 s alles freigeben */
+CR.last=0;
+setInterval(()=>{try{if(CR.last&&now()-CR.last>8000){vAlleFrei(VB);vAlleFrei(VD);if(MK.c){MK.c.width=1;MK.c.height=1;MK.c=null}CR.last=0}}catch(e){}},4000);
+
+/* ---------- Hilfen ---------- */
+const OID=new WeakMap();let oidN=0;const oid=o=>{if(!o||typeof o!=='object')return String(o);let v=OID.get(o);if(!v){v=++oidN;OID.set(o,v)}return v};
+function trans(){let m;try{m=cx.getTransform()}catch(e){return null}if(m.b!==0||m.c!==0||m.a!==m.d||!(m.a>0.05)||m.e!==Math.round(m.e)||m.f!==Math.round(m.f))return null;return m}
+function sicht(m,TS){return{i0:Math.floor(-m.e/TS),i1:Math.floor((cv.width-1-m.e)/TS),j0:Math.floor(-m.f/TS),j1:Math.floor((cv.height-1-m.f)/TS)}}
+const ZS=['lineCap','lineJoin','miterLimit','lineWidth','font','textAlign','textBaseline','imageSmoothingEnabled','imageSmoothingQuality','fillStyle','strokeStyle','lineDashOffset','direction'];
+function zustandUebernehmen(g){for(const k of ZS){try{if(k in cx&&g[k]!==cx[k])g[k]=cx[k]}catch(e){}}try{g.setLineDash(cx.getLineDash())}catch(e){}g.globalAlpha=1;g.globalCompositeOperation='source-over';
+ try{if(g.filter!=='none')g.filter='none'}catch(e){}g.shadowBlur=0;g.shadowColor='rgba(0,0,0,0)';g.shadowOffsetX=0;g.shadowOffsetY=0}
+const ZL=ZS.concat(['globalAlpha','globalCompositeOperation','shadowBlur','shadowColor','shadowOffsetX','shadowOffsetY']);
+function zustandLesen(c){const z={};for(const k of ZL){try{z[k]=c[k]}catch(e){}}try{z.dash=c.getLineDash()}catch(e){}try{z.m=c.getTransform()}catch(e){}return z}
+function zustandSchreiben(c,z){for(const k of ZL){try{if(z[k]!==undefined&&c[k]!==z[k])c[k]=z[k]}catch(e){}}try{if(z.dash)c.setLineDash(z.dash)}catch(e){}try{const m=z.m;if(m)c.setTransform(m.a,m.b,m.c,m.d,m.e,m.f)}catch(e){}}
+/* Maßstab muss einige Bilder stabil sein, bevor gebaut wird (Zoom-Stoß, Kampf-Zoom) */
+const SS={s:0,n:0,f:-1};
+function stabil(s){if(SS.f!==CR.st.f){SS.f=CR.st.f;if(s===SS.s)SS.n++;else{SS.s=s;SS.n=0}}return SS.n>=CR.stab}
+
+/* ---------- Boden wie in renderWorld (Boden, Straße, Abdunklung) ---------- */
+function strasse(c,R){if(!R)return;c.lineJoin='round';c.lineCap='round';c.beginPath();R.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.strokeStyle='#40352a';c.lineWidth=150;c.stroke();c.strokeStyle='#5c4c38';c.lineWidth=120;c.stroke();
+ for(const o of[-24,24]){c.beginPath();R.forEach((p,i)=>i?c.lineTo(p[0],p[1]+o):c.moveTo(p[0],p[1]+o));c.strokeStyle='rgba(40,30,20,.45)';c.lineWidth=5;c.stroke()}}
+function bodenRechteck(c,gr,R,X0,Y0,X1,Y1){/* Rechteck X0..X1 × Y0..Y1 (Welt) wie renderWorld mit camX=X0, vw=X1-X0 */
+ const vw=X1-X0,vh=Y1-Y0;c.fillStyle=gr;c.fillRect(X0-20,Y0-20,vw+40,vh+40);strasse(c,R);c.fillStyle='rgba(6,4,8,.78)';
+ if(X0<0)c.fillRect(X0-20,Y0-20,-X0+20,vh+40);if(Y0<0)c.fillRect(X0-20,Y0-20,vw+40,-Y0+20);
+ if(X0+vw>WORLD)c.fillRect(WORLD,Y0-20,X0+vw-WORLD+20,vh+40);if(Y0+vh>WORLD)c.fillRect(X0-20,WORLD,vw+40,Y0+vh-WORLD+20)}
+function bodenLive(gr,R){const vw=W/ZOOM,vh=H/ZOOM,camX=G.cam.x-vw/2,camY=G.cam.y-vh/2;bodenRechteck(cx,gr,R,camX,camY,camX+vw,camY+vh)}
+
+/* ---------- Statische Kette: bewegte Teile während des Kachelbaus weglassen ---------- */
+CR.bau=0;CR.ohneSuffix=0;
+const AR_FEST=new Set(['erde','lichtung','fliesen','seide','friedhof','asche']);
+const WL_DYN=k=>k==='wasser'||k==='lava';
+const WLS={ref:null,n:-1,L:null};
+function wlStatL(L){if(WLS.ref!==L||WLS.n!==L.length){WLS.ref=L;WLS.n=L.length;WLS.L=L.filter(o=>!(o.t==='c'&&WL_DYN(o.k)))}return WLS.L}
+function arenaInfo(){const K=G.ka;if(!K||!K.sec)return null;const A=K.sec.find(s=>s.art==='arena');let dyn=false;
+ try{const D=K.arDef||(typeof kaArenaDef==='function'?kaArenaDef():null);if(!D||D.bd==='runen')dyn=true}catch(e){dyn=true}
+ try{if(G.wl&&G.wl.lo)for(const o of G.wl.lo)if(o.k==='ka_lavarand'){dyn=true;break}}catch(e){}
+ return{A,dyn,kp:K.kampfP||null}}
+try{const f=kaBruecken;kaBruecken=function(){if(CR.bau||CR.ohneSuffix)return;return f.apply(this,arguments)}}catch(e){cErr('haken kaBruecken',e)}
+try{const f=kaArenaRand;kaArenaRand=function(){if(CR.bau||CR.ohneSuffix)return;return f.apply(this,arguments)}}catch(e){cErr('haken kaArenaRand',e)}
+try{const f=arBoden;arBoden=function(t){if(!CR.bau)return f.apply(this,arguments);
+  /* Kachelbau: nur ruhende Areale (keine Fallen, keine Druckplatten) */
+  if(G.room||!G.arN||!G.arN.length)return;const V=wlSicht();for(const a of G.arN)if(AR_FEST.has(a.b)&&a.x>V.x0-a.r&&a.x<V.x1+a.r&&a.y>V.y0-a.r&&a.y<V.y1+a.r)arBodenAreal(a,t)}}catch(e){cErr('haken arBoden',e)}
+try{const f=wlBoden;wlBoden=function(t){if(!CR.bau)return f.apply(this,arguments);const Wd=G.wl;if(!Wd||!Wd.lo)return f.apply(this,arguments);const L=Wd.lo;Wd.lo=wlStatL(L);try{return f.apply(this,arguments)}finally{Wd.lo=L}}}catch(e){cErr('haken wlBoden',e)}
+try{const f=kaArenaBoden;kaArenaBoden=function(t){if(!CR.bau)return f.apply(this,arguments);const I=arenaInfo();if(!I||I.dyn)return;const K=G.ka,kp=K.kampfP;K.kampfP=null;try{return f.apply(this,arguments)}finally{K.kampfP=kp}}}catch(e){cErr('haken kaArenaBoden',e)}
+
+/* ---------- Bewegte Teile der Kette: Rechtecke (Welt) für den Live-Rest ---------- */
+const PB=new Map();/* Umriss je Falle/Platte (Aufzeichnung), 20 Bilder gültig */
+function propUmriss(p,fn,t){let e=PB.get(p);if(e&&CR.st.f-e.f<20)return e.b;let b=null;try{const r=aufnehmen(()=>fn(p,t));b=r.bb}catch(er){b=null}
+ if(!b)b={x0:p.x-200,y0:p.y-200,x1:p.x+200,y1:p.y+200};PB.set(p,{b,f:CR.st.f});if(PB.size>400){for(const k of PB.keys()){PB.delete(k);if(PB.size<300)break}}return b}
+function dynRechtecke(add){if(G.room)return;let V;try{V=wlSicht()}catch(e){return}const t=G.time;
+ const Wd=G.wl;if(Wd&&Wd.an&&Wd.lo)for(const o of Wd.lo){if(o.t!=='c'||!WL_DYN(o.k))continue;const r=o.r*1.5+28;if(o.x+r>V.x0&&o.x-r<V.x1&&o.y+r>V.y0&&o.y-r<V.y1)add(o.x-r,o.y-r,o.x+r,o.y+r)}
+ if(G.arN&&(G.arN.length||G.props.length)){for(const a of G.arN){if(AR_FEST.has(a.b))continue;const r=a.r+16;if(a.x>V.x0-a.r&&a.x<V.x1+a.r&&a.y>V.y0-a.r&&a.y<V.y1+a.r)add(a.x-r,a.y-r,a.x+r,a.y+r)}
+  for(const p of G.props){if(p.k==='falle'&&!p.dead&&p.x>V.x0-180&&p.x<V.x1+180&&p.y>V.y0-180&&p.y<V.y1+180){const b=propUmriss(p,arFalleBoden,t);add(b.x0-6,b.y0-6,b.x1+6,b.y1+6)}
+   else if(p.k==='ar_platte'&&p.x>V.x0-40&&p.x<V.x1+40&&p.y>V.y0-40&&p.y<V.y1+40){const b=propUmriss(p,arPlatteDraw,t);add(b.x0-6,b.y0-6,b.x1+6,b.y1+6)}}}
+ if(G.ka){const I=arenaInfo();if(I){const A=I.A;if(I.dyn&&A&&!(A.x1<V.x0||A.x0>V.x1||A.y1<V.y0||A.y0>V.y1)){const K=G.ka,g_=K.arG;let x0=A.x0,y0=A.y0,x1=A.x1,y1=A.y1;
+    if(g_){x0=Math.min(x0,g_.cx-g_.rx);x1=Math.max(x1,g_.cx+g_.rx);y0=Math.min(y0,g_.cy-g_.ry);y1=Math.max(y1,g_.cy+g_.ry)}add(x0-80,y0-80,x1+80,y1+80);
+    try{for(const o of G.wl.lo)if(o.k==='ka_lavarand'){const r=Math.max(o.w,o.h)*0.7+16;add(o.x+o.w/2-r,o.y+o.h/2-r,o.x+o.w/2+r,o.y+o.h/2+r)}}catch(e){}}
+   const kp=I.kp;if(kp&&!(kp.x<V.x0-300||kp.x>V.x1+300||kp.y<V.y0-300||kp.y>V.y1+300))add(kp.x-262,kp.y-200,kp.x+262,kp.y+200)}}}
+
+/* ---------- Boden-Ebene ---------- */
+CR.rw=null;CR.inRW=0;
+let RW0=null;/* drawRoomWalls-Kette vor diesem Paket */
+function bgBasis(){const K=G.ka;let tp=0;try{if(K&&K.tore)for(const T of K.tore)tp+=((T.prop&&T.prop.prog||0)>=0.999?2:0)+(T.zu?1:0)}catch(e){}
+ const R=CR.rw?CR.rw.rd:G.road,gr=CR.rw?CR.rw.gr:G.ground,r=G.room;let ks='';try{ks=KAT.key+'/'+KAT.sc}catch(e){}let th='';try{th=(G.theme&&(G.theme.base+'/'+G.theme.dark))+'/'+(typeof CU==='function'&&CU('nacht')?1:0)}catch(e){}
+ return [G.runId,G.stage,G.themeKey,WORLD,oid(gr),R?oid(R)+'/'+R.length+'/'+R[0][0]+'/'+R[0][1]:0,ks,K?K.v+'/'+oid(K):0,tp,G.blkV||0,G.wl&&G.wl.lo?G.wl.lo.length+'/'+G.wl.haus.length:0,G.arN?G.arN.length:0,
+  r?[r.type,r.x0,r.y0,r.x1,r.y1].join(','):'',th,cx.imageSmoothingEnabled,cx.imageSmoothingQuality,(function(){try{return gfxL()+'/'+fxQ()}catch(e){return''}})()].join('|')}
+function bgBauIn(L,i,j,s){const TS=CR.TS,g=L.g;g.setTransform(1,0,0,1,0,0);zustandUebernehmen(g);g.setTransform(s,0,0,s,-i*TS,-j*TS);
+ const X0=i*TS/s,Y0=j*TS/s,X1=(i+1)*TS/s,Y1=(j+1)*TS/s;const R=CR.rw;bodenRechteck(g,R.gr,R.rd,X0,Y0,X1,Y1);
+ /* Kette mit einer Sicht so groß wie die Kachel (Rand für Teile, die hineinragen, legt die Kette selbst an) */
+ const c0=cx,W0=W,H0=H,cam0=G.cam,ism=g.imageSmoothingEnabled;cx=g;W=(X1-X0)*ZOOM;H=(Y1-Y0)*ZOOM;G.cam={x:(X0+X1)/2,y:(Y0+Y1)/2};CR.bau++;
+ try{RW0()}finally{cx=c0;W=W0;H=H0;G.cam=cam0;CR.bau--}g.globalAlpha=1;g.globalCompositeOperation='source-over';g.imageSmoothingEnabled=ism}
+function bgBau(i,j,s,k,f){const T0=now();const V=VB;let e=V.m.get(k);let L=e&&e.L;if(!L){L=vHolen(V,f);if(!L)return null}
+ if(!e){e={L,gen:-1,lu:f,i,j,s};V.m.set(k,e)}else e.L=L;
+ try{bgBauIn(L,i,j,s);e.gen=V.gen;e.lu=f;CR.st.bBau++}catch(er){cErr('bgbau',er);e.gen=-1}CR.bt+=now()-T0;return e}
+/* Nachprüfung: eine sichtbare Kachel neu zeichnen und vergleichen */
+let PRL=null;
+function bgPruef(e,k){if(!CR.k.pruef)return;try{if(!PRL)PRL=neueLw(CR.TS,true);bgBauIn(PRL,e.i,e.j,e.s);const TS=CR.TS;
+ const a=new Uint32Array(PRL.g.getImageData(0,0,TS,TS).data.buffer),b=new Uint32Array(e.L.g.getImageData(0,0,TS,TS).data.buffer);let n=0;for(let q=0;q<a.length;q++)if(a[q]!==b[q])n++;
+ CR.st.pruef++;if(n){CR.st.pruefFehl++;CR.pruefInfo={k,n,stufe:G.stage,f:CR.st.f};VB.gen++}}catch(er){cErr('prüf',er)}}
+CR.dbgRechtecke=[];
+function bgBild(){const R=CR.rw;CR.rw=null;G.ground=R.gr;G.road=R.rd;
+ const m=trans();if(!m||!CR.k.boden){CR.st.bLive++;bodenLive(R.gr,R.rd);return RW0()}
+ /* in Kammern mit (noch) sichtbarem Arena-Rand: ganz live (Reihenfolge Rand/Kammerboden) */
+ try{if(G.room&&G.ka&&(G.ka.arA||0)>0.001){CR.st.bLive++;bodenLive(R.gr,R.rd);return RW0()}}catch(e){}
+ const s=m.a,TS=CR.TS,V=VB,f=CR.st.f;CR.rw=R;const key=bgBasis();CR.rw=null;
+ if(V.key!==key){vLeeren(V);V.key=key;V.gen++}
+ V.ziel=vZiel(V,TS,0.4);if(V.alle.length>V.ziel)vKuerzen(V);
+ if(!V.ziel){CR.st.bLive++;bodenLive(R.gr,R.rd);return RW0()}
+ const S=sicht(m,TS),st=stabil(s),pre=s+'|';let fehlt=[];CR.rw=R;
+ try{for(let j=S.j0;j<=S.j1;j++)for(let i=S.i0;i<=S.i1;i++){const k=pre+i+','+j;let e=V.m.get(k);
+   if(!e||e.gen!==V.gen||!e.L){if(st&&CR.b0>0&&!(CR.bt>CR.ms&&CR.b1)){CR.b0--;CR.b1=1;e=bgBau(i,j,s,k,f)}else e=null;if(!e||e.gen!==V.gen){fehlt.push([i,j]);continue}}e.lu=f}}
+ finally{CR.rw=null}
+ const nVis=(S.i1-S.i0+1)*(S.j1-S.j0+1);
+ if(fehlt.length>=nVis){CR.st.bLive++;bodenLive(R.gr,R.rd);ringBau(S,s,pre,st,R);return RW0()}
+ /* Kacheln 1:1 auflegen */
+ cx.save();cx.setTransform(1,0,0,1,0,0);cx.globalAlpha=1;cx.globalCompositeOperation='source-over';
+ for(let j=S.j0;j<=S.j1;j++)for(let i=S.i0;i<=S.i1;i++){const e=V.m.get(pre+i+','+j);if(!e||e.gen!==V.gen||!e.L)continue;cx.drawImage(e.L.cv,i*TS+m.e,j*TS+m.f)}cx.restore();
+ /* Live-Rest: ganze Kette, aber nur in den Rechtecken der bewegten Teile und fehlenden Kacheln gerastert */
+ const RE=[];const cw=cv.width,ch=cv.height;
+ const addD=(x0,y0,x1,y1)=>{const a=Math.max(0,Math.floor(x0)),b=Math.max(0,Math.floor(y0)),c=Math.min(cw,Math.ceil(x1)),d=Math.min(ch,Math.ceil(y1));if(c>a&&d>b)RE.push([a,b,c-a,d-b])};
+ for(const q of fehlt)addD(q[0]*TS+m.e,q[1]*TS+m.f,(q[0]+1)*TS+m.e,(q[1]+1)*TS+m.f);
+ try{dynRechtecke((x0,y0,x1,y1)=>addD(x0*s+m.e,y0*s+m.f,x1*s+m.e,y1*s+m.f))}catch(er){cErr('dyn',er);RE.length=0;RE.push([0,0,cw,ch])}
+ CR.st.dynR+=RE.length;if(CR.dbg)CR.dbgRechtecke=RE.slice();
+ cx.save();cx.setTransform(1,0,0,1,0,0);cx.beginPath();if(RE.length)for(const r of RE)cx.rect(r[0],r[1],r[2],r[3]);else cx.rect(0,0,0,0);cx.clip();cx.setTransform(m.a,m.b,m.c,m.d,m.e,m.f);
+ let z=null;CR.ohneSuffix=1;
+ try{bodenLive(R.gr,R.rd);RW0()}catch(er){cErr('rest',er)}finally{CR.ohneSuffix=0;z=zustandLesen(cx);cx.restore();zustandSchreiben(cx,z)}
+ if(fehlt.length)CR.st.bTeil++;else CR.st.bB++;
+ /* zuletzt in der Kette: Brücken (Glanzlichter) und Arena-Rand live */
+ try{kaBruecken(G.time)}catch(er){}try{kaArenaRand()}catch(er){}
+ ringBau(S,s,pre,st,R);
+ if(CR.k.pruef&&f%CR.pruefAlle===37){const L=[];for(let j=S.j0;j<=S.j1;j++)for(let i=S.i0;i<=S.i1;i++){const k=pre+i+','+j,e=V.m.get(k);if(e&&e.gen===V.gen&&e.L)L.push([k,e])}if(L.length){const q=L[(f/CR.pruefAlle|0)%L.length];CR.rw=R;try{bgPruef(q[1],q[0])}finally{CR.rw=null}}}}
+/* Randkacheln vorbauen (eine je Bild, nur wenn Zeit übrig) */
+function ringBau(S,s,pre,st,R){const V=VB,f=CR.st.f;if(!st||CR.b0<=0||CR.bt>CR.ms*0.5)return;CR.rw=R;
+ try{for(let j=S.j0-1;j<=S.j1+1;j++)for(let i=S.i0-1;i<=S.i1+1;i++){if(j>=S.j0&&j<=S.j1&&i>=S.i0&&i<=S.i1)continue;const k=pre+i+','+j,e=V.m.get(k);if(e&&e.gen===V.gen&&e.L){e.lu=f;continue}
+   if(V.alle.length>=V.ziel&&!V.frei.length){/* nur alte Kacheln dürfen verdrängt werden */let alt=false;for(const q of V.m.values())if(q.lu<f-1){alt=true;break}if(!alt)return}
+   CR.b0--;bgBau(i,j,s,k,f);return}}finally{CR.rw=null}}
+
+/* ---------- Deko: Aufzeichnungs-Leinwand (aus Paket „kachel“) ---------- */
+const ST0={fillStyle:'#000000',strokeStyle:'#000000',lineWidth:1,lineCap:'butt',lineJoin:'miter',miterLimit:10,globalAlpha:1,globalCompositeOperation:'source-over',font:'10px sans-serif',textAlign:'start',textBaseline:'alphabetic',
+ direction:'ltr',filter:'none',shadowBlur:0,shadowColor:'rgba(0,0,0,0)',shadowOffsetX:0,shadowOffsetY:0,imageSmoothingEnabled:true,imageSmoothingQuality:'low',lineDashOffset:0};
+function Rec(){this.reset()}
+const RP=Rec.prototype;
+RP.reset=function(){this.L=[];this.m=[1,0,0,1,0,0];this.S=[];this.s=Object.assign({},ST0);this.dash=[];this.pb=null;this.bb=[Infinity,Infinity,-Infinity,-Infinity];this.mix=0;this.txt=0;this.gid=0;this.canvas={width:4096,height:4096}};
+const rv=(r,v)=>v&&typeof v==='object'?(v.__rk?v.__rk:'o'+oid(v)):typeof v==='number'?String(v):JSON.stringify(v);
+for(const k in ST0)Object.defineProperty(RP,k,{configurable:true,get(){return this.s[k]},set(v){this.s[k]=v;this.L.push(k+'='+rv(this,v));if(k==='globalCompositeOperation'&&v!=='source-over')this.mix=1;if(k==='filter'&&v&&v!=='none')this.mix=1}});
+RP.log=function(n,a){let t=n+'(';for(let i=0;i<a.length;i++)t+=(i?',':'')+rv(this,a[i]);this.L.push(t+')')};
+RP.mul=function(a,b,c,d,e,f){const m=this.m;this.m=[m[0]*a+m[2]*b,m[1]*a+m[3]*b,m[0]*c+m[2]*d,m[1]*c+m[3]*d,m[0]*e+m[2]*f+m[4],m[1]*e+m[3]*f+m[5]]};
+RP.pt=function(x,y,r){const m=this.m;r=r||0;const X=m[0]*x+m[2]*y+m[4],Y=m[1]*x+m[3]*y+m[5],k=r*Math.max(Math.hypot(m[0],m[1]),Math.hypot(m[2],m[3]));let b=this.pb;if(!b)b=this.pb=[Infinity,Infinity,-Infinity,-Infinity];
+ if(X-k<b[0])b[0]=X-k;if(Y-k<b[1])b[1]=Y-k;if(X+k>b[2])b[2]=X+k;if(Y+k>b[3])b[3]=Y+k};
+RP.sk=function(){const m=this.m;return Math.max(Math.hypot(m[0],m[1]),Math.hypot(m[2],m[3]))};
+RP.add=function(b,ex){if(!b||!(b[2]>=b[0]))return;const s=this.s,sh=(s.shadowBlur>0||s.shadowOffsetX||s.shadowOffsetY)?s.shadowBlur*2+Math.abs(s.shadowOffsetX)+Math.abs(s.shadowOffsetY):0;ex=(ex||0)+sh+1;const B=this.bb;
+ if(b[0]-ex<B[0])B[0]=b[0]-ex;if(b[1]-ex<B[1])B[1]=b[1]-ex;if(b[2]+ex>B[2])B[2]=b[2]+ex;if(b[3]+ex>B[3])B[3]=b[3]+ex};
+RP.save=function(){this.log('save',[]);this.S.push([this.m.slice(),Object.assign({},this.s),this.dash.slice()])};
+RP.restore=function(){this.log('restore',[]);const q=this.S.pop();if(q){this.m=q[0];this.s=q[1];this.dash=q[2]}};
+RP.translate=function(x,y){this.log('tr',arguments);this.mul(1,0,0,1,+x,+y)};
+RP.scale=function(x,y){this.log('sc',arguments);this.mul(+x,0,0,+y,0,0)};
+RP.rotate=function(a){this.log('ro',arguments);const c=Math.cos(a),s=Math.sin(a);this.mul(c,s,-s,c,0,0)};
+RP.transform=function(a,b,c,d,e,f){this.log('tf',arguments);this.mul(+a,+b,+c,+d,+e,+f)};
+RP.setTransform=function(a,b,c,d,e,f){this.log('st',arguments);if(a&&typeof a==='object'){const o=a;this.m=[o.a,o.b,o.c,o.d,o.e,o.f]}else if(arguments.length>=6)this.m=[+a,+b,+c,+d,+e,+f];else this.m=[1,0,0,1,0,0]};
+RP.resetTransform=function(){this.log('rt',[]);this.m=[1,0,0,1,0,0]};
+RP.getTransform=function(){const m=this.m;return{a:m[0],b:m[1],c:m[2],d:m[3],e:m[4],f:m[5],is2D:true,isIdentity:false}};
+RP.beginPath=function(){this.log('bp',[]);this.pb=null};
+RP.closePath=function(){this.log('cp',[])};
+RP.moveTo=function(x,y){this.log('mt',arguments);this.pt(x,y)};
+RP.lineTo=function(x,y){this.log('lt',arguments);this.pt(x,y)};
+RP.quadraticCurveTo=function(a,b,x,y){this.log('qc',arguments);this.pt(a,b);this.pt(x,y)};
+RP.bezierCurveTo=function(a,b,c,d,x,y){this.log('bc',arguments);this.pt(a,b);this.pt(c,d);this.pt(x,y)};
+RP.arcTo=function(a,b,c,d,r){this.log('at',arguments);this.pt(a,b,r);this.pt(c,d,r)};
+RP.arc=function(x,y,r){this.log('ar',arguments);this.pt(x,y,Math.abs(r))};
+RP.ellipse=function(x,y,rx,ry){this.log('el',arguments);this.pt(x,y,Math.max(Math.abs(rx),Math.abs(ry)))};
+RP.rect=function(x,y,w,h){this.log('re',arguments);this.pt(x,y);this.pt(x+w,y);this.pt(x,y+h);this.pt(x+w,y+h)};
+RP.fill=function(){this.log('fi',[]);this.add(this.pb,0)};
+RP.stroke=function(){this.log('sk',[]);const s=this.s;this.add(this.pb,(s.lineWidth/2)*this.sk()*(s.lineJoin==='miter'?Math.max(1,s.miterLimit):1.5)+1)};
+RP.clip=function(){this.log('cl',arguments)};
+RP.rbb=function(x,y,w,h){const o=this.pb;this.pb=null;this.pt(x,y);this.pt(x+w,y);this.pt(x,y+h);this.pt(x+w,y+h);const b=this.pb;this.pb=o;return b};
+RP.fillRect=function(x,y,w,h){this.log('fr',arguments);this.add(this.rbb(x,y,w,h),0)};
+RP.strokeRect=function(x,y,w,h){this.log('sr',arguments);const s=this.s;this.add(this.rbb(x,y,w,h),(s.lineWidth/2)*this.sk()*Math.max(1,s.miterLimit)+1)};
+RP.clearRect=function(){this.log('cr',arguments);this.mix=1};
+RP.drawImage=function(img){this.log('di',arguments);const a=arguments;let x,y,w,h;const iw=img&&(img.width||img.videoWidth)||0,ih=img&&(img.height||img.videoHeight)||0;
+ if(a.length<=3){x=a[1];y=a[2];w=iw;h=ih}else if(a.length<=5){x=a[1];y=a[2];w=a[3];h=a[4]}else{x=a[5];y=a[6];w=a[7];h=a[8]}this.add(this.rbb(+x,+y,+w,+h),0)};
+RP.fillText=function(){this.log('ft',arguments);this.txt=1;const s=this.s;const fs=parseFloat((/(\d+(?:\.\d+)?)px/.exec(s.font)||[0,10])[1]);const a=arguments,w=String(a[0]).length*fs;this.add(this.rbb(+a[1]-w,+a[2]-fs*1.5,w*2,fs*2.5),2)};
+RP.strokeText=function(){this.log('stx',arguments);this.txt=1;const s=this.s;const fs=parseFloat((/(\d+(?:\.\d+)?)px/.exec(s.font)||[0,10])[1]);const a=arguments,w=String(a[0]).length*fs;this.add(this.rbb(+a[1]-w,+a[2]-fs*1.5,w*2,fs*2.5),s.lineWidth+2)};
+RP.measureText=function(t){this.txt=1;return{width:String(t).length*6}};
+RP.getImageData=function(){this.txt=1;return{data:new Uint8ClampedArray(4),width:1,height:1}};RP.putImageData=function(){this.txt=1};RP.createImageData=function(){this.txt=1;return{data:new Uint8ClampedArray(4),width:1,height:1}};
+RP.setLineDash=function(a){this.log('ld',[JSON.stringify(a)]);this.dash=Array.isArray(a)?a.slice():[]};RP.getLineDash=function(){return this.dash.slice()};
+RP.isPointInPath=function(){this.txt=1;return false};RP.isPointInStroke=function(){this.txt=1;return false};
+RP.grad=function(n,a){const r=this,id='g'+(++this.gid);this.log(n,a);return{__rk:id,addColorStop(o,c){r.L.push(id+'.cs('+o+','+c+')')}}};
+RP.createLinearGradient=function(){return this.grad('clg',arguments)};RP.createRadialGradient=function(){return this.grad('crg',arguments)};RP.createConicGradient=function(){return this.grad('ccg',arguments)};
+RP.createPattern=function(){const id='p'+(++this.gid);this.log('cpt',arguments);return{__rk:id,setTransform(){}}};
+const REC=new Rec();CR.Rec=Rec;
+/* beliebigen Zeichenaufruf aufzeichnen (Umriss in Zielkoordinaten bei Einheitsmatrix = Weltkoordinaten) */
+function aufnehmen(fn){const R=REC;R.reset();const c0=cx;try{cx=R;fn()}finally{cx=c0}const B=R.bb;return{bb:B[2]>=B[0]?{x0:B[0],y0:B[1],x1:B[2],y1:B[3]}:null,mix:R.mix,n:R.L.length}}
+const PR={rn:0};
+let prRnd=12345;function prRandom(){prRnd=(prRnd*1103515245+12345)&0x7fffffff;PR.rn++;return prRnd/0x7fffffff}
+let _dd1=null;/* drawDeco-Kette vor diesem Paket */
+function probe(d,t,seed){const R=REC;R.reset();
+ const c0=cx,pn=performance.now,dn=Date.now,mr=Math.random,gt=G.time,L=[G.fxs,G.parts,G.lights,G.nums,G.zones,G.decals,G.ezones].map(a=>Array.isArray(a)?[a,a.length]:null);let ne=0;
+ const fake=1e6+seed*1777.7;prRnd=(seed*7919+13)&0x7fffffff;PR.rn=0;
+ try{cx=R;CR.dbau++;performance.now=function(){return fake};Date.now=function(){return 1.7e12+fake};Math.random=prRandom;G.time=t;try{_dd1(d,t)}catch(e){ne=1}}
+ finally{cx=c0;CR.dbau--;performance.now=pn;Date.now=dn;Math.random=mr;G.time=gt;for(const q of L)if(q&&q[0].length!==q[1]){if(q[0].length>q[1])q[0].length=q[1];ne=1}}
+ const B=R.bb;return{L:R.L.join('|'),bb:B[2]>=B[0]?{x0:B[0],y0:B[1],x1:B[2],y1:B[3]}:null,ne,mix:R.mix,txt:R.txt,rn:PR.rn,n:R.L.length}}
+const TT=[0.37,2.91,6.13,13.6,21.7];
+function ruhig(d,nT,r0){const a=r0||probe(d,TT[0],1);if(a.ne||a.mix||a.txt||a.rn)return false;for(let q=1;q<nT;q++){const b=probe(d,TT[q],q+1);if(b.ne||b.rn||b.L!==a.L)return false}return true}
+const KL={arr:null,len:0,env:'',idx:0,arten:new Map(),info:[],fertig:0,gen:0,sx:null,sy:null,sk:null,ss:null,sv:null,fest:new Set(),grid:new Map(),GC:128,ext:0};
+CR.KL=KL;CR.dbau=0;
+function env(){const a=[];const p=f=>{try{a.push(f())}catch(e){a.push('?')}};
+ p(()=>gfxL());p(()=>fxQ());p(()=>OA.s);p(()=>OA.ul?1:0);p(()=>G.themeKey);p(()=>G.runId);p(()=>G.stage);p(()=>G.room?(G.room.type||'r')+G.room.x0+','+G.room.y0:'');
+ p(()=>{const x=WX();return x?x.w+'/'+x.z:''});p(()=>NET.role||'');p(()=>CU('nacht')?1:0);p(()=>WF.aus.farbe?1:0);p(()=>G.theme&&G.theme.rune||'');return a.join('|')}
+function sig(){const D=G.deco;KL.arr=D;KL.len=D.length;const n=D.length;KL.sx=new Float64Array(n);KL.sy=new Float64Array(n);KL.ss=new Float64Array(n);KL.sv=new Float64Array(n);KL.sk=new Array(n);
+ for(let i=0;i<n;i++){const d=D[i];KL.sx[i]=+d.x;KL.sy[i]=+d.y;KL.ss[i]=+d.s;KL.sv[i]=+d.v;KL.sk[i]=d.k}}
+function sigOk(){const D=G.deco;if(D!==KL.arr||D.length!==KL.len)return false;const n=D.length,lim=Math.min(n,3000);let i0=0;if(n>lim){i0=KL.rot=((KL.rot||0)+lim)%n}const eq=Object.is;
+ for(let q=0;q<lim;q++){const i=(i0+q)%n,d=D[i];if(!d||!eq(+d.x,KL.sx[i])||!eq(+d.y,KL.sy[i])||d.k!==KL.sk[i]||!eq(+d.s,KL.ss[i])||!eq(+d.v,KL.sv[i]))return false}return true}
+function neuKlass(){sig();KL.env=env();KL.idx=0;KL.info=new Array(KL.len);KL.fertig=0;KL.arten=new Map();KL.fest.clear();KL.grid=new Map();KL.gen++;vLeeren(VD);VD.key='';CR.st.klass++}
+function klassSchritt(){const D=KL.arr,t0=now();
+ while(KL.idx<KL.len){if(now()-t0>CR.ms&&KL.idx>0)return false;const i=KL.idx++,d=D[i];if(!d||typeof d!=='object'){KL.info[i]={i,bb:null};continue}
+  let A=KL.arten.get(d.k);if(!A){A={n:0,ruhig:true,bsp:[]};KL.arten.set(d.k,A)}
+  const r=probe(d,TT[0],1);let bb=r.bb?Object.assign({},r.bb):{leer:1,x0:d.x,y0:d.y,x1:d.x,y1:d.y};if(r.ne)bb.ne=1;
+  const ru=A.ruhig?ruhig(d,A.n<4?5:2,r):false;if(A.n<4){A.n++;A.bsp.push(d)}if(!ru){A.ruhig=false;if(!bb.leer||r.n){for(let q=1;q<5;q++){const b=probe(d,TT[q],q+11).bb;if(b){if(bb.leer){bb={x0:b.x0,y0:b.y0,x1:b.x1,y1:b.y1};continue}bb.x0=Math.min(bb.x0,b.x0);bb.y0=Math.min(bb.y0,b.y0);bb.x1=Math.max(bb.x1,b.x1);bb.y1=Math.max(bb.y1,b.y1)}}}}
+  KL.info[i]={bb,i}}
+ return true}
+function klassAbschluss(){const D=KL.arr,G2=new Map(),GC=KL.GC;let nf=0,nl=0,nd=0,ext=0;
+ const addBox=(M,b,v)=>{for(let y=Math.floor(b.y0/GC);y<=Math.floor(b.y1/GC);y++)for(let x=Math.floor(b.x0/GC);x<=Math.floor(b.x1/GC);x++){const k=x+','+y;let L=M.get(k);if(!L)M.set(k,L=[]);L.push(v)}};
+ const hit=(b)=>{for(let y=Math.floor(b.y0/GC);y<=Math.floor(b.y1/GC);y++)for(let x=Math.floor(b.x0/GC);x<=Math.floor(b.x1/GC);x++){const L=G2.get(x+','+y);if(L)for(const q of L)if(q.x0<b.x1&&q.x1>b.x0&&q.y0<b.y1&&q.y1>b.y0)return true}return false};
+ for(let i=0;i<KL.len;i++){const I=KL.info[i],d=D[i];if(!I||!I.bb){nl++;continue}const b=I.bb,A=KL.arten.get(d.k);
+  if(b.leer){if(!A||!A.ruhig||b.ne){nl++;const g={x0:d.x-200,y0:d.y-200,x1:d.x+200,y1:d.y+200};addBox(G2,g,g)}continue}
+  const M=54;/* Sichtrand 70 minus Wackeln */const passt=b.x0>=d.x-M&&b.x1<=d.x+M&&b.y0>=d.y-M&&b.y1<=d.y+M;
+  let live=!A||!A.ruhig||!passt||b.ne;if(!A||!A.ruhig)nd++;
+  if(!live&&hit(b))live=true;
+  if(live){nl++;const g=b.ne?{x0:d.x-600,y0:d.y-600,x1:d.x+600,y1:d.y+600}:{x0:b.x0-12,y0:b.y0-12,x1:b.x1+12,y1:b.y1+12};addBox(G2,g,g)}
+  else{nf++;KL.fest.add(d);addBox(KL.grid,b,I);ext=Math.max(ext,b.x1-b.x0,b.y1-b.y0)}}
+ KL.ext=ext;KL.fertig=1;CR.st.fest=nf;CR.st.live=nl;CR.st.dyn=nd}
+function nachpruef(){if(!CR.k.pruef||!KL.fertig||CR.st.f%10)return;const L=[...KL.arten.entries()].filter(e=>e[1].ruhig&&e[1].bsp.length);if(!L.length)return;const z=CR.st.f/10|0,e=L[z%L.length],A=e[1],d=A.bsp[z%A.bsp.length];
+ if(!d)return;CR.st.nachpruef++;const t1=(G.time||0)%97+0.5;const a=probe(d,t1,(z%977)+31),b=probe(d,t1+7.77,(z%977)+47);
+ const ok=!a.ne&&!b.ne&&!a.mix&&!a.txt&&!a.rn&&!b.rn&&a.L===b.L;
+ if(!ok){A.ruhig=false;CR.st.neuArt++;KL.fest.clear();KL.grid=new Map();KL.gen++;vLeeren(VD);VD.key='';klassAbschluss()}}
+
+/* ---------- Deko-Kacheln: 256er Raster, Leinwand mit festem Rand 32 (kleine Deko über der Kachelkante liegt ganz in der Leinwand) ---------- */
+function dekoBau(i,j,s,k,f){const T0=now();const V=VD;let e=V.m.get(k);try{return dekoBau0(i,j,s,k,f,e)}finally{CR.bt+=now()-T0}}
+function dekoBau0(i,j,s,k,f,e){const TS=CR.TSD,A=CR.A,N=TS+2*A,X0=i*TS/s,Y0=j*TS/s,X1=(i+1)*TS/s,Y1=(j+1)*TS/s,GC=KL.GC,seen=new Set(),L=[],V=VD;
+ for(let y=Math.floor(Y0/GC);y<=Math.floor(Y1/GC);y++)for(let x=Math.floor(X0/GC);x<=Math.floor(X1/GC);x++){const Q=KL.grid.get(x+','+y);if(Q)for(const I of Q){if(seen.has(I))continue;seen.add(I);const b=I.bb;if(b.x0<X1&&b.x1>X0&&b.y0<Y1&&b.y1>Y0)L.push(I)}}
+ CR.st.dBau++;if(!e){e={L:null,gen:V.gen,lu:f,r:[]};V.m.set(k,e)}e.gen=V.gen;e.lu=f;e.r=[];
+ if(!L.length){if(e.L){V.frei.push(e.L);e.L=null}return e}
+ if(!e.L){e.L=vHolen(V,f);if(!e.L){V.m.delete(k);return null}}
+ L.sort((a,b)=>a.i-b.i);const g=e.L.g;g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,N,N);zustandUebernehmen(g);g.setTransform(s,0,0,s,A-i*TS,A-j*TS);
+ const NQ=CR.dq,H2=TS/NQ,Q=[];for(let q=0;q<NQ*NQ;q++)Q.push([TS,TS,0,0]);const c0=cx,mr=Math.random,t=G.time;
+ try{cx=g;CR.dbau++;Math.random=prRandom;for(const I of L){const d=KL.arr[I.i];try{_dd1(d,t)}catch(er){}const b=I.bb,x0=b.x0*s-i*TS,y0=b.y0*s-j*TS,x1=b.x1*s-i*TS,y1=b.y1*s-j*TS;
+   for(let q=0;q<Q.length;q++){const qx=(q%NQ)*H2,qy=Math.floor(q/NQ)*H2,R=Q[q];const a0=Math.max(qx,x0),b0=Math.max(qy,y0),a1=Math.min(qx+H2,x1),b1=Math.min(qy+H2,y1);if(a1<=a0||b1<=b0)continue;R[0]=Math.min(R[0],a0);R[1]=Math.min(R[1],b0);R[2]=Math.max(R[2],a1);R[3]=Math.max(R[3],b1)}}}
+ finally{cx=c0;CR.dbau--;Math.random=mr}
+ for(let q=0;q<Q.length;q++){const R=Q[q],qx=(q%NQ)*H2,qy=Math.floor(q/NQ)*H2;if(R[2]<=R[0])continue;const x0=Math.max(qx,Math.floor(R[0])-1),y0=Math.max(qy,Math.floor(R[1])-1),x1=Math.min(qx+H2,Math.ceil(R[2])+1),y1=Math.min(qy+H2,Math.ceil(R[3])+1);if(x1>x0&&y1>y0)e.r.push([x0,y0,x1-x0,y1-y0])}
+ if(!e.r.length){V.frei.push(e.L);e.L=null}return e}
+CR.dOn=0;
+function dekoBild(){CR.dOn=0;const V=VD;
+ if(spar()||!CR.k.deko){return}
+ if(!KL.arr||!sigOk()||KL.env!==env())neuKlass();
+ if(!KL.fertig){if(!klassSchritt()){CR.st.dL++;return}klassAbschluss()}
+ if(!KL.fest.size){CR.st.dL++;return}
+ const m=trans();if(!m){CR.st.dL++;return}
+ const s=m.a,TS=CR.TSD,A=CR.A,key=KL.gen+'|'+TS;if(V.key!==key){vLeeren(V);V.key=key;V.gen++}
+ V.ziel=vZiel(V,TS,0.55);if(V.alle.length>V.ziel)vKuerzen(V);if(!V.ziel){CR.st.dL++;return}
+ const S=sicht(m,TS),st=stabil(s),pre=s+'|',f=CR.st.f;let fehlt=0;
+ for(let j=S.j0;j<=S.j1;j++)for(let i=S.i0;i<=S.i1;i++){const k=pre+i+','+j;let e=V.m.get(k);
+  if(!e||e.gen!==V.gen){if(!st||CR.b0<=0||(CR.bt>CR.ms&&CR.b1)){fehlt++;continue}CR.b0--;CR.b1=1;e=dekoBau(i,j,s,k,f);if(!e){fehlt++;continue}}e.lu=f}
+ if(fehlt){CR.st.dL++;dRing(S,s,pre,st);return}
+ cx.save();cx.setTransform(1,0,0,1,0,0);cx.globalAlpha=1;cx.globalCompositeOperation='source-over';
+ for(let j=S.j0;j<=S.j1;j++)for(let i=S.i0;i<=S.i1;i++){const e=V.m.get(pre+i+','+j);if(!e||!e.L)continue;const ox=i*TS+m.e,oy=j*TS+m.f;for(const q of e.r){if(ox+q[0]>=cv.width||oy+q[1]>=cv.height||ox+q[0]+q[2]<=0||oy+q[1]+q[3]<=0)continue;cx.drawImage(e.L.cv,q[0]+A,q[1]+A,q[2],q[3],ox+q[0],oy+q[1],q[2],q[3])}}
+ cx.restore();CR.dOn=1;CR.st.dB++;dRing(S,s,pre,st);
+ try{nachpruef()}catch(e){cErr('nachprüf',e)}}
+function dRing(S,s,pre,st){const V=VD,f=CR.st.f;if(!st||CR.b0<=0||CR.bt>CR.ms*0.5)return;
+ for(let j=S.j0-1;j<=S.j1+1;j++)for(let i=S.i0-1;i<=S.i1+1;i++){if(j>=S.j0&&j<=S.j1&&i>=S.i0&&i<=S.i1)continue;const k=pre+i+','+j,e=V.m.get(k);if(e&&e.gen===V.gen){e.lu=f;continue}
+  if(V.alle.length>=V.ziel&&!V.frei.length){let alt=false;for(const q of V.m.values())if(q.L&&q.lu<f-1){alt=true;break}if(!alt)return}
+  CR.b0--;dekoBau(i,j,s,k,f);return}}
+
+/* ---------- Sparbetrieb (Handheld): die rg2-Deko-Kacheln (512er Welt-Kacheln mit 128 Rand, je Bild skaliert und geglättet gezeichnet,
+   ~2,3-fache Überdeckung) werden 1:1 in Bildpunkt-Kacheln übertragen – gleiche Bilder, gleiche Umrechnung, nur um ganze Bildpunkte verschoben.
+   Welche rg2-Kacheln gebaut/gezeichnet/als „ok“ markiert werden, folgt genau der rg2-Schleife; diese sieht danach eine leere Liste. ---------- */
+const RK={on:0};CR.RK=RK;
+function rgSig(i,j,s){const TS=CR.TSD,CS=RGDK_CS,PD=RGDK_PAD,X0=i*TS/s,Y0=j*TS/s,X1=(i+1)*TS/s,Y1=(j+1)*TS/s;let r='';
+ for(let cy=Math.floor((Y0-PD)/CS);cy<=Math.floor((Y1+PD)/CS);cy++)for(let cx_=Math.floor((X0-PD)/CS);cx_<=Math.floor((X1+PD)/CS);cx_++){const ch=RGDK.m.get(cx_+','+cy);if(ch&&ch.cv&&ch.ok)r+=cx_+','+cy+':'+oid(ch.cv)+';'}return r}
+function rgBau(i,j,s,k,f,sg){const T0=now();const V=VD;let e=V.m.get(k);try{
+  if(!e){e={L:null,gen:V.gen,lu:f,sg:''};V.m.set(k,e)}if(!e.L){e.L=vHolen(V,f);if(!e.L){V.m.delete(k);return null}}
+  const TS=CR.TSD,A=CR.A,N=TS+2*A,g=e.L.g,CS=RGDK_CS,PD=RGDK_PAD;g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,N,N);zustandUebernehmen(g);g.setTransform(s,0,0,s,A-i*TS,A-j*TS);
+  for(const ch of RGDK.m.values()){if(!ch.cv||!ch.ok)continue;const x0=ch.x-PD,y0=ch.y-PD,x1=ch.x+CS+PD,y1=ch.y+CS+PD;if(x1*s<i*TS||x0*s>(i+1)*TS||y1*s<j*TS||y0*s>(j+1)*TS)continue;g.drawImage(ch.cv,x0,y0,CS+2*PD,CS+2*PD)}
+  e.gen=V.gen;e.lu=f;e.sg=sg;CR.st.dBau++;return e}finally{CR.bt+=now()-T0}}
+function rgTiles(){const m=trans();if(!m)return false;const s=m.a,TS=CR.TSD,A=CR.A,V=VD,f=CR.st.f;
+ const vw=W/ZOOM,vh=H/ZOOM,camX=G.cam.x-vw/2,camY=G.cam.y-vh/2,inV=(x,y,mm)=>x>camX-mm&&x<camX+vw+mm&&y>camY-mm&&y<camY+vh+mm;
+ /* wie die rg2-Schleife: bauen (1 je Bild), ok/lu setzen */
+ const sc=Math.round(DPR*ZOOM*20)/20;let bud=1;const CS=RGDK_CS,PD=RGDK_PAD;
+ for(const ch of RGDK.m.values()){if(!inV(ch.x+CS/2,ch.y+CS/2,CS/2+PD))continue;if(!ch.cv||Math.abs(ch.sc/sc-1)>0.12){if(bud>0||!ch.cv){if(bud-->0)rgDkBau(ch,sc);else continue}}ch.ok=1;ch.lu=++RGDK.fc}
+ const key='rg|'+RGDK.key+'|'+TS;if(V.key!==key){vLeeren(V);V.key=key;V.gen++}
+ V.ziel=vZiel(V,TS,0.55);if(V.alle.length>V.ziel)vKuerzen(V);if(!V.ziel)return false;
+ const S=sicht(m,TS),st=stabil(s),pre=s+'|';let fehlt=0;const L=[];
+ for(let j=S.j0;j<=S.j1;j++)for(let i=S.i0;i<=S.i1;i++){const k=pre+i+','+j,sg=rgSig(i,j,s);let e=V.m.get(k);
+  if(!e||e.gen!==V.gen||e.sg!==sg){if(!st||CR.b0<=0||(CR.bt>CR.ms&&CR.b1)){fehlt++;continue}CR.b0--;CR.b1=1;e=rgBau(i,j,s,k,f,sg);if(!e){fehlt++;continue}}e.lu=f;L.push([i,j,e])}
+ if(fehlt){CR.st.dL++;return false}
+ cx.save();cx.setTransform(1,0,0,1,0,0);cx.globalAlpha=1;cx.globalCompositeOperation='source-over';for(const q of L){if(q[2].sg)cx.drawImage(q[2].L.cv,A,A,TS,TS,q[0]*TS+m.e,q[1]*TS+m.f,TS,TS)}cx.restore();
+ CR.st.dB++;return true}
+try{const f=rgDkPrep;rgDkPrep=function(){const r=f.apply(this,arguments);
+  try{if(CR.inRW&&!CR.bau&&!CR.dbau&&!RGDK.bau&&CR.k.deko&&spar()&&!G.room&&grund()&&rgTiles()){const M=RGDK.m;RK.M=M;RGDK.m=RK.P={values(){RGDK.m=M;return [][Symbol.iterator]()},get(k){return M.get(k)},set(k,v){return M.set(k,v)},clear(){return M.clear()},get size(){return M.size}}}}catch(e){cErr('rgdk',e)}
+  return r}}catch(e){cErr('haken rgDkPrep',e)}
+
+/* ---------- Minikarte: alle 100 ms neu, dazwischen 1:1 auflegen ---------- */
+const MK={c:null,g:null,x:0,y:0,w:0,h:0,sig:'',rf:-1e9,bf:-1e9,ok:0,mix:0,leer:0};CR.MK=MK;
+function mkSetT(g,ox,oy){const P=CanvasRenderingContext2D.prototype;g.setTransform=function(a,b,c,d,e,f){if(a&&typeof a==='object'){const o=a;return P.setTransform.call(g,o.a,o.b,o.c,o.d,o.e-ox,o.f-oy)}if(arguments.length<6)return P.setTransform.call(g,1,0,0,1,-ox,-oy);return P.setTransform.call(g,a,b,c,d,e-ox,f-oy)};
+ g.resetTransform=function(){return P.setTransform.call(g,1,0,0,1,-ox,-oy)};
+ g.getTransform=function(){const m=P.getTransform.call(g);try{return new DOMMatrix([m.a,m.b,m.c,m.d,m.e+ox,m.f+oy])}catch(e){return{a:m.a,b:m.b,c:m.c,d:m.d,e:m.e+ox,f:m.f+oy}}}}
+function karteBauen(prev,args){const x0=MK.bx0,y0=MK.by0,w=MK.bw,h=MK.bh;
+ if(!MK.c||MK.c.width<w||MK.c.height<h){const nw=Math.max(w,MK.c?MK.c.width:0),nh=Math.max(h,MK.c?MK.c.height:0);if(!MK.c){MK.c=document.createElement('canvas');MK.c.__crK=1;CR.st.neuCv++}MK.c.width=nw;MK.c.height=nh;
+  try{MK.g=MK.c.getContext('2d',{willReadFrequently:true})}catch(e){MK.g=MK.c.getContext('2d')}}
+ const g=MK.g;CanvasRenderingContext2D.prototype.setTransform.call(g,1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.clearRect(0,0,MK.c.width,MK.c.height);
+ zustandUebernehmen(g);try{g.globalAlpha=cx.globalAlpha}catch(e){}mkSetT(g,x0,y0);try{const m=cx.getTransform();g.setTransform(m.a,m.b,m.c,m.d,m.e,m.f)}catch(e){}
+ const c0=cx;try{cx=g;prev.apply(null,args)}finally{cx=c0}
+ Object.assign(MK,{x:x0,y:y0,w,h,ok:1});CR.st.kNeu++}
+/* Karte höchstens jedes 2. Bild neu zeichnen (in eine kleine Leinwand), dazwischen 1:1 auflegen. Umriss und Mischmodi werden durch Aufzeichnen
+   (ohne Rastern) bestimmt: beim ersten Mal, bei geänderter Anzeige (mkSig) und sonst jede Sekunde. Nur normal mischende Karten. */
+function mkSig(){let b='';try{const B=G.banner;b=B?(B.small?1:0)+'/'+(B.bars?1:0)+'/'+(B.y?1:0):''}catch(e){}
+ return [hud.hidden?1:0,G.state,SAVE.wlMini===false?0:1,G.room?1:0,b,innerWidth,innerHeight,W,H,DPR,cv.width,cv.height,G.stage,G.runId,G.overlay||'',G.paused?1:0,typeof NET!=='undefined'&&NET.role||'',G.mp?PL.length:1].join('|')}
+CR.karteJe=2;
+{const f=wlMini;wlMini=function(){
+  if(!CR.k.karte||!grund()||!rahmenOk())return f.apply(this,arguments);
+  const fr=CR.st.f,sg=mkSig();
+  try{if(sg!==MK.sig||fr-MK.rf>=60||fr<MK.rf){const r=aufnehmen(()=>f.apply(null,arguments));MK.sig=sg;MK.rf=fr;MK.mix=r.mix;MK.ok=0;
+    if(!r.bb){MK.leer=1}else{MK.leer=0;const b=r.bb;MK.bx0=Math.max(0,Math.floor(b.x0)-4);MK.by0=Math.max(0,Math.floor(b.y0)-4);const x1=Math.min(cv.width,Math.ceil(b.x1)+4),y1=Math.min(cv.height,Math.ceil(b.y1)+4);MK.bw=x1-MK.bx0;MK.bh=y1-MK.by0;if(MK.bw<=0||MK.bh<=0)MK.leer=1}}}
+  catch(e){cErr('karte',e);MK.mix=1}
+  if(MK.mix){CR.st.kLive++;return f.apply(this,arguments)}
+  if(MK.leer){CR.st.kN++;return}
+  if(!MK.ok||fr-MK.bf>=CR.karteJe||fr<MK.bf){try{karteBauen(f,arguments);MK.bf=fr}catch(e){cErr('karte',e);MK.ok=0;return f.apply(this,arguments)}}else CR.st.kAlt++;
+  CR.st.kN++;const c=cx;c.save();c.setTransform(1,0,0,1,0,0);c.globalAlpha=1;c.globalCompositeOperation='source-over';c.drawImage(MK.c,0,0,MK.w,MK.h,MK.x,MK.y,MK.w,MK.h);c.restore()}}
+
+/* ---------- Sprite-Leinwände im Prozessor-Pfad als Prozessor-Leinwand ---------- */
+function cpuCtx(c){try{if(CR.k.leinw&&grund()&&c&&c.getContext)c.getContext('2d',{willReadFrequently:true})}catch(e){}return c}
+try{const f=kgCv;kgCv=function(){return cpuCtx(f.apply(this,arguments))}}catch(e){cErr('haken kgCv',e)}
+
+/* ---------- Einhängen ---------- */
+RW0=drawRoomWalls;_dd1=drawDeco;
+CR.b0=0;CR.bt=0;CR.b1=0;
+{const _rw=renderWorld;renderWorld=function(dt){const g=grund();if(!g||!rahmenOk())return _rw.apply(this,arguments);
+  CR.st.f++;CR.b0=CR.bud;CR.bt=0;CR.b1=0;CR.last=now();CR.inRW=1;CR.dOn=0;let R=null,pfs=null,pa;
+  if(CR.k.boden&&G.ground){R={gr:G.ground,rd:G.road};CR.rw=R;G.ground='rgba(0,0,0,0)';G.road=null}
+  try{pfs=window.__hsPERF&&__hsPERF.str;if(pfs){pa=pfs.aus;pfs.aus=true}}catch(e){pfs=null}
+  try{return _rw.apply(this,arguments)}
+  finally{if(pfs)pfs.aus=pa;if(R){if(CR.rw===R){CR.rw=null;G.ground=R.gr;G.road=R.rd;CR.k.boden=0;cErr('boden','drawRoomWalls nicht erreicht – Boden-Ebene aus')}else{G.ground=R.gr;G.road=R.rd}}CR.inRW=0;CR.dOn=0}}}
+{const _w=drawRoomWalls;drawRoomWalls=function(){if(CR.inRW&&CR.rw&&!CR.bau){try{return bgBild()}catch(e){cErr('boden',e);const R=CR.rw;if(R){CR.rw=null;G.ground=R.gr;G.road=R.rd;try{bodenLive(R.gr,R.rd)}catch(e2){}}return _w.apply(this,arguments)}}
+  return _w.apply(this,arguments)}}
+{const _dc=drawDecals;drawDecals=function(inView){let r;try{r=_dc.apply(this,arguments)}finally{try{if(RK.P&&RGDK.m===RK.P)RGDK.m=RK.M;RK.P=null;RK.M=null}catch(e){}}if(CR.inRW&&!CR.dbau&&!CR.bau){try{dekoBild()}catch(e){CR.dOn=0;cErr('deko',e)}}return r}}
+drawDeco=function(d,t){if(CR.dOn&&!CR.dbau&&KL.fest.has(d))return;return _dd1.apply(this,arguments)};
+CR.dbg={probe,ruhig,aufnehmen,bgBasis:()=>bgBasis(),VB,VD};
+
+/* ---------- Diagnose-Zeile ---------- */
+function zeile(){const g=grund();const nb=VB.alle.length,nd=VD.alle.length;
+ if(!g)return 'CPU-Kacheln: aus'+(CR.modus!=='auto'?' (Schalter '+CR.modus+')':'');
+ const s=CR.st,bt=s.bB+s.bTeil+s.bLive;
+ return `CPU-Kacheln: an (${g}) · Boden ${nb} Kacheln (${bt?Math.round((s.bB+s.bTeil)/bt*100):0} % Bilder aus Kacheln) · Deko ${nd} Kacheln (${spar()?'rg2-Bilder 1:1':KL.fest.size+' ruhend'}) · ${String(CR.mb()).replace('.',',')} MB · Karte ${s.kN?'zwischengespeichert':'live'} · Neubau ${s.bBau+s.dBau} · Prüfungen ${s.pruef}${s.pruefFehl?' ⚠ '+s.pruefFehl+' Abweichungen':''}${s.fehler?' · Fehler '+s.fehler:''}`}
+CR.diagZeile=zeile;
+function diagHaken(){const DG=window.__hsDIAG;if(!DG||DG.__cr)return;DG.__cr=1;
+ try{const d0=Object.getOwnPropertyDescriptor(DG,'letzter');let lz=DG.letzter;const get=d0&&d0.get?d0.get:()=>lz,set=d0&&d0.set?d0.set:(v)=>{lz=v};
+  Object.defineProperty(DG,'letzter',{configurable:true,enumerable:true,get(){return get.call(DG)},set(v){try{if(typeof v==='string'&&v&&v.indexOf('CPU-Kacheln:')<0)v=v+'\n'+zeile()}catch(e){}set.call(DG,v)}})}catch(e){cErr('diag letzter',e)}
+ try{const d0=Object.getOwnPropertyDescriptor(DG,'daten');let wt=DG.daten;const get=d0&&d0.get?d0.get:()=>wt,set=d0&&d0.set?d0.set:(v)=>{wt=v};
+  Object.defineProperty(DG,'daten',{configurable:true,enumerable:true,get(){return get.call(DG)},set(d){try{if(d&&typeof d==='object'&&typeof d.pakete==='string'&&d.pakete.indexOf('cpuras')<0)d.pakete+=(d.pakete?' ':'')+'cpuras'+CR.v+(grund()?'(an)':'')}catch(e){}set.call(DG,d)}})}catch(e){cErr('diag daten',e)}}
+try{diagHaken()}catch(e){cErr('diaghaken',e)}
+
+}catch(e){console.error('cpuras',e);window.__hsCPURAS.err=String(e&&e.stack||e)}})();
+/* ================= Paket „neustart“: kein Geister-Spielstand beim ersten Start – window.__hsNEUSTART =================
+   kein Geister-Spielstand beim ersten Start.
+   Beim allerersten Start legte die Titel-Bühne einen leeren Heldeneintrag an ({up:{},best:-1,runs:0,clears:0}); die Migration
+   hielt das für einen alten Stand und erzeugte Platz 1 „Mein Abenteuer“ → „Fortsetzen“ mit Zufallsheld Stufe 1.
+   Jetzt zählen nur echte Fortschritte; ein solcher leerer Migrationsplatz wird entfernt (auch bei bestehenden Geräten). */
+window.__hsNEUSTART={v:1,weg:0};
+(function(){try{
+ const leerH=x=>{if(!isObj(x))return true;for(const k of Object.keys(x)){const v=x[k];
+  if(k==='up'){if(isObj(v)&&Object.keys(v).length)return false;continue}
+  if(k==='best'){if((+v)>-1)return false;continue}
+  if(k==='runs'||k==='clears'){if((+v||0)>0)return false;continue}
+  if(v==null||v===0||v===false||v==='')continue;return false}return true};
+ const echt=S=>{if(!S)return false;if((+S.gold||0)>0||S.run||S.mpRun||(+S.maxDiff||0)>0)return true;if(Array.isArray(S.truhe)&&S.truhe.length)return true;
+  if(isObj(S.heroes))for(const id in S.heroes)if(!leerH(S.heroes[id]))return true;return false};
+ try{slHas=echt}catch(e){}
+ function aufraeumen(){try{if(!SAVE||!isObj(SAVE.slots))return false;let weg=false;
+  for(const k of Object.keys(SAVE.slots)){const n=+k,e=SAVE.slots[k];if(!e||!e.m)continue;const m=e.m;
+   if(m.n!=='Mein Abenteuer'||m.mode!=='mix'||(+m.pt||0)>0)continue;
+   const D=n===SAVE.slot?SAVE:(e.d||{});if(echt(D))continue;
+   if(SAVE.slot===n){for(const x of SLK)if(x!=='heroes')delete SAVE[x];SAVE.slot=0;try{SPL.in=false}catch(_){}}
+   delete SAVE.slots[k];weg=true;__hsNEUSTART.weg++}
+  if(weg){delete SAVE.slMig;try{saveFix(SAVE)}catch(_){}try{persist()}catch(_){}
+   try{if(G.state==='title'){SPL.view='main';SPL.sel=0;showTitle()}}catch(_){}}
+  return weg}catch(e){console.error('neustart',e);return false}}
+ __hsNEUSTART.aufraeumen=aufraeumen;aufraeumen();
+}catch(e){console.error('neustart',e);window.__hsNEUSTART.err=String(e&&e.stack||e)}})();
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
@@ -37902,3 +38760,6 @@ window.__hs={get G(){return G},stil(){return{makeItem,makeSetItem,itemDelta,meis
  step(n,dt){for(let i=0;i<n;i++){if(G.state==='between'){if(G.stage<STAGES.length-1&&G.portal){setupStage(G.stage+1);G.state='play';hideScreen();hud.hidden=false}else if(!G.portal){hideScreen();hud.hidden=false;G.state='play'}}if(G.state!=='play')break;update(dt||1/30)}},render(){render(0.016);hudUpdate()},SAVE:()=>SAVE,stage(i){setupStage(i);hideScreen();hud.hidden=false;G.state='play';G.paused=false},MUSIK,MOUSE,pack(x,y){spawnPack(pickFoe(0.5),x,y)},kill(e){killEnemy(e,{})},dmg(e,v,o){return dealDmg(e,v,o||{})},drop(r,dx,dy){dropItem(P.x+dx,P.y+dy,randomItem(P.level+2,0,r))},xp(v){gainXp(v)},net(){return NET},netFns(){return{netHost,netJoin,netJoinScreen,netAction,netGuestReset,netCloseRoom,netWorld,netDiff,mpSlots}},fn(){return{dmSum,ccZaeh,CCZ,dmEndHtml,dmPauseHtml,LPOW,mouseAim,dealDmg,GFX,drawHero,openOverlay,recalc,spawnEnemy,makeElite,AFFIX,FOES,CURSES,WETTER,wxFor,makeItem,itemLines,showStageIntro,SETS,setsHtml,setLines,setFound,maybeEvent,renderEvent,chooseEvent,renderSmith,showTitle,startRun,enterSecret,leaveSecret,spawnThief,useShrine,openChest,makeSetItem,dailyInfo,endRun,showStageIntro,showChapterDone,breakProp,makeProps,say,setStages,CAMP_STAGES,EVENTS,smithAct,STAGES,doNextStage,enterPortal,gainXp,withP,rareStart,saeuleTreffer,teamKombo,zielTest:(k)=>{const S=STAGES[G.stage];G.allies=G.allies.filter(a=>a.kind==="rex");G.props=G.props.filter(p=>p.k!=="okaefig");const r=Math.random;Math.random=()=>0.01;try{zielWahl(S,Math.max(1,G.stage))}finally{Math.random=r}if(G.obj&&k&&G.obj.k!==k){const Z=ZIELE[k];G.obj={k,n:Z.n,d:Z.d,c:Z.c,done:0,fail:0,fr:0,txt:Z.n,t:0};if(k==="flucht"||k==="eskorte"){Math.random=()=>0.01;G.obj=null;let tries=0;while((!G.obj||G.obj.k!==k)&&tries++<60){Math.random=r;zielWahl(S,Math.max(1,G.stage));if(G.obj&&G.obj.k!==k)G.obj=null;Math.random=()=>0.01}Math.random=r}}zielProps();zielStart();return G.obj},portal2,leuchterSetzen,legS,makeAnc,ancRoll,dropItem,mpRemove,mpAddPlayer,groupRoll,musAk:a=>musAk(a),aktivSperre,ambiW:()=>ambiWunsch(),addMod,ambi:()=>JSON.stringify(Object.fromEntries(Object.entries(AMBI.el).map(([k,a])=>[k,{p:a.paused,bad:!!a._bad,g:a._g?+a._g.gain.value.toFixed(3):null}]))),lootBlocked,teleHits:typeof teleHits!=='undefined'?teleHits:null}},snd(){audioInit();return Object.keys(SND)},async sndLevel(n){const real=AC,realB=SFXB;const oc=new OfflineAudioContext(2,44100*3,44100);AC=oc;SFXB=oc.createGain();SFXB.connect(oc.destination);let err='';try{SND[n]()}catch(e){err=e.message}AC=real;SFXB=realB;const buf=await oc.startRendering();let pk=0,ss=0;const d=buf.getChannelData(0);for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);if(v>pk)pk=v;ss+=v*v}return{n,pk:+pk.toFixed(3),rms:+Math.sqrt(ss/d.length).toFixed(4),err}},item(r){return randomItem(P.level+2,0,r)},draw:{drawHero,drawRex,drawNpc:(c,n,x,y,t,s)=>drawNpc(c,n,x,y,t,s),NPCS,drawEnemy,FOES,GUARDS,BOSSES,setCx(c){cx=c}}};
 })();
 </script>
+
+</body>
+</html>
