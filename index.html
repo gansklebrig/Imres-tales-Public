@@ -3,6 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Kein Aufblitzen der Rohfassung: Die Seite bleibt unsichtbar, bis Skripte Startansicht und Handyleiste
+     aufgebaut haben, und blendet dann ein. Notbremse beim Laden bzw. nach 10 s; ohne JavaScript greift nichts davon. -->
+<style>
+html { background: #100e15; }
+html.vorlauf body { opacity: 0; }
+html.vorlauf::after { content: "Imres Tales"; position: fixed; inset: 0; display: grid; place-items: center; color: #e0a046; opacity: .55; font: 1.6rem/1 "IM Fell English SC", "Palatino Linotype", Georgia, serif; letter-spacing: .06em; pointer-events: none; }
+body { transition: opacity .25s ease; }
+@media (prefers-reduced-motion: reduce) { body { transition: none; } }
+</style>
+<script>
+(function () {
+  var d = document.documentElement, fertig = function () { d.classList.remove("vorlauf"); };
+  d.classList.add("vorlauf");
+  document.addEventListener("DOMContentLoaded", function () { requestAnimationFrame(function () { requestAnimationFrame(fertig); }); });
+  window.addEventListener("load", fertig); setTimeout(fertig, 10000);
+})();
+</script>
 <meta name="description" content="Imres Tales – die Chronik unserer Pen-&-Paper-Kampagne mit Barradin, Friedrich, Echo, Ezekiel und Rex.">
 <title>Imres Tales</title>
 <!-- Link-Vorschau für Discord, WhatsApp & Co. (Bild: vorschau.jpg, 1200 × 630) -->
