@@ -142,7 +142,7 @@
 
   /* ---------- Chronik: lebende Seitenränder und „Was bisher geschah“ (chronik/) ----------
      Werden erst geladen, wenn die Chronik aufgeht (oder nach dem Laden in einer ruhigen Sekunde). */
-  const CHRONIK_V = "20261110e";
+  const CHRONIK_V = "20261111a";
   let chronikGeladen = false;
   function chronikLaden() {
     if (chronikGeladen) return;
