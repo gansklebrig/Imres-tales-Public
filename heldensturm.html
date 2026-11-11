@@ -37532,13 +37532,19 @@ M.fn={sig,endlage,speichern,laden};
    wenn das Spiel währenddessen weiter rechnete (Firefox: Bericht offen, Bild läuft weiter → „16 Hz“ statt 110 Hz).
    Maßnahme 3: Diagnose nennt bei Firefox, dass der WebGL-Name nur eine „ähnliche“ Karte ist.
    Schalter: __hsLICHT2.aus=true (alles aus), __hsLICHT2.modus='auto'|'an'|'aus' (Weichlicht-Ebene: auto = nur Firefox). Zähler: __hsLICHT2.st */
-(function(){try{window.__hsLICHT2={v:2};
-const L2=window.__hsLICHT2;L2.aus=false;L2.modus='auto';L2.k={flach:1,dk:1,sonde:1,takt:1,bloom:1};L2.st={ebene:0,flach:0,flachEbene:0,dk:0,orig:0,hzFix:0,diagHz:0,sonde:0};L2.err=[];
+(function(){try{window.__hsLICHT2={v:3};
+const L2=window.__hsLICHT2;L2.aus=false;L2.modus='auto';L2.k={flach:1,dk:1,sonde:1,takt:1,bloom:1,schutz:1,frisch:1,heilen:1};L2.st={ebene:0,flach:0,flachEbene:0,dk:0,orig:0,hzFix:0,diagHz:0,sonde:0};L2.err=[];
 const lErr=(k,e)=>{if(L2.err.length<8)L2.err.push(k+': '+(e&&e.message||e))};
 const UA=String(navigator.userAgent||'');
 L2.firefox=/Firefox\/\d+/.test(UA)&&!/Seamonkey|Chrome\//.test(UA);
 const aktiv=()=>!L2.aus&&(L2.modus==='an'||(L2.modus==='auto'&&L2.firefox));
 L2.aktiv=aktiv;
+
+/* Aktive Spielleinwand (v3: in Firefox ggf. eine frisch angelegte Leinwand über #cv, siehe 1e) */
+const FL={T:null,g:null,n:0,log:[],heil:0,lastHeil:-1e9,grund:'',art0:''};L2.fl=FL;
+const CV0=(()=>{try{return cv.getContext('2d')}catch(e){return null}})();
+function spielCtx(){return FL.g||CV0}
+L2.spielCtx=spielCtx;
 
 /* ---------- 1) Weichlicht als Compositor-Ebene ---------- */
 const EB={el:[null,null],src:[null,null],op:['',''],mm:['',''],vis:[false,false],w:'',h:'',n:0,frame:[],inR:0,dom:false};
@@ -37548,7 +37554,7 @@ function ebEl(i){let c=EB.el[i];if(c&&c.isConnected)return c;
  c=c||document.createElement('canvas');c.className='l2grad';c.setAttribute('aria-hidden','true');c.width=160;c.height=90;
  c.style.cssText='position:fixed;left:0;top:0;pointer-events:none;mix-blend-mode:soft-light;image-rendering:auto;display:none;opacity:0';
  /* direkt über der Spielleinwand: vor der Text-Ebene (#txtov, z-index 1) und allen übrigen Ebenen */
- let ref=base.nextSibling;while(ref&&ref.classList&&ref.classList.contains('l2grad'))ref=ref.nextSibling;
+ let ref=base.nextSibling;while(ref&&ref.classList&&(ref.classList.contains('l2grad')||ref.classList.contains('l2cv')))ref=ref.nextSibling;
  base.parentNode.insertBefore(c,ref);EB.el[i]=c;EB.src[i]=null;EB.op[i]='';EB.mm[i]='';EB.vis[i]=false;return c}
 function ebZeig(i,A,k,mm){const c=ebEl(i);if(!c)return false;mm=mm||'soft-light';if(EB.mm[i]!==mm){EB.mm[i]=mm;c.style.mixBlendMode=mm}
  if(EB.src[i]!==A){const g=c.getContext('2d');if(c.width!==A.width||c.height!==A.height){c.width=A.width;c.height=A.height}
@@ -37560,7 +37566,7 @@ function ebZeig(i,A,k,mm){const c=ebEl(i);if(!c)return false;mm=mm||'soft-light'
 function ebAus(i){const c=EB.el[i];if(c&&EB.vis[i]){c.style.display='none';EB.vis[i]=false}}
 function ebAlleAus(){ebAus(0);ebAus(1)}
 L2.ebAus=ebAlleAus;
-function standard(c){try{if(!cv||c!==cv.getContext('2d'))return false;if(G.vp||(typeof splitOn==='function'&&splitOn()))return false;
+function standard(c){try{if(!cv||c!==spielCtx())return false;if(G.vp||(typeof splitOn==='function'&&splitOn()))return false;
   const m=c.getTransform();return Math.abs(m.a-DPR)<1e-6&&Math.abs(m.d-DPR)<1e-6&&!m.b&&!m.c&&!m.e&&!m.f}catch(e){return false}}
 {const _gl=oaGradLage;oaGradLage=function(c,A,k,s){
  if(!aktiv()||!A||OA.ul)return _gl.apply(this,arguments);
@@ -37581,7 +37587,7 @@ function standard(c){try{if(!cv||c!==cv.getContext('2d'))return false;if(G.vp||(
    aufeinander – beides normale Mischung. Statt zweier Vollbild-Durchgänge werden beide zuerst in eine Ebene mit der Auflösung der
    Sichtschatten (0,2×) gezeichnet und diese einmal hochgezogen (source-over ist assoziativ; die Dunkelheit ist ein weicher Verlauf). */
 const DK={c:null,g:null,pend:null};L2.dk=DK;
-const dkBereit=()=>{try{return aktiv()&&L2.k.dk&&EB.inR&&!!cx&&cx===cv.getContext('2d')&&standard(cx)&&!!GF().lite&&fsAktiv()&&fsSeher().length>0&&!(FOV.aug&&FOV.aug.length)}catch(e){return false}};
+const dkBereit=()=>{try{return aktiv()&&L2.k.dk&&EB.inR&&!!cx&&cx===spielCtx()&&standard(cx)&&!!GF().lite&&fsAktiv()&&fsSeher().length>0&&!(FOV.aug&&FOV.aug.length)}catch(e){return false}};
 const _ldO=liteDark;
 liteDark=function(camX,camY,dark){if(DK.pend||!dkBereit())return _ldO.apply(this,arguments);DK.pend=[camX,camY,dark];return};
 {const _fz=fsZeichne;fsZeichne=function(camX,camY){const p=DK.pend;DK.pend=null;if(!p)return _fz.apply(this,arguments);
@@ -37600,12 +37606,12 @@ liteDark=function(camX,camY,dark){if(DK.pend||!dkBereit())return _ldO.apply(this
    zeichnen und die Zeit messen: im Prozessor ≈ 1–4 ms je Million Bildpunkte, auf der Grafikkarte (Firefox nimmt nur auf) ≈ 0.
    Ergebnis in __hsLICHT2.sonde und im Diagnosebericht – entscheidet, ob weitere Prozessor-Sparmaßnahmen nötig sind. */
 const SO={k:0,v:[],art:'',msMpx:0,c:null};L2.sonde=SO;
-function sondeMessen(){try{if(!L2.k.sonde||!aktiv()||!G||G.state!=='play'||!G.ground||G.vp||G.ultra||(typeof splitOn==='function'&&splitOn())||!cx||cx!==cv.getContext('2d'))return;
-  if((SO.k++)%30!==7)return;const mpx=cv.width*cv.height/1e6;if(mpx<0.15)return;
+function sondeMessen(){try{if(!L2.k.sonde||!aktiv()||!G||G.state!=='play'||!G.ground||G.vp||G.ultra||(typeof splitOn==='function'&&splitOn())||!cx||cx!==spielCtx())return;
+  if((SO.k++)%(BI.on?4:30)!==(BI.on?0:7))return;const mpx=cv.width*cv.height/1e6;if(mpx<0.15)return;
   if(!SO.c){SO.c=document.createElement('canvas');SO.c.width=SO.c.height=256;const g=SO.c.getContext('2d');const gr=g.createLinearGradient(0,0,256,256);gr.addColorStop(0,'#201810');gr.addColorStop(1,'#403020');g.fillStyle=gr;g.fillRect(0,0,256,256)}
   const c=cx;c.save();c.setTransform(1,0,0,1,0,0);c.globalAlpha=1;c.globalCompositeOperation='source-over';c.imageSmoothingEnabled=true;
   const a=performance.now();c.drawImage(SO.c,0,0,256,256,0,0,cv.width,cv.height);const d=performance.now()-a;c.restore();
-  SO.v.push(d/mpx);if(SO.v.length>15)SO.v.shift();L2.st.sonde++;
+  SO.v.push(d/mpx);if(SO.v.length>15)SO.v.shift();if(BI.on&&BI.cur)BI.cur.p.push([BI.cur.f,Math.round(d/mpx*100)/100]);L2.st.sonde++;
   if(SO.v.length>=5){const s=SO.v.slice().sort((x,y)=>x-y),m=s[s.length>>1];SO.msMpx=Math.round(m*100)/100;SO.art=m>=0.6?'Prozessor':m<=0.15?'Grafikkarte':'unklar'}}catch(e){lErr('sonde',e)}}
 {const _r=render;render=function(){if(EB.inR===0)sondeMessen();return _r.apply(this,arguments)}}
 
@@ -37624,6 +37630,136 @@ const BL2={a:null,ga:null,b:null,gb:null};
  a.globalCompositeOperation='copy';a.drawImage(BL2.b,0,0,bw,bh,0,0,bw,bh);a.globalCompositeOperation='multiply';a.drawImage(BL2.b,0,0,bw,bh,0,0,bw,bh);
  a.globalCompositeOperation='source-over';b.globalCompositeOperation='source-over';
  cx.save();cx.setTransform(DPR,0,0,DPR,0,0);cx.imageSmoothingEnabled=true;cx.globalCompositeOperation='lighter';cx.globalAlpha=0.55;cx.drawImage(BL2.a,0,0,bw,bh,-W*0.01,-H*0.01,W*1.02,H*1.02);cx.restore();L2.st.bloom=(L2.st.bloom||0)+1}}
+
+/* ---------- 1e) Firefox: Spielleinwand vor dem Rückfall auf Software schützen (v3) ----------
+   Befund (Firefox-Quellen DrawTargetWebgl + Nachbildung test/licht2/ffmodell.mjs, vom Nutzer bestätigt: mit
+   profile-fallback-ratio=1 bleibt die Leinwand auf der Grafikkarte, 67 statt 9–13 FPS):
+   Firefox wertet die Leinwand dauerhaft auf Software ab, wenn > 30 % der Bilder einen „vollständigen Rückfall“ hatten. Auslöser im Spiel:
+   · Striche (stroke) mit anderer Mischung als source-over/copy (z. B. 'lighter' bei Schockwellen-Ringen, Zauber-Effekten), deren
+     sichtbare Box größer als ¼ der Leinwand ist: Firefox kann solche Striche nicht auf der Grafikkarte zeichnen („AAStroke“ nur für
+     source-over) und fällt für das ganze Bild in den Prozessor zurück;
+   · Füllungen mit Verlauf (radial, oder linear auf Pfad) bei anderer Mischung als source-over (z. B. icefan) – ebenfalls Rückfall;
+     mit source-over eine teure „Ebene“, nach der in einer deckenden Leinwand jeder Text einen Rückfall auslöst.
+   Maßnahme: Solche Befehle werden auf eine durchsichtige Hilfsleinwand (gleiche Größe) mit source-over gezeichnet und von dort
+   mit der ursprünglichen Mischung als Bild aufgetragen – rechnerisch gleich (ein einzelner Strich/eine Füllung), für Firefox aber
+   „Bild zeichnen“, was die Grafikkarte immer kann. Nur Firefox; nur die Spielleinwand. */
+const SCH={S:null,g:null,n:0,st:{strich:0,verlauf:0,rect:0,ohnePfad:0}};L2.schutz=SCH;
+const OK_OP={'source-over':1,'copy':1};
+function schS(w,h){if(!SCH.S){SCH.S=document.createElement('canvas');SCH.S.__l2dyn=1;SCH.g=SCH.S.getContext('2d')}if(SCH.S.width!==w||SCH.S.height!==h){SCH.S.width=w;SCH.S.height=h}return SCH.g}
+const ST_P=['fillStyle','strokeStyle','lineWidth','lineCap','lineJoin','miterLimit','lineDashOffset','globalAlpha','imageSmoothingEnabled'];
+function schAuftragen(c,box,zeichne){const C=c.canvas,w=C.width,h=C.height;let x0=Math.max(0,Math.floor(box[0])),y0=Math.max(0,Math.floor(box[1])),x1=Math.min(w,Math.ceil(box[2])),y1=Math.min(h,Math.ceil(box[3]));
+ if(x1<=x0||y1<=y0)return;if(SCH.dbg)try{SCH.dbg(c,[x0,y0,x1,y1])}catch(e){}const g=schS(w,h);g.setTransform(1,0,0,1,0,0);g.globalCompositeOperation='source-over';g.globalAlpha=1;g.clearRect(x0,y0,x1-x0,y1-y0);
+ g.save();for(const k of ST_P){try{if(g[k]!==c[k])g[k]=c[k]}catch(e){}}try{g.setLineDash(c.getLineDash())}catch(e){}try{g.shadowColor=c.shadowColor;g.shadowBlur=c.shadowBlur;g.shadowOffsetX=c.shadowOffsetX;g.shadowOffsetY=c.shadowOffsetY}catch(e){}
+ g.globalCompositeOperation='source-over';try{zeichne(g)}finally{g.restore()}
+ c.save();try{c.setTransform(1,0,0,1,0,0);c.globalAlpha=1;c.shadowBlur=0;c.shadowColor='rgba(0,0,0,0)';c.imageSmoothingEnabled=false;c.__l2drawImage(SCH.S,x0,y0,x1-x0,y1-y0,x0,y0,x1-x0,y1-y0)}finally{c.restore()}SCH.n++}
+function schutzAn(c){if(!c||c.__l2schutz)return;c.__l2schutz=1;const P=CanvasRenderingContext2D.prototype;const PF=['moveTo','lineTo','quadraticCurveTo','bezierCurveTo','arc','arcTo','ellipse','rect','closePath'];
+ c.__l2drawImage=function(){return P.drawImage.apply(c,arguments)};
+ let rec=null;const T4=(m,x,y)=>[m.a*x+m.c*y+m.e,m.b*x+m.d*y+m.f];
+ c.beginPath=function(){rec=null;return P.beginPath.apply(c,arguments)};
+ /* Pfad immer mitschreiben (Ring: erst source-over, dann derselbe Pfad mit 'lighter'); Transformation nur bei Änderung neu lesen */
+ let tv=1,tm=null,tmv=0;for(const n of ['setTransform','resetTransform','transform','translate','scale','rotate','save','restore']){const f=P[n];if(!f)continue;c[n]=function(){tv++;return f.apply(c,arguments)}}
+ for(const n of PF){const f=P[n];c[n]=function(){if(!rec)rec=[];if(rec.length<3000){if(tmv!==tv){const m=c.getTransform();tm=[m.a,m.b,m.c,m.d,m.e,m.f];tmv=tv}rec.push([n,Array.prototype.slice.call(arguments),tm])}else rec.push(null);return f.apply(c,arguments)}}
+ const box=(L,lw)=>{let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;const pt=(x,y)=>{if(x<x0)x0=x;if(y<y0)y0=y;if(x>x1)x1=x;if(y>y1)y1=y};
+  for(const r of L){const [n,a,mm]=r,m={a:mm[0],b:mm[1],c:mm[2],d:mm[3],e:mm[4],f:mm[5]};
+   if(n==='arc'||n==='ellipse'){const rx=a[2],ry=n==='arc'?a[2]:a[3];for(const [dx,dy] of [[-rx,-ry],[rx,-ry],[rx,ry],[-rx,ry]]){const p=T4(m,a[0]+dx,a[1]+dy);pt(p[0],p[1])}}
+   else if(n==='rect'){for(const [dx,dy] of [[0,0],[a[2],0],[a[2],a[3]],[0,a[3]]]){const p=T4(m,a[0]+dx,a[1]+dy);pt(p[0],p[1])}}
+   else for(let i=0;i+1<a.length&&i<6;i+=2){const p=T4(m,a[i],a[i+1]);pt(p[0],p[1])}}
+  const m=c.getTransform(),s=Math.max(Math.hypot(m.a,m.b),Math.hypot(m.c,m.d))*(lw||0)/2+2;return [x0-s,y0-s,x1+s,y1+s]};
+ const nachspielen=(g,L)=>{g.beginPath();for(const r of L){const mm=r[2];g.setTransform(mm[0],mm[1],mm[2],mm[3],mm[4],mm[5]);g[r[0]].apply(g,r[1])}const m=c.getTransform();g.setTransform(m.a,m.b,m.c,m.d,m.e,m.f)};
+ const grosser=(b)=>{const C=c.canvas,w=Math.max(0,Math.min(C.width,b[2])-Math.max(0,b[0])),h=Math.max(0,Math.min(C.height,b[3])-Math.max(0,b[1]));return w*h>C.width*C.height*0.2};
+ c.stroke=function(path){try{if(aktiv()&&L2.k.schutz&&c===spielCtx()){const op=c.globalCompositeOperation,gr=typeof c.strokeStyle!=='string';
+   if(!OK_OP[op]||gr||c.getLineDash().length){if(path&&typeof path==='object'){const m=c.getTransform();SCH.st.strich++;schAuftragen(c,[0,0,c.canvas.width,c.canvas.height],g=>{g.setTransform(m.a,m.b,m.c,m.d,m.e,m.f);g.stroke(path)});return}
+    if(rec&&rec.indexOf(null)<0&&rec.length){const b=box(rec,c.lineWidth);if(grosser(b)||!OK_OP[op]&&gr){const L=rec;SCH.st.strich++;schAuftragen(c,b,g=>{nachspielen(g,L);g.stroke()});return}}
+    else if(!rec||rec.indexOf(null)>=0)SCH.st.ohnePfad++}}}catch(e){lErr('schutz-strich',e)}
+  return P.stroke.apply(c,arguments)};
+ c.fill=function(a,b2){try{if(aktiv()&&L2.k.schutz&&c===spielCtx()&&typeof c.fillStyle!=='string'&&window.CanvasGradient&&c.fillStyle instanceof CanvasGradient){
+   const args=arguments;if(a&&typeof a==='object'){const m=c.getTransform();SCH.st.verlauf++;schAuftragen(c,[0,0,c.canvas.width,c.canvas.height],g=>{g.setTransform(m.a,m.b,m.c,m.d,m.e,m.f);g.fill.apply(g,args)});return}
+   if(rec&&rec.length&&rec.indexOf(null)<0){const L=rec;SCH.st.verlauf++;schAuftragen(c,box(L,0),g=>{nachspielen(g,L);g.fill.apply(g,args)});return}SCH.st.ohnePfad++}}catch(e){lErr('schutz-fill',e)}
+  return P.fill.apply(c,arguments)};
+ c.fillRect=function(x,y,w,h){try{if(aktiv()&&L2.k.schutz&&c===spielCtx()&&typeof c.fillStyle!=='string'&&window.CanvasGradient&&c.fillStyle instanceof CanvasGradient&&!(c.fillStyle.__lin&&OK_OP[c.globalCompositeOperation]==1&&c.globalCompositeOperation==='source-over')){
+   const m=c.getTransform(),L=[['rect',[x,y,w,h],[m.a,m.b,m.c,m.d,m.e,m.f]]];SCH.st.rect++;schAuftragen(c,box(L,0),g=>{g.setTransform(m.a,m.b,m.c,m.d,m.e,m.f);g.fillRect(x,y,w,h)});return}}catch(e){lErr('schutz-rect',e)}
+  return P.fillRect.apply(c,arguments)}}
+{const P=CanvasRenderingContext2D.prototype,f=P.createLinearGradient;P.createLinearGradient=function(){const g=f.apply(this,arguments);try{g.__lin=1}catch(e){}return g}}
+
+/* Nebel in halber Auflösung auch auf der frischen Leinwand (Paket gpu prüft cx.canvas===cv und würde sonst voll auflösend zeichnen):
+   gleiche Logik wie dort – Schwaden in eine Ebene mit halber Auflösung, einmal hochziehen. */
+const NB2={c:null,g:null};
+{const _nb=oaNebel;oaNebel=function(camX,camY,t,dt){const G0=window.__hsGPU;
+ if(!FL.T||cx!==FL.g||!G0||G0.aus||!G0.an||!G0.an.nebel||!OA.cfg||!OA.cfg.fog||!(DPR>0))return _nb.apply(this,arguments);
+ const T=FL.T,k=(G0.k&&G0.k.nebel)||0.5,lw=Math.max(2,Math.ceil(T.width*k)),lh=Math.max(2,Math.ceil(T.height*k));
+ if(!NB2.c){NB2.c=document.createElement('canvas');NB2.c.__l2dyn=1;NB2.g=NB2.c.getContext('2d')}const C=NB2.c,g=NB2.g;if(C.width!==lw||C.height!==lh){C.width=lw;C.height=lh}
+ g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.clearRect(0,0,lw,lh);
+ const c0=cx,d0=DPR,sm=c0.imageSmoothingEnabled;let r;cx=g;DPR=d0*lw/T.width;
+ try{r=_nb.apply(this,arguments)}finally{cx=c0;DPR=d0}
+ c0.setTransform(1,0,0,1,0,0);c0.globalAlpha=1;c0.globalCompositeOperation='source-over';c0.imageSmoothingEnabled=true;c0.drawImage(C,0,0,lw,lh,0,0,T.width,T.height);
+ c0.setTransform(DPR,0,0,DPR,0,0);c0.imageSmoothingEnabled=sm;return r}}
+
+/* ---------- 1f) Firefox: frische Spielleinwand (Selbstheilung, Firefox-Test) ----------
+   Hat Firefox eine Leinwand einmal abgewertet, bleibt sie bis zum Neuladen im Prozessor. Eine neu angelegte Leinwand hat ein frisches
+   Profil. Sie liegt deckungsgleich direkt über #cv (Eingaben gehen weiter an #cv), das Spiel zeichnet über die Variable cx dorthin.
+   Sie ist nicht „deckend“ angelegt (alpha:true): Firefox darf Text dort ohne Subpixel-Glättung zeichnen – dann löst Text nach einer
+   Ebene keinen Rückfall aus. #cv bleibt darunter stehen; toDataURL/toBlob von #cv liefern das Bild der aktiven Leinwand. */
+function flSync(){const T=FL.T;if(!T)return;if(cv.nextSibling!==T&&cv.parentNode){try{cv.parentNode.insertBefore(T,cv.nextSibling)}catch(e){}}if(T.width!==cv.width||T.height!==cv.height){const sm=FL.g.imageSmoothingEnabled;T.width=cv.width;T.height=cv.height;FL.g.imageSmoothingEnabled=sm}
+ const w=cv.style.width,h=cv.style.height;if(T.style.width!==w)T.style.width=w;if(T.style.height!==h)T.style.height=h;
+ if((FL.n++)%60===0){try{const ir=getComputedStyle(cv).imageRendering;if(T.style.imageRendering!==ir)T.style.imageRendering=ir}catch(e){}}}
+function frischeLeinwand(grund){try{if(EB.inR)return false;const alt=FL.T;const T=document.createElement('canvas');T.className='l2cv';T.__l2dyn=1;T.setAttribute('aria-hidden','true');
+  T.style.cssText='position:fixed;left:0;top:0;display:block;pointer-events:none;touch-action:none';T.width=cv.width;T.height=cv.height;T.style.width=cv.style.width||innerWidth+'px';T.style.height=cv.style.height||innerHeight+'px';
+  const g=T.getContext('2d',{alpha:true});if(!g)return false;
+  if(alt&&alt.parentNode)alt.parentNode.replaceChild(T,alt);else cv.parentNode.insertBefore(T,cv.nextSibling);
+  const vor=cx;try{g.imageSmoothingEnabled=vor.imageSmoothingEnabled}catch(e){}
+  FL.T=T;FL.g=g;if(vor===CV0||vor===(alt&&alt.__g)||!vor||vor.canvas===cv||vor.canvas===alt)cx=g;T.__g=g;schutzAn(g);
+  /* Bild sofort übernehmen, damit nichts aufblitzt (einmaliges Kopieren) */
+  try{g.drawImage(alt||cv,0,0)}catch(e){}
+  if(!cv.__l2tdu){cv.__l2tdu=1;const td=HTMLCanvasElement.prototype.toDataURL,tb=HTMLCanvasElement.prototype.toBlob;
+   cv.toDataURL=function(){return FL.T?td.apply(FL.T,arguments):td.apply(cv,arguments)};cv.toBlob=function(){return FL.T?tb.apply(FL.T,arguments):tb.apply(cv,arguments)}}
+  FL.log.push({t:Math.round(performance.now()/1000),grund});if(FL.log.length>12)FL.log.shift();return true}catch(e){lErr('frisch',e);return false}}
+L2.frisch=frischeLeinwand;
+function frischZurueck(){try{if(!FL.T||EB.inR)return;const T=FL.T;if(cx===FL.g)cx=CV0;FL.T=null;FL.g=null;if(T.parentNode)T.parentNode.removeChild(T)}catch(e){lErr('zurück',e)}}
+L2.frischZurueck=frischZurueck;
+try{if(CV0)schutzAn(CV0)}catch(e){lErr('schutz',e)}
+/* vor jedem Bild: Größe abgleichen; in Firefox einmal zu Beginn frisch (nicht deckend) anlegen; Selbstheilung nach Abwertung */
+function flVorBild(){try{if(!aktiv())return;if(L2.k.frisch&&!FL.T&&!FL.aus&&G&&G.state){frischeLeinwand('Start')}
+  flSync();if(cx===CV0&&FL.g&&!FL.aus)cx=FL.g;
+  if(L2.k.heilen&&FL.T&&SO.art==='Prozessor'&&FL.art0==='Grafikkarte'&&FL.heil<5&&performance.now()-FL.lastHeil>30000){FL.heil++;FL.lastHeil=performance.now();SO.v.length=0;SO.art='';FL.art0='';frischeLeinwand('Selbstheilung '+FL.heil+' (Sonde: Prozessor)')}
+  if(SO.art==='Grafikkarte')FL.art0='Grafikkarte'}catch(e){lErr('vorbild',e)}}
+{const _r=render;render=function(){if(EB.inR===0)flVorBild();return _r.apply(this,arguments)}}
+
+/* ---------- 1g) Firefox-Test (≈ 60 s): welche Zeichengruppe lässt Firefox die Leinwand abwerten? ----------
+   Je Phase (~6 s laufendes Spiel) eine frische Leinwand und eine Gruppe aus; die Sonde misst jedes 4. Bild. Kippt sie von
+   „schnell“ (Grafikkarte) auf „langsam“ (Prozessor), wird Bild und Zeit festgehalten. Danach öffnet sich der Diagnosebericht
+   (3 s Messung) mit dem Testergebnis am Ende. Knopf „Firefox-Test (60 s)“ neben „Diagnose (10 s)“, nur in Firefox. */
+const BI={on:false,i:-1,cur:null,res:[],gesp:[],txt:'',tLauf:0,last:0};L2.bi=BI;
+const BG=[['Basis (alles an)',[]],['ohne Wände',['drawRoomWalls']],['ohne Licht',['drawLighting']],['ohne Nebel/Wetter',['oaNebel','drawWeather']],['ohne Vignette/Bloom',['vignette','bloom']],
+ ['ohne Effekte/Partikel',['drawFx','drawPartsNormal','drawPartsAdd','drawAmb']],['ohne Deko/Leichen',['drawDeco','drawCorpses','drawDecals']],['ohne Gegner',['drawEnemy']],['ohne Text/Karte',['drawNums','drawBubbles','wlMini','drawPills']],['ohne Schutz (Vergleich)',[],1]];
+const BF={drawRoomWalls:[()=>drawRoomWalls,f=>{drawRoomWalls=f}],drawLighting:[()=>drawLighting,f=>{drawLighting=f}],oaNebel:[()=>oaNebel,f=>{oaNebel=f}],drawWeather:[()=>drawWeather,f=>{drawWeather=f}],
+ vignette:[()=>vignette,f=>{vignette=f}],bloom:[()=>bloom,f=>{bloom=f}],drawFx:[()=>drawFx,f=>{drawFx=f}],drawPartsNormal:[()=>drawPartsNormal,f=>{drawPartsNormal=f}],drawPartsAdd:[()=>drawPartsAdd,f=>{drawPartsAdd=f}],
+ drawAmb:[()=>drawAmb,f=>{drawAmb=f}],drawDeco:[()=>drawDeco,f=>{drawDeco=f}],drawCorpses:[()=>drawCorpses,f=>{drawCorpses=f}],drawDecals:[()=>drawDecals,f=>{drawDecals=f}],drawEnemy:[()=>drawEnemy,f=>{drawEnemy=f}],
+ drawNums:[()=>drawNums,f=>{drawNums=f}],drawBubbles:[()=>drawBubbles,f=>{drawBubbles=f}],wlMini:[()=>wlMini,f=>{wlMini=f}],drawPills:[()=>drawPills,f=>{drawPills=f}]};
+const biLaeuft=()=>{try{return G.state==='play'&&!G.paused&&!G.overlay&&!document.hidden&&(!scr||scr.hidden)}catch(e){return false}};
+function biAus(){for(const [n,f] of BI.gesp){try{BF[n][1](f)}catch(e){}}BI.gesp.length=0;L2.k.schutz=1}
+function biPhase(i){biAus();BI.i=i;if(i>=BG.length){biEnde();return}const [name,fns,ohneSchutz]=BG[i];
+ for(const n of fns){try{const o=BF[n][0]();BI.gesp.push([n,o]);BF[n][1](function(){})}catch(e){}}if(ohneSchutz)L2.k.schutz=0;
+ BI.cur={name,f:0,t:0,p:[],sch0:SCH.n};SO.v.length=0;frischeLeinwand('Test: '+name)}
+function biBild(){if(!BI.on)return;const now=performance.now(),dt=Math.min(100,now-(BI.last||now));BI.last=now;if(!biLaeuft())return;const c=BI.cur;if(!c)return;c.f++;c.t+=dt;
+ if(c.t>=6000){c.sch=SCH.n-c.sch0;BI.res.push(c);BI.cur=null;biPhase(BI.i+1)}}
+function biText(){const L=['Firefox-Test (je Phase frische Leinwand, Sonde ms/MPx: ≤0,15 Grafikkarte, ≥0,6 Prozessor):'];
+ for(const r of BI.res){const p=r.p,schnell=p.filter(q=>q[1]<=0.15).length,langsam=p.filter(q=>q[1]>=0.6).length;let kipp='';
+  for(let j=2;j<p.length;j++){if(p[j][1]>=0.6&&p[j-1][1]>=0.6&&p.slice(0,j-1).some(q=>q[1]<=0.15)){kipp=' · kippt bei Bild '+p[j-1][0];break}}
+  const zust=!p.length?'keine Messung':langsam===0?'Grafikkarte':schnell===0?'Prozessor (von Anfang an)':kipp?'Grafikkarte → Prozessor':'gemischt';
+  L.push(`  ${r.name}: ${r.f} Bilder · ${zust}${kipp} · Sonde ${p.length?p[0][1]+'→'+p[p.length-1][1]:'–'} · Umleitungen ${r.sch||0}`)}
+ return L.join('\n')}
+function biEnde(){BI.on=false;biAus();BI.txt=biText();frischeLeinwand('nach Test');try{const DG=window.__hsDIAG;if(DG&&DG.start)DG.start(3000)}catch(e){lErr('bi-diag',e)}}
+function biStart(){if(BI.on||!aktiv())return false;try{if(G.state!=='play'){try{toast('Der Firefox-Test misst im laufenden Spiel – erst eine Stufe starten.','#ff9a7a')}catch(e){}return false}
+  if(!SAVE.perf){SAVE.perf=true;try{persist()}catch(e){}}try{if(G.overlay)closeOverlay()}catch(e){}
+  BI.on=true;BI.res=[];BI.txt='';BI.last=0;try{toast('Firefox-Test läuft (~60 s) – bitte normal weiterspielen. Teile des Bildes fehlen kurzzeitig.','#e8c36a')}catch(e){}
+  setTimeout(()=>{if(BI.on&&BI.i<0)biPhase(0)},0);BI.i=-1;biPhase(0);return true}catch(e){lErr('bi',e);BI.on=false;biAus();return false}}
+L2.ffTest=biStart;
+{const _r=render;render=function(){const r=_r.apply(this,arguments);try{biBild()}catch(e){lErr('bi-bild',e)}return r}}
+/* Knopf neben „Diagnose (10 s)“ (nur Firefox bzw. modus 'an') */
+function biKnopf(){try{if(!aktiv())return;for(const b of document.querySelectorAll('#gfxBox [data-act="diag-start"]')){if(b.parentNode.querySelector('[data-act="l2-fftest"]'))continue;
+  b.insertAdjacentHTML('afterend','<button class="btn small" data-act="l2-fftest" title="Findet heraus, welche Zeichengruppe Firefox dazu bringt, die Spielleinwand auf den Prozessor umzustellen (je Phase frische Leinwand, ~60 s)">Firefox-Test (60 s)</button>')}}catch(e){}}
+if(typeof ulKnopf==='function'){const _uk=ulKnopf;ulKnopf=function(){const r=_uk.apply(this,arguments);try{Promise.resolve().then(()=>Promise.resolve()).then(biKnopf)}catch(e){}return r}}
+document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest?ev.target.closest('[data-act="l2-fftest"]'):null;if(!b||b.disabled)return;ev.stopPropagation();ev.preventDefault();try{sfx('ui')}catch(e){}biStart()},true);
 
 /* ---------- 2) Bildschirm-Hz robust ---------- */
 const HZR=[60,72,75,85,90,100,110,120,144,155,160,165,170,175,180,200,240,280,300,360];
@@ -37667,7 +37803,11 @@ function arbeitMedian(n){const k=Math.min(n,RB.n);if(!k)return 0;const a=[];for(
 let RN=0;{const _r=render;render=function(){RN++;return _r.apply(this,arguments)}}
 
 /* ---------- 3) Diagnose: Hz-Nachmessung absichern, Firefox-Hinweis zur Grafikkarte, Paket nennen ---------- */
+function ffZeilen(){if(!aktiv())return'';const L=[];const nt=FL.log.filter(x=>x.grund.indexOf('Test')<0&&x.grund.indexOf('nach Test')<0),nT=FL.log.length-nt.length,fr=nt.map(x=>x.grund+' ('+x.t+' s)').join(', ')+(nT?(nt.length?', ':'')+'Firefox-Test '+nT+'×':'');
+ L.push(`Firefox-Leinwand: ${FL.T?'frisch':'#cv'} · Neuanlagen: ${fr||'–'} · Umleitungen ${SCH.n} (Striche ${SCH.st.strich}, Verläufe ${SCH.st.verlauf+SCH.st.rect}, ohne Pfad ${SCH.st.ohnePfad})`);
+ if(BI.txt)L.push(BI.txt);return L.join('\n')}
 function diagHaken(){const DG=window.__hsDIAG;if(!DG||DG.__l2)return;DG.__l2=1;let wert=DG.daten;
+ {let lz=DG.letzter;Object.defineProperty(DG,'letzter',{configurable:true,enumerable:true,get(){return lz},set(v){lz=v;try{const z=ffZeilen();if(z&&typeof v==='string'&&v&&v.indexOf('Firefox-Leinwand:')<0)lz=v+'\n'+z}catch(e){}}})}
  Object.defineProperty(DG,'daten',{configurable:true,enumerable:true,get(){return wert},set(d){wert=d;try{if(d&&typeof d==='object'&&!L2.aus)diagDaten(d)}catch(e){lErr('diag',e)}}})}
 function diagDaten(d){
  try{if(L2.firefox&&d.gl&&d.gl.ren&&!/ähnliche/.test(d.gl.ren))d.gl.ren+=' (Firefox meldet nur eine ähnliche Karte)'}catch(e){}
