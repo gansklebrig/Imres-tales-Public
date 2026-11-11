@@ -14,6 +14,7 @@ import hashlib, json, os, re, subprocess, sys
 WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ZIEL = "audio/chronik/de/mix"
 TMP = os.environ.get("TMPDIR", "/tmp")
+MAX_SPUR = 780   # Sekunden Sprache je Spur höchstens
 NACHLAUF = 1.4   # Sekunden Ausklang nach dem letzten Absatz einer Spur
 
 def main():
@@ -30,6 +31,18 @@ def main():
             if e.get("titel") and cur: gruppen.append(cur); cur = []
             cur.append(e)
         if cur: gruppen.append(cur)
+        # Sehr lange Abschnitte (> MAX_SPUR s) in zwei Spuren teilen – sonst reicht der Arbeitsspeicher beim Mischen nicht
+        geteilt = []
+        for g in gruppen:
+            d = [float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0",
+                                                os.path.join(WURZEL, e["datei"])])) for e in g]
+            if sum(d) <= MAX_SPUR: geteilt.append(g); continue
+            summe, k = 0, len(g) // 2
+            for j, x in enumerate(d):
+                summe += x
+                if summe >= sum(d) / 2: k = j + 1; break
+            geteilt += [g[:k], g[k:]]
+        gruppen = geteilt
         for n, g in enumerate(gruppen, 1):
             spec = ",".join(f"{kap}:{e['i']}" for e in g)
             flags = []
