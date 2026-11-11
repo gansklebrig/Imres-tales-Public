@@ -38824,6 +38824,18 @@ window.__hsFFHINW={v:1};
  background:rgba(20,14,8,.82);border:1px solid #8a6a32;color:#f0d9a0;border-radius:8px;padding:4px 12px;font-size:clamp(11px,1.4vw,15px);white-space:nowrap;max-width:94vw;overflow:hidden;text-overflow:ellipsis}`;
  document.head.appendChild(st);
 }catch(e){console.error('ffhinw',e);window.__hsFFHINW.err=String(e&&e.stack||e)}})();
+/* ================= Paket „zeiger“: Mauszeiger über der Spielfläche ausblenden – window.__hsZEIGER =================
+   Wunsch: Beim Zielen mit der Maus am PC soll über dem Spielfeld nur das Zielkreuz des Spiels zu sehen sein, nicht der weiße
+   Systemzeiger. Gleiche Bedingung wie beim Zeichnen des Zielkreuzes (Mauszielen, im Spiel, kein Fenster offen). Über Leisten,
+   Knöpfen und Fenstern bleibt der normale Zeiger. Abschaltbar: window.__hsZEIGER.aus=1 */
+window.__hsZEIGER={v:1,an:0};
+(function(){try{
+ const Z=window.__hsZEIGER,de=document.documentElement;
+ const st=document.createElement('style');st.textContent='html.hsZiel #cv,html.hsZiel canvas.l2cv{cursor:none}';document.head.appendChild(st);
+ function lauf(){let on=false;try{on=!Z.aus&&!!P&&mouseAim()&&G.state==='play'&&!G.overlay}catch(e){}
+  if(on!==!!Z.an){Z.an=on?1:0;de.classList.toggle('hsZiel',on)}requestAnimationFrame(lauf)}
+ requestAnimationFrame(lauf);
+}catch(e){console.error('zeiger',e);window.__hsZEIGER.err=String(e&&e.stack||e)}})();
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
