@@ -1,5 +1,5 @@
 #!/bin/bash
-# imres-modus imres|zynthian|hintergrund|neustart|aus|aktualisieren|einrichten|pruefen|start-imres|start-zynthian|start-hintergrund|boot
+# imres-modus imres|zynthian|hintergrund|dj|zynsimple-update|zynthian-update|neustart|aus|aktualisieren|einrichten|pruefen|start-imres|start-zynthian|start-hintergrund|boot
 HIER="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 # Datenordner: neben der Seite – oder fest, wenn dieses Skript als Kopie in /usr/local/bin liegt
 case "$HIER" in */seite/zynthian) DATEN="$(dirname "$(dirname "$HIER")")" ;; *) DATEN="${IMRES_DATEN:-/zynthian/zynthian-my-data/imres}" ;; esac
@@ -11,8 +11,14 @@ if [ ! -d "$DATEN/seite" ]; then
 fi
 case "$1" in
   imres)       systemctl stop imres-hintergrund zynthian; systemctl start imres-buehne ;;
-  zynthian)    systemctl stop imres-buehne imres-hintergrund; systemctl start zynthian ;;
+  zynthian)    systemctl stop imres-buehne imres-hintergrund zynsimple-dj 2>/dev/null; systemctl start zynthian ;;
   hintergrund) systemctl stop imres-buehne; systemctl start zynthian; sleep 4; systemctl start imres-hintergrund ;;
+  dj)        if [ -x /usr/local/bin/zynsimple-dj ]; then systemctl stop imres-hintergrund; exec /usr/local/bin/zynsimple-dj dj
+             else echo "DJ-Pult nicht installiert (kommt mit ZynSimple 2.6)."; exit 1; fi ;;
+  zynsimple-update|zynthian-update)
+             # zurück zum Zynthian – ZynSimple startet dort das Update (BACK 2 s → System-Menü)
+             echo "$1" > /run/zynsimple-start-aktion
+             systemctl stop imres-buehne imres-hintergrund zynsimple-dj 2>/dev/null; systemctl start zynthian ;;
   neustart)  systemctl reboot ;;
   aus)       systemctl poweroff ;;
   aktualisieren)
@@ -111,5 +117,5 @@ case "$1" in
       hintergrund) sleep 6; systemctl start imres-hintergrund ;;
     esac
     ;;
-  *) echo "Benutzung: imres-modus imres|zynthian|hintergrund|neustart|aus|aktualisieren|zurueck|einrichten|pruefen|start-imres|start-zynthian|start-hintergrund"; exit 1 ;;
+  *) echo "Benutzung: imres-modus imres|zynthian|hintergrund|dj|zynsimple-update|zynthian-update|neustart|aus|aktualisieren|zurueck|einrichten|pruefen|start-imres|start-zynthian|start-hintergrund"; exit 1 ;;
 esac

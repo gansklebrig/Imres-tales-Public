@@ -687,6 +687,38 @@
   Object.keys(STIL_NEU).forEach(i => STIL_NEU[i].forEach(k => { const st = STIL[k]; if (st && Array.isArray(st.instrument) && !st.instrument.includes(i)) st.instrument.push(i); }));
   Object.keys(BAND_NEU).forEach(sp => Object.keys(BAND_NEU[sp]).forEach(i => BAND_NEU[sp][i].forEach(k => { const st = STIL[k]; if (st && st.band && Array.isArray(st.band[sp]) && !st.band[sp].includes(i)) st.band[sp].push(i); })));
 
+  /* ---------- Neue Zwischenstimmungen (für die Stimmungs-Uhr von Barden Beats) ----------
+     Jede erbt Klangbild, Besetzung und Kapelle von einer verwandten Stimmung und bekommt eigene Tonarten, Tempo und Charakter. */
+  const NEUE_STIMMUNGEN = {
+    heimweh: { vater: "kamin", nach: "klage", kul: "regen", de: "🌧 Heimweh", en: "🌧 Homesick",
+      stil: { dreier: undefined, modus: ["aeolisch", "dorisch"], tempo: [64, 74], swing: 0, bordun: 1, dichte: .6, echo: "lang",
+        instrument: ["laute", "harfe", "fidel", "zither", "psalter", "handpan"], band: { trommel: ["bodhran", "pauke"], floete: ["gesang", "okarina", "englischhorn", "bratsche", "shakuhachi"], ketten: ["schnipsen", "windspiel", "triangel"] } } },
+    letztesgefecht: { vater: "heldenlied", nach: "boss", kul: "schlacht", de: "🏴 Letztes Gefecht", en: "🏴 Last Stand",
+      stil: { fanfare: 1, modus: ["aeolisch", "phrygisch", "dorisch"], tempo: [120, 134], transpose: [-2, 0], swing: 0, bordun: 1, variation: 1, dichte: 1,
+        instrument: ["fidel", "drehleier", "dudelsack", "laute"], band: { trommel: ["pauke", "taiko", "marsch"], floete: ["horn", "oohchor", "gesang"], ketten: ["stampfen", "kriegstrommel", "ketten"] } } },
+    kriegstrommeln: { vater: "kampf", nach: "kampf", kul: "schlacht", de: "🥁 Kriegstrommeln", en: "🥁 War Drums",
+      stil: { modus: ["phrygisch", "aeolisch"], tempo: [128, 140], transpose: [-2, -4, 0], bordun: 1, dichte: .9,
+        instrument: ["drehleier", "dudelsack", "fidel", "schalmei"], band: { trommel: ["taiko", "pauke", "marsch"], floete: ["horn", "oohchor"], ketten: ["kriegstrommel", "stampfen", "ketten"] } } },
+    gaukler: { vater: "fey", nach: "marktplatz", kul: "markt", de: "🎪 Gauklerzelt", en: "🎪 Jugglers' Tent",
+      stil: { modus: ["lydisch", "mixolydisch", "ionisch"], tempo: [112, 124], swing: 1, dichte: .95,
+        instrument: ["hackbrett", "mandoline", "akkordeon", "glocken", "balafon", "cembalo"], band: { trommel: ["tamburin", "bongos", "darbuka"], floete: ["piccolo", "klarinette", "pfeife", "okarina"], ketten: ["schellen", "rassel", "klatschen", "triangel"] } } },
+    sternenhimmel: { vater: "elben", nach: "ruinen", kul: "wald", de: "🌌 Sternenhimmel", en: "🌌 Starry Sky",
+      stil: { modus: ["lydisch", "ionisch", "dorisch"], tempo: [58, 66], dichte: .5, echo: "lang",
+        instrument: ["harfe", "glocken", "illusion", "handpan", "psalter", "zither"], band: { trommel: ["pauke"], floete: ["oohchor", "shakuhachi", "gesang", "okarina"], ketten: ["windspiel", "triangel", "schnipsen"] } } }
+  };
+  const NACH_STIMMUNG = { heimweh: "klage", letztesgefecht: "boss", kriegstrommeln: "kampf", gaukler: "fey", sternenhimmel: "elben" };
+  Object.keys(NEUE_STIMMUNGEN).forEach(k => {
+    const n = NEUE_STIMMUNGEN[k], v = STIL[n.vater]; if (!v || STIL[k]) return;
+    const neu = JSON.parse(JSON.stringify(v)); Object.keys(n.stil).forEach(x => { if (n.stil[x] === undefined) delete neu[x]; else neu[x] = JSON.parse(JSON.stringify(n.stil[x])); });
+    delete neu.lieder; STIL[k] = neu;
+    const hinter = NACH_STIMMUNG[k], einf = (l, x) => { if (l.includes(k)) return; const i = l.indexOf(x); i >= 0 ? l.splice(i + 1, 0, k) : l.push(k); };
+    einf(STIMMUNGEN, hinter); einf(KAPELLE_NAMEN, hinter);
+    if (!KULISSE_ZU[k]) KULISSE_ZU[k] = n.kul || KULISSE_ZU[n.vater];
+    TX.de.vorlagen[k] = n.de; TX.en.vorlagen[k] = n.en;
+  });
+  /* die übrigen Tabellen (Hall, Orchester, Kapelle …) erben später, sobald sie angelegt sind */
+  function neueStimmungenErben(tabelle) { Object.keys(NEUE_STIMMUNGEN).forEach(k => { const v = NEUE_STIMMUNGEN[k].vater; if (tabelle[v] !== undefined && tabelle[k] === undefined) tabelle[k] = JSON.parse(JSON.stringify(tabelle[v])); }); }
+
   const zwischen = ([a, b]) => a + Math.floor(Math.random() * ((b - a) / 2 + 1)) * 2;
   const akkordToene = bassZeile => { const d = BASS_STUFEN[bassZeile]; return [d % 7, (d + 2) % 7, (d + 4) % 7]; };
   const naechsterTon = (ziel, erlaubt) => {
@@ -1282,13 +1314,20 @@
   function stimmungLied(k, behalten, stufe, neueForm) {
     const roh = STIL[k], ist = stufe != null ? stufe : (typeof S.intensitaet === "number" ? S.intensitaet : 5), st = mitIntensitaet(roh, ist);
     /* Stimmungen mit handgeschriebenen Themen (Kampf, Endgegner): ein Thema wählen – beim neuen Lied ein anderes */
-    if (roh.lieder && roh.lieder.length) {
-      const alt = behalten && S.stimmung === k && Number.isInteger(S.liedNr) ? S.liedNr : -1;
-      let nr = alt >= 0 && !neueForm ? alt : Math.floor(Math.random() * roh.lieder.length);
-      if (neueForm && roh.lieder.length > 1) while (nr === alt) nr = Math.floor(Math.random() * roh.lieder.length);
-      const v = liedVonNoten(roh.lieder[nr]), gleich = behalten && S.stimmung === k;
-      return pruefen({ tempo: tempoFuer(roh, ist), transpose: gleich ? S.transpose : zufall(roh.transpose), modus: v.modus, instrument: gleich ? S.instrument : v.instrument,
-        band: gleich ? S.band : Object.assign(BAND_START(), v.band), ablauf: v.ablauf, rollen: v.rollen, swing: v.swing || 0, bordun: v.bordun, takt: 16, liedNr: nr,
+    const altNr = behalten && S.stimmung === k && Number.isInteger(S.liedNr) ? S.liedNr : -1;
+    /* Stimmungen, die früher nur frei komponiert wurden: ab und zu (und wenn das gleiche Stück bleiben soll) weiter frei erfinden */
+    const frei = roh.liederFrei && (altNr === -2 && !neueForm || (altNr !== -2 || neueForm) && Math.random() < .18);
+    if (roh.lieder && roh.lieder.length && !frei) {
+      const alt = altNr;
+      const nr = alt >= 0 && !neueForm ? alt : liedNrWaehlen(k, roh.lieder.length, alt);
+      const v = liedVonNoten(roh.lieder[nr]), gleich = behalten && S.stimmung === k, d = roh.lieder[nr];
+      const bandZuf = () => ({ trommel: zufall(st.band.trommel), floete: zufall(st.band.floete), ketten: zufall(st.band.ketten) });
+      const inst = gleich ? S.instrument : v.instrument || zufall(st.instrument);
+      let band = gleich ? S.band : Object.assign(BAND_START(), v.band ? v.band : bandZuf());
+      if (!gleich && !v.band && (FAMILIE[inst] || []).includes(band.floete)) band.floete = echoWahl(st.band.floete, inst);
+      const tm = d.tempo ? Math.round(d.tempo + (tempoFuer(roh, ist) - tempoFuer(roh, 5))) : tempoFuer(roh, ist);
+      return pruefen({ tempo: tm, transpose: gleich ? S.transpose : zufall(roh.transpose), modus: v.modus, instrument: inst,
+        band, ablauf: v.ablauf, rollen: v.rollen, swing: v.swing || 0, bordun: v.bordun, takt: d.takt === 12 ? 12 : 16, liedNr: nr,
         arrSeed: Math.random() < .5 ? 0 : 1, kapWahl: gleich && Array.isArray(S.kapWahl) && S.kapWahl.length ? S.kapWahl.slice() : kapelleWaehlen(k),
         variation: v.variation, teile: Object.fromEntries(TEILE.map(p => [p, v[p] || teilLeer()])), vol: S.vol, mute: S.mute, stimmung: k, intensitaet: ist });
     }
@@ -1306,7 +1345,7 @@
     basis.kapWahl = behalten && !neueForm && S.stimmung === k && Array.isArray(S.kapWahl) && S.kapWahl.length ? S.kapWahl.slice() : kapelleWaehlen(k);
     try { teile = liedTeile(st, basis.modus, form.rollen, basis.takt); basis.ablauf = form.ablauf; basis.rollen = form.rollen; }
     catch (_) { teile = stimmungTeile(st, basis.modus); if (!/^[ABCD]+$/.test(basis.ablauf)) basis.ablauf = zufall(roh.ablauf); delete basis.rollen; }
-    return pruefen(Object.assign(basis, { variation: st.variation, teile, vol: S.vol, mute: S.mute, stimmung: k, intensitaet: ist }));
+    return pruefen(Object.assign(basis, { variation: st.variation, teile, vol: S.vol, mute: S.mute, stimmung: k, intensitaet: ist, liedNr: roh.lieder ? -2 : undefined }));
   }
 
   const kopie = o => JSON.parse(JSON.stringify(o));
@@ -1567,6 +1606,56 @@
     ]
   });
   Object.keys(KAMPF_LIEDER).forEach(k => { if (STIL[k]) STIL[k].lieder = KAMPF_LIEDER[k]; });
+  /* ---------- Liedersammlung (lieder.js): viele ausgeschriebene Stücke je Stimmung ----------
+     Jedes Stück: Intro, 4 Takte Strophe, 4 Takte Refrain, 2 Takte Brücke, Refrain mit Terzstimme und Schluss.
+     Besetzung offen gelassen = Barradin, Echo & Co. greifen zu einem der Instrumente, die zur Stimmung passen. */
+  const SCHLAG_VORLAGEN = {
+    keiner: {},
+    ruhig: { s: { trommel: [0] }, r: { trommel: [0, 8] }, b: {}, h: { trommel: [0, 8], ketten: [4, 12] } },
+    sanft: { s: { trommel: [0, 8], ketten: [12] }, r: { trommel: [0, 6, 8], ketten: [4, 12] }, b: { trommel: [0] }, h: { trommel: [0, 6, 8, 14], ketten: [4, 12] } },
+    tanz: { i: { trommel: [0, 8] }, s: { trommel: [0, 6, 8, 14], klopf: [0, 8], schelle: [4, 12] }, r: { trommel: [0, 3, 6, 8, 11, 14], klopf: [0, 4, 8, 12], schelle: [2, 6, 10, 14], ketten: [4, 12] },
+      b: { trommel: [0] }, h: { trommel: [0, 3, 6, 8, 10, 11, 12, 14], klopf: [0, 4, 8, 12], schelle: [2, 6, 10, 14], ketten: [4, 12] } },
+    marsch: { i: { trommel: [12, 13, 14, 15] }, s: { trommel: [0, 8], klopf: [4, 12] }, r: { trommel: [0, 4, 8, 10, 12], klopf: [4, 12], schelle: [0, 4, 8, 12] }, b: { trommel: [0, 8] },
+      h: { trommel: [0, 2, 4, 8, 10, 12, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [4, 12] } },
+    treibend: { i: { trommel: [0, 8, 12, 14] }, s: { trommel: [0, 3, 8, 11], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14] }, r: { trommel: [0, 3, 6, 8, 11, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [4, 12] },
+      b: { trommel: [0, 8], ketten: [4, 12] }, h: { trommel: [0, 2, 3, 6, 8, 10, 11, 14], klopf: [4, 12], schelle: [0, 2, 4, 6, 8, 10, 12, 14], ketten: [4, 12] } },
+    schleichend: { s: { trommel: [0], ketten: [10] }, r: { trommel: [0, 7], klopf: [12] }, b: {}, h: { trommel: [0, 3, 8, 11], ketten: [6, 14] } },
+    walzer: { i: { trommel: [0] }, s: { trommel: [0], klopf: [4, 8] }, r: { trommel: [0], klopf: [4, 8], schelle: [2, 6, 10] }, b: { trommel: [0] }, h: { trommel: [0, 8], klopf: [4, 8], ketten: [4, 8] } },
+    jig: { i: { trommel: [0, 6] }, s: { trommel: [0, 6], klopf: [3, 9] }, r: { trommel: [0, 3, 6, 9], klopf: [0, 6], schelle: [2, 5, 8, 11] }, b: { trommel: [0] },
+      h: { trommel: [0, 2, 3, 6, 8, 9], klopf: [0, 6], schelle: [2, 5, 8, 11], ketten: [3, 9] } },
+    kampf: KAMPF_SCHLAG, boss: BOSS_SCHLAG, verfolgung: VERF_SCHLAG, spannung: SPANN_SCHLAG, reiter: REIT_SCHLAG, sieg: SIEG_SCHLAG, markt: MARKT_SCHLAG
+  };
+  const LIED_ABLAUF = "ABCDEFGHIBCDEFGHIJKLMNO";
+  function liedAusSammlung(t) {
+    const fl = (x, d) => x == null ? d : x, takte = [[t.intro[0], t.intro[1] || "", fl(t.intro[2], "")]];
+    const pad = a => { a = String(a || "0000"); while (a.length < 4) a += a[a.length - 1] || "0"; return a.slice(0, 4); };
+    t.strophe.forEach(b => takte.push([b[0], b[1], fl(b[2], "echo")]));
+    t.refrain.forEach(b => takte.push([b[0], b[1], fl(b[2], "lang")]));
+    t.bruecke.forEach(b => takte.push([b[0], b[1], fl(b[2], "")]));
+    const r2 = t.refrain2 || t.refrain;
+    r2.forEach((b, i) => takte.push(i === 3 && t.schluss ? [t.schluss[0], t.schluss[1], fl(t.schluss[2], "terz")] : [b[0], b[1], fl(t.refrain2 ? b[2] : null, "terz")]));
+    const b = t.bass || {}, bs = typeof b === "string" ? { i: b, s: b, r: b, b: b, h: b } : b;
+    takte.forEach(z => { z[0] = pad(z[0]); });
+    return { titel: t.titel, instrument: t.instrument, band: t.band, modus: t.modus, bordun: t.bordun || 0, variation: t.variation == null ? 1 : t.variation, swing: t.swing || 0,
+      tempo: t.tempo, takt: t.takt === 12 ? 12 : 16, ablauf: t.ablauf || LIED_ABLAUF, schlag: SCHLAG_VORLAGEN[t.schlag] || SCHLAG_VORLAGEN.sanft,
+      bass: Object.assign({ i: "orgel", s: "halbe", r: "viertel", b: "halbe", h: "viertel" }, bs), takte };
+  }
+  const LIED_SAMMLUNG = (typeof window !== "undefined" && window.IMRES_LIEDER) || {};
+  Object.keys(LIED_SAMMLUNG).forEach(k => {
+    const st = STIL[k]; if (!st || !Array.isArray(LIED_SAMMLUNG[k])) return;
+    const neu = []; LIED_SAMMLUNG[k].forEach(t => { try { if (t && t.strophe && t.refrain) neu.push(liedAusSammlung(t)); } catch (_) {} });
+    if (!neu.length) return;
+    if (!st.lieder) st.liederFrei = true; /* hatte vorher keine geschriebenen Stücke: der Komponist darf ab und zu weiter frei erfinden */
+    st.lieder = (st.lieder || []).concat(neu);
+  });
+  /* welche Stücke zuletzt liefen – damit man lange zuhört, bevor eines wiederkommt */
+  const liedVerlauf = {};
+  function liedNrWaehlen(k, n, ausser) {
+    const v = liedVerlauf[k] = liedVerlauf[k] || [], sperr = Math.min(n - 1, Math.max(1, Math.floor(n * .7)));
+    const frei = []; for (let i = 0; i < n; i++) if (i !== ausser && !v.slice(0, sperr).includes(i)) frei.push(i);
+    const nr = frei.length ? frei[Math.floor(Math.random() * frei.length)] : (ausser >= 0 && n > 1 ? (ausser + 1 + Math.floor(Math.random() * (n - 1))) % n : Math.floor(Math.random() * n));
+    v.unshift(nr); v.length = Math.min(v.length, n); return nr;
+  }
 
   const ausVorlage = (k, mix) => {
     const v = kopie(VORLAGEN[k]);
@@ -2445,7 +2534,9 @@
     if ((weit || o.dumpf) && k.send) { const sg = ctx.createGain(); sg.gain.value = o.dumpf ? 2.2 : 1.5; letzter.connect(sg); sg.connect(k.send); }
     let t = j;
     for (let i = 0; i < n; i++) {
-      const da = e.f.filter(x => ambPuffer(x)), name = zufall(da.length ? da : e.f), b = ambPuffer(name);
+      const da = e.f.filter(x => ambPuffer(x));
+      /* der allererste Ton eines frisch dazugelegten Wesens: das längste Geräusch, damit man es richtig hört */
+      const name = o.lang1 && da.length ? da.reduce((m, x) => ambPuffer(x).duration > ambPuffer(m).duration ? x : m, da[0]) : zufall(da.length ? da : e.f), b = ambPuffer(name);
       if (da.length < e.f.length && Math.random() < .5) ambLaden(zufall(e.f));
       if (!b) { ambLaden(name); continue; }
       let r = e.tempo ? zz(e.tempo[0], e.tempo[1]) : zz(.95, 1.05);
@@ -2593,6 +2684,19 @@ const ZUS_ICON = {
   ketten: ["M7.6 12l-2.4 2.4a3.4 3.4 0 0 0 4.8 4.8l2.4-2.4a3.4 3.4 0 0 0 0-4.8M16.4 12l2.4-2.4a3.4 3.4 0 0 0-4.8-4.8l-2.4 2.4a3.4 3.4 0 0 0 0 4.8M9.5 14.5l5-5"],
   monster: ["M3.5 8c2.2-1.3 4.5-1.1 6.2.6M20.5 8c-2.2-1.3-4.5-1.1-6.2.6M5.5 16h13M7.5 16l1.2 3.4L10 16M14 16l1.3 3.4 1.2-3.4", "M5.8 10.6l4.2 1.3-3.9.8zM18.2 10.6L14 11.9l3.9.8z"]
 };
+/* ---------- Wesen & Ungeheuer: deutlich hörbar, öfter, näher, die großen tiefer ----------
+   Die Aufnahmen lagen leiser als die Tiere – angeglichen; dazu kürzere Pausen, seltener „in der Ferne“, und beim ersten Mal das längste Geräusch. */
+Object.assign(EV_NORM, {"e_hexe_1":1.84,"e_hexe_2":2.04,"e_hexe_3":2.12,"e_hexe_4":2.03,"e_hexe_5":2.09,"e_goblin_1":1.9,"e_goblin_2":1.77,"e_goblin_3":1.98,"e_goblin_4":2.06,"e_oger_1":2.07,"e_oger_2":2.09,"e_oger_3":2.23,"e_oger_4":2.17,"e_drachenbruellen_1":2.09,"e_drachenbruellen_2":2.11,"e_drachenbruellen_3":2.08,"e_drachenbruellen_4":1.98,"e_drachenbruellen_5":2.1,"e_drachenbruellen_6":2.07,"e_fluegelschlag_1":2.04,"e_fluegelschlag_2":2.04,"e_fluegelschlag_3":1.8,"e_lindwurm_1":1.92,"e_lindwurm_2":1.87,"e_lindwurm_3":1.94,"e_spinne_1":1.82,"e_spinne_2":1.76,"e_spinne_3":1.85,"e_spinne_4":1.78,"e_spinne_5":1.78,"e_spinne_6":1.72,"e_skelett_1":1.79,"e_skelett_2":1.76,"e_skelett_3":1.85,"e_ghul_1":1.9,"e_ghul_2":2.06,"e_ghul_3":2.21,"e_ghul_4":2.01,"e_ghul_5":2.13,"e_geisterfluestern_1":2.01,"e_geisterfluestern_2":1.79,"e_geisterfluestern_3":2.12,"e_geisterfluestern_4":2.03,"e_geisterfluestern_5":1.84,"e_geisterfluestern_6":1.87,"e_spuk_1":1.98,"e_spuk_2":1.95,"e_spuk_3":1.95,"e_spuk_4":1.97,"e_spuk_5":2.11,"e_spuk_6":1.95,"e_geisterheulen_1":2.04,"e_geisterheulen_2":2.05,"e_geisterheulen_3":2.07,"e_geisterheulen_4":2.01,"e_geisterheulen_5":2.0,"e_daemon_1":1.98,"e_daemon_2":2.02,"e_daemon_3":2.01,"e_daemon_4":1.96,"e_baer_1":2.15,"e_baer_2":2.09,"e_baer_3":2.09,"e_baer_4":2.09,"e_hyaene_1":1.84,"e_hyaene_2":1.76,"e_hyaene_3":1.93,"e_baumhirte_1":1.71,"e_baumhirte_2":1.66,"e_baumhirte_3":1.76,"e_golem_1":2.08,"e_golem_2":2.01,"e_golem_3":2.04,"e_golem_4":1.83,"e_golem_5":1.8,"e_feuerwesen_1":2.11,"e_feuerwesen_2":2.12,"e_seeungeheuer_1":2.12,"e_seeungeheuer_2":2.19,"e_seeungeheuer_3":2.07,"e_hoehlengesang_1":2.03,"e_hoehlengesang_2":2.21,"e_hoehlengesang_3":1.98,"e_hoehlengesang_4":2.01,"e_sirene_1":2.16,"e_sirene_2":2.11,"e_sirene_3":2.14,"e_sirene_4":2.19,"e_sirene_5":2.11,"e_raubkatze_1":2.03,"e_raubkatze_2":2.02,"e_raubkatze_3":2.05,"e_raubkatze_4":2.25});
+(() => {
+  const WESEN = "hexe goblin oger drachenbruellen fluegelschlag lindwurm spinne skelett ghul geisterfluestern spuk geisterheulen daemon baer hyaene baumhirte golem feuerwesen seeungeheuer hoehlengesang sirene raubkatze".split(" ");
+  const GROSS = { oger: [.84, .95], drachenbruellen: [.8, .94], lindwurm: [.86, .97], daemon: [.8, .93], golem: [.82, .95], seeungeheuer: [.8, .93], baer: [.86, .97], ghul: [.88, .98], raubkatze: [.88, .98], baumhirte: [.85, .96], fluegelschlag: [.86, .97] };
+  WESEN.forEach(id => {
+    const z = ZUSATZ[id]; if (!z) return;
+    z.wesen = 1;
+    z.ev = z.ev.map(([art, [a, b], st, fern, o]) => [art, [Math.max(8, Math.round(a * .45)), Math.max(18, Math.round(b * .45))], Math.min(.75, st * 1.5), Math.min(fern, .18), o]);
+    if (GROSS[id] && AMB_EV[id] && !AMB_EV[id].tempo) AMB_EV[id].tempo = GROSS[id];
+  });
+})();
 Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.8M8.2 15.2h8", "", "M15 6.5c1.5-.5 2.8 0 3.5 1"], "goblin": ["M7 9.5c0-2.9 2.2-5 5-5s5 2.1 5 5v2.5c0 3.2-2.2 6-5 6s-5-2.8-5-6zM7 9.5L1.8 6.5 7 12.2M17 9.5l5.2-3L17 12.2M9.8 15l1.1-1 1.1 1 1.1-1 1.1 1", "M9.2 10.3a1 1 0 1 0 2 0 1 1 0 1 0-2 0zM12.8 10.3a1 1 0 1 0 2 0 1 1 0 1 0-2 0z"], "oger": ["M4 20.5l8.5-8.5M12.5 12c-1.2-3 .4-6.6 3.6-7.8 2.6-1 4.6.6 4 3.1-.7 2.9-4.3 5.3-7.6 4.7zM15 4l.6-2M19.6 6.2l1.9-.5M18 10.6l1 1.8M13.5 7.2l-1.6-.8"], "drachenbruellen": ["M2.5 14.5c2.2-4.6 6-7.4 10.8-7.6L16 3.5l1 3.8 4.5 1.5-3.2 1.7 1.2 3.3-4.6-1c-2 3.4-6.6 4.8-11.2 3.6l3.2-2.4zM10.5 12.5l2.5 2.6M8 13.5l1.5 2", "M13.6 8.6a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0z"], "fluegelschlag": ["M12 13C9.6 7 6 4.2 2 4.8c.6 4.6 3.8 8.2 10 8.2zM12 13c2.4-6 6-8.8 10-8.2-.6 4.6-3.8 8.2-10 8.2zM12 13v7M5.5 8.5l2 1.5M18.5 8.5l-2 1.5"], "lindwurm": ["M2.5 19c3 0 4.2-3.5 7.5-3.5s3.6 3.5 6.6 3.5c2.6 0 4-2.8 4.9-6.5M15.5 10.5l1.6-6.5 2 5 3.4-1.2-2.4 4.4M17.2 13l3.9-.4", "M18.5 10.8a.7.7 0 1 0 1.4 0 .7.7 0 1 0-1.4 0z"], "spinne": ["M9 13.5a3 3.3 0 1 0 6 0 3 3.3 0 1 0-6 0zM10.2 8.5a1.8 1.8 0 1 0 3.6 0 1.8 1.8 0 1 0-3.6 0zM9.3 12L4.5 8 3.5 4.5M9.2 14.5L4 15l-1.5 3.5M14.7 12l4.8-4 1-3.5M14.8 14.5L20 15l1.5 3.5M10 16.4l-2.5 3.6M14 16.4l2.5 3.6"], "skelett": ["M5.5 10a6.5 6.5 0 0 1 13 0v3.2l-2 1.3V18h-9v-3.5l-2-1.3zM10 18v2.8M14 18v2.8M12 18v2.8M11.2 14.5l.8-1.4.8 1.4", "M8 10.5a1.6 1.6 0 1 0 3.2 0 1.6 1.6 0 1 0-3.2 0zM12.8 10.5a1.6 1.6 0 1 0 3.2 0 1.6 1.6 0 1 0-3.2 0z"], "ghul": ["M7 21.5v-5.5L4.5 11M7 16l.6-8.5M10 16.2l.6-10M13 16.5l1.6-9.5M14.5 17.5l4.5-5M7 16c2 1.6 5 2.2 7.5 1.5M4.5 11l-1-1.8M7.6 7.5l-.2-2M10.6 6.2l.2-2M14.6 7l.6-1.9M19 12.5l1.6-.9"], "geisterfluestern": ["M4 21V11a5.5 5.5 0 0 1 11 0v10l-1.8-1.4-1.9 1.4-1.8-1.4-1.9 1.4-1.8-1.4zM17.5 8.5c1 .9 1 2.6 0 3.5M19.8 6.5c2 2 2 5.6 0 7.6", "M7.2 11a.9 1.1 0 1 0 1.8 0 .9 1.1 0 1 0-1.8 0zM10.8 11a.9 1.1 0 1 0 1.8 0 .9 1.1 0 1 0-1.8 0z"], "spuk": ["M8 21V11a6 6 0 0 1 12 0v10l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5zM2.5 9.5h3M2 13h4M3 16.5h3.5M12.5 16a1.5 2 0 1 0 3 0 1.5 2 0 1 0-3 0z", "M11.2 11.5a1 1.2 0 1 0 2 0 1 1.2 0 1 0-2 0zM14.8 11.5a1 1.2 0 1 0 2 0 1 1.2 0 1 0-2 0z"], "geisterheulen": ["M5 21V11.5a5 5 0 0 1 10 0V21l-1.7-1.3-1.6 1.3-1.7-1.3-1.6 1.3-1.7-1.3zM9 15a1 1.6 0 1 0 2 0 1 1.6 0 1 0-2 0zM17 4.5a3.5 3.5 0 1 0 4.2 4.6 2.8 2.8 0 1 1-4.2-4.6z", "M7.6 11.6a.8 1 0 1 0 1.6 0 .8 1 0 1 0-1.6 0zM10.8 11.6a.8 1 0 1 0 1.6 0 .8 1 0 1 0-1.6 0z"], "daemon": ["M7 10.5c0-3 2.2-5.2 5-5.2s5 2.2 5 5.2v2.8c0 3.6-2.2 6.7-5 6.7s-5-3.1-5-6.7zM7.3 8.2L4 2.8l.8 6.6M16.7 8.2L20 2.8l-.8 6.6M9.8 15.5l1.1.9 1.1-.9 1.1.9 1.1-.9", "M8.8 11.2l2.4.8-2.4.6zM15.2 11.2l-2.4.8 2.4.6z"], "baer": ["M6 12.5c0-3.6 2.7-6.3 6-6.3s6 2.7 6 6.3c0 3.7-2.7 6.7-6 6.7s-6-3-6-6.7zM4 6.5a2.2 2.2 0 1 0 4.2 1M20 6.5a2.2 2.2 0 1 1-4.2 1M10.2 15.2c1.2 1 2.4 1 3.6 0", "M11 13.4c0-.6.5-.9 1-.9s1 .3 1 .9-.5 1-1 1-1-.4-1-1zM8.8 10.8a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0zM13.4 10.8a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0z"], "hyaene": ["M3 13.5L6.5 9h4.5L14 5.5l1.5 3.5 4 1.5-1 3.5h-3l-2 3H8.5zM15 13.5c.8 1 2 1.3 3.5 1M5 16.5l1.5 4M10 16.5l-.5 4", "", "M18.5 4.5l1.5-1.5M20.5 6l1.6-.6M16.5 3.3l.3-1.6"], "baumhirte": ["M12 21.5v-9M12 12.5c-4.2 0-7-2.5-7-5.6 0-2.6 2.3-4.4 5-4.4 1 0 1.5.3 2 .7.5-.4 1-.7 2-.7 2.7 0 5 1.8 5 4.4 0 3.1-2.8 5.6-7 5.6zM12 17l-4-2.5M12 15.5l3.8-2.2M9 21.5h6", "M8.8 7.2a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0zM13.4 7.2a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0z"], "golem": ["M8 3.5h8v5H8zM6 8.5h12v7H6zM6 9.5L3 15l1.8 1.2M18 9.5l3 5.5-1.8 1.2M8 15.5v5h3v-5M13 15.5v5h3v-5M9 12h6", "M9.7 5.4h1.6v1.4H9.7zM12.7 5.4h1.6v1.4h-1.6z"], "feuerwesen": ["M12 2.5c1.3 3.8 6 5.3 6 10.6a6 6 0 0 1-12 0c0-3 1.6-4.6 3-5.8.3 1.8 1.1 2.9 2.2 3.4.8-2.7.6-5.4.8-8.2zM9.8 17.3c1.4 1 3 1 4.4 0", "M9.4 13.8a1 1.1 0 1 0 2 0 1 1.1 0 1 0-2 0zM12.6 13.8a1 1.1 0 1 0 2 0 1 1.1 0 1 0-2 0z"], "seeungeheuer": ["M2 20c1.7 0 2.6-1.3 4-1.3s2.3 1.3 4 1.3 2.6-1.3 4-1.3 2.3 1.3 4 1.3 2.6-1.3 4-1.3M5 17c0-5 1-9 3.5-11 1.5 2.5 1 6-1 8.5M12 17c-.5-4.5.5-8 3-10 1.2 2.5.6 5.5-1.2 7.5M18.5 17c.3-3 1.4-5.2 3-6.2"], "hoehlengesang": ["M2.5 21V12a9.5 9.5 0 0 1 19 0v9M7 21v-6a5 5 0 0 1 10 0v6M13.5 9V4.2l3.5-.9v4.4", "M11.4 9.3a1.3 1 0 1 0 2.6 0 1.3 1 0 1 0-2.6 0zM14.9 8.4a1.3 1 0 1 0 2.6 0 1.3 1 0 1 0-2.6 0z"], "sirene": ["M9 8.5a3 3 0 1 0 6 0 3 3 0 1 0-6 0zM9.5 11c-1 2.5-.8 5 1.5 7l-2 3.5 3-1.5 3 1.5-2-3.5c2.3-2 2.5-4.5 1.5-7M18.5 4.5v4.5M21 3.8v4.4M18.5 4.5L21 3.8", "M17.2 9a1.3 1 0 1 0 2.6 0 1.3 1 0 1 0-2.6 0zM19.7 8.3a1.3 1 0 1 0 2.6 0 1.3 1 0 1 0-2.6 0z"], "raubkatze": ["M5 4.5c.8 5 1.2 10 .6 15.5M10.2 3c.8 5.5 1 11.5.3 18M15.5 3.5c.8 5.5.8 11-.2 16.5M20.5 5c.4 4.4.1 8.6-.9 12.5"], "fernschrei": ["M9 9a3.5 3.5 0 1 1 7 0c0 2.4-1.6 3.4-1.6 5.2v1.3h-3.8v-1.3C10.6 12.4 9 11.4 9 9zM11.8 11a.9 1.6 0 1 0 1.8 0 .9 1.6 0 1 0-1.8 0zM5.5 6c-1.4 2-1.4 4.6 0 6.6M3 4c-2.4 3.3-2.4 7.7 0 11M18.8 18.5h-12"], "tuerknarren": ["M6 21V4h10v17M4 21h14M13.5 12.5v1.5M16 4l4 2v15l-4 0", "", "M19.5 9.5c1 .5 1.6 1.4 1.6 2.5M21.5 7.5c1.4 1 2 2.6 2 4.5"], "ritualtrommel": ["M5 9.5c0-1.6 3.1-2.8 7-2.8s7 1.2 7 2.8v6.5c0 1.6-3.1 2.8-7 2.8S5 17.6 5 16zM5 9.5c0 1.6 3.1 2.8 7 2.8s7-1.2 7-2.8M12 13.5v4M10.2 15.3h3.6M8 3l2 3.5M16 3l-2 3.5"], "fernglocken": ["M8 15.5V11a4 4 0 0 1 8 0v4.5l1.5 2h-11zM12 5.5V7M10.5 19.5a1.5 1.5 0 0 0 3 0M3.5 9c-1 1.4-1 3.6 0 5M20.5 9c1 1.4 1 3.6 0 5M1.5 7c-1.8 2.6-1.8 7.4 0 10M22.5 7c1.8 2.6 1.8 7.4 0 10"], "schreibfeder": ["M4 20.5L14.5 10M20.5 3.5c-5.5.5-10 4-11.5 10.5l1.5 1.5c6.5-1.5 10-6 10-12zM13 8.5l2.2 2.2M3 21.5h6"], "seetaucher": ["M2 19.5c2 0 3-1.2 5-1.2s3 1.2 5 1.2 3-1.2 5-1.2 3 1.2 5 1.2M5 15.5h9.5c2.2 0 3.6-1.6 3.6-3.6V9.2c0-1.4 1.1-2.5 2.5-2.5h.8l1.6 1.2-1.6 1M14.5 15.5c-1-2.8-4-4.3-7.2-3.6", "M19.8 7.9a.6.6 0 1 0 1.2 0 .6.6 0 1 0-1.2 0z"], "brutzeln": ["M3 13.5h13.5v1.5a4 4 0 0 1-4 4h-5.5a4 4 0 0 1-4-4zM16.5 14H22M7 10c-.8-1 .8-2 0-3M10.5 10c-.8-1 .8-2 0-3M14 10c-.8-1 .8-2 0-3", "M7.2 15.5a1.2.8 0 1 0 2.4 0 1.2.8 0 1 0-2.4 0zM11 15.8a1 .7 0 1 0 2 0 1 .7 0 1 0-2 0z"], "teeaufguss": ["M5 12.5h10v3.5a4 4 0 0 1-4 4h-2a4 4 0 0 1-4-4zM15 13.5c2.4-.4 3.5 1 3 2.7-.4 1.4-1.8 2-3.2 1.6M5.2 12.5L3 9.5M8 12.5V11a2 2 0 0 1 4 0v1.5M9 5.5c-.8-1 .8-2 0-3M12 6.5c-.8-1 .8-2 0-3"], "stubenlachen": ["M2.5 12a5 5 0 1 0 10 0 5 5 0 1 0-10 0zM11.5 12a5 5 0 1 0 10 0 5 5 0 1 0-10 0zM5.2 13.2c.9 1.6 3.7 1.6 4.6 0M14.2 13.2c.9 1.6 3.7 1.6 4.6 0", "M5.5 10.6a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0zM8 10.6a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0zM14.4 10.6a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0zM16.9 10.6a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0z"], "fluestern": ["M3 12c2.5-2.5 5.5-3.5 9-1.2 3.5-2.3 6.5-1.3 9 1.2-2.5 3.3-5.5 4.5-9 4.5s-6.5-1.2-9-4.5zM3 12c3 .8 6 1 9 1s6-.2 9-1", "M6 5.5a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0zM11.1 4a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0zM16.2 5.5a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0zM9 20a.7.7 0 1 0 1.4 0 .7.7 0 1 0-1.4 0zM13.6 20a.7.7 0 1 0 1.4 0 .7.7 0 1 0-1.4 0z"], "grabesdroehnen": ["M7 20.5V9a5 5 0 0 1 10 0v11.5M4.5 20.5h15M12 9.5v6M9.5 12h5", "", "M1.5 15.5c1-1.2 2-1.2 3 0M19.5 15.5c1-1.2 2-1.2 3 0"], "geisterhauch": ["M4 18c3-1 4-4 3-7s0-6 3-7M10.5 20c3-1.5 4-5 3-8s.5-6.5 3.5-7.5M17 21c2-1.5 2.8-4 2.2-6.5", "M8.8 7.2a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0zM15.5 8.2a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0z"], "herzschlag": ["M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.5a4.3 4.3 0 0 1 7.5 2.3C19.5 15.4 12 20 12 20zM2 13h4.5l1.5-3 2 6 1.8-4.5 1.2 1.5H22"], "friedhof": ["M3.5 21.5h17M5.5 21.5v-8a3 3 0 0 1 6 0v8M15 21.5V9.5M12.5 12.5h5M7 16.5h3"], "ruinenwind": ["M4 21.5V8M8.5 21.5V11.5l-1.8-1.8 1.8-1.7M3 8h6.5M3 21.5h8M12 9h6.5a2.5 2.5 0 1 0-2.5-2.5M12 13.5h9a2.5 2.5 0 1 1-2.5 2.5M13.5 18h4"], "geisterchor": ["M2 20v-6a3.5 3.5 0 0 1 7 0v6l-1.2-1-1.1 1-1.2-1-1.1 1-1.2-1zM8.5 18.5V9.5a3.5 3.5 0 0 1 7 0v9l-1.2-1-1.1 1-1.2-1-1.1 1-1.2-1zM15 20v-6a3.5 3.5 0 0 1 7 0v6l-1.2-1-1.1 1-1.2-1-1.1 1-1.2-1z", "M11.2 11.5a.8 1.1 0 1 0 1.6 0 .8 1.1 0 1 0-1.6 0zM4.7 15.6a.7.9 0 1 0 1.4 0 .7.9 0 1 0-1.4 0zM17.9 15.6a.7.9 0 1 0 1.4 0 .7.9 0 1 0-1.4 0z"], "fliegenschwarm": ["M6 7.5c-1-1.5-.6-2.6.6-2.6M7.4 7.5c.2-1.7 1.3-2.4 2.3-1.7M15.5 11c-1-1.5-.6-2.6.6-2.6M16.9 11c.2-1.7 1.3-2.4 2.3-1.7M8.5 16.5c-1-1.5-.6-2.6.6-2.6M9.9 16.5c.2-1.7 1.3-2.4 2.3-1.7M2.5 12.5c1.5 1.5 3.5 2 5.5 1.5M12 6c2 .5 3 1.5 3.3 3.2M13 18.5c2.5.8 5 .2 7-1.8", "M5.8 8.3a1 .8 0 1 0 2 0 1 .8 0 1 0-2 0zM15.3 11.8a1 .8 0 1 0 2 0 1 .8 0 1 0-2 0zM8.3 17.3a1 .8 0 1 0 2 0 1 .8 0 1 0-2 0z"], "sommerwiese": ["M2.5 21.5h19M5 21.5c0-4 .5-7 2-9.5M7 21.5c.3-2.6 1.2-4.6 2.8-6M17 21.5c0-3.5-.3-6.2-1.5-8.5M19 21.5c.3-2.2 1-3.8 2-5M12 21.5v-9M12 8.5a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM12 6.5v2M9.5 10.5h-2M14.5 10.5h2M10.3 8.8L9 7.5M13.7 8.8L15 7.5", "M7.5 11.2a1.2 1.2 0 1 0 2.4 0 1.2 1.2 0 1 0-2.4 0zM15 12.5a1 1 0 1 0 2 0 1 1 0 1 0-2 0z"], "brunnen": ["M4 16.5h16v2.5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM12 16.5V8M12 8C10 5.5 7.5 5 5.5 6.5M12 8c2-2.5 4.5-3 6.5-1.5M5.5 6.5c-1 2-1 4 0 6.5M18.5 6.5c1 2 1 4 0 6.5M12 4.5V3"]});
   const zusSvg = (id, gross) => { const a = ZUS_ICON[id] || []; return '<svg class="lw-zico' + (gross ? " gross" : "") + '" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
     (a[0] ? '<path d="' + a[0] + '"/>' : "") + (a[1] ? '<path d="' + a[1] + '" fill="currentColor" stroke="none"/>' : "") + (a[2] ? '<path d="' + a[2] + '"/>' : "") + "</svg>"; };
@@ -2722,7 +2826,8 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
           /* der allererste Ton eines frisch angetippten Zusatzes: nah, voll, ohne Warten auf den Takt und ohne „Stille“-Ausfall –
              man soll sofort hören, was man gewählt hat; erst danach geht es im zufälligen Takt weiter */
           const erst = k.zusatz && !(k.erstOk && k.erstOk[i]);
-          const xx = erst ? [x[0], x[1], x[2], 0, Object.assign({}, x[4] || {}, { sofort: true })] : x;
+          const zw = k.zusatz && k.art && ZUSATZ[k.art.replace(/^z_/, "")];
+          const xx = erst ? [x[0], x[1], x[2] * (zw && zw.wesen ? 1.25 : 1), 0, Object.assign({}, x[4] || {}, { sofort: true, lang1: true })] : x;
           let ok = true; try { ok = weltEreignis(k, xx) !== false; } catch (_) {}
           if (erst && ok) (k.erstOk = k.erstOk || {})[i] = true;
           k.naechst[i] = jetzt + (ok ? zz(x[1][0], x[1][1]) : k.zusatz ? .25 : 1);
@@ -2752,8 +2857,38 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     setTimeout(() => { try { zeichnen(); knoepfe(); } catch (_) {} }, 0);
   }
   setInterval(() => { if (leben.zeitLauf && !document.hidden) try { waldZeitWechsel(); } catch (_) {} }, 20000);
+  /* ---------- Hall je nach Ort: Höhle hallt, Wald ist offen, Tempel klingt wie eine Kapelle ----------
+     Bei jedem Ortswechsel stellt sich der Raum passend ein (Raumart und Hall-Menge); danach darf man im Pult nachregeln. */
+  const ORT_RAUM = { taverne: ["taverne", 4], wald: ["stube", 2], waldnacht: ["stube", 2], feuer: ["stube", 2], regen: ["stube", 2], hoehle: ["hoehle", 7], markt: ["stube", 2], strasse: ["stube", 2],
+    schlacht: ["taverne", 3], meer: ["taverne", 2], schiff: ["stube", 3], wasserfall: ["hoehle", 4], unterreich: ["hoehle", 8], kerker: ["kapelle", 6], sumpf: ["stube", 3],
+    unterwasser: ["hoehle", 6], schmiede: ["taverne", 4], labor: ["stube", 4], bibliothek: ["kapelle", 4], tempel: ["kapelle", 7], dorf: ["stube", 2], hafen: ["taverne", 2],
+    gebirge: ["palast", 4], mine: ["hoehle", 6], burg: ["palast", 6], ufer: ["stube", 2], schlaegerei: ["taverne", 4], duell: ["taverne", 3] };
+  const RAUM_REIHE = ["stube", "taverne", "kapelle", "palast", "hoehle"];
+  let ortRaumZuletzt = null;
+  function ortRaumAnwenden(v) {
+    const b = ORT_RAUM[S.kulisse] || ["taverne", 4];
+    v = Math.max(-1, Math.min(1, +v || 0));
+    const hall = Math.round((v <= 0 ? b[1] * (1 + v) : b[1] + (10 - b[1]) * v) * 10) / 10;
+    const raum = RAUM_REIHE[Math.max(0, Math.min(4, RAUM_REIHE.indexOf(b[0]) + (v > .35 ? 1 : 0) + (v > .75 ? 1 : 0) - (v < -.5 ? 1 : 0)))];
+    S.hall = hall; if (wechsel) wechsel.hall = hall;
+    if (S.raum !== raum) { S.raum = raum; try { raumAnwenden(); } catch (_) {} }
+    try { effekteAnwenden(); } catch (_) {}
+    try {
+      root.querySelectorAll('[data-feld="hall"]').forEach(r => { r.value = hall; }); root.querySelectorAll(".lw-hval").forEach(x => { x.textContent = Math.round(hall * 10) + " %"; });
+      root.querySelectorAll('[data-feld="raum"]').forEach(r => { r.value = raum; });
+    } catch (_) {}
+    ortRaumZuletzt = S.kulisse; merken();
+    return { raum, hall, name: (t().raeume || {})[raum] || raum };
+  }
+  function ortRaumPruefen() {
+    if (!S.kulisse || S.kulisse === "keine" || S.kulisse === ortRaumZuletzt) return;
+    if (ortRaumZuletzt === null) { ortRaumZuletzt = S.kulisse; return; } /* beim Laden nichts verstellen – erst beim ersten echten Ortswechsel */
+    if (kulRaum(S.kulisse) === kulRaum(ortRaumZuletzt)) { ortRaumZuletzt = S.kulisse; return; } /* Wald Tag ↔ Nacht */
+    ortRaumAnwenden(0);
+  }
   function kulisseStart(sofort) {
     try { waldZeit(); } catch (_) {}
+    try { ortRaumPruefen(); } catch (_) {}
     try { raumWechselPruefen(); } catch (_) {}
     if (!ctx) return;
     try { zusSync(); } catch (_) {}
@@ -4358,9 +4493,18 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     }
     try { zusPegelSetzen(.25); } catch (_) {}
   }
-  function karteGehen(id) {
-    const z = KARTE[kartenArt()].find(x => x.id === id); if (!z) return;
-    audioStart(); kOrt().fig = [z.r[0] + z.r[2] / 2, z.r[1] + z.r[3] - 1.5]; karteSpeichern();
+  function karteGehen(id, ev) {
+    let z = KARTE[kartenArt()].find(x => x.id === id); if (!z) return;
+    audioStart();
+    /* genau dorthin, wo getippt wurde (nicht in die Mitte des Bereichs) */
+    const k = ev && ev.target && ev.target.closest && ev.target.closest(".lw-karte"), r = k && k.getBoundingClientRect();
+    if (r && r.width > 0 && typeof ev.clientX === "number") {
+      const x = Math.max(2, Math.min(98, (ev.clientX - r.left) / r.width * 100)), y = (ev.clientY - r.top) / r.height * 100;
+      const fh = ((k.querySelector(".lw-kfigur") || {}).offsetHeight || 21) / 2 / r.height * 100;
+      if (karteSicht === "oben") { const o = kOrt(), alt = figurOrt(); o.fig = [x, alt[1]]; o.figz = Math.max(8, Math.min(92, y + fh)); }
+      else { const yy = Math.max(16, Math.min(99, y + fh)); kOrt().fig = [x, yy]; z = zoneBei(x, yy) || z; } /* die Mitte der Figur landet genau unter dem Finger */
+    } else kOrt().fig = [z.r[0] + z.r[2] / 2, z.r[1] + z.r[3] - 1.5];
+    karteSpeichern();
     karteWirken(z); karteNeu(); try { boxNeu("klang"); } catch (_) {}
   }
   /* Ortswechsel mit Übergang: Tür geht auf, der alte Ort wird dumpf und leiser, der neue blendet ein, du stehst am Eingang */
@@ -8774,6 +8918,8 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     strum: [["trinklied", "umpa", "s"], ["dorffest", "arp", "s"], ["shanty", "umpa", "s"], ["reise", "arp", "s"], ["auenland", "arp", "s"], ["rast", "arp", "b"], ["marktplatz", "ostinato", "s"], ["zwerge", "umpa", "s"], ["reiter", "ostinato", "s"]] };
   Object.keys(KAP_NEU).forEach(inst => KAP_NEU[inst].forEach(([k, ...e]) => { (KAP_MEHR[k] = KAP_MEHR[k] || []).push([inst, ...e]); }));
   Object.keys(KAP_MEHR).forEach(k => { if (KAPELLE[k]) KAP_MEHR[k].forEach(e => { if (!KAPELLE[k].some(x => x[0] === e[0] && x[1] === e[1])) KAPELLE[k].push(e); }); });
+  [WENDUNG, HALL_STIMMUNG, TAKT_ECHO, ORCH, ORCH_FARBEN, PUB_STIMMUNG, KAPELLE].forEach(t => { try { neueStimmungenErben(t); } catch (_) {} });
+  Object.assign(DRAMA, { letztesgefecht: 2, kriegstrommeln: 2, heimweh: 0, gaukler: 0, sternenhimmel: 0 });
   function kapelleWaehlen(k) {
     const pool = KAPELLE[k]; if (!pool) return [];
     /* Kampfmusik: Bläser und Taiko sind immer dabei */
@@ -10439,6 +10585,10 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
       heldenlied: "A great moment for the heroes", sieg: "Done it! Loot and cheers", rast: "Campfire, rest, conversations", trinklied: "Arriving at the tavern, ale and laughter", kamin: "A quiet evening by the fire",
       klage: "Grief, farewell, a loss", auenland: "Peaceful village, green hills", elben: "Elven splendour, ancient forests", fey: "Enchanted wood, fey and will-o'-wisps", zwerge: "Dwarven halls, hammers and ore",
       dorffest: "Dancing and feasting in the village", marktplatz: "Trading and haggling in town", hof: "An audience with the king", shanty: "At sea, on deck", pilger: "Monastery, temple, quiet prayer" } });
+  Object.assign(TX.de.stBsp, { heimweh: "Regen, Ferne, Sehnsucht nach Zuhause", letztesgefecht: "Umzingelt – ein letztes Mal die Klingen heben", kriegstrommeln: "Ein Heer marschiert auf",
+    gaukler: "Gaukler, Feuerspucker, Zauberkunststücke", sternenhimmel: "Nachts unter den Sternen, ein uraltes Geheimnis" });
+  Object.assign(TX.en.stBsp, { heimweh: "Rain, distance, longing for home", letztesgefecht: "Surrounded – raise the blades one last time", kriegstrommeln: "An army marches",
+    gaukler: "Jugglers, fire-breathers, conjuring tricks", sternenhimmel: "At night under the stars, an ancient secret" });
   /* Abend-Sets: passende Stimmungen und Effekte für einen ganzen Spielabend */
   const ABEND_SETS = {
     dungeon: { sym: "🕯", st: ["spannung", "unterreich", "ruinen", "grusel", "kampf", "boss", "rast", "sieg"], fx: ["tuer", "schwert", "hieb", "falle", "truhe", "schluessel", "zauber", "drache"] },
@@ -11750,7 +11900,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     if (e.target.closest('[data-aktion="schlaf"]')) { schlafUmschalten(); return; }
     if (e.target.closest('[data-aktion="tuer"]')) { tuerUmschalten(); return; }
     const kz = e.target.closest("[data-kzone]");
-    if (kz) { karteGehen(kz.dataset.kzone); return; }
+    if (kz) { karteGehen(kz.dataset.kzone, e); return; }
     if (e.target.closest("[data-ktuer]")) { karteTuer(); return; }
     if (e.target.closest("[data-kluke]")) { lukeUmschalten(); return; }
     const szb = e.target.closest("[data-szene],[data-szweg],[data-szneu]");
@@ -13559,7 +13709,9 @@ registerProcessor("imres-glitch", ImresGlitch);`;
         tempo: S.tempo, tempoJetzt: laeuft ? (tempoJetzt || S.tempo) : S.tempo, hall: S.hall, fxVol: S.fxVol, echoHall: S.echoHall, spannung: leben.spannung, neuBesetzen: !!neuBesetzen,
         transpose: S.transpose, modus: S.modus, stimmungen: STIMMUNGEN.filter(k => STIL[k]), kulissen: KUL_ZEIGEN.slice(),
         setStimmungen: abendSet && ABEND_SETS[abendSet] ? ABEND_SETS[abendSet].st.slice() : null,
-        naechste: wechsel ? (wechsel.stimmung || wechsel.besetzung || null) : null, abendSet: abendSet || "" };
+        naechste: wechsel ? (wechsel.stimmung || wechsel.besetzung || null) : null, abendSet: abendSet || "",
+        liedNr: Number.isInteger(S.liedNr) ? S.liedNr : null, lied: S.stimmung && STIL[S.stimmung] && STIL[S.stimmung].lieder && S.liedNr >= 0 && STIL[S.stimmung].lieder[S.liedNr] ? STIL[S.stimmung].lieder[S.liedNr].titel || null : null,
+        lieder: S.stimmung && STIL[S.stimmung] && STIL[S.stimmung].lieder ? STIL[S.stimmung].lieder.length : 0 };
     },
     /* Zynthian-Pult: feste Listen (ohne Umsortieren nach Nutzung) und Namen */
     /* Spuren des Ortes fürs Pult: jede Schicht der Kulisse, die Einzelgeräusche und laufende Zusätze (Wetter …) – 1 = 100 % */
@@ -13585,10 +13737,10 @@ registerProcessor("imres-glitch", ImresGlitch);`;
       const HELL = { lydisch: 3, ionisch: 2, mixolydisch: 1.5, dorisch: 0, aeolisch: -1, phrygisch: -2 };
       const hell = st => { const m = st.modus || []; return m.length ? m.reduce((x, y) => x + (HELL[y] || 0), 0) / m.length : 0; };
       const tempo = st => st.tempo ? (st.tempo[0] + st.tempo[1]) / 2 : 100;
-      const FAM = { natur: ["elben", "fey", "auenland", "pilger", "rast", "kamin", "reise"], ruhig: ["rast", "kamin", "pilger", "klage", "elben", "ruinen"],
-        dunkel: ["unterreich", "grusel", "spannung", "ruinen", "klage", "boss"], kampf: ["kampf", "boss", "verfolgung", "reiter"],
-        fest: ["dorffest", "trinklied", "marktplatz", "shanty", "sieg", "auenland"], episch: ["heldenlied", "hof", "sieg", "reise", "zwerge", "reiter"],
-        reise: ["reise", "reiter", "shanty", "pilger", "zwerge"], heim: ["kamin", "rast", "trinklied", "auenland"] };
+      const FAM = { natur: ["elben", "fey", "auenland", "pilger", "rast", "kamin", "reise", "sternenhimmel", "gaukler"], ruhig: ["rast", "kamin", "pilger", "klage", "elben", "ruinen", "heimweh", "sternenhimmel"],
+        dunkel: ["unterreich", "grusel", "spannung", "ruinen", "klage", "boss", "letztesgefecht", "kriegstrommeln"], kampf: ["kampf", "boss", "verfolgung", "reiter", "letztesgefecht", "kriegstrommeln"],
+        fest: ["dorffest", "trinklied", "marktplatz", "shanty", "sieg", "auenland", "gaukler"], episch: ["heldenlied", "hof", "sieg", "reise", "zwerge", "reiter"],
+        reise: ["reise", "reiter", "shanty", "pilger", "zwerge"], heim: ["kamin", "rast", "trinklied", "auenland", "heimweh"] };
       let gemeinsam = 0; Object.values(FAM).forEach(l => { if (l.includes(A) && l.includes(B)) gemeinsam++; });
       return Math.min(2, gemeinsam) * 3 - Math.abs(tempo(sa) - tempo(sb)) / 18 - Math.abs(hell(sa) - hell(sb)) * .8 - Math.abs((DRAMA[A] || 0) - (DRAMA[B] || 0)) * 1.2;
     },
@@ -13766,6 +13918,8 @@ registerProcessor("imres-glitch", ImresGlitch);`;
       const j = ctx.currentTime, g = zynDuck.gain, d = Math.max(0, Math.min(.9, tiefe || .5));
       g.cancelScheduledValues(j); g.setValueAtTime(g.value, j); g.linearRampToValueAtTime(1 - d, j + .012); g.setTargetAtTime(1, j + .06, .09);
     },
+    /* Raumklang passend zum Ort: v = 0 passend, −1 ganz trocken, +1 riesiger Hall (für Barden Beats) */
+    raumOrt(v) { return ortRaumAnwenden(v); },
     kulFaktor(f) { zynKulFaktor = Math.max(.05, Math.min(1, f)); if (ctx && kulAusRef) kulAusRef.gain.setTargetAtTime(kulAusPegel(), ctx.currentTime, .35); }
   };
 
