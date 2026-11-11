@@ -489,6 +489,67 @@
       teilchen: [{ t: "nebel", n: 4, farbe: ["#b9a6a0"] }, { t: "staub", n: 10, farbe: ["#f2c58a"] }]
     },
 
+
+    /* ---------------- Unterwegs ---------------- */
+    highroad: {
+      name: { de: "Auf der High Road", en: "On the High Road" },
+      himmel: "radial-gradient(ellipse 60% 40% at 82% 28%, rgba(235,175,100,.16), transparent 70%), radial-gradient(ellipse 50% 40% at 15% 85%, rgba(200,150,90,.12), transparent 70%), linear-gradient(180deg, #12110f 0%, #1a1813 55%, #1f1b14 100%)",
+      farben: { fern: "#1f1e18", fern2: "#29271f", licht: "#f0b060" },
+      fern: (b, W, H, c) => FERN.huegel(b, W, H, c),
+      links(b, o) {
+        const s2 = "#0b0a08", s1 = "#14120e";
+        let s = b.laubbaum(40, 1000, 760, s1) + b.tanne(-30, 1010, 900, s2);
+        s += o.feuer ? b.licht(360, 840, 300, "#ff9a40", .3, "kl-glut") : b.licht(320, 800, 280, "#f0c080", .16, "kl-puls");
+        s += '<g transform="translate(0 -80)">';
+        /* der Karren: Säcke, Kisten und das Fässchen mit den „Nägeln“ */
+        s += '<path fill="' + s1 + '" d="M150 820 C160 744 210 724 250 734 C272 704 330 704 350 734 C390 724 444 744 452 820 Z"/>';
+        s += '<path fill="' + s2 + '" d="M120 900 L476 900 L464 818 L132 818 Z"/><path stroke="' + s1 + '" stroke-width="3" d="M140 846 H470 M136 872 H472"/>';
+        s += '<path fill="' + s2 + '" d="M372 818 C368 794 370 778 374 770 L412 770 C416 778 418 794 414 818Z"/><path stroke="' + s1 + '" stroke-width="2.4" d="M371 784 h45 M370 804 h46"/>';
+        s += '<path stroke="' + s2 + '" stroke-width="9" stroke-linecap="round" d="M470 884 L612 930"/>';
+        [[205, 934, 64], [408, 934, 58]].forEach(([x, y, r]) => {
+          s += '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="none" stroke="' + s2 + '" stroke-width="11"/><circle cx="' + x + '" cy="' + y + '" r="9" fill="' + s2 + '"/>';
+          for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI; s += '<path stroke="' + s2 + '" stroke-width="5" d="M' + r1(x - Math.cos(a) * r) + " " + r1(y - Math.sin(a) * r) + " L" + r1(x + Math.cos(a) * r) + " " + r1(y + Math.sin(a) * r) + '"/>'; }
+        });
+        if (o.feuer && !o.laute) {
+          /* Ezekiel lehnt am Wagenrad, Rex hat sich an seinen Stiefel gerollt */
+          s += '<g transform="translate(290 1004) scale(1.25)"><path fill="' + s2 + '" d="M-34 0 L-36 -42 C-38 -70 -28 -94 -12 -102 C-16 -110 -16 -122 -6 -128 L-18 -156 L-1 -134 C5 -136 11 -136 15 -132 L32 -154 L22 -124 C26 -116 24 -108 18 -102 C30 -94 36 -78 34 -58 L58 -54 L70 -22 L82 0 Z"/></g>';
+          s += b.licht(296, 852, 10, "#ff6a3a", .7, "kl-puls");
+          s += '<path fill="' + s2 + '" d="M352 1004 C350 980 376 968 404 972 C428 976 438 992 430 1004 Z M402 974 l8 -14 l6 14z"/>';
+        }
+        if (o.laute) {
+          /* die Laute lehnt am Rad, daneben ein Becher – gleich geht es los */
+          s += '<g transform="rotate(-16 320 960)"><ellipse cx="320" cy="958" rx="36" ry="46" fill="' + s2 + '"/><circle cx="320" cy="950" r="9" fill="#2a2018"/><rect x="314" y="828" width="12" height="96" fill="' + s2 + '"/><path fill="' + s2 + '" d="M310 830 h20 l-4 -26 h-12z"/></g>';
+          s += b.licht(320, 900, 90, "#ffd88a", .22, "kl-puls") + '<path fill="' + s2 + '" d="M400 1004 l4 -36 h26 l4 36z"/>';
+        }
+        s += "</g>";
+        s += '<path fill="' + s2 + '" d="M-10 1010 L-10 930 C120 918 260 926 380 920 C470 916 560 924 620 930 L620 1010Z"/>';
+        return s;
+      },
+      rechts(b, o) {
+        const s2 = "#0b0a08", s1 = "#14120e";
+        let s = b.tanne(30, 1000, 940, s1) + b.laubbaum(210, 1000, 600, s1) + b.tanne(-40, 1010, 1000, s2);
+        s += '<g transform="translate(0 -80)">';
+        if (o.feuer) {
+          /* das Lagerfeuer, und Echo schläft auf seinem Geldbeutel (das Geweih verrät ihn) */
+          s += b.licht(380, 940, 260, "#ff9a40", .45, "kl-glut");
+          s += '<path stroke="' + s2 + '" stroke-width="10" stroke-linecap="round" d="M330 1000 L430 980 M332 982 L428 1002"/>';
+          s += '<path fill="#ffb050" opacity=".6" class="kl-flamme" style="animation-duration:1.2s;transform-origin:380px 996px" d="M346 996 Q350 956 368 946 Q364 972 382 934 Q394 966 400 952 Q414 978 412 996Z"/>';
+          s += '<path fill="#ffe0a0" opacity=".5" class="kl-flamme" style="animation-duration:.9s;transform-origin:380px 996px" d="M364 996 Q366 976 378 966 Q378 982 388 970 Q398 986 396 996Z"/>';
+          s += b.rauch(380, 900, "#8a7f78", 4, 22);
+          s += '<path fill="' + s2 + '" d="M110 1004 C110 978 150 964 210 966 C250 968 270 984 268 1004 Z"/><path stroke="' + s2 + '" stroke-width="4" fill="none" stroke-linecap="round" d="M250 972 L270 940 L264 924 M270 940 L290 930 M250 972 L238 940 L246 926 M238 940 L222 934"/>';
+        } else {
+          /* ein Meilenstein am Wegrand, die Straße schlängelt sich nach Süden */
+          s += '<path fill="' + s2 + '" d="M300 1004 L304 900 C306 880 336 880 338 900 L342 1004Z"/><path stroke="' + s1 + '" stroke-width="2" d="M310 930 h22 M312 944 h18"/>';
+          s += b.busch(420, 1000, 130, s2) + b.busch(120, 1004, 110, s2);
+          for (let i = 0; i < 2; i++) s += '<g class="kl-moewe" style="animation-duration:' + r1(b.z(30, 42)) + "s;animation-delay:-" + r1(b.z(0, 30)) + 's"><path d="M' + r1(b.z(80, 300)) + " " + r1(b.z(160, 320)) + ' q6 -6 12 0 q6 -6 12 0" stroke="#a89a88" stroke-opacity=".5" stroke-width="2" fill="none" stroke-linecap="round" class="kl-fluegelschlag"/></g>';
+        }
+        s += "</g>";
+        s += '<path fill="' + s2 + '" d="M-10 1010 L-10 926 C140 918 300 928 420 922 C500 918 570 926 620 930 L620 1010Z"/>';
+        return s;
+      },
+      teilchen: [{ t: "blatt", n: 8 }, { t: "staub", n: 8, farbe: ["#e8d2a0"] }]
+    },
+
     waldstrasse: {
       name: { de: "Die Straße nach Phandalin", en: "The Road to Phandalin" },
       himmel: "radial-gradient(ellipse 50% 45% at 86% 82%, rgba(230,120,50,.22), transparent 70%), radial-gradient(ellipse 60% 40% at 30% 10%, rgba(140,150,110,.1), transparent 70%), linear-gradient(180deg, #0f1210 0%, #161a15 50%, #1d1d16 80%, #121310 100%)",
@@ -694,8 +755,8 @@
         s += b.netz(200, 470, 120, "#d8d0e0", 0, Math.PI / 2) + b.netz(-10, 500, 150, "#d8d0e0", -Math.PI / 2, Math.PI / 2);
         s += '<g fill="' + s2 + '"><ellipse cx="300" cy="992" rx="40" ry="10"/><circle cx="280" cy="976" r="13"/><path d="M300 984 L360 970 L362 976 L302 990Z"/></g>';
         s += b.laterne(300, 520, "#f0b060", s2, 50);
-        /* Stirges hängen von der Decke */
-        [[120, 120], [420, 90], [300, 180]].forEach(([x, y]) => { s += '<g transform="translate(' + x + " " + y + ') scale(1.3) rotate(180)"><path fill="' + s2 + '" d="M0 0 C-6 -4 -10 -12 -8 -18 L-2 -14 L0 -20 L2 -14 L8 -18 C10 -12 6 -4 0 0 Z M0 -2 L0 14" stroke="' + s2 + '" stroke-width="1.5"/></g>'; });
+        /* das Seil, an dem wir die Felswand hinabgeklettert sind */
+        s += '<g class="kl-pendel" style="animation-duration:9s;transform-origin:110px 0px"><path stroke="#2c2520" stroke-width="5" fill="none" stroke-linecap="round" d="M110 -10 C116 160 104 330 112 560 C114 600 108 630 112 660"/><path stroke="#2c2520" stroke-width="4" fill="none" d="M104 600 q8 -10 16 0 q-8 12 -16 0"/></g>';
         return s;
       },
       rechts(b) {
@@ -826,10 +887,10 @@
         s += '<path fill="' + s2 + '" d="M300 860 l40 -10 l30 14 l-60 6z M120 870 l20 -14 l40 10z"/>';
         return s;
       },
-      rechts(b) {
+      rechts(b, o) {
         const s2 = "#080a07";
-        /* der Venomfang kreist */
-        let s = '<g class="kl-drachenflug" style="animation-duration:26s"><g transform="translate(250 400) scale(1.15)"><path fill="#0b0f0a" d="' + FIGUREN.dracheFluegel2 + '" class="kl-fluegel" style="animation-delay:-.2s"/><path fill="' + s2 + '" d="' + FIGUREN.drache + '"/><path fill="' + s2 + '" d="' + FIGUREN.dracheFluegel + '" class="kl-fluegel"/></g></g>';
+        /* der Venomfang kreist – erst, wenn er in der Geschichte auftaucht */
+        let s = o && o.ohneDrache ? '<path stroke="#0b0f0a" stroke-width="2.4" fill="none" d="M120 300 q8 -8 16 0 q8 -8 16 0 M330 220 q6 -6 12 0 q6 -6 12 0"/>' : '<g class="kl-drachenflug" style="animation-duration:26s"><g transform="translate(250 400) scale(1.15)"><path fill="#0b0f0a" d="' + FIGUREN.dracheFluegel2 + '" class="kl-fluegel" style="animation-delay:-.2s"/><path fill="' + s2 + '" d="' + FIGUREN.drache + '"/><path fill="' + s2 + '" d="' + FIGUREN.dracheFluegel + '" class="kl-fluegel"/></g></g>';
         s += b.licht(240, 700, 220, "#8ad060", .2, "kl-puls");
         s += b.tanne(120, 1010, 380, "#0f140e") + b.tanne(300, 1010, 300, s2) + b.tanne(440, 1020, 340, "#0f140e") + b.tanne(10, 1020, 460, s2);
         return s;
@@ -848,8 +909,9 @@
         s += b.haus(220, 1004, 220, 190, s1, { dach: 110, fenster: [[.6, .4, .14, .2]], licht: "#d0e080" });
         s += '<path fill="' + s1 + '" d="M250 820 l-10 -50 l14 0 l6 40z M260 790 q-10 -30 6 -50 M280 800 q10 -20 0 -40" stroke="' + s1 + '" stroke-width="3"/>';
         s += '<path fill="#5a7a3a" opacity=".5" d="M300 960 q-10 -40 4 -60 q12 30 8 60z M340 960 q-6 -50 8 -66 q10 34 4 66z"/>';
-        /* Ezekiels Onkel als Statue */
-        s += b.figur("statue", 130, 1000, 1.5, s1);
+        /* das Haus, an dem schon von außen Spinnweben über Tür und Fenster hingen */
+        s += b.netz(220, 836, 150, "#cfc6d8", Math.PI / 2, Math.PI) + b.netz(440, 860, 90, "#cfc6d8", Math.PI, Math.PI * 1.5);
+        s += '<g class="kl-faden" style="animation-duration:14s"><path stroke="#cfc6d8" stroke-opacity=".35" stroke-width="1" d="M150 836 V920"/><g transform="translate(150 930) scale(.9)"><ellipse rx="9" ry="11" fill="' + s2 + '"/><path stroke="' + s2 + '" stroke-width="2" fill="none" d="M-8 -4 l-12 -8 M-8 2 l-14 0 M-8 6 l-12 8 M8 -4 l12 -8 M8 2 l14 0 M8 6 l12 8"/></g></g>';
         /* Zombies schlurfen */
         s += '<g class="kl-schlurfen" style="animation-duration:7s">' + b.figur("zombie", 360, 1004, 1.05, s2) + "</g>";
         s += '<g class="kl-schlurfen" style="animation-duration:8.5s;animation-delay:-3s">' + b.figur("zombie", 470, 1008, .9, s2) + "</g>";
@@ -895,9 +957,18 @@
         s += b.rauch(200, 880, "#b090c8", 6, 30);
         return s;
       },
-      rechts(b) {
+      rechts(b, o) {
         const s2 = "#0a080c";
         let s = "";
+        if (o && o.harmlos) {
+          /* die offene Tür: warmes Licht, der Spatz auf dem Zaun */
+          s += b.licht(170, 760, 220, "#f2b56a", .28, "kl-fenster");
+          s += '<path fill="#050405" d="M80 1010 V640 Q170 580 260 640 V1010Z"/><path fill="#f2b56a" opacity=".12" d="M100 1010 V655 Q170 605 240 655 V1010Z"/>';
+          s += '<path stroke="' + s2 + '" stroke-width="7" d="M300 1010 V860 M390 1010 V872 M480 1010 V880 M290 900 L500 916 M290 950 L500 962"/>';
+          s += '<path fill="' + s2 + '" d="M392 872 c-6 -10 2 -20 12 -18 c6 -6 14 -2 12 6 l10 2 l-10 4 c0 6 -8 10 -16 8z"/>';
+          s += '<path fill="' + s2 + '" d="M-10 1010 L-10 960 L520 976 L520 1010Z"/>';
+          return s;
+        }
         /* der süßliche, giftige Dampf wogt */
         for (let i = 0; i < 7; i++) s += '<ellipse cx="' + r1(b.z(0, 500)) + '" cy="' + r1(b.z(300, 950)) + '" rx="' + r1(b.z(120, 220)) + '" ry="' + r1(b.z(50, 90)) + '" fill="' + b.glow(i % 2 ? "#b090d0" : "#90c080", .35) + '" class="kl-wogen" style="animation-duration:' + r1(b.z(14, 22)) + "s;animation-delay:-" + r1(b.z(0, 20)) + 's"/>';
         s += '<rect fill="' + s2 + '" x="-10" y="600" width="70" height="410"/><path fill="' + s2 + '" d="M-10 1010 L-10 940 L420 960 L520 1010Z"/>';
@@ -1053,7 +1124,7 @@
     },
 
     demogorgon: {
-      name: { de: "Am Seeufer", en: "On the Lakeshore" },
+      name: { de: "Der Zorn aus der Tiefe", en: "Wrath from the Deep" },
       himmel: "radial-gradient(ellipse 50% 45% at 78% 45%, rgba(200,60,80,.22), transparent 70%), radial-gradient(ellipse 45% 40% at 15% 40%, rgba(160,70,170,.16), transparent 70%), linear-gradient(180deg, #0e090d 0%, #160e14 55%, #0e0c0e 100%)",
       farben: { fern: "#1a1218", fern2: "#22161e", licht: "#e06070", wasser: "#22403c", glanz: "#d8a0a8" },
       fern: (b, W, H, c) => FERN.see(b, W, H, c, { wild: true }),
@@ -1219,8 +1290,19 @@
         s += '<rect fill="' + s2 + '" x="-10" y="1000" width="620" height="20"/>';
         return s;
       },
-      rechts(b) {
+      rechts(b, o) {
         const s2 = "#090605";
+        if (o && o.ohneRiese) {
+          /* ein Stand mit Schöpfkellen und Töpfen – noch steht alles */
+          let m = b.licht(240, 820, 200, "#f0a050", .2, "kl-fenster");
+          m += '<rect fill="' + s2 + '" x="90" y="700" width="12" height="310"/><rect fill="' + s2 + '" x="400" y="700" width="12" height="310"/>';
+          m += '<path fill="#5a2a1e" opacity=".85" d="M70 700 L430 700 L410 650 L90 650Z"/><path fill="#7a4a1e" opacity=".5" d="M90 700 l30 22 l30 -22 l30 22 l30 -22 l30 22 l30 -22 l30 22 l30 -22 l30 22 l30 -22z"/>';
+          for (let i = 0; i < 6; i++) { const x = 130 + i * 48; m += '<path stroke="' + s2 + '" stroke-width="4" fill="none" d="M' + x + " 724 V" + (800 + (i % 2) * 14) + '"/><ellipse cx="' + x + '" cy="' + (808 + (i % 2) * 14) + '" rx="12" ry="8" fill="' + s2 + '"/>'; }
+          m += '<rect fill="' + s2 + '" x="80" y="900" width="340" height="16"/><path fill="' + s2 + '" d="M120 900 q0 -34 34 -34 q34 0 34 34z M240 900 q0 -26 28 -26 q28 0 28 26z"/>';
+          m += b.figur("zwerg", 480, 1004, 1.25, s2) + b.figur("zwergHelm", 30, 1010, 1.1, s2, "", true);
+          m += '<rect fill="' + s2 + '" x="-10" y="1000" width="620" height="20"/>';
+          return m;
+        }
         /* der rasende Riese im Staub */
         let s = b.licht(260, 640, 260, "#c89060", .16, "kl-puls") + '<g class="kl-wanken" style="animation-duration:6s">' + b.schatten("vorschau/klein/riese-frei.webp", 20, 410, 500, 600, s2, .95) + "</g>";
         s += '<ellipse cx="240" cy="980" rx="300" ry="70" fill="' + b.glow("#a08a70", .3) + '" class="kl-wogen" style="animation-duration:9s"/>';
@@ -1321,8 +1403,21 @@
       himmel: "radial-gradient(ellipse 70% 35% at 50% 100%, rgba(255,110,30,.34), transparent 70%), radial-gradient(ellipse 50% 55% at 82% 50%, rgba(240,90,50,.24), transparent 70%), linear-gradient(180deg, #110909 0%, #1b0e0a 50%, #2a1209 100%)",
       farben: { fern: "#22110b", fern2: "#2c160e", licht: "#ff8a30" },
       fern: (b, W, H, c) => FERN.hoehle(b, W, H, c, { lava: true }),
-      links(b) { return ORTE.flammenhalle.links(b); },
-      rechts(b) {
+      links(b, o) {
+        let s = ORTE.flammenhalle.links(b);
+        if (o && o.lied) {
+          /* Barradins Flöte malt unsere Geschichte in die Luft: Waldfrau mit Suppentopf, Wespe, Geier, Tentakel */
+          const ill = "#ffd88a";
+          s += '<g opacity=".7">';
+          s += '<g class="kl-illusion kl-schweben" style="animation-duration:6s,9s">' + b.figur("robe", 90, 640, .9, ill) + '<path fill="' + ill + '" d="M120 628 h26 q0 18 -13 20 q-13 -2 -13 -20z"/></g>';
+          s += '<g class="kl-illusion kl-surren" style="animation-duration:5s,7s;animation-delay:-2s,-3s"><g transform="translate(250 470) scale(1.6)"><path fill="' + ill + '" d="' + FIGUREN.wespe + '"/><path fill="' + ill + '" opacity=".6" d="' + FIGUREN.wespeFluegel + '" class="kl-schwirren"/></g></g>';
+          s += '<g class="kl-illusion kl-kreisen" style="animation-duration:7s,30s;animation-delay:-4s,-11s"><g transform="translate(330 600) scale(.7)"><path fill="' + ill + '" d="' + FIGUREN.geier + '"/></g></g>';
+          s += '<g class="kl-illusion kl-tentakel" style="animation-duration:5.5s,8s;transform-origin:220px 800px"><path fill="' + ill + '" d="M206 800 C200 760 236 740 224 700 C244 730 240 770 232 800Z M246 800 C244 776 270 762 262 734 C280 756 276 782 266 800Z"/></g>';
+          s += "</g>";
+        }
+        return s;
+      },
+      rechts(b, o) {
         const s2 = "#0a0504";
         let s = b.licht(260, 800, 300, "#ffc050", .25, "kl-puls");
         s += '<path fill="#3a2410" d="M-20 1010 C40 900 120 830 240 800 C340 820 440 880 540 1010Z"/><path fill="#c08a2a" opacity=".22" d="M-20 1010 C40 900 120 830 240 800 C340 820 440 880 540 1010Z"/>';
@@ -1336,7 +1431,7 @@
     },
 
     drachenei: {
-      name: { de: "Die Glutkammer", en: "The Ember Chamber" },
+      name: { de: "Vor der Halle des Drachen", en: "Outside the Dragon's Hall" },
       himmel: "radial-gradient(ellipse 45% 45% at 82% 60%, rgba(250,170,70,.24), transparent 70%), radial-gradient(ellipse 45% 40% at 12% 40%, rgba(140,130,150,.12), transparent 70%), linear-gradient(180deg, #0e0a0b 0%, #17100e 55%, #1c120c 100%)",
       farben: { fern: "#1e1512", fern2: "#271b16", licht: "#f0a050" },
       fern: (b, W, H, c) => FERN.festung(b, W, H, c),
@@ -1364,6 +1459,19 @@
     }
   };
   /* Varianten */
+  ORTE.lagerfeuer = Object.assign({}, ORTE.highroad, { feuer: true, name: { de: "Nachtlager an der High Road", en: "Night Camp on the High Road" },
+    himmel: "radial-gradient(ellipse 45% 35% at 70% 92%, rgba(255,140,60,.24), transparent 70%), radial-gradient(ellipse 50% 40% at 30% 12%, rgba(150,140,170,.1), transparent 70%), linear-gradient(180deg, #0c0b10 0%, #121016 50%, #19140f 100%)",
+    teilchen: [{ t: "funken", n: 8, zone: "rechts" }, { t: "glut", n: 6, zone: "rechts" }, { t: "kaefer", n: 6 }] });
+  ORTE.erzaehler = Object.assign({}, ORTE.lagerfeuer, { laute: true, name: { de: "Barradin erzählt", en: "Barradin's Tale" },
+    teilchen: [{ t: "noten", n: 8 }, { t: "funken", n: 6, zone: "rechts" }, { t: "glut", n: 6, zone: "rechts" }] });
+  ORTE.kraeuterhaus = Object.assign({}, ORTE.kraeuternebel, { harmlos: true,
+    himmel: "radial-gradient(ellipse 55% 50% at 75% 70%, rgba(240,170,90,.2), transparent 70%), radial-gradient(ellipse 50% 50% at 20% 70%, rgba(140,190,120,.14), transparent 70%), linear-gradient(180deg, #120f14 0%, #17141a 60%, #18140f 100%)",
+    teilchen: [{ t: "staub", n: 10, farbe: ["#f0c890"] }, { t: "sporen", n: 5, farbe: ["#a0d080"] }] });
+  ORTE.turmplattform = Object.assign({}, ORTE.drachenturm, { ohneDrache: true,
+    himmel: "radial-gradient(ellipse 60% 45% at 80% 40%, rgba(150,160,120,.12), transparent 70%), linear-gradient(180deg, #0e100d 0%, #131611 55%, #121410 100%)",
+    teilchen: [{ t: "nebel", n: 3, farbe: ["#7a8a70"] }, { t: "staub", n: 6, farbe: ["#c8c8a8"] }] });
+  ORTE["klingenmarkt-ruhig"] = Object.assign({}, ORTE.klingenmarkt, { ohneRiese: true, teilchen: [{ t: "staub", n: 10, farbe: ["#c8a888"] }, { t: "funken", n: 5, zone: "links" }] });
+  ORTE["themberchaud-lied"] = Object.assign({}, ORTE.themberchaud, { lied: true, teilchen: [{ t: "glut", n: 12 }, { t: "noten", n: 12, farbe: ["#ffd88a"] }, { t: "glitzer", n: 8, farbe: ["#ffe0a0"] }] });
   ORTE["schenke-rotroben"] = Object.assign({}, ORTE.schenke, { name: { de: "Die Schenke – Besuch in Rot", en: "The Tavern – Visitors in Red" }, gestalten: "rotroben" });
 
   /* Stichwörter, falls ein neuer Abschnitt noch keine Kulisse hat (erst Titel, dann Text) */
@@ -1384,6 +1492,8 @@
      ===================================================================== */
   const css = document.createElement("style");
   css.textContent = `
+/* Der Körper der Seite malt sonst seinen eigenen Hintergrund über die Kulisse (seit html einen eigenen hat) */
+html.mit-kulisse body { background: transparent !important; }
 #kulisse { position: fixed; inset: 0; z-index: -2; pointer-events: none; overflow: hidden; opacity: 0; transition: opacity 1.4s ease; contain: strict; }
 #kulisse.an { opacity: 1; }
 #kulisse .kl-szene { position: absolute; inset: 0; opacity: 0; transition: opacity 1.6s cubic-bezier(.45,.05,.35,1); }
@@ -1598,12 +1708,14 @@
     let letzter = null;
     kapitelBox.querySelectorAll(".chapter").forEach((ch, ki) => {
       const kap = (D.kapitel || [])[ki] || {}, kapDe = (DE.kapitel || [])[ki] || {};
-      const liste = kap.kulissen || kapDe.kulissen || [];
+      /* „szenen“ (nur Bild) hat Vorrang vor „kulissen“ (die das Hörspiel auch für den Klang nutzt) */
+      const liste = kap.szenen || kapDe.szenen || kap.kulissen || kapDe.kulissen || [];
+      const kinder = (ch.querySelector(".prose") || ch).children, deA = kapDe.absaetze || [];
       const texte = [];
       (kap.absaetze || []).forEach(p => { if (typeof p !== "string") return; if (p.indexOf("## ") === 0) texte.push({ titel: p.slice(3).trim(), text: "" }); else if (texte.length && p.charAt(0) !== "!") texte[texte.length - 1].text += " " + reinText(p); });
       ch.querySelectorAll(".prose > .sub").forEach((el, ai) => {
-        let eintrag = liste[ai], ort = null, figuren = null;
-        if (eintrag && typeof eintrag === "object") { ort = eintrag.ort; figuren = eintrag.figuren; }
+        let eintrag = liste[ai], ort = null, figuren = null, wechsel = null;
+        if (eintrag && typeof eintrag === "object") { ort = eintrag.ort; figuren = eintrag.figuren; wechsel = eintrag.wechsel; }
         else if (typeof eintrag === "string") ort = eintrag;
         const t = texte[ai] || { titel: el.textContent, text: "" };
         if (!ort || !ORTE[ort]) {
@@ -1611,7 +1723,25 @@
           ort = treffer ? treffer[1] : (letzter || "hafen");
         }
         letzter = ort;
-        abschnitte.push({ el, kap: ch, ki, ai, ort, titel: t.titel, text: t.titel + " " + t.text, figuren });
+        const eintragA = { el, kap: ch, ki, ai, ort, titel: t.titel, text: t.titel + " " + t.text, figuren };
+        abschnitte.push(eintragA);
+        /* Wechsel mitten im Abschnitt: [Anfang eines Absatzes (deutscher Text) oder Absatznummer, Ort].
+           Die Absätze stehen in DE und EN an derselben Stelle, darum gilt die Fundstelle für beide Sprachen. */
+        if (Array.isArray(wechsel)) {
+          const start = Array.prototype.indexOf.call(kinder, el);
+          let ende = deA.findIndex((p, j) => j > start && typeof p === "string" && p.indexOf("## ") === 0);
+          if (ende < 0) ende = deA.length;
+          let zuletzt = start;
+          wechsel.forEach(([stelle, ziel]) => {
+            if (!ORTE[ziel]) return;
+            let i = typeof stelle === "number" ? stelle : -1;
+            if (i < 0) for (let j = zuletzt + 1; j < ende; j++) { const p = deA[j]; if (typeof p === "string" && reinText(p).indexOf(stelle) >= 0) { i = j; break; } }
+            if (i <= zuletzt || i >= ende || !kinder[i]) return;
+            zuletzt = i;
+            abschnitte.push(Object.assign({}, eintragA, { el: kinder[i], ort: ziel, teil: true }));
+            letzter = ziel;
+          });
+        }
       });
     });
   }
@@ -1972,6 +2102,7 @@
     const vorher = sichtbar;
     sichtbar = offen;
     kulisse.classList.toggle("an", offen);
+    document.documentElement.classList.toggle("mit-kulisse", offen);
     rand.classList.toggle("an", offen);
     kulisse.classList.toggle("ruht", !offen || document.hidden);
     if (!offen) { schildHandy.classList.remove("da"); briefBox.querySelectorAll(".kl-brief").forEach(b => { b.tabIndex = -1; }); }
