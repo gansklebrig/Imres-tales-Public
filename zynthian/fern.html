@@ -137,6 +137,7 @@ details{margin-top:10px}summary{cursor:pointer;color:var(--mute);font-size:13px;
   <button data-s="imres">🎻 Barden Beats starten<small>Vollbild, Tasten des Zynthian</small></button>
   <button data-s="hintergrund">🎛+🎻 Zusammen mit Zynthian<small>die Bühne spielt im Hintergrund</small></button>
   <button data-s="zynthian">🎛 Nur Zynthian</button>
+  <button data-s="dj">🎧 DJ-Pult<small>Mixxx im Vollbild</small></button>
   <button data-s="start-imres">🔌 Einschalten → Bühne</button>
   <button data-s="start-hintergrund">🔌 Einschalten → zusammen</button>
   <button data-s="start-zynthian">🔌 Einschalten → Zynthian</button>
@@ -174,7 +175,7 @@ document.addEventListener("click", e => {
   if (d) { post("/zyn/dreh", { nr: +d.dataset.d, d: +d.dataset.w }).then(() => setTimeout(status, 250)); return; }
   const s = e.target.closest("[data-s]");
   if (s) {
-    const frage = { aus: "Wirklich ausschalten?", neustart: "Wirklich neu starten?", zynthian: "Imres beenden und nur den Zynthian zeigen?" }[s.dataset.s];
+    const frage = { aus: "Wirklich ausschalten?", neustart: "Wirklich neu starten?", zynthian: "Imres beenden und nur den Zynthian zeigen?", dj: "DJ-Pult starten? Die Bühne pausiert so lange." }[s.dataset.s];
     if (frage && !confirm(frage)) return;
     post("/zyn/system", { aktion: s.dataset.s }).then(() => status());
   }
