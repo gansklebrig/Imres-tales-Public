@@ -21,23 +21,25 @@
     welten: { sym: "🌿", name: W("Klangwelten", "Soundscapes"), sub: W("Große Geräuschkulissen zum Eintauchen", "Big immersive soundscapes"), farbe: "#a070d0", seite: "welten" }
   };
   const REIHE = ["buehne", "musik", "klang", "welten"];
-  let modus = lies("imres-bb-modus", SEITE === "welten" ? "welten" : "buehne");
+  /* immer Musik & Ort – die anderen Bereiche gibt es klein über den Knopf oben */
+  let modus = SEITE === "welten" ? "welten" : "buehne";
   if (!MODI[modus] || MODI[modus].seite !== SEITE) modus = SEITE === "welten" ? "welten" : "buehne";
   const ADRESSE = { buehne: "/index.html?bb=2#buehne", welten: "/ambient.html?bb=2" };
 
   /* ---------- Aussehen ---------- */
   const css = document.createElement("style");
   css.textContent = `
-.bb { position: fixed; inset: 0; z-index: 2147482500; display: flex; flex-direction: column; background:
+.bb-app { position: fixed; inset: 0; z-index: 2147482500; display: flex; flex-direction: column; background:
   radial-gradient(120% 70% at 50% -10%, rgba(224,160,70,.16), transparent 60%), radial-gradient(90% 60% at 100% 110%, rgba(176,58,72,.14), transparent 60%), #120e18;
   color: #ebe2cc; font: 16px/1.3 system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; overflow: hidden; }
-.bb[hidden] { display: none; }
+.bb-app[hidden] { display: none; }
 html.bb-offen, html.bb-offen body { overflow: hidden !important; }
-.bb * { box-sizing: border-box; }
-.bb button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulation; }
+.bb-app * { box-sizing: border-box; }
+.bb-app button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulation; }
 .bb-kopf { display: flex; align-items: center; gap: 8px; padding: max(10px, env(safe-area-inset-top)) 14px 8px; }
 .bb-titel { flex: 1; font: 700 19px/1.1 Georgia, "Times New Roman", serif; color: #f2cf6a; letter-spacing: .02em; }
 .bb-titel small { display: block; font: 500 12px system-ui, sans-serif; color: #a89f8f; letter-spacing: 0; margin-top: 2px; }
+.bb-chip[data-bb="wahl"] { min-width: 44px; min-height: 40px; padding: 6px 12px; font-size: 18px !important; }
 .bb-chip { border: 1px solid rgba(224,160,70,.45); background: rgba(235,226,204,.06); border-radius: 999px; padding: 7px 12px; font-size: 14px !important; white-space: nowrap; }
 .bb-chip.mehr { border-color: rgba(235,226,204,.25); color: #c9bfae; }
 .bb-inhalt { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; padding: 4px 14px 18px; display: flex; flex-direction: column; gap: 12px; }
@@ -119,12 +121,12 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
 .bb-regler { display: flex; flex-direction: column; gap: 14px; padding: 14px; border-radius: 18px; background: rgba(235,226,204,.04); border: 1px solid rgba(235,226,204,.1); }
 .bb-regler label { display: grid; grid-template-columns: 8.4em 1fr 2.4em; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; }
 .bb-regler output { text-align: right; color: #c9bfae; font-variant-numeric: tabular-nums; font-size: 14px; }
-.bb input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 34px; background: transparent; margin: 0; }
-.bb input[type=range]::-webkit-slider-runnable-track { height: 10px; border-radius: 5px; background: linear-gradient(90deg, #c88a20 var(--p, 50%), rgba(235,226,204,.14) var(--p, 50%)); }
-.bb input[type=range]::-moz-range-track { height: 10px; border-radius: 5px; background: rgba(235,226,204,.14); }
-.bb input[type=range]::-moz-range-progress { height: 10px; border-radius: 5px; background: #c88a20; }
-.bb input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 30px; margin-top: -10px; border-radius: 50%; background: #f2cf6a; border: 3px solid #241a26; box-shadow: 0 2px 8px rgba(0,0,0,.5); }
-.bb input[type=range]::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: #f2cf6a; border: 3px solid #241a26; }
+.bb-app input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 34px; background: transparent; margin: 0; }
+.bb-app input[type=range]::-webkit-slider-runnable-track { height: 10px; border-radius: 5px; background: linear-gradient(90deg, #c88a20 var(--p, 50%), rgba(235,226,204,.14) var(--p, 50%)); }
+.bb-app input[type=range]::-moz-range-track { height: 10px; border-radius: 5px; background: rgba(235,226,204,.14); }
+.bb-app input[type=range]::-moz-range-progress { height: 10px; border-radius: 5px; background: #c88a20; }
+.bb-app input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 30px; margin-top: -10px; border-radius: 50%; background: #f2cf6a; border: 3px solid #241a26; box-shadow: 0 2px 8px rgba(0,0,0,.5); }
+.bb-app input[type=range]::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: #f2cf6a; border: 3px solid #241a26; }
 .bb-toast { position: fixed; left: 50%; bottom: calc(118px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(10px); z-index: 2147482600; max-width: 90vw; padding: 11px 18px; border-radius: 14px;
   background: rgba(24,18,30,.96); border: 1px solid rgba(224,160,70,.6); color: #ebe2cc; font: 600 15px/1.3 system-ui, sans-serif; text-align: center; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; box-shadow: 0 10px 30px rgba(0,0,0,.55); }
 .bb-toast.an { opacity: 1; transform: translateX(-50%); }
@@ -137,7 +139,7 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
   document.head.appendChild(css);
 
   /* ---------- Gerüst ---------- */
-  const bb = document.createElement("div"); bb.className = "bb"; bb.hidden = true; bb.setAttribute("role", "dialog"); bb.lang = EN ? "en" : "de"; bb.setAttribute("aria-label", "Barden Beats");
+  const bb = document.createElement("div"); bb.className = "bb-app"; bb.hidden = true; bb.setAttribute("role", "dialog"); bb.lang = EN ? "en" : "de"; bb.setAttribute("aria-label", "Barden Beats");
   bb.innerHTML = '<div class="bb-kopf"><div class="bb-titel">Barden Beats<small></small></div><button type="button" class="bb-chip" data-bb="wahl"></button><button type="button" class="bb-chip mehr" data-bb="mehr">' + W("Mehr …", "More …") + '</button></div><div class="bb-inhalt"></div><div class="bb-leiste" hidden></div>';
   document.body.appendChild(bb);
   const leiste = $(".bb-leiste", bb), inhalt = $(".bb-inhalt", bb), unterTitel = $(".bb-titel small", bb), wahlChip = $('[data-bb="wahl"]', bb);
@@ -230,7 +232,7 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
   const regler = (id, name, wert, lo, hi) => '<label><span>' + name + '</span><input type="range" data-bbregler="' + id + '" min="' + lo + '" max="' + hi + '" step="1" value="' + wert + '" style="--p:' + Math.round((wert - lo) / (hi - lo) * 100) + '%"><output>' + Math.round((wert - lo) / (hi - lo) * 100) + "</output></label>";
   function spielZeichnen() {
     ansicht = "spiel"; wahlChip.hidden = false;
-    wahlChip.textContent = MODI[modus].sym + " " + MODI[modus].name + " ▾"; wahlChip.style.borderColor = MODI[modus].farbe;
+    wahlChip.textContent = modus === "buehne" ? "☰" : MODI[modus].sym + " ▾"; wahlChip.title = W("Andere Bereiche: nur Musik, nur Ort, Klangwelten", "Other modes"); wahlChip.style.borderColor = MODI[modus].farbe;
     let h = "";
     if (SEITE === "welten") {
       const l = welten(); if (!l.length) { inhalt.innerHTML = '<p class="bb-laden">' + W("Klangwelten werden geladen …", "Loading soundscapes …") + "</p>"; setTimeout(spielZeichnen, 500); return; }
@@ -463,15 +465,32 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
   }, 600);
 
   /* ---------- Öffnen / Schließen ---------- */
-  function oeffnen(direkt) {
+  /* Browser-Verlauf: die einfache Ansicht ist ein eigener Eintrag – „Zurück“ schließt sie (bzw. geht zur vorigen Seite) */
+  const istBB = st => !!(st && st.bardenbeats);
+  function oeffnen(direkt, ausVerlauf) {
     bb.hidden = false; document.documentElement.classList.add("bb-offen"); schreib("imres-bb", "1");
-    if (direkt) spielZeichnen(); else wahlZeichnen();
+    if (!ausVerlauf) {
+      try {
+        const st = Object.assign({}, history.state || {}, { bardenbeats: 1 });
+        if (/[?&]bb=/.test(location.search)) history.replaceState(st, "", location.href); /* kam über imrestales.de/Bardenbeats */
+        else if (!istBB(history.state)) history.pushState(st, "", location.href);
+      } catch (_) {}
+    }
+    spielZeichnen();
   }
+  function zu() { bb.hidden = true; document.documentElement.classList.remove("bb-offen"); schreib("imres-bb", "0"); }
   function schliessen() {
-    bb.hidden = true; document.documentElement.classList.remove("bb-offen"); schreib("imres-bb", "0");
-    try { const u = new URL(location.href); u.searchParams.delete("bb"); history.replaceState(null, "", u.pathname + (u.search || "") + u.hash); } catch (_) {}
+    zu();
+    try { const u = new URL(location.href); u.searchParams.delete("bb"); const st = Object.assign({}, history.state || {}); delete st.bardenbeats; history.replaceState(st, "", u.pathname + (u.search || "") + u.hash); } catch (_) {}
     const ziel = SEITE === "buehne" ? $("#lautenwerk") : null; if (ziel) ziel.scrollIntoView({ block: "start" });
   }
+  /* Zurück/Vor im Browser oder ein Sprung über das Menü der Seite: nur offen bleiben, solange der Eintrag dazugehört */
+  const verlauf = () => {
+    const soll = istBB(history.state) || (/[?&]bb=/.test(location.search) && !history.state);
+    if (!soll && !bb.hidden) zu();
+    else if (soll && bb.hidden) oeffnen(true, true);
+  };
+  addEventListener("popstate", verlauf); addEventListener("hashchange", () => setTimeout(verlauf, 0));
   window.__bardenbeats = { oeffnen, schliessen, autoJetzt() { autoNaechst = 1; } };
   const q = new URLSearchParams(location.search).get("bb");
   if (q != null) oeffnen(q === "2"); else if (window.__bbJetzt) oeffnen();
