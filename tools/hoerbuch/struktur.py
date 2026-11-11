@@ -84,7 +84,9 @@ def lesetext(block):
         if s["rolle"] == "erzaehler":
             out += ("<br>" if out else "") + s["text"]
         else:
-            rede = "„" + s["text"] + "“"
+            # Verse („ / “) als Zeilen, Bühnenwörter (*hust*) kursiv
+            t = re.sub(r"\*([^*]+)\*", r"<i>\1</i>", s["text"]).replace(" / ", "<br>")
+            rede = "„" + t + "“"
             out += (" " if out.rstrip().endswith(":") else ("<br>" if out else "")) + rede
     return out
 
