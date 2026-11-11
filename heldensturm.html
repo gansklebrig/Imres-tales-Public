@@ -38733,6 +38733,97 @@ window.__hsNEUSTART={v:1,weg:0};
   return weg}catch(e){console.error('neustart',e);return false}}
  __hsNEUSTART.aufraeumen=aufraeumen;aufraeumen();
 }catch(e){console.error('neustart',e);window.__hsNEUSTART.err=String(e&&e.stack||e)}})();
+/* ================= Paket „ruhe“: ruhiger erster Start, erstes Sternbild mit freier Wahl – window.__hsRUHE =================
+   Wunsch: Beim ersten Start (vor allem am Handy) liegen zu viele Fenster übereinander. Und das erste Sternbild soll auf die fünf
+   Einstiegssterne gezoomt sein, ohne vorausgewählten Stern.
+   1) Einführung (erste Stufe, solange sie läuft): normale Meldungen warten in einer Schlange und kommen danach einzeln
+      (alle 3,5 s, nur im Spiel). Kleine Meldungen (Feed) laufen weiter.
+   2) Einführung startet erst, wenn die Stufen-Einblendung durch ist (3,5 s).
+   3) Aushänge-Brett bleibt während der Einführung eingeklappt (nur die Siegel).
+   4) Erstes Sternbild (noch kein Stern gelernt): auf die Einstiegssterne gezoomt, kein Stern ausgewählt, Detailfeld zeigt
+      einen kurzen Hinweis; die lange Erklärung („Verstanden“) erscheint erst beim nächsten Öffnen.
+      Erstes Antippen zeigt den Stern, zweites lernt ihn (wie sonst). Steuerkreuz/Controller wählt wie gewohnt. */
+window.__hsRUHE={v:1,q:[],n:0,frei:0,zoom:0};
+(function(){try{
+ const R=window.__hsRUHE;
+ const ruhig=()=>{try{return!SAVE.tutDone&&!G.bot&&G.mode==='kampagne'&&G.stage===0&&G.state==='play'&&NET.role!=='guest'&&TUT.i<5}catch(e){return false}};
+ R.ruhig=ruhig;
+ /* 1) Meldungen zurückhalten */
+ const t0=toast;
+ toast=function(msg,col,o){try{o=o||{};if(ruhig()&&!o.sofort&&!o.ruhe){const txt=msg instanceof Node?msg.textContent:String(msg).replace(/<[^>]*>/g,'');
+   if(!(o.minor||TOAST_MINOR.test(txt))){if(!R.q.some(x=>x.txt===txt)){R.q.push({msg,col,o,txt});while(R.q.length>4)R.q.shift()}R.n++;return}}}catch(e){}
+  return t0.apply(this,arguments)};
+ let warte=0;
+ hook('tick',dt=>{try{if(!R.q.length)return;if(ruhig()){warte=1.2;return}if(G.state!=='play'||G.paused||G.overlay)return;warte-=dt;if(warte>0)return;
+  const x=R.q.shift();warte=3.5;const o=Object.assign({},x.o,{ruhe:1});t0(x.msg,x.col,o)}catch(e){}});
+ /* 2) Einführung nach der Stufen-Einblendung */
+ const tt=tutTick;
+ tutTick=function(dt){try{if(TUT.i<0&&!SAVE.tutDone&&(G.stageTime||0)<3.5)return}catch(e){}return tt.apply(this,arguments)};
+ /* 3) Aushänge eingeklappt (Brett liegt in eigenem Gültigkeitsbereich: Öffnungszeiten über __hsZIELE.ZL zurücksetzen) */
+ hook('tick',()=>{try{if(!ruhig())return;const Z=window.__hsZIELE&&__hsZIELE.ZL;if(Z){if(Z.openT)Z.openT=0;if(Z.kurzT)Z.kurzT=0}}catch(e){}});
+ /* 4) Erstes Sternbild */
+ const leer=()=>{try{return!!P&&P.hero&&spkLeer(P)&&P.sp>0&&stOwn()}catch(e){return false}};
+ function deko(){const m=scr&&scr.querySelector('.stmap');if(!m||!P)return;
+  if(P.ruheFrei==null){if(!leer())return;P.ruheFrei=G.treeSel||'';P.ruheZoom=1;P.ruheOffen=1}
+  /* lange Erklärung erst beim nächsten Öffnen (solange dieses erste Fenster offen ist) */
+  if(P.ruheOffen){const root=m.closest('.screen')||scr;for(const h of root.querySelectorAll('.hinw'))if(h.querySelector('[data-k="tree"]'))h.style.display='none'}
+  if(!P.ruheFrei&&P.ruheFrei!=='')return;
+  if(!leer()||G.treeSel!==P.ruheFrei){P.ruheFrei=0;return}
+  R.frei++;
+  for(const b of m.querySelectorAll('.stn.sel,.stn.armed')){b.classList.remove('sel','armed');if(b.dataset.act==='tree-learn')b.dataset.act='tree-sel'}
+  const root=m.closest('.screen')||scr;
+  for(const h of root.querySelectorAll('.hinw'))if(h.querySelector('[data-k="tree"]'))h.style.display='none';
+  const d=root.querySelector('.stdet');if(d&&!d.dataset.ruhe){const c=HCOL[P.id]||'#e5b454';d.dataset.ruhe=1;
+   d.innerHTML=`<div class="ruheW" style="--c:${c}"><b>Freie Wahl</b><p>Die <b>fünf leuchtenden Sterne</b> am Kern sind deine Einstiegssterne – jeder steht für einen Spielstil.</p><p>${tutGeraet()==='kb'?'Anklicken':tutGeraet()==='pad'?'Mit dem Steuerkreuz wählen':'Antippen'} zeigt einen Stern, ${tutGeraet()==='pad'?'<b>A</b>':'noch einmal'} lernt ihn.</p></div>`}}
+ /* ein Stern angetippt: ab jetzt normale Auswahl (auch derselbe Stern, der intern vorbelegt war) */
+ window.addEventListener('click',ev=>{try{const b=ev.target&&ev.target.closest&&ev.target.closest('.stmap [data-act="tree-sel"],.stmap [data-act="tree-learn"]');if(b&&P&&P.ruheFrei!=null&&P.ruheFrei!==0){P.ruheFrei=0;G.treeOpen=false}}catch(e){}},true);
+ const co=closeOverlay;closeOverlay=function(){try{if(P)P.ruheOffen=0}catch(e){}return co.apply(this,arguments)};
+ const rt=renderTree;
+ renderTree=function(){const r=rt.apply(this,arguments);try{deko()}catch(e){console.error('ruhe',e)}return r};
+ /* Zoom auf die Einstiegssterne (einmal je Held und Lauf) */
+ const sl=stLayout;
+ stLayout=function(m){try{if(m&&m.isConnected&&P&&P.ruheZoom===1&&P.ruheFrei!==0){const W=m.clientWidth,H=m.clientHeight;
+   if(W>=40&&H>=40){const v=stView(m),fit=Math.max(0.12,Math.min(W,H)/2/ST_FIT),want=Math.min(W,H)*0.40/(ST_R[0]+62);
+    v.z=clamp(want/fit,1,Math.max(1.2,3.2/fit));v.cx=0;v.cy=0;v.user=1;P.ruheZoom=2;R.zoom++;
+    try{ST.lastSel[stKey(m)]=m.dataset.sel}catch(e){}}}}catch(e){console.error('ruhe',e)}
+  return sl.apply(this,arguments)};
+ const st=document.createElement('style');st.textContent=`.stdet .ruheW{padding:4px 2px;display:flex;flex-direction:column;gap:6px}
+.stdet .ruheW>b{font-variant:small-caps;letter-spacing:.05em;font-size:20px;color:var(--c)}
+.stdet .ruheW p{margin:0;font-size:15px;line-height:1.45;color:#e8dcc8}.stdet .ruheW p b{color:#ffd77a}`;document.head.appendChild(st);
+}catch(e){console.error('ruhe',e);window.__hsRUHE.err=String(e&&e.stack||e)}})();
+/* ================= Paket „ffhinw“: dezenter Firefox-Hinweis in den Grafikeinstellungen + sichtbare Firefox-Test-Anzeige – window.__hsFFHINW =================
+   1) Nur in der Box „Grafikqualität“ (kein Popup): Wenn Firefox die Spielleinwand auf dem Prozessor zeichnet (licht2-Sonde),
+      eine kleine Zeile mit Rat (Edge/Chrome; am PC alternativ zwei about:config-Werte). Am Handy nur der Browser-Rat.
+   2) Während des Firefox-Tests oben eine kleine Leiste „Firefox-Test · ohne Licht (3/10)“ – sonst wirkt das kurzzeitig
+      aufgedeckte Bild (Phasen ohne Licht/Nebel) wie ein Fehler. */
+window.__hsFFHINW={v:1};
+(function(){try{
+ const FH=window.__hsFFHINW;
+ const L2=()=>window.__hsLICHT2;
+ const mobil=()=>{try{return /Android|Mobile/i.test(navigator.userAgent)}catch(e){return false}};
+ /* einmal „Prozessor“ in dieser Sitzung reicht (die Sonde misst nur im Spiel und meldet zwischendurch „unklar“) */
+ const zeigen=()=>{const l=L2();if(!(l&&l.firefox&&!l.aus))return false;if(l.sonde&&l.sonde.art==='Prozessor')FH.cpu=1;return!!FH.cpu};
+ FH.zeigen=zeigen;
+ const zeile=()=>`<div class="muted ffHinw" data-ffh-row>Firefox zeichnet das Spiel hier ohne Grafikkarte – in <b>Edge</b> oder <b>Chrome</b> läuft es deutlich flüssiger.${mobil()?'':` Alternativ in <code>about:config</code> die Werte <code>gfx.canvas.accelerated.profile-fallback-ratio</code> und <code>gfx.canvas.accelerated.profile-cache-miss-ratio</code> auf <code>1</code> setzen.`}</div>`;
+ let plan=false;
+ function einsetzen(){plan=false;try{for(const box of document.querySelectorAll('#gfxBox')){const alt=box.querySelector('[data-ffh-row]');
+   if(!zeigen()){if(alt)alt.remove();continue}if(alt)continue;
+   const p=box.querySelector('[data-kgr-row]')||(box.querySelector('[data-act="perf"]')||{closest:()=>null}).closest('.row');
+   if(p)p.insertAdjacentHTML('afterend',zeile());else box.insertAdjacentHTML('beforeend',zeile())}}catch(e){}}
+ FH.einsetzen=einsetzen;
+ if(typeof ulKnopf==='function'){const _uk=ulKnopf;ulKnopf=function(){const r=_uk.apply(this,arguments);try{if(!plan){plan=true;Promise.resolve().then(()=>Promise.resolve()).then(einsetzen)}}catch(e){}return r}}
+ /* Test-Leiste */
+ let el=null,txt='';
+ hook('tick',()=>{try{const l=L2(),B=l&&l.bi;if(!FH.cpu)zeigen();const an=!!(B&&B.on&&B.cur&&G.state==='play');
+  if(!an){if(el&&!el.hidden)el.hidden=true;return}
+  if(!el){el=document.createElement('div');el.id='ffTestLeiste';document.body.appendChild(el)}
+  const n=(B.i|0)+1,t=`Firefox-Test · ${B.cur.name} (${n}/10) – Teile des Bildes fehlen absichtlich`;if(t!==txt){txt=t;el.textContent=t}el.hidden=false}catch(e){}});
+ const st=document.createElement('style');st.textContent=`#gfxBox .ffHinw{margin-top:6px;font-size:13px;line-height:1.4;opacity:.85}
+#gfxBox .ffHinw code{font-size:12px;color:#e8c36a;word-break:break-all}#gfxBox .ffHinw b{color:#e8dcc8}
+#ffTestLeiste{position:fixed;left:50%;top:max(6px,env(safe-area-inset-top));transform:translateX(-50%);z-index:60;pointer-events:none;
+ background:rgba(20,14,8,.82);border:1px solid #8a6a32;color:#f0d9a0;border-radius:8px;padding:4px 12px;font-size:clamp(11px,1.4vw,15px);white-space:nowrap;max-width:94vw;overflow:hidden;text-overflow:ellipsis}`;
+ document.head.appendChild(st);
+}catch(e){console.error('ffhinw',e);window.__hsFFHINW.err=String(e&&e.stack||e)}})();
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
