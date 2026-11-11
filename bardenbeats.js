@@ -98,8 +98,9 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
 .bb-kachel.an { border-color: #f2cf6a; background: linear-gradient(135deg, rgba(242,207,106,.28), rgba(200,138,32,.12)); box-shadow: 0 0 18px rgba(242,207,106,.22); }
 .bb-kachel.gleich::after { content: "${W("gleich", "next")}"; position: absolute; right: 8px; top: 6px; font-size: 10.5px; font-weight: 700; color: #1d140a; background: #e0a046; border-radius: 6px; padding: 1px 5px; animation: bbpuls 1s ease-in-out infinite; }
 @keyframes bbpuls { 50% { opacity: .45; } }
-.bb-mini { display: flex; gap: 12px; padding: 8px 12px; border-radius: 14px; background: rgba(235,226,204,.04); border: 1px solid rgba(235,226,204,.1); }
-.bb-mini label { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0; font: 700 12px/1.2 system-ui, sans-serif; color: #c9bfae; }
+.bb-mini { display: flex; gap: 10px; padding: 8px 12px; border-radius: 14px; background: rgba(235,226,204,.04); border: 1px solid rgba(235,226,204,.1); }
+.bb-mini label { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0; font: 700 11.5px/1.2 system-ui, sans-serif; color: #c9bfae; }
+.bb-mini label span { gap: 4px; white-space: nowrap; } .bb-mini output { overflow: hidden; text-overflow: ellipsis; }
 .bb-mini label span { display: flex; justify-content: space-between; } .bb-mini output { color: #f2cf6a; }
 .bb-mini input[type=range] { height: 26px; }
 .bb-chips { display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 6px; scrollbar-width: none; }
@@ -217,6 +218,14 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
     return liste.slice(s * pro, s * pro + pro).map(x => '<button type="button" class="bb-kachel' + (x.k === aktiv ? " an" : "") + (x.k === gleich && x.k !== aktiv ? " gleich" : "") + '" data-bb' + art + '="' + esc(x.k) + '"><span class="sym">' + esc(x.s) + "</span><span>" + esc(x.n) + "</span></button>").join("") + mehr;
   };
   const abschnitt = (titel, mehrArt, gesamt) => '<div class="bb-ab"><h3>' + titel + "</h3>" + (gesamt > PRO_SEITE ? '<button type="button" data-bbmehr="' + mehrArt + '">' + W("andere ›", "more ›") + "</button>" : "") + "</div>";
+  let raumV = 0, raumName = "";
+  const RAUM_KURZ = { stube: W("Stube", "Room"), taverne: W("Taverne", "Tavern"), kapelle: W("Kapelle", "Chapel"), palast: W("Saal", "Hall"), hoehle: W("Höhle", "Cave") };
+  const raumText = () => Math.abs(raumV) < .08 ? W("passend", "matching") : raumV < 0 ? (raumV < -.9 ? W("trocken", "dry") : W("trockener", "drier")) : (RAUM_KURZ[raumName] || W("hallig", "echoing"));
+  function raumSetzen(v) {
+    raumV = v; const p = P(); if (!p || !p.raumOrt) return;
+    try { const r = p.raumOrt(v); raumName = r.raum; } catch (_) {}
+    const o = $('[data-bbregler="raum"]', bb); if (o) { const out = o.parentNode.querySelector("output"); if (out) out.textContent = raumText(); }
+  }
   const mini = (id, name, wert, lo, hi) => '<label><span>' + name + "<output>" + Math.round((wert - lo) / (hi - lo) * 100) + '</output></span><input type="range" data-bbregler="' + id + '" min="' + lo + '" max="' + hi + '" step="1" value="' + wert + '" style="--p:' + Math.round((wert - lo) / (hi - lo) * 100) + '%"></label>';
   const regler = (id, name, wert, lo, hi) => '<label><span>' + name + '</span><input type="range" data-bbregler="' + id + '" min="' + lo + '" max="' + hi + '" step="1" value="' + wert + '" style="--p:' + Math.round((wert - lo) / (hi - lo) * 100) + '%"><output>' + Math.round((wert - lo) / (hi - lo) * 100) + "</output></label>";
   function spielZeichnen() {
@@ -245,7 +254,8 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
       '<button type="button" class="bb-auto' + (autoAn ? " an" : "") + '" data-bb="auto">🤖 Auto ' + (autoAn ? W("an", "on") : W("aus", "off")) + "</button></div></div>";
     /* kleine Zusatzregler: wie viel los ist (Musik) und Spannung (Ort) */
     h += '<div class="bb-mini">' + (modus !== "klang" ? mini("int", "🔥 " + W("Wie viel los", "How busy"), Math.round(z.intensitaet ?? 5), 0, 10) : "") +
-      (modus !== "musik" ? mini("spann", "😨 " + W("Spannung", "Tension"), Math.round((z.spannung || 0) * 100), 0, 100) : "") + "</div>";
+      (modus !== "musik" ? mini("spann", "😨 " + W("Spannung", "Tension"), Math.round((z.spannung || 0) * 100), 0, 100) : "") +
+      '<label><span>🏛 ' + W("Raum", "Room") + "<output>" + esc(raumText()) + '</output></span><input type="range" data-bbregler="raum" min="-100" max="100" step="5" value="' + Math.round(raumV * 100) + '" style="--p:' + Math.round((raumV + 1) * 50) + '%"></label></div>';
     if (modus === "klang") h += '<div class="bb-zeile"><button type="button" class="bb-blitz" data-bb="blitz">⚡ ' + W("Etwas passiert", "Something happens") + '</button><button type="button" class="bb-ueber" data-bb="ueber">🎲 ' + W("Überrasch mich", "Surprise me") + "</button></div>";
     const kulAktiv = z.kulLaeuft ? (z.kulisse === "waldnacht" ? "wald" : z.kulisse) : null;
     if (modus === "klang") {
@@ -384,6 +394,8 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
   function ortWaehlen(k) {
     if (modus === "klang") { const z = Z(); if (z && z.laeuft) musikSpielen(); }
     pultKlick("data-kulisse", k);
+    /* neuer Ort: der Raumklang springt zurück auf „passend“ */
+    setTimeout(() => raumSetzen(0), 60);
   }
   function aktion(was) {
     if (SEITE === "welten") {
@@ -433,6 +445,7 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
     else if (id === "wspannung") weltRegler('[data-regler="spannung"]', v);
     else if (id === "int") pultRegler("intensitaet", v);
     else if (id === "spann") pultLeben("spannung", v);
+    else if (id === "raum") { r.style.setProperty("--p", Math.round((v + 100) / 2) + "%"); raumSetzen(v / 100); }
   });
   function pultLeben(art, v) {
     const root = $("#lautenwerk"); if (!root) return;

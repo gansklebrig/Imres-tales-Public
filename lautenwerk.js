@@ -13863,6 +13863,24 @@ registerProcessor("imres-glitch", ImresGlitch);`;
       const j = ctx.currentTime, g = zynDuck.gain, d = Math.max(0, Math.min(.9, tiefe || .5));
       g.cancelScheduledValues(j); g.setValueAtTime(g.value, j); g.linearRampToValueAtTime(1 - d, j + .012); g.setTargetAtTime(1, j + .06, .09);
     },
+    /* Raumklang passend zum Ort: v = 0 passend, −1 ganz trocken, +1 riesiger Hall (für Barden Beats) */
+    raumOrt(v) {
+      const ORT_RAUM = { taverne: ["taverne", 4], wald: ["stube", 2], feuer: ["stube", 2], regen: ["stube", 2], hoehle: ["hoehle", 7], markt: ["stube", 2], strasse: ["stube", 2],
+        schlacht: ["taverne", 3], meer: ["taverne", 2], schiff: ["stube", 3], wasserfall: ["hoehle", 4], unterreich: ["hoehle", 8], kerker: ["kapelle", 6], sumpf: ["stube", 3],
+        unterwasser: ["hoehle", 6], schmiede: ["taverne", 4], labor: ["stube", 4], bibliothek: ["kapelle", 4], tempel: ["kapelle", 7], dorf: ["stube", 2], hafen: ["taverne", 2],
+        gebirge: ["palast", 4], mine: ["hoehle", 6], burg: ["palast", 6], ufer: ["stube", 2], schlaegerei: ["taverne", 4], duell: ["taverne", 3], waldnacht: ["stube", 2] };
+      const REIHE = ["stube", "taverne", "kapelle", "palast", "hoehle"], b = ORT_RAUM[S.kulisse] || ["taverne", 4];
+      v = Math.max(-1, Math.min(1, +v || 0));
+      const hall = Math.round((v <= 0 ? b[1] * (1 + v) : b[1] + (10 - b[1]) * v) * 10) / 10;
+      const ri = Math.max(0, Math.min(4, REIHE.indexOf(b[0]) + (v > .35 ? 1 : 0) + (v > .75 ? 1 : 0) - (v < -.5 ? 1 : 0))), raum = REIHE[ri];
+      S.hall = hall; if (wechsel) wechsel.hall = hall;
+      if (S.raum !== raum) { S.raum = raum; try { raumAnwenden(); } catch (_) {} }
+      try { effekteAnwenden(); } catch (_) {}
+      root.querySelectorAll('[data-feld="hall"]').forEach(r => { r.value = hall; }); root.querySelectorAll(".lw-hval").forEach(x => { x.textContent = Math.round(hall * 10) + " %"; });
+      root.querySelectorAll('[data-feld="raum"]').forEach(r => { r.value = raum; });
+      merken();
+      return { raum, hall, name: (t().raeume || {})[raum] || raum };
+    },
     kulFaktor(f) { zynKulFaktor = Math.max(.05, Math.min(1, f)); if (ctx && kulAusRef) kulAusRef.gain.setTargetAtTime(kulAusPegel(), ctx.currentTime, .35); }
   };
 

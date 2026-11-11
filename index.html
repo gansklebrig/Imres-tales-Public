@@ -988,7 +988,7 @@ footer .fuss-recht .recht-links { padding-right: 2.4rem; }
 <script src="extras.js?v=20261107a" defer></script>
 <script type="text/plain" data-nachladen="buehne" src="klangwerk.js?v=20261021b"></script>
 <script type="text/plain" data-nachladen="buehne" src="lieder.js?v=20261111b"></script>
-<script type="text/plain" data-nachladen="buehne" src="lautenwerk.js?v=20261111a"></script>
+<script type="text/plain" data-nachladen="buehne" src="lautenwerk.js?v=20261111b"></script>
 <script type="text/plain" data-nachladen="taverne" src="duell.js?v=20261028a"></script>
 <script type="text/plain" data-nachladen="taverne" src="auftritt.js?v=20261107b"></script>
 <script type="text/plain" data-nachladen="taverne" src="waldlauf-figuren.js?v=20261026a"></script>
@@ -2297,8 +2297,8 @@ window.addEventListener("load", () => { const b = document.body.classList; if (!
 <script>
 /* Barden Beats – einfache Ansicht (imrestales.de/Bardenbeats) */
 (function () {
-  function laden() { window.__bbJetzt = true; if (window.__bardenbeats) return window.__bardenbeats.oeffnen(); var s = document.createElement("script"); s.src = "bardenbeats.js?v=20261111f"; document.body.appendChild(s); }
-  if (/[?&]bb=/.test(location.search)) { window.__bbJetzt = false; var s = document.createElement("script"); s.src = "bardenbeats.js?v=20261111f"; document.body.appendChild(s); }
+  function laden() { window.__bbJetzt = true; if (window.__bardenbeats) return window.__bardenbeats.oeffnen(); var s = document.createElement("script"); s.src = "bardenbeats.js?v=20261111g"; document.body.appendChild(s); }
+  if (/[?&]bb=/.test(location.search)) { window.__bbJetzt = false; var s = document.createElement("script"); s.src = "bardenbeats.js?v=20261111g"; document.body.appendChild(s); }
   document.addEventListener("click", function (e) { if (e.target.closest && e.target.closest("[data-bb-oeffnen]")) { e.preventDefault(); laden(); } });
 })();
 </script>
