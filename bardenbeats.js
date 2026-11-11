@@ -70,27 +70,21 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
 .bb-zeile > button { flex: 1; min-height: 56px; border-radius: 16px; border: 1px solid rgba(235,226,204,.18); background: rgba(235,226,204,.06); font-weight: 700 !important; font-size: 16px !important; }
 .bb-zeile .bb-ueber { border-color: rgba(160,112,208,.6); background: linear-gradient(135deg, rgba(160,112,208,.28), rgba(208,86,122,.18)); }
 .bb-zeile .bb-blitz { border-color: rgba(176,58,72,.6); background: linear-gradient(135deg, rgba(176,58,72,.3), rgba(224,160,70,.12)); }
-.bb-mood { border-radius: 18px; border: 1px solid rgba(224,160,70,.3); background: rgba(235,226,204,.04); padding: 10px 10px 12px; display: flex; flex-direction: column; gap: 8px; }
-.bb-mood-kopf { display: flex; align-items: center; gap: 8px; padding: 0 2px; }
-.bb-mood-kopf h3 { flex: 1; margin: 0; font: 700 13px system-ui, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #a89f8f; }
-.bb-auto { border-radius: 999px; padding: 6px 11px; font-size: 13px !important; font-weight: 700 !important; border: 1px solid rgba(235,226,204,.25); background: rgba(235,226,204,.06); color: #c9bfae; }
+.bb-oben { display: flex; gap: 10px; align-items: stretch; }
+.bb-oben .bb-play { flex: 1; min-height: 0; flex-direction: column; gap: 4px; }
+.bb-oben .bb-play small { font: 600 12.5px/1.2 system-ui, sans-serif; opacity: .8; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bb-uhr-box { flex: none; width: 112px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.bb-uhr { position: relative; width: 108px; height: 108px; border-radius: 50%; touch-action: none; cursor: pointer;
+  background: radial-gradient(circle at 50% 50%, #2a2030 0 38%, transparent 39%), conic-gradient(rgba(242,207,106,.6), rgba(200,50,60,.6) 25%, rgba(110,80,140,.65) 50%, rgba(63,174,116,.55) 75%, rgba(242,207,106,.6));
+  box-shadow: inset 0 0 0 2px rgba(224,160,70,.55), inset 0 0 0 7px rgba(18,14,24,.55), 0 4px 14px rgba(0,0,0,.45); }
+.bb-uhr .e { position: absolute; font-size: 19px; line-height: 1; transform: translate(-50%, -50%); pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
+.bb-uhr .zeiger { position: absolute; left: 50%; top: 50%; width: 5px; height: 34px; margin-left: -2.5px; border-radius: 3px; background: linear-gradient(#fff3c4, #e0a046);
+  transform-origin: 50% 0; transform: rotate(var(--w, 180deg)); box-shadow: 0 0 8px rgba(242,207,106,.7); pointer-events: none; transition: transform .35s cubic-bezier(.3,1.4,.5,1); }
+.bb-uhr .zeiger.mitte { height: 0; }
+.bb-uhr .nabe { position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #f2cf6a; box-shadow: 0 0 0 3px #241a26; pointer-events: none; }
+.bb-uhr-box .wort { font: 700 12px/1.1 system-ui, sans-serif; color: #f2cf6a; text-align: center; min-height: 1.1em; }
+.bb-auto { border-radius: 999px; padding: 3px 9px; font-size: 11.5px !important; font-weight: 700 !important; border: 1px solid rgba(235,226,204,.25); background: rgba(235,226,204,.06); color: #c9bfae; }
 .bb-auto.an { border-color: #6fd6a0; background: rgba(63,174,116,.22); color: #c8f2da; }
-.bb-pad { position: relative; height: 240px; border-radius: 14px; overflow: hidden; touch-action: none; cursor: crosshair;
-  background: radial-gradient(70% 55% at 50% 0%, rgba(242,207,106,.42), transparent 70%), radial-gradient(55% 70% at 100% 50%, rgba(200,50,60,.45), transparent 70%),
-    radial-gradient(70% 55% at 50% 100%, rgba(110,80,140,.5), transparent 70%), radial-gradient(55% 70% at 0% 50%, rgba(63,174,116,.42), transparent 70%), #1a1420; }
-.bb-pad::before, .bb-pad::after { content: ""; position: absolute; background: rgba(235,226,204,.1); pointer-events: none; }
-.bb-pad::before { left: 50%; top: 10%; bottom: 10%; width: 1px; } .bb-pad::after { top: 50%; left: 8%; right: 8%; height: 1px; }
-.bb-pol { position: absolute; font: 700 12.5px/1 system-ui, sans-serif; color: #ebe2cc; text-shadow: 0 1px 3px rgba(0,0,0,.8); pointer-events: none; white-space: nowrap; }
-.bb-pol.o { top: 7px; left: 50%; transform: translateX(-50%); } .bb-pol.u { bottom: 7px; left: 50%; transform: translateX(-50%); }
-.bb-pol.l { left: 4px; top: 50%; transform: translateY(-50%) rotate(-90deg) translateY(-50%); transform-origin: left center; left: 14px; } .bb-pol.r { right: 14px; top: 50%; transform: translateY(-50%) rotate(90deg) translateY(-50%); transform-origin: right center; }
-.bb-pkt { position: absolute; transform: translate(-50%, -50%); font-size: 15px; opacity: .45; pointer-events: none; transition: opacity .3s, transform .3s; filter: grayscale(.3); }
-.bb-pkt.an { opacity: 1; filter: none; transform: translate(-50%, -50%) scale(1.45); text-shadow: 0 0 12px rgba(242,207,106,.9); }
-.bb-pkt.gleich { opacity: .95; filter: none; animation: bbpuls 1s ease-in-out infinite; }
-.bb-punkt { position: absolute; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; pointer-events: none; border: 3px solid #f2cf6a;
-  background: radial-gradient(circle, rgba(242,207,106,.55), rgba(242,207,106,.08) 70%); box-shadow: 0 0 18px rgba(242,207,106,.6); transition: left .12s, top .12s; }
-.bb-pad.zieht .bb-punkt { transition: none; }
-.bb-mood-info { font-size: 13.5px; color: #c9bfae; text-align: center; min-height: 1.3em; }
-.bb-mood-info b { color: #f2cf6a; }
 .bb-ab { display: flex; align-items: baseline; justify-content: space-between; margin: 4px 2px -4px; }
 .bb-ab h3 { margin: 0; font: 700 13px system-ui, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #a89f8f; }
 .bb-ab button { border: 0; background: none; color: #e0a046; font-size: 14px !important; font-weight: 600 !important; padding: 4px 2px; }
@@ -228,9 +222,10 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
     const stN = (L.st.find(x => x.k === z.stimmung) || {}).n, kulN = (L.kul.find(x => x.k === z.kulisse || (x.k === "wald" && z.kulisse === "waldnacht")) || {}).n;
     unterTitel.textContent = modus === "klang" ? (z.kulLaeuft && kulN ? "🌲 " + kulN : W("Wähle einen Ort", "Pick a place")) :
       (z.laeuft && stN ? "🎵 " + stN + (modus === "buehne" && z.kulLaeuft && kulN ? " · 🌲 " + kulN : "") : W("Wähle eine Stimmung", "Pick a mood"));
-    h += playKnopf(modus === "klang" ? z.kulLaeuft : z.laeuft);
+    if (modus === "klang") h += playKnopf(z.kulLaeuft);
+    else h += '<div class="bb-oben">' + playKnopf(z.laeuft, z.laeuft && stN ? (L.st.find(x => x.k === z.stimmung) || {}).s + " " + stN : W("Dreh die Uhr auf eine Stimmung", "Turn the dial to a mood")) + uhrHtml() + "</div>";
     if (modus === "klang") h += '<div class="bb-zeile"><button type="button" class="bb-blitz" data-bb="blitz">⚡ ' + W("Etwas passiert", "Something happens") + '</button><button type="button" class="bb-ueber" data-bb="ueber">🎲 ' + W("Überrasch mich", "Surprise me") + "</button></div>";
-    else { h += padHtml(L, z); if (modus === "buehne") h += '<div class="bb-zeile"><button type="button" class="bb-blitz" data-bb="blitz">⚡ ' + W("Etwas passiert", "Something happens") + "</button></div>"; }
+    else { if (modus === "buehne") h += '<div class="bb-zeile"><button type="button" class="bb-blitz" data-bb="blitz">⚡ ' + W("Etwas passiert", "Something happens") + "</button></div>"; }
     const kulAktiv = z.kulLaeuft ? (z.kulisse === "waldnacht" ? "wald" : z.kulisse) : null;
     if (modus === "klang") {
       h += abschnitt("🌲 " + W("Orte", "Places"), "kul", L.kul.length) + '<div class="bb-kacheln">' + kacheln(L.kul, seiteKul, "kul", kulAktiv) + "</div>";
@@ -280,7 +275,7 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
     const zieh = ev => stell(ev), los = () => { balken.removeEventListener("pointermove", zieh); balken.removeEventListener("pointerup", los); balken.removeEventListener("pointercancel", los); };
     balken.addEventListener("pointermove", zieh); balken.addEventListener("pointerup", los); balken.addEventListener("pointercancel", los);
   });
-  const playKnopf = laeuft => '<button type="button" class="bb-play' + (laeuft ? " laeuft" : "") + '" data-bb="play"><span class="ic">' + (laeuft ? "■" : "▶") + "</span>" + (laeuft ? W("Anhalten", "Stop") : W("Spielen", "Play")) + "</button>";
+  const playKnopf = (laeuft, unter) => '<button type="button" class="bb-play' + (laeuft ? " laeuft" : "") + '" data-bb="play"><span><span class="ic">' + (laeuft ? "■" : "▶") + "</span> " + (laeuft ? W("Anhalten", "Stop") : W("Spielen", "Play")) + "</span>" + (unter ? "<small>" + esc(unter) + "</small>" : "") + "</button>";
 
   /* ---------- Stimmungs-Regler: fröhlich (oben) · wild (rechts) · traurig (unten) · verwundert (links) ---------- */
   const MOOD = {
@@ -297,7 +292,7 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
     const w = Math.atan2(y, x) * 180 / Math.PI, pol = w >= 45 && w < 135 ? "o" : w >= -45 && w < 45 ? "r" : w >= -135 && w < -45 ? "u" : "l";
     const nb = { o: w < 90 ? "r" : "l", r: w > 0 ? "o" : "u", u: w > -90 ? "r" : "l", l: w > 0 ? "o" : "u" }[pol];
     const ab = Math.abs(((w - { o: 90, r: 0, u: -90, l: 180 }[pol]) + 540) % 360 - 180);
-    return (r > .7 ? W("sehr ", "very ") : "") + POLE[pol][1] + (ab > 25 ? " · " + POLE[nb][1] : "");
+    return ab > 25 ? POLE[pol][1] + "–" + POLE[nb][1] : POLE[pol][1];
   };
   const moodListe = (L, [x, y]) => L.st.filter(o => MOOD[o.k]).map(o => ({ ...o, d: Math.hypot(MOOD[o.k][0] - x, MOOD[o.k][1] - y) })).sort((a, b) => a.d - b.d);
   const autoPlanen = () => { autoNaechst = Date.now() + (110 + Math.random() * 100) * 1000; };
@@ -323,32 +318,32 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
     const k = zufall(pool).k; weich(P()); autoZuletzt.unshift(k); autoZuletzt.length = Math.min(3, autoZuletzt.length);
     stimmungWaehlen(k, true); zeige("🤖 " + W("Gleich: ", "Next: ") + (L.st.find(o => o.k === k) || {}).s + " " + (L.st.find(o => o.k === k) || {}).n);
   }, 1000);
-  function padHtml(L, z) {
-    const pos = ([x, y]) => "left:" + (50 + x * 38) + "%;top:" + (50 - y * 34) + "%";
-    const punkte = L.st.filter(o => MOOD[o.k]).map(o => '<span class="bb-pkt' + (z.laeuft && z.stimmung === o.k ? " an" : "") + (z.naechste === o.k && z.stimmung !== o.k ? " gleich" : "") + '" style="' + pos(MOOD[o.k]) + '">' + esc(o.s) + "</span>").join("");
-    const stN = k => { const o = L.st.find(x => x.k === k); return o ? o.s + " " + o.n : ""; };
-    const info = !mood ? W("Tipp auf die Fläche – dort, wo es sich richtig anfühlt", "Tap the pad where it feels right")
-      : "<b>" + moodName(mood) + "</b>" + (z.laeuft ? " · " + stN(z.stimmung) + (z.naechste && z.naechste !== z.stimmung ? " → " + stN(z.naechste) : "") : "");
-    return '<div class="bb-mood"><div class="bb-mood-kopf"><h3>🎭 ' + W("Stimmung", "Mood") + '</h3><button type="button" class="bb-auto' + (autoAn ? " an" : "") + '" data-bb="auto">🤖 Auto ' + (autoAn ? W("an", "on") : W("aus", "off")) + "</button></div>" +
-      '<div class="bb-pad" data-bbpad>' + Object.entries(POLE).map(([k, [e, n]]) => '<span class="bb-pol ' + k + '">' + e + " " + n + "</span>").join("") + punkte +
-      (mood ? '<span class="bb-punkt" style="' + pos(mood) + '"></span>' : "") + '</div><div class="bb-mood-info">' + info + "</div></div>";
+  /* Stimmungs-Uhr: tippen oder drehen – der Zeiger rastet in 8 Richtungen ein, in der Mitte = ausgeglichen */
+  const RICHT = [[0, 1], [.71, .71], [1, 0], [.71, -.71], [0, -1], [-.71, -.71], [-1, 0], [-.71, .71]];
+  const uhrWinkel = m => m && Math.hypot(m[0], m[1]) > .2 ? (Math.atan2(m[0], m[1]) * 180 / Math.PI + 180) : null; /* Zeiger zeigt nach unten bei 0° → +180 */
+  function uhrHtml() {
+    const w = uhrWinkel(mood), e = (em, x, y) => '<span class="e" style="left:' + (50 + x * 37) + "%;top:" + (50 - y * 37) + '%">' + em + "</span>";
+    return '<div class="bb-uhr-box"><div class="bb-uhr" data-bbuhr role="slider" aria-label="' + W("Stimmung", "Mood") + '">' + e("😄", 0, 1) + e("😠", 1, 0) + e("😢", 0, -1) + e("😮", -1, 0) +
+      '<span class="zeiger' + (w == null ? " mitte" : "") + '" style="--w:' + (w == null ? 180 : w) + 'deg"></span><span class="nabe"></span></div>' +
+      '<div class="wort">' + (mood ? moodName(mood) : W("Stimmung?", "Mood?")) + '</div><button type="button" class="bb-auto' + (autoAn ? " an" : "") + '" data-bb="auto">🤖 Auto ' + (autoAn ? W("an", "on") : W("aus", "off")) + "</button></div>";
   }
   bb.addEventListener("pointerdown", e => {
-    const pad = e.target.closest("[data-bbpad]"); if (!pad) return;
-    e.preventDefault(); padZieht = true; pad.classList.add("zieht"); try { pad.setPointerCapture(e.pointerId); } catch (_) {}
+    const uhr = e.target.closest("[data-bbuhr]"); if (!uhr) return;
+    e.preventDefault(); padZieht = true; try { uhr.setPointerCapture(e.pointerId); } catch (_) {}
     const stell = ev => {
-      const r = pad.getBoundingClientRect(), x = Math.max(-1, Math.min(1, ((ev.clientX - r.left) / r.width * 100 - 50) / 38)), y = Math.max(-1, Math.min(1, (50 - (ev.clientY - r.top) / r.height * 100) / 34));
-      mood = [Math.round(x * 100) / 100, Math.round(y * 100) / 100]; reglerAktiv = Date.now();
-      let p = $(".bb-punkt", pad); if (!p) { p = document.createElement("span"); p.className = "bb-punkt"; pad.appendChild(p); }
-      p.style.left = (50 + mood[0] * 38) + "%"; p.style.top = (50 - mood[1] * 34) + "%";
-      const L = listen(), info = $(".bb-mood-info", bb); if (L && info) { const b = moodListe(L, mood)[0]; info.innerHTML = "<b>" + moodName(mood) + "</b>" + (b ? " · " + esc(b.s + " " + b.n) : ""); }
+      const r = uhr.getBoundingClientRect(), dx = (ev.clientX - r.left) / r.width * 2 - 1, dy = 1 - (ev.clientY - r.top) / r.height * 2;
+      if (Math.hypot(dx, dy) < .33) mood = [0, 0];
+      else { const i = (Math.round(Math.atan2(dx, dy) / (Math.PI / 4)) + 8) % 8; mood = [RICHT[i][0] * .8, RICHT[i][1] * .8]; }
+      reglerAktiv = Date.now();
+      const w = uhrWinkel(mood), z = $(".zeiger", uhr); z.classList.toggle("mitte", w == null); if (w != null) z.style.setProperty("--w", w + "deg");
+      const wort = $(".bb-uhr-box .wort", bb); if (wort) wort.textContent = moodName(mood);
     };
     stell(e);
     const zieh = ev => stell(ev), los = () => {
-      pad.removeEventListener("pointermove", zieh); pad.removeEventListener("pointerup", los); pad.removeEventListener("pointercancel", los);
-      padZieht = false; pad.classList.remove("zieht"); schreib("imres-bb-mood", JSON.stringify(mood)); moodAnwenden(); setTimeout(spielZeichnen, 200);
+      uhr.removeEventListener("pointermove", zieh); uhr.removeEventListener("pointerup", los); uhr.removeEventListener("pointercancel", los);
+      padZieht = false; schreib("imres-bb-mood", JSON.stringify(mood)); moodAnwenden(); setTimeout(spielZeichnen, 250);
     };
-    pad.addEventListener("pointermove", zieh); pad.addEventListener("pointerup", los); pad.addEventListener("pointercancel", los);
+    uhr.addEventListener("pointermove", zieh); uhr.addEventListener("pointerup", los); uhr.addEventListener("pointercancel", los);
   });
 
   /* ---------- Aktionen ---------- */
