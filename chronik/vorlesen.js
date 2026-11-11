@@ -135,13 +135,19 @@
     return !!(mix && H && H.an() && Math.abs(H.kulisse() - 1) < .01 && Math.abs(H.musik() - 1) < .01 && liste.length && liste.every(x => mix[x.kap + ":" + x.i]));
   }
   /* ---------- Melden: Stellen beim Hören markieren und gesammelt weitergeben ---------- */
+  /* Melde-Knopf: einmal ?melden=1 aufrufen (merkt sich der Browser), ?melden=0 schaltet ihn ab.
+     Gemerkt in localStorage UND als Cookie – manche Firefox-Einstellungen leeren oder sperren localStorage. */
   const MELDEN = (() => {
-    try {
-      const q = new URLSearchParams(location.search).get("melden");
-      if (q === "1") localStorage.setItem("imres-melden", "1");
-      if (q === "0") localStorage.removeItem("imres-melden");
-      return localStorage.getItem("imres-melden") === "1";
-    } catch (_) { return false; }
+    let q = null; try { q = new URLSearchParams(location.search).get("melden"); } catch (_) {}
+    const merken = an => {
+      try { if (an) localStorage.setItem("imres-melden", "1"); else localStorage.removeItem("imres-melden"); } catch (_) {}
+      try { document.cookie = "imres-melden=" + (an ? "1; max-age=31536000" : "; max-age=0") + "; path=/; SameSite=Lax"; } catch (_) {}
+    };
+    if (q === "1") { merken(true); return true; }
+    if (q === "0") { merken(false); return false; }
+    try { if (localStorage.getItem("imres-melden") === "1") return true; } catch (_) {}
+    try { if (/(?:^|;\s*)imres-melden=1/.test(document.cookie)) { merken(true); return true; } } catch (_) {}
+    return false;
   })();
   let meldungen = []; try { meldungen = JSON.parse(localStorage.getItem("imres-meldungen") || "[]"); } catch (_) {}
   let wortZeiten = null;
