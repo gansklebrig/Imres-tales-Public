@@ -229,6 +229,10 @@ body:not(.ansicht-start):not(.ansicht-bereich):not(.ohne-ansicht) main > section
 .part-head { display: grid; gap: .5rem; margin-bottom: 2.5rem; max-width: 42rem; }
 .part-head h2 { font-size: clamp(2.2rem, 6vw, 3.6rem); line-height: 1; }
 .part-head p { color: var(--ash); }
+.bb-oeffner { justify-self: start; display: inline-flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-top: .4rem; padding: .7rem 1.1rem; border-radius: 999px; border: 1px solid rgba(224,160,70,.6);
+  background: linear-gradient(135deg, rgba(242,207,106,.22), rgba(200,138,32,.1)); color: #f2cf6a; font: 700 1rem/1.1 system-ui, sans-serif; cursor: pointer; }
+.bb-oeffner small { font-weight: 500; color: #c9bfae; font-size: .82rem; }
+.bb-oeffner:hover { background: linear-gradient(135deg, rgba(242,207,106,.32), rgba(200,138,32,.16)); }
 
 /* Leere Zustände (Chronik, Bestiarium) */
 .tome {
@@ -951,6 +955,7 @@ footer .fuss-recht .recht-links { padding-right: 2.4rem; }
         <p class="label" data-i18n="buehneLabel">Spielmannskunst</p>
         <h2 data-i18n="buehneTitle">Barden Beats</h2>
         <p data-i18n="buehneText">Die Gefährten spielen auf, du bestimmst wie: Tippe in die Raster – Barradin spielt Melodie und Bass, Friedrich schlägt den Takt, Echo übernimmt die zweite Stimme, Ezekiel den Rhythmus, und Rex gibt seinen Senf dazu. Jedes Instrument ist frei wählbar.</p>
+        <button type="button" class="bb-oeffner" data-bb-oeffnen><span data-i18n="bbKnopf">🎮 Einfach spielen</span> <small data-i18n="bbKnopfSub">– große Knöpfe, fürs Handy</small></button>
       </div>
       <div class="taverne buehne">
         <article class="tav-karte lautenwerk" id="lautenwerk"></article>
@@ -1025,7 +1030,7 @@ footer .fuss-recht .recht-links { padding-right: 2.4rem; }
       navTaverne: "Taverne", tavLabel: "Zeitvertreib", tavTitle: "Die Taverne",
       tavText: "Zwischen zwei Abenteuern wird gewürfelt, gesungen, gejagt und geplündert. Such dir ein Spiel aus – ein Klick auf eine Karte zeigt, worum es geht.",
       hsLabel: "Roguelike", hsTitle: "Heldensturm", hsText: "Kämpf dich als Barradin, Echo, Friedrich oder Ezekiel durch die ganze Kampagne: vom Hinterhalt auf der Straße bis in die Slums von Gracklstugh, 15 Orte mit Wächtern und Bossen, die kämpfen wie in unserer Geschichte. Sammle Beute, schalte Talente frei und verstärke deine Helden nach jedem Lauf.", hsKnopf: "Ins Getümmel stürzen",
-      navBuehne: "Bühne", buehneLabel: "Spielmannskunst", buehneTitle: "Barden Beats",
+      navBuehne: "Bühne", buehneLabel: "Spielmannskunst", buehneTitle: "Barden Beats", bbKnopf: "🎮 Einfach spielen", bbKnopfSub: "– große Knöpfe, fürs Handy",
       buehneText: "Die Gefährten spielen auf, du bestimmst wie: Tippe in die Raster – Barradin spielt Melodie und Bass, Friedrich schlägt den Takt, Echo übernimmt die zweite Stimme, Ezekiel den Rhythmus, und Rex gibt seinen Senf dazu. Jedes Instrument ist frei wählbar.",
       probeLabel: "Auftreten-Probe", probeTitle: "Barradins Loblied", probeZiel: "Wen besingen?", probeWurf: "W20 werfen", probeTipp: "Wirf den Würfel!",
       probeText: "Wähle, wen Barradin besingen soll, und wirf den W20. Je höher der Wurf, desto prächtiger der Reim und desto dicker die Schmeichelei.",
@@ -1092,7 +1097,7 @@ footer .fuss-recht .recht-links { padding-right: 2.4rem; }
       navTaverne: "Tavern", tavLabel: "Pastimes", tavTitle: "The Tavern",
       tavText: "Between two adventures there is rolling, singing, hunting and plundering. Pick a game – click a card to see what it's about.",
       hsLabel: "Roguelike", hsTitle: "Heldensturm", hsText: "Fight through the whole campaign as Barradin, Echo, Friedrich or Ezekiel: from the ambush on the road to the slums of Gracklstugh, 14 places with guardians and bosses who fight just like in our story. Collect loot, unlock talents and strengthen your heroes after every run.", hsKnopf: "Join the fray",
-      navBuehne: "Stage", buehneLabel: "Minstrelsy", buehneTitle: "Barden Beats",
+      navBuehne: "Stage", buehneLabel: "Minstrelsy", buehneTitle: "Barden Beats", bbKnopf: "🎮 Just play", bbKnopfSub: "– big buttons, made for phones",
       buehneText: "The companions strike up, you decide how: tap the grids – Barradin plays melody and bass, Friedrich keeps the beat, Echo takes the second voice, Ezekiel the rhythm, and Rex adds his two cents. Every instrument can be swapped.",
       probeLabel: "Performance check", probeTitle: "Barradin's Song of Praise", probeZiel: "Who should he praise?", probeWurf: "Roll the d20", probeTipp: "Roll the die!",
       probeText: "Pick who Barradin should sing about and roll the d20. The higher the roll, the grander the rhyme and the thicker the flattery.",
@@ -2286,6 +2291,14 @@ window.addEventListener("load", () => { const b = document.body.classList; if (!
     var h=a.getAttribute("href").split(/[?#]/)[0];if(!SPIELE[h])return;e.preventDefault();schwarz(SPIELE[h]);var ziel=a.href;requestAnimationFrame(function(){requestAnimationFrame(function(){location.href=ziel})});},true);
   /* zurück aus dem Spiel (Seite aus dem Zwischenspeicher): Schwarz wieder weg */
   window.addEventListener("pageshow",function(){var d=document.getElementById("spielwechsel");if(d)d.remove()});
+})();
+</script>
+<script>
+/* Barden Beats – einfache Ansicht (imrestales.de/Bardenbeats) */
+(function () {
+  function laden() { window.__bbJetzt = true; if (window.__bardenbeats) return window.__bardenbeats.oeffnen(); var s = document.createElement("script"); s.src = "bardenbeats.js?v=20261111a"; document.body.appendChild(s); }
+  if (/[?&]bb=/.test(location.search)) { window.__bbJetzt = false; var s = document.createElement("script"); s.src = "bardenbeats.js?v=20261111a"; document.body.appendChild(s); }
+  document.addEventListener("click", function (e) { if (e.target.closest && e.target.closest("[data-bb-oeffnen]")) { e.preventDefault(); laden(); } });
 })();
 </script>
 </body>
