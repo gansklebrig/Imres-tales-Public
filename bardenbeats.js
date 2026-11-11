@@ -70,19 +70,22 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
 .bb-zeile > button { flex: 1; min-height: 56px; border-radius: 16px; border: 1px solid rgba(235,226,204,.18); background: rgba(235,226,204,.06); font-weight: 700 !important; font-size: 16px !important; }
 .bb-zeile .bb-ueber { border-color: rgba(160,112,208,.6); background: linear-gradient(135deg, rgba(160,112,208,.28), rgba(208,86,122,.18)); }
 .bb-zeile .bb-blitz { border-color: rgba(176,58,72,.6); background: linear-gradient(135deg, rgba(176,58,72,.3), rgba(224,160,70,.12)); }
-.bb-oben { display: flex; gap: 10px; align-items: stretch; }
-.bb-oben .bb-play { flex: 1; min-height: 0; flex-direction: column; gap: 4px; }
-.bb-oben .bb-play small { font: 600 12.5px/1.2 system-ui, sans-serif; opacity: .8; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bb-uhr-box { flex: none; width: 112px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-.bb-uhr { position: relative; width: 108px; height: 108px; border-radius: 50%; touch-action: none; cursor: pointer;
+.bb-oben { display: flex; gap: 12px; align-items: center; }
+.bb-seite { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.bb-oben .bb-play { min-height: 64px; border-radius: 18px; flex-direction: column; gap: 3px; font-size: 19px !important; padding: 8px 6px; }
+.bb-oben .bb-play .ic { font-size: 20px; }
+.bb-oben .bb-play small { font: 600 11.5px/1.2 system-ui, sans-serif; opacity: .8; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bb-klein { min-height: 40px; border-radius: 12px; border: 1px solid rgba(176,58,72,.6); background: linear-gradient(135deg, rgba(176,58,72,.3), rgba(224,160,70,.12)); font-weight: 700 !important; font-size: 14px !important; }
+.bb-uhr-box { flex: none; width: 176px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.bb-uhr { position: relative; width: 172px; height: 172px; border-radius: 50%; touch-action: none; cursor: pointer;
   background: radial-gradient(circle at 50% 50%, #2a2030 0 38%, transparent 39%), conic-gradient(rgba(242,207,106,.6), rgba(200,50,60,.6) 25%, rgba(110,80,140,.65) 50%, rgba(63,174,116,.55) 75%, rgba(242,207,106,.6));
   box-shadow: inset 0 0 0 2px rgba(224,160,70,.55), inset 0 0 0 7px rgba(18,14,24,.55), 0 4px 14px rgba(0,0,0,.45); }
-.bb-uhr .e { position: absolute; font-size: 19px; line-height: 1; transform: translate(-50%, -50%); pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
-.bb-uhr .zeiger { position: absolute; left: 50%; top: 50%; width: 5px; height: 34px; margin-left: -2.5px; border-radius: 3px; background: linear-gradient(#fff3c4, #e0a046);
+.bb-uhr .e { position: absolute; font-size: 28px; line-height: 1; transform: translate(-50%, -50%); pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
+.bb-uhr .zeiger { position: absolute; left: 50%; top: 50%; width: 7px; height: 56px; margin-left: -3.5px; border-radius: 3px; background: linear-gradient(#fff3c4, #e0a046);
   transform-origin: 50% 0; transform: rotate(var(--w, 180deg)); box-shadow: 0 0 8px rgba(242,207,106,.7); pointer-events: none; transition: transform .35s cubic-bezier(.3,1.4,.5,1); }
 .bb-uhr .zeiger.mitte { height: 0; }
-.bb-uhr .nabe { position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #f2cf6a; box-shadow: 0 0 0 3px #241a26; pointer-events: none; }
-.bb-uhr-box .wort { font: 700 12px/1.1 system-ui, sans-serif; color: #f2cf6a; text-align: center; min-height: 1.1em; }
+.bb-uhr .nabe { position: absolute; left: 50%; top: 50%; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; background: #f2cf6a; box-shadow: 0 0 0 3px #241a26; pointer-events: none; }
+.bb-uhr-box .wort { font: 700 14px/1.1 system-ui, sans-serif; color: #f2cf6a; text-align: center; min-height: 1.1em; }
 .bb-auto { border-radius: 999px; padding: 3px 9px; font-size: 11.5px !important; font-weight: 700 !important; border: 1px solid rgba(235,226,204,.25); background: rgba(235,226,204,.06); color: #c9bfae; }
 .bb-auto.an { border-color: #6fd6a0; background: rgba(63,174,116,.22); color: #c8f2da; }
 .bb-ab { display: flex; align-items: baseline; justify-content: space-between; margin: 4px 2px -4px; }
@@ -95,6 +98,19 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
 .bb-kachel.an { border-color: #f2cf6a; background: linear-gradient(135deg, rgba(242,207,106,.28), rgba(200,138,32,.12)); box-shadow: 0 0 18px rgba(242,207,106,.22); }
 .bb-kachel.gleich::after { content: "${W("gleich", "next")}"; position: absolute; right: 8px; top: 6px; font-size: 10.5px; font-weight: 700; color: #1d140a; background: #e0a046; border-radius: 6px; padding: 1px 5px; animation: bbpuls 1s ease-in-out infinite; }
 @keyframes bbpuls { 50% { opacity: .45; } }
+.bb-mini { display: flex; gap: 12px; padding: 8px 12px; border-radius: 14px; background: rgba(235,226,204,.04); border: 1px solid rgba(235,226,204,.1); }
+.bb-mini label { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0; font: 700 12px/1.2 system-ui, sans-serif; color: #c9bfae; }
+.bb-mini label span { display: flex; justify-content: space-between; } .bb-mini output { color: #f2cf6a; }
+.bb-mini input[type=range] { height: 26px; }
+.bb-chips { display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 6px; scrollbar-width: none; }
+.bb-chips::-webkit-scrollbar { display: none; }
+.bb-chips button { flex: none; border-radius: 999px; border: 1px solid rgba(224,160,70,.35); background: rgba(235,226,204,.05); padding: 7px 11px; font-size: 13.5px !important; font-weight: 600 !important; white-space: nowrap; position: relative; }
+.bb-chips button.an { border-color: #f2cf6a; background: linear-gradient(135deg, rgba(242,207,106,.32), rgba(200,138,32,.14)); }
+.bb-chips button.gleich { border-color: #e0a046; animation: bbpuls 1s ease-in-out infinite; }
+.bb-kacheln.ort { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.bb-kacheln.ort .bb-kachel { min-height: 62px; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; padding: 8px 4px; font-size: 13.5px !important; border-color: rgba(63,174,116,.3); background: rgba(63,174,116,.07); }
+.bb-kacheln.ort .bb-kachel .sym { font-size: 26px; }
+.bb-kacheln.ort .bb-kachel.an { border-color: #6fd6a0; background: linear-gradient(135deg, rgba(63,174,116,.45), rgba(63,174,116,.18)); box-shadow: 0 0 16px rgba(63,174,116,.3); }
 .bb-orte { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 6px; scrollbar-width: none; scroll-snap-type: x proximity; }
 .bb-orte::-webkit-scrollbar { display: none; }
 .bb-orte button { flex: none; scroll-snap-align: start; border-radius: 999px; border: 1px solid rgba(63,174,116,.45); background: rgba(63,174,116,.1); padding: 10px 14px; font-size: 15px !important; font-weight: 600 !important; white-space: nowrap; }
@@ -201,6 +217,7 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
     return liste.slice(s * pro, s * pro + pro).map(x => '<button type="button" class="bb-kachel' + (x.k === aktiv ? " an" : "") + (x.k === gleich && x.k !== aktiv ? " gleich" : "") + '" data-bb' + art + '="' + esc(x.k) + '"><span class="sym">' + esc(x.s) + "</span><span>" + esc(x.n) + "</span></button>").join("") + mehr;
   };
   const abschnitt = (titel, mehrArt, gesamt) => '<div class="bb-ab"><h3>' + titel + "</h3>" + (gesamt > PRO_SEITE ? '<button type="button" data-bbmehr="' + mehrArt + '">' + W("andere ›", "more ›") + "</button>" : "") + "</div>";
+  const mini = (id, name, wert, lo, hi) => '<label><span>' + name + "<output>" + Math.round((wert - lo) / (hi - lo) * 100) + '</output></span><input type="range" data-bbregler="' + id + '" min="' + lo + '" max="' + hi + '" step="1" value="' + wert + '" style="--p:' + Math.round((wert - lo) / (hi - lo) * 100) + '%"></label>';
   const regler = (id, name, wert, lo, hi) => '<label><span>' + name + '</span><input type="range" data-bbregler="' + id + '" min="' + lo + '" max="' + hi + '" step="1" value="' + wert + '" style="--p:' + Math.round((wert - lo) / (hi - lo) * 100) + '%"><output>' + Math.round((wert - lo) / (hi - lo) * 100) + "</output></label>";
   function spielZeichnen() {
     ansicht = "spiel"; wahlChip.hidden = false;
@@ -223,23 +240,30 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
     unterTitel.textContent = modus === "klang" ? (z.kulLaeuft && kulN ? "🌲 " + kulN : W("Wähle einen Ort", "Pick a place")) :
       (z.laeuft && stN ? "🎵 " + stN + (modus === "buehne" && z.kulLaeuft && kulN ? " · 🌲 " + kulN : "") : W("Wähle eine Stimmung", "Pick a mood"));
     if (modus === "klang") h += playKnopf(z.kulLaeuft);
-    else h += '<div class="bb-oben">' + playKnopf(z.laeuft, z.laeuft && stN ? (L.st.find(x => x.k === z.stimmung) || {}).s + " " + (z.lied ? "„" + z.lied + "“" : stN) : W("Dreh die Uhr auf eine Stimmung", "Turn the dial to a mood")) + uhrHtml() + "</div>";
+    else h += '<div class="bb-oben">' + uhrHtml() + '<div class="bb-seite">' + playKnopf(z.laeuft, z.laeuft && stN ? (L.st.find(x => x.k === z.stimmung) || {}).s + " " + (z.lied ? "„" + z.lied + "“" : stN) : W("Dreh die Uhr", "Turn the dial")) +
+      (modus === "buehne" ? '<button type="button" class="bb-klein" data-bb="blitz">⚡ ' + W("Etwas passiert", "Something happens") + "</button>" : "") +
+      '<button type="button" class="bb-auto' + (autoAn ? " an" : "") + '" data-bb="auto">🤖 Auto ' + (autoAn ? W("an", "on") : W("aus", "off")) + "</button></div></div>";
+    /* kleine Zusatzregler: wie viel los ist (Musik) und Spannung (Ort) */
+    h += '<div class="bb-mini">' + (modus !== "klang" ? mini("int", "🔥 " + W("Wie viel los", "How busy"), Math.round(z.intensitaet ?? 5), 0, 10) : "") +
+      (modus !== "musik" ? mini("spann", "😨 " + W("Spannung", "Tension"), Math.round((z.spannung || 0) * 100), 0, 100) : "") + "</div>";
     if (modus === "klang") h += '<div class="bb-zeile"><button type="button" class="bb-blitz" data-bb="blitz">⚡ ' + W("Etwas passiert", "Something happens") + '</button><button type="button" class="bb-ueber" data-bb="ueber">🎲 ' + W("Überrasch mich", "Surprise me") + "</button></div>";
-    else { if (modus === "buehne") h += '<div class="bb-zeile"><button type="button" class="bb-blitz" data-bb="blitz">⚡ ' + W("Etwas passiert", "Something happens") + "</button></div>"; }
     const kulAktiv = z.kulLaeuft ? (z.kulisse === "waldnacht" ? "wald" : z.kulisse) : null;
     if (modus === "klang") {
       h += abschnitt("🌲 " + W("Orte", "Places"), "kul", L.kul.length) + '<div class="bb-kacheln">' + kacheln(L.kul, seiteKul, "kul", kulAktiv) + "</div>";
     } else {
-      h += '<div class="bb-ab"><h3>🎵 ' + (seiteSt % Math.ceil(L.st.length / (PRO_SEITE - 1)) === 0 ? W("Vorschläge", "Suggestions") : W("Stimmungen", "Moods")) + '</h3></div><div class="bb-kacheln">' + kacheln(L.st, seiteSt, "st", z.laeuft ? z.stimmung : null, z.naechste, "st") + "</div>";
-      if (modus === "buehne") h += '<div class="bb-ab"><h3>🌲 ' + W("Ort", "Place") + '</h3></div><div class="bb-orte">' + L.kul.map(x => '<button type="button" data-bbkul="' + esc(x.k) + '" class="' + (x.k === kulAktiv ? "an" : "") + '">' + esc(x.s) + " " + esc(x.n) + "</button>").join("") + "</div>";
+      if (modus === "musik") h += '<div class="bb-ab"><h3>🎵 ' + (seiteSt % Math.ceil(L.st.length / (PRO_SEITE - 1)) === 0 ? W("Vorschläge", "Suggestions") : W("Stimmungen", "Moods")) + '</h3></div><div class="bb-kacheln">' + kacheln(L.st, seiteSt, "st", z.laeuft ? z.stimmung : null, z.naechste, "st") + "</div>";
+      else {
+        h += '<div class="bb-ab"><h3>🎵 ' + W("Stimmung", "Mood") + '</h3></div><div class="bb-chips">' + L.st.map(x => '<button type="button" data-bbst="' + esc(x.k) + '" class="' + (z.laeuft && x.k === z.stimmung ? "an" : x.k === z.naechste ? "gleich" : "") + '">' + esc(x.s) + " " + esc(x.n) + "</button>").join("") + "</div>";
+        h += '<div class="bb-ab"><h3>🌲 ' + W("Ort", "Place") + '</h3></div><div class="bb-kacheln ort">' + L.kul.map(x => '<button type="button" class="bb-kachel' + (x.k === kulAktiv ? " an" : "") + '" data-bbkul="' + esc(x.k) + '"><span class="sym">' + esc(x.s) + "</span><span>" + esc(x.n) + "</span></button>").join("") + "</div>";
+      }
     }
     leisteZeichnen([modus !== "klang" ? ["master", "🎵 " + W("Musik", "Music"), Math.round((z.master ?? 8) * 10)] : null,
       modus !== "musik" ? ["kulvol", "🌲 " + W("Hintergrund", "Backdrop"), Math.round((z.kulisseVol ?? 5) * 10)] : null]);
     inhaltSetzen(h);
   }
   function inhaltSetzen(h) {
-    const scroll = inhalt.scrollTop, orteScroll = $(".bb-orte", inhalt) ? $(".bb-orte", inhalt).scrollLeft : 0;
-    inhalt.innerHTML = h; inhalt.scrollTop = scroll; const o = $(".bb-orte", inhalt); if (o) o.scrollLeft = orteScroll;
+    const scroll = inhalt.scrollTop, quer = {}; [".bb-orte", ".bb-chips"].forEach(c => { const e = $(c, inhalt); if (e) quer[c] = e.scrollLeft; });
+    inhalt.innerHTML = h; inhalt.scrollTop = scroll; Object.keys(quer).forEach(c => { const e = $(c, inhalt); if (e) e.scrollLeft = quer[c]; });
   }
   /* unten: zwei Lautstärken nebeneinander, mit − / + (5 %) und zum Antippen oder Ziehen */
   const WERTE = {};
@@ -326,7 +350,7 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
     const w = uhrWinkel(mood), e = (em, x, y) => '<span class="e" style="left:' + (50 + x * 37) + "%;top:" + (50 - y * 37) + '%">' + em + "</span>";
     return '<div class="bb-uhr-box"><div class="bb-uhr" data-bbuhr role="slider" aria-label="' + W("Stimmung", "Mood") + '">' + e("😄", 0, 1) + e("😠", 1, 0) + e("😢", 0, -1) + e("😮", -1, 0) +
       '<span class="zeiger' + (w == null ? " mitte" : "") + '" style="--w:' + (w == null ? 180 : w) + 'deg"></span><span class="nabe"></span></div>' +
-      '<div class="wort">' + (mood ? moodName(mood) : W("Stimmung?", "Mood?")) + '</div><button type="button" class="bb-auto' + (autoAn ? " an" : "") + '" data-bb="auto">🤖 Auto ' + (autoAn ? W("an", "on") : W("aus", "off")) + "</button></div>";
+      '<div class="wort">' + (mood ? moodName(mood) : W("Stimmung?", "Mood?")) + "</div></div>";
   }
   bb.addEventListener("pointerdown", e => {
     const uhr = e.target.closest("[data-bbuhr]"); if (!uhr) return;
@@ -402,17 +426,26 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
   bb.addEventListener("input", e => {
     const r = e.target.closest("[data-bbregler]"); if (!r) return;
     reglerAktiv = Date.now();
-    const v = +r.value, lo = +r.min, hi = +r.max; r.style.setProperty("--p", Math.round((v - lo) / (hi - lo) * 100) + "%"); r.nextElementSibling.textContent = Math.round((v - lo) / (hi - lo) * 100);
+    const v = +r.value, lo = +r.min, hi = +r.max, pz = Math.round((v - lo) / (hi - lo) * 100); r.style.setProperty("--p", pz + "%"); const o = r.nextElementSibling || r.parentNode.querySelector("output"); if (o) o.textContent = pz;
     const id = r.dataset.bbregler;
     if (id === "master" || id === "kulvol") pultRegler(id, v);
     else if (id === "gesamt") weltRegler("#gesamt", v);
     else if (id === "wspannung") weltRegler('[data-regler="spannung"]', v);
+    else if (id === "int") pultRegler("intensitaet", v);
+    else if (id === "spann") pultLeben("spannung", v);
   });
+  function pultLeben(art, v) {
+    const root = $("#lautenwerk"); if (!root) return;
+    let el = $$('[data-leben="' + art + '"]', root).find(x => x.tagName === "INPUT"), temp = false;
+    if (!el) { el = document.createElement("input"); el.type = "range"; el.min = "0"; el.max = "100"; el.setAttribute("data-leben", art); el.hidden = true; root.appendChild(el); temp = true; }
+    el.value = String(v); el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true }));
+    if (temp) el.remove();
+  }
   /* regelmäßig nachziehen, was gerade läuft (nicht während jemand schiebt) */
   let merk = "";
   setInterval(() => {
     if (bb.hidden || ansicht !== "spiel" || padZieht || Date.now() - reglerAktiv < 1500) return;
-    const z = Z(), s = SEITE === "welten" ? String(weltAn()) + welten().length : z ? [z.laeuft, z.stimmung, z.naechste, z.kulisse, z.kulLaeuft, z.master, z.kulisseVol, z.lied].join("|") : "";
+    const z = Z(), s = SEITE === "welten" ? String(weltAn()) + welten().length : z ? [z.laeuft, z.stimmung, z.naechste, z.kulisse, z.kulLaeuft, z.master, z.kulisseVol, z.lied, z.intensitaet, Math.round((z.spannung || 0) * 20)].join("|") : "";
     if (s !== merk) { merk = s; spielZeichnen(); }
   }, 600);
 
