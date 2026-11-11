@@ -370,20 +370,28 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     $$(".zyn-update").forEach(x => x.remove());
     if (!document.getElementById("zyn-update-css")) { const st = document.createElement("style"); st.id = "zyn-update-css"; st.textContent = '.zyn-update { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2147483000; width: 520px; max-width: 92vw; padding: 18px 22px 14px; border-radius: 16px; background: #1b1422; border: 2px solid #ffc830; box-shadow: 0 10px 40px #000c; color: #f4e6cc; font-family: system-ui, sans-serif; text-align: center; visibility: visible !important; } .zyn-update * { visibility: visible !important; }\n.zyn-update h3 { margin: 0 0 12px; font-size: 20px; color: #ffc830; }\n.zu-balken { height: 18px; border-radius: 9px; background: #2c2436; overflow: hidden; }\n.zu-balken b { display: block; height: 100%; width: 2%; border-radius: 9px; background: linear-gradient(90deg, #c08020, #ffc830, #fff0c0, #ffc830); background-size: 200% 100%; animation: zuLauf 1.2s linear infinite; transition: width .2s; }\n@keyframes zuLauf { from { background-position: 200% 0; } to { background-position: 0 0; } }\n.zu-text { margin: 12px 0 2px; font-size: 16px; } .zu-klein { margin: 0; font-size: 12px; opacity: .6; }\n.zyn-update.fehler { border-color: #ff6a3a; } .zyn-update.fehler .zu-balken b { background: #ff6a3a; animation: none; }'; document.head.appendChild(st); }
     const el = document.createElement("div"); el.className = "zyn-update";
-    el.innerHTML = '<h3>⬇ ' + W("Barden Beats wird aktualisiert", "Updating Barden Beats") + '</h3><div class="zu-balken"><b></b></div><p class="zu-text">' + W("Starte …", "Starting …") + '</p><p class="zu-klein"></p>';
+    el.innerHTML = '<h3>⬇ ' + W("Barden Beats wird aktualisiert", "Updating Barden Beats") + ' <span class="zu-pz">0 %</span></h3><div class="zu-balken"><b></b></div><p class="zu-text">' + W("Starte …", "Starting …") + '</p><p class="zu-klein"></p><div class="zu-schritte"></div>';
+    if (!document.getElementById("zyn-update-css2")) { const st2 = document.createElement("style"); st2.id = "zyn-update-css2"; st2.textContent = '.zu-pz { color: #f4e6cc; font-variant-numeric: tabular-nums; margin-left: 8px; }\n.zu-schritte { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }\n.zu-schritte span { font-size: 11px; padding: 3px 7px; border-radius: 10px; border: 1px solid #4a3a2a; opacity: .55; }\n.zu-schritte span.ok { opacity: 1; border-color: #6a5020; background: #2a2014; }\n.zu-schritte span.an { opacity: 1; border-color: #ffc830; color: #ffc830; }\n.zu-klein { font-variant-numeric: tabular-nums; }'; document.head.appendChild(st2); }
+    const pz = el.querySelector(".zu-pz"), schritteEl = el.querySelector(".zu-schritte");
+    const SCHRITTE = [W("Laden", "Download"), W("Platz", "Space"), W("Auspacken", "Unpack"), W("Tauschen", "Swap"), W("Aufräumen", "Clean"), W("Neustart", "Restart")];
+    const schritteZeigen = (s) => { schritteEl.innerHTML = SCHRITTE.map((n, k) => '<span class="' + (k + 1 < s ? "ok" : (k + 1 === s ? "an" : "")) + '">' + (k + 1 < s ? "✓ " : "") + n + "</span>").join(""); };
+    schritteZeigen(0);
+    let details = "";
     document.body.appendChild(el);
     const balken = el.querySelector("b"), text = el.querySelector(".zu-text"), klein = el.querySelector(".zu-klein"), t0 = performance.now();
     let weg = 0, fertig = false, ziel = 2, jetzt = 2;
     const schliessen = (ms) => setTimeout(() => el.remove(), ms);
-    const zeichnen = () => { jetzt += (ziel - jetzt) * .25; balken.style.width = Math.max(2, Math.min(100, jetzt)) + "%"; klein.textContent = Math.round((performance.now() - t0) / 1000) + " s"; };
+    const zeichnen = () => { jetzt += (ziel - jetzt) * .25; balken.style.width = Math.max(2, Math.min(100, jetzt)) + "%"; pz.textContent = Math.round(Math.min(100, jetzt)) + " %"; klein.textContent = details; };
     const anim = setInterval(zeichnen, 120);
     const t = setInterval(() => {
       if (fertig) return;
       if (performance.now() - t0 > 240000) { clearInterval(t); clearInterval(anim); text.textContent = "⚠ " + W("Das Update dauert ungewöhnlich lange – Internet prüfen und später noch einmal versuchen.", "The update takes unusually long."); schliessen(15000); return; }
       fetch("/zyn/update", { cache: "no-store" }).then(r => r.json()).then(j => {
         weg = 0;
-        if (j.ende) { fertig = true; clearInterval(t); ziel = /neuesten|wiederhergestellt/.test(j.ende) ? 100 : jetzt; text.textContent = (/neuesten|wiederhergestellt/.test(j.ende) ? "✅ " : "⚠ ") + j.ende; el.classList.toggle("fehler", !/neuesten|wiederhergestellt/.test(j.ende)); setTimeout(() => clearInterval(anim), 1500); schliessen(9000); return; }
-        if (j.schritt) { ziel = Math.max(ziel, j.prozent || 0, 3); text.textContent = W("Schritt ", "Step ") + j.schritt + "/" + j.von + ": " + j.titel; }
+        if (j.ende) { fertig = true; clearInterval(t); ziel = /neuesten|wiederhergestellt/.test(j.ende) ? 100 : jetzt; if (ziel === 100) schritteZeigen(99); text.textContent = (/neuesten|wiederhergestellt/.test(j.ende) ? "✅ " : "⚠ ") + j.ende; el.classList.toggle("fehler", !/neuesten|wiederhergestellt/.test(j.ende)); setTimeout(() => clearInterval(anim), 1500); schliessen(9000); return; }
+        if (j.schritt) { ziel = Math.max(ziel, j.prozent || 0, 3); text.textContent = W("Schritt ", "Step ") + j.schritt + "/" + j.von + ": " + j.titel; schritteZeigen(j.schritt); }
+        if (j.schritt === 1 && (j.geladen || j.objekte)) details = [j.geladen && W(j.geladen + " geladen", j.geladen + " loaded"), j.tempo, j.objekte && W(j.objekte + " Teile", j.objekte + " objects")].filter(Boolean).join(" · ");
+        else if (j.schritt > 1) details = j.meldung || "";
         if (j.schritt === j.von) text.textContent = "🔄 " + W("Fast fertig – die Bühne startet gleich neu …", "Almost done – the stage restarts …");
       }).catch(() => { /* Brücke startet neu: das gehört am Ende dazu */ if (++weg > 1) { ziel = Math.max(ziel, 92); text.textContent = "🔄 " + W("Die Bühne startet neu …", "The stage is restarting …"); } });
     }, 1000);

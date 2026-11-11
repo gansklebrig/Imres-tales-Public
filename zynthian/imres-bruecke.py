@@ -228,6 +228,15 @@ def update_stand():
         if m:
             schritt, von, titel, nach = int(m.group(1)), int(m.group(2)), m.group(3), zeilen[i + 1:]
     teil = 0.0
+    geladen, tempo, objekte = "", "", ""
+    for z in nach[::-1] if schritt == 1 else []:
+        # git: „Receiving objects:  45% (1234/2700), 12.30 MiB | 1.20 MiB/s“
+        m = re.search(r"(?:Receiving objects|Empfange Objekte):\s+\d+%\s+\((\d+/\d+)\)(?:,\s*([\d.,]+\s*[KMG]i?B))?(?:\s*\|\s*([\d.,]+\s*[KMG]i?B/s))?", z)
+        if m:
+            objekte = m.group(1)
+            geladen = (m.group(2) or "").replace("iB", "B")
+            tempo = (m.group(3) or "").replace("iB", "B")
+            break
     if schritt == 1:
         for z in nach:
             m = re.search(r"(Receiving objects|Empfange Objekte|Resolving deltas|Löse Unterschiede auf):\s+(\d+)%", z)
@@ -244,6 +253,7 @@ def update_stand():
             ende = z
             break
     return {"ok": True, "zeilen": zeilen[-8:], "alter": round(time.time() - st.st_mtime), "schritt": schritt, "von": von, "titel": titel,
+            "geladen": geladen, "tempo": tempo, "objekte": objekte,
             "prozent": 100 if ende and "neuesten" in ende else prozent, "ende": ende, "meldung": meldungen[-1] if meldungen else ""}
 
 
