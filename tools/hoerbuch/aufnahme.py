@@ -48,8 +48,8 @@ TITEL_TON = {   # Tonfall der gesprochenen Überschriften
     "Tinte und Wachs": "warmly", "Stille im Gebüsch": "hushed", "Spuren im Moos": "curious", "Was keiner sagen will": "hushed",
     "Eisen und Kräuter": "serious", "Erwartete Gäste": "hushed", "Ein vertrautes Gesicht": "warmly", "Wo das Feuer schläft": "awed",
     "Möwen und Laternen": "nostalgic", "Hinter schweren Türen": "serious", "Ein Dorf hält den Atem an": "hushed", "Ein Schatten über den Zinnen": "dramatic",
-    "Suppe für Wanderer": "warmly", "Schwere Lider": "tired", "Kaltes Gestein": "serious", "Kleine Zähne": "mischievously",
-    "Über dem Abgrund": "hushed", "Dreitausend Jahre Staub": "awed", "Am stillen Ufer": "hushed", "Was unter der Oberfläche wartet": "dramatic",
+    "Suppe für Wanderer": "warmly", "Eine warme Küche": "tired", "Kaltes Gestein": "serious", "Publikum": "mischievously",
+    "Über dem Abgrund": "hushed", "Pilzlicht": "awed", "Am stillen Ufer": "hushed", "Was unter der Oberfläche wartet": "dramatic",
     "Stadt aus Ruß": "serious", "Kleine Lügen": "dryly", "Der Thron im Glutlicht": "solemn", "Flöten und Fläschchen": "cheerful",
     "Ärger auf dem Markt": "dramatic", "Große Leute": "warmly", "Worte wie Fels": "solemn", "Ein Tisch im Halbdunkel": "hushed",
     "Hitze von unten": "serious", "Ein Lied für den Gastgeber": "mischievously", "Ein Flüstern am Ausgang": "dryly", "Was bisher geschah": "warmly"}

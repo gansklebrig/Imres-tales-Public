@@ -2014,7 +2014,7 @@ def probe(ausgabe, spec, mit_ende=False, mit_start=True):
             st = variante(daten, abschnitt_von(i)["stimmung"], rnd_m); musik_ev.append((t + .3, st)); t += .3 + daten["musik"][st]["ende"] - daten["musik"][st]["ueber"]
         if i in schnitt: info = dict(info, d=schnitt[i], e=[q for q in info.get("e", []) if q["t"] < schnitt[i] - .5], schnitt=True)
         plan.append((t, kap, i, info)); t += info["d"]
-        warte = max([q.get("warte", 0) for q in info.get("e", [])] + [.2])
+        warte = max([q.get("warte", 0) for q in info.get("e", [])] + [.6])   # Atempause zwischen den Absätzen
         t += warte + .1
     if mit_ende:
         musik_ev.append((t, "cliff")); t += daten["musik"]["cliff"]["ende"]

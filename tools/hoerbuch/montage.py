@@ -16,7 +16,7 @@ WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file_
 sys.path.insert(0, os.path.join(WURZEL, "tools/hoerbuch"))
 import aufnahme as A
 SR = 44100
-SATZ, ABSATZ_MIN, TEIL = .45, .0, .5
+SATZ, ABSATZ_MIN, TEIL = .62, .0, .5
 STILLE_DB = -52
 
 def J(p, std=None):
