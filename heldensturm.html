@@ -38861,7 +38861,7 @@ window.__hsZEIGER={v:1,an:0};
    Schalter: __hsGLWELT.modus='auto'|'an'|'aus' (auch ?glwelt=an|aus, SAVE.glwelt, Knopf „WebGL-Welt“ in der Grafik-Box), __hsGLWELT.aus=true,
    __hsGLWELT.k.{boden,deko,licht,tee,vc,bloom,bloomU,bloomS1,vig,css,gueltig}=0/1. Diagnose: „WebGL-Welt: …“, Paketliste „glwelt1(an)“.
    Erweiterungspunkte für „glfx“: __hsGLWELT.haken.{welt,licht,ende,bloom,uPost}, __hsGLWELT.api. ES2017 (Chromium 77), WebGL1. */
-window.__hsGLWELT={v:1};
+window.__hsGLWELT={v:2};
 (function(){try{
  /* ---------- Farben (CSS → [r,g,b,a] 0..1, nicht vormultipliziert) ---------- */
  const FC=new Map();let FCX=null;
@@ -39259,7 +39259,7 @@ window.__hsGLWELT={v:1};
  GW.grund=function(){if(GW.aus||GW.modus==='aus')return '';if(!rInit())return '';if(GW.modus==='an')return 'erzwungen';
   if(RS.u.soft)return '';return 'auto'};
  function bereit(){return !RS.fehl&&RS.u&&RS.o&&!RS.u.lost&&!RS.o.lost&&!(RS.u.gl.isContextLost&&RS.u.gl.isContextLost())&&!(RS.o.gl.isContextLost&&RS.o.gl.isContextLost())}
- function glMoeglich(){try{if(GW.gesperrt||GW.aus||GW.modus==='aus')return false;if(!G||!G.ground||G.state==='title'||G.state==='camp'||!P)return false;if(!GW.grund()||!bereit())return false;
+ function glMoeglich(){try{if(GW.gesperrt||GW.aus||GW.modus==='aus')return false;if(GW.pauseBis&&performance.now()<GW.pauseBis)return false;{const L2=window.__hsLICHT2;if(L2&&L2.bi&&L2.bi.on){GW.imTest=1;return false}if(GW.imTest){GW.imTest=0;GW.fbN=0}}if(!G||!G.ground||G.state==='title'||G.state==='camp'||!P)return false;if(!GW.grund()||!bereit())return false;
    if(!G||!G.ground||G.state==='title'||G.state==='camp'||!P)return false;if(typeof splitOn==='function'&&splitOn())return false;if(G.vp)return false;if(ulAn())return false;
    if(!cv||!(cv.width>2&&cv.height>2))return false;return true}catch(e){return false}}
  GW.aktiv=()=>EB.an;
@@ -39281,16 +39281,19 @@ window.__hsGLWELT={v:1};
   const X=RS.gxo;X.neu();X.zielSetzen(RS.of,EB.w,EB.h);X.st.mix=0;X.st.text=0;X.st.unbek=0;EB.slN=0;
   FR.bloom=0;FR.vig=0;FR.tee=0;FR.live.length=0;FR.dOn=0;FR.rw=0;FR.phase='start'}
  {const _r=render;render=function(dt){
-  if(!glMoeglich()){if(EB.an)ebAus();return _r.apply(this,arguments)}
+  if(!glMoeglich()){cxPruef();if(EB.an)ebAus();return _r.apply(this,arguments)}
   const c0=cx;let ok=false;
   try{bildBeginn()}catch(e){gErr('beginn',e);if(EB.an)ebAus();return _r.apply(this,arguments)}
   FR.on=1;cx=EB.g1;EB.g1.setTransform(DPR,0,0,DPR,0,0);crAus();
   try{const r=_r.apply(this,arguments);ok=true;return r}
-  finally{FR.on=0;FR.tee=0;FR.tee1=0;cx=c0;crZurueck();LCU.an=0;fsvZurueck();
+  finally{FR.on=0;FR.tee=0;FR.tee1=0;cx=c0;cxPruef();crZurueck();LCU.an=0;fsvZurueck();
    if(ok&&FR.phase==='post'){try{abschluss();ebAn();GW.st.bilder++}catch(e){gErr('abschluss',e);ebAus()}}
-   else{GW.st.abbruch++;if(FR.rw)gErr('bild','Bild nicht vollständig ('+FR.phase+')');ebAus()}
+   else{GW.st.abbruch++;if(FR.rw)gErr('bild','Bild nicht vollständig ('+FR.phase+')');ebAus();GW.pauseBis=performance.now()+1500}
    if(FR.fb){GW.fbN++;if(GW.fbN>=3||GW.st.fehler>40){GW.gesperrt=true;ebAus();try{console.warn('glwelt: GL-Welt nach Fehlern abgeschaltet – 2D-Pfad',GW.err.slice(-3))}catch(e){}}}else GW.fbN=0;
    FR.phase=''}}}
+ /* Hat licht2 während eines GL-Bildes eine frische Leinwand angelegt, zeigt c0 auf die alte (nicht mehr eingehängte) – dann auf die aktive wechseln */
+ function cxPruef(){try{const c=cx&&cx.canvas;if(c&&c.isConnected===false){const L2=window.__hsLICHT2,F=L2&&L2.fl;cx=(F&&F.g&&F.T&&F.T.isConnected)?F.g:cv.getContext('2d');GW.st.cxFix=(GW.st.cxFix||0)+1}}catch(e){}}
+ GW.cxPruef=cxPruef;
  /* Vorspann von renderWorld (Bodenfarbe, Straße, Abdunklung außerhalb) schlucken – das zeichnet die untere Ebene */
  {const _rw=renderWorld;renderWorld=function(dt){if(!FR.on||FR.phase!=='start')return _rw.apply(this,arguments);
   FR.rw=1;FR.phase='vor';const N=RS.nul;N.neu();N.von(cx);cx=N;
@@ -39558,7 +39561,7 @@ window.__hsGLWELT={v:1};
  GW.mb=mb;
  function zeile(){const g=GW.grund();const st=GW.st;
   if(!g){return 'WebGL-Welt: aus ('+(GW.modus==='aus'||GW.aus?'Schalter':RS.fehl?RS.fehl:RS.u&&RS.u.soft?'Software-WebGL':'nicht bereit')+')'+(RS.u&&RS.u.ren?' · '+RS.u.ren:'')}
-  return `WebGL-Welt: ${EB.an?'an':'bereit'} (WebGL1, ${RS.u.ren}${g==='erzwungen'?', erzwungen':''}) · Texturen ${String(mb()).replace('.',',')} MB · Kontextverluste ${st.verlust} · Bilder ${st.bilder} (Abbruch ${st.abbruch}) · Boden-Kacheln ${BT.cur.size} (Bau ${st.kachelBau}, Live ${st.kachelLive}) · Deko ${DT.fest.size} ruhend (an ${st.dekoAn}/live ${st.dekoLive}) · Umleitungen ${st.tee} · CSS-Mischung ${st.css}${st.mix?' · ⚠ Mischmodi '+st.mix:''}${st.fehler?' · Fehler '+st.fehler+' ('+GW.err.slice(-2).join('; ')+')':''}`}
+  return `WebGL-Welt: ${GW.gesperrt?'aus (nach Fehlern gesperrt)':GW.imTest?'pausiert (Firefox-Test)':EB.an?'an':'bereit'} (WebGL1, ${RS.u.ren}${g==='erzwungen'?', erzwungen':''}) · Texturen ${String(mb()).replace('.',',')} MB · Kontextverluste ${st.verlust} · Bilder ${st.bilder} (Abbruch ${st.abbruch}) · Boden-Kacheln ${BT.cur.size} (Bau ${st.kachelBau}, Live ${st.kachelLive}) · Deko ${DT.fest.size} ruhend (an ${st.dekoAn}/live ${st.dekoLive}) · Umleitungen ${st.tee} · CSS-Mischung ${st.css}${st.mix?' · ⚠ Mischmodi '+st.mix:''}${st.fehler?' · Fehler '+st.fehler+' ('+GW.err.slice(-2).join('; ')+')':''}`}
  GW.zeile=zeile;
  function diagHaken(){const DG=window.__hsDIAG;if(!DG||DG.__gw)return;DG.__gw=1;
   try{const d0=Object.getOwnPropertyDescriptor(DG,'letzter');let lz=DG.letzter;const get=d0&&d0.get?d0.get:()=>lz,set=d0&&d0.set?d0.set:(v)=>{lz=v};
