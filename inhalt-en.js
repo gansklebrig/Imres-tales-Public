@@ -574,7 +574,7 @@ window.INHALT_EN = {
       ],
       neuAb: "Big Folk", /* erster Abschnitt der neuesten Sitzung – dorthin führt „Weiterlesen“ auf der Startseite */
       /* Lebende Seitenränder: eine Kulisse pro "## "-Abschnitt, in derselben Reihenfolge (alle Orte stehen in chronik/kulissen.js) */
-      kulissen: ["kraeuternebel", "kerker", "ausbruch", "spinnweben", "pilzgrab", "see", "demogorgon", "gracklstugh", "schenke", "thronsaal", "laden", "klingenmarkt", "riesendorf", "steinsprecher", "schenke-rotroben", "flammenhalle", "themberchaud", "drachenei"],
+      kulissen: ["schenke", "kraeuternebel", "kerker", "ausbruch", "spinnweben", "pilzgrab", "see", "demogorgon", "gracklstugh", "schenke", "thronsaal", "laden", "klingenmarkt", "riesendorf", "steinsprecher", "schenke-rotroben", "flammenhalle", "themberchaud", "drachenei"],
       /* "Previously" in 60 seconds: abschnitt = heading that "Go there" jumps to */
       rueckblick: [
         { abschnitt: "Cold Stone", bild: "gefangen-kerker.jpg", titel: "Waking up behind bars", text: "Ilvara was a drow and knocked us out with a herbal mist. We woke up bound in a dungeon. Echo, as a rat, gnawed through our bonds and fetched our gear. Simply brilliant." },

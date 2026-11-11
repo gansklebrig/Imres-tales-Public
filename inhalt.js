@@ -581,7 +581,7 @@ window.INHALT = {
       ],
       neuAb: "Große Leute", /* erster Abschnitt der neuesten Sitzung – dorthin führt „Weiterlesen“ auf der Startseite */
       /* Lebende Seitenränder: eine Kulisse pro "## "-Abschnitt, in derselben Reihenfolge (alle Orte stehen in chronik/kulissen.js) */
-      kulissen: ["kraeuternebel", "kerker", "ausbruch", "spinnweben", "pilzgrab", "see", "demogorgon", "gracklstugh", "schenke", "thronsaal", "laden", "klingenmarkt", "riesendorf", "steinsprecher", "schenke-rotroben", "flammenhalle", "themberchaud", "drachenei"],
+      kulissen: ["schenke", "kraeuternebel", "kerker", "ausbruch", "spinnweben", "pilzgrab", "see", "demogorgon", "gracklstugh", "schenke", "thronsaal", "laden", "klingenmarkt", "riesendorf", "steinsprecher", "schenke-rotroben", "flammenhalle", "themberchaud", "drachenei"],
       /* „Was bisher geschah“ in 60 Sekunden: abschnitt = Überschrift, zu der „Zur Stelle“ springt */
       rueckblick: [
         { abschnitt: "Kaltes Gestein", bild: "gefangen-kerker.jpg", titel: "Aufgewacht hinter Gittern", text: "Ilvara war eine Drow und betäubte uns mit Kräuternebel. Wir erwachten gefesselt in einem Kerker. Echo nagte uns als Ratte die Fesseln durch und holte unsere Ausrüstung. Einfach genial." },
