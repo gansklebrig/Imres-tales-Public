@@ -1,2094 +1,2214 @@
 {
 "absaetze": {
 "vorab:0": {
-"datei": "audio/chronik/de/mix/vorab-01-cb966b1614.mp3",
+"datei": "audio/chronik/de/mix/vorab-01-7c8beea6f9.mp3",
 "ab": 13.3,
-"bis": 78.6
+"bis": 79.2
 },
 "I:0": {
-"datei": "audio/chronik/de/mix/I-01-623dde0b7d.mp3",
+"datei": "audio/chronik/de/mix/I-01-aa4780eb3e.mp3",
 "ab": 13.3,
 "bis": 15.5
 },
 "I:1": {
-"datei": "audio/chronik/de/mix/I-01-623dde0b7d.mp3",
+"datei": "audio/chronik/de/mix/I-01-aa4780eb3e.mp3",
 "ab": 15.5,
 "bis": 46.0
 },
 "I:2": {
-"datei": "audio/chronik/de/mix/I-01-623dde0b7d.mp3",
+"datei": "audio/chronik/de/mix/I-01-aa4780eb3e.mp3",
 "ab": 46.0,
 "bis": 107.9
 },
 "I:3": {
-"datei": "audio/chronik/de/mix/I-01-623dde0b7d.mp3",
+"datei": "audio/chronik/de/mix/I-01-aa4780eb3e.mp3",
 "ab": 107.9,
 "bis": 183.8
 },
 "I:4": {
-"datei": "audio/chronik/de/mix/I-01-623dde0b7d.mp3",
+"datei": "audio/chronik/de/mix/I-01-aa4780eb3e.mp3",
 "ab": 183.8,
 "bis": 270.6
 },
 "I:5": {
-"datei": "audio/chronik/de/mix/I-01-623dde0b7d.mp3",
+"datei": "audio/chronik/de/mix/I-01-aa4780eb3e.mp3",
 "ab": 270.6,
 "bis": 316.3
 },
 "I:6": {
-"datei": "audio/chronik/de/mix/I-01-623dde0b7d.mp3",
+"datei": "audio/chronik/de/mix/I-01-aa4780eb3e.mp3",
 "ab": 316.3,
 "bis": 372.2
 },
 "I:7": {
-"datei": "audio/chronik/de/mix/I-01-623dde0b7d.mp3",
+"datei": "audio/chronik/de/mix/I-01-aa4780eb3e.mp3",
 "ab": 372.2,
-"bis": 396.3
+"bis": 392.4
 },
 "I:8": {
-"datei": "audio/chronik/de/mix/I-01-623dde0b7d.mp3",
-"ab": 396.3,
-"bis": 473.3
+"datei": "audio/chronik/de/mix/I-01-aa4780eb3e.mp3",
+"ab": 392.4,
+"bis": 469.3
 },
 "I:9": {
-"datei": "audio/chronik/de/mix/I-01-623dde0b7d.mp3",
-"ab": 473.3,
-"bis": 486.2
+"datei": "audio/chronik/de/mix/I-01-aa4780eb3e.mp3",
+"ab": 469.3,
+"bis": 482.2
 },
 "I:10": {
-"datei": "audio/chronik/de/mix/I-01-623dde0b7d.mp3",
-"ab": 486.2,
-"bis": 499.0
+"datei": "audio/chronik/de/mix/I-01-aa4780eb3e.mp3",
+"ab": 482.2,
+"bis": 495.0
 },
 "I:11": {
-"datei": "audio/chronik/de/mix/I-01-623dde0b7d.mp3",
-"ab": 499.0,
-"bis": 528.8
+"datei": "audio/chronik/de/mix/I-01-aa4780eb3e.mp3",
+"ab": 495.0,
+"bis": 524.8
 },
 "I:12": {
-"datei": "audio/chronik/de/mix/I-01-623dde0b7d.mp3",
-"ab": 528.8,
-"bis": 616.9
+"datei": "audio/chronik/de/mix/I-01-aa4780eb3e.mp3",
+"ab": 524.8,
+"bis": 596.9
 },
 "I:13": {
-"datei": "audio/chronik/de/mix/I-01-623dde0b7d.mp3",
-"ab": 616.9,
-"bis": 653.7
+"datei": "audio/chronik/de/mix/I-01-aa4780eb3e.mp3",
+"ab": 596.9,
+"bis": 622.2
 },
 "I:14": {
-"datei": "audio/chronik/de/mix/I-01-623dde0b7d.mp3",
-"ab": 653.7,
-"bis": 669.7
+"datei": "audio/chronik/de/mix/I-01-aa4780eb3e.mp3",
+"ab": 622.2,
+"bis": 633.2
 },
-"I:16": {
-"datei": "audio/chronik/de/mix/I-01-623dde0b7d.mp3",
-"ab": 669.7,
-"bis": 700.7
+"I:15": {
+"datei": "audio/chronik/de/mix/I-01-aa4780eb3e.mp3",
+"ab": 633.2,
+"bis": 651.3
 },
 "I:17": {
-"datei": "audio/chronik/de/mix/I-01-623dde0b7d.mp3",
-"ab": 700.7,
-"bis": 774.9
+"datei": "audio/chronik/de/mix/I-01-aa4780eb3e.mp3",
+"ab": 651.3,
+"bis": 682.4
 },
-"I:19": {
-"datei": "audio/chronik/de/mix/I-02-2237fbdadf.mp3",
+"I:18": {
+"datei": "audio/chronik/de/mix/I-01-aa4780eb3e.mp3",
+"ab": 682.4,
+"bis": 756.6
+},
+"I:20": {
+"datei": "audio/chronik/de/mix/I-02-22769d7261.mp3",
 "ab": 3.4,
 "bis": 5.3
 },
-"I:20": {
-"datei": "audio/chronik/de/mix/I-02-2237fbdadf.mp3",
+"I:21": {
+"datei": "audio/chronik/de/mix/I-02-22769d7261.mp3",
 "ab": 5.3,
 "bis": 56.4
 },
-"I:21": {
-"datei": "audio/chronik/de/mix/I-02-2237fbdadf.mp3",
+"I:22": {
+"datei": "audio/chronik/de/mix/I-02-22769d7261.mp3",
 "ab": 56.4,
 "bis": 80.8
 },
-"I:22": {
-"datei": "audio/chronik/de/mix/I-02-2237fbdadf.mp3",
-"ab": 80.8,
-"bis": 118.6
-},
 "I:23": {
-"datei": "audio/chronik/de/mix/I-02-2237fbdadf.mp3",
-"ab": 118.6,
-"bis": 128.9
+"datei": "audio/chronik/de/mix/I-02-22769d7261.mp3",
+"ab": 80.8,
+"bis": 118.1
 },
 "I:24": {
-"datei": "audio/chronik/de/mix/I-02-2237fbdadf.mp3",
-"ab": 128.9,
-"bis": 150.1
+"datei": "audio/chronik/de/mix/I-02-22769d7261.mp3",
+"ab": 118.1,
+"bis": 128.4
 },
 "I:25": {
-"datei": "audio/chronik/de/mix/I-02-2237fbdadf.mp3",
-"ab": 150.1,
-"bis": 181.2
+"datei": "audio/chronik/de/mix/I-02-22769d7261.mp3",
+"ab": 128.4,
+"bis": 151.3
 },
 "I:26": {
-"datei": "audio/chronik/de/mix/I-02-2237fbdadf.mp3",
-"ab": 181.2,
-"bis": 226.0
+"datei": "audio/chronik/de/mix/I-02-22769d7261.mp3",
+"ab": 151.3,
+"bis": 173.1
 },
 "I:27": {
-"datei": "audio/chronik/de/mix/I-02-2237fbdadf.mp3",
-"ab": 226.0,
-"bis": 241.1
+"datei": "audio/chronik/de/mix/I-02-22769d7261.mp3",
+"ab": 173.1,
+"bis": 199.6
 },
 "I:28": {
-"datei": "audio/chronik/de/mix/I-02-2237fbdadf.mp3",
-"ab": 241.1,
-"bis": 277.4
+"datei": "audio/chronik/de/mix/I-02-22769d7261.mp3",
+"ab": 199.6,
+"bis": 243.8
 },
 "I:29": {
-"datei": "audio/chronik/de/mix/I-02-2237fbdadf.mp3",
-"ab": 277.4,
-"bis": 313.3
+"datei": "audio/chronik/de/mix/I-02-22769d7261.mp3",
+"ab": 243.8,
+"bis": 251.3
 },
 "I:30": {
-"datei": "audio/chronik/de/mix/I-02-2237fbdadf.mp3",
-"ab": 313.3,
-"bis": 340.2
+"datei": "audio/chronik/de/mix/I-02-22769d7261.mp3",
+"ab": 251.3,
+"bis": 270.0
 },
 "I:31": {
-"datei": "audio/chronik/de/mix/I-02-2237fbdadf.mp3",
-"ab": 340.2,
-"bis": 345.4
+"datei": "audio/chronik/de/mix/I-02-22769d7261.mp3",
+"ab": 270.0,
+"bis": 284.4
 },
 "I:32": {
-"datei": "audio/chronik/de/mix/I-02-2237fbdadf.mp3",
-"ab": 345.4,
-"bis": 351.3
+"datei": "audio/chronik/de/mix/I-02-22769d7261.mp3",
+"ab": 284.4,
+"bis": 325.2
 },
 "I:33": {
-"datei": "audio/chronik/de/mix/I-02-2237fbdadf.mp3",
-"ab": 351.3,
-"bis": 366.3
+"datei": "audio/chronik/de/mix/I-02-22769d7261.mp3",
+"ab": 325.2,
+"bis": 355.9
 },
 "I:34": {
-"datei": "audio/chronik/de/mix/I-02-2237fbdadf.mp3",
-"ab": 366.3,
-"bis": 422.8
+"datei": "audio/chronik/de/mix/I-02-22769d7261.mp3",
+"ab": 355.9,
+"bis": 382.9
 },
 "I:35": {
-"datei": "audio/chronik/de/mix/I-02-2237fbdadf.mp3",
-"ab": 422.8,
-"bis": 467.9
+"datei": "audio/chronik/de/mix/I-02-22769d7261.mp3",
+"ab": 382.9,
+"bis": 388.0
+},
+"I:36": {
+"datei": "audio/chronik/de/mix/I-02-22769d7261.mp3",
+"ab": 388.0,
+"bis": 394.0
 },
 "I:37": {
-"datei": "audio/chronik/de/mix/I-03-620fea01f8.mp3",
+"datei": "audio/chronik/de/mix/I-02-22769d7261.mp3",
+"ab": 394.0,
+"bis": 409.0
+},
+"I:38": {
+"datei": "audio/chronik/de/mix/I-02-22769d7261.mp3",
+"ab": 409.0,
+"bis": 462.4
+},
+"I:39": {
+"datei": "audio/chronik/de/mix/I-02-22769d7261.mp3",
+"ab": 462.4,
+"bis": 511.0
+},
+"I:41": {
+"datei": "audio/chronik/de/mix/I-03-e0c6ffbd77.mp3",
 "ab": 3.4,
 "bis": 5.4
 },
-"I:38": {
-"datei": "audio/chronik/de/mix/I-03-620fea01f8.mp3",
+"I:42": {
+"datei": "audio/chronik/de/mix/I-03-e0c6ffbd77.mp3",
 "ab": 5.4,
 "bis": 32.3
 },
-"I:39": {
-"datei": "audio/chronik/de/mix/I-03-620fea01f8.mp3",
+"I:43": {
+"datei": "audio/chronik/de/mix/I-03-e0c6ffbd77.mp3",
 "ab": 32.3,
 "bis": 62.0
 },
-"I:40": {
-"datei": "audio/chronik/de/mix/I-03-620fea01f8.mp3",
+"I:44": {
+"datei": "audio/chronik/de/mix/I-03-e0c6ffbd77.mp3",
 "ab": 62.0,
 "bis": 119.9
 },
-"I:41": {
-"datei": "audio/chronik/de/mix/I-03-620fea01f8.mp3",
+"I:45": {
+"datei": "audio/chronik/de/mix/I-03-e0c6ffbd77.mp3",
 "ab": 119.9,
 "bis": 123.8
 },
-"I:42": {
-"datei": "audio/chronik/de/mix/I-03-620fea01f8.mp3",
+"I:46": {
+"datei": "audio/chronik/de/mix/I-03-e0c6ffbd77.mp3",
 "ab": 123.8,
 "bis": 178.1
 },
-"I:43": {
-"datei": "audio/chronik/de/mix/I-03-620fea01f8.mp3",
+"I:47": {
+"datei": "audio/chronik/de/mix/I-03-e0c6ffbd77.mp3",
 "ab": 178.1,
 "bis": 188.9
 },
-"I:44": {
-"datei": "audio/chronik/de/mix/I-03-620fea01f8.mp3",
+"I:48": {
+"datei": "audio/chronik/de/mix/I-03-e0c6ffbd77.mp3",
 "ab": 188.9,
 "bis": 221.8
 },
-"I:45": {
-"datei": "audio/chronik/de/mix/I-03-620fea01f8.mp3",
+"I:49": {
+"datei": "audio/chronik/de/mix/I-03-e0c6ffbd77.mp3",
 "ab": 221.8,
 "bis": 252.5
 },
-"I:46": {
-"datei": "audio/chronik/de/mix/I-03-620fea01f8.mp3",
+"I:50": {
+"datei": "audio/chronik/de/mix/I-03-e0c6ffbd77.mp3",
 "ab": 252.5,
 "bis": 267.0
 },
-"I:47": {
-"datei": "audio/chronik/de/mix/I-03-620fea01f8.mp3",
+"I:51": {
+"datei": "audio/chronik/de/mix/I-03-e0c6ffbd77.mp3",
 "ab": 267.0,
 "bis": 308.7
 },
-"I:48": {
-"datei": "audio/chronik/de/mix/I-03-620fea01f8.mp3",
-"ab": 308.7,
-"bis": 353.3
-},
-"I:49": {
-"datei": "audio/chronik/de/mix/I-03-620fea01f8.mp3",
-"ab": 353.3,
-"bis": 382.3
-},
-"I:50": {
-"datei": "audio/chronik/de/mix/I-03-620fea01f8.mp3",
-"ab": 382.3,
-"bis": 430.2
-},
 "I:52": {
-"datei": "audio/chronik/de/mix/I-04-3bb7e0cb15.mp3",
-"ab": 3.2,
-"bis": 5.3
+"datei": "audio/chronik/de/mix/I-03-e0c6ffbd77.mp3",
+"ab": 308.7,
+"bis": 338.7
 },
 "I:53": {
-"datei": "audio/chronik/de/mix/I-04-3bb7e0cb15.mp3",
-"ab": 5.3,
-"bis": 53.6
+"datei": "audio/chronik/de/mix/I-03-e0c6ffbd77.mp3",
+"ab": 338.7,
+"bis": 359.0
 },
 "I:54": {
-"datei": "audio/chronik/de/mix/I-04-3bb7e0cb15.mp3",
-"ab": 53.6,
-"bis": 79.2
+"datei": "audio/chronik/de/mix/I-03-e0c6ffbd77.mp3",
+"ab": 359.0,
+"bis": 388.0
 },
 "I:55": {
-"datei": "audio/chronik/de/mix/I-04-3bb7e0cb15.mp3",
-"ab": 79.2,
-"bis": 95.5
-},
-"I:56": {
-"datei": "audio/chronik/de/mix/I-04-3bb7e0cb15.mp3",
-"ab": 95.5,
-"bis": 123.0
+"datei": "audio/chronik/de/mix/I-03-e0c6ffbd77.mp3",
+"ab": 388.0,
+"bis": 441.5
 },
 "I:57": {
-"datei": "audio/chronik/de/mix/I-04-3bb7e0cb15.mp3",
-"ab": 123.0,
-"bis": 155.5
+"datei": "audio/chronik/de/mix/I-04-b0a47467b7.mp3",
+"ab": 3.2,
+"bis": 5.2
 },
 "I:58": {
-"datei": "audio/chronik/de/mix/I-04-3bb7e0cb15.mp3",
-"ab": 155.5,
-"bis": 190.6
+"datei": "audio/chronik/de/mix/I-04-b0a47467b7.mp3",
+"ab": 5.2,
+"bis": 53.5
 },
 "I:59": {
-"datei": "audio/chronik/de/mix/I-04-3bb7e0cb15.mp3",
-"ab": 190.6,
-"bis": 209.8
+"datei": "audio/chronik/de/mix/I-04-b0a47467b7.mp3",
+"ab": 53.5,
+"bis": 79.1
 },
 "I:60": {
-"datei": "audio/chronik/de/mix/I-04-3bb7e0cb15.mp3",
-"ab": 209.8,
-"bis": 236.5
+"datei": "audio/chronik/de/mix/I-04-b0a47467b7.mp3",
+"ab": 79.1,
+"bis": 95.4
 },
 "I:61": {
-"datei": "audio/chronik/de/mix/I-04-3bb7e0cb15.mp3",
-"ab": 236.5,
-"bis": 238.7
+"datei": "audio/chronik/de/mix/I-04-b0a47467b7.mp3",
+"ab": 95.4,
+"bis": 122.9
 },
 "I:62": {
-"datei": "audio/chronik/de/mix/I-04-3bb7e0cb15.mp3",
-"ab": 238.7,
-"bis": 260.6
+"datei": "audio/chronik/de/mix/I-04-b0a47467b7.mp3",
+"ab": 122.9,
+"bis": 155.4
 },
 "I:63": {
-"datei": "audio/chronik/de/mix/I-04-3bb7e0cb15.mp3",
-"ab": 260.6,
-"bis": 323.9
+"datei": "audio/chronik/de/mix/I-04-b0a47467b7.mp3",
+"ab": 155.4,
+"bis": 176.7
 },
 "I:64": {
-"datei": "audio/chronik/de/mix/I-04-3bb7e0cb15.mp3",
-"ab": 323.9,
-"bis": 353.8
+"datei": "audio/chronik/de/mix/I-04-b0a47467b7.mp3",
+"ab": 176.7,
+"bis": 195.3
 },
 "I:65": {
-"datei": "audio/chronik/de/mix/I-04-3bb7e0cb15.mp3",
-"ab": 353.8,
-"bis": 449.9
+"datei": "audio/chronik/de/mix/I-04-b0a47467b7.mp3",
+"ab": 195.3,
+"bis": 214.0
 },
 "I:66": {
-"datei": "audio/chronik/de/mix/I-04-3bb7e0cb15.mp3",
-"ab": 449.9,
-"bis": 468.2
+"datei": "audio/chronik/de/mix/I-04-b0a47467b7.mp3",
+"ab": 214.0,
+"bis": 233.2
 },
 "I:67": {
-"datei": "audio/chronik/de/mix/I-04-3bb7e0cb15.mp3",
-"ab": 468.2,
-"bis": 527.3
+"datei": "audio/chronik/de/mix/I-04-b0a47467b7.mp3",
+"ab": 233.2,
+"bis": 259.8
+},
+"I:68": {
+"datei": "audio/chronik/de/mix/I-04-b0a47467b7.mp3",
+"ab": 259.8,
+"bis": 262.1
 },
 "I:69": {
-"datei": "audio/chronik/de/mix/I-05-93cb416b8d.mp3",
+"datei": "audio/chronik/de/mix/I-04-b0a47467b7.mp3",
+"ab": 262.1,
+"bis": 298.2
+},
+"I:70": {
+"datei": "audio/chronik/de/mix/I-04-b0a47467b7.mp3",
+"ab": 298.2,
+"bis": 336.3
+},
+"I:71": {
+"datei": "audio/chronik/de/mix/I-04-b0a47467b7.mp3",
+"ab": 336.3,
+"bis": 375.3
+},
+"I:72": {
+"datei": "audio/chronik/de/mix/I-04-b0a47467b7.mp3",
+"ab": 375.3,
+"bis": 434.9
+},
+"I:73": {
+"datei": "audio/chronik/de/mix/I-04-b0a47467b7.mp3",
+"ab": 434.9,
+"bis": 464.8
+},
+"I:74": {
+"datei": "audio/chronik/de/mix/I-04-b0a47467b7.mp3",
+"ab": 464.8,
+"bis": 560.9
+},
+"I:75": {
+"datei": "audio/chronik/de/mix/I-04-b0a47467b7.mp3",
+"ab": 560.9,
+"bis": 579.2
+},
+"I:76": {
+"datei": "audio/chronik/de/mix/I-04-b0a47467b7.mp3",
+"ab": 579.2,
+"bis": 638.3
+},
+"I:78": {
+"datei": "audio/chronik/de/mix/I-05-d915950024.mp3",
 "ab": 3.7,
 "bis": 5.6
 },
-"I:70": {
-"datei": "audio/chronik/de/mix/I-05-93cb416b8d.mp3",
-"ab": 5.6,
-"bis": 33.6
-},
-"I:71": {
-"datei": "audio/chronik/de/mix/I-05-93cb416b8d.mp3",
-"ab": 33.6,
-"bis": 50.3
-},
-"I:72": {
-"datei": "audio/chronik/de/mix/I-05-93cb416b8d.mp3",
-"ab": 50.3,
-"bis": 62.7
-},
-"I:73": {
-"datei": "audio/chronik/de/mix/I-05-93cb416b8d.mp3",
-"ab": 62.7,
-"bis": 118.8
-},
-"I:74": {
-"datei": "audio/chronik/de/mix/I-05-93cb416b8d.mp3",
-"ab": 118.8,
-"bis": 122.5
-},
-"I:75": {
-"datei": "audio/chronik/de/mix/I-05-93cb416b8d.mp3",
-"ab": 122.5,
-"bis": 175.9
-},
-"I:76": {
-"datei": "audio/chronik/de/mix/I-05-93cb416b8d.mp3",
-"ab": 175.9,
-"bis": 185.6
-},
-"I:77": {
-"datei": "audio/chronik/de/mix/I-05-93cb416b8d.mp3",
-"ab": 185.6,
-"bis": 206.9
-},
-"I:78": {
-"datei": "audio/chronik/de/mix/I-05-93cb416b8d.mp3",
-"ab": 206.9,
-"bis": 237.3
-},
 "I:79": {
-"datei": "audio/chronik/de/mix/I-05-93cb416b8d.mp3",
-"ab": 237.3,
-"bis": 255.2
+"datei": "audio/chronik/de/mix/I-05-d915950024.mp3",
+"ab": 5.6,
+"bis": 26.9
 },
 "I:80": {
-"datei": "audio/chronik/de/mix/I-05-93cb416b8d.mp3",
-"ab": 255.2,
-"bis": 305.0
+"datei": "audio/chronik/de/mix/I-05-d915950024.mp3",
+"ab": 26.9,
+"bis": 61.2
 },
 "I:81": {
-"datei": "audio/chronik/de/mix/I-05-93cb416b8d.mp3",
-"ab": 305.0,
-"bis": 316.3
+"datei": "audio/chronik/de/mix/I-05-d915950024.mp3",
+"ab": 61.2,
+"bis": 77.8
 },
 "I:82": {
-"datei": "audio/chronik/de/mix/I-05-93cb416b8d.mp3",
-"ab": 316.3,
-"bis": 325.0
+"datei": "audio/chronik/de/mix/I-05-d915950024.mp3",
+"ab": 77.8,
+"bis": 90.2
 },
 "I:83": {
-"datei": "audio/chronik/de/mix/I-05-93cb416b8d.mp3",
-"ab": 325.0,
-"bis": 347.4
+"datei": "audio/chronik/de/mix/I-05-d915950024.mp3",
+"ab": 90.2,
+"bis": 146.3
 },
 "I:84": {
-"datei": "audio/chronik/de/mix/I-05-93cb416b8d.mp3",
-"ab": 347.4,
-"bis": 402.9
+"datei": "audio/chronik/de/mix/I-05-d915950024.mp3",
+"ab": 146.3,
+"bis": 150.0
 },
 "I:85": {
-"datei": "audio/chronik/de/mix/I-05-93cb416b8d.mp3",
-"ab": 402.9,
-"bis": 478.0
+"datei": "audio/chronik/de/mix/I-05-d915950024.mp3",
+"ab": 150.0,
+"bis": 203.4
 },
 "I:86": {
-"datei": "audio/chronik/de/mix/I-06-71580840d0.mp3",
-"ab": 0.0,
-"bis": 29.8
+"datei": "audio/chronik/de/mix/I-05-d915950024.mp3",
+"ab": 203.4,
+"bis": 213.1
 },
 "I:87": {
-"datei": "audio/chronik/de/mix/I-06-71580840d0.mp3",
-"ab": 29.8,
-"bis": 45.7
+"datei": "audio/chronik/de/mix/I-05-d915950024.mp3",
+"ab": 213.1,
+"bis": 234.4
 },
 "I:88": {
-"datei": "audio/chronik/de/mix/I-06-71580840d0.mp3",
-"ab": 45.7,
-"bis": 71.5
+"datei": "audio/chronik/de/mix/I-05-d915950024.mp3",
+"ab": 234.4,
+"bis": 264.8
 },
 "I:89": {
-"datei": "audio/chronik/de/mix/I-06-71580840d0.mp3",
-"ab": 71.5,
-"bis": 90.6
+"datei": "audio/chronik/de/mix/I-05-d915950024.mp3",
+"ab": 264.8,
+"bis": 282.7
 },
 "I:90": {
-"datei": "audio/chronik/de/mix/I-06-71580840d0.mp3",
-"ab": 90.6,
-"bis": 102.4
+"datei": "audio/chronik/de/mix/I-05-d915950024.mp3",
+"ab": 282.7,
+"bis": 332.0
 },
 "I:91": {
-"datei": "audio/chronik/de/mix/I-06-71580840d0.mp3",
-"ab": 102.4,
-"bis": 112.0
+"datei": "audio/chronik/de/mix/I-05-d915950024.mp3",
+"ab": 332.0,
+"bis": 343.3
+},
+"I:92": {
+"datei": "audio/chronik/de/mix/I-05-d915950024.mp3",
+"ab": 343.3,
+"bis": 352.0
 },
 "I:93": {
-"datei": "audio/chronik/de/mix/I-06-71580840d0.mp3",
-"ab": 112.0,
-"bis": 119.4
+"datei": "audio/chronik/de/mix/I-05-d915950024.mp3",
+"ab": 352.0,
+"bis": 374.4
 },
 "I:94": {
-"datei": "audio/chronik/de/mix/I-06-71580840d0.mp3",
-"ab": 119.4,
-"bis": 137.8
+"datei": "audio/chronik/de/mix/I-05-d915950024.mp3",
+"ab": 374.4,
+"bis": 399.0
 },
 "I:95": {
-"datei": "audio/chronik/de/mix/I-06-71580840d0.mp3",
-"ab": 137.8,
-"bis": 182.2
+"datei": "audio/chronik/de/mix/I-05-d915950024.mp3",
+"ab": 399.0,
+"bis": 420.2
 },
 "I:96": {
-"datei": "audio/chronik/de/mix/I-06-71580840d0.mp3",
-"ab": 182.2,
-"bis": 197.3
+"datei": "audio/chronik/de/mix/I-05-d915950024.mp3",
+"ab": 420.2,
+"bis": 501.6
 },
 "I:97": {
-"datei": "audio/chronik/de/mix/I-06-71580840d0.mp3",
-"ab": 197.3,
-"bis": 244.0
+"datei": "audio/chronik/de/mix/I-06-aafbac5cc1.mp3",
+"ab": 0.0,
+"bis": 45.4
 },
 "I:98": {
-"datei": "audio/chronik/de/mix/I-06-71580840d0.mp3",
-"ab": 244.0,
-"bis": 311.0
+"datei": "audio/chronik/de/mix/I-06-aafbac5cc1.mp3",
+"ab": 45.4,
+"bis": 75.3
 },
 "I:99": {
-"datei": "audio/chronik/de/mix/I-06-71580840d0.mp3",
-"ab": 311.0,
-"bis": 337.1
+"datei": "audio/chronik/de/mix/I-06-aafbac5cc1.mp3",
+"ab": 75.3,
+"bis": 91.1
+},
+"I:100": {
+"datei": "audio/chronik/de/mix/I-06-aafbac5cc1.mp3",
+"ab": 91.1,
+"bis": 117.8
 },
 "I:101": {
-"datei": "audio/chronik/de/mix/I-06-71580840d0.mp3",
-"ab": 337.1,
-"bis": 381.5
+"datei": "audio/chronik/de/mix/I-06-aafbac5cc1.mp3",
+"ab": 117.8,
+"bis": 141.6
 },
 "I:102": {
-"datei": "audio/chronik/de/mix/I-06-71580840d0.mp3",
-"ab": 381.5,
-"bis": 423.1
+"datei": "audio/chronik/de/mix/I-06-aafbac5cc1.mp3",
+"ab": 141.6,
+"bis": 145.9
 },
 "I:103": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 3.4,
-"bis": 6.1
+"datei": "audio/chronik/de/mix/I-06-aafbac5cc1.mp3",
+"ab": 145.9,
+"bis": 157.7
 },
 "I:104": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 6.1,
-"bis": 21.4
-},
-"I:105": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 21.4,
-"bis": 70.3
+"datei": "audio/chronik/de/mix/I-06-aafbac5cc1.mp3",
+"ab": 157.7,
+"bis": 167.4
 },
 "I:106": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 70.3,
-"bis": 76.8
+"datei": "audio/chronik/de/mix/I-06-aafbac5cc1.mp3",
+"ab": 167.4,
+"bis": 175.9
 },
 "I:107": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 76.8,
-"bis": 131.9
+"datei": "audio/chronik/de/mix/I-06-aafbac5cc1.mp3",
+"ab": 175.9,
+"bis": 194.2
 },
 "I:108": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 131.9,
-"bis": 155.3
+"datei": "audio/chronik/de/mix/I-06-aafbac5cc1.mp3",
+"ab": 194.2,
+"bis": 238.7
 },
 "I:109": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 155.3,
-"bis": 185.3
+"datei": "audio/chronik/de/mix/I-06-aafbac5cc1.mp3",
+"ab": 238.7,
+"bis": 253.7
 },
 "I:110": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 185.3,
-"bis": 222.2
+"datei": "audio/chronik/de/mix/I-06-aafbac5cc1.mp3",
+"ab": 253.7,
+"bis": 300.0
 },
 "I:111": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 222.2,
-"bis": 226.9
+"datei": "audio/chronik/de/mix/I-06-aafbac5cc1.mp3",
+"ab": 300.0,
+"bis": 371.9
 },
 "I:112": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 226.9,
-"bis": 236.6
-},
-"I:113": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 236.6,
-"bis": 267.7
+"datei": "audio/chronik/de/mix/I-06-aafbac5cc1.mp3",
+"ab": 371.9,
+"bis": 398.0
 },
 "I:114": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 267.7,
-"bis": 306.5
+"datei": "audio/chronik/de/mix/I-06-aafbac5cc1.mp3",
+"ab": 398.0,
+"bis": 437.4
+},
+"I:115": {
+"datei": "audio/chronik/de/mix/I-06-aafbac5cc1.mp3",
+"ab": 437.4,
+"bis": 479.0
 },
 "I:116": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 306.5,
-"bis": 349.0
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 3.4,
+"bis": 5.3
 },
 "I:117": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 349.0,
-"bis": 380.9
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 5.3,
+"bis": 20.6
 },
 "I:118": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 380.9,
-"bis": 389.9
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 20.6,
+"bis": 69.0
 },
 "I:119": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 389.9,
-"bis": 428.5
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 69.0,
+"bis": 75.5
 },
 "I:120": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 428.5,
-"bis": 452.8
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 75.5,
+"bis": 130.1
 },
 "I:121": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 452.8,
-"bis": 486.8
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 130.1,
+"bis": 153.5
 },
 "I:122": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 486.8,
-"bis": 498.9
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 153.5,
+"bis": 183.6
 },
 "I:123": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 498.9,
-"bis": 500.4
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 183.6,
+"bis": 220.4
 },
 "I:124": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 500.4,
-"bis": 519.9
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 220.4,
+"bis": 225.1
 },
 "I:125": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 519.9,
-"bis": 532.3
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 225.1,
+"bis": 234.8
 },
 "I:126": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 532.3,
-"bis": 556.8
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 234.8,
+"bis": 265.9
 },
 "I:127": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 556.8,
-"bis": 619.1
-},
-"I:128": {
-"datei": "audio/chronik/de/mix/I-07-07678a1cd9.mp3",
-"ab": 619.1,
-"bis": 655.6
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 265.9,
+"bis": 304.7
 },
 "I:129": {
-"datei": "audio/chronik/de/mix/I-08-b47d2e7c27.mp3",
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 304.7,
+"bis": 351.8
+},
+"I:130": {
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 351.8,
+"bis": 383.6
+},
+"I:131": {
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 383.6,
+"bis": 392.7
+},
+"I:132": {
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 392.7,
+"bis": 436.2
+},
+"I:133": {
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 436.2,
+"bis": 460.4
+},
+"I:134": {
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 460.4,
+"bis": 494.4
+},
+"I:135": {
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 494.4,
+"bis": 506.6
+},
+"I:136": {
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 506.6,
+"bis": 508.1
+},
+"I:137": {
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 508.1,
+"bis": 527.5
+},
+"I:138": {
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 527.5,
+"bis": 540.0
+},
+"I:139": {
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 540.0,
+"bis": 564.4
+},
+"I:140": {
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 564.4,
+"bis": 626.7
+},
+"I:141": {
+"datei": "audio/chronik/de/mix/I-07-35c97a5892.mp3",
+"ab": 626.7,
+"bis": 663.2
+},
+"I:142": {
+"datei": "audio/chronik/de/mix/I-08-62e6b6fb7e.mp3",
 "ab": 3.6,
 "bis": 5.9
 },
-"I:130": {
-"datei": "audio/chronik/de/mix/I-08-b47d2e7c27.mp3",
+"I:143": {
+"datei": "audio/chronik/de/mix/I-08-62e6b6fb7e.mp3",
 "ab": 5.9,
-"bis": 37.6
+"bis": 41.2
 },
-"I:131": {
-"datei": "audio/chronik/de/mix/I-08-b47d2e7c27.mp3",
-"ab": 37.6,
-"bis": 79.1
+"I:144": {
+"datei": "audio/chronik/de/mix/I-08-62e6b6fb7e.mp3",
+"ab": 41.2,
+"bis": 45.7
 },
-"I:132": {
-"datei": "audio/chronik/de/mix/I-08-b47d2e7c27.mp3",
-"ab": 79.1,
-"bis": 151.6
+"I:145": {
+"datei": "audio/chronik/de/mix/I-08-62e6b6fb7e.mp3",
+"ab": 45.7,
+"bis": 78.9
 },
-"I:133": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
+"I:146": {
+"datei": "audio/chronik/de/mix/I-08-62e6b6fb7e.mp3",
+"ab": 78.9,
+"bis": 109.5
+},
+"I:147": {
+"datei": "audio/chronik/de/mix/I-08-62e6b6fb7e.mp3",
+"ab": 109.5,
+"bis": 149.7
+},
+"I:148": {
+"datei": "audio/chronik/de/mix/I-08-62e6b6fb7e.mp3",
+"ab": 149.7,
+"bis": 188.0
+},
+"I:149": {
+"datei": "audio/chronik/de/mix/I-08-62e6b6fb7e.mp3",
+"ab": 188.0,
+"bis": 210.7
+},
+"I:150": {
+"datei": "audio/chronik/de/mix/I-08-62e6b6fb7e.mp3",
+"ab": 210.7,
+"bis": 283.2
+},
+"I:151": {
+"datei": "audio/chronik/de/mix/I-09-9125dcb3b6.mp3",
 "ab": 3.7,
 "bis": 6.1
 },
-"I:134": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
+"I:152": {
+"datei": "audio/chronik/de/mix/I-09-9125dcb3b6.mp3",
 "ab": 6.1,
 "bis": 32.3
 },
-"I:135": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
+"I:153": {
+"datei": "audio/chronik/de/mix/I-09-9125dcb3b6.mp3",
 "ab": 32.3,
 "bis": 103.1
 },
-"I:136": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 103.1,
-"bis": 123.3
-},
-"I:137": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 123.3,
-"bis": 134.8
-},
-"I:138": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 134.8,
-"bis": 165.2
-},
-"I:139": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 165.2,
-"bis": 194.0
-},
-"I:140": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 194.0,
-"bis": 253.4
-},
-"I:141": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 253.4,
-"bis": 294.2
-},
-"I:142": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 294.2,
-"bis": 329.1
-},
-"I:143": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 329.1,
-"bis": 343.7
-},
-"I:144": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 343.7,
-"bis": 380.6
-},
-"I:145": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 380.6,
-"bis": 383.2
-},
-"I:146": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 383.2,
-"bis": 409.3
-},
-"I:147": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 409.3,
-"bis": 422.8
-},
-"I:148": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 422.8,
-"bis": 532.3
-},
-"I:149": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 532.3,
-"bis": 567.6
-},
-"I:150": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 567.6,
-"bis": 596.0
-},
-"I:151": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 596.0,
-"bis": 611.3
-},
-"I:152": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 611.3,
-"bis": 634.9
-},
 "I:154": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 634.9,
-"bis": 651.6
+"datei": "audio/chronik/de/mix/I-09-9125dcb3b6.mp3",
+"ab": 103.1,
+"bis": 178.0
 },
 "I:155": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 651.6,
-"bis": 654.9
+"datei": "audio/chronik/de/mix/I-09-9125dcb3b6.mp3",
+"ab": 178.0,
+"bis": 189.5
 },
 "I:156": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 654.9,
-"bis": 688.9
+"datei": "audio/chronik/de/mix/I-09-9125dcb3b6.mp3",
+"ab": 189.5,
+"bis": 220.0
 },
 "I:157": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 688.9,
-"bis": 710.3
+"datei": "audio/chronik/de/mix/I-09-9125dcb3b6.mp3",
+"ab": 220.0,
+"bis": 248.7
 },
 "I:158": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 710.3,
-"bis": 716.2
+"datei": "audio/chronik/de/mix/I-09-9125dcb3b6.mp3",
+"ab": 248.7,
+"bis": 310.9
 },
 "I:159": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 716.2,
-"bis": 736.3
+"datei": "audio/chronik/de/mix/I-09-9125dcb3b6.mp3",
+"ab": 310.9,
+"bis": 347.0
 },
 "I:160": {
-"datei": "audio/chronik/de/mix/I-09-5dd44499af.mp3",
-"ab": 736.3,
-"bis": 773.3
+"datei": "audio/chronik/de/mix/I-09-9125dcb3b6.mp3",
+"ab": 347.0,
+"bis": 358.0
 },
 "I:161": {
-"datei": "audio/chronik/de/mix/I-10-18604a4db4.mp3",
+"datei": "audio/chronik/de/mix/I-09-9125dcb3b6.mp3",
+"ab": 358.0,
+"bis": 360.7
+},
+"I:162": {
+"datei": "audio/chronik/de/mix/I-09-9125dcb3b6.mp3",
+"ab": 360.7,
+"bis": 395.5
+},
+"I:163": {
+"datei": "audio/chronik/de/mix/I-09-9125dcb3b6.mp3",
+"ab": 395.5,
+"bis": 444.2
+},
+"I:164": {
+"datei": "audio/chronik/de/mix/I-10-e1ede15c6d.mp3",
+"ab": 0.0,
+"bis": 37.0
+},
+"I:165": {
+"datei": "audio/chronik/de/mix/I-10-e1ede15c6d.mp3",
+"ab": 37.0,
+"bis": 39.5
+},
+"I:166": {
+"datei": "audio/chronik/de/mix/I-10-e1ede15c6d.mp3",
+"ab": 39.5,
+"bis": 65.7
+},
+"I:167": {
+"datei": "audio/chronik/de/mix/I-10-e1ede15c6d.mp3",
+"ab": 65.7,
+"bis": 79.1
+},
+"I:168": {
+"datei": "audio/chronik/de/mix/I-10-e1ede15c6d.mp3",
+"ab": 79.1,
+"bis": 188.6
+},
+"I:169": {
+"datei": "audio/chronik/de/mix/I-10-e1ede15c6d.mp3",
+"ab": 188.6,
+"bis": 224.0
+},
+"I:170": {
+"datei": "audio/chronik/de/mix/I-10-e1ede15c6d.mp3",
+"ab": 224.0,
+"bis": 252.3
+},
+"I:171": {
+"datei": "audio/chronik/de/mix/I-10-e1ede15c6d.mp3",
+"ab": 252.3,
+"bis": 268.1
+},
+"I:172": {
+"datei": "audio/chronik/de/mix/I-10-e1ede15c6d.mp3",
+"ab": 268.1,
+"bis": 291.7
+},
+"I:174": {
+"datei": "audio/chronik/de/mix/I-10-e1ede15c6d.mp3",
+"ab": 291.7,
+"bis": 310.1
+},
+"I:175": {
+"datei": "audio/chronik/de/mix/I-10-e1ede15c6d.mp3",
+"ab": 310.1,
+"bis": 313.5
+},
+"I:176": {
+"datei": "audio/chronik/de/mix/I-10-e1ede15c6d.mp3",
+"ab": 313.5,
+"bis": 348.6
+},
+"I:177": {
+"datei": "audio/chronik/de/mix/I-10-e1ede15c6d.mp3",
+"ab": 348.6,
+"bis": 373.9
+},
+"I:178": {
+"datei": "audio/chronik/de/mix/I-10-e1ede15c6d.mp3",
+"ab": 373.9,
+"bis": 380.0
+},
+"I:179": {
+"datei": "audio/chronik/de/mix/I-10-e1ede15c6d.mp3",
+"ab": 380.0,
+"bis": 398.2
+},
+"I:180": {
+"datei": "audio/chronik/de/mix/I-10-e1ede15c6d.mp3",
+"ab": 398.2,
+"bis": 435.2
+},
+"I:181": {
+"datei": "audio/chronik/de/mix/I-11-c99ba32255.mp3",
 "ab": 3.2,
 "bis": 5.3
 },
-"I:162": {
-"datei": "audio/chronik/de/mix/I-10-18604a4db4.mp3",
+"I:182": {
+"datei": "audio/chronik/de/mix/I-11-c99ba32255.mp3",
 "ab": 5.3,
 "bis": 34.7
 },
-"I:163": {
-"datei": "audio/chronik/de/mix/I-10-18604a4db4.mp3",
+"I:183": {
+"datei": "audio/chronik/de/mix/I-11-c99ba32255.mp3",
 "ab": 34.7,
 "bis": 52.7
 },
-"I:164": {
-"datei": "audio/chronik/de/mix/I-10-18604a4db4.mp3",
+"I:184": {
+"datei": "audio/chronik/de/mix/I-11-c99ba32255.mp3",
 "ab": 52.7,
 "bis": 73.7
 },
-"I:165": {
-"datei": "audio/chronik/de/mix/I-10-18604a4db4.mp3",
+"I:185": {
+"datei": "audio/chronik/de/mix/I-11-c99ba32255.mp3",
 "ab": 73.7,
 "bis": 103.5
 },
-"I:166": {
-"datei": "audio/chronik/de/mix/I-10-18604a4db4.mp3",
-"ab": 103.5,
-"bis": 168.8
-},
-"I:167": {
-"datei": "audio/chronik/de/mix/I-10-18604a4db4.mp3",
-"ab": 168.8,
-"bis": 189.3
-},
-"I:168": {
-"datei": "audio/chronik/de/mix/I-10-18604a4db4.mp3",
-"ab": 189.3,
-"bis": 221.7
-},
-"I:169": {
-"datei": "audio/chronik/de/mix/I-10-18604a4db4.mp3",
-"ab": 221.7,
-"bis": 232.2
-},
-"I:170": {
-"datei": "audio/chronik/de/mix/I-10-18604a4db4.mp3",
-"ab": 232.2,
-"bis": 273.5
-},
-"I:171": {
-"datei": "audio/chronik/de/mix/I-10-18604a4db4.mp3",
-"ab": 273.5,
-"bis": 276.5
-},
-"I:172": {
-"datei": "audio/chronik/de/mix/I-10-18604a4db4.mp3",
-"ab": 276.5,
-"bis": 323.9
-},
-"I:173": {
-"datei": "audio/chronik/de/mix/I-11-148fa1632f.mp3",
-"ab": 3.4,
-"bis": 5.9
-},
-"I:174": {
-"datei": "audio/chronik/de/mix/I-11-148fa1632f.mp3",
-"ab": 5.9,
-"bis": 37.0
-},
-"I:175": {
-"datei": "audio/chronik/de/mix/I-11-148fa1632f.mp3",
-"ab": 37.0,
-"bis": 54.8
-},
-"I:176": {
-"datei": "audio/chronik/de/mix/I-11-148fa1632f.mp3",
-"ab": 54.8,
-"bis": 110.3
-},
-"I:177": {
-"datei": "audio/chronik/de/mix/I-11-148fa1632f.mp3",
-"ab": 110.3,
-"bis": 112.6
-},
-"I:178": {
-"datei": "audio/chronik/de/mix/I-11-148fa1632f.mp3",
-"ab": 112.6,
-"bis": 121.3
-},
-"I:179": {
-"datei": "audio/chronik/de/mix/I-11-148fa1632f.mp3",
-"ab": 121.3,
-"bis": 169.8
-},
-"I:180": {
-"datei": "audio/chronik/de/mix/I-12-af97196e93.mp3",
-"ab": 3.4,
-"bis": 6.0
-},
-"I:181": {
-"datei": "audio/chronik/de/mix/I-12-af97196e93.mp3",
-"ab": 6.0,
-"bis": 22.5
-},
-"I:182": {
-"datei": "audio/chronik/de/mix/I-12-af97196e93.mp3",
-"ab": 22.5,
-"bis": 24.4
-},
-"I:183": {
-"datei": "audio/chronik/de/mix/I-12-af97196e93.mp3",
-"ab": 24.4,
-"bis": 89.9
-},
-"I:184": {
-"datei": "audio/chronik/de/mix/I-13-97a38219fc.mp3",
-"ab": 3.9,
-"bis": 5.9
-},
-"I:185": {
-"datei": "audio/chronik/de/mix/I-13-97a38219fc.mp3",
-"ab": 5.9,
-"bis": 28.5
-},
 "I:186": {
-"datei": "audio/chronik/de/mix/I-13-97a38219fc.mp3",
-"ab": 28.5,
-"bis": 68.8
+"datei": "audio/chronik/de/mix/I-11-c99ba32255.mp3",
+"ab": 103.5,
+"bis": 193.5
 },
 "I:187": {
-"datei": "audio/chronik/de/mix/I-13-97a38219fc.mp3",
-"ab": 68.8,
-"bis": 94.9
+"datei": "audio/chronik/de/mix/I-11-c99ba32255.mp3",
+"ab": 193.5,
+"bis": 214.1
 },
 "I:188": {
-"datei": "audio/chronik/de/mix/I-13-97a38219fc.mp3",
-"ab": 94.9,
-"bis": 114.3
+"datei": "audio/chronik/de/mix/I-11-c99ba32255.mp3",
+"ab": 214.1,
+"bis": 268.0
 },
 "I:189": {
-"datei": "audio/chronik/de/mix/I-13-97a38219fc.mp3",
-"ab": 114.3,
-"bis": 140.0
+"datei": "audio/chronik/de/mix/I-11-c99ba32255.mp3",
+"ab": 268.0,
+"bis": 286.5
 },
 "I:190": {
-"datei": "audio/chronik/de/mix/I-13-97a38219fc.mp3",
-"ab": 140.0,
-"bis": 174.3
+"datei": "audio/chronik/de/mix/I-11-c99ba32255.mp3",
+"ab": 286.5,
+"bis": 294.9
 },
 "I:191": {
-"datei": "audio/chronik/de/mix/I-13-97a38219fc.mp3",
-"ab": 174.3,
-"bis": 212.6
+"datei": "audio/chronik/de/mix/I-11-c99ba32255.mp3",
+"ab": 294.9,
+"bis": 335.4
 },
 "I:192": {
-"datei": "audio/chronik/de/mix/I-13-97a38219fc.mp3",
-"ab": 212.6,
-"bis": 238.2
+"datei": "audio/chronik/de/mix/I-11-c99ba32255.mp3",
+"ab": 335.4,
+"bis": 338.3
 },
 "I:193": {
-"datei": "audio/chronik/de/mix/I-13-97a38219fc.mp3",
-"ab": 238.2,
-"bis": 269.9
+"datei": "audio/chronik/de/mix/I-11-c99ba32255.mp3",
+"ab": 338.3,
+"bis": 385.7
 },
 "I:194": {
-"datei": "audio/chronik/de/mix/I-13-97a38219fc.mp3",
-"ab": 269.9,
-"bis": 302.9
+"datei": "audio/chronik/de/mix/I-12-68b4fef612.mp3",
+"ab": 3.4,
+"bis": 5.9
+},
+"I:195": {
+"datei": "audio/chronik/de/mix/I-12-68b4fef612.mp3",
+"ab": 5.9,
+"bis": 36.7
 },
 "I:196": {
-"datei": "audio/chronik/de/mix/I-13-97a38219fc.mp3",
-"ab": 302.9,
-"bis": 335.2
+"datei": "audio/chronik/de/mix/I-12-68b4fef612.mp3",
+"ab": 36.7,
+"bis": 54.2
 },
 "I:197": {
-"datei": "audio/chronik/de/mix/I-14-18e422e05b.mp3",
+"datei": "audio/chronik/de/mix/I-12-68b4fef612.mp3",
+"ab": 54.2,
+"bis": 109.8
+},
+"I:198": {
+"datei": "audio/chronik/de/mix/I-12-68b4fef612.mp3",
+"ab": 109.8,
+"bis": 112.1
+},
+"I:199": {
+"datei": "audio/chronik/de/mix/I-12-68b4fef612.mp3",
+"ab": 112.1,
+"bis": 120.7
+},
+"I:200": {
+"datei": "audio/chronik/de/mix/I-12-68b4fef612.mp3",
+"ab": 120.7,
+"bis": 169.2
+},
+"I:201": {
+"datei": "audio/chronik/de/mix/I-13-2794189737.mp3",
+"ab": 3.4,
+"bis": 6.2
+},
+"I:202": {
+"datei": "audio/chronik/de/mix/I-13-2794189737.mp3",
+"ab": 6.2,
+"bis": 22.7
+},
+"I:203": {
+"datei": "audio/chronik/de/mix/I-13-2794189737.mp3",
+"ab": 22.7,
+"bis": 24.6
+},
+"I:204": {
+"datei": "audio/chronik/de/mix/I-13-2794189737.mp3",
+"ab": 24.6,
+"bis": 89.3
+},
+"I:205": {
+"datei": "audio/chronik/de/mix/I-14-64b8cdd3b2.mp3",
+"ab": 3.9,
+"bis": 6.2
+},
+"I:206": {
+"datei": "audio/chronik/de/mix/I-14-64b8cdd3b2.mp3",
+"ab": 6.2,
+"bis": 28.8
+},
+"I:207": {
+"datei": "audio/chronik/de/mix/I-14-64b8cdd3b2.mp3",
+"ab": 28.8,
+"bis": 68.7
+},
+"I:208": {
+"datei": "audio/chronik/de/mix/I-14-64b8cdd3b2.mp3",
+"ab": 68.7,
+"bis": 78.4
+},
+"I:209": {
+"datei": "audio/chronik/de/mix/I-14-64b8cdd3b2.mp3",
+"ab": 78.4,
+"bis": 107.7
+},
+"I:210": {
+"datei": "audio/chronik/de/mix/I-14-64b8cdd3b2.mp3",
+"ab": 107.7,
+"bis": 127.7
+},
+"I:211": {
+"datei": "audio/chronik/de/mix/I-14-64b8cdd3b2.mp3",
+"ab": 127.7,
+"bis": 153.4
+},
+"I:212": {
+"datei": "audio/chronik/de/mix/I-14-64b8cdd3b2.mp3",
+"ab": 153.4,
+"bis": 187.7
+},
+"I:213": {
+"datei": "audio/chronik/de/mix/I-14-64b8cdd3b2.mp3",
+"ab": 187.7,
+"bis": 225.6
+},
+"I:214": {
+"datei": "audio/chronik/de/mix/I-14-64b8cdd3b2.mp3",
+"ab": 225.6,
+"bis": 228.8
+},
+"I:215": {
+"datei": "audio/chronik/de/mix/I-14-64b8cdd3b2.mp3",
+"ab": 228.8,
+"bis": 253.7
+},
+"I:216": {
+"datei": "audio/chronik/de/mix/I-14-64b8cdd3b2.mp3",
+"ab": 253.7,
+"bis": 285.4
+},
+"I:217": {
+"datei": "audio/chronik/de/mix/I-14-64b8cdd3b2.mp3",
+"ab": 285.4,
+"bis": 318.4
+},
+"I:219": {
+"datei": "audio/chronik/de/mix/I-14-64b8cdd3b2.mp3",
+"ab": 318.4,
+"bis": 350.7
+},
+"I:220": {
+"datei": "audio/chronik/de/mix/I-15-c7e85c43f6.mp3",
 "ab": 3.4,
 "bis": 5.2
 },
-"I:198": {
-"datei": "audio/chronik/de/mix/I-14-18e422e05b.mp3",
+"I:221": {
+"datei": "audio/chronik/de/mix/I-15-c7e85c43f6.mp3",
 "ab": 5.2,
 "bis": 26.3
 },
-"I:199": {
-"datei": "audio/chronik/de/mix/I-14-18e422e05b.mp3",
+"I:222": {
+"datei": "audio/chronik/de/mix/I-15-c7e85c43f6.mp3",
 "ab": 26.3,
 "bis": 49.8
 },
-"I:200": {
-"datei": "audio/chronik/de/mix/I-14-18e422e05b.mp3",
+"I:223": {
+"datei": "audio/chronik/de/mix/I-15-c7e85c43f6.mp3",
 "ab": 49.8,
 "bis": 74.8
 },
-"I:201": {
-"datei": "audio/chronik/de/mix/I-14-18e422e05b.mp3",
+"I:224": {
+"datei": "audio/chronik/de/mix/I-15-c7e85c43f6.mp3",
 "ab": 74.8,
 "bis": 79.9
 },
-"I:202": {
-"datei": "audio/chronik/de/mix/I-14-18e422e05b.mp3",
+"I:225": {
+"datei": "audio/chronik/de/mix/I-15-c7e85c43f6.mp3",
 "ab": 79.9,
 "bis": 103.3
 },
-"I:203": {
-"datei": "audio/chronik/de/mix/I-14-18e422e05b.mp3",
+"I:226": {
+"datei": "audio/chronik/de/mix/I-15-c7e85c43f6.mp3",
 "ab": 103.3,
 "bis": 136.2
 },
-"I:204": {
-"datei": "audio/chronik/de/mix/I-14-18e422e05b.mp3",
+"I:227": {
+"datei": "audio/chronik/de/mix/I-15-c7e85c43f6.mp3",
 "ab": 136.2,
 "bis": 161.4
 },
-"I:205": {
-"datei": "audio/chronik/de/mix/I-14-18e422e05b.mp3",
+"I:228": {
+"datei": "audio/chronik/de/mix/I-15-c7e85c43f6.mp3",
 "ab": 161.4,
 "bis": 171.4
 },
-"I:206": {
-"datei": "audio/chronik/de/mix/I-14-18e422e05b.mp3",
+"I:229": {
+"datei": "audio/chronik/de/mix/I-15-c7e85c43f6.mp3",
 "ab": 171.4,
 "bis": 197.7
 },
-"I:208": {
-"datei": "audio/chronik/de/mix/I-14-18e422e05b.mp3",
+"I:231": {
+"datei": "audio/chronik/de/mix/I-15-c7e85c43f6.mp3",
 "ab": 197.7,
-"bis": 235.1
+"bis": 235.5
 },
-"I:209": {
-"datei": "audio/chronik/de/mix/I-14-18e422e05b.mp3",
-"ab": 235.1,
-"bis": 271.0
+"I:232": {
+"datei": "audio/chronik/de/mix/I-15-c7e85c43f6.mp3",
+"ab": 235.5,
+"bis": 271.3
 },
-"I:211": {
-"datei": "audio/chronik/de/mix/I-14-18e422e05b.mp3",
-"ab": 271.0,
-"bis": 279.9
+"I:234": {
+"datei": "audio/chronik/de/mix/I-15-c7e85c43f6.mp3",
+"ab": 271.3,
+"bis": 280.2
 },
-"I:212": {
-"datei": "audio/chronik/de/mix/I-14-18e422e05b.mp3",
-"ab": 279.9,
-"bis": 317.0
+"I:235": {
+"datei": "audio/chronik/de/mix/I-15-c7e85c43f6.mp3",
+"ab": 280.2,
+"bis": 317.7
 },
 "II:0": {
-"datei": "audio/chronik/de/mix/II-01-57e6ab2e55.mp3",
+"datei": "audio/chronik/de/mix/II-01-f4a65daddf.mp3",
 "ab": 13.3,
 "bis": 15.4
 },
 "II:1": {
-"datei": "audio/chronik/de/mix/II-01-57e6ab2e55.mp3",
+"datei": "audio/chronik/de/mix/II-01-f4a65daddf.mp3",
 "ab": 15.4,
 "bis": 103.8
 },
 "II:2": {
-"datei": "audio/chronik/de/mix/II-02-ea15bf2ccf.mp3",
+"datei": "audio/chronik/de/mix/II-02-4f954a899d.mp3",
 "ab": 3.4,
 "bis": 5.4
 },
 "II:4": {
-"datei": "audio/chronik/de/mix/II-02-ea15bf2ccf.mp3",
+"datei": "audio/chronik/de/mix/II-02-4f954a899d.mp3",
 "ab": 5.4,
 "bis": 28.4
 },
 "II:5": {
-"datei": "audio/chronik/de/mix/II-02-ea15bf2ccf.mp3",
+"datei": "audio/chronik/de/mix/II-02-4f954a899d.mp3",
 "ab": 28.4,
-"bis": 45.0
+"bis": 35.9
 },
 "II:6": {
-"datei": "audio/chronik/de/mix/II-02-ea15bf2ccf.mp3",
-"ab": 45.0,
-"bis": 61.0
+"datei": "audio/chronik/de/mix/II-02-4f954a899d.mp3",
+"ab": 35.9,
+"bis": 44.8
 },
 "II:7": {
-"datei": "audio/chronik/de/mix/II-02-ea15bf2ccf.mp3",
-"ab": 61.0,
-"bis": 75.6
+"datei": "audio/chronik/de/mix/II-02-4f954a899d.mp3",
+"ab": 44.8,
+"bis": 60.8
 },
 "II:8": {
-"datei": "audio/chronik/de/mix/II-02-ea15bf2ccf.mp3",
+"datei": "audio/chronik/de/mix/II-02-4f954a899d.mp3",
+"ab": 60.8,
+"bis": 75.6
+},
+"II:9": {
+"datei": "audio/chronik/de/mix/II-02-4f954a899d.mp3",
 "ab": 75.6,
 "bis": 119.9
 },
-"II:9": {
-"datei": "audio/chronik/de/mix/II-03-b4aa59f09a.mp3",
+"II:10": {
+"datei": "audio/chronik/de/mix/II-03-ddc1c1826e.mp3",
 "ab": 3.4,
 "bis": 5.5
 },
-"II:10": {
-"datei": "audio/chronik/de/mix/II-03-b4aa59f09a.mp3",
-"ab": 5.5,
-"bis": 32.0
-},
 "II:11": {
-"datei": "audio/chronik/de/mix/II-03-b4aa59f09a.mp3",
-"ab": 32.0,
-"bis": 47.6
+"datei": "audio/chronik/de/mix/II-03-ddc1c1826e.mp3",
+"ab": 5.5,
+"bis": 31.0
 },
 "II:12": {
-"datei": "audio/chronik/de/mix/II-03-b4aa59f09a.mp3",
-"ab": 47.6,
-"bis": 86.1
+"datei": "audio/chronik/de/mix/II-03-ddc1c1826e.mp3",
+"ab": 31.0,
+"bis": 46.6
 },
 "II:13": {
-"datei": "audio/chronik/de/mix/II-03-b4aa59f09a.mp3",
-"ab": 86.1,
-"bis": 100.1
+"datei": "audio/chronik/de/mix/II-03-ddc1c1826e.mp3",
+"ab": 46.6,
+"bis": 85.1
 },
 "II:14": {
-"datei": "audio/chronik/de/mix/II-03-b4aa59f09a.mp3",
-"ab": 100.1,
-"bis": 108.0
+"datei": "audio/chronik/de/mix/II-03-ddc1c1826e.mp3",
+"ab": 85.1,
+"bis": 99.1
 },
 "II:15": {
-"datei": "audio/chronik/de/mix/II-03-b4aa59f09a.mp3",
-"ab": 108.0,
-"bis": 123.4
+"datei": "audio/chronik/de/mix/II-03-ddc1c1826e.mp3",
+"ab": 99.1,
+"bis": 107.0
 },
 "II:16": {
-"datei": "audio/chronik/de/mix/II-03-b4aa59f09a.mp3",
-"ab": 123.4,
-"bis": 136.3
+"datei": "audio/chronik/de/mix/II-03-ddc1c1826e.mp3",
+"ab": 107.0,
+"bis": 122.4
 },
-"II:18": {
-"datei": "audio/chronik/de/mix/II-03-b4aa59f09a.mp3",
-"ab": 136.3,
-"bis": 139.9
+"II:17": {
+"datei": "audio/chronik/de/mix/II-03-ddc1c1826e.mp3",
+"ab": 122.4,
+"bis": 135.3
 },
 "II:19": {
-"datei": "audio/chronik/de/mix/II-03-b4aa59f09a.mp3",
-"ab": 139.9,
-"bis": 159.2
+"datei": "audio/chronik/de/mix/II-03-ddc1c1826e.mp3",
+"ab": 135.3,
+"bis": 138.9
 },
 "II:20": {
-"datei": "audio/chronik/de/mix/II-03-b4aa59f09a.mp3",
-"ab": 159.2,
-"bis": 180.8
+"datei": "audio/chronik/de/mix/II-03-ddc1c1826e.mp3",
+"ab": 138.9,
+"bis": 158.2
 },
 "II:21": {
-"datei": "audio/chronik/de/mix/II-03-b4aa59f09a.mp3",
-"ab": 180.8,
-"bis": 238.5
+"datei": "audio/chronik/de/mix/II-03-ddc1c1826e.mp3",
+"ab": 158.2,
+"bis": 179.8
 },
 "II:22": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
+"datei": "audio/chronik/de/mix/II-03-ddc1c1826e.mp3",
+"ab": 179.8,
+"bis": 237.5
+},
+"II:23": {
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
 "ab": 3.2,
 "bis": 5.0
 },
-"II:23": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
+"II:24": {
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
 "ab": 5.0,
 "bis": 19.8
 },
-"II:24": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
+"II:25": {
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
 "ab": 19.8,
 "bis": 39.6
 },
-"II:25": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
+"II:26": {
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
 "ab": 39.6,
 "bis": 52.9
 },
-"II:26": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
+"II:27": {
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
 "ab": 52.9,
 "bis": 68.8
 },
-"II:27": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
+"II:28": {
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
 "ab": 68.8,
 "bis": 86.7
 },
-"II:28": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
+"II:29": {
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
 "ab": 86.7,
 "bis": 99.1
 },
-"II:30": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
+"II:31": {
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
 "ab": 99.1,
 "bis": 137.3
 },
-"II:31": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
+"II:32": {
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
 "ab": 137.3,
 "bis": 147.6
 },
-"II:32": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
+"II:33": {
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
 "ab": 147.6,
 "bis": 155.6
 },
-"II:33": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
+"II:34": {
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
 "ab": 155.6,
 "bis": 163.7
 },
-"II:34": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
+"II:35": {
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
 "ab": 163.7,
 "bis": 169.8
 },
-"II:35": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
+"II:36": {
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
 "ab": 169.8,
 "bis": 175.4
 },
-"II:36": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
+"II:37": {
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
 "ab": 175.4,
 "bis": 185.3
 },
-"II:37": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
-"ab": 185.3,
-"bis": 202.7
-},
 "II:38": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
-"ab": 202.7,
-"bis": 246.3
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
+"ab": 185.3,
+"bis": 204.1
 },
 "II:39": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
-"ab": 246.3,
-"bis": 254.2
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
+"ab": 204.1,
+"bis": 247.6
 },
 "II:40": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
-"ab": 254.2,
-"bis": 291.7
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
+"ab": 247.6,
+"bis": 255.5
 },
 "II:41": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
-"ab": 291.7,
-"bis": 302.3
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
+"ab": 255.5,
+"bis": 293.0
 },
 "II:42": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
-"ab": 302.3,
-"bis": 314.5
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
+"ab": 293.0,
+"bis": 303.7
 },
-"II:44": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
-"ab": 314.5,
-"bis": 379.4
+"II:43": {
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
+"ab": 303.7,
+"bis": 315.8
 },
 "II:45": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
-"ab": 379.4,
-"bis": 386.9
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
+"ab": 315.8,
+"bis": 383.2
 },
 "II:46": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
-"ab": 386.9,
-"bis": 395.3
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
+"ab": 383.2,
+"bis": 390.8
 },
 "II:47": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
-"ab": 395.3,
-"bis": 413.9
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
+"ab": 390.8,
+"bis": 399.1
 },
 "II:48": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
-"ab": 413.9,
-"bis": 426.4
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
+"ab": 399.1,
+"bis": 417.8
 },
 "II:49": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
-"ab": 426.4,
-"bis": 453.4
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
+"ab": 417.8,
+"bis": 430.3
 },
 "II:50": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
-"ab": 453.4,
-"bis": 472.1
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
+"ab": 430.3,
+"bis": 457.3
 },
 "II:51": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
-"ab": 472.1,
-"bis": 494.9
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
+"ab": 457.3,
+"bis": 476.5
 },
 "II:52": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
-"ab": 494.9,
-"bis": 513.4
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
+"ab": 476.5,
+"bis": 499.3
 },
 "II:53": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
-"ab": 513.4,
-"bis": 527.5
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
+"ab": 499.3,
+"bis": 517.9
 },
 "II:54": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
-"ab": 527.5,
-"bis": 534.1
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
+"ab": 517.9,
+"bis": 531.9
 },
 "II:55": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
-"ab": 534.1,
-"bis": 555.3
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
+"ab": 531.9,
+"bis": 538.5
 },
 "II:56": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
-"ab": 555.3,
-"bis": 561.6
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
+"ab": 538.5,
+"bis": 559.7
 },
 "II:57": {
-"datei": "audio/chronik/de/mix/II-04-b85abcfe91.mp3",
-"ab": 561.6,
-"bis": 596.5
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
+"ab": 559.7,
+"bis": 566.0
 },
 "II:58": {
-"datei": "audio/chronik/de/mix/II-05-4428064017.mp3",
-"ab": 3.4,
-"bis": 5.7
+"datei": "audio/chronik/de/mix/II-04-3b4fbad0c4.mp3",
+"ab": 566.0,
+"bis": 600.9
 },
 "II:59": {
-"datei": "audio/chronik/de/mix/II-05-4428064017.mp3",
-"ab": 5.7,
-"bis": 40.9
+"datei": "audio/chronik/de/mix/II-05-a229bc78c8.mp3",
+"ab": 3.4,
+"bis": 5.6
 },
 "II:60": {
-"datei": "audio/chronik/de/mix/II-05-4428064017.mp3",
-"ab": 40.9,
-"bis": 91.5
+"datei": "audio/chronik/de/mix/II-05-a229bc78c8.mp3",
+"ab": 5.6,
+"bis": 40.8
 },
 "II:61": {
-"datei": "audio/chronik/de/mix/II-05-4428064017.mp3",
-"ab": 91.5,
-"bis": 95.3
+"datei": "audio/chronik/de/mix/II-05-a229bc78c8.mp3",
+"ab": 40.8,
+"bis": 88.5
 },
 "II:62": {
-"datei": "audio/chronik/de/mix/II-05-4428064017.mp3",
-"ab": 95.3,
-"bis": 119.3
+"datei": "audio/chronik/de/mix/II-05-a229bc78c8.mp3",
+"ab": 88.5,
+"bis": 91.8
 },
 "II:63": {
-"datei": "audio/chronik/de/mix/II-05-4428064017.mp3",
-"ab": 119.3,
-"bis": 133.2
+"datei": "audio/chronik/de/mix/II-05-a229bc78c8.mp3",
+"ab": 91.8,
+"bis": 115.8
 },
 "II:64": {
-"datei": "audio/chronik/de/mix/II-05-4428064017.mp3",
-"ab": 133.2,
-"bis": 153.9
+"datei": "audio/chronik/de/mix/II-05-a229bc78c8.mp3",
+"ab": 115.8,
+"bis": 129.7
 },
 "II:65": {
-"datei": "audio/chronik/de/mix/II-05-4428064017.mp3",
-"ab": 153.9,
-"bis": 197.6
+"datei": "audio/chronik/de/mix/II-05-a229bc78c8.mp3",
+"ab": 129.7,
+"bis": 150.4
 },
 "II:66": {
-"datei": "audio/chronik/de/mix/II-05-4428064017.mp3",
-"ab": 197.6,
-"bis": 217.8
+"datei": "audio/chronik/de/mix/II-05-a229bc78c8.mp3",
+"ab": 150.4,
+"bis": 194.1
 },
 "II:67": {
-"datei": "audio/chronik/de/mix/II-05-4428064017.mp3",
-"ab": 217.8,
-"bis": 229.7
+"datei": "audio/chronik/de/mix/II-05-a229bc78c8.mp3",
+"ab": 194.1,
+"bis": 214.3
 },
 "II:68": {
-"datei": "audio/chronik/de/mix/II-05-4428064017.mp3",
-"ab": 229.7,
-"bis": 252.6
+"datei": "audio/chronik/de/mix/II-05-a229bc78c8.mp3",
+"ab": 214.3,
+"bis": 226.2
 },
 "II:69": {
-"datei": "audio/chronik/de/mix/II-05-4428064017.mp3",
-"ab": 252.6,
-"bis": 267.7
+"datei": "audio/chronik/de/mix/II-05-a229bc78c8.mp3",
+"ab": 226.2,
+"bis": 249.1
 },
 "II:70": {
-"datei": "audio/chronik/de/mix/II-05-4428064017.mp3",
-"ab": 267.7,
-"bis": 302.2
+"datei": "audio/chronik/de/mix/II-05-a229bc78c8.mp3",
+"ab": 249.1,
+"bis": 264.2
 },
 "II:71": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
+"datei": "audio/chronik/de/mix/II-05-a229bc78c8.mp3",
+"ab": 264.2,
+"bis": 298.7
+},
+"II:72": {
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
 "ab": 3.7,
 "bis": 6.4
 },
-"II:72": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
+"II:73": {
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
 "ab": 6.4,
 "bis": 32.8
 },
-"II:73": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
+"II:74": {
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
 "ab": 32.8,
 "bis": 48.1
 },
-"II:74": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
+"II:75": {
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
 "ab": 48.1,
 "bis": 132.2
 },
-"II:76": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
+"II:77": {
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
 "ab": 132.2,
 "bis": 167.7
 },
-"II:77": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
+"II:78": {
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
 "ab": 167.7,
 "bis": 179.0
 },
-"II:78": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
+"II:79": {
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
 "ab": 179.0,
 "bis": 201.8
 },
-"II:79": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
+"II:80": {
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
 "ab": 201.8,
 "bis": 214.1
 },
-"II:80": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
+"II:81": {
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
 "ab": 214.1,
 "bis": 228.4
 },
-"II:81": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
-"ab": 228.4,
-"bis": 244.2
-},
 "II:82": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
-"ab": 244.2,
-"bis": 254.7
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
+"ab": 228.4,
+"bis": 243.7
 },
 "II:83": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
-"ab": 254.7,
-"bis": 286.3
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
+"ab": 243.7,
+"bis": 254.2
 },
 "II:84": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
-"ab": 286.3,
-"bis": 296.3
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
+"ab": 254.2,
+"bis": 285.8
 },
 "II:85": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
-"ab": 296.3,
-"bis": 314.4
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
+"ab": 285.8,
+"bis": 295.8
 },
 "II:86": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
-"ab": 314.4,
-"bis": 333.2
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
+"ab": 295.8,
+"bis": 313.3
 },
 "II:87": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
-"ab": 333.2,
-"bis": 340.6
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
+"ab": 313.3,
+"bis": 332.1
 },
 "II:88": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
-"ab": 340.6,
-"bis": 348.1
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
+"ab": 332.1,
+"bis": 339.5
 },
 "II:89": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
-"ab": 348.1,
-"bis": 369.3
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
+"ab": 339.5,
+"bis": 347.0
 },
 "II:90": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
-"ab": 369.3,
-"bis": 375.3
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
+"ab": 347.0,
+"bis": 368.2
 },
 "II:91": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
-"ab": 375.3,
-"bis": 382.5
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
+"ab": 368.2,
+"bis": 374.1
 },
 "II:92": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
-"ab": 382.5,
-"bis": 404.3
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
+"ab": 374.1,
+"bis": 381.3
 },
 "II:93": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
-"ab": 404.3,
-"bis": 437.8
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
+"ab": 381.3,
+"bis": 403.2
 },
 "II:94": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
-"ab": 437.8,
-"bis": 446.8
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
+"ab": 403.2,
+"bis": 435.7
 },
 "II:95": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
-"ab": 446.8,
-"bis": 460.7
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
+"ab": 435.7,
+"bis": 444.7
 },
 "II:96": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
-"ab": 460.7,
-"bis": 467.9
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
+"ab": 444.7,
+"bis": 458.6
 },
 "II:97": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
-"ab": 467.9,
-"bis": 486.3
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
+"ab": 458.6,
+"bis": 465.8
 },
 "II:98": {
-"datei": "audio/chronik/de/mix/II-06-95f1904f53.mp3",
-"ab": 486.3,
-"bis": 531.5
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
+"ab": 465.8,
+"bis": 484.2
 },
 "II:99": {
-"datei": "audio/chronik/de/mix/II-07-3002f9880f.mp3",
-"ab": 3.7,
-"bis": 5.6
+"datei": "audio/chronik/de/mix/II-06-266a76a306.mp3",
+"ab": 484.2,
+"bis": 529.4
 },
 "II:100": {
-"datei": "audio/chronik/de/mix/II-07-3002f9880f.mp3",
-"ab": 5.6,
-"bis": 58.9
+"datei": "audio/chronik/de/mix/II-07-cf2f1bf3fd.mp3",
+"ab": 3.7,
+"bis": 5.5
 },
 "II:101": {
-"datei": "audio/chronik/de/mix/II-07-3002f9880f.mp3",
-"ab": 58.9,
-"bis": 140.6
+"datei": "audio/chronik/de/mix/II-07-cf2f1bf3fd.mp3",
+"ab": 5.5,
+"bis": 58.8
 },
 "II:102": {
-"datei": "audio/chronik/de/mix/II-07-3002f9880f.mp3",
-"ab": 140.6,
-"bis": 155.3
+"datei": "audio/chronik/de/mix/II-07-cf2f1bf3fd.mp3",
+"ab": 58.8,
+"bis": 140.5
 },
 "II:103": {
-"datei": "audio/chronik/de/mix/II-07-3002f9880f.mp3",
-"ab": 155.3,
-"bis": 163.6
+"datei": "audio/chronik/de/mix/II-07-cf2f1bf3fd.mp3",
+"ab": 140.5,
+"bis": 155.2
 },
 "II:104": {
-"datei": "audio/chronik/de/mix/II-07-3002f9880f.mp3",
-"ab": 163.6,
-"bis": 199.3
+"datei": "audio/chronik/de/mix/II-07-cf2f1bf3fd.mp3",
+"ab": 155.2,
+"bis": 163.5
 },
 "II:105": {
-"datei": "audio/chronik/de/mix/II-07-3002f9880f.mp3",
-"ab": 199.3,
-"bis": 202.5
+"datei": "audio/chronik/de/mix/II-07-cf2f1bf3fd.mp3",
+"ab": 163.5,
+"bis": 199.2
 },
 "II:106": {
-"datei": "audio/chronik/de/mix/II-07-3002f9880f.mp3",
-"ab": 202.5,
-"bis": 234.8
+"datei": "audio/chronik/de/mix/II-07-cf2f1bf3fd.mp3",
+"ab": 199.2,
+"bis": 202.4
 },
 "II:107": {
-"datei": "audio/chronik/de/mix/II-07-3002f9880f.mp3",
-"ab": 234.8,
-"bis": 257.0
+"datei": "audio/chronik/de/mix/II-07-cf2f1bf3fd.mp3",
+"ab": 202.4,
+"bis": 234.2
 },
 "II:108": {
-"datei": "audio/chronik/de/mix/II-07-3002f9880f.mp3",
-"ab": 257.0,
-"bis": 268.0
+"datei": "audio/chronik/de/mix/II-07-cf2f1bf3fd.mp3",
+"ab": 234.2,
+"bis": 256.4
 },
 "II:109": {
-"datei": "audio/chronik/de/mix/II-07-3002f9880f.mp3",
-"ab": 268.0,
-"bis": 285.7
+"datei": "audio/chronik/de/mix/II-07-cf2f1bf3fd.mp3",
+"ab": 256.4,
+"bis": 267.3
 },
 "II:110": {
-"datei": "audio/chronik/de/mix/II-07-3002f9880f.mp3",
-"ab": 285.7,
-"bis": 309.4
+"datei": "audio/chronik/de/mix/II-07-cf2f1bf3fd.mp3",
+"ab": 267.3,
+"bis": 285.0
 },
 "II:111": {
-"datei": "audio/chronik/de/mix/II-07-3002f9880f.mp3",
-"ab": 309.4,
-"bis": 379.3
+"datei": "audio/chronik/de/mix/II-07-cf2f1bf3fd.mp3",
+"ab": 285.0,
+"bis": 308.7
 },
 "II:112": {
-"datei": "audio/chronik/de/mix/II-08-7663ab0722.mp3",
+"datei": "audio/chronik/de/mix/II-07-cf2f1bf3fd.mp3",
+"ab": 308.7,
+"bis": 378.6
+},
+"II:113": {
+"datei": "audio/chronik/de/mix/II-08-8d716471c7.mp3",
 "ab": 3.2,
 "bis": 5.8
 },
-"II:113": {
-"datei": "audio/chronik/de/mix/II-08-7663ab0722.mp3",
+"II:114": {
+"datei": "audio/chronik/de/mix/II-08-8d716471c7.mp3",
 "ab": 5.8,
 "bis": 20.0
 },
-"II:114": {
-"datei": "audio/chronik/de/mix/II-08-7663ab0722.mp3",
+"II:115": {
+"datei": "audio/chronik/de/mix/II-08-8d716471c7.mp3",
 "ab": 20.0,
 "bis": 66.5
 },
-"II:115": {
-"datei": "audio/chronik/de/mix/II-08-7663ab0722.mp3",
+"II:116": {
+"datei": "audio/chronik/de/mix/II-08-8d716471c7.mp3",
 "ab": 66.5,
 "bis": 83.6
 },
-"II:116": {
-"datei": "audio/chronik/de/mix/II-08-7663ab0722.mp3",
-"ab": 83.6,
-"bis": 107.1
-},
 "II:117": {
-"datei": "audio/chronik/de/mix/II-08-7663ab0722.mp3",
-"ab": 107.1,
-"bis": 150.1
+"datei": "audio/chronik/de/mix/II-08-8d716471c7.mp3",
+"ab": 83.6,
+"bis": 106.1
 },
 "II:118": {
-"datei": "audio/chronik/de/mix/II-08-7663ab0722.mp3",
-"ab": 150.1,
-"bis": 168.4
+"datei": "audio/chronik/de/mix/II-08-8d716471c7.mp3",
+"ab": 106.1,
+"bis": 149.1
 },
 "II:119": {
-"datei": "audio/chronik/de/mix/II-08-7663ab0722.mp3",
-"ab": 168.4,
-"bis": 175.8
+"datei": "audio/chronik/de/mix/II-08-8d716471c7.mp3",
+"ab": 149.1,
+"bis": 167.4
 },
 "II:120": {
-"datei": "audio/chronik/de/mix/II-08-7663ab0722.mp3",
-"ab": 175.8,
-"bis": 187.8
+"datei": "audio/chronik/de/mix/II-08-8d716471c7.mp3",
+"ab": 167.4,
+"bis": 174.8
 },
 "II:121": {
-"datei": "audio/chronik/de/mix/II-08-7663ab0722.mp3",
-"ab": 187.8,
-"bis": 212.6
+"datei": "audio/chronik/de/mix/II-08-8d716471c7.mp3",
+"ab": 174.8,
+"bis": 186.8
 },
 "II:122": {
-"datei": "audio/chronik/de/mix/II-08-7663ab0722.mp3",
-"ab": 212.6,
-"bis": 234.9
+"datei": "audio/chronik/de/mix/II-08-8d716471c7.mp3",
+"ab": 186.8,
+"bis": 211.6
 },
 "II:123": {
-"datei": "audio/chronik/de/mix/II-08-7663ab0722.mp3",
-"ab": 234.9,
-"bis": 255.2
+"datei": "audio/chronik/de/mix/II-08-8d716471c7.mp3",
+"ab": 211.6,
+"bis": 233.4
 },
-"II:125": {
-"datei": "audio/chronik/de/mix/II-08-7663ab0722.mp3",
-"ab": 255.2,
-"bis": 262.6
+"II:124": {
+"datei": "audio/chronik/de/mix/II-08-8d716471c7.mp3",
+"ab": 233.4,
+"bis": 253.7
 },
 "II:126": {
-"datei": "audio/chronik/de/mix/II-08-7663ab0722.mp3",
-"ab": 262.6,
-"bis": 285.9
+"datei": "audio/chronik/de/mix/II-08-8d716471c7.mp3",
+"ab": 253.7,
+"bis": 261.1
 },
 "II:127": {
-"datei": "audio/chronik/de/mix/II-08-7663ab0722.mp3",
-"ab": 285.9,
-"bis": 343.1
+"datei": "audio/chronik/de/mix/II-08-8d716471c7.mp3",
+"ab": 261.1,
+"bis": 284.4
 },
 "II:128": {
-"datei": "audio/chronik/de/mix/II-08-7663ab0722.mp3",
-"ab": 343.1,
-"bis": 349.2
+"datei": "audio/chronik/de/mix/II-08-8d716471c7.mp3",
+"ab": 284.4,
+"bis": 341.6
 },
 "II:129": {
-"datei": "audio/chronik/de/mix/II-08-7663ab0722.mp3",
-"ab": 349.2,
-"bis": 367.3
+"datei": "audio/chronik/de/mix/II-08-8d716471c7.mp3",
+"ab": 341.6,
+"bis": 347.7
 },
 "II:130": {
-"datei": "audio/chronik/de/mix/II-08-7663ab0722.mp3",
-"ab": 367.3,
-"bis": 374.9
+"datei": "audio/chronik/de/mix/II-08-8d716471c7.mp3",
+"ab": 347.7,
+"bis": 365.8
 },
-"II:132": {
-"datei": "audio/chronik/de/mix/II-08-7663ab0722.mp3",
-"ab": 374.9,
-"bis": 381.1
+"II:131": {
+"datei": "audio/chronik/de/mix/II-08-8d716471c7.mp3",
+"ab": 365.8,
+"bis": 373.4
 },
 "II:133": {
-"datei": "audio/chronik/de/mix/II-08-7663ab0722.mp3",
-"ab": 381.1,
-"bis": 452.8
+"datei": "audio/chronik/de/mix/II-08-8d716471c7.mp3",
+"ab": 373.4,
+"bis": 378.6
 },
-"II:135": {
-"datei": "audio/chronik/de/mix/II-09-eed23aa254.mp3",
+"II:134": {
+"datei": "audio/chronik/de/mix/II-08-8d716471c7.mp3",
+"ab": 378.6,
+"bis": 450.3
+},
+"II:136": {
+"datei": "audio/chronik/de/mix/II-09-f653e1a753.mp3",
 "ab": 3.4,
 "bis": 5.4
 },
-"II:136": {
-"datei": "audio/chronik/de/mix/II-09-eed23aa254.mp3",
+"II:137": {
+"datei": "audio/chronik/de/mix/II-09-f653e1a753.mp3",
 "ab": 5.4,
 "bis": 42.4
 },
-"II:137": {
-"datei": "audio/chronik/de/mix/II-09-eed23aa254.mp3",
+"II:138": {
+"datei": "audio/chronik/de/mix/II-09-f653e1a753.mp3",
 "ab": 42.4,
 "bis": 56.0
 },
-"II:138": {
-"datei": "audio/chronik/de/mix/II-09-eed23aa254.mp3",
+"II:139": {
+"datei": "audio/chronik/de/mix/II-09-f653e1a753.mp3",
 "ab": 56.0,
 "bis": 60.6
 },
-"II:139": {
-"datei": "audio/chronik/de/mix/II-09-eed23aa254.mp3",
+"II:140": {
+"datei": "audio/chronik/de/mix/II-09-f653e1a753.mp3",
 "ab": 60.6,
 "bis": 69.4
 },
-"II:140": {
-"datei": "audio/chronik/de/mix/II-09-eed23aa254.mp3",
+"II:141": {
+"datei": "audio/chronik/de/mix/II-09-f653e1a753.mp3",
 "ab": 69.4,
 "bis": 97.2
 },
-"II:142": {
-"datei": "audio/chronik/de/mix/II-09-eed23aa254.mp3",
+"II:143": {
+"datei": "audio/chronik/de/mix/II-09-f653e1a753.mp3",
 "ab": 97.2,
 "bis": 132.4
 },
-"II:143": {
-"datei": "audio/chronik/de/mix/II-10-162e0d0e78.mp3",
+"II:144": {
+"datei": "audio/chronik/de/mix/II-10-dfb0620af4.mp3",
 "ab": 3.2,
 "bis": 5.2
 },
-"II:144": {
-"datei": "audio/chronik/de/mix/II-10-162e0d0e78.mp3",
+"II:145": {
+"datei": "audio/chronik/de/mix/II-10-dfb0620af4.mp3",
 "ab": 5.2,
 "bis": 41.0
 },
-"II:145": {
-"datei": "audio/chronik/de/mix/II-10-162e0d0e78.mp3",
+"II:146": {
+"datei": "audio/chronik/de/mix/II-10-dfb0620af4.mp3",
 "ab": 41.0,
 "bis": 74.4
 },
-"II:146": {
-"datei": "audio/chronik/de/mix/II-10-162e0d0e78.mp3",
+"II:147": {
+"datei": "audio/chronik/de/mix/II-10-dfb0620af4.mp3",
 "ab": 74.4,
 "bis": 78.4
 },
-"II:147": {
-"datei": "audio/chronik/de/mix/II-10-162e0d0e78.mp3",
-"ab": 78.4,
-"bis": 119.2
-},
 "II:148": {
-"datei": "audio/chronik/de/mix/II-10-162e0d0e78.mp3",
-"ab": 119.2,
-"bis": 173.0
+"datei": "audio/chronik/de/mix/II-10-dfb0620af4.mp3",
+"ab": 78.4,
+"bis": 118.7
 },
 "II:149": {
-"datei": "audio/chronik/de/mix/II-10-162e0d0e78.mp3",
-"ab": 173.0,
-"bis": 178.5
+"datei": "audio/chronik/de/mix/II-10-dfb0620af4.mp3",
+"ab": 118.7,
+"bis": 172.1
 },
 "II:150": {
-"datei": "audio/chronik/de/mix/II-10-162e0d0e78.mp3",
-"ab": 178.5,
-"bis": 203.1
+"datei": "audio/chronik/de/mix/II-10-dfb0620af4.mp3",
+"ab": 172.1,
+"bis": 177.6
 },
 "II:151": {
-"datei": "audio/chronik/de/mix/II-10-162e0d0e78.mp3",
-"ab": 203.1,
-"bis": 215.9
+"datei": "audio/chronik/de/mix/II-10-dfb0620af4.mp3",
+"ab": 177.6,
+"bis": 202.3
 },
 "II:152": {
-"datei": "audio/chronik/de/mix/II-10-162e0d0e78.mp3",
-"ab": 215.9,
-"bis": 221.1
+"datei": "audio/chronik/de/mix/II-10-dfb0620af4.mp3",
+"ab": 202.3,
+"bis": 215.1
 },
 "II:153": {
-"datei": "audio/chronik/de/mix/II-10-162e0d0e78.mp3",
-"ab": 221.1,
-"bis": 253.5
+"datei": "audio/chronik/de/mix/II-10-dfb0620af4.mp3",
+"ab": 215.1,
+"bis": 220.2
 },
 "II:154": {
-"datei": "audio/chronik/de/mix/II-11-6ab04c0f8e.mp3",
-"ab": 3.4,
-"bis": 6.1
+"datei": "audio/chronik/de/mix/II-10-dfb0620af4.mp3",
+"ab": 220.2,
+"bis": 252.6
 },
-"II:156": {
-"datei": "audio/chronik/de/mix/II-11-6ab04c0f8e.mp3",
-"ab": 6.1,
-"bis": 119.7
+"II:155": {
+"datei": "audio/chronik/de/mix/II-11-4d10c90b16.mp3",
+"ab": 3.4,
+"bis": 5.6
 },
 "II:157": {
-"datei": "audio/chronik/de/mix/II-11-6ab04c0f8e.mp3",
-"ab": 119.7,
-"bis": 126.8
+"datei": "audio/chronik/de/mix/II-11-4d10c90b16.mp3",
+"ab": 5.6,
+"bis": 119.2
 },
-"II:159": {
-"datei": "audio/chronik/de/mix/II-11-6ab04c0f8e.mp3",
-"ab": 126.8,
-"bis": 156.2
+"II:158": {
+"datei": "audio/chronik/de/mix/II-11-4d10c90b16.mp3",
+"ab": 119.2,
+"bis": 126.3
 },
 "II:160": {
-"datei": "audio/chronik/de/mix/II-11-6ab04c0f8e.mp3",
-"ab": 156.2,
-"bis": 175.5
+"datei": "audio/chronik/de/mix/II-11-4d10c90b16.mp3",
+"ab": 126.3,
+"bis": 155.7
 },
 "II:161": {
-"datei": "audio/chronik/de/mix/II-11-6ab04c0f8e.mp3",
-"ab": 175.5,
-"bis": 199.9
+"datei": "audio/chronik/de/mix/II-11-4d10c90b16.mp3",
+"ab": 155.7,
+"bis": 175.0
 },
 "II:162": {
-"datei": "audio/chronik/de/mix/II-11-6ab04c0f8e.mp3",
-"ab": 199.9,
-"bis": 230.6
+"datei": "audio/chronik/de/mix/II-11-4d10c90b16.mp3",
+"ab": 175.0,
+"bis": 199.4
 },
 "II:163": {
-"datei": "audio/chronik/de/mix/II-11-6ab04c0f8e.mp3",
-"ab": 230.6,
-"bis": 243.1
+"datei": "audio/chronik/de/mix/II-11-4d10c90b16.mp3",
+"ab": 199.4,
+"bis": 230.2
 },
 "II:164": {
-"datei": "audio/chronik/de/mix/II-11-6ab04c0f8e.mp3",
-"ab": 243.1,
-"bis": 269.0
+"datei": "audio/chronik/de/mix/II-11-4d10c90b16.mp3",
+"ab": 230.2,
+"bis": 242.6
 },
 "II:165": {
-"datei": "audio/chronik/de/mix/II-11-6ab04c0f8e.mp3",
-"ab": 269.0,
-"bis": 308.7
+"datei": "audio/chronik/de/mix/II-11-4d10c90b16.mp3",
+"ab": 242.6,
+"bis": 268.5
 },
 "II:166": {
-"datei": "audio/chronik/de/mix/II-12-bf45ab4ca9.mp3",
+"datei": "audio/chronik/de/mix/II-11-4d10c90b16.mp3",
+"ab": 268.5,
+"bis": 308.2
+},
+"II:167": {
+"datei": "audio/chronik/de/mix/II-12-8f7cf4af60.mp3",
 "ab": 3.2,
 "bis": 5.3
 },
-"II:167": {
-"datei": "audio/chronik/de/mix/II-12-bf45ab4ca9.mp3",
+"II:168": {
+"datei": "audio/chronik/de/mix/II-12-8f7cf4af60.mp3",
 "ab": 5.3,
 "bis": 12.1
 },
-"II:168": {
-"datei": "audio/chronik/de/mix/II-12-bf45ab4ca9.mp3",
+"II:169": {
+"datei": "audio/chronik/de/mix/II-12-8f7cf4af60.mp3",
 "ab": 12.1,
 "bis": 42.8
 },
-"II:169": {
-"datei": "audio/chronik/de/mix/II-12-bf45ab4ca9.mp3",
+"II:170": {
+"datei": "audio/chronik/de/mix/II-12-8f7cf4af60.mp3",
 "ab": 42.8,
 "bis": 59.1
 },
-"II:170": {
-"datei": "audio/chronik/de/mix/II-12-bf45ab4ca9.mp3",
+"II:171": {
+"datei": "audio/chronik/de/mix/II-12-8f7cf4af60.mp3",
 "ab": 59.1,
 "bis": 79.0
 },
-"II:171": {
-"datei": "audio/chronik/de/mix/II-12-bf45ab4ca9.mp3",
+"II:172": {
+"datei": "audio/chronik/de/mix/II-12-8f7cf4af60.mp3",
 "ab": 79.0,
 "bis": 84.8
 },
-"II:172": {
-"datei": "audio/chronik/de/mix/II-12-bf45ab4ca9.mp3",
+"II:173": {
+"datei": "audio/chronik/de/mix/II-12-8f7cf4af60.mp3",
 "ab": 84.8,
 "bis": 92.9
 },
-"II:173": {
-"datei": "audio/chronik/de/mix/II-12-bf45ab4ca9.mp3",
+"II:174": {
+"datei": "audio/chronik/de/mix/II-12-8f7cf4af60.mp3",
 "ab": 92.9,
 "bis": 133.1
 },
-"II:174": {
-"datei": "audio/chronik/de/mix/II-13-828c9f12d1.mp3",
+"II:175": {
+"datei": "audio/chronik/de/mix/II-13-f34bfad492.mp3",
 "ab": 3.2,
-"bis": 5.3
-},
-"II:176": {
-"datei": "audio/chronik/de/mix/II-13-828c9f12d1.mp3",
-"ab": 5.3,
-"bis": 26.5
+"bis": 5.1
 },
 "II:177": {
-"datei": "audio/chronik/de/mix/II-13-828c9f12d1.mp3",
-"ab": 26.5,
-"bis": 82.4
+"datei": "audio/chronik/de/mix/II-13-f34bfad492.mp3",
+"ab": 5.1,
+"bis": 26.4
 },
 "II:178": {
-"datei": "audio/chronik/de/mix/II-13-828c9f12d1.mp3",
-"ab": 82.4,
-"bis": 118.6
+"datei": "audio/chronik/de/mix/II-13-f34bfad492.mp3",
+"ab": 26.4,
+"bis": 82.4
 },
 "II:179": {
-"datei": "audio/chronik/de/mix/II-13-828c9f12d1.mp3",
-"ab": 118.6,
-"bis": 127.2
+"datei": "audio/chronik/de/mix/II-13-f34bfad492.mp3",
+"ab": 82.4,
+"bis": 118.5
 },
 "II:180": {
-"datei": "audio/chronik/de/mix/II-13-828c9f12d1.mp3",
-"ab": 127.2,
-"bis": 147.9
+"datei": "audio/chronik/de/mix/II-13-f34bfad492.mp3",
+"ab": 118.5,
+"bis": 126.7
 },
 "II:181": {
-"datei": "audio/chronik/de/mix/II-13-828c9f12d1.mp3",
-"ab": 147.9,
-"bis": 206.4
+"datei": "audio/chronik/de/mix/II-13-f34bfad492.mp3",
+"ab": 126.7,
+"bis": 147.4
 },
 "II:182": {
-"datei": "audio/chronik/de/mix/II-14-de7dfb4531.mp3",
+"datei": "audio/chronik/de/mix/II-13-f34bfad492.mp3",
+"ab": 147.4,
+"bis": 205.9
+},
+"II:183": {
+"datei": "audio/chronik/de/mix/II-14-2300b4a68d.mp3",
 "ab": 3.2,
 "bis": 5.3
 },
-"II:183": {
-"datei": "audio/chronik/de/mix/II-14-de7dfb4531.mp3",
+"II:184": {
+"datei": "audio/chronik/de/mix/II-14-2300b4a68d.mp3",
 "ab": 5.3,
 "bis": 32.7
 },
-"II:184": {
-"datei": "audio/chronik/de/mix/II-14-de7dfb4531.mp3",
+"II:185": {
+"datei": "audio/chronik/de/mix/II-14-2300b4a68d.mp3",
 "ab": 32.7,
 "bis": 51.6
 },
-"II:185": {
-"datei": "audio/chronik/de/mix/II-14-de7dfb4531.mp3",
+"II:186": {
+"datei": "audio/chronik/de/mix/II-14-2300b4a68d.mp3",
 "ab": 51.6,
 "bis": 58.7
 },
-"II:186": {
-"datei": "audio/chronik/de/mix/II-14-de7dfb4531.mp3",
+"II:187": {
+"datei": "audio/chronik/de/mix/II-14-2300b4a68d.mp3",
 "ab": 58.7,
 "bis": 76.4
 },
-"II:187": {
-"datei": "audio/chronik/de/mix/II-14-de7dfb4531.mp3",
+"II:188": {
+"datei": "audio/chronik/de/mix/II-14-2300b4a68d.mp3",
 "ab": 76.4,
 "bis": 82.2
 },
-"II:188": {
-"datei": "audio/chronik/de/mix/II-14-de7dfb4531.mp3",
+"II:189": {
+"datei": "audio/chronik/de/mix/II-14-2300b4a68d.mp3",
 "ab": 82.2,
 "bis": 115.3
 },
-"II:189": {
-"datei": "audio/chronik/de/mix/II-15-083125290c.mp3",
-"ab": 3.7,
-"bis": 7.0
-},
 "II:190": {
-"datei": "audio/chronik/de/mix/II-15-083125290c.mp3",
-"ab": 7.0,
-"bis": 63.8
+"datei": "audio/chronik/de/mix/II-15-45116077c6.mp3",
+"ab": 3.7,
+"bis": 6.1
 },
 "II:191": {
-"datei": "audio/chronik/de/mix/II-15-083125290c.mp3",
-"ab": 63.8,
-"bis": 81.7
+"datei": "audio/chronik/de/mix/II-15-45116077c6.mp3",
+"ab": 6.1,
+"bis": 62.8
 },
 "II:192": {
-"datei": "audio/chronik/de/mix/II-15-083125290c.mp3",
-"ab": 81.7,
-"bis": 86.0
+"datei": "audio/chronik/de/mix/II-15-45116077c6.mp3",
+"ab": 62.8,
+"bis": 80.8
 },
 "II:193": {
-"datei": "audio/chronik/de/mix/II-15-083125290c.mp3",
-"ab": 86.0,
-"bis": 113.5
+"datei": "audio/chronik/de/mix/II-15-45116077c6.mp3",
+"ab": 80.8,
+"bis": 85.1
 },
 "II:194": {
-"datei": "audio/chronik/de/mix/II-15-083125290c.mp3",
-"ab": 113.5,
-"bis": 126.0
+"datei": "audio/chronik/de/mix/II-15-45116077c6.mp3",
+"ab": 85.1,
+"bis": 112.6
 },
 "II:195": {
-"datei": "audio/chronik/de/mix/II-15-083125290c.mp3",
-"ab": 126.0,
-"bis": 140.7
+"datei": "audio/chronik/de/mix/II-15-45116077c6.mp3",
+"ab": 112.6,
+"bis": 125.1
 },
 "II:196": {
-"datei": "audio/chronik/de/mix/II-15-083125290c.mp3",
-"ab": 140.7,
-"bis": 174.2
+"datei": "audio/chronik/de/mix/II-15-45116077c6.mp3",
+"ab": 125.1,
+"bis": 139.8
 },
 "II:197": {
-"datei": "audio/chronik/de/mix/II-15-083125290c.mp3",
-"ab": 174.2,
-"bis": 192.4
+"datei": "audio/chronik/de/mix/II-15-45116077c6.mp3",
+"ab": 139.8,
+"bis": 173.3
 },
 "II:198": {
-"datei": "audio/chronik/de/mix/II-15-083125290c.mp3",
-"ab": 192.4,
-"bis": 210.8
+"datei": "audio/chronik/de/mix/II-15-45116077c6.mp3",
+"ab": 173.3,
+"bis": 191.5
 },
 "II:199": {
-"datei": "audio/chronik/de/mix/II-15-083125290c.mp3",
-"ab": 210.8,
-"bis": 245.2
+"datei": "audio/chronik/de/mix/II-15-45116077c6.mp3",
+"ab": 191.5,
+"bis": 209.8
 },
 "II:200": {
-"datei": "audio/chronik/de/mix/II-16-cf8b8181bd.mp3",
+"datei": "audio/chronik/de/mix/II-15-45116077c6.mp3",
+"ab": 209.8,
+"bis": 244.2
+},
+"II:201": {
+"datei": "audio/chronik/de/mix/II-16-0dde906437.mp3",
 "ab": 3.4,
 "bis": 5.9
 },
-"II:201": {
-"datei": "audio/chronik/de/mix/II-16-cf8b8181bd.mp3",
+"II:202": {
+"datei": "audio/chronik/de/mix/II-16-0dde906437.mp3",
 "ab": 5.9,
 "bis": 56.6
 },
-"II:202": {
-"datei": "audio/chronik/de/mix/II-16-cf8b8181bd.mp3",
+"II:203": {
+"datei": "audio/chronik/de/mix/II-16-0dde906437.mp3",
 "ab": 56.6,
 "bis": 99.7
 },
-"II:203": {
-"datei": "audio/chronik/de/mix/II-17-a092ed0a60.mp3",
+"II:204": {
+"datei": "audio/chronik/de/mix/II-17-963a66cb0b.mp3",
 "ab": 3.7,
 "bis": 5.9
 },
-"II:204": {
-"datei": "audio/chronik/de/mix/II-17-a092ed0a60.mp3",
+"II:205": {
+"datei": "audio/chronik/de/mix/II-17-963a66cb0b.mp3",
 "ab": 5.9,
 "bis": 67.2
 },
-"II:205": {
-"datei": "audio/chronik/de/mix/II-17-a092ed0a60.mp3",
+"II:206": {
+"datei": "audio/chronik/de/mix/II-17-963a66cb0b.mp3",
 "ab": 67.2,
 "bis": 153.9
 },
-"II:206": {
-"datei": "audio/chronik/de/mix/II-17-a092ed0a60.mp3",
+"II:207": {
+"datei": "audio/chronik/de/mix/II-17-963a66cb0b.mp3",
 "ab": 153.9,
-"bis": 169.1
-},
-"II:208": {
-"datei": "audio/chronik/de/mix/II-17-a092ed0a60.mp3",
-"ab": 169.1,
-"bis": 175.3
+"bis": 168.3
 },
 "II:209": {
-"datei": "audio/chronik/de/mix/II-17-a092ed0a60.mp3",
-"ab": 175.3,
-"bis": 253.2
+"datei": "audio/chronik/de/mix/II-17-963a66cb0b.mp3",
+"ab": 168.3,
+"bis": 174.5
 },
 "II:210": {
-"datei": "audio/chronik/de/mix/II-18-591f47faef.mp3",
+"datei": "audio/chronik/de/mix/II-17-963a66cb0b.mp3",
+"ab": 174.5,
+"bis": 252.4
+},
+"II:211": {
+"datei": "audio/chronik/de/mix/II-18-6886ef94ca.mp3",
 "ab": 3.9,
 "bis": 6.2
 },
-"II:211": {
-"datei": "audio/chronik/de/mix/II-18-591f47faef.mp3",
+"II:212": {
+"datei": "audio/chronik/de/mix/II-18-6886ef94ca.mp3",
 "ab": 6.2,
 "bis": 18.0
 },
-"II:212": {
-"datei": "audio/chronik/de/mix/II-18-591f47faef.mp3",
+"II:213": {
+"datei": "audio/chronik/de/mix/II-18-6886ef94ca.mp3",
 "ab": 18.0,
 "bis": 22.0
 },
-"II:213": {
-"datei": "audio/chronik/de/mix/II-18-591f47faef.mp3",
+"II:214": {
+"datei": "audio/chronik/de/mix/II-18-6886ef94ca.mp3",
 "ab": 22.0,
 "bis": 102.6
 },
-"II:214": {
-"datei": "audio/chronik/de/mix/II-18-591f47faef.mp3",
+"II:215": {
+"datei": "audio/chronik/de/mix/II-18-6886ef94ca.mp3",
 "ab": 102.6,
 "bis": 175.9
 },
-"II:215": {
-"datei": "audio/chronik/de/mix/II-18-591f47faef.mp3",
+"II:216": {
+"datei": "audio/chronik/de/mix/II-18-6886ef94ca.mp3",
 "ab": 175.9,
 "bis": 199.7
 },
-"II:216": {
-"datei": "audio/chronik/de/mix/II-18-591f47faef.mp3",
+"II:217": {
+"datei": "audio/chronik/de/mix/II-18-6886ef94ca.mp3",
 "ab": 199.7,
 "bis": 216.0
 },
-"II:217": {
-"datei": "audio/chronik/de/mix/II-18-591f47faef.mp3",
+"II:218": {
+"datei": "audio/chronik/de/mix/II-18-6886ef94ca.mp3",
 "ab": 216.0,
 "bis": 229.1
 },
-"II:218": {
-"datei": "audio/chronik/de/mix/II-18-591f47faef.mp3",
+"II:219": {
+"datei": "audio/chronik/de/mix/II-18-6886ef94ca.mp3",
 "ab": 229.1,
 "bis": 253.0
 },
-"II:219": {
-"datei": "audio/chronik/de/mix/II-18-591f47faef.mp3",
+"II:220": {
+"datei": "audio/chronik/de/mix/II-18-6886ef94ca.mp3",
 "ab": 253.0,
 "bis": 287.5
 },
-"II:220": {
-"datei": "audio/chronik/de/mix/II-19-a15d258b74.mp3",
+"II:221": {
+"datei": "audio/chronik/de/mix/II-19-732ef57e25.mp3",
 "ab": 3.4,
-"bis": 4.9
-},
-"II:222": {
-"datei": "audio/chronik/de/mix/II-19-a15d258b74.mp3",
-"ab": 4.9,
-"bis": 25.2
+"bis": 6.2
 },
 "II:223": {
-"datei": "audio/chronik/de/mix/II-19-a15d258b74.mp3",
-"ab": 25.2,
-"bis": 29.8
+"datei": "audio/chronik/de/mix/II-19-732ef57e25.mp3",
+"ab": 6.2,
+"bis": 26.4
 },
 "II:224": {
-"datei": "audio/chronik/de/mix/II-19-a15d258b74.mp3",
-"ab": 29.8,
-"bis": 47.3
+"datei": "audio/chronik/de/mix/II-19-732ef57e25.mp3",
+"ab": 26.4,
+"bis": 31.1
 },
 "II:225": {
-"datei": "audio/chronik/de/mix/II-19-a15d258b74.mp3",
-"ab": 47.3,
-"bis": 58.3
+"datei": "audio/chronik/de/mix/II-19-732ef57e25.mp3",
+"ab": 31.1,
+"bis": 48.5
 },
 "II:226": {
-"datei": "audio/chronik/de/mix/II-19-a15d258b74.mp3",
-"ab": 58.3,
-"bis": 73.2
+"datei": "audio/chronik/de/mix/II-19-732ef57e25.mp3",
+"ab": 48.5,
+"bis": 59.5
 },
 "II:227": {
-"datei": "audio/chronik/de/mix/II-19-a15d258b74.mp3",
-"ab": 73.2,
-"bis": 101.3
+"datei": "audio/chronik/de/mix/II-19-732ef57e25.mp3",
+"ab": 59.5,
+"bis": 74.5
 },
 "II:228": {
-"datei": "audio/chronik/de/mix/II-19-a15d258b74.mp3",
-"ab": 101.3,
-"bis": 105.3
+"datei": "audio/chronik/de/mix/II-19-732ef57e25.mp3",
+"ab": 74.5,
+"bis": 102.5
 },
 "II:229": {
-"datei": "audio/chronik/de/mix/II-19-a15d258b74.mp3",
-"ab": 105.3,
-"bis": 167.4
+"datei": "audio/chronik/de/mix/II-19-732ef57e25.mp3",
+"ab": 102.5,
+"bis": 106.6
+},
+"II:230": {
+"datei": "audio/chronik/de/mix/II-19-732ef57e25.mp3",
+"ab": 106.6,
+"bis": 168.7
 }
 }
 }
