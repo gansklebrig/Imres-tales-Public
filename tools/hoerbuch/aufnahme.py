@@ -31,10 +31,15 @@ exhales sniffs gulps""".split()) | {"short pause", "pause", "long pause"}
 VERRAT = (ERLAUBT - {"pause"}) | {"pause", "short", "long", "whisper", "laughing", "sigh", "tone"}
 TAG = re.compile(r"\[([^\]]*)\]")
 
-def klar(s): return re.sub(r"\s+", " ", TAG.sub(" ", s)).strip()
+BUEHNE = re.compile(r"\*[^*]+\*")   # *hust* u. Ä.: Bühnenwörter im Skript, im Ton als Regie-Tag
+def klar(s): return re.sub(r"\s+", " ", TAG.sub(" ", BUEHNE.sub(" ", s)).replace(" / ", " ")).strip()
+def sprechtext(t):
+    """Text für die Sprachausgabe: Verszeilen („ / “) als Zeilenumbruch, damit jede Zeile ihren Reim am Ende betont."""
+    return re.sub(r"\s*/\s+", "\n", t)
+def verse(t): return [v for v in klar(t.replace(" / ", " |V| ")).split(" |V| ") if v] if " / " in t else []
 def vergleich(s):
     s = klar(s).replace("…", "...").replace("–", "-")
-    s = re.sub(r"[„“\"»«‚‘’.,!?:;()\-]", " ", s.lower())
+    s = re.sub(r"[„“\"»«‚‘’.,!?:;()\-/]", " ", s.lower())
     return re.sub(r"\s+", " ", s).strip()
 def saetze(t): return [x for x in re.split(r"(?<=[.!?…])\s+(?=(?:\[[^\]]*\]\s*)*[A-ZÄÖÜ„\"])", t.strip()) if x]
 
@@ -47,7 +52,7 @@ TITEL_TON = {   # Tonfall der gesprochenen Überschriften
     "Fäden, die zittern": "hushed", "Dreitausend Jahre Staub": "awed", "Schwarzes Wasser": "hushed", "Was unter der Oberfläche wartet": "dramatic",
     "Stadt aus Ruß": "serious", "Kleine Lügen": "dryly", "Eine Stimme wie Steinschlag": "solemn", "Flöten und Fläschchen": "cheerful",
     "Wenn der Boden bebt": "dramatic", "Große Leute": "warmly", "Der Stein schreit": "solemn", "Ein Tisch im Halbdunkel": "hushed",
-    "Hitze von unten": "serious", "Ein Lied für den Gastgeber": "mischievously", "Nachtisch": "dryly"}
+    "Hitze von unten": "serious", "Ein Lied für den Gastgeber": "mischievously", "Nachtisch": "dryly", "Was bisher geschah": "warmly"}
 
 def einheiten(kapitel):
     st, regie, rec, bes = J("tools/hoerbuch/struktur-de.json"), J("tools/hoerbuch/regie-de.json", {}), J("tools/hoerbuch/recycling-de.json", {}), J("tools/hoerbuch/besetzung.json")
@@ -128,6 +133,25 @@ def namen_fehlen(ziel, hyp):
         if ist < soll: fehlt.append(n)
     return fehlt
 
+def pegel(f):
+    """Spitzenpegel und Zahl übersteuerter Abtastwerte (Clipping) der Aufnahme."""
+    import numpy as np
+    raw = subprocess.check_output(["ffmpeg", "-v", "error", "-i", os.path.join(WURZEL, f), "-ac", "1", "-f", "f32le", "pipe:1"])
+    x = np.abs(np.frombuffer(raw, dtype=np.float32))
+    if not len(x): return -120.0, 0
+    return round(float(20 * np.log10(x.max() + 1e-12)), 1), int((x >= .995).sum())
+
+def reime_fehlen(ziel, hyp):
+    """Bei Versen: jedes Reimwort am Zeilenende muss zu hören sein (sonst sitzt der Reim nicht)."""
+    hw = [re.sub(r"[^a-zäöüß]", "", w.lower()) for w in hyp.split()]
+    fehlt = []
+    for v in verse(ziel):
+        ws = [re.sub(r"[^a-zäöüß]", "", w.lower()) for w in v.split()]; ws = [w for w in ws if w]
+        if not ws: continue
+        r = ws[-1]
+        if not any(difflib.SequenceMatcher(None, r, w).ratio() >= .75 for w in hw): fehlt.append(r)
+    return fehlt
+
 def pruefen(modell, f, ziel):
     seg, _ = modell.transcribe(os.path.join(WURZEL, f), language="de", word_timestamps=True, vad_filter=False, beam_size=5, condition_on_previous_text=False)
     woerter = [[w.word.strip(), round(w.start, 3), round(w.end, 3)] for s in seg for w in s.words]
@@ -139,8 +163,24 @@ def pruefen(modell, f, ziel):
     lang = len(b) > len(a) * 1.25 + 8
     grenze = .78 if len(a) < 30 else .86
     namen = namen_fehlen(ziel, hyp)
-    ok = ratio >= grenze and not verrat and not lang and not namen and erwartet * .45 < d < erwartet * 2.4 + 2
-    return {"ok": ok, "ratio": round(ratio, 3), "verrat": verrat, "namen": namen, "dauer": round(d, 2), "erwartet": round(erwartet, 2), "hyp": hyp, "woerter": woerter}
+    reime = reime_fehlen(ziel, hyp)
+    spitze, clip = pegel(f)
+    # Lücken mitten in der Aufnahme (abgehackte Pausen): Stille > 2,2 s zwischen zwei Wörtern
+    luecken = [round(woerter[k + 1][1] - woerter[k][2], 2) for k in range(len(woerter) - 1) if woerter[k + 1][1] - woerter[k][2] > 2.2]
+    # Sprache: deutsch erkannt? (englischer Einschlag/Akzent kippt die Erkennung) – nur bei genug Text verlässlich
+    sprache, sicher = "de", 1.0
+    if len(a) >= 40:
+        _, info = modell.transcribe(os.path.join(WURZEL, f), language=None, beam_size=1, condition_on_previous_text=False)
+        sprache, sicher = info.language, round(float(info.language_probability), 3)
+    akzent = sprache != "de" or sicher < .6
+    ok = (ratio >= grenze and not verrat and not lang and not namen and not reime and clip < 30 and not luecken and not akzent
+          and erwartet * .45 < d < erwartet * 2.4 + 2)
+    return {"ok": ok, "ratio": round(ratio, 3), "verrat": verrat, "namen": namen, "reime": reime, "spitze": spitze, "clip": clip,
+            "luecken": luecken, "sprache": sprache, "sicher": sicher, "dauer": round(d, 2), "erwartet": round(erwartet, 2), "hyp": hyp, "woerter": woerter}
+
+def guete(q):
+    """Vergleichswert zweier Takes: bestanden vor allem anderen, dann Wortlaut, wenig Mängel."""
+    return (q["ok"], -len(q["namen"]) - len(q.get("reime", [])) - len(q.get("luecken", [])) - (q.get("clip", 0) >= 30), q["ratio"])
 
 def main():
     kapitel = (os.environ.get("KAPITEL") or "vorab,I").split(",")
@@ -159,12 +199,12 @@ def main():
     os.makedirs(os.path.join(WURZEL, "audio/hoerbuch/seg"), exist_ok=True)
     qa = J("tools/hoerbuch/qa-de.json", {})
     def aufnehmen(e):
-        daten = {"text": e["text"], "model_id": "eleven_v3", "voice_settings": einstellung(e, bes), "language_code": "de"}
+        daten = {"text": sprechtext(e["text"]), "model_id": "eleven_v3", "voice_settings": einstellung(e, bes), "language_code": "de"}
         try:   # Sprache erzwingen: kurze Zeilen englischsprachiger Stimmen kippen sonst ins Englische
             mp3 = vertonen.veredeln(vertonen.anfrage(f"/v1/text-to-speech/{e['stimme']}?output_format=mp3_44100_128", daten, roh=True))
         except SystemExit as ex:
             if "language" not in str(ex).lower(): raise
-            mp3 = vertonen.tts(e["stimme"], e["text"], modell="eleven_v3", einstellung=einstellung(e, bes))
+            mp3 = vertonen.tts(e["stimme"], sprechtext(e["text"]), modell="eleven_v3", einstellung=einstellung(e, bes))
         open(os.path.join(WURZEL, datei(e, bes)), "wb").write(mp3)
     for n, e in enumerate(fehlend, 1):
         qa.pop(datei(e, bes), None)   # neue Aufnahme → neu prüfen
@@ -187,12 +227,17 @@ def main():
         if f in qa and qa[f].get("ok") is not None and "woerter" in qa[f]: continue
         q = pruefen(wm, f, ziel)
         versuche = 0
-        while e and not q["ok"] and versuche < 2 and verbraucht + len(e["text"]) <= nachholen:
-            print(f"NEU: {f} ratio={q['ratio']} verrat={q['verrat']} dauer={q['dauer']}/{q['erwartet']}\n  hörte: {q['hyp'][:160]}", flush=True)
+        pfad = os.path.join(WURZEL, f)
+        while e and not q["ok"] and versuche < 3 and verbraucht + len(e["text"]) <= nachholen:
+            print(f"NEU: {f} ratio={q['ratio']} namen={q['namen']} reime={q['reime']} clip={q['clip']} luecken={q['luecken']} "
+                  f"sprache={q['sprache']}/{q['sicher']} dauer={q['dauer']}/{q['erwartet']}\n  hörte: {q['hyp'][:160]}", flush=True)
+            bester = open(pfad, "rb").read()   # bisher besten Take aufheben – eine Neuaufnahme kann auch schlechter werden
             try: aufnehmen(e)
             except BaseException as ex: print("Neuaufnahme nicht möglich:", ex); break
             verbraucht += len(e["text"]); versuche += 1
-            q = pruefen(wm, f, ziel)
+            q2 = pruefen(wm, f, ziel)
+            if guete(q2) >= guete(q): q = q2
+            else: open(pfad, "wb").write(bester); print("  neuer Take schlechter – alter bleibt", flush=True)
         q["nachgeholt"] = versuche; qa[f] = q
         if not q["ok"]: print(f"WEITER AUFFÄLLIG: {f} ratio={q['ratio']} verrat={q['verrat']} hörte: {q['hyp'][:160]}", flush=True)
         if len(qa) % 50 == 0: json.dump(qa, open(os.path.join(HIER, "qa-de.json"), "w"), ensure_ascii=False)
