@@ -48,6 +48,11 @@
 .vl-ab svg { width: .95rem; height: .95rem; }
 .sub:hover .vl-ab, .vl-ab:hover, .vl-ab:focus-visible { opacity: 1; background: rgba(224,160,70,.12); }
 @media (pointer: coarse) { .vl-ab { width: 2.3rem; height: 2.3rem; opacity: .75; } }
+.vl-hier { display: inline-flex; align-items: center; gap: .35rem; margin: 0 .5rem .15rem 0; padding: .2rem .7rem .2rem .5rem; vertical-align: .1em; border: 1px solid rgba(224,160,70,.6); border-radius: 999px; background: rgba(16,14,21,.75); color: var(--ember, #e0a046); font: inherit; font-size: .8rem; line-height: 1.3; cursor: pointer; animation: vlHier .25s ease-out; }
+.vl-hier svg { width: .8rem; height: .8rem; }
+.vl-hier:hover, .vl-hier:focus-visible { background: rgba(224,160,70,.16); }
+@keyframes vlHier { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .vl-hier { animation: none; } }
 /* gerade gelesener Absatz */
 #chapters .prose > .vl-aktiv { position: relative; transition: color .4s; }
 #chapters .prose > p.vl-aktiv::before, #chapters .prose > .sub.vl-aktiv::before { content: ""; position: absolute; left: -1rem; top: .2em; bottom: .2em; width: 3px; border-radius: 3px; background: linear-gradient(180deg, transparent, var(--ember, #e0a046) 20%, var(--ember, #e0a046) 80%, transparent); box-shadow: 0 0 12px rgba(224,160,70,.55); animation: vlAtem 2.4s ease-in-out infinite; }
@@ -599,8 +604,25 @@
       });
     });
   }
+  /* Absatz antippen: kleiner Knopf „Ab hier vorlesen“, erst der zweite Tipp spielt */
+  document.addEventListener("click", e => {
+    const alt = document.querySelector(".vl-hier");
+    if (!e.target.closest || e.target.closest(".vl-hier")) return;
+    if (alt) alt.remove();
+    if (!manifest || e.target.closest("a, button, img, input, select, textarea, [data-vl-kap], .rb-knopf, .rb-kapitel")) return;
+    const sel = window.getSelection && window.getSelection(); if (sel && String(sel).trim()) return;
+    const p = e.target.closest("#chapters .chapter .prose > p"); if (!p) return;
+    const art = p.closest(".chapter"), nr = art.id.replace(/^kapitel-/, "");
+    const i = Array.prototype.indexOf.call(p.parentNode.children, p);
+    if (!((manifest.kapitel || {})[nr] || []).some(x => x.i === i)) return;
+    if (p.classList.contains("vl-aktiv") && pos >= 0) return;
+    const T = t(), h = document.createElement("button"); h.type = "button"; h.className = "vl-hier"; h.dataset.vlKap = nr; h.dataset.vlI = i;
+    h.innerHTML = PLAY + "<span>" + esc(T.abHier) + "</span>";
+    p.prepend(h);
+  });
   document.addEventListener("click", e => {
     const b = e.target.closest && e.target.closest("[data-vl-kap]"); if (!b) return;
+    if (b.classList.contains("vl-hier")) b.remove();
     e.preventDefault(); listeBauen();
     const H = HSP(); if (H) H.ein();   /* im Klick: Audio darf jetzt starten (iOS/Android) */
     const kap = b.dataset.vlKap, i = b.dataset.vlI != null ? +b.dataset.vlI : -1;
