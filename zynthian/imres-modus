@@ -30,6 +30,11 @@ case "$1" in
     [ -d "$DATEN/seite/.git" ] || { echo "Imres-Ordner nicht gefunden ($DATEN/seite)."; exit 1; }
     exec 9>"$DATEN/.update.lock"; flock -n 9 || { echo "Es läuft schon ein Update."; exit 0; }
     G="$DATEN/seite"
+    # Reste eines abgebrochenen Downloads (Strom/WLAN weg) blockieren sonst jedes weitere Update.
+    # Wir halten die Update-Sperre – läuft kein git, sind alle .lock-Dateien sicher verwaist.
+    if ! pgrep -x git >/dev/null 2>&1; then
+      find "$G/.git" -maxdepth 4 -name '*.lock' -type f -print -delete 2>/dev/null | sed 's|^|Aufgeräumt: |'
+    fi
     echo "SCHRITT 1/6 Lade die neue Version herunter …"
     git -C "$G" fetch --progress --depth 1 origin main 2>&1 || { echo "Kein Update möglich (Internet?). Imres bleibt, wie es ist."; exit 1; }
     ALT=$(git -C "$G" rev-parse HEAD 2>/dev/null); NEU=$(git -C "$G" rev-parse FETCH_HEAD 2>/dev/null)
