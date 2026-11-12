@@ -1,0 +1,210 @@
+{
+ "ziel": "audio/lachen",
+ "stimmen": {
+  "echo": "czb8zR3V35utWZxvKd9a",
+  "friedrich": "lx8LAX2EUAKftVz0Dk5z",
+  "nundro": "2OcnG4mH3jIMtWz3vKus",
+  "ezekiel": "18X2yBovneA0q06wd8E9",
+  "barradin": "g1jpii0iyvtRs8fqXsd1",
+  "dorf": "YyYOpSknZlewhHezK5bv",
+  "schlaeger": "eWmswbut7I70CIuRsFwP",
+  "harbin": "89gcX1AeMGgcsN8ypHLu",
+  "riese": "pfvZahoGcT3NdpxRuNkg",
+  "dolgrimson": "87AwpS6yC86wa2WglbsK",
+  "kardal": "CVcPLXStXPeDxhrSflDZ",
+  "frau": "vPFocGjG5CEBbSByU2UY",
+  "gartokkar": "UFO0Yv86wqRxAt1DmXUu"
+ },
+ "zeilen": {
+  "echo_laut_1": {
+   "stimme": "echo",
+   "text": "[laughs loudly] Hahahaha! Hahaha!",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.5,
+    "use_speaker_boost": true
+   }
+  },
+  "echo_laut_2": {
+   "stimme": "echo",
+   "text": "[bursts out laughing] Hahaha... hahahaha!",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.5,
+    "use_speaker_boost": true
+   }
+  },
+  "echo_dreckig_1": {
+   "stimme": "echo",
+   "text": "[laughs mischievously] Hehehehe...",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.5,
+    "use_speaker_boost": true
+   }
+  },
+  "echo_dreckig_2": {
+   "stimme": "echo",
+   "text": "[cackles] Hehe... hehehe.",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.5,
+    "use_speaker_boost": true
+   }
+  },
+  "echo_trocken": {
+   "stimme": "echo",
+   "text": "[dry chuckle] Hmh. Ha.",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.5,
+    "use_speaker_boost": true
+   }
+  },
+  "nundro_1": {
+   "stimme": "nundro",
+   "text": "[laughs heartily] Hahaha! Hohoho... hahahaha!",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.5,
+    "use_speaker_boost": true
+   }
+  },
+  "nundro_2": {
+   "stimme": "nundro",
+   "text": "[laughing, wheezing] Hoho... hahaha... hahaha!",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.5,
+    "use_speaker_boost": true
+   }
+  },
+  "friedrich_erschoepft": {
+   "stimme": "friedrich",
+   "text": "[laughs weakly, exhausted] Ha... haha...",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.5,
+    "use_speaker_boost": true
+   }
+  },
+  "friedrich_1": {
+   "stimme": "friedrich",
+   "text": "[laughs warmly] Hahaha!",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.5,
+    "use_speaker_boost": true
+   }
+  },
+  "ezekiel_leise": {
+   "stimme": "ezekiel",
+   "text": "[low, quiet chuckle] Hm... heh.",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.5,
+    "use_speaker_boost": true
+   }
+  },
+  "barradin_1": {
+   "stimme": "barradin",
+   "text": "[laughs heartily] Hahaha!",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.5,
+    "use_speaker_boost": true
+   }
+  },
+  "menge_1": {
+   "stimme": "dorf",
+   "text": "[laughs heartily] Hahaha! Hahaha!",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.5,
+    "use_speaker_boost": true
+   }
+  },
+  "menge_2": {
+   "stimme": "schlaeger",
+   "text": "[laughs loudly] Hahaha!",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.5,
+    "use_speaker_boost": true
+   }
+  },
+  "menge_3": {
+   "stimme": "harbin",
+   "text": "[chuckles] Hohoho.",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.5,
+    "use_speaker_boost": true
+   }
+  },
+  "menge_4": {
+   "stimme": "riese",
+   "text": "[deep belly laugh] Hohoho! Hohoho!",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.5,
+    "use_speaker_boost": true
+   }
+  },
+  "menge_5": {
+   "stimme": "dolgrimson",
+   "text": "[laughs] Hahaha!",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.5,
+    "use_speaker_boost": true
+   }
+  },
+  "menge_6": {
+   "stimme": "kardal",
+   "text": "[laughs heartily] Harharhar!",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.5,
+    "use_speaker_boost": true
+   }
+  },
+  "menge_7": {
+   "stimme": "frau",
+   "text": "[laughs] Hahaha!",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.5,
+    "use_speaker_boost": true
+   }
+  },
+  "menge_8": {
+   "stimme": "gartokkar",
+   "text": "[laughs mockingly] Hahaha!",
+   "einstellung": {
+    "stability": 0.5,
+    "similarity_boost": 0.85,
+    "style": 0.5,
+    "use_speaker_boost": true
+   }
+  }
+ }
+}

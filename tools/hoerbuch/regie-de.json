@@ -1345,7 +1345,7 @@
  },
  "I-d029f8ae": {
   "t": "[deadpan] Direkt neben mir knurrte es:",
-  "p": 0.85
+  "p": 1.6
  },
  "I-4ee5132a": {
   "t": "[grumpy] Was?",
@@ -2217,7 +2217,7 @@
  },
  "II-ceb2a147": {
   "t": "[furious] Haltet die Stellung! [menacing] Holt ihn runter, ihr Nichtsnutze!",
-  "p": 0.45
+  "p": 0.7
  },
  "II-a5b5ab94": {
   "t": "[wistful] Woher die Dämonen kamen und warum sie ausgerechnet Ilvaras Festung angriffen, ist mir bis heute ein Rätsel.",
@@ -3868,7 +3868,7 @@
   "p": 0.0
  },
  "I-af9a277a": {
-  "t": "[serious] Der letzte Söldner wehrte sich nur noch panisch. Kurz darauf lag er neben seiner Auftraggeberin auf dem kalten Höhlenboden. [quietly] Friedrich kniete sich neben Nezna und sah lange auf sie hinab. Ich wusste, woran er dachte: wie viele Diener diese Spinne wohl noch hatte ... und ob sie von uns wusste. Nur Echo durchsuchte ihren Gürtel nach Münzen, fand keine und knurrte:",
+  "t": "[serious] Der letzte Söldner wehrte sich nur noch panisch. Kurz darauf lag er neben seiner Auftraggeberin auf dem kalten Höhlenboden. [quietly] Friedrich kniete sich neben Nezna und sah lange auf sie hinab. [serious] Ich wusste, woran er dachte: wie viele Diener diese Spinne wohl noch hatte ... und ob sie von uns wusste. [short pause] [dryly] Nur Echo durchsuchte ihren Gürtel nach Münzen, fand keine und knurrte:",
   "p": 0.0
  },
  "I-3e9e1acd": {
@@ -3896,7 +3896,7 @@
   "p": 0.0
  },
  "II-6b0ec64f": {
-  "t": "[dramatic] Dort herrschte das absolute Chaos. Zerstörte Tische und tote Soldaten waren über den Boden verteilt, und ein geierartiger Dämon mit zerzausten, schwarzen Schwingen, einem nackten, sehnigen Hals und einem Schnabel voller Zähne, kreiste über ihnen und stürzte sich auf die übrigen Wachen. [serious] Es stank nach Blut und nassen Federn. Er stieß gerade mit einem lauten, krächzenden Aufschrei auf eine der Wachen nieder, als ich dahinter eine Drow entdeckte. Von der freundlichen Großmutter war nichts mehr übrig: dunkle, fast schwarze Haut, weißes Haar, zu einem hohen Knoten gebunden, eine schwarze Rüstung voller Dornen über einem violetten Gewand und ein langer, blasser Umhang. Mit grimmigem Gesichtsausdruck schoss sie Pfeile auf den Dämon, der durch ihre Festung wütete. Erst als sie ihre Leute anschrie, erkannte ich die Stimme: Ilvara, die Gestaltwandlerin, die uns betäubt und hierher verschleppt hatte.",
+  "t": "[dramatic] Dort herrschte das absolute Chaos. Zerstörte Tische und tote Soldaten waren über den Boden verteilt, und ein geierartiger Dämon mit zerzausten, schwarzen Schwingen, einem nackten, sehnigen Hals und einem Schnabel voller Zähne, kreiste über ihnen und stürzte sich auf die übrigen Wachen. [serious] Es stank nach Blut und nassen Federn. Er stieß gerade mit einem lauten, krächzenden Aufschrei auf eine der Wachen nieder, als ich dahinter eine Drow entdeckte. Von der freundlichen Großmutter war nichts mehr übrig: dunkle, fast schwarze Haut, weißes Haar, zu einem hohen Knoten gebunden, eine schwarze Rüstung voller Dornen über einem violetten Gewand und ein langer, blasser Umhang. Mit grimmigem Gesichtsausdruck schoss sie Pfeile auf den Dämon, der durch ihre Festung wütete. Erst als sie ihre Leute anschrie, erkannte ich die Stimme: [short pause] [dramatic] Ilvara, die Gestaltwandlerin, die uns betäubt und hierher verschleppt hatte.",
   "p": 1.0
  },
  "II-30a4ac54": {

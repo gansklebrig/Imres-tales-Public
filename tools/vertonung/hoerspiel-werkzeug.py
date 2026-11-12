@@ -98,7 +98,18 @@ ARTEN = {
     "blubb": {"f": reihe("e_blubb_", 4) + ["fx_rp_bubble", "fx_rp_bubble2"]},
     "atem": {"f": reihe("n_atem_", 6), "rate": [.6, .68]},
     "lachen_boese": {"f": reihe("n_lachen_boese_", 9)},
-    "lachen": {"f": reihe("n_lachen_", 20), "folge": [2, 3, .3, .6]},
+    # Menge (Schänke, Wachen, Dorf): nur tiefe, natürliche Lacher – die hellen klingen nach Gnom und bleiben den Goblins
+    "lachen": {"f": ["n_lachen_2", "n_lachen_3", "n_lachen_5", "n_lachen_8", "n_lachen_16"] + reihe("n_held_menge_", 8), "folge": [2, 3, .3, .6]},
+    "lachen_goblin": {"f": ["n_lachen_%d" % k for k in (1, 4, 9, 10, 12, 13, 15, 17, 18, 19, 20)], "folge": [1, 2, .2, .4]},
+    # Heldenlacher in den Stimmen der Figuren (erzeugt aus tools/vertonung/lachen-de.json, siehe lachen_uebernehmen())
+    "lachen_echo": {"f": ["n_held_echo_laut_1", "n_held_echo_laut_2"], "held": True},
+    "lachen_echo_dreckig": {"f": ["n_held_echo_dreckig_1", "n_held_echo_dreckig_2"], "held": True},
+    "lachen_echo_trocken": {"f": ["n_held_echo_trocken"], "held": True},
+    "lachen_nundro": {"f": ["n_held_nundro_1", "n_held_nundro_2"], "held": True},
+    "lachen_friedrich": {"f": ["n_held_friedrich_1"], "held": True},
+    "lachen_friedrich_matt": {"f": ["n_held_friedrich_erschoepft"], "held": True},
+    "lachen_ezekiel": {"f": ["n_held_ezekiel_leise"], "held": True},
+    "lachen_gruppe": {"f": ["n_held_echo_laut_1", "n_held_friedrich_1", "n_held_barradin_1", "n_held_echo_laut_2", "n_held_nundro_1"], "folge": [3, 3, .12, .3], "held": True},
     "jubel": {"f": reihe("e_jubel_", 6)},
     "zank": {"f": ["fx_0_v_latin_male_attack_1", "fx_0_v_latin_male_fight_1", "fx_0_v_greek_male_attack_10", "fx_0_v_persian_male_attack_1", "fx_0_v_persian_male_to_war_1"], "folge": [2, 3, .5, .9]},
     # Dinge und Orte
@@ -260,7 +271,7 @@ ORTE = {
     "geisterdorf": {"betten": [["a_ruinenwind", .55], ["a_friedhof", .45], ["a_wind3", .2], ["a_laub", .2]], "ev": [["kraehe", [25, 60], .25, .8], ["knarren", [25, 60], .22, .8]]},
     "kraeuterhaus": {"betten": [["a_kochen2", 0.32], ["a_feuer3", 0.27, {"tief": 4200}], ["a_tagvoegel", .15, {"tief": 2500}]], "ev": [["spatz", [20, 45], .2, .3]]},
     "nebel":       {"betten": [["a_kochen2", 0.21], ["a_geisterhauch", .45], ["a_fluestern", .2, {"tief": 2500}]], "ev": []},
-    "kerker":      {"betten": [["a_tropfen2", 0.17], ["a_wind1", .3, {"tief": 450}], ["a_tropfen1", 0.25], ["a_strom", 0.26, {"tief": 600}]], "ev": [["kette", [14, 35], .3, .6], ["riegel", [35, 80], .25, .7]]},
+    "kerker":      {"betten": [["a_tropfen2", 0.17], ["a_fluss", 0.3, {"tief": 1600}], ["a_tropfen1", 0.25], ["a_strom", 0.3, {"tief": 900}]], "ev": [["kette", [14, 35], .3, .6], ["riegel", [35, 80], .25, .7]]},
     "festung":     {"betten": [["a_strom", 0.38, {"tief": 900}], ["a_tropfen1", 0.22], ["a_heulwind", .2, {"tief": 350}], ["a_wind3", .12, {"tief": 300}]], "ev": [["stein", [25, 60], .25, .8]]},
     "abgrund":     {"betten": [["a_heulwind", .45, {"tief": 500}], ["a_tropfen1", 0.19], ["a_wind3", .25, {"tief": 400}], ["a_tropfstein", 0.11, {"schleife": True}]], "ev": [["spinne", [18, 40], .22, .6], ["steinschlag", [40, 90], .18, 1]]},
     "pilzwelt":    {"betten": [["a_rinnsal", 0.21], ["a_tropfstein", 0.28, {"schleife": True}], ["a_klangschale", .08], ["a_wind3", .12, {"tief": 400}]], "ev": [["tropfen", [8, 20], .25, .5], ["spinne", [40, 90], .18, .8]]},
@@ -281,6 +292,79 @@ ORTE = {
     "drachenhort": {"betten": [["a_feuer2", 0.3, {"tief": 4200}], ["a_kochen", 0.24, {"tief": 1000}], ["a_feuer1", 0.21, {"tief": 4200}], ["a_grabesdroehnen", .25]], "ev": [["atem", [14, 30], .2, .3], ["zischen", [16, 35], .2, .5], ["muenze", [40, 90], .12, .6]]},
     "gang":        {"betten": [["a_feuer3", 0.24, {"tief": 4200}], ["a_halle", .3, {"tief": 1800}], ["a_wind3", .15, {"tief": 500}]], "ev": [["steinschritte", [30, 70], .18, .7]]},
 }
+
+# Raumklang: jeder Ort bekommt einen Raum, und Effekte wie Ortsgeräusche hallen so, wie es dort klingen würde –
+# draußen fast trocken, in Stuben kurz, in Steinhallen lang, in Höhlen lang mit frühen Echos von den Felswänden.
+#   lang: Nachhall in s, abkl: Abklingrate (größer = kürzer), send: Hallanteil der Effekte (wenn das Ereignis keinen
+#   eigenen "hall" setzt), vor: Vorverzögerung in s, echos: [[Verzögerung s, Pegel], …] frühe Reflexionen
+RAEUME = {
+    "frei":   {"lang": .9,  "abkl": 7.5, "send": .05, "vor": .0},
+    "stube":  {"lang": 1.1, "abkl": 5.5, "send": .16, "vor": .008},
+    "halle":  {"lang": 2.6, "abkl": 2.6, "send": .30, "vor": .022},
+    "hoehle": {"lang": 3.4, "abkl": 1.9, "send": .40, "vor": .04, "echos": [[.11, .35], [.19, .22], [.31, .12]]},
+}
+ORT_RAUM = {
+    "erzaehler": "frei", "hafen": "frei", "strasse": "frei", "wald": "frei", "dorf": "frei", "feier": "frei", "ruine": "frei",
+    "nacht": "frei", "stadt": "frei", "donnerbaum": "frei", "turmspitze": "frei", "geisterdorf": "frei", "nebel": "frei",
+    "taverne": "stube", "amtsstube": "stube", "labor": "stube", "turm": "stube", "stube": "stube", "kraeuterhaus": "stube",
+    "laden": "stube", "schenke": "stube",
+    "runen": "halle", "halle": "halle", "festung": "halle", "fischstadt": "halle", "gracklstugh": "halle",
+    "duergarmarkt": "halle", "thron": "halle", "klingenmarkt": "halle", "riesendorf": "halle", "steinsprecher": "halle",
+    "flammenhalle": "halle", "drachenhort": "halle", "gang": "halle", "gewoelbe": "halle",
+    "goblinhoehle": "hoehle", "mine": "hoehle", "lager": "hoehle", "kerker": "hoehle", "abgrund": "hoehle", "pilzwelt": "hoehle",
+    "grab": "hoehle", "see": "hoehle", "demogorgon": "hoehle", "boot": "hoehle",
+}
+
+def raum_ir(r, sr, seed=11):
+    """Stereo-Impulsantwort eines Raums (Rauschen mit Abklingkurve, Vorverzögerung, frühe Echos)"""
+    rr = np.random.default_rng(seed); n = int(r["lang"] * sr); v = int(r.get("vor", 0) * sr)
+    ir = np.zeros((2, n + v), np.float32)
+    ir[:, v:] = rr.standard_normal((2, n)) * np.exp(-np.arange(n) / sr * r["abkl"])
+    ziel = sr / 6.4                                  # gleiche Energie wie der bisherige 2,2-s-Hall: "send" regelt die Menge
+    ir *= math.sqrt(ziel / max(1e-9, float((ir[0] ** 2).sum())))
+    for d, g in r.get("echos", []):                   # frühe Echos als deutliche Einzelreflexionen
+        j = int(d * sr)
+        if j < ir.shape[1]: ir[0, j] += g * math.sqrt(ziel); ir[1, min(ir.shape[1] - 1, j + int(.007 * sr))] += g * math.sqrt(ziel)
+    return ir
+
+# Stimmeffekte für einzelne Stellen der Aufnahme (Partitur: ("stimmfx", Stichwort-Anfang, Modus, Stichwort-Ende, Effekt))
+#   hoehlenecho: Ruf hallt als Echo von den Felswänden zurück · dumpf: Stimme aus einem Kokon/hinter einer Wand
+#   kopfstimme: Flüstern, das im Kopf erklingt (dünn, weit, mit langem Nachhall)
+STIMMFX = {"hoehlenecho", "dumpf", "kopfstimme"}
+
+def stimm_effekt(stimme, a, b, typ, sr):
+    """Bearbeitet stimme[:, a:b] (Stereo-Puffer) an Ort und Stelle; Nachklänge dürfen über b hinausreichen"""
+    from scipy.signal import butter, lfilter, oaconvolve
+    b = min(b, stimme.shape[1]); a = max(0, a)
+    if b - a < int(.05 * sr): return
+    x = stimme[:, a:b].mean(axis=0).copy()
+    k = int(.03 * sr); w = np.ones(len(x), np.float32); w[:k] = np.linspace(0, 1, k); w[-k:] = np.linspace(1, 0, k)
+    def tp(y, f, o=2): bb, aa = butter(o, f / (sr / 2), "low"); return lfilter(bb, aa, y).astype(np.float32)
+    def hp(y, f, o=2): bb, aa = butter(o, f / (sr / 2), "high"); return lfilter(bb, aa, y).astype(np.float32)
+    def dazu(y, t0, g, pan=0.0):
+        i0 = a + int(t0 * sr); n = min(len(y), stimme.shape[1] - i0)
+        if n <= 0: return
+        gl, gr = math.cos((pan + 1) * math.pi / 4) * math.sqrt(2), math.sin((pan + 1) * math.pi / 4) * math.sqrt(2)
+        stimme[0, i0:i0 + n] += y[:n] * g * gl; stimme[1, i0:i0 + n] += y[:n] * g * gr
+    if typ == "hoehlenecho":
+        # Original bleibt; dazu vier immer dumpfere, leisere Wiederholungen, abwechselnd links/rechts, und Höhlenhall
+        for n_, (d, g, f, pan) in enumerate([(.42, .42, 3200, -.5), (.84, .27, 2300, .5), (1.26, .16, 1700, -.35), (1.68, .09, 1200, .35)]):
+            dazu(tp(x, f), d, g, pan)
+        ir = raum_ir(RAEUME["hoehle"], sr, seed=5)
+        nach = np.stack([oaconvolve(x, ir[c])[:len(x) + len(ir[c])] for c in range(2)]).astype(np.float32) * .0035
+        i0 = a; n = min(nach.shape[1], stimme.shape[1] - i0); stimme[:, i0:i0 + n] += nach[:, :n]
+    elif typ == "dumpf":
+        # durch Spinnenseide gesprochen: Höhen weg, etwas leiser, ein Hauch Raum
+        y = tp(tp(x, 900, 4), 1400) * 1.35
+        stimme[:, a:b] = stimme[:, a:b] * (1 - w) + (y * w)[None, :] * .85
+    elif typ == "kopfstimme":
+        # dünn (ohne Tiefen), leicht verdoppelt, weit und mit langem Nachhall – kommt von überall und nirgends
+        y = hp(x, 320) * 1.45
+        stimme[:, a:b] = stimme[:, a:b] * (1 - w) + (y * w)[None, :]
+        dazu(y, .014, .35, -.8); dazu(y, .023, .35, .8)
+        ir = raum_ir({"lang": 3.2, "abkl": 1.6, "vor": .03}, sr, seed=9)
+        nach = np.stack([oaconvolve(y, ir[c])[:len(y) + len(ir[c])] for c in range(2)]).astype(np.float32) * .006
+        i0 = a; n = min(nach.shape[1], stimme.shape[1] - i0); stimme[:, i0:i0 + n] += nach[:, :n]
 
 # Abschnitt (Kulisse der Seitenränder, inhalt.js) → Ort und Stimmung des Zwischenspiels
 ABSCHNITTE = {
@@ -468,7 +552,7 @@ A("II", 49, ("blitz", "Ein gleißender Blitz", "auf", 0.65), ("wucht", "hart auf
 A("II", 51, ("windstoss", "sprang in den Abgrund", "auf", 0.35), ("geist", "euch alle kriegen", "auf", 0.3, {"hall": 0.7}))
 A("II", 52, ("platsch", "einem Platschen", "auf", 0.6, {"fern": 1, "hall": 0.5}))
 A("II", 54, ("muenzen", "Etwas Beute", "auf", 0.45))
-A("II", 58, ("lachen", "Befreiend? Absolut.", "nach", 0.35))
+A("II", 58, ("lachen_gruppe", "Befreiend? Absolut.", "nach", 0.35))
 A("II", 60, ("spinne", "keine Spinnen anzulocken", "auf", 0.35, {"fern": 1}))
 A("II", 61, ("steinschlag", "beinahe einen Sprung", "bei", 0.4, {"fern": 1}))
 A("II", 63, ("spinne", "Ein paar Spinnen", "auf", 0.5))
@@ -656,7 +740,6 @@ E("I", 175, ("feuer_an", "Wir schlugen unser Lager auf", "auf", 0.35), ("knister
 E("I", 179, ("riemen", "Danach ging es zurück nach Neverwinter", "bei", 0.3))
 E("I", 183, ("volk", "in der großen Stadt", "auf", 0.3), ("muenzen", "Gasthof gesichert", "auf", 0.3), ("klopfen", "um eine Audienz", "auf", 0.3))
 E("I", 186, ("tuer_oeffnen", "Hinter dem Tor öffnete sich", "bei", 0.35), ("stuhl", "nicht gerade erfreut", "auf", 0.3))
-E("I", 187, ("lachen", "entspannte sich sichtlich", "nach", 0.25))
 E("I", 187, ("papier", "vertröstete er uns", "auf", 0.3))
 E("I", 188, ("tuer_schliessen", "Also ging es auf eigene Faust", "bei", 0.3), ("kiesschritte", "durch die Straßen von Neverwinter", "auf", 0.3), ("volk", "auf Marktplätzen", "auf", 0.3), ("muenze", "etwas Geld verdienen", "auf", 0.25))
 E("I", 190, ("tuer_oeffnen", "zu unserem Gasthof zurück", "auf", 0.3))
@@ -929,7 +1012,7 @@ E("I", 179, ("holzschlag", "so fest auf sein Fass", "auf", 0.35), ("kiste", "das
 E("I", 180, ("moewe", "Ich erinnerte ihn", "bei", 0.2, {"fern": 1}))
 E("I", 187, ("feder", "Er legte die Feder weg", "bei", 0.25))
 E("I", 190, ("kiesschritte", "wir zogen weiter", "auf", 0.25))
-E("I", 191, ("holztritt", "auf denselben Steg", "auf", 0.25), ("lachen", "Wir lachten, Echo am lautesten", "bei", 0.3))
+E("I", 191, ("holztritt", "auf denselben Steg", "auf", 0.25), ("lachen_gruppe", "Wir lachten, Echo am lautesten", "bei", 0.32))
 E("I", 192, ("welle", "bis es ganz dunkel war", "bei", 0.2))
 E("I", 195, ("klopfen", "Diesmal klopften wir sogar an", "bei", 0.25))
 E("I", 201, ("steinschritte", "Kaum waren wir Mitglieder", "bei", 0.2))
@@ -988,11 +1071,11 @@ E("I", 64, ("lachen", "an den Tischen wurde gelacht", "auf", 0.3), ("holzschlag"
 E("I", 65, ("einschenken", "Der Wirt zapfte", "bei", 0.35), ("einschenken", "und zapfte und zapfte", "auf", 0.3))
 E("I", 70, ("stueck", "Da kam ein Händler", "auf", "lied", 0.4), ("holzschlag", "mit dem Krug den Takt", "auf", 0.25, {"n": 2}))
 E("I", 71, ("lachen", "Jetzt lachten sie", "bei", 0.35), ("raunen", "buhte die halbe Schänke", "auf", 0.3), ("stueck", "Der Zwerg, der stopfte", "auf", "lied", 0.4), ("holzschlag", "sang den Refrain mit", "auf", 0.25, {"n": 2}))
-E("I", 145, ("karren", "Dann kam ein Schlagloch", "bei", 0.45), ("holzschlag", "Der Karren machte einen Satz", "auf", 0.35), ("flasche", "Es gluckerte", "bei", 0.3), ("lachen", "dann lachte er", "auf", 0.3))
+E("I", 145, ("karren", "Dann kam ein Schlagloch", "bei", 0.45), ("holzschlag", "Der Karren machte einen Satz", "auf", 0.35), ("flasche", "Es gluckerte", "bei", 0.3), ("lachen_nundro", "dann lachte er", "auf", 0.42))
 E("I", 146, ("flasche", "Er zog den Zapfen heraus", "bei", 0.35))
 E("I", 147, ("einschenken", "seinen Becher hin", "nach", 0.35), ("trinken", "leerte seinen Becher in einem Zug", "bei", 0.35))
 E("I", 149, ("holzschlag", "klopfte zweimal auf den Deckel", "auf", 0.3))
-E("I", 154, ("lachen", "Echo lachte so laut", "bei", 0.3, {"hall": 0.4}), ("geroell", "Mein Stiefel fand einen losen Stein", "auf", 0.35), ("tuch", "packte mich Friedrich am Kragen", "auf", 0.35))
+E("I", 154, ("lachen_echo", "Echo lachte so laut", "bei", 0.4, {"hall": 0.5}), ("geroell", "Mein Stiefel fand einen losen Stein", "auf", 0.35), ("tuch", "packte mich Friedrich am Kragen", "auf", 0.35))
 E("I", 14, ("zusatz", "Zu wenig", "vor", ["a_lagerfeuer", 0.5, {"tief": 4200}], "rahmen"))
 E("I", 15, ("zusatz_aus", "Damals jedenfalls", "bei", "rahmen"))
 E("I", 38, ("zusatz", "Vor allem du nicht", "vor", ["a_lagerfeuer", 0.5, {"tief": 4200}], "rahmen"))
@@ -1006,6 +1089,98 @@ E("II", 120, ("zusatz", "Du hast hinter mir gestanden", "vor", ["a_lagerfeuer", 
 E("II", 153, ("zusatz", "Hattest du nicht", "vor", ["a_lagerfeuer", 0.5, {"tief": 4200}], "rahmen"))
 E("II", 154, ("zusatz_aus", "fast", "nach", "rahmen"))
 E("II", 215, ("zusatz", "Er hatte einfach keinen Hunger", "vor", ["a_lagerfeuer", 0.5, {"tief": 4200}], "rahmen"), ("zusatz_aus", "Auf Kunst", "nach", "rahmen"))
+
+# --- Fassung 6.8: Heldenlacher in ihren Stimmen, Höhlenecho, Kokon, Kopfstimme, Venomfang, Fluss, Ketten, Drachenlied ---
+E("I", 24, ("lachen_echo", "Echo lachte so laut", "auf", 0.45))
+E("I", 31, ("lachen_echo", "Echo lachte noch", "bei", 0.3))
+E("I", 35, ("lachen_goblin", "Dann kicherte er", "auf", 0.4))
+E("I", 87, ("lachen_echo_dreckig", "Echo lachte dreckig", "auf", 0.42))
+E("I", 97, ("lachen", "Der Schläger lachte", "auf", 0.3, {"n": 1}))
+E("I", 110, ("lachen_echo_trocken", "Echo lachte trocken", "auf", 0.38))
+E("I", 144, ("lachen_echo", "Echo lachte so laut", "bei", 0.42), ("rex", "dass Rex mitbellte", "auf", 0.4, {"n": 2}))
+E("I", 148, ("lachen_gruppe", "lachten wir den halben Weg", "bei", 0.3))
+E("I", 153, ("stimmfx", "Echo!", "bei", "Echo!", "hoehlenecho"))
+E("I", 185, ("kette", "rasselten die Ketten", "bei", 0.45, {"n": 3}), ("tor", "das Tor ging auf", "bei", 0.35))
+E("I", 206, ("zischen", "Er zischte nur", "auf", 0.45), ("tropfen", "tropfte etwas Grünes", "auf", 0.35), ("blubb", "auf dem Stein Blasen warf", "bei", 0.35), ("zischen", "Blasen warf", "auf", 0.2))
+E("II", 17, ("lachen", "lachte hämisch dabei", "bei", 0.3, {"n": 1}))
+E("II", 41, ("lachen_friedrich_matt", "er lachte erschöpft", "auf", 0.4))
+E("II", 65, ("stimmfx", "Hallo? Ist da wer?", "bei", "Ich schmecke furchtbar!", "dumpf"))
+E("II", 82, ("stimmfx", "Helft mir", "bei", "holt mich hier raus", "kopfstimme"))
+E("II", 89, ("lachen_boese", "lachte nur über unsere Klingen", "auf", 0.35, {"hall": 0.6}))
+E("II", 97, ("lachen_ezekiel", "Dann lachte er", "auf", 0.4))
+E("II", 147, ("lachen_echo_dreckig", "Dann lachte er dreckig", "auf", 0.4))
+E("II", 214, ("insekt", "die ihm um die Nase surrte", "bei", 0.25), ("fluegel", "über seine Krallen flatterte", "bei", 0.25),
+    ("blubb", "über der Lava stieg ein See auf", "bei", 0.3), ("welle", "stieg ein See auf", "auf", 0.3),
+    ("monsterlaut", "sehr vielen Tentakeln", "auf", 0.3, {"fern": 1, "rate": 0.7}), ("grollen", "Demogorgon bestellt", "auf", 0.35, {"fern": 1}),
+    ("stampfen", "das Krachen, Stampfen", "auf", 0.25, {"fern": 1}), ("blubb", "Gracklstugh uns Obdach bot", "bei", 0.25))
+
+# --- Fassung 6.8: mehr Leben zwischen den Zeilen (alles, was der Text hörbar beschreibt) ---
+E("I", 2, ("zank", "zwei Hafenarbeiter stritten über ein Fass", "bei", 0.25, {"fern": 1}), ("windstoss", "in den Wind stellte", "auf", 0.25))
+E("I", 26, ("knistern", "Als das Feuer niedriger brannte", "bei", 0.2))
+E("I", 27, ("leder", "Er lehnte sich ans Wagenrad", "bei", 0.2))
+E("I", 28, ("leder", "ein Stück Trockenfleisch aus seinem Beutel", "bei", 0.2), ("essen", "ohne hinzusehen", "auf", 0.2))
+E("I", 32, ("hund_knurren", "Rex knurrte leise", "auf", 0.3))
+E("I", 38, ("schwung", "pfiffen zweimal haarscharf", "auf", 0.35, {"n": 2}))
+E("I", 44, ("knistern", "hockten in ihrem Lager am Feuer", "auf", 0.2), ("gift", "eine Ladung Gift", "auf", 0.35), ("pfeil", "Friedrich schoss", "auf", 0.35), ("stich", "mit dem Dolch schon beim nächsten", "auf", 0.35))
+E("I", 46, ("tuch", "klopfte mir danach auf die Schulter", "bei", 0.25))
+E("I", 48, ("kette", "an den Hälsen hatten die Ketten", "bei", 0.25))
+E("I", 60, ("essen", "Dampfender Eintopf", "bei", 0.25), ("trinken", "nach dem ersten Schluck", "bei", 0.3))
+E("I", 61, ("trinken", "trank Wasser", "bei", 0.2))
+E("I", 62, ("geschirr", "wusch ungerührt weiter seinen Becher", "bei", 0.25))
+E("I", 65, ("jubel", "Die ganze Schänke jubelte", "auf", 0.4), ("geschirr", "stellte den Becher ab", "auf", 0.25))
+E("I", 70, ("geschirr", "der Wirt wusch seine Becher", "auf", 0.2, {"fern": 1}))
+E("I", 76, ("kette", "seine Kette klirrte", "auf", 0.3))
+E("I", 85, ("gift", "Giftwolke auf den dritten platzen", "auf", 0.35), ("husten", "rannte hustend zur Treppe", "auf", 0.3))
+E("I", 90, ("glas", "Echo klopfte gegen ein Glas", "auf", 0.3))
+E("I", 96, ("schwertziehen", "seine Klinge ein Stück aus der Scheide zog", "auf", 0.25))
+E("I", 99, ("muenzen", "strich die Münzen vom Tisch", "auf", 0.35))
+E("I", 108, ("papier", "ein Blatt Papier zwischen zwei Fingern", "auf", 0.25))
+E("I", 114, ("muenzen", "in einem kleinen Lederbeutel auf den Tisch", "auf", 0.3))
+E("I", 118, ("grasschritte", "Wir gingen ohne Fackel", "bei", 0.2))
+E("I", 120, ("windstoss", "hob die Nase in den Wind", "auf", 0.2), ("schnueffeln", "Echo schnupperte ebenfalls", "auf", 0.3))
+E("I", 147, ("geschirr", "stießen drei Becher Met", "auf", 0.3))
+E("I", 153, ("blubb", "Irgendwo blubberte Wasser", "auf", 0.3, {"fern": 1}))
+E("I", 156, ("fledermaus", "noch eins und noch eins", "auf", 0.35))
+E("I", 159, ("hecheln", "den Schwanz hochgestreckt", "bei", 0.25))
+E("I", 174, ("mechanik", "Wir zogen an Hebeln", "auf", 0.3), ("amboss", "mit der Faust auf den Amboss", "auf", 0.4))
+E("I", 186, ("rex", "Rex bellte", "auf", 0.35, {"n": 1}))
+E("I", 188, ("stueck", "Ich spielte an einer Straßenecke", "bei", "lied", 0.3))
+E("I", 189, ("muenzen", "schob beides zurück", "auf", 0.25))
+E("I", 191, ("moewe", "Mit einer Möwe", "auf", 0.25, {"fern": 1}))
+E("I", 193, ("schnarchen", "Echo schnarchte durch zwei Wände", "auf", 0.3, {"fern": 1}))
+E("I", 197, ("feder", "Friedrich unterschrieb ordentlich", "bei", 0.3))
+E("I", 210, ("feuerball", "Echo warf einen kleinen Feuerball", "auf", 0.4), ("pfeilblech", "die Pfeile prallten ab", "auf", 0.35), ("husten", "Echo hustete und fluchte", "auf", 0.3))
+E("I", 215, ("ausatmen", "die Pfeife im Mund", "auf", 0.2))
+E("I", 217, ("trinken", "reichte er mir seine Wasserflasche", "auf", 0.25))
+E("I", 220, ("rennen", "die Treppe schneller wieder herauf", "auf", 0.3), ("schwertziehen", "und zog die Klingen", "auf", 0.35))
+E("I", 221, ("hund", "Rex sprang einen davon an", "auf", 0.3))
+E("I", 225, ("ast", "wie einen Stock", "auf", 0.3))
+E("I", 227, ("knistern", "Echo stand mitten im Rauch", "bei", 0.25))
+E("II", 11, ("kette", "Neben mir regte sich Friedrich", "bei", 0.25))
+E("II", 21, ("ratte", "Eine ziemlich große, zerzauste Ratte", "auf", 0.35))
+E("II", 28, ("insekt", "Es kam näher und näher", "bei", 0.35))
+E("II", 31, ("insekt", "Dazu Flügel, die die Luft zerhackten", "auf", 0.4))
+E("II", 37, ("zauber", "knisterte es schon", "auf", 0.3))
+E("II", 41, ("hecheln", "übers Gesicht leckte", "auf", 0.25))
+E("II", 53, ("klopfen", "Er klopfte Wände ab", "auf", 0.3), ("geschirr", "drehte jeden Krug um", "auf", 0.25))
+E("II", 63, ("spinne", "dann ein Klicken", "auf", 0.35), ("krabbeln", "haarig, schnell", "bei", 0.35))
+E("II", 64, ("pfeil", "Pfeil, Dolch, Pfeil", "bei", 0.3), ("hund", "Rex bellte jede tote Spinne", "auf", 0.3, {"n": 2}))
+E("II", 75, ("knarren", "Bei jedem Schritt knarrte das Holz", "auf", 0.3), ("krabbeln", "auf uns zukrabbelten", "auf", 0.35))
+E("II", 90, ("skelett", "Im Inneren lag ein altes Skelett", "auf", 0.25))
+E("II", 119, ("erloeschen", "eben noch Blitze geknistert hatten", "auf", 0.3))
+E("II", 127, ("knarren", "Die Planken des Hafens quietschten", "auf", 0.35), ("welle", "hohe Wellen schlugen über den Steg", "auf", 0.4), ("stampfen", "stampfte das Ungetüm", "auf", 0.35, {"fern": 1}))
+E("II", 128, ("holzbruch", "rissen Stege ein", "auf", 0.35, {"fern": 1}), ("platsch", "zogen Kuo-Toa ins Wasser", "auf", 0.3, {"fern": 1}))
+E("II", 134, ("welle", "Echo starrte aufs Wasser", "bei", 0.2))
+E("II", 137, ("seeungeheuer", "Demogorgons Schreie hallten", "bei", 0.35, {"fern": 1, "hall": 0.6}), ("ruder", "die Ruder in den Händen", "auf", 0.3))
+E("II", 138, ("trank", "tranken Heiltränke", "auf", 0.3))
+E("II", 148, ("trinken", "tranken ein Bier", "auf", 0.25), ("essen", "Rex bekam unter dem Tisch", "auf", 0.25))
+E("II", 149, ("wolf", "Rex heulte beim Refrain mit", "auf", 0.22, {"rate": 1.25}), ("holzschlag", "klopften mit den Krügen", "auf", 0.3, {"n": 3}))
+E("II", 157, ("blubb", "floss glühende Lava", "auf", 0.25))
+E("II", 164, ("muenze", "Dann steckte er die Münze ein", "auf", 0.25))
+E("II", 169, ("klinge", "deren Klingen sogar im fahlen Licht", "bei", 0.2))
+E("II", 179, ("riesenbruellen", "Der Riese brüllte", "bei", 0.4), ("wucht", "ein paar Schritte zurück", "auf", 0.35), ("flasche", "Er träufelte den Trank", "auf", 0.25))
+E("II", 209, ("muenzen", "Münzen rutschten in Kaskaden", "auf", 0.4), ("muenze", "eine rollte bis vor Echos Stiefel", "auf", 0.3), ("drachenlaut", "Dann gähnte er", "auf", 0.3))
+E("II", 215, ("blubb", "nur noch die Lava zu hören", "auf", 0.3))
 
 # =====================================================================
 # 4. MUSIK – kleiner Sequenzer auf den Instrumenten-Samples der Bühne (klang/)
@@ -1820,7 +1995,9 @@ def pruefen(still=False):
     for name, a in ARTEN.items():
         for f in a["f"]:
             try: pfad(f)
-            except FileNotFoundError: fehler.append("Art %s: Klangdatei fehlt: %s" % (name, f))
+            except FileNotFoundError:
+                if f.startswith("n_held_"): warn.append("Art %s: Heldenlacher noch nicht erzeugt: %s" % (name, f))
+                else: fehler.append("Art %s: Klangdatei fehlt: %s" % (name, f))
     for name, o in ORTE.items():
         for b in o["betten"]:
             try: pfad(b[0])
@@ -1854,6 +2031,9 @@ def pruefen(still=False):
             elif typ == "stueck":
                 if x[3] not in stuecke: fehler.append("%s: unbekanntes Stück %s" % (wo, x[3]))
             elif typ in ("zusatz_aus", "stille"): pass
+            elif typ == "stimmfx":
+                if x[4] not in STIMMFX: fehler.append("%s: unbekannter Stimmeffekt %s" % (wo, x[4]))
+                if stichwort_pos(text, x[3]) < 0: fehler.append("%s: Stichwort (Ende) fehlt im Text: %r (stimmfx)" % (wo, x[3]))
             elif typ not in ARTEN: fehler.append("%s: unbekannte Art %s" % (wo, typ))
     for kap, i0, anz, stg in UNTER_EPISCH:
         idx = [j for j, b in enumerate(st.get(kap, [])) if j >= i0 and b.get("typ", "text") == "text"][:anz]
@@ -1930,6 +2110,9 @@ def partitur():
                     elif typ == "zusatz": ereignisse.append({"t": round(t, 2), "zusatz": x[4], "bett": x[3]})
                     elif typ == "zusatz_aus": ereignisse.append({"t": round(t, 2), "zusatz_aus": x[3]})
                     elif typ == "stille": ereignisse.append({"t": round(t, 2), "stille": x[3]})
+                    elif typ == "stimmfx":
+                        t1, _ = verankern(text, za, x[3], "auf")
+                        ereignisse.append({"t": round(max(0, t - .05), 2), "bis": round(t1 + .05, 2), "stimmfx": x[4]})
                     elif typ == "stueck":
                         o = x[5] if len(x) > 5 else {}
                         ev = {"t": round(t, 2), "stueck": x[3], "g": x[4]}
@@ -1972,6 +2155,7 @@ def partitur():
                   "summe": 2.23, "grenze": -4, "grenzeSprache": -8, "unter": .6, "unterSprache": .55, "unterLuecke": .8, "unterPause": 1.0},
         "abschnitte": abschnitte,
         "orte": ORTE,
+        "raeume": RAEUME, "ortRaum": ORT_RAUM,
         "arten": ARTEN,
         "norm": norm,
         "instrumente": instr,
@@ -2029,6 +2213,11 @@ def probe(ausgabe, spec, mit_ende=False, mit_start=True):
         x = lade(os.path.join(WURZEL, e["datei"]))
         if info.get("schnitt"): x = x[:int(info["d"] * SR)].copy(); kk = int(2.5 * SR); x[-kk:] *= np.linspace(1, 0, kk)
         mische(stimme, x, t0, 1.0, 0)
+    # Stimmeffekte an einzelnen Stellen (Höhlenecho, dumpf aus dem Kokon, Stimme im Kopf)
+    for (t0, k, i, info) in plan:
+        for q in info.get("e", []):
+            if "stimmfx" in q and q["t"] < info["d"]:
+                stimm_effekt(stimme, int((t0 + q["t"]) * SR), int((t0 + min(q["bis"], info["d"])) * SR), q["stimmfx"], SR)
     # Ortsfolge: (Zeit, Ort)
     orte = []
     for n, (t0, k, i, info) in enumerate(plan):
@@ -2043,6 +2232,13 @@ def probe(ausgabe, spec, mit_ende=False, mit_start=True):
         for q in info.get("e", []):
             if "ort" in q: orte.append((t0 + q["t"], q["ort"]))
     orte.sort()
+    # Raumklang: welcher Raum gilt zu welcher Zeit; je Raum ein eigener Hallweg
+    import bisect
+    o_t = [t_ for t_, _ in orte]
+    def raum_bei(t_):
+        j = bisect.bisect_right(o_t, t_) - 1
+        return ORT_RAUM.get(orte[max(0, j)][1], "frei")
+    raum_send = {r_: np.zeros_like(stimme) for r_ in RAEUME}
     # Atmo-Hülle: Ducking während Sprache
     huelle = np.full(stimme.shape[1], pg["atmoPause"])
     def rampe(arr, a, b, v0, v1):
@@ -2115,6 +2311,7 @@ def probe(ausgabe, spec, mit_ende=False, mit_start=True):
                         from scipy.signal import butter, lfilter
                         bb, aa = butter(2, 1400 / (SR / 2), "low"); x = lfilter(bb, aa, x); gg *= .75
                     mische(atmo, x, tt, gg * pg["atmo"], 0)
+                    r_ = raum_bei(tt); mische(raum_send[r_], x, tt, gg * pg["atmo"] * RAEUME[r_]["send"] * .8, 0)
                 tt += rnd.uniform(*ab_) * (1.3 if False else 1)
     atmo *= huelle
     # Effekte und Stücke
@@ -2135,7 +2332,8 @@ def probe(ausgabe, spec, mit_ende=False, mit_start=True):
                 from scipy.signal import butter, lfilter
                 bb, aa = butter(2, 1400 / (SR / 2), "low"); x = lfilter(bb, aa, x); gg *= .75
             mische(fx, x, tt, gg, q.get("pan", 0))
-            if q.get("hall"): mische(hall_send, x, tt, gg * q["hall"], 0)
+            r_ = raum_bei(tt)   # Hall des Raums, in dem es passiert (eigener "hall" der Partitur hat Vorrang)
+            mische(raum_send[r_], x, tt, gg * (q["hall"] if q.get("hall") else RAEUME[r_]["send"]), 0)
             if "folge" in A_: tt += rnd.uniform(A_["folge"][2], A_["folge"][3])
             else: tt += .35
     for (t0, k, i, info) in plan:
@@ -2162,6 +2360,10 @@ def probe(ausgabe, spec, mit_ende=False, mit_start=True):
     ir = np.stack([r.standard_normal(ir_len), r.standard_normal(ir_len)]) * np.exp(-np.arange(ir_len) / SR * 3.2)
     from scipy.signal import oaconvolve   # Overlap-Add: gleiches Ergebnis, aber wenig Speicher bei langen Abschnitten
     hall = np.stack([oaconvolve(hall_send[c], ir[c].astype(np.float32))[:hall_send.shape[1]].astype(np.float32) for c in range(2)]) * pg["hall"] * .08
+    for r_, sb in raum_send.items():
+        if not sb.any(): continue
+        ir_r = raum_ir(RAEUME[r_], SR)
+        hall += np.stack([oaconvolve(sb[c], ir_r[c])[:sb.shape[1]].astype(np.float32) for c in range(2)]) * pg["hall"] * .08
     hs = atmo + fx + mus + hall
     # Summenbus wie im Browser: Kompressor (−18 dB, 3:1) → feste Aufholverstärkung → Brickwall-Begrenzer
     hs = begrenzer(kompressor(hs) * pg.get("summe", 1.0), decke_verlauf(plan, hs.shape[1], pg))
@@ -2180,10 +2382,19 @@ def probe(ausgabe, spec, mit_ende=False, mit_start=True):
     print("Probe:", ausgabe, round(L, 1), "s · LUFS gesamt", lufs(ausgabe))
     for (tm, nm) in musik_ev: print("  Musik %6.1fs %s" % (tm, nm))
     for (t0, k, i, info) in plan:
-        print("  Absatz %s:%d ab %6.1fs (%5.1fs)" % (k, i, t0, info["d"]), " ".join("%s@%.1f" % (q.get("fx") or q.get("ort") or q.get("stueck") or q.get("zusatz") or q.get("zusatz_aus") or "stille", t0 + q["t"]) for q in info.get("e", [])))
+        print("  Absatz %s:%d ab %6.1fs (%5.1fs)" % (k, i, t0, info["d"]), " ".join("%s@%.1f" % (q.get("fx") or q.get("ort") or q.get("stueck") or q.get("zusatz") or q.get("zusatz_aus") or q.get("stimmfx") or "stille", t0 + q["t"]) for q in info.get("e", [])))
+
+def lachen_uebernehmen():
+    """Heldenlacher (vertonen.py zeilen mit tools/vertonung/lachen-de.json → audio/lachen/) als amb/n_held_<id>.mp3 übernehmen"""
+    import shutil
+    m = json.load(open(os.path.join(WURZEL, "audio/lachen/manifest.json")))
+    for zid, datei in m.items():
+        shutil.copyfile(os.path.join(WURZEL, datei), os.path.join(WURZEL, "amb", "n_held_" + zid + ".mp3"))
+        print("amb/n_held_%s.mp3 ← %s" % (zid, datei))
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "pruefen": sys.exit(1 if pruefen() else 0)
+    if len(sys.argv) > 1 and sys.argv[1] == "lachen": lachen_uebernehmen()
+    elif len(sys.argv) > 1 and sys.argv[1] == "pruefen": sys.exit(1 if pruefen() else 0)
     elif len(sys.argv) > 1 and sys.argv[1] == "partitur": partitur()
     elif len(sys.argv) > 3 and sys.argv[1] == "probe":
         probe(sys.argv[2], sys.argv[3], mit_ende="--ende" in sys.argv, mit_start="--ohne-thema" not in sys.argv)
