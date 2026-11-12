@@ -2698,7 +2698,20 @@ Object.assign(EV_NORM, {"e_hexe_1":1.84,"e_hexe_2":2.04,"e_hexe_3":2.12,"e_hexe_
   });
 })();
 Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.8M8.2 15.2h8", "", "M15 6.5c1.5-.5 2.8 0 3.5 1"], "goblin": ["M7 9.5c0-2.9 2.2-5 5-5s5 2.1 5 5v2.5c0 3.2-2.2 6-5 6s-5-2.8-5-6zM7 9.5L1.8 6.5 7 12.2M17 9.5l5.2-3L17 12.2M9.8 15l1.1-1 1.1 1 1.1-1 1.1 1", "M9.2 10.3a1 1 0 1 0 2 0 1 1 0 1 0-2 0zM12.8 10.3a1 1 0 1 0 2 0 1 1 0 1 0-2 0z"], "oger": ["M4 20.5l8.5-8.5M12.5 12c-1.2-3 .4-6.6 3.6-7.8 2.6-1 4.6.6 4 3.1-.7 2.9-4.3 5.3-7.6 4.7zM15 4l.6-2M19.6 6.2l1.9-.5M18 10.6l1 1.8M13.5 7.2l-1.6-.8"], "drachenbruellen": ["M2.5 14.5c2.2-4.6 6-7.4 10.8-7.6L16 3.5l1 3.8 4.5 1.5-3.2 1.7 1.2 3.3-4.6-1c-2 3.4-6.6 4.8-11.2 3.6l3.2-2.4zM10.5 12.5l2.5 2.6M8 13.5l1.5 2", "M13.6 8.6a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0z"], "fluegelschlag": ["M12 13C9.6 7 6 4.2 2 4.8c.6 4.6 3.8 8.2 10 8.2zM12 13c2.4-6 6-8.8 10-8.2-.6 4.6-3.8 8.2-10 8.2zM12 13v7M5.5 8.5l2 1.5M18.5 8.5l-2 1.5"], "lindwurm": ["M2.5 19c3 0 4.2-3.5 7.5-3.5s3.6 3.5 6.6 3.5c2.6 0 4-2.8 4.9-6.5M15.5 10.5l1.6-6.5 2 5 3.4-1.2-2.4 4.4M17.2 13l3.9-.4", "M18.5 10.8a.7.7 0 1 0 1.4 0 .7.7 0 1 0-1.4 0z"], "spinne": ["M9 13.5a3 3.3 0 1 0 6 0 3 3.3 0 1 0-6 0zM10.2 8.5a1.8 1.8 0 1 0 3.6 0 1.8 1.8 0 1 0-3.6 0zM9.3 12L4.5 8 3.5 4.5M9.2 14.5L4 15l-1.5 3.5M14.7 12l4.8-4 1-3.5M14.8 14.5L20 15l1.5 3.5M10 16.4l-2.5 3.6M14 16.4l2.5 3.6"], "skelett": ["M5.5 10a6.5 6.5 0 0 1 13 0v3.2l-2 1.3V18h-9v-3.5l-2-1.3zM10 18v2.8M14 18v2.8M12 18v2.8M11.2 14.5l.8-1.4.8 1.4", "M8 10.5a1.6 1.6 0 1 0 3.2 0 1.6 1.6 0 1 0-3.2 0zM12.8 10.5a1.6 1.6 0 1 0 3.2 0 1.6 1.6 0 1 0-3.2 0z"], "ghul": ["M7 21.5v-5.5L4.5 11M7 16l.6-8.5M10 16.2l.6-10M13 16.5l1.6-9.5M14.5 17.5l4.5-5M7 16c2 1.6 5 2.2 7.5 1.5M4.5 11l-1-1.8M7.6 7.5l-.2-2M10.6 6.2l.2-2M14.6 7l.6-1.9M19 12.5l1.6-.9"], "geisterfluestern": ["M4 21V11a5.5 5.5 0 0 1 11 0v10l-1.8-1.4-1.9 1.4-1.8-1.4-1.9 1.4-1.8-1.4zM17.5 8.5c1 .9 1 2.6 0 3.5M19.8 6.5c2 2 2 5.6 0 7.6", "M7.2 11a.9 1.1 0 1 0 1.8 0 .9 1.1 0 1 0-1.8 0zM10.8 11a.9 1.1 0 1 0 1.8 0 .9 1.1 0 1 0-1.8 0z"], "spuk": ["M8 21V11a6 6 0 0 1 12 0v10l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5zM2.5 9.5h3M2 13h4M3 16.5h3.5M12.5 16a1.5 2 0 1 0 3 0 1.5 2 0 1 0-3 0z", "M11.2 11.5a1 1.2 0 1 0 2 0 1 1.2 0 1 0-2 0zM14.8 11.5a1 1.2 0 1 0 2 0 1 1.2 0 1 0-2 0z"], "geisterheulen": ["M5 21V11.5a5 5 0 0 1 10 0V21l-1.7-1.3-1.6 1.3-1.7-1.3-1.6 1.3-1.7-1.3zM9 15a1 1.6 0 1 0 2 0 1 1.6 0 1 0-2 0zM17 4.5a3.5 3.5 0 1 0 4.2 4.6 2.8 2.8 0 1 1-4.2-4.6z", "M7.6 11.6a.8 1 0 1 0 1.6 0 .8 1 0 1 0-1.6 0zM10.8 11.6a.8 1 0 1 0 1.6 0 .8 1 0 1 0-1.6 0z"], "daemon": ["M7 10.5c0-3 2.2-5.2 5-5.2s5 2.2 5 5.2v2.8c0 3.6-2.2 6.7-5 6.7s-5-3.1-5-6.7zM7.3 8.2L4 2.8l.8 6.6M16.7 8.2L20 2.8l-.8 6.6M9.8 15.5l1.1.9 1.1-.9 1.1.9 1.1-.9", "M8.8 11.2l2.4.8-2.4.6zM15.2 11.2l-2.4.8 2.4.6z"], "baer": ["M6 12.5c0-3.6 2.7-6.3 6-6.3s6 2.7 6 6.3c0 3.7-2.7 6.7-6 6.7s-6-3-6-6.7zM4 6.5a2.2 2.2 0 1 0 4.2 1M20 6.5a2.2 2.2 0 1 1-4.2 1M10.2 15.2c1.2 1 2.4 1 3.6 0", "M11 13.4c0-.6.5-.9 1-.9s1 .3 1 .9-.5 1-1 1-1-.4-1-1zM8.8 10.8a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0zM13.4 10.8a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0z"], "hyaene": ["M3 13.5L6.5 9h4.5L14 5.5l1.5 3.5 4 1.5-1 3.5h-3l-2 3H8.5zM15 13.5c.8 1 2 1.3 3.5 1M5 16.5l1.5 4M10 16.5l-.5 4", "", "M18.5 4.5l1.5-1.5M20.5 6l1.6-.6M16.5 3.3l.3-1.6"], "baumhirte": ["M12 21.5v-9M12 12.5c-4.2 0-7-2.5-7-5.6 0-2.6 2.3-4.4 5-4.4 1 0 1.5.3 2 .7.5-.4 1-.7 2-.7 2.7 0 5 1.8 5 4.4 0 3.1-2.8 5.6-7 5.6zM12 17l-4-2.5M12 15.5l3.8-2.2M9 21.5h6", "M8.8 7.2a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0zM13.4 7.2a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0z"], "golem": ["M8 3.5h8v5H8zM6 8.5h12v7H6zM6 9.5L3 15l1.8 1.2M18 9.5l3 5.5-1.8 1.2M8 15.5v5h3v-5M13 15.5v5h3v-5M9 12h6", "M9.7 5.4h1.6v1.4H9.7zM12.7 5.4h1.6v1.4h-1.6z"], "feuerwesen": ["M12 2.5c1.3 3.8 6 5.3 6 10.6a6 6 0 0 1-12 0c0-3 1.6-4.6 3-5.8.3 1.8 1.1 2.9 2.2 3.4.8-2.7.6-5.4.8-8.2zM9.8 17.3c1.4 1 3 1 4.4 0", "M9.4 13.8a1 1.1 0 1 0 2 0 1 1.1 0 1 0-2 0zM12.6 13.8a1 1.1 0 1 0 2 0 1 1.1 0 1 0-2 0z"], "seeungeheuer": ["M2 20c1.7 0 2.6-1.3 4-1.3s2.3 1.3 4 1.3 2.6-1.3 4-1.3 2.3 1.3 4 1.3 2.6-1.3 4-1.3M5 17c0-5 1-9 3.5-11 1.5 2.5 1 6-1 8.5M12 17c-.5-4.5.5-8 3-10 1.2 2.5.6 5.5-1.2 7.5M18.5 17c.3-3 1.4-5.2 3-6.2"], "hoehlengesang": ["M2.5 21V12a9.5 9.5 0 0 1 19 0v9M7 21v-6a5 5 0 0 1 10 0v6M13.5 9V4.2l3.5-.9v4.4", "M11.4 9.3a1.3 1 0 1 0 2.6 0 1.3 1 0 1 0-2.6 0zM14.9 8.4a1.3 1 0 1 0 2.6 0 1.3 1 0 1 0-2.6 0z"], "sirene": ["M9 8.5a3 3 0 1 0 6 0 3 3 0 1 0-6 0zM9.5 11c-1 2.5-.8 5 1.5 7l-2 3.5 3-1.5 3 1.5-2-3.5c2.3-2 2.5-4.5 1.5-7M18.5 4.5v4.5M21 3.8v4.4M18.5 4.5L21 3.8", "M17.2 9a1.3 1 0 1 0 2.6 0 1.3 1 0 1 0-2.6 0zM19.7 8.3a1.3 1 0 1 0 2.6 0 1.3 1 0 1 0-2.6 0z"], "raubkatze": ["M5 4.5c.8 5 1.2 10 .6 15.5M10.2 3c.8 5.5 1 11.5.3 18M15.5 3.5c.8 5.5.8 11-.2 16.5M20.5 5c.4 4.4.1 8.6-.9 12.5"], "fernschrei": ["M9 9a3.5 3.5 0 1 1 7 0c0 2.4-1.6 3.4-1.6 5.2v1.3h-3.8v-1.3C10.6 12.4 9 11.4 9 9zM11.8 11a.9 1.6 0 1 0 1.8 0 .9 1.6 0 1 0-1.8 0zM5.5 6c-1.4 2-1.4 4.6 0 6.6M3 4c-2.4 3.3-2.4 7.7 0 11M18.8 18.5h-12"], "tuerknarren": ["M6 21V4h10v17M4 21h14M13.5 12.5v1.5M16 4l4 2v15l-4 0", "", "M19.5 9.5c1 .5 1.6 1.4 1.6 2.5M21.5 7.5c1.4 1 2 2.6 2 4.5"], "ritualtrommel": ["M5 9.5c0-1.6 3.1-2.8 7-2.8s7 1.2 7 2.8v6.5c0 1.6-3.1 2.8-7 2.8S5 17.6 5 16zM5 9.5c0 1.6 3.1 2.8 7 2.8s7-1.2 7-2.8M12 13.5v4M10.2 15.3h3.6M8 3l2 3.5M16 3l-2 3.5"], "fernglocken": ["M8 15.5V11a4 4 0 0 1 8 0v4.5l1.5 2h-11zM12 5.5V7M10.5 19.5a1.5 1.5 0 0 0 3 0M3.5 9c-1 1.4-1 3.6 0 5M20.5 9c1 1.4 1 3.6 0 5M1.5 7c-1.8 2.6-1.8 7.4 0 10M22.5 7c1.8 2.6 1.8 7.4 0 10"], "schreibfeder": ["M4 20.5L14.5 10M20.5 3.5c-5.5.5-10 4-11.5 10.5l1.5 1.5c6.5-1.5 10-6 10-12zM13 8.5l2.2 2.2M3 21.5h6"], "seetaucher": ["M2 19.5c2 0 3-1.2 5-1.2s3 1.2 5 1.2 3-1.2 5-1.2 3 1.2 5 1.2M5 15.5h9.5c2.2 0 3.6-1.6 3.6-3.6V9.2c0-1.4 1.1-2.5 2.5-2.5h.8l1.6 1.2-1.6 1M14.5 15.5c-1-2.8-4-4.3-7.2-3.6", "M19.8 7.9a.6.6 0 1 0 1.2 0 .6.6 0 1 0-1.2 0z"], "brutzeln": ["M3 13.5h13.5v1.5a4 4 0 0 1-4 4h-5.5a4 4 0 0 1-4-4zM16.5 14H22M7 10c-.8-1 .8-2 0-3M10.5 10c-.8-1 .8-2 0-3M14 10c-.8-1 .8-2 0-3", "M7.2 15.5a1.2.8 0 1 0 2.4 0 1.2.8 0 1 0-2.4 0zM11 15.8a1 .7 0 1 0 2 0 1 .7 0 1 0-2 0z"], "teeaufguss": ["M5 12.5h10v3.5a4 4 0 0 1-4 4h-2a4 4 0 0 1-4-4zM15 13.5c2.4-.4 3.5 1 3 2.7-.4 1.4-1.8 2-3.2 1.6M5.2 12.5L3 9.5M8 12.5V11a2 2 0 0 1 4 0v1.5M9 5.5c-.8-1 .8-2 0-3M12 6.5c-.8-1 .8-2 0-3"], "stubenlachen": ["M2.5 12a5 5 0 1 0 10 0 5 5 0 1 0-10 0zM11.5 12a5 5 0 1 0 10 0 5 5 0 1 0-10 0zM5.2 13.2c.9 1.6 3.7 1.6 4.6 0M14.2 13.2c.9 1.6 3.7 1.6 4.6 0", "M5.5 10.6a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0zM8 10.6a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0zM14.4 10.6a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0zM16.9 10.6a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0z"], "fluestern": ["M3 12c2.5-2.5 5.5-3.5 9-1.2 3.5-2.3 6.5-1.3 9 1.2-2.5 3.3-5.5 4.5-9 4.5s-6.5-1.2-9-4.5zM3 12c3 .8 6 1 9 1s6-.2 9-1", "M6 5.5a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0zM11.1 4a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0zM16.2 5.5a.9.9 0 1 0 1.8 0 .9.9 0 1 0-1.8 0zM9 20a.7.7 0 1 0 1.4 0 .7.7 0 1 0-1.4 0zM13.6 20a.7.7 0 1 0 1.4 0 .7.7 0 1 0-1.4 0z"], "grabesdroehnen": ["M7 20.5V9a5 5 0 0 1 10 0v11.5M4.5 20.5h15M12 9.5v6M9.5 12h5", "", "M1.5 15.5c1-1.2 2-1.2 3 0M19.5 15.5c1-1.2 2-1.2 3 0"], "geisterhauch": ["M4 18c3-1 4-4 3-7s0-6 3-7M10.5 20c3-1.5 4-5 3-8s.5-6.5 3.5-7.5M17 21c2-1.5 2.8-4 2.2-6.5", "M8.8 7.2a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0zM15.5 8.2a.8.8 0 1 0 1.6 0 .8.8 0 1 0-1.6 0z"], "herzschlag": ["M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.5a4.3 4.3 0 0 1 7.5 2.3C19.5 15.4 12 20 12 20zM2 13h4.5l1.5-3 2 6 1.8-4.5 1.2 1.5H22"], "friedhof": ["M3.5 21.5h17M5.5 21.5v-8a3 3 0 0 1 6 0v8M15 21.5V9.5M12.5 12.5h5M7 16.5h3"], "ruinenwind": ["M4 21.5V8M8.5 21.5V11.5l-1.8-1.8 1.8-1.7M3 8h6.5M3 21.5h8M12 9h6.5a2.5 2.5 0 1 0-2.5-2.5M12 13.5h9a2.5 2.5 0 1 1-2.5 2.5M13.5 18h4"], "geisterchor": ["M2 20v-6a3.5 3.5 0 0 1 7 0v6l-1.2-1-1.1 1-1.2-1-1.1 1-1.2-1zM8.5 18.5V9.5a3.5 3.5 0 0 1 7 0v9l-1.2-1-1.1 1-1.2-1-1.1 1-1.2-1zM15 20v-6a3.5 3.5 0 0 1 7 0v6l-1.2-1-1.1 1-1.2-1-1.1 1-1.2-1z", "M11.2 11.5a.8 1.1 0 1 0 1.6 0 .8 1.1 0 1 0-1.6 0zM4.7 15.6a.7.9 0 1 0 1.4 0 .7.9 0 1 0-1.4 0zM17.9 15.6a.7.9 0 1 0 1.4 0 .7.9 0 1 0-1.4 0z"], "fliegenschwarm": ["M6 7.5c-1-1.5-.6-2.6.6-2.6M7.4 7.5c.2-1.7 1.3-2.4 2.3-1.7M15.5 11c-1-1.5-.6-2.6.6-2.6M16.9 11c.2-1.7 1.3-2.4 2.3-1.7M8.5 16.5c-1-1.5-.6-2.6.6-2.6M9.9 16.5c.2-1.7 1.3-2.4 2.3-1.7M2.5 12.5c1.5 1.5 3.5 2 5.5 1.5M12 6c2 .5 3 1.5 3.3 3.2M13 18.5c2.5.8 5 .2 7-1.8", "M5.8 8.3a1 .8 0 1 0 2 0 1 .8 0 1 0-2 0zM15.3 11.8a1 .8 0 1 0 2 0 1 .8 0 1 0-2 0zM8.3 17.3a1 .8 0 1 0 2 0 1 .8 0 1 0-2 0z"], "sommerwiese": ["M2.5 21.5h19M5 21.5c0-4 .5-7 2-9.5M7 21.5c.3-2.6 1.2-4.6 2.8-6M17 21.5c0-3.5-.3-6.2-1.5-8.5M19 21.5c.3-2.2 1-3.8 2-5M12 21.5v-9M12 8.5a2 2 0 1 0 0 4 2 2 0 1 0 0-4zM12 6.5v2M9.5 10.5h-2M14.5 10.5h2M10.3 8.8L9 7.5M13.7 8.8L15 7.5", "M7.5 11.2a1.2 1.2 0 1 0 2.4 0 1.2 1.2 0 1 0-2.4 0zM15 12.5a1 1 0 1 0 2 0 1 1 0 1 0-2 0z"], "brunnen": ["M4 16.5h16v2.5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM12 16.5V8M12 8C10 5.5 7.5 5 5.5 6.5M12 8c2-2.5 4.5-3 6.5-1.5M5.5 6.5c-1 2-1 4 0 6.5M18.5 6.5c1 2 1 4 0 6.5M12 4.5V3"]});
-  const zusSvg = (id, gross) => { const a = ZUS_ICON[id] || []; return '<svg class="lw-zico' + (gross ? " gross" : "") + '" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
+  /* klare Bildzeichen für die Zusatz-Geräusche (Emoji) – die Strichsymbole bleiben nur als Rückfall */
+  const ZUS_EMOJI = { regen: "🌧️", starkregen: "☔", gewitter: "⛈️", sturm: "🌪️", wind: "💨", laub: "🍂", schnee: "❄️",
+    bach: "🏞️", wellen: "🌊", wasserfall: "💦", tropfen: "💧", blubbern: "🫧",
+    feuer: "🔥", kessel: "🍲", uhr: "🕰️", katze: "🐈", glocke: "🔔", muehle: "🌾",
+    voegel: "🐦", grillen: "🦗", eule: "🦉", frosch: "🐸", wolf: "🐺", kraehe: "🐦‍⬛", moewe: "🕊️", specht: "🪵", bienen: "🐝", fledermaus: "🦇", wal: "🐋", ente: "🦆", hirsch: "🦌", keiler: "🐗", greif: "🦅", schlange: "🐍",
+    hund: "🐕", pferd: "🐎", kuh: "🐄", schaf: "🐑", huhn: "🐔", schwein: "🐖", esel: "🐴", ziege: "🐐",
+    kinder: "🧒", stimmen: "🗣️", markt: "🧺", hafen: "⚓", segel: "⛵", gesang: "🎶",
+    schmiede: "⚒️", axt: "🪓", hacke: "⛏️",
+    geist: "👻", untot: "🧟", ketten: "⛓️", monster: "👹", yeti: "🦍", kriegstrommeln: "🥁",
+    hexe: "🧙‍♀️", goblin: "👺", oger: "🧌", drachenbruellen: "🐉", fluegelschlag: "🪽", lindwurm: "🐲", spinne: "🕷️", skelett: "💀", ghul: "🧟‍♂️", geisterfluestern: "🤫", spuk: "🕯️",
+    geisterheulen: "🌕", daemon: "😈", baer: "🐻", hyaene: "🐾", baumhirte: "🌳", golem: "🗿", feuerwesen: "☄️", seeungeheuer: "🐙", hoehlengesang: "🕳️", sirene: "🧜‍♀️", raubkatze: "🐆",
+    fernschrei: "😱", tuerknarren: "🚪", ritualtrommel: "🪘", fluestern: "🗨️", grabesdroehnen: "⚰️", geisterhauch: "🌫️", herzschlag: "🫀", friedhof: "🪦", ruinenwind: "🏚️", geisterchor: "🎼", fliegenschwarm: "🪰",
+    fernglocken: "⛪", schreibfeder: "🪶", seetaucher: "🦢", brutzeln: "🍳", teeaufguss: "🫖", stubenlachen: "😂", sommerwiese: "🌼", brunnen: "⛲" };
+  const zusSvg = (id, gross) => { if (ZUS_EMOJI[id]) return '<span class="lw-zico lw-zemo' + (gross ? " gross" : "") + '" aria-hidden="true">' + ZUS_EMOJI[id] + "</span>"; const a = ZUS_ICON[id] || []; return '<svg class="lw-zico' + (gross ? " gross" : "") + '" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
     (a[0] ? '<path d="' + a[0] + '"/>' : "") + (a[1] ? '<path d="' + a[1] + '" fill="currentColor" stroke="none"/>' : "") + (a[2] ? '<path d="' + a[2] + '"/>' : "") + "</svg>"; };
   const DRINNEN = ["taverne", "hoehle", "unterreich", "kerker", "schmiede", "labor", "bibliothek", "tempel", "mine", "schlaegerei"];
   /* ---------- Tür zu: man geht hinein – draußen (Kulisse unter freiem Himmel, Wind, Regen, Vögel …) klingt nur noch gedämpft durch die Wand ---------- */
@@ -4056,18 +4069,34 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
   const zonenName = (z, en) => { const n = (KARTE_NAMEN[S.kulisse] || {})[z.id]; return n ? n[en ? 1 : 0] : (en ? z.en : z.de); };
   /* gemerkt: Figur und Geräusche je Ort */
   let karteMerk = (() => { try { const x = JSON.parse(localStorage.getItem("imres-lw-karte")); if (x && typeof x === "object") return x; } catch (_) {} return {}; })();
-  const karteSpeichern = () => { try { localStorage.setItem("imres-lw-karte", JSON.stringify(karteMerk)); } catch (_) {} };
+  /* wo jedes Geräusch zuletzt lag – je Kartenart (drinnen/draußen), damit es im nächsten Ort wieder an seinem gewohnten Platz auftaucht */
+  let zusLetzt = (() => { try { const x = JSON.parse(localStorage.getItem("imres-lw-zusletzt")); return x && typeof x === "object" ? x : {}; } catch (_) { return {}; } })();
+  const karteSpeichern = () => {
+    try { const o = karteMerk[kulRaum(S.kulisse || "keine")], a = kartenArt(); if (o && o.zus) { const m = zusLetzt[a] = zusLetzt[a] || {}; Object.keys(o.zus).forEach(id => { if (Array.isArray(o.zus[id])) m[id] = o.zus[id].slice(0, 3); }); localStorage.setItem("imres-lw-zusletzt", JSON.stringify(zusLetzt)); } } catch (_) {}
+    try { localStorage.setItem("imres-lw-karte", JSON.stringify(karteMerk)); } catch (_) {}
+  };
+  /* Begleiter: Tiere/Geräusche, die mit in den nächsten Ort ziehen (sonst bleibt alles im Raum zurück) */
+  let zusBegleiter = (() => { try { const x = JSON.parse(localStorage.getItem("imres-lw-begleiter")); return new Set(Array.isArray(x) ? x : []); } catch (_) { return new Set(); } })();
+  const begleiterMerken = () => { try { localStorage.setItem("imres-lw-begleiter", JSON.stringify([...zusBegleiter])); } catch (_) {} };
   const kOrt = () => { const k = kulRaum(S.kulisse || "keine"); return karteMerk[k] || (karteMerk[k] = {}); };
   /* Jede Kulisse ist ein fester Raum: welche Zusätze dort laufen (mit Lautstärke und Platz auf der Karte), bleibt dort.
      Beim Wechsel bleiben sie zurück; kommt man wieder, ist alles wie verlassen. Ein neuer Ort beginnt ohne Zusätze. */
   let zusKul = null;
-  function raumZusMerken() { if (zusKul === null) return; try { localStorage.setItem("imres-lw-zuskul", zusKul); } catch (_) {} const o = karteMerk[zusKul] || (karteMerk[zusKul] = {}); o.wahl = Object.assign({}, zusWahl); karteSpeichern(); }
+  function raumZusMerken(ohneBegleiter) { if (zusKul === null) return; try { localStorage.setItem("imres-lw-zuskul", zusKul); } catch (_) {} const o = karteMerk[zusKul] || (karteMerk[zusKul] = {}); o.wahl = Object.assign({}, zusWahl); if (ohneBegleiter) zusBegleiter.forEach(id => { delete o.wahl[id]; }); karteSpeichern(); }
   function raumWechselPruefen() {
     const neu = kulRaum(S.kulisse || "keine");
     if (zusKul === null) { let w = null; try { w = localStorage.getItem("imres-lw-zuskul"); } catch (_) {} zusKul = w || neu; raumZusMerken(); }
     if (neu === zusKul) return;
-    raumZusMerken(); zusKul = neu; try { localStorage.setItem("imres-lw-zuskul", neu); } catch (_) {}
+    const mit = [...zusBegleiter].filter(id => zusWahl[id] && ZUSATZ[id]), mitWert = {}; mit.forEach(id => { mitWert[id] = zusWahl[id]; });
+    raumZusMerken(true); zusKul = neu; try { localStorage.setItem("imres-lw-zuskul", neu); } catch (_) {}
     const o = kOrt(); zusWahl = Object.assign({}, o.wahl || {});
+    /* Begleiter ziehen mit und tauchen neben dir auf */
+    if (mit.length) {
+      o.zus = o.zus || {}; const f = figurOrt();
+      mit.forEach((id, i) => { zusWahl[id] = mitWert[id]; const sx = (i % 2 ? 1 : -1) * (5 + Math.floor(i / 2) * 5); o.zus[id] = [Math.max(3, Math.min(97, f[0] + sx)), Math.max(10, f[1] - 5), f[2]]; });
+      try { karteSpeichern(); } catch (_) {}
+      setTimeout(() => { try { status("🐾 " + mit.map(id => ZUSATZ[id][sprache()] || ZUSATZ[id].de).join(", ") + (sprache() === "en" ? " came along" : " kommt mit")); } catch (_) {} }, 300);
+    }
     try { localStorage.setItem("imres-lw-zusaetze", JSON.stringify(zusWahl)); } catch (_) {}
   }
   /* Zusätze für eine bestimmte Kulisse setzen (gemerkte Szene, eigene Stimmung): gilt sofort, wenn man dort ist, sonst beim Hinkommen */
@@ -4081,14 +4110,42 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
   /* Geräusche, die von überall kommen – sie stehen nicht im Bild, sondern oben als Wetter */
   const UEBERALL = ["regen", "starkregen", "gewitter", "sturm", "wind", "schnee"];
   const LUFT = ["voegel", "eule", "kraehe", "specht", "fledermaus", "greif", "moewe", "bienen", "geist"];
+  /* logische Plätze: Vögel in der Luft, Hoftiere und Wasser am Rand draußen, Haus-Geräusche mittendrin, Unheimliches im Keller,
+     große Ungeheuer lauern am Rand oder im Nebenraum, Geister am Fenster – mit kleiner Streuung je Geräusch */
+  const PLATZ_GR = {
+    luft: "voegel eule kraehe specht fledermaus greif moewe bienen fluegelschlag drachenbruellen lindwurm fliegenschwarm",
+    wasser: "bach wellen wasserfall brunnen frosch ente wal seetaucher seeungeheuer sirene blubbern",
+    hof: "hund pferd kuh schaf huhn schwein esel ziege sommerwiese grillen schlange hirsch keiler wolf",
+    haus: "feuer kessel uhr katze glocke brutzeln teeaufguss stubenlachen schreibfeder kinder stimmen gesang",
+    keller: "tropfen ketten skelett ghul spinne grabesdroehnen herzschlag untot",
+    gross: "oger golem baer raubkatze baumhirte hyaene yeti monster daemon feuerwesen goblin hexe",
+    geist: "geist spuk geisterheulen geisterchor geisterhauch fluestern geisterfluestern fernschrei hoehlengesang friedhof ruinenwind",
+    werk: "schmiede axt hacke muehle markt hafen segel tuerknarren ritualtrommel kriegstrommeln fernglocken"
+  };
+  const PLATZ_VON = {}; Object.keys(PLATZ_GR).forEach(g => PLATZ_GR[g].split(" ").forEach(id => { PLATZ_VON[id] = g; }));
+  function zusPlatzLogisch(id, art, h) {
+    const r = (a, b) => a + (h % 997) / 997 * (b - a), r2 = (a, b) => a + ((h >> 9) % 991) / 991 * (b - a), drin = art === "drin";
+    const g = PLATZ_VON[id] || (LUFT.includes(id) ? "luft" : ZUSATZ[id] && ZUSATZ[id].raus ? "hof" : null);
+    const P = drin ? {
+      luft: [r(3, 15), r2(14, 30)], wasser: [r(3, 15), r2(46, 60)], hof: [r(3, 15), r2(44, 60)], haus: [r(24, 52), r2(44, 60)], keller: [r(26, 94), r2(76, 94)],
+      gross: [r(80, 96), r2(44, 60)], geist: [r(58, 71), r2(22, 50)], werk: [r(78, 96), r2(42, 60)] }
+      : {
+      luft: [r(10, 70), r2(12, 28)], wasser: [r(3, 18), r2(48, 60)], hof: [r(22, 56), r2(46, 60)], haus: [r(78, 96), r2(40, 60)], keller: [r(78, 97), r2(76, 94)],
+      gross: [r(3, 18), r2(44, 60)], geist: [r(26, 54), r2(24, 44)], werk: [r(60, 73), r2(44, 60)] };
+    if (g && P[g]) return P[g].slice();
+    return [drin ? 22 + (h % 48) : 8 + (h % 62), 40 + (h >> 7) % 18];
+  }
   function zusOrt(id) {
     const o = kOrt(); o.zus = o.zus || {};
     if (!o.zus[id]) {
       /* fester, aber für jedes Geräusch anderer Startplatz */
       let h = 0; for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-      const raus = kartenArt() === "drin" && ZUSATZ[id] && ZUSATZ[id].raus;
-      const x = raus ? 3 + (h % 12) : kartenArt() === "drin" ? 22 + (h % 48) : 8 + (h % 62), y = LUFT.includes(id) ? 18 + (h >> 7) % 16 : 40 + (h >> 7) % 18;
-      o.zus[id] = [x, y];
+      const art = kartenArt(), letzt = zusLetzt[art] && zusLetzt[art][id];
+      if (Array.isArray(letzt) && letzt.length >= 2) o.zus[id] = letzt.slice(0, 3);
+      else o.zus[id] = zusPlatzLogisch(id, art, h);
+      /* nicht genau auf ein anderes Geräusch legen */
+      const andere = Object.keys(o.zus).filter(k => k !== id).map(k => o.zus[k]);
+      for (let v = 0; v < 6 && andere.some(p => Math.abs(p[0] - o.zus[id][0]) < 4.5 && Math.abs(p[1] - o.zus[id][1]) < 6); v++) o.zus[id][0] = Math.max(3, Math.min(97, o.zus[id][0] + (v % 2 ? -1 : 1) * (5 + v * 2)));
     }
     if (o.zus[id].length < 3) { let h = 7; for (const c of id) h = (h * 17 + c.charCodeAt(0)) >>> 0; o.zus[id][2] = 20 + h % 60; }
     return o.zus[id];
@@ -4463,7 +4520,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
       (oben ? "" : '<button type="button" class="lw-ktuer" data-ktuer="1" style="left:' + (tx - 2.5) + "%;top:" + ty + "%;height:" + th + '%" title="' + esc(tuerZu ? T.tuerAuf : T.tuerZu) + '" aria-label="' + esc(tuerZu ? T.tuerAuf : T.tuerZu) + '"></button>') +
       aktiveQuellen().map(n => { const [x, y, z] = schichtOrt(n), fern = raumBei(x, y) !== raumBei(fx, fy), nm = quellName(n);
         return '<div class="lw-kquelle schicht' + (fern ? " anderer" : "") + '" data-zs="' + n + '" style="left:' + x + "%;top:" + (oben ? z : y) + '%" title="' + esc(nm + " – " + T.karteSchicht) + '">' + zusSvg(n) + "</div>"; }).join("") +
-      frei.map(id => { const [x, y, z] = zusOrt(id), fern = raumBei(x, y) !== raumBei(fx, fy); return '<div class="lw-kquelle' + (fern ? " anderer" : "") + '" data-zq="' + id + '" style="left:' + x + "%;top:" + (oben ? z : y) + '%" title="' + esc(ZUSATZ[id][en ? "en" : "de"] + " – " + T.karteQuelle) + '">' + zusSvg(id) + "</div>"; }).join("") +
+      frei.map(id => { const [x, y, z] = zusOrt(id), fern = raumBei(x, y) !== raumBei(fx, fy); return '<div class="lw-kquelle' + (fern ? " anderer" : "") + (zusBegleiter.has(id) ? " begleit" : "") + '" data-zq="' + id + '" style="left:' + x + "%;top:" + (oben ? z : y) + '%" title="' + esc(ZUSATZ[id][en ? "en" : "de"] + " – " + T.karteQuelle) + '">' + zusSvg(id) + "</div>"; }).join("") +
       wegeSvg(frei, oben) + kMenueHTML(T, oben) +
       '<div class="lw-kfigur" style="left:' + fx + "%;top:" + (oben ? fz : fy) + '%" title="' + esc(T.karteFigur) + '"><svg viewBox="0 0 20 30" aria-hidden="true"><circle cx="10" cy="6" r="4.4"/><path d="M4 28 L5.5 13 Q10 10.5 14.5 13 L16 28 Z"/></svg></div>' +
       (kartenTippZeigen ? '<div class="lw-ktipp">' + T.einf.kartenTipp + "</div>" : "") +
@@ -10237,8 +10294,19 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     return '<div class="lw-spuren lw-zregler">' +
       alleRegler(T, zurueckKnopf(T, "zus100") + '<button type="button" class="lw-klein lw-allek" data-aktion="zusalleaus" title="' + esc(T.zusAlleAus) + '" aria-label="' + esc(T.zusAlleAus) + '">✕</button>') + an.map(id => { const v = Math.round(zusWert(id) * 100);
         return '<div class="lw-zuszeile" data-hlq="' + id + '"><button type="button" class="lw-zknopf an" data-zusatz="' + id + '" aria-pressed="true" title="' + name(id) + " – " + T.zusAus + '" aria-label="' + name(id) + " – " + T.zusAus + '">' + zusSvg(id, 1) + "</button>" +
-          '<span class="lw-zrname">' + name(id) + '</span><input type="range" min="0" max="200" step="5" value="' + v + '" data-zusvol="' + id + '" aria-label="' + name(id) + '"><b>' + v + " %</b></div>"; }).join("") + "</div>";
+          '<span class="lw-zrname">' + name(id) + '</span><button type="button" class="lw-klein lw-zbegl' + (zusBegleiter.has(id) ? " an" : "") + '" data-zbegl="' + id + '" aria-pressed="' + zusBegleiter.has(id) + '" title="' + esc(T.zusBegleit) + '" aria-label="' + esc(T.zusBegleit) + '">🐾</button><input type="range" min="0" max="200" step="5" value="' + v + '" data-zusvol="' + id + '" aria-label="' + name(id) + '"><b>' + v + " %</b></div>"; }).join("") + "</div>";
   }
+  function begleiterSetzen(id, an) {
+    if (!ZUSATZ[id]) return;
+    if (an) { zusBegleiter.add(id); if (!zusIst(id) && Object.keys(zusWahl).length < zusMax()) { zusWahl[id] = 1; zusPausiert = false; zusMerken(); zusSync(); } }
+    else zusBegleiter.delete(id);
+    begleiterMerken(); try { karteNeu(); boxNeu("klang"); } catch (_) {}
+    const n = ZUSATZ[id][sprache()] || ZUSATZ[id].de;
+    status(an ? "🐾 " + n + (sprache() === "en" ? " will come along to the next place" : " kommt mit in den nächsten Ort") : n + (sprache() === "en" ? " stays here" : " bleibt hier"));
+  }
+  root.addEventListener("click", e => { const b = e.target.closest && e.target.closest("[data-zbegl]"); if (!b) return; e.preventDefault(); e.stopPropagation(); begleiterSetzen(b.dataset.zbegl, !zusBegleiter.has(b.dataset.zbegl)); }, true);
+  Object.assign(TX.de, { zusBegleit: "Kommt mit in den nächsten Ort (sonst bleibt es hier zurück)" });
+  Object.assign(TX.en, { zusBegleit: "Comes along to the next place (otherwise it stays here)" });
   Object.assign(TX.de, { zusRegler: "Laufende Geräusche", zusReglerLeer: "Noch nichts dazugelegt – bei „✚ Mehr Geräusche“ ein Symbol antippen oder ins Bild ziehen." });
   Object.assign(TX.en, { zusRegler: "Layered sounds", zusReglerLeer: "Nothing layered yet – tap a symbol in “✚ More sounds” or drag it onto the map." });
   function zusBox(T, ohneRegler) {
@@ -11323,6 +11391,10 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     const kulWeg = k => () => { if (kul && kul.art === k) { kulMerk = S.kulisse; kulisseStop(); try { zeichnen(); knoepfe(); } catch (_) {} } };
     KUL_ZEIGEN.filter(k => k !== "keine").forEach(k => add([ohneSym(T.kulissen[k])].concat(SPRACH_KUL[k] || []), "Kulisse " + ohneSym(T.kulissen[k]), kulWahl(k), kulWeg(k), ohneSym(T.kulissen[k]) + " verlassen"));
     const zusSchalt = (id, an) => () => { audioStart(); if (an) { if (!zusIst(id)) { if (Object.keys(zusWahl).length >= zusMax()) return; zusWahl[id] = 1; } } else delete zusWahl[id]; zusPausiert = false; zusMerken(); zusSync(); boxNeu("klang"); };
+    const begleitSchalt = (id, an) => () => { audioStart(); begleiterSetzen(id, an); };
+    Object.keys(ZUSATZ).forEach(id => { const n = ZUSATZ[id].de.toLowerCase();
+      add([n + " kommt mit", n + " begleitet uns", n + " folgt uns", "nimm " + n + " mit", n + " geht mit", n + " bleibt bei uns"], n + " kommt mit", begleitSchalt(id, true), begleitSchalt(id, false), n + " bleibt hier");
+      add([n + " bleibt hier", n + " bleibt zurück", n + " geht nicht mit"], n + " bleibt hier", begleitSchalt(id, false)); });
     Object.keys(ZUSATZ).forEach(id => { const n = ZUSATZ[id].de; add(["dazu " + n, "plus " + n, "mit " + n], "Zusatz " + n, zusSchalt(id, true), zusSchalt(id, false), "Zusatz " + n + " aus"); add([n + " aus", "ohne " + n], "Zusatz " + n + " aus", zusSchalt(id, false)); });
     const stWahl = k => () => { vorlageWaehlen(k); if (!laeuft && !hoerer) { pausiert = false; start(); } };
     Object.keys(T.vorlagen).filter(k => STIL[k]).forEach(k => add(["musik " + ohneSym(T.vorlagen[k]), "stimmung " + ohneSym(T.vorlagen[k])], "Stimmung " + ohneSym(T.vorlagen[k]), stWahl(k), musikAus, "Musik anhalten"));
@@ -12907,6 +12979,13 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .lw-zknopf.drin:hover { border-color: var(--line); color: var(--vellum); }
 .lw-zico { width: 1.25rem; height: 1.25rem; vertical-align: -.25rem; flex: none; }
 .lw-zico.gross { width: 100%; height: 100%; }
+.lw-zemo { display: inline-grid; place-items: center; font-size: 1.05rem; line-height: 1; width: auto; height: auto; min-width: 1.25rem; font-style: normal; filter: saturate(1.1); }
+.lw-zemo.gross { font-size: 1.35rem; width: auto; height: auto; }
+.lw-kquelle .lw-zemo { font-size: 12px; min-width: 0; } .lw-karte.gross .lw-kquelle .lw-zemo { font-size: 18px; }
+.lw-karte .lw-kquelle .lw-zemo { font-size: clamp(12px, 2.9cqw, 29px); }
+.lw-ksym .lw-zemo { font-size: 11px; min-width: 0; } .lw-karte.gross .lw-ksym .lw-zemo { font-size: 15px; }
+.lw-kquelle.begleit::after { content: "🐾"; position: absolute; right: -35%; bottom: -30%; font-size: 55%; filter: drop-shadow(0 1px 1px #000); }
+.lw-zbegl { opacity: .45; filter: grayscale(1); } .lw-zbegl.an { opacity: 1; filter: none; border-color: var(--ember) !important; }
 .lw-zkurz { display: inline-flex; gap: .2rem; margin-left: .4rem; color: #9fc9da; }
 .lw-zhinweis { min-height: 1.1rem; margin: .4rem 0 0; font-size: .8rem; color: #9fc9da; }
 .lw-zhinweis.warn { color: var(--ember); }
