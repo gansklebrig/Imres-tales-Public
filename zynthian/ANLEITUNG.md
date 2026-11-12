@@ -65,7 +65,7 @@ Der Bildschirm zeigt ein eigenes Pult für 800 × 480 – nichts scrollt, alles 
 - **ALT + ◀ ▶** wechselt die Seite, **ALT + ▲ ▼** springt zur nächsten Gruppe (z. B. Wetter, Effekte, Szenen).
 - **Farben:** Jede Taste leuchtet in der Farbe dessen, was sie tut – dieselbe Farbe wie auf dem Bildschirm (Punkt in der Fußleiste, Seitenfarbe auf F1–F4, Bankfarbe auf MIXER und am Reglerfeld). CTRL leuchtet in der Farbe der nächsten Seite, ZS3 in der der vorigen. Hell = läuft gerade, gedimmt = bereit, blinkend = kommt am Taktende.
 - **🎛 Belegung ändern (MENU):** jeden Drehregler (je Seite, Bank B, Bank FX) und die Tasten PLAY, STOP, PAD, REC, TEMPO, ZS3, CTRL (auch mit ALT) frei belegen. ◀ ▶ oder SEL ändert, „Standard wiederherstellen“ setzt zurück. Die Belegung bleibt gespeichert.
-- **BACK 2 Sekunden halten:** zurück zur normalen Zynthian-Oberfläche.
+- **BACK 3 Sekunden halten:** System-Menü (Zynthian, DJ-Pult, Updates, Ausschalten).
 - **Vom Zynthian zur Bühne:** in der Zynthian-Oberfläche oben rechts den kleinen **♫**-Knopf 1 Sekunde halten. Andere Ecke oder aus: in `einstellungen.sh` `IMRES_KNOPF=lo` (links oben), `ru`, `lu` oder `aus`.
 
 Die alte Ansicht (die Webseite) gibt es weiter: MENU → „Alte Ansicht“, zurück mit MENU → „Neues Pult“.

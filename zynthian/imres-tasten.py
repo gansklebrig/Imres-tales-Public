@@ -31,6 +31,7 @@ TASTEN = {1: "MENU", 2: "MIXER", 3: "CTRL", 4: "ZS3", 5: "ALT", 6: "TEMPO", 7: "
 LED_NR = {"MENU": 0, "MIXER": 1, "CTRL": 2, "ZS3": 3, "F1": 4, "PAD": 5, "TEMPO": 6, "ALT": 7, "REC": 8, "STOP": 9,
           "PLAY": 10, "F2": 11, "F3": 12, "SEL": 13, "UP": 14, "BACK": 15, "LEFT": 16, "DOWN": 17, "RIGHT": 18, "F4": 19}
 LANG_MS = int(os.environ.get("ZYNTHIAN_UI_SWITCH_LONG_MS", "2000") or 2000)
+BACK_LANG_MS = 3000          # BACK 3 s halten = System-Menü (wie in ZynSimple und im DJ-Pult)
 MITTEL_MS = int(os.environ.get("ZYNTHIAN_UI_SWITCH_BOLD_MS", "300") or 300)
 
 
@@ -93,11 +94,11 @@ def hardware():
                     lang_gemeldet.discard(idx)
                     schicken({"typ": "taste", "name": name, "art": "los"})
                 else:
-                    schicken({"typ": "taste", "name": name, "art": "lang" if ms >= LANG_MS else "mittel" if ms >= MITTEL_MS else "kurz"})
+                    schicken({"typ": "taste", "name": name, "art": "lang" if ms >= (BACK_LANG_MS if name == "BACK" else LANG_MS) else "mittel" if ms >= MITTEL_MS else "kurz"})
                     schicken({"typ": "taste", "name": name, "art": "los"})
             # lange gehalten: schon während des Haltens melden
             t0 = gedrueckt.get(idx)
-            if t0 is not None and idx not in lang_gemeldet and (jetzt - t0) * 1000 >= LANG_MS:
+            if t0 is not None and idx not in lang_gemeldet and (jetzt - t0) * 1000 >= (BACK_LANG_MS if name == "BACK" else LANG_MS):
                 lang_gemeldet.add(idx)
                 schicken({"typ": "taste", "name": name, "art": "lang"})
         for i in range(npots):
