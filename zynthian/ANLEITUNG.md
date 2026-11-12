@@ -217,14 +217,35 @@ Drei Wege: oben der Reiter **🥁 Beats**, **ALT + PAD** (nochmal ALT + PAD: zur
 
 Oben der Reiter **🔁 Live** (oder MENU → 🔁 Live). Dafür muss ein Eingang an sein (MENU → 🎤 Eingänge).
 
-- **Handpan-Looper – vier Schichten (F1–F4):** Kachel antippen = aufnehmen. Die Aufnahme beginnt auf der nächsten **1** (⏳ zählt die Schläge runter), läuft genau 1/2/4/8 Takte (⏺ füllt sich) und spielt dann nahtlos im Takt weiter (🔁). Nochmal antippen = stumm/an. Während sie wartet oder aufnimmt: antippen = verwerfen. **F-Taste halten** = Schicht löschen.
-- **Regler 1–4** = Lautstärke der vier Schichten (bis 160 %). Regler drücken: leere Schicht → aufnehmen, sonst **2× drücken = löschen**.
+- **Handpan-Looper – vier Schichten (F1–F4):** Kachel antippen = aufnehmen. Die Aufnahme beginnt auf der nächsten **1** (⏳ zählt die Schläge runter), läuft genau 1/2/4/8 Takte (⏺ füllt sich) und spielt dann nahtlos im Takt weiter (🔁). Nochmal antippen = stumm/an. Während sie wartet oder aufnimmt: antippen = verwerfen.
+- **Regler 1–4** = Lautstärke der vier Schichten (bis 160 %). **Reglerbank B** (MIXER) = Filter je Schicht: links dumpf, rechts dünn, drücken = neutral.
+- **Schicht-Effekte:** F-Taste halten, Kachel lange antippen oder Regler drücken öffnet das Menü einer Schicht:
+  - **⏺ Overdub** – eine Runde drüber spielen, ab der nächsten 1; die Schicht läuft dabei weiter. **↶ Letzten Overdub zurück** nimmt die letzte Runde wieder weg.
+  - **⏪ Rückwärts**, **🐢 Halbe Geschwindigkeit** (Oktave tiefer, doppelt so lang, bleibt im Takt), **✂ Stotter** (ein Achtel wiederholt sich) – wechseln auf dem nächsten Sechzehntel.
+  - **🎚 Filter** (◀ ▶), stumm, löschen (zweimal wählen).
 - **ALT F1 📏 Loop-Länge** 1/2/4/8 Takte · **ALT F2 🎤 Quelle** IN1 + IN2 / nur IN1 / nur IN2.
 - **ALT F3 ⚡ Drop:** ab der nächsten 1 wird es über 4 Takte enger (Filter schließt sich, Rauschen steigt, Trommelwirbel wird dichter, Beat dünnt aus) – auf der 1 danach knallt alles wieder rein. Anlauf 2/4/8 Takte in MENU → Einstellungen → 🔁 Looper & Drop. Auch auf eine Taste legbar („⚡ Drop auslösen“, „🔁 Looper: nächste Schicht aufnehmen“).
 - **ALT F4 💾 Session aufnehmen:** nimmt alles als WAV auf, siehe Abschnitt 9. Die Zeit läuft oben in der Statuszeile mit.
-- **Zweites Blatt (◀ ▶):** Alle anhalten / weiter · Letzte weg · Alle löschen (2× tippen) · Einstellungen.
+- **Zweites Blatt (◀ ▶):** ⏺ Overdub (auf die zuletzt angetippte Schicht) · 🎛 Schicht-Effekte · 🎼 Tonart hören · 🪵 Didge-Grundton · Alle anhalten / weiter · Letzte weg · Alle löschen (2× tippen) · Einstellungen.
+- **🎼 Tonart hören:** 8 s Handpan spielen – Grundton und Skala stellen sich ein. **🪵 Didge-Grundton:** 5 s die Drone halten – nur der Grundton wird übernommen, die Skala bleibt. Stimmungen, Bordun und Bass folgen.
 - Beim **Stimmungswechsel** halten die Schichten an (anderes Tempo, andere Tonart). Antippen = weiter ab der nächsten 1, im neuen Tempo angepasst (⏱).
 - **Versatz:** Klingt eine Schicht etwas zu spät oder zu früh, in MENU → Einstellungen → 🔁 Looper & Drop den Versatz in 5-ms-Schritten anpassen (SEL = wieder automatisch).
+
+### 🎬 Songs (Reiter „Set“)
+
+**➕ Jetzt speichern** merkt sich alles, was gerade klingt: Stimmung, Tempo, Ort, Effekte, die **Mischung**, die **Tonart**, selbst gebaute **Beats** und die **Loops** (die Aufnahmen selbst). Antippen ruft den Song ab: Musik und Ort wechseln am Taktende, die Mischung blendet in 1,5 s herüber, die Loops starten auf der nächsten 1. Die Reihenfolge ist deine Setliste (halten: überschreiben, verschieben, löschen); auf eine Taste legbar: „Nächster Song“. Auf der Kachel steht, was drin ist (♩ Tempo · 🔁 Loops · 🥁 eigene Beats · 🎼 Tonart · 🎚 Mischung).
+
+### ✅ Auftritts-Check
+
+**MENU → ✅ Auftritts-Check** prüft auf einen Blick, grün / gelb / rot: kommt Ton raus, haben die Eingänge Signal (übersteuert?), kommt der MIDI-Takt der TR-8S an, Prozessor und Temperatur, **Unterspannung** (zu schwaches Netzteil), Aussetzer der letzten 10 Minuten, WLAN, Platz für die Aufnahme (USB-Stick?) und ob die Bühnen-Sperre an ist. Antippen einer Zeile hilft weiter (Testton, Eingänge einrichten, Sperre an).
+
+### 🔒 Bühnen-Sperre
+
+**MENU → 🔒 Bühnen-Sperre** für den Auftritt: System-Menü, Update, Moduswechsel, Optionen und Einstellungen sind dann zu – auch über die Handy-Fernbedienung. Musik, Looper, Mischer und alle Kacheln gehen normal; MENU zeigt nur noch die Live-Sachen. **Entsperren: MENU 3 Sekunden halten** (oder im Menü 3× schnell auf 🔓 tippen). Oben in der Statuszeile steht 🔒.
+
+### 📜 Abend-Ablauf für die Spielleitung (wahlweise)
+
+**MENU → 📜 Abend-Ablauf** zeigt einen QR-Code (Adresse: **http://zynthian.local:8790/zyn/spielleitung**). Am Handy unter **✏ Vorbereiten** die Szenen des Abends anlegen – Name, Stimmung, Ort und eine Notiz („Drei Banditen am Fenster“). Am Tisch unter **▶ Spielen** nur noch **Weiter** tippen: das Pult wechselt Musik und Ort am Taktende und zeigt die Szene kurz an, oben steht 📜 2/8. Eine Szene in der Liste antippen springt direkt dorthin. Solange der Abend-Ablauf am Pult **aus** ist, kann das Handy nichts umschalten (Vorbereiten geht trotzdem). Auf Tasten legbar: „Nächste / Vorige Szene“.
 
 ### 📱 Spieler-Klänge am Handy
 

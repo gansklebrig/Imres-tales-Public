@@ -1919,28 +1919,116 @@ registerProcessor("imres-loop-rec", ImresLoopRec);`;
     return { i };
   }
   function loopFertig(d) {
+    const od = LOOP.s.findIndex(x => x && x.od && x.od.id === d.id); if (od >= 0) { loopOverdubFertig(LOOP.s[od], d); return; }
     const i = LOOP.s.findIndex(x => x && x.id === d.id), sch = LOOP.s[i]; if (!sch) return;
-    if (sch.ein) { (sch.quellen || []).forEach(k => { try { EIN.k[k] && EIN.k[k].out.disconnect(sch.ein); } catch (_) {} }); try { sch.ein.disconnect(); } catch (_) {} sch.ein = null; }
+    loopEinTrennen(sch);
     const n = d.l.length, buf = ctx.createBuffer(2, n, ctx.sampleRate), r = Math.min(256, n >> 3);
     for (let x = 0; x < r; x++) { const f = x / r; d.l[x] *= f; d.r[x] *= f; d.l[n - 1 - x] *= f; d.r[n - 1 - x] *= f; }
     buf.copyToChannel(d.l, 0); buf.copyToChannel(d.r, 1); sch.buf = buf;
     /* Pegel prüfen: war gar nichts zu hören, Schicht wieder freigeben */
     let m = 0; for (let x = 0; x < n; x += 7) { const v = Math.abs(d.l[x]) + Math.abs(d.r[x]); if (v > m) m = v; }
     sch.leise = m < .002;
-    loopAbspielen(sch, ctx.currentTime + .03, true);
+    loopAbspielen(sch, ctx.currentTime + .03, sch.ab);
   }
-  function loopAbspielen(sch, j, nahtlos) {
-    const src = ctx.createBufferSource(); src.buffer = sch.buf; src.loop = true; src.playbackRate.value = sch.rate;
-    const g = ctx.createGain(); g.gain.value = 0; g.gain.setTargetAtTime(sch.stumm ? 0 : sch.laut, j, .015);
-    const an = ctx.createAnalyser(); an.fftSize = 256; src.connect(g); g.connect(loopBus()); g.connect(an);
-    const len = sch.dauer / sch.rate, off = nahtlos ? (((j - sch.bis) % len + len) % len) * sch.rate : 0;
-    src.start(j, off); sch.src = src; sch.g = g; sch.an = an; sch.null = j - off / sch.rate; sch.zustand = "spielt";
+  function loopEinTrennen(o) {
+    if (!o || !o.ein) return; (o.quellen || []).forEach(k => { try { EIN.k[k] && EIN.k[k].out.disconnect(o.ein); } catch (_) {} }); try { o.ein.disconnect(); } catch (_) {} o.ein = null;
+  }
+  /* Effekte je Schicht: rückwärts, halbe Geschwindigkeit, Stotter (ein Achtel wiederholt sich), Filter (− dumpf … + dünn) */
+  const loopRate = sch => sch.rate * (sch.halb ? .5 : 1);
+  function loopRueckBuf(sch) {
+    if (sch.rueckBuf) return sch.rueckBuf; const b = sch.buf, n = b.length, r = ctx.createBuffer(2, n, b.sampleRate);
+    for (let c = 0; c < 2; c++) { const q = b.getChannelData(c), z = r.getChannelData(c); for (let x = 0; x < n; x++) z[x] = q[n - 1 - x]; }
+    return (sch.rueckBuf = r);
+  }
+  /* Stelle im Puffer (0…1, vorwärts gezählt) zu einer Zeit – das Raster hängt an sch.null, damit Schichten auch nach Effekten im Takt bleiben */
+  const loopPhase = (sch, j) => { const P = sch.dauer / loopRate(sch); return ((((j - sch.null) % P) + P) % P) / P; };
+  /* nächste Sechzehntel-Grenze (bei stehender Musik: sofort) */
+  function loopRaster(vor) { const j = ctx.currentTime + (vor || .03); if (!laeuft) return j; const sd = schrittDauer(), te = taktEnde(); return te - Math.floor((te - j) / sd) * sd; }
+  const loopFilterHz = f => f < 0 ? [20000 * Math.pow(2, f * 8), 20] : [20000, 20 * Math.pow(2, f * 7)];
+  function loopAbspielen(sch, j, neuNull) {
+    if (neuNull != null) sch.null = neuNull;
+    const r = loopRate(sch), buf = sch.rueck ? loopRueckBuf(sch) : sch.buf, ph = loopPhase(sch, j);
+    const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true; src.playbackRate.value = r;
+    let off = (sch.rueck ? 1 - ph : ph) * sch.dauer; if (off >= sch.dauer - 1e-4) off = 0;
+    if (sch.stotter) { const sl = Math.min(sch.dauer / 2, 2 * (laeuft ? schrittDauer() : loopTakt() / 16) * r); src.loopStart = off; src.loopEnd = Math.min(sch.dauer, off + sl); }
+    const [lpHz, hpHz] = loopFilterHz(sch.filter || 0), lp = ctx.createBiquadFilter(), hp = ctx.createBiquadFilter();
+    lp.type = "lowpass"; lp.frequency.value = lpHz; lp.Q.value = .9; hp.type = "highpass"; hp.frequency.value = hpHz; hp.Q.value = .9;
+    const g = ctx.createGain(); g.gain.value = 0; g.gain.setTargetAtTime(sch.stumm ? 0 : sch.laut, j, .006);
+    const an = ctx.createAnalyser(); an.fftSize = 256; src.connect(lp); lp.connect(hp); hp.connect(g); g.connect(loopBus()); g.connect(an);
+    src.start(j, off); sch.src = src; sch.g = g; sch.an = an; sch.lp = lp; sch.hp = hp; sch.zustand = "spielt";
+  }
+  /* an einer Rastergrenze nahtlos neu starten (alte Quelle blendet in 6 ms aus, neue ein) */
+  function loopNeuStart(sch, j) {
+    const src = sch.src, g = sch.g; if (src && g) { try { g.gain.cancelScheduledValues(j - .01); g.gain.setTargetAtTime(0, j, .004); src.stop(j + .06); } catch (_) {} setTimeout(() => { try { g.disconnect(); } catch (_) {} }, (j - ctx.currentTime) * 1000 + 300); }
+    loopAbspielen(sch, j);
   }
   function loopHalt(sch, sanft) {
     if (!sch || !sch.src) return; const j = ctx.currentTime, src = sch.src, g = sch.g;
     try { g.gain.cancelScheduledValues(j); g.gain.setValueAtTime(g.gain.value, j); g.gain.setTargetAtTime(0, j, sanft ? .6 : .02); src.stop(j + (sanft ? 3 : .1)); } catch (_) {}
     setTimeout(() => { try { g.disconnect(); } catch (_) {} }, sanft ? 3500 : 300); sch.src = null; sch.g = null; sch.an = null;
   }
+  /* Overdub: eine Runde über die laufende Schicht drüber aufnehmen – ab der nächsten 1, die Schicht spielt dabei weiter */
+  function loopOverdub(i) {
+    const sch = LOOP.s[i]; if (!ctx || !sch) return { fehler: "Schicht ist leer" };
+    if (sch.zustand !== "spielt") return { fehler: "Schicht läuft gerade nicht" };
+    if (sch.od) { loopOverdubAbbrechen(sch); return { abgebrochen: true }; }
+    if (LOOP.s.some(x => x && (x.zustand === "wartet" || x.zustand === "nimmt" || x.od))) return { fehler: "es nimmt schon eine Schicht auf" };
+    if (sch.rueck || sch.halb || sch.stotter) return { fehler: "Overdub geht nur ohne Rückwärts, Halb und Stotter" };
+    const ks = [0, 1].filter(n => (LOOP.quelle === 0 || LOOP.quelle === n + 1) && EIN.k[n]); if (!ks.length) return { fehler: "kein Eingang an" };
+    const r = loopRate(sch), P = sch.dauer / r, T = laeuft ? taktEnde() : ctx.currentTime + .3;
+    const lat = LOOP.versatz != null ? LOOP.versatz / 1000 : loopLatStd(), sr = ctx.sampleRate, von = Math.round((T + lat) * sr), n = Math.round(P * sr);
+    const od = sch.od = { ab: T, bis: T + P, dauer: P, id: ++LOOP.id, pos: loopPhase(sch, T) * sch.buf.length, r };
+    loopRecBereit().then(rec => {
+      if (sch.od !== od) return; const g = ctx.createGain(); ks.forEach(k => { try { EIN.k[k].out.connect(g); } catch (_) {} }); g.connect(rec); od.ein = g; od.quellen = ks;
+      rec.port.postMessage({ von, bis: von + n, id: od.id });
+    }).catch(() => { if (sch.od === od) sch.od = null; });
+    return { i, ab: T, bis: T + P };
+  }
+  function loopOverdubAbbrechen(sch) { if (!sch || !sch.od) return; if (LOOP.rec) LOOP.rec.port.postMessage({ ab: 1 }); loopEinTrennen(sch.od); sch.od = null; }
+  function loopOverdubFertig(sch, d) {
+    const od = sch.od; loopEinTrennen(od); sch.od = null;
+    const b = sch.buf, N = b.length, M = d.l.length, rf = Math.min(256, M >> 3);
+    for (let x = 0; x < rf; x++) { const f = x / rf; d.l[x] *= f; d.r[x] *= f; d.l[M - 1 - x] *= f; d.r[M - 1 - x] *= f; }
+    const alt = [new Float32Array(b.getChannelData(0)), new Float32Array(b.getChannelData(1))], neu = [new Float32Array(alt[0]), new Float32Array(alt[1])], q = [d.l, d.r];
+    let spitze = 0, m2 = 0;
+    for (let x = 0; x < N; x++) {
+      const m = ((((x - od.pos) % N) + N) % N) / od.r, k = Math.floor(m), f = m - k; if (k >= M - 1) continue;
+      for (let c = 0; c < 2; c++) { const v = q[c][k] * (1 - f) + q[c][k + 1] * f; neu[c][x] += v; const a = Math.abs(neu[c][x]); if (a > spitze) spitze = a; if (Math.abs(v) > m2) m2 = Math.abs(v); }
+    }
+    if (m2 < .002) { sch.odLeise = true; return; } sch.odLeise = false;
+    if (spitze > .98) { const k = .98 / spitze; for (let c = 0; c < 2; c++) for (let x = 0; x < N; x++) neu[c][x] *= k; }
+    const nb = ctx.createBuffer(2, N, b.sampleRate); nb.copyToChannel(neu[0], 0); nb.copyToChannel(neu[1], 1);
+    sch.vorher = alt; sch.buf = nb; sch.rueckBuf = null; sch.leise = false; sch.lagen = (sch.lagen || 1) + 1;
+    if (sch.src) loopNeuStart(sch, ctx.currentTime + .02);
+  }
+  function loopZurueck(sch) {
+    if (!sch || !sch.vorher || !sch.buf) return null; const b = sch.buf, nb = ctx.createBuffer(2, b.length, b.sampleRate);
+    nb.copyToChannel(sch.vorher[0], 0); nb.copyToChannel(sch.vorher[1], 1); sch.buf = nb; sch.rueckBuf = null; sch.vorher = null; sch.lagen = Math.max(1, (sch.lagen || 2) - 1);
+    if (sch.src) loopNeuStart(sch, ctx.currentTime + .02); return { ok: true };
+  }
+  function loopEffekt(sch, art, v) {
+    if (!sch || !sch.buf) return null;
+    if (art === "filter") { sch.filter = Math.max(-1, Math.min(1, Math.round((+v || 0) * 20) / 20)); if (sch.lp) { const [a, b] = loopFilterHz(sch.filter), j = ctx.currentTime; sch.lp.frequency.setTargetAtTime(a, j, .04); sch.hp.frequency.setTargetAtTime(b, j, .04); } return { filter: sch.filter }; }
+    if (!["rueck", "halb", "stotter"].includes(art)) return null;
+    if (sch.od) loopOverdubAbbrechen(sch);
+    sch[art] = v == null ? !sch[art] : !!v;
+    if (sch.src) loopNeuStart(sch, loopRaster(art === "stotter" ? .02 : .05));
+    return { [art]: sch[art] };
+  }
+  /* für den Song-Speicher: Schichten als rohe Daten heraus und wieder hinein (pausiert, starten auf der nächsten 1) */
+  function loopExport() {
+    return { takte: LOOP.takte, s: LOOP.s.map(x => x && x.buf ? { l: new Float32Array(x.buf.getChannelData(0)), r: new Float32Array(x.buf.getChannelData(1)), sr: x.buf.sampleRate, takte: x.takte, bar: x.bar, laut: x.laut, stumm: x.stumm, rueck: !!x.rueck, halb: !!x.halb, filter: x.filter || 0 } : null) };
+  }
+  function loopImport(d) {
+    if (!ctx || !d || !Array.isArray(d.s)) return null;
+    LOOP.s.forEach((x, k) => { if (x) loopBefehl("loeschen", k); });
+    d.s.slice(0, 4).forEach((x, i) => {
+      if (!x || !x.l || !x.l.length) return; const buf = ctx.createBuffer(2, x.l.length, x.sr || ctx.sampleRate); buf.copyToChannel(x.l, 0); buf.copyToChannel(x.r || x.l, 1);
+      LOOP.s[i] = { zustand: "pause", buf, dauer: buf.duration, takte: x.takte || 4, bar: x.bar || buf.duration / (x.takte || 4), laut: x.laut == null ? 1 : x.laut, stumm: !!x.stumm, rueck: !!x.rueck, halb: !!x.halb, filter: x.filter || 0, id: ++LOOP.id, rate: 1, null: 0 };
+    });
+    return { ok: true, n: LOOP.s.filter(Boolean).length };
+  }
+  function loopWeiter(sch) { const bar = loopTakt(); sch.rate = sch.bar / bar; sch.stumm = false; const j = laeuft ? taktEnde() : ctx.currentTime + .05; loopAbspielen(sch, j, j); }
   function loopBefehl(was, i, v) {
     if (!ctx && was !== "einstellen") return null;
     const sch = i != null ? LOOP.s[i] : null;
@@ -1949,13 +2037,20 @@ registerProcessor("imres-loop-rec", ImresLoopRec);`;
       case "tippen": /* je nach Zustand: leer → aufnehmen, spielt → stumm/an, pausiert → wieder an */
         if (!sch) return loopAufnehmen(i);
         if (sch.zustand === "wartet" || sch.zustand === "nimmt") return loopBefehl("loeschen", i);
-        if (sch.zustand === "pause") { const bar = loopTakt(); sch.rate = sch.bar / bar; sch.stumm = false; loopAbspielen(sch, laeuft ? taktEnde() : ctx.currentTime + .05, false); return { an: true }; }
+        if (sch.zustand === "pause") { loopWeiter(sch); return { an: true }; }
+        if (sch.od) { loopOverdubAbbrechen(sch); return { abgebrochen: true }; }
         return loopBefehl("stumm", i);
+      case "weiter": if (sch && sch.zustand === "pause") { loopWeiter(sch); return { an: true }; } return null;
       case "stumm": if (!sch || !sch.g) return null; sch.stumm = !sch.stumm; { const j = ctx.currentTime; sch.g.gain.cancelScheduledValues(j); sch.g.gain.setTargetAtTime(sch.stumm ? 0 : sch.laut, j, .03); } return { stumm: sch.stumm };
       case "laut": if (!sch) return null; sch.laut = Math.max(0, Math.min(1.6, +v || 0)); if (sch.g && !sch.stumm) sch.g.gain.setTargetAtTime(sch.laut, ctx.currentTime, .03); return { laut: sch.laut };
-      case "loeschen": if (!sch) return null; if ((sch.zustand === "wartet" || sch.zustand === "nimmt") && LOOP.rec) { LOOP.rec.port.postMessage({ ab: 1 }); if (sch.ein) { try { sch.ein.disconnect(); } catch (_) {} } } loopHalt(sch, false); LOOP.s[i] = null; return { ok: true };
+      case "overdub": return sch || i != null ? loopOverdub(i) : null;
+      case "odZurueck": return loopZurueck(sch);
+      case "effekt": return loopEffekt(sch, v && v.art, v && v.wert);
+      case "export": return loopExport();
+      case "laden": return loopImport(v);
+      case "loeschen": if (!sch) return null; if ((sch.zustand === "wartet" || sch.zustand === "nimmt") && LOOP.rec) { LOOP.rec.port.postMessage({ ab: 1 }); loopEinTrennen(sch); } if (sch.od) loopOverdubAbbrechen(sch); loopHalt(sch, false); LOOP.s[i] = null; return { ok: true };
       case "alleLoeschen": LOOP.s.forEach((x, k) => { if (x) loopBefehl("loeschen", k); }); return { ok: true };
-      case "allePause": LOOP.s.forEach(x => { if (x && x.zustand === "spielt") { loopHalt(x, true); x.zustand = "pause"; } }); return { ok: true };
+      case "allePause": LOOP.s.forEach(x => { if (x && x.zustand === "spielt") { if (x.od) loopOverdubAbbrechen(x); loopHalt(x, true); x.zustand = "pause"; } }); return { ok: true };
       case "letzte": { let k = -1, best = -1; LOOP.s.forEach((x, n) => { if (x && x.id > best) { best = x.id; k = n; } }); return k >= 0 ? loopBefehl("loeschen", k) : null; }
       case "einstellen": if (v && [1, 2, 4, 8].includes(v.takte)) LOOP.takte = v.takte; if (v && [0, 1, 2].includes(v.quelle)) LOOP.quelle = v.quelle; if (v && "versatz" in v) LOOP.versatz = v.versatz == null ? null : Math.max(0, Math.min(400, Math.round(v.versatz))); loopMerken(); return { ok: true };
     }
@@ -1967,10 +2062,12 @@ registerProcessor("imres-loop-rec", ImresLoopRec);`;
       s: LOOP.s.map(x => {
         if (!x) return null; let z = x.zustand; if ((z === "wartet" || z === "nimmt") && ctx) z = j < x.ab ? "wartet" : "nimmt";
         let pg = 0; if (x.an) { const d = new Float32Array(256); x.an.getFloatTimeDomainData(d); for (let k = 0; k < 256; k++) { const a = Math.abs(d[k]); if (a > pg) pg = a; } }
-        const len = x.dauer / (x.rate || 1);
+        const od = x.od ? (j < x.od.ab ? "wartet" : "nimmt") : "";
         return { zustand: z, takte: x.takte, laut: x.laut, stumm: x.stumm, leise: !!x.leise, pegel: pg, tempoAnders: tp ? Math.abs(tp - x.bar) / x.bar > .01 : false,
-          fort: z === "nimmt" ? Math.min(1, (j - x.ab) / x.dauer) : z === "spielt" && x.null != null ? (((j - x.null) % len) + len) % len / len : 0,
-          schlaegeBis: z === "wartet" ? Math.max(1, Math.ceil((x.ab - j) / schlag)) : 0 };
+          fort: z === "nimmt" ? Math.min(1, (j - x.ab) / x.dauer) : z === "spielt" && x.null != null && x.buf ? (x.rueck ? 1 - loopPhase(x, j) : loopPhase(x, j)) : 0,
+          schlaegeBis: z === "wartet" ? Math.max(1, Math.ceil((x.ab - j) / schlag)) : od === "wartet" ? Math.max(1, Math.ceil((x.od.ab - j) / schlag)) : 0,
+          od, odFort: od === "nimmt" ? Math.min(1, (j - x.od.ab) / x.od.dauer) : 0, odLeise: !!x.odLeise, lagen: x.lagen || 1, kannZurueck: !!x.vorher,
+          rueck: !!x.rueck, halb: !!x.halb, stotter: !!x.stotter, filter: x.filter || 0 };
       }) };
   }
   /* ===================== ⚡ Drop: Spannung über 4/8 Takte, dann knallt alles auf der nächsten „1“ wieder rein ===================== */
