@@ -403,6 +403,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     menue("<h3>⚙ " + W("System", "System") + '</h3><div class="reihe">' +
       '<button type="button" data-zm="zyn">🎛 ' + W("Zurück zum Zynthian", "Back to Zynthian") + "<small>" + W("Die normale Zynthian-Oberfläche startet", "Starts the normal Zynthian interface") + "</small></button>" +
       '<button type="button" data-zm="dj">🎧 ' + W("DJ-Pult", "DJ deck") + "<small>" + W("Mixxx im Vollbild mit dem DDJ-200 · zurück: Mixxx beenden oder BACK halten", "Mixxx full screen with the DDJ-200 · back: quit Mixxx or hold BACK") + "</small></button>" +
+      '<button type="button" data-zm="hybrid">♫ ' + W("DJ + Instrumente", "DJ + instruments") + "<small>" + W("Mixxx als Kanal im ZynSimple-Mischer, Spuren laufen weiter", "Mixxx as a channel in the ZynSimple mixer, tracks keep running") + "</small></button>" +
       '<button type="button" data-zm="zsupd">⬇ ' + W("ZynSimple aktualisieren", "Update ZynSimple") + "<small>" + W("wechselt zum Zynthian und sucht das Update", "switches to Zynthian and looks for the update") + "</small></button>" +
       '<button type="button" data-zm="zyupd">⬇ ' + W("Zynthian aktualisieren", "Update Zynthian") + "<small>" + W("wechselt zum Zynthian und startet das System-Update", "switches to Zynthian and runs the system update") + "</small></button>" +
       '<button type="button" data-zm="upd">⬇ ' + W("Bühne aktualisieren", "Update the stage") + "<small>" + W("holt die neueste Version (Internet nötig) und startet neu", "fetches the latest version (needs internet) and restarts") + "</small></button>" +
@@ -422,6 +423,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       dj: () => { zeige("🎧 " + W("DJ-Pult startet …", "DJ deck is starting …"), null, W("beim ersten Mal wird Mixxx erst installiert – Internet nötig, einige Minuten", "first time Mixxx gets installed – needs internet, a few minutes")); post("dj"); },
       upd: () => { menueZu(); zeige("⬇ " + W("Barden Beats wird aktualisiert …", "Updating Barden Beats …"), null, W("dauert bis zu einer Minute, danach startet die Bühne neu", "takes up to a minute, then the stage restarts")); post("aktualisieren"); updateVerfolgen(); },
       hg: () => haengerMenue(),
+      hybrid: () => { zeige("♫ " + W("DJ + Instrumente startet …", "DJ + instruments is starting …"), null, W("zum Zynthian – Mixxx spielt dort im Kanal „DJ-Pult“", "to Zynthian – Mixxx plays in the „DJ-Pult“ channel")); post("hybrid"); },
       zsupd: () => { zeige("⬇ " + W("Zum Zynthian – ZynSimple sucht das Update …", "To Zynthian – ZynSimple looks for the update …")); post("zynsimple-update"); },
       zyupd: () => { zeige("⬇ " + W("Zum Zynthian – das System-Update startet …", "To Zynthian – system update starts …")); post("zynthian-update"); },
       gpu: () => { const an = !GPU.an; fetch("/zyn/grafik", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ an }) }).catch(() => {});

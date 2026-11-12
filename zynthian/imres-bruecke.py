@@ -829,7 +829,7 @@ class Handler(SimpleHTTPRequestHandler):
             return self.json_antwort({"ok": True, "an": an})
         if p == "/zyn/system":
             aktion = str(d.get("aktion", ""))
-            if aktion not in ("imres", "zynthian", "hintergrund", "dj", "zynsimple-update", "zynthian-update", "neustart", "aus", "seite-neu", "aktualisieren", "zurueck", "start-imres", "start-zynthian", "start-hintergrund"):
+            if aktion not in ("imres", "zynthian", "hintergrund", "dj", "hybrid", "zynsimple-update", "zynthian-update", "neustart", "aus", "seite-neu", "aktualisieren", "zurueck", "start-imres", "start-zynthian", "start-hintergrund"):
                 return self.json_antwort({"ok": False, "fehler": "unbekannte Aktion"}, 400)
             if aktion == "seite-neu":
                 senden({"typ": "neu-laden"})
