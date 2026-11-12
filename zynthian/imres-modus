@@ -1,5 +1,5 @@
 #!/bin/bash
-# imres-modus imres|zynthian|hintergrund|dj|hybrid|zynsimple-update|zynthian-update|neustart|aus|aktualisieren|einrichten|pruefen|start-imres|start-zynthian|start-hintergrund|boot
+# imres-modus aufraeumen|imres|zynthian|hintergrund|dj|hybrid|zynsimple-update|zynthian-update|neustart|aus|aktualisieren|einrichten|pruefen|start-imres|start-zynthian|start-hintergrund|boot
 HIER="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 # Datenordner: neben der Seite – oder fest, wenn dieses Skript als Kopie in /usr/local/bin liegt
 case "$HIER" in */seite/zynthian) DATEN="$(dirname "$(dirname "$HIER")")" ;; *) DATEN="${IMRES_DATEN:-/zynthian/zynthian-my-data/imres}" ;; esac
@@ -43,33 +43,114 @@ case "$1" in
       "$S/imres-modus" einrichten >/dev/null 2>&1; exit 0
     fi
     echo "SCHRITT 2/6 Prüfe den Platz auf der SD-Karte …"
-    # Platz prüfen (die neue Version entsteht daneben)
-    FREI=$(df -Pk "$DATEN" | awk 'NR==2{print $4}'); GROSS=$(du -sk --exclude=.git "$G" 2>/dev/null | cut -f1)
-    if [ -n "$FREI" ] && [ -n "$GROSS" ] && [ "$FREI" -lt $((GROSS + 51200)) ]; then echo "Zu wenig Platz auf der SD-Karte für das Update."; exit 1; fi
     # alte, abgebrochene Reste weg
     rm -rf "$DATEN/seite.neu"
+    # Nur geänderte Dateien kommen neu dazu – alles Unveränderte (Musik, Bilder …) wird per Hardlink geteilt und belegt keinen Platz doppelt.
+    # Geht das nicht (lokal verändert, nach „zurueck“, cp kann keine Hardlinks), wird wie früher alles ausgepackt.
+    LISTE="$DATEN/.update-liste"; TEIL=""
+    if [ -z "$(git -C "$G" status --porcelain --untracked-files=no 2>/dev/null)" ] && git -C "$G" diff --name-only --no-renames -z HEAD FETCH_HEAD > "$LISTE" 2>/dev/null; then
+      N=$(tr -cd '\0' < "$LISTE" | wc -c)
+      # Platz = Größe der neuen/geänderten Dateien + 50 MB Reserve
+      BRAUCHT=$(( $(git -C "$G" diff --no-renames --diff-filter=AMT --raw HEAD FETCH_HEAD 2>/dev/null | awk '{print $4}' | git -C "$G" cat-file --batch-check='%(objectsize)' 2>/dev/null | awk '{s+=$1} END{print int(s/1024)}') + 51200 ))
+      TEIL=1
+    else
+      N=""; BRAUCHT=$(( $(du -sk --exclude=.git "$G" 2>/dev/null | cut -f1) + 51200 ))
+    fi
+    FREI=$(df -Pk "$DATEN" | awk 'NR==2{print $4}')
+    if [ -n "$FREI" ] && [ "$FREI" -lt "$BRAUCHT" ]; then
+      # erst die ältesten Versionen opfern (eine bleibt immer), dann noch einmal messen
+      while [ "$FREI" -lt "$BRAUCHT" ] && [ "$(ls -d "$DATEN"/seite.alt-* 2>/dev/null | wc -l)" -gt 1 ]; do
+        X=$(ls -d "$DATEN"/seite.alt-* | sort | head -1); echo "Wenig Platz – lösche alte Version $(basename "$X")"; rm -rf "$X"; FREI=$(df -Pk "$DATEN" | awk 'NR==2{print $4}')
+      done
+      [ "$FREI" -lt "$BRAUCHT" ] && { echo "Zu wenig Platz auf der SD-Karte für das Update ($((FREI/1024)) MB frei, $((BRAUCHT/1024)) MB nötig)."; exit 1; }
+    fi
     echo "SCHRITT 3/6 Packe die neue Version aus …"
     # die neue Version entsteht in seite.neu – die laufende bleibt unberührt, bis alles fertig ist
-    mkdir -p "$DATEN/seite.neu" && git -C "$G" archive FETCH_HEAD | tar -x -C "$DATEN/seite.neu" || { rm -rf "$DATEN/seite.neu"; echo "Update konnte nicht entpackt werden – Imres bleibt, wie es ist."; exit 1; }
+    if [ -n "$TEIL" ] && cp -al "$G" "$DATEN/seite.neu" 2>/dev/null; then
+      rm -rf "$DATEN/seite.neu/.git"
+      echo "$N Dateien haben sich geändert – der Rest wird geteilt."
+      # geänderte Dateien zuerst entfernen (bricht nur den Hardlink, die alte Version bleibt heil), dann frisch auspacken
+      ( cd "$DATEN/seite.neu" && xargs -0 -r rm -f -- < "$LISTE" )
+      git -C "$G" diff --name-only --no-renames --diff-filter=AMT -z HEAD FETCH_HEAD \
+        | xargs -0 -r git -C "$G" --literal-pathspecs archive FETCH_HEAD -- | tar -x -i --unlink-first -C "$DATEN/seite.neu" \
+        || { rm -rf "$DATEN/seite.neu"; TEIL=""; echo "Teil-Update ging nicht – packe alles aus …"; }
+    else TEIL=""; fi
+    if [ -z "$TEIL" ]; then
+      mkdir -p "$DATEN/seite.neu" && git -C "$G" archive FETCH_HEAD | tar -x -C "$DATEN/seite.neu" || { rm -rf "$DATEN/seite.neu"; echo "Update konnte nicht entpackt werden – Imres bleibt, wie es ist."; exit 1; }
+    fi
+    rm -f "$LISTE"
     [ -f "$DATEN/seite.neu/zynthian/imres-modus" ] && [ -f "$DATEN/seite.neu/lautenwerk.js" ] || { rm -rf "$DATEN/seite.neu"; echo "Update unvollständig – Imres bleibt, wie es ist."; exit 1; }
     echo "SCHRITT 4/6 Tausche alte gegen neue Version …"
     # Tausch: Git-Verwaltung wandert mit, die alte Version wird als seite.alt-DATUM aufgehoben
+    git -C "$G" config core.trustctime false; git -C "$G" config core.checkStat minimal  # Hardlinks ändern die ctime – kein Grund, alles neu einzulesen
     mv "$G/.git" "$DATEN/seite.neu/.git" && git -C "$DATEN/seite.neu" reset -q FETCH_HEAD
     STEMPEL=$(date +%Y%m%d-%H%M%S)
+    echo "$ALT" > "$G/.imres-version" 2>/dev/null
     mv "$G" "$DATEN/seite.alt-$STEMPEL" && mv "$DATEN/seite.neu" "$G"; sync
     echo "SCHRITT 5/6 Räume alte Versionen auf …"
-    # Aufräumen: die letzten 5 alten Versionen behalten, ältere und Reste löschen
-    ls -d "$DATEN"/seite.alt-* 2>/dev/null | sort | head -n -5 | while read -r X; do rm -rf "$X"; done
-    find "$G" -name __pycache__ -type d -prune -exec rm -rf {} + 2>/dev/null
-    echo "Neue Version $(echo "$NEU" | cut -c1-7) ist installiert (vorher $(echo "$ALT" | cut -c1-7))."
+    "$S/imres-modus" aufraeumen-schnell
     echo "SCHRITT 6/6 Richte ein und starte neu …"
     "$S/imres-modus" einrichten
+    ;;
+  aufraeumen-schnell)
+    # nach jedem Update: die letzten $BEHALTEN alten Versionen behalten, Git-Verwaltung schlank halten, Rest im Hintergrund
+    BEHALTEN=5
+    ls -d "$DATEN"/seite.alt-* 2>/dev/null | sort | head -n -$BEHALTEN | while read -r X; do echo "Lösche alte Version $(basename "$X")"; rm -rf "$X"; done
+    ls -d "$DATEN"/seite.verworfen-* 2>/dev/null | sort | head -n -2 | while read -r X; do rm -rf "$X"; done
+    G="$DATEN/seite"; find "$G" -name __pycache__ -type d -prune -exec rm -rf {} + 2>/dev/null
+    rm -f "$G/.git/ORIG_HEAD"
+    # Git sammelt bei jedem Download neue Pakete – wird es deutlich größer als die Seite selbst, einmal frisch packen (nur das Nötige)
+    GG=$(du -sk "$G/.git" 2>/dev/null | cut -f1); GS=$(du -sk --exclude=.git "$G" 2>/dev/null | cut -f1)
+    if [ -n "$GG" ] && [ -n "$GS" ] && [ "$GG" -gt $((GS * 3 / 2 + 102400)) ]; then
+      echo "Git-Verwaltung ist auf $((GG/1024)) MB gewachsen – packe neu …"
+      git -C "$G" reflog expire --expire=now --all 2>/dev/null
+      nice -n 10 git -C "$G" -c pack.window=0 -c pack.depth=0 -c pack.threads=2 repack -a -d -q 2>/dev/null && git -C "$G" prune --expire=now 2>/dev/null
+      echo "Git-Verwaltung jetzt $(( $(du -sk "$G/.git" | cut -f1) / 1024 )) MB."
+    fi
+    # Doppelte Dateien in alten Versionen durch Hardlinks ersetzen – dauert beim ersten Mal ein paar Minuten, darum leise im Hintergrund
+    if [ -n "$IMRES_TEST" ] || ! command -v systemd-run >/dev/null 2>&1 || [ ! -d /run/systemd/system ]; then "$S/imres-modus" aufraeumen
+    else systemd-run --quiet --collect --unit=imres-aufraeumen-$$ --nice=19 -p IOSchedulingClass=idle --setenv=IMRES_DATEN="$DATEN" /bin/bash "$S/imres-modus" aufraeumen >/dev/null 2>&1 || "$S/imres-modus" aufraeumen; fi
+    ;;
+  aufraeumen)
+    # gleiche Dateien in seite.alt-* / seite.verworfen-* mit der aktuellen (und jüngeren) Version teilen
+    exec 8>"$DATEN/.aufraeumen.lock"; flock -n 8 || exit 0
+    python3 - "$DATEN" <<'PY'
+import os, sys, glob, filecmp
+d = sys.argv[1]; jetzt = os.path.join(d, "seite")
+alte = sorted(glob.glob(os.path.join(d, "seite.alt-*")) + glob.glob(os.path.join(d, "seite.verworfen-*")), key=lambda x: x.rsplit("-", 2)[-2:], reverse=True)
+spar = 0; n = 0; refs = [jetzt]
+for alt in alte:
+    for wurzel, ordner, dateien in os.walk(alt):
+        ordner[:] = [o for o in ordner if o != ".git"]
+        for f in dateien:
+            p = os.path.join(wurzel, f); rel = os.path.relpath(p, alt)
+            try:
+                st = os.lstat(p)
+                if not os.path.isfile(p) or os.path.islink(p): continue
+                for ref in refs:
+                    r = os.path.join(ref, rel)
+                    try: rs = os.lstat(r)
+                    except OSError: continue
+                    if rs.st_ino == st.st_ino: break
+                    if os.path.islink(r) or rs.st_size != st.st_size: continue
+                    if filecmp.cmp(r, p, shallow=False):
+                        tmp = p + ".imres-link"; os.link(r, tmp); os.replace(tmp, p)
+                        if st.st_nlink == 1: spar += st.st_size
+                        n += 1; break
+            except OSError:
+                pass
+    refs.append(alt)
+if n: print("Aufgeräumt: %d doppelte Dateien geteilt, %.0f MB frei geworden." % (n, spar / 1048576))
+PY
+    echo "Platz: $(du -sch "$DATEN"/seite "$DATEN"/seite.alt-* 2>/dev/null | tail -1 | cut -f1) für $(ls -d "$DATEN"/seite.alt-* 2>/dev/null | wc -l) alte + aktuelle Version · frei: $(df -Ph "$DATEN" | awk 'NR==2{print $4}')"
     ;;
   zurueck)
     # letzte Version wiederherstellen (falls ein Update etwas kaputt gemacht hat)
     exec 9>"$DATEN/.update.lock"; flock -n 9 || { echo "Es läuft gerade ein Update."; exit 1; }
     ALT=$(ls -d "$DATEN"/seite.alt-* 2>/dev/null | sort | tail -1); [ -n "$ALT" ] || { echo "Keine ältere Version vorhanden."; exit 1; }
     mv "$DATEN/seite/.git" "$ALT/.git" 2>/dev/null
+    # passt die Git-Verwaltung zur alten Version (Stand ist noch da), das nächste Update wieder nur die Änderungen laden lassen
+    V=$(cat "$ALT/.imres-version" 2>/dev/null); [ -n "$V" ] && git -C "$ALT" cat-file -e "$V^{commit}" 2>/dev/null && git -C "$ALT" reset -q "$V" 2>/dev/null
     mv "$DATEN/seite" "$DATEN/seite.verworfen-$(date +%Y%m%d-%H%M%S)" && mv "$ALT" "$DATEN/seite"; sync
     ls -d "$DATEN"/seite.verworfen-* 2>/dev/null | sort | head -n -2 | while read -r X; do rm -rf "$X"; done
     echo "Vorige Version wiederhergestellt: $(basename "$ALT")"
