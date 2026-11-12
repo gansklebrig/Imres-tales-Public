@@ -99,17 +99,17 @@ ARTEN = {
     "atem": {"f": reihe("n_atem_", 6), "rate": [.6, .68]},
     "lachen_boese": {"f": reihe("n_lachen_boese_", 9)},
     # Menge (Schänke, Wachen, Dorf): nur tiefe, natürliche Lacher – die hellen klingen nach Gnom und bleiben den Goblins
-    "lachen": {"f": ["n_lachen_2", "n_lachen_3", "n_lachen_5", "n_lachen_8", "n_lachen_16"] + reihe("n_held_menge_", 8), "folge": [2, 3, .3, .6]},
+    "lachen": {"f": ["n_lachen_2", "n_lachen_3", "n_lachen_5", "n_lachen_8", "n_lachen_16"] + ["n_held_menge_%d" % k for k in (3, 4, 5, 7, 8)], "folge": [2, 3, .3, .6]},
     "lachen_goblin": {"f": ["n_lachen_%d" % k for k in (1, 4, 9, 10, 12, 13, 15, 17, 18, 19, 20)], "folge": [1, 2, .2, .4]},
-    # Heldenlacher in den Stimmen der Figuren (erzeugt aus tools/vertonung/lachen-de.json, siehe lachen_uebernehmen())
-    "lachen_echo": {"f": ["n_held_echo_laut_1", "n_held_echo_laut_2"], "held": True},
-    "lachen_echo_dreckig": {"f": ["n_held_echo_dreckig_1", "n_held_echo_dreckig_2"], "held": True},
+    # Heldenlacher in den Stimmen der Figuren (erzeugt aus tools/vertonung/lachen-de.json, siehe lachen_uebernehmen());
+    # Aufnahmen, die in die Kopfstimme kippen (echo_laut_2, echo_dreckig_1, friedrich_1, menge_1/2/6), bleiben draußen
+    "lachen_echo": {"f": ["n_held_echo_laut_1"], "rate": [.94, 1.04], "held": True},
+    "lachen_echo_dreckig": {"f": ["n_held_echo_dreckig_2"], "held": True},
     "lachen_echo_trocken": {"f": ["n_held_echo_trocken"], "held": True},
     "lachen_nundro": {"f": ["n_held_nundro_1", "n_held_nundro_2"], "held": True},
-    "lachen_friedrich": {"f": ["n_held_friedrich_1"], "held": True},
     "lachen_friedrich_matt": {"f": ["n_held_friedrich_erschoepft"], "held": True},
     "lachen_ezekiel": {"f": ["n_held_ezekiel_leise"], "held": True},
-    "lachen_gruppe": {"f": ["n_held_echo_laut_1", "n_held_friedrich_1", "n_held_barradin_1", "n_held_echo_laut_2", "n_held_nundro_1"], "folge": [3, 3, .12, .3], "held": True},
+    "lachen_gruppe": {"f": ["n_held_echo_laut_1", "n_held_barradin_1", "n_held_nundro_1"], "folge": [3, 3, .12, .3], "held": True},
     "jubel": {"f": reihe("e_jubel_", 6)},
     "zank": {"f": ["fx_0_v_latin_male_attack_1", "fx_0_v_latin_male_fight_1", "fx_0_v_greek_male_attack_10", "fx_0_v_persian_male_attack_1", "fx_0_v_persian_male_to_war_1"], "folge": [2, 3, .5, .9]},
     # Dinge und Orte
