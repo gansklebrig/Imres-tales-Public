@@ -133,10 +133,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-427fcf4f",
+     "id": "I-f7c78da1",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Dann ein Druide in langen weißen Gewändern, Pelz auf den Schultern und silberner Schmuck auf der Brust. Weißes Haar fiel ihm wild über die Schultern, ein weißer Bart rahmte ein hartes, grimmiges Gesicht, und an den Seiten standen spitze, rötliche Ohren ab. Und aus dem Haar wuchs ihm ein Geweih. Ein richtiges, breites Geweih wie bei einem alten Hirsch, nur dass ein Hirsch freundlicher schaut. Er sah aus, als wäre er bereit für jeden Streit, und knurrte uns an, statt sich vorzustellen. Jedenfalls klang es so:",
+     "text": "Dann ein Druide in langen weißen Gewändern, Pelz auf den Schultern und silberner Schmuck auf der Brust. Weißes Haar fiel ihm wild über die Schultern, ein weißer Bart rahmte ein hartes, grimmiges Gesicht, und an den Seiten standen spitze, rötliche Ohren ab. Und aus dem Haar wuchs ihm ein Geweih. Ein richtiges, breites Geweih wie bei einem alten Hirsch, nur dass ein Hirsch freundlicher schaut. Er sah aus, als wäre er bereit für jeden Streit, und knurrte seine Vorstellung mehr, als dass er sie sprach:",
      "geraeusch": [
       "Hund hechelt zufrieden, Schwanz klopft auf Holzplanken"
      ]
@@ -174,18 +174,6 @@
      "rolle": "ezekiel",
      "figur": "Ezekiel",
      "text": "Ezekiel. The Destroyer."
-    },
-    {
-     "id": "I-2dae5093",
-     "rolle": "erzaehler",
-     "figur": "Erzähler",
-     "text": "Ich beugte mich zu Friedrich hinüber und flüsterte:"
-    },
-    {
-     "id": "I-f73f02b0",
-     "rolle": "barradin",
-     "figur": "Barradin",
-     "text": "Ein Goliath. Ich dachte immer, die gibt es nur in Liedern. In sehr großen Liedern."
     }
    ]
   },
@@ -203,6 +191,18 @@
   {
    "typ": "text",
    "segmente": [
+    {
+     "id": "I-2dae5093",
+     "rolle": "erzaehler",
+     "figur": "Erzähler",
+     "text": "Ich beugte mich zu Friedrich hinüber und flüsterte:"
+    },
+    {
+     "id": "I-f73f02b0",
+     "rolle": "barradin",
+     "figur": "Barradin",
+     "text": "Ein Goliath. Ich dachte immer, die gibt es nur in Liedern. In sehr großen Liedern."
+    },
     {
      "id": "I-40382535",
      "rolle": "erzaehler",
@@ -247,10 +247,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-30ce3c32",
+     "id": "I-1e155d07",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Gundren kam deshalb schnell zur Sache. Der schwarzbärtige Zwerg, den Bart zu zwei dicken Zöpfen geflochten und mit goldenen Ringen verziert, auf dem Kopf einen breitkrempigen Hut und an den Füßen Stiefel mit Stahlkappen, stützte seine schwieligen Hände auf ein Fass, das ihm als Tisch diente, und senkte die Stimme, obwohl ringsum nur Möwen lauschten."
+     "text": "Gundren, der das Ganze bisher schweigend beobachtet hatte, kam deshalb schnell zur Sache. Der schwarzbärtige Zwerg, den Bart zu zwei dicken Zöpfen geflochten und mit goldenen Ringen verziert, auf dem Kopf einen breitkrempigen Hut und an den Füßen Stiefel mit Stahlkappen, stützte seine schwieligen Hände auf ein Fass, das ihm als Tisch diente, und senkte die Stimme, obwohl ringsum nur Möwen lauschten."
     },
     {
      "id": "I-82178113",
@@ -288,10 +288,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-ae3dab77",
+     "id": "I-07bc8f9b",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Mich hatte er ohnehin schon bei den Worten „magische Schmiede“. Ich sah mich bereits mit einer Laute, die sich von selbst stimmt, und mit einem Hut, der bei jedem Applaus ein kleines bisschen funkelt. Und dann versprach Gundren uns auch noch eine stattliche Belohnung. Echo beugte sich vor:"
+     "text": "Mich hatte er ohnehin schon bei den Worten „magische Schmiede“. Ich sah mich bereits mit einer Laute, die sich von selbst stimmt, und mit einem Hut, der bei jedem Applaus ein kleines bisschen funkelt. Und dann versprach Gundren uns auch noch eine ordentliche Belohnung. Echo beugte sich vor:"
     },
     {
      "id": "I-4014510a",
@@ -484,10 +484,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-bb37b5de",
+     "id": "I-31426109",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Das Feuer knackte. Echo lachte so laut, dass ein Ochse aufschreckte."
+     "text": "Das Feuer knackte. Echo lachte so laut, dass die Funken aus dem Feuer stoben."
     },
     {
      "id": "I-2930ec40",
@@ -600,10 +600,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-b62d9a04",
+     "id": "I-425c3e2e",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Er lachte herzhaft, als Friedrich den Ochsen ein Stopp zurief und der Wagen stehen blieb. Das Ächzen der Räder verstummte, und wir sahen alle verwundert zu Friedrich."
+     "text": "Echo lachte noch über seinen eigenen Reim, als Friedrich den Ochsen ein ‚Brrr!‘ zurief und der Wagen stehen blieb. Das Ächzen der Räder verstummte, und wir sahen alle verwundert zu Friedrich."
     },
     {
      "id": "I-797fe6a2",
@@ -719,10 +719,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-3b894818",
+     "id": "I-b5c69dc4",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Der Kampf war härter als erwartet, und das lag nicht nur an den Goblins. Wir waren uns unserer Sache so sicher, dass keiner von uns so richtig entschlossen kämpfte, und Goblins sind klein, flink und ducken sich immer genau dann, wenn man es am wenigsten gebrauchen kann. Mein erster Hieb traf einen Busch. Mein zweiter denselben Busch. Ob meine Augen dabei vom Husten tränten oder rot vor Scham waren, lasse ich an dieser Stelle offen. Ezekiels Klingen pfiffen zweimal haarscharf an einem Goblinohr vorbei, und danach starrte er auf seine Waffe, als hätte sie ihn verraten. Friedrichs Pfeile ritzten nur, einer blieb sogar im verkohlten Wagenrad stecken, Echos Zauber versengte ein paar Haare, leider vor allem seine eigenen, und die Goblins tanzten kichernd um uns herum. Erst beim dritten Anlauf, oder beim vierten, fiel der erste, und dann endlich auch der Rest. Ich will niemanden beim Namen nennen, aber an diesem Tag hat keiner von uns so richtig –"
+     "text": "Der Kampf war härter als erwartet, und das lag nicht nur an den Goblins. Wir waren uns unserer Sache viel zu sicher, und Goblins sind klein, flink und ducken sich immer genau dann, wenn man es am wenigsten gebrauchen kann. Mein erster Hieb traf einen Busch. Mein zweiter denselben Busch. Ob meine Augen dabei vom Husten tränten oder rot vor Scham waren, lasse ich an dieser Stelle offen. Ezekiels Klingen pfiffen zweimal haarscharf an einem Goblinohr vorbei, und danach starrte er auf seine Waffe, als hätte sie ihn verraten. Friedrichs Pfeile ritzten nur, einer blieb sogar im verkohlten Wagenrad stecken, Echos Zauber versengte ein paar Haare, leider vor allem seine eigenen, und die Goblins tanzten kichernd um uns herum. Erst beim dritten Anlauf, oder beim vierten, fiel der erste, und dann endlich auch der Rest. Ich will niemanden beim Namen nennen, aber an diesem Tag hat keiner von uns so richtig –"
     },
     {
      "id": "I-df11c8dc",
@@ -795,10 +795,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-6336237c",
+     "id": "I-dc62ae38",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Auf einer Lichtung ganz in der Nähe stießen wir auf ein paar weitere Goblins. Zwei hockten in ihrem Lager am Feuer, zwei andere drehten gelangweilt ihre Runden am Waldrand. Einen Plan hatten wir nicht. Wir stürmten einfach los, aber wir waren so plötzlich zwischen ihnen, dass sie aufkreischten wie erschrockene Hühner, und diesmal saß fast jeder Treffer. Echo warf ihnen eine Ladung Gift entgegen, Friedrich schoss, und Ezekiel war mit dem Dolch schon beim nächsten, bevor der sich umgedreht hatte. Den letzten schnappte ich mir selbst. Ich warf mich auf ihn, rang ihn zu Boden und setzte mich obendrauf.",
+     "text": "Auf einer Lichtung ganz in der Nähe stießen wir auf ein paar weitere Goblins. Zwei hockten in ihrem Lager am Feuer, zwei andere drehten gelangweilt ihre Runden am Waldrand. Einen Plan hatten wir nicht. Wir stürmten einfach los und waren so plötzlich zwischen ihnen, dass sie aufkreischten wie erschrockene Hühner, und diesmal saß fast jeder Treffer. Echo warf ihnen eine Ladung Gift entgegen, Friedrich schoss, und Ezekiel war mit dem Dolch schon beim nächsten, bevor der sich umgedreht hatte. Den letzten schnappte ich mir selbst. Ich warf mich auf ihn, rang ihn zu Boden und setzte mich obendrauf.",
      "geraeusch": [
       "Wald, Zweige knacken, Bach in der Ferne, Krähe"
      ]
@@ -838,10 +838,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-f1c9a60a",
+     "id": "I-ee8e3226",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Also las Echo die Spuren: Er kniete sich hin, roch an der feuchten Erde, grummelte etwas Unverständliches und stapfte los Richtung Wald, und wir hinterher, durch dichtes Unterholz, in dem jeder Dorn es auf meine gute Kleidung abgesehen hatte. Friedrich und Echo lasen den Wald auf völlig verschiedene Weise. Friedrich schaute, Echo schnüffelte. Und zu meinem Erstaunen kamen beide jedes Mal zum selben Ergebnis. Zweimal lagen Fallen auf dem Pfad, eine Schlinge und eine Grube. Ich entdeckte beide als Erster. Sagen wir: aus nächster Nähe. Friedrich klopfte mir danach auf die Schulter:"
+     "text": "Also las Echo die Spuren: Er kniete sich hin, roch an der feuchten Erde, grummelte etwas Unverständliches und stapfte los, tiefer in den Wald, und wir hinterher, durch dichtes Unterholz, in dem jeder Dorn es auf meine gute Kleidung abgesehen hatte. Friedrich und Echo lasen den Wald auf völlig verschiedene Weise. Friedrich schaute, Echo schnüffelte. Und zu meinem Erstaunen kamen beide jedes Mal zum selben Ergebnis. Zweimal lagen Fallen auf dem Pfad, eine Schlinge und eine Grube. Ich entdeckte beide als Erster. Sagen wir: aus nächster Nähe. Friedrich klopfte mir danach auf die Schulter:"
     },
     {
      "id": "I-d882b0b1",
@@ -964,10 +964,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-4c76e41c",
+     "id": "I-a93f4350",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Ich bin gern der laute Teil. Ich schritt erhobenen Hauptes in die Halle, und meine Stimme hallte von allen Wänden wider. Dort wartete er: ein größerer Goblin mit einem Ritterhelm auf dem Kopf, den er wohl jemandem geklaut hatte, und um ihn herum ein paar seiner Leute.",
+     "text": "Ich bin gern der laute Teil. Ich schritt erhobenen Hauptes in die Halle, und meine Stimme füllte die ganze Halle. Dort wartete er: ein größerer Goblin mit einem Ritterhelm auf dem Kopf, den er wohl jemandem geklaut hatte, und um ihn herum ein paar seiner Leute.",
      "geraeusch": [
       "Grollen, dann eine Stimme, die von allen Wänden widerhallt"
      ]
@@ -1437,10 +1437,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-5416e538",
+     "id": "I-39280064",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Also gingen wir runter. Bessere Ausrüstung? Nein. Ein paar Heiltränke? Nein. Ein Mann aus dem Dorf, der uns begleitet? Ein Maultier? Ein warmes Abendessen?"
+     "text": "Also gingen wir mit unseren Forderungen herunter. Bessere Ausrüstung? Nein. Ein paar Heiltränke? Nein. Ein Mann aus dem Dorf, der uns begleitet? Ein Maultier? Ein warmes Abendessen?"
     },
     {
      "id": "I-c9a4b45c",
@@ -1586,10 +1586,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-4d86a5c1",
+     "id": "I-3076cdec",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Durch halb eingestürzte, staubige Tunnel stiegen wir hinab. Wurzeln hingen von der Decke, die Luft roch nach Moder, und unsere Fackel flackerte, als wolle sie lieber umkehren. Ich stieß mir zweimal den Kopf. Ezekiel, der mich um gut zwei Köpfe überragt, kein einziges Mal. Ich weiß bis heute nicht, wie er das macht. Unter dem Anwesen öffnete sich eine Höhle. Als wir tiefer hineinschlichen, stießen wir auf die ersten drei Wachen, die vor einer Zelle standen. Eine Zelle voller Geiseln aus dem Dorf. Die anderen blieben im Dunkel. Ich trat ins Fackellicht, breitete die Arme aus und schmetterte ein Marschlied, wie ein frischer Rekrut an seinem ersten Tag:",
+     "text": "Durch halb eingestürzte, staubige Tunnel stiegen wir hinab. Wurzeln hingen von der Decke, die Luft roch nach Moder, und unsere Fackel flackerte, als wolle sie lieber umkehren. Ich stieß mir zweimal den Kopf. Ezekiel, der mich um gut zwei Köpfe überragt, kein einziges Mal. Ich weiß bis heute nicht, wie er das macht. Unter dem Anwesen öffnete sich eine Höhle. Als wir tiefer hineinschlichen, stießen wir auf die ersten drei Wachen, die vor einer Zelle standen. Eine Zelle voller Geiseln aus dem Dorf. Meine Gefährten blieben im Dunkel. Ich trat ins Fackellicht, breitete die Arme aus und schmetterte ein Marschlied, wie ein frischer Rekrut an seinem ersten Tag:",
      "geraeusch": [
       "enger Tunnel, rieselnde Erde, flackernde Fackel, gedämpfte Stimmen"
      ]
@@ -1843,10 +1843,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-2a69e3df",
+     "id": "I-d624d696",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Ich tat mein Bestes, uns nicht um Kopf und Kragen zu reden. Ich wich seinen Fragen aus, so gut es ging, und erklärte ihm, wir seien einfache Wanderer, hätten in Phandalin von den Roten Roben gehört und wollten nun unbedingt dazugehören. Mir lief der Schweiß den Rücken hinunter. Hinter mir hörte ich, wie Ezekiel seine Klinge ein Stück aus der Scheide zog. Dann, endlich, senkte er den gläsernen Stab und deutete damit zur Tür:"
+     "text": "Ich tat mein Bestes, uns nicht um Kopf und Kragen zu reden. Ich wich seinen Fragen aus, so gut es ging, und erklärte ihm, wir seien einfache Wanderer, hätten in Phandalin von den Roten Roben gehört und wollten nun unbedingt dazugehören. Mir lief der Schweiß den Rücken hinunter. Hinter mir hörte ich, wie Ezekiel seine Klinge ein Stück aus der Scheide zog. Dann, endlich, senkte Glasstab seinen Stab und deutete damit zur Tür:"
     },
     {
      "id": "I-411d6b1c",
@@ -2314,10 +2314,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-627ea706",
+     "id": "I-820103b7",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Es lief ungefähr so gut wie beim ersten Besuch. Kurz: Er wird uns so schnell nicht wieder einladen. Lange hielt es uns danach ohnehin nicht mehr in Phandalin."
+     "text": "Harbin wird uns so schnell nicht wieder einladen. Lange hielt es uns danach ohnehin nicht mehr in Phandalin."
     }
    ]
   },
@@ -2594,10 +2594,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-5332303a",
+     "id": "I-ac76ef31",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Friedrich zögerte keinen Moment. Sein Pfeil streifte den Oberschenkel der Drow, und noch während sie schmerzerfüllt aufschrie und sich ungläubig an die Wunde griff, sprang Echo vor und ließ einen Fächer aus Eis auf sie und den Goblin zuschießen. Der Goblin bekam die volle Ladung ab, die Drow konnte trotz ihres verwundeten Beins zurückweichen und bekam nur wenig ab. Raureif kroch über den Boden, und unser Atem stand plötzlich als weiße Wolke in der Luft.",
+     "text": "Friedrich zögerte keinen Moment. Sein Pfeil streifte den Oberschenkel der Drow, und noch während sie schmerzerfüllt aufschrie und sich ungläubig an die Wunde griff, sprang Echo vor und ließ einen Fächer aus Eis auf sie und den Goblin zuschießen. Der Goblin bekam die volle Ladung ab, die Drow wich trotz ihres Beins zurück, und das Eis streifte sie nur. Raureif kroch über den Boden, und unser Atem stand plötzlich als weiße Wolke in der Luft.",
      "geraeusch": [
       "Bogensehne, Schrei, eisiges Knistern"
      ]
@@ -2668,10 +2668,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-d9f77ccb",
+     "id": "I-2cea7e38",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Friedrich sprang mit einem gewaltigen Satz auf den Bugbear zu und stach sein Schwert in dessen pelzige Seite. Er musste ihn gut getroffen haben, aber trotz verwundeter Flanke schubste der Bugbear den Waldläufer von sich und wandte sich wütend wieder Echo zu, um ihn ein weiteres Mal zu attackieren. Doch da war Ezekiel schon neben ihm, wie aus dem Nichts. Zwei Dolche, einer in die bereits verwundete Flanke, einer tief in den Rücken! Der behaarte Hüne erschlaffte und fiel zu Boden."
+     "text": "Friedrich sprang mit einem gewaltigen Satz auf den Bugbear zu und stach sein Schwert in dessen pelzige Seite. Er musste ihn gut getroffen haben, aber trotz verwundeter Flanke schubste der Bugbear den Waldläufer von sich und wandte sich wütend wieder Echo zu, um ein zweites Mal zuzuschlagen. Doch da war Ezekiel schon neben ihm, wie aus dem Nichts. Zwei Dolche, einer in die bereits verwundete Flanke, einer tief in den Rücken! Der behaarte Hüne erschlaffte und fiel zu Boden."
     }
    ]
   },
@@ -3241,10 +3241,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-f7124013",
+     "id": "I-997d05fb",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Echo schüttelte sich das Fell vom Leib und stand wieder auf zwei Beinen. Im Raum neben der Festhalle wartete eine alte Bekannte: Nezna, die Drow, die uns im Wachturm als Fledermaus entwischt war. Sie saß mit zwei Söldnern beisammen, Duergar in dunklen Gewändern, und blätterte in einem Buch. Ihr Bein war verbunden. Als wir eintraten, sah sie auf, und zum ersten Mal sah ich sie wirklich überrascht:"
+     "text": "Echo schüttelte sich das Fell vom Leib und stand wieder auf zwei Beinen. Im Raum neben der Festhalle wartete eine alte Bekannte: die Drow, die uns im Wachturm als Fledermaus entwischt war. Nezna hieß sie, wie wir später noch herausfinden sollten. Sie saß mit zwei Söldnern beisammen, Duergar in dunklen Gewändern, und blätterte in einem Buch. Ihr Bein war verbunden. Als wir eintraten, sah sie auf, und zum ersten Mal sah ich sie wirklich überrascht:"
     },
     {
      "id": "I-89ec4382",
@@ -3312,10 +3312,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-85addfc5",
+     "id": "I-af9a277a",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Der letzte Söldner wehrte sich nur noch panisch. Kurz darauf lag er neben seiner Auftraggeberin auf dem kalten Höhlenboden. Friedrich kniete sich neben Nezna und sah lange auf sie hinab. Ich wusste, woran er dachte. Wir alle wussten es. Nur Echo durchsuchte ihren Gürtel nach Münzen, fand keine und knurrte:"
+     "text": "Der letzte Söldner wehrte sich nur noch panisch. Kurz darauf lag er neben seiner Auftraggeberin auf dem kalten Höhlenboden. Friedrich kniete sich neben Nezna und sah lange auf sie hinab. Ich wusste, woran er dachte: wie viele Diener diese Spinne wohl noch hatte ... und ob sie von uns wusste. Nur Echo durchsuchte ihren Gürtel nach Münzen, fand keine und knurrte:"
     },
     {
      "id": "I-d70735da",
@@ -3372,10 +3372,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-73e52ad6",
+     "id": "I-3e9e1acd",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Dabei deutete er in die Halle. Überall zwischen den Bändern standen Skelette, und kaum eines glich dem anderen. Kurze, breite mit gewaltigen Brustkörben, die wohl einmal Zwerge gewesen waren. Schlanke, hochgewachsene mit langen, feinen Gliedern, vielleicht Elfen. Ein paar in Menschengröße, und dazwischen ein riesiges, krummes Gerippe mit Hauern im Kiefer, das einmal ein Ork gewesen sein musste. Sie trugen Streitäxte und Schwerter, einige sogar Bögen. Die letzten Wächter der Schmiede."
+     "text": "Ezekiel deutete in die Halle. Überall zwischen den Bändern standen Skelette, und kaum eines glich dem anderen. Kurze, breite mit gewaltigen Brustkörben, die wohl einmal Zwerge gewesen waren. Schlanke, hochgewachsene mit langen, feinen Gliedern, vielleicht Elfen. Ein paar in Menschengröße, und dazwischen ein riesiges, krummes Gerippe mit Hauern im Kiefer, das einmal ein Ork gewesen sein musste. Sie trugen Streitäxte und Schwerter, einige sogar Bögen. Die letzten Wächter der Schmiede."
     }
    ]
   },
@@ -4063,25 +4063,12 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-5fef5b0a",
+     "id": "I-6261cb9d",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Wir schlichen durch den Turm nach oben. Stufe um Stufe, gespannt, was uns dort erwarten sollte ... Friedrich ging voran, einen Pfeil auf der Sehne. Auf dem höchsten Plateau schlug das Schicksal zu: Zuerst hörten wir nur einen kreischenden, markerschütternden Aufschrei aus dem nahen Wald,",
+     "text": "Wir schlichen durch den Turm nach oben. Stufe um Stufe, gespannt, was uns dort erwarten sollte ... Friedrich ging voran, einen Pfeil auf der Sehne. Auf dem höchsten Plateau schlug das Schicksal zu: Zuerst hörten wir nur einen kreischenden, markerschütternden Aufschrei aus dem nahen Wald, dann wurde plötzlich eine Kreatur sichtbar, die schnell auf uns zuflog und schließlich auf dem Plateau landete ... Ein junger grüner Drache, ein giftspeiendes Ungetüm mit riesigen Krallen und Zähnen, die nur darauf warteten, uns zu zerfetzen ... Seine Schuppen glänzten wie nasses Laub, um den Kopf trug er einen Kranz aus Hörnern, den Rücken entlang einen Kamm aus Stacheln, und sein Atem roch nach faulem Sumpf. Von unten aus dem Treppenhaus, wo Echo gerade an einer Schießscharte stand, brüllte es herauf:",
      "geraeusch": [
-      "enge Wendeltreppe, Schritte auf Stein, Wind pfeift durch Schießscharten"
-     ]
-    }
-   ]
-  },
-  {
-   "typ": "text",
-   "segmente": [
-    {
-     "id": "I-f4707851",
-     "rolle": "erzaehler",
-     "figur": "Erzähler",
-     "text": "dann wurde plötzlich eine Kreatur sichtbar, die schnell auf uns zuflog und schließlich auf dem Plateau landete ... Ein junger grüner Drache, ein giftspeiendes Ungetüm mit riesigen Krallen und Zähnen, die nur darauf warteten, uns zu zerfetzen ... Seine Schuppen glänzten wie nasses Laub, um den Kopf trug er einen Kranz aus Hörnern, den Rücken entlang einen Kamm aus Stacheln, und sein Atem roch nach faulem Sumpf. Von unten aus dem Treppenhaus, wo Echo gerade an einer Schießscharte stand, brüllte es herauf:",
-     "geraeusch": [
+      "enge Wendeltreppe, Schritte auf Stein, Wind pfeift durch Schießscharten",
       "markerschütternder Schrei aus dem Wald, dann mächtiger Flügelschlag, der näher kommt"
      ]
     },
@@ -4253,10 +4240,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-71533a7f",
+     "id": "I-b67c0575",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Danach gönnten wir uns eine lange Rast, und die hatten wir uns verdient. Ich lag auf dem Rücken, die Pfeife im Mund, und sah den Wolken zu. Rex hatte sich seinen Anteil an der Beute längst selbst gesichert: ein ordentliches Stück vom Schwanz des Drachen, das er ihm im Kampf abgerissen hatte. Er kaute zufrieden darauf herum. Ezekiel saß an der Brüstung und reinigte seinen Bogen. Ich setzte mich zu ihm:"
+     "text": "Danach gönnten wir uns eine lange Rast, und die hatten wir uns verdient. Ich lag auf dem Rücken, die Pfeife im Mund, und sah den Wolken zu. Rex hatte sich seinen Anteil an der Beute längst selbst gesichert: ein ordentliches Stück vom Schwanz des Drachen, das er sich nach dem Kampf eigenzähnig abgerissen hatte. Er kaute zufrieden darauf herum. Ezekiel saß an der Brüstung und reinigte seinen Bogen. Ich setzte mich zu ihm:"
     },
     {
      "id": "I-6dde3c68",
@@ -4463,10 +4450,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "I-043efa00",
+     "id": "I-810f671a",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Es roch nach Essen, und durch die offene Tür sahen wir einen köchelnden Topf, und unsere Mägen hofften schon. Dahinter stapelten sich Kräuter, Tinkturen und handschriftliche Notizen über die Tiere des Waldes. Echo nickte anerkennend und brummte:"
+     "text": "Es roch nach Essen. Durch die offene Tür sahen wir einen köchelnden Topf, und unsere Mägen hofften schon. Dahinter stapelten sich Kräuter, Tinkturen und handschriftliche Notizen über die Tiere des Waldes. Echo nickte anerkennend und brummte:"
     },
     {
      "id": "I-a4c5c604",
@@ -5120,10 +5107,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-74354da1",
+     "id": "II-f9dc8a37",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Echos Blitz traf dort, wo die Dolche versagt hatten, und brannte sich in den Panzer, während ich dem Biest eine Beleidigung entgegenschleuderte, so giftig, dass sie selbst durch seinen Panzer ging:",
+     "text": "Echos Blitz traf dort, wo die Dolche versagt hatten, und brannte sich in den Panzer, während ich dem Biest eine Beleidigung entgegenschleuderte, so giftig, dass sie selbst durch Chitin ging:",
      "geraeusch": [
       "Blitzschlag, Knistern"
      ]
@@ -5140,10 +5127,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-d5f97f89",
+     "id": "II-0b605b7f",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Das verdammte Biest stach noch einmal zu und traf Ezekiel. Er schrie auf, und ich sah das Blut spritzen, als sich der Stachel tief in sein Fleisch bohrte. Ich weiß nicht, wie er es schaffte, auf den Beinen zu bleiben. Da hielt es Rex nicht mehr bei Friedrich. Außer sich vor Wut sprang er die Chasme an und verbiss sich in ihren Panzer. Seine Zähne rutschten ab, wieder und wieder, aber er schnappte weiter wie von Sinnen, und die Chasme drehte sich nach ihm um. Genau diesen Moment nutzte Ezekiel. Er rammte seinen Dolch genau in das Auge der Bestie, und sein zweiter Angriff schnitt in den Körper der Chasme."
+     "text": "Das verdammte Biest stach noch einmal zu und traf Ezekiel. Er schrie auf, und ich sah das Blut spritzen, als sich der Stachel tief in sein Fleisch bohrte. Ich weiß nicht, wie er es schaffte, auf den Beinen zu bleiben. Da hielt es Rex nicht mehr bei Friedrich. Außer sich vor Wut sprang er die Chasme an und verbiss sich in ihren Panzer. Seine Zähne rutschten ab, wieder und wieder, aber er schnappte weiter wie von Sinnen, und die Chasme drehte sich nach ihm um. Genau diesen Moment nutzte Ezekiel. Er rammte der Bestie den Dolch ins Auge und zog die zweite Klinge quer durch ihren Leib."
     },
     {
      "id": "II-220d27ac",
@@ -5238,10 +5225,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-b7bd3451",
+     "id": "II-6b0ec64f",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Dort herrschte das absolute Chaos. Zerstörte Tische und tote Soldaten waren über den Boden verteilt, und ein geierartiger Dämon mit zerzausten, schwarzen Schwingen, einem nackten, sehnigen Hals und einem Schnabel voller Zähne, kreiste über ihnen und stürzte sich auf die übrigen Wachen. Es stank nach Blut und nassen Federn. Er stieß gerade mit einem lauten, krächzenden Aufschrei auf eine der Wachen nieder, als ich dahinter Ilvara erkannte, die Gestaltwandlerin, die uns betäubt und hierher verschleppt hatte. Von der freundlichen Großmutter war nichts mehr übrig: dunkle, fast schwarze Haut, weißes Haar, zu einem hohen Knoten gebunden, eine schwarze Rüstung voller Dornen über einem violetten Gewand und ein langer, blasser Umhang. Erkannt habe ich sie nur an der Stimme. Mit grimmigem Gesichtsausdruck schoss die Drow Pfeile auf den Dämon, der durch ihre Festung wütete, und schrie ihre Leute an:",
+     "text": "Dort herrschte das absolute Chaos. Zerstörte Tische und tote Soldaten waren über den Boden verteilt, und ein geierartiger Dämon mit zerzausten, schwarzen Schwingen, einem nackten, sehnigen Hals und einem Schnabel voller Zähne, kreiste über ihnen und stürzte sich auf die übrigen Wachen. Es stank nach Blut und nassen Federn. Er stieß gerade mit einem lauten, krächzenden Aufschrei auf eine der Wachen nieder, als ich dahinter eine Drow entdeckte. Von der freundlichen Großmutter war nichts mehr übrig: dunkle, fast schwarze Haut, weißes Haar, zu einem hohen Knoten gebunden, eine schwarze Rüstung voller Dornen über einem violetten Gewand und ein langer, blasser Umhang. Mit grimmigem Gesichtsausdruck schoss sie Pfeile auf den Dämon, der durch ihre Festung wütete. Erst als sie ihre Leute anschrie, erkannte ich die Stimme: Ilvara, die Gestaltwandlerin, die uns betäubt und hierher verschleppt hatte.",
      "geraeusch": [
       "Krächzen, Flügelschläge, Kampfgetümmel"
      ]
@@ -5320,10 +5307,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-63d8d827",
+     "id": "II-30a4ac54",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Auf der gegnerischen Seite war nur noch die Drow verblieben, und ich fing an, ihr Beleidigungen entgegenzuschmettern:"
+     "text": "Von ihren Leuten stand keiner mehr, nur sie selbst. Ich schmetterte ihr entgegen:"
     },
     {
      "id": "II-ae27d3ce",
@@ -5355,10 +5342,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-ccdfca06",
+     "id": "II-59a6f942",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Ich denke, sie hat den Ernst ihrer Lage kapiert. Sie sah den toten Vrock an, sah ihre toten Wachen an, und flüchtete. Sie rannte einfach auf das Geländer zu und sprang in den Abgrund. Im Fallen schrie sie noch:"
+     "text": "Ich denke, sie hat den Ernst ihrer Lage kapiert. Sie sah den toten Vrock an, sah ihre toten Wachen an, und rannte los, geradewegs aufs Geländer zu, und sprang in den Abgrund. Im Fallen schrie sie noch:"
     },
     {
      "id": "II-53509e3d",
@@ -6007,10 +5994,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-967f189c",
+     "id": "II-0244bc3f",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Dann ballte sich etwas Kaltes zu einer Gestalt zusammen: ein Wraith, ein Schatten mit Krallen, kälter als jedes Grab. Echo schrie:",
+     "text": "Dann zog sich ihr Schemen zusammen, wurde dunkler und kälter: ein Wraith, ein Schatten mit Krallen. Echo schrie:",
      "geraeusch": [
       "geisterhaftes, unverständliches Murmeln"
      ]
@@ -6196,10 +6183,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-81bcf824",
+     "id": "II-dc738f2f",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Er hielt die Klinge noch prüfend ins Licht, als Friedrich zu Fagas hinüberstapfte. Er kniete sich neben den kleinen Gnom und legte ihm die Hand auf den Rücken:"
+     "text": "Er hielt die Klinge noch prüfend ins Licht, als Friedrich zu Fagas hinüberstapfte. Friedrich kniete sich neben den kleinen Gnom und legte ihm die Hand auf den Rücken:"
     },
     {
      "id": "II-80fb216d",
@@ -6353,10 +6340,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-4c07c095",
+     "id": "II-3c525fd5",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Ploopploopeen wartete geduldig, und seine großen Augen wanderten von einem zum anderen. Nach einiger Diskussion stand fest: Wir vertrauen ihm. Er klatschte in seine Schwimmhände:"
+     "text": "Ploopploopeen wartete geduldig, und seine großen Augen wanderten von einem zum anderen. Am Ende stand fest: Wir vertrauten ihm. Er klatschte in seine Schwimmhände:"
     },
     {
      "id": "II-dbcf2091",
@@ -6522,10 +6509,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-e211041b",
+     "id": "II-224f6c67",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Sie zögerte keinen Augenblick. Ein verheerender Zauber brach aus ihren Händen und traf Ploopploopeen und Ezekiel, der direkt neben ihm stand, mit voller Wucht. Jeder andere wäre liegen geblieben. Ezekiel nicht. Er riss Dawnbringer hoch und schlug zu, und die Klinge riss ihr eine tiefe Wunde in den Fischleib. Es roch nach Blut und Algen. Dawnbringer leuchtete auf, nur einen Herzschlag lang, und Ezekiel stand da, blutend und aufrecht, und hinter seiner Maske glühten die Augen heller als je zuvor. Er sah auf die Klinge in seiner Hand:",
+     "text": "Sie zögerte keinen Augenblick. Ein verheerender Zauber brach aus ihren Händen und traf Ploopploopeen und Ezekiel, der direkt neben ihm stand, mit voller Wucht. Jeder andere wäre liegen geblieben. Ezekiel nicht. Er riss Dawnbringer hoch und schlug zu, und die Klinge schnitt ihr eine tiefe Wunde in den Fischleib. Es roch nach Blut und Algen. Dawnbringer leuchtete auf, nur einen Herzschlag lang, und Ezekiel stand da, blutend und aufrecht, und hinter seiner Maske glühten die Augen heller als je zuvor. Er sah auf die Klinge in seiner Hand:",
      "geraeusch": [
       "krachende Entladung, Schreie"
      ]
@@ -7032,10 +7019,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-d5b3fde7",
+     "id": "II-873a2cc3",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Lange hielten wir uns dort nicht auf, sondern steuerten geradewegs eine Taverne an und ließen es uns erst einmal richtig schmecken: Pilzbraten und schwarzes Brot. Echo und Friedrich tranken ein Bier, so dunkel und dick, dass der Löffel fast darin stehen blieb. Ich ließ mir einen Saft aus gepressten, mit Honig gesüßten Algen schmecken, und Ezekiel trank wie immer Wasser. Rex bekam unter dem Tisch mehr ab als jeder von uns. Echo sprach mit vollem Mund:",
+     "text": "Lange hielten wir uns dort nicht auf, sondern steuerten geradewegs eine Taverne an und ließen es uns erst einmal richtig schmecken: Pilzbraten und schwarzes Brot. Echo und Friedrich tranken ein Bier, so dunkel und dick, dass der Löffel fast darin stehen blieb. Ich trank einen Saft aus gepressten, mit Honig gesüßten Algen, und Ezekiel trank wie immer Wasser. Rex bekam unter dem Tisch mehr ab als jeder von uns. Echo sprach mit vollem Mund:",
      "geraeusch": [
       "Taverne, Krüge, brutzelndes Fett"
      ]
@@ -7361,10 +7348,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-03b9f34b",
+     "id": "II-7142cedd",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Wir gingen zum Markt der Klingen, dem größten Marktplatz der Stadt. Hier wurde gefeilscht, gebrüllt und betrogen, was das Zeug hielt. Bei einem standen Fläschchen in allen Farben, dazu Kräuter und getrocknete Pilze an Schnüren. Bei einem anderen hingen unzählige Waffen in Halterungen und Ständern, deren Klingen sogar im fahlen Licht der Unterwelt blitzten. Ein dritter verkaufte Musikinstrumente. Hier gab es wirklich alles!",
+     "text": "Wir gingen zum Markt der Klingen, dem größten Marktplatz der Stadt. Hier wurde gefeilscht, gebrüllt und betrogen, was das Zeug hielt. An einem Stand standen Fläschchen in allen Farben, dazu Kräuter und getrocknete Pilze an Schnüren. An einem anderen hingen unzählige Waffen in Halterungen und Ständern, deren Klingen sogar im fahlen Licht der Unterwelt blitzten. Ein dritter Händler verkaufte Musikinstrumente. Hier gab es wirklich alles!",
      "geraeusch": [
       "Marktlärm, klirrendes Glas"
      ]
@@ -7540,10 +7527,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-097a5c6f",
+     "id": "II-6a4a25c2",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Ezekiel und ich fesselten den schlafenden Riesen sofort mit einem Bootstau.",
+     "text": "Ezekiel und ich fesselten den schlafenden Riesen ohne lange zu fackeln mit einem Bootstau.",
      "geraeusch": [
       "gewaltiger Aufprall, klappernde Kellen"
      ]
@@ -8280,10 +8267,10 @@
    "typ": "text",
    "segmente": [
     {
-     "id": "II-e99e62b8",
+     "id": "II-d21899ce",
      "rolle": "erzaehler",
      "figur": "Erzähler",
-     "text": "Er behauptete, jemand habe ihm etwas zugeflüstert: Der Verdacht fiel auf einen gewissen Drokey, angeblich ein Mitglied der Grauen Geister, einer Diebesgilde aus den Slums von Gracklstugh. Genau den Slums, von denen Kardal uns gerade hatte erzählen wollen."
+     "text": "Gartokkar behauptete, jemand habe ihm etwas zugeflüstert: Der Verdacht fiel auf einen gewissen Drokey, angeblich ein Mitglied der Grauen Geister, einer Diebesgilde aus den Slums von Gracklstugh. Genau den Slums, von denen Kardal uns gerade hatte erzählen wollen."
     }
    ]
   },

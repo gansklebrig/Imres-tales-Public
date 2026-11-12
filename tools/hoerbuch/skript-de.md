@@ -38,7 +38,7 @@ Rex war ein mittelgroßer Hütehund mit dichtem, zotteligem Fell, schwarz, weiß
 
 *(Geräusch: Hund hechelt zufrieden, Schwanz klopft auf Holzplanken)*
 
-Dann ein Druide in langen weißen Gewändern, Pelz auf den Schultern und silberner Schmuck auf der Brust. Weißes Haar fiel ihm wild über die Schultern, ein weißer Bart rahmte ein hartes, grimmiges Gesicht, und an den Seiten standen spitze, rötliche Ohren ab. Und aus dem Haar wuchs ihm ein Geweih. Ein richtiges, breites Geweih wie bei einem alten Hirsch, nur dass ein Hirsch freundlicher schaut. Er sah aus, als wäre er bereit für jeden Streit, und knurrte uns an, statt sich vorzustellen. Jedenfalls klang es so:
+Dann ein Druide in langen weißen Gewändern, Pelz auf den Schultern und silberner Schmuck auf der Brust. Weißes Haar fiel ihm wild über die Schultern, ein weißer Bart rahmte ein hartes, grimmiges Gesicht, und an den Seiten standen spitze, rötliche Ohren ab. Und aus dem Haar wuchs ihm ein Geweih. Ein richtiges, breites Geweih wie bei einem alten Hirsch, nur dass ein Hirsch freundlicher schaut. Er sah aus, als wäre er bereit für jeden Streit, und knurrte seine Vorstellung mehr, als dass er sie sprach:
 
 **Echo:** „Echo. Druide. Das Geweih ist echt, und wer es anfasst, verliert einen Finger. Ich komme aus dem tiefen Wald, da redet man nicht viel. Was ich mag: Gold, Edelsteine, alles, was glänzt. Und wer mir dumm kommt, der brennt.“
 
@@ -48,11 +48,11 @@ Der Vierte, den Gundren eingeladen hatte, stand ein Stück abseits, und trotzdem
 
 **Ezekiel:** „Ezekiel. The Destroyer.“
 
+Seine Stimme klang, als käme sie von weit her: ruhig, beinahe freundlich. Und trotzdem lief es mir kalt den Rücken hinunter, wie bei einem, der fröhlich pfeift, während er ein Messer schleift.
+
 Ich beugte mich zu Friedrich hinüber und flüsterte:
 
 **Barradin:** „Ein Goliath. Ich dachte immer, die gibt es nur in Liedern. In sehr großen Liedern.“
-
-Seine Stimme klang, als käme sie von weit her: ruhig, beinahe freundlich. Und trotzdem lief es mir kalt den Rücken hinunter, wie bei einem, der fröhlich pfeift, während er ein Messer schleift.
 
 Friedrich versuchte es freundlich:
 
@@ -66,7 +66,7 @@ Ezekiel legte den Kopf ein wenig schief, fast fröhlich:
 
 Mehr kam nicht. Ein Name, ein Beiname und ein Satz, bei dem keiner von uns genauer wissen wollte, wie er gemeint war. Keine Verbeugung, nicht einmal ein Nicken. Rex legte den Kopf schief. Echo schnaubte. Und ich stand da, mit einem Lächeln, das mitten im Gesicht festgefroren war. Unser erstes Kennenlernen verlief, vorsichtig gesagt, etwas holprig. Im ersten Moment war sich keiner von uns sicher, wie wir als Gruppe zusammenpassen sollten.
 
-Gundren kam deshalb schnell zur Sache. Der schwarzbärtige Zwerg, den Bart zu zwei dicken Zöpfen geflochten und mit goldenen Ringen verziert, auf dem Kopf einen breitkrempigen Hut und an den Füßen Stiefel mit Stahlkappen, stützte seine schwieligen Hände auf ein Fass, das ihm als Tisch diente, und senkte die Stimme, obwohl ringsum nur Möwen lauschten.
+Gundren, der das Ganze bisher schweigend beobachtet hatte, kam deshalb schnell zur Sache. Der schwarzbärtige Zwerg, den Bart zu zwei dicken Zöpfen geflochten und mit goldenen Ringen verziert, auf dem Kopf einen breitkrempigen Hut und an den Füßen Stiefel mit Stahlkappen, stützte seine schwieligen Hände auf ein Fass, das ihm als Tisch diente, und senkte die Stimme, obwohl ringsum nur Möwen lauschten.
 
 **Gundren:** „In einer alten, verlassenen Mine, Freunde, liegt eine magische Schmiede. Ein vergessener Ort, an dem früher Kostbarkeiten von besonderer Macht hergestellt wurden.“
 
@@ -78,7 +78,7 @@ Einige mächtige Lords interessierten sich brennend dafür, und Gundren roch das
 
 **Gundren:** „Die feinen Herren in Neverwinter würden ihr letztes Hemd dafür geben.“
 
-Mich hatte er ohnehin schon bei den Worten „magische Schmiede“. Ich sah mich bereits mit einer Laute, die sich von selbst stimmt, und mit einem Hut, der bei jedem Applaus ein kleines bisschen funkelt. Und dann versprach Gundren uns auch noch eine stattliche Belohnung. Echo beugte sich vor:
+Mich hatte er ohnehin schon bei den Worten „magische Schmiede“. Ich sah mich bereits mit einer Laute, die sich von selbst stimmt, und mit einem Hut, der bei jedem Applaus ein kleines bisschen funkelt. Und dann versprach Gundren uns auch noch eine ordentliche Belohnung. Echo beugte sich vor:
 
 **Echo:** „Wie viel Gold?“
 
@@ -130,7 +130,7 @@ Abends am Feuer gab ich Kostproben meines Repertoires, und Ezekiel saß dabei im
 
 **Ezekiel:** „Vorbei.“
 
-Das Feuer knackte. Echo lachte so laut, dass ein Ochse aufschreckte.
+Das Feuer knackte. Echo lachte so laut, dass die Funken aus dem Feuer stoben.
 
 **Echo:** „Gib's auf, Barde. Aus dem kriegst du nicht mehr raus.“
 
@@ -158,7 +158,7 @@ Am nächsten Tag hatte ich kurz nach dem Aufbruch begonnen, ein Lied über langw
 
 **Echo:** „Dass ich nicht kotze.“
 
-Er lachte herzhaft, als Friedrich den Ochsen ein Stopp zurief und der Wagen stehen blieb. Das Ächzen der Räder verstummte, und wir sahen alle verwundert zu Friedrich.
+Echo lachte noch über seinen eigenen Reim, als Friedrich den Ochsen ein ‚Brrr!‘ zurief und der Wagen stehen blieb. Das Ächzen der Räder verstummte, und wir sahen alle verwundert zu Friedrich.
 
 *(Geräusch: Karren knarrt, plötzlich Stille, kein Vogel; dann Rascheln im Unterholz)*
 
@@ -188,7 +188,7 @@ Rex dachte nicht daran. Er schoss an Friedrich vorbei, sprang den ersten Goblin 
 
 **Echo:** „Der Große gehört mir!“
 
-Der Kampf war härter als erwartet, und das lag nicht nur an den Goblins. Wir waren uns unserer Sache so sicher, dass keiner von uns so richtig entschlossen kämpfte, und Goblins sind klein, flink und ducken sich immer genau dann, wenn man es am wenigsten gebrauchen kann. Mein erster Hieb traf einen Busch. Mein zweiter denselben Busch. Ob meine Augen dabei vom Husten tränten oder rot vor Scham waren, lasse ich an dieser Stelle offen. Ezekiels Klingen pfiffen zweimal haarscharf an einem Goblinohr vorbei, und danach starrte er auf seine Waffe, als hätte sie ihn verraten. Friedrichs Pfeile ritzten nur, einer blieb sogar im verkohlten Wagenrad stecken, Echos Zauber versengte ein paar Haare, leider vor allem seine eigenen, und die Goblins tanzten kichernd um uns herum. Erst beim dritten Anlauf, oder beim vierten, fiel der erste, und dann endlich auch der Rest. Ich will niemanden beim Namen nennen, aber an diesem Tag hat keiner von uns so richtig –
+Der Kampf war härter als erwartet, und das lag nicht nur an den Goblins. Wir waren uns unserer Sache viel zu sicher, und Goblins sind klein, flink und ducken sich immer genau dann, wenn man es am wenigsten gebrauchen kann. Mein erster Hieb traf einen Busch. Mein zweiter denselben Busch. Ob meine Augen dabei vom Husten tränten oder rot vor Scham waren, lasse ich an dieser Stelle offen. Ezekiels Klingen pfiffen zweimal haarscharf an einem Goblinohr vorbei, und danach starrte er auf seine Waffe, als hätte sie ihn verraten. Friedrichs Pfeile ritzten nur, einer blieb sogar im verkohlten Wagenrad stecken, Echos Zauber versengte ein paar Haare, leider vor allem seine eigenen, und die Goblins tanzten kichernd um uns herum. Erst beim dritten Anlauf, oder beim vierten, fiel der erste, und dann endlich auch der Rest. Ich will niemanden beim Namen nennen, aber an diesem Tag hat keiner von uns so richtig –
 
 **Friedrich:** „Vor allem du nicht.“
 
@@ -208,7 +208,7 @@ Ich wiederum wollte vor allem eine Geschichte, die sich zu erzählen lohnt. Und 
 
 *(Geräusch: Wald, Zweige knacken, Bach in der Ferne, Krähe)*
 
-Auf einer Lichtung ganz in der Nähe stießen wir auf ein paar weitere Goblins. Zwei hockten in ihrem Lager am Feuer, zwei andere drehten gelangweilt ihre Runden am Waldrand. Einen Plan hatten wir nicht. Wir stürmten einfach los, aber wir waren so plötzlich zwischen ihnen, dass sie aufkreischten wie erschrockene Hühner, und diesmal saß fast jeder Treffer. Echo warf ihnen eine Ladung Gift entgegen, Friedrich schoss, und Ezekiel war mit dem Dolch schon beim nächsten, bevor der sich umgedreht hatte. Den letzten schnappte ich mir selbst. Ich warf mich auf ihn, rang ihn zu Boden und setzte mich obendrauf.
+Auf einer Lichtung ganz in der Nähe stießen wir auf ein paar weitere Goblins. Zwei hockten in ihrem Lager am Feuer, zwei andere drehten gelangweilt ihre Runden am Waldrand. Einen Plan hatten wir nicht. Wir stürmten einfach los und waren so plötzlich zwischen ihnen, dass sie aufkreischten wie erschrockene Hühner, und diesmal saß fast jeder Treffer. Echo warf ihnen eine Ladung Gift entgegen, Friedrich schoss, und Ezekiel war mit dem Dolch schon beim nächsten, bevor der sich umgedreht hatte. Den letzten schnappte ich mir selbst. Ich warf mich auf ihn, rang ihn zu Boden und setzte mich obendrauf.
 
 **Barradin:** „So. Wo ist euer Versteck?“
 
@@ -218,7 +218,7 @@ Der Goblin spuckte nur. Ezekiel hockte sich neben ihn, ganz ruhig, fast freundli
 
 Der Goblin sagte nichts. Danach auch nicht mehr.
 
-Also las Echo die Spuren: Er kniete sich hin, roch an der feuchten Erde, grummelte etwas Unverständliches und stapfte los Richtung Wald, und wir hinterher, durch dichtes Unterholz, in dem jeder Dorn es auf meine gute Kleidung abgesehen hatte. Friedrich und Echo lasen den Wald auf völlig verschiedene Weise. Friedrich schaute, Echo schnüffelte. Und zu meinem Erstaunen kamen beide jedes Mal zum selben Ergebnis. Zweimal lagen Fallen auf dem Pfad, eine Schlinge und eine Grube. Ich entdeckte beide als Erster. Sagen wir: aus nächster Nähe. Friedrich klopfte mir danach auf die Schulter:
+Also las Echo die Spuren: Er kniete sich hin, roch an der feuchten Erde, grummelte etwas Unverständliches und stapfte los, tiefer in den Wald, und wir hinterher, durch dichtes Unterholz, in dem jeder Dorn es auf meine gute Kleidung abgesehen hatte. Friedrich und Echo lasen den Wald auf völlig verschiedene Weise. Friedrich schaute, Echo schnüffelte. Und zu meinem Erstaunen kamen beide jedes Mal zum selben Ergebnis. Zweimal lagen Fallen auf dem Pfad, eine Schlinge und eine Grube. Ich entdeckte beide als Erster. Sagen wir: aus nächster Nähe. Friedrich klopfte mir danach auf die Schulter:
 
 **Friedrich:** „Danke fürs Testen.“
 
@@ -254,7 +254,7 @@ Dann ging es hinein ins Goblinnest: Wasser tropfte von der Decke, beißender Rau
 
 *(Geräusch: Grollen, dann eine Stimme, die von allen Wänden widerhallt)*
 
-Ich bin gern der laute Teil. Ich schritt erhobenen Hauptes in die Halle, und meine Stimme hallte von allen Wänden wider. Dort wartete er: ein größerer Goblin mit einem Ritterhelm auf dem Kopf, den er wohl jemandem geklaut hatte, und um ihn herum ein paar seiner Leute.
+Ich bin gern der laute Teil. Ich schritt erhobenen Hauptes in die Halle, und meine Stimme füllte die ganze Halle. Dort wartete er: ein größerer Goblin mit einem Ritterhelm auf dem Kopf, den er wohl jemandem geklaut hatte, und um ihn herum ein paar seiner Leute.
 
 **Barradin:** „Goblin! Vor dir steht Barradin, die goldene Zunge, Bezwinger der Marktplätze! Leg die Waffe nieder und lausche meinen Worten!“
 
@@ -380,7 +380,7 @@ Danach ging es mit dem Gespräch rasch bergab. Echo legte unsere erste Forderung
 
 **Harbin:** „Selbstverständlich ... wie bitte?!“
 
-Also gingen wir runter. Bessere Ausrüstung? Nein. Ein paar Heiltränke? Nein. Ein Mann aus dem Dorf, der uns begleitet? Ein Maultier? Ein warmes Abendessen?
+Also gingen wir mit unseren Forderungen herunter. Bessere Ausrüstung? Nein. Ein paar Heiltränke? Nein. Ein Mann aus dem Dorf, der uns begleitet? Ein Maultier? Ein warmes Abendessen?
 
 **Harbin:** „Nein! Nein! Selbstverständlich NEIN!“
 
@@ -422,7 +422,7 @@ Als wir ihn wieder herausziehen wollten, entdeckten wir dahinter einen halb vers
 
 *(Geräusch: enger Tunnel, rieselnde Erde, flackernde Fackel, gedämpfte Stimmen)*
 
-Durch halb eingestürzte, staubige Tunnel stiegen wir hinab. Wurzeln hingen von der Decke, die Luft roch nach Moder, und unsere Fackel flackerte, als wolle sie lieber umkehren. Ich stieß mir zweimal den Kopf. Ezekiel, der mich um gut zwei Köpfe überragt, kein einziges Mal. Ich weiß bis heute nicht, wie er das macht. Unter dem Anwesen öffnete sich eine Höhle. Als wir tiefer hineinschlichen, stießen wir auf die ersten drei Wachen, die vor einer Zelle standen. Eine Zelle voller Geiseln aus dem Dorf. Die anderen blieben im Dunkel. Ich trat ins Fackellicht, breitete die Arme aus und schmetterte ein Marschlied, wie ein frischer Rekrut an seinem ersten Tag:
+Durch halb eingestürzte, staubige Tunnel stiegen wir hinab. Wurzeln hingen von der Decke, die Luft roch nach Moder, und unsere Fackel flackerte, als wolle sie lieber umkehren. Ich stieß mir zweimal den Kopf. Ezekiel, der mich um gut zwei Köpfe überragt, kein einziges Mal. Ich weiß bis heute nicht, wie er das macht. Unter dem Anwesen öffnete sich eine Höhle. Als wir tiefer hineinschlichen, stießen wir auf die ersten drei Wachen, die vor einer Zelle standen. Eine Zelle voller Geiseln aus dem Dorf. Meine Gefährten blieben im Dunkel. Ich trat ins Fackellicht, breitete die Arme aus und schmetterte ein Marschlied, wie ein frischer Rekrut an seinem ersten Tag:
 
 **Barradin:** „Ich bin der Neue, stark und treu, / und kenne weder Angst noch Scheu!“
 
@@ -488,7 +488,7 @@ Glasstab kniff die Augen zusammen und musterte uns, einen nach dem anderen: Echo
 
 **Barradin:** „Eben! Das sollte eine Überraschung werden.“
 
-Ich tat mein Bestes, uns nicht um Kopf und Kragen zu reden. Ich wich seinen Fragen aus, so gut es ging, und erklärte ihm, wir seien einfache Wanderer, hätten in Phandalin von den Roten Roben gehört und wollten nun unbedingt dazugehören. Mir lief der Schweiß den Rücken hinunter. Hinter mir hörte ich, wie Ezekiel seine Klinge ein Stück aus der Scheide zog. Dann, endlich, senkte er den gläsernen Stab und deutete damit zur Tür:
+Ich tat mein Bestes, uns nicht um Kopf und Kragen zu reden. Ich wich seinen Fragen aus, so gut es ging, und erklärte ihm, wir seien einfache Wanderer, hätten in Phandalin von den Roten Roben gehört und wollten nun unbedingt dazugehören. Mir lief der Schweiß den Rücken hinunter. Hinter mir hörte ich, wie Ezekiel seine Klinge ein Stück aus der Scheide zog. Dann, endlich, senkte Glasstab seinen Stab und deutete damit zur Tür:
 
 **Glasstab:** „Nun gut. Ich bin Glasstab, euer Anführer. Und jetzt raus mit euch, allesamt! Fragt die anderen nebenan, wie ihr helfen könnt!“
 
@@ -618,7 +618,7 @@ Echo begann zur Sicherheit noch einmal von vorn:
 
 **Echo:** „Eins ... zwei ...“
 
-Es lief ungefähr so gut wie beim ersten Besuch. Kurz: Er wird uns so schnell nicht wieder einladen. Lange hielt es uns danach ohnehin nicht mehr in Phandalin.
+Harbin wird uns so schnell nicht wieder einladen. Lange hielt es uns danach ohnehin nicht mehr in Phandalin.
 
 ### Erwartete Gäste
 
@@ -696,7 +696,7 @@ Und das war noch nicht alles. Nur Augenblicke später bewegte sich etwas in der 
 
 *(Geräusch: Bogensehne, Schrei, eisiges Knistern)*
 
-Friedrich zögerte keinen Moment. Sein Pfeil streifte den Oberschenkel der Drow, und noch während sie schmerzerfüllt aufschrie und sich ungläubig an die Wunde griff, sprang Echo vor und ließ einen Fächer aus Eis auf sie und den Goblin zuschießen. Der Goblin bekam die volle Ladung ab, die Drow konnte trotz ihres verwundeten Beins zurückweichen und bekam nur wenig ab. Raureif kroch über den Boden, und unser Atem stand plötzlich als weiße Wolke in der Luft.
+Friedrich zögerte keinen Moment. Sein Pfeil streifte den Oberschenkel der Drow, und noch während sie schmerzerfüllt aufschrie und sich ungläubig an die Wunde griff, sprang Echo vor und ließ einen Fächer aus Eis auf sie und den Goblin zuschießen. Der Goblin bekam die volle Ladung ab, die Drow wich trotz ihres Beins zurück, und das Eis streifte sie nur. Raureif kroch über den Boden, und unser Atem stand plötzlich als weiße Wolke in der Luft.
 
 Ich spitzte gerade meine Lippen, um der Drow ein paar Worte um die Ohren zu hauen:
 
@@ -714,7 +714,7 @@ Echo brüllte vor Schmerz und Wut:
 
 **Echo:** „Du räudiger Bettvorleger!“
 
-Friedrich sprang mit einem gewaltigen Satz auf den Bugbear zu und stach sein Schwert in dessen pelzige Seite. Er musste ihn gut getroffen haben, aber trotz verwundeter Flanke schubste der Bugbear den Waldläufer von sich und wandte sich wütend wieder Echo zu, um ihn ein weiteres Mal zu attackieren. Doch da war Ezekiel schon neben ihm, wie aus dem Nichts. Zwei Dolche, einer in die bereits verwundete Flanke, einer tief in den Rücken! Der behaarte Hüne erschlaffte und fiel zu Boden.
+Friedrich sprang mit einem gewaltigen Satz auf den Bugbear zu und stach sein Schwert in dessen pelzige Seite. Er musste ihn gut getroffen haben, aber trotz verwundeter Flanke schubste der Bugbear den Waldläufer von sich und wandte sich wütend wieder Echo zu, um ein zweites Mal zuzuschlagen. Doch da war Ezekiel schon neben ihm, wie aus dem Nichts. Zwei Dolche, einer in die bereits verwundete Flanke, einer tief in den Rücken! Der behaarte Hüne erschlaffte und fiel zu Boden.
 
 *(Geräusch: schwerer Körper schlägt auf Steinboden, Staub rieselt)*
 
@@ -872,7 +872,7 @@ Wie viele Kämpfe es dort unten insgesamt waren? Viele. Sehr viele. Mehr, als ic
 
 ... Gefühlt waren es mehr.
 
-Echo schüttelte sich das Fell vom Leib und stand wieder auf zwei Beinen. Im Raum neben der Festhalle wartete eine alte Bekannte: Nezna, die Drow, die uns im Wachturm als Fledermaus entwischt war. Sie saß mit zwei Söldnern beisammen, Duergar in dunklen Gewändern, und blätterte in einem Buch. Ihr Bein war verbunden. Als wir eintraten, sah sie auf, und zum ersten Mal sah ich sie wirklich überrascht:
+Echo schüttelte sich das Fell vom Leib und stand wieder auf zwei Beinen. Im Raum neben der Festhalle wartete eine alte Bekannte: die Drow, die uns im Wachturm als Fledermaus entwischt war. Nezna hieß sie, wie wir später noch herausfinden sollten. Sie saß mit zwei Söldnern beisammen, Duergar in dunklen Gewändern, und blätterte in einem Buch. Ihr Bein war verbunden. Als wir eintraten, sah sie auf, und zum ersten Mal sah ich sie wirklich überrascht:
 
 **Nezna:** „Ihr. Schon wieder.“
 
@@ -890,7 +890,7 @@ Dann ging es schnell. Echos Blitz schlug zwischen den beiden Söldnern ein, Frie
 
 Dann brach sie endgültig zusammen.
 
-Der letzte Söldner wehrte sich nur noch panisch. Kurz darauf lag er neben seiner Auftraggeberin auf dem kalten Höhlenboden. Friedrich kniete sich neben Nezna und sah lange auf sie hinab. Ich wusste, woran er dachte. Wir alle wussten es. Nur Echo durchsuchte ihren Gürtel nach Münzen, fand keine und knurrte:
+Der letzte Söldner wehrte sich nur noch panisch. Kurz darauf lag er neben seiner Auftraggeberin auf dem kalten Höhlenboden. Friedrich kniete sich neben Nezna und sah lange auf sie hinab. Ich wusste, woran er dachte: wie viele Diener diese Spinne wohl noch hatte ... und ob sie von uns wusste. Nur Echo durchsuchte ihren Gürtel nach Münzen, fand keine und knurrte:
 
 **Echo:** „Schon wieder Spinne. Langsam nervt die.“
 
@@ -906,7 +906,7 @@ Sie war riesig. Laufbänder aus Eisen zogen sich durch die Halle, die einst Erzb
 
 **Ezekiel:** „Noch nicht ganz.“
 
-Dabei deutete er in die Halle. Überall zwischen den Bändern standen Skelette, und kaum eines glich dem anderen. Kurze, breite mit gewaltigen Brustkörben, die wohl einmal Zwerge gewesen waren. Schlanke, hochgewachsene mit langen, feinen Gliedern, vielleicht Elfen. Ein paar in Menschengröße, und dazwischen ein riesiges, krummes Gerippe mit Hauern im Kiefer, das einmal ein Ork gewesen sein musste. Sie trugen Streitäxte und Schwerter, einige sogar Bögen. Die letzten Wächter der Schmiede.
+Ezekiel deutete in die Halle. Überall zwischen den Bändern standen Skelette, und kaum eines glich dem anderen. Kurze, breite mit gewaltigen Brustkörben, die wohl einmal Zwerge gewesen waren. Schlanke, hochgewachsene mit langen, feinen Gliedern, vielleicht Elfen. Ein paar in Menschengröße, und dazwischen ein riesiges, krummes Gerippe mit Hauern im Kiefer, das einmal ein Ork gewesen sein musste. Sie trugen Streitäxte und Schwerter, einige sogar Bögen. Die letzten Wächter der Schmiede.
 
 *(Geräusch: Bogensehnen, splitternde Knochen, Wolfsknurren)*
 
@@ -1094,11 +1094,9 @@ Donnerbaum empfing uns mit einer Stille, die mir sofort unter die Haut kroch: ei
 
 *(Geräusch: enge Wendeltreppe, Schritte auf Stein, Wind pfeift durch Schießscharten)*
 
-Wir schlichen durch den Turm nach oben. Stufe um Stufe, gespannt, was uns dort erwarten sollte ... Friedrich ging voran, einen Pfeil auf der Sehne. Auf dem höchsten Plateau schlug das Schicksal zu: Zuerst hörten wir nur einen kreischenden, markerschütternden Aufschrei aus dem nahen Wald,
-
 *(Geräusch: markerschütternder Schrei aus dem Wald, dann mächtiger Flügelschlag, der näher kommt)*
 
-dann wurde plötzlich eine Kreatur sichtbar, die schnell auf uns zuflog und schließlich auf dem Plateau landete ... Ein junger grüner Drache, ein giftspeiendes Ungetüm mit riesigen Krallen und Zähnen, die nur darauf warteten, uns zu zerfetzen ... Seine Schuppen glänzten wie nasses Laub, um den Kopf trug er einen Kranz aus Hörnern, den Rücken entlang einen Kamm aus Stacheln, und sein Atem roch nach faulem Sumpf. Von unten aus dem Treppenhaus, wo Echo gerade an einer Schießscharte stand, brüllte es herauf:
+Wir schlichen durch den Turm nach oben. Stufe um Stufe, gespannt, was uns dort erwarten sollte ... Friedrich ging voran, einen Pfeil auf der Sehne. Auf dem höchsten Plateau schlug das Schicksal zu: Zuerst hörten wir nur einen kreischenden, markerschütternden Aufschrei aus dem nahen Wald, dann wurde plötzlich eine Kreatur sichtbar, die schnell auf uns zuflog und schließlich auf dem Plateau landete ... Ein junger grüner Drache, ein giftspeiendes Ungetüm mit riesigen Krallen und Zähnen, die nur darauf warteten, uns zu zerfetzen ... Seine Schuppen glänzten wie nasses Laub, um den Kopf trug er einen Kranz aus Hörnern, den Rücken entlang einen Kamm aus Stacheln, und sein Atem roch nach faulem Sumpf. Von unten aus dem Treppenhaus, wo Echo gerade an einer Schießscharte stand, brüllte es herauf:
 
 **Echo:** „Vorsicht! Das ist ein Venomfang!“
 
@@ -1142,7 +1140,7 @@ Erst einmal: durchatmen, Wunden versorgen, Pfeife stopfen. In genau dieser Reihe
 
 **Echo:** „Der Zahn gehört mir. Und der. Und der.“
 
-Danach gönnten wir uns eine lange Rast, und die hatten wir uns verdient. Ich lag auf dem Rücken, die Pfeife im Mund, und sah den Wolken zu. Rex hatte sich seinen Anteil an der Beute längst selbst gesichert: ein ordentliches Stück vom Schwanz des Drachen, das er ihm im Kampf abgerissen hatte. Er kaute zufrieden darauf herum. Ezekiel saß an der Brüstung und reinigte seinen Bogen. Ich setzte mich zu ihm:
+Danach gönnten wir uns eine lange Rast, und die hatten wir uns verdient. Ich lag auf dem Rücken, die Pfeife im Mund, und sah den Wolken zu. Rex hatte sich seinen Anteil an der Beute längst selbst gesichert: ein ordentliches Stück vom Schwanz des Drachen, das er sich nach dem Kampf eigenzähnig abgerissen hatte. Er kaute zufrieden darauf herum. Ezekiel saß an der Brüstung und reinigte seinen Bogen. Ich setzte mich zu ihm:
 
 **Barradin:** „Verdammt guter Schuss, Ezekiel.“
 
@@ -1196,7 +1194,7 @@ Vor dem letzten Haus wartete schließlich eine alte Druidin, die sich als Ilvara
 
 **Ilvara:** „Wanderer! Ihr seht hungrig aus.“
 
-Es roch nach Essen, und durch die offene Tür sahen wir einen köchelnden Topf, und unsere Mägen hofften schon. Dahinter stapelten sich Kräuter, Tinkturen und handschriftliche Notizen über die Tiere des Waldes. Echo nickte anerkennend und brummte:
+Es roch nach Essen. Durch die offene Tür sahen wir einen köchelnden Topf, und unsere Mägen hofften schon. Dahinter stapelten sich Kräuter, Tinkturen und handschriftliche Notizen über die Tiere des Waldes. Echo nickte anerkennend und brummte:
 
 **Echo:** „Du bist also auch gerne im Wald?“
 
@@ -1370,11 +1368,11 @@ Doch die Klingen glitten am Chitinpanzer ab. Hinter ihm knisterte es schon zwisc
 
 *(Geräusch: Blitzschlag, Knistern)*
 
-Echos Blitz traf dort, wo die Dolche versagt hatten, und brannte sich in den Panzer, während ich dem Biest eine Beleidigung entgegenschleuderte, so giftig, dass sie selbst durch seinen Panzer ging:
+Echos Blitz traf dort, wo die Dolche versagt hatten, und brannte sich in den Panzer, während ich dem Biest eine Beleidigung entgegenschleuderte, so giftig, dass sie selbst durch Chitin ging:
 
 **Barradin:** „Du fettes, hässliches Mistvieh! Niemand sticht unseren Waldläufer!“
 
-Das verdammte Biest stach noch einmal zu und traf Ezekiel. Er schrie auf, und ich sah das Blut spritzen, als sich der Stachel tief in sein Fleisch bohrte. Ich weiß nicht, wie er es schaffte, auf den Beinen zu bleiben. Da hielt es Rex nicht mehr bei Friedrich. Außer sich vor Wut sprang er die Chasme an und verbiss sich in ihren Panzer. Seine Zähne rutschten ab, wieder und wieder, aber er schnappte weiter wie von Sinnen, und die Chasme drehte sich nach ihm um. Genau diesen Moment nutzte Ezekiel. Er rammte seinen Dolch genau in das Auge der Bestie, und sein zweiter Angriff schnitt in den Körper der Chasme.
+Das verdammte Biest stach noch einmal zu und traf Ezekiel. Er schrie auf, und ich sah das Blut spritzen, als sich der Stachel tief in sein Fleisch bohrte. Ich weiß nicht, wie er es schaffte, auf den Beinen zu bleiben. Da hielt es Rex nicht mehr bei Friedrich. Außer sich vor Wut sprang er die Chasme an und verbiss sich in ihren Panzer. Seine Zähne rutschten ab, wieder und wieder, aber er schnappte weiter wie von Sinnen, und die Chasme drehte sich nach ihm um. Genau diesen Moment nutzte Ezekiel. Er rammte der Bestie den Dolch ins Auge und zog die zweite Klinge quer durch ihren Leib.
 
 **Ezekiel:** „Ruhe.“
 
@@ -1400,7 +1398,7 @@ Aus dem Nebenhof drang noch immer Kampflärm. Halbwegs zusammengeflickt stiegen 
 
 *(Geräusch: Krächzen, Flügelschläge, Kampfgetümmel)*
 
-Dort herrschte das absolute Chaos. Zerstörte Tische und tote Soldaten waren über den Boden verteilt, und ein geierartiger Dämon mit zerzausten, schwarzen Schwingen, einem nackten, sehnigen Hals und einem Schnabel voller Zähne, kreiste über ihnen und stürzte sich auf die übrigen Wachen. Es stank nach Blut und nassen Federn. Er stieß gerade mit einem lauten, krächzenden Aufschrei auf eine der Wachen nieder, als ich dahinter Ilvara erkannte, die Gestaltwandlerin, die uns betäubt und hierher verschleppt hatte. Von der freundlichen Großmutter war nichts mehr übrig: dunkle, fast schwarze Haut, weißes Haar, zu einem hohen Knoten gebunden, eine schwarze Rüstung voller Dornen über einem violetten Gewand und ein langer, blasser Umhang. Erkannt habe ich sie nur an der Stimme. Mit grimmigem Gesichtsausdruck schoss die Drow Pfeile auf den Dämon, der durch ihre Festung wütete, und schrie ihre Leute an:
+Dort herrschte das absolute Chaos. Zerstörte Tische und tote Soldaten waren über den Boden verteilt, und ein geierartiger Dämon mit zerzausten, schwarzen Schwingen, einem nackten, sehnigen Hals und einem Schnabel voller Zähne, kreiste über ihnen und stürzte sich auf die übrigen Wachen. Es stank nach Blut und nassen Federn. Er stieß gerade mit einem lauten, krächzenden Aufschrei auf eine der Wachen nieder, als ich dahinter eine Drow entdeckte. Von der freundlichen Großmutter war nichts mehr übrig: dunkle, fast schwarze Haut, weißes Haar, zu einem hohen Knoten gebunden, eine schwarze Rüstung voller Dornen über einem violetten Gewand und ein langer, blasser Umhang. Mit grimmigem Gesichtsausdruck schoss sie Pfeile auf den Dämon, der durch ihre Festung wütete. Erst als sie ihre Leute anschrie, erkannte ich die Stimme: Ilvara, die Gestaltwandlerin, die uns betäubt und hierher verschleppt hatte.
 
 **Ilvara:** „Haltet die Stellung! Holt ihn runter, ihr Nichtsnutze!“
 
@@ -1420,7 +1418,7 @@ Von der Treppe aus erledigten Friedrich und Ezekiel mit gezielten Schüssen die 
 
 Ein gleißender Blitz holte ihn vom Himmel. Noch knisternd vor Spannung schlug das Geiermonster hart auf dem Boden auf, und ein paar Federn segelten langsam hinterher.
 
-Auf der gegnerischen Seite war nur noch die Drow verblieben, und ich fing an, ihr Beleidigungen entgegenzuschmettern:
+Von ihren Leuten stand keiner mehr, nur sie selbst. Ich schmetterte ihr entgegen:
 
 **Barradin:** „Ilvara, Ilvara, so tief bist du gefallen: / zwei Vögel und ein Barde bringen deine Feste zum Knallen!“
 
@@ -1430,7 +1428,7 @@ Friedrich murmelte neben mir:
 
 **Barradin:** „Ein Vogel, eine Wespe und ein Barde bringen deine Feste zum Knallen!“
 
-Ich denke, sie hat den Ernst ihrer Lage kapiert. Sie sah den toten Vrock an, sah ihre toten Wachen an, und flüchtete. Sie rannte einfach auf das Geländer zu und sprang in den Abgrund. Im Fallen schrie sie noch:
+Ich denke, sie hat den Ernst ihrer Lage kapiert. Sie sah den toten Vrock an, sah ihre toten Wachen an, und rannte los, geradewegs aufs Geländer zu, und sprang in den Abgrund. Im Fallen schrie sie noch:
 
 **Ilvara:** „Die Spinne wird euch alle kriegen!“
 
@@ -1606,7 +1604,7 @@ Zu spät. Eine geisterhafte Gestalt erschien, bleich und durchscheinend, und spr
 
 *(Geräusch: geisterhaftes, unverständliches Murmeln)*
 
-Dann ballte sich etwas Kaltes zu einer Gestalt zusammen: ein Wraith, ein Schatten mit Krallen, kälter als jedes Grab. Echo schrie:
+Dann zog sich ihr Schemen zusammen, wurde dunkler und kälter: ein Wraith, ein Schatten mit Krallen. Echo schrie:
 
 **Echo:** „Lasst euch nicht berühren! Der saugt euch das Leben aus!“
 
@@ -1652,7 +1650,7 @@ Zum ersten Mal konnte ich in Ezekiels glühenden Augen etwas lesen: Vorfreude. F
 
 Dann lachte er. Leise. Ich hatte ihn noch nie lachen hören.
 
-Er hielt die Klinge noch prüfend ins Licht, als Friedrich zu Fagas hinüberstapfte. Er kniete sich neben den kleinen Gnom und legte ihm die Hand auf den Rücken:
+Er hielt die Klinge noch prüfend ins Licht, als Friedrich zu Fagas hinüberstapfte. Friedrich kniete sich neben den kleinen Gnom und legte ihm die Hand auf den Rücken:
 
 **Friedrich:** „Mach's gut, Fagas. Wir kannten dich nur kurz. Aber vergessen werden wir dich nicht.“
 
@@ -1698,7 +1696,7 @@ Ezekiel legte die Hand an Dawnbringer.
 
 **Friedrich:** „Schau ihn dir an. Der lügt nicht.“
 
-Ploopploopeen wartete geduldig, und seine großen Augen wanderten von einem zum anderen. Nach einiger Diskussion stand fest: Wir vertrauen ihm. Er klatschte in seine Schwimmhände:
+Ploopploopeen wartete geduldig, und seine großen Augen wanderten von einem zum anderen. Am Ende stand fest: Wir vertrauten ihm. Er klatschte in seine Schwimmhände:
 
 **Ploopploopeen:** „Gut! Sehr gut! Freunde!“
 
@@ -1744,7 +1742,7 @@ Dann kreischte sie:
 
 *(Geräusch: krachende Entladung, Schreie)*
 
-Sie zögerte keinen Augenblick. Ein verheerender Zauber brach aus ihren Händen und traf Ploopploopeen und Ezekiel, der direkt neben ihm stand, mit voller Wucht. Jeder andere wäre liegen geblieben. Ezekiel nicht. Er riss Dawnbringer hoch und schlug zu, und die Klinge riss ihr eine tiefe Wunde in den Fischleib. Es roch nach Blut und Algen. Dawnbringer leuchtete auf, nur einen Herzschlag lang, und Ezekiel stand da, blutend und aufrecht, und hinter seiner Maske glühten die Augen heller als je zuvor. Er sah auf die Klinge in seiner Hand:
+Sie zögerte keinen Augenblick. Ein verheerender Zauber brach aus ihren Händen und traf Ploopploopeen und Ezekiel, der direkt neben ihm stand, mit voller Wucht. Jeder andere wäre liegen geblieben. Ezekiel nicht. Er riss Dawnbringer hoch und schlug zu, und die Klinge schnitt ihr eine tiefe Wunde in den Fischleib. Es roch nach Blut und Algen. Dawnbringer leuchtete auf, nur einen Herzschlag lang, und Ezekiel stand da, blutend und aufrecht, und hinter seiner Maske glühten die Augen heller als je zuvor. Er sah auf die Klinge in seiner Hand:
 
 **Ezekiel:** „Oh. Die ist gut.“
 
@@ -1876,7 +1874,7 @@ Dann lachte er dreckig und ging zum nächsten Stand.
 
 *(Geräusch: Taverne, Krüge, brutzelndes Fett)*
 
-Lange hielten wir uns dort nicht auf, sondern steuerten geradewegs eine Taverne an und ließen es uns erst einmal richtig schmecken: Pilzbraten und schwarzes Brot. Echo und Friedrich tranken ein Bier, so dunkel und dick, dass der Löffel fast darin stehen blieb. Ich ließ mir einen Saft aus gepressten, mit Honig gesüßten Algen schmecken, und Ezekiel trank wie immer Wasser. Rex bekam unter dem Tisch mehr ab als jeder von uns. Echo sprach mit vollem Mund:
+Lange hielten wir uns dort nicht auf, sondern steuerten geradewegs eine Taverne an und ließen es uns erst einmal richtig schmecken: Pilzbraten und schwarzes Brot. Echo und Friedrich tranken ein Bier, so dunkel und dick, dass der Löffel fast darin stehen blieb. Ich trank einen Saft aus gepressten, mit Honig gesüßten Algen, und Ezekiel trank wie immer Wasser. Rex bekam unter dem Tisch mehr ab als jeder von uns. Echo sprach mit vollem Mund:
 
 **Echo:** „Was auch immer das ist ... noch eins.“
 
@@ -1962,7 +1960,7 @@ Was tut eine Heldengruppe in einer fremden Stadt? Richtig: einkaufen.
 
 *(Geräusch: Marktlärm, klirrendes Glas)*
 
-Wir gingen zum Markt der Klingen, dem größten Marktplatz der Stadt. Hier wurde gefeilscht, gebrüllt und betrogen, was das Zeug hielt. Bei einem standen Fläschchen in allen Farben, dazu Kräuter und getrocknete Pilze an Schnüren. Bei einem anderen hingen unzählige Waffen in Halterungen und Ständern, deren Klingen sogar im fahlen Licht der Unterwelt blitzten. Ein dritter verkaufte Musikinstrumente. Hier gab es wirklich alles!
+Wir gingen zum Markt der Klingen, dem größten Marktplatz der Stadt. Hier wurde gefeilscht, gebrüllt und betrogen, was das Zeug hielt. An einem Stand standen Fläschchen in allen Farben, dazu Kräuter und getrocknete Pilze an Schnüren. An einem anderen hingen unzählige Waffen in Halterungen und Ständern, deren Klingen sogar im fahlen Licht der Unterwelt blitzten. Ein dritter Händler verkaufte Musikinstrumente. Hier gab es wirklich alles!
 
 Wir deckten uns mit Heiltränken ein, und ich erstand eine Flöte der Illusionen. Echo und Friedrich kauften ein paar Zaubertränke. Ich hatte die Flöte kaum in der Hand, da kam schon Friedrich:
 
@@ -2010,7 +2008,7 @@ Der Riese brüllte und schlug zweimal nach uns. Mich streifte er nur, aber selbs
 
 *(Geräusch: gewaltiger Aufprall, klappernde Kellen)*
 
-Ezekiel und ich fesselten den schlafenden Riesen sofort mit einem Bootstau.
+Ezekiel und ich fesselten den schlafenden Riesen ohne lange zu fackeln mit einem Bootstau.
 
 Kurz darauf bebte der Boden erneut, und schon erschien ein zweiter Riese. Echo hob bereits die Hände, doch dieser Riese kniete sich hin, ganz langsam, damit er niemanden zertrat:
 
@@ -2210,7 +2208,7 @@ Echo pfiff leise durch die Zähne.
 
 **Echo:** „Respekt.“
 
-Er behauptete, jemand habe ihm etwas zugeflüstert: Der Verdacht fiel auf einen gewissen Drokey, angeblich ein Mitglied der Grauen Geister, einer Diebesgilde aus den Slums von Gracklstugh. Genau den Slums, von denen Kardal uns gerade hatte erzählen wollen.
+Gartokkar behauptete, jemand habe ihm etwas zugeflüstert: Der Verdacht fiel auf einen gewissen Drokey, angeblich ein Mitglied der Grauen Geister, einer Diebesgilde aus den Slums von Gracklstugh. Genau den Slums, von denen Kardal uns gerade hatte erzählen wollen.
 
 Dann drückte er uns noch ein Abzeichen in die Hand, zum Beweis, dass wir im Namen der Flamme handeln: eine faustgroße Goldmünze mit einem Drachenkopf darauf.
 

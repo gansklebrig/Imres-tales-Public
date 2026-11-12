@@ -3802,5 +3802,141 @@
  "II-b6ec97df": {
   "t": "[relieved] Erst als wir die Halle des Drachen wieder verließen und vor dem Ausgang auf Gartokkar trafen, rückte er mit der Sprache heraus. [hushed] Er sah sich um, als könnten die Wände zuhören:",
   "p": 1.2
+ },
+ "I-f7c78da1": {
+  "t": "[curious] Dann ein Druide in langen weißen Gewändern, Pelz auf den Schultern und silberner Schmuck auf der Brust. Weißes Haar fiel ihm wild über die Schultern, ein weißer Bart rahmte ein hartes, grimmiges Gesicht, und an den Seiten standen spitze, rötliche Ohren ab. Und aus dem Haar wuchs ihm ein Geweih. Ein richtiges, breites Geweih wie bei einem alten Hirsch, nur dass ein Hirsch freundlicher schaut. Er sah aus, als wäre er bereit für jeden Streit, und knurrte seine Vorstellung mehr, als dass er sie sprach:",
+  "p": 1.0
+ },
+ "I-1e155d07": {
+  "t": "[warmly] Gundren, der das Ganze bisher schweigend beobachtet hatte, kam deshalb schnell zur Sache. Der schwarzbärtige Zwerg, den Bart zu zwei dicken Zöpfen geflochten und mit goldenen Ringen verziert, auf dem Kopf einen breitkrempigen Hut und an den Füßen Stiefel mit Stahlkappen, stützte seine schwieligen Hände auf ein Fass, das ihm als Tisch diente, und senkte die Stimme, obwohl ringsum nur Möwen lauschten.",
+  "p": 0.0
+ },
+ "I-07bc8f9b": {
+  "t": "[excited] Mich hatte er ohnehin schon bei den Worten „magische Schmiede“. [wistful] Ich sah mich bereits mit einer Laute, die sich von selbst stimmt, und mit einem Hut, der bei jedem Applaus ein kleines bisschen funkelt. [warmly] Und dann versprach Gundren uns auch noch eine ordentliche Belohnung. Echo beugte sich vor:",
+  "p": 0.0
+ },
+ "I-31426109": {
+  "t": "[quietly] Das Feuer knackte. [amused] Echo lachte so laut, dass die Funken aus dem Feuer stoben.",
+  "p": 0.0
+ },
+ "I-425c3e2e": {
+  "t": "[amused] Echo lachte noch über seinen eigenen Reim, als Friedrich den Ochsen ein ‚Brrr!‘ zurief und der Wagen stehen blieb. [quietly] Das Ächzen der Räder verstummte, und wir sahen alle verwundert zu Friedrich.",
+  "p": 0.0
+ },
+ "I-b5c69dc4": {
+  "t": "[sheepish] Der Kampf war härter als erwartet, und das lag nicht nur an den Goblins. [dryly] Wir waren uns unserer Sache viel zu sicher, und Goblins sind klein, flink und ducken sich immer genau dann, wenn man es am wenigsten gebrauchen kann. Mein erster Hieb traf einen Busch. Mein zweiter denselben Busch. Ob meine Augen dabei vom Husten tränten oder rot vor Scham waren, lasse ich an dieser Stelle offen. Ezekiels Klingen pfiffen zweimal haarscharf an einem Goblinohr vorbei, und danach starrte er auf seine Waffe, als hätte sie ihn verraten. Friedrichs Pfeile ritzten nur, einer blieb sogar im verkohlten Wagenrad stecken, Echos Zauber versengte ein paar Haare, leider vor allem seine eigenen, und die Goblins tanzten kichernd um uns herum. Erst beim dritten Anlauf, oder beim vierten, fiel der erste, und dann endlich auch der Rest. Ich will niemanden beim Namen nennen, aber an diesem Tag hat keiner von uns so richtig –",
+  "p": 0.6
+ },
+ "I-dc62ae38": {
+  "t": "[warmly] Auf einer Lichtung ganz in der Nähe stießen wir auf ein paar weitere Goblins. Zwei hockten in ihrem Lager am Feuer, zwei andere drehten gelangweilt ihre Runden am Waldrand. Einen Plan hatten wir nicht. Wir stürmten einfach los und waren so plötzlich zwischen ihnen, dass sie aufkreischten wie erschrockene Hühner, und diesmal saß fast jeder Treffer. Echo warf ihnen eine Ladung Gift entgegen, Friedrich schoss, und Ezekiel war mit dem Dolch schon beim nächsten, bevor der sich umgedreht hatte. Den letzten schnappte ich mir selbst. Ich warf mich auf ihn, rang ihn zu Boden und setzte mich obendrauf.",
+  "p": 0.0
+ },
+ "I-ee8e3226": {
+  "t": "[curious] Also las Echo die Spuren: Er kniete sich hin, roch an der feuchten Erde, grummelte etwas Unverständliches und stapfte los, tiefer in den Wald, und wir hinterher, durch dichtes Unterholz, in dem jeder Dorn es auf meine gute Kleidung abgesehen hatte. Friedrich und Echo lasen den Wald auf völlig verschiedene Weise. Friedrich schaute, Echo schnüffelte. Und zu meinem Erstaunen kamen beide jedes Mal zum selben Ergebnis. [proudly] Zweimal lagen Fallen auf dem Pfad, eine Schlinge und eine Grube. Ich entdeckte beide als Erster. [short pause] [dryly] Sagen wir: aus nächster Nähe. Friedrich klopfte mir danach auf die Schulter:",
+  "p": 0.0
+ },
+ "I-a93f4350": {
+  "t": "[proudly] Ich bin gern der laute Teil. Ich schritt erhobenen Hauptes in die Halle, und meine Stimme füllte die ganze Halle. Dort wartete er: ein größerer Goblin mit einem Ritterhelm auf dem Kopf, den er wohl jemandem geklaut hatte, und um ihn herum ein paar seiner Leute.",
+  "p": 1.0
+ },
+ "I-39280064": {
+  "t": "[dryly] Also gingen wir mit unseren Forderungen herunter. Bessere Ausrüstung? Nein. Ein paar Heiltränke? Nein. Ein Mann aus dem Dorf, der uns begleitet? Ein Maultier? Ein warmes Abendessen?",
+  "p": 0.0
+ },
+ "I-3076cdec": {
+  "t": "[hushed] Durch halb eingestürzte, staubige Tunnel stiegen wir hinab. Wurzeln hingen von der Decke, die Luft roch nach Moder, und unsere Fackel flackerte, als wolle sie lieber umkehren. [dryly] Ich stieß mir zweimal den Kopf. Ezekiel, der mich um gut zwei Köpfe überragt, kein einziges Mal. Ich weiß bis heute nicht, wie er das macht. [quietly] Unter dem Anwesen öffnete sich eine Höhle. Als wir tiefer hineinschlichen, stießen wir auf die ersten drei Wachen, die vor einer Zelle standen. Eine Zelle voller Geiseln aus dem Dorf. Meine Gefährten blieben im Dunkel. Ich trat ins Fackellicht, breitete die Arme aus und schmetterte ein Marschlied, wie ein frischer Rekrut an seinem ersten Tag:",
+  "p": 1.0
+ },
+ "I-d624d696": {
+  "t": "[nervous] Ich tat mein Bestes, uns nicht um Kopf und Kragen zu reden. Ich wich seinen Fragen aus, so gut es ging, und erklärte ihm, wir seien einfache Wanderer, hätten in Phandalin von den Roten Roben gehört und wollten nun unbedingt dazugehören. Mir lief der Schweiß den Rücken hinunter. Hinter mir hörte ich, wie Ezekiel seine Klinge ein Stück aus der Scheide zog. Dann, endlich, senkte Glasstab seinen Stab und deutete damit zur Tür:",
+  "p": 0.6
+ },
+ "I-820103b7": {
+  "t": "[dryly] Harbin wird uns so schnell nicht wieder einladen. [wistful] Lange hielt es uns danach ohnehin nicht mehr in Phandalin.",
+  "p": 0.0
+ },
+ "I-ac76ef31": {
+  "t": "[quickly] Friedrich zögerte keinen Moment. Sein Pfeil streifte den Oberschenkel der Drow, und noch während sie schmerzerfüllt aufschrie und sich ungläubig an die Wunde griff, sprang Echo vor und ließ einen Fächer aus Eis auf sie und den Goblin zuschießen. Der Goblin bekam die volle Ladung ab, die Drow wich trotz ihres Beins zurück, und das Eis streifte sie nur. [awed] Raureif kroch über den Boden, und unser Atem stand plötzlich als weiße Wolke in der Luft.",
+  "p": 1.0
+ },
+ "I-2cea7e38": {
+  "t": "[dramatic] Friedrich sprang mit einem gewaltigen Satz auf den Bugbear zu und stach sein Schwert in dessen pelzige Seite. Er musste ihn gut getroffen haben, aber trotz verwundeter Flanke schubste der Bugbear den Waldläufer von sich und wandte sich wütend wieder Echo zu, um ein zweites Mal zuzuschlagen. [hushed] Doch da war Ezekiel schon neben ihm, wie aus dem Nichts. [dramatic] Zwei Dolche, einer in die bereits verwundete Flanke, einer tief in den Rücken! [slowly] Der behaarte Hüne erschlaffte und fiel zu Boden.",
+  "p": 0.0
+ },
+ "I-997d05fb": {
+  "t": "[hushed] Echo schüttelte sich das Fell vom Leib und stand wieder auf zwei Beinen. Im Raum neben der Festhalle wartete eine alte Bekannte: die Drow, die uns im Wachturm als Fledermaus entwischt war. Nezna hieß sie, wie wir später noch herausfinden sollten. Sie saß mit zwei Söldnern beisammen, Duergar in dunklen Gewändern, und blätterte in einem Buch. Ihr Bein war verbunden. Als wir eintraten, sah sie auf, und zum ersten Mal sah ich sie wirklich überrascht:",
+  "p": 0.0
+ },
+ "I-af9a277a": {
+  "t": "[serious] Der letzte Söldner wehrte sich nur noch panisch. Kurz darauf lag er neben seiner Auftraggeberin auf dem kalten Höhlenboden. [quietly] Friedrich kniete sich neben Nezna und sah lange auf sie hinab. Ich wusste, woran er dachte: wie viele Diener diese Spinne wohl noch hatte ... und ob sie von uns wusste. Nur Echo durchsuchte ihren Gürtel nach Münzen, fand keine und knurrte:",
+  "p": 0.0
+ },
+ "I-3e9e1acd": {
+  "t": "[serious] Ezekiel deutete in die Halle. Überall zwischen den Bändern standen Skelette, und kaum eines glich dem anderen. Kurze, breite mit gewaltigen Brustkörben, die wohl einmal Zwerge gewesen waren. Schlanke, hochgewachsene mit langen, feinen Gliedern, vielleicht Elfen. Ein paar in Menschengröße, und dazwischen ein riesiges, krummes Gerippe mit Hauern im Kiefer, das einmal ein Ork gewesen sein musste. Sie trugen Streitäxte und Schwerter, einige sogar Bögen. Die letzten Wächter der Schmiede.",
+  "p": 0.0
+ },
+ "I-6261cb9d": {
+  "t": "[dramatic] Wir schlichen durch den Turm nach oben. Stufe um Stufe, gespannt, was uns dort erwarten sollte ... Friedrich ging voran, einen Pfeil auf der Sehne. Auf dem höchsten Plateau schlug das Schicksal zu: [dramatic] Zuerst hörten wir nur einen kreischenden, markerschütternden Aufschrei aus dem nahen Wald, dann wurde plötzlich eine Kreatur sichtbar, die schnell auf uns zuflog und schließlich auf dem Plateau landete ... Ein junger grüner Drache, ein giftspeiendes Ungetüm mit riesigen Krallen und Zähnen, die nur darauf warteten, uns zu zerfetzen ... Seine Schuppen glänzten wie nasses Laub, um den Kopf trug er einen Kranz aus Hörnern, den Rücken entlang einen Kamm aus Stacheln, und sein Atem roch nach faulem Sumpf. Von unten aus dem Treppenhaus, wo Echo gerade an einer Schießscharte stand, brüllte es herauf:",
+  "p": 1.0
+ },
+ "I-b67c0575": {
+  "t": "[warmly] Danach gönnten wir uns eine lange Rast, und die hatten wir uns verdient. Ich lag auf dem Rücken, die Pfeife im Mund, und sah den Wolken zu. Rex hatte sich seinen Anteil an der Beute längst selbst gesichert: ein ordentliches Stück vom Schwanz des Drachen, das er sich nach dem Kampf eigenzähnig abgerissen hatte. Er kaute zufrieden darauf herum. [quietly] Ezekiel saß an der Brüstung und reinigte seinen Bogen. Ich setzte mich zu ihm:",
+  "p": 0.0
+ },
+ "I-810f671a": {
+  "t": "[warmly] Es roch nach Essen. Durch die offene Tür sahen wir einen köchelnden Topf, und unsere Mägen hofften schon. Dahinter stapelten sich Kräuter, Tinkturen und handschriftliche Notizen über die Tiere des Waldes. Echo nickte anerkennend und brummte:",
+  "p": 0.0
+ },
+ "II-f9dc8a37": {
+  "t": "[angry] Echos Blitz traf dort, wo die Dolche versagt hatten, und brannte sich in den Panzer, während ich dem Biest eine Beleidigung entgegenschleuderte, so giftig, dass sie selbst durch Chitin ging:",
+  "p": 1.0
+ },
+ "II-0b605b7f": {
+  "t": "[dramatic] Das verdammte Biest stach noch einmal zu und traf Ezekiel. Er schrie auf, und ich sah das Blut spritzen, als sich der Stachel tief in sein Fleisch bohrte. [awed] Ich weiß nicht, wie er es schaffte, auf den Beinen zu bleiben. Da hielt es Rex nicht mehr bei Friedrich. Außer sich vor Wut sprang er die Chasme an und verbiss sich in ihren Panzer. Seine Zähne rutschten ab, wieder und wieder, aber er schnappte weiter wie von Sinnen, und die Chasme drehte sich nach ihm um. Genau diesen Moment nutzte Ezekiel. Er rammte der Bestie den Dolch ins Auge und zog die zweite Klinge quer durch ihren Leib.",
+  "p": 0.0
+ },
+ "II-6b0ec64f": {
+  "t": "[dramatic] Dort herrschte das absolute Chaos. Zerstörte Tische und tote Soldaten waren über den Boden verteilt, und ein geierartiger Dämon mit zerzausten, schwarzen Schwingen, einem nackten, sehnigen Hals und einem Schnabel voller Zähne, kreiste über ihnen und stürzte sich auf die übrigen Wachen. [serious] Es stank nach Blut und nassen Federn. Er stieß gerade mit einem lauten, krächzenden Aufschrei auf eine der Wachen nieder, als ich dahinter eine Drow entdeckte. Von der freundlichen Großmutter war nichts mehr übrig: dunkle, fast schwarze Haut, weißes Haar, zu einem hohen Knoten gebunden, eine schwarze Rüstung voller Dornen über einem violetten Gewand und ein langer, blasser Umhang. Mit grimmigem Gesichtsausdruck schoss sie Pfeile auf den Dämon, der durch ihre Festung wütete. Erst als sie ihre Leute anschrie, erkannte ich die Stimme: Ilvara, die Gestaltwandlerin, die uns betäubt und hierher verschleppt hatte.",
+  "p": 1.0
+ },
+ "II-30a4ac54": {
+  "t": "[smug] Von ihren Leuten stand keiner mehr, nur sie selbst. Ich schmetterte ihr entgegen:",
+  "p": 0.0
+ },
+ "II-59a6f942": {
+  "t": "[smug] Ich denke, sie hat den Ernst ihrer Lage kapiert. Sie sah den toten Vrock an, sah ihre toten Wachen an, und rannte los, geradewegs aufs Geländer zu, und sprang in den Abgrund. Im Fallen schrie sie noch:",
+  "p": 0.0
+ },
+ "II-0244bc3f": {
+  "t": "[scared] Dann zog sich ihr Schemen zusammen, wurde dunkler und kälter: ein Wraith, ein Schatten mit Krallen. [quickly] Echo schrie:",
+  "p": 1.0
+ },
+ "II-dc738f2f": {
+  "t": "[sad] Er hielt die Klinge noch prüfend ins Licht, als Friedrich zu Fagas hinüberstapfte. Friedrich kniete sich neben den kleinen Gnom und legte ihm die Hand auf den Rücken:",
+  "p": 0.0
+ },
+ "II-3c525fd5": {
+  "t": "[amused] Ploopploopeen wartete geduldig, und seine großen Augen wanderten von einem zum anderen. Am Ende stand fest: Wir vertrauten ihm. [warmly] Er klatschte in seine Schwimmhände:",
+  "p": 0.0
+ },
+ "II-224f6c67": {
+  "t": "[dramatic] Sie zögerte keinen Augenblick. Ein verheerender Zauber brach aus ihren Händen und traf Ploopploopeen und Ezekiel, der direkt neben ihm stand, mit voller Wucht. Jeder andere wäre liegen geblieben. Ezekiel nicht. Er riss Dawnbringer hoch und schlug zu, und die Klinge schnitt ihr eine tiefe Wunde in den Fischleib. Es roch nach Blut und Algen. Dawnbringer leuchtete auf, nur einen Herzschlag lang, und Ezekiel stand da, blutend und aufrecht, und hinter seiner Maske glühten die Augen heller als je zuvor. Er sah auf die Klinge in seiner Hand:",
+  "p": 1.0
+ },
+ "II-873a2cc3": {
+  "t": "[warmly] Lange hielten wir uns dort nicht auf, sondern steuerten geradewegs eine Taverne an und ließen es uns erst einmal richtig schmecken: Pilzbraten und schwarzes Brot. [amused] Echo und Friedrich tranken ein Bier, so dunkel und dick, dass der Löffel fast darin stehen blieb. Ich trank einen Saft aus gepressten, mit Honig gesüßten Algen, und Ezekiel trank wie immer Wasser. [warmly] Rex bekam unter dem Tisch mehr ab als jeder von uns. Echo sprach mit vollem Mund:",
+  "p": 1.0
+ },
+ "II-7142cedd": {
+  "t": "[enthusiastic] Wir gingen zum Markt der Klingen, dem größten Marktplatz der Stadt. Hier wurde gefeilscht, gebrüllt und betrogen, was das Zeug hielt. An einem Stand standen Fläschchen in allen Farben, dazu Kräuter und getrocknete Pilze an Schnüren. [awed] An einem anderen hingen unzählige Waffen in Halterungen und Ständern, deren Klingen sogar im fahlen Licht der Unterwelt blitzten. [excited] Ein dritter Händler verkaufte Musikinstrumente. Hier gab es wirklich alles!",
+  "p": 1.2
+ },
+ "II-6a4a25c2": {
+  "t": "[quickly] Ezekiel und ich fesselten den schlafenden Riesen ohne lange zu fackeln mit einem Bootstau.",
+  "p": 1.0
+ },
+ "II-d21899ce": {
+  "t": "[serious] Gartokkar behauptete, jemand habe ihm etwas zugeflüstert: Der Verdacht fiel auf einen gewissen Drokey, angeblich ein Mitglied der Grauen Geister, einer Diebesgilde aus den Slums von Gracklstugh. [curious] Genau den Slums, von denen Kardal uns gerade hatte erzählen wollen.",
+  "p": 0.9
  }
 }

@@ -35,7 +35,9 @@ BUEHNE = re.compile(r"\*[^*]+\*")   # *hust* u. Ä.: Bühnenwörter im Skript, i
 def klar(s): return re.sub(r"\s+", " ", TAG.sub(" ", BUEHNE.sub(" ", s)).replace(" / ", " ")).strip()
 def sprechtext(t):
     """Text für die Sprachausgabe: Verszeilen („ / “) als Zeilenumbruch, damit jede Zeile ihren Reim am Ende betont."""
-    return re.sub(r"\s*/\s+", "\n", t)
+    t = re.sub(r"\s*/\s+", "\n", t)
+    # „Echo“ (Name des Druiden) deutsch sprechen: [ˈɛço], nicht englisch [ˈɛkoʊ] – vor allem in der Anrede und im Genitiv
+    return re.sub(r"\bEcho(s?)\b", r"Ächo\1", t)
 def verse(t): return [v for v in klar(t.replace(" / ", " |V| ")).split(" |V| ") if v] if " / " in t else []
 def vergleich(s):
     s = klar(s).replace("…", "...").replace("–", "-")
