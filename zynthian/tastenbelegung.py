@@ -6,7 +6,7 @@ Gespeichert wird, welche Funktion auf welcher Taste liegt: {"dj": {"REC": "STOP"
 (echte Taste → Funktion; nur was vom Standard abweicht). Umbelegen = zwei Tasten tauschen,
 so ist jede Funktion immer genau einmal erreichbar. ALT- und Halten-Belegungen wandern mit.
 
-Kopie aus ZynSimple (dj/tastenbelegung.py) – beide lesen dieselbe Datei.
+Dieselbe Datei liest auch Barden Beats (zynthian/tastenbelegung.py dort ist eine Kopie).
 """
 import json
 import os
@@ -58,12 +58,12 @@ FUNKTIONEN = {
         "ZS3": ("große Bibliothek", "", ""),
         "ALT": ("zweite Belegung (halten)", "", ""),
         "TEMPO": ("Tempo tippen", "Sync", ""),
-        "PAD": ("Handpan im Mix an/aus", "", ""),
+        "PAD": ("Handpan im Mix an/aus", "Auto-DJ an/aus", ""),
         "F1": ("Stem/Loop/Handpan 1", "Deck B", ""), "F2": ("Stem/Loop/Effekt 2", "Deck B", ""),
         "F3": ("Stem/Loop/Effekt 3", "Deck B", ""), "F4": ("Stem/Loop/Durchsage 4", "Deck B", ""),
         "REC": ("Set aufnehmen", "", ""),
-        "STOP": ("Panik (Effekte, Filter aus)", "", "ausschalten (3 s)"),
-        "PLAY": ("Auto-DJ an/aus", "", ""),
+        "STOP": ("Panik (Effekte, Filter aus)", "", ""),
+        "PLAY": ("Deck A ▶ / ❚❚", "Deck B ▶ / ❚❚", ""),
         "UP": ("Titel hoch", "★ +1", ""), "DOWN": ("Titel runter", "★ −1", ""),
         "LEFT": ("Bereich links", "Ebene zurück", ""), "RIGHT": ("Bereich rechts", "Ebene vor", ""),
         "SEL": ("Titel ins freie Deck laden", "", ""),
