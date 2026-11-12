@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>Barden Beats – Spieler-Klänge</title>
+<meta name="theme-color" content="#120e18">
+<style>
+:root{--bg:#120e18;--panel:#1d1726;--panel2:#261d31;--line:#3a2f45;--ink:#ebe2cc;--mute:#a89f8f;--gold:#e0a046;--gold2:#ffd98a;--h:#ffc830}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:600 16px/1.3 system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100%}
+body{padding:calc(14px + env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto;user-select:none}
+header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+header .logo{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);flex:1}
+header button{font:700 13px system-ui,sans-serif;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px 11px}
+h1{font-size:22px;margin:4px 0 4px}
+p.sub{color:var(--mute);font-size:14px;margin:0 0 14px;font-weight:500}
+.helden{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.held{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 8px 14px;border-radius:16px;border:1.5px solid color-mix(in srgb,var(--h) 40%,var(--line));
+  background:radial-gradient(120% 90% at 50% 10%,color-mix(in srgb,var(--h) 20%,#241c2e),#17121f 75%);color:var(--ink);font:inherit;cursor:pointer}
+.held:active{transform:scale(.97)}
+.med{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:32px;
+  background:radial-gradient(circle at 36% 30%,color-mix(in srgb,var(--h) 65%,#fff4dc 8%),color-mix(in srgb,var(--h) 30%,#1a1422) 74%);
+  box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--h) 60%,#fff4dc 25%),0 3px 10px rgba(0,0,0,.45)}
+.held b{font-size:17px}.held small{color:var(--mute);font-weight:500;font-size:12.5px}
+.kopf{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:16px;margin-bottom:12px;border:1.5px solid color-mix(in srgb,var(--h) 45%,var(--line));
+  background:radial-gradient(140% 120% at 0% 0%,color-mix(in srgb,var(--h) 22%,#241c2e),#17121f 70%)}
+.kopf .med{width:52px;height:52px;font-size:26px}.kopf div{flex:1}.kopf b{display:block;font-size:19px}.kopf small{color:var(--mute);font-weight:500}
+.brett{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.k{position:relative;overflow:hidden;min-height:92px;border-radius:16px;border:1.5px solid color-mix(in srgb,var(--h) 30%,var(--line));background:linear-gradient(180deg,#221a2c,#18121f);
+  color:var(--ink);font:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px 6px;cursor:pointer;touch-action:manipulation}
+.k .e{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:24px;
+  background:radial-gradient(circle at 36% 30%,color-mix(in srgb,var(--h) 55%,#fff4dc 6%),color-mix(in srgb,var(--h) 25%,#1a1422) 74%);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--h) 55%,#fff4dc 20%)}
+.k span{font-size:15px;text-align:center}
+.k::after{content:"";position:absolute;left:0;bottom:0;height:4px;width:0;background:var(--h);opacity:.9}
+.k.los{border-color:var(--h);box-shadow:0 0 18px color-mix(in srgb,var(--h) 55%,transparent)}
+.k.los::after{animation:abkling 1s linear forwards}
+@keyframes abkling{from{width:100%}to{width:0}}
+.k.zu{animation:wackel .3s}
+@keyframes wackel{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.hinweis{margin-top:16px;color:var(--mute);font-size:13px;text-align:center;font-weight:500}
+.weg{display:none;margin:0 0 12px;padding:10px 12px;border-radius:12px;background:#3a1c22;border:1px solid #e0445e;color:#ffd0d6;font-size:14px}
+.weg.an{display:block}
+</style></head>
+<body>
+<header><span class="logo">🎻 Barden Beats</span><button type="button" id="wechsel" hidden>Held wechseln</button></header>
+<div class="weg" id="weg">Das Pult ist gerade nicht erreichbar – gleiches WLAN? Läuft Barden Beats?</div>
+<main id="inhalt"></main>
+<p class="hinweis" id="fuss">Die Klänge kommen über das Pult und mischen sich in die Musik.</p>
+<script>
+"use strict";
+/* Jeder Held hat acht Klänge. Effekt-Namen sind die der Bühne; „riff:…“ spielt eine kleine Melodie in der Tonart, die gerade läuft. */
+const HELDEN = [
+  { id: "barradin", name: "Barradin", rolle: "Elfischer Barde", sym: "🎻", farbe: "#ffc830", k: [["riff:laute", "🪕", "Lautenriff"], ["riff:harfe", "💫", "Harfenlauf"], ["zauber", "✨", "Trugbild"], ["schwert", "🤺", "Rapier"], ["jubel", "👏", "Applaus"], ["tusch", "🎺", "Tusch"], ["ooh", "😮", "Staunen"], ["lufthorn", "📯", "Spott-Horn"]] },
+  { id: "echo", name: "Echo", rolle: "Gehörnter Druide", sym: "🦌", farbe: "#5ad08a", k: [["donner", "⛈", "Donner"], ["blitz", "⚡", "Blitz"], ["feuerball", "🔥", "Feuerball"], ["loewe", "🐻", "Gebrüll"], ["segen", "🌿", "Ranken"], ["muenzen", "🪙", "Goldnase"], ["wolf", "🐺", "Wildgestalt"], ["riff:floete", "🪈", "Waldflöte"]] },
+  { id: "friedrich", name: "Friedrich", rolle: "Waldläufer mit Rex", sym: "🏹", farbe: "#e0a050", k: [["pfeil", "🏹", "Pfeil"], ["bogen", "🎯", "Bogen spannen"], ["hund", "🐕", "Rex bellt"], ["horn", "📯", "Jagdhorn"], ["krit", "💥", "Volltreffer"], ["armbrust", "🪃", "Armbrust"], ["eule", "🦉", "Eulenruf"], ["kraehe", "🐦", "Krähe"]] },
+  { id: "ezekiel", name: "Ezekiel", rolle: "Goliath-Schurke", sym: "🗡", farbe: "#e8462a", k: [["hieb", "⚔", "Hieb"], ["wucht", "💢", "Wucht"], ["dolch", "🗡", "Dolch"], ["schatten", "🌑", "Schatten"], ["schwertkampf", "🌀", "Klingenwirbel"], ["riff:fanfare", "☀", "Dawnbringer"], ["truhe", "🧰", "Schloss knacken"], ["schmerz", "🤕", "Autsch"]] },
+  { id: "meister", name: "Spielleitung", rolle: "Meister:in", sym: "🎲", farbe: "#c070e0", k: [["drache", "🐉", "Drache"], ["dramatisch", "🎭", "Dramatisch"], ["gong", "🔔", "Gong"], ["tuer", "🚪", "Tür"], ["untot", "💀", "Untote"], ["troll", "👹", "Troll"], ["riff:chor", "👼", "Chor"], ["schock", "😱", "Schock"]] },
+  { id: "tisch", name: "Alle am Tisch", rolle: "für jeden", sym: "🍺", farbe: "#ff9a80", k: [["krit", "🎉", "Natürliche 20"], ["posaune", "📉", "Natürliche 1"], ["levelup", "⬆", "Level-up"], ["grillen", "🦗", "Stille …"], ["halleluja", "😇", "Halleluja"], ["wuerfel", "🎲", "Würfel"], ["ruelpser", "🍺", "Rülpser"], ["boing", "🤪", "Boing"]] }
+];
+const $ = s => document.querySelector(s), inhalt = $("#inhalt");
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+let held = null; try { held = HELDEN.find(h => h.id === localStorage.getItem("bb-held")) || null; } catch (_) {}
+function auswahl() {
+  document.body.style.removeProperty("--h"); $("#wechsel").hidden = true;
+  inhalt.innerHTML = "<h1>Wer bist du?</h1><p class=\"sub\">Wähl deinen Helden – dann hast du deine eigenen Klänge, die über das Pult in die Musik kommen.</p><div class=\"helden\">" +
+    HELDEN.map(h => '<button type="button" class="held" data-held="' + h.id + '" style="--h:' + h.farbe + '"><span class="med">' + h.sym + "</span><b>" + esc(h.name) + "</b><small>" + esc(h.rolle) + "</small></button>").join("") + "</div>";
+}
+function brett() {
+  document.body.style.setProperty("--h", held.farbe); $("#wechsel").hidden = false;
+  inhalt.innerHTML = '<div class="kopf"><span class="med">' + held.sym + "</span><div><b>" + esc(held.name) + "</b><small>" + esc(held.rolle) + '</small></div></div><div class="brett">' +
+    held.k.map(([art, e, n], i) => '<button type="button" class="k" data-i="' + i + '"><span class="e">' + e + "</span><span>" + esc(n) + "</span></button>").join("") + "</div>";
+}
+function zeigen() { held ? brett() : auswahl(); }
+inhalt.addEventListener("click", e => {
+  const h = e.target.closest("[data-held]");
+  if (h) { held = HELDEN.find(x => x.id === h.dataset.held); try { localStorage.setItem("bb-held", held.id); } catch (_) {} zeigen(); return; }
+  const k = e.target.closest(".k"); if (!k || !held) return;
+  const [art, , name] = held.k[+k.dataset.i];
+  if (navigator.vibrate) try { navigator.vibrate(12); } catch (_) {}
+  k.classList.remove("los", "zu"); void k.offsetWidth;
+  fetch("/zyn/spieler", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ wer: held.id, klang: art, name }) })
+    .then(r => r.json()).then(j => { $("#weg").classList.remove("an"); k.classList.add(j.ok ? "los" : "zu"); setTimeout(() => k.classList.remove("los", "zu"), 1000); })
+    .catch(() => { $("#weg").classList.add("an"); k.classList.add("zu"); });
+});
+$("#wechsel").addEventListener("click", () => { held = null; try { localStorage.removeItem("bb-held"); } catch (_) {} zeigen(); });
+zeigen();
+</script>
+</body></html>

@@ -279,6 +279,48 @@ def system_befehl(aktion):
 aufnahme = {"proc": None, "datei": None, "seit": 0}
 
 
+spieler_zuletzt = {}
+
+
+def eigene_ip():
+    """Adresse im WLAN/LAN – fürs Handy (zynthian.local klappt auf Android oft nicht)"""
+    import socket
+    try:
+        s0 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s0.connect(("10.255.255.255", 1))
+        ip = s0.getsockname()[0]
+        s0.close()
+        return ip
+    except OSError:
+        return ""
+
+
+def usb_sticks():
+    """eingesteckte USB-Sticks (beschreibbar gemountet)"""
+    erg = []
+    try:
+        with open("/proc/mounts", encoding="utf-8") as f:
+            for z in f:
+                t = z.split()
+                if len(t) >= 4 and t[0].startswith("/dev/sd") and (t[1].startswith("/media/") or t[1].startswith("/mnt/")) and "rw" in t[3].split(","):
+                    erg.append(t[1].replace("\\040", " "))
+    except OSError:
+        pass
+    return erg
+
+
+def aufnahme_ziel():
+    sticks = usb_sticks()
+    if sticks:
+        return os.path.join(sticks[0], "BardenBeats"), "USB-Stick"
+    return ARGS.aufnahmen, "Zynthian"
+
+
+def aufnahme_stand():
+    return {"an": aufnahme_laeuft(), "seit": aufnahme.get("seit") or 0, "dauer": round(time.time() - aufnahme["seit"]) if aufnahme_laeuft() and aufnahme.get("seit") else 0,
+            "datei": os.path.basename(aufnahme.get("datei") or ""), "ziel": aufnahme.get("ziel") or aufnahme_ziel()[1], "stick": bool(usb_sticks())}
+
+
 def aufnahme_schalten(an):
     p = aufnahme["proc"]
     if not an:
@@ -288,12 +330,23 @@ def aufnahme_schalten(an):
                 p.wait(timeout=5)
             except Exception:
                 p.kill()
+        dauer = round(time.time() - aufnahme["seit"]) if aufnahme.get("seit") else 0
         aufnahme.update(proc=None, seit=0)
-        return {"an": False, "datei": aufnahme["datei"]}
+        try:
+            os.sync()   # damit der Stick gleich herausgezogen werden kann
+        except Exception:
+            pass
+        return {"an": False, "datei": aufnahme["datei"], "ziel": aufnahme.get("ziel", ""), "dauer": dauer}
     if p and p.poll() is None:
         return {"an": True, "datei": aufnahme["datei"]}
-    os.makedirs(ARGS.aufnahmen, exist_ok=True)
-    datei = os.path.join(ARGS.aufnahmen, time.strftime("imres-%Y-%m-%d_%H-%M-%S.wav"))
+    ordner, ziel = aufnahme_ziel()
+    try:
+        os.makedirs(ordner, exist_ok=True)
+    except OSError:
+        ordner, ziel = ARGS.aufnahmen, "Zynthian"
+        os.makedirs(ordner, exist_ok=True)
+    datei = os.path.join(ordner, time.strftime("BardenBeats_%Y-%m-%d_%H-%M-%S.wav"))
+    aufnahme["ziel"] = ziel
     if ARGS.test:
         aufnahme.update(proc=None, datei=datei, seit=time.time())
         return {"an": True, "datei": datei, "test": True}
@@ -392,6 +445,14 @@ class Handler(SimpleHTTPRequestHandler):
             return self.datei_antwort(os.path.join(ZYN, "zyn.js"), "application/javascript; charset=utf-8")
         if p in ("/zyn/fern", "/zyn/fern.html"):
             return self.datei_antwort(os.path.join(ZYN, "fern.html"), "text/html; charset=utf-8")
+        if p in ("/zyn/spieler", "/zyn/spieler.html", "/spieler"):
+            return self.datei_antwort(os.path.join(ZYN, "spieler.html"), "text/html; charset=utf-8")
+        if p == "/zyn/qr.js":
+            return self.datei_antwort(os.path.join(ZYN, "qr.js"), "application/javascript; charset=utf-8")
+        if p == "/zyn/adresse":
+            return self.json_antwort({"ip": eigene_ip(), "port": ARGS.port if hasattr(ARGS, "port") else 8790})
+        if p == "/zyn/aufnahme":
+            return self.json_antwort(aufnahme_stand())
         if p == "/zyn/gans.png":
             return self.datei_antwort(os.path.join(ZYN, "gans.png"), "image/png")
         if p == "/zyn/version":
@@ -582,12 +643,27 @@ class Handler(SimpleHTTPRequestHandler):
                 except (TypeError, ValueError):
                     pass
             return self.json_antwort({"ok": True})
+        if p == "/zyn/spieler":
+            # ein Held am Handy löst einen Klang aus – kurz gebremst, damit niemand das Pult zuschüttet
+            wer = re.sub(r"[^a-z]", "", str(d.get("wer", "")).lower())[:16]
+            klang = re.sub(r"[^a-z0-9:]", "", str(d.get("klang", "")).lower())[:24]
+            name = str(d.get("name", ""))[:32]
+            if not wer or not klang:
+                return self.json_antwort({"ok": False})
+            j = time.time()
+            ip = self.client_address[0]
+            if j - spieler_zuletzt.get(ip, 0) < 0.8:
+                return self.json_antwort({"ok": False, "zu_schnell": True})
+            spieler_zuletzt[ip] = j
+            senden({"typ": "spieler", "wer": wer, "klang": klang, "name": name})
+            return self.json_antwort({"ok": True})
         if p == "/zyn/aufnahme":
             an = d.get("an")
             if an is None:
                 an = not aufnahme_laeuft()
             erg = aufnahme_schalten(bool(an))
-            senden({"typ": "aufnahme", "an": erg.get("an", False), "datei": os.path.basename(erg.get("datei") or "")})
+            erg["ziel"] = erg.get("ziel") or aufnahme.get("ziel", "")
+            senden({"typ": "aufnahme", "an": erg.get("an", False), "datei": os.path.basename(erg.get("datei") or ""), "ziel": erg["ziel"]})
             return self.json_antwort(erg)
         if p == "/zyn/grafik":
             # Test: Chromium zeichnet mit dem Grafikchip (kiosk.sh liest grafik.sh beim Browserstart; stürzt er ab, nimmt kiosk.sh es zurück)

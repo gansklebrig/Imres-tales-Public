@@ -1876,6 +1876,161 @@
   const MIT = { stufe: 3, laut: 70, hall: 35, oktave: 0 };
   try { Object.assign(MIT, JSON.parse(localStorage.getItem("imres-lw-mit") || "{}")); } catch (_) {}
   let mitBus = null, mitHall = null;
+  /* ===================== 🔁 Looper: vier Schichten aus IN1/IN2, taktgenau zur Bühne =====================
+     Aufgenommen wird ab der nächsten „1“ für 1/2/4/8 Takte (um die Laufzeit Ton→Ohr→Instrument→Eingang verschoben), danach läuft die
+     Schicht nahtlos weiter. Beim Stimmungswechsel blenden die Schichten aus (anderes Tempo, andere Tonart) und warten. */
+  const LOOP_CODE = `class ImresLoopRec extends AudioWorkletProcessor {
+  constructor() { super(); this.job = null; this.port.onmessage = e => { const d = e.data; if (d.von != null) this.job = { von: d.von, bis: d.bis, n: d.bis - d.von, l: new Float32Array(d.bis - d.von), r: new Float32Array(d.bis - d.von), id: d.id }; else this.job = null; }; }
+  process(inp) { const j = this.job; if (!j) return true; const k = inp[0], a = k && k[0], b = k && (k[1] || k[0]), len = a ? a.length : 128, f0 = currentFrame;
+    if (f0 + len <= j.von) return true;
+    for (let x = 0; x < len; x++) { const f = f0 + x - j.von; if (f < 0) continue; if (f >= j.n) break; j.l[f] = a ? a[x] : 0; j.r[f] = b ? b[x] : 0; }
+    if (f0 + len >= j.bis) { this.port.postMessage({ id: j.id, l: j.l, r: j.r }, [j.l.buffer, j.r.buffer]); this.job = null; }
+    return true; } }
+registerProcessor("imres-loop-rec", ImresLoopRec);`;
+  const LOOP = { s: [null, null, null, null], takte: 4, quelle: 0, versatz: null, bus: null, rec: null, recBereit: null, id: 0 };
+  try { const v = JSON.parse(localStorage.getItem("imres-lw-loop") || "{}"); if ([1, 2, 4, 8].includes(v.takte)) LOOP.takte = v.takte; if ([0, 1, 2].includes(v.quelle)) LOOP.quelle = v.quelle; if (typeof v.versatz === "number") LOOP.versatz = v.versatz; } catch (_) {}
+  const loopMerken = () => { try { localStorage.setItem("imres-lw-loop", JSON.stringify({ takte: LOOP.takte, quelle: LOOP.quelle, versatz: LOOP.versatz })); } catch (_) {} };
+  const loopLatStd = () => ctx ? 2 * ((ctx.outputLatency || 0) + (ctx.baseLatency || 0)) : 0;
+  function loopBus() { if (!LOOP.bus) { LOOP.bus = ctx.createGain(); LOOP.bus.gain.value = 1; LOOP.bus.connect(einAusgang || ausgang); } return LOOP.bus; }
+  function loopRecBereit() {
+    if (LOOP.recBereit) return LOOP.recBereit;
+    const url = URL.createObjectURL(new Blob([LOOP_CODE], { type: "application/javascript" }));
+    LOOP.recBereit = ctx.audioWorklet.addModule(url).then(() => {
+      const n = new AudioWorkletNode(ctx, "imres-loop-rec", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1], channelCount: 2, channelCountMode: "explicit", channelInterpretation: "speakers" });
+      const still = ctx.createGain(); still.gain.value = 0; n.connect(still); still.connect(ctx.destination); n.port.onmessage = e => loopFertig(e.data); LOOP.rec = n; return n;
+    });
+    LOOP.recBereit.catch(() => { LOOP.recBereit = null; });
+    return LOOP.recBereit;
+  }
+  const loopTakt = () => taktL() * schrittDauer();
+  function loopAufnehmen(i) {
+    if (!ctx) return { fehler: "Ton noch nicht gestartet" };
+    if (LOOP.s.some(x => x && (x.zustand === "wartet" || x.zustand === "nimmt"))) return { fehler: "es nimmt schon eine Schicht auf" };
+    if (i == null) i = LOOP.s.findIndex(x => !x); if (i < 0 || i > 3 || LOOP.s[i]) return { fehler: "keine freie Schicht" };
+    const ks = [0, 1].filter(n => (LOOP.quelle === 0 || LOOP.quelle === n + 1) && EIN.k[n]);
+    if (!ks.length) return { fehler: "kein Eingang an" };
+    const bar = loopTakt(), T0 = laeuft ? taktEnde() : ctx.currentTime + .3, dauer = LOOP.takte * bar;
+    const lat = LOOP.versatz != null ? LOOP.versatz / 1000 : loopLatStd(), sr = ctx.sampleRate, von = Math.round((T0 + lat) * sr), n = Math.round(dauer * sr);
+    const sch = LOOP.s[i] = { zustand: "wartet", ab: T0, bis: T0 + dauer, dauer, takte: LOOP.takte, bar, laut: 1, stumm: false, id: ++LOOP.id, lat, rate: 1, frei: !laeuft };
+    loopRecBereit().then(rec => {
+      if (LOOP.s[i] !== sch) return; const g = ctx.createGain(); ks.forEach(k => { try { EIN.k[k].out.connect(g); } catch (_) {} }); g.connect(rec); sch.ein = g; sch.quellen = ks;
+      rec.port.postMessage({ von, bis: von + n, id: sch.id });
+    }).catch(() => { if (LOOP.s[i] === sch) LOOP.s[i] = null; });
+    return { i };
+  }
+  function loopFertig(d) {
+    const i = LOOP.s.findIndex(x => x && x.id === d.id), sch = LOOP.s[i]; if (!sch) return;
+    if (sch.ein) { (sch.quellen || []).forEach(k => { try { EIN.k[k] && EIN.k[k].out.disconnect(sch.ein); } catch (_) {} }); try { sch.ein.disconnect(); } catch (_) {} sch.ein = null; }
+    const n = d.l.length, buf = ctx.createBuffer(2, n, ctx.sampleRate), r = Math.min(256, n >> 3);
+    for (let x = 0; x < r; x++) { const f = x / r; d.l[x] *= f; d.r[x] *= f; d.l[n - 1 - x] *= f; d.r[n - 1 - x] *= f; }
+    buf.copyToChannel(d.l, 0); buf.copyToChannel(d.r, 1); sch.buf = buf;
+    /* Pegel prüfen: war gar nichts zu hören, Schicht wieder freigeben */
+    let m = 0; for (let x = 0; x < n; x += 7) { const v = Math.abs(d.l[x]) + Math.abs(d.r[x]); if (v > m) m = v; }
+    sch.leise = m < .002;
+    loopAbspielen(sch, ctx.currentTime + .03, true);
+  }
+  function loopAbspielen(sch, j, nahtlos) {
+    const src = ctx.createBufferSource(); src.buffer = sch.buf; src.loop = true; src.playbackRate.value = sch.rate;
+    const g = ctx.createGain(); g.gain.value = 0; g.gain.setTargetAtTime(sch.stumm ? 0 : sch.laut, j, .015);
+    const an = ctx.createAnalyser(); an.fftSize = 256; src.connect(g); g.connect(loopBus()); g.connect(an);
+    const len = sch.dauer / sch.rate, off = nahtlos ? (((j - sch.bis) % len + len) % len) * sch.rate : 0;
+    src.start(j, off); sch.src = src; sch.g = g; sch.an = an; sch.null = j - off / sch.rate; sch.zustand = "spielt";
+  }
+  function loopHalt(sch, sanft) {
+    if (!sch || !sch.src) return; const j = ctx.currentTime, src = sch.src, g = sch.g;
+    try { g.gain.cancelScheduledValues(j); g.gain.setValueAtTime(g.gain.value, j); g.gain.setTargetAtTime(0, j, sanft ? .6 : .02); src.stop(j + (sanft ? 3 : .1)); } catch (_) {}
+    setTimeout(() => { try { g.disconnect(); } catch (_) {} }, sanft ? 3500 : 300); sch.src = null; sch.g = null; sch.an = null;
+  }
+  function loopBefehl(was, i, v) {
+    if (!ctx && was !== "einstellen") return null;
+    const sch = i != null ? LOOP.s[i] : null;
+    switch (was) {
+      case "aufnehmen": return loopAufnehmen(i);
+      case "tippen": /* je nach Zustand: leer → aufnehmen, spielt → stumm/an, pausiert → wieder an */
+        if (!sch) return loopAufnehmen(i);
+        if (sch.zustand === "wartet" || sch.zustand === "nimmt") return loopBefehl("loeschen", i);
+        if (sch.zustand === "pause") { const bar = loopTakt(); sch.rate = sch.bar / bar; sch.stumm = false; loopAbspielen(sch, laeuft ? taktEnde() : ctx.currentTime + .05, false); return { an: true }; }
+        return loopBefehl("stumm", i);
+      case "stumm": if (!sch || !sch.g) return null; sch.stumm = !sch.stumm; { const j = ctx.currentTime; sch.g.gain.cancelScheduledValues(j); sch.g.gain.setTargetAtTime(sch.stumm ? 0 : sch.laut, j, .03); } return { stumm: sch.stumm };
+      case "laut": if (!sch) return null; sch.laut = Math.max(0, Math.min(1.6, +v || 0)); if (sch.g && !sch.stumm) sch.g.gain.setTargetAtTime(sch.laut, ctx.currentTime, .03); return { laut: sch.laut };
+      case "loeschen": if (!sch) return null; if ((sch.zustand === "wartet" || sch.zustand === "nimmt") && LOOP.rec) { LOOP.rec.port.postMessage({ ab: 1 }); if (sch.ein) { try { sch.ein.disconnect(); } catch (_) {} } } loopHalt(sch, false); LOOP.s[i] = null; return { ok: true };
+      case "alleLoeschen": LOOP.s.forEach((x, k) => { if (x) loopBefehl("loeschen", k); }); return { ok: true };
+      case "allePause": LOOP.s.forEach(x => { if (x && x.zustand === "spielt") { loopHalt(x, true); x.zustand = "pause"; } }); return { ok: true };
+      case "letzte": { let k = -1, best = -1; LOOP.s.forEach((x, n) => { if (x && x.id > best) { best = x.id; k = n; } }); return k >= 0 ? loopBefehl("loeschen", k) : null; }
+      case "einstellen": if (v && [1, 2, 4, 8].includes(v.takte)) LOOP.takte = v.takte; if (v && [0, 1, 2].includes(v.quelle)) LOOP.quelle = v.quelle; if (v && "versatz" in v) LOOP.versatz = v.versatz == null ? null : Math.max(0, Math.min(400, Math.round(v.versatz))); loopMerken(); return { ok: true };
+    }
+    return null;
+  }
+  function loopZustand() {
+    const j = ctx ? ctx.currentTime : 0, tp = ctx && laeuft ? loopTakt() : 0, spb = taktL() % 4 === 0 ? 4 : taktL() % 3 === 0 ? 3 : taktL(), schlag = ctx ? spb * schrittDauer() : .5;
+    return { takte: LOOP.takte, quelle: LOOP.quelle, versatz: LOOP.versatz, latStd: Math.round(loopLatStd() * 1000), eingaenge: [!!EIN.k[0], !!EIN.k[1]], laeuft,
+      s: LOOP.s.map(x => {
+        if (!x) return null; let z = x.zustand; if ((z === "wartet" || z === "nimmt") && ctx) z = j < x.ab ? "wartet" : "nimmt";
+        let pg = 0; if (x.an) { const d = new Float32Array(256); x.an.getFloatTimeDomainData(d); for (let k = 0; k < 256; k++) { const a = Math.abs(d[k]); if (a > pg) pg = a; } }
+        const len = x.dauer / (x.rate || 1);
+        return { zustand: z, takte: x.takte, laut: x.laut, stumm: x.stumm, leise: !!x.leise, pegel: pg, tempoAnders: tp ? Math.abs(tp - x.bar) / x.bar > .01 : false,
+          fort: z === "nimmt" ? Math.min(1, (j - x.ab) / x.dauer) : z === "spielt" && x.null != null ? (((j - x.null) % len) + len) % len / len : 0,
+          schlaegeBis: z === "wartet" ? Math.max(1, Math.ceil((x.ab - j) / schlag)) : 0 };
+      }) };
+  }
+  /* ===================== ⚡ Drop: Spannung über 4/8 Takte, dann knallt alles auf der nächsten „1“ wieder rein ===================== */
+  let DROP = null;
+  function rauschPuffer(sek) { const n = Math.round(ctx.sampleRate * sek), b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1; return b; }
+  function dropStarten(takte) {
+    if (!ctx || !laeuft) return { fehler: "erst Musik starten" };
+    if (DROP) return { fehler: "läuft schon" }; if (wechsel) return { fehler: "gerade Stimmungswechsel" };
+    takte = takte === 8 ? 8 : takte === 2 ? 2 : 4;
+    const bar = loopTakt(), T0 = taktEnde(), T1 = T0 + takte * bar, sd = schrittDauer(), ziel = atem || ausgang;
+    DROP = { ab: T0, bis: T1, takte };
+    /* Klang wird enger: Tiefpass schließt sich, auf der 1 sofort wieder offen */
+    if (uebLp) { const f = uebLp.frequency, j = ctx.currentTime; f.cancelScheduledValues(j); f.setValueAtTime(f.value, j); f.setValueAtTime(20000, T0); f.exponentialRampToValueAtTime(900, T1 - .03); f.setValueAtTime(20000, T1); }
+    /* aufsteigendes Rauschen */
+    const rs = ctx.createBufferSource(); rs.buffer = rauschPuffer(2); rs.loop = true;
+    const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.Q.value = 1.8; bp.frequency.setValueAtTime(350, T0); bp.frequency.exponentialRampToValueAtTime(7000, T1);
+    const rg = ctx.createGain(); rg.gain.setValueAtTime(0.0001, T0); rg.gain.exponentialRampToValueAtTime(.22, T1 - .02); rg.gain.setValueAtTime(0, T1);
+    rs.connect(bp); bp.connect(rg); rg.connect(ziel); rs.start(T0); rs.stop(T1 + .05);
+    /* Trommelwirbel in den letzten zwei Takten: erst Viertel, dann Achtel, zuletzt Sechzehntel – immer lauter */
+    const wb = rauschPuffer(.25), w0 = T1 - Math.min(2, takte) * bar, schritteW = Math.round((T1 - w0) / sd);
+    for (let k = 0; k < schritteW; k++) {
+      const p = k / schritteW, raster = p < .5 ? 4 : p < .75 ? 2 : 1; if (k % raster) continue;
+      const t = w0 + k * sd, s1 = ctx.createBufferSource(); s1.buffer = wb; const f1 = ctx.createBiquadFilter(); f1.type = "bandpass"; f1.frequency.value = 1900 + p * 1500; f1.Q.value = .9;
+      const g1 = ctx.createGain(), lv = .1 + .45 * p * p; g1.gain.setValueAtTime(lv, t); g1.gain.exponentialRampToValueAtTime(.0005, t + .11);
+      s1.connect(f1); f1.connect(g1); g1.connect(ziel); s1.start(t); s1.stop(t + .14);
+    }
+    /* Einschlag auf der 1: tiefer Schlag + Becken-Rauschen */
+    const o = ctx.createOscillator(); o.type = "sine"; o.frequency.setValueAtTime(95, T1); o.frequency.exponentialRampToValueAtTime(34, T1 + .5);
+    const og = ctx.createGain(); og.gain.setValueAtTime(.9, T1); og.gain.exponentialRampToValueAtTime(.001, T1 + 1.3); o.connect(og); og.connect(ziel); o.start(T1); o.stop(T1 + 1.35);
+    const cr = ctx.createBufferSource(); cr.buffer = rauschPuffer(2.2); const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 3500;
+    const cg = ctx.createGain(); cg.gain.setValueAtTime(.32, T1); cg.gain.exponentialRampToValueAtTime(.001, T1 + 2.1); cr.connect(hp); hp.connect(cg); cg.connect(ziel); cr.start(T1); cr.stop(T1 + 2.2);
+    setTimeout(() => { DROP = null; }, Math.max(0, (T1 - ctx.currentTime + 2.5) * 1000));
+    return { ok: true, ab: T0 - ctx.currentTime, bis: T1 - ctx.currentTime, takte };
+  }
+  const dropP = zeit => DROP && zeit >= DROP.ab && zeit < DROP.bis ? (zeit - DROP.ab) / (DROP.bis - DROP.ab) : -1;
+  /* ===================== 📱 Spieler-Klänge: Effekte und kleine Riffs in der laufenden Tonart ===================== */
+  const RIFFS = {
+    laute: { gr: "gitarre", st: [0, 2, 4, 7, 4, 7, 9, 11], rh: [1, 1, 1, 1, 1, 1, 1, 3], o: -12, laut: .6 },
+    harfe: { gr: "harfe", st: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14], rh: Array(14).fill(.5), o: -12, laut: .5 },
+    fanfare: { gr: "trp", st: [0, 4, 4, 7], rh: [1, .5, .5, 4], o: -12, laut: .5 },
+    floete: { gr: "fl", st: [7, 6, 4, 6, 7, 9, 7], rh: [1, 1, 1, 1, 1, 1, 3], o: 0, laut: .45 },
+    chor: { gr: "ooh", st: [0, 4, 7], rh: [0, 0, 6], o: -12, laut: .4 }
+  };
+  function spielerRiff(n, st, nochmal) {
+    const r = RIFFS[n]; if (!r) return false; probenLaden(r.gr);
+    const sk = MODI[S.modus] || MODI.dorisch, g = MEL_GRUND + (S.transpose || 0) + r.o, sd = schrittDauer();
+    let t = laeuft ? naechste + ((2 - schritt % 2) % 2) * sd : ctx.currentTime + .05; while (t < ctx.currentTime + .03) t += 2 * sd;
+    const einheit = laeuft ? 2 * sd : .16, ton = i => g + sk[i % 7] + 12 * Math.floor(i / 7);
+    let ok = false, z = t;
+    r.st.forEach((s1, k) => { try { if (probe(r.gr, ton(s1), z, sfxBus, r.laut * (st || 1), { dauer: 2, aus: .5 })) ok = true; } catch (_) {} z += einheit * (r.rh[k] != null ? r.rh[k] : 1); });
+    if (!ok && !nochmal) setTimeout(() => spielerRiff(n, st, true), 900);
+    return true;
+  }
+  function spielerKlang(art, st) {
+    if (!ctx) return false; art = String(art || "");
+    if (art.startsWith("riff:")) return spielerRiff(art.slice(5), st);
+    if (!ALLE_FX.includes(art)) return false;
+    effekt(art, st || 1); return true;
+  }
+
   const PEGEL_MX = {}; /* Messpunkte des Mischers (ImresPult.pegel) */
   function mitVorladen() { if (!ctx) return; MIT_LAGEN.slice(0, MIT.stufe).forEach(x => { try { probenLaden(x[0]); } catch (_) {} }); }
   function mitspielen(midi, staerke) {
@@ -5983,7 +6138,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
 
   }
   function kickSchritt(zeit, ab) {
-    if (!S.kick || S.mute.trommel || !ctx || ausduennen || (!morphEin && einblend > EINBLEND / 2) || (fliessend && wechsel && flP(zeit) > FL_FOLGE.trommel)) return;
+    if (!S.kick || S.mute.trommel || !ctx || ausduennen || (!morphEin && einblend > EINBLEND / 2) || (fliessend && wechsel && flP(zeit) > FL_FOLGE.trommel) || dropP(zeit) > .35) return;
     const L = taktL(), rolle = S.rollen ? rolleAn(ab) : "r";
     let m = kickMuster(rolle, L);
     if (gefuehl === "halb") m = m.filter(x => x % 8 === 0);
@@ -6355,6 +6510,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     const dr = S.stimmung && S.orchester !== 0 ? DRAMA[S.stimmung] || 0 : 0;
     ausduennen = false; einblend = dr ? 0 : EINBLEND; einblendMax = EINBLEND; morphEin = false;
     const flNeu = flWechsel && nachBruecke; fliessend = null; flWechsel = false;
+    if (LOOP.s.some(x => x && x.zustand === "spielt")) loopBefehl("allePause"); /* neue Stimmung: Schleifen blenden aus und warten */
     if (flNeu && master) {
       /* fließend: das neue Stück wächst über mehrere Takte heran – erst warm und leise, Schicht für Schicht, dann öffnet sich der Klang */
       einblend = einblendMax = 6 * taktL();
@@ -6443,6 +6599,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
         /* weicher Übergang: vorher fällt das Schlagwerk weg, danach kommt es erst im zweiten Takt wieder dazu */
         if (SCHLAGWERK[k] && !morphEin && (ausduennen || (einblend > EINBLEND / 2))) return;
         if (fliessend && wechsel && SCHLAGWERK[k] && flP(ev.zeit) > (FL_FOLGE[k] != null ? FL_FOLGE[k] : .5)) return;
+        if (SCHLAGWERK[k] && dropP(ev.zeit) > .5) return; /* Drop: in der zweiten Hälfte schweigt das Schlagwerk – nur noch der Wirbel */
         const umgestellt = neuTeil && SCHLAGWERK[k] && neuTeil[k] && morph.takt >= Math.floor((MORPH_FOLGE[k] || 0) * morph.pivot);
         const dk = umgestellt ? neuTeil[k] : daten[k];
         let wert = variiert(k, dk[schritt], schritt, dk, v, letzterTakt);
@@ -13939,6 +14096,11 @@ registerProcessor("imres-glitch", ImresGlitch);`;
       const kb = Math.ceil(schritt / spb) * spb, tb = naechste + (kb - schritt) * sd, jetzt = ctx.currentTime - (ctx.outputLatency || 0) - (ctx.baseLatency || 0);
       let ph = ((jetzt - tb) / bd) % 1; if (ph < 0) ph += 1; return { bd, ph, schlaege: Math.round(L / spb) };
     },
+    /* Live-Werkzeuge am Pult */
+    loop(was, i, v) { try { if (was !== "zustand" && was !== "einstellen") audioStart(); } catch (_) {} return was === "zustand" ? loopZustand() : loopBefehl(was, i, v); },
+    drop(takte) { return dropStarten(takte); },
+    dropZustand() { return DROP && ctx ? { ab: DROP.ab - ctx.currentTime, bis: DROP.bis - ctx.currentTime, takte: DROP.takte } : null; },
+    spielerKlang(art, st) { try { audioStart(); } catch (_) {} return spielerKlang(art, st); },
     /* nur für Tests: wo steht ein laufender Wechsel? */
     _wechselInfo() { return ctx ? { jetzt: ctx.currentTime, wechselAb, abschnitt, schritt, ablauf: S.ablauf.length, takt: taktL() * schrittDauer(), fl: fliessend ? Object.assign({}, fliessend) : null, brueckeBis, gain: master ? master.gain.value : null, lp: uebLp ? uebLp.frequency.value : null, wechsel: !!wechsel, stimmung: S.stimmung } : null; },
     /* Spitzenpegel der Mischer-Wege nach dem Regler (1 = Vollaussteuerung) – die Messpunkte entstehen erst beim ersten Abfragen.

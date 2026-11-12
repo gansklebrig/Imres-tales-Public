@@ -405,7 +405,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       '<button type="button" data-zm="zyupd">⬇ ' + W("Zynthian aktualisieren", "Update Zynthian") + "<small>" + W("wechselt zum Zynthian und startet das System-Update", "switches to Zynthian and runs the system update") + "</small></button>" +
       '<button type="button" data-zm="upd">⬇ ' + W("Bühne aktualisieren", "Update the stage") + "<small>" + W("holt die neueste Version (Internet nötig) und startet neu", "fetches the latest version (needs internet) and restarts") + "</small></button>" +
       '<button type="button" data-zm="hinter">🎛+🎻 ' + W("Zusammen mit Zynthian", "Together with Zynthian") + "<small>" + W("Zynthian-Oberfläche, Barden Beats spielt im Hintergrund weiter (Handy/MIDI)", "Zynthian UI, the stage keeps playing in the background") + "</small></button>" +
-      '<button type="button" data-zm="auf">' + (aufnahmeAn ? "⏹ " + W("Aufnahme beenden", "Stop recording") : "⏺ " + W("Aufnahme starten", "Start recording")) + "<small>" + W("alles, was rauskommt – im Zynthian-Ordner „capture“", "everything you hear – Zynthian capture folder") + "</small></button>" +
+      '<button type="button" data-zm="auf">' + (aufnahmeAn ? "⏹ " + W("Aufnahme beenden", "Stop recording") : "⏺ " + W("Aufnahme starten", "Start recording")) + "<small>" + (aufnahmeAn && aufSeit ? "⏺ " + zeitText((Date.now() - aufSeit) / 1000) + " · " : "") + W("alles, was rauskommt – als WAV ", "everything you hear – as WAV ") + (aufStick ? W("auf den USB-Stick (Ordner BardenBeats)", "to the USB stick (folder BardenBeats)") : W("in den Zynthian-Ordner „capture“ · USB-Stick stecken = dorthin", "to the Zynthian capture folder · plug a USB stick to record there")) + "</small></button>" +
       '<button type="button" data-zm="start">🔌 ' + W("Beim Einschalten: ", "At power-on: ") + "<b>" + W("Barden Beats", "Barden Beats") + "</b><small>" + W("so startet das Gerät ab jetzt", "the device starts like this from now on") + "</small></button>" +
       '<button type="button" data-zm="startz">🔌 ' + W("Beim Einschalten: ", "At power-on: ") + "<b>Zynthian</b></button>" +
       '<button type="button" data-zm="neu">🔄 ' + W("Seite neu laden", "Reload page") + "</button>" +
@@ -631,13 +631,21 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   }
 
   /* ---------- Aufnahme (in der Brücke: alles, was aus den Ausgängen kommt) ---------- */
-  let aufnahmeAn = false;
+  let aufnahmeAn = false, aufSeit = 0, aufZiel = "", aufStick = false;
+  const zeitText = s => { s = Math.max(0, Math.round(s)); const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, x = s % 60; return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(x).padStart(2, "0"); };
+  const aufZielText = z => z === "USB-Stick" ? "💾 " + W("auf den USB-Stick", "to the USB stick") : "🗂 " + W("in den Zynthian (capture)", "into the Zynthian (capture)");
+  function aufnahmeStand(j) { if (!j) return; const war = aufnahmeAn; aufnahmeAn = !!j.an; if (j.ziel) aufZiel = j.ziel; if ("stick" in j) aufStick = !!j.stick;
+    if (aufnahmeAn && (!war || !aufSeit)) aufSeit = Date.now() - (+j.dauer || 0) * 1000; if (!aufnahmeAn) aufSeit = 0; }
   function aufnahme() {
     fetch("/zyn/aufnahme", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ an: !aufnahmeAn }) }).then(r => r.json()).then(j => {
-      aufnahmeAn = !!j.an; leisteZeichnen(); ledsMelden();
-      zeige(aufnahmeAn ? "⏺ " + W("Aufnahme läuft", "Recording") : j.fehler ? "⚠ " + j.fehler : "⏹ " + W("Aufnahme gespeichert", "Recording saved"), null, j.datei ? j.datei.split("/").pop() : "");
+      const war = aufnahmeAn; aufnahmeStand(j); if (aufnahmeAn && !war) aufSeit = Date.now();
+      leisteZeichnen(); ledsMelden(); if (PULT) zpZeichnen(true);
+      if (j.fehler) { zeige("⚠ " + j.fehler); return; }
+      if (aufnahmeAn) zeige("⏺ " + W("Aufnahme läuft", "Recording"), null, aufZielText(aufZiel));
+      else zeige("⏹ " + W("Gespeichert", "Saved") + (j.dauer ? " · " + zeitText(j.dauer) : ""), null, (j.ziel === "USB-Stick" ? "💾 USB-Stick · " + W("kann gleich raus", "safe to unplug") + " · " : "🗂 capture · ") + (j.datei ? j.datei.split("/").pop() : ""));
     }).catch(() => zeige("⚠ " + W("Aufnahme geht nicht", "Recording failed")));
   }
+  const aufnahmeHolen = () => fetch("/zyn/aufnahme").then(r => r.json()).then(j => { aufnahmeStand(j); leisteZeichnen(); }).catch(() => {});
 
   /* ---------- MIDI-Master: Tempo und Schlag an die Brücke ---------- */
   let masterLief = false, masterZeit = 0;
@@ -896,7 +904,8 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     { id: "ort", sym: "🌲", name: W("Ort", "Place"), seite: "buehne", farbe: "#3fbf6a", led: "#30ff70" },
     { id: "momente", sym: "⚡", name: W("Momente", "Moments"), seite: "buehne", farbe: "#e0703a", led: "#ff6a10" },
     { id: "set", sym: "🎬", name: "Set", seite: "buehne", farbe: "#d8c088", led: "#ffe0a0" },
-    { id: "beats", sym: "🥁", name: "Beats", seite: "buehne", farbe: "#e0884a", led: "#ff9a40" }
+    { id: "beats", sym: "🥁", name: "Beats", seite: "buehne", farbe: "#e0884a", led: "#ff9a40" },
+    { id: "live", sym: "🔁", name: "Live", seite: "buehne", farbe: "#ff7a5a", led: "#ff9a80" }
   ];
   const zpDef = id => ZP_SEITEN.find(x => x.id === id) || ZP_SEITEN[0];
   let zpSeite = lies("imres-zp-seite-" + SEITE, ZP_SEITEN[0].id);
@@ -907,6 +916,198 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const teil = (txt, sym) => { txt = String(txt || "").trim(); const m = EMO.exec(txt); return m ? [m[1], m[2] || txt] : [sym, txt]; };
   const esc2 = x => String(x).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
+  /* ===================== 🔁 Live: Handpan-Looper, Drop, Aufnahme · 📱 Spieler-Klänge · 🌙 Einschlaf-Timer ===================== */
+  const LIVE_FARBE = ["#ffc830", "#ff7a5a", "#5ad08a", "#d090ff"], REC_FARBE = "#ff4a4a";
+  const QUELLE_NAME = [W("IN1 + IN2", "IN1 + IN2"), W("nur IN1", "IN1 only"), W("nur IN2", "IN2 only")];
+  const taktWort = n => n === 1 ? W(" Takt", " bar") : W(" Takte", " bars");
+  const dropTakte = () => { const v = +lies("imres-zp-drop", "4"); return [2, 4, 8].includes(v) ? v : 4; };
+  const LP = () => window.ImresPult && window.ImresPult.loop ? window.ImresPult : null;
+  const LEER_Z = { s: [null, null, null, null], takte: 4, quelle: 0, versatz: null, latStd: 0, eingaenge: [false, false], laeuft: false };
+  const liveZ = () => { const P = LP(); return (P && P.loop("zustand")) || LEER_Z; };
+  const liveBestaetig = {};
+  /* zweimal innerhalb von 2,5 s = wirklich */
+  function zweimal(k, frage, unter) { const j = Date.now(); if (liveBestaetig[k] && j - liveBestaetig[k] < 2500) { delete liveBestaetig[k]; return true; } liveBestaetig[k] = j; zeige(frage, null, unter || W("zum Bestätigen noch einmal", "again to confirm")); return false; }
+  function liveFehler(r) {
+    if (!r || !r.fehler) return false;
+    if (/Eingang/.test(r.fehler)) zeige("🎤 " + W("Kein Eingang an", "No input on"), null, W("MENU → 🎤 Eingänge: Handpan / Didgeridoo anschalten", "MENU → 🎤 Inputs: switch on handpan / didgeridoo"));
+    else zeige("⚠ " + r.fehler);
+    return true;
+  }
+  function liveTippen(i) {
+    const P = LP(); if (!P) return; const Z = liveZ(), s = Z.s[i], r = P.loop("tippen", i);
+    if (liveFehler(r)) return;
+    const nm = "🔁 " + W("Schicht ", "Layer ") + (i + 1);
+    if (!s) zeige("⏺ " + nm, null, (Z.laeuft ? W("nimmt ab der nächsten 1 auf · ", "records from the next 1 · ") : W("Musik steht – nimmt gleich auf · ", "music stopped – recording now · ")) + Z.takte + taktWort(Z.takte));
+    else if (s.zustand === "wartet" || s.zustand === "nimmt") zeige("✕ " + nm, null, W("Aufnahme verworfen", "recording discarded"));
+    else if (s.zustand === "pause") zeige("▶ " + nm, null, Z.laeuft ? W("läuft ab der nächsten 1 wieder – im neuen Tempo", "resumes on the next 1 – at the new tempo") : W("läuft wieder", "playing again"));
+    else if (r) zeige((r.stumm ? "🔇 " : "🔊 ") + nm, null, r.stumm ? W("stumm – antippen: wieder an", "muted – tap: on again") : W("wieder zu hören", "audible again"));
+    liveFrisch();
+  }
+  function liveLoeschen(i) { const P = LP(); if (!P || !liveZ().s[i]) return; P.loop("loeschen", i); zeige("🗑 " + W("Schicht ", "Layer ") + (i + 1) + W(" gelöscht", " deleted")); liveFrisch(); }
+  function liveDrop() {
+    const P = LP(); if (!P || !P.drop) return; const t = dropTakte(), r = P.drop(t);
+    if (r && r.fehler) { zeige("⚡ Drop", null, "⚠ " + r.fehler); return; }
+    zeige("⚡ Drop · " + t + taktWort(t), null, W("ab der nächsten 1 wird es enger – auf der 1 danach knallt alles rein", "tightens from the next 1 – everything hits on the 1 after")); liveFrisch();
+  }
+  function livePauseAlle() {
+    const P = LP(); if (!P) return; const Z = liveZ();
+    if (Z.s.some(s => s && s.zustand === "spielt")) { P.loop("allePause"); zeige("⏸ " + W("Alle Schichten angehalten", "All layers paused"), null, W("antippen: einzeln weiter", "tap one to resume")); }
+    else if (Z.s.some(s => s && s.zustand === "pause")) { Z.s.forEach((s, i) => { if (s && s.zustand === "pause") P.loop("tippen", i); }); zeige("▶ " + W("Alle Schichten weiter", "All layers resume"), null, W("ab der nächsten 1", "from the next 1")); }
+    liveFrisch();
+  }
+  function liveInhalt() {
+    const P = LP(); if (!P) return [];
+    const Z = liveZ(), D = P.dropZustand ? P.dropZustand() : null, ein = Z.eingaenge.some(Boolean);
+    const l = Z.s.map((s, i) => {
+      const it = { key: "loop:" + i, farbe: LIVE_FARBE[i], name: W("Schicht ", "Layer ") + (i + 1), los: () => liveTippen(i) };
+      if (!s) return Object.assign(it, { sym: "➕", info: ein ? W("tippen: aufnehmen", "tap: record") : "🎤 " + W("kein Eingang an", "no input on") });
+      if (s.zustand === "wartet") return Object.assign(it, { sym: "⏳", vor: true, farbe: REC_FARBE, info: W("ab der 1 · noch ", "on the 1 · in ") + s.schlaegeBis });
+      if (s.zustand === "nimmt") return Object.assign(it, { sym: "⏺", an: true, farbe: REC_FARBE, p: Math.round(s.fort * 100), info: W("nimmt auf ", "recording ") + Math.min(s.takte, Math.floor(s.fort * s.takte) + 1) + "/" + s.takte });
+      if (s.zustand === "pause") return Object.assign(it, { sym: "⏸", info: W("tippen: weiter", "tap: resume") });
+      return Object.assign(it, { sym: s.stumm ? "🔇" : "🔁", an: !s.stumm, p: Math.round(s.fort * 100),
+        info: s.leise ? "⚠ " + W("fast nichts drauf", "almost silent") : s.stumm ? W("stumm", "muted") : (s.tempoAnders ? "⏱ " : "") + s.takte + taktWort(s.takte) + " · " + Math.round(s.laut * 100) + " %" });
+    });
+    let dropIt;
+    if (D && D.bis > 0) { const ges = Math.max(.01, D.bis - D.ab), bar = ges / D.takte;
+      dropIt = D.ab > 0 ? { sym: "⏳", vor: true, info: W("ab der nächsten 1", "from the next 1") }
+        : { sym: "⚡", an: true, p: Math.round(Math.min(1, -D.ab / ges) * 100), info: D.bis < bar ? "💥 " + W("gleich!", "now!") : W("noch ", "") + Math.ceil(D.bis / bar) + taktWort(Math.ceil(D.bis / bar)) + W("", " to go") };
+    } else dropIt = { sym: "⚡", info: dropTakte() + taktWort(dropTakte()) + W(" Anlauf", " build-up") };
+    const recZeit = aufnahmeAn && aufSeit ? zeitText((Date.now() - aufSeit) / 1000) : "";
+    l.push({ key: "live:takte", sym: "📏", name: W("Loop-Länge", "Loop length"), farbe: "#e0b070", info: Z.takte + taktWort(Z.takte),
+        los: () => { const v = [1, 2, 4, 8], n = v[(v.indexOf(Z.takte) + 1) % 4]; LP().loop("einstellen", null, { takte: n }); zeige("📏 " + n + taktWort(n), null, W("gilt für die nächste Aufnahme", "applies to the next recording")); } },
+      { key: "live:quelle", sym: "🎤", name: W("Quelle", "Source"), farbe: "#f0b070", info: ein ? QUELLE_NAME[Z.quelle] : "⚠ " + W("kein Eingang an", "no input on"),
+        los: () => { if (!ein) { eingangMenue(); return; } const n = (Z.quelle + 1) % 3; LP().loop("einstellen", null, { quelle: n }); zeige("🎤 " + QUELLE_NAME[n], null, W("was der Looper aufnimmt", "what the looper records")); } },
+      Object.assign({ key: "live:drop", name: "Drop", farbe: "#ff9a40", los: liveDrop }, dropIt),
+      { key: "live:rec", sym: aufnahmeAn ? "⏺" : "💾", name: aufnahmeAn ? W("Aufnahme läuft", "Recording") : W("Session aufnehmen", "Record session"), farbe: REC_FARBE, an: aufnahmeAn,
+        info: aufnahmeAn ? recZeit + (aufZiel === "USB-Stick" ? " · USB" : "") : aufStick ? W("auf USB-Stick", "to USB stick") : W("in den Zynthian", "into the Zynthian"), los: aufnahme });
+    const g = [{ titel: "🔁 " + W("Looper · Drop · Aufnahme", "Looper · drop · recording"), l }];
+    const hat = Z.s.some(Boolean), spielt = Z.s.some(s => s && s.zustand === "spielt"), pause = Z.s.some(s => s && s.zustand === "pause");
+    g.push({ titel: "🧰 " + W("Looper-Werkzeuge", "Looper tools"), l: [
+      { key: "live:pause", sym: spielt || !pause ? "⏸" : "▶", name: spielt || !pause ? W("Alle anhalten", "Pause all") : W("Alle weiter", "Resume all"), farbe: "#e0a050", info: hat ? "" : W("noch nichts aufgenommen", "nothing recorded yet"), los: livePauseAlle },
+      { key: "live:letzte", sym: "↶", name: W("Letzte weg", "Undo last"), farbe: "#d8c088", info: W("jüngste Schicht löschen", "delete newest layer"), los: () => { const P = LP(); if (P && P.loop("letzte")) zeige("↶ " + W("Letzte Schicht gelöscht", "Newest layer deleted")); else zeige("↶ " + W("Nichts zum Löschen", "Nothing to delete")); liveFrisch(); } },
+      { key: "live:alle", sym: "🗑", name: W("Alle löschen", "Clear all"), farbe: "#e8462a", info: W("2× tippen", "tap twice"), los: () => { if (!hat) { zeige("🗑 " + W("Schon alles leer", "Already empty")); return; } if (zweimal("alle", "🗑 " + W("Alle Schichten löschen?", "Delete all layers?"))) { LP().loop("alleLoeschen"); zeige("🗑 " + W("Alle Schichten gelöscht", "All layers deleted")); liveFrisch(); } } },
+      { key: "live:einst", sym: "⚙", name: W("Looper & Drop", "Looper & drop"), farbe: "#c8a0e0", info: W("Versatz, Drop-Länge", "offset, drop length"), los: () => liveMenue() }] });
+    return g;
+  }
+  /* Regler auf der Live-Seite (Bank A): Lautstärke der vier Schichten · drücken: leer → aufnehmen, sonst 2× drücken = löschen */
+  const LIVE_REGLER = [0, 1, 2, 3].map(i => ({ name: "🔁 " + W("Schicht ", "Layer ") + (i + 1), lo: 0, hi: 160, schritt: 5,
+    lies: () => { const s = liveZ().s[i]; return s ? Math.round(s.laut * 100) : 0; },
+    setz: v => { const P = LP(); if (P && liveZ().s[i]) P.loop("laut", i, v / 100); },
+    text: v => { const s = liveZ().s[i]; return !s ? W("leer", "empty") : s.zustand === "wartet" || s.zustand === "nimmt" ? "⏺ REC" : s.zustand === "pause" ? "⏸ " + v + "%" : s.stumm ? "🔇 " + v + "%" : v + "%"; },
+    get drucktext() { return liveZ().s[i] ? W("2× drücken: löschen", "push 2×: delete") : W("drücken: aufnehmen", "push: record"); },
+    aktion: () => { const s = liveZ().s[i]; if (!s) { liveTippen(i); return; } if (zweimal("dreh" + i, "🗑 " + W("Schicht ", "Layer ") + (i + 1) + W(" löschen?", " delete?"), W("Regler noch einmal drücken", "push the knob again"))) liveLoeschen(i); } }));
+  const liveSeite = () => SEITE === "buehne" && zpSeite === "live";
+  let liveSig = "";
+  function liveFrisch() { liveSig = ""; setTimeout(liveTick, 60); }
+  /* 4× pro Sekunde: Fortschritt und Texte direkt nachziehen, neu gezeichnet wird nur, wenn sich etwas Grundsätzliches ändert */
+  function liveTick() {
+    if (!PULT || !zpEl || !liveSeite() || zpRuhe || panelAktiv()) { liveSig = ""; return; }
+    const blatt = zpAufbauen(), sig = blatt.map(it => it ? [it.sym, it.name, !!it.an, !!it.vor, it.farbe, it.p != null, !!it.info].join("|") : "").join("‖") + "#" + bank;
+    if (sig !== liveSig) { liveSig = sig; zpZeichnen(true); return; }
+    blatt.forEach((it, i) => { const el = zpEl.querySelector('[data-zp-k="' + i + '"]'); if (!el || !it) return;
+      if (it.p != null) el.style.setProperty("--p", it.p + "%");
+      const t = el.querySelector(".zp-dauer"); if (t && t.textContent !== it.info) t.textContent = it.info; });
+    zpMerk = ""; if (!bank) zpReglerAnzeige();
+  }
+  setInterval(liveTick, 250);
+  function liveMenue(fokusK) {
+    const P = LP(), Z = liveZ(), zz = (id, t, w, u) => '<button type="button" data-zm="' + id + '">' + t + (w != null ? "<b>" + w + "</b>" : "") + (u ? "<small>" + u + "</small>" : "") + "</button>";
+    const neu = id => () => liveMenue(id), ver = Z.versatz;
+    const verStufe = st => { if (!P) return; let v = ver == null ? (st > 0 ? Z.latStd : -1) : ver + st * 5; P.loop("einstellen", null, { versatz: v < 0 ? null : Math.min(400, v) }); liveMenue("versatz"); };
+    const a = { zu: menueZu,
+      takte: () => { const l = [1, 2, 4, 8]; P && P.loop("einstellen", null, { takte: l[(l.indexOf(Z.takte) + 1) % 4] }); neu("takte")(); },
+      "takte:stufe": st => { const l = [1, 2, 4, 8]; P && P.loop("einstellen", null, { takte: l[Math.max(0, Math.min(3, l.indexOf(Z.takte) + st))] }); neu("takte")(); },
+      quelle: () => { P && P.loop("einstellen", null, { quelle: (Z.quelle + 1) % 3 }); neu("quelle")(); },
+      "quelle:stufe": st => { P && P.loop("einstellen", null, { quelle: (Z.quelle + st + 3) % 3 }); neu("quelle")(); },
+      versatz: () => { P && P.loop("einstellen", null, { versatz: null }); neu("versatz")(); }, "versatz:stufe": verStufe,
+      drop: () => { const l = [2, 4, 8]; schreib("imres-zp-drop", String(l[(l.indexOf(dropTakte()) + 1) % 3])); neu("drop")(); },
+      "drop:stufe": st => { const l = [2, 4, 8]; schreib("imres-zp-drop", String(l[Math.max(0, Math.min(2, l.indexOf(dropTakte()) + st))])); neu("drop")(); },
+      eingang: () => eingangMenue(),
+      alle: () => { if (zweimal("alleM", "🗑 " + W("Alle Schichten löschen?", "Delete all layers?"), W("noch einmal wählen", "select again"))) { P && P.loop("alleLoeschen"); zeige("🗑 " + W("Alle Schichten gelöscht", "All layers deleted")); } } };
+    const m = menue("<h3>🔁 " + W("Looper & Drop", "Looper & drop") + '</h3><div class="reihe zyn-opt">' +
+      zz("takte", "📏 " + W("Loop-Länge: ", "Loop length: "), Z.takte + taktWort(Z.takte), W("◀ ▶ · eine Schicht ist so lang; aufgenommen wird ab der nächsten 1", "◀ ▶ · one layer is this long; recording starts on the next 1")) +
+      zz("quelle", "🎤 " + W("Quelle: ", "Source: "), QUELLE_NAME[Z.quelle], Z.eingaenge.some(Boolean) ? W("◀ ▶ · welcher Eingang in den Looper geht", "◀ ▶ · which input feeds the looper") : "⚠ " + W("gerade ist kein Eingang an", "no input is on right now")) +
+      zz("versatz", "⏱ " + W("Versatz: ", "Offset: "), ver == null ? W("automatisch", "automatic") + " (" + Z.latStd + " ms)" : ver + " ms", W("◀ ▶ in 5 ms · klingt die Schicht zu spät: größer, zu früh: kleiner · SEL: automatisch", "◀ ▶ in 5 ms · layer late: larger, early: smaller · SEL: automatic")) +
+      zz("drop", "⚡ " + W("Drop-Anlauf: ", "Drop build-up: "), dropTakte() + taktWort(dropTakte()), W("◀ ▶ · so lange wird es enger, dann knallt alles auf der 1 rein", "◀ ▶ · how long it tightens before everything hits on the 1")) +
+      zz("eingang", "🎛 " + W("Eingänge einrichten", "Set up inputs"), null, W("Handpan / Didgeridoo anstecken, Gain, eigene Effekte", "plug in handpan / didgeridoo, gain, own effects")) +
+      zz("alle", "🗑 " + W("Alle Schichten löschen", "Delete all layers"), null, W("zweimal wählen", "select twice")) +
+      '<button type="button" data-zm="zu">✕ ' + W("Fertig", "Done") + "</button></div>" +
+      '<p class="hinweis">' + W("Live-Reiter: Kachel tippen = aufnehmen / stumm · F-Taste halten = Schicht löschen · Regler = Lautstärke", "Live tab: tap tile = record / mute · hold F key = delete layer · knobs = level") + "</p>", a);
+    menueArt = "live"; if (fokusK) { const b = m.querySelector('[data-zm="' + fokusK + '"]'); if (b) fokusSetzen(b); }
+  }
+  /* ----- 📱 Spieler-Klänge: Helden lösen am Handy eigene Klänge aus, das Pult spielt sie in die Musik ----- */
+  const HELD = { barradin: ["🎻", "Barradin"], echo: ["🦌", "Echo"], friedrich: ["🏹", "Friedrich"], ezekiel: ["🗡", "Ezekiel"], meister: ["🎲", W("Spielleitung", "Game master")], tisch: ["🍺", W("Am Tisch", "The table")] };
+  const spielerAn = () => lies("imres-zp-spieler", "1") === "1";
+  function spielerEreignis(e) {
+    if (SEITE !== "buehne" || !spielerAn() || !window.ImresPult || !window.ImresPult.spielerKlang) return;
+    const ok = window.ImresPult.spielerKlang(String(e.klang || "")); if (!ok) return;
+    const h = HELD[e.wer] || ["📱", W("Spieler", "Player")];
+    if (!$(".zyn-menue")) zeige(h[0] + " " + esc2(h[1]), null, "📱 " + esc2(e.name || e.klang || ""));
+  }
+  let qrLaden = null;
+  const qrLib = () => qrLaden || (qrLaden = new Promise((ok, nein) => { if (window.qrcode) return ok(window.qrcode); const s = document.createElement("script"); s.src = "/zyn/qr.js"; s.onload = () => window.qrcode ? ok(window.qrcode) : nein(); s.onerror = () => { qrLaden = null; nein(); }; document.head.appendChild(s); }));
+  function qrSvg(text) {
+    const q = window.qrcode(0, "M"); q.addData(text); q.make(); const n = q.getModuleCount(), r = 2; let d = "";
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (q.isDark(y, x)) d += "M" + (x + r) + " " + (y + r) + "h1v1h-1z";
+    return '<svg viewBox="0 0 ' + (n + 2 * r) + " " + (n + 2 * r) + '" shape-rendering="crispEdges" aria-label="QR"><rect width="100%" height="100%" fill="#fff8ea"/><path d="' + d + '" fill="#120e18"/></svg>';
+  }
+  function spielerMenue(fokusK) {
+    const zeichne = (url, svg) => {
+      const m = menue("<h3>📱 " + W("Spieler-Klänge", "Player sounds") + '</h3><div class="zyn-qr"><div class="qr">' + (svg || '<span>⏳</span>') + "</div><div><b>" + W("Handy scannen – Held wählen – loslegen", "Scan – pick your hero – play") + "</b>" +
+        "<p>" + W("Jeder am Tisch bekommt acht eigene Klänge (Barradins Laute, Echos Donner, Rex bellt …). Sie kommen über das Pult und passen in Takt und Tonart.", "Everyone at the table gets eight sounds of their own. They play through the console, in time and in key.") + "</p>" +
+        '<code>' + esc2(url || "…") + "</code><small>" + W("Handys müssen im selben WLAN sein wie das Pult.", "Phones must be on the same Wi-Fi as the console.") + "</small></div></div>" +
+        '<div class="reihe zyn-opt"><button type="button" data-zm="an">🔊 ' + W("Spieler-Klänge: ", "Player sounds: ") + "<b>" + (spielerAn() ? W("an", "on") : W("aus", "off")) + "</b><small>" + W("aus: Handys können nichts auslösen (z. B. in ernsten Szenen)", "off: phones can’t trigger anything (e.g. serious scenes)") + "</small></button>" +
+        '<button type="button" data-zm="zu">✕ ' + W("Fertig", "Done") + "</button></div>",
+        { zu: menueZu, an: () => { schreib("imres-zp-spieler", spielerAn() ? "0" : "1"); spielerMenue("an"); } });
+      menueArt = "spieler"; if (fokusK) { const b = m.querySelector('[data-zm="' + fokusK + '"]'); if (b) fokusSetzen(b); }
+    };
+    zeichne(spielerMenue.url, spielerMenue.svg);
+    if (spielerMenue.svg) return;
+    Promise.all([fetch("/zyn/adresse").then(r => r.json()), qrLib()]).then(([a]) => {
+      const host = a && a.ip && a.ip !== "127.0.0.1" ? a.ip : location.hostname; const url = "http://" + host + ":" + (a && a.port || location.port || 8790) + "/zyn/spieler";
+      spielerMenue.url = url; spielerMenue.svg = qrSvg(url); if (menueArt === "spieler") zeichne(url, spielerMenue.svg);
+    }).catch(() => { if (menueArt === "spieler") zeige("⚠ " + W("Adresse nicht gefunden – WLAN verbunden?", "Address not found – Wi-Fi connected?")); });
+  }
+  /* ----- 💤 Einschlaf-Timer: nach X Minuten langsam leiser und aus ----- */
+  const SCHLAF = { bis: 0, dauer: 0, orig: null }, SCHLAF_STUFEN = [0, 15, 30, 45, 60, 90];
+  const schlafRest = () => SCHLAF.bis ? Math.max(0, (SCHLAF.bis - Date.now()) / 1000) : 0;
+  const schlafText = () => { const r = schlafRest(); return "💤 " + (r >= 60 ? Math.ceil(r / 60) + "′" : zeitText(r)); };
+  const schlafRegler = () => (SEITE === "welten" ? [ZP_PARAM.w_gesamt] : [ZP_PARAM.musik, ZP_PARAM.hg]).filter(Boolean);
+  function schlafZurueck() { if (SCHLAF.orig) SCHLAF.orig.forEach(([r, v]) => { try { r.setz(v); } catch (_) {} }); SCHLAF.orig = null; }
+  function schlafSetzen(min) {
+    schlafZurueck();
+    if (!min) { SCHLAF.bis = 0; zeige("💤 " + W("Einschlaf-Timer aus", "Sleep timer off")); }
+    else { SCHLAF.bis = Date.now() + min * 60000; SCHLAF.dauer = min * 60; zeige("💤 " + min + " " + W("Minuten", "minutes"), null, W("am Ende wird es langsam leiser, dann ist Ruhe", "fades out gently at the end")); }
+    zpZeichnen(true); if (zpRuhe) zpRuheZeichnen();
+  }
+  function schlafTick() {
+    if (!SCHLAF.bis) return; const rest = schlafRest(), F = Math.min(180, SCHLAF.dauer / 4);
+    if (rest <= 0) {
+      const orig = SCHLAF.orig; SCHLAF.bis = 0; SCHLAF.orig = null;
+      allesStopp(); const P = LP(); if (P && SEITE === "buehne") P.loop("allePause");
+      zeige("💤 " + W("Gute Nacht", "Good night"), null, W("alles aus – die Lautstärke ist wieder wie vorher", "all off – volume restored"));
+      setTimeout(() => { if (orig) orig.forEach(([r, v]) => { try { r.setz(v); } catch (_) {} }); }, 3000);
+      zpZeichnen(true); if (zpRuhe) zpRuheZeichnen(); return;
+    }
+    if (rest < F) { if (!SCHLAF.orig) SCHLAF.orig = schlafRegler().map(r => [r, r.lies()]); const f = Math.pow(rest / F, 1.6); SCHLAF.orig.forEach(([r, v]) => { try { r.setz(r.lo + (v - r.lo) * f); } catch (_) {} }); }
+  }
+  function schlafMenue() {
+    const akt = SCHLAF.bis ? SCHLAF_STUFEN.reduce((b, x) => x && Math.abs(x * 60 - schlafRest()) < Math.abs(b * 60 - schlafRest()) ? x : b, 15) : 0;
+    const a = { zu: menueZu }; SCHLAF_STUFEN.forEach(x => { a["s" + x] = () => { schlafSetzen(x); menueZu(); }; });
+    const m = menue("<h3>💤 " + W("Einschlaf-Timer", "Sleep timer") + "</h3>" + (SCHLAF.bis ? '<p class="hinweis">' + W("läuft – noch ", "running – ") + zeitText(schlafRest()) + W("", " left") + "</p>" : "") + '<div class="reihe zyn-opt">' +
+      SCHLAF_STUFEN.map(x => '<button type="button" data-zm="s' + x + '"' + (SCHLAF.bis && x === akt ? ' class="an"' : "") + ">" + (x ? "💤 " + x + " " + W("Minuten", "minutes") : "✕ " + W("Aus", "Off")) + (x ? "<small>" + W("die letzten ", "fades over the last ") + Math.round(Math.min(180, x * 15) / 60) + W(" Minuten wird es leiser", " minutes") + "</small>" : "") + "</button>").join("") +
+      '<button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>", a);
+    menueArt = "schlaf"; return m;
+  }
+  /* Uhr: Aufnahmezeit und Einschlaf-Timer im Kopf und im Ruhebild */
+  setInterval(() => {
+    schlafTick(); if (!PULT || !zpEl) return;
+    const rz = aufnahmeAn && aufSeit ? zeitText((Date.now() - aufSeit) / 1000) : "", st = SCHLAF.bis ? schlafText() : "";
+    const a = zpEl.querySelector(".zp-recz"); if (a && rz && a.textContent !== rz) { a.textContent = rz; zpMerk = ""; }
+    const s = zpEl.querySelector(".zp-schlaf"); if (s && st && s.textContent !== st) { s.textContent = st; zpMerk = ""; }
+    if (zpRuheEl && zpRuhe) { const u = zpRuheEl.querySelector(".zr-uhr"), h = zrUhr(); if (u && u.innerHTML !== h) u.innerHTML = h; }
+  }, 500);
+  const zrUhr = () => (aufnahmeAn ? '<span class="rec">⏺ ' + (aufSeit ? zeitText((Date.now() - aufSeit) / 1000) : "REC") + "</span>" : "") + (SCHLAF.bis ? "<span>" + schlafText() + "</span>" : "");
   /* ----- was auf einer Seite liegt: Gruppen, jede beginnt auf einem neuen Blatt (8 Kacheln) ----- */
   const ZUS_GR_SYM = { wetter: "🌦", wasser: "💧", haus: "🏠", wild: "🦌", hof: "🐄", menschen: "👥", handwerk: "🔨", grusel: "👻", wesen: "🐉", duester: "🌑", behaglich: "🕯", weitere: "✨" };
   const ZUS_SYM = { regen: "🌧", starkregen: "⛈", gewitter: "🌩", sturm: "🌪", wind: "💨", laub: "🍃", schnee: "❄", bach: "🏞", wellen: "🌊", wasserfall: "💦", tropfen: "💧", blubbern: "🫧", feuer: "🔥", kessel: "🍲", uhr: "🕰", katze: "🐈", glocke: "🔔", muehle: "⚙",
@@ -937,6 +1138,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       return g.filter(x => x.l.length);
     }
     if (zpSeite === "beats") return g;
+    if (zpSeite === "live") return liveInhalt();
     if (zpSeite === "set") {
       g.push({ titel: W("Set – deine Songs", "Set – your songs"), l: SET.map((sn, i) => ({ key: "set:" + i, sym: sn.sym || "🎬", name: (i + 1) + ". " + sn.name, an: i === setIndex, los: () => setLaden(i) }))
         .concat([{ sym: "➕", name: W("Jetzt speichern", "Save current"), los: setSpeichern }]) });
@@ -981,7 +1183,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const favListe = () => FAV[zpSeite] || [];
   function zpAufbauen() {
     zpGruppen = zpInhalt(); zpListe = [];
-    const fl = zpSeite === "set" ? [] : favListe();
+    const fl = zpSeite === "set" || zpSeite === "live" ? [] : favListe();
     if (fl.length) {
       const alle = {}; zpGruppen.forEach(gr => gr.l.forEach(it => { if (it.key) alle[it.key] = it; }));
       const favs = fl.map(k => alle[k]).filter(Boolean).map(it => Object.assign({}, it, { fav: true }));
@@ -1032,6 +1234,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     seite_vor: [W("➡ nächste Seite", "➡ next page"), W("Seite", "page")], seite_zurueck: [W("⬅ vorige Seite", "⬅ previous page"), W("◀ Seite", "◀ page")],
     bank: [W("⟲ Reglerbank wechseln", "⟲ Next knob bank"), W("Bank", "bank")], hg: [W("🌲 Hintergrund an/aus", "🌲 Backdrop on/off"), "🌲"],
     fx_aus: [W("✨ Effekte zurücksetzen", "✨ Reset effects"), W("FX aus", "FX off")],
+    loop: [W("🔁 Looper: nächste Schicht aufnehmen", "🔁 Looper: record next layer"), "🔁"], drop: [W("⚡ Drop auslösen", "⚡ Trigger drop"), "⚡ Drop"],
     filterzu: [W("🎛 Filter zu – solange gedrückt", "🎛 Filter close – while held"), W("Filter", "filter")],
     filterhoch: [W("🎛 Hochpass – solange gedrückt", "🎛 High-pass – while held"), W("Hochpass", "high-pass")],
     echowurf: [W("🔁 Echo-Wurf – solange gedrückt", "🔁 Echo throw – while held"), W("Echo-Wurf", "echo throw")],
@@ -1301,6 +1504,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (SEITE === "welten") return W_REGLER[bank % 2].map((r, i) => Object.assign({ druck: i === 0 ? "stumm" : i === 1 ? "friedlich" : "mitte" }, r));
     if (zpSeite === "beats" && !bank) return beatsRegler();
     if (zpSeite === "beats" && bank === 1) return beatsHuelleRegler();
+    if (zpSeite === "live" && SEITE === "buehne" && !bank) return LIVE_REGLER;
     const l = bank ? ZB.regler[bankName()] : ZB.regler["A:" + (zpSeite === "set" ? "stimmung" : zpSeite)];
     return (l || []).slice(0, 4).map(k => ZP_PARAM[k] || ZP_PARAM.nichts);
   }
@@ -1346,7 +1550,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   }, 25);
   function zpDreh(nr, d) {
     const beatsRg = zpSeite === "beats" && bank < 2 && !panelAktiv();
-    if (drehGedrueckt[nr] && !beatsRg) { drehGedreht[nr] = true; zpParamZyklus(nr, d); return; }
+    if (drehGedrueckt[nr] && !beatsRg && !(liveSeite() && !bank && !panelAktiv())) { drehGedreht[nr] = true; zpParamZyklus(nr, d); return; }
     const r = zpRegler()[nr]; if (!r || !r.schritt) return; const f = drehFaktor("zp" + nr + ":" + r.name, d, (r.hi - r.lo) / r.schritt >= 40);
     const mk = mxKey(r); if (mk && (MX.stumm[mk] != null || mxBlend[mk])) { if (mxBlend[mk]) { clearInterval(mxBlend[mk].t); delete mxBlend[mk]; } if (MX.stumm[mk] != null) { delete MX.stumm[mk]; MX.soloStumm = (MX.soloStumm || []).filter(x => x !== mk); mxMerken(); zpZeichnen(true); } }
     const v0 = r.lies(); let v = rasten(v0 + d * r.schritt * f, r);
@@ -1417,6 +1621,8 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       case "autopilot": autoSetzen(AUTO_STUFEN[(AUTO_STUFEN.indexOf(autoModus) + 1) % AUTO_STUFEN.length]); return true;
       case "set_weiter": if (SEITE === "welten" || !SET.length) return true; setLaden(Math.min(SET.length - 1, setIndex + 1)); return true;
       case "mixab": mxAB(); return true;
+      case "loop": { if (SEITE !== "buehne") return false; const Z = liveZ(), i = Z.s.findIndex(x => !x); if (Z.s.some(x => x && (x.zustand === "wartet" || x.zustand === "nimmt"))) { zeige("⏺ " + W("Nimmt gerade schon auf", "Already recording")); return true; } if (i < 0) { zeige("🔁 " + W("Alle vier Schichten belegt", "All four layers in use"), null, W("Live-Reiter: F-Taste halten löscht eine", "Live tab: hold an F key to delete one")); return true; } liveTippen(i); return true; }
+      case "drop": if (SEITE !== "buehne") return false; liveDrop(); return true;
       case "set_zurueck": if (SEITE === "welten" || !SET.length) return true; setLaden(Math.max(0, setIndex - 1)); return true;
       case "nichts": return true;
     }
@@ -1457,6 +1663,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   }
   function zpFavUmschalten(i) {
     const it = zpBlattJetzt()[i]; if (!it || !it.key) return;
+    if (zpSeite === "live") { const m = /^loop:(\d)$/.exec(it.key); if (m) liveLoeschen(+m[1]); return; }
     if (zpSeite === "set") { const nr = +String(it.key).slice(4); if (SET[nr]) setMenue(nr); return; }
     const l = favListe().slice(), j = l.indexOf(it.key);
     if (j >= 0) { l.splice(j, 1); zeige("☆ " + it.name, null, W("kein Favorit mehr", "no longer a favourite")); } else { l.push(it.key); zeige("★ " + it.name, null, W("Favorit – steht jetzt vorne", "favourite – now shown first")); }
@@ -1548,11 +1755,14 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       (SEITE === "buehne" ? zz("begl", "🎹 " + W("Synth-Begleitung: ", "Synth accompaniment: ") + "<b>" + (BEGL.an ? W("an", "on") : W("aus", "off")) + "</b>", W("Akkorde als MIDI an Zynthian-Synths", "chords as MIDI to Zynthian synths")) : "") +
       (SEITE === "buehne" ? zz("beats", "🥁 " + W("Drumpad / Beats", "Drum pad / beats"), W("Step-Sequencer wie eine kleine TR-8S · auch: ALT + PAD oder oben der Reiter „Beats“", "step sequencer · also ALT + PAD or the Beats tab")) : "") +
       (SEITE === "buehne" ? zz("eingang", "🎤 " + W("Eingänge (Handpan, Didgeridoo …)", "Inputs (handpan, didgeridoo …)"), W("Instrumente anstecken, Gain, Lautstärke, eigene Effekte", "plug in instruments, gain, level, own effects")) : "") +
+      (SEITE === "buehne" ? zz("live", "🔁 " + W("Live: Looper, Drop, Aufnahme", "Live: looper, drop, recording"), W("Handpan in Schichten loopen, Drop auf die 1, Session als WAV · auch Reiter „Live“", "loop the handpan in layers, drop on the 1, record the session · also the Live tab")) : "") +
+      (SEITE === "buehne" ? zz("spieler", "📱 " + W("Spieler-Klänge: ", "Player sounds: ") + "<b>" + (spielerAn() ? W("an", "on") : W("aus", "off")) + "</b>", W("QR-Code fürs Handy – jeder Held löst eigene Klänge aus", "QR code for phones – every hero triggers their own sounds")) : "") +
+      zz("schlaf", "💤 " + W("Einschlaf-Timer: ", "Sleep timer: ") + "<b>" + (SCHLAF.bis ? schlafText().slice(3) : W("aus", "off")) + "</b>", W("nach einer Weile langsam leiser und aus – für Gute-Nacht-Geschichten", "fades out after a while – for bedtime stories")) +
       zz("audio", "🎚 " + W("Audio: Ausgänge & Pegel", "Audio: outputs & levels"), W("welche Buchsen, Lautstärke der Soundkarte", "which jacks, sound-card levels")) +
       zz("einst", "🛠 " + W("Einstellungen", "Settings"), W("Leistung, Licht, Bühnenbild, Belegung …", "performance, light, stage view, mapping …")) +
       '<button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>" +
       '<p class="hinweis">' + W("F1–F4 wählen · Pfeile/Drehregler + SEL · BACK schließt", "F1–F4 pick · arrows/knob + SEL · BACK closes") + "</p>",
-      { modus: zpModusMenue, abend: zpAbendMenue, optionen: () => optionenMenue(), system: systemMenue, zu: menueZu, einst: () => zpEinstellungen(), begl: () => beglMenue(), eingang: () => eingangMenue(), audio: () => audioMenue(), beats: () => { menueZu(); zpAktion("beats"); },
+      { live: () => { menueZu(); mischAn = false; zpSeiteSetzen("live"); }, spieler: () => spielerMenue(), schlaf: () => schlafMenue(), modus: zpModusMenue, abend: zpAbendMenue, optionen: () => optionenMenue(), system: systemMenue, zu: menueZu, einst: () => zpEinstellungen(), begl: () => beglMenue(), eingang: () => eingangMenue(), audio: () => audioMenue(), beats: () => { menueZu(); zpAktion("beats"); },
         autoueb: () => { schreib("imres-zp-autoueb", AUTO_UEB[(AUTO_UEB.indexOf(autoUeb()) + 1) % AUTO_UEB.length]); zpMenue(); const b = $('.zyn-menue [data-zm="autoueb"]'); if (b) fokusSetzen(b); },
         autowahl: () => { schreib("imres-zp-autowahl", AUTO_WAHL[(AUTO_WAHL.indexOf(autoWahl()) + 1) % AUTO_WAHL.length]); zpMenue(); const b = $('.zyn-menue [data-zm="autowahl"]'); if (b) fokusSetzen(b); },
         auto: () => { autoSetzen(AUTO_STUFEN[(AUTO_STUFEN.indexOf(autoModus) + 1) % AUTO_STUFEN.length]); zpMenue(); const b = $('.zyn-menue [data-zm="auto"]'); if (b) fokusSetzen(b); } });
@@ -2305,7 +2515,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   function zpEinstellungen(fokusK) {
     const zz = (id, t, w, u) => '<button type="button" data-zm="' + id + '">' + t + (w != null ? "<b>" + w + "</b>" : "") + (u ? "<small>" + u + "</small>" : "") + "</button>";
     const neu = id => () => { zpEinstellungen(id); };
-    const a = { zu: menueZu, hilfe: zpHilfe, sicher: () => sicherMenue(), mischer: () => mxMenue(), tour: () => { menueZu(); tourStart(); }, ueb: () => { const P = window.ImresPult, l = [1, 2, 4, 6, 8], v = P.uebergang(); P.uebergang(l[(l.findIndex(x => x >= v) + 1) % l.length] || 1); neu("ueb")(); }, beleg: () => belegMenue(), wlan: () => wlanMenue(true), bt: () => btMenue(false),
+    const a = { zu: menueZu, hilfe: zpHilfe, sicher: () => sicherMenue(), livemen: () => liveMenue(), mischer: () => mxMenue(), tour: () => { menueZu(); tourStart(); }, ueb: () => { const P = window.ImresPult, l = [1, 2, 4, 6, 8], v = P.uebergang(); P.uebergang(l[(l.findIndex(x => x >= v) + 1) % l.length] || 1); neu("ueb")(); }, beleg: () => belegMenue(), wlan: () => wlanMenue(true), bt: () => btMenue(false),
       leistung: () => { const l = ["voll", "mittel", "leicht", "spar"], n = l[(l.indexOf(leistung()) + 1) % l.length]; schreib("imres-lw-mittel", n === "mittel" ? "1" : "0"); schreib("imres-lw-leicht", n === "leicht" || n === "spar" ? "1" : "0"); schreib("imres-lw-spar", n === "spar" ? "1" : "0"); schreib("imres-zp-leistung-gewaehlt", "1"); zeige("⚡ " + LEISTUNG_NAME[n], null, W("lädt neu …", "reloading …")); setTimeout(() => location.reload(), 500); },
       hell: () => { const v = LED_STUFEN[(LED_STUFEN.indexOf(ledHell()) + 1) % LED_STUFEN.length]; schreib("imres-zp-hell", String(v)); ledMerk = ""; ledsMelden(); neu("hell")(); },
       looplen: () => { const l = [1, 2, 4, 8], v = l[(l.indexOf(loopTakte()) + 1) % l.length]; schreib("imres-zp-looplen", String(v)); neu("looplen")(); },
@@ -2319,6 +2529,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       zz("hell", "💡 " + W("Tastenlicht: ", "Button light: "), Math.round(ledHell() * 100) + " %") +
       zz("ruhe", "💤 " + W("Bühnenbild nach: ", "Stage view after: "), ruheSek() ? ruheSek() + " s" : W("nie", "never"), W("ohne Eingabe spielt die Band im Bild", "with no input the band plays on screen")) +
       zz("bild", "🖼 " + W("Bühnenbild hinter dem Pult: ", "Stage behind the console: "), bildHinten() ? W("an", "on") : W("aus", "off"), W("kostet Rechenzeit", "costs processing time")) +
+      (SEITE === "buehne" ? zz("livemen", "🔁 " + W("Looper & Drop", "Looper & drop"), null, W("Loop-Länge, Quelle, Versatz, Drop-Anlauf", "loop length, source, offset, drop build-up")) : "") +
       zz("looplen", "⟳ " + W("Regler-Loop: ", "Knob loop: "), loopTakte() + W(" Takte", " bars"), W("ALT + Regler drücken: aufnehmen / Loop aus", "ALT + push knob: record / loop off")) +
       zz("mischer", "🎚 " + W("Mischer", "Mixer"), null, W("dB/%, Blendzeit, Mischungen A/B, Obergrenzen", "dB/%, fade time, mixes A/B, upper limits")) +
       zz("beleg", "🎛 " + W("Belegung ändern", "Change mapping"), null, W("Drehregler, Effekte und Tasten selbst belegen", "assign knobs, effects and buttons")) +
@@ -2483,12 +2694,12 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     else { const sn = z.stimmung && L ? teil(L.namen.st[z.stimmung] || z.stimmung, "")[1] : "–", kn = z.kulLaeuft && L && z.kulisse !== "keine" ? teil(L.namen.kul[z.kulisse] || z.kulisse, "")[1] : W("kein Hintergrund", "no backdrop");
       status = (z.laeuft ? "▶ <b>" + esc2(sn) + "</b>" : "■ " + esc2(sn)) + " · 🌲 " + esc2(kn) + " · ♩ " + Math.round(z.tempoJetzt || z.tempo || 0) + (OPT.takt === "slave" && tempoMidi ? " ⇄" : OPT.takt === "master" ? " ⇉" : ""); }
     status = lastAnzeige() + status + (autoModus !== "aus" ? " · 🤖" : "") + (BEGL.an && SEITE === "buehne" ? " · 🎹" : "");
-    status += (OPT.tonartAn ? " · 🎼 " + esc2(tonartName()) : "") + (aufnahmeAn ? ' · <span class="rec">⏺ REC</span>' : "") + (alt ? ' · <span class="alt">ALT</span>' : "");
+    status += (OPT.tonartAn ? " · 🎼 " + esc2(tonartName()) : "") + (aufnahmeAn ? ' · <span class="rec">⏺ <span class="zp-recz">' + (aufSeit ? zeitText((Date.now() - aufSeit) / 1000) : "REC") + "</span></span>" : "") + (SCHLAF.bis ? ' · <span class="zp-schlaf">' + schlafText() + "</span>" : "") + (alt ? ' · <span class="alt">ALT</span>' : "");
     const tabs = ZP_SEITEN.map(s => '<button type="button" class="zp-tab' + (s.id === zpSeite ? " an" : "") + '" data-zp-tab="' + s.id + '" style="--f:' + s.farbe + '"><span class="zp-sym">' + s.sym + "</span> " + s.name + "</button>").join("");
     const kach = Array.from({ length: 8 }, (_, i) => { const it = blatt[i];
       const f = '<span class="zp-f' + (i < 4 ? "" : " alt") + '">' + (i < 4 ? "" : "ALT ") + "F" + (i % 4 + 1) + "</span>";
       if (!it) return '<div class="zp-k leer">' + f + "</div>";
-      return '<button type="button" class="zp-k' + (it.an ? " an" : "") + (it.vor ? " vor" : "") + (it.fav ? " fav" : "") + (i === zpCursor ? " cur" : "") + (it.p != null ? " lauf" : "") + '" data-zp-k="' + i + '" style="--k:' + kachelFarbe(it) + (it.p != null ? ";--p:" + it.p + "%" : "") + '">' + f + (it.fav ? '<span class="zp-stern">★</span>' : "") + (it.still ? '<span class="zp-still" title="' + W("mit Stille", "brings a hush") + '">🤫</span>' : "") + kachelBild(it, it.sym || d.sym) + (it.an && SEITE === "buehne" && z.laeuft ? '<span class="zp-eq"><i></i><i></i><i></i></span>' : "") + '<span class="zp-n">' + esc2(it.name) + "</span>" + (it.vor ? '<span class="zp-v">' + W("am Taktende", "at bar end") + "</span>" : "") + (it.info ? '<span class="zp-v zp-dauer">' + esc2(it.info) + "</span>" : "") + "</button>"; }).join("");
+      return '<button type="button" class="zp-k' + (it.an ? " an" : "") + (it.vor ? " vor" : "") + (it.fav ? " fav" : "") + (i === zpCursor ? " cur" : "") + (it.p != null ? " lauf" : "") + '" data-zp-k="' + i + '" style="--k:' + kachelFarbe(it) + (it.p != null ? ";--p:" + it.p + "%" : "") + '">' + f + (it.fav ? '<span class="zp-stern">★</span>' : "") + (it.still ? '<span class="zp-still" title="' + W("mit Stille", "brings a hush") + '">🤫</span>' : "") + kachelBild(it, it.sym || d.sym) + (it.an && SEITE === "buehne" && z.laeuft ? '<span class="zp-eq"><i></i><i></i><i></i></span>' : "") + '<span class="zp-n">' + esc2(it.name) + "</span>" + (it.vor && !it.info ? '<span class="zp-v">' + W("am Taktende", "at bar end") + "</span>" : "") + (it.info ? '<span class="zp-v zp-dauer">' + esc2(it.info) + "</span>" : "") + "</button>"; }).join("");
     const gr = blatt[0] ? blatt[0].gruppe : (SEITE === "buehne" && !(window.ImresPult && window.ImresPult.listen) ? "⏳ " + W("Bühne lädt …", "Stage loading …") + " " + Math.round(performance.now() / 1000) + " s" : "");
     const kopf = '<div class="zp-gruppe"><span data-zp-gruppe="1">' + esc2(gr || d.name) + (zpGruppen.length > 1 ? ' <small>▸ ' + W("ALT + ▲ ▼: andere Gruppe", "ALT + ▲ ▼: other group") + "</small>" : "") + "</span>" + (n > 1 ? '<span class="zp-blatt"><button type="button" data-zp-blatt="-1">◀</button>' + (n <= 9 ? Array.from({ length: n }, (_, i) => "<i" + (i === bi ? ' class="an"' : "") + "></i>").join("") : "<em>" + (bi + 1) + " / " + n + "</em>") + '<button type="button" data-zp-blatt="1">▶</button></span>' : "") + "</div>";
     const bk = mischAktiv() ? "MIX" : spurAktiv() ? "SPUR" : SEITE === "welten" ? (bank ? "B" : "A") : bankName(), bf = BANK_FARBE[bk] || BANK_FARBE.A;
@@ -2500,7 +2711,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     const fuss = ["PLAY", "STOP", "PAD", "REC", "TEMPO", "CTRL"].map(k => zpSeite === "beats" && k === "PAD" ? t("PAD", "live", "#ff9a40") : zpSeite === "beats" && k === "REC" ? t("REC", BC.liveRec ? "⏺ LIVE" : "⏺", "#ff1a30") : zpSeite === "beats" && k === "CTRL" ? t("CTRL", W("halten: kopieren", "hold: copy"), "#ffe0a0") : kurz(k)).join("") + t("MIXER", bk, bf) + t("MENU", "☰", "#ffcf50");
     const html = '<div class="zp-kopf">' + tabs + '<span class="zp-status">' + status + "</span></div>" +
       (panelAktiv() ? '<div class="zp-mitte" style="--f:' + bf + '">' + mischHTML() + "</div>" : zpSeite === "beats" ? '<div class="zp-mitte" style="--f:' + d.farbe + '">' + beatsKopf() + beatsHTML() + "</div>" : zpSeite === "raum" && SEITE === "welten" ? '<div class="zp-mitte zr-m" style="--f:' + d.farbe + '">' + raumHTML() + "</div>" : '<div class="zp-mitte" style="--f:' + d.farbe + '">' + kopf + '<div class="zp-kacheln">' + kach + "</div></div>") +
-      '<div class="zp-regler" style="--b:' + bf + '"><div class="zp-bank">⟲ ' + W("Bank ", "Bank ") + bk + (SEITE !== "welten" && !spurAktiv() && (mischAktiv() || !(zpSeite === "beats" && bank < 2)) ? '<small>' + W("drücken+drehen ⇄", "push+turn ⇄") + "</small>" : "") + "</div>" + regler + "</div>" + '<div class="zp-fuss">' + fuss + "</div>";
+      '<div class="zp-regler" style="--b:' + bf + '"><div class="zp-bank">⟲ ' + W("Bank ", "Bank ") + bk + (SEITE !== "welten" && !spurAktiv() && (mischAktiv() || !(zpSeite === "beats" && bank < 2) && !(zpSeite === "live" && !bank)) ? '<small>' + W("drücken+drehen ⇄", "push+turn ⇄") + "</small>" : "") + "</div>" + regler + "</div>" + '<div class="zp-fuss">' + fuss + "</div>";
     if (html === zpMerk || (zpZeiger && !sofort)) return;
     zpMerk = html; zpEl.innerHTML = html; pulsSync(true); tourKlassen();
   }
@@ -2538,6 +2749,8 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (id === "mixab") return mxAbAkt() === "B" ? "#d090ff" : "#ffc830";
     if (id === "beats") return "#ff9a40";
     if (id === "spurmix") return "#ff9a80";
+    if (id === "loop") return "#ff9a80";
+    if (id === "drop") return "#ff9a40";
     return { play: "#30ff70", stop: "#ff1a30", passiert: "#ff6a10", stille: "#fff4e0", neubesetzen: "#ffc830", sprechen: "#f0dca0", aufnahme: "#ff1a30", takt: "#d8d0c0", hg: "#80ffb0", fx_aus: "#fff8ec",
       filterzu: BANK_FARBE.FX, filterhoch: BANK_FARBE.FX, echowurf: BANK_FARBE.FX, stotter: BANK_FARBE.GLITCH, rueckwaerts: BANK_FARBE.GLITCH, bandstop: BANK_FARBE.GLITCH, crushhalt: BANK_FARBE.GLITCH, tap: "#ffc830", autopilot: "#c040ff", set_weiter: "#ffe0a0", set_zurueck: "#ffe0a0" }[id] || "#000000";
   }
@@ -2758,6 +2971,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   ];
   const FW_REST = ["#ffc830", "#ff9a60", "#e0a050", "#d08ab0", "#a0c860", "#c8a0e0", "#f0b070"];
   function kachelFarbe(it) {
+    if (it.farbe) return it.farbe;
     const k = (it.key || "") + " " + (it.name || "") + " " + (it.gruppe || ""), t = k.toLowerCase();
     const m = /^st:(\w+)/.exec(it.key || ""); if (m && ST_BILD[m[1]]) return ST_BILD[m[1]][0];
     for (const [re, f] of FARBWELT) if (re.test(t)) return f;
@@ -2956,7 +3170,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       const gesehen = new Set();
       quellen = $$("#lautenwerk .lw-karte .lw-kquelle").map(el => { const n = (el.getAttribute("title") || "").split(" – ")[0].trim(); if (!n || gesehen.has(n)) return ""; gesehen.add(n); const sv = el.querySelector("svg"); return '<span class="q">' + (sv ? sv.outerHTML : "") + esc2(n) + "</span>"; }).join("");
     }
-    zpRuheEl.innerHTML = '<div class="zr-kopf"><div class="zr-titel">' + esc2(titel) + '</div><div class="zr-unter">' + esc2(unter) + (z.laeuft ? " · ♩ " + Math.round(z.tempoJetzt || z.tempo || 0) : "") + "</div></div>" +
+    zpRuheEl.innerHTML = '<div class="zr-kopf"><div class="zr-titel">' + esc2(titel) + '</div><div class="zr-unter">' + esc2(unter) + (z.laeuft ? " · ♩ " + Math.round(z.tempoJetzt || z.tempo || 0) : "") + "</div></div>" + '<div class="zr-uhr">' + zrUhr() + "</div>" +
       (quellen ? '<div class="zr-quellen">' + quellen + "</div>" : "") + '<div class="zr-tipp">' + W("Taste, Regler oder Bildschirm – weiter geht’s", "Any button, knob or touch to continue") + "</div>";
   }
   /* Tasten als 4 Spalten à 5 (unten → oben), so wie sie auf dem V5 liegen */
@@ -3144,8 +3358,18 @@ html.zyn-ruhe .zp-ruhe { display: block; }
 .zr-info { position: absolute; left: 8px; top: 6px; display: flex; flex-direction: column; gap: 1px; max-width: 42%; pointer-events: none; font-size: 12.5px; color: #e8dcc4; background: rgba(20, 14, 26, .72); border-radius: 9px; padding: 5px 9px; }
 .zr-info:empty { display: none; } .zr-info b { font-size: 14.5px; color: #fff4dc; } .zr-info small { color: #b8a8c8; font-size: 11px; }
 .zr-tipp { position: absolute; right: 8px; bottom: 5px; max-width: 46%; text-align: right; font-size: 10.5px; color: #a898b8; pointer-events: none; line-height: 1.25; }
-.zp-k.lauf::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: var(--p, 0%); background: linear-gradient(90deg, color-mix(in srgb, var(--f) 22%, transparent), color-mix(in srgb, var(--f) 48%, transparent)); border-right: 2px solid var(--f); pointer-events: none; }
+.zp-k.lauf::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: var(--p, 0%); background: linear-gradient(90deg, color-mix(in srgb, var(--k, var(--f)) 22%, transparent), color-mix(in srgb, var(--k, var(--f)) 48%, transparent)); border-right: 2px solid var(--k, var(--f)); pointer-events: none; }
 .zp-k.lauf .zp-s, .zp-k.lauf .zp-n, .zp-k.lauf .zp-v { position: relative; }
+.zp-ruhe .zr-uhr { position: absolute; right: 14px; top: 12px; display: flex; gap: 8px; font-size: 17px; }
+.zp-ruhe .zr-uhr:empty { display: none; } .zp-ruhe .zr-uhr span { padding: 6px 12px; border-radius: 12px; background: rgba(14, 10, 18, .6); border: 1px solid rgba(240, 220, 160, .35); color: #f0dca0; }
+.zp-ruhe .zr-uhr .rec { color: #ff6a6a; border-color: rgba(255, 74, 74, .55); }
+.zp-status .zp-schlaf { color: #f0dca0; }
+.zyn-menue .zyn-qr { display: flex; gap: 16px; align-items: center; margin: 4px 0 10px; text-align: left; }
+.zyn-menue .zyn-qr .qr { flex: none; width: 168px; height: 168px; border-radius: 12px; overflow: hidden; background: #fff8ea; display: grid; place-items: center; box-shadow: 0 0 0 2px #ffc830, 0 0 22px rgba(255, 200, 48, .25); }
+.zyn-menue .zyn-qr .qr svg { width: 100%; height: 100%; display: block; } .zyn-menue .zyn-qr .qr span { font-size: 30px; color: #120e18; }
+.zyn-menue .zyn-qr b { color: #ffc830; font-size: 16px; } .zyn-menue .zyn-qr p { margin: 6px 0; font-size: 13px; color: #d8ccb4; line-height: 1.35; font-weight: 500; }
+.zyn-menue .zyn-qr code { display: block; font-size: 14px; color: #fff4dc; background: #2a2134; border-radius: 8px; padding: 4px 8px; margin: 4px 0; word-break: break-all; }
+.zyn-menue .zyn-qr small { color: #a89f8f; font-size: 12px; }
 .zp-k .zp-dauer { color: #d8ccb4; font-weight: 600; } .zp-k.an .zp-dauer { color: #fff4dc; }
 .zp-k:active { transform: scale(.97); }
 @keyframes zpblink { 50% { border-color: #3a2f48 !important; } }
@@ -3289,7 +3513,8 @@ html.zyn-ruhe .zp-ruhe { display: block; }
         else if (e.typ === "midi") midi(e);
         else if (e.typ === "neu-laden") location.reload();
         else if (e.typ === "optionen") optSetzen(e.optionen || {}, true);
-        else if (e.typ === "aufnahme") { aufnahmeAn = !!e.an; leisteZeichnen(); }
+        else if (e.typ === "aufnahme") { const war = aufnahmeAn; aufnahmeStand(e); if (e.an && !war) aufSeit = Date.now(); leisteZeichnen(); if (PULT) zpZeichnen(true); }
+        else if (e.typ === "spieler") spielerEreignis(e);
         else if (e.typ === "wert" || e.typ === "aktion" || e.typ === "kachel" || e.typ === "blatt" || e.typ === "seite") fernBefehl(e);
       } catch (err) { console.warn("zyn", err); }
       if (e.typ !== "dreh") ledsMelden();
@@ -3319,7 +3544,7 @@ html.zyn-ruhe .zp-ruhe { display: block; }
   setTimeout(weltenMischBereit, 1500);
   setTimeout(tabPassend, 1200);
   if (SEITE === "buehne") setTimeout(() => { const r = $("#lautenwerk"); if (r) r.scrollIntoView({ block: "start" }); }, 600);
-  fetch("/zyn/status").then(r => r.json()).then(j => { aufnahmeAn = !!j.aufnahme; leisteZeichnen(); }).catch(() => {});
+  fetch("/zyn/status").then(r => r.json()).then(j => { aufnahmeAn = !!j.aufnahme; leisteZeichnen(); aufnahmeHolen(); }).catch(() => {});
   leisteZeichnen(); ledsMelden();
   window.ImresZyn = { _test: { ruhe: () => zpRuheAn(), gruppen: () => zpInhalt().map(g => ({ titel: g.titel, items: g.l.map(x => ({ key: x.key, sym: x.sym, name: x.name })) })), tonhoehe, tonartErkennen, stimmgeraet, get opt() { return OPT; }, autoSofort(art) { if (art === "mom") autoMom = 1; else if (art === "sp") autoSp = 1; else autoSt = 1; }, autoSetzen: m => autoSetzen(m) }, messer: MESSER, taste, dreh, midi, modusSetzen, optSetzen, get modus() { return modus; }, get opt() { return Object.assign({}, OPT); } };
 })();

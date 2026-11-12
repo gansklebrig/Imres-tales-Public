@@ -213,6 +213,27 @@ Drei Wege: oben der Reiter **🥁 Beats**, **ALT + PAD** (nochmal ALT + PAD: zur
 
 **Pads:** Oben rechts schaltet **🥁 Pads / ▦ Raster** die Ansicht um. In der Pad-Ansicht gibt es 8 große Pads – antippen spielt das Instrument sofort (F1–F4 spielen die oberen vier). Mit **⏺ Aufnahme** (oder REC) wird bei laufendem Beat alles, was du spielst, auf den nächsten Schritt gesetzt. Darunter das kleine Raster: dort siehst du, wann welches Instrument spielt (die Pads blitzen mit), und ein Tipp auf ein Feld nimmt den Schlag wieder raus.
 
+### 🔁 Live: Looper, Drop, Aufnahme (Reiter „Live“)
+
+Oben der Reiter **🔁 Live** (oder MENU → 🔁 Live). Dafür muss ein Eingang an sein (MENU → 🎤 Eingänge).
+
+- **Handpan-Looper – vier Schichten (F1–F4):** Kachel antippen = aufnehmen. Die Aufnahme beginnt auf der nächsten **1** (⏳ zählt die Schläge runter), läuft genau 1/2/4/8 Takte (⏺ füllt sich) und spielt dann nahtlos im Takt weiter (🔁). Nochmal antippen = stumm/an. Während sie wartet oder aufnimmt: antippen = verwerfen. **F-Taste halten** = Schicht löschen.
+- **Regler 1–4** = Lautstärke der vier Schichten (bis 160 %). Regler drücken: leere Schicht → aufnehmen, sonst **2× drücken = löschen**.
+- **ALT F1 📏 Loop-Länge** 1/2/4/8 Takte · **ALT F2 🎤 Quelle** IN1 + IN2 / nur IN1 / nur IN2.
+- **ALT F3 ⚡ Drop:** ab der nächsten 1 wird es über 4 Takte enger (Filter schließt sich, Rauschen steigt, Trommelwirbel wird dichter, Beat dünnt aus) – auf der 1 danach knallt alles wieder rein. Anlauf 2/4/8 Takte in MENU → Einstellungen → 🔁 Looper & Drop. Auch auf eine Taste legbar („⚡ Drop auslösen“, „🔁 Looper: nächste Schicht aufnehmen“).
+- **ALT F4 💾 Session aufnehmen:** nimmt alles als WAV auf, siehe Abschnitt 9. Die Zeit läuft oben in der Statuszeile mit.
+- **Zweites Blatt (◀ ▶):** Alle anhalten / weiter · Letzte weg · Alle löschen (2× tippen) · Einstellungen.
+- Beim **Stimmungswechsel** halten die Schichten an (anderes Tempo, andere Tonart). Antippen = weiter ab der nächsten 1, im neuen Tempo angepasst (⏱).
+- **Versatz:** Klingt eine Schicht etwas zu spät oder zu früh, in MENU → Einstellungen → 🔁 Looper & Drop den Versatz in 5-ms-Schritten anpassen (SEL = wieder automatisch).
+
+### 📱 Spieler-Klänge am Handy
+
+**MENU → 📱 Spieler-Klänge** zeigt einen QR-Code. Jeder am Tisch scannt ihn (selbes WLAN), wählt seinen Helden – Barradin, Echo, Friedrich, Ezekiel, die Spielleitung oder „Alle am Tisch“ – und bekommt acht eigene Klänge (Lautenriff, Donner, Rex bellt, Klingenwirbel, Drache, Natürliche 20 …). Sie kommen über das Pult, Melodien passen in Takt und Tonart, und kurz erscheint, wer was ausgelöst hat. Im selben Menü lassen sich die Spieler-Klänge **ausschalten** (z. B. für ernste Szenen). Adresse ohne QR: **http://zynthian.local:8790/spieler**
+
+### 💤 Einschlaf-Timer
+
+**MENU → 💤 Einschlaf-Timer:** 15/30/45/60/90 Minuten. Am Ende wird es über bis zu drei Minuten langsam leiser, dann ist alles aus – die Lautstärke steht danach wieder wie vorher. Die Restzeit steht oben in der Statuszeile und im Ruhebild.
+
 ### 🌦 Wetter & Geräusche (Seite Ort)
 
 - **Wetter-Regler** (Regler 2 auf der Ort-Seite): ☀ klar → 💨 Wind → 🌧 Regen → ⛈ Starkregen → 🌩 Gewitter → 🌪 Unwetter – ein Dreh, und das ganze Wetter wandert mit.
@@ -269,7 +290,12 @@ Bedienen kannst du die Bühne dann über **MIDI** (Steuer-Kanal, siehe oben) und
 
 ## 9. Aufnahme
 
-**ALT + REC** (oder System-Menü, oder Handy): nimmt alles auf, was aus den Ausgängen kommt – die Bühne und Zynthian-Synths zusammen. Die Dateien liegen im Zynthian-Ordner **capture** (in der Zynthian-Weboberfläche unter „Audio/Captures“ herunterladbar). Die REC-Taste leuchtet rot, solange aufgenommen wird.
+**ALT + REC**, Reiter **🔁 Live → 💾 Session aufnehmen** (oder System-Menü, oder Handy): nimmt alles auf, was aus den Ausgängen kommt – die Bühne, deine Instrumente und Zynthian-Synths zusammen, als WAV (24 bit).
+
+- **USB-Stick eingesteckt?** Dann landet die Aufnahme direkt auf dem Stick im Ordner **BardenBeats** (z. B. `BardenBeats_2026-11-12_20-15-03.wav`). Nach dem Stoppen ist alles geschrieben – der Stick kann gleich raus.
+- **Ohne Stick** liegt sie im Zynthian-Ordner **capture** (Zynthian-Weboberfläche → „Audio/Captures“).
+
+Die Laufzeit steht oben in der Statuszeile (⏺ 12:34) und im Ruhebild, die REC-Taste leuchtet rot. Beim Stoppen zeigt das Pult Länge und Speicherort.
 
 ---
 
