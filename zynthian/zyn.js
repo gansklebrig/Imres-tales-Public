@@ -454,7 +454,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       [W("Regler 1–4", "Knobs 1–4"), REGLER().map(r => r.name).join(" · ")], [W("Regler drücken", "Push knob"), W("1: stumm/an · 2: Kulisse/Szenen · 3/4: Mitte", "1: mute · 2: backdrop · 3/4: centre")],
       ["ALT + REC", W("⏺ Aufnahme an / aus", "⏺ Record on / off")], ["ALT + TEMPO", W("MIDI-Takt: aus → Slave → Master", "MIDI clock: off → slave → master")], ["ALT + MENU", W("🎚 Optionen", "🎚 Options")],
       ["MIDI", W("Clock → Tempo und Schlag · Start/Stop · Noten 36–43 → F1–F4 (40–43 mit ALT) · CC 20–23 → Regler · Program Change → Stimmung · CC 119 → umschalten", "Clock → tempo and beat · Start/Stop · notes 36–43 → F1–F4 · CC 20–23 → knobs · Program Change → mood · CC 119 → switch")]];
-    menue("<h3>❔ " + W("Tastenbelegung", "Button map") + " – " + MODI[modus].sym + " " + MODI[modus].name + '</h3><div class="zyn-hilfe">' + b.concat(allg).map(([k, t]) => z(k, t)).join("") + '</div><div class="reihe drei"><button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>", { zu: menueZu });
+    menue("<h3>❔ " + W("Tastenbelegung", "Button map") + " – " + MODI[modus].sym + " " + MODI[modus].name + '</h3><div class="zyn-hilfe">' + b.concat(allg).map(([k, t]) => z(k, t)).join("") + '</div><div class="reihe drei"><button type="button" data-zm="tausch">⌨ ' + W("Tasten tauschen", "Swap buttons") + '</button><button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>", { zu: menueZu, tausch: () => tastenTausch() });
     menueArt = "hilfe";
   }
   function modusSetzen(k) {
@@ -2033,6 +2033,36 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (art === "r") { ZB.regler[a] = (ZB.regler[a] || ["nichts", "nichts", "nichts", "nichts"]).slice(); ZB.regler[a][+b] = n; } else ZB.tasten[a] = n;
     belegMerken(); belegMenue(id); zpZeichnen(true);
   }
+  /* ⌨ Tasten tauschen: jede Funktion auf eine andere Taste legen (gemeinsame Datei mit ZynSimple/DJ-Pult).
+     Getauscht wird immer paarweise, so bleibt jede Funktion genau einmal erreichbar; BACK bleibt BACK. */
+  let tauschScharf = 0;
+  function tastenTausch(wahl) {
+    fetch("/zyn/tasten").then(r => r.json()).then(d => {
+      const a = { zu: menueZu, zurueck: () => (wahl ? tastenTausch() : hilfe()) };
+      const an = d.anzeige || {};
+      let html;
+      if (!wahl) {
+        html = "<h3>⌨ " + W("Tasten tauschen", "Swap buttons") + '</h3><p class="hinweis">' + W("Funktion antippen → neue Taste wählen · die zwei Tasten tauschen ihre Aufgabe", "Tap a function → pick its new button · the two buttons swap") + '</p><div class="reihe">' +
+          d.liste.map(r => { a["tf_" + r.funktion] = () => tastenTausch(r.funktion);
+            return '<button type="button" data-zm="tf_' + r.funktion + '" class="' + (r.geaendert ? "an" : "") + '"><span>' + W("Funktion ", "Function ") + r.name + "</span><small>" + (r.geaendert ? W("liegt jetzt auf ", "now on ") + r.taste_name : W("auf der eigenen Taste", "on its own button")) + "</small></button>"; }).join("") +
+          '</div><div class="reihe drei"><button type="button" data-zm="reset">↺ ' + (tauschScharf > Date.now() ? W("Wirklich alles zurück?", "Really reset all?") : W("Standard", "Default")) + '</button><button type="button" data-zm="zurueck">← ' + W("Zurück", "Back") + '</button><button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>";
+        a.reset = () => {
+          if (tauschScharf > Date.now()) { tauschScharf = 0; fetch("/zyn/tasten", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ aktion: "zuruecksetzen" }) }).then(() => { zeige("⌨ " + W("Alle Tasten wie ab Werk", "All buttons reset")); tastenTausch(); }); }
+          else { tauschScharf = Date.now() + 3000; tastenTausch(); }
+        };
+      } else {
+        const k = d.karte || {};
+        html = "<h3>⌨ " + W("Funktion ", "Function ") + (an[wahl] || wahl) + W(" auf welche Taste?", " on which button?") + '</h3><div class="zyn-tastenfeld" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">' +
+          d.layout.flat().map(t => { if (!(t in k)) return '<button type="button" disabled style="opacity:.35"><span>' + (an[t] || t) + "</span><small>" + W("fest", "fixed") + "</small></button>";
+            a["tz_" + t] = () => fetch("/zyn/tasten", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ funktion: wahl, taste: t }) })
+              .then(r => r.json()).then(x => { zeige("⌨ " + (an[t] || t) + " → " + (an[wahl] || wahl), null, x.ok ? W("getauscht", "swapped") : x.fehler); tastenTausch(); });
+            return '<button type="button" data-zm="tz_' + t + '" class="' + (k[t] === wahl ? "an" : "") + '"><span>' + (an[t] || t) + "</span><small>" + W("jetzt: ", "now: ") + (an[k[t]] || k[t]) + "</small></button>"; }).join("") +
+          '</div><div class="reihe drei"><button type="button" data-zm="zurueck">← ' + W("Zurück", "Back") + "</button></div>";
+      }
+      menue(html, a);
+      menueArt = "tasten";
+    }).catch(() => zeige("⌨ " + W("Tastenbelegung nicht erreichbar", "Button map unavailable")));
+  }
   function belegMenue(fokusId) {
     let h = "<h3>🎛 " + W("Belegung ändern", "Change mapping") + '</h3><div class="reihe zyn-opt">', gr = "";
     const a = { zu: menueZu, std: () => { ZB = JSON.parse(JSON.stringify(ZP_STANDARD)); belegMerken(); belegMenue(); zpZeichnen(true); zeige("↺ " + W("Standard-Belegung", "Default mapping")); } };
@@ -2062,7 +2092,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       ["ALT + ◀ ▶", W("vorige / nächste Seite", "previous / next page")], ["ALT + ▲ ▼", W("andere Gruppe (Favoriten, Wetter, Effekte …)", "other group")], ["▲ ▼ / SEL", W("Reihe wechseln / auslösen", "switch row / trigger")], ["F 1,5 s halten", W("★ Favorit an/aus – Favoriten stehen vorne", "★ favourite on/off")],
       ["ALT + PAD", W("🥁 Drumpad (Beats) auf/zu – oder oben der Reiter „Beats“", "🥁 drum pad open/close")], ["🎻 " + W("Mitspieler", "Ensemble"), W("MENU → Eingänge → Mitspieler: Bühneninstrumente spielen die Töne deiner Handpan mit · MIXER → Bank MIT: Ensemble (0 = niemand … 8 = Harfe, Gitarre, Streicher, Celli, Chor, Flöte, Glockenspiel, Kontrabass), Lautstärke, Hall, Oktave", "MENU → inputs → ensemble")], ["ZS3", W("🎛 Spuren der Stimmung: jedes Instrument einzeln, Kulisse, Orchester/Kapelle/Gäste · ALT + drehen: untere Reihe · ◀ ▶ weitere · wird je Stimmung gemerkt", "🎛 tracks of the mood")], ["STOP " + W("lang", "hold"), W("🚨 Panik: Musik, Kulisse, alle Effekte, Loops, Autopilot und MIDI-Noten aus", "🚨 panic: everything off")], ["CTRL", W("🎚 Mischpult: 4 Regler für Musik, Hintergrund, Instrument, Effekte (drücken+drehen: andere Spur)", "🎚 Mixer: 4 knobs for music, backdrop, instrument, effects")], ["MIXER", W("Reglerbank A → B → FX (→ IN1/IN2) · lang: eine Bank zurück", "Knob bank A → B → FX (→ IN1/IN2) · hold: one bank back")], [W("Regler drücken + drehen", "Push + turn knob"), W("anderen Effekt / Wert auf diesen Regler legen", "put another effect on this knob")], ["ALT + " + W("Regler drücken", "push knob"), W("⟳ Reglerbewegung aufnehmen und im Takt loopen · nochmal: Loop aus", "⟳ record knob moves and loop in time · again: off")], ["MENU", W("Menü (lang: System)", "Menu (hold: system)")], ["ALT + MENU", W("🎚 Optionen", "🎚 Options")], ["BACK", W("zurück · 2 s halten: System-Menü (Zynthian, DJ, Updates, Ausschalten)", "back · hold 2 s: system menu")], ["🎤 " + W("Eingänge", "Inputs"), W("MENU → Eingänge: Eingang 1/2 an, Gain, Lautstärke · dann MIXER → Bank IN1/IN2: Lautstärke, Filter, Delay, Hall (drücken+drehen: Gain, Rückkopplung, Drive, Panorama)", "MENU → inputs · then MIXER → bank IN1/IN2")], ["🥁 Beats", W("◀▶ Schritt · ▲▼ Spur · SEL/F1–F4 setzen · Regler 3 Tonhöhe · PAD live spielen · REC live aufnehmen · ALT+◀▶ verschieben · ALT+▲/▼ Spur kopieren/einfügen · ALT+SEL leeren · ALT+F1–F4 Variation 1–4 · CTRL halten+F1–F4 Pattern in Variation kopieren · ZS3 halten+F1–F4 nur die Spur kopieren", "◀▶ step · ▲▼ track · SEL/F1–F4 set · knob 3 pitch · PAD play live · REC live record · ALT+◀▶ shift · ALT+▲/▼ copy/paste · ALT+SEL clear")], ["🎬 Set", W("Kachel = Song laden · ➕ speichert den jetzigen Klang · 1,5 s halten: ändern/verschieben/löschen", "tile = load song · ➕ saves · hold 1.5 s: edit")]]
       .concat(ZP_TASTEN.map(t => [t.replace("ALT+", "ALT + "), (ZP_AKT[ZB.tasten[t]] || ZP_AKT.nichts)[0]]));
-    menue("<h3>❔ " + W("Tastenbelegung", "Button map") + '</h3><div class="zyn-hilfe">' + l.map(([x, y]) => z(x, y)).join("") + '</div><div class="reihe drei"><button type="button" data-zm="beleg">🎛 ' + W("Ändern", "Change") + '</button><button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>", { zu: menueZu, beleg: () => belegMenue() });
+    menue("<h3>❔ " + W("Tastenbelegung", "Button map") + '</h3><div class="zyn-hilfe">' + l.map(([x, y]) => z(x, y)).join("") + '</div><div class="reihe drei"><button type="button" data-zm="beleg">🎛 ' + W("Ändern", "Change") + '</button><button type="button" data-zm="tausch">⌨ ' + W("Tasten tauschen", "Swap buttons") + '</button><button type="button" data-zm="zu">✕ ' + W("Schließen", "Close") + "</button></div>", { zu: menueZu, beleg: () => belegMenue(), tausch: () => tastenTausch() });
     menueArt = "hilfe";
   }
 

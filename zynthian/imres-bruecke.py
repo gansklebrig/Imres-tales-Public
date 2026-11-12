@@ -376,6 +376,14 @@ def ablauf_szene_saeubern(x):
     return {"name": kurz(x.get("name"), 60) or "Szene", "st": kurz(x.get("st"), 40), "kul": kurz(x.get("kul"), 40), "notiz": kurz(x.get("notiz"), 200)}
 
 
+def _tasten():
+    """tastenbelegung.py neben der Brücke (gemeinsame Datei mit ZynSimple)."""
+    if ZYN not in sys.path:
+        sys.path.insert(0, ZYN)
+    import tastenbelegung
+    return tastenbelegung
+
+
 def eigene_ip():
     """Adresse im WLAN/LAN – fürs Handy (zynthian.local klappt auf Android oft nicht)"""
     import socket
@@ -551,6 +559,10 @@ class Handler(SimpleHTTPRequestHandler):
             return self.json_antwort(check_stand())
         if p == "/zyn/sperre":
             return self.json_antwort({"ok": True, "an": SPERRE["an"]})
+        if p == "/zyn/tasten":
+            tb = _tasten()
+            return self.json_antwort({"liste": tb.liste("barden"), "layout": tb.LAYOUT, "anzeige": tb.ANZEIGE,
+                                      "karte": tb.karte("barden")})
         if p in ("/zyn/ablauf.html", "/ablauf", "/zyn/spielleitung"):
             return self.datei_antwort(os.path.join(ZYN, "ablauf.html"), "text/html; charset=utf-8")
         if p == "/zyn/ablauf":
@@ -675,6 +687,16 @@ class Handler(SimpleHTTPRequestHandler):
                     if isinstance(e, dict):
                         haenger_merken(str(e.get("art", "?"))[:12], e.get("ms"), e.get("info", ""), e.get("t"))
             return self.json_antwort({"ok": True})
+        if p == "/zyn/tasten":
+            tb = _tasten()
+            try:
+                if d.get("aktion") == "zuruecksetzen":
+                    tb.zuruecksetzen("barden")
+                else:
+                    tb.tauschen("barden", str(d.get("funktion", "")), str(d.get("taste", "")))
+                return self.json_antwort({"ok": True, "liste": tb.liste("barden")})
+            except Exception as e:
+                return self.json_antwort({"ok": False, "fehler": str(e)})
         if p == "/zyn/hw":
             # von imres-tasten.py: Tasten, Drehregler, MIDI
             if isinstance(d, dict):

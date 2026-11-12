@@ -18,6 +18,9 @@ import threading
 import time
 import urllib.request
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import tastenbelegung as tb  # noqa: E402   eigene Tastenbelegung (Menü → Tastenbelegung → Tasten tauschen)
+
 BRUECKE = os.environ.get("IMRES_BRUECKE", "http://127.0.0.1:8790")
 LIB = os.environ.get("ZYNCORE_LIB", "/zynthian/zyncoder/build/libzyncore.so")
 
@@ -77,6 +80,8 @@ def hardware():
             name = TASTEN.get(idx - 3)
             if not name:
                 continue
+            if name in tb.TASTEN["barden"]:
+                name = tb.funktion("barden", name)      # umbelegt? dann zählt die Funktion
             d = lib.get_zynswitch(idx, 20 * 1000000)
             if d == 0:
                 gedrueckt[idx] = jetzt
@@ -121,7 +126,9 @@ def leds():
                 d = json.loads(r.read().decode("utf-8"))
             nr = d.get("nr", nr)
             for name, i in LED_NR.items():
-                f = str(d.get("farben", {}).get(name, "#000000"))
+                # die LED einer Taste zeigt die Farbe der Funktion, die gerade auf ihr liegt
+                fkt = tb.funktion("barden", name) if name in tb.TASTEN["barden"] else name
+                f = str(d.get("farben", {}).get(fkt, "#000000"))
                 m = re.fullmatch(r"#?([0-9a-fA-F]{6})", f)
                 v = int(m.group(1), 16) if m else 0
                 r_, g_, b_ = (v >> 16) & 255, (v >> 8) & 255, v & 255

@@ -72,6 +72,13 @@ Die alte Ansicht (die Webseite) gibt es weiter: MENU → „Alte Ansicht“, zur
 
 > Die Tabellen weiter unten beschreiben die alte Ansicht.
 
+## 1c. Tasten tauschen (neu)
+
+MENU → ❔ Tastenbelegung → **⌨ Tasten tauschen**: Funktion antippen, dann die Taste wählen, auf der sie liegen
+soll – die beiden Tasten tauschen ihre Aufgabe (ALT- und Halten-Belegung wandern mit, die LEDs auch).
+„↺ Standard“ stellt alles wie ab Werk. BACK bleibt immer BACK. Dieselbe Einstellung gibt es in ZynSimple
+(Einstellungen → Bedienung → Tasten belegen) – dort lassen sich auch Mischer und DJ-Pult umbelegen.
+
 ## 2. Die vier Modi
 
 **MENU** kurz drücken → auswählen mit **F1–F4**:
