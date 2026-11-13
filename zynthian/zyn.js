@@ -401,9 +401,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (gesperrt()) return;
     const post = aktion => fetch("/zyn/system", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ aktion }) }).catch(() => {});
     menue("<h3>⚙ " + W("System", "System") + '</h3><div class="reihe">' +
-      '<button type="button" data-zm="zyn">🎛 ' + W("Zurück zum Zynthian", "Back to Zynthian") + "<small>" + W("Die normale Zynthian-Oberfläche startet", "Starts the normal Zynthian interface") + "</small></button>" +
-      '<button type="button" data-zm="dj">🎧 ' + W("DJ-Pult", "DJ deck") + "<small>" + W("Mixxx im Vollbild mit dem DDJ-200 · zurück: Mixxx beenden oder BACK halten", "Mixxx full screen with the DDJ-200 · back: quit Mixxx or hold BACK") + "</small></button>" +
-      '<button type="button" data-zm="hybrid">♫ ' + W("DJ + Instrumente", "DJ + instruments") + "<small>" + W("Mixxx als Kanal im ZynSimple-Mischer, Spuren laufen weiter", "Mixxx as a channel in the ZynSimple mixer, tracks keep running") + "</small></button>" +
+      '<button type="button" data-zm="zyn">🎛 ' + W("Zum Mischpult", "To the mixing desk") + "<small>" + W("Instrumente & DJ in einer Oberfläche (Zynthian mit ZynSimple)", "Instruments & DJ in one interface (Zynthian with ZynSimple)") + "</small></button>" +
       '<button type="button" data-zm="zsupd">⬇ ' + W("ZynSimple aktualisieren", "Update ZynSimple") + "<small>" + W("wechselt zum Zynthian und sucht das Update", "switches to Zynthian and looks for the update") + "</small></button>" +
       '<button type="button" data-zm="zyupd">⬇ ' + W("Zynthian aktualisieren", "Update Zynthian") + "<small>" + W("wechselt zum Zynthian und startet das System-Update", "switches to Zynthian and runs the system update") + "</small></button>" +
       '<button type="button" data-zm="upd">⬇ ' + W("Bühne aktualisieren", "Update the stage") + "<small>" + W("holt die neueste Version (Internet nötig) und startet neu", "fetches the latest version (needs internet) and restarts") + "</small></button>" +
