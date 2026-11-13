@@ -18,6 +18,9 @@ import threading
 import time
 import urllib.request
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import tastenbelegung as tb  # noqa: E402   eigene Tastenbelegung (Menü → Tastenbelegung → Tasten tauschen)
+
 BRUECKE = os.environ.get("IMRES_BRUECKE", "http://127.0.0.1:8790")
 LIB = os.environ.get("ZYNCORE_LIB", "/zynthian/zyncoder/build/libzyncore.so")
 
@@ -28,6 +31,7 @@ TASTEN = {1: "MENU", 2: "MIXER", 3: "CTRL", 4: "ZS3", 5: "ALT", 6: "TEMPO", 7: "
 LED_NR = {"MENU": 0, "MIXER": 1, "CTRL": 2, "ZS3": 3, "F1": 4, "PAD": 5, "TEMPO": 6, "ALT": 7, "REC": 8, "STOP": 9,
           "PLAY": 10, "F2": 11, "F3": 12, "SEL": 13, "UP": 14, "BACK": 15, "LEFT": 16, "DOWN": 17, "RIGHT": 18, "F4": 19}
 LANG_MS = int(os.environ.get("ZYNTHIAN_UI_SWITCH_LONG_MS", "2000") or 2000)
+BACK_LANG_MS = 3000          # BACK 3 s halten = System-Menü (wie in ZynSimple und im DJ-Pult)
 MITTEL_MS = int(os.environ.get("ZYNTHIAN_UI_SWITCH_BOLD_MS", "300") or 300)
 
 
@@ -77,6 +81,8 @@ def hardware():
             name = TASTEN.get(idx - 3)
             if not name:
                 continue
+            if name in tb.TASTEN["barden"]:
+                name = tb.funktion("barden", name)      # umbelegt? dann zählt die Funktion
             d = lib.get_zynswitch(idx, 20 * 1000000)
             if d == 0:
                 gedrueckt[idx] = jetzt
@@ -88,11 +94,11 @@ def hardware():
                     lang_gemeldet.discard(idx)
                     schicken({"typ": "taste", "name": name, "art": "los"})
                 else:
-                    schicken({"typ": "taste", "name": name, "art": "lang" if ms >= LANG_MS else "mittel" if ms >= MITTEL_MS else "kurz"})
+                    schicken({"typ": "taste", "name": name, "art": "lang" if ms >= (BACK_LANG_MS if name == "BACK" else LANG_MS) else "mittel" if ms >= MITTEL_MS else "kurz"})
                     schicken({"typ": "taste", "name": name, "art": "los"})
             # lange gehalten: schon während des Haltens melden
             t0 = gedrueckt.get(idx)
-            if t0 is not None and idx not in lang_gemeldet and (jetzt - t0) * 1000 >= LANG_MS:
+            if t0 is not None and idx not in lang_gemeldet and (jetzt - t0) * 1000 >= (BACK_LANG_MS if name == "BACK" else LANG_MS):
                 lang_gemeldet.add(idx)
                 schicken({"typ": "taste", "name": name, "art": "lang"})
         for i in range(npots):
@@ -121,7 +127,9 @@ def leds():
                 d = json.loads(r.read().decode("utf-8"))
             nr = d.get("nr", nr)
             for name, i in LED_NR.items():
-                f = str(d.get("farben", {}).get(name, "#000000"))
+                # die LED einer Taste zeigt die Farbe der Funktion, die gerade auf ihr liegt
+                fkt = tb.funktion("barden", name) if name in tb.TASTEN["barden"] else name
+                f = str(d.get("farben", {}).get(fkt, "#000000"))
                 m = re.fullmatch(r"#?([0-9a-fA-F]{6})", f)
                 v = int(m.group(1), 16) if m else 0
                 r_, g_, b_ = (v >> 16) & 255, (v >> 8) & 255, v & 255

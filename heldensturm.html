@@ -38866,7 +38866,7 @@ window.__hsZEIGER={v:1,an:0};
    Schalter: __hsGLWELT.modus='auto'|'an'|'aus' (auch ?glwelt=an|aus, SAVE.glwelt, Knopf „WebGL-Welt“ in der Grafik-Box), __hsGLWELT.aus=true,
    __hsGLWELT.k.{boden,deko,licht,tee,vc,bloom,bloomU,bloomS1,vig,css,gueltig}=0/1. Diagnose: „WebGL-Welt: …“, Paketliste „glwelt1(an)“.
    Erweiterungspunkte für „glfx“: __hsGLWELT.haken.{welt,licht,ende,bloom,uPost}, __hsGLWELT.api. ES2017 (Chromium 77), WebGL1. */
-window.__hsGLWELT={v:2};
+window.__hsGLWELT={v:3};
 (function(){try{
  /* ---------- Farben (CSS → [r,g,b,a] 0..1, nicht vormultipliziert) ---------- */
  const FC=new Map();let FCX=null;
@@ -39352,7 +39352,8 @@ window.__hsGLWELT={v:2};
   try{RWK()}finally{cx=c0;W=W0;H=H0;G.cam=cam0;ZOOM=Z0;C.bau--;Math.random=mr}
   const e={t:texAusLw(RS.u,BT.bc,null),gen:BT.gen,lu:RS.u.frame};GW.st.kachelBau++;BT.bt+=jetzt()-T0;return e}
  function kachelnFrei(M){const g=RS.u.gl;for(const e of M.values())if(e.t)try{g.deleteTexture(e.t)}catch(er){}M.clear()}
- function texCap(){let m=0;try{m=+navigator.deviceMemory||0}catch(e){}return (m>=8?96:m>=4?64:m>0?40:64)*1048576}
+ function texCap(){let m=0;try{m=+navigator.deviceMemory||0}catch(e){}let mob=false;try{mob=!!MOBIL}catch(e){}return (m>=8?96:m>=4?64:m>0?40:mob?64:128)*1048576}
+ function kCap(anteil,nVis){return Math.min(520,Math.max(texCap()*anteil/(GW.TS*GW.TS*4),nVis*1.8))}
  /* Welt-Ebene eines Bildes: Kacheln zeichnen/bauen, Live-Rest auf S1 */
  function welt(m){const s=m[0],e=m[4],f=m[5];const RU=RS.u,TS=GW.TS;
   if(!GW.k.boden||m[1]||m[2]||Math.abs(m[3]-s)>1e-9||!(s>0.05)){GW.st.bodenLive++;bodenLive();RWK();return}
@@ -39363,7 +39364,7 @@ window.__hsGLWELT={v:2};
   if(Math.abs(s/BT.sB-1)>0.12){if(++BT.ab>30){GW.st.massstab=(GW.st.massstab||0)+1;kachelnFrei(BT.alt);BT.alt=BT.cur;BT.altS=BT.sB;BT.cur=new Map();BT.sB=s;BT.ab=0}}else BT.ab=0;
   const sB=BT.sB,T=TS/sB,cw=EB.w,ch=EB.h;const X0=-e/s,Y0=-f/s,X1=(cw-e)/s,Y1=(ch-f)/s;
   const i0=Math.floor(X0/T),i1=Math.floor((X1-1e-6)/T),j0=Math.floor(Y0/T),j1=Math.floor((Y1-1e-6)/T);
-  BT.b0=GW.bud;BT.bt=0;const fehlt=[];const Q=[];
+  const nVis=(i1-i0+1)*(j1-j0+1);BT.nVis=nVis;BT.b0=Math.max(GW.bud,Math.ceil(nVis/18));BT.bt=0;const fehlt=[];const Q=[];
   for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){const k=i+','+j;let E=BT.cur.get(k);
    if(!E&&BT.b0>0&&BT.bt<GW.ms){BT.b0--;try{E=kachelBau(i,j,sB);BT.cur.set(k,E)}catch(er){gErr('kachel',er);E=null}}
    if(E){E.lu=RU.frame;Q.push([E.t,i*T,j*T,T]);continue}
@@ -39371,9 +39372,9 @@ window.__hsGLWELT={v:2};
     for(let b=b0;b<=b1&&ok;b++)for(let a=a0;a<=a1;a++){const A=BT.alt.get(a+','+b);if(!A){ok=false;break}L.push([A.t,a*Ta,b*Ta,Ta])}if(ok){for(const q of L)Q.push(q);continue}}
    fehlt.push([i,j])}
   /* Ring vorbauen, wenn Zeit übrig */
-  if(BT.b0>0&&BT.bt<GW.ms*0.5){outer:for(let j=j0-1;j<=j1+1;j++)for(let i=i0-1;i<=i1+1;i++){if(j>=j0&&j<=j1&&i>=i0&&i<=i1)continue;const k=i+','+j;if(BT.cur.has(k))continue;try{BT.cur.set(k,kachelBau(i,j,sB))}catch(er){gErr('ring',er)}break outer}}
+  if(BT.b0>0&&BT.bt<GW.ms*0.5){outer:for(let j=j0-1;j<=j1+1;j++)for(let i=i0-1;i<=i1+1;i++){if(j>=j0&&j<=j1&&i>=i0&&i<=i1)continue;const k=i+','+j;if(BT.cur.has(k))continue;try{BT.cur.set(k,kachelBau(i,j,sB))}catch(er){gErr('ring',er)}if(--BT.b0<=Math.ceil(BT.nVis/36)||BT.bt>=GW.ms*0.5)break outer}}
   /* zu viele Kacheln: älteste weg */
-  const cap=texCap()*0.5/(TS*TS*4);if(BT.cur.size>cap){const L=[...BT.cur.entries()].sort((a,b)=>a[1].lu-b[1].lu);for(const [k,E] of L){if(BT.cur.size<=cap*0.85||E.lu>=RU.frame)break;try{RU.gl.deleteTexture(E.t)}catch(er){}BT.cur.delete(k)}}
+  const cap=kCap(0.5,nVis);if(BT.cur.size>cap){const L=[...BT.cur.entries()].sort((a,b)=>a[1].lu-b[1].lu);for(const [k,E] of L){if(BT.cur.size<=cap*0.85||E.lu>=RU.frame)break;try{RU.gl.deleteTexture(E.t)}catch(er){}BT.cur.delete(k)}}
   if(!fehlt.length&&BT.alt.size&&BT.cur.size>=(i1-i0+1)*(j1-j0+1))kachelnFrei(BT.alt);
   /* zeichnen (untere Ebene) */
   rZiel(RU,RS.uf||null);const g=RU.gl;
@@ -39438,8 +39439,8 @@ window.__hsGLWELT={v:2};
   for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){const k=i+','+j;let E=DT.m.get(k);
    if(!E){if(BT.b0>0&&BT.bt<GW.ms){BT.b0--;const T0=jetzt();try{E=dKachelBau(i,j,sB);DT.m.set(k,E)}catch(er){gErr('dekokachel',er)}BT.bt+=jetzt()-T0}}
    if(!E){fehlt++;continue}E.lu=RU.frame;if(E.t)Q.push([E.t,i*T,j*T,T])}
-  if(BT.b0>0&&BT.bt<GW.ms*0.5){outer:for(let j=j0-1;j<=j1+1;j++)for(let i=i0-1;i<=i1+1;i++){if(j>=j0&&j<=j1&&i>=i0&&i<=i1)continue;const k=i+','+j;if(DT.m.has(k))continue;try{DT.m.set(k,dKachelBau(i,j,sB))}catch(er){}break outer}}
-  const cap=texCap()*0.45/(TS*TS*4);if(DT.m.size>cap){const L=[...DT.m.entries()].sort((a,b)=>a[1].lu-b[1].lu);for(const [k,E] of L){if(DT.m.size<=cap*0.85||E.lu>=RU.frame)break;if(E.t)try{RU.gl.deleteTexture(E.t)}catch(er){}DT.m.delete(k)}}
+  if(BT.b0>0&&BT.bt<GW.ms*0.5){outer:for(let j=j0-1;j<=j1+1;j++)for(let i=i0-1;i<=i1+1;i++){if(j>=j0&&j<=j1&&i>=i0&&i<=i1)continue;const k=i+','+j;if(DT.m.has(k))continue;const T0=jetzt();try{DT.m.set(k,dKachelBau(i,j,sB))}catch(er){}BT.bt+=jetzt()-T0;if(--BT.b0<=0||BT.bt>=GW.ms*0.5)break outer}}
+  const cap=kCap(0.45,(i1-i0+1)*(j1-j0+1));if(DT.m.size>cap){const L=[...DT.m.entries()].sort((a,b)=>a[1].lu-b[1].lu);for(const [k,E] of L){if(DT.m.size<=cap*0.85||E.lu>=RU.frame)break;if(E.t)try{RU.gl.deleteTexture(E.t)}catch(er){}DT.m.delete(k)}}
   if(fehlt){GW.st.dekoLive++;return}
   rZiel(RU,RS.uf||null);const g=RU.gl;for(const q of Q){const x0=e+q[1]*s,y0=f+q[2]*s,x1=x0+q[3]*s,y1=y0+q[3]*s;zustand(RU,RU.P.tex,q[0],RS.uf?'overm':'over',0,Math.abs(s-sB)<1e-6?g.NEAREST:g.LINEAR);quad(RU,x0,y0,x1,y0,x1,y1,x0,y1,0,0,1,1,1,1,1,1)}
   flush(RU);FR.dOn=1;GW.st.dekoAn++}
@@ -39566,7 +39567,7 @@ window.__hsGLWELT={v:2};
  GW.mb=mb;
  function zeile(){const g=GW.grund();const st=GW.st;
   if(!g){return 'WebGL-Welt: aus ('+(GW.modus==='aus'||GW.aus?'Schalter':RS.fehl?RS.fehl:RS.u&&RS.u.soft?'Software-WebGL':'nicht bereit')+')'+(RS.u&&RS.u.ren?' · '+RS.u.ren:'')}
-  return `WebGL-Welt: ${GW.gesperrt?'aus (nach Fehlern gesperrt)':GW.imTest?'pausiert (Firefox-Test)':EB.an?'an':'bereit'} (WebGL1, ${RS.u.ren}${g==='erzwungen'?', erzwungen':''}) · Texturen ${String(mb()).replace('.',',')} MB · Kontextverluste ${st.verlust} · Bilder ${st.bilder} (Abbruch ${st.abbruch}) · Boden-Kacheln ${BT.cur.size} (Bau ${st.kachelBau}, Live ${st.kachelLive}) · Deko ${DT.fest.size} ruhend (an ${st.dekoAn}/live ${st.dekoLive}) · Umleitungen ${st.tee} · CSS-Mischung ${st.css}${st.mix?' · ⚠ Mischmodi '+st.mix:''}${st.fehler?' · Fehler '+st.fehler+' ('+GW.err.slice(-2).join('; ')+')':''}`}
+  return `WebGL-Welt: ${GW.gesperrt?'aus (nach Fehlern gesperrt)':GW.imTest?'pausiert (Firefox-Test)':EB.an?'an':'bereit'} (WebGL1, ${RS.u.ren}${g==='erzwungen'?', erzwungen':''}) · Texturen ${String(mb()).replace('.',',')} MB · Kontextverluste ${st.verlust} · Bilder ${st.bilder} (Abbruch ${st.abbruch}) · Boden-Kacheln ${BT.cur.size}/${BT.nVis||0} sichtbar (Bau ${st.kachelBau}, Live ${st.kachelLive}, neu wegen Szene ${st.schluessel||0}${(function(){try{const d=GW.kDiff;if(!d||!d[0])return'';const A=String(d[0]).split('|'),B=String(d[1]).split('|'),L=[];for(let i=0;i<B.length;i++)if(A[i]!==B[i])L.push(i);return' ['+L.join(',')+']'}catch(e){return''}})()}, Maßstab ${st.massstab||0}) · Deko ${DT.fest.size} ruhend (an ${st.dekoAn}/live ${st.dekoLive}) · Umleitungen ${st.tee} · CSS-Mischung ${st.css}${st.mix?' · ⚠ Mischmodi '+st.mix:''}${st.fehler?' · Fehler '+st.fehler+' ('+GW.err.slice(-2).join('; ')+')':''}`}
  GW.zeile=zeile;
  function diagHaken(){const DG=window.__hsDIAG;if(!DG||DG.__gw)return;DG.__gw=1;
   try{const d0=Object.getOwnPropertyDescriptor(DG,'letzter');let lz=DG.letzter;const get=d0&&d0.get?d0.get:()=>lz,set=d0&&d0.set?d0.set:(v)=>{lz=v};

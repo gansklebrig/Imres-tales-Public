@@ -65,12 +65,19 @@ Der Bildschirm zeigt ein eigenes Pult für 800 × 480 – nichts scrollt, alles 
 - **ALT + ◀ ▶** wechselt die Seite, **ALT + ▲ ▼** springt zur nächsten Gruppe (z. B. Wetter, Effekte, Szenen).
 - **Farben:** Jede Taste leuchtet in der Farbe dessen, was sie tut – dieselbe Farbe wie auf dem Bildschirm (Punkt in der Fußleiste, Seitenfarbe auf F1–F4, Bankfarbe auf MIXER und am Reglerfeld). CTRL leuchtet in der Farbe der nächsten Seite, ZS3 in der der vorigen. Hell = läuft gerade, gedimmt = bereit, blinkend = kommt am Taktende.
 - **🎛 Belegung ändern (MENU):** jeden Drehregler (je Seite, Bank B, Bank FX) und die Tasten PLAY, STOP, PAD, REC, TEMPO, ZS3, CTRL (auch mit ALT) frei belegen. ◀ ▶ oder SEL ändert, „Standard wiederherstellen“ setzt zurück. Die Belegung bleibt gespeichert.
-- **BACK 2 Sekunden halten:** zurück zur normalen Zynthian-Oberfläche.
+- **BACK 3 Sekunden halten:** System-Menü (Zynthian, DJ-Pult, Updates, Ausschalten).
 - **Vom Zynthian zur Bühne:** in der Zynthian-Oberfläche oben rechts den kleinen **♫**-Knopf 1 Sekunde halten. Andere Ecke oder aus: in `einstellungen.sh` `IMRES_KNOPF=lo` (links oben), `ru`, `lu` oder `aus`.
 
 Die alte Ansicht (die Webseite) gibt es weiter: MENU → „Alte Ansicht“, zurück mit MENU → „Neues Pult“.
 
 > Die Tabellen weiter unten beschreiben die alte Ansicht.
+
+## 1c. Tasten tauschen (neu)
+
+MENU → ❔ Tastenbelegung → **⌨ Tasten tauschen**: Funktion antippen, dann die Taste wählen, auf der sie liegen
+soll – die beiden Tasten tauschen ihre Aufgabe (ALT- und Halten-Belegung wandern mit, die LEDs auch).
+„↺ Standard“ stellt alles wie ab Werk. BACK bleibt immer BACK. Dieselbe Einstellung gibt es in ZynSimple
+(Einstellungen → Bedienung → Tasten belegen) – dort lassen sich auch Mischer und DJ-Pult umbelegen.
 
 ## 2. Die vier Modi
 
@@ -213,6 +220,48 @@ Drei Wege: oben der Reiter **🥁 Beats**, **ALT + PAD** (nochmal ALT + PAD: zur
 
 **Pads:** Oben rechts schaltet **🥁 Pads / ▦ Raster** die Ansicht um. In der Pad-Ansicht gibt es 8 große Pads – antippen spielt das Instrument sofort (F1–F4 spielen die oberen vier). Mit **⏺ Aufnahme** (oder REC) wird bei laufendem Beat alles, was du spielst, auf den nächsten Schritt gesetzt. Darunter das kleine Raster: dort siehst du, wann welches Instrument spielt (die Pads blitzen mit), und ein Tipp auf ein Feld nimmt den Schlag wieder raus.
 
+### 🔁 Live: Looper, Drop, Aufnahme (Reiter „Live“)
+
+Oben der Reiter **🔁 Live** (oder MENU → 🔁 Live). Dafür muss ein Eingang an sein (MENU → 🎤 Eingänge).
+
+- **Handpan-Looper – vier Schichten (F1–F4):** Kachel antippen = aufnehmen. Die Aufnahme beginnt auf der nächsten **1** (⏳ zählt die Schläge runter), läuft genau 1/2/4/8 Takte (⏺ füllt sich) und spielt dann nahtlos im Takt weiter (🔁). Nochmal antippen = stumm/an. Während sie wartet oder aufnimmt: antippen = verwerfen.
+- **Regler 1–4** = Lautstärke der vier Schichten (bis 160 %). **Reglerbank B** (MIXER) = Filter je Schicht: links dumpf, rechts dünn, drücken = neutral.
+- **Schicht-Effekte:** F-Taste halten, Kachel lange antippen oder Regler drücken öffnet das Menü einer Schicht:
+  - **⏺ Overdub** – eine Runde drüber spielen, ab der nächsten 1; die Schicht läuft dabei weiter. **↶ Letzten Overdub zurück** nimmt die letzte Runde wieder weg.
+  - **⏪ Rückwärts**, **🐢 Halbe Geschwindigkeit** (Oktave tiefer, doppelt so lang, bleibt im Takt), **✂ Stotter** (ein Achtel wiederholt sich) – wechseln auf dem nächsten Sechzehntel.
+  - **🎚 Filter** (◀ ▶), stumm, löschen (zweimal wählen).
+- **ALT F1 📏 Loop-Länge** 1/2/4/8 Takte · **ALT F2 🎤 Quelle** IN1 + IN2 / nur IN1 / nur IN2.
+- **ALT F3 ⚡ Drop:** ab der nächsten 1 wird es über 4 Takte enger (Filter schließt sich, Rauschen steigt, Trommelwirbel wird dichter, Beat dünnt aus) – auf der 1 danach knallt alles wieder rein. Anlauf 2/4/8 Takte in MENU → Einstellungen → 🔁 Looper & Drop. Auch auf eine Taste legbar („⚡ Drop auslösen“, „🔁 Looper: nächste Schicht aufnehmen“).
+- **ALT F4 💾 Session aufnehmen:** nimmt alles als WAV auf, siehe Abschnitt 9. Die Zeit läuft oben in der Statuszeile mit.
+- **Zweites Blatt (◀ ▶):** ⏺ Overdub (auf die zuletzt angetippte Schicht) · 🎛 Schicht-Effekte · 🎼 Tonart hören · 🪵 Didge-Grundton · Alle anhalten / weiter · Letzte weg · Alle löschen (2× tippen) · Einstellungen.
+- **🎼 Tonart hören:** 8 s Handpan spielen – Grundton und Skala stellen sich ein. **🪵 Didge-Grundton:** 5 s die Drone halten – nur der Grundton wird übernommen, die Skala bleibt. Stimmungen, Bordun und Bass folgen.
+- Beim **Stimmungswechsel** halten die Schichten an (anderes Tempo, andere Tonart). Antippen = weiter ab der nächsten 1, im neuen Tempo angepasst (⏱).
+- **Versatz:** Klingt eine Schicht etwas zu spät oder zu früh, in MENU → Einstellungen → 🔁 Looper & Drop den Versatz in 5-ms-Schritten anpassen (SEL = wieder automatisch).
+
+### 🎬 Songs (Reiter „Set“)
+
+**➕ Jetzt speichern** merkt sich alles, was gerade klingt: Stimmung, Tempo, Ort, Effekte, die **Mischung**, die **Tonart**, selbst gebaute **Beats** und die **Loops** (die Aufnahmen selbst). Antippen ruft den Song ab: Musik und Ort wechseln am Taktende, die Mischung blendet in 1,5 s herüber, die Loops starten auf der nächsten 1. Die Reihenfolge ist deine Setliste (halten: überschreiben, verschieben, löschen); auf eine Taste legbar: „Nächster Song“. Auf der Kachel steht, was drin ist (♩ Tempo · 🔁 Loops · 🥁 eigene Beats · 🎼 Tonart · 🎚 Mischung).
+
+### ✅ Auftritts-Check
+
+**MENU → ✅ Auftritts-Check** prüft auf einen Blick, grün / gelb / rot: kommt Ton raus, haben die Eingänge Signal (übersteuert?), kommt der MIDI-Takt der TR-8S an, Prozessor und Temperatur, **Unterspannung** (zu schwaches Netzteil), Aussetzer der letzten 10 Minuten, WLAN, Platz für die Aufnahme (USB-Stick?) und ob die Bühnen-Sperre an ist. Antippen einer Zeile hilft weiter (Testton, Eingänge einrichten, Sperre an).
+
+### 🔒 Bühnen-Sperre
+
+**MENU → 🔒 Bühnen-Sperre** für den Auftritt: System-Menü, Update, Moduswechsel, Optionen und Einstellungen sind dann zu – auch über die Handy-Fernbedienung. Musik, Looper, Mischer und alle Kacheln gehen normal; MENU zeigt nur noch die Live-Sachen. **Entsperren: MENU 3 Sekunden halten** (oder im Menü 3× schnell auf 🔓 tippen). Oben in der Statuszeile steht 🔒.
+
+### 📜 Abend-Ablauf für die Spielleitung (wahlweise)
+
+**MENU → 📜 Abend-Ablauf** zeigt einen QR-Code (Adresse: **http://zynthian.local:8790/zyn/spielleitung**). Am Handy unter **✏ Vorbereiten** die Szenen des Abends anlegen – Name, Stimmung, Ort und eine Notiz („Drei Banditen am Fenster“). Am Tisch unter **▶ Spielen** nur noch **Weiter** tippen: das Pult wechselt Musik und Ort am Taktende und zeigt die Szene kurz an, oben steht 📜 2/8. Eine Szene in der Liste antippen springt direkt dorthin. Solange der Abend-Ablauf am Pult **aus** ist, kann das Handy nichts umschalten (Vorbereiten geht trotzdem). Auf Tasten legbar: „Nächste / Vorige Szene“.
+
+### 📱 Spieler-Klänge am Handy
+
+**MENU → 📱 Spieler-Klänge** zeigt einen QR-Code. Jeder am Tisch scannt ihn (selbes WLAN), wählt seinen Helden – Barradin, Echo, Friedrich, Ezekiel, die Spielleitung oder „Alle am Tisch“ – und bekommt acht eigene Klänge (Lautenriff, Donner, Rex bellt, Klingenwirbel, Drache, Natürliche 20 …). Sie kommen über das Pult, Melodien passen in Takt und Tonart, und kurz erscheint, wer was ausgelöst hat. Im selben Menü lassen sich die Spieler-Klänge **ausschalten** (z. B. für ernste Szenen). Adresse ohne QR: **http://zynthian.local:8790/spieler**
+
+### 💤 Einschlaf-Timer
+
+**MENU → 💤 Einschlaf-Timer:** 15/30/45/60/90 Minuten. Am Ende wird es über bis zu drei Minuten langsam leiser, dann ist alles aus – die Lautstärke steht danach wieder wie vorher. Die Restzeit steht oben in der Statuszeile und im Ruhebild.
+
 ### 🌦 Wetter & Geräusche (Seite Ort)
 
 - **Wetter-Regler** (Regler 2 auf der Ort-Seite): ☀ klar → 💨 Wind → 🌧 Regen → ⛈ Starkregen → 🌩 Gewitter → 🌪 Unwetter – ein Dreh, und das ganze Wetter wandert mit.
@@ -269,7 +318,12 @@ Bedienen kannst du die Bühne dann über **MIDI** (Steuer-Kanal, siehe oben) und
 
 ## 9. Aufnahme
 
-**ALT + REC** (oder System-Menü, oder Handy): nimmt alles auf, was aus den Ausgängen kommt – die Bühne und Zynthian-Synths zusammen. Die Dateien liegen im Zynthian-Ordner **capture** (in der Zynthian-Weboberfläche unter „Audio/Captures“ herunterladbar). Die REC-Taste leuchtet rot, solange aufgenommen wird.
+**ALT + REC**, Reiter **🔁 Live → 💾 Session aufnehmen** (oder System-Menü, oder Handy): nimmt alles auf, was aus den Ausgängen kommt – die Bühne, deine Instrumente und Zynthian-Synths zusammen, als WAV (24 bit).
+
+- **USB-Stick eingesteckt?** Dann landet die Aufnahme direkt auf dem Stick im Ordner **BardenBeats** (z. B. `BardenBeats_2026-11-12_20-15-03.wav`). Nach dem Stoppen ist alles geschrieben – der Stick kann gleich raus.
+- **Ohne Stick** liegt sie im Zynthian-Ordner **capture** (Zynthian-Weboberfläche → „Audio/Captures“).
+
+Die Laufzeit steht oben in der Statuszeile (⏺ 12:34) und im Ruhebild, die REC-Taste leuchtet rot. Beim Stoppen zeigt das Pult Länge und Speicherort.
 
 ---
 

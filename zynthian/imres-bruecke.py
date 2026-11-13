@@ -228,6 +228,15 @@ def update_stand():
         if m:
             schritt, von, titel, nach = int(m.group(1)), int(m.group(2)), m.group(3), zeilen[i + 1:]
     teil = 0.0
+    geladen, tempo, objekte = "", "", ""
+    for z in nach[::-1] if schritt == 1 else []:
+        # git: „Receiving objects:  45% (1234/2700), 12.30 MiB | 1.20 MiB/s“
+        m = re.search(r"(?:Receiving objects|Empfange Objekte):\s+\d+%\s+\((\d+/\d+)\)(?:,\s*([\d.,]+\s*[KMG]i?B))?(?:\s*\|\s*([\d.,]+\s*[KMG]i?B/s))?", z)
+        if m:
+            objekte = m.group(1)
+            geladen = (m.group(2) or "").replace("iB", "B")
+            tempo = (m.group(3) or "").replace("iB", "B")
+            break
     if schritt == 1:
         for z in nach:
             m = re.search(r"(Receiving objects|Empfange Objekte|Resolving deltas|Löse Unterschiede auf):\s+(\d+)%", z)
@@ -244,6 +253,7 @@ def update_stand():
             ende = z
             break
     return {"ok": True, "zeilen": zeilen[-8:], "alter": round(time.time() - st.st_mtime), "schritt": schritt, "von": von, "titel": titel,
+            "geladen": geladen, "tempo": tempo, "objekte": objekte,
             "prozent": 100 if ende and "neuesten" in ende else prozent, "ende": ende, "meldung": meldungen[-1] if meldungen else ""}
 
 
@@ -269,6 +279,150 @@ def system_befehl(aktion):
 aufnahme = {"proc": None, "datei": None, "seit": 0}
 
 
+spieler_zuletzt = {}
+
+
+# ---------- Auftritts-Check: alles, was das Pult selbst nicht sehen kann ----------
+def check_stand():
+    erg = {"ok": True, "last": last_messen(), "test": ARGS.test}
+    # Unterspannung / Drosselung (Pi): vcgencmd get_throttled → throttled=0x0 ist gut
+    erg["drossel"] = None
+    if not ARGS.test:
+        c, t = _lauf(["vcgencmd", "get_throttled"], 4)
+        m = re.search(r"0x([0-9a-fA-F]+)", t or "")
+        if m:
+            w = int(m.group(1), 16)
+            erg["drossel"] = {"jetzt_unterspannung": bool(w & 0x1), "jetzt_gedrosselt": bool(w & 0x6), "war_unterspannung": bool(w & 0x10000), "war_gedrosselt": bool(w & 0x60000)}
+    # Aussetzer der letzten 10 Minuten (aus dem Hänger-Rekorder)
+    jetzt = time.time()
+    with haenger_sperre:
+        liste = list(haenger)
+    erg["xruns"] = sum(1 for h in liste if h.get("art") == "xrun" and jetzt - h.get("t", 0) < 600)
+    erg["haenger"] = sum(1 for h in liste if h.get("art") not in ("xrun", "info") and jetzt - h.get("t", 0) < 600)
+    # JACK
+    if ARGS.test:
+        erg["jack"] = True
+    else:
+        c, t = _lauf(["jack_lsp"], 4)
+        erg["jack"] = c == 0 and "system:playback" in (t or "")
+    # WLAN
+    erg["wlan"] = None
+    if not ARGS.test:
+        c, t = _lauf(["nmcli", "-t", "-f", "ACTIVE,SSID,SIGNAL", "dev", "wifi"], 6)
+        for z in (t or "").splitlines():
+            teile = z.split(":")
+            if len(teile) >= 3 and teile[0] in ("yes", "ja"):
+                erg["wlan"] = {"ssid": ":".join(teile[1:-1]), "signal": int(teile[-1]) if teile[-1].isdigit() else None}
+                break
+        if erg["wlan"] is None:
+            erg["wlan"] = {"ssid": "", "signal": None}
+    else:
+        erg["wlan"] = {"ssid": "Testnetz", "signal": 72}
+    erg["ip"] = eigene_ip()
+    # Platz für die Aufnahme
+    ordner, ziel = aufnahme_ziel()
+    try:
+        import shutil
+        frei = shutil.disk_usage(ordner if os.path.isdir(ordner) else os.path.dirname(ordner) or "/").free
+    except Exception:
+        frei = None
+    erg["aufnahme"] = {"ziel": ziel, "frei_gb": round(frei / 1e9, 1) if frei is not None else None, "stick": bool(usb_sticks())}
+    # MIDI-Eingänge
+    try:
+        import imres_midi
+        erg["midi_ports"] = imres_midi.ports("i")
+    except Exception:
+        erg["midi_ports"] = []
+    erg["master"] = bool(takt and takt.seq)
+    erg["sperre"] = SPERRE["an"]
+    return erg
+
+
+# ---------- Bühnen-Sperre: beim Auftritt nichts Wichtiges aus Versehen ----------
+SPERRE = {"an": False}
+
+
+# ---------- Abend-Ablauf der Spielleitung (Handy) ----------
+ABLAUF_DATEI = os.path.join(os.path.dirname(SEITE), "ablauf.json")
+ablauf_sperre = threading.Lock()
+KATALOG = {"stimmungen": [], "orte": [], "zeit": 0}
+
+
+def ablauf_lesen():
+    try:
+        with open(ABLAUF_DATEI, encoding="utf-8") as f:
+            d = json.load(f)
+        if isinstance(d, dict):
+            d.setdefault("an", False)
+            d.setdefault("szenen", [])
+            d.setdefault("jetzt", -1)
+            return d
+    except (OSError, ValueError):
+        pass
+    return {"an": False, "szenen": [], "jetzt": -1}
+
+
+def ablauf_schreiben(d):
+    tmp = ABLAUF_DATEI + ".neu"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(d, f, ensure_ascii=False)
+    os.replace(tmp, ABLAUF_DATEI)
+
+
+def ablauf_szene_saeubern(x):
+    if not isinstance(x, dict):
+        return None
+    kurz = lambda v, n: re.sub(r"[\x00-\x1f<>]", "", str(v or ""))[:n]
+    return {"name": kurz(x.get("name"), 60) or "Szene", "st": kurz(x.get("st"), 40), "kul": kurz(x.get("kul"), 40), "notiz": kurz(x.get("notiz"), 200)}
+
+
+def _tasten():
+    """tastenbelegung.py neben der Brücke (gemeinsame Datei mit ZynSimple)."""
+    if ZYN not in sys.path:
+        sys.path.insert(0, ZYN)
+    import tastenbelegung
+    return tastenbelegung
+
+
+def eigene_ip():
+    """Adresse im WLAN/LAN – fürs Handy (zynthian.local klappt auf Android oft nicht)"""
+    import socket
+    try:
+        s0 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s0.connect(("10.255.255.255", 1))
+        ip = s0.getsockname()[0]
+        s0.close()
+        return ip
+    except OSError:
+        return ""
+
+
+def usb_sticks():
+    """eingesteckte USB-Sticks (beschreibbar gemountet)"""
+    erg = []
+    try:
+        with open("/proc/mounts", encoding="utf-8") as f:
+            for z in f:
+                t = z.split()
+                if len(t) >= 4 and t[0].startswith("/dev/sd") and (t[1].startswith("/media/") or t[1].startswith("/mnt/")) and "rw" in t[3].split(","):
+                    erg.append(t[1].replace("\\040", " "))
+    except OSError:
+        pass
+    return erg
+
+
+def aufnahme_ziel():
+    sticks = usb_sticks()
+    if sticks:
+        return os.path.join(sticks[0], "BardenBeats"), "USB-Stick"
+    return ARGS.aufnahmen, "Zynthian"
+
+
+def aufnahme_stand():
+    return {"an": aufnahme_laeuft(), "seit": aufnahme.get("seit") or 0, "dauer": round(time.time() - aufnahme["seit"]) if aufnahme_laeuft() and aufnahme.get("seit") else 0,
+            "datei": os.path.basename(aufnahme.get("datei") or ""), "ziel": aufnahme.get("ziel") or aufnahme_ziel()[1], "stick": bool(usb_sticks())}
+
+
 def aufnahme_schalten(an):
     p = aufnahme["proc"]
     if not an:
@@ -278,12 +432,23 @@ def aufnahme_schalten(an):
                 p.wait(timeout=5)
             except Exception:
                 p.kill()
+        dauer = round(time.time() - aufnahme["seit"]) if aufnahme.get("seit") else 0
         aufnahme.update(proc=None, seit=0)
-        return {"an": False, "datei": aufnahme["datei"]}
+        try:
+            os.sync()   # damit der Stick gleich herausgezogen werden kann
+        except Exception:
+            pass
+        return {"an": False, "datei": aufnahme["datei"], "ziel": aufnahme.get("ziel", ""), "dauer": dauer}
     if p and p.poll() is None:
         return {"an": True, "datei": aufnahme["datei"]}
-    os.makedirs(ARGS.aufnahmen, exist_ok=True)
-    datei = os.path.join(ARGS.aufnahmen, time.strftime("imres-%Y-%m-%d_%H-%M-%S.wav"))
+    ordner, ziel = aufnahme_ziel()
+    try:
+        os.makedirs(ordner, exist_ok=True)
+    except OSError:
+        ordner, ziel = ARGS.aufnahmen, "Zynthian"
+        os.makedirs(ordner, exist_ok=True)
+    datei = os.path.join(ordner, time.strftime("BardenBeats_%Y-%m-%d_%H-%M-%S.wav"))
+    aufnahme["ziel"] = ziel
     if ARGS.test:
         aufnahme.update(proc=None, datei=datei, seit=time.time())
         return {"an": True, "datei": datei, "test": True}
@@ -382,6 +547,29 @@ class Handler(SimpleHTTPRequestHandler):
             return self.datei_antwort(os.path.join(ZYN, "zyn.js"), "application/javascript; charset=utf-8")
         if p in ("/zyn/fern", "/zyn/fern.html"):
             return self.datei_antwort(os.path.join(ZYN, "fern.html"), "text/html; charset=utf-8")
+        if p in ("/zyn/spieler", "/zyn/spieler.html", "/spieler"):
+            return self.datei_antwort(os.path.join(ZYN, "spieler.html"), "text/html; charset=utf-8")
+        if p == "/zyn/qr.js":
+            return self.datei_antwort(os.path.join(ZYN, "qr.js"), "application/javascript; charset=utf-8")
+        if p == "/zyn/adresse":
+            return self.json_antwort({"ip": eigene_ip(), "port": ARGS.port if hasattr(ARGS, "port") else 8790})
+        if p == "/zyn/aufnahme":
+            return self.json_antwort(aufnahme_stand())
+        if p == "/zyn/check":
+            return self.json_antwort(check_stand())
+        if p == "/zyn/sperre":
+            return self.json_antwort({"ok": True, "an": SPERRE["an"]})
+        if p == "/zyn/tasten":
+            tb = _tasten()
+            return self.json_antwort({"liste": tb.liste("barden"), "layout": tb.LAYOUT, "anzeige": tb.ANZEIGE,
+                                      "karte": tb.karte("barden")})
+        if p in ("/zyn/ablauf.html", "/ablauf", "/zyn/spielleitung"):
+            return self.datei_antwort(os.path.join(ZYN, "ablauf.html"), "text/html; charset=utf-8")
+        if p == "/zyn/ablauf":
+            with ablauf_sperre:
+                d = ablauf_lesen()
+            d["katalog"] = KATALOG
+            return self.json_antwort(d)
         if p == "/zyn/gans.png":
             return self.datei_antwort(os.path.join(ZYN, "gans.png"), "image/png")
         if p == "/zyn/version":
@@ -397,7 +585,7 @@ class Handler(SimpleHTTPRequestHandler):
             return self.json_antwort({"modus": modus_jetzt(), "seite": zustand["seite"], "seitenModus": zustand["modus"], "aufnahme": aufnahme_laeuft(),
                                       "master": bool(takt and takt.seq), "optionen": dict(OPT),
                                       "text": zustand["text"], "vor": round(time.time() - zustand["zeit"], 1) if zustand["zeit"] else None,
-                                      "fern": zustand.get("fern"), "last": last_messen()})
+                                      "fern": zustand.get("fern"), "last": last_messen(), "sperre": SPERRE["an"]})
         if p == "/zyn/optionen":
             return self.json_antwort(dict(OPT))
         if p == "/zyn/last":
@@ -499,6 +687,16 @@ class Handler(SimpleHTTPRequestHandler):
                     if isinstance(e, dict):
                         haenger_merken(str(e.get("art", "?"))[:12], e.get("ms"), e.get("info", ""), e.get("t"))
             return self.json_antwort({"ok": True})
+        if p == "/zyn/tasten":
+            tb = _tasten()
+            try:
+                if d.get("aktion") == "zuruecksetzen":
+                    tb.zuruecksetzen("barden")
+                else:
+                    tb.tauschen("barden", str(d.get("funktion", "")), str(d.get("taste", "")))
+                return self.json_antwort({"ok": True, "liste": tb.liste("barden")})
+            except Exception as e:
+                return self.json_antwort({"ok": False, "fehler": str(e)})
         if p == "/zyn/hw":
             # von imres-tasten.py: Tasten, Drehregler, MIDI
             if isinstance(d, dict):
@@ -572,12 +770,67 @@ class Handler(SimpleHTTPRequestHandler):
                 except (TypeError, ValueError):
                     pass
             return self.json_antwort({"ok": True})
+        if p == "/zyn/sperre":
+            SPERRE["an"] = bool(d.get("an"))
+            senden({"typ": "sperre", "an": SPERRE["an"]})
+            return self.json_antwort({"ok": True, "an": SPERRE["an"]})
+        if p == "/zyn/katalog":
+            for k in ("stimmungen", "orte"):
+                l = d.get(k)
+                if isinstance(l, list):
+                    KATALOG[k] = [[str(x[0])[:40], str(x[1])[:60], str(x[2])[:8]] for x in l[:200] if isinstance(x, list) and len(x) >= 3]
+            KATALOG["zeit"] = time.time()
+            return self.json_antwort({"ok": True})
+        if p == "/zyn/ablauf":
+            with ablauf_sperre:
+                a = ablauf_lesen()
+                if "an" in d:
+                    a["an"] = bool(d.get("an"))
+                if isinstance(d.get("szenen"), list):
+                    a["szenen"] = [x for x in (ablauf_szene_saeubern(y) for y in d["szenen"][:80]) if x]
+                    if a["jetzt"] >= len(a["szenen"]):
+                        a["jetzt"] = len(a["szenen"]) - 1
+                ablauf_schreiben(a)
+            senden({"typ": "ablauf", "an": a["an"], "n": len(a["szenen"]), "jetzt": a["jetzt"]})
+            return self.json_antwort({"ok": True, "an": a["an"], "jetzt": a["jetzt"]})
+        if p == "/zyn/ablauf/gehe":
+            with ablauf_sperre:
+                a = ablauf_lesen()
+                if not a["an"]:
+                    return self.json_antwort({"ok": False, "fehler": "Abend-Ablauf ist am Pult ausgeschaltet"})
+                n = len(a["szenen"])
+                if not n:
+                    return self.json_antwort({"ok": False, "fehler": "noch keine Szenen"})
+                if d.get("schritt") is not None:
+                    i = a["jetzt"] + int(d.get("schritt") or 0)
+                else:
+                    i = int(d.get("i", 0))
+                i = max(0, min(n - 1, i))
+                a["jetzt"] = i
+                ablauf_schreiben(a)
+            senden({"typ": "szene", "i": i, "n": n, "szene": a["szenen"][i]})
+            return self.json_antwort({"ok": True, "jetzt": i})
+        if p == "/zyn/spieler":
+            # ein Held am Handy löst einen Klang aus – kurz gebremst, damit niemand das Pult zuschüttet
+            wer = re.sub(r"[^a-z]", "", str(d.get("wer", "")).lower())[:16]
+            klang = re.sub(r"[^a-z0-9:]", "", str(d.get("klang", "")).lower())[:24]
+            name = str(d.get("name", ""))[:32]
+            if not wer or not klang:
+                return self.json_antwort({"ok": False})
+            j = time.time()
+            ip = self.client_address[0]
+            if j - spieler_zuletzt.get(ip, 0) < 0.8:
+                return self.json_antwort({"ok": False, "zu_schnell": True})
+            spieler_zuletzt[ip] = j
+            senden({"typ": "spieler", "wer": wer, "klang": klang, "name": name})
+            return self.json_antwort({"ok": True})
         if p == "/zyn/aufnahme":
             an = d.get("an")
             if an is None:
                 an = not aufnahme_laeuft()
             erg = aufnahme_schalten(bool(an))
-            senden({"typ": "aufnahme", "an": erg.get("an", False), "datei": os.path.basename(erg.get("datei") or "")})
+            erg["ziel"] = erg.get("ziel") or aufnahme.get("ziel", "")
+            senden({"typ": "aufnahme", "an": erg.get("an", False), "datei": os.path.basename(erg.get("datei") or ""), "ziel": erg["ziel"]})
             return self.json_antwort(erg)
         if p == "/zyn/grafik":
             # Test: Chromium zeichnet mit dem Grafikchip (kiosk.sh liest grafik.sh beim Browserstart; stürzt er ab, nimmt kiosk.sh es zurück)
@@ -598,11 +851,13 @@ class Handler(SimpleHTTPRequestHandler):
             return self.json_antwort({"ok": True, "an": an})
         if p == "/zyn/system":
             aktion = str(d.get("aktion", ""))
-            if aktion not in ("imres", "zynthian", "hintergrund", "dj", "zynsimple-update", "zynthian-update", "neustart", "aus", "seite-neu", "aktualisieren", "zurueck", "start-imres", "start-zynthian", "start-hintergrund"):
+            if aktion not in ("imres", "zynthian", "hintergrund", "dj", "hybrid", "zynsimple-update", "zynthian-update", "neustart", "aus", "seite-neu", "aktualisieren", "zurueck", "start-imres", "start-zynthian", "start-hintergrund"):
                 return self.json_antwort({"ok": False, "fehler": "unbekannte Aktion"}, 400)
             if aktion == "seite-neu":
                 senden({"typ": "neu-laden"})
                 return self.json_antwort({"ok": True})
+            if SPERRE["an"]:
+                return self.json_antwort({"ok": False, "fehler": "Bühnen-Sperre ist an – erst am Pult entsperren (MENU 3 s halten)"})
             system_befehl(aktion)
             return self.json_antwort({"ok": True, "test": ARGS.test})
         self.send_error(404)

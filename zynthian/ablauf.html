@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Barden Beats – Abend-Ablauf</title>
+<meta name="theme-color" content="#120e18">
+<style>
+:root{--bg:#120e18;--panel:#1d1726;--panel2:#261d31;--line:#3a2f45;--ink:#ebe2cc;--mute:#a89f8f;--gold:#e0a046;--gold2:#ffd98a;--lila:#c070e0;--rot:#e8462a;--gruen:#5ad08a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:600 16px/1.3 system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100%}
+body{padding:calc(12px + env(safe-area-inset-top)) 14px calc(24px + env(safe-area-inset-bottom));max-width:620px;margin:0 auto}
+header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+header .logo{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);flex:1}
+.tabs{display:flex;gap:6px}
+.tabs button{font:700 14px system-ui,sans-serif;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px 12px}
+.tabs button.an{background:color-mix(in srgb,var(--lila) 30%,var(--panel2));border-color:var(--lila)}
+.hinweis{margin:0 0 12px;padding:10px 12px;border-radius:12px;font-size:14px;font-weight:500;display:none}
+.hinweis.an{display:block}.hinweis.warn{background:#3a2c14;border:1px solid #e0a046;color:#ffe0a8}.hinweis.weg{background:#3a1c22;border:1px solid #e0445e;color:#ffd0d6}
+.karte{border-radius:18px;padding:16px;border:1.5px solid color-mix(in srgb,var(--lila) 45%,var(--line));background:radial-gradient(140% 120% at 0% 0%,color-mix(in srgb,var(--lila) 22%,#241c2e),#17121f 70%);margin-bottom:12px}
+.karte small{color:var(--mute);font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:12px}
+.karte h1{margin:4px 0 8px;font-size:26px}
+.karte .zeile{display:flex;gap:10px;flex-wrap:wrap;color:#d8ccb4;font-size:15px}
+.karte .zeile span{background:#2a2134;border-radius:10px;padding:4px 10px}
+.karte .notiz{margin-top:10px;color:#e8dcc4;font-weight:500;font-size:15px;white-space:pre-wrap}
+.knoepfe{display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-bottom:16px}
+.knoepfe button{font:800 20px system-ui,sans-serif;padding:18px 10px;border-radius:16px;border:1.5px solid var(--line);color:var(--ink);background:linear-gradient(180deg,#2a2134,#1c1624)}
+.knoepfe .weiter{border-color:var(--gold);background:linear-gradient(180deg,color-mix(in srgb,var(--gold) 40%,#2a2134),#2a1f18);color:#fff4dc}
+.knoepfe button:disabled{opacity:.4}
+.knoepfe button:active{transform:scale(.98)}
+.liste{display:flex;flex-direction:column;gap:6px}
+.sz{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--panel);border:1px solid var(--line);color:var(--ink);font:inherit;text-align:left;width:100%}
+.sz .n{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#2a2134;font-size:13px;flex:none}
+.sz.jetzt{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,var(--panel))}.sz.jetzt .n{background:var(--gold);color:#120e18}
+.sz .t{flex:1;min-width:0}.sz .t b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sz .t small{color:var(--mute);font-weight:500}
+.ed{padding:12px;border-radius:14px;background:var(--panel);border:1px solid var(--line);margin-bottom:10px}
+.ed .kopf{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+.ed .kopf .n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#2a2134;font-size:13px;flex:none}
+.ed input,.ed select,.ed textarea{width:100%;font:600 16px system-ui,sans-serif;color:var(--ink);background:#15101c;border:1px solid var(--line);border-radius:10px;padding:9px 10px}
+.ed textarea{font-weight:500;min-height:44px;resize:vertical}
+.ed .zwei{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.ed .kopf button{flex:none;font:700 15px system-ui,sans-serif;color:var(--ink);background:#2a2134;border:1px solid var(--line);border-radius:9px;width:38px;height:38px}
+.ed .kopf button.x{color:#ffb4a8}
+.neu{width:100%;font:800 17px system-ui,sans-serif;padding:14px;border-radius:14px;border:1.5px dashed color-mix(in srgb,var(--lila) 60%,var(--line));background:transparent;color:var(--ink)}
+.stand{color:var(--mute);font-size:13px;text-align:center;margin-top:10px;font-weight:500}
+.leer{color:var(--mute);text-align:center;padding:30px 10px;font-weight:500}
+</style></head>
+<body>
+<header><span class="logo">📜 Barden Beats · Abend-Ablauf</span><div class="tabs"><button type="button" data-t="spiel" class="an">▶ Spielen</button><button type="button" data-t="bau">✏ Vorbereiten</button></div></header>
+<div class="hinweis warn" id="aus">Am Pult ausgeschaltet – dort <b>MENU → 📜 Abend-Ablauf</b> einschalten. Vorbereiten geht trotzdem.</div>
+<div class="hinweis warn" id="kat">Die Liste der Stimmungen und Orte kommt, sobald das Pult auf der Bühne läuft.</div>
+<div class="hinweis weg" id="weg">Das Pult ist gerade nicht erreichbar – gleiches WLAN?</div>
+<main id="inhalt"></main>
+<script>
+"use strict";
+const $ = s => document.querySelector(s), inhalt = $("#inhalt");
+const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+let D = { an: false, szenen: [], jetzt: -1, katalog: { stimmungen: [], orte: [] } }, ansicht = "spiel", speicherT = 0, gespeichert = true;
+const st = k => (D.katalog.stimmungen || []).find(x => x[0] === k), ort = k => (D.katalog.orte || []).find(x => x[0] === k);
+const stText = k => { const x = st(k); return k ? (x ? x[2] + " " + x[1] : "♪ " + k) : ""; };
+const ortText = k => k === "keine" ? "🔇 kein Hintergrund" : k ? (ort(k) ? ort(k)[2] + " " + ort(k)[1] : "🌲 " + k) : "";
+function holen() {
+  return fetch("/zyn/ablauf").then(r => r.json()).then(j => { $("#weg").classList.remove("an"); if (gespeichert || ansicht === "spiel") D = j; else { D.an = j.an; D.jetzt = j.jetzt; D.katalog = j.katalog; } zeigen(); })
+    .catch(() => $("#weg").classList.add("an"));
+}
+function speichern(sofort) {
+  gespeichert = false; clearTimeout(speicherT);
+  speicherT = setTimeout(() => fetch("/zyn/ablauf", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ szenen: D.szenen }) })
+    .then(r => r.json()).then(() => { gespeichert = true; const s = $("#stand"); if (s) s.textContent = "✓ gespeichert"; }).catch(() => $("#weg").classList.add("an")), sofort ? 0 : 600);
+  const s = $("#stand"); if (s) s.textContent = "…";
+}
+function gehe(x) {
+  fetch("/zyn/ablauf/gehe", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(x) }).then(r => r.json())
+    .then(j => { if (j.ok) { D.jetzt = j.jetzt; if (navigator.vibrate) try { navigator.vibrate(15); } catch (_) {} zeigen(); } else alert(j.fehler || "geht nicht"); }).catch(() => $("#weg").classList.add("an"));
+}
+function spiel() {
+  const n = D.szenen.length, s = D.szenen[D.jetzt];
+  if (!n) { inhalt.innerHTML = '<p class="leer">Noch keine Szenen.<br>Unter <b>✏ Vorbereiten</b> eine Liste für den Abend anlegen.</p>'; return; }
+  inhalt.innerHTML = '<div class="karte">' + (s ? "<small>Szene " + (D.jetzt + 1) + " von " + n + "</small><h1>" + esc(s.name) + '</h1><div class="zeile">' + (s.st ? "<span>" + esc(stText(s.st)) + "</span>" : "") + (s.kul ? "<span>" + esc(ortText(s.kul)) + "</span>" : "") + "</div>" + (s.notiz ? '<div class="notiz">' + esc(s.notiz) + "</div>" : "")
+      : "<small>" + n + " Szenen bereit</small><h1>Los geht’s</h1><div class=\"zeile\"><span>▶ Weiter startet Szene 1</span></div>") + "</div>" +
+    '<div class="knoepfe"><button type="button" data-g="-1"' + (D.jetzt <= 0 || !D.an ? " disabled" : "") + '>◀</button><button type="button" class="weiter" data-g="1"' + (D.jetzt >= n - 1 || !D.an ? " disabled" : "") + ">" + (D.jetzt < 0 ? "▶ Start" : D.jetzt >= n - 1 ? "Ende" : "▶ Weiter") + "</button></div>" +
+    '<div class="liste">' + D.szenen.map((x, i) => '<button type="button" class="sz' + (i === D.jetzt ? " jetzt" : "") + '" data-i="' + i + '"' + (!D.an ? " disabled" : "") + '><span class="n">' + (i + 1) + '</span><span class="t"><b>' + esc(x.name) + "</b><small>" + esc([stText(x.st), ortText(x.kul)].filter(Boolean).join(" · ") || "Musik und Ort bleiben") + "</small></span></button>").join("") + "</div>";
+}
+function optionen(liste, wert, extra) {
+  const hat = !wert || liste.some(x => x[0] === wert) || extra.some(x => x[0] === wert);
+  return extra.concat(liste.map(x => [x[0], x[2] + " " + x[1]])).concat(hat ? [] : [[wert, wert]]).map(([k, t]) => '<option value="' + esc(k) + '"' + (k === (wert || "") ? " selected" : "") + ">" + esc(t) + "</option>").join("");
+}
+function bau() {
+  const S = D.katalog.stimmungen || [], O = D.katalog.orte || [];
+  inhalt.innerHTML = D.szenen.map((x, i) => '<div class="ed" data-i="' + i + '"><div class="kopf"><span class="n">' + (i + 1) + '</span><input data-f="name" value="' + esc(x.name) + '" placeholder="Name der Szene" maxlength="60">' +
+      '<button type="button" data-a="hoch" aria-label="nach oben">↑</button><button type="button" data-a="runter" aria-label="nach unten">↓</button><button type="button" class="x" data-a="weg" aria-label="löschen">✕</button></div>' +
+      '<div class="zwei"><select data-f="st">' + optionen(S, x.st, [["", "♪ Musik bleibt"]]) + '</select><select data-f="kul">' + optionen(O, x.kul, [["", "🌲 Ort bleibt"], ["keine", "🔇 kein Hintergrund"]]) + "</select></div>" +
+      '<textarea data-f="notiz" placeholder="Notiz für dich (z. B. „Wache fragt nach dem Passierschein“)" maxlength="200">' + esc(x.notiz) + "</textarea></div>").join("") +
+    '<button type="button" class="neu" data-a="neu">➕ Szene dazu</button><p class="stand" id="stand">' + (gespeichert ? "✓ gespeichert" : "…") + "</p>";
+}
+function zeigen() {
+  $("#aus").classList.toggle("an", !D.an); $("#kat").classList.toggle("an", !(D.katalog && D.katalog.stimmungen && D.katalog.stimmungen.length));
+  document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("an", b.dataset.t === ansicht));
+  const f = document.activeElement && inhalt.contains(document.activeElement) && ansicht === "bau"; if (f) return; /* beim Tippen nicht neu zeichnen */
+  ansicht === "spiel" ? spiel() : bau();
+}
+document.querySelector(".tabs").addEventListener("click", e => { const b = e.target.closest("[data-t]"); if (!b) return; ansicht = b.dataset.t; if (ansicht === "spiel" && !gespeichert) speichern(true); if (document.activeElement) document.activeElement.blur(); zeigen(); });
+inhalt.addEventListener("click", e => {
+  const g = e.target.closest("[data-g]"); if (g) { gehe({ schritt: +g.dataset.g }); return; }
+  const z = e.target.closest(".sz[data-i]"); if (z) { gehe({ i: +z.dataset.i }); return; }
+  const a = e.target.closest("[data-a]"); if (!a) return; const ed = a.closest(".ed"), i = ed ? +ed.dataset.i : -1;
+  if (a.dataset.a === "neu") { D.szenen.push({ name: "Szene " + (D.szenen.length + 1), st: "", kul: "", notiz: "" }); speichern(); bau(); const l = inhalt.querySelectorAll('.ed input[data-f="name"]'); if (l.length) { l[l.length - 1].focus(); l[l.length - 1].select(); } return; }
+  if (a.dataset.a === "weg") { if (!confirm("Szene „" + D.szenen[i].name + "“ löschen?")) return; D.szenen.splice(i, 1); }
+  if (a.dataset.a === "hoch" && i > 0) [D.szenen[i - 1], D.szenen[i]] = [D.szenen[i], D.szenen[i - 1]];
+  if (a.dataset.a === "runter" && i < D.szenen.length - 1) [D.szenen[i + 1], D.szenen[i]] = [D.szenen[i], D.szenen[i + 1]];
+  speichern(); bau();
+});
+inhalt.addEventListener("input", e => { const f = e.target.dataset.f, ed = e.target.closest(".ed"); if (!f || !ed) return; D.szenen[+ed.dataset.i][f] = e.target.value; speichern(); });
+inhalt.addEventListener("change", e => { if (e.target.tagName === "SELECT") { e.target.blur(); } });
+/* Pult meldet Szenenwechsel live */
+try { const q = new EventSource("/zyn/ereignisse"); q.onmessage = e => { try { const j = JSON.parse(e.data); if (j.typ === "szene") { D.jetzt = j.i; if (ansicht === "spiel") zeigen(); } else if (j.typ === "ablauf") { D.an = !!j.an; D.jetzt = j.jetzt; zeigen(); } } catch (_) {} }; q.onerror = () => {}; } catch (_) {}
+holen(); setInterval(() => { if (ansicht === "spiel" || gespeichert) holen(); }, 8000);
+</script>
+</body></html>
