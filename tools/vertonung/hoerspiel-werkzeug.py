@@ -2238,7 +2238,11 @@ def probe(ausgabe, spec, mit_ende=False, mit_start=True):
     def raum_bei(t_):
         j = bisect.bisect_right(o_t, t_) - 1
         return ORT_RAUM.get(orte[max(0, j)][1], "frei")
-    raum_send = {r_: np.zeros_like(stimme) for r_ in RAEUME}
+    raum_send = {}   # je Raum ein Mono-Hallweg, erst angelegt, wenn der Raum vorkommt (spart Speicher bei langen Spuren)
+    def senden(r_, x, t_, g_):
+        if r_ not in raum_send: raum_send[r_] = np.zeros(stimme.shape[1], np.float32)
+        i0 = int(t_ * SR); n_ = min(len(x), stimme.shape[1] - i0)
+        if n_ > 0 and i0 >= 0: raum_send[r_][i0:i0 + n_] += (np.asarray(x[:n_]) * g_).astype(np.float32)
     # Atmo-Hülle: Ducking während Sprache
     huelle = np.full(stimme.shape[1], pg["atmoPause"])
     def rampe(arr, a, b, v0, v1):
@@ -2311,7 +2315,7 @@ def probe(ausgabe, spec, mit_ende=False, mit_start=True):
                         from scipy.signal import butter, lfilter
                         bb, aa = butter(2, 1400 / (SR / 2), "low"); x = lfilter(bb, aa, x); gg *= .75
                     mische(atmo, x, tt, gg * pg["atmo"], 0)
-                    r_ = raum_bei(tt); mische(raum_send[r_], x, tt, gg * pg["atmo"] * RAEUME[r_]["send"] * .8, 0)
+                    r_ = raum_bei(tt); senden(r_, x, tt, gg * pg["atmo"] * RAEUME[r_]["send"] * .8)
                 tt += rnd.uniform(*ab_) * (1.3 if False else 1)
     atmo *= huelle
     # Effekte und Stücke
@@ -2333,7 +2337,7 @@ def probe(ausgabe, spec, mit_ende=False, mit_start=True):
                 bb, aa = butter(2, 1400 / (SR / 2), "low"); x = lfilter(bb, aa, x); gg *= .75
             mische(fx, x, tt, gg, q.get("pan", 0))
             r_ = raum_bei(tt)   # Hall des Raums, in dem es passiert (eigener "hall" der Partitur hat Vorrang)
-            mische(raum_send[r_], x, tt, gg * (q["hall"] if q.get("hall") else RAEUME[r_]["send"]), 0)
+            senden(r_, x, tt, gg * (q["hall"] if q.get("hall") else RAEUME[r_]["send"]))
             if "folge" in A_: tt += rnd.uniform(A_["folge"][2], A_["folge"][3])
             else: tt += .35
     for (t0, k, i, info) in plan:
@@ -2360,10 +2364,10 @@ def probe(ausgabe, spec, mit_ende=False, mit_start=True):
     ir = np.stack([r.standard_normal(ir_len), r.standard_normal(ir_len)]) * np.exp(-np.arange(ir_len) / SR * 3.2)
     from scipy.signal import oaconvolve   # Overlap-Add: gleiches Ergebnis, aber wenig Speicher bei langen Abschnitten
     hall = np.stack([oaconvolve(hall_send[c], ir[c].astype(np.float32))[:hall_send.shape[1]].astype(np.float32) for c in range(2)]) * pg["hall"] * .08
-    for r_, sb in raum_send.items():
-        if not sb.any(): continue
-        ir_r = raum_ir(RAEUME[r_], SR)
-        hall += np.stack([oaconvolve(sb[c], ir_r[c])[:sb.shape[1]].astype(np.float32) for c in range(2)]) * pg["hall"] * .08
+    for r_ in list(raum_send):
+        sb = raum_send.pop(r_); ir_r = raum_ir(RAEUME[r_], SR)
+        for c in range(2): hall[c] += oaconvolve(sb, ir_r[c])[:len(sb)].astype(np.float32) * (pg["hall"] * .08)
+        del sb
     hs = atmo + fx + mus + hall
     # Summenbus wie im Browser: Kompressor (−18 dB, 3:1) → feste Aufholverstärkung → Brickwall-Begrenzer
     hs = begrenzer(kompressor(hs) * pg.get("summe", 1.0), decke_verlauf(plan, hs.shape[1], pg))
