@@ -45,8 +45,13 @@ cp "$ORT/seite/zynthian/dienste/zynthian-conflicts.conf" /etc/systemd/system/zyn
 systemctl daemon-reload
 systemctl enable --now imres-bruecke.service
 systemctl enable imres-start.service
-systemctl enable imres-knopf.service
-systemctl is-active -q zynthian && systemctl restart imres-knopf.service || true
+# ♫-Knopf nur ohne ZynSimple – mit ZynSimple gibt es dort den ♪-Knopf (→ DJ-Pult)
+if [ -f /etc/systemd/system/zynsimple-knopf.service ]; then
+  systemctl disable --now imres-knopf.service >/dev/null 2>&1 || true
+else
+  systemctl enable imres-knopf.service
+  systemctl is-active -q zynthian && systemctl restart imres-knopf.service || true
+fi
 [ -f "$ORT/start-modus" ] || echo zynthian > "$ORT/start-modus"
 
 IP=$(hostname -I 2>/dev/null | awk '{print $1}')

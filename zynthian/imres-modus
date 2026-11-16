@@ -171,8 +171,13 @@ PY
       apt-get install -y -q fonts-noto-color-emoji >/dev/null 2>&1 || { apt-get update -q >/dev/null 2>&1; apt-get install -y -q fonts-noto-color-emoji >/dev/null 2>&1; } || echo "Symbol-Schrift ließ sich nicht installieren (Internet?)"
     fi
     systemctl daemon-reload
-    systemctl enable imres-bruecke.service imres-start.service imres-knopf.service >/dev/null 2>&1
-    systemctl is-active -q zynthian && systemctl restart imres-knopf.service
+    systemctl enable imres-bruecke.service imres-start.service >/dev/null 2>&1
+    if [ -f /etc/systemd/system/zynsimple-knopf.service ]; then
+      systemctl disable --now imres-knopf.service >/dev/null 2>&1   # ZynSimple hat den ♪-Knopf (→ DJ-Pult)
+    else
+      systemctl enable imres-knopf.service >/dev/null 2>&1
+      systemctl is-active -q zynthian && systemctl restart imres-knopf.service
+    fi
     systemctl is-active -q imres-buehne && systemctl restart imres-buehne.service
     systemctl is-active -q imres-hintergrund && systemctl restart imres-hintergrund.service
     echo "Imres ist eingerichtet und auf dem neuesten Stand."
