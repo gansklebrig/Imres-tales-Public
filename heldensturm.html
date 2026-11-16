@@ -38866,7 +38866,7 @@ window.__hsZEIGER={v:1,an:0};
    Schalter: __hsGLWELT.modus='auto'|'an'|'aus' (auch ?glwelt=an|aus, SAVE.glwelt, Knopf „WebGL-Welt“ in der Grafik-Box), __hsGLWELT.aus=true,
    __hsGLWELT.k.{boden,deko,licht,tee,vc,bloom,bloomU,bloomS1,vig,css,gueltig}=0/1. Diagnose: „WebGL-Welt: …“, Paketliste „glwelt1(an)“.
    Erweiterungspunkte für „glfx“: __hsGLWELT.haken.{welt,licht,ende,bloom,uPost}, __hsGLWELT.api. ES2017 (Chromium 77), WebGL1. */
-window.__hsGLWELT={v:3};
+window.__hsGLWELT={v:4};
 (function(){try{
  /* ---------- Farben (CSS → [r,g,b,a] 0..1, nicht vormultipliziert) ---------- */
  const FC=new Map();let FCX=null;
@@ -39275,7 +39275,20 @@ window.__hsGLWELT={v:3};
  function crAus(){const C=CR();if(C&&!C.aus){C.aus=true;FR.crAus=C}else FR.crAus=null;
   try{const p=window.__hsPERF&&__hsPERF.str;if(p){FR.pfs=p;FR.pfsA=p.aus;p.aus=true}else FR.pfs=null}catch(e){FR.pfs=null}}
  function crZurueck(){if(FR.crAus){FR.crAus.aus=false;FR.crAus=null}if(FR.pfs){FR.pfs.aus=FR.pfsA;FR.pfs=null}}
- function bildBeginn(){FR.fb=0;ebSync();const g1=EB.g1,g2=EB.g2;for(const g of [g1,g2]){g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.clearRect(0,0,EB.w,EB.h)}
+ /* Firefox stuft große 2D-Ebenen gelegentlich auf den Prozessor herab (dann kostet schon das Leeren Millisekunden).
+    Messen über das Leeren; bleibt es teuer, beide 2D-Ebenen frisch anlegen (frische Leinwände starten auf der Grafikkarte). */
+ const S12={mp:0,n:0,t:0,seit:0,k:0,v:[[],[]],m:[0,0],c:null};GW.s12=S12;
+ function s12Neu(){const par=EB.s1&&EB.s1.parentNode;for(const k of ['s1','s2']){const alt=EB[k],n=lw(alt.className);n.style.cssText=alt.style.cssText;n.width=alt.width;n.height=alt.height;if(par&&alt.parentNode===par)par.replaceChild(n,alt);EB[k]=n;try{alt.width=alt.height=0}catch(e){}}
+  EB.g1=EB.s1.getContext('2d',{alpha:true});EB.g2=EB.s2.getContext('2d',{alpha:true});try{TEE.g1=false;TEE.g2=false}catch(e){}S12.n++;S12.t=performance.now();S12.seit=0;S12.mp=0;S12.v=[[],[]];S12.m=[0,0]}
+ function bildBeginn(){FR.fb=0;ebSync();
+  S12.mp=Math.max(S12.m[0],S12.m[1]);S12.seit++;
+  if(S12.mp>=0.6&&S12.seit>90&&S12.n<6&&performance.now()-S12.t>20000&&GW.k.s12!==0)s12Neu();
+  const g1=EB.g1,g2=EB.g2;
+  /* Sonde wie licht2: hochgezogenes Bild über die ganze Ebene (wird gleich wieder geleert) – Prozessor ≈ 1–4 ms/MPx, Grafikkarte ≈ 0 */
+  {const k=(S12.k++)%60,i=k===7?0:k===37?1:-1;const mpx=EB.w*EB.h/1e6;if(i>=0&&mpx>=0.15&&GW.k.s12!==0){try{if(!S12.c){S12.c=document.createElement('canvas');S12.c.width=S12.c.height=256;const q=S12.c.getContext('2d');q.fillStyle='#302418';q.fillRect(0,0,256,256);q.fillStyle='#5a4030';q.fillRect(40,40,120,90)}
+   const g=i?g2:g1;g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.imageSmoothingEnabled=true;const a=performance.now();g.drawImage(S12.c,0,0,256,256,0,0,EB.w,EB.h);const d=(performance.now()-a)/mpx;
+   const V=S12.v[i];V.push(d);if(V.length>7)V.shift();if(V.length>=3){const q=V.slice().sort((x,y)=>x-y);S12.m[i]=q[q.length>>1]}}catch(e){}}}
+  for(const g of [g1,g2]){g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.clearRect(0,0,EB.w,EB.h)}
   const RU=RS.u,RO=RS.o;RU.frame++;RO.frame++;
   /* untere Ebene: deckend schwarz (mit Nachbearbeitung: in einen Bild-Puffer) */
   if(GW.haken.uPost){if(!RS.uf||RS.uf.w!==EB.w||RS.uf.h!==EB.h){if(RS.uf)fbWeg(RU,RS.uf);RS.uf=fbNeu(RU,EB.w,EB.h,true);if(!RS.uf)throw new Error('U-Puffer')}}else if(RS.uf){fbWeg(RU,RS.uf);RS.uf=null}
@@ -39293,7 +39306,7 @@ window.__hsGLWELT={v:3};
   try{const r=_r.apply(this,arguments);ok=true;return r}
   finally{FR.on=0;FR.tee=0;FR.tee1=0;cx=c0;cxPruef();crZurueck();LCU.an=0;fsvZurueck();
    if(ok&&FR.phase==='post'){try{abschluss();ebAn();GW.st.bilder++}catch(e){gErr('abschluss',e);ebAus()}}
-   else{GW.st.abbruch++;if(FR.rw)gErr('bild','Bild nicht vollständig ('+FR.phase+')');ebAus();GW.pauseBis=performance.now()+1500}
+   else{GW.st.abbruch++;if(FR.rw)gErr('bild','Bild nicht vollständig ('+FR.phase+')');ebAus();if(FR.rw){GW.st.abbrRW=(GW.st.abbrRW||0)+1;GW.pauseBis=performance.now()+1500}}
    if(FR.fb){GW.fbN++;if(GW.fbN>=3||GW.st.fehler>40){GW.gesperrt=true;ebAus();try{console.warn('glwelt: GL-Welt nach Fehlern abgeschaltet – 2D-Pfad',GW.err.slice(-3))}catch(e){}}}else GW.fbN=0;
    FR.phase=''}}}
  /* Hat licht2 während eines GL-Bildes eine frische Leinwand angelegt, zeigt c0 auf die alte (nicht mehr eingehängte) – dann auf die aktive wechseln */
@@ -39320,7 +39333,7 @@ window.__hsGLWELT={v:3};
  const OID=new WeakMap();let oidN=0;const oid=o=>{if(!o||typeof o!=='object')return String(o);let v=OID.get(o);if(!v){v=++oidN;OID.set(o,v)}return v};
  function bgBasis(){const K=G.ka;let tp=0;try{if(K&&K.tore)for(const T of K.tore)tp+=((T.prop&&T.prop.prog||0)>=0.999?2:0)+(T.zu?1:0)}catch(e){}
   const R=G.road,gr=G.ground,r=G.room;let ks='';try{ks=KAT.key+'/'+KAT.sc}catch(e){}let th='';try{th=(G.theme&&(G.theme.base+'/'+G.theme.dark))+'/'+(typeof CU==='function'&&CU('nacht')?1:0)}catch(e){}
-  return [G.runId,G.stage,G.themeKey,WORLD,oid(gr),R?oid(R)+'/'+R.length+'/'+R[0][0]+'/'+R[0][1]:0,ks,K?K.v+'/'+oid(K):0,tp,G.blkV||0,G.wl&&G.wl.lo?G.wl.lo.length+'/'+G.wl.haus.length:0,G.arN?G.arN.length:0,
+  BT.weich=tp+'/'+(G.blkV||0);return [G.runId,G.stage,G.themeKey,WORLD,oid(gr),R?oid(R)+'/'+R.length+'/'+R[0][0]+'/'+R[0][1]:0,ks,K?K.v+'/'+oid(K):0,0,0,G.wl&&G.wl.lo?G.wl.lo.length+'/'+G.wl.haus.length:0,G.arN?G.arN.length:0,
    r?[r.type,r.x0,r.y0,r.x1,r.y1].join(','):'',th,(function(){try{return gfxL()+'/'+fxQ()}catch(e){return''}})()].join('|')}
  const AR_FEST=new Set(['erde','lichtung','fliesen','seide','friedhof','asche']);
  const WL_DYN=k=>k==='wasser'||k==='lava';
@@ -39355,17 +39368,23 @@ window.__hsGLWELT={v:3};
  function texCap(){let m=0;try{m=+navigator.deviceMemory||0}catch(e){}let mob=false;try{mob=!!MOBIL}catch(e){}return (m>=8?96:m>=4?64:m>0?40:mob?64:128)*1048576}
  function kCap(anteil,nVis){return Math.min(520,Math.max(texCap()*anteil/(GW.TS*GW.TS*4),nVis*1.8))}
  /* Welt-Ebene eines Bildes: Kacheln zeichnen/bauen, Live-Rest auf S1 */
- function welt(m){const s=m[0],e=m[4],f=m[5];const RU=RS.u,TS=GW.TS;
+ function prioK(x,y,T){const L=BT.prio;if(!L||!L.length)return false;for(const r of L)if(x<r[2]&&x+T>r[0]&&y<r[3]&&y+T>r[1])return true;return false}
+ function welt(m){const T0=jetzt();BT.bt=0;try{return welt_(m)}finally{const d=jetzt()-T0;GW.st.weltE=GW.st.weltE==null?d:GW.st.weltE*0.95+d*0.05;GW.st.bauE=GW.st.bauE==null?BT.bt:GW.st.bauE*0.95+BT.bt*0.05}}
+ function welt_(m){const s=m[0],e=m[4],f=m[5];const RU=RS.u,TS=GW.TS;
   if(!GW.k.boden||m[1]||m[2]||Math.abs(m[3]-s)>1e-9||!(s>0.05)){GW.st.bodenLive++;bodenLive();RWK();return}
   /* in Kammern mit noch sichtbarem Arena-Rand: ganz live (Reihenfolge Rand/Kammerboden) */
   try{if(G.room&&G.ka&&(G.ka.arA||0)>0.001){GW.st.bodenLive++;bodenLive();RWK();return}}catch(er){}
-  const key=bgBasis();if(BT.key!==key){GW.st.schluessel=(GW.st.schluessel||0)+1;GW.kDiff=[BT.key,key];BT.key=key;kachelnFrei(BT.cur);kachelnFrei(BT.alt);BT.sB=s;BT.gen++;BT.ab=0}
+  const key=bgBasis();if(BT.key===key&&BT.weichK!==BT.weich){BT.weichK=BT.weich;BT.gen++;GW.st.weich=(GW.st.weich||0)+1;
+   /* Kacheln an Toren sofort neu (sonst stünde ein offenes Tor kurz noch zu) */BT.prio=[];try{const K=G.ka;if(K&&K.tore)for(const T of K.tore){const r=(T.w||160)*0.75+90;BT.prio.push([T.x-r,T.y-r,T.x+r,T.y+r])}}catch(er){}}
+  if(BT.key!==key){BT.weichK=BT.weich;GW.st.schluessel=(GW.st.schluessel||0)+1;GW.kDiff=[BT.key,key];BT.key=key;kachelnFrei(BT.cur);kachelnFrei(BT.alt);BT.sB=s;BT.gen++;BT.ab=0}
   /* Maßstab: bleibt, solange ±12 %; sonst nach 30 Bildern neu bauen (die alten Kacheln überbrücken) */
   if(Math.abs(s/BT.sB-1)>0.12){if(++BT.ab>30){GW.st.massstab=(GW.st.massstab||0)+1;kachelnFrei(BT.alt);BT.alt=BT.cur;BT.altS=BT.sB;BT.cur=new Map();BT.sB=s;BT.ab=0}}else BT.ab=0;
   const sB=BT.sB,T=TS/sB,cw=EB.w,ch=EB.h;const X0=-e/s,Y0=-f/s,X1=(cw-e)/s,Y1=(ch-f)/s;
   const i0=Math.floor(X0/T),i1=Math.floor((X1-1e-6)/T),j0=Math.floor(Y0/T),j1=Math.floor((Y1-1e-6)/T);
   const nVis=(i1-i0+1)*(j1-j0+1);BT.nVis=nVis;BT.b0=Math.max(GW.bud,Math.ceil(nVis/18));BT.bt=0;const fehlt=[];const Q=[];
   for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){const k=i+','+j;let E=BT.cur.get(k);
+   /* veraltete Kachel (Tor/Geröll geändert): weiter zeigen, neu bauen sobald Budget da */
+   if(E&&E.gen!==BT.gen&&((BT.b0>0&&BT.bt<GW.ms)||prioK(i*T,j*T,T))){BT.b0--;try{const N=kachelBau(i,j,sB);try{RU.gl.deleteTexture(E.t)}catch(er){}E=N;BT.cur.set(k,E)}catch(er){gErr('kachel',er)}}
    if(!E&&BT.b0>0&&BT.bt<GW.ms){BT.b0--;try{E=kachelBau(i,j,sB);BT.cur.set(k,E)}catch(er){gErr('kachel',er);E=null}}
    if(E){E.lu=RU.frame;Q.push([E.t,i*T,j*T,T]);continue}
    /* alter Maßstab vorhanden? */if(BT.alt.size){const Ta=TS/BT.altS,a0=Math.floor(i*T/Ta),a1=Math.floor(((i+1)*T-1e-6)/Ta),b0=Math.floor(j*T/Ta),b1=Math.floor(((j+1)*T-1e-6)/Ta);let ok=true;const L=[];
@@ -39567,7 +39586,7 @@ window.__hsGLWELT={v:3};
  GW.mb=mb;
  function zeile(){const g=GW.grund();const st=GW.st;
   if(!g){return 'WebGL-Welt: aus ('+(GW.modus==='aus'||GW.aus?'Schalter':RS.fehl?RS.fehl:RS.u&&RS.u.soft?'Software-WebGL':'nicht bereit')+')'+(RS.u&&RS.u.ren?' · '+RS.u.ren:'')}
-  return `WebGL-Welt: ${GW.gesperrt?'aus (nach Fehlern gesperrt)':GW.imTest?'pausiert (Firefox-Test)':EB.an?'an':'bereit'} (WebGL1, ${RS.u.ren}${g==='erzwungen'?', erzwungen':''}) · Texturen ${String(mb()).replace('.',',')} MB · Kontextverluste ${st.verlust} · Bilder ${st.bilder} (Abbruch ${st.abbruch}) · Boden-Kacheln ${BT.cur.size}/${BT.nVis||0} sichtbar (Bau ${st.kachelBau}, Live ${st.kachelLive}, neu wegen Szene ${st.schluessel||0}${(function(){try{const d=GW.kDiff;if(!d||!d[0])return'';const A=String(d[0]).split('|'),B=String(d[1]).split('|'),L=[];for(let i=0;i<B.length;i++)if(A[i]!==B[i])L.push(i);return' ['+L.join(',')+']'}catch(e){return''}})()}, Maßstab ${st.massstab||0}) · Deko ${DT.fest.size} ruhend (an ${st.dekoAn}/live ${st.dekoLive}) · Umleitungen ${st.tee} · CSS-Mischung ${st.css}${st.mix?' · ⚠ Mischmodi '+st.mix:''}${st.fehler?' · Fehler '+st.fehler+' ('+GW.err.slice(-2).join('; ')+')':''}`}
+  return `WebGL-Welt: ${GW.gesperrt?'aus (nach Fehlern gesperrt)':GW.imTest?'pausiert (Firefox-Test)':EB.an?'an':'bereit'} (WebGL1, ${RS.u.ren}${g==='erzwungen'?', erzwungen':''}) · Texturen ${String(mb()).replace('.',',')} MB · Kontextverluste ${st.verlust} · Bilder ${st.bilder} (Abbruch ${st.abbruch}, davon kaputt ${st.abbrRW||0}) · 2D-Ebenen ${S12.mp>=0.6?'Prozessor':S12.mp<=0.15?'Grafikkarte':'unklar'} (Sonde ${S12.m[0].toFixed(2)}/${S12.m[1].toFixed(2)} ms/MPx, erneuert ${S12.n}) · Welt-Ebene ⌀ ${(st.weltE||0).toFixed(1)} ms (davon Bau ${(st.bauE||0).toFixed(1)}) · Boden-Kacheln ${BT.cur.size}/${BT.nVis||0} sichtbar (Tor/Geröll ${st.weich||0}, Bau ${st.kachelBau}, Live ${st.kachelLive}, neu wegen Szene ${st.schluessel||0}${(function(){try{const d=GW.kDiff;if(!d||!d[0])return'';const A=String(d[0]).split('|'),B=String(d[1]).split('|'),L=[];for(let i=0;i<B.length;i++)if(A[i]!==B[i])L.push(i);return' ['+L.join(',')+']'}catch(e){return''}})()}, Maßstab ${st.massstab||0}) · Deko ${DT.fest.size} ruhend (an ${st.dekoAn}/live ${st.dekoLive}) · Umleitungen ${st.tee} · CSS-Mischung ${st.css}${st.mix?' · ⚠ Mischmodi '+st.mix:''}${st.fehler?' · Fehler '+st.fehler+' ('+GW.err.slice(-2).join('; ')+')':''}`}
  GW.zeile=zeile;
  function diagHaken(){const DG=window.__hsDIAG;if(!DG||DG.__gw)return;DG.__gw=1;
   try{const d0=Object.getOwnPropertyDescriptor(DG,'letzter');let lz=DG.letzter;const get=d0&&d0.get?d0.get:()=>lz,set=d0&&d0.set?d0.set:(v)=>{lz=v};
