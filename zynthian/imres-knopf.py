@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Imres-Knopf: ein kleiner Knopf „♫“ in einer Ecke der normalen Zynthian-Oberfläche.
-kurz halten (0,8 s) oder doppelt tippen → die Imres-Bühne startet (wie „imres-modus imres“).
+♪-Knopf: ein kleiner Knopf in einer Ecke der Zynthian-Oberfläche (ZynSimple-Mischpult).
+kurz halten oder doppelt tippen → das DJ-Pult startet (Mixxx im Vollbild).
+Barden Beats erreicht man nur noch über ZynSimple → Einstellungen → System.
+Ohne ZynSimple-DJ-Pult startet der Knopf wie früher die Imres-Bühne.
 
 Läuft nur, solange die Zynthian-Oberfläche läuft (imres-knopf.service, PartOf=zynthian.service).
 Ecke einstellen in /zynthian/zynthian-my-data/imres/einstellungen.sh:
@@ -126,6 +128,29 @@ def touch_lesen(pfad, ecke, zustand, melden):
                     zustand["roh_seit"] = None
 
 
+def dj_da():
+    return os.path.exists("/usr/local/bin/zynsimple-dj")
+
+
+def ziel_starten():
+    """DJ-Pult starten (über ZynSimple – zeigt dort „DJ-Pult startet …“), sonst wie früher Barden Beats."""
+    if not dj_da():
+        return imres_starten()
+    port = 8090
+    try:
+        with open("/zynthian/zynthian-my-data/zynsimple/zynsimple.json", encoding="utf-8") as f:
+            port = int(json.load(f).get("web_port", 8090))
+    except Exception:
+        pass
+    try:
+        req = urllib.request.Request("http://127.0.0.1:%d/api/dj" % port, data=json.dumps({"aktion": "dj"}).encode("utf-8"),
+                                     headers={"Content-Type": "application/json"}, method="POST")
+        urllib.request.urlopen(req, timeout=3).read()
+    except Exception as e:
+        print("ZynSimple nicht erreichbar:", e)
+        os.system("setsid /usr/local/bin/zynsimple-dj dj >/dev/null 2>&1 &")
+
+
 def imres_starten():
     try:
         req = urllib.request.Request(BRUECKE + "/zyn/system", data=json.dumps({"aktion": "imres"}).encode("utf-8"),
@@ -168,7 +193,7 @@ def main():
     c.pack()
     rand = c.create_rectangle(1, 1, GROESSE - 2, GROESSE - 2, outline="#e0a046", width=2)
     fuell = c.create_rectangle(2, GROESSE - 2, GROESSE - 2, GROESSE - 2, outline="", fill="#7a5418")
-    c.create_text(GROESSE // 2, GROESSE // 2 - 1, text="♫", font=("DejaVu Sans", 28, "bold"), fill="#e0a046")
+    c.create_text(GROESSE // 2, GROESSE // 2 - 1, text="♪" if dj_da() else "♫", font=("DejaVu Sans", 28, "bold"), fill="#e0a046")
     zustand = {"seit": None, "ausgeloest": False, "letzter_tipp": 0, "roh_seit": None}
     for pfad, name in touch_geraete():
         print("Touchscreen:", name, pfad, flush=True)
@@ -182,7 +207,7 @@ def main():
         c.itemconfigure(rand, outline="#50ff70")
         c.coords(fuell, 2, 2, GROESSE - 2, GROESSE - 2)
         root.update_idletasks()
-        imres_starten()
+        ziel_starten()
 
     def ticken():
         seit = zustand["seit"] if zustand["seit"] is not None else zustand.get("roh_seit")

@@ -135,14 +135,13 @@ details{margin-top:10px}summary{cursor:pointer;color:var(--mute);font-size:13px;
 <h2><span>System</span></h2>
 <div class="system">
   <button data-s="imres">🎻 Barden Beats starten<small>Vollbild, Tasten des Zynthian</small></button>
-  <button data-s="hintergrund">🎛+🎻 Zusammen mit Zynthian<small>die Bühne spielt im Hintergrund</small></button>
-  <button data-s="zynthian">🎛 Nur Zynthian</button>
-  <button data-s="dj">🎧 DJ-Pult<small>Mixxx im Vollbild</small></button>
-  <button data-s="start-imres">🔌 Einschalten → Bühne</button>
-  <button data-s="start-hintergrund">🔌 Einschalten → zusammen</button>
-  <button data-s="start-zynthian">🔌 Einschalten → Zynthian</button>
+  <button data-s="zynthian">🎛 Zum Mischpult<small>Instrumente (ZynSimple)</small></button>
+  <button data-s="dj">🎧 Zum DJ-Pult<small>Mixxx im Vollbild</small></button>
+  <button data-s="start-imres">🔌 Einschalten → Barden Beats</button>
+  <button data-s="start-zynthian">🔌 Einschalten → Mischpult</button>
   <button data-s="seite-neu">🔄 Seite neu laden</button>
-  <button data-s="aktualisieren">⬇ Bühne aktualisieren<small>braucht Internet</small></button>
+  <button data-s="zynsimple-update">⬇ ZynSimple aktualisieren<small>wechselt dafür ins Mischpult</small></button>
+  <button data-s="aktualisieren">⬇ Barden Beats aktualisieren<small>braucht Internet</small></button>
   <button data-s="neustart">↻ Neu starten</button>
   <button data-s="aus">⏻ Ausschalten</button>
 </div>
@@ -175,7 +174,7 @@ document.addEventListener("click", e => {
   if (d) { post("/zyn/dreh", { nr: +d.dataset.d, d: +d.dataset.w }).then(() => setTimeout(status, 250)); return; }
   const s = e.target.closest("[data-s]");
   if (s) {
-    const frage = { aus: "Wirklich ausschalten?", neustart: "Wirklich neu starten?", zynthian: "Imres beenden und nur den Zynthian zeigen?", dj: "DJ-Pult starten? Die Bühne pausiert so lange." }[s.dataset.s];
+    const frage = { aus: "Wirklich ausschalten?", neustart: "Wirklich neu starten?", zynthian: "Barden Beats beenden und zum Mischpult?", "zynsimple-update": "Barden Beats beenden und ZynSimple aktualisieren?", dj: "DJ-Pult starten? Die Bühne pausiert so lange." }[s.dataset.s];
     if (frage && !confirm(frage)) return;
     post("/zyn/system", { aktion: s.dataset.s }).then(() => status());
   }
@@ -250,7 +249,7 @@ function lastZeigen(l) {
 async function status() {
   try {
     const r = await fetch("/zyn/status", { cache: "no-store" }); const j = await r.json();
-    const m = j.modus === "imres" ? "🎻 Imres-Bühne" : j.modus === "hintergrund" ? "🎛+🎻 zusammen" : j.modus === "zynthian" ? "🎛 nur Zynthian" : "?";
+    const m = j.modus === "imres" ? "🎻 Imres-Bühne" : j.modus === "hintergrund" ? "🎛+🎻 zusammen" : j.modus === "zynthian" ? "🎛 Mischpult" : "?";
     $("status").textContent = m + (j.modus !== "zynthian" && j.text ? " · " + j.text : "") + (j.aufnahme ? " · ⏺ REC" : "");
     aufnahme = !!j.aufnahme; const rk = $("rec"); rk.classList.toggle("an", aufnahme); rk.firstChild.textContent = aufnahme ? "⏹ Aufnahme beenden" : "⏺ Aufnahme starten";
     if (j.optionen && !optOffen) optZeichnen(j.optionen);
