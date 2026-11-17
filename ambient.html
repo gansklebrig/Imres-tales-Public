@@ -50,6 +50,7 @@ h1{font-family:var(--fd);font-weight:400;font-size:clamp(2rem,6vw,2.8rem);margin
 .misch-knopf{display:none;flex:0 0 auto;width:2.4rem;height:2.4rem;border-radius:50%;border:1px solid var(--line);background:none;font-size:1rem;line-height:1}
 .misch-knopf[aria-expanded="true"]{border-color:var(--ember);background:rgba(224,160,70,.15)}
 .raum3d-knopf{display:block}
+html.zyn .raum3d-knopf{display:none!important}
 .auf-knopf{display:block;color:#e06050}
 .schlaf-knopf{display:block;color:var(--mute);font-size:.8rem;width:auto;min-width:2.4rem;border-radius:1.2rem;padding:0 .5rem;white-space:nowrap}
 .schlaf-knopf[aria-pressed="true"]{border-color:#8a7fc0;background:rgba(138,127,192,.25);color:inherit}
@@ -991,6 +992,10 @@ h2.abschnitt small{font-family:var(--fb);font-size:.8rem;color:var(--mute);flex:
      Vorbeiziehendes wandert am Kopf vorbei. Nur für Kopfhörer gedacht. */
   let raum3d = false;
   try { raum3d = localStorage.getItem("imres-lw-3d") === "1"; } catch (_) {}
+  /* Zynthian (Barden Beats): spielt über Lautsprecher, und der kleine Rechner soll im Auftritt nicht ins Stocken kommen –
+     kein 3D (der Rest läuft dort ohnehin in der leichten Bauweise, weil der Pi nur 4 Kerne hat) */
+  const zynGeraet = (() => { try { return sessionStorage.getItem("imres-zyn") === "1" || /[?&]zyn=1/.test(location.search); } catch (_) { return false; } })();
+  if (zynGeraet) raum3d = false;
   const HOEHE = { vogel: 28, kraehe: 32, moewe: 38, eule: 22, specht: 18, fledermaus: 30, drache: 42, donner: 50, grollen: 35, glocke: 22, gong: 8, signalhorn: 12,
     glocklein: 10, nepal: 12, glbaum: 15, laub: -8, kies: -28, laubschritt: -25, holzschritte: -22, schritte: -22, steinschritte: -22, hufe: -12, kaefer: -30, schleim: -18,
     platsch: -24, nass: -24, stampfen: -10, kette: -6, frosch: -26, insekt: -10, ast: -5 };

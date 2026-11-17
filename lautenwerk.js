@@ -39,6 +39,8 @@
   /* „mittel“ (Zynthian): voller Klangaufbau mit beiden Faltungshallen, aber 32 kHz statt 44,1/48 kHz */
   const mittel = !spar && !mobil && (() => { try { return localStorage.getItem("imres-lw-mittel") === "1"; } catch (_) { return false; } })();
   const leicht = () => leichtFest !== null ? leichtFest : (spar || mobil);
+  /* Läuft auf dem Zynthian (Barden Beats)? Dann sparsamer rechnen, wo man es nicht hört – sonst stottert der kleine Rechner im Auftritt */
+  const zynGeraet = (() => { try { return sessionStorage.getItem("imres-zyn") === "1" || /[?&]zyn=1/.test(location.search); } catch (_) { return false; } })();
   try { const c = new URLSearchParams(location.search).get("lauschen"); if (c && /^[a-z0-9]{4,16}$/i.test(c)) hoerer = { raum: c.toLowerCase(), an: false, verbunden: false, zuletzt: null }; } catch (_) {}
 
   const ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -2157,6 +2159,50 @@ registerProcessor("imres-loop-rec", ImresLoopRec);`;
   }
   /* Sparsamer Hall fürs Handy: vier rückgekoppelte Verzögerungen mit Dämpfung (Feedback-Delay-Netz).
      Klingt etwas einfacher als der Faltungshall, kostet aber nur einen Bruchteil der Rechenzeit. */
+  /* Günstiger Raumklang für den Zynthian: acht rückgekoppelte Verzögerungen (Feedback-Delay-Netz) in EINEM AudioWorklet.
+     Als Kette aus Web-Audio-Knoten wären das rund 90 Knoten – im Worklet kostet es einen Bruchteil einer Faltungshalle,
+     und bei Stille rechnet es gar nicht. Nachhallzeit und Pegel sind auf die Faltungshallen abgeglichen (gemessen mit Rauschen). */
+  const RAUM_CODE = `class ImresRaum extends AudioWorkletProcessor {
+  constructor(o) {
+    super(); const p = (o && o.processorOptions) || {}, sr = sampleRate, rt = Math.max(.2, p.rt60 || 2), Z = [.0297, .0371, .0411, .0437, .0533, .0571, .0677, .0797];
+    this.n = 8; this.len = Z.map(z => Math.max(2, Math.round(z * sr))); this.buf = this.len.map(l => new Float32Array(l)); this.pos = new Int32Array(8);
+    this.lp = new Float32Array(8); this.lp2 = new Float32Array(8); this.fb = new Float32Array(Z.map(z => Math.pow(10, -3 * z / rt)));
+    this.a = 1 - Math.exp(-2 * Math.PI * (p.hell || 4000) / sr); this.pegel = p.pegel == null ? 1 : p.pegel; this.ruhig = 0; this.tail = Math.round(rt * sr * 1.2);
+  }
+  process(ins, outs) {
+    const inp = ins[0], out = outs[0]; if (!out || !out.length) return true;
+    const L = out[0], R = out[1] || out[0], N = L.length, iL = inp && inp[0], iR = inp && (inp[1] || inp[0]);
+    let leise = true; if (iL) for (let i = 0; i < N; i++) if (iL[i] !== 0 || iR[i] !== 0) { leise = false; break; }
+    if (leise) { this.ruhig += N; if (this.ruhig > this.tail) { L.fill(0); if (R !== L) R.fill(0); return true; } } else this.ruhig = 0;
+    const buf = this.buf, len = this.len, pos = this.pos, lp = this.lp, lp2 = this.lp2, fb = this.fb, a = this.a, g = this.pegel, k2 = 2 / this.n;
+    for (let i = 0; i < N; i++) {
+      const x = iL ? (iL[i] + iR[i]) * .5 : 0; let s = 0;
+      for (let k = 0; k < 8; k++) { const y = buf[k][pos[k]]; lp[k] += a * (y - lp[k]); lp2[k] += a * (lp[k] - lp2[k]); s += fb[k] * lp2[k]; }
+      s *= k2;
+      for (let k = 0; k < 8; k++) { buf[k][pos[k]] = x + fb[k] * lp2[k] - s; if (++pos[k] >= len[k]) pos[k] = 0; }
+      L[i] = (lp2[0] - lp2[2] + lp2[4] + lp2[7]) * g; R[i] = (lp2[1] + lp2[3] - lp2[5] + lp2[6]) * g;
+    }
+    return true;
+  }
+}
+registerProcessor("imres-raum", ImresRaum);
+`;
+  let raumModul = null;
+  function raumModulLaden() {
+    if (raumModul || !ctx || !ctx.audioWorklet) return raumModul;
+    const url = URL.createObjectURL(new Blob([RAUM_CODE], { type: "application/javascript" }));
+    raumModul = ctx.audioWorklet.addModule(url).then(() => true, () => false);
+    return raumModul;
+  }
+  /* ein Raum: Eingang sofort nutzbar, der Hall hängt sich an, sobald das Worklet geladen ist */
+  function raumWerk([rt60, hell, pegel], ziel) {
+    const ein = ctx.createGain(); let n = null, weg = false;
+    const p = raumModulLaden();
+    if (p) p.then(ok => { if (!ok || weg) return; try { n = new AudioWorkletNode(ctx, "imres-raum", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [2], processorOptions: { rt60, hell, pegel } }); ein.connect(n); n.connect(ziel); } catch (_) {} });
+    return { ein, trennen: () => { weg = true; try { ein.disconnect(); } catch (_) {} if (n) try { n.disconnect(); } catch (_) {} } };
+  }
+  /* Nachhallzeit (fürs Worklet), Helligkeit, Pegel – entspricht raumAntwort() bzw. echoBild() */
+  const RAUM_FDN = { holz: [.6, 6500, .165], stein: [2.65, 4500, .31], weit: [3.8, 3500, .4], wald: [1, 3000, .31] }, ECHO_FDN = [5.6, 5000, .29];
   function fdnHall(rt60, hell) {
     const ein = ctx.createGain(), aus = ctx.createGain(), n = 4;
     const zeiten = [.0631, .0797, .0937, .1129], linien = [];
@@ -2705,6 +2751,7 @@ registerProcessor("imres-loop-rec", ImresLoopRec);`;
      wirklich am Kopf vorbei (Web-Audio HRTF). Über Lautsprecher klingt das seltsam – deshalb ein Schalter. */
   let raum3d = false;
   try { raum3d = localStorage.getItem("imres-lw-3d") === "1"; } catch (_) {}
+  if (zynGeraet) raum3d = false; /* Zynthian spielt über Lautsprecher – 3D (HRTF) kostet dort viel Rechenzeit und klingt über Boxen seltsam */
   const HOEHE = { vogel: 28, greif: 40, ente: -4, schlange: -10, kraehe: 32, moewe: 38, eule: 22, specht: 18, fledermaus: 30, drache: 42, donner: 50, grollen: 35, glocke: 22, gong: 8, signalhorn: 12,
     glocklein: 10, nepal: 12, glbaum: 15, laub: -8, kies: -28, laubschritt: -25, holzschritte: -22, schritte: -22, steinschritte: -22, hufe: -12, kaefer: -30, schleim: -18,
     platsch: -24, nass: -24, stampfen: -10, kette: -6, frosch: -26, insekt: -10, ast: -5 };
@@ -3215,6 +3262,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
       setTimeout(() => { alt.knoten.forEach(n => { try { n.stop(); } catch (_) {} }); try { alt.g.disconnect(); } catch (_) {} try { if (alt.gd) alt.gd.disconnect(); } catch (_) {} try { if (alt.lebenAus) alt.lebenAus(); } catch (_) {} }, 350); } catch (_) {} });
     kulAusblend.push(k); setTimeout(() => { const i = kulAusblend.indexOf(k); if (i >= 0) kulAusblend.splice(i, 1); }, (ueberblenden ? 3.5 : 1.5) * 1000 + 200);
     [k.g, k.gd].forEach(g => { if (g) { g.gain.cancelScheduledValues(j); g.gain.setValueAtTime(g.gain.value, j); g.gain.linearRampToValueAtTime(0, j + aus); } });
+    if (k.evFdn) { const f = k.evFdn; setTimeout(() => f.trennen(), aus * 1000 + 4000); }
     setTimeout(() => { k.knoten.forEach(n => { try { n.stop(); } catch (_) {} }); try { k.g.disconnect(); } catch (_) {} if (k.gd) { const gd = k.gd; setTimeout(() => { try { gd.disconnect(); } catch (_) {} }, 25000); } }, aus * 1000 + 200);
     try { miniAnzeigen(); } catch (_) {}
   }
@@ -4078,7 +4126,8 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     if (k.feuer && leben.zeitLauf) k.glut = 1;
     /* Raumklang für die Einzelgeräusche */
     const typ = RAUM_TYP[k.art];
-    if (typ && !leicht() && ctx.createConvolver) { const c = ctx.createConvolver(); c.buffer = raumAntwort(typ); c.connect(k.g); k.evHall = c; k.evHallMix = RAUM_MIX[typ]; }
+    if (typ && !leicht() && zynGeraet && RAUM_FDN[typ] && ctx.audioWorklet) { const f = raumWerk(RAUM_FDN[typ], k.g); k.evHall = f.ein; k.evFdn = f; k.evHallMix = RAUM_MIX[typ]; }
+    else if (typ && !leicht() && ctx.createConvolver) { const c = ctx.createConvolver(); c.buffer = raumAntwort(typ); c.connect(k.g); k.evHall = c; k.evHallMix = RAUM_MIX[typ]; }
     drohnStart(k); drohnSetzen(k);
     /* Szenen-Geräusche schon einmal anladen (je Art ein paar Aufnahmen) */
     (KUL_SZENEN[k.art] || []).concat([KUL_GROSS[k.art] || []]).forEach(sz => sz.forEach(([, a]) => { const e = AMB_EV[a]; if (e) e.f.slice(0).sort(() => Math.random() - .5).slice(0, 3).forEach(ambLaden); }));
@@ -5142,7 +5191,8 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     tusch: .7, posaune: .3, krit: .6, dramatisch: .5, grillen: .45, ooh: .5, muenzen: .6, ruelpser: .55, schnarchen: .8, bonk: .8,
     lufthorn: .38, kratzer: .65, boom: .55, falsch: .3, richtig: .6, rutsch: .25, boing: .55, hupe: .32, halleluja: .55, levelup: .33, schock: .6, wirbel: 1 };
   /* sanft vorrechnen: je Effekt erst eine Variante, mit Abstand – damit schwächere Geräte nicht ins Stocken geraten */
-  function fxVorwaermen() { if (kwWorker !== false && !spar) EFFEKTE.concat(KAMPF_FX, MOMENTE).forEach((f, i) => setTimeout(() => fxNachfuellen(f, 1), 2500 + 600 * i)); }
+  /* auf dem Zynthian gemächlich: der Rechner soll beim Start nicht eine Minute lang Effekte vorrechnen, während schon Musik läuft */
+  function fxVorwaermen() { if (kwWorker !== false && !spar) EFFEKTE.concat(KAMPF_FX, MOMENTE).forEach((f, i) => setTimeout(() => fxNachfuellen(f, 1), zynGeraet ? 8000 + 2500 * i : 2500 + 600 * i)); }
   const NUR_ECHT = { armbrust: 1, speer: 1, schleuder: 1, segen: 1, fluch: 1 };
   /* Wucht für große Effekte: ein tiefer Einschlag (Sub-Bass, der nach unten fällt) und Grollen mit langem Hallschweif */
   const EPISCH = { feuerball: [1, .55], boom: [1, 0], donner: [.75, .05], blitz: [.8, .05], drache: [.7, .2], wucht: [.55, 0], fluch: [.6, .1], horn: [.35, 0], krit: [.6, 0], sterben: [.3, .3], katapult: [.9, .4], pfeilhagel: [.4, .3] };
@@ -5405,6 +5455,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
       /* Echos eigener Hall: weiter, schwebender Raum nur für ihre Instrumente, unabhängig vom Raumhall */
       echoSend = ctx.createGain(); echoSend.gain.value = 1; echoNass = ctx.createGain(); echoNass.gain.value = echoPegel();
       if (leicht()) { echoNass.gain.value = echoPegel() * 10; echoSend.connect(echoNass); if (hallNode && hallNode.ein) echoNass.connect(hallNode.ein); sparAusgang(); }
+      else if (zynGeraet && ctx.audioWorklet) { echoKonv = raumWerk(ECHO_FDN, echoNass); echoSend.connect(echoKonv.ein); echoNass.connect(komp); }
       else { echoKonv = ctx.createConvolver(); echoKonv.buffer = echoBild(); echoSend.connect(echoKonv); echoKonv.connect(echoNass); echoNass.connect(komp); }
       echoHallSchalten();
       /* Echo für die Flöte der Illusionen */
@@ -10658,7 +10709,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
       klappe("kul", klangAuf.kul, klangAuf.kul ? T.kulWeniger : T.kulAlle(KUL_ZEIGEN.length - 1)) + "</section>";
     const lebenFeld = '<section class="lw-box lw-lebenfeld"><div class="lw-box-kopf"><h4>🎛 ' + T.steuer + "</h4></div>" +
       (amRechner() && !hoerer ? '<details class="lw-sprachklappe"' + (spracheAuf ? " open" : "") + '><summary>🎙 ' + T.spracheKlappe + '</summary><div class="lw-sprache-ort"></div></details>' : "") +
-      '<div class="lw-3dzeile"><button type="button" class="lw-schalter lw-tuer" data-aktion="tuer" aria-pressed="' + tuerZu + '" title="' + esc(T.tuerTipp) + '">' + (tuerZu ? T.tuerAuf : T.tuerZu) + "</button>" + '<button type="button" class="lw-schalter lw-3d" data-aktion="raum3d" aria-pressed="' + raum3d + '" title="' + esc(T.raum3dTipp) + '">🎧 ' + T.raum3d + "</button>" + sprechKnopf(T) + info("raum3d") + "</div>" +
+      '<div class="lw-3dzeile"><button type="button" class="lw-schalter lw-tuer" data-aktion="tuer" aria-pressed="' + tuerZu + '" title="' + esc(T.tuerTipp) + '">' + (tuerZu ? T.tuerAuf : T.tuerZu) + "</button>" + (zynGeraet ? "" : '<button type="button" class="lw-schalter lw-3d" data-aktion="raum3d" aria-pressed="' + raum3d + '" title="' + esc(T.raum3dTipp) + '">🎧 ' + T.raum3d + "</button>") + sprechKnopf(T) + (zynGeraet ? "" : info("raum3d")) + "</div>" +
       lebenBox(T) + "</section>";
     const spurFeld = '<section class="lw-box lw-spurfeld"><div class="lw-box-kopf"><h4>🎚 ' + T.kulSpuren + '</h4><button type="button" class="lw-klein" data-aktion="spurenpop" title="' + esc(T.spurenAlsPop) + '">⧉ ' + T.spurenAlsPop + "</button></div>" + spurenInhalt(T) + "</section>";
     const zusFeld = '<section class="lw-box lw-zusfeld"><div class="lw-box-kopf"><h4>✚ ' + T.zusaetze + "</h4></div>" + zusBox(T, true) + "</section>";
@@ -13971,9 +14022,12 @@ registerProcessor("imres-glitch", ImresGlitch);`;
   }
   /* ---------- Eingänge des Zynthian (Handpan, Didgeridoo …) mit eigener Effektkette ----------
      Chromium nimmt beide Eingänge als ein Stereo-Signal auf (links = Eingang 1, rechts = Eingang 2). */
-  const KANAL_STD = { an: true, pegel: 100, laut: 80, filter: 0, echo: 0, rueck: 35, hall: 0, drive: 0, pan: 0, duck: 0 };
+  const KANAL_STD = { an: false, pegel: 100, laut: 80, filter: 0, echo: 0, rueck: 35, hall: 0, drive: 0, pan: 0, duck: 0 };
   const KANAL = [Object.assign({}, KANAL_STD), Object.assign({}, KANAL_STD)];
   try { const g = JSON.parse(localStorage.getItem("imres-lw-kanaele") || "null"); if (Array.isArray(g)) g.forEach((x, i) => { if (KANAL[i]) Object.assign(KANAL[i], x); }); /* an/aus wird gemerkt */ } catch (_) {}
+  /* Eingänge sind ab jetzt erst an, wenn man sie einschaltet: offene Eingänge kosten dauernd Rechenzeit (Mikrofon-Strom, Messung, Effektkette).
+     Einmalig beim Umstieg alles aus – wer sie wieder einschaltet, behält sie an. */
+  try { if (localStorage.getItem("imres-lw-kanaele-v") !== "2") { KANAL.forEach(k => { k.an = false; }); localStorage.setItem("imres-lw-kanaele", JSON.stringify(KANAL)); localStorage.setItem("imres-lw-kanaele-v", "2"); } } catch (_) {}
   const EIN = { strom: null, quelle: null, split: null, k: [null, null], hall: null, laedt: null, fehler: "" };
   /* Ausweichen: spielt das Instrument, wird die Musik (samt Kulisse) um „duck“ % leiser – schnell runter, langsam wieder hoch */
   let duckJetzt = 1;
