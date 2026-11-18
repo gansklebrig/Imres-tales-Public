@@ -39843,6 +39843,356 @@ FX.zeile=zeile;
  try{const d0=Object.getOwnPropertyDescriptor(DG,'daten');let wt=DG.daten;const get=d0&&d0.get?d0.get:()=>wt,set=d0&&d0.set?d0.set:(v)=>{wt=v};
   Object.defineProperty(DG,'daten',{configurable:true,enumerable:true,get(){return get.call(DG)},set(d){try{if(d&&typeof d==='object'&&typeof d.pakete==='string'&&d.pakete.indexOf('glfx')<0)d.pakete+=(d.pakete?' ':'')+'glfx'+FX.v}catch(e){}set.call(DG,d)}})}catch(e){}})();
 }catch(e){console.error('glfx',e);window.__hsGLFX.fatal=String(e&&e.stack||e)}})();
+/* ================= Paket „ulti2“: stärkere Ultis – window.__hsULTI2 =================
+   Sechs passive Ultis werden aktiv (Passiv bleibt), alle Ultis +60 % Wirkung plus Ulti-Welle,
+   Ladung über Kills (und Kombos über __hsULTI2.lade). Keine Zeitlupe, kein Standbild. */
+window.__hsULTI2={v:2,mul:1.6,n:0,lade:null};
+(function(){try{
+ const U=window.__hsULTI2;const GOLD='#ffd27a';
+ const nd=id=>{for(const h of HERO_IDS)for(const n of HEROES[h].tree)if(n.id===id)return n;return null};
+ const rk=id=>{try{return rank(id)}catch(e){return 0}};
+ /* --- Ladung: jeder Kill verkürzt die Abklingzeit der Ulti (Elite/Wächter mehr, Bosse viel) --- */
+ /* höchstens 0,8 s Ladung je Spielsekunde, damit die Ulti selten bleibt */
+ function lade(s){if(!P||!P.actives)return;const t=G.time;if(!(P.u2T>t-1)){P.u2T=t;P.u2A=0}const f=Math.min(s,0.8-(P.u2A||0));if(f<=0)return;P.u2A=(P.u2A||0)+f;for(const n of P.actives)if(n.ult&&(P.cds[n.id]||0)>0)P.cds[n.id]=Math.max(0,P.cds[n.id]-f)}
+ U.lade=lade;
+ hook('kill',e=>{try{lade(e.boss?5:(e.elite||e.guard||e.champ||e.rare)?1.5:0.2)}catch(x){}});
+ /* --- Ulti-Welle: jede Ulti stößt sichtbar und spürbar um den Helden herum --- */
+ function welle(r){const c=HCOL[P.id]||GOLD,R=(260+25*r)*P.st.area;
+  aoe(P.x,P.y,R,sk(1.6+0.7*r),{knock:240});G.fxs.push({k:'shock',x:P.x,y:P.y,r:R,c,t:0,life:0.5});ring(P.x,P.y,R*0.8,GOLD,0.45,5);light(P.x,P.y,R*1.4,c,0.6,0.9);burst(P.x,P.y,c,22,320)}
+ /* --- die sechs passiven Ultis als aktive Momente --- */
+ const AKT={
+  b_overgrowth:{cd:42,t:'Aktiv: Ein Wald bricht aus dem Boden – alle Gegner ringsum sind gefesselt, kleine Rankenfelder wuchern an weiteren Gegnern.',
+   cast(r){const R=(300+30*r)*P.st.area;zone({x:P.x,y:P.y,r:R,dur:5+r,dps:sk(0.8+0.3*r),root:1,vuln:0.05*r,kind:'vines',vine:1});
+    for(const e of targetsNear(600,4+r))zone({x:e.x,y:e.y,r:85*P.st.area,dur:4+r,dps:sk(0.6+0.2*r),root:1,kind:'vines',vine:1});
+    aoe(P.x,P.y,R,sk(1.5+0.6*r),{root:2.5});word(P.x,P.y-70,'Wucherwald!','#9bd36a');sfx('vine')}},
+  b_hall:{cd:40,t:'Aktiv: Sechs Trugbilder erscheinen im Kreis, spielen eine Strophe und zerplatzen dann alle.',
+   cast(r){const m=rk('b_mirror')||r;for(let i=0;i<6;i++){const a=i*TAU/6;illusion(P.x+Math.cos(a)*95,P.y+Math.sin(a)*95,m,{life:5+r})}
+    aoe(P.x,P.y,320*P.st.area,sk(1+0.4*r),{fear:1.5});word(P.x,P.y-70,'Spiegelkabinett!','#e6c8ff');sfx('magic')}},
+  e_primal:{cd:48,t:'Aktiv: Echo wird zum Urbären – die Gestalt hält lange, und jeder Schritt sendet Stampfwellen aus.',
+   cast(r){const d=12+3*r;setForm('bear',d);P.urBis=G.time+d;P.urR=r;P.urT=0;heal(P.st.maxHp*0.25);word(P.x,P.y-70,'Urbär!','#c89a6a');sfx('roar')}},
+  f_tenth:{cd:28,t:'Aktiv: Drei Meisterschüsse hintereinander – jeder durchbohrt alles und trifft sicher kritisch.',
+   cast(r){for(let i=0;i<3;i++)later(i*0.22,()=>{const p=aimPoint(700);shoot({x:P.x,y:P.y-8,a:ang(P,p),spd:1500,dmg:sk(3.2+1.1*r),r:11,pierce:99,kind:'arrow',c:GOLD,crit:true,life:0.9,knock:140});sfx('bow')});
+    word(P.x,P.y-70,'Meisterschuss!',GOLD)}},
+  f_bigrex:{cd:45,t:'Aktiv: Rex wird für kurze Zeit riesig und wirft mit jedem Stampfer die Gegner um sich herum um.',
+   cast(r){const rx=fmRex(P);if(!rx)return false;if(rx.dead||rx.hp<=0){rx.dead=false;rx.down=0}rx.hp=rx.maxHp;P.rexGrBis=G.time+10+2*r;P.rexGrR=r;P.rexGrT=0.5;
+    aoe(rx.x,rx.y,(170+20*r)*P.st.area,sk(2+0.8*r),{knock:300,stun:1});ring(rx.x,rx.y,150,'#c89a6a',0.5,6);word(rx.x,rx.y-60,'Rex der Große!','#e8c27a');sfx('bark')}},
+  z_assassin:{cd:32,t:'Aktiv: Ezekiel springt nacheinander hinter bis zu fünf Gegner und sticht jedem in den Rücken.',
+   cast(r){const L=targetsNear(560,3+r).slice(0,5);if(!L.length)return false;P.inv=Math.max(P.inv,0.2*L.length+0.4);
+    L.forEach((e,i)=>later(i*0.16,()=>{if(!e||e.dead)return;smoke(P.x,P.y);const a=ang(P,e);P.x=clamp(e.x+Math.cos(a)*(e.r+18),20,WORLD-20);P.y=clamp(e.y+Math.sin(a)*(e.r+18),20,WORLD-20);
+     dealDmg(e,sk(3+1.1*r),{crit:true});sparks(e.x,e.y-10,'#ff5050',10,260);sfx('slash')}));word(P.x,P.y-70,'Meuchelmörder!','#ff5050')}}};
+ for(const id in AKT){const n=nd(id);if(!n||n.cast)continue;const A=AKT[id];n.a=1;n.cd=()=>A.cd;n.cast=A.cast;const d0=n.d;n.d=r=>d0(r)+' '+A.t;n.ulti2=1}
+ /* --- alle Ultis stärker: +60 % auf Fertigkeitsschaden beim Wirken, dazu die Welle --- */
+ for(const h of HERO_IDS)for(const n of HEROES[h].tree){if(!n.ult||!n.cast||n.ulti2w)continue;const c0=n.cast;n.ulti2w=1;
+  n.cast=function(r){const m0=P.skMul||1;P.skMul=m0*U.mul;let ok;try{ok=c0.call(this,r)}finally{P.skMul=m0}if(ok!==false){try{welle(r);U.n++}catch(e){}}return ok}}
+ /* --- laufende Effekte: Urbär-Stampfer, großer Rex; alte Spielstände: aktive Ulti in Leiste übernehmen --- */
+ let mig=0;
+ hook('tick',dt=>{try{
+  if(P.urBis){if(P.form!=='bear'||G.time>P.urBis)P.urBis=0;else{P.urT-=dt;if(P.urT<=0){P.urT=0.9;const R=(150+15*P.urR)*P.st.area;aoe(P.x,P.y,R,sk(0.9+0.35*P.urR),{knock:180,stun:0.3});ring(P.x,P.y+8,R,'#c89a6a',0.35,5);burst(P.x,P.y+10,'#8a6a4a',8,160)}}}
+  if(P.rexGrBis){const rx=fmRex(P);if(!rx||G.time>P.rexGrBis)P.rexGrBis=0;else if(!rx.dead){P.rexGrT-=dt;if(P.rexGrT<=0){P.rexGrT=1.3;const R=(150+20*P.rexGrR)*P.st.area;aoe(rx.x,rx.y,R,sk(1.1+0.4*P.rexGrR),{knock:220,stun:0.4,rex:1});ring(rx.x,rx.y+6,R,'#e8c27a',0.4,6);burst(rx.x,rx.y+8,'#8a6a4a',8,160)}}}
+  mig-=dt;if(mig<=0){mig=1;let ch=0;for(const n of P.hero.tree)if(n.ulti2&&rk(n.id)>0&&P.learn&&!P.learn.includes(n.id)){P.learn.push(n.id);if(P.bar&&!P.bar.includes(n.id)){if(P.bar.length<6)P.bar.push(n.id);else if(G.bot){const i=P.bar.findIndex(id=>{const m=P.hero.tree.find(x=>x.id===id);return m&&!m.ult});if(i>=0)P.bar[i]=n.id}}ch=1}
+   if(ch)buildSkillBar()}
+ }catch(e){}});
+}catch(e){console.error('ulti2',e);window.__hsULTI2.err=String(e&&e.stack||e)}})();
+/* ================= Paket „astk“: Ast-Kombos – jeder Ast ein eigener Spielstil – window.__hsASTK =================
+   Je Ast eine Kombo (vorbereiten → auslösen), Schaden unter 'astk:<id>' messbar, lädt die Ulti (ulti2).
+   Allein tragende Fähigkeiten etwas schwächer (K.nerf), dafür lohnt das Zusammenspiel. Abschaltbar: __hsASTK.aus=1 */
+window.__hsASTK={v:8,n:{},aus:0};
+(function(){try{
+ const K=window.__hsASTK;
+ K.nerf={'karte:f_fallen':0.45,b_vine:0.82,z_step:0.4,f_s_hetz:0.85,e_call:0.88,f_f_spreng:0.85,b_dissonant:0.9};
+ const rk=id=>{try{return rank(id)||0}catch(e){return 0}};
+ const an=()=>!K.aus&&P&&!P.down;
+ const fbT={};
+ function kfx(id,name,c,x,y){K.n[id]=(K.n[id]||0)+1;const t=G.time;if(!(fbT[id]>t)){fbT[id]=t+0.7;word(x!=null?x:P.x,(y!=null?y:P.y)-78,name,c||'#ffd27a');sfx('kombo')}
+  try{window.__hsULTI2&&__hsULTI2.lade&&__hsULTI2.lade(1.2)}catch(e){}}
+ const kd=(id,fn)=>{const o=DMO;DMO='astk:'+id;try{return dmRun('astk:'+id,fn)}finally{DMO=o}};
+ const nahe=(x,y,R,f)=>{const L=[];query(x,y,R+40,e=>{if(!e.dead&&targetable(e)&&d2(e,{x,y})<(R+e.r)*(R+e.r)&&(!f||f(e)))L.push(e)});return L};
+ try{DMFIX['astk']=['Ast-Kombos','✦']}catch(e){}
+ /* allgemeine Dämpfung allein tragender Fähigkeiten */
+ hook('dmgMul',(e,o)=>{if(K.aus)return 1;const f=K.nerf[DMS]||(o&&o.dmK&&K.nerf[o.dmK]);return f||1});
+
+ /* Handschrift: normale Angriffe treiben die Fähigkeiten des Hauptasts an – jeder 4. verkürzt deren Abklingzeiten um 0,5 s */
+ hook('basic',()=>{if(K.aus||!P||!P.hero)return;P.akB=(P.akB||0)+1;if(P.akB<4)return;P.akB=0;
+  if(!(P.akHT>G.time)){P.akHT=G.time+5;const sum=[0,0,0,0,0];for(const n of P.hero.tree)sum[n.b]+=rk(n.id);P.akH=sum.indexOf(Math.max.apply(null,sum))}
+  for(const n of P.actives||[])if(!n.ult&&n.b===P.akH&&(P.cds[n.id]||0)>0)P.cds[n.id]=Math.max(0,P.cds[n.id]-0.5)});
+ /* ================= Barradin ================= */
+ /* Verzauberung: Spott auf kontrollierte Gegner bezaubert sie; Flüstern auf Bezauberte lässt Angst überspringen */
+ const kontr=e=>e.stun>0||e.heldT>0||e.fearT>0||e.gmKn>0||e.root>0;
+ hook('hit',(e,o,amt)=>{if(!an()||e.dead)return;
+  if(DMS==='b_mock'&&kontr(e)&&!(e.gmB>0)){try{if(gmBez(e,4+rk('b_mock')*0.3,'verz',{cap:2+(rk('b_mock')>>1)}))kfx('verz','Wehrlos!','#f0c860',e.x,e.y)}catch(x){}}
+  if(DMS==='b_dissonant'&&e.gmB>0&&e.gmO===P&&!(e.vzAngst>G.time)){e.vzAngst=G.time+3;kd('verz',()=>{aoe(e.x,e.y,240*P.st.area,sk(1.2+0.3*rk('b_dissonant')),{fear:2,fx:e.x,fy:e.y})});ring(e.x,e.y,240,'#c070e0',0.5,5);kfx('verz','Panik!','#c070e0',e.x,e.y)}
+ },'barradin');
+ hook('dmgMul',(e,o)=>{if(K.aus||DMS!=='b_dissonant')return 1;return kontr(e)||e.gmB>0?1.3:1},'barradin');
+ /* Trugbilder und Beschwörungen etwas stärker (Illusion soll nicht vom normalen Angriff leben) */
+ hook('dmgMul',(e,o)=>o&&o.pet&&rk('b_mirror')?1.25:1,'barradin');
+ /* Ranken: Würgeranken auf Gefesselte platzt in Dornen; Rankenfessel auf Gegner im Dornenwall = Käfig */
+ hook('hit',(e,o)=>{if(!an()||e.dead)return;
+  if(DMS==='b_strangle'&&e.root>0&&!(e.rkT>G.time)){e.rkT=G.time+0.5;const r=rk('b_strangle');kd('ranken',()=>{dealDmg(e,sk(1.2+0.3*r),{});aoe(e.x,e.y,80*P.st.area,sk(0.6+0.15*r),{})});burst(e.x,e.y,'#7ab84a',10,200);kfx('ranken','Dornenkäfig!','#9bd36a',e.x,e.y)}
+  if(DMS==='b_vine'&&e.wallT>G.time&&!(e.rkW>G.time)){e.rkW=G.time+2;e.root=Math.max(e.root||0,2);e.vulnT=Math.max(e.vulnT||0,4);e.vuln=Math.max(e.vuln||0,0.12);kfx('ranken','Käfig!','#9bd36a',e.x,e.y)}
+ },'barradin');
+ /* Gegner im Dornenwall merken (der Wall verlangsamt) */
+ hook('hit',(e)=>{if(DMS==='b_wall')e.wallT=G.time+1.2},'barradin');
+ /* Illusion: Dimensionstür auf ein Trugbild = Platztausch, Trugbild platzt doppelt; Phantasmagorie lässt Trugbilder mitschreien */
+ hook('precast',(n)=>{if(!an())return;
+  if(n.id==='b_fear'){const r=rk('b_fear');let k=0;for(const a of G.allies)if(a.kind==='ill'&&!a.dead&&d2(a,P)<520*520){k++;const x=a.x,y=a.y;kd('illusion',()=>aoe(x,y,130*P.st.area,sk(0.8+0.2*r),{fear:1.5,fx:x,fy:y}));ring(x,y,130,'#b06cff',0.5,4)}if(k)kfx('illusion','Chor der Schrecken!','#c070e0')}
+ },'barradin');
+ hook('cast',(n)=>{if(!an()||n.id!=='b_door')return;let best=null,bd=170*170;for(const a of G.allies)if(a.kind==='ill'&&!a.dead&&a.life>1.05&&d2(a,P)<bd){bd=d2(a,P);best=a}
+  if(best){const r=rk('b_door'),x=best.x,y=best.y;kd('illusion',()=>aoe(x,y,130*P.st.area,sk(2.5+0.6*r)*2,{fear:1,fx:x,fy:y}));ring(x,y,130,'#e6c8ff',0.5,5);burst(x,y,'#e6c8ff',18,240);best.life=0;kfx('illusion','Trugbild-Tausch!','#e6c8ff',x,y)}},'barradin');
+ /* Klingentanz: wechselnde Klingentanz-Fähigkeiten bauen Tanzschritte (bis 5) → Sternfigur bereit + Finale; Abwehr → nächster Gleitender Schwung doppelt */
+ const KT=new Set(['b_k_schnitt','b_k_abwehr','b_k_fleche','b_k_stern','b_k_ballett']);
+ hook('cast',(n)=>{if(!an()||!KT.has(n.id))return;
+  if(P.ktLast&&P.ktLast!==n.id&&G.time-P.ktLastT<4.5){P.ktSchr=Math.min(5,(P.ktSchr||0)+1);word(P.x,P.y-62,'Schritt '+P.ktSchr,'#f0d890')}else if(G.time-(P.ktLastT||0)>=4.5)P.ktSchr=0;
+  P.ktLast=n.id;P.ktLastT=G.time;
+  if(P.ktSchr>=5){P.ktSchr=0;P.cds['b_k_stern']=0;const r=rk('b_k_ballett')||rk('b_k_schnitt')||1;kd('klingentanz',()=>aoe(P.x,P.y,(200+10*r)*P.st.area,sk(3+0.8*r),{knock:220,fx:P.x,fy:P.y}));G.fxs.push({k:'shock',x:P.x,y:P.y,r:200,c:'#f0d890',t:0,life:0.45});kfx('klingentanz','Finale!','#f0d890')}
+  if(n.id==='b_k_abwehr')P.ktKonter=G.time+4;
+  if(n.id==='b_k_fleche'&&P.ktKonter>G.time){P.ktKonterAn=G.time+0.5;P.ktKonter=0;kfx('klingentanz','Konter!','#f0d890')}
+ },'barradin');
+ hook('dmgMul',()=>DMS==='b_k_fleche'&&P.ktKonterAn>G.time?2:1,'barradin');
+ /* Glamour: „Knie nieder“ lässt Bewunderer huldigen (Heilung + Glanzstoß); Krone macht sie zu Feenrittern */
+ hook('cast',(n)=>{if(!an())return;if(n.id!=='b_g_knie'&&n.id!=='b_g_krone')return;const r=rk(n.id);let k=0;
+  for(const e of G.enemies)if(!e.dead&&e.gmB>0&&e.gmO===P&&d2(e,P)<480*480){k++;const x=e.x,y=e.y;kd('glamour',()=>aoe(x,y,110*P.st.area,sk(1+0.3*r),{fx:x,fy:y}));burst(x,y,'#ffc8e8',10,180);if(n.id==='b_g_krone')e.gmB+=8}
+  if(k){for(const q of [P].concat(teamNear(P,auraR(P))))withP(q,()=>heal(P.st.maxHp*0.015*k));kfx('glamour',n.id==='b_g_krone'?'Feenritter!':'Huldigung!','#ffc8e8')}
+ },'barradin');
+
+ /* ================= Echo ================= */
+ /* Sturm: Blitz auf Unterkühlte = Zersplittern; Donnerwoge entfacht brennenden Boden zum Feuerwirbel; Elementwechsel lädt doppelt */
+ const BLITZ=new Set(['e_call','e_chain','e_tempest','e_storm']);
+ hook('hit',(e,o)=>{if(!an()||e.dead)return;if((BLITZ.has(DMS)||o.lightning)&&e.chillT>0&&!(e.stZers>G.time)){e.stZers=G.time+1;e.chillT=0;const r=rk('e_icefan')||1;
+   kd('sturm',()=>{dealDmg(e,sk(1+0.25*r),{});aoe(e.x,e.y,95*P.st.area,sk(0.6+0.15*r),{fx:e.x,fy:e.y})});sparks(e.x,e.y-10,'#e8f4f0',12,300);kfx('sturm','Zersplittert!','#e8f4f0',e.x,e.y)}},'echo');
+ hook('cast',(n)=>{if(!an())return;
+  if(n.id==='e_wave'){let k=0;for(const z of G.zones)if(z.kind==='fire'&&!z.stWirbel&&d2(z,P)<260*260){z.stWirbel=1;k++;const x=z.x,y=z.y,r=rk('e_fireball')||1;kd('sturm',()=>aoe(x,y,(z.r||90)*1.3,sk(1.5+0.35*r),{burn:sk(0.4),fx:x,fy:y}));G.fxs.push({k:'shock',x,y,r:(z.r||90)*1.3,c:'#ff8a2a',t:0,life:0.4})}if(k)kfx('sturm','Feuerwirbel!','#ff9a3a')}
+  const el=n.id==='e_fireball'?'f':n.id==='e_icefan'?'i':BLITZ.has(n.id)||n.id==='e_wave'?'b':null;
+  if(el&&rk('e_storm')){if(P.stEl&&P.stEl!==el)P.stat=(P.stat||0)+1;P.stEl=el}
+ },'echo');
+ /* Wildgestalt: Gestaltwechsel geben Wechselschläge */
+ {const sf=setForm;setForm=function(f,t){const alt=P&&P.form;const r=sf.apply(this,arguments);try{if(an()&&P.id==='echo'&&f==='bear'&&alt!=='bear'&&rk('e_primal')&&!((P.cds['e_primal']||0)>0)&&!(P.urBis>G.time)){const ur=rk('e_primal'),d=12+3*ur;P.formT=Math.max(P.formT,d);P.urBis=G.time+d;P.urR=ur;P.urT=0;P.cds['e_primal']=48*(1-P.st.cdr);word(P.x,P.y-90,'Urbär!','#c89a6a');try{__hsULTI2.n++}catch(x){}}}catch(e){}try{if(an()&&P.id==='echo'&&alt==='rat'&&f==='bear'){const R=150*P.st.area,s=rk('e_bear')||1;kd('wild',()=>aoe(P.x,P.y,R,sk(2+0.5*s),{stun:1.2,crit:true,knock:200,fx:P.x,fy:P.y}));G.fxs.push({k:'shock',x:P.x,y:P.y,r:R,c:'#c89a6a',t:0,life:0.4});kfx('wild','Hinterhalt!','#c89a6a')}}catch(e){}return r}}
+ {const ef=endForm;endForm=function(){const f=P&&P.form;const r=ef.apply(this,arguments);try{if(an()&&P.id==='echo'&&f==='bear'&&rk('e_roar')){const R=240*P.st.area;kd('wild',()=>aoe(P.x,P.y,R,sk(1.2+0.3*rk('e_roar')),{fear:1.5,fx:P.x,fy:P.y}));P.buffs.roarG=Math.max(P.buffs.roarG||0,4);ring(P.x,P.y,R,'#c89a6a',0.5,5);kfx('wild','Wechselschrei!','#c89a6a')}}catch(e){}return r}}
+ /* Wildgestalt war der schwächste Ast: in Bärengestalt +25 % Schaden */
+ hook('dmgMul',()=>P.form==='bear'&&rk('e_bear')?1.25:1,'echo');
+ /* Natur & Gier: Schwarm im Mondstrahl wird Mondschwarm; Gold sammeln verlängert den Mondstrahl; Zorn der Natur wächst mit dem Gold des Laufs */
+ hook('cast',(n)=>{if(!an())return;
+  if(n.id==='e_swarm'||n.id==='e_moon'){const mo=G.zones.find(z=>/moon/.test(z.kind)&&z.t<z.dur&&(!G.mp||z.own===P)),sw=G.zones.filter(z=>/swarm/.test(z.kind)&&z.t<z.dur&&(!G.mp||z.own===P));
+   if(mo&&sw.length){for(const z of sw)if(!z.mond){z.mond=1;z.dps*=1.3;z.follow=(z.follow||150)*1.3;z.dur+=1}kfx('gier','Mondschwarm!','#e8e0b0',mo.x,mo.y)}}
+ },'echo');
+ hook('dmgMul',()=>{if(DMS!=='e_wrath')return 1;const g=(G.goldRun||0);return 1+Math.min(0.5,g/20000)},'echo');
+ {let gl=-1;hook('tick',()=>{const g=G.goldRun||0;if(gl<0){gl=g;return}if(g>gl&&rk('e_moon')){for(const z of G.zones)if(/moon/.test(z.kind)&&z.t<z.dur&&(!G.mp||z.own===P))z.dur+=Math.min(1,(g-gl)/200)}gl=g},'echo')}
+ /* Sternenkreis: drei verschiedene Sternen-Fähigkeiten binnen 8 s = Konstellation vollendet (Sternenregen) */
+ const ESK=new Set(['e_s_bolt','e_s_form','e_s_omen','e_s_fessel','e_s_nacht']);
+ hook('cast',(n)=>{if(!an()||!ESK.has(n.id))return;const L=(P.skSbH||[]).filter(x=>G.time-x[1]<8&&x[0]!==n.id);L.push([n.id,G.time]);P.skSbH=L;
+  if(L.length>=3){P.skSbH=[];const r=rk('e_s_funkel')||rk('e_s_bolt')||1,T=targetsNear(520,10);
+   T.forEach((e,i)=>later(i*0.06,()=>{if(e.dead)return;kd('sterne',()=>aoe(e.x,e.y,70*P.st.area,sk(0.8+0.2*r),{fx:e.x,fy:e.y}));sparks(e.x,e.y-30,'#f0ead0',8,240)}));kfx('sterne','Konstellation!','#f0ead0')}},'echo');
+ /* Sporenkreis: Bovistplatzer bringt befallene Gegner im Hexenring zum Platzen – Befall springt weiter */
+ hook('cast',(n)=>{if(!an()||n.id!=='e_p_platz')return;const r=rk('e_p_platz');let k=0;
+  for(const z of G.zones){if(z.kind!=='ep_ring'||z.t>=z.dur||(G.mp&&z.own!==P))continue;
+   for(const e of nahe(z.x,z.y,z.r)){if(!(e.epBef>G.time))continue;k++;const x=e.x,y=e.y;kd('sporen',()=>{dealDmg(e,sk(1.2+0.3*r),{});aoe(x,y,110*P.st.area,sk(0.5+0.12*r),{fx:x,fy:y})});for(const e2 of nahe(x,y,110))e2.epBef=G.time+4;burst(x,y,'#b8d88a',12,200)}}
+  if(k)kfx('sporen','Kettenreaktion!','#b8d88a')},'echo');
+
+ /* ================= Friedrich ================= */
+ /* Schützenkunst: Sprengpfeil auf Verlangsamte explodiert größer; Kugelhagel sammelt Zielwasser für Den einen Pfeil */
+ hook('dmgMul',(e)=>{if(DMS==='f_explode'&&(e.slowT>0||e.inZoneSlow>G.time))return 1.25;if(DMS==='f_onearrow'&&P.fzW>0)return 1+0.03*P.fzW;return 1},'friedrich');
+ hook('hit',(e)=>{if(!an()||e.dead)return;if(DMS==='f_rain')e.inZoneSlow=G.time+0.6;
+  if(DMS==='f_explode'&&(e.slowT>0||e.inZoneSlow>G.time)&&!(P.fxBoomT>G.time)){P.fxBoomT=G.time+0.3;const r=rk('f_explode');kd('schuetze',()=>aoe(e.x,e.y,70*P.st.area,sk(1+0.25*r),{burn:sk(0.3),fx:e.x,fy:e.y}));kfx('schuetze','Feuersturm!','#ff9a3a',e.x,e.y)}
+  if(DMS==='f_strafe'&&rk('f_onearrow')){P.fzW=Math.min(15,(P.fzW||0)+1)}},'friedrich');
+ hook('cast',(n)=>{if(n.id==='f_onearrow'&&P.fzW>=10){kfx('schuetze','Zielwasser ×'+P.fzW+'!','#ffd27a');later(1.2,()=>{P.fzW=0})}},'friedrich');
+ /* Jäger: Durchbohrender Schuss auf Markierte im Stillstand = sicher kritisch + Abklingzeit zurück; Falle im Netz schnappt doppelt */
+ hook('precast',(n)=>{if(!an()||n.id!=='f_pierce')return;if(rk('f_mark')&&!(P.fjT>G.time)){const still=(P.polC||0)>0.005;P.critNext=(P.critNext||0)+1;P.fjReset=1;P.fjT=G.time+(still?3:7)}},'friedrich');
+ hook('cast',(n)=>{if(n.id==='f_pierce'&&P.fjReset){P.fjReset=0;later(0.05,()=>{P.cds['f_pierce']=0});kfx('jaeger','Ruhige Hand!','#efe0b8')}},'friedrich');
+ hook('dmgMul',(e)=>{if((DMS==='f_trap'||DMS==='f_f_schlinge')&&G.zones.some(z=>z.kind==='net'&&z.t<z.dur&&d2(z,e)<(z.r+e.r)*(z.r+e.r))){if(!(e.fjN>G.time)){e.fjN=G.time+1;kfx('jaeger','Im Netz!','#efe0b8',e.x,e.y)}return 2}return 1},'friedrich');
+ /* Rex: abwechselnd eigene Fähigkeit und Rex-Befehl = Kommandokette, bei 3 Gliedern Spezialbiss; Fass! auf Gefesselte zerrt sie heran */
+ const REX=new Set(['f_rex','f_howl','f_wolves','f_bigrex']);
+ hook('cast',(n)=>{if(!an()||n.ult&&!REX.has(n.id))return;const rx=fmRex(P);if(!rx)return;const t=REX.has(n.id)?'r':'f';
+  if(P.frLast&&P.frLast!==t&&G.time-P.frT<7)P.frN=(P.frN||1)+1;else P.frN=1;P.frLast=t;P.frT=G.time;
+  if(P.frN>=2&&!rx.dead){P.frN=0;const e=nearest(rx.x,rx.y,320);if(e){const r=rk('f_rex')||1;kd('rex',()=>dealDmg(e,sk(2.5+0.6*r),{stun:1,rex:1}));sparks(e.x,e.y-10,'#e8c27a',12,260);kfx('rex','Spezialbiss!','#e8c27a',e.x,e.y)}}
+ },'friedrich');
+ hook('hit',(e)=>{if(!an()||e.dead||DMS!=='f_rex'||!(e.root>0||e.stun>0))return;if(e.boss||e.guard)return;const a=ang(e,P),d=Math.max(0,Math.sqrt(d2(e,P))-60);e.x=clamp(e.x+Math.cos(a)*d*0.8,20,WORLD-20);e.y=clamp(e.y+Math.sin(a)*d*0.8,20,WORLD-20);kfx('rex','Hergezerrt!','#e8c27a',e.x,e.y)},'friedrich');
+ hook('dmgMul',(e)=>DMS==='f_rex'&&(e.root>0||e.stun>0)?1.5:1,'friedrich');
+ /* Schwarmhüter: Stiche sammeln Schwarm-Stapel, Schwarmwoge bringt sie zum Platzen */
+ hook('hit',(e)=>{if(!an()||e.dead)return;if(DMS==='f_s_stich'||DMS==='f_s_hetz'){e.fsSt=Math.min(10,(e.fsSt||0)+1);e.fsStT=G.time+6}
+  if(DMS==='f_s_woge'&&e.fsSt>0&&e.fsStT>G.time){const n=e.fsSt;e.fsSt=0;const r=rk('f_s_woge');kd('schwarm',()=>dealDmg(e,sk((0.22+0.05*r)*n),{}));sparks(e.x,e.y-10,'#d8f07a',4+n,220);kfx('schwarm','Schwarm platzt!','#d8f07a',e.x,e.y)}},'friedrich');
+ /* Fallensteller: zwei verschiedene Fallen hintereinander am selben Gegner = Kettenfalle (doppelt) */
+ const FALLE=new Set(['f_trap','f_f_draht','f_f_schlinge','f_f_spreng','f_f_koeder','f_f_revier']);
+ hook('dmgMul',(e)=>{if(!FALLE.has(DMS))return 1;const ok=e.ffL&&e.ffL!==DMS&&G.time-e.ffT<10;return ok?2:1},'friedrich');
+ hook('hit',(e)=>{if(!an()||!FALLE.has(DMS))return;if(e.ffL&&e.ffL!==DMS&&G.time-e.ffT<10&&!(e.ffK>G.time)){e.ffK=G.time+1;kfx('fallen','Kettenfalle!','#e0a060',e.x,e.y)}e.ffL=DMS;e.ffT=G.time},'friedrich');
+
+ /* ================= Ezekiel ================= */
+ /* Klingen: Messerfächer auf voll Vergiftete lässt das Gift platzen */
+ hook('hit',(e)=>{if(!an()||e.dead||DMS!=='z_fan'||!e.dots)return;const d=e.dots.find(x=>/^(poison|venom)/.test(x.k));if(!d||d.n<2||e.zkGift>G.time)return;e.zkGift=G.time+0.6;const v=d.dps*d.t*(1+0.15*d.n);e.dots.splice(e.dots.indexOf(d),1);
+  kd('klingen',()=>dealDmg(e,v,{}));burst(e.x,e.y,'#9be06a',14,220);kfx('klingen','Gift platzt!','#9be06a',e.x,e.y)},'ezekiel');
+ /* Goliath: Sprung in die Gruppe, dann Goliath-Schnitt binnen 1,5 s = Erdbebenhieb */
+ hook('cast',(n)=>{if(!an())return;if(n.id==='z_leap')P.zgSpr=G.time+1.8;
+  if(n.id==='z_cleave'&&P.zgSpr>G.time){P.zgSpr=0;const r=rk('z_cleave'),R=230*P.st.area;kd('goliath',()=>aoe(P.x,P.y,R,sk(1.6+0.4*r),{stun:0.6,knock:260,fx:P.x,fy:P.y}));G.fxs.push({k:'shock',x:P.x,y:P.y,r:R,c:'#ff5050',t:0,life:0.45});G.shake+=6;kfx('goliath','Erdbebenhieb!','#ff5050')}},'ezekiel');
+ /* Schatten: Schattenschritt öffnet ein Rückenstich-Fenster – der nächste andere Treffer trifft hart und sicher kritisch */
+ hook('cast',(n)=>{if(n.id==='z_step')P.zsFen=G.time+1.4},'ezekiel');
+ hook('dmgMul',(e,o)=>{if(K.aus||!(P.zsFen>G.time)||DMS==='z_step'||o.dot||String(DMS||'').startsWith('astk'))return 1;P.zsFen=0;P.critNext=(P.critNext||0)+1;kfx('schatten','Rückenstich!','#ff5050',e.x,e.y);return 1.9},'ezekiel');
+ hook('dmgMul',(e,o)=>o&&o.pet&&e.markT>0&&rk('z_clone')?1.5:1,'ezekiel');
+ /* Dieb: Krähenfüße in brennendem Öl werden zu glühenden Spitzen */
+ hook('dmgMul',(e)=>{if(DMS!=='z_d_kraehe')return 1;const inOel=G.zones.some(z=>/oel/.test(z.kind||'')&&z.t<z.dur&&d2(z,e)<(z.r+e.r)*(z.r+e.r));if(inOel&&!(e.zdK>G.time)){e.zdK=G.time+1.5;dot(e,'burn',sk(0.5),3);kfx('dieb','Glühende Spitzen!','#ff9a3a',e.x,e.y)}return inOel?2:1},'ezekiel');
+ /* Phantom: Seelenernte mit 5 Seelen wird zur Sensenwelle */
+ hook('precast',(n)=>{if(n.id==='z_p_ernte')P.zpVor=P.zpN||0},'ezekiel');
+ hook('cast',(n)=>{if(!an()||n.id!=='z_p_ernte'||(P.zpVor||0)<5)return;const r=rk('z_p_ernte'),R=280*P.st.area;kd('phantom',()=>aoe(P.x,P.y,R,sk(3+0.7*r),{fear:1,fx:P.x,fy:P.y}));G.fxs.push({k:'shock',x:P.x,y:P.y,r:R,c:'#d0c0e8',t:0,life:0.5});kfx('phantom','Sensenwelle!','#d0c0e8')},'ezekiel');
+}catch(e){console.error('astk',e);window.__hsASTK.err=String(e&&e.stack||e)}})();
+/* ================= Paket „kurve“: Schwer früher fordernd – window.__hsKURVE =================
+   Schwer (Kampagne): ab Stufe 1 zusätzliche Elite-Rudel (ab Stufe 3 ein zweites zur Hälfte der Stufe),
+   ab Stufe 2 tragen Champion-Rudel eine Eigenschaft mehr (zwei zugleich). Normal bleibt unverändert. */
+window.__hsKURVE={v:1,n:0,aus:0};
+(function(){try{
+ const KV=window.__hsKURVE;
+ const erst=()=>!(G.mp&&PL[0]&&P!==PL[0]);
+ const ok=()=>erst()&&!KV.aus&&HARD()&&G.mode==='kampagne'&&G.state==='play'&&!G.room;
+ function rudel(){try{if(!ok())return;const pt=edgePoint(420);spawnPack(pickFoe(0.6),pt.x,pt.y);KV.n++}catch(e){}}
+ hook('stage',i=>{try{if(!erst()||KV.aus||!HARD()||G.mode!=='kampagne')return;const s=G.stage;if(s<1||s>8)return;KV.halb=s>=3?1:0;later(8,rudel)}catch(e){}});
+ hook('tick',()=>{try{if(!KV.halb||!ok()||!G.need)return;if(G.stageKills>=G.need*0.5){KV.halb=0;rudel()}}catch(e){}});
+ /* Champion-Rudel auf Schwer ab Stufe 2: eine Eigenschaft mehr */
+ const sp=spawnPack;spawnPack=function(){let ra=null;try{if(!KV.aus&&HARD()&&G.stage>=2){ra=rollAffixes;rollAffixes=function(n){return ra(n===1?2:n)}}}catch(e){}
+  try{return sp.apply(this,arguments)}finally{if(ra)rollAffixes=ra}};
+}catch(e){console.error('kurve',e);window.__hsKURVE.err=String(e&&e.stack||e)}})();
+/* ================= Paket „praeg“: Wahlknoten – Prägung je Fähigkeit ab Rang 3 – window.__hsPRAEG =================
+   Jede aktive Fähigkeit (keine Ulti) bekommt ab Rang 3 eine Wahl: „Wucht“ (stärker und größer, seltener) oder
+   „Fluss“ (öfter, etwas schwächer). Gespeichert im Lauf unter P.use['pg:<id>']. Wahl im Sternbild-Detailfeld. */
+window.__hsPRAEG={v:1,n:0};
+(function(){try{
+ const PG=window.__hsPRAEG;
+ PG.W={w:{n:'Wucht',d:'+40 % Schaden, +25 % Wirkungsbereich, +35 % Abklingzeit',dmg:1.4,area:1.25,cd:1.35},f:{n:'Fluss',d:'−35 % Abklingzeit, −20 % Schaden',dmg:0.8,area:1,cd:0.65}};
+ const get=(q,id)=>{try{const v=q&&q.use&&q.use['pg:'+id];return v==='w'||v==='f'?v:null}catch(e){return null}};
+ const darf=n=>!!(n&&n.a&&!n.ult&&n.cast&&rank(n.id)>=3);
+ PG.get=id=>get(P,id);
+ PG.set=(id,v)=>{if(!P)return;P.use=P.use||{};if(v)P.use['pg:'+id]=v;else delete P.use['pg:'+id]};
+ for(const h of HERO_IDS)for(const n of HEROES[h].tree){if(!n.a||n.ult||!n.cast||n.pgW)continue;n.pgW=1;const c0=n.cast;
+  n.cast=function(r){const v=get(P,n.id);if(!v)return c0.call(this,r);const W=PG.W[v],m0=P.skMul||1,a0=P.st.area;P.skMul=m0*W.dmg;P.st.area=a0*W.area;
+   try{return c0.call(this,r)}finally{P.skMul=m0;P.st.area=a0}}}
+ hook('cast',(n,ctx)=>{const v=get(P,n.id);if(!v||!ctx)return;ctx.cdF=(ctx.cdF||1)*PG.W[v].cd;PG.n++});
+ /* Wahl im Detailfeld des Sternbilds */
+ const st=document.createElement('style');st.textContent=`.stdet .pgRow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px}
+.stdet .pgRow .pgL{font-size:13px;color:#d8c8a8;font-weight:700}.stdet .pgRow button{min-height:30px;padding:3px 10px;font-size:13px}
+.stdet .pgRow button.an{background:#5a4320;border-color:#e5b454;color:#ffe2a0}.stdet .pgD{font-size:12px;color:#c8b898;width:100%;line-height:1.3}`;document.head.appendChild(st);
+ function deko(){const d=scr&&scr.querySelector('.stdet');if(!d||!P)return;const n=P.hero.tree.find(x=>x.id===G.treeSel);const alt=d.querySelector('.pgRow');if(alt)alt.remove();if(!darf(n))return;
+  const v=get(P,n.id);const el=document.createElement('div');el.className='pgRow';
+  el.innerHTML=`<span class="pgL">Prägung:</span><button class="btn${v==='w'?' an':''}" data-pg="w" data-pgid="${n.id}">Wucht</button><button class="btn${v==='f'?' an':''}" data-pg="f" data-pgid="${n.id}">Fluss</button><span class="pgD">${v?PG.W[v].d:'Wucht: stärker und größer, seltener · Fluss: öfter, schwächer'}</span>`;
+  const row=d.querySelector('.row');if(row&&row.parentNode)row.parentNode.insertBefore(el,row.nextSibling);else d.appendChild(el)}
+ const rt=renderTree;renderTree=function(){const r=rt.apply(this,arguments);try{deko()}catch(e){console.error('praeg',e)}return r};
+ window.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('[data-pg]');if(!b||!P)return;ev.preventDefault();ev.stopPropagation();
+  const id=b.dataset.pgid,v=b.dataset.pg,n=P.hero.tree.find(x=>x.id===id);if(!darf(n))return;PG.set(id,get(P,id)===v?null:v);sfx('ui');try{saveRun()}catch(e){}try{renderTree(true)}catch(e){deko()}},true);
+}catch(e){console.error('praeg',e);window.__hsPRAEG.err=String(e&&e.stack||e)}})();
+/* ================= Paket „gold2“: Hehler und Wette am Lagerfeuer – window.__hsGOLD2 =================
+   Hehler: verhüllte Ware (Waffe/Rüstung/Schmuck) in drei Güten, Chancen stehen offen dran, Preis steigt mit Stufe und
+   jedem Kauf im Lauf. Wette auf dich selbst: nächste Stufe ohne Heiltrank / nie unter 30 % Leben / beides – Einsatz
+   10 % oder 25 % des Goldes, Gewinn doppelt (beides dreifach). Kein Automat, keine Endlos-Würfe. */
+window.__hsGOLD2={v:1,kauf:0,wette:0,gew:0};
+(function(){try{
+ const GD=window.__hsGOLD2;const ORANGE='#e5b454';
+ const GUETE=[{k:'b',n:'Bündel',min:1,bon:0.3,f:1},{k:'k',n:'Kiste',min:2,bon:0.8,f:2.6},{k:'s',n:'Schatulle',min:2,bon:2.2,f:6.5}];
+ const ARTEN=[{k:'w',n:'Waffe',sl:()=>pick(['weapon','ranged'])},{k:'r',n:'Rüstung',sl:()=>pick(['helm','armor','gloves'])},{k:'s',n:'Schmuck',sl:()=>'ring'}];
+ const preis=g=>Math.round((120+40*P.level)*g.f*Math.pow(1.3,G.hehK||0)/10)*10;
+ function chancen(g){const ok=G.bot;let n=0,sel=0,leg=0;const pn=G.pityN;for(let i=0;i<1500;i++){const r=Math.max(g.min,rollRarity(g.bon));n++;if(r>=2)sel++;if(r>=4)leg++}G.pityN=pn;return{sel:Math.round(sel/n*100),leg:Math.max(0.1,Math.round(leg/n*1000)/10)}}
+ function kaufe(g,a){const pr=preis(g);if(SAVE.gold<pr)return null;SAVE.gold-=pr;G.hehK=(G.hehK||0)+1;GD.kauf++;
+  let r=Math.max(g.min,rollRarity(g.bon));const it=makeItem(a.sl(),scale().il+2,r,P.id);sfx(it.rar>=3?'legend':'buy');
+  let txt;if(P.bag.length>=BAGMAX){const v=scrapValue(it);SAVE.gold+=v;txt=`<span class="c${it.rar}">${esc(it.name)}</span> – Beutel voll, für ${fmt(v)} Gold weiterverkauft`}else{P.bag.push(it);try{updateInvBadge()}catch(e){}txt=`<span class="c${it.rar}">${esc(it.name)}</span> liegt jetzt im Beutel`}
+  try{persist()}catch(e){}return txt}
+ /* ---- Wette ---- */
+ const WETTEN=[{k:'trank',n:'Ohne Heiltrank',d:'Die nächste Stufe ohne einen einzigen Heiltrank.',x:2},{k:'heil',n:'Nie unter 30 % Leben',d:'Dein Leben fällt in der nächsten Stufe nie unter 30 %.',x:2},{k:'beides',n:'Beides',d:'Ohne Heiltrank und nie unter 30 % Leben.',x:3}];
+ const einsatz=f=>Math.max(50,Math.round(SAVE.gold*f/10)*10);
+ function wetteSetzen(w,f){const e=einsatz(f);if(SAVE.gold<e)return false;SAVE.gold-=e;G.wette={k:w.k,x:w.x,e,st:G.stage+1,trank:0,min:1,tod:0};GD.wette++;sfx('coin');try{persist()}catch(x){}return true}
+ {const up=usePotion;usePotion=function(){const p0=P&&P.pots;const r=up.apply(this,arguments);try{const W=G.wette;if(W&&G.stage===W.st&&P.pots<p0)W.trank=1}catch(e){}return r}}
+ hook('tick',()=>{const W=G.wette;if(!W||G.stage!==W.st||G.state!=='play'||!P||(G.mp&&PL[0]&&P!==PL[0]))return;W.min=Math.min(W.min,P.hp/P.st.maxHp);if(P.down)W.tod=1});
+ hook('stage',()=>{const W=G.wette;if(!W||(G.mp&&PL[0]&&P!==PL[0]))return;if(G.stage<=W.st)return;G.wette=null;
+  const ok=!W.tod&&(W.k==='heil'||!W.trank)&&(W.k==='trank'||W.min>=0.3);
+  if(ok){const g=W.e*W.x;SAVE.gold+=g;GD.gew+=g;later(1.2,()=>{if(!G.bot)toast(`Wette gewonnen! +${fmt(g)} Gold`,ORANGE,{sofort:1});sfx('coin')})}
+  else later(1.2,()=>{if(!G.bot)toast('Wette verloren – der Einsatz ist weg.','#c8a090',{sofort:1})})});
+ /* ---- Oberfläche am Lagerfeuer ---- */
+ const css=document.createElement('style');css.textContent=`.g2bar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:6px 0}
+.g2ov{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,7,4,.72);z-index:60;padding:8px}
+.g2box{background:#1e160e;border:2px solid #6a5028;border-radius:12px;max-width:min(560px,96vw);max-height:94vh;overflow:hidden;padding:10px 14px;display:flex;flex-direction:column;gap:7px;color:#efe2c8}
+.g2box h3{margin:0;font-variant:small-caps;color:#f0d08a;font-size:20px}.g2box p{margin:0;font-size:14px;line-height:1.35}
+.g2grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.g2grid button{min-height:34px;font-size:14px;padding:4px 6px}
+.g2grid button.an{background:#5a4320;border-color:#e5b454;color:#ffe2a0}.g2klein{font-size:12px;color:#c8b898}.g2row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+@media (max-height:420px){.g2box{padding:6px 10px;gap:4px}.g2box h3{font-size:16px}.g2box p{font-size:12px}.g2grid button{min-height:28px;font-size:12px}}`;document.head.appendChild(css);
+ let zu=null;
+ function ov(html){schliessen();const d=document.createElement('div');d.className='g2ov';d.innerHTML=`<div class="g2box" role="dialog">${html}</div>`;(scr||document.body).appendChild(d);zu=d;const b=d.querySelector('button');try{b&&b.focus()}catch(e){}}
+ function schliessen(){if(zu){zu.remove();zu=null}}
+ let wahl={a:0};
+ function hehler(msg){const L=GUETE.map(g=>({g,c:chancen(g),p:preis(g)}));
+  ov(`<h3>Der Hehler</h3><p>„Frisch vom Wagen gefallen. Was drin ist, sieht man erst nachher.“ · Dein Gold: <b>${fmt(SAVE.gold)}</b></p>
+  <div class="g2grid">${ARTEN.map((a,i)=>`<button class="btn${wahl.a===i?' an':''}" data-g2="art" data-i="${i}">${a.n}</button>`).join('')}</div>
+  <div class="g2grid">${L.map((x,i)=>`<button class="btn gold" data-g2="kauf" data-i="${i}" ${SAVE.gold<x.p?'disabled':''}>${x.g.n}<br><span class="g2klein">${fmt(x.p)} Gold</span></button>`).join('')}</div>
+  <div class="g2grid">${L.map(x=>`<span class="g2klein">mind. selten ${x.c.sel} % · legendär ${String(x.c.leg).replace('.',',')} %</span>`).join('')}</div>
+  ${msg?`<p>${msg}</p>`:''}<div class="g2row"><button class="btn" data-g2="zu">Zurück zum Feuer</button></div>`)}
+ function wette(msg){const W=G.wette;
+  ov(`<h3>Wette auf dich selbst</h3>${W?`<p>Läuft schon: <b>${WETTEN.find(x=>x.k===W.k).n}</b> um ${fmt(W.e)} Gold – Gewinn ${fmt(W.e*W.x)}.</p>`:`<p>Für die nächste Stufe. Gewinnst du, bekommst du den Einsatz doppelt (bei „Beides“ dreifach) zurück. Dein Gold: <b>${fmt(SAVE.gold)}</b></p>
+  ${WETTEN.map((w,i)=>`<div class="g2grid" style="grid-template-columns:1fr auto auto;align-items:center"><span><b>${w.n}</b><br><span class="g2klein">${w.d}</span></span><button class="btn" data-g2="wette" data-i="${i}" data-f="0.1" ${SAVE.gold<einsatz(0.1)?'disabled':''}>${fmt(einsatz(0.1))}</button><button class="btn" data-g2="wette" data-i="${i}" data-f="0.25" ${SAVE.gold<einsatz(0.25)?'disabled':''}>${fmt(einsatz(0.25))}</button></div>`).join('')}`}
+  ${msg?`<p>${msg}</p>`:''}<div class="g2row"><button class="btn" data-g2="zu">Zurück zum Feuer</button></div>`)}
+ GD.hehler=()=>hehler();GD.wetteUI=()=>wette();
+ const sc=showCampfire;showCampfire=function(){const r=sc.apply(this,arguments);try{if(G.mode==='kampagne'&&!G.bot&&STAGES[G.stage+1]){const b=scr.querySelector('[data-act="fire-go"]');if(b){const d=document.createElement('div');d.className='g2bar';
+   d.innerHTML=`<button class="btn" data-g2="hehler">Zum Hehler</button><button class="btn" data-g2="wetteUI">${G.wette?'Deine Wette':'Wette eingehen'}</button>`;b.parentNode.insertBefore(d,b)}}}catch(e){console.error('gold2',e)}return r};
+ window.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('[data-g2]');if(!b)return;ev.preventDefault();ev.stopPropagation();const k=b.dataset.g2,i=+b.dataset.i;sfx('ui');
+  if(k==='zu'){schliessen();const w=scr.querySelector('[data-g2="wetteUI"]');if(w)w.textContent=G.wette?'Deine Wette':'Wette eingehen';return}
+  if(k==='hehler')return hehler();if(k==='wetteUI')return wette();
+  if(k==='art'){wahl.a=i;return hehler()}
+  if(k==='kauf'){const t=kaufe(GUETE[i],ARTEN[wahl.a]);return hehler(t||'Dafür reicht dein Gold nicht.')}
+  if(k==='wette'){const ok=wetteSetzen(WETTEN[i],+b.dataset.f);return wette(ok?'Die Wette gilt. Viel Glück!':'Dafür reicht dein Gold nicht.')}},true);
+}catch(e){console.error('gold2',e);window.__hsGOLD2.err=String(e&&e.stack||e)}})();
+/* ================= Paket „kart2“: Regel-Karten statt Prozente – window.__hsKART2 =================
+   Neue Schicksalskarten, die eine Regel ändern: Doppeltes Echo, Lockruf, Feuerspur, Kombo-Rausch, Goldblut und die
+   legendäre „Bühne frei“ (Ultis stärker, normale Angriffe schwächer). Wirkung über Hooks, fkHat(P,id). */
+window.__hsKART2={v:1,n:{}};
+(function(){try{
+ const K2=window.__hsKART2;const zaehl=id=>{K2.n[id]=(K2.n[id]||0)+1};
+ const NEU=[
+  {id:'r_echo',r:'e',n:'Doppeltes Echo',ic:'∞',c:'#f0d890',art:'welle',d:'Jede 5. Fähigkeit wird ein zweites Mal gewirkt.',ld:'Jede fünfte gewirkte Fähigkeit (keine Ulti) wird kurz darauf ein zweites Mal gewirkt – ohne Abklingzeit.'},
+  {id:'r_lock',r:'s',n:'Lockruf',ic:'⊙',c:'#c8e0a0',art:'kreis',d:'Deine Flächen und Fallen ziehen Gegner zu sich.',ld:'Gegner in der Nähe deiner Flächen, Ranken und Fallen werden sanft zu deren Mitte gezogen.'},
+  {id:'r_spur',r:'s',n:'Feuerspur',ic:'♨',c:'#ff9a3a',art:'flamme',d:'Die Ausweichrolle hinterlässt brennenden Boden.',ld:'Wo du ausweichst, brennt 3 s lang der Boden (50 % Fähigkeitsschaden pro Sekunde).'},
+  {id:'r_rausch',r:'e',n:'Kombo-Rausch',ic:'✦',c:'#ffd27a',art:'strahl',d:'Ast-Kombos laden die Ulti doppelt und heilen 2 %.',ld:'Jede ausgelöste Ast-Kombo lädt deine Ulti zusätzlich auf und heilt dich um 2 % deines Lebens.'},
+  {id:'r_goldblut',r:'s',n:'Goldblut',ic:'◉',c:'#ffd04a',art:'kreis',d:'Aufgesammeltes Gold heilt dich ein wenig.',ld:'Jedes aufgesammelte Gold heilt dich (je 100 Gold 1 % Leben, höchstens 3 % pro Sekunde).'},
+  {id:'l_buehne',r:'l',n:'Bühne frei',ic:'★',c:'#ffc060',art:'strahl',d:'Ultis +50 % Schaden, laden doppelt so schnell.',nd:'normale Angriffe −25 %',ld:'Deine Ultis verursachen 50 % mehr Schaden, und Kills laden sie doppelt. Nachteil: normale Angriffe verursachen 25 % weniger Schaden.'}];
+ for(const k of NEU)if(!FK_DEF.some(x=>x.id===k.id)){FK_DEF.push(k);FKD[k.id]=k}
+ const hat=id=>{try{return fkHat(P,id)}catch(e){return false}};
+ /* Doppeltes Echo */
+ hook('cast',(n)=>{if(!hat('r_echo')||n.ult||!n.cast||P.k2Echo)return;P.k2C=(P.k2C||0)+1;if(P.k2C<5)return;P.k2C=0;const r=rank(n.id);
+  later(0.28,()=>{if(!P||P.down||G.state!=='play')return;P.k2Echo=1;try{dmRun(n.id,()=>n.cast(r))}catch(e){}finally{P.k2Echo=0}word(P.x,P.y-80,'Echo!','#f0d890');zaehl('r_echo')})});
+ /* Lockruf */
+ let lt=0;hook('tick',dt=>{if(!hat('r_lock'))return;lt-=dt;if(lt>0)return;lt=0.2;
+  const Z=G.zones.filter(z=>(!G.mp||z.own===P)&&z.t<z.dur&&(z.dps>0||z.root));const T=G.traps||[];
+  const zieh=(x,y,R)=>query(x,y,R,e=>{if(e.dead||e.boss||e.guard||e.gmB>0)return;const d=Math.sqrt(d2(e,{x,y}));if(d<20||d>R)return;const k=Math.min(18,d*0.12);e.x+=(x-e.x)/d*k;e.y+=(y-e.y)/d*k});
+  for(const z of Z.slice(0,8))zieh(z.x,z.y,(z.r||80)*1.6);for(const t of T.slice(0,6))if(!t.done)zieh(t.x,t.y,150)});
+ /* Feuerspur */
+ hook('roll',()=>{if(!hat('r_spur'))return;const x=P.x,y=P.y;later(0.12,()=>{zone({x,y,r:60*P.st.area,dur:3,dps:sk(0.5),kind:'fire',src:'karte:r_spur'});zaehl('r_spur')})});
+ /* Kombo-Rausch: zählt die Ast-Kombos mit */
+ {let alt=-1;hook('tick',()=>{const A=window.__hsASTK;if(!A)return;let s=0;for(const k in A.n)s+=A.n[k];if(alt<0){alt=s;return}if(s>alt&&hat('r_rausch')){const d=s-alt;try{__hsULTI2.lade(1.2*d)}catch(e){}heal(P.st.maxHp*0.02*Math.min(3,d));zaehl('r_rausch')}alt=s})}
+ /* Goldblut */
+ {let gl=-1,ht=0,hs=0;hook('tick',dt=>{const g=G.goldRun||0;if(gl<0){gl=g;return}ht+=dt;if(ht>=1){ht=0;hs=0}if(g>gl&&hat('r_goldblut')){const v=Math.min(0.03-hs,(g-gl)/100*0.01);if(v>0){hs+=v;heal(P.st.maxHp*v);zaehl('r_goldblut')}}gl=g})}
+ /* Bühne frei */
+ hook('dmgMul',(e,o)=>{if(!hat('l_buehne'))return 1;if(o&&o.basic)return 0.75;const n=P.hero.tree.find(x=>x.id===DMS);return n&&n.ult?1.5:1});
+ hook('kill',(e)=>{if(!hat('l_buehne'))return;try{__hsULTI2.lade(e.boss?5:(e.elite||e.guard||e.champ||e.rare)?1.5:0.2)}catch(x){}});
+}catch(e){console.error('kart2',e);window.__hsKART2.err=String(e&&e.stack||e)}})();
+/* ================= Paket „wege“: Portale mit Belohnung und Mutatoren – window.__hsWEGE =================
+   Stehen sicherer und gefährlicher Weg zur Wahl, zeigt der sichere eine kleine Belohnung (Gold, Beute oder Heilung),
+   der gefährliche zusätzlich einen Mutator für die nächste Stufe (Blutmond, Ehrenkampf, Horde) mit Lohn am Ende. */
+window.__hsWEGE={v:1,n:0};
+(function(){try{
+ const WG=window.__hsWEGE;
+ const LOHN={gold:{n:'+ Gold'},beute:{n:'+ Gegenstand'},heil:{n:'+ volle Tränke'}};
+ const MUT={blutmond:{n:'Blutmond',d:'Gegner schneller – am Ende +50 % des Stufengolds'},ehre:{n:'Ehrenkampf',d:'Keine Heiltränke, Ulti lädt schneller – am Ende ein epischer Gegenstand'},horde:{n:'Horde',d:'Zusätzliche Elite-Rudel – am Ende Gold und ein seltener Gegenstand'}};
+ const erst=()=>!(G.mp&&PL[0]&&P!==PL[0]);
+ hook('tick',()=>{if(!erst())return;if(G.portal2&&!G.portal2.mut)G.portal2.mut=pick(Object.keys(MUT));if(G.portal&&G.portal2&&!G.portal.lohn)G.portal.lohn=pick(Object.keys(LOHN))});
+ const dp=drawPortal2;drawPortal2=function(t){const r=dp.apply(this,arguments);try{const c=cx,p=G.portal2;if(!p)return r;c.save();c.font='700 12px "Alegreya Sans",sans-serif';c.textAlign='center';c.lineWidth=4;c.strokeStyle='rgba(0,0,0,.85)';
+   if(p.mut){const s=MUT[p.mut].n;c.strokeText(s,p.x,p.y-50);c.fillStyle='#ffb09a';c.fillText(s,p.x,p.y-50)}
+   const q=G.portal;if(q&&q.lohn){const s=LOHN[q.lohn].n;c.strokeText(s,q.x,q.y-50);c.fillStyle='#e8d8a8';c.fillText(s,q.x,q.y-50)}c.restore()}catch(e){}return r};
+ const ep=enterPortal;enterPortal=function(){try{if(erst()){if(G.gefahrNext&&G.b2P2&&G.b2P2.mut)G.wegeNext={mut:G.b2P2.mut};else if(G.portal&&G.portal.lohn&&!G.gefahrNext)G.wegeNext={lohn:G.portal.lohn};else G.wegeNext=null}}catch(e){}return ep.apply(this,arguments)};
+ function lohnGeben(k){const L=[];if(k==='gold'){const g=Math.round(80+40*SL()+5*P.level);SAVE.gold+=g;L.push('+'+fmt(g)+' Gold')}
+  if(k==='beute'){L.push(giveItem(2,0.8))}if(k==='heil'){for(const q of (G.mp?PL:[P]).filter(Boolean))withP(q,()=>{P.pots=P.potMax;heal(P.st.maxHp)});L.push('Tränke voll, Leben voll')}return L.join(' · ')}
+ hook('stage',()=>{if(!erst())return;const A=G.wegeAkt;
+  /* Lohn der gerade geschafften Mutator-Stufe */
+  if(A&&A.mut&&G.stage>A.st){let t='';if(A.mut==='blutmond'){const g=Math.round(Math.max(0,(G.goldRun||0)-A.g0)*0.5);SAVE.gold+=g;t='+'+fmt(g)+' Gold'}
+   if(A.mut==='ehre')t=giveItem(3,1.2);if(A.mut==='horde'){const g=Math.round(150+60*SL());SAVE.gold+=g;t='+'+fmt(g)+' Gold · '+giveItem(2,0.8)}
+   WG.n++;later(1.5,()=>{if(!G.bot)toast(`<b>${MUT[A.mut].n} überstanden:</b> ${t}`,'#ffd27a',{sofort:1})})}
+  G.wegeAkt=null;const N=G.wegeNext;G.wegeNext=null;if(!N)return;
+  if(N.lohn){const t=lohnGeben(N.lohn);WG.n++;later(1.2,()=>{if(!G.bot)toast(`<b>Lohn des sicheren Wegs:</b> ${t}`,'#e8d8a8',{sofort:1})})}
+  if(N.mut){G.wegeAkt={mut:N.mut,st:G.stage,g0:G.goldRun||0};later(3.6,()=>{if(!G.bot)toast(`<b>${MUT[N.mut].n}:</b> ${MUT[N.mut].d}`,'#ffb09a',{sofort:1})});
+   if(N.mut==='horde'){const pack=()=>{try{if(G.state!=='play'||G.room)return;const pt=edgePoint(420);spawnPack(pickFoe(0.6),pt.x,pt.y)}catch(e){}};later(7,pack);later(25,pack)}}});
+ const mutAn=k=>{const A=G.wegeAkt;return A&&A.mut===k&&G.stage===A.st};
+ const se=spawnEnemy;spawnEnemy=function(){const e=se.apply(this,arguments);try{if(e&&mutAn('blutmond')&&!e.boss)e.sp*=1.2}catch(x){}return e};
+ const up=usePotion;usePotion=function(){if(mutAn('ehre')){if(!G.bot&&!(G.wgT>G.time)){G.wgT=G.time+2;toast('Ehrenkampf: keine Heiltränke in dieser Stufe.','#ffb09a')}return}return up.apply(this,arguments)};
+ hook('kill',e=>{if(mutAn('ehre'))try{__hsULTI2.lade(0.3)}catch(x){}});
+}catch(e){console.error('wege',e);window.__hsWEGE.err=String(e&&e.stack||e)}})();
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
