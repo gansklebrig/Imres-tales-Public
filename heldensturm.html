@@ -37611,7 +37611,7 @@ liteDark=function(camX,camY,dark){if(DK.pend||!dkBereit())return _ldO.apply(this
    zeichnen und die Zeit messen: im Prozessor ≈ 1–4 ms je Million Bildpunkte, auf der Grafikkarte (Firefox nimmt nur auf) ≈ 0.
    Ergebnis in __hsLICHT2.sonde und im Diagnosebericht – entscheidet, ob weitere Prozessor-Sparmaßnahmen nötig sind. */
 const SO={k:0,v:[],art:'',msMpx:0,c:null};L2.sonde=SO;
-function sondeMessen(){try{if(!L2.k.sonde||!aktiv()||!G||G.state!=='play'||!G.ground||G.vp||G.ultra||(typeof splitOn==='function'&&splitOn())||!cx||cx!==spielCtx())return;
+function sondeMessen(){try{if((window.__hsGLWELT&&__hsGLWELT.api&&__hsGLWELT.api.EB&&__hsGLWELT.api.EB.an)||!L2.k.sonde||!aktiv()||!G||G.state!=='play'||!G.ground||G.vp||G.ultra||(typeof splitOn==='function'&&splitOn())||!cx||cx!==spielCtx())return;
   if((SO.k++)%(BI.on?4:30)!==(BI.on?0:7))return;const mpx=cv.width*cv.height/1e6;if(mpx<0.15)return;
   if(!SO.c){SO.c=document.createElement('canvas');SO.c.width=SO.c.height=256;const g=SO.c.getContext('2d');const gr=g.createLinearGradient(0,0,256,256);gr.addColorStop(0,'#201810');gr.addColorStop(1,'#403020');g.fillStyle=gr;g.fillRect(0,0,256,256)}
   const c=cx;c.save();c.setTransform(1,0,0,1,0,0);c.globalAlpha=1;c.globalCompositeOperation='source-over';c.imageSmoothingEnabled=true;
@@ -37725,7 +37725,7 @@ try{if(CV0)schutzAn(CV0)}catch(e){lErr('schutz',e)}
 /* vor jedem Bild: Größe abgleichen; in Firefox einmal zu Beginn frisch (nicht deckend) anlegen; Selbstheilung nach Abwertung */
 function flVorBild(){try{if(!aktiv())return;if(L2.k.frisch&&!FL.T&&!FL.aus&&G&&G.state){frischeLeinwand('Start')}
   flSync();if(cx===CV0&&FL.g&&!FL.aus)cx=FL.g;
-  if(L2.k.heilen&&FL.T&&SO.art==='Prozessor'&&FL.art0==='Grafikkarte'&&FL.heil<5&&performance.now()-FL.lastHeil>30000){FL.heil++;FL.lastHeil=performance.now();SO.v.length=0;SO.art='';FL.art0='';frischeLeinwand('Selbstheilung '+FL.heil+' (Sonde: Prozessor)')}
+  if(!(window.__hsGLWELT&&__hsGLWELT.api&&__hsGLWELT.api.EB&&__hsGLWELT.api.EB.an)&&L2.k.heilen&&FL.T&&SO.art==='Prozessor'&&FL.art0==='Grafikkarte'&&FL.heil<5&&performance.now()-FL.lastHeil>30000){FL.heil++;FL.lastHeil=performance.now();SO.v.length=0;SO.art='';FL.art0='';frischeLeinwand('Selbstheilung '+FL.heil+' (Sonde: Prozessor)')}
   if(SO.art==='Grafikkarte')FL.art0='Grafikkarte'}catch(e){lErr('vorbild',e)}}
 {const _r=render;render=function(){if(EB.inR===0)flVorBild();return _r.apply(this,arguments)}}
 
@@ -38866,7 +38866,7 @@ window.__hsZEIGER={v:1,an:0};
    Schalter: __hsGLWELT.modus='auto'|'an'|'aus' (auch ?glwelt=an|aus, SAVE.glwelt, Knopf „WebGL-Welt“ in der Grafik-Box), __hsGLWELT.aus=true,
    __hsGLWELT.k.{boden,deko,licht,tee,vc,bloom,bloomU,bloomS1,vig,css,gueltig}=0/1. Diagnose: „WebGL-Welt: …“, Paketliste „glwelt1(an)“.
    Erweiterungspunkte für „glfx“: __hsGLWELT.haken.{welt,licht,ende,bloom,uPost}, __hsGLWELT.api. ES2017 (Chromium 77), WebGL1. */
-window.__hsGLWELT={v:4};
+window.__hsGLWELT={v:5};
 (function(){try{
  /* ---------- Farben (CSS → [r,g,b,a] 0..1, nicht vormultipliziert) ---------- */
  const FC=new Map();let FCX=null;
@@ -39588,6 +39588,14 @@ window.__hsGLWELT={v:4};
   if(!g){return 'WebGL-Welt: aus ('+(GW.modus==='aus'||GW.aus?'Schalter':RS.fehl?RS.fehl:RS.u&&RS.u.soft?'Software-WebGL':'nicht bereit')+')'+(RS.u&&RS.u.ren?' · '+RS.u.ren:'')}
   return `WebGL-Welt: ${GW.gesperrt?'aus (nach Fehlern gesperrt)':GW.imTest?'pausiert (Firefox-Test)':EB.an?'an':'bereit'} (WebGL1, ${RS.u.ren}${g==='erzwungen'?', erzwungen':''}) · Texturen ${String(mb()).replace('.',',')} MB · Kontextverluste ${st.verlust} · Bilder ${st.bilder} (Abbruch ${st.abbruch}, davon kaputt ${st.abbrRW||0}) · 2D-Ebenen ${S12.mp>=0.6?'Prozessor':S12.mp<=0.15?'Grafikkarte':'unklar'} (Sonde ${S12.m[0].toFixed(2)}/${S12.m[1].toFixed(2)} ms/MPx, erneuert ${S12.n}) · Welt-Ebene ⌀ ${(st.weltE||0).toFixed(1)} ms (davon Bau ${(st.bauE||0).toFixed(1)}) · Boden-Kacheln ${BT.cur.size}/${BT.nVis||0} sichtbar (Tor/Geröll ${st.weich||0}, Bau ${st.kachelBau}, Live ${st.kachelLive}, neu wegen Szene ${st.schluessel||0}${(function(){try{const d=GW.kDiff;if(!d||!d[0])return'';const A=String(d[0]).split('|'),B=String(d[1]).split('|'),L=[];for(let i=0;i<B.length;i++)if(A[i]!==B[i])L.push(i);return' ['+L.join(',')+']'}catch(e){return''}})()}, Maßstab ${st.massstab||0}) · Deko ${DT.fest.size} ruhend (an ${st.dekoAn}/live ${st.dekoLive}) · Umleitungen ${st.tee} · CSS-Mischung ${st.css}${st.mix?' · ⚠ Mischmodi '+st.mix:''}${st.fehler?' · Fehler '+st.fehler+' ('+GW.err.slice(-2).join('; ')+')':''}`}
  GW.zeile=zeile;
+ /* Hochladen je Sekunde (Texturen aus 2D-Leinwänden) – in Firefox teuer, wenn die Quelle auf der Grafikkarte liegt */
+ const UPR={t:0,u:0,b:0,rs:0,rb:0};GW.upr=UPR;
+ (function upM(){try{const n=performance.now();if(n-UPR.t>=1000){const u=(RU&&RU.st?RU.st.up:0)+(RO&&RO.st?RO.st.up:0),b=(RU&&RU.st?RU.st.upB:0)+(RO&&RO.st?RO.st.upB:0);if(UPR.t){const d=(n-UPR.t)/1000;UPR.rs=Math.round((u-UPR.u)/d);UPR.rb=(b-UPR.b)/d/1048576}UPR.t=n;UPR.u=u;UPR.b=b}}catch(e){}requestAnimationFrame(upM)})();
+ const z0=zeile;GW.zeile=zeile=function(){let t=z0.apply(this,arguments);try{t=t.replace(' · Umleitungen ',` · Hochladen ${UPR.rs}/s (${UPR.rb.toFixed(1)} MB/s) · Umleitungen `)}catch(e){}return t};
+ /* Firefox: neue kleine Hilfsleinwände (Sprites, Lichtkegel, Zwischenbilder) im Arbeitsspeicher anlegen – Firefox lädt sie dann
+    ohne Rücklesen von der Grafikkarte hoch. Große Ebenen (Spielfläche) bleiben unberührt. Abschaltbar: __hsGLWELT.k.fxRam=0 */
+ try{const ff=/firefox/i.test(navigator.userAgent);const gc=HTMLCanvasElement.prototype.getContext;
+  if(ff&&gc&&!gc.__glRam){const neu=function(typ,opt){try{if(typ==='2d'&&GW.k.fxRam!==0&&(this.width*this.height)<1.2e6&&!this.isConnected&&!(opt&&'willReadFrequently' in opt)){opt=Object.assign({},opt||{},{willReadFrequently:true});GW.st.ram=(GW.st.ram||0)+1}}catch(e){}return gc.call(this,typ,opt)};neu.__glRam=1;HTMLCanvasElement.prototype.getContext=neu}}catch(e){}
  function diagHaken(){const DG=window.__hsDIAG;if(!DG||DG.__gw)return;DG.__gw=1;
   try{const d0=Object.getOwnPropertyDescriptor(DG,'letzter');let lz=DG.letzter;const get=d0&&d0.get?d0.get:()=>lz,set=d0&&d0.set?d0.set:(v)=>{lz=v};
    Object.defineProperty(DG,'letzter',{configurable:true,enumerable:true,get(){return get.call(DG)},set(v){try{if(typeof v==='string'&&v&&v.indexOf('WebGL-Welt:')<0)v=v+'\n'+zeile()}catch(e){}set.call(DG,v)}})}catch(e){gErr('diag letzter',e)}
