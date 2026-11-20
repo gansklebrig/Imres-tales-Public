@@ -38872,7 +38872,11 @@ window.__hsZEIGER={v:1,an:0};
    Schalter: __hsGLWELT.modus='auto'|'an'|'aus' (auch ?glwelt=an|aus, SAVE.glwelt, Knopf „WebGL-Welt“ in der Grafik-Box), __hsGLWELT.aus=true,
    __hsGLWELT.k.{boden,deko,licht,tee,vc,bloom,bloomU,bloomS1,vig,css,gueltig}=0/1. Diagnose: „WebGL-Welt: …“, Paketliste „glwelt1(an)“.
    Erweiterungspunkte für „glfx“: __hsGLWELT.haken.{welt,licht,ende,bloom,uPost}, __hsGLWELT.api. ES2017 (Chromium 77), WebGL1. */
-window.__hsGLWELT={v:6};
+/* v7: Ringpuffer für Eckdaten (kein Warten auf laufende Zeichenbefehle), Ohrenschnitt für einfache konkave Flächen (statt Schablone),
+   Zustand der umgeleiteten 2D-Ebenen im Schatten (keine teuren Getter je Befehl), GX-Zustand beim save() geteilt statt kopiert,
+   native Verläufe/Muster werden für GX nachgebaut, Kacheln (Boden/Wände/Deko) in Firefox direkt auf der Grafikkarte gebaut (GW.k.kgx),
+   „Figuren über WebGL“ (GW.k.voll) in Firefox automatisch an, mit Knopf in der Grafik-Box. */
+window.__hsGLWELT={v:7};
 (function(){try{
  /* ---------- Farben (CSS → [r,g,b,a] 0..1, nicht vormultipliziert) ---------- */
  const FC=new Map();let FCX=null;
@@ -38927,8 +38931,8 @@ window.__hsGLWELT={v:6};
     if(!g.getProgramParameter(p,g.LINK_STATUS)&&!g.isContextLost())throw new Error('Link: '+g.getProgramInfoLog(p));const u={};const n=g.getProgramParameter(p,g.ACTIVE_UNIFORMS)||0;
     for(let i=0;i<n;i++){const a=g.getActiveUniform(p,i);const nm=a.name.replace(/\[0\]$/,'');u[nm]=g.getUniformLocation(p,a.name)}return{p,u}};
    R.P={tex:pr(FS_TEX),grad:pr(FS_GRAD),post:pr(FS_POST),down:pr(FS_DOWN),b4:pr(FS_B4)};R.mkProg=pr;R.gen=(R.gen||0)+1;
-   R.vb=g.createBuffer();R.V=new Float32Array(8*6*4096);R.n=0;
-   g.bindBuffer(g.ARRAY_BUFFER,R.vb);g.bufferData(g.ARRAY_BUFFER,R.V.byteLength,g.DYNAMIC_DRAW);
+   R.vb=g.createBuffer();R.V=new Float32Array(8*6*4096);R.n=0;R.vo=0;R.vcap=131072;
+   g.bindBuffer(g.ARRAY_BUFFER,R.vb);g.bufferData(g.ARRAY_BUFFER,R.vcap*32,g.DYNAMIC_DRAW);
    g.enableVertexAttribArray(0);g.enableVertexAttribArray(1);g.enableVertexAttribArray(2);
    g.vertexAttribPointer(0,2,g.FLOAT,false,32,0);g.vertexAttribPointer(1,2,g.FLOAT,false,32,8);g.vertexAttribPointer(2,4,g.FLOAT,false,32,16);
    R.weiss=g.createTexture();g.bindTexture(g.TEXTURE_2D,R.weiss);g.texImage2D(g.TEXTURE_2D,0,g.RGBA,1,1,0,g.RGBA,g.UNSIGNED_BYTE,new Uint8Array([255,255,255,255]));texPar(g,g.NEAREST);
@@ -38955,7 +38959,9 @@ window.__hsGLWELT={v:6};
   case 'dout':g.blendFuncSeparate(g.ZERO,g.ONE_MINUS_SRC_ALPHA,g.ZERO,g.ONE_MINUS_SRC_ALPHA);break;case 'din':g.blendFuncSeparate(g.ZERO,g.SRC_ALPHA,g.ZERO,g.SRC_ALPHA);break;
   case 'clear':g.blendFuncSeparate(g.ZERO,g.ZERO,g.ZERO,g.ZERO);break;case 'overm':g.blendFuncSeparate(g.ONE,g.ONE_MINUS_SRC_ALPHA,g.ZERO,g.ONE_MINUS_SRC_ALPHA);break;case 'copy':g.blendFuncSeparate(g.ONE,g.ZERO,g.ONE,g.ZERO);break;
   default:g.blendFuncSeparate(g.ONE,g.ONE_MINUS_SRC_ALPHA,g.ONE,g.ONE_MINUS_SRC_ALPHA)}}
- function flush(R){if(!R.n)return;const g=R.gl;g.bindBuffer(g.ARRAY_BUFFER,R.vb);g.bufferSubData(g.ARRAY_BUFFER,0,R.V.subarray(0,R.n*8));g.drawArrays(g.TRIANGLES,0,R.n);R.st.draw++;R.n=0}
+ /* Ringpuffer: jede Ladung an eine neue Stelle, damit der Treiber nicht auf noch laufende Zeichenbefehle warten muss; voll → Puffer neu anfordern (verwaisen) */
+ const RK=window.__hsRK={on:1},OHR=window.__hsOHR={an:1};function flush(R){const n=R.n;if(!n)return;const g=R.gl;g.bindBuffer(g.ARRAY_BUFFER,R.vb);if(!RK.on){g.bufferSubData(g.ARRAY_BUFFER,0,R.V.subarray(0,n*8));g.drawArrays(g.TRIANGLES,0,n);R.st.draw++;R.n=0;return}if(R.vo+n>R.vcap){g.bufferData(g.ARRAY_BUFFER,R.vcap*32,g.DYNAMIC_DRAW);R.vo=0;R.st.orph=(R.st.orph||0)+1}
+  g.bufferSubData(g.ARRAY_BUFFER,R.vo*32,R.V.subarray(0,n*8));g.drawArrays(g.TRIANGLES,R.vo,n);R.vo+=n;R.st.draw++;R.n=0}
  function useProg(R,p){if(R.b.prog===p)return;flush(R);R.gl.useProgram(p.p);R.b.prog=p;R.b.gk=null;R.gl.uniform2f(p.u.uR,R.zw,R.zh);p.zw=R.zw;p.zh=R.zh}
  function zustand(R,prog,tex,blend,rep,flt){const g=R.gl,b=R.b;
   if(b.prog!==prog||b.tex!==tex||b.blend!==blend||b.rep!==rep||b.flt!==flt||prog.zw!==R.zw||prog.zh!==R.zh){flush(R);
@@ -38997,11 +39003,12 @@ window.__hsGLWELT={v:6};
  const XP=GX.prototype;let GID=0;
  const PROPS={globalAlpha:'ga',globalCompositeOperation:'op',fillStyle:'fs',strokeStyle:'ss',lineWidth:'lw',lineCap:'cap',lineJoin:'join',miterLimit:'ml',imageSmoothingEnabled:'sm',imageSmoothingQuality:'smq',font:'font',textAlign:'ta',textBaseline:'tb',direction:'dir',filter:'flt',shadowBlur:'sb',shadowColor:'sc',shadowOffsetX:'sx',shadowOffsetY:'sy',lineDashOffset:'ldo'};
  for(const k in PROPS){const q=PROPS[k];Object.defineProperty(XP,k,{configurable:true,get(){return this.s[q]},set(v){
-  if(q==='ga'){v=+v;if(!(v>=0&&v<=1))return}else if(q==='lw'||q==='ml'){v=+v;if(!(v>0)||!isFinite(v))return}else if(q==='fs'||q==='ss'){if(!(typeof v==='string'||v&&v.__gx))return}
-  this.s[q]=v}})}
+  if(q==='ga'){v=+v;if(!(v>=0&&v<=1))return}else if(q==='lw'||q==='ml'){v=+v;if(!(v>0)||!isFinite(v))return}else if(q==='fs'||q==='ss'){if(typeof v!=='string'){v=gxKonv(v);if(!v)return}}
+  if(this.sg){this.s=Object.assign({},this.s);this.sg=0}this.s[q]=v}})}
+ XP.su=function(){if(this.sg){this.s=Object.assign({},this.s);this.sg=0}};
  XP.zielSetzen=function(F,w,h){this.ziel=F;this.cw=w;this.ch=h;if(!this.canvas.__vc){this.canvas.width=w;this.canvas.height=h}};
- XP.save=function(){this.S.push([this.m.slice(),Object.assign({},this.s),this.dash.slice(),this.clipN])};
- XP.restore=function(){const q=this.S.pop();if(!q)return;this.m=q[0];this.s=q[1];this.dash=q[2];if(this.clipN!==q[3]){this.clipN=q[3];this.clipNeu()}};
+ XP.save=function(){/* Zustand teilen statt kopieren; kopiert wird erst beim nächsten Ändern */this.S.push([this.m.slice(),this.s,this.dash,this.clipN]);this.sg=1};
+ XP.restore=function(){const q=this.S.pop();if(!q)return;this.m=q[0];this.s=q[1];this.sg=1;this.dash=q[2];if(this.clipN!==q[3]){this.clipN=q[3];this.clipNeu()}};
  XP.mul=function(a,b,c,d,e,f){const m=this.m;this.m=[m[0]*a+m[2]*b,m[1]*a+m[3]*b,m[0]*c+m[2]*d,m[1]*c+m[3]*d,m[0]*e+m[2]*f+m[4],m[1]*e+m[3]*f+m[5]]};
  XP.translate=function(x,y){const m=this.m;m[4]+=m[0]*x+m[2]*y;m[5]+=m[1]*x+m[3]*y};
  XP.scale=function(x,y){const m=this.m;m[0]*=x;m[1]*=x;m[2]*=y;m[3]*=y};
@@ -39022,12 +39029,24 @@ window.__hsGLWELT={v:6};
  XP.createRadialGradient=function(x0,y0,r0,x1,y1,r1){return{__gx:1,__id:++GID,typ:1,a:[+x0,+y0,+x1,+y1],r:[+r0,+r1],s:[],addColorStop(o,c){const f=farbe(c);if(f&&o>=0&&o<=1){this.s.push([+o,f]);this.s.sort((p,q)=>p[0]-q[0]);this.__id=++GID}}}};
  XP.createConicGradient=function(){this.st.unbek++;return{__gx:1,typ:9,a:[0,0,0,0],r:[0,0],s:[],addColorStop(){}}};
  XP.createPattern=function(img,rep){return{__gx:2,img,rep:rep||'repeat',pm:null,setTransform(m){this.pm=m?[m.a,m.b,m.c,m.d,m.e,m.f]:null}}};
+ /* Native Verläufe/Muster (von beliebigen 2D-Leinwänden) merken, damit GX sie nachbauen kann – für die Umleitung und für Kacheln auf der Grafikkarte */
+ try{const CP=CanvasRenderingContext2D.prototype;
+  for(const [n,t] of [['createLinearGradient',0],['createRadialGradient',1]]){const f=CP[n];if(f&&!f.__hsT){const w=function(){const gr=f.apply(this,arguments);try{gr.__mk=[t,Array.prototype.slice.call(arguments,0,t?6:4).map(Number)];gr.__st=[]}catch(e){}return gr};w.__hsT=1;CP[n]=w}}
+  const ac=CanvasGradient.prototype.addColorStop;if(ac&&!ac.__hsT){const w=function(o,c){const r=ac.apply(this,arguments);if(this.__st)this.__st.push([+o,c]);return r};w.__hsT=1;CanvasGradient.prototype.addColorStop=w}
+  const cp=CP.createPattern;if(cp&&!cp.__hsT){const w=function(img,rep){const pa=cp.apply(this,arguments);if(pa)try{pa.__mk=[2,img,rep||'repeat']}catch(e){}return pa};w.__hsT=1;CP.createPattern=w}
+  const pst=typeof CanvasPattern!=='undefined'&&CanvasPattern.prototype.setTransform;if(pst&&!pst.__hsT){const w=function(m){const r=pst.apply(this,arguments);try{this.__pm=m?[m.a,m.b,m.c,m.d,m.e,m.f]:null;if(this.__gxT)this.__gxT.pm=this.__pm}catch(e){}return r};w.__hsT=1;CanvasPattern.prototype.setTransform=w}
+ }catch(e){}
+ function gxKonv(v){if(!v||typeof v!=='object')return null;if(v.__gx)return v;const mk=v.__mk;
+  if(v.__gxT&&(!mk||mk[0]===2||v.__gxN===(v.__st?v.__st.length:-1)))return v.__gxT;if(!mk)return null;
+  if(mk[0]===2){if(!istQuelle(mk[1]))return null;const t={__gx:2,img:mk[1],rep:mk[2],pm:v.__pm||null,setTransform(m){this.pm=m?[m.a,m.b,m.c,m.d,m.e,m.f]:null}};v.__gxT=t;return t}
+  const a=mk[1];if(!a.every(isFinite))return null;const t={__gx:1,__id:++GID,typ:mk[0],a:mk[0]?[a[0],a[1],a[3],a[4]]:[a[0],a[1],a[2],a[3]],r:mk[0]?[a[2],a[5]]:[0,0],s:[]};
+  for(const q of v.__st){const f=farbe(q[1]);if(f&&q[0]>=0&&q[0]<=1)t.s.push([q[0],f])}t.s.sort((p,q)=>p[0]-q[0]);v.__gxT=t;v.__gxN=v.__st.length;return t}
  /* ---- Pfade (Gerätekoordinaten, beim Befehl transformiert) ---- */
  XP.beginPath=function(){this.sp.length=0;this.cur=null};
  XP.pt=function(x,y){const m=this.m;return[m[0]*x+m[2]*y+m[4],m[1]*x+m[3]*y+m[5]]};
- XP.neuSub=function(x,y){const p=this.pt(x,y);this.cur={p:[p[0],p[1]],zu:false};this.sp.push(this.cur);this.lx=x;this.ly=y};
+ XP.neuSub=function(x,y){const m=this.m;this.cur={p:[m[0]*x+m[2]*y+m[4],m[1]*x+m[3]*y+m[5]],zu:false};this.sp.push(this.cur);this.lx=x;this.ly=y};
  XP.moveTo=function(x,y){x=+x;y=+y;if(!isFinite(x)||!isFinite(y))return;this.neuSub(x,y)};
- XP.lineTo=function(x,y){x=+x;y=+y;if(!isFinite(x)||!isFinite(y))return;if(!this.cur){this.neuSub(x,y);return}const p=this.pt(x,y);this.cur.p.push(p[0],p[1]);this.lx=x;this.ly=y};
+ XP.lineTo=function(x,y){x=+x;y=+y;if(!isFinite(x)||!isFinite(y))return;if(!this.cur){this.neuSub(x,y);return}const m=this.m;this.cur.p.push(m[0]*x+m[2]*y+m[4],m[1]*x+m[3]*y+m[5]);this.lx=x;this.ly=y};
  XP.closePath=function(){const c=this.cur;if(!c)return;c.zu=true;const x=c.p[0],y=c.p[1];const m=this.m,d=m[0]*m[3]-m[1]*m[2];/* neuer Teilpfad am Startpunkt */
   const ix=Math.abs(d)>1e-12?((x-m[4])*m[3]-(y-m[5])*m[2])/d:this.lx,iy=Math.abs(d)>1e-12?((y-m[5])*m[0]-(x-m[4])*m[1])/d:this.ly;this.cur={p:[x,y],zu:false};this.sp.push(this.cur);this.lx=ix;this.ly=iy};
  XP.skal=function(){const m=this.m;return Math.sqrt(Math.abs(m[0]*m[3]-m[1]*m[2]))||Math.hypot(m[0],m[1])};
@@ -39038,7 +39057,12 @@ window.__hsGLWELT={v:6};
  XP.ellipse=function(x,y,rx,ry,rot,a0,a1,ccw){x=+x;y=+y;rx=+rx;ry=+ry;rot=+rot||0;a0=+a0;a1=+a1;if(!(rx>=0&&ry>=0)||!isFinite(x+y+a0+a1))return;
   let sw=a1-a0;const T=Math.PI*2;if(!ccw){if(sw>=T)sw=T;else{sw=sw%T;if(sw<0)sw+=T}}else{if(-sw>=T)sw=-T;else{sw=sw%T;if(sw>0)sw-=T}}
   const rd=Math.max(rx,ry)*this.skal(),n=Math.max(4,Math.min(256,Math.ceil(Math.abs(sw)/(2*Math.acos(Math.max(-1,Math.min(1,1-0.3/Math.max(rd,0.31))))))));
-  const cr=Math.cos(rot),sr=Math.sin(rot);for(let i=0;i<=n;i++){const a=a0+sw*i/n,px=Math.cos(a)*rx,py=Math.sin(a)*ry,X=x+px*cr-py*sr,Y=y+px*sr+py*cr;if(i===0&&!this.cur)this.neuSub(X,Y);else this.lineTo(X,Y)}};
+  /* Punkte direkt in Gerätekoordinaten (Drehung schrittweise statt cos/sin je Punkt) */
+  const cr=Math.cos(rot),sr=Math.sin(rot),m=this.m,st=sw/n,cd=Math.cos(st),sd=Math.sin(st);let ca=Math.cos(a0),sa=Math.sin(a0),X=0,Y=0;
+  for(let i=0;i<=n;i++){if(i===n){ca=Math.cos(a0+sw);sa=Math.sin(a0+sw)}const px=ca*rx,py=sa*ry;X=x+px*cr-py*sr;Y=y+px*sr+py*cr;
+   if(i===0&&!this.cur)this.neuSub(X,Y);else if(isFinite(X)&&isFinite(Y)){if(!this.cur)this.neuSub(X,Y);else this.cur.p.push(m[0]*X+m[2]*Y+m[4],m[1]*X+m[3]*Y+m[5])}
+   const c2=ca*cd-sa*sd;sa=sa*cd+ca*sd;ca=c2}
+  if(isFinite(X)&&isFinite(Y)){this.lx=X;this.ly=Y}};
  XP.arc=function(x,y,r,a0,a1,ccw){this.ellipse(x,y,r,r,0,a0,a1,ccw)};
  XP.arcTo=function(x1,y1,x2,y2,r){if(!this.cur){this.neuSub(+x1,+y1);return}const x0=this.lx,y0=this.ly;const d0x=x0-x1,d0y=y0-y1,d2x=x2-x1,d2y=y2-y1,l0=Math.hypot(d0x,d0y),l2=Math.hypot(d2x,d2y);
   const cr=d0x*d2y-d0y*d2x;if(l0<1e-9||l2<1e-9||Math.abs(cr)<1e-9||!(r>0)){this.lineTo(x1,y1);return}
@@ -39070,7 +39094,7 @@ window.__hsGLWELT={v:6};
   zustand(R,R.P.tex,e.t,b||'over',0,this.s.sm?R.gl.LINEAR:R.gl.NEAREST);quad(R,A[0],A[1],B[0],B[1],C[0],C[1],D[0],D[1],u0,v0,u1,v1,al,al,al,al);
   if(this.clipN)this.stencilClipAus()};
  XP.fillRect=function(x,y,w,h){if(this.sw)return;x=+x;y=+y;w=+w;h=+h;if(!isFinite(x+y+w+h)||!w||!h)return;this.form([{p:[...this.pt(x,y),...this.pt(x+w,y),...this.pt(x+w,y+h),...this.pt(x,y+h)],zu:true}],this.s.fs,'nonzero',true)};
- XP.clearRect=function(x,y,w,h){if(this.sw)return;x=+x;y=+y;w=+w;h=+h;if(!isFinite(x+y+w+h)||!w||!h)return;const o=this.s.op,ga=this.s.ga;this.s.op='__clear';this.s.ga=1;
+ XP.clearRect=function(x,y,w,h){if(this.sw)return;x=+x;y=+y;w=+w;h=+h;if(!isFinite(x+y+w+h)||!w||!h)return;this.su();const o=this.s.op,ga=this.s.ga;this.s.op='__clear';this.s.ga=1;
   try{this.form([{p:[...this.pt(x,y),...this.pt(x+w,y),...this.pt(x+w,y+h),...this.pt(x,y+h)],zu:true}],'#000','nonzero',true)}finally{this.s.op=o;this.s.ga=ga}};
  XP.strokeRect=function(x,y,w,h){if(this.sw)return;const sp=this.sp,c=this.cur;this.sp=[];this.cur=null;this.rect(x,y,w,h);try{this.stroke()}finally{this.sp=sp;this.cur=c}};
  XP.fill=function(a,b){if(this.sw)return;let regel='nonzero';if(typeof a==='string')regel=a;else if(a&&typeof a==='object'){this.st.unbek++;return}else if(typeof b==='string')regel=b;this.st.fill++;this.form(this.sp,this.s.fs,regel,false)};
@@ -39079,9 +39103,12 @@ window.__hsGLWELT={v:6};
  XP.form=function(sp,stl,regel,istRechteck){const R=this.R;let b=this.s.op==='__clear'?'clear':this.blend();if(!b){b='over'}
   const S=this.stil(stl);if(!S&&b!=='clear')return;const L=sp.filter(q=>q.p.length>=6);if(!L.length)return;this.zielAn();
   if(this.s.op==='copy'){/* copy: alles außerhalb wird gelöscht */const g=R.gl;flush(R);g.clearColor(0,0,0,0);g.clear(g.COLOR_BUFFER_BIT);b='over'}
-  const konvex=L.length===1&&konv(L[0].p);
+  const konvex=L.length===1&&konv(L[0].p);const oh=!konvex&&L.length===1&&OHR.an?ohren(L[0].p):null;
   if(this.clipN)this.stencilClipAn();
   if(konvex){if(b==='clear'||this.s.op==='copy')this.zeichneFlaeche(S,b,L[0].p,null);else this.flaecheAA(S,b,L[0].p)}
+  else if(oh){const P=oh.P,n=P.length>>1;this.zeichneFlaeche(S,b,P,null,null,oh.T);this.st.ohr=(this.st.ohr||0)+1;
+   /* Kantenglättung wie beim Schablonenweg: 0,5-px-Randstreifen nach außen */
+   if(b!=='clear'&&this.s.op!=='copy'){const ST=[];const sg=oh.sg;for(let i=0;i<n;i++){const j=(i+1)%n,ax=P[2*i],ay=P[2*i+1],bx=P[2*j],by=P[2*j+1],dx=bx-ax,dy=by-ay,l=Math.hypot(dx,dy);if(l<1e-6)continue;const nx=dy/l*sg*0.5,ny=-dx/l*sg*0.5;ST.push([ax,ay,bx,by,bx+nx,by+ny,ax+nx,ay+ny])}if(ST.length)this.streifen(S,b,ST,0.5)}}
   else{const g=R.gl;flush(R);this.st.sten++;let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
    g.enable(g.STENCIL_TEST);g.colorMask(false,false,false,false);const cm=this.clipN?0x80:0;
    g.stencilMask(0x7f);g.stencilFunc(this.clipN?g.EQUAL:g.ALWAYS,cm,cm);
@@ -39107,10 +39134,13 @@ window.__hsGLWELT={v:6};
    I[2*i]=P[2*i]-mx*0.5;I[2*i+1]=P[2*i+1]-my*0.5;O[2*i]=P[2*i]+mx*0.5;O[2*i+1]=P[2*i+1]+my*0.5}
   /* sehr kleine Formen: Deckkraft nach Fläche */let k=1;const fl=Math.abs(ar)/2,um=(()=>{let u=0;for(let i=0;i<n;i++){const j=(i+1)%n;u+=Math.hypot(P[2*j]-P[2*i],P[2*j+1]-P[2*i+1])}return u})();
   if(fl<um*0.5+1){k=Math.max(0,Math.min(1,fl/Math.max(um*0.5,1e-3)));for(let i=0;i<2*n;i++)I[i]=P[i]}
-  this.zeichneFlaeche(S,b,I,null,k);const st=[];for(let i=0;i<n;i++){const j=(i+1)%n;st.push([I[2*i],I[2*i+1],I[2*j],I[2*j+1],O[2*j],O[2*j+1],O[2*i],O[2*i+1]])}
+  this.zeichneFlaeche(S,b,I,null,k);
+  if(S[0]===0||S[0]===1){/* Randstreifen direkt (ohne Zwischenlisten) */const R=this.R;let r,gg,bb,a;if(S[0]===1){if(!this.gradAn(S,b))return;r=gg=bb=a=S[2]*k}else{zustand(R,R.P.tex,R.weiss,b,0,R.gl.NEAREST);r=S[1]*k;gg=S[2]*k;bb=S[3]*k;a=S[4]*k}
+   for(let i=0;i<n;i++){const j=i+1<n?i+1:0;vtx(R,I[2*i],I[2*i+1],0,0,r,gg,bb,a);vtx(R,I[2*j],I[2*j+1],0,0,r,gg,bb,a);vtx(R,O[2*j],O[2*j+1],0,0,0,0,0,0);vtx(R,I[2*i],I[2*i+1],0,0,r,gg,bb,a);vtx(R,O[2*j],O[2*j+1],0,0,0,0,0,0);vtx(R,O[2*i],O[2*i+1],0,0,0,0,0,0)}return}
+  const st=[];for(let i=0;i<n;i++){const j=(i+1)%n;st.push([I[2*i],I[2*i+1],I[2*j],I[2*j+1],O[2*j],O[2*j+1],O[2*i],O[2*i+1]])}
   this.streifen(S,b,st,k)};
  /* Streifen-Vierecke a(innen) b(innen) c(außen) d(außen): Deckkraft innen k, außen 0 */
- XP.streifen=function(S,b,L,k){const R=this.R,g=R.gl;if(S[0]===1){if(!this.gradAn(S,b))return;const ga=S[2];for(const q of L){const a=ga*k;vtx(R,q[0],q[1],0,0,a,a,a,a);vtx(R,q[2],q[3],0,0,a,a,a,a);vtx(R,q[4],q[5],0,0,0,0,0,0);vtx(R,q[0],q[1],0,0,a,a,a,a);vtx(R,q[4],q[5],0,0,0,0,0,0);vtx(R,q[6],q[7],0,0,0,0,0,0)}flush(R);return}
+ XP.streifen=function(S,b,L,k){const R=this.R,g=R.gl;if(S[0]===1){if(!this.gradAn(S,b))return;const ga=S[2];for(const q of L){const a=ga*k;vtx(R,q[0],q[1],0,0,a,a,a,a);vtx(R,q[2],q[3],0,0,a,a,a,a);vtx(R,q[4],q[5],0,0,0,0,0,0);vtx(R,q[0],q[1],0,0,a,a,a,a);vtx(R,q[4],q[5],0,0,0,0,0,0);vtx(R,q[6],q[7],0,0,0,0,0,0)}return}
   if(S[0]===0){zustand(R,R.P.tex,R.weiss,b,0,g.NEAREST);const r=S[1]*k,gg=S[2]*k,bb=S[3]*k,a=S[4]*k;
    for(const q of L){vtx(R,q[0],q[1],0,0,r,gg,bb,a);vtx(R,q[2],q[3],0,0,r,gg,bb,a);vtx(R,q[4],q[5],0,0,0,0,0,0);vtx(R,q[0],q[1],0,0,r,gg,bb,a);vtx(R,q[4],q[5],0,0,0,0,0,0);vtx(R,q[6],q[7],0,0,0,0,0,0)}return}
   for(const q of L){this.zeichneFlaeche(S,b,[q[0],q[1],q[2],q[3],q[4],q[5]],[k,k,0]);this.zeichneFlaeche(S,b,[q[0],q[1],q[4],q[5],q[6],q[7]],[k,0,0])}};
@@ -39123,21 +39153,17 @@ window.__hsGLWELT={v:6};
   const st=G_.s.slice(0,8),C=new Float32Array(32),O=new Float32Array(8);for(let i=0;i<8;i++){const q=st[Math.min(i,st.length-1)];C[i*4]=q[1][0];C[i*4+1]=q[1][1];C[i*4+2]=q[1][2];C[i*4+3]=q[1][3];O[i]=q[0]}
   g.uniform4fv(p.u.uSC,C);g.uniform1fv(p.u.uSO,O);g.uniform1f(p.u.uN,st.length);R.b.gk=key;return true};
  /* Fläche (konvexes Polygon in Gerätekoordinaten) mit Stil zeichnen; av = Deckkraft je Ecke (nur Dreieck) oder Zahl für alle */
- XP.zeichneFlaeche=function(S,b,P,av,kk){const R=this.R,g=R.gl,n=P.length>>1;if(n<3)return;const K=i=>av?av[i]:(kk==null?1:kk);
-  if(b==='clear'||S[0]===0){const r=b==='clear'?0:S[1],gg=b==='clear'?0:S[2],bb=b==='clear'?0:S[3],a=b==='clear'?1:S[4];zustand(R,R.P.tex,R.weiss,b,0,g.NEAREST);
-   for(let i=1;i+1<n;i++){for(const j of [0,i,i+1]){const k=b==='clear'?1:K(j);vtx(R,P[2*j],P[2*j+1],0,0,r*k,gg*k,bb*k,a*k)}}return}
-  if(S[0]===1){const G_=S[1],ga=S[2];if(!this.gradAn(S,b))return;
-   for(let i=1;i+1<n;i++){for(const j of [0,i,i+1]){const a=ga*K(j);vtx(R,P[2*j],P[2*j+1],0,0,a,a,a,a)}}return}
-  if(false){const G_=S[1],ga=S[2],p=R.P.grad;flush(R);useProg(R,p);if(R.b.blend!==b){setBlend(R,b);R.b.blend=b}
-   const inv=inv3(this.m);g.uniformMatrix3fv(p.u.uInv,false,inv);g.uniform1f(p.u.uTyp,G_.typ);g.uniform4f(p.u.uA,G_.a[0],G_.a[1],G_.a[2],G_.a[3]);g.uniform2f(p.u.uRr,G_.r[0],G_.r[1]);
-   const st=G_.s.slice(0,8),C=new Float32Array(32),O=new Float32Array(8);for(let i=0;i<8;i++){const q=st[Math.min(i,st.length-1)];C[i*4]=q[1][0];C[i*4+1]=q[1][1];C[i*4+2]=q[1][2];C[i*4+3]=q[1][3];O[i]=q[0]}
-   g.uniform4fv(p.u.uSC,C);g.uniform1fv(p.u.uSO,O);g.uniform1f(p.u.uN,st.length);
-   if(G_.typ===0&&G_.a[0]===G_.a[2]&&G_.a[1]===G_.a[3])return;if(G_.typ===1&&G_.a[0]===G_.a[2]&&G_.a[1]===G_.a[3]&&G_.r[0]===G_.r[1])return;
-   for(let i=1;i+1<n;i++){for(const j of [0,i,i+1]){const a=ga*K(j);vtx(R,P[2*j],P[2*j+1],0,0,a,a,a,a)}}flush(R);return}
+ XP.zeichneFlaeche=function(S,b,P,av,kk,T){const R=this.R,g=R.gl,n=P.length>>1;if(n<3)return;const kd=kk==null?1:kk;
+  /* Dreiecke: T = Eckenliste (Ohrenschnitt) oder Fächer um Ecke 0 */const nt=T?T.length/3:n-2;
+  if(b==='clear'||S[0]===0){const cl=b==='clear',r=cl?0:S[1],gg=cl?0:S[2],bb=cl?0:S[3],a=cl?1:S[4];zustand(R,R.P.tex,R.weiss,b,0,g.NEAREST);
+   for(let t=0;t<nt;t++)for(let c=0;c<3;c++){const j=T?T[3*t+c]:(c===0?0:t+c);const k=cl?1:(av?av[j]:kd);vtx(R,P[2*j],P[2*j+1],0,0,r*k,gg*k,bb*k,a*k)}return}
+  if(S[0]===1){const ga=S[2];if(!this.gradAn(S,b))return;
+   for(let t=0;t<nt;t++)for(let c=0;c<3;c++){const j=T?T[3*t+c]:(c===0?0:t+c);const a=ga*(av?av[j]:kd);vtx(R,P[2*j],P[2*j+1],0,0,a,a,a,a)}return}
   if(S[0]===2){const pt=S[1],ga=S[2],e=texVon(R,pt.img);if(!e){this.st.unbek++;return}const inv=inv3(this.m),pm=pt.pm;let pinv=null;if(pm)pinv=inv3(pm);
-   zustand(R,R.P.tex,e.t,b,pt.rep==='no-repeat'?0:1,this.s.sm?g.LINEAR:g.NEAREST);const iw=pt.img.width||1,ih=pt.img.height||1;
-   const uv=(x,y)=>{let lx=inv[0]*x+inv[3]*y+inv[6],ly=inv[1]*x+inv[4]*y+inv[7];if(pinv){const tx=pinv[0]*lx+pinv[3]*ly+pinv[6],ty=pinv[1]*lx+pinv[4]*ly+pinv[7];lx=tx;ly=ty}return[lx/iw,e.fl?1-ly/ih:ly/ih]};
-   for(let i=1;i+1<n;i++){for(const k of [0,i,i+1]){const q=uv(P[2*k],P[2*k+1]),a=ga*K(k);vtx(R,P[2*k],P[2*k+1],q[0],q[1],a,a,a,a)}}}};
+   zustand(R,R.P.tex,e.t,b,pt.rep==='no-repeat'?0:1,this.s.sm?g.LINEAR:g.NEAREST);const iw=pt.img.width||1,ih=pt.img.height||1,fl=e.fl;
+   for(let t=0;t<nt;t++)for(let c=0;c<3;c++){const j=T?T[3*t+c]:(c===0?0:t+c);const x=P[2*j],y=P[2*j+1];let lx=inv[0]*x+inv[3]*y+inv[6],ly=inv[1]*x+inv[4]*y+inv[7];
+    if(pinv){const tx=pinv[0]*lx+pinv[3]*ly+pinv[6],ty=pinv[1]*lx+pinv[4]*ly+pinv[7];lx=tx;ly=ty}const a=ga*(av?av[j]:kd);vtx(R,x,y,lx/iw,fl?1-ly/ih:ly/ih,a,a,a,a)}}};
+
  /* ---- Striche: Vierecke je Abschnitt, runde/spitze Ecken, Kappen; dünne Linien mit Kantenglättung über Deckkraft ---- */
  XP.stroke=function(a){if(this.sw)return;if(a&&typeof a==='object'){this.st.unbek++;return}this.st.stroke++;const b=this.blend()||'over';const S=this.stil(this.s.ss);if(!S)return;
   const sk=this.skal();let w=this.s.lw*sk,af=1;if(w<1){af=w;w=1}let L=this.sp.filter(q=>q.p.length>=4||q.zu&&q.p.length>=2);if(!L.length)return;
@@ -39176,7 +39202,7 @@ window.__hsGLWELT={v:6};
    zustand(R,R.P.tex,R.weiss,'over',0,g.NEAREST);let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(let i=0;i<tris.length;i+=2){const x=tris[i],y=tris[i+1];vtx(R,x,y,0,0,1,1,1,1);if(x<x0)x0=x;if(y<y0)y0=y;if(x>x1)x1=x;if(y>y1)y1=y}
    flush(R);g.colorMask(true,true,true,true);g.stencilMask(0x7f);g.stencilFunc(g.NOTEQUAL,0,0x7f);g.stencilOp(g.ZERO,g.ZERO,g.ZERO);
    this.zeichneFlaeche(Sa,b,[x0-1,y0-1,x1+1,y0-1,x1+1,y1+1,x0-1,y1+1],null);flush(R);g.stencilMask(0xff);g.disable(g.STENCIL_TEST)}
-  else{for(let i=0;i<tris.length;i+=6)this.zeichneFlaeche(Sa,b,[tris[i],tris[i+1],tris[i+2],tris[i+3],tris[i+4],tris[i+5]],null)}
+  else{const nv=tris.length/2,TI=new Array(nv);for(let q=0;q<nv;q++)TI[q]=q;this.zeichneFlaeche(Sa,b,tris,null,null,TI)}
   if(this.clipN)this.stencilClipAus()};
  /* Schnittmaske: Bit 7 der Schablone = innerhalb aller Schnitte. Neu aufbauen bei clip()/restore() */
  XP.clipNeu=function(){if(this.sw||!this.R)return;const R=this.R,g=R.gl;this.zielAn();flush(R);g.enable(g.STENCIL_TEST);g.stencilMask(0x80);g.clearStencil(0);g.clear(g.STENCIL_BUFFER_BIT);
@@ -39196,7 +39222,7 @@ window.__hsGLWELT={v:6};
  /* Zustand von einer echten 2D-Leinwand übernehmen bzw. dorthin zurückgeben */
  const ZK=['globalAlpha','globalCompositeOperation','lineWidth','lineCap','lineJoin','miterLimit','imageSmoothingEnabled','font','textAlign','textBaseline'];
  XP.von=function(c){try{const m=c.getTransform();this.m=[m.a,m.b,m.c,m.d,m.e,m.f]}catch(e){}for(const k of ZK){try{this[k]=c[k]}catch(e){}}
-  try{const f=c.fillStyle;this.s.fs=typeof f==='string'?f:'#000';const s=c.strokeStyle;this.s.ss=typeof s==='string'?s:'#000'}catch(e){}try{this.dash=c.getLineDash()}catch(e){}this.sp.length=0;this.cur=null};
+  try{this.su();const f=c.fillStyle;this.s.fs=typeof f==='string'?f:'#000';const s=c.strokeStyle;this.s.ss=typeof s==='string'?s:'#000'}catch(e){}try{this.dash=c.getLineDash()}catch(e){}this.sp.length=0;this.cur=null};
  XP.nach=function(c){const m=this.m;try{c.setTransform(m[0],m[1],m[2],m[3],m[4],m[5])}catch(e){}for(const k of ZK){try{if(c[k]!==this[k])c[k]=this[k]}catch(e){}}
   try{if(typeof this.s.fs==='string')c.fillStyle=this.s.fs;if(typeof this.s.ss==='string')c.strokeStyle=this.s.ss;c.setLineDash(this.dash)}catch(e){}};
 
@@ -39204,8 +39230,23 @@ window.__hsGLWELT={v:6};
   if(P.length>=4&&Math.abs(P[0]-P[P.length-2])<1e-4&&Math.abs(P[1]-P[P.length-1])<1e-4){P.pop();P.pop()}return P}
  function konv(P){P=dedup(P);const n=P.length>>1;if(n<3)return false;let sg=0;for(let i=0;i<n;i++){const ax=P[2*i],ay=P[2*i+1],bx=P[(2*i+2)%(2*n)],by=P[(2*i+3)%(2*n)],cx_=P[(2*i+4)%(2*n)],cy_=P[(2*i+5)%(2*n)];
    const cr=(bx-ax)*(cy_-by)-(by-ay)*(cx_-bx);if(Math.abs(cr)<1e-9)continue;const s=cr>0?1:-1;if(!sg)sg=s;else if(s!==sg)return false}
-  /* Umlaufwinkel ≈ 2π (keine Schleifen) */let w=0;for(let i=0;i<n;i++){const ax=P[2*((i+1)%n)]-P[2*i],ay=P[2*((i+1)%n)+1]-P[2*i+1],bx=P[2*((i+2)%n)]-P[2*((i+1)%n)],by=P[2*((i+2)%n)+1]-P[2*((i+1)%n)+1];if((ax||ay)&&(bx||by))w+=Math.atan2(ax*by-ay*bx,ax*bx+ay*by)}
-  return Math.abs(Math.abs(w)-Math.PI*2)<0.05}
+  /* nur eine Umrundung (keine Schleifen): Richtungswechsel in x und y je höchstens 2 */if(!sg)return false;let wx=0,wy=0,lx=0,ly=0,fx=0,fy=0;
+  for(let i=0;i<n;i++){const j=(i+1)%n,dx=P[2*j]-P[2*i],dy=P[2*j+1]-P[2*i+1],sx=dx>1e-9?1:dx<-1e-9?-1:0,sy=dy>1e-9?1:dy<-1e-9?-1:0;
+   if(sx){if(!fx)fx=sx;else if(sx!==lx)wx++;lx=sx}if(sy){if(!fy)fy=sy;else if(sy!==ly)wy++;ly=sy}}
+  if(fx&&lx!==fx)wx++;if(fy&&ly!==fy)wy++;return wx<=2&&wy<=2}
+ /* Ohrenschnitt für einfache (nicht selbstschneidende) Vielecke bis 64 Ecken: Dreiecke statt Schablone → kein Zwischenzeichnen, weniger Zeichenbefehle */
+ function ohren(P0){const P=dedup(P0),n=P.length>>1;if(n<4||n>64)return null;let ar=0;for(let i=0;i<n;i++){const j=(i+1)%n;ar+=P[2*i]*P[2*j+1]-P[2*j]*P[2*i+1]}if(Math.abs(ar)<1e-6)return null;const sg=ar>0?1:-1;
+  const o=(ax,ay,bx,by,cx_,cy_)=>(bx-ax)*(cy_-by)-(by-ay)*(cx_-bx);
+  for(let i=0;i<n;i++){const i1=(i+1)%n,ax=P[2*i],ay=P[2*i+1],bx=P[2*i1],by=P[2*i1+1];for(let j=i+2;j<n;j++){if(i===0&&j===n-1)continue;const j1=(j+1)%n,cx_=P[2*j],cy_=P[2*j+1],dx=P[2*j1],dy=P[2*j1+1];
+    const d1=o(ax,ay,bx,by,cx_,cy_),d2=o(ax,ay,bx,by,dx,dy),d3=o(cx_,cy_,dx,dy,ax,ay),d4=o(cx_,cy_,dx,dy,bx,by);if((d1>0)!==(d2>0)&&(d3>0)!==(d4>0)&&d1&&d2&&d3&&d4)return null}}
+  const V=[];for(let i=0;i<n;i++)V.push(i);const T=[];let w=0;
+  while(V.length>3){if(++w>n*n)return null;let ok=false;const m=V.length;
+   for(let k=0;k<m;k++){const ia=V[(k+m-1)%m],ib=V[k],ic=V[(k+1)%m],ax=P[2*ia],ay=P[2*ia+1],bx=P[2*ib],by=P[2*ib+1],cx_=P[2*ic],cy_=P[2*ic+1];const cr=o(ax,ay,bx,by,cx_,cy_)*sg;
+    if(Math.abs(cr)<1e-9){V.splice(k,1);ok=true;break}if(cr<0)continue;let frei=true;
+    for(let q=0;q<m&&frei;q++){const iq=V[q];if(iq===ia||iq===ib||iq===ic)continue;const px=P[2*iq],py=P[2*iq+1];if(o(ax,ay,bx,by,px,py)*sg>=0&&o(bx,by,cx_,cy_,px,py)*sg>=0&&o(cx_,cy_,ax,ay,px,py)*sg>=0)frei=false}
+    if(frei){T.push(ia,ib,ic);V.splice(k,1);ok=true;break}}
+   if(!ok)return null}
+  T.push(V[0],V[1],V[2]);return{P,T,sg}}
  function inv3(m){/* 2D-Matrix [a,b,c,d,e,f] → Inverse als 3×3 (spaltenweise) */const a=m[0],b=m[1],c=m[2],d=m[3],e=m[4],f=m[5],D=a*d-b*c;if(Math.abs(D)<1e-12)return new Float32Array([1,0,0,0,1,0,0,0,1]);
   const ia=d/D,ib=-b/D,ic=-c/D,id=a/D,ie=-(ia*e+ic*f),iF=-(ib*e+id*f);return new Float32Array([ia,ib,0,ic,id,0,ie,iF,1])}
  function striche(L,D,off){const out=[];const tot=D.reduce((a,b)=>a+b,0);if(!(tot>0))return L;
@@ -39288,14 +39329,15 @@ window.__hsGLWELT={v:6};
   EB.g1=EB.s1.getContext('2d',{alpha:true});EB.g2=EB.s2.getContext('2d',{alpha:true});try{TEE.g1=false;TEE.g2=false}catch(e){}S12.n++;S12.t=performance.now();S12.seit=0;S12.mp=0;S12.v=[[],[]];S12.m=[0,0]}
  function bildBeginn(){FR.fb=0;ebSync();
   S12.mp=Math.max(S12.m[0],S12.m[1]);S12.seit++;
-  if(S12.mp>=0.6&&S12.seit>90&&S12.n<6&&performance.now()-S12.t>20000&&GW.k.s12!==0)s12Neu();
+  /* Firefox mit „Figuren über WebGL“ (Auto): Sonde und Neuanlegen der 2D-Ebenen unnötig – kostet nur Rasterzeit */const s12an=GW.k.s12!==0&&!(firefox&&GW.k.voll!==0);
+  if(S12.mp>=0.6&&S12.seit>90&&S12.n<6&&performance.now()-S12.t>20000&&s12an)s12Neu();
   const g1=EB.g1,g2=EB.g2;
   /* Sonde wie licht2: hochgezogenes Bild über die ganze Ebene (wird gleich wieder geleert) – Prozessor ≈ 1–4 ms/MPx, Grafikkarte ≈ 0 */
-  {const k=(S12.k++)%60,i=k===7?0:k===37?1:-1;const mpx=EB.w*EB.h/1e6;if(i>=0&&mpx>=0.15&&GW.k.s12!==0){try{if(!S12.c){S12.c=document.createElement('canvas');S12.c.width=S12.c.height=256;const q=S12.c.getContext('2d');q.fillStyle='#302418';q.fillRect(0,0,256,256);q.fillStyle='#5a4030';q.fillRect(40,40,120,90)}
+  {const k=(S12.k++)%60,i=k===7?0:k===37?1:-1;const mpx=EB.w*EB.h/1e6;if(i>=0&&mpx>=0.15&&s12an){try{if(!S12.c){S12.c=document.createElement('canvas');S12.c.width=S12.c.height=256;const q=S12.c.getContext('2d');q.fillStyle='#302418';q.fillRect(0,0,256,256);q.fillStyle='#5a4030';q.fillRect(40,40,120,90)}
    const g=i?g2:g1;EB.vProbe=i;g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.imageSmoothingEnabled=true;const a=performance.now();g.drawImage(S12.c,0,0,256,256,0,0,EB.w,EB.h);const d=(performance.now()-a)/mpx;
    const V=S12.v[i];V.push(d);if(V.length>7)V.shift();if(V.length>=3){const q=V.slice().sort((x,y)=>x-y);S12.m[i]=q[q.length>>1]}}catch(e){}}}
-  FR.voll=GW.k.tee&&(GW.k.voll===1||(GW.k.voll!==0&&S12.mp>=0.6&&(S12.n>=2||S12.seit>600)))?1:0;GW.st.voll=FR.voll;
-  [g1,g2].forEach((g,i)=>{const c=i?EB.s2:EB.s1;const war=EB.vb[i];if(war||!FR.voll||EB.vProbe===i){g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.clearRect(0,0,EB.w,EB.h)}
+  FR.voll=GW.k.tee&&(GW.k.voll===1||(GW.k.voll!==0&&(firefox||S12.mp>=0.6&&(S12.n>=2||S12.seit>600))))?1:0;GW.st.voll=FR.voll;
+  [g1,g2].forEach((g,i)=>{const c=i?EB.s2:EB.s1;if(g.__shSync&&GW.k.schatten!==0)g.__shSync();const war=EB.vb[i];if(war||!FR.voll||EB.vProbe===i){g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.clearRect(0,0,EB.w,EB.h)}
    if(FR.voll&&!war){if(c&&c.style.visibility!=='hidden')c.style.visibility='hidden'}else if(c&&c.style.visibility)c.style.visibility='';EB.vb[i]=FR.voll?0:1});EB.vProbe=-1;
   const RU=RS.u,RO=RS.o;RU.frame++;RO.frame++;
   /* untere Ebene: deckend schwarz (mit Nachbearbeitung: in einen Bild-Puffer) */
@@ -39367,7 +39409,23 @@ window.__hsGLWELT={v:6};
  function zustandUebernehmen(g,von){const ZS=['lineCap','lineJoin','miterLimit','lineWidth','font','textAlign','textBaseline','imageSmoothingEnabled','imageSmoothingQuality','fillStyle','strokeStyle','lineDashOffset','direction'];
   for(const k of ZS){try{if(k in von&&g[k]!==von[k])g[k]=von[k]}catch(e){}}try{g.setLineDash(von.getLineDash())}catch(e){}g.globalAlpha=1;g.globalCompositeOperation='source-over';try{if(g.filter!=='none')g.filter='none'}catch(e){}g.shadowBlur=0;g.shadowColor='rgba(0,0,0,0)'}
  function texAusLw(R,c,alt){flush(R);const g=R.gl;const t=alt||g.createTexture();g.bindTexture(g.TEXTURE_2D,t);texPar(g,g.LINEAR);t.__flt=g.LINEAR;g.texImage2D(g.TEXTURE_2D,0,g.RGBA,g.RGBA,g.UNSIGNED_BYTE,c);R.b.tex=null;R.st.up++;return t}
- function kachelBau(i,j,sB){const T0=jetzt();if(!BT.bc){const L=bauLw(GW.TS,true);BT.bc=L.c;BT.bg=L.g}const TS=GW.TS,g=BT.bg;g.setTransform(1,0,0,1,0,0);zustandUebernehmen(g,EB.g1);g.setTransform(sB,0,0,sB,-i*TS,-j*TS);
+ /* Kachel direkt auf der Grafikkarte bauen (GX in einen Bildpuffer): kein Rastern auf dem Prozessor, kein Hochladen.
+    Die Textur steht dabei auf dem Kopf (GL-Bildpuffer) → e.fl=1, beim Zeichnen gespiegelt. Fällt bei Problemen auf den 2D-Weg zurück. */
+ function kachelGX(){const v=GW.k.kgx;return v===1||(v!==0&&firefox)}
+ function kachelBauGX(i,j,sB){const T0=jetzt(),R=RS.u,g=R.gl,TS=GW.TS;const F=fbNeu(R,TS,TS,true);if(!F)return null;
+  if(!BT.gx){BT.gx=new GX(R,'lw')}const X=BT.gx;const z0=R.ziel;X.neu();X.st.unbek=0;X.st.text=0;X.st.mix=0;X.zielSetzen(F,TS,TS);rZiel(R,F);g.clearColor(0,0,0,1);g.clearStencil(0);g.clear(g.COLOR_BUFFER_BIT|g.STENCIL_BUFFER_BIT);R.b.tgt=F;
+  try{X.von(EB.g1)}catch(e){}X.globalAlpha=1;X.globalCompositeOperation='source-over';X.setTransform(sB,0,0,sB,-i*TS,-j*TS);
+  const X0=i*TS/sB,Y0=j*TS/sB,X1=(i+1)*TS/sB,Y1=(j+1)*TS/sB;
+  const c0=cx,W0=W,H0=H,cam0=G.cam,Z0=ZOOM,C=CRs(),mr=Math.random;let ok=true;
+  try{bodenRechteck(X,G.ground,G.road,X0,Y0,X1,Y1);cx=X;W=(X1-X0)*ZOOM;H=(Y1-Y0)*ZOOM;G.cam={x:(X0+X1)/2,y:(Y0+Y1)/2};C.bau=(C.bau||0)+1;dRnd=(i*7919+j*104729)&0x7fffffff;Math.random=dRandom;RWK()}
+  catch(e){ok=false;gErr('kachelGX',e)}finally{cx=c0;W=W0;H=H0;G.cam=cam0;ZOOM=Z0;if(C.bau)C.bau--;Math.random=mr}
+  flush(R);rZiel(R,z0);
+  /* Bildpuffer und Schablone freigeben, Textur behalten */try{g.deleteFramebuffer(F.f);if(F.rb)g.deleteRenderbuffer(F.rb)}catch(e){}R.b.tgt=undefined;
+  const fehl=X.st.unbek+X.st.text+X.st.mix;GW.st.kgxFehl=(GW.st.kgxFehl||0)+fehl;
+  if(!ok||fehl){try{g.deleteTexture(F.t)}catch(e){}GW.st.kgxAus=(GW.st.kgxAus||0)+1;if(!ok||GW.st.kgxAus>40)BT.kgxSperre=1;return null}
+  F.t.__flt=g.LINEAR;GW.st.kachelBau++;GW.st.kgx=(GW.st.kgx||0)+1;BT.bt+=jetzt()-T0;return{t:F.t,gen:BT.gen,lu:R.frame,fl:1}}
+ function kachelBau(i,j,sB){if(kachelGX()&&!BT.kgxSperre){const e=kachelBauGX(i,j,sB);if(e)return e}return kachelBau2D(i,j,sB)}
+ function kachelBau2D(i,j,sB){const T0=jetzt();if(!BT.bc){const L=bauLw(GW.TS,true);BT.bc=L.c;BT.bg=L.g}const TS=GW.TS,g=BT.bg;g.setTransform(1,0,0,1,0,0);zustandUebernehmen(g,EB.g1);g.setTransform(sB,0,0,sB,-i*TS,-j*TS);
   const X0=i*TS/sB,Y0=j*TS/sB,X1=(i+1)*TS/sB,Y1=(j+1)*TS/sB;bodenRechteck(g,G.ground,G.road,X0,Y0,X1,Y1);
   const c0=cx,W0=W,H0=H,cam0=G.cam,Z0=ZOOM,C=CRs(),mr=Math.random;cx=g;W=(X1-X0)*ZOOM;H=(Y1-Y0)*ZOOM;G.cam={x:(X0+X1)/2,y:(Y0+Y1)/2};C.bau=(C.bau||0)+1;dRnd=(i*7919+j*104729)&0x7fffffff;Math.random=dRandom;
   try{RWK()}finally{cx=c0;W=W0;H=H0;G.cam=cam0;ZOOM=Z0;C.bau--;Math.random=mr}
@@ -39394,9 +39452,9 @@ window.__hsGLWELT={v:6};
    /* veraltete Kachel (Tor/Geröll geändert): weiter zeigen, neu bauen sobald Budget da */
    if(E&&E.gen!==BT.gen&&((BT.b0>0&&BT.bt<GW.ms)||prioK(i*T,j*T,T))){BT.b0--;try{const N=kachelBau(i,j,sB);try{RU.gl.deleteTexture(E.t)}catch(er){}E=N;BT.cur.set(k,E)}catch(er){gErr('kachel',er)}}
    if(!E&&BT.b0>0&&BT.bt<GW.ms){BT.b0--;try{E=kachelBau(i,j,sB);BT.cur.set(k,E)}catch(er){gErr('kachel',er);E=null}}
-   if(E){E.lu=RU.frame;Q.push([E.t,i*T,j*T,T]);continue}
+   if(E){E.lu=RU.frame;Q.push([E.t,i*T,j*T,T,E.fl]);continue}
    /* alter Maßstab vorhanden? */if(BT.alt.size){const Ta=TS/BT.altS,a0=Math.floor(i*T/Ta),a1=Math.floor(((i+1)*T-1e-6)/Ta),b0=Math.floor(j*T/Ta),b1=Math.floor(((j+1)*T-1e-6)/Ta);let ok=true;const L=[];
-    for(let b=b0;b<=b1&&ok;b++)for(let a=a0;a<=a1;a++){const A=BT.alt.get(a+','+b);if(!A){ok=false;break}L.push([A.t,a*Ta,b*Ta,Ta])}if(ok){for(const q of L)Q.push(q);continue}}
+    for(let b=b0;b<=b1&&ok;b++)for(let a=a0;a<=a1;a++){const A=BT.alt.get(a+','+b);if(!A){ok=false;break}L.push([A.t,a*Ta,b*Ta,Ta,A.fl])}if(ok){for(const q of L)Q.push(q);continue}}
    fehlt.push([i,j])}
   /* Ring vorbauen, wenn Zeit übrig */
   if(BT.b0>0&&BT.bt<GW.ms*0.5){outer:for(let j=j0-1;j<=j1+1;j++)for(let i=i0-1;i<=i1+1;i++){if(j>=j0&&j<=j1&&i>=i0&&i<=i1)continue;const k=i+','+j;if(BT.cur.has(k))continue;try{BT.cur.set(k,kachelBau(i,j,sB))}catch(er){gErr('ring',er)}if(--BT.b0<=Math.ceil(BT.nVis/36)||BT.bt>=GW.ms*0.5)break outer}}
@@ -39405,7 +39463,7 @@ window.__hsGLWELT={v:6};
   if(!fehlt.length&&BT.alt.size&&BT.cur.size>=(i1-i0+1)*(j1-j0+1))kachelnFrei(BT.alt);
   /* zeichnen (untere Ebene) */
   rZiel(RU,RS.uf||null);const g=RU.gl;
-  for(const q of Q){const x0=e+q[1]*s,y0=f+q[2]*s,x1=x0+q[3]*s,y1=y0+q[3]*s;zustand(RU,RU.P.tex,q[0],'copy',0,Math.abs(s-sB)<1e-6?g.NEAREST:g.LINEAR);quad(RU,x0,y0,x1,y0,x1,y1,x0,y1,0,0,1,1,1,1,1,1)}
+  for(const q of Q){const x0=e+q[1]*s,y0=f+q[2]*s,x1=x0+q[3]*s,y1=y0+q[3]*s;zustand(RU,RU.P.tex,q[0],'copy',0,Math.abs(s-sB)<1e-6?g.NEAREST:g.LINEAR);if(q[4])quad(RU,x0,y0,x1,y0,x1,y1,x0,y1,0,1,1,0,1,1,1,1);else quad(RU,x0,y0,x1,y0,x1,y1,x0,y1,0,0,1,1,1,1,1,1)}
   flush(RU);
   /* Live-Rest (Bildpunkte): fehlende Kacheln + bewegte Teile */
   const RE=[],W2=[];const addD=(x0,y0,x1,y1)=>{const a=Math.max(0,Math.floor(x0)),b=Math.max(0,Math.floor(y0)),c=Math.min(cw,Math.ceil(x1)),d=Math.min(ch,Math.ceil(y1));if(c>a&&d>b){RE.push([a,b,c-a,d-b]);W2.push([(a-e)/s,(b-f)/s,(c-e)/s,(d-f)/s])}};
@@ -39456,10 +39514,21 @@ window.__hsGLWELT={v:6};
  function dKachelBau(i,j,sB){const TS=GW.TS,X0=i*TS/sB,Y0=j*TS/sB,X1=(i+1)*TS/sB,Y1=(j+1)*TS/sB,GC=DT.GC,seen=new Set(),L=[];
   for(let y=Math.floor(Y0/GC);y<=Math.floor(Y1/GC);y++)for(let x=Math.floor(X0/GC);x<=Math.floor(X1/GC);x++){const Q=DT.grid.get(x+','+y);if(Q)for(const I of Q){if(seen.has(I))continue;seen.add(I);const b=I.bb;if(b.x0<X1&&b.x1>X0&&b.y0<Y1&&b.y1>Y0)L.push(I)}}
   GW.st.dekoBau++;if(!L.length)return{t:null,lu:RS.u.frame};
+  L.sort((a,b)=>a.i-b.i);if(kachelGX()&&!BT.kgxSperre){const e=dKachelGX(i,j,sB,L);if(e)return e}
   if(!DT.bc){const Lw=bauLw(TS,false);DT.bc=Lw.c;DT.bg=Lw.g}const g=DT.bg;g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,TS,TS);zustandUebernehmen(g,EB.g1);g.setTransform(sB,0,0,sB,-i*TS,-j*TS);
   L.sort((a,b)=>a.i-b.i);const c0=cx,mr=Math.random,t=G.time,C=CRs();
   try{cx=g;FR.dbau=1;C.dbau=(C.dbau||0)+1;dRnd=(i*7919+j*104729+17)&0x7fffffff;Math.random=dRandom;for(const I of L){try{DD(DT.arr[I.i],t)}catch(er){}}}finally{cx=c0;FR.dbau=0;C.dbau--;Math.random=mr}
   return{t:texAusLw(RS.u,DT.bc,null),lu:RS.u.frame}}
+ /* Deko-Kachel (durchsichtig) auf der Grafikkarte, wie kachelBauGX */
+ function dKachelGX(i,j,sB,L){const R=RS.u,g=R.gl,TS=GW.TS;const F=fbNeu(R,TS,TS,true);if(!F)return null;if(!BT.gx)BT.gx=new GX(R,'lw');const X=BT.gx,z0=R.ziel;
+  X.neu();X.st.unbek=0;X.st.text=0;X.st.mix=0;X.zielSetzen(F,TS,TS);rZiel(R,F);g.clearColor(0,0,0,0);g.clearStencil(0);g.clear(g.COLOR_BUFFER_BIT|g.STENCIL_BUFFER_BIT);
+  try{X.von(EB.g1)}catch(e){}X.globalAlpha=1;X.globalCompositeOperation='source-over';X.setTransform(sB,0,0,sB,-i*TS,-j*TS);
+  const c0=cx,mr=Math.random,t=G.time,C=CRs();let ok=true;
+  try{cx=X;FR.dbau=1;C.dbau=(C.dbau||0)+1;dRnd=(i*7919+j*104729+17)&0x7fffffff;Math.random=dRandom;for(const I of L){try{DD(DT.arr[I.i],t)}catch(er){}}}catch(e){ok=false}finally{cx=c0;FR.dbau=0;C.dbau--;Math.random=mr}
+  flush(R);rZiel(R,z0);try{g.deleteFramebuffer(F.f);if(F.rb)g.deleteRenderbuffer(F.rb)}catch(e){}R.b.tgt=undefined;
+  const fehl=X.st.unbek+X.st.text+X.st.mix;GW.st.kgxFehl=(GW.st.kgxFehl||0)+fehl;
+  if(!ok||fehl){try{g.deleteTexture(F.t)}catch(e){}GW.st.kgxAus=(GW.st.kgxAus||0)+1;if(GW.st.kgxAus>40)BT.kgxSperre=1;return null}
+  F.t.__flt=g.LINEAR;GW.st.kgx=(GW.st.kgx||0)+1;return{t:F.t,lu:R.frame,fl:1}}
  function dekoWelt(m,sB){FR.dOn=0;if(!GW.k.deko)return;try{if(GF().nodeco)return}catch(e){}
   if(!DT.arr||!dSigOk()||DT.env!==dEnv())dNeu();
   if(!DT.fertig){if(!dSchritt()){GW.st.dekoLive++;return}dAbschluss()}
@@ -39469,11 +39538,11 @@ window.__hsGLWELT={v:6};
   let fehlt=0;const Q=[];
   for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){const k=i+','+j;let E=DT.m.get(k);
    if(!E){if(BT.b0>0&&BT.bt<GW.ms){BT.b0--;const T0=jetzt();try{E=dKachelBau(i,j,sB);DT.m.set(k,E)}catch(er){gErr('dekokachel',er)}BT.bt+=jetzt()-T0}}
-   if(!E){fehlt++;continue}E.lu=RU.frame;if(E.t)Q.push([E.t,i*T,j*T,T])}
+   if(!E){fehlt++;continue}E.lu=RU.frame;if(E.t)Q.push([E.t,i*T,j*T,T,E.fl])}
   if(BT.b0>0&&BT.bt<GW.ms*0.5){outer:for(let j=j0-1;j<=j1+1;j++)for(let i=i0-1;i<=i1+1;i++){if(j>=j0&&j<=j1&&i>=i0&&i<=i1)continue;const k=i+','+j;if(DT.m.has(k))continue;const T0=jetzt();try{DT.m.set(k,dKachelBau(i,j,sB))}catch(er){}BT.bt+=jetzt()-T0;if(--BT.b0<=0||BT.bt>=GW.ms*0.5)break outer}}
   const cap=kCap(0.45,(i1-i0+1)*(j1-j0+1));if(DT.m.size>cap){const L=[...DT.m.entries()].sort((a,b)=>a[1].lu-b[1].lu);for(const [k,E] of L){if(DT.m.size<=cap*0.85||E.lu>=RU.frame)break;if(E.t)try{RU.gl.deleteTexture(E.t)}catch(er){}DT.m.delete(k)}}
   if(fehlt){GW.st.dekoLive++;return}
-  rZiel(RU,RS.uf||null);const g=RU.gl;for(const q of Q){const x0=e+q[1]*s,y0=f+q[2]*s,x1=x0+q[3]*s,y1=y0+q[3]*s;zustand(RU,RU.P.tex,q[0],RS.uf?'overm':'over',0,Math.abs(s-sB)<1e-6?g.NEAREST:g.LINEAR);quad(RU,x0,y0,x1,y0,x1,y1,x0,y1,0,0,1,1,1,1,1,1)}
+  rZiel(RU,RS.uf||null);const g=RU.gl;for(const q of Q){const x0=e+q[1]*s,y0=f+q[2]*s,x1=x0+q[3]*s,y1=y0+q[3]*s;zustand(RU,RU.P.tex,q[0],RS.uf?'overm':'over',0,Math.abs(s-sB)<1e-6?g.NEAREST:g.LINEAR);if(q[4])quad(RU,x0,y0,x1,y0,x1,y1,x0,y1,0,1,1,0,1,1,1,1);else quad(RU,x0,y0,x1,y0,x1,y1,x0,y1,0,0,1,1,1,1,1,1)}
   flush(RU);FR.dOn=1;GW.st.dekoAn++}
  function imLive(d){const L=FR.live;if(!L.length)return false;const I=DT.info&&DT.info.length?null:null;const x=d.x,y=d.y,M=70;for(const r of L){if(x+M>r[0]&&x-M<r[2]&&y+M>r[1]&&y-M<r[3])return true}return false}
  DD=drawDeco;
@@ -39548,11 +39617,11 @@ window.__hsGLWELT={v:6};
   {const fs0=PT.save,fr0=PT.restore,sv=g.save,rs=g.restore;g.save=function(){g.__sd=(g.__sd||0)+1;return sv.apply(g,arguments)};g.restore=function(){g.__sd=Math.max(0,(g.__sd||0)-1);if(g.__sperr&&g.__sd<g.__sperr)g.__sperr=0;return rs.apply(g,arguments)}}
   {const fp=PT.createPattern;g.createPattern=function(img,r){const pa=fp.apply(g,arguments);if(pa&&an()&&istQuelle(img)){try{const X=XF();const t=X.createPattern(img,r);pa.__gxT=t;const st=pa.setTransform&&pa.setTransform.bind(pa);if(st)pa.setTransform=function(m){st(m);try{t.setTransform(m)}catch(e){}}}catch(e){}}return pa}}
   for(const n of ['createLinearGradient','createRadialGradient']){const f=PT[n];g[n]=function(){const gr=f.apply(g,arguments);if(an()){try{const X=XF();const t=X[n].apply(X,arguments);const a=gr.addColorStop.bind(gr);gr.addColorStop=function(o,c){a(o,c);try{t.addColorStop(o,c)}catch(e){}};gr.__gxT=t}catch(e){}}return gr}}
-  const stil=v=>typeof v==='string'?v:v&&v.__gxT?v.__gxT:null;
-  const vor=X=>{X.s.ga=g.globalAlpha;X.s.op=FR.voll?g.globalCompositeOperation:'lighter';X.s.ml=g.miterLimit;X.s.ldo=g.lineDashOffset;X.s.lw=g.lineWidth;X.s.cap=g.lineCap;X.s.join=g.lineJoin;X.s.sm=g.imageSmoothingEnabled;const f=stil(g.fillStyle),s=stil(g.strokeStyle);if(f)X.s.fs=f;if(s)X.s.ss=s;return[f,s]};
+  const stil=v=>typeof v==='string'?v:gxKonv(v);
+  const vor=X=>{X.su();X.s.ga=g.globalAlpha;X.s.op=FR.voll?g.globalCompositeOperation:'lighter';X.s.ml=g.miterLimit;X.s.ldo=g.lineDashOffset;X.s.lw=g.lineWidth;X.s.cap=g.lineCap;X.s.join=g.lineJoin;X.s.sm=g.imageSmoothingEnabled;const f=stil(g.fillStyle),s=stil(g.strokeStyle);if(f)X.s.fs=f;if(s)X.s.ss=s;return[f,s]};
   const opOk=()=>{const o=g.globalCompositeOperation;if(o==='lighter')return true;if(!FR.voll||g.__sperr)return false;const X=XF();return !!(X.modus==='lw'?OPS_LW:OPS_DECK)[o]};
   const umleiten=()=>an()&&g.shadowBlur===0&&(!g.filter||g.filter==='none')&&opOk();
-  const rueck=()=>{if(FR.voll&&FR.on){const i=g===EB.g1?0:1;if(!EB.vb[i]){EB.vb[i]=1;const c=i?EB.s2:EB.s1;if(c&&c.style.visibility)c.style.visibility=''}GW.st.vRueck=(GW.st.vRueck||0)+1}};
+  const i0=()=>g!==EB.g1;const rueck=(nm)=>{if(FR.voll&&FR.on){if(GW.k.rgrund){const G_=GW.st.rgr=GW.st.rgr||{};const k=(nm||'?')+':'+(g.shadowBlur?'blur':g.filter&&g.filter!=='none'?'filter':'op='+g.globalCompositeOperation+(g.__sperr?' sperr':''))+(i0()?' S2':' S1');G_[k]=(G_[k]||0)+1}const i=g===EB.g1?0:1;if(!EB.vb[i]){EB.vb[i]=1;const c=i?EB.s2:EB.s1;if(c&&c.style.visibility)c.style.visibility=''}GW.st.vRueck=(GW.st.vRueck||0)+1}};
   /* Text: als kleines Bild (zwischengespeichert) in die GL-Ebene */
   const textGL=(t,x,y,mw,strich)=>{if(!FR.voll||!umleiten())return false;const sty=stil(strich?g.strokeStyle:g.fillStyle);if(typeof sty!=='string')return false;t=String(t);if(!t)return true;
    const key=g.font+'|'+sty+'|'+(strich?g.lineWidth+'|'+g.lineJoin:'f')+'|'+t;let e=TXC.get(key);
@@ -39564,14 +39633,25 @@ window.__hsGLWELT={v:6};
    let sx=1;if(mw!=null&&mw>0&&e.w>mw)sx=mw/e.w;const ta=g.textAlign,tb=g.textBaseline;let ax=0;if(ta==='center')ax=-e.w*sx/2;else if(ta==='right'||ta==='end')ax=-e.w*sx;
    let ay=0;if(tb==='top'||tb==='hanging')ay=e.fa;else if(tb==='middle')ay=(e.fa-e.fd)/2;else if(tb==='bottom'||tb==='ideographic')ay=-e.fd;
    const X=XF();vor(X);X.drawImage(e.c,x+ax-(e.pad+e.lft)*sx,y+ay-e.asc-e.pad,e.c.width*sx,e.c.height);GW.st.vText=(GW.st.vText||0)+1;return true};
-  {const fT=PT.fillText,sT=PT.strokeText;g.fillText=function(t,x,y,mw){try{if(textGL(t,x,y,mw,false))return}catch(e){gErr('text',e)}rueck();return fT.apply(g,arguments)};
-   g.strokeText=function(t,x,y,mw){try{if(textGL(t,x,y,mw,true))return}catch(e){gErr('text',e)}rueck();return sT.apply(g,arguments)}}
-  {const fSR=PT.strokeRect,fCR=PT.clearRect,fPI=PT.putImageData;g.strokeRect=function(){if(umleiten()&&FR.voll){const X=XF(),q=vor(X);if(q[1]){try{X.strokeRect.apply(X,arguments);return}catch(e){gErr('tee',e)}}}rueck();return fSR.apply(g,arguments)};
-   g.clearRect=function(){if(FR.voll)rueck();return fCR.apply(g,arguments)};g.putImageData=function(){rueck();return fPI.apply(g,arguments)}}
-  const fD=PT.drawImage;g.drawImage=function(img){if(umleiten()&&istQuelle(img)){const X=XF();vor(X);try{X.drawImage.apply(X,arguments);GW.st.tee++;return}catch(e){gErr('tee',e)}}rueck();return fD.apply(g,arguments)};
-  const fF=PT.fill;g.fill=function(a){if(umleiten()&&!(a&&typeof a==='object')){const X=XF(),q=vor(X);if(q[0]){try{X.fill.apply(X,arguments);GW.st.tee++;return}catch(e){gErr('tee',e)}}}rueck();return fF.apply(g,arguments)};
-  const fS=PT.stroke;g.stroke=function(a){if(umleiten()&&!(a&&typeof a==='object')){const X=XF(),q=vor(X);if(q[1]){try{X.stroke.apply(X,arguments);GW.st.tee++;return}catch(e){gErr('tee',e)}}}rueck();return fS.apply(g,arguments)};
-  const fR=PT.fillRect;g.fillRect=function(){if(umleiten()){const X=XF(),q=vor(X);if(q[0]){try{X.fillRect.apply(X,arguments);GW.st.tee++;return}catch(e){gErr('tee',e)}}}rueck();return fR.apply(g,arguments)}}
+  {const fT=PT.fillText,sT=PT.strokeText;g.fillText=function(t,x,y,mw){try{if(textGL(t,x,y,mw,false))return}catch(e){gErr('text',e)}rueck('fillText');return fT.apply(g,arguments)};
+   g.strokeText=function(t,x,y,mw){try{if(textGL(t,x,y,mw,true))return}catch(e){gErr('text',e)}rueck('strokeText');return sT.apply(g,arguments)}}
+  {const fSR=PT.strokeRect,fCR=PT.clearRect,fPI=PT.putImageData;g.strokeRect=function(){if(umleiten()&&FR.voll){const X=XF(),q=vor(X);if(q[1]){try{X.strokeRect.apply(X,arguments);return}catch(e){gErr('tee',e)}}}rueck('strokeRect');return fSR.apply(g,arguments)};
+   g.clearRect=function(){if(FR.voll)rueck('clearRect');return fCR.apply(g,arguments)};g.putImageData=function(){rueck('putImageData');return fPI.apply(g,arguments)}}
+  const fD=PT.drawImage;g.drawImage=function(img){if(umleiten()&&istQuelle(img)){const X=XF();vor(X);try{X.drawImage.apply(X,arguments);GW.st.tee++;return}catch(e){gErr('tee',e)}}rueck('drawImage');return fD.apply(g,arguments)};
+  const fF=PT.fill;g.fill=function(a){if(umleiten()&&!(a&&typeof a==='object')){const X=XF(),q=vor(X);if(q[0]){try{X.fill.apply(X,arguments);GW.st.tee++;return}catch(e){gErr('tee',e)}}}rueck('fill');return fF.apply(g,arguments)};
+  const fS=PT.stroke;g.stroke=function(a){if(umleiten()&&!(a&&typeof a==='object')){const X=XF(),q=vor(X);if(q[1]){try{X.stroke.apply(X,arguments);GW.st.tee++;return}catch(e){gErr('tee',e)}}}rueck('stroke');return fS.apply(g,arguments)};
+  const fR=PT.fillRect;g.fillRect=function(){if(umleiten()){const X=XF(),q=vor(X);if(q[0]){try{X.fillRect.apply(X,arguments);GW.st.tee++;return}catch(e){gErr('tee',e)}}}rueck('fillRect');return fR.apply(g,arguments)};
+  /* Zustand im Schatten führen: die Umleitung liest pro Zeichenbefehl ~12 Eigenschaften – native Getter (v. a. fillStyle/strokeStyle: Farbe als Text)
+     sind teuer. Setzen geht weiter an die echte Leinwand; Zahlen/Wahlwerte werden nach dem Setzen zurückgelesen (billig), Farben über den Farbcache geprüft. */
+  try{const CP=CanvasRenderingContext2D.prototype,SHK=['globalAlpha','globalCompositeOperation','miterLimit','lineDashOffset','lineWidth','lineCap','lineJoin','imageSmoothingEnabled','fillStyle','strokeStyle','shadowBlur','filter','font','textAlign','textBaseline'],D={},SH={},SHS=[];
+   for(const k of SHK){const d=Object.getOwnPropertyDescriptor(CP,k);if(d&&d.get&&d.set)D[k]=d}
+   const sync=()=>{for(const k in D)SH[k]=D[k].get.call(g);SHS.length=0};sync();g.__shSync=sync;
+   for(const k in D){const d=D[k],farb=k==='fillStyle'||k==='strokeStyle';
+    Object.defineProperty(g,k,{configurable:true,enumerable:true,get(){return GW.k.schatten===0?d.get.call(g):SH[k]},set(v){d.set.call(g,v);if(farb&&typeof v==='string'&&farbe(v))SH[k]=v;else SH[k]=d.get.call(g)}})}
+   const sv=g.save,rs=g.restore;g.save=function(){SHS.push(Object.assign({},SH));return sv.apply(g,arguments)};
+   g.restore=function(){const r=rs.apply(g,arguments);const q=SHS.pop();if(q)Object.assign(SH,q);else sync();return r};
+   const st=g.reset;if(typeof st==='function')g.reset=function(){const r=st.apply(g,arguments);sync();return r};
+   GW.st.schatten=1}catch(e){gErr('schatten',e)}}
  {const _dc=drawCorpses;drawCorpses=function(){if(FR.on&&FR.tee1&&!FR.voll){FR.tee1=0;try{flush(RS.u)}catch(e){}}return _dc.apply(this,arguments)}}
 
  /* untere Ebene (Boden/Wände/Deko) verkleinert für den Bloom: Bildschirm → Textur kopieren, verkleinern, kleines Bild auslesen */
@@ -39623,7 +39703,7 @@ window.__hsGLWELT={v:6};
  /* Hochladen je Sekunde (Texturen aus 2D-Leinwänden) – in Firefox teuer, wenn die Quelle auf der Grafikkarte liegt */
  const UPR={t:0,u:0,b:0,rs:0,rb:0};GW.upr=UPR;
  (function upM(){try{const n=performance.now();if(n-UPR.t>=1000){const u=(RU&&RU.st?RU.st.up:0)+(RO&&RO.st?RO.st.up:0),b=(RU&&RU.st?RU.st.upB:0)+(RO&&RO.st?RO.st.upB:0);if(UPR.t){const d=(n-UPR.t)/1000;UPR.rs=Math.round((u-UPR.u)/d);UPR.rb=(b-UPR.b)/d/1048576}UPR.t=n;UPR.u=u;UPR.b=b}}catch(e){}requestAnimationFrame(upM)})();
- const z0=zeile;GW.zeile=zeile=function(){let t=z0.apply(this,arguments);try{t=t.replace(' · Umleitungen ',` · Hochladen ${UPR.rs}/s (${UPR.rb.toFixed(1)} MB/s) · Figuren auf Grafikkarte ${GW.st.voll?'ja':'nein'} · enger Live-Rest ${GW.st.eng||0} · Umleitungen `)}catch(e){}return t};
+ const z0=zeile;GW.zeile=zeile=function(){let t=z0.apply(this,arguments);try{t=t.replace(' · Umleitungen ',` · Hochladen ${UPR.rs}/s (${UPR.rb.toFixed(1)} MB/s) · Figuren auf Grafikkarte ${GW.st.voll?'ja':'nein'} · Kacheln auf Grafikkarte ${GW.st.kgx||0}${GW.st.kgxAus?' (zurück auf 2D '+GW.st.kgxAus+(GW.api&&GW.api.BT&&GW.api.BT.kgxSperre?', gesperrt':'')+')':''} · enger Live-Rest ${GW.st.eng||0} · Umleitungen `)}catch(e){}return t};
  /* Firefox: neue kleine Hilfsleinwände (Sprites, Lichtkegel, Zwischenbilder) im Arbeitsspeicher anlegen – Firefox lädt sie dann
     ohne Rücklesen von der Grafikkarte hoch. Große Ebenen (Spielfläche) bleiben unberührt. Abschaltbar: __hsGLWELT.k.fxRam=0 */
  try{const ff=/firefox/i.test(navigator.userAgent);const gc=HTMLCanvasElement.prototype.getContext;
@@ -39638,7 +39718,16 @@ window.__hsGLWELT={v:6};
  /* ---------- Schalter in der Grafik-Box (neben „Ultra leicht“) ---------- */
  function knopf(){const g=RS.init?GW.grund():'';const v=GW.modus==='an'?'an':GW.modus==='aus'?'aus':'Auto'+(EB.an||g?' (an)':' (aus)');
   return `<button class="btn small ${EB.an?'gold':''}" data-act="glwelt" title="Boden, Wände, Licht, Nebel und Wetter über WebGL zeichnen – schont den Prozessor (vor allem in Firefox). „Auto“ schaltet sie ein, wenn der Browser eine Grafikkarte nutzt.">WebGL-Welt: ${v}</button>`}
+ /* Figuren/Effekte ebenfalls über WebGL (statt zwei 2D-Leinwänden): Auto = Firefox immer, sonst wenn die 2D-Ebenen auf dem Prozessor liegen */
+ try{if(SAVE.glvoll==='an')GW.k.voll=1;else if(SAVE.glvoll==='aus')GW.k.voll=0}catch(e){}
+ function knopfV(){const v=GW.k.voll===1?'an':GW.k.voll===0?'aus':'Auto'+(GW.st.voll?' (an)':' (aus)');
+  return `<button class="btn small ${GW.st.voll?'gold':''}" data-act="glvoll" title="Figuren, Effekte, Beute und Zahlen ebenfalls über die Grafikkarte zeichnen. „Auto“: in Firefox immer, sonst nur, wenn der Browser die 2D-Ebenen auf dem Prozessor rechnet.">Figuren über WebGL: ${v}</button>`}
+ {const k0=knopf;knopf=function(){return k0()+(EB.an||GW.modus==='an'?knopfV():'')}}
  GW.knopf=knopf;
+ document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest?ev.target.closest('[data-act="glvoll"]'):null;if(!b)return;ev.stopPropagation();ev.preventDefault();try{sfx('ui')}catch(e){}
+  const m=GW.k.voll===1?'aus':GW.k.voll===0?'auto':'an';if(m==='an')GW.k.voll=1;else if(m==='aus')GW.k.voll=0;else delete GW.k.voll;
+  try{if(m==='auto')delete SAVE.glvoll;else SAVE.glvoll=m;persist()}catch(e){}
+  try{const el=$('gfxBox');if(el)el.innerHTML=gfxInner()}catch(e){}try{toast('Figuren über WebGL: '+(m==='auto'?'automatisch':m),'#e5b454')}catch(e){}},true);
  if(typeof ulKnopf==='function'){const _uk=ulKnopf;ulKnopf=function(){const r=_uk.apply(this,arguments);try{return r+knopf()}catch(e){return r}}}
  document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest?ev.target.closest('[data-act="glwelt"]'):null;if(!b)return;ev.stopPropagation();ev.preventDefault();try{sfx('ui')}catch(e){}
   GW.modus=GW.modus==='auto'?'an':GW.modus==='an'?'aus':'auto';GW.entsperren();try{if(GW.modus==='auto')delete SAVE.glwelt;else SAVE.glwelt=GW.modus;persist()}catch(e){}
