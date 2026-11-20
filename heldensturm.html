@@ -4821,7 +4821,7 @@ function renderWorld(dt){
  cx.globalCompositeOperation='source-over';cx.globalAlpha=1;
  drawNums();drawBubbles();
  cx.setTransform(DPR,0,0,DPR,0,0);
- if(q>2)bloom();if(q>1)vignette();if(!G.vp){drawPills();drawCombo();drawMpHud()}
+ if(q>2||(q>1&&(window.__hsGLWELT&&__hsGLWELT.api&&__hsGLWELT.api.EB&&__hsGLWELT.api.EB.an&&!__hsGLWELT.api.RS.u.soft)))bloom();if(q>1)vignette();if(!G.vp){drawPills();drawCombo();drawMpHud()}
  const pr=P.hp/P.st.maxHp;if(pr<0.35){const g=cx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.3,W/2,H/2,Math.max(W,H)*0.7);g.addColorStop(0,'rgba(120,0,0,0)');g.addColorStop(1,`rgba(140,0,0,${(0.35-pr)*1.4+0.1*Math.sin(t*6)})`);cx.fillStyle=g;cx.fillRect(0,0,W,H)}
  if(G.sf){G.sf.a-=dt*G.sf.a0/G.sf.d;if(G.sf.a<=0)G.sf=null;else{cx.globalAlpha=G.sf.a;cx.fillStyle=G.sf.c;cx.fillRect(0,0,W,H);cx.globalAlpha=1}}
  drawBanner(dt);
@@ -18627,7 +18627,7 @@ const IVD={cfg:{},bp:{},bs:{}};
 .wrap.ivg .stilbox>div:not(.stilrow){grid-column:1/-1}
 .wrap.ivg .stilbox .stilrow{grid-template-columns:minmax(0,auto) minmax(30px,1fr) 34px;margin-top:3px}
 .wrap.ivg .stilbox .stilrow>span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.wrap.ivg.ivtiny .stilbox>div:last-child{display:none}.wrap.ivg.ivtiny.ivm-N .stilbox .stilrow{display:none}.wrap.ivg.ivtiny.ivm-N .stilbox{padding:4px 10px}
+.wrap.ivg.ivtiny .stilbox>div:last-child{display:none}.wrap.ivg.ivtiny.ivm-N .stilbox .stilrow{display:none}.wrap.ivg.ivtiny .stilbox .stilrow{display:none}.wrap.ivg.ivtiny.ivhinw .iv-body p.muted{display:none}.wrap.ivg.ivtiny .stilbox{padding:4px 10px}.wrap.ivg.ivtiny .stilbox>div:first-child .muted{display:none}.wrap.ivg.ivtiny.ivm-N .stilbox{padding:4px 10px}
 .wrap.ivg.ivtiny .eyebrow{font-size:11px}
 `;document.head.appendChild(st)}catch(e){}})();
 
@@ -18670,7 +18670,13 @@ function ivBuild(h,w,k){if(w._ivB)return;w._ivB=1;const mk=(c,t)=>{const d=docum
 function ivTiles(h,grid,cap,key,mob){if(!grid)return;grid.classList.add('ivsz');const tiles=[...grid.querySelectorAll(':scope>.it')];tiles.forEach(t=>t.classList.remove('iv-off'));
  const lab=grid.previousElementSibling;const oldP=lab&&lab.querySelector('.ivbp');if(oldP)oldP.remove();
  if(lab&&lab.classList.contains('eyebrow')&&!lab.querySelector('.ivlt')){const sp=document.createElement('span');sp.className='ivlt';while(lab.firstChild)sp.appendChild(lab.firstChild);lab.appendChild(sp)}
- const W=grid.clientWidth-4,H=grid.clientHeight-4,g=parseFloat(getComputedStyle(grid).columnGap)||8;const smax=mob?76:96,smin=mob?50:56;
+ grid.style.minHeight='';const smax=mob?76:96,smin=mob?50:56;
+ /* sehr niedrige Fenster: mindestens eine Reihe Kacheln (sonst liegen sie unter den Heldenwerten) */
+ const pa=grid.parentElement,lb=grid.previousElementSibling;if(pa)pa.style.minHeight='';
+ /* verfügbare Höhe aus dem Elternfeld (das Raster selbst ist inhaltshoch und würde sonst sich selbst messen) */
+ const avail=()=>{let a=grid.clientHeight;if(pa&&pa.clientHeight>0){const cs=getComputedStyle(pa);a=Math.min(a,pa.clientHeight-(lb?lb.offsetHeight:0)-(parseFloat(cs.rowGap)||0)-(parseFloat(cs.paddingTop)||0)-(parseFloat(cs.paddingBottom)||0))}return a};
+ if(avail()-4<44&&pa){grid.style.minHeight='48px';pa.style.minHeight=((lb?lb.offsetHeight:16)+56)+'px'}
+ const W=grid.clientWidth-4,H=Math.max(44,avail()-4),g=parseFloat(getComputedStyle(grid).columnGap)||8;
  const fit=(n,s)=>{const cols=Math.max(1,Math.floor((W+g)/(s+g)));return Math.ceil(n/cols)*(s+g)-g<=H};
  const pick=n=>{for(let s=smax;s>=smin;s-=2)if(fit(n,s))return s;return 0};
  const n=Math.max(1,tiles.length);let s=pick(Math.max(n,cap))||pick(n);let pages=1,per=n;
@@ -18680,11 +18686,11 @@ function ivTiles(h,grid,cap,key,mob){if(!grid)return;grid.classList.add('ivsz');
   /* Platz für die Seitenknöpfe: eine Zeile weniger */
   const b=document.createElement('span');b.className='ivbp';b.innerHTML=`<button type="button" data-ivbp="-1" aria-label="Vorige Seite">‹</button><span>1 / 2</span><button type="button" data-ivbp="1" aria-label="Nächste Seite">›</button>`;lab.appendChild(b);
   /* die Seitenknöpfe können die Überschrift höher machen: neu messen */
-  const H2=grid.clientHeight-4;let bs=s,bper=0;for(let q=smin;q>=42;q-=2){const c2=Math.max(1,Math.floor((W+g)/(q+g))),r2=Math.max(1,Math.floor((H2+g)/(q+g)));if(c2*r2>bper*1.15){bper=c2*r2;bs=q}}
+  const H2=Math.max(44,avail()-4);let bs=s,bper=0;for(let q=smin;q>=42;q-=2){const c2=Math.max(1,Math.floor((W+g)/(q+g))),r2=Math.max(1,Math.floor((H2+g)/(q+g)));if(c2*r2>bper*1.15){bper=c2*r2;bs=q}}
   if(bs!==s){s=bs;cols=Math.max(1,Math.floor((W+g)/(s+g)));grid.style.setProperty('--ivs',s+'px');grid.style.setProperty('--ivcols',cols);grid.classList.add('ivmini')}
   const rows=Math.max(1,Math.floor((H2+g)/(s+g)));per=Math.max(1,cols*rows);pages=Math.ceil(n/per);const sk=si>=0?tiles[si].dataset.k:'';if(si>=0&&IVD.bs[key]!==sk)p=Math.floor(si/per);IVD.bs[key]=sk;p=Math.max(0,Math.min(pages-1,p));IVD.bp[key]=p;
   tiles.forEach((t,i)=>t.classList.toggle('iv-off',i<p*per||i>=(p+1)*per));
-  b.children[0].disabled=p<=0;b.children[1].textContent=`${p+1} / ${pages}`;b.children[2].disabled=p>=pages-1;grid._ivbp={key,per,pages,p,cap};h._ivbp=grid}
+  if(pages<=1){b.remove();grid._ivbp=null;if(h._ivbp===grid)h._ivbp=null}else{b.children[0].disabled=p<=0;b.children[1].textContent=`${p+1} / ${pages}`;b.children[2].disabled=p>=pages-1;grid._ivbp={key,per,pages,p,cap};h._ivbp=grid}}
  else{grid._ivbp=null;if(h._ivbp===grid)h._ivbp=null}}
 function ivBagPage(h,d,focus){const grid=h&&h._ivbp;if(!grid||!grid.isConnected||!grid._ivbp)return false;const B=grid._ivbp;const p=Math.max(0,Math.min(B.pages-1,B.p+d));if(p===B.p)return false;
  B.p=p;IVD.bp[B.key]=p;const tiles=[...grid.querySelectorAll(':scope>.it')];tiles.forEach((t,i)=>t.classList.toggle('iv-off',i<p*B.per||i>=(p+1)*B.per));
@@ -18717,7 +18723,7 @@ function ivFit(h,w,k){mfReset(h);h.classList.remove('mfd','mfgrid','mfcamp','mfl
  const det=w.querySelector(':scope>.iv-det'),body=w.querySelector(':scope>.iv-body');
  const key=k+'|'+(h===scr?'s':'p'+(h._mfid||(h._mfid=(MF.id=(MF.id||0)+1))))+'|'+vw+'x'+vh+'|'+(G.statsOpen?1:0)+'|'+(mob?1:0);
  const setZ=z=>{w.style.zoom=z;w.style.setProperty('--ez',z);w.style.height=(vh/z)+'px';w.style.setProperty('min-height','0px','important')};
- const setMode=(m,z,t)=>{w.classList.toggle('ivtiny',!!t);w.classList.toggle('ivstopen',!!G.statsOpen&&k==='inv');w.classList.remove('ivm-W','ivm-W2','ivm-SB','ivm-SBF','ivm-N','ivnarrow','ivwide','ivshort');w.classList.add('ivm-'+m);const cw=vw/z,ch=vh/z;w.classList.toggle('ivshort',ch<560);setZ(z);
+ const setMode=(m,z,t)=>{w.classList.toggle('ivtiny',!!t);w.classList.toggle('ivhinw',!!w.querySelector('.hinw'));w.classList.toggle('ivstopen',!!G.statsOpen&&k==='inv');w.classList.remove('ivm-W','ivm-W2','ivm-SB','ivm-SBF','ivm-N','ivnarrow','ivwide','ivshort');w.classList.add('ivm-'+m);const cw=vw/z,ch=vh/z;w.classList.toggle('ivshort',ch<560);setZ(z);
   w.classList.toggle('ivnarrow',m==='N'&&cw<600);w.classList.toggle('ivwide',m==='W'||m==='W2');
   /* Breite des Detailfelds: etwa die Hälfte, lesbar begrenzt */
   const dw=m==='SB'||m==='SBF'?Math.max(300,Math.min(cw*0.5,640)):Math.max(480,Math.min(cw*0.5,k==='inv'?980:860));w.style.setProperty('--ivdw',Math.round(dw)+'px');
@@ -22563,7 +22569,7 @@ function ulRenderWorldBase(dt){
  cx.globalCompositeOperation='source-over';cx.globalAlpha=1;
  drawNums();drawBubbles();
  cx.setTransform(DPR,0,0,DPR,0,0);
- if(q>2)bloom();if(q>1)vignette();if(!G.vp){drawPills();drawCombo();drawMpHud()}
+ if(q>2||(q>1&&(window.__hsGLWELT&&__hsGLWELT.api&&__hsGLWELT.api.EB&&__hsGLWELT.api.EB.an&&!__hsGLWELT.api.RS.u.soft)))bloom();if(q>1)vignette();if(!G.vp){drawPills();drawCombo();drawMpHud()}
  const pr=P.hp/P.st.maxHp;if(pr<0.35)ulLowHp(pr,t);
  if(G.sf){G.sf.a-=dt*G.sf.a0/G.sf.d;if(G.sf.a<=0)G.sf=null;else{cx.globalAlpha=G.sf.a;cx.fillStyle=G.sf.c;cx.fillRect(0,0,W,H);cx.globalAlpha=1}}
  drawBanner(dt);
@@ -37249,7 +37255,7 @@ function auswerten(){const iv=M.iv.slice();M.ivK=iv;const n=iv.length,sek=M.akti
  try{d.vollbild=!!(document.fullscreenElement||document.webkitFullscreenElement)}catch(e){}
  try{const auto=SAVE.gfx==='auto'||SAVE.gfx===undefined;d.gfx=GFX[gfxL()].n+(auto?' (Auto)':' (fest)');d.res=resFest()?Math.round(resFest()*100)+' % fest':'Auto';
   d.ultra=!!(window.__hsULTRA&&__hsULTRA.on);d.fx=typeof HSFX!=='undefined'&&HSFX.name?(HSFX.auto()?'Auto ('+HSFX.name()+')':HSFX.name()):'';
-  d.bloom=typeof BLOFF!=='undefined'&&BLOFF?'aus (zu langsam)':gfxL()>=3?'an':'aus';d.sicht=SAVE.fov!==false;d.mobil=typeof MOBIL!=='undefined'&&!!MOBIL}catch(e){dErr('gfx',e)}
+  d.bloom=(window.__hsGLWELT&&__hsGLWELT.api&&__hsGLWELT.api.EB&&__hsGLWELT.api.EB.an&&!__hsGLWELT.api.RS.u.soft)?(gfxL()>=2?'an (Grafikkarte)':'aus'):typeof BLOFF!=='undefined'&&BLOFF?'aus (zu langsam)':gfxL()>=3?'an':'aus';d.sicht=SAVE.fov!==false;d.mobil=typeof MOBIL!=='undefined'&&!!MOBIL}catch(e){dErr('gfx',e)}
  return d}
 function text(d){const L=[];
  L.push(`Heldensturm-Diagnose · Version ${d.ver} · Build ${d.build}${d.pakete?' · '+d.pakete:''}`);
@@ -38866,7 +38872,7 @@ window.__hsZEIGER={v:1,an:0};
    Schalter: __hsGLWELT.modus='auto'|'an'|'aus' (auch ?glwelt=an|aus, SAVE.glwelt, Knopf „WebGL-Welt“ in der Grafik-Box), __hsGLWELT.aus=true,
    __hsGLWELT.k.{boden,deko,licht,tee,vc,bloom,bloomU,bloomS1,vig,css,gueltig}=0/1. Diagnose: „WebGL-Welt: …“, Paketliste „glwelt1(an)“.
    Erweiterungspunkte für „glfx“: __hsGLWELT.haken.{welt,licht,ende,bloom,uPost}, __hsGLWELT.api. ES2017 (Chromium 77), WebGL1. */
-window.__hsGLWELT={v:5};
+window.__hsGLWELT={v:6};
 (function(){try{
  /* ---------- Farben (CSS → [r,g,b,a] 0..1, nicht vormultipliziert) ---------- */
  const FC=new Map();let FCX=null;
@@ -39286,9 +39292,11 @@ window.__hsGLWELT={v:5};
   const g1=EB.g1,g2=EB.g2;
   /* Sonde wie licht2: hochgezogenes Bild über die ganze Ebene (wird gleich wieder geleert) – Prozessor ≈ 1–4 ms/MPx, Grafikkarte ≈ 0 */
   {const k=(S12.k++)%60,i=k===7?0:k===37?1:-1;const mpx=EB.w*EB.h/1e6;if(i>=0&&mpx>=0.15&&GW.k.s12!==0){try{if(!S12.c){S12.c=document.createElement('canvas');S12.c.width=S12.c.height=256;const q=S12.c.getContext('2d');q.fillStyle='#302418';q.fillRect(0,0,256,256);q.fillStyle='#5a4030';q.fillRect(40,40,120,90)}
-   const g=i?g2:g1;g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.imageSmoothingEnabled=true;const a=performance.now();g.drawImage(S12.c,0,0,256,256,0,0,EB.w,EB.h);const d=(performance.now()-a)/mpx;
+   const g=i?g2:g1;EB.vProbe=i;g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.imageSmoothingEnabled=true;const a=performance.now();g.drawImage(S12.c,0,0,256,256,0,0,EB.w,EB.h);const d=(performance.now()-a)/mpx;
    const V=S12.v[i];V.push(d);if(V.length>7)V.shift();if(V.length>=3){const q=V.slice().sort((x,y)=>x-y);S12.m[i]=q[q.length>>1]}}catch(e){}}}
-  for(const g of [g1,g2]){g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.clearRect(0,0,EB.w,EB.h)}
+  FR.voll=GW.k.tee&&(GW.k.voll===1||(GW.k.voll!==0&&S12.mp>=0.6&&(S12.n>=2||S12.seit>600)))?1:0;GW.st.voll=FR.voll;
+  [g1,g2].forEach((g,i)=>{const c=i?EB.s2:EB.s1;const war=EB.vb[i];if(war||!FR.voll||EB.vProbe===i){g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.clearRect(0,0,EB.w,EB.h)}
+   if(FR.voll&&!war){if(c&&c.style.visibility!=='hidden')c.style.visibility='hidden'}else if(c&&c.style.visibility)c.style.visibility='';EB.vb[i]=FR.voll?0:1});EB.vProbe=-1;
   const RU=RS.u,RO=RS.o;RU.frame++;RO.frame++;
   /* untere Ebene: deckend schwarz (mit Nachbearbeitung: in einen Bild-Puffer) */
   if(GW.haken.uPost){if(!RS.uf||RS.uf.w!==EB.w||RS.uf.h!==EB.h){if(RS.uf)fbWeg(RU,RS.uf);RS.uf=fbNeu(RU,EB.w,EB.h,true);if(!RS.uf)throw new Error('U-Puffer')}}else if(RS.uf){fbWeg(RU,RS.uf);RS.uf=null}
@@ -39404,9 +39412,13 @@ window.__hsGLWELT={v:5};
   for(const q of fehlt)addD(e+q[0]*T*s,f+q[1]*T*s,e+(q[0]+1)*T*s,f+(q[1]+1)*T*s);
   try{dynRechtecke((x0,y0,x1,y1)=>addD(x0*s+e,y0*s+f,x1*s+e,y1*s+f))}catch(er){gErr('dyn',er);RE.length=0;W2.length=0;addD(0,0,cw,ch)}
   FR.live=W2;if(fehlt.length)GW.st.kachelLive++;
+  if(FR.voll){try{tee1Start()}catch(er){gErr('tee1',er)}}
   const C=CRs();
   if(RE.length){const c=cx;c.save();c.setTransform(1,0,0,1,0,0);c.beginPath();for(const r of RE)c.rect(r[0],r[1],r[2],r[3]);c.clip();c.setTransform(m[0],m[1],m[2],m[3],m[4],m[5]);C.ohneSuffix=1;
-   try{bodenLive();RWK()}catch(er){gErr('rest',er)}finally{C.ohneSuffix=0;c.restore();c.setTransform(m[0],m[1],m[2],m[3],m[4],m[5]);c.globalAlpha=1;c.globalCompositeOperation='source-over'}}
+   /* nur den Ausschnitt um die Live-Stellen durchlaufen: Sicht (Kamera, W/H) für die Dauer des Zeichnens auf deren Hülle verkleinern */
+   let eng=null;try{if(GW.k.liveEng!==0&&!G.room){let a0=1e9,b0=1e9,a1=-1e9,b1=-1e9;for(const w of W2){a0=Math.min(a0,w[0]);b0=Math.min(b0,w[1]);a1=Math.max(a1,w[2]);b1=Math.max(b1,w[3])}
+     const vw=W/ZOOM,vh=H/ZOOM;if((a1-a0)*(b1-b0)<vw*vh*0.7){eng={cam:G.cam,W,H};a0-=40;b0-=40;a1+=40;b1+=40;G.cam=Object.assign({},G.cam,{x:(a0+a1)/2,y:(b0+b1)/2});W=Math.max(8,(a1-a0)*ZOOM);H=Math.max(8,(b1-b0)*ZOOM);GW.st.eng=(GW.st.eng||0)+1}}}catch(er){eng=null}
+   try{bodenLive();RWK()}catch(er){gErr('rest',er)}finally{if(eng){G.cam=eng.cam;W=eng.W;H=eng.H}C.ohneSuffix=0;c.restore();c.setTransform(m[0],m[1],m[2],m[3],m[4],m[5]);c.globalAlpha=1;c.globalCompositeOperation='source-over'}}
   try{kaBruecken(G.time)}catch(er){}try{kaArenaRand()}catch(er){}
   /* Deko-Kacheln */
   try{dekoWelt(m,sB)}catch(er){gErr('deko',er);FR.dOn=0}
@@ -39526,21 +39538,41 @@ window.__hsGLWELT={v:5};
   if(!EB.slVis[i]){EB.slVis[i]=true;c.style.display='block'}GW.st.css++;return true}
 
  /* ---------- Leuchtendes nach dem Licht (lighter) in die GL-Deckschicht – auf einer durchsichtigen 2D-Ebene wäre es nicht additiv ---------- */
- const PT=CanvasRenderingContext2D.prototype;const TEE={g1:false,g2:false};
+ const PT=CanvasRenderingContext2D.prototype;const TEE={g1:false,g2:false};const TXC=new Map();EB.vb=[1,1];EB.vbV=[1,1];
  function teeStart(){if(!FR.tee)return;const X=RS.gxo;X.von(EB.g2);X.S.length=0;if(!TEE.g2){TEE.g2=true;teeAnlegen(EB.g2,()=>RS.gxo,()=>FR.tee)}}
  function tee1Start(){if(!GW.k.tee){FR.tee1=0;return}FR.tee1=1;const X=RS.gxu;X.von(EB.g1);X.S.length=0;if(!TEE.g1){TEE.g1=true;teeAnlegen(EB.g1,()=>RS.gxu,()=>FR.tee1)}}
  function teeAnlegen(g,XF,an){
   for(const n of ['save','restore','translate','scale','rotate','transform','setTransform','resetTransform','beginPath','moveTo','lineTo','closePath','quadraticCurveTo','bezierCurveTo','arc','arcTo','ellipse','rect','setLineDash']){const f=PT[n];if(!f)continue;
    g[n]=function(){if(an()){try{const X=XF();X[n].apply(X,arguments)}catch(e){}}return f.apply(g,arguments)}}
+  {const fc=PT.clip;g.clip=function(a){if(an()){if(a&&typeof a==='object'){g.__sperr=(g.__sd||0)||1;GW.st.vsperr=(GW.st.vsperr||0)+1}else{try{const X=XF();X.clip.apply(X,arguments)}catch(e){}}}return fc.apply(g,arguments)}}
+  {const fs0=PT.save,fr0=PT.restore,sv=g.save,rs=g.restore;g.save=function(){g.__sd=(g.__sd||0)+1;return sv.apply(g,arguments)};g.restore=function(){g.__sd=Math.max(0,(g.__sd||0)-1);if(g.__sperr&&g.__sd<g.__sperr)g.__sperr=0;return rs.apply(g,arguments)}}
+  {const fp=PT.createPattern;g.createPattern=function(img,r){const pa=fp.apply(g,arguments);if(pa&&an()&&istQuelle(img)){try{const X=XF();const t=X.createPattern(img,r);pa.__gxT=t;const st=pa.setTransform&&pa.setTransform.bind(pa);if(st)pa.setTransform=function(m){st(m);try{t.setTransform(m)}catch(e){}}}catch(e){}}return pa}}
   for(const n of ['createLinearGradient','createRadialGradient']){const f=PT[n];g[n]=function(){const gr=f.apply(g,arguments);if(an()){try{const X=XF();const t=X[n].apply(X,arguments);const a=gr.addColorStop.bind(gr);gr.addColorStop=function(o,c){a(o,c);try{t.addColorStop(o,c)}catch(e){}};gr.__gxT=t}catch(e){}}return gr}}
   const stil=v=>typeof v==='string'?v:v&&v.__gxT?v.__gxT:null;
-  const vor=X=>{X.s.ga=g.globalAlpha;X.s.op='lighter';X.s.lw=g.lineWidth;X.s.cap=g.lineCap;X.s.join=g.lineJoin;X.s.sm=g.imageSmoothingEnabled;const f=stil(g.fillStyle),s=stil(g.strokeStyle);if(f)X.s.fs=f;if(s)X.s.ss=s;return[f,s]};
-  const umleiten=()=>an()&&g.globalCompositeOperation==='lighter'&&g.shadowBlur===0&&(!g.filter||g.filter==='none');
-  const fD=PT.drawImage;g.drawImage=function(img){if(umleiten()&&istQuelle(img)){const X=XF();vor(X);try{X.drawImage.apply(X,arguments);GW.st.tee++;return}catch(e){gErr('tee',e)}}return fD.apply(g,arguments)};
-  const fF=PT.fill;g.fill=function(a){if(umleiten()&&!(a&&typeof a==='object')){const X=XF(),q=vor(X);if(q[0]){try{X.fill.apply(X,arguments);GW.st.tee++;return}catch(e){gErr('tee',e)}}}return fF.apply(g,arguments)};
-  const fS=PT.stroke;g.stroke=function(a){if(umleiten()&&!(a&&typeof a==='object')){const X=XF(),q=vor(X);if(q[1]){try{X.stroke.apply(X,arguments);GW.st.tee++;return}catch(e){gErr('tee',e)}}}return fS.apply(g,arguments)};
-  const fR=PT.fillRect;g.fillRect=function(){if(umleiten()){const X=XF(),q=vor(X);if(q[0]){try{X.fillRect.apply(X,arguments);GW.st.tee++;return}catch(e){gErr('tee',e)}}}return fR.apply(g,arguments)}}
- {const _dc=drawCorpses;drawCorpses=function(){if(FR.on&&FR.tee1){FR.tee1=0;try{flush(RS.u)}catch(e){}}return _dc.apply(this,arguments)}}
+  const vor=X=>{X.s.ga=g.globalAlpha;X.s.op=FR.voll?g.globalCompositeOperation:'lighter';X.s.ml=g.miterLimit;X.s.ldo=g.lineDashOffset;X.s.lw=g.lineWidth;X.s.cap=g.lineCap;X.s.join=g.lineJoin;X.s.sm=g.imageSmoothingEnabled;const f=stil(g.fillStyle),s=stil(g.strokeStyle);if(f)X.s.fs=f;if(s)X.s.ss=s;return[f,s]};
+  const opOk=()=>{const o=g.globalCompositeOperation;if(o==='lighter')return true;if(!FR.voll||g.__sperr)return false;const X=XF();return !!(X.modus==='lw'?OPS_LW:OPS_DECK)[o]};
+  const umleiten=()=>an()&&g.shadowBlur===0&&(!g.filter||g.filter==='none')&&opOk();
+  const rueck=()=>{if(FR.voll&&FR.on){const i=g===EB.g1?0:1;if(!EB.vb[i]){EB.vb[i]=1;const c=i?EB.s2:EB.s1;if(c&&c.style.visibility)c.style.visibility=''}GW.st.vRueck=(GW.st.vRueck||0)+1}};
+  /* Text: als kleines Bild (zwischengespeichert) in die GL-Ebene */
+  const textGL=(t,x,y,mw,strich)=>{if(!FR.voll||!umleiten())return false;const sty=stil(strich?g.strokeStyle:g.fillStyle);if(typeof sty!=='string')return false;t=String(t);if(!t)return true;
+   const key=g.font+'|'+sty+'|'+(strich?g.lineWidth+'|'+g.lineJoin:'f')+'|'+t;let e=TXC.get(key);
+   if(!e){const c=document.createElement('canvas');const q=c.getContext('2d');q.font=g.font;const M=q.measureText(t);const asc=Math.ceil(M.actualBoundingBoxAscent||parseFloat(g.font)||10),des=Math.ceil(M.actualBoundingBoxDescent||3),pad=Math.ceil((strich?g.lineWidth:0)/2)+2;
+    const lft=Math.ceil(M.actualBoundingBoxLeft||0),w=Math.ceil(Math.max(M.width,(M.actualBoundingBoxRight||0)))+lft;c.width=Math.max(1,w+pad*2);c.height=Math.max(1,asc+des+pad*2);
+    q.font=g.font;q.textAlign='left';q.textBaseline='alphabetic';if(strich){q.strokeStyle=sty;q.lineWidth=g.lineWidth;q.lineJoin=g.lineJoin;q.miterLimit=g.miterLimit;q.strokeText(t,pad+lft,pad+asc)}else{q.fillStyle=sty;q.fillText(t,pad+lft,pad+asc)}
+    e={c,w:M.width,asc,des,pad,lft,fa:M.fontBoundingBoxAscent||asc,fd:M.fontBoundingBoxDescent||des};TXC.set(key,e);if(TXC.size>700){const k0=TXC.keys().next().value;TXC.delete(k0)}}
+   else{TXC.delete(key);TXC.set(key,e)}
+   let sx=1;if(mw!=null&&mw>0&&e.w>mw)sx=mw/e.w;const ta=g.textAlign,tb=g.textBaseline;let ax=0;if(ta==='center')ax=-e.w*sx/2;else if(ta==='right'||ta==='end')ax=-e.w*sx;
+   let ay=0;if(tb==='top'||tb==='hanging')ay=e.fa;else if(tb==='middle')ay=(e.fa-e.fd)/2;else if(tb==='bottom'||tb==='ideographic')ay=-e.fd;
+   const X=XF();vor(X);X.drawImage(e.c,x+ax-(e.pad+e.lft)*sx,y+ay-e.asc-e.pad,e.c.width*sx,e.c.height);GW.st.vText=(GW.st.vText||0)+1;return true};
+  {const fT=PT.fillText,sT=PT.strokeText;g.fillText=function(t,x,y,mw){try{if(textGL(t,x,y,mw,false))return}catch(e){gErr('text',e)}rueck();return fT.apply(g,arguments)};
+   g.strokeText=function(t,x,y,mw){try{if(textGL(t,x,y,mw,true))return}catch(e){gErr('text',e)}rueck();return sT.apply(g,arguments)}}
+  {const fSR=PT.strokeRect,fCR=PT.clearRect,fPI=PT.putImageData;g.strokeRect=function(){if(umleiten()&&FR.voll){const X=XF(),q=vor(X);if(q[1]){try{X.strokeRect.apply(X,arguments);return}catch(e){gErr('tee',e)}}}rueck();return fSR.apply(g,arguments)};
+   g.clearRect=function(){if(FR.voll)rueck();return fCR.apply(g,arguments)};g.putImageData=function(){rueck();return fPI.apply(g,arguments)}}
+  const fD=PT.drawImage;g.drawImage=function(img){if(umleiten()&&istQuelle(img)){const X=XF();vor(X);try{X.drawImage.apply(X,arguments);GW.st.tee++;return}catch(e){gErr('tee',e)}}rueck();return fD.apply(g,arguments)};
+  const fF=PT.fill;g.fill=function(a){if(umleiten()&&!(a&&typeof a==='object')){const X=XF(),q=vor(X);if(q[0]){try{X.fill.apply(X,arguments);GW.st.tee++;return}catch(e){gErr('tee',e)}}}rueck();return fF.apply(g,arguments)};
+  const fS=PT.stroke;g.stroke=function(a){if(umleiten()&&!(a&&typeof a==='object')){const X=XF(),q=vor(X);if(q[1]){try{X.stroke.apply(X,arguments);GW.st.tee++;return}catch(e){gErr('tee',e)}}}rueck();return fS.apply(g,arguments)};
+  const fR=PT.fillRect;g.fillRect=function(){if(umleiten()){const X=XF(),q=vor(X);if(q[0]){try{X.fillRect.apply(X,arguments);GW.st.tee++;return}catch(e){gErr('tee',e)}}}rueck();return fR.apply(g,arguments)}}
+ {const _dc=drawCorpses;drawCorpses=function(){if(FR.on&&FR.tee1&&!FR.voll){FR.tee1=0;try{flush(RS.u)}catch(e){}}return _dc.apply(this,arguments)}}
 
  /* untere Ebene (Boden/Wände/Deko) verkleinert für den Bloom: Bildschirm → Textur kopieren, verkleinern, kleines Bild auslesen */
  function uBloom(bw,bh){const R=RS.u,g=R.gl;flush(R);const w=EB.w,h=EB.h;let quelle=RS.uf?RS.uf.t:null;
@@ -39591,7 +39623,7 @@ window.__hsGLWELT={v:5};
  /* Hochladen je Sekunde (Texturen aus 2D-Leinwänden) – in Firefox teuer, wenn die Quelle auf der Grafikkarte liegt */
  const UPR={t:0,u:0,b:0,rs:0,rb:0};GW.upr=UPR;
  (function upM(){try{const n=performance.now();if(n-UPR.t>=1000){const u=(RU&&RU.st?RU.st.up:0)+(RO&&RO.st?RO.st.up:0),b=(RU&&RU.st?RU.st.upB:0)+(RO&&RO.st?RO.st.upB:0);if(UPR.t){const d=(n-UPR.t)/1000;UPR.rs=Math.round((u-UPR.u)/d);UPR.rb=(b-UPR.b)/d/1048576}UPR.t=n;UPR.u=u;UPR.b=b}}catch(e){}requestAnimationFrame(upM)})();
- const z0=zeile;GW.zeile=zeile=function(){let t=z0.apply(this,arguments);try{t=t.replace(' · Umleitungen ',` · Hochladen ${UPR.rs}/s (${UPR.rb.toFixed(1)} MB/s) · Umleitungen `)}catch(e){}return t};
+ const z0=zeile;GW.zeile=zeile=function(){let t=z0.apply(this,arguments);try{t=t.replace(' · Umleitungen ',` · Hochladen ${UPR.rs}/s (${UPR.rb.toFixed(1)} MB/s) · Figuren auf Grafikkarte ${GW.st.voll?'ja':'nein'} · enger Live-Rest ${GW.st.eng||0} · Umleitungen `)}catch(e){}return t};
  /* Firefox: neue kleine Hilfsleinwände (Sprites, Lichtkegel, Zwischenbilder) im Arbeitsspeicher anlegen – Firefox lädt sie dann
     ohne Rücklesen von der Grafikkarte hoch. Große Ebenen (Spielfläche) bleiben unberührt. Abschaltbar: __hsGLWELT.k.fxRam=0 */
  try{const ff=/firefox/i.test(navigator.userAgent);const gc=HTMLCanvasElement.prototype.getContext;
