@@ -379,6 +379,8 @@ ABSCHNITTE = {
     "thronsaal": ("thron", "triumph"), "laden": ("laden", "heiter"), "klingenmarkt": ("klingenmarkt", "kampf"),
     "riesendorf": ("riesendorf", "heiter"), "steinsprecher": ("steinsprecher", "geheimnis"), "schenke-rotroben": ("schenke", "spannung"),
     "flammenhalle": ("gang", "geheimnis"), "themberchaud": ("drachenhort", "drache"), "drachenei": ("gang", "spannung"),
+    "erzaehler": ("erzaehler", "heiter"), "klingenmarkt-ruhig": ("klingenmarkt", "heiter"), "erztunnel": ("mine", "geheimnis"),
+    "leichenhoehle": ("grab", "duester"), "pilzgang": ("pilzwelt", "heiter"), "duergarlabor": ("mine", "kampf"),
 }
 
 # =====================================================================
@@ -1089,6 +1091,38 @@ E("II", 120, ("zusatz", "Du hast hinter mir gestanden", "vor", ["a_lagerfeuer", 
 E("II", 153, ("zusatz", "Hattest du nicht", "vor", ["a_lagerfeuer", 0.5, {"tief": 4200}], "rahmen"))
 E("II", 154, ("zusatz_aus", "fast", "nach", "rahmen"))
 E("II", 215, ("zusatz", "Er hatte einfach keinen Hunger", "vor", ["a_lagerfeuer", 0.5, {"tief": 4200}], "rahmen"), ("zusatz_aus", "Auf Kunst", "nach", "rahmen"))
+
+# ---- KAPITEL III: Das Ei des Drachen ----
+A("III", 1, ("stueck", "Ein Süppchen nur", "vor", "lied", 0.45), ort="erzaehler")
+A("III", 4, ("einschenken", "Also gingen wir zuerst zu Kardal", "bei", 0.3), ort="schenke")
+A("III", 7, ("volk", "Gracklstugh hat mehr Marktplätze", "bei", 0.35), ("amboss", "unter rußgeschwärzten Bögen", "auf", 0.25, {"fern": 1}), ort="klingenmarkt")
+A("III", 10, ("lachen_echo_dreckig", "Echo leise lachen", "bei", 0.28), ("geschirr", "seine Töpfe nun mit beiden Armen", "auf", 0.3))
+A("III", 13, ("rennen", "Links, rechts, eine Treppe hinunter", "bei", 0.3), ("amboss", "an einer Schmiede vorbei", "bei", 0.3), ("amboss", "an einer zweiten Schmiede vorbei", "bei", 0.3), ort="gracklstugh")
+A("III", 16, ("geschirr", "SCHON WIEDER", "bei", 0.35))
+A("III", 17, ("kettenhemd", "zwei Duergar mit Äxten", "bei", 0.35), ("steinschritte", "Die Wachen waren schneller da", "bei", 0.3))
+A("III", 18, ("muenze", "Goldmünze mit dem Drachenkopf", "auf", 0.45))
+A("III", 19, ("ruestung", "die Rücken krümmten sich", "bei", 0.25))
+A("III", 23, ("tropfen", "Die Tunnel waren schöner", "bei", 0.35), ("kristall", "Adern aus blau leuchtendem Erz", "bei", 0.3), ort="mine")
+A("III", 25, ("insekt", "Dort lagen Leichen", "auf", 0.25, {"n": 2}), ort="grab")
+A("III", 26, ("lachen_goblin", "er kicherte", "auf", 0.38))
+A("III", 27, ("schrei", "mit einem Kreischen", "bei", 0.35, {"rate": 1.3, "hall": 0.5}))
+A("III", 28, ("zauber", "meine Magie packte ihn", "bei", 0.45))
+A("III", 29, ("skelett", "Doch da klapperte es", "bei", 0.45, {"n": 2}), ("untot", "Skelette auf", "auf", 0.3))
+A("III", 30, ("donner", "ballte sich ein Gewitter", "auf", 0.45, {"hall": 0.6}), ("blitz", "dann krachten Blitze herunter", "auf", 0.5, {"n": 3}), ("blitz", "Einer schlug direkt vor Rex ein", "auf", 0.5), ("hund", "Rex machte einen Satz", "bei", 0.3))
+A("III", 31, ("pfeil", "und ließ los", "auf", 0.45), ("hund_knurren", "Rex erledigte den Rest", "bei", 0.35), ("aufprall", "riss den kleinen Wahnsinnigen um", "auf", 0.35))
+A("III", 34, ("geist", "wurde es kalt", "auf", 0.4, {"hall": 0.6}), ("stimmfx", "Ich komme aus Blingdenstone", "bei", "Nur ein Stück von mir. Bitte.", "kopfstimme"))
+A("III", 41, ("verwandlung", "Und schrumpfte", "bei", 0.35))
+A("III", 44, ("hecheln", "leckte mich einmal", "bei", 0.3), ort="pilzwelt")
+A("III", 46, ("blubb", "in denen es blubberte", "bei", 0.4), ("magie_hell", "leuchtete ein großer Kreis", "auf", 0.3), ort="mine")
+A("III", 47, ("zank", "Davor standen zwei Duergar und stritten", "auf", 0.4))
+A("III", 48, ("rex", "Ich gab Rex die Fersen", "auf", 0.35))
+A("III", 49, ("rennen", "Er drehte sich um und rannte", "auf", 0.3))
+A("III", 50, ("biss", "verbiss sich im Bein", "bei", 0.4), ("schwung", "schlug mit der Spitzhacke", "auf", 0.35), ("zauber", "schnippte mit den Fingern", "auf", 0.4))
+A("III", 52, ("stueck", "Ein Ton quietschte", "bei", "floete", 0.35))
+A("III", 53, ("pfeiltreffer", "Ezekiels Pfeil traf ihn", "bei", 0.45), ("aufprall", "fiel um und rührte sich nicht mehr", "bei", 0.35))
+A("III", 54, ("hund_knurren", "Rex biss sich durch", "bei", 0.35))
+A("III", 55, ("stampfen", "Schwere Stiefel, viele davon", "bei", 0.4, {"n": 2}), ("kampfruf", "Noch mehr Duergar stürmten heran", "bei", 0.3))
+A("III", 56, ("eis", "ein Fächer aus Eis", "bei", 0.5), ("windstoss", "die Luft wurde schlagartig eisig", "bei", 0.35))
 
 # --- Fassung 6.8: Heldenlacher in ihren Stimmen, Höhlenecho, Kokon, Kopfstimme, Venomfang, Fluss, Ketten, Drachenlied ---
 E("I", 24, ("lachen_echo", "Echo lachte so laut", "auf", 0.45))

@@ -29,7 +29,9 @@
   const reduziert = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
 
   function an(o) {
-    const karte = o.karte, buehne = o.buehne, W = o.W, H = o.H;
+    const karte = o.karte, buehne = o.buehne;
+    let H = typeof o.H === "function" ? o.H() : o.H;
+    let W = typeof o.W === "function" ? o.W() : o.W;
     karte.querySelectorAll(":scope > .pano-flaeche").forEach(e => e.remove());
     karte.classList.add("mit-panorama");
     buehne.classList.add("pano-buehne");
@@ -72,16 +74,19 @@
       const jetzt = performance.now(), g = messen(jetzt);
       if (!g || g.aus) { if (aktiv) { aktiv = false; c.style.display = "none"; karte.classList.remove("pano-an"); } return; }
       if (!aktiv) { aktiv = true; c.style.display = "block"; karte.classList.add("pano-an"); }
+      if (typeof o.W === "function") W = o.W();
+      if (typeof o.H === "function") H = o.H();
       const k = g.bw / W, d = g.dpr;
       x.setTransform(1, 0, 0, 1, 0, 0);
       x.fillStyle = o.grund || "#07060b"; x.fillRect(0, 0, c.width, c.height);
       // Kulisse des Spiels einmal in eine Hilfsfläche malen (Weltmaße), dann gespiegelt an beide Ränder setzen
+      const ox = g.bx * d, oy = g.by * d, bwD = g.bw * d;
+      if (o.hinten) {
       const hw = Math.round(W * k * d), hh = Math.round(H * k * d);
       if (hilfe.width !== hw || hilfe.height !== hh) { hilfe.width = hw; hilfe.height = hh; }
       hx.setTransform(k * d, 0, 0, k * d, 0, 0);
       hx.clearRect(0, 0, W, H);
       try { o.hinten(hx, t, dt); } catch (e) { /* Kulisse darf nie das Spiel stören */ }
-      const ox = g.bx * d, oy = g.by * d, bwD = g.bw * d;
       // links: gespiegelt, dann (falls breiter) wieder ungespiegelt usw.
       for (let i = 0, xx = ox; xx > -bwD; i++) {
         x.save(); x.translate(xx, oy);
@@ -93,17 +98,20 @@
         if (i % 2 === 0) { x.translate(bwD, 0); x.scale(-1, 1); x.drawImage(hilfe, 0, 0); } else { x.drawImage(hilfe, 0, 0); }
         x.restore(); xx += bwD;
       }
+      }
       // Weltkoordinaten: x = 0 am linken Bühnenrand
       x.setTransform(k * d, 0, 0, k * d, ox, oy);
       const L = g.bx / k, R = (g.kw - g.bx - g.bw) / k, oben = -g.by / k, unten = (g.kh - g.by) / k;
       const info = { W, H, L, R, oben, unten, k, t, dt, ruhig: reduziert.matches };
       // Luftperspektive: nach außen dunkler und kühler, an der Bühne fast unverändert
-      [[-L, 0, -1], [W, W + R, 1]].forEach(([a, b, s]) => {
+      const dunkel = () => [[-L, 0, -1], [W, W + R, 1]].forEach(([a, b, s]) => {
         const gr = x.createLinearGradient(s < 0 ? 0 : W, 0, s < 0 ? -L : W + R, 0);
         gr.addColorStop(0, "rgba(6,5,10,.06)"); gr.addColorStop(.4, "rgba(6,5,10,.22)"); gr.addColorStop(1, "rgba(4,3,8,.62)");
         x.fillStyle = gr; x.fillRect(a, oben, b - a, unten - oben);
       });
+      if (o.hinten) dunkel();
       try { if (o.seiten) o.seiten(x, info); } catch (e) { if (!an.fehlerGemeldet) { an.fehlerGemeldet = true; console.warn("Panorama:", e); } }
+      if (!o.hinten) dunkel();
       // weiche Lichtkante an der Bühne, damit das Spielfeld als Mittelpunkt wirkt
       [[0, -1], [W, 1]].forEach(([ex, s]) => {
         const gr = x.createLinearGradient(ex, 0, ex + s * 26, 0);

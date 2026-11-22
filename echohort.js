@@ -3249,6 +3249,7 @@
   /* ================== ZEICHNEN ================== */
   const leinwand = document.createElement("canvas");
   const ctx = leinwand.getContext("2d");
+  let pano = null;
   let skala = 1, hgBild = null, hgSchluessel = "";
   /* Themberchaud schaut im Raubzug über den Rand seiner Halle – kein Feind, nur ein sehr großer Zuschauer */
   const DRACHE = new Image(); DRACHE.decoding = "async";
@@ -5575,6 +5576,7 @@
     if (S.phase === "raub" && S.R) zeichneRaub(ctx, zeit);
     else if (S.phase === "abwehr" && S.A) zeichneAbwehr(ctx, zeit);
     else zeichneTitel(ctx, zeit);
+    if (pano) pano.zeichnen(zeit, 0);
   }
 
   /* ---------- Schleife ---------- */
@@ -5626,6 +5628,12 @@
       '<div class="eh-liste" aria-live="polite"></div>';
     buehne = root.querySelector(".eh-buehne");
     buehne.insertBefore(leinwand, buehne.firstChild);
+    /* Breitbild am PC: links und rechts geht Echos Welt weiter */
+    if (window.Panorama && window.ECHOHORT_PANO) pano = window.Panorama.an({
+      karte: root, buehne, W, H, grund: "#07060a",
+      hinten: x => { if (hgBild && S && (S.R || S.A) && zustand !== "start") x.drawImage(hgBild, 0, 0, W, H); },
+      seiten: (x, info) => { if (!S || zustand === "start" || (!S.R && !S.A)) return; const g = S.A ? S.A.g : gebietVon(S.lv); window.ECHOHORT_PANO(x, info, GEB[g] && GEB[g].k, S.phase === "abwehr" && S.A ? "abwehr" : "raub"); }
+    });
     leinwand.setAttribute("aria-label", tx.titel);
     schleier = root.querySelector(".eh-schleier");
     tafel = root.querySelector(".eh-tafel");

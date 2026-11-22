@@ -2230,6 +2230,7 @@
   const neueLein = () => { const c = document.createElement("canvas"); c.width = LW; c.height = LH; return c; };
   const lichtLein = neueLein(), lctx = lichtLein.getContext("2d"), weichLein = neueLein(), wctx = weichLein.getContext("2d");
   const FILTER_OK = typeof wctx.filter === "string";
+  let pano = null;
   let skala = 1, hgBild = null, rexBild = null, startBild = null;
   const THEMEN = {
     holz:       { boden: "#33241a", fuge: "#22180f", hell: "rgba(224,160,70,.05)", wand: "#1f1b19", wandOben: "#3a312a", stein: false },
@@ -3356,6 +3357,7 @@
     }
     ctx.restore();
     hudZeichnen();
+    if (pano) { const jetzt = performance.now() / 1000; pano.zeichnen(jetzt, 0); }
   }
   function startZeichnen() {
     // Titelbild hinter dem Startschleier: Ezekiels Porträt, abgedunkelt
@@ -3468,6 +3470,11 @@
       '<div class="dn-liste" aria-live="polite"></div>';
     buehne = root.querySelector(".dn-buehne");
     buehne.insertBefore(leinwand, buehne.firstChild);
+    /* Breitbild am PC: rund um das Haus der Nacht geht die Welt weiter */
+    if (window.Panorama && window.DIEBESNACHT_PANO) pano = window.Panorama.an({
+      karte: root, buehne, W: () => BW, H: () => H, grund: "#07060a",
+      seiten: (x, info) => { const b = S && S.def ? S.def.boden : (LEVELS[0] && LEVELS[0].boden); window.DIEBESNACHT_PANO(x, info, b); }
+    });
     leinwand.setAttribute("aria-label", tx.titel);
     schleier = root.querySelector(".dn-schleier");
     tafel = root.querySelector(".dn-tafel");
