@@ -639,10 +639,618 @@
       vrock: { geheim: '"You\'re the only vulture I\'d trust with my heart."', frage: '"Skraah? What do you want from me, little human?"', gut: '"Just a dance. And maybe a feather."', mittel: '"Actually just the exit."', schlecht: '"For you to take a bath."' }
     }
   };
+  /* ---------- Fassung November 2026: alle Sprüche neu – echte Flirts mit Anspielungen auf Figur und Geschichte ---------- */
+  const NEUE_SPRUECHE = {
+ "de": {
+  "gundren": {
+   "charmant": [
+    "„Gundren, dein Bart glänzt heller als jede Ader in der Mine. Und ich hab noch nicht mal danach gegraben.“",
+    "„Du hast die Augen eines Mannes, der Schätze findet. Gerade schauen sie mich an. Zufall?“",
+    "„Ein Zwerg, der rechnen, reisen und so lächeln kann? Die verlorene Mine ist nicht der einzige Fund hier.“",
+    "„Bei dir fühl ich mich sicher wie Gold im Tresor. Und ungefähr genauso wertvoll.“"
+   ],
+   "kuehn": [
+    "„Zahl im Voraus, Gundren. Ich zahle dir dafür in Phandalin zurück. In Küssen. Mit Zinsen.“",
+    "„Du suchst eine Schmiede, in der Magie glüht? Komm näher. Ich zeig dir, wo's warm wird.“",
+    "„Lass Nundro die Ochsen treiben. Wir zwei nehmen den langen Weg nach Phandalin.“",
+    "„Ich unterschreibe jeden Vertrag, Gundren. Solange unten dein Name neben meinem steht.“"
+   ],
+   "absurd": [
+    "„Bist du eine verlorene Mine? Ich will dich nämlich finden, erschließen und nie wieder hergeben.“",
+    "„Hast du eine Spitzhacke dabei? Du hast gerade mein Herz freigelegt.“",
+    "„Nenn mich Erz. Dann hast du einen Grund, mich in deinen Wagen zu laden.“",
+    "„Ich hab mich in deinen Bart verliebt. Der Rest von dir hat gute Chancen, nachzuziehen.“"
+   ],
+   "passend": [
+    "„Ein guter Händler zahlt für Qualität im Voraus. Und ich bin beste Qualität.“",
+    "„Für dich würde ich sogar Ochsen füttern. Und ich hasse Ochsen.“",
+    "„Du willst die Mine deiner Ahnen zurück? Ich will nur einen Abend mit dir. Wir sind beide Romantiker.“"
+   ]
+  },
+  "buergermeister": {
+   "charmant": [
+    "„Harbin, Ihre Amtskette liegt so schön auf Ihrer Brust. Ich bin fast neidisch. Auf die Kette.“",
+    "„Wenn Sie ein Dokument stempeln, zittern meine Knie. Diese Entschlossenheit!“",
+    "„Phandalin hat Glück mit Ihnen. Und ich hätte es gern auch.“",
+    "„Sie haben die weichsten Hände, die je eine Belohnung ausgezahlt haben. Zeigen Sie mal?“"
+   ],
+   "kuehn": [
+    "„Zahlen Sie ohne Feilschen, Harbin. Feilschen können wir später. Bei Kerzenschein.“",
+    "„Ich hätte da einen Antrag. Nicht für den Stadtrat. Für Sie.“",
+    "„Schließen Sie die Amtsstube ab. Ich hätte eine sehr private Anhörung.“",
+    "„Sie verwalten die ganze Stadt. Verwalten Sie doch mal mich.“"
+   ],
+   "absurd": [
+    "„Sind Sie eine Steuer? Ich kann Ihnen nämlich einfach nicht entkommen.“",
+    "„Ich möchte einen Antrag stellen. Formular sieben, Herz, in dreifacher Ausfertigung.“",
+    "„Wenn Sie ein Stempel wären, ich wäre Ihr Papier. Drücken Sie fest auf.“",
+    "„Ich hab Ihr Wappen auf meine Laute gemalt. Sie hat jetzt kein Loch mehr. Und ich keine Ruhe.“"
+   ],
+   "passend": [
+    "„Die Rotmäntel sind weg. Feiern wir? Sie zahlen, ich küsse.“",
+    "„Ein Bürgermeister, der pünktlich zahlt, ist das Attraktivste, was ich mir vorstellen kann.“",
+    "„Ihr Vorgänger hat gefeilscht. Er war sehr einsam.“"
+   ]
+  },
+  "blight": {
+   "charmant": [
+    "„Deine Augen leuchten wie Rubine im Unterholz. Ich bin hin und weg. Und ein bisschen umrankt.“",
+    "„So schlank, so knorrig, so geheimnisvoll. Du bist der schönste Zweig in ganz Donnerbaum.“",
+    "„Du raschelst so zärtlich. Sag das noch mal.“",
+    "„Ich habe noch nie jemanden getroffen, der so … verwurzelt ist.“"
+   ],
+   "kuehn": [
+    "„Lass mich los, Liebling. Oder halt mich fester. Aber entscheide dich.“",
+    "„Ich bin eine Flamme, aber für dich brenn ich nur innerlich.“",
+    "„Komm mit mir. Ich kenn einen Topf mit richtig guter Erde.“",
+    "„Du darfst mich umranken. Aber nur, wenn du mich danach in den Arm nimmst.“"
+   ],
+   "absurd": [
+    "„Bist du ein Ast? Ich falle nämlich gerade für dich.“",
+    "„Ich hab dir was mitgebracht. Dünger. Ganz frisch. Romantisch, oder?“",
+    "„Wenn du ein Baum wärst, würde ich dir mein Herz in die Rinde ritzen. Natürlich nur mit deiner Erlaubnis.“",
+    "„Ich bin ein bisschen wie Laub: Im Herbst falle ich für jeden. Aber bei dir bleib ich liegen.“"
+   ],
+   "passend": [
+    "„Keine Fackel, kein Feuer. Nur ich, du und das Rascheln.“",
+    "„Echo behält den Feuerball in der Tasche. Versprochen. Du bist bei mir sicher.“",
+    "„Du bist ein Blight. Ich bin ein Barde. Wir haben beide schon Schlimmeres getan als das hier.“"
+   ]
+  },
+  "bugbear": {
+   "charmant": [
+    "„Dein Fell ist so dicht, da würde ich mich glatt verlaufen. Und es nicht bereuen.“",
+    "„Du schleichst so leise, dass ich gar nicht gemerkt hab, wie du mein Herz gestohlen hast.“",
+    "„So groß und so leise. Das ist eine gefährliche Mischung. Ich mag gefährlich.“",
+    "„Deine Krallen sind gepflegt. Ein Bugbear mit Stil. Endlich.“"
+   ],
+   "kuehn": [
+    "„Lass mich durch die Tür. Oder lass mich davor stehen bleiben. Mit dir.“",
+    "„Ich wette, du gibst die beste Bärenumarmung der ganzen Schwertküste. Beweis es.“",
+    "„Nach deiner Wache: du, ich, ein Feuer und dein Fell als Decke. Mit dir drin.“",
+    "„Knurr noch mal so. Ich hab Gänsehaut. Die gute Sorte.“"
+   ],
+   "absurd": [
+    "„Bist du ein Teppich? Ich würde nämlich gern vor einem Kamin auf dir liegen.“",
+    "„Ich hab auch Haare an den Armen. Fast eine Verlobung, oder?“",
+    "„Grrr.“ (Barradin glaubt, er hätte gerade ‚Du hast schöne Augen‘ gesagt.)",
+    "„Ich würde dir meinen Hut schenken. Nicht zum Tragen. Zum Fressen. Als Liebesbeweis.“"
+   ],
+   "passend": [
+    "„Du bewachst diese Tür so treu. Bewach doch mal mich.“",
+    "„Ein Bugbear, der nicht sofort zuschlägt? Ich glaube, das ist Liebe.“",
+    "„Ich mag Kerle, die einen Wachturm halten können. Und mich gleich dazu.“"
+   ]
+  },
+  "ilvara": {
+   "charmant": [
+    "„Herrin, selbst Eure Fesseln sitzen elegant. Wie macht Ihr das?“",
+    "„Eure Augen funkeln wie Feenfeuer. Ich würde mich gern darin verbrennen.“",
+    "„Ihr wart als Kräuterweib schon bezaubernd. Als Drow seid Ihr vernichtend.“",
+    "„Ich habe Eure Suppe gegessen. Seitdem denke ich nur noch an Euch. Und an Kräuter.“"
+   ],
+   "kuehn": [
+    "„Lockert die Ketten, Herrin. Ich lauf nicht weg. Nicht von Euch.“",
+    "„Ihr haltet die Peitsche, ich halte die Laute. Wer zuerst nachgibt, bezahlt das Abendessen.“",
+    "„Lolth hat acht Beine. Ich habe nur zwei. Aber beide würden für Euch tanzen.“",
+    "„Wenn Ihr mich schon gefangen haltet, dann wenigstens in Eurer Nähe.“"
+   ],
+   "absurd": [
+    "„Ist das eine Peitsche in Eurer Hand, oder freut Ihr Euch, mich zu sehen? … Es ist eine Peitsche.“",
+    "„Ich hab eine Spinne nach Euch benannt. Sie hat mich gebissen. Ich hab's als Zuneigung gewertet.“",
+    "„Verwandelt Euch noch mal in die Waldfrau. Ich hab immer noch Hunger. Auf Suppe. Und so.“",
+    "„Wollt Ihr mein Netz sehen? Es ist ein Fischernetz. Ich hab's auf dem Markt gekauft. Für uns.“"
+   ],
+   "passend": [
+    "„Ihr seid eine Meisterin der Verwandlung. Verwandelt mich in Euren Lieblingsgefangenen.“",
+    "„Velkynvelve ist finster. Aber neben Euch hätte ich nichts gegen ein bisschen Dunkelheit.“",
+    "„Ihr habt mich in Euer Netz gelockt, Herrin. Ehrlich gesagt war ich leicht zu fangen.“"
+   ]
+  },
+  "chasme": {
+   "charmant": [
+    "„Dein Summen geht mir direkt ins Herz. Und ein bisschen in die Zähne.“",
+    "„So viele Augen, und alle schauen sie nur mich an. Ich fühl mich geschmeichelt.“",
+    "„Du schwirrst so anmutig. Wie ein Ballkleid mit Flügeln.“",
+    "„Deine Stimme macht mich schläfrig. Ich nenn das Geborgenheit.“"
+   ],
+   "kuehn": [
+    "„Lass das Stechen, Schätzchen. Ich bin freiwillig hier.“",
+    "„Schläfer mich ruhig ein. Aber bleib da, wenn ich aufwache.“",
+    "„Wir könnten zusammen summen. Ich die Melodie, du den Bass.“",
+    "„Ich würde mit dir bis in den Abyss fliegen. Wenn du mich trägst.“"
+   ],
+   "absurd": [
+    "„Bist du eine Fliege? Ich hab nämlich Schmetterlinge im Bauch. Iss sie bitte nicht.“",
+    "„Ich hab dir einen Rüssel gemalt. Er ist kleiner als deiner. Das ist ein Kompliment.“",
+    "„Summ mir was vor. Ich summ zurück. Das ist praktisch eine Hochzeit.“",
+    "„Man sagt, Liebe sticht. Bei dir glaub ich das sofort.“"
+   ],
+   "passend": [
+    "„Friedrich hat dich so lange angestarrt. Ich glaube, er ist eifersüchtig. Auf mich.“",
+    "„Du bist das Schönste, was je durch Ilvaras Festung geflogen ist. Und das Lauteste.“",
+    "„Ich mag Frauen mit Stich. Aber nicht wörtlich.“"
+   ]
+  },
+  "vrock": {
+   "charmant": [
+    "„Deine Federn haben den Glanz von verbranntem Pech. Atemberaubend. Im wahrsten Sinn.“",
+    "„Dein Kreischen ist Musik in meinen Ohren. Laute Musik. Sehr laute.“",
+    "„So eine Flügelspannweite! Da passt eine ganze Umarmung rein.“",
+    "„Du tanzt so wild. Darf ich mittanzen?“"
+   ],
+   "kuehn": [
+    "„Lass die Sporen weg, Liebling. Mein Herz infizierst du auch so.“",
+    "„Tanz mit mir einen Unheilstanz. Ich führe. Oder du. Hauptsache zusammen.“",
+    "„Ich hab Platz auf meinem Rücken. Oder du auf deinem. Fliegen wir?“",
+    "„Pick mich ruhig. Aber zärtlich.“"
+   ],
+   "absurd": [
+    "„Bist du ein Geier? Ich fühl mich nämlich gerade wie Aas. In gut.“",
+    "„Ich hab dir einen Wurm mitgebracht. Romantik ist, was man draus macht.“",
+    "„Wenn du kreischst, kreisch ich zurück. Das ist unser Lied.“",
+    "„Ich mag deinen Schnabel. Spitz, aber ehrlich.“"
+   ],
+   "passend": [
+    "„Echo hat dich vom Himmel geholt. Ich hol dich auf die Tanzfläche.“",
+    "„Du bist ein Dämon aus dem Abyss. Ich bin ein Barde aus Phandalin. Klingt nach einer Ballade.“",
+    "„Ein Vrock, der zuhört? Ich glaube, ich hab Glück.“"
+   ]
+  },
+  "kuotoa": {
+   "charmant": [
+    "„Deine Augen sind so groß und klar wie der See im Dunkeln. Und du blinzelst nie weg. Wie aufmerksam.“",
+    "„Deine Schuppen schimmern wie Mondlicht auf Wasser. Ich hab nur nie Mondlicht hier unten gesehen.“",
+    "„Du riechst nach Algen und Abenteuer. Meine Lieblingsmischung.“",
+    "„Du hältst deinen Speer so elegant. Wie eine Rose. Eine spitze Rose.“"
+   ],
+   "kuehn": [
+    "„Lass uns rein. Und dann zeig mir, wo man in Schlamm-Stadt am romantischsten tropft.“",
+    "„Ein feuchter Kuss, und ich vergesse, wie seltsam das hier ist.“",
+    "„Ich würde für dich Kiemen bekommen wollen. Gib mir einen Grund.“",
+    "„Du und ich, ein Boot und der See. Ich rudere.“"
+   ],
+   "absurd": [
+    "„Blubb blubb.“ (Barradin hofft, das heißt ‚Du bist schön‘. Es heißt ‚Der Abfluss ist verstopft‘.)",
+    "„Darf ich dein Aquarium sein?“",
+    "„Ich hab eine Muschel für dich. Sie ist leer. Wie mein Herz ohne dich.“",
+    "„Bist du ein Fisch? Ich hab nämlich angebissen.“"
+   ],
+   "passend": [
+    "„Ploopploopeen wäre stolz auf deinen Geschmack. Du siehst ja mich an.“",
+    "„Du bewachst eine ganze Stadt. Bewach doch mal ein Barden-Herz.“",
+    "„Ich hab gehört, ihr betet an, was ihr euch ausdenkt. Denk dir mich aus.“"
+   ]
+  },
+  "horga": {
+   "charmant": [
+    "„Eure Majestät, Euer Bart ist geschmiedet wie Stahl. Und genauso unwiderstehlich.“",
+    "„Ihr seid der fünfte Horga. Aber für mich der erste.“",
+    "„Eure Krone glüht. Oder seid Ihr das?“",
+    "„In ganz Gracklstugh gibt es nur ein Feuer, das heißer brennt als Eure Schmieden: Euer Blick.“"
+   ],
+   "kuehn": [
+    "„Gewährt mir Gastrecht, Majestät. Und vielleicht noch etwas mehr Nähe.“",
+    "„Ihr könnt Euch unsichtbar machen. Bitte nicht bei mir.“",
+    "„Ihr könnt riesengroß werden? Ich hätte da einen Vorschlag. Rein räumlich.“",
+    "„Für Euch singe ich sogar in einer Tonart aus Stahl.“"
+   ],
+   "absurd": [
+    "„Seid Ihr ein Amboss? Mein Herz hämmert nämlich gerade.“",
+    "„Ich hab Euch eine Krone gebastelt. Aus Pilzen. Sie leuchtet im Dunkeln. Wie Ihr.“",
+    "„Wenn Ihr ein Hammer wärt, ich wäre der Nagel. Hau zu. Also. Nein. Bildlich.“",
+    "„Ich mag graue Haut. Sie passt zu meinem Lieblingsstein.“"
+   ],
+   "passend": [
+    "„Ein König, der Gäste ehrt, wird in Liedern unsterblich. Ich schreibe die Lieder.“",
+    "„Gracklstugh ist rau. Ihr seid rau. Ich mag rau.“",
+    "„Die Stadt gehorcht Euch. Ich würde es auch. Gern.“"
+   ]
+  },
+  "hgraam": {
+   "charmant": [
+    "„Deine Stimme klingt wie ein Erdrutsch. Ein sehr sanfter Erdrutsch.“",
+    "„Du bist so groß, ich müsste klettern, um dir ins Herz zu schauen. Ich bin ein guter Kletterer.“",
+    "„In deinen Rätseln steckt mehr Weisheit als in allen Bibliotheken. Und mehr Kiesel.“",
+    "„Du bist ein Fels in der Brandung. Und ich bin die Brandung.“"
+   ],
+   "kuehn": [
+    "„Gib mir deinen Kristall. Ich geb dir dafür meinen Herzschlag.“",
+    "„Lass uns gemeinsam schweigen. Du kannst das am besten. Ich lern's für dich.“",
+    "„Ich würde dir gern ins Ohr flüstern. Gib mir eine Leiter und eine Stunde.“",
+    "„Du sprichst mit Steinen. Sprich mal mit mir. Ich bin auch ziemlich hart im Nehmen.“"
+   ],
+   "absurd": [
+    "„Bist du ein Stein? Weil ich bei dir nämlich weich werde.“",
+    "„Ich hab einen Kiesel nach dir benannt. Er heißt jetzt Liebling.“",
+    "„Lass uns Steine sammeln. Du die großen, ich die Herzen.“",
+    "„Ich habe dir ein Gedicht geschrieben. Es ist in Stein gemeißelt. Es ist sehr kurz.“"
+   ],
+   "passend": [
+    "„Die Steine haben mir von dir erzählt. Nur Gutes. Und viel Geröll.“",
+    "„Wenn die Steine sprechen, was sagen sie über uns zwei?“",
+    "„Rätsel mögen dich. Ich auch.“"
+   ]
+  },
+  "themberchaud": {
+   "charmant": [
+    "„Meister der Flammen, Eure Schuppen glühen wie Euer Hort. Nur heißer.“",
+    "„Ihr seid der prächtigste Drache, den ich je gesehen habe. Und der einzige, der mich nicht gefressen hat.“",
+    "„Eure Stimme rollt wie Gold den Berg hinunter. Ich könnte Euch stundenlang zuhören.“",
+    "„Diese Hörner! Diese Kehle! Dieser … Bauch! Majestätisch.“"
+   ],
+   "kuehn": [
+    "„Fresst mich nicht, Meister. Ich bin zum Vernaschen viel zu schade.“",
+    "„Legt Euch ruhig auf Euren Hort. Ich leg mich daneben. Nur zum Wärmen.“",
+    "„Ich bin vielleicht klein, aber ich passe perfekt zwischen zwei Krallen.“",
+    "„Euer Feuer macht mir keine Angst. Es macht mich nervös. Auf die gute Art.“"
+   ],
+   "absurd": [
+    "„Seid Ihr ein Vulkan? Ich bin nämlich gerade geschmolzen.“",
+    "„Ich hab Euch was mitgebracht: mich. Mit Gewürzen, falls Ihr doch Hunger bekommt.“",
+    "„Ihr habt dreihunderttausend Münzen. Ich habe ein Herz. Tauschen wir?“",
+    "„Ich bin wie ein guter Wein: am besten ungegessen.“"
+   ],
+   "passend": [
+    "„Euer Hort glänzt. Aber Ihr glänzt mehr.“",
+    "„Ich singe für Euch, Meister. Kein Wort über Eier. Versprochen.“",
+    "„Ein Drache mit so gutem Geschmack frisst keine Barden. Er sammelt sie.“"
+   ]
+  },
+  "demogorgon": {
+   "charmant": [
+    "„Zwei Köpfe, und beide wunderschön. Ich kann mich gar nicht entscheiden.“",
+    "„Deine Tentakel sind so … zahlreich. Das gefällt mir an einem Prinzen.“",
+    "„Wenn du den See zum Kochen bringst, wird mir ganz warm ums Herz.“",
+    "„Du bist der Prinz der Dämonen. Ich hätte gern eine Audienz. Eine lange.“"
+   ],
+   "kuehn": [
+    "„Einer deiner Köpfe will mich fressen, der andere küssen. Ich wette auf den zweiten.“",
+    "„Umarm mich mit allen Tentakeln gleichzeitig. Ich halte das aus. Vielleicht.“",
+    "„Geh wieder, Schatz. Aber schreib mir.“",
+    "„Ich bin der einzige Sterbliche, der dir je zugezwinkert hat. Merk dir das.“"
+   ],
+   "absurd": [
+    "„Bist du ein Prinz? Ich hab nämlich eine Prinzessin erwartet. Aber ich bin flexibel.“",
+    "„Darf ich beide Köpfe zum Essen einladen? Getrennte Rechnungen.“",
+    "„Ich hab Wahnsinn im Blick. Du auch. Wir passen.“",
+    "„Wer hat dich bestellt? Egal. Ich nehm dich.“"
+   ],
+   "passend": [
+    "„Du hast eine ganze Fischstadt verschluckt. Lass mir wenigstens mein Herz.“",
+    "„Ploopploopeen hat dich gerufen. Ich will nur, dass du wieder gehst. Aber mit Stil.“",
+    "„Ein Dämonenprinz mit zwei Köpfen braucht zwei Barden. Ich bin bereit, für zwei zu singen.“"
+   ]
+  }
+ },
+ "en": {
+  "gundren": {
+   "charmant": [
+    "\"Gundren, your beard shines brighter than any vein in that mine. And I haven't even dug for it.\"",
+    "\"You've got the eyes of a man who finds treasure. Right now they're looking at me. Coincidence?\"",
+    "\"A dwarf who can count, travel and smile like that? The lost mine isn't the only find around here.\"",
+    "\"With you I feel safe as gold in a vault. And about as valuable.\""
+   ],
+   "kuehn": [
+    "\"Pay in advance, Gundren. I'll pay you back in Phandalin. In kisses. With interest.\"",
+    "\"Looking for a forge where magic glows? Come closer. I'll show you where it gets warm.\"",
+    "\"Let Nundro drive the oxen. You and I will take the long road to Phandalin.\"",
+    "\"I'll sign any contract, Gundren. As long as your name ends up next to mine.\""
+   ],
+   "absurd": [
+    "\"Are you a lost mine? Because I want to find you, work you and never give you back.\"",
+    "\"Did you bring a pickaxe? You just struck my heart.\"",
+    "\"Call me ore. Then you've got a reason to load me onto your wagon.\"",
+    "\"I've fallen for your beard. The rest of you has a good chance of following.\""
+   ],
+   "passend": [
+    "\"A good trader pays in advance for quality. And I'm top quality.\"",
+    "\"For you I'd even feed the oxen. And I hate oxen.\"",
+    "\"You want your ancestors' mine back. I just want one evening with you. We're both romantics.\""
+   ]
+  },
+  "buergermeister": {
+   "charmant": [
+    "\"Harbin, your chain of office rests so nicely on your chest. I'm almost jealous. Of the chain.\"",
+    "\"When you stamp a document, my knees go weak. Such decisiveness!\"",
+    "\"Phandalin is lucky to have you. I'd like to be lucky too.\"",
+    "\"You have the softest hands that ever paid out a reward. May I see?\""
+   ],
+   "kuehn": [
+    "\"Pay without haggling, Harbin. We can haggle later. By candlelight.\"",
+    "\"I'd like to make a proposal. Not to the council. To you.\"",
+    "\"Lock the town hall. I'd like a very private hearing.\"",
+    "\"You govern the whole town. Why not govern me for a while?\""
+   ],
+   "absurd": [
+    "\"Are you a tax? Because I simply can't avoid you.\"",
+    "\"I'd like to file an application. Form seven, heart, in triplicate.\"",
+    "\"If you were a stamp, I'd be your paper. Press firmly.\"",
+    "\"I painted your coat of arms on my lute. Now it has no sound hole. And I have no peace.\""
+   ],
+   "passend": [
+    "\"The Red Brands are gone. Shall we celebrate? You pay, I kiss.\"",
+    "\"A mayor who pays on time is the most attractive thing I can imagine.\"",
+    "\"Your predecessor haggled. He was very lonely.\""
+   ]
+  },
+  "blight": {
+   "charmant": [
+    "\"Your eyes glow like rubies in the undergrowth. I'm smitten. And a little entangled.\"",
+    "\"So slender, so gnarled, so mysterious. You're the prettiest twig in all of Thundertree.\"",
+    "\"You rustle so tenderly. Say that again.\"",
+    "\"I've never met anyone so … well rooted.\""
+   ],
+   "kuehn": [
+    "\"Let go of me, darling. Or hold me tighter. But make up your mind.\"",
+    "\"I'm a flame, but for you I only burn on the inside.\"",
+    "\"Come with me. I know a pot with really good soil.\"",
+    "\"You may entangle me. But only if you hug me afterwards.\""
+   ],
+   "absurd": [
+    "\"Are you a branch? Because I'm falling for you.\"",
+    "\"I brought you something. Fertiliser. Fresh. Romantic, isn't it?\"",
+    "\"If you were a tree, I'd carve my heart into your bark. With your permission, of course.\"",
+    "\"I'm a bit like leaves: in autumn I fall for everyone. But with you I'd stay down.\""
+   ],
+   "passend": [
+    "\"No torch, no fire. Just you, me and the rustling.\"",
+    "\"Echo keeps the fireball in his pocket. Promise. You're safe with me.\"",
+    "\"You're a blight. I'm a bard. We've both done worse things than this.\""
+   ]
+  },
+  "bugbear": {
+   "charmant": [
+    "\"Your fur is so thick I could get lost in it. And not regret it.\"",
+    "\"You sneak so quietly I didn't even notice you stealing my heart.\"",
+    "\"So big and so quiet. That's a dangerous mix. I like dangerous.\"",
+    "\"Your claws are well kept. A bugbear with style. Finally.\""
+   ],
+   "kuehn": [
+    "\"Let me through the door. Or let me stay right here. With you.\"",
+    "\"I bet you give the best bear hug on the Sword Coast. Prove it.\"",
+    "\"After your shift: you, me, a fire and your fur as a blanket. With you in it.\"",
+    "\"Growl like that again. I've got goosebumps. The good kind.\""
+   ],
+   "absurd": [
+    "\"Are you a rug? Because I'd love to lie on you in front of a fire.\"",
+    "\"I've got hairy arms too. That's practically an engagement, right?\"",
+    "\"Grrr.\" (Barradin believes he just said 'you have beautiful eyes'.)",
+    "\"I'd give you my hat. Not to wear. To eat. As a token of my love.\""
+   ],
+   "passend": [
+    "\"You guard this door so faithfully. Why not guard me for a change?\"",
+    "\"A bugbear who doesn't hit me straight away? I think this is love.\"",
+    "\"I like a guy who can hold a watchtower. And me while he's at it.\""
+   ]
+  },
+  "ilvara": {
+   "charmant": [
+    "\"Mistress, even your shackles look elegant. How do you do it?\"",
+    "\"Your eyes sparkle like faerie fire. I'd gladly get burned.\"",
+    "\"As a herb woman you were enchanting. As a drow you're devastating.\"",
+    "\"I ate your soup. Since then I can only think of you. And herbs.\""
+   ],
+   "kuehn": [
+    "\"Loosen the chains, mistress. I won't run. Not from you.\"",
+    "\"You hold the whip, I hold the lute. Whoever gives in first pays for dinner.\"",
+    "\"Lolth has eight legs. I only have two. But both would dance for you.\"",
+    "\"If you're going to keep me captive, at least keep me close.\""
+   ],
+   "absurd": [
+    "\"Is that a whip in your hand, or are you happy to see me? … It's a whip.\"",
+    "\"I named a spider after you. It bit me. I took it as affection.\"",
+    "\"Turn into the herb woman again. I'm still hungry. For soup. And things.\"",
+    "\"Want to see my web? It's a fishing net. I bought it at the market. For us.\""
+   ],
+   "passend": [
+    "\"You're a mistress of transformation. Turn me into your favourite prisoner.\"",
+    "\"Velkynvelve is grim. But next to you I wouldn't mind a little darkness.\"",
+    "\"You lured me into your web, mistress. To be honest, I was easy to catch.\""
+   ]
+  },
+  "chasme": {
+   "charmant": [
+    "\"Your buzzing goes straight to my heart. And a little to my teeth.\"",
+    "\"So many eyes, and all of them looking at me. I'm flattered.\"",
+    "\"You hover so gracefully. Like a ball gown with wings.\"",
+    "\"Your voice makes me drowsy. I call that feeling safe.\""
+   ],
+   "kuehn": [
+    "\"Stop stinging, sweetheart. I'm here voluntarily.\"",
+    "\"Put me to sleep if you like. But be there when I wake up.\"",
+    "\"We could hum together. I'll take the melody, you take the bass.\"",
+    "\"I'd fly to the Abyss with you. If you carry me.\""
+   ],
+   "absurd": [
+    "\"Are you a fly? Because I've got butterflies in my stomach. Please don't eat them.\"",
+    "\"I drew you a proboscis. It's smaller than yours. That's a compliment.\"",
+    "\"Hum me something. I'll hum back. That's practically a wedding.\"",
+    "\"They say love stings. With you I believe it at once.\""
+   ],
+   "passend": [
+    "\"Friedrich stared at you for so long. I think he's jealous. Of me.\"",
+    "\"You're the most beautiful thing that ever flew through Ilvara's fortress. And the loudest.\"",
+    "\"I like a woman with a sting. Just not literally.\""
+   ]
+  },
+  "vrock": {
+   "charmant": [
+    "\"Your feathers have the sheen of burnt pitch. Breathtaking. Literally.\"",
+    "\"Your screech is music to my ears. Loud music. Very loud.\"",
+    "\"What a wingspan! A whole hug fits in there.\"",
+    "\"You dance so wildly. May I join in?\""
+   ],
+   "kuehn": [
+    "\"Skip the spores, darling. You've infected my heart anyway.\"",
+    "\"Dance a doom dance with me. I'll lead. Or you will. As long as it's together.\"",
+    "\"There's room on my back. Or on yours. Shall we fly?\"",
+    "\"Peck me if you must. But gently.\""
+   ],
+   "absurd": [
+    "\"Are you a vulture? Because right now I feel like carrion. In a good way.\"",
+    "\"I brought you a worm. Romance is what you make of it.\"",
+    "\"When you screech, I'll screech back. That's our song.\"",
+    "\"I like your beak. Sharp, but honest.\""
+   ],
+   "passend": [
+    "\"Echo brought you down from the sky. I'll bring you onto the dance floor.\"",
+    "\"You're a demon from the Abyss. I'm a bard from Phandalin. Sounds like a ballad.\"",
+    "\"A vrock who listens? I think I'm in luck.\""
+   ]
+  },
+  "kuotoa": {
+   "charmant": [
+    "\"Your eyes are as big and clear as the lake in the dark. And you never look away. How attentive.\"",
+    "\"Your scales shimmer like moonlight on water. Not that I've seen moonlight down here.\"",
+    "\"You smell of algae and adventure. My favourite blend.\"",
+    "\"You hold your spear so elegantly. Like a rose. A pointy rose.\""
+   ],
+   "kuehn": [
+    "\"Let us in. Then show me where Sloobludop drips most romantically.\"",
+    "\"One wet kiss and I'll forget how strange all of this is.\"",
+    "\"I'd grow gills for you. Give me a reason.\"",
+    "\"You and me, a boat and the lake. I'll row.\""
+   ],
+   "absurd": [
+    "\"Blub blub.\" (Barradin hopes it means 'you're beautiful'. It means 'the drain is blocked'.)",
+    "\"May I be your aquarium?\"",
+    "\"I've got a shell for you. It's empty. Like my heart without you.\"",
+    "\"Are you a fish? Because I've taken the bait.\""
+   ],
+   "passend": [
+    "\"Ploopploopeen would be proud of your taste. You're looking at me, after all.\"",
+    "\"You guard a whole city. Why not guard a bard's heart?\"",
+    "\"I hear you worship whatever you make up. Make me up.\""
+   ]
+  },
+  "horga": {
+   "charmant": [
+    "\"Your Majesty, your beard is forged like steel. And just as irresistible.\"",
+    "\"You're the fifth Horga. But to me, you're the first.\"",
+    "\"Your crown is glowing. Or is that you?\"",
+    "\"In all of Gracklstugh there's only one fire hotter than your forges: your gaze.\""
+   ],
+   "kuehn": [
+    "\"Grant me guest right, Majesty. And perhaps a little more closeness.\"",
+    "\"You can turn invisible. Please don't, not around me.\"",
+    "\"You can grow huge? I'd have a suggestion. Purely spatial.\"",
+    "\"For you I'd even sing in a key made of steel.\""
+   ],
+   "absurd": [
+    "\"Are you an anvil? Because my heart is hammering.\"",
+    "\"I made you a crown. Out of mushrooms. It glows in the dark. Like you.\"",
+    "\"If you were a hammer, I'd be the nail. Strike. Well. No. Figuratively.\"",
+    "\"I like grey skin. It matches my favourite stone.\""
+   ],
+   "passend": [
+    "\"A king who honours his guests becomes immortal in song. I'll write the songs.\"",
+    "\"Gracklstugh is rough. You're rough. I like rough.\"",
+    "\"The city obeys you. So would I. Gladly.\""
+   ]
+  },
+  "hgraam": {
+   "charmant": [
+    "\"Your voice sounds like a landslide. A very gentle landslide.\"",
+    "\"You're so tall I'd have to climb to look into your heart. I'm a good climber.\"",
+    "\"There's more wisdom in your riddles than in all the libraries. And more gravel.\"",
+    "\"You're a rock in the surf. And I'm the surf.\""
+   ],
+   "kuehn": [
+    "\"Give me your crystal. I'll give you my heartbeat.\"",
+    "\"Let's be silent together. You're the best at it. I'll learn, for you.\"",
+    "\"I'd love to whisper in your ear. Give me a ladder and an hour.\"",
+    "\"You talk to stones. Talk to me. I'm pretty hard to break too.\""
+   ],
+   "absurd": [
+    "\"Are you a stone? Because around you I go soft.\"",
+    "\"I named a pebble after you. It's called Darling now.\"",
+    "\"Let's collect stones. You take the big ones, I'll take the hearts.\"",
+    "\"I wrote you a poem. It's carved in stone. It's very short.\""
+   ],
+   "passend": [
+    "\"The stones told me about you. Only good things. And lots of gravel.\"",
+    "\"When the stones speak, what do they say about the two of us?\"",
+    "\"Riddles like you. So do I.\""
+   ]
+  },
+  "themberchaud": {
+   "charmant": [
+    "\"Master of Flames, your scales glow like your hoard. Only hotter.\"",
+    "\"You're the most magnificent dragon I've ever seen. And the only one who hasn't eaten me.\"",
+    "\"Your voice rolls like gold down a mountain. I could listen to you for hours.\"",
+    "\"Those horns! That throat! That … belly! Majestic.\""
+   ],
+   "kuehn": [
+    "\"Don't eat me, Master. I'm far too sweet to be a snack.\"",
+    "\"Lie down on your hoard. I'll lie next to it. Just to keep you warm.\"",
+    "\"I may be small, but I fit perfectly between two claws.\"",
+    "\"Your fire doesn't scare me. It makes me nervous. The good kind.\""
+   ],
+   "absurd": [
+    "\"Are you a volcano? Because I just melted.\"",
+    "\"I brought you a present: me. With seasoning, in case you get hungry after all.\"",
+    "\"You have three hundred thousand coins. I have one heart. Trade?\"",
+    "\"I'm like a good wine: best left unconsumed.\""
+   ],
+   "passend": [
+    "\"Your hoard shines. But you shine brighter.\"",
+    "\"I'll sing for you, Master. Not one word about eggs. Promise.\"",
+    "\"A dragon with such good taste doesn't eat bards. He collects them.\""
+   ]
+  },
+  "demogorgon": {
+   "charmant": [
+    "\"Two heads, and both of them gorgeous. I just can't choose.\"",
+    "\"Your tentacles are so … numerous. I like that in a prince.\"",
+    "\"When you bring the lake to a boil, my heart gets all warm.\"",
+    "\"You're the Prince of Demons. I'd like an audience. A long one.\""
+   ],
+   "kuehn": [
+    "\"One of your heads wants to eat me, the other wants to kiss me. I'm betting on the second.\"",
+    "\"Hug me with all your tentacles at once. I can take it. Probably.\"",
+    "\"Go home, darling. But write to me.\"",
+    "\"I'm the only mortal who ever winked at you. Remember that.\""
+   ],
+   "absurd": [
+    "\"Are you a prince? I was expecting a princess. But I'm flexible.\"",
+    "\"May I invite both heads to dinner? Separate bills.\"",
+    "\"I've got madness in my eyes. So have you. We're a match.\"",
+    "\"Who ordered you? Doesn't matter. I'll take you.\""
+   ],
+   "passend": [
+    "\"You swallowed a whole fish town. At least leave me my heart.\"",
+    "\"Ploopploopeen summoned you. I just want you to leave. But with style.\"",
+    "\"A demon prince with two heads needs two bards. I'm ready to sing for two.\""
+   ]
+  }
+ }
+};
   ["de", "en"].forEach(l => {
-    Object.keys(MEHR_SPRUECHE[l]).forEach(id => Object.keys(MEHR_SPRUECHE[l][id]).forEach(art => { TX[l].nsc[id][art] = TX[l].nsc[id][art].concat(MEHR_SPRUECHE[l][id][art]); }));
     Object.assign(TX[l].nsc, NEUE_NSC[l]);
     Object.assign(NSC2[l], NEUE_NSC2[l]);
+    /* die neuen Sprüche ersetzen die alten Listen ganz (die alten waren teils wahllos und kaum Flirts) */
+    Object.keys(NEUE_SPRUECHE[l]).forEach(id => { if (TX[l].nsc[id]) Object.assign(TX[l].nsc[id], NEUE_SPRUECHE[l][id]); });
   });
   /* ---------- Gespräche: jede Antwort hat ihre eigene Reaktion und führt zu einer eigenen Folgefrage ----------
      Form: { f: Frage, a: [[Qualität, Barradins Antwort, Reaktion des NSC, (Folgefrage)], …] } */
