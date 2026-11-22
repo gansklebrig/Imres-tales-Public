@@ -39411,16 +39411,24 @@ window.__hsGLWELT={v:7};
  function texAusLw(R,c,alt){flush(R);const g=R.gl;const t=alt||g.createTexture();g.bindTexture(g.TEXTURE_2D,t);texPar(g,g.LINEAR);t.__flt=g.LINEAR;g.texImage2D(g.TEXTURE_2D,0,g.RGBA,g.RGBA,g.UNSIGNED_BYTE,c);R.b.tex=null;R.st.up++;return t}
  /* Kachel direkt auf der Grafikkarte bauen (GX in einen Bildpuffer): kein Rastern auf dem Prozessor, kein Hochladen.
     Die Textur steht dabei auf dem Kopf (GL-Bildpuffer) → e.fl=1, beim Zeichnen gespiegelt. Fällt bei Problemen auf den 2D-Weg zurück. */
+ /* ein Bildpuffer (mit Schablone) für alle Kacheln: je Kachel nur eine neue Textur anhängen – kein Neuanlegen und keine
+    Statusabfrage (die in Firefox auf die Grafikkarte wartet) pro Kachel */
+ function kfbNeu(R,TS){const g=R.gl;let K=BT.kfb;if(K&&(K.gen!==R.gen||K.w!==TS)){try{g.deleteFramebuffer(K.f);g.deleteRenderbuffer(K.rb)}catch(e){}K=BT.kfb=null}
+  flush(R);if(!K){const f=g.createFramebuffer(),rb=g.createRenderbuffer();g.bindRenderbuffer(g.RENDERBUFFER,rb);g.renderbufferStorage(g.RENDERBUFFER,g.STENCIL_INDEX8,TS,TS);
+   g.bindFramebuffer(g.FRAMEBUFFER,f);g.framebufferRenderbuffer(g.FRAMEBUFFER,g.STENCIL_ATTACHMENT,g.RENDERBUFFER,rb);K=BT.kfb={f,rb,w:TS,gen:R.gen,ok:0}}
+  const t=g.createTexture();g.bindTexture(g.TEXTURE_2D,t);g.texImage2D(g.TEXTURE_2D,0,g.RGBA,TS,TS,0,g.RGBA,g.UNSIGNED_BYTE,null);texPar(g,g.LINEAR);
+  g.bindFramebuffer(g.FRAMEBUFFER,K.f);g.framebufferTexture2D(g.FRAMEBUFFER,g.COLOR_ATTACHMENT0,g.TEXTURE_2D,t,0);
+  if(!K.ok){if(g.checkFramebufferStatus(g.FRAMEBUFFER)!==g.FRAMEBUFFER_COMPLETE){g.bindFramebuffer(g.FRAMEBUFFER,null);try{g.deleteTexture(t)}catch(e){}R.b.tex=null;R.b.tgt=undefined;BT.kgxSperre=1;return null}K.ok=1}
+  R.b.tex=null;const F={f:K.f,t,rb:null,w:TS,h:TS,geteilt:1};R.b.tgt=F;return F}
  function kachelGX(){const v=GW.k.kgx;return v===1||(v!==0&&firefox)}
- function kachelBauGX(i,j,sB){const T0=jetzt(),R=RS.u,g=R.gl,TS=GW.TS;const F=fbNeu(R,TS,TS,true);if(!F)return null;
+ function kachelBauGX(i,j,sB){const T0=jetzt(),R=RS.u,g=R.gl,TS=GW.TS;const F=kfbNeu(R,TS);if(!F)return null;
   if(!BT.gx){BT.gx=new GX(R,'lw')}const X=BT.gx;const z0=R.ziel;X.neu();X.st.unbek=0;X.st.text=0;X.st.mix=0;X.zielSetzen(F,TS,TS);rZiel(R,F);g.clearColor(0,0,0,1);g.clearStencil(0);g.clear(g.COLOR_BUFFER_BIT|g.STENCIL_BUFFER_BIT);R.b.tgt=F;
   try{X.von(EB.g1)}catch(e){}X.globalAlpha=1;X.globalCompositeOperation='source-over';X.setTransform(sB,0,0,sB,-i*TS,-j*TS);
   const X0=i*TS/sB,Y0=j*TS/sB,X1=(i+1)*TS/sB,Y1=(j+1)*TS/sB;
   const c0=cx,W0=W,H0=H,cam0=G.cam,Z0=ZOOM,C=CRs(),mr=Math.random;let ok=true;
   try{bodenRechteck(X,G.ground,G.road,X0,Y0,X1,Y1);cx=X;W=(X1-X0)*ZOOM;H=(Y1-Y0)*ZOOM;G.cam={x:(X0+X1)/2,y:(Y0+Y1)/2};C.bau=(C.bau||0)+1;dRnd=(i*7919+j*104729)&0x7fffffff;Math.random=dRandom;RWK()}
   catch(e){ok=false;gErr('kachelGX',e)}finally{cx=c0;W=W0;H=H0;G.cam=cam0;ZOOM=Z0;if(C.bau)C.bau--;Math.random=mr}
-  flush(R);rZiel(R,z0);
-  /* Bildpuffer und Schablone freigeben, Textur behalten */try{g.deleteFramebuffer(F.f);if(F.rb)g.deleteRenderbuffer(F.rb)}catch(e){}R.b.tgt=undefined;
+  flush(R);rZiel(R,z0);R.b.tgt=undefined;
   const fehl=X.st.unbek+X.st.text+X.st.mix;GW.st.kgxFehl=(GW.st.kgxFehl||0)+fehl;
   if(!ok||fehl){try{g.deleteTexture(F.t)}catch(e){}GW.st.kgxAus=(GW.st.kgxAus||0)+1;if(!ok||GW.st.kgxAus>40)BT.kgxSperre=1;return null}
   F.t.__flt=g.LINEAR;GW.st.kachelBau++;GW.st.kgx=(GW.st.kgx||0)+1;BT.bt+=jetzt()-T0;return{t:F.t,gen:BT.gen,lu:R.frame,fl:1}}
@@ -39435,14 +39443,30 @@ window.__hsGLWELT={v:7};
  function kCap(anteil,nVis){return Math.min(520,Math.max(texCap()*anteil/(GW.TS*GW.TS*4),nVis*1.8))}
  /* Welt-Ebene eines Bildes: Kacheln zeichnen/bauen, Live-Rest auf S1 */
  function prioK(x,y,T){const L=BT.prio;if(!L||!L.length)return false;for(const r of L)if(x<r[2]&&x+T>r[0]&&y<r[3]&&y+T>r[1])return true;return false}
+ /* Geröll/Hindernisse geändert (z. B. Erdbeben, zerstörte Steine): nur die Kacheln um die geänderten Hindernisse neu bauen
+    statt aller (vorher: jede Änderung → alle sichtbaren Kacheln neu, auf breiten Bildschirmen > 80 Stück) */
+ function blkBox(b){const p=b.t==='c'?Math.max(110,(b.r||0)*5*(b.s||1)):90;if(b.t==='c')return[b.x-p,b.y-p,b.x+p,b.y+p];if(b.w!=null&&b.h!=null)return[b.x-p,b.y-p,b.x+b.w+p,b.y+b.h+p];return null}
+ function blkSig(b){return b.t+'|'+b.x+'|'+b.y+'|'+(b.r||0)+'|'+(b.w||0)+'|'+(b.h||0)}
+ function blkAlle(){const L=(G.blk||[]).slice();try{if(G.wl&&G.wl.lo)for(const o of G.wl.lo)L.push(o)}catch(e){}return L}
+ function blkSnap(){const M=new Map();try{for(const b of blkAlle())M.set(b,blkSig(b))}catch(e){}BT.blkS=M;BT.torS=String(BT.weich||'').split('/')[0]}
+ function blkLokal(){if(GW.k.weichLokal===0||!BT.blkS)return false;const tor=String(BT.weich||'').split('/')[0];if(tor!==BT.torS)return false;
+  const alt=BT.blkS,neu=new Map(),R=[];let n=0;
+  for(const b of blkAlle()){const sg=blkSig(b);neu.set(b,sg);if(alt.get(b)!==sg){const q=blkBox(b);if(!q)return false;R.push(q);if(++n>60)return false}}
+  for(const [b,sg] of alt){if(!neu.has(b)){const q=blkBox(b);if(!q)return false;R.push(q);if(++n>60)return false}}
+  /* alte Position eines verschobenen Hindernisses */for(const [b,sg] of alt){if(neu.has(b)&&neu.get(b)!==sg){const v=sg.split('|');const o={t:v[0],x:+v[1],y:+v[2],r:+v[3],w:+v[4],h:+v[5],s:b.s};const q=blkBox(o);if(q)R.push(q)}}
+  BT.blkS=neu;GW.st.weichLok=(GW.st.weichLok||0)+1;if(!R.length)return true;
+  const mk=(M,sB)=>{if(!M||!M.size)return;const T=GW.TS/sB;for(const [k,E] of M){const c=k.indexOf(','),i=+k.slice(0,c),j=+k.slice(c+1),x0=i*T,y0=j*T;
+   for(const q of R)if(x0<q[2]&&x0+T>q[0]&&y0<q[3]&&y0+T>q[1]){E.gen=-1;break}}};
+  mk(BT.cur,BT.sB);mk(BT.alt,BT.altS||BT.sB);BT.prio=R.slice(0,12);return true}
  function welt(m){const T0=jetzt();BT.bt=0;try{return welt_(m)}finally{const d=jetzt()-T0;GW.st.weltE=GW.st.weltE==null?d:GW.st.weltE*0.95+d*0.05;GW.st.bauE=GW.st.bauE==null?BT.bt:GW.st.bauE*0.95+BT.bt*0.05}}
  function welt_(m){const s=m[0],e=m[4],f=m[5];const RU=RS.u,TS=GW.TS;
   if(!GW.k.boden||m[1]||m[2]||Math.abs(m[3]-s)>1e-9||!(s>0.05)){GW.st.bodenLive++;bodenLive();RWK();return}
   /* in Kammern mit noch sichtbarem Arena-Rand: ganz live (Reihenfolge Rand/Kammerboden) */
   try{if(G.room&&G.ka&&(G.ka.arA||0)>0.001){GW.st.bodenLive++;bodenLive();RWK();return}}catch(er){}
-  const key=bgBasis();if(BT.key===key&&BT.weichK!==BT.weich){BT.weichK=BT.weich;BT.gen++;GW.st.weich=(GW.st.weich||0)+1;
+  const key=bgBasis();if(BT.key===key&&BT.weichK!==BT.weich&&blkLokal()){BT.weichK=BT.weich}
+  if(BT.key===key&&BT.weichK!==BT.weich){BT.weichK=BT.weich;BT.gen++;GW.st.weich=(GW.st.weich||0)+1;blkSnap();
    /* Kacheln an Toren sofort neu (sonst stünde ein offenes Tor kurz noch zu) */BT.prio=[];try{const K=G.ka;if(K&&K.tore)for(const T of K.tore){const r=(T.w||160)*0.75+90;BT.prio.push([T.x-r,T.y-r,T.x+r,T.y+r])}}catch(er){}}
-  if(BT.key!==key){BT.weichK=BT.weich;GW.st.schluessel=(GW.st.schluessel||0)+1;GW.kDiff=[BT.key,key];BT.key=key;kachelnFrei(BT.cur);kachelnFrei(BT.alt);BT.sB=s;BT.gen++;BT.ab=0}
+  if(BT.key!==key){BT.weichK=BT.weich;blkSnap();GW.st.schluessel=(GW.st.schluessel||0)+1;GW.kDiff=[BT.key,key];BT.key=key;kachelnFrei(BT.cur);kachelnFrei(BT.alt);BT.sB=s;BT.gen++;BT.ab=0}
   /* Maßstab: bleibt, solange ±12 %; sonst nach 30 Bildern neu bauen (die alten Kacheln überbrücken) */
   if(Math.abs(s/BT.sB-1)>0.12){if(++BT.ab>30){GW.st.massstab=(GW.st.massstab||0)+1;kachelnFrei(BT.alt);BT.alt=BT.cur;BT.altS=BT.sB;BT.cur=new Map();BT.sB=s;BT.ab=0}}else BT.ab=0;
   const sB=BT.sB,T=TS/sB,cw=EB.w,ch=EB.h;const X0=-e/s,Y0=-f/s,X1=(cw-e)/s,Y1=(ch-f)/s;
@@ -39520,12 +39544,12 @@ window.__hsGLWELT={v:7};
   try{cx=g;FR.dbau=1;C.dbau=(C.dbau||0)+1;dRnd=(i*7919+j*104729+17)&0x7fffffff;Math.random=dRandom;for(const I of L){try{DD(DT.arr[I.i],t)}catch(er){}}}finally{cx=c0;FR.dbau=0;C.dbau--;Math.random=mr}
   return{t:texAusLw(RS.u,DT.bc,null),lu:RS.u.frame}}
  /* Deko-Kachel (durchsichtig) auf der Grafikkarte, wie kachelBauGX */
- function dKachelGX(i,j,sB,L){const R=RS.u,g=R.gl,TS=GW.TS;const F=fbNeu(R,TS,TS,true);if(!F)return null;if(!BT.gx)BT.gx=new GX(R,'lw');const X=BT.gx,z0=R.ziel;
+ function dKachelGX(i,j,sB,L){const R=RS.u,g=R.gl,TS=GW.TS;const F=kfbNeu(R,TS);if(!F)return null;if(!BT.gx)BT.gx=new GX(R,'lw');const X=BT.gx,z0=R.ziel;
   X.neu();X.st.unbek=0;X.st.text=0;X.st.mix=0;X.zielSetzen(F,TS,TS);rZiel(R,F);g.clearColor(0,0,0,0);g.clearStencil(0);g.clear(g.COLOR_BUFFER_BIT|g.STENCIL_BUFFER_BIT);
   try{X.von(EB.g1)}catch(e){}X.globalAlpha=1;X.globalCompositeOperation='source-over';X.setTransform(sB,0,0,sB,-i*TS,-j*TS);
   const c0=cx,mr=Math.random,t=G.time,C=CRs();let ok=true;
   try{cx=X;FR.dbau=1;C.dbau=(C.dbau||0)+1;dRnd=(i*7919+j*104729+17)&0x7fffffff;Math.random=dRandom;for(const I of L){try{DD(DT.arr[I.i],t)}catch(er){}}}catch(e){ok=false}finally{cx=c0;FR.dbau=0;C.dbau--;Math.random=mr}
-  flush(R);rZiel(R,z0);try{g.deleteFramebuffer(F.f);if(F.rb)g.deleteRenderbuffer(F.rb)}catch(e){}R.b.tgt=undefined;
+  flush(R);rZiel(R,z0);R.b.tgt=undefined;
   const fehl=X.st.unbek+X.st.text+X.st.mix;GW.st.kgxFehl=(GW.st.kgxFehl||0)+fehl;
   if(!ok||fehl){try{g.deleteTexture(F.t)}catch(e){}GW.st.kgxAus=(GW.st.kgxAus||0)+1;if(GW.st.kgxAus>40)BT.kgxSperre=1;return null}
   F.t.__flt=g.LINEAR;GW.st.kgx=(GW.st.kgx||0)+1;return{t:F.t,lu:R.frame,fl:1}}
