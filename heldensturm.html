@@ -21230,7 +21230,9 @@ function kaParken(dt){const K=G.ka;if(!K||!K.an||G.room||G.netGuestRun||KAP.off)
  /* parken */
  let raus=null;for(const e of G.enemies){if(kaParkbar(e)&&fern(e,KAP.aus)){const g=G.wl&&G.wl.gr&&G.wl.gr[e.wlG];if(g&&g.wach)continue;(raus||(raus=new Set())).add(e)}}
  if(raus){G.enemies=G.enemies.filter(e=>!raus.has(e));for(const e of raus)park.push(e)}}
-{const up0=update;update=function(dt){try{kaParken(dt)}catch(er){KAP.off=1;console.error('kaParken',er)}return up0.apply(this,arguments)}}
+/* Handhelds (Ultra leicht): schlafende Gruppen schon ab gut zwei Bildschirmbreiten parken – spart Spiel-Logik, an der Spielmechanik ändert sich nichts (sie schlafen) */
+const KAP0={aus:KAP.aus,ein:KAP.ein};function kaParkGrenze(){const u=!!(window.__hsULTRA&&window.__hsULTRA.on);KAP.aus=u?950:KAP0.aus;KAP.ein=u?820:KAP0.ein}
+{const up0=update;update=function(dt){try{kaParkGrenze();kaParken(dt)}catch(er){KAP.off=1;console.error('kaParken',er)}return up0.apply(this,arguments)}}
 /* Stufenwechsel: geparkte verwerfen (gehören zur alten Karte) – passiert automatisch, da K.park an G.ka hängt */
 window.__kaKAP=KAP;
 /* Zähl-Logik der Welt (Nachschub/Rückfall) muss die geparkten Gegner mitzählen, sonst schickt sie Verstärkung */
