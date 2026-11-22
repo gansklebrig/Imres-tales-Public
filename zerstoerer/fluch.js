@@ -10,8 +10,8 @@
   const CURSE = [
     null,
     { n: 10, mul: 1.9, name: ["Verflucht", "Cursed"], extra: [] },
-    { n: 20, mul: 2.7, name: ["Schwer verflucht", "Gravely cursed"], extra: ["vampirisch"] },
-    { n: 50, mul: 4.0, name: ["Verdammt", "Damned"], extra: ["vampirisch", "kritisch", "flink"] }
+    { n: 20, mul: 2.7, name: ["Schwer verflucht", "Gravely cursed"], extra: ["kritisch"] },
+    { n: 50, mul: 4.0, name: ["Verdammt", "Damned"], extra: ["kritisch", "flink"] }
   ];
   Z.CURSE = CURSE;
 
@@ -19,6 +19,8 @@
   Z.curseItem = function (it, lvl) {
     if (!it) return it;
     it.cursed = lvl; it.curseN = CURSE[lvl].n; it.rar = Math.max(it.rar, Math.min(3, lvl));
+    it.aff = it.aff.filter(a => a !== "vampirisch");
+    if (Z.CPOWER_IDS && !it.power) it.power = Z.R.pick(Z.CPOWER_IDS.filter(k => !Z.CPOWER[k].only || Z.CPOWER[k].only === it.type));
     const isSkill = it.type === "skill";
     for (const a of CURSE[lvl].extra) if (!it.aff.includes(a) && (!isSkill || Z.AFFIX_SKILL.includes(a))) it.aff.push(a);
     return it;
@@ -59,7 +61,8 @@
   Z.curseCardHTML = function (it) {
     if (!it || !it.cursed) return "";
     const c = CURSE[it.cursed], done = it.curseApplied && Z.player && Z.player.curse <= 0;
-    return '<div class="ic-fluch">☠ <b>' + esc(L(c.name)) + "</b> · " + (done ? L(["Fluch gebrochen – volle Kraft", "Curse broken – full power"]) : L(["Schaden ×", "Damage ×"]) + c.mul.toFixed(1) + " · " + L(["bis ", "until "]) + c.n + L([" Kills tötet dich jeder Treffer", " kills, any hit kills you"])) + "</div>";
+    const pw = it.power && Z.CPOWER[it.power];
+    return '<div class="ic-fluch">☠ <b>' + esc(L(c.name)) + "</b>" + (pw ? '<div class="ic-kraft"><b>' + esc(L(pw.n)) + "</b> – " + esc(L(pw.d)) + "</div>" : "") + (done ? L(["Fluch gebrochen – volle Kraft", "Curse broken – full power"]) : L(["Schaden ×", "Damage ×"]) + c.mul.toFixed(1) + " · " + L(["bis ", "until "]) + c.n + L([" Kills tötet dich jeder Treffer", " kills, any hit kills you"])) + "</div>";
   };
   /* Verfluchte Funde leuchten violett */
   const draw0 = Z.drawParcours;
