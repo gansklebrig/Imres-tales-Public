@@ -63,21 +63,11 @@ jobs:
       - name: Spieldateien einpacken
         run: python3 tools/android/sammeln.py
 
-      - name: Signaturschlüssel entschlüsseln
-        env:
-          HELDENSTURM_SCHLUESSEL: ${{ secrets.HELDENSTURM_SCHLUESSEL }}
-          SCHLUESSEL_VAR: ${{ vars.HELDENSTURM_SCHLUESSEL }}
+      - name: Signaturschlüssel prüfen
         run: |
-          [ -z "$HELDENSTURM_SCHLUESSEL" ] && HELDENSTURM_SCHLUESSEL="$SCHLUESSEL_VAR"
-          echo "schluessel_laenge=${#HELDENSTURM_SCHLUESSEL} als_variable=$([ -n "$SCHLUESSEL_VAR" ] && echo ja || echo nein)" > namen.txt
-          HELDENSTURM_SCHLUESSEL="$(printf '%s' "$HELDENSTURM_SCHLUESSEL" | tr -d '[:space:]')"
-          if [ -z "$HELDENSTURM_SCHLUESSEL" ]; then
-            echo "::warning::Secret HELDENSTURM_SCHLUESSEL fehlt (Settings → Secrets and variables → Actions) – Probebau ohne Release."
-            exit 0
-          fi
-          echo "HS_SIGNIERT=1" >> "$GITHUB_ENV"
-          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
-            -in android/keystore/heldensturm.jks.enc -out android/keystore/heldensturm.jks -pass env:HELDENSTURM_SCHLUESSEL
+          # Der Schlüssel liegt bewusst offen im Repo (android/keystore/heldensturm.jks), damit kein Secret nötig ist
+          if [ -f android/keystore/heldensturm.jks ]; then echo "HS_SIGNIERT=1" >> "$GITHUB_ENV"; echo "schluessel=repo" > namen.txt
+          else echo "::warning::android/keystore/heldensturm.jks fehlt – Probebau ohne Release."; echo "schluessel=fehlt" > namen.txt; fi
 
       - name: APK bauen
         working-directory: android

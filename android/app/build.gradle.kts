@@ -16,8 +16,7 @@ android {
         versionName = "1.$run"
     }
 
-    // Fester Schlüssel: liegt verschlüsselt im Repo (keystore/heldensturm.jks.enc) und wird auf GitHub
-    // mit dem Secret HELDENSTURM_SCHLUESSEL entschlüsselt. Ohne ihn: Debug-Schlüssel (nicht update-fähig).
+    // Fester Schlüssel im Repo (keystore/heldensturm.jks), damit jede neue Version als Update passt.
     val hsKey = rootProject.file("keystore/heldensturm.jks")
     signingConfigs {
         create("hs") {
