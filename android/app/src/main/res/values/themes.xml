@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Gleiche dunkle Farbe wie das Ladebild, damit beim Start nichts schwarz aufblitzt -->
+    <style name="Theme.Heldensturm" parent="@android:style/Theme.Black.NoTitleBar.Fullscreen">
+        <item name="android:windowBackground">@color/himmel</item>
+    </style>
+    <color name="himmel">#FF140E12</color>
+</resources>

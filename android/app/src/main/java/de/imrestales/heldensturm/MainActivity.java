@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
+import android.widget.FrameLayout;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -33,6 +34,9 @@ public class MainActivity extends Activity {
 
     private WebView web;
     private Aktualisierer upd;
+    private Ladebild lade;
+    private final long ladeStart = android.os.SystemClock.uptimeMillis();
+    private boolean ladeWeg = false;
 
     @Override
     protected void onCreate(Bundle saved) {
@@ -47,8 +51,15 @@ public class MainActivity extends Activity {
         }
 
         web = new WebView(this);
-        web.setBackgroundColor(0xFF000000);
-        setContentView(web);
+        web.setBackgroundColor(0xFF0E0A0C);
+        FrameLayout rahmen = new FrameLayout(this);
+        rahmen.setBackgroundColor(0xFF0E0A0C);
+        rahmen.addView(web, new FrameLayout.LayoutParams(-1, -1));
+        lade = new Ladebild(this);
+        rahmen.addView(lade, new FrameLayout.LayoutParams(-1, -1));
+        setContentView(rahmen);
+        // spätestens nach 20 s weg, falls das Spiel sich nicht meldet
+        lade.postDelayed(this::ladebildWeg, 20000);
 
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
@@ -91,10 +102,33 @@ public class MainActivity extends Activity {
             runOnUiThread(() -> upd.suche(true));
         }
 
+        /** Das Spiel meldet: Hauptmenü steht – Ladebild ausblenden. */
+        @JavascriptInterface
+        public void bereit() {
+            runOnUiThread(MainActivity.this::ladebildWeg);
+        }
+
         @JavascriptInterface
         public String version() {
             return "1." + Aktualisierer.eigeneVersion(MainActivity.this);
         }
+    }
+
+    /** Ladebild sanft ausblenden – aber mindestens 1,6 s zeigen, damit die Gans einmal zu sehen ist. */
+    void ladebildWeg() {
+        if (ladeWeg || lade == null) return;
+        long rest = 1600 - (android.os.SystemClock.uptimeMillis() - ladeStart);
+        if (rest > 0) {
+            lade.postDelayed(this::ladebildWeg, rest);
+            return;
+        }
+        ladeWeg = true;
+        lade.animate().alpha(0f).setDuration(350).withEndAction(() -> {
+            lade.setVisibility(View.GONE);
+            ((FrameLayout) lade.getParent()).removeView(lade);
+            lade = null;
+            if (web != null) web.requestFocus();
+        }).start();
     }
 
     @Override
@@ -123,6 +157,12 @@ public class MainActivity extends Activity {
             } catch (IOException e) {
                 return fehlt();
             }
+        }
+
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            // Rückfall, falls sich das Spiel nicht meldet
+            if (lade != null) lade.postDelayed(MainActivity.this::ladebildWeg, 6000);
         }
 
         @Override

@@ -20123,7 +20123,7 @@ function offHtml(){const st=OFF.st,f=OFF.fort,z=OFF.zip;
 .offpg .slbtn.klein{font-size:.78em;align-self:flex-start;opacity:.8}`;document.head.appendChild(st)})();
 /* Hauptmenü: Knopf „Offline spielen“ (nur wenn es hier etwas zu tun gibt) */
 slIco.offline='⇩';
-{const f=slMainHtml;slMainHtml=function(){let h=f.apply(this,arguments);if(OFF.app){let v='';try{v=window.HeldensturmApp?HeldensturmApp.version():''}catch(e){}
+{const f=slMainHtml;slMainHtml=function(){let h=f.apply(this,arguments);if(OFF.app){if(!window.__hsBereit){window.__hsBereit=1;setTimeout(()=>{try{window.HeldensturmApp&&HeldensturmApp.bereit&&HeldensturmApp.bereit()}catch(e){}},120)}let v='';try{v=window.HeldensturmApp?HeldensturmApp.version():''}catch(e){}
   const ab=`<button class="slb" onclick="try{window.HeldensturmApp&&HeldensturmApp.suche()}catch(e){}"><span class="ic">⟳</span><span class="tx">Nach Updates suchen<small>App-Version ${esc(v||'?')}</small></span></button>`,a0='<button class="slb" data-act="sl-go" data-v="credits">';return h.includes(a0)?h.replace(a0,ab+a0):h}
  const st=OFF.st,sub=OFF.datei?'Heruntergeladene Fassung':!OFF.ok?'So geht’s: Spiel auf imrestales.de speichern':OFF.fort?'Wird gespeichert …':st&&st.n>=st.total?'✓ Offline bereit':'App installieren oder ZIP für den PC';
  const b=`<button class="slb" data-act="sl-go" data-v="offline"><span class="ic">${slIco.offline}</span><span class="tx">Offline spielen<small>${sub}</small></span></button>`;
