@@ -2286,7 +2286,7 @@ window.addEventListener("load", () => { const b = document.body.classList; if (!
 <script>
 /* Spiele öffnen ohne Aufblitzen der Seite: sofort schwarz, dann wechseln (Handy, Handheld) */
 (function(){
-  var SPIELE={"heldensturm.html":"Heldensturm"};
+  var SPIELE={"heldensturm.html":"Heldensturm","zerstoerer.html":"Ezekiel – The Destroyer"};
   function schwarz(titel){var d=document.createElement("div");d.id="spielwechsel";d.setAttribute("style","position:fixed;inset:0;z-index:2147483000;background:#100c12;display:flex;align-items:center;justify-content:center;color:#e5b454;font:400 clamp(26px,7vw,44px) 'IM Fell English SC',Georgia,serif");d.textContent=titel;document.body.appendChild(d);}
   document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a[href]");if(!a||e.defaultPrevented||e.button>0||e.ctrlKey||e.metaKey||e.shiftKey||a.target==="_blank")return;
     var h=a.getAttribute("href").split(/[?#]/)[0];if(!SPIELE[h])return;e.preventDefault();schwarz(SPIELE[h]);var ziel=a.href;requestAnimationFrame(function(){requestAnimationFrame(function(){location.href=ziel})});},true);

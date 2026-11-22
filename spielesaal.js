@@ -29,6 +29,8 @@
       plakat: B("plakat-jagd"), pos: "center 22%", farbe: "#8fd36b", clip: "vorschau/jagd-clip.mp4?v=5", ton: "bogen.mp3", art: "update", stand: "2026-11-07" },
     { key: "nacht", karte: "diebesnacht", held: "ezekiel.jpg", bilder: [B("nacht-1"), B("nacht-2"), B("nacht-3")],
       plakat: B("plakat-nacht"), pos: "center 28%", farbe: "#ff5a4e", clip: "vorschau/nacht-clip.mp4?v=5", ton: "shake.mp3", art: "update", stand: "2026-11-07" },
+    { key: "zerstoerer", karte: "zerstoerer", extern: "zerstoerer.html", held: "ezekiel.jpg", bilder: ["vorschau/zerstoerer-1.webp?v=1", "vorschau/zerstoerer-2.webp?v=1", "vorschau/zerstoerer-3.webp?v=1"],
+      plakat: "vorschau/plakat-zerstoerer.webp?v=1", pos: "62% 30%", farbe: "#ff3a2a", clip: "vorschau/zerstoerer-clip.mp4?v=1", ton: "timp1.mp3", art: "neu", stand: "2026-11-22" },
     { key: "hort", karte: "echohort", held: "echo.jpg", bilder: [B("hort-1"), B("hort-2"), B("hort-3")],
       plakat: B("plakat-hort"), pos: "52% center", farbe: "#5fd6b8", clip: "vorschau/hort-clip.mp4?v=5", ton: "harfe_76.mp3", art: "update", stand: "2026-11-07" },
     { key: "auftritt", karte: "auftritt", held: "barradin.jpg", bilder: [B("auftritt-1"), B("auftritt-2"), B("auftritt-3")],
@@ -46,12 +48,12 @@
   const MEHR = {
     de: {
       spruch: { heldensturm: "Vier Helden. Tausend Goblins. Ein sehr müder Barde.", jagd: "Wie viele Goblins schaffst du, bevor Rex heiser ist?",
-        nacht: "Ezekiel nimmt nur, was niemand vermisst. Meistens.", hort: "Was glänzt, gehört Echo. Was nicht glänzt, auch.",
+        nacht: "Ezekiel nimmt nur, was niemand vermisst. Meistens.", zerstoerer: "Ohne Waffe rein. Mit allen Waffen raus.", hort: "Was glänzt, gehört Echo. Was nicht glänzt, auch.",
         auftritt: "Vom Hinterhof bis zu den Göttern – kein Ton daneben.", probe: "Eine 20 macht Helden. Eine 1 macht Lieder über dich.",
         memory: "Erinnerst du dich an jedes Monster, das uns fressen wollte?", charme: "Kann ich den NSC verführen? – Würfel auf Charisma.",
         kehle: "Hier würfelt keiner. Hier singst du. Echt." },
       kopfLabel: "Zeitvertreib", kopfTitel: "Die Taverne",
-      kopfText: "Krüge hoch, Würfel raus! Neun Spiele aus unserer Kampagne – vom Hordenkampf bis zum Gesang. Zieh dir einen Hocker ran.",
+      kopfText: "Krüge hoch, Würfel raus! Zehn Spiele aus unserer Kampagne – vom Hordenkampf bis zum Gesang. Zieh dir einen Hocker ran.",
       heute: "Heute in der Taverne", jetzt: "▶ Jetzt spielen", mehr: "Mehr erfahren", spielen: "▶ Spielen", weiter: "▶ Weiterspielen",
       neu: "Neu", update: "Frisch", spiele: n => n + " Spiele", rekorde: n => n + (n === 1 ? " Rekord" : " Rekorde"), neuZahl: n => n + " neu",
       tonAn: "Tavernenklänge an", tonAus: "Tavernenklänge aus", nieGespielt: "Noch nie gespielt – trau dich!", deinStand: "Dein Stand",
@@ -59,6 +61,7 @@
         heldensturm: d => [d.gold ? "💰 " + d.gold.toLocaleString("de-DE") + " Gold" : "", d.laeufe ? d.laeufe + (d.laeufe === 1 ? " Lauf" : " Läufe") : ""],
         jagd: d => [d.rekord ? "🏆 " + d.rekord.toLocaleString("de-DE") + " Punkte" : "", d.kapitel > 1 ? "Kapitel " + d.kapitel : ""],
         nacht: d => [d.rekord ? "🏆 " + d.rekord.toLocaleString("de-DE") + " Punkte" : "", d.nacht > 1 ? "Nacht " + d.nacht : "", d.taeglich ? "📅 Tägliche Nacht wartet" : ""],
+        zerstoerer: d => [d.enden ? "⚔ " + d.enden + "/3 Enden" : "", d.laeufe ? d.laeufe + (d.laeufe === 1 ? " Lauf" : " Läufe") : "", d.splitter ? "◆ " + d.splitter + " Splitter" : ""],
         hort: d => [d.weiter ? "▶ Level " + d.weiter + " gespeichert" : "", d.rekord ? "🏆 " + d.rekord.toLocaleString("de-DE") + " Punkte" : ""],
         auftritt: d => [d.sterne ? "★ " + d.sterne + "/36" : "", d.buehne > 1 ? "Bühne " + d.buehne + "/12" : ""],
         probe: () => ["🎲 Ein Wurf genügt"],
@@ -69,12 +72,12 @@
     },
     en: {
       spruch: { heldensturm: "Four heroes. A thousand goblins. One very tired bard.", jagd: "How many goblins can you drop before Rex goes hoarse?",
-        nacht: "Ezekiel only takes what no one will miss. Mostly.", hort: "If it shines, it's Echo's. If it doesn't – also Echo's.",
+        nacht: "Ezekiel only takes what no one will miss. Mostly.", zerstoerer: "In without a weapon. Out with all of them.", hort: "If it shines, it's Echo's. If it doesn't – also Echo's.",
         auftritt: "From the back alley to the gods – not one wrong note.", probe: "A 20 makes heroes. A 1 makes songs about you.",
         memory: "Do you remember every monster that tried to eat us?", charme: "Can I seduce the NPC? – Roll Charisma.",
         kehle: "No dice here. You sing. For real." },
       kopfLabel: "Pastimes", kopfTitel: "The Tavern",
-      kopfText: "Raise your tankards, roll the dice! Nine games from our campaign – from horde battles to singing. Pull up a stool.",
+      kopfText: "Raise your tankards, roll the dice! Ten games from our campaign – from horde battles to singing. Pull up a stool.",
       heute: "Tonight at the tavern", jetzt: "▶ Play now", mehr: "Learn more", spielen: "▶ Play", weiter: "▶ Continue",
       neu: "New", update: "Fresh", spiele: n => n + " games", rekorde: n => n + (n === 1 ? " record" : " records"), neuZahl: n => n + " new",
       tonAn: "Tavern sounds on", tonAus: "Tavern sounds off", nieGespielt: "Never played – dare you!", deinStand: "Your progress",
@@ -82,6 +85,7 @@
         heldensturm: d => [d.gold ? "💰 " + d.gold.toLocaleString("en-GB") + " gold" : "", d.laeufe ? d.laeufe + (d.laeufe === 1 ? " run" : " runs") : ""],
         jagd: d => [d.rekord ? "🏆 " + d.rekord.toLocaleString("en-GB") + " points" : "", d.kapitel > 1 ? "Chapter " + d.kapitel : ""],
         nacht: d => [d.rekord ? "🏆 " + d.rekord.toLocaleString("en-GB") + " points" : "", d.nacht > 1 ? "Night " + d.nacht : "", d.taeglich ? "📅 Daily night awaits" : ""],
+        zerstoerer: d => [d.enden ? "⚔ " + d.enden + "/3 endings" : "", d.laeufe ? d.laeufe + (d.laeufe === 1 ? " run" : " runs") : "", d.splitter ? "◆ " + d.splitter + " shards" : ""],
         hort: d => [d.weiter ? "▶ Level " + d.weiter + " saved" : "", d.rekord ? "🏆 " + d.rekord.toLocaleString("en-GB") + " points" : ""],
         auftritt: d => [d.sterne ? "★ " + d.sterne + "/36" : "", d.buehne > 1 ? "Stage " + d.buehne + "/12" : ""],
         probe: () => ["🎲 One roll is all it takes"],
@@ -105,6 +109,7 @@
     if (key === "jagd") { d.rekord = maxMitPrefix("imres-waldlauf-rekord"); d.kapitel = parseInt(lies("imres-waldlauf-kapitel"), 10) || 0; }
     if (key === "nacht") { d.rekord = maxMitPrefix("imres-diebesnacht-rekord-"); d.nacht = parseInt(lies("imres-diebesnacht-nacht"), 10) || 0;
       d.taeglich = (d.rekord > 0 || d.nacht > 1) && !lies("imres-diebesnacht-tag-" + heuteStr()); }
+    if (key === "zerstoerer") { const z = json("imres-zerstoerer-v1"); if (z) { d.laeufe = z.runs | 0; d.splitter = z.shards | 0; const e = z.endings && typeof z.endings === "object" ? z.endings : {}; d.enden = ["tiefe", "glut", "himmel"].filter(k => e[k]).length; } }
     if (key === "hort") { const sp = json("imres-echohort-spiel"); if (sp && typeof sp.lv === "number") d.weiter = sp.lv + 1; d.rekord = maxMitPrefix("imres-echohort-rekord-"); }
     if (key === "auftritt") { const w = json("imres-auftritt-weg"); if (w) { d.sterne = (Array.isArray(w.sterne) ? w.sterne : []).reduce((a, b) => a + (+b || 0), 0); d.buehne = (w.frei | 0) + 1; }
       d.gespielt = !!lies("imres-auftritt-rekord") || !!d.sterne; }
@@ -151,6 +156,10 @@
           text: "Friedrich erzählt die Kampagne nach, Kapitel für Kapitel: von der Straße nach Phandalin bis nach Gracklstugh. Goblins, Banditen und die Kreaturen des Bestiariums kommen – Rex bellt, bevor sie auftauchen.",
           punkte: ["Elf Kapitel mit eigener Kulisse und einem Endgegner, danach eine endlose Nacht", "Nach jeder Welle eine Gabe wie Doppelschuss oder Feuerpfeile", "Drei Schwierigkeitsstufen und eine gemeinsame Bestenliste", "Wind, der jede Welle dreht – Pfeile treiben ab, Blätter zeigen, woher er weht", "„Fass, Rex!“ – auf Knopfdruck reißt Rex Gegner um; Bosse haben leuchtende Schwachstellen, der letzte Treffer kommt in Zeitlupe", "Jede Jagd sieht anders aus: Wetter, Licht und Kulisse wechseln mit Kapitel und Durchlauf"],
           pc: "Ins Bild klicken, Maus zurückziehen, zielen, loslassen. P = Pause.", handy: "Ins Bild tippen, Finger zurückziehen, zielen, loslassen." },
+        zerstoerer: { titel: "Ezekiel – The Destroyer", kurz: "Mit leeren Händen durch die Feste der Fäden – tiefer hinab, hindurch oder hinauf.", genre: "Action-Roguelite", wer: "Ezekiel",
+          text: "Eines Nachts ist Ezekiels Platz am Feuer leer. Am Horizont steht eine Feste, in deren Hallen alle warten, die wir je besiegt haben. Ezekiel geht hinein – ohne Waffe. Jede Waffe, jede Fähigkeit muss er dort finden. Jeder Lauf ist eine neue Feste: Keller, Verlies und Spinnenschlund führen in die Tiefe, Burghallen, Hafen und Runenschmiede hindurch, Wehrgang, Glockenturm und Zinnen hinauf – und jeder Weg endet bei einem anderen Endboss.",
+          punkte: ["Kämpfe von der Seite wie in Dead Cells: Kombos, Rolle mit Unverwundbarkeit, Doppelsprung, Kanten hochziehen, Leitern, Sturzangriff, Parade mit dem richtigen Timing", "26 Waffen mit völlig eigenen Angriffsmustern und kritischen Treffern – Sicheln, Dawnbringer, Kettenpeitsche, Krebsscherenspeer, Riesenkeule, Venomfangs Zahn, Bogen, Armbrust, Schilde und mehr", "16 Fähigkeiten mit den Gefährten: Rex beißt, Barradin spottet, Friedrich lässt Pfeile regnen, Echo ruft Blitze – dazu 24 Segen für Glaskanonen, Panzer und Kontrolle", "13 vernetzte Gebiete und 6 Bossarenen, jedes Mal neu erzeugt, mit Geheimgängen hinter rissigen Wänden, Schatztruhen, verfluchten Truhen, Händlern und Brunnen", "Über 50 Gegnerarten mit eigenen Angriffen, Elite-Gegner und 12 Bosskämpfe – Glasstab, Bugbear & Nezna, der Wraith, Ilvara, Demogorgon, Themberchaud, Venomfang und mehr", "Startet mit nichts: Seelensplitter bringen im Lager dauerhaften Fortschritt – Nundro schärft jede schon einmal gefundene Waffe, Fundglück macht sie häufiger, Barradins Fundbuch kennt die Fundchancen", "Drei Enden, Schädel für mehr Herausforderung, Trainingspuppe im Lager", "Licht und Schatten, Wetter, Hintergründe mit Leben, echte Geräuschkulissen der Bühne und Musik, die sich nach der Kampfstärke richtet"],
+          pc: "A/D laufen, Leertaste springen (zweimal: Doppelsprung), Shift rollen, J oder Linksklick Waffe 1, U oder Rechtsklick Waffe 2, Q und O Fähigkeiten, R Heiltrank, E benutzen, M Karte, Esc Pause. Xbox-Controller werden erkannt.", handy: "Links ziehen zum Laufen und Klettern, rechts Knöpfe für Springen, Rolle, Waffen, Fähigkeiten und Trank. Im Querformat spielen." },
         nacht: { titel: "Ezekiels lange Nacht", kurz: "Schleichen, stehlen, Schlösser knacken.", genre: "Schleichen & Stehlen", wer: "Ezekiel",
           text: "Sechs Nächte, achtzehn Orte: Ezekiel leert fremde Taschen, bleibt im Schatten, knackt jede Truhe und ist verschwunden, bevor jemand „Dieb!“ rufen kann.",
           punkte: ["Wachen mit Sichtkegeln, Kerzen zum Auspusten, Fässer zum Verstecken", "Nebenaufträge mit Briefen aus der Kampagne und eine tägliche Nacht", "Diebesversteck mit Ausrüstung, danach geht die Nacht endlos weiter", "Jeder Schritt zählt: Holz knarzt, Teppich schluckt – Wachen horchen auf", "Taschendiebstahl mit Timing, Verkleidung aus dem Diebesversteck", "Nach jeder Stufe die Nachstellung: dein Weg und die Wachrouten"],
@@ -194,6 +203,10 @@
           text: "Friedrich retells the campaign chapter by chapter: from the road to Phandalin all the way to Gracklstugh. Goblins, bandits and the creatures of the bestiary attack – Rex barks before they show up.",
           punkte: ["Eleven chapters, each with its own scenery and a boss, then an endless night", "A gift after every wave, like double shot or fire arrows", "Three difficulty levels and a shared leaderboard", "Wind that shifts every wave – arrows drift, leaves show where it blows", "“Get him, Rex!” – on command Rex knocks enemies down; bosses have glowing weak spots, and the final blow lands in slow motion", "Every hunt looks different: weather, light and scenery change by chapter and run"],
           pc: "Click into the picture, pull back, aim, let go. P = pause.", handy: "Touch the picture, pull back, aim, let go." },
+        zerstoerer: { titel: "Ezekiel – The Destroyer", kurz: "Empty-handed through the Keep of Threads – deeper down, straight through or higher up.", genre: "Action roguelite", wer: "Ezekiel",
+          text: "One night Ezekiel's place by the fire is empty. On the horizon stands a keep whose halls hold everyone we've ever defeated. Ezekiel goes in – without a weapon. Every weapon, every skill must be found inside. Every run is a new keep: cellars, dungeon and spider chasm lead into the depths, great halls, harbour and rune forge straight through, ramparts, bell tower and spires up high – and each path ends with a different final boss.",
+          punkte: ["Side-view combat in the spirit of Dead Cells: combos, a roll with invulnerability, double jump, ledge climbing, ladders, plunge attacks, parries with the right timing", "26 weapons with completely distinct attack patterns and critical hits – sickles, Dawnbringer, chain whip, crab-claw spear, giant's club, Venomfang's fang, bow, crossbow, shields and more", "16 skills with the companions: Rex bites, Barradin mocks, Friedrich rains arrows, Echo calls lightning – plus 24 blessings for glass cannons, tanks and control", "13 connected areas and 6 boss arenas, generated anew every time, with secret passages behind cracked walls, treasure chests, cursed chests, merchants and fountains", "Over 50 enemy types with their own attacks, elite enemies and 12 boss fights – Glasstaff, the Bugbear & Nezna, the Wraith, Ilvara, Demogorgon, Themberchaud, Venomfang and more", "Start with nothing: soul shards bring permanent progress in camp – Nundro sharpens any weapon you've found before, find luck makes it more common, Barradin's ledger knows the find chances", "Three endings, skulls for extra challenge, a training dummy in camp", "Light and shadow, weather, living backgrounds, real soundscapes from the stage and music that follows the intensity of the fight"],
+          pc: "A/D move, Space jump (twice: double jump), Shift roll, J or left click weapon 1, U or right click weapon 2, Q and O skills, R potion, E use, M map, Esc pause. Xbox controllers are detected.", handy: "Drag on the left to move and climb, buttons on the right for jump, roll, weapons, skills and potion. Play in landscape." },
         nacht: { titel: "Ezekiel's Long Night", kurz: "Sneak, steal, pick locks.", genre: "Stealth & theft", wer: "Ezekiel",
           text: "Six nights, eighteen places: Ezekiel empties strangers' pockets, stays in the shadows, cracks every chest and vanishes before anyone can shout \"Thief!\".",
           punkte: ["Guards with vision cones, candles to blow out, barrels to hide in", "Side jobs with letters from the campaign and a daily night", "A thieves' den with gear – then the night goes on forever", "Every step counts: wood creaks, carpet muffles – guards listen", "Timed pickpocketing and a disguise kit from the hideout", "After every stage, a reenactment of your path and the guard routes"],
