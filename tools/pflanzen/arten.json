@@ -1,0 +1,1154 @@
+[
+{
+"id": "rotbuche",
+"de": "Rotbuche",
+"wiss": "Fagus sylvatica",
+"kap": "baum"
+},
+{
+"id": "stieleiche",
+"de": "Stieleiche",
+"wiss": "Quercus robur",
+"kap": "baum"
+},
+{
+"id": "traubeneiche",
+"de": "Traubeneiche",
+"wiss": "Quercus petraea",
+"kap": "baum"
+},
+{
+"id": "hainbuche",
+"de": "Hainbuche",
+"wiss": "Carpinus betulus",
+"kap": "baum"
+},
+{
+"id": "bergahorn",
+"de": "Bergahorn",
+"wiss": "Acer pseudoplatanus",
+"kap": "baum"
+},
+{
+"id": "spitzahorn",
+"de": "Spitzahorn",
+"wiss": "Acer platanoides",
+"kap": "baum"
+},
+{
+"id": "feldahorn",
+"de": "Feldahorn",
+"wiss": "Acer campestre",
+"kap": "baum"
+},
+{
+"id": "esche",
+"de": "Gemeine Esche",
+"wiss": "Fraxinus excelsior",
+"kap": "baum"
+},
+{
+"id": "winterlinde",
+"de": "Winterlinde",
+"wiss": "Tilia cordata",
+"kap": "baum"
+},
+{
+"id": "sommerlinde",
+"de": "Sommerlinde",
+"wiss": "Tilia platyphyllos",
+"kap": "baum"
+},
+{
+"id": "haengebirke",
+"de": "Hängebirke",
+"wiss": "Betula pendula",
+"kap": "baum"
+},
+{
+"id": "schwarzerle",
+"de": "Schwarzerle",
+"wiss": "Alnus glutinosa",
+"kap": "baum"
+},
+{
+"id": "bergulme",
+"de": "Bergulme",
+"wiss": "Ulmus glabra",
+"kap": "baum"
+},
+{
+"id": "vogelkirsche",
+"de": "Vogelkirsche",
+"wiss": "Prunus avium",
+"kap": "baum"
+},
+{
+"id": "traubenkirsche",
+"de": "Traubenkirsche",
+"wiss": "Prunus padus",
+"kap": "baum"
+},
+{
+"id": "eberesche",
+"de": "Eberesche",
+"wiss": "Sorbus aucuparia",
+"kap": "baum"
+},
+{
+"id": "mehlbeere",
+"de": "Echte Mehlbeere",
+"wiss": "Sorbus aria",
+"kap": "baum"
+},
+{
+"id": "elsbeere",
+"de": "Elsbeere",
+"wiss": "Sorbus torminalis",
+"kap": "baum"
+},
+{
+"id": "wildapfel",
+"de": "Holzapfel",
+"wiss": "Malus sylvestris",
+"kap": "baum"
+},
+{
+"id": "wildbirne",
+"de": "Wildbirne",
+"wiss": "Pyrus pyraster",
+"kap": "baum"
+},
+{
+"id": "walnuss",
+"de": "Echte Walnuss",
+"wiss": "Juglans regia",
+"kap": "baum"
+},
+{
+"id": "edelkastanie",
+"de": "Edelkastanie",
+"wiss": "Castanea sativa",
+"kap": "baum"
+},
+{
+"id": "rosskastanie",
+"de": "Gewöhnliche Rosskastanie",
+"wiss": "Aesculus hippocastanum",
+"kap": "baum"
+},
+{
+"id": "silberweide",
+"de": "Silberweide",
+"wiss": "Salix alba",
+"kap": "baum"
+},
+{
+"id": "salweide",
+"de": "Salweide",
+"wiss": "Salix caprea",
+"kap": "baum"
+},
+{
+"id": "zitterpappel",
+"de": "Zitterpappel",
+"wiss": "Populus tremula",
+"kap": "baum"
+},
+{
+"id": "robinie",
+"de": "Robinie",
+"wiss": "Robinia pseudoacacia",
+"kap": "baum"
+},
+{
+"id": "fichte",
+"de": "Gemeine Fichte",
+"wiss": "Picea abies",
+"kap": "baum"
+},
+{
+"id": "weisstanne",
+"de": "Weißtanne",
+"wiss": "Abies alba",
+"kap": "baum"
+},
+{
+"id": "waldkiefer",
+"de": "Waldkiefer",
+"wiss": "Pinus sylvestris",
+"kap": "baum"
+},
+{
+"id": "laerche",
+"de": "Europäische Lärche",
+"wiss": "Larix decidua",
+"kap": "baum"
+},
+{
+"id": "zirbe",
+"de": "Zirbelkiefer",
+"wiss": "Pinus cembra",
+"kap": "baum"
+},
+{
+"id": "latsche",
+"de": "Latschenkiefer",
+"wiss": "Pinus mugo",
+"kap": "baum"
+},
+{
+"id": "eibe",
+"de": "Europäische Eibe",
+"wiss": "Taxus baccata",
+"kap": "baum"
+},
+{
+"id": "wacholder",
+"de": "Gemeiner Wacholder",
+"wiss": "Juniperus communis",
+"kap": "strauch"
+},
+{
+"id": "hasel",
+"de": "Gemeine Hasel",
+"wiss": "Corylus avellana",
+"kap": "strauch"
+},
+{
+"id": "holunder",
+"de": "Schwarzer Holunder",
+"wiss": "Sambucus nigra",
+"kap": "strauch"
+},
+{
+"id": "roterholunder",
+"de": "Roter Holunder",
+"wiss": "Sambucus racemosa",
+"kap": "strauch"
+},
+{
+"id": "schlehe",
+"de": "Schlehdorn",
+"wiss": "Prunus spinosa",
+"kap": "strauch"
+},
+{
+"id": "weissdorn",
+"de": "Eingriffeliger Weißdorn",
+"wiss": "Crataegus monogyna",
+"kap": "strauch"
+},
+{
+"id": "hundsrose",
+"de": "Hunds-Rose",
+"wiss": "Rosa canina",
+"kap": "strauch"
+},
+{
+"id": "kornelkirsche",
+"de": "Kornelkirsche",
+"wiss": "Cornus mas",
+"kap": "strauch"
+},
+{
+"id": "hartriegel",
+"de": "Roter Hartriegel",
+"wiss": "Cornus sanguinea",
+"kap": "strauch"
+},
+{
+"id": "berberitze",
+"de": "Gewöhnliche Berberitze",
+"wiss": "Berberis vulgaris",
+"kap": "strauch"
+},
+{
+"id": "sanddorn",
+"de": "Sanddorn",
+"wiss": "Hippophae rhamnoides",
+"kap": "strauch"
+},
+{
+"id": "felsenbirne",
+"de": "Gewöhnliche Felsenbirne",
+"wiss": "Amelanchier ovalis",
+"kap": "strauch"
+},
+{
+"id": "schneeball",
+"de": "Gewöhnlicher Schneeball",
+"wiss": "Viburnum opulus",
+"kap": "strauch"
+},
+{
+"id": "pfaffenhuetchen",
+"de": "Pfaffenhütchen",
+"wiss": "Euonymus europaeus",
+"kap": "strauch"
+},
+{
+"id": "liguster",
+"de": "Gewöhnlicher Liguster",
+"wiss": "Ligustrum vulgare",
+"kap": "strauch"
+},
+{
+"id": "faulbaum",
+"de": "Faulbaum",
+"wiss": "Frangula alnus",
+"kap": "strauch"
+},
+{
+"id": "heckenkirsche",
+"de": "Rote Heckenkirsche",
+"wiss": "Lonicera xylosteum",
+"kap": "strauch"
+},
+{
+"id": "seidelbast",
+"de": "Echter Seidelbast",
+"wiss": "Daphne mezereum",
+"kap": "strauch"
+},
+{
+"id": "stechpalme",
+"de": "Europäische Stechpalme",
+"wiss": "Ilex aquifolium",
+"kap": "strauch"
+},
+{
+"id": "waldrebe",
+"de": "Gewöhnliche Waldrebe",
+"wiss": "Clematis vitalba",
+"kap": "strauch"
+},
+{
+"id": "efeu",
+"de": "Gemeiner Efeu",
+"wiss": "Hedera helix",
+"kap": "strauch"
+},
+{
+"id": "hopfen",
+"de": "Echter Hopfen",
+"wiss": "Humulus lupulus",
+"kap": "strauch"
+},
+{
+"id": "heidelbeere",
+"de": "Heidelbeere",
+"wiss": "Vaccinium myrtillus",
+"kap": "beere"
+},
+{
+"id": "preiselbeere",
+"de": "Preiselbeere",
+"wiss": "Vaccinium vitis-idaea",
+"kap": "beere"
+},
+{
+"id": "himbeere",
+"de": "Himbeere",
+"wiss": "Rubus idaeus",
+"kap": "beere"
+},
+{
+"id": "brombeere",
+"de": "Brombeere",
+"wiss": "Rubus fruticosus",
+"kap": "beere"
+},
+{
+"id": "walderdbeere",
+"de": "Wald-Erdbeere",
+"wiss": "Fragaria vesca",
+"kap": "beere"
+},
+{
+"id": "stachelbeere",
+"de": "Stachelbeere",
+"wiss": "Ribes uva-crispa",
+"kap": "beere"
+},
+{
+"id": "tollkirsche",
+"de": "Schwarze Tollkirsche",
+"wiss": "Atropa belladonna",
+"kap": "beere"
+},
+{
+"id": "einbeere",
+"de": "Einbeere",
+"wiss": "Paris quadrifolia",
+"kap": "beere"
+},
+{
+"id": "nachtschatten",
+"de": "Bittersüßer Nachtschatten",
+"wiss": "Solanum dulcamara",
+"kap": "beere"
+},
+{
+"id": "baerlauch",
+"de": "Bärlauch",
+"wiss": "Allium ursinum",
+"kap": "kraut"
+},
+{
+"id": "maigloeckchen",
+"de": "Maiglöckchen",
+"wiss": "Convallaria majalis",
+"kap": "kraut"
+},
+{
+"id": "herbstzeitlose",
+"de": "Herbstzeitlose",
+"wiss": "Colchicum autumnale",
+"kap": "kraut"
+},
+{
+"id": "aronstab",
+"de": "Gefleckter Aronstab",
+"wiss": "Arum maculatum",
+"kap": "kraut"
+},
+{
+"id": "brennnessel",
+"de": "Große Brennnessel",
+"wiss": "Urtica dioica",
+"kap": "kraut"
+},
+{
+"id": "loewenzahn",
+"de": "Gewöhnlicher Löwenzahn",
+"wiss": "Taraxacum officinale",
+"kap": "kraut"
+},
+{
+"id": "giersch",
+"de": "Giersch",
+"wiss": "Aegopodium podagraria",
+"kap": "kraut"
+},
+{
+"id": "gaensebluemchen",
+"de": "Gänseblümchen",
+"wiss": "Bellis perennis",
+"kap": "kraut"
+},
+{
+"id": "spitzwegerich",
+"de": "Spitzwegerich",
+"wiss": "Plantago lanceolata",
+"kap": "kraut"
+},
+{
+"id": "breitwegerich",
+"de": "Breitwegerich",
+"wiss": "Plantago major",
+"kap": "kraut"
+},
+{
+"id": "sauerampfer",
+"de": "Wiesen-Sauerampfer",
+"wiss": "Rumex acetosa",
+"kap": "kraut"
+},
+{
+"id": "sauerklee",
+"de": "Wald-Sauerklee",
+"wiss": "Oxalis acetosella",
+"kap": "kraut"
+},
+{
+"id": "gundermann",
+"de": "Gundermann",
+"wiss": "Glechoma hederacea",
+"kap": "kraut"
+},
+{
+"id": "knoblauchsrauke",
+"de": "Knoblauchsrauke",
+"wiss": "Alliaria petiolata",
+"kap": "kraut"
+},
+{
+"id": "vogelmiere",
+"de": "Vogelmiere",
+"wiss": "Stellaria media",
+"kap": "kraut"
+},
+{
+"id": "wiesenschaumkraut",
+"de": "Wiesenschaumkraut",
+"wiss": "Cardamine pratensis",
+"kap": "kraut"
+},
+{
+"id": "scharbockskraut",
+"de": "Scharbockskraut",
+"wiss": "Ficaria verna",
+"kap": "kraut"
+},
+{
+"id": "brunnenkresse",
+"de": "Echte Brunnenkresse",
+"wiss": "Nasturtium officinale",
+"kap": "kraut"
+},
+{
+"id": "waldmeister",
+"de": "Waldmeister",
+"wiss": "Galium odoratum",
+"kap": "kraut"
+},
+{
+"id": "taubnessel",
+"de": "Weiße Taubnessel",
+"wiss": "Lamium album",
+"kap": "kraut"
+},
+{
+"id": "schafgarbe",
+"de": "Gemeine Schafgarbe",
+"wiss": "Achillea millefolium",
+"kap": "kraut"
+},
+{
+"id": "wiesenknopf",
+"de": "Kleiner Wiesenknopf",
+"wiss": "Sanguisorba minor",
+"kap": "kraut"
+},
+{
+"id": "maedesuess",
+"de": "Echtes Mädesüß",
+"wiss": "Filipendula ulmaria",
+"kap": "kraut"
+},
+{
+"id": "kamille",
+"de": "Echte Kamille",
+"wiss": "Matricaria chamomilla",
+"kap": "kraut"
+},
+{
+"id": "johanniskraut",
+"de": "Echtes Johanniskraut",
+"wiss": "Hypericum perforatum",
+"kap": "kraut"
+},
+{
+"id": "huflattich",
+"de": "Huflattich",
+"wiss": "Tussilago farfara",
+"kap": "kraut"
+},
+{
+"id": "rotklee",
+"de": "Rotklee",
+"wiss": "Trifolium pratense",
+"kap": "kraut"
+},
+{
+"id": "thymian",
+"de": "Arznei-Thymian",
+"wiss": "Thymus pulegioides",
+"kap": "kraut"
+},
+{
+"id": "dost",
+"de": "Wilder Dost",
+"wiss": "Origanum vulgare",
+"kap": "kraut"
+},
+{
+"id": "wasserminze",
+"de": "Wasserminze",
+"wiss": "Mentha aquatica",
+"kap": "kraut"
+},
+{
+"id": "lungenkraut",
+"de": "Echtes Lungenkraut",
+"wiss": "Pulmonaria officinalis",
+"kap": "kraut"
+},
+{
+"id": "beinwell",
+"de": "Echter Beinwell",
+"wiss": "Symphytum officinale",
+"kap": "kraut"
+},
+{
+"id": "hirtentaeschel",
+"de": "Hirtentäschel",
+"wiss": "Capsella bursa-pastoris",
+"kap": "kraut"
+},
+{
+"id": "wegwarte",
+"de": "Gemeine Wegwarte",
+"wiss": "Cichorium intybus",
+"kap": "kraut"
+},
+{
+"id": "malve",
+"de": "Wilde Malve",
+"wiss": "Malva sylvestris",
+"kap": "kraut"
+},
+{
+"id": "frauenmantel",
+"de": "Gewöhnlicher Frauenmantel",
+"wiss": "Alchemilla vulgaris",
+"kap": "kraut"
+},
+{
+"id": "guterheinrich",
+"de": "Guter Heinrich",
+"wiss": "Blitum bonus-henricus",
+"kap": "kraut"
+},
+{
+"id": "wiesenkerbel",
+"de": "Wiesen-Kerbel",
+"wiss": "Anthriscus sylvestris",
+"kap": "kraut"
+},
+{
+"id": "wildemoehre",
+"de": "Wilde Möhre",
+"wiss": "Daucus carota",
+"kap": "kraut"
+},
+{
+"id": "baerenklau",
+"de": "Wiesen-Bärenklau",
+"wiss": "Heracleum sphondylium",
+"kap": "kraut"
+},
+{
+"id": "riesenbaerenklau",
+"de": "Riesen-Bärenklau",
+"wiss": "Heracleum mantegazzianum",
+"kap": "kraut"
+},
+{
+"id": "schierling",
+"de": "Gefleckter Schierling",
+"wiss": "Conium maculatum",
+"kap": "kraut"
+},
+{
+"id": "hundspetersilie",
+"de": "Hundspetersilie",
+"wiss": "Aethusa cynapium",
+"kap": "kraut"
+},
+{
+"id": "wiesensalbei",
+"de": "Wiesen-Salbei",
+"wiss": "Salvia pratensis",
+"kap": "kraut"
+},
+{
+"id": "klatschmohn",
+"de": "Klatschmohn",
+"wiss": "Papaver rhoeas",
+"kap": "kraut"
+},
+{
+"id": "buschwindroeschen",
+"de": "Buschwindröschen",
+"wiss": "Anemone nemorosa",
+"kap": "blume"
+},
+{
+"id": "leberbluemchen",
+"de": "Leberblümchen",
+"wiss": "Hepatica nobilis",
+"kap": "blume"
+},
+{
+"id": "schluesselblume",
+"de": "Echte Schlüsselblume",
+"wiss": "Primula veris",
+"kap": "blume"
+},
+{
+"id": "maerzenbecher",
+"de": "Märzenbecher",
+"wiss": "Leucojum vernum",
+"kap": "blume"
+},
+{
+"id": "schneegloeckchen",
+"de": "Kleines Schneeglöckchen",
+"wiss": "Galanthus nivalis",
+"kap": "blume"
+},
+{
+"id": "sumpfdotterblume",
+"de": "Sumpfdotterblume",
+"wiss": "Caltha palustris",
+"kap": "blume"
+},
+{
+"id": "trollblume",
+"de": "Trollblume",
+"wiss": "Trollius europaeus",
+"kap": "blume"
+},
+{
+"id": "tuerkenbund",
+"de": "Türkenbund-Lilie",
+"wiss": "Lilium martagon",
+"kap": "blume"
+},
+{
+"id": "frauenschuh",
+"de": "Gelber Frauenschuh",
+"wiss": "Cypripedium calceolus",
+"kap": "blume"
+},
+{
+"id": "edelweiss",
+"de": "Edelweiß",
+"wiss": "Leontopodium nivale subsp. alpinum",
+"kap": "blume"
+},
+{
+"id": "enzian",
+"de": "Kochscher Enzian",
+"wiss": "Gentiana acaulis",
+"kap": "blume"
+},
+{
+"id": "alpenrose",
+"de": "Rostblättrige Alpenrose",
+"wiss": "Rhododendron ferrugineum",
+"kap": "blume"
+},
+{
+"id": "fingerhut",
+"de": "Roter Fingerhut",
+"wiss": "Digitalis purpurea",
+"kap": "blume"
+},
+{
+"id": "eisenhut",
+"de": "Blauer Eisenhut",
+"wiss": "Aconitum napellus",
+"kap": "blume"
+},
+{
+"id": "arnika",
+"de": "Arnika",
+"wiss": "Arnica montana",
+"kap": "blume"
+},
+{
+"id": "adlerfarn",
+"de": "Adlerfarn",
+"wiss": "Pteridium aquilinum",
+"kap": "farn"
+},
+{
+"id": "wurmfarn",
+"de": "Gewöhnlicher Wurmfarn",
+"wiss": "Dryopteris filix-mas",
+"kap": "farn"
+},
+{
+"id": "schachtelhalm",
+"de": "Acker-Schachtelhalm",
+"wiss": "Equisetum arvense",
+"kap": "farn"
+},
+{
+"id": "baerlapp",
+"de": "Keulen-Bärlapp",
+"wiss": "Lycopodium clavatum",
+"kap": "farn"
+},
+{
+"id": "torfmoos",
+"de": "Torfmoose",
+"wiss": "Sphagnum",
+"kap": "farn"
+},
+{
+"id": "haarmuetzenmoos",
+"de": "Goldenes Frauenhaarmoos",
+"wiss": "Polytrichum commune",
+"kap": "farn"
+},
+{
+"id": "bartflechte",
+"de": "Bartflechten",
+"wiss": "Usnea",
+"kap": "farn"
+},
+{
+"id": "rentierflechte",
+"de": "Echte Rentierflechte",
+"wiss": "Cladonia rangiferina",
+"kap": "farn"
+},
+{
+"id": "steinpilz",
+"de": "Fichten-Steinpilz",
+"wiss": "Boletus edulis",
+"kap": "pilz"
+},
+{
+"id": "marone",
+"de": "Maronen-Röhrling",
+"wiss": "Imleria badia",
+"kap": "pilz"
+},
+{
+"id": "birkenpilz",
+"de": "Gemeiner Birkenpilz",
+"wiss": "Leccinum scabrum",
+"kap": "pilz"
+},
+{
+"id": "rotkappe",
+"de": "Birken-Rotkappe",
+"wiss": "Leccinum versipelle",
+"kap": "pilz"
+},
+{
+"id": "gallenroehrling",
+"de": "Gallenröhrling",
+"wiss": "Tylopilus felleus",
+"kap": "pilz"
+},
+{
+"id": "hexenroehrling",
+"de": "Flockenstieliger Hexen-Röhrling",
+"wiss": "Neoboletus erythropus",
+"kap": "pilz"
+},
+{
+"id": "satanspilz",
+"de": "Satans-Röhrling",
+"wiss": "Rubroboletus satanas",
+"kap": "pilz"
+},
+{
+"id": "pfifferling",
+"de": "Echter Pfifferling",
+"wiss": "Cantharellus cibarius",
+"kap": "pilz"
+},
+{
+"id": "falscherpfifferling",
+"de": "Falscher Pfifferling",
+"wiss": "Hygrophoropsis aurantiaca",
+"kap": "pilz"
+},
+{
+"id": "trompetenpfifferling",
+"de": "Trompeten-Pfifferling",
+"wiss": "Craterellus tubaeformis",
+"kap": "pilz"
+},
+{
+"id": "herbsttrompete",
+"de": "Herbsttrompete",
+"wiss": "Craterellus cornucopioides",
+"kap": "pilz"
+},
+{
+"id": "semmelstoppel",
+"de": "Semmel-Stoppelpilz",
+"wiss": "Hydnum repandum",
+"kap": "pilz"
+},
+{
+"id": "parasol",
+"de": "Parasol",
+"wiss": "Macrolepiota procera",
+"kap": "pilz"
+},
+{
+"id": "riesenbovist",
+"de": "Riesenbovist",
+"wiss": "Calvatia gigantea",
+"kap": "pilz"
+},
+{
+"id": "flaschenstaeubling",
+"de": "Flaschen-Stäubling",
+"wiss": "Lycoperdon perlatum",
+"kap": "pilz"
+},
+{
+"id": "kartoffelbovist",
+"de": "Dickschaliger Kartoffelbovist",
+"wiss": "Scleroderma citrinum",
+"kap": "pilz"
+},
+{
+"id": "hallimasch",
+"de": "Honiggelber Hallimasch",
+"wiss": "Armillaria mellea",
+"kap": "pilz"
+},
+{
+"id": "glucke",
+"de": "Krause Glucke",
+"wiss": "Sparassis crispa",
+"kap": "pilz"
+},
+{
+"id": "schwefelporling",
+"de": "Gemeiner Schwefelporling",
+"wiss": "Laetiporus sulphureus",
+"kap": "pilz"
+},
+{
+"id": "austernseitling",
+"de": "Austern-Seitling",
+"wiss": "Pleurotus ostreatus",
+"kap": "pilz"
+},
+{
+"id": "morchel",
+"de": "Speise-Morchel",
+"wiss": "Morchella esculenta",
+"kap": "pilz"
+},
+{
+"id": "lorchel",
+"de": "Frühjahrs-Giftlorchel",
+"wiss": "Gyromitra esculenta",
+"kap": "pilz"
+},
+{
+"id": "wiesenchampignon",
+"de": "Wiesen-Champignon",
+"wiss": "Agaricus campestris",
+"kap": "pilz"
+},
+{
+"id": "karbolchampignon",
+"de": "Karbol-Champignon",
+"wiss": "Agaricus xanthodermus",
+"kap": "pilz"
+},
+{
+"id": "gruenerknollenblaetterpilz",
+"de": "Grüner Knollenblätterpilz",
+"wiss": "Amanita phalloides",
+"kap": "pilz"
+},
+{
+"id": "weisserknollenblaetterpilz",
+"de": "Kegelhütiger Knollenblätterpilz",
+"wiss": "Amanita virosa",
+"kap": "pilz"
+},
+{
+"id": "fliegenpilz",
+"de": "Fliegenpilz",
+"wiss": "Amanita muscaria",
+"kap": "pilz"
+},
+{
+"id": "pantherpilz",
+"de": "Pantherpilz",
+"wiss": "Amanita pantherina",
+"kap": "pilz"
+},
+{
+"id": "perlpilz",
+"de": "Perlpilz",
+"wiss": "Amanita rubescens",
+"kap": "pilz"
+},
+{
+"id": "frauentaeubling",
+"de": "Frauen-Täubling",
+"wiss": "Russula cyanoxantha",
+"kap": "pilz"
+},
+{
+"id": "speitaeubling",
+"de": "Kirschroter Spei-Täubling",
+"wiss": "Russula emetica",
+"kap": "pilz"
+},
+{
+"id": "fichtenreizker",
+"de": "Fichten-Reizker",
+"wiss": "Lactarius deterrimus",
+"kap": "pilz"
+},
+{
+"id": "schopftintling",
+"de": "Schopf-Tintling",
+"wiss": "Coprinus comatus",
+"kap": "pilz"
+},
+{
+"id": "stockschwamm",
+"de": "Gemeines Stockschwämmchen",
+"wiss": "Kuehneromyces mutabilis",
+"kap": "pilz"
+},
+{
+"id": "gifthaeubling",
+"de": "Gift-Häubling",
+"wiss": "Galerina marginata",
+"kap": "pilz"
+},
+{
+"id": "schwefelkopf",
+"de": "Grünblättriger Schwefelkopf",
+"wiss": "Hypholoma fasciculare",
+"kap": "pilz"
+},
+{
+"id": "zunderschwamm",
+"de": "Zunderschwamm",
+"wiss": "Fomes fomentarius",
+"kap": "pilz"
+},
+{
+"id": "birkenporling",
+"de": "Birkenporling",
+"wiss": "Fomitopsis betulina",
+"kap": "pilz"
+},
+{
+"id": "judasohr",
+"de": "Judasohr",
+"wiss": "Auricularia auricula-judae",
+"kap": "pilz"
+},
+{
+"id": "samtfussruebling",
+"de": "Gemeiner Samtfußrübling",
+"wiss": "Flammulina velutipes",
+"kap": "pilz"
+},
+{
+"id": "roetelritterling",
+"de": "Violetter Rötelritterling",
+"wiss": "Lepista nuda",
+"kap": "pilz"
+},
+{
+"id": "reh",
+"de": "Reh",
+"wiss": "Capreolus capreolus",
+"kap": "tier"
+},
+{
+"id": "rothirsch",
+"de": "Rothirsch",
+"wiss": "Cervus elaphus",
+"kap": "tier"
+},
+{
+"id": "wildschwein",
+"de": "Wildschwein",
+"wiss": "Sus scrofa",
+"kap": "tier"
+},
+{
+"id": "gaemse",
+"de": "Gämse",
+"wiss": "Rupicapra rupicapra",
+"kap": "tier"
+},
+{
+"id": "fuchs",
+"de": "Rotfuchs",
+"wiss": "Vulpes vulpes",
+"kap": "tier"
+},
+{
+"id": "dachs",
+"de": "Europäischer Dachs",
+"wiss": "Meles meles",
+"kap": "tier"
+},
+{
+"id": "feldhase",
+"de": "Feldhase",
+"wiss": "Lepus europaeus",
+"kap": "tier"
+},
+{
+"id": "eichhoernchen",
+"de": "Eurasisches Eichhörnchen",
+"wiss": "Sciurus vulgaris",
+"kap": "tier"
+},
+{
+"id": "baummarder",
+"de": "Baummarder",
+"wiss": "Martes martes",
+"kap": "tier"
+},
+{
+"id": "luchs",
+"de": "Eurasischer Luchs",
+"wiss": "Lynx lynx",
+"kap": "tier"
+},
+{
+"id": "wolf",
+"de": "Wolf",
+"wiss": "Canis lupus",
+"kap": "tier"
+},
+{
+"id": "biber",
+"de": "Europäischer Biber",
+"wiss": "Castor fiber",
+"kap": "tier"
+},
+{
+"id": "fischotter",
+"de": "Fischotter",
+"wiss": "Lutra lutra",
+"kap": "tier"
+},
+{
+"id": "igel",
+"de": "Braunbrustigel",
+"wiss": "Erinaceus europaeus",
+"kap": "tier"
+},
+{
+"id": "murmeltier",
+"de": "Alpenmurmeltier",
+"wiss": "Marmota marmota",
+"kap": "tier"
+},
+{
+"id": "waschbaer",
+"de": "Waschbär",
+"wiss": "Procyon lotor",
+"kap": "tier"
+},
+{
+"id": "buntspecht",
+"de": "Buntspecht",
+"wiss": "Dendrocopos major",
+"kap": "tier"
+},
+{
+"id": "waldkauz",
+"de": "Waldkauz",
+"wiss": "Strix aluco",
+"kap": "tier"
+}
+]

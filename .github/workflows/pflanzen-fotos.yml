@@ -1,0 +1,48 @@
+# Holt frei lizenzierte Fotos (Wikimedia Commons) für Friedrichs Waldbuch nach pflanzen/bilder/.
+# Startet von selbst, wenn sich Artenliste, Ausnahmen (overrides.json) oder neu.txt ändern.
+name: Waldbuch-Fotos holen
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - tools/pflanzen/arten.json
+      - tools/pflanzen/overrides.json
+      - tools/pflanzen/neu.txt
+      - tools/pflanzen/holen.py
+      - .github/workflows/pflanzen-fotos.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pflanzen-fotos
+  cancel-in-progress: false
+
+jobs:
+  holen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            tools/pflanzen
+            pflanzen
+      - name: Pillow
+        run: pip install --quiet pillow
+      - name: Holen
+        run: python3 tools/pflanzen/holen.py
+      - name: Sichern
+        run: |
+          git config user.name "Waldbuch-Fotos"
+          git config user.email "actions@users.noreply.github.com"
+          git add pflanzen
+          git diff --cached --quiet && echo "nichts Neues" && exit 0
+          git commit -q -m "Waldbuch: Fotos von Wikimedia Commons geholt"
+          for i in 1 2 3 4 5; do
+            git pull -q --rebase origin main && git push -q origin HEAD:main && exit 0
+            sleep 10
+          done
+          exit 1
