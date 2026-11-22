@@ -68,9 +68,10 @@ jobs:
           HELDENSTURM_SCHLUESSEL: ${{ secrets.HELDENSTURM_SCHLUESSEL }}
         run: |
           if [ -z "$HELDENSTURM_SCHLUESSEL" ]; then
-            echo "::error::Secret HELDENSTURM_SCHLUESSEL fehlt (Settings → Secrets and variables → Actions)."
-            exit 1
+            echo "::warning::Secret HELDENSTURM_SCHLUESSEL fehlt (Settings → Secrets and variables → Actions) – Probebau ohne Release."
+            exit 0
           fi
+          echo "HS_SIGNIERT=1" >> "$GITHUB_ENV"
           openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
             -in android/keystore/heldensturm.jks.enc -out android/keystore/heldensturm.jks -pass env:HELDENSTURM_SCHLUESSEL
 
@@ -81,7 +82,16 @@ jobs:
       - name: APK umbenennen
         run: cp android/app/build/outputs/apk/release/app-release.apk Heldensturm.apk && ls -la Heldensturm.apk
 
+      - name: Probebau sichern
+        if: env.HS_SIGNIERT != '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Heldensturm-probe
+          path: Heldensturm.apk
+          retention-days: 3
+
       - name: Als Release veröffentlichen
+        if: env.HS_SIGNIERT == '1'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: heldensturm-1.${{ env.HS_VERSION }}
@@ -94,6 +104,7 @@ jobs:
           make_latest: true
 
       - name: Alte App-Versionen aufräumen (die letzten 3 bleiben)
+        if: env.HS_SIGNIERT == '1'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
