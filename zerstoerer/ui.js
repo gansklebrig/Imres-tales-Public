@@ -336,14 +336,19 @@
   actions.stat = s => { const P = Z.player; P.stats[s]++; const before = P.hpMax; Z.recalcPlayer(); P.hp += P.hpMax - before; closeModal(); A.play("holy", { vol: 0.5 }); Z.fx.text(P.x + P.w / 2, P.y - 14, L(Z.STATS[s].n) + " +1", Z.STATS[s].col, true); Z.fx.burst(P.x + P.w / 2, P.y + 10, 20, { col: Z.STATS[s].col, sp: 60, up: 60, life: 0.8, size: 2.5, kind: "glow", add: true }); };
 
   /* ---------- Lager: Figuren ---------- */
+  /* Sprechblase über einer Figur im Lager */
+  const bubble = $("#bubble"); let bubbleT = 0, bubbleAt = null;
+  ui.say = (wx, wy, who, txt, ms) => { bubble.innerHTML = (who ? "<b>" + esc(who) + "</b>" : "") + esc(txt); bubble.hidden = false; bubbleAt = [wx, wy]; bubbleT = (ms || 4200) / 1000; };
+  function bubbleTick(dt) { if (bubble.hidden) return; bubbleT -= dt; if (bubbleT <= 0 || ui.modalOpen) { bubble.hidden = true; return; } const [x, y] = worldToScreen(bubbleAt[0], bubbleAt[1]); bubble.style.transform = "translate(" + Math.round(x) + "px," + Math.round(y) + "px) translate(-50%,-100%)"; }
   ui.npc = id => {
     const lines = Z.CAMP_TALK[id];
-    if (lines) ui.toast("<b>" + ({ B: "Barradin", G: "Friedrich", E: "Echo", A: "Nundro", R: "Rex", C: "" }[id] || "") + (id === "C" ? "" : ":</b> ") + esc(L(Z.R.pick(lines))), 3600);
-    if (id === "A") setTimeout(() => ui.forge(), 250);
-    if (id === "B") setTimeout(() => ui.codex(), 250);
-    if (id === "C") setTimeout(() => ui.skulls(), 250);
+    const s = Z.level.props.find(p => p.id === id);
+    if (lines && s) ui.say(s.x * Z.TILE + 8, s.y * Z.TILE - 22, { B: "Barradin", G: "Friedrich", E: "Echo", A: "Nundro", R: "Rex", C: "" }[id] || "", L(Z.R.pick(lines)), id === "A" || id === "B" || id === "C" ? 2600 : 4600);
+    if (id === "A") setTimeout(() => ui.forge(), 900);
+    if (id === "B") setTimeout(() => ui.codex(), 900);
+    if (id === "C") setTimeout(() => ui.skulls(), 700);
     if (id === "F") ui.story();
-    if (id === "Y") ui.toast(L(["Die Puppe hält alles aus. Probier deine Kombos – über ihr erscheint der Schaden pro Sekunde.", "The dummy takes everything. Try your combos – damage per second appears above it."]), 3600);
+    if (id === "Y") ui.say(s.x * Z.TILE + 8, s.y * Z.TILE - 26, "", L(["Die Puppe hält alles aus. Probier deine Kombos – über ihr erscheint der Schaden pro Sekunde.", "The dummy takes everything. Try your combos – damage per second appears above it."]), 4200);
     if (id === "R") A.play("bark");
   };
 
@@ -404,7 +409,7 @@
         const d = pool[id]; if (!d.find) continue;
         const found = M.found[id];
         const ch = d.legendaryOnly ? L(["nur vom Wraith", "only from the Wraith"]) : findChance(id, d, 3).toFixed(1) + " %";
-        body += '<div class="zeile' + (found ? "" : " unbekannt") + '"><span class="ico" data-icon="' + d.icon + '" data-col="' + (found ? d.col : "#3a3236") + '"></span><div><b>' + (found ? esc(L(d.n)) : "???") + "</b><small>" + (found ? esc(L(d.d)) : esc(t("unknown"))) + '</small><small class="fund">' + esc(L(Z.FIND[d.find].n)) + " · " + esc(t("findChance")) + " ≈ " + ch + (d.only ? " · " + L(["Orte: ", "Places: "]) + d.only.map(o => Z.areaName(o)).join(", ") : "") + (d.tags ? " · " + d.tags.join(", ") : "") + "</small></div></div>";
+        body += '<div class="zeile' + (found ? "" : " unbekannt") + '"><span class="ico" data-icon="' + d.icon + '" data-col="' + (found ? d.col : "#3a3236") + '"></span><div><b>' + (found ? esc(L(d.n)) : "???") + "</b><small>" + (found ? esc(L(d.d)) : esc(t("unknown"))) + '</small><small class="fund">' + esc(L(Z.FIND[d.find].n)) + " · " + esc(t("findChance")) + " ≈ " + ch + (d.only ? " · " + L(["Orte: ", "Places: "]) + d.only.map(o => Z.BOSSDEF[o] && !Z.BIOMES[o] && !Z.ARENAS[o] ? L(Z.BOSSDEF[o].n) : Z.areaName(o)).join(", ") : "") + (d.tags ? " · " + d.tags.join(", ") : "") + "</small></div></div>";
       }
     } else if (codexTab === 2) {
       for (const id in Z.ENEMIES) { if (id === "puppe" || id === "glutlingKlein") continue; const d = Z.ENEMIES[id], n = M.seen[id] || 0; body += '<div class="zeile' + (n ? "" : " unbekannt") + '"><div><b>' + (n ? esc(L(d.n)) : "???") + "</b><small>" + (n ? L(["Erschlagen: ", "Slain: "]) + n + " · " + d.atks.length + L([" Angriffe", " attacks"]) + (d.undead ? L([" · untot", " · undead"]) : "") + (d.demon ? L([" · Dämon", " · demon"]) : "") + (d.front ? L([" · Schild vorn – von hinten angreifen", " · shield in front – attack from behind"]) : "") : "") + "</small></div></div>"; }
@@ -557,7 +562,7 @@
       return;
     }
     choiceInput();
-    if (Z.level) updateHud(dt);
+    if (Z.level) { updateHud(dt); bubbleTick(dt); }
   };
   /* Splitter-Anzeige: Bank im Lager */
   document.addEventListener("visibilitychange", () => { if (document.hidden && Z.level && !ui.modalOpen && Z.run) ui.pause(); });

@@ -90,6 +90,9 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 #choice button{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:6px 10px;text-align:left}
 #choice button small{display:block;font-size:10px}
 #choice .abbr{color:var(--mute)}
+#bubble{position:fixed;left:0;top:0;z-index:12;pointer-events:none;max-width:min(320px,70vw);background:#f0e6d4;color:#1a1216;border-radius:10px;padding:6px 10px;font-size:13px;line-height:1.35;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+#bubble::after{content:"";position:absolute;left:50%;bottom:-7px;margin-left:-7px;border:7px solid transparent;border-bottom:0;border-top-color:#f0e6d4}
+#bubble b{display:block;font-size:11px;color:#8a1a1a;text-transform:uppercase;letter-spacing:.04em}
 #fade{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .35s;z-index:40}
 #fade.an{opacity:1}
 
@@ -204,6 +207,7 @@ button:disabled{opacity:.45;cursor:default}
 <div id="prompt" hidden></div>
 <div id="card" hidden></div>
 <div id="toast" hidden></div>
+<div id="bubble" hidden></div>
 <div id="banner" hidden></div>
 <div id="choice" hidden></div>
 <div id="dreh">Querformat spielt sich besser</div>
@@ -223,17 +227,17 @@ button:disabled{opacity:.45;cursor:default}
 <div id="modal" hidden></div>
 <div id="title"></div>
 <div id="fade"></div>
-<script src="zerstoerer/kern.js?v=1"></script>
-<script src="zerstoerer/welt.js?v=1"></script>
-<script src="zerstoerer/daten.js?v=1"></script>
-<script src="zerstoerer/kampf.js?v=1"></script>
-<script src="zerstoerer/geschosse.js?v=1"></script>
-<script src="zerstoerer/gegner.js?v=1"></script>
-<script src="zerstoerer/bosse.js?v=1"></script>
-<script src="zerstoerer/figuren.js?v=1"></script>
-<script src="zerstoerer/bild.js?v=1"></script>
-<script src="zerstoerer/musik.js?v=1"></script>
-<script src="zerstoerer/spiel.js?v=1"></script>
-<script src="zerstoerer/ui.js?v=1"></script>
+<script src="zerstoerer/kern.js?v=2"></script>
+<script src="zerstoerer/welt.js?v=2"></script>
+<script src="zerstoerer/daten.js?v=2"></script>
+<script src="zerstoerer/kampf.js?v=2"></script>
+<script src="zerstoerer/geschosse.js?v=2"></script>
+<script src="zerstoerer/gegner.js?v=2"></script>
+<script src="zerstoerer/bosse.js?v=2"></script>
+<script src="zerstoerer/figuren.js?v=2"></script>
+<script src="zerstoerer/bild.js?v=2"></script>
+<script src="zerstoerer/musik.js?v=2"></script>
+<script src="zerstoerer/spiel.js?v=2"></script>
+<script src="zerstoerer/ui.js?v=2"></script>
 </body>
 </html>

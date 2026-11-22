@@ -269,8 +269,12 @@
     Z.newRun();
     Z.ui.fade(() => { Z.loadArea("torhof"); if (!Z.meta.tut) Z.ui.tutorial(); });
   };
+  const RETURN = [["B", ["Du lebst. Gut. Die Ballade wäre so kurz gewesen.", "You're alive. Good. The ballad would have been so short."]], ["E", ["Ich hab schon dein Gold gezählt. Es war keins.", "I already counted your gold. There wasn't any."]], ["G", ["Rex hat die ganze Zeit zum Tor gestarrt.", "Rex stared at the gate the whole time."]], ["B", ["Wieder da? Ich nenne das Kapitel „Noch nicht“.", "Back again? I'm calling this chapter 'Not yet'."]], ["A", ["Bring mir die Splitter. Dann schärfe ich, was du gefunden hast.", "Bring me the shards. Then I'll sharpen what you've found."]], ["G", ["Die Rolle, Ezekiel. Immer die Rolle.", "The roll, Ezekiel. Always the roll."]]];
   Z.backToCamp = function () {
-    Z.ui.fade(() => { Z.player = Z.newPlayer(); Z.loadArea("lager"); });
+    Z.ui.fade(() => {
+      Z.player = Z.newPlayer(); Z.loadArea("lager");
+      setTimeout(() => { const [id, txt] = Z.R.pick(RETURN); const s = Z.level.props.find(p => p.id === id); if (s && Z.level.hub) Z.ui.say(s.x * T + 8, s.y * T - 22, { B: "Barradin", E: "Echo", G: "Friedrich", A: "Nundro" }[id], L(txt), 4800); }, 1400);
+    });
   };
 
   /* ======================= TOD ======================= */
