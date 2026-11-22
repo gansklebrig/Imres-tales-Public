@@ -888,6 +888,9 @@
   }
   /* Fallen auf normale Räume streuen – je Gebiet passend */
   const TRAPKINDS = { torhof: "kr", keller: "kr<", hallen: "pk<", wehrgang: "pk<", verlies: "kf<", hafen: "zkj", glocken: "pkr", schlund: "rfk", schmiede: "zfk", zinnen: "pkj", see: "rkj", glut: "fkz", sturm: "pkr" };
+  const trapKeep = {};
+  function trapDens(B) { const sk = Z.run ? Z.run.skulls || 0 : 0; return Math.min(1, 0.3 + 0.17 * (B.tier || 0) + 0.1 * sk); }
+  Z.trapDens = trapDens;
   function sprinkleTraps(lv, R, B, avoid) {
     const kinds = TRAPKINDS[lv.biome]; if (!kinds) return; lv.traps = lv.traps || [];
     const g = lv.get, solid = v => v === 1 || v === 7, taken = [];
@@ -895,7 +898,7 @@
     const add = (t, x, y) => { (lv.traps = lv.traps || []).push({ t, x, y }); taken.push([x, y]); };
     for (const k in lv.cells) {
       const c = lv.cells[k];
-      if (c === lv.startCell || c.kind === "secret" || !R.chance(c.kind === "path" ? 0.75 : 0.35)) continue;
+      if (c === lv.startCell || c.kind === "secret" || !R.chance((c.kind === "path" ? 0.75 : 0.35) * trapDens(B))) continue;
       const ox = c.x * CW, oy = c.y * CH, want = R.chance(0.4) ? 2 : 1;
       for (let n = 0, tries = 0; n < want && tries < 30; tries++) {
         const kind = kinds[R.int(0, kinds.length - 1)], x = ox + R.int(2, CW - 3), y = oy + R.int(2, CH - 2);
@@ -930,6 +933,7 @@
   }
 
   function placeSpecial(lv, R, B, opts) {
+    for (const k in trapKeep) delete trapKeep[k];
     lv.spawns = []; lv.loot = []; lv.props = []; lv.doors = []; lv.decor = [];
     /* Start: im ersten Raum ein Platz für die Eingangstür */
     let sp = spotsIn(lv, lv.startCell, 3, true);
@@ -995,7 +999,11 @@
       if (m.t === "S" && scrolls < 3 && R.chance(0.65)) { lv.loot.push({ kind: "scroll", x: m.x, y: m.y }); scrolls++; }
       if (m.t === "b" && !nearDoor(m.x, m.y)) lv.props.push({ kind: "breakable", x: m.x, y: m.y });
       if (m.t === "w") lv.decor.push({ kind: "window", x: m.x, y: m.y });
-      if ("pfkrjz<>m".includes(m.t)) (lv.traps = lv.traps || []).push({ t: m.t, x: m.x, y: m.y });
+      if ("pfkrjz<>m".includes(m.t)) {
+        /* Fallen nehmen über den Lauf zu: im Torhof wenige, in der Tiefe alle (Federn und Fähren bleiben immer) */
+        if (!"jm".includes(m.t)) { const k = (m.cell ? m.cell.x + "," + m.cell.y : "") + m.t; trapKeep[k] = trapKeep[k] != null ? trapKeep[k] : R() < trapDens(B); if (!trapKeep[k]) continue; }
+        (lv.traps = lv.traps || []).push({ t: m.t, x: m.x, y: m.y });
+      }
     }
     /* Fallen über die Karte verteilen, nicht direkt an Start und Türen */
     sprinkleTraps(lv, R, B, (x, y) => nearStart(x, y) || nearDoor(x, y) || lv.doors.some(d => Math.abs(d.x - x) < 5 && Math.abs(d.y - y) < 4));
