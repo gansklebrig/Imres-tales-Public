@@ -324,7 +324,7 @@
     const ak = lv.arena && Z.ARENAS[lv.arena] ? Z.ARENAS[lv.arena].kind : null;
     const kind = ak === "hoard" ? "hoardbg" : ak === "lab" ? "labbg" : ak === "lakeboss" ? "lake" : ak === "towertop" ? "storm" : ak === "pier" ? "harbour" : ak === "tower" ? "ramparts" : B.bg;
     const fn = PAGES[kind]; if (!fn) { page = null; return; }
-    const q = Z.gq ? Z.gq.level : 2; if (q === 0) { page = null; return; }
+    const q = Z.gq && Number.isFinite(Z.gq.level) && Z.gq.level >= 0 ? Z.gq.level : 2; if (q === 0) { page = null; return; }
     const H = Math.ceil(Z.cam.h + 120), s = Math.min(G.scale || 1, q >= 3 ? 2 : 1.5);
     const cv = document.createElement("canvas"); cv.width = Math.ceil(PW * s); cv.height = Math.ceil(H * s);
     const c = cv.getContext("2d"); c.scale(s, s);
@@ -396,7 +396,7 @@
   Z.drawBackLife = function (c, cam, t, B, oy, LH) {
     if (life0) life0.apply(this, arguments);
     if (!Z.level) return;
-    const q = Z.gq ? Z.gq.level : 2;
+    const q = Z.gq && Number.isFinite(Z.gq.level) && Z.gq.level >= 0 ? Z.gq.level : 2;
     if (!page || page.lvRef !== Z.level || page.q !== q || Math.abs(page.H - Math.ceil(Z.cam.h + 120)) > 2) build();
     if (!page) return;
     const lvH = Z.level.H * Z.TILE;
