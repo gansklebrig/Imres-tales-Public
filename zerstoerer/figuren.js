@@ -102,7 +102,7 @@
     const pts = P.cape; if (!pts) return;
     const w0 = 6.5;
     c.save(); c.globalAlpha = alpha;
-    const g = c.createLinearGradient(0, pts[0].y, 0, pts[CAPE_N - 1].y + 4); g.addColorStop(0, "#8a1414"); g.addColorStop(1, "#4a0a0c");
+    const g = c.createLinearGradient(0, pts[0].y, 0, pts[CAPE_N - 1].y + 4); g.addColorStop(0, (Z.capeCol && Z.capeCol[0]) || "#8a1414"); g.addColorStop(1, (Z.capeCol && Z.capeCol[1]) || "#4a0a0c");
     c.fillStyle = g; c.beginPath();
     const left = [], right = [];
     for (let i = 0; i < CAPE_N; i++) {

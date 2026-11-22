@@ -209,9 +209,9 @@
     modal.hidden = true; modal.innerHTML = ""; ui.modalOpen = false; Z.paused = false; A.muffle(20000);
     const cb = ui.onClose; ui.onClose = null; if (cb) cb();
   }
-  ui.close = closeModal;
+  ui.close = closeModal; ui.open = openModal; Z.TX = TX;
   modal.addEventListener("click", e => { const b = e.target.closest("[data-act]"); if (!b) return; const fn = actions[b.dataset.act]; if (fn) { A.play("ui", { vol: 0.35 }); fn(b.dataset.arg, b); } });
-  const actions = {};
+  const actions = {}; ui.actions = actions;
   /* Tastatur in Menüs */
   ui.onKey = e => {
     if (inp.capture) return false;

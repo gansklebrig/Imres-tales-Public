@@ -231,7 +231,9 @@
     }
     /* ---------- Angriffe & Fähigkeiten ---------- */
     if (canAct && P.rollT <= 0 && P.drinkT <= 0) {
+      const diving = !P.onGround && inp.held.down && !P.plunge && P.vy > -260 && !P.climbing;
       for (const s of ["a1", "a2"]) {
+        if (diving && P.buf[s] > 0) continue; /* Runter + Angriff in der Luft: Sturzangriff statt normalem Schlag */
         const it = P.slots[s];
         const d = it ? Z.WEAPONS[it.id] : s === "a1" ? Z.WEAPONS.faeuste : null;
         if (!d) { take(P, s); continue; }
@@ -248,6 +250,7 @@
         }
         if (P.buf[s] > 0 && (!P.act || (P.act.phase === "post" && P.act.t > (P.act.def.post || 0.1) * 0.25) || (P.act.slot !== s && P.act.phase === "post"))) {
           P.buf[s] = 0; if (P.act) endAct(P);
+          if (Z.attackMod && Z.attackMod(P, s, it, d)) continue;
           if (d.kind === "melee") startMelee(P, s, it, d);
           else startShot(P, s, it, d);
         }
@@ -298,9 +301,10 @@
     if (P.jumpRel && P.jumpT >= 0.085 && P.vy < 0 && !P.cut) { P.vy *= C.CUT; P.cut = true; }
     if (!inp.held.jump && P.jumpT >= 0.085) P.jumpHeld = false;
     /* Sturzangriff: in der Luft unten + Angriff */
-    if (!P.onGround && !locked && inp.held.down && (inp.pressed.a1 || inp.pressed.a2) && !P.act && !P.plunge && P.vy > -200) {
-      const s = inp.pressed.a1 ? "a1" : "a2"; const it = P.slots[s], d = it ? Z.WEAPONS[it.id] : Z.WEAPONS.faeuste;
-      if (d && d.kind === "melee") { P.buf[s] = 0; P.plunge = true; P.plungeItem = it; P.vy = 640; P.vx = 0; A.play("swingHeavy", { vol: 0.7 }); }
+    if (!P.onGround && !locked && inp.held.down && (P.buf.a1 > 0 || P.buf.a2 > 0) && (!P.act || P.act.phase === "post") && !P.plunge && P.vy > -260) {
+      const s = P.buf.a1 > 0 ? "a1" : "a2"; if (P.act) endAct(P); const it = P.slots[s], d = it ? Z.WEAPONS[it.id] : Z.WEAPONS.faeuste;
+      if (d && Z.diveStart && Z.diveStart(P, s, it, d)) { P.buf[s] = 0; }
+      else if (d && d.kind === "melee") { P.buf[s] = 0; P.plunge = true; P.plungeItem = it; P.vy = 640; P.vx = 0; A.play("swingHeavy", { vol: 0.7 }); }
     }
     /* Schwerkraft */
     if (!P.onGround) {
@@ -600,6 +604,7 @@
       if (c.pull && Z.metaLvl("kettenpeitsche") >= 3) eff.stun = Math.max(eff.stun || 0, 0.6);
       Z.hitEnemy(e, dmg, { crit, kb, kbUp: c.kbUp || (crit ? 60 : 30), eff, src: "melee", it: a.it, heavy: c.heavy, wallSlam: c.wallSlam, dir: P.face, sfx: c.hitSnd });
       if (a.d.leech) Z.healPlayer(dmg * a.d.leech);
+      if (c.onHit) c.onHit(P, e, dmg, a);
       if (a.bash && Z.shieldHook) Z.shieldHook("bashHit", P, { a, e, dmg });
     }
     /* Kisten, Fässer, rissige Wände */
@@ -616,6 +621,7 @@
     A.play("rock", { vol: 0.6 });
   }
   function plungeLand(P) {
+    if (Z.diveLand && Z.diveLand(P)) { P.plunge = false; return; }
     P.plunge = false;
     const it = P.plungeItem, dmg = dmgOf(P, it, 26);
     FX.addShake(6); FX.stop(0.05); A.play("hitHeavy", { vol: 0.7 }); A.play("land", { vol: 0.8 });
@@ -643,6 +649,7 @@
       case "phiole": { const n = lv >= 3 ? 2 : 1; for (let i = 0; i < n; i++) Z.spawnProj("phiole", x, y, P.face, { dmg: base, it: a.it, eff, vx: P.face * (170 + i * 60), vy: -220 - i * 20 }); break; }
       case "blitz": Z.chainLightning(P, x, y, base, (s.chain || 4) + (lv >= 3 ? 2 : 0), Object.assign({ stun: 0.3 }, eff), a.it); break;
       case "netz": Z.spawnProj("netz", x, y, P.face, { dmg: base, it: a.it, eff: Object.assign({ root: 2.2, mark: 3 }, eff), pierce: lv >= 3 }); break;
+      default: if (Z.SHOT_FX && Z.SHOT_FX[s.proj]) Z.SHOT_FX[s.proj](P, a, x, y, base, eff, lv);
     }
     FX.burst(x + P.face * 4, y, 4, { col: "#ffe0a0", sp: 60, ang: P.face > 0 ? 0 : Math.PI, spread: 0.6, life: 0.15, size: 1.5, kind: "spark", add: true });
   }
@@ -717,7 +724,7 @@
     if ((P.iframe > 0 || P.ledge) && !o.force) {
       if (P.dodgeT > 0 && !P.dodged && !o.hazard) {
         P.dodged = true; P.counterT = 1.2; Z.stats.dodges = (Z.stats.dodges || 0) + 1;
-        FX.stop(0.06); FX.text(P.x + P.w / 2, P.y - 10, L(["Ausgewichen!", "Dodged!"]), "#ffe08a", true);
+        FX.stop(0.04); FX.slowmo(0.3, 0.16); FX.text(P.x + P.w / 2, P.y - 10, L(["Ausgewichen!", "Dodged!"]), "#ffe08a", true);
         FX.ring(P.x + P.w / 2, P.y + 12, 18, "#ffe08a", 0.25, 2); A.play("parry", { vol: 0.35, rate: 1.6 }); Z.input.rumble(0.25, 60);
       }
       return false;

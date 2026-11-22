@@ -64,6 +64,7 @@
 
   function projEnd(p, hitX, hitY) {
     p.dead = true;
+    if (p.onEnd && !p.ended) { p.ended = true; p.onEnd(p, hitX, hitY); }
     const k = p.k;
     if (p.kind === "phiole") { Z.spawnHazard({ kind: "fire", x: hitX, y: groundY(hitX, hitY), w: 46, life: 3, dmg: p.dmg * 0.25, owner: "p", eff: { burn: 1 } }); A.play("glass", { x: hitX, y: hitY, vol: 0.6 }); A.play("fire", { x: hitX, vol: 0.4 }); FX.burst(hitX, hitY, 14, { col: ["#7fd36a", "#ffb040", "#ff6a2a"], sp: 120, life: 0.4, size: 2, kind: "spark", add: true }); splashDamage(p, hitX, hitY, 30); }
     if (p.kind === "bombe") { explode(hitX, hitY, 46, p.dmg, "p", p.eff); }
@@ -98,7 +99,7 @@
     for (let i = Z.projs.length - 1; i >= 0; i--) {
       const p = Z.projs[i]; p.t += dt;
       if (p.dead || p.t > p.life) {
-        if (!p.dead && (p.k.lob || p.k.fuse)) projEnd(p, p.x, p.y);
+        if (!p.dead && (p.k.lob || p.k.fuse || p.onEnd)) projEnd(p, p.x, p.y);
         if (!p.dead && p.kind === "anker" && p.returning == null) {}
         Z.projs.splice(i, 1); continue;
       }
@@ -156,11 +157,12 @@
           if (k.anchor) { p.grab = p.grab || []; if (!e.def.boss && !e.def.heavy) p.grab.push(e); }
           if (p.kind === "phiole" || p.kind === "bombe") { projEnd(p, p.x, p.y); break; }
           if (p.kind === "netz") { FX.burst(p.x, p.y, 10, { col: "#eee8f0", sp: 60, life: 0.4, size: 2 }); A.play("web", { x: p.x, vol: 0.5 }); }
-          if (!p.pierce && !k.trap) { p.dead = true; break; }
+          if (p.onHitE) p.onHitE(p, e);
+          if (!p.pierce && !k.trap) { if (p.onEnd && !p.ended) { p.ended = true; p.onEnd(p, p.x, p.y); } p.dead = true; break; }
         }
       } else if (P && !P.dead) {
         const r = p.r;
-        if (p.x + r > P.x && p.x - r < P.x + P.w && p.y + r > P.y && p.y - r < P.y + P.h && !p.hits.has(P)) {
+        if (p.x + r > P.x + 2 && p.x - r < P.x + P.w - 2 && p.y + r > P.y + 3 && p.y - r < P.y + P.h - 1 && !p.hits.has(P)) { /* etwas kleinere Trefferfläche: faires Ausweichen */
           p.hits.add(P);
           if (k.web) { if (P.iframe <= 0 && !(P.act && P.act.type === "shield")) { Z.addStatus(P, "web", 2, true); FX.text(P.x + P.w / 2, P.y - 8, L(["Eingesponnen!", "Webbed!"]), "#eee8f0"); A.play("web"); } p.dead = true; continue; }
           const hurt = Z.hurtPlayer(p.dmg, { x: p.x - p.vx * 0.05, kb: k.rock ? 220 : 120, proj: k.parry !== false ? p : null, parryable: k.parry !== false, eff: p.eff });
@@ -182,6 +184,8 @@
     for (const p of Z.projs) {
       const k = p.k;
       c.save(); c.translate(p.x, p.y);
+      /* feindliche Geschosse: roter Schein, damit man sie im Getümmel sofort sieht */
+      if (p.owner === "e") { c.globalCompositeOperation = "lighter"; c.fillStyle = "rgba(255,80,40,.28)"; c.beginPath(); c.arc(0, 0, (k.r || 3) + 5, 0, 6.283); c.fill(); c.fillStyle = "rgba(255,200,150,.25)"; c.beginPath(); c.arc(0, 0, (k.r || 3) + 2, 0, 6.283); c.fill(); c.globalCompositeOperation = "source-over"; }
       switch (p.kind) {
         case "pfeil": case "e_pfeil": case "bolzen": case "e_bolzen": case "regenpfeil": case "e_feder": {
           c.rotate(p.rot); const len = p.kind.includes("bolzen") ? 8 : 11;

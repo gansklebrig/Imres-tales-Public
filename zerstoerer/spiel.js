@@ -293,7 +293,7 @@
   };
 
   /* ======================= HAUPTSCHLEIFE ======================= */
-  const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+  const cv = document.getElementById("cv"), ctx = cv.getContext("2d", { alpha: false, desynchronized: true }) || cv.getContext("2d");
   let VW = 0, VH = 0, dpr = 1;
   function resize() {
     const q = Z.gq || {};
@@ -360,6 +360,8 @@
     Z.updateParcours && Z.updateParcours(dt);
     Z.prachtTick && Z.prachtTick(dt);
     Z.bilanzTick && Z.bilanzTick(dt);
+    Z.kampfTick && Z.kampfTick(dt);
+    Z.abenteuerTick && Z.abenteuerTick(dt);
     updateCampRex(dt);
     Z.updatePickups(dt);
     if (Z.darkness > 0) Z.darkness -= dt;
