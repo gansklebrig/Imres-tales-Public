@@ -16,6 +16,13 @@
   function setup(lv) {
     doors = []; seen = new Set(); lvRef = lv; Z.lvDoors = doors;
     if (!lv || lv.hub || lv.arena || lv.passage || !lv.cells) return;
+    /* Außengebiete: keine unsichtbare Decke – über der Karte ist offener Himmel */
+    if (lv.out && !lv._skyOpen) {
+      lv._skyOpen = true;
+      for (let x = 1; x < lv.W - 1; x++) if (lv.get(x, 0) === 1) lv.set(x, 0, 0);
+      const g0 = lv.get; lv.get = (x, y) => (y < 0 && x >= 0 && x < lv.W ? 0 : g0(x, y));
+      if (Z.cam.bounds) { Z.cam.bounds.y = -6 * T; Z.cam.bounds.h = lv.H * T + 6 * T; }
+    }
     /* Türen auf Pfad- und Seitenverbindungen nach rechts */
     for (const k in lv.cells) {
       const c = lv.cells[k], r = lv.cells[(c.x + 1) + "," + c.y];
@@ -86,35 +93,67 @@
     }
   }
 
-  /* ======================= Nebel über unerforschten Räumen ======================= */
-  let fogSpr = null;
-  function fogSprite() {
-    if (fogSpr) return fogSpr;
-    const cv = document.createElement("canvas"); cv.width = 64; cv.height = 64; const g = cv.getContext("2d");
-    for (let i = 0; i < 26; i++) { const x = Math.random() * 64, y = Math.random() * 64, r = 10 + Math.random() * 18; const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, "rgba(120,110,120,.18)"); gr.addColorStop(1, "rgba(120,110,120,0)"); g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2); }
-    return (fogSpr = cv);
+  /* ======================= Sicht: was Ezekiel wirklich sehen kann =======================
+     Sichtlinien von Ezekiels Augen aus: durch offene Räume, Durchgänge und offene Türen klar,
+     hinter Wänden und geschlossenen Türen liegt Schatten. Schon Gesehenes bleibt gedämpft erkennbar,
+     Unbekanntes liegt im Dunkel. Die Sichtweite hängt vom Gebiet ab. */
+  let vis = null, mem = null, tvis = null, visLv = null, visT = 0, ofs = null, ofc = null;
+  const blocks = v => v === 1 || v === 7 || v === 12;
+  function sightRange(lv) {
+    const B = Z.biome || {};
+    let r = lv.out ? 30 : B.open === "cave" ? 15 : 21;
+    if (B.dark > 0.6) r -= 3;
+    if (Z.darkness > 0) r = Math.min(r, 10);
+    return r;
+  }
+  function computeVis(lv, cam) {
+    const P = Z.player; if (!P) return;
+    const n = lv.W * lv.H;
+    if (visLv !== lv) { visLv = lv; vis = new Float32Array(n); mem = new Uint8Array(n); tvis = new Float32Array(n); }
+    tvis.fill(0);
+    const ex = (P.x + P.w / 2) / T, ey = (P.y + 7) / T, R = sightRange(lv), R2 = R * R;
+    const x0 = Math.max(0, Math.floor(cam.x / T) - 2), x1 = Math.min(lv.W - 1, Math.ceil((cam.x + cam.w) / T) + 2);
+    const y0 = Math.max(0, Math.floor(cam.y / T) - 2), y1 = Math.min(lv.H - 1, Math.ceil((cam.y + cam.h) / T) + 2);
+    for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) {
+      const cx = tx + 0.5, cy = ty + 0.5, dx = cx - ex, dy = cy - ey, d2 = dx * dx + dy * dy;
+      if (d2 > R2) continue;
+      const d = Math.sqrt(d2), steps = Math.ceil(d * 2.2);
+      let ok = true;
+      for (let s = 1; s < steps; s++) {
+        const u = s / steps, sx = Math.floor(ex + dx * u), sy = Math.floor(ey + dy * u);
+        if (sx === tx && sy === ty) break;
+        if (blocks(lv.get(sx, sy))) { ok = false; break; }
+      }
+      if (!ok) continue;
+      const f = d < R * 0.7 ? 1 : Math.max(0, 1 - (d - R * 0.7) / (R * 0.3));
+      const i = ty * lv.W + tx; tvis[i] = f;
+      if (f > 0.25) { mem[i] = 1; const k = Math.floor(tx / CW) + "," + Math.floor(ty / CH); if (!seen.has(k)) seen.add(k); }
+    }
   }
   function drawFog(c, cam, t) {
     const lv = Z.level; if (!lv || lv.hub || lv.arena || lv.passage || !lv.cells) return;
-    fogT = Math.min(1, fogT + 0.02);
-    const sw = CW * T, sh = CH * T, x0 = Math.floor(cam.x / sw), x1 = Math.floor((cam.x + cam.w) / sw), y0 = Math.floor(cam.y / sh), y1 = Math.floor((cam.y + cam.h) / sh);
-    const spr = fogSprite();
-    for (let cy = y0; cy <= y1; cy++) for (let cx = x0; cx <= x1; cx++) {
-      const k = cx + "," + cy; if (seen.has(k) || !lv.cells[k]) continue;
-      const px = cx * sw, py = cy * sh, pad = 18;
-      c.save();
-      /* weicher Rand: zur Seite eines bekannten Raums hin auslaufen */
-      const g = c.createLinearGradient(px, 0, px + sw, 0);
-      const lk = seen.has((cx - 1) + "," + cy), rk = seen.has((cx + 1) + "," + cy);
-      g.addColorStop(0, lk ? "rgba(8,6,10,.55)" : "rgba(8,6,10,.96)"); g.addColorStop(lk ? 0.12 : 0, "rgba(8,6,10,.96)"); g.addColorStop(rk ? 0.88 : 1, "rgba(8,6,10,.96)"); g.addColorStop(1, rk ? "rgba(8,6,10,.55)" : "rgba(8,6,10,.96)");
-      c.fillStyle = g; c.fillRect(px - 1, py - 1, sw + 2, sh + 2);
-      /* treibender Nebel */
-      if (Z.gq && Z.gq.level === 0) { c.restore(); continue; }
-      c.globalAlpha = 0.9; const o = (t * 6) % 64;
-      for (let yy = py - 64; yy < py + sh; yy += 64) for (let xx = px - 64 + o; xx < px + sw; xx += 64) c.drawImage(spr, xx, yy + Math.sin(t * 0.5 + xx * 0.01) * 4, 64, 64);
-      c.restore();
+    const now = performance.now();
+    if (now - visT > 70 || visLv !== lv) { visT = now; computeVis(lv, cam); }
+    const x0 = Math.max(0, Math.floor(cam.x / T) - 1), x1 = Math.min(lv.W - 1, Math.ceil((cam.x + cam.w) / T) + 1);
+    const y0 = Math.max(0, Math.floor(cam.y / T) - 1), y1 = Math.min(lv.H - 1, Math.ceil((cam.y + cam.h) / T) + 1);
+    const w = x1 - x0 + 1, h = y1 - y0 + 1;
+    if (!ofs) { ofs = document.createElement("canvas"); ofc = ofs.getContext("2d"); }
+    if (ofs.width !== w || ofs.height !== h) { ofs.width = w; ofs.height = h; }
+    const img = ofc.createImageData(w, h), D = img.data;
+    const memA = lv.out ? 0.42 : 0.6, unA = lv.out ? 0.72 : 0.95;
+    for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) {
+      const i = ty * lv.W + tx;
+      vis[i] += (tvis[i] - vis[i]) * 0.18;
+      const base = mem[i] ? memA : unA, a = base * (1 - vis[i]);
+      const o = ((ty - y0) * w + (tx - x0)) * 4;
+      D[o] = 7; D[o + 1] = 5; D[o + 2] = 10; D[o + 3] = Math.round(a * 255);
     }
+    ofc.putImageData(img, 0, 0);
+    c.save(); c.imageSmoothingEnabled = true;
+    c.drawImage(ofs, x0 * T, y0 * T, w * T, h * T);
+    c.restore();
   }
+  Z.sightAt = (px, py) => { const lv = Z.level; if (!lv || !vis || visLv !== lv) return 1; const i = Math.floor(py / T) * lv.W + Math.floor(px / T); return vis[i] || 0; };
 
   /* ======================= Fallschaden & Schutz vor Selbstmord ======================= */
   function groundAhead(e, dist) {

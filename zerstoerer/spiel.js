@@ -244,12 +244,12 @@
       if (p.kind === "chest") { p.open = true; A.play("chest"); FX.burst(p.x, p.y - 8, 20, { col: ["#ffd27a", "#fff0c0"], sp: 120, up: 60, life: 0.6, size: 2, kind: "spark", add: true }); Z.dropGold(p.x, p.y - 10, 25 * Z.BAL.goldMul(Z.run.tier)); Z.dropItem(p.x, p.y - 10, { chest: true }); if (Z.R() < 0.3) Z.spawnPickup("food", p.x, p.y - 10, { food: Z.R.pick(Z.FOOD), drop: true }); return; }
       if (p.kind === "cursed") {
         const open = it => {
-          p.open = true; P.curse = Math.max(P.curse || 0, 10); A.play("dark"); FX.flashScreen("#c040ff", 0.4); FX.text(P.x + P.w / 2, P.y - 14, L(["Verflucht!", "Cursed!"]), "#c040ff", true);
+          p.open = true; A.play("chest"); FX.burst(p.x, p.y - 8, 24, { col: ["#c040ff", "#ff9af0"], sp: 120, up: 60, life: 0.7, size: 2, kind: "spark", add: true });
           Z.dropGold(p.x, p.y - 10, 80 * Z.BAL.goldMul(Z.run.tier)); Z.dropItem(p.x, p.y - 10, { elite: true }); Z.dropShards(p.x, p.y, 10);
           return it ? Z.spawnPickup("item", p.x + 10, p.y - 10, { it, drop: true, vy: -200, vx: 30 }) : null;
         };
         if (Z.ui.cursedChest) return Z.ui.cursedChest(p, open);
-        return Z.ui.confirm(L(["Verfluchte Truhe", "Cursed Chest"]), L(["Reiche Beute – aber danach tötet dich jeder Treffer, bis du 10 Gegner erschlagen hast.", "Rich loot – but afterwards any hit kills you until you have slain 10 enemies."]), L(["Öffnen", "Open"]), () => open(Z.rollItem({ rar: [35, 45, 16, 4], chest: true, cursedChest: true })));
+        return Z.ui.confirm(L(["Verfluchte Truhe", "Cursed Chest"]), L(["Darin liegt eine verfluchte Waffe. Erst wer sie anlegt, trägt den Fluch.", "A cursed weapon lies within. Only equipping it brings the curse."]), L(["Öffnen", "Open"]), () => open(Z.rollItem({ rar: [35, 45, 16, 4], chest: true, cursedChest: true })));
       }
     }
     if (o.type === "door") {

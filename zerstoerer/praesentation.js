@@ -346,10 +346,10 @@
     let take = "";
     if (both) take = [sA, sB].map(s => btn(s, verb + L(["anlegen statt ", "equip instead of "]) + slotLabel(s) + ' <kbd>' + esc(inp.device === "pad" ? inp.label(s) : "") + "</kbd>")).join("");
     else take = btn("auto", verb + L(["anlegen", "equip"]));
-    if (chestOpen) take += btn("leave", L(["Nur öffnen – Fund liegen lassen", "Just open – leave it lying"]));
+    if (chestOpen) take += btn("leave", L(["Nur öffnen – liegen lassen", "Just open – leave it"]));
     const rules = "<ul class=\"fv-regeln\">" +
-      (chestOpen ? "<li>" + L(["Schon das Öffnen verflucht dich: ", "Opening alone curses you: "]) + "<b>10</b>" + L([" Kills ohne einen einzigen Treffer.", " kills without a single hit."]) + "</li>" : "") +
-      "<li>" + L(["Legst du sie an: ", "If you equip it: "]) + "<b>" + cu.n + "</b>" + L([" Kills ohne Treffer – " + (chestOpen ? "zusätzlich. " : "") + "Jeder Treffer bis dahin tötet dich.", " kills without a hit" + (chestOpen ? " on top" : "") + ". Any hit until then kills you."]) + "</li>" +
+      (chestOpen ? "<li>" + L(["Öffnen und Anschauen kostet nichts – nur das Anlegen bringt den Fluch.", "Opening and looking costs nothing – only equipping brings the curse."]) + "</li>" : "") +
+      "<li>" + L(["Legst du sie an: ", "If you equip it: "]) + "<b>" + cu.n + "</b>" + L([" Kills ohne Treffer. Jeder Treffer bis dahin tötet dich.", " kills without a hit. Any hit until then kills you."]) + "</li>" +
       "<li>" + L(["Danach bleibt sie für immer so stark: Schaden ×", "Afterwards it stays this strong for good: damage ×"]) + cu.mul.toFixed(1) + (pw ? L([" und ", " and "]) + "<b>" + esc(L(pw.n)) + "</b>" : "") + ".</li>" +
       (P.curse > 0 ? "<li class=\"warn\">" + L(["Du trägst schon einen Fluch: noch ", "You already carry a curse: "]) + P.curse + L([" Kills.", " kills left."]) + "</li>" : "") +
       "</ul>";
@@ -358,7 +358,7 @@
       "<h2>" + (chestOpen ? L(["Verfluchte Truhe", "Cursed Chest"]) : L(["Verfluchter Fund", "Cursed Find"])) + "</h2>" +
       '<p class="hinweis">' + (chestOpen ? L(["Durch die Ritzen siehst du, was darin liegt …", "Through the cracks you can see what lies within…"]) : L(["Die Waffe flüstert. Nimm dir Zeit.", "The weapon whispers. Take your time."])) + "</p>" +
       '<div class="fv-reihe"><div class="fv-bild"><canvas width="240" height="200"></canvas></div><div class="fv-karte">' + ui.itemCardHTML(it, true) + "</div></div>" + rules +
-      '<div class="knoepfe">' + take + '<button data-act="fvNo" autofocus>' + (chestOpen ? L(["Lieber nicht", "Better not"]) : L(["Liegen lassen", "Leave it"])) + "</button></div></div>", { cls: "breit" });
+      '<div class="knoepfe">' + take + '<button data-act="fvNo" autofocus>' + (chestOpen ? L(["Zu lassen", "Keep it shut"]) : L(["Liegen lassen", "Leave it"])) + "</button></div></div>", { cls: "breit" });
     A.play("dark", { vol: 0.4 });
     setTimeout(() => preview(it), 20);
   }

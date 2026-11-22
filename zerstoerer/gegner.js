@@ -247,7 +247,7 @@
     /* Rückstoß-Phase */
     if (e.kbT > 0) {
       e.kbT -= dt;
-      if (!d.fly) e.vy += 1400 * dt;
+      if (!d.fly) e.vy += (Z.ENEMY_GRAV || 1400) * dt;
       e.vx *= Math.pow(0.02, dt);
       if (d.fly) { e.vy *= Math.pow(0.02, dt); }
       Z.moveBody(e, dt);
@@ -256,7 +256,7 @@
     }
     if (st.stun > 0 || e.stagger > 0) {
       if (e.stagger > 0) e.stagger -= dt;
-      if (!d.fly) { e.vy += 1400 * dt; e.vx = U.approach(e.vx, 0, 800 * dt); } else { e.vx *= 0.9; e.vy = U.approach(e.vy, d.fly && st.stun > 0 ? 60 : 0, 300 * dt); }
+      if (!d.fly) { e.vy += (Z.ENEMY_GRAV || 1400) * dt; e.vx = U.approach(e.vx, 0, 800 * dt); } else { e.vx *= 0.9; e.vy = U.approach(e.vy, d.fly && st.stun > 0 ? 60 : 0, 300 * dt); }
       Z.moveBody(e, dt);
       return;
     }
@@ -284,7 +284,7 @@
     /* Angst */
     if (st.fear > 0) { moveToward(e, dt, -U.sign(dx), 1.1); return; }
     if (!e.aware || e.alertT > 0) { idle(e, dt); return; }
-    if (st.root > 0) { e.vx = 0; if (!d.fly) { e.vy += 1400 * dt; Z.moveBody(e, dt); } faceTo(e, dx); tryAttack(e, dx, dy, adx, P, true); return; }
+    if (st.root > 0) { e.vx = 0; if (!d.fly) { e.vy += (Z.ENEMY_GRAV || 1400) * dt; Z.moveBody(e, dt); } faceTo(e, dx); tryAttack(e, dx, dy, adx, P, true); return; }
     faceTo(e, dx);
     /* Angriff auswählen */
     if (tryAttack(e, dx, dy, adx, P)) return;
@@ -310,7 +310,7 @@
   function idle(e, dt) {
     const d = e.def;
     if (d.fly) { e.vx = Math.sin(e.anim * 0.8) * 20; e.vy = Math.cos(e.anim * 1.3) * 12; Z.moveBody(e, dt); return; }
-    if (d.ai === "turret") { e.vx = 0; e.vy += 1400 * dt; Z.moveBody(e, dt); return; }
+    if (d.ai === "turret") { e.vx = 0; e.vy += (Z.ENEMY_GRAV || 1400) * dt; Z.moveBody(e, dt); return; }
     e.patrol -= dt;
     if (e.patrol <= 0) { e.patrol = 1.5 + Z.R() * 2.5; e.pDir = Z.R() < 0.4 ? 0 : Z.R() < 0.5 ? -1 : 1; }
     moveToward(e, dt, e.pDir || 0, 0.35);
@@ -332,7 +332,7 @@
       if (dir && W.solidT(W.tile(tx, Math.floor((e.y + e.h - 4) / T))) && !W.solidT(W.tile(tx, Math.floor((e.y + e.h - 20) / T))) && e.aware) e.vy = -300;
     }
     e.vx = U.approach(e.vx, dir * d.spd * spd, 1400 * dt);
-    e.vy += 1400 * dt; if (e.vy > 500) e.vy = 500;
+    e.vy += (Z.ENEMY_GRAV || 1400) * dt; if (e.vy > 620) e.vy = 620;
     Z.moveBody(e, dt);
     if (e.hitWall && !e.aware) e.pDir = -e.hitWall;
     if (dir) e.face = e.st.fear > 0 ? dir : e.face;
@@ -389,7 +389,7 @@
     ac.t += dt / ac.fast;
     const dx = tgt.x + tgt.w / 2 - (e.x + e.w / 2);
     /* Bewegung während des Angriffs */
-    if (!d.fly) e.vy += 1400 * dt;
+    if (!d.fly) e.vy += (Z.ENEMY_GRAV || 1400) * dt;
     if (ac.phase === "pre") {
       if (a.track !== false && ac.t < a.pre * 0.6 && Math.abs(dx) > 6) e.face = U.sign(dx);
       if (!d.fly) e.vx = U.approach(e.vx, 0, 900 * dt);

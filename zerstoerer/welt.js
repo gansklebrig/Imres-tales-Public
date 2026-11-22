@@ -938,21 +938,49 @@
     const st = sp[0] || [lv.startCell.x * CW + 12, lv.startCell.y * CH + 10];
     lv.start = { x: st[0], y: st[1] };
     lv.doors.push({ kind: "entry", x: st[0], y: st[1] });
-    /* Ausgänge: im letzten Raum, möglichst weit auseinander */
+    /* Ausgänge über das ganze Gebiet verteilt – dort, wo sie hinführen:
+       Wege in die Tiefe (Keller, Verlies, Schlund, See …) liegen unten, Wege nach oben (Wehrgang, Turm, Zinnen …) oben,
+       alles andere auf mittlerer Höhe und möglichst weit vom Eingang. */
     const exits = opts.exits || B.exits || [];
-    let ep = spotsIn(lv, lv.endCell, 3, true).filter(p => Math.abs(p[0] - st[0]) + Math.abs(p[1] - st[1]) > 6);
-    if (ep.length < exits.length) ep = ep.concat(spotsIn(lv, lv.endCell, 3, false));
-    if (ep.length < exits.length) {
-      /* Notfall: Boden im Ausgangsraum ebnen und Platz schaffen */
-      const oy = lv.endCell.y * CH, ox = lv.endCell.x * CW;
-      for (let x = ox + 2; x < ox + CW - 2; x++) { for (let y = oy + 8; y <= oy + 11; y++) lv.set(x, y, 0); lv.set(x, oy + 12, 1); }
-      ep = spotsIn(lv, lv.endCell, 3, true);
+    const VDIR = { keller: 1, verlies: 1, schlund: 1, see: 1, hafen: 0.6, labor: 1, glut: 0.5, demogorgon: 1, themberchaud: 0.5,
+      wehrgang: -1, glocken: -1, zinnen: -1, sturm: -1, wachturm: -1, venomfang: -1, erzpriesterin: 0.3, hallen: 0, schmiede: 0 };
+    const gh = lv.gh, sc = lv.startCell;
+    const cellsAll = Object.keys(lv.cells).map(k => lv.cells[k]).filter(c => c.kind !== "secret");
+    const used = [], chosen = [];
+    const order = exits.map((to, i) => ({ to, i, v: VDIR[to] != null ? VDIR[to] : 0 })).sort((a, b) => Math.abs(b.v) - Math.abs(a.v));
+    for (const ex of order) {
+      let best = null, bs = -1e9;
+      for (const c of cellsAll) {
+        if (c === sc && cellsAll.length > 2) continue;
+        const ry = gh > 1 ? c.y / (gh - 1) : 0.5;
+        const want = ex.v > 0 ? 1 : ex.v < 0 ? 0 : 0.5;
+        let sc2 = -Math.abs(ry - want) * 10 * (Math.abs(ex.v) || 0.6);
+        sc2 += (Math.abs(c.x - sc.x) + Math.abs(c.y - sc.y)) * 1.2;
+        if (Math.abs(c.x - sc.x) + Math.abs(c.y - sc.y) < 2) sc2 -= 6;
+        for (const u of used) sc2 -= Math.max(0, 4 - (Math.abs(c.x - u.x) + Math.abs(c.y - u.y))) * 3;
+        if (used.includes(c)) sc2 -= 50;
+        if (c === lv.endCell) sc2 += 1.5;
+        if (c.kind === "path") sc2 += 0.8;
+        sc2 += R() * 0.5;
+        let spots = spotsIn(lv, c, 3, true); if (!spots.length) spots = spotsIn(lv, c, 3, false);
+        spots = spots.filter(p => !chosen.some(q => Math.abs(q[0] - p[0]) < 4 && Math.abs(q[1] - p[1]) < 3) && Math.abs(p[0] - st[0]) + Math.abs(p[1] - st[1]) > 6);
+        if (!spots.length) continue;
+        if (sc2 > bs) { bs = sc2; best = { c, spots }; }
+      }
+      let p;
+      if (best) {
+        const sp2 = best.spots.slice().sort((a, b) => ex.v > 0 ? b[1] - a[1] : ex.v < 0 ? a[1] - b[1] : Math.abs(a[0] - (best.c.x * CW + 12)) - Math.abs(b[0] - (best.c.x * CW + 12)));
+        p = sp2[Math.min(sp2.length - 1, R.int(0, Math.min(2, sp2.length - 1)))]; used.push(best.c);
+      } else {
+        const oy = lv.endCell.y * CH, ox = lv.endCell.x * CW;
+        for (let x = ox + 2; x < ox + CW - 2; x++) { for (let y = oy + 8; y <= oy + 11; y++) lv.set(x, y, 0); lv.set(x, oy + 12, 1); }
+        const e2 = spotsIn(lv, lv.endCell, 3, true).filter(p2 => !chosen.some(q => Math.abs(q[0] - p2[0]) < 4 && Math.abs(q[1] - p2[1]) < 3));
+        p = e2[0] || [ox + 6 + chosen.length * 5, oy + 11];
+      }
+      chosen.push(p);
+      ex.p = p;
     }
-    const chosen = [];
-    R.shuffle(ep);
-    for (const p of ep) { if (chosen.length >= exits.length) break; if (chosen.every(q => Math.abs(q[0] - p[0]) >= 4 || Math.abs(q[1] - p[1]) >= 3)) chosen.push(p); }
-    chosen.sort((a, b) => a[0] - b[0]);
-    exits.forEach((to, i) => { const p = chosen[i] || chosen[0] || [lv.endCell.x * CW + 12, lv.endCell.y * CH + 11]; lv.doors.push({ kind: "exit", to, x: p[0], y: p[1] }); });
+    order.sort((a, b) => a.i - b.i).forEach(ex => lv.doors.push({ kind: "exit", to: ex.to, x: ex.p[0], y: ex.p[1], dir: ex.v > 0.4 ? "down" : ex.v < -0.4 ? "up" : "mid" }));
     if (B.warden) lv.warden = { id: B.warden, cell: lv.endCell };
     /* Markierungen auswerten */
     const startPx = lv.start.x, startPy = lv.start.y;

@@ -474,7 +474,7 @@
   function startShield(P, slot, it, d) {
     if (P.act) endAct(P);
     P.act = { slot, it, d, def: { post: 0.12 }, type: "shield", phase: "hold", t: 0 };
-    P.parryT = d.shield.parry * (Z.metaLvl(it ? it.id : "") >= 3 && it && it.id === "goldschild" ? 1.2 : 1);
+    P.parryT = d.shield.parry * (Z.parryScale ? Z.parryScale() : 1) * (Z.metaLvl(it ? it.id : "") >= 3 && it && it.id === "goldschild" ? 1.2 : 1);
     A.play("block", { vol: 0.3, rate: 1.3 });
   }
   /* Schildstoß: kurzer Stoß nach vorn, wenig Schaden, betäubt; jeder Schild hat eigene Wirkungen (werkzeuge.js) */
@@ -751,7 +751,7 @@
         if (Z.shieldHook) Z.shieldHook("parry", P, o);
         return false;
       }
-      const through = dmg * (1 - sh.block);
+      const through = dmg * Math.min(1, 1 - sh.block + (Z.blockLeak ? Z.blockLeak() : 0));
       A.play("block", { vol: 0.7 }); FX.burst(P.x + P.w / 2 + P.face * 8, P.y + 12, 8, { col: "#ffe0a0", sp: 110, life: 0.25, size: 1.6, kind: "spark", add: true });
       P.vx = -P.face * 120; FX.addShake(2); FX.stop(0.04);
       if (sh.thorns && o.attacker && !o.attacker.dead) Z.hitEnemy(o.attacker, dmg * sh.thorns, { kb: 60, src: "thorns", eff: Z.metaLvl("dornenschild") >= 3 ? { bleed: 1 } : null });
