@@ -36,13 +36,16 @@
 
   /* ---------------- Eingabe ---------------- */
   const ACTIONS = ["left", "right", "up", "down", "jump", "roll", "a1", "a2", "s1", "s2", "use", "potion", "pause", "map"];
-  const KEYMAP = {
-    KeyA: "left", ArrowLeft: "left", KeyD: "right", ArrowRight: "right", KeyW: "up", ArrowUp: "up", KeyS: "down", ArrowDown: "down",
-    Space: "jump", KeyK: "jump", ShiftLeft: "roll", ShiftRight: "roll", KeyL: "roll",
-    KeyJ: "a1", KeyU: "a2", KeyI: "s1", KeyO: "s2", KeyQ: "s1", KeyE: "use", KeyF: "use", KeyR: "potion", KeyH: "potion",
-    Escape: "pause", KeyP: "pause", KeyM: "map", Tab: "map", Enter: "use"
+  /* Standardbelegung: je Aktion bis zu zwei Tasten */
+  const KEYS0 = {
+    left: ["KeyA", "ArrowLeft"], right: ["KeyD", "ArrowRight"], up: ["KeyW", "ArrowUp"], down: ["KeyS", "ArrowDown"],
+    jump: ["Space", "KeyK"], roll: ["ShiftLeft", "KeyL"], a1: ["KeyJ", null], a2: ["KeyU", null], s1: ["KeyQ", "KeyI"], s2: ["KeyO", null],
+    use: ["KeyE", "KeyF"], potion: ["KeyR", "KeyH"], pause: ["Escape", "KeyP"], map: ["KeyM", "Tab"]
   };
-  const inp = (Z.input = { held: {}, pressed: {}, released: {}, mouse: false, device: "keys", touch: false, vib: true, lastPad: null, axis: 0 });
+  /* Xbox-Layout (Standard-Gamepad): 0 A, 1 B, 2 X, 3 Y, 4 LB, 5 RB, 6 LT, 7 RT, 8 Ansicht, 9 Menü, 10 LS, 11 RS, 12–15 Steuerkreuz */
+  const PAD0 = { jump: 0, roll: 1, a1: 2, a2: 3, s1: 4, s2: 5, potion: 6, use: 7, map: 8, pause: 9 };
+  const PADNAMES = ["A", "B", "X", "Y", "LB", "RB", "LT", "RT", "View", "Menu", "LS", "RS", "↑", "↓", "←", "→", "Xbox"];
+  const inp = (Z.input = { held: {}, pressed: {}, released: {}, mouse: false, device: "keys", touch: false, vib: true, lastPad: null, axis: 0, padName: "", capture: null });
   ACTIONS.forEach(a => { inp.held[a] = false; inp.pressed[a] = false; inp.released[a] = false; });
   const src = { key: {}, pad: {}, touch: {}, mouse: {} };
   function recompute() {
@@ -55,37 +58,82 @@
   }
   inp.endFrame = () => { for (const a of ACTIONS) { inp.pressed[a] = false; inp.released[a] = false; } };
   inp.consume = a => { inp.pressed[a] = false; };
-  inp.rebind = {}; /* frei belegbar über das Menü: code -> Aktion */
-  try { Object.assign(inp.rebind, JSON.parse(localStorage.getItem("imres-zerstoerer-tasten") || "{}")); } catch (_) {}
-  const mapKey = code => inp.rebind[code] || KEYMAP[code];
+  /* gespeicherte Belegung */
+  const clone = o => JSON.parse(JSON.stringify(o));
+  inp.keys = clone(KEYS0); inp.pad = clone(PAD0);
+  try { const k = JSON.parse(localStorage.getItem("imres-zerstoerer-tasten2") || "null"); if (k) for (const a of ACTIONS) if (Array.isArray(k[a])) inp.keys[a] = k[a].slice(0, 2); } catch (_) {}
+  try { const p = JSON.parse(localStorage.getItem("imres-zerstoerer-pad") || "null"); if (p) for (const a in PAD0) if (typeof p[a] === "number") inp.pad[a] = p[a]; } catch (_) {}
+  let codeMap = {};
+  inp.rebuild = () => { codeMap = {}; for (const a of ACTIONS) for (const c of inp.keys[a] || []) if (c) codeMap[c] = a; if (!codeMap.Escape) codeMap.Escape = "pause"; if (!codeMap.ShiftRight && inp.keys.roll.includes("ShiftLeft")) codeMap.ShiftRight = "roll"; };
+  inp.rebuild();
+  inp.save = () => { try { localStorage.setItem("imres-zerstoerer-tasten2", JSON.stringify(inp.keys)); localStorage.setItem("imres-zerstoerer-pad", JSON.stringify(inp.pad)); } catch (_) {} inp.rebuild(); };
+  inp.reset = () => { inp.keys = clone(KEYS0); inp.pad = clone(PAD0); inp.save(); };
+  /* eine Taste/Knopf neu belegen; doppelte Belegungen werden entfernt */
+  inp.setKey = (action, slot, code) => { for (const a of ACTIONS) inp.keys[a] = inp.keys[a].map(c => (c === code ? null : c)); inp.keys[action][slot] = code; inp.save(); };
+  inp.setPad = (action, btn) => { for (const a in inp.pad) if (inp.pad[a] === btn) inp.pad[a] = inp.pad[action]; inp.pad[action] = btn; inp.save(); };
+  inp.keyName = code => {
+    if (!code) return "–";
+    const sp = { Space: Z.settings && Z.settings.lang === "en" ? "Space" : "Leertaste", ShiftLeft: "Shift", ShiftRight: "Shift ⇧", ControlLeft: "Strg", ControlRight: "Strg ⇧", AltLeft: "Alt", Escape: "Esc", Enter: "Enter", Tab: "Tab", Backspace: "⌫", ArrowLeft: "←", ArrowRight: "→", ArrowUp: "↑", ArrowDown: "↓", CapsLock: "Caps" };
+    if (sp[code]) return sp[code];
+    if (code.startsWith("Key")) return code.slice(3);
+    if (code.startsWith("Digit")) return code.slice(5);
+    if (code.startsWith("Numpad")) return "Num " + code.slice(6);
+    return code;
+  };
+  inp.padButtonName = i => (i == null ? "–" : PADNAMES[i] || "#" + i);
+  /* Beschriftung einer Aktion für das aktuelle Gerät */
+  inp.label = a => {
+    if (inp.device === "pad") return inp.pad[a] != null ? inp.padButtonName(inp.pad[a]) : a === "left" || a === "right" ? "◐" : "";
+    if (inp.device === "touch") return "";
+    const k = inp.keys[a] && (inp.keys[a][0] || inp.keys[a][1]);
+    return inp.keyName(k);
+  };
   addEventListener("keydown", e => {
+    if (inp.capture && inp.capture.kind === "key") {
+      e.preventDefault();
+      const c = inp.capture; inp.capture = null;
+      if (e.code !== "Escape" || c.action === "pause") inp.setKey(c.action, c.slot, e.code);
+      c.done && c.done(); return;
+    }
     if (Z.ui && Z.ui.onKey && Z.ui.onKey(e)) { e.preventDefault(); return; }
-    const a = mapKey(e.code); if (!a) return;
+    const a = codeMap[e.code]; if (!a) return;
     if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
     e.preventDefault(); if (e.repeat) return;
     src.key[a] = true; inp.device = "keys"; recompute();
   });
-  addEventListener("keyup", e => { const a = mapKey(e.code); if (!a) return; src.key[a] = false; recompute(); });
+  addEventListener("keyup", e => { const a = codeMap[e.code]; if (!a) return; src.key[a] = false; recompute(); });
   addEventListener("blur", () => { for (const k in src.key) src.key[k] = false; for (const k in src.mouse) src.mouse[k] = false; recompute(); });
   /* Maus: links = Waffe 1, rechts = Waffe 2 (nur auf dem Spielfeld) */
   addEventListener("mousedown", e => { if (e.target && e.target.id === "cv") { if (e.button === 0) src.mouse.a1 = true; if (e.button === 2) src.mouse.a2 = true; inp.device = "keys"; recompute(); } });
   addEventListener("mouseup", e => { if (e.button === 0) src.mouse.a1 = false; if (e.button === 2) src.mouse.a2 = false; recompute(); });
   addEventListener("contextmenu", e => { if (e.target && e.target.id === "cv") e.preventDefault(); });
+  addEventListener("gamepadconnected", e => { inp.padName = e.gamepad.id || ""; inp.device = "pad"; Z.toast && Z.toast((Z.settings.lang === "en" ? "Controller connected" : "Controller verbunden") + (/xbox|xinput/i.test(inp.padName) ? " (Xbox)" : ""), 2200); });
+  addEventListener("gamepaddisconnected", () => { inp.padName = ""; inp.lastPad = null; for (const a of ACTIONS) src.pad[a] = false; recompute(); Z.toast && Z.toast(Z.settings.lang === "en" ? "Controller disconnected" : "Controller getrennt", 2200); });
 
-  /* Gamepad (Standard-Layout: A springen, B rollen, X Waffe 1, Y Waffe 2, LB/RB Fähigkeiten, LT Trank, RT benutzen) */
+  /* Gamepad abfragen. Richtungen: linker Stick und Steuerkreuz. Trigger zählen ab halbem Druck. */
+  let padPrev = [], captureArmed = false;
   inp.pollPad = () => {
     const pads = navigator.getGamepads ? navigator.getGamepads() : [];
     let p = null; for (const g of pads) if (g && g.connected) { p = g; break; }
     for (const a of ACTIONS) src.pad[a] = false;
     if (p) {
-      const b = i => !!(p.buttons[i] && p.buttons[i].pressed);
+      const down = i => { const bt = p.buttons[i]; return !!bt && (bt.pressed || bt.value > 0.45); };
+      const now = p.buttons.map((_, i) => down(i));
+      /* Belegung einfangen: erst wenn alle Knöpfe losgelassen wurden, dann der nächste Druck */
+      if (inp.capture && inp.capture.kind === "pad") {
+        if (!now.some(Boolean)) captureArmed = true;
+        else if (captureArmed) { const i = now.findIndex((v, k) => v && !padPrev[k]); if (i >= 0) { const c = inp.capture; inp.capture = null; captureArmed = false; if (i < 12) inp.setPad(c.action, i); c.done && c.done(); } }
+        padPrev = now; inp.lastPad = p; recompute(); return;
+      }
+      captureArmed = false;
+      const dz = (Z.settings && Z.settings.dead) || 0.35;
       const ax = p.axes[0] || 0, ay = p.axes[1] || 0;
-      src.pad.left = ax < -0.35 || b(14); src.pad.right = ax > 0.35 || b(15);
-      src.pad.up = ay < -0.5 || b(12); src.pad.down = ay > 0.5 || b(13);
-      src.pad.jump = b(0); src.pad.roll = b(1) || b(7) && false; src.pad.a1 = b(2); src.pad.a2 = b(3);
-      src.pad.s1 = b(4); src.pad.s2 = b(5); src.pad.potion = b(6); src.pad.use = b(7) || b(10); src.pad.pause = b(9); src.pad.map = b(8);
-      if (p.buttons.some(x => x && x.pressed) || Math.abs(ax) > 0.35) inp.device = "pad";
-      inp.lastPad = p;
+      src.pad.left = ax < -dz || now[14]; src.pad.right = ax > dz || now[15];
+      src.pad.up = ay < -Math.max(0.5, dz) || now[12]; src.pad.down = ay > Math.max(0.5, dz) || now[13];
+      for (const a in inp.pad) if (now[inp.pad[a]]) src.pad[a] = true;
+      if (now.some(Boolean) || Math.abs(ax) > dz || Math.abs(ay) > 0.5) inp.device = "pad";
+      if (!inp.padName) inp.padName = p.id || "";
+      inp.lastPad = p; padPrev = now;
     }
     recompute();
   };

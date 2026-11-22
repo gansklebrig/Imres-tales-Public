@@ -144,6 +144,17 @@ button:disabled{opacity:.45;cursor:default}
 .schaedelwahl{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0}
 .schaedelwahl button.an{border-color:var(--gold);color:var(--gold)}
 .einst{display:flex;flex-direction:column;gap:9px}
+.steuerknopf{background:linear-gradient(#3a262a,#2a1a1e);border:1px solid #5a3a3e;border-radius:8px;padding:8px 12px;font-weight:700;text-align:left}
+.steuerknopf:focus,.steuerknopf:hover{border-color:var(--gold)}
+.belegtab{width:100%;border-collapse:collapse;margin:6px 0}
+.belegtab th{text-align:left;font-weight:700;font-size:13px;color:var(--mute);padding:3px 6px}
+.belegtab tbody th{color:var(--text)}
+.belegtab td{padding:3px 4px}
+.belegung{width:100%;min-width:74px;background:#2a1c20;border:1px solid #4a3236;border-radius:6px;padding:5px 8px;font-weight:800;color:var(--gold)}
+.belegung:hover,.belegung:focus{border-color:var(--gold)}
+.belegung.wartet{background:#5a2a1a;color:#fff;animation:puls .7s infinite alternate}
+@keyframes puls{from{opacity:1}to{opacity:.55}}
+.fix{color:var(--mute);font-size:12px}
 .regler{display:flex;flex-direction:column;font-size:13px;color:var(--mute)}
 .regler input{accent-color:var(--ember);width:100%}
 .schalter{display:flex;align-items:center;gap:8px;font-size:14px}
@@ -227,17 +238,17 @@ button:disabled{opacity:.45;cursor:default}
 <div id="modal" hidden></div>
 <div id="title"></div>
 <div id="fade"></div>
-<script src="zerstoerer/kern.js?v=2"></script>
-<script src="zerstoerer/welt.js?v=2"></script>
-<script src="zerstoerer/daten.js?v=2"></script>
-<script src="zerstoerer/kampf.js?v=2"></script>
-<script src="zerstoerer/geschosse.js?v=2"></script>
-<script src="zerstoerer/gegner.js?v=2"></script>
-<script src="zerstoerer/bosse.js?v=2"></script>
-<script src="zerstoerer/figuren.js?v=2"></script>
-<script src="zerstoerer/bild.js?v=2"></script>
-<script src="zerstoerer/musik.js?v=2"></script>
-<script src="zerstoerer/spiel.js?v=2"></script>
-<script src="zerstoerer/ui.js?v=2"></script>
+<script src="zerstoerer/kern.js?v=3"></script>
+<script src="zerstoerer/welt.js?v=3"></script>
+<script src="zerstoerer/daten.js?v=3"></script>
+<script src="zerstoerer/kampf.js?v=3"></script>
+<script src="zerstoerer/geschosse.js?v=3"></script>
+<script src="zerstoerer/gegner.js?v=3"></script>
+<script src="zerstoerer/bosse.js?v=3"></script>
+<script src="zerstoerer/figuren.js?v=3"></script>
+<script src="zerstoerer/bild.js?v=3"></script>
+<script src="zerstoerer/musik.js?v=3"></script>
+<script src="zerstoerer/spiel.js?v=3"></script>
+<script src="zerstoerer/ui.js?v=3"></script>
 </body>
 </html>

@@ -55,7 +55,7 @@
   const hud = $("#hud"), modal = $("#modal"), toastEl = $("#toast"), banner = $("#banner"), prompt = $("#prompt"), bossbar = $("#bossbar"), choice = $("#choice"), fadeEl = $("#fade"), title = $("#title"), card = $("#card");
   /* Symbol-Leinwände für die vier Plätze */
   const slotEls = {};
-  ["a1", "a2", "s1", "s2"].forEach(s => { const el = $("#slot-" + s); slotEls[s] = { el, cv: el.querySelector("canvas"), cd: el.querySelector(".cd"), uid: -1, n: el.querySelector(".n") }; });
+  ["a1", "a2", "s1", "s2"].forEach(s => { const el = $("#slot-" + s); slotEls[s] = { el, cv: el.querySelector("canvas"), cd: el.querySelector(".cd"), uid: -1, n: el.querySelector(".n"), k: el.querySelector(".k") }; });
   function drawSlot(s, it) {
     const se = slotEls[s], c = se.cv.getContext("2d"), dpr = 2;
     se.cv.width = 40 * dpr; se.cv.height = 40 * dpr; c.scale(dpr, dpr); c.clearRect(0, 0, 40, 40);
@@ -88,6 +88,7 @@
       se.cd.style.height = Math.max(0, Math.min(1, k)) * 100 + "%";
       se.el.classList.toggle("aktiv", !!(P.act && P.act.slot === s));
       se.el.classList.toggle("stumm", s[0] === "s" && P.st.silence > 0);
+      const lab = inp.label(s); if (se.lab !== lab) { se.lab = lab; se.k.textContent = lab; se.k.hidden = !lab; }
     }
     hudT -= dt;
     if (hudT <= 0) {
@@ -109,7 +110,7 @@
     if (o && !ui.modalOpen && !ui.choiceActive && !P.dead) {
       const [sx, sy] = worldToScreen(o.type === "pickup" ? o.p.x : (o.d || o.s).x * T + 8, o.type === "pickup" ? o.p.y - 22 : ((o.d || o.s).y + 1) * T - 40);
       prompt.hidden = false; prompt.style.transform = "translate(" + Math.round(sx) + "px," + Math.round(sy) + "px) translate(-50%,-100%)";
-      const key = inp.device === "pad" ? "RT" : inp.device === "touch" ? "✋" : "E";
+      const key = inp.device === "touch" ? "✋" : inp.label("use");
       prompt.innerHTML = '<kbd>' + key + "</kbd> " + esc(promptLabel(o));
       showCard(o);
     } else { prompt.hidden = true; card.hidden = true; }
@@ -213,6 +214,7 @@
   const actions = {};
   /* Tastatur in Menüs */
   ui.onKey = e => {
+    if (inp.capture) return false;
     if (!title.hidden && (e.code === "Enter" || e.code === "Space")) { const b = title.querySelector("button:focus") || title.querySelector("button"); if (b) { b.click(); return true; } }
     if (!ui.modalOpen) {
       if ((e.code === "KeyM" || e.code === "Tab") && Z.level) { bigMap = !bigMap; drawMinimap(); return true; }
@@ -245,7 +247,7 @@
   actions.close = () => closeModal();
   ui.tutorial = () => {
     Z.meta.tut = true; Z.saveMeta();
-    const dev = inp.device === "pad" ? t("ctrlPad") : inp.device === "touch" || ui.touchOn ? t("ctrlTouch") : t("ctrlKeys");
+    const dev = (inp.device === "touch" || (ui.touchOn && inp.device !== "pad") ? t("ctrlTouch") : bindingSummary()) + '<br><small class="hinweis">' + L(["Alles umbelegbar: Einstellungen → Steuerung.", "Everything can be remapped: Settings → Controls."]) + "</small>";
     openModal("<h2>" + esc(t("tut")) + '</h2><p class="steuer">' + dev + '</p><p class="tipp">' + esc(L(TX.tips[0])) + '</p><div class="knoepfe"><button data-act="close" autofocus>' + esc(t("cont")) + "</button></div>", { cls: "schmal" });
   };
 
@@ -283,14 +285,48 @@
       '<label class="regler">' + L(["Bildschirmwackeln", "Screen shake"]) + '<input type="range" min="0" max="100" value="' + Math.round(s.shake * 100) + '" data-shake="1"></label>' +
       '<label class="regler">' + L(["Größe der Touch-Knöpfe", "Touch button size"]) + '<input type="range" min="70" max="140" value="' + Math.round(s.touchSize * 100) + '" data-touch="1"></label>' +
       ck("showDmg", L(["Schadenszahlen", "Damage numbers"]), s.showDmg) + ck("flashes", L(["Bildschirmblitze", "Screen flashes"]), s.flashes) + ck("vib", L(["Vibration", "Vibration"]), s.vib !== false) +
+      '<label class="regler">' + L(["Stick-Totzone (Controller)", "Stick dead zone (controller)"]) + '<input type="range" min="15" max="60" value="' + Math.round((s.dead || 0.35) * 100) + '" data-dead="1"></label>' +
+      '<button class="steuerknopf" data-act="controls">' + L(["Steuerung: Tastatur & Controller belegen", "Controls: remap keyboard & controller"]) + "</button>" +
       ck("autoAim", L(["Zielhilfe für Fernkampf", "Ranged aim assist"]), s.autoAim) + ck("fps", L(["Bilder pro Sekunde anzeigen", "Show FPS"]), s.fps) +
       '<label class="schalter">' + L(["Sprache", "Language"]) + ' <select data-lang="1"><option value="de"' + (s.lang === "de" ? " selected" : "") + '>Deutsch</option><option value="en"' + (s.lang === "en" ? " selected" : "") + ">English</option></select></label>" +
       '</div><div class="knoepfe"><button data-act="close" autofocus>' + esc(t("close")) + "</button></div>", { cls: "schmal", onClose: () => { Z.saveSettings(); A.saveVol(); if (!Z.level) showTitle(); } });
     modal.querySelectorAll("[data-vol]").forEach(r => r.oninput = () => { A.vol[r.dataset.vol] = r.value / 100; A.applyVol(); if (r.dataset.vol === "sfx") A.play("hitFlesh", { vol: 0.6, gap: 0.15 }); });
     modal.querySelector("[data-shake]").oninput = e => { Z.settings.shake = e.target.value / 100; };
+    modal.querySelector("[data-dead]").oninput = e => { Z.settings.dead = e.target.value / 100; };
     modal.querySelector("[data-touch]").oninput = e => { Z.settings.touchSize = e.target.value / 100; touchSync(); };
     modal.querySelectorAll("[data-set]").forEach(c => c.onchange = () => { Z.settings[c.dataset.set] = c.checked; if (c.dataset.set === "vib") inp.vib = c.checked; });
     modal.querySelector("[data-lang]").onchange = e => { Z.settings.lang = e.target.value; Z.saveSettings(); closeModal(); for (const k in slotEls) slotEls[k].uid = -9; ui.settings(); };
+  };
+
+  /* ---------- Steuerung belegen ---------- */
+  const ACT_NAMES = { left: ["Links", "Left"], right: ["Rechts", "Right"], up: ["Hoch / Leiter", "Up / ladder"], down: ["Runter / Ducken", "Down / crouch"], jump: ["Springen", "Jump"], roll: ["Rolle", "Roll"],
+    a1: ["Waffe 1", "Weapon 1"], a2: ["Waffe 2", "Weapon 2"], s1: ["Fähigkeit 1", "Skill 1"], s2: ["Fähigkeit 2", "Skill 2"], use: ["Benutzen / Aufheben", "Use / pick up"], potion: ["Heiltrank", "Healing potion"], map: ["Karte", "Map"], pause: ["Pause", "Pause"] };
+  function bindingSummary() {
+    const pad = inp.device === "pad";
+    const row = a => "<b>" + esc(pad ? inp.label(a) : inp.keyName(inp.keys[a][0] || inp.keys[a][1])) + "</b> " + esc(L(ACT_NAMES[a]));
+    return (pad ? L(["Linker Stick / Steuerkreuz laufen · ", "Left stick / D-pad move · "]) : "<b>" + esc(inp.keyName(inp.keys.left[0])) + "/" + esc(inp.keyName(inp.keys.right[0])) + "</b> " + L(["laufen · ", "move · "])) +
+      ["jump", "roll", "a1", "a2", "s1", "s2", "potion", "use", "map", "pause"].map(row).join(" · ") + (pad ? "" : L([" · Linksklick/Rechtsklick: Waffe 1/2 · Runter + Sprung: durch Stege fallen · Runter + Angriff in der Luft: Sturzangriff", " · Left/right click: weapon 1/2 · Down + jump: drop through ledges · Down + attack in the air: plunge"]));
+  }
+  ui.controls = () => {
+    const padOn = !!inp.lastPad;
+    const cell = (a, kind, slot) => { const lab = kind === "pad" ? inp.padButtonName(inp.pad[a]) : inp.keyName(inp.keys[a][slot]); return '<button class="belegung" data-act="bind" data-arg="' + a + "|" + kind + "|" + slot + '">' + esc(lab) + "</button>"; };
+    let rows = "";
+    for (const a in ACT_NAMES) rows += "<tr><th>" + esc(L(ACT_NAMES[a])) + "</th><td>" + cell(a, "key", 0) + "</td><td>" + cell(a, "key", 1) + "</td><td>" + (inp.pad[a] != null ? cell(a, "pad", 0) : '<span class="fix">' + (a === "left" || a === "right" || a === "up" || a === "down" ? L(["Stick + Kreuz", "Stick + D-pad"]) : "–") + "</span>") + "</td></tr>";
+    openModal("<h2>" + L(["Steuerung", "Controls"]) + "</h2>" +
+      '<p class="hinweis">' + (padOn ? "🎮 " + esc(inp.padName.replace(/\(.*?\)/g, "").trim() || L(["Controller verbunden", "Controller connected"])) : L(["Kein Controller erkannt – einmal einen Knopf drücken, dann erscheint er hier.", "No controller detected – press any button and it will appear here."])) + "</p>" +
+      '<table class="belegtab"><thead><tr><th></th><th>' + L(["Taste", "Key"]) + "</th><th>" + L(["Zweite Taste", "Second key"]) + "</th><th>Controller</th></tr></thead><tbody>" + rows + "</tbody></table>" +
+      '<p class="hinweis" id="bindhint">' + L(["Feld wählen, dann die neue Taste oder den Controller-Knopf drücken. Esc bricht ab. Maus: links Waffe 1, rechts Waffe 2.", "Pick a field, then press the new key or controller button. Esc cancels. Mouse: left weapon 1, right weapon 2."]) + "</p>" +
+      '<div class="knoepfe"><button data-act="bindReset">' + L(["Standard wiederherstellen", "Restore defaults"]) + '</button><button data-act="controlsBack" autofocus>' + esc(t("back")) + "</button></div>", { cls: "breit" });
+  };
+  actions.controls = () => { Z.saveSettings(); closeModal(); ui.controls(); };
+  actions.controlsBack = () => { closeModal(); ui.settings(); };
+  actions.bindReset = () => { inp.reset(); for (const k in slotEls) slotEls[k].lab = null; ui.controls(); };
+  actions.bind = (arg, btn) => {
+    const [a, kind, slot] = arg.split("|");
+    btn.textContent = kind === "pad" ? L(["Knopf drücken …", "Press button…"]) : L(["Taste drücken …", "Press key…"]);
+    btn.classList.add("wartet");
+    const done = () => { for (const k in slotEls) slotEls[k].lab = null; A.play("uiOk", { vol: 0.4 }); const f = arg; ui.controls(); setTimeout(() => { const b = modal.querySelector('[data-arg="' + f + '"]'); if (b) b.focus(); }, 40); };
+    inp.capture = { kind, action: a, slot: +slot, done };
   };
 
   /* ---------- Gegenstand aufheben / tauschen ---------- */
@@ -312,7 +348,7 @@
     if (!P.slots[sB]) return place(sB);
     /* beide belegt: Auswahl */
     ui.choiceActive = { p, sA, sB, place };
-    const key = s => inp.device === "pad" ? { a1: "X", a2: "Y", s1: "LB", s2: "RB" }[s] : inp.device === "touch" || ui.touchOn ? "" : { a1: "J", a2: "U", s1: "Q", s2: "O" }[s];
+    const key = s => inp.device === "touch" || (ui.touchOn && inp.device !== "pad") ? "" : inp.label(s);
     choice.innerHTML = '<div class="ch-kopf">' + esc(t("replace")) + ": " + '<b style="color:' + Z.RARITY[it.rar].col + '">' + esc(L(Z.itemDef(it).n)) + "</b></div>" +
       [sA, sB].map(s => '<button data-slot="' + s + '"><kbd>' + key(s) + "</kbd> " + esc(L(Z.itemDef(P.slots[s]).n)) + '<small style="color:' + Z.RARITY[P.slots[s].rar].col + '">' + esc(L(Z.RARITY[P.slots[s].rar].n)) + "</small></button>").join("") +
       '<button data-slot="x" class="abbr">' + esc(t("cancel")) + "</button>";
@@ -553,6 +589,8 @@
     if (inp.pressed.pause && !ui.choiceActive) { inp.consume("pause"); if (ui.modalOpen) { if (!ui.noEsc) closeModal(); } else ui.pause(); }
     if (inp.pressed.map && !ui.modalOpen) { inp.consume("map"); bigMap = !bigMap; drawMinimap(); }
     if (ui.modalOpen) {
+      if (inp.capture) { inp.endFrame(); return; }
+      if (inp.pressed.s1 || inp.pressed.s2) { const tabs = [...modal.querySelectorAll(".reiter button")]; const i = tabs.findIndex(b => b.classList.contains("an")); if (tabs.length) { const n = tabs[(i + (inp.pressed.s2 ? 1 : -1) + tabs.length) % tabs.length]; n.click(); setTimeout(() => { const f = modal.querySelector(".reiter .an"); if (f) f.focus(); }, 30); } }
       /* Gamepad/Touch in Menüs */
       if (inp.pressed.down || inp.pressed.right) moveFocus(1);
       if (inp.pressed.up || inp.pressed.left) moveFocus(-1);
