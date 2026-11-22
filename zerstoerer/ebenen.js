@@ -140,7 +140,7 @@
     if (!ofs) { ofs = document.createElement("canvas"); ofc = ofs.getContext("2d"); }
     if (ofs.width !== w || ofs.height !== h) { ofs.width = w; ofs.height = h; }
     const img = ofc.createImageData(w, h), D = img.data;
-    const memA = lv.out ? 0.42 : 0.6, unA = lv.out ? 0.72 : 0.95;
+    const memA = lv.out ? 0.38 : 0.52, unA = lv.out ? 0.7 : 0.88;
     for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) {
       const i = ty * lv.W + tx;
       vis[i] += (tvis[i] - vis[i]) * 0.18;

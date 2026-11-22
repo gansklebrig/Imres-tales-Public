@@ -226,8 +226,8 @@
   function isWin(x, y) {
     const mode = lv.arena ? "arena" : B.open; if (!mode) return false;
     if (mode === "arena") { if (y > lv.H - 5 || y < 1) return false; return lv.get(x, y) !== 1; }
-    if (mode === "arch") { const lx = x % 12, ly = y % 7; if (lx < 3 || lx > 8 || ly < 1 || ly > 5) return false; }
-    else if (mode === "vault") { const lx = x % 18, ly = y % 9; if (lx < 5 || lx > 11 || ly < 2 || ly > 6) return false; }
+    if (mode === "arch") { const lx = x % 12, ly = y % 7; if (lx < 2 || lx > 9 || ly < 1 || ly > 5) return false; }
+    else if (mode === "vault") { const lx = x % 18, ly = y % 9; if (lx < 4 || lx > 13 || ly < 1 || ly > 7) return false; }
     else if (mode === "cave") { if (vnoise(x / 5.5, y / 4.5) * 0.7 + vnoise(x / 2.2 + 30, y / 2.2) * 0.3 < 0.56) return false; }
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const v = lv.get(x + dx, y + dy); if (v === 1 || v === 7) return false; }
     return true;
@@ -250,8 +250,8 @@
       /* Außengebiete: große Bogenfenster in der Rückwand zeigen den Himmel */
       if (!lv.hub && !lv.passage && isWin(x, y)) {
         if (lv.arena) continue;
-        if (B.open === "arch") { const lx = x % 12; if (y % 7 === 1 && (lx === 3 || lx === 8)) { c.fillStyle = B.wall; c.fillRect(px, py, T, T); } else continue; }
-        else if (B.open === "vault") { const lx = x % 18; if (y % 9 === 2 && (lx === 5 || lx === 11)) { c.fillStyle = B.wall; c.fillRect(px, py, T, T); } else continue; }
+        if (B.open === "arch") { const lx = x % 12; if (y % 7 === 1 && (lx === 2 || lx === 9)) { c.fillStyle = B.wall; c.fillRect(px, py, T, T); } else continue; }
+        else if (B.open === "vault") { const lx = x % 18; if (y % 9 === 1 && (lx === 4 || lx === 13)) { c.fillStyle = B.wall; c.fillRect(px, py, T, T); } else continue; }
         else continue;
       }
       c.fillStyle = B.wall; c.fillRect(px, py, T, T);
