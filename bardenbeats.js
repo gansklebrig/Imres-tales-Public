@@ -77,6 +77,9 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
 .bb-oben .bb-play { min-height: 64px; border-radius: 18px; flex-direction: column; gap: 3px; font-size: 19px !important; padding: 8px 6px; }
 .bb-oben .bb-play .ic { font-size: 20px; }
 .bb-oben .bb-play small { font: 600 11.5px/1.2 system-ui, sans-serif; opacity: .8; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bb-bew { display: flex; gap: 6px; }
+.bb-bew button { flex: 1; min-height: 34px; border-radius: 12px; border: 1px solid rgba(235,226,204,.22); background: rgba(255,255,255,.04); font-size: 17px !important; filter: grayscale(1); opacity: .7; }
+.bb-bew button.an { filter: none; opacity: 1; border-color: rgba(224,160,70,.8); background: rgba(224,160,70,.18); }
 .bb-klein { min-height: 40px; border-radius: 12px; border: 1px solid rgba(176,58,72,.6); background: linear-gradient(135deg, rgba(176,58,72,.3), rgba(224,160,70,.12)); font-weight: 700 !important; font-size: 14px !important; }
 .bb-uhr-box { flex: none; width: 176px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .bb-uhr { position: relative; width: 172px; height: 172px; border-radius: 50%; touch-action: none; cursor: pointer;
@@ -253,6 +256,7 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
     if (modus === "klang") h += playKnopf(z.kulLaeuft);
     else h += '<div class="bb-oben">' + uhrHtml() + '<div class="bb-seite">' + playKnopf(z.laeuft, z.laeuft && stN ? (L.st.find(x => x.k === z.stimmung) || {}).s + " " + (z.lied ? "„" + z.lied + "“" : stN) : W("Dreh die Uhr", "Turn the dial")) +
       (modus === "buehne" ? '<button type="button" class="bb-klein" data-bb="blitz">⚡ ' + W("Etwas passiert", "Something happens") + "</button>" : "") +
+      (z.laeuft && z.lied && P().bewerten ? '<div class="bb-bew"><button type="button" data-bb="bew1" class="' + (z.bewertung > 0 ? "an" : "") + '" aria-label="' + W("Gefällt mir", "Like") + '">👍</button><button type="button" data-bb="bew-1" class="' + (z.bewertung < 0 ? "an" : "") + '" aria-label="' + W("Gefällt mir nicht – nächstes Stück", "Dislike – next piece") + '">👎</button></div>' : "") +
       '<button type="button" class="bb-auto' + (autoAn ? " an" : "") + '" data-bb="auto">🤖 Auto ' + (autoAn ? W("an", "on") : W("aus", "off")) + "</button></div></div>";
     /* kleine Zusatzregler: wie viel los ist (Musik) und Spannung (Ort) */
     h += '<div class="bb-mini">' + (modus !== "klang" ? mini("int", "🔥 " + W("Wie viel los", "How busy"), Math.round(z.intensitaet ?? 5), 0, 10) : "") +
@@ -432,6 +436,7 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
     const me = t.closest("[data-bbmehr]"); if (me) { if (me.dataset.bbmehr === "st") seiteSt++; else if (me.dataset.bbmehr === "kul") seiteKul++; else seiteW++; spielZeichnen(); return; }
     const a = t.closest("[data-bb]"); if (!a) return;
     if (a.dataset.bb === "wahl") { wahlZeichnen(); return; }
+    if (a.dataset.bb === "bew1" || a.dataset.bb === "bew-1") { const w = P().bewerten(a.dataset.bb === "bew1" ? 1 : -1); zeige(w > 0 ? "👍 " + W("Kommt öfter", "Plays more often") : w < 0 ? "👎 " + W("Kommt selten – nächstes Stück", "Plays rarely – next piece") : W("Bewertung entfernt", "Rating removed")); setTimeout(spielZeichnen, 200); return; }
     if (a.dataset.bb === "mehr") { schliessen(); return; }
     if (a.dataset.bb === "auto") { autoAn = !autoAn; schreib("imres-bb-auto", autoAn ? "1" : "0"); if (autoAn) autoPlanen(); zeige(autoAn ? "🤖 " + W("Auto: wechselt alle paar Minuten fließend zu einer passenden Stimmung", "Auto: drifts to a matching mood every few minutes") : "🤖 " + W("Auto aus", "Auto off")); spielZeichnen(); return; }
     aktion(a.dataset.bb);
@@ -460,7 +465,7 @@ html.bb-offen, html.bb-offen body { overflow: hidden !important; }
   let merk = "";
   setInterval(() => {
     if (bb.hidden || ansicht !== "spiel" || padZieht || Date.now() - reglerAktiv < 1500) return;
-    const z = Z(), s = SEITE === "welten" ? String(weltAn()) + welten().length : z ? [z.laeuft, z.stimmung, z.naechste, z.kulisse, z.kulLaeuft, z.master, z.kulisseVol, z.lied, z.intensitaet, Math.round((z.spannung || 0) * 20)].join("|") : "";
+    const z = Z(), s = SEITE === "welten" ? String(weltAn()) + welten().length : z ? [z.laeuft, z.stimmung, z.naechste, z.kulisse, z.kulLaeuft, z.master, z.kulisseVol, z.lied, z.bewertung, z.intensitaet, Math.round((z.spannung || 0) * 20)].join("|") : "";
     if (s !== merk) { merk = s; spielZeichnen(); }
   }, 600);
 

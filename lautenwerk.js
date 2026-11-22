@@ -1652,10 +1652,16 @@
   });
   /* welche Stücke zuletzt liefen – damit man lange zuhört, bevor eines wiederkommt */
   const liedVerlauf = {};
+  /* 👍 / 👎 je Stück: gemochte kommen öfter, abgelehnte nur noch selten */
+  let BEWERTUNG = {}; try { BEWERTUNG = JSON.parse(localStorage.getItem("imres-lw-bewertung") || "{}") || {}; } catch (_) {}
+  const bewSchluessel = (k, nr) => { const l = k && STIL[k] && STIL[k].lieder && nr >= 0 ? STIL[k].lieder[nr] : null; return l ? k + ":" + (l.titel || nr) : null; };
+  const bewertungVon = (k, nr) => { const b = bewSchluessel(k, nr); return b ? BEWERTUNG[b] || 0 : 0; };
+  const bewGewicht = (k, nr) => { const b = bewertungVon(k, nr); return b > 0 ? 2.5 : b < 0 ? .12 : 1; };
   function liedNrWaehlen(k, n, ausser) {
     const v = liedVerlauf[k] = liedVerlauf[k] || [], sperr = Math.min(n - 1, Math.max(1, Math.floor(n * .7)));
     const frei = []; for (let i = 0; i < n; i++) if (i !== ausser && !v.slice(0, sperr).includes(i)) frei.push(i);
-    const nr = frei.length ? frei[Math.floor(Math.random() * frei.length)] : (ausser >= 0 && n > 1 ? (ausser + 1 + Math.floor(Math.random() * (n - 1))) % n : Math.floor(Math.random() * n));
+    const gewWahl = l => { const g = l.map(i => bewGewicht(k, i)); let r = Math.random() * g.reduce((a, b) => a + b, 0); for (let i = 0; i < l.length; i++) { r -= g[i]; if (r <= 0) return l[i]; } return l[l.length - 1]; };
+    const nr = frei.length ? gewWahl(frei) : (ausser >= 0 && n > 1 ? (ausser + 1 + Math.floor(Math.random() * (n - 1))) % n : Math.floor(Math.random() * n));
     v.unshift(nr); v.length = Math.min(v.length, n); return nr;
   }
 
@@ -6821,7 +6827,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     if (!S.stimmung || !STIL[S.stimmung]) return;
     planenVoraus(1.2);
     const neu = vorrat && vorrat.stimmung === S.stimmung ? vorrat.lied : stimmungLied(S.stimmung, true, undefined, neuesThema);
-    S.teile = neu.teile; S.ablauf = neu.ablauf; if (neu.rollen) S.rollen = neu.rollen; else delete S.rollen; S.kapWahl = neu.kapWahl; S.arrSeed = neu.arrSeed; S.tempo = tempoFuer(STIL[S.stimmung], S.intensitaet);
+    S.teile = neu.teile; S.ablauf = neu.ablauf; if (neu.rollen) S.rollen = neu.rollen; else delete S.rollen; S.kapWahl = neu.kapWahl; if (neu.liedNr !== undefined) S.liedNr = neu.liedNr; S.arrSeed = neu.arrSeed; S.tempo = tempoFuer(STIL[S.stimmung], S.intensitaet);
     /* mit dem neuen Thema greifen Barradin und Echo manchmal zu einem anderen Instrument – außer man hat sie selbst gewählt */
     if (neuesThema && !S.festBesetzung) {
       const st = STIL[S.stimmung], anders = (liste, jetzt) => { const r = liste.filter(x => x !== jetzt); return r.length ? zufall(r) : jetzt; };
@@ -9965,6 +9971,8 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
   }, true);
   /* ---------- Pult-Helfer: Aufklappen, Wechselanzeige, mitwandernde Steuerleiste ---------- */
   root.addEventListener("click", e => {
+    const bw = e.target.closest("[data-bew]");
+    if (bw) { e.stopPropagation(); e.preventDefault(); bewerten(+bw.dataset.bew); bewAnzeige([root, leiste].filter(Boolean)); return; }
     const ei = e.target.closest("[data-einst]");
     if (ei) { e.stopPropagation(); einstAuf[ei.dataset.einst] = !einstAuf[ei.dataset.einst]; boxNeu(ei.dataset.einst === "musik" || ei.dataset.einst === "mitspieler" ? "musik" : "klang"); return; }
     if (e.target.closest('[data-aktion="funkauf"]')) { e.stopPropagation(); funkAuf = !funkAuf; zeichnen(); knoepfe(); return; }
@@ -9995,9 +10003,32 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     if (ausklangAb && !ausklingt) return { text: "→ " + T.ausklangKommt, p: ausklangAb > 0 ? (j - ausklangStart) / Math.max(.2, ausklangAb - ausklangStart) : 0 };
     return null;
   }
+  /* das laufende Stück bewerten */
+  let bewMerk = "";
+  function bewerten(w) {
+    const k = S.stimmung, nr = S.liedNr, b = bewSchluessel(k, nr); if (!b) return 0;
+    const neu = BEWERTUNG[b] === w ? 0 : w;
+    if (neu) BEWERTUNG[b] = neu; else delete BEWERTUNG[b];
+    try { localStorage.setItem("imres-lw-bewertung", JSON.stringify(BEWERTUNG)); } catch (_) {}
+    bewMerk = String(Date.now());
+    /* 👎 = gleich ein anderes Stück derselben Stimmung */
+    if (neu < 0 && laeuft) setTimeout(() => { try { stimmungWeiter(true); } catch (_) {} }, 0);
+    try { status(neu > 0 ? "👍 " + (sprache() === "en" ? "plays more often" : "kommt öfter") : neu < 0 ? "👎 " + (sprache() === "en" ? "plays rarely – next piece" : "kommt selten – nächstes Stück") : (sprache() === "en" ? "Rating removed" : "Bewertung entfernt")); } catch (_) {}
+    return neu;
+  }
+  function bewAnzeige(ziele) {
+    const k = S.stimmung, nr = S.liedNr, l = laeuft && bewSchluessel(k, nr) ? STIL[k].lieder[nr] : null, b = l ? bewertungVon(k, nr) : 0;
+    const merk = (l ? k + nr + ":" + b : "-") + bewMerk;
+    const els = []; ziele.forEach(z => z.querySelectorAll(".lw-bew").forEach(el => { if (el.dataset.m !== merk) els.push(el); }));
+    if (!els.length) return;
+    const en = sprache() === "en";
+    const html = l ? '<span class="lw-bew-t">♪ ' + esc(l.titel || "") + '</span><button type="button" data-bew="1" class="' + (b > 0 ? "an" : "") + '" title="' + (en ? "Like – plays more often" : "Gefällt mir – kommt öfter") + '">👍</button><button type="button" data-bew="-1" class="' + (b < 0 ? "an" : "") + '" title="' + (en ? "Dislike – plays rarely, skip now" : "Gefällt mir nicht – kommt selten, gleich weiter") + '">👎</button>' : "";
+    els.forEach(el => { el.innerHTML = html; el.dataset.m = merk; });
+  }
   function wechselAnzeige() {
     const w = wechselStand(), text = w ? w.text : "", p = w ? Math.max(0, Math.min(1, w.p)) : 0;
     const ziele = [root, leiste].filter(Boolean);
+    bewAnzeige(ziele);
     if (text !== wechselMerk) {
       wechselMerk = text;
       ziele.forEach(z => z.querySelectorAll(".lw-titel-naechste, .ll-naechste").forEach(el => { el.textContent = text; }));
@@ -10558,6 +10589,81 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
   }
   /* von den Stimmungen zuerst zwölf (Favoriten und die laufende vorn), der Rest aufklappbar */
   const ST_KURZ = 12; let mehrSt = 0;
+  /* ---------- Stimmungs-Uhr (wie in Barden Beats): fröhlich oben · wild rechts · traurig unten · verwundert links ---------- */
+  const MOOD_KARTE = {
+    dorffest: [.2, 1], trinklied: [.05, .9], marktplatz: [-.15, .7], shanty: [.35, .68], auenland: [-.38, .76], sieg: [.52, .82],
+    heldenlied: [.56, .45], hof: [-.22, .46], reise: [.12, .36], reiter: [.62, .3], zwerge: [.36, .16], rast: [0, .14], kamin: [-.2, .02],
+    verfolgung: [.82, .06], kampf: [.96, -.06], boss: [.86, -.42], spannung: [.42, -.34],
+    heimweh: [.12, -.6], letztesgefecht: [.58, -.62], kriegstrommeln: [.92, -.24], gaukler: [-.55, .62], sternenhimmel: [-.88, -.14],
+    elben: [-.9, .18], fey: [-.8, .5], unterreich: [-.6, -.34], grusel: [-.42, -.6], ruinen: [-.62, -.62], pilger: [-.24, -.62], klage: [0, -.95]
+  };
+  const MOOD_RICHT = [[0, 1], [.71, .71], [1, 0], [.71, -.71], [0, -1], [-.71, -.71], [-1, 0], [-.71, .71]];
+  let pultMood = (() => { try { const m = JSON.parse(localStorage.getItem("imres-bb-mood") || "null"); return Array.isArray(m) && m.length === 2 ? m : null; } catch (_) { return null; } })();
+  let pultMoodAuto = (() => { try { return localStorage.getItem("imres-lw-moodauto") === "1"; } catch (_) { return false; } })(), pultMoodNaechst = 0, pultMoodZuletzt = [];
+  const moodWinkel = m => m && Math.hypot(m[0], m[1]) > .2 ? (Math.atan2(m[0], m[1]) * 180 / Math.PI + 180) : null;
+  function moodWort(m) {
+    const en = sprache() === "en", P = { o: en ? "happy" : "fröhlich", r: en ? "fierce" : "wild", u: en ? "sad" : "traurig", l: en ? "wondrous" : "verwundert" };
+    if (!m) return en ? "Mood?" : "Stimmung?";
+    const [x, y] = m; if (Math.hypot(x, y) < .22) return en ? "balanced" : "ausgeglichen";
+    const w = Math.atan2(y, x) * 180 / Math.PI, pol = w >= 45 && w < 135 ? "o" : w >= -45 && w < 45 ? "r" : w >= -135 && w < -45 ? "u" : "l";
+    const nb = { o: w < 90 ? "r" : "l", r: w > 0 ? "o" : "u", u: w > -90 ? "r" : "l", l: w > 0 ? "o" : "u" }[pol];
+    const ab = Math.abs(((w - { o: 90, r: 0, u: -90, l: 180 }[pol]) + 540) % 360 - 180);
+    return ab > 25 ? P[pol] + "–" + P[nb] : P[pol];
+  }
+  const moodNaehe = m => STIMMUNGEN.filter(k => STIL[k] && MOOD_KARTE[k]).map(k => ({ k, d: Math.hypot(MOOD_KARTE[k][0] - m[0], MOOD_KARTE[k][1] - m[1]) })).sort((a, b) => a.d - b.d);
+  const moodPlanen = () => { pultMoodNaechst = Date.now() + (110 + Math.random() * 100) * 1000; };
+  function moodSpielen(k) {
+    if (laeuft) { try { window.ImresPult.naechsterWechsel("fliessend"); } catch (_) {} }
+    pultMoodZuletzt.unshift(k); pultMoodZuletzt.length = Math.min(3, pultMoodZuletzt.length);
+    vorlageWaehlen(k);
+    if (!laeuft && !hoerer) { pausiert = false; start(); }
+  }
+  function moodAnwendenPult() {
+    if (!pultMood) return; const l = moodNaehe(pultMood); if (!l.length) return;
+    moodPlanen();
+    const best = l[0], jetzt = l.find(o => o.k === S.stimmung);
+    if (laeuft && (S.stimmung === best.k || (jetzt && jetzt.d - best.d < .12))) return;
+    moodSpielen(best.k);
+  }
+  setInterval(() => {
+    if (!pultMoodAuto || !pultMood || !laeuft || !pultMoodNaechst || Date.now() < pultMoodNaechst || document.documentElement.classList.contains("bb-offen")) return;
+    moodPlanen();
+    const l = moodNaehe(pultMood).filter(o => o.k !== S.stimmung); if (!l.length) return;
+    let pool = l.filter(o => o.d <= l[0].d + .38 && !pultMoodZuletzt.includes(o.k)); if (pool.length < 2) pool = l.slice(0, 3);
+    moodSpielen(zufall(pool).k);
+  }, 1000);
+  function moodUhrHtml() {
+    const en = sprache() === "en", w = moodWinkel(pultMood), e = (em, x, y) => '<span class="e" style="left:' + (50 + x * 36) + "%;top:" + (50 - y * 36) + '%">' + em + "</span>";
+    return '<div class="lw-mood"><div class="lw-uhr" data-lwuhr role="slider" aria-label="' + (en ? "Mood" : "Stimmung") + '">' + e("😄", 0, 1) + e("😠", 1, 0) + e("😢", 0, -1) + e("😮", -1, 0) +
+      '<span class="zeiger' + (w == null ? " mitte" : "") + '" style="--w:' + (w == null ? 180 : w) + 'deg"></span><span class="nabe"></span></div>' +
+      '<div class="lw-mood-txt"><b class="lw-mood-wort">' + moodWort(pultMood) + "</b><small>" + (en ? "Tap or turn the dial – the best-fitting mood plays, smoothly." : "Uhr tippen oder drehen – die passendste Stimmung spielt, fließend.") + "</small>" +
+      '<button type="button" class="lw-klein' + (pultMoodAuto ? " an" : "") + '" data-aktion="moodauto" aria-pressed="' + pultMoodAuto + '">🤖 Auto ' + (pultMoodAuto ? (en ? "on" : "an") : (en ? "off" : "aus")) + "</button></div></div>";
+  }
+  root.addEventListener("pointerdown", e => {
+    const uhr = e.target.closest && e.target.closest("[data-lwuhr]"); if (!uhr) return;
+    e.preventDefault(); try { uhr.setPointerCapture(e.pointerId); } catch (_) {}
+    const stell = ev => {
+      const r = uhr.getBoundingClientRect(), dx = (ev.clientX - r.left) / r.width * 2 - 1, dy = 1 - (ev.clientY - r.top) / r.height * 2;
+      if (Math.hypot(dx, dy) < .33) pultMood = [0, 0];
+      else { const i = (Math.round(Math.atan2(dx, dy) / (Math.PI / 4)) + 8) % 8; pultMood = [MOOD_RICHT[i][0] * .8, MOOD_RICHT[i][1] * .8]; }
+      const w = moodWinkel(pultMood), z = uhr.querySelector(".zeiger"); z.classList.toggle("mitte", w == null); if (w != null) z.style.setProperty("--w", w + "deg");
+      const wort = uhr.parentNode.querySelector(".lw-mood-wort"); if (wort) wort.textContent = moodWort(pultMood);
+    };
+    stell(e);
+    const zieh = ev => stell(ev), los = () => {
+      uhr.removeEventListener("pointermove", zieh); uhr.removeEventListener("pointerup", los); uhr.removeEventListener("pointercancel", los);
+      try { localStorage.setItem("imres-bb-mood", JSON.stringify(pultMood)); } catch (_) {}
+      audioStart(); moodAnwendenPult(); setTimeout(() => { zeichnen(); knoepfe(); }, 200);
+    };
+    uhr.addEventListener("pointermove", zieh); uhr.addEventListener("pointerup", los); uhr.addEventListener("pointercancel", los);
+  });
+  root.addEventListener("click", e => {
+    if (!e.target.closest || !e.target.closest('[data-aktion="moodauto"]')) return;
+    e.stopPropagation(); pultMoodAuto = !pultMoodAuto; try { localStorage.setItem("imres-lw-moodauto", pultMoodAuto ? "1" : "0"); } catch (_) {}
+    if (pultMoodAuto) moodPlanen();
+    try { status(pultMoodAuto ? (sprache() === "en" ? "🤖 Auto: drifts to a nearby mood every few minutes" : "🤖 Auto: alle paar Minuten fließend zu einer Stimmung in der Nähe") : "🤖 Auto " + (sprache() === "en" ? "off" : "aus")); } catch (_) {}
+    zeichnen(); knoepfe();
+  }, true);
   function musikBox(T, voll) {
     let kacheln;
     if (musikTab === "lieder") kacheln = ['<p class="lw-trenner">' + T.vorlagenTitel + "</p>"].concat(oben("v", LIEDER).map(k => kachel("data-vorlage", k, T.vorlagen[k], !S.stimmung && S.titel === T.vorlagen[k].replace(/^[^\wÄÖÜäöü]+/, ""))),
@@ -10578,6 +10684,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     return '<section class="lw-box lw-musik"><div class="lw-box-kopf"><h4>🎵 ' + T.musik + " " + info("musik") + "</h4>" +
         reiter("musiktab", [["stimmungen", T.tabStimmungen], ["lieder", T.tabLieder], ["eigene", T.tabEigene]], musikTab, T) + "</div>" +
       kleinRegler("🔊", T.master, "master", S.master, "lw-mval") +
+      (musikTab === "stimmungen" ? moodUhrHtml() : "") +
       '<div class="lw-pult-gitter">' + kacheln + "</div>" +
       (musikTab === "stimmungen" && mehrSt ? '<button type="button" class="lw-klappe" data-klangauf="st" aria-expanded="' + !!klangAuf.st + '">' + (klangAuf.st ? T.stWeniger : T.stAlle(mehrSt)) + " <span>" + (klangAuf.st ? "▴" : "▾") + "</span></button>" : "") +
       (voll && musikTab === "eigene" ? '<div class="lw-eigene-zeile">' + '<button type="button" class="lw-klein" data-aktion="speichern">' + T.speichern + "</button>" +
@@ -11036,7 +11143,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     const E = T.einf;
     return '<div class="lw-pult-kopf lw-ekopf">' +
       '<div class="lw-ekopf-reihe"><button type="button" class="lw-play lw-play-gross">' + (laeuft ? T.stopp : T.spielen) + "</button>" +
-      '<span class="lw-pult-titel"><span class="lw-titel-name">' + esc(S.titel || T.eigenesLied) + '</span><span class="lw-titel-naechste"></span><i class="lw-wechselbalken"></i></span>' +
+      '<span class="lw-pult-titel"><span class="lw-titel-name">' + esc(S.titel || T.eigenesLied) + '</span><span class="lw-titel-naechste"></span><span class="lw-bew"></span><i class="lw-wechselbalken"></i></span>' +
       "</div>" +
       '<p class="lw-ejetzt" aria-live="polite">' + jetztText(T) + "</p>" +
       '<div class="lw-ekopf-reihe lw-eregler">' + kleinRegler("🎵", E.musikLaut, "master", S.master, "lw-mval") + spannRegler(T) + '<div class="lw-ehg">' + kleinRegler("🌲", E.hgLaut, "kulvol", S.kulisseVol, "lw-kval") + hgKnopf(T) + "</div></div>" +
@@ -11099,7 +11206,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     return '<div class="lw-esteuer"><button type="button" class="lw-play lw-play-gross">' + (laeuft ? T.stopp : T.spielen) + "</button>" + kleinRegler("🎵", E.musikLaut, "master", S.master, "lw-mval") +
       (stilKey() && STIL[stilKey()] && !hoerer ? '<button type="button" class="lw-schalter lw-neubesetzen lw-eneubes' + (neuBesetzen ? " wartet" : "") + '" data-aktion="neubesetzen" aria-pressed="' + !!neuBesetzen + '" title="' + esc(T.neuBesTipp) + '">🎲 ' + (neuBesetzen ? T.neuBesWartet.replace("… ", "") : T.neuBes) + "</button>" : "") + "</div>" +
       '<h4 class="lw-eh">' + E.titel + "</h4>" + (set ? '<p class="lw-eset">' + ABEND_SETS[abendSet].sym + " " + E.heute(E.abendNamen[abendSet]) + "</p>" : "") +
-      '<p class="lw-zweck">' + E.zweckMusik + "</p>" +
+      '<p class="lw-zweck">' + E.zweckMusik + "</p>" + moodUhrHtml() +
       '<div class="lw-egitter">' + kern.map(tile).join("") + "</div>" +
       (eMehr.st ? '<div class="lw-egitter">' + rest.filter(k => !kern.includes(k)).map(tile).join("") + eig.map(k => eKachel("data-vorlage", k, "⭐ " + esc(eigeneStimmungen[k].name), S.eigeneStimmung === k)).join("") + "</div>" : "") +
       '<button type="button" class="lw-klappe" data-emehr="st" aria-expanded="' + eMehr.st + '">' + (eMehr.st ? E.weniger : E.mehrSt(STIMMUNGEN.length + eig.length)) + " <span>" + (eMehr.st ? "▴" : "▾") + "</span></button>" +
@@ -11243,7 +11350,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
   function freiInhalt(id, T) {
     const E = T.einf;
     if (id === "steuer") return '<div class="lw-ekopf lw-ekopf-frei"><div class="lw-ekopf-reihe"><button type="button" class="lw-play lw-play-gross">' + (laeuft ? T.stopp : T.spielen) + "</button>" +
-      '<span class="lw-pult-titel"><span class="lw-titel-name">' + esc(S.titel || T.eigenesLied) + '</span><span class="lw-titel-naechste"></span><i class="lw-wechselbalken"></i></span></div>' +
+      '<span class="lw-pult-titel"><span class="lw-titel-name">' + esc(S.titel || T.eigenesLied) + '</span><span class="lw-titel-naechste"></span><span class="lw-bew"></span><i class="lw-wechselbalken"></i></span></div>' +
       '<p class="lw-ejetzt" aria-live="polite">' + jetztText(T) + "</p>" +
       '<div class="lw-ekopf-reihe lw-eregler">' + kleinRegler("🎵", E.musikLaut, "master", S.master, "lw-mval") + spannRegler(T) + '<div class="lw-ehg">' + kleinRegler("🌲", E.hgLaut, "kulvol", S.kulisseVol, "lw-kval") + hgKnopf(T) + "</div></div></div>";
     if (id === "knoepfe") return '<div class="lw-ekopf lw-ekopf-frei"><div class="lw-ekopf-reihe lw-eknoepfe"><button type="button" class="lw-schalter" data-aktion="passiert">' + ikonText(T.leben.passiert, E.kurz.passiert) + "</button>" +
@@ -11736,7 +11843,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
         '<div class="lw-pult-kopf"><button type="button" class="lw-play lw-play-gross">' + (laeuft ? T.stopp : T.spielen) + "</button>" +
           '<button type="button" class="lw-ausklang" data-aktion="ausklang" title="' + esc(T.ausklangTipp) + '"' + (laeuft ? "" : " hidden") + ">" + T.ausklang + "</button>" +
           '<button type="button" class="lw-kulknopf" data-aktion="kulumschalt" hidden></button>' +
-          '<span class="lw-pult-titel"><span class="lw-titel-name">' + esc(S.titel || T.eigenesLied) + '</span><span class="lw-titel-naechste"></span><i class="lw-wechselbalken"></i></span>' +
+          '<span class="lw-pult-titel"><span class="lw-titel-name">' + esc(S.titel || T.eigenesLied) + '</span><span class="lw-titel-naechste"></span><span class="lw-bew"></span><i class="lw-wechselbalken"></i></span>' +
           '<span class="lw-kopf-rechts"><button type="button" class="lw-schalter lw-emodusknopf" data-aktion="modus" title="' + esc(T.einf.einfachTipp) + '">' + T.einf.einfach + "</button>" + '<button type="button" class="lw-schalter lw-ewasist" data-aktion="wasist" aria-pressed="' + wasIst + '" title="' + esc(T.einf.wasIstTipp) + '">' + (wasIst ? T.einf.wasIstAn : T.einf.wasIst) + "</button>" + '<button type="button" class="lw-schalter lw-rec" data-aktion="aufnahme" aria-pressed="false">' + T.aufnehmen + "</button>" + '<button type="button" class="lw-schalter lw-schlaf" data-aktion="schlaf" aria-pressed="false">' + T.schlaf + "</button>" + '<button type="button" class="lw-schalter lw-rundgang-knopf' + (rundgangNeu() ? " neu" : "") + '" data-aktion="rundgang" title="' + esc(T.rundgangTipp) + '">' + T.rundgang + "</button>" + '<a class="lw-schalter lw-klangwelten" href="ambient.html" title="' + esc(T.klangweltenTipp) + '">' + T.klangwelten + "</a>" + '<button type="button" class="lw-schalter lw-funk-knopf' + (funk ? " an" : "") + '" data-aktion="funkauf" aria-expanded="' + funkAuf + '">' + funkKnopfText(T) + "</button></span></div>" +
         (funkAuf ? '<section class="lw-funk"><h4>' + T.funk + "</h4>" + funkTeil(T) + "</section>" : "") +
         konsole(T, false) +
@@ -13143,6 +13250,21 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .ll-knoepfe [hidden] { display: none; }
 .lw-titel-naechste, .ll-naechste { font-size: .78rem; color: var(--ember); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lw-titel-naechste:empty, .ll-naechste:empty { display: none; }
+.lw-mood { display: flex; align-items: center; gap: .9rem; margin: .5rem 0 .7rem; }
+.lw-uhr { position: relative; flex: none; width: 104px; height: 104px; border-radius: 50%; touch-action: none; cursor: pointer; background: radial-gradient(circle at 50% 45%, #3a2a2c, #1b1416 70%); box-shadow: inset 0 0 0 2px rgba(224,160,70,.45), 0 2px 8px rgba(0,0,0,.5); }
+.lw-uhr .e { position: absolute; font-size: 19px; line-height: 1; transform: translate(-50%, -50%); pointer-events: none; }
+.lw-uhr .zeiger { position: absolute; left: 50%; top: 50%; width: 5px; height: 34px; margin-left: -2.5px; border-radius: 3px; background: linear-gradient(#fff3c4, #e0a046); transform-origin: 50% 0; transform: rotate(var(--w)); transition: transform .25s ease; pointer-events: none; }
+.lw-uhr .zeiger.mitte { height: 0; }
+.lw-uhr .nabe { position: absolute; left: 50%; top: 50%; width: 13px; height: 13px; margin: -6.5px 0 0 -6.5px; border-radius: 50%; background: #f2cf6a; box-shadow: 0 0 0 2px #241a26; pointer-events: none; }
+.lw-mood-txt { display: flex; flex-direction: column; align-items: flex-start; gap: .3rem; min-width: 0; }
+.lw-mood-wort { color: #f2cf6a; font-size: 1rem; }
+.lw-mood-txt small { opacity: .75; font-size: .78rem; line-height: 1.3; }
+.lw-mood-txt .lw-klein.an { border-color: var(--ember); background: rgba(200,120,50,.2); }
+.lw-bew { display: flex; align-items: center; gap: .3rem; font-size: .74rem; color: var(--vellum); opacity: .85; min-width: 0; }
+.lw-bew:empty { display: none; }
+.lw-bew-t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; font-style: italic; }
+.lw-bew button { flex: none; border: 1px solid rgba(235,226,204,.25); background: transparent; border-radius: 999px; padding: 0 .35rem; font-size: .8rem; line-height: 1.5; cursor: pointer; filter: grayscale(1); opacity: .65; }
+.lw-bew button.an { filter: none; opacity: 1; border-color: var(--ember); background: rgba(200,120,50,.18); }
 .lw-wechselbalken { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--ember); transform-origin: 0 50%; transform: scaleX(0); opacity: 0; transition: opacity .4s; border-radius: 2px; }
 .wechselt > .lw-wechselbalken { opacity: 1; }
 .lw-leiste { position: fixed; left: 50%; bottom: max(.6rem, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 60; width: min(40rem, calc(100% - 1.2rem)); display: flex; align-items: center; gap: .45rem; padding: .4rem .5rem; border: 1px solid rgba(224,160,70,.55); border-radius: 999px; background: rgba(16,14,21,.94); box-shadow: 0 8px 28px rgba(0,0,0,.55); backdrop-filter: blur(6px); animation: lwleisteein .25s ease-out; }
@@ -14091,6 +14213,7 @@ registerProcessor("imres-glitch", ImresGlitch);`;
     return ctx.currentTime - (ctx.outputLatency || 0) - (ctx.baseLatency || 0) + (p - performance.now()) / 1000;
   };
   window.ImresPult = {
+    bewerten: w => bewerten(w === -1 ? -1 : 1),
     /* Einzelspur-Aufnahme (Zynthian): die Busse, an denen abgegriffen werden kann */
     spurKnoten() {
       if (!ctx) return null;
@@ -14107,7 +14230,7 @@ registerProcessor("imres-glitch", ImresGlitch);`;
         transpose: S.transpose, modus: S.modus, stimmungen: STIMMUNGEN.filter(k => STIL[k]), kulissen: KUL_ZEIGEN.slice(),
         setStimmungen: abendSet && ABEND_SETS[abendSet] ? ABEND_SETS[abendSet].st.slice() : null,
         naechste: wechsel ? (wechsel.stimmung || wechsel.besetzung || null) : null, abendSet: abendSet || "",
-        liedNr: Number.isInteger(S.liedNr) ? S.liedNr : null, lied: S.stimmung && STIL[S.stimmung] && STIL[S.stimmung].lieder && S.liedNr >= 0 && STIL[S.stimmung].lieder[S.liedNr] ? STIL[S.stimmung].lieder[S.liedNr].titel || null : null,
+        liedNr: Number.isInteger(S.liedNr) ? S.liedNr : null, bewertung: bewertungVon(S.stimmung, S.liedNr), lied: S.stimmung && STIL[S.stimmung] && STIL[S.stimmung].lieder && S.liedNr >= 0 && STIL[S.stimmung].lieder[S.liedNr] ? STIL[S.stimmung].lieder[S.liedNr].titel || null : null,
         lieder: S.stimmung && STIL[S.stimmung] && STIL[S.stimmung].lieder ? STIL[S.stimmung].lieder.length : 0 };
     },
     /* Zynthian-Pult: feste Listen (ohne Umsortieren nach Nutzung) und Namen */
