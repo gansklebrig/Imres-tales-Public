@@ -59,6 +59,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .ic-fluch{background:linear-gradient(90deg,#3a1046,#1a0a20);border:1px solid #c040ff;border-radius:6px;padding:4px 7px;margin-bottom:5px;font-size:12px;color:#e8c8ff}
 .fluchfund h2{color:#e0a8ff}.fv-reihe{display:flex;gap:12px;align-items:flex-start}.fv-bild canvas{width:120px;height:100px;display:block;border-radius:8px;background:radial-gradient(circle,#2a0a36,#0e0610 70%)}.fv-karte{flex:1;min-width:0}.fv-regeln{margin:8px 0;padding-left:18px;color:#e8d8f0;font-size:13px}.fv-regeln li{margin:2px 0}.fv-regeln .warn{color:#ff8a8a}.fluchfund .knoepfe{flex-wrap:wrap}.fluchfund kbd:empty{display:none}
 .klein .fv-reihe{gap:8px}.klein .fv-bild canvas{width:84px;height:70px}
+.vorg{display:grid;grid-template-columns:1fr 1fr;gap:10px}.vg{display:flex;gap:8px;align-items:flex-start;background:rgba(40,26,22,.5);border-radius:8px;padding:8px}.vg canvas{width:56px;height:64px;flex:none;border-radius:4px}.vg p{margin:3px 0;font-size:13px}.vg .bar{font-style:italic;color:#e8c890}.klein .vorg{grid-template-columns:1fr}
 .tagebuch h2{font-family:var(--fd);color:#e8d0a0}.tb-kopf{font-size:11px;color:var(--mute);letter-spacing:.08em;text-transform:uppercase;margin:0}
 .tb-text{font-family:'Palatino Linotype',Palatino,Georgia,serif;font-style:italic;font-size:15px;line-height:1.55;color:#2a1e14;background:linear-gradient(170deg,#efe2c0,#d8c69a);padding:14px 16px;border-radius:4px;box-shadow:inset 0 0 30px rgba(120,80,30,.35),0 2px 8px rgba(0,0,0,.4);transform:rotate(-.4deg)}
 .tb-liste{display:flex;flex-direction:column;gap:4px;max-height:50vh;overflow:auto}.tb-liste button{text-align:left}.tb-liste button:disabled{opacity:.45}
@@ -270,39 +271,41 @@ button:disabled{opacity:.45;cursor:default}
 <div id="modal" hidden></div>
 <div id="title"></div>
 <div id="fade"></div>
-<script src="zerstoerer/kern.js?v=16"></script>
-<script src="zerstoerer/welt.js?v=16"></script>
-<script src="zerstoerer/daten.js?v=16"></script>
-<script src="zerstoerer/kampf.js?v=16"></script>
-<script src="zerstoerer/geschosse.js?v=16"></script>
-<script src="zerstoerer/gegner.js?v=16"></script>
-<script src="zerstoerer/bosse.js?v=16"></script>
-<script src="zerstoerer/figuren.js?v=16"></script>
-<script src="zerstoerer/werkzeuge.js?v=16"></script>
-<script src="zerstoerer/bild.js?v=16"></script>
-<script src="zerstoerer/pracht.js?v=16"></script>
-<script src="zerstoerer/grafik.js?v=16"></script>
-<script src="zerstoerer/musik.js?v=16"></script>
-<script src="zerstoerer/spiel.js?v=16"></script>
-<script src="zerstoerer/parcours.js?v=16"></script>
-<script src="zerstoerer/bilanz.js?v=16"></script>
-<script src="zerstoerer/kampfkunst.js?v=16"></script>
-<script src="zerstoerer/hintergrund.js?v=16"></script>
-<script src="zerstoerer/bilderbuch.js?v=16"></script>
-<script src="zerstoerer/abenteuer.js?v=16"></script>
-<script src="zerstoerer/fluch.js?v=16"></script>
-<script src="zerstoerer/fluchkraft.js?v=16"></script>
-<script src="zerstoerer/ebenen.js?v=16"></script>
-<script src="zerstoerer/spuren.js?v=16"></script>
-<script src="zerstoerer/effekte.js?v=16"></script>
-<script src="zerstoerer/hinterhalt.js?v=16"></script>
-<script src="zerstoerer/leben.js?v=16"></script>
-<script src="zerstoerer/gegnerkunst.js?v=16"></script>
-<script src="zerstoerer/wetter.js?v=16"></script>
-<script src="zerstoerer/ausstattung.js?v=16"></script>
-<script src="zerstoerer/ausgleich.js?v=16"></script>
-<script src="zerstoerer/ui.js?v=16"></script>
-<script src="zerstoerer/praesentation.js?v=16"></script>
-<script src="zerstoerer/tagebuch.js?v=16"></script>
+<script src="zerstoerer/kern.js?v=17"></script>
+<script src="zerstoerer/welt.js?v=17"></script>
+<script src="zerstoerer/daten.js?v=17"></script>
+<script src="zerstoerer/kampf.js?v=17"></script>
+<script src="zerstoerer/geschosse.js?v=17"></script>
+<script src="zerstoerer/gegner.js?v=17"></script>
+<script src="zerstoerer/bosse.js?v=17"></script>
+<script src="zerstoerer/bossphasen.js?v=17"></script>
+<script src="zerstoerer/figuren.js?v=17"></script>
+<script src="zerstoerer/werkzeuge.js?v=17"></script>
+<script src="zerstoerer/bild.js?v=17"></script>
+<script src="zerstoerer/pracht.js?v=17"></script>
+<script src="zerstoerer/grafik.js?v=17"></script>
+<script src="zerstoerer/musik.js?v=17"></script>
+<script src="zerstoerer/klang.js?v=17"></script>
+<script src="zerstoerer/spiel.js?v=17"></script>
+<script src="zerstoerer/parcours.js?v=17"></script>
+<script src="zerstoerer/bilanz.js?v=17"></script>
+<script src="zerstoerer/kampfkunst.js?v=17"></script>
+<script src="zerstoerer/hintergrund.js?v=17"></script>
+<script src="zerstoerer/bilderbuch.js?v=17"></script>
+<script src="zerstoerer/abenteuer.js?v=17"></script>
+<script src="zerstoerer/fluch.js?v=17"></script>
+<script src="zerstoerer/fluchkraft.js?v=17"></script>
+<script src="zerstoerer/ebenen.js?v=17"></script>
+<script src="zerstoerer/spuren.js?v=17"></script>
+<script src="zerstoerer/effekte.js?v=17"></script>
+<script src="zerstoerer/hinterhalt.js?v=17"></script>
+<script src="zerstoerer/leben.js?v=17"></script>
+<script src="zerstoerer/gegnerkunst.js?v=17"></script>
+<script src="zerstoerer/wetter.js?v=17"></script>
+<script src="zerstoerer/ausstattung.js?v=17"></script>
+<script src="zerstoerer/ausgleich.js?v=17"></script>
+<script src="zerstoerer/ui.js?v=17"></script>
+<script src="zerstoerer/praesentation.js?v=17"></script>
+<script src="zerstoerer/tagebuch.js?v=17"></script>
 </body>
 </html>

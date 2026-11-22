@@ -8,12 +8,27 @@
   /* ---------- Bausteine ---------- */
   const cxOf = e => e.x + e.w / 2, feet = e => e.y + e.h;
   const dmg = (e, m) => e.dmgMul * (m || 1) * (e.st.weak > 0 ? 0.6 : 1);
-  const arena = () => ({ x0: 2 * T, x1: (W.lv.W - 2) * T, floor: Z.groundY(W.lv.W * T / 2, (W.lv.H - 4) * T) });
+  /* Kampfbereich: in Bossarenen die ganze Ebene, bei Wächtern der Raum, in dem sie erwacht sind (e.box, siehe spawnBoss) */
+  const arena = () => { const b = Z.boss; if (b && b.box && !Z.bossDefeated) return b.box; return { x0: 2 * T, x1: (W.lv.W - 2) * T, floor: Z.groundY(W.lv.W * T / 2, (W.lv.H - 4) * T), top: T }; };
+  /* Zeitversetzte Abläufe laufen in Spielzeit (Pause, Zeitlupe und Trefferstopp halten sie mit an) – siehe bossphasen.js */
+  const setTimeout = (fn, ms) => (Z.bossLater ? Z.bossLater(fn, ms) : window.setTimeout(fn, ms));
   function box(e, bx, by, bw, bh) { const c = cxOf(e), f = feet(e); return e.face > 0 ? { x: c + bx, y: f + by, w: bw, h: bh } : { x: c - bx - bw, y: f + by, w: bw, h: bh }; }
   function melee(e, r, m, o) { const P = Z.player; if (P && !P.dead && U.overlap(r, P)) return Z.hurtPlayer(dmg(e, m), Object.assign({ x: cxOf(e), kb: 220, kbUp: 180, attacker: e, melee: true }, o || {})); }
   function mark(x, o) { return Z.spawnHazard(Object.assign({ kind: "zone", x, y: Z.groundY(x, arena().floor - 8), w: 30, hgt: 30, warn: 0.8, life: 0.25, owner: "e" }, o)); }
   function strikeAt(x, o) { return Z.spawnHazard(Object.assign({ kind: "strike", x, y: Z.groundY(x, arena().floor - 8), w: 24, hgt: 400, warn: 0.85, life: 0.3, owner: "e", unblockable: false }, o)); }
-  function rainProj(kind, n, spanX, e, m, o) { const P = Z.player; for (let i = 0; i < n; i++) setTimeout(() => { if (e.dead) return; const x = P.x + P.w / 2 + (R() - 0.5) * spanX; Z.spawnHazard({ kind: "zone", x, y: Z.groundY(x, arena().floor - 8), w: 18, hgt: 4, warn: 0.7, life: 0.01, owner: "e", dmg: 0, warnCol: "#ff3a2a" }); setTimeout(() => { if (!e.dead) { const p = Z.spawnProj(kind, x, Z.cam.y - 10, 0, Object.assign({ dmg: dmg(e, m), vx: 0, vy: 60 }, o || {})); p.g = 900; } }, 300); }, i * (o && o.gap || 110)); }
+  /* Regen aus Geschossen: Bodenmarke an der Landestelle, Start unter der Decke (Z.bossDrop aus bossphasen.js) */
+  function rainProj(kind, n, spanX, e, m, o) {
+    const P = Z.player;
+    for (let i = 0; i < n; i++) setTimeout(() => {
+      if (e.dead) return;
+      const x = P.x + P.w / 2 + (R() - 0.5) * spanX;
+      const dp = Z.bossDrop ? Z.bossDrop(x, null, kind) : { top: Z.cam.y - 10, land: Z.groundY(x, arena().floor - 8) };
+      if (!dp) return;
+      const fall = (-60 + Math.sqrt(3600 + 1800 * Math.max(0, dp.land - dp.top))) / 900;
+      if (Z.bossTele) Z.bossTele({ k: "floor", x, y: dp.land, w: 18, dur: 0.3 + fall + 0.04, col: "#ff3a2a" }); else Z.spawnHazard({ kind: "zone", x, y: dp.land, w: 18, hgt: 4, warn: 0.7, life: 0.01, owner: "e", dmg: 0, warnCol: "#ff3a2a" });
+      setTimeout(() => { if (!e.dead) { const p = Z.spawnProj(kind, x, dp.top, 0, Object.assign({ dmg: dmg(e, m), vx: 0, vy: 60 }, o || {})); p.g = 900; } }, 300);
+    }, i * (o && o.gap || 110));
+  }
   function face(e, P) { const d = P.x + P.w / 2 - cxOf(e); if (Math.abs(d) > 6) e.face = U.sign(d); }
   function walkTo(e, dt, tx, spd) { const d = tx - cxOf(e); e.vx = U.approach(e.vx, Math.abs(d) > 8 ? U.sign(d) * spd : 0, 1000 * dt); }
   function grav(e, dt) { if (!e.def.fly || e.grounded) { e.vy += 1400 * dt; if (e.vy > 600) e.vy = 600; } }
@@ -283,11 +298,43 @@
   });
 
   /* Hilfen für die Arenen: welche Bosse spielen dort, Begleiter (Nezna) */
+  /* Wächter: Raum (Zelle) bestimmen, in dem der Kampf stattfindet; liegt der Startpunkt außerhalb, in den Raum holen */
+  function wardenBox(id, x, y) {
+    const lv = Z.level; if (!lv || lv.arena || !lv.warden) return null;
+    const c = lv.warden.cell, x0 = c.x * Z.CW * T, y0 = c.y * Z.CH * T, x1 = x0 + Z.CW * T, y1 = y0 + Z.CH * T;
+    const P = Z.player, d = B[id] || {}, bw = d.w || 16, bh = d.h || 28;
+    let bx = U.clamp(x, x0 + 3 * T, x1 - 3 * T), by = y;
+    const inside = (px, py) => px > x0 && px < x1 && py - bh > y0 && py <= y1;
+    /* ganzer Körper frei, fester Boden (oder Plattform) darunter */
+    const free = (px, py) => {
+      for (let yy = py - bh + 1; yy < py - 1; yy += 6) for (let xx = px - bw / 2 + 1; xx < px + bw / 2; xx += 6) if (W.solidAt(xx, yy)) return false;
+      return W.solidAt(px, py + 2) || W.isPlat(Math.floor(px / T), Math.floor((py + 2) / T));
+    };
+    if (!inside(bx, by) || !free(bx, by)) {
+      /* Bodenstelle im Raum suchen: nicht zu nah am Spieler, nicht zu weit weg */
+      let best = null, bd = 1e9;
+      for (let tx = x0 + 3 * T; tx < x1 - 3 * T; tx += 8) for (let ty = y0 + 2 * T; ty <= y1; ty += T) {
+        const fy = ty - 1; if (!free(tx, fy)) continue;
+        const dx = P ? Math.abs(tx - P.x) : 120, dy = P ? Math.abs(fy - (P.y + P.h)) : 0;
+        const score = Math.abs(dx - 130) + dy * 1.5;
+        if (dx > 70 && score < bd) { bd = score; best = [tx, fy]; }
+      }
+      if (best) { bx = best[0]; by = best[1]; }
+    }
+    const fl = Z.groundY(bx, by);
+    return { x: bx, y: by, box: { x0: x0 + T, x1: x1 - T, floor: fl, top: y0 + T, y1, warden: true } };
+  }
   Z.spawnBoss = function (id, x, y) {
+    const wb = wardenBox(id, x, y);
+    if (wb) { x = wb.x; y = wb.y; }
     const e = Z.spawnEnemy(id, x, y, { tier: Z.run.tier });
     if (!e) return null;
+    e.box = wb ? wb.box : null;
     e.intro = 1.8; e.aware = true; e.phase = 0; e.idle = 1;
     if (id === "bugbear") { const n = Z.spawnEnemy("nezna", x - 60, y, { tier: Z.run.tier }); n.intro = 1.8; n.aware = true; n.phase = 0; n.idle = 2; e.partner = n; n.partner = e; }
+    if (e.partner) e.partner.box = e.box;
     return e;
   };
+  /* Bausteine für Erweiterungen (bossphasen.js) */
+  Z.bossKit = { cxOf, feet, dmg, arena, box, melee, mark, strikeAt, rainProj, face, walkTo, grav, summon, roar, brain: bossBrain };
 })();

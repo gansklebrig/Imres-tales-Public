@@ -12,7 +12,7 @@
     const lv = Z.level; if (!lv || !lv.decor) return;
     c.save(); c.globalCompositeOperation = "lighter";
     for (const d of lv.decor) {
-      if (d.kind !== "window") continue;
+      if (d.kind !== "window" || (Z.gfx.sky && Z.gfx.sky[d.y * lv.W + d.x])) continue;
       const x = d.x * T + 8, y = d.y * T + 6;
       if (x < cam.x - 160 || x > cam.x + cam.w + 60 || y < cam.y - 40 || y > cam.y + cam.h) continue;
       const len = 150, slant = 0.42, w0 = 10, w1 = 44, a = 0.09 + 0.025 * Math.sin(t * 0.7 + d.x);
@@ -28,30 +28,75 @@
     c.restore();
   }
 
-  /* ---------- Vordergrund-Silhouetten (Bildschirmkoordinaten, schneller als die Welt: Tiefe) ---------- */
+  /* ---------- Mondlicht durch große Bogenfenster: breite, sehr schwache Bahnen schräg in den Raum ---------- */
+  function archShafts(c, cam, t) {
+    const B = Z.biome || {}, ops = Z.gfx && Z.gfx.openings; if (!ops || !ops.length || B.open !== "arch") return;
+    c.save(); c.globalCompositeOperation = "lighter";
+    for (const o of ops) {
+      if (o.blind) continue;
+      const L = o.x0 * T, R = (o.x1 + 1) * T, Tp = o.y0 * T, Bt = (o.y1 + 1) * T;
+      if (R + 200 < cam.x || L > cam.x + cam.w || Bt + 200 < cam.y || Tp > cam.y + cam.h) continue;
+      const len = 170, sl = 0.5, a = 0.035 + 0.01 * Math.sin(t * 0.4 + o.x0);
+      const g = c.createLinearGradient(L, Tp, L + len * sl, Tp + len); g.addColorStop(0, "rgba(240,222,205," + a + ")"); g.addColorStop(1, "rgba(240,222,205,0)");
+      c.fillStyle = g; c.beginPath(); c.moveTo(L + 6, Tp + 10); c.lineTo(R - 6, Tp + 10); c.lineTo(R - 6 + len * sl, Bt + len * 0.6); c.lineTo(L + 6 + len * sl, Bt + len * 0.6); c.closePath(); c.fill();
+    }
+    c.restore();
+  }
+
+  /* ---------- Vordergrund-Silhouetten (Bildschirmkoordinaten, schneller als die Welt: Tiefe) ----------
+     Vorgezeichnete Schattenrisse mit schwachem Randlicht: Säulen mit Basis und Kapitell, Bogenansätze,
+     Ketten aus Gliedern, geknotete Taue und zerklüftete Tropfsteine. */
   const FG = { castle: "pillar", cellar: "chain", halls: "pillar", ramparts: "pillar", dungeon: "chain", harbour: "rope", belltower: "chain", chasm: "stalactite", forge: "chain", spires: "pillar", lake: "stalactite", embercity: "stalactite", storm: "pillar" };
+  const fgCache = {};
+  function fgSprite(kind, v) {
+    const key = kind + ((v * 4) | 0); if (fgCache[key]) return fgCache[key];
+    const W = 140, H = 420, cv = document.createElement("canvas"); cv.width = W; cv.height = H; const g = cv.getContext("2d");
+    const col = "#0b0709", rim = "rgba(255,196,150,.13)", R = k => hash(k, (v * 97) | 0);
+    g.fillStyle = col; g.strokeStyle = col;
+    if (kind === "pillar") {
+      /* von unten aufragende Säule: Sockel, kannelierter Schaft, Kapitell oder Bruchkante */
+      const x0 = 45, x1 = 95, top = 70 + R(1) * 60, broken = v < 0.5;
+      g.fillRect(x0 - 16, H - 34, x1 - x0 + 32, 34); g.fillRect(x0 - 10, H - 46, x1 - x0 + 20, 13);
+      g.fillRect(x0, top, x1 - x0, H - top - 40);
+      if (broken) { g.beginPath(); g.moveTo(x0, top + 2); for (let k = 0; k <= 6; k++) g.lineTo(x0 + (x1 - x0) * k / 6, top - 4 - R(k + 3) * 16); g.lineTo(x1, top + 2); g.fill(); }
+      else { g.fillRect(x0 - 12, top - 18, x1 - x0 + 24, 12); g.fillRect(x0 - 6, top - 7, x1 - x0 + 12, 8); g.fillRect(x0 - 16, top - 24, x1 - x0 + 32, 7); }
+      g.fillStyle = rim; g.fillRect(x0, top, 2.5, H - top - 46); g.fillRect(x0 - 16, H - 34, 2.5, 34); g.fillRect(x0 - 10, H - 46, x1 - x0 + 20, 1.5);
+      g.fillStyle = "rgba(255,196,150,.05)"; for (let k = 1; k < 5; k++) g.fillRect(x0 + k * 10, top + 6, 1.2, H - top - 56);
+    } else if (kind === "chain") {
+      /* Kette aus Gliedern mit schwerem Haken */
+      const len = 200 + R(2) * 160; g.lineWidth = 5;
+      for (let y = -6, k = 0; y < len; y += 13, k++) { if (k % 2) { g.fillRect(W / 2 - 2.5, y, 5, 15); } else { g.beginPath(); g.ellipse(W / 2, y + 7, 7, 10, 0, 0, 6.283); g.stroke(); } }
+      g.lineWidth = 8; g.beginPath(); g.moveTo(W / 2, len); g.lineTo(W / 2, len + 18); g.arc(W / 2 - 14, len + 18, 14, 0, Math.PI * 0.9); g.stroke();
+      g.strokeStyle = rim; g.lineWidth = 1.2; g.beginPath(); g.arc(W / 2 - 14, len + 18, 17, 0.2, 1.4); g.stroke();
+    } else if (kind === "rope") {
+      const len = 220 + R(2) * 150; g.lineWidth = 6; g.beginPath(); g.moveTo(W / 2, -4); g.quadraticCurveTo(W / 2 + 10, len * 0.5, W / 2 + 4, len); g.stroke();
+      for (let k = 0; k < 3; k++) { const y = 60 + k * 90 + R(k) * 30; g.beginPath(); g.ellipse(W / 2 + 6, y, 7, 9, 0, 0, 6.283); g.fill(); }
+      g.strokeStyle = "rgba(255,196,150,.08)"; g.lineWidth = 1; for (let y = 0; y < len; y += 7) { g.beginPath(); g.moveTo(W / 2 - 2, y); g.lineTo(W / 2 + 3, y + 5); g.stroke(); }
+      g.beginPath(); g.moveTo(W / 2 + 4, len); g.lineTo(W / 2 - 6, len + 30); g.moveTo(W / 2 + 4, len); g.lineTo(W / 2 + 12, len + 26); g.strokeStyle = col; g.lineWidth = 3; g.stroke();
+    } else {
+      /* Tropfsteine: zerklüftete Zapfen von der Decke, mit Nebenzapfen */
+      const base = (cx, w, h, dir) => { g.beginPath(); g.moveTo(cx - w, dir > 0 ? -2 : H + 2); const n = 7; for (let k = 1; k < n; k++) { const u = k / n, yy = dir > 0 ? h * u : H - h * u; g.lineTo(cx - w * (1 - u) + (R(k + w) - 0.5) * 6, yy); } g.lineTo(cx + (R(w) - 0.5) * 3, dir > 0 ? h : H - h); for (let k = n - 1; k > 0; k--) { const u = k / n, yy = dir > 0 ? h * u : H - h * u; g.lineTo(cx + w * (1 - u) + (R(k * 3 + w) - 0.5) * 6, yy); } g.lineTo(cx + w, dir > 0 ? -2 : H + 2); g.fill(); };
+      base(W / 2, 30 + R(1) * 14, 140 + R(2) * 120, 1); base(W / 2 - 34, 12, 60 + R(3) * 50, 1); base(W / 2 + 30, 10, 40 + R(4) * 40, 1);
+      g.fillStyle = rim; g.beginPath(); g.moveTo(W / 2 - 30, 0); g.lineTo(W / 2 - 4, 130 + R(2) * 100); g.lineTo(W / 2 - 26, 0); g.fill();
+    }
+    return (fgCache[key] = cv);
+  }
   function foreground(c, cam, W, H, S) {
     const B = Z.biome || {}, lv = Z.level; if (!lv || lv.hub || lv.arena || lv.passage) return;
     const kind = FG[B.bg] || "pillar", f = 1.35, span = 330;
     const sx = cam.x * f, i0 = Math.floor(sx / span) - 1, i1 = Math.floor((sx + cam.w * 1.1) / span) + 1;
     c.save(); c.setTransform(S, 0, 0, S, 0, 0);
-    const col = "rgba(8,5,7,.92)";
     for (let i = i0; i <= i1; i++) {
       const r = hash(i, lv.seed || 3); if (r < 0.45) continue;
-      const x = i * span + r * 120 - sx, w = 18 + r * 26;
-      c.fillStyle = col;
-      if (kind === "pillar") {
-        const top = r > 0.75; /* von oben hängend oder von unten aufragend */
-        const g = c.createLinearGradient(x - w, 0, x + w, 0); g.addColorStop(0, "rgba(8,5,7,0)"); g.addColorStop(0.25, col); g.addColorStop(0.75, col); g.addColorStop(1, "rgba(8,5,7,0)"); c.fillStyle = g;
-        if (top) c.fillRect(x - w, 0, w * 2, cam.h * (0.18 + r * 0.1)); else c.fillRect(x - w, cam.h * (0.82 - r * 0.08), w * 2, cam.h);
-      } else if (kind === "chain" || kind === "rope") {
-        const len = cam.h * (0.3 + r * 0.35), sway = Math.sin(Z.gfx.time * 0.6 + i) * 4;
-        c.strokeStyle = col; c.lineWidth = kind === "rope" ? 3 : 4; c.beginPath(); c.moveTo(x, -4); c.quadraticCurveTo(x + sway, len * 0.5, x + sway * 1.5, len); c.stroke();
-        if (kind === "chain") { c.fillStyle = col; c.beginPath(); c.ellipse(x + sway * 1.5, len + 6, 7, 9, 0, 0, 6.283); c.fill(); }
-      } else if (kind === "stalactite") {
-        c.beginPath(); c.moveTo(x - w, -2); c.lineTo(x + w, -2); c.lineTo(x + w * 0.2, cam.h * (0.18 + r * 0.16)); c.closePath(); c.fill();
-        if (r > 0.7) { c.beginPath(); c.moveTo(x + 60 - w, cam.h + 2); c.lineTo(x + 60 + w, cam.h + 2); c.lineTo(x + 60, cam.h * (0.86 - r * 0.08)); c.closePath(); c.fill(); }
-      }
+      const spr = fgSprite(kind, r), sc = cam.h / 300 * (0.85 + r * 0.3), w = spr.width * sc, h = spr.height * sc;
+      const x = i * span + r * 120 - sx - w / 2;
+      const fromTop = kind !== "pillar";
+      const y = fromTop ? -h * (0.3 - r * 0.2) : cam.h - h * (0.42 + r * 0.12);
+      /* zur Bildmitte hin durchscheinend, damit nichts das Spiel verdeckt */
+      const mid = Math.abs(x + w / 2 - cam.w / 2) / (cam.w * 0.5);
+      c.globalAlpha = Math.max(0.35, Math.min(0.95, (mid - 0.1) / 0.5));
+      if (kind === "chain" || kind === "rope") { const sway = Math.sin(Z.gfx.time * 0.6 + i) * 0.03; c.save(); c.translate(x + w / 2, y); c.rotate(sway); c.drawImage(spr, -w / 2, 0, w, h); c.restore(); }
+      else c.drawImage(spr, x, y, w, h);
     }
     c.restore();
   }
@@ -201,6 +246,7 @@
   Z.drawAfterLight = function (c, cam, W, H, t) {
     if (!rich()) return;
     shafts(c, cam, t);
+    archShafts(c, cam, t);
     foreground(c, cam, W, H, Z.gfx.scale);
     colorGrade(c, W, H);
   };

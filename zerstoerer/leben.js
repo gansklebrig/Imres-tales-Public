@@ -33,7 +33,7 @@
     if (e && e.sleep && !(o && o.dot)) {
       o = Object.assign({}, o || {}, { crit: true });
       dmg *= 2; e.sleep = false;
-      FX.text(e.x + e.w / 2, e.y - 16, L(["Überrascht!", "Ambushed!"]), "#ffd27a", true);
+      FX.text(e.x + e.w / 2, e.y - 16, L(["Überrascht!", "Ambushed!"]), "#ffd27a", true); Z.meta.ueberrascht = (Z.meta.ueberrascht || 0) + 1;
       const r = hit0.call(this, e, dmg, o); if (!e.dead) wake(e, true); return r;
     }
     return hit0.apply(this, arguments);

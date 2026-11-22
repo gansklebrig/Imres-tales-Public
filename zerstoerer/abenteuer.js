@@ -45,6 +45,11 @@
   const CAPES = {
     rot: { n: ["Darkin-Rot", "Darkin Red"], c: ["#8a1414", "#4a0a0c"] },
     rost: { n: ["Rost", "Rust"], c: ["#8a4a1e", "#4a240c"] },
+    karte: { n: ["Kartenzeichnerin", "Cartographer"], c: ["#c8a060", "#5a3a1a"] },
+    rune: { n: ["Runenwacht", "Rune Watch"], c: ["#c03a5a", "#4a0e1e"] },
+    kundschaft: { n: ["Kundschafter", "Scout"], c: ["#6a5a3a", "#2a2216"] },
+    pergament: { n: ["Pergament", "Parchment"], c: ["#d8c8a0", "#7a6a48"] },
+    nacht: { n: ["Leise Nacht", "Quiet Night"], c: ["#3a2a3a", "#120a12"] },
     moos: { n: ["Moos", "Moss"], c: ["#3a6a2a", "#1a3a14"] },
     gold: { n: ["Gold", "Gold"], c: ["#c8902a", "#6a4a10"] },
     weiss: { n: ["Federweiß", "Feather White"], c: ["#e8e0d8", "#9a908a"] },
@@ -85,6 +90,11 @@
     { id: "zorn", n: ["Vernichter", "Annihilator"], d: ["Ein einzelner Treffer mit 500 Schaden.", "A single hit of 500 damage."], ok: () => (S().maxHit || 0) >= 500, r: { cape: "zorn" } },
     { id: "zaeh", n: ["Unverwüstlich", "Relentless"], d: ["10-mal gefallen und immer wieder aufgestanden.", "Fallen 10 times and always got back up."], ok: () => (M().deaths || 0) >= 10, r: { bonus: "leben" } },
     { id: "ereignis", n: ["Abenteurer", "Adventurer"], d: ["5 Raum-Ereignisse abschließen.", "Complete 5 room events."], ok: () => (M().events || 0) >= 5, r: { bonus: "glueck" } },
+    { id: "tagebuch", n: ["Miras Chronist", "Mira's Chronicler"], d: ["Alle 13 Seiten aus Miras Tagebuch finden.", "Find all 13 pages of Mira's diary."], ok: () => Object.keys(M().tagebuch || {}).length >= 13, r: { cape: "karte" } },
+    { id: "hinterhalt", n: ["Nicht mit mir", "Not Today"], d: ["3 Hinterhalte in einem Durchgang überstehen.", "Survive 3 ambushes in one run."], ok: () => (S().ambushes || 0) >= 3, r: { cape: "rune" } },
+    { id: "befreier", n: ["Kettensprenger", "Chainbreaker"], d: ["3 gefesselte Kundschafter befreien.", "Free 3 shackled scouts."], ok: () => (M().befreit || 0) >= 3, r: { cape: "kundschaft" } },
+    { id: "spuren", n: ["Spurenleser", "Tracker"], d: ["10 Spuren früherer Abenteurer lesen.", "Read 10 traces of earlier adventurers."], ok: () => (M().spuren || 0) >= 10, r: { cape: "pergament" } },
+    { id: "schleicher", n: ["Leise Sohlen", "Soft Soles"], d: ["5 schlafende Gegner überraschen.", "Ambush 5 sleeping enemies."], ok: () => (M().ueberrascht || 0) >= 5, r: { cape: "nacht" } },
     { id: "wette", n: ["Wettkönig", "Bet King"], d: ["Barradins Wette gewinnen.", "Win Barradin's bet."], ok: () => !!M().betWon, r: { cape: "gold" } }
   ];
   Z.ACH = ACH;

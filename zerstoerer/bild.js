@@ -8,6 +8,7 @@
 
   /* Farbe aufhellen/abdunkeln (#rrggbb) */
   function shade(hex, f) { const n = parseInt(hex.slice(1), 16); let r = n >> 16, g = (n >> 8) & 255, b = n & 255; if (f > 0) { r += (255 - r) * f; g += (255 - g) * f; b += (255 - b) * f; } else { r *= 1 + f; g *= 1 + f; b *= 1 + f; } return "rgb(" + (r | 0) + "," + (g | 0) + "," + (b | 0) + ")"; }
+  function rgbaS(hex, a) { const n = parseInt(hex.slice(1), 16); return "rgba(" + (n >> 16) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")"; }
   function mix(a, b, t) { const A = parseInt(a.slice(1), 16), Bb = parseInt(b.slice(1), 16); const r = ((A >> 16) * (1 - t) + (Bb >> 16) * t) | 0, g = (((A >> 8) & 255) * (1 - t) + ((Bb >> 8) & 255) * t) | 0, bl = ((A & 255) * (1 - t) + (Bb & 255) * t) | 0; return "rgb(" + r + "," + g + "," + bl + ")"; }
   Z.shade = shade;
   /* Pseudozufall aus Koordinaten (stabil) */
@@ -20,9 +21,15 @@
     G.sky = new Uint8Array(lv.W * lv.H);
     if (lv.out) for (let x = 0; x < lv.W; x++) for (let y = 0; y < lv.H; y++) { if (y > 0 && (lv.get(x, y) === 1 || lv.get(x, y) === 7)) break; G.sky[y * lv.W + x] = 1; }
     if (lv.hub || (lv.arena && lv.out)) for (let x = 0; x < lv.W; x++) for (let y = 0; y < lv.H - 3; y++) if (lv.get(x, y) !== 1 || lv.hub) G.sky[y * lv.W + x] = lv.get(x, y) === 1 && !lv.hub ? 0 : 1;
+    PR = null; G.openings = [];
     G.buildLayers();
   };
-  Z.dirtyTiles = (tx, ty) => { for (const k of [...G.chunks.keys()]) G.chunks.delete(k); };
+  /* Kacheln geändert (z. B. Wand zerstört): Vorberechnung erneuern, nur betroffene Chunks verwerfen */
+  Z.dirtyTiles = (tx, ty) => {
+    if (lv && B) prep();
+    if (tx == null || ty == null) { G.chunks.clear(); return; }
+    for (const k of [...G.chunks.keys()]) { const [cx, cy] = k.split(",").map(Number); if (tx >= cx * CH_W - 4 && tx < (cx + 1) * CH_W + 4 && ty >= cy * CH_H - 4 && ty < (cy + 1) * CH_H + 4) G.chunks.delete(k); }
+  };
 
   /* ======================= PARALLAXE ======================= */
   const LW = 640; /* Breite einer Kachel des Hintergrunds (wiederholt sich) */
@@ -46,6 +53,22 @@
     if (R.chance(0.5)) { c.beginPath(); c.moveTo(x - 3, base - h); c.lineTo(x + w / 2, base - h - w * 1.2); c.lineTo(x + w + 3, base - h); c.fill(); }
     if (win) for (let k = 0; k < 3; k++) if (R.chance(0.6)) { c.fillStyle = win; c.fillRect(x + w / 2 - 1.5, base - h + 10 + k * 14, 3, 5); c.fillStyle = col; }
   }
+  /* Mauerfugen in Silhouetten: deutet Steinlagen an, ohne die Ferne unruhig zu machen */
+  function bgCourses(c, x, y, w, h, a, rh) {
+    rh = rh || 6; c.fillStyle = "rgba(0,0,0," + a + ")";
+    for (let yy = y + rh; yy < y + h; yy += rh) { c.fillRect(x, yy, w, 0.6); const off = ((yy / rh) & 1) * rh; for (let xx = x + off; xx < x + w; xx += rh * 2.2) c.fillRect(xx, yy - rh, 0.6, rh); }
+  }
+  /* Turm mit Zinnen oder Kegeldach, erleuchteten Fenstern und Mondkante */
+  function bgTower(c, x, base, w, h, col, R, winCol, rim) {
+    c.fillStyle = col; c.fillRect(x, base - h, w, h);
+    bgCourses(c, x, base - h, w, h, 0.18, 5);
+    if (rim) { c.fillStyle = rim; c.fillRect(x + w - 1.2, base - h, 1.2, h); }
+    const roof = R.chance(0.55);
+    if (roof) { c.fillStyle = lit(col, -0.12); c.beginPath(); c.moveTo(x - 3, base - h); c.lineTo(x + w / 2, base - h - w * 1.4); c.lineTo(x + w + 3, base - h); c.fill(); if (rim) { c.strokeStyle = rim; c.lineWidth = 0.8; c.beginPath(); c.moveTo(x + w / 2, base - h - w * 1.4); c.lineTo(x + w + 3, base - h); c.stroke(); }
+      if (R.chance(0.5)) { c.fillStyle = col; c.fillRect(x + w / 2 - 0.4, base - h - w * 1.4 - 8, 0.8, 8); c.fillStyle = "rgba(150,40,40,.8)"; c.beginPath(); c.moveTo(x + w / 2 + 0.4, base - h - w * 1.4 - 8); c.lineTo(x + w / 2 + 6, base - h - w * 1.4 - 6.5); c.lineTo(x + w / 2 + 0.4, base - h - w * 1.4 - 5); c.fill(); } }
+    else { c.fillStyle = col; c.fillRect(x - 2, base - h - 2, w + 4, 3); for (let i = -2; i < w + 2; i += 5) c.fillRect(x + i, base - h - 6, 3, 4); }
+    if (winCol) for (let k = 0; k < 4; k++) if (R.chance(0.55)) { const wy = base - h + 8 + k * 13; if (wy > base - 6) break; D.glow(c, x + w / 2, wy + 2.5, 6, "rgba(255,170,90,.35)"); c.fillStyle = winCol; c.beginPath(); c.moveTo(x + w / 2 - 1.6, wy + 5); c.lineTo(x + w / 2 - 1.6, wy + 1.4); c.quadraticCurveTo(x + w / 2, wy - 0.6, x + w / 2 + 1.6, wy + 1.4); c.lineTo(x + w / 2 + 1.6, wy + 5); c.fill(); }
+  }
   function paintBg(kind, f, m, H, R) {
     const sky = B.sky;
     switch (kind) {
@@ -55,11 +78,17 @@
         if (kind === "castle" || kind === "harbour" || kind === "camp" || kind === "ramparts") { const mx = 380, my = 50; D.glow(f, mx, my, 60, "rgba(255,230,200,.25)"); D.circ(f, mx, my, 14, "#f0e6d4"); D.circ(f, mx - 4, my - 3, 3, "#d8ccb8"); D.circ(f, mx + 5, my + 4, 2, "#d8ccb8"); }
         if (kind === "spires") { for (let i = 0; i < 14; i++) { const x = R() * LW, y = 30 + R() * 120; repeatDraw(f, () => D.ell(f, x, y, 40 + R() * 60, 6 + R() * 8, "rgba(255,120,60," + (0.08 + R() * 0.1) + ")")); } }
         if (kind === "storm") { for (let i = 0; i < 10; i++) { const x = R() * LW, y = 20 + R() * 100; repeatDraw(f, () => D.ell(f, x, y, 60 + R() * 70, 12 + R() * 14, "rgba(30,44,30," + (0.4 + R() * 0.3) + ")")); } }
-        /* ferne Berge/Türme */
-        f.fillStyle = shade(sky[1], -0.35);
-        repeatDraw(f, () => { f.beginPath(); f.moveTo(0, H); for (let x = 0; x <= LW; x += 20) f.lineTo(x, H * 0.62 - Math.sin(x * 0.012) * 26 - Math.sin(x * 0.031 + 2) * 14); f.lineTo(LW, H); f.fill(); });
-        const towerCol = shade(sky[1], -0.5);
-        for (let i = 0; i < 6; i++) { const x = i * 110 + R() * 40, w = 14 + R() * 14, h = 50 + R() * 80; repeatDraw(f, () => silTower(f, x, H * 0.66, w, h, towerCol, kind === "spires" ? null : "rgba(255,190,110,.7)", R)); }
+        /* zwei Bergketten: die hintere im Dunst, die vordere mit Mondkante (nahtlos über LW) */
+        const ridge = (yb, a1, a2, p1, p2, col, rim) => { const yf = x => yb - Math.sin(x * Math.PI * 2 / LW * p1) * a1 - Math.sin(x * Math.PI * 2 / LW * p2 + 2) * a2;
+          const g = f.createLinearGradient(0, yb - a1 - a2, 0, H); g.addColorStop(0, col); g.addColorStop(1, shade(col.slice(0, 7), -0.4)); f.fillStyle = g;
+          f.beginPath(); f.moveTo(0, H); for (let x = 0; x <= LW; x += 8) f.lineTo(x, yf(x)); f.lineTo(LW, H); f.fill();
+          if (rim) { f.strokeStyle = rim; f.lineWidth = 0.8; f.beginPath(); for (let x = 0; x <= LW; x += 8) x ? f.lineTo(x, yf(x)) : f.moveTo(x, yf(x)); f.stroke(); } };
+        ridge(H * 0.56, 22, 10, 3, 7, mixH(sky[1], sky[2], 0.3), null);
+        ridge(H * 0.63, 26, 14, 2, 5, lit(sky[1], -0.35), kind === "storm" ? null : "rgba(255,230,210,.14)");
+        /* Dunst über dem Tal */
+        const hz = f.createLinearGradient(0, H * 0.5, 0, H * 0.72); hz.addColorStop(0, "rgba(255,220,210,0)"); hz.addColorStop(0.6, rgbaS(sky[2], 0.22)); hz.addColorStop(1, "rgba(255,220,210,0)"); f.fillStyle = hz; f.fillRect(0, H * 0.5, LW, H * 0.22);
+        const towerCol = lit(sky[1], -0.5);
+        for (let i = 0; i < 6; i++) { const x = i * 110 + R() * 40, w = 14 + R() * 14, h = 50 + R() * 80; repeatDraw(f, () => bgTower(f, x, H * 0.66, w, h, towerCol, R, kind === "spires" ? null : "rgba(255,190,110,.75)", kind === "storm" ? null : "rgba(255,230,210,.12)")); }
         if (kind === "harbour") {
           /* Wasser mit Mondspiegelung */
           const wy = H * 0.7; f.fillStyle = shade(sky[0], -0.2); f.fillRect(0, wy, LW, H - wy);
@@ -71,12 +100,30 @@
         }
         /* mittlere Ebene: Mauern mit Zinnen */
         if (kind !== "harbour") {
-          const col = shade(B.wall, -0.25);
+          const col = shade(B.wall, -0.25), rim = kind === "storm" ? "rgba(220,230,200,.12)" : "rgba(255,226,200,.16)";
           repeatDraw(m, () => {
-            m.fillStyle = col; const top = H * 0.72;
-            m.fillRect(0, top, LW, H - top);
-            for (let x = 0; x < LW; x += 14) m.fillRect(x, top - 7, 8, 7);
-            for (let i = 0; i < 4; i++) { const x = 40 + i * 160; m.fillRect(x, top - 60, 34, 60); for (let k = 0; k < 34; k += 9) m.fillRect(x + k, top - 66, 5, 6); m.fillStyle = "rgba(255,180,90,.55)"; m.fillRect(x + 14, top - 44, 5, 9); m.fillStyle = col; }
+            const top = H * 0.72;
+            /* Wehrmauer mit Steinlagen, Zinnen mit Mondkante, Schießscharten */
+            m.fillStyle = col; m.fillRect(0, top, LW, H - top);
+            bgCourses(m, 0, top, LW, H - top, 0.22, 7);
+            for (let x = 0; x < LW; x += 14) { m.fillStyle = col; m.fillRect(x, top - 7, 8, 7); m.fillStyle = rim; m.fillRect(x, top - 7, 8, 0.8); }
+            m.fillStyle = "rgba(0,0,0,.35)"; m.fillRect(0, top, LW, 2);
+            for (let x = 30; x < LW; x += 46) { m.fillStyle = "#0a0608"; m.fillRect(x, top + 12, 1.6, 9); m.fillRect(x - 1.5, top + 15.5, 4.6, 1.4); }
+            for (let i = 0; i < 4; i++) {
+              const x = 40 + i * 160, tw = 34, th = 60;
+              m.fillStyle = col; m.fillRect(x, top - th, tw, th); bgCourses(m, x, top - th, tw, th, 0.2, 6);
+              /* Pechnasen (Maschikulis) und Zinnenkranz */
+              m.fillStyle = col; m.fillRect(x - 3, top - th - 4, tw + 6, 5); m.fillStyle = "rgba(0,0,0,.4)"; for (let k = 0; k < tw + 6; k += 5) m.fillRect(x - 3 + k + 1, top - th + 1, 2, 2);
+              for (let k = -2; k < tw + 2; k += 9) { m.fillStyle = col; m.fillRect(x + k, top - th - 10, 5, 6); m.fillStyle = rim; m.fillRect(x + k, top - th - 10, 5, 0.8); }
+              m.fillStyle = rim; m.fillRect(x + tw - 1, top - th, 1, th);
+              /* erleuchtetes Bogenfenster mit Kreuzsprosse */
+              D.glow(m, x + 16.5, top - 39, 12, "rgba(255,170,80,.35)");
+              m.fillStyle = "rgba(255,180,90,.75)"; m.beginPath(); m.moveTo(x + 14, top - 34); m.lineTo(x + 14, top - 42); m.quadraticCurveTo(x + 16.5, top - 46, x + 19, top - 42); m.lineTo(x + 19, top - 34); m.fill();
+              m.fillStyle = col; m.fillRect(x + 16.1, top - 45, 0.8, 11); m.fillRect(x + 14, top - 39.5, 5, 0.8);
+              if (R.chance(0.6)) { m.fillStyle = "rgba(120,24,30,.85)"; m.fillRect(x + 4, top - th + 6, 6, 14); m.beginPath(); m.moveTo(x + 4, top - th + 20); m.lineTo(x + 7, top - th + 24); m.lineTo(x + 10, top - th + 20); m.fill(); m.fillStyle = "rgba(229,180,84,.7)"; m.fillRect(x + 6.4, top - th + 10, 1.4, 1.4); }
+            }
+            /* Bodennebel vor der Mauer */
+            const g = m.createLinearGradient(0, H * 0.86, 0, H); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,.35)"); m.fillStyle = g; m.fillRect(0, H * 0.86, LW, H * 0.14);
           });
         }
         if (kind === "camp") {
@@ -96,7 +143,16 @@
           for (let i = 0; i < 5; i++) {
             const x = i * 128, w = 128;
             f.fillStyle = col; f.fillRect(x, 0, 18, H); f.fillRect(x + w - 18, 0, 18, H);
-            f.fillStyle = col2; f.beginPath(); f.moveTo(x + 18, H); f.lineTo(x + 18, H * 0.4); f.quadraticCurveTo(x + w / 2, H * 0.08, x + w - 18, H * 0.4); f.lineTo(x + w - 18, H); f.fill();
+            bgCourses(f, x, 0, 18, H, 0.2, 7); bgCourses(f, x + w - 18, 0, 18, H, 0.2, 7);
+            f.fillStyle = "rgba(255,230,200,.05)"; f.fillRect(x, 0, 2, H); f.fillRect(x + w - 18, 0, 2, H);
+            /* Gewölbenische mit Tiefenverlauf */
+            const vg = f.createLinearGradient(0, H * 0.1, 0, H); vg.addColorStop(0, shade(B.wall, -0.72)); vg.addColorStop(0.6, col2); vg.addColorStop(1, shade(B.wall, -0.5));
+            f.fillStyle = vg; f.beginPath(); f.moveTo(x + 18, H); f.lineTo(x + 18, H * 0.4); f.quadraticCurveTo(x + w / 2, H * 0.08, x + w - 18, H * 0.4); f.lineTo(x + w - 18, H); f.fill();
+            /* Bogenring aus Keilsteinen */
+            f.strokeStyle = shade(B.wall, -0.18); f.lineWidth = 5; f.beginPath(); f.moveTo(x + 15.5, H * 0.4); f.quadraticCurveTo(x + w / 2, H * 0.06, x + w - 15.5, H * 0.4); f.stroke();
+            f.strokeStyle = "rgba(0,0,0,.35)"; f.lineWidth = 0.6; for (let k = 1; k < 12; k++) { const u = k / 12, bx = (1 - u) * (1 - u) * (x + 15.5) + 2 * (1 - u) * u * (x + w / 2) + u * u * (x + w - 15.5), by = (1 - u) * (1 - u) * H * 0.4 + 2 * (1 - u) * u * H * 0.06 + u * u * H * 0.4; f.beginPath(); f.moveTo(bx, by - 2.5); f.lineTo(bx, by + 2.5); f.stroke(); }
+            /* Kämpferplatten und Sockel */
+            f.fillStyle = shade(B.wall, -0.15); f.fillRect(x - 2, H * 0.4 - 3, 22, 4); f.fillRect(x + w - 20, H * 0.4 - 3, 22, 4); f.fillRect(x - 3, H * 0.9, 24, 6); f.fillRect(x + w - 21, H * 0.9, 24, 6);
             if (kind === "halls" || kind === "passage") { /* hohe Fenster mit Mondlicht */ f.fillStyle = "rgba(200,190,220,.16)"; f.beginPath(); f.moveTo(x + 50, H * 0.55); f.lineTo(x + 50, H * 0.3); f.quadraticCurveTo(x + 64, H * 0.2, x + 78, H * 0.3); f.lineTo(x + 78, H * 0.55); f.fill(); f.strokeStyle = "rgba(20,10,10,.6)"; f.lineWidth = 1.5; f.beginPath(); f.moveTo(x + 64, H * 0.22); f.lineTo(x + 64, H * 0.55); f.moveTo(x + 50, H * 0.42); f.lineTo(x + 78, H * 0.42); f.stroke(); }
             if (kind === "dungeon") { f.strokeStyle = "rgba(10,12,10,.8)"; f.lineWidth = 2; for (let k = 0; k < 6; k++) { f.beginPath(); f.moveTo(x + 34 + k * 12, H * 0.5); f.lineTo(x + 34 + k * 12, H); f.stroke(); } }
             if (kind === "forge") { D.glow(f, x + 64, H * 0.6, 60, "rgba(255,120,30,.18)"); f.strokeStyle = "rgba(255,170,60,.35)"; f.lineWidth = 1; f.beginPath(); f.arc(x + 64, H * 0.35, 18, 0, 6.283); f.stroke(); for (let k = 0; k < 6; k++) { const a = k / 6 * 6.283; f.fillStyle = "rgba(255,180,70,.4)"; f.fillRect(x + 64 + Math.cos(a) * 24 - 2, H * 0.35 + Math.sin(a) * 24 - 2, 4, 4); } }
@@ -107,11 +163,11 @@
         repeatDraw(m, () => {
           for (let i = 0; i < 4; i++) {
             const x = 30 + i * 160 + R() * 30;
-            m.fillStyle = shade(B.wall, -0.15); m.fillRect(x, 0, 20, H); m.fillStyle = shade(B.wall, 0.05); m.fillRect(x, 0, 4, H);
-            m.fillStyle = shade(B.wall, -0.2); m.fillRect(x - 4, H * 0.7, 28, 8);
-            if (kind === "cellar") for (let k = 0; k < 3; k++) { D.ell(m, x + 60 + k * 20, H * 0.86, 9, 11, "#2a1e16"); m.fillStyle = "#3a2a1c"; m.fillRect(x + 51 + k * 20, H * 0.84, 18, 1.5); }
+            m.fillStyle = shade(B.wall, -0.15); m.fillRect(x, 0, 20, H); bgCourses(m, x, 0, 20, H, 0.18, 8); m.fillStyle = shade(B.wall, 0.05); m.fillRect(x, 0, 4, H); m.fillStyle = "rgba(0,0,0,.3)"; m.fillRect(x + 17, 0, 3, H);
+            m.fillStyle = shade(B.wall, -0.2); m.fillRect(x - 4, H * 0.7, 28, 8); m.fillStyle = shade(B.wall, -0.05); m.fillRect(x - 4, H * 0.7, 28, 1.2); m.fillStyle = "rgba(0,0,0,.35)"; m.fillRect(x - 4, H * 0.7 + 8, 28, 3);
+            if (kind === "cellar") { m.fillStyle = "#24180f"; m.fillRect(x + 48, H * 0.86 + 9, 66, 4); for (let k = 0; k < 3; k++) { const bx = x + 60 + k * 20; D.ell(m, bx, H * 0.86, 9, 11, "#2a1e16"); m.fillStyle = "rgba(255,220,180,.07)"; m.fillRect(bx - 6, H * 0.86 - 9, 2, 18); m.fillStyle = "#14100c"; m.fillRect(bx - 9, H * 0.86 - 6, 18, 1.5); m.fillRect(bx - 9, H * 0.86 + 4.5, 18, 1.5); D.circ(m, bx, H * 0.86, 1.6, "#3a2a1c"); } }
             if (kind === "halls") { m.fillStyle = "rgba(120,24,30,.8)"; m.fillRect(x + 50, H * 0.12, 22, 70); m.beginPath(); m.moveTo(x + 50, H * 0.12 + 70); m.lineTo(x + 61, H * 0.12 + 80); m.lineTo(x + 72, H * 0.12 + 70); m.fill(); m.fillStyle = "rgba(229,180,84,.7)"; m.fillRect(x + 58, H * 0.12 + 20, 6, 6); }
-            if (kind === "dungeon" || kind === "cellar") { m.strokeStyle = "rgba(20,18,16,.9)"; m.lineWidth = 1.2; m.setLineDash([2, 1.5]); m.beginPath(); m.moveTo(x + 70, 0); m.lineTo(x + 70, H * 0.3 + R() * 40); m.stroke(); m.setLineDash([]); }
+            if (kind === "dungeon" || kind === "cellar") { const ln = H * 0.3 + R() * 40; m.strokeStyle = "rgba(20,18,16,.9)"; m.lineWidth = 0.9; for (let yy = 0; yy < ln; yy += 3) { m.beginPath(); if ((yy / 3) & 1) { m.moveTo(x + 70, yy); m.lineTo(x + 70, yy + 3); } else m.ellipse(x + 70, yy + 1.5, 1, 1.8, 0, 0, 6.283); m.stroke(); } m.lineWidth = 1.4; m.beginPath(); m.arc(x + 68, ln + 3, 3, -0.3, 3.4); m.stroke(); }
           }
         });
         break;
@@ -140,9 +196,13 @@
       case "chasm": case "lake": case "embercity": {
         const deep = kind === "chasm" ? "#0a0612" : kind === "lake" ? "#050c09" : "#120604";
         const grd = f.createLinearGradient(0, 0, 0, H); grd.addColorStop(0, sky[0]); grd.addColorStop(1, deep); f.fillStyle = grd; f.fillRect(0, 0, LW, H);
-        /* Stalaktiten */
-        f.fillStyle = shade(B.wall, -0.4);
-        repeatDraw(f, () => { for (let x = 0; x < LW; x += 14) { const h = 20 + hash(x, 3) * 60; f.beginPath(); f.moveTo(x, 0); f.lineTo(x + 7, h); f.lineTo(x + 14, 0); f.fill(); } });
+        /* ferne Felssäulen zwischen Decke und Grund, mit schwachem Randlicht */
+        const colC = lit(B.wall, -0.55), rimC = kind === "lake" ? "rgba(170,230,190,.1)" : kind === "chasm" ? "rgba(210,170,255,.1)" : "rgba(255,150,80,.12)";
+        repeatDraw(f, () => { for (let i = 0; i < 3; i++) { const x = 90 + i * 210 + hash(i, 41) * 60, w = 16 + hash(i, 42) * 18; f.fillStyle = colC; f.beginPath(); f.moveTo(x - w * 1.6, 0); f.quadraticCurveTo(x - w * 0.4, H * 0.35, x - w * 0.5, H * 0.5); f.quadraticCurveTo(x - w * 0.6, H * 0.7, x - w * 1.8, H); f.lineTo(x + w * 1.8, H); f.quadraticCurveTo(x + w * 0.6, H * 0.7, x + w * 0.5, H * 0.5); f.quadraticCurveTo(x + w * 0.4, H * 0.35, x + w * 1.6, 0); f.fill(); f.strokeStyle = rimC; f.lineWidth = 1; f.beginPath(); f.moveTo(x + w * 1.6, 0); f.quadraticCurveTo(x + w * 0.4, H * 0.35, x + w * 0.5, H * 0.5); f.quadraticCurveTo(x + w * 0.6, H * 0.7, x + w * 1.8, H); f.stroke(); } });
+        /* Stalaktiten mit Randlicht und Tropfen */
+        repeatDraw(f, () => { for (let x = 0; x < LW; x += 14) { const h = 20 + hash(x, 3) * 60, w = 6 + hash(x, 9) * 4; f.fillStyle = shade(B.wall, -0.4); f.beginPath(); f.moveTo(x, 0); f.lineTo(x + 7, h); f.lineTo(x + 7 + w, 0); f.fill(); f.fillStyle = rimC; f.beginPath(); f.moveTo(x + 7 + w, 0); f.lineTo(x + 7, h); f.lineTo(x + 5 + w, 0); f.fill(); if (hash(x, 5) < 0.3) { f.fillStyle = rimC; f.fillRect(x + 6.6, h + 3 + hash(x, 6) * 8, 0.8, 1.4); } } });
+        /* Stalagmiten am Grund */
+        repeatDraw(f, () => { for (let x = 4; x < LW; x += 22) { const h = 12 + hash(x, 13) * 34, w = 5 + hash(x, 14) * 5; f.fillStyle = shade(B.wall, -0.5); f.beginPath(); f.moveTo(x - w, H); f.lineTo(x, H - h); f.lineTo(x + w, H); f.fill(); f.fillStyle = rimC; f.beginPath(); f.moveTo(x, H - h); f.lineTo(x + w, H); f.lineTo(x + w - 1.5, H); f.fill(); } });
         if (kind === "chasm") {
           /* Häuser auf Felsnadeln, von Netzen gehalten */
           repeatDraw(f, () => { for (let i = 0; i < 4; i++) { const x = 40 + i * 160, top = H * (0.35 + hash(i, 7) * 0.2); f.fillStyle = "#140c1a"; f.beginPath(); f.moveTo(x - 8, H); f.lineTo(x - 2, top + 20); f.lineTo(x + 22, top + 20); f.lineTo(x + 30, H); f.fill(); f.fillRect(x - 4, top, 28, 22); f.beginPath(); f.moveTo(x - 6, top); f.lineTo(x + 10, top - 14); f.lineTo(x + 26, top); f.fill(); f.fillStyle = "rgba(255,170,90,.5)"; f.fillRect(x + 6, top + 6, 3, 4); f.strokeStyle = "rgba(220,210,230,.18)"; f.lineWidth = 0.6; for (let k = 0; k < 5; k++) { f.beginPath(); f.moveTo(x + 10, top); f.quadraticCurveTo(x + 60 + k * 10, top - 30, x + 150, top + 20 - k * 15); f.stroke(); } } });
@@ -209,20 +269,109 @@
   }
 
   /* ======================= KACHELN ======================= */
-  const CH_W = 24, CH_H = 14;
-  function chunkCanvas(cx, cy) {
-    const key = cx + "," + cy;
-    let ch = G.chunks.get(key);
-    if (ch) return ch;
-    if (G.chunks.size > 14) G.chunks.delete(G.chunks.keys().next().value);
-    const s = G.bs, cv = document.createElement("canvas");
-    cv.width = Math.ceil(CH_W * T * s); cv.height = Math.ceil(CH_H * T * s);
-    const c = cv.getContext("2d"); c.scale(s, s); c.translate(-cx * CH_W * T, -cy * CH_H * T);
-    paintTiles(c, cx * CH_W, cy * CH_H, CH_W, CH_H);
-    ch = { cv }; G.chunks.set(key, ch); return ch;
+  /* Alles hier wird einmal je Chunk (24×14 Kacheln) in eine Leinwand gemalt und zwischengespeichert –
+     darum darf es aufwendig sein. Muster liegen in Weltkoordinaten, damit Kacheln und Chunks nahtlos passen. */
+  const CH_W = 24, CH_H = 14, TAU = Math.PI * 2;
+  const solidV = v => v === 1 || v === 7;
+  /* Detailstufe der Kacheln (0 schlicht … 3 prächtig); „eigene Werte“ zählen als Hoch */
+  const detail = () => { const q = Z.gq; if (!q || !Number.isFinite(q.level)) return 2; return q.level < 0 ? (q.layers === false ? 1 : 2) : q.level; };
+  /* Mauerwerk und Fels je Szenerie */
+  const STY = {
+    castle: { wall: "ashlar", rock: "block", ivy: 1, moss: 1, pil: 1, cor: 1, niche: 1 },
+    ramparts: { wall: "ashlar", rock: "block", ivy: 1, moss: 1, pil: 1, cor: 1 },
+    storm: { wall: "ashlar", rock: "block", ivy: 1, moss: 1, wet: 1, pil: 1, cor: 1 },
+    spires: { wall: "ashlar", rock: "block", soot: 1, pil: 1, cor: 1, niche: 1 },
+    camp: { wall: "ashlar", rock: "block", ivy: 1, moss: 1 },
+    passage: { wall: "panel", rock: "block", pil: 1 },
+    cellar: { wall: "brick", rock: "block", wet: 1, salt: 1, pil: 1, niche: 1 },
+    halls: { wall: "panel", rock: "block", pil: 1, cor: 1, dentil: 1 },
+    dungeon: { wall: "rubble", rock: "rubble", wet: 1, slime: 1, moss: 1, niche: 1 },
+    harbour: { wall: "plank", rock: "block", wet: 1, salt: 1 },
+    belltower: { wall: "timber", rock: "block", niche: 1 },
+    chasm: { wall: "cave", rock: "cave", web: 1 },
+    lake: { wall: "cave", rock: "cave", wet: 1, lichen: 1 },
+    embercity: { wall: "slab", rock: "cave", soot: 1, ember: 1 },
+    forge: { wall: "slab", rock: "block", soot: 1, rune: 1, pil: 1, cor: 1 }
+  };
+  const styleOf = () => STY[B.bg] || STY.castle;
+
+  /* Farbhilfen mit Hex-Ergebnis (verkettbar) */
+  const cl8 = v => (v < 0 ? 0 : v > 255 ? 255 : v | 0);
+  const rgbOf = h => { const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
+  const hexOf = (r, g, b) => "#" + ((1 << 24) | (cl8(r) << 16) | (cl8(g) << 8) | cl8(b)).toString(16).slice(1);
+  function lit(h, f) { const [r, g, b] = rgbOf(h); return f > 0 ? hexOf(r + (255 - r) * f, g + (255 - g) * f, b + (255 - b) * f) : hexOf(r * (1 + f), g * (1 + f), b * (1 + f)); }
+  function mixH(a, b, t) { const A = rgbOf(a), C = rgbOf(b); return hexOf(A[0] + (C[0] - A[0]) * t, A[1] + (C[1] - A[1]) * t, A[2] + (C[2] - A[2]) * t); }
+  function rgba(h, a) { const [r, g, b] = rgbOf(h); return "rgba(" + r + "," + g + "," + b + "," + a + ")"; }
+  const h3 = (x, y, k) => hash(x * 7 + k * 131, y * 13 - k * 71);
+
+  /* Rechteck-Zuschnitt ohne Canvas-Clip: fr() füllt nur innerhalb des aktuellen Rahmens */
+  let C0x = 0, C0y = 0, C1x = 0, C1y = 0;
+  function setCR(x, y, w, h) { C0x = x; C0y = y; C1x = x + w; C1y = y + h; }
+  function fr(c, x, y, w, h) { const a = x < C0x ? C0x : x, b = y < C0y ? C0y : y, e = x + w > C1x ? C1x : x + w, f = y + h > C1y ? C1y : y + h; if (e > a && f > b) c.fillRect(a, b, e - a, f - b); }
+
+  /* Quaderreihen mit Fasen; o: rowH, bw, off, jit, gap, seed, cols, hi, hi2, lo, extra */
+  /* WRAP: beim Malen einer Mustervorlage wiederholt sich der Zufall nach w×h Pixeln (nahtlose Kachelung) */
+  let WRAP = null;
+  const wk = (k, per) => (WRAP ? ((k % per) + per) % per : k);
+  function masonry(c, o) {
+    const rh = o.rowH, bw = o.bw, gap = o.gap, KX = WRAP ? Math.round(WRAP.w / bw) : 0, KY = WRAP ? Math.round(WRAP.h / rh) : 0;
+    for (let r = Math.floor(C0y / rh); r * rh < C1y; r++) {
+      const by = r * rh, off = (r & 1) * o.off, rr = wk(r, KY);
+      const bnd = k => k * bw + off + (o.jit ? Math.round((hash(wk(k, KX) * 7 + o.seed, rr * 3 + 1) - 0.5) * o.jit) : 0);
+      let k = Math.floor((C0x - off) / bw) - 1, xa = bnd(k);
+      while (xa < C1x) {
+        const xb = bnd(k + 1);
+        if (xb > C0x) {
+          const v = hash(wk(k, KX) * 13 + o.seed, rr * 7 + 3), w2 = xb - xa - gap, h2 = rh - gap;
+          c.fillStyle = o.cols[(v * o.cols.length) | 0]; fr(c, xa, by, w2, h2);
+          c.fillStyle = o.hi; fr(c, xa, by, w2, 1);
+          c.fillStyle = o.hi2; fr(c, xa, by + 1, 1, h2 - 1);
+          c.fillStyle = o.lo; fr(c, xa + 1, by + h2 - 1, w2 - 1, 1); fr(c, xa + w2 - 1, by + 1, 1, h2 - 2);
+          if (o.extra) o.extra(c, xa, by, w2, h2, v, k, r, o);
+        }
+        xa = xb; k++;
+      }
+    }
   }
-  /* Öffnungen in der Rückwand: Bogenfenster (draußen), Gewölbe (Keller) oder Höhlenlöcher (Unterreich) */
+  /* Abnutzung auf Quadern: Poren, abgeschlagene Ecken, Flecken */
+  function chips(c, x, y, w, h, v, k, r, o) {
+    if (v < 0.2) { c.fillStyle = "rgba(0,0,0,.25)"; fr(c, x + 2 + ((v * 97) % 1) * (w - 5), y + 2 + ((v * 13) % 1) * Math.max(0, h - 5), 2, 1); }
+    if (v > 0.88) { c.fillStyle = o.hi; fr(c, x + 1, y + 1, 2, 1); fr(c, x + 1, y + 2, 1, 1); }
+    if (v > 0.42 && v < 0.47) { c.fillStyle = "rgba(0,0,0,.18)"; fr(c, x + w * 0.3, y + h * 0.5, 1, 1); fr(c, x + w * 0.62, y + h * 0.35, 1, 1); fr(c, x + w * 0.5, y + h * 0.7, 1, 1); }
+    if (v > 0.6 && v < 0.64 && w > 8) { c.fillStyle = "rgba(0,0,0,.3)"; fr(c, x + w * 0.4, y + 1, 1, h * 0.4); fr(c, x + w * 0.4 + 1, y + h * 0.4, 1, h * 0.35); }
+  }
+  /* Runen auf Steinplatten (Schmiede) und Hitzerisse (Glutgassen) */
+  function slabExtra(c, x, y, w, h, v, k, r, o) {
+    chips(c, x, y, w, h, v, k, r, o);
+    c.fillStyle = o.hi; fr(c, x + 1, y + 1, w - 2, 1);
+    if (o.rune && v < 0.22 && w > 14 && h > 14) {
+      const cx = x + w / 2, cy = y + h / 2, s = h * 0.28, g = (v * 977) % 1;
+      c.save(); c.beginPath(); c.rect(C0x, C0y, C1x - C0x, C1y - C0y); c.clip();
+      c.strokeStyle = "rgba(0,0,0,.55)"; c.lineWidth = 1.2; runeGlyph(c, cx, cy, s, g); c.stroke();
+      c.strokeStyle = "rgba(255,150,60,.35)"; c.lineWidth = 0.5; runeGlyph(c, cx, cy, s, g); c.stroke();
+      c.restore();
+    }
+    if (o.ember && v > 0.9) {
+      c.save(); c.beginPath(); c.rect(C0x, C0y, C1x - C0x, C1y - C0y); c.clip();
+      c.strokeStyle = "rgba(255,110,30,.4)"; c.lineWidth = 0.6; c.beginPath(); let xx = x + 3, yy = y + h * 0.3; c.moveTo(xx, yy); for (let i = 0; i < 4; i++) { xx += w / 5; yy += (hash(k + i, r) - 0.4) * 5; c.lineTo(xx, yy); } c.stroke();
+      c.restore();
+    }
+  }
+  function runeGlyph(c, cx, cy, s, g) {
+    c.beginPath();
+    const n = (g * 5) | 0;
+    c.moveTo(cx, cy - s); c.lineTo(cx, cy + s);
+    if (n === 0) { c.moveTo(cx, cy - s * 0.6); c.lineTo(cx + s * 0.6, cy - s * 0.1); c.moveTo(cx, cy); c.lineTo(cx - s * 0.6, cy + s * 0.5); }
+    else if (n === 1) { c.moveTo(cx - s * 0.6, cy - s * 0.5); c.lineTo(cx + s * 0.6, cy + s * 0.5); c.moveTo(cx + s * 0.6, cy - s * 0.5); c.lineTo(cx - s * 0.6, cy + s * 0.5); }
+    else if (n === 2) { c.moveTo(cx, cy - s); c.lineTo(cx + s * 0.6, cy - s * 0.4); c.lineTo(cx, cy + s * 0.1); }
+    else if (n === 3) { c.moveTo(cx - s * 0.6, cy - s); c.lineTo(cx, cy - s * 0.4); c.lineTo(cx + s * 0.6, cy - s); c.moveTo(cx - s * 0.5, cy + s * 0.4); c.lineTo(cx + s * 0.5, cy + s * 0.4); }
+    else { c.moveTo(cx - s * 0.5, cy - s * 0.3); c.lineTo(cx + s * 0.5, cy - s * 0.3); c.moveTo(cx - s * 0.5, cy + s * 0.3); c.lineTo(cx + s * 0.5, cy + s * 0.3); }
+  }
+
+  /* ---------- Vorberechnung je Level: Felstiefe, Öffnungen ---------- */
+  let PR = null, PAL = null;
   function vnoise(x, y) { const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi; const s = t => t * t * (3 - 2 * t); const a = hash(xi, yi), b = hash(xi + 1, yi), c2 = hash(xi, yi + 1), d = hash(xi + 1, yi + 1); return U.lerp(U.lerp(a, b, s(xf)), U.lerp(c2, d, s(xf)), s(yf)); }
+  /* Öffnungen in der Rückwand: Bogenfenster (draußen), Gewölbe (Keller) oder Höhlenlöcher (Unterreich) */
   function isWin(x, y) {
     const mode = lv.arena ? "arena" : B.open; if (!mode) return false;
     if (mode === "arena") { if (y > lv.H - 5 || y < 1) return false; return lv.get(x, y) !== 1; }
@@ -232,114 +381,905 @@
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const v = lv.get(x + dx, y + dy); if (v === 1 || v === 7) return false; }
     return true;
   }
-  function paintTiles(c, x0, y0, w, h) {
-    const tl = B.tile, get = lv.get;
-    const solid = v => v === 1 || v === 7;
-    const air = (x, y) => !solid(get(x, y));
-    /* Rückwand */
-    for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) {
-      if (solid(get(x, y))) continue;
-      if (get(x, y) === 9) { /* Abgrund: Rückwand verliert sich in Schwärze */
-        const px = x * T, py = y * T, top = get(x, y - 1) !== 9;
-        if (top) { const g = c.createLinearGradient(0, py, 0, py + T); g.addColorStop(0, B.wall); g.addColorStop(1, "#060405"); c.fillStyle = g; c.fillRect(px, py, T, T); c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(px, py, T, 2); }
-        else { c.fillStyle = "#060405"; c.fillRect(px, py, T, T); }
-        continue;
-      }
-      if (G.sky[y * lv.W + x]) continue;
-      const px = x * T, py = y * T;
-      /* Außengebiete: große Bogenfenster in der Rückwand zeigen den Himmel */
-      if (!lv.hub && !lv.passage && isWin(x, y)) {
-        if (lv.arena) continue;
-        if (B.open === "arch") { const lx = x % 12; if (y % 7 === 1 && (lx === 2 || lx === 9)) { c.fillStyle = B.wall; c.fillRect(px, py, T, T); } else continue; }
-        else if (B.open === "vault") { const lx = x % 18; if (y % 9 === 1 && (lx === 4 || lx === 13)) { c.fillStyle = B.wall; c.fillRect(px, py, T, T); } else continue; }
-        else continue;
-      }
-      c.fillStyle = B.wall; c.fillRect(px, py, T, T);
-      /* Ziegelmuster */
-      c.fillStyle = B.brick;
-      const off = (y % 2) * 8;
-      c.fillRect(px, py + 7, T, 1); c.fillRect(px + ((off + 0) % 16), py, 1, 7); c.fillRect(px + ((off + 8) % 16), py + 8, 1, 8);
-      const r = hash(x, y);
-      if (r < 0.12) { c.fillStyle = shade(B.wall, 0.06); c.fillRect(px + 2, py + 1, 5, 5); }
-      if (r > 0.94) { c.fillStyle = shade(B.wall, -0.25); c.fillRect(px + 9, py + 9, 4, 4); }
-      /* Schatten unter Decken */
-      if (solid(get(x, y - 1))) { const g = c.createLinearGradient(0, py, 0, py + 10); g.addColorStop(0, "rgba(0,0,0,.45)"); g.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = g; c.fillRect(px, py, T, 10); }
-      if (solid(get(x - 1, y))) { c.fillStyle = "rgba(0,0,0,.25)"; c.fillRect(px, py, 4, T); }
-      if (solid(get(x + 1, y))) { c.fillStyle = "rgba(0,0,0,.25)"; c.fillRect(px + T - 4, py, 4, T); }
+  function prep() {
+    const W = lv.W, H = lv.H, N = W * H, get = lv.get;
+    const sol = new Uint8Array(N), dep = new Uint8Array(N), q = new Int32Array(N);
+    let qh = 0, qt = 0;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = y * W + x; if (solidV(get(x, y))) { sol[i] = 1; dep[i] = 99; } else q[qt++] = i; }
+    /* Felstiefe: Schritte bis zur nächsten freien Kachel (8er-Nachbarschaft) */
+    while (qh < qt) {
+      const i = q[qh++], x = i % W, y = (i / W) | 0, d = dep[i] + 1; if (d > 8) continue;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= W || yy >= H) continue; const j = yy * W + xx; if (dep[j] > d) { dep[j] = d; q[qt++] = j; } }
     }
-    /* Fels */
-    for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) {
-      const v = get(x, y); if (!solid(v)) continue;
-      if (y === 0 && lv.out) continue;
-      /* Fels unter einem Abgrund verschwindet in der Tiefe */
-      if (get(x, y - 1) === 9 || (get(x, y - 2) === 9 && solid(get(x, y - 1))) || (get(x, y - 3) === 9 && solid(get(x, y - 1)) && solid(get(x, y - 2)))) { c.fillStyle = "#060405"; c.fillRect(x * T, y * T, T, T); continue; }
-      const px = x * T, py = y * T, r = hash(x, y);
-      const exposed = air(x, y - 1) || air(x, y + 1) || air(x - 1, y) || air(x + 1, y);
-      const deep = !exposed && !air(x - 1, y - 1) && !air(x + 1, y + 1) && !air(x + 1, y - 1) && !air(x - 1, y + 1);
-      c.fillStyle = deep ? shade(tl.dark, 0.05) : mix(tl.base, tl.dark, 0.15 + r * 0.25); c.fillRect(px, py, T, T);
-      if (deep) { c.fillStyle = shade(tl.dark, -0.18); const o2 = (y % 2) * 8; c.fillRect(px, py + 7.5, T, 0.8); c.fillRect(px + ((o2 + 4) % 16), py, 0.8, 8); c.fillRect(px + ((o2 + 12) % 16), py + 8, 0.8, 8); if (r < 0.15) { c.fillStyle = shade(tl.dark, 0.12); c.fillRect(px + 3, py + 3, 3, 2); } }
-      if (!deep) {
-        /* Steinblöcke */
-        c.fillStyle = shade(tl.base, -0.25); const off = (y % 2) * 8;
-        c.fillRect(px, py + 7.5, T, 1); c.fillRect(px + ((off + 4) % 16), py, 1, 8); c.fillRect(px + ((off + 12) % 16), py + 8, 1, 8);
-        c.fillStyle = shade(tl.base, 0.08); c.fillRect(px + 1, py + 1, 6, 1); c.fillRect(px + 9, py + 9, 6, 1);
-        if (r < 0.2) { c.fillStyle = tl.det; c.globalAlpha = 0.5; c.fillRect(px + 3 + r * 40, py + 3, 2, 2); c.globalAlpha = 1; }
+    /* Öffnungen: Maske und zusammenhängende Gruppen */
+    const clear = new Uint8Array(N), win = new Uint8Array(N), comps = [];
+    for (let i = 0; i < N; i++) if (G.sky[i] && !sol[i]) clear[i] = 1;
+    if (!lv.hub && !lv.passage && (B.open || lv.arena)) {
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = y * W + x; if (sol[i] || G.sky[i] || get(x, y) === 9) continue; if (isWin(x, y)) { if (lv.arena) clear[i] = 1; else win[i] = 1; } }
+      if (!lv.arena) {
+        const seen = new Uint8Array(N), wallDec = new Set();
+        /* Gemälde und Regale machen eine Öffnung zum Blendbogen (wie eine Galerie) */
+        const BLOCK = { painting: 1, shelf: 1 };
+        for (const d of lv.decor || []) if (BLOCK[d.kind]) { wallDec.add(d.y * W + d.x); wallDec.add((d.y - 1) * W + d.x); }
+        for (let i = 0; i < N; i++) {
+          if (!win[i] || seen[i]) continue;
+          const o = { x0: 1e9, y0: 1e9, x1: -1, y1: -1, tiles: [], mode: B.open }; const st = [i]; seen[i] = 1;
+          while (st.length) { const j = st.pop(), x = j % W, y = (j / W) | 0; o.tiles.push(x, y); if (x < o.x0) o.x0 = x; if (x > o.x1) o.x1 = x; if (y < o.y0) o.y0 = y; if (y > o.y1) o.y1 = y;
+            for (const k of [j - 1, j + 1, j - W, j + W]) if (k >= 0 && k < N && win[k] && !seen[k] && Math.abs((k % W) - x) <= 1) { seen[k] = 1; st.push(k); } }
+          const n = o.tiles.length / 2;
+          if (n < 3) { for (let t = 0; t < o.tiles.length; t += 2) win[o.tiles[t + 1] * W + o.tiles[t]] = 0; continue; }
+          o.full = n === (o.x1 - o.x0 + 1) * (o.y1 - o.y0 + 1);
+          /* hängt Wandschmuck (Fackel, Gemälde, Regal …) in der Öffnung, wird sie zum Blendbogen bzw. bleibt Wand */
+          let hit = false; for (let t = 0; t < o.tiles.length && !hit; t += 2) if (wallDec.has(o.tiles[t + 1] * W + o.tiles[t])) hit = true;
+          if (hit) { for (let t = 0; t < o.tiles.length; t += 2) win[o.tiles[t + 1] * W + o.tiles[t]] = 0; if (o.mode === "cave") continue; o.blind = true; }
+          comps.push(o);
+        }
       }
-      /* Kanten */
-      if (air(x, y - 1)) {
-        c.fillStyle = tl.light; c.fillRect(px, py, T, 2); c.fillStyle = shade(tl.light, -0.2); c.fillRect(px, py + 2, T, 1);
-        topper(c, tl, px, py, x, y);
-      }
-      if (air(x, y + 1)) { c.fillStyle = shade(tl.dark, -0.2); c.fillRect(px, py + T - 2, T, 2); }
-      if (air(x - 1, y)) { c.fillStyle = shade(tl.light, -0.3); c.fillRect(px, py, 1.5, T); }
-      if (air(x + 1, y)) { c.fillStyle = shade(tl.dark, -0.1); c.fillRect(px + T - 1.5, py, 1.5, T); }
-      if (v === 7) { /* Risse */ c.strokeStyle = "rgba(10,8,8,.85)"; c.lineWidth = 1; c.beginPath(); c.moveTo(px + 3, py + 2); c.lineTo(px + 7, py + 7); c.lineTo(px + 5, py + 11); c.lineTo(px + 10, py + 15); c.moveTo(px + 7, py + 7); c.lineTo(px + 13, py + 5); c.stroke(); c.strokeStyle = "rgba(255,220,160,.12)"; c.beginPath(); c.moveTo(px + 4, py + 3); c.lineTo(px + 8, py + 8); c.stroke(); }
     }
-    /* Stege, Leitern, Stacheln */
-    for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) {
+    /* Fackeln, die in einer Öffnung hängen würden, wandern an den nächsten Mauerpfeiler daneben */
+    for (const d of lv.decor || []) {
+      if (d.kind !== "torch" || !(win[d.y * W + d.x] || (d.y > 0 && win[(d.y - 1) * W + d.x]))) continue;
+      for (let k = 1; k < 8; k++) { let moved = false; for (const xx of [d.x - k, d.x + k]) { if (xx < 1 || xx >= W - 1) continue; const i0 = d.y * W + xx, i1 = (d.y - 1) * W + xx; if (!sol[i0] && !win[i0] && !win[i1] && !sol[i1] && !clear[i0]) { d.x = xx; moved = true; break; } } if (moved) break; }
+    }
+    PR = { sol, dep, win, clear, comps, W, H };
+    G.openings = comps;
+    /* Farben */
+    const wall = B.wall, tl = B.tile;
+    const core = mixH(tl.dark, "#000000", 0.42), cr = rgbOf(core);
+    PAL = {
+      core, coreRGB: cr.join(","),
+      wallCols: [lit(wall, -0.12), lit(wall, -0.05), wall, lit(wall, 0.04), lit(wall, 0.09)],
+      wHi: rgba(lit(wall, 0.32), 0.55), wHi2: rgba(lit(wall, 0.22), 0.35), wLo: "rgba(0,0,0,.32)",
+      rockCols: [mixH(tl.base, tl.dark, 0.26), mixH(tl.base, tl.dark, 0.16), mixH(tl.base, tl.dark, 0.06), mixH(tl.base, tl.light, 0.07), mixH(tl.base, tl.light, 0.15)],
+      rHi: rgba(lit(tl.light, 0.05), 0.5), rHi2: rgba(tl.light, 0.3), rLo: "rgba(0,0,0,.38)",
+      stone: lit(wall, 0.1), stoneHi: lit(wall, 0.28), stoneLo: lit(wall, -0.3)
+    };
+    /* Tiefenkarte des Felsens (1 Pixel je 4 Weltpixel): je weiter von freier Luft, desto dunkler und ruhiger */
+    const dm = document.createElement("canvas"); dm.width = W * 4; dm.height = H * 4;
+    const dmc = dm.getContext("2d"), dd = dmc.createImageData(W * 4, H * 4), [cr0, cr1, cr2] = cr;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const d = dep[y * W + x]; if (!d) continue;
+      let near = null;
+      if (d < 4) { near = []; for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) { const xx = x + dx, yy = y + dy; if (xx >= 0 && yy >= 0 && xx < W && yy < H && !sol[yy * W + xx]) near.push(xx * T, yy * T); } }
+      for (let sy = 0; sy < 4; sy++) for (let sx = 0; sx < 4; sx++) {
+        let a = 1;
+        if (near) { const qx = x * T + sx * 4 + 2, qy = y * T + sy * 4 + 2; let best = 1e9; for (let i = 0; i < near.length; i += 2) { const ddx = Math.max(near[i] - qx, 0, qx - near[i] - T), ddy = Math.max(near[i + 1] - qy, 0, qy - near[i + 1] - T), q2 = ddx * ddx + ddy * ddy; if (q2 < best) best = q2; } a = Math.min(1, Math.max(0, (Math.sqrt(best) - 5) / 17)); a = a < 0.12 ? 0 : a < 0.45 ? 0.3 : a < 0.8 ? 0.6 : 0.8; }
+        if (!near) a = 0.88;
+        const o = ((y * 4 + sy) * W * 4 + x * 4 + sx) * 4; dd.data[o] = cr0; dd.data[o + 1] = cr1; dd.data[o + 2] = cr2; dd.data[o + 3] = a * 255;
+      }
+    }
+    dmc.putImageData(dd, 0, 0);
+    PR.depth = dm;
+  }
+  /* Wertrauschen, das sich nach px×py Gitterzellen wiederholt (für nahtlose Vorlagen) */
+  function vnoiseP(x, y, px, py) { const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi, s = t => t * t * (3 - 2 * t), X = k => ((k % px) + px) % px, Y = k => ((k % py) + py) % py;
+    const a = hash(X(xi), Y(yi)), b = hash(X(xi + 1), Y(yi)), c2 = hash(X(xi), Y(yi + 1)), d = hash(X(xi + 1), Y(yi + 1)); return U.lerp(U.lerp(a, b, s(xf)), U.lerp(c2, d, s(xf)), s(yf)); }
+  /* großflächige Alterung der Wand: dunkle Wasserränder und ausgeblichene Stellen */
+  function wallBlotches(g, w, h) {
+    for (let y = 0; y < h; y += 4) for (let x = 0; x < w; x += 4) {
+      const n = vnoiseP((x + 2) / 72, (y + 2) / 56, w / 72, h / 56) * 0.75 + vnoiseP((x + 2) / 24 + 7, (y + 2) / 21, w / 24, h / 21) * 0.25;
+      if (n > 0.52) { g.fillStyle = "rgba(0,0,0," + ((n - 0.52) * 0.75).toFixed(3) + ")"; g.fillRect(x, y, 4, 4); }
+      else if (n < 0.34) { g.fillStyle = "rgba(255,236,210," + ((0.34 - n) * 0.18).toFixed(3) + ")"; g.fillRect(x, y, 4, 4); }
+    }
+  }
+  /* Mustervorlagen je Gebiet: einmal aufwendig gemalt, danach nur noch als Füllmuster benutzt */
+  const PWW = 576, PWH = 336, PRW = 384, PRH = 192;
+  let TEX = null;
+  const canPatT = typeof DOMMatrix !== "undefined" && typeof CanvasPattern !== "undefined" && !!CanvasPattern.prototype.setTransform;
+  /* Auflösung der Chunks auf Viertel gerundet: Muster passen dann pixelgenau (ohne Filterung) */
+  const chunkScale = () => Math.max(1, Math.round((G.bs || 1) * 4) / 4);
+  function textures(st, det) {
+    const s = canPatT ? chunkScale() : 1, key = s + "|" + det + "|" + B.bg + "|" + B.wall + "|" + B.brick + "|" + B.tile.base + "|" + B.tile.dark;
+    if (TEX && TEX.key === key) return TEX;
+    const mk = (w, h, fn) => { const cv = document.createElement("canvas"); cv.width = Math.round(w * s); cv.height = Math.round(h * s); const g = cv.getContext("2d"); g.scale(cv.width / w, cv.height / h); WRAP = { w, h }; try { fn(g); } catch (e) { console.error(e); } WRAP = null; return { cv, w, h }; };
+    /* der leichte Schleier, der die Rückwand hinter den Fels treten lässt, ist gleich mit eingebacken */
+    TEX = { key, wall: mk(PWW, PWH, g => { wallBase(g, st, 0, 0, PWW, PWH, det); if (det >= 1) wallBlotches(g, PWW, PWH); g.fillStyle = "rgba(" + PAL.coreRGB + ",.2)"; g.fillRect(0, 0, PWW, PWH); }), rock: mk(PRW, PRH, g => rockBase(g, st, 0, 0, PRW, PRH, det)) };
+    return TEX;
+  }
+  /* Vorlage wiederholt in ein Rechteck kopieren (Ursprung bei Welt 0,0 – nahtlos zwischen Chunks) */
+  function tileTex(c, t, X, Y, w, h) { for (let ty = Math.floor(Y / t.h) * t.h; ty < Y + h; ty += t.h) for (let tx = Math.floor(X / t.w) * t.w; tx < X + w; tx += t.w) c.drawImage(t.cv, tx, ty, t.w, t.h); }
+  function patternOf(c, t) { const p = c.createPattern(t.cv, "repeat"); if (canPatT) p.setTransform(new DOMMatrix().scale(t.w / t.cv.width, t.h / t.cv.height)); return p; }
+  /* Ausschnitt einer Karte weich vergrößert zeichnen (eine Zelle Rand, damit Chunks nahtlos sind) */
+  function drawMap(c, map, k, x0, y0, w, h) {
+    const sx = Math.max(0, x0 * k - 1), sy = Math.max(0, y0 * k - 1), ex = Math.min(map.width, (x0 + w) * k + 1), ey = Math.min(map.height, (y0 + h) * k + 1);
+    if (ex <= sx || ey <= sy) return;
+    const f = T / k; c.drawImage(map, sx, sy, ex - sx, ey - sy, sx * f, sy * f, (ex - sx) * f, (ey - sy) * f);
+  }
+  G.prepTiles = function () { if (lv && B) prep(); };
+  const sol = (x, y) => x < 0 || y < 0 || x >= PR.W || y >= PR.H ? 1 : PR.sol[y * PR.W + x];
+  const inLv = (x, y) => x >= 0 && y >= 0 && x < PR.W && y < PR.H;
+  /* begehbare Rückwand: frei, kein Himmel, kein Fenster, kein Abgrund */
+  const isWall = (x, y) => inLv(x, y) && !PR.sol[y * PR.W + x] && !PR.clear[y * PR.W + x] && !PR.win[y * PR.W + x] && lv.get(x, y) !== 9;
+  const isPlatV = v => v === 2 || v === 8 || v === 10;
+  /* Abstand (in Kacheln) zum nächsten Boden unter einer Wandkachel, 0 = keiner in Reichweite */
+  function floorBelow(x, y, max) { for (let k = 1; k <= max; k++) { const v = lv.get(x, y + k); if (solidV(v) || isPlatV(v)) return k; if (v === 9) return 0; } return 0; }
+
+  /* ---------- Rückwand: Grundmuster je Mauerart ---------- */
+  function wallBase(c, st, X, Y, w, h, det) {
+    const wall = B.wall;
+    setCR(X, Y, w, h);
+    c.fillStyle = B.brick; c.fillRect(X, Y, w, h);
+    switch (st.wall) {
+      case "brick": {
+        const warm = mixH(wall, "#6a3020", 0.32);
+        masonry(c, { rowH: 6, bw: 12, off: 6, jit: 0, gap: 1, seed: 5, cols: [lit(warm, -0.15), lit(warm, -0.06), warm, mixH(wall, "#5a3a28", 0.2), lit(warm, 0.07), lit(wall, 0.02)], hi: rgba(lit(warm, 0.3), 0.45), hi2: rgba(lit(warm, 0.2), 0.2), lo: "rgba(0,0,0,.3)", extra: det >= 1 ? chips : null });
+        break;
+      }
+      case "rubble": {
+        /* Bruchstein: unregelmäßige Steine in versetzten Reihen */
+        const cols = PAL.wallCols;
+        const KX = WRAP ? WRAP.w / 12 : 0, KY = WRAP ? WRAP.h / 8 : 0;
+        for (let j = Math.floor(Y / 8) - 1; j * 8 < Y + h + 8; j++) {
+          const off = (j & 1) * 6, jj = wk(j, KY);
+          for (let i = Math.floor((X - off) / 12) - 1; i * 12 + off < X + w + 12; i++) {
+            const bx = k => k * 12 + off + (hash(wk(k, KX) * 3 + 1, jj * 5 + 2) - 0.5) * 5;
+            const x0 = bx(i) + 1, x1 = bx(i + 1) - 1, v = hash(wk(i, KX) * 11 + 3, jj * 7 + 5);
+            const y0 = j * 8 + 0.8 + (v * 1.4), y1 = (j + 1) * 8 - 0.4 - ((v * 7) % 1) * 1.4, ch = 2.2;
+            c.fillStyle = cols[(v * cols.length) | 0];
+            c.beginPath(); c.moveTo(x0 + ch, y0); c.lineTo(x1 - ch, y0); c.lineTo(x1, y0 + ch); c.lineTo(x1, y1 - ch); c.lineTo(x1 - ch, y1); c.lineTo(x0 + ch, y1); c.lineTo(x0, y1 - ch); c.lineTo(x0, y0 + ch); c.fill();
+            c.fillStyle = PAL.wHi; c.fillRect(x0 + ch, y0, x1 - x0 - ch * 2, 1); c.fillRect(x0, y0 + ch, 1, y1 - y0 - ch * 2);
+            c.fillStyle = PAL.wLo; c.fillRect(x0 + ch, y1 - 1, x1 - x0 - ch * 2, 1); c.fillRect(x1 - 1, y0 + ch, 1, y1 - y0 - ch * 2);
+            if (v > 0.86) { c.fillStyle = "rgba(0,0,0,.25)"; c.fillRect(x0 + (x1 - x0) * 0.4, y0 + 2, 1.5, 1); }
+          }
+        }
+        break;
+      }
+      case "plank": {
+        /* senkrechte Bretter mit Stößen, Maserung und Querlatten */
+        const wood = mixH(wall, "#5a4028", 0.45), cols = [lit(wood, -0.12), lit(wood, -0.05), wood, lit(wood, 0.06)];
+        const KX = WRAP ? WRAP.w / 8 : 0, KY = WRAP ? WRAP.h / 56 : 0;
+        for (let b = Math.floor(X / 8) - 1; b * 8 < X + w; b++) {
+          const bx = b * 8, bb = wk(b, KX);
+          for (let j = Math.floor(Y / 56) - 1; j * 56 < Y + h + 56; j++) {
+            const s0 = j * 56 + ((hash(bb, wk(j, KY)) * 40) | 0), s1 = (j + 1) * 56 + ((hash(bb, wk(j + 1, KY)) * 40) | 0), v = hash(bb * 3 + 1, wk(j, KY));
+            if (s1 < Y || s0 > Y + h) continue;
+            c.fillStyle = cols[(v * cols.length) | 0]; c.fillRect(bx, s0, 7, s1 - s0 - 1);
+            c.fillStyle = rgba(lit(wood, 0.25), 0.35); c.fillRect(bx, s0, 1, s1 - s0 - 1);
+            c.fillStyle = "rgba(0,0,0,.18)"; c.fillRect(bx + 2 + ((v * 9) | 0) % 3, s0 + 2, 0.6, s1 - s0 - 4); c.fillRect(bx + 6, s0, 1, s1 - s0 - 1);
+            if (det >= 1 && v > 0.9) { c.fillStyle = "rgba(0,0,0,.35)"; c.beginPath(); c.ellipse(bx + 3, s0 + 14 + v * 20, 1.4, 2.2, 0, 0, TAU); c.fill(); }
+            c.fillStyle = "#1a120c"; c.fillRect(bx + 1.5, s0 + 2, 0.9, 0.9); c.fillRect(bx + 4, s0 + 2, 0.9, 0.9);
+          }
+        }
+        for (let n = Math.floor(Y / 112) - 1; n * 112 < Y + h; n++) {
+          const by = n * 112 + 70, wd = mixH(wall, "#4a3020", 0.55);
+          c.fillStyle = "rgba(0,0,0,.3)"; c.fillRect(X, by + 5, w, 2);
+          c.fillStyle = wd; c.fillRect(X, by, w, 5); c.fillStyle = rgba(lit(wd, 0.3), 0.5); c.fillRect(X, by, w, 1);
+          c.fillStyle = "#16100a"; for (let xx = Math.floor(X / 8) * 8 + 3; xx < X + w; xx += 8) c.fillRect(xx, by + 2, 1, 1);
+        }
+        break;
+      }
+      case "panel": {
+        /* Hallen: Stoffbespannung mit Rautenmuster (Damast) */
+        c.fillStyle = wall; c.fillRect(X, Y, w, h);
+        c.fillStyle = lit(wall, -0.06); for (let xx = Math.floor(X / 24) * 24; xx < X + w; xx += 24) c.fillRect(xx, Y, 12, h);
+        c.save(); c.beginPath(); c.rect(X, Y, w, h); c.clip();
+        c.strokeStyle = rgba(lit(wall, 0.2), 0.22); c.lineWidth = 0.6; c.beginPath();
+        for (let d = Math.floor((X - Y - h) / 12) * 12; d < X + w - Y; d += 12) { c.moveTo(d + Y, Y); c.lineTo(d + Y + h, Y + h); }
+        for (let d = Math.floor((X + Y) / 12) * 12; d < X + w + Y + h; d += 12) { c.moveTo(d - Y, Y); c.lineTo(d - Y - h, Y + h); }
+        c.stroke();
+        c.fillStyle = "rgba(229,180,84,.16)";
+        for (let yy = Math.floor(Y / 12) * 12; yy < Y + h; yy += 12) for (let xx = Math.floor(X / 12) * 12 + ((yy / 12) & 1 ? 6 : 0); xx < X + w; xx += 12) { c.fillRect(xx - 0.5, yy + 6 - 2, 1, 4); c.fillRect(xx - 2, yy + 6 - 0.5, 4, 1); }
+        c.restore();
+        break;
+      }
+      case "cave": {
+        /* Höhlenfels: verzogenes Facettennetz mit Lichtkanten */
+        const cols = [lit(wall, -0.16), lit(wall, -0.08), wall, lit(wall, 0.05), lit(wall, 0.1)], gw = 16, gh = 12, KX = WRAP ? WRAP.w / gw : 0, KY = WRAP ? WRAP.h / gh : 0;
+        const P = (i, j) => { const a = wk(i, KX), b = wk(j, KY); return [i * gw + (hash(a, b * 3 + 1) - 0.5) * 9, j * gh + (hash(b * 5 + 31, a) - 0.5) * 7]; };
+        const hiS = rgba(lit(wall, 0.3), 0.3);
+        for (let j = Math.floor(Y / gh) - 1; j * gh < Y + h + gh; j++) for (let i = Math.floor(X / gw) - 1; i * gw < X + w + gw; i++) {
+          const a = P(i, j), b = P(i + 1, j), d = P(i + 1, j + 1), e = P(i, j + 1), v = hash(wk(i, KX) * 17 + 5, wk(j, KY) * 23 + 9);
+          const band = hash(wk(j, KY), 77) * 0.6;
+          c.fillStyle = cols[Math.min(4, (v * 3 + band * 2.2) | 0)];
+          c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.lineTo(d[0], d[1]); c.lineTo(e[0], e[1]); c.closePath(); c.fill();
+          c.strokeStyle = hiS; c.lineWidth = 0.7; c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.stroke();
+          c.strokeStyle = "rgba(0,0,0,.28)"; c.beginPath(); c.moveTo(b[0], b[1]); c.lineTo(d[0], d[1]); c.lineTo(e[0], e[1]); c.stroke();
+        }
+        break;
+      }
+      case "slab": {
+        masonry(c, { rowH: 24, bw: 32, off: 16, jit: 4, gap: 1, seed: 9, cols: PAL.wallCols, hi: PAL.wHi, hi2: PAL.wHi2, lo: PAL.wLo, extra: det >= 1 ? slabExtra : null, rune: st.rune, ember: st.ember });
+        break;
+      }
+      case "timber": {
+        masonry(c, { rowH: 8, bw: 18, off: 9, jit: 6, gap: 1, seed: 3, cols: PAL.wallCols, hi: PAL.wHi, hi2: PAL.wHi2, lo: PAL.wLo, extra: det >= 1 ? chips : null });
+        /* Fachwerk: Ständer, Riegel und Kopfbänder */
+        const wood = mixH(wall, "#3e2818", 0.6), wHi = rgba(lit(wood, 0.3), 0.5);
+        const beamH = (bx, by, bw2, bh2) => { c.fillStyle = "rgba(0,0,0,.28)"; c.fillRect(bx + 1, by + bh2, bw2, 2); c.fillStyle = wood; c.fillRect(bx, by, bw2, bh2); c.fillStyle = wHi; c.fillRect(bx, by, bw2, 1); c.fillStyle = "rgba(0,0,0,.2)"; c.fillRect(bx, by + bh2 * 0.6, bw2, 0.6); };
+        for (let j = Math.floor(Y / (7 * T)) - 1; j * 7 * T < Y + h; j++) beamH(X, j * 7 * T, w, 7);
+        for (let k = Math.floor(X / (12 * T)) - 1; k * 12 * T < X + w + 12 * T; k++) {
+          const px0 = k * 12 * T - 4;
+          c.fillStyle = "rgba(0,0,0,.3)"; c.fillRect(px0 + 8, Y, 2, h);
+          c.fillStyle = wood; c.fillRect(px0, Y, 8, h); c.fillStyle = wHi; c.fillRect(px0, Y, 1, h); c.fillStyle = "rgba(0,0,0,.18)"; c.fillRect(px0 + 3, Y, 0.6, h);
+          for (let j = Math.floor(Y / (7 * T)) - 1; j * 7 * T < Y + h + 7 * T; j++) {
+            const by = j * 7 * T + 7;
+            for (const s of [-1, 1]) { c.fillStyle = wood; c.beginPath(); const ex = s < 0 ? px0 : px0 + 8; c.moveTo(ex, by + 22); c.lineTo(ex, by + 28); c.lineTo(ex + s * 26, by); c.lineTo(ex + s * 20, by); c.fill(); }
+            c.fillStyle = "#1a120a"; c.fillRect(px0 + 3, by - 4, 2, 2);
+          }
+        }
+        break;
+      }
+      default: /* ashlar */
+        masonry(c, { rowH: 8, bw: 18, off: 9, jit: 6, gap: 1, seed: 3, cols: PAL.wallCols, hi: PAL.wHi, hi2: PAL.wHi2, lo: PAL.wLo, extra: det >= 1 ? chips : null });
+    }
+  }
+
+  /* ---------- Rückwand: Schmuck je Kachel ---------- */
+  function wallFeatures(c, st, x0, y0, x1, y1, det, GR) {
+    const M = B.open === "arch" ? 12 : B.open === "vault" ? 18 : st.wall === "panel" ? 10 : 0, MV = B.open === "arch" ? 7 : B.open === "vault" ? 9 : 0;
+    const wall = B.wall;
+    for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+      if (!isWall(x, y)) continue;
+      const px = x * T, py = y * T; setCR(px, py, T, T);
+      /* Gesims zwischen den Fensterreihen */
+      if (MV && st.cor && y % MV === 0 && !sol(x, y - 1)) {
+        c.fillStyle = "rgba(0,0,0,.22)"; fr(c, px, py + 5, T, 3);
+        c.fillStyle = PAL.stone; fr(c, px, py, T, 5); c.fillStyle = PAL.stoneHi; fr(c, px, py, T, 1); c.fillStyle = PAL.stoneLo; fr(c, px, py + 4, T, 1);
+        if (st.dentil) { c.fillStyle = PAL.stoneLo; for (let k = 0; k < T; k += 4) fr(c, px + k + 1, py + 5, 2, 2); }
+        else { c.fillStyle = "rgba(0,0,0,.18)"; fr(c, px + ((x * 5) % 16), py + 1, 1, 3); }
+      }
+      /* Pfeiler */
+      if (M && st.pil) {
+        const lx = ((x % M) + M) % M;
+        if (lx === 0 || lx === M - 1) {
+          const cx = lx === 0 ? px : px + T, pw = st.wall === "panel" ? 6 : 7;
+          const pc = st.wall === "panel" ? mixH(wall, "#6a4a30", 0.45) : PAL.stone;
+          c.fillStyle = "rgba(0,0,0,.25)"; fr(c, cx + pw, py, 3, T);
+          c.fillStyle = pc; fr(c, cx - pw, py, pw * 2, T);
+          c.fillStyle = rgba(lit(pc, 0.3), 0.6); fr(c, cx - pw, py, 1.5, T);
+          c.fillStyle = "rgba(0,0,0,.22)"; fr(c, cx + pw - 2, py, 2, T); fr(c, cx - 2.5, py, 0.7, T); fr(c, cx + 2, py, 0.7, T);
+          if (st.wall !== "panel") { c.fillStyle = "rgba(0,0,0,.2)"; fr(c, cx - pw, py + ((y & 1) ? 9 : 1), pw * 2, 0.7); }
+          if (sol(x, y - 1)) { c.fillStyle = "rgba(0,0,0,.3)"; fr(c, cx - pw - 2, py + 6, pw * 2 + 4, 2); c.fillStyle = lit(pc, 0.08); fr(c, cx - pw - 3, py, pw * 2 + 6, 3); fr(c, cx - pw - 1.5, py + 3, pw * 2 + 3, 3); c.fillStyle = rgba(lit(pc, 0.35), 0.7); fr(c, cx - pw - 3, py + 3, pw * 2 + 6, 0.7); }
+          const fb = lv.get(x, y + 1);
+          if (solidV(fb) || isPlatV(fb)) { c.fillStyle = lit(pc, -0.08); fr(c, cx - pw - 2, py + T - 6, pw * 2 + 4, 6); c.fillStyle = rgba(lit(pc, 0.3), 0.6); fr(c, cx - pw - 2, py + T - 6, pw * 2 + 4, 1); fr(c, cx - pw - 1, py + T - 3.5, pw * 2 + 2, 0.7); }
+        }
+      }
+      /* Sockel, Vertäfelung, Steinsockel */
+      const fb = floorBelow(x, y, 2);
+      if (fb) {
+        const fy = (y + fb) * T;
+        if (st.wall === "panel") {
+          /* Holzvertäfelung mit Füllungen und Handlauf */
+          const top = fy - 26, wood = mixH(wall, "#4a2a18", 0.55);
+          c.fillStyle = lit(wood, -0.15); fr(c, px, top, T, 26);
+          const pw2 = 24, pi = Math.floor(px / pw2);
+          for (let k = pi - 1; k <= pi + 1; k++) {
+            const qx = k * pw2 + 3, qy = top + 5, qw = pw2 - 6, qh = 17;
+            c.fillStyle = wood; fr(c, qx, qy, qw, qh);
+            c.fillStyle = rgba(lit(wood, 0.3), 0.55); fr(c, qx, qy, qw, 1); fr(c, qx, qy, 1, qh);
+            c.fillStyle = "rgba(0,0,0,.35)"; fr(c, qx, qy + qh - 1, qw, 1); fr(c, qx + qw - 1, qy, 1, qh);
+            c.fillStyle = rgba(lit(wood, 0.12), 0.6); fr(c, qx + 3, qy + 3, qw - 6, qh - 6);
+            c.fillStyle = "rgba(0,0,0,.2)"; fr(c, qx + 3, qy + qh - 4, qw - 6, 1);
+          }
+          c.fillStyle = "rgba(0,0,0,.3)"; fr(c, px, top + 3, T, 2);
+          c.fillStyle = lit(wood, 0.12); fr(c, px, top, T, 3); c.fillStyle = rgba("#e5b454", 0.45); fr(c, px, top, T, 0.7);
+        } else if (st.wall === "plank") {
+          setCR(px, Math.max(py, fy - 12), T, Math.min(py + T, fy) - Math.max(py, fy - 12));
+          if (C1y > C0y) { c.fillStyle = B.brick; fr(c, C0x, C0y, T, 12); masonry(c, { rowH: 6, bw: 12, off: 6, jit: 3, gap: 1, seed: 7, cols: [lit(B.tile.base, -0.25), lit(B.tile.base, -0.15), lit(B.tile.base, -0.32)], hi: PAL.rHi, hi2: PAL.rHi2, lo: PAL.rLo, extra: null }); }
+          setCR(px, py, T, T); c.fillStyle = "rgba(0,0,0,.35)"; fr(c, px, fy - 13, T, 1);
+        } else if (st.wall !== "cave") {
+          c.fillStyle = lit(wall, -0.14); fr(c, px, fy - 6, T, 6);
+          c.fillStyle = PAL.wHi; fr(c, px, fy - 6, T, 1);
+          c.fillStyle = "rgba(0,0,0,.3)"; fr(c, px + ((x * 7) & 15), fy - 5, 1, 5);
+        }
+      }
+    }
+  }
+
+  /* ---------- Rückwand: Flecken, Risse, Nischen, Efeu, Ruß (dürfen über Kachelgrenzen reichen) ---------- */
+  function wallDirt(c, st, x0, y0, x1, y1, det) {
+    if (det < 1) return;
+    const tl = B.tile, wall = B.wall;
+    for (let y = y0 - 4; y < y1 + 4; y++) for (let x = x0 - 3; x < x1 + 3; x++) {
+      if (!isWall(x, y)) continue;
+      const px = x * T, py = y * T, r = h3(x, y, 1), r2 = h3(x, y, 2), r3 = h3(x, y, 3);
+      /* Wasserflecken und Schlieren unter Decken */
+      if (sol(x, y - 1) && r < (st.wet ? 0.4 : st.soot ? 0.3 : 0.2)) {
+        const sx = px + 2 + r2 * 10, sw = 3 + r3 * 5, sl = 14 + r2 * 34;
+        const col = st.soot ? "14,10,10" : st.slime ? "40,60,20" : st.moss ? "20,30,16" : "10,8,6";
+        const g = c.createLinearGradient(0, py, 0, py + sl); g.addColorStop(0, "rgba(" + col + ",.45)"); g.addColorStop(1, "rgba(" + col + ",0)");
+        c.fillStyle = g; c.beginPath(); c.moveTo(sx - 1, py); c.lineTo(sx + sw + 1, py); c.quadraticCurveTo(sx + sw, py + sl * 0.6, sx + sw * 0.55, py + sl); c.quadraticCurveTo(sx, py + sl * 0.5, sx - 1, py); c.fill();
+        if (st.slime || st.wet) { c.fillStyle = st.slime ? "rgba(110,150,40,.45)" : "rgba(170,190,170,.18)"; c.fillRect(sx + sw * 0.4, py, 0.8, sl * 0.8); if (st.slime) { c.beginPath(); c.arc(sx + sw * 0.4 + 0.4, py + sl * 0.8, 1, 0, TAU); c.fill(); } }
+        if (st.salt) { c.fillStyle = "rgba(230,224,206,.16)"; c.beginPath(); c.moveTo(sx - 2, py + sl * 0.55); c.quadraticCurveTo(sx + sw / 2, py + sl * 0.45, sx + sw + 2, py + sl * 0.55); c.lineTo(sx + sw + 2, py + sl * 0.62); c.quadraticCurveTo(sx + sw / 2, py + sl * 0.5, sx - 2, py + sl * 0.62); c.fill(); }
+      }
+      /* Ruß unter der Decke in Schmiede und Zinnen */
+      if (st.soot && sol(x, y - 1)) { const g = c.createLinearGradient(0, py, 0, py + 22); g.addColorStop(0, "rgba(8,5,4,.4)"); g.addColorStop(1, "rgba(8,5,4,0)"); c.fillStyle = g; c.fillRect(px, py, T, 22); }
+      /* Moos an feuchten Stellen */
+      if (st.moss && r3 < 0.16 && (sol(x, y + 1) || sol(x, y - 1) || sol(x - 1, y) || sol(x + 1, y))) {
+        const mx = px + 8, my = sol(x, y + 1) ? py + 14 : sol(x, y - 1) ? py + 2 : py + 8;
+        for (let k = 0; k < 14; k++) { const a = h3(x, y, 20 + k) * TAU, d = h3(x, y, 40 + k) * 7; c.fillStyle = k % 3 ? "rgba(70,96,42,.5)" : "rgba(100,128,56,.45)"; c.fillRect(mx + Math.cos(a) * d * 1.4, my + Math.sin(a) * d * 0.7, 1.6, 1.3); }
+      }
+      /* Flechten am Seeufer */
+      if (st.lichen && r3 > 0.9) { for (let k = 0; k < 7; k++) { c.fillStyle = k % 2 ? "rgba(150,170,110,.2)" : "rgba(190,180,120,.16)"; c.beginPath(); c.ellipse(px + h3(x, y, 50 + k) * 16, py + h3(x, y, 60 + k) * 16, 0.6 + h3(x, y, 70 + k) * 1.6, 0.4 + h3(x, y, 71 + k) * 0.8, 0, 0, TAU); c.fill(); } }
+      /* Risse */
+      if (r2 > 0.93) {
+        let xx = px + r * 16, yy = py + r3 * 6; c.strokeStyle = "rgba(0,0,0,.5)"; c.lineWidth = 0.8; c.beginPath(); c.moveTo(xx, yy);
+        const pts = []; for (let k = 0; k < 5; k++) { xx += (h3(x, y, 80 + k) - 0.5) * 9; yy += 3 + h3(x, y, 90 + k) * 4; c.lineTo(xx, yy); pts.push(xx, yy); }
+        c.moveTo(pts[2], pts[3]); c.lineTo(pts[2] + 5, pts[3] + 2); c.stroke();
+        c.strokeStyle = rgba(lit(wall, 0.35), 0.3); c.lineWidth = 0.5; c.beginPath(); c.moveTo(px + r * 16 + 0.8, py + r3 * 6 + 0.6); for (let k = 0; k < 4; k += 2) c.lineTo(pts[k] + 0.8, pts[k + 1] + 0.6); c.stroke();
+      }
+      /* Spinnweben in Ecken (Schlund) */
+      if (st.web && sol(x, y - 1) && (sol(x - 1, y) || sol(x + 1, y)) && r < 0.7) {
+        const left = sol(x - 1, y), ox = left ? px : px + T, oy = py, s = left ? 1 : -1, R0 = 10 + r2 * 10;
+        c.strokeStyle = "rgba(225,218,235,.32)"; c.lineWidth = 0.5;
+        for (let k = 0; k <= 4; k++) { const a = k / 4 * Math.PI / 2; c.beginPath(); c.moveTo(ox, oy); c.lineTo(ox + s * Math.cos(a) * R0, oy + Math.sin(a) * R0); c.stroke(); }
+        for (let rr = 3; rr < R0; rr += 3) { c.beginPath(); for (let k = 0; k <= 4; k++) { const a = k / 4 * Math.PI / 2, q = rr - (k % 2) * 0.8; k ? c.lineTo(ox + s * Math.cos(a) * q, oy + Math.sin(a) * q) : c.moveTo(ox + s * Math.cos(a) * q, oy + Math.sin(a) * q); } c.stroke(); }
+      }
+      /* Nischen mit Kleinkram */
+      if (det >= 2 && st.niche && r > 0.955 && isWall(x, y - 1) && isWall(x - 1, y) && isWall(x + 1, y) && !sol(x, y + 1) && floorBelow(x, y, 3) >= 2) niche(c, px, py, r2, st);
+      /* Efeu klettert vom Boden die Wand hinauf */
+      if (st.ivy && r2 < 0.13 && floorBelow(x, y, 1) === 1) ivy(c, x, y, r3);
+      /* Glut-Adern in der Glutstadt */
+      if (st.ember && det >= 2 && r3 > 0.95) { c.save(); c.globalCompositeOperation = "lighter"; c.strokeStyle = "rgba(255,100,30,.35)"; c.lineWidth = 1.2; c.beginPath(); let xx = px + r * 16, yy = py; c.moveTo(xx, yy); for (let k = 0; k < 6; k++) { xx += (h3(x, y, 100 + k) - 0.5) * 8; yy += 4; c.lineTo(xx, yy); } c.stroke(); c.restore(); }
+    }
+    /* Ruß über Fackeln und Feuerbecken */
+    if (!G.sootSpr) { const s = G.sootSpr = document.createElement("canvas"); s.width = 32; s.height = 64; const g = s.getContext("2d"), gr = g.createRadialGradient(16, 40, 2, 16, 34, 30); gr.addColorStop(0, "rgba(6,4,3,.6)"); gr.addColorStop(0.5, "rgba(6,4,3,.25)"); gr.addColorStop(1, "rgba(6,4,3,0)"); g.fillStyle = gr; g.fillRect(0, 0, 32, 64); }
+    for (const d of lv.decor) {
+      if (d.x < x0 - 3 || d.x > x1 + 3 || d.y < y0 - 4 || d.y > y1 + 4) continue;
+      if (d.kind === "torch") c.drawImage(G.sootSpr, d.x * T - 8, d.y * T - 48, 32, 52);
+      else if (d.kind === "brazier" || d.kind === "forge") c.drawImage(G.sootSpr, d.x * T - 12, d.y * T - 50, 40, 60);
+    }
+  }
+  function niche(c, px, py, r, st) {
+    const x0 = px + 3, x1 = px + 13, top = py - 4, bot = py + 12;
+    c.fillStyle = "rgba(0,0,0,.5)"; c.beginPath(); c.moveTo(x0, bot); c.lineTo(x0, top + 5); c.arc(px + 8, top + 5, 5, Math.PI, 0); c.lineTo(x1, bot); c.fill();
+    const g = c.createLinearGradient(0, top, 0, top + 10); g.addColorStop(0, "rgba(0,0,0,.45)"); g.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = g; c.fillRect(x0, top, 10, 10);
+    c.fillStyle = rgba(lit(B.wall, 0.3), 0.18); c.fillRect(x1 - 1.5, top + 4, 1.5, bot - top - 4);
+    c.strokeStyle = PAL.stoneHi; c.lineWidth = 0.8; c.beginPath(); c.moveTo(x0 - 1, bot); c.lineTo(x0 - 1, top + 5); c.arc(px + 8, top + 5, 6, Math.PI, 0); c.lineTo(x1 + 1, bot); c.stroke();
+    c.fillStyle = PAL.stone; c.fillRect(x0 - 2, bot, 14, 2); c.fillStyle = PAL.stoneHi; c.fillRect(x0 - 2, bot, 14, 0.7);
+    /* Inhalt */
+    const k = (r * 1000 | 0) % 5;
+    if (k === 0) { D.circ(c, px + 8, bot - 3, 2.8, "#cfc6b4"); c.fillStyle = "#1a1210"; c.fillRect(px + 6.6, bot - 4, 1.1, 1.2); c.fillRect(px + 8.4, bot - 4, 1.1, 1.2); c.fillStyle = "#bfb6a4"; c.fillRect(px + 6.8, bot - 1.2, 2.6, 1.2); }
+    else if (k === 1) { D.ell(c, px + 8, bot - 3.5, 3, 3.5, "#7a4a2e"); c.fillStyle = "#5a3420"; c.fillRect(px + 6.5, bot - 8.5, 3, 2); c.fillStyle = "rgba(255,220,180,.25)"; c.fillRect(px + 6, bot - 5.5, 1, 3); }
+    else if (k === 2) { c.fillStyle = "#e0d4b8"; c.fillRect(px + 5, bot - 5, 2, 5); c.fillRect(px + 9, bot - 3.5, 2, 3.5); c.fillStyle = "rgba(240,230,210,.6)"; c.fillRect(px + 4.6, bot - 0.8, 7, 0.8); c.fillStyle = "#2a1a10"; c.fillRect(px + 5.8, bot - 6, 0.5, 1); c.fillRect(px + 9.8, bot - 4.5, 0.5, 1); }
+    else if (k === 3) { c.fillStyle = "#3a2a4a"; c.fillRect(px + 5, bot - 6, 2, 6); c.fillStyle = "#6a3a2a"; c.fillRect(px + 7.2, bot - 7, 2.2, 7); c.fillStyle = "#4a5a2a"; c.save(); c.translate(px + 10.5, bot); c.rotate(0.25); c.fillRect(-1, -6, 2, 6); c.restore(); }
+    else { c.fillStyle = "#3a4a2a"; c.fillRect(px + 6, bot - 6, 3, 6); c.fillRect(px + 6.8, bot - 8, 1.4, 2); c.fillStyle = "rgba(220,255,200,.3)"; c.fillRect(px + 6.4, bot - 5.5, 0.7, 4); }
+  }
+  function ivy(c, x, y, r) {
+    const px = x * T + 3 + r * 10; let yy = (y + 1) * T, xx = px;
+    let n = 0; while (n < 6 && isWall(x, y - n)) n++;
+    const len = Math.min(n, 2 + ((r * 7) | 0) % 4) * T - 4; if (len < 12) return;
+    c.strokeStyle = "#2a3a1c"; c.lineWidth = 1; c.beginPath(); c.moveTo(xx, yy);
+    const pts = [];
+    for (let s = 0; s < len; s += 3) { const ny = yy - s, nx = px + Math.sin(s * 0.11 + r * 9) * 4 + Math.sin(s * 0.31) * 1.2; c.lineTo(nx, ny); pts.push(nx, ny); }
+    c.stroke();
+    for (let i = 0; i < pts.length; i += 2) {
+      const lx = pts[i], ly = pts[i + 1], side = (i / 2) % 2 ? 1 : -1, hh = h3(x, i, 7);
+      if (hh < 0.15) continue;
+      c.fillStyle = hh < 0.45 ? "#2e4a22" : hh < 0.8 ? "#3e5e2a" : "#567a34";
+      c.beginPath(); c.ellipse(lx + side * 2.2, ly - 0.5, 2.1, 1.3, side * 0.5, 0, TAU); c.fill();
+      if (hh > 0.9) { c.fillStyle = "rgba(255,255,220,.25)"; c.fillRect(lx + side * 2.2 - 0.5, ly - 1.2, 1, 0.6); }
+    }
+  }
+  /* Kontaktschatten an Decken, Seitenwänden und Böden */
+  function wallAO(c, x0, y0, x1, y1, GR) {
+    for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+      if (!isWall(x, y)) continue;
+      const px = x * T, py = y * T, u = sol(x, y - 1), l = sol(x - 1, y), r = sol(x + 1, y), d = sol(x, y + 1);
+      if (!(u || l || r || d || sol(x - 1, y - 1) || sol(x + 1, y - 1))) continue;
+      c.save(); c.translate(px, py);
+      if (u) { c.fillStyle = GR.top; c.fillRect(0, 0, T, 16); }
+      if (l) { c.fillStyle = GR.left; c.fillRect(0, 0, 8, T); }
+      if (r) { c.fillStyle = GR.right; c.fillRect(T - 8, 0, 8, T); }
+      if (d) { c.fillStyle = GR.bot; c.fillRect(0, T - 6, T, 6); }
+      if (!u && !l && sol(x - 1, y - 1)) { c.fillStyle = GR.corner; c.fillRect(0, 0, 8, 8); }
+      if (!u && !r && sol(x + 1, y - 1)) { c.save(); c.translate(T, 0); c.scale(-1, 1); c.fillStyle = GR.corner; c.fillRect(0, 0, 8, 8); c.restore(); }
+      c.restore();
+    }
+  }
+
+  /* ---------- Öffnungen mit Laibung, Bogensteinen, Fensterbank und Sprossen ---------- */
+  function openings(c, st, x0, y0, x1, y1, det) {
+    for (const o of PR.comps) {
+      if (o.x1 < x0 - 3 || o.x0 > x1 + 3 || o.y1 < y0 - 3 || o.y0 > y1 + 3) continue;
+      if (o.mode === "cave") caveHole(c, o, det); else archOpening(c, o, st, det);
+    }
+  }
+  function maskPath(c, o) { c.beginPath(); for (let t = 0; t < o.tiles.length; t += 2) c.rect(o.tiles[t] * T, o.tiles[t + 1] * T, T, T); }
+  function archOpening(c, o, st, det) {
+    const L = o.x0 * T, R = (o.x1 + 1) * T, Tp = o.y0 * T, Bt = (o.y1 + 1) * T, w = R - L, hh = Bt - Tp, cx = (L + R) / 2, rx = w / 2;
+    const s = Math.max(6, Math.min(rx * (o.mode === "vault" ? 0.75 : 0.62), hh * 0.42)), sp = Tp + s, rad = (rx * rx + s * s) / (2 * s), cy = sp + rad - s;
+    const aL = Math.atan2(sp - cy, L - cx), aR = Math.atan2(sp - cy, R - cx);
+    const shape = g => { c.beginPath(); c.moveTo(L - g, Bt); c.lineTo(L - g, sp); c.arc(cx, cy, rad + g, aL, aR); c.lineTo(R + g, sp); c.lineTo(R + g, Bt); c.closePath(); };
+    const brick = st.wall === "brick", wall = B.wall;
+    const sC = brick ? mixH(wall, "#7a3a26", 0.35) : PAL.stone, sHi = lit(sC, 0.22), sLo = lit(sC, -0.35);
+    const sillOK = !sol(o.x0, o.y1 + 1) || !sol(o.x1, o.y1 + 1);
+    /* 1) ausstanzen – oder beim Blendbogen eine vertiefte Wandfläche */
+    c.save(); if (!o.full) { maskPath(c, o); c.clip(); }
+    if (o.blind) { c.fillStyle = "rgba(0,0,0,.28)"; shape(0); c.fill(); const g = c.createLinearGradient(0, Tp, 0, sp + 18); g.addColorStop(0, "rgba(0,0,0,.35)"); g.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = g; shape(0); c.fill(); }
+    else { c.globalCompositeOperation = "destination-out"; shape(0); c.fill(); c.globalCompositeOperation = "source-over"; }
+    /* 2) Laibung: die Mauerdicke im Inneren der Öffnung */
+    c.save(); shape(0); c.clip();
+    c.strokeStyle = lit(wall, -0.38); c.lineWidth = 9; shape(0); c.stroke();
+    c.strokeStyle = lit(wall, -0.2); c.lineWidth = 3; shape(-3.5); c.stroke();
+    c.fillStyle = rgba(lit(wall, 0.15), 0.5); c.fillRect(L, sp, 4.5, Bt - sp);
+    c.strokeStyle = "rgba(0,0,0,.45)"; c.lineWidth = 1; shape(-4.5); c.stroke();
+    /* Sprossen und Maßwerk */
+    if (o.mode === "arch" && w >= 5 * T && det >= 1 && !o.blind) {
+      const mw = 4, glass = st.wall === "panel" || st.wall === "timber";
+      if (glass && det >= 2) {
+        /* Bleiglas mit Rautenmuster (warm, nie blau) */
+        /* Rautenmuster als vorgezeichnete Kachel: eine einzige Füllung statt vieler Linien */
+        if (!G.glassTile || G.glassTile.s !== chunkScale()) { const sc = chunkScale(), gt = document.createElement("canvas"); gt.width = gt.height = Math.round(14 * sc); const gg = gt.getContext("2d"); gg.scale(gt.width / 14, gt.height / 14);
+          gg.fillStyle = "rgba(255,190,110,.07)"; gg.fillRect(0, 0, 14, 14); gg.strokeStyle = "rgba(20,12,8,.35)"; gg.lineWidth = 0.6; gg.beginPath(); gg.moveTo(0, 0); gg.lineTo(14, 14); gg.moveTo(14, 0); gg.lineTo(0, 14); gg.moveTo(7, -7); gg.lineTo(21, 7); gg.moveTo(-7, 7); gg.lineTo(7, 21); gg.moveTo(7, 21); gg.lineTo(21, 7); gg.moveTo(-7, 7); gg.lineTo(7, -7); gg.stroke(); G.glassTile = { cv: gt, w: 14, h: 14, s: sc }; }
+        c.fillStyle = patternOf(c, G.glassTile); shape(-4.5); c.fill();
+        for (let k = 0; k < 6; k++) { const gx = L + 8 + h3(o.x0, o.y0, k) * (w - 16), gy = sp + h3(o.y0, o.x0, k) * (Bt - sp - 8); c.fillStyle = ["rgba(170,40,40,.18)", "rgba(220,170,60,.18)", "rgba(90,130,60,.16)"][k % 3]; c.fillRect(gx, gy, 5, 5); }
+      }
+      const sub = (a, b, sag, yS) => { const r2 = ((b - a) / 2) ** 2 / (2 * sag) + sag / 2, ccx = (a + b) / 2, ccy = yS + r2 - sag; c.beginPath(); c.arc(ccx, ccy, r2, Math.atan2(yS - ccy, a - ccx), Math.atan2(yS - ccy, b - ccx)); };
+      const ySub = sp + (Bt - sp) * 0.18, sag = Math.min(rx / 2 - 3, (ySub - Tp) * 0.75);
+      c.lineCap = "butt";
+      const oc = Math.min(sag * 0.55, rx * 0.2);
+      for (const [col, lw] of [[sLo, 4], [sC, 2.6], [sHi, 0.6]]) {
+        c.strokeStyle = col; c.lineWidth = lw;
+        sub(L + 4, cx - mw / 2, sag, ySub); c.stroke(); sub(cx + mw / 2, R - 4, sag, ySub); c.stroke();
+        if (oc > 4) { c.beginPath(); c.arc(cx, (Tp + ySub - sag) / 2 + 1, oc, 0, TAU); c.stroke(); }
+      }
+      c.fillStyle = sLo; c.fillRect(cx - mw / 2 - 0.5, Tp, mw + 1.5, hh);
+      c.fillStyle = sC; c.fillRect(cx - mw / 2, Tp, mw, hh);
+      c.fillStyle = sHi; c.fillRect(cx - mw / 2, Tp, 1, hh);
+      c.fillStyle = sC; c.fillRect(cx - mw / 2 - 1.5, ySub - 3, mw + 3, 3); c.fillStyle = sHi; c.fillRect(cx - mw / 2 - 1.5, ySub - 3, mw + 3, 0.7);
+      /* eiserne Quersprossen */
+      c.fillStyle = "rgba(24,18,16,.85)"; for (let yb = ySub + 16; yb < Bt - 6; yb += 18) { c.fillRect(L + 3, yb, cx - L - 5, 1.2); c.fillRect(cx + 2, yb, R - cx - 5, 1.2); }
+    }
+    if (o.mode === "vault" && B.bg === "dungeon" && !o.blind) {
+      /* Gitterstäbe, einer verbogen */
+      const bent = (h3(o.x0, o.y0, 5) * 8) | 0;
+      c.fillStyle = "rgba(14,14,12,.95)";
+      for (let k = 0, xb = L + 7; xb < R - 4; xb += 10, k++) {
+        if (k === bent) { c.strokeStyle = "rgba(14,14,12,.95)"; c.lineWidth = 2; c.beginPath(); c.moveTo(xb + 1, Tp); c.quadraticCurveTo(xb + 9, (Tp + Bt) / 2, xb + 1, Bt); c.stroke(); continue; }
+        c.fillRect(xb, Tp, 2, hh); c.fillStyle = "rgba(160,150,130,.35)"; c.fillRect(xb, Tp, 0.6, hh); c.fillStyle = "rgba(14,14,12,.95)";
+      }
+      for (const yb of [sp + 6, Bt - 20]) { c.fillRect(L, yb, w, 2.4); c.fillStyle = "rgba(160,150,130,.3)"; c.fillRect(L, yb, w, 0.6); c.fillStyle = "rgba(14,14,12,.95)"; }
+    }
+    c.restore();
+    /* innere Fensterbank */
+    if (sillOK) { c.fillStyle = lit(sC, -0.1); c.fillRect(L, Bt - 4, w, 4); c.fillStyle = sHi; c.fillRect(L, Bt - 4, w, 1); }
+    c.restore();
+    /* 3) Bogensteine mit Schlussstein */
+    const arcLen = rad * (aR - aL), N = Math.max(5, (Math.round(arcLen / (brick ? 5 : 8)) | 1));
+    for (let i = 0; i < N; i++) {
+      const a0 = aL + (aR - aL) * i / N, a1 = aL + (aR - aL) * (i + 1) / N, key = i === (N - 1) / 2, g = key ? 10 : brick ? 6 : 7;
+      c.fillStyle = key ? lit(sC, 0.1) : i % 2 ? sC : lit(sC, -0.08);
+      c.beginPath(); c.arc(cx, cy, rad - 0.5, a0, a1); c.arc(cx, cy, rad + g, a1, a0, true); c.closePath(); c.fill();
+      c.strokeStyle = "rgba(0,0,0,.45)"; c.lineWidth = 0.6; c.stroke();
+      c.strokeStyle = sHi; c.lineWidth = 0.6; c.beginPath(); c.arc(cx, cy, rad + g - 0.4, a0 + 0.01, a1 - 0.01); c.stroke();
+      if (key && st.rune) { c.save(); c.globalCompositeOperation = "lighter"; const am = (a0 + a1) / 2, kx = cx + Math.cos(am) * (rad + 5), ky = cy + Math.sin(am) * (rad + 5); c.strokeStyle = "rgba(255,160,60,.6)"; c.lineWidth = 0.7; runeGlyph(c, kx, ky, 3, 0.5); c.stroke(); D.glow(c, kx, ky, 8, "rgba(255,140,50,.35)"); c.restore(); }
+    }
+    if (brick && det >= 1) { c.strokeStyle = rgba(sLo, 0.8); c.lineWidth = 1; c.beginPath(); c.arc(cx, cy, rad + 7, aL, aR); c.stroke(); }
+    /* 4) Eckquader an den Gewänden */
+    for (const side of [-1, 1]) {
+      let y = sp, k = 0; const ex = side < 0 ? L : R;
+      while (y < Bt - 0.5) {
+        const bh = Math.min(k % 2 ? 7 : 9, Bt - y), bw = k % 2 ? 5 : 9, bx = side < 0 ? ex - bw : ex;
+        c.fillStyle = k % 2 ? lit(sC, -0.06) : sC; c.fillRect(bx, y, bw, bh - 0.8);
+        c.fillStyle = sHi; c.fillRect(bx, y, bw, 0.8); if (side < 0) c.fillRect(bx, y, 0.8, bh - 0.8);
+        c.fillStyle = "rgba(0,0,0,.4)"; c.fillRect(bx, y + bh - 0.8, bw, 0.8); if (side > 0) c.fillRect(bx + bw - 0.8, y, 0.8, bh - 0.8);
+        y += bh; k++;
+      }
+    }
+    /* 5) Fensterbank mit Schatten */
+    if (sillOK) {
+      const g = c.createLinearGradient(0, Bt + 4, 0, Bt + 10); g.addColorStop(0, "rgba(0,0,0,.4)"); g.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = g; c.fillRect(L - 6, Bt + 4, w + 12, 6);
+      c.fillStyle = sC; c.fillRect(L - 6, Bt, w + 12, 4); c.fillStyle = sHi; c.fillRect(L - 6, Bt, w + 12, 1); c.fillStyle = sLo; c.fillRect(L - 6, Bt + 3.2, w + 12, 0.8);
+      c.fillStyle = sC; c.fillRect(L - 4, Bt + 4, 4, 3); c.fillRect(R, Bt + 4, 4, 3);
+    }
+  }
+  function caveHole(c, o, det) {
+    const W = PR.W, wall = B.wall, tl = o.tiles;
+    /* Mittelpunkte leicht verwackelt, Nachbarn mit runden Kapseln verbunden: glatte, organische Ränder ohne Blasen */
+    const cxOf = (x, y) => x * T + 8 + (hash(x, y) - 0.5) * 5, cyOf = (x, y) => y * T + 8 + (hash(y, x) - 0.5) * 5;
+    const inM = (x, y) => inLv(x, y) && PR.win[y * W + x] === 1;
+    const path = (dx, dy) => {
+      c.beginPath();
+      for (let t = 0; t < tl.length; t += 2) {
+        const x = tl[t], y = tl[t + 1], ax = cxOf(x, y) + dx, ay = cyOf(x, y) + dy;
+        c.moveTo(ax, ay); c.lineTo(ax + 0.01, ay);
+        if (inM(x + 1, y)) { c.moveTo(ax, ay); c.lineTo(cxOf(x + 1, y) + dx, cyOf(x + 1, y) + dy); }
+        if (inM(x, y + 1)) { c.moveTo(ax, ay); c.lineTo(cxOf(x, y + 1) + dx, cyOf(x, y + 1) + dy); }
+        if (inM(x + 1, y + 1) && inM(x + 1, y) && inM(x, y + 1)) { c.moveTo(ax, ay); c.lineTo(cxOf(x + 1, y + 1) + dx, cyOf(x + 1, y + 1) + dy); c.moveTo(cxOf(x + 1, y) + dx, cyOf(x + 1, y) + dy); c.lineTo(cxOf(x, y + 1) + dx, cyOf(x, y + 1) + dy); }
+      }
+    };
+    const R = 11.5;
+    c.save(); c.lineCap = "round"; c.lineJoin = "round";
+    c.strokeStyle = rgba(lit(wall, -0.55), 0.7); c.lineWidth = (R + 5) * 2; path(0, 1.5); c.stroke();
+    c.strokeStyle = lit(wall, 0.14); c.lineWidth = (R + 2.2) * 2; path(-0.6, -1.4); c.stroke();
+    c.strokeStyle = lit(wall, -0.22); c.lineWidth = (R + 1.2) * 2; path(0.4, 0.6); c.stroke();
+    c.globalCompositeOperation = "destination-out"; c.strokeStyle = "#000"; c.lineWidth = R * 2; path(0, 0); c.stroke();
+    c.restore();
+    /* Tropfsteine an der Oberkante, Geröllhäufchen an der Unterkante */
+    if (det < 1) return;
+    for (let t = 0; t < tl.length; t += 2) {
+      const x = tl[t], y = tl[t + 1];
+      if (!inM(x, y - 1)) {
+        const n = 1 + ((hash(x, y + 3) * 3) | 0), ey = cyOf(x, y) - R;
+        for (let k = 0; k < n; k++) { const sx = x * T + 3 + h3(x, y, k) * 10, ln = 4 + h3(x, y, k + 5) * 9, sw = 1.8 + h3(x, y, k + 9) * 2;
+          c.fillStyle = lit(wall, -0.18); c.beginPath(); c.moveTo(sx - sw, ey - 2); c.lineTo(sx + sw, ey - 2); c.lineTo(sx, ey + ln); c.fill(); c.fillStyle = rgba(lit(wall, 0.3), 0.45); c.beginPath(); c.moveTo(sx - sw, ey - 2); c.lineTo(sx - sw * 0.4, ey - 2); c.lineTo(sx, ey + ln); c.fill(); }
+      }
+      if (!inM(x, y + 1) && hash(x * 5, y) < 0.6) {
+        const ey = cyOf(x, y) + R + 1;
+        for (let k = 0; k < 2; k++) { const sx = x * T + 3 + h3(x, y, k + 20) * 10, rw = 2.5 + h3(x, y, k) * 3, rh = 1.6 + h3(x, y, k + 1) * 2; c.fillStyle = lit(wall, -0.25); c.beginPath(); c.ellipse(sx, ey, rw, rh, 0, Math.PI, 0); c.fill(); c.fillStyle = rgba(lit(wall, 0.25), 0.5); c.fillRect(sx - rw * 0.6, ey - rh + 0.2, rw * 0.8, 0.6); }
+      }
+    }
+  }
+
+  /* ---------- Fels ---------- */
+  const alphaStr = []; for (let i = 0; i <= 20; i++) alphaStr.push((i / 20).toFixed(2));
+  /* Felsmuster als nahtlose Vorlage (Quader, Bruchstein oder Höhlenfacetten) */
+  function rockBase(c, st, X, Y, w, h, det) {
+    const tl = B.tile;
+    setCR(X, Y, w, h);
+    c.fillStyle = lit(tl.dark, -0.05); c.fillRect(X, Y, w, h);
+    if (st.rock === "cave") {
+      const cols = PAL.rockCols, gw = 12, gh = 8, KX = WRAP ? WRAP.w / gw : 0, KY = WRAP ? WRAP.h / gh : 0;
+      const P = (i, j) => { const a = wk(i, KX), b = wk(j, KY); return [i * gw + (hash(a + 77, b * 3 + 1) - 0.5) * 7, j * gh + (hash(b * 5 + 3, a + 77) - 0.5) * 5]; };
+      for (let j = Math.floor(Y / gh) - 1; j * gh < Y + h + gh; j++) for (let i = Math.floor(X / gw) - 1; i * gw < X + w + gw; i++) {
+        const a = P(i, j), b = P(i + 1, j), e = P(i + 1, j + 1), f = P(i, j + 1), vv = hash(wk(i, KX) * 19 + 3, wk(j, KY) * 29 + 7);
+        c.fillStyle = cols[(vv * cols.length) | 0]; c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.lineTo(e[0], e[1]); c.lineTo(f[0], f[1]); c.closePath(); c.fill();
+        c.strokeStyle = PAL.rHi; c.lineWidth = 0.7; c.beginPath(); c.moveTo(f[0], f[1]); c.lineTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.stroke();
+        c.strokeStyle = PAL.rLo; c.lineWidth = 0.8; c.beginPath(); c.moveTo(b[0], b[1]); c.lineTo(e[0], e[1]); c.lineTo(f[0], f[1]); c.stroke();
+        if (det >= 1 && vv > 0.9) { c.fillStyle = "rgba(0,0,0,.3)"; c.fillRect(a[0] + 3, a[1] + 3, 1.5, 1); }
+      }
+    } else if (st.rock === "rubble") {
+      const KX = WRAP ? WRAP.w / 12 : 0, KY = WRAP ? WRAP.h / 8 : 0;
+      for (let j = Math.floor(Y / 8) - 1; j * 8 < Y + h + 8; j++) { const off = (j & 1) * 6, jj = wk(j, KY); for (let i = Math.floor((X - off) / 12) - 1; i * 12 + off < X + w + 12; i++) {
+        const bx = k => k * 12 + off + (hash(wk(k, KX) * 5 + 2, jj * 3 + 9) - 0.5) * 4, x0 = bx(i) + 0.6, x1 = bx(i + 1) - 0.6, vv = hash(wk(i, KX) * 7 + 1, jj * 11 + 4), y0 = j * 8 + 0.5 + vv * 0.8, y1 = j * 8 + 8 - 0.5 - ((vv * 5) % 1) * 0.8, ch = 2.2;
+        c.fillStyle = PAL.rockCols[(vv * 5) | 0]; c.beginPath(); c.moveTo(x0 + ch, y0); c.lineTo(x1 - ch, y0); c.lineTo(x1, y0 + ch); c.lineTo(x1, y1 - ch); c.lineTo(x1 - ch, y1); c.lineTo(x0 + ch, y1); c.lineTo(x0, y1 - ch); c.lineTo(x0, y0 + ch); c.fill();
+        c.fillStyle = PAL.rHi; c.fillRect(x0 + ch, y0, x1 - x0 - 2 * ch, 1.2); c.fillRect(x0, y0 + ch, 1, y1 - y0 - 2 * ch);
+        c.fillStyle = PAL.rLo; c.fillRect(x0 + ch, y1 - 1.2, x1 - x0 - 2 * ch, 1.2); c.fillRect(x1 - 1, y0 + ch, 1, y1 - y0 - 2 * ch);
+      } }
+    } else {
+      /* gehauene Quader mit kräftiger Fase: wirken plastischer als die flache Rückwand */
+      masonry(c, { rowH: 8, bw: 16, off: 8, jit: 4, gap: 1, seed: 11, cols: PAL.rockCols, hi: PAL.rHi, hi2: PAL.rHi2, lo: PAL.rLo, extra: (g, x, y, ww, hh, v, k, r, o) => { g.fillStyle = PAL.rHi; fr(g, x, y + 1, ww - 1, 0.7); g.fillStyle = "rgba(0,0,0,.22)"; fr(g, x + 1, y + hh - 2, ww - 2, 1); if (det >= 1) chips(g, x, y, ww, hh, v, k, r, o); } });
+    }
+  }
+  /* Kanten eines freiliegenden Felsens: helle Lauffläche, dunkle Unterseite, Seitenlicht, Kontur */
+  function rockEdges(c, st, x, y, v, det) {
+    const tl = B.tile, px = x * T, py = y * T;
+    const aU = !sol(x, y - 1), aD = !sol(x, y + 1), aL = !sol(x - 1, y), aR = !sol(x + 1, y);
+    setCR(px, py, T, T);
+    if (aL) { c.fillStyle = "rgba(0,0,0,.55)"; c.fillRect(px, py, 1, T); c.fillStyle = rgba(lit(tl.light, -0.1), 0.9); c.fillRect(px + 1, py, 1.2, T); c.fillStyle = rgba(tl.light, 0.2); c.fillRect(px + 2.2, py, 2.5, T); }
+    if (aR) { c.fillStyle = "rgba(0,0,0,.6)"; c.fillRect(px + T - 1, py, 1, T); c.fillStyle = rgba(lit(tl.dark, -0.2), 0.8); c.fillRect(px + T - 3, py, 2, T); }
+    if (aD) { c.fillStyle = rgba(lit(tl.dark, -0.3), 0.95); c.fillRect(px, py + T - 3, T, 3); c.fillStyle = "rgba(0,0,0,.6)"; c.fillRect(px, py + T - 1, T, 1); c.fillStyle = "rgba(0,0,0,.2)"; c.fillRect(px, py + T - 6, T, 3); }
+    if (aU) {
+      c.fillStyle = G.topGrad; c.save(); c.translate(px, py); c.fillRect(0, 2, T, 8); c.restore();
+      c.fillStyle = lit(tl.light, 0.14); c.fillRect(px, py, T, 1.2); c.fillStyle = tl.light; c.fillRect(px, py + 1.2, T, 1.4); c.fillStyle = lit(tl.light, -0.3); c.fillRect(px, py + 2.6, T, 1);
+      if (aL) { c.fillStyle = lit(tl.light, 0.28); c.fillRect(px, py, 2.2, 1.2); c.fillStyle = "rgba(0,0,0,.5)"; c.fillRect(px, py, 0.8, 0.8); }
+      if (aR) { c.fillStyle = rgba(lit(tl.light, -0.3), 0.9); c.fillRect(px + T - 2, py, 2, 3); }
+    }
+    if (!aU && !aL && !sol(x - 1, y - 1)) { c.fillStyle = rgba(tl.light, 0.5); c.fillRect(px, py, 1.5, 1.5); }
+  }
+  /* dunkle Kontur außen um den Fels (auch für Nachbarkacheln außerhalb des Chunks) */
+  function rockContour(c, x, y) {
+    const px = x * T, py = y * T;
+    c.fillStyle = "rgba(0,0,0,.5)";
+    if (!sol(x - 1, y)) c.fillRect(px - 2, py, 2, T);
+    if (!sol(x + 1, y)) c.fillRect(px + T, py, 2, T);
+    if (!sol(x, y + 1)) c.fillRect(px, py + T, T, 2);
+    if (!sol(x, y - 1)) { c.fillStyle = "rgba(0,0,0,.4)"; c.fillRect(px, py - 1, T, 1); }
+  }
+  /* bröckelnde Wand (zerstörbar): auffällige Risse, helle Bruchkanten, loser Schutt */
+  function crackedWall(c, x, y, px, py) {
+    c.fillStyle = "rgba(255,226,180,.06)"; c.fillRect(px, py, T, T);
+    const r = hash(x * 3, y * 7);
+    c.strokeStyle = "rgba(8,6,6,.9)"; c.lineWidth = 1.2; c.beginPath();
+    c.moveTo(px + 2 + r * 3, py); c.lineTo(px + 6, py + 5 + r * 2); c.lineTo(px + 4, py + 10); c.lineTo(px + 8, py + T);
+    c.moveTo(px + 6, py + 5 + r * 2); c.lineTo(px + 12, py + 4); c.lineTo(px + T, py + 6 + r * 3);
+    c.moveTo(px + 4, py + 10); c.lineTo(px, py + 12);
+    c.moveTo(px + 9, py + 12); c.lineTo(px + 13, py + 10); c.lineTo(px + 15, py + 14);
+    c.stroke();
+    c.strokeStyle = "rgba(255,226,180,.3)"; c.lineWidth = 0.5; c.beginPath(); c.moveTo(px + 3 + r * 3, py + 0.5); c.lineTo(px + 7, py + 5.5 + r * 2); c.lineTo(px + 13, py + 4.6); c.stroke();
+    c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(px + 10, py + 7, 3, 2); c.fillRect(px + 3, py + 13, 2, 2);
+  }
+  /* Lauflächen je Gebiet */
+  const FLOW = ["#d8607a", "#e8c050", "#ece4d6", "#e08a3a", "#b0507a", "#f0d8a0"];
+  const surf = (x, y) => sol(x, y) && !sol(x, y - 1);
+  function topper(c, x, y, det) {
+    const tl = B.tile, px = x * T, py = y * T, r = hash(x, y + 7), col = tl.topCol;
+    switch (tl.top) {
+      case "moss": {
+        const dk = lit(col, -0.32), lt = lit(col, 0.22);
+        c.fillStyle = dk; c.fillRect(px, py, T, 4);
+        c.fillStyle = col; c.fillRect(px, py - 1, T, 3);
+        for (let k = 0; k < 4; k++) { const hh = hash(x * 4 + k, y) * 2.4; c.fillRect(px + k * 4, py - 1 - hh, 4, hh + 1); }
+        c.fillStyle = lt; for (let k = 0; k < 4; k++) if (hash(x * 4 + k, y + 3) < 0.55) c.fillRect(px + k * 4 + 1, py - 1 - hash(x * 4 + k, y) * 2.4, 2, 0.8);
+        for (let k = 0; k < 6; k++) { const hb = hash(x * 6 + k, y + 1); if (hb < 0.5) { const bh = 2 + hb * 8; c.fillStyle = hb < 0.18 ? lt : hb < 0.36 ? col : dk; c.fillRect(px + k * 2.6 + 0.5, py - 1 - bh, 1, bh); } }
+        c.fillStyle = dk; for (let k = 0; k < 3; k++) { const hm = hash(x * 3 + k, y + 9); if (hm < 0.45) c.fillRect(px + 2 + k * 5, py + 3, 1.4, 2 + hm * 8); }
+        if (det >= 2) {
+          if (r < 0.24) for (let f = 0; f < 1 + ((r * 13) | 0) % 2; f++) { const fx = px + 3 + h3(x, y, f) * 10, fh = 3 + h3(x, y, f + 3) * 4, fc = FLOW[(h3(x, y, f + 6) * FLOW.length) | 0]; c.fillStyle = dk; c.fillRect(fx, py - 1 - fh, 0.8, fh); c.fillStyle = fc; c.fillRect(fx - 1, py - 2 - fh, 0.9, 0.9); c.fillRect(fx + 0.9, py - 2 - fh, 0.9, 0.9); c.fillRect(fx - 0.05, py - 3 - fh, 0.9, 0.9); c.fillRect(fx - 0.05, py - 1.1 - fh, 0.9, 0.9); c.fillStyle = "#f8e080"; c.fillRect(fx, py - 2 - fh, 0.8, 0.8); }
+          if (r > 0.95) { c.fillStyle = "#d8ccb0"; c.fillRect(px + 9, py - 4, 1, 3); D.ell(c, px + 9.5, py - 4.2, 2.4, 1.4, "#a0482a"); c.fillStyle = "#f0e0c0"; c.fillRect(px + 8.4, py - 4.8, 0.8, 0.6); }
+        }
+        break;
+      }
+      case "carpet": {
+        const cL = surf(x - 1, y), cR = surf(x + 1, y);
+        let run = 1; for (let k = 1; k <= 2; k++) { if (surf(x - k, y)) run++; else break; } for (let k = 1; k <= 2; k++) { if (surf(x + k, y)) run++; else break; }
+        if (run < 3) { if (r < 0.3) { c.fillStyle = "rgba(0,0,0,.2)"; c.fillRect(px + 4, py + 0.5, 6, 1); } break; }
+        const a = cL ? px : px + 3, b = cR ? px + T : px + T - 3;
+        c.fillStyle = lit(col, -0.45); c.fillRect(a, py - 1, b - a, 3.5);
+        c.fillStyle = col; c.fillRect(a, py - 2, b - a, 3);
+        c.fillStyle = lit(col, 0.2); c.fillRect(a, py - 2, b - a, 0.7);
+        c.fillStyle = "#c89a3c"; c.fillRect(a, py - 0.6, b - a, 0.6);
+        c.fillStyle = "rgba(229,180,84,.7)"; for (let k = (x & 1) * 4; k < T; k += 8) if (px + k >= a && px + k + 2 <= b) { c.fillRect(px + k + 1, py - 1.6, 2, 0.7); c.fillRect(px + k + 1.6, py - 2, 0.8, 1.4); }
+        c.fillStyle = "#d8c090";
+        if (!cL) for (let k = 0; k < 3; k++) c.fillRect(a - 2.4, py - 1.8 + k * 1.1, 2.4, 0.5);
+        if (!cR) for (let k = 0; k < 3; k++) c.fillRect(b, py - 1.8 + k * 1.1, 2.4, 0.5);
+        break;
+      }
+      case "web": {
+        c.fillStyle = "rgba(216,208,224,.16)"; c.fillRect(px, py - 0.5, T, 1.2);
+        if (r < 0.45) { c.strokeStyle = "rgba(230,224,236,.45)"; c.lineWidth = 0.5; c.beginPath(); c.moveTo(px, py); c.quadraticCurveTo(px + 8, py - 5 - r * 6, px + 16, py); c.stroke(); c.beginPath(); c.moveTo(px + 4, py); c.lineTo(px + 7, py - 3 - r * 3); c.stroke(); }
+        if (r > 0.9 && det >= 2) { D.ell(c, px + 8, py - 2.5, 3, 2.4, "#ddd6e2"); c.strokeStyle = "rgba(160,150,170,.6)"; c.lineWidth = 0.4; c.beginPath(); c.moveTo(px + 5.5, py - 3); c.lineTo(px + 10.5, py - 2); c.stroke(); }
+        /* Eckweben, wo der Boden auf eine Wand trifft */
+        if (det >= 1 && (sol(x - 1, y - 1) || sol(x + 1, y - 1)) && r > 0.3) { const left = sol(x - 1, y - 1), ox = left ? px : px + T, s = left ? 1 : -1; c.strokeStyle = "rgba(230,224,236,.35)"; c.lineWidth = 0.45; for (let k = 0; k <= 3; k++) { const an = k / 3 * Math.PI / 2; c.beginPath(); c.moveTo(ox, py); c.lineTo(ox + s * Math.cos(an) * 10, py - Math.sin(an) * 10); c.stroke(); } for (let rr = 3; rr < 10; rr += 3) { c.beginPath(); c.moveTo(ox + s * rr, py); c.quadraticCurveTo(ox + s * rr * 0.8, py - rr * 0.8, ox, py - rr); c.stroke(); } }
+        break;
+      }
+      case "snow": {
+        c.fillStyle = "#c8c0cc"; c.fillRect(px, py - 1, T, 4);
+        c.fillStyle = "#eae6ee"; c.fillRect(px, py - 2, T, 3); for (let k = 0; k < 4; k++) { const hh = hash(x * 4 + k, y) * 2; c.fillRect(px + k * 4, py - 2 - hh, 4, hh + 1); }
+        break;
+      }
+      case "soot": {
+        c.fillStyle = col; c.fillRect(px, py - 1, T, 3.5);
+        for (let k = 0; k < 4; k++) { const hh = hash(x * 4 + k, y) * 1.6; c.fillRect(px + k * 4, py - 1 - hh, 4, hh + 1); }
+        if (det >= 1) {
+          c.save(); c.globalCompositeOperation = "lighter";
+          for (let k = 0; k < 3; k++) if (h3(x, y, k) < 0.4) { const ex = px + 2 + h3(x, y, k + 4) * 12; c.fillStyle = "rgba(255,110,30,.25)"; c.fillRect(ex - 1, py - 1.5, 3, 2); c.fillStyle = "rgba(255,180,90,.85)"; c.fillRect(ex, py - 1, 1, 1); }
+          if (r < 0.25) { c.strokeStyle = "rgba(255,100,30,.35)"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(px + 3 + r * 20, py + 3); c.lineTo(px + 6 + r * 20, py + 7); c.lineTo(px + 4 + r * 20, py + 11); c.stroke(); }
+          c.restore();
+        }
+        break;
+      }
+      case "algae": {
+        const dk = lit(col, -0.35);
+        c.fillStyle = dk; c.fillRect(px, py, T, 3); c.fillStyle = col; c.fillRect(px, py - 1, T, 2);
+        for (let k = 0; k < 4; k++) { const hm = hash(x * 4 + k, y + 5); if (hm < 0.6) { c.fillStyle = k % 2 ? dk : col; c.fillRect(px + 1 + k * 4, py + 1, 1.3, 3 + hm * 10); c.fillRect(px + 1.4 + k * 4, py + 3 + hm * 10, 0.8, 1.5); } }
+        c.fillStyle = "rgba(200,255,210,.25)"; c.fillRect(px, py - 1, T, 0.6);
+        if (det >= 2 && r < 0.2) { c.fillStyle = "#c87a8a"; c.fillRect(px + 5 + r * 30, py - 4, 1, 3); c.fillRect(px + 4 + r * 30, py - 4, 3, 1); }
+        break;
+      }
+      case "rune": {
+        c.fillStyle = "#6a5030"; c.fillRect(px, py, T, 1.4); c.fillStyle = "rgba(255,210,140,.35)"; c.fillRect(px, py, T, 0.5);
+        if (r < 0.28) {
+          c.save(); c.globalCompositeOperation = "lighter"; c.strokeStyle = rgba(col, 0.25); c.lineWidth = 2.4; runeGlyph(c, px + 8, py + 8, 3.5, r * 3.7 % 1); c.stroke();
+          c.strokeStyle = rgba(col, 0.9); c.lineWidth = 0.8; runeGlyph(c, px + 8, py + 8, 3.5, r * 3.7 % 1); c.stroke(); c.restore();
+        }
+        break;
+      }
+      case "ash": {
+        c.fillStyle = lit(col, -0.25); c.fillRect(px, py, T, 3); c.fillStyle = col; c.fillRect(px, py - 1, T, 2);
+        for (let k = 0; k < 3; k++) { const hh = hash(x * 3 + k, y) * 2.2; c.fillStyle = k % 2 ? col : lit(col, 0.12); c.beginPath(); c.ellipse(px + 3 + k * 5, py - 0.5, 3, hh + 0.5, 0, Math.PI, 0); c.fill(); }
+        if (det >= 2 && r < 0.15) { c.fillStyle = "#d8d0c0"; c.fillRect(px + 4, py - 1.6, 4, 0.9); c.fillRect(px + 3.6, py - 2, 0.9, 1.7); }
+        break;
+      }
+      case "wood": {
+        c.fillStyle = lit(col, -0.3); c.fillRect(px, py - 1, T, 4); c.fillStyle = col; c.fillRect(px, py - 1, T, 3);
+        c.fillStyle = rgba(lit(col, 0.3), 0.7); c.fillRect(px, py - 1, T, 0.7);
+        const sx = px + ((x * 5 + y * 3) % 2 ? 4 : 11); c.fillStyle = lit(col, -0.45); c.fillRect(sx, py - 1, 0.8, 3); c.fillStyle = "#1a120a"; c.fillRect(sx - 1.6, py, 0.8, 0.8); c.fillRect(sx + 1.6, py, 0.8, 0.8);
+        c.fillStyle = "rgba(0,0,0,.18)"; c.fillRect(px, py + 0.6, T, 0.5);
+        break;
+      }
+      case "slime": {
+        if (r < 0.55) { c.fillStyle = col; c.fillRect(px, py - 0.5, T, 2); c.fillRect(px + 3 + r * 12, py, 1.6, 3 + r * 9); D.circ(c, px + 3.8 + r * 12, py + 3 + r * 9, 1.1, col); c.fillStyle = "rgba(220,255,160,.3)"; c.fillRect(px + 2, py - 0.5, 5, 0.5); }
+        break;
+      }
+      case "drip": {
+        c.fillStyle = "rgba(200,220,200,.16)"; c.fillRect(px, py, T, 0.8);
+        if (r < 0.22) { D.ell(c, px + 8, py + 0.5, 5, 1, "rgba(10,14,12,.55)"); c.fillStyle = "rgba(220,235,225,.35)"; c.fillRect(px + 5, py, 3, 0.5); }
+        if (r > 0.6 && r < 0.75) { c.fillStyle = col; c.fillRect(px + r * 16, py - 0.5, 4, 1.5); }
+        break;
+      }
+      default: {
+        if (r < 0.35) { c.fillStyle = rgba(lit(tl.light, 0.1), 0.7); c.fillRect(px + r * 40 % 13, py - 0.8, 1.6, 1); c.fillRect(px + (r * 90 % 12) + 2, py - 0.6, 1, 0.8); }
+      }
+    }
+  }
+  /* Unterseiten: Tropfsteine, Wurzeln, Tropfen, Zahnschnitt */
+  function hanger(c, st, x, y, det) {
+    const tl = B.tile, px = x * T, by = (y + 1) * T, r = h3(x, y, 9);
+    if (st.rock === "cave") {
+      if (r < 0.5) { const n = 1 + ((r * 7) | 0) % 2; for (let k = 0; k < n; k++) { const sx = px + 3 + h3(x, y, k + 1) * 10, ln = 4 + h3(x, y, k + 2) * 11, sw = 2 + h3(x, y, k + 3) * 2.5;
+        c.fillStyle = mixH(tl.base, tl.dark, 0.45); c.beginPath(); c.moveTo(sx - sw, by - 1); c.lineTo(sx + sw, by - 1); c.lineTo(sx, by + ln); c.fill();
+        c.fillStyle = rgba(tl.light, 0.45); c.beginPath(); c.moveTo(sx - sw, by - 1); c.lineTo(sx - sw * 0.3, by - 1); c.lineTo(sx, by + ln); c.fill();
+        if (st.wet && det >= 2) { c.fillStyle = "rgba(200,240,220,.7)"; c.fillRect(sx - 0.4, by + ln, 0.9, 1.2); } } }
+      return;
+    }
+    if (st.dentil && isWall(x, y + 1)) { c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(px, by + 4, T, 2); c.fillStyle = PAL.stone; c.fillRect(px, by, T, 2.4); c.fillStyle = PAL.stoneLo; for (let k = 0; k < T; k += 4) c.fillRect(px + k + 0.5, by + 2.4, 2.4, 2.2); c.fillStyle = PAL.stoneHi; c.fillRect(px, by + 2, T, 0.5); return; }
+    if (tl.top === "moss" || st.moss) {
+      if (r < 0.45) { c.strokeStyle = r < 0.2 ? "#3a4a24" : "#4a3a26"; c.lineWidth = 0.7; c.beginPath(); for (let k = 0; k < 3; k++) { const sx = px + 2 + h3(x, y, k + 4) * 12, ln = 3 + h3(x, y, k + 7) * 9; c.moveTo(sx, by - 1); c.quadraticCurveTo(sx + 1.5, by + ln * 0.5, sx + (k - 1), by + ln); } c.stroke(); }
+      return;
+    }
+    if (st.slime || tl.top === "slime" || tl.top === "drip" || st.wet) {
+      if (r < 0.35) { const sx = px + 3 + r * 28; c.fillStyle = st.slime ? rgba(tl.topCol, 0.85) : "rgba(150,170,160,.5)"; c.fillRect(sx, by - 1, 1.2, 2 + r * 8); c.beginPath(); c.arc(sx + 0.6, by + 1 + r * 8, 1, 0, TAU); c.fill(); }
+      return;
+    }
+    if (det >= 2 && r < 0.08) { c.fillStyle = "rgba(0,0,0,.45)"; c.fillRect(px + 6, by - 1, 4, 2); }
+  }
+
+  /* ---------- Stege, Treppen, Leitern, Stacheln ---------- */
+  function fixtures(c, x0, y0, x1, y1, det) {
+    const get = lv.get, pl = B.plat;
+    const plD = lit(pl, -0.35), plL = lit(pl, 0.22), plS = lit(pl, -0.5);
+    for (let y = y0; y <= y1; y++) for (let x = x0; x < x1; x++) {
       const v = get(x, y), px = x * T, py = y * T;
       if (v === 2 || v === 8) {
-        if (B.webPlat) { c.strokeStyle = "rgba(230,224,236,.8)"; c.lineWidth = 1.2; c.beginPath(); c.moveTo(px, py + 1); c.quadraticCurveTo(px + 8, py + 3, px + 16, py + 1); c.stroke(); c.lineWidth = 0.5; c.beginPath(); c.moveTo(px + 2, py + 1); c.lineTo(px + 6, py + 6); c.moveTo(px + 12, py + 1); c.lineTo(px + 9, py + 7); c.stroke(); }
-        else {
-          c.fillStyle = shade(B.plat, -0.25); c.fillRect(px, py, T, 5); c.fillStyle = B.plat; c.fillRect(px, py, T, 3); c.fillStyle = shade(B.plat, 0.2); c.fillRect(px, py, T, 1);
-          c.fillStyle = shade(B.plat, -0.45); c.fillRect(px + 7, py, 1, 3);
-          if (!(get(x - 1, y) === 2 || get(x - 1, y) === 8)) { c.fillStyle = shade(B.plat, -0.3); c.fillRect(px + 1, py + 5, 2, 5); c.beginPath(); c.moveTo(px + 2, py + 9); c.lineTo(px + 8, py + 4); c.lineTo(px + 6, py + 4); c.fill(); }
-          if (!(get(x + 1, y) === 2 || get(x + 1, y) === 8)) { c.fillStyle = shade(B.plat, -0.3); c.fillRect(px + 13, py + 5, 2, 5); }
+        const L = !(get(x - 1, y) === 2 || get(x - 1, y) === 8), R = !(get(x + 1, y) === 2 || get(x + 1, y) === 8);
+        if (B.webPlat) {
+          c.strokeStyle = "rgba(0,0,0,.3)"; c.lineWidth = 1.6; c.beginPath(); c.moveTo(px, py + 2.5); c.quadraticCurveTo(px + 8, py + 4.5, px + 16, py + 2.5); c.stroke();
+          c.strokeStyle = "rgba(236,230,242,.9)"; c.lineWidth = 1.3; c.beginPath(); c.moveTo(px, py + 1); c.quadraticCurveTo(px + 8, py + 3, px + 16, py + 1); c.stroke();
+          c.strokeStyle = "rgba(230,224,236,.55)"; c.lineWidth = 0.5; c.beginPath(); c.moveTo(px, py + 2.6); c.quadraticCurveTo(px + 8, py + 4.6, px + 16, py + 2.6); c.moveTo(px + 2, py + 1); c.lineTo(px + 6, py + 7); c.moveTo(px + 12, py + 1); c.lineTo(px + 9, py + 7); c.moveTo(px + 6, py + 7); c.lineTo(px + 9, py + 7); c.stroke();
+          if (det >= 2) { c.fillStyle = "rgba(255,250,255,.8)"; c.fillRect(px + 4 + hash(x, y) * 8, py + 1.6, 0.8, 0.8); }
+          continue;
+        }
+        if (v === 8) {
+          /* Steinstufe */
+          c.fillStyle = "rgba(0,0,0,.3)"; c.fillRect(px, py + 6, T, 2);
+          c.fillStyle = mixH(B.tile.base, B.tile.dark, 0.2); c.fillRect(px, py, T, 6);
+          c.fillStyle = B.tile.light; c.fillRect(px, py, T, 1.2); c.fillStyle = "rgba(0,0,0,.4)"; c.fillRect(px, py + 5, T, 1); if (L) c.fillRect(px, py, 1, 6); c.fillRect(px + 8 + ((x & 1) ? -4 : 3), py + 1.2, 0.8, 4);
+          continue;
+        }
+        /* Holzsteg: zwei Bohlen, Maserung, Nägel, Konsolen */
+        c.fillStyle = "rgba(0,0,0,.28)"; c.fillRect(px, py + 5, T, 2.5);
+        c.fillStyle = plD; c.fillRect(px, py, T, 5);
+        c.fillStyle = pl; c.fillRect(px, py, T, 3.6);
+        c.fillStyle = plL; c.fillRect(px, py, T, 0.9);
+        c.fillStyle = rgba(plS, 0.5); c.fillRect(px, py + 2, T, 0.5);
+        if (det >= 1) { c.fillStyle = rgba(plS, 0.35); const g1 = hash(x * 3, y) * 8; c.fillRect(px + g1, py + 1.3, 5, 0.4); c.fillRect(px + 16 - g1 - 4, py + 3, 4, 0.4); }
+        const sx = px + 4 + ((hash(x, y * 3) * 8) | 0);
+        c.fillStyle = plS; c.fillRect(sx, py, 0.9, 5);
+        c.fillStyle = "#1a1410"; c.fillRect(sx - 1.8, py + 1.4, 0.9, 0.9); c.fillRect(sx + 1.8, py + 1.4, 0.9, 0.9);
+        for (const s of [1, -1]) {
+          if (s > 0 ? !L : !R) continue;
+          const ex = s > 0 ? px : px + T;
+          c.fillStyle = plS; c.fillRect(s > 0 ? px : px + T - 1.2, py, 1.2, 5);
+          const wallSide = sol(x - s, y) || sol(x - s, y + 1);
+          if (wallSide) {
+            /* eiserne Winkelkonsole an der Wand */
+            c.fillStyle = "#2a2624"; c.fillRect(s > 0 ? px : px + T - 1.6, py + 5, 1.6, 8);
+            c.strokeStyle = "#2a2624"; c.lineWidth = 1.3; c.beginPath(); c.moveTo(ex + s * 0.8, py + 12); c.lineTo(ex + s * 8, py + 5); c.stroke();
+            c.fillStyle = "#5a5450"; c.fillRect(s > 0 ? px + 0.3 : px + T - 1.3, py + 7, 1, 1); c.fillRect(s > 0 ? px + 0.3 : px + T - 1.3, py + 11, 1, 1);
+          } else {
+            /* hölzernes Kopfband */
+            c.fillStyle = plD; c.beginPath(); c.moveTo(ex + s * 1, py + 5); c.lineTo(ex + s * 3, py + 5); c.lineTo(ex + s * 3, py + 11); c.lineTo(ex + s * 1, py + 11); c.fill();
+            c.beginPath(); c.moveTo(ex + s * 3, py + 9); c.lineTo(ex + s * 9, py + 5); c.lineTo(ex + s * 7, py + 5); c.lineTo(ex + s * 3, py + 7.5); c.fill();
+            if (B.bg === "harbour") { c.fillStyle = "#a08860"; c.fillRect(ex + s * 1 - (s < 0 ? 2.6 : 0), py + 0.6, 2.6, 0.7); c.fillRect(ex + s * 1 - (s < 0 ? 2.6 : 0), py + 2.2, 2.6, 0.7); c.fillRect(ex + s * 1 - (s < 0 ? 2.6 : 0), py + 3.8, 2.6, 0.7); }
+          }
         }
       }
       if (v === 4) {
-        c.fillStyle = shade(B.plat, -0.2); c.fillRect(px + 3, py, 2, T); c.fillRect(px + 11, py, 2, T);
-        c.fillStyle = B.plat; for (let k = 2; k < T; k += 5) c.fillRect(px + 3, py + k, 10, 1.6);
+        const top = get(x, y - 1) !== 4;
+        c.fillStyle = "rgba(0,0,0,.3)"; c.fillRect(px + 4.5, py, 1, T); c.fillRect(px + 13.5, py, 1, T);
+        c.fillStyle = plD; c.fillRect(px + 2.5, py - (top ? 4 : 0), 2, T + (top ? 4 : 0)); c.fillRect(px + 11.5, py - (top ? 4 : 0), 2, T + (top ? 4 : 0));
+        c.fillStyle = plL; c.fillRect(px + 2.5, py - (top ? 4 : 0), 0.6, T + (top ? 4 : 0)); c.fillRect(px + 11.5, py - (top ? 4 : 0), 0.6, T + (top ? 4 : 0));
+        for (let k = 3; k < T; k += 5) {
+          c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(px + 4.5, py + k + 1.6, 7, 0.8);
+          c.fillStyle = pl; c.fillRect(px + 3.5, py + k, 9, 1.8); c.fillStyle = plL; c.fillRect(px + 3.5, py + k, 9, 0.5);
+          if (det >= 1) { c.fillStyle = "#3a2a1a"; c.fillRect(px + 2.2, py + k - 0.4, 2.6, 0.7); c.fillRect(px + 11.2, py + k - 0.4, 2.6, 0.7); c.fillRect(px + 2.2, py + k + 1.5, 2.6, 0.7); c.fillRect(px + 11.2, py + k + 1.5, 2.6, 0.7); }
+        }
       }
       if (v === 3) {
-        c.fillStyle = "#4a4448"; c.fillRect(px, py + 12, T, 4);
-        for (let k = 0; k < 4; k++) { c.fillStyle = "#8a8288"; c.beginPath(); c.moveTo(px + k * 4, py + 13); c.lineTo(px + k * 4 + 2, py + 3); c.lineTo(px + k * 4 + 4, py + 13); c.fill(); c.fillStyle = "#c8c0c4"; c.fillRect(px + k * 4 + 1.6, py + 4, 0.8, 4); }
+        c.fillStyle = "#2a2628"; c.fillRect(px, py + 12, T, 4); c.fillStyle = "#4a4448"; c.fillRect(px, py + 12, T, 1); c.fillStyle = "#6a6266"; c.fillRect(px + 2, py + 14, 1, 1); c.fillRect(px + 13, py + 14, 1, 1);
+        for (let k = 0; k < 4; k++) {
+          const sx = px + k * 4, hh = 9 + hash(x * 4 + k, y) * 2;
+          c.fillStyle = "#5a5458"; c.beginPath(); c.moveTo(sx, py + 13); c.lineTo(sx + 2, py + 13 - hh); c.lineTo(sx + 4, py + 13); c.fill();
+          c.fillStyle = "#9a9296"; c.beginPath(); c.moveTo(sx + 0.4, py + 13); c.lineTo(sx + 2, py + 13 - hh); c.lineTo(sx + 2, py + 13); c.fill();
+          c.fillStyle = "#e0d8dc"; c.fillRect(sx + 1.6, py + 13 - hh, 0.8, 1.6);
+          if (det >= 1 && hash(x * 4 + k, y + 2) < 0.18) { c.fillStyle = "rgba(110,40,20,.7)"; c.fillRect(sx + 1, py + 10, 2, 3); }
+          if (det >= 2 && hash(x * 4 + k, y + 5) < 0.08) { c.fillStyle = "rgba(120,10,10,.7)"; c.fillRect(sx + 1.6, py + 13 - hh + 1.6, 0.8, 3); }
+        }
       }
     }
   }
-  function topper(c, tl, px, py, x, y) {
-    const r = hash(x, y + 7);
-    switch (tl.top) {
-      case "moss": c.fillStyle = tl.topCol; c.fillRect(px, py - 1, T, 3); for (let k = 0; k < 4; k++) if (hash(x * 4 + k, y) < 0.6) c.fillRect(px + k * 4 + 1, py - 2 - hash(x + k, y) * 3, 1.4, 3); if (r < 0.25) { c.fillStyle = shade(tl.topCol, -0.2); c.fillRect(px + 5, py + 2, 4, 3 + r * 10); } break;
-      case "carpet": if (r < 0.75) { c.fillStyle = tl.topCol; c.fillRect(px, py - 1, T, 3); c.fillStyle = "#e5b454"; c.fillRect(px, py + 1.5, T, 0.6); } break;
-      case "web": if (r < 0.35) { c.strokeStyle = "rgba(220,214,230,.55)"; c.lineWidth = 0.5; c.beginPath(); c.moveTo(px, py); c.quadraticCurveTo(px + 8, py - 6, px + 16, py); c.stroke(); } break;
-      case "snow": c.fillStyle = "#e8e4ec"; c.fillRect(px, py - 2, T, 3); break;
-      case "soot": c.fillStyle = tl.topCol; c.fillRect(px, py, T, 2); if (r < 0.2) { c.fillStyle = "rgba(255,120,40,.6)"; c.fillRect(px + r * 60, py, 2, 1); } break;
-      case "algae": c.fillStyle = tl.topCol; c.fillRect(px, py - 1, T, 2); if (r < 0.5) { c.fillRect(px + 3, py + 1, 1.5, 4 + r * 8); c.fillRect(px + 10, py + 1, 1.5, 3 + r * 6); } break;
-      case "rune": if (r < 0.18) { c.fillStyle = tl.topCol; c.globalAlpha = 0.8; c.fillRect(px + 4, py + 4, 1.2, 6); c.fillRect(px + 4, py + 4, 5, 1.2); c.fillRect(px + 8, py + 4, 1.2, 4); c.globalAlpha = 1; } break;
-      case "ash": c.fillStyle = tl.topCol; c.fillRect(px, py - 1, T, 2); break;
-      case "wood": c.fillStyle = tl.topCol; c.fillRect(px, py - 1, T, 3); c.fillStyle = shade(tl.topCol, -0.3); c.fillRect(px + 7, py - 1, 1, 3); c.fillRect(px, py + 1.5, T, 0.5); break;
-      case "slime": if (r < 0.4) { c.fillStyle = tl.topCol; c.fillRect(px, py, T, 1.5); c.fillRect(px + 4 + r * 10, py, 1.5, 3 + r * 8); } break;
-      case "drip": if (r < 0.15) { c.fillStyle = tl.topCol; c.fillRect(px, py, T, 1.5); } break;
+
+  /* ---------- Gesamter Chunk ---------- */
+  let PT = null; G.profTiles = on => { if (!on) { PT = null; return; } const acc = G.tileProf = {}; let t0 = performance.now(); PT = k => { if (G._pc) G._pc.getImageData(0, 0, 1, 1); const n = performance.now(); acc[k] = (acc[k] || 0) + n - t0; t0 = n; }; };
+  function paintTiles(c, x0, y0, w, h) {
+    if (!PR || PR.W !== lv.W || PR.H !== lv.H) prep();
+    const det = detail(), st = styleOf(), get = lv.get, W = lv.W;
+    const x1 = Math.min(lv.W, x0 + w), y1 = Math.min(lv.H, y0 + h);
+    G._pc = PT ? c : null;
+    const tex = textures(st, det);
+    PT && PT("tex");
+    const lg = (ax, ay, bx, by, a0, a1) => { const g = c.createLinearGradient(ax, ay, bx, by); g.addColorStop(0, "rgba(0,0,0," + a0 + ")"); if (a1) g.addColorStop(0.4, "rgba(0,0,0," + a1 + ")"); g.addColorStop(1, "rgba(0,0,0,0)"); return g; };
+    const GR = { top: lg(0, 0, 0, 16, 0.6, 0.25), left: lg(0, 0, 8, 0, 0.45), right: lg(T, 0, T - 8, 0, 0.45), bot: lg(0, T, 0, T - 6, 0.35),
+      corner: (() => { const g = c.createRadialGradient(0, 0, 0, 0, 0, 8); g.addColorStop(0, "rgba(0,0,0,.4)"); g.addColorStop(1, "rgba(0,0,0,0)"); return g; })() };
+    G.topGrad = (() => { const g = c.createLinearGradient(0, 2, 0, 10); g.addColorStop(0, rgba(B.tile.light, 0.38)); g.addColorStop(1, rgba(B.tile.light, 0)); return g; })();
+    c.imageSmoothingEnabled = true;
+    /* 1) Rückwand: Muster, Gesteinsschichten, Großflecken */
+    tileTex(c, tex.wall, x0 * T, y0 * T, w * T, h * T);
+    if (st.wall === "cave" && det >= 1) {
+      const X = x0 * T, Y = y0 * T, ww = w * T, hh = h * T;
+      c.strokeStyle = "rgba(0,0,0,.16)"; c.lineWidth = 2;
+      for (let n = Math.floor(Y / 46); n * 46 < Y + hh + 46; n++) { c.beginPath(); for (let xx = X - 10; xx <= X + ww + 10; xx += 10) { const yy = n * 46 + (vnoise(xx / 60, n * 3.1) - 0.5) * 18; xx === X - 10 ? c.moveTo(xx, yy) : c.lineTo(xx, yy); } c.stroke(); }
     }
+    PT && PT("base");
+    /* 2) Wandschmuck, Schmutz, Kontaktschatten, Schleier */
+    wallFeatures(c, st, x0, y0, x1, y1, det, GR);
+    PT && PT("feat");
+    wallDirt(c, st, x0, y0, x1, y1, det);
+    PT && PT("dirt");
+    wallAO(c, x0, y0, x1, y1, GR);
+    /* 3) Himmel und Arenafenster freistellen */
+    c.save(); c.globalCompositeOperation = "destination-out"; c.fillStyle = "#000";
+    for (let y = y0; y < y1; y++) { let s = -1; for (let x = x0; x <= x1; x++) { const on = x < x1 && PR.clear[y * W + x]; if (on && s < 0) s = x; else if (!on && s >= 0) { c.fillRect(s * T, y * T, (x - s) * T, T); s = -1; } } }
+    c.restore();
+    PT && PT("ao");
+    /* 4) Fenster und Gewölbeöffnungen mit Rahmen */
+    openings(c, st, x0, y0, x1, y1, det);
+    PT && PT("open");
+    /* 5) Abgrund: Rückwand verliert sich in Schwärze */
+    for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+      if (get(x, y) !== 9) continue;
+      const px = x * T, py = y * T, top = get(x, y - 1) !== 9;
+      if (top) { const g = c.createLinearGradient(0, py, 0, py + T); g.addColorStop(0, B.wall); g.addColorStop(1, "#060405"); c.fillStyle = g; c.fillRect(px, py, T, T); c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(px, py, T, 2); }
+      else { c.fillStyle = "#060405"; c.fillRect(px, py, T, T); }
+    }
+    /* 6) Fels: Kontur (mit Rand), Muster in Läufen, Tiefenkarte, Kanten */
+    const black = (x, y) => get(x, y - 1) === 9 || (get(x, y - 2) === 9 && solidV(get(x, y - 1))) || (get(x, y - 3) === 9 && solidV(get(x, y - 1)) && solidV(get(x, y - 2)));
+    for (let y = y0 - 1; y <= y1; y++) for (let x = x0 - 1; x <= x1; x++) if (inLv(x, y) && sol(x, y) && PR.dep[y * W + x] === 1 && !(y === 0 && lv.out)) rockContour(c, x, y);
+    /* Felsmuster: Läufe als Rechteck-Maske, dann die Vorlage pixelgenau hineinkopieren */
+    c.save(); c.beginPath(); let anyRock = false;
+    for (let y = y0; y < y1; y++) {
+      let s = -1;
+      for (let x = x0; x <= x1; x++) {
+        const on = x < x1 && sol(x, y) && !(y === 0 && lv.out) && !black(x, y);
+        if (on && s < 0) s = x; else if (!on && s >= 0) { c.rect(s * T, y * T, (x - s) * T, T); anyRock = true; s = -1; }
+      }
+    }
+    if (anyRock) { c.clip(); tileTex(c, tex.rock, x0 * T, y0 * T, w * T, h * T); }
+    c.restore();
+    if (lv.out && y0 === 0) for (let x = x0; x < x1; x++) if (sol(x, 0)) c.clearRect(x * T, 0, T, T);
+    c.imageSmoothingEnabled = false; drawMap(c, PR.depth, 4, x0, y0, w, h); c.imageSmoothingEnabled = true;
+    for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+      if (!sol(x, y) || (y === 0 && lv.out)) continue;
+      if (black(x, y)) { c.fillStyle = "#060405"; c.fillRect(x * T, y * T, T, T); continue; }
+      const v = get(x, y), d = PR.dep[y * W + x];
+      if (d === 1) rockEdges(c, st, x, y, v, det);
+      else if (d >= 4 && det >= 1) { const r = hash(x, y); if (r < 0.12) { c.fillStyle = "rgba(255,240,220,.03)"; c.fillRect(x * T + (r * 80) % 10, y * T + 3, 6, 4); } else if (r > 0.93) { c.fillStyle = "rgba(0,0,0,.14)"; c.fillRect(x * T + 2, y * T + (r * 100) % 12, 9, 1); c.fillRect(x * T + 10, y * T + (r * 100) % 12, 1, 4); } }
+      if (v === 7) crackedWall(c, x, y, x * T, y * T);
+    }
+    PT && PT("rock");
+    /* Laufflächen (auch eine Reihe unterhalb, damit Gras über die Chunkgrenze ragt) und Unterseiten */
+    for (let y = y0; y <= y1; y++) for (let x = x0 - 1; x <= x1; x++) if (inLv(x, y) && sol(x, y) && !sol(x, y - 1) && !(y === 0 && lv.out) && get(x, y - 1) !== 9) topper(c, x, y, det);
+    if (det >= 1) for (let y = y0 - 1; y < y1; y++) for (let x = x0; x < x1; x++) if (inLv(x, y) && sol(x, y) && !sol(x, y + 1) && lv.get(x, y + 1) !== 9 && !PR.clear[(y + 1) * W + x]) hanger(c, st, x, y, det);
+    PT && PT("top");
+    /* 7) Stege, Leitern, Stacheln */
+    fixtures(c, x0, y0, x1, y1, det);
+    PT && PT("fix");
+    if (PT) { c.getImageData(0, 0, 1, 1); PT("raster"); }
+  }
+  function chunkCanvas(cx, cy) {
+    const key = cx + "," + cy;
+    let ch = G.chunks.get(key);
+    if (ch) { G.chunks.delete(key); G.chunks.set(key, ch); return ch; }
+    const s = chunkScale(), cw = Math.ceil(CH_W * T * s), chh = Math.ceil(CH_H * T * s);
+    let cv = null;
+    if (G.chunks.size > 20) { const k0 = G.chunks.keys().next().value, old = G.chunks.get(k0); G.chunks.delete(k0); if (old && old.cv.width === cw && old.cv.height === chh) cv = old.cv; }
+    if (!cv) { cv = document.createElement("canvas"); cv.width = cw; cv.height = chh; }
+    const c = cv.getContext("2d"); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = 1; c.globalCompositeOperation = "source-over"; c.clearRect(0, 0, cw, chh); c.scale(s, s); c.translate(-cx * CH_W * T, -cy * CH_H * T);
+    try { paintTiles(c, cx * CH_W, cy * CH_H, CH_W, CH_H); } catch (e) { console.error(e); }
+    ch = { cv }; G.chunks.set(key, ch); return ch;
   }
   function drawTiles(c, cam) {
+    const det = detail(); if (G.det !== det) { G.det = det; G.chunks.clear(); }
     const cx0 = Math.floor(cam.x / (CH_W * T)), cx1 = Math.floor((cam.x + cam.w) / (CH_W * T));
     const cy0 = Math.floor(cam.y / (CH_H * T)), cy1 = Math.floor((cam.y + cam.h) / (CH_H * T));
+    let built = 0;
     for (let cy = cy0; cy <= cy1; cy++) for (let cx = cx0; cx <= cx1; cx++) {
       if (cx < 0 || cy < 0 || cx * CH_W >= lv.W || cy * CH_H >= lv.H) continue;
+      if (!G.chunks.has(cx + "," + cy)) built++;
       const ch = chunkCanvas(cx, cy);
       c.drawImage(ch.cv, cx * CH_W * T, cy * CH_H * T, CH_W * T, CH_H * T);
+    }
+    /* vorausschauend: höchstens einen Nachbar-Chunk pro Bild vorbereiten (in Blickrichtung zuerst) */
+    if (!built) {
+      const dx = Z.player ? Math.sign(Z.player.vx || 0) : 0, dy = Z.player ? Math.sign(Z.player.vy || 0) : 0;
+      const cand = [];
+      const ccx = Math.floor((cam.x + cam.w / 2) / (CH_W * T)), ccy = Math.floor((cam.y + cam.h / 2) / (CH_H * T));
+      for (let yy = cy0 - 1; yy <= cy1 + 1; yy++) for (let xx = cx0 - 1; xx <= cx1 + 1; xx++) {
+        if (xx < 0 || yy < 0 || xx * CH_W >= lv.W || yy * CH_H >= lv.H || G.chunks.has(xx + "," + yy)) continue;
+        cand.push([Math.abs(xx - ccx - dx) + Math.abs(yy - ccy - dy), xx, yy]);
+      }
+      if (cand.length) { cand.sort((a, b) => a[0] - b[0]); chunkCanvas(cand[0][1], cand[0][2]); }
     }
   }
   /* Flüssigkeiten leben: jedes Bild neu */
@@ -369,20 +1309,112 @@
       const fl = Math.sin(t * 9 + d.x) * 0.5 + Math.sin(t * 13 + d.y) * 0.5;
       switch (d.kind) {
         case "torch": {
+          /* Wandfackel: genietete Halterung, geschwungener Arm, umwickelter Schaft, Pechkopf */
           const y = py - 22;
-          c.fillStyle = "#3a2a1a"; c.fillRect(px - 1, y, 2, 7); c.fillStyle = "#5a4a3a"; c.fillRect(px - 2.5, y - 1, 5, 2);
-          flame(c, px, y - 1, 1 + fl * 0.15, "#ff9a3a");
-          if (Math.random() < 0.08) FX.p({ x: px, y: y - 6, vx: (Math.random() - 0.5) * 10 + (Z.windX || 0) * 0.3, vy: -30, life: 0.8, size: 1.2, col: "#ffb060", kind: "spark", add: true });
+          if (G.isOpen(d.x, d.y)) {
+            /* ohne Wand dahinter (Himmel, Fenster, Arena): auf einer Stange, wenn Boden nah ist – sonst an einer Kette von der Decke */
+            if (!d._mt || d._mt.pr !== PR) {
+              const hard = yy => { const v = lv.get(d.x, yy); return v === 1 || v === 2 || v === 7; };
+              let gy = d.y + 1; while (gy < lv.H && gy <= d.y + 3 && !hard(gy)) gy++;
+              let cy = d.y - 1; while (cy > 0 && cy >= d.y - 10 && !hard(cy)) cy--;
+              d._mt = { pr: PR, pole: gy <= d.y + 3 && hard(gy) ? gy * T : 0, chain: hard(cy) ? (cy + 1) * T : 0 };
+            }
+            const mt = d._mt;
+            if (mt.pole) { c.fillStyle = "#2a1c12"; c.fillRect(px - 0.9, y + 2, 1.8, mt.pole - y - 2); c.fillStyle = "#4a3220"; c.fillRect(px - 0.9, y + 2, 0.6, mt.pole - y - 2); c.fillStyle = "#3a3430"; c.fillRect(px - 2.4, mt.pole - 3, 4.8, 3); c.fillRect(px - 1.6, y + 1, 3.2, 2); }
+            else {
+              const top = mt.chain || y - 40; c.strokeStyle = "#2a2522"; c.lineWidth = 0.8; c.setLineDash([1.6, 0.9]); c.beginPath(); c.moveTo(px - 3, y + 3); c.lineTo(px, top); c.lineTo(px + 3, y + 3); c.stroke(); c.setLineDash([]);
+              c.fillStyle = "#2a2420"; c.beginPath(); c.moveTo(px - 4, y + 1); c.lineTo(px + 4, y + 1); c.lineTo(px + 2.4, y + 4.5); c.lineTo(px - 2.4, y + 4.5); c.fill(); c.fillStyle = "#6a5a4a"; c.fillRect(px - 4, y + 1, 8, 0.6);
+            }
+            flame(c, px, y - 3, 1.05 + fl * 0.15, "#ff9a3a");
+            if (Math.random() < 0.08) FX.p({ x: px, y: y - 8, vx: (Math.random() - 0.5) * 10 + (Z.windX || 0) * 0.3, vy: -30, life: 0.8, size: 1.2, col: "#ffb060", kind: "spark", add: true });
+            break;
+          }
+          c.fillStyle = "#16120f"; c.fillRect(px - 2.8, y + 3, 5.6, 8.5); c.fillStyle = "#3a3430"; c.fillRect(px - 2.2, y + 3.5, 4.4, 7.5);
+          c.fillStyle = "#6a625a"; c.fillRect(px - 1.4, y + 4.3, 0.9, 0.9); c.fillRect(px + 0.5, y + 9.3, 0.9, 0.9); c.fillStyle = "rgba(255,220,170,.25)"; c.fillRect(px - 2.2, y + 3.5, 4.4, 0.6);
+          c.strokeStyle = "#221d1a"; c.lineWidth = 1.3; c.beginPath(); c.moveTo(px, y + 8); c.quadraticCurveTo(px + 3.5, y + 5, px + 0.6, y + 1.5); c.stroke();
+          c.save(); c.translate(px, y + 3); c.rotate(-0.1);
+          c.fillStyle = "#4a3220"; c.fillRect(-1.1, -4, 2.2, 8); c.fillStyle = "#6a4a2e"; c.fillRect(-1.1, -4, 0.7, 8);
+          c.fillStyle = "#2a1c12"; c.fillRect(-1.3, -3.2, 2.6, 0.8); c.fillRect(-1.3, -1.2, 2.6, 0.8);
+          c.fillStyle = "#5a4a3a"; c.fillRect(-2.3, -5.2, 4.6, 1.6); c.fillStyle = "#8a7a62"; c.fillRect(-2.3, -5.2, 4.6, 0.5);
+          c.fillStyle = "#24160c"; c.beginPath(); c.ellipse(0, -5.6, 2, 1.5, 0, 0, 6.283); c.fill();
+          c.restore();
+          flame(c, px, y - 3, 1.05 + fl * 0.15, "#ff9a3a");
+          if (Math.random() < 0.08) FX.p({ x: px, y: y - 8, vx: (Math.random() - 0.5) * 10 + (Z.windX || 0) * 0.3, vy: -30, life: 0.8, size: 1.2, col: "#ffb060", kind: "spark", add: true });
           break;
         }
         case "brazier": c.fillStyle = "#3a3434"; c.beginPath(); c.moveTo(px - 7, py - 10); c.lineTo(px + 7, py - 10); c.lineTo(px + 4, py - 4); c.lineTo(px - 4, py - 4); c.fill(); c.fillRect(px - 1, py - 4, 2, 4); c.fillRect(px - 4, py - 1, 8, 1); flame(c, px, py - 10, 1.4 + fl * 0.2, "#ff8a2a"); flame(c, px - 3, py - 10, 0.9, "#ff6a1a"); break;
         case "greenfire": c.fillStyle = "#2a2a2a"; c.fillRect(px - 5, py - 6, 10, 6); flame(c, px, py - 6, 1.3 + fl * 0.2, "#6aff7a"); break;
-        case "candle": c.fillStyle = "#e8dcc0"; c.fillRect(px - 1, py - 6, 2, 6); flame(c, px, py - 6, 0.5, "#ffc060"); break;
-        case "candelabra": c.fillStyle = "#8a6a2a"; c.fillRect(px - 0.8, py - 18, 1.6, 18); c.fillRect(px - 6, py - 18, 12, 1.4); c.fillRect(px - 4, py - 1, 8, 1.5); for (const o of [-6, 0, 6]) { c.fillStyle = "#e8dcc0"; c.fillRect(px + o - 0.8, py - 22, 1.6, 4); flame(c, px + o, py - 22, 0.45, "#ffc060"); } break;
-        case "chandelier": { const sw = Math.sin(t * 0.8 + d.x) * 1.5; c.strokeStyle = "#3a3020"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(px, py - 16); c.lineTo(px + sw, py + 8); c.stroke(); c.fillStyle = "#6a5020"; c.fillRect(px - 10 + sw, py + 8, 20, 2); for (let k = -2; k <= 2; k++) { c.fillStyle = "#e8dcc0"; c.fillRect(px + k * 4.5 + sw - 0.6, py + 4, 1.2, 4); flame(c, px + k * 4.5 + sw, py + 4, 0.4, "#ffc060"); } break; }
-        case "lantern": { const sw = Math.sin(t * 1.4 + d.x) * 2; c.strokeStyle = "#2a2420"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(px, py - 16); c.lineTo(px + sw, py - 2); c.stroke(); c.fillStyle = "#3a2e24"; c.fillRect(px - 3 + sw, py - 2, 6, 8); c.fillStyle = "rgba(255,200,110,.9)"; c.fillRect(px - 2 + sw, py, 4, 4); D.glow(c, px + sw, py + 2, 16, "rgba(255,180,90,.35)"); break; }
-        case "banner": { const w = 10, h = 22, y = py - 30; c.fillStyle = "#3a2a1a"; c.fillRect(px - 7, y - 1, 14, 1.5); c.fillStyle = B.bg === "spires" ? "#3a1a1a" : B.bg === "storm" ? "#2a3a2a" : "#7a1a20"; c.beginPath(); c.moveTo(px - w / 2, y); c.lineTo(px + w / 2, y); for (let k = 0; k <= 4; k++) c.lineTo(px + w / 2 + Math.sin(t * 2 + k * 0.8 + d.x) * (k / 4) * 2 * ((Z.windX || 0) / 20 + 1), y + (k / 4) * h); c.lineTo(px, y + h - 4); c.lineTo(px - w / 2 + Math.sin(t * 2 + d.x) * 2, y + h); c.fill(); c.fillStyle = "#e5b454"; c.beginPath(); c.arc(px, y + 8, 2.5, 0, 6.283); c.fill(); c.strokeStyle = "#e5b454"; c.lineWidth = 0.5; for (let k = 0; k < 8; k++) { const a = k / 8 * 6.283; c.beginPath(); c.moveTo(px, y + 8); c.lineTo(px + Math.cos(a) * 4, y + 8 + Math.sin(a) * 4); c.stroke(); } break; }
-        case "chain": { const sw = Math.sin(t * 1.1 + d.x) * 2; c.strokeStyle = "#3a3430"; c.lineWidth = 1; c.setLineDash([2, 1]); c.beginPath(); c.moveTo(px, py - 16); c.quadraticCurveTo(px + sw, py + 4, px + sw * 1.4, py + 16 + d.s * 20); c.stroke(); c.setLineDash([]); if (d.s > 0.6) { c.strokeStyle = "#4a4440"; c.lineWidth = 1.5; c.beginPath(); c.arc(px + sw * 1.4, py + 20 + d.s * 20, 3, 0, 5); c.stroke(); } break; }
+        case "candle": { /* Kerze im Messingschälchen mit Wachstropfen */
+          D.ell(c, px, py - 0.8, 3.4, 1.1, "#6a4a1e"); c.fillStyle = "#a07a34"; c.fillRect(px - 3.4, py - 1.6, 6.8, 0.7);
+          const hh = 6 + (d.s || 0.5) * 3; c.fillStyle = "#e8dcc0"; c.fillRect(px - 1.2, py - 1 - hh, 2.4, hh); c.fillStyle = "#fff4dc"; c.fillRect(px - 1.2, py - 1 - hh, 0.7, hh);
+          c.fillStyle = "#d8ccb0"; c.fillRect(px + 0.6, py - hh + 0.5, 0.8, 2.5); c.fillRect(px - 1.6, py - 1 - hh * 0.4, 0.8, 1.6);
+          c.fillStyle = "#2a1a10"; c.fillRect(px - 0.2, py - 2 - hh, 0.5, 1.2);
+          flame(c, px, py - 1.8 - hh, 0.55, "#ffc060"); break; }
+        case "candelabra": { /* dreiarmiger Leuchter mit Füßen, Knauf und Tropfschalen */
+          const g1 = "#8a6a2a", g2 = "#c8a050";
+          c.fillStyle = g1; c.beginPath(); c.moveTo(px - 5, py); c.lineTo(px + 5, py); c.lineTo(px + 1.2, py - 3); c.lineTo(px - 1.2, py - 3); c.fill();
+          c.fillRect(px - 0.8, py - 18, 1.6, 16); D.ell(c, px, py - 8, 1.8, 1.2, g1); D.ell(c, px, py - 13, 1.4, 1, g1);
+          c.strokeStyle = g1; c.lineWidth = 1.2; c.beginPath(); c.moveTo(px - 6, py - 22); c.quadraticCurveTo(px - 6, py - 16, px, py - 17); c.quadraticCurveTo(px + 6, py - 16, px + 6, py - 22); c.stroke();
+          c.fillStyle = g2; c.fillRect(px - 0.8, py - 18, 0.5, 15);
+          for (const o of [-6, 0, 6]) { const top = o ? py - 22 : py - 24; c.fillStyle = g1; c.fillRect(px + o - 2, top, 4, 1.2); c.fillStyle = "#e8dcc0"; c.fillRect(px + o - 0.9, top - 4, 1.8, 4); c.fillStyle = "#fff4dc"; c.fillRect(px + o - 0.9, top - 4, 0.5, 4); flame(c, px + o, top - 4, 0.45, "#ffc060"); }
+          break; }
+        case "chandelier": { /* eiserner Radleuchter an drei Ketten */
+          const sw = Math.sin(t * 0.8 + d.x) * 1.5, cy = py + 8;
+          c.strokeStyle = "#2a2218"; c.lineWidth = 0.6; c.setLineDash([1.4, 0.8]); c.beginPath(); c.moveTo(px, py - 16); c.lineTo(px + sw, cy - 8); c.moveTo(px + sw, cy - 8); c.lineTo(px + sw - 10, cy); c.moveTo(px + sw, cy - 8); c.lineTo(px + sw + 10, cy); c.moveTo(px + sw, cy - 8); c.lineTo(px + sw, cy); c.stroke(); c.setLineDash([]);
+          D.circ(c, px + sw, cy - 8, 1.2, "#5a4a2a");
+          c.fillStyle = "#3a2a14"; c.beginPath(); c.ellipse(px + sw, cy + 1, 11, 2.2, 0, 0, 6.283); c.fill(); c.fillStyle = "#6a5020"; c.beginPath(); c.ellipse(px + sw, cy, 11, 1.8, 0, 0, 6.283); c.fill(); c.fillStyle = "#2a1c0e"; c.beginPath(); c.ellipse(px + sw, cy, 8.5, 1, 0, 0, 6.283); c.fill();
+          c.fillStyle = "#6a5020"; for (const k of [-1, 1]) { c.beginPath(); c.moveTo(px + sw + k * 9, cy + 1.5); c.quadraticCurveTo(px + sw + k * 10, cy + 5, px + sw + k * 7, cy + 5.5); c.lineTo(px + sw + k * 7.5, cy + 4.5); c.quadraticCurveTo(px + sw + k * 9, cy + 4, px + sw + k * 8, cy + 1.5); c.fill(); }
+          for (let k = -2; k <= 2; k++) { const kx = px + k * 4.5 + sw; c.fillStyle = "#e8dcc0"; c.fillRect(kx - 0.7, cy - 4, 1.4, 4); flame(c, kx, cy - 4, 0.42, "#ffc060"); }
+          break; }
+        case "lantern": { /* Laterne mit Dach, Gitterstäben und glimmendem Docht */
+          const sw = Math.sin(t * 1.4 + d.x) * 2, lx = px + sw, ly = py - 2, fl2 = 0.85 + 0.15 * Math.sin(t * 11 + d.x);
+          c.strokeStyle = "#2a2420"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(px, py - 16); c.lineTo(lx, ly - 2.5); c.stroke();
+          c.strokeStyle = "#3a302a"; c.lineWidth = 0.8; c.beginPath(); c.arc(lx, ly - 3.2, 1.2, 0, 6.283); c.stroke();
+          c.fillStyle = "rgba(255,190,100," + (0.85 * fl2).toFixed(2) + ")"; c.fillRect(lx - 2.6, ly + 0.5, 5.2, 6);
+          c.fillStyle = "#fff0c0"; c.fillRect(lx - 0.7, ly + 2.5, 1.4, 2.4);
+          c.fillStyle = "#2a221c"; c.beginPath(); c.moveTo(lx - 4, ly + 0.6); c.lineTo(lx, ly - 2.2); c.lineTo(lx + 4, ly + 0.6); c.fill();
+          c.fillRect(lx - 3.4, ly + 0.4, 6.8, 1); c.fillRect(lx - 3.4, ly + 6.4, 6.8, 1.4); c.fillRect(lx - 3.4, ly + 0.4, 0.9, 7); c.fillRect(lx + 2.5, ly + 0.4, 0.9, 7); c.fillRect(lx - 0.35, ly + 0.4, 0.7, 7);
+          c.fillStyle = "rgba(255,230,180,.35)"; c.fillRect(lx - 3.4, ly + 0.4, 6.8, 0.4);
+          D.glow(c, lx, ly + 3.5, 18, "rgba(255,180,90,.4)"); break; }
+        case "banner": { /* Wappenbanner: Stange mit Knäufen, Borte, Stickerei, Schwalbenschwanz und Quasten */
+          const w = 11, h = 24, y = py - 31, wind = (Z.windX || 0) / 20 + 1;
+          const col = B.bg === "spires" ? "#4a1a1a" : B.bg === "storm" ? "#2e3a24" : B.bg === "halls" ? "#8a1a22" : "#7a1a20";
+          const sway = k => Math.sin(t * 2 + k * 0.8 + d.x) * (k / 4) * 2 * wind;
+          const pts = []; for (let k = 0; k <= 4; k++) pts.push([px + w / 2 + sway(k), y + (k / 4) * h]);
+          const tipL = [px - w / 2 + Math.sin(t * 2 + d.x) * 2 * wind, y + h], mid = [px + sway(3) * 0.5, y + h - 5];
+          const shape = () => { c.beginPath(); c.moveTo(px - w / 2, y); for (const q of pts) c.lineTo(q[0], q[1]); c.lineTo(mid[0], mid[1]); c.lineTo(tipL[0], tipL[1]); c.closePath(); };
+          c.fillStyle = col; shape(); c.fill();
+          /* Faltenschatten */
+          c.save(); shape(); c.clip();
+          c.fillStyle = "rgba(0,0,0,.22)"; for (let k = 0; k < 3; k++) { const fx = px - w / 2 + 2 + k * 3.6 + Math.sin(t * 2 + d.x + k) * 0.8; c.fillRect(fx, y, 1.3, h); }
+          c.fillStyle = "rgba(255,220,200,.12)"; c.fillRect(px - w / 2, y, w, 1.2);
+          /* Borte */
+          c.strokeStyle = "#d8a84a"; c.lineWidth = 0.8; c.beginPath(); c.moveTo(px - w / 2 + 1.2, y + 1); c.lineTo(px - w / 2 + 1.2 + Math.sin(t * 2 + d.x) * 1.6 * wind, y + h - 2); c.moveTo(pts[0][0] - 1.2, y + 1); for (let k = 1; k <= 3; k++) c.lineTo(pts[k][0] - 1.2, pts[k][1]); c.stroke();
+          c.restore();
+          /* Stickerei: Sonne mit Strahlen */
+          const ex = px + sway(2) * 0.4, ey = y + 9.5;
+          c.strokeStyle = "#e5b454"; c.lineWidth = 0.55; for (let k = 0; k < 12; k++) { const a = k / 12 * 6.283 + t * 0.05; c.beginPath(); c.moveTo(ex + Math.cos(a) * 2.6, ey + Math.sin(a) * 2.6); c.lineTo(ex + Math.cos(a) * (k % 2 ? 4 : 4.8), ey + Math.sin(a) * (k % 2 ? 4 : 4.8)); c.stroke(); }
+          D.circ(c, ex, ey, 2.4, "#e5b454"); D.circ(c, ex - 0.5, ey - 0.5, 1, "#ffe0a0");
+          c.fillStyle = "#d8a84a"; for (let k = 0; k < 3; k++) c.fillRect(ex - 2 + k * 2 - 0.4, y + 17, 0.8, 0.8);
+          /* Stange mit Knäufen und Kordel */
+          c.fillStyle = "#2a1c10"; c.fillRect(px - 8, y - 1.6, 16, 1.8); c.fillStyle = "#6a4a26"; c.fillRect(px - 8, y - 1.6, 16, 0.5);
+          D.circ(c, px - 8.5, y - 0.7, 1.4, "#c8a050"); D.circ(c, px + 8.5, y - 0.7, 1.4, "#c8a050");
+          c.strokeStyle = "#a07a34"; c.lineWidth = 0.5; c.beginPath(); c.moveTo(px - 7, y - 1); c.lineTo(px, y - 6); c.lineTo(px + 7, y - 1); c.stroke(); D.circ(c, px, y - 6.3, 0.8, "#3a2a1a");
+          /* Quasten */
+          for (const q of [tipL, pts[4]]) { c.fillStyle = "#d8a84a"; c.fillRect(q[0] - 0.5, q[1], 1, 1.6); c.beginPath(); c.moveTo(q[0] - 1.2, q[1] + 1.4); c.lineTo(q[0] + 1.2, q[1] + 1.4); c.lineTo(q[0], q[1] + 4); c.fill(); }
+          break; }
+        case "chain": { /* Kette aus einzelnen Gliedern, mit Deckenring und Haken */
+          const sw = Math.sin(t * 1.1 + d.x) * 2, len = 32 + d.s * 20, ex = px + sw * 1.4, ey = py - 16 + len;
+          c.fillStyle = "#2a2522"; c.fillRect(px - 2.5, py - 16, 5, 1.6); c.strokeStyle = "#3a3430"; c.lineWidth = 0.9; c.beginPath(); c.arc(px, py - 13.6, 1.4, 0, 6.283); c.stroke();
+          const n = Math.floor(len / 2.6);
+          for (let i = 1; i <= n; i++) {
+            const u = i / n, ix = (1 - u) * (1 - u) * px + 2 * (1 - u) * u * (px + sw) + u * u * ex, iy = (1 - u) * (1 - u) * (py - 12) + 2 * (1 - u) * u * (py + 4) + u * u * ey;
+            if (i % 2) { c.strokeStyle = "#4a4440"; c.lineWidth = 0.75; c.beginPath(); c.ellipse(ix, iy, 0.9, 1.6, sw * 0.04, 0, 6.283); c.stroke(); c.fillStyle = "rgba(220,200,180,.35)"; c.fillRect(ix - 0.9, iy - 1, 0.4, 0.8); }
+            else { c.fillStyle = "#2e2a26"; c.fillRect(ix - 0.35, iy - 1.5, 0.7, 3); }
+          }
+          if (d.s > 0.6) { c.strokeStyle = "#4a4440"; c.lineWidth = 1.5; c.beginPath(); c.arc(ex, ey + 4, 3, -0.4, 3.6); c.stroke(); c.strokeStyle = "rgba(220,200,180,.3)"; c.lineWidth = 0.5; c.beginPath(); c.arc(ex, ey + 4, 3, 2.4, 3.4); c.stroke(); }
+          else if (d.s > 0.3) { c.strokeStyle = "#4a4440"; c.lineWidth = 1.3; c.beginPath(); c.moveTo(ex, ey); c.lineTo(ex, ey + 3); c.arc(ex - 2, ey + 3, 2, 0, Math.PI); c.stroke(); }
+          break; }
         case "cage": { const sw = Math.sin(t * 0.9 + d.x) * 0.08; c.save(); c.translate(px, py - 16); c.rotate(sw); c.strokeStyle = "#3a3430"; c.lineWidth = 0.8; c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 14); c.stroke(); c.lineWidth = 1; for (let k = -6; k <= 6; k += 3) { c.beginPath(); c.moveTo(k, 14); c.lineTo(k, 32); c.stroke(); } c.beginPath(); c.ellipse(0, 14, 7, 2, 0, 0, 6.283); c.stroke(); c.fillStyle = "#2a2420"; c.fillRect(-7, 31, 14, 2); if (d.s > 0.5) { D.circ(c, -1, 27, 2.4, "#c8c0b0"); c.fillStyle = "#c8c0b0"; c.fillRect(-1, 28, 1, 4); } c.restore(); break; }
         case "web": { c.strokeStyle = "rgba(230,224,240,.35)"; c.lineWidth = 0.5; const r = 14 + d.s * 10; const ox = px + (d.s < 0.5 ? -8 : 8), oy = py - 16; for (let k = 0; k < 5; k++) { const a = (d.s < 0.5 ? 0 : Math.PI / 2) + k / 4 * Math.PI / 2; c.beginPath(); c.moveTo(ox, oy); c.lineTo(ox + Math.cos(a) * r, oy + Math.sin(a) * r); c.stroke(); } for (let rr = 4; rr < r; rr += 4) { c.beginPath(); for (let k = 0; k <= 4; k++) { const a = (d.s < 0.5 ? 0 : Math.PI / 2) + k / 4 * Math.PI / 2; k ? c.lineTo(ox + Math.cos(a) * rr, oy + Math.sin(a) * rr) : c.moveTo(ox + Math.cos(a) * rr, oy + Math.sin(a) * rr); } c.stroke(); } break; }
         case "cocoon": { const sw = Math.sin(t * 0.7 + d.x) * 0.1; c.save(); c.translate(px, py - 16); c.rotate(sw); c.strokeStyle = "rgba(230,224,240,.6)"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 8); c.stroke(); D.ell(c, 0, 18, 5, 10, "#d8d0dc"); c.strokeStyle = "rgba(160,150,170,.6)"; for (let k = 0; k < 4; k++) { c.beginPath(); c.moveTo(-5, 12 + k * 4); c.lineTo(5, 14 + k * 4); c.stroke(); } c.restore(); break; }
@@ -398,14 +1430,24 @@
         case "statueDuergar": c.fillStyle = "#3a3438"; c.fillRect(px - 7, py - 4, 14, 4); c.fillRect(px - 5, py - 20, 10, 16); D.circ(c, px, py - 23, 4, "#3a3438"); c.fillRect(px - 3, py - 21, 6, 8); break;
         case "armor": c.fillStyle = "#4a4e58"; c.fillRect(px - 1, py - 26, 2, 26); c.fillRect(px - 5, py - 22, 10, 10); D.circ(c, px, py - 25, 3.4, "#5a5e68"); c.fillStyle = "#2a2a30"; c.fillRect(px - 0.5, py - 26, 2.5, 1); c.fillStyle = "#3a3e48"; c.fillRect(px - 4, py - 12, 3, 12); c.fillRect(px + 1, py - 12, 3, 12); break;
         case "table": c.fillStyle = "#5a3a22"; c.fillRect(px - 10, py - 9, 20, 2); c.fillRect(px - 9, py - 7, 2, 7); c.fillRect(px + 7, py - 7, 2, 7); c.fillStyle = "#c8a060"; c.fillRect(px - 5, py - 11, 3, 2); D.ell(c, px + 3, py - 10, 3, 1, "#a0a0a0"); break;
-        case "painting": c.fillStyle = "#6a4a1a"; c.fillRect(px - 9, py - 30, 18, 14); c.fillStyle = shade(B.wall, -0.4); c.fillRect(px - 7.5, py - 28.5, 15, 11); D.circ(c, px, py - 24, 3, "#3a2a2a"); c.fillStyle = "#7a1a1a"; c.fillRect(px - 3, py - 21, 6, 3); break;
-        case "window": { const y = py - 30; c.fillStyle = shade(B.wall, -0.5); c.beginPath(); c.moveTo(px - 6, y + 18); c.lineTo(px - 6, y + 4); c.quadraticCurveTo(px, y - 4, px + 6, y + 4); c.lineTo(px + 6, y + 18); c.fill(); c.fillStyle = B.out ? "rgba(180,150,190,.35)" : "rgba(200,180,220,.22)"; c.beginPath(); c.moveTo(px - 5, y + 17); c.lineTo(px - 5, y + 5); c.quadraticCurveTo(px, y - 2, px + 5, y + 5); c.lineTo(px + 5, y + 17); c.fill(); c.fillStyle = shade(B.wall, -0.5); c.fillRect(px - 0.5, y, 1, 18); c.fillRect(px - 5, y + 9, 10, 1); /* Lichtstrahl */ c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = 0.06; c.fillStyle = "#e8d8f0"; c.beginPath(); c.moveTo(px - 5, y + 4); c.lineTo(px + 5, y + 4); c.lineTo(px + 30, y + 60); c.lineTo(px + 14, y + 60); c.fill(); c.restore(); break; }
+        case "painting": if (G.isOpen(d.x, d.y)) break; c.fillStyle = "#6a4a1a"; c.fillRect(px - 9, py - 30, 18, 14); c.fillStyle = shade(B.wall, -0.4); c.fillRect(px - 7.5, py - 28.5, 15, 11); D.circ(c, px, py - 24, 3, "#3a2a2a"); c.fillStyle = "#7a1a1a"; c.fillRect(px - 3, py - 21, 6, 3); break;
+        case "window": { /* kleines Spitzbogenfenster mit Steinrahmen, Sprossen und Fensterbank */
+          if (G.isOpen(d.x, d.y)) break;
+          const y = py - 30, st0 = PAL ? PAL.stone : shade(B.wall, 0.1), sth = PAL ? PAL.stoneHi : shade(B.wall, 0.3);
+          c.fillStyle = st0; c.beginPath(); c.moveTo(px - 7.5, y + 19); c.lineTo(px - 7.5, y + 4); c.quadraticCurveTo(px, y - 5.5, px + 7.5, y + 4); c.lineTo(px + 7.5, y + 19); c.fill();
+          c.fillStyle = shade(B.wall, -0.55); c.beginPath(); c.moveTo(px - 5.5, y + 18); c.lineTo(px - 5.5, y + 4.5); c.quadraticCurveTo(px, y - 2.5, px + 5.5, y + 4.5); c.lineTo(px + 5.5, y + 18); c.fill();
+          c.fillStyle = B.out ? "rgba(190,160,190,.32)" : "rgba(220,190,170,.2)"; c.beginPath(); c.moveTo(px - 4.6, y + 17.5); c.lineTo(px - 4.6, y + 5); c.quadraticCurveTo(px, y - 1.2, px + 4.6, y + 5); c.lineTo(px + 4.6, y + 17.5); c.fill();
+          c.fillStyle = "rgba(255,240,220,.18)"; c.fillRect(px - 4.6, y + 5, 1.2, 12.5);
+          c.fillStyle = shade(B.wall, -0.6); c.fillRect(px - 0.5, y - 1, 1, 19); c.fillRect(px - 4.6, y + 10, 9.2, 1);
+          c.fillStyle = sth; c.fillRect(px - 7.5, y + 4, 0.8, 15);
+          c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(px - 9, y + 21, 18, 2); c.fillStyle = st0; c.fillRect(px - 9, y + 18.5, 18, 2.6); c.fillStyle = sth; c.fillRect(px - 9, y + 18.5, 18, 0.7);
+          c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = 0.06; c.fillStyle = "#f0dcc8"; c.beginPath(); c.moveTo(px - 5, y + 4); c.lineTo(px + 5, y + 4); c.lineTo(px + 30, y + 60); c.lineTo(px + 14, y + 60); c.fill(); c.restore(); break; }
         case "rune": { const g = 0.5 + 0.5 * Math.sin(t * 1.5 + d.x); c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = 0.5 + g * 0.5; c.strokeStyle = "#ffb040"; c.lineWidth = 1; const y = py - 26; c.beginPath(); c.arc(px, y, 6, 0, 6.283); c.stroke(); c.beginPath(); c.moveTo(px - 3, y + 3); c.lineTo(px, y - 4); c.lineTo(px + 3, y + 3); c.moveTo(px - 2, y); c.lineTo(px + 2, y); c.stroke(); D.glow(c, px, y, 14, "rgba(255,170,60," + 0.3 * g + ")"); c.restore(); break; }
-        case "pipe": c.fillStyle = "#3a3434"; c.fillRect(px - 2, py - 40, 4, 40); c.fillRect(px - 4, py - 20, 8, 3); if (Math.random() < 0.03) FX.p({ x: px, y: py - 40, vx: 0, vy: -20, life: 1.5, size: 4, col: "rgba(90,80,80,.6)", kind: "smoke" }); break;
+        case "pipe": if (G.isOpen(d.x, d.y)) break; c.fillStyle = "#3a3434"; c.fillRect(px - 2, py - 40, 4, 40); c.fillRect(px - 4, py - 20, 8, 3); if (Math.random() < 0.03) FX.p({ x: px, y: py - 40, vx: 0, vy: -20, life: 1.5, size: 4, col: "rgba(90,80,80,.6)", kind: "smoke" }); break;
         case "column": c.fillStyle = shade(B.wall, 0.08); c.fillRect(px - 5, py - 48, 10, 48); c.fillStyle = shade(B.wall, 0.2); c.fillRect(px - 5, py - 48, 2, 48); c.fillStyle = shade(B.wall, -0.1); c.fillRect(px - 7, py - 50, 14, 3); c.fillRect(px - 7, py - 3, 14, 3); break;
         case "bars": c.fillStyle = "rgba(10,10,10,.7)"; for (let k = -10; k <= 10; k += 4) c.fillRect(px + k, py - 34, 1.6, 34); c.fillRect(px - 11, py - 34, 23, 1.6); break;
-        case "crenel": c.fillStyle = shade(B.wall, -0.15); for (let k = -16; k < 16; k += 8) c.fillRect(px + k, py - 10, 5, 10); break;
-        case "shelf": c.fillStyle = "#5a3a22"; c.fillRect(px - 10, py - 22, 20, 1.6); c.fillRect(px - 10, py - 12, 20, 1.6); for (let k = 0; k < 5; k++) { c.fillStyle = ["#7a2a2a", "#2a5a3a", "#6a5a2a", "#4a3a5a", "#7a6a5a"][k]; c.fillRect(px - 9 + k * 4, py - 29 + (k % 2), 3, 7); } D.ell(c, px - 4, py - 15, 2.4, 2.8, "#5a8a5a"); D.ell(c, px + 3, py - 15, 2.4, 2.8, "#8a5a7a"); break;
+        case "crenel": if (G.isOpen(d.x, d.y)) break; c.fillStyle = shade(B.wall, -0.15); for (let k = -16; k < 16; k += 8) c.fillRect(px + k, py - 10, 5, 10); break;
+        case "shelf": if (G.isOpen(d.x, d.y)) break; c.fillStyle = "#5a3a22"; c.fillRect(px - 10, py - 22, 20, 1.6); c.fillRect(px - 10, py - 12, 20, 1.6); for (let k = 0; k < 5; k++) { c.fillStyle = ["#7a2a2a", "#2a5a3a", "#6a5a2a", "#4a3a5a", "#7a6a5a"][k]; c.fillRect(px - 9 + k * 4, py - 29 + (k % 2), 3, 7); } D.ell(c, px - 4, py - 15, 2.4, 2.8, "#5a8a5a"); D.ell(c, px + 3, py - 15, 2.4, 2.8, "#8a5a7a"); break;
         case "rack": c.fillStyle = "#4a3020"; c.fillRect(px - 10, py - 20, 2, 20); c.fillRect(px + 8, py - 20, 2, 20); c.fillRect(px - 10, py - 20, 20, 2); c.fillStyle = "#8a8288"; for (let k = -6; k <= 6; k += 4) c.fillRect(px + k, py - 18, 1, 10); break;
         case "weapons": c.fillStyle = "#4a3020"; c.fillRect(px - 9, py - 3, 18, 3); c.save(); c.translate(px - 4, py - 3); c.rotate(-1.7); Z.drawWeapon(c, "spear", "#a0a0a0", t); c.restore(); c.save(); c.translate(px + 2, py - 3); c.rotate(-1.4); Z.drawWeapon(c, "axe", "#a0a0a0", t); c.restore(); break;
         case "anvil": c.fillStyle = "#3a3a40"; c.fillRect(px - 3, py - 7, 6, 7); c.fillRect(px - 8, py - 11, 16, 4); c.beginPath(); c.moveTo(px + 8, py - 11); c.lineTo(px + 13, py - 10); c.lineTo(px + 8, py - 8); c.fill(); c.fillStyle = "#5a5a62"; c.fillRect(px - 8, py - 11, 16, 1); break;
@@ -428,15 +1470,21 @@
       }
     }
   }
+  /* Flamme: Hof, äußere Zunge, Kern und weißer Docht – alles additiv */
+  /* frei sichtbarer Hintergrund (Himmel, Fenster, Arena): dort gibt es keine Wand für Wandschmuck */
+  G.isOpen = (x, y) => { if (!lv || x < 0 || y < 0 || x >= lv.W || y >= lv.H) return false; const i = y * lv.W + x; return !!((G.sky && G.sky[i]) || (PR && (PR.win[i] || PR.clear[i]))); };
   function flame(c, x, y, s, col) {
     c.save(); c.globalCompositeOperation = "lighter";
-    const h = (7 + Math.sin(G.time * 17 + x) * 1.6) * s, w = 3 * s;
-    D.glow(c, x, y - h * 0.4, 14 * s + 4, "rgba(255,150,60,.35)");
-    c.fillStyle = col; c.beginPath(); c.moveTo(x - w, y); c.quadraticCurveTo(x - w * 0.6, y - h * 0.6, x + Math.sin(G.time * 11 + y) * w * 0.4, y - h); c.quadraticCurveTo(x + w * 0.6, y - h * 0.5, x + w, y); c.fill();
-    c.fillStyle = "#fff0c0"; c.beginPath(); c.moveTo(x - w * 0.4, y); c.quadraticCurveTo(x, y - h * 0.55, x + w * 0.4, y); c.fill();
+    const tm = G.time, h = (7 + Math.sin(tm * 17 + x) * 1.6 + Math.sin(tm * 29 + x * 3) * 0.7) * s, w = 3 * s, lean = Math.sin(tm * 11 + y) * w * 0.45 + (Z.windX || 0) * 0.02 * s;
+    D.glow(c, x, y - h * 0.4, 14 * s + 5, "rgba(255,150,60,.32)");
+    c.fillStyle = col; c.globalAlpha = 0.85; c.beginPath(); c.moveTo(x - w, y); c.quadraticCurveTo(x - w * 0.8, y - h * 0.6, x + lean, y - h); c.quadraticCurveTo(x + w * 0.8, y - h * 0.5, x + w, y); c.quadraticCurveTo(x, y + w * 0.5, x - w, y); c.fill();
+    if (s > 0.6) { c.globalAlpha = 0.6; c.beginPath(); c.moveTo(x + w * 0.2, y - h * 0.3); c.quadraticCurveTo(x + w * 0.9, y - h * 0.7, x + lean * 1.6 + w * 0.6, y - h * 0.95 - Math.sin(tm * 23 + x) * s); c.quadraticCurveTo(x + w * 0.5, y - h * 0.45, x + w * 0.2, y - h * 0.3); c.fill(); }
+    c.globalAlpha = 1; c.fillStyle = "#ffd890"; c.beginPath(); c.moveTo(x - w * 0.55, y); c.quadraticCurveTo(x - w * 0.3, y - h * 0.5, x + lean * 0.6, y - h * 0.72); c.quadraticCurveTo(x + w * 0.35, y - h * 0.4, x + w * 0.55, y); c.fill();
+    c.fillStyle = "#fff6dc"; c.beginPath(); c.moveTo(x - w * 0.3, y); c.quadraticCurveTo(x, y - h * 0.42, x + w * 0.3, y); c.fill();
     c.restore();
   }
   Z.flame = flame;
+  G._drawTiles = drawTiles; G._light = (c, W, H) => lightPass(c, Z.cam, W, H); /* für Tests */
 
   /* Türen und Stationen */
   function drawDoors(c, t) {
@@ -471,8 +1519,17 @@
     if (G.darkCol !== B.ambCol) { G.darkCol = B.ambCol; const n = parseInt((B.ambCol || "#202020").slice(1), 16); G.darkRGB = [((n >> 16) * 0.12) | 0, (((n >> 8) & 255) * 0.12) | 0, ((n & 255) * 0.12) | 0].join(","); }
     l.fillStyle = "rgba(" + G.darkRGB + "," + dark + ")"; l.fillRect(0, 0, G.light.width, G.light.height);
     l.globalCompositeOperation = "destination-out";
-    if (!G.holeSpr) { G.holeSpr = document.createElement("canvas"); G.holeSpr.width = G.holeSpr.height = 64; const h = G.holeSpr.getContext("2d"); const g = h.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, "rgba(0,0,0,1)"); g.addColorStop(0.55, "rgba(0,0,0,.55)"); g.addColorStop(1, "rgba(0,0,0,0)"); h.fillStyle = g; h.fillRect(0, 0, 64, 64); }
+    if (!G.holeSpr) {
+      /* weicher Lichtkreis (fast quadratischer Abfall, kein harter Rand) */
+      G.holeSpr = document.createElement("canvas"); G.holeSpr.width = G.holeSpr.height = 64; const h = G.holeSpr.getContext("2d"); const g = h.createRadialGradient(32, 32, 0, 32, 32, 32);
+      for (const [o, a] of [[0, 1], [0.2, 0.93], [0.4, 0.72], [0.6, 0.42], [0.8, 0.15], [1, 0]]) g.addColorStop(o, "rgba(0,0,0," + a + ")"); h.fillStyle = g; h.fillRect(0, 0, 64, 64);
+      /* Lichtkegel nach unten (Laternen, Kronleuchter) */
+      G.coneSpr = document.createElement("canvas"); G.coneSpr.width = 64; G.coneSpr.height = 96; const k = G.coneSpr.getContext("2d");
+      const kg = k.createRadialGradient(32, 0, 0, 32, 0, 96); kg.addColorStop(0, "rgba(0,0,0,.9)"); kg.addColorStop(0.5, "rgba(0,0,0,.4)"); kg.addColorStop(1, "rgba(0,0,0,0)"); k.fillStyle = kg;
+      k.beginPath(); k.moveTo(26, 0); k.lineTo(38, 0); k.lineTo(64, 96); k.lineTo(0, 96); k.closePath(); k.fill();
+    }
     const hole = (x, y, r, a) => { const X = (x - cam.x) * sx, Y = (y - cam.y) * sy, Rr = r * sx; if (X < -Rr || Y < -Rr || X > G.light.width + Rr || Y > G.light.height + Rr) return; l.globalAlpha = a; l.drawImage(G.holeSpr, X - Rr, Y - Rr, Rr * 2, Rr * 2); };
+    const cone = (x, y, w, hh, a) => { const X = (x - cam.x) * sx, Y = (y - cam.y) * sy, Ww = w * sx, Hh = hh * sy; if (X < -Ww || X > G.light.width + Ww || Y > G.light.height || Y < -Hh) return; l.globalAlpha = a; l.drawImage(G.coneSpr, X - Ww / 2, Y, Ww, Hh); };
     const P = Z.player, t = G.time;
     if (P) {
       let r = Z.darkness > 0 ? 70 : 150;
@@ -480,7 +1537,8 @@
       hole(P.x + P.w / 2, P.y + 10, r, 0.95);
     }
     if (Z.darkness <= 0) {
-      for (const d of lv.lights) { const f = 1 + Math.sin(t * 9 + d.x) * 0.06 + Math.sin(t * 23 + d.y) * 0.04; const big = { forge: 90, brazier: 80, chandelier: 90, campfire: 120, greenfire: 70, fountain: 60, altar: 60 }[d.kind] || (d.kind === "mushroom" ? 40 : d.kind === "window" ? 60 : d.kind === "candle" ? 34 : 70); hole(d.x * T + 8, d.y * T + (d.kind === "torch" ? -6 : 6), big * f, d.kind === "window" ? 0.6 : 0.9); }
+      for (const d of lv.lights) { const f = 1 + Math.sin(t * 9 + d.x) * 0.06 + Math.sin(t * 23 + d.y) * 0.04; const big = { forge: 90, brazier: 80, chandelier: 90, campfire: 120, greenfire: 70, fountain: 60, altar: 60 }[d.kind] || (d.kind === "mushroom" ? 40 : d.kind === "window" ? 60 : d.kind === "candle" ? 34 : 70); hole(d.x * T + 8, d.y * T + (d.kind === "torch" ? -6 : 6), big * f, d.kind === "window" ? 0.6 : 0.9);
+        if (d.kind === "chandelier" || d.kind === "lantern") cone(d.x * T + 8, d.y * T + 10, 90 * f, 130, 0.45); }
       for (const h of Z.hazards) if (h.kind === "fire" || h.kind === "column" || h.kind === "strike" || (h.kind === "breath")) hole(h.x, h.y - 10, 60, 0.8);
       for (const p of Z.projs) if (p.k.glow || p.kind === "lichtwelle" || p.kind === "e_feuerball") hole(p.x, p.y, 40, 0.8);
       for (const e of Z.enemies) if (!e.dead && !(e.hidden > 0)) { const big = e.def.glow || e.def.shape === "wisp" || e.def.boss || e.elite; hole(e.x + e.w / 2, e.y + e.h / 2, e.def.boss ? 150 : big ? 50 : 30 + e.h * 0.4, big ? 0.75 : 0.5); }
@@ -489,9 +1547,26 @@
       for (const s of lv.props) if (s.kind === "npc" || s.kind === "station") hole(s.x * T + 8, s.y * T, 60, 0.6);
       if (Z.lightExtra) Z.lightExtra(hole);
       if (Z.flashLight > 0) { l.fillStyle = "rgba(0,0,0," + Z.flashLight + ")"; l.fillRect(0, 0, G.light.width, G.light.height); }
+      warmTint(l, cam, sx, sy, t);
     }
     l.globalAlpha = 1;
     c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.imageSmoothingEnabled = true; c.drawImage(G.light, 0, 0, W, H); c.restore();
+  }
+
+  /* Warmes Leuchten der Lichtquellen (additiv, nach der Dunkelheit): Fackeln färben ihre Umgebung */
+  const WARM = { torch: ["rgba(255,140,50,.5)", 60], brazier: ["rgba(255,120,40,.55)", 70], forge: ["rgba(255,110,30,.6)", 80], candle: ["rgba(255,200,120,.45)", 26], candelabra: ["rgba(255,190,110,.5)", 44], chandelier: ["rgba(255,190,110,.5)", 60], lantern: ["rgba(255,180,90,.5)", 46], greenfire: ["rgba(110,255,120,.45)", 60], mushroom: ["rgba(180,120,255,.4)", 30], rune: ["rgba(255,160,60,.45)", 40], crystal: ["rgba(255,140,70,.45)", 36], campfire: ["rgba(255,140,50,.55)", 100] };
+  /* warme Farbe in die Lichtkarte: Fackeln tönen ihre Umgebung (kostet keinen eigenen Vollbild-Durchgang) */
+  function warmTint(l, cam, sx, sy, t) {
+    if (!lv.lights || (Z.gq && Z.gq.level === 0)) return;
+    l.globalCompositeOperation = "source-over";
+    for (const d of lv.lights) {
+      const w = WARM[d.kind]; if (!w) continue;
+      let col = w[0]; if (d.kind === "mushroom" && d.s >= 0.5) col = "rgba(130,230,120,.4)";
+      const x = d.x * T + 8, y = d.y * T + (d.kind === "torch" ? -8 : 4), r = w[1] * (1 + Math.sin(t * 9 + d.x) * 0.05 + Math.sin(t * 23 + d.y) * 0.03);
+      if (x < cam.x - r || x > cam.x + cam.w + r || y < cam.y - r || y > cam.y + cam.h + r) continue;
+      l.globalAlpha = 0.42; l.drawImage(Z.glowSprite(col), (x - r - cam.x) * sx, (y - r - cam.y) * sy, r * 2 * sx, r * 2 * sy);
+    }
+    l.globalAlpha = 1;
   }
 
   /* ======================= WETTER & STIMMUNG ======================= */

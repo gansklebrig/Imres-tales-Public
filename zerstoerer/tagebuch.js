@@ -29,7 +29,7 @@
   const count = () => Object.keys(meta()).length;
 
   /* ---------- Aufbau je Gebiet ---------- */
-  let page = null, signs = [], scouts = [], lvRef = null;
+  let page = null, signs = [], scouts = [], lvRef = null, spurPrev = 0;
   function farSpot(lv, R, pred, loose) {
     const st = lv.start || { x: 0, y: 0 }, cand = [];
     for (const k in lv.cells) {
@@ -101,6 +101,8 @@
   const tick0 = Z.ebenenTick;
   Z.ebenenTick = function (dt) {
     if (tick0) tick0(dt);
+    /* gelesene Spuren dauerhaft mitzählen (für den Erfolg „Spurenleser“) */
+    if (Z.stats) { const n = Z.stats.spuren || 0; if (n > spurPrev) { Z.meta.spuren = (Z.meta.spuren || 0) + (n - spurPrev); } spurPrev = n; }
     const P = Z.player; if (!P || P.dead || Z.level !== lvRef) return;
     const px = P.x + P.w / 2, py = P.y + P.h;
     if (page && !page.got && Math.abs(page.x * T + 8 - px) < 14 && Math.abs((page.y + 1) * T - py) < 18) {
@@ -122,7 +124,7 @@
         P.potions = Math.min(P.potMax || 2, (P.potions || 0) + 1);
         Z.ui.say(s.x * T + 8, s.y * T - 18, s.name, L(Z.R.pick([["Danke! Hier – meine Karte. Und ein Trank, ich brauch ihn nicht mehr.", "Thank you! Here – my map. And a potion, I won't need it."], ["Die Ausgänge? Ich hab sie alle eingezeichnet. Nimm die Karte, ich nehm die Beine in die Hand.", "The exits? I marked them all. Take the map, I'm taking to my heels."], ["Mira war hier, vor Wochen. Sie hat nach oben gewollt. Viel Glück.", "Mira was here, weeks ago. She wanted to go up. Good luck."]])), 4600);
         Z.toast && Z.toast("<b>" + L(["Karte des Gebiets aufgedeckt", "Area map revealed"]) + "</b><br><small>" + L(["+1 Heiltrank", "+1 healing potion"]) + "</small>", 2400);
-        if (Z.stats) Z.stats.befreit = (Z.stats.befreit || 0) + 1;
+        if (Z.stats) Z.stats.befreit = (Z.stats.befreit || 0) + 1; Z.meta.befreit = (Z.meta.befreit || 0) + 1; Z.saveMeta();
       }
     }
   };
@@ -199,6 +201,49 @@
     for (const s of signs) drawSign(c, s);
     for (const s of scouts) drawScout(c, s, t);
     drawPage(c, t);
+  };
+  /* ---------- Barradins Fundbuch: die Vorgänger ---------- */
+  const GROUP = [
+    { id: "mira", n: "Mira", r: ["Kartenzeichnerin", "Cartographer"], page: 12, col: "#c8a060", hair: "#6a3a1a",
+      fate: ["Ging allein weiter, den Fäden nach – zur Weberin.", "Went on alone, following the threads – to the Weaver."], bar: ["„Eine Frau, die Karten von Orten zeichnet, die sich bewegen. Respekt. Oder Wahnsinn.“", "“A woman who maps places that move. Respect. Or madness.”"] },
+    { id: "holm", n: "Bruder Holm", r: ["Priester", "Priest"], page: 10, col: "#d8d0bc", hair: "#8a8a80",
+      fate: ["Blieb am Schrein des schwarzen Sees, um für die zu beten, die nach ihnen kommen.", "Stayed at the black lake's shrine to pray for those who come after."], bar: ["„Betet für uns? Sehr nett. Ich hätte lieber seinen Heiltrank.“", "“Praying for us? Very kind. I'd rather have his potion.”"] },
+    { id: "tavik", n: "Tavik", r: ["Dieb", "Thief"], page: 7, col: "#5a4a3a", hair: "#2a1a10",
+      fate: ["Von einem Faden in den Schlund gezogen. Man hörte ihn lachen.", "Pulled into the chasm by a thread. He was heard laughing."], bar: ["„Ein Dieb, der von einem Faden geklaut wurde. Das schreibt sich selbst.“", "“A thief stolen by a thread. It writes itself.”"] },
+    { id: "grete", n: "Grete", r: ["Zwergenkriegerin", "Dwarf warrior"], page: 9, col: "#8a3a2a", hair: "#c86a2a",
+      fate: ["Nahm auf den Zinnen den kurzen Weg nach unten. Die Mutigste von allen.", "Took the short way down on the spires. The bravest of them all."], bar: ["„Ich schreibe ihr eine Ballade. Eine kurze. Mit einem langen Fall.“", "“I'll write her a ballad. A short one. With a long fall.”"] }
+  ];
+  function portrait(cv, g, known) {
+    const c = cv.getContext("2d"); c.scale(2, 2); const W = cv.width / 2, H = cv.height / 2;
+    c.fillStyle = "#2a1e1a"; c.fillRect(0, 0, W, H); c.fillStyle = "#8a6a2a"; c.lineWidth = 3; c.strokeStyle = "#8a6a2a"; c.strokeRect(1.5, 1.5, W - 3, H - 3);
+    if (!known) { c.fillStyle = "#4a3a34"; c.font = "700 20px serif"; c.textAlign = "center"; c.fillText("?", W / 2, H / 2 + 7); return; }
+    c.fillStyle = g.col; c.beginPath(); c.moveTo(6, H); c.quadraticCurveTo(W / 2, H - 22, W - 6, H); c.fill();
+    c.fillStyle = "#d8b49a"; c.beginPath(); c.ellipse(W / 2, H / 2 - 2, 9, 11, 0, 0, TAU); c.fill();
+    c.fillStyle = g.hair; c.beginPath(); c.ellipse(W / 2, H / 2 - 9, 10, 6, 0, Math.PI, 0); c.fill();
+    if (g.id === "grete") { c.fillStyle = g.hair; c.beginPath(); c.moveTo(W / 2 - 8, H / 2 + 2); c.quadraticCurveTo(W / 2, H / 2 + 18, W / 2 + 8, H / 2 + 2); c.fill(); c.fillStyle = "#7a7a80"; c.beginPath(); c.arc(W / 2, H / 2 - 9, 10, Math.PI, 0); c.fill(); }
+    if (g.id === "holm") { c.fillStyle = "#c8c0b0"; c.beginPath(); c.arc(W / 2, H / 2 - 4, 11, Math.PI * 1.05, Math.PI * 1.95); c.lineTo(W / 2 + 9, H / 2 + 12); c.lineTo(W / 2 - 9, H / 2 + 12); c.fill(); c.fillStyle = "#d8b49a"; c.beginPath(); c.ellipse(W / 2, H / 2 - 1, 7, 9, 0, 0, TAU); c.fill(); }
+    if (g.id === "tavik") { c.fillStyle = "#2a2018"; c.fillRect(W / 2 - 9, H / 2 - 5, 18, 3); }
+    if (g.id === "mira") { c.fillStyle = "#e8dcb8"; c.fillRect(W - 16, H - 16, 10, 8); c.fillStyle = "#6a4a2a"; c.fillRect(W - 15, H - 14, 8, 0.8); c.fillRect(W - 15, H - 12, 6, 0.8); }
+    c.fillStyle = "#1a1014"; c.fillRect(W / 2 - 4, H / 2 - 3, 2, 2); c.fillRect(W / 2 + 2, H / 2 - 3, 2, 2);
+    c.strokeStyle = "#6a3a2a"; c.lineWidth = 1; c.beginPath(); c.arc(W / 2, H / 2 + 3, 3, 0.3, Math.PI - 0.3); c.stroke();
+  }
+  function groupHTML() {
+    const m = meta();
+    let h = '<h2>' + L(["Die Vorgänger", "Those who came before"]) + '</h2><p class="hinweis">' + L(["Barradin hat Miras Seiten abgeschrieben. Wer vor uns in der Feste war:", "Barradin copied Mira's pages. Who entered the keep before us:"]) + '</p><div class="vorg">';
+    for (const g of GROUP) {
+      const known = !!m[g.page];
+      h += '<div class="vg"><canvas width="112" height="128" data-g="' + g.id + '" data-k="' + (known ? 1 : 0) + '"></canvas><div><b>' + (known || count() > 0 ? esc(g.n) : "???") + "</b> <small>" + esc(L(g.r)) + "</small><p>" + (known ? esc(L(g.fate)) : L(["Ihr Schicksal steht auf einer Seite, die noch fehlt.", "Their fate is written on a page still missing."])) + "</p>" + (known ? '<p class="bar">' + esc(L(g.bar)) + "</p>" : "") + "</div></div>";
+    }
+    return h + '</div><div class="knoepfe"><button data-act="tbBuch">📜 ' + L(["Tagebuch lesen", "Read the diary"]) + '</button><button data-act="tbCodex" autofocus>' + L(["Zurück", "Back"]) + "</button></div>";
+  }
+  Z.ui.actions.tbGruppe = () => { Z.ui.close(); Z.ui.open(groupHTML(), { cls: "breit" }); document.querySelectorAll("#modal canvas[data-g]").forEach(cv => portrait(cv, GROUP.find(g => g.id === cv.dataset.g), cv.dataset.k === "1")); };
+  Z.ui.actions.tbCodex = () => { Z.ui.close(); Z.ui.codex(); };
+  const codex0 = Z.ui.codex;
+  Z.ui.codex = function () {
+    const r = codex0.apply(this, arguments);
+    const tabs = document.querySelector("#modal .reiter");
+    if (tabs && !tabs.querySelector('[data-act="tbGruppe"]')) { const b = document.createElement("button"); b.dataset.act = "tbGruppe"; b.textContent = L(["Die Vorgänger", "Before us"]); tabs.appendChild(b); }
+    return r;
   };
   /* Seite und Kundschafter auf der Karte */
   Z.tagebuch = { pages: PAGES, count, page: () => page, signs: () => signs, scouts: () => scouts };
