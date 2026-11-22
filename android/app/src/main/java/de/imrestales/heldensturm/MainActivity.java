@@ -9,6 +9,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -31,6 +32,7 @@ public class MainActivity extends Activity {
     static final String START = "https://" + HOST + "/heldensturm.html";
 
     private WebView web;
+    private Aktualisierer upd;
 
     @Override
     protected void onCreate(Bundle saved) {
@@ -61,6 +63,8 @@ public class MainActivity extends Activity {
         s.setDisplayZoomControls(false);
         s.setCacheMode(WebSettings.LOAD_NO_CACHE);
 
+        upd = new Aktualisierer(this);
+        web.addJavascriptInterface(new Bruecke(), "HeldensturmApp");
         web.setWebChromeClient(new WebChromeClient());
         web.setWebViewClient(new Spielserver());
         web.setFocusable(true);
@@ -69,6 +73,27 @@ public class MainActivity extends Activity {
         if (saved == null || web.restoreState(saved) == null) web.loadUrl(START);
         web.requestFocus();
         vollbild();
+        if (getIntent() != null && Aktualisierer.ACTION_STATUS.equals(getIntent().getAction())) upd.status(getIntent());
+        else upd.automatisch();
+    }
+
+    /** Für den Knopf im Spielmenü: window.HeldensturmApp.suche() / .version() */
+    private class Bruecke {
+        @JavascriptInterface
+        public void suche() {
+            runOnUiThread(() -> upd.suche(true));
+        }
+
+        @JavascriptInterface
+        public String version() {
+            return "1." + Aktualisierer.eigeneVersion(MainActivity.this);
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent i) {
+        super.onNewIntent(i);
+        if (i != null && Aktualisierer.ACTION_STATUS.equals(i.getAction())) upd.status(i);
     }
 
     /** Liefert jede Datei des Spiels aus den Assets; alles andere (z. B. Links) geht in den Browser. */

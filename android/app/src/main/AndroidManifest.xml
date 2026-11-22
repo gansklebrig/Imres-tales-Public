@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Nur für das gemeinsame Spiel übers Netz (PeerJS); allein läuft alles offline -->
+    <!-- Für Updates und das gemeinsame Spiel übers Netz; allein läuft alles offline -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Eigener Update-Knopf: neue Version von GitHub laden und installieren -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
     <uses-feature android:name="android.hardware.gamepad" android:required="false" />
 
