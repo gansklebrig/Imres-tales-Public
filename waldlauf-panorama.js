@@ -491,8 +491,8 @@
       [-1, 1].forEach(s => {
         for (let k = 0; k < 7; k++) {
           const px = seitenX(info, s, 0.1 + r() * 0.85), py = info.oben + 60 + r() * 220, gold = r() < 0.4;
-          x.strokeStyle = gold ? "rgba(224,160,70,.45)" : "rgba(90,200,170," + (0.25 + 0.15 * Math.sin(t * 0.8 + k)).toFixed(3) + ")"; x.lineWidth = 1.6;
-          x.beginPath(); x.moveTo(px, py); for (let j = 1; j < 5; j++) x.lineTo(px + (r() - 0.5) * 40, py + j * 14); x.stroke();
+          x.strokeStyle = gold ? "rgba(224,160,70,.16)" : "rgba(90,200,170," + (0.08 + 0.06 * Math.sin(t * 0.8 + k)).toFixed(3) + ")"; x.lineWidth = 1.2;
+          x.beginPath(); x.moveTo(px, py); let qx = px; for (let j = 1; j < 5; j++) { qx += (r() - 0.5) * 16; x.lineTo(qx, py + j * 9); } x.stroke();
         }
       });
       // links: Erztunnel mit Grubenwagen und Schienen

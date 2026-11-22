@@ -739,8 +739,8 @@
         hoehlenDecke(x, r, "#030304", 46);
         /* Erzadern in Teal und Gold */
         for (let i = 0; i < 9; i++) {
-          const px = r() * W, py = 60 + r() * 140; x.strokeStyle = r() < 0.5 ? "rgba(90,200,170,.28)" : "rgba(224,160,70,.3)"; x.lineWidth = 1.2;
-          x.beginPath(); x.moveTo(px, py); for (let k = 0; k < 4; k++) x.lineTo(px + (r() - 0.5) * 50, py + k * 12 + r() * 8); x.stroke();
+          const px = r() * W, py = 60 + r() * 140; x.strokeStyle = r() < 0.5 ? "rgba(90,200,170,.12)" : "rgba(224,160,70,.13)"; x.lineWidth = 1;
+          x.beginPath(); x.moveTo(px, py); let qx = px; for (let k = 1; k < 4; k++) { qx += (r() - 0.5) * 14; x.lineTo(qx, py + k * 7); } x.stroke();
         }
         x.fillStyle = "#0b090e";
         x.beginPath(); x.moveTo(0, 50); x.lineTo(64, 96); x.lineTo(50, 190); x.lineTo(78, 250); x.lineTo(56, 300); x.lineTo(0, 300); x.fill();
