@@ -13,6 +13,13 @@
   metaInit();
 
   /* ======================= PAKTE ======================= */
+  /* Startausrüstung: immer zwei schlichte Waffen, nie mit bloßen Fäusten los */
+  const KITS = {
+    sb: { n: ["Schwert & Bogen", "Sword & bow"], d: ["Kurzschwert für die Nähe, Jagdbogen für die Ferne.", "Shortsword up close, hunting bow at range."], a1: "kurzschwert", a2: "jagdbogen" },
+    ss: { n: ["Schwert & Schild", "Sword & shield"], d: ["Zuschlagen und parieren – der sichere Weg.", "Strike and parry – the safe way."], a1: "kurzschwert", a2: "holzschild" },
+    bs: { n: ["Bogen & Schild", "Bow & shield"], d: ["Abstand halten, Geschosse zurückwerfen.", "Keep your distance, deflect projectiles."], a1: "jagdbogen", a2: "holzschild" }
+  };
+  Z.KITS = KITS;
   const PACTS = {
     glas: { n: ["Glasknochen", "Glass Bones"], d: ["35 % weniger Leben.", "35% less health."] },
     durst: { n: ["Ewiger Durst", "Endless Thirst"], d: ["Keine Heiltränke.", "No healing potions."] },
@@ -97,15 +104,17 @@
   const ui = () => Z.ui;
   let sel = null;
   function startModal() {
-    const m = M(); sel = sel || { hero: m.heroes[m.hero] ? m.hero : "Z", cape: m.capes[m.cape] ? m.cape : "rot", pacts: (m.pactSel || []).slice() };
+    const m = M(); sel = sel || { hero: m.heroes[m.hero] ? m.hero : "Z", cape: m.capes[m.cape] ? m.cape : "rot", pacts: (m.pactSel || []).slice(), kit: KITS[m.kit] ? m.kit : "sb" };
     const b = (act, arg, on, lab, dis, sub) => '<button class="wahl' + (on ? " an" : "") + '" data-act="' + act + '" data-arg="' + arg + '"' + (dis ? " disabled" : "") + "><b>" + esc(lab) + "</b>" + (sub ? "<small>" + esc(sub) + "</small>" : "") + "</button>";
     const heroes = Object.keys(HEROES).map(k => b("abHero", k, sel.hero === k, L(HEROES[k].n), !m.heroes[k], m.heroes[k] ? L(HEROES[k].d) : "🔒 " + L(HEROES[k].unlock))).join("");
     const capes = Object.keys(CAPES).filter(k => m.capes[k]).map(k => '<button class="umhang' + (sel.cape === k ? " an" : "") + '" data-act="abCape" data-arg="' + k + '" title="' + esc(L(CAPES[k].n)) + '" style="--a:' + CAPES[k].c[0] + ";--b:" + CAPES[k].c[1] + '"></button>').join("");
     const pacts = Object.keys(PACTS).map(k => b("abPact", k, sel.pacts.includes(k), L(PACTS[k].n), false, L(PACTS[k].d))).join("");
+    const kits = Object.keys(KITS).map(k => b("abKit", k, sel.kit === k, L(KITS[k].n), false, L(KITS[k].d))).join("");
     const n = sel.pacts.length;
     const sk = Z.meta.skullSel || 0;
     ui().open("<h2>" + L(["Die Feste betreten", "Enter the keep"]) + "</h2>" +
       "<h3>" + L(["Held", "Hero"]) + '</h3><div class="wahlen">' + heroes + "</div>" +
+      "<h3>" + L(["Ausrüstung", "Gear"]) + ' <small class="hinweis">' + L(["Zwei einfache Waffen für den Anfang – alles Bessere findest du unterwegs", "Two plain weapons to start – anything better you find on the way"]) + '</small></h3><div class="wahlen">' + kits + "</div>" +
       "<h3>" + L(["Umhang", "Cape"]) + ' <small class="hinweis">' + Object.keys(m.capes).length + "/" + Object.keys(CAPES).length + '</small></h3><div class="umhaenge">' + capes + "</div>" +
       "<h3>" + L(["Pakte", "Pacts"]) + ' <small class="hinweis">' + L(["Jeder Pakt: +30 % Seelensplitter, bessere Beute", "Each pact: +30% soul shards, better loot"]) + (n ? " · " + L(["aktiv: ", "active: "]) + n + " (×" + (1 + 0.3 * n).toFixed(1) + ")" : "") + '</small></h3><div class="wahlen pakte">' + pacts + "</div>" +
       (sk ? '<p class="schaedel">' + "☠".repeat(sk) + " " + L(["Schädel aktiv", "skulls active"]) + "</p>" : "") +
@@ -117,7 +126,8 @@
     act.abHero = k => { if (!M().heroes[k]) return; sel.hero = k; ui().close(); startModal(); refocus(k); };
     act.abCape = k => { sel.cape = k; M().cape = k; applyCape(); ui().close(); startModal(); refocus(k); };
     act.abPact = k => { const i = sel.pacts.indexOf(k); if (i >= 0) sel.pacts.splice(i, 1); else sel.pacts.push(k); ui().close(); startModal(); refocus(k); };
-    act.abGo = () => { const m = M(); m.hero = sel.hero; m.cape = sel.cape; m.pactSel = sel.pacts.slice(); Z.saveMeta(); ui().close(); Z.startRun(); };
+    act.abKit = k => { sel.kit = k; ui().close(); startModal(); refocus(k); };
+    act.abGo = () => { const m = M(); m.kit = sel.kit; m.hero = sel.hero; m.cape = sel.cape; m.pactSel = sel.pacts.slice(); Z.saveMeta(); ui().close(); Z.startRun(); };
     act.abAch = () => { ui().close(); achModal(true); };
     act.abAchBack = arg => { ui().close(); if (arg === "start") startModal(); };
     ui().startRunConfirm = () => { sel = null; startModal(); };
@@ -175,8 +185,11 @@
     if (!run.heroGiven && Z.level && !Z.level.hub) {
       run.heroGiven = true;
       const give = (id, slot) => { const it = Z.makeItem(id, 0, 1); P.slots[slot] = it; Z.meta.found[id] = true; };
+      const kit = KITS[M().kit] || KITS.sb;
+      if (!P.slots.a1) P.slots.a1 = Z.makeItem(kit.a1, 0, 0);
+      if (!P.slots.a2) P.slots.a2 = Z.makeItem(kit.a2, 0, 0);
       if (h === "G") give("bogen", "a2"); if (h === "B") give("spottlied", "s1"); if (h === "E") give("echoblitz", "s1");
-      if (M().bonus.startwaffe) { const ids = Object.keys(Z.meta.found || {}).filter(id => Z.WEAPONS[id] && Z.WEAPONS[id].kind && id !== "faeuste" && !Z.WEAPONS[id].legendaryOnly); if (ids.length && !P.slots.a1) give(Z.R.pick(ids), "a1"); }
+      if (M().bonus.startwaffe) { const ids = Object.keys(Z.meta.found || {}).filter(id => Z.WEAPONS[id] && Z.WEAPONS[id].kind && id !== "faeuste" && !Z.WEAPONS[id].legendaryOnly); if (ids.length && (!P.slots.a1 || Z.WEAPONS[P.slots.a1.id].find == null)) give(Z.R.pick(ids), "a1"); }
     }
     if (h === "G" && P.onGround) P.airJumps = 2;
     if (h === "E" && !P.onGround && inp.held.jump && P.vy > 70 && !P.plunge && !P.climbing) { P.vy = 70; if (Math.random() < dt * 20) FX.p({ x: P.x + P.w / 2 + (Math.random() - 0.5) * 16, y: P.y + 6, vx: 0, vy: 20, life: 0.6, size: 2, col: "#e8e0d0", kind: "leaf", vr: 3 }); }

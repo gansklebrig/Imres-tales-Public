@@ -62,7 +62,7 @@
     if (!it || !it.cursed) return "";
     const c = CURSE[it.cursed], done = it.curseApplied && Z.player && Z.player.curse <= 0;
     const pw = it.power && Z.CPOWER[it.power];
-    return '<div class="ic-fluch">☠ <b>' + esc(L(c.name)) + "</b>" + (pw ? '<div class="ic-kraft"><b>' + esc(L(pw.n)) + "</b> – " + esc(L(pw.d)) + "</div>" : "") + (done ? L(["Fluch gebrochen – volle Kraft", "Curse broken – full power"]) : L(["Schaden ×", "Damage ×"]) + c.mul.toFixed(1) + " · " + L(["bis ", "until "]) + c.n + L([" Kills tötet dich jeder Treffer", " kills, any hit kills you"])) + "</div>";
+    return '<div class="ic-fluch">☠ <b>' + esc(L(c.name)) + "</b> · " + (pw ? '<div class="ic-kraft"><b>' + esc(L(pw.n)) + "</b> – " + esc(L(pw.d)) + "</div>" : "") + (done ? L(["Fluch gebrochen – volle Kraft", "Curse broken – full power"]) : L(["Schaden ×", "Damage ×"]) + c.mul.toFixed(1) + " · " + L(["bis ", "until "]) + c.n + L([" Kills tötet dich jeder Treffer", " kills, any hit kills you"])) + "</div>";
   };
   /* Verfluchte Funde leuchten violett */
   const draw0 = Z.drawParcours;

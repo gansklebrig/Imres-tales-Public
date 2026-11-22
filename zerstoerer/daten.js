@@ -34,6 +34,25 @@
         { pre: 0.1, act: 0.09, post: 0.22, dmg: 11, box: [2, -26, 22, 20], lunge: 90, kb: 190, kbUp: 120, sw: "punch", heavy: true, smear: { r: 18, a0: 1.2, a1: -1.2, th: 6 } }
       ], tags: ["start"]
     },
+    kurzschwert: {
+      n: ["Rostiges Kurzschwert", "Rusty Shortsword"], kind: "melee", stat: "brut", find: null, tier: 0, icon: "dagger", col: "#c8c0b4",
+      d: ["Ein schlichtes Schwert aus der Rüstkammer. Drei ehrliche Hiebe, nichts Besonderes – aber besser als Fäuste.", "A plain sword from the armoury. Three honest strikes, nothing special – but better than fists."],
+      combo: [
+        { pre: 0.06, act: 0.07, post: 0.1, dmg: 8, box: [0, -26, 26, 22], lunge: 50, kb: 50, sw: "slash", smear: { r: 22, a0: -1.5, a1: 0.9, th: 6 } },
+        { pre: 0.06, act: 0.07, post: 0.1, dmg: 8, box: [0, -26, 26, 22], lunge: 50, kb: 50, sw: "slash", smear: { r: 22, a0: 1.2, a1: -1.3, th: 6 } },
+        { pre: 0.1, act: 0.1, post: 0.24, dmg: 14, box: [0, -30, 30, 26], lunge: 90, kb: 150, kbUp: 60, sw: "slash", heavy: true, smear: { r: 26, a0: -2.2, a1: 1.4, th: 8 } }
+      ], tags: ["start"]
+    },
+    holzschild: {
+      n: ["Beschlagenes Holzschild", "Studded Wooden Shield"], kind: "shield", stat: "ueber", find: null, tier: 0, icon: "shield", col: "#a88a62",
+      d: ["Halten zum Blocken, im richtigen Moment gehoben pariert es. Antippen: Schildstoß. Einfach, aber verlässlich.", "Hold to block; raised at the right moment it parries. Tap: shield bash. Simple but reliable."],
+      shield: { block: 0.85, parry: 0.18, bash: 12, parryStun: 1.2 }, tags: ["start"]
+    },
+    jagdbogen: {
+      n: ["Einfacher Jagdbogen", "Plain Hunting Bow"], kind: "ranged", stat: "takt", find: null, tier: 0, icon: "bow", col: "#b89a6a",
+      d: ["Halten zum Spannen. Voll gespannte Pfeile treffen härter. Kein Zauber, nur Holz und Sehne.", "Hold to draw. Fully drawn arrows hit harder. No magic, just wood and string."],
+      shoot: { charge: 0.75, minCharge: 0.12, post: 0.18, proj: "pfeil", dmg: 8, dmgFull: 24, sw: "bow" }, tags: ["start"]
+    },
     sicheln: {
       n: ["Ezekiels Sicheln", "Ezekiel's Sickles"], kind: "melee", stat: "brut", find: "haeufig", tier: 0, icon: "sickles", col: "#ff5a4e",
       d: ["Zwei Klingen, geschwungen wie Sicheln. Schnelle Viererkette; der letzte Hieb trifft kritisch und lässt bluten.", "Two blades curved like sickles. Fast four-hit chain; the last strike always crits and causes bleeding."],

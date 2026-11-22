@@ -82,7 +82,9 @@
       if (st === "wirbel") { const k = Math.floor(P.diveT / 0.07); if (P.diveHits.has(e.uid + "_" + k)) continue; e.uid = e.uid || Math.random(); P.diveHits.add(e.uid + "_" + k); Z.hitEnemy(e, Z.dmgOf(P, it, base(d) * 0.32), { src: "melee", it, kb: 20, kbUp: 40, dir: U.sign(e.x - P.x) || 1 }); continue; }
       if (POGO[st]) {
         Z.hitEnemy(e, Z.dmgOf(P, it, base(d) * (st === "meuchel" ? 1.6 : 1.3)), { src: "melee", it, crit: st === "meuchel", kb: 60, kbUp: 120, heavy: true, eff: st === "schild" ? { stun: 1 } : st === "meteor" ? { stun: 0.5 } : null, dir: P.face });
-        P.plunge = false; P.vy = -430; P.vx *= 0.4; P.airJumps = 1; P.cut = true; P.diveShots = 0; FX.stop(0.06); FX.ring(P.x + P.w / 2, P.y + P.h, 18, "#ffd27a", 0.25, 3);
+        if (Z.pogoOn && Z.pogoOn(P)) { P.plunge = false; P.diveStyle = null; P.vy = -470; P.vx *= 0.4; P.airJumps = 1; P.cut = true; P.diveShots = 0; P.diveLock = false; FX.ring(P.x + P.w / 2, P.y + P.h, 26, "#ff6ae0", 0.3, 3); }
+        else { P.plunge = false; P.diveStyle = null; P.vy = -120; P.vx = -P.face * 60; P.airJumps = 0; P.cut = true; P.diveShots = 0; P.diveLock = true; P.diveRecPend = true; }
+        FX.stop(0.06); FX.ring(P.x + P.w / 2, P.y + P.h, 18, "#ffd27a", 0.25, 3);
         A.play(st === "schild" ? "block" : "hitHeavy", { vol: 0.6 }); Z.input.rumble(0.35, 60);
         return;
       }
@@ -93,7 +95,7 @@
     const it = P.plungeItem, d = P.diveD || wd(it), cx = P.x + P.w / 2, fy = P.y + P.h, b = base(d);
     const ring = (rad, dmg, o, col) => { FX.ring(cx, fy, rad, col || "#ff8a5a", 0.35, 4); for (const e of Z.enemies) if (alive(e) && Math.abs(e.x + e.w / 2 - cx) < rad && Math.abs(e.y + e.h - fy) < 34) Z.hitEnemy(e, dmg, Object.assign({ src: "melee", it, heavy: true, dir: U.sign(e.x - P.x) || 1 }, o)); Z.hitProps && Z.hitProps({ x: cx - rad, y: fy - 30, w: rad * 2, h: 34 }, dmg, null); };
     const dust = n => FX.burst(cx, fy, n, { col: [Z.dustCol || "#8a7a70", "#ff7a4a"], sp: 170, ang: -Math.PI / 2, spread: 2.8, life: 0.5, size: 3, kind: "smoke" });
-    A.play("land", { vol: 0.8 }); P.vy = -140; P.onGround = false;
+    A.play("land", { vol: 0.8 }); P.vy = 0; P.diveRec = 0.32; P.diveRecPend = false;
     switch (st) {
       case "beben": FX.addShake(10); FX.stop(0.08); A.play("quake", { vol: 0.8 }); dust(30); ring(92, Z.dmgOf(P, it, b * 2.2), { kb: 120, kbUp: 300, eff: { stun: 1.3 } }, "#e5a43a");
         for (const dir of [-1, 1]) for (let i = 0; i < 3; i++) setTimeout(() => Z.spawnHazard({ kind: "rockspike", x: cx + dir * (30 + i * 20), y: fy, w: 14, life: 0.45, dmg: Z.dmgOf(P, it, b * 0.6), owner: "p", kbUp: 320, once: true }), i * 70); break;

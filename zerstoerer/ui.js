@@ -215,7 +215,7 @@
     modal.hidden = true; modal.innerHTML = ""; ui.modalOpen = false; Z.paused = false; A.muffle(20000);
     const cb = ui.onClose; ui.onClose = null; if (cb) cb();
   }
-  ui.close = closeModal; ui.open = openModal; Z.TX = TX;
+  ui.close = closeModal; ui.open = openModal; Z.TX = TX; ui.itemCardHTML = (it, cmp) => itemCardHTML(it, cmp); ui.choiceEl = () => choice;
   modal.addEventListener("click", e => { const b = e.target.closest("[data-act]"); if (!b) return; const fn = actions[b.dataset.act]; if (fn) { A.play("ui", { vol: 0.35 }); fn(b.dataset.arg, b); } });
   const actions = {}; ui.actions = actions;
   /* Tastatur in Menüs */
@@ -474,7 +474,7 @@
   ui.offerItem = p => {
     const P = Z.player, it = p.it, isSkill = it.type === "skill";
     const sA = isSkill ? "s1" : "a1", sB = isSkill ? "s2" : "a2";
-    if (!Z.meta.found[it.id]) setTimeout(() => ui.toast("<b>" + L(["Neu im Fundbuch: ", "New in the ledger: "]) + esc(L(Z.itemDef(it).n)) + "</b><br><small>" + L(["Nundro kann sie ab jetzt im Lager schärfen.", "Nundro can now sharpen it in camp."]) + "</small>", 3200), 300);
+    if (!Z.meta.found[it.id]) setTimeout(() => ui.toast("<b>" + L(["Neu im Fundbuch: ", "New in the ledger: "]) + esc(L(Z.itemDef(it).n)) + "</b><br><small>" + L(["Nundro kann sie ab jetzt im Lager schärfen.", "Nundro can now sharpen it in camp."]) + "</small>", 3200), Z.presentItem ? 2400 : 300);
     Z.meta.found[it.id] = true; Z.saveMeta();
     const place = s => {
       const old = P.slots[s]; P.slots[s] = it;
@@ -482,7 +482,7 @@
       if (old) Z.spawnPickup("item", p.x, p.y - 4, { it: old, drop: true, vy: -140, vx: -P.face * 60 });
       if (P.mag[s]) delete P.mag[s];
       P.combo[s] = 0;
-      A.play("pickup", { vol: 0.6 }); Z.fx.text(P.x + P.w / 2, P.y - 12, L(Z.itemDef(it).n), Z.RARITY[it.rar].col, true);
+      if (!Z.presentItem) { A.play("pickup", { vol: 0.6 }); Z.fx.text(P.x + P.w / 2, P.y - 12, L(Z.itemDef(it).n), Z.RARITY[it.rar].col, true); }
       Z.fx.burst(P.x + P.w / 2, P.y + 10, 14, { col: [Z.RARITY[it.rar].col, "#fff"], sp: 80, up: 40, life: 0.5, size: 2, kind: "spark", add: true });
     };
     if (!P.slots[sA]) return place(sA);

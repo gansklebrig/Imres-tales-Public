@@ -126,7 +126,7 @@
     /* Erste Waffe: man beginnt mit nichts, findet aber gleich am Anfang etwas zum Zuschlagen */
     if (lv.biome === "torhof" && !run.firstWeaponGiven) {
       run.firstWeaponGiven = true;
-      const it = Z.rollItem({ R, kind: "weapon", rar: [100, 0, 0, 0], filter: (id, d) => d.kind === "melee" && (d.tier || 0) === 0 });
+      const it = Z.rollItem({ R, kind: "weapon", rar: [0, 100, 0, 0], filter: (id, d) => d.kind === "melee" && (d.tier || 0) === 0 });
       const sp = lv.start; let gx = sp.x + 4, gy = sp.y;
       for (let dx = 3; dx < 9; dx++) if (Z.standable(lv, sp.x + dx, sp.y)) { gx = sp.x + dx; break; }
       if (it) Z.spawnPickup("item", gx * T + 8, gy * T + 16, { it, vx: 0, vy: 0, float: true, altar: true });
@@ -242,10 +242,15 @@
       if (p.kind === "scroll") { Z.pickups.splice(Z.pickups.indexOf(p), 1); A.play("scroll"); return Z.ui.scrollChoice(); }
       if (p.kind === "food") { Z.pickups.splice(Z.pickups.indexOf(p), 1); const f = p.food || Z.FOOD[0]; Z.healPlayer(P.hpMax * f.heal); A.play("potion", { vol: 0.5 }); FX.text(P.x + P.w / 2, P.y - 14, L(f.n), "#e8c890"); return; }
       if (p.kind === "chest") { p.open = true; A.play("chest"); FX.burst(p.x, p.y - 8, 20, { col: ["#ffd27a", "#fff0c0"], sp: 120, up: 60, life: 0.6, size: 2, kind: "spark", add: true }); Z.dropGold(p.x, p.y - 10, 25 * Z.BAL.goldMul(Z.run.tier)); Z.dropItem(p.x, p.y - 10, { chest: true }); if (Z.R() < 0.3) Z.spawnPickup("food", p.x, p.y - 10, { food: Z.R.pick(Z.FOOD), drop: true }); return; }
-      if (p.kind === "cursed") return Z.ui.confirm(L(["Verfluchte Truhe", "Cursed Chest"]), L(["Reiche Beute – aber danach tötet dich jeder Treffer, bis du 10 Gegner erschlagen hast.", "Rich loot – but afterwards any hit kills you until you have slain 10 enemies."]), L(["Öffnen", "Open"]), () => {
-        p.open = true; P.curse = 10; A.play("dark"); FX.flashScreen("#c040ff", 0.4); FX.text(P.x + P.w / 2, P.y - 14, L(["Verflucht!", "Cursed!"]), "#c040ff", true);
-        Z.dropGold(p.x, p.y - 10, 80 * Z.BAL.goldMul(Z.run.tier)); Z.dropItem(p.x, p.y - 10, { elite: true }); Z.dropItem(p.x + 10, p.y - 10, { chest: true, cursedChest: true }); Z.dropShards(p.x, p.y, 10);
-      });
+      if (p.kind === "cursed") {
+        const open = it => {
+          p.open = true; P.curse = Math.max(P.curse || 0, 10); A.play("dark"); FX.flashScreen("#c040ff", 0.4); FX.text(P.x + P.w / 2, P.y - 14, L(["Verflucht!", "Cursed!"]), "#c040ff", true);
+          Z.dropGold(p.x, p.y - 10, 80 * Z.BAL.goldMul(Z.run.tier)); Z.dropItem(p.x, p.y - 10, { elite: true }); Z.dropShards(p.x, p.y, 10);
+          return it ? Z.spawnPickup("item", p.x + 10, p.y - 10, { it, drop: true, vy: -200, vx: 30 }) : null;
+        };
+        if (Z.ui.cursedChest) return Z.ui.cursedChest(p, open);
+        return Z.ui.confirm(L(["Verfluchte Truhe", "Cursed Chest"]), L(["Reiche Beute – aber danach tötet dich jeder Treffer, bis du 10 Gegner erschlagen hast.", "Rich loot – but afterwards any hit kills you until you have slain 10 enemies."]), L(["Öffnen", "Open"]), () => open(Z.rollItem({ rar: [35, 45, 16, 4], chest: true, cursedChest: true })));
+      }
     }
     if (o.type === "door") {
       const d = o.d;

@@ -284,6 +284,7 @@
       if (P.crouch && P.onGround) target *= C.CRAWL;
       if (P.st.slow > 0) target *= 0.55;
       if (P.st.web > 0) target *= 0.3;
+      if (P.diveRec > 0 && P.onGround) target *= 0.2;
       const acc = P.onGround ? (Math.abs(target) > Math.abs(P.vx) || U.sign(target) !== U.sign(P.vx) ? C.ACC_G : C.DEC_G) : (h ? C.ACC_A : C.DEC_A);
       if (!(P.act && P.act.lungeT > 0)) P.vx = U.approach(P.vx, target, acc * dt);
       if (h && (!P.act || P.act.type === "shield" && false || P.act.phase === "post" && P.act.type !== "shield")) { if (!P.act || P.act.phase === "post") P.face = h; }
@@ -291,7 +292,11 @@
     }
     /* ---------- Springen ---------- */
     if (P.onGround) { P.coyote = C.COYOTE; P.airJumps = 1; P.plungeOK = true; } else P.coyote -= dt;
-    if (!locked && P.jumpBuf > 0 && (!P.act || P.act.phase === "post" || P.act.type === "shield" || P.act.type === "charge")) {
+    /* Nach einem Sturzangriff kurz durchatmen: erst wieder springen, dann erneut stürzen */
+    if (P.diveRec > 0) P.diveRec -= dt;
+    if (P.onGround && P.diveRecPend) { P.diveRecPend = false; P.diveRec = Math.max(P.diveRec || 0, 0.24); }
+    if (P.onGround && !(P.diveRec > 0)) P.diveLock = false;
+    if (!locked && P.jumpBuf > 0 && !(P.diveRec > 0) && (!P.act || P.act.phase === "post" || P.act.type === "shield" || P.act.type === "charge")) {
       if (inp.held.down && P.onGround && P.onPlat) { P.dropT = 0.22; P.jumpBuf = 0; P.y += 2; P.onGround = false; }
       else if (P.coyote > 0) { doJump(P, C.JUMP); P.coyote = 0; }
       else if (P.airJumps > 0) { P.airJumps--; doJump(P, C.DJUMP, true); }
@@ -301,10 +306,10 @@
     if (P.jumpRel && P.jumpT >= 0.085 && P.vy < 0 && !P.cut) { P.vy *= C.CUT; P.cut = true; }
     if (!inp.held.jump && P.jumpT >= 0.085) P.jumpHeld = false;
     /* Sturzangriff: in der Luft unten + Angriff */
-    if (!P.onGround && !locked && inp.held.down && (P.buf.a1 > 0 || P.buf.a2 > 0) && (!P.act || P.act.phase === "post") && !P.plunge && P.vy > -260) {
+    if (!P.onGround && !locked && inp.held.down && (P.buf.a1 > 0 || P.buf.a2 > 0) && (!P.act || P.act.phase === "post") && !P.plunge && !P.diveLock && P.vy > -260) {
       const s = P.buf.a1 > 0 ? "a1" : "a2"; if (P.act) endAct(P); const it = P.slots[s], d = it ? Z.WEAPONS[it.id] : Z.WEAPONS.faeuste;
-      if (d && Z.diveStart && Z.diveStart(P, s, it, d)) { P.buf[s] = 0; }
-      else if (d && d.kind === "melee") { P.buf[s] = 0; P.plunge = true; P.plungeItem = it; P.vy = 640; P.vx = 0; A.play("swingHeavy", { vol: 0.7 }); }
+      if (d && Z.diveStart && Z.diveStart(P, s, it, d)) { P.buf[s] = 0; if (P.plunge && !(Z.pogoOn && Z.pogoOn(P))) P.diveLock = true; }
+      else if (d && d.kind === "melee") { P.buf[s] = 0; P.plunge = true; P.plungeItem = it; P.vy = 640; P.vx = 0; if (!(Z.pogoOn && Z.pogoOn(P))) P.diveLock = true; A.play("swingHeavy", { vol: 0.7 }); }
     }
     /* Schwerkraft */
     if (!P.onGround) {
@@ -630,7 +635,7 @@
     const r = { x: P.x - 34, y: P.y - 6, w: P.w + 68, h: P.h + 12 };
     for (const e of Z.enemies) if (!e.dead && U.overlap(r, e)) Z.hitEnemy(e, dmg, { kb: 120, kbUp: 200, eff: { stun: 0.7 }, src: "melee", it, heavy: true, dir: U.sign(e.x - P.x) || 1 });
     Z.hitProps && Z.hitProps(r, dmg, null);
-    P.vy = -160; P.onGround = false;
+    P.vy = 0; P.diveRec = 0.32; P.diveRecPend = false;
   }
 
   /* ---------- Fernkampf ---------- */
