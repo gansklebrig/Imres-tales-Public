@@ -62,6 +62,13 @@ public class MainActivity extends Activity {
         s.setBuiltInZoomControls(false);
         s.setDisplayZoomControls(false);
         s.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        if (Build.VERSION.SDK_INT >= 26) s.setSafeBrowsingEnabled(false);
+
+        // Leistung: kein Überscrollen/Scrollbalken, Spiel-Prozess bleibt wichtig (wird nicht heruntergestuft)
+        web.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        web.setVerticalScrollBarEnabled(false);
+        web.setHorizontalScrollBarEnabled(false);
+        if (Build.VERSION.SDK_INT >= 26) web.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, false);
 
         upd = new Aktualisierer(this);
         web.addJavascriptInterface(new Bruecke(), "HeldensturmApp");

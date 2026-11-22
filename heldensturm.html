@@ -22616,7 +22616,7 @@ Object.assign(UL,{ga:null,lf:0,iv:[],n:0,noGlow:0,noKa:0,bgOn:0,gen:0,bud:0,st:{
 const ULKEYS={enemy:['elite','guard','boss','rare','champ','add','phase2','schild','trommel','summon','charging'],prop:['k','open','used','found','locked','freed','dead','boom','type','mimic','an','lit','zu','broken','on']};
 function grUltra(){return UL.on}
 function ulWunsch(){try{const q=location.search||'';if(/[?&]ultraaus\b/.test(q))return false;if(/[?&]ultra\b/.test(q))return true;
- if(SAVE.ultra===true)return true;if(SAVE.ultra===false)return false;const auto=SAVE.gfx==='auto'||SAVE.gfx===undefined;return !!(auto&&RG2.weak&&RG2.hh)}catch(e){return false}}
+ if(SAVE.ultra===true)return true;if(SAVE.ultra===false)return false;const auto=SAVE.gfx==='auto'||SAVE.gfx===undefined;return !!(auto&&RG2.weak&&(RG2.hh||window.__hsAPP))}catch(e){return false}}
 function ulCalc(){const on=ulWunsch();if(on===UL.on)return false;UL.on=on;ulUmschalten(on);return true}
 function ulUmschalten(on){
  if(on){if(!UL.ga)UL.ga=[GAUTO,GCEIL];GAUTO=0;GCEIL=0}else if(UL.ga){GAUTO=UL.ga[0];GCEIL=UL.ga[1];UL.ga=null}
