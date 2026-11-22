@@ -6,3 +6,4 @@ Kleine WebView-App, die das ganze Spiel offline aus der APK liefert (Vollbild, C
 - Dateien: `tools/android/sammeln.py` (Liste aus `heldensturm-sw.js` + Klänge, Sprachaufnahmen, Erzählertexte)
 - Signatur: `keystore/heldensturm.jks.enc`, entschlüsselt mit dem Secret `HELDENSTURM_SCHLUESSEL`
 - Updates aufs Gerät: Obtainium mit `github.com/gansklebrig/Imres-tales-Public`
+- Spielstände liegen im App-Speicher (bleiben bei Updates erhalten, gehen beim Deinstallieren verloren)
