@@ -44,7 +44,7 @@
   };
   Z.dropItem = function (x, y, o) {
     o = o || {};
-    const it = Z.rollItem({ rar: o.boss ? [0, 30, 50, 20] : o.elite ? [20, 45, 28, 7] : o.chest ? [35, 45, 16, 4] : [70, 24, 5, 1], src: o.src, kind: o.kind });
+    const it = Z.rollItem({ rar: o.boss ? [0, 30, 50, 20] : o.elite ? [20, 45, 28, 7] : o.chest ? [35, 45, 16, 4] : [70, 24, 5, 1], src: o.src, kind: o.kind, chest: o.chest, cursedChest: o.cursedChest });
     if (!it) return;
     Z.spawnPickup("item", x, y, { it, drop: true, vy: -200, vx: (Math.random() - 0.5) * 80 });
   };
@@ -244,7 +244,7 @@
       if (p.kind === "chest") { p.open = true; A.play("chest"); FX.burst(p.x, p.y - 8, 20, { col: ["#ffd27a", "#fff0c0"], sp: 120, up: 60, life: 0.6, size: 2, kind: "spark", add: true }); Z.dropGold(p.x, p.y - 10, 25 * Z.BAL.goldMul(Z.run.tier)); Z.dropItem(p.x, p.y - 10, { chest: true }); if (Z.R() < 0.3) Z.spawnPickup("food", p.x, p.y - 10, { food: Z.R.pick(Z.FOOD), drop: true }); return; }
       if (p.kind === "cursed") return Z.ui.confirm(L(["Verfluchte Truhe", "Cursed Chest"]), L(["Reiche Beute – aber danach tötet dich jeder Treffer, bis du 10 Gegner erschlagen hast.", "Rich loot – but afterwards any hit kills you until you have slain 10 enemies."]), L(["Öffnen", "Open"]), () => {
         p.open = true; P.curse = 10; A.play("dark"); FX.flashScreen("#c040ff", 0.4); FX.text(P.x + P.w / 2, P.y - 14, L(["Verflucht!", "Cursed!"]), "#c040ff", true);
-        Z.dropGold(p.x, p.y - 10, 80 * Z.BAL.goldMul(Z.run.tier)); Z.dropItem(p.x, p.y - 10, { elite: true }); Z.dropItem(p.x + 10, p.y - 10, { chest: true }); Z.dropShards(p.x, p.y, 10);
+        Z.dropGold(p.x, p.y - 10, 80 * Z.BAL.goldMul(Z.run.tier)); Z.dropItem(p.x, p.y - 10, { elite: true }); Z.dropItem(p.x + 10, p.y - 10, { chest: true, cursedChest: true }); Z.dropShards(p.x, p.y, 10);
       });
     }
     if (o.type === "door") {
@@ -362,6 +362,7 @@
     Z.bilanzTick && Z.bilanzTick(dt);
     Z.kampfTick && Z.kampfTick(dt);
     Z.abenteuerTick && Z.abenteuerTick(dt);
+    Z.fluchTick && Z.fluchTick(dt);
     updateCampRex(dt);
     Z.updatePickups(dt);
     if (Z.darkness > 0) Z.darkness -= dt;

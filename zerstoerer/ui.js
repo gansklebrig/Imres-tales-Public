@@ -128,7 +128,7 @@
     const d = Z.itemDef(it), r = Z.RARITY[it.rar], st = Z.STATS[d.stat];
     const kind = it.type === "skill" ? L(["Fähigkeit", "Skill"]) : d.kind === "ranged" ? L(["Fernkampf", "Ranged"]) : d.kind === "shield" ? L(["Schild", "Shield"]) : L(["Nahkampf", "Melee"]);
     const lvl = Z.metaLvl(it.id);
-    return '<div class="ic-kopf" style="--rar:' + r.col + '"><b>' + esc(L(d.n)) + "</b>" + (lvl ? ' <span class="lv">+' + lvl + "</span>" : "") + '<small>' + esc(L(r.n)) + " · " + kind + ' · <span style="color:' + st.col + '">' + esc(L(st.n)) + "</span> · " + L(["Stufe", "Tier"]) + " " + (it.tier + 1) + "</small></div>" +
+    return (Z.curseCardHTML ? Z.curseCardHTML(it) : "") + '<div class="ic-kopf" style="--rar:' + (it.cursed ? "#c040ff" : r.col) + '"><b>' + esc(L(d.n)) + "</b>" + (lvl ? ' <span class="lv">+' + lvl + "</span>" : "") + '<small>' + esc(L(r.n)) + " · " + kind + ' · <span style="color:' + st.col + '">' + esc(L(st.n)) + "</span> · " + L(["Stufe", "Tier"]) + " " + (it.tier + 1) + "</small></div>" +
       '<p>' + esc(L(d.d)) + "</p>" + (it.aff.length ? '<ul class="aff">' + it.aff.map(a => "<li>" + esc(L(Z.AFFIX[a].n)) + ": " + esc(L(Z.AFFIX[a].d)) + "</li>").join("") + "</ul>" : "") +
       (d.tags ? '<p class="tags">' + d.tags.map(x => "<span>" + esc(x) + "</span>").join("") + "</p>" : "") +
       (lvl >= 3 && d.master ? '<p class="meister">' + esc(L(d.master)) + "</p>" : "") +
@@ -623,7 +623,7 @@
     });
     const healPrice = Math.round(40 + 30 * Z.run.tier);
     body += '<div class="zeile"><div><b>' + L(["Pilzbraten (60 % Leben)", "Mushroom roast (60% health)"]) + '</b><small>„' + L(["Frisch aus Gracklstugh.", "Fresh from Gracklstugh."]) + '“</small></div><div class="kauf"><button data-act="buyHeal"' + (P.gold < healPrice || P.hp >= P.hpMax ? " disabled" : "") + ">" + healPrice + " ●</button></div></div>";
-    if (P.curse > 0) body += '<div class="zeile"><div><b>' + L(["Fluch brechen", "Break the curse"]) + '</b></div><div class="kauf"><button data-act="buyCurse"' + (P.gold < 150 ? " disabled" : "") + ">150 ●</button></div></div>";
+    if (P.curse > 0) body += '<div class="zeile"><div><b>' + L(["Fluch brechen", "Break the curse"]) + '</b></div><div class="kauf"><button data-act="buyCurse"' + (P.gold < Math.max(150, P.curse * 15) ? " disabled" : "") + ">" + Math.max(150, P.curse * 15) + " ●</button></div></div>";
     body += "</div>";
     openModal("<h2>" + esc(t("shop")) + ' <span class="bank">' + U.fmt(P.gold) + " ● " + esc(t("gold")) + "</span></h2>" + body + '<div class="knoepfe"><button data-act="close">' + esc(t("close")) + "</button></div>", { cls: "breit" });
     drawIcons();
@@ -637,7 +637,7 @@
     ui.toast(L(["Gekauft. Es liegt vor dir.", "Bought. It lies before you."]));
   };
   actions.buyHeal = () => { const P = Z.player, price = Math.round(40 + 30 * Z.run.tier); if (P.gold < price) return; P.gold -= price; Z.healPlayer(P.hpMax * 0.6); A.play("heal"); ui.shop(); };
-  actions.buyCurse = () => { const P = Z.player; if (P.gold < 150) return; P.gold -= 150; P.curse = 0; A.play("holy"); ui.shop(); };
+  actions.buyCurse = () => { const P = Z.player, cost = Math.max(150, P.curse * 15); if (P.gold < cost) return; P.gold -= cost; P.curse = 0; A.play("holy"); ui.shop(); };
   ui.altar = () => {
     const P = Z.player, lv = Z.level;
     if (lv.blessTaken) return ui.toast(L(["Der Altar ist erloschen.", "The altar has gone dark."]));
