@@ -11194,7 +11194,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     const E = T.einf;
     return '<section class="lw-eabend"><h4>' + E.abendTitel + "</h4><p class=\"lw-zweck\">" + E.abendTipp + '</p><div class="lw-echips">' +
       '<button type="button" class="lw-lchip" data-abend="" aria-pressed="' + !abendSet + '">' + E.abendOhne + "</button>" +
-      Object.keys(ABEND_SETS).map(k => '<button type="button" class="lw-lchip" data-abend="' + k + '" aria-pressed="' + (abendSet === k) + '">' + ABEND_SETS[k].sym + " " + E.abendNamen[k] + "</button>").join("") + "</div></section>";
+      Object.keys(ABEND_SETS).map(k => '<button type="button" class="lw-lchip" data-abend="' + k + '" aria-pressed="' + (abendSet === k) + '">' + ABEND_SETS[k].sym + " " + E.abendNamen[k] + "</button>").join("") + "</div>" + mitspTeil() + "</section>";
   }
   function einfachMusik(T) {
     const E = T.einf, set = abendSet && ABEND_SETS[abendSet], jetzt = S.stimmung;
@@ -11845,7 +11845,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
           '<button type="button" class="lw-kulknopf" data-aktion="kulumschalt" hidden></button>' +
           '<span class="lw-pult-titel"><span class="lw-titel-name">' + esc(S.titel || T.eigenesLied) + '</span><span class="lw-titel-naechste"></span><span class="lw-bew"></span><i class="lw-wechselbalken"></i></span>' +
           '<span class="lw-kopf-rechts"><button type="button" class="lw-schalter lw-emodusknopf" data-aktion="modus" title="' + esc(T.einf.einfachTipp) + '">' + T.einf.einfach + "</button>" + '<button type="button" class="lw-schalter lw-ewasist" data-aktion="wasist" aria-pressed="' + wasIst + '" title="' + esc(T.einf.wasIstTipp) + '">' + (wasIst ? T.einf.wasIstAn : T.einf.wasIst) + "</button>" + '<button type="button" class="lw-schalter lw-rec" data-aktion="aufnahme" aria-pressed="false">' + T.aufnehmen + "</button>" + '<button type="button" class="lw-schalter lw-schlaf" data-aktion="schlaf" aria-pressed="false">' + T.schlaf + "</button>" + '<button type="button" class="lw-schalter lw-rundgang-knopf' + (rundgangNeu() ? " neu" : "") + '" data-aktion="rundgang" title="' + esc(T.rundgangTipp) + '">' + T.rundgang + "</button>" + '<a class="lw-schalter lw-klangwelten" href="ambient.html" title="' + esc(T.klangweltenTipp) + '">' + T.klangwelten + "</a>" + '<button type="button" class="lw-schalter lw-funk-knopf' + (funk ? " an" : "") + '" data-aktion="funkauf" aria-expanded="' + funkAuf + '">' + funkKnopfText(T) + "</button></span></div>" +
-        (funkAuf ? '<section class="lw-funk"><h4>' + T.funk + "</h4>" + funkTeil(T) + "</section>" : "") +
+        (funkAuf ? '<section class="lw-funk"><h4>' + T.funk + "</h4>" + funkTeil(T) + mitspTeil() + "</section>" : "") +
         konsole(T, false) +
         werkstatt(T, true) +
       "</div>" +
@@ -11854,11 +11854,11 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     setTimeout(() => { try { spracheOrt(); } catch (_) {} }, 0);
   }
   /* ---------- Mitlauschen: Supabase Realtime (Broadcast + Presence) über einen schlichten WebSocket ---------- */
-  function funkKanal(raum, rolle, beiNachricht, beiStatus) {
+  function funkKanal(raum, rolle, beiNachricht, beiStatus, zaehlRolle) {
     let ws = null, ref = 0, joinRef = null, herz = null, zu = false, leute = {};
     const topic = "realtime:imres-lautenwerk-" + raum;
     const roh = (event, payload, t) => { if (ws && ws.readyState === 1) ws.send(JSON.stringify({ topic: t || topic, event, payload, ref: String(++ref), join_ref: t ? undefined : joinRef })); };
-    const zaehlen = () => beiStatus("ok", Object.values(leute).filter(r => r === "hoerer").length);
+    const zaehlen = () => beiStatus("ok", Object.values(leute).filter(r => r === (zaehlRolle || "hoerer")).length);
     function auf() {
       beiStatus("verbinde");
       try { ws = new WebSocket(LIED_SERVER.url.replace(/^http/, "ws") + "/realtime/v1/websocket?apikey=" + encodeURIComponent(LIED_SERVER.key) + "&vsn=1.0.0"); }
@@ -11915,6 +11915,51 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     return { s: lied, pos: { abschnitt, schritt }, lied: kodieren(), titel: S.titel || "", stimmung: S.stimmung || null, intensitaet: S.intensitaet, kulisse: S.kulisse, kulisseVol: S.kulisseVol,
       hall: S.hall, raum: S.raum, hallAus: S.hallAus, echoHall: S.echoHall, orchester: S.orchester, kapStufe: S.kapStufe, gaeste: S.gaeste, laeuft };
   }
+  /* ---------- Mitspielen: die Handys am Tisch lösen Klänge in diesem Pult aus (Link / QR, Funk-Raum „sp…“) ---------- */
+  let mitsp = null;
+  const MITSP_HELD = { barradin: "🎻 Barradin", echo: "🦌 Echo", friedrich: "🏹 Friedrich", ezekiel: "🗡 Ezekiel", meister: "🎲", tisch: "🍺" };
+  const mitspLink = () => location.origin + "/mitspielen?r=" + funkRaum();
+  function mitspUmschalten(an) {
+    if (an == null) an = !mitsp;
+    if (!an) { if (mitsp) { mitsp.kanal.schliessen(); mitsp = null; } try { localStorage.setItem("imres-lw-mitsp", "0"); } catch (_) {} return; }
+    if (mitsp) return;
+    try { localStorage.setItem("imres-lw-mitsp", "1"); } catch (_) {}
+    mitsp = { status: "verbinde", zahl: 0, zuletzt: {}, t: 0 };
+    mitsp.kanal = funkKanal("sp" + funkRaum(), "pult", (ev, d) => { if (ev === "spieler") mitspKlang(d || {}); },
+      (st, n) => { if (!mitsp) return; mitsp.status = st; if (n != null) mitsp.zahl = n; mitspAnzeigen(); }, "spieler");
+  }
+  function mitspKlang(d) {
+    const j = Date.now(), wer = String(d.wer || "").slice(0, 20), klang = String(d.klang || "").slice(0, 40);
+    if (!klang || j - mitsp.t < 250 || j - (mitsp.zuletzt[wer] || 0) < 700) return;
+    mitsp.t = j; mitsp.zuletzt[wer] = j;
+    let ok = false; try { audioStart(); ok = spielerKlang(klang); } catch (_) {}
+    if (ok) { try { status("📱 " + (MITSP_HELD[wer] || "") + " · " + String(d.name || klang).slice(0, 30)); } catch (_) {} }
+  }
+  const mitspStatusText = () => { const en = sprache() === "en"; return !mitsp ? "" : mitsp.status === "ok" ? "🟢 " + (en ? "open · " + mitsp.zahl + " phone" + (mitsp.zahl === 1 ? "" : "s") : "offen · " + mitsp.zahl + " Handy" + (mitsp.zahl === 1 ? "" : "s")) : mitsp.status === "fehler" ? "🔴 " + (en ? "no connection" : "keine Verbindung") : "🟡 " + (en ? "connecting …" : "verbinde …"); };
+  function mitspAnzeigen() { root.querySelectorAll(".lw-mitsp-status").forEach(el => { el.textContent = mitspStatusText(); }); }
+  let qrLaden = null;
+  const qrLib = () => qrLaden || (qrLaden = new Promise((ok, nein) => { if (window.qrcode) return ok(); const sc = document.createElement("script"); sc.src = "/zynthian/qr.js"; sc.onload = () => window.qrcode ? ok() : nein(); sc.onerror = nein; document.head.appendChild(sc); }));
+  function qrSvg(text) {
+    const q = window.qrcode(0, "M"); q.addData(text); q.make(); const n = q.getModuleCount(), r = 2; let d = "";
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (q.isDark(y, x)) d += "M" + (x + r) + " " + (y + r) + "h1v1h-1z";
+    return '<svg viewBox="0 0 ' + (n + 2 * r) + " " + (n + 2 * r) + '" shape-rendering="crispEdges" aria-label="QR"><rect width="100%" height="100%" fill="#fff8ea"/><path d="' + d + '" fill="#120e18"/></svg>';
+  }
+  function mitspTeil() {
+    const en = sprache() === "en";
+    const kopf = '<h4>📱 ' + (en ? "Play along" : "Mitspielen") + "</h4><p class=\"lw-zweck\">" + (en ? "Everyone at the table scans the code, picks their hero and gets eight sounds of their own (lute riff, thunder, Rex barks …) – they play here in your console, in time and key." : "Alle am Tisch scannen den Code, wählen ihren Helden und bekommen acht eigene Klänge (Lautenriff, Donner, Rex bellt …) – die erklingen hier in deinem Pult, im Takt und in der Tonart.") + "</p>";
+    if (!mitsp) return '<section class="lw-mitsp">' + kopf + '<button type="button" class="lw-schalter" data-aktion="mitsp">📱 ' + (en ? "Open for players" : "Für Spieler öffnen") + "</button></section>";
+    setTimeout(() => qrLib().then(() => root.querySelectorAll(".lw-mitsp-qr").forEach(el => { if (!el.firstElementChild) el.innerHTML = qrSvg(mitspLink()); })).catch(() => {}), 0);
+    return '<section class="lw-mitsp">' + kopf + '<div class="lw-mitsp-box"><div class="lw-mitsp-qr"></div><div class="lw-mitsp-rechts"><input type="text" readonly class="lw-funk-link" value="' + esc(mitspLink()) + '">' +
+      '<button type="button" class="lw-schalter" data-aktion="mitspkopie">🔗 ' + (en ? "Copy link" : "Link kopieren") + '</button><p class="lw-mitsp-status">' + esc(mitspStatusText()) + "</p>" +
+      '<button type="button" class="lw-schalter" data-aktion="mitsp">' + (en ? "Close" : "Schließen") + "</button></div></div></section>";
+  }
+  root.addEventListener("click", e => {
+    const b = e.target.closest && e.target.closest('[data-aktion="mitsp"], [data-aktion="mitspkopie"]'); if (!b) return;
+    e.stopPropagation();
+    if (b.dataset.aktion === "mitspkopie") { const l = mitspLink(); if (navigator.clipboard) navigator.clipboard.writeText(l).then(() => status(sprache() === "en" ? "Link copied" : "Link kopiert"), () => window.prompt("Link", l)); else window.prompt("Link", l); return; }
+    mitspUmschalten(); zeichnen(); knoepfe();
+  }, true);
+  try { if (localStorage.getItem("imres-lw-mitsp") === "1" && !hoerer) setTimeout(() => { mitspUmschalten(true); }, 1500); } catch (_) {}
   function funkSenden(ev, daten) { if (funk && funk.kanal) funk.kanal.senden(ev, daten); }
   function funkAenderung() {
     if (!funk) return;
@@ -13250,6 +13295,14 @@ html.lw-leiste-da body { padding-bottom: 4.6rem; }
 .ll-knoepfe [hidden] { display: none; }
 .lw-titel-naechste, .ll-naechste { font-size: .78rem; color: var(--ember); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lw-titel-naechste:empty, .ll-naechste:empty { display: none; }
+.lw-mitsp { margin-top: .9rem; padding-top: .7rem; border-top: 1px solid rgba(235,226,204,.12); }
+.lw-mitsp h4 { margin: 0 0 .3rem; }
+.lw-mitsp-box { display: flex; gap: .9rem; align-items: center; flex-wrap: wrap; }
+.lw-mitsp-qr { width: 132px; height: 132px; flex: none; border-radius: 10px; overflow: hidden; background: #fff8ea; }
+.lw-mitsp-qr svg { display: block; width: 100%; height: 100%; }
+.lw-mitsp-rechts { display: flex; flex-direction: column; gap: .4rem; flex: 1 1 12rem; min-width: 0; }
+.lw-mitsp-rechts input.lw-funk-link { width: 100%; flex: none; height: auto; min-height: 0; padding: .4rem .55rem; font-size: .8rem; }
+.lw-mitsp-status { margin: 0; font-size: .85rem; }
 .lw-mood { display: flex; align-items: center; gap: .9rem; margin: .5rem 0 .7rem; }
 .lw-uhr { position: relative; flex: none; width: 104px; height: 104px; border-radius: 50%; touch-action: none; cursor: pointer; background: radial-gradient(circle at 50% 45%, #3a2a2c, #1b1416 70%); box-shadow: inset 0 0 0 2px rgba(224,160,70,.45), 0 2px 8px rgba(0,0,0,.5); }
 .lw-uhr .e { position: absolute; font-size: 19px; line-height: 1; transform: translate(-50%, -50%); pointer-events: none; }

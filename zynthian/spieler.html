@@ -57,6 +57,34 @@ const HELDEN = [
 ];
 const $ = s => document.querySelector(s), inhalt = $("#inhalt");
 const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+/* Zwei Wege: am Zynthian über die Brücke (gleiches WLAN) – oder auf imrestales.de über einen Funk-Raum (?r=…), dann landen die Klänge im Pult der Spielleitung */
+const RAUM = (new URLSearchParams(location.search).get("r") || "").toLowerCase();
+const FUNK = /^[a-z0-9]{4,16}$/.test(RAUM) ? (() => {
+  const URL_ = "wss://iszdxkwkgkksdemtqhwu.supabase.co/realtime/v1/websocket?apikey=" + encodeURIComponent("sb_publishable_Bt3Vw5BSnLaVcTRPTS0ZsA_MeG6G2-Z") + "&vsn=1.0.0";
+  const topic = "realtime:imres-lautenwerk-sp" + RAUM;
+  let ws = null, ref = 0, joinRef = null, herz = null, bereit = false, pult = 0;
+  const roh = (event, payload, t) => { if (ws && ws.readyState === 1) ws.send(JSON.stringify({ topic: t || topic, event, payload, ref: String(++ref), join_ref: t ? undefined : joinRef })); };
+  const zeig = () => { $("#weg").textContent = !bereit ? "Verbinde mit dem Pult …" : pult ? "" : "Die Spielleitung hat „Mitspielen“ gerade nicht offen."; $("#weg").classList.toggle("an", !bereit || !pult); };
+  const leute = {};
+  const zaehl = () => { pult = Object.values(leute).filter(r => r === "pult").length; zeig(); };
+  function auf() {
+    bereit = false; zeig();
+    try { ws = new WebSocket(URL_); } catch (_) { setTimeout(auf, 4000); return; }
+    ws.onopen = () => { joinRef = String(++ref); ws.send(JSON.stringify({ topic, event: "phx_join", ref: joinRef, join_ref: joinRef, payload: { config: { broadcast: { self: false, ack: false }, presence: { key: "spieler-" + Math.random().toString(36).slice(2, 8) }, private: false } } })); herz = setInterval(() => roh("heartbeat", {}, "phoenix"), 25000); };
+    ws.onmessage = e => {
+      let m; try { m = JSON.parse(e.data); } catch (_) { return; }
+      if (m.topic !== topic) return;
+      if (m.event === "phx_reply" && m.ref === joinRef && m.payload && m.payload.status === "ok") { bereit = true; roh("presence", { type: "presence", event: "track", payload: { rolle: "spieler" } }); zeig(); }
+      else if (m.event === "presence_state") { Object.keys(leute).forEach(k => delete leute[k]); Object.keys(m.payload || {}).forEach(k => { leute[k] = k.split("-")[0]; }); zaehl(); }
+      else if (m.event === "presence_diff") { Object.keys((m.payload && m.payload.joins) || {}).forEach(k => { leute[k] = k.split("-")[0]; }); Object.keys((m.payload && m.payload.leaves) || {}).forEach(k => { delete leute[k]; }); zaehl(); }
+    };
+    ws.onclose = () => { clearInterval(herz); bereit = false; zeig(); setTimeout(auf, 3000); };
+    ws.onerror = () => { try { ws.close(); } catch (_) {} };
+  }
+  auf();
+  return { senden: d => { if (!bereit || !pult) return false; roh("broadcast", { type: "broadcast", event: "spieler", payload: d }); return true; } };
+})() : null;
+if (FUNK) { $("#fuss").textContent = "Die Klänge kommen aus dem Pult der Spielleitung und mischen sich in die Musik."; }
 let held = null; try { held = HELDEN.find(h => h.id === localStorage.getItem("bb-held")) || null; } catch (_) {}
 function auswahl() {
   document.body.style.removeProperty("--h"); $("#wechsel").hidden = true;
@@ -76,6 +104,7 @@ inhalt.addEventListener("click", e => {
   const [art, , name] = held.k[+k.dataset.i];
   if (navigator.vibrate) try { navigator.vibrate(12); } catch (_) {}
   k.classList.remove("los", "zu"); void k.offsetWidth;
+  if (FUNK) { const ok = FUNK.senden({ wer: held.id, klang: art, name }); k.classList.add(ok ? "los" : "zu"); setTimeout(() => k.classList.remove("los", "zu"), 1000); return; }
   fetch("/zyn/spieler", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ wer: held.id, klang: art, name }) })
     .then(r => r.json()).then(j => { $("#weg").classList.remove("an"); k.classList.add(j.ok ? "los" : "zu"); setTimeout(() => k.classList.remove("los", "zu"), 1000); })
     .catch(() => { $("#weg").classList.add("an"); k.classList.add("zu"); });
