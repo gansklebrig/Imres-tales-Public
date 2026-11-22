@@ -202,7 +202,13 @@
     modal.innerHTML = '<div class="mbox ' + (opts.cls || "") + '">' + html + "</div>";
     modal.hidden = false; ui.modalOpen = true; Z.paused = true; ui.onClose = opts.onClose || null; ui.noEsc = !!opts.noEsc;
     A.muffle(1600);
-    setTimeout(() => { const f = modal.querySelector("[autofocus]") || modal.querySelector("button:not([disabled]),input"); if (f) f.focus(); }, 30);
+    /* sinnvoller Startpunkt für den Controller: ausdrücklich markiert → erste echte Wahl (kein Reiter, kein Schließen) → irgendwas */
+    setTimeout(() => {
+      const all = [...modal.querySelectorAll("button:not([disabled]),input,select,a.btn")].filter(el => el.offsetParent !== null);
+      const real = all.find(el => !el.closest(".reiter") && !/^(close|controlsBack|graphicsBack|abAchBack)$/.test(el.dataset.act || "") && el.tagName === "BUTTON");
+      const f = modal.querySelector("[autofocus]:not([disabled])") || real || all[0];
+      if (f) { f.focus({ preventScroll: true }); f.scrollIntoView && f.scrollIntoView({ block: "nearest" }); }
+    }, 30);
   }
   function closeModal() {
     if (!ui.modalOpen) return;
@@ -327,11 +333,11 @@
       ck("showDmg", L(["Schadenszahlen", "Damage numbers"]), s.showDmg) + ck("flashes", L(["Bildschirmblitze", "Screen flashes"]), s.flashes) + ck("vib", L(["Vibration", "Vibration"]), s.vib !== false) +
       '<label class="regler">' + L(["Stick-Totzone (Controller)", "Stick dead zone (controller)"]) + '<input type="range" min="15" max="60" value="' + Math.round((s.dead || 0.35) * 100) + '" data-dead="1"></label>' +
       '<button class="steuerknopf" data-act="controls">' + L(["Steuerung: Tastatur & Controller belegen", "Controls: remap keyboard & controller"]) + "</button>" +
-      (fs.ok ? '<button class="steuerknopf" data-act="fullscreen">' + esc(fs.label()) + " <small>· F11 / Alt+Enter</small></button>" + ck("autoFs", L(["Am Handy beim Spielstart automatisch Vollbild", "Automatic fullscreen on phones when starting"]), Z.settings.autoFs !== false) : "") +
+      (fs.ok ? '<button class="steuerknopf" data-act="fullscreen">' + esc(fs.label()) + " <small>· F · Alt+Enter</small></button>" + ck("autoFs", L(["Am Handy beim Spielstart automatisch Vollbild", "Automatic fullscreen on phones when starting"]), Z.settings.autoFs !== false) : "") +
       '<button class="steuerknopf" data-act="graphics">' + L(["Grafik, Leistung & Fehlerbericht", "Graphics, performance & error report"]) + " <small>· " + esc(Z.gfxName()) + "</small></button>" +
       ck("autoAim", L(["Zielhilfe für Fernkampf", "Ranged aim assist"]), s.autoAim) + ck("fps", L(["Bilder pro Sekunde anzeigen", "Show FPS"]), s.fps) +
       '<label class="schalter">' + L(["Sprache", "Language"]) + ' <select data-lang="1"><option value="de"' + (s.lang === "de" ? " selected" : "") + '>Deutsch</option><option value="en"' + (s.lang === "en" ? " selected" : "") + ">English</option></select></label>" +
-      '</div><div class="knoepfe"><button data-act="close" autofocus>' + esc(t("close")) + "</button></div>", { cls: "schmal", onClose: () => { Z.saveSettings(); A.saveVol(); if (!Z.level) showTitle(); } });
+      '</div><div class="knoepfe"><button data-act="close">' + esc(t("close")) + "</button></div>", { cls: "schmal", onClose: () => { Z.saveSettings(); A.saveVol(); if (!Z.level) showTitle(); } });
     modal.querySelectorAll("[data-vol]").forEach(r => r.oninput = () => { A.vol[r.dataset.vol] = r.value / 100; A.applyVol(); if (r.dataset.vol === "sfx") A.play("hitFlesh", { vol: 0.6, gap: 0.15 }); });
     modal.querySelector("[data-shake]").oninput = e => { Z.settings.shake = e.target.value / 100; };
     modal.querySelector("[data-dead]").oninput = e => { Z.settings.dead = e.target.value / 100; };
@@ -367,7 +373,11 @@
   };
   if (fsBtn) fsBtn.onclick = e => { e.preventDefault(); fs.toggle(); fsBtn.blur(); };
   document.addEventListener("fullscreenchange", fsSync); document.addEventListener("webkitfullscreenchange", fsSync);
-  addEventListener("keydown", e => { if (e.code === "Enter" && e.altKey) { e.preventDefault(); e.stopPropagation(); fs.toggle(); } }, true);
+  addEventListener("keydown", e => {
+    if (e.code === "Enter" && e.altKey) { e.preventDefault(); e.stopPropagation(); fs.toggle(); return; }
+    /* F: Vollbild – solange F nicht selbst belegt ist */
+    if (e.code === "KeyF" && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey && !inp.capture && !(e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) && !Object.values(inp.keys).some(k => k && k.includes("KeyF"))) { e.preventDefault(); e.stopPropagation(); fs.toggle(); }
+  }, true);
   actions.fullscreen = () => fs.toggle();
   fsSync();
 
@@ -732,7 +742,7 @@
   }
   ui.frame = dt => {
     syncPadHint();
-    if (!title.hidden && !ui.modalOpen) { if (inp.pressed.jump || inp.pressed.use || inp.pressed.a1) { const b = title.querySelector("button:focus") || title.querySelector("button"); if (b) b.click(); } if (inp.pressed.down || inp.pressed.up) { const bs = [...title.querySelectorAll("button")]; const i = bs.indexOf(document.activeElement); (bs[(i + (inp.pressed.down ? 1 : -1) + bs.length) % bs.length] || bs[0]).focus(); } inp.endFrame(); return; }
+    if (!title.hidden && !ui.modalOpen) { if (inp.pressed.jump || inp.pressed.use || inp.pressed.a1) { const b = title.querySelector("button:focus, a:focus") || title.querySelector("button"); if (b) b.click(); } if (inp.pressed.down || inp.pressed.up) { const bs = [...title.querySelectorAll("button, a")]; const i = bs.indexOf(document.activeElement); (bs[(i + (inp.pressed.down ? 1 : -1) + bs.length) % bs.length] || bs[0]).focus(); } inp.endFrame(); return; }
     if (inp.pressed.pause && !ui.choiceActive) { inp.consume("pause"); if (ui.modalOpen) { if (!ui.noEsc) closeModal(); } else ui.pause(); }
     if (inp.pressed.map && !ui.modalOpen) { inp.consume("map"); bigMap = !bigMap; drawMinimap(); }
     if (ui.modalOpen) {

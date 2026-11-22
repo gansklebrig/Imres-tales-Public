@@ -40,7 +40,7 @@
   const KEYS0 = {
     left: ["KeyA", "ArrowLeft"], right: ["KeyD", "ArrowRight"], up: ["KeyW", "ArrowUp"], down: ["KeyS", "ArrowDown"],
     jump: ["Space", "KeyK"], roll: ["ShiftLeft", "KeyL"], a1: ["KeyJ", null], a2: ["KeyU", null], s1: ["KeyQ", "KeyI"], s2: ["KeyO", null],
-    use: ["KeyE", "KeyF"], potion: ["KeyR", "KeyH"], pause: ["Escape", "KeyP"], map: ["KeyM", "Tab"]
+    use: ["KeyE", "Enter"], potion: ["KeyR", "KeyH"], pause: ["Escape", "KeyP"], map: ["KeyM", "Tab"]
   };
   /* Xbox-Layout (Standard-Gamepad): 0 A, 1 B, 2 X, 3 Y, 4 LB, 5 RB, 6 LT, 7 RT, 8 Ansicht, 9 Menü, 10 LS, 11 RS, 12–15 Steuerkreuz */
   const PAD0 = { jump: 0, roll: 1, a1: 2, a2: 3, s1: 4, s2: 5, potion: 6, use: 7, map: 8, pause: 9 };
@@ -62,6 +62,8 @@
   const clone = o => JSON.parse(JSON.stringify(o));
   inp.keys = clone(KEYS0); inp.pad = clone(PAD0);
   try { const k = JSON.parse(localStorage.getItem("imres-zerstoerer-tasten2") || "null"); if (k) for (const a of ACTIONS) if (Array.isArray(k[a])) inp.keys[a] = k[a].slice(0, 2); } catch (_) {}
+  /* F ist jetzt Vollbild: alte Belegung von F auf „Benutzen“ entfernen */
+  try { if (!localStorage.getItem("imres-zerstoerer-fmig")) { inp.keys.use = inp.keys.use.map(c => (c === "KeyF" ? "Enter" : c)); localStorage.setItem("imres-zerstoerer-fmig", "1"); } } catch (_) {}
   try { const p = JSON.parse(localStorage.getItem("imres-zerstoerer-pad") || "null"); if (p) for (const a in PAD0) if (typeof p[a] === "number") inp.pad[a] = p[a]; } catch (_) {}
   let codeMap = {};
   inp.rebuild = () => { codeMap = {}; for (const a of ACTIONS) for (const c of inp.keys[a] || []) if (c) codeMap[c] = a; if (!codeMap.Escape) codeMap.Escape = "pause"; if (!codeMap.ShiftRight && inp.keys.roll.includes("ShiftLeft")) codeMap.ShiftRight = "roll"; };

@@ -820,6 +820,8 @@
     }
     /* Parcours: Gruben in lange Böden schlagen (nicht im Start-/Zielraum, nicht in Leiter-/Türspalten) */
     carvePits({ get, set, cells, startCell, endCell }, R, B);
+    /* Gruben, unter denen ein Raum liegt, werden zu Schächten nach unten – mit Leiter zum Wiederhochklettern */
+    if (!ABYSS[biomeId]) voidToShafts({ get, set, cells, W, H }, R);
     /* Stacheln brauchen Boden */
     for (let y = 0; y < H - 1; y++) for (let x = 0; x < W; x++) if (get(x, y) === 3 && get(x, y + 1) !== 1) set(x, y + 1, 1);
     const lv = { biome: biomeId, seed, W, H, tiles, marks, cells, path, gw, gh, startCell, endCell, flow: B.flow, out: !!B.out };
@@ -856,6 +858,32 @@
         /* manchmal ein bröckelnder Steg über der Grube */
         if (gl >= 3 && R.chance(0.3)) for (let x = gx; x < gx + gl; x++) lv.set(x, r, 10);
       }
+    }
+  }
+  const ABYSS = { schlund: 1, glut: 1, sturm: 1, zinnen: 1 };
+  function voidToShafts(lv, R) {
+    const g = lv.get, done = new Set();
+    for (let y = 1; y < lv.H - 1; y++) for (let x = 1; x < lv.W - 1; x++) {
+      if (g(x, y) !== 9 || g(x, y - 1) === 9 || done.has(x + "," + y)) continue;
+      /* Lauf der Grube in dieser Zeile */
+      let x1 = x; while (g(x1 + 1, y) === 9) x1++;
+      for (let q = x; q <= x1; q++) done.add(q + "," + y);
+      const cy = Math.floor(y / CH), cxl = Math.floor(x / CW);
+      const below = lv.cells[cxl + "," + (cy + 1)];
+      if (!below) continue;
+      /* Grube und Fels darunter bis in den unteren Raum öffnen */
+      let ok = true; const bottoms = [];
+      for (let q = x; q <= x1; q++) {
+        let yy = y; while (g(q, yy) === 9) { lv.set(q, yy, 0); yy++; }
+        let n = 0; while (n < 7 && (g(q, yy) === 1 || g(q, yy) === 7)) { lv.set(q, yy, 0); yy++; n++; }
+        if (n >= 7) ok = false;
+        let fy = yy; while (fy < lv.H - 1 && g(q, fy + 1) !== 1 && g(q, fy + 1) !== 2 && g(q, fy + 1) !== 8 && fy - y < 40) fy++;
+        bottoms.push(fy);
+      }
+      /* Leiter in der Mitte des Schachts vom unteren Boden bis zur Grubenkante */
+      const lx = Math.round((x + x1) / 2), bot = bottoms[lx - x];
+      for (let yy = bot; yy >= y; yy--) { const v = g(lx, yy); if (v === 0 || v === 2) lv.set(lx, yy, 4); else if (v !== 4) break; }
+      if (!ok) for (let q = x; q <= x1; q++) lv.set(q, y, 9);
     }
   }
   /* Fallen auf normale Räume streuen – je Gebiet passend */

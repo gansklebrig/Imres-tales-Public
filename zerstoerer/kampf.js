@@ -7,7 +7,7 @@
   /* ======================= WELT-ABFRAGEN ======================= */
   const W = (Z.world = { lv: null });
   W.tile = (tx, ty) => (W.lv ? W.lv.get(tx, ty) : 1);
-  W.solidT = v => v === 1 || v === 7;
+  W.solidT = v => v === 1 || v === 7 || v === 12;
   W.solidAt = (px, py) => W.solidT(W.tile(Math.floor(px / T), Math.floor(py / T)));
   W.isLadder = (tx, ty) => W.tile(tx, ty) === 4;
   /* Plattform: Steg, Treppe, oberste Leiterkachel */

@@ -363,6 +363,7 @@
     Z.kampfTick && Z.kampfTick(dt);
     Z.abenteuerTick && Z.abenteuerTick(dt);
     Z.fluchTick && Z.fluchTick(dt);
+    Z.ebenenTick && Z.ebenenTick(dt);
     updateCampRex(dt);
     Z.updatePickups(dt);
     if (Z.darkness > 0) Z.darkness -= dt;
