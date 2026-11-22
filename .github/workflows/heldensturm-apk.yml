@@ -65,8 +65,13 @@ jobs:
 
       - name: Signaturschlüssel entschlüsseln
         env:
-          HELDENSTURM_SCHLUESSEL: ${{ secrets.HELDENSTURM_SCHLUESSEL }}
+          HELDENSTURM_SCHLUESSEL: ${{ secrets.HELDENSTURM_SCHLUESSEL || vars.HELDENSTURM_SCHLUESSEL }}
+          SECRET_NAMEN: ${{ toJSON(secrets) }}
+          VAR_NAMEN: ${{ toJSON(vars) }}
         run: |
+          # nur die Namen (nie die Werte) für die Fehlersuche festhalten
+          { echo "secrets: $(echo "$SECRET_NAMEN" | jq -c 'keys')"; echo "vars: $(echo "$VAR_NAMEN" | jq -c 'keys')"; } > namen.txt
+          HELDENSTURM_SCHLUESSEL="$(printf '%s' "$HELDENSTURM_SCHLUESSEL" | tr -d '[:space:]')"
           if [ -z "$HELDENSTURM_SCHLUESSEL" ]; then
             echo "::warning::Secret HELDENSTURM_SCHLUESSEL fehlt (Settings → Secrets and variables → Actions) – Probebau ohne Release."
             exit 0
@@ -117,6 +122,7 @@ jobs:
         run: |
           mkdir -p /tmp/st && cd /tmp/st && git init -q -b heldensturm-app-stand
           { echo "lauf=${GITHUB_RUN_NUMBER} ergebnis=${{ job.status }} signiert=${HS_SIGNIERT:-0} commit=${GITHUB_SHA}"; ls -la "$GITHUB_WORKSPACE/Heldensturm.apk" 2>&1; } > STAND.txt
+          cat "$GITHUB_WORKSPACE/namen.txt" >> STAND.txt 2>/dev/null || true
           tail -c 20000 "$GITHUB_WORKSPACE/bau.log" > bau.log 2>/dev/null || true
           git add . && git -c user.name=Heldensturm-App -c user.email=actions@users.noreply.github.com commit -q -m "Stand ${GITHUB_RUN_NUMBER}"
           git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" heldensturm-app-stand
