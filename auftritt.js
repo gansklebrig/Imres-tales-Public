@@ -1634,6 +1634,8 @@
       dingMalen(g, wf.art, x, yy, u * 1.5, wf.rot + wf.dreh * p, zeit);
       return true;
     });
+    if (!ruhe) try { kleineGaeste(g, w, h, u, zeit, s); } catch (_) {}
+    if (pano) try { pano.zeichnen(zeit, dt); } catch (_) {}
     /* Vorhänge links und rechts */
     vorhangMalen(g, w, h, u);
     /* Ansage */
@@ -1647,6 +1649,55 @@
         g.beginPath(); g.roundRect ? g.roundRect(w / 2 - tw / 2, my - fs, tw, fs * 2, fs) : g.rect(w / 2 - tw / 2, my - fs, tw, fs * 2); g.fill(); g.stroke();
         g.fillStyle = "#ffd27a"; g.fillText(s.meldung.text, w / 2, my + 1, tw - 16 * dpr); g.textBaseline = "alphabetic"; g.globalAlpha = 1;
       }
+    }
+  }
+  /* Kleine Gäste am Bühnenrand: Rex lugt aus der Kulisse, eine Maus flitzt vorbei,
+     ein winziger Barradin (der Pilz!) schleicht übers Brett, ab und zu eine Flöte im Flug */
+  function kleineGaeste(g, w, h, u, zeit, s) {
+    const rand = w * (.035 + .4 * s.vorhang), y = h * .82;
+    /* Rex: alle ~38 s für 5 s, bei guter Stimmung öfter */
+    const rz = zeit % (s.st > .7 ? 24 : 38);
+    if (rz < 5) {
+      const raus = Math.sin(Math.min(1, rz / .6, (5 - rz) / .6) * Math.PI / 2) * u * 5;
+      const x = w - rand - u * 1 + u * 5 - raus, ky = y - u * 7, wedel = Math.sin(zeit * 9);
+      g.save(); g.translate(x, ky);
+      g.fillStyle = "#6a4a2a"; g.beginPath(); g.ellipse(0, 0, u * 3, u * 2.4, -.15, 0, TAU); g.fill();               /* Kopf */
+      g.beginPath(); g.ellipse(-u * 2.6, u * .6, u * 1.8, u * 1.1, -.1, 0, TAU); g.fill();                              /* Schnauze */
+      g.fillStyle = "#4a3018"; g.beginPath(); g.ellipse(u * 1.2, -u * 1.4 + wedel * u * .2, u * .9, u * 2, .5 + wedel * .2, 0, TAU); g.fill(); /* Ohr */
+      g.fillStyle = "#1a0e08"; g.beginPath(); g.arc(-u * 4.2, u * .4, u * .55, 0, TAU); g.fill();                       /* Nase */
+      g.fillStyle = "#f0e0c0"; g.beginPath(); g.arc(-u * 1.2, -u * .6, u * .5, 0, TAU); g.fill();
+      g.fillStyle = "#1a0e08"; g.beginPath(); g.arc(-u * 1.35, -u * .55, u * .28, 0, TAU); g.fill();                     /* Auge */
+      if (s.st > .6) { g.fillStyle = "#d06a6a"; g.beginPath(); g.ellipse(-u * 2.8, u * 1.6 + Math.abs(wedel) * u * .4, u * .5, u * .9, 0, 0, TAU); g.fill(); } /* Zunge */
+      g.restore();
+    }
+    /* Maus quer übers Brett, alle ~53 s */
+    const mz = (zeit + 17) % 53;
+    if (mz < 3.2) {
+      const p = mz / 3.2, x = rand + (w - 2 * rand) * p, hop = Math.abs(Math.sin(zeit * 22)) * u * .3;
+      g.fillStyle = "#3a3030"; g.beginPath(); g.ellipse(x, y + u * 3 - hop, u * 1.1, u * .6, 0, 0, TAU); g.fill();
+      g.beginPath(); g.arc(x + u * 1, y + u * 2.7 - hop, u * .45, 0, TAU); g.fill();
+      g.strokeStyle = "#3a3030"; g.lineWidth = u * .15; g.beginPath(); g.moveTo(x - u * 1, y + u * 3 - hop); g.quadraticCurveTo(x - u * 2.2, y + u * 2 , x - u * 2.6, y + u * 2.8); g.stroke();
+      g.fillStyle = "#e0a0a0"; g.beginPath(); g.arc(x + u * .85, y + u * 2.3 - hop, u * .25, 0, TAU); g.fill();
+    }
+    /* Mini-Barradin nach dem Pilz: winzig, mit Hut, alle ~71 s, singt Mini-Noten */
+    const bz = (zeit + 40) % 71;
+    if (bz < 6) {
+      const p = bz / 6, x = w - rand - (w - 2 * rand) * p, schr = Math.sin(zeit * 12) * u * .15;
+      g.fillStyle = "#2a1a10"; g.fillRect(x - u * .35, y + u * 1.4 + schr, u * .7, u * 1.3);                           /* Körper */
+      g.fillStyle = "#e8c8a0"; g.beginPath(); g.arc(x, y + u * 1.1, u * .45, 0, TAU); g.fill();                         /* Kopf */
+      g.fillStyle = "#7a2a1a"; g.fillRect(x - u * .7, y + u * .75, u * 1.4, u * .18); g.fillRect(x - u * .35, y + u * .25, u * .7, u * .55); /* Hut */
+      g.fillStyle = "#c9a040"; g.fillRect(x - u * .35, y + u * .62, u * .7, u * .1);
+      if ((bz * 2) % 1 < .5) { g.fillStyle = "rgba(255,226,160,.85)"; g.font = (u * 1.4) + "px serif"; g.textAlign = "center"; g.fillText("♪", x - u * 1.2, y - u * .3 - (bz * 2 % 1) * u * 2); }
+    }
+    /* Eine schlecht gespielte Flöte segelt durchs Bild (Kapitel III), alle ~97 s */
+    const fz = (zeit + 63) % 97;
+    if (fz < 2.4) {
+      const p = fz / 2.4, x = rand + (w - 2 * rand) * p, yy = h * .2 + Math.sin(p * Math.PI) * -h * .08 + p * h * .25;
+      g.save(); g.translate(x, yy); g.rotate(p * 9);
+      g.fillStyle = "#b88a50"; g.fillRect(-u * 3, -u * .3, u * 6, u * .6);
+      g.fillStyle = "#3a2010"; for (let i = 0; i < 4; i++) { g.beginPath(); g.arc(-u * 1.5 + i * u, 0, u * .14, 0, TAU); g.fill(); }
+      g.restore();
+      g.fillStyle = "rgba(255,226,160,.6)"; g.font = (u * 1.6) + "px serif"; g.textAlign = "center"; g.fillText("♭", x - u * 4, yy - u);
     }
   }
   function vorhangMalen(g, w, h, u) {
@@ -1810,6 +1861,7 @@
         (ergebnis && !spiel && !ergebnis.duell ? '<div class="at-eintrag-box">' + eintragHtml(T) + "</div>" : "") + '<div class="at-liste">' + listeHtml(T) + "</div>");
     tonNeu(); pauseZeigen();
     if (duell) duellZeichnen(); /* Online-Duell: Leiste, Gegner, gesperrte Wahl */
+    panoSetzen(laeuft && !duell);
     hoeheAnpassen();
     if (kalib) return;
     malenRuhe(); ruheStarten();
@@ -1830,6 +1882,27 @@
     return '<div class="at-v-karte"><p class="at-v-kopf">' + kopf + '</p><p class="at-v-titel">' + titel + "</p>" +
       (text ? '<p class="at-v-text">' + text + "</p>" : "") + (klein ? '<p class="at-v-klein">' + klein + "</p>" : "") + "</div>" +
       '<div class="at-aktion">' + knoepfeHtml(T) + "</div>";
+  }
+  /* Testzugang (nur mit ?at-test): spielt automatisch perfekt */
+  if (/[?&]at-test\b/.test(location.search)) window.__at = { spiel: () => spiel, auto() {
+    const lauf = () => { if (spiel && spiel.pause == null) { const j = hoerZeit() - spiel.start - kalibWert; spiel.daten.liste.forEach(n => { if (!n.status && Math.abs(n.zeit - j) < .02) { tippen(n.spur); if (!n.dauer) loslassen(n.spur); } }); } requestAnimationFrame(lauf); };
+    lauf(); } };
+  /* Breitbild am PC: links und rechts der Bühne geht das Theater weiter (nur während des Lieds) */
+  let pano = null;
+  function panoSetzen(an) {
+    pano = null;
+    root.querySelectorAll(":scope > .pano-flaeche").forEach(e => e.remove());
+    root.classList.remove("mit-panorama", "pano-an");
+    if (!an || !window.Panorama || !window.AUFTRITT_PANO) return;
+    const b = root.querySelector(".at-buehne"), c = canvas(); if (!b || !c) return;
+    pano = window.Panorama.an({
+      karte: root, buehne: b, W: () => c.width || 1, H: () => c.height || 1, grund: "#0a0608",
+      seiten: (x, info) => {
+        const s = szene; if (!s) return;
+        window.AUFTRITT_PANO(x, info, { st: s.st, jubel: s.jubel, schlag: taktJetzt(), vorhang: s.K.vorhang, licht: s.v.licht, k: s.k, feuer: s.feuer,
+          ende: s.ende ? (s.ende.gut ? 1 : -1) : 0, rexWeg: (s.zeit % (s.st > .7 ? 24 : 38)) < 5.5 });
+      }
+    });
   }
   /* Spielfläche so hoch, wie bis zum unteren Fensterrand Platz ist (im Vollbild: bis zum Rand der Karte) */
   function hoeheAnpassen() {
@@ -2011,6 +2084,7 @@
     });
     buehneVorn(g, w, h, dpr, (jetzt - d0.vor) / schlagDauer);
     spurNamen(g, w, h, dpr);
+    trefferFxMalen(g, w, h, dpr, jetzt, y);
     g.shadowColor = "rgba(0,0,0,.9)"; g.shadowBlur = 4 * dpr;
     g.fillStyle = "#ebe2cc"; g.textAlign = "left"; g.font = (14 * dpr) + "px Georgia, serif";
     const links = 10 * dpr + (szene ? w * (.035 + .4 * szene.vorhang) : 0);
@@ -2047,7 +2121,83 @@
     const i = n === -1 ? -1 : spiel.daten.liste.indexOf(n);
     (spiel.zuege = spiel.zuege || []).push(i === -1 ? [-1, art, spur, Math.round((hoerZeit() - spiel.start) * 100)] : [i, art]);
   }
-  function zeigeUrteil(art, spur) { spiel.urteil = { art, spur, zeit: hoerZeit() - spiel.start }; }
+  function zeigeUrteil(art, spur) {
+    const z = hoerZeit() - spiel.start;
+    spiel.urteil = { art, spur, zeit: z };
+    if (reduziert()) return;
+    const fx = spiel.fx || (spiel.fx = []);
+    if (fx.length > 40) fx.splice(0, fx.length - 40);
+    const tn = [];
+    if (art !== "daneben") {
+      const n = art === "perfekt" ? 5 : art === "gut" ? 3 : 1;
+      for (let i = 0; i < n; i++) tn.push({ a: -Math.PI / 2 + (Math.random() - .5) * 1.6, v: .7 + Math.random() * .7, z: "♪♫♩♬✦"[Math.floor(Math.random() * 5)], d: (Math.random() - .5) * 4 });
+    } else for (let i = 0; i < 4; i++) tn.push({ a: Math.PI / 2 + (Math.random() - .5) * 2.4, v: .3 + Math.random() * .4, z: "·", d: 0 });
+    fx.push({ art, spur, t: z, tn, serie: spiel.serie });
+    /* Meilensteine der Serie: großer Schriftzug */
+    if (art !== "daneben" && spiel.serie && spiel.serie % 25 === 0) spiel.meilenstein = { n: spiel.serie, t: z };
+  }
+  /* Trefferfunken, Notenschwärme, Ringe – alles, was beim Tippen aufblitzt */
+  function trefferFxMalen(g, w, h, dpr, jetzt, y) {
+    const fx = spiel && spiel.fx; if (!fx || !fx.length) return;
+    const bahn = w / 3;
+    g.save();
+    spiel.fx = fx.filter(e => {
+      const a = jetzt - e.t; if (a > 1.1 || a < -.05) return a < 0;
+      const x = e.spur * bahn + bahn / 2, f = FARBEN[e.spur], p = a / 1.1;
+      if (e.art === "daneben") {
+        g.globalAlpha = (1 - p) * .7; g.strokeStyle = "#e0675a"; g.lineWidth = 2 * dpr;
+        const r = (10 + p * 10) * dpr; g.beginPath(); g.moveTo(x - r, y - r * .5); g.lineTo(x + r, y + r * .5); g.moveTo(x + r, y - r * .5); g.lineTo(x - r, y + r * .5); g.stroke();
+        g.fillStyle = "#8a7a6a"; g.font = (14 * dpr) + "px serif"; g.textAlign = "center";
+        e.tn.forEach(n => g.fillText(n.z, x + Math.cos(n.a) * n.v * a * 60 * dpr, y + Math.sin(n.a) * n.v * a * 60 * dpr + a * a * 80 * dpr));
+        return true;
+      }
+      const stark = e.art === "perfekt" ? 1 : e.art === "gut" ? .7 : .4;
+      g.globalCompositeOperation = "lighter";
+      /* zwei Ringe, der zweite etwas später */
+      for (let k = 0; k < 2; k++) {
+        const q = klemme((a - k * .08) / .45, 0, 1); if (q <= 0 || q >= 1) continue;
+        g.globalAlpha = (1 - q) * stark; g.strokeStyle = k ? "#ffd27a" : f; g.lineWidth = (4 - q * 3) * dpr;
+        g.beginPath(); g.ellipse(x, y, (18 + q * 52 * stark) * dpr, (9 + q * 22 * stark) * dpr, 0, 0, TAU); g.stroke();
+      }
+      /* Lichtsäule über der Spur */
+      if (a < .35) {
+        const q = 1 - a / .35, gr = g.createLinearGradient(0, y, 0, y - h * .55 * stark);
+        gr.addColorStop(0, "rgba(255,210,122," + (.32 * q * stark) + ")"); gr.addColorStop(1, "rgba(255,210,122,0)");
+        g.globalAlpha = 1; g.fillStyle = gr; g.fillRect(x - bahn * .28, y - h * .55 * stark, bahn * .56, h * .55 * stark);
+      }
+      /* Strahlenkranz bei Perfekt */
+      if (e.art === "perfekt" && a < .4) {
+        const q = a / .4; g.globalAlpha = (1 - q) * .9; g.strokeStyle = "#fff0c0"; g.lineWidth = 1.5 * dpr;
+        g.beginPath();
+        for (let i = 0; i < 12; i++) { const wi = i / 12 * TAU + e.t * 3, r0 = (14 + q * 30) * dpr, r1 = r0 + (10 + (i % 2) * 12) * dpr * (1 - q); g.moveTo(x + Math.cos(wi) * r0, y + Math.sin(wi) * r0 * .6); g.lineTo(x + Math.cos(wi) * r1, y + Math.sin(wi) * r1 * .6); }
+        g.stroke();
+      }
+      /* fliegende Noten */
+      g.globalCompositeOperation = "source-over";
+      g.textAlign = "center"; g.textBaseline = "middle";
+      e.tn.forEach((n, i) => {
+        const dx = Math.cos(n.a) * n.v * a * 110 * dpr + Math.sin(a * 6 + i) * 6 * dpr, dy = Math.sin(n.a) * n.v * a * 150 * dpr + a * a * 40 * dpr;
+        g.globalAlpha = Math.min(1, (1 - p) * 1.6);
+        g.save(); g.translate(x + dx, y + dy); g.rotate(n.d * a * .4);
+        g.font = ((n.z === "✦" ? 13 : 18) * dpr) + "px serif"; g.fillStyle = n.z === "✦" ? "#fff0c0" : f;
+        g.shadowColor = f; g.shadowBlur = 8 * dpr; g.fillText(n.z, 0, 0); g.restore();
+      });
+      g.textBaseline = "alphabetic";
+      return true;
+    });
+    /* Meilenstein: große goldene Zahl in der Mitte */
+    const m = spiel.meilenstein;
+    if (m && jetzt - m.t < 1.4 && jetzt >= m.t) {
+      const a = (jetzt - m.t) / 1.4, sc = 1 + Math.sin(Math.min(1, a * 4) * Math.PI / 2) * .3 - a * .1;
+      g.globalAlpha = Math.min(1, (1 - a) * 2); g.globalCompositeOperation = "source-over";
+      g.translate(w / 2, h * .38); g.scale(sc, sc);
+      g.font = "bold " + (44 * dpr) + "px Georgia, serif"; g.textAlign = "center";
+      g.lineWidth = 5 * dpr; g.strokeStyle = "rgba(40,16,8,.85)"; g.strokeText(m.n + "×", 0, 0);
+      const gr = g.createLinearGradient(0, -40 * dpr, 0, 6 * dpr); gr.addColorStop(0, "#fff3c4"); gr.addColorStop(1, "#e0a046");
+      g.fillStyle = gr; g.shadowColor = "#ffb060"; g.shadowBlur = 22 * dpr; g.fillText(m.n + "×", 0, 0);
+    }
+    g.restore();
+  }
 
   /* ---------- Spielablauf ---------- */
   let stimmt = null; /* läuft gerade das Laden der Aufnahmen? */
