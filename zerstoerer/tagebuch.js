@@ -87,12 +87,25 @@
     PAGES.forEach((p, i) => { h += m[i] ? '<button data-act="tbSeite" data-arg="' + i + '"><b>' + (i + 1) + ".</b> " + esc(L(p.t)) + "</button>" : '<button disabled><b>' + (i + 1) + ".</b> " + esc(Z.areaName ? Z.areaName(p.area) : p.area) + " · ???</button>"; });
     return h + '</div><div class="knoepfe"><button data-act="close" autofocus>' + L(["Zurück", "Back"]) + "</button></div></div>";
   }
+  Z.ui.actions.tbEingang = () => {
+    Z.ui.close();
+    const P = Z.player, lv = Z.level; if (!P || !lv || !lv.start) return;
+    try { const log = JSON.parse(localStorage.getItem("imres-zerstoerer-steck") || "[]"); log.push({ t: Date.now(), area: lv.biome, seed: lv.seed, x: Math.round(P.x), y: Math.round(P.y) }); localStorage.setItem("imres-zerstoerer-steck", JSON.stringify(log.slice(-20))); } catch (e) {}
+    /* offene Siegel und Türen freigeben, dann an den Eingang */
+    if (Z.ambush && Z.ambush() && Z.ambush().state === "fight") { const a = Z.ambush(); for (const [x, y, v] of a.sealed) lv.set(x, y, v); a.sealed = []; a.state = "done"; Z.dirtyTiles && Z.dirtyTiles(); }
+    P.x = lv.start.x * T + 8 - P.w / 2; P.y = (lv.start.y + 1) * T - P.h; P.vx = 0; P.vy = 0; P.iframe = Math.max(P.iframe || 0, 1.5);
+    P.plunge = false; P.climbing = false; P.ledge = null; P.grabbed = null; P.diveLock = false;
+    Z.cam.snap(P.x, P.y); FX.burst(P.x + P.w / 2, P.y + P.h / 2, 20, { col: ["#ffd27a", "#fff0c0"], sp: 90, life: 0.6, size: 2, kind: "spark", add: true }); A.play("holy", { vol: 0.4 });
+    Z.meta.unstuck = (Z.meta.unstuck || 0) + 1; Z.saveMeta();
+  };
   Z.ui.actions.tbSeite = i => { Z.ui.close(); Z.ui.open(pageHTML(+i, false).replace('data-act="close"', 'data-act="tbBuch"'), { cls: "schmal" }); };
   Z.ui.actions.tbBuch = () => { Z.ui.close(); Z.ui.open(bookHTML(), { cls: "schmal" }); };
   const pause0 = Z.ui.pause;
   Z.ui.pause = function () {
     const r = pause0.apply(this, arguments);
-    const box = document.querySelector("#modal .knoepfe");
+    const box = document.querySelector("#modal .pausenmenue .knoepfe"); /* nur ins echte Pausenmenü, nie in ein anderes offenes Fenster */
+    /* Sicherheitsnetz: wer feststeckt, kehrt zum Eingang des Gebiets zurück */
+    if (box && Z.run && Z.level && !Z.level.hub && !box.querySelector('[data-act="tbEingang"]')) { const b = document.createElement("button"); b.dataset.act = "tbEingang"; b.textContent = "⟲ " + L(["Festgesteckt? Zurück zum Eingang", "Stuck? Back to the entrance"]); const ab = box.querySelector('[data-act="abort"]'); box.insertBefore(b, ab || null); }
     if (box && count() > 0 && !box.querySelector('[data-act="tbBuch"]')) { const b = document.createElement("button"); b.dataset.act = "tbBuch"; b.textContent = "📜 " + L(["Miras Tagebuch", "Mira's Diary"]) + " (" + count() + "/" + PAGES.length + ")"; box.insertBefore(b, box.children[1] || null); }
     return r;
   };
@@ -229,7 +242,9 @@
   }
   function groupHTML() {
     const m = meta();
-    let h = '<h2>' + L(["Die Vorgänger", "Those who came before"]) + '</h2><p class="hinweis">' + L(["Barradin hat Miras Seiten abgeschrieben. Wer vor uns in der Feste war:", "Barradin copied Mira's pages. Who entered the keep before us:"]) + '</p><div class="vorg">';
+    /* dieselben Reiter wie im Fundbuch, damit man mit LB/RB (oder Q/O) weiterblättern kann */
+    const tabs = L(Z.TX && Z.TX.tabsCodex || [[], []]);
+    let h = '<h2>' + L(["Die Vorgänger", "Those who came before"]) + '</h2><div class="reiter">' + tabs.map((x, i) => '<button data-act="codexTab" data-arg="' + i + '">' + esc(x) + "</button>").join("") + '<button data-act="tbGruppe" class="an">' + L(["Die Vorgänger", "Before us"]) + '</button></div><p class="hinweis">' + L(["Barradin hat Miras Seiten abgeschrieben. Wer vor uns in der Feste war:", "Barradin copied Mira's pages. Who entered the keep before us:"]) + '</p><div class="vorg">';
     for (const g of GROUP) {
       const known = !!m[g.page];
       h += '<div class="vg"><canvas width="112" height="128" data-g="' + g.id + '" data-k="' + (known ? 1 : 0) + '"></canvas><div><b>' + (known || count() > 0 ? esc(g.n) : "???") + "</b> <small>" + esc(L(g.r)) + "</small><p>" + (known ? esc(L(g.fate)) : L(["Ihr Schicksal steht auf einer Seite, die noch fehlt.", "Their fate is written on a page still missing."])) + "</p>" + (known ? '<p class="bar">' + esc(L(g.bar)) + "</p>" : "") + "</div></div>";

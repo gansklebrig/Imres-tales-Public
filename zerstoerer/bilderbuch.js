@@ -1669,7 +1669,9 @@
     const t0 = performance.now();
     const H = Math.ceil(Z.cam.h + 120), s = Math.min(Math.max(1, G.scale || 1), q >= 3 ? 1.9 : q >= 2 ? 1.6 : 1.2);
     const cv = document.createElement("canvas"); cv.width = Math.ceil(PW * s); cv.height = Math.ceil(H * s);
-    const c = cv.getContext("2d"); c.scale(s, s);
+    /* exakt auf die Leinwand skalieren: sonst bleibt am rechten Rand eine halb durchsichtige Spalte (feine Naht alle 1536 px) */
+    const sx = cv.width / PW, sy = cv.height / H;
+    const c = cv.getContext("2d"); c.scale(sx, sy);
     const R = Rng(((B.name[0].length * 7919) ^ ((lv.seed || 7) * 31)) >>> 0);
     const pal = palette(B, kind);
     const o = P(c, R, pal, H, s);
@@ -1680,8 +1682,42 @@
     for (const m of o.mists) mistStrip(o, m);
     for (const f of o.falls) { fallTex(o, f); if (!f.lava) { c.fillStyle = "rgba(200,230,210,.16)"; c.fillRect(f.x, f.y, f.w, f.h); } }
     o.smokeCol = nb(mix(pal.fog, "#8a8080", 0.35)); o.smokeDark = "#2a2220";
-    page = { cv, s, H, o, kind, lvRef: lv, q, ms: +(performance.now() - t0).toFixed(1) };
+    const opaque = !!(o.topFill && o.botFill) && isOpaque(cv);
+    /* Mittel (Stufe 1): ruhige Lichter und Strahlen einmal einbacken statt jedes Bild additiv zu malen
+       (nur bei deckenden Innenseiten – dort sieht „lighter“ eingebacken genauso aus) */
+    if (q <= 1 && opaque) bakeStatic(o, c);
+    page = { cv, s, sx, sy, H, o, kind, lvRef: lv, q, opaque, ms: +(performance.now() - t0).toFixed(1) };
   }
+  /* deckt die Seite vollständig? (verkleinert prüfen – billig) */
+  function isOpaque(cv) {
+    try {
+      const w = 96, h = 32, t = document.createElement("canvas"); t.width = w; t.height = h; const g = t.getContext("2d");
+      g.drawImage(cv, 0, 0, w, h); const d = g.getImageData(0, 0, w, h).data;
+      for (let i = 3; i < d.length; i += 4) if (d[i] < 250) return false;
+      return true;
+    } catch (e) { return false; }
+  }
+  function bakeStatic(o, c) {
+    c.save(); c.globalCompositeOperation = "lighter";
+    for (const s of o.shafts) {
+      const a = s.a * 0.875, dx = Math.cos(s.ang), dy = Math.sin(s.ang); c.fillStyle = rgba(s.col, a);
+      for (const L of [0.45, 0.75, 1]) { const l = s.len * L, sp = 1 + L * 0.5; c.beginPath(); c.moveTo(s.x, s.y); c.lineTo(s.x + s.w, s.y); c.lineTo(s.x + s.w * sp + dx * l, s.y + dy * l); c.lineTo(s.x - s.w * (sp - 1) + dx * l, s.y + dy * l); c.closePath(); c.fill(); }
+    }
+    o.shafts = [];
+    const keep = [];
+    for (const l of o.lights) { if (l.tog) { keep.push(l); continue; } glow(c, l.x, l.y, l.r, l.col, l.a * (l.f === 0 ? 1 : l.f === 2 ? 0.72 : 0.86), l.soft); }
+    o.lights = keep;
+    const gk = [];
+    for (const g of o.glows) {
+      const avg = g.kind === "steady" ? 1 : g.kind === "pulse" ? 0.65 : g.kind === "forge" ? 0.75 : g.kind == null || g.kind === "flicker" ? 0.75 : -1;
+      if (avg < 0) { gk.push(g); continue; }
+      glow(c, g.x, g.y, g.r * 1.6, g.col, (g.a || 0.4) * avg);
+    }
+    o.glows = gk;
+    c.restore();
+  }
+  /* deckt die Bilderbuchseite gerade das ganze Bild? Dann braucht es weder Himmel noch ferne Ebene darunter */
+  Z.bilderbuchCovers = () => !!(page && !page.none && page.opaque && page.lvRef === Z.level && page.q === curQ() && Math.abs(page.H - Math.ceil(Z.cam.h + 120)) <= 2);
   Z.bilderbuchPage = () => page;
   Z.bilderbuchBuild = () => { build(); return page && page.ms; };
   /* Prüfhilfe: ganze Seite samt Leben in ein Bild malen */
@@ -1970,7 +2006,8 @@
   /* ======================= EINHÄNGEN: zwischen ferner Ebene und Mittelgrund ======================= */
   const life0 = Z.drawBackLife;
   Z.drawBackLife = function (c, cam, t, B, oy, LH) {
-    if (life0) life0.apply(this, arguments);
+    /* was darunter läge (Wolken, ferne Tiere …), wäre unter einer deckenden Seite ohnehin unsichtbar */
+    if (life0 && !Z.bilderbuchCovers()) life0.apply(this, arguments);
     if (!Z.level) return;
     const tA = performance.now();
     try { drawPage(c, cam, t); } finally { Z.bilderbuchMs = performance.now() - tA; }
@@ -1989,7 +2026,7 @@
     let x = Math.floor((cam.x - ox) / PW) * PW + ox;
     for (; x < cam.x + cam.w; x += PW) {
       const vx0 = Math.max(x, cam.x - 2), vx1 = Math.min(x + PW, cam.x + cam.w + 2); if (vx1 <= vx0) continue;
-      const k = page.s; c.drawImage(page.cv, (vx0 - x) * k, (y0 - py) * k, (vx1 - vx0) * k, (y1 - y0) * k, vx0, y0, vx1 - vx0, y1 - y0);
+      const kx = page.sx, ky = page.sy; c.drawImage(page.cv, (vx0 - x) * kx, (y0 - py) * ky, (vx1 - vx0) * kx, (y1 - y0) * ky, vx0, y0, vx1 - vx0, y1 - y0);
     }
     /* Leben auch für Elemente, die über die Seitennaht ragen */
     for (x = Math.floor((cam.x - ox) / PW) * PW + ox - PW; x < cam.x + cam.w; x += PW) {

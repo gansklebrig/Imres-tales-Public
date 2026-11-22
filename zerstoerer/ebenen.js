@@ -19,7 +19,9 @@
     /* Außengebiete: keine unsichtbare Decke – über der Karte ist offener Himmel */
     if (lv.out && !lv._skyOpen) {
       lv._skyOpen = true;
-      for (let x = 1; x < lv.W - 1; x++) if (lv.get(x, 0) === 1) lv.set(x, 0, 0);
+      /* Geheimräume in der obersten Reihe behalten ihre Decke (sonst fällt man von oben hinein und sitzt hinter rissigen Wänden) */
+      const secretTop = x => { const c = lv.cells[Math.floor(x / CW) + ",0"]; return c && c.kind === "secret"; };
+      for (let x = 1; x < lv.W - 1; x++) if (lv.get(x, 0) === 1 && !secretTop(x)) lv.set(x, 0, 0);
       const g0 = lv.get; lv.get = (x, y) => (y < 0 && x >= 0 && x < lv.W ? 0 : g0(x, y));
       if (Z.cam.bounds) { Z.cam.bounds.y = -6 * T; Z.cam.bounds.h = lv.H * T + 6 * T; }
     }
@@ -43,7 +45,7 @@
       if ((c.kind === "side" || c.kind === "secret" || exits <= 1) && !hasLoot(c)) {
         for (let i = 0; i < 200; i++) {
           const x = c.x * CW + 2 + ((Math.random() * (CW - 4)) | 0), y = c.y * CH + 2 + ((Math.random() * (CH - 4)) | 0);
-          if (!Z.standable(lv, x, y, 2)) continue;
+          if (!Z.standable(lv, x, y, 2) || (lv.reach && !lv.reach[y * lv.W + x] && c.kind !== "secret")) continue;
           const r = Math.random(), px = x * T + 8, py = (y + 1) * T - 2;
           if (r < 0.45) Z.spawnPickup("chest", px, py, { vx: 0, vy: 0 });
           else if (r < 0.65) Z.spawnPickup("scroll", px, py, { vx: 0, vy: 0 });
@@ -97,7 +99,7 @@
      Sichtlinien von Ezekiels Augen aus: durch offene Räume, Durchgänge und offene Türen klar,
      hinter Wänden und geschlossenen Türen liegt Schatten. Schon Gesehenes bleibt gedämpft erkennbar,
      Unbekanntes liegt im Dunkel. Die Sichtweite hängt vom Gebiet ab. */
-  let vis = null, mem = null, tvis = null, visLv = null, visT = 0, ofs = null, ofc = null;
+  let vis = null, mem = null, tvis = null, visLv = null, visT = 0, ofs = null, ofc = null, ofImg = null, seenRef = null, seenN = null;
   const blocks = v => v === 1 || v === 7 || v === 12;
   function sightRange(lv) {
     const B = Z.biome || {};
@@ -110,6 +112,7 @@
     const P = Z.player; if (!P) return;
     const n = lv.W * lv.H;
     if (visLv !== lv) { visLv = lv; vis = new Float32Array(n); mem = new Uint8Array(n); tvis = new Float32Array(n); }
+    if (seenRef !== seen) { seenRef = seen; seenN = new Set(); }
     tvis.fill(0);
     const ex = (P.x + P.w / 2) / T, ey = (P.y + 7) / T, R = sightRange(lv), R2 = R * R;
     const x0 = Math.max(0, Math.floor(cam.x / T) - 2), x1 = Math.min(lv.W - 1, Math.ceil((cam.x + cam.w) / T) + 2);
@@ -127,30 +130,47 @@
       if (!ok) continue;
       const f = d < R * 0.7 ? 1 : Math.max(0, 1 - (d - R * 0.7) / (R * 0.3));
       const i = ty * lv.W + tx; tvis[i] = f;
-      if (f > 0.25) { mem[i] = 1; const k = Math.floor(tx / CW) + "," + Math.floor(ty / CH); if (!seen.has(k)) seen.add(k); }
+      if (f > 0.25) { mem[i] = 1; const kn = Math.floor(tx / CW) * 4096 + Math.floor(ty / CH); if (!seenN.has(kn)) { seenN.add(kn); seen.add(Math.floor(tx / CW) + "," + Math.floor(ty / CH)); } }
     }
   }
-  function drawFog(c, cam, t) {
-    const lv = Z.level; if (!lv || lv.hub || lv.arena || lv.passage || !lv.cells) return;
+  /* Sichtnebel als kleines Bild (eine Kachel = ein Pixel) aktualisieren; liefert die Lage in Kacheln */
+  function fogImage(lv, cam) {
     const now = performance.now();
     if (now - visT > 70 || visLv !== lv) { visT = now; computeVis(lv, cam); }
     const x0 = Math.max(0, Math.floor(cam.x / T) - 1), x1 = Math.min(lv.W - 1, Math.ceil((cam.x + cam.w) / T) + 1);
     const y0 = Math.max(0, Math.floor(cam.y / T) - 1), y1 = Math.min(lv.H - 1, Math.ceil((cam.y + cam.h) / T) + 1);
     const w = x1 - x0 + 1, h = y1 - y0 + 1;
+    if (w <= 0 || h <= 0) return null;
     if (!ofs) { ofs = document.createElement("canvas"); ofc = ofs.getContext("2d"); }
-    if (ofs.width !== w || ofs.height !== h) { ofs.width = w; ofs.height = h; }
-    const img = ofc.createImageData(w, h), D = img.data;
+    if (ofs.width !== w || ofs.height !== h) { ofs.width = w; ofs.height = h; ofImg = null; }
+    if (!ofImg) ofImg = ofc.createImageData(w, h);
+    const D = ofImg.data;
     const memA = lv.out ? 0.38 : 0.52, unA = lv.out ? 0.7 : 0.88;
-    for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) {
-      const i = ty * lv.W + tx;
-      vis[i] += (tvis[i] - vis[i]) * 0.18;
-      const base = mem[i] ? memA : unA, a = base * (1 - vis[i]);
-      const o = ((ty - y0) * w + (tx - x0)) * 4;
-      D[o] = 7; D[o + 1] = 5; D[o + 2] = 10; D[o + 3] = Math.round(a * 255);
+    for (let ty = y0; ty <= y1; ty++) {
+      let o = (ty - y0) * w * 4, i = ty * lv.W + x0;
+      for (let tx = x0; tx <= x1; tx++, i++, o += 4) {
+        const v = vis[i] += (tvis[i] - vis[i]) * 0.18;
+        D[o] = 7; D[o + 1] = 5; D[o + 2] = 10; D[o + 3] = ((mem[i] ? memA : unA) * (1 - v) * 255 + 0.5) | 0;
+      }
     }
-    ofc.putImageData(img, 0, 0);
+    ofc.putImageData(ofImg, 0, 0);
+    return { x0, y0, w, h };
+  }
+  const fogOn = lv => lv && !lv.hub && !lv.arena && !lv.passage && lv.cells;
+  /* bevorzugt: direkt in die Lichtkarte (spart einen Vollbild-Durchgang) */
+  let fogFrame = -1;
+  if (Z.gfx.lightOver) Z.gfx.lightOver.push(function (l, X0, Y0, sx, sy) {
+    const lv = Z.level; if (!fogOn(lv)) return;
+    const cam = Z.cam, f = fogImage(lv, { x: X0, y: Y0, w: cam.w, h: cam.h }); if (!f) return;
+    l.imageSmoothingEnabled = true; l.drawImage(ofs, (f.x0 * T - X0) * sx, (f.y0 * T - Y0) * sy, f.w * T * sx, f.h * T * sy);
+    fogFrame = Z.gfx.frame;
+  });
+  function drawFog(c, cam, t) {
+    const lv = Z.level; if (!fogOn(lv)) return;
+    if (fogFrame === Z.gfx.frame && Z.gfx.lightMerged && Z.gfx.lightMerged()) return;
+    const f = fogImage(lv, cam); if (!f) return;
     c.save(); c.imageSmoothingEnabled = true;
-    c.drawImage(ofs, x0 * T, y0 * T, w * T, h * T);
+    c.drawImage(ofs, f.x0 * T, f.y0 * T, f.w * T, f.h * T);
     c.restore();
   }
   Z.sightAt = (px, py) => { const lv = Z.level; if (!lv || !vis || visLv !== lv) return 1; const i = Math.floor(py / T) * lv.W + Math.floor(px / T); return vis[i] || 0; };
@@ -187,12 +207,15 @@
     }
   }
   function landed(P) {
-    const h = P.y - P.peakY; if (h <= 8 * T || P.plunge || P._noFall) return;
+    const h = P.y - P.peakY; if (h <= 10 * T || P.plunge || P._noFall) return;
     if (P.rollT > 0 || (P._rollPress && P.time - P._rollPress < 0.18)) { FX.text(P.x + P.w / 2, P.y - 10, L(["Abgerollt!", "Rolled!"]), "#ffe08a"); A.play("roll", { vol: 0.6 }); if (P.rollT <= 0) { P.rollT = 0.18; P.rollDir = P.face; } return; }
-    const frac = Math.min(0.35, (h - 8 * T) / (T * 30) + 0.05);
+    /* milder als zuvor: in den Tiefen-Gebieten führt der Weg oft durch Schächte nach unten (Leitern sind da, aber Springen soll nicht ein Viertel des Lebens kosten) */
+    const frac = Math.min(0.25, (h - 10 * T) / (T * 40) + 0.04);
     const n = Math.round(P.hpMax * frac);
     Z.hurtPlayer(n, { x: P.x, kb: 0, unblockable: true, hazard: true, force: true, fall: true });
     P.hurtT = 0.25; FX.addShake(6); A.play("land", { vol: 0.9, rate: 0.7 });
+    /* beim ersten Aufprall einmalig erklären, wie man ihn vermeidet */
+    if (Z.meta && !Z.meta.fallTip) { Z.meta.fallTip = 1; Z.saveMeta && Z.saveMeta(); const key = Z.input.label ? Z.input.label("roll") : "Rolle"; Z.toast && Z.toast("<b>" + L(["Tipp", "Tip"]) + "</b><br><small>" + L(["Kurz vor der Landung rollen (" + key + ") fängt den Sturz ab.", "Roll (" + key + ") just before landing to break the fall."]) + "</small>", 4200); }
     FX.burst(P.x + P.w / 2, P.y + P.h, 16, { col: Z.dustCol || "#8a7a70", sp: 140, ang: -Math.PI / 2, spread: 2.8, life: 0.5, size: 3, kind: "smoke" });
     FX.text(P.x + P.w / 2, P.y - 14, L(["Aufprall!", "Impact!"]), "#ff9a7a", true);
   }

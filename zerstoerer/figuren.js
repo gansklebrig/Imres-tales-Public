@@ -16,18 +16,34 @@
   /* Linienzug (offen) */
   function line(c, pts, w, col) { c.strokeStyle = col; c.lineWidth = w; c.lineCap = "round"; c.lineJoin = "round"; c.beginPath(); c.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) c.lineTo(pts[i], pts[i + 1]); c.stroke(); }
   /* Leuchten: vorgerenderte Verläufe je Farbe (deutlich schneller als jedes Mal einen Verlauf zu bauen) */
-  const GLOW = new Map();
-  function glowSprite(col) {
-    let cv = GLOW.get(col); if (cv) return cv;
+  /* Viele Aufrufer bauen die Farbe mit wechselnder Deckkraft („rgba(255,90,60,0.37)“). Früher entstand dafür
+     jedes Mal eine neue Leinwand (Cache lief über) – jetzt: Farbe zerlegen, ein Sprite je Grundfarbe (Deckkraft 1),
+     die Deckkraft geht über globalAlpha. Ergebnis identisch (Verlauf Farbe → transparentes Schwarz). */
+  const GLOW = new Map(), PARSE = new Map();
+  function parseCol(col) {
+    let v = PARSE.get(col); if (v) return v;
+    const m = /^rgba\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/.exec(col);
+    v = m ? ["rgb(" + (+m[1] | 0) + "," + (+m[2] | 0) + "," + (+m[3] | 0) + ")", Math.max(0, Math.min(1, +m[4]))] : [col, 1];
+    if (PARSE.size > 4000) PARSE.clear(); PARSE.set(col, v); return v;
+  }
+  function baseSprite(key, col) {
+    let cv = GLOW.get(key); if (cv) return cv;
     cv = document.createElement("canvas"); cv.width = cv.height = 64; const g = cv.getContext("2d");
     const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, col); gr.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
-    if (GLOW.size > 300) GLOW.clear(); GLOW.set(col, cv); return cv;
+    if (GLOW.size > 400) GLOW.clear(); GLOW.set(key, cv); return cv;
+  }
+  /* für andere Module (zeichnen direkt mit drawImage): Deckkraft in 1/32-Stufen eingebacken */
+  function glowSprite(col) {
+    const [rgb, a] = parseCol(col); if (a >= 1) return baseSprite(rgb, rgb);
+    const q = Math.round(a * 32) / 32, m = /\((.*)\)/.exec(rgb)[1];
+    return baseSprite(rgb + "@" + q, "rgba(" + m + "," + q + ")");
   }
   function glow(c, x, y, r, col, a) {
     if (r <= 0) return;
+    const [rgb, ca] = parseCol(col); if (ca <= 0) return;
     const pa = c.globalAlpha, po = c.globalCompositeOperation;
-    c.globalCompositeOperation = "lighter"; c.globalAlpha = pa * (a == null ? 1 : a);
-    c.drawImage(glowSprite(col), x - r, y - r, r * 2, r * 2);
+    c.globalCompositeOperation = "lighter"; c.globalAlpha = pa * (a == null ? 1 : a) * ca;
+    c.drawImage(baseSprite(rgb, rgb), x - r, y - r, r * 2, r * 2);
     c.globalAlpha = pa; c.globalCompositeOperation = po;
   }
   Z.glowSprite = glowSprite;

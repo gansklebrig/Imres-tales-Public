@@ -148,10 +148,11 @@
     if (al0) al0.apply(this, arguments);
     if (!W) return;
     c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
-    for (const f of W.fogs) {
-      const x = f.x * W2 * 1.4 - W2 * 0.2, y = f.y * H2, w = W2 * 0.7 * f.s, h = H2 * 0.22 * f.s;
-      const g = c.createRadialGradient(x, y, 0, x, y, w * 0.5); g.addColorStop(0, "rgba(170,160,180,.22)"); g.addColorStop(1, "rgba(170,160,180,0)");
-      c.save(); c.translate(x, y); c.scale(1, h / w); c.translate(-x, -y); c.fillStyle = g; c.beginPath(); c.arc(x, y, w * 0.5, 0, TAU); c.fill(); c.restore();
+    /* Nebelbänke: ein vorgefertigter weicher Fleck statt Verlauf je Bild */
+    const nf = Z.gq && Z.gq.level === 0 ? 0 : W.fogs.length; /* Handheld: keine Nebelbänke */
+    for (let i = 0; i < nf; i++) {
+      const f = W.fogs[i], x = f.x * W2 * 1.4 - W2 * 0.2, y = f.y * H2, w = W2 * 0.7 * f.s, h = H2 * 0.22 * f.s;
+      c.drawImage(fogBlob(), x - w * 0.5, y - h * 0.5, w, h);
     }
     for (const s of W.shafts) {
       const u = s.t / s.life, a = Math.sin(u * Math.PI) * 0.16;
@@ -164,9 +165,22 @@
       c.globalCompositeOperation = "source-over";
     }
     if (W.dim > 0) { const a = Math.min(1, W.dim / 0.6) * 0.3 * (0.6 + 0.4 * Math.sin(t * 23)); c.fillStyle = "rgba(4,2,8," + a + ")"; c.fillRect(0, 0, W2, H2); }
-    if (W.mood === "regen" || W.mood === "gewitter") { c.fillStyle = "rgba(40,40,60,.08)"; c.fillRect(0, 0, W2, H2); }
+    if ((W.mood === "regen" || W.mood === "gewitter") && rainFrame !== Z.gfx.frame) { c.fillStyle = RAIN_TINT; c.fillRect(0, 0, W2, H2); }
     c.restore();
   };
+  /* Regendüster: lieber in der Lichtkarte (kein eigener Vollbild-Durchgang); leicht violettgrau, kein Blau */
+  const RAIN_TINT = "rgba(44,38,50,.08)";
+  let rainFrame = -1, blob = null;
+  if (Z.gfx.lightOver) Z.gfx.lightOver.push(function (l, X0, Y0, sx, sy, LW, LH) {
+    if (!W || !(W.mood === "regen" || W.mood === "gewitter")) return;
+    l.fillStyle = RAIN_TINT; l.fillRect(0, 0, LW, LH); rainFrame = Z.gfx.frame;
+  });
+  function fogBlob() {
+    if (blob) return blob;
+    blob = document.createElement("canvas"); blob.width = blob.height = 64; const g = blob.getContext("2d");
+    const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, "rgba(170,160,180,.22)"); gr.addColorStop(1, "rgba(170,160,180,0)");
+    g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return blob;
+  }
   Z.wetter = () => W;
   Z.wetterForce = m => { if (!W) return; W.mood = m; W.ev = 0.1; };
 })();

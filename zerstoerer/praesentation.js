@@ -342,9 +342,11 @@
     const cu = Z.CURSE[it.cursed], pw = it.power && Z.CPOWER && Z.CPOWER[it.power];
     const both = P.slots[sA] && P.slots[sB];
     const verb = chestOpen ? L(["Öffnen & ", "Open & "]) : "";
-    const btn = (arg, txt, af) => '<button data-act="fvTake" data-arg="' + arg + '"' + (af ? " autofocus" : "") + ">" + txt + "</button>";
+    const btn = (arg, txt, af, hk) => '<button data-act="fvTake" data-arg="' + arg + '"' + (hk ? ' data-hotkey="' + hk + '"' : "") + (af ? " autofocus" : "") + ">" + txt + "</button>";
+    /* Kurztaste sichtbar: Tastatur-Taste bzw. Controller-Knopf des Platzes (Touch: tippen, daher ohne) */
+    const hk = s => { const k = inp.device === "touch" || (ui.touchOn && inp.device !== "pad") ? "" : inp.label(s); return k ? " <kbd>" + esc(k) + "</kbd>" : ""; };
     let take = "";
-    if (both) take = [sA, sB].map(s => btn(s, verb + L(["anlegen statt ", "equip instead of "]) + slotLabel(s) + ' <kbd>' + esc(inp.device === "pad" ? inp.label(s) : "") + "</kbd>")).join("");
+    if (both) take = [sA, sB].map(s => btn(s, verb + L(["anlegen statt ", "equip instead of "]) + slotLabel(s) + hk(s), false, s)).join("");
     else take = btn("auto", verb + L(["anlegen", "equip"]));
     if (chestOpen) take += btn("leave", L(["Nur öffnen – liegen lassen", "Just open – leave it"]));
     const rules = "<ul class=\"fv-regeln\">" +

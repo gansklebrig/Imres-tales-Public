@@ -4,12 +4,13 @@
 (function () {
   "use strict";
   const Z = window.Z, L = v => Z.L(v);
-  const VERSION = "zerstoerer v13 · 2026-11-22";
+  const VERSION = "zerstoerer v14 · 2026-11-23";
   Z.VERSION = VERSION;
 
   /* ======================= QUALITÄTSSTUFEN ======================= */
   const PRESETS = [
-    { n: ["Niedrig", "Low"], res: 0.6, part: 0.35, light: 8, weather: false, fog: false, layers: false, critters: false, vignette: false, maxPix: 1100 * 640 },
+    /* Stufe 0 = Handheld: stark verschlankt (keine Bilderbuch-Ebene, kein Vordergrund, schlichte Kacheln, kaum Partikel/Wetter) */
+    { n: ["Handheld (schlank)", "Handheld (lean)"], res: 0.6, part: 0.2, light: 8, weather: false, fog: false, layers: false, critters: false, vignette: false, maxPix: 1100 * 640 },
     { n: ["Mittel", "Medium"], res: 0.8, part: 0.65, light: 6, weather: true, fog: true, layers: true, critters: false, vignette: true, maxPix: 1400 * 820 },
     { n: ["Hoch", "High"], res: 1, part: 1, light: 4, weather: true, fog: true, layers: true, critters: true, vignette: true, maxPix: 1600 * 940 },
     { n: ["Ultra", "Ultra"], res: 1, part: 1, light: 3, weather: true, fog: true, layers: true, critters: true, vignette: true, maxPix: 2560 * 1440 }
@@ -19,8 +20,11 @@
   const S = Z.settings;
   if (!S.gfx || typeof S.gfx !== "object") S.gfx = { preset: "auto", fpsCap: 0 };
   const touchDev = matchMedia && matchMedia("(pointer: coarse)").matches;
-  let autoLvl = touchDev || (navigator.hardwareConcurrency || 8) <= 4 ? 1 : 2;
-  try { const a = +sessionStorage.getItem("imres-zerstoerer-autolvl"); if (a >= 0 && a <= 3 && sessionStorage.getItem("imres-zerstoerer-autolvl") != null) autoLvl = a; } catch (_) {}
+  /* kleiner Bildschirm (Handhelds wie RG353V/R36S: 640×480) oder sehr schwaches Gerät → Handheld-Stufe */
+  const smallScr = (screen.width || innerWidth) * (screen.height || innerHeight) <= 800 * 600;
+  const weakDev = (navigator.hardwareConcurrency || 8) <= 2 || (navigator.deviceMemory && navigator.deviceMemory <= 2);
+  let autoLvl = smallScr || weakDev ? 0 : touchDev || (navigator.hardwareConcurrency || 8) <= 4 ? 1 : 2;
+  try { const a = +sessionStorage.getItem("imres-zerstoerer-autolvl"); if (a >= 0 && a <= 3 && sessionStorage.getItem("imres-zerstoerer-autolvl") != null && !(smallScr || weakDev)) autoLvl = Math.min(autoLvl, a); } catch (_) {}
   Z.gq = {};
   Z.applyGfx = function (noResize) {
     const g = S.gfx;
@@ -36,7 +40,7 @@
     const g = S.gfx;
     if (g.preset === "auto") return L(["Automatisch", "Automatic"]) + " (" + L(PRESETS[autoLvl].n) + ")";
     if (g.preset === "custom") return L(["Eigene", "Custom"]);
-    return L(PRESETS[+g.preset].n);
+    return L((PRESETS[+g.preset] || PRESETS[2]).n);
   };
   /* eigene Werte: von der aktuellen Stufe ausgehend */
   Z.setGfx = function (k, v) {
@@ -230,7 +234,7 @@
       if (r.prof) out.push("Zeichenbereiche (mit Abgleich): " + Object.entries(r.prof).map(([k, v]) => (PROFN[k] || k) + " " + f1(v / r.profN)).join(" · ") + " ms");
       out.push("Lange Aufgaben (>50 ms): " + r.longs.length + (r.longs.length ? " (max " + f0(Math.max.apply(null, r.longs)) + " ms)" : "") + (window.PerformanceObserver ? "" : " (nicht messbar)"));
       try { const m = performance.memory; if (m) out.push("Speicher: " + Math.round(m.usedJSHeapSize / 1048576) + " / " + Math.round(m.jsHeapSizeLimit / 1048576) + " MB"); } catch (_) {}
-    } else {
+    } else if (kind === "bench" && Array.isArray(r.res)) {
       out.push("Ergebnis je Stufe (Ø fps / schlechteste 1 % / längstes Bild):");
       for (const x of r.res) out.push("  " + PRESETS[x.lvl].n[0].padEnd(8) + f1(x.s.fps).padStart(6) + " fps  " + f1(x.s.low).padStart(6) + " fps  " + f0(x.s.max).toString().padStart(4) + " ms");
       out.push("Empfehlung: " + PRESETS[benchPick(r.res)].n[0]);

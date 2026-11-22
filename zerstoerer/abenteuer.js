@@ -17,7 +17,7 @@
   const KITS = {
     sb: { n: ["Schwert & Bogen", "Sword & bow"], d: ["Kurzschwert für die Nähe, Jagdbogen für die Ferne.", "Shortsword up close, hunting bow at range."], a1: "kurzschwert", a2: "jagdbogen" },
     ss: { n: ["Schwert & Schild", "Sword & shield"], d: ["Zuschlagen und parieren – der sichere Weg.", "Strike and parry – the safe way."], a1: "kurzschwert", a2: "holzschild" },
-    bs: { n: ["Bogen & Schild", "Bow & shield"], d: ["Abstand halten, Geschosse zurückwerfen.", "Keep your distance, deflect projectiles."], a1: "jagdbogen", a2: "holzschild" }
+    bs: { n: ["Bogen & Schild", "Bow & shield"], d: ["Für Geübte: Abstand halten, Geschosse zurückwerfen – keine Nahkampfwaffe.", "For the skilled: keep your distance, deflect projectiles – no melee weapon."], a1: "jagdbogen", a2: "holzschild" }
   };
   Z.KITS = KITS;
   const PACTS = {
@@ -215,7 +215,7 @@
   Z.hitEnemy = function (e, dmg, o) { o = o || {}; if (Z.run && Z.run.hero === "G" && o.src === "ranged" && !o.dot) dmg *= 1.2; return hit0(e, dmg, o); };
   /* Tode zählen, Sturzangriffe zählen */
   const death0 = Z.onPlayerDeath;
-  Z.onPlayerDeath = function () { M().deaths = (M().deaths || 0) + 1; return death0.apply(this, arguments); };
+  Z.onPlayerDeath = function () { if (Z.player && Z.player.dead) return; M().deaths = (M().deaths || 0) + 1; return death0.apply(this, arguments); };
   const dive0 = Z.diveStart;
   if (dive0) Z.diveStart = function () { const r = dive0.apply(this, arguments); if (r && Z.stats) Z.stats.dives = (Z.stats.dives || 0) + 1; return r; };
 
@@ -317,7 +317,9 @@
       if (ev.k === "rune" && !ev.done) { const b = Math.sin(t * 2) * 2; c.save(); c.globalCompositeOperation = "lighter"; glow(c, x, y - 12 + b, 16, "rgba(220,200,255,.55)"); c.restore(); poly(c, [x, y - 20 + b, x + 5, y - 12 + b, x, y - 4 + b, x - 5, y - 12 + b], "#d8d0e8"); poly(c, [x, y - 17 + b, x + 2.5, y - 12 + b, x, y - 7 + b, x - 2.5, y - 12 + b], "#c03a5a"); }
     }
     /* Riss im Netz */
-    const lv = Z.level; if (lv && lv.rift) { const r = lv.rift; c.save(); c.globalCompositeOperation = "lighter"; glow(c, r.x, r.y - 20, 34 + Math.sin(t * 4) * 4, "rgba(200,60,110,.5)"); c.restore(); c.strokeStyle = "rgba(230,220,240,.8)"; c.lineWidth = 0.7; for (let i = 0; i < 8; i++) { const a = i / 8 * 6.283 + t * 0.3; c.beginPath(); c.moveTo(r.x, r.y - 20); c.lineTo(r.x + Math.cos(a) * 22, r.y - 20 + Math.sin(a) * 26); c.stroke(); } ell(c, r.x, r.y - 20, 6, 16, "#120810"); tag({ x: r.x, y: r.y, done: false }, L(["Durch den Riss", "Through the rift"])); }
+    const lv = Z.level; if (lv && lv.rift) { const r = lv.rift, P = Z.player;
+      if (P && Math.abs(P.x + P.w / 2 - r.x) < 40 && Math.abs(P.y + P.h - r.y) < 40) { const lab = inp.device === "touch" ? "✋" : inp.label("use"); c.save(); c.font = "700 7px 'Alegreya Sans',sans-serif"; c.textAlign = "center"; const s = "[" + lab + "] " + L(["Hindurchgehen", "Step through"]), w = c.measureText(s).width + 6; c.fillStyle = "rgba(14,8,10,.85)"; c.fillRect(r.x - w / 2, r.y - 62, w, 10); c.fillStyle = "#ffd27a"; c.fillText(s, r.x, r.y - 54.5); c.restore(); }
+      c.save(); c.globalCompositeOperation = "lighter"; glow(c, r.x, r.y - 20, 34 + Math.sin(t * 4) * 4, "rgba(200,60,110,.5)"); c.restore(); c.strokeStyle = "rgba(230,220,240,.8)"; c.lineWidth = 0.7; for (let i = 0; i < 8; i++) { const a = i / 8 * 6.283 + t * 0.3; c.beginPath(); c.moveTo(r.x, r.y - 20); c.lineTo(r.x + Math.cos(a) * 22, r.y - 20 + Math.sin(a) * 26); c.stroke(); } ell(c, r.x, r.y - 20, 6, 16, "#120810"); tag({ x: r.x, y: r.y, done: false }, L(["Durch den Riss", "Through the rift"])); }
   }
   const hz0 = Z.drawParcours;
   Z.drawParcours = function (c, t) { if (hz0) hz0(c, t); drawEvents(c, t); };
@@ -364,7 +366,7 @@
     if (!Z.ui || !Z.ui.actions || !Z.TX) return setTimeout(late, 50); wire(); wireEnding(); Z.TX.endings.wahr = WAHR;
     /* Erfolge auch im Pause-Menü */
     const pause0 = Z.ui.pause;
-    Z.ui.pause = function () { const r = pause0.apply(this, arguments); const k = document.querySelector("#modal .knoepfe"); if (k && !k.querySelector('[data-act="abAchP"]')) { const b = document.createElement("button"); b.dataset.act = "abAchP"; b.textContent = "🏆 " + L(["Erfolge", "Achievements"]); k.insertBefore(b, k.children[2] || null); } return r; };
+    Z.ui.pause = function () { const r = pause0.apply(this, arguments); const k = document.querySelector("#modal .pausenmenue .knoepfe") || (document.querySelector("#modal .pausenmenue") ? document.querySelector("#modal .knoepfe") : null); if (k && !k.querySelector('[data-act="abAchP"]')) { const b = document.createElement("button"); b.dataset.act = "abAchP"; b.textContent = "🏆 " + L(["Erfolge", "Achievements"]); k.insertBefore(b, k.children[2] || null); } return r; };
     Z.ui.actions.abAchP = () => { Z.ui.close(); achModal(false); };
   }
   late();

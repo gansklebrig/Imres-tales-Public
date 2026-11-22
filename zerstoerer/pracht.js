@@ -15,7 +15,8 @@
       if (d.kind !== "window" || (Z.gfx.sky && Z.gfx.sky[d.y * lv.W + d.x])) continue;
       const x = d.x * T + 8, y = d.y * T + 6;
       if (x < cam.x - 160 || x > cam.x + cam.w + 60 || y < cam.y - 40 || y > cam.y + cam.h) continue;
-      const len = 150, slant = 0.42, w0 = 10, w1 = 44, a = 0.09 + 0.025 * Math.sin(t * 0.7 + d.x);
+      const sv = Z.sightAt ? Math.min(1, Z.sightAt(x, y) * 1.4) : 1; if (sv < 0.04) continue;
+      const len = 150, slant = 0.42, w0 = 10, w1 = 44, a = ((0.09 + 0.025 * Math.sin(t * 0.7 + d.x)) * sv).toFixed(3);
       const g = c.createLinearGradient(x, y, x + len * slant, y + len); g.addColorStop(0, "rgba(255,226,170," + a + ")"); g.addColorStop(1, "rgba(255,210,150,0)");
       c.fillStyle = g; c.beginPath(); c.moveTo(x - w0 / 2, y); c.lineTo(x + w0 / 2, y); c.lineTo(x + len * slant + w1 / 2, y + len); c.lineTo(x + len * slant - w1 / 2, y + len); c.closePath(); c.fill();
       /* Staub im Strahl */
@@ -94,7 +95,10 @@
       const y = fromTop ? -h * (0.3 - r * 0.2) : cam.h - h * (0.42 + r * 0.12);
       /* zur Bildmitte hin durchscheinend, damit nichts das Spiel verdeckt */
       const mid = Math.abs(x + w / 2 - cam.w / 2) / (cam.w * 0.5);
-      c.globalAlpha = Math.max(0.35, Math.min(0.95, (mid - 0.1) / 0.5));
+      const a0 = Math.max(0.35, Math.min(0.95, (mid - 0.1) / 0.5));
+      /* nie vor Spieler, Gegnern, Geschossen, Gefahren oder Truhen/Türen: dann fast ganz ausblenden */
+      c.globalAlpha = Z.gfx.fgAlpha ? Z.gfx.fgAlpha("p" + i, x, y, w, h, a0) : a0;
+      if (c.globalAlpha < 0.01) continue;
       if (kind === "chain" || kind === "rope") { const sway = Math.sin(Z.gfx.time * 0.6 + i) * 0.03; c.save(); c.translate(x + w / 2, y); c.rotate(sway); c.drawImage(spr, -w / 2, 0, w, h); c.restore(); }
       else c.drawImage(spr, x, y, w, h);
     }
@@ -102,15 +106,25 @@
   }
 
   /* ---------- Farbstimmung: warmes Oben, schweres Unten ---------- */
-  let grade = null, gradeKey = "";
-  function colorGrade(c, W, H) {
-    const B = Z.biome || {}, key = (B.ambCol || "") + W + "x" + H;
-    if (key !== gradeKey) {
+  let grade = null, gradeKey = "", gradeFrame = -1;
+  /* bevorzugt in die Lichtkarte (spart einen Vollbild-Durchgang) */
+  if (Z.gfx.lightOver) Z.gfx.lightOver.push(function (l, X0, Y0, sx, sy, LW, LH) {
+    if (!rich() || !Z.level) return;
+    gradeSprite(); l.drawImage(grade, 0, 0, LW, LH); gradeFrame = Z.gfx.frame;
+  });
+  function gradeSprite() {
+    const B = Z.biome || {}, key = B.ambCol || "";
+    if (key !== gradeKey || !grade) {
       gradeKey = key; grade = document.createElement("canvas"); grade.width = 8; grade.height = 64;
       const g = grade.getContext("2d"), n = parseInt((B.ambCol || "#3a2a2a").slice(1), 16), rgb = [Math.min(255, (n >> 16) + 60), Math.min(255, ((n >> 8) & 255) + 40), Math.min(255, (n & 255) + 20)].join(",");
       const lg = g.createLinearGradient(0, 0, 0, 64); lg.addColorStop(0, "rgba(" + rgb + ",.10)"); lg.addColorStop(0.45, "rgba(" + rgb + ",0)"); lg.addColorStop(0.7, "rgba(0,0,0,0)"); lg.addColorStop(1, "rgba(0,0,0,.22)");
       g.fillStyle = lg; g.fillRect(0, 0, 8, 64);
     }
+    return grade;
+  }
+  function colorGrade(c, W, H) {
+    if (gradeFrame === Z.gfx.frame && Z.gfx.lightMerged && Z.gfx.lightMerged()) return;
+    gradeSprite();
     c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = "source-over"; c.drawImage(grade, 0, 0, W, H); c.restore();
   }
 

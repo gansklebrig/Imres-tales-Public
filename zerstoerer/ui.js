@@ -83,8 +83,13 @@
       const key = it ? it.uid : s === "a1" ? -2 : -3;
       if (se.uid !== key) { se.uid = key; drawSlot(s, it); }
       let k = 0;
-      if (s[0] === "s" && it) k = P.cd[s] / (Z.SKILLS[it.id].cd || 1);
-      if (s[0] === "a" && it && P.mag[s] && P.mag[s].t > 0) { P.mag[s].t -= dt; k = P.mag[s].t / Z.WEAPONS[it.id].shoot.reload; if (P.mag[s].t <= 0) P.mag[s].n = Z.WEAPONS[it.id].shoot.mag + (Z.metaLvl(it.id) >= 3 ? 2 : 0); }
+      if (s[0] === "s" && it && Z.SKILLS[it.id]) k = P.cd[s] / (Z.SKILLS[it.id].cd || 1);
+      if (s[0] === "a" && it && P.mag[s] && P.mag[s].t > 0) {
+        /* Magazin-Zustand einer früheren Fernwaffe, aber jetzt liegt etwas anderes im Platz (z. B. außerhalb von place belegt) */
+        const wd = Z.WEAPONS[it.id];
+        if (!wd || !wd.shoot) delete P.mag[s];
+        else { P.mag[s].t -= dt; k = P.mag[s].t / (wd.shoot.reload || 1); if (P.mag[s].t <= 0) P.mag[s].n = wd.shoot.mag + (Z.metaLvl(it.id) >= 3 ? 2 : 0); }
+      }
       se.cd.style.height = Math.max(0, Math.min(1, k)) * 100 + "%";
       se.el.classList.toggle("aktiv", !!(P.act && P.act.slot === s));
       se.el.classList.toggle("stumm", s[0] === "s" && P.st.silence > 0);
@@ -204,13 +209,26 @@
   /* Fenster, die aufgehen wollen, während ein Pflichtfenster offen ist (Tod, Ende, Schriftrolle …),
      warten, bis es geschlossen wurde – sonst ginge die Entscheidung verloren. */
   let modalQueue = [];
+  const confirmGuard = { t: 0, held: {} };
+  const GUARD_MS = 220;
+  /* darf eine Bestätigung (A / Benutzen / Enter) jetzt auslösen? */
+  function confirmOk(a) {
+    if (performance.now() - confirmGuard.t < GUARD_MS) return false;
+    if (a && confirmGuard.held[a]) return false;
+    return true;
+  }
   function openModal(html, opts) {
     opts = opts || {};
     if (ui.modalOpen && ui.noEsc && !opts.noEsc && !opts.force) { if (modalQueue.length < 4) modalQueue.push([html, opts]); return; }
     if (inp.capture) inp.capture = null;
     modal.innerHTML = '<div class="mbox ' + (opts.cls || "") + '">' + html + "</div>";
     modal.hidden = false; ui.modalOpen = true; Z.paused = true; ui.onClose = opts.onClose || null; ui.noEsc = !!opts.noEsc;
+    /* Schutz vor „Durchrutschen“: Knopf/Taste, mit der das Fenster geöffnet wurde (z. B. Benutzen beim Aufheben),
+       oder ein prellender Trigger lösen hier nichts aus – erst nach dem Loslassen bzw. nach einer kurzen Schonzeit */
+    confirmGuard.t = performance.now(); confirmGuard.held = { jump: inp.held.jump, a1: inp.held.a1, use: inp.held.use };
     A.muffle(1600);
+    /* sofort ein vorläufiger Fokus, damit ein schneller Knopfdruck nie „ins Leere“ geht (die Feinwahl folgt unten) */
+    { const f0 = modal.querySelector("[autofocus]:not([disabled])") || modal.querySelector(".mbox button:not([disabled])"); if (f0) try { f0.focus({ preventScroll: true }); } catch (_) {} }
     /* sinnvoller Startpunkt für den Controller: ausdrücklich markiert → erste echte Wahl (kein Reiter, kein Schließen) → irgendwas */
     setTimeout(() => {
       const all = [...modal.querySelectorAll("button:not([disabled]),input,select,a.btn")].filter(el => el.offsetParent !== null);
@@ -229,6 +247,14 @@
   }
   ui.clearQueue = () => { modalQueue.length = 0; };
   ui.close = closeModal; ui.open = openModal; Z.TX = TX; ui.itemCardHTML = (it, cmp) => itemCardHTML(it, cmp); ui.choiceEl = () => choice;
+  /* Taverne mitten im Lauf: erst nachfragen (beim Tastenhämmern landet man sonst versehentlich außerhalb des Spiels) */
+  modal.addEventListener("click", e => {
+    const a = e.target.closest && e.target.closest("a[href]"); if (!a || !Z.run || a.dataset.ok) return;
+    e.preventDefault(); e.stopPropagation(); const href = a.getAttribute("href");
+    closeModal(); ui.confirm(t("tavern"), L(["Der laufende Durchgang geht dabei verloren.", "The current run will be lost."]), t("tavern"), () => { location.href = href; });
+    /* sicherer Startpunkt: „Abbrechen“ */
+    setTimeout(() => { const c = modal.querySelector('[data-act="close"]'); if (c) c.focus({ preventScroll: true }); }, 45);
+  }, true);
   modal.addEventListener("click", e => { const b = e.target.closest("[data-act]"); if (!b) return; const fn = actions[b.dataset.act]; if (fn) { A.play("ui", { vol: 0.35 }); fn(b.dataset.arg, b); } });
   const actions = {}; ui.actions = actions;
   /* Tastatur in Menüs */
@@ -244,7 +270,16 @@
     if (["ArrowLeft", "ArrowRight", "KeyA", "KeyD"].includes(e.code) && adjustField(document.activeElement, /Right|KeyD/.test(e.code) ? 1 : -1)) return true;
     if (e.code === "Tab") { moveFocus(e.shiftKey ? -1 : 1); return true; }
     if (["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "KeyW", "KeyS", "KeyA", "KeyD"].includes(e.code)) { if (document.activeElement && document.activeElement.tagName === "TEXTAREA" && /Arrow/.test(e.code)) return false; const d = /Down|KeyS/.test(e.code) ? [0, 1] : /Up|KeyW/.test(e.code) ? [0, -1] : /Right|KeyD/.test(e.code) ? [1, 0] : [-1, 0]; moveDir(d[0], d[1]); return true; }
-    if (e.code === "Enter" || e.code === "Space" || e.code === "KeyE" || e.code === "KeyJ") { const f = document.activeElement; if (f && modal.contains(f)) { if (f.tagName === "INPUT" && f.type === "range") return false; f.click(); } return true; }
+    /* Knöpfe mit eigener Kurztaste (data-hotkey="a1" usw.), z. B. „anlegen statt …“ im Fluchfenster */
+    for (const hb of modal.querySelectorAll("[data-hotkey]")) { const ks = inp.keys[hb.dataset.hotkey]; if (ks && ks.includes(e.code) && !hb.disabled) { if (!e.repeat) hb.click(); return true; } }
+    if (e.code === "Enter" || e.code === "Space" || e.code === "KeyE" || e.code === "KeyJ") {
+      /* gehaltene Taste (Wiederholung) und Tastendruck direkt beim Öffnen lösen nichts aus */
+      if (e.repeat || !confirmOk()) return true;
+      const had = document.activeElement && modal.contains(document.activeElement) && document.activeElement !== modal;
+      const f = had ? document.activeElement : ensureFocus();
+      if (f && modal.contains(f)) { if (f.tagName === "INPUT" && f.type === "range") return false; if (f.tagName === "SELECT") adjustField(f, 1); else f.click(); }
+      return true;
+    }
     return true;
   };
   /* Regler und Auswahllisten mit Links/Rechts verstellen (Tastatur und Controller) */
@@ -511,16 +546,22 @@
     if (!P.slots[sA]) return place(sA);
     if (!P.slots[sB]) return place(sB);
     /* beide belegt: Auswahl */
-    ui.choiceActive = { p, sA, sB, place };
+    ui.choiceActive = { p, sA, sB, place, dev: inp.device };
     const key = s => inp.device === "touch" || (ui.touchOn && inp.device !== "pad") ? "" : inp.label(s);
     choice.innerHTML = '<div class="ch-kopf">' + esc(t("replace")) + ": " + '<b style="color:' + Z.RARITY[it.rar].col + '">' + esc(L(Z.itemDef(it).n)) + "</b></div>" +
-      [sA, sB].map(s => '<button data-slot="' + s + '"><kbd>' + key(s) + "</kbd> " + esc(L(Z.itemDef(P.slots[s]).n)) + '<small style="color:' + Z.RARITY[P.slots[s].rar].col + '">' + esc(L(Z.RARITY[P.slots[s].rar].n)) + "</small></button>").join("") +
+      [sA, sB].map(s => '<button data-slot="' + s + '">' + (key(s) ? "<kbd>" + esc(key(s)) + "</kbd> " : "") + esc(L(Z.itemDef(P.slots[s]).n)) + '<small style="color:' + Z.RARITY[P.slots[s].rar].col + '">' + esc(L(Z.RARITY[P.slots[s].rar].n)) + "</small></button>").join("") +
       '<button data-slot="x" class="abbr">' + (key("roll") ? "<kbd>" + key("roll") + "</kbd> " : "") + esc(t("cancel")) + "</button>";
     choice.hidden = false;
   };
   choice.addEventListener("click", e => { const b = e.target.closest("[data-slot]"); if (!b || !ui.choiceActive) return; const c = ui.choiceActive; ui.choiceActive = null; choice.hidden = true; if (b.dataset.slot !== "x") c.place(b.dataset.slot); });
   function choiceInput() {
     const c = ui.choiceActive; if (!c) return;
+    /* Gerät gewechselt (Tastatur ↔ Controller): Tasten-Hinweise in der Tauschleiste nachziehen */
+    if (c.dev !== inp.device) {
+      c.dev = inp.device;
+      const k = a => (inp.device === "touch" || (ui.touchOn && inp.device !== "pad") ? "" : inp.label(a));
+      choice.querySelectorAll("[data-slot]").forEach(b => { const a = b.dataset.slot === "x" ? "roll" : b.dataset.slot, kb = b.querySelector("kbd"), lab = k(a); if (lab) { if (kb) kb.textContent = lab; else b.insertAdjacentHTML("afterbegin", "<kbd>" + esc(lab) + "</kbd> "); } else if (kb) kb.remove(); });
+    }
     for (const s of [c.sA, c.sB]) if (inp.pressed[s]) { inp.consume(s); ui.choiceActive = null; choice.hidden = true; c.place(s); Z.player.buf[s] = 0; return; }
     if (inp.pressed.roll || inp.pressed.pause) { ui.choiceActive = null; choice.hidden = true; inp.consume("pause"); inp.consume("roll"); Z.player.buf.roll = 0; }
     const P = Z.player; if (P && Math.abs(c.p.x - (P.x + P.w / 2)) > 50) { ui.choiceActive = null; choice.hidden = true; }
@@ -704,7 +745,7 @@
   ui.deathScreen = o => {
     openModal("<h2>" + esc(t("died")) + "</h2><p><i>" + esc(o && o.abort ? L(["Ezekiel kehrt um. Ohne ein Wort.", "Ezekiel turns back. Without a word."]) : t("diedSub")) + "</i></p>" + statsHTML() + '<p class="tipp">' + esc(L(Z.R.pick(TX.tips))) + '</p><div class="knoepfe"><button data-act="toCamp" autofocus>' + esc(t("camp")) + "</button></div>", { cls: "breit", noEsc: true });
   };
-  actions.toCamp = () => { closeModal(); Z.backToCamp(); };
+  actions.toCamp = () => { modalQueue.length = 0; closeModal(); Z.backToCamp(); }; /* nach Tod/Ende nichts Altes nachholen */
   ui.ending = key => {
     const M = Z.meta, run = Z.run;
     const first = !M.endings[key];
@@ -732,7 +773,7 @@
   const stick = $("#stick"), knob = $("#knob");
   let stickId = null, sx0 = 0, sy0 = 0;
   const stickArea = $("#stickzone");
-  stickArea.addEventListener("pointerdown", e => { stickId = e.pointerId; sx0 = e.clientX; sy0 = e.clientY; stick.style.left = sx0 + "px"; stick.style.top = sy0 + "px"; stick.classList.add("an"); stickArea.setPointerCapture(e.pointerId); moveStick(e); });
+  stickArea.addEventListener("pointerdown", e => { stickId = e.pointerId; sx0 = e.clientX; sy0 = e.clientY; stick.style.left = sx0 + "px"; stick.style.top = sy0 + "px"; stick.classList.add("an"); try { stickArea.setPointerCapture(e.pointerId); } catch (_) {} moveStick(e); });
   stickArea.addEventListener("pointermove", e => { if (e.pointerId === stickId) moveStick(e); });
   const endStick = e => { if (e.pointerId !== stickId) return; stickId = null; stick.classList.remove("an"); knob.style.transform = ""; ["left", "right", "up", "down"].forEach(a => inp.setTouch(a, false)); };
   stickArea.addEventListener("pointerup", endStick); stickArea.addEventListener("pointercancel", endStick);
@@ -745,7 +786,7 @@
   }
   tc.querySelectorAll("[data-t]").forEach(b => {
     const a = b.dataset.t;
-    b.addEventListener("pointerdown", e => { e.preventDefault(); b.setPointerCapture(e.pointerId); b.classList.add("an"); if (a === "pause") { if (ui.modalOpen) { if (!ui.noEsc) closeModal(); } else if (!ui.choiceActive) ui.pause(); return; } if (a === "map") { bigMap = !bigMap; drawMinimap(); return; } inp.setTouch(a, true); A.init(); });
+    b.addEventListener("pointerdown", e => { e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch (_) {} b.classList.add("an"); if (a === "pause") { if (ui.modalOpen) { if (!ui.noEsc) closeModal(); } else if (!ui.choiceActive) ui.pause(); return; } if (a === "map") { bigMap = !bigMap; drawMinimap(); return; } inp.setTouch(a, true); A.init(); });
     const up = () => { b.classList.remove("an"); if (a !== "pause" && a !== "map") inp.setTouch(a, false); };
     b.addEventListener("pointerup", up); b.addEventListener("pointercancel", up); b.addEventListener("lostpointercapture", up);
   });
@@ -756,14 +797,17 @@
   const padHint = document.createElement("div"); padHint.id = "padhint"; padHint.hidden = true; document.body.appendChild(padHint);
   let padHintKey = "";
   function syncPadHint() {
-    const show = ui.modalOpen && inp.device === "pad";
-    const n = k => inp.padButtonName(inp.pad[k]);
+    /* Controller und Tastatur bekommen eine Hinweisleiste (Touch braucht keine: dort wird getippt) */
+    const pad = inp.device === "pad", show = ui.modalOpen && (pad || (inp.device === "keys" && !ui.touchOn));
+    const n = k => (pad ? inp.padButtonName(inp.pad[k]) : inp.label(k));
     const tabs = show && modal.querySelector(".reiter button");
-    const key = show ? [n("jump"), n("roll"), ui.noEsc, !!tabs, n("s1"), n("s2"), Z.settings.lang].join("|") : "";
+    const key = show ? [pad, n("jump"), n("roll"), ui.noEsc, !!tabs, n("s1"), n("s2"), Z.settings.lang].join("|") : "";
     if (key === padHintKey) return; padHintKey = key;
     padHint.hidden = !show; if (!show) return;
-    padHint.innerHTML = "<span><kbd>" + esc(n("jump")) + "</kbd> " + L(["Auswählen", "Select"]) + "</span>" + (ui.noEsc ? "" : "<span><kbd>" + esc(n("roll")) + "</kbd> " + L(["Zurück", "Back"]) + "</span>") +
+    if (pad) padHint.innerHTML = "<span><kbd>" + esc(n("jump")) + "</kbd> " + L(["Auswählen", "Select"]) + "</span>" + (ui.noEsc ? "" : "<span><kbd>" + esc(n("roll")) + "</kbd> " + L(["Zurück", "Back"]) + "</span>") +
       (tabs ? "<span><kbd>" + esc(n("s1")) + "</kbd><kbd>" + esc(n("s2")) + "</kbd> " + L(["Reiter", "Tabs"]) + "</span>" : "") + "<span><kbd>◐</kbd> " + L(["Bewegen · rechter Stick blättert", "Move · right stick scrolls"]) + "</span>";
+    else padHint.innerHTML = "<span><kbd>Enter</kbd> " + L(["Auswählen", "Select"]) + "</span>" + (ui.noEsc ? "" : "<span><kbd>Esc</kbd> " + L(["Zurück", "Back"]) + "</span>") +
+      (tabs ? "<span><kbd>" + esc(n("s1")) + "</kbd><kbd>" + esc(n("s2")) + "</kbd> " + L(["Reiter", "Tabs"]) + "</span>" : "") + "<span><kbd>↑↓←→</kbd> " + L(["Bewegen · Maus geht auch", "Move · mouse works too"]) + "</span>";
   }
   ui.frame = dt => {
     syncPadHint();
@@ -784,7 +828,10 @@
         const d = { u: [0, -1], d: [0, 1], l: [-1, 0], r: [1, 0] }[dirNow];
         if (d[0] && adjustField(fe, d[0])) {} else moveDir(d[0], d[1]);
       }
-      if (inp.pressed.jump || inp.pressed.a1 || inp.pressed.use) { const had = document.activeElement && modal.contains(document.activeElement) && document.activeElement !== modal; const f = ensureFocus(); if (f && had) { if (f.tagName === "SELECT") adjustField(f, 1); else f.click(); } }
+      /* Knopf, mit dem das Fenster geöffnet wurde, gilt erst nach dem Loslassen wieder */
+      for (const a of ["jump", "a1", "use"]) if (confirmGuard.held[a] && !inp.held[a]) confirmGuard.held[a] = false;
+      const cf = ["jump", "a1", "use"].find(a => inp.pressed[a] && confirmOk(a));
+      if (cf) { const f = ensureFocus(); if (f && modal.contains(f)) { if (f.tagName === "SELECT") adjustField(f, 1); else if (!(f.tagName === "INPUT" && f.type === "range")) f.click(); } }
       if (inp.pressed.roll && !ui.noEsc) closeModal();
       const pad = inp.lastPad; if (pad) { const ry = pad.axes[3] || 0; if (Math.abs(ry) > 0.25) { const box = modal.querySelector(".mbox"); if (box) box.scrollTop += ry * dt * 900; } }
       inp.endFrame();

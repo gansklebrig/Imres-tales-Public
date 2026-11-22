@@ -21,9 +21,10 @@
   };
   const kill0 = Z.killEnemy;
   Z.killEnemy = function (e, o) {
-    const was = e && !e.deadCounted; if (e) e.deadCounted = true;
     const r = kill0.apply(this, arguments);
-    if (was && e && !e.dummy) {
+    /* erst zählen, wenn der Gegner wirklich liegt (Skelette setzen sich sonst wieder zusammen und würden doppelt bzw. gar nicht gezählt) */
+    const was = e && e.dead && !e.deadCounted; if (was) e.deadCounted = true;
+    if (was && !e.dummy) {
       const s = S(); o = o || {};
       if (e.elite) inc("elites"); if (e.def && e.def.boss) inc("bosses");
       if (o.src === "trap") inc("trapKills"); if (o.src === "fall") inc("fallKills");

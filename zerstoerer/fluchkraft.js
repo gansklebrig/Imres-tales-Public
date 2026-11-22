@@ -3,6 +3,8 @@
    und wird mit der Fluchstufe stärker (×1 / ×1,4 / ×2). */
 (function () {
   "use strict";
+  /* Verzögerungen in Spielzeit (Pause/Zeitlupe/Gebietswechsel-sicher), sonst Rückfall auf setTimeout */
+  const later = (fn, ms) => (Z.bossLater ? Z.bossLater(fn, ms) : window.setTimeout(fn, ms));
   const Z = window.Z, U = Z.U, FX = Z.fx, A = Z.audio, W = Z.world, T = Z.TILE, L = v => Z.L(v);
   const { glow, circ, poly, limb, ell } = Z.draw;
   const alive = e => e && !e.dead && !(e.intro > 0);
@@ -17,14 +19,14 @@
 
   const CP = (Z.CPOWER = {
     himmel: { n: ["Himmelsgericht", "Heaven's Verdict"], d: ["Jeder Treffer ruft einen Lichtpfeil vom Himmel auf das Ziel.", "Every hit calls down a bolt of light onto the target."],
-      hit: (e, dmg, it) => { fl.push({ k: "strahl", x: cx(e), y: e.y + e.h, t: 0, life: 0.35, col: "255,230,150" }); setTimeout(() => { if (alive(e)) { fxHit(e, dmg * 0.45 * K(it), { crit: true }); FX.burst(cx(e), e.y + e.h, 10, { col: ["#fff6d0", "#ffd27a"], sp: 120, ang: -Math.PI / 2, spread: 2, life: 0.35, size: 2, kind: "spark", add: true }); A.play("zap", { vol: 0.25, rate: 1.8, gap: 0.05 }); } }, 120); } },
+      hit: (e, dmg, it) => { fl.push({ k: "strahl", x: cx(e), y: e.y + e.h, t: 0, life: 0.35, col: "255,230,150" }); later(() => { if (alive(e)) { fxHit(e, dmg * 0.45 * K(it), { crit: true }); FX.burst(cx(e), e.y + e.h, 10, { col: ["#fff6d0", "#ffd27a"], sp: 120, ang: -Math.PI / 2, spread: 2, life: 0.35, size: 2, kind: "spark", add: true }); A.play("zap", { vol: 0.25, rate: 1.8, gap: 0.05 }); } }, 120); } },
     frost: { n: ["Frostherz", "Frost Heart"], d: ["Jeder vierte Treffer friert das Ziel ein, eingefrorene Gegner zerspringen in Eissplitter, die weitere einfrieren.", "Every fourth hit freezes the target; frozen foes shatter into shards that freeze others."],
       hit: (e, dmg, it, st) => { st.n = (st.n || 0) + 1; if (e.frozenT > 0) { for (let i = 0; i < 6; i++) { const a = i / 6 * 6.283; Z.spawnProj("eis", cx(e), cy(e), 1, { vx: Math.cos(a) * 260, vy: Math.sin(a) * 260, dmg: dmg * 0.3, fx: true, onHitE: (p, x) => { Z.addStatus(x, "stun", 1); x.frozenT = x.st.stun; } }); } }
         if (st.n % Math.max(2, Math.round(4 / K(it))) === 0) { Z.addStatus(e, "stun", 1.6); e.frozenT = e.st.stun; FX.ring(cx(e), cy(e), 22, "#ffffff", 0.35, 3); A.play("glass", { vol: 0.4, rate: 0.7 }); } } },
     seuche: { n: ["Seuchenträger", "Plaguebearer"], d: ["Treffer vergiften dreifach. Vergiftete platzen beim Tod in eine Giftwolke, die weiterspringt.", "Hits poison three times over. Poisoned foes burst into a spreading cloud on death."],
       hit: (e, dmg, it) => { Z.addStatus(e, "poison", Math.round(3 * K(it))); }, kill: (e, it) => { if (!(e.st.poison > 0)) return; Z.spawnHazard({ kind: "poisoncloud", x: cx(e), y: e.y + e.h, w: 90, life: 4, dmg: 4 * K(it), owner: "p", eff: { poison: 2 } }); FX.burst(cx(e), cy(e), 20, { col: ["#9ad04a", "#4a7a2a"], sp: 90, life: 0.8, size: 4, kind: "smoke" }); A.play("poison", { vol: 0.5 }); } },
     zwilling: { n: ["Spiegelklinge", "Mirror Blade"], d: ["Jeder Schlag wird von einer Geisterklinge wiederholt, jedes Geschoss fliegt doppelt.", "Every strike is repeated by a ghost blade; every projectile flies twice."],
-      hit: (e, dmg, it, st, o) => { if (o.src !== "melee") return; setTimeout(() => { if (!alive(e)) return; fxHit(e, dmg * 0.6 * K(it), { kb: 60 }); const P = P_(); FX.smear({ x: cx(e) - P.face * 8, y: cy(e), dir: P.face, r: 20, a0: 1.2, a1: -1.2, th: 6, life: 0.16, col: "#c890ff", core: "#fff", a: 0.7 }); A.play("slash", { vol: 0.25, rate: 1.4, gap: 0.04 }); }, 160); } },
+      hit: (e, dmg, it, st, o) => { if (o.src !== "melee") return; later(() => { if (!alive(e)) return; fxHit(e, dmg * 0.6 * K(it), { kb: 60 }); const P = P_(); FX.smear({ x: cx(e) - P.face * 8, y: cy(e), dir: P.face, r: 20, a0: 1.2, a1: -1.2, th: 6, life: 0.16, col: "#c890ff", core: "#fff", a: 0.7 }); A.play("slash", { vol: 0.25, rate: 1.4, gap: 0.04 }); }, 160); } },
     wind: { n: ["Windläufer", "Windrunner"], d: ["Die Rolle hat keine Abklingzeit und schneidet Gegner, durch die du rollst.", "The roll has no cooldown and cuts through enemies you roll past."], passive: true },
     blutmond: { n: ["Blutmond", "Blood Moon"], d: ["Jeder Kill beschwört einen Blutmond, der um dich kreist und auf Gegner feuert (bis zu 5).", "Every kill summons a blood moon that orbits you and fires at foes (up to 5)."],
       kill: (e, it) => { if (fl.filter(f => f.k === "mond").length >= 5) return; fl.push({ k: "mond", a: Math.random() * 6.28, t: 0, life: 9, cd: 0.4, dmg: 9 * K(it) }); A.play("magic", { vol: 0.4, rate: 0.7 }); } },

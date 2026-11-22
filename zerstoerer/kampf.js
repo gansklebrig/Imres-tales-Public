@@ -2,6 +2,8 @@
    Physik (Kachelkollision), Ezekiels Steuerung, Waffen, Fähigkeiten, Geschosse, Statuseffekte und Schaden. */
 (function () {
   "use strict";
+  /* Verzögerungen in Spielzeit (Pause/Zeitlupe/Gebietswechsel-sicher), sonst Rückfall auf setTimeout */
+  const later = (fn, ms) => (Z.bossLater ? Z.bossLater(fn, ms) : window.setTimeout(fn, ms));
   const Z = window.Z, U = Z.U, T = Z.TILE, FX = Z.fx, A = Z.audio, L = v => Z.L(v);
 
   /* ======================= WELT-ABFRAGEN ======================= */
@@ -390,7 +392,9 @@
       const free = !W.solidT(W.tile(Math.floor(x1 / T), ty - 1)) && !W.solidT(W.tile(Math.floor((x1 + P.w - 1) / T), ty - 1)) && !W.solidT(W.tile(Math.floor(x1 / T), ty - 2)) && !W.solidT(W.tile(Math.floor((x1 + P.w - 1) / T), ty - 2));
       if (!free) continue;
       /* Kopf darf nicht gegen eine Decke stoßen */
-      if (W.solidT(W.tile(Math.floor((P.x + P.w / 2) / T), ty - 2))) continue;
+      if (W.solidT(W.tile(Math.floor((P.x + P.w / 2) / T), ty - 2)) || W.solidT(W.tile(Math.floor((P.x + P.w / 2) / T), ty - 1))) continue;
+      /* nicht diagonal an einer Felsecke über dem Kopf vorbeischlüpfen */
+      if (W.solidT(W.tile(Math.floor((P.x + (h > 0 ? P.w - 1 : 0)) / T), ty - 1)) && W.solidT(W.tile(Math.floor((P.x + (h > 0 ? P.w - 1 : 0)) / T), ty - 2))) continue;
       P.ledge = { t: 0, dur: 0.17, x0: P.x, y0: P.y, x1, y1: topY - P.h };
       P.vx = 0; P.vy = 0; P.face = h; A.play("jump", { vol: 0.3, rate: 0.8 });
       return;
@@ -407,7 +411,9 @@
     }
     /* Abgrund: wer hineinfällt, verliert Leben und steht am letzten sicheren Platz wieder auf */
     if (W.tile(Math.floor((P.x + P.w / 2) / T), Math.floor((P.y + P.h * 0.35) / T)) === 9) {
-      const hurt = Math.round(P.hpMax * 0.15);
+      const now = P.time || 0, again = P._voidT != null && now - P._voidT < 12 && P._voidX != null && Math.abs(P._voidX - P.x) < 80;
+      P._voidT = now; P._voidX = P.x;
+      const hurt = Math.round(P.hpMax * (again ? 0.07 : 0.15));
       FX.flashScreen("#000000", 0.7); A.play("hurt", { vol: 0.6 }); A.play("land", { vol: 0.5, rate: 0.6 });
       Z.hurtPlayer(hurt, { x: P.x, unblockable: true, hazard: true, force: true, kb: 0 });
       if (!P.dead) {
@@ -420,7 +426,9 @@
     }
     if (spike && P.iframe <= 0) {
       Z.hurtPlayer(Math.round(P.hpMax * 0.14), { x: P.x + P.w / 2, kb: 0, spike: true, unblockable: true });
-      P.vy = -330; P.y -= 2;
+      /* keine Stachel-Schleifen: nach dem Treffer an den letzten sicheren Platz, kurz unverwundbar */
+      if (!P.dead && P.lastSafe) { P.x = P.lastSafe.x; P.y = P.lastSafe.y; P.h = C.H; P.crouch = false; P.vx = 0; P.vy = 0; P.iframe = Math.max(P.iframe, 1.1); P.rollT = 0; FX.text(P.x + P.w / 2, P.y - 10, L(["Autsch!", "Ouch!"]), "#ff8a6a"); }
+      else { P.vy = -330; P.y -= 2; }
     }
     if (liquid && P.y + P.h > Math.floor((P.y + P.h - 3) / T) * T + 6) {
       if (liquid === 5) { if (P.iframe <= 0 || true) Z.hurtPlayer(Math.round(P.hpMax * 0.18), { x: P.x, unblockable: true, hazard: true, force: true }); addStatus(P, "burn", 2, true); }
@@ -442,6 +450,7 @@
     }
   }
   function healP(P, n) {
+    if (!P || !isFinite(n) || n <= 0) return 0;
     const before = P.hp; P.hp = Math.min(P.hpMax, P.hp + n);
     const d = P.hp - before; if (d > 0.5) FX.text(P.x + P.w / 2, P.y - 4, "+" + Math.round(d), "#7fd36a");
     return d;
@@ -626,7 +635,7 @@
   }
   function rockSpikes(P, a) {
     const rows = Z.metaLvl("steinfaust") >= 3 ? 3 : 1;
-    for (let r = 0; r < rows; r++) for (let i = 0; i < 4; i++) setTimeout(() => Z.spawnHazard({ kind: "rockspike", x: P.x + P.w / 2 + P.face * (24 + i * 18), y: P.y + P.h, w: 14, life: 0.45, dmg: dmgOf(P, a.it, 10), owner: "p", kbUp: 300, once: true }), (i * 70 + r * 220));
+    for (let r = 0; r < rows; r++) for (let i = 0; i < 4; i++) later(() => Z.spawnHazard({ kind: "rockspike", x: P.x + P.w / 2 + P.face * (24 + i * 18), y: P.y + P.h, w: 14, life: 0.45, dmg: dmgOf(P, a.it, 10), owner: "p", kbUp: 300, once: true }), (i * 70 + r * 220));
     A.play("rock", { vol: 0.6 });
   }
   function plungeLand(P) {
@@ -643,7 +652,29 @@
   }
 
   /* ---------- Fernkampf ---------- */
+  /* Höhen-Zielhilfe: gerade Geschosse fliegen in Brusthöhe von Ezekiel und gingen sonst über kleine Gegner
+     (Goblins, Wölfe, Ratten, Spinnen) hinweg – sanft auf die Körpermitte des nächsten Gegners vorn lenken. */
+  function aimFix(P, from) {
+    const tgt = nearestEnemy(P, 300, false);
+    if (!tgt) return;
+    const tx = tgt.x + tgt.w / 2, ty = tgt.y + tgt.h * 0.5;
+    if (U.sign(tx - (P.x + P.w / 2)) !== P.face && Math.abs(tx - (P.x + P.w / 2)) > 6) return;
+    for (let i = from; i < Z.projs.length; i++) {
+      const p = Z.projs[i], k = p.k || {};
+      if (p.owner !== "p" || k.lob || k.rain || k.ground || k.wave || k.trap || k.anchor || !p.vx) continue;
+      const t = Math.max(0.02, Math.abs(tx - p.x) / Math.abs(p.vx));
+      const want = (ty - p.y) / t - 0.5 * (p.g || 0) * t;
+      if (!isFinite(want)) continue;
+      const lim = Math.abs(p.vx) * 0.6;
+      p.vy += U.clamp(want, -lim, lim);
+    }
+  }
   function fireShot(P, a) {
+    const n0 = Z.projs.length;
+    fireShot0(P, a);
+    aimFix(P, n0);
+  }
+  function fireShot0(P, a) {
     const s = a.d.shoot; a.fired = (a.fired || 0) + 1;
     const x = P.x + P.w / 2 + P.face * 8, y = P.y + 9;
     const base = dmgOf(P, a.it, s.dmg);
@@ -668,7 +699,9 @@
     const eff = {}; a.it.aff.forEach(af => { const ad = Z.AFFIX[af]; if (ad.eff) Object.assign(eff, ad.eff); });
     const x = P.x + P.w / 2 + P.face * 8, y = P.y + 9;
     const n = full && Z.metaLvl("bogen") >= 3 ? 3 : 1;
+    const n0 = Z.projs.length;
     for (let i = 0; i < n; i++) Z.spawnProj("pfeil", x, y, P.face, { dmg, it: a.it, eff, pierce: full, critAlways: full, speed: U.lerp(380, 640, k), vy: (i - (n - 1) / 2) * 50 });
+    aimFix(P, n0);
     A.play("bow", { vol: 0.6 }); if (full) FX.addShake(2);
   }
 
@@ -690,7 +723,7 @@
       case "pfeilhagel": {
         A.play("bow", { vol: 0.6 });
         const tx = cx + f * 70;
-        for (let i = 0; i < 14; i++) setTimeout(() => Z.spawnProj("regenpfeil", tx + (Math.random() - 0.5) * 90, Z.cam.y - 10, 0, { dmg: 7 * m, eff }), i * 55);
+        for (let i = 0; i < 14; i++) later(() => Z.spawnProj("regenpfeil", tx + (Math.random() - 0.5) * 90, Z.cam.y - 10, 0, { dmg: 7 * m, eff }), i * 55);
         break;
       }
       case "echoblitz": Z.chainLightning(P, cx, P.y + 6, 24 * m, 3, Object.assign({ stun: 0.5 }, eff), it, true); break;
@@ -700,12 +733,12 @@
       case "floete": Z.spawnAlly("illusion", cx + f * 30, P.y + P.h - 20, { life: 7 }); A.play("magic"); break;
       case "kristall":
         A.play("rock");
-        for (let i = 0; i < 5; i++) setTimeout(() => Z.spawnHazard({ kind: "rockspike", x: cx + f * (26 + i * 20), y: P.y + P.h, w: 16, life: 0.5, dmg: 16 * m, owner: "p", kbUp: 340, once: true, eff }), i * 75);
+        for (let i = 0; i < 5; i++) later(() => Z.spawnHazard({ kind: "rockspike", x: cx + f * (26 + i * 20), y: P.y + P.h, w: 16, life: 0.5, dmg: 16 * m, owner: "p", kbUp: 340, once: true, eff }), i * 75);
         break;
       case "schattenschritt": {
         const e = nearestEnemy(P, 200, true);
         if (e) { const side = e.face > 0 ? -1 : 1; P.x = e.x + e.w / 2 + side * (e.w / 2 + 10) - P.w / 2; P.y = e.y + e.h - P.h; Z.unstick(P); P.face = -side; FX.burst(cx, cy, 16, { col: ["#a060ff", "#2a1a3a"], sp: 90, life: 0.4, size: 3, kind: "smoke" }); A.play("shadow");
-          setTimeout(() => { if (!e.dead) { Z.hitEnemy(e, 30 * m * 2, { crit: true, kb: 60, src: "skill", it, eff }); FX.smear({ x: P.x + P.w / 2, y: P.y + 12, dir: P.face, r: 22, a0: -0.4, a1: 0.3, th: 4, life: 0.14, col: "#a060ff", core: "#fff", stab: true }); } }, 60); }
+          later(() => { if (!e.dead) { Z.hitEnemy(e, 30 * m * 2, { crit: true, kb: 60, src: "skill", it, eff }); FX.smear({ x: P.x + P.w / 2, y: P.y + 12, dir: P.face, r: 22, a0: -0.4, a1: 0.3, th: 4, life: 0.14, col: "#a060ff", core: "#fff", stab: true }); } }, 60); }
         else P.cd[slot] = 0.5;
         break;
       }
@@ -716,7 +749,7 @@
       case "sprengphiole": Z.spawnProj("bombe", cx, P.y + 6, f, { dmg: 34 * m, eff, vx: f * 200, vy: -200 }); A.play("glass", { vol: 0.4 }); break;
       case "darkinzorn": P.wrath = 8; A.play("roar", { vol: 0.6 }); FX.flashScreen("#ff2a1a", 0.25); FX.ring(cx, cy, 60, "#ff2a3a", 0.5, 4); break;
       case "ranken": A.play("roots");
-        for (let i = 0; i < 6; i++) setTimeout(() => Z.spawnHazard({ kind: "roots", x: cx + f * (20 + i * 22), y: P.y + P.h, w: 20, life: 0.7, dmg: 6 * m, owner: "p", eff: Object.assign({ root: 2.5 }, eff), once: true }), i * 60);
+        for (let i = 0; i < 6; i++) later(() => Z.spawnHazard({ kind: "roots", x: cx + f * (20 + i * 22), y: P.y + P.h, w: 20, life: 0.7, dmg: 6 * m, owner: "p", eff: Object.assign({ root: 2.5 }, eff), once: true }), i * 60);
         break;
       default: if (Z.SKILL_FX && Z.SKILL_FX[id] && Z.SKILL_FX[id](P, it, { m, eff, slot, cx, cy, f }) === false) P.cd[slot] = 0.4; break;
       case "drachenatem": Z.spawnHazard({ kind: "breath", x: cx + f * 8, y: P.y + 10, w: 90, dir: f, life: 0.9, dmg: 5 * m, owner: "p", eff: { poison: 2 } }); A.play("fireBig", { vol: 0.5, rate: 1.3 }); break;
@@ -730,6 +763,8 @@
     const P = Z.player; if (!P || P.dead) return false;
     o = o || {};
     if (Z.godMode) return false;
+    if (typeof dmg !== "number" || isNaN(dmg)) dmg = 1; else if (dmg === Infinity) dmg = P.hpMax * 10;
+    if (!isFinite(P.hp)) P.hp = P.hpMax;
     if ((P.iframe > 0 || P.ledge) && !o.force) {
       if (P.dodgeT > 0 && !P.dodged && !o.hazard) {
         P.dodged = true; P.counterT = 1.2; Z.stats.dodges = (Z.stats.dodges || 0) + 1;
@@ -836,6 +871,9 @@
   Z.hitEnemy = function (e, dmg, o) {
     if (!e || e.dead) return 0;
     o = o || {};
+    /* Schutz gegen kaputte Werte: NaN/undefined würde Leben dauerhaft auf NaN setzen (unsterblicher Gegner) */
+    if (typeof dmg !== "number" || isNaN(dmg)) dmg = 0; else if (dmg === Infinity) dmg = Math.max(1, e.hp || 1) * 10;
+    if (!isFinite(e.hp)) e.hp = e.hpMax > 0 ? e.hpMax : 1;
     const P = Z.player;
     if (e.invuln > 0 && !o.dot) { FX.text(e.x + e.w / 2, e.y - 4, "—", "#a99a8b"); return 0; }
     /* Schild von vorn */

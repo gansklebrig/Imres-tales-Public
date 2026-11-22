@@ -15,7 +15,7 @@
   const hash = (x, y) => { let h = (x * 374761393 + y * 668265263) ^ 0x5bd1e995; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
 
   G.setLevel = function (level, biome) {
-    lv = level; B = biome; G.chunks.clear(); G.layers = null;
+    lv = level; B = biome; G.chunks.clear(); G.layers = null; fgState.clear();
     Z.dustCol = shade(B.tile.light, -0.15); Z.tileCol = B.tile.base;
     /* Innen/Außen: Spalten ohne Decke zeigen den Himmel */
     G.sky = new Uint8Array(lv.W * lv.H);
@@ -36,7 +36,7 @@
   G.buildLayers = function () {
     if (!B) return;
     const H = Math.ceil((Z.cam.h + 120));
-    const mk = s => { const cv = document.createElement("canvas"); cv.width = Math.ceil(LW * s); cv.height = Math.ceil(H * s); const c = cv.getContext("2d"); c.scale(s, s); return { cv, c, s, H }; };
+    const mk = s => { const cv = document.createElement("canvas"); cv.width = Math.ceil(LW * s); cv.height = Math.ceil(H * s); const c = cv.getContext("2d"); const sx = cv.width / LW, sy = cv.height / H; c.scale(sx, sy); return { cv, c, s, sx, sy, H }; };
     const far = mk(Math.min(G.scale, 1.15)), mid = mk(Math.min(G.scale, 1.7));
     /* Himmel direkt in die ferne Ebene backen (spart eine Vollbildfüllung pro Bild) */
     const g = far.c.createLinearGradient(0, 40, 0, H - 80); g.addColorStop(0, B.sky[0]); g.addColorStop(0.6, B.sky[1]); g.addColorStop(1, B.sky[2]); far.c.fillStyle = g; far.c.fillRect(0, 0, LW, H);
@@ -251,17 +251,20 @@
   }
   function drawLayers(c, cam) {
     const L = G.layers; if (!L) return;
-    c.fillStyle = B.sky[2]; c.fillRect(cam.x - 2, cam.y - 2, cam.w + 4, cam.h + 4);
+    /* deckt die Bilderbuchseite alles, sind Himmel und ferne Ebene unsichtbar: zwei Vollbild-Durchgänge gespart */
+    const cover = Z.bilderbuchCovers && Z.bilderbuchCovers();
+    if (!cover) { c.fillStyle = B.sky[2]; c.fillRect(cam.x - 2, cam.y - 2, cam.w + 4, cam.h + 4); }
     const lvH = lv.H * T;
     for (const [layer, px, py] of [[L.far, 0.12, 0.08], [L.mid, 0.32, 0.2]]) {
       const ox = cam.x * (1 - px), oy = cam.y - (cam.y - (lvH - cam.h) * 0.5) * py - 40;
+      if (cover && layer === L.far) { if (Z.drawBackLife) Z.drawBackLife(c, cam, G.time, B, oy, L.H); continue; }
       let x = Math.floor((cam.x - ox) / LW) * LW + ox;
       const y0 = Math.max(oy, cam.y - 2), y1 = Math.min(oy + L.H, cam.y + cam.h + 2);
       if (y1 <= y0) continue;
       for (; x < cam.x + cam.w; x += LW) {
         /* nur den sichtbaren Ausschnitt kopieren */
         const vx0 = Math.max(x, cam.x - 2), vx1 = Math.min(x + LW, cam.x + cam.w + 2); if (vx1 <= vx0) continue;
-        const k = layer.s; c.drawImage(layer.cv, (vx0 - x) * k, (y0 - oy) * k, (vx1 - vx0) * k, (y1 - y0) * k, vx0, y0, vx1 - vx0, y1 - y0);
+        const kx = layer.sx, ky = layer.sy; c.drawImage(layer.cv, (vx0 - x) * kx, (y0 - oy) * ky, (vx1 - vx0) * kx, (y1 - y0) * ky, vx0, y0, vx1 - vx0, y1 - y0);
       }
       /* lebendige Ferne zwischen den Ebenen: Wolken, Vögel, Sternschnuppen, Fledermäuse … */
       if (layer === L.far && Z.drawBackLife) Z.drawBackLife(c, cam, G.time, B, oy, L.H);
@@ -1193,7 +1196,7 @@
     }
     PT && PT("base");
     /* 2) Wandschmuck, Schmutz, Kontaktschatten, Schleier */
-    wallFeatures(c, st, x0, y0, x1, y1, det, GR);
+    if (det >= 1) wallFeatures(c, st, x0, y0, x1, y1, det, GR); /* Handheld: schlichte Wände ohne Pfeiler/Nischen */
     PT && PT("feat");
     wallDirt(c, st, x0, y0, x1, y1, det);
     PT && PT("dirt");
@@ -1290,8 +1293,9 @@
       const v = lv.get(x, y); if (v !== 5 && v !== 6) continue;
       const px = x * T, py = y * T, top = lv.get(x, y - 1) !== v;
       if (v === 5) {
-        const g = c.createLinearGradient(0, py, 0, py + T); g.addColorStop(0, "#ffb040"); g.addColorStop(0.3, "#ff6a1a"); g.addColorStop(1, "#8a1a08");
-        c.fillStyle = g; c.fillRect(px, py + (top ? 4 + Math.sin(t * 3 + x) * 1.2 : 0), T, T);
+        if (!G.lavaG) { G.lavaG = c.createLinearGradient(0, 0, 0, T); G.lavaG.addColorStop(0, "#ffb040"); G.lavaG.addColorStop(0.3, "#ff6a1a"); G.lavaG.addColorStop(1, "#8a1a08"); }
+        /* Verlauf einmal anlegen und verschieben statt je Kachel und Bild neu */
+        c.save(); c.translate(0, py); c.fillStyle = G.lavaG; c.fillRect(px, top ? 4 + Math.sin(t * 3 + x) * 1.2 : 0, T, T); c.restore();
         if (top) { c.fillStyle = "#ffe0a0"; c.fillRect(px, py + 4 + Math.sin(t * 3 + x) * 1.2, T, 1); if (Math.random() < 0.02) FX.p({ x: px + Math.random() * T, y: py + 4, vx: 0, vy: -60 - Math.random() * 40, g: 200, life: 0.6, size: 1.6, col: "#ffb040", kind: "spark", add: true }); }
       } else {
         c.fillStyle = B.hazard === "water" && B.bg === "lake" ? "rgba(20,50,40,.85)" : "rgba(30,40,50,.8)"; const ty = top ? 5 + Math.sin(t * 2 + x * 0.7) * 1.2 : 0;
@@ -1474,6 +1478,11 @@
   /* frei sichtbarer Hintergrund (Himmel, Fenster, Arena): dort gibt es keine Wand für Wandschmuck */
   G.isOpen = (x, y) => { if (!lv || x < 0 || y < 0 || x >= lv.W || y >= lv.H) return false; const i = y * lv.W + x; return !!((G.sky && G.sky[i]) || (PR && (PR.win[i] || PR.clear[i]))); };
   function flame(c, x, y, s, col) {
+    if (Z.gq && Z.gq.level === 0) { /* Handheld: eine einfache Flamme ohne Schein */
+      const h = (7 + Math.sin(G.time * 17 + x) * 1.6) * s, w = 2.6 * s;
+      c.fillStyle = col; c.beginPath(); c.moveTo(x - w, y); c.lineTo(x, y - h); c.lineTo(x + w, y); c.fill();
+      c.fillStyle = "#ffd890"; c.fillRect(x - w * 0.35, y - h * 0.4, w * 0.7, h * 0.4); return;
+    }
     c.save(); c.globalCompositeOperation = "lighter";
     const tm = G.time, h = (7 + Math.sin(tm * 17 + x) * 1.6 + Math.sin(tm * 29 + x * 3) * 0.7) * s, w = 3 * s, lean = Math.sin(tm * 11 + y) * w * 0.45 + (Z.windX || 0) * 0.02 * s;
     D.glow(c, x, y - h * 0.4, 14 * s + 5, "rgba(255,150,60,.32)");
@@ -1484,7 +1493,7 @@
     c.restore();
   }
   Z.flame = flame;
-  G._drawTiles = drawTiles; G._light = (c, W, H) => lightPass(c, Z.cam, W, H); /* für Tests */
+  G._drawTiles = drawTiles; G._light = (c, W, H) => { G.frame++; return lightPass(c, Z.cam, W, H); }; /* für Tests */
 
   /* Türen und Stationen */
   function drawDoors(c, t) {
@@ -1510,9 +1519,15 @@
   }
 
   /* ======================= LICHT ======================= */
-  function lightPass(c, cam, W, H) {
+  /* Bildschirm-Überlagerungen (Sichtnebel, Farbstimmung, Vignette …) werden – wenn möglich – in die kleine
+     Lichtkarte gemalt statt als eigene Vollbild-Durchgänge: gleiches Ergebnis (alles „source-over“ über der Szene),
+     aber nur noch ein Vollbild-Blit. Module melden sich mit G.lightOver.push(fn(l, X0, Y0, sx, sy, LW, LH)) an. */
+  G.lightOver = []; G.frame = 0; G.lightFrame = -1;
+  function lightPass(c, cam, W, H, camX, camY) {
     const dark = Z.darkness > 0 ? 0.93 : B.dark * 0.82 + (Z.run && Z.run.skulls ? Z.run.skulls * 0.02 : 0);
-    if (dark < 0.05) return;
+    if (dark < 0.05) return false;
+    /* gleiche Kameralage wie die Welt (inkl. Wackeln), damit Lichtkreise und Sichtnebel nicht verrutschen */
+    if (camX != null) cam = { x: camX, y: camY, w: cam.w, h: cam.h };
     const LD = (Z.gq && Z.gq.light) || 4; if (!G.light || G.light.width !== Math.ceil(W / LD) || G.light.height !== Math.ceil(H / LD)) { G.light = document.createElement("canvas"); G.light.width = Math.ceil(W / LD); G.light.height = Math.ceil(H / LD); G.lc = G.light.getContext("2d"); }
     const l = G.lc, sx = G.light.width / cam.w, sy = G.light.height / cam.h;
     l.globalCompositeOperation = "source-over"; l.clearRect(0, 0, G.light.width, G.light.height);
@@ -1549,9 +1564,16 @@
       if (Z.flashLight > 0) { l.fillStyle = "rgba(0,0,0," + Z.flashLight + ")"; l.fillRect(0, 0, G.light.width, G.light.height); }
       warmTint(l, cam, sx, sy, t);
     }
-    l.globalAlpha = 1;
+    l.globalAlpha = 1; l.globalCompositeOperation = "source-over";
+    for (const f of G.lightOver) { try { f(l, cam.x, cam.y, sx, sy, G.light.width, G.light.height); } catch (e) { console.error(e); } l.globalAlpha = 1; l.globalCompositeOperation = "source-over"; }
+    if (!Z.gq || Z.gq.vignette !== false) { vigSprite(); l.drawImage(G.vig, 0, 0, G.light.width, G.light.height); }
+    G.lightFrame = G.frame;
     c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.imageSmoothingEnabled = true; c.drawImage(G.light, 0, 0, W, H); c.restore();
+    return true;
   }
+  function vigSprite() { if (!G.vig) { G.vig = document.createElement("canvas"); G.vig.width = 160; G.vig.height = 90; const v = G.vig.getContext("2d"); const vg = v.createRadialGradient(80, 45, 40, 80, 45, 92); vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.5)"); v.fillStyle = vg; v.fillRect(0, 0, 160, 90); } return G.vig; }
+  /* true, wenn die Lichtkarte dieses Bildes schon die Überlagerungen enthält */
+  G.lightMerged = () => G.lightFrame === G.frame;
 
   /* Warmes Leuchten der Lichtquellen (additiv, nach der Dunkelheit): Fackeln färben ihre Umgebung */
   const WARM = { torch: ["rgba(255,140,50,.5)", 60], brazier: ["rgba(255,120,40,.55)", 70], forge: ["rgba(255,110,30,.6)", 80], candle: ["rgba(255,200,120,.45)", 26], candelabra: ["rgba(255,190,110,.5)", 44], chandelier: ["rgba(255,190,110,.5)", 60], lantern: ["rgba(255,180,90,.5)", 46], greenfire: ["rgba(110,255,120,.45)", 60], mushroom: ["rgba(180,120,255,.4)", 30], rune: ["rgba(255,160,60,.45)", 40], crystal: ["rgba(255,140,70,.45)", 36], campfire: ["rgba(255,140,50,.55)", 100] };
@@ -1600,14 +1622,51 @@
   };
   function fog(c, cam) {
     if (!(B.weather || []).includes("fog") || (Z.gq && Z.gq.fog === false)) return;
+    if (!G.fogStrip) { const f = G.fogStrip = document.createElement("canvas"); f.width = 4; f.height = 40; const g = f.getContext("2d"), gr = g.createLinearGradient(0, 0, 0, 40); gr.addColorStop(0, "rgba(180,190,180,0)"); gr.addColorStop(0.5, "rgba(180,190,180,.7)"); gr.addColorStop(1, "rgba(180,190,180,0)"); g.fillStyle = gr; g.fillRect(0, 0, 4, 40); }
+    /* die Bahnen sind waagerecht gleichförmig: nur der sichtbare Teil, ohne Verlauf je Bild */
     c.save(); c.globalAlpha = 0.18;
-    for (let i = 0; i < 4; i++) { const y = cam.y + cam.h * (0.55 + i * 0.12), x = cam.x - ((G.time * (6 + i * 3)) % 200); const g = c.createLinearGradient(0, y - 20, 0, y + 20); g.addColorStop(0, "rgba(180,190,180,0)"); g.addColorStop(0.5, "rgba(180,190,180,.7)"); g.addColorStop(1, "rgba(180,190,180,0)"); c.fillStyle = g; c.fillRect(x, y - 20, cam.w + 220, 40); }
+    for (let i = 0; i < 4; i++) { const y = cam.y + cam.h * (0.55 + i * 0.12); c.drawImage(G.fogStrip, cam.x - 2, y - 20, cam.w + 4, 40); }
     c.restore();
   }
 
+  /* ======================= VORDERGRUND DARF NIE STÖREN =======================
+     Spielrelevante Rechtecke (Spieler, Gegner, Geschosse, Gefahren, Truhen/Gegenstände, Türen, Stationen) in
+     Kamerakoordinaten (Welt − Kamera; der Vordergrund zeichnet mit setTransform(S,0,0,S,0,0)). Für jedes
+     Vordergrundelement liefert G.fgAlpha(key, x, y, w, h, base) die Deckkraft: liegt etwas Wichtiges darunter
+     oder in der Nähe (~40 Bildpunkte Rand), blendet es in ~0,25 s auf höchstens 0,12 aus. */
+  let fgBoxes = null, fgBoxFrame = -1, fgT = 0, fgDt = 0;
+  const fgState = new Map();
+  function fgCollect() {
+    if (fgBoxFrame === G.frame) return fgBoxes;
+    fgBoxFrame = G.frame; const now = performance.now(); fgDt = fgT ? Math.min(0.1, (now - fgT) / 1000) : 0.016; fgT = now;
+    const cam = Z.cam, cx = cam.x, cy = cam.y, out = [], vis = (x, y, w, h) => x + w > -60 && x < cam.w + 60 && y + h > -60 && y < cam.h + 60;
+    const add = (x, y, w, h) => { x -= cx; y -= cy; if (vis(x, y, w, h)) out.push(x, y, w, h); };
+    const P = Z.player; if (P && !P.dead) add(P.x - 6, P.y - 10, P.w + 12, P.h + 14);
+    for (const e of Z.enemies) if (!e.dead && !(e.hidden > 0)) add(e.x, e.y, e.w, e.h);
+    for (const p of Z.projs) if (p.owner === "e") add(p.x - 6, p.y - 6, 12, 12);
+    for (const h of Z.hazards) { const w = h.w || 24, hh = h.h || 20; add(h.x - w / 2, h.y - hh, w, hh); }
+    for (const p of Z.pickups) add(p.x - 9, p.y - 16, 18, 18);
+    if (Z.gadgets) for (const g of Z.gadgets) if (g && g.x != null) add(g.x - 8, g.y - 8, (g.w || 16), (g.h || 16));
+    if (lv) {
+      if (lv.doors) for (const d of lv.doors) if (d.kind !== "entry") add(d.x * T - 8, d.y * T - 40, 32, 56);
+      if (lv.props) for (const s2 of lv.props) if (s2.kind === "npc" || s2.kind === "station") add(s2.x * T - 12, s2.y * T - 24, 40, 40);
+    }
+    return (fgBoxes = out);
+  }
+  G.fgAlpha = function (key, x, y, w, h, base) {
+    const b = fgCollect(), m = 40 / (G.scale || 2);
+    let hit = false;
+    for (let i = 0; i < b.length; i += 4) if (b[i] < x + w + m && b[i] + b[i + 2] > x - m && b[i + 1] < y + h + m && b[i + 1] + b[i + 3] > y - m) { hit = true; break; }
+    let st = fgState.get(key); if (st == null) st = hit ? 1 : 0;
+    st += ((hit ? 1 : 0) - st) * Math.min(1, fgDt / 0.08); /* ~0,25 s bis fast ganz übergeblendet */
+    if (Math.abs(st - (hit ? 1 : 0)) < 0.01) st = hit ? 1 : 0;
+    if (fgState.size > 400) fgState.clear(); fgState.set(key, st);
+    return base + (Math.min(base, 0.12) - base) * st;
+  };
+
   /* ======================= GESAMTBILD ======================= */
   G.render = function (c, W, H, dt) {
-    G.time += dt;
+    G.time += dt; G.frame++;
     const cam = Z.cam, t = G.time;
     if (!lv || !B) return;
     const S = G.scale;
@@ -1638,15 +1697,14 @@
     FX.drawSmears(c);
     FX.draw(c, true); mark("fx");
     fog(c, cam);
-    lightPass(c, cam, W, H); mark("light");
+    const merged = lightPass(c, cam, W, H, -ox, -oy); mark("light");
     Z.drawAfterLight && Z.drawAfterLight(c, cam, W, H, t);
     /* Bildschirmblitz und Vignette */
     c.setTransform(1, 0, 0, 1, 0, 0);
     if (FX.flash > 0 && Z.settings.flashes) { c.globalAlpha = FX.flash * 0.6; c.fillStyle = FX.flashCol; c.fillRect(0, 0, W, H); c.globalAlpha = 1; }
     const P = Z.player;
     if (P && P.hp < P.hpMax * 0.3 && !P.dead) { if (!G.vigR) { G.vigR = document.createElement("canvas"); G.vigR.width = 160; G.vigR.height = 90; const v = G.vigR.getContext("2d"); const g = v.createRadialGradient(80, 45, 26, 80, 45, 84); g.addColorStop(0, "rgba(140,0,0,0)"); g.addColorStop(1, "rgba(140,0,0,1)"); v.fillStyle = g; v.fillRect(0, 0, 160, 90); } c.globalAlpha = (0.3 - P.hp / P.hpMax) / 0.3 * (0.6 + 0.2 * Math.sin(t * 5)); c.drawImage(G.vigR, 0, 0, W, H); c.globalAlpha = 1; }
-    if (!G.vig) { G.vig = document.createElement("canvas"); G.vig.width = 160; G.vig.height = 90; const v = G.vig.getContext("2d"); const vg = v.createRadialGradient(80, 45, 40, 80, 45, 92); vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.5)"); v.fillStyle = vg; v.fillRect(0, 0, 160, 90); }
-    if (!Z.gq || Z.gq.vignette !== false) c.drawImage(G.vig, 0, 0, W, H);
+    if (!merged && (!Z.gq || Z.gq.vignette !== false)) c.drawImage(vigSprite(), 0, 0, W, H);
     if (pf) { const n = performance.now(); pf.post = (pf.post || 0) + n - t0; }
   };
 })();

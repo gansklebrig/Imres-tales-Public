@@ -2384,7 +2384,10 @@
       if (x > cam.w + 20 || x + w < -20) continue;
       /* zur Bildmitte hin durchscheinend, damit der Vordergrund nie das Spiel verdeckt */
       const mid = Math.abs(x + w / 2 - cam.w / 2) / (cam.w * 0.5);
-      const al = Math.max(0.28, Math.min(1, (mid - 0.15) / 0.55));
+      const al0 = Math.max(0.28, Math.min(1, (mid - 0.15) / 0.55));
+      /* nie vor Spieler, Gegnern, Geschossen, Gefahren oder Truhen/Türen: dann fast ganz ausblenden */
+      const al = Z.gfx.fgAlpha ? Z.gfx.fgAlpha("a" + i, x, y, w, h, al0) : al0;
+      if (al < 0.01) continue;
       c.save(); c.globalAlpha = al;
       const mir = (kind === "spinnwebe" || kind === "vorhang") && x + w / 2 > cam.w / 2;
       if (d.swing) { c.translate(x + w / 2, y); c.rotate(Math.sin(t * 0.6 + i * 1.7) * d.swing); c.translate(-w / 2, 0); } else c.translate(x, y);

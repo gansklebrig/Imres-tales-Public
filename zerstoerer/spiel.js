@@ -9,7 +9,18 @@
   const KEY = "imres-zerstoerer-v1";
   const META0 = () => ({ v: 1, shards: 0, wlvl: {}, luck: {}, found: {}, up: { trank: 0, zaeh: 0, klingen: 0, haendler: 0 }, skulls: 0, skullSel: 0, endings: {}, runs: 0, wins: 0, best: { time: 0, kills: 0 }, seen: {}, bosses: {}, intro: false, tut: false });
   Z.meta = META0();
-  try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); if (s && s.v === 1) Z.meta = Object.assign(META0(), s); } catch (_) {}
+  try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); if (s && s.v === 1) {
+    /* gegen kaputte Speicherstände absichern: Objektfelder nur als Objekt, Zahlen nur endlich */
+    const m = META0();
+    for (const k in s) {
+      const v = s[k], d = m[k];
+      if (d && typeof d === "object") { if (v && typeof v === "object" && !Array.isArray(v)) m[k] = Object.assign(d, v); }
+      else if (typeof d === "number") { if (Number.isFinite(v)) m[k] = v; }
+      else if (typeof d === "boolean") m[k] = !!v;
+      else if (v !== null && v !== undefined) m[k] = v;
+    }
+    Z.meta = m;
+  } } catch (_) {}
   Z.saveMeta = () => { try { localStorage.setItem(KEY, JSON.stringify(Z.meta)); } catch (_) {} };
 
   /* Sondergebiete für die Darstellung */
@@ -77,7 +88,7 @@
     Z.gfx.setLevel(lv, B);
     /* Spieler */
     const P = Z.player || (Z.player = Z.newPlayer());
-    P.x = lv.start.x * T + T / 2 - P.w / 2; P.y = (lv.start.y + 1) * T - P.h; P.vx = 0; P.vy = 0; P.cape = null; P.act = null; P.ledge = null; P.climbing = false; P.rollT = 0; P.lastSafe = { x: P.x, y: P.y }; P.rexUsed = false; P.grabbed = null; P.dead = false;
+    P.x = lv.start.x * T + T / 2 - P.w / 2; P.y = (lv.start.y + 1) * T - P.h; P.vx = 0; P.vy = 0; P.peakY = null; P._wasAir = false; P._voidT = null; P.cape = null; P.act = null; P.ledge = null; P.climbing = false; P.rollT = 0; P.lastSafe = { x: P.x, y: P.y }; P.rexUsed = false; P.grabbed = null; P.dead = false; P.plunge = false; P.diveStyle = null; P.diveLock = false; P.diveRecPend = false; P.diveRec = 0;
     P.face = 1;
     Z.cam.bounds = { x: 0, y: 0, w: lv.W * T, h: lv.H * T }; Z.cam.lock = null;
     Z.cam.snap(P.x + P.w / 2, P.y);
@@ -112,7 +123,7 @@
       const elite = eliteBudget > 0 && R() < 0.06 && !d.group && d.ai !== "turret";
       if (elite) eliteBudget--;
       const n = d.group ? R.int(d.group[0], d.group[1]) : 1;
-      for (let i = 0; i < n; i++) { const e = Z.spawnEnemy(id, s.x * T + 8 + (i - (n - 1) / 2) * 12, s.y * T + 16 - (d.fly ? 20 : 0), { elite }); if (e) { e.spawnT = 0; } }
+      for (let i = 0; i < n; i++) { const e = Z.spawnEnemy(id, s.x * T + 8 + (i - (n - 1) / 2) * 12, s.y * T + 16 - (d.fly ? 20 : 0), { elite }); if (e) { e.spawnT = 0; if (Z.world && Z.world.solidAt && (Z.world.solidAt(e.x + e.w / 2, e.y + e.h / 2) || Z.world.solidAt(e.x + e.w / 2, e.y + e.h - 2))) { e.x = s.x * T + 8 - e.w / 2; Z.unstick && Z.unstick(e); } } }
     }
     /* Beute */
     for (const l of lv.loot) {
@@ -208,7 +219,7 @@
     const run = Z.run;
     Z.dropGold(cx, cy, 60 * Z.BAL.goldMul(run.tier));
     Z.dropShards(cx, cy, (b.warden ? 18 : 30) * (1 + 0.25 * run.skulls));
-    setTimeout(() => {
+    (Z.bossLater || setTimeout)(() => {
       Z.dropItem(cx, b.y + b.h - 4, { boss: true, src: b.id });
       if (b.def.drop === "dawnbringer" && (!Z.meta.found.dawnbringer || Z.R() < 0.4)) { const it = Z.makeItem("dawnbringer", run.tier + 1, 3); Z.spawnPickup("item", cx + 20, b.y + b.h - 4, { it, drop: true, vy: -260 }); }
       else if (!b.warden) Z.dropItem(cx, b.y + b.h - 4, { boss: true, src: b.id });
@@ -218,7 +229,8 @@
     run.doorsOpen = true; Z.cam.lock = null;
     Z.music.target = 0;
     const A2 = Z.ARENAS[Z.level.arena];
-    if (A2 && A2.final) setTimeout(() => Z.ui.ending(A2.final), 4200);
+    /* Endboss: kurz unverwundbar, damit Nachzügler-Geschosse den Sieg nicht in einen Tod verwandeln */
+    if (A2 && A2.final) { const P = Z.player; if (P) P.iframe = Math.max(P.iframe, 5); const aid = Z.level.arena; setTimeout(() => { if (Z.player && !Z.player.dead && Z.level && Z.level.arena === aid) Z.ui.ending(A2.final); }, 4200); }
     Z.saveMeta();
   }
 
@@ -385,7 +397,7 @@
     /* Zeit */
     if (Z.run && !P.dead) Z.run.time += dt;
     /* Abstürze in den Abgrund unterhalb der Karte */
-    if (P.y > lv.H * T + 40 && !P.dead) { P.x = P.lastSafe.x; P.y = P.lastSafe.y; P.vx = P.vy = 0; Z.hurtPlayer(Math.round(P.hpMax * 0.15), { force: true, unblockable: true, kb: 0 }); }
+    if (P.y > lv.H * T + 40 && !P.dead) { P.x = P.lastSafe.x; P.y = P.lastSafe.y; P.vx = P.vy = 0; Z.hurtPlayer(Math.round(P.hpMax * 0.15), { force: true, unblockable: true, kb: 0, hazard: true, fall: true }); }
   }
   /* Rex im Lager: läuft herum, holt Stöckchen, setzt sich zu Ezekiel */
   function updateCampRex(dt) {

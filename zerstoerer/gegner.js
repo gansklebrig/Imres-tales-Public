@@ -405,7 +405,7 @@
     const fast = e.elite === "wuetend" ? 0.75 : 1;
     const tier = Z.run ? Z.run.tier || 0 : 0;
     /* je tiefer, desto schneller holen Gegner aus – und manche täuschen an */
-    e.act = { a, phase: "pre", t: 0, n: 0, hit: false, fast: fast * Math.max(0.72, 1 - 0.05 * tier), armor: a.armor || e.elite === "gepanzert" };
+    e.act = { a, phase: "pre", t: 0, n: 0, hit: false, fast: Math.min(fast * Math.max(0.72, 1 - 0.05 * tier), a.pre ? Math.max(1, 0.3 / a.pre) * fast : fast), armor: a.armor || e.elite === "gepanzert" };
     if (tier >= 2 && !d0(e).boss && a.box && Z.R() < 0.06 + 0.035 * tier && !e.fainted) { e.act.feint = true; e.fainted = 1; } else e.fainted = 0;
     e.uses[a.k] = (e.uses[a.k] || 0) + 1;
     if (a.k === "shoot" || a.k === "lob" || a.k === "web" || a.k === "volley") e.act.aim = { x: P.x + P.w / 2, y: P.y + 12 };
@@ -447,7 +447,7 @@
   function meleeCheck(e, a, P, mul) {
     if (!P || P.dead) return;
     const r = hitbox(e, a.box);
-    if (U.overlap(r, P)) { Z.hurtPlayer(dmgP(e, mul || a.dmg), { x: e.x + e.w / 2, kb: a.kb || 170, attacker: e, melee: true, unblockable: a.unblockable, parryable: !a.unblockable, eff: a.eff }); e.act.hit = true; if (a.hitSfx) A.play(a.hitSfx, { x: e.x, vol: 0.5 }); }
+    if (U.overlap(r, P)) { Z.hurtPlayer(dmgP(e, mul || a.dmg), { x: e.x + e.w / 2, kb: a.kb || 170, attacker: e, melee: true, unblockable: a.unblockable, parryable: !a.unblockable, eff: a.eff }); e.act && (e.act.hit = true); if (a.hitSfx) A.play(a.hitSfx, { x: e.x, vol: 0.5 }); }
     for (const al of Z.allies) if (al.kind === "illusion" && U.overlap(r, al)) al.t += 1;
   }
   function onActStart(e, a, P, tgt) {
@@ -588,7 +588,7 @@
     if (e.elite === "beschwoerer") for (let i = 0; i < 2; i++) { const m = Z.spawnEnemy(e.id === "brutsack" ? "spinnchen" : e.id, cx + (i - 0.5) * 20, e.y + e.h); if (m) m.aware = true; }
     if (d.boss) return; /* Bosse kümmern sich selbst */
     if (e.master || o.self && !d.gold) { /* beschworene Wesen geben wenig */ }
-    if (P) {
+    if (P && !o.self) { /* Selbstzerstörung (Bombengoblin) und aufgelöste Diener des Bosses zählen nicht als Kill */
       P.kills++;
       Z.stats.kills = (Z.stats.kills || 0) + 1;
       Z.meta && (Z.meta.seen = Z.meta.seen || {}, Z.meta.seen[e.id] = (Z.meta.seen[e.id] || 0) + 1);

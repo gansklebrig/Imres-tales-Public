@@ -61,10 +61,16 @@
   /* gespeicherte Belegung */
   const clone = o => JSON.parse(JSON.stringify(o));
   inp.keys = clone(KEYS0); inp.pad = clone(PAD0);
-  try { const k = JSON.parse(localStorage.getItem("imres-zerstoerer-tasten2") || "null"); if (k) for (const a of ACTIONS) if (Array.isArray(k[a])) inp.keys[a] = k[a].slice(0, 2); } catch (_) {}
+  /* gespeicherte Belegung nur übernehmen, wenn sie gültig ist (kaputter Speicher darf nichts zerstören) */
+  const okCode = c => (typeof c === "string" && /^[A-Za-z][A-Za-z0-9]{1,30}$/.test(c) ? c : null);
+  try { const k = JSON.parse(localStorage.getItem("imres-zerstoerer-tasten2") || "null"); if (k && typeof k === "object") for (const a of ACTIONS) if (Array.isArray(k[a])) { const v = [okCode(k[a][0]), okCode(k[a][1])]; if (v[0] || v[1]) inp.keys[a] = v; } } catch (_) {}
   /* F ist jetzt Vollbild: alte Belegung von F auf „Benutzen“ entfernen */
   try { if (!localStorage.getItem("imres-zerstoerer-fmig")) { inp.keys.use = inp.keys.use.map(c => (c === "KeyF" ? "Enter" : c)); localStorage.setItem("imres-zerstoerer-fmig", "1"); } } catch (_) {}
-  try { const p = JSON.parse(localStorage.getItem("imres-zerstoerer-pad") || "null"); if (p) for (const a in PAD0) if (typeof p[a] === "number") inp.pad[a] = p[a]; } catch (_) {}
+  try { const p = JSON.parse(localStorage.getItem("imres-zerstoerer-pad") || "null"); if (p && typeof p === "object") for (const a in PAD0) if (Number.isInteger(p[a]) && p[a] >= 0 && p[a] < 12) inp.pad[a] = p[a]; } catch (_) {}
+  /* doppelte Knöpfe aus altem/kaputtem Speicher: dann lieber Standard */
+  { const v = Object.values(inp.pad); if (new Set(v).size !== v.length) inp.pad = clone(PAD0); }
+  /* jede Aktion braucht mindestens eine Taste */
+  for (const a of ACTIONS) { if (!Array.isArray(inp.keys[a]) || inp.keys[a].length < 2) inp.keys[a] = [(inp.keys[a] || [])[0] || null, (inp.keys[a] || [])[1] || null]; if (!inp.keys[a][0] && !inp.keys[a][1]) inp.keys[a] = KEYS0[a].slice(); }
   let codeMap = {};
   inp.rebuild = () => { codeMap = {}; for (const a of ACTIONS) for (const c of inp.keys[a] || []) if (c) codeMap[c] = a; if (!codeMap.Escape) codeMap.Escape = "pause"; if (!codeMap.ShiftRight && inp.keys.roll.includes("ShiftLeft")) codeMap.ShiftRight = "roll"; };
   inp.rebuild();
@@ -93,8 +99,17 @@
   addEventListener("keydown", e => {
     if (inp.capture && inp.capture.kind === "key") {
       e.preventDefault();
+      if (e.repeat) return;
+      /* System- und Browsertasten nicht belegen (Windows-Taste, F5, F11 …) */
+      if (/^(Meta|OS|ContextMenu|F5|F11|F12|PrintScreen)/.test(e.code) || !e.code) return;
       const c = inp.capture; inp.capture = null;
       if (e.code !== "Escape" || c.action === "pause") inp.setKey(c.action, c.slot, e.code);
+      c.done && c.done(); return;
+    }
+    /* Controller-Knopf wird erwartet, aber eine Taste gedrückt: Belegen abbrechen statt Menü zu schließen */
+    if (inp.capture && inp.capture.kind === "pad") {
+      e.preventDefault(); if (e.repeat) return;
+      const c = inp.capture; inp.capture = null; captureArmed = false;
       c.done && c.done(); return;
     }
     if (Z.ui && Z.ui.onKey && Z.ui.onKey(e)) { e.preventDefault(); return; }
@@ -104,7 +119,10 @@
     src.key[a] = true; inp.device = "keys"; recompute();
   });
   addEventListener("keyup", e => { const a = codeMap[e.code]; if (!a) return; src.key[a] = false; recompute(); });
-  addEventListener("blur", () => { for (const k in src.key) src.key[k] = false; for (const k in src.mouse) src.mouse[k] = false; recompute(); });
+  /* Fenster verliert den Fokus / Tab wird gewechselt: nichts darf „kleben“ bleiben */
+  inp.releaseAll = () => { for (const k in src.key) src.key[k] = false; for (const k in src.mouse) src.mouse[k] = false; for (const k in src.touch) src.touch[k] = false; recompute(); };
+  addEventListener("blur", inp.releaseAll);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) inp.releaseAll(); });
   /* Maus: links = Waffe 1, rechts = Waffe 2 (nur auf dem Spielfeld) */
   addEventListener("mousedown", e => { if (e.target && e.target.id === "cv") { if (e.button === 0) src.mouse.a1 = true; if (e.button === 2) src.mouse.a2 = true; inp.device = "keys"; recompute(); } });
   addEventListener("mouseup", e => { if (e.button === 0) src.mouse.a1 = false; if (e.button === 2) src.mouse.a2 = false; recompute(); });
@@ -126,6 +144,9 @@
         if (!now.some(Boolean)) captureArmed = true;
         else if (captureArmed) { const i = now.findIndex((v, k) => v && !padPrev[k]); if (i >= 0) { const c = inp.capture; inp.capture = null; captureArmed = false; if (i < 12) inp.setPad(c.action, i); c.done && c.done(); } }
         padPrev = now; inp.lastPad = p; recompute(); return;
+      }
+      if (inp.capture && inp.capture.kind === "key") {
+        if (now.some((v, k) => v && !padPrev[k])) { const c = inp.capture; inp.capture = null; for (const a of ACTIONS) src.pad[a] = false; padPrev = now; inp.lastPad = p; recompute(); inp.endFrame(); c.done && c.done(); return; }
       }
       captureArmed = false;
       const dz = (Z.settings && Z.settings.dead) || 0.35;
@@ -151,7 +172,7 @@
 
   /* ---------------- Ton ---------------- */
   const A = (Z.audio = { ctx: null, buf: {}, loading: {}, vol: { master: 0.9, music: 0.55, sfx: 0.9, amb: 0.7 }, ok: false, loops: {}, lastPlay: {} });
-  try { const v = JSON.parse(localStorage.getItem("imres-zerstoerer-ton") || "null"); if (v) Object.assign(A.vol, v); } catch (_) {}
+  try { const v = JSON.parse(localStorage.getItem("imres-zerstoerer-ton") || "null"); if (v && typeof v === "object") for (const k in A.vol) if (typeof v[k] === "number" && isFinite(v[k])) A.vol[k] = Math.max(0, Math.min(1, v[k])); } catch (_) {}
   A.saveVol = () => { try { localStorage.setItem("imres-zerstoerer-ton", JSON.stringify(A.vol)); } catch (_) {} };
   A.init = () => {
     if (A.ctx) { if (A.ctx.state === "suspended") A.ctx.resume(); return; }
@@ -441,7 +462,15 @@
 
   /* ---------------- Einstellungen ---------------- */
   Z.settings = { shake: 1, lang: "de", touchSize: 1, showDmg: true, flashes: true, autoAim: true, fps: false };
-  try { Object.assign(Z.settings, JSON.parse(localStorage.getItem("imres-zerstoerer-einst") || "{}")); } catch (_) {}
+  try { const v = JSON.parse(localStorage.getItem("imres-zerstoerer-einst") || "{}"); if (v && typeof v === "object" && !Array.isArray(v)) Object.assign(Z.settings, v); } catch (_) {}
+  /* Werte prüfen: kaputter oder alter Speicher darf das Spiel nicht lahmlegen */
+  {
+    const S = Z.settings, num = (k, a, b, d) => { S[k] = typeof S[k] === "number" && isFinite(S[k]) ? Math.max(a, Math.min(b, S[k])) : d; };
+    num("shake", 0, 1, 1); num("touchSize", 0.7, 1.4, 1); if (S.dead != null) num("dead", 0.15, 0.6, 0.35);
+    if (S.lang !== "de" && S.lang !== "en") S.lang = "de";
+    for (const k of ["showDmg", "flashes", "autoAim"]) if (typeof S[k] !== "boolean") S[k] = true;
+    if (typeof S.fps !== "boolean") S.fps = false;
+  }
   try { const s = localStorage.getItem("imres-lang"); if (!localStorage.getItem("imres-zerstoerer-einst") && (s === "de" || s === "en")) Z.settings.lang = s; } catch (_) {}
   Z.saveSettings = () => { try { localStorage.setItem("imres-zerstoerer-einst", JSON.stringify(Z.settings)); } catch (_) {} };
   inp.vib = Z.settings.vib !== false;

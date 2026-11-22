@@ -68,7 +68,7 @@
       tile: { base: "#4a4038", light: "#7a6a56", dark: "#201a16", det: "#5a4e40", top: "wood", topCol: "#6a4e30" }, plat: "#7a5634",
       dark: 0.4, ambCol: "#2a2a3a", bg: "harbour", weather: ["drizzle", "fog", "gulls"], hazard: "water",
       props: { barrel: 3, crate: 3, rope: 3, net: 2, anchor: 1, lantern: 3, mast: 1, sack: 2 },
-      foes: { kuotoa: 4, kuotoaSpeer: 2, soeldner: 2, goblinBombe: 2, ratte: 1, robeArmbrust: 1 }, density: 1,
+      foes: { kuotoa: 4, kuotoaSpeer: 2, soeldner: 2, goblinBombe: 2, ratte: 1, robeArmbrust: 1 }, density: 1, pits: 0.45, /* weniger Löcher: der Hafen war schwerer als sein Boss */
       exits: ["erzpriesterin"], amb: { loops: [["amb/a_hafen.mp3", 0.4], ["amb/a_wellen1.mp3", 0.4]], one: [["e_moewe_", 10, 9], ["n_knarren_", 8, 7], ["e_platsch_", 4, 12]] },
       music: "hafen", story: ["Der Hafen der Feste. Die Stege sind nass. Nicht nur vom Regen.", "The keep's harbour. The piers are wet. Not only from rain."]
     },
@@ -257,7 +257,7 @@
       "##########----##########",
       "#......................#",
       "#..........F...........#",
-      "........................",
+      "..........----..........",
       "........................",
       "...E....b........E......",
       "####.....#....#.....####",
@@ -287,10 +287,10 @@
       "#..F...................#",
       "#..................---.#",
       "#......---.............#",
-      "...................####.",
-      "..............E...#####.",
+      "........................",
+      "..............E.........",
       "............######......",
-      "...E....#####...........",
+      "...E....################",
       "########################",
       "########################"] },
     { n: "balkone", r: [
@@ -320,7 +320,7 @@
       "........................",
       "........................",
       "..E...................E.",
-      "######---.------.---####",
+      "######--------------####",
       "######~~~~~~~~~~~~~~####",
       "########################"] },
     { n: "fallgrube", r: [
@@ -524,9 +524,9 @@
       "#......................#",
       "#..w.......F.......w...#",
       "#......................#",
+      "#......................#",
+      "#......................#",
       "#.....------..------...#",
-      "#......................#",
-      "#......................#",
       "#......................#",
       "........................",
       "........................",
@@ -651,8 +651,8 @@
       "..........--............",
       "........................",
       "..E....k.........k...E..",
-      "#######--######--#######",
-      "#######..######..#######",
+      "#######--#....#--#######",
+      "#######..#....#..#######",
       "##########....##########"] },
   ];
   /* Prüfen und Öffnungen bestimmen */
@@ -701,13 +701,37 @@
   /* Baut eine Karte für ein Gebiet. Gibt {w,h,tiles,spawns,...} in Kacheln zurück. */
   Z.genLevel = function (biomeId, seed, opts) {
     opts = opts || {};
+    let best = null, bs = 1e9;
     for (let attempt = 0; attempt < 40; attempt++) {
       const lv = tryGen(biomeId, (seed + attempt * 7919) >>> 0, opts);
-      if (lv && validate(lv)) { lv.attempts = attempt + 1; return lv; }
+      if (lv && validate(lv)) { lv.attempts = attempt + 1; settle(lv); return lv; }
+      /* Notfall: die beste Karte merken (alle Ausgänge erreichbar, möglichst wenige Festsitz-Stellen) */
+      const sc = lv && lv.stuck ? lv.stuck.length : 1e8;
+      if (lv && sc < bs) { bs = sc; best = lv; }
     }
+    if (best) { settle(best); return best; }
     return tryGen(biomeId, seed, opts);
   };
 
+  /* Nach der Prüfung: Beute, die nur auf unerreichbaren Simsen läge, auf erreichbare Plätze im selben Raum legen;
+     Bodengegner an unerreichbaren Stellen weglassen (Geheimräume hinter rissigen Wänden bleiben, wie sie sind) */
+  function settle(lv) {
+    if (!lv.reach) return;
+    const W = lv.W, R = Z.Rng(((lv.seed || 1) ^ 0x2f17) >>> 0);
+    const near = (x, y) => lv.reach[y * W + x] || lv.reach[y * W + x - 1] || lv.reach[y * W + x + 1];
+    const cellOf = (x, y) => lv.cells[Math.floor(x / CW) + "," + Math.floor(y / CH)];
+    const secret = (x, y) => { const c = cellOf(x, y); return c && c.kind === "secret"; };
+    const taken = l2 => lv.loot.some(o => o !== l2 && Math.abs(o.x - l2.x) < 3 && o.y === l2.y);
+    for (const l of lv.loot) {
+      if (near(l.x, l.y) || secret(l.x, l.y)) continue;
+      const c = cellOf(l.x, l.y), cand = [];
+      for (let y = 1; y < lv.H - 1; y++) for (let x = 1; x < W - 1; x++) if (lv.reach[y * W + x] && standable(lv, x, y, 2) && (!c || cellOf(x, y) === c) && Math.abs(x - lv.start.x) + Math.abs(y - lv.start.y) > 8) cand.push([x, y]);
+      R.shuffle(cand);
+      for (const [x, y] of cand) { const ox = l.x, oy = l.y; l.x = x; l.y = y; if (!taken(l)) break; l.x = ox; l.y = oy; }
+    }
+    lv.spawns = lv.spawns.filter(s2 => s2.fly || near(s2.x, s2.y) || secret(s2.x, s2.y));
+  }
+  Z._tryGen = (b, s, o) => tryGen(b, s, o || {}); /* für Tests */
   function tryGen(biomeId, seed, opts) {
     const B = BIOMES[biomeId], R = Z.Rng(seed);
     const [gw, gh] = B.grid;
@@ -762,6 +786,8 @@
           let w = 1;
           if (c.kind !== "path" && t.dead) w = 4;
           if (c.kind === "path" && t.dead) w = 0.15;
+          /* Startraum: ruhiger Boden – keine Parcours-/Gefahrenräume direkt am Eingang */
+          if (c === startCell && (t.pk || t.n === "bruecke" || t.n === "grube")) w *= 0.02;
           if (t.pk) w *= (c.kind === "path" ? (B.parcours != null ? B.parcours : 9) : 1) * (t.U || t.D ? 0.45 : 1);
           /* weniger überflüssige Öffnungen = natürlicher */
           const extra = (L && !n.L) + (Rr && !n.R) + (t.U && !n.U) + (t.D && !n.D);
@@ -799,7 +825,8 @@
       }
     }
     /* Außengebiete: oberste Raumreihe ohne Decke, damit der Himmel zu sehen ist */
-    if (B.out) for (let x = 1; x < W - 1; x++) for (let y = 1; y <= 2; y++) if (get(x, y) === 1 && get(x, y + 1) !== 0 || y === 1) { if (get(x, 3) === 0 || y === 1) set(x, y, 0); }
+    /* (Geheimräume behalten ihre Decke – sonst fiele man von oben hinein und säße hinter rissigen Wänden fest) */
+    if (B.out) for (let x = 1; x < W - 1; x++) for (let y = 1; y <= 2; y++) if (!(cells[Math.floor(x / CW) + ",0"] && cells[Math.floor(x / CW) + ",0"].kind === "secret") && (get(x, y) === 1 && get(x, y + 1) !== 0 || y === 1)) { if (get(x, 3) === 0 || y === 1) set(x, y, 0); }
     /* Außenrand immer Fels */
     for (let x = 0; x < W; x++) { set(x, 0, 1); set(x, H - 1, 1); }
     for (let y = 0; y < H; y++) { set(0, y, 1); set(W - 1, y, 1); }
@@ -870,7 +897,8 @@
       for (let q = x; q <= x1; q++) done.add(q + "," + y);
       const cy = Math.floor(y / CH), cxl = Math.floor(x / CW);
       const below = lv.cells[cxl + "," + (cy + 1)];
-      if (!below) continue;
+      /* nicht in Geheimräume durchbrechen (die bleiben hinter rissigen Wänden verborgen) */
+      if (!below || below.kind === "secret") continue;
       /* Grube und Fels darunter bis in den unteren Raum öffnen */
       let ok = true; const bottoms = [];
       for (let q = x; q <= x1; q++) {
@@ -918,7 +946,11 @@
     const g = lv.get, below = g(x, y + 1);
     if (g(x, y) !== 0) return false;
     for (let i = 1; i < (head || 2); i++) if (g(x, y - i) !== 0) return false;
-    return below === 1 || below === 2 || below === 8;
+    if (!(below === 1 || below === 2 || below === 8)) return false;
+    /* nach der Prüfung: nur Plätze, die der Spieler erreichen kann (oder in Geheimräumen hinter rissigen Wänden) –
+       so landen Truhen, Seiten, Spuren und Gegner nie auf unerreichbaren Simsen */
+    if (lv.reach && lv.W && !lv.reach[y * lv.W + x]) { const c = lv.cells && lv.cells[Math.floor(x / CW) + "," + Math.floor(y / CH)]; if (!c || c.kind !== "secret") return false; }
+    return true;
   }
   Z.standable = standable;
   function spotsIn(lv, cell, head, wide) {
@@ -960,14 +992,15 @@
         const want = ex.v > 0 ? 1 : ex.v < 0 ? 0 : 0.5;
         let sc2 = -Math.abs(ry - want) * 10 * (Math.abs(ex.v) || 0.6);
         sc2 += (Math.abs(c.x - sc.x) + Math.abs(c.y - sc.y)) * 1.2;
-        if (Math.abs(c.x - sc.x) + Math.abs(c.y - sc.y) < 2) sc2 -= 6;
+        /* Ausgänge nicht gleich neben dem Eingang (sonst ist das Gebiet in Sekunden durchquert) */
+        if (Math.abs(c.x - sc.x) + Math.abs(c.y - sc.y) < 2) sc2 -= 20;
         for (const u of used) sc2 -= Math.max(0, 4 - (Math.abs(c.x - u.x) + Math.abs(c.y - u.y))) * 3;
         if (used.includes(c)) sc2 -= 50;
         if (c === lv.endCell) sc2 += 1.5;
         if (c.kind === "path") sc2 += 0.8;
         sc2 += R() * 0.5;
         let spots = spotsIn(lv, c, 3, true); if (!spots.length) spots = spotsIn(lv, c, 3, false);
-        spots = spots.filter(p => !chosen.some(q => Math.abs(q[0] - p[0]) < 4 && Math.abs(q[1] - p[1]) < 3) && Math.abs(p[0] - st[0]) + Math.abs(p[1] - st[1]) > 6);
+        spots = spots.filter(p => !chosen.some(q => Math.abs(q[0] - p[0]) < 4 && Math.abs(q[1] - p[1]) < 3) && Math.abs(p[0] - st[0]) + Math.abs(p[1] - st[1]) > 14);
         if (!spots.length) continue;
         if (sc2 > bs) { bs = sc2; best = { c, spots }; }
       }
@@ -1000,6 +1033,9 @@
       if (m.t === "b" && !nearDoor(m.x, m.y)) lv.props.push({ kind: "breakable", x: m.x, y: m.y });
       if (m.t === "w") lv.decor.push({ kind: "window", x: m.x, y: m.y });
       if ("pfkrjz<>m".includes(m.t)) {
+        /* keine Falle direkt am Eingang (Federn und Fähren bleiben – sie gehören zum Weg) */
+        if ("fkrz<>".includes(m.t) && Math.abs(m.x - startPx) < 9 && Math.abs(m.y - startPy) < 6) continue;
+        if (m.t === "p" && Math.abs(m.x - startPx) < 15 && Math.abs(m.y - startPy) < 12) continue; /* Pendel schwingen weit */
         /* Fallen nehmen über den Lauf zu: im Torhof wenige, in der Tiefe alle (Federn und Fähren bleiben immer) */
         if (!"jm".includes(m.t)) { const k = (m.cell ? m.cell.x + "," + m.cell.y : "") + m.t; trapKeep[k] = trapKeep[k] != null ? trapKeep[k] : R() < trapDens(B); if (!trapKeep[k]) continue; }
         (lv.traps = lv.traps || []).push({ t: m.t, x: m.x, y: m.y });
@@ -1060,48 +1096,92 @@
   }
 
   /* ======================= ERREICHBARKEIT ======================= */
-  /* grobe Prüfung: Von der Startposition aus müssen alle Ausgänge erreichbar sein (Laufen, Fallen, Springen bis 6 Kacheln, Leitern). */
+  /* Prüfung auf dem Kachelgitter (Sprungweiten passend zur Spielerphysik: Einfachsprung ~3,5 Kacheln, Doppelsprung ~6,4,
+     Kantengriff): (1) alle Ausgänge sind vom Start aus erreichbar, (2) von jedem erreichbaren Platz führt ein Weg
+     zurück zu einem Ausgang – keine Gruben oder Kammern ohne Rückweg. Wege müssen frei sein: kein Springen durch Böden,
+     kein Stehen auf Lava, Wasser, Stacheln oder über dem Abgrund. Ergebnis: lv.reach, lv.stuck. */
   function validate(lv) {
     /* Abgrund zählt als unbetretbar, bröckelnde Stege und Fährstrecken wie Stege */
-    const g0 = lv.get, g = (x, y) => { const v = g0(x, y); return v === 9 ? 99 : v === 10 || v === 11 ? 2 : v; }, W = lv.W, H = lv.H;
-    const passable = v => v === 0 || v === 2 || v === 4 || v === 6 || v === 8;
-    const canStand = (x, y) => passable(g(x, y)) && g(x, y) !== 2 && passable(g(x, y - 1)) && (g(x, y + 1) === 1 || g(x, y + 1) === 2 || g(x, y + 1) === 7 || g(x, y + 1) === 3 || g(x, y + 1) === 5 || g(x, y + 1) === 4 || g(x, y) === 4);
-    const seen = new Uint8Array(W * H), q = [];
-    const push = (x, y) => { if (x < 1 || y < 1 || x >= W - 1 || y >= H - 1) return; const i = y * W + x; if (seen[i]) return; if (!canStand(x, y)) return; seen[i] = 1; q.push([x, y]); };
+    const g0 = lv.get, g = (x, y) => { const v = g0(x, y); return v === 9 ? 99 : v === 10 || v === 11 ? 2 : v === 12 ? 0 : v; }, W = lv.W, H = lv.H, N = W * H;
+    const passable = v => v === 0 || v === 2 || v === 4 || v === 8;
+    const air = v => passable(v) || v === 6 || v === 5 || v === 3 || v === 99; /* Körper kann hindurch (Gefahr, aber kein Hindernis) */
+    const canStand = (x, y) => passable(g(x, y)) && g(x, y) !== 2 && g(x, y) !== 8 && passable(g(x, y - 1)) && (g(x, y + 1) === 1 || g(x, y + 1) === 2 || g(x, y + 1) === 7 || g(x, y + 1) === 8 || g(x, y + 1) === 4 || g(x, y) === 4);
+    const seen = new Uint8Array(N), q = [], ea = [], eb = [];
+    let from = -1;
+    const push = (x, y) => { if (x < 1 || y < 1 || x >= W - 1 || y >= H - 1) return; const i = y * W + x; if (!canStand(x, y)) return; if (from >= 0 && from !== i) { ea.push(from); eb.push(i); } if (seen[i]) return; seen[i] = 1; q.push(i); };
+    /* freier Körperplatz (2 Kacheln hoch) */
+    const body = (x, y) => air(g(x, y)) && air(g(x, y - 1));
+    /* Fallen: bis zum ersten Halt; Gefahren (Abgrund, Flüssigkeit) beenden den Fall ohne Halt */
+    const fall = (x, y) => { let yy = y; while (yy < H - 1 && passable(g(x, yy + 1)) && g(x, yy + 1) !== 2 && g(x, yy + 1) !== 8 && g(x, yy + 1) !== 4) yy++; return yy; };
+    const colFree = (x, ya, yb) => { for (let y = ya; y <= yb; y++) if (!air(g(x, y))) return false; return true; };
     push(lv.start.x, lv.start.y);
-    const fall = (x, y) => { let yy = y; while (yy < H - 1 && passable(g(x, yy + 1)) && g(x, yy + 1) !== 2 && g(x, yy + 1) !== 4) yy++; return yy; };
     while (q.length) {
-      const [x, y] = q.pop();
-      /* Leiter */
+      const i = q.pop(), x = i % W, y = (i / W) | 0; from = i;
+      /* Leiter hinauf / hinunter */
       if (g(x, y) === 4 || g(x, y - 1) === 4) { let yy = y; while (g(x, yy - 1) === 4 || (g(x, yy) === 4 && passable(g(x, yy - 1)))) { yy--; push(x, yy); if (yy < 1) break; } }
       if (g(x, y + 1) === 4) { let yy = y + 1; while (g(x, yy) === 4) { push(x, yy); yy++; } push(x, fall(x, yy - 1)); }
-      /* Laufen und Fallen */
+      if (g(x, y) === 4 && g(x, y + 1) === 4) { let yy = y + 1; while (g(x, yy) === 4) { push(x, yy); yy++; } push(x, fall(x, yy - 1)); }
+      /* Laufen und von Kanten fallen (mit etwas Steuerung in der Luft, aber nicht durch Wände) */
       for (const d of [-1, 1]) {
         const nx = x + d;
         if (!passable(g(nx, y)) || !passable(g(nx, y - 1))) continue;
-        if (canStand(nx, y)) push(nx, y);
-        else { const fy = fall(nx, y); for (let dx = 0; dx <= 3; dx++) { const fx = nx + d * dx; if (canStand(fx, fy)) push(fx, fy); const fy2 = fall(fx, y); if (passable(g(fx, y)) && canStand(fx, fy2)) push(fx, fy2); } }
+        if (canStand(nx, y)) { push(nx, y); continue; }
+        for (let dx = 0; dx <= 3; dx++) {
+          const fx = nx + d * dx;
+          if (dx && !body(fx, y)) break;
+          const fy = fall(fx, y);
+          /* seitliches Abdriften braucht etwas Fallhöhe */
+          if (dx >= 2 && fy - y < dx + 1) continue;
+          if (canStand(fx, fy)) push(fx, fy);
+        }
       }
       /* Durch Stege fallen */
-      if (g(x, y + 1) === 2) push(x, fall(x, y + 1));
-      /* Springen: Ziele bis 6 hoch / 5 weit, wenn der Kopfraum frei ist */
+      if (g(x, y + 1) === 2 || g(x, y + 1) === 8) push(x, fall(x, y + 1));
+      /* Springen nach oben: Kopfraum über dem Startplatz frei, dann waagrecht in Zielhöhe (Füße und Kopf frei) */
       for (let dy = 1; dy <= 6; dy++) {
         if (!passable(g(x, y - dy - 1)) && g(x, y - dy - 1) !== 2) break;
-        const maxDx = dy <= 3 ? 6 : dy <= 5 ? 4 : 2;
+        const maxDx = dy <= 2 ? 6 : dy <= 3 ? 5 : dy <= 5 ? 4 : 2;
         for (let dx = -maxDx; dx <= maxDx; dx++) {
           const tx = x + dx, ty = y - dy;
           if (!canStand(tx, ty)) continue;
-          /* waagrechter Weg in Zielhöhe frei? */
           let ok = true; const s = U.sign(dx);
-          for (let k = 0; k !== dx; k += s) if (!passable(g(x + k, ty - 1)) && g(x + k, ty - 1) !== 2) { ok = false; break; }
+          for (let k = s; k !== dx; k += s) { const a = g(x + k, ty - 1), b = g(x + k, ty); if ((!air(a) && a !== 2) || (!air(b) && b !== 2)) { ok = false; break; } }
           if (ok) push(tx, ty);
         }
       }
-      /* weite Sprünge auf gleicher Höhe / nach unten */
-      for (let dx = -7; dx <= 7; dx++) for (let dy = 0; dy <= 4; dy++) { const tx = x + dx, ty = y + dy; if (canStand(tx, ty)) { let ok = true; const s = U.sign(dx); for (let k = s; k !== dx; k += s) if (!passable(g(x + k, y - 1)) || !passable(g(x + k, y - 2))) { ok = false; break; } if (ok) push(tx, ty); } }
+      /* weite Sprünge auf gleicher Höhe / nach unten: über die Lücke in Kopfhöhe, dann senkrecht hinab */
+      for (let dx = -7; dx <= 7; dx++) {
+        if (!dx) continue;
+        const s = U.sign(dx); let ok = true;
+        for (let k = s; k !== dx + s; k += s) if (!air(g(x + k, y - 1)) || !air(g(x + k, y - 2)) && Math.abs(k) > 1) { ok = false; break; }
+        if (!ok) continue;
+        const tx = x + dx;
+        for (let dy = 0; dy <= 4; dy++) { const ty = y + dy; if (!colFree(tx, y - 1, ty)) break; if (canStand(tx, ty)) { push(tx, ty); break; } }
+      }
     }
+    from = -1;
     lv.reach = seen;
-    for (const d of lv.doors) if (d.kind === "exit" && !seen[d.y * W + d.x]) return false;
+    const exits = lv.doors.filter(d => d.kind === "exit");
+    for (const d of exits) if (!seen[d.y * W + d.x]) return false;
+    /* Rückweg: rückwärts von den Ausgängen über dieselben Kanten */
+    const head = new Int32Array(N).fill(-1), nxt = new Int32Array(ea.length);
+    for (let k = 0; k < ea.length; k++) { nxt[k] = head[eb[k]]; head[eb[k]] = k; }
+    const back = new Uint8Array(N), bq = [];
+    for (const d of exits) { const id = d.y * W + d.x; if (!back[id]) { back[id] = 1; bq.push(id); } }
+    while (bq.length) { const id = bq.pop(); for (let e = head[id]; e >= 0; e = nxt[e]) { const p = ea[e]; if (!back[p]) { back[p] = 1; bq.push(p); } } }
+    lv.back = back; lv.stuck = [];
+    for (let k = 0; k < N; k++) if (seen[k] && !back[k]) lv.stuck.push(k);
+    if (exits.length && lv.stuck.length) return false;
+    /* Wächter: Ausgänge bleiben zu, bis er besiegt ist – sein Raum muss erreichbar sein und man muss von überall
+       (auch nach einem Sturz aus dem Kampfraum) wieder hineinkommen */
+    if (lv.warden && lv.warden.cell) {
+      const c = lv.warden.cell, wb = new Uint8Array(N), wq = [];
+      for (let y = c.y * CH + 1; y < c.y * CH + CH - 1; y++) for (let x = c.x * CW + 1; x < c.x * CW + CW - 1; x++) { const id = y * W + x; if (seen[id]) { wb[id] = 1; wq.push(id); } }
+      if (wq.length < 6) return false;
+      while (wq.length) { const id = wq.pop(); for (let e = head[id]; e >= 0; e = nxt[e]) { const p = ea[e]; if (!wb[p]) { wb[p] = 1; wq.push(p); } } }
+      for (let k = 0; k < N; k++) if (seen[k] && !wb[k]) { lv.stuck.push(k); }
+      if (lv.stuck.length) return false;
+    }
     return true;
   }
   Z.validateLevel = validate;

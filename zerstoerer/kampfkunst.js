@@ -4,6 +4,8 @@
    Gegner: mehr Angriffe je Typ, Kombo-Ketten, Ausweichen, Konter gegen Hämmern, mehr Schaden – aber alles mit klarer Vorwarnung. */
 (function () {
   "use strict";
+  /* Verzögerungen in Spielzeit (Pause/Zeitlupe/Gebietswechsel-sicher), sonst Rückfall auf setTimeout */
+  const later = (fn, ms) => (Z.bossLater ? Z.bossLater(fn, ms) : window.setTimeout(fn, ms));
   const Z = window.Z, U = Z.U, FX = Z.fx, A = Z.audio, W = Z.world, T = Z.TILE, L = v => Z.L(v);
   const inp = Z.input, { limb, circ, poly, ell, glow } = Z.draw;
   const alive = e => e && !e.dead && !(e.intro > 0);
@@ -70,6 +72,8 @@
   const POGO = { pfahl: 1, meuchel: 1, meteor: 1, schild: 1 };
   function diveTick(P, dt) {
     if (P.onGround) P.diveShots = 0;
+    /* Hängender Sturz (Leiter, Gebietswechsel, Boden ohne Landung): beenden, sonst wirbelt er endlos weiter */
+    if (P.plunge && (P.onGround || P.climbing || P.ledge || P.grapple || P.dead || P.grabbed)) { P.plunge = false; P.diveStyle = null; P.diveRecPend = false; }
     if (!P.plunge || !P.diveStyle) return;
     const st = P.diveStyle, it = P.plungeItem, d = P.diveD || wd(it);
     P.diveT += dt;
@@ -98,7 +102,7 @@
     A.play("land", { vol: 0.8 }); P.vy = 0; P.diveRec = 0.32; P.diveRecPend = false;
     switch (st) {
       case "beben": FX.addShake(10); FX.stop(0.08); A.play("quake", { vol: 0.8 }); dust(30); ring(92, Z.dmgOf(P, it, b * 2.2), { kb: 120, kbUp: 300, eff: { stun: 1.3 } }, "#e5a43a");
-        for (const dir of [-1, 1]) for (let i = 0; i < 3; i++) setTimeout(() => Z.spawnHazard({ kind: "rockspike", x: cx + dir * (30 + i * 20), y: fy, w: 14, life: 0.45, dmg: Z.dmgOf(P, it, b * 0.6), owner: "p", kbUp: 320, once: true }), i * 70); break;
+        for (const dir of [-1, 1]) for (let i = 0; i < 3; i++) later(() => Z.spawnHazard({ kind: "rockspike", x: cx + dir * (30 + i * 20), y: fy, w: 14, life: 0.45, dmg: Z.dmgOf(P, it, b * 0.6), owner: "p", kbUp: 320, once: true }), i * 70); break;
       case "meteor": FX.addShake(6); dust(18); ring(56, Z.dmgOf(P, it, b * 1.6), { kb: 80, kbUp: 380 }); break;
       case "morgen": FX.addShake(6); dust(14); ring(50, Z.dmgOf(P, it, b * 1.4), { kb: 100, kbUp: 200 }, "#ffd27a"); for (const dir of [-1, 1]) Z.spawnProj("lichtwelle", cx + dir * 10, P.y + 8, dir, { dmg: Z.dmgOf(P, it, b * 0.8), it }); FX.flashScreen("#fff0c0", 0.2); break;
       case "mond": FX.addShake(5); dust(12); ring(40, Z.dmgOf(P, it, b), { kb: 80 }); for (const dir of [-1, 1]) Z.spawnProj("glutsichel", cx + dir * 10, P.y + 12, dir, { dmg: Z.dmgOf(P, it, b * 0.9), it }); break;
@@ -312,7 +316,7 @@
   const hit1 = Z.hitEnemy;
   Z.hitEnemy = function (e, dmg, o) {
     o = o || {};
-    if (e && !e.dead && !o.dot && !e.def.boss && (o.src === "melee") && e.hpMax > 60) {
+    if (e && !e.dead && !o.dot && !e.def.boss && !e.thief && (o.src === "melee") && e.hpMax > 60) {
       const now = Z.player ? Z.player.time : 0; e.hitLog = (e.hitLog || []).filter(t => now - t < 1.5); e.hitLog.push(now);
       if (e.hitLog.length >= 5 && (e.counterCd || 0) <= 0 && !(e.st.stun > 0.4) && !e.frozenT) {
         e.counterCd = 5; e.hitLog.length = 0; e.stagger = 0; e.kbT = 0;
@@ -348,5 +352,12 @@
   }
 
   /* ======================= Schritt ======================= */
-  Z.kampfTick = function (dt) { diveTick(Z.player, dt); synTick(dt); synEffects(dt); enemyTick(dt); };
+  /* Sicherheitsnetz: Gegner, die durch Zug-Effekte (Anker, schwarzes Loch, Kettenzug) oder versiegelte Ausgänge
+     in Fels geraten sind, wieder herausschieben – sonst wären sie unerreichbar (Hinterhalt/Wächter hängen). */
+  let stuckT = 0;
+  function unstickTick(dt) {
+    stuckT -= dt; if (stuckT > 0) return; stuckT = 0.2;
+    for (const e of Z.enemies) if (alive(e) && !e.ghost && !e.def.ghost && e.def.ai !== "phase" && !e.def.boss && !e.ceil && !(e.kbT > 0 && e.def.fly)) Z.unstick(e);
+  }
+  Z.kampfTick = function (dt) { diveTick(Z.player, dt); synTick(dt); synEffects(dt); enemyTick(dt); unstickTick(dt); };
 })();

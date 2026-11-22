@@ -86,8 +86,8 @@
     if (e && !was && e.dead && e.elite === "explosiv") {
       const cx = e.x + e.w / 2, cy = e.y + e.h / 2;
       FX.text(cx, e.y - 12, L(["Gleich knallt's!", "About to blow!"]), "#ff8a3a", true); A.play("fire", { vol: 0.5, x: cx });
-      const ring = { x: cx, y: cy, t: 0 }; bombs.push(ring);
-      setTimeout(() => { const i = bombs.indexOf(ring); if (i >= 0) bombs.splice(i, 1); if (Z.level) Z.explode(cx, cy, 52, e.dmgMul * 1.6, "e"); }, 900);
+      /* Zünder läuft in Spielzeit (Pause, Gebietswechsel und Tod halten ihn an bzw. löschen ihn) */
+      bombs.push({ x: cx, y: cy, t: 0, dmg: e.dmgMul * 1.6 });
     }
     return r;
   };
@@ -100,7 +100,7 @@
       if (e.dead || !e.elite) continue;
       if (e.elite === "giftig" && e.onGround && Math.abs(e.vx) > 30) { e.trailT = (e.trailT || 0) - dt; if (e.trailT <= 0) { e.trailT = 0.7; Z.spawnHazard({ kind: "poisonpool", x: e.x + e.w / 2, y: e.y + e.h, w: 18, life: 3, dmg: e.dmgMul * 0.08, owner: "e", eff: { poison: 1 } }); } }
     }
-    for (const b of bombs) b.t += dt;
+    for (let i = bombs.length - 1; i >= 0; i--) { const b = bombs[i]; b.t += dt; if (b.t >= 0.9) { bombs.splice(i, 1); if (Z.level) Z.explode(b.x, b.y, 52, b.dmg, "e"); } }
   };
 
   /* ---------- Zeichnen: Namen der Techniken, Elite-Auren ---------- */
