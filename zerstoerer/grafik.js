@@ -4,7 +4,7 @@
 (function () {
   "use strict";
   const Z = window.Z, L = v => Z.L(v);
-  const VERSION = "zerstoerer v11 · 2026-11-22";
+  const VERSION = "zerstoerer v12 · 2026-11-22";
   Z.VERSION = VERSION;
 
   /* ======================= QUALITÄTSSTUFEN ======================= */
