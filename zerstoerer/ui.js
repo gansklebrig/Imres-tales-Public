@@ -109,7 +109,8 @@
     const o = Z.interactTarget;
     if (o && !ui.modalOpen && !ui.choiceActive && !P.dead) {
       const [sx, sy] = worldToScreen(o.type === "pickup" ? o.p.x : (o.d || o.s).x * T + 8, o.type === "pickup" ? o.p.y - 22 : ((o.d || o.s).y + 1) * T - 40);
-      prompt.hidden = false; prompt.style.transform = "translate(" + Math.round(sx) + "px," + Math.round(sy) + "px) translate(-50%,-100%)";
+      const hz = hudZoom();
+      prompt.hidden = false; prompt.style.transform = "translate(" + Math.round(sx / hz) + "px," + Math.round(sy / hz) + "px) translate(-50%,-100%)";
       const key = inp.device === "touch" ? "✋" : inp.label("use");
       prompt.innerHTML = '<kbd>' + key + "</kbd> " + esc(promptLabel(o));
       showCard(o);
@@ -141,10 +142,14 @@
     const [sx, sy] = worldToScreen(o.p.x, o.p.y - 40);
     card.hidden = false;
     const w = card.offsetWidth, h = card.offsetHeight;
-    card.style.transform = "translate(" + Math.round(U.clamp(sx - w / 2, 8, innerWidth - w - 8)) + "px," + Math.round(U.clamp(sy - h - 24, 60, innerHeight - h - 8)) + "px)";
+    const hz = hudZoom(), vw = innerWidth / hz, vh = innerHeight / hz;
+    card.style.transform = "translate(" + Math.round(U.clamp(sx / hz - w / 2, 8, vw - w - 8)) + "px," + Math.round(U.clamp(sy / hz - h - 24, 60, vh - h - 8)) + "px)";
   }
   const cvEl = document.getElementById("cv");
   function worldToScreen(x, y) { const k = Z.gfx.scale / (cvEl.width / (cvEl.clientWidth || 1)); return [(x - Z.cam.x) * k, (y - Z.cam.y) * k]; }
+  /* Hinweis und Karte stehen unter CSS-zoom (--hud): Bildschirmkoordinaten durch den Zoom teilen, sonst rutschen sie auf großen Bildschirmen weg */
+  let hudZ = 1, hudZT = 0;
+  function hudZoom() { const n = performance.now(); if (n - hudZT > 500) { hudZT = n; hudZ = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hud")) || 1; } return hudZ; }
   const fmtTime = s => { s = Math.floor(s || 0); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
 
   /* ======================= KARTE ======================= */
@@ -196,9 +201,13 @@
   ui.fade = fn => { fadeEl.classList.add("an"); setTimeout(() => { try { fn(); } finally { setTimeout(() => fadeEl.classList.remove("an"), 60); } }, 380); };
 
   /* ======================= MODALE ======================= */
-  let modalStack = [];
+  /* Fenster, die aufgehen wollen, während ein Pflichtfenster offen ist (Tod, Ende, Schriftrolle …),
+     warten, bis es geschlossen wurde – sonst ginge die Entscheidung verloren. */
+  let modalQueue = [];
   function openModal(html, opts) {
     opts = opts || {};
+    if (ui.modalOpen && ui.noEsc && !opts.noEsc && !opts.force) { if (modalQueue.length < 4) modalQueue.push([html, opts]); return; }
+    if (inp.capture) inp.capture = null;
     modal.innerHTML = '<div class="mbox ' + (opts.cls || "") + '">' + html + "</div>";
     modal.hidden = false; ui.modalOpen = true; Z.paused = true; ui.onClose = opts.onClose || null; ui.noEsc = !!opts.noEsc;
     A.muffle(1600);
@@ -212,21 +221,26 @@
   }
   function closeModal() {
     if (!ui.modalOpen) return;
-    modal.hidden = true; modal.innerHTML = ""; ui.modalOpen = false; Z.paused = false; A.muffle(20000);
+    inp.capture = null; /* angefangene Tastenbelegung endet mit dem Fenster */
+    modal.hidden = true; modal.innerHTML = ""; ui.modalOpen = false; ui.noEsc = false; Z.paused = false; A.muffle(20000);
     const cb = ui.onClose; ui.onClose = null; if (cb) cb();
+    /* wartende Fenster nachholen (nur wenn nicht gerade ein neues aufging und der Spieler lebt) */
+    if (modalQueue.length && !ui.modalOpen) { const q = modalQueue.shift(); if (Z.level && Z.player && !Z.player.dead) setTimeout(() => { if (!ui.modalOpen) openModal(q[0], q[1]); else modalQueue.unshift(q); }, 60); else modalQueue.length = 0; }
   }
+  ui.clearQueue = () => { modalQueue.length = 0; };
   ui.close = closeModal; ui.open = openModal; Z.TX = TX; ui.itemCardHTML = (it, cmp) => itemCardHTML(it, cmp); ui.choiceEl = () => choice;
   modal.addEventListener("click", e => { const b = e.target.closest("[data-act]"); if (!b) return; const fn = actions[b.dataset.act]; if (fn) { A.play("ui", { vol: 0.35 }); fn(b.dataset.arg, b); } });
   const actions = {}; ui.actions = actions;
   /* Tastatur in Menüs */
   ui.onKey = e => {
     if (inp.capture) return false;
-    if (!title.hidden && (e.code === "Enter" || e.code === "Space")) { const b = title.querySelector("button:focus") || title.querySelector("button"); if (b) { b.click(); return true; } }
+    if (!title.hidden && !ui.modalOpen && (e.code === "Enter" || e.code === "Space")) { const b = title.querySelector("button:focus") || title.querySelector("button"); if (b) { b.click(); return true; } }
     if (!ui.modalOpen) {
       if ((e.code === "KeyM" || e.code === "Tab") && Z.level) { bigMap = !bigMap; drawMinimap(); return true; }
       return false;
     }
     if (e.code === "Escape" || e.code === "KeyP") { if (!ui.noEsc) closeModal(); return true; }
+    if (e.code === "PageUp" || e.code === "PageDown" || (!/^(Arrow|Key[WASDEJ]$|Enter|Space|Tab)/.test(e.code) && (inp.keys.s1.includes(e.code) || inp.keys.s2.includes(e.code)) && modal.querySelector(".reiter button"))) { if (!e.repeat) switchTab(e.code === "PageDown" || inp.keys.s2.includes(e.code) ? 1 : -1); return true; }
     if (["ArrowLeft", "ArrowRight", "KeyA", "KeyD"].includes(e.code) && adjustField(document.activeElement, /Right|KeyD/.test(e.code) ? 1 : -1)) return true;
     if (e.code === "Tab") { moveFocus(e.shiftKey ? -1 : 1); return true; }
     if (["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "KeyW", "KeyS", "KeyA", "KeyD"].includes(e.code)) { if (document.activeElement && document.activeElement.tagName === "TEXTAREA" && /Arrow/.test(e.code)) return false; const d = /Down|KeyS/.test(e.code) ? [0, 1] : /Up|KeyW/.test(e.code) ? [0, -1] : /Right|KeyD/.test(e.code) ? [1, 0] : [-1, 0]; moveDir(d[0], d[1]); return true; }
@@ -269,13 +283,22 @@
       const edge = dx ? (dx > 0 ? r.left - r0.right : r0.left - r.right) : (dy > 0 ? r.top - r0.bottom : r0.top - r.bottom);
       if (px <= 2 || edge < -Math.min(r.width, r.height, r0.width, r0.height) * 0.5) continue;
       const ortho = dx ? Math.max(0, Math.abs(ey - cy) - (r.height + r0.height) / 2) : Math.max(0, Math.abs(ex - cx) - (r.width + r0.width) / 2);
-      const sc = Math.max(0, edge) + ortho * 2.5 + Math.abs(px) * 0.05;
+      /* senkrecht: zuerst die nächste Zeile, dann die nächste Spalte darin (Listen mit Knöpfen rechts bleiben erreichbar);
+         waagrecht: in der Zeile bleiben */
+      const sc = Math.max(0, edge) + ortho * (dy ? 0.6 : 2.5) + Math.abs(px) * 0.05;
       if (sc < bs) { bs = sc; best = el; }
     }
     if (best) focusEl(best);
     else if (dy) moveFocus(dy); /* am Rand: der Reihe nach weiter (umlaufend) */
   }
   ui.moveDir = moveDir;
+  /* Reiter wechseln (Controller LB/RB, Tastatur Fähigkeitstasten oder Bild↑/Bild↓) */
+  function switchTab(d) {
+    const tabs = [...modal.querySelectorAll(".reiter button")]; if (!tabs.length) return;
+    const i = tabs.findIndex(b => b.classList.contains("an"));
+    const n = tabs[((i < 0 ? 0 : i) + d + tabs.length) % tabs.length]; n.click();
+    setTimeout(() => { const f = modal.querySelector(".reiter .an") || modal.querySelector(".reiter button"); if (f) f.focus({ preventScroll: true }); }, 30);
+  }
 
   /* ---------- Titel ---------- */
   function showTitle() {
@@ -303,7 +326,7 @@
     const inRun = !!Z.run;
     const tip = L(Z.R.pick(TX.tips));
     openModal("<h2>" + esc(t("pause")) + '</h2><p class="tipp">' + esc(tip) + '</p><div class="knoepfe senk"><button data-act="close" autofocus>' + esc(t("resume")) + '</button><button data-act="ctrl">' + esc(t("tut")) + '</button><button data-act="settings">' + esc(t("settings")) + "</button>" + (fs.ok ? '<button data-act="fullscreen">' + esc(fs.label()) + "</button>" : "") +
-      (inRun ? '<button data-act="abort" class="gefahr">' + esc(t("abort")) + "</button>" : "") + '<a class="btn" href="./#taverne">' + esc(t("tavern")) + "</a></div>", { cls: "schmal" });
+      (inRun ? '<button data-act="abort" class="gefahr">' + esc(t("abort")) + "</button>" : "") + '<a class="btn" href="./#taverne">' + esc(t("tavern")) + "</a></div>", { cls: "schmal pausenmenue" });
   };
   actions.ctrl = () => { closeModal(); ui.tutorial(); };
   actions.settings = () => { closeModal(); ui.settings(); };
@@ -521,9 +544,11 @@
     const lines = Z.CAMP_TALK[id];
     const s = Z.level.props.find(p => p.id === id);
     if (lines && s) ui.say(s.x * Z.TILE + 8, s.y * Z.TILE - 22, { B: "Barradin", G: "Friedrich", E: "Echo", A: "Nundro", R: "Rex", C: "" }[id] || "", L(Z.R.pick(lines)), id === "A" || id === "B" || id === "C" ? 2600 : 4600);
-    if (id === "A") setTimeout(() => ui.forge(), 900);
-    if (id === "B") setTimeout(() => ui.codex(), 900);
-    if (id === "C") setTimeout(() => ui.skulls(), 700);
+    /* Fenster erst nach der Sprechblase – aber nur, wenn inzwischen nichts anderes offen ist und man noch im Lager steht */
+    const later = (fn, ms) => { const lv = Z.level; setTimeout(() => { if (!ui.modalOpen && Z.level === lv && lv.hub && Z.player && !Z.player.dead) fn(); }, ms); };
+    if (id === "A") later(() => ui.forge(), 900);
+    if (id === "B") later(() => ui.codex(), 900);
+    if (id === "C") later(() => ui.skulls(), 700);
     if (id === "F") ui.story();
     if (id === "Y") ui.say(s.x * Z.TILE + 8, s.y * Z.TILE - 26, "", L(["Die Puppe hält alles aus. Probier deine Kombos – über ihr erscheint der Schaden pro Sekunde.", "The dummy takes everything. Try your combos – damage per second appears above it."]), 4200);
     if (id === "R") A.play("bark");
@@ -720,7 +745,7 @@
   }
   tc.querySelectorAll("[data-t]").forEach(b => {
     const a = b.dataset.t;
-    b.addEventListener("pointerdown", e => { e.preventDefault(); b.setPointerCapture(e.pointerId); b.classList.add("an"); if (a === "pause") return ui.pause(); if (a === "map") { bigMap = !bigMap; drawMinimap(); return; } inp.setTouch(a, true); A.init(); });
+    b.addEventListener("pointerdown", e => { e.preventDefault(); b.setPointerCapture(e.pointerId); b.classList.add("an"); if (a === "pause") { if (ui.modalOpen) { if (!ui.noEsc) closeModal(); } else if (!ui.choiceActive) ui.pause(); return; } if (a === "map") { bigMap = !bigMap; drawMinimap(); return; } inp.setTouch(a, true); A.init(); });
     const up = () => { b.classList.remove("an"); if (a !== "pause" && a !== "map") inp.setTouch(a, false); };
     b.addEventListener("pointerup", up); b.addEventListener("pointercancel", up); b.addEventListener("lostpointercapture", up);
   });
@@ -747,7 +772,7 @@
     if (inp.pressed.map && !ui.modalOpen) { inp.consume("map"); bigMap = !bigMap; drawMinimap(); }
     if (ui.modalOpen) {
       if (inp.capture) { inp.endFrame(); return; }
-      if (inp.pressed.s1 || inp.pressed.s2) { const tabs = [...modal.querySelectorAll(".reiter button")]; const i = tabs.findIndex(b => b.classList.contains("an")); if (tabs.length) { const n = tabs[(i + (inp.pressed.s2 ? 1 : -1) + tabs.length) % tabs.length]; n.click(); setTimeout(() => { const f = modal.querySelector(".reiter .an"); if (f) f.focus(); }, 30); } }
+      if (inp.pressed.s1 || inp.pressed.s2) switchTab(inp.pressed.s2 ? 1 : -1);
       /* Gamepad in Menüs: Richtung mit Wiederholung beim Halten, A bestätigt, B zurück, rechter Stick blättert */
       const fe = document.activeElement;
       const dirNow = inp.held.up ? "u" : inp.held.down ? "d" : inp.held.left ? "l" : inp.held.right ? "r" : "";
