@@ -81,7 +81,7 @@
     if (!P.cape) capeInit(P);
     const pts = P.cape;
     const roll = P.rollT > 0;
-    const ax = P.x + P.w / 2 - P.face * 3, ay = P.y + (roll ? 14 : 7);
+    const ax = P.x + P.w / 2 - P.face * 3, ay = P.y + (roll ? 14 : P.crouch ? 4 : 7);
     pts[0].x = ax; pts[0].y = ay;
     const wind = (Z.windX || 0) + Math.sin(P.time * 2.3) * 8;
     for (let i = 1; i < CAPE_N; i++) {
@@ -131,6 +131,8 @@
     /* Umhang (in Weltkoordinaten) */
     if (P.rollT <= 0 && !P.dead) drawCape(c, P, alpha);
     c.save(); c.translate(cx, fy); c.scale(P.face, 1); c.globalAlpha = alpha;
+    /* Ducken: Figur zusammengekauert */
+    if (P.crouch) { c.scale(1.08, 0.66); c.rotate(0.06); }
     /* Streckung im Sprung, Stauchung bei der Landung (Squash & Stretch) */
     if (!P.onGround && P.rollT <= 0 && !P.climbing && !P.ledge) { const k = Math.max(-1, Math.min(1, -P.vy / 420)); if (k > 0.15) c.scale(1 - k * 0.07, 1 + k * 0.1); else if (k < -0.6) c.scale(1 + 0.03, 1 - 0.03); }
     const A = P.anim, act = P.act;

@@ -222,7 +222,8 @@
     }
     if (e.code === "Escape" || e.code === "KeyP") { if (!ui.noEsc) closeModal(); return true; }
     if (["ArrowLeft", "ArrowRight", "KeyA", "KeyD"].includes(e.code) && adjustField(document.activeElement, /Right|KeyD/.test(e.code) ? 1 : -1)) return true;
-    if (["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "KeyW", "KeyS", "KeyA", "KeyD", "Tab"].includes(e.code)) { moveFocus(/Down|Right|KeyS|KeyD|Tab/.test(e.code) ? 1 : -1); return true; }
+    if (e.code === "Tab") { moveFocus(e.shiftKey ? -1 : 1); return true; }
+    if (["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "KeyW", "KeyS", "KeyA", "KeyD"].includes(e.code)) { if (document.activeElement && document.activeElement.tagName === "TEXTAREA" && /Arrow/.test(e.code)) return false; const d = /Down|KeyS/.test(e.code) ? [0, 1] : /Up|KeyW/.test(e.code) ? [0, -1] : /Right|KeyD/.test(e.code) ? [1, 0] : [-1, 0]; moveDir(d[0], d[1]); return true; }
     if (e.code === "Enter" || e.code === "Space" || e.code === "KeyE" || e.code === "KeyJ") { const f = document.activeElement; if (f && modal.contains(f)) { if (f.tagName === "INPUT" && f.type === "range") return false; f.click(); } return true; }
     return true;
   };
@@ -233,21 +234,52 @@
     if (f.tagName === "SELECT") { const n = f.options.length; f.selectedIndex = (f.selectedIndex + d + n) % n; f.dispatchEvent(new Event("change", { bubbles: true })); return true; }
     return false;
   }
-  function moveFocus(d) {
-    const list = [...modal.querySelectorAll("button:not([disabled]),input,select")];
-    if (!list.length) return;
-    let i = list.indexOf(document.activeElement); i = (i + d + list.length) % list.length; list[i].focus();
-    list[i].scrollIntoView && list[i].scrollIntoView({ block: "nearest" });
+  const focusables = () => [...modal.querySelectorAll("button:not([disabled]),input,select,a.btn,textarea")].filter(el => el.offsetParent !== null || el === document.activeElement);
+  function focusEl(el) { if (!el) return; el.focus({ preventScroll: true }); el.scrollIntoView && el.scrollIntoView({ block: "nearest", inline: "nearest" }); A.play("ui", { vol: 0.12, rate: 1.5, gap: 0.03 }); }
+  /* sicherstellen, dass etwas im Menü ausgewählt ist (Controller kann sonst „ins Leere“ drücken) */
+  function ensureFocus() {
+    const f = document.activeElement;
+    if (f && modal.contains(f) && f !== modal) return f;
+    const el = modal.querySelector("[autofocus]") || focusables()[0];
+    if (el) el.focus({ preventScroll: true });
+    return el;
   }
+  ui.ensureFocus = ensureFocus;
+  function moveFocus(d) {
+    const list = focusables();
+    if (!list.length) return;
+    let i = list.indexOf(document.activeElement); i = i < 0 ? 0 : (i + d + list.length) % list.length; focusEl(list[i]);
+  }
+  /* räumliche Navigation: nächstes Element in Richtung (dx, dy) – angenehm in Rastern (Schmiede, Fundbuch, Laden) */
+  function moveDir(dx, dy) {
+    const list = focusables(), cur = document.activeElement;
+    if (!cur || !list.includes(cur)) { focusEl(ensureFocus()); return; }
+    const r0 = cur.getBoundingClientRect(), cx = r0.left + r0.width / 2, cy = r0.top + r0.height / 2;
+    let best = null, bs = Infinity;
+    for (const el of list) {
+      if (el === cur) continue;
+      const r = el.getBoundingClientRect(), ex = r.left + r.width / 2, ey = r.top + r.height / 2;
+      const px = (ex - cx) * dx + (ey - cy) * dy; /* Abstand in Richtung */
+      const edge = dx ? (dx > 0 ? r.left - r0.right : r0.left - r.right) : (dy > 0 ? r.top - r0.bottom : r0.top - r.bottom);
+      if (px <= 2 || edge < -Math.min(r.width, r.height, r0.width, r0.height) * 0.5) continue;
+      const ortho = dx ? Math.max(0, Math.abs(ey - cy) - (r.height + r0.height) / 2) : Math.max(0, Math.abs(ex - cx) - (r.width + r0.width) / 2);
+      const sc = Math.max(0, edge) + ortho * 2.5 + Math.abs(px) * 0.05;
+      if (sc < bs) { bs = sc; best = el; }
+    }
+    if (best) focusEl(best);
+    else if (dy) moveFocus(dy); /* am Rand: der Reihe nach weiter (umlaufend) */
+  }
+  ui.moveDir = moveDir;
 
   /* ---------- Titel ---------- */
   function showTitle() {
     title.hidden = false; hud.hidden = true;
     title.innerHTML = '<div class="tbox"><div class="ttl">' + esc(t("title")) + '</div><div class="tsub">' + esc(t("sub")) + '</div>' +
-      '<div class="tbtn"><button id="t-play" autofocus>' + esc(t("play")) + '</button><button id="t-set">' + esc(t("settings")) + '</button><a href="./#taverne">' + esc(t("tavern")) + "</a></div>" +
+      '<div class="tbtn"><button id="t-play" autofocus>' + esc(t("play")) + '</button><button id="t-set">' + esc(t("settings")) + '</button>' + (fs.ok ? '<button id="t-fs">' + esc(fs.label()) + "</button>" : "") + '<a href="./#taverne">' + esc(t("tavern")) + "</a></div>" +
       '<p class="tfoot">' + L(["Ein Spiel zu Imres Tales · Kopfhörer empfohlen", "A game for Imre's Tales · headphones recommended"]) + "</p></div>";
-    $("#t-play").onclick = () => { A.init(); preload(); title.hidden = true; Z.player = Z.newPlayer(); Z.loadArea("lager"); if (!Z.meta.intro) { Z.meta.intro = true; Z.saveMeta(); ui.story(); } };
+    $("#t-play").onclick = () => { A.init(); if (Z.settings.autoFs !== false && fs.ok && fs.touch && !fs.on()) fs.enter(); preload(); title.hidden = true; Z.player = Z.newPlayer(); Z.loadArea("lager"); if (!Z.meta.intro) { Z.meta.intro = true; Z.saveMeta(); ui.story(); } };
     $("#t-set").onclick = () => { A.init(); ui.settings(); };
+    if ($("#t-fs")) $("#t-fs").onclick = () => { A.init(); fs.toggle(); };
     setTimeout(() => $("#t-play").focus(), 50);
   }
   function preload() { A.loadAll(A.allSfxPaths()); }
@@ -264,7 +296,7 @@
     if (ui.modalOpen || !Z.level) return;
     const inRun = !!Z.run;
     const tip = L(Z.R.pick(TX.tips));
-    openModal("<h2>" + esc(t("pause")) + '</h2><p class="tipp">' + esc(tip) + '</p><div class="knoepfe senk"><button data-act="close" autofocus>' + esc(t("resume")) + '</button><button data-act="ctrl">' + esc(t("tut")) + '</button><button data-act="settings">' + esc(t("settings")) + "</button>" +
+    openModal("<h2>" + esc(t("pause")) + '</h2><p class="tipp">' + esc(tip) + '</p><div class="knoepfe senk"><button data-act="close" autofocus>' + esc(t("resume")) + '</button><button data-act="ctrl">' + esc(t("tut")) + '</button><button data-act="settings">' + esc(t("settings")) + "</button>" + (fs.ok ? '<button data-act="fullscreen">' + esc(fs.label()) + "</button>" : "") +
       (inRun ? '<button data-act="abort" class="gefahr">' + esc(t("abort")) + "</button>" : "") + '<a class="btn" href="./#taverne">' + esc(t("tavern")) + "</a></div>", { cls: "schmal" });
   };
   actions.ctrl = () => { closeModal(); ui.tutorial(); };
@@ -295,6 +327,7 @@
       ck("showDmg", L(["Schadenszahlen", "Damage numbers"]), s.showDmg) + ck("flashes", L(["Bildschirmblitze", "Screen flashes"]), s.flashes) + ck("vib", L(["Vibration", "Vibration"]), s.vib !== false) +
       '<label class="regler">' + L(["Stick-Totzone (Controller)", "Stick dead zone (controller)"]) + '<input type="range" min="15" max="60" value="' + Math.round((s.dead || 0.35) * 100) + '" data-dead="1"></label>' +
       '<button class="steuerknopf" data-act="controls">' + L(["Steuerung: Tastatur & Controller belegen", "Controls: remap keyboard & controller"]) + "</button>" +
+      (fs.ok ? '<button class="steuerknopf" data-act="fullscreen">' + esc(fs.label()) + " <small>· F11 / Alt+Enter</small></button>" + ck("autoFs", L(["Am Handy beim Spielstart automatisch Vollbild", "Automatic fullscreen on phones when starting"]), Z.settings.autoFs !== false) : "") +
       '<button class="steuerknopf" data-act="graphics">' + L(["Grafik, Leistung & Fehlerbericht", "Graphics, performance & error report"]) + " <small>· " + esc(Z.gfxName()) + "</small></button>" +
       ck("autoAim", L(["Zielhilfe für Fernkampf", "Ranged aim assist"]), s.autoAim) + ck("fps", L(["Bilder pro Sekunde anzeigen", "Show FPS"]), s.fps) +
       '<label class="schalter">' + L(["Sprache", "Language"]) + ' <select data-lang="1"><option value="de"' + (s.lang === "de" ? " selected" : "") + '>Deutsch</option><option value="en"' + (s.lang === "en" ? " selected" : "") + ">English</option></select></label>" +
@@ -306,6 +339,37 @@
     modal.querySelectorAll("[data-set]").forEach(c => c.onchange = () => { Z.settings[c.dataset.set] = c.checked; if (c.dataset.set === "vib") inp.vib = c.checked; });
     modal.querySelector("[data-lang]").onchange = e => { Z.settings.lang = e.target.value; Z.saveSettings(); closeModal(); for (const k in slotEls) slotEls[k].uid = -9; ui.settings(); };
   };
+
+  /* ---------- Vollbild ---------- */
+  const fs = (Z.fs = {
+    el: document.documentElement,
+    ok: !!(document.fullscreenEnabled || document.webkitFullscreenEnabled),
+    touch: matchMedia("(pointer: coarse)").matches,
+    on: () => !!(document.fullscreenElement || document.webkitFullscreenElement),
+    label: () => (fs.on() ? L(["Vollbild beenden", "Exit fullscreen"]) : L(["Vollbild", "Fullscreen"])),
+    enter() {
+      const e = fs.el, req = e.requestFullscreen || e.webkitRequestFullscreen;
+      if (!req) return;
+      try {
+        const p = req.call(e, { navigationUI: "hide" });
+        const lock = () => { try { if (fs.touch && screen.orientation && screen.orientation.lock) screen.orientation.lock("landscape").catch(() => {}); } catch (_) {} };
+        if (p && p.then) p.then(lock).catch(() => ui.toast(L(["Vollbild wurde vom Browser abgelehnt.", "The browser refused fullscreen."]), 2400)); else lock();
+      } catch (_) {}
+    },
+    exit() { const x = document.exitFullscreen || document.webkitExitFullscreen; try { if (x) { const p = x.call(document); if (p && p.catch) p.catch(() => {}); } } catch (_) {} },
+    toggle() { fs.on() ? fs.exit() : fs.enter(); }
+  });
+  const fsBtn = document.getElementById("fsbtn");
+  const fsSync = () => {
+    if (fsBtn) { fsBtn.hidden = !fs.ok; fsBtn.textContent = fs.on() ? "🗗" : "⛶"; fsBtn.title = fs.label(); fsBtn.setAttribute("aria-label", fs.label()); }
+    const tb = document.getElementById("t-fs"); if (tb) tb.textContent = fs.label();
+    modal.querySelectorAll('[data-act="fullscreen"]').forEach(b => { const sm = b.querySelector("small"); b.textContent = fs.label() + " "; if (sm) b.appendChild(sm); });
+  };
+  if (fsBtn) fsBtn.onclick = e => { e.preventDefault(); fs.toggle(); fsBtn.blur(); };
+  document.addEventListener("fullscreenchange", fsSync); document.addEventListener("webkitfullscreenchange", fsSync);
+  addEventListener("keydown", e => { if (e.code === "Enter" && e.altKey) { e.preventDefault(); e.stopPropagation(); fs.toggle(); } }, true);
+  actions.fullscreen = () => fs.toggle();
+  fsSync();
 
   /* ---------- Grafik & Diagnose ---------- */
   ui.graphics = () => {
@@ -418,14 +482,14 @@
     const key = s => inp.device === "touch" || (ui.touchOn && inp.device !== "pad") ? "" : inp.label(s);
     choice.innerHTML = '<div class="ch-kopf">' + esc(t("replace")) + ": " + '<b style="color:' + Z.RARITY[it.rar].col + '">' + esc(L(Z.itemDef(it).n)) + "</b></div>" +
       [sA, sB].map(s => '<button data-slot="' + s + '"><kbd>' + key(s) + "</kbd> " + esc(L(Z.itemDef(P.slots[s]).n)) + '<small style="color:' + Z.RARITY[P.slots[s].rar].col + '">' + esc(L(Z.RARITY[P.slots[s].rar].n)) + "</small></button>").join("") +
-      '<button data-slot="x" class="abbr">' + esc(t("cancel")) + "</button>";
+      '<button data-slot="x" class="abbr">' + (key("roll") ? "<kbd>" + key("roll") + "</kbd> " : "") + esc(t("cancel")) + "</button>";
     choice.hidden = false;
   };
   choice.addEventListener("click", e => { const b = e.target.closest("[data-slot]"); if (!b || !ui.choiceActive) return; const c = ui.choiceActive; ui.choiceActive = null; choice.hidden = true; if (b.dataset.slot !== "x") c.place(b.dataset.slot); });
   function choiceInput() {
     const c = ui.choiceActive; if (!c) return;
     for (const s of [c.sA, c.sB]) if (inp.pressed[s]) { inp.consume(s); ui.choiceActive = null; choice.hidden = true; c.place(s); Z.player.buf[s] = 0; return; }
-    if (inp.pressed.roll || inp.pressed.jump || inp.pressed.pause) { ui.choiceActive = null; choice.hidden = true; inp.consume("pause"); }
+    if (inp.pressed.roll || inp.pressed.pause) { ui.choiceActive = null; choice.hidden = true; inp.consume("pause"); inp.consume("roll"); Z.player.buf.roll = 0; }
     const P = Z.player; if (P && Math.abs(c.p.x - (P.x + P.w / 2)) > 50) { ui.choiceActive = null; choice.hidden = true; }
   }
 
@@ -597,12 +661,13 @@
 
   /* ---------- Tod & Ende ---------- */
   function statsHTML() {
+    if (Z.runStatsHTML) return Z.runStatsHTML();
     const P = Z.player, run = Z.run || { time: 0, shardsBank: 0 };
     return '<div class="stats"><div><b>' + (Z.stats.kills || 0) + "</b>" + esc(t("kills")) + "</div><div><b>" + fmtTime(run.time) + "</b>" + esc(t("time")) + "</div><div><b>" + U.fmt(Z.stats.gold || 0) + "</b>" + esc(t("gold")) + "</div><div><b>" + (Z.stats.parries || 0) + "</b>" + esc(t("parries")) + "</div><div><b>" + run.shardsBank + "</b>" + esc(t("shardsKept")) + "</div>" + (P && P.shards ? "<div><b>" + P.shards + "</b>" + esc(t("shardsLost")) + "</div>" : "") + "</div>" +
       '<p class="hinweis">' + esc(t("reached")) + ": " + (run.route || []).map(r => esc(Z.areaName(r))).join(" → ") + "</p>";
   }
   ui.deathScreen = o => {
-    openModal("<h2>" + esc(t("died")) + "</h2><p><i>" + esc(o && o.abort ? L(["Ezekiel kehrt um. Ohne ein Wort.", "Ezekiel turns back. Without a word."]) : t("diedSub")) + "</i></p>" + statsHTML() + '<p class="tipp">' + esc(L(Z.R.pick(TX.tips))) + '</p><div class="knoepfe"><button data-act="toCamp" autofocus>' + esc(t("camp")) + "</button></div>", { cls: "schmal", noEsc: true });
+    openModal("<h2>" + esc(t("died")) + "</h2><p><i>" + esc(o && o.abort ? L(["Ezekiel kehrt um. Ohne ein Wort.", "Ezekiel turns back. Without a word."]) : t("diedSub")) + "</i></p>" + statsHTML() + '<p class="tipp">' + esc(L(Z.R.pick(TX.tips))) + '</p><div class="knoepfe"><button data-act="toCamp" autofocus>' + esc(t("camp")) + "</button></div>", { cls: "breit", noEsc: true });
   };
   actions.toCamp = () => { closeModal(); Z.backToCamp(); };
   ui.ending = key => {
@@ -619,7 +684,7 @@
     if (showAll) M.endings.alle = 1;
     Z.saveMeta();
     const e = TX.endings[key];
-    openModal('<h2 class="ende">' + esc(L(e[0])) + '</h2><p class="erz">' + L(e[1]) + "</p>" + (showAll ? '<h2 class="ende">' + esc(L(TX.endings.alle[0])) + '</h2><p class="erz">' + L(TX.endings.alle[1]) + "</p>" : "") + statsHTML() + (newSkull ? '<p class="schaedel">☠ ' + esc(t("winSkull")) + "</p>" : "") + '<div class="knoepfe"><button data-act="toCamp" autofocus>' + esc(t("camp")) + "</button></div>", { cls: "schmal", noEsc: true });
+    openModal('<h2 class="ende">' + esc(L(e[0])) + '</h2><p class="erz">' + L(e[1]) + "</p>" + (showAll ? '<h2 class="ende">' + esc(L(TX.endings.alle[0])) + '</h2><p class="erz">' + L(TX.endings.alle[1]) + "</p>" : "") + statsHTML() + (newSkull ? '<p class="schaedel">☠ ' + esc(t("winSkull")) + "</p>" : "") + '<div class="knoepfe"><button data-act="toCamp" autofocus>' + esc(t("camp")) + "</button></div>", { cls: "breit", noEsc: true });
     A.play("holy", { vol: 0.6 });
   };
 
@@ -651,19 +716,42 @@
   });
 
   /* ======================= JEDES BILD ======================= */
+  const navRep = { dir: "", t: 0 };
+  /* Hinweisleiste für Controller in Menüs */
+  const padHint = document.createElement("div"); padHint.id = "padhint"; padHint.hidden = true; document.body.appendChild(padHint);
+  let padHintKey = "";
+  function syncPadHint() {
+    const show = ui.modalOpen && inp.device === "pad";
+    const n = k => inp.padButtonName(inp.pad[k]);
+    const tabs = show && modal.querySelector(".reiter button");
+    const key = show ? [n("jump"), n("roll"), ui.noEsc, !!tabs, n("s1"), n("s2"), Z.settings.lang].join("|") : "";
+    if (key === padHintKey) return; padHintKey = key;
+    padHint.hidden = !show; if (!show) return;
+    padHint.innerHTML = "<span><kbd>" + esc(n("jump")) + "</kbd> " + L(["Auswählen", "Select"]) + "</span>" + (ui.noEsc ? "" : "<span><kbd>" + esc(n("roll")) + "</kbd> " + L(["Zurück", "Back"]) + "</span>") +
+      (tabs ? "<span><kbd>" + esc(n("s1")) + "</kbd><kbd>" + esc(n("s2")) + "</kbd> " + L(["Reiter", "Tabs"]) + "</span>" : "") + "<span><kbd>◐</kbd> " + L(["Bewegen · rechter Stick blättert", "Move · right stick scrolls"]) + "</span>";
+  }
   ui.frame = dt => {
+    syncPadHint();
     if (!title.hidden && !ui.modalOpen) { if (inp.pressed.jump || inp.pressed.use || inp.pressed.a1) { const b = title.querySelector("button:focus") || title.querySelector("button"); if (b) b.click(); } if (inp.pressed.down || inp.pressed.up) { const bs = [...title.querySelectorAll("button")]; const i = bs.indexOf(document.activeElement); (bs[(i + (inp.pressed.down ? 1 : -1) + bs.length) % bs.length] || bs[0]).focus(); } inp.endFrame(); return; }
     if (inp.pressed.pause && !ui.choiceActive) { inp.consume("pause"); if (ui.modalOpen) { if (!ui.noEsc) closeModal(); } else ui.pause(); }
     if (inp.pressed.map && !ui.modalOpen) { inp.consume("map"); bigMap = !bigMap; drawMinimap(); }
     if (ui.modalOpen) {
       if (inp.capture) { inp.endFrame(); return; }
       if (inp.pressed.s1 || inp.pressed.s2) { const tabs = [...modal.querySelectorAll(".reiter button")]; const i = tabs.findIndex(b => b.classList.contains("an")); if (tabs.length) { const n = tabs[(i + (inp.pressed.s2 ? 1 : -1) + tabs.length) % tabs.length]; n.click(); setTimeout(() => { const f = modal.querySelector(".reiter .an"); if (f) f.focus(); }, 30); } }
-      /* Gamepad/Touch in Menüs */
+      /* Gamepad in Menüs: Richtung mit Wiederholung beim Halten, A bestätigt, B zurück, rechter Stick blättert */
       const fe = document.activeElement;
-      if ((inp.pressed.left || inp.pressed.right) && adjustField(fe, inp.pressed.right ? 1 : -1)) {}
-      else { if (inp.pressed.down || inp.pressed.right) moveFocus(1); if (inp.pressed.up || inp.pressed.left) moveFocus(-1); }
-      if (inp.pressed.jump || inp.pressed.a1 || inp.pressed.use) { const f = document.activeElement; if (f && modal.contains(f)) f.click(); }
+      const dirNow = inp.held.up ? "u" : inp.held.down ? "d" : inp.held.left ? "l" : inp.held.right ? "r" : "";
+      let fire = false;
+      if (dirNow && dirNow !== navRep.dir) { navRep.dir = dirNow; navRep.t = 0.34; fire = true; }
+      else if (dirNow) { navRep.t -= dt; if (navRep.t <= 0) { navRep.t = 0.085; fire = true; } }
+      else navRep.dir = "";
+      if (fire) {
+        const d = { u: [0, -1], d: [0, 1], l: [-1, 0], r: [1, 0] }[dirNow];
+        if (d[0] && adjustField(fe, d[0])) {} else moveDir(d[0], d[1]);
+      }
+      if (inp.pressed.jump || inp.pressed.a1 || inp.pressed.use) { const had = document.activeElement && modal.contains(document.activeElement) && document.activeElement !== modal; const f = ensureFocus(); if (f && had) { if (f.tagName === "SELECT") adjustField(f, 1); else f.click(); } }
       if (inp.pressed.roll && !ui.noEsc) closeModal();
+      const pad = inp.lastPad; if (pad) { const ry = pad.axes[3] || 0; if (Math.abs(ry) > 0.25) { const box = modal.querySelector(".mbox"); if (box) box.scrollTop += ry * dt * 900; } }
       inp.endFrame();
       return;
     }

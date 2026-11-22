@@ -359,6 +359,7 @@
     Z.updateGadgets && Z.updateGadgets(dt);
     Z.updateParcours && Z.updateParcours(dt);
     Z.prachtTick && Z.prachtTick(dt);
+    Z.bilanzTick && Z.bilanzTick(dt);
     updateCampRex(dt);
     Z.updatePickups(dt);
     if (Z.darkness > 0) Z.darkness -= dt;

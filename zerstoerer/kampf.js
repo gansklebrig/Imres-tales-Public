@@ -106,8 +106,8 @@
   /* ======================= SPIELER ======================= */
   const C = (Z.PC = {
     RUN: 156, ACC_G: 2900, DEC_G: 3600, ACC_A: 2300, DEC_A: 1600,
-    GRAV: 1420, FALL: 1.5, MAXFALL: 500, JUMP: 405, DJUMP: 360, CUT: 0.5, COYOTE: 0.11, JBUF: 0.15,
-    ROLL: 0.3, ROLLSPD: 300, ROLLCD: 0.12, DODGE: 0.1, CLIMB: 110
+    GRAV: 1420, FALL: 1.18, MAXFALL: 430, JUMP: 405, DJUMP: 360, CUT: 0.5, COYOTE: 0.11, JBUF: 0.15,
+    ROLL: 0.3, ROLLSPD: 300, ROLLCD: 0.12, DODGE: 0.1, CLIMB: 110, H: 28, HC: 17, CRAWL: 0.42
   });
   Z.newPlayer = () => {
     const P = {
@@ -156,7 +156,8 @@
     for (const k of ["a1", "a2"]) { P.comboT[k] -= dt; if (P.comboT[k] <= 0) P.combo[k] = 0; }
     if (P.rallyT > 0) P.rallyT -= dt; else P.rally = Math.max(0, P.rally - dt * (Z.has("rallye") ? 8 : 16));
     statusTick(P, dt, true);
-    P.lookDown = inp.held.down && P.onGround && Math.abs(P.vx) < 5 && !P.act;
+    P.lookDown = inp.held.down && P.onGround && Math.abs(P.vx) < 5 && !P.act && (P.crouchHold = (P.crouchHold || 0) + dt) > 0.6;
+    if (!inp.held.down) P.crouchHold = 0;
     P.lookUp = inp.held.up && P.onGround && Math.abs(P.vx) < 5 && !P.act;
 
     if (P.dead) { P.vx *= 0.9; P.vy += C.GRAV * dt; Z.moveBody(P, dt); return; }
@@ -200,6 +201,15 @@
       if (P.climbing) { if (P.anim.climb > 1) { P.anim.climb = 0; } return; }
     }
 
+    /* ---------- Ducken: Runter am Boden halten – kleinere Trefferfläche, langsames Kriechen ---------- */
+    const wantCrouch = inp.held.down && P.onGround && !P.climbing && !P.ledge && !P.dead && !P.grapple && !(P.act && P.act.type === "shield");
+    if (wantCrouch && P.h !== C.HC) { P.y += C.H - C.HC; P.h = C.HC; P.crouch = true; if (!P.crouchSnd) { P.crouchSnd = true; A.play("step", { vol: 0.25, rate: 0.7 }); } }
+    else if (!wantCrouch && P.h !== C.H) {
+      /* aufstehen nur, wenn über dem Kopf Platz ist */
+      const ny = P.y - (C.H - C.HC); let free = true;
+      for (let tx = Math.floor((P.x + 0.5) / T); tx <= Math.floor((P.x + P.w - 0.5) / T); tx++) if (W.solidT(W.tile(tx, Math.floor(ny / T)))) free = false;
+      if (free) { P.y = ny; P.h = C.H; P.crouch = false; P.crouchSnd = false; } else P.crouch = true;
+    }
     /* ---------- Rolle ---------- */
     const canAct = P.hurtT <= 0 && !P.climbing;
     if (canAct && P.buf.roll > 0 && P.rollT <= 0 && (P.rollCd <= 0 || (Z.has("schattenroll") && P.rolls === 1))) {
@@ -268,6 +278,7 @@
         else if (a.type === "melee" || a.type === "shot" || a.type === "skill") target = P.onGround ? 0 : P.vx * 0.98;
       }
       if (P.drinkT > 0) target *= 0.35;
+      if (P.crouch && P.onGround) target *= C.CRAWL;
       if (P.st.slow > 0) target *= 0.55;
       if (P.st.web > 0) target *= 0.3;
       const acc = P.onGround ? (Math.abs(target) > Math.abs(P.vx) || U.sign(target) !== U.sign(P.vx) ? C.ACC_G : C.DEC_G) : (h ? C.ACC_A : C.DEC_A);
@@ -319,7 +330,7 @@
     P.safeT -= dt;
     if (P.onGround && !P.onPlat && P.safeT <= 0) {
       const tx = Math.floor((P.x + P.w / 2) / T), ty = Math.floor((P.y + P.h + 1) / T);
-      if (W.tile(tx, ty) === 1 && ![3, 5, 6, 9].includes(W.tile(tx - 1, ty - 1)) && ![3, 5, 6].includes(W.tile(tx + 1, ty - 1)) && W.tile(tx - 1, ty) === 1 && W.tile(tx + 1, ty) === 1) { P.lastSafe = { x: P.x, y: P.y }; P.safeT = 0.3; }
+      if (W.tile(tx, ty) === 1 && ![3, 5, 6, 9].includes(W.tile(tx - 1, ty - 1)) && ![3, 5, 6].includes(W.tile(tx + 1, ty - 1)) && W.tile(tx - 1, ty) === 1 && W.tile(tx + 1, ty) === 1) { P.lastSafe = { x: P.x, y: P.y + P.h - C.H }; P.safeT = 0.3; }
     }
     /* Schritte */
     if (P.onGround && Math.abs(P.vx) > 40) {
@@ -392,7 +403,7 @@
       Z.hurtPlayer(hurt, { x: P.x, unblockable: true, hazard: true, force: true, kb: 0 });
       if (!P.dead) {
         const lvS = Z.level && Z.level.start, s = P.lastSafe || (lvS ? { x: lvS.x * T + 8 - P.w / 2, y: (lvS.y + 1) * T - P.h } : null);
-        if (s) { P.x = s.x; P.y = s.y; } P.vx = 0; P.vy = 0; P.iframe = Math.max(P.iframe, 1.1); P.rollT = 0; P.act = null; P.grapple = null;
+        if (s) { P.x = s.x; P.y = s.y; P.h = C.H; P.crouch = false; } P.vx = 0; P.vy = 0; P.iframe = Math.max(P.iframe, 1.1); P.rollT = 0; P.act = null; P.grapple = null;
         FX.text(P.x + P.w / 2, P.y - 10, L(["Abgestürzt!", "Fell!"]), "#ff8a6a", true); Z.stats.falls = (Z.stats.falls || 0) + 1;
         Z.cam.x = P.x + P.w / 2 - Z.cam.w / 2; Z.cam.y = P.y + P.h / 2 - Z.cam.h / 2; Z.cam.clamp && Z.cam.clamp();
       }
@@ -405,7 +416,7 @@
     if (liquid && P.y + P.h > Math.floor((P.y + P.h - 3) / T) * T + 6) {
       if (liquid === 5) { if (P.iframe <= 0 || true) Z.hurtPlayer(Math.round(P.hpMax * 0.18), { x: P.x, unblockable: true, hazard: true, force: true }); addStatus(P, "burn", 2, true); }
       else { A.play("splash", { x: P.x, y: P.y }); FX.burst(P.x + P.w / 2, P.y + P.h, 14, { col: ["#4a6a5a", "#8aa090"], sp: 90, ang: -Math.PI / 2, spread: 1.2, life: 0.5, g: 400, size: 2 }); Z.hurtPlayer(Math.round(P.hpMax * 0.08), { x: P.x, unblockable: true, hazard: true, force: true }); }
-      if (P.lastSafe) { P.x = P.lastSafe.x; P.y = P.lastSafe.y; P.vx = 0; P.vy = 0; P.iframe = Math.max(P.iframe, 1); }
+      if (P.lastSafe) { P.x = P.lastSafe.x; P.y = P.lastSafe.y; P.h = C.H; P.crouch = false; P.vx = 0; P.vy = 0; P.iframe = Math.max(P.iframe, 1); }
     }
   }
   function pushOutOfEnemies(P) {
