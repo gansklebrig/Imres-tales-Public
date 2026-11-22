@@ -38951,7 +38951,8 @@ window.__hsGLWELT={v:7};
   const ok=g.checkFramebufferStatus(g.FRAMEBUFFER)===g.FRAMEBUFFER_COMPLETE;g.bindFramebuffer(g.FRAMEBUFFER,null);R.b.tex=null;R.b.tgt=undefined;
   if(!ok){try{g.deleteFramebuffer(f);g.deleteTexture(t);if(rb)g.deleteRenderbuffer(rb)}catch(e){}return null}return{f,t,rb,w,h}}
  function fbWeg(R,F){if(!F)return;const g=R.gl;try{g.deleteFramebuffer(F.f);g.deleteTexture(F.t);if(F.rb)g.deleteRenderbuffer(F.rb)}catch(e){}}
- function rZiel(R,F){const g=R.gl;flush(R);const w=F?F.w:R.cv.width,h=F?F.h:R.cv.height;if(R.b.tgt!==F){g.bindFramebuffer(g.FRAMEBUFFER,F?F.f:null);R.b.tgt=F}g.viewport(0,0,w,h);R.zw=w;R.zh=h;R.ziel=F}
+ function rZiel(R,F){const g=R.gl;flush(R);const w=F?F.w:R.cv.width,h=F?F.h:R.cv.height;if(R.b.tgt!==F){g.bindFramebuffer(g.FRAMEBUFFER,F?F.f:null);R.b.tgt=F}const ox=F&&F.vx||0,oy=F&&F.vy||0;g.viewport(ox,oy,w,h);
+  /* Atlas-Feld: Schere aufs Feld (Löschen und Kantenglättung bleiben drin) */if(F&&F.vx!=null){g.enable(g.SCISSOR_TEST);g.scissor(ox,oy,w,h);R.sc=1}else if(R.sc){g.disable(g.SCISSOR_TEST);R.sc=0}R.zw=w;R.zh=h;R.ziel=F}
 
  /* ---------- Stapel-Zeichnen ---------- */
  const BL={over:1,add:2,addc:3,dout:4,din:5,clear:6,copy:7,max:8};
@@ -38964,7 +38965,7 @@ window.__hsGLWELT={v:7};
   g.bufferSubData(g.ARRAY_BUFFER,R.vo*32,R.V.subarray(0,n*8));g.drawArrays(g.TRIANGLES,R.vo,n);R.vo+=n;R.st.draw++;R.n=0}
  function useProg(R,p){if(R.b.prog===p)return;flush(R);R.gl.useProgram(p.p);R.b.prog=p;R.b.gk=null;R.gl.uniform2f(p.u.uR,R.zw,R.zh);p.zw=R.zw;p.zh=R.zh}
  function zustand(R,prog,tex,blend,rep,flt){const g=R.gl,b=R.b;
-  if(b.prog!==prog||b.tex!==tex||b.blend!==blend||b.rep!==rep||b.flt!==flt||prog.zw!==R.zw||prog.zh!==R.zh){flush(R);
+  if(b.prog!==prog||b.tex!==tex||b.blend!==blend||b.rep!==rep||b.flt!==flt||prog.zw!==R.zw||prog.zh!==R.zh){if(R.n&&ATL.grund){const W_=R.st.wg||(R.st.wg={});const k=b.prog!==prog?'prog':b.tex!==tex?'tex':b.blend!==blend?'blend':b.flt!==flt?'flt':'rep';W_[k]=(W_[k]||0)+1;if(k==='tex'&&tex){const T_=R.st.wt||(R.st.wt={});const nm=tex.__atlas?'kachelatlas':R.atl&&tex===R.atl.t?'atlas':R.atlN&&tex===R.atlN.t?'atlasN':(ATL.nm&&ATL.nm.get(tex))||tex.__nm||'?';T_[nm]=(T_[nm]||0)+1}}flush(R);
    if(b.prog!==prog){g.useProgram(prog.p);b.prog=prog;b.gk=null}if(prog.zw!==R.zw||prog.zh!==R.zh){g.uniform2f(prog.u.uR,R.zw,R.zh);prog.zw=R.zw;prog.zh=R.zh}
    if(tex&&(b.tex!==tex||b.flt!==flt)){g.activeTexture(g.TEXTURE0);g.bindTexture(g.TEXTURE_2D,tex);if(tex.__flt!==flt){g.texParameteri(g.TEXTURE_2D,g.TEXTURE_MIN_FILTER,flt);g.texParameteri(g.TEXTURE_2D,g.TEXTURE_MAG_FILTER,flt);tex.__flt=flt}}
    if(b.blend!==blend)setBlend(R,blend);if(prog===R.P.tex&&b.rep!==rep)g.uniform1f(prog.u.uRep,rep);b.tex=tex;b.blend=blend;b.rep=rep;b.flt=flt}
@@ -38984,9 +38985,28 @@ window.__hsGLWELT={v:7};
   const g=R.gl;let e=R.tex.get(s);const dyn=s instanceof HTMLCanvasElement||(typeof OffscreenCanvas!=='undefined'&&s instanceof OffscreenCanvas);if(dyn&&!s.__glI)instr(s);const ver=dyn?s.__glv:1;
   if(e&&e.v===ver&&e.sw===w&&e.sh===h){e.lu=R.frame;return e}
   flush(R);  let src=s,tw=w,th=h;if(w>R.maxT||h>R.maxT){const k=R.maxT/Math.max(w,h);tw=Math.max(1,Math.floor(w*k));th=Math.max(1,Math.floor(h*k));if(!SKC)SKC=document.createElement('canvas');SKC.width=tw;SKC.height=th;const q=SKC.getContext('2d');q.imageSmoothingEnabled=true;q.drawImage(s,0,0,tw,th);src=SKC}
-  if(!e){e={t:g.createTexture(),w:tw,h:th,sw:w,sh:h,v:-1,lu:R.frame,b:0};R.tex.set(s,e);g.bindTexture(g.TEXTURE_2D,e.t);texPar(g,g.LINEAR);e.t.__flt=g.LINEAR;g.texImage2D(g.TEXTURE_2D,0,g.RGBA,g.RGBA,g.UNSIGNED_BYTE,src)}
+  if(!e){e={t:g.createTexture(),w:tw,h:th,sw:w,sh:h,v:-1,lu:R.frame,b:0};R.tex.set(s,e);if(ATL.grund){(ATL.nm||(ATL.nm=new WeakMap())).set(e.t,(s.__glFb?'fb':s instanceof HTMLImageElement?'img':'cv')+w+'x'+h)}g.bindTexture(g.TEXTURE_2D,e.t);texPar(g,g.LINEAR);e.t.__flt=g.LINEAR;g.texImage2D(g.TEXTURE_2D,0,g.RGBA,g.RGBA,g.UNSIGNED_BYTE,src)}
   else{g.bindTexture(g.TEXTURE_2D,e.t);if(e.w===tw&&e.h===th)g.texSubImage2D(g.TEXTURE_2D,0,0,0,g.RGBA,g.UNSIGNED_BYTE,src);else g.texImage2D(g.TEXTURE_2D,0,g.RGBA,g.RGBA,g.UNSIGNED_BYTE,src)}
   R.b.tex=null;R.texB+=tw*th*4-e.b;e.b=tw*th*4;e.w=tw;e.h=th;e.sw=w;e.sh=h;e.v=ver;e.lu=R.frame;R.st.up++;R.st.upB+=tw*th*4;return e}
+ /* ---------- Atlas: kleine Bilder (Sprites, Texte, Lichtpunkte) teilen sich eine große Textur ----------
+    Jeder Texturwechsel beendet einen Stapel (bindTexture + bufferSubData + drawArrays). In Firefox kostet jeder WebGL-Aufruf
+    spürbar mehr (Prozessgrenze), deshalb: bis 256 px große Quellen in eine 2048er-Seite packen (Regalpacker, 2 px Rand),
+    beim Zeichnen nur uv umrechnen – viele Bilder hintereinander bleiben ein Stapel. Seite voll → leeren und neu befüllen. */
+ const ATL={an:1,S:2048,max:700,st:{neu:0,voll:0}};window.__hsATL=ATL;
+ /* Seite anlegen; oben links ein weißer 4×4-Block bei uv (0,0): einfarbige Flächen nutzen dieselbe Textur wie die Bilder
+    (vorher eigene 1×1-Weiß-Textur → bei jedem Wechsel Farbe/Bild ein neuer Stapel) */
+ function atlasNeu(R,nah){const g=R.gl,A={t:g.createTexture(),M:new Map(),reg:[],y:4,n:0};const F=nah?g.NEAREST:g.LINEAR;g.bindTexture(g.TEXTURE_2D,A.t);texPar(g,F);A.t.__flt=F;
+  g.texImage2D(g.TEXTURE_2D,0,g.RGBA,ATL.S,ATL.S,0,g.RGBA,g.UNSIGNED_BYTE,null);g.texSubImage2D(g.TEXTURE_2D,0,0,0,4,4,g.RGBA,g.UNSIGNED_BYTE,new Uint8Array(64).fill(255));R.b.tex=null;R.texB+=ATL.S*ATL.S*4;return A}
+ function weissT(R){if(!ATL.an)return R.weiss;if(R.atlN&&R.b.tex===R.atlN.t)return R.atlN.t;if(!R.atl&&R.gl)try{R.atl=atlasNeu(R,0)}catch(e){return R.weiss}return R.atl?R.atl.t:R.weiss}
+ function weissF(R,t){return t&&t.__flt||R.gl.NEAREST}
+ function atlasVon(R,s,nah){if(!ATL.an||!R.gl)return null;const AK=nah?'atlN':'atl';const w=s.width|0,h=s.height|0;if(w<1||h<1||w>ATL.max||h>ATL.max)return null;
+  const g=R.gl;let A=R[AK];if(!A){A=R[AK]=atlasNeu(R,nah)}
+  const dyn=s instanceof HTMLCanvasElement||(typeof OffscreenCanvas!=='undefined'&&s instanceof OffscreenCanvas);if(dyn&&!s.__glI)instr(s);const ver=dyn?s.__glv:1;
+  let e=A.M.get(s);if(e&&e.v===ver&&e.sw===w&&e.sh===h){e.lu=R.frame;return e}
+  if(!e||e.sw!==w||e.sh!==h){/* Platz suchen */const pw=w+4,ph=h+4;let sp=null;for(const r of A.reg){if(r.h>=ph&&r.h<=ph*1.6+8&&r.x+pw<=ATL.S){sp=r;break}}
+   if(!sp){if(A.y+ph>ATL.S){/* Seite voll: leeren (bereits gestapelte Zeichnungen vorher abschicken) */flush(R);A.M.clear();A.reg=[];A.y=4;ATL.st.voll++}sp={x:0,y:A.y,h:ph};A.reg.push(sp);A.y+=ph}
+   e={ax:sp.x+2,ay:sp.y+2,w,h,sw:w,sh:h,v:-1,lu:R.frame,atl:1,t:A.t};sp.x+=pw;A.M.set(s,e);ATL.st.neu++}
+  flush(R);g.bindTexture(g.TEXTURE_2D,A.t);g.texSubImage2D(g.TEXTURE_2D,0,e.ax,e.ay,g.RGBA,g.UNSIGNED_BYTE,s);R.b.tex=null;e.v=ver;e.lu=R.frame;R.st.up++;R.st.upB+=w*h*4;return e}
  /* alte Texturen freigeben: nicht mehr benutzt seit n Bildern, oder über der Obergrenze (älteste zuerst) */
  function texAufraeumen(R,cap){const g=R.gl;if(R.frame%30!==0&&R.texB<=cap)return;const L=[];for(const [k,e] of R.tex){if(R.frame-e.lu>900){g.deleteTexture(e.t);R.texB-=e.b;R.tex.delete(k)}else L.push([k,e])}
   if(R.texB>cap){L.sort((a,b)=>a[1].lu-b[1].lu);for(const [k,e] of L){if(R.texB<=cap*0.8||e.lu>=R.frame-1)break;g.deleteTexture(e.t);R.texB-=e.b;R.tex.delete(k)}}}
@@ -39087,9 +39107,9 @@ window.__hsGLWELT={v:7};
   if(sw<0){sx+=sw;sw=-sw}if(sh<0){sy+=sh;sh=-sh}if(dw<0){dx+=dw;dw=-dw}if(dh<0){dy+=dh;dh=-dh}
   if(sx<0){const k=-sx/sw;dx+=dw*k;dw*=1-k;sw+=sx;sx=0}if(sy<0){const k=-sy/sh;dy+=dh*k;dh*=1-k;sh+=sy;sy=0}
   if(sx+sw>iw){const k=(sx+sw-iw)/sw;dw*=1-k;sw=iw-sx}if(sy+sh>ih){const k=(sy+sh-ih)/sh;dh*=1-k;sh=ih-sy}if(sw<=0||sh<=0||dw<=0||dh<=0)return;
-  this.zielAn();const e=texVon(R,img);if(!e){this.st.unbek++;return}this.st.img++;
+  this.zielAn();let e=null;if(ATL.an&&!img.__glFb&&istQuelle(img)&&!(img instanceof HTMLImageElement&&!img.complete)){try{e=atlasVon(R,img,!this.s.sm)}catch(er){e=null}}if(!e)e=texVon(R,img);if(!e){this.st.unbek++;return}this.st.img++;
   const m=this.m,p=(x,y)=>[m[0]*x+m[2]*y+m[4],m[1]*x+m[3]*y+m[5]];const A=p(dx,dy),B=p(dx+dw,dy),C=p(dx+dw,dy+dh),D=p(dx,dy+dh);
-  const kx=e.w/iw,ky=e.h/ih;let u0=sx*kx/e.w,u1=(sx+sw)*kx/e.w,v0=sy*ky/e.h,v1=(sy+sh)*ky/e.h;if(e.fl){v0=1-v0;v1=1-v1}
+  let u0,u1,v0,v1;if(e.atl){const S=ATL.S;u0=(e.ax+sx)/S;u1=(e.ax+sx+sw)/S;v0=(e.ay+sy)/S;v1=(e.ay+sy+sh)/S}else{const kx=e.w/iw,ky=e.h/ih;u0=sx*kx/e.w;u1=(sx+sw)*kx/e.w;v0=sy*ky/e.h;v1=(sy+sh)*ky/e.h;if(e.fl){v0=1-v0;v1=1-v1}}
   if(this.clipN)this.stencilClipAn();
   zustand(R,R.P.tex,e.t,b||'over',0,this.s.sm?R.gl.LINEAR:R.gl.NEAREST);quad(R,A[0],A[1],B[0],B[1],C[0],C[1],D[0],D[1],u0,v0,u1,v1,al,al,al,al);
   if(this.clipN)this.stencilClipAus()};
@@ -39113,7 +39133,7 @@ window.__hsGLWELT={v:7};
    g.enable(g.STENCIL_TEST);g.colorMask(false,false,false,false);const cm=this.clipN?0x80:0;
    g.stencilMask(0x7f);g.stencilFunc(this.clipN?g.EQUAL:g.ALWAYS,cm,cm);
    if(regel==='evenodd'){g.stencilOp(g.KEEP,g.KEEP,g.INVERT);g.stencilMask(0x01)}else{g.stencilOpSeparate(g.FRONT,g.KEEP,g.KEEP,g.INCR_WRAP);g.stencilOpSeparate(g.BACK,g.KEEP,g.KEEP,g.DECR_WRAP)}
-   zustand(R,R.P.tex,R.weiss,'over',0,g.NEAREST);
+   zustand(R,R.P.tex,weissT(R),'over',0,weissF(R,weissT(R)));
    for(const q of L){const P=q.p,n=P.length>>1;for(let i=0;i<n;i++){const x=P[2*i],y=P[2*i+1];if(x<x0)x0=x;if(y<y0)y0=y;if(x>x1)x1=x;if(y>y1)y1=y}
     for(let i=1;i+1<n;i++){vtx(R,P[0],P[1],0,0,1,1,1,1);vtx(R,P[2*i],P[2*i+1],0,0,1,1,1,1);vtx(R,P[2*i+2],P[2*i+3],0,0,1,1,1,1)}}
    flush(R);g.colorMask(true,true,true,true);g.stencilMask(regel==='evenodd'?0x01:0x7f);g.stencilFunc(g.NOTEQUAL,0,regel==='evenodd'?0x01:0x7f);g.stencilOp(g.ZERO,g.ZERO,g.ZERO);
@@ -39135,13 +39155,13 @@ window.__hsGLWELT={v:7};
   /* sehr kleine Formen: Deckkraft nach Fläche */let k=1;const fl=Math.abs(ar)/2,um=(()=>{let u=0;for(let i=0;i<n;i++){const j=(i+1)%n;u+=Math.hypot(P[2*j]-P[2*i],P[2*j+1]-P[2*i+1])}return u})();
   if(fl<um*0.5+1){k=Math.max(0,Math.min(1,fl/Math.max(um*0.5,1e-3)));for(let i=0;i<2*n;i++)I[i]=P[i]}
   this.zeichneFlaeche(S,b,I,null,k);
-  if(S[0]===0||S[0]===1){/* Randstreifen direkt (ohne Zwischenlisten) */const R=this.R;let r,gg,bb,a;if(S[0]===1){if(!this.gradAn(S,b))return;r=gg=bb=a=S[2]*k}else{zustand(R,R.P.tex,R.weiss,b,0,R.gl.NEAREST);r=S[1]*k;gg=S[2]*k;bb=S[3]*k;a=S[4]*k}
+  if(S[0]===0||S[0]===1){/* Randstreifen direkt (ohne Zwischenlisten) */const R=this.R;let r,gg,bb,a;if(S[0]===1){if(!this.gradAn(S,b))return;r=gg=bb=a=S[2]*k}else{zustand(R,R.P.tex,weissT(R),b,0,weissF(R,weissT(R)));r=S[1]*k;gg=S[2]*k;bb=S[3]*k;a=S[4]*k}
    for(let i=0;i<n;i++){const j=i+1<n?i+1:0;vtx(R,I[2*i],I[2*i+1],0,0,r,gg,bb,a);vtx(R,I[2*j],I[2*j+1],0,0,r,gg,bb,a);vtx(R,O[2*j],O[2*j+1],0,0,0,0,0,0);vtx(R,I[2*i],I[2*i+1],0,0,r,gg,bb,a);vtx(R,O[2*j],O[2*j+1],0,0,0,0,0,0);vtx(R,O[2*i],O[2*i+1],0,0,0,0,0,0)}return}
   const st=[];for(let i=0;i<n;i++){const j=(i+1)%n;st.push([I[2*i],I[2*i+1],I[2*j],I[2*j+1],O[2*j],O[2*j+1],O[2*i],O[2*i+1]])}
   this.streifen(S,b,st,k)};
  /* Streifen-Vierecke a(innen) b(innen) c(außen) d(außen): Deckkraft innen k, außen 0 */
  XP.streifen=function(S,b,L,k){const R=this.R,g=R.gl;if(S[0]===1){if(!this.gradAn(S,b))return;const ga=S[2];for(const q of L){const a=ga*k;vtx(R,q[0],q[1],0,0,a,a,a,a);vtx(R,q[2],q[3],0,0,a,a,a,a);vtx(R,q[4],q[5],0,0,0,0,0,0);vtx(R,q[0],q[1],0,0,a,a,a,a);vtx(R,q[4],q[5],0,0,0,0,0,0);vtx(R,q[6],q[7],0,0,0,0,0,0)}return}
-  if(S[0]===0){zustand(R,R.P.tex,R.weiss,b,0,g.NEAREST);const r=S[1]*k,gg=S[2]*k,bb=S[3]*k,a=S[4]*k;
+  if(S[0]===0){zustand(R,R.P.tex,weissT(R),b,0,weissF(R,weissT(R)));const r=S[1]*k,gg=S[2]*k,bb=S[3]*k,a=S[4]*k;
    for(const q of L){vtx(R,q[0],q[1],0,0,r,gg,bb,a);vtx(R,q[2],q[3],0,0,r,gg,bb,a);vtx(R,q[4],q[5],0,0,0,0,0,0);vtx(R,q[0],q[1],0,0,r,gg,bb,a);vtx(R,q[4],q[5],0,0,0,0,0,0);vtx(R,q[6],q[7],0,0,0,0,0,0)}return}
   for(const q of L){this.zeichneFlaeche(S,b,[q[0],q[1],q[2],q[3],q[4],q[5]],[k,k,0]);this.zeichneFlaeche(S,b,[q[0],q[1],q[4],q[5],q[6],q[7]],[k,0,0])}};
  /* Verlaufs-Programm mit den Werten des Verlaufs einrichten; mehrere Flächen gleichen Verlaufs/Transform teilen sich einen Stapel */
@@ -39155,7 +39175,7 @@ window.__hsGLWELT={v:7};
  /* Fläche (konvexes Polygon in Gerätekoordinaten) mit Stil zeichnen; av = Deckkraft je Ecke (nur Dreieck) oder Zahl für alle */
  XP.zeichneFlaeche=function(S,b,P,av,kk,T){const R=this.R,g=R.gl,n=P.length>>1;if(n<3)return;const kd=kk==null?1:kk;
   /* Dreiecke: T = Eckenliste (Ohrenschnitt) oder Fächer um Ecke 0 */const nt=T?T.length/3:n-2;
-  if(b==='clear'||S[0]===0){const cl=b==='clear',r=cl?0:S[1],gg=cl?0:S[2],bb=cl?0:S[3],a=cl?1:S[4];zustand(R,R.P.tex,R.weiss,b,0,g.NEAREST);
+  if(b==='clear'||S[0]===0){const cl=b==='clear',r=cl?0:S[1],gg=cl?0:S[2],bb=cl?0:S[3],a=cl?1:S[4];zustand(R,R.P.tex,weissT(R),b,0,weissF(R,weissT(R)));
    for(let t=0;t<nt;t++)for(let c=0;c<3;c++){const j=T?T[3*t+c]:(c===0?0:t+c);const k=cl?1:(av?av[j]:kd);vtx(R,P[2*j],P[2*j+1],0,0,r*k,gg*k,bb*k,a*k)}return}
   if(S[0]===1){const ga=S[2];if(!this.gradAn(S,b))return;
    for(let t=0;t<nt;t++)for(let c=0;c<3;c++){const j=T?T[3*t+c]:(c===0?0:t+c);const a=ga*(av?av[j]:kd);vtx(R,P[2*j],P[2*j+1],0,0,a,a,a,a)}return}
@@ -39179,7 +39199,7 @@ window.__hsGLWELT={v:7};
      if(hi>0)tr.push(x0+nx*hi,y0+ny*hi,x1+nx*hi,y1+ny*hi,x1-nx*hi,y1-ny*hi,x0-nx*hi,y0-ny*hi);
      ST.push([x0+nx*hi,y0+ny*hi,x1+nx*hi,y1+ny*hi,x1+nx*ho,y1+ny*ho,x0+nx*ho,y0+ny*ho]);ST.push([x1-nx*hi,y1-ny*hi,x0-nx*hi,y0-ny*hi,x0-nx*ho,y0-ny*ho,x1-nx*ho,y1-ny*ho])}}
    for(let i=0;i<tr.length;i+=8)this.zeichneFlaeche(Sa,b,tr.slice(i,i+8),null);this.streifen(Sa,b,ST,1);if(this.clipN)this.stencilClipAus();return}
-  const tris=[];const hw=w/2,cap=this.s.cap,join=this.s.join,ml=this.s.ml;
+  const tris=[];const hw=w/2,cap=this.s.cap,join=this.s.join,ml=this.s.ml;/* Kantenglättung für dicke, deckende Striche: 0,7-px-Randstreifen längs der Abschnitte */const ST2=!sten&&alpha>=0.999&&b!=='add'&&b!=='addc'?[]:null;
   const T=(ax,ay,bx,by,cx_,cy_)=>{tris.push(ax,ay,bx,by,cx_,cy_)};
   const kreis=(x,y,r)=>{const n=Math.max(6,Math.min(48,Math.ceil(r*1.5)));for(let i=0;i<n;i++){const a0=i/n*Math.PI*2,a1=(i+1)/n*Math.PI*2;T(x,y,x+Math.cos(a0)*r,y+Math.sin(a0)*r,x+Math.cos(a1)*r,y+Math.sin(a1)*r)}};
   for(const q of L){const P=q.p.slice();if(q.zu&&(P[0]!==P[P.length-2]||P[1]!==P[P.length-1]))P.push(P[0],P[1]);
@@ -39188,7 +39208,8 @@ window.__hsGLWELT={v:7};
    const zu=q.zu;
    for(let i=0;i+1<n;i++){let x0=Q[2*i],y0=Q[2*i+1],x1=Q[2*i+2],y1=Q[2*i+3];const dx=x1-x0,dy=y1-y0,l=Math.hypot(dx,dy)||1,ux=dx/l,uy=dy/l,nx=-uy*hw,ny=ux*hw;
     if(!zu&&cap==='square'){if(i===0){x0-=ux*hw;y0-=uy*hw}if(i===n-2){x1+=ux*hw;y1+=uy*hw}}
-    T(x0+nx,y0+ny,x1+nx,y1+ny,x1-nx,y1-ny);T(x0+nx,y0+ny,x1-nx,y1-ny,x0-nx,y0-ny)}
+    T(x0+nx,y0+ny,x1+nx,y1+ny,x1-nx,y1-ny);T(x0+nx,y0+ny,x1-nx,y1-ny,x0-nx,y0-ny);
+    if(ST2){const ex=nx/hw*0.7,ey=ny/hw*0.7;ST2.push([x0+nx,y0+ny,x1+nx,y1+ny,x1+nx+ex,y1+ny+ey,x0+nx+ex,y0+ny+ey]);ST2.push([x1-nx,y1-ny,x0-nx,y0-ny,x0-nx-ex,y0-ny-ey,x1-nx-ex,y1-ny-ey])}}
    const gel=(i,j,k)=>{const x=Q[2*j],y=Q[2*j+1],ax=x-Q[2*i],ay=y-Q[2*i+1],bx=Q[2*k]-x,by=Q[2*k+1]-y,la=Math.hypot(ax,ay)||1,lb=Math.hypot(bx,by)||1;
     const cr=ax*by-ay*bx;if(Math.abs(cr)<1e-9*la*lb)return;
     if(join==='round'){kreis(x,y,hw);return}const s=cr>0?-1:1,n1x=-ay/la*hw*s,n1y=ax/la*hw*s,n2x=-by/lb*hw*s,n2y=bx/lb*hw*s;
@@ -39199,14 +39220,15 @@ window.__hsGLWELT={v:7};
   if(!tris.length){if(this.clipN)this.stencilClipAus();return}
   if(sten){flush(R);this.st.sten++;g.enable(g.STENCIL_TEST);g.colorMask(false,false,false,false);g.stencilMask(0x7f);g.stencilOp(g.KEEP,g.KEEP,g.REPLACE);
    if(this.clipN)g.stencilFunc(g.EQUAL,0x81,0x80);else g.stencilFunc(g.ALWAYS,1,0xff);
-   zustand(R,R.P.tex,R.weiss,'over',0,g.NEAREST);let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(let i=0;i<tris.length;i+=2){const x=tris[i],y=tris[i+1];vtx(R,x,y,0,0,1,1,1,1);if(x<x0)x0=x;if(y<y0)y0=y;if(x>x1)x1=x;if(y>y1)y1=y}
+   zustand(R,R.P.tex,weissT(R),'over',0,weissF(R,weissT(R)));let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(let i=0;i<tris.length;i+=2){const x=tris[i],y=tris[i+1];vtx(R,x,y,0,0,1,1,1,1);if(x<x0)x0=x;if(y<y0)y0=y;if(x>x1)x1=x;if(y>y1)y1=y}
    flush(R);g.colorMask(true,true,true,true);g.stencilMask(0x7f);g.stencilFunc(g.NOTEQUAL,0,0x7f);g.stencilOp(g.ZERO,g.ZERO,g.ZERO);
    this.zeichneFlaeche(Sa,b,[x0-1,y0-1,x1+1,y0-1,x1+1,y1+1,x0-1,y1+1],null);flush(R);g.stencilMask(0xff);g.disable(g.STENCIL_TEST)}
   else{const nv=tris.length/2,TI=new Array(nv);for(let q=0;q<nv;q++)TI[q]=q;this.zeichneFlaeche(Sa,b,tris,null,null,TI)}
+  if(ST2&&ST2.length)this.streifen(Sa,b,ST2,1);
   if(this.clipN)this.stencilClipAus()};
  /* Schnittmaske: Bit 7 der Schablone = innerhalb aller Schnitte. Neu aufbauen bei clip()/restore() */
  XP.clipNeu=function(){if(this.sw||!this.R)return;const R=this.R,g=R.gl;this.zielAn();flush(R);g.enable(g.STENCIL_TEST);g.stencilMask(0x80);g.clearStencil(0);g.clear(g.STENCIL_BUFFER_BIT);
-  if(this.clipN>0){/* Schnittmenge: Zähler in Bits 0..6, dann Bit 7 wo Zähler == clipN */g.stencilMask(0x7f);g.clear(g.STENCIL_BUFFER_BIT);g.colorMask(false,false,false,false);zustand(R,R.P.tex,R.weiss,'over',0,g.NEAREST);
+  if(this.clipN>0){/* Schnittmenge: Zähler in Bits 0..6, dann Bit 7 wo Zähler == clipN */g.stencilMask(0x7f);g.clear(g.STENCIL_BUFFER_BIT);g.colorMask(false,false,false,false);zustand(R,R.P.tex,weissT(R),'over',0,weissF(R,weissT(R)));
    for(let k=0;k<this.clipN;k++){const L=this.clipL[k]||[];/* je Schnitt: Bit 6 als „innen“-Markierung (gerade/ungerade) */g.stencilMask(0x40);g.clear(g.STENCIL_BUFFER_BIT);g.stencilFunc(g.ALWAYS,0,0);g.stencilOp(g.KEEP,g.KEEP,g.INVERT);
     for(const q of L){const P=q.p,n=P.length>>1;for(let i=1;i+1<n;i++){vtx(R,P[0],P[1],0,0,1,1,1,1);vtx(R,P[2*i],P[2*i+1],0,0,1,1,1,1);vtx(R,P[2*i+2],P[2*i+3],0,0,1,1,1,1)}}flush(R);
     g.stencilMask(0x3f);g.stencilFunc(g.EQUAL,0x40,0x40);g.stencilOp(g.KEEP,g.KEEP,g.INCR);vtx(R,0,0,0,0,1,1,1,1);vtx(R,R.zw,0,0,0,1,1,1,1);vtx(R,R.zw,R.zh,0,0,1,1,1,1);vtx(R,0,0,0,0,1,1,1,1);vtx(R,R.zw,R.zh,0,0,1,1,1,1);vtx(R,0,R.zh,0,0,1,1,1,1);flush(R)}
@@ -39413,7 +39435,24 @@ window.__hsGLWELT={v:7};
     Die Textur steht dabei auf dem Kopf (GL-Bildpuffer) → e.fl=1, beim Zeichnen gespiegelt. Fällt bei Problemen auf den 2D-Weg zurück. */
  /* ein Bildpuffer (mit Schablone) für alle Kacheln: je Kachel nur eine neue Textur anhängen – kein Neuanlegen und keine
     Statusabfrage (die in Firefox auf die Grafikkarte wartet) pro Kachel */
- function kfbNeu(R,TS){const g=R.gl;let K=BT.kfb;if(K&&(K.gen!==R.gen||K.w!==TS)){try{g.deleteFramebuffer(K.f);g.deleteRenderbuffer(K.rb)}catch(e){}K=BT.kfb=null}
+ /* Kachel-Atlas: alle auf der Grafikkarte gebauten Kacheln (Boden/Wände und Deko) in EINER großen Textur → der ganze Boden
+    wird mit wenigen Zeichenbefehlen gemalt statt einem je Kachel (in Firefox kostet jeder WebGL-Aufruf viel). Felder werden
+    frei, sobald keine Kachel-Liste sie mehr hält (Sammeln nur bei Bedarf). Voll oder zu kleine Höchstgröße → wie bisher eigene Textur. */
+ const TAT={an:1,st:{felder:0,voll:0,gc:0}};GW.tat=TAT;
+ function tatHol(R,TS){if(!TAT.an)return null;const g=R.gl;let A=R.tatl;
+  if(!A){const S=R.maxT>=4096?4096:R.maxT>=2048?2048:0;if(!S||S<TS*4)return null;const t=g.createTexture();g.bindTexture(g.TEXTURE_2D,t);g.texImage2D(g.TEXTURE_2D,0,g.RGBA,S,S,0,g.RGBA,g.UNSIGNED_BYTE,null);texPar(g,g.LINEAR);t.__flt=g.LINEAR;t.__atlas=1;
+   const f=g.createFramebuffer(),rb=g.createRenderbuffer();g.bindRenderbuffer(g.RENDERBUFFER,rb);g.renderbufferStorage(g.RENDERBUFFER,g.STENCIL_INDEX8,S,S);g.bindFramebuffer(g.FRAMEBUFFER,f);
+   g.framebufferTexture2D(g.FRAMEBUFFER,g.COLOR_ATTACHMENT0,g.TEXTURE_2D,t,0);g.framebufferRenderbuffer(g.FRAMEBUFFER,g.STENCIL_ATTACHMENT,g.RENDERBUFFER,rb);
+   const ok=g.checkFramebufferStatus(g.FRAMEBUFFER)===g.FRAMEBUFFER_COMPLETE;g.bindFramebuffer(g.FRAMEBUFFER,null);R.b.tex=null;R.b.tgt=undefined;
+   if(!ok){try{g.deleteFramebuffer(f);g.deleteRenderbuffer(rb);g.deleteTexture(t)}catch(e){}TAT.an=0;return null}
+   /* Atlas-Textur nie über die normalen Wege löschen */if(!g.__tatDel){const d0=g.deleteTexture.bind(g);g.deleteTexture=function(x){if(x&&x.__atlas)return;return d0(x)};g.__tatDel=1}
+   const n=Math.floor(S/TS);A=R.tatl={t,f,rb,S,TS,n,frei:[],belegt:new Set()};for(let i=n*n-1;i>=0;i--)A.frei.push(i);R.texB+=S*S*4}
+  if(A.TS!==TS)return null;
+  if(!A.frei.length){/* einsammeln: Felder, die keine Kachel-Liste mehr hält */TAT.st.gc++;const halt=new Set();const nimm=M=>{if(M)for(const E of M.values())if(E&&E.slot!=null)halt.add(E.slot)};nimm(BT.cur);nimm(BT.alt);nimm(DT.m);
+   for(const i of A.belegt)if(!halt.has(i)){A.belegt.delete(i);A.frei.push(i)}if(!A.frei.length){TAT.st.voll++;return null}}
+  const i=A.frei.pop();A.belegt.add(i);TAT.st.felder=A.belegt.size;const vx=(i%A.n)*TS,vy=Math.floor(i/A.n)*TS;
+  flush(R);R.b.tex=null;const F={f:A.f,t:A.t,rb:null,w:TS,h:TS,vx,vy,slot:i,uv:[vx/A.S,(vy+TS)/A.S,(vx+TS)/A.S,vy/A.S,0.5/A.S],geteilt:1};return F}
+ function kfbNeu(R,TS){const tf=tatHol(R,TS);if(tf)return tf;const g=R.gl;let K=BT.kfb;if(K&&(K.gen!==R.gen||K.w!==TS)){try{g.deleteFramebuffer(K.f);g.deleteRenderbuffer(K.rb)}catch(e){}K=BT.kfb=null}
   flush(R);if(!K){const f=g.createFramebuffer(),rb=g.createRenderbuffer();g.bindRenderbuffer(g.RENDERBUFFER,rb);g.renderbufferStorage(g.RENDERBUFFER,g.STENCIL_INDEX8,TS,TS);
    g.bindFramebuffer(g.FRAMEBUFFER,f);g.framebufferRenderbuffer(g.FRAMEBUFFER,g.STENCIL_ATTACHMENT,g.RENDERBUFFER,rb);K=BT.kfb={f,rb,w:TS,gen:R.gen,ok:0}}
   const t=g.createTexture();g.bindTexture(g.TEXTURE_2D,t);g.texImage2D(g.TEXTURE_2D,0,g.RGBA,TS,TS,0,g.RGBA,g.UNSIGNED_BYTE,null);texPar(g,g.LINEAR);
@@ -39430,8 +39469,8 @@ window.__hsGLWELT={v:7};
   catch(e){ok=false;gErr('kachelGX',e)}finally{cx=c0;W=W0;H=H0;G.cam=cam0;ZOOM=Z0;if(C.bau)C.bau--;Math.random=mr}
   flush(R);rZiel(R,z0);R.b.tgt=undefined;
   const fehl=X.st.unbek+X.st.text+X.st.mix;GW.st.kgxFehl=(GW.st.kgxFehl||0)+fehl;
-  if(!ok||fehl){try{g.deleteTexture(F.t)}catch(e){}GW.st.kgxAus=(GW.st.kgxAus||0)+1;if(!ok||GW.st.kgxAus>40)BT.kgxSperre=1;return null}
-  F.t.__flt=g.LINEAR;GW.st.kachelBau++;GW.st.kgx=(GW.st.kgx||0)+1;BT.bt+=jetzt()-T0;return{t:F.t,gen:BT.gen,lu:R.frame,fl:1}}
+  if(!ok||fehl){if(F.slot!=null&&R.tatl){R.tatl.belegt.delete(F.slot);R.tatl.frei.push(F.slot)}else try{g.deleteTexture(F.t)}catch(e){}GW.st.kgxAus=(GW.st.kgxAus||0)+1;if(!ok||GW.st.kgxAus>40)BT.kgxSperre=1;return null}
+  if(F.slot==null)F.t.__flt=g.LINEAR;GW.st.kachelBau++;GW.st.kgx=(GW.st.kgx||0)+1;BT.bt+=jetzt()-T0;return{t:F.t,gen:BT.gen,lu:R.frame,fl:1,slot:F.slot,uv:F.uv}}
  function kachelBau(i,j,sB){if(kachelGX()&&!BT.kgxSperre){const e=kachelBauGX(i,j,sB);if(e)return e}return kachelBau2D(i,j,sB)}
  function kachelBau2D(i,j,sB){const T0=jetzt();if(!BT.bc){const L=bauLw(GW.TS,true);BT.bc=L.c;BT.bg=L.g}const TS=GW.TS,g=BT.bg;g.setTransform(1,0,0,1,0,0);zustandUebernehmen(g,EB.g1);g.setTransform(sB,0,0,sB,-i*TS,-j*TS);
   const X0=i*TS/sB,Y0=j*TS/sB,X1=(i+1)*TS/sB,Y1=(j+1)*TS/sB;bodenRechteck(g,G.ground,G.road,X0,Y0,X1,Y1);
@@ -39476,9 +39515,9 @@ window.__hsGLWELT={v:7};
    /* veraltete Kachel (Tor/Geröll geändert): weiter zeigen, neu bauen sobald Budget da */
    if(E&&E.gen!==BT.gen&&((BT.b0>0&&BT.bt<GW.ms)||prioK(i*T,j*T,T))){BT.b0--;try{const N=kachelBau(i,j,sB);try{RU.gl.deleteTexture(E.t)}catch(er){}E=N;BT.cur.set(k,E)}catch(er){gErr('kachel',er)}}
    if(!E&&BT.b0>0&&BT.bt<GW.ms){BT.b0--;try{E=kachelBau(i,j,sB);BT.cur.set(k,E)}catch(er){gErr('kachel',er);E=null}}
-   if(E){E.lu=RU.frame;Q.push([E.t,i*T,j*T,T,E.fl]);continue}
+   if(E){E.lu=RU.frame;Q.push([E.t,i*T,j*T,T,E.fl,E.uv]);continue}
    /* alter Maßstab vorhanden? */if(BT.alt.size){const Ta=TS/BT.altS,a0=Math.floor(i*T/Ta),a1=Math.floor(((i+1)*T-1e-6)/Ta),b0=Math.floor(j*T/Ta),b1=Math.floor(((j+1)*T-1e-6)/Ta);let ok=true;const L=[];
-    for(let b=b0;b<=b1&&ok;b++)for(let a=a0;a<=a1;a++){const A=BT.alt.get(a+','+b);if(!A){ok=false;break}L.push([A.t,a*Ta,b*Ta,Ta,A.fl])}if(ok){for(const q of L)Q.push(q);continue}}
+    for(let b=b0;b<=b1&&ok;b++)for(let a=a0;a<=a1;a++){const A=BT.alt.get(a+','+b);if(!A){ok=false;break}L.push([A.t,a*Ta,b*Ta,Ta,A.fl,A.uv])}if(ok){for(const q of L)Q.push(q);continue}}
    fehlt.push([i,j])}
   /* Ring vorbauen, wenn Zeit übrig */
   if(BT.b0>0&&BT.bt<GW.ms*0.5){outer:for(let j=j0-1;j<=j1+1;j++)for(let i=i0-1;i<=i1+1;i++){if(j>=j0&&j<=j1&&i>=i0&&i<=i1)continue;const k=i+','+j;if(BT.cur.has(k))continue;try{BT.cur.set(k,kachelBau(i,j,sB))}catch(er){gErr('ring',er)}if(--BT.b0<=Math.ceil(BT.nVis/36)||BT.bt>=GW.ms*0.5)break outer}}
@@ -39487,7 +39526,7 @@ window.__hsGLWELT={v:7};
   if(!fehlt.length&&BT.alt.size&&BT.cur.size>=(i1-i0+1)*(j1-j0+1))kachelnFrei(BT.alt);
   /* zeichnen (untere Ebene) */
   rZiel(RU,RS.uf||null);const g=RU.gl;
-  for(const q of Q){const x0=e+q[1]*s,y0=f+q[2]*s,x1=x0+q[3]*s,y1=y0+q[3]*s;zustand(RU,RU.P.tex,q[0],'copy',0,Math.abs(s-sB)<1e-6?g.NEAREST:g.LINEAR);if(q[4])quad(RU,x0,y0,x1,y0,x1,y1,x0,y1,0,1,1,0,1,1,1,1);else quad(RU,x0,y0,x1,y0,x1,y1,x0,y1,0,0,1,1,1,1,1,1)}
+  for(const q of Q){const x0=e+q[1]*s,y0=f+q[2]*s,x1=x0+q[3]*s,y1=y0+q[3]*s;zustand(RU,RU.P.tex,q[0],'copy',0,Math.abs(s-sB)<1e-6?g.NEAREST:g.LINEAR);if(q[5]){const U=q[5],h=Math.abs(s-sB)<1e-6?0:U[4];quad(RU,x0,y0,x1,y0,x1,y1,x0,y1,U[0]+h,U[1]-h,U[2]-h,U[3]+h,1,1,1,1)}else if(q[4])quad(RU,x0,y0,x1,y0,x1,y1,x0,y1,0,1,1,0,1,1,1,1);else quad(RU,x0,y0,x1,y0,x1,y1,x0,y1,0,0,1,1,1,1,1,1)}
   flush(RU);
   /* Live-Rest (Bildpunkte): fehlende Kacheln + bewegte Teile */
   const RE=[],W2=[];const addD=(x0,y0,x1,y1)=>{const a=Math.max(0,Math.floor(x0)),b=Math.max(0,Math.floor(y0)),c=Math.min(cw,Math.ceil(x1)),d=Math.min(ch,Math.ceil(y1));if(c>a&&d>b){RE.push([a,b,c-a,d-b]);W2.push([(a-e)/s,(b-f)/s,(c-e)/s,(d-f)/s])}};
@@ -39551,8 +39590,8 @@ window.__hsGLWELT={v:7};
   try{cx=X;FR.dbau=1;C.dbau=(C.dbau||0)+1;dRnd=(i*7919+j*104729+17)&0x7fffffff;Math.random=dRandom;for(const I of L){try{DD(DT.arr[I.i],t)}catch(er){}}}catch(e){ok=false}finally{cx=c0;FR.dbau=0;C.dbau--;Math.random=mr}
   flush(R);rZiel(R,z0);R.b.tgt=undefined;
   const fehl=X.st.unbek+X.st.text+X.st.mix;GW.st.kgxFehl=(GW.st.kgxFehl||0)+fehl;
-  if(!ok||fehl){try{g.deleteTexture(F.t)}catch(e){}GW.st.kgxAus=(GW.st.kgxAus||0)+1;if(GW.st.kgxAus>40)BT.kgxSperre=1;return null}
-  F.t.__flt=g.LINEAR;GW.st.kgx=(GW.st.kgx||0)+1;return{t:F.t,lu:R.frame,fl:1}}
+  if(!ok||fehl){if(F.slot!=null&&R.tatl){R.tatl.belegt.delete(F.slot);R.tatl.frei.push(F.slot)}else try{g.deleteTexture(F.t)}catch(e){}GW.st.kgxAus=(GW.st.kgxAus||0)+1;if(GW.st.kgxAus>40)BT.kgxSperre=1;return null}
+  if(F.slot==null)F.t.__flt=g.LINEAR;GW.st.kgx=(GW.st.kgx||0)+1;return{t:F.t,lu:R.frame,fl:1,slot:F.slot,uv:F.uv}}
  function dekoWelt(m,sB){FR.dOn=0;if(!GW.k.deko)return;try{if(GF().nodeco)return}catch(e){}
   if(!DT.arr||!dSigOk()||DT.env!==dEnv())dNeu();
   if(!DT.fertig){if(!dSchritt()){GW.st.dekoLive++;return}dAbschluss()}
@@ -39562,11 +39601,11 @@ window.__hsGLWELT={v:7};
   let fehlt=0;const Q=[];
   for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){const k=i+','+j;let E=DT.m.get(k);
    if(!E){if(BT.b0>0&&BT.bt<GW.ms){BT.b0--;const T0=jetzt();try{E=dKachelBau(i,j,sB);DT.m.set(k,E)}catch(er){gErr('dekokachel',er)}BT.bt+=jetzt()-T0}}
-   if(!E){fehlt++;continue}E.lu=RU.frame;if(E.t)Q.push([E.t,i*T,j*T,T,E.fl])}
+   if(!E){fehlt++;continue}E.lu=RU.frame;if(E.t)Q.push([E.t,i*T,j*T,T,E.fl,E.uv])}
   if(BT.b0>0&&BT.bt<GW.ms*0.5){outer:for(let j=j0-1;j<=j1+1;j++)for(let i=i0-1;i<=i1+1;i++){if(j>=j0&&j<=j1&&i>=i0&&i<=i1)continue;const k=i+','+j;if(DT.m.has(k))continue;const T0=jetzt();try{DT.m.set(k,dKachelBau(i,j,sB))}catch(er){}BT.bt+=jetzt()-T0;if(--BT.b0<=0||BT.bt>=GW.ms*0.5)break outer}}
   const cap=kCap(0.45,(i1-i0+1)*(j1-j0+1));if(DT.m.size>cap){const L=[...DT.m.entries()].sort((a,b)=>a[1].lu-b[1].lu);for(const [k,E] of L){if(DT.m.size<=cap*0.85||E.lu>=RU.frame)break;if(E.t)try{RU.gl.deleteTexture(E.t)}catch(er){}DT.m.delete(k)}}
   if(fehlt){GW.st.dekoLive++;return}
-  rZiel(RU,RS.uf||null);const g=RU.gl;for(const q of Q){const x0=e+q[1]*s,y0=f+q[2]*s,x1=x0+q[3]*s,y1=y0+q[3]*s;zustand(RU,RU.P.tex,q[0],RS.uf?'overm':'over',0,Math.abs(s-sB)<1e-6?g.NEAREST:g.LINEAR);if(q[4])quad(RU,x0,y0,x1,y0,x1,y1,x0,y1,0,1,1,0,1,1,1,1);else quad(RU,x0,y0,x1,y0,x1,y1,x0,y1,0,0,1,1,1,1,1,1)}
+  rZiel(RU,RS.uf||null);const g=RU.gl;for(const q of Q){const x0=e+q[1]*s,y0=f+q[2]*s,x1=x0+q[3]*s,y1=y0+q[3]*s;zustand(RU,RU.P.tex,q[0],RS.uf?'overm':'over',0,Math.abs(s-sB)<1e-6?g.NEAREST:g.LINEAR);if(q[5]){const U=q[5],h=Math.abs(s-sB)<1e-6?0:U[4];quad(RU,x0,y0,x1,y0,x1,y1,x0,y1,U[0]+h,U[1]-h,U[2]-h,U[3]+h,1,1,1,1)}else if(q[4])quad(RU,x0,y0,x1,y0,x1,y1,x0,y1,0,1,1,0,1,1,1,1);else quad(RU,x0,y0,x1,y0,x1,y1,x0,y1,0,0,1,1,1,1,1,1)}
   flush(RU);FR.dOn=1;GW.st.dekoAn++}
  function imLive(d){const L=FR.live;if(!L.length)return false;const I=DT.info&&DT.info.length?null:null;const x=d.x,y=d.y,M=70;for(const r of L){if(x+M>r[0]&&x-M<r[2]&&y+M>r[1]&&y-M<r[3])return true}return false}
  DD=drawDeco;
