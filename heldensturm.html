@@ -40792,6 +40792,81 @@ function wache(c,w,t){const sch=Math.sin(t*(w.streife&&w.ruhe<=0?9:1.5)+w.seed*6
 {const pg=drawPropGlow;drawPropGlow=function(inView,t){const r=pg.apply(this,arguments);try{if(!G.room)for(const p of G.props){if(p.k!=='ar_wache'||p.dead||!inView(p.x,p.y,60))continue;const f=Math.cos(p.blick)>=0?1:-1;glow(p.x+f*10,p.y-6,46,'#ffc870',0.5,true);const o=cx.globalCompositeOperation;cx.globalCompositeOperation='lighter';kegel(cx,p,t);cx.globalCompositeOperation=o}}catch(e){}return r}}
 }catch(e){console.error('wache',e);window.__hsWACHE.fatal=String(e&&e.stack||e)}})();
 
+
+/* ================= Paket „raum“: Raumgestaltung – große Hallen und Lichtungen bekommen einen Grundriss – window.__hsRAUM =================
+   Die Abschnittskarten bestehen aus großen Rechteck-Räumen (oft 800–1400 px), verbunden durch Gänge – innen meist leer bis auf
+   verstreuten Kleinkram. Jetzt bekommt (fast) jeder große Raum eine gestaltete Mitte, passend zum Ort:
+   Hallen: Säulenhalle, Kreuzgang um Brunnen/Statue, Innenhof mit Eckmauern, Barrikaden-Deckung. Gassen: Markt mit Ständen, Platz mit
+   Statue und Bäumen, Kistenlager. Höhlen: Tropfsteingruppen, Kristallsee (in Glutorten Lavasee), Felsblöcke, Spalte mit Steg.
+   Draußen: Hain mit Steinkreis, Teich mit Bäumen, Ruine, Heckengarten. Dazu Licht an den Mittelstücken.
+   Spielwert: Deckung gegen Fernkampf, Engstellen und Rundläufe im Kampf, Orientierung (jeder Raum wiedererkennbar).
+   Sicherheit: nur im Innenbereich (≥120 px Abstand zu allen Raumkanten → Türen und Umlauf bleiben frei), jedes Teil nur auf freier
+   Fläche (keine Überlappung mit Bestehendem), nie im Startbereich und nie in Kampfplatz/Boss-Arena. Online: Teil des Stufenpakets.
+   Präfix rg. Abschalten: window.__hsRAUM.aus=1 */
+window.__hsRAUM={v:1,aus:0,st:{raeume:0,teile:0}};
+(function(){try{
+const RG=window.__hsRAUM;
+function gestalten(){const K=G.ka;if(RG.aus||!K||!K.sec||G.room||K.flucht||K.esc)return;const T=K.T||{},Z=K.Z||40,th=G.themeKey;
+ const glut=!!T.glut||th==='glutgang'||th==='hort'||th==='schmiede'||th==='gracklstugh';
+ const frei=(x,y,r)=>!blkPunkt(x,y,r)&&!wlLoPunkt(x,y,r+8);
+ const S0=K.start?{x:K.start.x!=null?K.start.x:K.start[0],y:K.start.y!=null?K.start.y:K.start[1]}:{x:P.x,y:P.y};
+ const B=[],LO=[],D=[];let teile=0;
+ const C_=(x,y,r,k,o)=>{if(!frei(x,y,r+14))return false;const b=Object.assign({t:'c',x,y,r,k,v:Math.random(),wl:1,rg:1},o||{});G.blk.push(b);teile++;return true};
+ const R_=(x,y,w,h,k)=>{for(let u=0;u<=1.001;u+=0.25)for(let v=0;v<=1.001;v+=0.5){if(!frei(x+w*u,y+h*v,16))return false}G.blk.push({t:'r',x,y,w,h,k,v:Math.random(),wl:1,rg:1});teile++;return true};
+ const W_=(x,y,r,k)=>{if(!frei(x,y,r+40))return false;G.wl.lo.push({t:'c',x,y,r,k,v:Math.random(),wl:1,rg:1});teile++;return true};
+ const DK=(x,y,k,s)=>G.deco.push({x,y,k,s:s||rnd(0.85,1.2),v:Math.random(),wl:1});
+ const licht=(x,y)=>DK(x,y,glut?'brazier':T.mas==='wald'?'torch':'brazier',1);
+ for(const s of K.sec){if(s.art==='arena'||s.art==='boss'||s.art==='kampf')continue;const L=s.rooms||s.blobs;if(!L)continue;
+  /* Rechteck-Räume [i0,j0,i1,j1] (Hallen/Gassen) oder Ellipsen [cx,cy,rx,ry] in Zellen (organische Karten: größte zuerst) */
+  const LL=L.slice().sort((a,b)=>(b[2]>b[0]?0:b[2]*b[3])-(a[2]>a[0]?0:a[2]*a[3]));let nE=0;
+  for(const q of LL){if(!q||q.length<4)continue;const rect=q[2]>q[0]&&q[3]>q[1];let ix0,iy0,ix1,iy1;
+   if(rect){if(q[2]-q[0]<10||q[3]-q[1]<10)continue;const band=120;ix0=q[0]*Z+band;iy0=q[1]*Z+band;ix1=(q[2]+1)*Z-band;iy1=(q[3]+1)*Z-band}
+   else{if(++nE>2)continue;const ex=(q[0]+0.5)*Z,ey=(q[1]+0.5)*Z,hx=(q[2]*Z-130)*0.72,hy=(q[3]*Z-130)*0.72;if(hx<150||hy<150)continue;ix0=ex-hx;ix1=ex+hx;iy0=ey-hy;iy1=ey+hy}
+   const iw=ix1-ix0,ih=iy1-iy0;if(iw<300||ih<300)continue;
+   const cx=(ix0+ix1)/2,cy=(iy0+iy1)/2;if(Math.hypot(cx-S0.x,cy-S0.y)<520)continue;
+   if(G.ar&&G.ar.L&&G.ar.L.some(A=>Math.hypot(A.x-cx,A.y-cy)<(A.r||250)+120))continue;
+   if(Math.random()<0.2)continue;/* manche Räume bleiben offen – Platz für große Kämpfe */
+   const m=Math.min(iw,ih),lang=iw>=ih;let art;
+   if(T.mas==='mauer')art=pick(th==='grab'||th==='ruine'?['kreuzgang','saeulenhalle','deckung']:['saeulenhalle','kreuzgang','innenhof','deckung']);
+   else if(T.mas==='haus')art=pick(['markt','platz','kisten']);
+   else if(T.mas==='fels')art=pick(glut?['lavasee','felsbloecke','tropf']:['tropf','kristallsee','felsbloecke','spalte']);
+   else art=pick(['hain','teich','ruine','hecken']);
+   const vorher=teile;
+   if(art==='saeulenhalle'){const n=Math.max(2,Math.floor((lang?iw:ih)/170));for(let i=0;i<n;i++){const u=(i+0.5)/n;for(const v of [0.18,0.82]){const x=lang?ix0+iw*u:ix0+iw*v,y=lang?iy0+ih*v:iy0+ih*u;C_(x,y,17,'saeule')}}
+    C_(lang?ix0+iw*0.5:cx,lang?cy:iy0+ih*0.5,19,'statue');licht(cx+(lang?0:60),cy+(lang?60:0))}
+   else if(art==='kreuzgang'){const r=m*0.36,n=8;for(let i=0;i<n;i++){const a=i/n*TAU+Math.PI/8;C_(cx+Math.cos(a)*r,cy+Math.sin(a)*r*0.9,17,'saeule')}
+    C_(cx,cy,th==='grab'?19:20,th==='grab'?'statue':pick(['brunnen','statue']));licht(cx-40,cy+42);licht(cx+40,cy+42)}
+   else if(art==='innenhof'){const h=Math.min(m*0.34,220),t=34,L_=h*0.62;for(const sx of [-1,1])for(const sy of [-1,1]){const ex=cx+sx*h,ey=cy+sy*h;
+     R_(sx<0?ex:ex-L_,sy<0?ey:ey-t,L_,t,'wand');R_(sx<0?ex:ex-t,sy<0?ey+t:ey-L_,t,L_-t,'wand')}C_(cx,cy,20,'brunnen');licht(cx,cy+50)}
+   else if(art==='deckung'){const n=ri(4,6);for(let i=0;i<n;i++){const x=ix0+rnd(0.1,0.9)*iw,y=iy0+rnd(0.1,0.9)*ih,hor=Math.random()<0.5,len=rnd(110,160);hor?R_(x-len/2,y-17,len,34,'wand'):R_(x-17,y-len/2,34,len,'wand')}
+    for(let i=0;i<3;i++)R_(ix0+rnd(0.1,0.9)*iw,iy0+rnd(0.1,0.9)*ih,50,34,'kisten')}
+   else if(art==='markt'){C_(cx,cy,20,'brunnen');const r=m*0.34;for(let i=0;i<6;i++){const a=i/6*TAU+rnd(-0.15,0.15),x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r*0.85;R_(x-42,y-17,84,34,'stand')}licht(cx+50,cy+40)}
+   else if(art==='platz'){C_(cx,cy,19,'statue');const r=m*0.32;for(let i=0;i<4;i++){const a=i/4*TAU+Math.PI/4;C_(cx+Math.cos(a)*r,cy+Math.sin(a)*r*0.85,19,'baum',{s:rnd(1.2,1.5),art:'laub'})}
+    for(let i=0;i<4;i++){const a=i/4*TAU;R_(cx+Math.cos(a)*r*1.25-25,cy+Math.sin(a)*r*1.05-17,50,34,'kisten')}licht(cx-46,cy+40)}
+   else if(art==='kisten'){for(let i=0;i<ri(5,8);i++)R_(ix0+rnd(0.08,0.92)*iw-25,iy0+rnd(0.08,0.92)*ih-17,50,34,Math.random()<0.75?'kisten':'stand')}
+   else if(art==='tropf'){for(let g=0;g<3;g++){const a=g/3*TAU+rnd(0,1),gx=cx+Math.cos(a)*m*0.28,gy=cy+Math.sin(a)*m*0.24;for(let i=0;i<ri(3,5);i++)C_(gx+rnd(-60,60),gy+rnd(-50,50),rnd(12,17),'stalag')}}
+   else if(art==='kristallsee'||art==='lavasee'){const r=Math.min(m*0.2,130);if(W_(cx,cy,r,art==='lavasee'?'lava':'wasser')){if(art==='lavasee')DK(cx,cy,'wl_glut',r/60,0.5);for(let i=0;i<7;i++){const a=i/7*TAU+rnd(-0.2,0.2);C_(cx+Math.cos(a)*(r+70),cy+Math.sin(a)*(r*0.8+60),18,art==='lavasee'?'stalag':'kristall')}}}
+   else if(art==='felsbloecke'){for(let i=0;i<ri(4,6);i++)C_(ix0+rnd(0.12,0.88)*iw,iy0+rnd(0.12,0.88)*ih,rnd(30,40),'fels')}
+   else if(art==='spalte'){/* Spalte quer zur langen Achse, in der Mitte ein Steg (Lücke) */const len=(lang?ih:iw)*0.86,gap=120,th_=56;const a0=lang?iy0+(ih-len)/2:ix0+(iw-len)/2;const l1=(len-gap)/2;
+    const ok=(x,y,w,h)=>{for(let u=0;u<=1.001;u+=0.2)for(let v=0;v<=1.001;v+=0.5)if(!frei(x+w*u,y+h*v,14))return false;return true};
+    const P_=lang?[[cx-th_/2,a0,th_,l1],[cx-th_/2,a0+l1+gap,th_,l1]]:[[a0,cy-th_/2,l1,th_],[a0+l1+gap,cy-th_/2,l1,th_]];
+    if(P_.every(r=>ok(...r))){for(const r of P_){G.wl.lo.push({t:'r',x:r[0],y:r[1],w:r[2],h:r[3],k:'ka_schlucht',v:Math.random(),wl:1,rg:1});teile++}C_(lang?cx+90:cx,lang?cy:cy+90,14,'schutt')}}
+   else if(art==='hain'){const r=m*0.34,n=7;for(let i=0;i<n;i++){const a=i/n*TAU+rnd(-0.2,0.2);C_(cx+Math.cos(a)*r,cy+Math.sin(a)*r*0.85,19,'baum',{s:rnd(1.4,1.9),art:th==='nacht'?'tanne':'laub'})}
+    for(let i=0;i<5;i++){const a=i/5*TAU;C_(cx+Math.cos(a)*70,cy+Math.sin(a)*58,13,'schutt')}C_(cx,cy,19,'statue')}
+   else if(art==='teich'){const r=Math.min(m*0.2,120);if(W_(cx,cy,r,'wasser')){for(let i=0;i<4;i++){const a=i/4*TAU+rnd(-0.3,0.3);C_(cx+Math.cos(a)*(r+90),cy+Math.sin(a)*(r*0.8+80),19,'baum',{s:rnd(1.3,1.7),art:'laub'})}for(let i=0;i<5;i++){const a=rnd(0,TAU);DK(cx+Math.cos(a)*(r+8),cy+Math.sin(a)*(r*0.8+6),'reeds')}}}
+   else if(art==='ruine'){const h=Math.min(m*0.3,190);R_(cx-h,cy-h,h*1.1,34,'wand');R_(cx-h,cy-h+34,34,h*0.9,'wand');R_(cx+h*0.35,cy+h-34,h*0.65,34,'wand');for(let i=0;i<4;i++)C_(cx+rnd(-h,h),cy+rnd(-h,h),14,'schutt');C_(cx+h*0.7,cy-h*0.6,17,'saeule')}
+   else if(art==='hecken'){const n=3;for(let i=0;i<n;i++){const y=iy0+ih*(i+0.5)/n;const len=iw*0.32;R_(ix0+iw*0.08,y-13,len,26,'hecke');R_(ix1-iw*0.08-len,y-13,len,26,'hecke')}C_(cx,cy,19,'statue')}
+   if(teile>vorher)RG.st.raeume++}}
+ RG.st.teile+=teile}
+RG.gestalten=gestalten;
+{const kd=kaDeko;kaDeko=function(S){const r=kd.apply(this,arguments);try{gestalten()}catch(e){console.error('raum',e);RG.err=String(e&&e.stack||e)}return r}}
+/* Hauptweg (K.ka2W, entsteht erst nach dem Bau) frei halten: Teile nahe am Weg wieder entfernen – Karren, Leitlinie und Wegfindung bleiben frei */
+{const kb=wlBau;wlBau=function(S){const r=kb.apply(this,arguments);const K=G.ka;try{if(K&&K.ka2W&&K.ka2W.length>1&&G.blk){const W=K.ka2W;const nah=(x,y,r)=>{for(let i=1;i<W.length;i++){const a=W[i-1],b=W[i],dx=b[0]-a[0],dy=b[1]-a[1],l2=dx*dx+dy*dy||1;let u=((x-a[0])*dx+(y-a[1])*dy)/l2;u=u<0?0:u>1?1:u;const px=a[0]+dx*u-x,py=a[1]+dy*u-y;if(px*px+py*py<r*r)return true}return false};
+  const nlo=()=>G.wl&&G.wl.lo?G.wl.lo.length:0;const vor=G.blk.length+nlo();const box=b=>b.t==='c'?[b.x,b.y,b.r]:[b.x+b.w/2,b.y+b.h/2,Math.hypot(b.w,b.h)/2];
+  G.blk=G.blk.filter(b=>{if(!b.rg)return true;const q=box(b);return !nah(q[0],q[1],q[2]+62)});if(G.wl&&G.wl.lo)G.wl.lo=G.wl.lo.filter(o=>{if(!o.rg)return true;const q=box(o);return !nah(q[0],q[1],q[2]+70)});
+  const weg=vor-(G.blk.length+nlo());RG.st.wegfrei=(RG.st.wegfrei||0)+weg;if(weg){blkRaster();if(G.wl)wlLoRaster();G.blkV=(G.blkV||0)+1}}}catch(e){console.error('raum weg',e)}return r}}
+}catch(e){console.error('raum',e);window.__hsRAUM.fatal=String(e&&e.stack||e)}})();
+
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
