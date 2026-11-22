@@ -406,6 +406,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       '<button type="button" data-zm="zsupd">⬇ ' + W("ZynSimple aktualisieren", "Update ZynSimple") + "<small>" + W("Mischpult und DJ-Pult – wechselt dafür ins Mischpult", "mixing desk and DJ deck – switches to the mixing desk") + "</small></button>" +
       '<button type="button" data-zm="upd">⬇ ' + W("Barden Beats aktualisieren", "Update Barden Beats") + "<small>" + W("holt die neueste Version (Internet nötig) und startet neu", "fetches the latest version (needs internet) and restarts") + "</small></button>" +
       '<button type="button" data-zm="auf">' + (aufnahmeAn ? "⏹ " + W("Aufnahme beenden", "Stop recording") : "⏺ " + W("Aufnahme starten", "Start recording")) + "<small>" + (aufnahmeAn && aufSeit ? "⏺ " + zeitText((Date.now() - aufSeit) / 1000) + " · " : "") + W("alles, was rauskommt – als WAV ", "everything you hear – as WAV ") + (aufStick ? W("auf den USB-Stick (Ordner BardenBeats)", "to the USB stick (folder BardenBeats)") : W("in den Zynthian-Ordner „capture“ · USB-Stick stecken = dorthin", "to the Zynthian capture folder · plug a USB stick to record there")) + "</small></button>" +
+      '<button type="button" data-zm="aufart">🎚 ' + W("Aufnahme als: ", "Record as: ") + "<b>" + (spurenWahl ? W("Einzelspuren", "separate tracks") : W("kompletter Mix", "full mix")) + "</b><small>" + (spurenWahl ? W("eigener Ordner: Gesamt + Band, Kulisse, Live, Effekte je als WAV", "own folder: full mix + band, ambience, live, effects as WAVs") : W("eine WAV-Datei mit allem · SEL = Einzelspuren", "one WAV with everything · SEL = separate tracks")) + "</small></button>" +
       '<button type="button" data-zm="start">🔌 ' + W("Beim Einschalten: ", "At power-on: ") + "<b>" + W("Barden Beats", "Barden Beats") + "</b><small>" + W("so startet das Gerät ab jetzt", "the device starts like this from now on") + "</small></button>" +
       '<button type="button" data-zm="startz">🔌 ' + W("Beim Einschalten: ", "At power-on: ") + "<b>" + W("Mischpult", "Mixing desk") + "</b></button>" +
       '<button type="button" data-zm="neu">🔄 ' + W("Seite neu laden", "Reload page") + "</button>" +
@@ -427,6 +428,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
         fetch("/zyn/diagnose").then(r => r.json()).then(j => { const pre = $(".zyn-menue pre"); if (pre) pre.textContent = j.text || "–"; }).catch(() => { const pre = $(".zyn-menue pre"); if (pre) pre.textContent = W("Brücke nicht erreichbar", "bridge unreachable"); }); },
       zurueck: () => { menueZu(); zeige("↺ " + W("Vorige Version wird geholt …", "Restoring previous version …")); post("zurueck"); updateVerfolgen(); },
       auf: () => { menueZu(); aufnahme(); },
+      aufart: () => { if (aufnahmeAn) { zeige("⏺ " + W("Erst Aufnahme beenden", "Stop recording first")); return; } spurenWahl = !spurenWahl; schreib("imres-zp-spuren", spurenWahl ? "1" : "0"); systemMenue(); },
       start: () => { post("start-imres"); zeige("🔌 " + W("Startet künftig mit Barden Beats", "Will start with Barden Beats")); menueZu(); },
       startz: () => { post("start-zynthian"); zeige("🔌 " + W("Startet künftig mit dem Mischpult", "Will start with the mixing desk")); menueZu(); },
       neu: () => location.reload(), neustart: () => post("neustart"), aus: () => { zeige("⏻ " + W("Fährt herunter …", "Shutting down …")); post("aus"); }, zu: menueZu });
@@ -667,13 +669,60 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   const aufZielText = z => z === "USB-Stick" ? "💾 " + W("auf den USB-Stick", "to the USB stick") : "🗂 " + W("in den Zynthian (capture)", "into the Zynthian (capture)");
   function aufnahmeStand(j) { if (!j) return; const war = aufnahmeAn; aufnahmeAn = !!j.an; if (j.ziel) aufZiel = j.ziel; if ("stick" in j) aufStick = !!j.stick;
     if (aufnahmeAn && (!war || !aufSeit)) aufSeit = Date.now() - (+j.dauer || 0) * 1000; if (!aufnahmeAn) aufSeit = 0; }
-  function aufnahme() {
-    fetch("/zyn/aufnahme", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ an: !aufnahmeAn }) }).then(r => r.json()).then(j => {
+  /* ---------- Einzelspuren: Busse der Bühne abgreifen und als PCM an die Brücke ---------- */
+  let spurenWahl = lies("imres-zp-spuren", "0") === "1";
+  const SPUR = { an: false, liste: [], uhr: null, stumm: null };
+  async function spurenStart() {
+    if (SPUR.an || SPUR.startet) return;
+    SPUR.startet = true;
+    try { await spurenStartJetzt(); } finally { SPUR.startet = false; }
+  }
+  async function spurenStartJetzt() {
+    const P = window.ImresPult, k = P && P.spurKnoten && P.spurKnoten();
+    if (!k || !k.ctx || !k.ctx.audioWorklet) { zeige("⚠ " + W("Einzelspuren gehen hier nicht – nur Gesamt", "Separate tracks unavailable – full mix only")); return; }
+    const ctx = k.ctx;
+    if (spurenStart.ctx !== ctx) {
+      const code = "class S extends AudioWorkletProcessor{constructor(){super();this.l=[];this.r=[];this.n=0}process(i){const x=i[0];let a,b;if(x&&x.length){a=x[0];b=x[1]||x[0]}else{a=b=new Float32Array(128)}this.l.push(a.slice());this.r.push(b.slice());this.n+=a.length;if(this.n>=8192){this.port.postMessage([this.l,this.r]);this.l=[];this.r=[];this.n=0}return true}}registerProcessor('imres-spur',S)";
+      await ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([code], { type: "application/javascript" })));
+      spurenStart.ctx = ctx;
+    }
+    SPUR.stumm = ctx.createGain(); SPUR.stumm.gain.value = 0; SPUR.stumm.connect(ctx.destination);
+    SPUR.liste = ["Band", "Kulisse", "Live", "Effekte"].filter(n => k[n]).map(name => {
+      const node = new AudioWorkletNode(ctx, "imres-spur", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1], channelCount: 2, channelCountMode: "explicit" });
+      const sp = { name, node, quelle: k[name], puffer: [], kette: Promise.resolve(), sr: ctx.sampleRate };
+      node.port.onmessage = ev => sp.puffer.push(ev.data);
+      k[name].connect(node); node.connect(SPUR.stumm);
+      return sp;
+    });
+    SPUR.an = true;
+    SPUR.uhr = setInterval(() => SPUR.liste.forEach(spurSchicken), 1000);
+  }
+  function spurSchicken(sp) {
+    if (!sp.puffer.length) return sp.kette;
+    const teile = sp.puffer; sp.puffer = [];
+    let n = 0; teile.forEach(([l]) => l.forEach(b => n += b.length));
+    const pcm = new Int16Array(n * 2); let o = 0;
+    teile.forEach(([l, r]) => l.forEach((bl, bi) => { const br = r[bi]; for (let q = 0; q < bl.length; q++) { const a = Math.max(-1, Math.min(1, bl[q])), b = Math.max(-1, Math.min(1, br[q])); pcm[o++] = a < 0 ? a * 32768 : a * 32767; pcm[o++] = b < 0 ? b * 32768 : b * 32767; } }));
+    sp.kette = sp.kette.then(() => fetch("/zyn/spur?spur=" + sp.name + "&sr=" + Math.round(sp.sr) + "&ch=2", { method: "POST", headers: { "Content-Type": "application/octet-stream" }, body: pcm.buffer })).catch(() => {});
+    return sp.kette;
+  }
+  async function spurenStopp(senden) {
+    if (!SPUR.an) return;
+    SPUR.an = false; clearInterval(SPUR.uhr);
+    SPUR.liste.forEach(sp => { try { sp.quelle.disconnect(sp.node); } catch (_) {} try { sp.node.disconnect(); } catch (_) {} });
+    try { SPUR.stumm.disconnect(); } catch (_) {}
+    if (senden) await Promise.all(SPUR.liste.map(spurSchicken));
+    SPUR.liste = [];
+  }
+  async function aufnahme() {
+    if (aufnahmeAn && SPUR.an) await spurenStopp(true);
+    fetch("/zyn/aufnahme", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ an: !aufnahmeAn, spuren: spurenWahl }) }).then(r => r.json()).then(j => {
       const war = aufnahmeAn; aufnahmeStand(j); if (aufnahmeAn && !war) aufSeit = Date.now();
+      if (aufnahmeAn && !war && j.spuren) spurenStart().catch(() => zeige("⚠ " + W("Einzelspuren gehen nicht – nur Gesamt", "Separate tracks failed – full mix only")));
       leisteZeichnen(); ledsMelden(); if (PULT) zpZeichnen(true);
       if (j.fehler) { zeige("⚠ " + j.fehler); return; }
       if (aufnahmeAn) zeige("⏺ " + W("Aufnahme läuft", "Recording"), null, aufZielText(aufZiel));
-      else zeige("⏹ " + W("Gespeichert", "Saved") + (j.dauer ? " · " + zeitText(j.dauer) : ""), null, (j.ziel === "USB-Stick" ? "💾 USB-Stick · " + W("kann gleich raus", "safe to unplug") + " · " : "🗂 capture · ") + (j.datei ? j.datei.split("/").pop() : ""));
+      else zeige("⏹ " + W("Gespeichert", "Saved") + (j.dauer ? " · " + zeitText(j.dauer) : ""), null, (j.ziel === "USB-Stick" ? "💾 USB-Stick · " + W("kann gleich raus", "safe to unplug") + " · " : "🗂 capture · ") + (j.spuren && j.ordner ? j.ordner.split("/").pop() + "/ · " + (j.spuren + 1) + W(" Spuren", " tracks") : (j.datei ? j.datei.split("/").pop() : "")));
     }).catch(() => zeige("⚠ " + W("Aufnahme geht nicht", "Recording failed")));
   }
   const aufnahmeHolen = () => fetch("/zyn/aufnahme").then(r => r.json()).then(j => { aufnahmeStand(j); leisteZeichnen(); }).catch(() => {});
@@ -804,6 +853,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     }
     if (e.art === "stop") { if (!slave) return; const z = pz(); if (SEITE === "buehne" && z && z.laeuft) musikSpielen(); return; }
     if (e.art === "note") {
+      if ((NEO.an || NEO.lernen) && neoKanalPasst(e) && !(OPT.noten && steuerOk(e) && OPT.steuerKanal && e.note >= 36 && e.note <= 43)) { neoNote(e); return; }
       if (OPT.kickDucken && e.kanal === OPT.kickKanal && e.note === OPT.kickNote) {
         const t = (OPT.duckTiefe || 40) / 100 * Math.min(1, .5 + e.wert / 254);
         try { if (SEITE === "buehne" && P) P.ducken(t); else if (window.ImresWelten) window.ImresWelten.ducken(t); } catch (_) {}
@@ -2289,7 +2339,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   }
 
   /* ===================== Synth-Begleitung (MIDI an Zynthian-Ketten / externe Synths) ===================== */
-  const BEGL_STD = { an: false, pad: true, bass: true, glocken: true, drone: false, gm: false };
+  const BEGL_STD = { an: false, pad: true, bass: true, glocken: true, drone: false, gm: false, ziele: {} };
   let BEGL = Object.assign({}, BEGL_STD); try { Object.assign(BEGL, JSON.parse(lies("imres-zp-begl", "{}")) || {}); } catch (_) {}
   const beglMerken = () => schreib("imres-zp-begl", JSON.stringify(BEGL));
   const KAN = { pad: 0, bass: 1, glocken: 2, drone: 3 };
@@ -2313,7 +2363,10 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
   };
   const ensembleVon = st => Object.keys(ENSEMBLES).find(k => ENSEMBLES[k].st.includes(st)) || "abenteuer";
   let beglPad = [], beglBass = null, beglDrone = [], beglArp = 0, beglLief = false, beglEns = "", beglPuffer = [], beglT = 0;
+  /* wohin jede Stimme geht: alle Geräte, nur Zynthian, ein bestimmtes Gerät (z. B. Streichfett) oder aus */
+  const beglZiel = k => { const r = Object.keys(KAN).find(x => KAN[x] === k); return (r && BEGL.ziele && BEGL.ziele[r]) || "alle"; };
   function beglSenden(liste, alleAus) {
+    liste = liste.map(x => (x.z ? x : Object.assign({ z: beglZiel(x.k) }, x))).filter(x => x.z !== "aus");
     beglPuffer.push(...liste);
     if (alleAus) { fetch("/zyn/noten", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ alleAus: true }) }).catch(() => {}); }
     if (beglT) return;
@@ -2350,18 +2403,36 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     a["b:test"] = () => { const t = performance.now() + 50; beglSenden([[60, 64, 67].map(n => ({ k: KAN.pad, n, v: 90, t })), [60, 64, 67].map(n => ({ k: KAN.pad, n, v: 0, t: t + 900 })), [{ k: KAN.bass, n: 36, v: 100, t }, { k: KAN.bass, n: 36, v: 0, t: t + 900 }], [{ k: KAN.glocken, n: 79, v: 90, t: t + 300 }, { k: KAN.glocken, n: 79, v: 0, t: t + 800 }]].flat()); zeige("🎹 " + W("Testakkord auf Kanal 1–3", "Test chord on channels 1–3")); };
     a["b:aus"] = () => { beglAus(); zeige("🔇 " + W("Alle Noten aus", "All notes off")); };
     a["b:ideen"] = beglIdeen;
+    if (!beglMenue.geraete || Date.now() - (beglMenue.geholt || 0) > 4000) { beglMenue.geraete = beglMenue.geraete || []; beglMenue.geholt = Date.now(); fetch("/zyn/midigeraete").then(r => r.json()).then(j => { beglMenue.geraete = (j.geraete || []).map(g => g.name); if (menueArt === "begl") beglMenue(fokusK); }).catch(() => {}); }
+    BEGL.ziele = BEGL.ziele || {};
+    const ZIEL_L = () => ["alle", "zynthian"].concat(beglMenue.geraete || []).concat(["aus"]);
+    const zielName = v => v === "alle" || !v ? W("alle Geräte", "all devices") : v === "zynthian" ? W("nur Zynthian", "Zynthian only") : v === "aus" ? W("aus", "off") : v;
+    const zielZeile = r => '<button type="button" data-zm="bz:' + r + '"><span>· → ' + W("geht an: ", "goes to: ") + "<b>" + esc2(zielName(BEGL.ziele[r])) + "</b></span><small>" + W("◀ ▶ / SEL: anderes Ziel", "◀ ▶ / SEL: other target") + "</small></button>";
+    ["pad", "bass", "glocken", "drone"].forEach(r => {
+      const weiter = st => { const l = ZIEL_L(), i = Math.max(0, l.indexOf(BEGL.ziele[r] || "alle")); BEGL.ziele[r] = l[(i + st + l.length) % l.length]; beglMerken(); beglMenue("z" + r); };
+      a["bz:" + r] = () => weiter(1); a["bz:" + r + ":stufe"] = weiter;
+    });
+    /* Test: der Streichfett (oder ein anderes Gerät) spielt die Flächen, alles andere bleibt im Zynthian */
+    a["b:streichfett"] = () => {
+      const g = beglMenue.geraete || [], sf = g.find(n => /streichfett|waldorf/i.test(n)) || g[0];
+      if (!sf) { zeige("⚠ " + W("Kein externes MIDI-Gerät gefunden", "No external MIDI device found"), null, W("Streichfett per USB oder MIDI-Interface anstecken", "Connect Streichfett via USB or a MIDI interface")); return; }
+      Object.assign(BEGL, { an: true, pad: true }); BEGL.ziele = { pad: sf, bass: "zynthian", glocken: "zynthian", drone: "zynthian" }; beglMerken();
+      zeige("🎻 " + W("Flächen → ", "Pads → ") + sf, null, W("Streichfett auf MIDI-Kanal 1 stellen · Testakkord kommt", "Set Streichfett to MIDI channel 1 · test chord coming"));
+      setTimeout(() => a["b:test"](), 600); beglMenue("streichfett");
+    };
     const h = "<h3>🎹 " + W("Synth-Begleitung", "Synth accompaniment") + '</h3><div class="reihe zyn-opt">' +
       z("an", "🎹 " + W("Begleitung", "Accompaniment"), an(BEGL.an), W("Die Bühne spielt ihre Akkorde als MIDI mit – in eurer Tonart, im Takt", "The stage plays its chords as MIDI – in key, in time")) +
-      z("pad", "· " + W("Fläche (Kanal 1)", "Pad (channel 1)"), an(BEGL.pad), W("gehaltene Akkorde", "held chords")) +
-      z("bass", "· " + W("Bass (Kanal 2)", "Bass (channel 2)"), an(BEGL.bass), W("Grundton eine Oktave tiefer", "root an octave down")) +
-      z("glocken", "· " + W("Glocken/Arpeggio (Kanal 3)", "Bells/arpeggio (channel 3)"), an(BEGL.glocken), W("Akkordtöne auf den Schlägen – je mehr los ist, desto mehr", "chord tones on beats – busier when busy")) +
-      z("drone", "· " + W("Bordun (Kanal 4)", "Drone (channel 4)"), an(BEGL.drone), W("Grundton + Quinte der Handpan-Tonart", "root + fifth of the handpan key")) +
+      '<button type="button" data-zm="b:streichfett">🎻 ' + W("Test: Streichfett spielt die Flächen", "Test: Streichfett plays the pads") + "<small>" + W("Akkorde gehen nur an den Streichfett (Kanal 1), der Rest an den Zynthian", "chords only to the Streichfett (ch. 1), the rest to Zynthian") + "</small></button>" +
+      z("pad", "· " + W("Fläche (Kanal 1)", "Pad (channel 1)"), an(BEGL.pad), W("gehaltene Akkorde", "held chords")) + (BEGL.pad ? zielZeile("pad") : "") +
+      z("bass", "· " + W("Bass (Kanal 2)", "Bass (channel 2)"), an(BEGL.bass), W("Grundton eine Oktave tiefer", "root an octave down")) + (BEGL.bass ? zielZeile("bass") : "") +
+      z("glocken", "· " + W("Glocken/Arpeggio (Kanal 3)", "Bells/arpeggio (channel 3)"), an(BEGL.glocken), W("Akkordtöne auf den Schlägen – je mehr los ist, desto mehr", "chord tones on beats – busier when busy")) + (BEGL.glocken ? zielZeile("glocken") : "") +
+      z("drone", "· " + W("Bordun (Kanal 4)", "Drone (channel 4)"), an(BEGL.drone), W("Grundton + Quinte der Handpan-Tonart", "root + fifth of the handpan key")) + (BEGL.drone ? zielZeile("drone") : "") +
       z("gm", "🎼 " + W("Klänge je Stimmung wechseln", "Switch sounds per mood"), an(BEGL.gm), W("sendet General-MIDI-Programme (FluidSynth mit GM-Soundfont)", "sends General MIDI programs (FluidSynth GM soundfont)")) +
       '<button type="button" data-zm="b:ideen">🎻 ' + W("Ensembles & Klangideen", "Ensembles & sound ideas") + "<small>" + W("welche Synths zu welcher Stimmung passen", "which synths fit which mood") + "</small></button>" +
       '<button type="button" data-zm="b:test">🔔 ' + W("Testakkord senden", "Send test chord") + '</button><button type="button" data-zm="b:aus">🔇 ' + W("Alle Noten aus", "All notes off") + "</button>" +
       '<button type="button" data-zm="zu">✕ ' + W("Fertig", "Done") + "</button></div>" +
       '<p class="hinweis">' + W("Im Zynthian: „Zusammen mit Zynthian“ starten, Ketten auf MIDI-Kanal 1–4 anlegen, „Barden Beats“ als MIDI-Eingang aktivieren. Externe Synths am USB bekommen die Noten automatisch.", "In Zynthian: start “Together with Zynthian”, create chains on MIDI ch. 1–4, enable “the stage Begleitung” as MIDI input. USB synths get the notes automatically.") + "</p>";
-    const m = menue(h, a); menueArt = "begl"; if (fokusK) { const b = m.querySelector('[data-zm="b:' + fokusK + '"]'); if (b) fokusSetzen(b); }
+    const m = menue(h, a); menueArt = "begl"; if (fokusK) { const b = m.querySelector('[data-zm="b:' + fokusK + '"]') || (fokusK[0] === "z" && m.querySelector('[data-zm="bz:' + fokusK.slice(1) + '"]')); if (b) fokusSetzen(b); }
   }
   function beglIdeen() {
     const zeile = E => "<div style=\"grid-column:1/-1\"><b style=\"min-width:0\">" + E.name + "</b></div>" +
@@ -2547,6 +2618,8 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       h += '<button type="button" data-zm="mitmidi"><span>· ' + W("auch als MIDI an den Zynthian: ", "also as MIDI to Zynthian: ") + "<b>" + (MS.midi ? W("an, Kanal ", "on, channel ") + (MS.kanal + 1) : W("aus", "off")) + "</b></span><small>" + W("SEL: an/aus · ◀ ▶ Kanal", "SEL: on/off · ◀ ▶ channel") + "</small></button>";
       a.mitmidi = () => { MS.midi = !MS.midi; msMerken(); eingangMenue("mitmidi"); };
       a["mitmidi:stufe"] = st => { MS.kanal = (MS.kanal + st + 16) % 16; msMerken(); eingangMenue("mitmidi"); }; }
+    h += '<button type="button" data-zm="neo"><span>' + (NEO.an ? "✅ " : "⬜ ") + "🪘 " + W("Handpan führt die Band (MIDI)", "Handpan leads the band (MIDI)") + "</span><small>" + W("Neotone & Co.: Tonart, Energie und Antworten folgen deinem Spiel", "Neotone etc.: key, energy and answers follow your playing") + "</small></button>";
+    a.neo = () => neoMenue();
     h += '<button type="button" data-zm="trocken"><span>🧽 ' + W("Effekte der Eingänge aus", "Inputs: effects off") + "</span><small>" + W("Hall, Echo, Filter, Drive auf 0 – trockener Klang", "reverb, echo, filter, drive to 0 – dry sound") + "</small></button>";
     a.trocken = () => { [0, 1].forEach(x => kanalSetz(x, { hall: 0, echo: 0, filter: 0, drive: 0 })); if (MS.an && window.ImresPult.mitspieler) window.ImresPult.mitspieler({ hall: 0 }); zeige("🧽 " + W("Eingänge trocken", "Inputs dry"), null, W("Hall, Echo, Filter, Drive aus" + (MS.an ? " · Mitspieler ohne Hall" : ""), "effects off")); eingangMenue("trocken"); };
     h += '<button type="button" data-zm="stimm"><span>🎯 ' + W("Stimmgerät", "Tuner") + "</span><small>" + W("Ton, Abweichung in Cent, passt er zur Tonart?", "note, cents, fits the key?") + "</small></button>";
@@ -2604,6 +2677,106 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (sk) { let best = n, bd = 99; for (let d = -2; d <= 2; d++) { const c = n + d; if (sk.includes(((c - OPT.grund) % 12 + 12) % 12) && Math.abs(c - midi) < bd) { bd = Math.abs(c - midi); best = c; } } n = best; }
     return n;
   }
+
+  /* ===================== 🪘 Handpan führt die Band (MIDI, z. B. Neotone) =====================
+     Die digitale Handpan schickt jeden Ton als MIDI – genauer als jedes Mikrofon. Daraus:
+     • Tonart: Grundton und Skala folgen dem, was du spielst (gleitet weich hinüber)
+     • Energie: fester/dichter anschlagen = mehr los in der Band, sanft = ruhiger
+     • Mitspielen: Bühneninstrumente doppeln deine Töne (wie der Mitspieler, nur ohne Fehlgriffe)
+     • Antworten: machst du eine Pause, antwortet ein Instrument mit einer Abwandlung deiner letzten Phrase */
+  const NEO_STD = { an: false, kanal: 0, tonart: true, energie: true, mitspielen: false, antworten: true, lernen: false };
+  let NEO = Object.assign({}, NEO_STD); try { Object.assign(NEO, JSON.parse(lies("imres-zp-neo", "{}")) || {}); } catch (_) {} NEO.lernen = false;
+  const neoMerken = () => schreib("imres-zp-neo", JSON.stringify(NEO));
+  let neoNoten = [], neoTonartKand = null, neoTonartZeit = 0, neoEnergieZeit = 0, neoPhrase = [], neoAntwortBis = 0, neoGeantwortet = true, neoLetzte = 0;
+  function neoKanalPasst(e) {
+    if (NEO.lernen) { NEO.kanal = e.kanal; NEO.lernen = false; neoMerken(); zeige("🪘 " + W("Handpan erkannt: MIDI-Kanal ", "Handpan found: MIDI channel ") + e.kanal); if (menueArt === "neo") neoMenue("kanal"); return true; }
+    if (NEO.kanal) return e.kanal === NEO.kanal;
+    /* „alle“: alles außer Steuer-Kanal und Drum-Machine */
+    return !(OPT.steuerKanal && e.kanal === OPT.steuerKanal) && !(OPT.kickDucken && e.kanal === OPT.kickKanal);
+  }
+  function neoNote(e) {
+    const jetzt = performance.now(), P = window.ImresPult, z = pz() || {};
+    neoNoten.push({ t: jetzt, n: e.note, v: e.wert }); neoNoten = neoNoten.filter(x => jetzt - x.t < 30000);
+    if (!neoGeantwortet && jetzt - neoLetzte > 4000) neoPhrase = [];
+    neoPhrase.push({ t: jetzt, n: e.note, v: e.wert }); if (neoPhrase.length > 8) neoPhrase.shift();
+    neoLetzte = jetzt; neoGeantwortet = false;
+    if (NEO.mitspielen && P && P.mitspielen && SEITE === "buehne") { try { P.mitspielen(msZiel(e.note), Math.max(.3, e.wert / 127)); } catch (_) {} }
+    if (NEO.tonart && neoNoten.length >= 10 && jetzt - neoTonartZeit > 2500) { neoTonartZeit = jetzt; neoTonartPruefen(); }
+  }
+  /* Tonart aus den letzten Tönen: gleiche Bewertung wie „Tonart hören“, aber aus exakten MIDI-Tönen */
+  function neoTonartPruefen() {
+    const jetzt = performance.now(), chroma = new Array(12).fill(0), bass = new Array(12).fill(0);
+    neoNoten.slice(-32).forEach(x => { const w = (.4 + x.v / 127) * Math.exp(-(jetzt - x.t) / 20000); chroma[x.n % 12] += w; });
+    const tief = Math.min(...neoNoten.slice(-32).map(x => x.n)); neoNoten.slice(-32).forEach(x => { if (x.n <= tief + 4) bass[x.n % 12] += 1; });
+    const summe = chroma.reduce((a, b) => a + b, 0); if (summe <= 0) return;
+    let best = null; const cmax = Math.max(...chroma), bsum = bass.reduce((a, b) => a + b, 0) || 1;
+    Object.keys(SKALEN).forEach(k => { const st = SKALEN[k][2]; if (!st) return;
+      for (let g = 0; g < 12; g++) { let drin = 0, leer = 0; st.forEach(i => { const v = chroma[(g + i) % 12]; drin += v; if (v < cmax * .08) leer++; });
+        const wert = drin / summe - (summe - drin) / summe * 1.5 - leer * .15 + chroma[g] / summe * .6 + bass[g] / bsum * .7 - st.length * .005;
+        if (!best || wert > best.wert) best = { k, g, wert }; } });
+    if (!best) return;
+    const sig = best.g + ":" + best.k;
+    if (OPT.tonartAn && OPT.grund === best.g && OPT.skala === best.k) { neoTonartKand = null; return; }
+    /* erst wechseln, wenn es zweimal hintereinander so aussieht – sonst kippt es bei jedem Durchgangston */
+    if (neoTonartKand !== sig) { neoTonartKand = sig; return; }
+    neoTonartKand = null; optSetzen({ tonartAn: true, grund: best.g, skala: best.k });
+    zeige("🪘 " + W("Die Band folgt: ", "The band follows: ") + tonartName(), null, skalaToene());
+  }
+  function neoTakt() {
+    if (!NEO.an || SEITE !== "buehne") return;
+    const jetzt = performance.now(), z = pz() || {}, P = window.ImresPult;
+    /* Energie: Anschläge pro Sekunde und Anschlagstärke der letzten 4 s → wie viel los ist */
+    if (NEO.energie && jetzt - neoEnergieZeit > 1500) {
+      neoEnergieZeit = jetzt; const l = neoNoten.filter(x => jetzt - x.t < 4000);
+      if (l.length >= 2) {
+        const dichte = Math.min(1, l.length / 4 / 3.5), staerke = l.reduce((a, x) => a + x.v, 0) / l.length / 127;
+        const soll = Math.round(2 + 8 * Math.min(1, dichte * .55 + staerke * .6)), ist = Math.round(z.intensitaet == null ? 5 : z.intensitaet);
+        if (Math.abs(soll - ist) >= 1) pultRegler("data-feld", "intensitaet", ist + Math.sign(soll - ist));
+      }
+    }
+    /* Antworten: nach einer Phrase (≥ 3 Töne) und einer Pause von gut einem Schlag spielt die Band eine Abwandlung zurück */
+    const q = 60 / Math.max(50, z.tempoJetzt || z.tempo || 100) * 1000;
+    if (NEO.antworten && !neoGeantwortet && z.laeuft && neoPhrase.length >= 3 && jetzt - neoLetzte > q * 1.15 && jetzt - neoLetzte < q * 3 && P && P.mitspielen) {
+      neoGeantwortet = true;
+      const ph = neoPhrase.slice(-5), t0 = ph[0].t, dauer = Math.min(q * 4, Math.max(q, ph[ph.length - 1].t - t0));
+      const dehn = Math.min(1.5, Math.max(.6, (q * 2) / Math.max(1, dauer)));
+      const art = Math.floor(Math.random() * 3), mitte = ph.reduce((a, x) => a + x.n, 0) / ph.length;
+      ph.forEach((x, i) => {
+        /* 0: eine Terz höher · 1: gespiegelt um die Mitte · 2: rückwärts */
+        const quelle = art === 2 ? ph[ph.length - 1 - i] : x;
+        const n = art === 0 ? x.n + 4 : art === 1 ? Math.round(2 * mitte - x.n) : quelle.n;
+        const wann = (x.t - t0) * dehn;
+        setTimeout(() => { try { P.mitspielen(msZiel(n), Math.max(.3, x.v / 127 * .8)); } catch (_) {} }, 30 + wann);
+      });
+      neoPhrase = [];
+    }
+  }
+  setInterval(() => { try { neoTakt(); } catch (_) {} }, 120);
+  function neoSchalten(an) {
+    NEO.an = an == null ? !NEO.an : !!an; neoMerken();
+    const P = window.ImresPult;
+    if (NEO.an && (NEO.mitspielen || NEO.antworten) && P && P.mitspieler) { try { const m = P.mitspieler(); if (!m.stufe) P.mitspieler({ stufe: 3 }); } catch (_) {} }
+    zeige(NEO.an ? "🪘 " + W("Die Handpan führt die Band", "The handpan leads the band") : "🪘 " + W("Handpan führt: aus", "Handpan leads: off"));
+  }
+  function neoMenue(fokusK) {
+    const an = x => x ? "✅ " + W("an", "on") : "⬜ " + W("aus", "off"), a = { zu: menueZu };
+    const z = (k, t, w, u) => '<button type="button" data-zm="n:' + k + '"><span>' + t + ": <b>" + w + "</b></span>" + (u ? "<small>" + u + "</small>" : "") + "</button>";
+    a["n:an"] = () => { neoSchalten(); neoMenue("an"); };
+    ["tonart", "energie", "mitspielen", "antworten"].forEach(k => { a["n:" + k] = () => { NEO[k] = !NEO[k]; neoMerken(); if (NEO.an) neoSchalten(true); neoMenue(k); }; });
+    a["n:kanal"] = () => { NEO.lernen = true; zeige("🪘 " + W("Schlag jetzt einen Ton auf der Handpan an …", "Strike a note on the handpan now …")); neoMenue("kanal"); };
+    a["n:kanal:stufe"] = st => { NEO.lernen = false; NEO.kanal = (NEO.kanal + st + 17) % 17; neoMerken(); neoMenue("kanal"); };
+    const zuletzt = neoNoten.length ? NOTEN[neoNoten[neoNoten.length - 1].n % 12] + " · " + Math.round((performance.now() - neoNoten[neoNoten.length - 1].t) / 1000) + " s" : W("noch nichts gehört", "nothing heard yet");
+    const h = "<h3>🪘 " + W("Handpan führt die Band (MIDI)", "Handpan leads the band (MIDI)") + '</h3><div class="reihe zyn-opt">' +
+      z("an", "🪘 " + W("Handpan führt", "Handpan leads"), an(NEO.an), W("Neotone o. ä. per USB-MIDI · zuletzt: ", "Neotone etc. via USB MIDI · last: ") + zuletzt) +
+      z("kanal", "· " + W("MIDI-Kanal", "MIDI channel"), NEO.lernen ? W("🎯 schlag einen Ton an …", "🎯 strike a note …") : NEO.kanal ? NEO.kanal : W("alle (außer Steuerung/Drums)", "all (except control/drums)"), W("SEL: lernen (einen Ton anschlagen) · ◀ ▶ von Hand", "SEL: learn (strike a note) · ◀ ▶ manual")) +
+      z("tonart", "· 🎼 " + W("Tonart folgt", "Key follows"), an(NEO.tonart), W("Grundton und Skala aus deinem Spiel – die Band gleitet hinüber", "root and scale from your playing – the band glides over")) +
+      z("energie", "· 🔥 " + W("Energie folgt", "Energy follows"), an(NEO.energie), W("fest und dicht anschlagen = mehr los, sanft = ruhiger", "hard and dense = busier, soft = calmer")) +
+      z("antworten", "· 💬 " + W("Antworten", "Call & response"), an(NEO.antworten), W("in deinen Pausen spielt die Band eine Abwandlung deiner Phrase zurück", "in your pauses the band plays a variation of your phrase")) +
+      z("mitspielen", "· 🎻 " + W("Mitspielen", "Double"), an(NEO.mitspielen), W("Bühneninstrumente spielen jeden deiner Töne mit (Ensemble: MIXER → Bank MIT)", "stage instruments double every note")) +
+      '<button type="button" data-zm="zu">✕ ' + W("Fertig", "Done") + "</button></div>";
+    const m = menue(h, a); menueArt = "neo"; if (fokusK) { const b = m.querySelector('[data-zm="n:' + fokusK + '"]'); if (b) fokusSetzen(b); }
+  }
+
   function msSchalten(an) {
     const P = window.ImresPult; MS.an = an == null ? !MS.an : !!an; msMerken(); clearInterval(msT); msT = 0;
     if (!MS.an || !P || !P.mitspieler) { bankenNeu(); return; }
@@ -3822,7 +3995,7 @@ html.zyn-ruhe .zp-ruhe { display: block; }
         else if (e.typ === "midi") midi(e);
         else if (e.typ === "neu-laden") location.reload();
         else if (e.typ === "optionen") optSetzen(e.optionen || {}, true);
-        else if (e.typ === "aufnahme") { const war = aufnahmeAn; aufnahmeStand(e); if (e.an && !war) aufSeit = Date.now(); leisteZeichnen(); if (PULT) zpZeichnen(true); }
+        else if (e.typ === "aufnahme") { const war = aufnahmeAn; aufnahmeStand(e); if (!e.an && SPUR.an) spurenStopp(true); if (e.an && e.spuren && !SPUR.an) spurenStart().catch(() => {}); if (e.an && !war) aufSeit = Date.now(); leisteZeichnen(); if (PULT) zpZeichnen(true); }
         else if (e.typ === "spieler") spielerEreignis(e);
         else if (e.typ === "szene") szeneAnwenden(e);
         else if (e.typ === "ablauf") { ablaufStand.an = !!e.an; ablaufStand.n = e.n; ablaufStand.jetzt = e.jetzt; if (PULT) zpZeichnen(true); }
@@ -3860,5 +4033,5 @@ html.zyn-ruhe .zp-ruhe { display: block; }
   /* Sperre gilt auch für die Brücke (Handy-Fernbedienung, System-Befehle); Abend-Ablauf-Stand holen, Liste der Stimmungen/Orte fürs Handy */
   sperreMelden(); ablaufHolen(); setTimeout(katalogMelden, 6000); setTimeout(katalogMelden, 30000);
   leisteZeichnen(); ledsMelden();
-  window.ImresZyn = { _test: { ruhe: () => zpRuheAn(), gruppen: () => zpInhalt().map(g => ({ titel: g.titel, items: g.l.map(x => ({ key: x.key, sym: x.sym, name: x.name })) })), tonhoehe, tonartErkennen, stimmgeraet, get opt() { return OPT; }, autoSofort(art) { if (art === "mom") autoMom = 1; else if (art === "sp") autoSp = 1; else autoSt = 1; }, autoSetzen: m => autoSetzen(m) }, messer: MESSER, taste, dreh, midi, modusSetzen, optSetzen, get modus() { return modus; }, get opt() { return Object.assign({}, OPT); } };
+  window.ImresZyn = { _test: { ruhe: () => zpRuheAn(), gruppen: () => zpInhalt().map(g => ({ titel: g.titel, items: g.l.map(x => ({ key: x.key, sym: x.sym, name: x.name })) })), tonhoehe, tonartErkennen, stimmgeraet, get opt() { return OPT; }, autoSofort(art) { if (art === "mom") autoMom = 1; else if (art === "sp") autoSp = 1; else autoSt = 1; }, autoSetzen: m => autoSetzen(m), aufnahme, get spur() { return { an: SPUR.an, n: SPUR.liste.length, wahl: spurenWahl }; }, get neo() { return NEO; }, get begl() { return BEGL; } }, messer: MESSER, taste, dreh, midi, modusSetzen, optSetzen, get modus() { return modus; }, get opt() { return Object.assign({}, OPT); } };
 })();

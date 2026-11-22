@@ -14091,6 +14091,16 @@ registerProcessor("imres-glitch", ImresGlitch);`;
     return ctx.currentTime - (ctx.outputLatency || 0) - (ctx.baseLatency || 0) + (p - performance.now()) / 1000;
   };
   window.ImresPult = {
+    /* Einzelspur-Aufnahme (Zynthian): die Busse, an denen abgegriffen werden kann */
+    spurKnoten() {
+      if (!ctx) return null;
+      const k = { ctx };
+      if (ausgang) k.Band = ausgang;
+      if (kulAusRef) k.Kulisse = kulAusRef;
+      if (einAusgang) k.Live = einAusgang;
+      if (fxAusgang) k.Effekte = fxAusgang;
+      return k;
+    },
     get zustand() {
       return { laeuft, stimmung: stilKey(), kulisse: S.kulisse, kulLaeuft: kulisseLaeuft(), master: S.master, kulisseVol: S.kulisseVol, intensitaet: S.intensitaet,
         tempo: S.tempo, tempoJetzt: laeuft ? (tempoJetzt || S.tempo) : S.tempo, hall: S.hall, fxVol: S.fxVol, echoHall: S.echoHall, spannung: leben.spannung, neuBesetzen: !!neuBesetzen,

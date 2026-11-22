@@ -59,7 +59,7 @@ Der Bildschirm zeigt ein eigenes Pult für 800 × 480 – nichts scrollt, alles 
 - **🤖 Autopilot (MENU):** ruhig (Stimmung alle 4–7 min, Momente alle 2–3 min) oder lebendig (2–4 min / ~1 min); Spannung atmet leicht mit. Bevorzugt deine ★-Stimmungen. Wechselst du selbst, wartet er wieder. In den Klangwelten startet er Szenen und Geräusche.
   - **Autopilot-Wechsel „fließend“** (Standard): Der Wechsel landet immer auf einem Phrasenende. Davor klingt die alte Musik mindestens 4 Takte lang aus (Schlagwerk Instrument für Instrument, Melodie leiser, Klang wärmer), dazwischen führen gehaltene Akkorde in die neue Tonart, danach wächst das neue Stück über mehrere Takte heran. Drehst du während eines Übergangs an der Lautstärke, gilt das auch für die neue Stimmung.
 - **⚙ Auslastung:** vorne in der Statuszeile – grün unter 60 %, gold bis 85 %, rot darüber; 🌡 ab 70 °C, ⚠ bei Rucklern der Oberfläche.
-- **🎹 Synth-Begleitung (MENU):** Die Bühne spielt ihre Akkorde als MIDI mit – Kanal 1 Fläche, 2 Bass, 3 Glocken/Arpeggio, 4 Bordun (Grundton + Quinte der Handpan-Tonart). Mit „Klänge je Stimmung wechseln“ schaltet er General-MIDI-Programme passend zur Stimmung um (Ensembles: Tavernen-Kapelle, Abenteuer-Orchester, Schlacht-Blech, Mystik-Chor, Lagerfeuer & Elben). Im Zynthian: „Zusammen mit Zynthian“, Ketten auf Kanal 1–4 (z. B. FluidSynth mit GM-Soundfont), „Barden Beats“ als MIDI-Eingang aktivieren. Externe USB-Synths bekommen die Noten automatisch.
+- **🎹 Synth-Begleitung (MENU):** Die Bühne spielt ihre Akkorde als MIDI mit – Kanal 1 Fläche, 2 Bass, 3 Glocken/Arpeggio, 4 Bordun (Grundton + Quinte der Handpan-Tonart). Mit „Klänge je Stimmung wechseln“ schaltet er General-MIDI-Programme passend zur Stimmung um (Ensembles: Tavernen-Kapelle, Abenteuer-Orchester, Schlacht-Blech, Mystik-Chor, Lagerfeuer & Elben). Im Zynthian: „Zusammen mit Zynthian“, Ketten auf Kanal 1–4 (z. B. FluidSynth mit GM-Soundfont), „Barden Beats“ als MIDI-Eingang aktivieren. Externe USB-Synths bekommen die Noten automatisch. Je Stimme lässt sich wählen, **wohin** sie geht: alle Geräte, nur Zynthian, ein bestimmtes Gerät (z. B. Streichfett) oder aus. **🎻 Test: Streichfett spielt die Flächen** stellt das mit einem Knopf ein: Flächen-Akkorde nur an den Streichfett (am Streichfett MIDI-Kanal 1 einstellen), Bass, Glocken und Bordun an den Zynthian – und spielt einen Testakkord.
 - **🔊 Bluetooth & 📶 WLAN (MENU → 🛠 Einstellungen):** Bluetooth-Lautsprecher suchen, koppeln und verbinden – der Ton der Bühne läuft dann über die Box (beim ersten Mal wird Bluetooth-Audio einmalig installiert, braucht Internet; ca. 0,2 s Verzögerung, also nicht für den Takt mit der TR-8S). „Zurück zu den Zynthian-Ausgängen“ schaltet zurück. WLAN: Netze suchen, antippen, Passwort mit der Bildschirmtastatur (Finger oder Pfeile + SEL) eingeben. Jedes Netz, mit dem der Zynthian einmal verbunden war, merkt sich die Bühne zusätzlich selbst (🔐 in „Gespeicherte WLANs“, auch Netze aus der Zynthian-Weboberfläche). Verliert der Zynthian ein Profil oder Passwort, trägt sie es innerhalb einer Minute wieder ein und verbindet sich. Steht das WLAN im Zynthian auf „aus“, bleibt es aus.
 - **★ Favoriten:** eine Kachel 1,5 Sekunden halten (Taste oder Finger) – sie steht dann auf ihrer Seite ganz vorne. Nochmal halten nimmt sie wieder raus.
 - **ALT + ◀ ▶** wechselt die Seite, **ALT + ▲ ▼** springt zur nächsten Gruppe (z. B. Wetter, Effekte, Szenen).
@@ -193,6 +193,18 @@ Gesteuert wird über den **Steuer-Kanal** (Standard: Kanal 16, einstellbar, auch
 
 > Hijaz klingt am nächsten als Moll; die übermäßige Sekunde der Hijaz-Skala kennt die Bühne nicht.
 
+### 🪘 Handpan führt die Band (Neotone per MIDI)
+
+**MENU → 🎤 Eingänge → „🪘 Handpan führt die Band (MIDI)“**. Die Neotone schickt MIDI-Noten – die Band hört darauf:
+
+- **Kanal:** SEL drücken = **lernen** (einfach eine Note spielen, der Kanal wird übernommen), ◀ ▶ = von Hand (0 = alle Kanäle).
+- **🎼 Tonart folgt:** Die Bühne erkennt aus den letzten Tönen Grundton und Skala und wechselt mit – erst wenn das Ergebnis zweimal hintereinander gleich ist, damit sie nicht hin und her springt.
+- **⚡ Energie folgt:** Spielst du dichter und lauter, wird die Band lebendiger (Intensität steigt); wirst du ruhiger, nimmt sie sich langsam zurück.
+- **💬 Antworten (Call & Response):** Spielst du eine kleine Phrase und machst dann eine Pause, antwortet die Band mit einer Variation deiner letzten Töne.
+- **🎻 Mitspielen (Verdoppeln):** Die Band spielt jeden deiner Töne mit (über den Mitspieler-Klang), passend in der Tonart.
+
+Solange „Handpan führt“ an ist, lösen die Noten der Neotone keine Pads/Kulissen-Befehle mehr aus – außer auf dem Steuer-Kanal.
+
 ---
 
 ## 7. Mikrofon-Eingang
@@ -324,6 +336,11 @@ Bedienen kannst du die Bühne dann über **MIDI** (Steuer-Kanal, siehe oben) und
 - **Ohne Stick** liegt sie im Zynthian-Ordner **capture** (Zynthian-Weboberfläche → „Audio/Captures“).
 
 Die Laufzeit steht oben in der Statuszeile (⏺ 12:34) und im Ruhebild, die REC-Taste leuchtet rot. Beim Stoppen zeigt das Pult Länge und Speicherort.
+
+**🎚 Aufnahme als: kompletter Mix / Einzelspuren** (System-Menü, direkt unter „Aufnahme starten“; nur umschaltbar, solange nichts aufgenommen wird):
+
+- **Kompletter Mix** (Standard): eine WAV-Datei mit allem.
+- **Einzelspuren:** ein eigener Ordner `BardenBeats_<Datum>` mit **Gesamt.wav** (alles, auch Zynthian-Synths) und je einer Datei für **Band**, **Kulisse**, **Live** (Eingänge, Mitspieler, Looper) und **Effekte**. Zum späteren Abmischen am Computer einfach alle Dateien an den Anfang legen. Zwischen den Spuren und Gesamt.wav kann es einen Versatz von ein paar Hundertstelsekunden geben – Spuren notfalls kurz an Gesamt.wav angleichen.
 
 ---
 

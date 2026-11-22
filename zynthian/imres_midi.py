@@ -14,6 +14,25 @@ import time
 AUSSCHLUSS = re.compile(r"through|imres|midi through|pipewire|a2j|jack|zynmidi|zynthian|zynseq|zynsmf|ttymidi|ctrlr", re.I)
 
 
+def ports_namen():
+    """[(Adresse "c:p", "Gerät – Port")] aller MIDI-Geräte, an die man senden kann"""
+    try:
+        r = subprocess.run(["aconnect", "-o"], capture_output=True, text=True, timeout=5)
+    except Exception:
+        return []
+    erg, client, cname = [], None, ""
+    for zeile in r.stdout.splitlines():
+        m = re.match(r"client (\d+): '([^']*)'", zeile)
+        if m:
+            client, cname = int(m.group(1)), m.group(2)
+            continue
+        m = re.match(r"\s+(\d+) '([^']*)'", zeile)
+        if m and client is not None and client not in (0, 14) and not AUSSCHLUSS.search(cname + " " + m.group(2)):
+            pn = m.group(2).strip()
+            erg.append(("%d:%s" % (client, m.group(1)), cname.strip() + ("" if pn.startswith(cname.strip()) or not pn else " – " + pn)))
+    return erg
+
+
 def ports(richtung):
     """richtung 'i' = Geräte, von denen wir lesen (aseqdump -l), 'o' = Geräte, an die wir senden (aconnect -o)"""
     try:
@@ -278,6 +297,8 @@ class MidiNoten(threading.Thread):
         self.verbunden = set()
         self.zuletzt = 0
         self.aktiv_bis = 0
+        self.extern = []          # [(Adresse, Name)] externer Geräte – bekommen Noten gezielt (nicht über Abonnement)
+        self.extern_zeit = 0
         try:
             self.lib = ctypes.CDLL("libasound.so.2")
             seq = ctypes.c_void_p()
@@ -291,12 +312,37 @@ class MidiNoten(threading.Thread):
             print("Begleitung: MIDI-Ausgang nicht verfügbar:", e, flush=True)
             self.seq = None
 
-    def senden(self, typ, kanal, a, b=0):
+    def geraete(self, frisch=False):
+        if frisch or time.monotonic() - self.extern_zeit > 5:
+            self.extern = ports_namen()
+            self.extern_zeit = time.monotonic()
+        return self.extern
+
+    def ziele(self, ziel):
+        """None/"alle" = Zynthian + alle Geräte · "zynthian" = nur Zynthian · "aus" = nichts · sonst Name (oder Adresse) eines Geräts"""
+        if ziel in (None, "", "alle"):
+            return [None] + [a for a, _ in self.geraete()]
+        if ziel == "zynthian":
+            return [None]
+        if ziel == "aus":
+            return []
+        z = str(ziel).lower()
+        return [a for a, n in self.geraete() if a == ziel or z in n.lower()]
+
+    def senden(self, typ, kanal, a, b=0, ziel=None):
+        for adr in self.ziele(ziel):
+            self._senden(typ, kanal, a, b, adr)
+
+    def _senden(self, typ, kanal, a, b, adr):
         if not self.seq:
             return
         e = _Ereignis()
         e.type, e.flags, e.queue = typ, 0, 253
-        e.src_port, e.dst_client, e.dst_port = self.port, 254, 253
+        if adr is None:
+            e.src_port, e.dst_client, e.dst_port = self.port, 254, 253   # Abonnenten (Zynthian über JACK)
+        else:
+            c, pt = adr.split(":")
+            e.src_port, e.dst_client, e.dst_port = self.port, int(c), int(pt)
         k = max(0, min(15, int(kanal)))
         if typ in (NOTE_AN, NOTE_AUS):
             e.data[0], e.data[1], e.data[2] = k, max(0, min(127, int(a))), max(0, min(127, int(b)))
@@ -328,21 +374,23 @@ class MidiNoten(threading.Thread):
             self.plan = []
         for k in range(16):
             self.senden(REGLER, k, 123, 0)
+            self.senden(REGLER, k, 64, 0)
 
     def verbinden(self):
         """mit externen MIDI-Geräten (ALSA) und – wenn vorhanden – dem MIDI-Eingang des Zynthian (JACK) verbinden"""
         if not self.seq or time.monotonic() - self.zuletzt < 8:
             return
         self.zuletzt = time.monotonic()
-        for ziel in ports("o"):
-            if ziel in self.verbunden:
+        self.geraete(True)
+        # ältere Versionen hatten externe Geräte abonniert – lösen, sonst kämen Noten doppelt an
+        for ziel, _ in self.extern:
+            if ("alt", ziel) in self.verbunden:
                 continue
             try:
-                r = subprocess.run(["aconnect", "%d:%d" % (self.client, self.port), ziel], capture_output=True, timeout=3)
-                if r.returncode == 0 or b"already" in r.stderr:
-                    self.verbunden.add(ziel)
+                subprocess.run(["aconnect", "-d", "%d:%d" % (self.client, self.port), ziel], capture_output=True, timeout=3)
             except Exception:
                 pass
+            self.verbunden.add(("alt", ziel))
         try:
             r = subprocess.run(["jack_lsp", "-t"], capture_output=True, text=True, timeout=3)
             zeilen = r.stdout.splitlines()
@@ -378,12 +426,12 @@ class MidiNoten(threading.Thread):
                 if not self.plan or self.plan[0][0] > time.monotonic() + 0.002:
                     continue
                 _, _, x = self.heapq.heappop(self.plan)
-            k = x.get("k", 0)
+            k, z = x.get("k", 0), x.get("z")
             if "pc" in x:
-                self.senden(PROGRAMM, k, 0, x["pc"])
+                self.senden(PROGRAMM, k, 0, x["pc"], z)
             elif "cc" in x:
-                self.senden(REGLER, k, x["cc"], x.get("w", 0))
+                self.senden(REGLER, k, x["cc"], x.get("w", 0), z)
             elif x.get("v", 0) > 0:
-                self.senden(NOTE_AN, k, x.get("n", 60), x["v"])
+                self.senden(NOTE_AN, k, x.get("n", 60), x["v"], z)
             else:
-                self.senden(NOTE_AUS, k, x.get("n", 60), 0)
+                self.senden(NOTE_AUS, k, x.get("n", 60), 0, z)

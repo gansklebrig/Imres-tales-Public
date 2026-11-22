@@ -31,7 +31,7 @@ import signal
 import sys
 import time
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
-from urllib.parse import urlparse, unquote
+from urllib.parse import urlparse, unquote, parse_qs
 
 HIER = os.path.dirname(os.path.abspath(__file__))
 
@@ -276,7 +276,46 @@ def system_befehl(aktion):
 
 
 # ---------- Aufnahme (alles, was aus den Ausgängen kommt) ----------
-aufnahme = {"proc": None, "datei": None, "seit": 0}
+aufnahme = {"proc": None, "datei": None, "seit": 0, "spuren": False, "ordner": None}
+# Einzelspuren: die Bühne schickt Band, Kulisse und Eingänge als rohes PCM (16 bit) – hier wird je Spur eine WAV-Datei daraus
+spur_dateien = {}
+spur_lock = threading.Lock()
+
+
+def _wav_kopf(f, sr, ch, datenlaenge):
+    import struct
+    f.seek(0)
+    f.write(b"RIFF" + struct.pack("<I", 36 + datenlaenge) + b"WAVEfmt " + struct.pack("<IHHIIHH", 16, 1, ch, sr, sr * ch * 2, ch * 2, 16) + b"data" + struct.pack("<I", datenlaenge))
+
+
+def spur_schreiben(name, sr, ch, daten):
+    if not aufnahme.get("spuren") or not aufnahme.get("ordner") or not (aufnahme_laeuft() or aufnahme.get("seit")):
+        return False
+    name = "".join(c for c in str(name) if c.isalnum() or c in "-_")[:24] or "Spur"
+    with spur_lock:
+        sd = spur_dateien.get(name)
+        if not sd:
+            pfad = os.path.join(aufnahme["ordner"], name + ".wav")
+            f = open(pfad, "w+b")
+            _wav_kopf(f, sr, ch, 0)
+            sd = spur_dateien[name] = {"f": f, "sr": sr, "ch": ch, "n": 0, "pfad": pfad}
+        sd["f"].seek(0, 2)
+        sd["f"].write(daten)
+        sd["n"] += len(daten)
+    return True
+
+
+def spuren_schliessen():
+    with spur_lock:
+        for sd in spur_dateien.values():
+            try:
+                _wav_kopf(sd["f"], sd["sr"], sd["ch"], sd["n"])
+                sd["f"].close()
+            except Exception:
+                pass
+        n = len(spur_dateien)
+        spur_dateien.clear()
+    return n
 
 
 spieler_zuletzt = {}
@@ -423,7 +462,7 @@ def aufnahme_stand():
             "datei": os.path.basename(aufnahme.get("datei") or ""), "ziel": aufnahme.get("ziel") or aufnahme_ziel()[1], "stick": bool(usb_sticks())}
 
 
-def aufnahme_schalten(an):
+def aufnahme_schalten(an, einzelspuren=False):
     p = aufnahme["proc"]
     if not an:
         if p and p.poll() is None:
@@ -433,12 +472,14 @@ def aufnahme_schalten(an):
             except Exception:
                 p.kill()
         dauer = round(time.time() - aufnahme["seit"]) if aufnahme.get("seit") else 0
-        aufnahme.update(proc=None, seit=0)
+        time.sleep(0.6)  # die letzten Spur-Pakete der Bühne abwarten
+        spuren = spuren_schliessen()
+        aufnahme.update(proc=None, seit=0, spuren=False)
         try:
             os.sync()   # damit der Stick gleich herausgezogen werden kann
         except Exception:
             pass
-        return {"an": False, "datei": aufnahme["datei"], "ziel": aufnahme.get("ziel", ""), "dauer": dauer}
+        return {"an": False, "datei": aufnahme["datei"], "ziel": aufnahme.get("ziel", ""), "dauer": dauer, "spuren": spuren, "ordner": aufnahme.get("ordner") if spuren else None}
     if p and p.poll() is None:
         return {"an": True, "datei": aufnahme["datei"]}
     ordner, ziel = aufnahme_ziel()
@@ -447,11 +488,19 @@ def aufnahme_schalten(an):
     except OSError:
         ordner, ziel = ARGS.aufnahmen, "Zynthian"
         os.makedirs(ordner, exist_ok=True)
-    datei = os.path.join(ordner, time.strftime("BardenBeats_%Y-%m-%d_%H-%M-%S.wav"))
+    stempel = time.strftime("BardenBeats_%Y-%m-%d_%H-%M-%S")
+    if einzelspuren:
+        # eigener Ordner: Gesamt.wav (alles, auch Zynthian-Synths) + je Spur eine Datei
+        ordner = os.path.join(ordner, stempel)
+        os.makedirs(ordner, exist_ok=True)
+        datei = os.path.join(ordner, "Gesamt.wav")
+    else:
+        datei = os.path.join(ordner, stempel + ".wav")
+    aufnahme.update(spuren=bool(einzelspuren), ordner=ordner if einzelspuren else None)
     aufnahme["ziel"] = ziel
     if ARGS.test:
         aufnahme.update(proc=None, datei=datei, seit=time.time())
-        return {"an": True, "datei": datei, "test": True}
+        return {"an": True, "datei": datei, "test": True, "spuren": bool(einzelspuren)}
     befehle = [["jack_capture", "--no-stdin", "-f", "wav", "-b", "24", "-c", "2", "-p", "system:playback_1", "-p", "system:playback_2", datei],
                ["jack_capture", "-c", "2", "-p", "system:playback_1", "-p", "system:playback_2", datei]]
     for b in befehle:
@@ -460,7 +509,7 @@ def aufnahme_schalten(an):
             time.sleep(0.4)
             if proc.poll() is None:
                 aufnahme.update(proc=proc, datei=datei, seit=time.time())
-                return {"an": True, "datei": datei}
+                return {"an": True, "datei": datei, "spuren": bool(einzelspuren)}
         except FileNotFoundError:
             break
     return {"an": False, "fehler": "jack_capture fehlt oder JACK läuft nicht"}
@@ -588,6 +637,9 @@ class Handler(SimpleHTTPRequestHandler):
                                       "fern": zustand.get("fern"), "last": last_messen(), "sperre": SPERRE["an"]})
         if p == "/zyn/optionen":
             return self.json_antwort(dict(OPT))
+        if p == "/zyn/midigeraete":
+            # externe MIDI-Geräte, an die die Begleitung gezielt senden kann (z. B. Streichfett)
+            return self.json_antwort({"geraete": [{"adr": a, "name": n} for a, n in (noten.geraete(True) if noten else [])]})
         if p == "/zyn/last":
             return self.json_antwort(last_messen())
         if p == "/zyn/haenger":
@@ -673,7 +725,19 @@ class Handler(SimpleHTTPRequestHandler):
 
     # ---- POST ----
     def do_POST(self):
-        p = urlparse(self.path).path
+        u0 = urlparse(self.path)
+        p = u0.path
+        if p == "/zyn/spur":
+            # rohes PCM (int16 little endian) einer Einzelspur
+            q = parse_qs(u0.query)
+            n = int(self.headers.get("Content-Length") or 0)
+            daten = self.rfile.read(n) if 0 < n <= 8 * 1024 * 1024 else b""
+            try:
+                sr = int((q.get("sr") or ["48000"])[0]); ch = int((q.get("ch") or ["2"])[0])
+            except ValueError:
+                sr, ch = 48000, 2
+            ok = bool(daten) and spur_schreiben((q.get("spur") or ["Spur"])[0], sr, max(1, min(2, ch)), daten)
+            return self.json_antwort({"ok": ok})
         d = self.koerper(8 * 1024 * 1024 if p == "/zyn/sicherung" else 65536)
         if p == "/zyn/sicherung":
             return self.json_antwort(sicherung(d if isinstance(d, dict) else {}))
@@ -828,9 +892,9 @@ class Handler(SimpleHTTPRequestHandler):
             an = d.get("an")
             if an is None:
                 an = not aufnahme_laeuft()
-            erg = aufnahme_schalten(bool(an))
+            erg = aufnahme_schalten(bool(an), bool(d.get("spuren")))
             erg["ziel"] = erg.get("ziel") or aufnahme.get("ziel", "")
-            senden({"typ": "aufnahme", "an": erg.get("an", False), "datei": os.path.basename(erg.get("datei") or ""), "ziel": erg["ziel"]})
+            senden({"typ": "aufnahme", "an": erg.get("an", False), "datei": os.path.basename(erg.get("datei") or ""), "ziel": erg["ziel"], "spuren": bool(erg.get("spuren"))})
             return self.json_antwort(erg)
         if p == "/zyn/grafik":
             # Test: Chromium zeichnet mit dem Grafikchip (kiosk.sh liest grafik.sh beim Browserstart; stürzt er ab, nimmt kiosk.sh es zurück)
