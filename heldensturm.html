@@ -41778,6 +41778,23 @@ function vogelDraw(v,t){const c=cx,f=v.face||1,flieg=v.st!=='schwimm',fl=Math.si
     else{c.globalCompositeOperation='lighter';const R=rng(B.seed|0);for(let i=ix[0];i<=ix[1];i++){const p=B.pts[i];for(let q=0;q<3;q++){const ox=(R()-0.5)*B.w*0.7,oy=(R()-0.5)*B.w*0.5,k=Math.max(0,Math.sin(tt*2.4+i*1.3+q*2))**12;if(k<0.05)continue;const sx=(p[0]+ox-cX)*z,sy=(p[1]+oy-cY)*z;c.globalAlpha=0.85*k;c.fillStyle='#fffbe8';c.fillRect(sx-3,sy-0.6,6,1.2);c.fillRect(sx-0.6,sy-2,1.2,4)}}}
     c.restore()}}}}catch(e){if(!FL.err)FL.err=String(e&&e.stack||e)}return r}}
 }catch(e){console.error('fluss',e);window.__hsFLUSS.fatal=String(e&&e.stack||e)}})();
+/* ================= Paket „hhbake“: Sprite-Vorrendern ohne Rücklesen von der Grafikkarte – window.__hsHHBAKE =================
+   Befund RG353V (Mali-G52, Chrome 78, Ultra leicht): Gegner zeichnen 21,6 ms/Bild, lange Aufgaben bis 384 ms. Ursache: ulBake/p3 rendern jedes
+   neue Sprite in EIN wachsendes Arbeitsbild (ULW.cv, durch Gebäude bald > 128×128 → liegt auf der Grafikkarte) und lesen es mit
+   getImageData zurück (glReadPixels: wartet auf die ganze Grafikkarte). Lösung: kleine Sprites (die meisten Gegner/Geschosse/Dinge) bekommen
+   ein eigenes kleines Arbeitsbild (≤ 128×128, bleibt im Hauptspeicher) – Rücklesen und Zuschnitt kosten dort fast nichts. Große bleiben wie bisher.
+   Gleiches Bild, gleiche Logik. */
+(function(){try{if(window.__hsHHBAKE)return;const HB=window.__hsHHBAKE={v:1,klein:0,gross:0,err:null};
+ const KL=128*128;const K={cv:null,g:null},Kh={g:null};let gross=null,grossG=null,grossH=null;
+ if(typeof ulScratch==='function'){const _s=ulScratch;ulScratch=function(w,h){try{
+   if(w*h<=KL&&w<=128&&h<=128){if(ULW.cv&&ULW.cv!==K.cv){gross=ULW.cv;grossG=ULW.g}
+    if(!K.cv){K.cv=document.createElement('canvas');K.cv.width=128;K.cv.height=128;K.g=K.cv.getContext('2d')}
+    ULW.cv=K.cv;ULW.g=K.g;const g=K.g;g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.clearRect(0,0,w,h);g.imageSmoothingEnabled=false;HB.klein++;return g}
+   if(ULW.cv===K.cv){ULW.cv=gross;ULW.g=grossG}HB.gross++}catch(e){HB.err=String(e)}return _s.apply(this,arguments)}}
+ if(typeof p3Halb==='function'){const _h=p3Halb;p3Halb=function(w,h){try{if(w*h<=KL/4&&w<=64&&h<=64){if(P3K.h&&P3K.h!==Kh.g)grossH=P3K.h;
+   if(!Kh.g){const C=document.createElement('canvas');C.width=64;C.height=64;Kh.g=C.getContext('2d')}P3K.h=Kh.g}else if(P3K.h===Kh.g)P3K.h=grossH}catch(e){HB.err=String(e)}return _h.apply(this,arguments)}}
+}catch(e){window.__hsHHBAKE={v:1,err:String(e)}}})();
+
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
