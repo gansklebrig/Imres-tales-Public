@@ -65,12 +65,11 @@ jobs:
 
       - name: Signaturschlüssel entschlüsseln
         env:
-          HELDENSTURM_SCHLUESSEL: ${{ secrets.HELDENSTURM_SCHLUESSEL || vars.HELDENSTURM_SCHLUESSEL }}
-          SECRET_NAMEN: ${{ toJSON(secrets) }}
-          VAR_NAMEN: ${{ toJSON(vars) }}
+          HELDENSTURM_SCHLUESSEL: ${{ secrets.HELDENSTURM_SCHLUESSEL }}
+          SCHLUESSEL_VAR: ${{ vars.HELDENSTURM_SCHLUESSEL }}
         run: |
-          # nur die Namen (nie die Werte) für die Fehlersuche festhalten
-          { echo "secrets: $(echo "$SECRET_NAMEN" | jq -c 'keys')"; echo "vars: $(echo "$VAR_NAMEN" | jq -c 'keys')"; } > namen.txt
+          [ -z "$HELDENSTURM_SCHLUESSEL" ] && HELDENSTURM_SCHLUESSEL="$SCHLUESSEL_VAR"
+          echo "schluessel_laenge=${#HELDENSTURM_SCHLUESSEL} als_variable=$([ -n "$SCHLUESSEL_VAR" ] && echo ja || echo nein)" > namen.txt
           HELDENSTURM_SCHLUESSEL="$(printf '%s' "$HELDENSTURM_SCHLUESSEL" | tr -d '[:space:]')"
           if [ -z "$HELDENSTURM_SCHLUESSEL" ]; then
             echo "::warning::Secret HELDENSTURM_SCHLUESSEL fehlt (Settings → Secrets and variables → Actions) – Probebau ohne Release."
