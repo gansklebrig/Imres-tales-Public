@@ -107,7 +107,7 @@
   const C = (Z.PC = {
     RUN: 152, ACC_G: 2100, DEC_G: 2600, ACC_A: 1500, DEC_A: 700,
     GRAV: 1420, FALL: 1.45, MAXFALL: 500, JUMP: 405, DJUMP: 360, CUT: 0.5, COYOTE: 0.1, JBUF: 0.14,
-    ROLL: 0.3, ROLLSPD: 300, ROLLCD: 0.12, CLIMB: 110
+    ROLL: 0.3, ROLLSPD: 300, ROLLCD: 0.12, DODGE: 0.1, CLIMB: 110
   });
   Z.newPlayer = () => {
     const P = {
@@ -150,7 +150,7 @@
     buffer(P, dt);
     /* Zeitgeber */
     P.iframe = Math.max(0, P.iframe - dt); P.rollCd = Math.max(0, P.rollCd - dt); P.dropT = Math.max(0, P.dropT - dt);
-    P.afterRoll = Math.max(0, P.afterRoll - dt); P.invis = Math.max(0, P.invis - dt); P.wrath = Math.max(0, P.wrath - dt);
+    P.afterRoll = Math.max(0, P.afterRoll - dt); P.dodgeT = Math.max(0, (P.dodgeT || 0) - dt); P.counterT = Math.max(0, (P.counterT || 0) - dt); P.invis = Math.max(0, P.invis - dt); P.wrath = Math.max(0, P.wrath - dt);
     P.bountyT = Math.max(0, P.bountyT - dt); if (P.bountyT <= 0) P.bounty = 0;
     for (const k of ["s1", "s2"]) P.cd[k] = Math.max(0, P.cd[k] - dt * (Z.has("flinkeHaende") ? 1.3 : 1));
     for (const k of ["a1", "a2"]) { P.comboT[k] -= dt; if (P.comboT[k] <= 0) P.combo[k] = 0; }
@@ -221,7 +221,10 @@
         const d = it ? Z.WEAPONS[it.id] : s === "a1" ? Z.WEAPONS.faeuste : null;
         if (!d) { take(P, s); continue; }
         if (d.kind === "shield") {
-          if (inp.held[s] && (!P.act || P.act.slot === s || P.act.phase === "post")) { if (!P.act || P.act.slot !== s) startShield(P, s, it || null, d); }
+          const free = !P.act || P.act.phase === "post";
+          if (P.shieldOut && P.shieldOut.slot === s) { take(P, s); continue; }
+          if (inp.held[s] && (free || P.act.slot === s)) { if (!P.act || P.act.slot !== s) { startShield(P, s, it || null, d); P.buf[s] = 0; } }
+          else if (P.buf[s] > 0 && !inp.held[s] && free) { P.buf[s] = 0; if (P.act) endAct(P); startBash(P, s, it || null, d); }
           continue;
         }
         if (d.kind === "ranged" && d.shoot.charge) {
@@ -255,7 +258,7 @@
       let target = h * C.RUN;
       if (P.act) {
         const a = P.act;
-        if (a.type === "shield") target *= 0.35;
+        if (a.type === "shield") target *= a.d.shield.move || 0.35;
         else if (a.type === "charge") target *= 0.45;
         else if (a.type === "melee" || a.type === "shot" || a.type === "skill") target = P.onGround ? 0 : P.vx * 0.98;
       }
@@ -333,7 +336,7 @@
     }
   }
   function startRoll(P, dir) {
-    P.rollT = C.ROLL; P.rollDir = dir; P.face = dir; P.iframe = Math.max(P.iframe, C.ROLL - 0.05); P.rolls = (P.rolls || 0) + 1;
+    P.rollT = C.ROLL; P.rollDir = dir; P.face = dir; P.iframe = Math.max(P.iframe, C.DODGE); P.dodgeT = C.DODGE; P.dodged = false; P.rolls = (P.rolls || 0) + 1;
     if (P.rolls >= 2 && Z.has("schattenroll")) { P.invis = 1.2; P.rolls = 0; }
     if (P.plunge) P.plunge = false;
     A.play("roll", { vol: 0.5 });
@@ -426,13 +429,23 @@
     P.parryT = d.shield.parry * (Z.metaLvl(it ? it.id : "") >= 3 && it && it.id === "goldschild" ? 1.2 : 1);
     A.play("block", { vol: 0.3, rate: 1.3 });
   }
+  /* Schildstoß: kurzer Stoß nach vorn, wenig Schaden, betäubt; jeder Schild hat eigene Wirkungen (werkzeuge.js) */
+  function startBash(P, slot, it, d) {
+    const sh = d.shield;
+    if (Z.shieldHook && Z.shieldHook("bashStart", P, { slot, it, d }) === false) return;
+    const c = Object.assign({ pre: 0.05, act: 0.1, post: 0.2, dmg: sh.bash, box: [-2, -28, 24, 28], lunge: 170, kb: 230, kbUp: 90, sw: "punch", heavy: true, hitSnd: "hitMetal",
+      eff: Object.assign({ stun: 0.45 }, sh.bashEff || {}), smear: { r: 16, a0: -0.3, a1: 0.3, th: 10, stab: true } }, sh.bashDef || {});
+    P.act = { slot, it, d, def: c, type: "melee", bash: true, step: 0, phase: "pre", t: 0, speed: 1, hit: new Set(), lungeT: 0 };
+    if (inp.held.left && !inp.held.right) P.face = -1; else if (inp.held.right && !inp.held.left) P.face = 1;
+    A.play("block", { vol: 0.4, rate: 0.8 });
+  }
   function endAct(P) { P.act = null; P.parryT = 0; }
   function updateAct(P, dt) {
     const a = P.act; a.t += dt * (a.speed || 1);
     if (a.lungeT > 0) { a.lungeT -= dt; if (P.onGround || a.dash) P.vx = P.face * a.lungeV * (a.dash ? 1 : U.clamp(a.lungeT / 0.08, 0, 1)); }
     if (a.type === "shield") {
       P.parryT = Math.max(0, P.parryT - dt);
-      if (!inp.held[a.slot]) { a.phase = "post"; a.type = "shieldDown"; a.t = 0; }
+      if (!inp.held[a.slot]) { if (a.t < 0.2 && !a.parried) { startBash(P, a.slot, a.it, a.d); return; } a.phase = "post"; a.type = "shieldDown"; a.t = 0; }
       if (inp.held.left && !inp.held.right) P.face = -1; else if (inp.held.right && !inp.held.left) P.face = 1;
       return;
     }
@@ -522,6 +535,7 @@
     if (!crit && Z.hasAff(a.it, "meuchelnd") && behind) crit = true;
     if (!crit && Z.hasAff(a.it, "kritisch") && Z.R() < 0.15) crit = true;
     if (P.st.smoke > 0) { crit = true; P.st.smoke = 0; P.invis = 0; }
+    if (P.counterT > 0) { crit = true; P.counterT = 0; }
     return crit;
   }
   function meleeHits(P, a) {
@@ -547,6 +561,7 @@
       if (c.pull && Z.metaLvl("kettenpeitsche") >= 3) eff.stun = Math.max(eff.stun || 0, 0.6);
       Z.hitEnemy(e, dmg, { crit, kb, kbUp: c.kbUp || (crit ? 60 : 30), eff, src: "melee", it: a.it, heavy: c.heavy, wallSlam: c.wallSlam, dir: P.face, sfx: c.hitSnd });
       if (a.d.leech) Z.healPlayer(dmg * a.d.leech);
+      if (a.bash && Z.shieldHook) Z.shieldHook("bashHit", P, { a, e, dmg });
     }
     /* Kisten, Fässer, rissige Wände */
     Z.hitProps && Z.hitProps(r, dmgOf(P, a.it, c.dmg), a);
@@ -648,6 +663,7 @@
       case "ranken": A.play("roots");
         for (let i = 0; i < 6; i++) setTimeout(() => Z.spawnHazard({ kind: "roots", x: cx + f * (20 + i * 22), y: P.y + P.h, w: 20, life: 0.7, dmg: 6 * m, owner: "p", eff: Object.assign({ root: 2.5 }, eff), once: true }), i * 60);
         break;
+      default: if (Z.SKILL_FX && Z.SKILL_FX[id] && Z.SKILL_FX[id](P, it, { m, eff, slot, cx, cy, f }) === false) P.cd[slot] = 0.4; break;
       case "drachenatem": Z.spawnHazard({ kind: "breath", x: cx + f * 8, y: P.y + 10, w: 90, dir: f, life: 0.9, dmg: 5 * m, owner: "p", eff: { poison: 2 } }); A.play("fireBig", { vol: 0.5, rate: 1.3 }); break;
     }
     FX.p({ x: cx, y: P.y - 4, vx: 0, vy: -20, life: 0.6, size: 10, col: d.col, kind: "glow", add: true });
@@ -659,11 +675,18 @@
     const P = Z.player; if (!P || P.dead) return false;
     o = o || {};
     if (Z.godMode) return false;
-    if ((P.iframe > 0 || P.ledge) && !o.force) return false;
+    if ((P.iframe > 0 || P.ledge) && !o.force) {
+      if (P.dodgeT > 0 && !P.dodged && !o.hazard) {
+        P.dodged = true; P.counterT = 1.2; Z.stats.dodges = (Z.stats.dodges || 0) + 1;
+        FX.stop(0.06); FX.text(P.x + P.w / 2, P.y - 10, L(["Ausgewichen!", "Dodged!"]), "#ffe08a", true);
+        FX.ring(P.x + P.w / 2, P.y + 12, 18, "#ffe08a", 0.25, 2); A.play("parry", { vol: 0.35, rate: 1.6 }); Z.input.rumble(0.25, 60);
+      }
+      return false;
+    }
     const fromX = o.x != null ? o.x : P.x + P.w / 2 + P.face;
     const fromFront = (fromX > P.x + P.w / 2) === (P.face > 0);
     /* Schild */
-    if (P.act && P.act.type === "shield" && fromFront && !o.unblockable) {
+    if (P.act && (P.act.type === "shield" || (P.act.bash && P.act.phase !== "post")) && (fromFront || P.act.d.shield.allround) && !o.unblockable) {
       const sh = P.act.d.shield;
       if (P.parryT > 0 && o.parryable !== false) {
         A.play("parry", { vol: 0.8 }); FX.stop(0.1); FX.flashScreen("#fff3c0", 0.25); FX.ring(P.x + P.w / 2 + P.face * 8, P.y + 12, 26, "#ffe08a", 0.3, 3);
@@ -673,7 +696,8 @@
         if (o.proj) { o.proj.owner = "p"; o.proj.vx *= -1.3; o.proj.vy *= -0.5; o.proj.dmg = dmgOf(P, P.act.it, 12) * (sh.reflectMul || 1.5); o.proj.hits = new Set(); o.proj.reflected = true; }
         if (P.act.it && Z.metaLvl(P.act.it.id) >= 3) { if (P.act.it.id === "turmschild") Z.healPlayer(P.hpMax * 0.04); if (P.act.it.id === "goldschild") P.iframe = 2; }
         if (Z.has("bollwerk")) Z.healPlayer(P.hpMax * 0.03);
-        Z.stats.parries = (Z.stats.parries || 0) + 1;
+        Z.stats.parries = (Z.stats.parries || 0) + 1; P.act.parried = true;
+        if (Z.shieldHook) Z.shieldHook("parry", P, o);
         return false;
       }
       const through = dmg * (1 - sh.block);
@@ -681,6 +705,7 @@
       P.vx = -P.face * 120; FX.addShake(2); FX.stop(0.04);
       if (sh.thorns && o.attacker && !o.attacker.dead) Z.hitEnemy(o.attacker, dmg * sh.thorns, { kb: 60, src: "thorns", eff: Z.metaLvl("dornenschild") >= 3 ? { bleed: 1 } : null });
       if (Z.has("bollwerk")) Z.healPlayer(P.hpMax * 0.03);
+      if (Z.shieldHook && Z.shieldHook("block", P, o, dmg) === "reflect") return false;
       if (o.proj) o.proj.dead = true;
       if (through < 1) return false;
       dmg = through;

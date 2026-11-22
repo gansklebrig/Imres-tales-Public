@@ -320,7 +320,9 @@
   const MAXP = 1400;
   /* p: x,y,vx,vy,life,size,col,g(gravity),drag,kind ('dot','spark','smoke','ember','shard','glow','ring','bubble','leaf','drop'),add(blend) */
   FX.p = o => {
-    if (FX.parts.length > MAXP) FX.parts.splice(0, 80);
+    const q = Z.gq && Z.gq.part != null ? Z.gq.part : 1;
+    if (q < 1 && !o.keep && Math.random() > q) return o;
+    if (FX.parts.length > MAXP * Math.max(0.3, q)) FX.parts.splice(0, 80);
     o.t = 0; o.life = o.life || 0.5; o.size = o.size || 2; o.g = o.g || 0; o.drag = o.drag == null ? 0.9 : o.drag; o.kind = o.kind || "dot"; o.a = o.a == null ? 1 : o.a;
     o.rot = o.rot || 0; o.vr = o.vr || 0; FX.parts.push(o); return o;
   };

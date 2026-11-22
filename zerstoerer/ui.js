@@ -221,10 +221,18 @@
       return false;
     }
     if (e.code === "Escape" || e.code === "KeyP") { if (!ui.noEsc) closeModal(); return true; }
+    if (["ArrowLeft", "ArrowRight", "KeyA", "KeyD"].includes(e.code) && adjustField(document.activeElement, /Right|KeyD/.test(e.code) ? 1 : -1)) return true;
     if (["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "KeyW", "KeyS", "KeyA", "KeyD", "Tab"].includes(e.code)) { moveFocus(/Down|Right|KeyS|KeyD|Tab/.test(e.code) ? 1 : -1); return true; }
     if (e.code === "Enter" || e.code === "Space" || e.code === "KeyE" || e.code === "KeyJ") { const f = document.activeElement; if (f && modal.contains(f)) { if (f.tagName === "INPUT" && f.type === "range") return false; f.click(); } return true; }
     return true;
   };
+  /* Regler und Auswahllisten mit Links/Rechts verstellen (Tastatur und Controller) */
+  function adjustField(f, d) {
+    if (!f || !modal.contains(f)) return false;
+    if (f.tagName === "INPUT" && f.type === "range") { const mn = +f.min || 0, mx = +f.max || 100, st = Math.max(+f.step || 1, (mx - mn) / 20); f.value = Math.max(mn, Math.min(mx, +f.value + d * st)); f.dispatchEvent(new Event("input", { bubbles: true })); f.dispatchEvent(new Event("change", { bubbles: true })); return true; }
+    if (f.tagName === "SELECT") { const n = f.options.length; f.selectedIndex = (f.selectedIndex + d + n) % n; f.dispatchEvent(new Event("change", { bubbles: true })); return true; }
+    return false;
+  }
   function moveFocus(d) {
     const list = [...modal.querySelectorAll("button:not([disabled]),input,select")];
     if (!list.length) return;
@@ -287,6 +295,7 @@
       ck("showDmg", L(["Schadenszahlen", "Damage numbers"]), s.showDmg) + ck("flashes", L(["Bildschirmblitze", "Screen flashes"]), s.flashes) + ck("vib", L(["Vibration", "Vibration"]), s.vib !== false) +
       '<label class="regler">' + L(["Stick-Totzone (Controller)", "Stick dead zone (controller)"]) + '<input type="range" min="15" max="60" value="' + Math.round((s.dead || 0.35) * 100) + '" data-dead="1"></label>' +
       '<button class="steuerknopf" data-act="controls">' + L(["Steuerung: Tastatur & Controller belegen", "Controls: remap keyboard & controller"]) + "</button>" +
+      '<button class="steuerknopf" data-act="graphics">' + L(["Grafik, Leistung & Fehlerbericht", "Graphics, performance & error report"]) + " <small>· " + esc(Z.gfxName()) + "</small></button>" +
       ck("autoAim", L(["Zielhilfe für Fernkampf", "Ranged aim assist"]), s.autoAim) + ck("fps", L(["Bilder pro Sekunde anzeigen", "Show FPS"]), s.fps) +
       '<label class="schalter">' + L(["Sprache", "Language"]) + ' <select data-lang="1"><option value="de"' + (s.lang === "de" ? " selected" : "") + '>Deutsch</option><option value="en"' + (s.lang === "en" ? " selected" : "") + ">English</option></select></label>" +
       '</div><div class="knoepfe"><button data-act="close" autofocus>' + esc(t("close")) + "</button></div>", { cls: "schmal", onClose: () => { Z.saveSettings(); A.saveVol(); if (!Z.level) showTitle(); } });
@@ -297,6 +306,64 @@
     modal.querySelectorAll("[data-set]").forEach(c => c.onchange = () => { Z.settings[c.dataset.set] = c.checked; if (c.dataset.set === "vib") inp.vib = c.checked; });
     modal.querySelector("[data-lang]").onchange = e => { Z.settings.lang = e.target.value; Z.saveSettings(); closeModal(); for (const k in slotEls) slotEls[k].uid = -9; ui.settings(); };
   };
+
+  /* ---------- Grafik & Diagnose ---------- */
+  ui.graphics = () => {
+    const q = Z.gq, g = Z.settings.gfx, D = Z.diag;
+    const opt = (v, lab, cur) => '<option value="' + v + '"' + (String(cur) === String(v) ? " selected" : "") + ">" + esc(lab) + "</option>";
+    const ck = (id, lab, val) => '<label class="schalter"><input type="checkbox" data-gq="' + id + '"' + (val ? " checked" : "") + "> " + esc(lab) + "</label>";
+    const rg = (id, lab, val, mn, mx, unit) => '<label class="regler">' + esc(lab) + ' <b data-out="' + id + '">' + val + unit + '</b><input type="range" min="' + mn + '" max="' + mx + '" step="5" value="' + val + '" data-gr="' + id + '"></label>';
+    const nErr = (D.old || []).length + D.errors.length;
+    openModal("<h2>" + L(["Grafik & Leistung", "Graphics & performance"]) + '</h2><div class="einst">' +
+      '<label class="schalter">' + L(["Qualität", "Quality"]) + ' <select data-preset="1" autofocus>' + opt("auto", L(["Automatisch", "Automatic"]) + (g.preset === "auto" ? " (" + L(Z.GFX_PRESETS[q.level].n) + ")" : ""), g.preset) +
+        Z.GFX_PRESETS.map((p, i) => opt(i, L(p.n), g.preset)).join("") + (g.preset === "custom" ? opt("custom", L(["Eigene", "Custom"]), g.preset) : "") + "</select></label>" +
+      rg("res", L(["Auflösung", "Resolution"]), Math.round(q.res * 100), 40, 100, " %") +
+      rg("part", L(["Partikel & Funken", "Particles & sparks"]), Math.round(q.part * 100), 20, 100, " %") +
+      '<label class="schalter">' + L(["Licht und Schatten", "Light and shadow"]) + ' <select data-light="1">' + opt(3, L(["Fein", "Fine"]), q.light) + opt(4, L(["Normal", "Normal"]), q.light) + opt(6, L(["Einfach", "Simple"]), q.light) + opt(8, L(["Grob (schnell)", "Coarse (fast)"]), q.light) + "</select></label>" +
+      ck("layers", L(["Hintergrund-Ebenen (Parallax)", "Background layers (parallax)"]), q.layers) + ck("critters", L(["Tiere im Hintergrund", "Background critters"]), q.critters) +
+      ck("weather", L(["Wetter (Regen, Asche, Funken …)", "Weather (rain, ash, embers…)"]), q.weather) + ck("fog", L(["Nebel", "Fog"]), q.fog) + ck("vignette", L(["Vignette (dunkle Ränder)", "Vignette (dark edges)"]), q.vignette) +
+      '<label class="schalter">' + L(["Bildrate begrenzen", "Limit frame rate"]) + ' <select data-cap="1">' + opt(0, L(["Aus", "Off"]), q.fpsCap) + opt(60, "60 fps", q.fpsCap) + opt(30, L(["30 fps (Akku sparen)", "30 fps (save battery)"]), q.fpsCap) + "</select></label>" +
+      '<label class="schalter"><input type="checkbox" data-set="fps"' + (Z.settings.fps ? " checked" : "") + "> " + L(["Bilder pro Sekunde anzeigen", "Show FPS"]) + "</label>" +
+      "<h3>" + L(["Fehler & Tests", "Errors & tests"]) + '</h3><p class="hinweis">' + L(["Die Berichte enthalten nur Technik (Gerät, Browser, Bildrate, Fehler) – keine persönlichen Daten. Einfach kopieren und Claude schicken.", "Reports only contain technical data (device, browser, frame rate, errors) – nothing personal. Just copy it and send it to Claude."]) +
+        " " + (nErr ? "<b>" + nErr + L([" Fehler gesammelt.", " errors collected."]) + "</b>" : L(["Bisher keine Fehler.", "No errors so far."])) + "</p>" +
+      '<button class="steuerknopf" data-act="diagRun">' + L(["Diagnose: 10 Sekunden normal spielen, dann Bericht", "Diagnosis: play normally for 10 seconds, then report"]) + "</button>" +
+      '<button class="steuerknopf" data-act="benchRun">' + L(["Grafiktest: alle Stufen durchmessen (ca. 20 s)", "Graphics test: measure every level (approx. 20 s)"]) + "</button>" +
+      '<button class="steuerknopf" data-act="diagNow">' + L(["Fehlerbericht jetzt anzeigen", "Show error report now"]) + "</button>" +
+      (nErr ? '<button class="steuerknopf" data-act="diagClear">' + L(["Fehlerliste leeren", "Clear error list"]) + "</button>" : "") +
+      '</div><div class="knoepfe"><button data-act="graphicsBack">' + esc(t("back")) + "</button></div>", { cls: "schmal", onClose: () => { Z.saveSettings(); if (!Z.level) showTitle(); } });
+    const re = () => { const f = document.activeElement && document.activeElement.dataset ? Object.entries(document.activeElement.dataset)[0] : null; ui.onClose = null; closeModal(); ui.graphics(); if (f) setTimeout(() => { const el = modal.querySelector("[data-" + f[0] + '="' + f[1] + '"]'); if (el) el.focus(); }, 40); };
+    modal.querySelector("[data-preset]").onchange = e => { Z.setGfx("preset", e.target.value === "auto" || e.target.value === "custom" ? e.target.value : +e.target.value); re(); };
+    modal.querySelectorAll("[data-gr]").forEach(r => { r.oninput = () => { modal.querySelector('[data-out="' + r.dataset.gr + '"]').textContent = r.value + " %"; }; r.onchange = () => { Z.setGfx(r.dataset.gr, r.value / 100); re(); }; });
+    modal.querySelector("[data-light]").onchange = e => { Z.setGfx("light", +e.target.value); re(); };
+    modal.querySelector("[data-cap]").onchange = e => { Z.setGfx("fpsCap", +e.target.value); };
+    modal.querySelectorAll("[data-gq]").forEach(c => c.onchange = () => { Z.setGfx(c.dataset.gq, c.checked); re(); });
+    modal.querySelector("[data-set=fps]").onchange = e => { Z.settings.fps = e.target.checked; Z.saveSettings(); };
+  };
+  actions.graphics = () => { Z.saveSettings(); A.saveVol(); ui.onClose = null; closeModal(); ui.graphics(); };
+  actions.graphicsBack = () => { ui.onClose = null; closeModal(); ui.settings(); };
+  actions.diagRun = () => { Z.saveSettings(); const ok = Z.level; if (!ok) { ui.toast(L(["Die Diagnose misst im laufenden Spiel – erst einen Durchgang starten oder ins Lager gehen.", "The diagnosis measures live gameplay – start a run or enter the camp first."]), 3200); return; } ui.onClose = null; Z.diag.startDiag(10000); };
+  actions.benchRun = () => { Z.saveSettings(); if (!Z.level) { ui.toast(L(["Der Grafiktest braucht eine Szene – erst einen Durchgang starten oder ins Lager gehen.", "The graphics test needs a scene – start a run or enter the camp first."]), 3200); return; } ui.onClose = null; Z.diag.startBench(); };
+  actions.diagNow = () => { ui.onClose = null; ui.showReport(Z.diag.quick(), L(["Fehlerbericht", "Error report"])); };
+  actions.diagClear = () => { Z.diag.clearOld(); ui.onClose = null; closeModal(); ui.graphics(); };
+  /* Bericht anzeigen: kopieren, teilen, Empfehlung übernehmen */
+  let reportText = "", reportRec = null;
+  ui.showReport = (text, head, rec) => {
+    reportText = text; reportRec = rec;
+    openModal("<h2>" + esc(head) + '</h2><p class="hinweis">' + L(["Kopieren und einfach im Chat einfügen.", "Copy it and paste it into the chat."]) + '</p><textarea class="bericht" readonly rows="14">' + esc(text) + "</textarea>" +
+      '<div class="knoepfe">' + '<button data-act="repCopy" autofocus>' + L(["Kopieren", "Copy"]) + "</button>" + (navigator.share ? '<button data-act="repShare">' + L(["Teilen …", "Share…"]) + "</button>" : "") +
+      (rec != null ? '<button data-act="repApply">' + L(["Empfehlung übernehmen: ", "Apply recommendation: "]) + esc(L(Z.GFX_PRESETS[rec].n)) + "</button>" : "") +
+      '<button data-act="close">' + esc(t("close")) + "</button></div>", { cls: "breit" });
+  };
+  actions.repCopy = () => {
+    const done = () => ui.toast(L(["Bericht kopiert – jetzt im Chat einfügen.", "Report copied – now paste it into the chat."]), 2600);
+    const fallback = () => { const ta = modal.querySelector(".bericht"); if (ta) { ta.removeAttribute("readonly"); ta.select(); try { document.execCommand("copy"); done(); } catch (_) { ui.toast(L(["Bitte den Text markieren und kopieren.", "Please select the text and copy it."]), 3000); } ta.setAttribute("readonly", ""); } };
+    try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(reportText).then(done, fallback); else fallback(); } catch (_) { fallback(); }
+  };
+  actions.repShare = () => { try { navigator.share({ title: "Ezekiel – The Destroyer · Bericht", text: reportText }).catch(() => {}); } catch (_) {} };
+  actions.repApply = () => { if (reportRec != null) { Z.setGfx("preset", reportRec); ui.toast(L(["Grafik: ", "Graphics: "]) + "<b>" + esc(Z.gfxName()) + "</b>", 2200); } closeModal(); };
+  /* bei einem Fehler einmal pro Sitzung leise Bescheid geben */
+  let errHinted = false;
+  Z.diag.onError = () => { if (errHinted) return; errHinted = true; setTimeout(() => ui.toast(L(["Es ist ein Fehler aufgetreten. Bericht: Einstellungen → Grafik, Leistung & Fehlerbericht.", "An error occurred. Report: Settings → Graphics, performance & error report."]), 4200), 200); };
 
   /* ---------- Steuerung belegen ---------- */
   const ACT_NAMES = { left: ["Links", "Left"], right: ["Rechts", "Right"], up: ["Hoch / Leiter", "Up / ladder"], down: ["Runter / Ducken", "Down / crouch"], jump: ["Springen", "Jump"], roll: ["Rolle", "Roll"],
@@ -592,8 +659,9 @@
       if (inp.capture) { inp.endFrame(); return; }
       if (inp.pressed.s1 || inp.pressed.s2) { const tabs = [...modal.querySelectorAll(".reiter button")]; const i = tabs.findIndex(b => b.classList.contains("an")); if (tabs.length) { const n = tabs[(i + (inp.pressed.s2 ? 1 : -1) + tabs.length) % tabs.length]; n.click(); setTimeout(() => { const f = modal.querySelector(".reiter .an"); if (f) f.focus(); }, 30); } }
       /* Gamepad/Touch in Menüs */
-      if (inp.pressed.down || inp.pressed.right) moveFocus(1);
-      if (inp.pressed.up || inp.pressed.left) moveFocus(-1);
+      const fe = document.activeElement;
+      if ((inp.pressed.left || inp.pressed.right) && adjustField(fe, inp.pressed.right ? 1 : -1)) {}
+      else { if (inp.pressed.down || inp.pressed.right) moveFocus(1); if (inp.pressed.up || inp.pressed.left) moveFocus(-1); }
       if (inp.pressed.jump || inp.pressed.a1 || inp.pressed.use) { const f = document.activeElement; if (f && modal.contains(f)) f.click(); }
       if (inp.pressed.roll && !ui.noEsc) closeModal();
       inp.endFrame();

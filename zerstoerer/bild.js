@@ -455,7 +455,7 @@
   function lightPass(c, cam, W, H) {
     const dark = Z.darkness > 0 ? 0.93 : B.dark * 0.82 + (Z.run && Z.run.skulls ? Z.run.skulls * 0.02 : 0);
     if (dark < 0.05) return;
-    if (!G.light || G.light.width !== Math.ceil(W / 4) || G.light.height !== Math.ceil(H / 4)) { G.light = document.createElement("canvas"); G.light.width = Math.ceil(W / 4); G.light.height = Math.ceil(H / 4); G.lc = G.light.getContext("2d"); }
+    const LD = (Z.gq && Z.gq.light) || 4; if (!G.light || G.light.width !== Math.ceil(W / LD) || G.light.height !== Math.ceil(H / LD)) { G.light = document.createElement("canvas"); G.light.width = Math.ceil(W / LD); G.light.height = Math.ceil(H / LD); G.lc = G.light.getContext("2d"); }
     const l = G.lc, sx = G.light.width / cam.w, sy = G.light.height / cam.h;
     l.globalCompositeOperation = "source-over"; l.clearRect(0, 0, G.light.width, G.light.height);
     if (G.darkCol !== B.ambCol) { G.darkCol = B.ambCol; const n = parseInt((B.ambCol || "#202020").slice(1), 16); G.darkRGB = [((n >> 16) * 0.12) | 0, (((n >> 8) & 255) * 0.12) | 0, ((n & 255) * 0.12) | 0].join(","); }
@@ -486,7 +486,7 @@
   /* ======================= WETTER & STIMMUNG ======================= */
   G.weather = function (dt) {
     if (!B || !Z.player) return;
-    const cam = Z.cam, w = B.weather || [];
+    const cam = Z.cam, w = (B.weather || []).filter(k => !Z.gq || Z.gq.weather !== false || k === "lightning");
     Z.windX = w.includes("wind") ? 30 + Math.sin(G.time * 0.4) * 20 : w.includes("rain") ? 15 : 0;
     const spawn = (n, fn) => { let k = n * dt; while (k > 0) { if (Math.random() < k) fn(); k -= 1; } };
     for (const kind of w) {
@@ -513,7 +513,7 @@
     if (Z.flashLight > 0) Z.flashLight = Math.max(0, Z.flashLight - dt * 2.5);
   };
   function fog(c, cam) {
-    if (!(B.weather || []).includes("fog")) return;
+    if (!(B.weather || []).includes("fog") || (Z.gq && Z.gq.fog === false)) return;
     c.save(); c.globalAlpha = 0.18;
     for (let i = 0; i < 4; i++) { const y = cam.y + cam.h * (0.55 + i * 0.12), x = cam.x - ((G.time * (6 + i * 3)) % 200); const g = c.createLinearGradient(0, y - 20, 0, y + 20); g.addColorStop(0, "rgba(180,190,180,0)"); g.addColorStop(0.5, "rgba(180,190,180,.7)"); g.addColorStop(1, "rgba(180,190,180,0)"); c.fillStyle = g; c.fillRect(x, y - 20, cam.w + 220, 40); }
     c.restore();
@@ -529,7 +529,8 @@
     c.setTransform(S, 0, 0, S, ox * S, oy * S);
     const pf = Z.prof, tm = pf ? () => performance.now() : null; let t0 = pf ? tm() : 0;
     const mark = k => { if (pf) { c.getImageData(0, 0, 1, 1); const n = tm(); pf[k] = (pf[k] || 0) + n - t0; t0 = n; } };
-    if (Z.noLayers) {} else if (B.open || lv.out || lv.hub || lv.arena) { drawLayers(c, cam); updCritters(dt, cam); drawCritters(c, cam); } else { c.fillStyle = B.wall; c.fillRect(cam.x - 2, cam.y - 2, cam.w + 4, cam.h + 4); } mark("layers");
+    const lay = !Z.gq || Z.gq.layers !== false;
+    if (Z.noLayers) {} else if (lay && (B.open || lv.out || lv.hub || lv.arena)) { drawLayers(c, cam); if (!Z.gq || Z.gq.critters !== false) { updCritters(dt, cam); drawCritters(c, cam); } } else { c.fillStyle = B.wall; c.fillRect(cam.x - 2, cam.y - 2, cam.w + 4, cam.h + 4); } mark("layers");
     drawTiles(c, cam); mark("tiles");
     drawLiquids(c, cam, t);
     drawDecor(c, cam, t); mark("decor");
@@ -544,6 +545,7 @@
     mark("enemies");
     if (Z.player) Z.drawPlayer(c, Z.player, t);
     Z.drawProjs(c);
+    Z.drawGadgets && Z.drawGadgets(c, t);
     FX.drawSmears(c);
     FX.draw(c, true); mark("fx");
     fog(c, cam);
@@ -554,7 +556,7 @@
     const P = Z.player;
     if (P && P.hp < P.hpMax * 0.3 && !P.dead) { if (!G.vigR) { G.vigR = document.createElement("canvas"); G.vigR.width = 160; G.vigR.height = 90; const v = G.vigR.getContext("2d"); const g = v.createRadialGradient(80, 45, 26, 80, 45, 84); g.addColorStop(0, "rgba(140,0,0,0)"); g.addColorStop(1, "rgba(140,0,0,1)"); v.fillStyle = g; v.fillRect(0, 0, 160, 90); } c.globalAlpha = (0.3 - P.hp / P.hpMax) / 0.3 * (0.6 + 0.2 * Math.sin(t * 5)); c.drawImage(G.vigR, 0, 0, W, H); c.globalAlpha = 1; }
     if (!G.vig) { G.vig = document.createElement("canvas"); G.vig.width = 160; G.vig.height = 90; const v = G.vig.getContext("2d"); const vg = v.createRadialGradient(80, 45, 40, 80, 45, 92); vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.5)"); v.fillStyle = vg; v.fillRect(0, 0, 160, 90); }
-    c.drawImage(G.vig, 0, 0, W, H);
+    if (!Z.gq || Z.gq.vignette !== false) c.drawImage(G.vig, 0, 0, W, H);
     if (pf) { const n = performance.now(); pf.post = (pf.post || 0) + n - t0; }
   };
 })();

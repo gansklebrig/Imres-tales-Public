@@ -64,7 +64,7 @@
   /* Gebiet laden */
   Z.loadArea = function (id, opts) {
     opts = opts || {};
-    Z.enemies.length = 0; Z.projs.length = 0; Z.hazards.length = 0; Z.allies.length = 0; Z.pickups.length = 0; Z.propsLive.length = 0; Z.stuck.length = 0; Z.bolts.length = 0;
+    Z.enemies.length = 0; Z.projs.length = 0; Z.hazards.length = 0; Z.allies.length = 0; Z.pickups.length = 0; Z.propsLive.length = 0; Z.stuck.length = 0; Z.bolts.length = 0; if (Z.gadgets) Z.gadgets.length = 0; if (Z.player) { Z.player.grapple = null; Z.player.shieldOut = null; }
     FX.parts.length = 0; FX.texts.length = 0; Z.darkness = 0; Z.boss = null; Z.bossDefeated = false;
     let lv, B;
     if (id === "lager") { lv = Z.genHub(); B = HUB_B; Z.run = null; }
@@ -296,10 +296,12 @@
   const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
   let VW = 0, VH = 0, dpr = 1;
   function resize() {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const q = Z.gq || {};
+    dpr = Math.min(window.devicePixelRatio || 1, q.level === 3 ? 3 : 2);
     const cw = window.innerWidth, ch = window.innerHeight;
-    /* begrenze die Pixelzahl auf sehr großen Bildschirmen */
-    const maxPix = 1600 * 940; if (cw * ch * dpr * dpr > maxPix) dpr = Math.sqrt(maxPix / (cw * ch));
+    /* begrenze die Pixelzahl auf sehr großen Bildschirmen (je nach Grafikstufe) */
+    const maxPix = q.maxPix || 1600 * 940; if (cw * ch * dpr * dpr > maxPix) dpr = Math.sqrt(maxPix / (cw * ch));
+    dpr *= q.res || 1; dpr = Math.max(0.35, dpr);
     VW = cv.width = Math.round(cw * dpr); VH = cv.height = Math.round(ch * dpr);
     cv.style.width = cw + "px"; cv.style.height = ch + "px";
     /* sichtbarer Weltausschnitt: ~250 Einheiten hoch im Querformat */
@@ -308,14 +310,16 @@
     Z.cam.w = VW / S; Z.cam.h = VH / S;
     if (Z.level) { Z.gfx.chunks.clear(); Z.gfx.buildLayers(); Z.cam.clamp(); }
   }
-  addEventListener("resize", resize); resize();
+  addEventListener("resize", resize); Z.resize = resize; resize();
 
   let last = performance.now(), acc = 0, fpsT = 0, fpsN = 0;
   const STEP = 1 / 120;
   Z.paused = false;
   function frame(now) {
     requestAnimationFrame(frame);
+    if (Z.frameGate && !Z.frameGate(now)) return;
     let dt = Math.min(0.05, (now - last) / 1000); last = now;
+    Z.gfxAutoTick && Z.gfxAutoTick(dt, !!(Z.level && !Z.paused));
     fpsT += dt; fpsN++; if (fpsT > 1) { Z.fps = fpsN; fpsN = 0; fpsT = 0; }
     inp.pollPad();
     if (Z.ui) Z.ui.frame(dt);
@@ -347,6 +351,7 @@
     Z.updateProjs(dt);
     Z.updateHazards(dt);
     Z.updateAllies(dt);
+    Z.updateGadgets && Z.updateGadgets(dt);
     updateCampRex(dt);
     Z.updatePickups(dt);
     if (Z.darkness > 0) Z.darkness -= dt;

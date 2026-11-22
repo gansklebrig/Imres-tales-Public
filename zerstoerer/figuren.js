@@ -69,6 +69,7 @@
       case "shield": c.fillStyle = "#6a5a4a"; c.fillRect(-2, -12, 7, 24); c.fillStyle = "#8a7a62"; c.fillRect(-1, -11, 5, 22); limb(c, 1.5, -11, 1.5, 11, 1, "#c8a060"); break;
       case "goldshield": ell(c, 1, 0, 5, 11, "#c8902a"); ell(c, 1.5, 0, 3.5, 9, "#ffd27a"); circ(c, 1.5, 0, 2, "#e0a040"); break;
       case "thornshield": ell(c, 1, 0, 5, 10, "#5a4a2a"); for (let i = -8; i <= 8; i += 4) poly(c, [5, i - 1, 9, i, 5, i + 1], "#8a6a3a"); break;
+      default: if (Z.WICON && Z.WICON[icon]) Z.WICON[icon](c, col, t);
     }
   }
   Z.drawWeapon = weapon;
@@ -747,6 +748,7 @@
     roots: c => { c.strokeStyle = "#5aa040"; c.lineWidth = 1.6; for (let i = -1; i <= 1; i++) { c.beginPath(); c.moveTo(i * 4, 8); c.quadraticCurveTo(i * 7, 0, i * 3, -8); c.stroke(); } },
     breath: c => { poly(c, [-8, 0, 7, -7, 7, 7], "#a8e050"); circ(c, -8, 0, 3, "#3a7a3a"); }
   };
+  Z.SKILL_ICON = SKILL_ICON;
   Z.drawIcon = function (c, icon, x, y, size, col) {
     c.save(); c.translate(x, y); const s = (size || 14) / 18; c.scale(s, s);
     if (SKILL_ICON[icon]) SKILL_ICON[icon](c);
