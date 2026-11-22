@@ -40346,6 +40346,452 @@ window.__hsWEGE={v:1,n:0};
  const up=usePotion;usePotion=function(){if(mutAn('ehre')){if(!G.bot&&!(G.wgT>G.time)){G.wgT=G.time+2;toast('Ehrenkampf: keine Heiltränke in dieser Stufe.','#ffb09a')}return}return up.apply(this,arguments)};
  hook('kill',e=>{if(mutAn('ehre'))try{__hsULTI2.lade(0.3)}catch(x){}});
 }catch(e){console.error('wege',e);window.__hsWEGE.err=String(e&&e.stack||e)}})();
+
+/* ================= Paket „takt“: Taktgang – Fallen im Rhythmus statt Hebel daneben – window.__hsTAKT =================
+   Vorher (areal, Schatzkammer): 2–3 Trittfallen im Gang, dazu ein Hebel direkt neben dem Gangmund, der alle Fallen abschaltet –
+   meist ging man einfach zum Hebel, die Fallen waren nie eine echte Hürde, die Goldhaufen gab es geschenkt.
+   Jetzt: der Gang zur Schatzkammer ist ein Taktgang. 3–4 Fallenreihen spannen sich über die ganze Gangbreite und schlagen
+   automatisch im Takt zu (Stacheln, Klingen, Flammen, Pfeile). Jede Reihe kündigt sich ½ s vorher an (Glühen, Zischen),
+   die Reihen laufen versetzt (Welle, Gegentakt, Doppelschlag) – man muss den Rhythmus lesen und sich durchtimen.
+   Treffer kosten etwa ein Fünftel Leben und werfen zurück zum Gangmund. Der Hebel liegt jetzt IN der Kammer (für den Rückweg).
+   Wer ohne Treffer durchkommt: „Makellos!“ – mehr Gold und eine bessere Truhe. Schwieriger mit Stufe und Schwierigkeit
+   (kürzerer Takt, längere Schlagphase, mehr Reihen). Fallen treffen auch Gegner. Ausweichrollen schützen wie sonst.
+   Online: Takt hängt nur an G.time und den übertragenen Feldern (pd/ph/aw/fv) – Gäste sehen dieselben Schläge.
+   Präfix tk. Abschalten: window.__hsTAKT.aus=1 (dann alte Schatzkammer). */
+window.__hsTAKT={v:1,aus:0};
+(function(){try{
+const TK=window.__hsTAKT;
+for(const k of ['pd','ph','aw','w','h','fa','sub','blick','ver','kl','kw','streife'])if(!NETW.props.includes(k))NETW.props.push(k);
+AR_FT.takt={n:'Taktfalle',zyk:1,r:30};
+AR_TIPP.takt=['Taktgang','Fallenreihen quer über den ganzen Gang, Kerben und Brandspuren am Boden.','Sie schlagen im festen Takt. Kurz vorher glüht die Reihe – Rhythmus beobachten, im richtigen Moment durchlaufen. Der Hebel steckt drinnen.'];
+const SUBN={stacheln:'Stachelreihe',klingen:'Sägeblatt',feuer:'Flammenreihe',pfeile:'Pfeilreihe',felsen:'Rollstein'};
+const WARN=0.5;
+/* Zustand einer Reihe: f = Phase 0..1; aktiv: f<aw; Warnung: die letzten WARN s davor */
+function tkZ(p,t){const pd=p.pd||2,f=(((t+(p.ph||0)*pd)/pd)%1+1)%1,aw=p.aw||0.45;const rest=(1-f)*pd;
+ return{f,aktiv:f<aw,warn:f>=aw&&rest<WARN,wk:f>=aw&&rest<WARN?1-rest/WARN:0,ak:f<aw?f/aw:0,zyk:Math.floor((t+(p.ph||0)*pd)/pd)}}
+TK.z=tkZ;
+function tkLokal(p,x,y){const ca=Math.cos(p.fa),sa=Math.sin(p.fa),dx=x-p.x,dy=y-p.y;return[dx*ca+dy*sa,-dx*sa+dy*ca]}
+function tkDrin(p,o,m){const L=tkLokal(p,o.x,o.y);return Math.abs(L[0])<p.h/2+(o.r||12)*0.55+(m||0)&&Math.abs(L[1])<p.w/2+(m||0)}
+const tkSchaden=q=>{const mh=(q.st&&q.st.maxHp)||q.hp||200;return Math.max(arSc()*1.6,mh*(0.19+0.008*Math.min(10,arHart())+(HARD()?0.03:0)))};
+
+/* ---------- Bau: ersetzt die Füllung der Schatzkammer ---------- */
+const fill0=AR_FILL.schatzkammer;
+AR_FILL.schatzkammer=function(A){if(TK.aus||!A.tuer||!A.gang)return fill0.apply(this,arguments);
+ const D=AR_DIR(A.ea),fa=Math.atan2(D.y,D.x),sl=SL()||0,hart=arHart();
+ const n=sl<3&&hart<1?3:4;const subs=A.stil==='hoehle'?['stacheln','klingen','feuer','stacheln']:A.stil==='burg'||A.stil==='gruft'?['klingen','pfeile','feuer','stacheln']:['stacheln','pfeile','klingen','feuer'];
+ const L=subs.slice().sort(()=>Math.random()-0.5);
+ const pd=clamp(2.35-0.035*sl-0.06*hart-(HARD()?0.12:0),1.45,2.35),aw=clamp(0.4+0.008*Math.min(12,sl)+0.012*hart,0.4,0.54);
+ const muster=pick(sl<2?['welle','welle','gegen']:['welle','gegen','doppel','zufall']);
+ A.tk={muster,hit:0,drin:0,fertig:0,n,pd};
+ for(let i=0;i<n;i++){const u=38+i*(164/(n-1));const x=A.tuer.x+D.x*u,y=A.tuer.y+D.y*u;
+  /* Phasen: Welle von außen nach innen (wer im Takt geht, reitet die Lücke), Gegentakt, Doppelschlag (zwei Reihen gemeinsam) */
+  let ph=muster==='welle'?(n-1-i)*0.21:muster==='gegen'?(i%2)*0.5:muster==='doppel'?(i>>1)*0.5+(i%2)*0.08:Math.random();
+  const p=arFalle('takt',x,y,{a:fa,w:100,h:26,ai:A.id});if(!p)continue;p.sub=L[i%L.length];p.pd=+(pd*(0.96+0.08*Math.random())).toFixed(3);p.ph=+(ph%1).toFixed(3);p.aw=+aw.toFixed(3);p.fv=['stacheln','klingen','feuer','pfeile'].indexOf(p.sub);p.n=i}
+ /* Hebel in der Kammer (für den Rückweg), Truhe und Gold wie bisher */
+ const perp={x:-D.y,y:D.x};const sd=Math.random()<0.5?1:-1;const hx=A.innen.x-D.x*62+perp.x*sd*62,hy=A.innen.y-D.y*62+perp.y*sd*62;const hq=wlNahFrei(hx,hy,5)||{x:hx,y:hy};
+ A.hebelP={k:'ar_hebel',prop:1,x:hq.x,y:hq.y,r:14,used:0,ai:A.id,tkInnen:1};G.props.push(A.hebelP);
+ A.truhe=arTruhe(A,A.innen.x,A.innen.y+10,sl>=6&&Math.random()<0.35?2:1);
+ G.props.push({k:'goldpile',prop:1,x:A.innen.x-50,y:A.innen.y+30,r:16},{k:'goldpile',prop:1,x:A.innen.x+50,y:A.innen.y+34,r:16});
+ if(sl>=4&&Math.random()<0.5){const E=[];for(let i=0;i<2;i++){const e=arFeind(A,pickFoe(0.7),A.innen.x+(i?40:-40),A.innen.y-30,{pr:0.6});if(e)E.push(e)}arGruppe(A,E,'schlaf',150)}};
+/* Beschreibung im Areal-Hinweis */
+try{if(typeof AR_LVI!=='undefined'&&AR_LVI.schatzkammer)AR_LVI.schatzkammer.d='Der Gang zur Beute ist ein Taktgang: Fallenreihen schlagen im Rhythmus zu und glühen kurz vorher auf. Beobachtet den Takt und lauft im richtigen Moment – drinnen schaltet ein Hebel sie für den Rückweg ab.'}catch(e){}
+try{AR_K.schatzkammer.sub='Taktgang: Rhythmus lesen, durchtimen!'}catch(e){}
+
+/* ---------- Takt (Gastgeber): Treffer, Klänge, „Makellos“ ---------- */
+let tkTon=0;
+const ft0=arFallenTick;arFallenTick=function(dt){ft0.apply(this,arguments);try{tkTick(dt)}catch(e){if(!TK.err)TK.err=String(e&&e.stack||e)}};
+function tkTick(dt){if(TK.aus)return;const SP=arSpieler(),t=G.time;let L=null;
+ for(const p of G.props){if(p.k!=='falle'||p.type!=='takt'||p.dead)continue;(L||(L=[])).push(p);if(p.act===4)continue;const z=tkZ(p,t);
+  const nah=SP.some(q=>d2(q,p)<380*380);
+  if(z.aktiv&&p.tkZ!==z.zyk){p.tkZ=z.zyk;if(nah&&t-tkTon>0.16){tkTon=t;sfxAt(p.sub==='feuer'?'fire':p.sub==='pfeile'?'g_wind':p.sub==='felsen'?'d_stone':'g_blade',p.x,p.y)}
+   if(nah&&!G.bot&&fxQ()>0){const ca=Math.cos(p.fa),sa=Math.sin(p.fa),bx=-sa,by=ca;
+    if(p.sub==='feuer')for(let i=0;i<4;i++){const u=rnd(-0.5,0.5)*p.w;embers(p.x+bx*u,p.y+by*u-6,'#ffb050',1,6)}
+    else if(p.sub==='stacheln'||p.sub==='klingen')for(let i=0;i<2;i++){const u=rnd(-0.5,0.5)*p.w;sparks(p.x+bx*u,p.y+by*u,'#f0e8d8',2,120,1)}}}
+  if(!z.aktiv)continue;
+  const kl=p.sub==='klingen'?[tkScheibe(p,z,0),tkScheibe(p,z,1)]:p.sub==='felsen'?[tkFels(p,z)]:null;const kr=p.sub==='felsen'?17:11;const drin=o=>kl?kl.some(s=>Math.hypot(o.x-s[0],o.y-s[1])<kr+(o.r||12)*0.7):tkDrin(p,o);
+  for(const q of SP){if(q.inv>0||q.down||(q.tkT||0)>t)continue;if(!drin(q))continue;
+   q.tkT=t+0.55;const ca=Math.cos(p.fa),sa=Math.sin(p.fa);const A=G.ar&&G.ar.L?G.ar.L.find(a=>a.id===p.ai):null;if(A&&A.tk)A.tk.hit++;
+   withP(q,()=>{hurt(tkSchaden(P));P.kx+=ca*340;P.ky+=sa*340;if(p.sub==='feuer')arDot(P,'brand',arSc()*0.2,1.5);else if(p.sub!=='pfeile')arDot(P,'blut',arSc()*0.12,1.5)});
+   if(!G.bot){word(q.x,q.y-40,SUBN[p.sub]||'Falle!','#ff8a5a');try{sparks(q.x,q.y-10,p.sub==='feuer'?'#ffa040':'#f0e0d0',6,200)}catch(e){}}}
+  query(p.x,p.y,p.w/2+30,e=>{if(e.flying||(e.tkT||0)>t||!drin(e))return;e.tkT=t+0.55;arHitE(e,0.22,{quiet:1});const ca=Math.cos(p.fa),sa=Math.sin(p.fa);e.kx=(e.kx||0)+ca*200;e.ky=(e.ky||0)+sa*200})}
+ if(!L)return;
+ /* Durchkommen messen: wer den Gang betritt und die Kammer erreicht */
+ for(const A of (G.ar&&G.ar.L)||[]){if((A.k!=='schatzkammer'&&A.k!=='taktpfad')||!A.tk||A.tk.fertig||!A.innen)continue;const R=L.filter(p=>p.ai===A.id);if(!R.length)continue;
+  for(const q of SP){if(R.some(p=>tkDrin(p,q,22)))A.tk.drin=1;
+   if(A.tk.drin&&Math.hypot(q.x-A.innen.x,q.y-A.innen.y)<78){A.tk.fertig=1;const aus=R.every(p=>p.act===4);
+    if(aus)break;
+    if(A.tk.hit===0){if(!G.bot){banner('Makellos!','Ohne einen Kratzer durch den Taktgang','#ffd36a',{dur:1.8,size:30,y:H*0.26});sfx('xp')}arGold(A.innen.x,A.innen.y,10,1.4);arXp(A.innen.x,A.innen.y,2);if(A.truhe&&!A.truhe.open)A.truhe.rich=Math.min(2,(A.truhe.rich||0)+1);TK.makellos=(TK.makellos||0)+1}
+    else if(!G.bot)word(q.x,q.y-46,A.tk.hit===1?'Durch – mit einem Treffer':`Durch – ${A.tk.hit} Treffer`,'#ffd36a');
+    break}}}}
+/* Text im Areal-Rahmen */
+const tick0=AR_TICK.schatzkammer;AR_TICK.schatzkammer=function(A){if(TK.aus||!A.tk)return tick0.apply(this,arguments);if(A.s!==1)return;
+ const an=G.props.filter(p=>p.k==='falle'&&p.ai===A.id&&p.type==='takt'&&p.act!==4).length;A.tx=an?(A.tk.drin&&!A.tk.fertig?`Im Takt bleiben! Treffer: ${A.tk.hit}`:'Taktgang: Rhythmus lesen, dann los'):'Der Gang ist abgeschaltet';
+ if(A.truhe&&A.truhe.open)arSieg(A,A.tk.hit===0&&A.tk.fertig?'Makellos geborgen!':'Schatz geborgen!')};
+
+/* ---------- Zeichnen ---------- */
+const SILBER='#d8d2c6',DUNKEL='#24201c';
+function tkScheibe(p,z,j,w,h){const u=z.aktiv?((z.ak*1.6+j*0.5)%1):0.5;const b=(j?1:-1)*(u-0.5)*((w||p.w||100)-24);return tkPunkt(p,(j?1:-1)*(h||p.h||26)/4,b)}
+function tkFels(p,z){const w=p.w||100;const u=z.aktiv?z.ak:0;return tkPunkt(p,0,(p.fv>=5?1:-1)*(-w/2-14+u*(w+28)))}
+function tkPunkt(p,a,b){const ca=Math.cos(p.fa),sa=Math.sin(p.fa);return[p.x+ca*a-sa*b,p.y+sa*a+ca*b]}
+function tkBoden(p,t){const vor=p.pd==null;const c=cx,base=(G.theme&&G.theme.base)||'#3a3430',aus=p.act===4,z=vor?{aktiv:1,warn:0,wk:0,ak:0.5}:aus?{aktiv:0,warn:0,wk:0,ak:0}:tkZ(p,G.time);const h=vor?20:p.h||26,w=vor?48:p.w||100,sub=p.sub||'stacheln';
+ const E=[tkPunkt(p,-h/2,-w/2),tkPunkt(p,h/2,-w/2),tkPunkt(p,h/2,w/2),tkPunkt(p,-h/2,w/2)];
+ c.save();c.globalAlpha=aus?0.55:0.95;hP(c,bT(base,-0.35),'rgba(0,0,0,.65)',1.4,[E[0][0],E[0][1],E[1][0],E[1][1],E[2][0],E[2][1],E[3][0],E[3][1]]);
+ /* Kerben/Schlitze quer */c.globalAlpha=aus?0.35:0.7;for(const a of [-h/4,h/4]){const s0=tkPunkt(p,a,-w/2+6),s1=tkPunkt(p,a,w/2-6);ln(c,'rgba(0,0,0,.75)',3,s0[0],s0[1],s1[0],s1[1])}
+ /* Warnung: Glühen in den Schlitzen, wird zum Schlag hin heller */
+ if(z.warn){const k=z.wk;c.globalAlpha=0.35+0.6*k;for(const a of [-h/4,h/4]){const s0=tkPunkt(p,a,-w/2+6),s1=tkPunkt(p,a,w/2-6);ln(c,sub==='feuer'?'#ffa040':'#ff6a3a',2,s0[0],s0[1],s1[0],s1[1])}}
+ if(z.aktiv&&(sub==='feuer'||sub==='pfeile')){c.globalAlpha=0.45;hP(c,sub==='feuer'?'rgba(255,120,40,.55)':'rgba(255,220,160,.25)',null,0,[E[0][0],E[0][1],E[1][0],E[1][1],E[2][0],E[2][1],E[3][0],E[3][1]])}
+ /* Düsen/Schlitze an den Wänden */
+ if(sub==='feuer'||sub==='pfeile'){c.globalAlpha=aus?0.5:1;for(const s of [-1,1]){if(sub==='pfeile'&&s>0)continue;const q=tkPunkt(p,0,s*(w/2+3));circ(c,q[0],q[1],5,DUNKEL);if(z.warn||z.aktiv){c.globalAlpha=0.5+0.5*(z.aktiv?1:z.wk);circ(c,q[0],q[1],3,sub==='feuer'?'#ffb050':'#ffe0a0');c.globalAlpha=aus?0.5:1}}}
+ c.restore()}
+function tkOben(p,t){if(p.act===4)return;const vor=p.pd==null;const z=vor?{aktiv:1,warn:0,wk:0,ak:0.5}:tkZ(p,G.time);if(!z.aktiv&&!z.warn)return;const c=cx,h=vor?20:p.h||26,w=vor?48:p.w||100,sub=p.sub||'stacheln';
+ /* Ausfahren: schnell hoch, am Ende zurück */const k=z.aktiv?Math.min(1,z.ak*6)*Math.min(1,(1-z.ak)*5):z.wk*0.18;
+ c.save();
+ if(sub==='stacheln'){const N=7;for(let i=0;i<N;i++)for(const a of [-h/4,h/4]){const b=-w/2+8+i*(w-16)/(N-1);const q=tkPunkt(p,a,b);const H=12*k;if(H<0.6)continue;
+   hP(c,SILBER,'rgba(0,0,0,.55)',1,[q[0]-3.2,q[1],q[0]+3.2,q[1],q[0],q[1]-H])}}
+ else if(sub==='klingen'){/* Sägeblätter fahren aus den Schlitzen und rasen quer durch den Gang */const R=9.5*k;if(R>0.8){let j=0;for(const a of [-h/4,h/4]){const q=tkScheibe(p,z,j,w,h);const rot=G.time*18*(j?-1:1);j++;
+   c.globalAlpha=0.35;ell(c,q[0],q[1]+2,R*1.05,R*0.4,'rgba(0,0,0,.5)');c.globalAlpha=1;const Z=[];for(let i=0;i<16;i++){const an=rot+i*Math.PI/8,rr=i%2?R:R*0.78;Z.push(q[0]+Math.cos(an)*rr,q[1]-R*0.55+Math.sin(an)*rr*0.9)}
+   hP(c,SILBER,'rgba(0,0,0,.6)',1,Z);circ(c,q[0],q[1]-R*0.55,R*0.32,DUNKEL);c.globalAlpha=0.6;ln(c,'#fffaf0',1,q[0]-R*0.5,q[1]-R*1.0,q[0]+R*0.2,q[1]-R*1.25);c.globalAlpha=1}}}
+ else if(sub==='felsen'&&z.aktiv){const q=tkFels(p,z),R=15,rot=z.ak*7*(p.fv>=5?1:-1);c.globalAlpha=0.35;ell(c,q[0],q[1]+3,R*1.05,R*0.42,'rgba(0,0,0,.6)');c.globalAlpha=1;const Z=[];for(let i=0;i<9;i++){const an=rot+i*TAU/9,rr=R*(0.82+0.18*Math.sin(i*2.3+p.ph*7));Z.push(q[0]+Math.cos(an)*rr,q[1]-R*0.8+Math.sin(an)*rr*0.92)}hP(c,'#7a6e60','rgba(0,0,0,.6)',1.2,Z);c.globalAlpha=0.5;ln(c,'#a89a88',2,q[0]-R*0.45,q[1]-R*1.25,q[0]+R*0.1,q[1]-R*1.45);ln(c,'rgba(0,0,0,.45)',1.5,q[0]+Math.cos(rot)*R*0.5,q[1]-R*0.8+Math.sin(rot)*R*0.5,q[0]-Math.cos(rot)*R*0.3,q[1]-R*0.8-Math.sin(rot)*R*0.3);c.globalAlpha=1}
+ else if(sub==='feuer'&&z.aktiv){const N=6;for(let i=0;i<N;i++){const b=-w/2+6+i*(w-12)/(N-1);const q=tkPunkt(p,0,b);const fl=0.75+0.25*Math.sin(G.time*23+i*1.7+p.ph*9);const H=(26+10*fl)*k;
+   c.globalAlpha=0.55;ell(c,q[0],q[1]-H*0.45,9,H*0.5,'#ff7a28');c.globalAlpha=0.75;ell(c,q[0],q[1]-H*0.35,5,H*0.32,'#ffd070')}}
+ else if(sub==='pfeile'&&z.aktiv){const N=4;for(let i=0;i<N;i++){const a=(i%2?-1:1)*h/5;const u=((z.ak*2.2+i*0.27)%1);const b=-w/2+u*w;const q=tkPunkt(p,a,b),q2=tkPunkt(p,a,b-16);
+   ln(c,'#6a4a2a',2,q2[0],q2[1]-8,q[0],q[1]-8);hP(c,SILBER,null,0,(()=>{const r=tkPunkt(p,a,b+5);return[r[0],r[1]-8,q[0]-2,q[1]-10.5,q[0]-2,q[1]-5.5]})())}}
+ c.restore()}
+const fb0=arFalleBoden;arFalleBoden=function(p,t){if(p&&p.type==='takt'){try{tkBoden(p,t)}catch(e){}return}return fb0.apply(this,arguments)};
+const fo0=arFalleOben;arFalleOben=function(p,t){if(p&&p.type==='takt'){try{tkOben(p,t)}catch(e){}return}return fo0.apply(this,arguments)};
+/* Glühen der Warnung/Flammen im Dunkeln */
+{const pg0=drawPropGlow;drawPropGlow=function(inView,t){const r=pg0.apply(this,arguments);try{if(G.room||TK.aus)return r;for(const p of G.props){if(p.k!=='falle'||p.type!=='takt'||p.dead||p.act===4||!inView(p.x,p.y,80))continue;const z=tkZ(p,G.time);
+  if(p.sub==='feuer'&&z.aktiv)glow(p.x,p.y-14,70,'#ff8a3a',0.55,true);else if(z.warn)glow(p.x,p.y,40+20*z.wk,'#ff6a3a',0.18+0.3*z.wk,true)}}catch(e){}return r}}
+/* Bestiarium: Vorschau */
+TK.vorschau=function(c,w,h){const p={k:'falle',type:'takt',x:w/2,y:h/2+6,fa:0,w:w*0.8,h:20,pd:2,ph:0,aw:0.5,sub:'stacheln',act:0};const o=cx;cx=c;try{tkBoden(p,0);const z0=G.time;G.time=0.4;tkOben(p,0);G.time=z0}finally{cx=o}};
+/* Gesehen: sobald jemand eine Reihe schlagen sah */
+{const t0=arFallenTick;arFallenTick=function(dt){t0.apply(this,arguments);try{const S=SAVE.arSeen||(SAVE.arSeen={});if(S.takt||!P)return;for(const p of G.props)if(p.type==='takt'&&p.k==='falle'&&!p.dead&&d2(P,p)<300*300){S.takt=1;break}}catch(e){}}}
+/* Bot: Taktgang nicht als Hindernis meiden, sondern auf Lücke warten (nur für Testläufe) */
+{const bm0=typeof arBotMeide==='function'?arBotMeide:null;if(bm0)arBotMeide=function(v){const r=bm0.apply(this,arguments);try{for(const p of G.props){if(p.type!=='takt'||p.k!=='falle'||p.act===4)continue;const z=tkZ(p,G.time+0.25);if((z.aktiv||z.warn)&&tkDrin(p,P,30)){return[r[0]*0.15,r[1]*0.15]}}}catch(e){}return r}}
+}catch(e){console.error('takt',e);window.__hsTAKT.fatal=String(e&&e.stack||e)}})();
+
+
+/* ================= Paket „laden“: Händler mit richtigem Laden – Sortiment ansehen, kaufen, eigene Sachen verkaufen – window.__hsLADEN =================
+   Vorher: Händler verkauften verdeckte Ware (Sockel im Geheimraum, Dankesware des geretteten Händlers) oder genau eine Sache im
+   Gespräch (Mosk) – man sah nicht, was man bekommt.
+   Jetzt: jeder Händler hat ein kleines Sortiment aus 5 echten Gegenständen (sichtbar, mit Werten und Vergleich zur Ausrüstung),
+   dazu „Tränke auffüllen“ und bei Mosk seine besondere Ware. Im selben Fenster kann man Beutel-Gegenstände verkaufen –
+   für 50 % mehr Gold als beim Verschrotten. Gemerkte (★) Teile und Leihgaben lassen sich nicht verkaufen.
+   Bedienung wie die Truhe (gleiche Aufteilung, Steuerkreuz/Maus/Touch, bis 640×394), Spiel ruht solange (wie der Beutel).
+   Quellen: Geheimraum „Der fahrende Händler“, geretteter Händler (Areal, halber Preis), Mosk / fahrender Händler (Feilschen
+   verändert die Preise einmal je Händler, Gerüchte gibt es weiter). Online als Gast: alter Weg (Gastgeber verwaltet Beute).
+   Präfix ld. Abschalten: window.__hsLADEN.aus=1 */
+window.__hsLADEN={v:1,aus:0,kauf:0,verkauf:0};
+(function(){try{
+const LD=window.__hsLADEN;const GOLDC='#e8c070';
+const gast=()=>{try{return NET&&NET.role==='guest'}catch(e){return false}};
+const an=()=>!LD.aus&&!gast()&&!G.bot;
+const VK=1.5;/* Verkauf: Verschrottwert × 1,5 */
+const vkPreis=it=>it.leih?0:Math.max(1,Math.round(scrapValue(it)*VK));
+const KMUL=[10,12,14,16,20,16];
+const kPreis=(L,it)=>Math.max(10,Math.round(scrapValue(it)*KMUL[it.rar]*(L.f||1)*(1-(L.rab||0))/5)*5);
+const tPreis=L=>Math.max(10,Math.round((40+8*(SL()||0))*(L.f||1)*(1-(L.rab||0))/5)*5);
+const HSL=['weapon','ranged','helm','armor','gloves','ring'];
+/* Sortiment: 5 Teile, mindestens eine Waffe und ein Rüstungsteil, Güte steigt nach rechts */
+function sortiment(L){const il=Math.max(1,(scale().il||1)+1+(L.ilb||0)),hero=P.id;const minR=L.minR||[1,1,2,2,3];const sl=[pick(['weapon','ranged']),pick(['helm','armor','gloves']),pick(HSL),pick(HSL),pick(HSL)].sort(()=>Math.random()-0.5);
+ const W=[];const pn=G.pityN;for(let i=0;i<5;i++){let r=Math.max(minR[i],rollRarity(0.4+0.25*i));if(r>4)r=4;const it=makeItem(sl[i],il,r,hero);it.ld=1;W.push(it)}G.pityN=pn;
+ W.sort((a,b)=>a.rar-b.rar||a.ilvl-b.ilvl);return W}
+function neu(o){const L=Object.assign({id:Math.random().toString(36).slice(2,8),n:'Händler',titel:'',spruch:'',c:GOLDC,f:1,rab:0,waren:null,trank:1,feilsch:0,ger:0,gekauft:0},o||{});return L}
+LD.neu=neu;
+/* ---------- Öffnen / Schließen ---------- */
+let L0=null;
+function oeffnen(L,q){if(!an()||!L||G.state!=='play')return false;if(!L.waren)L.waren=sortiment(L);L0=L;G.ldSel=null;LD.msg='';
+ const i=G.mp&&PL?PL.indexOf(q):-1;G.menuP=i>=0?i:0;if(G.mp&&PL[G.menuP])P=PL[G.menuP];
+ G.paused=true;G.resumeT=0;G.overlay='laden';hud.hidden=true;joy=null;for(const k in keys)keys[k]=false;try{sfx('beutel')}catch(e){}render_();return true}
+LD.oeffnen=oeffnen;
+{const co=closeOverlay;closeOverlay=function(){const war=G.overlay==='laden';const r=co.apply(this,arguments);if(war&&L0){const L=L0;L0=null;try{if(L.zu)L.zu(L)}catch(e){console.error('laden zu',e)}}return r}}
+{const rp=renderPause;renderPause=function(){if(G.overlay==='laden'&&L0)return render_(true);return rp.apply(this,arguments)}}
+{const so=switchOverlay;switchOverlay=function(k){if(G.overlay==='laden'&&k!=='laden'){const L=L0;L0=null;G.overlay=null;try{if(L&&L.zu)L.zu(L)}catch(e){}}return so.apply(this,arguments)}}
+/* leere Detail-Fläche: eigener Text */
+{const il0=ivLeer;ivLeer=function(k){if(G.overlay==='laden'&&L0){const pad=(()=>{try{return Object.keys(PADS.st||{}).length>0}catch(e){return false}})();
+ return`<div class="ivc"><div class="ivl-i" aria-hidden="true"><span>⚖</span></div><div class="ivl-t">Ware oder eigenen Gegenstand wählen</div><div class="ivl-d">Oben die Ware des Händlers mit Werten und Vergleich, unten dein Beutel – Verkaufen bringt 50 % mehr Gold als Verschrotten.${pad?'<br>🎮 Steuerkreuz wählen · A auswählen':''}</div></div>`}return il0.apply(this,arguments)}}
+/* ---------- Darstellung (Aufbau wie die Truhe) ---------- */
+function render_(keep){const L=L0;if(!L)return;const W=L.waren;let sel=G.ldSel,it=null,k=null,i=-1;let xk=null;if(sel){[k,i]=sel.split(':');if(k==='x'){xk=i;i=-1}else{i=+i;it=k==='w'?W[i]:P.bag[i];if(!it){G.ldSel=sel=null}}}
+ const ico=x=>`<canvas class="ico" data-ico="${x.slot}|${x.rar}|${esc(x.base||'')}" width="72" height="72" aria-hidden="true"></canvas>`;
+ const dd=x=>{const d=itemDelta(x);return Math.abs(d)>0.005?`<span class="ua ${d>0?'':'dn'}">${d>0?'+':''}${Math.round(d*100)}%</span>`:''};
+ const tileW=(x,j)=>{const pr=kPreis(L,x),zu=SAVE.gold<pr;return`<button class="it r${x.rar}${x.anc?' anc'+x.anc:''} ${sel==='w:'+j?'sel':''} ld-w${zu?' ld-zu':''}" data-act="ld-sel" data-k="w:${j}">${dd(x)}${ico(x)}<span class="nm">${esc(x.name)}</span><span class="ld-p">${fmt(pr)}</span></button>`};
+ const tileB=(x,j)=>`<button class="it r${x.rar}${x.anc?' anc'+x.anc:''} ${sel==='b:'+j?'sel':''}" data-act="ld-sel" data-k="b:${j}">${x.fav?'<span class="fav">★</span>':''}${dd(x)}${ico(x)}<span class="nm">${esc(x.name)}</span>${x.fav||x.leih?'':`<span class="ld-p v">${fmt(vkPreis(x))}</span>`}</button>`;
+ let det='';
+ if(it){const slot=bestSlotFor(it),cur=P.eq[slot];const kauf=k==='w';const pr=kauf?kPreis(L,it):vkPreis(it);
+  let knopf;if(kauf){const voll=P.bag.length>=BAGMAX,arm=SAVE.gold<pr;knopf=`<button class="btn gold" data-act="ld-kauf" ${voll||arm?'disabled':''}>Kaufen für ${fmt(pr)} Gold</button>${voll?'<span class="muted" style="font-size:13px">Beutel voll – erst etwas verkaufen.</span>':arm?`<span class="muted" style="font-size:13px">Dir fehlen ${fmt(pr-SAVE.gold)} Gold.</span>`:''}`}
+  else{knopf=it.fav?'<span class="muted" style="font-size:13px">Gemerkt (★) – im Beutel den Stern entfernen, um es zu verkaufen.</span>':it.leih?'<span class="muted" style="font-size:13px">Leihgaben kann man nicht verkaufen.</span>':`<button class="btn gold" data-act="ld-verkauf">Verkaufen für ${fmt(pr)} Gold</button><span class="muted" style="font-size:13px">Verschrotten brächte ${fmt(scrapValue(it))}.</span>`}
+  det=`<div class="idet2 card" id="idet2"><button class="x" data-act="ld-desel" aria-label="Schließen">×</button>
+   <div class="sh-head">${ico(it)}<div><div class="in c${it.rar}">${esc(it.name)}</div><div class="muted" style="font-size:13px">${RARN[it.rar]} · ${SLOTLBL[it.slot]}${it.slot==='weapon'||it.slot==='ranged'?' ('+esc(it.base)+')':''} · Stufe ${it.ilvl}${cur&&cur!==it?` · statt <span class="c${cur.rar}">${esc(cur.name)}</span>`:''}</div></div></div>
+   ${urteilHtml(it,cur)}${compareHtml(it,cur)}${it.pow&&LPOW[it.pow]?`<div class="lpow"><b>${LPOW[it.pow].n}</b> ${LPOW[it.pow].d}</div>`:''}
+   <div class="row">${knopf}</div></div>`}
+ const tp=tPreis(L),tvoll=mpL().every(q=>q.pots>=q.potMax),xp=L.extra?Math.max(10,Math.round(L.extra.p*(L.f||1)/5)*5):0;
+ /* Dienste als eigene Kacheln in der Warenreihe (gleiche Bedienung wie Gegenstände) */
+ const X=[];if(L.trank)X.push({k:'trank',ic:'⚗',n:tvoll?'Tränke voll':'Tränke auffüllen',p:tvoll?0:tp,d:'Füllt die Heiltränke aller Helden auf.',b:tvoll?'':`Auffüllen für ${fmt(tp)} Gold`,dis:tvoll||SAVE.gold<tp,a:'ld-trank'});
+ if(L.extra&&!L.extra.weg)X.push({k:'extra',ic:'✦',n:L.extra.n,p:xp,d:(L.extra.d||'Besondere Ware')+'.',b:`Kaufen für ${fmt(xp)} Gold`,dis:SAVE.gold<xp,a:'ld-extra'});
+ if(L.kannFeilschen&&!L.feilsch)X.push({k:'feilsch',ic:'⚄',n:'Feilschen',p:0,d:'Ein Wurf mit dem W20 (Barradin +4, Echo +2): ab 12 wird alles 20 % billiger, bei einer 20 sogar 40 %. Darunter wird es 15 % teurer. Nur einmal je Händler.',b:'Würfeln',a:'ld-feilsch'});
+ if(L.geruecht&&!L.ger)X.push({k:'ger',ic:'✉',n:'Gerücht hören',p:0,d:'Händler hören viel. Manches stimmt sogar.',b:'Zuhören',a:'ld-ger'});
+ const tileX=x=>`<button class="it r1 ld-x ${sel==='x:'+x.k?'sel':''}" data-act="ld-sel" data-k="x:${x.k}"><span class="ld-xi" aria-hidden="true">${x.ic}</span><span class="nm">${esc(x.n)}</span>${x.p?`<span class="ld-p">${fmt(x.p)}</span>`:''}</button>`;
+ if(xk){const x=X.find(y=>y.k===xk);if(!x){G.ldSel=sel=null}else det=`<div class="idet2 card" id="idet2"><button class="x" data-act="ld-desel" aria-label="Schließen">×</button><div class="sh-head"><span class="ld-xi gross" aria-hidden="true">${x.ic}</span><div><div class="in">${esc(x.n)}</div><div class="muted" style="font-size:13px">${esc(L.n)}</div></div></div>
+   <p style="margin:6px 0">${esc(x.d)}</p>${LD.msg?`<p class="ld-msg">${LD.msg}</p>`:''}<div class="row">${x.b?`<button class="btn gold" data-act="${x.a}" ${x.dis?'disabled':''}>${x.b}</button>`:''}</div></div>`}
+ if(!det&&LD.msg&&!it)det=`<div class="idet2 card" id="idet2"><button class="x" data-act="ld-desel" aria-label="Schließen">×</button><p class="ld-msg" style="margin-top:28px">${LD.msg}</p></div>`;
+ showScreen(`<div class="wrap inv laden">
+  <div class="inv-head"><h2>${esc(L.n)}<small>Dein Gold: ${fmt(SAVE.gold)}${L.rab?` · ${Math.round(L.rab*100)} % Rabatt`:''}${L.f>1.001?' · teurer':L.f<0.999?' · Feilschpreis':''}</small></h2><div class="row"><button class="btn gold" data-act="close">Weiter</button></div></div>
+  <p class="muted ld-spruch">${esc(L.spruch||'„Schaut euch nur um – alles ehrlich erworben.“')}</p>
+  <div class="eyebrow">Ware · ${W.length?W.length+' Stück':'ausverkauft'} · Dienste</div><div class="bag">${W.map(tileW).join('')}${X.map(tileX).join('')}</div>
+  <div class="eyebrow">Dein Beutel – verkaufen · ${P.bag.length} / ${BAGMAX}</div><div class="bag">${P.bag.map(tileB).join('')||'<div class="muted" style="grid-column:1/-1">Beutel leer.</div>'}</div>
+  ${det}</div>`,'',keep)}
+LD.render=render_;
+/* ---------- Handlungen ---------- */
+function geld(n){SAVE.gold+=n;if(n>0&&(G.state==='play'||G.state==='between'))G.goldRun=(G.goldRun||0)+n}
+document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest?ev.target.closest('[data-act^="ld-"]'):null;if(!b||G.overlay!=='laden'||!L0)return;ev.stopPropagation();ev.preventDefault();if(b.disabled)return;
+ const a=b.dataset.act,L=L0;LD.msg='';
+ try{
+ if(a==='ld-sel'){G.ldSel=G.ldSel===b.dataset.k?null:b.dataset.k;try{sfx('ui')}catch(e){}return render_(true)}
+ if(a==='ld-desel'){G.ldSel=null;return render_(true)}
+ if(a==='ld-trank'){const p=tPreis(L);if(SAVE.gold<p)return;SAVE.gold-=p;for(const q of mpL())q.pots=Math.max(q.pots,q.potMax);sfx('buy');LD.msg='Die Tränke sind voll.';persist();return render_(true)}
+ if(a==='ld-extra'){const X=L.extra;const p=Math.max(10,Math.round(X.p*(L.f||1)/5)*5);if(!X||X.weg||SAVE.gold<p)return;SAVE.gold-=p;X.weg=1;sfx('buy');try{LD.msg=X.f()||'Gekauft.'}catch(e){LD.msg='Gekauft.'}L.gekauft++;persist();return render_(true)}
+ if(a==='ld-feilsch'){L.feilsch=1;const bon=(mpL().some(z=>z&&z.id==='barradin')?4:0)+(mpL().some(z=>z&&z.id==='echo')?2:0);const w=1+Math.floor(Math.random()*20),s=w+bon;
+  if(w===20){L.f=0.6;LD.msg='Natürliche 20! „Ihr ruiniert mich! Nehmt es fast geschenkt.“'}else if(s>=12){L.f=0.8;LD.msg=`Wurf ${w}${bon?'+'+bon:''}: „Na gut, na gut. Weil ihr es seid.“ (−20 %)`}else{L.f=1.15;LD.msg=`Wurf ${w}${bon?'+'+bon:''}: „Jetzt erst recht teurer!“ (+15 %)`}
+  sfx(w===20?'legend':'ui');return render_(true)}
+ if(a==='ld-ger'){L.ger=1;try{LD.msg='„'+L.geruecht()+'“'}catch(e){LD.msg='„Hab nichts gehört. Ehrlich.“'}sfx('ui');return render_(true)}
+ const sel=G.ldSel;if(!sel)return;const [k,s]=sel.split(':'),i=+s;
+ if(a==='ld-kauf'&&k==='w'){const it=L.waren[i];if(!it)return;const p=kPreis(L,it);if(SAVE.gold<p||P.bag.length>=BAGMAX)return;SAVE.gold-=p;L.waren.splice(i,1);delete it.ld;P.bag.push(it);L.gekauft++;LD.kauf++;
+  sfx(it.rar>=4?'legend':'buy');updateInvBadge();LD.msg=`<span class="c${it.rar}">${esc(it.name)}</span> liegt jetzt in deinem Beutel.`;G.ldSel=L.waren.length?'w:'+Math.min(i,L.waren.length-1):null;if(G.rl)try{rlSync()}catch(e){}persist();return render_(true)}
+ if(a==='ld-verkauf'&&k==='b'){const it=P.bag[i];if(!it||it.fav||it.leih)return;const p=vkPreis(it);P.bag.splice(i,1);geld(p);L.verkauft=(L.verkauft||0)+1;LD.verkauf++;sfx('coin');updateInvBadge();
+  LD.msg=`${esc(it.name)} verkauft: +${fmt(p)} Gold.`;G.ldSel=P.bag.length?'b:'+Math.min(i,P.bag.length-1):null;if(G.rl)try{rlSync()}catch(e){}persist();return render_(true)}
+ }catch(er){console.error('laden',er);LD.err=String(er&&er.stack||er)}},true);
+/* ---------- Stil ---------- */
+{const st=document.createElement('style');st.textContent=`.wrap.laden .ld-p{position:absolute;left:4px;top:4px;font:800 11px/1 "Alegreya Sans",sans-serif;color:#ffd77a;text-shadow:0 1px 2px #000,0 0 3px #000;pointer-events:none}
+.wrap.laden .ld-p.v{color:#e8dcc4}.wrap.laden .ld-p::after{content:" G";font-size:9px;opacity:.8}.wrap.laden .it{position:relative}.wrap.laden .it.ld-zu .ld-p{color:#ff9a7a}
+.wrap.laden .ld-spruch{font-size:13px;margin:0 0 6px}.wrap.laden .ld-xi{font-size:26px;line-height:1;color:#ffd77a;text-shadow:0 1px 3px #000;display:block;margin:4px auto 2px}.wrap.laden .ld-xi.gross{font-size:34px;width:48px;text-align:center}.wrap.laden .ld-msg{color:#ffe2a0;font-size:14px;margin:6px 0}.wrap.ivg.ivtiny.laden .ld-spruch,.wrap.ivg.ivshort.laden .ld-spruch{display:none}`;document.head.appendChild(st)}
+
+/* ================= Quellen ================= */
+const KAPN=()=>{try{return npKap()}catch(e){return 0}};
+/* 1) Verdeckte Ware (Geheimraum, geretteter Händler): Sockel weg, der Händler bekommt einen Laden */
+function wareUmbau(){if(!an()||!G.props)return;for(const w of G.props){if(w.k!=='ware'||w.dead||w.used||w.ldU)continue;w.ldU=1;
+  let m=null,best=1e9;for(const p of G.props){if(p.k!=='merchant'||p.dead)continue;const d=Math.hypot(p.x-w.x,p.y-w.y);if(d<best){best=d;m=p}}
+  if(!m||best>420)continue;w.dead=true;w.used=1;
+  if(!m.ldL){const area=m.arH,room=G.room&&G.room.type==='haendler';
+   m.ldL=neu({n:area?'Der gerettete Händler':'Der fahrende Händler',spruch:area?'„Ihr habt mir das Leben gerettet – für euch alles zum halben Preis!“':'„Seltenes aus aller Herren Länder. Und alles mit Preisschild, versprochen.“',rab:area?0.5:0,ilb:room?1:0,minR:room?[1,2,2,3,3]:[1,1,2,2,3],kannFeilschen:!area})}}
+ G.props=G.props.filter(p=>!(p.k==='ware'&&p.ldU&&p.dead))}
+/* 2) Mosk / fahrender Händler: statt eines Gesprächs mit einer Ware gleich der Laden (Feilschen und Gerücht darin) */
+if(typeof npDlgHaendler==='function'){const dh0=npDlgHaendler;npDlgHaendler=function(o,q,step){if(!an()||step||!o||!o.pr)return dh0.apply(this,arguments);const p=o.pr;
+  if(!o.ldL){const W_=o.npW||(o.npW=pick(npWare()));let rab=0;try{rab=npLauf().rab||0}catch(e){}let auf=1;try{auf=npLauf().aufschlag||1}catch(e){}
+   o.ldL=neu({n:'Mosk Feilschmund',spruch:pick(['„Heute im Angebot: alles! Na gut, fünf Sachen. Aber was für welche!“','„Frisch eingetroffen, kaum gestohlen. Kleiner Scherz. Großer Preis. Auch ein Scherz.“','„Für Helden der Allianz: Preise wie in Neverwinter. Also hoch. Aber ehrlich hoch.“']),rab,f:auf,kannFeilschen:1,
+    geruecht:()=>{try{return npGeruecht()}catch(e){return 'Hab nichts gehört.'}},
+    extra:{n:W_.n,p:npPreis(1),d:'Mosks besondere Ware',f:()=>{const fx=W_.fx;if(fx==='gem'){giveGems(1);return 'Ein Edelstein für dich.'}if(fx==='trank'){P.potMax=(P.potMax||1)+1;P.pots=P.potMax;return 'Ein Trankplatz mehr.'}if(ARFX[fx]){for(const z of spLeben())arFx(z,fx,2);return `${W_.n}: der Segen wirkt zwei Ebenen lang.`}P.bag.length<BAGMAX?P.bag.push(randomItem(P.level+2,1,2)):dropItem(p.x+30,p.y+30,randomItem(P.level+2,1,2));return 'Ein Gegenstand für dich.'}},
+    zu:L=>{o.kuehl=1;o.kuehlT=G.time+1;try{npGesehen('mosk')}catch(e){}if(L.gekauft){try{npMem().k++;npSave()}catch(e){}npSag(p,pick(['Beehrt mich wieder!','Ein Vergnügen!','Erzählt es weiter!']),2.6)}else npSag(p,'Ich bin noch eine Weile hier.',2.2)}})}
+  if(!oeffnen(o.ldL,q))return dh0.apply(this,arguments)}}
+/* 3) Händler-Figuren mit Laden: hinstellen (Ring) → Laden; nach dem Schließen erst weggehen */
+const RING=0.7;
+function haendlerTick(){if(!an()||G.state!=='play'||G.paused||G.overlay)return;if(LD.lt===G.time)return;const dt=Math.min(0.1,Math.max(0,G.time-(LD.lt==null?G.time:LD.lt)));LD.lt=G.time;wareUmbau();
+ for(const m of G.props){if(m.k!=='merchant'||!m.ldL||m.dead)continue;const q=mpL().find(z=>z&&!z.down&&Math.hypot(z.x-m.x,z.y-m.y)<m.r+44);
+  if(m.ldKuehl){if(!q)m.ldKuehl=0;m.prog=0;continue}
+  if(q){m.prog=Math.min(1,(m.prog||0)+dt/RING);if(m.prog>=1){m.prog=0;m.ldKuehl=1;const L=m.ldL;L.zu=L.zu||(()=>{m.ldKuehl=1});oeffnen(L,q)}}else m.prog=Math.max(0,(m.prog||0)-dt*1.5)}}
+hook('tick',()=>{try{haendlerTick()}catch(e){if(!LD.err)LD.err=String(e&&e.stack||e)}});
+{const dp=drawProp3;drawProp3=function(p,t){const r=dp.apply(this,arguments);try{if(p&&p.k==='merchant'&&p.ldL&&!p.dead&&an()){const c=cx;kaRing(c,p.x,p.y-14,34,p.prog||0,GOLDC);
+   const me=NET&&NET.role==='guest'?(NET.mine||P):P;if(me&&Math.hypot(me.x-p.x,me.y-p.y)<300)kaLabel(c,p.x,p.y-82,p.ldL.waren&&!p.ldL.waren.length?'⚖ Laden · ausverkauft':'⚖ Laden · hinstellen zum Ansehen',GOLDC)}}catch(e){}return r}}
+/* Hinweis im Geheimraum anpassen */
+try{if(ROOMS&&ROOMS.haendler)ROOMS.haendler.sub='Sein Laden: Ware ansehen, kaufen, verkaufen'}catch(e){}
+{const er=enterRoom;enterRoom=function(type){const r=er.apply(this,arguments);try{if(type==='haendler'&&an()&&G.room){G.room.txt='Stell dich zum Händler, um seinen Laden zu öffnen';wareUmbau()}}catch(e){}return r}}
+}catch(e){console.error('laden',e);window.__hsLADEN.fatal=String(e&&e.stack||e)}})();
+
+
+/* ================= Paket „takt2“: Fallenpfad – neues Areal mit Taktfallen unter freiem Himmel und in Höhlen – window.__hsTAKT2 =================
+   Ein ummauerter Pfad (Fels, Palisade oder Mauer) führt in eine Sackgasse mit Truhe und Goldhaufen. 3–4 Reihen schlagen im Takt:
+   Rollsteine (poltern quer über den Pfad), Sägeblätter, Stachelreihen, Flammen, Pfeile – je nach Gegend. Hebel am Ende für den Rückweg,
+   „Makellos!“ ohne Treffer wie im Taktgang. Nutzt die Taktfallen aus „takt“ (gleiche Regeln, gleiche Zeichnung). Präfix tp. */
+window.__hsTAKT2={v:1};
+(function(){try{
+if(!window.__hsTAKT||window.__hsTAKT.fatal)throw new Error('takt fehlt');
+AR_K.taktpfad={n:{x:'Fallenpfad',hoehle:'Rollsteingang',burg:'Klingenflur',gruft:'Gang der Wächter',wald:'Wildererpfad',dorf:'Hinterhof der Schmuggler'},sub:'Im Takt hindurch – am Ende wartet eine Truhe',c:'#ffb45a',ic:'kiste',R:250,w:{land:1.6,wald:1.6,hoehle:1.6,dorf:1.2,burg:1.2,gruft:1.2}};
+AR_LVI.taktpfad={c:'#ffb45a',n:'Fallenpfad',d:'Ein ummauerter Pfad endet an einer Truhe. Rollsteine, Sägeblätter und Flammen schlagen im festen Takt quer über den Weg – kurz vorher glühen die Kerben. Rhythmus beobachten, durchtimen; am Ende schaltet ein Hebel alles für den Rückweg ab.'};
+AR_BAU.taktpfad=function(A){const D=AR_DIR(A.ea),hor=D.x!==0,st=A.stil,wk=st==='hoehle'||st==='land'||st==='wald'?'felswand':st==='dorf'?'zaun':'wand',d=20,cw=104,L=262;
+ /* Mund zeigt zur Kartenmitte, das Ende (Truhe) liegt außen */const Mx=A.x+D.x*126,My=A.y+D.y*126,Ex=Mx-D.x*L,Ey=My-D.y*L;A.mund={x:Mx,y:My};A.ende={x:Ex,y:Ey};A.tpL=L;
+ if(hor){const x0=Math.min(Mx,Ex),x1=Math.max(Mx,Ex);arWand(A,x0,A.y-cw/2-d,x1-x0,true,d,wk,{m:'stein'});arWand(A,x0,A.y+cw/2,x1-x0,true,d,wk,{m:'stein'});arWand(A,D.x>0?x0-d:x1,A.y-cw/2-d,cw+2*d,false,d,wk,{m:'stein'})}
+ else{const y0=Math.min(My,Ey),y1=Math.max(My,Ey);arWand(A,A.x-cw/2-d,y0,y1-y0,false,d,wk,{m:'stein'});arWand(A,A.x+cw/2,y0,y1-y0,false,d,wk,{m:'stein'});arWand(A,A.x-cw/2-d,D.y>0?y0-d:y1,cw+2*d,true,d,wk,{m:'stein'})}
+ arDk(A,Ex+D.x*30+(hor?0:-34),Ey+D.y*30+(hor?-34:0),'goldhaufen',0.8);arDk(A,Mx+(hor?0:-cw/2-30),My+(hor?-cw/2-30:0),st==='hoehle'?'rock':'torch');arDk(A,Mx+(hor?0:cw/2+30),My+(hor?cw/2+30:0),st==='hoehle'?'rubble':'torch')};
+AR_FILL.taktpfad=function(A){if(!A.mund)return;const D=AR_DIR(A.ea),fa=Math.atan2(D.y,D.x),sl=SL()||0,hart=arHart();
+ const n=sl<4&&hart<1?3:4;const pool=A.stil==='hoehle'?['felsen','felsen','klingen','stacheln']:A.stil==='land'||A.stil==='wald'?['felsen','pfeile','stacheln','klingen']:A.stil==='dorf'?['pfeile','klingen','feuer','felsen']:['klingen','feuer','pfeile','stacheln'];
+ const L=pool.slice().sort(()=>Math.random()-0.5);const pd=clamp(2.2-0.035*sl-0.06*hart-(HARD()?0.12:0),1.4,2.2),aw=clamp(0.42+0.008*Math.min(12,sl)+0.012*hart,0.42,0.56);
+ const muster=pick(['welle','gegen','doppel','welle']);A.tk={muster,hit:0,drin:0,fertig:0,n,pd};
+ for(let i=0;i<n;i++){const s=44+i*(150/(n-1));const x=A.mund.x-D.x*s,y=A.mund.y-D.y*s;
+  let ph=muster==='welle'?i*0.21:muster==='gegen'?(i%2)*0.5:(i>>1)*0.5+(i%2)*0.08;
+  const p=arFalle('takt',x,y,{a:fa,w:100,h:26,ai:A.id});if(!p)continue;p.sub=L[i%L.length];p.pd=+(pd*(0.96+0.08*Math.random())).toFixed(3);p.ph=+(ph%1).toFixed(3);p.aw=+(p.sub==='felsen'?Math.min(0.5,aw):aw).toFixed(3);p.fv=p.sub==='felsen'?(Math.random()<0.5?5:6):['stacheln','klingen','feuer','pfeile'].indexOf(p.sub);p.n=i}
+ /* Ziel: Truhe am Ende, Hebel daneben (für den Rückweg) */
+ const T=arTruhe(A,A.ende.x+D.x*34,A.ende.y+D.y*34,sl>=5&&Math.random()<0.35?2:1);A.truhe=T;A.innen={x:T.x,y:T.y};
+ const perp={x:-D.y,y:D.x};const hx=T.x+perp.x*36,hy=T.y+perp.y*36;const hq=wlNahFrei(hx,hy,3)||{x:hx,y:hy};A.hebelP={k:'ar_hebel',prop:1,x:hq.x,y:hq.y,r:14,used:0,ai:A.id,tkInnen:1};G.props.push(A.hebelP);
+ G.props.push({k:'goldpile',prop:1,x:T.x-perp.x*34,y:T.y-perp.y*34,r:16})};
+AR_TICK.taktpfad=function(A){if(A.s!==1||!A.tk)return;const an=G.props.filter(p=>p.k==='falle'&&p.ai===A.id&&p.type==='takt'&&p.act!==4).length;
+ A.tx=an?(A.tk.drin&&!A.tk.fertig?`Im Takt bleiben! Treffer: ${A.tk.hit}`:'Fallenpfad: Rhythmus lesen, dann los'):'Der Pfad ist abgeschaltet';
+ if(A.truhe&&A.truhe.open)arSieg(A,A.tk.hit===0&&A.tk.fertig?'Makellos geborgen!':'Truhe geborgen!')};
+}catch(e){console.error('takt2',e);window.__hsTAKT2.fatal=String(e&&e.stack||e)}})();
+
+
+/* ================= Paket „leben“: Himmel und Wasser – Wolkenschatten, Vogelzüge, Libellen, springende Fische, Flaschenpost – window.__hsLEBEN =================
+   Ergänzt „details“ (Kleintiere, Spuren, Laub, Rauch …) und „Optik A“ (Teilchen, Sonnenstrahlen, Nebel) – nichts davon doppelt:
+   1) Wolkenschatten: draußen bei Tag ziehen große, weiche Schatten mit dem Wind über Boden, Wände und Figuren (Regen/Nebel: aus).
+   2) Vogelzüge: draußen ab und zu ein Schwarm hoch oben (Flügelschlag, Keilformation), sein Schatten gleitet versetzt über den Boden.
+   3) Teiche (Wasserflächen der Welt): Libellen stehen in der Luft und schießen weiter; manchmal springt ein Fisch mit Spritzern und Ringen.
+   4) Flaschenpost (Kampagne, selten, am Wasser): aufheben → ein Gerücht aus der Chronik und ein paar Münzen.
+   Nur Darstellung (außer Flaschenpost: Gold/Gerücht über die vorhandenen Wege, nur Gastgeber/Solo). Kosmetischer Zufall über MATHRND.
+   Leistung: Zeichnung in Bildschirmkoordinaten in der Wetter-Phase (eine Handvoll Befehle, ein vorgerendertes Schattenbild),
+   ab Effekt-Stufe Mittel; Hoch: mehr Wolken und Vögel. Präfix lb. Abschalten: window.__hsLEBEN.aus=1 */
+window.__hsLEBEN={v:1,aus:0,st:{voegel:0,fische:0,flaschen:0}};
+(function(){try{
+const LB=window.__hsLEBEN;const R=()=>MATHRND(),Rn=(a,b)=>a+(b-a)*MATHRND();
+const stufe=()=>{try{return HSFX.stufe()}catch(e){return 2}};
+const an=()=>!LB.aus&&!G.bot&&!REDUCED&&G.state==='play'&&!G.room&&stufe()>=1;
+const draussen=()=>OUTDOOR.has(G.themeKey);
+function wx(){try{return WX()}catch(e){return null}}
+const tag=()=>{const x=wx();return !x||!x.z||x.z==='tag'};
+const daemmer=()=>{const x=wx();return x&&x.z==='daemmer'};
+const nass=()=>{const x=wx();return x&&(x.w==='regen'||x.w==='gewitter'||x.w==='nebel'||x.w==='schnee')};
+/* Schattenbild (weich, schwarz) einmal vorrendern */
+let SCH=null;function schatten(){if(SCH)return SCH;const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');const gr=g.createRadialGradient(64,64,4,64,64,62);
+ gr.addColorStop(0,'rgba(0,0,0,1)');gr.addColorStop(0.55,'rgba(0,0,0,.75)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,128,128);SCH=c;return c}
+const S=window.__hsLEBEN.S={k:'',wolken:[],wind:{x:0,y:0},voegel:null,vT:0,teich:[],teichK:'',flasche:null,fK:''};
+const kam=()=>{const vw=W/ZOOM,vh=H/ZOOM;return{x:G.cam.x-vw/2,y:G.cam.y-vh/2,w:vw,h:vh}};
+function neuStufe(){const k=(G.runId||0)+':'+G.stage+':'+G.themeKey;if(S.k===k)return;S.k=k;S.wolken.length=0;S.voegel=null;S.vT=Rn(8,25);
+ const a=Rn(0,TAU);S.wind={x:Math.cos(a)*Rn(10,18),y:Math.sin(a)*Rn(4,9)};S.teich=[];S.teichK='';S.flasche=null}
+/* ---------- 1) Wolkenschatten ---------- */
+function wolkenUpd(dt,C){const soll=draussen()&&tag()&&!nass()?(stufe()>=2?5:3):0;const W_=S.wolken;
+ while(W_.length<soll){const r=Rn(320,620);W_.push({x:C.x+Rn(-r,C.w+r),y:C.y+Rn(-r,C.h+r),rx:r,ry:r*Rn(0.45,0.7),a:Rn(0.09,0.16),f:0,rot:Rn(-0.3,0.3),teil:[[Rn(-0.4,0.4),Rn(-0.25,0.25),Rn(0.5,0.8)],[Rn(-0.4,0.4),Rn(-0.25,0.25),Rn(0.45,0.75)]]})}
+ for(let i=W_.length-1;i>=0;i--){const w=W_[i];w.x+=S.wind.x*dt;w.y+=S.wind.y*dt;w.f=Math.min(1,w.f+dt*0.25);
+  const m=w.rx*1.4;if(i>=soll||w.x<C.x-m*2||w.x>C.x+C.w+m*2||w.y<C.y-m*2||w.y>C.y+C.h+m*2){/* gegen den Wind neu einsetzen */
+   if(i>=soll){w.f-=dt*0.6;if(w.f<=0)W_.splice(i,1);continue}const r=w.rx;const vx=S.wind.x,vy=S.wind.y,l=Math.hypot(vx,vy)||1;w.x=C.x+C.w/2-vx/l*(C.w/2+r*1.2)+Rn(-C.w*0.4,C.w*0.4)*(-vy/l);w.y=C.y+C.h/2-vy/l*(C.h/2+r*1.2)+Rn(-C.h*0.4,C.h*0.4)*(vx/l);w.f=0}}}
+function wolkenDraw(C){if(!S.wolken.length)return;const c=cx,img=schatten(),z=ZOOM;c.save();c.globalCompositeOperation='source-over';
+ for(const w of S.wolken){const sx=(w.x-C.x)*z,sy=(w.y-C.y)*z;const k=w.a*w.f*(daemmer()?0.6:1);if(k<0.005)continue;c.globalAlpha=k;
+  c.drawImage(img,sx-w.rx*z,sy-w.ry*z,w.rx*2*z,w.ry*2*z);for(const t of w.teil){const rx=w.rx*t[2],ry=w.ry*t[2];c.globalAlpha=k*0.7;c.drawImage(img,sx+t[0]*w.rx*z-rx*z,sy+t[1]*w.ry*z-ry*z,rx*2*z,ry*2*z)}}
+ c.restore()}
+/* ---------- 2) Vogelzüge ---------- */
+function voegelUpd(dt,C){if(S.voegel){const V=S.voegel;V.t+=dt;V.x+=V.vx*dt;V.y+=V.vy*dt;if(V.t>V.life)S.voegel=null;return}
+ if(!draussen()||G.themeKey==='nacht'&&!daemmer()&&!tag())return;if(nass()&&wx().w!=='nebel')return;S.vT-=dt;if(S.vT>0)return;S.vT=Rn(35,75);
+ /* quer über das Bild, hoch oben; Schatten auf dem Boden folgt versetzt */const n=Math.round(Rn(5,stufe()>=2?11:8));const a=Math.atan2(S.wind.y,S.wind.x)+Rn(-0.6,0.6);const sp=Rn(150,210);const vx=Math.cos(a)*sp,vy=Math.sin(a)*sp*0.6;
+ const cx0=C.x+C.w/2,cy0=C.y+C.h/2,L=Math.hypot(C.w,C.h)*0.65;const x=cx0-Math.cos(a)*L+Rn(-C.w*0.2,C.w*0.2)*(-Math.sin(a)),y=cy0-Math.sin(a)*L*0.6+Rn(-C.h*0.25,C.h*0.25);
+ const B=[];for(let i=0;i<n;i++){const r=Math.ceil(i/2),s=i%2?1:-1;B.push({dx:-r*26+Rn(-6,6),dy:s*r*16+Rn(-5,5),ph:Rn(0,TAU),f:Rn(7,9.5),g:Rn(0.85,1.15)})}
+ S.voegel={x,y,vx,vy,a:Math.atan2(vy,vx),t:0,life:L*2/sp+2,B,h:Rn(120,170),krah:G.themeKey==='geisterdorf'||G.themeKey==='nacht'||G.themeKey==='schloss'};LB.st.voegel++;
+ if(S.voegel.krah&&R()<0.6){try{wgTon('e_kraehe_3',0.25,x+vx*2,y+vy*2)}catch(e){}}}
+function voegelDraw(C){const V=S.voegel;if(!V)return;const c=cx,z=ZOOM,ca=Math.cos(V.a),sa=Math.sin(V.a),t=G.time;const fade=Math.min(1,V.t*1.2,(V.life-V.t)*1.2);if(fade<=0)return;c.save();
+ /* Schatten am Boden */c.globalAlpha=0.16*fade*(tag()?1:0.5);c.fillStyle='#000';
+ for(const b of V.B){const wx_=V.x+b.dx*ca-b.dy*sa,wy_=V.y+b.dx*sa+b.dy*ca;const sx=(wx_-C.x+V.h*0.5)*z,sy=(wy_-C.y+V.h)*z;const fl=Math.sin(t*b.f+b.ph);c.beginPath();c.ellipse(sx,sy,(5+2*Math.abs(fl))*z*b.g,2*z*b.g,V.a,0,TAU);c.fill()}
+ /* Vögel */c.globalAlpha=0.85*fade;c.strokeStyle=V.krah?'#141014':'#2a221c';c.lineWidth=Math.max(1.2,1.7*z);c.lineCap='round';c.lineJoin='round';
+ for(const b of V.B){const wx_=V.x+b.dx*ca-b.dy*sa,wy_=V.y+b.dx*sa+b.dy*ca;const sx=(wx_-C.x)*z,sy=(wy_-C.y)*z;const fl=Math.sin(t*b.f+b.ph),sp=9*z*b.g,up=(fl*5-1.2)*z*b.g;
+  const px=-sa,py=ca;c.beginPath();c.moveTo(sx+px*sp+0,sy+py*sp*0.6-up);c.quadraticCurveTo(sx+px*sp*0.4,sy-2*z,sx,sy);c.quadraticCurveTo(sx-px*sp*0.4,sy-2*z,sx-px*sp,sy-py*sp*0.6-up);c.stroke()}
+ c.restore()}
+/* ---------- 3) Teiche: Libellen und Fische ---------- */
+function teiche(){const k=S.k+':'+((G.wl&&G.wl.lo&&G.wl.lo.length)||0);if(S.teichK===k)return S.teich;S.teichK=k;S.teich=[];
+ try{for(const o of (G.wl&&G.wl.lo)||[])if(o.k==='wasser'&&o.t==='c'&&o.r>=30)S.teich.push({o,lib:[],fT:Rn(3,10),fisch:null})}catch(e){}return S.teich}
+function teichUpd(dt,C){const L=teiche();if(!L.length)return;const viel=stufe()>=2;
+ for(const T of L){const o=T.o;const sicht=o.x>C.x-o.r-60&&o.x<C.x+C.w+o.r+60&&o.y>C.y-o.r-60&&o.y<C.y+C.h+o.r+60;if(!sicht){T.lib.length=0;continue}
+  const nl=tag()||daemmer()?(viel?2:1):0;while(T.lib.length<nl){const a=Rn(0,TAU),d=Rn(0.3,0.9)*o.r;T.lib.push({x:o.x+Math.cos(a)*d,y:o.y+Math.sin(a)*d*0.7,tx:0,ty:0,w:Rn(0.3,1.4),z:Rn(14,22),c:R()<0.5?'#c8e070':'#e0a050',ph:Rn(0,TAU)})}
+  if(T.lib.length>nl)T.lib.length=nl;
+  for(const l of T.lib){l.w-=dt;if(l.w<=0){const a=Rn(0,TAU),d=Rn(0.1,1.15)*o.r;l.tx=o.x+Math.cos(a)*d;l.ty=o.y+Math.sin(a)*d*0.7;l.w=Rn(0.8,2.6)}
+   if(l.tx){const k=Math.min(1,dt*7);l.x+=(l.tx-l.x)*k;l.y+=(l.ty-l.y)*k;if(Math.hypot(l.tx-l.x,l.ty-l.y)<1)l.tx=0}
+   /* Held kommt nah: wegflitzen */const q=P;if(q&&Math.hypot(q.x-l.x,q.y-l.y)<48){const a=Math.atan2(l.y-q.y,l.x-q.x);l.tx=l.x+Math.cos(a)*90;l.ty=l.y+Math.sin(a)*60;l.w=1.2}}
+  T.fT-=dt;if(!T.fisch&&T.fT<=0){T.fT=Rn(5,13);const a=Rn(0,TAU),d=Rn(0,0.55)*o.r;T.fisch={x:o.x+Math.cos(a)*d,y:o.y+Math.sin(a)*d*0.7,r:R()<0.5?-1:1,t:0,L:Rn(26,40),gross:R()<0.15};LB.st.fische++;
+   if(Math.hypot(P.x-T.fisch.x,P.y-T.fisch.y)<500){try{wgTon('e_platsch_1',0.18,T.fisch.x,T.fisch.y)}catch(e){}}}
+  if(T.fisch){T.fisch.t+=dt;if(T.fisch.t>2.2)T.fisch=null}}}
+function teichDraw(C){const L=S.teich;if(!L.length)return;const c=cx,z=ZOOM,t=G.time;c.save();
+ /* Nachts: Mondspiegelung und funkelnde Wellen */const nacht=(()=>{const x=wx();return x&&x.z==='nacht'||G.themeKey==='nacht'})();
+ if(nacht){const o0=c.globalCompositeOperation;c.globalCompositeOperation='lighter';for(const T of L){const o=T.o,sx=(o.x-C.x)*z,sy=(o.y-C.y)*z,r=o.r*z;if(sx<-r||sy<-r||sx>W+r||sy>H+r)continue;
+   glow(sx+r*0.15,sy-r*0.12,r*0.55,'#f4ecd0',0.16+0.04*Math.sin(t*0.7+o.x),true);c.globalAlpha=0.5;c.strokeStyle='#fff6dc';c.lineWidth=Math.max(1,1.2*z);
+   for(let i=0;i<5;i++){const u=(i-2)*0.17,w=(0.35-Math.abs(u))*r*(0.6+0.4*Math.sin(t*2.3+i*1.7+o.y));if(w<=1)continue;const yy=sy-r*0.12+u*r*0.6;c.globalAlpha=0.18+0.2*Math.max(0,Math.sin(t*3.1+i*2.1+o.x));c.beginPath();c.moveTo(sx+r*0.15-w,yy);c.lineTo(sx+r*0.15+w,yy);c.stroke()}}
+  c.globalCompositeOperation=o0;c.globalAlpha=1}
+ for(const T of L){for(const l of T.lib){const sx=(l.x-C.x)*z,sy=(l.y-C.y-l.z)*z;if(sx<-20||sy<-20||sx>W+20||sy>H+20)continue;
+   c.globalAlpha=0.25;c.fillStyle='#000';c.beginPath();c.ellipse(sx,sy+l.z*z,3*z,1.2*z,0,0,TAU);c.fill();
+   c.globalAlpha=0.9;c.strokeStyle=l.c;c.lineWidth=Math.max(1,1.4*z);c.beginPath();c.moveTo(sx-4*z,sy);c.lineTo(sx+4*z,sy);c.stroke();
+   const fl=0.5+0.5*Math.sin(t*60+l.ph);c.globalAlpha=0.35+0.3*fl;c.fillStyle='#f4f0e0';c.beginPath();c.ellipse(sx-1*z,sy-1.5*z,3.5*z,1.2*z,-0.5,0,TAU);c.ellipse(sx+1*z,sy-1.5*z,3.5*z,1.2*z,0.5,0,TAU);c.fill()}
+  const F=T.fisch;if(F){const u=F.t/0.9;const sx0=(F.x-C.x)*z,sy0=(F.y-C.y)*z;
+   /* Ringe */for(const r0 of [0,0.95]){const k=(F.t-r0)/1.2;if(k>0&&k<1){c.globalAlpha=0.5*(1-k);c.strokeStyle='#e8f0e8';c.lineWidth=Math.max(1,1.2*z);c.beginPath();c.ellipse(sx0+(r0?F.r*F.L*z:0),sy0,(4+22*k)*z*(F.gross?1.4:1),(2+9*k)*z*(F.gross?1.4:1),0,0,TAU);c.stroke()}}
+   if(u<1){const x=sx0+F.r*F.L*u*z,y=sy0-Math.sin(u*Math.PI)*(F.gross?26:16)*z;const a=Math.atan2(-Math.cos(u*Math.PI)*(F.gross?26:16),F.r*F.L)*1;c.globalAlpha=0.95;c.save();c.translate(x,y);c.rotate(a);c.scale(F.r*z*(F.gross?1.5:1),z*(F.gross?1.5:1));
+    c.fillStyle='#b8a888';c.beginPath();c.ellipse(0,0,6,2.4,0,0,TAU);c.fill();c.beginPath();c.moveTo(-5,0);c.lineTo(-9,-3);c.lineTo(-9,3);c.closePath();c.fill();c.fillStyle='#1a1410';c.fillRect(3.4,-0.8,1,1);c.restore();
+    if(u>0.05&&u<0.2||u>0.85){c.globalAlpha=0.6;c.fillStyle='#eef4ee';for(let i=0;i<3;i++)c.fillRect(x+Rn(-6,6)*z,y+Rn(-4,2)*z,1.5*z,1.5*z)}}}}
+ c.restore()}
+/* ---------- 4) Flaschenpost ---------- */
+function flaschePlan(){if(S.fK===S.k)return;S.fK=S.k;S.flasche=null;try{if(G.mode!=='kampagne'||NET.role==='guest'||G.bot)return;const L=teiche();if(!L.length||R()>0.22)return;
+  const T=L[Math.floor(R()*L.length)],o=T.o;for(let tr=0;tr<12;tr++){const a=Rn(0,TAU),x=o.x+Math.cos(a)*(o.r+16),y=o.y+Math.sin(a)*(o.r*0.7+14);if(typeof wlFrei==='function'&&!wlFrei(x,y,10))continue;S.flasche={x,y,used:0,t:Rn(0,6)};break}}catch(e){}}
+function flascheUpd(dt){const F=S.flasche;if(!F||F.used)return;F.t+=dt;const q=P;if(!q||q.down)return;if(Math.hypot(q.x-F.x,q.y-F.y)<26){F.used=1;LB.st.flaschen++;
+  const g=Math.round(Rn(18,36)*(1+0.06*(SL()||0)));SAVE.gold+=g;G.goldRun=(G.goldRun||0)+g;let id=-1;try{id=ghGeruechtNeu('zettel',0)}catch(e){}
+  try{sfx('coin')}catch(e){}word(F.x,F.y-30,`Flaschenpost! +${g} Gold`,'#e8d8a8');if(id<0){try{toast('In der Flasche: eine Karte mit einem Kreuz – und ein paar Münzen.','#e8d8a8')}catch(e){}}}}
+function flascheDraw(C){const F=S.flasche;if(!F||F.used)return;const c=cx,z=ZOOM,sx=(F.x-C.x)*z,sy=(F.y-C.y)*z;if(sx<-30||sy<-30||sx>W+30||sy>H+30)return;const b=Math.sin(G.time*2+F.t)*1.5;
+ c.save();c.translate(sx,sy+b*z);c.rotate(0.35+0.08*Math.sin(G.time*1.3));c.scale(z,z);c.globalAlpha=0.35;c.fillStyle='#000';c.beginPath();c.ellipse(0,5,10,3,0,0,TAU);c.fill();c.globalAlpha=0.9;
+ c.fillStyle='#6a8a5a';c.beginPath();c.ellipse(0,0,9,4.2,0,0,TAU);c.fill();c.fillRect(7,-2,6,4);c.fillStyle='#8a6a40';c.fillRect(12,-1.6,3,3.2);c.fillStyle='#efe2c0';c.fillRect(-5,-1.6,9,3.2);
+ c.globalAlpha=0.5+0.4*Math.sin(G.time*3);c.fillStyle='#fffbe8';c.fillRect(-3,-3.4,4,1.2);c.restore()}
+/* ---------- Einbindung: Wetter-Phase (Bildschirmkoordinaten, über der Dunkelheit) ---------- */
+let lt=null;
+{const dw=drawWeather;drawWeather=function(t){const r=dw.apply(this,arguments);try{if(an()){neuStufe();const C=kam();const dt=Math.min(0.1,Math.max(0,lt==null?0:G.time-lt));lt=G.time;
+   wolkenUpd(dt,C);voegelUpd(dt,C);teichUpd(dt,C);flaschePlan();flascheUpd(dt);
+   wolkenDraw(C);teichDraw(C);flascheDraw(C);voegelDraw(C)}else lt=null}catch(e){if(!LB.err)LB.err=String(e&&e.stack||e)}return r}}
+}catch(e){console.error('leben',e);window.__hsLEBEN.fatal=String(e&&e.stack||e)}})();
+
+
+/* ================= Paket „wache“: Wachposten – ungesehen an Laternenwachen vorbeischleichen – window.__hsWACHE =================
+   Neues Areal: 2–3 Wachen mit Laternen gehen Streife oder halten Ausschau, ihr Lichtkegel (warmgelb) tastet den Boden ab.
+   Kisten und Fässer geben Deckung (Sichtlinie). Steht ein Held im Kegel, füllt sich über der Wache ein „?“ – nach ~0,5 s „!“:
+   Alarm, die Wachen ziehen blank und rufen Verstärkung. Wer die Truhe in der Mitte ungesehen erreicht: „Ungesehen!“ – mehr Gold,
+   bessere Truhe. Im Kampf wird es einfach ein normales Gefecht. Skill: Timing, Wege lesen, Deckung nutzen. Präfix wp. */
+window.__hsWACHE={v:1};
+(function(){try{
+const WP=window.__hsWACHE;const GELB='#ffd77a';
+AR_K.wachposten={n:{x:'Bewachtes Lager',burg:'Wachgang',dorf:'Schmugglerversteck',hoehle:'Späherposten',gruft:'Grabwächter',wald:'Wildhüterlager'},sub:'Ungesehen an den Laternen vorbei!',c:'#ffd77a',ic:'auge',R:250,w:{land:1.3,wald:1.4,dorf:1.4,burg:1.3,hoehle:1.1,gruft:1}};
+AR_LVI.wachposten={c:'#ffd77a',n:'Wachposten',d:'Laternenwachen gehen Streife. Ihr Lichtkegel verrät, wohin sie schauen; Kisten und Fässer geben Deckung. Wer zu lange im Licht steht, löst Alarm aus. Ungesehen zur Truhe: mehr Gold und eine bessere Truhe.'};
+AR_BAU.wachposten=function(A){/* Deckung: Kisten/Fässer als Hindernisse, ein Ring aus Pfählen mit zwei Lücken */const R=200,g0=A.ea,g1=A.ea+Math.PI;const n=Math.round(TAU*R/30);
+ for(let i=0;i<n;i++){const a=i/n*TAU,da=v=>Math.abs(Math.atan2(Math.sin(a-v),Math.cos(a-v)));if(da(g0)<0.32||da(g1)<0.28)continue;if(i%3===1)continue;arCc(A,A.x+Math.cos(a)*R,A.y+Math.sin(a)*R*0.86,10,A.stil==='hoehle'||A.stil==='gruft'?'stalag':'pfahl')}
+ const dk=[[-110,-40],[100,-60],[-60,80],[70,70],[-140,40],[140,20]];for(const [dx,dy] of dk){if(Math.random()<0.25)continue;const x=A.x+dx+rnd(-10,10),y=A.y+dy+rnd(-10,10),st=A.stil;if(st==='land'||st==='wald')arCc(A,x,y,16,'baum',{s:rnd(1.1,1.4),art:'laub'});else if(st==='hoehle')arCc(A,x,y,15,Math.random()<0.5?'stalag':'kristall');else arCc(A,x,y,16,Math.random()<0.6?'saeule':'statue')}
+ arDk(A,A.x+30,A.y-30,'torch')};
+AR_FILL.wachposten=function(A){const sl=SL()||0,hart=arHart();const n=sl<3?2:3;A.wp={wachen:[],alarm:0,ziel:0,gesehen:0};
+ const T=arTruhe(A,A.x,A.y,sl>=5&&Math.random()<0.35?2:1);A.truhe=T;G.props.push({k:'goldpile',prop:1,x:A.x-34,y:A.y+20,r:16});
+ for(let i=0;i<n;i++){const a=A.ea+Math.PI/2+i*TAU/n+rnd(-0.3,0.3),d=rnd(95,135);const x=A.x+Math.cos(a)*d,y=A.y+Math.sin(a)*d*0.86;const q=wlNahFrei(x,y,4)||{x,y};
+  const streife=i!==n-1||Math.random()<0.5;const b=a+Math.PI/2;const L=rnd(70,110);
+  const w={k:'ar_wache',prop:1,x:q.x,y:q.y,r:13,ai:A.id,ax:q.x-Math.cos(b)*L/2,ay:q.y-Math.sin(b)*L/2,bx:q.x+Math.cos(b)*L/2,by:q.y+Math.sin(b)*L/2,u:Math.random(),dir:1,ruhe:0,
+   blick:streife?b:Math.atan2(A.y-q.y,A.x-q.x)+Math.PI,streife:streife?1:0,sp:streife?rnd(42,58)+3*Math.min(10,sl):0,kl:150+8*Math.min(8,sl)+10*hart,kw:0.62+0.02*Math.min(8,hart),ver:0,seed:Math.random(),hp:1};
+  w.x=w.ax+(w.bx-w.ax)*w.u;w.y=w.ay+(w.by-w.ay)*w.u;G.props.push(w);A.wp.wachen.push(w)}};
+function sieht(w,q){const dx=q.x-w.x,dy=q.y-w.y,d=Math.hypot(dx,dy);if(d>w.kl+q.r*0.5)return 0;let da=Math.atan2(dy,dx)-w.blick;da=Math.atan2(Math.sin(da),Math.cos(da));if(Math.abs(da)>w.kw/2+0.05)return 0;if(!losFrei(w,q))return 0;
+ /* nah und mittig: schneller entdeckt */return (1.3-d/w.kl*0.6)*(1-Math.abs(da)/(w.kw/2+0.05)*0.4)}
+function alarm(A,w){if(A.wp.alarm)return;A.wp.alarm=1;const sl=SL()||0;if(!G.bot){word(w.x,w.y-46,'ALARM!','#ff7a5a');try{banner('Entdeckt!','Die Wachen schlagen Alarm','#ff8a5a',{dur:1.6,size:30,y:H*0.26})}catch(e){}sfxAt('boss',w.x,w.y)}
+ /* Wachen werden zu Kämpfern, dazu Verstärkung */const L=[];for(const v of A.wp.wachen){if(v.dead)continue;v.dead=true;const e=arFeind(A,pickFoe(0.7),v.x,v.y,{pr:0.7,elite:sl>=4?1:0});if(e){e.born=-9;L.push(e)}}
+ for(let i=0;i<2+Math.min(3,sl>>2);i++){const a=rnd(TAU);const e=arFeind(A,pickFoe(0.6),A.x+Math.cos(a)*rnd(150,210),A.y+Math.sin(a)*rnd(120,180),{pr:0.6});if(e)L.push(e)}
+ try{const g=arGruppe(A,L,'lager',300);if(g)g.wach=1}catch(e){}for(const e of L){e.aggro=1;e.wlZz=0}arSync(1)}
+AR_TICK.wachposten=function(A,dt){const W_=A.wp;if(!W_)return;if(A.s===2)return;dt=dt||0.016;
+ if(W_.alarm){A.tx=`Alarm! Gegner: ${arFeinde(A).length}`;if(A.truhe&&A.truhe.open&&!arFeinde(A).length)arSieg(A,'Den Posten ausgehoben!');return}
+ if(A.s===1)A.tx=W_.gesehen>0.05?'Vorsicht – sie werden aufmerksam …':'Ungesehen zur Truhe!';
+ const SP=arSpieler();
+ for(const w of W_.wachen){if(w.dead)continue;
+  /* Bewegung: Streife hin und her mit Halt und Umschauen; Posten: Blick schwenkt */
+  if(w.streife){if(w.ruhe>0){w.ruhe-=dt;w.blick+=Math.sin(G.time*1.6+w.seed*9)*dt*0.9}else{const L=Math.hypot(w.bx-w.ax,w.by-w.ay)||1;w.u+=w.dir*w.sp*dt/L;if(w.u>=1||w.u<=0){w.u=clamp(w.u,0,1);w.dir*=-1;w.ruhe=rnd(0.9,1.6)}
+    w.x=w.ax+(w.bx-w.ax)*w.u;w.y=w.ay+(w.by-w.ay)*w.u;const zb=Math.atan2((w.by-w.ay)*w.dir,(w.bx-w.ax)*w.dir);let da=Math.atan2(Math.sin(zb-w.blick),Math.cos(zb-w.blick));w.blick+=clamp(da,-dt*4,dt*4)}}
+  else{w.blick+=Math.sin(G.time*0.7+w.seed*9)*dt*0.55}
+  /* Entdecken */let s=0,Q=null;for(const q of SP){const v=sieht(w,q);if(v>s){s=v;Q=q}}
+  if(s>0){w.ver=Math.min(1,w.ver+dt*s*2.1);w.ruhe=Math.max(w.ruhe,0.2);if(Q){const zb=Math.atan2(Q.y-w.y,Q.x-w.x);let da=Math.atan2(Math.sin(zb-w.blick),Math.cos(zb-w.blick));w.blick+=clamp(da,-dt*2.2,dt*2.2)}}
+  else w.ver=Math.max(0,w.ver-dt*0.45);
+  W_.gesehen=Math.max(...W_.wachen.map(v=>v.ver||0));
+  if(w.ver>=1){alarm(A,w);return}
+  /* Treffer auf die Wache (Angriff) = Alarm */if(w.hp<=0){alarm(A,w);return}}
+ /* Ziel: Truhe erreicht, ohne Alarm */
+ if(!W_.ziel&&A.truhe&&SP.some(q=>Math.hypot(q.x-A.truhe.x,q.y-A.truhe.y)<46)){W_.ziel=1;if(!G.bot){try{banner('Ungesehen!','Niemand hat euch bemerkt','#ffd77a',{dur:1.8,size:30,y:H*0.26})}catch(e){}sfx('xp')}
+  arGold(A.truhe.x,A.truhe.y,10,1.4);arXp(A.truhe.x,A.truhe.y,2);if(!A.truhe.open)A.truhe.rich=Math.min(2,(A.truhe.rich||0)+1);WP.ungesehen=(WP.ungesehen||0)+1}
+ if(A.truhe&&A.truhe.open)arSieg(A,W_.ziel?'Ungesehen geplündert!':'Truhe geborgen!')};
+/* Angriffe auf Wachen lösen Alarm aus */
+{const tb=arTrefferBei;arTrefferBei=function(x,y,R,fern){const r=tb.apply(this,arguments);try{for(const p of G.props){if(p.k!=='ar_wache'||p.dead)continue;if(Math.hypot(p.x-x,p.y-y)<R+p.r+6){p.hp=0;r||0}}}catch(e){}return r}}
+/* ---------- Zeichnen ---------- */
+function kegel(c,w,t){const al=0.16+0.16*w.ver;const k=w.ver>0.05;const R=w.kl,a0=w.blick-w.kw/2,a1=w.blick+w.kw/2;c.save();
+ const g=c.createRadialGradient(w.x,w.y-8,6,w.x,w.y-8,R);g.addColorStop(0,k?'rgba(255,170,90,'+(al+0.12)+')':'rgba(255,225,150,'+(al+0.08)+')');g.addColorStop(0.75,k?'rgba(255,150,80,'+al+')':'rgba(255,215,130,'+al+')');g.addColorStop(1,'rgba(255,200,120,0)');
+ c.fillStyle=g;c.beginPath();c.moveTo(w.x,w.y-4);c.arc(w.x,w.y-4,R,a0,a1);c.closePath();c.fill();
+ c.globalAlpha=0.35+0.3*w.ver;c.strokeStyle=k?'#ffa060':'#ffe0a0';c.lineWidth=1.2;c.setLineDash([5,6]);c.beginPath();c.arc(w.x,w.y-4,R,a0,a1);c.stroke();c.setLineDash([]);c.restore()}
+function wache(c,w,t){const sch=Math.sin(t*(w.streife&&w.ruhe<=0?9:1.5)+w.seed*6),f=Math.cos(w.blick)>=0?1:-1;
+ ell(c,w.x,w.y+8,13,5,'rgba(0,0,0,.35)');c.save();c.translate(w.x,w.y);
+ /* Beine */ln(c,'#2a221c',3,-4,2,-4+sch*3,9);ln(c,'#2a221c',3,4,2,4-sch*3,9);
+ /* Mantel mit Kapuze */hP(c,'#5a4a3a','rgba(0,0,0,.6)',1.2,[-9,4,9,4,7,-14,0,-20,-7,-14]);hP(c,'#4a3c30','rgba(0,0,0,.6)',1,[-6,-14,6,-14,4,-24,0,-27,-4,-24]);
+ circ(c,f*2,-19,2.6,'#e0b890');c.fillStyle='#1a1410';c.fillRect(f*3,-20,1.4,1.4);
+ /* Speer */ln(c,'#6a5030',2,-f*8,8,-f*10,-30);hP(c,'#c8c0b0',null,0,[-f*10-2,-30,-f*10+2,-30,-f*10,-36]);
+ /* Laterne */const lx=f*10,ly=-6+Math.sin(t*2+w.seed*5)*1;ln(c,'#3a2a1a',1.4,f*6,-8,lx,ly-4);c.fillStyle='#2a2018';c.fillRect(lx-3,ly-4,6,7);c.fillStyle='#ffd77a';c.fillRect(lx-2,ly-3,4,5);c.restore();
+ /* Aufmerksamkeit */if(w.ver>0.02){const v=w.ver,y=w.y-44;c.save();c.font='900 16px "Alegreya Sans",sans-serif';c.textAlign='center';c.lineWidth=3.5;c.strokeStyle='rgba(0,0,0,.85)';
+  const z=v>=0.7?'!':'?';c.strokeText(z,w.x,y);c.fillStyle=v>=0.7?'#ff7a5a':'#ffd77a';c.fillText(z,w.x,y);c.fillStyle='rgba(0,0,0,.6)';c.fillRect(w.x-12,y+4,24,3);c.fillStyle=v>=0.7?'#ff7a5a':'#ffd77a';c.fillRect(w.x-12,y+4,24*v,3);c.restore()}}
+{const dp=drawProp3;drawProp3=function(p,t){if(p&&p.k==='ar_wache'){if(!p.dead){try{wache(cx,p,t)}catch(e){}}return true}return dp.apply(this,arguments)}}
+{const pg=drawPropGlow;drawPropGlow=function(inView,t){const r=pg.apply(this,arguments);try{if(!G.room)for(const p of G.props){if(p.k!=='ar_wache'||p.dead||!inView(p.x,p.y,60))continue;const f=Math.cos(p.blick)>=0?1:-1;glow(p.x+f*10,p.y-6,46,'#ffc870',0.5,true);const o=cx.globalCompositeOperation;cx.globalCompositeOperation='lighter';kegel(cx,p,t);cx.globalCompositeOperation=o}}catch(e){}return r}}
+}catch(e){console.error('wache',e);window.__hsWACHE.fatal=String(e&&e.stack||e)}})();
+
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
