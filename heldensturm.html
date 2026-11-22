@@ -41826,6 +41826,473 @@ function vogelDraw(v,t){const c=cx,f=v.face||1,flieg=v.st!=='schwimm',fl=Math.si
     if(e._hhA){const d=Math.min(0.12,dt+e._hhA);e._hhA=0;return ue.call(this,e,d)}}}catch(x){HS.err=String(x&&x.stack||x)}return ue.apply(this,arguments)}}
 }catch(e){window.__hsHHSPAR={v:1,err:String(e&&e.stack||e)}}})();
 
+/* «reso» */
+/* ================= Paket „reso“: Resonanzen – Talente, Schicksalskarten, Ausrüstung und Pakte verstärken sich – window.__hsRESO =================
+   Bestandsaufnahme: Synergien gab es bisher nur innerhalb eines Bausteins – Set-Boni (Ausrüstung), Kartenverbindungen (zwei Karten),
+   Ast-Kombos (ein Talentast), Prägungen (eine Fähigkeit). Neu ist eine Ebene QUER über alle Bausteine:
+   Jede Fähigkeit im Talentbaum, jede Schicksalskarte, aktive Set-Boni (ab 2 Teilen, voll ab 4 doppelt), Legendärkräfte, das Element
+   von Nah- und Fernwaffe und Pakte aus Ereignissen gehören zu einer oder zwei von neun Schulen:
+     Glut ✹ · Himmel ϟ · Wildnis ❦ · Blut ♦ · Schatten ☾ · Rudel ⚘ · Bann ◎ · Klinge ✦ · Gier ❂
+   Ab 3 / 6 / 10 Punkten einer Schule erwacht deren Resonanz in drei Stufen – jede mit eigener, sichtbarer Wirkung (Brand, Funken,
+   Ranken, Blutnova, Schatten, Geisterwolf, Bannring, Klingenblitz, Goldregen). Wer auf eine Schule baut, spürt es sofort.
+   Anzeige: Leiste im HUD, Zeile im Talentbaum (antippen = Beschreibung), Punkte an jedem Knoten, „passt zu …“ bei Talenten,
+   Schicksalskarten und Beute, Übersicht im Pausemenü. Ankündigung beim Erwachen (Banner im Spiel, Meldung im Menü).
+   Schaden unter 'reso' messbar (Schadensquellen). Kein Freeze-Frame/Hitstop/Zeitlupe. Kein Blau. Abschaltbar: __hsRESO.aus=1 */
+(function(){try{if(window.__hsRESO)return;
+const RS=window.__hsRESO={v:1,aus:0,err:[],n:{}};
+const rsErr=e=>{if(RS.err.length<20)RS.err.push(String(e&&e.stack||e).slice(0,300))};
+const ST=[3,6,10],ROM=['','I','II','III'];
+const SCH={
+ gl:{n:'Glut',ic:'✹',c:'#ff8a3a',s:['Treffer setzen mit 10 % Chance in Brand; Brennende erleiden 10 % mehr Schaden.','Brennende Gegner explodieren beim Tod (80 % Schaden ringsum, steckt an).','Glutherz: Im Kampf alle 7 s eine Feuernova um dich (160 % Fähigkeitsschaden). Explosionen werden größer.']},
+ hi:{n:'Himmel',ic:'ϟ',c:'#f0dc6a',s:['+8 % Angriffstempo.','Kritische Treffer springen als Funke auf einen weiteren Gegner über (40 % des Treffers).','Alle 6 s schlägt ein Blitz in den stärksten Gegner in der Nähe (250 % Fähigkeitsschaden, kurz betäubt).']},
+ wi:{n:'Wildnis',ic:'❦',c:'#9fd06a',s:['Gefesselte, verlangsamte und vergiftete Gegner erleiden 12 % mehr Schaden.','Besiegte Gegner lassen mit 25 % Chance ein Dornenfeld zurück.','Alle 5 s fesselt eine Ranke den nächsten Gegner und vergiftet ihn.']},
+ bl:{n:'Blut',ic:'♦',c:'#e8505a',s:['+2 % Lebensraub.','Unter 50 % Leben verursachst du 20 % mehr Schaden.','Kills heilen 1 % Leben; jeder 15. Kill entfesselt eine Blutnova (120 % Schaden, heilt 4 %).']},
+ sc:{n:'Schatten',ic:'☾',c:'#b48ae8',s:['Nach einer Ausweichrolle 1,5 s lang +25 % Schaden.','Besiegte Gegner lassen nahe Gegner mit 20 % Chance kurz fliehen.','Wo du ausweichst, bleibt ein Schatten zurück, der nach 1 s zerplatzt (150 % Fähigkeitsschaden, Furcht).']},
+ ru:{n:'Rudel',ic:'⚘',c:'#dcb47a',s:['Begleiter, Rex und Trugbilder verursachen 25 % mehr Schaden.','Treffer deiner Begleiter heilen dich ein wenig (bis 2 % pro Sekunde).','Alle 14 s eilt ein Geisterwolf an deine Seite und kämpft 10 s mit.']},
+ ba:{n:'Bann',ic:'◎',c:'#ffb8d0',s:['Betäubungen, Fesseln und Furcht halten 15 % länger.','Betäubte, gefesselte und fliehende Gegner erleiden 15 % mehr Schaden.','Stirbt ein kontrollierter Gegner, betäubt ein Bannring alle Gegner ringsum kurz.']},
+ kl:{n:'Klinge',ic:'✦',c:'#efe4cc',s:['+5 % kritische Trefferchance.','+25 % kritischer Schaden.','Kritische Treffer werfen mit 25 % Chance einen Klingenblitz auf einen weiteren Gegner (60 % des Treffers).']},
+ gi:{n:'Gier',ic:'❂',c:'#ffd04a',s:['+15 % Gold.','Aufgesammeltes Gold gibt 6 s lang +1 % Schaden (bis +15 %).','Besiegte Gegner zerplatzen mit 6 % Chance in einem Goldregen (100 % Schaden ringsum, Gold).']}};
+const KEYS=Object.keys(SCH);
+RS.SCH=SCH;RS.ST=ST;
+/* Zuordnung: Talentknoten (id), Schicksalskarten (k:id), Sets (s:id, zählen ab 2 Teilen, ab 4 doppelt), Legendärkräfte (p:id).
+   Erste Schule = Hauptschule. Aus allen Beschreibungen erhoben und von Hand nachgeschärft. */
+const T={b_hold:'ba',b_laugh:'ba',b_pattern:'ba,sc',b_mock:'ba,kl',b_tongue:'kl',b_dissonant:'sc',b_ballad:'ru',b_vine:'wi,ba',b_thorns:'wi,ba',b_song:'ba',b_wall:'wi,ba',b_bloom:'wi',b_strangle:'wi,ba',b_overgrowth:'wi,ba',b_mirror:'sc',b_phantom:'sc',b_fear:'sc',b_flute:'ru,sc',b_juggle:'gl,sc',b_door:'sc',b_hall:'sc',b_k_schnitt:'kl,hi',b_k_fuss:'kl',b_k_abwehr:'kl',b_k_fleche:'kl',b_k_inspir:'kl',b_k_stern:'kl,ba',b_k_ballett:'kl',b_g_kuss:'ru',b_g_mantel:'ru',b_g_glanz:'ru',b_g_knie:'ba,ru',b_g_unzer:'ru',b_g_darb:'ru,ba',b_g_krone:'ru',b_st_spiegel:'kl,sc',b_st_spiegtanz:'sc,kl',b_st_dornklinge:'kl,wi',b_st_rosentanz:'wi,ba',b_st_dornweise:'wi,ba',b_st_verse:'wi,ba',b_st_bann:'ba,ru',b_st_ehrfurcht:'ru,ba',b_st_schimmer:'sc',b_st_feenspiegel:'sc',b_t_takt:'kl',b_t_wurzel:'wi,ba',b_t_ensemble:'sc,ru',b_t_fecht:'kl',b_t_star:'ba,ru',e_wave:'hi',e_storm:'hi',e_call:'hi,ba',e_fireball:'gl',e_icefan:'ba',e_chain:'hi',e_tempest:'hi',e_bear:'ru',e_beast:'ru,ba',e_charge:'ru',e_rat:'ru,sc',e_maul:'bl,ru',e_roar:'ru,sc',e_primal:'ru,bl',e_bark:'wi',e_moon:'hi',e_greed:'gi',e_swarm:'wi',e_treant:'ru,wi',e_hoard:'gi',e_wrath:'wi,ba',e_s_bolt:'hi',e_s_form:'hi,ru',e_s_karte:'hi',e_s_omen:'hi',e_s_funkel:'hi',e_s_fessel:'hi,ba',e_s_nacht:'hi',e_p_wurf:'wi,ba',e_p_kranz:'wi,ba',e_p_sym:'wi,bl',e_p_befall:'wi,ru',e_p_ring:'wi,ba',e_p_platz:'wi,ru',e_p_frucht:'wi,ba',e_st_funke:'hi',e_st_sturm:'hi',e_st_wandel:'ru',e_st_pelz:'ru',e_st_myzel:'wi,ba',e_st_frucht:'wi,ru',e_st_pilzgold:'gi,wi',e_st_wald:'wi,ru',e_st_goldblitz:'gi,hi',e_st_wetter:'hi',e_t_gewitter:'hi',e_t_fell:'ru',e_t_wald:'wi,gi',e_t_glanz:'hi,kl',e_t_myzel:'wi',f_fan:'kl',f_double:'kl',f_rain:'kl,ba',f_explode:'gl,kl',f_ricochet:'kl',f_strafe:'kl',f_onearrow:'kl',f_pierce:'kl',f_mark:'kl',f_sniper:'kl',f_trap:'ba',f_sword:'kl',f_leap:'ba',f_tenth:'kl',f_rex:'ru',f_loyal:'ru',f_pack:'ru',f_howl:'ru',f_fetch:'ru,gi',f_wolves:'ru',f_bigrex:'ru',f_s_hetz:'wi',f_s_stich:'wi',f_s_flug:'wi',f_s_schleier:'wi',f_s_rex:'ru,wi',f_s_woge:'wi,ba',f_s_macht:'wi',f_f_draht:'ba',f_f_kunde:'ba',f_f_koeder:'ba',f_f_schlinge:'ba',f_f_hinterhalt:'ba,ru',f_f_spreng:'gl,ba',f_f_revier:'ba,ru',f_st_jagdbogen:'bl,kl',f_st_atem:'kl',f_st_fallenjaeger:'ba',f_st_netz:'ba,kl',f_st_spuer:'ru,ba',f_st_treib:'ru,ba',f_st_gluehfell:'ru',f_st_leucht:'wi,ru',f_st_gluehpfeil:'wi,kl',f_st_auge:'wi',f_t_adler:'kl',f_t_faehrte:'kl',f_t_rudel:'ru',f_t_nacht:'wi',f_t_bauer:'ba',z_rain:'kl,bl',z_whirl:'kl',z_sneak:'kl',z_fan:'kl',z_poison:'wi,kl',z_spin:'kl',z_lotus:'kl',z_cleave:'bl',z_wrath:'bl',z_frenzy:'bl',z_dawn:'gl,bl',z_pact:'bl',z_leap:'bl,ba',z_ascend:'bl',z_step:'sc',z_murder:'sc',z_destroyer:'bl,kl',z_smoke:'sc',z_clone:'sc',z_mark:'sc',z_assassin:'sc,kl',z_d_griff:'gi,sc',z_d_finger:'gi',z_d_oel:'gl,gi',z_d_kraehe:'ba,gi',z_d_hehler:'gi',z_d_raub:'gi,ba',z_d_coup:'gi,sc',z_p_klage:'sc',z_p_troph:'sc',z_p_wehklag:'sc,kl',z_p_gang:'sc',z_p_wache:'sc',z_p_ernte:'sc',z_p_schrei:'sc,ba',z_st_trunk:'bl',z_st_totentanz:'sc,bl',z_st_jenseits:'sc',z_st_schattseel:'sc',z_st_griff:'sc',z_st_fisch:'kl',z_st_kraehe:'kl,ba',z_st_messer:'kl',z_st_blutklinge:'bl,kl',z_st_rot:'bl,kl',z_t_scharf:'kl',z_t_durst:'bl',z_t_meuchel:'sc,kl',z_t_lang:'gi',z_t_kaelte:'sc,ba','k:b_heil':'ru','k:b_takt':'ba','k:b_dacapo':'kl','k:b_dorn':'wi','k:b_klinge':'kl','k:e_glut':'gl','k:e_dorn':'wi','k:e_gewitter':'hi','k:e_wild':'ru','k:e_spor':'wi','k:f_rex':'ru','k:f_konter':'kl','k:f_rudel':'ru','k:f_splitter':'kl','k:f_falke':'kl','k:z_schatten':'sc','k:z_blut':'bl','k:z_ader':'bl','k:z_lang':'gi','k:z_hunger':'bl','k:a_druck':'kl','k:a_gold':'gi','k:a_elite':'kl','k:a_rausch':'bl','k:a_fuss':'sc','k:a_klang':'ru','k:a_stern':'hi','k:a_seele':'sc','k:a_glueck':'kl','k:l_glas':'kl','k:l_drache':'gl','k:l_pakt':'bl','k:b_kadenz':'kl','k:e_funke':'gl','k:e_rinde':'wi','k:e_kugel':'hi','k:f_pfeilsturm':'kl','k:f_fallen':'ba','k:f_mal':'ru','k:f_geist':'ru','k:f_wache':'ru','k:z_klingen':'kl','k:z_glut':'bl','k:z_raub':'gi','k:z_fluch':'sc','k:z_erst':'kl','k:a_dorn':'wi','k:a_sichel':'hi','k:l_sturm':'hi','k:l_riese':'bl','k:r_lock':'wi','k:r_spur':'gl','k:r_goldblut':'gi','s:barradin':'sc','s:b_verz':'ba','s:b_ranke':'wi','s:echo':'hi','s:e_bar':'ru','s:e_hort':'gi','s:friedrich':'ru','s:f_schuetz':'kl','s:f_jaeger':'ba','s:ezekiel':'bl','s:z_klingen':'kl','s:z_schatten':'sc','s:g_feuer':'gl','s:g_blitz':'hi','s:g_vampir':'bl','s:g_rudel':'ru','s:g_bund':'ru','s:g_glueck':'gi,kl','s:g_tanz':'kl','s:g_weit':'kl','s:g_magier':'hi','p:phiole':'gl','p:uralt':'hi','p:demohaut':'ru','p:kraeuter':'wi','p:giftzahn':'wi','p:taverne':'gi','p:rexstock':'ru','p:blutdurst':'bl','p:abprall':'kl','p:kettenblitz':'hi','p:schattenklon':'sc','p:meteor':'hi','p:blutnebel':'bl','p:dawnlicht':'gl','p:wildherz':'wi','p:falke':'ru','p:blutkelch':'bl','p:flammenabzeichen':'gl','p:gh_eiche':'wi','p:gh_monokel':'kl','p:gh_bund':'gi','p:gh_sporen':'wi','p:gh_rauch':'sc','p:gh_mond':'ru','p:gh_esse':'gl','p:gh_seide':'ba','p:gh_goldzahn':'gi','p:gh_stern':'hi','p:gh_laterne':'hi'};
+RS.T=T;
+try{DMFIX.reso=['Resonanzen','✧']}catch(e){}
+const nz=v=>typeof v==='number'&&isFinite(v)?v:0;
+function elemTag(it){try{const e=window.__hsWAFF&&typeof __hsWAFF.elem==='function'?(__hsWAFF.elem(it)|0):0;return e===1?'gl':e===2?'wi':e===3?'ba':e===4?'hi':''}catch(e){return''}}
+function add(c,s,n){if(!s)return;const a=s.split(',');for(let i=0;i<a.length;i++){const k=a[i];if(SCH[k])c[k]=(c[k]||0)+(n||1)}}
+/* Schulen eines Gegenstands (für Hinweise im Beutel) */
+function itemTags(it){if(!it)return[];const o=[];const e=(it.slot==='weapon'||it.slot==='ranged')?elemTag(it):'';if(e)o.push({k:e,w:'Element'});
+ if(it.pow&&T['p:'+it.pow])for(const k of T['p:'+it.pow].split(','))o.push({k,w:'Legendärkraft'});
+ if(it.set&&T['s:'+it.set])for(const k of T['s:'+it.set].split(','))o.push({k,w:'Set ab 2 Teilen'});return o}
+RS.itemTags=itemTags;
+function zaehl(q,extra){const c={};if(!q)return c;
+ if(q.ranks)for(const id in q.ranks)if(q.ranks[id]>0&&T[id])add(c,T[id]);
+ const K=q.karten||[];for(let i=0;i<K.length;i++)add(c,T['k:'+K[i]]);
+ const eq=q.eq||{},m={};
+ for(const k of SLOTS){const it=eq[k];if(!it)continue;
+  if(it.set&&SETS[it.set]&&(!SETS[it.set].hero||SETS[it.set].hero===q.id)){(m[it.set]=m[it.set]||{})[it.slot]=1}
+  if(it.pow)add(c,T['p:'+it.pow]);if(k==='weapon'||k==='ranged')add(c,elemTag(it))}
+ for(const id in m){const n=Object.keys(m[id]).length;if(n>=2)add(c,T['s:'+id]);if(n>=4)add(c,T['s:'+id])}
+ if(q.rsPakt)for(const k in q.rsPakt)if(SCH[k])c[k]=(c[k]||0)+(q.rsPakt[k]|0);
+ /* Pakte aus Ereignissen (P.mods, k:'rsPakt', rs:{Schule:Punkte}) – werden mit dem Lauf gespeichert */
+ const M=q.mods||[];for(let i=0;i<M.length;i++){const m=M[i];if(m&&m.k==='rsPakt'&&m.rs)for(const k in m.rs)if(SCH[k])c[k]=(c[k]||0)+(m.rs[k]|0)}
+ /* Steinkreis im Lager: jeder Resonanzstein gibt allen Helden 1 Startpunkt (nicht in der Tagesherausforderung) */
+ if(G.mode!=='taeglich'&&!G.bot){const SB=(SAVE&&SAVE.rsStein)|0;if(SB)for(let i=0;i<KEYS.length;i++)if((SB>>i)&1)c[KEYS[i]]=(c[KEYS[i]]||0)+1}
+ for(const k in c)if(c[k]<0)c[k]=0;
+ if(extra)for(const k in extra)if(SCH[k])c[k]=(c[k]||0)+extra[k];
+ return c}
+RS.zaehl=zaehl;
+const stufe=n=>n>=ST[2]?3:n>=ST[1]?2:n>=ST[0]?1:0;
+RS.stufe=stufe;
+/* Stand je Held: q.rs = {c: Punkte, t: Stufen}; q.rsAn = bereits angekündigte Stufen in diesem Lauf */
+function rsUpd(q,still){if(!q||!q.hero)return;const c=zaehl(q),t={};for(const k of KEYS)t[k]=stufe(c[k]||0);q.rs={c,t};
+ if(!q.rsAn||q.rsAnRun!==G.runId){q.rsAn=Object.assign({},t);q.rsAnRun=G.runId;return}
+ if(!G.bot&&q===P&&G.mode!=='taeglich')for(let i=0;i<KEYS.length;i++)if(t[KEYS[i]]>=3&&!(((SAVE.rsStein|0)>>i)&1))try{window.__hsSTEIN&&__hsSTEIN.neu(KEYS[i])}catch(e){rsErr(e)}
+ if(still||G.bot)return;const neu=[];for(const k of KEYS){if(t[k]>(q.rsAn[k]|0))neu.push(k);q.rsAn[k]=Math.max(q.rsAn[k]|0,t[k])}
+ if(neu.length)ansage(q,neu)}
+RS.upd=rsUpd;
+function ansage(q,neu){try{neu.sort((a,b)=>q.rs.t[b]-q.rs.t[a]);
+  const imSpiel=G.state==='play'&&!G.overlay&&!G.paused;
+  neu.forEach((k,i)=>{const S=SCH[k],s=q.rs.t[k];RS.n[k+s]=(RS.n[k+s]||0)+1;
+   const txt=`<b style="color:${S.c}">${S.ic} Resonanz erwacht: ${S.n} ${ROM[s]}</b> – ${S.s[s-1]}`;
+   if(imSpiel&&i===0&&q===P){banner(`${S.ic} ${S.n} ${ROM[s]}`,'Resonanz erwacht – '+S.s[s-1],S.c,{dur:3,size:34,y:H*0.3});withP(q,()=>{ring(P.x,P.y,70,S.c,0.7,5);ring(P.x,P.y,130,S.c,0.9,3);burst(P.x,P.y,S.c,22,200);light(P.x,P.y,220,S.c,0.6,0.8)})}
+   else toast(txt,S.c,{sofort:1})});
+  sfx('legend');try{musAk('segen')}catch(e){}
+  if(!SAVE.rsTip){SAVE.rsTip=1;later(3.2,()=>{if(!G.bot)toast('<b>Resonanzen</b>: Talente, Schicksalskarten, Sets, Legendärkräfte und das Element deiner Waffen zählen zu Schulen. Ab 3 / 6 / 10 Punkten erwacht eine neue Stufe – im Talentbaum siehst du, was wozu passt.','#ffd27a',{sofort:1})});persist()}}catch(e){rsErr(e)}}
+{const rc=recalc;recalc=function(){try{if(P&&P.hero&&!RS.aus)rsUpd(P)}catch(e){rsErr(e)}return rc.apply(this,arguments)}}
+const rsT=()=>!RS.aus&&P&&P.rs&&!P.down?P.rs.t:null;
+const brennt=e=>{const D=e.dots;if(!D)return false;for(let i=0;i<D.length;i++)if(D[i].k==='burn'&&D[i].t>0)return true;return false};
+const vergiftet=e=>{const D=e.dots;if(!D)return false;for(let i=0;i<D.length;i++){const k=D[i].k;if(D[i].t>0&&(k==='poison'||k==='spore'||k.charCodeAt(0)===118&&k.indexOf('venom')===0))return true}return false};
+const kontrolliert=e=>e.stun>0||e.root>0||e.fearT>0||e.heldT>0;
+function andere(e,R){let b=null,bd=R*R;for(const f of G.enemies){if(f===e||f.dead||!targetable(f))continue;const dx=f.x-e.x,dy=f.y-e.y,dd=dx*dx+dy*dy;if(dd<bd){bd=dd;b=f}}return b}
+function linie(a,b,c){const pts=[[a.x,a.y-a.r*0.4]],n=6;for(let i=1;i<n;i++){const q=i/n;pts.push([a.x+(b.x-a.x)*q+rnd(-12,12),a.y+(b.y-a.y)*q-(a.r*0.4)*(1-q)+rnd(-8,8)])}pts.push([b.x,b.y-b.r*0.4]);
+ if(G.fxs.length<170)G.fxs.push({k:'bolt',pts,br:[],t:0,life:0.22});if(c)sparks(b.x,b.y-b.r*0.4,c,4,200)}
+const leicht=()=>{try{return typeof spLeicht==='function'&&spLeicht()}catch(e){return false}};
+/* ---------- Werte ---------- */
+hook('stats',s=>{const t=rsT();if(!t)return;if(t.hi>=1)s.rateP+=0.08;if(t.bl>=1)s.ls+=0.02;if(t.ru>=1)s.petP+=0.25;if(t.ba>=1)s.ctrlP+=0.15;if(t.kl>=1)s.crit+=0.05;if(t.kl>=2)s.critd+=0.25;if(t.gi>=1)s.gold+=0.15});
+/* ---------- Schaden ---------- */
+hook('dmgMul',(e,o)=>{const t=rsT();if(!t||!e)return 1;let m=1;
+ if(t.gl&&brennt(e))m*=1.10;
+ if(t.wi&&(e.root>0||e.slowT>0||vergiftet(e)))m*=1.12;
+ if(t.bl>=2&&P.hp<P.st.maxHp*0.5)m*=1.2;
+ if(t.sc&&P.rsSchT>G.time&&!(o&&o.dot))m*=1.25;
+ if(t.ba>=2&&kontrolliert(e))m*=1.15;
+ if(t.gi>=2&&P.rsGoldT>G.time&&P.rsGoldN)m*=1+0.01*P.rsGoldN;
+ return m});
+hook('hit',(e,o,amt,crit)=>{const t=rsT();if(!t||!o||o.rsF||!e)return;
+ if(t.gl&&!o.dot&&!e.dead&&Math.random()<0.1){dot(e,'burn',P.st.dmg*0.45,3);if(!leicht())embers(e.x,e.y-e.r*0.5,'#ff9a3a',3,e.r)}
+ if(t.hi>=2&&crit&&!o.dot&&!(P.rsHiT>G.time)){const f=andere(e,240);if(f){P.rsHiT=G.time+0.15;linie(e,f,'#f8e8a0');dealDmg(f,amt*0.4,{rsF:1,lightning:1,noCrit:1,dmK:'reso'})}}
+ if(t.kl>=3&&crit&&!o.dot&&!(P.rsKlT>G.time)&&Math.random()<0.25){const f=andere(e,260);if(f){P.rsKlT=G.time+0.2;if(G.fxs.length<170)G.fxs.push({k:'tracer',x:e.x,y:e.y-8,x2:f.x,y2:f.y-8,c:'#fff1c2',w:3,t:0,life:0.24});sparks(f.x,f.y-8,'#fff2d8',4,200);dealDmg(f,amt*0.6,{rsF:1,noCrit:1,dmK:'reso'})}}
+ if(t.ru>=2&&o.pet){const w=Math.floor(G.time);if(P.rsRuW!==w){P.rsRuW=w;P.rsRuS=0}const h=Math.min(P.st.maxHp*0.004,P.st.maxHp*0.02-(P.rsRuS||0));if(h>0){P.rsRuS=(P.rsRuS||0)+h;heal(h)}}});
+/* ---------- Kills ---------- */
+hook('kill',(e,o)=>{const t=rsT();if(!t||!e)return;const x=e.x,y=e.y,A=P.st.area||1;
+ if(t.gl>=2&&brennt(e)&&!(P.rsGlK>G.time)){P.rsGlK=G.time+0.12;const R=(t.gl>=3?125:90)*A;aoe(x,y,R,P.st.dmg*0.8,{rsF:1,dmK:'reso',onHit:f=>dot(f,'burn',P.st.dmg*0.45,3)});explodeFx(x,y,R*0.75,'#ff8a3a');if(!leicht())embers(x,y,'#ffb04a',8,R*0.5);sfxAt('boom',x,y)}
+ if(t.wi>=2&&Math.random()<0.25&&G.zones.length<40){zone({x,y,r:58*A,dur:2.5,dps:sk(0.35),slow:0.4,kind:'thorns',vine:1,dmK:'reso'})}
+ if(t.bl>=3){const w=Math.floor(G.time);if(P.rsBlW!==w){P.rsBlW=w;P.rsBlS=0}if((P.rsBlS||0)<0.03){P.rsBlS=(P.rsBlS||0)+0.01;heal(P.st.maxHp*0.01)}
+  P.rsBlN=(P.rsBlN||0)+1;if(P.rsBlN>=15){P.rsBlN=0;const R=150*A;aoe(P.x,P.y,R,P.st.dmg*1.2,{rsF:1,dmK:'reso'});heal(P.st.maxHp*0.04);G.fxs.push({k:'shock',x:P.x,y:P.y,r:R,c:'#e8505a',t:0,life:0.5});ring(P.x,P.y,R*0.7,'#ff6a72',0.5,5);burst(P.x,P.y,'#e8505a',18,220);word(P.x,P.y-46,'Blutnova','#ff8a8a');sfx('d_flesh')}}
+ if(t.sc>=2&&Math.random()<0.2){let n=0;query(x,y,170,f=>{if(n<4&&!f.dead&&f!==e&&!f.boss){n++;dealDmg(f,0.01,{fear:1.5,fx:x,fy:y,rsF:1,quiet:1,noCrit:1,noLs:1})}});if(n){puffs(x,y,'#4a2a5a',6,60,14);ring(x,y,120,'#b48ae8',0.4,3)}}
+ if(t.ba>=3&&kontrolliert(e)&&!(P.rsBaT>G.time)){P.rsBaT=G.time+0.25;const R=115*A;aoe(x,y,R,sk(0.4),{stun:0.6,rsF:1,dmK:'reso'});ring(x,y,R,'#ffb8d0',0.45,5);ring(x,y,R*0.55,'#fff0f6',0.35,3);sfxAt('magic',x,y)}
+ if(t.gi>=3&&Math.random()<0.06){const R=100*A;aoe(x,y,R,P.st.dmg,{rsF:1,dmK:'reso'});for(let i=0;i<3;i++)orb(x,y,'gold',Math.max(1,Math.round(ri(1,3)*P.st.gold)));G.fxs.push({k:'flash',x,y,r:R,c:'#ffd04a',t:0,life:0.25});sparks(x,y,'#ffe08a',12,260,1);word(x,y-30,'Goldregen!','#ffd04a');sfx('coin')}});
+/* ---------- Takt (Wirkungen in Abständen) ---------- */
+function staerkster(R){let b=null,bh=-1;for(const e of G.enemies){if(e.dead||!targetable(e))continue;const dx=e.x-P.x,dy=e.y-P.y;if(dx*dx+dy*dy>R*R)continue;if(e.hp>bh){bh=e.hp;b=e}}return b}
+hook('tick',dt=>{const t=rsT();if(!t||G.state!=='play'||G.paused)return;
+ let kampf=null,kq=false;const K=()=>{if(!kq){kq=true;kampf=nearest(P.x,P.y,430)}return kampf};
+ if(t.gl>=3){P.rsGlT=(P.rsGlT==null?3:P.rsGlT)-dt;if(P.rsGlT<=0){if(K()){P.rsGlT=7;const R=160*(P.st.area||1);aoe(P.x,P.y,R,sk(1.6),{rsF:1,dmK:'reso',knock:120,fx:P.x,fy:P.y,onHit:f=>dot(f,'burn',P.st.dmg*0.45,3)});explodeFx(P.x,P.y,R*0.8,'#ff7a2a');ring(P.x,P.y,R,'#ffb04a',0.55,6);if(!leicht())embers(P.x,P.y,'#ffb04a',14,R*0.6);word(P.x,P.y-50,'Glutherz','#ffb070');sfx('fire')}else P.rsGlT=0}}
+ if(t.hi>=3){P.rsHi3=(P.rsHi3==null?2:P.rsHi3)-dt;if(P.rsHi3<=0){const e=K()&&staerkster(430);if(e){P.rsHi3=6;bolt(e.x,e.y);dealDmg(e,sk(2.5),{rsF:1,lightning:1,stun:0.5,dmK:'reso'});sfxAt('thunder',e.x,e.y)}else P.rsHi3=0}}
+ if(t.wi>=3){P.rsWi3=(P.rsWi3==null?2:P.rsWi3)-dt;if(P.rsWi3<=0){const e=K();if(e){P.rsWi3=5;if(!e.boss&&!e.ccImmune)e.root=Math.max(e.root||0,ccZaeh(e,1.5*(e.guard?0.5:1),e.root||0));dot(e,'poison',P.st.dmg*0.35,4);
+    G.fxs.push({k:'vineline',x:e.x,y:e.y,x2:P.x,y2:P.y,t:0,life:0.45});ring(e.x,e.y,e.r+22,'#9fd06a',0.5,4);sfxAt('vine',e.x,e.y)}else P.rsWi3=0}}
+ if(t.ru>=3){P.rsRu3=(P.rsRu3==null?4:P.rsRu3)-dt;if(P.rsRu3<=0){if(K()){P.rsRu3=14;spawnPet('wolf',P.x+rnd(-60,60),P.y+rnd(-60,60),{life:10,dmg:()=>P.st.dmg*0.55,hp:P.st.maxHp*0.5,every:0.8,r:12,speed:240});G.fxs.push({k:'shock',x:P.x,y:P.y,r:120,c:'#dcb47a',t:0,life:0.5});sfx('roar')}else P.rsRu3=0}}
+ if(P.rsGoldT&&P.rsGoldT<=G.time&&P.rsGoldN){P.rsGoldN=0}});
+/* ---------- Ausweichen ---------- */
+hook('roll',a=>{const t=rsT();if(!t)return;if(t.sc)P.rsSchT=G.time+1.5;
+ if(t.sc>=3&&!(P.rsSc3>G.time)){P.rsSc3=G.time+1.1;const x=P.x,y=P.y;if(G.fxs.length<170)G.fxs.push({k:'shade',x,y,t:0,life:1});puffs(x,y,'#3a2246',5,40,12);
+  later(1,()=>{const R=110*(P.st.area||1);aoe(x,y,R,sk(1.5),{fear:1,fx:x,fy:y,rsF:1,dmK:'reso'});ring(x,y,R,'#b48ae8',0.45,5);puffs(x,y,'#4a2a5a',10,90,16);sparks(x,y,'#d8b8ff',8,200);sfxAt('magic',x,y)})}});
+/* ---------- Gold ---------- */
+if(typeof heroGold==='function'){const hg=heroGold;heroGold=function(q){const r=hg.apply(this,arguments);try{if(q&&q.rs&&q.rs.t.gi>=2&&!RS.aus){q.rsGoldN=Math.min(15,(q.rsGoldT>G.time?q.rsGoldN||0:0)+1);q.rsGoldT=G.time+6}}catch(e){rsErr(e)}return r}}
+/* ---------- Karten: Stand neu berechnen ---------- */
+if(typeof fkNimm==='function'){const fn=fkNimm;fkNimm=function(q){const r=fn.apply(this,arguments);try{if(r&&q){if(q===P)recalc();else withP(q,()=>recalc())}}catch(e){rsErr(e)}return r}}
+
+/* ================= Anzeige ================= */
+function css(){if(document.getElementById('rsCss'))return;const s=document.createElement('style');s.id='rsCss';s.textContent=`
+#rsHud{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;pointer-events:none}
+#rsHud .rsH{display:inline-flex;align-items:center;gap:2px;padding:1px 6px 1px 5px;border-radius:9px;background:rgba(20,12,16,.72);border:1px solid color-mix(in srgb,var(--c) 55%,transparent);border-color:var(--c);color:var(--c);font:700 11px/1.35 "Alegreya Sans",sans-serif;white-space:nowrap}
+#rsHud .rsH b{font-size:10px;letter-spacing:.04em;color:#f3e6cc}
+#rsHud .rsH.zu{opacity:.55;border-style:dashed}
+.rsRow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0 6px}
+.rsRow .eyebrow{margin-right:2px}
+.rsC{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:var(--c);font:700 13px/1.2 "Alegreya Sans",sans-serif;cursor:pointer}
+.rsC.on{background:color-mix(in srgb,var(--c) 18%,transparent);background:rgba(255,220,160,.09);border-color:var(--c)}
+.rsC.sel{outline:2px solid var(--c);outline-offset:1px}
+.rsC .n{color:#f3e6cc}.rsC .p{letter-spacing:1px;font-size:10px}
+.rsC.leer{opacity:.42}
+.rsInfo{border:1px solid var(--c);border-radius:10px;padding:8px 10px;margin:0 0 8px;background:rgba(20,12,16,.6);font-size:13px;line-height:1.35}
+.rsInfo h4{margin:0 0 4px;color:var(--c);font-size:14px}
+.rsInfo .l{opacity:.55}.rsInfo .l.on{opacity:1}.rsInfo .l b{color:var(--c)}
+.node .rsDots,.stn .rsDots{position:absolute;left:4px;bottom:4px;display:flex;gap:2px;pointer-events:none}
+.stn .rsDots{left:50%;bottom:-3px;transform:translateX(-50%)}
+.stn .rsDots i{width:5px;height:5px}
+.rsMap{position:absolute;left:10px;bottom:10px;z-index:4;max-width:min(560px,calc(100% - 80px));display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.rsMap .rsRow{margin:0;padding:4px 8px;border-radius:14px;background:rgba(14,9,12,.78);border:1px solid rgba(229,180,84,.25)}
+.rsMap .rsInfo{margin:0;background:rgba(14,9,12,.9);max-width:440px}
+.tdet .rsTd{font-size:12px;margin:2px 0 4px}
+.node .rsDots i{width:6px;height:6px;border-radius:50%;display:block;box-shadow:0 0 0 1px rgba(0,0,0,.6)}
+.rsTd,.rsIt{font-size:13px;margin:4px 0 6px;line-height:1.35}
+.rsTd b,.rsIt b{color:var(--c)}
+.rsTag{display:inline-block;padding:0 6px;border-radius:8px;border:1px solid var(--c);color:var(--c);font-weight:800;margin-right:4px;white-space:nowrap}
+.fkRs{display:block;margin-top:5px;font-size:12px;font-weight:700;line-height:1.3}
+.fkRs i{font-style:normal}
+.rsPause .rsPl{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:13px;line-height:1.3}
+.rsPause .rsPl b{color:var(--c);white-space:nowrap}
+@media (max-height:420px),(max-width:700px){#rsHud .rsH{font-size:10px;padding:0 4px}.rsC{font-size:11px;padding:1px 5px}.rsC .p{display:none}.rsInfo{font-size:11px;padding:5px 7px}.rsInfo .muted{display:none}.rsMap{left:6px;top:6px;bottom:auto;max-width:calc(100% - 12px);flex-direction:column-reverse}.rsMap .rsInfo{max-height:calc(100% - 40px)}.rsMap .rsRow .eyebrow{display:none}.tdet .rsTd{font-size:11px}}
+`;document.head.appendChild(s)}
+const pips=(s)=>'●'.repeat(s)+'○'.repeat(3-s);
+const naechste=n=>n>=ST[2]?null:n>=ST[1]?ST[2]:n>=ST[0]?ST[1]:ST[0];
+/* Vorschau: was bringt ein zusätzlicher Baustein? */
+function vorschau(q,tags){if(!q||!tags||!tags.length)return'';const c=(q.rs&&q.rs.c)||zaehl(q);return tags.map(k=>{const S=SCH[k];if(!S)return'';const a=c[k]||0,b=a+1,sa=stufe(a),sb=stufe(b);
+  return`<span class="rsTag" style="--c:${S.c}">${S.ic} ${S.n} ${a}→${b}${sb>sa?` · Stufe ${ROM[sb]}!`:''}</span>`}).join('')}
+RS.vorschau=vorschau;
+/* HUD-Leiste */
+let hudEl=null,hudS='',hudT=0;
+function hudUpd(){try{if(RS.aus||!P||!P.rs){if(hudEl&&hudS){hudEl.innerHTML='';hudS=''}return}
+ if(!hudEl||!hudEl.isConnected){const pn=document.querySelector('#hud .top .panel');if(!pn)return;hudEl=document.createElement('div');hudEl.id='rsHud';pn.appendChild(hudEl);css();hudS=''}
+ const c=P.rs.c,t=P.rs.t;let L=KEYS.filter(k=>t[k]>0).sort((a,b)=>t[b]-t[a]||(c[b]-c[a]));let zu='';
+ if(L.length<4){let best=null,bv=0;for(const k of KEYS){if(t[k]>0)continue;const v=c[k]||0;if(v>bv){bv=v;best=k}}if(best&&bv>=2)zu=best}
+ L=L.slice(0,4);let s='';for(const k of L){const S=SCH[k];s+=`<span class="rsH" style="--c:${S.c}" title="${S.n} ${ROM[t[k]]}">${S.ic}<b>${ROM[t[k]]}</b></span>`}
+ if(zu){const S=SCH[zu];s+=`<span class="rsH zu" style="--c:${S.c}" title="${S.n}: noch ${ST[0]-(c[zu]||0)} bis Stufe I">${S.ic}<b>${c[zu]||0}/${ST[0]}</b></span>`}
+ if(s!==hudS){hudS=s;hudEl.innerHTML=s}}catch(e){rsErr(e)}}
+hook('tick',()=>{const n=performance.now();if(n-hudT<400)return;hudT=n;if(G.mp&&P!==PL[0])return;hudUpd()});
+/* Talentbaum */
+const pakte=q=>(q.mods||[]).filter(m=>m&&m.k==='rsPakt'&&m.n);
+function zeile(q,nurAktiv){const c=(q.rs&&q.rs.c)||{},t=(q.rs&&q.rs.t)||{};const L=nurAktiv?KEYS.filter(k=>(c[k]||0)>0||G.rsInfo===k):KEYS;const pk=pakte(q);
+ return`<div class="rsRow"><span class="eyebrow">Resonanzen</span>${L.length?'':'<span class="muted" style="font-size:12px">noch keine – lerne Fähigkeiten oder ziehe Schicksalskarten</span>'}${L.map(k=>{const S=SCH[k],n=c[k]||0,s=t[k]||0;return`<button class="rsC ${s?'on':''} ${n?'':'leer'} ${G.rsInfo===k?'sel':''}" data-act="rs-info" data-k="${k}" style="--c:${S.c}" title="${S.n}: ${n} Punkte${naechste(n)?' · nächste Stufe ab '+naechste(n):''}">${S.ic}<span class="n">${n}</span><span class="p">${pips(s)}</span></button>`}).join('')}${pk.length?`<button class="rsC on ${G.rsInfo==='pakt'?'sel':''}" data-act="rs-info" data-k="pakt" style="--c:#e5b454" title="Pakte aus Ereignissen">◈<span class="n">${pk.length}</span></button>`:''}</div>`}
+function info(q,k){if(k==='pakt'){const pk=pakte(q);return`<div class="rsInfo" style="--c:#e5b454"><h4>◈ Pakte · ganzer Lauf</h4>${pk.map(m=>`<div class="l on">${esc(m.n.replace(/^◈ /,''))}</div>`).join('')||'<div class="l">Noch keine Pakte.</div>'}</div>`}
+ const S=SCH[k];if(!S)return'';const n=(q.rs&&q.rs.c[k])||0,s=stufe(n),nx=naechste(n);
+ return`<div class="rsInfo" style="--c:${S.c}"><h4>${S.ic} ${S.n} · ${n} Punkte${nx?` · Stufe ${ROM[s+1]} ab ${nx}`:' · voll erwacht'}</h4>${S.s.map((x,i)=>`<div class="l ${s>i?'on':''}"><b>${ROM[i+1]} (${ST[i]})</b> ${x}</div>`).join('')}<div class="muted" style="font-size:12px;margin-top:4px">Punkte geben gelernte Fähigkeiten, Schicksalskarten, Set-Boni ab 2 Teilen, Legendärkräfte, das Element deiner Waffen, Pakte aus Ereignissen${(((SAVE.rsStein|0)>>KEYS.indexOf(k))&1)?' und dein Resonanzstein im Lager (+1)':''}.</div></div>`}
+RS.zeile=zeile;RS.info=info;
+if(typeof renderTree==='function'){const rt=renderTree;renderTree=function(){const r=rt.apply(this,arguments);try{if(!RS.aus&&P&&P.hero)baumNach()}catch(e){rsErr(e)}return r}}
+function mapHtml(){return`<div class="rsMap">${G.rsInfo?info(P,G.rsInfo):''}${zeile(P,1)}</div>`}
+function baumNach(){css();const w=scr.querySelector('.tree-wrap');if(!w)return;if(!P.rs)rsUpd(P,true);
+ const map=w.querySelector('.stmap');
+ if(map){if(!map.querySelector('.rsMap')){map.insertAdjacentHTML('beforeend',mapHtml());const m=map.querySelector('.rsMap');for(const k of['pointerdown','mousedown','touchstart','wheel'])m.addEventListener(k,e=>e.stopPropagation(),{passive:true})}}
+ else{const br=w.querySelector('.barrow');if(br&&!w.querySelector('.rsRow')){br.insertAdjacentHTML('afterend',zeile(P)+(G.rsInfo?info(P,G.rsInfo):''))}}
+ for(const b of w.querySelectorAll('.node[data-id],.stn[data-id]')){const tg=T[b.dataset.id];if(!tg||b.querySelector('.rsDots'))continue;b.insertAdjacentHTML('beforeend',`<span class="rsDots">${tg.split(',').map(k=>SCH[k]?`<i style="background:${SCH[k].c}"></i>`:'').join('')}</span>`)}
+ const td=w.querySelector('.tdet');if(td&&G.treeSel&&T[G.treeSel]&&!td.querySelector('.rsTd')){const tg=T[G.treeSel].split(',').filter(k=>SCH[k]);const r=rank(G.treeSel);
+  const h=r?`<div class="rsTd">Zählt zu ${tg.map(k=>`<span class="rsTag" style="--c:${SCH[k].c}">${SCH[k].ic} ${SCH[k].n} ${(P.rs&&P.rs.c[k])||0}</span>`).join('')}</div>`:`<div class="rsTd">Passt zu ${vorschau(P,tg)}</div>`;
+  const anker=td.querySelector('.tds')||td.querySelector('.tdmore');if(anker)anker.insertAdjacentHTML('afterend',h);else td.insertAdjacentHTML('beforeend',h)}}
+document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('[data-act="rs-info"]');if(!b)return;ev.stopPropagation();ev.preventDefault();try{audioInit();sfx('ui');const k=b.dataset.k;G.rsInfo=G.rsInfo===k?null:k;
+  const w=scr.querySelector('.tree-wrap');const mp=w&&w.querySelector('.rsMap');if(mp){const pa=mp.parentNode;mp.remove();pa.insertAdjacentHTML('beforeend',mapHtml());const m=pa.querySelector('.rsMap');for(const q of['pointerdown','mousedown','touchstart','wheel'])m.addEventListener(q,e=>e.stopPropagation(),{passive:true});const nb=m.querySelector(`.rsC[data-k="${k}"]`);if(nb)try{nb.focus({preventScroll:true})}catch(e){}return}
+  if(w){const row=w.querySelector('.rsRow');const alt=w.querySelector('.rsInfo');if(alt)alt.remove();if(row){row.outerHTML=zeile(P);const nr=w.querySelector('.rsRow');if(G.rsInfo&&nr)nr.insertAdjacentHTML('afterend',info(P,G.rsInfo));const nb=w.querySelector(`.rsC[data-k="${k}"]`);if(nb)try{nb.focus({preventScroll:true})}catch(e){}}}}catch(e){rsErr(e)}},true);
+/* Schicksalskarten */
+if(typeof fkKarteHtml==='function'){const fh=fkKarteHtml;fkKarteHtml=function(q,id){let h=fh.apply(this,arguments);try{const tg=T['k:'+id];if(tg&&!RS.aus&&q){const v=vorschau(q,tg.split(','));if(v)h=h.replace('<span class="fkOrn">',`<span class="fkRs">${v}</span><span class="fkOrn">`)}}catch(e){rsErr(e)}return h}}
+if(typeof fkHtml==='function'){const fh=fkHtml;fkHtml=function(){css();return fh.apply(this,arguments)}}
+/* Beutel */
+if(typeof renderInv==='function'){const ri0=renderInv;renderInv=function(){const r=ri0.apply(this,arguments);try{if(!RS.aus&&P&&G.invSel)beutelNach()}catch(e){rsErr(e)}return r}}
+function beutelNach(){const d=scr.querySelector('#idet2');if(!d||d.querySelector('.rsIt'))return;const[t0,k0]=String(G.invSel).split(':');const it=t0==='e'?P.eq[k0]:P.bag[+k0];const tg=itemTags(it);if(!tg.length)return;css();
+ const h=`<div class="rsIt">Resonanz: ${t0==='e'?tg.map(o=>`<span class="rsTag" style="--c:${SCH[o.k].c}">${SCH[o.k].ic} ${SCH[o.k].n}</span><span class="muted" style="font-size:12px">${esc(o.w)}</span> `).join(''):tg.map(o=>vorschau(P,[o.k])+`<span class="muted" style="font-size:12px">${esc(o.w)}</span> `).join('')}</div>`;
+ const row=d.querySelector('.row');if(row)row.insertAdjacentHTML('beforebegin',h);else d.insertAdjacentHTML('beforeend',h)}
+}catch(e){console.error('reso',e);window.__hsRESO={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/reso» */
+/* «konter» */
+/* ================= Paket „konter“: Perfektes Ausweichen, Konter, Fokus und lesbare Bossphasen – window.__hsKONTER =================
+   Bestandsaufnahme: Ausweichrolle (Leertaste/Wischen, kurze Unverwundbarkeit), Barradins Abwehrschwung pariert, Friedrich weicht
+   zufällig aus, einige Karten/Talente lösen bei der Rolle etwas aus. Bosse kündigen Flächen an (tele), Themberchaud und die Gans
+   haben eigene Phasen. Es fehlte: eine Belohnung für gutes Timing – und eine Lebensleiste, die Phasen zeigt.
+   1) Perfektes Ausweichen: Rollt ein Held durch einen Angriff, der ihn sonst getroffen hätte (Nahkampfschlag, Geschoss,
+      angekündigte Fläche oder Welle), ist das ein perfektes Ausweichen: goldener Ring, ein Spruch des Helden, die Rolle kostet
+      keine Ausdauer und ist sofort wieder bereit.
+   2) Konter: Der nächste eigene Treffer innerhalb von 2,5 s verursacht +120 % Schaden („Konter!“).
+   3) Fokus: Perfekte Ausweichen kurz hintereinander (höchstens 6 s Abstand) stapeln Fokus bis 3 – je +8 % Schaden für 6 s.
+   4) Ansatz-Funkeln: Nahkampfgegner, die gleich zuschlagen, funkeln kurz golden über dem Kopf – Timing zum Lernen.
+   5) Bosse und Wächter: Ein perfektes Ausweichen gegen sie reißt eine Blöße – 3 s lang +30 % Schaden auf sie (goldene Risse).
+      Lebensleiste mit Phasenmarken (Phasen 66/33 %, Wende 50 %, Raserei 40 %); die Raserei wird angekündigt und ist als rote
+      Aura zu sehen. Einmalige Hinweise beim ersten Boss/Wächter und beim ersten perfekten Ausweichen.
+   Kein Freeze-Frame/Hitstop/Zeitlupe. Kein Blau. Abschaltbar: __hsKONTER.aus=1 */
+(function(){try{if(window.__hsKONTER)return;
+const KO=window.__hsKONTER={v:1,aus:0,n:0,konter:0,blosse:0,err:[]};
+const kErr=e=>{if(KO.err.length<20)KO.err.push(String(e&&e.stack||e).slice(0,300))};
+const FENSTER=0.42;
+/* Übungspuppe im Lager (siehe Paket „steinkreis“): ab 25 perfekten Ausweichrollen 3 s Konterfenster, ab 150 Konter +150 % */
+const kZahl=()=>G.mode==='taeglich'?0:(SAVE.koN|0);const kFenster=()=>kZahl()>=25?3:2.5,kMul=()=>kZahl()>=150?2.5:2.2;
+const RUF={barradin:['Olé!','Daneben, Schätzchen!','Zu langsam!','Und Pirouette!'],echo:['Hm.','Zu langsam.','Nö.','Knapp vorbei.'],friedrich:['Daneben!','Gesehen.','Nicht heute.','Ruhig bleiben.'],ezekiel:['Fast.','Langweilig.','Nächstes Mal vielleicht.','Hm.']};
+const frisch=q=>!!(q&&q.roll&&G.time-q.roll<FENSTER&&q.inv>0&&!q.down&&q.hero);
+function bossVon(src,q){const B=G.boss&&!G.boss.dead&&G.boss.hp>0?G.boss:G.guardE&&!G.guardE.dead&&G.guardE.hp>0?G.guardE:null;if(!B)return null;
+ if(src&&typeof src==='object'&&src.pdSrc)return src.pdSrc===B?B:null;
+ if(src&&typeof src==='object'&&(src.boss||src.guard))return src;
+ return d2(B,q)<(B.r+q.r+170)*(B.r+q.r+170)?B:null}
+function perfekt(q,src){if(KO.aus||!q||G.state!=='play'||q.pdLast>G.time-0.35)return;q.pdLast=G.time;KO.n++;
+ if(!G.bot&&!G.netGuestRun&&G.mode!=='taeglich'){const a=SAVE.koN|0;SAVE.koN=a+1;if(a<25&&a+1>=25||a<150&&a+1>=150)try{window.__hsSTEIN&&__hsSTEIN.puppe(a+1)}catch(e){kErr(e)}}
+ withP(q,()=>{P.stam=Math.min(P.stamMax||100,(P.stam||0)+ROLL_KOST);P.rollCd=G.time;P.pdT=G.time+kFenster();
+  P.pdF=P.pdFT>G.time?Math.min(3,(P.pdF||0)+1):1;P.pdFT=G.time+6;
+  ring(P.x,P.y,44,'#ffe08a',0.42,4);ring(P.x,P.y,92,'#ffc85a',0.6,2);sparks(P.x,P.y-12,'#fff2c0',10,260,1);light(P.x,P.y,190,'#ffd27a',0.45,0.6);
+  word(P.x,P.y-60,'Perfekt!','#ffe9a0');const L=RUF[P.id];if(L&&!G.bot){const tx=pick(L);later(0.32,()=>word(P.x,P.y-74,tx,'#f3e6cc'))}
+  sfx('g_blade');try{rumble(P,0.25,90)}catch(e){}
+  const B=bossVon(src,P);if(B){B.pdBlT=G.time+3;KO.blosse++;word(B.x,B.y-B.r-28,'Blöße!','#ffd04a');ring(B.x,B.y,B.r+26,'#ffd04a',0.55,4);sparks(B.x,B.y-B.r*0.4,'#ffe08a',8,220)}});
+ if(!SAVE.koTip2&&!G.bot){SAVE.koTip2=1;persist();later(0.8,()=>toast('<b>Perfekt ausgewichen!</b> Die Rolle war gratis und sofort wieder bereit, dein nächster Treffer ist ein <b>Konter</b> (+120 % Schaden). Mehrere kurz hintereinander geben <b>Fokus</b> – gegen Bosse und Wächter reißt es eine <b>Blöße</b>.','#ffd27a',{sofort:1}))}}
+KO.perfekt=perfekt;
+/* 1a) Nahkampf, Wellen, Sturmangriffe: hurt wird auch während der Unverwundbarkeit gerufen */
+{const h0=hurt;hurt=function(raw,src){try{if(!KO.aus&&P&&frisch(P))perfekt(P,src)}catch(e){kErr(e)}return h0.apply(this,arguments)}}
+/* 1b) Angekündigte Flächen (Kreis, Linie, Kegel): beim Auslösen prüfen, ob die Rolle den Treffer verhindert hat */
+{const t0=tele;tele=function(o){const r=t0.apply(this,arguments);try{if(o&&o.dmg&&o.k!=='beam'&&o.k!=='wave'&&!o.pdW){o.pdW=1;const B=G.boss&&!G.boss.dead?G.boss:G.guardE&&!G.guardE.dead?G.guardE:null;if(B&&d2(B,o)<950*950)o.pdSrc=B;
+   const af=o.after;o.after=function(){try{if(!KO.aus)for(const q of mpL())if(q&&!q.down&&frisch(q)&&teleHits(o,q))perfekt(q,o)}catch(e){kErr(e)}if(af)return af.apply(this,arguments)}}}catch(e){kErr(e)}return r}}
+/* 1c) Geschosse: während der Rolle durchfliegende feindliche Geschosse */
+hook('tick',dt=>{if(KO.aus||!P||!frisch(P))return;const R=P.r+4;for(const p of G.projs){if(p.team!=='e'||p.dead||p.pdS)continue;const dx=p.x-P.x,dy=p.y-P.y,rr=(p.r||6)+R;if(dx*dx+dy*dy<rr*rr){p.pdS=1;perfekt(P,p);break}}});
+/* 1d) Nahkampf-Ansatz: Funkelt ein Gegner in Reichweite (gleich schlägt er zu) und der Held rollt jetzt, zählt das als perfektes
+       Ausweichen, sobald der Schlag gekommen wäre – auch wenn die Rolle aus der Reichweite herausführt. */
+const FERN0={ranged:1,caster:1,netter:1,healer:1,still:1,thief:1};
+hook('roll',a=>{if(KO.aus||!P||P.down)return;let best=9,be=null;
+ query(P.x,P.y,190,e=>{if(e.dead||e.stun>0||e.fearT>0||!(e.hitCd>0&&e.hitCd<0.32))return;const d=e.def;if(!d||FERN0[d.k]||d.kite)return;const lim=e.r+P.r+34;const dx=e.x-P.x,dy=e.y-P.y;if(dx*dx+dy*dy>lim*lim)return;if(e.hitCd<best){best=e.hitCd;be=e}});
+ if(be){const q=P,e=be;later(Math.max(0.03,best),()=>{try{if(frisch(q)&&!e.dead)perfekt(q,e)}catch(x){kErr(x)}})}});
+/* 2,3,5) Schaden: Konter, Fokus, Blöße */
+hook('dmgMul',(e,o)=>{if(KO.aus||!P)return 1;let m=1;
+ if(P.pdT>G.time&&!(o&&(o.dot||o.pet||o.rsF))){m*=kMul();P.pdUse=1}
+ if(P.pdFT>G.time&&P.pdF)m*=1+0.08*P.pdF;
+ if(e&&e.pdBlT>G.time)m*=1.3;
+ return m});
+hook('hit',(e,o)=>{if(!P||!P.pdUse)return;P.pdUse=0;P.pdT=0;KO.konter++;if(!e)return;word(e.x,e.y-e.r-30,'Konter!','#ffd04a');
+ if(G.fxs.length<170)G.fxs.push({k:'star',x:e.x,y:e.y-e.r*0.3,r:e.r+28,c:'#ffd04a',t:0,life:0.32,a:rnd(TAU)});sparks(e.x,e.y-e.r*0.3,'#ffe9a0',8,260);sfx('kombo')});
+/* 4) Ansatz-Funkeln und Boss-Auren (Weltkoordinaten) */
+function stern(c,x,y,s){c.beginPath();c.moveTo(x,y-s);c.lineTo(x+s*0.28,y-s*0.28);c.lineTo(x+s,y);c.lineTo(x+s*0.28,y+s*0.28);c.lineTo(x,y+s);c.lineTo(x-s*0.28,y+s*0.28);c.lineTo(x-s,y);c.lineTo(x-s*0.28,y-s*0.28);c.closePath();c.fill()}
+const FERN={ranged:1,caster:1,netter:1,healer:1,still:1,thief:1};
+hook('draw',(t,c)=>{if(KO.aus||G.state!=='play'||!P||P.down)return;try{
+ c.save();c.fillStyle='#ffe9a0';
+ query(P.x,P.y,170,e=>{if(e.dead||e.boss||e.guard||e.stun>0||e.fearT>0||!(e.hitCd>0&&e.hitCd<0.3))return;const d=e.def;if(!d||FERN[d.k]||d.kite)return;
+  const lim=e.r+P.r+34;const dx=e.x-P.x,dy=e.y-P.y;if(dx*dx+dy*dy>lim*lim)return;const a=1-e.hitCd/0.3;c.globalAlpha=0.35+0.65*a;stern(c,e.x+e.r*0.55,e.y-e.r-12,3+4*a)});
+ const B=G.boss&&!G.boss.dead?G.boss:G.guardE&&!G.guardE.dead?G.guardE:null;
+ if(B){const tt=G.time;
+  if(B.koRas){c.globalAlpha=0.22+0.16*Math.sin(tt*6);c.strokeStyle='#ff5a3a';c.lineWidth=3;c.beginPath();c.ellipse(B.x,B.y+B.r*0.55,B.r*1.35,B.r*0.5,0,0,TAU);c.stroke();c.globalAlpha*=0.6;c.lineWidth=6;c.beginPath();c.ellipse(B.x,B.y+B.r*0.55,B.r*1.6,B.r*0.6,0,0,TAU);c.stroke()}
+  if(B.pdBlT>tt){const k=Math.min(1,(B.pdBlT-tt)/0.6);c.globalAlpha=0.85*k;c.strokeStyle='#ffd04a';c.lineWidth=2;c.beginPath();const R=B.r+12,n=9;for(let i=0;i<=n;i++){const a=i/n*TAU+tt*0.8,rr=R+(i%2?7:-3);const x=B.x+Math.cos(a)*rr,y=B.y-B.r*0.2+Math.sin(a)*rr*0.8;if(i)c.lineTo(x,y);else c.moveTo(x,y)}c.stroke()}}
+ c.restore()}catch(e){kErr(e)}});
+/* 5) Phasenmarken an der Lebensleiste, Raserei-Ansage */
+let mKey='';
+function marken(pb){const bar=document.getElementById('progBar');if(!bar)return;if(!pb){if(mKey){mKey='';bar.querySelectorAll('.koM').forEach(x=>x.remove())}return}
+ const def=pb.def||{};const L=[];if(def.phases||def.goosePh)L.push([0.66,'Phase 2'],[0.33,'Phase 3']);else if(!def.survive){if(def.half)L.push([0.5,'Wende']);L.push([0.4,'Raserei'])}
+ const key=(def.n||'')+'|'+L.map(x=>x[0]).join(',');if(key===mKey)return;mKey=key;bar.querySelectorAll('.koM').forEach(x=>x.remove());
+ for(const x of L){const m=document.createElement('i');m.className='koM';m.style.left=(x[0]*100)+'%';m.title=x[1];bar.appendChild(m)}}
+let hT=0,hS='',hEl=null;
+hook('tick',dt=>{if(KO.aus||(G.mp&&P!==PL[0]))return;const now=performance.now();if(now-hT<120)return;hT=now;try{
+ const pb=G.state==='play'?(G.boss&&!G.boss.dead&&G.boss.hp>0?G.boss:G.guardE&&!G.guardE.dead&&G.guardE.hp>0?G.guardE:null):null;marken(pb);
+ if(pb){const def=pb.def||{};
+  if(!SAVE.koTip1&&!G.bot){SAVE.koTip1=1;persist();later(2.5,()=>toast('<b>Tipp:</b> Weiche im letzten Moment durch einen Angriff hindurch (Ausweichrolle). Ein perfektes Ausweichen reißt eine <b>Blöße</b>: 3 s lang +30 % Schaden auf diesen Gegner. Die Striche in der Lebensleiste zeigen, wann er die Phase wechselt.','#ffd27a',{sofort:1}))}
+  if(!pb.koRas&&!def.phases&&!def.goosePh&&!def.survive&&pb.hp<pb.maxHp*0.4){pb.koRas=1;if(!G.bot){if(pb.boss){banner(`${def.n||'Der Boss'} rast!`,'Greift jetzt schneller an – weich im letzten Moment aus und kontere','#ff6a4a',{dur:2.4,size:38});try{musAk('phase')}catch(e){}}else toast(`<b>${esc(def.n||'Der Wächter')} rast!</b> Greift jetzt schneller an.`,'#ff8a6a');sfx('roar');G.shake=Math.min(12,(G.shake||0)+4)}}}
+ /* Fokus/Konter-Anzeige unter den Resonanzen */
+ let s='';if(P&&P.pdFT>G.time&&P.pdF)s+=`<span class="koF" title="Fokus: +${8*P.pdF} % Schaden">Fokus ${'◆'.repeat(P.pdF)}${'◇'.repeat(3-P.pdF)}</span>`;if(P&&P.pdT>G.time)s+='<span class="koK">Konter bereit</span>';
+ if(!hEl||!hEl.isConnected){const pn=document.querySelector('#hud .top .panel');if(pn){hEl=document.createElement('div');hEl.id='koHud';pn.appendChild(hEl);css();hS=''}}
+ if(hEl&&s!==hS){hS=s;hEl.innerHTML=s}}catch(e){kErr(e)}});
+function css(){if(document.getElementById('koCss'))return;const s=document.createElement('style');s.id='koCss';s.textContent=`
+#progBar{position:relative}
+#progBar .koM{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;background:#ffecc8;box-shadow:0 0 0 1px rgba(0,0,0,.65);z-index:3;pointer-events:none;border-radius:1px}
+#koHud{display:flex;gap:6px;margin-top:3px;pointer-events:none;min-height:0}
+#koHud:empty{display:none}
+#koHud span{font:800 11px/1.35 "Alegreya Sans",sans-serif;padding:1px 7px;border-radius:9px;background:rgba(20,12,16,.75);border:1px solid #ffd04a;color:#ffd04a;white-space:nowrap}
+#koHud .koK{animation:koPuls .6s ease-in-out infinite alternate}
+@keyframes koPuls{from{box-shadow:0 0 0 0 rgba(255,208,74,.0)}to{box-shadow:0 0 8px 1px rgba(255,208,74,.55)}}
+@media (max-height:420px),(max-width:700px){#koHud span{font-size:10px;padding:0 5px}}
+`;document.head.appendChild(s)}
+css();
+}catch(e){console.error('konter',e);window.__hsKONTER={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/konter» */
+/* «pakt» */
+/* ================= Paket „pakt“: Pakte – Ereignisse mit echten Abwägungen für die Resonanzen – window.__hsPAKT =================
+   Bestandsaufnahme: Würfel-Ereignisse 2.0 (gestaffelte Wahl, Chips für Risiko/Lohn/Chance, Segen/Flüche über 1–3 Ebenen,
+   Kettenereignisse), Ereignis-Orte und Fehden (lauf), Weg-Momente, Wendepunkte, Portale mit Mutatoren. Was fehlte: Entscheidungen,
+   die den BUILD formen – also dauerhaft für den ganzen Lauf gelten und spürbar etwas kosten.
+   Neu: sechs Pakt-Ereignisse im selben Würfelbildschirm (gleiche Chips, gleiche Gruppenprobe im Mehrspieler). Ihre Angebote
+   richten sich nach dem eigenen Build – die eigene stärkste Schule vertiefen, die zweite ausbauen oder etwas Neues wagen –
+   und jeder Pakt hat einen klaren Preis (Leben, Gegnerschaden, Heiltrank, Gold oder Punkte einer anderen Schule).
+   Pakte sind Einträge in P.mods (k:'rsPakt'), werden also mit dem Lauf gespeichert, im Zwischenbildschirm und im Pausemenü
+   aufgeführt und zählen sofort für die Resonanzen (Ankündigung, wenn eine Stufe erwacht).
+     · Der Kristall der neun Klänge – vertiefen (−8 % Leben), ausbauen (Gold) oder Neues wagen (gratis); Barradin singt mit
+     · Der Preis der Macht – +3 in der stärksten Schule gegen härtere Gegner, oder umschmieden (eine Schule gegen eine andere)
+     · Die Glutschale – Glut gegen Leben; Echo weiß, worauf es ankommt
+     · Der stille Spiegel – Schatten gegen einen Heiltrank; Barradin tanzt mit seinem Spiegelbild
+     · Rex hat etwas ausgebuddelt – nur mit Friedrich; Rex wird gelobt, nie verspottet
+     · Der Bernsteinwürfel – Glücksspiel um Punkte (ein Fehlschlag kostet einen Punkt)
+   Abschaltbar: __hsPAKT.aus=1 (keine neuen Pakt-Ereignisse; bestehende Pakte wirken weiter). */
+(function(){try{if(window.__hsPAKT)return;const RS=window.__hsRESO;if(!RS||!RS.SCH||typeof EV2L==='undefined'||typeof EV2==='undefined')return;
+const PK=window.__hsPAKT={v:1,aus:0,n:0,err:[]};const SCH=RS.SCH,KEYS=Object.keys(SCH),ROM=['','I','II','III'];
+const pErr=e=>{if(PK.err.length<20)PK.err.push(String(e&&e.stack||e).slice(0,300))};
+const nm=k=>SCH[k].ic+' '+SCH[k].n;
+const cnt=q=>{try{RS.upd(q,true)}catch(e){}return(q.rs&&q.rs.c)||RS.zaehl(q)};
+function rang(q){const c=cnt(q);return KEYS.filter(k=>(c[k]||0)>0).sort((a,b)=>(c[b]||0)-(c[a]||0))}
+const top=q=>{const L=rang(q);return L.length?(cnt(q)[L[0]]||0):0};
+function vor(k,n){const c=cnt(P),a=c[k]||0,b=Math.max(0,a+n),sa=RS.stufe(a),sb=RS.stufe(b);return`${a}→${b}${sb>sa?' · Stufe '+ROM[sb]+'!':sb<sa?' · Stufe sinkt':''}`}
+/* zufällige Schule, die noch nicht in der Liste ist (möglichst eine, in der der Held schon etwas hat – sonst irgendeine) */
+function neueSchule(aus){const c=cnt(P);const L=KEYS.filter(k=>aus.indexOf(k)<0);const mit=L.filter(k=>(c[k]||0)>0&&(c[k]||0)<3);return pick(mit.length&&Math.random()<0.5?mit:L)}
+/* Pakt schließen: Punkte (auch negativ), Leben, Gegnerschaden – alles für den ganzen Lauf */
+function exPakt(id,name,rs,o){o=o||{};P.mods=P.mods||[];let m=P.mods.find(x=>x.k==='rsPakt'&&x.id===id);if(!m){m={k:'rsPakt',id,rs:{},good:1,st:999,v:0};P.mods.push(m)}
+ for(const k in rs)if(SCH[k])m.rs[k]=(m.rs[k]||0)+rs[k];if(o.hp)m.hp=Math.round(((m.hp||0)+o.hp)*100)/100;if(o.edmg)m.edmg=Math.round(((m.edmg||0)+o.edmg)*100)/100;
+ const t=Object.keys(m.rs).filter(k=>m.rs[k]).map(k=>`${SCH[k].ic} ${m.rs[k]>0?'+':''}${m.rs[k]} ${SCH[k].n}`).join(', ');
+ const nach=[];if(m.hp)nach.push(`${m.hp>0?'+':''}${Math.round(m.hp*100)} % Leben`);if(m.edmg)nach.push(`Gegner +${Math.round(m.edmg*100)} % Schaden`);
+ m.good=nach.length||Object.keys(m.rs).some(k=>m.rs[k]<0)?0:1;m.n=`◈ ${name}: ${t||'–'}${nach.length?' · '+nach.join(', '):''} (ganzer Lauf)`;
+ PK.n++;recalc();
+ for(const k in rs)if(SCH[k]&&rs[k])exChip(`${SCH[k].ic} ${rs[k]>0?'+':''}${rs[k]} ${SCH[k].n} · ganzer Lauf`,rs[k]>0);
+ if(o.hp)exChip(`♥ ${o.hp>0?'+':''}${Math.round(o.hp*100)} % Leben · ganzer Lauf`,o.hp>0);if(o.edmg)exChip(`✖ Gegner +${Math.round(o.edmg*100)} % Schaden · ganzer Lauf`,0);
+ try{sfx(m.good?'segen':'fluch')}catch(e){}return''}
+PK.exPakt=exPakt;
+/* Nachteile der Pakte */
+hook('stats',s=>{for(const m of P.mods||[])if(m&&m.k==='rsPakt'&&m.hp)s.hpP+=m.hp});
+hook('hurtMul',()=>{let f=1;for(const m of P&&P.mods||[])if(m&&m.k==='rsPakt'&&m.edmg)f*=1+m.edmg;return f});
+const ab1=()=>!PK.aus&&(G.stage|0)>=1;
+const EVS=[
+ {id:'rs_kristall',w:1.4,when:ab1,t:'Der Kristall der neun Klänge',
+  txt:'In einer Felsnische summt ein Kristall – neun Töne zugleich, und jeder zieht an etwas anderem in euch. Barradin summt schon mit, bevor jemand fragen kann.',
+  mk(){const L=rang(P);const a=L[0]||neueSchule([]),b=L[1]||neueSchule([a]),c=neueSchule([a,b]);
+   const o=[
+    {l:`Den ${SCH[a].n}-Ton vertiefen`,r:1,lohn:'groß',win:`${nm(a)} +2 (${vor(a,2)})`,lose:'Preis: −8 % Leben, ganzer Lauf',ok(){exPakt('kristall_'+a,'Kristallton',{[a]:2},{hp:-0.08});return`Der Ton fährt euch bis in die Knochen. Es tut weh – und dann klingt es nach ${SCH[a].n}.`}},
+    {l:`Den ${SCH[b].n}-Ton ausbauen`,r:0,lohn:'gut',cost:()=>evGold(110),win:`${nm(b)} +2 (${vor(b,2)})`,ok(){exPakt('kristall_'+b,'Kristallton',{[b]:2});return'Ihr legt eine Münze in die Nische. Der Kristall nimmt sie, als hätte er schon darauf gewartet.'}},
+    {l:`Den fremden ${SCH[c].n}-Ton wagen`,r:0,lohn:'gut',win:`${nm(c)} +2 (${vor(c,2)})`,ok(){exPakt('kristall_'+c,'Kristallton',{[c]:2});return'Ein Ton, den ihr nicht kanntet. Er gefällt euch. Ein bisschen zu sehr.'}},
+    {l:'Alle neun Töne auf einmal',r:3,lohn:'episch',skill:'Willenskraft',dc:14,bonus:{echo:2,barradin:2},win:'+1 in jeder deiner Schulen',lose:'Schwäche · 2 Ebenen',
+     ok(){const L2=rang(P),rs={};for(const k of L2)rs[k]=1;if(!L2.length)rs[c]=2;exPakt('neunklang','Neunklang',rs);return'Neun Töne, ein Akkord. Für einen Herzschlag versteht ihr alles. Dann nur noch das Wichtigste.'},
+     fail(){exFx('ev_schwaeche',2);return'Zu viel auf einmal. Euch klingeln die Ohren bis in die nächste Ebene.'}},
+    {l:'Mitsingen',hero:'barradin',r:2,lohn:'groß',skill:'Auftreten',dc:11,bonus:{barradin:4},win:`${nm(a)} und ${nm(b)} je +2`,lose:'Pech',
+     ok(){exPakt('kristall_'+a,'Kristallton',{[a]:2});exPakt('kristall_'+b,'Kristallton',{[b]:2});return'Barradin trifft den Akkord. Der Kristall antwortet mit einer zweiten Stimme – und sie ist fast so schön wie seine. Fast.'},
+     fail(){exFx('ev_pech',1);return'Barradin singt eine Terz zu hoch. Der Kristall verstummt beleidigt.'}},
+    {l:EVW}];return o}},
+ {id:'rs_preis',w:1.0,when:()=>ab1()&&(G.stage|0)>=2&&top(P)>=3,t:'Der Preis der Macht',
+  txt:'Eine Stimme aus dem Dunkel, sanft wie ein Händler: „Ich sehe, was ihr seid. Ich kann euch mehr davon geben. Oder etwas anderes. Alles hat seinen Preis.“',
+  mk(){const L=rang(P),a=L[0],b=L[1],c=cnt(P);const o=[
+    {l:`Mehr ${SCH[a].n}`,r:2,lohn:'episch',win:`${nm(a)} +3 (${vor(a,3)})`,lose:'Preis: Gegner +12 % Schaden, ganzer Lauf',ok(){exPakt('preis','Preis der Macht',{[a]:3},{edmg:0.12});return'„Abgemacht.“ Die Stimme klingt zufrieden. Viel zu zufrieden.'}}];
+   if(b&&(c[b]||0)>=2)o.push({l:`${SCH[b].n} in ${SCH[a].n} umschmieden`,r:1,lohn:'gut',win:`${nm(a)} +3 (${vor(a,3)})`,lose:`Preis: ${nm(b)} −2 (${vor(b,-2)})`,ok(){exPakt('preis_um','Umgeschmiedet',{[a]:3,[b]:-2});return'Etwas in euch wird leiser, etwas anderes lauter. Die Stimme nimmt sich ihren Teil und schweigt.'}});
+   o.push({l:'Zurückflüstern',hero:'ezekiel',r:2,lohn:'groß',skill:'Willenskraft',dc:12,bonus:{ezekiel:3},win:`${nm('sc')} +2 – ohne Preis`,lose:'Verwundbar',
+    ok(){exPakt('preis_flu','Geflüsterter Handel',{sc:2});return'Ezekiel flüstert etwas zurück. Lange. Die Stimme zahlt – und meidet ihn danach.'},fail(){exFx('ev_verwundbar',1);return'Die Stimme lacht. Ezekiel nicht.'}});
+   o.push({l:'Weghören'});return o}},
+ {id:'rs_glut',w:1.0,when:ab1,t:'Die Glutschale',
+  txt:'Eine steinerne Schale voller Glut, die nie erlischt. Daneben Zwergenrunen: „Wer die Glut hält, den hält die Glut.“ Es riecht nach Esse und ein bisschen nach verbrannten Fingern.',
+  opts:[
+   {l:'Die Hand hineinlegen',r:2,lohn:'groß',win:'✹ Glut +3',lose:'Preis: −12 % Leben, ganzer Lauf',ok(){exPakt('glut','Glutschale',{gl:3},{hp:-0.12});return'Es brennt nicht. Es brennt WEITER – irgendwo innen, wo vorher nichts war.'}},
+   {l:'Nur die Hände wärmen',r:0,lohn:'klein',win:'✹ Glut +1',ok(){exPakt('glut','Glutschale',{gl:1});return'Warme Finger, warmes Herz. Mehr verlangt die Schale nicht.'}},
+   {l:'Kommt auf die Glut an',hero:'echo',r:1,lohn:'groß',skill:'Naturkunde',dc:10,bonus:{echo:4},win:'✹ Glut +2 · ❦ Wildnis +1',lose:'Gift im Blut',
+    ok(){exPakt('glut','Glutschale',{gl:2,wi:1});return'Echo schnuppert, nickt mürrisch und nimmt nur die besten Stücke. „Kommt immer auf die Glut an.“'},fail(){exFx('ev_gift',1);return'Schwefel. Echo hustet eine Ebene lang.'}},
+   {l:EVW}]},
+ {id:'rs_spiegel',w:1.0,when:ab1,t:'Der stille Spiegel',
+  txt:'In einem Tümpel liegt euer Spiegelbild – aber es bewegt sich eine Spur zu spät. Und es lächelt, wenn ihr es nicht tut.',
+  opts:[
+   {l:'Dem Spiegelbild die Hand geben',r:2,lohn:'groß',win:'◐ Schatten +3',lose:'Preis: −1 Heiltrank, ganzer Lauf',ok(){exPakt('spiegel','Stiller Spiegel',{sc:3});exPot(-1);return'Die Hand ist kalt. Euer Schatten folgt euch ab jetzt ein kleines bisschen eifriger.'}},
+   {l:'Eine Münze hineinwerfen',r:0,lohn:'gut',cost:()=>evGold(70),win:'◐ Schatten +1 · ❂ Gier +1',ok(){exPakt('spiegel','Stiller Spiegel',{sc:1,gi:1});return'Plopp. Das Spiegelbild fängt die Münze. Und behält sie.'}},
+   {l:'Mit dem Spiegelbild tanzen',hero:'barradin',r:2,lohn:'groß',skill:'Auftreten',dc:11,bonus:{barradin:4},win:'◐ Schatten +2 · ✦ Klinge +1',lose:'Lahm',
+    ok(){exPakt('spiegel','Stiller Spiegel',{sc:2,kl:1});return'Ein Tango mit sich selbst. Barradin führt. Natürlich führt Barradin.'},fail(){exFx('ev_lahm',1);return'Das Spiegelbild tritt ihm auf den Fuß. Wie auch immer das geht.'}},
+   {l:EVW}]},
+ {id:'rs_rex',w:1.3,when:()=>ab1()&&ev2In('friedrich'),t:'Rex hat etwas ausgebuddelt',
+  txt:'Rex buddelt, als ginge es um sein Leben, und kommt stolz mit einem alten Beinknochen zurück, in den jemand Löcher geschnitzt hat – eine Knochenflöte. Sein Schwanz wedelt so heftig, dass er fast umfällt.',
+  opts:[
+   {l:'Rex ausgiebig loben',r:0,lohn:'gut',win:'⚘ Rudel +2 · Edelstein',ok(){exPakt('rex','Rex’ Fund',{ru:2});exGems(1);return'Rex bekommt Streicheleinheiten von allen. Unter dem Knochen lag außerdem ein Edelstein. Guter Junge!'}},
+   {l:'Mit ihm weitersuchen',r:1,lohn:'groß',skill:'Überleben',dc:9,bonus:{friedrich:4},win:'⚘ Rudel +2 · ❂ Gier +1 · Gold',lose:'nichts – Rex hatte trotzdem Spaß',
+    ok(){exPakt('rex','Rex’ Fund',{ru:2,gi:1});exGold(150);return'Rex findet noch einen vergrabenen Beutel. Friedrich ist sehr stolz. Rex noch mehr.'},fail(){return'Ihr findet nur Steine. Rex findet das großartig.'}},
+   {l:'Ein Leckerli spendieren',hero:'friedrich',r:0,lohn:'groß',win:'⚘ Rudel +3',ok(){exPakt('rex','Rex’ Fund',{ru:3});return'Friedrich spielt drei Töne auf der Knochenflöte. Rex heult mit. Irgendwo antworten Wölfe – freundlich.'}},
+   {l:EVW}]},
+ {id:'rs_wuerfel',w:0.7,when:()=>ab1()&&top(P)>=2,t:'Der Bernsteinwürfel',
+  txt:'In einer Nische liegt ein Zwanzigseiter aus Bernstein, so groß wie ein Kopf und warm wie ein Ofen. In jede Seite ist ein winziges Zeichen geschnitten – neun verschiedene.',
+  mk(){const L=rang(P),a=L[0],b=L[1]||neueSchule([a]);return[
+   {l:'Würfeln',r:2,lohn:'groß',skill:'Glück',dc:11,win:`${nm(a)} +2 · ${nm(b)} +1`,lose:`${nm(a)} −1`,ok(){exPakt('wuerfel','Bernsteinwürfel',{[a]:2,[b]:1});return'Der Würfel rollt, als hätte er es eilig – und bleibt auf dem richtigen Zeichen liegen.'},fail(){exPakt('wuerfel','Bernsteinwürfel',{[a]:-1});return'Der Würfel bleibt auf einem Zeichen liegen, das euch nicht mag.'}},
+   {l:'Eine natürliche 20 verlangen',r:3,lohn:'episch',skill:'Glück',dc:17,win:`${nm(a)} +4`,lose:`${nm(a)} −2`,ok(){exPakt('wuerfel','Bernsteinwürfel',{[a]:4});return'Zwanzig. Der Bernstein leuchtet, und für einen Moment hört ihr Imre lachen.'},fail(){exPakt('wuerfel','Bernsteinwürfel',{[a]:-2});return'Der Würfel ist enttäuscht. Ihr auch.'}},
+   {l:'Nur ansehen'}]}}];
+for(const e of EVS){e.v2=1;e.rs=1;if(!e.opts)e.opts=[{l:EVW}];if(!EV2[e.id]){EV2L.push(e);EV2[e.id]=e;try{EVENTS.push(e)}catch(x){}}}
+PK.EVS=EVS;
+/* Angebote erst beim Öffnen bauen (richten sich nach dem aktuellen Build) */
+if(typeof ev2Start==='function'){const es=ev2Start;ev2Start=function(ev){try{if(ev&&ev.mk)ev.opts=ev.mk()}catch(e){pErr(e)}return es.apply(this,arguments)}}
+}catch(e){console.error('pakt',e);window.__hsPAKT={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/pakt» */
+/* «steinkreis» */
+/* ================= Paket „steinkreis“: Das Lager wächst mit den neuen Systemen – window.__hsSTEIN =================
+   Bestandsaufnahme: Das Lager hat Gebäude (Schmiede, Bibliothek, Zwinger, Kräutergarten, bezahlt mit Vorräten), Bewohner mit
+   Freundschaft und Aufträgen, Lagerdeko, Rex-Garderobe, Erzfeind-Trophäen und Wendepunkte. Neu ist, was die Resonanzen und das
+   perfekte Ausweichen dort hinterlassen:
+   1) Steinkreis der Resonanzen: Erreicht ein Held zum ersten Mal Stufe III einer Schule, erhebt sich im Lager ein Resonanzstein
+      mit leuchtender Rune (in der Lagerszene am Rand des Feuerplatzes – leere Sockel zeigen, was noch fehlt). Jeder Stein gibt
+      allen Helden dauerhaft 1 Startpunkt in seiner Schule (nicht in der Tagesherausforderung). SAVE.rsStein (Bitfeld, 9 Schulen).
+   2) Übungsplatz: Nach 25 perfekten Ausweichrollen steht im Lager eine Übungspuppe (Konterfenster 3 s statt 2,5 s),
+      nach 150 eine Fechtmeister-Puppe mit Wimpel (Konter +150 % statt +120 %). SAVE.koN zählt mit.
+   3) Übersicht unter der Lagerszene („Steinkreis“ und „Übungsplatz“), Meldung beim Freischalten.
+   Zeichnen: nach der Lagerszene (fireSky-Hülle wie im Paket „lager“), kleine vorgezeichnete Glühbilder, keine Allokation je Bild. */
+(function(){try{if(window.__hsSTEIN)return;const RS=window.__hsRESO;if(!RS||!RS.SCH)return;
+const ST=window.__hsSTEIN={v:1,err:[]};const SCH=RS.SCH,KEYS=Object.keys(SCH);
+const sErr=e=>{if(ST.err.length<20)ST.err.push(String(e&&e.stack||e).slice(0,300))};
+const bits=()=>(SAVE&&SAVE.rsStein)|0;const hat=i=>((bits()>>i)&1)===1;
+ST.neu=function(k){const i=KEYS.indexOf(k);if(i<0||hat(i))return;SAVE.rsStein=bits()|(1<<i);persist();const S=SCH[k];
+ later(1.6,()=>{if(!G.bot)toast(`<b style="color:${S.c}">${S.ic} Ein Resonanzstein erhebt sich im Lager: ${S.n}</b> – ab jetzt beginnt jeder Held mit 1 Punkt ${S.n}.`,S.c,{sofort:1})});try{sfx('legend')}catch(e){}};
+ST.puppe=function(n){persist();later(1,()=>{if(G.bot)return;if(n>=150)toast('<b>Im Lager steht jetzt eine Fechtmeister-Puppe.</b> 150 perfekte Ausweichrollen – Konter verursachen ab jetzt +150 % Schaden.','#ffd27a',{sofort:1});
+ else toast('<b>Im Lager steht jetzt eine Übungspuppe.</b> 25 perfekte Ausweichrollen – das Konterfenster bleibt ab jetzt 3 s offen.','#ffd27a',{sofort:1})})};
+/* ---------- Zeichnen ---------- */
+const GL={};function glow(c){if(GL[c])return GL[c];const cv=document.createElement('canvas');cv.width=cv.height=48;const g=cv.getContext('2d');const r=g.createRadialGradient(24,24,0,24,24,24);r.addColorStop(0,c);r.addColorStop(0.35,c+'88');r.addColorStop(1,c+'00');g.fillStyle=r;g.fillRect(0,0,48,48);return GL[c]=cv}
+function steinMalen(c,x,y,s,k,an,t,i){if(!an){c.fillStyle='rgba(20,14,12,.55)';c.beginPath();c.ellipse(x,y,7*s,2.4*s,0,0,6.2832);c.fill();c.strokeStyle='rgba(229,180,84,.18)';c.lineWidth=1;c.stroke();return}
+ const S=SCH[k],h=17*s,w=6.5*s;
+ c.fillStyle='rgba(0,0,0,.35)';c.beginPath();c.ellipse(x+2*s,y+0.6*s,w*1.25,2.6*s,0,0,6.2832);c.fill();
+ c.fillStyle='#4a4048';c.strokeStyle='#1a1214';c.lineWidth=1.1;c.beginPath();c.moveTo(x-w,y);c.lineTo(x-w*0.85,y-h*0.82);c.quadraticCurveTo(x-w*0.3,y-h*1.05,x+w*0.55,y-h*0.92);c.lineTo(x+w,y-h*0.1);c.lineTo(x+w*0.9,y);c.closePath();c.fill();c.stroke();
+ c.fillStyle='#5e5258';c.beginPath();c.moveTo(x-w*0.85,y-h*0.82);c.quadraticCurveTo(x-w*0.3,y-h*1.05,x+w*0.55,y-h*0.92);c.lineTo(x+w*0.2,y-h*0.7);c.lineTo(x-w*0.6,y-h*0.66);c.closePath();c.fill();
+ const p=0.65+0.35*Math.sin(t*1.6+i*1.3);c.globalCompositeOperation='lighter';c.globalAlpha=0.55*p;const g=glow(S.c),gs=22*s;c.drawImage(g,x-gs/2,y-h*0.5-gs/2,gs,gs);c.globalAlpha=1;c.globalCompositeOperation='source-over';
+ c.fillStyle=S.c;c.font=`700 ${Math.round(8.5*s)}px serif`;c.textAlign='center';c.textBaseline='middle';c.globalAlpha=0.75+0.25*p;c.fillText(S.ic,x,y-h*0.5);c.globalAlpha=1;c.textBaseline='alphabetic'}
+function puppeMalen(c,x,y,s,stufe,t){const sw=Math.sin(t*1.3)*0.04;c.save();c.translate(x,y);c.rotate(sw);
+ c.fillStyle='rgba(0,0,0,.35)';c.beginPath();c.ellipse(1*s,0.5*s,9*s,2.6*s,0,0,6.2832);c.fill();
+ c.strokeStyle='#3a2616';c.lineWidth=2.4*s;c.beginPath();c.moveTo(0,0);c.lineTo(0,-28*s);c.stroke();c.beginPath();c.moveTo(-10*s,-21*s);c.lineTo(10*s,-21*s);c.stroke();
+ c.fillStyle='#c8a868';c.strokeStyle='#2a1a10';c.lineWidth=1;c.beginPath();c.ellipse(0,-17*s,6*s,8.5*s,0,0,6.2832);c.fill();c.stroke();
+ c.beginPath();c.arc(0,-30*s,4.6*s,0,6.2832);c.fill();c.stroke();
+ c.strokeStyle='#8a2a22';c.lineWidth=1.2*s;c.beginPath();c.arc(0,-17*s,3.2*s,0,6.2832);c.stroke();c.beginPath();c.arc(0,-17*s,1.2*s,0,6.2832);c.stroke();
+ if(stufe>=2){c.strokeStyle='#5a4028';c.lineWidth=1.4*s;c.beginPath();c.moveTo(0,-34*s);c.lineTo(0,-44*s);c.stroke();const f=Math.sin(t*3)*1.5*s;c.fillStyle='#e5b454';c.beginPath();c.moveTo(0,-44*s);c.lineTo(9*s,-41.5*s+f);c.lineTo(0,-39*s);c.closePath();c.fill();
+  c.strokeStyle='#d8d0c0';c.lineWidth=1.3*s;c.beginPath();c.moveTo(8*s,-24*s);c.lineTo(15*s,-6*s);c.stroke()}
+ c.restore()}
+if(typeof fireSky==='function'){const fs=fireSky;fireSky=function(cv,c,W,H,t){const r=fs.apply(this,arguments);try{if(cv&&cv.dataset&&cv.dataset.lager!=null&&W>120)szene(c,W,H,t)}catch(e){sErr(e)}return r}}
+function szene(c,W,H,t){const fx=W/2,fy=H*0.8,s=Math.min(1.2,H/220),rx=Math.min(W*0.36,300),ry=H*0.19;c.save();
+ for(let i=0;i<KEYS.length;i++){const a=Math.PI*(1.08+0.84*i/(KEYS.length-1));steinMalen(c,fx+Math.cos(a)*rx,fy+Math.sin(a)*ry,s,KEYS[i],hat(i),t,i)}
+ const n=SAVE.koN|0;if(n>=25)puppeMalen(c,fx-rx*1.08,fy+ry*0.15,s,n>=150?2:1,t);
+ c.restore()}
+/* ---------- Übersicht unter der Lagerszene ---------- */
+function kartenHtml(){const n=SAVE.koN|0,z=KEYS.filter((k,i)=>hat(i)).length;
+ return`<div class="card stKreis"><div class="eyebrow">Steinkreis der Resonanzen · ${z} / ${KEYS.length}</div>
+  <div class="stKr">${KEYS.map((k,i)=>{const S=SCH[k],a=hat(i);return`<span class="stK ${a?'on':''}" style="--c:${S.c}" title="${S.n}: ${a?'Resonanzstein steht – jeder Held beginnt mit 1 Punkt':'Erreiche Stufe III in '+S.n}">${S.ic}</span>`}).join('')}</div>
+  <p class="muted stH">Erreiche mit einem Helden Stufe III einer Resonanz – dann erhebt sich ihr Stein, und jeder Held beginnt mit 1 Punkt in dieser Schule.</p>
+  <div class="eyebrow" style="margin-top:6px">Übungsplatz · ${n} perfekte Ausweichrollen</div>
+  <p class="muted stH">${n>=150?'Fechtmeister-Puppe: Konterfenster 3 s, Konter +150 % Schaden.':n>=25?`Übungspuppe: Konterfenster 3 s. Bei 150 kommt die Fechtmeister-Puppe (Konter +150 %) – noch ${150-n}.`:`Bei 25 perfekten Ausweichrollen stellt jemand eine Übungspuppe auf (Konterfenster 3 s) – noch ${25-n}.`}</p></div>`}
+function css(){if(document.getElementById('stCss'))return;const s=document.createElement('style');s.id='stCss';s.textContent=`
+.stKreis{margin-top:10px;padding:10px 12px}.stKr{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
+.stK{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;border:1px dashed rgba(229,180,84,.25);color:rgba(243,230,204,.25);font:700 16px/1 serif}
+.stK.on{border:1px solid var(--c);color:var(--c);background:rgba(255,220,160,.08);box-shadow:0 0 10px -3px var(--c)}
+.stH{font-size:12px;margin:2px 0 0;line-height:1.35}
+@media (max-height:420px),(max-width:700px){.stK{width:24px;height:24px;font-size:13px}.stKreis{padding:7px 9px}}`;document.head.appendChild(s)}
+if(typeof showLager==='function'){const sl=showLager;showLager=function(){const r=sl.apply(this,arguments);try{css();const w=scr.querySelector('.lager-wrap');if(w&&!w.querySelector('.stKreis')){const ch=w.querySelector('.lager-chips');if(ch)ch.insertAdjacentHTML('afterend',kartenHtml());else w.insertAdjacentHTML('beforeend',kartenHtml())}}catch(e){sErr(e)}return r}}
+}catch(e){console.error('steinkreis',e);window.__hsSTEIN={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/steinkreis» */
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
