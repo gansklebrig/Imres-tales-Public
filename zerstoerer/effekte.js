@@ -149,6 +149,24 @@
         c.save(); c.globalAlpha = (1 - u) * 0.35; c.strokeStyle = "#ffe8d0"; c.lineWidth = 1; c.beginPath(); c.moveTo(f.x, f.y); c.lineTo(f.x - (Z.player ? Math.sign(Z.player.vx) : 1) * 10, f.y); c.stroke(); c.restore();
       }
     }
+    /* Angriffe lesbar machen: Aufblitzen kurz vor dem Schlag, Hiebspur während des Schlags */
+    const cam = Z.cam;
+    for (const e of Z.enemies) {
+      const ac = e.act; if (!ac || e.dead || !ac.a || !ac.a.box) continue;
+      if (e.x < cam.x - 40 || e.x > cam.x + cam.w + 40) continue;
+      const a = ac.a, sz = e.size || 1, [bx, by, bw, bh] = a.box.map(v => v * sz), cx = e.x + e.w / 2, fy = e.y + e.h;
+      const hx = e.face > 0 ? cx + bx : cx - bx - bw, hy = fy + by;
+      const unbl = a.unblockable, col = unbl ? "#ff3a6a" : "#ffb040";
+      if (ac.phase === "pre") {
+        const left = a.pre - ac.t;
+        if (left < 0.2 && left > 0) { const u = 1 - left / 0.2, gx = e.face > 0 ? hx + bw * 0.6 : hx + bw * 0.4, gy = hy + bh * 0.3; c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = Math.sin(u * Math.PI); c.fillStyle = unbl ? "#ff6a8a" : "#fff0c0"; c.translate(gx, gy); c.rotate(u * 1.5); for (let k = 0; k < 2; k++) { c.rotate(Math.PI / 2); c.beginPath(); c.moveTo(-7, 0); c.lineTo(0, 1); c.lineTo(7, 0); c.lineTo(0, -1); c.fill(); } c.restore(); }
+      } else if (ac.phase === "act" && ac.t < 0.14 && !["shoot", "lob", "web", "volley", "summon", "heal", "beam", "mark"].includes(a.k)) {
+        const u = ac.t / 0.14; c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = (1 - u) * 0.7; c.strokeStyle = col; c.lineCap = "round";
+        const r = Math.max(bw, bh) * 0.62, ox = hx + bw / 2 - e.face * bw * 0.2, oy = hy + bh * 0.55;
+        for (let k = 0; k < 3; k++) { c.lineWidth = (3 - k) * 1.2; c.beginPath(); const a0 = e.face > 0 ? -1.9 : Math.PI + 1.9, a1 = e.face > 0 ? 0.6 : Math.PI - 0.6; c.arc(ox, oy, r - k * 2, Math.min(a0, a1) + (e.face > 0 ? u * 0.6 : 0), Math.max(a0, a1) - (e.face > 0 ? 0 : u * 0.6), e.face < 0); c.stroke(); }
+        c.restore();
+      }
+    }
     /* Seelenfunken */
     c.globalCompositeOperation = "lighter";
     for (const s of souls) { if (s.t < s.delay) continue; const g = c.createRadialGradient(s.x, s.y, 0, s.x, s.y, 5); g.addColorStop(0, "rgba(255,240,210,.95)"); g.addColorStop(0.4, s.col); g.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = g; c.beginPath(); c.arc(s.x, s.y, 5, 0, TAU); c.fill(); }

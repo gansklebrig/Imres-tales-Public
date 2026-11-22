@@ -328,14 +328,41 @@
       for (let k = 0; k < 3; k++) { const v = W.tile(tx, ty + k); if (W.solidT(v) || W.isPlat(tx, ty + k)) { ground = true; break; } if ([3, 5, 6, 9].includes(v)) break; }
       const hazard = [3, 5, 6, 9].includes(W.tile(tx, ty)) || [3, 5, 6, 9].includes(W.tile(tx, ty - 1));
       if (!ground || hazard) { dir = 0; if (!e.aware) e.pDir = -(e.pDir || 1); }
+      /* Lücke: wenn dahinter Boden auf gleicher Höhe liegt und der Spieler dort ist, hinüberspringen */
+      if (!ground && e.aware && !hazard && e.def.ai !== "turret" && !(e.jT > 0)) {
+        const P = Z.player;
+        if (P && U.sign(P.x - e.x) === dir) for (let g = 2; g <= 5; g++) { const gx = tx + dir * g; if ((W.solidT(W.tile(gx, ty)) || W.isPlat(gx, ty)) && !W.solidT(W.tile(gx, ty - 1)) && !W.solidT(W.tile(gx, ty - 2))) { e.vy = -340; e.vx = dir * Math.max(d.spd * 1.6, 120 + g * 22); e.jT = 0.9; Z.moveBody(e, dt); return; } }
+      }
       /* kleine Wand: hochspringen, wenn der Spieler oben ist */
       if (dir && W.solidT(W.tile(tx, Math.floor((e.y + e.h - 4) / T))) && !W.solidT(W.tile(tx, Math.floor((e.y + e.h - 20) / T))) && e.aware) e.vy = -300;
     }
     e.vx = U.approach(e.vx, dir * d.spd * spd, 1400 * dt);
     e.vy += (Z.ENEMY_GRAV || 1400) * dt; if (e.vy > 620) e.vy = 620;
+    if (e.jT > 0) e.jT -= dt;
+    if (e.aware && e.onGround && d.ai !== "turret" && d.ai !== "jumper" && !(e.jT > 0)) climbOrDrop(e);
+    if (e.dropT > 0) { e.dropT -= dt; e.noPlat = true; }
     Z.moveBody(e, dt);
     if (e.hitWall && !e.aware) e.pDir = -e.hitWall;
     if (dir) e.face = e.st.fear > 0 ? dir : e.face;
+  }
+  /* Dem Spieler nach oben auf Stege und Absätze folgen, nach unten durch Stege fallen */
+  function climbOrDrop(e) {
+    const P = Z.player; if (!P || P.dead) return;
+    const ex = e.x + e.w / 2, ey = e.y + e.h, px = P.x + P.w / 2, py = P.y + P.h, dx = px - ex, dy = py - ey;
+    if (dy < -24 && Math.abs(dx) < 120 && P.onGround) {
+      const tx0 = Math.floor(ex / T), ty0 = Math.floor((ey - 1) / T);
+      for (let up = 2; up <= 5; up++) for (const off of [0, 1, -1, 2, -2, 3, -3]) {
+        const tx = tx0 + off * (U.sign(dx) || 1), ty = ty0 - up;
+        const stand = (W.solidT(W.tile(tx, ty + 1)) || W.isPlat(tx, ty + 1)) && !W.solidT(W.tile(tx, ty)) && !W.solidT(W.tile(tx, ty - 1));
+        if (!stand) continue;
+        let clear = true; for (let k = 1; k <= up + 1; k++) if (W.solidT(W.tile(tx0, ty0 - k))) { clear = false; break; }
+        if (!clear) continue;
+        const h = (up + 0.6) * T, g = Z.ENEMY_GRAV || 1400;
+        e.vy = -Math.sqrt(2 * g * h); e.vx = ((tx + 0.5) * T - ex) / (2 * h / Math.sqrt(2 * g * h)) ; e.jT = 1.1;
+        e.face = U.sign(dx) || e.face; return;
+      }
+      e.jT = 0.6;
+    } else if (dy > 24 && Math.abs(dx) < 90 && e.onPlat) { e.dropT = 0.25; e.jT = 0.6; }
   }
   function flyMove(e, dt, tgt, dx, dy) {
     const d = e.def, [mn, mx] = d.keep || [40, 90];
@@ -372,10 +399,14 @@
     startAct(e, pick, P);
     return true;
   }
+  const d0 = e => e.def || {};
   function countMinions(e) { return Z.enemies.filter(o => !o.dead && o.master === e).length; }
   function startAct(e, a, P) {
     const fast = e.elite === "wuetend" ? 0.75 : 1;
-    e.act = { a, phase: "pre", t: 0, n: 0, hit: false, fast, armor: a.armor || e.elite === "gepanzert" };
+    const tier = Z.run ? Z.run.tier || 0 : 0;
+    /* je tiefer, desto schneller holen Gegner aus – und manche täuschen an */
+    e.act = { a, phase: "pre", t: 0, n: 0, hit: false, fast: fast * Math.max(0.72, 1 - 0.05 * tier), armor: a.armor || e.elite === "gepanzert" };
+    if (tier >= 2 && !d0(e).boss && a.box && Z.R() < 0.06 + 0.035 * tier && !e.fainted) { e.act.feint = true; e.fainted = 1; } else e.fainted = 0;
     e.uses[a.k] = (e.uses[a.k] || 0) + 1;
     if (a.k === "shoot" || a.k === "lob" || a.k === "web" || a.k === "volley") e.act.aim = { x: P.x + P.w / 2, y: P.y + 12 };
     if (a.k === "mark") e.act.aim = { x: P.x + P.w / 2, y: Z.groundY(P.x + P.w / 2, P.y + P.h) };
@@ -395,6 +426,7 @@
       if (!d.fly) e.vx = U.approach(e.vx, 0, 900 * dt);
       else { e.vx *= 0.9; e.vy *= 0.9; }
       if (ac.aim && !(a.lockAim && ac.t > a.pre - a.lockAim)) { ac.aim.x = U.lerp(ac.aim.x, P.x + P.w / 2, Math.min(1, dt * 6)); ac.aim.y = U.lerp(ac.aim.y, P.y + 12, Math.min(1, dt * 6)); if (a.k === "mark") ac.aim.y = Z.groundY(ac.aim.x, P.y + P.h); }
+      if (ac.feint && ac.t >= a.pre * 0.7) { e.act = null; e.cd = 0.12 + Z.R() * 0.15; e.vx = -e.face * 60; return; }
       if (ac.t >= a.pre) { ac.phase = "act"; ac.t = 0; onActStart(e, a, P, tgt); }
     } else if (ac.phase === "act") {
       onActTick(e, a, P, dt, tgt);
