@@ -450,6 +450,8 @@
 
   /* ---------- Nahkampf ---------- */
   function startMelee(P, slot, it, d) {
+    /* Umdrehen beim Zuschlagen: wer in die andere Richtung drückt, schlägt dorthin */
+    { const hh = (inp.held.right ? 1 : 0) - (inp.held.left ? 1 : 0); if (hh) P.face = hh; }
     const speed = 1 + (Z.hasAff(it, "flink") ? 0.18 : 0) + (P.wrath > 0 ? 0.1 : 0);
     let step = P.combo[slot] % d.combo.length;
     const c = d.combo[step];
@@ -461,6 +463,7 @@
     const tgt = nearestEnemy(P, 60, true); if (tgt && !inp.held.left && !inp.held.right) P.face = tgt.x + tgt.w / 2 > P.x + P.w / 2 ? 1 : -1;
   }
   function startShot(P, slot, it, d) {
+    { const hh = (inp.held.right ? 1 : 0) - (inp.held.left ? 1 : 0); if (hh) P.face = hh; }
     const s = d.shoot;
     if (s.mag) { const m = P.mag[slot] || { n: s.mag + (Z.metaLvl(it.id) >= 3 ? 2 : 0), t: 0 }; P.mag[slot] = m; if (m.n <= 0) return; }
     P.act = { slot, it, d, def: { pre: s.pre || 0.06, act: 0.02, post: s.post || 0.15 }, type: "shot", phase: "pre", t: 0, speed: 1 + (Z.hasAff(it, "flink") ? 0.18 : 0), fired: 0 };
@@ -468,6 +471,7 @@
     else if (inp.held.left && !inp.held.right) P.face = -1; else if (inp.held.right) P.face = 1;
   }
   function startCharge(P, slot, it, d) {
+    { const hh = (inp.held.right ? 1 : 0) - (inp.held.left ? 1 : 0); if (hh) P.face = hh; }
     P.act = { slot, it, d, def: { pre: 0, act: 0, post: d.shoot.post }, type: "charge", phase: "charge", t: 0, charge: 0 };
     A.play("bow", { vol: 0.25, rate: 0.7 });
   }
