@@ -203,6 +203,8 @@
         const vx0 = Math.max(x, cam.x - 2), vx1 = Math.min(x + LW, cam.x + cam.w + 2); if (vx1 <= vx0) continue;
         const k = layer.s; c.drawImage(layer.cv, (vx0 - x) * k, (y0 - oy) * k, (vx1 - vx0) * k, (y1 - y0) * k, vx0, y0, vx1 - vx0, y1 - y0);
       }
+      /* lebendige Ferne zwischen den Ebenen: Wolken, Vögel, Sternschnuppen, Fledermäuse … */
+      if (layer === L.far && Z.drawBackLife) Z.drawBackLife(c, cam, G.time, B, oy, L.H);
     }
   }
 
@@ -542,7 +544,8 @@
     if (Z.noLayers) {} else if (lay && (B.open || lv.out || lv.hub || lv.arena)) { drawLayers(c, cam); if (!Z.gq || Z.gq.critters !== false) { updCritters(dt, cam); drawCritters(c, cam); } } else { c.fillStyle = B.wall; c.fillRect(cam.x - 2, cam.y - 2, cam.w + 4, cam.h + 4); } mark("layers");
     drawTiles(c, cam); mark("tiles");
     drawLiquids(c, cam, t);
-    drawDecor(c, cam, t); mark("decor");
+    drawDecor(c, cam, t);
+    Z.drawMidLife && Z.drawMidLife(c, cam, t); mark("decor");
     drawDoors(c, t);
     Z.drawWorldProps && Z.drawWorldProps(c, t);
     Z.drawPickups(c, t);

@@ -210,6 +210,9 @@ button:disabled{opacity:.45;cursor:default}
 #t-map{right:calc(58px + env(safe-area-inset-right,0px));top:calc(170px + env(safe-area-inset-top,0px));width:40px;height:40px;border-radius:9px}
 @media (pointer:coarse){.hb{left:auto;right:calc(318px * var(--ts,1));transform:none;bottom:calc(env(safe-area-inset-bottom,0px) + 10px)}.slot{width:44px;height:44px}.slot canvas{width:34px;height:34px;left:3px;top:3px}.slot .k{display:none}.slot .n{display:none}}
 @media (orientation:portrait) and (pointer:coarse){#dreh{display:flex!important}}
+.hl,.hr,.hb,#bossbar,#prompt,#card,#choice,#padhint,#toast{zoom:var(--hud,1)}
+.mbox{zoom:var(--ui,1);max-height:calc(92vh / var(--ui,1))!important;width:min(760px,calc(96vw / var(--ui,1)))!important}
+.klein #minimap{max-width:96px}.klein .mbox{padding:10px 12px}.klein .mbox h2{font-size:20px;margin:0 0 6px}
 #dreh{position:fixed;left:50%;bottom:30%;transform:translateX(-50%);z-index:9;display:none;color:var(--mute);font-size:13px;background:rgba(14,9,12,.8);border-radius:8px;padding:6px 12px;pointer-events:none}
 </style>
 </head>
@@ -253,22 +256,22 @@ button:disabled{opacity:.45;cursor:default}
 <div id="modal" hidden></div>
 <div id="title"></div>
 <div id="fade"></div>
-<script src="zerstoerer/kern.js?v=7"></script>
-<script src="zerstoerer/welt.js?v=7"></script>
-<script src="zerstoerer/daten.js?v=7"></script>
-<script src="zerstoerer/kampf.js?v=7"></script>
-<script src="zerstoerer/geschosse.js?v=7"></script>
-<script src="zerstoerer/gegner.js?v=7"></script>
-<script src="zerstoerer/bosse.js?v=7"></script>
-<script src="zerstoerer/figuren.js?v=7"></script>
-<script src="zerstoerer/werkzeuge.js?v=7"></script>
-<script src="zerstoerer/bild.js?v=7"></script>
-<script src="zerstoerer/pracht.js?v=7"></script>
-<script src="zerstoerer/grafik.js?v=7"></script>
-<script src="zerstoerer/musik.js?v=7"></script>
-<script src="zerstoerer/spiel.js?v=7"></script>
-<script src="zerstoerer/parcours.js?v=7"></script>
-<script src="zerstoerer/bilanz.js?v=7"></script>
-<script src="zerstoerer/ui.js?v=7"></script>
+<script src="zerstoerer/kern.js?v=8"></script>
+<script src="zerstoerer/welt.js?v=8"></script>
+<script src="zerstoerer/daten.js?v=8"></script>
+<script src="zerstoerer/kampf.js?v=8"></script>
+<script src="zerstoerer/geschosse.js?v=8"></script>
+<script src="zerstoerer/gegner.js?v=8"></script>
+<script src="zerstoerer/bosse.js?v=8"></script>
+<script src="zerstoerer/figuren.js?v=8"></script>
+<script src="zerstoerer/werkzeuge.js?v=8"></script>
+<script src="zerstoerer/bild.js?v=8"></script>
+<script src="zerstoerer/pracht.js?v=8"></script>
+<script src="zerstoerer/grafik.js?v=8"></script>
+<script src="zerstoerer/musik.js?v=8"></script>
+<script src="zerstoerer/spiel.js?v=8"></script>
+<script src="zerstoerer/parcours.js?v=8"></script>
+<script src="zerstoerer/bilanz.js?v=8"></script>
+<script src="zerstoerer/ui.js?v=8"></script>
 </body>
 </html>
