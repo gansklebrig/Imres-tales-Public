@@ -2576,18 +2576,18 @@
      werden, bis die Kugel auf der anderen Seite ist.
      ================================================================= */
   const KG_TX = {
-    de: { titel: "Tonkugel", menue: "🔮 Tonkugel", menueInfo: "Sing die Kugel durch die Tore", text: "Tore mit einem Loch rollen heran. Deine Stimme hebt und senkt die Kugel – nur mit dem richtigen Ton passt sie durch. Daneben? Sie prallt ab, und du hast einen Moment, den Ton zu finden. Im Tor musst du ihn halten.",
+    de: { titel: "Tonkugel", menue: "🔮 Tonkugel", menueInfo: "Sing die Kugel durch die Tore", text: "Tore mit einem Loch rollen heran. Deine Stimme hebt und senkt die Kugel – nur mit dem richtigen Ton passt sie durch. Daneben? Sie prallt ab und wartet, bis du den Ton gefunden hast. Im Tor musst du ihn halten.",
       uebungen: "Übungen", lieder: "Lieder", tonleiter: "Tonleiter", dreiklang: "Dreiklänge", spruenge: "Sprünge", zufall: "Zufallsparcours", zufallInfo: "40 Tore, die Sprünge werden immer größer",
       tempo: "Tempo", tempi: { langsam: "🐢 Langsam", normal: "Normal", schnell: "🐇 Schnell" }, laenge: "Länge bei Liedern", laengen: { strophe: "Erste Strophe", ganz: "Ganzes Lied" }, hilfe: "Hilfston", hilfeInfo: "Der Ton des nächsten Tors klingt an – und noch einmal nach jedem Abpraller.",
       tor: (a, b) => "Tor " + a + " / " + b, stopp: "■ Stopp", pausiert: "Pausiert – Leertaste oder Tippen zum Weiterspielen", sing: "Sing, um die Kugel zu heben",
-      hoeher: "höher ↑", tiefer: "tiefer ↓", halten: "halten …", fertig: "Alle Tore geschafft!", tore: "Tore", abpraller: "Abpraller", perfekt: "ohne Abpraller", zeit: "Zeit", punkte: "Punkte",
+      hoeher: "höher ↑", tiefer: "tiefer ↓", halten: "halten …", warten: "Finde den Ton – dann rollt die Kugel wieder los", wartenKurz: "dann rollt sie wieder", fertig: "Alle Tore geschafft!", tore: "Tore", abpraller: "Abpraller", perfekt: "ohne Abpraller", zeit: "Zeit", punkte: "Punkte",
       rekord: "Neuer Bestwert!", bisher: p => "Bisher bester Wert: " + p, nochmal: "↻ Nochmal", andere: "Anderes Stück", sekunden: s => s + " s",
       lob: [["Die Kugel hat mehr Wände gesehen als ein Kerker. Aber sie ist angekommen!", "Rex hat jeden Abpraller mit dem Kopf verfolgt. Er ist jetzt schwindelig."], ["Gut gerollt! Ein paar Tore wollten noch überzeugt werden.", "Solide – die Kugel kennt jetzt den Weg."], ["Fast alles im ersten Anlauf – sauber!", "Friedrich nickt. Er hätte geschossen, aber gut."], ["Kein einziger Abpraller! Die Tore haben sich vor dir verneigt.", "Glatt durch wie Ezekiel durch eine Wachmannschaft."]] },
-    en: { titel: "Tone Orb", menue: "🔮 Tone Orb", menueInfo: "Sing the orb through the gates", text: "Gates with a hole roll towards you. Your voice lifts and lowers the orb – only the right note lets it through. Off? It bounces back, and you get a moment to find the note. Inside the gate you have to hold it.",
+    en: { titel: "Tone Orb", menue: "🔮 Tone Orb", menueInfo: "Sing the orb through the gates", text: "Gates with a hole roll towards you. Your voice lifts and lowers the orb – only the right note lets it through. Off? It bounces back and waits until you've found the note. Inside the gate you have to hold it.",
       uebungen: "Exercises", lieder: "Songs", tonleiter: "Scale", dreiklang: "Triads", spruenge: "Leaps", zufall: "Random course", zufallInfo: "40 gates, the leaps keep growing",
       tempo: "Tempo", tempi: { langsam: "🐢 Slow", normal: "Normal", schnell: "🐇 Fast" }, laenge: "Song length", laengen: { strophe: "First verse", ganz: "Whole song" }, hilfe: "Helper tone", hilfeInfo: "The next gate's note sounds – and again after every bounce.",
       tor: (a, b) => "Gate " + a + " / " + b, stopp: "■ Stop", pausiert: "Paused – space or tap to continue", sing: "Sing to lift the orb",
-      hoeher: "higher ↑", tiefer: "lower ↓", halten: "hold …", fertig: "All gates cleared!", tore: "Gates", abpraller: "Bounces", perfekt: "without a bounce", zeit: "Time", punkte: "Points",
+      hoeher: "higher ↑", tiefer: "lower ↓", halten: "hold …", warten: "Find the note – then the orb rolls again", wartenKurz: "then it rolls again", fertig: "All gates cleared!", tore: "Gates", abpraller: "Bounces", perfekt: "without a bounce", zeit: "Time", punkte: "Points",
       rekord: "New best!", bisher: p => "Previous best: " + p, nochmal: "↻ Again", andere: "Other piece", sekunden: s => s + " s",
       lob: [["The orb has seen more walls than a dungeon. But it made it!", "Rex followed every bounce with his head. He's dizzy now."], ["Nicely rolled! A few gates needed convincing.", "Solid – the orb knows the way now."], ["Almost everything on the first try – clean!", "Friedrich nods. He'd have shot it, but fine."], ["Not a single bounce! The gates bowed before you.", "Straight through, like Ezekiel through a guard patrol."]] }
   };
@@ -2668,19 +2668,31 @@
     const tore = KG.stk.tore, tor = tore[KG.idx];
     /* Tonhöhe → Kugel (Oktave egal, geglättet). Ohne Stimme schwebt sie langsam abwärts. */
     const ziel = tor ? tor.m : KG.pAnz;
+    /* schnell folgen (kaum Glättung); kurze Aussetzer der Erkennung (Konsonanten, Atem) überbrücken */
     if (e.m != null) {
       const f = falte(e.m, ziel);
-      KG.glatt = KG.glatt == null || Math.abs(f - KG.glatt) > 1.2 ? f : KG.glatt + (f - KG.glatt) * Math.min(1, dt / .1);
+      KG.glatt = KG.glatt == null || Math.abs(f - KG.glatt) > 1.5 ? f : KG.glatt + (f - KG.glatt) * Math.min(1, dt / .045);
       KG.p = KG.glatt; KG.still = 0;
-    } else { KG.glatt = null; KG.still += dt; if (KG.p != null && KG.still > .25) KG.p = Math.max(KG.lo + .5, KG.p - dt * 1.6); }
+    } else { KG.still += dt; if (KG.still > .35) KG.glatt = null; if (KG.p != null && KG.still > .6) KG.p = Math.max(KG.lo + .5, KG.p - dt * 1.2); }
     if (KG.p == null) KG.p = KG.lo + 1;
-    KG.pAnz += (KG.p - KG.pAnz) * Math.min(1, dt / .06);
-    const imLoch = t => KG.p != null && e.m != null && Math.abs(KG.p - t.m) <= KG.tol;
+    KG.pAnz += (KG.p - KG.pAnz) * Math.min(1, dt / .03);
+    const klingt = KG.still < .35;
+    /* Einfahrt: Ton im Loch. Im Tor: etwas mehr Spielraum, damit Halten nicht an Wackeln scheitert. */
+    const imLoch = (t, extra) => KG.p != null && klingt && Math.abs(KG.p - t.m) <= KG.tol * (extra || 1);
     /* Hilfston, wenn ein neues Tor das nächste ist */
     if (tor && !KG.gespielt.has(KG.idx) && tor.x - KG.ballX < 2.3) { KG.gespielt.add(KG.idx); kgTon(tor.m); }
-    /* Bewegung: vorwärts mit Fahrt, nach einem Abpraller zurück und wieder beschleunigen */
-    const A = 3.2;
-    if (KG.vx < 1) KG.vx = Math.min(1, KG.vx + A * dt);
+    /* Bewegung: Nach einem Abpraller rollt die Kugel zurück, bleibt stehen und wartet,
+       bis du den Ton gefunden und kurz gehalten hast – erst dann nimmt sie wieder Anlauf. */
+    if (KG.warten) {
+      if (KG.vx < 0) KG.vx = Math.min(0, KG.vx + 2.4 * dt);
+      else {
+        KG.vx = 0;
+        if (tor && imLoch(tor)) KG.bereit += dt; else KG.bereit = Math.max(0, KG.bereit - dt * .7);
+        KG.wartZeit += dt;
+        if (E.kgHilfe && tor && KG.wartZeit - KG.letzterHilfston > 3) { KG.letzterHilfston = KG.wartZeit; kgTon(tor.m, .7); }
+        if (KG.bereit >= .4) { KG.warten = false; KG.bereit = 0; }
+      }
+    } else if (KG.vx < 1) KG.vx = Math.min(1, KG.vx + 2.2 * dt);
     let nx = KG.ballX + KG.vx * dt * KG.tempo;
     const R = .09; /* Radius in Welteinheiten (fürs Ein- und Austreten) */
     if (tor) {
@@ -2690,7 +2702,7 @@
         if (imLoch(tor)) { /* hinein */ }
         else { nx = tor.x - R; kgAbprall(tor); }
       } else if (drin) {
-        if (!imLoch(tor)) { nx = tor.x - R - .01; kgAbprall(tor); }
+        if (!imLoch(tor, 1.4)) { nx = tor.x - R - .01; kgAbprall(tor); }
         else if (nx - R >= tor.x + tor.w) kgDurch(tor);
       }
     } else if (nx > KG.zielX) { kgFertig(); return; }
@@ -2700,9 +2712,10 @@
     kgHud();
   }
   function kgAbprall(tor) {
-    KG.vx = -1.35; tor.abpraller++; KG.abpraller++; KG.wackel = 1; KG.flash = -1;
+    KG.vx = -1.1; KG.warten = true; KG.bereit = 0; KG.wartZeit = 0; KG.letzterHilfston = 0;
+    tor.abpraller++; KG.abpraller++; KG.wackel = 1; KG.flash = -1;
     if (ctx) spielen("holz1", 0, ctx.currentTime + .01, .35, 0, ausgang);
-    if (E.kgHilfe) setTimeout(() => { if (KG && KG.stk.tore[KG.idx] === tor) kgTon(tor.m, .8); }, 380);
+    if (E.kgHilfe) setTimeout(() => { if (KG && KG.stk.tore[KG.idx] === tor) kgTon(tor.m, .8); }, 450);
     for (let i = 0; i < 10; i++) KG.funken.push({ x: tor.x, p: KG.pAnz, vx: -Math.random() * .8, vy: (Math.random() - .5) * 6, t: 0, leben: .5, farbe: "235,226,204" });
   }
   function kgDurch(tor) {
@@ -2778,13 +2791,18 @@
     /* Spur und Kugel */
     const r = Math.max(5, Math.min(13, lochH * .78));
     KG.spur.forEach((q, i) => { const a = i / KG.spur.length; g.fillStyle = (q.ok ? "rgba(159,224,143," : "rgba(255,210,122,") + (a * .35).toFixed(2) + ")"; g.beginPath(); g.arc(X(q.x), Y(klemm(q.p, KG.lo, KG.hi)), r * a, 0, 7); g.fill(); });
-    const ok = tor && KG.p != null && KG.still === 0 && Math.abs(KG.p - tor.m) <= KG.tol;
+    const ok = tor && KG.p != null && KG.still < .35 && Math.abs(KG.p - tor.m) <= KG.tol;
     const wack = KG.wackel > 0 ? Math.sin(performance.now() / 25) * 3 * KG.wackel : 0; KG.wackel = Math.max(0, KG.wackel - (dt || .016) * 3);
     const kugel = g.createRadialGradient(bx - r * .35 + wack, by - r * .35, r * .1, bx + wack, by, r);
     kugel.addColorStop(0, "#fff7e0"); kugel.addColorStop(.45, ok ? "#b8f0a8" : "#ffd27a"); kugel.addColorStop(1, ok ? "#4f9a45" : "#b8742c");
     g.shadowColor = ok ? "#9fe08f" : "#ffb54a"; g.shadowBlur = 18; g.fillStyle = kugel; g.beginPath(); g.arc(bx + wack, by, r, 0, 7); g.fill(); g.shadowBlur = 0;
+    /* Warten nach Abpraller: Ring füllt sich, solange der Ton stimmt */
+    if (KG.warten && KG.vx === 0) {
+      g.strokeStyle = "rgba(235,226,204,.18)"; g.lineWidth = 3; g.beginPath(); g.arc(bx, by, r + 7, 0, 7); g.stroke();
+      if (KG.bereit > 0) { g.strokeStyle = "#9fe08f"; g.beginPath(); g.arc(bx, by, r + 7, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, KG.bereit / .4)); g.stroke(); }
+    }
     /* Pfeil „höher/tiefer“ */
-    if (tor && KG.p != null && KG.still === 0 && !ok) {
+    if (tor && KG.p != null && KG.still < .35 && !ok) {
       const hoch = KG.p < tor.m; g.fillStyle = "rgba(232,162,74,.9)"; g.beginPath();
       if (hoch) { g.moveTo(bx - 7, by - r - 6); g.lineTo(bx, by - r - 15); g.lineTo(bx + 7, by - r - 6); } else { g.moveTo(bx - 7, by + r + 6); g.lineTo(bx, by + r + 15); g.lineTo(bx + 7, by + r + 6); }
       g.fill();
@@ -2795,7 +2813,7 @@
     KG.flash = KG.flash > 0 ? Math.max(0, KG.flash - (dt || .016) * 2) : KG.flash < 0 ? Math.min(0, KG.flash + (dt || .016) * 2) : 0;
     /* Hinweistext unten */
     const tx = KT(); let hin = "";
-    if (KG.pause) hin = tx.pausiert; else if (KG.still > 2.5) hin = tx.sing; else if (tor && KG.p != null && !ok && KG.still === 0) hin = KG.p < tor.m ? tx.hoeher : tx.tiefer;
+    if (KG.pause) hin = tx.pausiert; else if (KG.warten && KG.vx === 0 && ok) hin = tx.halten; else if (KG.still > 2.5) hin = KG.warten ? tx.warten : tx.sing; else if (tor && KG.p != null && !ok && KG.still < .35) hin = (KG.p < tor.m ? tx.hoeher : tx.tiefer) + (KG.warten ? " · " + tx.wartenKurz : "");
     else if (tor && ok && KG.ballX + .09 > tor.x) hin = tx.halten;
     if (hin) { g.font = "600 " + (cw < 420 ? 14 : 16) + "px system-ui, sans-serif"; g.textAlign = "center"; g.fillStyle = ok ? "rgba(159,224,143,.9)" : "rgba(235,226,204,.75)"; g.fillText(hin, cw * .55, ch - unten - 4); g.textAlign = "left"; }
     if (KG.pause) { g.fillStyle = "rgba(10,8,14,.55)"; g.fillRect(0, 0, cw, ch); g.font = "700 22px Georgia, serif"; g.textAlign = "center"; g.fillStyle = "#ffd27a"; g.fillText("⏸", cw / 2, ch / 2 - 10); g.font = "14px system-ui, sans-serif"; g.fillStyle = "rgba(235,226,204,.85)"; g.fillText(tx.pausiert, cw / 2, ch / 2 + 16); g.textAlign = "left"; }
