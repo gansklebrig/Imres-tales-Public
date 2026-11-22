@@ -729,6 +729,69 @@
       wetter: ["tropfen", "nebel", "klar"],
       licht: [{ o: [80, 30, 20, 0.06], u: [80, 30, 10, 0.08] }, { o: [30, 20, 30, 0.18], u: [60, 20, 10, 0.14] }],
       lagen: { form: "stein", rand: "rgba(255,140,60,.2)", farben: ["#1e1410", "#170f0c", "#100a08"] }
+    },
+    /* Kapitel XII: Erztunnel, Leichenhöhle, Pilzgang – und hinten glimmt das Labor der Duergar */
+    labor: {
+      partikel: "sporen", unten: true,
+      varianten: r => ({ pilz: zuf(r, ["#c88aff", "#9cff5a", "#ffb04a"]), schaedel: 70 + r() * 260, kolben: [0, 1, 2, 3].map(() => zuf(r, ["#9cff5a", "#c88aff", "#ffcf7a", "#ff7a5a"])), arm: r() < 0.5 ? 64 : 338 }),
+      fern(x, r) {
+        himmel(x, [[0, "#040406"], [0.4, "#0c0a12"], [0.7, "#161020"], [1, "#08060a"]]);
+        hoehlenDecke(x, r, "#030304", 46);
+        /* Erzadern in Teal und Gold */
+        for (let i = 0; i < 9; i++) {
+          const px = r() * W, py = 60 + r() * 140; x.strokeStyle = r() < 0.5 ? "rgba(90,200,170,.28)" : "rgba(224,160,70,.3)"; x.lineWidth = 1.2;
+          x.beginPath(); x.moveTo(px, py); for (let k = 0; k < 4; k++) x.lineTo(px + (r() - 0.5) * 50, py + k * 12 + r() * 8); x.stroke();
+        }
+        x.fillStyle = "#0b090e";
+        x.beginPath(); x.moveTo(0, 50); x.lineTo(64, 96); x.lineTo(50, 190); x.lineTo(78, 250); x.lineTo(56, 300); x.lineTo(0, 300); x.fill();
+        x.beginPath(); x.moveTo(W, 50); x.lineTo(W - 58, 104); x.lineTo(W - 44, 186); x.lineTo(W - 72, 246); x.lineTo(W - 52, 300); x.lineTo(W, 300); x.fill();
+        glow(x, 200, 190, 160, "rgba(156,255,90,.07)");
+      },
+      mitte(x, r, v) {
+        /* Labortisch der Duergar mit Destillierkolben in der Mitte hinten */
+        x.fillStyle = "#1a1416"; x.fillRect(130, 196, 140, 8); x.fillRect(138, 204, 6, 26); x.fillRect(256, 204, 6, 26);
+        v.kolben.forEach((f, i) => {
+          const px = 148 + i * 34, py = 196;
+          x.fillStyle = "rgba(200,220,210,.18)"; x.beginPath(); x.arc(px, py - 10, 9 - (i % 2) * 2, 0, PI2); x.fill(); x.fillRect(px - 2, py - 26, 4, 10);
+          x.fillStyle = f; x.globalAlpha = 0.55; x.beginPath(); x.arc(px, py - 9, 7 - (i % 2) * 2, 0, Math.PI); x.fill(); x.globalAlpha = 1;
+        });
+        x.strokeStyle = "rgba(200,220,210,.25)"; x.lineWidth = 1.5; x.beginPath(); x.moveTo(150, 170); x.quadraticCurveTo(200, 150, 250, 172); x.stroke();
+        /* Knochenhaufen links und rechts */
+        const knochen = (cx, cy, n) => { for (let i = 0; i < n; i++) { x.save(); x.translate(cx + (r() - 0.5) * 50, cy + (r() - 0.5) * 10); x.rotate(r() * 3); x.fillStyle = "#3a3630"; x.fillRect(-8, -1.5, 16, 3); x.beginPath(); x.arc(-8, 0, 2.4, 0, PI2); x.arc(8, 0, 2.4, 0, PI2); x.fill(); x.restore(); } };
+        knochen(90, 286, 14); knochen(310, 288, 14); knochen(200, 232, 6);
+        [[v.schaedel, 280], [v.schaedel + 40, 284]].forEach(([px, py]) => { x.fillStyle = "#3e3a32"; x.beginPath(); x.arc(px, py, 6, Math.PI, 0); x.fill(); x.fillRect(px - 4, py, 8, 4); x.fillStyle = "#0a0808"; x.fillRect(px - 3, py - 3, 2, 2); x.fillRect(px + 1, py - 3, 2, 2); });
+        /* Riesenpilze an den Wänden */
+        [[40, 230, 22], [362, 236, 26], [76, 180, 14], [330, 176, 16]].forEach(([px, py, gr]) => {
+          x.fillStyle = "#2a2230"; x.fillRect(px - gr * 0.12, py - gr * 0.2, gr * 0.24, gr * 1.1);
+          x.fillStyle = "#3a2a44"; x.beginPath(); x.ellipse(px, py - gr * 0.2, gr, gr * 0.45, 0, Math.PI, 0); x.fill();
+          x.fillStyle = "rgba(200,138,255,.35)"; for (let k = 0; k < 4; k++) { x.beginPath(); x.arc(px + (k - 1.5) * gr * 0.4, py - gr * 0.35, 1.8, 0, PI2); x.fill(); }
+        });
+        /* Grubenschienen */
+        x.strokeStyle = "#2a2420"; x.lineWidth = 2; x.beginPath(); x.moveTo(0, 268); x.lineTo(W, 262); x.moveTo(0, 276); x.lineTo(W, 270); x.stroke();
+        for (let px = 6; px < W; px += 18) { x.fillStyle = "#1e1812"; x.fillRect(px, 264, 4, 14); }
+      },
+      deko(x, t, u) {
+        const v = u.v;
+        /* blubbernde Kolben */
+        v.kolben.forEach((f, i) => {
+          const px = 148 + i * 34;
+          glow(x, px, 186, 18, "rgba(156,255,90,.16)");
+          for (let k = 0; k < 2; k++) { const ph = (t * (0.8 + i * 0.2) + k * 0.5) % 1; x.fillStyle = "rgba(220,255,200," + (0.6 * (1 - ph)).toFixed(2) + ")"; x.beginPath(); x.arc(px + Math.sin(ph * 8 + i) * 2, 186 - ph * 26, 1.2 + ph * 1.5, 0, PI2); x.fill(); }
+        });
+        /* Pilze glimmen im Atemtakt */
+        [[40, 222, 22], [362, 228, 26], [76, 176, 14], [330, 172, 16]].forEach(([px, py, gr], i) => glow(x, px, py, gr * 1.6, "rgba(200,138,255," + (0.08 + 0.06 * Math.sin(t * 1.2 + i)).toFixed(3) + ")"));
+        /* der Arm mit dem Ring liegt im Knochenhaufen – der Ring blitzt */
+        const gl = Math.max(0, Math.sin(t * 1.3)) ** 10;
+        x.fillStyle = "#4a443a"; x.save(); x.translate(v.arm, 284); x.rotate(-0.4); x.fillRect(-12, -2, 24, 4); x.restore();
+        if (gl > 0.05) glow(x, v.arm + 10, 280, 8, "rgba(255,224,128," + (0.8 * gl).toFixed(2) + ")");
+        /* ein Geisterschimmer zieht vorbei */
+        const g = (t * 0.07) % 1; if (g < 0.4) { const a = Math.sin(g / 0.4 * Math.PI) * 0.18; glow(x, 40 + g * 800, 150 + Math.sin(t) * 8, 22, "rgba(200,230,255," + a.toFixed(3) + ")"); }
+        haenger(x, v.h, t, u.wind);
+      },
+      haenger: r => { const l = []; for (let i = 0; i < 3; i++) l.push({ x: 70 + i * 130 + r() * 30, y: 26 + r() * 20, l: 24 + r() * 30, art: i === 1 ? "kette" : "laterne", f: 0.9 + r(), ph: r() * 6 }); return l; },
+      wetter: ["tropfen", "nebel", "klar"],
+      licht: [{ o: [20, 40, 30, 0.12], u: [60, 120, 40, 0.1] }, { o: [40, 20, 50, 0.16], u: [90, 60, 120, 0.12] }],
+      lagen: { form: "stein", rand: "rgba(156,255,90,.18)", farben: ["#16121a", "#100d14", "#0a080d"] }
     }
   };
 

@@ -482,6 +482,77 @@
       const gx = seitenX(info, 1, 0.75), gy = 200; x.fillStyle = "#120e0c"; x.fillRect(gx - 14, info.oben, 28, info.unten);
       x.strokeStyle = "rgba(230,180,80,.55)"; x.lineWidth = 1.5; x.beginPath(); x.arc(gx, gy, 8, 0, PI2); x.moveTo(gx, gy - 8); x.lineTo(gx, gy - 16); x.moveTo(gx - 6, gy - 13); x.lineTo(gx, gy - 18); x.lineTo(gx + 6, gy - 13); x.stroke();
       funken(x, info, 40, "rgba(255,160,70,1)", 122, true);
+    },
+    /* XII · Das Ei des Drachen: Erztunnel, Leichenhöhle, Pilzgang, Labor der Duergar */
+    labor(x, info, w, u) {
+      const t = info.t, r = zuf(131);
+      stalaktiten(x, -info.L, 0, info.oben, "#08070a", r, 14, 70); stalaktiten(x, info.W, info.W + info.R, info.oben, "#08070a", r, 14, 70);
+      // Erzadern (Teal und Gold) mit sanftem Pulsieren
+      [-1, 1].forEach(s => {
+        for (let k = 0; k < 7; k++) {
+          const px = seitenX(info, s, 0.1 + r() * 0.85), py = info.oben + 60 + r() * 220, gold = r() < 0.4;
+          x.strokeStyle = gold ? "rgba(224,160,70,.45)" : "rgba(90,200,170," + (0.25 + 0.15 * Math.sin(t * 0.8 + k)).toFixed(3) + ")"; x.lineWidth = 1.6;
+          x.beginPath(); x.moveTo(px, py); for (let j = 1; j < 5; j++) x.lineTo(px + (r() - 0.5) * 40, py + j * 14); x.stroke();
+        }
+      });
+      // links: Erztunnel mit Grubenwagen und Schienen
+      const tx0 = seitenX(info, -1, 0.55), ty = info.unten - 40;
+      x.fillStyle = "#050406"; x.beginPath(); x.moveTo(tx0 - 70, ty); x.lineTo(tx0 - 70, ty - 110); x.quadraticCurveTo(tx0, ty - 170, tx0 + 70, ty - 110); x.lineTo(tx0 + 70, ty); x.fill();
+      x.strokeStyle = "#3a2a1a"; x.lineWidth = 9; x.beginPath(); x.moveTo(tx0 - 74, ty); x.lineTo(tx0 - 74, ty - 112); x.lineTo(tx0 + 74, ty - 112); x.lineTo(tx0 + 74, ty); x.stroke();
+      x.strokeStyle = "#2a2420"; x.lineWidth = 2; x.beginPath(); x.moveTo(tx0 - 40, ty); x.lineTo(-4, ty + 6); x.moveTo(tx0 - 30, ty - 8); x.lineTo(-4, ty - 2); x.stroke();
+      const wg = takt(t, 23, 7, 3), wx = wg >= 0 ? tx0 - 30 + wg * (info.L * 0.5) : tx0 + 10;
+      x.fillStyle = "#2a2018"; x.fillRect(wx - 22, ty - 30, 44, 22); x.fillStyle = "#14100c"; x.beginPath(); x.arc(wx - 13, ty - 6, 6, 0, PI2); x.arc(wx + 13, ty - 6, 6, 0, PI2); x.fill();
+      x.fillStyle = "#4a6a60"; for (let k = 0; k < 5; k++) { x.beginPath(); x.arc(wx - 14 + k * 7, ty - 32 - (k % 2) * 4, 5, 0, PI2); x.fill(); }
+      // Knochenhaufen beidseits, ein Schädel blinzelt (?)
+      [-1, 1].forEach(s => {
+        const bx = seitenX(info, s, 0.3), by = info.unten - 28;
+        for (let k = 0; k < 26; k++) { x.save(); x.translate(bx + (r() - 0.5) * 110, by - r() * 26); x.rotate(r() * 3); x.fillStyle = k % 3 ? "#3a352e" : "#4a443a"; x.fillRect(-10, -2, 20, 4); x.beginPath(); x.arc(-10, 0, 3, 0, PI2); x.arc(10, 0, 3, 0, PI2); x.fill(); x.restore(); }
+        x.fillStyle = "#565046"; x.beginPath(); x.arc(bx + s * 18, by - 30, 11, Math.PI, 0); x.fill(); x.fillRect(bx + s * 18 - 7, by - 30, 14, 7);
+        const bl = takt(t, 17, 0.4, s * 5) >= 0;
+        x.fillStyle = bl ? "rgba(156,255,90,.9)" : "#0a0808"; x.fillRect(bx + s * 18 - 6, by - 36, 4, 4); x.fillRect(bx + s * 18 + 2, by - 36, 4, 4);
+      });
+      // Riesenpilze, die im Atemtakt glühen
+      [[-1, 0.82, 70], [-1, 0.2, 46], [1, 0.25, 58], [1, 0.88, 80]].forEach(([s, f, h], i) => {
+        const px = seitenX(info, s, f), py = info.unten - 30;
+        x.fillStyle = "#241c2a"; x.fillRect(px - h * 0.08, py - h, h * 0.16, h);
+        x.fillStyle = "#3a2a44"; x.beginPath(); x.ellipse(px, py - h, h * 0.62, h * 0.26, 0, Math.PI, 0); x.fill();
+        glow(x, px, py - h - 4, h * 0.9, "rgba(200,138,255," + (0.12 + 0.07 * Math.sin(t * 1.1 + i)).toFixed(3) + ")");
+        x.fillStyle = "rgba(220,180,255,.6)"; for (let k = 0; k < 5; k++) { x.beginPath(); x.arc(px + (k - 2) * h * 0.2, py - h - h * 0.12, 1.8, 0, PI2); x.fill(); }
+      });
+      // rechts: Alchemietisch der Duergar mit blubbernden Kolben
+      const lx = seitenX(info, 1, 0.55), ly = info.unten - 70;
+      x.fillStyle = "#1a1416"; x.fillRect(lx - 70, ly, 140, 10); x.fillRect(lx - 62, ly + 10, 8, 40); x.fillRect(lx + 54, ly + 10, 8, 40);
+      [["156,255,90", -48], ["200,138,255", -14], ["255,207,122", 20], ["255,122,90", 50]].forEach(([c, dx], i) => {
+        const px = lx + dx, py = ly - 12;
+        x.fillStyle = "rgba(210,225,220,.22)"; x.beginPath(); x.arc(px, py, 12 - (i % 2) * 3, 0, PI2); x.fill(); x.fillRect(px - 3, py - 32, 6, 22);
+        x.fillStyle = "rgba(" + c + ",.6)"; x.beginPath(); x.arc(px, py + 1, 10 - (i % 2) * 3, 0, Math.PI); x.fill();
+        glow(x, px, py, 30, "rgba(" + c + ",.16)");
+        for (let k = 0; k < 3; k++) { const ph = (t * (0.7 + i * 0.15) + k / 3) % 1; x.fillStyle = "rgba(240,255,230," + (0.7 * (1 - ph)).toFixed(2) + ")"; x.beginPath(); x.arc(px + Math.sin(ph * 9 + i) * 3, py - 8 - ph * 40, 1.4 + ph * 2, 0, PI2); x.fill(); }
+      });
+      // Rauch aus dem Destillierrohr
+      for (let k = 0; k < 5; k++) { const ph = (t * 0.25 + k / 5) % 1; x.fillStyle = "rgba(140,200,120," + (0.12 * (1 - ph)).toFixed(3) + ")"; x.beginPath(); x.arc(lx - 14 + Math.sin(t + k) * 8 + ph * 20, ly - 50 - ph * 140, 8 + ph * 22, 0, PI2); x.fill(); }
+      // Buppido lugt hinter dem Pilz hervor und hält sein Schild hoch
+      const bu = takt(t, 37, 7, 12);
+      if (bu >= 0) {
+        const o = Math.sin(bu * Math.PI), px = seitenX(info, -1, 0.2) + 26 * o, py = info.unten - 40;
+        x.fillStyle = "#1e1618"; x.beginPath(); x.arc(px, py - 26, 8, 0, PI2); x.fill(); x.fillRect(px - 8, py - 18, 16, 18);
+        x.fillStyle = "rgba(255,230,160,.9)"; x.fillRect(px - 4, py - 28, 2, 2); x.fillRect(px + 2, py - 28, 2, 2);
+        x.strokeStyle = "#3a2818"; x.lineWidth = 2; x.beginPath(); x.moveTo(px + 8, py - 10); x.lineTo(px + 14, py - 48); x.stroke();
+        x.fillStyle = "#d8c8a0"; x.fillRect(px - 4, py - 64, 38, 17);
+        x.fillStyle = "#3a1a10"; x.font = "bold 11px Georgia, serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("Altar?", px + 15, py - 55); x.textBaseline = "alphabetic";
+      }
+      // ein namenloser Geist zieht vorbei und flüstert
+      const gz = takt(t, 29, 9, 4);
+      if (gz >= 0) {
+        const px = seitenX(info, 1, 0.95 - gz * 0.85), py = info.oben + 150 + Math.sin(gz * 9) * 12, a = Math.sin(gz * Math.PI) * 0.3;
+        glow(x, px, py, 40, "rgba(210,230,255," + a.toFixed(3) + ")");
+        x.fillStyle = "rgba(220,235,255," + (a * 1.3).toFixed(3) + ")"; x.beginPath(); x.arc(px, py - 10, 9, 0, PI2); x.moveTo(px - 10, py - 6); x.quadraticCurveTo(px - 12, py + 20, px - 2, py + 26); x.quadraticCurveTo(px + 4, py + 18, px + 12, py + 24); x.quadraticCurveTo(px + 12, py, px + 10, py - 6); x.fill();
+      }
+      // eine Münze liegt im Dreck und blitzt
+      const mx = seitenX(info, 1, 0.12), my = info.unten - 34, mg = Math.max(0, Math.sin(t * 1.7)) ** 10;
+      x.fillStyle = "#b08a3a"; x.beginPath(); x.ellipse(mx, my, 4, 2, 0, 0, PI2); x.fill(); if (mg > 0.05) glow(x, mx, my, 12, "rgba(255,230,150," + (0.9 * mg).toFixed(2) + ")");
+      funken(x, info, 26, "rgba(200,138,255,1)", 133, false);
+      funken(x, info, 14, "rgba(156,255,90,1)", 134, true);
     }
   };
 

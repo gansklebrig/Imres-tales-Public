@@ -1,6 +1,6 @@
 /* =====================================================================
    ECHOS HORT – Raubzug, Wildgestalt und der Zorn des Hains
-   Neun Gebiete wie in der Kampagne (Wald an der Straße, Phandalin,
+   Zehn Gebiete wie in der Kampagne (Wald an der Straße, Phandalin,
    Wachturm, magische Schmiede, Donnerbaum, Unterreich, See der Kuo-Toa,
    Gracklstugh, Themberchauds Hort), je drei Level, danach geht es endlos weiter.
    Jedes Level hat zwei Phasen:
@@ -41,7 +41,7 @@
   const TX = {
     de: {
       label: "Druiden-Probe", titel: "Echos Hort",
-      text: "Echo schleudert seine Ranke in die Tiefe, verwandelt sich in Rabe, Bär oder Ratte und rafft zusammen, was glänzt. Danach kommen die Plünderer, und der Hain muss den Hort verteidigen. Neun Gebiete wie in unserer Kampagne, viele Level, noch mehr Verbesserungen.",
+      text: "Echo schleudert seine Ranke in die Tiefe, verwandelt sich in Rabe, Bär oder Ratte und rafft zusammen, was glänzt. Danach kommen die Plünderer, und der Hain muss den Hort verteidigen. Zehn Gebiete wie in unserer Kampagne, viele Level, noch mehr Verbesserungen.",
       steuerung: "Raubzug: Tippe, um die Ranke zu schleudern, die Knöpfe unten verwandeln Echo. Abwehr: Tippe auf einen Pflanzplatz, um einen Wächter wachsen zu lassen, und irgendwo auf die Karte für einen Feuerball. Tasten: F = Tempo, G = Wildgestalt.",
       neu: "▶ Neuer Raubzug", fortsetzen: (g, l) => "▶ Fortsetzen · " + g + " " + l + "/3", fortsetzenEndlos: n => "▶ Fortsetzen · Endlos, Runde " + n,
       weiter: "▶ Weiter", los: "▶ Los!", nochmal: "↻ Neuer Raubzug", beenden: "Raubzug beenden", zumHain: "▶ In den Hain", zurAbwehr: "▶ Den Hort verteidigen", nochmalLevel: "↻ Level wiederholen",
@@ -59,7 +59,8 @@
         ["Das Unterreich", "Gefesselt im Kerker. Doch Echo erinnert sich: Als Ratte kommt man überall durch. Durch Ketten. Durch Netze."],
         ["Der See der Kuo-Toa", "Unter der Wasseroberfläche liegen Perlen und Opfergaben. Und tief unten schläft etwas mit zwei Köpfen."],
         ["Gracklstugh", "Die Festung der Duergar. Schmiedegold, Glut und ein Riese, der Stimmen hört."],
-        ["Themberchauds Hort", "Eine Halle aus Glut, Lava an allen Rändern, in der Mitte ein Berg aus Gold. Echo rechnet schon, was er sich davon kaufen könnte. Und während er rechnet, schleichen die Grauen Geister zu seinem eigenen Hort."]
+        ["Themberchauds Hort", "Eine Halle aus Glut, Lava an allen Rändern, in der Mitte ein Berg aus Gold. Echo rechnet schon, was er sich davon kaufen könnte. Und während er rechnet, schleichen die Grauen Geister zu seinem eigenen Hort."],
+        ["Die Leichenhöhle", "Hinter dem Erztunnel: Knochen, Pilze, die im Dunkeln glimmen, und ein Arm mit einem Ring. Echo hat einen Pilz gegessen und ist jetzt sehr klein. Gierig ist er trotzdem. Hinten blubbert das Labor der Duergar."]
       ],
       endlosName: "Der endlose Raubzug", endlosText: n => "Runde " + n + ": Echo kennt jeden Schatz. Die Plünderer kennen Echo.",
       levelKurz: (g, l) => g + " · Level " + l + "/3", levelEndlos: n => "Endlos · Runde " + n,
@@ -75,8 +76,8 @@
         ratte: ["Ratte", "Nagt sich durch Netze."]
       },
       dinge: { muenze: "Münzen", beutel: "Goldbeutel", nugget: "Goldklumpen", edelstein: "Edelstein", stein: "Stein", truhe: "Truhe" },
-      res: ["Eicheln", "Gartenkräuter", "Turmmoos", "Leuchtkristalle", "Wurzelholz", "Sporenpilze", "Muscheln", "Feuermoos", "Drachenpfeffer"],
-      relikt: ["Goblin-Krone", "Silberkelch", "Drow-Amulett", "Runenhammer", "Drachenschuppe", "Spinnenidol", "Kuo-Toa-Perle", "Duergar-Krone", "Faustgroße Drachenmünze"],
+      res: ["Eicheln", "Gartenkräuter", "Turmmoos", "Leuchtkristalle", "Wurzelholz", "Sporenpilze", "Muscheln", "Feuermoos", "Drachenpfeffer", "Riesenpilze"],
+      relikt: ["Goblin-Krone", "Silberkelch", "Drow-Amulett", "Runenhammer", "Drachenschuppe", "Spinnenidol", "Kuo-Toa-Perle", "Duergar-Krone", "Faustgroße Drachenmünze", "Der Ring am Arm"],
       ev: {
         naturfrevel: "Die Natur grollt!", gekappt: "Ranke gekappt!", mimik: "Ein Mimik! Hmpf.", zuSchwer: "Zu schwer für den Raben!",
         fels: "Fels! Nur ein Bär …", netz: "Netz! Nur eine Ratte …", wildPlus: "+1 Wildgestalt", keineWild: "Keine Wildgestalt mehr!",
@@ -85,7 +86,7 @@
       ausbruch: { feuerball: "FEUERBALL!", blitz: "BLITZ!", baer: "BÄRENWUT!", grummeln: "Hmpf. Echo schmollt.", feuersturm: "FEUERSTURM!" },
       ausbruchTipp: "Der Zorn ist voll. Bei Echo weiß man nie, was jetzt passiert …",
       kommen: n => "Die Plünderer kommen in " + n + " …", jetzt: "Sofort kommen lassen", bereitLos: "Bereit – los geht's!", klaut: n => "−" + n + " Gold",
-      bossRuft: { anfuehrer: "Der Goblin-Anführer!", glasstab: "Glasstab, Anführer der Roten Roben!", bugbaer: "Der Bugbear vom Wachturm!", nezna: "Nezna, die Drow!", venomfang: "Venomfang!", vrock: "Ein Vrock!", demogorgon: "DEMOGORGON!", riese: "Der rasende Riese!", drokey: "Drokey, der Meisterdieb!" },
+      bossRuft: { anfuehrer: "Der Goblin-Anführer!", glasstab: "Glasstab, Anführer der Roten Roben!", bugbaer: "Der Bugbear vom Wachturm!", nezna: "Nezna, die Drow!", venomfang: "Venomfang!", vrock: "Ein Vrock!", demogorgon: "DEMOGORGON!", riese: "Der rasende Riese!", drokey: "Drokey, der Meisterdieb!", laborMeister: "Der Duergar-Vorarbeiter! Mal sichtbar, mal nicht." },
       demo: { text: "Demogorgon ist nicht zu besiegen. Halte ihn auf, bis er im See versinkt!", weg: "Demogorgon versinkt im See …", schrei: "Sein Schrei lässt die Magie erlöschen!" },
       neznaFlieht: "Nezna wird zur Fledermaus!", drokeyWeg: "Drokey entwischt durch einen Geheimgang – aber ohne Echos Gold!", gift: "Giftatem!", wurf: "Felswurf!", netzTreffer: "Eingesponnen!", geheimgang: "Geheimgang!",
       wachter: {
@@ -116,8 +117,8 @@
       hain: "Echos Hain", hainText: "Hier wächst, was Echo stärker macht. Bezahlt wird mit Gold. Er tut es ungern.",
       beutel: n => n + " Gold im Beutel", kaufen: n => n + " Gold", max: "voll",
       hainGruppen: { raub: "Raubzug", wesen: "Gemüt", abwehr: "Abwehr", besonders: "Besonderes" },
-      feinde: { goblin: "Goblin", rotrobe: "Rote Robe", bandit: "Bandit", bugbear: "Bugbear", soeldner: "Söldner", zombie: "Zombie", blight: "Blight", spinne: "Riesenspinne", drow: "Drow", ettercap: "Ettercap", chasme: "Chasme", kuotoa: "Kuo-Toa", duergar: "Duergar", graugeist: "Grauer Geist", glutkaefer: "Glutkäfer", flammenwahrer: "Bewahrer der Flamme",
-        anfuehrer: "Goblin-Anführer", glasstab: "Glasstab", bugbaer: "Der Bugbear vom Wachturm", nezna: "Nezna", venomfang: "Venomfang", vrock: "Vrock", demogorgon: "Demogorgon", riese: "Der rasende Riese", drokey: "Drokey, der Meisterdieb" },
+      feinde: { goblin: "Goblin", rotrobe: "Rote Robe", bandit: "Bandit", bugbear: "Bugbear", soeldner: "Söldner", zombie: "Zombie", blight: "Blight", spinne: "Riesenspinne", drow: "Drow", ettercap: "Ettercap", chasme: "Chasme", kuotoa: "Kuo-Toa", duergar: "Duergar", graugeist: "Grauer Geist", glutkaefer: "Glutkäfer", flammenwahrer: "Bewahrer der Flamme", skelett: "Skelett",
+        anfuehrer: "Goblin-Anführer", glasstab: "Glasstab", bugbaer: "Der Bugbear vom Wachturm", nezna: "Nezna", venomfang: "Venomfang", vrock: "Vrock", demogorgon: "Demogorgon", riese: "Der rasende Riese", drokey: "Drokey, der Meisterdieb", laborMeister: "Der Duergar-Vorarbeiter" },
       eig: { flug: "fliegt", schnell: "schnell", zaeh: "zäh", ausweichen: "weicht aus", unsichtbar: "zeitweise unsichtbar", netz: "spinnt Wächter ein", feuerSchwach: "feuerschwach", wurzelFest: "wurzelfest",
         ruft: "ruft Verstärkung", blinzeln: "nimmt Geheimgänge", gift: "Giftatem lähmt Wächter", schrei: "Schrei lähmt Wächter", wurf: "wirft Felsen auf Wächter", verwandeln: "flieht als Fledermaus", unbesiegbar: "unbesiegbar – nur aufhalten!" },
       zweige: {
@@ -274,7 +275,7 @@
         freunde: ["Gute Freunde", "Rex, Barradin und Ezekiel kommen öfter vorbei."]
       },
       leben: n => "❤ " + n,
-      endeTitel: "Echos Raubzug endet", sieg: "Die ganze Kampagne geplündert!", siegText: "Alle neun Gebiete. Und Echo will trotzdem mehr. Ab jetzt geht es endlos weiter.",
+      endeTitel: "Echos Raubzug endet", sieg: "Die ganze Kampagne geplündert!", siegText: "Alle zehn Gebiete. Und Echo will trotzdem mehr. Ab jetzt geht es endlos weiter.",
       punkte: "Punkte",
       wert: { level: "Level", gold: "Gold gesamt", erlegt: "Plünderer", schaetze: "Schätze" },
       spruch: {
@@ -301,7 +302,7 @@
     },
     en: {
       label: "Druid check", titel: "Echo's Hoard",
-      text: "Echo hurls his vine into the depths, turns into raven, bear or rat and grabs whatever glitters. Then the plunderers come, and the grove must defend the hoard. Nine regions like in our campaign, many levels, even more upgrades.",
+      text: "Echo hurls his vine into the depths, turns into raven, bear or rat and grabs whatever glitters. Then the plunderers come, and the grove must defend the hoard. Ten regions like in our campaign, many levels, even more upgrades.",
       steuerung: "Raid: tap to hurl the vine, the buttons below transform Echo. Defence: tap a planting spot to grow a guardian, and anywhere on the map for a fireball. Keys: F = speed, G = wild shape.",
       neu: "▶ New raid", fortsetzen: (g, l) => "▶ Continue · " + g + " " + l + "/3", fortsetzenEndlos: n => "▶ Continue · Endless, round " + n,
       weiter: "▶ Continue", los: "▶ Go!", nochmal: "↻ New raid", beenden: "End raid", zumHain: "▶ To the grove", zurAbwehr: "▶ Defend the hoard", nochmalLevel: "↻ Retry level",
@@ -319,7 +320,8 @@
         ["The Underdark", "Shackled in a dungeon. But Echo remembers: as a rat you get through anything. Chains. Webs."],
         ["The lake of the Kuo-toa", "Beneath the surface lie pearls and offerings. And deep below sleeps something with two heads."],
         ["Gracklstugh", "The fortress of the duergar. Forge gold, embers and a giant who hears voices."],
-        ["Themberchaud's hoard", "A hall of embers, lava along every edge, a mountain of gold in the middle. Echo is already working out what he could buy with it. And while he counts, the Grey Ghosts creep towards his own hoard."]
+        ["Themberchaud's hoard", "A hall of embers, lava along every edge, a mountain of gold in the middle. Echo is already working out what he could buy with it. And while he counts, the Grey Ghosts creep towards his own hoard."],
+        ["The corpse cave", "Beyond the ore tunnel: bones, mushrooms glowing in the dark, and an arm with a ring. Echo ate a mushroom and is very small now. Still greedy, though. In the back, the duergar laboratory is bubbling."]
       ],
       endlosName: "The endless raid", endlosText: n => "Round " + n + ": Echo knows every treasure. The plunderers know Echo.",
       levelKurz: (g, l) => g + " · Level " + l + "/3", levelEndlos: n => "Endless · Round " + n,
@@ -335,8 +337,8 @@
         ratte: ["Rat", "Gnaws through webs."]
       },
       dinge: { muenze: "Coins", beutel: "Gold pouch", nugget: "Gold nugget", edelstein: "Gem", stein: "Stone", truhe: "Chest" },
-      res: ["Acorns", "Garden herbs", "Tower moss", "Glow crystals", "Rootwood", "Spore mushrooms", "Shells", "Fire moss", "Dragon peppers"],
-      relikt: ["Goblin crown", "Silver chalice", "Drow amulet", "Rune hammer", "Dragon scale", "Spider idol", "Kuo-toa pearl", "Duergar crown", "Fist-sized dragon coin"],
+      res: ["Acorns", "Garden herbs", "Tower moss", "Glow crystals", "Rootwood", "Spore mushrooms", "Shells", "Fire moss", "Dragon peppers", "Giant mushrooms"],
+      relikt: ["Goblin crown", "Silver chalice", "Drow amulet", "Rune hammer", "Dragon scale", "Spider idol", "Kuo-toa pearl", "Duergar crown", "Fist-sized dragon coin", "The ring on the arm"],
       ev: {
         naturfrevel: "Nature is angry!", gekappt: "Vine cut!", mimik: "A mimic! Hmph.", zuSchwer: "Too heavy for the raven!",
         fels: "Boulder! Only a bear …", netz: "Web! Only a rat …", wildPlus: "+1 wild shape", keineWild: "No wild shapes left!",
@@ -345,7 +347,7 @@
       ausbruch: { feuerball: "FIREBALL!", blitz: "LIGHTNING!", baer: "BEAR RAGE!", grummeln: "Hmph. Echo sulks.", feuersturm: "FIRESTORM!" },
       ausbruchTipp: "His rage is full. With Echo you never know what happens next …",
       kommen: n => "The plunderers arrive in " + n + " …", jetzt: "Bring them on now", bereitLos: "Ready – let's go!", klaut: n => "−" + n + " gold",
-      bossRuft: { anfuehrer: "The goblin boss!", glasstab: "Glasstaff, leader of the Redbrands!", bugbaer: "The bugbear of the watchtower!", nezna: "Nezna the drow!", venomfang: "Venomfang!", vrock: "A vrock!", demogorgon: "DEMOGORGON!", riese: "The raging giant!", drokey: "Drokey, the master thief!" },
+      bossRuft: { anfuehrer: "The goblin boss!", glasstab: "Glasstaff, leader of the Redbrands!", bugbaer: "The bugbear of the watchtower!", nezna: "Nezna the drow!", venomfang: "Venomfang!", vrock: "A vrock!", demogorgon: "DEMOGORGON!", riese: "The raging giant!", drokey: "Drokey, the master thief!", laborMeister: "The duergar foreman! Now you see him, now you don't." },
       demo: { text: "Demogorgon cannot be defeated. Hold him off until he sinks back into the lake!", weg: "Demogorgon sinks into the lake …", schrei: "His scream snuffs out all magic!" },
       neznaFlieht: "Nezna turns into a bat!", drokeyWeg: "Drokey slips away through a secret passage – but without Echo's gold!", gift: "Poison breath!", wurf: "Boulder throw!", netzTreffer: "Webbed!", geheimgang: "Secret passage!",
       wachter: {
@@ -376,8 +378,8 @@
       hain: "Echo's grove", hainText: "Here grows what makes Echo stronger. Paid for in gold. He does it reluctantly.",
       beutel: n => n + " gold in the pouch", kaufen: n => n + " gold", max: "maxed",
       hainGruppen: { raub: "Raid", wesen: "Temper", abwehr: "Defence", besonders: "Special" },
-      feinde: { goblin: "Goblin", rotrobe: "Redbrand", bandit: "Bandit", bugbear: "Bugbear", soeldner: "Mercenary", zombie: "Zombie", blight: "Blight", spinne: "Giant spider", drow: "Drow", ettercap: "Ettercap", chasme: "Chasme", kuotoa: "Kuo-toa", duergar: "Duergar", graugeist: "Grey Ghost", glutkaefer: "Fire beetle", flammenwahrer: "Keeper of the Flame",
-        anfuehrer: "Goblin boss", glasstab: "Glasstaff", bugbaer: "The watchtower bugbear", nezna: "Nezna", venomfang: "Venomfang", vrock: "Vrock", demogorgon: "Demogorgon", riese: "The raging giant", drokey: "Drokey, the master thief" },
+      feinde: { goblin: "Goblin", rotrobe: "Redbrand", bandit: "Bandit", bugbear: "Bugbear", soeldner: "Mercenary", zombie: "Zombie", blight: "Blight", spinne: "Giant spider", drow: "Drow", ettercap: "Ettercap", chasme: "Chasme", kuotoa: "Kuo-toa", duergar: "Duergar", graugeist: "Grey Ghost", glutkaefer: "Fire beetle", flammenwahrer: "Keeper of the Flame", skelett: "Skeleton",
+        anfuehrer: "Goblin boss", glasstab: "Glasstaff", bugbaer: "The watchtower bugbear", nezna: "Nezna", venomfang: "Venomfang", vrock: "Vrock", demogorgon: "Demogorgon", riese: "The raging giant", drokey: "Drokey, the master thief", laborMeister: "The duergar foreman" },
       eig: { flug: "flies", schnell: "fast", zaeh: "tough", ausweichen: "dodges", unsichtbar: "sometimes invisible", netz: "webs guardians", feuerSchwach: "weak to fire", wurzelFest: "root-proof",
         ruft: "calls for help", blinzeln: "uses secret passages", gift: "poison breath stuns guardians", schrei: "scream stuns guardians", wurf: "throws boulders at guardians", verwandeln: "flees as a bat", unbesiegbar: "invincible – just hold him off!" },
       zweige: {
@@ -534,7 +536,7 @@
         freunde: ["Good friends", "Rex, Barradin and Ezekiel drop by more often."]
       },
       leben: n => "❤ " + n,
-      endeTitel: "Echo's raid ends", sieg: "The whole campaign plundered!", siegText: "All nine regions. And Echo still wants more. From now on it goes on endlessly.",
+      endeTitel: "Echo's raid ends", sieg: "The whole campaign plundered!", siegText: "All ten regions. And Echo still wants more. From now on it goes on endlessly.",
       punkte: "points",
       wert: { level: "Level", gold: "Total gold", erlegt: "Plunderers", schaetze: "Treasures" },
       spruch: {
@@ -615,7 +617,11 @@
     /* Themberchauds Halle: Lava an allen Rändern, in der Mitte der Goldberg. Der Drache schaut nur zu. */
     { k: "hort", stil: { ambient: "glut", horizont: "halle", glut: true, deko: "steine", res: "pfeffer", lavarand: true }, regel: "lavastrom", musik: "hort",
       relikt: "drachenmuenze", tier: "salamander", stoerer: "rauch", gegner: [["graugeist", 0.5], ["glutkaefer", 0.25], ["flammenwahrer", 0.25]], boss: "drokey",
-      f: { himmel: ["#140806", "#3a140a"], boden: ["#34180e", "#140806"], akzent: "#ff7a2a", stein: "#5e4238", res: "#e0402a", weg: "#40261a", gras: "#2a120a", lava: true } }
+      f: { himmel: ["#140806", "#3a140a"], boden: ["#34180e", "#140806"], akzent: "#ff7a2a", stein: "#5e4238", res: "#e0402a", weg: "#40261a", gras: "#2a120a", lava: true } },
+    /* Kapitel III: Leichenhöhle und Labor der Duergar – dunkel, Pilze, Knochen. Nur hinten anhängen. */
+    { k: "labor", stil: { ambient: "spore", horizont: "hoehle", deko: "steine", res: "sporen", knochen: true }, regel: "dunkel", musik: "labor",
+      relikt: "ring", tier: "fledermaus", stoerer: "spinne", gegner: [["skelett", 0.4], ["duergar", 0.45], ["graugeist", 0.15]], boss: "laborMeister",
+      f: { himmel: ["#07080a", "#121a16"], boden: ["#1a1c1a", "#0a0c0a"], akzent: "#9cff5a", stein: "#4a4a50", res: "#c88aff", weg: "#2a2a2c", gras: "#141a14", pilze: true } }
   ];
   const GEBIETE_ANZAHL = GEB.length, KAMPAGNE = GEBIETE_ANZAHL * LEVEL_PRO_GEBIET;
 
@@ -637,6 +643,7 @@
     graugeist:     { hp: 56, v: 48, klau: 24, r: 8, pkt: 13, farbe: "#55555f", unsichtbar: true, ausweichen: 0.15 },
     glutkaefer:    { hp: 88, v: 34, klau: 10, r: 9, pkt: 11, farbe: "#7a2a14" },
     flammenwahrer: { hp: 120, v: 27, klau: 20, r: 10, pkt: 17, farbe: "#8a2418" },
+    skelett:       { hp: 52, v: 34, klau: 10, r: 9, pkt: 9, farbe: "#bdb49c" },
     // Bosse
     anfuehrer: { hp: 430, v: 24, klau: 60, r: 15, pkt: 100, farbe: "#5d6e35", boss: true, ruft: "goblin" },
     glasstab:  { hp: 580, v: 22, klau: 70, r: 14, pkt: 120, farbe: "#9b3a2f", boss: true, blinzeln: true },
@@ -646,7 +653,8 @@
     vrock:     { hp: 1500, v: 26, klau: 110, r: 18, pkt: 220, farbe: "#8a8070", boss: true, bild: "vrock.jpg", bildY: 0.28, flug: true },
     demogorgon:{ hp: 1, v: 8.5, klau: 99999, r: 24, pkt: 500, farbe: "#9b3a2f", boss: true, bild: "demogorgon-karte.webp", bildY: 0.3, unbesiegbar: true, schrei: true },
     riese:     { hp: 1800, v: 13, klau: 220, r: 22, pkt: 350, farbe: "#7a6a5a", boss: true, bild: "portrait-riese.jpg", bildY: 0.5, wurf: true },
-    drokey:    { hp: 1600, v: 25, klau: 240, r: 17, pkt: 380, farbe: "#4a4a56", boss: true, blinzeln: true, unsichtbar: true }
+    drokey:    { hp: 1600, v: 25, klau: 240, r: 17, pkt: 380, farbe: "#4a4a56", boss: true, blinzeln: true, unsichtbar: true },
+    laborMeister: { hp: 1750, v: 21, klau: 240, r: 18, pkt: 390, farbe: "#5a3a22", boss: true, unsichtbar: true, ruft: "skelett" }
   };
 
   /* Wächter (Türme). ab = ab welchem Level (Index) verfügbar */
@@ -747,13 +755,13 @@
     kroete:     { sym: "🐸", farbe: "#a8d060", tempo: 140, reich: 82, takt: 0.85, schaden: 46 },
     salamander: { sym: "🦎", farbe: "#ff8a3a", tempo: 190, reich: 15, takt: 0.42, schaden: 24 }
   };
-  const GESTALT_GEBIET = { wald: "wolf", phandalin: "wolf", wachturm: "eule", schmiede: "salamander", donnerbaum: "kroete", unterreich: "eule", see: "kroete", gracklstugh: "salamander", hort: "salamander" };
+  const GESTALT_GEBIET = { wald: "wolf", phandalin: "wolf", wachturm: "eule", schmiede: "salamander", donnerbaum: "kroete", unterreich: "eule", see: "kroete", gracklstugh: "salamander", hort: "salamander", labor: "eule" };
   const GESTALT_AB = 1, GESTALT_DAUER = 8, GESTALT_CD = 40;
   /* ===== Stimmung je Gebiet: Jahreszeit und (zufällig je Durchlauf) Tageszeit, Wind, Dichte der Partikel ===== */
   const STIMMUNG = {
     wald: { s: "fruehling", draussen: true }, phandalin: { s: "sommer", draussen: true }, wachturm: { s: "herbst", draussen: true },
     schmiede: { s: "runen" }, donnerbaum: { s: "sturm", draussen: true }, unterreich: { s: "ewig" },
-    see: { s: "winter", draussen: true }, gracklstugh: { s: "glut" }, hort: { s: "drache" }
+    see: { s: "winter", draussen: true }, gracklstugh: { s: "glut" }, hort: { s: "drache" }, labor: { s: "ewig" }
   };
   /* dunkel: Zuschlag zur Dunkelheit · ton: Farbschleier · seite: von wo das Licht kommt (-1 links, 1 rechts) */
   const ZEITEN = {
@@ -927,6 +935,7 @@
     unterreich:  { grund: [48, 46], modi: ["lokrisch", "phrygisch", "harm"], tempo: [52, 68], walzer: 0.2, arp: ["harfe"], mel: ["glock", "stimme", "fl"], bass: ["vctrem", "kb"], pad: ["orgel", "vlntrem"], schlag: ["gong", "timp"], natur: "k_bach", luecken: 0.4 },
     see:         { grund: [53, 55, 50], modi: ["lydisch", "ionisch", "dorisch"], tempo: [60, 82], walzer: 0.4, arp: ["harfe", "gitarre"], mel: ["pan", "fl", "stimme", "klar"], bass: ["vc", "kb"], pad: ["geigest", "flst"], schlag: ["shake", "schelle"], natur: "k_wellen" },
     gracklstugh: { grund: [50, 49], modi: ["harm", "phrdom", "aeolisch"], tempo: [76, 96], walzer: 0.1, arp: ["gitarre", "spic"], mel: ["horn", "trp", "pos", "fag"], bass: ["tuba", "kb"], pad: ["orgel"], schlag: ["amboss", "timp", "bodh"], natur: "k_feuer" },
+    labor:       { grund: [47, 49], modi: ["phrygisch", "harm", "lokrisch"], tempo: [60, 78], walzer: 0.1, arp: ["harfe"], mel: ["glock", "fl", "stimme"], bass: ["vctrem", "kb"], pad: ["orgel", "vlntrem"], schlag: ["timp", "gong"], natur: "k_bach", luecken: 0.35 },
     hort:        { grund: [50, 47, 52], modi: ["harm", "phrdom", "dorisch", "lydisch"], tempo: [66, 88], walzer: 0.15, arp: ["harfe", "gitarre"], mel: ["horn", "glock", "oboe", "trp"], bass: ["tuba", "kb"], pad: ["orgel", "vctrem"], schlag: ["timp", "gong", "amboss"], natur: "k_feuer" }
   };
   const PROBEN = {
@@ -958,7 +967,7 @@
     unterreich: { arp: ["zit", "mbira"], pad: ["glas"], bass: ["didge"], schlag: ["darb"] },
     see: { arp: ["fharfe", "psa"], mel: ["hglo"], pad: ["glas", "psab"] },
     gracklstugh: { arp: ["bal"], bass: ["didge"], schlag: ["darb"] },
-    hort: { arp: ["fharfe"], mel: ["hglo"], pad: ["rorg"] } };
+    hort: { arp: ["fharfe"], mel: ["hglo"], pad: ["rorg"] }, labor: { arp: ["mbira", "zit"], pad: ["glas"], bass: ["didge"], schlag: ["rahm"] } };
   Object.keys(GEBIET_NEU).forEach(k => Object.keys(GEBIET_NEU[k]).forEach(f => GEBIET_NEU[k][f].forEach(i => { if (!GEBIET_MUSIK[k][f].includes(i)) GEBIET_MUSIK[k][f].push(i); })));
   /* Lagen für die Melodie: wohin welches Instrument gehört */
   const LAGE = { psa: 12, psab: 12, hglo: 12, fl: 12, flst: 12, oka: 12, pan: 12, glock: 24, stimme: 12, geige: 12, klar: 0, oboe: 12, horn: -12, fag: -12, pos: -12, trp: 0, dudel: 12, gitarre: 0, harfe: 12 };
@@ -3428,7 +3437,7 @@
       versatz(0, (px, py, s0, w) => { if (s0 % 18 > 2.9) return; const seite = Math.floor(s0 / 18) % 2 ? 3 : -3; x.save(); x.translate(px + Math.cos(w + Math.PI / 2) * seite, py + Math.sin(w + Math.PI / 2) * seite); x.rotate(w); x.fillStyle = "rgba(0,0,0,.2)"; oval(x, 0, 0, 2.6, 1.4); oval(x, 3.2, 0, 1.2, 1.1); x.restore(); });
     }
     // Laternen, Kristalle oder Glutbecken am Wegrand – geben dem Weg Licht
-    const k0 = G.k, lat = k0 === "schmiede" ? "kristall" : k0 === "unterreich" ? "pilzkristall" : k0 === "gracklstugh" || k0 === "hort" ? "glut" : "laterne";
+    const k0 = G.k, lat = k0 === "schmiede" ? "kristall" : k0 === "unterreich" || k0 === "labor" ? "pilzkristall" : k0 === "gracklstugh" || k0 === "hort" ? "glut" : "laterne";
     for (let s0 = 70, i = 0; s0 < P.gesamt - 40; s0 += 135, i++) {
       const a = pfadPunkt(P, s0), b = pfadPunkt(P, s0 + 2), w = Math.atan2(b.y - a.y, b.x - a.x), sd = i % 2 ? 1 : -1;
       const lx = a.x + Math.cos(w + Math.PI / 2) * 25 * sd, ly = a.y + Math.sin(w + Math.PI / 2) * 25 * sd;
@@ -3565,7 +3574,8 @@
     wald: ["pilzring", "lagerfeuer", "baumstamm", "steinkreis", "pilzring"], phandalin: ["heuhaufen", "brunnen", "kisten", "vogelscheuche", "lagerfeuer"],
     wachturm: ["ruine", "kisten", "lagerfeuer", "steinkreis", "baumstamm"], schmiede: ["lore", "kristalle", "amboss", "knochen"],
     donnerbaum: ["grabstein", "karren", "vogelscheuche", "knochen", "baumstamm"], unterreich: ["riesenpilz", "spinnennetz", "kristalle", "knochen", "riesenpilz"],
-    see: ["boot", "schilf", "eisloch", "schilf", "lagerfeuer"], gracklstugh: ["lavapfuetze", "amboss", "knochen", "kisten"], hort: ["muenzen", "lavapfuetze", "knochen", "muenzen", "kristalle"]
+    see: ["boot", "schilf", "eisloch", "schilf", "lagerfeuer"], gracklstugh: ["lavapfuetze", "amboss", "knochen", "kisten"], hort: ["muenzen", "lavapfuetze", "knochen", "muenzen", "kristalle"],
+    labor: ["knochen", "riesenpilz", "kisten", "knochen", "riesenpilz", "kristalle"]
   };
   function kulisseDeko(x, K, G, r, frei, L, P) {
     const liste = DEKO_GEBIET[G.k] || ["steinkreis"], n = 4 + Math.floor(r() * 3), feuer = [];
@@ -4052,6 +4062,10 @@
       x.fillStyle = "#e8c8b0"; x.beginPath(); x.moveTo(-r, r * 0.3); x.quadraticCurveTo(0, -r * 1.3, r, r * 0.3); x.closePath(); x.fill();
       const pg = x.createRadialGradient(-3, -3, 1, 0, 0, r * 0.6); pg.addColorStop(0, "#ffffff"); pg.addColorStop(1, "#c8c0d8");
       x.fillStyle = pg; kreis(x, 0, 0, r * 0.55);
+    } else if (art === "ring") { // der Ring am Arm aus der Leichenhöhle
+      x.lineWidth = r * 0.32; x.beginPath(); x.ellipse(0, r * 0.15, r * 0.7, r * 0.55, 0, 0, Math.PI * 2); x.stroke();
+      x.shadowColor = "#c88aff"; x.fillStyle = "#c88aff"; x.beginPath(); x.moveTo(0, -r * 0.95); x.lineTo(r * 0.32, -r * 0.55); x.lineTo(0, -r * 0.2); x.lineTo(-r * 0.32, -r * 0.55); x.closePath(); x.fill();
+      x.fillStyle = "rgba(255,255,255,.8)"; kreis(x, -r * 0.08, -r * 0.62, 1.2);
     } else if (art === "drachenmuenze") { // faustgroße Goldmünze mit Drachenkopf – das Abzeichen der Grauen Geister
       kreis(x, 0, 0, r * 0.95);
       x.shadowBlur = 0; x.strokeStyle = "#a8701e"; x.lineWidth = 1.4; x.beginPath(); x.arc(0, 0, r * 0.78, 0, Math.PI * 2); x.stroke();
@@ -4215,7 +4229,7 @@
     if (e.schild > 0) { x.fillStyle = "rgba(0,0,0,.6)"; x.fillRect(e.x - b / 2 - 1, y - 4, b + 2, 3); x.fillStyle = "#e0a046"; x.fillRect(e.x - b / 2, y - 3.5, b * klemm(e.schild / e.schildMax, 0, 1), 2); }
   }
   function malFigur(x, typ, r, d, zeit, e) {
-    const k = { goblin: 0, rotrobe: 1, bandit: 1, bugbear: 2, soeldner: 3, zombie: 4, blight: 5, spinne: 6, drow: 7, ettercap: 8, chasme: 9, kuotoa: 10, duergar: 11, graugeist: 12, glutkaefer: 13, flammenwahrer: 14, anfuehrer: 0, glasstab: 1, nezna: 7, drokey: 12 }[typ];
+    const k = { goblin: 0, rotrobe: 1, bandit: 1, bugbear: 2, soeldner: 3, zombie: 4, blight: 5, spinne: 6, drow: 7, ettercap: 8, chasme: 9, kuotoa: 10, duergar: 11, graugeist: 12, glutkaefer: 13, flammenwahrer: 14, anfuehrer: 0, glasstab: 1, nezna: 7, drokey: 12, skelett: 15, laborMeister: 11 }[typ];
     const f = d.farbe;
     if (k === 6 || k === 8) { // Spinne / Ettercap
       x.strokeStyle = "#1a1416"; x.lineWidth = 1.6;
@@ -4245,6 +4259,17 @@
       x.strokeStyle = f; x.lineWidth = 2.2; x.lineCap = "round";
       for (let i = 0; i < 6; i++) { const w = i / 6 * Math.PI * 2 + Math.sin(zeit * 6) * 0.2; x.beginPath(); x.moveTo(0, 0); x.lineTo(Math.cos(w) * r * 1.2, Math.sin(w) * r * 1.2); x.stroke(); }
       x.fillStyle = "#3b2a1b"; kreis(x, 0, 0, r * 0.6); x.fillStyle = "#ff3a2a"; kreis(x, -1.8, -1, 1.2); kreis(x, 1.8, -1, 1.2);
+      return;
+    }
+    if (k === 15) { // Skelett von oben: Rippen, Schädel mit dunklen Augenhöhlen
+      x.fillStyle = "rgba(0,0,0,.25)"; kreis(x, 0, 1, r * 0.9);
+      x.strokeStyle = f; x.lineWidth = 1.6; x.lineCap = "round";
+      x.beginPath(); x.moveTo(0, -r * 0.2); x.lineTo(0, r * 0.9); x.stroke();
+      for (let i = 0; i < 4; i++) { const yy = r * (0.05 + i * 0.22), b = r * (0.75 - i * 0.1); x.beginPath(); x.moveTo(-b, yy - 1); x.quadraticCurveTo(0, yy + 2.5, b, yy - 1); x.stroke(); }
+      const sw = Math.sin(zeit * 8 + (e ? e.ph : 0)) * 0.4;
+      x.beginPath(); x.moveTo(-r * 0.75, 0); x.lineTo(-r * 1.1, r * 0.5 + sw * r); x.moveTo(r * 0.75, 0); x.lineTo(r * 1.1, r * 0.5 - sw * r); x.stroke();
+      x.fillStyle = "#e2dac4"; kreis(x, 0, -r * 0.45, r * 0.48);
+      x.fillStyle = "#1a1612"; kreis(x, -r * 0.18, -r * 0.5, 1.3); kreis(x, r * 0.18, -r * 0.5, 1.3);
       return;
     }
     // humanoide Gestalten von oben: Schultern, Kopf, Merkmal

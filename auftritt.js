@@ -38,7 +38,7 @@
       lieder: { reigen: "Tavernenreigen", bugbear: "Der Bugbear im Fass", klage: "Phandalins Klage", schmiede: "Hammer und Amboss", seemann: "Seemannsgarn", walzer: "Demogorgons Walzer",
         schatten: "Ezekiels Schattentanz", rex: "Rex' wilde Jagd", ploop: "Ploopploopeens Tiefseeshanty", venom: "Venomfangs Odem",
         buerger: "Des Bürgermeisters Geldbeutel", palast: "Hymne der Krone", elfen: "Mondscheinreigen der Feen", goetter: "Das Ewige Lied",
-        flammen: "Die Ballade vom Meister der Flammen" },
+        flammen: "Die Ballade vom Meister der Flammen", pilz: "Die Kopfstimmen-Polka" },
       stimmen_laden: "🎻 Instrumente werden gestimmt …",
       erfinden: { vorlage: ["Die Ballade vom {a} {n}", "Das Lied vom {a} {n}", "Der Reigen vom {a} {n}", "Die Mär vom {a} {n}", "Die Klage vom {a} {n}"],
         adj: ["traurigen", "betrunkenen", "tanzenden", "verliebten", "singenden", "hungrigen", "verlorenen", "kichernden", "einsamen", "wütenden", "verfluchten", "goldenen"],
@@ -148,7 +148,7 @@
       lieder: { reigen: "Tavern Round", bugbear: "The Bugbear in the Barrel", klage: "Phandalin's Lament", schmiede: "Hammer and Anvil", seemann: "Sailor's Yarn", walzer: "Demogorgon's Waltz",
         schatten: "Ezekiel's Shadow Dance", rex: "Rex's Wild Hunt", ploop: "Ploopploopeen's Deep-Sea Shanty", venom: "Venomfang's Breath",
         buerger: "The Mayor's Purse", palast: "Hymn of the Crown", elfen: "Moonlit Dance of the Fey", goetter: "The Eternal Song",
-        flammen: "The Ballad of the Master of Flames" },
+        flammen: "The Ballad of the Master of Flames", pilz: "The Falsetto Polka" },
       stimmen_laden: "🎻 Tuning the instruments …",
       erfinden: { vorlage: ["The Ballad of the {a} {n}", "The Song of the {a} {n}", "The Round of the {a} {n}", "The Tale of the {a} {n}", "The Lament of the {a} {n}"],
         adj: ["Sad", "Drunken", "Dancing", "Lovesick", "Singing", "Hungry", "Lost", "Giggling", "Lonely", "Angry", "Cursed", "Golden"],
@@ -277,6 +277,9 @@
       motive: [[0, 3, 6, 9], [0, 2, 3, 6, 8], [0, 3, 4, 6, 9], [0, 6, 9]], floete: { g: [10], u: [4, 10] } },
     venom: { modus: "harmonisch", grund: 64, tempo: 1.08, folge: [0, 5, 3, 4, 0, 3, 5, 4], takt: 16, bass: [0, 8],
       motive: [[0, 2, 4, 6, 8, 12], [0, 3, 6, 8, 11], [2, 4, 6, 10, 12], [0, 4, 6, 8, 10, 12]], floete: { g: [2, 10], u: [6, 10, 14] } },
+    /* Kapitel III: Barradin hat den Pilz gegessen, ist 30 cm groß und singt eine Oktave höher – Polka mit Hm-ta-Bass, schnell und hoch */
+    pilz: { modus: "ionisch", grund: 67, tempo: 1.24, folge: [0, 4, 0, 4, 0, 3, 4, 0], takt: 16, bass: [0, 4, 8, 12],
+      motive: [[0, 4, 8, 12], [0, 2, 4, 8, 12], [0, 4, 6, 8, 12], [2, 4, 8, 10, 12]], floete: { g: [12], u: [6, 12] } },
     /* Stücke, die es nur auf Barradins Weg gibt */
     buerger: { nurWeg: true, modus: "ionisch", grund: 60, tempo: 1.04, folge: [0, 4, 5, 3, 0, 3, 4, 0], takt: 16, bass: [0, 8],
       motive: [[0, 4, 6, 8, 12], [2, 4, 8, 10, 12], [0, 4, 8, 12, 14], [4, 6, 8, 10, 12]], floete: { g: [14], u: [6, 14] } },
@@ -305,6 +308,7 @@
     rex: ["7.7.4...7.7.9...", "8...6...3.4.6...", "7.7.4...2.3.4...", "6...4...1-------", "7.7.4...7.7.9...", "a...8...6...3...", "5...7...3.4.5...", "4...6...8-------"],
     ploop: ["7.47.89.87.4", "5.7a.75.73..", "4.79.87.64..", "6.84.68..4..", "7.47.89.87.4", "a.97.53.57..", "8.63.68.76..", "7..4..0-----"],
     venom: ["7.6.7...4...2...", "5.4.5...2...0...", "3.4.5...7...a...", "8.7.6...4-------", "7.6.7...4...2...", "a.9.7...5...3...", "9.8.7...5...7...", "6...8...4-------"],
+    pilz: ["7.4.7.4.9.7.9...", "8.5.8.5.a.8.a...", "9.b.9.7.8.a.8.6.", "7...4...7-------", "7.4.7.4.9.7.9...", "a.8.a.8.c...a...", "9.7.9.b.a.8.6.8.", "9.8.7.6.7-------"],
     buerger: ["7...7.9.b...9.7.", "8...6.8.b...8...", "7...5.7.9.8.7...", "5...7...a-------", "7...7.9.b...9.7.", "a...7...5.7.a...", "4.4.6...8...6.8.", "7...4...0-------"],
     palast: ["7-----4.4...7.9.", "a-------7...5...", "6...8...4...6.8.", "9-------7-------", "5.6.7...9.8.7...", "a.9.a...7...5...", "8.9.a...5...8...", "4...6...8-------"],
     elfen: ["4.7.9...7...", "5.8.a...8...", "9.8.7-------", "6...4-------", "5.7.9...7...", "5.8.a...8...", "4.6.8...6...", "7-----4-----"],
@@ -559,7 +563,7 @@
   Object.assign(KARTE, {"psa":[70,72,74,76,78,80,82,84,86,88,90],"zit":[47,49,51,54,56,59,61,63,66,68,71,73,75,78,80,83],"bal":[61,65,72,77,84,89],"mbira":[46,48,50,51,53,55,56,58,60,62,63,65,67,68,70,72,73,74,75],"fharfe":[36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,82,84,86,88,90,92],"strum":[50,52,54,55,57,59,61,62,64,66,67,69,71,73,74,76,78,79,81],"hglo":[60,62,64,66,68,70,72,74,76,78,80,81,84,86,88,90,92,94,96],"hack":[48,51,54,57,60,63,66,69,72,75,78,81,84,87,90,93,96]});
   const FARBE = { klage: { t: "psa", f: 1.6 }, seemann: { t: "strum", f: 1.15, tr: "rahm" }, buerger: { t: "strum", f: 1.15 }, walzer: { t: "fharfe", f: 1.4 },
     schatten: { t: "zit", f: 1.8, tr: "darb" }, schmiede: { t: "bal", f: 1.7, tr: "darb" }, palast: { t: "hack", f: 1.1 }, elfen: { t: "psa", f: 1.6, tr: "rahm" },
-    goetter: { t: "hglo", f: 1.5, tr: "rahm" }, flammen: { t: "mbira", f: 1.7, tr: "darb" }, ploop: { t: "bal", f: 1.7 }, rex: { t: "strum", f: 1.15 }, venom: { t: "zit", f: 1.8, tr: "darb" } };
+    goetter: { t: "hglo", f: 1.5, tr: "rahm" }, flammen: { t: "mbira", f: 1.7, tr: "darb" }, pilz: { t: "hack", f: 1.1, tr: "rahm" }, ploop: { t: "bal", f: 1.7 }, rex: { t: "strum", f: 1.15 }, venom: { t: "zit", f: 1.8, tr: "darb" } };
   const TROMMEL_PROBE = { rahm: ["rahm_1", "rahm_2", 1.5], darb: ["darb_1", "darb_2", 1.5] };
   const imBereich = (g, m) => { const k = KARTE[g]; if (!k) return m; while (m < k[0] - 2) m += 12; while (m > k[k.length - 1] + 2) m -= 12; return m; };
   const farbe = daten => (daten && daten.lied && FARBE[daten.lied.key]) || {};

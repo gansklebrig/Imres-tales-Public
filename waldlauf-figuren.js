@@ -355,7 +355,8 @@
     },
 
     /* Duergar, von den Stimmen besessen */
-    duergar() {
+    duergar(art) {
+      const alch = art === "alchemist", meister = art === "meister";
       const [c, x] = grund(130, 160);
       linie(x, "#3a3a3e", 12, [[76, 112], [82, 140], [82, 156]]);
       linie(x, "#2e2e32", 12, [[56, 112], [50, 140], [48, 156]]);
@@ -373,12 +374,36 @@
       linie(x, "#2a2622", 3, [[44, 30], [58, 34]]);
       leuchtAuge(x, 50, 36, 3, 2, "#c88aff", 9); leuchtAuge(x, 62, 36, 2.6, 1.8, "#c88aff", 9);
       x.fillStyle = "#8a8682"; poly(x, [[44, 36], [30, 30], [46, 42]]);
+      if (alch) {
+        // Lederschürze mit Flecken, Schutzbrille auf der Stirn, gläserne Flasche mit giftgrünem Gebräu
+        x.fillStyle = "#5a3a22"; x.beginPath(); x.moveTo(46, 66); x.lineTo(86, 66); x.lineTo(92, 120); x.lineTo(42, 120); x.closePath(); x.fill();
+        x.fillStyle = "rgba(150,230,90,.55)"; oval(x, 58, 90, 5, 3); oval(x, 76, 104, 4, 2.5); x.fillStyle = "rgba(200,120,255,.5)"; oval(x, 66, 112, 3.5, 2);
+        x.fillStyle = "#3a3632"; x.fillRect(44, 22, 34, 6);
+        x.fillStyle = "#c9a040"; oval(x, 52, 25, 5.5, 5.5); oval(x, 68, 25, 5.5, 5.5);
+        x.fillStyle = "rgba(160,255,120,.7)"; oval(x, 52, 25, 3.5, 3.5); oval(x, 68, 25, 3.5, 3.5);
+        linie(x, "#6a6a72", 10, [[48, 64], [32, 80], [26, 70]]);
+        x.fillStyle = "#8a8682"; oval(x, 26, 68, 5.5, 5.5);
+        x.save(); x.shadowColor = "#9cff5a"; x.shadowBlur = 12;
+        x.fillStyle = "rgba(220,240,230,.55)"; x.beginPath(); x.arc(24, 52, 11, 0, Math.PI * 2); x.fill(); x.fillRect(20, 30, 8, 14);
+        x.fillStyle = "rgba(140,240,80,.9)"; x.beginPath(); x.arc(24, 55, 8, 0, Math.PI); x.fill();
+        x.restore(); x.fillStyle = "#6a4a2a"; x.fillRect(19, 26, 10, 6);
+        x.fillStyle = "rgba(200,255,160,.8)"; oval(x, 20, 48, 2, 2); oval(x, 27, 44, 1.4, 1.4);
+        return c;
+      }
+      if (meister) {
+        // Helm mit Hörnern und Kette über der Brust
+        x.fillStyle = "#4a4a52"; x.beginPath(); x.arc(62, 30, 19, Math.PI, 0); x.fill(); x.fillRect(42, 28, 40, 6);
+        x.fillStyle = "#d8d0bc"; poly(x, [[44, 26], [26, 6], [36, 4], [50, 22]]); poly(x, [[80, 26], [98, 6], [88, 4], [74, 22]]);
+        x.strokeStyle = "#c9a040"; x.lineWidth = 2.5; x.beginPath(); x.moveTo(46, 62); x.quadraticCurveTo(66, 84, 90, 62); x.stroke();
+        x.fillStyle = "#c88aff"; x.save(); x.shadowColor = "#c88aff"; x.shadowBlur = 10; oval(x, 67, 76, 4, 5); x.restore();
+      }
       // Arm mit Kriegshacke
       linie(x, "#6a6a72", 10, [[48, 64], [32, 86], [24, 86]]);
       x.fillStyle = "#8a8682"; oval(x, 22, 86, 5.5, 5.5);
       linie(x, "#4a3424", 4, [[22, 112], [22, 30]]);
       x.fillStyle = verlauf(x, 4, 24, 40, 40, [[0, "#c9c4b8"], [1, "#6a6660"]]);
       poly(x, [[22, 26], [42, 34], [22, 40], [2, 46], [8, 34]]);
+      if (meister) { x.fillStyle = verlauf(x, 4, 24, 40, 40, [[0, "#e8d8a8"], [1, "#8a6a30"]]); poly(x, [[22, 22], [46, 32], [22, 42], [0, 48], [6, 32]]); }
       return c;
     },
 

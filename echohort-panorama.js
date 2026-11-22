@@ -19,7 +19,7 @@
     x.fillStyle = g; x.fillRect(px - rad, py - rad, rad * 2, rad * 2);
   }
   /* Teilchen je Jahreszeit: Blüten, Pollen, Laub, Regen, Schnee, Glimmer, Asche, Glut */
-  const WETTER = { wald: "pollen", phandalin: "laub", wachturm: "nebel", schmiede: "glut", donnerbaum: "asche", unterreich: "glimmer", see: "blase", gracklstugh: "glut", hort: "glut" };
+  const WETTER = { wald: "pollen", phandalin: "laub", wachturm: "nebel", schmiede: "glut", donnerbaum: "asche", unterreich: "glimmer", see: "blase", gracklstugh: "glut", hort: "glut", labor: "glimmer" };
   function wetter(x, info, art, seed) {
     const r = zuf(seed), t = info.t, n = art === "nebel" ? 6 : 34;
     for (let i = 0; i < n; i++) {
@@ -87,7 +87,7 @@
     // Blüten und Pilzringe (statisch nach Saat, sanft leuchtend)
     for (let i = 0; i < 26; i++) {
       const s = i % 2 ? -1 : 1, px = sx(info, s, 0.06 + r() * 0.9), py = info.oben + hh * r(), art = r();
-      if (k === "unterreich" || k === "schmiede" || k === "gracklstugh" || k === "hort") { const a = 0.5 + 0.5 * Math.sin(t * 1.2 + i); glow(x, px, py, 12, (k === "unterreich" ? "rgba(196,154,224," : "rgba(255,150,70,") + (0.25 * a).toFixed(3) + ")"); x.fillStyle = k === "unterreich" ? "rgba(196,154,224,.7)" : "rgba(255,170,90,.6)"; x.beginPath(); x.arc(px, py, 2.2, 0, PI2); x.fill(); continue; }
+      if (k === "unterreich" || k === "labor" || k === "schmiede" || k === "gracklstugh" || k === "hort") { const a = 0.5 + 0.5 * Math.sin(t * 1.2 + i); glow(x, px, py, 12, ((k === "unterreich" || k === "labor") ? "rgba(196,154,224," : "rgba(255,150,70,") + (0.25 * a).toFixed(3) + ")"); x.fillStyle = (k === "unterreich" || k === "labor") ? "rgba(196,154,224,.7)" : "rgba(255,170,90,.6)"; x.beginPath(); x.arc(px, py, 2.2, 0, PI2); x.fill(); continue; }
       if (art < 0.5) { const f = ["#e8b0c8", "#f0e0a0", "#c8a0e0", "#f0f0e8"][i % 4]; for (let j = 0; j < 5; j++) { const w = j / 5 * PI2 + t * 0.1; x.fillStyle = f; x.beginPath(); x.ellipse(px + Math.cos(w) * 2.6, py + Math.sin(w) * 2.6, 2, 1.2, w, 0, PI2); x.fill(); } x.fillStyle = "#e0a046"; x.beginPath(); x.arc(px, py, 1.2, 0, PI2); x.fill(); }
       else { for (let j = 0; j < 7; j++) { const w = j / 7 * PI2; x.fillStyle = "#cfc3a8"; x.beginPath(); x.arc(px + Math.cos(w) * 10, py + Math.sin(w) * 8, 2.4, 0, PI2); x.fill(); x.fillStyle = "#8a3a2a"; x.beginPath(); x.arc(px + Math.cos(w) * 10, py + Math.sin(w) * 8 - 0.6, 1.6, 0, PI2); x.fill(); } }
     }
@@ -95,13 +95,21 @@
     const h = takt(t, 19, 7, 4);
     if (h >= 0) {
       const s = Math.floor(t / 19) % 2 ? 1 : -1, px = sx(info, s, 0.95 - h * 0.9), py = info.oben + hh * (0.3 + 0.4 * Math.sin(h * 3)) - Math.abs(Math.sin(h * 26)) * 6;
-      if (k === "unterreich" || k === "schmiede" || k === "gracklstugh" || k === "hort") { const fl = Math.sin(t * 18); x.fillStyle = "#0a090c"; x.beginPath(); x.moveTo(px, py); x.quadraticCurveTo(px - 6, py - 6 * fl, px - 12, py - 2 * fl); x.lineTo(px, py + 3); x.lineTo(px + 12, py - 2 * fl); x.quadraticCurveTo(px + 6, py - 6 * fl, px, py); x.fill(); }
+      if (k === "unterreich" || k === "labor" || k === "schmiede" || k === "gracklstugh" || k === "hort") { const fl = Math.sin(t * 18); x.fillStyle = "#0a090c"; x.beginPath(); x.moveTo(px, py); x.quadraticCurveTo(px - 6, py - 6 * fl, px - 12, py - 2 * fl); x.lineTo(px, py + 3); x.lineTo(px + 12, py - 2 * fl); x.quadraticCurveTo(px + 6, py - 6 * fl, px, py); x.fill(); }
       else { x.fillStyle = "#8a7a66"; x.beginPath(); x.ellipse(px, py, 6, 4.5, 0, 0, PI2); x.fill(); x.beginPath(); x.arc(px - 5 * s * -1, py - 2, 3, 0, PI2); x.fill(); x.beginPath(); x.ellipse(px + 5 * s, py - 6, 1.4, 4, 0.3 * s, 0, PI2); x.fill(); x.fillStyle = "#f0ece4"; x.beginPath(); x.arc(px - 6 * s, py + 1, 1.6, 0, PI2); x.fill(); }
     }
     // Schmetterlinge oder Glutfalter
     for (let i = 0; i < 4; i++) { const s = i % 2 ? -1 : 1, px = sx(info, s, 0.5) + Math.sin(t * 0.5 + i * 2) * info.L * 0.35, py = info.oben + hh * (0.2 + i * 0.18) + Math.cos(t * 0.7 + i) * 30, fl = Math.abs(Math.sin(t * 12 + i)); x.fillStyle = k === "hort" || k === "gracklstugh" ? "rgba(255,150,60,.8)" : ["rgba(240,200,120,.85)", "rgba(220,170,230,.85)"][i % 2]; x.beginPath(); x.ellipse(px - 2.5 * fl, py, 2.6 * fl + 0.3, 1.8, 0.3, 0, PI2); x.ellipse(px + 2.5 * fl, py, 2.6 * fl + 0.3, 1.8, -0.3, 0, PI2); x.fill(); }
     // Drachenmünze rollt über den Boden (Hort)
     if (k === "hort") { const m = takt(t, 11, 3, 1); if (m >= 0) { const px = sx(info, 1, 0.1 + m * 0.8), py = info.oben + hh * 0.8; x.fillStyle = "#e0b24a"; x.beginPath(); x.ellipse(px, py, 3.2, 3.2 * Math.abs(Math.cos(m * 30)) + 0.5, 0, 0, PI2); x.fill(); } }
+    // Kapitel III: der Arm mit dem Ring ragt aus einem Knochenhaufen und winkt ab und zu
+    if (k === "labor") {
+      const px = sx(info, -1, 0.35), py = info.oben + hh * 0.72, w = takt(t, 9, 1.6, 2), wk = w >= 0 ? Math.sin(w * Math.PI * 4) * 0.35 : 0;
+      for (let j = 0; j < 9; j++) { x.save(); x.translate(px + (j - 4) * 5, py + 6 + (j % 3) * 2); x.rotate(j * 1.3); x.fillStyle = "#4a443a"; x.fillRect(-6, -1.2, 12, 2.4); x.restore(); }
+      x.save(); x.translate(px, py); x.rotate(-0.2 + wk); x.fillStyle = "#c8b8a0"; x.fillRect(-1.6, -14, 3.2, 14); x.beginPath(); x.arc(0, -15, 3, 0, PI2); x.fill();
+      x.fillStyle = "#e0b040"; x.fillRect(-1.8, -16, 3.6, 1.2); x.restore();
+      const gl = Math.max(0, Math.sin(t * 1.3)) ** 10; if (gl > 0.05) glow(x, px, py - 15, 8, "rgba(255,224,128," + (0.9 * gl).toFixed(2) + ")");
+    }
     // Kuo-Toa-Gräte am Ufer (See)
     if (k === "see") { const px = sx(info, -1, 0.3), py = info.oben + hh * 0.7; x.strokeStyle = "#cfc8b8"; x.lineWidth = 1; x.beginPath(); x.moveTo(px - 12, py); x.lineTo(px + 12, py); for (let j = -8; j <= 8; j += 4) { x.moveTo(px + j, py - 4); x.lineTo(px + j, py + 4); } x.stroke(); x.beginPath(); x.moveTo(px + 12, py); x.lineTo(px + 18, py - 4); x.lineTo(px + 18, py + 4); x.closePath(); x.stroke(); }
   }

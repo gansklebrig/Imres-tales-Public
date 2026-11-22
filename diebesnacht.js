@@ -31,11 +31,11 @@
   const TX = {
     de: {
       label: "Schurken-Probe", titel: "Ezekiels lange Nacht",
-      text: "Sechs Nächte, achtzehn Orte: Ezekiel leert fremde Taschen, bleibt im Schatten, knackt jede Truhe und verschwindet, bevor jemand „Dieb!“ rufen kann. Was er dabei denkt, weiß nur Ezekiel.",
+      text: "Sieben Nächte, einundzwanzig Orte: Ezekiel leert fremde Taschen, bleibt im Schatten, knackt jede Truhe und verschwindet, bevor jemand „Dieb!“ rufen kann. Was er dabei denkt, weiß nur Ezekiel.",
       steuerung: "Tippe auf einen Ort, um dorthin zu schleichen. Tippe Gäste, Wachen, Kerzen und Truhen an, um zu tun, was ein Schurke eben tut.",
       start: "▶ In die Nacht", los: "▶ Los", weiter: "▶ Weiter", nochmal: "↻ Neue Nacht", beenden: "Nacht beenden", erneut: "▶ Noch einmal",
       pause: "Im Schatten verharren", pauseText: "Niemand bemerkt dich, solange du stillhältst.",
-      naechte: [["Phandalin", "Zum Schlafenden Riesen"], ["Die Schlossruine", "Bei den Roten Roben"], ["Donnerbaum", "Der verfallene Wachturm"], ["Gracklstugh", "Die Stadt der Duergar"], ["Das Unterreich", "Ilvaras Festung"], ["Gracklstugh", "Das gestohlene Drachenei"]],
+      naechte: [["Phandalin", "Zum Schlafenden Riesen"], ["Die Schlossruine", "Bei den Roten Roben"], ["Donnerbaum", "Der verfallene Wachturm"], ["Gracklstugh", "Die Stadt der Duergar"], ["Das Unterreich", "Ilvaras Festung"], ["Gracklstugh", "Das gestohlene Drachenei"], ["Gracklstugh", "Das Ei des Drachen"]],
       nacht: n => "Nacht " + n, endlos: k => "Endlose Nacht · " + k, endlosUnter: "Die Nacht nimmt kein Ende",
       kurz: (n, s) => "N" + n + " · " + s + "/3", kurzEndlos: k => "∞ " + k,
       lv: [
@@ -56,7 +56,10 @@
         ["Das Grab", "Hier ruht eine Klinge, die leuchtet wie ein Sonnenaufgang. Trägst du sie, leuchtest du mit – und alle sehen dich."],
         ["Der Markt der Klingen", "Ein Grauer Geist mischt sich unters Volk. Er trägt ihr Abzeichen: eine faustgroße Goldmünze mit Drachenkopf. Nimm sie ihm ab – von hinten."],
         ["Die Slums der Grauen Geister", "Ganz unten in Gracklstugh. Die Späher der Grauen Geister sind flink und sehen im Dunkeln weit. Drokey hockt bei seiner Truhe – sobald Alarm geschlagen wird, haut er ab."],
-        ["Themberchauds Halle", "Hier verschwand das Ei. Lava an allen Rändern verrät dich mit ihrem Schein, auf dem Goldberg schläft der Meister der Flammen. Lärm weckt ihn. Und eine Münze vom Berg … merkt doch keiner."]
+        ["Themberchauds Halle", "Hier verschwand das Ei. Lava an allen Rändern verrät dich mit ihrem Schein, auf dem Goldberg schläft der Meister der Flammen. Lärm weckt ihn. Und eine Münze vom Berg … merkt doch keiner."],
+        ["Der Markt", "Ein ganz gewöhnlicher Markt. Barradin beschuldigt gerade einen Händler, und alle schauen hin. Einer der Duergar trägt den Schlüssel zum Erztunnel."],
+        ["Die Leichenhöhle", "Knochen überall. Die Skelette sehen schlecht, aber sie geben nicht auf. Und irgendwo flüstert ein Geist ohne Namen."],
+        ["Das Labor der Duergar", "Kolben blubbern, Pilze glimmen. Ein Duergar-Alchemist bewacht die Truhe. Sobald Alarm geschlagen wird, rennt er los. Einer ist uns schon entwischt."]
       ],
       ziel: { schluessel: "Stiehl den Schlüssel", truhe: "Knacke die Truhe", frei: "Finde den Ausgang", schwert: "Hol dir die Klinge", ausgang: "✓ Zum Ausgang!" },
       zielWort: "Ziel: ",
@@ -84,9 +87,10 @@
         "Donnerbaum ist verlassen. Fast. Goblins, ein schlafender Bugbear – und etwas Grünes, das auf Gold schläft.",
         "In Gracklstugh wird Tag und Nacht geschmiedet. Und der Riese in der Gasse hört wieder Stimmen.",
         "Ilvaras Festung. Ketten, Spinnweben – und ein Grab, das schon viel zu lange wartet.",
-        "Später, wieder in Gracklstugh: Ein Drachenei ist gestohlen. Ezekiel hört sich auf eigene Faust um – die Spur führt zu einer Goldmünze mit Drachenkopf und zu einem Dieb namens Drokey."
+        "Später, wieder in Gracklstugh: Ein Drachenei ist gestohlen. Ezekiel hört sich auf eigene Faust um – die Spur führt zu einer Goldmünze mit Drachenkopf und zu einem Dieb namens Drokey.",
+        "Kardal kann nicht helfen, Buppido will uns seinen Altar zeigen, und Barradin hat sich gerade mit einem Händler angelegt. Ezekiel geht lieber allein voraus: durch den Markt, durch die Leichenhöhle, bis zu einem Labor, in dem es blubbert."
       ],
-      alarmRuf: ["Die Glocke von Phandalin läutet!", "Die Kultglocke dröhnt durch die Ruine!", "Ein Goblin bläst ins Horn!", "Die Duergar schlagen Alarm auf dem Amboss!", "Ein Gong hallt durch das Unterreich!", "Ein Pfiff gellt durch die Gassen von Gracklstugh!"],
+      alarmRuf: ["Die Glocke von Phandalin läutet!", "Die Kultglocke dröhnt durch die Ruine!", "Ein Goblin bläst ins Horn!", "Die Duergar schlagen Alarm auf dem Amboss!", "Ein Gong hallt durch das Unterreich!", "Ein Pfiff gellt durch die Gassen von Gracklstugh!", "Ein Duergar hämmert mit dem Kolben auf den Kessel!"],
       alarm: "ALARM!", alarmSub: "Verstärkung kommt – die Kerzen brennen gleich wieder.", alarmHinweis: "Sobald du das Ziel hast, wird Alarm geschlagen: Verstärkung kommt, Kerzen werden wieder angezündet. Der Rückweg ist die eigentliche Prüfung.",
       leiche: "Eine Leiche! Alarm!", verborgen: "Versteckt.", leichenHinweis: "Ausgeschaltete Wachen werden gefunden. Tippe sie an, damit Ezekiel sie versteckt.",
       magier: "Arkanes Auge!", magierHinweis: "Ein Magier tastet regelmäßig mit einem Arkanen Auge durch Wände. Achte auf das violette Leuchten – dann ab ins Fass oder weg.",
@@ -109,6 +113,11 @@
       tageszeit: { daemmerung: "Abenddämmerung", mitternacht: "Mitternacht", morgengrauen: "Kurz vor Morgengrauen" },
       /* Nacht-eigene Texte: überschreiben die allgemeinen, solange eine Karte dieser Nacht läuft */
       ueber: {
+        7: { ziel: { schluessel: "Stiehl den Tunnelschlüssel" }, schluesselDa: "Der Tunnelschlüssel!", bossName: "Alchemist", auftragBoss: "Stelle den Alchemisten",
+          glasstabHinweis: "Ein Duergar-Alchemist bewacht die Truhe. Sobald Alarm geschlagen wird, flieht er zum Ausgang – stell ihn, bevor er entkommt.",
+          glasstabFlieht: "Der Alchemist rennt!", glasstabSieht: "Eindringling im Labor!", glasstabGefangen: "Alchemist gestellt!", glasstabSpruch: "„Grubnar drak khaz!“ Keiner von euch spricht Zwergisch.", glasstabWeg: "Der Alchemist ist entkommen. Schon wieder einer.",
+          friedrich: ["Kopfschuss. Wie immer.", "Rex, bleib. Nicht an die Knochen.", "Wer hat eigentlich die Flöten eingepackt?", "Lass mir was übrig."],
+          barradin: ["Psst – ich beschuldige einen Händler, dann schauen alle her!", "Ich hab den Pilz gegessen. Meine Stimme ist jetzt sehr hoch. Und sehr laut.", "Echo hat den Wachen eine Münze gezeigt. Jetzt verbeugen sie sich."] },
         6: { ziel: { schluessel: "Stiehl die Drachenmünze" }, schluesselDa: "Die Drachenmünze!", bossName: "Drokey", auftragBoss: "Stelle Drokey",
           glasstabHinweis: "Drokey ist hier. Sobald Alarm geschlagen wird, flieht er zum Ausgang – stell ihn, bevor er entkommt.",
           glasstabFlieht: "Drokey haut ab!", glasstabSieht: "Ein Schnüffler!", glasstabGefangen: "Drokey gestellt!", glasstabSpruch: "„Das Ei? Frag doch die Rotroben …“", glasstabWeg: "Drokey ist entkommen.",
@@ -134,6 +143,7 @@
         n4: ["Ein Befehl der Duergar", "„Der Riese in der Schmiedegasse hört wieder Stimmen. Doppelte Wachen an der Esse. Und niemand redet mit ihm über Spinnen.“"],
         n5: ["Ein Siegel des Hauses Mizzrym", "„Lasst niemanden ins Grab. Was dort leuchtet, gehört dem Haus Mizzrym. – I.“"],
         n6: ["Ein Zettel mit Drachenkopf", "„Die Ware ist warm. Sehr warm. Nicht schütteln, nicht fallen lassen. Übergabe unten am Abfluss, wenn der Amboss dreimal schlägt. Und kein Wort zu den Rotroben. – D.“"],
+        n7: ["Ein Laborzettel der Duergar", "„Pilzsud, Probe sieben: Testperson schrumpft auf Kniehöhe und singt eine Oktave höher. Nebenwirkung: Sie hört nicht mehr auf. Und wer die Flöten im Lager liegen lässt, spielt sie gefälligst nicht.“"],
         e1: ["Ein Steckbrief", "„Gesucht: gehörnter Dieb in scharlachroter Rüstung. Spricht wenig. Belohnung: 500 Gold.“ Darunter, in anderer Schrift: „Viel Glück.“"],
         e2: ["Eine vergilbte Skizze", "Eine Statue, mit Kohle gezeichnet. Auf der Rückseite ein Name – verwischt, unleserlich. Ezekiel steckt sie ein, ohne ein Wort."],
         e3: ["Ein Liedtext", "„Oh Ezekiel, der Schatten Sohn, / er nimmt dein Gold und dankt dir schon …“ Unterschrieben mit einem schwungvollen B."],
@@ -202,11 +212,11 @@
     },
     en: {
       label: "Rogue check", titel: "Ezekiel's Long Night",
-      text: "Six nights, eighteen places: Ezekiel empties strangers' pockets, stays in the shadows, cracks every chest and vanishes before anyone can shout \"Thief!\". What he is thinking, only Ezekiel knows.",
+      text: "Seven nights, twenty-one places: Ezekiel empties strangers' pockets, stays in the shadows, cracks every chest and vanishes before anyone can shout \"Thief!\". What he is thinking, only Ezekiel knows.",
       steuerung: "Tap a spot to sneak there. Tap guests, guards, candles and chests to do what a rogue does.",
       start: "▶ Into the night", los: "▶ Go", weiter: "▶ Continue", nochmal: "↻ New night", beenden: "End the night", erneut: "▶ Try again",
       pause: "Frozen in the shadows", pauseText: "Nobody notices you as long as you stay still.",
-      naechte: [["Phandalin", "The Sleeping Giant"], ["The castle ruin", "Among the Red Robes"], ["Thundertree", "The crumbling watchtower"], ["Gracklstugh", "City of the duergar"], ["The Underdark", "Ilvara's fortress"], ["Gracklstugh", "The stolen dragon egg"]],
+      naechte: [["Phandalin", "The Sleeping Giant"], ["The castle ruin", "Among the Red Robes"], ["Thundertree", "The crumbling watchtower"], ["Gracklstugh", "City of the duergar"], ["The Underdark", "Ilvara's fortress"], ["Gracklstugh", "The stolen dragon egg"], ["Gracklstugh", "The Dragon's Egg"]],
       nacht: n => "Night " + n, endlos: k => "Endless night · " + k, endlosUnter: "The night never ends",
       kurz: (n, s) => "N" + n + " · " + s + "/3", kurzEndlos: k => "∞ " + k,
       lv: [
@@ -227,7 +237,10 @@
         ["The tomb", "Here rests a blade that shines like a sunrise. Once you carry it, you shine too – and everyone sees you."],
         ["The Market of Blades", "A Grey Ghost mingles with the crowd. He wears their token: a fist-sized gold coin with a dragon's head. Take it from him – from behind."],
         ["The Grey Ghosts' slums", "The very bottom of Gracklstugh. The Grey Ghost scouts are quick and see far in the dark. Drokey crouches by his chest – once the alarm is raised, he runs."],
-        ["Themberchaud's hall", "This is where the egg vanished. Lava along every edge gives you away with its glow, and on the mountain of gold sleeps the Master of Flames. Noise wakes him. And one coin from the pile … nobody will notice."]
+        ["Themberchaud's hall", "This is where the egg vanished. Lava along every edge gives you away with its glow, and on the mountain of gold sleeps the Master of Flames. Noise wakes him. And one coin from the pile … nobody will notice."],
+        ["The market", "A perfectly ordinary market. Barradin is busy accusing a trader, and everyone is watching. One of the duergar carries the key to the ore tunnel."],
+        ["The corpse cave", "Bones everywhere. The skeletons see poorly, but they never give up. And somewhere a nameless ghost is whispering."],
+        ["The duergar laboratory", "Flasks bubble, mushrooms glow. A duergar alchemist guards the chest. As soon as the alarm is raised, he runs. One of them already got away from us."]
       ],
       ziel: { schluessel: "Steal the key", truhe: "Crack the chest", frei: "Find the exit", schwert: "Take the blade", ausgang: "✓ To the exit!" },
       zielWort: "Goal: ",
@@ -255,9 +268,10 @@
         "Thundertree is deserted. Almost. Goblins, a sleeping bugbear – and something green asleep on gold.",
         "In Gracklstugh the forges burn day and night. And the giant in the alley hears voices again.",
         "Ilvara's fortress. Chains, webs – and a tomb that has been waiting far too long.",
-        "Later, back in Gracklstugh: a dragon egg has been stolen. Ezekiel makes his own enquiries – the trail leads to a gold coin with a dragon's head and to a thief called Drokey."
+        "Later, back in Gracklstugh: a dragon egg has been stolen. Ezekiel makes his own enquiries – the trail leads to a gold coin with a dragon's head and to a thief called Drokey.",
+        "Kardal can't help, Buppido wants to show us his altar, and Barradin has just picked a fight with a trader. Ezekiel would rather go ahead alone: through the market, through the corpse cave, all the way to a laboratory where something is bubbling."
       ],
-      alarmRuf: ["The bell of Phandalin rings!", "The cult bell booms through the ruin!", "A goblin blows the horn!", "The duergar beat the alarm on the anvil!", "A gong echoes through the Underdark!", "A whistle shrills through the alleys of Gracklstugh!"],
+      alarmRuf: ["The bell of Phandalin rings!", "The cult bell booms through the ruin!", "A goblin blows the horn!", "The duergar beat the alarm on the anvil!", "A gong echoes through the Underdark!", "A whistle shrills through the alleys of Gracklstugh!", "A duergar hammers the kettle with a pestle!"],
       alarm: "ALARM!", alarmSub: "Reinforcements are coming – the candles will soon be lit again.", alarmHinweis: "Once you reach the goal, the alarm is raised: reinforcements arrive, candles are lit again. The way back is the real test.",
       leiche: "A body! Alarm!", verborgen: "Hidden.", leichenHinweis: "Guards you took down will be found. Tap them so Ezekiel hides them.",
       magier: "Arcane eye!", magierHinweis: "A mage regularly probes through walls with an arcane eye. Watch for the violet glow – then into a barrel or away.",
@@ -278,6 +292,11 @@
       wetter: { klar: "✨ Starry", regen: "🌧 Rain", schnee: "❄ Snow", wind: "🌬 Gale", gewitter: "⛈ Thunderstorm", nebel: "🌫 Fog" },
       tageszeit: { daemmerung: "Dusk", mitternacht: "Midnight", morgengrauen: "Just before dawn" },
       ueber: {
+        7: { ziel: { schluessel: "Steal the tunnel key" }, schluesselDa: "The tunnel key!", bossName: "Alchemist", auftragBoss: "Catch the alchemist",
+          glasstabHinweis: "A duergar alchemist guards the chest. As soon as the alarm is raised he runs for the exit – catch him before he escapes.",
+          glasstabFlieht: "The alchemist runs!", glasstabSieht: "Intruder in the lab!", glasstabGefangen: "Alchemist caught!", glasstabSpruch: "“Grubnar drak khaz!” None of you speaks Dwarvish.", glasstabWeg: "The alchemist escaped. Another one.",
+          friedrich: ["Headshot. As always.", "Rex, stay. Leave the bones.", "Who packed the flutes, anyway?", "Save some for me."],
+          barradin: ["Psst – I'll accuse a trader, then everyone looks over here!", "I ate the mushroom. My voice is very high now. And very loud.", "Echo showed the guards a coin. Now they're bowing."] },
         6: { ziel: { schluessel: "Steal the dragon coin" }, schluesselDa: "The dragon coin!", bossName: "Drokey", auftragBoss: "Catch Drokey",
           glasstabHinweis: "Drokey is here. Once the alarm is raised, he flees to the exit – catch him before he escapes.",
           glasstabFlieht: "Drokey bolts!", glasstabSieht: "A snoop!", glasstabGefangen: "Drokey caught!", glasstabSpruch: "“The egg? Go ask the Red Robes …”", glasstabWeg: "Drokey escaped.",
@@ -303,6 +322,7 @@
         n4: ["A duergar order", "“The giant in the forge alley hears voices again. Double guards at the forge. And nobody talks to him about spiders.”"],
         n5: ["A seal of House Mizzrym", "“Let no one into the tomb. What shines there belongs to House Mizzrym. – I.”"],
         n6: ["A note with a dragon's head", "“The goods are warm. Very warm. Don't shake, don't drop. Handover down at the drain when the anvil strikes three times. And not a word to the Red Robes. – D.”"],
+        n7: ["A duergar lab note", "“Mushroom brew, sample seven: test subject shrinks to knee height and sings an octave higher. Side effect: it does not stop. And whoever leaves the flutes in the storeroom had better not play them.”"],
         e1: ["A wanted poster", "“Wanted: horned thief in scarlet armour. Speaks little. Reward: 500 gold.” Below, in a different hand: “Good luck.”"],
         e2: ["A yellowed sketch", "A statue, drawn in charcoal. On the back a name – smudged, illegible. Ezekiel pockets it without a word."],
         e3: ["Song lyrics", "“Oh Ezekiel, the shadow's son, / he takes your gold and thanks you, one by one …” Signed with a flourishing B."],
@@ -400,6 +420,7 @@
     hauptmann: { sicht: 4.6, halb: 0.62, tempo: 1.2, jagd: 2.3, dunkel: 1.8, r: 0.37, mantel: "#5a1914", kopf: "#c49a74", haube: "#e0a046", hauptmann: true },
     ilvara:    { sicht: 4.8, halb: 0.65, tempo: 1.45, jagd: 2.5, dunkel: 3.4, r: 0.34, mantel: "#2a5a3a", kopf: "#4a4160", haar: "#ece8f4", auge: true, hauptmann: true },
     hund:      { sicht: 2.8, halb: 0.9, tempo: 1.7, jagd: 3.0, dunkel: 2.2, r: 0.27, mantel: "#7a5e44", kopf: "#8e6e50", hund: true, nase: 1.75 },
+    skelett:   { sicht: 3.3, halb: 0.75, tempo: 1.0, jagd: 1.9, dunkel: 2.4, r: 0.3, mantel: "#bdb49c", kopf: "#e2dac4" },
     geist:     { sicht: 4.1, halb: 0.7, tempo: 1.5, jagd: 2.6, dunkel: 2.6, r: 0.3, mantel: "#4c4d54", kopf: "#8a8b92", haube: "#3a3b41" },
     feuerpriester: { sicht: 4.3, halb: 0.6, tempo: 1.1, jagd: 2.15, dunkel: 2.0, r: 0.34, mantel: "#a3261a", kopf: "#8c8580", haube: "#c2331f", spitz: true, bart: true, fackel: true },
     wirt:      { sicht: 2.8, halb: 0.85, tempo: 0, jagd: 0, dunkel: 1.3, r: 0.33, mantel: "#cfc4ad", kopf: "#c99c78", ruft: true, schuerze: true }
@@ -518,7 +539,20 @@
     { n: 6, boden: "lava", ziel: "truhe",
       karte: ["############", "#VV.c..c.VV#", "#V..$K.$..V#", "#....$$....#", "#V...DD...V#", "#V...DD...V#", "#...$..$...#", "#V........V#", "##VV.==.VV##", "#O........O#", "#.c..VV..c.#", "#....VV....#", "#S.........A", "############"],
       wachen: [{ typ: "feuerpriester", weg: [[1, 6], [10, 6]] }, { typ: "feuerpriester", weg: [[2, 9], [9, 9]] }, { typ: "feuerpriester", weg: [[9, 3]], blicke: ["l", "d"] }],
-      drache: "themberchaud", truhe: { gold: 180, pins: 5, ziel: true } }
+      drache: "themberchaud", truhe: { gold: 180, pins: 5, ziel: true } },
+    /* Nacht 7 – Kapitel III: Markt, Leichenhöhle, Labor der Duergar (nur hinten anhängen) */
+    { n: 7, boden: "schmiede", ziel: "schluessel",
+      karte: ["############", "#F.==..==.F#", "#..........#", "#.=..o.o..=#", "#.=.......=#", "#....==....#", "#O.........#", "##.=.==.=.##", "#..........#", "#.c..O..L..#", "#.==....==.#", "#..........#", "#S..~~..O..A", "############"],
+      wachen: [{ typ: "duergar", weg: [[10, 8], [1, 8]] }, { typ: "duergar", weg: [[1, 2], [10, 2]] }, { typ: "hauptmann", weg: [[5, 11]], blicke: ["l", "r", "u"] }],
+      gaeste: [{ x: 2, y: 2, dir: "d", gold: 15, typ: "duergar" }, { x: 7, y: 4, dir: "u", gold: 16 }, { x: 4, y: 6, dir: "r", gold: 14, typ: "duergar" }, { x: 9, y: 6, dir: "l", gold: 22, typ: "duergar", key: true }, { x: 3, y: 11, dir: "u", gold: 12 }, { x: 6, y: 8, gold: 18, wandert: true, typ: "duergar" }],
+      freunde: { friedrich: [9, 4, "l"], rex: [9, 5], barradin: [1, 9, "r"] }, nezna: "katze" },
+    { n: 7, boden: "fels", ziel: "frei",
+      karte: ["############", "#S..#$...O.#", "#...#..~...#", "#.O.##.###.#", "#..........#", "###.#~~.#.##", "#$..#...#..#", "#...#.O.#.c#", "#.###...#..#", "#...~...##.#", "#.O.##.....#", "#....#.$.O.#", "#....#.....A", "############"],
+      wachen: [{ typ: "skelett", weg: [[1, 4], [10, 4]] }, { typ: "skelett", weg: [[5, 6], [7, 6], [7, 9], [5, 9]] }, { typ: "skelett", weg: [[6, 10], [10, 10], [10, 12], [6, 12]] }, { typ: "geist", weg: [[9, 7]], blicke: ["l", "d", "u"] }] },
+    { n: 7, boden: "schmiede", ziel: "truhe",
+      karte: ["############", "#S..=..=..K#", "#...=..=...#", "#.O..c.....#", "##.==.##.###", "#.....#....#", "#.==..~..O.#", "#.==..#....#", "#....F#.==.#", "###.###.==.#", "#O........L#", "#..=.==.=..#", "#$........OA", "############"],
+      wachen: [{ typ: "duergar", weg: [[2, 10], [9, 10]] }, { typ: "duergar", weg: [[7, 5], [10, 5], [10, 8], [7, 8]] }, { typ: "duergar", weg: [[8, 2]], blicke: ["l", "d"] }],
+      truhe: { gold: 170, pins: 5, ziel: true }, boss: { x: 9, y: 1, dir: "l" } }
   ];
 
   function spiegeln(def) {
@@ -772,7 +806,7 @@
       }
     }
     // Boss (Glasstab)
-    if (D.boss) S.boss = { name: D.n === 6 ? "drokey" : "glasstab", x: D.boss.x + 0.5, y: D.boss.y + 0.5, ang: DIRW[D.boss.dir || "u"], basis: DIRW[D.boss.dir || "u"], zustand: "wartet", pfad: [], a: 0, t: 0, gefangen: false, entkommen: false, zielAng: 0 };
+    if (D.boss) S.boss = { name: D.n === 6 ? "drokey" : D.n === 7 ? "alchemist" : "glasstab", x: D.boss.x + 0.5, y: D.boss.y + 0.5, ang: DIRW[D.boss.dir || "u"], basis: DIRW[D.boss.dir || "u"], zustand: "wartet", pfad: [], a: 0, t: 0, gefangen: false, entkommen: false, zielAng: 0 };
     neznaSetzen();
     auftragSetzen();
     dekoBauen();
@@ -2296,7 +2330,7 @@
           (S.deko.tische[xx + "," + y] || []).forEach(d => kramMalen(x, d.art, px + d.ox * C, py + d.oy * C, d.rot, 0.85));
         }
       } else if (z === "=") {
-        const holz = !th.stein || S.def.n === 4 && S.def.ziel !== "truhe" || S.def.n === 6 && S.def.ziel === "schluessel"; // Tresen bzw. Marktstände
+        const holz = !th.stein || S.def.n === 4 && S.def.ziel !== "truhe" || (S.def.n === 6 || S.def.n === 7) && S.def.ziel === "schluessel"; // Tresen bzw. Marktstände
         const l = zeichen(xx - 1, y) === "=" || zeichen(xx - 1, y) === "K", rr = zeichen(xx + 1, y) === "=" || zeichen(xx + 1, y) === "K", o = zeichen(xx, y - 1) === "=", u = zeichen(xx, y + 1) === "=";
         const x0 = px + (l ? 0 : 3), x1 = px + C - (rr ? 0 : 3), y0 = py + (o ? 0 : 3), y1 = py + C - (u ? 0 : 3);
         x.fillStyle = holz ? "#4a321f" : "#3d3a40"; x.fillRect(x0, y0, x1 - x0, y1 - y0);
@@ -2462,7 +2496,7 @@
       case "kette": for (let i = 0; i < 5; i++) { x.strokeStyle = "#6a6460"; x.lineWidth = 1; x.beginPath(); x.ellipse(cx + Math.sin(i) * 1.5, py + C * 0.66 + i * 3.4, i % 2 ? 0.8 : 1.5, 1.9, 0, 0, 7); x.stroke(); } break;
       case "buecher": x.fillStyle = "#4a321f"; x.fillRect(px + 2, fy + 2, C - 4, 2); for (let i = 0; i < 7; i++) { x.fillStyle = ["#5a1c18", "#2f4428", "#5a4220", "#4a2238", "#7a5a2c"][i % 5]; x.fillRect(px + 4 + i * 3.6, fy - 6 + (i % 3), 3, 8 - (i % 3)); } break;
       case "banner": {
-        const rot = S.def.n <= 2 ? "#8a1e18" : S.def.n === 6 || S.def.n === 4 ? "#4a4644" : "#3a2a50";
+        const rot = S.def.n <= 2 ? "#8a1e18" : S.def.n >= 6 || S.def.n === 4 ? "#4a4644" : "#3a2a50";
         x.fillStyle = rot; x.beginPath(); x.moveTo(cx - 6, py + C * 0.6); x.lineTo(cx + 6, py + C * 0.6); x.lineTo(cx + 6, py + C * 1.22); x.lineTo(cx, py + C * 1.1); x.lineTo(cx - 6, py + C * 1.22); x.closePath(); x.fill();
         x.strokeStyle = "#c98a3a"; x.lineWidth = 0.9; x.stroke(); kreis(cx, py + C * 0.84, 2.4, "#c98a3a"); strich(cx - 7, py + C * 0.6, cx + 7, py + C * 0.6, "#4a3020", 1.6); break; }
       case "riss": x.strokeStyle = "rgba(0,0,0,.55)"; x.lineWidth = 1; x.beginPath(); x.moveTo(px + C * (0.2 + s * 0.5), py + C * 0.1); x.lineTo(px + C * (0.35 + s * 0.3), py + C * 0.45); x.lineTo(px + C * (0.25 + s * 0.4), py + C * 0.7); x.lineTo(px + C * (0.4 + s * 0.3), py + C * 0.98); x.stroke(); break;
@@ -2928,7 +2962,14 @@
     const px = PX(b.x), py = PY(b.y), r = C * 0.34;
     schatten(px, py, r);
     ctx.save(); ctx.translate(px, py); ctx.rotate(b.ang);
-    if (b.name === "drokey") { // Drokey: grauer Kapuzendieb, die Drachenmünze blitzt am Gürtel
+    if (b.name === "alchemist") { // Duergar-Alchemist: Glatze, langer Bart, Schürze, grün leuchtende Flasche
+      ctx.fillStyle = "#5a3a22"; ctx.beginPath(); ctx.ellipse(-r * 0.08, 0, r * 0.8, r * 1.0, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = "#4a4642"; ctx.beginPath(); ctx.ellipse(r * 0.5, 0, r * 0.3, r * 0.42, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = "#8c8580"; ctx.beginPath(); ctx.arc(r * 0.12, 0, r * 0.48, 0, 7); ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,.18)"; ctx.beginPath(); ctx.arc(r * 0.0, -r * 0.15, r * 0.16, 0, 7); ctx.fill();
+      ctx.fillStyle = "rgba(156,255,90,.95)"; ctx.shadowColor = "#9cff5a"; ctx.shadowBlur = 8 + 4 * Math.sin(S.zeit * 5); ctx.beginPath(); ctx.arc(-r * 0.3, r * 0.85, 3.6, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+      ctx.restore();
+    } else if (b.name === "drokey") { // Drokey: grauer Kapuzendieb, die Drachenmünze blitzt am Gürtel
       ctx.strokeStyle = "#a8a29a"; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.moveTo(r * 0.1, r * 0.85); ctx.lineTo(r * 1.05, r * 0.8); ctx.stroke();
       ctx.fillStyle = "#3e3f46"; ctx.beginPath(); ctx.ellipse(-r * 0.08, 0, r * 0.76, r, 0, 0, 7); ctx.fill();
       ctx.strokeStyle = "rgba(170,172,180,.6)"; ctx.lineWidth = 1.2; ctx.stroke();
