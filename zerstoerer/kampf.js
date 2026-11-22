@@ -11,7 +11,7 @@
   W.solidAt = (px, py) => W.solidT(W.tile(Math.floor(px / T), Math.floor(py / T)));
   W.isLadder = (tx, ty) => W.tile(tx, ty) === 4;
   /* Plattform: Steg, Treppe, oberste Leiterkachel */
-  W.isPlat = (tx, ty) => { const v = W.tile(tx, ty); return v === 2 || v === 8 || (v === 4 && W.tile(tx, ty - 1) !== 4 && !W.solidT(W.tile(tx, ty - 1))); };
+  W.isPlat = (tx, ty) => { const v = W.tile(tx, ty); return v === 2 || v === 8 || v === 10 || (v === 4 && W.tile(tx, ty - 1) !== 4 && !W.solidT(W.tile(tx, ty - 1))); };
   /* Sichtlinie (für Gegner) */
   W.los = (x0, y0, x1, y1) => {
     const d = Math.hypot(x1 - x0, y1 - y0), n = Math.ceil(d / 8);
@@ -105,8 +105,8 @@
 
   /* ======================= SPIELER ======================= */
   const C = (Z.PC = {
-    RUN: 152, ACC_G: 2100, DEC_G: 2600, ACC_A: 1500, DEC_A: 700,
-    GRAV: 1420, FALL: 1.45, MAXFALL: 500, JUMP: 405, DJUMP: 360, CUT: 0.5, COYOTE: 0.1, JBUF: 0.14,
+    RUN: 156, ACC_G: 2900, DEC_G: 3600, ACC_A: 2300, DEC_A: 1600,
+    GRAV: 1420, FALL: 1.5, MAXFALL: 500, JUMP: 405, DJUMP: 360, CUT: 0.5, COYOTE: 0.11, JBUF: 0.15,
     ROLL: 0.3, ROLLSPD: 300, ROLLCD: 0.12, DODGE: 0.1, CLIMB: 110
   });
   Z.newPlayer = () => {
@@ -203,7 +203,12 @@
     /* ---------- Rolle ---------- */
     const canAct = P.hurtT <= 0 && !P.climbing;
     if (canAct && P.buf.roll > 0 && P.rollT <= 0 && (P.rollCd <= 0 || (Z.has("schattenroll") && P.rolls === 1))) {
-      if (!P.act || P.act.phase !== "act" || P.act.cancelAct) { P.buf.roll = 0; if (P.act) endAct(P); startRoll(P, h || P.face); }
+      if (!P.act || P.act.phase !== "act" || P.act.cancelAct || (P.act.t > 0.035 && !P.act.dash)) { P.buf.roll = 0; if (P.act) endAct(P); startRoll(P, h || P.face); }
+    }
+    /* Rollsprung: aus der Rolle heraus springen (nach dem Ausweichfenster), Schwung bleibt erhalten */
+    if (P.rollT > 0 && P.jumpBuf > 0 && C.ROLL - P.rollT > 0.06 && (P.onGround || P.coyote > 0 || P.airJumps > 0)) {
+      const air = !(P.onGround || P.coyote > 0);
+      P.rollT = 0; P.rollCd = C.ROLLCD; P.vx = (h || P.rollDir) * C.RUN * 1.22; if (air) P.airJumps--; doJump(P, air ? C.DJUMP : C.JUMP, air); P.coyote = 0;
     }
     if (P.rollT > 0) {
       P.rollT -= dt;
@@ -293,9 +298,11 @@
       if (Math.abs(P.vy) < 70 && inp.held.jump && !P.cut) g *= 0.55;
       if (P.act && P.act.type === "melee" && P.act.phase !== "post" && !P.plunge) g *= P.act.airHover ? 0.25 : 0.6;
       if (P.act && P.act.type === "charge") g *= 0.6;
-      P.vy = Math.min(P.vy + g * dt, P.plunge ? 700 : inp.held.down ? C.MAXFALL * 1.15 : C.MAXFALL);
+      if (inp.held.down && P.vy > 0 && !P.plunge) g *= 1.35;
+      P.vy = Math.min(P.vy + g * dt, P.plunge ? 700 : inp.held.down ? C.MAXFALL * 1.3 : C.MAXFALL);
     }
     const preVy = P.vy;
+    if (P.vy < 0) cornerNudge(P, dt);
     Z.moveBody(P, dt);
     pushOutOfEnemies(P);
     /* Landung */
@@ -312,7 +319,7 @@
     P.safeT -= dt;
     if (P.onGround && !P.onPlat && P.safeT <= 0) {
       const tx = Math.floor((P.x + P.w / 2) / T), ty = Math.floor((P.y + P.h + 1) / T);
-      if (W.tile(tx, ty) === 1 && ![3, 5, 6].includes(W.tile(tx - 1, ty - 1)) && ![3, 5, 6].includes(W.tile(tx + 1, ty - 1)) && W.tile(tx - 1, ty) === 1 && W.tile(tx + 1, ty) === 1) { P.lastSafe = { x: P.x, y: P.y }; P.safeT = 0.3; }
+      if (W.tile(tx, ty) === 1 && ![3, 5, 6, 9].includes(W.tile(tx - 1, ty - 1)) && ![3, 5, 6].includes(W.tile(tx + 1, ty - 1)) && W.tile(tx - 1, ty) === 1 && W.tile(tx + 1, ty) === 1) { P.lastSafe = { x: P.x, y: P.y }; P.safeT = 0.3; }
     }
     /* Schritte */
     if (P.onGround && Math.abs(P.vx) > 40) {
@@ -342,6 +349,14 @@
     A.play("roll", { vol: 0.5 });
     FX.burst(P.x + P.w / 2, P.y + P.h - 2, 6, { col: Z.dustCol || "#8a7a70", sp: 50, ang: Math.PI + (dir > 0 ? 0 : Math.PI), spread: 0.8, life: 0.35, size: 2.5, kind: "smoke" });
   }
+  /* Eckenkorrektur: stößt nur eine Kopfkante an eine Deckenecke (bis 5 px), rutscht man daran vorbei statt abzuprallen */
+  function cornerNudge(P, dt) {
+    const ty = Math.floor((P.y + P.vy * dt) / T); if (ty === Math.floor(P.y / T)) return;
+    const l = Math.floor((P.x + 0.5) / T), r = Math.floor((P.x + P.w - 0.5) / T);
+    const sl = W.solidT(W.tile(l, ty)), sr = W.solidT(W.tile(r, ty));
+    if (sl && !sr) { const push = (l + 1) * T - P.x; if (push > 0 && push <= 5 && !W.solidT(W.tile(Math.floor((P.x + push + P.w - 0.5) / T), ty))) P.x += push + 0.01; }
+    else if (sr && !sl) { const push = P.x + P.w - r * T; if (push > 0 && push <= 5 && !W.solidT(W.tile(Math.floor((P.x - push + 0.5) / T), ty))) P.x -= push + 0.01; }
+  }
   function tryLedge(P, h) {
     const frontX = h > 0 ? P.x + P.w + 2 : P.x - 2, tx = Math.floor(frontX / T);
     for (const off of [2, 8]) {
@@ -369,6 +384,19 @@
       if (a === 3) spike = true;
       if (a === 5 || b === 5) liquid = 5;
       if ((a === 6 || b === 6) && !liquid) liquid = 6;
+    }
+    /* Abgrund: wer hineinfällt, verliert Leben und steht am letzten sicheren Platz wieder auf */
+    if (W.tile(Math.floor((P.x + P.w / 2) / T), Math.floor((P.y + P.h * 0.35) / T)) === 9) {
+      const hurt = Math.round(P.hpMax * 0.15);
+      FX.flashScreen("#000000", 0.7); A.play("hurt", { vol: 0.6 }); A.play("land", { vol: 0.5, rate: 0.6 });
+      Z.hurtPlayer(hurt, { x: P.x, unblockable: true, hazard: true, force: true, kb: 0 });
+      if (!P.dead) {
+        const lvS = Z.level && Z.level.start, s = P.lastSafe || (lvS ? { x: lvS.x * T + 8 - P.w / 2, y: (lvS.y + 1) * T - P.h } : null);
+        if (s) { P.x = s.x; P.y = s.y; } P.vx = 0; P.vy = 0; P.iframe = Math.max(P.iframe, 1.1); P.rollT = 0; P.act = null; P.grapple = null;
+        FX.text(P.x + P.w / 2, P.y - 10, L(["Abgestürzt!", "Fell!"]), "#ff8a6a", true); Z.stats.falls = (Z.stats.falls || 0) + 1;
+        Z.cam.x = P.x + P.w / 2 - Z.cam.w / 2; Z.cam.y = P.y + P.h / 2 - Z.cam.h / 2; Z.cam.clamp && Z.cam.clamp();
+      }
+      return;
     }
     if (spike && P.iframe <= 0) {
       Z.hurtPlayer(Math.round(P.hpMax * 0.14), { x: P.x + P.w / 2, kb: 0, spike: true, unblockable: true });

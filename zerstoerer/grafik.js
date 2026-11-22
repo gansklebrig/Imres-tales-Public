@@ -4,7 +4,7 @@
 (function () {
   "use strict";
   const Z = window.Z, L = v => Z.L(v);
-  const VERSION = "zerstoerer v4 · 2026-11-22";
+  const VERSION = "zerstoerer v5 · 2026-11-22";
   Z.VERSION = VERSION;
 
   /* ======================= QUALITÄTSSTUFEN ======================= */
@@ -89,7 +89,7 @@
 
   /* ======================= MESSUNG ======================= */
   const now = () => performance.now();
-  const WRAP = ["updatePlayer", "updateEnemies", "updateProjs", "updateHazards", "updateAllies", "updateGadgets", "updatePickups"];
+  const WRAP = ["updatePlayer", "updateEnemies", "updateProjs", "updateHazards", "updateAllies", "updateGadgets", "updateParcours", "updatePickups"];
   let M = null;
   function wrapAll() {
     M.orig = {};

@@ -326,9 +326,14 @@
     if (Z.level && !Z.paused) {
       let sdt = dt * (FX.slow > 0 ? FX.slow : 1) * (Z.ui && Z.ui.choiceActive ? 0.12 : 1);
       if (FX.hitstop > 0) { FX.hitstop -= dt; sdt = 0; }
-      acc += sdt; let first = true, n = 0;
-      while (acc >= STEP && n < 8) { acc -= STEP; n++; tick(STEP, first); first = false; }
-      if (!first) inp.endFrame(); else if (sdt === 0) {} else inp.endFrame();
+      /* Bildgenau rechnen: so viele gleich lange Teilschritte (≤ 1/120 s), wie das Bild dauert –
+         ergibt auf 60-, 90-, 120- und 144-Hz-Schirmen gleich weiche Bewegung ohne Ruckeln. */
+      let first = true;
+      if (sdt > 0) {
+        const n = Math.min(8, Math.max(1, Math.ceil(sdt / STEP - 0.01))), h = sdt / n;
+        for (let i = 0; i < n; i++) { tick(h, first); first = false; }
+        inp.endFrame();
+      }
       FX.update(dt);
       Z.cam.update(dt, Z.player);
       Z.gfx.weather(dt);
@@ -352,6 +357,8 @@
     Z.updateHazards(dt);
     Z.updateAllies(dt);
     Z.updateGadgets && Z.updateGadgets(dt);
+    Z.updateParcours && Z.updateParcours(dt);
+    Z.prachtTick && Z.prachtTick(dt);
     updateCampRex(dt);
     Z.updatePickups(dt);
     if (Z.darkness > 0) Z.darkness -= dt;

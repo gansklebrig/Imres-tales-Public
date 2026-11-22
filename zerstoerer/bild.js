@@ -237,6 +237,12 @@
     /* Rückwand */
     for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) {
       if (solid(get(x, y))) continue;
+      if (get(x, y) === 9) { /* Abgrund: Rückwand verliert sich in Schwärze */
+        const px = x * T, py = y * T, top = get(x, y - 1) !== 9;
+        if (top) { const g = c.createLinearGradient(0, py, 0, py + T); g.addColorStop(0, B.wall); g.addColorStop(1, "#060405"); c.fillStyle = g; c.fillRect(px, py, T, T); c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(px, py, T, 2); }
+        else { c.fillStyle = "#060405"; c.fillRect(px, py, T, T); }
+        continue;
+      }
       if (G.sky[y * lv.W + x]) continue;
       const px = x * T, py = y * T;
       /* Außengebiete: große Bogenfenster in der Rückwand zeigen den Himmel */
@@ -263,6 +269,8 @@
     for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) {
       const v = get(x, y); if (!solid(v)) continue;
       if (y === 0 && lv.out) continue;
+      /* Fels unter einem Abgrund verschwindet in der Tiefe */
+      if (get(x, y - 1) === 9 || (get(x, y - 2) === 9 && solid(get(x, y - 1))) || (get(x, y - 3) === 9 && solid(get(x, y - 1)) && solid(get(x, y - 2)))) { c.fillStyle = "#060405"; c.fillRect(x * T, y * T, T, T); continue; }
       const px = x * T, py = y * T, r = hash(x, y);
       const exposed = air(x, y - 1) || air(x, y + 1) || air(x - 1, y) || air(x + 1, y);
       const deep = !exposed && !air(x - 1, y - 1) && !air(x + 1, y + 1) && !air(x + 1, y - 1) && !air(x - 1, y + 1);
@@ -477,6 +485,7 @@
       for (const p of Z.pickups) if (p.kind === "item" || p.kind === "chest" || p.kind === "scroll") hole(p.x, p.y - 8, 40, 0.6);
       for (const d of lv.doors) if (d.kind === "exit" || d.kind === "gate") hole(d.x * T + 8, d.y * T, 50, 0.7);
       for (const s of lv.props) if (s.kind === "npc" || s.kind === "station") hole(s.x * T + 8, s.y * T, 60, 0.6);
+      if (Z.lightExtra) Z.lightExtra(hole);
       if (Z.flashLight > 0) { l.fillStyle = "rgba(0,0,0," + Z.flashLight + ")"; l.fillRect(0, 0, G.light.width, G.light.height); }
     }
     l.globalAlpha = 1;
@@ -537,12 +546,14 @@
     drawDoors(c, t);
     Z.drawWorldProps && Z.drawWorldProps(c, t);
     Z.drawPickups(c, t);
-    Z.drawHazards(c, t); mark("misc");
+    Z.drawHazards(c, t);
+    Z.drawParcours && Z.drawParcours(c, t); mark("misc");
     for (const e of Z.enemies) if (e.def.boss && e.def.shape === "demogorgon") Z.drawEnemy(c, e, t);
     FX.draw(c, false);
     for (const a of Z.allies) Z.drawAlly(c, a, t);
     for (const e of Z.enemies) if (!(e.def.boss && e.def.shape === "demogorgon")) { if (e.x > cam.x - 80 && e.x < cam.x + cam.w + 80 && e.y > cam.y - 120 && e.y < cam.y + cam.h + 80) Z.drawEnemy(c, e, t); }
     mark("enemies");
+    Z.drawBeforePlayer && Z.drawBeforePlayer(c);
     if (Z.player) Z.drawPlayer(c, Z.player, t);
     Z.drawProjs(c);
     Z.drawGadgets && Z.drawGadgets(c, t);
@@ -550,6 +561,7 @@
     FX.draw(c, true); mark("fx");
     fog(c, cam);
     lightPass(c, cam, W, H); mark("light");
+    Z.drawAfterLight && Z.drawAfterLight(c, cam, W, H, t);
     /* Bildschirmblitz und Vignette */
     c.setTransform(1, 0, 0, 1, 0, 0);
     if (FX.flash > 0 && Z.settings.flashes) { c.globalAlpha = FX.flash * 0.6; c.fillStyle = FX.flashCol; c.fillRect(0, 0, W, H); c.globalAlpha = 1; }

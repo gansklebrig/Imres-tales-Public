@@ -325,8 +325,8 @@
       /* nicht über Kanten laufen (außer kleine Stufen) und nicht in Gefahren */
       const ahead = dir > 0 ? e.x + e.w + 2 : e.x - 2, tx = Math.floor(ahead / T), ty = Math.floor((e.y + e.h + 2) / T);
       let ground = false;
-      for (let k = 0; k < 3; k++) { const v = W.tile(tx, ty + k); if (W.solidT(v) || W.isPlat(tx, ty + k)) { ground = true; break; } if ([3, 5, 6].includes(v)) break; }
-      const hazard = [3, 5, 6].includes(W.tile(tx, ty)) || [3, 5, 6].includes(W.tile(tx, ty - 1));
+      for (let k = 0; k < 3; k++) { const v = W.tile(tx, ty + k); if (W.solidT(v) || W.isPlat(tx, ty + k)) { ground = true; break; } if ([3, 5, 6, 9].includes(v)) break; }
+      const hazard = [3, 5, 6, 9].includes(W.tile(tx, ty)) || [3, 5, 6, 9].includes(W.tile(tx, ty - 1));
       if (!ground || hazard) { dir = 0; if (!e.aware) e.pDir = -(e.pDir || 1); }
       /* kleine Wand: hochspringen, wenn der Spieler oben ist */
       if (dir && W.solidT(W.tile(tx, Math.floor((e.y + e.h - 4) / T))) && !W.solidT(W.tile(tx, Math.floor((e.y + e.h - 20) / T))) && e.aware) e.vy = -300;
@@ -522,7 +522,7 @@
       const nx = tx - e.w / 2, ny = gy - e.h;
       const b = { x: nx, y: ny, w: e.w, h: e.h };
       let blocked = false;
-      for (let ty = Math.floor(b.y / T); ty <= Math.floor((b.y + b.h - 1) / T); ty++) for (let txx = Math.floor(b.x / T); txx <= Math.floor((b.x + b.w - 1) / T); txx++) if (W.solidT(W.tile(txx, ty)) || [3, 5, 6].includes(W.tile(txx, ty))) blocked = true;
+      for (let ty = Math.floor(b.y / T); ty <= Math.floor((b.y + b.h - 1) / T); ty++) for (let txx = Math.floor(b.x / T); txx <= Math.floor((b.x + b.w - 1) / T); txx++) if (W.solidT(W.tile(txx, ty)) || [3, 5, 6, 9].includes(W.tile(txx, ty))) blocked = true;
       if (blocked) continue;
       e.x = nx; e.y = e.def.fly ? ny - 30 : ny; e.vx = 0; e.vy = 0;
       if (a.behind) e.face = U.sign(P.x - e.x) || 1;

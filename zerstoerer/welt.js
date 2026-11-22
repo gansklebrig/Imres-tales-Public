@@ -472,12 +472,193 @@
       "..b....E......S.........",
       "###....######.......####",
       "########################",
-      "########################"] }
+      "########################"] },
+    /* ---------- Parcours-Räume: Abgründe (A), bröckelnde Stege (c), Fähre (m), Fallen: p Pendel, f Flammendüse, k Stachelfalle, r Steinschlag, j Sprungfeder, z Säge, < > Pfeilfalle ---------- */
+    { n: "abgrund", pk: true, r: [
+      "########################",
+      "#.....r..........r.....#",
+      "#......................#",
+      "#...w............w.....#",
+      "#......................#",
+      "#..........F...........#",
+      "#......................#",
+      "#......................#",
+      "........................",
+      "........................",
+      "..E......--....--...E...",
+      "#####..............#####",
+      "#####AAAAAAAAAAAAAA#####",
+      "#####AAAAAAAAAAAAAA#####"] },
+    { n: "broeckelbruecke", pk: true, r: [
+      "########################",
+      "#......................#",
+      "#...w..........w.......#",
+      "#......................#",
+      "#......................#",
+      "#..........F...........#",
+      "#......................#",
+      "#.........-----........#",
+      "........................",
+      "........................",
+      "..E..................E..",
+      "####cccc..cccc..ccc#####",
+      "####AAAAAAAAAAAAAAA#####",
+      "####AAAAAAAAAAAAAAA#####"] },
+    { n: "pendelgang", pk: true, r: [
+      "########################",
+      "#......p......p......#.#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "........................",
+      "........................",
+      "..E.....................",
+      "#####..####..####..#####",
+      "#####AA####AA####AA#####",
+      "#####AA####AA####AA#####"] },
+    { n: "flammenflur", pk: true, r: [
+      "########################",
+      "#......................#",
+      "#..w.......F.......w...#",
+      "#......................#",
+      "#.....------..------...#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "........................",
+      "........................",
+      "..E..f....f.k..f....E...",
+      "########################",
+      "########################",
+      "########################"] },
+    { n: "pfeilgang", pk: true, r: [
+      "########################",
+      "#......................#",
+      "#...........r..........#",
+      "#......................#",
+      "#..-----.......-----...#",
+      "#......................#",
+      "#..............E.......#",
+      "#.....#####....#####...#",
+      "......#####>...#####....",
+      "......#####....#####....",
+      "..E...#####k..k#####.E..",
+      "######################..",
+      "######################AA",
+      "######################AA"] },
+    { n: "faehre", pk: true, r: [
+      "########################",
+      "#......................#",
+      "#...w......F.......w...#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "........................",
+      "........................",
+      "..E..................E..",
+      "####mmmmmmmmmmmmmmmm####",
+      "####AAAAAAAAAAAAAAAA####",
+      "####AAAAAAAAAAAAAAAA####"] },
+    { n: "saegewerk", pk: true, r: [
+      "########################",
+      "#......................#",
+      "#..r.......r.......r...#",
+      "#......................#",
+      "#......................#",
+      "#.......-----..........#",
+      "#......................#",
+      "#..............F.......#",
+      "........................",
+      "........................",
+      "..E..zzzzzzzzzzzzzz..E..",
+      "########################",
+      "########################",
+      "########################"] },
+    { n: "springgrube", pk: true, r: [
+      "########################",
+      "#......................#",
+      "#.......F..............#",
+      "#......................#",
+      "#.........######.......#",
+      "#.........#....#.......#",
+      "#..............#.......#",
+      "#......................#",
+      "........................",
+      "........................",
+      "..E..j.......j......E...",
+      "###.###.....###.....####",
+      "###A###AAAAA###AAAAA####",
+      "###A###AAAAA###AAAAA####"] },
+    { n: "steinschlag", pk: true, r: [
+      "########################",
+      "#..r....r....r....r....#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#..........F...........#",
+      "#......................#",
+      "#......................#",
+      "........................",
+      "........................",
+      "..E..................E..",
+      "######c###cc###c########",
+      "######A###AA###A########",
+      "######A###AA###A########"] },
+    { n: "inselsprung", pk: true, r: [
+      "########################",
+      "#......................#",
+      "#..w..........w........#",
+      "#..........--..........#",
+      "#......................#",
+      "#......--.......--.....#",
+      "#......................#",
+      "#..E...................#",
+      "........................",
+      "........................",
+      "..E.......cc....--......",
+      "####..##......##....####",
+      "####AA##AAAAAA##AAAA####",
+      "####AA##AAAAAA##AAAA####"] },
+    { n: "kletterschacht", pk: true, r: [
+      "##########....##########",
+      "#....r...........r.....#",
+      "#......................#",
+      "#..--......cc......--..#",
+      "#......................#",
+      "#......--......--......#",
+      "#..j................j..#",
+      "#####..............#####",
+      "........cc....cc........",
+      "........................",
+      "..E..................E..",
+      "####..--........--..####",
+      "####................####",
+      "##########....##########"] },
+    { n: "sprossenturm", pk: true, r: [
+      "##########....##########",
+      "#.........p............#",
+      "#..------.......-----..#",
+      "#......................#",
+      "#..........c...........#",
+      "#....--.........--.....#",
+      "#......................#",
+      "#.F...........cc.....F.#",
+      "..........--............",
+      "........................",
+      "..E....k.........k...E..",
+      "#######--######--#######",
+      "#######..######..#######",
+      "##########....##########"] },
   ];
   /* Prüfen und Öffnungen bestimmen */
   TPL.forEach(t => {
     t.r = t.r.map(row => (row.length < CW ? row + "#".repeat(CW - row.length) : row.slice(0, CW)));
-    const open = (r, c) => t.r[r][c] !== "#" && t.r[r][c] !== "?";
+    const open = (r, c) => !"#?A".includes(t.r[r][c]);
     t.L = [8, 9, 10].every(r => open(r, 0));
     t.R = [8, 9, 10].every(r => open(r, CW - 1));
     t.U = [10, 11, 12, 13].every(c => open(0, c));
@@ -581,6 +762,7 @@
           let w = 1;
           if (c.kind !== "path" && t.dead) w = 4;
           if (c.kind === "path" && t.dead) w = 0.15;
+          if (t.pk) w *= (c.kind === "path" ? (B.parcours != null ? B.parcours : 9) : 1) * (t.U || t.D ? 0.45 : 1);
           /* weniger überflüssige Öffnungen = natürlicher */
           const extra = (L && !n.L) + (Rr && !n.R) + (t.U && !n.U) + (t.D && !n.D);
           w /= 1 + extra * 0.25;
@@ -599,8 +781,9 @@
           let v = 0;
           if (ch === "#") v = 1; else if (ch === "-") v = 2; else if (ch === "^") v = 3; else if (ch === "H") v = 4; else if (ch === "~") v = B.hazard === "water" ? 6 : B.hazard === "lava" ? 5 : 3;
           else if (ch === "X") v = 7; else if (ch === "?") v = R.chance(0.5) ? 1 : 0;
+          else if (ch === "A") v = 9; else if (ch === "c") v = 10; else if (ch === "m") v = 11;
           set(ox + q, oy + r, v);
-          if ("ETSFbw".includes(ch)) marks.push({ t: ch, x: ox + q, y: oy + r, cell: c });
+          if ("ETSFbwpfkrjz<>m".includes(ch)) marks.push({ t: ch === "<" || ch === ">" ? (chosen.mir ? (ch === "<" ? ">" : "<") : ch) : ch, x: ox + q, y: oy + r, cell: c });
         }
       /* nicht benötigte Öffnungen verschließen, geheime Öffnungen mit rissiger Wand */
       const seal = (side, val) => {
@@ -635,6 +818,8 @@
     for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
       if (get(x, y) === 1 && get(x - 1, y) === 0 && get(x + 1, y) === 0 && get(x, y - 1) === 0 && get(x, y + 1) === 0) set(x, y, 0);
     }
+    /* Parcours: Gruben in lange Böden schlagen (nicht im Start-/Zielraum, nicht in Leiter-/Türspalten) */
+    carvePits({ get, set, cells, startCell, endCell }, R, B);
     /* Stacheln brauchen Boden */
     for (let y = 0; y < H - 1; y++) for (let x = 0; x < W; x++) if (get(x, y) === 3 && get(x, y + 1) !== 1) set(x, y + 1, 1);
     const lv = { biome: biomeId, seed, W, H, tiles, marks, cells, path, gw, gh, startCell, endCell, flow: B.flow, out: !!B.out };
@@ -643,6 +828,60 @@
     return lv;
   }
 
+  function carvePits(lv, R, B) {
+    const g = lv.get, chance = B.pits != null ? B.pits : 0.9;
+    for (const k in lv.cells) {
+      const c = lv.cells[k];
+      if (c === lv.startCell || c === lv.endCell || c.kind === "secret" || !R.chance(c.kind === "path" ? chance : chance * 0.4)) continue;
+      const ox = c.x * CW, oy = c.y * CH, runs = [];
+      for (let r = oy + 4; r <= oy + CH - 2; r++) {
+        let x0 = -1;
+        for (let x = ox + 2; x <= ox + CW - 3; x++) {
+          const ok = g(x, r) === 1 && g(x, r - 1) === 0 && g(x, r - 2) === 0 && (g(x, r - 3) === 0 || g(x, r - 3) === 2) && g(x, r + 1) === 1;
+          if (ok && x0 < 0) x0 = x;
+          if ((!ok || x === ox + CW - 3) && x0 >= 0) { const x1 = ok ? x : x - 1; if (x1 - x0 + 1 >= 6) runs.push([x0, x1, r]); x0 = -1; }
+        }
+      }
+      if (!runs.length) continue;
+      const nPits = R.chance(0.55) ? 2 : 1;
+      for (let n = 0; n < nPits && runs.length; n++) {
+        const [x0, x1, r] = runs.splice(R.int(0, runs.length - 1), 1)[0];
+        const gl = Math.min(R.int(2, 4), x1 - x0 - 3);
+        if (gl < 2) continue;
+        const vert = c.need.U || c.need.D, opts = [];
+        for (let gx = x0 + 2; gx + gl <= x1 - 1; gx++) { let bad = false; if (vert) for (let x = gx - 1; x <= gx + gl; x++) { const rel = x - ox; if (rel >= 8 && rel <= 15) bad = true; } if (!bad) opts.push(gx); }
+        if (!opts.length) continue;
+        const gx = opts[R.int(0, opts.length - 1)];
+        for (let x = gx; x < gx + gl; x++) for (let y = r; y <= Math.min(r + 2, oy + CH - 1); y++) { if (g(x, y) === 1) lv.set(x, y, 9); else break; }
+        /* manchmal ein bröckelnder Steg über der Grube */
+        if (gl >= 3 && R.chance(0.3)) for (let x = gx; x < gx + gl; x++) lv.set(x, r, 10);
+      }
+    }
+  }
+  /* Fallen auf normale Räume streuen – je Gebiet passend */
+  const TRAPKINDS = { torhof: "kr", keller: "kr<", hallen: "pk<", wehrgang: "pk<", verlies: "kf<", hafen: "zkj", glocken: "pkr", schlund: "rfk", schmiede: "zfk", zinnen: "pkj", see: "rkj", glut: "fkz", sturm: "pkr" };
+  function sprinkleTraps(lv, R, B, avoid) {
+    const kinds = TRAPKINDS[lv.biome]; if (!kinds) return; lv.traps = lv.traps || [];
+    const g = lv.get, solid = v => v === 1 || v === 7, taken = [];
+    const free = (x, y) => !avoid(x, y) && !taken.some(([a, b]) => Math.abs(a - x) < 4 && Math.abs(b - y) < 3) && !(lv.traps || []).some(t => Math.abs(t.x - x) < 3 && Math.abs(t.y - y) < 3);
+    const add = (t, x, y) => { (lv.traps = lv.traps || []).push({ t, x, y }); taken.push([x, y]); };
+    for (const k in lv.cells) {
+      const c = lv.cells[k];
+      if (c === lv.startCell || c.kind === "secret" || !R.chance(c.kind === "path" ? 0.75 : 0.35)) continue;
+      const ox = c.x * CW, oy = c.y * CH, want = R.chance(0.4) ? 2 : 1;
+      for (let n = 0, tries = 0; n < want && tries < 30; tries++) {
+        const kind = kinds[R.int(0, kinds.length - 1)], x = ox + R.int(2, CW - 3), y = oy + R.int(2, CH - 2);
+        if (!free(x, y)) continue;
+        if ((kind === "k" || kind === "f" || kind === "j") && standable(lv, x, y, 3) && standable(lv, x - 1, y, 2) && standable(lv, x + 1, y, 2) && g(x, y + 1) === 1) { add(kind, x, y); n++; }
+        else if (kind === "z" && standable(lv, x, y, 3)) { let x1 = x; while (x1 - x < 7 && standable(lv, x1 + 1, y, 3) && g(x1 + 1, y + 1) === 1) x1++; if (x1 - x >= 4) { for (let q = x; q <= x1; q++) lv.traps.push({ t: "z", x: q, y }); taken.push([x, y]); n++; } }
+        else if (kind === "r" && g(x, y) === 0 && solid(g(x, y - 1))) { let d = 0; while (d < 9 && g(x, y + d + 1) === 0) d++; if (d >= 4 && d < 9) { add("r", x, y); n++; } }
+        else if (kind === "p" && g(x, y) === 0 && solid(g(x, y - 1))) { let d = 0; while (d < 12 && g(x, y + d + 1) === 0) d++; if (d >= 7) { add("p", x, y); n++; } }
+        else if (kind === "<" && standable(lv, x, y, 3)) {
+          for (const dir of [1, -1]) { if (!solid(g(x - dir, y - 1))) continue; let run = 0; while (run < 8 && g(x + dir * (run + 1), y - 1) === 0) run++; if (run >= 6) { add(dir > 0 ? ">" : "<", x, y - 1); n++; break; } }
+        }
+      }
+    }
+  }
   /* Standplätze finden: Luft mit festem Boden darunter und Kopffreiheit */
   function standable(lv, x, y, head) {
     const g = lv.get, below = g(x, y + 1);
@@ -700,7 +939,10 @@
       if (m.t === "S" && scrolls < 3 && R.chance(0.65)) { lv.loot.push({ kind: "scroll", x: m.x, y: m.y }); scrolls++; }
       if (m.t === "b" && !nearDoor(m.x, m.y)) lv.props.push({ kind: "breakable", x: m.x, y: m.y });
       if (m.t === "w") lv.decor.push({ kind: "window", x: m.x, y: m.y });
+      if ("pfkrjz<>m".includes(m.t)) (lv.traps = lv.traps || []).push({ t: m.t, x: m.x, y: m.y });
     }
+    /* Fallen über die Karte verteilen, nicht direkt an Start und Türen */
+    sprinkleTraps(lv, R, B, (x, y) => nearStart(x, y) || nearDoor(x, y) || lv.doors.some(d => Math.abs(d.x - x) < 5 && Math.abs(d.y - y) < 4));
     /* zusätzliche Gegner auf zufälligen Bodenplätzen, damit jede Karte gut gefüllt ist */
     const allSpots = [];
     for (const k in lv.cells) spotsIn(lv, lv.cells[k], 2, false).forEach(p => allSpots.push(p));
@@ -756,7 +998,8 @@
   /* ======================= ERREICHBARKEIT ======================= */
   /* grobe Prüfung: Von der Startposition aus müssen alle Ausgänge erreichbar sein (Laufen, Fallen, Springen bis 6 Kacheln, Leitern). */
   function validate(lv) {
-    const g = lv.get, W = lv.W, H = lv.H;
+    /* Abgrund zählt als unbetretbar, bröckelnde Stege und Fährstrecken wie Stege */
+    const g0 = lv.get, g = (x, y) => { const v = g0(x, y); return v === 9 ? 99 : v === 10 || v === 11 ? 2 : v; }, W = lv.W, H = lv.H;
     const passable = v => v === 0 || v === 2 || v === 4 || v === 6 || v === 8;
     const canStand = (x, y) => passable(g(x, y)) && g(x, y) !== 2 && passable(g(x, y - 1)) && (g(x, y + 1) === 1 || g(x, y + 1) === 2 || g(x, y + 1) === 7 || g(x, y + 1) === 3 || g(x, y + 1) === 5 || g(x, y + 1) === 4 || g(x, y) === 4);
     const seen = new Uint8Array(W * H), q = [];

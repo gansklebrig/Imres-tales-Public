@@ -131,6 +131,8 @@
     /* Umhang (in Weltkoordinaten) */
     if (P.rollT <= 0 && !P.dead) drawCape(c, P, alpha);
     c.save(); c.translate(cx, fy); c.scale(P.face, 1); c.globalAlpha = alpha;
+    /* Streckung im Sprung, Stauchung bei der Landung (Squash & Stretch) */
+    if (!P.onGround && P.rollT <= 0 && !P.climbing && !P.ledge) { const k = Math.max(-1, Math.min(1, -P.vy / 420)); if (k > 0.15) c.scale(1 - k * 0.07, 1 + k * 0.1); else if (k < -0.6) c.scale(1 + 0.03, 1 - 0.03); }
     const A = P.anim, act = P.act;
     const run = P.onGround && Math.abs(P.vx) > 30 && !act;
     const ph = A.run;
