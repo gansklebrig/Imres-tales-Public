@@ -20031,7 +20031,7 @@ PETART.ev_kueken={draw(a,t,c,fade){const fl=Math.sin(t*14+a.v*9)*0.5+0.5,y=a.y-1
 window.__hsEv={EV2,EV2L,ev2Start,ev2Chance,ev2Pick,fin:()=>finishEvent(),go:()=>{hideScreen();hud.hidden=false;G.state="play";G.paused=false}};
 
 /* ---------- Offline spielen: App installieren (Service Worker speichert alles) oder ZIP für den PC ---------- */
-const OFF={ok:false,reg:null,bip:null,st:null,fort:null,zip:null,datei:location.protocol==='file:',inst:false};
+const OFF={ok:false,reg:null,bip:null,st:null,fort:null,zip:null,datei:location.protocol==='file:'||location.hostname==='appassets.androidplatform.net',app:location.hostname==='appassets.androidplatform.net',inst:false};window.__hsAPP=OFF.app;
 function offMB(b){return(b/1e6).toLocaleString('de-DE',{maximumFractionDigits:1,minimumFractionDigits:1})+' MB'}
 function offSend(m){try{const c=navigator.serviceWorker&&navigator.serviceWorker.controller;const w=c||(OFF.reg&&(OFF.reg.active||OFF.reg.waiting||OFF.reg.installing));if(w)w.postMessage({hsOff:m})}catch(e){}}
 function offUpd(){try{if(G.state==='title'&&SPL.view==='offline'&&scr.querySelector('.offpg')){const f=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.act;slRender(true);if(f){const b=scr.querySelector(`[data-act="${f}"]`);if(b)b.focus()}}else if(G.state==='title'&&SPL.view==='main'&&scr.querySelector('.slnav')&&!scr.querySelector('[data-v="offline"]'))slRender(true)}catch(e){}}
@@ -20093,7 +20093,7 @@ function offHtml(){const st=OFF.st,f=OFF.fort,z=OFF.zip;
  const bereit=st&&st.n>=st.total;
  const bar=(p,t)=>`<div class="offbar"><i style="width:${Math.max(2,Math.min(100,p))}%"></i></div><div class="offst">${t}</div>`;
  let app;
- if(OFF.datei)app=`<p>Du spielst gerade die <b>heruntergeladene Fassung</b> von deinem Rechner. Neue Versionen gibt es auf imrestales.de.</p>`;
+ if(OFF.app)app=`<p>Du spielst die <b>App-Fassung</b> – alles ist schon auf dem Gerät. Neue Versionen kommen als App-Update.</p>`;else if(OFF.datei)app=`<p>Du spielst gerade die <b>heruntergeladene Fassung</b> von deinem Rechner. Neue Versionen gibt es auf imrestales.de.</p>`;
  else if(!OFF.ok)app=`<p>Hier kann das Spiel nicht gespeichert werden. Öffne <b>imrestales.de/heldensturm.html</b> direkt im Browser (Chrome, Firefox, Edge, Safari – nicht in einer Vorschau oder App-Ansicht). Dort steht an dieser Stelle der Knopf <b>„Für offline speichern“</b>.</p>${OFF.err?`<p class="offbad">Der Browser meldet: ${esc(OFF.err)}</p>`:''}`;
  else{const knopf=f?'':bereit?`<button class="slbtn" data-act="off-laden">Erneut prüfen</button>`:`<button class="slbtn gold" data-act="off-laden" data-sl-def="1">Für offline speichern${ges?` (${offMB(ges)})`:''}</button>`;
   const inst=OFF.inst?`<p class="offok">✓ Läuft als installierte App.</p>`:OFF.bip?`<button class="slbtn gold" data-act="off-inst" ${bereit?'data-sl-def="1"':''}>App installieren</button>`:
@@ -20118,7 +20118,7 @@ function offHtml(){const st=OFF.st,f=OFF.fort,z=OFF.zip;
 .offpg .slbtn.klein{font-size:.78em;align-self:flex-start;opacity:.8}`;document.head.appendChild(st)})();
 /* Hauptmenü: Knopf „Offline spielen“ (nur wenn es hier etwas zu tun gibt) */
 slIco.offline='⇩';
-{const f=slMainHtml;slMainHtml=function(){let h=f.apply(this,arguments);
+{const f=slMainHtml;slMainHtml=function(){let h=f.apply(this,arguments);if(OFF.app)return h;
  const st=OFF.st,sub=OFF.datei?'Heruntergeladene Fassung':!OFF.ok?'So geht’s: Spiel auf imrestales.de speichern':OFF.fort?'Wird gespeichert …':st&&st.n>=st.total?'✓ Offline bereit':'App installieren oder ZIP für den PC';
  const b=`<button class="slb" data-act="sl-go" data-v="offline"><span class="ic">${slIco.offline}</span><span class="tx">Offline spielen<small>${sub}</small></span></button>`;
  const a='<button class="slb" data-act="sl-go" data-v="credits">';return h.includes(a)?h.replace(a,b+a):h}}

@@ -1,0 +1,102 @@
+# Baut Heldensturm als Android-App (offline, alle Dateien in der APK) und stellt sie als Release bereit:
+# github.com/gansklebrig/Imres-tales-Public/releases → Heldensturm.apk (Obtainium findet Updates dort).
+name: Heldensturm-App bauen
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - heldensturm.html
+      - heldensturm-erzaehler.js
+      - heldensturm-sw.js
+      - "audio/heldensturm/**"
+      - "klang/**"
+      - "heldensturm-clips/**"
+      - "tools/vertonung/heldensturm-de.json"
+      - "android/**"
+      - "tools/android/**"
+      - ".github/workflows/heldensturm-apk.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: heldensturm-apk
+  cancel-in-progress: true
+
+jobs:
+  bauen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /android/
+            /tools/android/
+            /tools/vertonung/heldensturm-de.json
+            /heldensturm*
+            /klang/
+            /amb/
+            /audio/heldensturm/
+            /heldensturm-clips/
+            /schriften/
+            /vendor/
+            /kuerzel.js
+            /inhalt.js
+            /*-frei.webp
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.7"
+
+      - name: Version festlegen
+        run: echo "HS_VERSION=${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
+
+      - name: Spieldateien einpacken
+        run: python3 tools/android/sammeln.py
+
+      - name: Signaturschlüssel entschlüsseln
+        env:
+          HELDENSTURM_SCHLUESSEL: ${{ secrets.HELDENSTURM_SCHLUESSEL }}
+        run: |
+          if [ -z "$HELDENSTURM_SCHLUESSEL" ]; then
+            echo "::error::Secret HELDENSTURM_SCHLUESSEL fehlt (Settings → Secrets and variables → Actions)."
+            exit 1
+          fi
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
+            -in android/keystore/heldensturm.jks.enc -out android/keystore/heldensturm.jks -pass env:HELDENSTURM_SCHLUESSEL
+
+      - name: APK bauen
+        working-directory: android
+        run: gradle assembleRelease --no-daemon --stacktrace
+
+      - name: APK umbenennen
+        run: cp android/app/build/outputs/apk/release/app-release.apk Heldensturm.apk && ls -la Heldensturm.apk
+
+      - name: Als Release veröffentlichen
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: heldensturm-1.${{ env.HS_VERSION }}
+          name: Heldensturm 1.${{ env.HS_VERSION }}
+          body: |
+            ${{ github.event.head_commit.message }}
+
+            Installieren: unten auf **Heldensturm.apk** tippen, herunterladen und öffnen. Läuft offline, mit Controller.
+          files: Heldensturm.apk
+          make_latest: true
+
+      - name: Alte App-Versionen aufräumen (die letzten 3 bleiben)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release list --repo "$GITHUB_REPOSITORY" --limit 100 --json tagName,createdAt \
+            --jq '[.[] | select(.tagName | startswith("heldensturm-1."))] | sort_by(.createdAt) | reverse | .[3:] | .[].tagName' |
+          while read -r t; do gh release delete "$t" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || true; done

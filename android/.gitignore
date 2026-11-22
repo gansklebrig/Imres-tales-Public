@@ -1,0 +1,8 @@
+.gradle/
+/local.properties
+/build/
+/app/build/
+*.apk
+keystore/heldensturm.jks
+# wird beim Bauen aus dem Repo zusammengestellt (tools/android/sammeln.py)
+/app/src/main/assets/
