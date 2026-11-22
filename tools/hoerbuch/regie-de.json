@@ -3938,5 +3938,405 @@
  "II-d21899ce": {
   "t": "[serious] Gartokkar behauptete, jemand habe ihm etwas zugeflüstert: Der Verdacht fiel auf einen gewissen Drokey, angeblich ein Mitglied der Grauen Geister, einer Diebesgilde aus den Slums von Gracklstugh. [curious] Genau den Slums, von denen Kardal uns gerade hatte erzählen wollen.",
   "p": 0.9
+ },
+ "III-2eba601a": {
+  "t": "[mischievously] Für alle, die gerade erst einschalten oder beim Drachen vor Angst die Ohren zugehalten haben, hier das Wichtigste in aller Kürze:",
+  "p": 0.0
+ },
+ "III-0a36ad34": {
+  "t": "[theatrical] Ein Süppchen nur, ein Kräuterduft, / dann lagen wir in Kerkerluft. / Bei Ilvara, der Drow, gefangen, / sind wir durch Fels und Feuer gegangen. / Ein Dämon kam, wir nutzten's aus / und flohen aus dem Spinnenhaus. / Ein Kokon sprach, ein Schatten fror, / ein Flüstern kroch uns in das Ohr. / Dann stieg in Fischstadt aus der See / Demogorgon. Oh weh, oh weh! / Ein Boot, ein Ruder, still und stumm, / nach Gracklstugh, mit Ruß ringsum. / Ein Riese raste, laut und wild, / ein Schlaftrunk machte ihn ganz mild. / Dann sang ich vor des Drachen Thron / und überlebte. Welch ein Lohn! / [dramatic] Nun fehlt dem Drachen gar ein Ei, / [sighs] und wir sind leider mit dabei.",
+  "p": 0.85
+ },
+ "III-fc469c40": {
+  "t": "Gartokkar hatte seine Verdächtigen schnell beisammen: die Ärmsten der Stadt. Wer nichts besitzt, so seine Logik, der stiehlt eben ein Drachenei, um es seinem eigenen Gott zu opfern. [dryly] Ich habe in meinem Leben schon viele schlechte Begründungen gehört, die meisten davon von mir selbst. Aber diese war [short pause] besonders schief.",
+  "p": 0.0
+ },
+ "III-24ddabab": {
+  "t": "[serious] Wer nichts zu essen hat, stiehlt Brot. Kein Drachenei.",
+  "p": 0.7
+ },
+ "III-60b9411b": {
+  "t": "[deadpan] Kommt aufs Ei an.",
+  "p": 0.8
+ },
+ "III-48788574": {
+  "t": "[warmly] Also gingen wir zuerst zu Kardal. Er hatte uns schon einmal von den Slums erzählen wollen, und wenn uns in dieser Stadt jemand weiterhelfen konnte, dann er. Er hörte sich alles an, nickte und kratzte sich lange am Bart. Er hätte uns gern geholfen, das sah man ihm an. Aber mehr als Gerüchte hatte er auch nicht.",
+  "p": 0.0
+ },
+ "III-00bca1d5": {
+  "t": "[serious] Die Grauen Geister? Jeder hat von ihnen gehört, keiner hat sie je gesehen. Das ist ja gerade ihr Trick. Tut mir leid, Freunde.",
+  "p": 0.7
+ },
+ "III-58b0e138": {
+  "t": "[curious] Und dieser Drokey?",
+  "p": 0.8
+ },
+ "III-99b80765": {
+  "t": "[serious] Ein Name. Mehr nicht.",
+  "p": 0.8
+ },
+ "III-72227dd6": {
+  "t": "[dryly] Wir dankten ihm und gingen. Ezekiel fand, wir hatten gar nichts gehört. Gesagt hat er es nicht. Musste er auch nicht.",
+  "p": 0.0
+ },
+ "III-d3ad0530": {
+  "t": "[cheerful] Gracklstugh hat mehr Marktplätze, als ein Barde Strophen hat. Wir nahmen den erstbesten: einen, an dem wir schon auf dem Hinweg vorbeigekommen waren, ohne hinzusehen. Kein Markt der Klingen, keine glänzenden Waffen, keine Riesen. Nur ein paar Stände unter rußgeschwärzten Bögen, ein paar Händler mit grauen Gesichtern, Pilzbrot, Lampenöl, Seile, Töpfe.",
+  "p": 0.0
+ },
+ "III-e9308fe8": {
+  "t": "Ich ließ den Blick über die Stände schweifen und blieb an einem hängen. [mischievously] Dahinter stand ein Händler, der so gelangweilt aussah, dass er unmöglich unschuldig sein konnte. Ich ging zielstrebig auf ihn zu.",
+  "p": 0.0
+ },
+ "III-7c42c29c": {
+  "t": "[pompous] Guter Mann! Eure Preise. Die sind ja geradezu lächerlich günstig.",
+  "p": 0.7
+ },
+ "III-4a9248bc": {
+  "t": "[confused] Danke?",
+  "p": 0.8
+ },
+ "III-42a40607": {
+  "t": "[suspicious] Zu günstig. Verdächtig günstig. So günstig, dass Ihr die Ware eigentlich nur von den Grauen Geistern haben könnt.",
+  "p": 0.65
+ },
+ "III-fdf41a37": {
+  "t": "[dryly] Der Händler sah mich an, als hätte ich ihm gerade ins Pilzbrot gespuckt.",
+  "p": 0.0
+ },
+ "III-655cbdf3": {
+  "t": "[annoyed] Ich hab sie von meinem Schwager.",
+  "p": 0.7
+ },
+ "III-2761194d": {
+  "t": "[suspicious] Und woher hat sie Euer Schwager?",
+  "p": 0.6
+ },
+ "III-060beaa3": {
+  "t": "[annoyed] Von seinem Schwager.",
+  "p": 0.8
+ },
+ "III-58174ce2": {
+  "t": "[curious] Und der?",
+  "p": 0.8
+ },
+ "III-4d435799": {
+  "t": "[deadpan] Ist Einzelkind.",
+  "p": 0.8
+ },
+ "III-308c8235": {
+  "t": "[amused] Ich stritt. Er stritt dagegen. Ich stritt noch etwas mehr, er noch etwas lauter. Hinter mir hörte ich Echo leise lachen und Friedrich leise seufzen. Am Ende hatte ich genau gar nichts erreicht, außer dass der Händler seine Töpfe nun mit beiden Armen festhielt.",
+  "p": 0.0
+ },
+ "III-5ebfb5ec": {
+  "t": "[tired] Barradin. Komm.",
+  "p": 0.7
+ },
+ "III-7eb2c2f8": {
+  "t": "[proudly] Also zogen wir weiter. Ich übernahm die Führung, denn wer, wenn nicht ein Barde, kennt den Weg durch eine fremde Stadt?",
+  "p": 0.0
+ },
+ "III-76dbec5e": {
+  "t": "[excited] Mir nach! Man folgt einfach der Musik.",
+  "p": 0.7
+ },
+ "III-6b6b5d49": {
+  "t": "[deadpan] Hm.",
+  "p": 0.8
+ },
+ "III-d7a97765": {
+  "t": "[quickly] Links, rechts, eine Treppe hinunter, durch eine Gasse, so eng, dass Rex sich durchquetschen musste, an einer Schmiede vorbei, an einer zweiten Schmiede vorbei, die genauso aussah wie die erste, um eine Ecke … [short pause] [dryly] und wir standen wieder auf demselben Markt. Vor demselben Stand. Vor demselben Händler. [deadpan] Die Musik hatte uns im Kreis geführt. [short pause] Es war wohl ein Kanon.",
+  "p": 0.0
+ },
+ "III-4937d8bf": {
+  "t": "[slowly] Echo sah mich an. Friedrich sah mich an. Ezekiel sah gar nicht erst hin.",
+  "p": 0.0
+ },
+ "III-ff70ef60": {
+  "t": "[sarcastic] Gute Musik, was?",
+  "p": 0.7
+ },
+ "III-f51cfde7": {
+  "t": "[mischievously] Nun, wenn man schon einmal da ist. Ich räusperte mich, trat noch einmal an den Stand und stellte ihm genau dieselbe Frage wie vorhin. Ob er die Grauen Geister kenne. Und woher er seine Waren habe.",
+  "p": 0.0
+ },
+ "III-66a5d7d2": {
+  "t": "[dramatic] Diesmal kochte er über.",
+  "p": 0.0
+ },
+ "III-04a3d2ac": {
+  "t": "[furious] SCHON WIEDER?! WACHE! WACHE!",
+  "p": 1.1
+ },
+ "III-7768f11e": {
+  "t": "Die Wachen waren schneller da, als mir lieb war: zwei Duergar mit Äxten, grau wie der Stein um sie herum [dryly] und genauso freundlich. Sie bauten sich vor uns auf und machten keinen Hehl daraus, dass sie uns am liebsten gleich mitgenommen hätten.",
+  "p": 0.0
+ },
+ "III-b224f9b0": {
+  "t": "[gruffly] Fremde, die Händler belästigen. Mitkommen. Sofort.",
+  "p": 0.7
+ },
+ "III-1a5c8360": {
+  "t": "[quietly] Friedrich hob beschwichtigend die Hände. Ezekiels Finger wanderten ganz langsam zum Gürtel. Da schob sich Echo nach vorn, griff in seine Tasche und zog die faustgroße Goldmünze mit dem Drachenkopf hervor. Er hielt sie den Wachen direkt unter die Nase.",
+  "p": 0.0
+ },
+ "III-30724ade": {
+  "t": "[amused] Ich habe selten gesehen, wie schnell sich zwei Gesichter ändern können. Die Äxte sanken, die Rücken krümmten sich, und plötzlich waren wir keine Störenfriede mehr, sondern Gesandte der Flamme.",
+  "p": 0.0
+ },
+ "III-f6ed89d5": {
+  "t": "[nervous] Verzeiht. Wir wussten nicht … Womit können wir dienen?",
+  "p": 0.7
+ },
+ "III-7fb69344": {
+  "t": "[smug] Siehst du, Friedrich? Doch ein Lohn.",
+  "p": 0.65
+ },
+ "III-8e859efa": {
+  "t": "[serious] Die Wachen ließen sich ausfragen wie Schüler vor ihrem Lehrer. Welche Viertel sie meiden würden? Was man sich dort erzählte? Viel wussten sie nicht, und das Wenige rückten sie nur stockend heraus. Aber von einem Tunnel wussten sie, unter der Stadt, der hinab in die Tiefe führte. Einer ihrer Kameraden war dort hinuntergestiegen und nie wiedergekommen. Seitdem ging keiner mehr hin.",
+  "p": 0.0
+ },
+ "III-d9f290eb": {
+  "t": "[nervous] Wir bringen euch hin. Aber hinein … geht ihr allein.",
+  "p": 0.7
+ },
+ "III-1ad46681": {
+  "t": "[dryly] Der Händler sah uns nach, bis wir um die Ecke waren. Ich winkte ihm. Er winkte nicht zurück.",
+  "p": 0.0
+ },
+ "III-a90e1b8f": {
+  "t": "[awed] Die Tunnel waren schöner, als ich erwartet hatte, und das hätte mich warnen sollen. Durch die Wände zogen sich Adern aus blau leuchtendem Erz, so hell, dass wir keine Fackel brauchten, und dazwischen wuchsen Pilze, die im Dunkeln glommen wie kleine Laternen. Man hätte hier ein Liebeslied schreiben können. [wistful] Ich hatte schon die erste Zeile im Kopf.",
+  "p": 0.0
+ },
+ "III-c93e5d7f": {
+  "t": "[awed] Wunderschön.",
+  "p": 0.7
+ },
+ "III-19e80891": {
+  "t": "[suspicious] Wunderschön leer. Wo sind denn alle?",
+  "p": 0.6
+ },
+ "III-fb71a12c": {
+  "t": "[serious] Das erfuhren wir in der zweiten Höhle.",
+  "p": 0.0
+ },
+ "III-bbca937e": {
+  "t": "[hushed] Dort lagen Leichen. Nicht eine, nicht zwei, sondern ganze Berge, aufgeschichtet bis an die Decke, und in jedem Zustand, den ein Körper nach dem Tod so durchmacht. Manche frisch, manche nur noch Knochen in Lumpen. Der Geruch kroch einem in die Kleider und blieb dort. Rex winselte und drückte sich an Friedrichs Bein. Mein Liebeslied war vergessen.",
+  "p": 0.0
+ },
+ "III-1fe3a5c5": {
+  "t": "[nervous] Mittendrin hockte ein kleiner Kerl, Gnom oder Zwerg, so genau ließ sich das unter all dem Blut und Dreck nicht sagen. Seine Augen waren weit aufgerissen, und er kicherte, als hätte ihm gerade jemand den besten Witz der Welt erzählt.",
+  "p": 0.0
+ },
+ "III-85d97a79": {
+  "t": "[excited] Gäste! Gäste! Ich bin Buppido. [giggles] Wollt ihr meinen Altar sehen? Die Götter freuen sich, wenn Gäste kommen!",
+  "p": 1.1
+ },
+ "III-00ebc09f": {
+  "t": "[firm] Danke. Nein.",
+  "p": 0.8
+ },
+ "III-ef9a3867": {
+  "t": "[excited] Nur ganz kurz! Er ist wunderschön! Die Götter haben ihn so gern!",
+  "p": 0.6
+ },
+ "III-cfc9cc50": {
+  "t": "[coldly] Wir haben auch so genug gesehen.",
+  "p": 0.6
+ },
+ "III-76b84682": {
+  "t": "[impatient] Doch, doch, doch! Kommt, ich zeig ihn euch!",
+  "p": 0.6
+ },
+ "III-b88b1cf8": {
+  "t": "[dramatic] Beim dritten Nein hörte er auf zu kichern. Und dann sprang er uns an, mit einem Kreischen, das von allen Wänden zurückkam.",
+  "p": 0.0
+ },
+ "III-6318d205": {
+  "t": "[proudly] Ich war schneller. Ein paar Worte, eine Geste, und meine Magie packte ihn mitten im Sprung. Er erstarrte, wie eine Statue seiner selbst, den Mund noch zum Lachen verzogen, die Finger noch nach uns gekrallt.",
+  "p": 0.0
+ },
+ "III-f6348cce": {
+  "t": "[smug] So. Und jetzt bleibst du schön da.",
+  "p": 0.7
+ },
+ "III-59b6305b": {
+  "t": "[nervous] Doch da klapperte es um uns herum. Zwischen den Leichenbergen richteten sich Skelette auf, sechs oder sieben, eins nach dem anderen, und streckten ihre knochigen Finger nach uns aus.",
+  "p": 0.0
+ },
+ "III-835f8e82": {
+  "t": "[deadpan] Mehr Gäste.",
+  "p": 1.0
+ },
+ "III-e77d0250": {
+  "t": "[dramatic] Echo hob die Hände. Unter der Höhlendecke ballte sich ein Gewitter zusammen, mitten in der Erde, wo es nie ein Gewitter geben dürfte. Die Luft knisterte, meine Locken standen zu Berge, und dann krachten Blitze herunter, einer nach dem anderen. Einer schlug direkt vor Rex ein und zerlegte ein Skelett in seine Einzelteile. [amused] Rex machte einen Satz rückwärts, sah die rauchenden Knochen an, sah Echo an und beschloss dann offenbar, dass er so etwas auch kann. Danach wütete er zwischen den Untoten wie ein Sturm auf vier Pfoten.",
+  "p": 0.0
+ },
+ "III-db6bd65e": {
+  "t": "[smug] Gewitter. Unter der Erde. Bitte sehr.",
+  "p": 0.7
+ },
+ "III-59476813": {
+  "t": "[serious] Friedrich hatte inzwischen Buppido im Blick, der immer noch erstarrt dastand. Er legte an, zielte in aller Ruhe auf den Kopf, wie er es am liebsten tut, und ließ los. Der Pfeil saß genau zwischen den Augen. Rex erledigte den Rest: Er biss mit voller Kraft zu und riss den kleinen Wahnsinnigen um. Buppido stand nicht mehr auf. [dryly] Seinen Altar hat er uns nie gezeigt.",
+  "p": 0.0
+ },
+ "III-bab4bc85": {
+  "t": "[hushed] Den Altar fanden wir trotzdem. Friedrich entdeckte ihn hinter den Leichenbergen: einen flachen Stein voller dunkler Flecken, über die ich nicht nachdenken wollte. Darauf lag ein Arm, abgetrennt und vertrocknet, und an einem der Finger steckte ein Ring.",
+  "p": 0.0
+ },
+ "III-55458b26": {
+  "t": "[excited] Oh. Schmuck.",
+  "p": 0.7
+ },
+ "III-632dfaa2": {
+  "t": "[sternly] Echo, das ist ein Toter.",
+  "p": 0.6
+ },
+ "III-07e447d7": {
+  "t": "[deadpan] Der braucht ihn nicht mehr.",
+  "p": 0.6
+ },
+ "III-8275f465": {
+  "t": "[hushed] Friedrich seufzte, beugte sich dennoch über den Arm und griff nach dem Ring. Kaum hatte er ihn berührt, wurde es kalt. Über dem Altar erschien eine Gestalt, bleich und durchscheinend, und ihre Stimme klang, als käme sie von sehr weit her:",
+  "p": 0.0
+ },
+ "III-2fd81945": {
+  "t": "[whispers] Ich komme aus Blingdenstone … Ich will nach Hause … Bringt mich heim. Nur ein Stück von mir. Bitte.",
+  "p": 0.45
+ },
+ "III-448137c0": {
+  "t": "[serious] Ein Tiefengnom also, aus der Stadt der Svirfneblin, weit weg von hier. Wer ihn umgebracht hatte, mussten wir nicht fragen. [dryly] Der lag ja gleich nebenan.",
+  "p": 0.0
+ },
+ "III-ef8eb177": {
+  "t": "[softly] Wir bringen dich heim. Versprochen.",
+  "p": 0.7
+ },
+ "III-333343ee": {
+  "t": "[warmly] Wir versprachen es hoch und heilig. Friedrich wollte darauf einschlagen, aber ein Geist gibt einem nicht die Hand. [deadpan] Also nahmen wir seine mit. [short pause] Samt Arm. Der Ring steckt übrigens immer noch am Finger. [amused] Echo sieht ihn sehr oft an.",
+  "p": 0.0
+ },
+ "III-669e25b4": {
+  "t": "Kurz darauf standen wir vor einem Gang, so niedrig, dass selbst Rex auf dem Bauch hätte kriechen müssen. Dahinter ging es weiter, das hörten wir am Luftzug. Nur eben nicht für Leute unserer Größe.",
+  "p": 0.0
+ },
+ "III-ef4f987f": {
+  "t": "[dryly] An den Wänden wuchsen zwei Sorten Pilze: kleine, die aussahen wie Knöpfe, und große mit Hüten so breit wie ein Teller. [dryly] Ezekiel sah mich an. Ich sah die Pilze an. Friedrich wollte gerade etwas Vernünftiges sagen.",
+  "p": 0.0
+ },
+ "III-e9bc2dc7": {
+  "t": "[deadpan] Echo aß einfach einen kleinen.",
+  "p": 0.0
+ },
+ "III-a3081f66": {
+  "t": "[amused] Und schrumpfte. Erst bis zu meiner Hüfte, dann bis zu meinem Knie, und dann stand er da, keine Spanne größer als ein Stiefel. Seine Stimme war mitgeschrumpft.",
+  "p": 0.0
+ },
+ "III-1d36f854": {
+  "t": "[deadpan] Hm. Passt.",
+  "p": 0.7
+ },
+ "III-6b1e0c84": {
+  "t": "[annoyed] Du hättest auch warten können, bis wir wissen, was …",
+  "p": 0.6
+ },
+ "III-311ef7f4": {
+  "t": "[mischievously] Hab ich aber nicht.",
+  "p": 0.8
+ },
+ "III-ffe58f18": {
+  "t": "Also aßen wir alle einen kleinen Pilz, zwängten uns durch den Gang und steckten vorsichtshalber ein paar große ein. Auf der anderen Seite aßen die anderen einen großen und wuchsen sofort wieder auf ihre alte Größe. [short pause] [proudly] Ich nicht.",
+  "p": 0.0
+ },
+ "III-8901ab78": {
+  "t": "[proudly] Erstens ist ein Barde, der so klein ist wie ein Daumen, verdammt schwer zu treffen. Zweitens hatte ich auf einmal eine Stimme wie ein Rotkehlchen, und das wollte ich noch ein bisschen genießen. Und drittens hatte ich etwas entdeckt: Wer klein genug ist, kann auf einem Hund reiten.",
+  "p": 0.0
+ },
+ "III-4ba93953": {
+  "t": "[excited] Ich kletterte an Rex' Bein hoch, zog mich an seinem Nackenfell hinauf und setzte mich zwischen seine Schultern. [excited] So flauschig! Ich habe in Federbetten schlechter gesessen. Rex drehte den Kopf, schnupperte an mir, leckte mich einmal von unten bis oben ab und trabte dann einfach los, als hätte er nie etwas anderes getan.",
+  "p": 0.0
+ },
+ "III-8ec656f8": {
+  "t": "[amused] Barradin, du bist so groß wie mein Daumen.",
+  "p": 0.7
+ },
+ "III-f247a96b": {
+  "t": "[cheerful] Klein wie ein Daumen, groß wie ein Lied, / reitet der Barde, wohin es ihn zieht!",
+  "p": 0.6
+ },
+ "III-443a2dcd": {
+  "t": "[deadpan] Er singt immer noch.",
+  "p": 0.8
+ },
+ "III-994e87bd": {
+  "t": "[amused] Höher. Er singt höher.",
+  "p": 0.8
+ },
+ "III-585762b9": {
+  "t": "[curious] Hinter der nächsten Biegung öffnete sich die Höhle zu einem Lager. Lange Tische standen darin, voller Essen und voller alchemistischem Gerät: Kolben, Tiegel, gläserne Röhren, in denen es blubberte, Gläser mit Augen darin und Zutaten, die ich lieber nicht benennen will. Mitten im Raum leuchtete ein großer Kreis auf dem Boden, voller Spiralen und Zeichen, die keiner von uns lesen konnte.",
+  "p": 0.0
+ },
+ "III-68b06b10": {
+  "t": "[amused] Davor standen zwei Duergar und stritten. Worüber, verstand keiner von uns, denn keiner von uns spricht Zwergisch. Es klang, als würfen sich zwei Felsbrocken gegenseitig Beleidigungen an den Kopf.",
+  "p": 0.0
+ },
+ "III-eb1e3aa0": {
+  "t": "[excited] Ich zögerte nicht. Ich gab Rex die Fersen, schwenkte den toten Arm über dem Kopf wie ein Banner und ritt mitten hinein, so klein wie ein Daumen und so laut wie eine ganze Kapelle. Wenn schon, denn schon: [mischievously] Halbe Sachen macht ein Barde nicht. Ganze Arme schon.",
+  "p": 0.0
+ },
+ "III-0b27188c": {
+  "t": "[cheerful] Guten Tag! Ich komme wegen der Anzeige: Arm gefunden, Besitzer gesucht!",
+  "p": 0.7
+ },
+ "III-1ed30acc": {
+  "t": "[dryly] Offenbar fühlte sich einer angesprochen. Er drehte sich um und rannte. Der andere hob eine Spitzhacke.",
+  "p": 0.0
+ },
+ "III-63c613ea": {
+  "t": "[dramatic] Im letzten Moment sprang ich ab. Rex flog weiter, ohne mich, mit offenem Maul, und verbiss sich im Bein des Alchemisten. Der brüllte und schlug mit der Spitzhacke nach ihm. Ich landete, rollte mich ab, schnippte mit den Fingern, und neben mir standen plötzlich drei weitere Barradins: schimmernd, durchscheinend und genauso winzig wie ich. Vier Barden, und keiner wusste, welcher der echte war. Die Duergar auch nicht.",
+  "p": 0.0
+ },
+ "III-8316293e": {
+  "t": "[proudly] Meine Zauber waren damit allerdings aufgebraucht. Aber ein Barde gibt nicht auf. Also zückten wir unsere Flöten. Alle vier. Und spielten.",
+  "p": 0.0
+ },
+ "III-0c861209": {
+  "t": "[sheepish] Ich will ehrlich sein: Es war nicht unser bester Auftritt. Vier winzige Barden, vier Flöten, keine einzige Note im selben Takt. Ein Ton quietschte, einer pfiff, einer fiepte, und einer war, glaube ich, gar keiner. Aber die Duergar wussten danach nicht mehr, wohin sie schlagen sollten, und genau darum ging es. Sagen wir so: [short pause] Es war Absicht.",
+  "p": 0.0
+ },
+ "III-8f4aa159": {
+  "t": "[shouting] Einen von ihnen könnten wir lebendig gebrauchen!",
+  "p": 0.7
+ },
+ "III-e5c46487": {
+  "t": "[dramatic] Für den Alchemisten kam das zu spät. Ezekiels Pfeil traf ihn genau in diesem Moment: ein perfekter Schuss aus dem Dunkel, und der Duergar fiel um und rührte sich nicht mehr. Kurz darauf lag auch der zweite Alchemist am Boden.",
+  "p": 0.0
+ },
+ "III-69317b42": {
+  "t": "[deadpan] Zu spät.",
+  "p": 0.7
+ },
+ "III-41ae3176": {
+  "t": "[annoyed] Das sehe ich.",
+  "p": 0.8
+ },
+ "III-00e3cc49": {
+  "t": "[proudly] Und Rex? Rex biss sich durch diesen Kampf, als hätte er die ganze Woche nur darauf gewartet. Zweimal, dreimal saß sein Biss so tief, dass selbst die Duergar zurückwichen. Wer im Unterreich glaubt, der gefährlichste von uns trage eine Klinge oder einen Zauberstab, der hat Rex noch nicht kennengelernt.",
+  "p": 0.0
+ },
+ "III-6d479034": {
+  "t": "[dramatic] Doch dann polterte es aus einem anderen Gang. Schwere Stiefel, viele davon. Noch mehr Duergar stürmten heran, die Äxte schon erhoben, und fielen über Friedrich und Echo her, die noch draußen im Gang standen.",
+  "p": 0.0
+ },
+ "III-b792276d": {
+  "t": "[excited] Publikum!",
+  "p": 0.7
+ },
+ "III-c05ba026": {
+  "t": "[menacing] Ziele.",
+  "p": 0.5
+ },
+ "III-f323aed2": {
+  "t": "[dramatic] Er riss die Hände hoch, die Luft wurde schlagartig eisig, und ein Fächer aus Eis fegte den Angreifern entgegen …",
+  "p": 0.0
  }
 }

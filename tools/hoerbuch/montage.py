@@ -117,7 +117,7 @@ def schreibe(x, ziel):
 def main():
     kapitel = sys.argv[1:] or ["vorab", "I"]
     st, regie, rec, qa, bes = J("tools/hoerbuch/struktur-de.json"), J("tools/hoerbuch/regie-de.json"), J("tools/hoerbuch/recycling-de.json", {}), J("tools/hoerbuch/qa-de.json", {}), J("tools/hoerbuch/besetzung.json")
-    A.einheiten_alle, fehler, _ = A.einheiten(["vorab", "I", "II"])
+    A.einheiten_alle, fehler, _ = A.einheiten(["vorab", "I", "II", "III"])
     alt = J("audio/chronik/de/manifest.json")
     altregie = J("tools/vertonung/regie-de.json")
     titel_alt = J("tools/hoerbuch/titel-de.json")   # Überschriften: bisherige Aufnahmen

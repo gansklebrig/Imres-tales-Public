@@ -22,7 +22,7 @@ ROLLEN = {
     "Themberchaud": "themberchaud", "Venomfang": "venomfang", "Zilda": "zilda", "Ploopploopeen": "ploop",
     "Goblin": "goblin", "Schurke": "schlaeger", "Wache": "schlaeger", "Bewahrer": "schlaeger",
     "Wirt": "dorf", "Alter Mann": "dorf", "Händler": "dorf", "Goldschmied": "dorf",
-    "Frau": "frau", "Junge": "junge", "Erzpriesterin": "erzpriesterin", "Gefangener": "gefangener", "Stimme": "fluestern",
+    "Buppido": "goblin", "Geist": "fluestern", "Frau": "frau", "Junge": "junge", "Erzpriesterin": "erzpriesterin", "Gefangener": "gefangener", "Stimme": "fluestern",
 }
 
 GESEHEN = {}
@@ -35,7 +35,7 @@ def sid(kap, rolle, text):
 def lesen():
     t = open(os.path.join(HIER, "skript-de.md")).read()
     teile = [p.strip() for p in t.split("\n\n") if p.strip()]
-    kap, aus, block, hinweise = "vorab", {"vorab": [], "I": [], "II": []}, None, []
+    kap, aus, block, hinweise = "vorab", {"vorab": [], "I": [], "II": [], "III": []}, None, []
     letzte = None   # "erz" | "rede"
     def schliessen():
         nonlocal block
@@ -44,7 +44,8 @@ def lesen():
     for p in teile:
         if p.startswith("# "):
             schliessen()
-            if "Kapitel II" in p: kap = "II"
+            if "Kapitel III" in p: kap = "III"
+            elif "Kapitel II" in p: kap = "II"
             continue
         if p.startswith("### "):
             schliessen()
@@ -134,15 +135,16 @@ def main():
     aus = lesen()
     I = inhalt_lesen()
     for k in I["kapitel"]:
-        if k["nummer"] in ("I", "II"):
+        if k["nummer"] in ("I", "II", "III"):
             aus[k["nummer"]] = bilder_einsetzen(aus[k["nummer"]], k["absaetze"])
     json.dump(aus, open(os.path.join(HIER, "struktur-de.json"), "w"), ensure_ascii=False, indent=1)
     n = {k: sum(1 for e in v if e.get("typ") == "text") for k, v in aus.items() if k != "vorab"}
-    segs = [s for k in ("I", "II") for e in aus[k] if e.get("typ") == "text" for s in e["segmente"]] + [s for b in aus["vorab"] for s in b["segmente"]]
+    segs = [s for k in ("I", "II", "III") for e in aus[k] if e.get("typ") == "text" for s in e["segmente"]] + [s for b in aus["vorab"] for s in b["segmente"]]
     print("Blöcke", n, "Segmente", len(segs), "Zeichen", sum(len(s["text"]) for s in segs))
     if "--inhalt" in sys.argv:
         quelle = open(os.path.join(WURZEL, "inhalt.js")).read()
-        for nr in ("I", "II"):
+        for nr in ("I", "II", "III"):
+            if not re.search(r'nummer:\s*"%s",' % nr, quelle): continue
             absaetze = [e["text"] if e["typ"] != "text" else lesetext(e) for e in aus[nr]]
             # Array „absaetze“ des Kapitels ersetzen
             m = re.search(r'nummer:\s*"%s",' % nr, quelle)

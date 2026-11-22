@@ -1116,8 +1116,59 @@
   }
 
   /* ---------- Update ---------- */
+  /* ---------- Geheimnisse: je Kulisse ein verstecktes Kleinod, das ab und zu kurz aufblitzt ---------- */
+  const GEHEIM = {
+    strasse: ["🗺️", "Gundrens verlorene Karte", "Gundren's lost map"],
+    hoehle: ["👑", "Yeemiks Blechkrone", "Yeemik's tin crown"],
+    schloss: ["🔮", "Ein Splitter von Glasstabs Stab", "A shard of Glasstaff's staff"],
+    wachturm: ["🪶", "Eine Fledermausfeder (?)", "A bat feather (?)"],
+    mine: ["✨", "Ein Funke der Flammenschmiede", "A spark of the Forge of Spells"],
+    donnerbaum: ["🐉", "Eine Schuppe von Venomfang", "One of Venomfang's scales"],
+    gefaengnis: ["🗝️", "Der Schlüssel zur Zelle", "The key to the cell"],
+    spinnweben: ["👞", "Fagas' verlorener Schuh", "Fagas' lost shoe"],
+    see: ["🐚", "Ploopploopeens Muschel", "Ploopploopeen's shell"],
+    gracklstugh: ["🥄", "Die zweite Schöpfkelle", "The second ladle"],
+    slums: ["🪙", "Eine Münze aus dem Drachenhort", "A coin from the dragon's hoard"]
+  };
+  const geheimGefunden = () => { try { return JSON.parse(lies("imres-waldlauf-geheim", "[]")) || []; } catch (_) { return []; } };
+  function geheimUpdate(dt) {
+    const th = weltName ? weltName.split(":")[0] : (welt && welt.name);
+    if (!S.geheim) S.geheim = { t: 14 + Math.random() * 14, an: null };
+    const g = S.geheim;
+    if (g.an) { g.an.t += dt; if (g.an.t > g.an.dauer) { g.an = null; g.t = 22 + Math.random() * 18; } return; }
+    g.t -= dt;
+    if (g.t <= 0 && GEHEIM[th] && !S.gegner.some(e => e.a.art === "boss")) {
+      const orte = [[60, 150], [340, 140], [200, 120], [90, 236], [318, 228], [250, 190]];
+      const o = orte[Math.floor(Math.random() * orte.length)];
+      g.an = { th, x: o[0], y: o[1], t: 0, dauer: 7 };
+    }
+  }
+  function geheimZeichnen() {
+    const g = S && S.geheim && S.geheim.an; if (!g) return;
+    const a = g.t < 0.6 ? g.t / 0.6 : g.t > g.dauer - 0.8 ? (g.dauer - g.t) / 0.8 : 1, p = 0.5 + 0.5 * Math.sin(g.t * 5);
+    ctx.save(); ctx.globalAlpha = Math.max(0, a);
+    const gr = ctx.createRadialGradient(g.x, g.y, 0, g.x, g.y, 18 + p * 6); gr.addColorStop(0, "rgba(255,220,130,.55)"); gr.addColorStop(1, "rgba(255,220,130,0)");
+    ctx.fillStyle = gr; ctx.fillRect(g.x - 26, g.y - 26, 52, 52);
+    ctx.font = "13px serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(GEHEIM[g.th][0], g.x, g.y + Math.sin(g.t * 2) * 1.5);
+    for (let i = 0; i < 4; i++) { const w = g.t * 2 + i * 1.57, r = 13 + p * 3; ctx.fillStyle = "rgba(255,240,190," + (0.5 + 0.5 * Math.sin(g.t * 6 + i)).toFixed(2) + ")"; ctx.fillRect(g.x + Math.cos(w) * r - 0.8, g.y + Math.sin(w) * r - 0.8, 1.6, 1.6); }
+    ctx.restore();
+  }
+  function geheimTreffer(p) {
+    const g = S.geheim && S.geheim.an; if (!g || g.t < 0.3) return false;
+    if ((p.x - g.x) ** 2 + (p.y - g.y) ** 2 > 13 * 13) return false;
+    const liste = geheimGefunden(), neu = !liste.includes(g.th), en = sprache() === "en", name = GEHEIM[g.th][en ? 2 : 1];
+    if (neu) { liste.push(g.th); schreib("imres-waldlauf-geheim", JSON.stringify(liste)); }
+    S.punkte += neu ? 300 : 120;
+    textAuf(W / 2, 150, (en ? "Secret! " : "Geheimnis! ") + name, "#ffcf7a", 19, 2.4);
+    textAuf(g.x, g.y - 18, "+" + (neu ? 300 : 120) + (neu ? (en ? " · " : " · ") + liste.length + "/" + Object.keys(GEHEIM).length : ""), "#ebe2cc", 16, 1.6);
+    glut(g.x, g.y, ruhig ? 8 : 30, ["#ffd36a", "#fff0b0", "#e0a046"]); KLANG.glocke();
+    S.geheim.an = null; S.geheim.t = 30 + Math.random() * 20;
+    return true;
+  }
+
   function update(dt) {
     const tx = t();
+    geheimUpdate(dt);
     if (S.banner) { S.banner.t += dt; if (S.banner.t > S.banner.dauer) S.banner = null; }
     S.beben = Math.max(0, S.beben - dt);
     S.abkuehl = Math.max(0, S.abkuehl - dt);
@@ -1314,6 +1365,7 @@
         const d = dt / schritte;
         p.vy += G * d; p.vx += S.wind * d; p.x += p.vx * d; p.y += p.vy * d; p.t += d;
         if (pfeilHindernis(p)) { p.weg = true; break; }
+        if (geheimTreffer(p)) { p.weg = true; break; }
         for (const e of S.gegner) {
           if (e.tot || e.weg || e.liegt > 0 || e.unsichtbar || p.getroffen.includes(e)) continue;
           const m = mitte(e), r = radius(e), sp = e.a.art === "boss" ? schwachPunkt(e) : null;
@@ -1366,6 +1418,7 @@
   /* ---------- Zeichnen ---------- */
   const leinwand = document.createElement("canvas");
   const ctx = leinwand.getContext("2d");
+  let pano = null, letzteU = null;
   let skala = 1, welt = null, weltAlt = null, wechsel = 0, weltName = "";
   const amb = Array.from({ length: 22 }, () => ({ x: Math.random() * W, y: Math.random() * H, p: Math.random() * 6, v: 0.4 + Math.random() * 0.8 }));
   const startSeed = 1 + Math.floor(Math.random() * 1e6); // Kulisse auf dem Startbildschirm: bei jedem Besuch ein bisschen anders
@@ -1685,6 +1738,7 @@
     const zk = zustand === "spiel" && (zielArt === "kreuz" || padAn) ? kreuzVektor() : null;
     const z = zustand === "spiel" ? (zk || zielVektor()) : null;
     const u = umgebung(s, dtB, z, zk);
+    letzteU = u;
     ambWind += u.wind * dtB * 0.08;
     ctx.setTransform(skala, 0, 0, skala, 0, 0);
     ctx.save();
@@ -1692,6 +1746,7 @@
     const zl = S && S.zeitlupe ? Math.min(1, S.zeitlupe.t / S.zeitlupe.dauer) : -1;
     if (zl >= 0 && !ruhig) { const f = 1 + 0.13 * Math.sin(zl * Math.PI), zx = S.zeitlupe.x, zy = S.zeitlupe.y; ctx.translate(zx, zy); ctx.scale(f, f); ctx.translate(-zx, -zy); }
     welt.hinten(ctx, s, dtB, u);
+    geheimZeichnen();
     ambientZeichnen(welt.partikel, jetzt);
     const gg = S ? S.gegner : [];
     gg.forEach(e => { if (e.bahn < 0 && (e.bew === "drache" || e.bew === "schwebe")) gegnerZeichnen(e); });
@@ -1777,6 +1832,7 @@
     ctx.restore();
     if (S && zustand !== "start" && zustand !== "geschichte") hudZeichnen();
     if (S && zustand === "spiel") bannerZeichnen();
+    if (pano) pano.zeichnen(s, dtB);
   }
 
   /* ---------- Schleife ---------- */
@@ -1862,6 +1918,18 @@
     rexKnopf.addEventListener("click", () => { audio(); rexFass(); });
     document.addEventListener("fullscreenchange", vollSetzen); document.addEventListener("webkitfullscreenchange", vollSetzen);
     tafel.addEventListener("click", tafelKlick);
+    /* Breitbild am PC: links und rechts vom Spielfeld geht die Welt weiter */
+    pano = window.Panorama && window.WALDLAUF_PANO ? window.Panorama.an({
+      karte: root, buehne, W, H,
+      vollRahmen: () => (rahmen && rahmen.classList.contains("voll") ? rahmen : null),
+      hinten: (x, tt) => {
+        if (!welt || !letzteU) return;
+        welt.hinten(x, tt, 0, letzteU);
+        for (let i = 0; i < 3; i++) { x.drawImage(welt.lagen[i], 0, 0, W, H); welt.halme(x, i, tt, letzteU); }
+        welt.vorne(x, tt, 0, letzteU);
+      },
+      seiten: (x, info) => window.WALDLAUF_PANO(x, info, welt, letzteU)
+    }) : null;
     tafel.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.closest(".wl-name")) { e.preventDefault(); eintragen(); } });
     fussSetzen();
   }
@@ -1916,6 +1984,7 @@
       (lauf ? '<div class="wl-fortsetzen"><button type="button" class="tav-knopf wl-haupt" data-tun="fortsetzen">' + esc(tx.fortsetzen) + '</button><p class="wl-stufen-text">' +
         esc(tx.fortsetzenInfo(Math.max(1, lauf.s.welle + (lauf.kampf ? 0 : 1)), lauf.s.punkte, lauf.s.leben) + ' · ' + esc(tx.stufen[lauf.s.stufe])) + '</p></div>' : "") +
       stufenHtml(tx) + kapitelHtml(tx) + zielHtml(tx) +
+      '<p class="wl-geheim">' + (sprache() === "en" ? "✨ Secrets found: " : "✨ Geheimnisse gefunden: ") + geheimGefunden().length + " / " + Object.keys(GEHEIM).length + (sprache() === "en" ? " – sometimes something glints in the background. Shoot it!" : " – manchmal blitzt im Hintergrund etwas auf. Triff es!") + '</p>' +
       '<button type="button" class="tav-knopf wl-haupt" data-tun="start">' + esc(lauf ? tx.neueJagd : tx.start) + '</button>');
   }
   function pauseZeigen() {
@@ -2229,6 +2298,7 @@
 .wl-rex { position: absolute; left: 80%; top: 91%; width: 15%; height: 11.6%; min-width: 36px; min-height: 36px; z-index: 2; display: none; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .wl-buehne.laeuft .wl-rex { display: block; }
 .wl-rex:focus-visible { outline: 2px solid var(--ember); outline-offset: -4px; }
+.wl-tafel .wl-geheim { font-size: .8rem; color: #d9b36a; font-style: italic; }
 .wl-tafel h4 { font-family: var(--name); font-weight: 400; font-size: clamp(1.45rem, 5.5vw, 2rem); line-height: 1.05; color: var(--vellum); }
 .wl-tafel p { color: var(--ash); font-size: .92rem; margin: 0; }
 .wl-tafel .tav-knopf { justify-self: center; }

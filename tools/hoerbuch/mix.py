@@ -18,7 +18,7 @@ MAX_SPUR = 780   # Sekunden Sprache je Spur höchstens
 NACHLAUF = 1.4   # Sekunden Ausklang nach dem letzten Absatz einer Spur
 
 def main():
-    kapitel = sys.argv[1:] or ["vorab", "I", "II"]
+    kapitel = sys.argv[1:] or ["vorab", "I", "II", "III"]
     m = json.load(open(os.path.join(WURZEL, "audio/chronik/de/manifest.json")))
     mp = os.path.join(WURZEL, ZIEL, "manifest.json")
     alt = json.load(open(mp)) if os.path.exists(mp) else {"absaetze": {}}

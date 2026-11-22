@@ -1456,6 +1456,125 @@
         return s;
       },
       teilchen: [{ t: "glut", n: 10 }, { t: "staub", n: 10, farbe: ["#e0c090"] }]
+    },
+
+    /* ---------- Kapitel III ---------- */
+    erztunnel: {
+      name: { de: "Die Tunnel unter Gracklstugh", en: "The Tunnels beneath Gracklstugh" },
+      himmel: "radial-gradient(ellipse 45% 40% at 12% 50%, rgba(140,230,200,.16), transparent 70%), radial-gradient(ellipse 45% 40% at 88% 60%, rgba(160,240,210,.14), transparent 70%), linear-gradient(180deg, #08090b 0%, #0c0f10 50%, #101312 100%)",
+      farben: { fern: "#111517", fern2: "#171c1d", licht: "#8fe0c0", licht2: "#c8a0f0" },
+      fern: (b, W, H, c) => FERN.hoehle(b, W, H, c, { pilze: true }),
+      decke: true,
+      links(b) {
+        const s2 = "#060708", s1 = "#0d1011";
+        /* Felswand mit leuchtenden Erzadern */
+        let s = '<path fill="' + s1 + '" d="M-10 1010 L-10 200 Q120 260 160 420 Q200 600 300 760 Q380 900 360 1010Z"/>';
+        [[40, 330, 140, 420], [20, 520, 180, 560], [90, 640, 240, 720], [150, 800, 300, 860]].forEach(([x1, y1, x2, y2], i) => {
+          s += '<path d="M' + x1 + " " + y1 + " Q" + r1((x1 + x2) / 2) + " " + r1(y1 - 30) + " " + x2 + " " + y2 + '" stroke="#8fe0c0" stroke-opacity=".55" stroke-width="' + (3 + i % 2) + '" fill="none" class="kl-glanz" style="animation-duration:' + (5 + i) + 's"/>';
+          s += b.licht(x2, y2, 60, "#8fe0c0", .22, "kl-puls");
+        });
+        s += b.pilz(250, 1004, 1.5, s2, "#8fe0c0", .36) + b.pilz(80, 1008, 2.2, s2, "#c8a0f0", .3);
+        s += b.boden(990, s2, 5);
+        return s;
+      },
+      rechts(b) {
+        const s2 = "#060708", s1 = "#0d1011";
+        /* Der Tunnel führt in die Tiefe – eine verlassene Wachlaterne, ein Helm am Boden */
+        let s = '<path fill="' + s1 + '" d="M610 1010 L610 180 Q480 240 440 420 Q400 620 300 780 Q230 900 250 1010Z"/>';
+        s += b.kristall(430, 990, .9, s2, "#8fe0c0") + b.pilz(330, 1006, 1.2, s2, "#c8a0f0", .32);
+        s += b.laterne(520, 700, "#8fe0c0", s2, true);
+        s += '<path fill="#1a1c1e" d="M300 996 q22 -30 44 0 z"/><path stroke="#2a2c2e" stroke-width="3" d="M296 996 h52"/>';
+        s += b.boden(990, s2, 5);
+        return s;
+      },
+      teilchen: [{ t: "sporen", n: 16, farbe: ["#8fe0c0", "#c8a0f0"] }, { t: "staub", n: 6, farbe: ["#a0c0b0"] }]
+    },
+    leichenhoehle: {
+      name: { de: "Buppidos Höhle", en: "Buppido's Cave" },
+      himmel: "radial-gradient(ellipse 40% 35% at 80% 75%, rgba(200,170,120,.12), transparent 70%), radial-gradient(ellipse 50% 40% at 15% 30%, rgba(140,230,200,.08), transparent 70%), linear-gradient(180deg, #0a0909 0%, #100e0d 55%, #14110f 100%)",
+      farben: { fern: "#151312", fern2: "#1b1816", licht: "#e0c080" },
+      fern: (b, W, H, c) => FERN.hoehle(b, W, H, c),
+      decke: true,
+      links(b) {
+        const s2 = "#070606", s1 = "#100e0d";
+        /* aufgeschichtete Leichenberge: Knochen und Lumpen bis an die Decke */
+        let s = '<path fill="' + s1 + '" d="M-10 1010 L-10 520 Q40 470 90 540 Q140 440 200 560 Q260 500 300 640 Q360 700 380 1010Z"/>';
+        for (let i = 0; i < 26; i++) { const x = b.z(0, 340), y = b.z(560, 980), w = b.z(18, 40), a = b.zi(-40, 40); s += '<rect x="' + r1(x) + '" y="' + r1(y) + '" width="' + r1(w) + '" height="5" rx="2.5" fill="#3a332c" fill-opacity=".55" transform="rotate(' + a + " " + r1(x) + " " + r1(y) + ')"/>'; }
+        for (let i = 0; i < 6; i++) { const x = b.z(20, 320), y = b.z(600, 960); s += '<circle cx="' + r1(x) + '" cy="' + r1(y) + '" r="11" fill="#3e3730" fill-opacity=".6"/><circle cx="' + r1(x - 4) + '" cy="' + r1(y - 1) + '" r="2.5" fill="' + s2 + '"/><circle cx="' + r1(x + 4) + '" cy="' + r1(y - 1) + '" r="2.5" fill="' + s2 + '"/>'; }
+        /* ein Skelett rappelt sich gerade auf */
+        s += '<g class="kl-schweben" style="animation-duration:5s"><path stroke="#5a5248" stroke-width="5" stroke-linecap="round" fill="none" d="M440 1000 L450 930 M470 1000 L462 930 M456 930 L456 870 M456 880 L420 850 M456 880 L496 860 M440 900 h32 M440 912 h32 M440 924 h32"/><circle cx="456" cy="852" r="16" fill="#5a5248"/><circle cx="450" cy="850" r="3.5" fill="' + s2 + '"/><circle cx="462" cy="850" r="3.5" fill="' + s2 + '"/></g>';
+        s += b.boden(990, s2, 5);
+        return s;
+      },
+      rechts(b) {
+        const s2 = "#070606", s1 = "#100e0d";
+        /* der Altar – und auf ihm der Arm mit dem Ring; darüber schimmert der Geist aus Blingdenstone */
+        let s = '<path fill="' + s1 + '" d="M610 1010 L610 300 Q520 320 500 520 L470 1010Z"/>';
+        s += '<path fill="#1c1916" d="M150 1004 L170 880 L390 880 L410 1004Z"/><path fill="#2a2420" d="M140 880 h270 v-16 h-270z"/>';
+        s += '<path fill="#4a3a2a" d="M200 864 q60 -12 140 -6 q10 4 0 10 q-80 8 -140 4 z"/><circle cx="334" cy="860" r="5" fill="none" stroke="#e0c080" stroke-width="2.4"/>' + b.licht(334, 860, 30, "#ffe0a0", .45, "kl-puls");
+        s += '<g class="kl-schweben" style="animation-duration:7s" opacity=".5">' + b.licht(270, 700, 160, "#d8e8e0", .2, "kl-puls") + b.figur("robe", 270, 840, 1.6, "#c8d8d0", ' opacity=".35"') + "</g>";
+        s += b.boden(990, s2, 5);
+        return s;
+      },
+      teilchen: [{ t: "staub", n: 14, farbe: ["#c8b8a0"] }, { t: "sporen", n: 6, farbe: ["#d8e8e0"] }]
+    },
+    pilzgang: {
+      name: { de: "Der niedrige Gang", en: "The Low Passage" },
+      himmel: "radial-gradient(ellipse 50% 45% at 20% 75%, rgba(200,150,240,.18), transparent 70%), radial-gradient(ellipse 50% 45% at 85% 70%, rgba(140,230,190,.16), transparent 70%), linear-gradient(180deg, #0a090d 0%, #100e14 55%, #131118 100%)",
+      farben: { fern: "#16141c", fern2: "#1d1a24", licht: "#c8a0f0", licht2: "#8fe0c0" },
+      fern: (b, W, H, c) => FERN.hoehle(b, W, H, c, { pilze: true }),
+      decke: true,
+      links(b) {
+        const s2 = "#070608", s1 = "#0f0d12";
+        /* die zwei Sorten Pilze: kleine Knöpfe und große Teller */
+        let s = b.pilz(140, 1004, 4.2, s1, "#c8a0f0", .3) + b.pilz(360, 1006, 3.4, s1, "#c8a0f0", .3);
+        for (let i = 0; i < 9; i++) s += b.pilz(b.z(20, 520), b.z(990, 1006), b.z(.35, .55), s2, "#8fe0c0", .4);
+        s += b.boden(995, s2, 4);
+        return s;
+      },
+      rechts(b) {
+        const s2 = "#070608", s1 = "#0f0d12";
+        /* der niedrige Gang – und ein winziger Barde auf einem Hund */
+        let s = '<path fill="' + s1 + '" d="M-10 1010 L-10 780 Q120 700 300 760 Q420 790 610 720 L610 1010Z"/>';
+        s += '<path fill="#020203" d="M120 1004 Q120 900 200 900 Q280 900 280 1004Z"/>' + b.licht(200, 960, 70, "#8fe0c0", .16, "kl-puls");
+        s += '<g class="kl-huschen" style="animation-duration:30s;animation-delay:-6s">' + b.figur("hund", 380, 1000, .95, "#141118") + '<circle cx="388" cy="912" r="7" fill="#141118"/><path fill="#141118" d="M382 924 h12 v-6 h-12z M384 905 l4 -10 l4 10z"/></g>';
+        s += b.pilz(520, 1004, 1.2, s2, "#c8a0f0", .38);
+        s += b.boden(995, s2, 4);
+        return s;
+      },
+      teilchen: [{ t: "sporen", n: 22, farbe: ["#c8a0f0", "#8fe0c0", "#f0c070"] }, { t: "kaefer", n: 4, farbe: ["#d0f0a0"] }]
+    },
+    duergarlabor: {
+      name: { de: "Das Lager der Alchemisten", en: "The Alchemists' Camp" },
+      himmel: "radial-gradient(ellipse 50% 40% at 50% 85%, rgba(170,120,240,.2), transparent 70%), radial-gradient(ellipse 40% 35% at 15% 55%, rgba(240,170,80,.16), transparent 70%), linear-gradient(180deg, #0a090c 0%, #110f13 55%, #151116 100%)",
+      farben: { fern: "#18151a", fern2: "#1f1b22", licht: "#f0b060", licht2: "#b890f0" },
+      fern: (b, W, H, c) => FERN.hoehle(b, W, H, c),
+      decke: true,
+      links(b) {
+        const s2 = "#070608", s1 = "#100e12";
+        /* lange Tische mit Kolben, Tiegeln und Gläsern voller Augen */
+        let s = '<path fill="' + s1 + '" d="M-10 900 h460 v14 h-460z M20 914 v90 h12 v-90z M400 914 v90 h12 v-90z"/>';
+        [[60, "#f0b060"], [150, "#b890f0"], [250, "#a0e090"], [340, "#f0b060"]].forEach(([x, c], i) => {
+          s += b.licht(x, 860, 46, c, .3, "kl-puls");
+          s += '<path fill="' + c + '" fill-opacity=".35" stroke="' + s2 + '" stroke-width="3" d="M' + (x - 14) + " 900 q-4 -30 10 -40 v-22 h8 v22 q14 10 10 40 z" + '"/>';
+          if (i === 1) s += '<circle cx="' + (x + 50) + '" cy="880" r="16" fill="#e8e0d0" fill-opacity=".2" stroke="' + s2 + '" stroke-width="2"/><circle cx="' + (x + 46) + '" cy="878" r="4" fill="#e8e0d0" fill-opacity=".6"/><circle cx="' + (x + 55) + '" cy="884" r="4" fill="#e8e0d0" fill-opacity=".6"/>';
+        });
+        s += b.rauch(150, 820, "#b890f0", 4, 40);
+        s += b.figur("zwerg", 480, 1004, 1.5, "#141216");
+        s += b.boden(1000, s2, 3);
+        return s;
+      },
+      rechts(b) {
+        const s2 = "#070608";
+        /* der große Kreis voller Spiralen – niemand weiß, wozu er gut ist */
+        let s = b.licht(300, 960, 220, "#b890f0", .25, "kl-puls");
+        s += '<g class="kl-glanz" style="animation-duration:7s"><ellipse cx="300" cy="970" rx="230" ry="44" fill="none" stroke="#b890f0" stroke-opacity=".55" stroke-width="4"/><ellipse cx="300" cy="970" rx="170" ry="32" fill="none" stroke="#b890f0" stroke-opacity=".4" stroke-width="2"/>' +
+          '<path fill="none" stroke="#d0b0ff" stroke-opacity=".5" stroke-width="2.5" d="M300 970 m-60 0 a60 12 0 1 1 120 0 a40 8 0 1 1 -80 0 a20 4 0 1 1 40 0 M180 960 q20 -10 40 0 M380 980 q20 10 40 0"/></g>';
+        s += b.figur("zwerg", 150, 1004, 1.6, "#141216") + b.figur("zwerg", 470, 1004, 1.5, "#141216", "", true);
+        s += b.boden(1000, s2, 3);
+        return s;
+      },
+      teilchen: [{ t: "sporen", n: 12, farbe: ["#b890f0", "#f0b060"] }, { t: "glitzer", n: 6, farbe: ["#d0b0ff"] }, { t: "staub", n: 6 }]
     }
   };
   /* Varianten */

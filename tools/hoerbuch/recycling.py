@@ -68,7 +68,7 @@ def zeiten(lauf, alt):
 def plan():
     st = J("tools/hoerbuch/struktur-de.json"); alte = alte_absaetze()
     erg, gespart = {}, 0
-    for kap in ("vorab", "I", "II"):
+    for kap in ("vorab", "I", "II", "III"):
         bloecke = st[kap] if kap != "vorab" else st["vorab"]
         for b in bloecke:
             if b.get("typ", "text") != "text": continue

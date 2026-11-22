@@ -30,7 +30,7 @@ def quellen():
         return {"tools/hoerbuch/struktur-de.json": alt_st, "tools/hoerbuch/regie-de.json": alt_regie,
                 "tools/hoerbuch/recycling-de.json": alt_rec}.get(p) or orig(p, std)
     A.J = J2
-    try: E, fehler, bes = A.einheiten(["vorab", "I", "II"])
+    try: E, fehler, bes = A.einheiten(["vorab", "I", "II", "III"])
     finally: A.J = orig
     out = []
     for e in E:
@@ -46,10 +46,10 @@ def quellen():
     return out
 
 def plan():
-    st = J("tools/hoerbuch/struktur-de.json"); alt_ids = {s["id"] for k in ("vorab", "I", "II") for b in J(os.environ["ALT_STRUKTUR"])[k]
+    st = J("tools/hoerbuch/struktur-de.json"); alt_ids = {s["id"] for k in ("vorab", "I", "II", "III") for b in J(os.environ["ALT_STRUKTUR"])[k]
                                                          if b.get("typ", "text") == "text" for s in b["segmente"]}
     Q = quellen(); erg, gespart = {}, 0
-    for kap in ("vorab", "I", "II"):
+    for kap in ("vorab", "I", "II", "III"):
         for b in st[kap]:
             if b.get("typ", "text") != "text": continue
             for s in b["segmente"]:
@@ -93,7 +93,7 @@ def main():
     erg, gespart = plan()
     rec = J(os.environ["ALT_RECYCLING"])
     st = J("tools/hoerbuch/struktur-de.json")
-    ids = {s["id"] for k in ("vorab", "I", "II") for b in st[k] if b.get("typ", "text") == "text" for s in b["segmente"]}
+    ids = {s["id"] for k in ("vorab", "I", "II", "III") for b in st[k] if b.get("typ", "text") == "text" for s in b["segmente"]}
     rec = {k: v for k, v in rec.items() if k in ids}   # nur noch benutzte Segmente
     if "--schneiden" in sys.argv:
         ziel = os.path.join(WURZEL, "audio/hoerbuch/alt"); os.makedirs(ziel, exist_ok=True)
