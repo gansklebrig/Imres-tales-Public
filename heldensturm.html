@@ -41797,6 +41797,35 @@ function vogelDraw(v,t){const c=cx,f=v.face||1,flieg=v.st!=='schwimm',fl=Math.si
    if(!Kh.g){const C=document.createElement('canvas');C.width=64;C.height=64;Kh.g=C.getContext('2d')}P3K.h=Kh.g}else if(P3K.h===Kh.g)P3K.h=grossH}catch(e){HB.err=String(e)}return _h.apply(this,arguments)}}
 }catch(e){window.__hsHHBAKE={v:1,err:String(e)}}})();
 
+/* ================= Paket „hhspar“: Handheld-Sparfassung (nur im Modus „Ultra leicht“) – window.__hsHHSPAR =================
+   Mit dem Spieler abgesprochen (RG353V): ein paar weniger Gegner, schlichtere Welt nur am Handheld, Übersichtskarte seltener,
+   gröbere Berechnung für Gegner, die weder im Bild noch im Kampf sind. Am PC/Handy ändert sich nichts (alles hängt an UL.on).
+   1) Gegner: schlafende Gruppen beim Stufenstart um ~30 % ausgedünnt (keine Elite/Champions/Bosse/Wächter/Ziel-Gegner),
+      Streif-/Verstärkungstrupps ~30 % kleiner, Kill-Ziel ×0,75 (Nachschub-Logik sorgt weiter dafür, dass es erreichbar bleibt).
+   2) Welt: Bilderbuch-Pflanzen/Glitzern, Bäche/Wasservögel, Kleintiere und Gegner-Farbvarianten aus; flache Bodendeko
+      (Moos, Pilze, Geröll, Netze, Knochen) halbiert.
+   3) Übersichtskarte alle 2,5 s statt jede Sekunde neu (Spielerpunkte bleiben live).
+   4) Gegner außerhalb des Bildes und weit weg von allen Helden (> 560) rechnen nur jeden 3. Schritt (mit gesammelter Zeit). */
+(function(){try{if(window.__hsHHSPAR)return;const HS=window.__hsHHSPAR={v:1,aus:0,st:{weg:0,deko:0,grob:0},err:null};
+ const an=()=>!HS.aus&&!!(window.__hsULTRA&&window.__hsULTRA.on)&&!G.mp&&!(typeof NET!=='undefined'&&NET.role);
+ const pkg=()=>{const on=an()?1:0;for(const k of['__hsDETAIL','__hsFLUSS','__hsMAERCHEN']){const o=window[k];if(o&&(o.__hh===undefined||o.__hh!==on)){if(on){o.__alt=o.aus;o.aus=1}else if(o.__hh===1)o.aus=o.__alt||0;o.__hh=on}}};
+ const FLACH=/^(moss|glowshroom|mush|rubble|web|bones)$/;
+ const schuetzt=e=>e.boss||e.guard||e.elite||e.champ||e.rare||e.kaKey!=null||e.kaLager!=null||e.kaFaehre!=null||e.arA!=null||e.thief!==undefined||e.objDieb||e.kaWach||e.summon||e.mimic;
+ {const ss=setupStage;setupStage=function(i){const r=ss.apply(this,arguments);try{pkg();if(an()){
+   let n=0;G.enemies=G.enemies.filter(e=>{if(e.dead||!e.wlZz||schuetzt(e))return true;n++;if(n%10===3||n%10===6||n%10===9){HS.st.weg++;e.dead=true;e.hhWeg=1;return false}return true});
+   if(G.need>10)G.need=Math.max(10,Math.round(G.need*0.75));
+   let m=0;G.deco=G.deco.filter(d=>{if(d.edge||!FLACH.test(d.k))return true;m++;if(m&1){HS.st.deko++;return false}return true})}}catch(e){HS.err=String(e&&e.stack||e)}return r}}
+ if(typeof wlTrupp==='function'){const wt=wlTrupp;wlTrupp=function(ax,ay,n){try{if(an()&&n>2){const a=[].slice.call(arguments);a[2]=Math.max(2,Math.round(n*0.7));return wt.apply(this,a)}}catch(e){}return wt.apply(this,arguments)}}
+ /* Übersichtskarte seltener: Zeitstempel künstlich jünger halten */
+ if(typeof ULM!=='undefined'&&typeof wlMini==='function'){const wm=wlMini;wlMini=function(){try{pkg();if(an()&&ULM.ok){const now=performance.now();if(now-ULM.t>1000&&now-ULM.t<2500){const t0=ULM.t;ULM.t=now-500;try{return wm.apply(this,arguments)}finally{ULM.t=t0}}}}catch(e){}return wm.apply(this,arguments)}}
+ /* gröbere Berechnung außerhalb des Bildes */
+ if(typeof updEnemy==='function'){const ue=updEnemy;let tick=0,lt=-1;updEnemy=function(e,dt){try{if(an()&&e&&!e.boss&&!e.guard&&!e.elite&&!e.champ&&!e.dying&&G.cam&&G.state==='play'){
+    if(G.time!==lt){lt=G.time;tick++}
+    const vw=W/ZOOM/2+90,vh=H/ZOOM/2+90;if(Math.abs(e.x-G.cam.x)>vw||Math.abs(e.y-G.cam.y)>vh){let nah=false;for(const q of (G.mp?PL:[P]))if(q&&Math.abs(e.x-q.x)<560&&Math.abs(e.y-q.y)<560){nah=true;break}
+     if(!nah&&!(e.hitAt>G.time-2)){e._hhA=(e._hhA||0)+dt;if(((tick+(e.seed?Math.floor(e.seed*7):0))%3)!==0)return;const d=Math.min(0.12,e._hhA);e._hhA=0;HS.st.grob++;return ue.call(this,e,d)}}
+    if(e._hhA){const d=Math.min(0.12,dt+e._hhA);e._hhA=0;return ue.call(this,e,d)}}}catch(x){HS.err=String(x&&x.stack||x)}return ue.apply(this,arguments)}}
+}catch(e){window.__hsHHSPAR={v:1,err:String(e&&e.stack||e)}}})();
+
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
