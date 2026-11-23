@@ -14828,6 +14828,30 @@
 },
 {
 "a": "blatt",
+"autor": "T. Kebert",
+"beschr": "relativně čerstvé listí buku lesního ( Fagus sylvatica ), CHKO Brdy, Česko",
+"f": "rotbuche-15.webp",
+"h": 587,
+"lizenz": "CC BY-SA 4.0",
+"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
+"quelle": "https://commons.wikimedia.org/wiki/File:Fagus_sylvatica_TK_2021-05-22_1.jpg",
+"titel": "File:Fagus sylvatica TK 2021-05-22 1.jpg",
+"w": 880
+},
+{
+"a": "blatt",
+"autor": "Krzysztof Golik",
+"beschr": "Fagus sylvatica in Jardin Botanique de l'Aubrac, commune of Saint-Chély-d'Aubrac, Aveyron, France",
+"f": "rotbuche-16.webp",
+"h": 587,
+"lizenz": "CC BY-SA 4.0",
+"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
+"quelle": "https://commons.wikimedia.org/wiki/File:Fagus_sylvatica_in_Jardin_Botanique_de_l%27Aubrac_07.jpg",
+"titel": "File:Fagus sylvatica in Jardin Botanique de l'Aubrac 07.jpg",
+"w": 880
+},
+{
+"a": "blatt",
 "autor": "Dominicus Johannes Bergsma",
 "beschr": "Withered leaf of beech ( Fagus sylvatica ) after protracted drizzle in March.",
 "f": "rotbuche-3.webp",
@@ -14944,32 +14968,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Hortus_Haren_(Groningen)_13-12-2025._(actm.)_04.jpg",
 "titel": "File:Hortus Haren (Groningen) 13-12-2025. (actm.) 04.jpg",
-"w": 880
-},
-{
-"a": "blatt",
-"autor": "T. Kebert",
-"beschr": "relativně čerstvé listí buku lesního ( Fagus sylvatica ), CHKO Brdy, Česko",
-"f": "rotbuche-15.webp",
-"h": 587,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"neu": 1,
-"quelle": "https://commons.wikimedia.org/wiki/File:Fagus_sylvatica_TK_2021-05-22_1.jpg",
-"titel": "File:Fagus sylvatica TK 2021-05-22 1.jpg",
-"w": 880
-},
-{
-"a": "blatt",
-"autor": "Krzysztof Golik",
-"beschr": "Fagus sylvatica in Jardin Botanique de l'Aubrac, commune of Saint-Chély-d'Aubrac, Aveyron, France",
-"f": "rotbuche-16.webp",
-"h": 587,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"neu": 1,
-"quelle": "https://commons.wikimedia.org/wiki/File:Fagus_sylvatica_in_Jardin_Botanique_de_l%27Aubrac_07.jpg",
-"titel": "File:Fagus sylvatica in Jardin Botanique de l'Aubrac 07.jpg",
 "w": 880
 }
 ],
@@ -19946,6 +19944,18 @@
 "tollkirsche": [
 {
 "a": "haupt",
+"autor": "Pattedyr",
+"beschr": "Atropa belladonna",
+"f": "tollkirsche-8.webp",
+"h": 587,
+"lizenz": "CC BY-SA 4.0",
+"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
+"quelle": "https://commons.wikimedia.org/wiki/File:Wolfskers,_Atropa_bella-donna_L.,_Solatrum_Lethale,_Hortus_Botanicus_Leiden_(NL).jpg",
+"titel": "File:Wolfskers, Atropa bella-donna L., Solatrum Lethale, Hortus Botanicus Leiden (NL).jpg",
+"w": 880
+},
+{
+"a": "bluete",
 "autor": "Stefan.lefnaer",
 "beschr": "Blüte Taxonym: Atropa bella-donna ss Fischer et al. EfÖLS 2008 ISBN 978-3-85474-187-9 Fundort: Glockenberg O von Würnitz, Bezirk Mistelbach, Niederösterreich - ca. 280 m ü. A. Standort: Schlagfläche",
 "f": "tollkirsche-1.webp",
@@ -20000,7 +20010,6 @@
 "h": 659,
 "lizenz": "CC BY-SA 3.0",
 "lizenzurl": "http://creativecommons.org/licenses/by-sa/3.0/",
-"neu": 1,
 "quelle": "https://commons.wikimedia.org/wiki/File:Atropa_belladonna_-_Bele-dame_Prwaji_foyes_sepales.jpg",
 "titel": "File:Atropa belladonna - Bele-dame Prwaji foyes sepales.jpg",
 "w": 880
@@ -20013,7 +20022,6 @@
 "h": 585,
 "lizenz": "CC BY-SA 3.0",
 "lizenzurl": "http://creativecommons.org/licenses/by-sa/3.0/",
-"neu": 1,
 "quelle": "https://commons.wikimedia.org/wiki/File:Atropa-bella-donna_Bl%C3%BCte_103.jpg",
 "titel": "File:Atropa-bella-donna Blüte 103.jpg",
 "w": 880
@@ -20026,22 +20034,8 @@
 "h": 660,
 "lizenz": "CC BY-SA 3.0",
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"neu": 1,
 "quelle": "https://commons.wikimedia.org/wiki/File:Tollkirsche_GO-2.jpg",
 "titel": "File:Tollkirsche GO-2.jpg",
-"w": 880
-},
-{
-"a": "frucht",
-"autor": "Pattedyr",
-"beschr": "Atropa belladonna",
-"f": "tollkirsche-8.webp",
-"h": 587,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"neu": 1,
-"quelle": "https://commons.wikimedia.org/wiki/File:Wolfskers,_Atropa_bella-donna_L.,_Solatrum_Lethale,_Hortus_Botanicus_Leiden_(NL).jpg",
-"titel": "File:Wolfskers, Atropa bella-donna L., Solatrum Lethale, Hortus Botanicus Leiden (NL).jpg",
 "w": 880
 },
 {
@@ -20052,36 +20046,9 @@
 "h": 564,
 "lizenz": "CC BY 4.0",
 "lizenzurl": "https://creativecommons.org/licenses/by/4.0",
-"neu": 1,
 "quelle": "https://commons.wikimedia.org/wiki/File:Atropa_belladonna_RF.jpg",
 "titel": "File:Atropa belladonna RF.jpg",
 "w": 880
-},
-{
-"a": "blatt",
-"autor": "Emőke Dénes",
-"beschr": "Belladonna or deadly nightshade (Atropa bella-donna) flowers and leaves, at the Cambridge University Botanic Garden, England.",
-"f": "tollkirsche-10.webp",
-"h": 880,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"neu": 1,
-"quelle": "https://commons.wikimedia.org/wiki/File:Solanales_-_Atropa_bella-donna_-_2.jpg",
-"titel": "File:Solanales - Atropa bella-donna - 2.jpg",
-"w": 660
-},
-{
-"a": "frucht",
-"autor": "Mitumial",
-"beschr": "Tollkirsche auf Balkon in Frankfurt am Main",
-"f": "tollkirsche-11.webp",
-"h": 880,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"neu": 1,
-"quelle": "https://commons.wikimedia.org/wiki/File:IMGTollkirsche.jpg",
-"titel": "File:IMGTollkirsche.jpg",
-"w": 658
 },
 {
 "a": "bluete",
@@ -20091,7 +20058,6 @@
 "h": 585,
 "lizenz": "CC BY-SA 4.0",
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"neu": 1,
 "quelle": "https://commons.wikimedia.org/wiki/File:Atropa_belladonna_cvet.jpg",
 "titel": "File:Atropa belladonna cvet.jpg",
 "w": 880
