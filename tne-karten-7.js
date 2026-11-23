@@ -69,7 +69,7 @@ Am nächsten Tag schreibt dir {name}: „Danke fürs Fragen gestern. Wir reden g
 § #bz_fr_plan spieler bez:freunde
 {name} und {p2} haben vorher per Nachricht einen Plan ausgeheckt. // Das merkst du daran, dass sie sich seit zehn Minuten angrinsen.
 < Den Plan aufgehen lassen | s+5 t+3 l-2 bez+5 | Der Plan ist absurd, umständlich und funktioniert. Die beiden klatschen sich über den Tisch ab. | konfetti
-> Den Plan durchkreuzen | W12 l+3 ? s+4 : s-3 bez-1 beide-3 | Du durchkreuzt ihn – aber so, dass es noch besser wird. :: Der Plan scheitert an einem Detail. Die beiden schauen sich an wie zwei Kinder, denen das Eis runtergefallen ist.
+> Den Plan durchkreuzen | W12 l+3 ? s+4 : s-3 bez-1 beide-3 | Du durchkreuzt ihn – aber so, dass es noch besser wird. :: Der Plan scheitert an einem Detail. Die beiden schauen sich an wie zwei Leute, denen gerade das Eis runtergefallen ist.
 
 § #bz_fr_heimweg tisch bez:freunde
 {name} ist die Mitfahrgelegenheit von {p2}. {p2} muss heute um 23 Uhr los – also muss {name} auch.
