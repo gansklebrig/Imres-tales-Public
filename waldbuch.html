@@ -177,6 +177,53 @@ h3.hand{font-size:1.7rem;margin:1.3rem 0 .3rem;color:var(--moos)}
 .balkchen{height:6px;border-radius:3px;background:rgba(0,0,0,.08);margin-top:.2rem}
 .balkchen i{display:block;height:100%;border-radius:3px;background:var(--moos2)}
 
+/* ---------- Einstieg: Erste Schritte & Wörterbuch ---------- */
+.neu-hier{display:flex;gap:.8rem;align-items:center;margin:.8rem 0 .4rem;padding:.75rem 1rem;background:linear-gradient(135deg,#e7f0cf,#d3e2a8);border:2px solid var(--moos2);border-radius:12px;text-decoration:none;color:var(--tinte);box-shadow:0 6px 16px rgba(79,107,44,.25);max-width:560px;transition:transform .15s}
+.neu-hier:hover{transform:translateY(-2px)}
+.neu-hier>span:first-child{font-size:2.1rem;line-height:1}
+.neu-hier b{display:block;font-family:var(--fh);font-weight:400;font-size:1.55rem;color:var(--moos);line-height:1.1}
+.neu-hier small{font-family:var(--fb);font-size:.9rem;color:var(--tinte2)}
+button.wort{all:unset;cursor:help;border-bottom:2px dotted var(--moos2);color:inherit;text-decoration:none;border-radius:2px}
+button.wort:hover,button.wort:focus-visible{background:#e3ecc8;outline:2px solid var(--moos3);outline-offset:1px}
+.wort-pop{position:absolute;z-index:70;background:#fffdf6;border:2px solid var(--moos2);border-radius:12px;box-shadow:0 14px 34px rgba(40,28,14,.35);padding:.8rem 1rem .7rem;font-size:.95rem;animation:auf .15s}
+.wort-pop b.hand{display:block;font-size:1.5rem;font-weight:400;color:var(--moos);margin-right:2rem;line-height:1.1}
+.wort-pop p{margin:.35rem 0}
+.wort-pop .wp-zu{position:absolute;right:.4rem;top:.4rem;border:0;background:#efe6cf;border-radius:50%;width:34px;height:34px;font-size:1rem;cursor:pointer}
+.wort-pop .wp-bild svg,.wk-bild svg{width:100%;height:auto;display:block}
+.wort-pop .wp-bild{width:130px;margin:0 auto .2rem}
+.wp-bsp{font-size:.88rem;color:var(--tinte2)}
+.wp-mehr{font-family:var(--fb);font-size:.85rem}
+.anfang-kopf{display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:end}
+.anfang-fr{height:190px;filter:drop-shadow(0 6px 8px rgba(0,0,0,.25))}
+@media (max-width:620px){.anfang-kopf{grid-template-columns:1fr}.anfang-fr{display:none}}
+.weg{counter-reset:w;list-style:none;padding:0;margin:.5rem 0 1rem}
+.weg li{counter-increment:w;position:relative;padding:.6rem .8rem .6rem 3.1rem;margin:.45rem 0;background:#fffdf6;box-shadow:0 3px 10px rgba(60,40,20,.15);border-radius:8px}
+.weg li::before{content:counter(w);position:absolute;left:.7rem;top:.45rem;font-family:var(--fh);font-size:1.9rem;color:var(--ocker);line-height:1}
+.erste{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.7rem;margin:.6rem 0 1rem}
+.erste-art{position:relative;display:flex;flex-direction:column;background:#fffdf6;padding:.4rem .4rem .55rem;box-shadow:0 4px 12px rgba(60,40,20,.2);text-decoration:none;color:var(--tinte);border-radius:4px}
+.erste-art .bild{aspect-ratio:4/3;overflow:hidden;background:#e7dcc0}.erste-art .bild img{width:100%;height:100%;object-fit:cover}
+.erste-art b{font-family:var(--fh);font-weight:400;font-size:1.3rem;margin:.3rem 0 .1rem;line-height:1.1}
+.erste-art small{font-size:.8rem;color:var(--tinte2);line-height:1.25}
+.erste-art.kann{outline:3px solid var(--moos3)}
+.erste-art .haken{position:absolute;top:.2rem;right:.2rem;background:var(--moos);color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:800}
+.hinschauen{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.6rem;margin:.6rem 0 1rem}
+.hinschauen>div{background:#fffdf6;padding:.6rem .75rem;border-left:4px solid var(--moos3);box-shadow:0 2px 8px rgba(60,40,20,.12)}
+.hinschauen .hs-em{font-size:1.5rem;margin-right:.35rem}
+.hinschauen b{font-family:var(--fh);font-weight:400;font-size:1.35rem}
+.hinschauen p{margin:.2rem 0 0;font-size:.95rem}
+.regeln{background:#fbeee6;border:2px solid #d9a38f;border-radius:10px;padding:.4rem 1rem;margin:.5rem 0 1rem}
+.regeln p{margin:.55rem 0}
+.schilder p{margin:.45rem 0}
+.woerter{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:.7rem;margin:.5rem 0 1.2rem}
+.wort-karte{display:grid;grid-template-columns:110px 1fr;gap:.7rem;align-items:start;background:#fffdf6;padding:.7rem;box-shadow:0 3px 10px rgba(60,40,20,.15);border-radius:6px;scroll-margin-top:90px}
+.wort-karte.ohne{grid-template-columns:1fr}
+.wort-karte b.hand{font-size:1.45rem;font-weight:400;color:var(--moos);line-height:1.1}
+.wort-karte p{margin:.3rem 0;font-size:.95rem}
+.wk-bild{background:#f6efdc;border-radius:6px;padding:.2rem}
+.wort-karte.glimm{outline:3px solid var(--ocker);animation:glimm 1.6s ease-out 2}
+@keyframes glimm{50%{box-shadow:0 0 0 8px rgba(197,138,44,.25)}}
+@media (max-width:420px){.wort-karte{grid-template-columns:86px 1fr}}
+
 /* ---------- Lernen & Spiel ---------- */
 .karte-lern{max-width:560px;margin:1rem auto;background:#fffdf6;box-shadow:0 10px 26px rgba(60,40,20,.3);padding:1rem;transform:rotate(-.5deg)}
 .karte-lern .frage{font-family:var(--fh);font-size:1.7rem;line-height:1.15;text-align:center;margin:.3rem 0 .8rem}
@@ -390,8 +437,9 @@ footer a{color:#d9c08c}
 <script src="waldbuch-arten-4.js?v=2"></script>
 <script src="waldbuch-arten-5.js?v=2"></script>
 <script src="waldbuch-merk.js?v=2"></script>
-<script src="waldbuch.js?v=4"></script>
+<script src="waldbuch.js?v=5"></script>
 <script src="waldbuch-spiel.js?v=3"></script>
 <script src="waldbuch-mehr.js?v=3"></script>
+<script src="waldbuch-start.js?v=2"></script>
 </body>
 </html>

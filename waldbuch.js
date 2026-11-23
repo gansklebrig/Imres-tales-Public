@@ -217,10 +217,10 @@
   /* ---------- Register ---------- */
   function register(aktiv) {
     const r = $("#register");
-    const extra = [["", "Deckblatt", "#efe2c2"], ["bestimmen", "🔍 Bestimmen", "#f1d38f"], ["jetzt", "📅 Was wächst jetzt?", "#e9c9a0"], ["ausflug", "🥾 Ausflug", "#cfe0a8"], ["fundbuch", "📷 Fundbuch", "#f4dfa0"], ["album", "📒 Sammelalbum", "#e8c7a8"], ["doppelgaenger", "☠ Doppelgänger", "#e6a99a"], ["lernen", "🧠 Lernkiste", "#d8c0e0"], ["spiel", "🐾 Rex' Spürnase", "#f0b77c"], ["offline", "📥 Offline", "#d6cfa8"]];
-    r.innerHTML = extra.slice(0, 1).map(([k, n, f]) => '<a class="reiter" href="#/' + k + '" style="background:' + f + '"' + (aktiv === k ? ' aria-current="page"' : "") + ">" + n + "</a>").join("") +
+    const extra = [["", "Deckblatt", "#efe2c2"], ["anfang", "🌱 Erste Schritte", "#d9e6b8"], ["bestimmen", "🔍 Bestimmen", "#f1d38f"], ["jetzt", "📅 Was wächst jetzt?", "#e9c9a0"], ["ausflug", "🥾 Ausflug", "#cfe0a8"], ["fundbuch", "📷 Fundbuch", "#f4dfa0"], ["album", "📒 Sammelalbum", "#e8c7a8"], ["doppelgaenger", "☠ Doppelgänger", "#e6a99a"], ["lernen", "🧠 Lernkiste", "#d8c0e0"], ["spiel", "🐾 Rex' Spürnase", "#f0b77c"], ["woerter", "📖 Wörterbuch", "#e4d6b0"], ["offline", "📥 Offline", "#d6cfa8"]];
+    r.innerHTML = extra.slice(0, 2).map(([k, n, f]) => '<a class="reiter" href="#/' + k + '" style="background:' + f + '"' + (aktiv === k ? ' aria-current="page"' : "") + ">" + n + "</a>").join("") +
       KAPITEL.map(k => '<a class="reiter" href="#/kapitel/' + k.k + '" style="background:' + k.farbe + '"' + (aktiv === "kapitel/" + k.k ? ' aria-current="page"' : "") + ">" + k.name + "</a>").join("") +
-      extra.slice(1).map(([k, n, f]) => '<a class="reiter" href="#/' + k + '" style="background:' + f + '"' + (aktiv === k ? ' aria-current="page"' : "") + ">" + n + "</a>").join("");
+      extra.slice(2).map(([k, n, f]) => '<a class="reiter" href="#/' + k + '" style="background:' + f + '"' + (aktiv === k ? ' aria-current="page"' : "") + ">" + n + "</a>").join("");
     const a = r.querySelector("[aria-current]"); if (a) a.scrollIntoView({ inline: "center", block: "nearest" });
   }
 
@@ -230,6 +230,7 @@
     const gefunden = Object.keys(STAND.gefunden).length;
     seite('<div class="deckblatt"><div><p class="leise" style="font-family:var(--fb);letter-spacing:.14em;text-transform:uppercase">Notizen eines Waldläufers</p><h1 class="hand">Friedrichs Waldbuch</h1><p style="font-size:1.1rem">Was der Wald mich gelehrt hat – aufgeschrieben für alle, die mit offenen Augen gehen. Mit Fotos, Jahreskalender, giftigen Doppelgängern und den Spuren, die Rex schneller findet als ich.</p>' +
       '<div class="zahlen"><span><b>' + ARTEN.length + "</b>Arten</span><span><b>" + Object.values(BILDER).reduce((s, b) => s + b.length, 0) + "</b>Fotos</span><span><b>" + KAPITEL.length + "</b>Kapitel</span><span><b>" + (window.WB_MEHR ? Object.keys(STAND.funde || {}).length : gefunden) + "</b>selbst gefunden</span></div>" +
+      '<a class="neu-hier" href="#/anfang"><span>🌱</span><span><b>Neu hier? Fang hier an.</b><small>Keine Vorkenntnisse nötig: die ersten zwölf Arten, wie man richtig hinschaut, ein Wörterbuch mit Zeichnungen und die wichtigsten Sicherheitsregeln.</small></span></a>' +
       '<div class="reihe"><a class="knopf" href="#/ausflug">🥾 Auf einen Ausflug</a><a class="knopf" href="#/spiel">🐾 Spurensuche mit Rex</a><a class="knopf hell" href="#/bestimmen">🔍 Etwas bestimmen</a><a class="knopf hell" href="#/fundbuch">📷 Mein Fundbuch</a><a class="knopf hell" href="#/lernen">🧠 Lernkiste</a><a class="knopf hell" href="#/doppelgaenger">☠ Doppelgänger</a><a class="knopf hell" href="#/offline">📥 Offline mitnehmen</a></div></div>' +
       '<div class="bilder" aria-hidden="true"><img src="friedrich-frei.webp" alt="" style="right:18%;bottom:0;height:300px"><img src="rex-frei.webp" alt="" style="right:0;bottom:0;height:150px"></div></div>' +
       '<div class="notiz">Bevor du losziehst: Dieses Buch ist zum Lernen da. Ich habe mir Mühe gegeben, dass alles stimmt – aber ein Buch ersetzt keine Pilzberatung und keine erfahrene Hand. Wer sammelt, sammelt nur, was er sicher kennt, und nur so viel, wie er braucht. Geschützte Pflanzen bleiben stehen. Und Rex bleibt an der Leine, wenn Rehkitze im Gras liegen.<span class="unterschrift">– Friedrich</span></div><div id="mehr-heute"></div>' +
@@ -471,7 +472,8 @@
   /* ---------- Lernkiste ---------- */
   function lernPool(art) {
     let p = ARTEN.filter(a => bilderVon(a.id).length);
-    if (art && art !== "alle") p = p.filter(a => a.kap === art || (art === "pflanze" && !["pilz", "tier"].includes(a.kap)));
+    if (art === "einsteiger" && window.WB_START) return p.filter(a => WB_START.EINSTEIGER.includes(a.id));
+    if (art && art !== "alle" && art !== "einsteiger") p = p.filter(a => a.kap === art || (art === "pflanze" && !["pilz", "tier"].includes(a.kap)));
     return p;
   }
   function naechsteLernkarte(pool) {
@@ -489,13 +491,13 @@
     while (out.length < n && kand.length) out.push(kand.pop());
     return out;
   }
-  let lernArt = "alle", lernModus = "name";
+  let lernArt = Object.keys(STAND.kiste || {}).length < 20 ? "einsteiger" : "alle", lernModus = "name";
   function lernSeite() {
     const kisten = [1, 2, 3, 4, 5].map(k => ARTEN.filter(a => (STAND.kiste[a.id] || 0) === k).length);
     const neu = ARTEN.filter(a => !STAND.kiste[a.id]).length;
     seite('<h2 class="hand">Die Lernkiste</h2><p>Jede Art wandert durch fünf Fächer: Wer richtig erkannt wird, rutscht eins weiter nach hinten und kommt seltener dran. Wer falsch ist, muss zurück ins erste Fach. So lernt man den Wald, ohne zu büffeln.</p>' +
       '<div class="kisten">' + kisten.map((n, i) => '<div class="kiste"><b>' + n + "</b>Fach " + (i + 1) + "</div>").join("") + '<div class="kiste"><b>' + neu + "</b>noch neu</div></div>" +
-      '<div class="chips" role="group" aria-label="Was lernen?">' + [["alle", "Alles"], ["pflanze", "Pflanzen"], ["baum", "Bäume"], ["kraut", "Kräuter"], ["beere", "Beeren"], ["pilz", "Pilze"], ["tier", "Tiere"]].map(([k, n]) => '<button class="chip" data-a="' + k + '" aria-pressed="' + (lernArt === k) + '">' + n + "</button>").join("") + "</div>" +
+      '<div class="chips" role="group" aria-label="Was lernen?">' + [["einsteiger", "🌱 Einsteiger"], ["alle", "Alles"], ["pflanze", "Pflanzen"], ["baum", "Bäume"], ["kraut", "Kräuter"], ["beere", "Beeren"], ["pilz", "Pilze"], ["tier", "Tiere"]].map(([k, n]) => '<button class="chip" data-a="' + k + '" aria-pressed="' + (lernArt === k) + '">' + n + "</button>").join("") + "</div>" +
       '<div class="modi">' + [["name", "Wer bin ich?", "Ein Foto – vier Namen."], ["bild", "Zeig mir …", "Ein Name – vier Fotos."], ["merkmal", "Merkmal-Rätsel", "Friedrich beschreibt, du rätst."], ["verwechslung", "Doppelgänger-Duell", "Welches ist das Richtige? Die gefährlichsten Paare."], ["monat", "Wann ist es soweit?", "Blüte, Frucht, Pilzzeit."], ["sinne", "Mit allen Sinnen", "Riechen, fühlen, lauschen – wer ist das?"]].concat(window.WB_MEHR && WB_MEHR.stimmenDa >= 4 ? [["stimme", "Wer ruft da?", "Tierstimmen erkennen."]] : []).map(([k, n, t]) => '<button class="modus" data-m="' + k + '"' + (lernModus === k ? ' style="outline:3px solid var(--ocker)"' : "") + "><b>" + n + "</b>" + t + "</button>").join("") + '</div><div id="lernfeld"></div>');
     const s = $("#seite");
     const zumFeld = () => { const f = $("#lernfeld"); if (f && window.innerWidth < 900) f.scrollIntoView({ block: "start" }); };
@@ -644,7 +646,7 @@
     else if (teil === "bestimmen") { register("bestimmen"); bestimmenSeite(); }
     else if (teil === "jetzt") { register("jetzt"); jetztSeite(); }
     else if (teil === "doppelgaenger") { register("doppelgaenger"); doppelSeite(); }
-    else if (teil === "lernen") { register("lernen"); lernSeite(); }
+    else if (teil === "lernen") { register("lernen"); if (arg) lernArt = arg; lernSeite(); }
     else if (teil === "spiel") { register("spiel"); if (window.WB_SPIEL) window.WB_SPIEL.start($("#seite")); }
     else if (teil === "nachweise") { register(""); nachweisSeite(); }
     else if (teil === "offline") { register("offline"); offlineSeite(); }
