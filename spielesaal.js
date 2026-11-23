@@ -30,7 +30,7 @@
     { key: "nacht", karte: "diebesnacht", held: "ezekiel.jpg", bilder: [B("nacht-1"), B("nacht-2"), B("nacht-3")],
       plakat: B("plakat-nacht"), pos: "center 28%", farbe: "#ff5a4e", clip: "vorschau/nacht-clip.mp4?v=5", ton: "shake.mp3", art: "update", stand: "2026-11-22" },
     { key: "zerstoerer", karte: "zerstoerer", extern: "zerstoerer.html", held: "ezekiel.jpg", bilder: ["vorschau/zerstoerer-1.webp?v=1", "vorschau/zerstoerer-2.webp?v=1", "vorschau/zerstoerer-3.webp?v=1"],
-      plakat: "vorschau/plakat-zerstoerer.webp?v=1", pos: "62% 30%", farbe: "#ff3a2a", clip: "vorschau/zerstoerer-clip.mp4?v=1", ton: "timp1.mp3", art: "neu", stand: "2026-11-22" },
+      plakat: "vorschau/plakat-zerstoerer.webp?v=1", pos: "62% 30%", farbe: "#ff3a2a", clip: "vorschau/zerstoerer-clip.mp4?v=1", ton: "timp1.mp3", art: "neu", stand: "2026-11-23" },
     { key: "hort", karte: "echohort", held: "echo.jpg", bilder: [B("hort-1"), B("hort-2"), B("hort-3")],
       plakat: B("plakat-hort"), pos: "52% center", farbe: "#5fd6b8", clip: "vorschau/hort-clip.mp4?v=5", ton: "harfe_76.mp3", art: "update", stand: "2026-11-22" },
     { key: "auftritt", karte: "auftritt", held: "barradin.jpg", bilder: [B("auftritt-1"), B("auftritt-2"), B("auftritt-3")],
