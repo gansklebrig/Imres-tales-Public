@@ -371,19 +371,23 @@
   const hudEl = document.getElementById("hud"), promptEl = document.getElementById("prompt"), cardEl = document.getElementById("card");
   let book = null, muteBanner = false, skipReq = false, padPrev = [];
   const visitSeen = { seed: null, set: new Set() };
-  const HOLD_IN = 0.8, TURN = 0.78;
+  const HOLD_IN = 0.8, TURN = 0.78, TURN_AREA = 0.55; /* Gebietsseiten: kurz, nicht blockierend (Spiel läuft darunter weiter) */
   let hudHidden = false;
-  function hudHide(v) { if (!hudEl || hudHidden === !!v) return; hudHidden = !!v; hudEl.style.transition = "opacity .3s"; hudEl.style.opacity = v ? "0" : ""; }
+  function hudHide(v) {
+    if (!hudEl || hudHidden === !!v) return; hudHidden = !!v; ui.verdeckt = !!v;
+    /* HUD, Meldungen und Weltschilder warten, solange die Seite über dem Bild liegt */
+    for (const el of [hudEl, document.getElementById("meldungen"), document.getElementById("welt")]) if (el) { el.style.transition = "opacity .3s"; el.style.opacity = v ? "0" : ""; }
+  }
   function pageInfo(id, B, lv) {
     const run = Z.run;
-    if (lv.hub) return { kind: "hub", chapter: L(["Prolog", "Prologue"]), title: L(B.name), sub: L(["Hier beginnt jeder Lauf. Mit leeren Händen.", "Every run begins here. Empty-handed."]), story: L(["Am Feuer wird erzählt, was in der Feste geschah – und was noch geschehen wird.", "By the fire they tell what happened in the keep – and what is yet to happen."]), hold: 1.05, pose: "stand" };
-    if (lv.passage) return { kind: "passage", chapter: L(["Zwischenspiel", "Interlude"]), title: L(["Durchgang", "Passage"]), sub: L(["Weiter nach: ", "Onward to: "]) + Z.areaName(lv.to), story: L(["Ein Atemzug zwischen zwei Kapiteln. Händler, Brunnen, ein Altar – und Nundros Rabe.", "A breath between two chapters. A merchant, a fountain, an altar – and Nundro's raven."]), hold: 0.75, pose: "stand" };
+    if (lv.hub) return { kind: "hub", chapter: L(["Prolog", "Prologue"]), title: L(B.name), sub: L(["Hier beginnt jeder Lauf. Mit leeren Händen.", "Every run begins here. Empty-handed."]), story: L(["Am Feuer wird erzählt, was in der Feste geschah – und was noch geschehen wird.", "By the fire they tell what happened in the keep – and what is yet to happen."]), hold: 0.7, pose: "stand" };
+    if (lv.passage) return { kind: "passage", chapter: L(["Zwischenspiel", "Interlude"]), title: L(["Durchgang", "Passage"]), sub: L(["Weiter nach: ", "Onward to: "]) + Z.areaName(lv.to), story: L(["Ein Atemzug zwischen zwei Kapiteln. Händler, Brunnen, ein Altar – und Nundros Rabe.", "A breath between two chapters. A merchant, a fountain, an altar – and Nundro's raven."]), hold: 0.5, pose: "stand" };
     const n = run ? run.route.length : 1;
     if (lv.arena) {
       const AR = Z.ARENAS[id] || {}, fin = !!AR.final;
-      return { kind: "arena", chapter: (fin ? L(["Letztes Kapitel", "Final Chapter"]) : L(["Kapitel ", "Chapter "]) + roman(n)), title: Z.areaName(id), sub: fin ? L(["Am Ende eines Fadens", "At the end of a thread"]) : L(["Ein Kampf, von dem man noch erzählen wird", "A fight they will tell of"]), story: L((Z.BIOMES[AR.base] || {}).story || ["", ""]), hold: 1.1, pose: "stand", pageNo: n * 2 + 1 };
+      return { kind: "arena", chapter: (fin ? L(["Letztes Kapitel", "Final Chapter"]) : L(["Kapitel ", "Chapter "]) + roman(n)), title: Z.areaName(id), sub: fin ? L(["Am Ende eines Fadens", "At the end of a thread"]) : L(["Ein Kampf, von dem man noch erzählen wird", "A fight they will tell of"]), story: L((Z.BIOMES[AR.base] || {}).story || ["", ""]), hold: 0.8, pose: "stand", pageNo: n * 2 + 1 };
     }
-    return { kind: "area", chapter: L(["Kapitel ", "Chapter "]) + roman(n), title: L(B.name), sub: L(B.sub || ["", ""]), story: B.story ? L(B.story) : "", hold: 1.2, pose: "stand", pageNo: n * 2 + 1 };
+    return { kind: "area", chapter: L(["Kapitel ", "Chapter "]) + roman(n), title: L(B.name), sub: L(B.sub || ["", ""]), story: B.story ? L(B.story) : "", hold: 0.75, pose: "stand", pageNo: n * 2 + 1 };
   }
   function grabPage() {
     try {
@@ -420,7 +424,7 @@
       return;
     }
     if (b.mode === "turn") {
-      if (b.t >= (b.low ? 0.32 : TURN)) { b.i++; b.t = 0; b.appear = false; if (b.i >= b.pages.length) endBook(); else b.mode = "hold"; }
+      if (b.t >= (b.low ? 0.32 : b.closing ? TURN : TURN_AREA)) { b.i++; b.t = 0; b.appear = false; if (b.i >= b.pages.length) endBook(); else b.mode = "hold"; }
     }
   }
   function drawBook(c, W, H) {
@@ -436,7 +440,7 @@
     if (b.mode === "in") drawTurn(c, W, H, pg.cv, null, 1 - easeIO(Math.min(1, b.t / HOLD_IN)), qLevel() >= 2);
     else if (b.mode === "hold") {
       if (b.appear && ui.modalOpen) b.appear = false; /* wartet hinter einem Fenster (Steuerung, Erzählung): Seite gleich ganz zeigen */
-      if (b.appear && b.t < 0.2) c.globalAlpha = b.t / 0.2;
+      if (b.appear && b.t < 0.15) c.globalAlpha = b.t / 0.15;
       c.drawImage(pg.cv, 0, 0, W, H); c.globalAlpha = 1;
       /* leichtes Atmen des Papiers: Lichtkante wandert */
       const s = Math.min(W, H) / 100, a = 0.06 + 0.04 * Math.sin(b.age * 2.2);
@@ -446,13 +450,13 @@
       const pre = span(b.t, Math.max(0, pg.hold - 0.45), pg.hold) * (b.fast ? 0 : 1);
       if (pre > 0 && !(b.closing && b.i === b.pages.length - 1 && b.onClosed)) { c.restore(); c.save(); c.setTransform(1, 0, 0, 1, 0, 0); drawTurn(c, W, H, pg.cv, under, 0.035 * easeIO(pre), true); }
       /* Hinweis */
-      const ha = span(b.t, 0.35, 0.7) * 0.75;
+      const ha = b.closing ? span(b.t, 0.35, 0.7) * 0.75 : 0; /* Gebietsseiten blättern von selbst um – kein Tastenhinweis */
       if (ha > 0) {
         const dev = inp.device === "pad" ? L(["Knopf: weiter", "Button: continue"]) : inp.device === "touch" || (ui.touchOn && inp.device !== "pad") ? L(["Tippen: weiter", "Tap: continue"]) : L(["Taste: weiter", "Any key: continue"]);
         c.globalAlpha = ha; c.fillStyle = INK2; c.font = "italic " + (s * 2.6).toFixed(1) + "px " + FI; c.textAlign = "right"; c.textBaseline = "alphabetic";
         c.fillText("— " + dev + " ▸", W - s * 25, H - s * 8); c.globalAlpha = 1;
       }
-    } else if (b.mode === "turn") drawTurn(c, W, H, pg.cv, under, easeIO(Math.min(1, b.t / TURN)), qLevel() >= 2);
+    } else if (b.mode === "turn") drawTurn(c, W, H, pg.cv, under, easeIO(Math.min(1, b.t / (b.closing ? TURN : TURN_AREA))), qLevel() >= 2);
     c.restore();
   }
   function skipAll() {
@@ -838,7 +842,9 @@
   };
 
   /* ======================= EINGABE: blockieren nur während überspringbarer Übergänge ======================= */
-  const blocking = () => !!(book || pan || (suck && !suck.done) || (suck && suck.done && suck.t < suck.doneT + 0.6));
+  /* Gebietsseiten blockieren nicht mehr: das Spiel läuft darunter weiter, jede Aktion blättert schneller um.
+     Nur die Schlussseite (Tod/Rückkehr), die Kamerafahrt und der Sog in die Tür halten die Eingabe kurz an. */
+  const blocking = () => !!((book && book.closing) || pan || (suck && !suck.done) || (suck && suck.done && suck.t < suck.doneT + 0.6));
   addEventListener("keydown", e => { if (!e.repeat && blocking() && !ui.modalOpen && !inp.capture) skipReq = true; }, true);
   addEventListener("pointerdown", e => { if (blocking() && !ui.modalOpen && e.target && (e.target.id === "cv" || (e.target.closest && e.target.closest("#touch")))) skipReq = true; }, true);
   const frame0 = ui.frame;
@@ -854,7 +860,11 @@
       FX.hitstop = Math.max(FX.hitstop || 0, 0.05);
       Z.interactTarget = null;
       if (promptEl) promptEl.hidden = true;
-    } else { skipReq = false; const pad = inp.lastPad; if (pad && pad.buttons) padPrev = pad.buttons.map(b => !!b && (b.pressed || b.value > 0.45)); }
+    } else {
+      skipReq = false; const pad = inp.lastPad; if (pad && pad.buttons) padPrev = pad.buttons.map(b => !!b && (b.pressed || b.value > 0.45));
+      /* offene Gebietsseite: eine Aktion blättert sofort um, die Taste wirkt trotzdem im Spiel */
+      if (book && !book.closing && !ui.modalOpen && book.age > 0.15) { for (const k of ["jump", "roll", "a1", "a2", "s1", "s2", "use"]) if (inp.pressed[k]) { skipAll(); break; } }
+    }
     return frame0.apply(this, arguments);
   };
 
@@ -909,8 +919,8 @@
         info = pageInfo(id, B, lv); info.id = id; info.B = B; info.lv = lv; info.low = low();
         if (!info.low) info.page = grabPage();
         if (Z.run) { if (visitSeen.seed !== Z.run.seed) { visitSeen.seed = Z.run.seed; visitSeen.set = new Set(); } info.first = !visitSeen.set.has(id) && (info.kind === "area" || info.kind === "arena"); visitSeen.set.add(id); }
-        if (!info.first && info.kind === "area") info.hold = 0.85;
-        if (info.low) info.hold = Math.min(info.hold, 0.75);
+        if (!info.first && info.kind === "area") info.hold = 0.45;
+        if (info.low) info.hold = Math.min(info.hold, 0.6);
       } catch (e) { console.error(e); info = null; }
     }
     muteBanner = !!info;
@@ -921,7 +931,7 @@
         try {
           const pg = newPage(info);
           if (book && book.closing && !book.onClosed) { book.pages.push(pg); book.low = false; }
-          else startBook(pg, { pan: !!info.first && rich() });
+          else startBook(pg, { pan: !!info.first && rich() && !!(Z.settings && Z.settings.cinePan) });
         } catch (e) { console.error(e); endBook(); }
       }
     }
@@ -977,7 +987,7 @@
   const toast0 = Z.toast;
   const toastW = function (msg) {
     const r = toast0.apply(this, arguments);
-    try { if (on() && /🏆|Rekord|record/i.test(String(msg))) { const el = document.getElementById("toast"); setTimeout(() => goldAtEl(el, 1.3), 30); } } catch (_) {}
+    try { if (on() && /🏆|Rekord|record/i.test(String(msg))) { const el = r || ui.lastNote; setTimeout(() => goldAtEl(el, 1.3), 60); } } catch (_) {}
     return r;
   };
   Z.toast = ui.toast = toastW;

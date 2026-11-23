@@ -42,6 +42,7 @@
 
   /* Funde: tiefere Gebiete → höhere Grundstufe; Bosse +1; mit Runenkunde manchmal schon graviert */
   function pickRunes(it, n) {
+    if (Z.runePool) return Z.runePool(it, n); /* runen.js: passend zur Familie bevorzugt, Schildrunen nur mit Schild */
     const d = Z.itemDef(it), have = it.runes || [];
     const pool = Object.keys(Z.RUNES).filter(k => !have.includes(k) && !(d && d.kind === "shield" && Z.RUNES[k].noShield));
     return Z.R.shuffle(pool).slice(0, n);
@@ -113,6 +114,14 @@
         const P = Z.player; if (!P) return;
         if (!o.offer) o.offer = Z.R.shuffle(Object.keys(Z.BLESS).filter(b => !P.bless.includes(b))).slice(0, 2);
         orbNow = o;
+        /* kein Fenster: die Kugel teilt sich in zwei Fäden-Kugeln in der Welt – hingehen, Benutzen nimmt eine */
+        if (ui.auslage && ui.segenKugel && o.offer.length) {
+          o.off = true; A.play("magic", { vol: 0.5 }); FX.burst(o.x, o.y - 22, 20, { col: ["#ffd27a", "#ff8a5a", "#fff"], sp: 90, up: 30, life: 0.7, size: 2, kind: "glow", add: true });
+          ui.auslage({ key: "segenskugel" + Math.round(o.x), x: o.x, y: o.y, abstand: 30, hoch: 38, einmal: true,
+            items: o.offer.map(b => ui.segenKugel(b, () => { if (Z.player.bless.length >= 3) { ui.actions.bless(b); return false; } ui.actions.bless(b); })) });
+          ui.notify(L(["Zwei Segen – nimm einen", "Two blessings – take one"]), { prio: 3, art: "magie", ort: "welt", x: o.x, y: o.y - 46, dauer: 2400 });
+          return;
+        }
         ui.open("<h2>" + L(["Segenskugel", "Orb of Blessing"]) + '</h2><p class="hinweis">' + L(["Zwei Fäden glimmen in der Kugel. Einer davon gehört dir – ohne Preis.", "Two threads glimmer in the orb. One of them is yours – free of charge."]) + '</p><div class="rollen">' +
           o.offer.map((b, i) => { const d = Z.BLESS[b]; return '<button data-act="smSegen" data-arg="' + b + '" data-key="' + (i + 1) + '" class="k-' + d.k + '"' + (i === 0 ? " autofocus" : "") + "><b>" + digitHint(i + 1) + esc(L(d.n)) + '</b><small class="art">' + esc(L(Z.BLESS_KIND[d.k])) + "</small><small>" + esc(L(d.d)) + "</small></button>"; }).join("") +
           '</div><div class="knoepfe"><button data-act="close">' + L(["Später", "Later"]) + "</button></div>", { cls: "schmal" });
@@ -150,8 +159,8 @@
       const hand = slot === "a1" ? L(["Hand 1", "Hand 1"]) : L(["Hand 2", "Hand 2"]);
       const k = keyHint(slot) || (inp.device === "touch" ? L(["Knopf „Waffe " + (slot === "a1" ? 1 : 2) + "“", "button 'Weapon " + (slot === "a1" ? 1 : 2) + "'"]) : "");
       const both = P.slots.a1 && P.slots.a2;
-      later(() => Z.toast("<b>" + esc(Z.itemTitle(it)) + "</b> " + L(["liegt in ", "is in "]) + hand + " – " + L(["angreifen mit ", "attack with "]) + k +
-        "<br><small>" + (both ? L(["Beide Hände voll. Nimmst du noch etwas, wählst du mit ", "Both hands full. Pick up another and choose with "]) + keyHint("a1") + " / " + keyHint("a2") + L([", welche Hand tauscht. Probier sie an der Puppe aus!", " which hand swaps. Try them on the dummy!"]) : L(["Eine Hand ist noch frei – nimm dir eine zweite Waffe.", "One hand is still free – take a second weapon."])) + "</small>", 4200), Z.presentItem ? 1300 : 200);
+      later(() => ui.notify("<b>" + esc(Z.itemTitle(it)) + "</b> " + L(["liegt in ", "is in "]) + hand + " – " + L(["angreifen mit ", "attack with "]) + k +
+        "<br><small>" + (both ? L(["Beide Hände voll. Nimmst du noch etwas, wählst du mit ", "Both hands full. Pick up another and choose with "]) + keyHint("a1") + " / " + keyHint("a2") + L([", welche Hand tauscht. Probier sie an der Puppe aus!", " which hand swaps. Try them on the dummy!"]) : L(["Eine Hand ist noch frei – nimm dir eine zweite Waffe.", "One hand is still free – take a second weapon."])) + "</small>", { prio: 2, art: "gold", icon: "⚒", dauer: 4200, key: "ständer" }), Z.presentItem ? 700 : 200);
     }
   };
 
@@ -222,10 +231,10 @@
     P.gold -= c.gold; P.glut -= c.glut; a.used++;
     const before = statLines(it, it.plus || 0);
     anim = { it, slot: s, t: 0, from: it.plus || 0, to: (it.plus || 0) + 1, hits: 0, before, sparks: [], done: false };
-    Z.stats.upgrades = (Z.stats.upgrades || 0) + 1; ui.noEsc = true; /* während der Vorführung nicht versehentlich schließen */
+    Z.stats.upgrades = (Z.stats.upgrades || 0) + 1; /* Schließen ist jederzeit erlaubt: safeFinish() setzt die Stufe trotzdem */
     /* Fenster auf die Vorführung umstellen: Knöpfe weg, nur das Bild */
     const box = document.querySelector("#modal .glutamboss");
-    if (box) { const bk = box.querySelector(".bank"); if (bk) bk.innerHTML = '<span class="gld">' + U.fmt(P.gold) + ' ●</span> <span class="glt">' + (P.glut || 0) + " ✦ " + L(["Glut", "Embers"]) + "</span>"; box.querySelector(".gb-haende").innerHTML = '<p class="gb-laeuft">' + L(["Nundros Hammer singt …", "Nundro's hammer sings…"]) + ' <small class="hinweis">(' + L(["Taste: überspringen", "any key: skip"]) + ")</small></p>"; const k = box.querySelector(".knoepfe"); if (k) k.style.visibility = "hidden"; const h = box.querySelector(".hinweis"); if (h) h.textContent = ""; }
+    if (box) { const bk = box.querySelector(".bank"); if (bk) bk.innerHTML = '<span class="gld">' + U.fmt(P.gold) + ' ●</span> <span class="glt">' + (P.glut || 0) + " ✦ " + L(["Glut", "Embers"]) + "</span>"; box.querySelector(".gb-haende").innerHTML = '<p class="gb-laeuft">' + L(["Nundros Hammer singt …", "Nundro's hammer sings…"]) + ' <small class="hinweis">' + (ui.key ? ui.key("jump") : "") + " " + L(["überspringen", "skip"]) + "</small></p>"; const k = box.querySelector(".knoepfe"); if (k) { k.style.visibility = "hidden"; k.querySelectorAll("button").forEach(b => (b.disabled = true)); } const h = box.querySelector(".hinweis"); if (h) h.textContent = ""; if (document.activeElement) document.activeElement.blur(); }
   };
   /* Fenster wird mitten in Vorführung/Runenwahl geschlossen: nichts geht verloren (Stufe kommt, Rune wird zufällig gewählt) */
   function safeFinish() {
@@ -291,7 +300,7 @@
     };
     raf = requestAnimationFrame(loop);
   }
-  const HIT_T = [0.35, 0.8, 1.25], ANIM_END = 1.95;
+  const HIT_T = [0.22, 0.5, 0.78], ANIM_END = 1.3; /* kurz – und jede Taste überspringt */
   function drawScene(cv, t, dt) {
     const c = cv.getContext("2d"), W = cv.width, H = cv.height, sc = scene;
     c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, W, H);
@@ -301,7 +310,8 @@
     if (an && !an.done) {
       an.t += dt;
       const anyKey = inp.pressed.jump || inp.pressed.use || inp.pressed.roll || inp.pressed.a1 || inp.pressed.a2;
-      if (anyKey && an.t > 0.3 && an.t < HIT_T[2]) { an.t = HIT_T[2] - 0.02; for (let i = an.hits; i < 2; i++) an.hits++; }
+      if (anyKey && an.t > 0.05 && an.t < HIT_T[2]) { an.t = HIT_T[2] - 0.02; for (let i = an.hits; i < 2; i++) an.hits++; }
+      else if (anyKey && an.final && an.t < ANIM_END - 0.05) an.t = ANIM_END - 0.05;
       for (let i = 0; i < 3; i++) {
         const ht = HIT_T[i];
         if (an.t >= ht - 0.3 && an.t < ht) hammer = -1.1 - 0.35 * Math.sin((an.t - (ht - 0.3)) / 0.3 * Math.PI) + (an.t - (ht - 0.3)) / 0.3 * 1.25;
@@ -314,11 +324,11 @@
           for (let k = 0; k < n + i * 10; k++) { const ang = -Math.PI / 2 + (Math.random() - 0.5) * 2.6, v = 120 + Math.random() * 260; sc.sparks.push({ x: W * 0.5, y: H * 0.56, vx: Math.cos(ang) * v, vy: Math.sin(ang) * v, life: 0.5 + Math.random() * 0.6, max: 1.1, col: Math.random() < 0.3 ? "#fff3c0" : Math.random() < 0.5 ? "#ffb040" : "#ff6a2a" }); }
         }
       }
-      if (an.t >= HIT_T[2] + 0.2 && !an.final) {
+      if (an.t >= HIT_T[2] + 0.12 && !an.final) {
         an.final = true; A.play(an.to >= 4 ? "holy" : "gem", { vol: 0.6 }); A.play("fire", { vol: 0.35 });
         for (let k = 0; k < 40; k++) { const ang = Math.random() * TAU, v = 60 + Math.random() * 160; sc.sparks.push({ x: W * 0.5, y: H * 0.5, vx: Math.cos(ang) * v, vy: Math.sin(ang) * v - 40, life: 0.8 + Math.random() * 0.5, max: 1.3, col: Z.plusCol(an.to) }); }
       }
-      if (an.final) flash = clamp(1 - (an.t - HIT_T[2] - 0.2) / 0.6, 0, 1);
+      if (an.final) flash = clamp(1 - (an.t - HIT_T[2] - 0.12) / 0.4, 0, 1);
       if (an.t >= ANIM_END) finishForge();
     } else sc.heat = Math.max(0.15, sc.heat - dt * 0.25);
     const sh = sc.shake > 0 ? (sc.shake -= dt, (Math.random() - 0.5) * 6 * sc.shake / 0.18) : 0;
@@ -363,7 +373,7 @@
     c.restore();
     /* Abschluss-Blitz und „+N" */
     if (an && an.final) {
-      const u = clamp((an.t - HIT_T[2] - 0.2) / 0.5, 0, 1);
+      const u = clamp((an.t - HIT_T[2] - 0.12) / 0.35, 0, 1);
       c.save(); c.globalAlpha = flash * 0.55; c.fillStyle = Z.plusCol(an.to); c.fillRect(0, 0, W, H); c.restore();
       c.save(); c.globalAlpha = Math.min(1, u * 2); c.font = "700 " + Math.round(40 + 18 * (1 - u)) + "px " + (getComputedStyle(document.documentElement).getPropertyValue("--fd") || "serif"); c.textAlign = "center"; c.textBaseline = "middle"; c.fillStyle = Z.plusCol(an.to); c.shadowColor = "#000"; c.shadowBlur = 10; c.fillText("+" + an.to, W * 0.78, H * 0.32); c.restore();
     }
@@ -565,17 +575,12 @@
     /* Schild über dem Gestell, mit Tastenhinweis, wenn man in der Nähe ist */
     const P = Z.player; if (!P) return;
     const px = P.x + P.w / 2, near = px > x0 - 90 && px < x1 + 90 && Math.abs(P.y + P.h - y) < 50;
-    if (near && !ui.choiceActive) {
-      const k = inp.device === "touch" ? "✋" : inp.label("use");
-      const s1 = L(["Waffenständer · zwei Hände, zwei Waffen", "Weapon rack · two hands, two weapons"]), s2 = "[" + k + "] " + L(["aufheben", "pick up"]) + (P.slots.a1 && P.slots.a2 ? " · [" + (inp.label("a1") || "1") + "]/[" + (inp.label("a2") || "2") + "] " + L(["Hand wählen", "choose hand"]) : "");
-      c.save(); c.font = "700 7px 'Alegreya Sans',sans-serif"; c.textAlign = "center";
-      const w = Math.max(c.measureText(s1).width, c.measureText(s2).width) + 10, cx = (x0 + x1) / 2;
-      c.fillStyle = "rgba(14,8,10,.82)"; c.fillRect(cx - w / 2, y - 62, w, 21); c.strokeStyle = "rgba(229,180,84,.6)"; c.lineWidth = 0.6; c.strokeRect(cx - w / 2 + 0.3, y - 61.7, w - 0.6, 20.4);
-      c.fillStyle = "#e5b454"; c.fillText(s1, cx, y - 53.5); c.fillStyle = "#f0e6d4"; c.fillText(s2, cx, y - 44.5);
-      /* Namen über den Waffen */
-      c.font = "700 5.5px 'Alegreya Sans',sans-serif";
-      for (const p of Z.pickups) if (p.rack && p.it && Math.abs(p.x - px) < 34) { c.fillStyle = "rgba(14,8,10,.7)"; const nm = Z.itemTitle(p.it), tw = c.measureText(nm).width + 4; c.fillRect(p.x - tw / 2, y - 38, tw, 7); c.fillStyle = p.it.plus ? Z.plusCol(p.it.plus) : "#e8dcc8"; c.fillText(nm, p.x, y - 32.6); }
-      c.restore();
+    if (near && !ui.choiceActive && ui.worldLabel) {
+      /* Schild über dem Gestell – im gemeinsamen Stil (Eisenplakette, Tastenkappen) */
+      const cx = (x0 + x1) / 2, both = P.slots.a1 && P.slots.a2;
+      ui.worldLabel("staender", { x: cx, y: y - 42, cls: "zwei", art: "gold", jetzt: true,
+        html: L(["Waffenständer", "Weapon rack"]) + "<small>" + (ui.key("use") || "✋") + " " + L(["aufheben", "pick up"]) + (both && ui.key("a1") ? " · " + ui.key("a1") + ui.key("a2") + " " + L(["Hand wählen", "choose hand"]) : " · " + L(["zwei Hände, zwei Waffen", "two hands, two weapons"])) + "</small>" });
+      Z.pickups.forEach((p, i) => { if (p.rack && p.it && Math.abs(p.x - px) < 34) ui.worldLabel("staender" + i, { x: p.x, y: y - 28, text: Z.itemTitle(p.it), cls: "leise", jetzt: true }); });
     }
   }
   const wp0 = Z.drawWorldProps;
@@ -614,8 +619,8 @@
   const css = document.createElement("style");
   css.textContent = [
     ".res .gl{color:#ffb060}.res .gl::before{content:\"✦\";color:#ff8a2a;margin-right:3px}.res .ky::before{content:\"⚷\";color:#ffd27a;margin-right:2px}",
-    "#aufgabe{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;font-size:11px;font-weight:800;text-shadow:0 1px 2px #000}",
-    "#aufgabe span{padding:1px 6px;border-radius:9px;background:rgba(20,12,16,.72);border:1px solid #3d2a2e}#aufgabe .ok{border-color:#7fd36a;color:#b8f0a0}#aufgabe .weg{opacity:.45;text-decoration:line-through}#aufgabe .kette{border-color:#e5b454;color:#ffd27a}",
+    "#aufgabe{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;font-size:12px;font-weight:800;text-shadow:0 1px 2px #000;transition:opacity .3s}",
+    "#aufgabe span{padding:1px 8px;border-radius:4px;background:linear-gradient(rgba(36,22,26,.9),rgba(20,12,15,.9));border:1px solid #3b2e28}#aufgabe .kette{border-color:#8a6420;color:#ffd27a}",
     ".slot.geschmiedet{box-shadow:inset 0 0 12px rgba(0,0,0,.6),0 0 9px var(--plc)}.slot[data-plus]::after{content:attr(data-plus);position:absolute;right:-7px;top:-8px;font-size:10px;font-weight:800;background:#2a1e22;border:1px solid var(--plc);color:var(--plc);border-radius:6px;padding:0 4px}",
     ".fadeninfo{margin:4px 0;font-size:12px;color:#ffd27a;border-left:2px solid #e5b454;padding-left:6px}.fadeninfo .fz{font-weight:800}",
     ".ic-kopf .plus{font-weight:800}.plusinfo{margin:3px 0;font-weight:700;font-size:12px}.runen{margin:4px 0;padding-left:4px;list-style:none;font-size:12px}.runen li{margin:1px 0}",
@@ -623,14 +628,14 @@
     "@media (max-height:560px){.glutamboss .gb-bild{max-width:330px;margin:0 auto 4px}.glutamboss h2{margin-bottom:4px}}",
     ".glutamboss .bank .gld{color:#e5b454}.glutamboss .bank .glt{color:#ffa040;margin-left:8px}",
     ".gb-haende{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}",
-    ".gb-hand{border:1px solid #3d2a2e;border-radius:9px;padding:8px 10px;background:rgba(36,20,22,.55)}.gb-kopf{font-size:11px;color:#a99a8b;font-weight:800;margin-bottom:3px}",
+    ".gb-hand{border:1px solid #33241f;border-radius:6px;padding:8px 10px;background:rgba(255,235,200,.03)}.gb-kopf{font-size:11px;color:#a99a8b;font-weight:800;margin-bottom:3px}",
     ".gb-name{font-size:16px}.gb-runen span{margin-right:6px;font-weight:700}.gb-pips{display:flex;gap:4px;margin:4px 0}.gb-pips i{width:10px;height:10px;transform:rotate(45deg);background:#3a2c2c;border:1px solid #5a4040;display:block}.gb-pips i.an{background:var(--pc);border-color:var(--pc);box-shadow:0 0 6px var(--pc)}",
     ".werte{border-collapse:collapse;margin:4px 0;font-size:12.5px;width:100%}.werte th{text-align:left;color:#a99a8b;font-weight:700;padding:1px 8px 1px 0}.werte td{padding:1px 4px;font-variant-numeric:tabular-nums}.werte .pf{color:#6a5a5a}.werte .neu{color:#ffd27a;font-weight:800}",
-    ".gb-hand button{width:100%;margin-top:6px;padding:7px 10px;border-radius:8px;border:1px solid #6a4a2a;background:#3a2214;color:#f0e6d4;font-weight:800;text-align:left}.gb-hand button:focus,.gb-hand button:hover:not(:disabled){border-color:#e5b454;box-shadow:0 0 12px rgba(255,150,60,.35)}.gb-hand button:disabled{opacity:.5}",
+    ".gb-hand button{width:100%;margin-top:6px;padding:7px 10px;border-radius:6px;border:1px solid #5e4a3c;border-top-color:#7a624c;border-bottom-color:#160f0c;background:linear-gradient(#3e2a1c,#2a1a10);color:#f0e6d4;font-weight:800;text-align:left;box-shadow:0 2px 0 rgba(0,0,0,.45)}.gb-hand button:focus,.gb-hand button:hover:not(:disabled){border-color:#e5b454;box-shadow:0 0 14px rgba(229,180,84,.3)}.gb-hand button:disabled{opacity:.5}",
     ".gb-hand .kosten{float:right;font-weight:800}.gb-hand .kosten .fehlt{color:#e0545a}.gb-rune{color:#c890ff;font-size:12px;margin:3px 0}.gb-laeuft{text-align:center;color:#ffb060;font-weight:800}",
     ".gb-ergebnis{text-align:center}.gb-ergebnis b{font-size:20px;font-family:var(--fd)}.gb-ergebnis .werte{max-width:420px;margin:6px auto}",
     ".runen3 button{border-color:var(--c)!important}.runen3 .rz{color:var(--c);font-size:20px}",
-    ".haende{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 6px}.haende .hand{padding:4px 10px;border-radius:8px;border:1px solid #3d2a2e;background:rgba(36,20,22,.6);font-size:13px}.haende .hand.leer{border-color:#c23b3f}.haende kbd,.rollen kbd,.gb-hand kbd,.gb-kopf kbd,.kauf kbd{font-family:var(--fb);background:#3a2a2e;border:1px solid #5a4448;border-radius:4px;padding:0 5px;color:#e5b454;font-weight:800;font-size:11px}",
+    ".haende{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 6px}.haende .hand{padding:4px 10px;border-radius:6px;border:1px solid #33241f;background:rgba(255,235,200,.03);font-size:13px}.haende .hand.leer{border-color:#c23b3f}",
     ".warnung{color:#ffb090;font-weight:700;border-left:3px solid #c23b3f;padding-left:8px;margin:4px 0}",
     ".rollen .nutzen{color:#e8c890;font-size:11px}"
   ].join("\n");
@@ -648,14 +653,14 @@
     const P = Z.player; if (!P || !Z.level) return;
     if (!hudEls) hudEls = hudInit(); if (!hudEls) return;
     const run = !!Z.run;
-    hudEls.gl.hidden = !run; hudEls.gl.textContent = P.glut || 0;
+    hudEls.gl.hidden = !run || !(P.glut > 0); hudEls.gl.textContent = P.glut || 0; /* Glut nur, wenn vorhanden (HUD schlank) */
     hudEls.ky.hidden = !(P.keys > 0); hudEls.ky.textContent = P.keys || 0;
-    const now = Z.run ? Z.run.time || 0 : 0;
-    const ch = run && chain.n >= 2 && now - chain.last < 3 ? chain.n : 0;
-    let key = "", html = "";
-    if (run && Z.chHUD) { const h = Z.chHUD(); html += h.html; key += h.key; }
-    if (ch) { html += '<span class="kette">⛓ ' + ch + " · ×" + chainMul(ch) + "</span>"; key += "|c" + ch; }
-    if (key !== hudEls.key) { hudEls.key = key; hudEls.au.innerHTML = html; }
+    /* Kill-Kette erst ab 3 – und sie verblasst, wenn die Kette abreißt (Herausforderungen: eigene Zeile, bilanz.js) */
+    const now = Z.run ? Z.run.time || 0 : 0, age = now - chain.last;
+    const ch = run && chain.n >= 3 && age < 3 ? chain.n : 0;
+    const key = ch ? "c" + ch : "";
+    if (key !== hudEls.key) { hudEls.key = key; hudEls.au.innerHTML = ch ? '<span class="kette">⛓ ' + ch + " · " + L(["Gold", "Gold"]) + " ×" + chainMul(ch) + "</span>" : ""; }
+    if (ch) hudEls.au.style.opacity = String(Math.max(0, Math.min(1, (3 - age) / 1.2)));
   }
   /* Fenster-Tasten: Ziffern 1–3 für Wahl-Knöpfe, Hand-Tasten im Glutamboss */
   addEventListener("keydown", e => {

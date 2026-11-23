@@ -391,7 +391,7 @@
       if (a.once && e.uses[a.k]) continue;
       if (rooted && ["lunge", "leap", "charge", "dive", "teleport"].includes(a.k)) continue;
       if (adx < a.r[0] || adx > a.r[1]) continue;
-      const maxDy = a.k === "leap" ? 90 : a.k === "dive" ? 200 : ["shoot", "lob", "mark", "summon", "heal", "shield", "teleport", "grow", "invis", "beam", "volley", "web", "pull"].includes(a.k) ? 160 : 28;
+      const maxDy = a.dy != null ? a.dy : a.k === "leap" ? 90 : a.k === "dive" ? 200 : ["shoot", "lob", "mark", "summon", "heal", "shield", "teleport", "grow", "invis", "beam", "volley", "web", "pull"].includes(a.k) ? 160 : 28;
       if (Math.abs(dy) > maxDy && !(d.fly && a.k !== "hit")) continue;
       if (a.k === "summon" && countMinions(e) >= (a.max || 4)) continue;
       if (a.k === "heal" && !Z.enemies.some(o => !o.dead && o !== e && o.hp < o.hpMax * 0.7 && U.dist(o.x, o.y, e.x, e.y) < 260)) continue;

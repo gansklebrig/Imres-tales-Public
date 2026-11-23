@@ -30,7 +30,7 @@
   /* Lager: Ankunftspunkt links vom Waffenständer, damit der Weg zum Tor an der Start-Ausrüstung vorbeiführt */
   Z.interacts = [];
   const hub0 = Z.genHub;
-  Z.genHub = function () { const lv = hub0.apply(this, arguments); if (lv && lv.start) lv.start = { x: Math.min(lv.start.x, 53), y: lv.start.y }; return lv; };
+  Z.genHub = function () { const lv = hub0.apply(this, arguments); if (lv && lv.start) lv.start = { x: Math.min(lv.start.x, 53 + (lv.ox || 0)), y: lv.start.y }; return lv; };
 
   /* ======================= ZUSATZ-GEGNER: Trainingspuppe ======================= */
   Z.ENEMIES.puppe = { n: ["Trainingspuppe", "Training Dummy"], shape: "dummy", w: 14, h: 30, hp: 40, dmg: 0, spd: 0, ai: "turret", sight: 0, gold: 0, noBlock: true, heavy: true, atks: [], poise: 99 };
@@ -72,9 +72,10 @@
     Z.run = { seed, area: "torhof", tier: 0, skulls: Z.meta.skullSel || 0, route: ["torhof"], doorsOpen: true, t0: performance.now(), time: 0, shardsBank: 0, bossesBeaten: [], firstWeaponGiven: false };
     Z.stats = { kills: 0, gold: 0, parries: 0, secrets: 0 };
     /* Ausrüstung aus dem Lager mitnehmen: was man am Waffenständer aufgehoben hat, trägt man in die Feste */
-    const prevP = Z.player, keep = Z.level && Z.level.hub && prevP && prevP.slots ? { a1: prevP.slots.a1, a2: prevP.slots.a2 } : null;
+    const prevP = Z.player, keep = Z.level && Z.level.hub && prevP && prevP.slots ? { a1: prevP.slots.a1, a2: prevP.slots.a2, s1: prevP.slots.s1, s2: prevP.slots.s2 } : null;
     const P = (Z.player = Z.newPlayer());
-    if (keep) { P.slots.a1 = keep.a1 || null; P.slots.a2 = keep.a2 || null; }
+    /* auch Fähigkeiten, die man im Lager bekommen hat (Lottes Ware), wandern mit */
+    if (keep) { P.slots.a1 = keep.a1 || null; P.slots.a2 = keep.a2 || null; if (keep.s1) P.slots.s1 = keep.s1; if (keep.s2) P.slots.s2 = keep.s2; }
     Z.run.fromHub = !!keep;
     P.potMax = P.potions = 2 + (Z.meta.up.trank || 0);
     Z.recalcPlayer(); P.hp = P.hpMax;
@@ -169,7 +170,7 @@
     P.potMax = P.potions = 2 + (Z.meta.up.trank || 0);
     Z.recalcPlayer(); P.hp = P.hpMax;
     for (const p of lv.props) if (p.id === "Y") { const e = Z.spawnEnemy("puppe", p.x * T + 8, (p.y + 1) * T, { tier: 0 }); e.dummy = true; e.hp = e.hpMax = 99999; }
-    Z.allies.push({ kind: "campRex", x: 45 * T, y: 11 * T + 3, w: 16, h: 13, face: -1, t: 0, life: 1e9, run: 0, state: "sit", st: 0 });
+    Z.allies.push({ kind: "campRex", x: (45 + (lv.ox || 0)) * T, y: 11 * T + 3, w: 16, h: 13, face: -1, t: 0, life: 1e9, run: 0, state: "sit", st: 0 });
     /* Start-Ausrüstung liegt am Waffenständer vor dem Tor – mit den echten Aufhebe-Tasten nehmen (schmiede.js) */
     if (Z.setupRack) Z.setupRack(lv);
   }
@@ -396,6 +397,7 @@
     Z.fluchTick && Z.fluchTick(dt);
     Z.ebenenTick && Z.ebenenTick(dt);
     updateCampRex(dt);
+    Z.lagerTick && Z.lagerTick(dt);
     Z.updatePickups(dt);
     if (Z.darkness > 0) Z.darkness -= dt;
     if (lv.warden) checkWarden();
@@ -418,8 +420,10 @@
     for (const a of Z.allies) {
       if (a.kind !== "campRex") continue;
       a.t += dt; a.st -= dt;
+      /* lager.js übernimmt Rex kurz (Kunststücke bei Wendel) */
+      if (a.lock > 0) { a.lock -= dt; continue; }
       const P = Z.player;
-      if (a.st <= 0) { a.st = 2 + Math.random() * 4; a.state = Math.random() < 0.5 ? "sit" : "wander"; a.tx = (20 + Math.random() * 40) * T; if (Math.abs(P.x - a.x) < 200 && Math.random() < 0.4) { a.state = "follow"; } }
+      if (a.st <= 0) { a.st = 2 + Math.random() * 4; a.state = Math.random() < 0.5 ? "sit" : "wander"; const ox = (Z.level && Z.level.ox) || 0; a.tx = (Math.max(4, 20 + ox - Math.min(ox, 30) * Math.random()) + Math.random() * 40) * T; if (Math.abs(P.x - a.x) < 200 && Math.random() < 0.4) { a.state = "follow"; } }
       let tx = a.state === "follow" ? P.x - P.face * 20 : a.state === "wander" ? a.tx : a.x;
       const d = tx - a.x; a.face = Math.abs(d) > 4 ? U.sign(d) : a.face;
       a.vx = a.state !== "sit" && Math.abs(d) > 10 ? U.sign(d) * 110 : 0; a.vy = (a.vy || 0) + 1400 * dt;
@@ -437,7 +441,7 @@
       else if (p.style === "barrel") { Z.draw.ell(c, x, y - 7, 6, 7.5, "#5a3a22"); c.fillStyle = "#3a2a1a"; c.fillRect(x - 6, y - 11, 12, 1.4); c.fillRect(x - 6, y - 4, 12, 1.4); }
       else { Z.draw.ell(c, x, y - 5, 5, 5.5, "#8a5a3a"); c.fillStyle = "#6a4028"; c.fillRect(x - 3, y - 12, 6, 2); }
     }
-    for (const a of Z.allies) if (a.kind === "campRex") Z.drawRex(c, a.x + a.w / 2, a.y + a.h, a.face, t, a.run, a.vx === 0);
+    for (const a of Z.allies) if (a.kind === "campRex") { if (a.drawFn) a.drawFn(c, a, t); else Z.drawRex(c, a.x + a.w / 2, a.y + a.h, a.face, t, a.run, a.vx === 0); }
     const lv = Z.level;
     /* Lager-Figuren und Stationen */
     for (const s of lv.props) {

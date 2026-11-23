@@ -309,6 +309,82 @@
     echo: { n: ["Echoschlag", "Echo Strike"], col: "#d890ff", ico: "◎", d: ["Jeder 4. Treffer hallt nach: ein zweiter Treffer mit 50 %.", "Every 4th hit echoes: a second hit for 50%."] }
   };
 
+  /* ======================= RUNEN-FAMILIEN UND SPIELWEISE-RUNEN (runen.js) =======================
+     Jede Gravur gehört zu einer Familie. Zwei bzw. drei verschiedene Runen derselben Familie (beide Hände + Runengürtel)
+     schalten einen Familienbonus frei. Spielweise-Runen (mech) wirken für Ezekiel als Ganzes, solange die Waffe in der
+     Hand liegt bzw. der Runenstein im Gürtel steckt. Zahlen in Z.RUNE_NUM (Texte rechnen sie mit ein). Kein Blau. */
+  const RN = (Z.RUNE_NUM = {
+    funkenT: 1.2, funkenR: 70, glutR: 52, glutDmg: 0.6, bluete: 10, blueteDmg: 2.2, blueteAnst: 4, schleierCd: 1.4,
+    donnerN: 3, donnerR: 60, donnerStun: 0.6, pfuetzeT: 3.5, pfuetzeWeit: 0.6, rissN: 2, rissDmg: 0.45, falleMul: 2, falleKb: 1.4,
+    klingeT: 1.2, klingeDmg: 0.35, schwebeT: 0.32, ladungN: 8, ladungR: 74, ladungDmg: 1.5, ladungHeil: 0.05,
+    spiegelR: 84, bumerangW: 150, bumerangDmg: 0.8, guertel: 3
+  });
+  const pc = v => Math.round(v * 100);
+  Z.RUNE_FAM = {
+    feuer: { n: ["Glut", "Ember"], col: "#ff7a2a", ico: "🜂",
+      b2: ["Brand brennt 50 % heißer.", "Burning deals 50% more damage."], b3: ["Deine Rolle hinterlässt eine Glutspur.", "Your roll leaves an ember trail."] },
+    gift: { n: ["Seuche", "Plague"], col: "#9ad04a", ico: "☣",
+      b2: ["Gift wirkt 50 % stärker.", "Poison is 50% stronger."], b3: ["Jeder Treffer legt einen Giftstapel nach.", "Every hit adds a poison stack."] },
+    sturm: { n: ["Sturm", "Storm"], col: "#f0e060", ico: "ϟ",
+      b2: ["Kettenblitze springen einmal mehr und betäuben kurz.", "Chain lightning leaps once more and briefly stuns."], b3: ["Gewitterherz: alle 4 s schlägt ein Blitz in einen nahen Gegner.", "Storm heart: every 4 s lightning strikes a nearby foe."] },
+    faden: { n: ["Faden & Jagd", "Thread & Hunt"], col: "#ffd27a", ico: "◈",
+      b2: ["Faden-Marken halten doppelt so lange, Markierte nehmen +15 % Schaden.", "Thread marks last twice as long, marked foes take +15% damage."], b3: ["Wer einen Markierten tötet, markiert die zwei nächsten Gegner.", "Killing a marked foe marks the two nearest enemies."] },
+    schatten: { n: ["Schatten", "Shadow"], col: "#b77cff", ico: "☾",
+      b2: ["Nach einer Rolle trifft der nächste Hieb kritisch (alle 3 s).", "After a roll your next strike crits (every 3 s)."], b3: ["Schattenklingen jagen den Gegnern nach.", "Shadow blades hunt down enemies."] },
+    blut: { n: ["Blut", "Blood"], col: "#e0545a", ico: "♥",
+      b2: ["Jeder Kill heilt 2 % Leben.", "Every kill heals 2% health."], b3: ["Unter 40 % Leben: +30 % Schaden, doppelter Lebensraub.", "Below 40% health: +30% damage, double life drain."] },
+    bollwerk: { n: ["Bollwerk", "Bulwark"], col: "#d8a060", ico: "⬢",
+      b2: ["Blocken lässt 10 % weniger Schaden durch.", "Blocking lets 10% less damage through."], b3: ["Jede Parade: 1 s unverwundbar, Fähigkeiten laden 2 s auf.", "Every parry: 1 s invulnerable, skills recharge 2 s."] }
+  };
+  const FAM_OF = { brand: "feuer", gift: "gift", kette: "sturm", tempo: "sturm", raub: "blut", krit: "blut", wucht: "bollwerk", bruch: "faden", jagd: "faden", echo: "schatten" };
+  for (const k in FAM_OF) if (Z.RUNES[k]) Z.RUNES[k].fam = FAM_OF[k];
+  Object.assign(Z.RUNES, {
+    funkenflug: { mech: true, fam: "feuer", n: ["Funkenflug", "Spark Leap"], col: "#ff9a3a", ico: "✺",
+      d: ["Kritische Treffer entzünden. Brennende stecken alle " + String(RN.funkenT).replace(".", ",") + " s einen Nachbarn an.", "Crits ignite. Burning foes set a neighbour alight every " + RN.funkenT + " s."] },
+    glutherz: { mech: true, fam: "feuer", n: ["Glutherz", "Ember Heart"], col: "#ff6a2a", ico: "❂",
+      d: ["Brennende Gegner explodieren beim Tod (" + pc(RN.glutDmg) + " % Waffenschaden, entzündet).", "Burning foes explode on death (" + pc(RN.glutDmg) + "% weapon damage, ignites)."] },
+    giftbluete: { mech: true, fam: "gift", n: ["Giftblüte", "Venom Bloom"], col: "#a8e050", ico: "❀",
+      d: ["Gift platzt bei " + RN.bluete + " Stapeln zu einer Blüte: großer Schaden, steckt Nachbarn mit " + RN.blueteAnst + " Stapeln an.", "Poison bursts at " + RN.bluete + " stacks into a bloom: heavy damage, infects neighbours with " + RN.blueteAnst + " stacks."] },
+    giftschleier: { mech: true, fam: "gift", n: ["Giftschleier", "Venom Veil"], col: "#8ac040", ico: "≋",
+      d: ["Deine Rolle hinterlässt einen Giftschleier.", "Your roll leaves a veil of poison."] },
+    donnersprung: { mech: true, fam: "sturm", n: ["Donnersprung", "Thunder Leap"], col: "#f0e060", ico: "⇑",
+      d: ["Jeder " + RN.donnerN + ". Sprung entlädt eine Schockwelle, die betäubt.", "Every " + RN.donnerN + "rd jump releases a stunning shockwave."] },
+    gewitter: { mech: true, fam: "sturm", n: ["Gewitterpfütze", "Storm Puddle"], col: "#e8d050", ico: "☔",
+      d: ["Blitztreffer hinterlassen geladene Pfützen; Kettenblitze springen über Pfützen und Wasser " + pc(RN.pfuetzeWeit) + " % weiter.", "Lightning hits leave charged puddles; chain lightning leaps " + pc(RN.pfuetzeWeit) + "% further across puddles and water."] },
+    fadenriss: { mech: true, fam: "faden", n: ["Fadenriss", "Thread Rend"], col: "#ffd27a", ico: "⋔",
+      d: ["Faden-Krits spalten sich: " + RN.rissN + " Splitterfäden treffen nahe Gegner (" + pc(RN.rissDmg) + " %) und markieren sie.", "Thread crits split: " + RN.rissN + " splinter threads hit nearby foes (" + pc(RN.rissDmg) + "%) and mark them."] },
+    fallensteller: { mech: true, fam: "faden", n: ["Fallensteller", "Trapper"], col: "#e5b454", ico: "⊓",
+      d: ["Fallen machen Gegnern doppelten Schaden; dein Rückstoß ist " + pc(RN.falleKb - 1) + " % stärker und wirft sie hinein.", "Traps deal double damage to foes; your knockback is " + pc(RN.falleKb - 1) + "% stronger and throws them in."] },
+    schattenklinge: { mech: true, fam: "schatten", n: ["Schattenklinge", "Shadow Blade"], col: "#b77cff", ico: "⚔",
+      d: ["Deine Rolle hinterlässt eine wirbelnde Schattenklinge.", "Your roll leaves a whirling shadow blade."] },
+    schwebeklinge: { mech: true, fam: "schatten", n: ["Schwebeklinge", "Hover Blade"], col: "#c890ff", ico: "∿",
+      d: ["Treffer in der Luft halten dich kurz schwebend; jeder 3. Lufttreffer in Folge ist kritisch.", "Airborne hits keep you hovering; every 3rd air hit in a row crits."] },
+    darkinladung: { mech: true, fam: "blut", n: ["Darkin-Ladung", "Darkin Charge"], col: "#ff3a3a", ico: "✹",
+      d: ["Kills laden Darkin-Glut (" + RN.ladungN + "). Voll entlädt der nächste Nahkampftreffer eine Nova und heilt.", "Kills charge Darkin embers (" + RN.ladungN + "). When full, your next melee hit unleashes a nova and heals."] },
+    spiegelparade: { mech: true, fam: "bollwerk", needShield: true, n: ["Spiegelparade", "Mirror Parry"], col: "#e8c890", ico: "⟲",
+      d: ["Paraden schleudern alle Geschosse ringsum zurück und senden eine Schildwelle.", "Parries hurl back every projectile around you and send a shield wave."] },
+    schildbumerang: { mech: true, fam: "bollwerk", needShield: true, n: ["Schildbumerang", "Shield Boomerang"], col: "#d8a060", ico: "◐",
+      d: ["Nach einer Parade fliegt dein Schild als Bumerang (betäubt).", "After a parry your shield flies out as a boomerang (stuns)."] }
+  });
+
+  /* ======================= BEWEGUNGS-RUNEN (runen.js) =======================
+     In einem Lauf gefunden: gilt für diesen Lauf. Im Lager an der Runenstele mit Seelensplittern dauerhaft freischalten.
+     gate: Art der Sperre auf den Karten (welt.js). Farben warm, kein Blau. */
+  Z.MOVE_RUNES = {
+    kralle: { n: ["Krallenrune", "Claw Rune"], col: "#ffb347", cost: 140, gate: ["Kratzspuren an hohen Schächten", "claw marks in tall shafts"],
+      d: ["Wandrutschen und Wandsprung: Gegen eine Wand drücken bremst den Fall, Springen stößt dich ab.", "Wall slide and wall jump: press against a wall to slow your fall, jump to kick off."] },
+    schatten: { n: ["Schattenrune", "Shadow Rune"], col: "#b77cff", cost: 140, gate: ["Schattenspalten", "shadow slits"],
+      d: ["Die Rolle wird zum Schattensprint: weiter, in der Luft ohne Fallen, flach genug für Schattenspalten.", "Your roll becomes a shadow sprint: longer, gravity-free in the air, flat enough for shadow slits."] },
+    schwingen: { n: ["Darkin-Schwingen", "Darkin Wings"], col: "#ff5a4e", cost: 200, gate: ["Aufwindschächte", "updraft shafts"],
+      d: ["Dritter Sprung in der Luft. Sprung halten beim Fallen: Gleiten – Aufwinde tragen dich hinauf.", "A third jump in the air. Hold jump while falling to glide – updrafts carry you up."] },
+    erde: { n: ["Erdrune", "Earth Rune"], col: "#d8a060", cost: 120, gate: ["rissige Böden", "cracked floors"],
+      d: ["Dein Sturzangriff wird zum Bodenstampfer: durchschlägt rissige Böden und bebt weiter.", "Your plunge becomes a ground pound: it smashes cracked floors and shakes further."] },
+    kette: { n: ["Kettenrune", "Chain Rune"], col: "#c8a070", cost: 160, gate: ["Ösen an der Decke", "rings in the ceiling"],
+      d: ["Enterhaken an Ösen: In der Luft ohne Sprünge erneut springen (oder Benutzen) zieht dich zur nächsten Öse.", "Grapple to rings: jump again in the air with no jumps left (or press use) to pull yourself to the nearest ring."] },
+    nebel: { n: ["Nebelrune", "Mist Rune"], col: "#e0d0d8", cost: 100, gate: ["Gitter mit Nebel", "mist-veiled grates"],
+      d: ["In der Rolle wirst du zu Nebel: Du schlüpfst durch Nebelgitter, Geschosse gehen durch dich hindurch.", "While rolling you turn to mist: you slip through mist grates and projectiles pass through you."] }
+  };
+
   /* ======================= ESSEN (Heilung aus Kisten und Fässern) ======================= */
   Z.FOOD = [
     { n: ["Pilzbraten", "Mushroom Roast"], heal: 0.25 }, { n: ["Schwarzbrot", "Black Bread"], heal: 0.15 }, { n: ["Algensaft mit Honig", "Algae Juice with Honey"], heal: 0.12 },

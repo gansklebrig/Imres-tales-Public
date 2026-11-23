@@ -1,8 +1,33 @@
 /* Ezekiel – The Destroyer · Oberfläche
-   HUD, Menüs (Titel, Pause, Einstellungen, Schmiede, Fundbuch, Schädelaltar, Händler, Segen, Schriftrollen), Touch-Steuerung, Enden. */
+   HUD, Menüs (Titel, Pause, Einstellungen, Schmiede, Fundbuch, Schädelaltar, Händler, Segen, Schriftrollen), Touch-Steuerung, Enden.
+
+   ===================== GEMEINSAME UI-SCHNITTSTELLE (für alle Module) =====================
+   Stil „Pergament & Schmiedeeisen“ (CSS in zerstoerer.html): Fenster = Samt im Eisenrahmen (.mbox), kleine Schilder =
+   Eisenplakette (.eisen), Erzählung = Pergament (.erz). Farben nach Bedeutung: Gold wertvoll · Darkin-Rot Gefahr/Fluch ·
+   Violett Runen/Magie · Grün NUR Gift · kein Blau. Schriften: var(--fd) Titel, var(--fb) Text. Tasten immer als <kbd>.
+
+   Z.ui.notify(text, { prio, icon, ort, x, y, dauer, art, key })      → Meldung; gibt das Element zurück (oder null)
+       text   HTML (kurz! eine Zeile + optional <small>Zusatz</small>)
+       prio   0 Stimmung (Wetter, Tipps) · 1 Info (Funde, Geheimnisse, Erfolge) · 2 wichtig (Fluch, Hinterhalt, Händlerin)
+              · 3 Antwort auf eine Handlung (verriegelt, zu wenig Gold, Controller). Einstellung „Hinweise“:
+              alle = ab 0, wenige = ab 2, keine = nur 3.
+       ort    'hud' (Standard): EIN Meldungsbereich oben Mitte, höchstens 2 gleichzeitig, Wichtigeres verdrängt,
+              Unwichtiges verfällt in der Warteschlange · 'welt': kurze Zeile an Weltposition x/y (Weltpixel, y = Boden)
+       art    'gold' | 'gefahr' | 'magie' | 'gift' | 'sieg' | 'pergament' (Farbakzent)   key: gleiche Meldung nur auffrischen
+   Z.toast(html, ms)  → bleibt erhalten und läuft über notify (Priorität wird aus dem Text geschätzt).
+   Z.ui.worldLabel(key, { x, y, html|text, art, cls, dy, jetzt })      → Schild an einer Weltposition (Preis, Name, Hinweis)
+       jetzt: true = nur solange jedes Bild erneut aufgerufen; sonst bleibt es bis worldLabel(key, null) oder Gebietswechsel.
+   Z.ui.key(aktion)   → '<kbd>J</kbd>' für das aktuelle Gerät (Tastatur/Controller; Touch: '') · Z.ui.kbd(text) → Kappe
+   Z.ui.klang('auf' | 'ok' | 'zurueck' | 'wahl' | 'fehler')            → einheitliche Menü-Klänge
+   Z.ui.open(html, { cls: 'schmal'|'breit'|…, noEsc, onClose })        → Fenster (Samt im Eisenrahmen, Controller-Navigation,
+       Reiter mit LB/RB, Kurztasten über data-hotkey="a1" bzw. data-key="1", Hinweisleiste unten) · Z.ui.close()
+   Z.ui.hinweise()    → 0 | 2 | 3 (aktuelle Mindest-Priorität)
+   ========================================================================================== */
 (function () {
   "use strict";
   const Z = window.Z, U = Z.U, T = Z.TILE, A = Z.audio, inp = Z.input, L = v => Z.L(v), esc = U.esc;
+  /* Stilregel „Grün nur für Gift“: die Seltenheit „Selten“ leuchtet silbern statt grün (Gewöhnlich wird dafür eisengrau) */
+  if (Z.RARITY && Z.RARITY[1] && /^#7fd36a$/i.test(Z.RARITY[1].col)) { Z.RARITY[1].col = "#ece4d2"; if (Z.RARITY[0]) Z.RARITY[0].col = "#a0968a"; }
   const $ = s => document.querySelector(s);
   const ui = (Z.ui = { modalOpen: false, choiceActive: null });
   const en = () => Z.settings.lang === "en";
@@ -73,7 +98,12 @@
     se.el.classList.toggle("geschmiedet", !!pl); se.el.classList.add("neu"); clearTimeout(se.nt); se.nt = setTimeout(() => se.el.classList.remove("neu"), 2200);
   }
   /* ======================= HUD ======================= */
-  let hudT = 0, mapT = 0;
+  let hudT = 0, mapT = 0, areaShow = 0;
+  /* DOM nur anfassen, wenn sich etwas ändert */
+  const hudCache = {};
+  function setTxt(id, v, hide) { const c = hudCache[id] || (hudCache[id] = { el: document.getElementById(id) }); if (!c.el) return; if (c.v !== v) { c.el.textContent = v; c.v = v; } if (c.h !== !!hide) { c.el.hidden = !!hide; c.h = !!hide; } }
+  function setHTML(id, v) { const c = hudCache[id] || (hudCache[id] = { el: document.getElementById(id) }); if (c.el && c.v !== v) { c.el.innerHTML = v; c.v = v; } }
+  const areaTitle = () => (Z.level.hub ? L(Z.biome.name) : Z.level.passage ? L(["Durchgang", "Passage"]) : Z.areaName(Z.level.id));
   function updateHud(dt) {
     const P = Z.player; if (!P || !Z.level) return;
     const hp = Math.max(0, P.hp), mx = P.hpMax;
@@ -81,10 +111,13 @@
     $("#hprally").style.width = (Math.min(mx, hp + P.rally) / mx * 100) + "%";
     $("#hptxt").textContent = Math.ceil(hp) + " / " + mx;
     $("#hpbar").classList.toggle("fluch", P.curse > 0);
-    $("#pots").innerHTML = Array.from({ length: P.potMax }, (_, i) => '<i class="' + (i < P.potions ? "voll" : "") + '"></i>').join("");
-    $("#gold").textContent = U.fmt(P.gold);
-    $("#shards").textContent = U.fmt(P.shards) + (Z.level.hub ? "" : "") ;
-    $("#bank").textContent = U.fmt(Z.meta.shards);
+    setHTML("pots", Array.from({ length: P.potMax }, (_, i) => '<i class="' + (i < P.potions ? "voll" : "") + '"></i>').join(""));
+    /* kompakt: Gold immer, getragene Splitter nur wenn vorhanden, Lager-Bank nur im Lager, Fluch nur wenn aktiv */
+    const hub = !!Z.level.hub;
+    setTxt("gold", U.fmt(P.gold));
+    setTxt("shards", U.fmt(P.shards), !hub && !(P.shards > 0));
+    setTxt("bank", U.fmt(Z.meta.shards), !hub);
+    setTxt("fluchz", P.curse > 0 ? String(P.curse) : "", !(P.curse > 0));
     for (const s of ["a1", "a2", "s1", "s2"]) {
       const it = P.slots[s], se = slotEls[s];
       const key = it ? it.uid + "|" + (it.plus || 0) : s === "a1" ? -2 : -3;
@@ -105,20 +138,19 @@
     hudT -= dt;
     if (hudT <= 0) {
       hudT = 0.25;
-      $("#bless").innerHTML = P.bless.map(b => '<span title="' + esc(L(Z.BLESS[b].d)) + '" class="k-' + Z.BLESS[b].k + '">' + esc(L(Z.BLESS[b].n)) + "</span>").join("") +
-        (P.stats.brut + P.stats.takt + P.stats.ueber || Z.run ? '<span class="st"><b style="color:' + Z.STATS.brut.col + '">' + P.stats.brut + '</b> <b style="color:' + Z.STATS.takt.col + '">' + P.stats.takt + '</b> <b style="color:' + Z.STATS.ueber.col + '">' + P.stats.ueber + "</b></span>" : "") +
-        (P.curse > 0 ? '<span class="fluch">' + L(["Fluch", "Curse"]) + " " + P.curse + "</span>" : "");
-      const run = Z.run;
-      $("#area").innerHTML = esc(Z.level.hub ? L(Z.biome.name) : Z.level.passage ? t("fountain").replace(/.*/, L(["Durchgang", "Passage"])) : Z.areaName(Z.level.id)) +
-        (run ? '<small>' + fmtTime(run.time) + (run.skulls ? " · " + "☠".repeat(run.skulls) : "") + "</small>" : "");
+      /* Segen und Werte stehen jetzt im Pausenmenü; der Gebietsname zeigt sich nur nach dem Betreten (und auf der großen Karte) */
+      const run = Z.run, an = areaShow > 0 || bigMap;
+      setHTML("area", esc(areaTitle()) + (run && an ? '<small>' + fmtTime(run.time) + (run.skulls ? " · " + "☠".repeat(run.skulls) : "") + "</small>" : ""));
+      $("#area").classList.toggle("still", !an);
       $("#fps").textContent = Z.settings.fps ? (Z.fps || 0) + " fps" : "";
     }
+    if (areaShow > 0) areaShow -= dt;
     /* Boss */
     const b = Z.boss;
     if (b && !Z.bossDefeated && !b.def.noBar) { bossbar.hidden = false; $("#bossfill").style.width = Math.max(0, b.hp / b.hpMax * 100) + "%"; }
     else bossbar.hidden = true;
     /* Interaktions-Hinweis */
-    const o = Z.interactTarget;
+    const o = proxyOf(Z.interactTarget);
     if (o && !ui.modalOpen && !ui.choiceActive && !P.dead) {
       const [sx, sy] = o.type === "obj" ? worldToScreen(o.o.x, o.o.y - (o.o.h || 30)) : worldToScreen(o.type === "pickup" ? o.p.x : (o.d || o.s).x * T + 8, o.type === "pickup" ? o.p.y - (o.p.rack ? 30 : 22) : ((o.d || o.s).y + 1) * T - 40);
       const hz = hudZoom();
@@ -149,17 +181,114 @@
       (Z.cardExtraHTML ? Z.cardExtraHTML(it, cmp) : "") +
       (cmp ? '<p class="mul">' + L(["Kraft", "Power"]) + ": ×" + Z.itemMul(it).toFixed(2) + "</p>" : "");
   }
+  /* Fundkarte über dem Gegenstand – auch für Waren auf einem Tisch (Z.interacts mit cardIt) */
+  function cardFoot(o, it) {
+    if (o.type === "obj") return o.o.cardFoot ? (typeof o.o.cardFoot === "function" ? o.o.cardFoot() : o.o.cardFoot) : "";
+    if (touchy()) return "";
+    const P = Z.player, sk = it.type === "skill", sA = sk ? "s1" : "a1", sB = sk ? "s2" : "a2";
+    if (P.slots[sA] && P.slots[sB]) return '<p class="ic-tasten"><span>' + ui.key("use") + L([" aufheben, dann", " pick up, then"]) + "</span><span>" + ui.key(sA) + " " + (sk ? L(["Platz 1", "Slot 1"]) : L(["Hand 1", "Hand 1"])) + "</span><span>" + ui.key(sB) + " " + (sk ? L(["Platz 2", "Slot 2"]) : L(["Hand 2", "Hand 2"])) + "</span></p>";
+    return "";
+  }
   function showCard(o) {
-    if (o.type !== "pickup" || o.p.kind !== "item") { card.hidden = true; return; }
-    const it = o.p.it;
-    const ck = it.uid + "|" + (it.plus || 0) + "|" + (it.runes || []).join(",");
-    if (card.dataset.uid !== ck) { card.innerHTML = itemCardHTML(it, true); card.dataset.uid = ck; }
-    const [sx, sy] = worldToScreen(o.p.x, o.p.y - 40);
+    o = proxyOf(o);
+    const it = o.type === "pickup" && o.p.kind === "item" ? o.p.it : o.type === "obj" && o.o.cardIt ? o.o.cardIt : null;
+    const html0 = it ? null : o.type === "obj" && o.o.cardHTML ? (typeof o.o.cardHTML === "function" ? o.o.cardHTML() : o.o.cardHTML) : null;
+    if ((!it && !html0) || ui.choiceActive) { card.hidden = true; return; }
+    const foot = cardFoot(o, it || {});
+    const ck = (it ? it.uid + "|" + (it.plus || 0) + "|" + (it.runes || []).join(",") : html0) + "|" + foot;
+    if (card.dataset.uid !== ck) { card.innerHTML = (it ? itemCardHTML(it, true) : html0) + foot; card.dataset.uid = ck; }
+    const ax = o.type === "obj" ? o.o.x : o.p.x, ay = o.type === "obj" ? o.o.y - (o.o.h || 30) - 10 : o.p.y - 40;
+    const [sx, sy] = worldToScreen(ax, ay);
     card.hidden = false;
     const w = card.offsetWidth, h = card.offsetHeight;
     const hz = hudZoom(), vw = innerWidth / hz, vh = innerHeight / hz;
     card.style.transform = "translate(" + Math.round(U.clamp(sx / hz - w / 2, 8, vw - w - 8)) + "px," + Math.round(U.clamp(sy / hz - h - 24, 60, vh - h - 8)) + "px)";
   }
+
+  /* ======================= AUSLAGE IN DER WELT =======================
+     Waren auf dem Tisch, Segenskugeln über dem Altar: statt eines Fensters liegen die Wahlmöglichkeiten in der Welt.
+     Hingehen zeigt Karte und Preis, die Benutzen-Taste nimmt/kauft. Andere Module nutzen das über Z.ui.auslage(…):
+       Z.ui.auslage({ key, x, y, abstand, hoch, items: [{ art: 'ware'|'kugel', it, icon, col, name, label(), cardHTML,
+                      preis, kannt(), nimm(eintrag, gruppe) → true wenn genommen }], einmal: true (nur eines nehmbar) })
+     Station-Stellvertreter: steht man an einer Lager-/Durchgangs-Station, für die eine Auslage existiert,
+     gilt das nächste Stück der Auslage (Hinweis, Karte, Benutzen). */
+  const auslagen = [];
+  ui.auslage = o => {
+    for (let i = auslagen.length - 1; i >= 0; i--) if (auslagen[i].key === o.key || auslagen[i].lv !== Z.level) { const g0 = auslagen[i]; Z.interacts = (Z.interacts || []).filter(x => x.g !== g0); auslagen.splice(i, 1); }
+    const g = { key: o.key, lv: Z.level, o, list: [], zu: false, station: o.station || null };
+    const n = o.items.length, sp = o.abstand || 24;
+    o.items.forEach((d, i) => {
+      const e = { x: o.x + (i - (n - 1) / 2) * sp, y: o.y, r: o.r || 14, h: o.hoch || 32, g, d, t: Math.random() * 9, auslage: true,
+        ok: () => !d.weg && !g.zu,
+        label: () => (d.label ? d.label() : d.name || ""),
+        cardIt: d.it || null, cardHTML: d.cardHTML || null,
+        cardFoot: () => '<p class="ic-tasten"><span>' + ui.key("use") + " " + esc(d.verb || (d.preis != null ? L(["kaufen", "buy"]) : L(["wählen", "choose"]))) + "</span>" + (d.preis != null ? '<span class="' + (Z.player && Z.player.gold < d.preis ? "gefahr" : "") + '">' + U.fmt(d.preis) + ' <i class="muenze">●</i></span>' : "") + (o.einmal && n > 1 ? "<span>" + L(["nur eines", "only one"]) + "</span>" : "") + "</p>",
+        use: () => {
+          if (d.weg || g.zu) return;
+          if (d.kannt && !d.kannt()) { ui.klang("fehler"); return; }
+          if (d.nimm(d, g, e) !== false) { d.weg = true; if (o.einmal) g.zu = true; ui.klang("ok"); }
+        } };
+      g.list.push(e); (Z.interacts = Z.interacts || []).push(e);
+    });
+    auslagen.push(g);
+    return g;
+  };
+  ui.auslagen = () => auslagen.filter(g => g.lv === Z.level);
+  /* Station (z. B. Händler „M“, Altar „S“) mit eigener Auslage: nächstes Stück vertritt sie */
+  function proxyOf(o) {
+    if (!o || o.type !== "station") return o;
+    const g = auslagen.find(x => x.lv === Z.level && x.station === o.s.id && !x.zu); if (!g) return o;
+    const P = Z.player, px = P.x + P.w / 2; let best = null, bd = 1e9;
+    for (const e of g.list) if (!e.d.weg) { const d = Math.abs(e.x - px); if (d < bd) { bd = d; best = e; } }
+    return best ? { type: "obj", o: best } : o;
+  }
+  ui.proxyOf = proxyOf;
+  function auslageTick() {
+    const P = Z.player; if (!P || !Z.level) return;
+    const px = P.x + P.w / 2, py = P.y + P.h;
+    const tg = proxyOf(Z.interactTarget), tgt = tg && tg.type === "obj" ? tg.o : null; /* das gewählte Stück hat Hinweis + Karte, kein Schild */
+    for (const g of auslagen) {
+      if (g.lv !== Z.level) continue;
+      if (g.o.aktiv && !g.o.aktiv()) g.zu = true;
+      const near = Math.abs(g.o.x - px) < (g.o.sicht || 150) && Math.abs(g.o.y - py) < 90;
+      g.list.forEach((e, i) => {
+        const d = e.d, k = "ausl-" + g.key + "-" + i;
+        if (!near || d.weg || g.zu || e === tgt) return;
+        if (d.preis != null) ui.worldLabel(k, { x: e.x, y: e.y - e.h + 4, html: U.fmt(d.preis) + " ●", art: P.gold >= d.preis ? "gold" : "gefahr", cls: "preis", jetzt: true });
+        else if (d.name && g.o.namen !== false) ui.worldLabel(k, { x: e.x, y: e.y - e.h - 2, html: esc(d.name) + (d.unter ? "<small>" + esc(d.unter) + "</small>" : ""), art: d.artL || "magie", cls: "zwei", jetzt: true });
+      });
+    }
+  }
+  /* Zeichnen: Waren schweben über dem Tisch, Kugeln über dem Altar */
+  const dwp0 = Z.drawWorldProps;
+  Z.drawWorldProps = function (c, tt) {
+    if (dwp0) dwp0.apply(this, arguments);
+    const it0 = Z.interactTarget, tgt = it0 && (it0.type === "obj" ? it0.o : proxyOf(it0) && proxyOf(it0).o);
+    for (const g of auslagen) {
+      if (g.lv !== Z.level) continue;
+      for (const e of g.list) {
+        const d = e.d; if (d.weg || g.zu) continue;
+        const bob = Math.sin(tt * 2.2 + e.t) * 1.6, x = e.x, y = e.y - e.h * 0.62 + bob, hi = tgt === e;
+        if (d.art === "kugel") {
+          const col = d.col || "#c890ff";
+          c.save(); c.globalCompositeOperation = "lighter"; Z.draw.glow(c, x, y, (hi ? 17 : 13) + Math.sin(tt * 3 + e.t) * 1.5, rgbaHex(col, hi ? 0.7 : 0.5)); c.restore();
+          Z.draw.circ(c, x, y, 4.2, col); Z.draw.circ(c, x - 1.2, y - 1.2, 1.5, "#fff6e8");
+          if (Math.random() < 0.04) Z.fx.p({ x: x + (Math.random() - 0.5) * 8, y: y + 2, vx: 0, vy: -14, life: 0.9, size: 1.2, col, kind: "glow", add: true });
+        } else {
+          /* Tuch unter der Ware */
+          c.fillStyle = "rgba(90,20,30,.85)"; c.fillRect(x - 8, e.y - 3, 16, 3);
+          if (hi) { c.save(); c.globalCompositeOperation = "lighter"; Z.draw.glow(c, x, y, 14, "rgba(255,210,122,.35)"); c.restore(); }
+          const def = d.it ? Z.itemDef(d.it) : null, icon = d.icon || (def && def.icon), col = d.col || (def && def.col) || "#e8d8c0";
+          if (icon === "beutel") { Z.draw.ell(c, x, y + 1.5, 5.5, 5, "#7a5230"); Z.draw.ell(c, x - 1.5, y, 2.5, 2.5, "#9a6a3e"); c.fillStyle = "#c8a060"; c.fillRect(x - 3, y - 4.5, 6, 1.6); Z.draw.ell(c, x, y - 6, 2.4, 1.6, "#7a5230"); c.fillStyle = "#ffd27a"; c.fillRect(x - 0.6, y + 0.2, 1.2, 2.6); }
+          else if (icon === "braten") { Z.draw.ell(c, x - 1, y + 1, 5.5, 3.6, "#8a4a22"); Z.draw.ell(c, x - 2, y, 4, 2.4, "#b8743a"); c.fillStyle = "#efe2c8"; c.fillRect(x + 3, y - 0.6, 5, 1.6); Z.draw.circ(c, x + 8, y - 0.8, 1.3, "#efe2c8"); Z.draw.circ(c, x + 8, y + 1, 1.3, "#efe2c8"); }
+          else if (icon) { c.save(); c.translate(x, y); if (d.it && d.it.type !== "skill") c.rotate(-0.6); Z.drawIcon(c, icon, 0, 0, 13, col); c.restore(); }
+          else { Z.draw.circ(c, x, y, 3.5, col); }
+          if (d.it) { c.fillStyle = Z.RARITY[d.it.rar].col; c.fillRect(x - 6, e.y - 1, 12, 1); }
+        }
+      }
+    }
+  };
+  function rgbaHex(h, a) { const n = parseInt(String(h).replace("#", "").padEnd(6, "0").slice(0, 6), 16); return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")"; }
   const cvEl = document.getElementById("cv");
   function worldToScreen(x, y) { const k = Z.gfx.scale / (cvEl.width / (cvEl.clientWidth || 1)); return [(x - Z.cam.x) * k, (y - Z.cam.y) * k]; }
   /* Hinweis und Karte stehen unter CSS-zoom (--hud): Bildschirmkoordinaten durch den Zoom teilen, sonst rutschen sie auf großen Bildschirmen weg */
@@ -170,6 +299,8 @@
   /* ======================= KARTE ======================= */
   const mm = $("#minimap"), mmc = mm.getContext("2d");
   let bigMap = false;
+  /* Karte auf/zu – zeigt dabei für einige Sekunden den Wegweiser-Pfeil (erkundung.js liest ui.mapPing) */
+  function toggleMap() { bigMap = !bigMap; drawMinimap(); ui.mapPing = performance.now(); areaShow = Math.max(areaShow, bigMap ? 0 : 3); hudT = 0; }
   function drawMinimap() {
     const lv = Z.level; if (!lv || !Z.explored) return;
     const big = bigMap;
@@ -194,14 +325,148 @@
     mmc.fillStyle = "#ff5a3a"; mmc.fillRect(((P.x + P.w / 2) / T - ox) * scale - 2, ((P.y + P.h / 2) / T - oy) * scale - 2, 4, 4);
   }
 
-  /* ======================= MELDUNGEN ======================= */
-  let toastT = null;
-  Z.toast = ui.toast = (msg, ms) => { toastEl.innerHTML = msg; toastEl.hidden = false; toastEl.classList.remove("weg"); clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.add("weg"), ms || 2600); };
+  /* ======================= UI-BAUKASTEN ======================= */
+  const touchy = () => inp.device === "touch" || (ui.touchOn && inp.device !== "pad");
+  ui.kbd = s => (s ? "<kbd>" + esc(String(s)) + "</kbd>" : "");
+  ui.key = a => (touchy() ? "" : ui.kbd(inp.label(a)));
+  ui.klang = art => {
+    const o = { auf: ["ui", { vol: 0.22, rate: 0.85, gap: 0.08 }], ok: ["uiOk", { vol: 0.32, gap: 0.08 }], zurueck: ["ui", { vol: 0.2, rate: 0.62, gap: 0.08 }], wahl: ["ui", { vol: 0.12, rate: 1.5, gap: 0.03 }], fehler: ["ui", { vol: 0.25, rate: 0.5, gap: 0.1 }] }[art];
+    if (o) A.play(o[0], o[1]);
+  };
+  /* Hinweis-Stufe: alle (0) · wenige (2) · keine (3) */
+  ui.hinweise = () => ({ alle: 0, wenige: 2, keine: 3 })[Z.settings.hinweise || "alle"] || 0;
+
+  /* ======================= MELDUNGEN (eine Warteschlange) ======================= */
+  const notesEl = $("#meldungen"), weltEl = $("#welt");
+  const NOTE_MAX = 2, NOTE_DUR = [2000, 2800, 3800, 2600], NOTE_WAIT = [1.2, 4, 10, 20];
+  let notes = [], noteWait = [], worldNotes = [];
+  const stripTags = s => String(s).replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  const LEAD = /^\s*(🏆|⚖|◆|☠|✦|✧|⛓|⚷|📜|⚠|♪|✋|⚒|⟲|◈|ᚱ)\s*/u;
+  function noteShow(n) {
+    const el = document.createElement("div");
+    el.className = "meldung eisen p" + n.prio + (n.art ? " " + n.art : "");
+    el.innerHTML = (n.icon ? '<span class="mi">' + n.icon + "</span>" : "") + '<span class="mt">' + n.html + "</span>";
+    if (n.prio >= 2) notesEl.prepend(el); else notesEl.appendChild(el);
+    void el.offsetWidth; el.classList.add("an");
+    n.el = el; n.t = 0; notes.push(n); ui.lastNote = el;
+  }
+  function noteDrop(n, fast) {
+    notes = notes.filter(x => x !== n);
+    const el = n.el; if (!el) return;
+    el.classList.remove("an"); el.classList.add("weg");
+    setTimeout(() => el.remove(), fast ? 160 : 320);
+  }
+  /* Platz frei? Wartende nach Priorität nachholen; zu lange Wartende verfallen */
+  function notePump() {
+    noteWait = noteWait.filter(n => n.wait < NOTE_WAIT[n.prio]);
+    noteWait.sort((a, b) => b.prio - a.prio || a.seq - b.seq);
+    while (notes.length < NOTE_MAX && noteWait.length) noteShow(noteWait.shift());
+  }
+  let noteSeq = 0;
+  ui.notify = (text, o) => {
+    o = o || {};
+    let html = String(text == null ? "" : text), icon = o.icon || "";
+    const prio = Math.max(0, Math.min(3, o.prio == null ? 1 : o.prio | 0));
+    if (prio < ui.hinweise()) return null;
+    if (!icon) { const m = LEAD.exec(html); if (m) { icon = m[1]; html = html.slice(m[0].length); } }
+    if (o.ort === "welt" && Z.level && o.x != null) return worldNote(html, icon, prio, o);
+    const dur = (o.dauer || NOTE_DUR[prio]) / 1000;
+    const key = o.key || stripTags(html).slice(0, 60);
+    const same = notes.find(n => n.key === key);
+    if (same) { same.t = 0; same.dur = Math.max(same.dur, dur); same.el.querySelector(".mt").innerHTML = html; return same.el; }
+    if (noteWait.some(n => n.key === key)) return null;
+    const n = { html, icon, prio, art: o.art || "", dur, key, seq: noteSeq++, wait: 0 };
+    if (notes.length >= NOTE_MAX) {
+      const low = notes.slice().sort((a, b) => a.prio - b.prio || b.t - a.t)[0];
+      if (low && low.prio < prio) noteDrop(low, true);
+      else { noteWait.push(n); return null; }
+    }
+    noteShow(n);
+    return n.el;
+  };
+  function noteTick(dt) {
+    if (ui.verdeckt) dt = 0; /* Kapitelseite liegt darüber: Meldungen warten */
+    /* großer Gebietsname (Banner) sichtbar: Stimmungs-/Info-Meldungen warten unsichtbar, Antworten (prio 3) bleiben */
+    const ban = !banner.hidden && banner.classList.contains("an");
+    document.body.classList.toggle("banner-an", ban);
+    /* Fundkarte überdeckt den Meldungsbereich: Meldungen treten zurück, die Karte ist wichtiger */
+    let dim = false;
+    if (!card.hidden && notes.length) { const a = card.getBoundingClientRect(), b = notesEl.getBoundingClientRect(); dim = a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top; }
+    notesEl.classList.toggle("gedimmt", dim);
+    for (const n of notes.slice()) { n.t += ban && n.prio < 3 ? 0 : dt; if (n.t >= n.dur) noteDrop(n); }
+    for (const n of noteWait) n.wait += dt;
+    notePump();
+    for (const w of worldNotes.slice()) {
+      w.t += dt;
+      if (w.t >= w.dur || w.lv !== Z.level) { worldNotes = worldNotes.filter(x => x !== w); w.el.style.opacity = "0"; setTimeout(() => w.el.remove(), 420); continue; }
+      placeAt(w.el, w.x, w.y, -16 - w.t * 8);
+      w.el.style.opacity = w.t > w.dur - 0.5 ? "0" : "";
+    }
+  }
+  ui.clearNotes = () => { for (const n of notes.slice()) noteDrop(n, true); noteWait = []; };
+  /* Weltmeldung: kurze Zeile an einer Stelle in der Welt (Falle, Geheimnis, Kundschafter …) */
+  function worldNote(html, icon, prio, o) {
+    if (worldNotes.length >= 2) { const w = worldNotes.shift(); w.el.remove(); }
+    const el = document.createElement("div");
+    el.className = "weltmeldung eisen" + (o.art ? " wl " + o.art : "");
+    el.innerHTML = (icon ? icon + " " : "") + html;
+    weltEl.appendChild(el);
+    const w = { el, x: o.x, y: o.y, t: 0, dur: (o.dauer || NOTE_DUR[prio] + 600) / 1000, lv: Z.level };
+    worldNotes.push(w); placeAt(el, w.x, w.y, -16);
+    return el;
+  }
+  /* Element mit Unterkante-Mitte an eine Weltposition hängen (CSS-zoom des HUD berücksichtigt) */
+  function placeAt(el, wx, wy, dy) {
+    const [sx, sy] = worldToScreen(wx, wy), hz = hudZoom();
+    el.style.transform = "translate(" + Math.round(sx / hz) + "px," + Math.round(sy / hz + (dy || 0)) + "px) translate(-50%,-100%)";
+  }
+  ui.placeAt = placeAt;
+
+  /* ======================= WELTSCHILDER ======================= */
+  const labels = new Map();
+  ui.worldLabel = (key, o) => {
+    let L0 = labels.get(key);
+    if (!o) { if (L0) { L0.el.remove(); labels.delete(key); } return null; }
+    if (!L0) { const el = document.createElement("div"); weltEl.appendChild(el); L0 = { el, html: null, cls: null }; labels.set(key, L0); }
+    const html = o.html != null ? o.html : esc(o.text || "");
+    if (L0.html !== html) { L0.el.innerHTML = html; L0.html = html; }
+    const cls = "wl eisen" + (o.art ? " " + o.art : "") + (o.cls ? " " + o.cls : "");
+    if (L0.cls !== cls) { L0.el.className = cls; L0.cls = cls; }
+    L0.x = o.x; L0.y = o.y; L0.dy = o.dy || 0; L0.jetzt = !!o.jetzt; L0.seen = performance.now(); L0.lv = Z.level;
+    return L0.el;
+  };
+  function labelTick() {
+    const now = performance.now(), hide = ui.modalOpen;
+    for (const [k, l] of labels) {
+      if (l.lv !== Z.level) { l.el.remove(); labels.delete(k); continue; }
+      const off = hide || (l.jetzt && now - l.seen > 150);
+      l.el.classList.toggle("aus", off);
+      if (!off) placeAt(l.el, l.x, l.y, l.dy);
+    }
+  }
+  ui.clearLabels = () => { for (const [, l] of labels) l.el.remove(); labels.clear(); for (const w of worldNotes) w.el.remove(); worldNotes = []; };
+
+  /* Z.toast bleibt für alle Module: Priorität und Farbe aus dem Inhalt schätzen */
+  function guessNote(msg) {
+    const s = stripTags(msg);
+    if (/🏆/.test(msg)) return { prio: 1, art: "sieg" };
+    if (/Rekord|record/i.test(s)) return { prio: 2, art: "sieg" };
+    if (/^\s*<small>[\s\S]*<\/small>\s*$/.test(msg)) return { prio: 0 };
+    if (/Verriegelt|versperrt|Zu wenig|Zu wenige|Not enough|Locked|barred|Nicht jetzt|Not now|Controller|kopiert|copied|abgelehnt|refused|Fehler|error|Grafik|Graphics|Diagnose|Bericht|markieren/i.test(s)) return { prio: 3 };
+    if (/Verfehlt|Missed/i.test(s)) return { prio: 1, art: "gefahr" };
+    if (/Fluch|curse|Hinterhalt|Ambush/i.test(s)) return { prio: 2, art: "gefahr" };
+    if (/Rune|Paarung|Pairing|Segen|blessing|Schrein|shrine/i.test(s)) return { prio: 1, art: "magie" };
+    if (/Händlerin|Trader|Splitter|shards|Gold|Schlüssel|Key/i.test(s)) return { prio: 1, art: "gold" };
+    return { prio: 1 };
+  }
+  Z.toast = ui.toast = (msg, ms) => { const g = guessNote(msg); return ui.notify(msg, { prio: g.prio, art: g.art, dauer: ms ? Math.min(ms, 4200) : 0 }); };
   let bannerT = null;
   ui.banner = (big, small, ms) => { banner.innerHTML = "<b>" + esc(big) + "</b>" + (small ? "<small>" + esc(small) + "</small>" : ""); banner.hidden = false; banner.classList.remove("weg"); void banner.offsetWidth; banner.classList.add("an"); clearTimeout(bannerT); bannerT = setTimeout(() => { banner.classList.remove("an"); banner.classList.add("weg"); }, ms || 3200); };
   Z.bossSay = msg => ui.toast("<i>" + esc(msg) + "</i>", 2200);
   ui.onArea = (id, B, lv) => {
     hud.hidden = false; title.hidden = true;
+    areaShow = 5.5; ui.clearLabels(); ui.choiceActive = null; choice.hidden = true;
+    if (lv.passage) try { passageAuslage(lv); } catch (e) { console.error(e); }
     if (lv.hub) ui.banner(L(B.name), L(["Hier beginnt jeder Lauf. Mit leeren Händen.", "Every run begins here. Empty-handed."]));
     else if (lv.passage) ui.banner(L(["Durchgang", "Passage"]), L(["Weiter nach: ", "Onward to: "]) + Z.areaName(lv.to));
     else if (lv.arena) ui.banner(Z.areaName(id), "");
@@ -239,7 +504,7 @@
     /* Schutz vor „Durchrutschen“: Knopf/Taste, mit der das Fenster geöffnet wurde (z. B. Benutzen beim Aufheben),
        oder ein prellender Trigger lösen hier nichts aus – erst nach dem Loslassen bzw. nach einer kurzen Schonzeit */
     confirmGuard.t = performance.now(); confirmGuard.held = { jump: inp.held.jump, a1: inp.held.a1, use: inp.held.use };
-    A.muffle(1600);
+    A.muffle(1600); ui.klang("auf");
     /* sofort ein vorläufiger Fokus, damit ein schneller Knopfdruck nie „ins Leere“ geht (die Feinwahl folgt unten) */
     { const f0 = modal.querySelector("[autofocus]:not([disabled])") || modal.querySelector(".mbox button:not([disabled])"); if (f0) try { f0.focus({ preventScroll: true }); } catch (_) {} }
     /* sinnvoller Startpunkt für den Controller: ausdrücklich markiert → erste echte Wahl (kein Reiter, kein Schließen) → irgendwas */
@@ -253,7 +518,7 @@
   function closeModal() {
     if (!ui.modalOpen) return;
     inp.capture = null; /* angefangene Tastenbelegung endet mit dem Fenster */
-    modal.hidden = true; modal.innerHTML = ""; ui.modalOpen = false; ui.noEsc = false; Z.paused = false; A.muffle(20000);
+    modal.hidden = true; modal.innerHTML = ""; ui.modalOpen = false; ui.noEsc = false; Z.paused = false; A.muffle(20000); ui.klang("zurueck");
     const cb = ui.onClose; ui.onClose = null; if (cb) cb();
     /* wartende Fenster nachholen (nur wenn nicht gerade ein neues aufging und der Spieler lebt) */
     if (modalQueue.length && !ui.modalOpen) { const q = modalQueue.shift(); if (Z.level && Z.player && !Z.player.dead) setTimeout(() => { if (!ui.modalOpen) openModal(q[0], q[1]); else modalQueue.unshift(q); }, 60); else modalQueue.length = 0; }
@@ -275,7 +540,7 @@
     if (inp.capture) return false;
     if (!title.hidden && !ui.modalOpen && (e.code === "Enter" || e.code === "Space")) { const b = title.querySelector("button:focus") || title.querySelector("button"); if (b) { b.click(); return true; } }
     if (!ui.modalOpen) {
-      if ((e.code === "KeyM" || e.code === "Tab") && Z.level) { bigMap = !bigMap; drawMinimap(); return true; }
+      if ((e.code === "KeyM" || e.code === "Tab") && Z.level) { toggleMap(); return true; }
       return false;
     }
     if (e.code === "Escape" || e.code === "KeyP") { if (!ui.noEsc) closeModal(); return true; }
@@ -351,7 +616,7 @@
   /* ---------- Titel ---------- */
   function showTitle() {
     title.hidden = false; hud.hidden = true;
-    title.innerHTML = '<div class="tbox"><div class="ttl">' + esc(t("title")) + '</div><div class="tsub">' + esc(t("sub")) + '</div>' +
+    title.innerHTML = '<div class="tbox"><div class="ttl">' + esc(t("title")) + '</div><div class="tsub">' + esc(t("sub")) + '</div><span class="tzier"></span>' +
       '<div class="tbtn"><button id="t-play" autofocus>' + esc(t("play")) + '</button><button id="t-set">' + esc(t("settings")) + '</button>' + (fs.ok ? '<button id="t-fs">' + esc(fs.label()) + "</button>" : "") + '<a href="./#taverne">' + esc(t("tavern")) + "</a></div>" +
       '<p class="tfoot">' + L(["Ein Spiel zu Imres Tales · Kopfhörer empfohlen", "A game for Imre's Tales · headphones recommended"]) + "</p></div>";
     $("#t-play").onclick = () => { A.init(); if (Z.settings.autoFs !== false && fs.ok && fs.touch && !fs.on()) fs.enter(); preload(); title.hidden = true; Z.player = Z.newPlayer(); Z.loadArea("lager"); if (!Z.meta.intro) { Z.meta.intro = true; Z.saveMeta(); ui.story(); } };
@@ -362,21 +627,43 @@
   function preload() { A.loadAll(A.allSfxPaths()); }
   ui.story = () => openModal('<h2>' + esc(t("title")) + " · " + L(["Die Feste der Fäden", "The Keep of Threads"]) + '</h2><p class="erz">' + t("intro") + '</p><div class="knoepfe"><button data-act="close" autofocus>' + esc(t("cont")) + "</button></div>", { cls: "schmal" });
   actions.close = () => closeModal();
+  /* Erster Lauf: kein Fenster mehr – eine kurze Tastenübersicht blendet sich ein, das Spiel läuft weiter.
+     Die volle Übersicht gibt es im Pausenmenü („Steuerung“). */
   ui.tutorial = () => {
     Z.meta.tut = true; Z.saveMeta();
-    const dev = (inp.device === "touch" || (ui.touchOn && inp.device !== "pad") ? t("ctrlTouch") : bindingSummary()) + '<br><small class="hinweis">' + L(["Alles umbelegbar: Einstellungen → Steuerung.", "Everything can be remapped: Settings → Controls."]) + "</small>";
-    openModal("<h2>" + esc(t("tut")) + '</h2><p class="steuer">' + dev + '</p><p class="tipp">' + esc(L(TX.tips[0])) + '</p><div class="knoepfe"><button data-act="close" autofocus>' + esc(t("cont")) + "</button></div>", { cls: "schmal" });
+    setTimeout(() => {
+      if (touchy()) { ui.notify("<b>" + esc(t("tut")) + "</b><br><small>" + esc(t("ctrlTouch")) + "</small>", { prio: 2, art: "pergament", dauer: 9000, icon: "✋" }); return; }
+      const k = a => ui.key(a) + " " + esc(L(ACT_NAMES[a]));
+      ui.notify("<b>" + esc(t("tut")) + "</b><br><small>" + ["a1", "a2", "jump", "roll", "use", "potion", "map", "pause"].map(k).join(" · ") + "</small>", { prio: 2, art: "pergament", dauer: 10000, icon: "⚒" });
+    }, 1600);
+  };
+  ui.controlsHelp = () => {
+    const dev = (touchy() ? esc(t("ctrlTouch")) : bindingSummary()) + '<br><small class="hinweis">' + L(["Alles umbelegbar: Einstellungen → Steuerung.", "Everything can be remapped: Settings → Controls."]) + "</small>";
+    openModal("<h2>" + esc(t("tut")) + '</h2><p class="steuer">' + dev + '</p><p class="tipp">' + esc(L(TX.tips[0])) + '</p><div class="knoepfe"><button data-act="close" autofocus>' + esc(t("back")) + "</button></div>", { cls: "schmal" });
   };
 
   /* ---------- Pause ---------- */
   ui.pause = () => {
     if (ui.modalOpen || !Z.level) return;
-    const inRun = !!Z.run;
+    const inRun = !!Z.run, P = Z.player, run = Z.run;
     const tip = L(Z.R.pick(TX.tips));
-    openModal("<h2>" + esc(t("pause")) + '</h2><p class="tipp">' + esc(tip) + '</p><div class="knoepfe senk"><button data-act="close" autofocus>' + esc(t("resume")) + '</button><button data-act="ctrl">' + esc(t("tut")) + '</button><button data-act="settings">' + esc(t("settings")) + "</button>" + (fs.ok ? '<button data-act="fullscreen">' + esc(fs.label()) + "</button>" : "") +
-      (inRun ? '<button data-act="abort" class="gefahr">' + esc(t("abort")) + "</button>" : "") + '<a class="btn" href="./#taverne">' + esc(t("tavern")) + "</a></div>", { cls: "schmal pausenmenue" });
+    /* rechts: Lage – Herausforderungen (bilanz.js setzt sie hinter den Tipp), Werte, Segen, Fluch */
+    const st = P && P.stats ? P.stats : null;
+    const werte = st ? '<div class="p-werte">' + ["brut", "takt", "ueber"].map(k => '<span style="color:' + Z.STATS[k].col + '" title="' + esc(L(Z.STATS[k].d)) + '">' + esc(L(Z.STATS[k].n)) + " " + st[k] + "</span>").join("") + "</div>" : "";
+    const segen = P && P.bless && P.bless.length ? '<div class="p-chips">' + P.bless.map(b => '<span class="k-' + Z.BLESS[b].k + '" title="' + esc(L(Z.BLESS[b].d)) + '">' + esc(L(Z.BLESS[b].n)) + "</span>").join("") + "</div>" : '<p class="hinweis">' + L(["Noch kein Segen.", "No blessing yet."]) + "</p>";
+    const fluch = P && P.curse > 0 ? '<div class="p-chips"><span class="fluch">☠ ' + L(["Fluch: noch ", "Curse: "]) + P.curse + L([" Kills ohne Treffer", " kills without a hit left"]) + "</span></div>" : "";
+    const ort = esc(areaTitle()) + (run ? " · " + fmtTime(run.time) + (run.skulls ? " · " + "☠".repeat(run.skulls) : "") : "");
+    const hin = { alle: L(["alle", "all"]), wenige: L(["wenige", "few"]), keine: L(["keine", "none"]) }[Z.settings.hinweise || "alle"];
+    openModal('<h2 class="p-kopf">' + esc(t("pause")) + '<span class="p-ort">' + ort + '</span></h2><div class="p-spalten"><div class="knoepfe senk"><button data-act="close" autofocus>' + esc(t("resume")) + '</button><button data-act="ctrl">' + esc(t("tut")) + '</button><button data-act="settings">' + esc(t("settings")) + '</button><button data-act="hinweise">' + L(["Hinweise: ", "Hints: "]) + hin + "</button>" + (fs.ok ? '<button data-act="fullscreen">' + esc(fs.label()) + "</button>" : "") +
+      (inRun ? '<button data-act="abort" class="gefahr">' + esc(t("abort")) + "</button>" : "") + '<a class="btn" href="./#taverne">' + esc(t("tavern")) + '</a></div><div class="p-info"><p class="tipp">' + esc(tip) + "</p>" +
+      (inRun ? "<h3>" + L(["Werte & Segen", "Stats & blessings"]) + "</h3>" + werte + segen + fluch : "") + "</div></div>", { cls: "schmal pausenmenue" });
   };
-  actions.ctrl = () => { closeModal(); ui.tutorial(); };
+  /* Hinweise schnell umschalten: alle → wenige → keine */
+  actions.hinweise = (_, b) => {
+    const o = ["alle", "wenige", "keine"], i = (o.indexOf(Z.settings.hinweise || "alle") + 1) % 3; Z.settings.hinweise = o[i]; Z.saveSettings();
+    if (b) b.textContent = L(["Hinweise: ", "Hints: "]) + [L(["alle", "all"]), L(["wenige", "few"]), L(["keine", "none"])][i];
+  };
+  actions.ctrl = () => { closeModal(); ui.controlsHelp(); };
   actions.settings = () => { closeModal(); ui.settings(); };
   actions.abort = () => { closeModal(); ui.confirm(t("abort"), L(["Nicht abgelieferte Seelensplitter gehen verloren.", "Undelivered soul shards will be lost."]), t("abort"), () => { Z.run.time = Z.run.time || 0; ui.deathScreen({ abort: true }); }); };
 
@@ -401,6 +688,8 @@
       sl("master", L(["Gesamtlautstärke", "Master volume"]), v.master) + sl("music", L(["Musik", "Music"]), v.music) + sl("sfx", L(["Effekte", "Effects"]), v.sfx) + sl("amb", L(["Geräuschkulisse", "Ambience"]), v.amb) +
       '<label class="regler">' + L(["Bildschirmwackeln", "Screen shake"]) + '<input type="range" min="0" max="100" value="' + Math.round(s.shake * 100) + '" data-shake="1"></label>' +
       '<label class="regler">' + L(["Größe der Touch-Knöpfe", "Touch button size"]) + '<input type="range" min="70" max="140" value="' + Math.round(s.touchSize * 100) + '" data-touch="1"></label>' +
+      '<label class="schalter">' + L(["Hinweise im Spiel", "In-game hints"]) + ' <select data-hint="1">' + [["alle", L(["alle", "all"])], ["wenige", L(["wenige (nur Wichtiges)", "few (important only)"])], ["keine", L(["keine", "none"])]].map(([v, n]) => '<option value="' + v + '"' + ((s.hinweise || "alle") === v ? " selected" : "") + ">" + esc(n) + "</option>").join("") + "</select></label>" +
+      ck("cinePan", L(["Kamerafahrt zum Ausgang beim Betreten", "Camera pan to the exit on arrival"]), !!s.cinePan) + ck("presentOff", L(["Fundvorführung aus", "Turn off item showcase"]), !!s.presentOff) +
       ck("showDmg", L(["Schadenszahlen", "Damage numbers"]), s.showDmg) + ck("flashes", L(["Bildschirmblitze", "Screen flashes"]), s.flashes) + ck("vib", L(["Vibration", "Vibration"]), s.vib !== false) +
       '<label class="regler">' + L(["Stick-Totzone (Controller)", "Stick dead zone (controller)"]) + '<input type="range" min="15" max="60" value="' + Math.round((s.dead || 0.35) * 100) + '" data-dead="1"></label>' +
       '<button class="steuerknopf" data-act="controls">' + L(["Steuerung: Tastatur & Controller belegen", "Controls: remap keyboard & controller"]) + "</button>" +
@@ -414,6 +703,7 @@
     modal.querySelector("[data-dead]").oninput = e => { Z.settings.dead = e.target.value / 100; };
     modal.querySelector("[data-touch]").oninput = e => { Z.settings.touchSize = e.target.value / 100; touchSync(); };
     modal.querySelectorAll("[data-set]").forEach(c => c.onchange = () => { Z.settings[c.dataset.set] = c.checked; if (c.dataset.set === "vib") inp.vib = c.checked; });
+    modal.querySelector("[data-hint]").onchange = e => { Z.settings.hinweise = e.target.value; Z.saveSettings(); };
     modal.querySelector("[data-lang]").onchange = e => { Z.settings.lang = e.target.value; Z.saveSettings(); closeModal(); for (const k in slotEls) slotEls[k].uid = -9; ui.settings(); };
   };
 
@@ -516,8 +806,8 @@
     a1: ["Waffe 1", "Weapon 1"], a2: ["Waffe 2", "Weapon 2"], s1: ["Fähigkeit 1", "Skill 1"], s2: ["Fähigkeit 2", "Skill 2"], use: ["Benutzen / Aufheben", "Use / pick up"], potion: ["Heiltrank", "Healing potion"], map: ["Karte", "Map"], pause: ["Pause", "Pause"] };
   function bindingSummary() {
     const pad = inp.device === "pad";
-    const row = a => "<b>" + esc(pad ? inp.label(a) : inp.keyName(inp.keys[a][0] || inp.keys[a][1])) + "</b> " + esc(L(ACT_NAMES[a]));
-    return (pad ? L(["Linker Stick / Steuerkreuz laufen · ", "Left stick / D-pad move · "]) : "<b>" + esc(inp.keyName(inp.keys.left[0])) + "/" + esc(inp.keyName(inp.keys.right[0])) + "</b> " + L(["laufen · ", "move · "])) +
+    const row = a => ui.kbd(pad ? inp.label(a) : inp.keyName(inp.keys[a][0] || inp.keys[a][1])) + " " + esc(L(ACT_NAMES[a]));
+    return (pad ? L(["Linker Stick / Steuerkreuz laufen · ", "Left stick / D-pad move · "]) : ui.kbd(inp.keyName(inp.keys.left[0])) + ui.kbd(inp.keyName(inp.keys.right[0])) + " " + L(["laufen · ", "move · "])) +
       ["jump", "roll", "a1", "a2", "s1", "s2", "potion", "use", "map", "pause"].map(row).join(" · ") + (pad ? "" : L([" · Linksklick/Rechtsklick: Waffe 1/2 · Runter + Sprung: durch Stege fallen · Runter + Angriff in der Luft: Sturzangriff", " · Left/right click: weapon 1/2 · Down + jump: drop through ledges · Down + attack in the air: plunge"]));
   }
   ui.controls = () => {
@@ -546,7 +836,7 @@
   ui.offerItem = p => {
     const P = Z.player, it = p.it, isSkill = it.type === "skill";
     const sA = isSkill ? "s1" : "a1", sB = isSkill ? "s2" : "a2";
-    if (!Z.meta.found[it.id]) setTimeout(() => ui.toast("<b>" + L(["Neu im Fundbuch: ", "New in the ledger: "]) + esc(L(Z.itemDef(it).n)) + "</b><br><small>" + L(["Nundro kann sie ab jetzt im Lager schärfen.", "Nundro can now sharpen it in camp."]) + "</small>", 3200), Z.presentItem ? 2400 : 300);
+    if (!Z.meta.found[it.id]) setTimeout(() => ui.notify("<b>" + L(["Neu im Fundbuch: ", "New in the ledger: "]) + esc(L(Z.itemDef(it).n)) + "</b><br><small>" + L(["Nundro kann sie ab jetzt im Lager schärfen.", "Nundro can now sharpen it in camp."]) + "</small>", { prio: 1, art: "gold", icon: "📜", dauer: 3000 }), Z.presentItem ? 1200 : 300);
     Z.meta.found[it.id] = true; Z.saveMeta();
     const place = s => {
       const old = P.slots[s]; P.slots[s] = it;
@@ -565,11 +855,19 @@
     const key = s => inp.device === "touch" || (ui.touchOn && inp.device !== "pad") ? "" : inp.label(s);
     const ttl = x => (Z.itemTitle ? Z.itemTitle(x) : L(Z.itemDef(x).n));
     const hand = s => (isSkill ? "" : L(s === "a1" ? ["Hand 1: ", "Hand 1: "] : ["Hand 2: ", "Hand 2: "]));
-    choice.innerHTML = '<div class="ch-kopf">' + esc(t("replace")) + ": " + '<b style="color:' + Z.RARITY[it.rar].col + '">' + esc(ttl(it)) + "</b></div>" +
+    /* kompakte Tauschwahl direkt über dem Fund – das Spiel läuft weiter, die Hand-Tasten tauschen sofort */
+    choice.innerHTML = '<div class="ch-kopf">' + esc(t("replace")) + ": " + '<b style="color:' + Z.RARITY[it.rar].col + '">' + esc(ttl(it)) + '</b></div><div class="ch-reihe">' +
       [sA, sB].map(s => '<button data-slot="' + s + '">' + (key(s) ? "<kbd>" + esc(key(s)) + "</kbd> " : "") + esc(hand(s) + ttl(P.slots[s])) + '<small style="color:' + Z.RARITY[P.slots[s].rar].col + '">' + esc(L(Z.RARITY[P.slots[s].rar].n)) + "</small></button>").join("") +
-      '<button data-slot="x" class="abbr">' + (key("roll") ? "<kbd>" + key("roll") + "</kbd> " : "") + esc(t("cancel")) + "</button>";
-    choice.hidden = false;
+      '</div><button data-slot="x" class="abbr">' + (key("roll") ? "<kbd>" + key("roll") + "</kbd> " : "") + esc(t("cancel")) + "</button>";
+    choice.hidden = false; card.hidden = true; placeChoice();
+    ui.klang("auf");
   };
+  function placeChoice() {
+    const c = ui.choiceActive; if (!c || choice.hidden) return;
+    const [sx, sy] = worldToScreen(c.p.x, c.p.y - 34), hz = hudZoom(), w = choice.offsetWidth, h = choice.offsetHeight;
+    const vw = innerWidth / hz, vh = innerHeight / hz;
+    choice.style.transform = "translate(" + Math.round(U.clamp(sx / hz - w / 2, 8, vw - w - 8)) + "px," + Math.round(U.clamp(sy / hz - h, 60, vh - h - 90)) + "px)";
+  }
   choice.addEventListener("click", e => { const b = e.target.closest("[data-slot]"); if (!b || !ui.choiceActive) return; const c = ui.choiceActive; ui.choiceActive = null; choice.hidden = true; if (b.dataset.slot !== "x") c.place(b.dataset.slot); });
   function choiceInput() {
     const c = ui.choiceActive; if (!c) return;
@@ -581,7 +879,8 @@
     }
     for (const s of [c.sA, c.sB]) if (inp.pressed[s]) { inp.consume(s); ui.choiceActive = null; choice.hidden = true; c.place(s); Z.player.buf[s] = 0; return; }
     if (inp.pressed.roll || inp.pressed.pause) { ui.choiceActive = null; choice.hidden = true; inp.consume("pause"); inp.consume("roll"); Z.player.buf.roll = 0; }
-    const P = Z.player; if (P && Math.abs(c.p.x - (P.x + P.w / 2)) > 50) { ui.choiceActive = null; choice.hidden = true; }
+    const P = Z.player; if (P && Math.abs(c.p.x - (P.x + P.w / 2)) > 50) { ui.choiceActive = null; choice.hidden = true; return; }
+    placeChoice();
   }
 
   /* ---------- Schriftrolle ---------- */
@@ -710,11 +1009,50 @@
     if (id === "K") {
       if (lv.fountainUsed) return ui.toast(L(["Der Brunnen ist leer.", "The fountain is dry."]));
       lv.fountainUsed = true; P.potions = P.potMax; Z.healPlayer(P.hpMax * 0.25); A.play("splash", { vol: 0.6 }); A.play("heal");
-      return ui.toast(L(["Heiltränke aufgefüllt.", "Healing potions refilled."]));
+      const s = lv.props.find(q => q.id === "K");
+      return ui.notify(L(["Heiltränke aufgefüllt", "Healing potions refilled"]), s ? { ort: "welt", x: s.x * T + 8, y: s.y * T - 8, prio: 3, art: "gold" } : { prio: 3 });
     }
+    /* Händler und Altar im Durchgang: Waren und Segenskugeln liegen in der Welt – das nächste Stück wird genommen */
+    const px = proxyOf({ type: "station", s: lv.props.find(q => q.id === id) || { id } });
+    if (px && px.type === "obj") return px.o.use();
     if (id === "M") return ui.shop();
-    if (id === "S") return ui.altar();
+    if (id === "S") return lv.blessTaken ? ui.notify(L(["Der Altar ist erloschen.", "The altar has gone dark."]), { prio: 3 }) : ui.altar();
   };
+  /* Durchgang: Auslage des Händlers und Segenskugeln über dem Altar */
+  function passageAuslage(lv) {
+    const M = lv.props.find(q => q.id === "M"), S = lv.props.find(q => q.id === "S"), P = Z.player;
+    if (M && lv.shop && lv.shop.length) {
+      const wares = lv.shop.slice(); lv.shopWelt = wares; lv.shop = []; /* die kleinen Symbole am Stand zeichnet jetzt die Auslage */
+      const items = wares.map(it => ({ art: "ware", it, preis: Z.itemPrice(it), verb: L(["kaufen & anlegen", "buy & equip"]),
+        kannt: () => Z.player.gold >= Z.itemPrice(it) || (ui.notify(t("noGold"), { prio: 3 }), false),
+        nimm: (d, g, e) => { const P2 = Z.player, pr = Z.itemPrice(it); P2.gold -= pr; it.sold = true; A.play("coin", { vol: 0.6 });
+          const p = Z.spawnPickup("item", e.x, e.y, { it: Object.assign({}, it, { uid: it.uid + 100000 }), vx: 0, vy: 0, float: true }); ui.offerItem(p); } }));
+      const healPrice = Math.round(40 + 30 * Z.run.tier);
+      items.push({ art: "ware", icon: "braten", col: "#c88a4a", name: L(["Pilzbraten", "Mushroom roast"]), preis: healPrice, verb: L(["essen", "eat"]),
+        label: () => L(["Pilzbraten – 60 % Leben", "Mushroom roast – 60% health"]),
+        cardHTML: '<div class="ic-kopf" style="--rar:#e8c890"><b>' + L(["Pilzbraten", "Mushroom roast"]) + "</b><small>" + L(["Heilt 60 % Leben", "Heals 60% health"]) + "</small></div><p>„" + L(["Frisch aus Gracklstugh.", "Fresh from Gracklstugh."]) + "“</p>",
+        kannt: () => (Z.player.gold < healPrice ? (ui.notify(t("noGold"), { prio: 3 }), false) : Z.player.hp >= Z.player.hpMax ? (ui.notify(L(["Du bist satt und heil.", "You're full and healthy."]), { prio: 3 }), false) : true),
+        nimm: () => { const P2 = Z.player; P2.gold -= healPrice; Z.healPlayer(P2.hpMax * 0.6); A.play("heal"); } });
+      if (P.curse > 0) { const cost = Math.max(150, P.curse * 15); items.push({ art: "ware", icon: "vial", col: "#c890ff", name: L(["Fluch brechen", "Break the curse"]), preis: cost, verb: L(["brechen", "break"]),
+        cardHTML: '<div class="ic-kopf" style="--rar:#b07cff"><b>' + L(["Fluch brechen", "Break the curse"]) + "</b><small>" + L(["Der Fluch fällt sofort ab", "The curse falls away at once"]) + "</small></div>",
+        kannt: () => Z.player.gold >= cost || (ui.notify(t("noGold"), { prio: 3 }), false), nimm: () => { const P2 = Z.player; P2.gold -= cost; P2.curse = 0; A.play("holy"); } }); }
+      ui.auslage({ key: "haendler", station: "M", x: M.x * T + 8, y: (M.y + 1) * T, abstand: 21, hoch: 30, items });
+    }
+    if (S && lv.blessOffer && lv.blessOffer.length && !lv.blessTaken) {
+      ui.auslage({ key: "altar", station: "S", x: S.x * T + 8, y: (S.y + 1) * T, abstand: 26, hoch: 44, einmal: true, aktiv: () => !Z.level.blessTaken,
+        items: lv.blessOffer.map(b => segenKugel(b, () => { const P2 = Z.player; if (P2.bless.length >= 3) { actions.bless(b); return false; } actions.bless(b); })) });
+    }
+  }
+  /* Segen als Kugel in der Welt (Altar, Schrein, Segenskugel) */
+  const SEGEN_COL = { glas: "#ff7a6a", tank: "#e0b070", cc: "#c890ff", heil: "#ff9ab0", nutz: "#ffd27a" };
+  function segenKugel(b, nimm, extra) {
+    const d = Z.BLESS[b];
+    return Object.assign({ art: "kugel", col: SEGEN_COL[d.k] || "#c890ff", name: L(d.n), unter: L(Z.BLESS_KIND[d.k]), artL: "magie", verb: L(["Segen nehmen", "take blessing"]),
+      label: () => L(d.n),
+      cardHTML: '<div class="ic-kopf" style="--rar:' + (SEGEN_COL[d.k] || "#c890ff") + '"><b>' + esc(L(d.n)) + "</b><small>" + esc(L(Z.BLESS_KIND[d.k])) + "</small></div><p>" + esc(L(d.d)) + "</p>" + (Z.player && Z.player.bless.length >= 3 ? '<p class="hinweis">' + L(["Du trägst schon drei Segen – danach wählst du, welcher geht.", "You already carry three – you'll then pick which one leaves."]) + "</p>" : ""),
+      nimm }, extra || {});
+  }
+  ui.segenKugel = segenKugel;
   ui.shop = () => {
     const P = Z.player, lv = Z.level;
     let body = '<p class="hinweis">„' + L(["Kaufen oder raus.", "Buy or get out."]) + '“</p><div class="liste">';
@@ -768,7 +1106,7 @@
       '<p class="hinweis">' + esc(t("reached")) + ": " + (run.route || []).map(r => esc(Z.areaName(r))).join(" → ") + "</p>";
   }
   ui.deathScreen = o => {
-    openModal("<h2>" + esc(t("died")) + "</h2><p><i>" + esc(o && o.abort ? L(["Ezekiel kehrt um. Ohne ein Wort.", "Ezekiel turns back. Without a word."]) : t("diedSub")) + "</i></p>" + statsHTML() + '<p class="tipp">' + esc(L(Z.R.pick(TX.tips))) + '</p><div class="knoepfe"><button data-act="toCamp" autofocus>' + esc(t("camp")) + "</button></div>", { cls: "breit", noEsc: true });
+    openModal("<h2>" + esc(o && o.abort ? L(["Umgekehrt", "Turned back"]) : t("died")) + '</h2><p class="unter">' + esc(o && o.abort ? L(["Ezekiel kehrt um. Ohne ein Wort.", "Ezekiel turns back. Without a word."]) : t("diedSub")) + "</p>" + statsHTML() + '<p class="tipp">' + esc(L(Z.R.pick(TX.tips))) + '</p><div class="knoepfe"><button data-act="toCamp" autofocus>' + esc(t("camp")) + "</button></div>", { cls: "breit todfenster", noEsc: true });
   };
   actions.toCamp = () => { modalQueue.length = 0; closeModal(); Z.backToCamp(); }; /* nach Tod/Ende nichts Altes nachholen */
   ui.ending = key => {
@@ -785,7 +1123,7 @@
     if (showAll) M.endings.alle = 1;
     Z.saveMeta();
     const e = TX.endings[key];
-    openModal('<h2 class="ende">' + esc(L(e[0])) + '</h2><p class="erz">' + L(e[1]) + "</p>" + (showAll ? '<h2 class="ende">' + esc(L(TX.endings.alle[0])) + '</h2><p class="erz">' + L(TX.endings.alle[1]) + "</p>" : "") + statsHTML() + (newSkull ? '<p class="schaedel">☠ ' + esc(t("winSkull")) + "</p>" : "") + '<div class="knoepfe"><button data-act="toCamp" autofocus>' + esc(t("camp")) + "</button></div>", { cls: "breit", noEsc: true });
+    openModal('<h2 class="ende">' + esc(L(e[0])) + '</h2><p class="erz">' + L(e[1]) + "</p>" + (showAll ? '<h2 class="ende">' + esc(L(TX.endings.alle[0])) + '</h2><p class="erz">' + L(TX.endings.alle[1]) + "</p>" : "") + statsHTML() + (newSkull ? '<p class="schaedel">☠ ' + esc(t("winSkull")) + "</p>" : "") + '<div class="knoepfe"><button data-act="toCamp" autofocus>' + esc(t("camp")) + "</button></div>", { cls: "breit endfenster", noEsc: true });
     A.play("holy", { vol: 0.6 });
   };
 
@@ -811,7 +1149,7 @@
   }
   tc.querySelectorAll("[data-t]").forEach(b => {
     const a = b.dataset.t;
-    b.addEventListener("pointerdown", e => { e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch (_) {} b.classList.add("an"); if (a === "pause") { if (ui.modalOpen) { if (!ui.noEsc) closeModal(); } else if (!ui.choiceActive) ui.pause(); return; } if (a === "map") { bigMap = !bigMap; drawMinimap(); return; } inp.setTouch(a, true); A.init(); });
+    b.addEventListener("pointerdown", e => { e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch (_) {} b.classList.add("an"); if (a === "pause") { if (ui.modalOpen) { if (!ui.noEsc) closeModal(); } else if (!ui.choiceActive) ui.pause(); return; } if (a === "map") { toggleMap(); return; } inp.setTouch(a, true); A.init(); });
     const up = () => { b.classList.remove("an"); if (a !== "pause" && a !== "map") inp.setTouch(a, false); };
     b.addEventListener("pointerup", up); b.addEventListener("pointercancel", up); b.addEventListener("lostpointercapture", up);
   });
@@ -819,7 +1157,7 @@
   /* ======================= JEDES BILD ======================= */
   const navRep = { dir: "", t: 0 };
   /* Hinweisleiste für Controller in Menüs */
-  const padHint = document.createElement("div"); padHint.id = "padhint"; padHint.hidden = true; document.body.appendChild(padHint);
+  const padHint = document.createElement("div"); padHint.id = "padhint"; padHint.className = "eisen"; padHint.hidden = true; document.body.appendChild(padHint);
   let padHintKey = "";
   function syncPadHint() {
     /* Controller und Tastatur bekommen eine Hinweisleiste (Touch braucht keine: dort wird getippt) */
@@ -830,15 +1168,19 @@
     if (key === padHintKey) return; padHintKey = key;
     padHint.hidden = !show; if (!show) return;
     if (pad) padHint.innerHTML = "<span><kbd>" + esc(n("jump")) + "</kbd> " + L(["Auswählen", "Select"]) + "</span>" + (ui.noEsc ? "" : "<span><kbd>" + esc(n("roll")) + "</kbd> " + L(["Zurück", "Back"]) + "</span>") +
-      (tabs ? "<span><kbd>" + esc(n("s1")) + "</kbd><kbd>" + esc(n("s2")) + "</kbd> " + L(["Reiter", "Tabs"]) + "</span>" : "") + "<span><kbd>◐</kbd> " + L(["Bewegen · rechter Stick blättert", "Move · right stick scrolls"]) + "</span>";
+      (tabs ? "<span><kbd>" + esc(n("s1")) + "</kbd><kbd>" + esc(n("s2")) + "</kbd> " + L(["Reiter", "Tabs"]) + "</span>" : "") + "<span><kbd>◐</kbd> " + L(["Bewegen", "Move"]) + "</span>";
     else padHint.innerHTML = "<span><kbd>Enter</kbd> " + L(["Auswählen", "Select"]) + "</span>" + (ui.noEsc ? "" : "<span><kbd>Esc</kbd> " + L(["Zurück", "Back"]) + "</span>") +
-      (tabs ? "<span><kbd>" + esc(n("s1")) + "</kbd><kbd>" + esc(n("s2")) + "</kbd> " + L(["Reiter", "Tabs"]) + "</span>" : "") + "<span><kbd>↑↓←→</kbd> " + L(["Bewegen · Maus geht auch", "Move · mouse works too"]) + "</span>";
+      (tabs ? "<span><kbd>" + esc(n("s1")) + "</kbd><kbd>" + esc(n("s2")) + "</kbd> " + L(["Reiter", "Tabs"]) + "</span>" : "") + "<span><kbd>↑↓←→</kbd> " + L(["Bewegen", "Move"]) + "</span>";
   }
+  let lastFrame = performance.now();
   ui.frame = dt => {
+    /* Meldungen und Weltschilder laufen in Echtzeit (auch hinter Fenstern) */
+    const now = performance.now(), rdt = Math.min(0.1, (now - lastFrame) / 1000); lastFrame = now;
+    try { noteTick(rdt); if (Z.level) labelTick(); } catch (e) { console.error(e); }
     syncPadHint();
     if (!title.hidden && !ui.modalOpen) { if (inp.pressed.jump || inp.pressed.use || inp.pressed.a1) { const b = title.querySelector("button:focus, a:focus") || title.querySelector("button"); if (b) b.click(); } if (inp.pressed.down || inp.pressed.up) { const bs = [...title.querySelectorAll("button, a")]; const i = bs.indexOf(document.activeElement); (bs[(i + (inp.pressed.down ? 1 : -1) + bs.length) % bs.length] || bs[0]).focus(); } inp.endFrame(); return; }
     if (inp.pressed.pause && !ui.choiceActive) { inp.consume("pause"); if (ui.modalOpen) { if (!ui.noEsc) closeModal(); } else ui.pause(); }
-    if (inp.pressed.map && !ui.modalOpen) { inp.consume("map"); bigMap = !bigMap; drawMinimap(); }
+    if (inp.pressed.map && !ui.modalOpen) { inp.consume("map"); toggleMap(); }
     if (ui.modalOpen) {
       if (inp.capture) { inp.endFrame(); return; }
       if (inp.pressed.s1 || inp.pressed.s2) switchTab(inp.pressed.s2 ? 1 : -1);
@@ -863,10 +1205,22 @@
       return;
     }
     choiceInput();
-    if (Z.level) { updateHud(dt); bubbleTick(dt); }
+    if (Z.level) { updateHud(dt); bubbleTick(dt); auslageTick(); }
   };
   /* Splitter-Anzeige: Bank im Lager */
   document.addEventListener("visibilitychange", () => { if (document.hidden && Z.level && !ui.modalOpen && Z.run) ui.pause(); });
+
+  /* Handheld / kleine Bildschirme (z. B. 640×480, 800×480): Schrift im HUD nie winzig, Fenster kompakter.
+     pracht.js setzt --hud/--ui nach Bildschirmgröße; hier nur eine Untergrenze für kleine Bildschirme. */
+  function fitKlein() {
+    const H = innerHeight, W = innerWidth, de = document.documentElement, klein = H <= 620 || W <= 900;
+    de.classList.toggle("handheld", klein);
+    if (!klein) return;
+    const cur = parseFloat(de.style.getPropertyValue("--hud")) || 1;
+    de.style.setProperty("--hud", Math.max(cur, Math.min(1, H / 500)).toFixed(3));
+    hudZT = 0;
+  }
+  addEventListener("resize", () => setTimeout(fitKlein, 0)); addEventListener("orientationchange", () => setTimeout(fitKlein, 260)); fitKlein();
 
   /* Start */
   showTitle();

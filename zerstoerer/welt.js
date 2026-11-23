@@ -812,7 +812,7 @@
     let best = null, bs = 1e9;
     for (let attempt = 0; attempt < 40; attempt++) {
       const lv = tryGen(biomeId, (seed + attempt * 7919) >>> 0, opts);
-      if (lv && validate(lv)) { lv.attempts = attempt + 1; settle(lv); plan(lv); return lv; }
+      if (lv && validate(lv)) { lv.attempts = attempt + 1; settle(lv); plan(lv); if (!Z.noRuneGates) runeGates(lv); return lv; }
       /* Notfall: die beste Karte merken (alle Ausgänge erreichbar, möglichst wenige Festsitz-Stellen) */
       const sc = lv && lv.stuck ? lv.stuck.length : 1e8;
       if (lv && sc < bs) { bs = sc; best = lv; }
@@ -1003,6 +1003,241 @@
     }
   }
   Z.planLevel = plan;
+
+  /* ======================= RUNENGESPERRTE ZWEIGE (Bewegungs-Runen, runen.js) =======================
+     Nach plan(): ein bis drei Sackgassen werden zu Runenkammern, die nur mit einer bestimmten Bewegungs-Rune erreichbar
+     sind – sichtbar angedeutet (Kratzspuren, Ösen, Aufwind, rissiger Boden, Nebelgitter, Schattenspalt), mit besonders
+     guter Beute. Je nach Lage der Sackgasse:
+       über dem Elternraum (Eingang unten)  → Schacht: kralle (Wände) | kette (Ösen) | schwingen (Aufwind)
+       unter dem Elternraum (Eingang oben)  → erde: der Boden über dem Abstieg wird rissig (nur der Bodenstampfer bricht ihn)
+       seitlich (Eingang links/rechts)      → nebel: Gitter im Durchgang | schatten: eine Kachel hoher Spalt
+     Jede Kammer wird doppelt geprüft: ohne Runen bleibt alles bisher Erreichbare (Hauptweg, Ausgänge, übrige Zweige)
+     erreichbar und niemand sitzt fest, die Beute der Kammer aber nicht; mit der Rune ist die Beute erreichbar und es gibt
+     keinen Festsitz-Platz. Ergebnis: lv.runeGates [{kind, cell, side, tiles:[[x,y,danach]], rings, updraft, loot}],
+     lv.rings, lv.updrafts; zusätzlich manchmal ein Runensockel (Belohnung „bewegung“) in einem offenen Zweig. */
+  const RUNE_SHAFT = [
+    "########################",
+    "###...........##########",
+    "###...........##########",
+    "###.$..$......##########",
+    "##########....##########",
+    "##########....##########",
+    "##########....##########",
+    "##########....##########",
+    "##########....##########",
+    "##########....##########",
+    "##########....##########",
+    "##########....##########",
+    "##########....##########",
+    "##########....##########"
+  ];
+  Z.RUNE_ABIL = { kralle: { wall: 1 }, kette: {}, schwingen: { glide: 1, jump3: 1 }, erde: {}, nebel: {}, schatten: { dash: 1 } };
+  function runeGates(lv) {
+    if (!lv.reach || !lv.cells || !lv.rewards) return;
+    const B = BIOMES[lv.biome] || {}, lay = LAYOUT[lv.biome] || {}, gentle = !!lay.gentle;
+    const R = Z.Rng(((lv.seed || 1) ^ 0x7a3b1) >>> 0), W = lv.W, key = (x, y) => x + "," + y, cells = lv.cells;
+    lv.runeGates = []; lv.rings = []; lv.updrafts = [];
+    const exitCells = new Set(lv.doors.filter(d => d.kind === "exit" || d.kind === "entry").map(d => key(Math.floor(d.x / CW), Math.floor(d.y / CH))));
+    const inC = (c, x, y) => Math.floor(x / CW) === c.x && Math.floor(y / CH) === c.y;
+    const busy = c => (lv.feats || []).some(f => f.t !== "mouth" && f.t !== "shrine" && (f.cell === key(c.x, c.y) || (f.x != null && f.y != null && inC(c, f.x, f.y)) || (f.y0 != null && inC(c, f.x, f.y0))));
+    const sides = c => ["L", "R", "U", "D"].filter(s2 => c.need[s2]);
+    const cand = [];
+    for (const k in cells) {
+      const c = cells[k];
+      if (c.kind !== "side" || c === lv.startCell || c === lv.endCell || exitCells.has(k) || (lv.warden && lv.warden.cell === c)) continue;
+      const sd = sides(c); if (sd.length !== 1 || c.need[sd[0]] !== true) continue;
+      if (busy(c)) continue;
+      if (lv.out && c.y === 0) continue; /* oberste Reihe unter freiem Himmel: von oben offen */
+      cand.push({ c, side: sd[0], v: (c.val || 0) + R() * 0.8 });
+    }
+    cand.sort((a, b) => b.v - a.v);
+    let want = gentle ? (R() < 0.6 ? 1 : 0) : 1 + (R() < 0.6 ? 1 : 0) + (cand.length >= 7 && R() < 0.35 ? 1 : 0);
+    const used = new Set();
+    const snapshot = () => ({ reach: lv.reach, back: lv.back, stuck: lv.stuck });
+    const restoreV = sn => { lv.reach = sn.reach; lv.back = sn.back; lv.stuck = sn.stuck; };
+    /* lv.reach stammt aus der Prüfung vor plan() (die Schatzkammer war da noch offen): frisch rechnen als Vergleichsbasis,
+       am Ende aber den alten Stand behalten und nur um die Runenkammern verkleinern – sonst ändert sich für andere Module nichts */
+    const stale = snapshot();
+    validate(lv); const fresh0 = lv.reach;
+    for (const cd of cand) {
+      if (lv.runeGates.length >= want) break;
+      const c = cd.c, side = cd.side, ck = key(c.x, c.y), ox = c.x * CW, oy = c.y * CH;
+      /* Reihenfolge gewichtet (seltener gelingende Arten zuerst), im selben Gebiet möglichst verschiedene */
+      const wts = { kralle: 1.3, kette: 1, schwingen: 1, erde: 1, nebel: 0.8, schatten: 1.5 };
+      const kinds = (side === "D" ? ["kralle", "kette", "schwingen"] : side === "U" ? ["erde"] : ["nebel", "schatten"]).map(k2 => ({ k2, w: R() * wts[k2] + (used.has(k2) ? -2 : 0) })).sort((a, b) => b.w - a.w).map(o => o.k2);
+      for (const kind of kinds) {
+        const g = tryRuneGate(lv, c, side, kind, R, lv.reach);
+        if (g) { lv.runeGates.push(g); used.add(kind); break; }
+      }
+    }
+    /* Endstand ohne Runen (lv.reach u. a. für Gegner, Spuren, Fallen): alter Stand minus Runenkammern */
+    if (!lv.runeGates.length) restoreV(stale);
+    else {
+      validate(lv);
+      const fin = lv.reach, out = new Uint8Array(stale.reach);
+      for (let i = 0; i < out.length; i++) if (fresh0[i] && !fin[i]) out[i] = 0;
+      for (const gt of lv.runeGates) { const [gx, gy] = gt.cell.split(",").map(Number); for (let y = gy * CH; y < gy * CH + CH; y++) for (let x = gx * CW; x < gx * CW + CW; x++) out[y * W + x] = 0; }
+      lv.reach = out;
+    }
+    /* Gegenprobe mit allen Runen und offenen Sperren (nur Statistik) */
+    if (lv.runeGates.length) {
+      const open = []; for (const gt of lv.runeGates) for (const [x, y, v] of gt.tiles) { open.push([x, y, lv.get(x, y)]); lv.set(x, y, v); }
+      const sn = snapshot();
+      lv.runeAllOk = validate(lv, { wall: 1, glide: 1, jump3: 1, dash: 1, rings: lv.rings, updrafts: lv.updrafts });
+      lv.runeAllStuck = (lv.stuck || []).length; { const g2 = (x, y) => lv.get(x, y); lv.runeAllStuckStand = (lv.stuck || []).filter(i => { const x = i % W, y = (i / W) | 0, b2 = g2(x, y + 1); return b2 === 1 || b2 === 2 || b2 === 7 || b2 === 8 || b2 === 4 || g2(x, y) === 4; }).length; } if (Z._rgWhy && !lv.runeAllOk) Z._rgAll = (Z._rgAll || []).concat([{ b: lv.biome, seed: lv.seed, stuck: lv.stuck.slice(0, 40), W }]);
+      restoreV(sn); for (const [x, y, v] of open) lv.set(x, y, v);
+    }
+    /* Runensockel: in einem offenen, wertvollen Zweig wartet manchmal eine Bewegungs-Rune */
+    const pRate = gentle ? 0.35 : 0.28 + (lv.runeGates.length ? 0.12 : 0);
+    if (R() < pRate) {
+      const gated = new Set(lv.runeGates.map(gt => gt.cell));
+      const rw = lv.rewards.filter(r => !r.vault && !gated.has(r.cell) && r.tier >= 1 && lv.reach[r.y * W + r.x]).sort((a, b) => (cells[b.cell] ? cells[b.cell].val : 0) - (cells[a.cell] ? cells[a.cell].val : 0));
+      if (rw.length) { const r = rw[0]; r.kind = "bewegung"; r.tier = 3; lv.runeAltar = { x: r.x, y: r.y, cell: r.cell }; }
+    }
+    /* Schatzkammern (vault): manchmal liegt ein Runenstein (Spielweise-Rune für den Runengürtel) zwischen den Schätzen */
+    const vaults = lv.rewards.filter(r => r.vault && r.kind !== "schluessel");
+    if (vaults.length >= 2 && R() < 0.45) vaults[Math.floor(R() * vaults.length)].kind = "runenstein";
+    lv.secretsTotal = (lv.secretsList || []).length;
+  }
+  function tryRuneGate(lv, c, side, kind, R, r0) {
+    const W = lv.W, H = lv.H, ck = c.x + "," + c.y, ox = c.x * CW, oy = c.y * CH;
+    const inCell = (x, y) => x >= ox && x < ox + CW && y >= oy && y < oy + CH;
+    const changed = []; /* [x, y, alt] zum Zurücksetzen */
+    const setT = (x, y, v) => { changed.push([x, y, lv.get(x, y)]); lv.set(x, y, v); };
+    const undo = () => { for (let i = changed.length - 1; i >= 0; i--) lv.set(changed[i][0], changed[i][1], changed[i][2]); };
+    const g0 = { reach: lv.reach, back: lv.back, stuck: lv.stuck };
+    const back = why => { if (Z._rgWhy) Z._rgWhy.push(kind + ":" + side + ":" + why); undo(); lv.reach = g0.reach; lv.back = g0.back; lv.stuck = g0.stuck; return null; };
+    const gate = { kind, cell: ck, side, tiles: [], rings: [], updraft: null, loot: [] };
+    const free = new Set(); /* Plätze, die ohne Rune nicht mehr erreichbar sein dürfen (Kammer, entfernte Leiter) */
+    let spots = null;
+    if (side === "D") {
+      /* Schacht: Kammer neu bauen, Leiter darunter entfernen */
+      const rows = R() < 0.5 ? RUNE_SHAFT : mirrorRows(RUNE_SHAFT);
+      spots = [];
+      for (let r = 0; r < CH; r++) for (let q = 0; q < CW; q++) { const ch = rows[r][q]; setT(ox + q, oy + r, ch === "#" ? 1 : 0); if (ch === "$") spots.push([ox + q, oy + r]); }
+      const col = ox + 11; let lb = oy + CH - 1;
+      for (let y = oy + CH; y < H - 1 && lv.get(col, y) === 4; y++) { setT(col, y, 0); free.add(y * W + col); lb = y; }
+      if (lb - oy - CH > (kind === "kralle" ? 15 : 30)) return back("lang"); /* Schacht höchstens einen Raum tief hinab – sonst wird das Klettern zäh */
+      if (kind === "kette") {
+        for (let ry = oy + 2, i = 0; ry <= lb - 3; ry += 4, i++) {
+          const cols = i % 2 ? [ox + 12, ox + 11, ox + 13, ox + 10] : [ox + 11, ox + 12, ox + 10, ox + 13];
+          const rx = cols.find(x => lv.get(x, ry) === 0 && lv.get(x, ry + 1) === 0 && lv.get(x, ry - 1) !== 4);
+          if (rx != null) gate.rings.push({ x: rx, y: ry });
+        }
+        if (gate.rings.length < 2) return back("oesen");
+      }
+      if (kind === "schwingen") gate.updraft = { x0: ox + 10, x1: ox + 13, y0: oy + 1, y1: lb };
+      if (kind === "kralle") {
+        /* die Schachtwände ragen als Kamin in den Elternraum, bis drei Kacheln über dessen Boden (darunter frei zum Durchgehen) */
+        for (const wx of [ox + 9, ox + 14]) for (let y = oy + CH; y <= lb - 3; y++) { const v = lv.get(wx, y); if (v === 1 || v === 7) continue; if (v !== 0) break; setT(wx, y, 1); gate.tiles.length; (gate.walls = gate.walls || []).push([wx, y]); }
+      }
+      gate.lb = lb;
+    } else if (side === "U") {
+      /* rissiger Boden über dem Abstieg im Elternraum */
+      const py = oy - 1;
+      for (let q = 10; q <= 13; q++) {
+        const x = ox + q;
+        for (const y of [py, py - 1]) {
+          const v = lv.get(x, y);
+          if (v === 1 || v === 7) continue;
+          if (y === py - 1 && !((lv.get(ox + 9, y) === 1) && (lv.get(ox + 14, y) === 1))) continue;
+          gate.tiles.push([x, y, v]); setT(x, y, 1);
+        }
+      }
+      if (!gate.tiles.length) return back("keinboden");
+      for (const [x, y] of gate.tiles) free.add(y * W + x);
+    } else {
+      const bx = side === "L" ? ox : ox + CW - 1, dir = side === "L" ? 1 : -1;
+      for (let y = oy + 8; y <= oy + 10; y++) if (lv.get(bx, y) !== 0) return back("tuer");
+      if (kind === "nebel") {
+        for (let y = oy + 8; y <= oy + 10; y++) { gate.tiles.push([bx, y, 0]); setT(bx, y, 1); }
+      } else {
+        /* Schattenspalt: vier Spalten im Eingangsgang, nur die unterste Reihe bleibt frei */
+        let j0 = -1;
+        for (let s0 = 0; s0 <= 6 && j0 < 0; s0++) {
+          let ok = true;
+          for (let j = 0; j < s0 + 4 && ok; j++) { const x = bx + dir * j; for (let y = oy + 8; y <= oy + 10; y++) if (lv.get(x, y) !== 0) ok = false; }
+          for (let j = s0; j < s0 + 4 && ok; j++) if (lv.get(bx + dir * j, oy + 11) !== 1) ok = false;
+          if (ok) j0 = s0;
+        }
+        if (j0 < 0) return back("spalt");
+        for (let j = j0; j < j0 + 4; j++) {
+          const x = bx + dir * j; let top = oy + 7; while (top > oy && lv.get(x, top) !== 1 && lv.get(x, top) !== 7) top--;
+          if (lv.get(x, top) !== 1 && lv.get(x, top) !== 7) return back("spaltdecke");
+          for (let y = top + 1; y <= oy + 9; y++) { setT(x, y, 1); gate.tiles.push([x, y, 1]); }
+        }
+        gate.slit = { x0: Math.min(bx + dir * j0, bx + dir * (j0 + 3)), x1: Math.max(bx + dir * j0, bx + dir * (j0 + 3)), y: oy + 10 };
+      }
+    }
+    for (let y = oy; y < oy + CH; y++) for (let x = ox; x < ox + CW; x++) free.add(y * W + x);
+    /* Schatzplätze der Kammer */
+    const rws = lv.rewards.filter(r => r.cell === ck);
+    let tre = spots ? spots : rws.map(r => [r.x, r.y]);
+    /* ein Schrein in der Kammer zählt als Schatz (Segen hinter der Sperre) */
+    const shrines = (lv.feats || []).filter(f => f.t === "shrine" && inCell(f.x, f.y));
+    if (side === "D" && shrines.length) return back("schrein");
+    for (const f of shrines) tre.push([f.x, f.y]);
+    const noTre = !tre.length;
+    /* 1) ohne Runen: alles Bisherige außerhalb der Kammer bleibt erreichbar, kein Festsitz, Schatz unerreichbar */
+    if (!validate(lv)) return back("ohne:ungueltig");
+    /* Verlust außerhalb der Kammer: nur unwichtige Simse (keine Türen, Beute, Stationen) und nur wenige Plätze */
+    let lost = 0; for (let i = 0; i < W * H; i++) if (r0[i] && !lv.reach[i] && !free.has(i)) lost++;
+    if (lost > 60) return back("ohne:verlust");
+    if (lost) {
+      const keyPts = [];
+      for (const d of lv.doors) keyPts.push([d.x, d.y, "door"]);
+      for (const l of lv.loot) keyPts.push([l.x, l.y, "loot"]);
+      for (const r of lv.rewards) if (r.cell !== ck) keyPts.push([r.x, r.y, "rw"]);
+      for (const f of lv.feats || []) if (f.t !== "mouth" && f.t !== "lock" && f.x != null && f.y != null) keyPts.push([f.x, f.y, f.t]);
+      const was = (x, y) => r0[y * W + x] || r0[y * W + x - 1] || r0[y * W + x + 1], now = (x, y) => lv.reach[y * W + x] || lv.reach[y * W + x - 1] || lv.reach[y * W + x + 1];
+      const kp = keyPts.find(([x, y]) => !inCell(x, y) && was(x, y) && !now(x, y));
+      if (kp) { if (Z._rgWhy) Z._rgWhy.push("  pt " + kp.join(",") + " cell " + Math.floor(kp[0] / CW) + "," + Math.floor(kp[1] / CH) + " gate " + ck + " lost " + lost); return back("ohne:verlustwichtig"); }
+    }
+    const near = (rc, x, y) => rc[y * W + x] || rc[y * W + x - 1] || rc[y * W + x + 1];
+    if (tre.some(([x, y]) => near(lv.reach, x, y))) return back("ohne:schatzoffen");
+    const reachNo = lv.reach;
+    /* 2) mit der Rune: Sperre offen, Schatz erreichbar, nirgends Festsitz */
+    const opened = gate.tiles.map(([x, y]) => [x, y, lv.get(x, y)]);
+    for (const [x, y, v] of gate.tiles) lv.set(x, y, v);
+    const ab = Object.assign({}, Z.RUNE_ABIL[kind], { rings: gate.rings, updrafts: gate.updraft ? [gate.updraft] : [] });
+    const okAb = validate(lv, ab), reachAb = lv.reach;
+    if (noTre && okAb) {
+      /* Sackgasse ohne Belohnung: der tiefste mit Rune erreichbare, ohne Rune unerreichbare Platz der Kammer */
+      const sp = spotsIn(lv, c, 2, false).filter(([x, y]) => reachAb[y * W + x] && !near(reachNo, x, y));
+      const cx = side === "L" ? ox + CW : side === "R" ? ox : ox + CW / 2;
+      sp.sort((a, b) => Math.abs(b[0] - cx) - Math.abs(a[0] - cx));
+      if (sp.length) { tre = [sp[0]]; lv.rewards.push({ kind: "glut", x: sp[0][0], y: sp[0][1], tier: 3, cell: ck }); rws.push(lv.rewards[lv.rewards.length - 1]); }
+    }
+    let okT = okAb && tre.length && tre.every(([x, y]) => near(reachAb, x, y));
+    /* weitere Stehplätze für Beute (nur in der Kammer, mit Rune erreichbar) */
+    let extra = [];
+    if (okT) extra = spotsIn(lv, c, 2, false).filter(([x, y]) => reachAb[y * W + x] && !tre.some(([a, b]) => Math.abs(a - x) < 3 && Math.abs(b - y) < 2));
+    for (const [x, y, v] of opened) lv.set(x, y, v);
+    if (!okT) { if (noTre && rws.length) lv.rewards = lv.rewards.filter(r => r !== rws[0]); return back(okAb ? "mit:schatzzu" : "mit:ungueltig"); }
+    if (!validate(lv)) return back("ende");
+    /* Kammer ausräumen bzw. aufwerten */
+    const inCk = o => inCell(o.x, o.y);
+    lv.spawns = lv.spawns.filter(o => !inCk(o));
+    if (side === "D") {
+      lv.loot = lv.loot.filter(o => !inCk(o)); lv.traps = (lv.traps || []).filter(o => !inCk(o)); lv.decor = lv.decor.filter(o => !inCk(o));
+      lv.props = lv.props.filter(o => !inCk(o)); lv.lights = (lv.lights || []).filter(o => !inCk(o)); c.tpl = "runenschacht"; c.dead = true;
+      lv.rewards = lv.rewards.filter(r => r.cell !== ck);
+      const best = R() < 0.5 ? "waffe" : "glut";
+      spots.forEach(([x, y], i) => lv.rewards.push({ kind: i === 0 ? "runenstein" : best, x, y, tier: 3, cell: ck, rune: kind }));
+      gate.loot = spots.slice();
+    } else {
+      for (const r of rws) { r.tier = 3; r.rune = kind; if (r.kind === "gold" || r.kind === "heil") r.kind = R() < 0.5 ? "glut" : "waffe"; }
+      const sp = extra.sort((a, b) => b[1] - a[1])[0];
+      if (sp) lv.rewards.push({ kind: "runenstein", x: sp[0], y: sp[1], tier: 3, cell: ck, rune: kind });
+      else if (rws[0]) rws[0].kind = "runenstein";
+      gate.loot = lv.rewards.filter(r => r.cell === ck).map(r => [r.x, r.y]);
+    }
+    lv.rings.push(...gate.rings); if (gate.updraft) lv.updrafts.push(gate.updraft);
+    (lv.secretsList = lv.secretsList || []).push({ k: "rune", cell: ck, kind });
+    gate.changed = changed.length;
+    return gate;
+  }
+  Z._runeGates = runeGates; /* für Tests */
 
   /* Nach der Prüfung: Beute, die nur auf unerreichbaren Simsen läge, auf erreichbare Plätze im selben Raum legen;
      Bodengegner an unerreichbaren Stellen weglassen (Geheimräume hinter rissigen Wänden bleiben, wie sie sind) */
@@ -1506,8 +1741,13 @@
   /* Prüfung auf dem Kachelgitter (Sprungweiten passend zur Spielerphysik: Einfachsprung ~3,5 Kacheln, Doppelsprung ~6,4,
      Kantengriff): (1) alle Ausgänge sind vom Start aus erreichbar, (2) von jedem erreichbaren Platz führt ein Weg
      zurück zu einem Ausgang – keine Gruben oder Kammern ohne Rückweg. Wege müssen frei sein: kein Springen durch Böden,
-     kein Stehen auf Lava, Wasser, Stacheln oder über dem Abgrund. Ergebnis: lv.reach, lv.stuck. */
-  function validate(lv) {
+     kein Stehen auf Lava, Wasser, Stacheln oder über dem Abgrund. Ergebnis: lv.reach, lv.stuck.
+     ab (optional, Bewegungs-Runen aus runen.js): { wall: Wandrutschen/Wandsprung, jump3: dritter Sprung, glide: Gleiten,
+     dash: Schattensprint (weiter, flach durch Schattenspalten), rings: [{x,y}] Ösen für den Enterhaken, updrafts:
+     [{x0,x1,y0,y1}] Aufwindschächte (nur mit glide) }. Nebelgitter und rissige Böden öffnet der Aufrufer über die Kacheln.
+     Zwischenknoten (an der Wand, an der Öse, oben im Aufwind) sind keine Stehplätze; sie gehören nur zur Runen-Prüfung.
+     Ohne ab läuft die Prüfung genau wie bisher. */
+  function validate(lv, ab) {
     /* Abgrund zählt als unbetretbar, bröckelnde Stege und Fährstrecken wie Stege */
     const W = lv.W, H = lv.H, N = W * H;
     /* Kacheln einmal vorab umsetzen (schneller als je Abfrage über lv.get – die großen Karten haben 2–3× so viele Plätze) */
@@ -1527,9 +1767,13 @@
     /* Fallen: bis zum ersten Halt; Gefahren (Abgrund, Flüssigkeit) beenden den Fall ohne Halt */
     const fall = (x, y) => { let yy = y; while (yy < H - 1 && passable(g(x, yy + 1)) && g(x, yy + 1) !== 2 && g(x, yy + 1) !== 8 && g(x, yy + 1) !== 4) yy++; return yy; };
     const colFree = (x, ya, yb) => { for (let y = ya; y <= yb; y++) if (!air(g(x, y))) return false; return true; };
+    const RA = ab ? runeMoves(ab, { W, H, g, passable, air, canStand, push, seen, q, fall, colFree, body, setFrom: v => (from = v), edge: (a, b) => { ea.push(a); eb.push(b); } }) : null;
     push(lv.start.x, lv.start.y);
     while (q.length) {
       const i = q.pop(), x = i % W, y = (i / W) | 0; from = i;
+      const virt = RA ? !canStand(x, y) : false;
+      if (RA) RA.node(x, y, virt, i);
+      if (virt) continue;
       /* Leiter hinauf / hinunter */
       if (g(x, y) === 4 || g(x, y - 1) === 4) { let yy = y; while (g(x, yy - 1) === 4 || (g(x, yy) === 4 && passable(g(x, yy - 1)))) { yy--; push(x, yy); if (yy < 1) break; } }
       if (g(x, y + 1) === 4) { let yy = y + 1; while (g(x, yy) === 4) { push(x, yy); yy++; } push(x, fall(x, yy - 1)); }
@@ -1583,7 +1827,7 @@
     for (const d of exits) { const id = d.y * W + d.x; if (!back[id]) { back[id] = 1; bq.push(id); } }
     while (bq.length) { const id = bq.pop(); for (let e = head[id]; e >= 0; e = nxt[e]) { const p = ea[e]; if (!back[p]) { back[p] = 1; bq.push(p); } } }
     lv.back = back; lv.stuck = [];
-    for (let k = 0; k < N; k++) if (seen[k] && !back[k]) lv.stuck.push(k);
+    for (let k = 0; k < N; k++) if (seen[k] && !back[k] && (!ab || canStand(k % W, (k / W) | 0))) lv.stuck.push(k); /* mit Runen: nur echte Stehplätze (Zwischenknoten sind Modell, kein Ort) */
     if (exits.length && lv.stuck.length) return false;
     /* Wächter: Ausgänge bleiben zu, bis er besiegt ist – sein Raum muss erreichbar sein und man muss von überall
        (auch nach einem Sturz aus dem Kampfraum) wieder hineinkommen */
@@ -1592,12 +1836,123 @@
       for (let y = c.y * CH + 1; y < c.y * CH + CH - 1; y++) for (let x = c.x * CW + 1; x < c.x * CW + CW - 1; x++) { const id = y * W + x; if (seen[id]) { wb[id] = 1; wq.push(id); } }
       if (wq.length < 6) return false;
       while (wq.length) { const id = wq.pop(); for (let e = head[id]; e >= 0; e = nxt[e]) { const p = ea[e]; if (!wb[p]) { wb[p] = 1; wq.push(p); } } }
-      for (let k = 0; k < N; k++) if (seen[k] && !wb[k]) { lv.stuck.push(k); }
+      for (let k = 0; k < N; k++) if (seen[k] && !wb[k] && (!ab || canStand(k % W, (k / W) | 0))) { lv.stuck.push(k); }
       if (lv.stuck.length) return false;
     }
     return true;
   }
   Z.validateLevel = validate;
+
+  /* ---------- Bewegungs-Runen im Prüfer ----------
+     Zusätzliche Kanten je Knoten. Bewusst vorsichtig (lieber zu wenig als zu viel): was der Prüfer mit einer Rune für
+     erreichbar hält, muss im Spiel sicher gehen. Reichweiten gemessen in /home/claude/test/w4_runen (Sprung ~6,7 Kacheln,
+     Dritter Sprung +2,4, Schattensprint ~7,5 Kacheln waagrecht, Ösen-Reichweite 7 Kacheln). */
+  const RING_R = 6.5;
+  function runeMoves(ab, k) {
+    const { W, H, g, passable, air, canStand, push, seen, q, fall, colFree } = k;
+    const solid = v => v === 1 || v === 7;
+    const bodyP = (x, y) => passable(g(x, y)) && passable(g(x, y - 1));
+    let cur = -1;
+    /* Zwischenknoten: kein Stehplatz, aber freier Körperplatz */
+    let curStand = false;
+    const pushV = (x, y, back) => {
+      if (x < 1 || y < 2 || x >= W - 1 || y >= H - 1) return;
+      if (canStand(x, y)) { push(x, y); return; }
+      if (!bodyP(x, y)) return;
+      const i = y * W + x; if (cur >= 0 && cur !== i) { k.edge(cur, i); if (back && curStand) k.edge(i, cur); }
+      if (seen[i]) return; seen[i] = 1; q.push(i);
+    };
+    const wallAt = (x, y) => solid(g(x, y));
+    const clingAt = (x, y) => ab.wall && bodyP(x, y) && (wallAt(x - 1, y) || wallAt(x - 1, y - 1) || wallAt(x + 1, y) || wallAt(x + 1, y - 1));
+    const rings = ab.rings || [], ringSet = new Set(rings.map(r => r.x + "," + (r.y + 1)));
+    const ups = ab.glide ? ab.updrafts || [] : [];
+    const los = (x0, y0, x1, y1) => { const d = Math.hypot(x1 - x0, y1 - y0), n = Math.ceil(d * 4); for (let s = 1; s < n; s++) { const t = s / n; if (!passable(g(Math.floor(x0 + (x1 - x0) * t), Math.floor(y0 + (y1 - y0) * t)))) return false; } return true; };
+    /* Sprung nach oben ab (x, y) bis Höhe d1 (wie der Grundprüfer, mit größerer Reichweite/Klammerzielen) */
+    const upJ = (x, y, d0, d1, extra) => {
+      for (let dy = 1; dy <= d1; dy++) {
+        if (!passable(g(x, y - dy - 1)) && g(x, y - dy - 1) !== 2) break;
+        if (dy < d0) continue;
+        const maxDx = (dy <= 2 ? 6 : dy <= 3 ? 5 : dy <= 5 ? 4 : 2) + (extra || 0);
+        for (let dx = -maxDx; dx <= maxDx; dx++) {
+          const tx = x + dx, ty = y - dy, st = canStand(tx, ty);
+          if (!st && !(clingAt(tx, ty) && dy <= 5 && Math.abs(dx) <= 4)) continue;
+          let ok = true; const s = Math.sign(dx);
+          for (let j = s; j !== dx; j += s) { const a = g(x + j, ty - 1), b = g(x + j, ty); if ((!air(a) && a !== 2) || (!air(b) && b !== 2)) { ok = false; break; } }
+          if (ok) (st ? push(tx, ty) : pushV(tx, ty, true)); /* zur Wand gesprungen: zurückfallen (mit Luftsteuerung) geht immer */
+        }
+      }
+    };
+    /* weite Sprünge auf gleicher Höhe oder abwärts: über die Lücke in Kopfhöhe, dann hinab */
+    const wideJ = (x, y, dx0, dx1, dyMax) => {
+      for (const s of [-1, 1]) {
+        for (let j = 1; j <= dx1; j++) {
+          if (!air(g(x + s * j, y - 1)) || (!air(g(x + s * j, y - 2)) && j > 1)) break;
+          if (j < dx0) continue;
+          const tx = x + s * j;
+          for (let dy = 0; dy <= dyMax; dy++) { const ty = y + dy; if (!colFree(tx, y - 1, ty)) break; if (canStand(tx, ty)) { push(tx, ty); break; } }
+        }
+      }
+    };
+    /* Gleiten: weit hinab, Weite wächst mit der Fallhöhe */
+    const glideJ = (x, y) => {
+      for (const s of [-1, 1]) {
+        for (let j = 1; j <= 16; j++) {
+          if (!air(g(x + s * j, y - 1)) || (!air(g(x + s * j, y - 2)) && j > 1)) break;
+          const tx = x + s * j;
+          for (let dy = 0; dy <= 9; dy++) { const ty = y + dy; if (j > Math.min(16, 9 + 2 * dy)) continue; if (!colFree(tx, y - 1, ty)) break; if (canStand(tx, ty)) { push(tx, ty); break; } }
+        }
+      }
+    };
+    /* Schattenspalt: flach (eine Kachel hoch) bis 7 Kacheln weit */
+    const slitJ = (x, y) => {
+      for (const s of [-1, 1]) for (let j = 1; j <= 7; j++) { const tx = x + s * j; if (!passable(g(tx, y)) || g(tx, y) === 4) break; if (canStand(tx, ty0(tx, y))) { if (j > 1) push(tx, ty0(tx, y)); break; } }
+    };
+    const ty0 = (x, y) => y;
+    const ringsFrom = (x, y) => {
+      for (const r of rings) {
+        const cx = x + 0.5, cy = y + 0.13, rx = r.x + 0.5, ry = r.y + 0.5;
+        if (Math.hypot(rx - cx, ry - cy) > RING_R || (r.x === x && r.y + 1 === y)) continue;
+        if (!los(cx, cy - 0.4, rx, ry)) continue;
+        pushV(r.x, r.y + 1);
+      }
+    };
+    const updraftFrom = (x, y) => {
+      for (const u of ups) {
+        if (x < u.x0 || x > u.x1) continue;
+        const inside = y >= u.y0 && y <= u.y1 + 1, below = y > u.y1 && y - u.y1 <= 5 && colFree(x, u.y1, y - 1);
+        if ((inside || below) && !(y === u.y0 + 1)) pushV(x, u.y0 + 1);
+      }
+    };
+    return {
+      node(x, y, virt, i) {
+        cur = i; curStand = !virt; k.setFrom(i);
+        if (!virt) {
+          if (ab.jump3) upJ(x, y, 7, 8, 0);
+          if (ab.dash) { wideJ(x, y, 8, 11, 4); upJ(x, y, 1, 3, 4); slitJ(x, y); }
+          if (ab.glide) glideJ(x, y);
+          if (ab.wall) for (const d of [-1, 1]) if (wallAt(x + d, y - 1) || wallAt(x + d, y - 2)) { pushV(x, y - 1, true); break; }
+          if (ab.wall) upJ(x, y, 1, 5, 0);
+        } else {
+          /* Zwischenknoten: Fallen ist immer möglich */
+          push(x, fall(x, y));
+          const cling = clingAt(x, y), ring = ringSet.has(x + "," + y);
+          let top = false; for (const u of ups) if (x >= u.x0 && x <= u.x1 && y === u.y0 + 1) top = true;
+          if (cling) {
+            if (clingAt(x, y - 1)) pushV(x, y - 1);
+            if (bodyP(x, y + 1)) pushV(x, y + 1);
+            upJ(x, y, 1, 6, 0); wideJ(x, y, 1, 7, 4);
+          }
+          if (ring) { upJ(x, y, 1, 4, 0); wideJ(x, y, 1, 6, 4); if (ab.glide) glideJ(x, y); }
+          if (top) { upJ(x, y, 1, 3, 2); wideJ(x, y, 1, 9, 6); }
+          if (ab.jump3 && (cling || ring || top)) upJ(x, y, 1, 3, 0);
+          if (ab.dash && (cling || ring || top)) wideJ(x, y, 1, 11, 4);
+        }
+        if (rings.length) ringsFrom(x, y);
+        if (ups.length) updraftFrom(x, y);
+        cur = -1;
+      }
+    };
+  }
 
   /* ======================= HANDGEBAUTE KARTEN ======================= */
   /* Lager vor der Feste (Startbereich), Zwischenhalt und die Bossarenen */
@@ -1623,8 +1978,13 @@
 
   Z.genHub = function () {
     /* P Spieler, A Amboss/Schmiede (Nundro), B Bestiarium/Fundbuch (Barradin), C Schädelaltar, D Tor in die Feste, F Lagerfeuer,
-       R Rex, E Echo, G Friedrich, Y Trainingspuppe, N Schwarzes Brett/Rückblick */
-    const rows = [
+       R Rex, E Echo, G Friedrich, Y Trainingspuppe, N Schwarzes Brett/Rückblick
+       Das Lager wächst (lager.js liefert Z.hubPlan()): ext zusätzliche Spalten im Westen für die Plätze der Geretteten,
+       terrace = zweite Ebene (Holzgalerie mit Leitern) über dem Westteil. Der Kern (Feuer, Ständer, Tor) bleibt gleich,
+       verschiebt sich nur um lv.ox nach rechts – der Weg von der Ankunft zum Tor bleibt kurz. */
+    const plan = (Z.hubPlan && Z.hubPlan()) || {};
+    const ox = Math.max(0, Math.min(80, plan.ext | 0));
+    const core = [
       "....................................................................",
       "#..................................................................#",
       "#..................................................................#",
@@ -1640,15 +2000,32 @@
       "####################################################################",
       "####################################################################"
     ];
+    /* Westteil voranstellen: Wand ganz links, die alte Westwand des Kerns wird zu offenem Boden */
+    const rows = core.map((r, y) => {
+      if (!ox) return r;
+      const solid = y >= core.length - 2, top = y === 0;
+      const west = solid ? "#".repeat(ox) : top ? ".".repeat(ox) : "#" + ".".repeat(ox - 1);
+      return west + (solid || top ? r : "." + r.slice(1));
+    });
+    /* zweite Ebene: durchlässige Holzgalerie in Zeile 6 (Stand auf Zeile 5) mit Leitern an beiden Enden */
+    const terr = plan.terrace && ox >= 20 ? { x0: 2, x1: ox - 3, y: 6 } : null;
+    if (terr) {
+      const set = (x, y, ch) => { rows[y] = rows[y].slice(0, x) + ch + rows[y].slice(x + 1); };
+      for (let x = terr.x0; x <= terr.x1; x++) set(x, terr.y, "-");
+      terr.ladders = [terr.x0 + 1, terr.x1 - 1];
+      for (const lx of terr.ladders) for (let y = terr.y; y <= 11; y++) set(lx, y, "H");
+    }
     const lv = fromRows(rows, { biome: "lager", hub: true, out: true });
+    lv.ox = ox; lv.terrace = terr; lv.plan = plan;
     for (const m of lv.marks) {
       if (m.t === "P") lv.start = { x: m.x, y: m.y };
       else if (m.t === "D") lv.doors.push({ kind: "gate", x: m.x, y: m.y });
       else lv.props.push({ kind: "npc", id: m.t, x: m.x, y: m.y });
     }
-    lv.decor.push({ kind: "tent", x: 30, y: 11 }, { kind: "tent", x: 22, y: 11, s: 0.6 }, { kind: "cart", x: 12, y: 11 }, { kind: "barrel", x: 18, y: 11 }, { kind: "crate", x: 19, y: 11 },
-      { kind: "torch", x: 64, y: 8 }, { kind: "torch", x: 60, y: 8 }, { kind: "banner", x: 66, y: 6 }, { kind: "weapons", x: 14, y: 11 }, { kind: "lantern", x: 43, y: 9 });
-    lv.lights = [{ kind: "campfire", x: 35, y: 11 }, { kind: "forge", x: 16, y: 11 }, { kind: "torch", x: 64, y: 8 }, { kind: "torch", x: 60, y: 8 }, { kind: "lantern", x: 43, y: 9 }];
+    const X = x => x + ox;
+    lv.decor.push({ kind: "tent", x: X(30), y: 11 }, { kind: "tent", x: X(22), y: 11, s: 0.6 }, { kind: "cart", x: X(12), y: 11 }, { kind: "barrel", x: X(18), y: 11 }, { kind: "crate", x: X(19), y: 11 },
+      { kind: "torch", x: X(64), y: 8 }, { kind: "torch", x: X(60), y: 8 }, { kind: "banner", x: X(66), y: 6 }, { kind: "weapons", x: X(14), y: 11 }, { kind: "lantern", x: X(43), y: 9 });
+    lv.lights = [{ kind: "campfire", x: X(35), y: 11 }, { kind: "forge", x: X(16), y: 11 }, { kind: "torch", x: X(64), y: 8 }, { kind: "torch", x: X(60), y: 8 }, { kind: "lantern", x: X(43), y: 9 }];
     return lv;
   };
 

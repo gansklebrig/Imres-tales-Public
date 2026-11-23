@@ -202,7 +202,7 @@
     pend = null; if (!Z.run || !lv || lv.hub || lv.passage) return;
     C = pick(lv);
     for (const x of C.list) x.rw = rwOf(x);
-    C.announce = 4.2; /* nach der Kapitel-Titelseite */
+    C.announce = 1.7; /* kurz nach der (jetzt kurzen) Kapitel-Titelseite */
   }
   /* Ende: beim Verlassen ins Durchgangs-Gebiet. Liefert Ergebnisse; die Belohnung wird nach dem Laden ausgezahlt. */
   Z.chEnd = function () {
@@ -231,44 +231,57 @@
     }
     celebrate(x);
   }
-  /* ---------- Anzeige ---------- */
+  /* ---------- Anzeige ----------
+     Kein großes Fenster mehr: beim Betreten schiebt sich unter der Minikarte kurz eine kleine Karte ein (ohne Pause),
+     danach bleibt eine kompakte Zeile, die nur bei Fortschritt aufleuchtet. Die volle Liste steht im Pausenmenü. */
   const css = document.createElement("style");
   css.textContent = [
-    "#hfliste{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 64px);transform:translateX(-50%) translateY(-14px);z-index:13;pointer-events:none;opacity:0;transition:opacity .45s,transform .45s;min-width:min(440px,90vw);max-width:94vw;background:linear-gradient(rgba(26,16,18,.95),rgba(16,10,12,.95));border:1px solid #e5b454;border-radius:12px;padding:10px 16px 8px;box-shadow:0 10px 40px rgba(0,0,0,.6),0 0 24px rgba(229,180,84,.15);zoom:var(--hud,1)}",
-    "#hfliste.an{opacity:1;transform:translateX(-50%) translateY(0)}#hfliste h4{margin:0 0 6px;font-family:var(--fd);font-weight:400;color:#e5b454;font-size:19px;text-align:center;letter-spacing:.03em}",
-    "#hfliste .hz{display:grid;grid-template-columns:28px 1fr auto;gap:2px 10px;align-items:center;padding:4px 0;border-top:1px solid rgba(229,180,84,.15)}#hfliste .hi{font-size:18px;text-align:center;color:#ffd27a}#hfliste b{font-size:14px;color:#f0e6d4}#hfliste small{display:block;color:#c8b8a4;font-size:12px}#hfliste .hw{color:#ffb060;font-weight:800;font-size:12px;white-space:nowrap}",
-    "#hfliste .fuss{text-align:center;color:#a99a8b;font-size:11px;margin-top:5px}#hfliste kbd,.hfp kbd{font-family:var(--fb);background:#3a2a2e;border:1px solid #5a4448;border-radius:4px;padding:0 5px;color:#e5b454;font-weight:800}",
-    "#hfsieg{position:fixed;left:50%;top:44%;transform:translate(-50%,-50%) scale(.7);z-index:14;pointer-events:none;opacity:0;text-align:center;zoom:var(--hud,1)}",
-    "#hfsieg.an{animation:hfsieg 2.8s ease-out forwards}@keyframes hfsieg{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}12%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}20%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-62%) scale(1)}}",
-    "#hfsieg .k{font-size:12px;font-weight:800;letter-spacing:.2em;color:#ffd27a;text-transform:uppercase;text-shadow:0 2px 6px #000}#hfsieg .t{font-family:var(--fd);font-size:clamp(26px,4vw,44px);color:#ffe2a0;text-shadow:0 3px 14px #000,0 0 26px rgba(255,170,60,.55)}#hfsieg .r{font-weight:800;color:#ffb060;text-shadow:0 2px 6px #000;font-size:15px}",
-    "#hfsieg .strahl{position:absolute;left:50%;top:50%;width:420px;height:420px;margin:-210px 0 0 -210px;background:radial-gradient(circle,rgba(255,200,110,.35),rgba(255,140,40,0) 60%);z-index:-1}",
-    "#aufgabe .hf{border-color:#6a4a2a}#aufgabe .hf.ok{border-color:#7fd36a;color:#b8f0a0}#aufgabe .hf.weg{opacity:.4;text-decoration:line-through}#aufgabe .hf.knapp{border-color:#e0545a;color:#ffb0a0}",
-    ".hfp{margin:6px 0 2px;text-align:left}.hfp div{display:flex;gap:8px;padding:3px 0;font-size:13px}.hfp .ok{color:#b8f0a0}.hfp .weg{opacity:.5;text-decoration:line-through}.hfp i{font-style:normal;color:#ffd27a;width:20px;text-align:center}.hfp span{flex:1}.hfp em{font-style:normal;color:#ffb060;font-weight:800}"
+    "#hfzeile{max-width:min(330px,38vw);padding:4px 9px;font-size:12px;font-weight:700;line-height:1.35;opacity:0;transform:translateX(14px);transition:opacity .35s ease,transform .35s cubic-bezier(.2,.75,.25,1),box-shadow .3s,border-color .3s;pointer-events:none;text-shadow:0 1px 2px #000}",
+    "#hfzeile.an{opacity:1;transform:none}#hfzeile.leise{opacity:.0}#hfzeile.puls{border-color:#e5b454;box-shadow:0 0 0 1px #000,0 0 18px rgba(229,180,84,.45)}",
+    "#hfzeile h4{margin:0 0 3px;font-family:var(--fd);font-weight:400;color:#e5b454;font-size:15px;letter-spacing:.02em}",
+    "#hfzeile .hz{display:grid;grid-template-columns:18px 1fr auto;gap:0 7px;align-items:baseline;padding:2px 0;border-top:1px solid rgba(229,180,84,.14)}#hfzeile .hi{text-align:center;color:#ffd27a}#hfzeile .hz small{display:block;color:#c8b8a4;font-weight:600;font-size:11px}#hfzeile .hw{color:#ffb060;font-size:11px;white-space:nowrap}",
+    "#hfzeile .hc{white-space:nowrap;margin-right:8px;display:inline-block}#hfzeile .hc.ok{color:#ffd27a}#hfzeile .hc.weg{opacity:.45;text-decoration:line-through}#hfzeile .hc.knapp{color:#ff9a8a}#hfzeile .hk{color:#e5b454;margin-right:4px}",
+    ".hfp{margin:6px 0 2px;text-align:left}.hfp h3{margin-top:4px}.hfp div{display:flex;gap:8px;padding:3px 0;font-size:13px}.hfp .ok{color:#ffd27a}.hfp .ok span::after{content:' ✓'}.hfp .weg{opacity:.5;text-decoration:line-through}.hfp i{font-style:normal;color:#ffd27a;width:20px;text-align:center}.hfp span{flex:1}.hfp em{font-style:normal;color:#ffb060;font-weight:800}"
   ].join("\n");
   document.head.appendChild(css);
-  const liste = document.createElement("div"); liste.id = "hfliste"; document.body.appendChild(liste);
-  const sieg = document.createElement("div"); sieg.id = "hfsieg"; document.body.appendChild(sieg);
-  let listeT = 0;
+  const zeile = document.createElement("div"); zeile.id = "hfzeile"; zeile.className = "eisen";
+  const hang = () => { const hr = document.querySelector("#hud .hr"); if (hr && zeile.parentNode !== hr) { const mm = document.getElementById("minimap"); hr.insertBefore(zeile, mm ? mm.nextSibling : null); } };
+  let zeileT = 0, karteT = 0, zKey = "", zTick = 0;
   function showList() {
     if (!C || !C.list.length) return;
-    const arena = !!C.lv.arena, inp = Z.input;
-    const k = inp.device === "touch" ? "II" : inp.label("pause");
-    liste.innerHTML = "<h4>✦ " + L([C.list.length > 1 ? "Herausforderungen" : "Herausforderung", C.list.length > 1 ? "Challenges" : "Challenge"]) + "</h4>" +
-      C.list.map(x => '<div class="hz"><span class="hi">' + x.h.ico + "</span><span><b>" + esc(L(x.h.n)) + "</b><small>" + esc(textOf(x, arena)) + '</small></span><span class="hw">' + esc(rwTxt(x.rw)) + "</span></div>").join("") +
-      '<div class="fuss">' + L(["Fortschritt links oben · Liste jederzeit im Pausenmenü ", "Progress top left · list any time in the pause menu "]) + (k ? "<kbd>" + esc(k) + "</kbd>" : "") + "</div>";
-    liste.classList.add("an"); listeT = 6.5;
-    Z.audio.play("bell", { vol: 0.3, rate: 1.2 });
+    hang();
+    const arena = !!C.lv.arena;
+    zeile.innerHTML = "<h4>✦ " + L([C.list.length > 1 ? "Herausforderungen" : "Herausforderung", C.list.length > 1 ? "Challenges" : "Challenge"]) + "</h4>" +
+      C.list.map(x => '<div class="hz"><span class="hi">' + x.h.ico + "</span><span>" + esc(L(x.h.n)) + "<small>" + esc(textOf(x, arena)) + '</small></span><span class="hw">' + esc(rwTxt(x.rw)) + "</span></div>").join("");
+    zeile.classList.add("an"); zeile.classList.remove("puls"); karteT = 4.2; zeileT = 0; zKey = "";
+    Z.audio.play("bell", { vol: 0.22, rate: 1.2 });
   }
+  function compactHTML() {
+    const now = Z.run.time - C.t0, arena = !!C.lv.arena; let h = '<span class="hk">✦</span>', key = "";
+    for (const x of C.list) {
+      C.need = x.need;
+      let p = "";
+      if (x.h.art === "zaehl") p = Math.min(progOf(x), x.need) + "/" + x.need;
+      else if (x.h.art === "zeit") p = fmtCT(Math.max(0, x.lim - now));
+      else if (x.h.prog) p = progOf(x) + "/" + x.need;
+      const knapp = x.state === "laeuft" && x.h.art === "zeit" && x.lim - now < 15;
+      h += '<span class="hc ' + (x.state === "ok" ? "ok" : x.state === "weg" ? "weg" : knapp ? "knapp" : "") + '" title="' + esc(textOf(x, arena)) + '">' + x.h.ico + " " + esc(L(x.h.n)) + (x.state === "ok" ? " ✓" : p ? " " + p : "") + "</span>";
+      key += x.state + (x.h.art === "zeit" ? (knapp ? "k" : "") : p) + "|";
+    }
+    return [h, key];
+  }
+  function pulse(t) { if (!C) return; hang(); const [h, k] = compactHTML(); zeile.innerHTML = h; zKey = k; zeile.classList.add("an", "puls"); zeileT = t || 2.6; }
   function celebrate(x) {
-    sieg.innerHTML = '<div class="strahl"></div><div class="k">✦ ' + L(["Herausforderung geschafft", "Challenge complete"]) + ' ✦</div><div class="t">' + x.h.ico + " " + esc(L(x.h.n)) + '</div><div class="r">' + esc(rwTxt(x.rw)) + "</div>";
-    sieg.classList.remove("an"); void sieg.offsetWidth; sieg.classList.add("an");
-    Z.audio.play("holy", { vol: 0.55 }); Z.audio.play("coin", { vol: 0.4, rate: 0.8, delay: 0.15 });
+    pulse(3);
+    if (Z.ui && Z.ui.notify) Z.ui.notify("<b>" + L(["Geschafft: ", "Done: "]) + esc(L(x.h.n)) + "</b><br><small>" + esc(rwTxt(x.rw)) + "</small>", { prio: 2, art: "sieg", icon: x.h.ico || "✦", dauer: 3200 });
+    Z.audio.play("holy", { vol: 0.5 }); Z.audio.play("coin", { vol: 0.4, rate: 0.8, delay: 0.15 });
     const P = Z.player; if (P && Z.fx) { Z.fx.burst(P.x + P.w / 2, P.y + 6, 30, { col: ["#ffd27a", "#ffb060", "#fff2c0"], sp: 130, up: 60, life: 0.9, size: 2.2, kind: "glow", add: true }); Z.fx.ring(P.x + P.w / 2, P.y + 14, 30, "#ffd27a", 0.4, 2); }
     Z.input.rumble && Z.input.rumble(0.3, 140);
   }
   function fail(x) {
     if (x.state !== "laeuft") return; x.state = "weg";
-    Z.toast && Z.toast("✧ <b>" + L(["Verfehlt: ", "Missed: "]) + esc(L(x.h.n)) + "</b><br><small>" + L(["Die anderen Herausforderungen laufen weiter.", "The other challenges are still on."]) + "</small>", 2200);
+    pulse(2.4);
+    if (Z.ui && Z.ui.notify) Z.ui.notify("<b>" + L(["Verfehlt: ", "Missed: "]) + esc(L(x.h.n)) + "</b>", { prio: 1, art: "gefahr", icon: "✧", dauer: 2200 });
     Z.audio.play("ui", { vol: 0.25, rate: 0.6 });
   }
   /* je Schritt: Fortschritt prüfen */
@@ -291,7 +304,16 @@
     }
     const kc = Z.killChain && Z.killChain(); if (kc && kc.n > C.bestChain && Z.run.time - kc.last < 3) C.bestChain = kc.n;
   };
-  Z.chFrame = function (dt) { if (listeT > 0) { listeT -= dt; if (listeT <= 0 || (Z.ui && Z.ui.modalOpen && listeT < 5.5)) { liste.classList.remove("an"); listeT = 0; } } };
+  /* jedes Bild: Karte zur Zeile einklappen, Zeile bei Fortschritt aufleuchten lassen, sonst ausblenden */
+  let chLast = performance.now();
+  Z.chFrame = function () {
+    const nowR = performance.now(), dt = Math.min(0.1, (nowR - chLast) / 1000); chLast = nowR; /* Echtzeit: gleich lang auf jedem Rechner */
+    if (!C || !Z.run || (Z.ui && Z.ui.modalOpen)) { if (!C && zeile.classList.contains("an")) zeile.classList.remove("an", "puls"); return; }
+    if (karteT > 0) { karteT -= dt; if (karteT <= 0) pulse(2.2); return; }
+    zTick -= dt;
+    if (zTick <= 0 && C.list.length) { zTick = 0.25; const [h, k] = compactHTML(); if (zKey && k !== zKey) { zeile.innerHTML = h; zeile.classList.add("an", "puls"); zeileT = 2.6; } zKey = k; }
+    if (zeileT > 0) { zeileT -= dt; if (zeileT < 1.8) zeile.classList.remove("puls"); if (zeileT <= 0) zeile.classList.remove("an"); }
+  };
   /* HUD-Chips (von schmiede.js eingesetzt) */
   Z.chHUD = function () {
     if (!C || !Z.run) return { html: "", key: "" };

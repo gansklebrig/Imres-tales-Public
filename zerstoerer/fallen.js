@@ -1474,7 +1474,7 @@
     if (toastCd > 0 || !Z.meta || !Z.toast) return;
     const m = Z.meta; m.fallenSeen = m.fallenSeen || {};
     const sk = Z.trapSkin ? Z.trapSkin() : {}, biome = Z.level && Z.level.biome;
-    const tell = (key, n, d, x, y) => { if (m.fallenSeen[key] || !near(x, y, 150) || !vis(x, y, -20)) return false; m.fallenSeen[key] = 1; Z.saveMeta && Z.saveMeta(); toastCd = 6; Z.toast("<b>" + L(n) + "</b><br><small>" + L(d) + "</small>", 3000); return true; };
+    const tell = (key, n, d, x, y) => { if (m.fallenSeen[key] || !near(x, y, 150) || !vis(x, y, -20)) return false; m.fallenSeen[key] = 1; Z.saveMeta && Z.saveMeta(); toastCd = 6; /* Erstkontakt: kleine Zeile direkt an der Falle statt einer Meldung oben */ if (Z.ui && Z.ui.notify) Z.ui.notify("⚠ <b>" + L(n) + "</b><small>" + L(d) + "</small>", { prio: 1, art: "gefahr", ort: "welt", x, y: y - 6, dauer: 3400 }); else Z.toast("<b>" + L(n) + "</b><br><small>" + L(d) + "</small>", 3000); return true; };
     for (const tr of list) { const d = D[tr.k]; if (d && tell(tr.k, d.n, d.d, tr.x, tr.y || tr.fy)) return; }
     const CH = { pendel: "p", flamme: "f", stachel: "k", stein: "r", saege: "z" };
     for (const tr of Z.traps || []) {

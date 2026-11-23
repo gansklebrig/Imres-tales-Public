@@ -224,9 +224,9 @@
     }
 
     /* ---------- Ducken: Runter am Boden halten – kleinere Trefferfläche, langsames Kriechen ---------- */
-    const wantCrouch = inp.held.down && P.onGround && !P.climbing && !P.ledge && !P.dead && !P.grapple && !(P.act && P.act.type === "shield");
+    const wantCrouch = inp.held.down && P.onGround && !P.climbing && !P.ledge && !P.dead && !P.grapple && !P.shadowForm && !(P.act && P.act.type === "shield");
     if (wantCrouch && P.h !== C.HC) { P.y += C.H - C.HC; P.h = C.HC; P.crouch = true; if (!P.crouchSnd) { P.crouchSnd = true; A.play("step", { vol: 0.25, rate: 0.7 }); } }
-    else if (!wantCrouch && P.h !== C.H) {
+    else if (!wantCrouch && P.h !== C.H && !P.shadowForm) { /* shadowForm: flache Schattengestalt (runen.js) regelt ihre Höhe selbst */
       /* aufstehen nur, wenn über dem Kopf Platz ist */
       const ny = P.y - (C.H - C.HC); let free = true;
       for (let tx = Math.floor((P.x + 0.5) / T); tx <= Math.floor((P.x + P.w - 0.5) / T); tx++) if (W.solidT(W.tile(tx, Math.floor(ny / T)))) free = false;
@@ -246,7 +246,7 @@
       P.rollT -= dt;
       const k = 1 - P.rollT / C.ROLL;
       const spd = C.ROLLSPD * (k < 0.75 ? 1 : 1 - (k - 0.75) * 3);
-      P.vx = P.rollDir * spd;
+      P.vx = P.rollDir * spd * (P.rollMul || 1); /* rollMul: Schattensprint (runen.js), sonst 1 */
       if (!P.onGround && k < 0.4) P.vy = Math.min(P.vy, 30);
       if (Z.has("glutspur") && Math.random() < dt * 40) Z.spawnHazard({ kind: "fire", x: P.x + P.w / 2, y: P.y + P.h - 2, w: 14, life: 2.2, dmg: 4, owner: "p" });
       if (P.rollT <= 0) { P.rollCd = C.ROLLCD; P.afterRoll = 2; if (Z.has("klingentanz")) P.st.dance = 2; P.rolls = P.rollCd > 0 && P.rolls === 1 ? 0 : P.rolls; }
@@ -329,7 +329,9 @@
       /* Durchfallen: Coyote löschen, sonst würde ein zweiter Druck gleich wieder hinaufspringen */
       if (inp.held.down && P.onGround && P.onPlat) { P.dropT = 0.22; P.jumpBuf = 0; P.y += 2; P.onGround = false; P.coyote = 0; }
       else if (P.coyote > 0) { doJump(P, C.JUMP); P.coyote = 0; }
+      else if (Z.preJump && Z.preJump(P, h)) { /* Wandsprung (runen.js) vor dem Doppelsprung */ }
       else if (P.airJumps > 0) { P.airJumps--; doJump(P, C.DJUMP, true); }
+      else if (Z.extraJump && Z.extraJump(P, h)) { /* dritter Sprung / Enterhaken an Ösen (runen.js) */ }
     }
     /* variable Sprunghöhe: Loslassen kappt den Aufstieg, frühestens nach MINJ (kurzes Antippen = kleiner Hüpfer).
        Der Schnitt wird zeitgenau ausgeglichen, damit die Hüpferhöhe nicht von der Bildrate abhängt. */
@@ -351,10 +353,12 @@
     let vyEnd = null;
     if (!P.onGround) {
       const hang = inp.held.jump && P.jumpHeld && !P.cut, down = inp.held.down && !P.plunge;
-      const cap = P.plunge ? 700 : inp.held.down ? C.MAXFALL * 1.3 : C.MAXFALL;
+      let cap = P.plunge ? 700 : inp.held.down ? C.MAXFALL * 1.3 : C.MAXFALL;
+      if (P.capV != null && !P.plunge) cap = Math.min(cap, P.capV); /* Wandrutschen, Gleiten (runen.js) */
       let gk = 1;
       if (P.act && P.act.type === "melee" && P.act.phase !== "post" && !P.plunge) gk *= P.act.airHover ? 0.25 : 0.6;
       if (P.act && P.act.type === "charge") gk *= 0.6;
+      if (P.gMul != null && !P.plunge) gk *= P.gMul; /* Schattensprint, Schweben, Aufwind (runen.js) */
       const gOf = v => {
         let g = C.GRAV * gk;
         if (v > 0) { const r = Math.min(1, v / C.FALLV); g *= 1 + (C.FALL - 1) * r; if (down) g *= 1 + (C.FASTFALL - 1) * r; }
@@ -397,6 +401,8 @@
     P.anim.blink -= dt;
   };
 
+  /* für runen.js: dieselben Sprung-/Rollen-Bausteine wie hier */
+  Z.PJ = { doJump: (P, v, dbl) => doJump(P, v, dbl), startRoll: (P, d) => startRoll(P, d), bodyFree: (x, y, w, h) => bodyFree(x, y, w, h) };
   function doJump(P, v, dbl) {
     P.vy = -v; P.jumpBuf = 0; P.jumpHeld = true; P.jumpRel = false; P.jumpT = 0; P.cut = false; P.onGround = false;
     if (dbl) {

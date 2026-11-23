@@ -49,7 +49,7 @@
     if (mood === "glutregen") add("embers");
     if (mood === "algen") add("fireflies");
     if (mood === "sporen") add("spores");
-    const nm = NAMES[mood]; if (nm) setTimeout(() => { if (W && W.mood === mood) Z.toast && Z.toast("<small>" + L(nm) + "</small>", 1800); }, 1900);
+    const nm = NAMES[mood]; if (nm) setTimeout(() => { if (W && W.mood === mood) if (Z.ui && Z.ui.notify) Z.ui.notify(L(nm), { prio: 0, key: "wetter", dauer: 2000 }); else Z.toast && Z.toast("<small>" + L(nm) + "</small>", 1800); /* Stimmung: leiseste Stufe, entfällt bei „Hinweise: wenige/keine“ */ }, 1900);
   }
   const load0 = Z.loadArea;
   Z.loadArea = function () { const r = load0.apply(this, arguments); try { setup(Z.level); } catch (e) { console.error(e); } return r; };

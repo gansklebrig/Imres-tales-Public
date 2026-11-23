@@ -100,7 +100,8 @@
   Z.presentItem = function (it) {
     if (!it || !Z.player || (Z.settings && Z.settings.presentOff)) return;
     const st = styleOf(it), cursed = !!it.cursed, rar = it.rar || 0;
-    pres = { it, st, t: 0, dur: cursed ? 2.7 : rar >= 3 ? 1.8 : rar >= 2 ? 1.45 : 1.2, cursed, rar, bolts: [], boltT: 0.25, flags: {}, chainsOn: cursed };
+    /* kurz und nicht blockierend: das Spiel läuft weiter, alle Tasten wirken sofort */
+    pres = { it, st, t: 0, dur: cursed ? 1.9 : rar >= 3 ? 1.45 : rar >= 2 ? 1.15 : 0.95, cursed, rar, bolts: [], boltT: 0.25, flags: {}, chainsOn: cursed };
     ps = [];
     A.play(cursed ? "dark" : rar >= 3 ? "holy" : "pickup", { vol: 0.6 });
     if (cursed) { A.play("chain", { vol: 0.5 }); inp.rumble && inp.rumble(0.35, 260); }
@@ -112,11 +113,11 @@
     if (!P || P.dead || !Z.level) { pres = null; return; }
     p.t += dt;
     const u = p.t / p.dur;
-    const anyKey = inp.pressed.jump || inp.pressed.a1 || inp.pressed.a2 || inp.pressed.use || inp.pressed.roll;
-    for (const k in inp.pressed) inp.pressed[k] = false;
-    if (anyKey && p.t > 0.45 && u < 0.86) p.t = p.dur * 0.86;
+    /* angreifen, rollen, springen beendet die Vorführung sofort (die Taste wirkt trotzdem im Spiel) */
+    const anyKey = inp.pressed.jump || inp.pressed.a1 || inp.pressed.a2 || inp.pressed.roll || inp.pressed.s1 || inp.pressed.s2;
+    if (anyKey && p.t > 0.12 && u < 0.86) p.t = p.dur * 0.86;
+    if (P.act || Math.abs(P.vx) > 60) { if (u < 0.86 && p.t > 0.35) p.t = p.dur * 0.86; }
     if (p.t >= p.dur) { pres = null; return; }
-    FX.hitstop = Math.max(FX.hitstop || 0, 0.06);
     const d = Z.itemDef(p.it), col = p.cursed ? "#c040ff" : d.col || "#fff";
     const rc = p.cursed ? "#c040ff" : Z.RARITY[p.rar].col;
     const hx = P.x + P.w / 2, top = P.y - 13;
@@ -161,7 +162,7 @@
     /* Untergrund: Dunkelheit (Fluch), Lichtsäule (Legende), Strahlen (Episch) */
     if (p.cursed) {
       const S = Z.gfx.scale || 1, sx = (hx - cam.x) * S, sy = (top - cam.y) * S;
-      const a = 0.72 * span(u, 0, 0.15) * (1 - out);
+      const a = 0.45 * span(u, 0, 0.15) * (1 - out);
       c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
       const g = c.createRadialGradient(sx, sy, 30 * S, sx, sy, Math.max(W, H) * 0.7);
       g.addColorStop(0, "rgba(20,0,30,0)"); g.addColorStop(0.35, "rgba(16,0,24," + a * 0.7 + ")"); g.addColorStop(1, "rgba(6,0,10," + a + ")");
@@ -275,25 +276,32 @@
     }
     drawSparks(c);
   }
+  /* Name des Fundes: kleine Plakette direkt über Ezekiel (statt eines Bandes quer über den Bildschirm) */
   function banner(c, p, W, H) {
-    const u = p.t / p.dur, a = span(u, 0.12, 0.3) * (1 - span(u, 0.84, 1));
+    const u = p.t / p.dur, a = span(u, 0.08, 0.22) * (1 - span(u, 0.82, 1));
     if (a <= 0) return;
-    const it = p.it, d = Z.itemDef(it), r = Z.RARITY[it.rar];
-    const fs = clamp(Math.min(W, H) * 0.055, 15, 46), fd = getComputedStyle(document.documentElement).getPropertyValue("--fd") || "serif";
-    c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
-    const Pp = Z.player, psy = Pp ? (Pp.y - Z.cam.y) * (Z.gfx.scale || 1) : H; const cy = (psy < H * 0.5 ? H * 0.72 : H * 0.24) + (1 - span(u, 0.12, 0.3)) * 10;
-    const shake = p.cursed && u < 0.62 ? (Math.random() - 0.5) * 2.5 : 0;
-    c.globalAlpha = a * 0.6; const g = c.createLinearGradient(0, cy - fs * 1.4, 0, cy + fs * 1.6); g.addColorStop(0, "rgba(8,4,8,0)"); g.addColorStop(0.5, "rgba(8,4,8,.85)"); g.addColorStop(1, "rgba(8,4,8,0)"); c.fillStyle = g; c.fillRect(0, cy - fs * 1.4, W, fs * 3);
-    c.globalAlpha = a; c.textAlign = "center"; c.textBaseline = "middle";
-    if (p.cursed) { c.font = "700 " + Math.round(fs * 0.48) + "px " + fd; c.fillStyle = "#ff9af0"; c.fillText("☠ " + L(Z.CURSE[it.cursed].name).toUpperCase() + " ☠", W / 2 + shake, cy - fs * 0.95); }
-    c.font = Math.round(fs) + "px " + fd; c.shadowColor = p.cursed ? "#c040ff" : r.col; c.shadowBlur = fs * 0.5;
-    c.fillStyle = p.cursed ? "#f0d0ff" : r.col; c.fillText(Z.itemTitle ? Z.itemTitle(it) : L(d.n), W / 2 + shake, cy);
-    c.shadowBlur = 0; c.font = "600 " + Math.round(fs * 0.42) + "px " + (getComputedStyle(document.documentElement).getPropertyValue("--fb") || "sans-serif");
+    const it = p.it, d = Z.itemDef(it), r = Z.RARITY[it.rar], P = Z.player; if (!P) return;
+    const S = Z.gfx.scale || 1, cam = Z.cam;
+    const css = getComputedStyle(document.documentElement), fd = css.getPropertyValue("--fd") || "serif", fb = css.getPropertyValue("--fb") || "sans-serif";
+    const fs = clamp(Math.min(W, H) * 0.03, 13, 30);
+    const name = Z.itemTitle ? Z.itemTitle(it) : L(d.n);
     const pw = it.power && Z.CPOWER && Z.CPOWER[it.power];
-    c.fillStyle = pw ? "#ff9af0" : "#d8c8b8";
-    c.fillText(pw ? "✦ " + L(pw.n) + " ✦" : L(r.n) + (it.aff && it.aff.length ? " · " + it.aff.map(k => L(Z.AFFIX[k].n)).join(" · ") : "") + (it.runes && it.runes.length && Z.RUNES ? " · ᚱ " + it.runes.map(k => L(Z.RUNES[k].n)).join(" · ") : ""), W / 2, cy + fs * 0.85);
-    /* Faden-Stücke: eigene goldene Zeile mit kurzer Erklärung */
-    if (d.faden && !p.cursed) { c.font = "700 " + Math.round(fs * 0.36) + "px " + (getComputedStyle(document.documentElement).getPropertyValue("--fb") || "sans-serif"); c.fillStyle = "#ffd27a"; c.fillText("◈ " + L(["Faden – Treffer markieren, Nahkampf vollstreckt kritisch", "Thread – hits mark, melee executes with a crit"]), W / 2, cy + fs * 1.45); }
+    const sub = p.cursed ? "☠ " + L(Z.CURSE[it.cursed].name) : pw ? "✦ " + L(pw.n) : L(r.n) + (it.aff && it.aff.length ? " · " + it.aff.map(k => L(Z.AFFIX[k].n)).join(" · ") : "") + (it.runes && it.runes.length && Z.RUNES ? " · ᚱ " + it.runes.map(k => L(Z.RUNES[k].n)).join(" · ") : "") + (d.faden && !p.cursed ? " · ◈ " + L(["Faden", "Thread"]) : "");
+    c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
+    c.font = Math.round(fs) + "px " + fd; const w1 = c.measureText(name).width;
+    c.font = "700 " + Math.round(fs * 0.5) + "px " + fb; const w2 = c.measureText(sub).width;
+    const bw = Math.max(w1, w2) + fs * 1.4, bh = fs * 2.05;
+    const cx = clamp((P.x + P.w / 2 - cam.x) * S, bw / 2 + 8, W - bw / 2 - 8), cy = clamp((P.y - 44 - cam.y) * S - (1 - span(u, 0.08, 0.22)) * 6, bh + 70, H - 90);
+    c.globalAlpha = a * 0.92;
+    const g = c.createLinearGradient(0, cy - bh, 0, cy); g.addColorStop(0, "rgba(36,22,26,.95)"); g.addColorStop(1, "rgba(20,12,15,.95)");
+    c.fillStyle = g; c.fillRect(cx - bw / 2, cy - bh, bw, bh);
+    c.strokeStyle = p.cursed ? "#7a3aa0" : "#5a4638"; c.lineWidth = 1.5; c.strokeRect(cx - bw / 2 + 0.5, cy - bh + 0.5, bw - 1, bh - 1);
+    c.fillStyle = p.cursed ? "#c040ff" : r.col; c.fillRect(cx - bw / 2, cy - bh, 3, bh);
+    c.globalAlpha = a; c.textAlign = "center"; c.textBaseline = "middle";
+    c.font = Math.round(fs) + "px " + fd; c.shadowColor = p.cursed ? "#c040ff" : r.col; c.shadowBlur = fs * 0.35;
+    c.fillStyle = p.cursed ? "#f0d0ff" : r.col; c.fillText(name, cx, cy - bh * 0.62);
+    c.shadowBlur = 0; c.font = "700 " + Math.round(fs * 0.5) + "px " + fb; c.fillStyle = p.cursed || pw ? "#e8b8ff" : "#d8c8b8";
+    c.fillText(sub, cx, cy - bh * 0.24);
     c.restore();
   }
 

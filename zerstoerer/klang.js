@@ -3,7 +3,8 @@
       Keller und Grüfte einen Tropfhall (Rückkopplungs-Echo) samt prozedural erzeugten Wassertropfen,
       Freiflächen bleiben trocken. Die Sende-Anteile hängen hinter den Lautstärkereglern (Effekte, Kulisse, Musik).
    2. Ereignisse aus dem Spiel werden beobachtet (ohne andere Dateien anzufassen) und lösen Stinger der Musik aus:
-      Tagebuchseite, Truhe, Bossauftritt, Bossphase, Bosssieg, Tod und Killketten. */
+      Tagebuchseite, Truhe, Bossauftritt, Bossphase, Bosssieg, Tod, Killketten (Stufen 3/5/8/12/20),
+      Elite-Sichtung, seltene/legendäre Beute, geschaffte Herausforderung oder Prüfung. */
 (function () {
   "use strict";
   const Z = window.Z, A = Z.audio, M = Z.music;
@@ -104,12 +105,15 @@
   }
 
   /* ---------- Beobachter ---------- */
-  const W = { lv: null, pages: 0, kills: 0, chain: 0, chainT: 0, boss: null, phase: 0, won: false, dead: false, seenChest: new WeakSet(), dripT: 2 };
+  const W = { lv: null, pages: 0, kills: 0, chain: 0, chainT: 0, boss: null, phase: 0, won: false, dead: false, seenChest: new WeakSet(), seenElite: new WeakSet(), seenLoot: new WeakSet(), chall: 0, trials: 0, dripT: 2 };
+  /* liegt ein Punkt im Bild (mit etwas Rand)? */
+  const onCam = (x, y, m) => { const c = Z.cam; if (!c) return true; m = m || 0; return x > c.x - m && x < c.x + c.w + m && y > c.y - m && y < c.y + c.h + m; };
   const pageCount = () => (Z.meta && Z.meta.tagebuch ? Object.keys(Z.meta.tagebuch).length : 0);
   function onLevel(lv) {
     W.lv = lv; W.pages = pageCount(); W.kills = (Z.stats && Z.stats.kills) || 0; W.chain = 0; W.chainT = 0;
     W.boss = Z.boss || null; W.phase = (Z.boss && Z.boss.phase) || 0; W.won = !!Z.bossDefeated; W.dead = !!(Z.player && Z.player.dead);
-    for (const p of Z.pickups || []) if (p.open) W.seenChest.add(p);
+    for (const p of Z.pickups || []) { if (p.open) W.seenChest.add(p); }
+    W.chall = (Z.stats && Z.stats.challenges) || 0; W.trials = (Z.stats && Z.stats.pruefungen) || 0;
     KL.setRaum(raumFor(lv));
   }
   KL.tick = (dt) => {
@@ -140,15 +144,32 @@
     const dead = !!(P && P.dead);
     if (dead && !W.dead) M.stinger("tod");
     W.dead = dead;
-    /* Killketten: Gegner, die kurz nacheinander fallen */
+    /* Killketten: Gegner, die kurz nacheinander fallen – Intensität steigt, Stinger nur auf den Stufen */
     const k = (Z.stats && Z.stats.kills) || 0;
     if (k < W.kills) W.kills = k; /* neuer Lauf */
     if (k > W.kills) {
-      const n = k - W.kills; W.kills = k;
+      const n = k - W.kills, prev = W.chain; W.kills = k;
       W.chain = W.chainT > 0 ? W.chain + n : n; W.chainT = 2.6;
-      if (W.chain >= 3 && !dead) M.stinger("kette", { n: W.chain });
+      if (!dead && M.chainHit && W.chain >= 3) M.chainHit(W.chain, prev); /* Mehrfach-Kill: nur die höchste erreichte Stufe erklingt */
     }
-    if (W.chainT > 0) { W.chainT -= dt; if (W.chainT <= 0) W.chain = 0; }
+    if (W.chainT > 0) { W.chainT -= dt; if (W.chainT <= 0) { W.chain = 0; M.chainEnd && M.chainEnd(); } }
+    /* Elite gesichtet: das erste Mal im Bild und wach (oder schon recht nah) */
+    if (P && !dead) for (const e of Z.enemies || []) {
+      if (!e.elite || e.dead || e.ally || e.dummy || W.seenElite.has(e)) continue;
+      const ex = e.x + (e.w || 0) / 2, ey = e.y + (e.h || 0) / 2;
+      if (!onCam(ex, ey, -8)) continue;
+      if (e.aware || Math.hypot(ex - P.x, ey - P.y) < 220) { W.seenElite.add(e); M.stinger("elite"); M.push && M.push(0.5, 5); }
+    }
+    /* seltene Beute: ein sehr seltener oder legendärer Gegenstand liegt neu im Bild */
+    for (const p of Z.pickups || []) {
+      if (p.kind !== "item" || !p.it || W.seenLoot.has(p) || !onCam(p.x, p.y, 8)) continue;
+      W.seenLoot.add(p);
+      if ((p.it.rar || 0) >= 2 && !p.it.cursed) M.stinger("beute", { rar: p.it.rar });
+    }
+    /* Herausforderung (bilanz.js) oder Prüfungskammer (erkundung.js) geschafft */
+    const ch = (Z.stats && Z.stats.challenges) || 0, tr = (Z.stats && Z.stats.pruefungen) || 0;
+    if ((ch > W.chall || tr > W.trials) && !dead) M.stinger("geschafft");
+    W.chall = ch; W.trials = tr;
     /* Tropfen im Keller und in Grüften */
     if (KL.R && KL.R.drip > 0 && net && KL.drips < 6) {
       W.dripT -= dt;

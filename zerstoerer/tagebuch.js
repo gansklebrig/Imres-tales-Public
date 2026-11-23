@@ -122,7 +122,10 @@
       page.got = true; meta()[page.i] = 1; Z.saveMeta();
       A.play("scroll", { vol: 0.7 }); FX.burst(page.x * T + 8, (page.y + 1) * T - 8, 16, { col: ["#f0e0b0", "#ffd27a"], sp: 70, up: 40, life: 0.8, size: 1.8, kind: "spark", add: true });
       if (count() === PAGES.length && !Z.meta.tbBonus) { Z.meta.tbBonus = 1; Z.dropShards(px, P.y, 60); Z.saveMeta(); }
-      setTimeout(() => Z.ui.open(pageHTML(page.i, true), { cls: "schmal" }), 150);
+      /* kein Fenster mitten im Lauf: kurze Pergament-Meldung, lesen im Pausenmenü („Miras Tagebuch“) */
+      const pg = PAGES[page.i], txt = L([pg.de, pg.en]), teaser = txt.length > 96 ? txt.slice(0, 92).replace(/\s+\S*$/, "") + " …" : txt;
+      const pk = Z.ui.key ? Z.ui.key("pause") : "";
+      Z.ui.notify("<b>" + esc(L(["Miras Tagebuch", "Mira's Diary"])) + " · " + (page.i + 1) + "/" + PAGES.length + ": " + esc(L(pg.t)) + "</b><br><small>„" + esc(teaser) + "“ — " + L(["ganz lesen: Pause", "read it all: pause"]) + (pk ? " " + pk : "") + (count() === PAGES.length ? " · " + L(["alle Seiten gefunden!", "all pages found!"]) : "") + "</small>", { prio: 2, art: "pergament", icon: "📜", dauer: 6500 });
     }
     for (const s of scouts) {
       if (s.freed) { s.t += dt; continue; }
@@ -136,7 +139,7 @@
         for (const k in lv.cells) Z.fogSeen && Z.fogSeen().add(k);
         P.potions = Math.min(P.potMax || 2, (P.potions || 0) + 1);
         Z.ui.say(s.x * T + 8, s.y * T - 18, s.name, L(Z.R.pick([["Danke! Hier – meine Karte. Und ein Trank, ich brauch ihn nicht mehr.", "Thank you! Here – my map. And a potion, I won't need it."], ["Die Ausgänge? Ich hab sie alle eingezeichnet. Nimm die Karte, ich nehm die Beine in die Hand.", "The exits? I marked them all. Take the map, I'm taking to my heels."], ["Mira war hier, vor Wochen. Sie hat nach oben gewollt. Viel Glück.", "Mira was here, weeks ago. She wanted to go up. Good luck."]])), 4600);
-        Z.toast && Z.toast("<b>" + L(["Karte des Gebiets aufgedeckt", "Area map revealed"]) + "</b><br><small>" + L(["+1 Heiltrank", "+1 healing potion"]) + "</small>", 2400);
+        Z.ui.notify("<b>" + L(["Karte des Gebiets aufgedeckt", "Area map revealed"]) + "</b><small> · " + L(["+1 Heiltrank", "+1 healing potion"]) + "</small>", { prio: 1, art: "gold", ort: "welt", x: s.x * T + 8, y: s.y * T - 30, dauer: 2600 });
         if (Z.stats) Z.stats.befreit = (Z.stats.befreit || 0) + 1; Z.meta.befreit = (Z.meta.befreit || 0) + 1; Z.saveMeta();
       }
     }
@@ -194,9 +197,8 @@
       c.strokeStyle = "#d8b49a"; c.lineWidth = 1.2; c.beginPath(); c.moveTo(x - 2, gy - 9); c.lineTo(x - f * 3, gy - 14); c.moveTo(x + 2, gy - 9); c.lineTo(x + f * 1, gy - 13); c.stroke();
       c.fillStyle = "#c8b890"; c.save(); c.translate(x + f * 6, gy - 1); c.rotate(0.3); c.fillRect(-3, -2, 6, 4); c.restore(); /* zusammengerollte Karte */
       if (s.near) {
-        const lab = inp.device === "touch" ? "✋" : inp.label("use");
-        c.font = "700 7px 'Alegreya Sans',sans-serif"; c.textAlign = "center"; const tx = "[" + lab + "] " + L(["Befreien", "Free"]), w = c.measureText(tx).width + 6;
-        c.fillStyle = "rgba(14,8,10,.85)"; c.fillRect(x - w / 2, gy - 34, w, 10); c.fillStyle = "#ffd27a"; c.fillText(tx, x, gy - 26.5);
+        /* gleicher Benutzen-Hinweis wie überall (Eisenplakette mit Tastenkappe) */
+        if (Z.ui.worldLabel) Z.ui.worldLabel("kundschafter" + s.x, { x, y: gy - 24, html: (Z.ui.key("use") || "✋") + " " + esc(L(["Befreien", "Free"])), jetzt: true });
       } else if (Math.sin(t * 0.7 + s.x) > 0.95) { c.font = "italic 6px 'Alegreya Sans',sans-serif"; c.textAlign = "center"; c.fillStyle = "rgba(232,216,200,.8)"; c.fillText(L(["Hilfe …", "Help…"]), x, gy - 22); }
     } else if (s.t < 4) {
       /* läuft davon */

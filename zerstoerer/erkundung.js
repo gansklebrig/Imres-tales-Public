@@ -15,7 +15,9 @@
   const Z = window.Z, U = Z.U, T = Z.TILE, CW = Z.CW, CH = Z.CH, FX = Z.fx, A = Z.audio, L = v => Z.L(v);
   const TAU = Math.PI * 2;
   const ui = () => Z.ui || {};
-  const toast = (h, ms) => { if (Z.toast) Z.toast(h, ms); };
+  /* Hinweise: über die gemeinsame Meldungs-Warteschlange (ui.js); mit Ort als kurze Zeile in der Welt */
+  const toast = (h, ms, at, o) => { if (Z.ui && Z.ui.notify) Z.ui.notify(h, Object.assign({ dauer: ms }, at ? { ort: "welt", x: at.x, y: at.y } : {}, o || {})); else if (Z.toast) Z.toast(h, ms); };
+  const Pat = () => { const P = Z.player; return P ? { x: P.x + P.w / 2, y: P.y - 6 } : null; };
   const later = (fn, ms) => (Z.bossLater ? Z.bossLater(fn, ms) : window.setTimeout(fn, ms));
   let S = null; /* Zustand des aktuellen Gebiets */
 
@@ -34,6 +36,8 @@
         case "heil": return Z.spawnReward("heil", x, y, { drop: true, big: q >= 1 });
         case "segen": return Z.spawnReward("segen", x, y - 4, {});
         case "schluessel": return Z.spawnReward("schluessel", x, y, {});
+        /* runen.js: Runenstein (Spielweise-Rune für den Gürtel) und Runensockel (Bewegungs-Rune) */
+        case "runenstein": case "bewegung": return Z.runen ? Z.runen.give(kind, x, y, q) : Z.spawnReward("glut", x, y, { n: 2 });
       }
     }
     /* Rückfall ohne schmiede.js */
@@ -59,7 +63,7 @@
     if (Z.stats) Z.stats.geheimnisse = (Z.stats.geheimnisse || 0) + 1;
     if (Z.meta) { Z.meta.geheimnisse = (Z.meta.geheimnisse || 0) + 1; }
     A.play("holy", { vol: 0.45 });
-    toast("<b>" + L(["Geheimnis entdeckt", "Secret found"]) + "</b> · " + n + "/" + tot + (what ? "<br><small>" + what + "</small>" : ""), 2600);
+    toast("✦ <b>" + L(["Geheimnis", "Secret"]) + " " + n + "/" + tot + "</b>" + (what ? "<small>" + what + "</small>" : ""), 2600, Pat(), { prio: 1, art: "gold" });
   }
 
   /* ======================= Aufbau je Gebiet ======================= */
@@ -129,7 +133,7 @@
     if (o.open) return;
     if (!hasKey()) {
       A.play("chain", { vol: 0.5 });
-      toast("<b>" + L(["Verschlossene Kammer", "Locked chamber"]) + "</b><br><small>" + L(["Der Schlüssel liegt irgendwo in einem anderen Zweig dieses Gebiets.", "The key lies somewhere in another branch of this area."]) + "</small>", 3000);
+      toast("⚷ <b>" + L(["Verschlossen", "Locked"]) + "</b><small>" + L(["Der Schlüssel liegt in einem anderen Zweig.", "The key lies in another branch."]) + "</small>", 3000, Pat(), { prio: 3 });
       return;
     }
     if (!useKey()) return;
@@ -181,7 +185,7 @@
   }
   function startTrial(o) {
     if (o.state !== "idle") return;
-    if (Z.ambush && Z.ambush() && Z.ambush().state === "fight") { toast(L(["Nicht jetzt.", "Not now."])); return; }
+    if (Z.ambush && Z.ambush() && Z.ambush().state === "fight") { toast(L(["Nicht jetzt.", "Not now."]), 1800, null, { prio: 3 }); return; }
     const P = Z.player;
     const inside = P.x > (o.ox + 1) * T && P.x + P.w < (o.ox + CW - 1) * T && P.y > o.oy * T && P.y + P.h < (o.oy + CH) * T;
     if (!inside) return;
@@ -191,7 +195,7 @@
     if (!o.pool.length) o.pool = ["goblin"];
     o.state = "fight"; o.t = 0; o.wave = 0; sealTrial(o);
     A.play("gong", { vol: 0.7 }); FX.flashScreen && FX.flashScreen("#6a3a10", 0.3); FX.addShake(4);
-    toast("<b>" + L(["Prüfung", "Trial"]) + "</b><br><small>" + L(["Besiege alle Wellen. Dann gehört der Schatz dir.", "Defeat every wave. Then the treasure is yours."]) + "</small>", 2600);
+    toast("<b>" + L(["Prüfung", "Trial"]) + "</b><br><small>" + L(["Besiege alle Wellen. Dann gehört der Schatz dir.", "Defeat every wave. Then the treasure is yours."]) + "</small>", 2600, null, { prio: 2, art: "gefahr" });
     Z.music && Z.music.set && Z.music.set("boss1");
     later(() => spawnWave(o), 700);
   }
@@ -252,13 +256,14 @@
     const P = Z.player; if (!S || !P || P.dead || Z.level !== S.lv) return;
     S.t += dt;
     const px = P.x + P.w / 2, py = P.y + P.h;
+    zielTick(dt, px, py);
     for (const r of S.rewards) { r.t += dt; if (!r.open && Math.abs(r.x - px) < 15 && Math.abs(r.y - py) < 22) openReward(r); }
     for (const k of S.keys) {
       k.t += dt;
       if (!k.got && Math.abs(k.x - px) < 16 && Math.abs(k.y - 8 - py) < 26) {
         k.got = true; give("schluessel", k.x, k.y - 4, 0);
         A.play("chain", { vol: 0.6, rate: 1.5 }); FX.burst(k.x, k.y - 14, 18, { col: ["#ffd27a", "#fff0c0"], sp: 90, life: 0.6, size: 2, kind: "spark", add: true });
-        toast("<b>" + L(["Schlüssel gefunden", "Key found"]) + "</b><br><small>" + L(["Irgendwo in diesem Gebiet wartet eine verschlossene Kammer.", "Somewhere in this area a locked chamber waits."]) + "</small>", 3200);
+        toast("⚷ <b>" + L(["Schlüssel", "Key"]) + "</b><small>" + L(["Irgendwo wartet eine verschlossene Kammer.", "A locked chamber waits somewhere."]) + "</small>", 3200, { x: k.x, y: k.y - 18 }, { prio: 1, art: "gold" });
       }
     }
     for (const o of S.levers) if (o.pulled && o.a < 1) o.a = Math.min(1, o.a + dt * 4);
@@ -271,13 +276,13 @@
     if (!S.exitTip && S.total > 0) for (const d of S.lv.doors) if (d.kind === "exit" && Math.abs(d.x * T + 8 - px) < 70 && Math.abs((d.y + 1) * T - py) < 40) {
       S.exitTip = true;
       const n = S.found.size, rest = S.rewards.filter(r => !r.open).length;
-      toast("<b>" + L(["Geheimnisse dieses Gebiets", "Secrets of this area"]) + ": " + n + "/" + S.total + "</b>" + (rest ? "<br><small>" + L(["Noch ", "Still "]) + rest + L([" Fundstücke abseits des Weges.", " finds off the beaten path."]) + "</small>" : ""), 3400);
+      toast("✦ <b>" + L(["Geheimnisse hier", "Secrets here"]) + ": " + n + "/" + S.total + "</b>" + (rest ? "<small>" + L(["Noch ", "Still "]) + rest + L([" Fundstücke abseits des Weges", " finds off the beaten path"]) + "</small>" : ""), 3400, { x: d.x * T + 8, y: d.y * T - 6 }, { prio: rest ? 1 : 0, art: "gold" });
       break;
     }
   };
 
   /* ======================= Zeichnen ======================= */
-  const COL = { gold: ["#ffd27a", "#c08a2a"], glut: ["#ff8a2a", "#ffd080"], waffe: ["#e8dcc8", "#ffd27a"], rolle: ["#f0e0b0", "#c04040"], heil: ["#ff5a5a", "#ffc0a0"], segen: ["#ffe9a0", "#ff9a5a"] };
+  const COL = { gold: ["#ffd27a", "#c08a2a"], glut: ["#ff8a2a", "#ffd080"], waffe: ["#e8dcc8", "#ffd27a"], rolle: ["#f0e0b0", "#c04040"], heil: ["#ff5a5a", "#ffc0a0"], segen: ["#ffe9a0", "#ff9a5a"], runenstein: ["#ffb347", "#ff6a3a"], bewegung: ["#ff5a4e", "#ffd27a"] };
   function drawReward(c, r, t) {
     const x = r.x, y = r.y, k = r.kind, s = 1 + r.q * 0.08, bob = Math.sin(t * 2 + r.t) * 1.2;
     /* Sockel */
@@ -289,6 +294,7 @@
     else if (k === "waffe") { c.fillStyle = "#5a4a44"; c.fillRect(-4, -3, 8, 3); c.fillStyle = "#d8d0c8"; c.fillRect(-0.8, -16, 1.6, 13); c.fillStyle = "#ffd27a"; c.fillRect(-3.5, -16, 7, 1.6); c.fillStyle = "#6a3a2a"; c.fillRect(-0.8, -20, 1.6, 4); }
     else if (k === "rolle") { c.fillStyle = "#4a3426"; c.fillRect(-1, -8, 2, 8); c.fillStyle = "#f0e0b0"; c.fillRect(-6, -12, 12, 5); c.fillStyle = "#c8b080"; c.fillRect(-6, -12, 1.5, 5); c.fillRect(4.5, -12, 1.5, 5); c.fillStyle = "#c04040"; c.fillRect(-1, -10, 2, 2); }
     else if (k === "heil") { c.fillStyle = "#ff5a5a"; c.beginPath(); c.arc(0, -5, 4, 0, TAU); c.fill(); c.fillStyle = "#e8dcc8"; c.fillRect(-1.2, -11, 2.4, 3); c.fillStyle = "rgba(255,230,220,.6)"; c.fillRect(-2, -7, 1.2, 1.2); }
+    else if (k === "runenstein" || k === "bewegung") { c.fillStyle = "#3a302c"; c.beginPath(); c.ellipse(0, -7, 5, 6.5, 0, 0, TAU); c.fill(); c.strokeStyle = COL[k][0]; c.lineWidth = 1; c.stroke(); c.fillStyle = COL[k][0]; c.font = "700 7px serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(k === "bewegung" ? "ᛟ" : "ᚱ", 0, -6.5); }
     else { c.fillStyle = "#ffe9a0"; c.fillRect(-1.2, -10, 2.4, 9); const f = 0.6 + 0.4 * Math.sin(t * 9 + r.t); c.fillStyle = "rgba(255,170,90," + f + ")"; c.beginPath(); c.ellipse(0, -12, 1.6, 2.6 + f, 0, 0, TAU); c.fill(); }
     c.restore();
     /* Glanz: kleine Funken, häufiger bei wertvollen Funden */
@@ -394,7 +400,24 @@
 
   /* ======================= Wegweiser am Bildrand ======================= */
   /* Ein dezenter goldener Pfeil zeigt zum nächsten Ausgang, solange er nicht im Bild ist; mit Schlüssel in der Tasche
-     ein violetter zur verschlossenen Kammer. Erscheint erst nach ein paar Sekunden – erst einmal schauen. */
+     ein violetter zur verschlossenen Kammer. Er erscheint NICHT mehr von selbst nach Sekunden, sondern erst
+     nach längerer Ziellosigkeit (kein Fortschritt zum Ausgang, nichts Neues entdeckt, kein Kampf) –
+     oder auf Wunsch: Karte öffnen (M / Select) zeigt ihn für einige Sekunden. */
+  const ZIELLOS = 45;
+  function zielTick(dt, px, py) {
+    let bd = 1e9;
+    for (const d of S.lv.doors) if (d.kind === "exit") bd = Math.min(bd, Math.hypot(d.x * T + 8 - px, (d.y + 0.5) * T - py));
+    if (S.zBest == null || bd < S.zBest - 64) { S.zBest = bd; S.ziellos = 0; }
+    let kampf = !!Z.boss;
+    if (!kampf) for (const e of Z.enemies) if (!e.dead && e.aware && !e.dummy && Math.abs(e.x - px) < 300 && Math.abs(e.y - py) < 200) { kampf = true; break; }
+    if (S.found.size !== S.zFound) { S.zFound = S.found.size; S.ziellos = Math.min(S.ziellos || 0, 10); }
+    if (!kampf) S.ziellos = (S.ziellos || 0) + dt;
+  }
+  function zeigeWeg() {
+    const ping = Z.ui && Z.ui.mapPing ? (performance.now() - Z.ui.mapPing) / 1000 : 99;
+    if (ping < 9) return Math.min(1, ping * 4) * Math.min(1, (9 - ping) / 1.5);
+    return Math.min(0.85, Math.max(0, ((S.ziellos || 0) - ZIELLOS) / 4));
+  }
   function arrow(c, cam, tx, ty, col, a, t) {
     const cx = cam.x + cam.w / 2, cy = cam.y + cam.h / 2, dx = tx - cx, dy = ty - cy;
     if (Math.abs(dx) < cam.w / 2 - 20 && Math.abs(dy) < cam.h / 2 - 20) return;
@@ -408,13 +431,14 @@
   const al0 = Z.drawAfterLight;
   Z.drawAfterLight = function (c, cam, W2, H2, t) {
     if (al0) al0.apply(this, arguments);
-    if (!S || Z.level !== S.lv || S.t < 6 || (Z.settings && Z.settings.wegweiser === false)) return;
+    if (!S || Z.level !== S.lv || (Z.settings && Z.settings.wegweiser === false)) return;
     const P = Z.player; if (!P || P.dead) return;
+    const wa = zeigeWeg(); if (wa <= 0.01) return;
     const px = P.x + P.w / 2, py = P.y + P.h / 2;
     let best = null, bd = 1e9;
     for (const d of S.lv.doors) if (d.kind === "exit") { const dd = Math.hypot(d.x * T + 8 - px, (d.y + 0.5) * T - py); if (dd < bd) { bd = dd; best = d; } }
-    if (best) arrow(c, cam, best.x * T + 8, (best.y + 0.5) * T, "#ffd27a", Math.min(0.85, (S.t - 6) / 4), t);
-    if (hasKey()) for (const o of S.locks) if (!o.open) arrow(c, cam, o.x, (o.f.y0 + 1.5) * T, "#c88aff", 0.8, t);
+    if (best) arrow(c, cam, best.x * T + 8, (best.y + 0.5) * T, "#ffd27a", wa, t);
+    if (hasKey()) for (const o of S.locks) if (!o.open) arrow(c, cam, o.x, (o.f.y0 + 1.5) * T, "#c88aff", wa, t);
   };
 
   Z.erkundung = () => S;
