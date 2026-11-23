@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Friedrichs Waldbuch – ein handgeschriebenes Wald-Lexikon zu Imres Tales: fast 200 heimische Bäume, Sträucher, Kräuter, Pilze und Tiere Bayerns mit Fotos, Jahreskalender, Bestimmungshilfe und Rex' Spurensuche.">
+<meta name="theme-color" content="#2e2416">
+<meta property="og:title" content="Friedrichs Waldbuch">
+<meta property="og:description" content="Was der Wald mich gelehrt hat – Bäume, Beeren, Kräuter, Pilze und Spuren aus Bayern, aufgeschrieben von Friedrich (und Rex).">
+<meta property="og:image" content="https://imrestales.de/vorschau/waldbuch-1.webp">
+<link rel="icon" href="favicon.svg">
+<link rel="stylesheet" href="schriften/schriften.css">
+<title>Friedrichs Waldbuch</title>
+<style>
+/* Moos, Rinde, Pergament – ohne Blau. */
+:root{color-scheme:light;--moos:#4f6b2c;--moos2:#6f8f3a;--moos3:#a9c27a;--rinde:#3b2a1a;--rinde2:#5c4229;--ocker:#c58a2c;--beere:#a83a32;--pilz:#b9824a;--papier:#f4ead2;--papier2:#eadbb6;--tinte:#2f2416;--tinte2:#5d4a33;--blei:#7b6a55;
+  --fh:'Caveat','Comic Sans MS',cursive;--fs:'Spectral',Georgia,serif;--fb:'Alegreya Sans','Trebuchet MS',system-ui,sans-serif;--fd:'IM Fell English SC',Georgia,serif;
+  --sicher-u:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;font-family:var(--fs);color:var(--tinte);line-height:1.55;background:
+  radial-gradient(ellipse at 20% 0%,rgba(120,150,70,.35),transparent 50%),
+  radial-gradient(ellipse at 90% 100%,rgba(70,90,40,.4),transparent 55%),
+  repeating-linear-gradient(90deg,rgba(0,0,0,.05) 0 3px,transparent 3px 11px),
+  linear-gradient(160deg,#3a2c1b,#241a10);background-attachment:fixed}
+a{color:var(--moos);text-decoration-thickness:1px;text-underline-offset:2px}
+button{font:inherit;color:inherit;cursor:pointer}
+img{max-width:100%;display:block}
+
+/* ---------- Leiste ---------- */
+.leiste{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:.5rem;padding:.5rem .8rem;background:linear-gradient(180deg,rgba(36,26,16,.97),rgba(36,26,16,.9));border-bottom:1px solid rgba(197,138,44,.3);backdrop-filter:blur(6px)}
+.leiste a.zurueck{color:#e9d9b4;text-decoration:none;font-family:var(--fb);font-size:.9rem;white-space:nowrap;padding:.35rem .6rem;border-radius:10px;border:1px solid rgba(233,217,180,.2)}
+.leiste .titel{flex:1;font-family:var(--fh);font-size:1.55rem;color:#f2e2bb;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.leiste .titel small{font-family:var(--fb);font-size:.7rem;color:#bfa77c;letter-spacing:.08em;margin-left:.4rem}
+.suche-mini{display:flex;align-items:center;background:rgba(244,234,210,.1);border:1px solid rgba(233,217,180,.25);border-radius:12px;padding:0 .4rem}
+.suche-mini input{width:9rem;background:none;border:0;color:#f2e2bb;font:inherit;font-family:var(--fb);padding:.4rem .2rem;outline:none}
+.suche-mini input::placeholder{color:#a8926b}
+.ton-knopf{border:1px solid rgba(233,217,180,.25);background:none;color:#f2e2bb;border-radius:10px;width:38px;height:36px}
+
+/* ---------- Register ---------- */
+.register{position:sticky;top:55px;z-index:25;display:flex;gap:.3rem;overflow-x:auto;padding:.5rem .8rem .2rem;scrollbar-width:none}
+.register::-webkit-scrollbar{display:none}
+.reiter{flex:none;font-family:var(--fh);font-size:1.15rem;line-height:1;padding:.45rem .8rem .55rem;border-radius:10px 10px 4px 4px;border:0;color:#2f2416;box-shadow:0 3px 8px rgba(0,0,0,.35);transform:translateY(4px);transition:transform .15s;text-decoration:none;white-space:nowrap}
+.reiter:hover,.reiter[aria-current=page]{transform:translateY(0)}
+.reiter[aria-current=page]{box-shadow:0 -2px 0 rgba(255,255,255,.4) inset,0 4px 12px rgba(0,0,0,.45)}
+
+/* ---------- Buchseite ---------- */
+main{max-width:1060px;margin:0 auto;padding:.4rem .7rem calc(2rem + var(--sicher-u))}
+.seite{position:relative;background:
+  radial-gradient(ellipse at 15% 10%,rgba(255,255,255,.55),transparent 45%),
+  radial-gradient(ellipse at 90% 85%,rgba(160,110,50,.18),transparent 50%),
+  repeating-linear-gradient(0deg,transparent 0 31px,rgba(120,90,50,.08) 31px 32px),
+  linear-gradient(175deg,var(--papier),var(--papier2));border-radius:6px 14px 14px 6px;box-shadow:0 18px 45px rgba(0,0,0,.5),inset 0 0 60px rgba(150,110,60,.25),inset 14px 0 18px -14px rgba(80,50,20,.45);padding:1.6rem 1.4rem 2rem 2.2rem;min-height:70vh;animation:blaettern .4s ease-out}
+@keyframes blaettern{from{opacity:0;transform:translateX(18px) rotate(.3deg)}}
+.seite::before{content:"";position:absolute;left:12px;top:18px;bottom:18px;width:2px;background:repeating-linear-gradient(180deg,rgba(168,58,50,.35) 0 6px,transparent 6px 12px)}
+h1,h2,h3{font-weight:400;line-height:1.1}
+.hand{font-family:var(--fh)}
+h1.hand{font-size:clamp(2.6rem,7vw,4.2rem);margin:.1rem 0 .3rem;color:var(--rinde)}
+h2.hand{font-size:clamp(2rem,5vw,2.8rem);margin:.2rem 0 .3rem;color:var(--rinde)}
+h3.hand{font-size:1.7rem;margin:1.3rem 0 .3rem;color:var(--moos)}
+.latein{font-style:italic;color:var(--tinte2)}
+.leise{color:var(--blei);font-size:.9rem}
+.notiz{position:relative;font-family:var(--fh);font-size:1.35rem;line-height:1.25;color:#3d3020;background:linear-gradient(170deg,#fff6c6,#f5e59d);padding:1rem 1.1rem .9rem;box-shadow:0 6px 14px rgba(0,0,0,.18);transform:rotate(-1deg);border-radius:2px;margin:1rem 0}
+.notiz::before{content:"";position:absolute;top:-10px;left:50%;width:90px;height:22px;margin-left:-45px;background:rgba(169,194,122,.65);transform:rotate(2deg);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.notiz .unterschrift{display:block;text-align:right;font-size:1.1rem;color:var(--moos)}
+.warnung{position:relative;border:2px dashed rgba(168,58,50,.55);background:rgba(168,58,50,.06);border-radius:10px;padding:.8rem 1rem;margin:1rem 0;font-family:var(--fb)}
+.warnung b{color:var(--beere)}
+.knopf{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--fb);font-weight:700;font-size:1rem;padding:.6rem 1.1rem;border-radius:12px;border:2px solid var(--rinde2);background:var(--moos);color:#fbf3dc;text-decoration:none;box-shadow:0 3px 0 var(--rinde)}
+.knopf:active{transform:translateY(2px);box-shadow:0 1px 0 var(--rinde)}
+.knopf.hell{background:#fbf3dc;color:var(--rinde)}
+.knopf.klein{font-size:.85rem;padding:.35rem .7rem}
+.reihe{display:flex;flex-wrap:wrap;gap:.6rem;margin:.8rem 0}
+
+/* ---------- Eingeklebte Karten ---------- */
+.gitter{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1.4rem 1rem;margin-top:1rem}
+.klebe{position:relative;display:block;background:#fffdf6;padding:.45rem .45rem .6rem;box-shadow:0 6px 14px rgba(60,40,20,.25);text-decoration:none;color:var(--tinte);transition:transform .2s,box-shadow .2s}
+.klebe:nth-child(3n){transform:rotate(1.6deg)}.klebe:nth-child(3n+1){transform:rotate(-1.4deg)}.klebe:nth-child(3n+2){transform:rotate(.6deg)}
+.klebe:hover,.klebe:focus-visible{transform:rotate(0) scale(1.04);box-shadow:0 12px 24px rgba(60,40,20,.35);z-index:2;outline:none}
+.klebe::before{content:"";position:absolute;top:-9px;left:50%;width:62px;height:18px;margin-left:-31px;background:var(--band,rgba(197,138,44,.55));transform:rotate(-3deg);z-index:2}
+.klebe .bild{aspect-ratio:4/3;background:#e7dcc0 center/cover no-repeat;overflow:hidden}
+.klebe .bild img{width:100%;height:100%;object-fit:cover}
+.klebe .name{font-family:var(--fh);font-size:1.3rem;line-height:1.05;margin-top:.35rem}
+.klebe .lat{font-size:.72rem;font-style:italic;color:var(--blei)}
+.klebe .marken{position:absolute;right:.3rem;top:.3rem;display:flex;gap:.2rem}
+.marke{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:12px;font-size:.78rem;background:rgba(255,253,246,.92);box-shadow:0 1px 3px rgba(0,0,0,.25);padding:0 .3rem;font-family:var(--fb);font-weight:700}
+.marke.ess{color:var(--moos)}.marke.gift{color:var(--beere)}.marke.tod{background:var(--beere);color:#fff}.marke.schutz{color:var(--ocker)}
+.klebe .monate{display:flex;gap:1px;margin-top:.3rem}
+.klebe .monate i{flex:1;height:4px;background:rgba(0,0,0,.08)}
+.klebe .monate i.b{background:var(--ocker)}.klebe .monate i.f{background:var(--beere)}.klebe .monate i.e{background:var(--moos2)}
+.klebe .gefunden{position:absolute;left:-6px;bottom:-8px;font-family:var(--fh);font-size:.95rem;color:var(--moos);background:#fffdf6;border:1.5px solid var(--moos);border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;transform:rotate(-14deg)}
+.chips{display:flex;flex-wrap:wrap;gap:.35rem;margin:.6rem 0}
+.chip{font-family:var(--fb);font-size:.88rem;padding:.3rem .7rem;border-radius:20px;border:1.5px solid var(--rinde2);background:#fffaf0;color:var(--rinde)}
+.chip[aria-pressed=true]{background:var(--moos);color:#fbf3dc;border-color:var(--moos)}
+
+/* ---------- Artseite ---------- */
+.art-kopf{display:flex;flex-wrap:wrap;align-items:flex-end;gap:.4rem 1rem}
+.art-kopf h1{margin:0}
+.art{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:1.6rem;margin-top:.8rem}
+@media (max-width:820px){.art{grid-template-columns:1fr}}
+.galerie .haupt{position:relative;background:#fffdf6;padding:.6rem .6rem 2.2rem;box-shadow:0 8px 20px rgba(60,40,20,.3);transform:rotate(-1deg);cursor:zoom-in}
+.galerie .haupt img{width:100%;aspect-ratio:4/3;object-fit:cover;background:#e7dcc0}
+.galerie .haupt .unter{position:absolute;left:.7rem;right:.7rem;bottom:.35rem;font-family:var(--fh);font-size:1.15rem;color:var(--tinte2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.galerie .haupt::before,.galerie .haupt::after{content:"";position:absolute;width:70px;height:20px;background:rgba(169,194,122,.6);top:-8px}
+.galerie .haupt::before{left:-14px;transform:rotate(-30deg)}.galerie .haupt::after{right:-14px;transform:rotate(28deg)}
+.daumen{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:.6rem;margin-top:1.1rem}
+.daumen button{border:0;padding:.25rem .25rem 1.25rem;background:#fffdf6;box-shadow:0 3px 8px rgba(60,40,20,.25);position:relative}
+.daumen button img{width:100%;aspect-ratio:1;object-fit:cover}
+.daumen button span{position:absolute;left:0;right:0;bottom:.1rem;font-family:var(--fh);font-size:.95rem;color:var(--tinte2)}
+.daumen button[aria-current=true]{outline:3px solid var(--ocker)}
+.keinbild{display:flex;align-items:center;justify-content:center;aspect-ratio:4/3;background:repeating-linear-gradient(45deg,#efe3c6 0 10px,#e9dcbc 10px 20px);font-family:var(--fh);font-size:1.3rem;color:var(--blei);text-align:center;padding:1rem}
+.steck{background:rgba(255,253,246,.7);border:1.5px solid rgba(92,66,41,.35);border-radius:10px;padding:.8rem 1rem;font-family:var(--fb);font-size:.95rem}
+.steck dl{display:grid;grid-template-columns:auto 1fr;gap:.25rem .8rem;margin:0}
+.steck dt{color:var(--blei)}
+.steck dd{margin:0;font-weight:500}
+.ess-schild{display:inline-block;font-family:var(--fb);font-weight:800;font-size:.85rem;padding:.2rem .6rem;border-radius:6px;letter-spacing:.03em}
+.ess-schild.essbar{background:#dfe9c8;color:#3c5420}.ess-schild.bedingt{background:#f3e2b6;color:#7a5410}.ess-schild.kein{background:#e9e1cf;color:#5d4a33}.ess-schild.giftig{background:#f3d0c8;color:#8e2a20}.ess-schild.toedlich{background:#8e2a20;color:#fff}
+.kalender{margin:1rem 0;font-family:var(--fb);font-size:.75rem}
+.kalender .zeile{display:grid;grid-template-columns:5.6rem repeat(12,1fr);gap:2px;align-items:center;margin:2px 0}
+.kalender .zeile span{text-align:center;color:var(--blei)}
+.kalender .zeile b{font-weight:600;color:var(--tinte2)}
+.kalender i{height:14px;border-radius:3px;background:rgba(0,0,0,.06)}
+.kalender i.an.b{background:var(--ocker)}.kalender i.an.f{background:var(--beere)}.kalender i.an.e{background:var(--moos2)}
+.kalender i.heute{outline:2px solid var(--rinde);outline-offset:-1px}
+.merk{margin:.2rem 0}
+.merk dt{font-family:var(--fh);font-size:1.35rem;color:var(--moos);margin-top:.6rem}
+.merk dd{margin:0 0 .2rem}
+.verw{display:flex;flex-wrap:wrap;gap:.8rem;margin:.4rem 0}
+.verw a{display:flex;align-items:center;gap:.5rem;background:#fffdf6;padding:.3rem .6rem .3rem .3rem;box-shadow:0 2px 6px rgba(60,40,20,.25);text-decoration:none;color:var(--tinte);font-family:var(--fh);font-size:1.15rem}
+.verw a img,.verw a .mini{width:48px;height:48px;object-fit:cover;background:#e7dcc0}
+.spur-bild{background:#f7efda;border:1px dashed rgba(92,66,41,.4);border-radius:10px;padding:.6rem;margin:.6rem 0}
+.spur-bild svg{width:100%;height:auto;max-height:180px}
+.nachweis{font-family:var(--fb);font-size:.74rem;color:var(--blei);margin-top:1.4rem;border-top:1px dashed rgba(92,66,41,.3);padding-top:.5rem}
+.nachweis a{color:var(--blei)}
+.weiterblaettern{display:flex;justify-content:space-between;gap:1rem;margin-top:1.6rem;font-family:var(--fh);font-size:1.3rem}
+.weiterblaettern a{text-decoration:none;color:var(--rinde2)}
+
+/* ---------- Lightbox ---------- */
+.lupe{position:fixed;inset:0;z-index:60;background:rgba(20,14,8,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1rem;animation:auf .2s}
+@keyframes auf{from{opacity:0}}
+.lupe img{max-height:76vh;max-width:96vw;object-fit:contain;box-shadow:0 10px 40px rgba(0,0,0,.6);border:8px solid #fffdf6}
+.lupe .text{max-width:720px;margin-top:.7rem;color:#efe2c2;font-family:var(--fb);font-size:.9rem;text-align:center}
+.lupe .text b{font-family:var(--fh);font-size:1.4rem;font-weight:400;display:block;color:#fff1cd}
+.lupe .text a{color:#d9c08c}
+.lupe button{position:absolute;border:0;background:rgba(255,253,246,.12);color:#fff;width:46px;height:46px;border-radius:50%;font-size:1.4rem}
+.lupe .zu{top:.8rem;right:.8rem}.lupe .vor{right:.8rem;top:50%}.lupe .zur{left:.8rem;top:50%}
+
+/* ---------- Bestimmen ---------- */
+.bestimm textarea{width:100%;min-height:5.5rem;font:inherit;font-family:var(--fh);font-size:1.4rem;line-height:1.3;padding:.7rem .9rem;border-radius:10px;border:2px solid rgba(92,66,41,.4);background:repeating-linear-gradient(0deg,#fffdf4 0 31px,rgba(120,90,50,.12) 31px 32px);color:var(--tinte);resize:vertical}
+.bestimm fieldset{border:1.5px dashed rgba(92,66,41,.35);border-radius:10px;padding:.4rem .8rem .6rem;margin:.6rem 0}
+.bestimm legend{font-family:var(--fh);font-size:1.3rem;color:var(--moos);padding:0 .3rem}
+.treffer{list-style:none;padding:0;margin:1rem 0}
+.treffer li{display:grid;grid-template-columns:72px 1fr auto;gap:.8rem;align-items:center;padding:.55rem;border-bottom:1px dashed rgba(92,66,41,.3)}
+.treffer li img,.treffer li .mini{width:72px;height:56px;object-fit:cover;background:#e7dcc0}
+.treffer li a{font-family:var(--fh);font-size:1.4rem;text-decoration:none;color:var(--rinde)}
+.treffer .warum{font-family:var(--fb);font-size:.8rem;color:var(--blei)}
+.treffer .warum mark{background:rgba(169,194,122,.45);padding:0 .15rem;border-radius:3px;color:var(--tinte)}
+.quote{font-family:var(--fb);font-weight:800;color:var(--moos);text-align:right;min-width:3.4rem}
+.quote small{display:block;font-weight:400;color:var(--blei);font-size:.7rem}
+.balkchen{height:6px;border-radius:3px;background:rgba(0,0,0,.08);margin-top:.2rem}
+.balkchen i{display:block;height:100%;border-radius:3px;background:var(--moos2)}
+
+/* ---------- Lernen & Spiel ---------- */
+.karte-lern{max-width:560px;margin:1rem auto;background:#fffdf6;box-shadow:0 10px 26px rgba(60,40,20,.3);padding:1rem;transform:rotate(-.5deg)}
+.karte-lern .frage{font-family:var(--fh);font-size:1.7rem;line-height:1.15;text-align:center;margin:.3rem 0 .8rem}
+.karte-lern .fbild{aspect-ratio:4/3;background:#e7dcc0}
+.karte-lern .fbild img{width:100%;height:100%;object-fit:cover}
+.antworten{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-top:.8rem}
+@media (max-width:480px){.antworten{grid-template-columns:1fr}}
+.antworten button{font-family:var(--fh);font-size:1.3rem;line-height:1.1;padding:.6rem;border:2px solid rgba(92,66,41,.4);border-radius:10px;background:#fbf4e2;min-height:3.2rem}
+.antworten button.bildwahl{padding:.25rem;background:#fffdf6}
+.antworten button.bildwahl img{width:100%;aspect-ratio:4/3;object-fit:cover}
+.antworten button.richtig{background:#dfe9c8;border-color:var(--moos)}
+.antworten button.falsch{background:#f3d0c8;border-color:var(--beere);opacity:.75}
+.antworten button.weg{visibility:hidden}
+.erklaerung{font-family:var(--fs);margin-top:.8rem;font-size:.98rem}
+.kisten{display:flex;gap:.5rem;justify-content:center;margin:.6rem 0}
+.kiste{width:62px;text-align:center;font-family:var(--fb);font-size:.75rem;color:var(--blei)}
+.kiste b{display:block;height:46px;border:2px solid var(--rinde2);border-top-width:6px;border-radius:4px;background:#e9dcbc;font-family:var(--fh);font-size:1.4rem;color:var(--rinde);line-height:40px}
+.modi{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1rem;margin:1rem 0}
+.modus{display:block;background:#fffdf6;padding:.9rem 1rem;box-shadow:0 6px 14px rgba(60,40,20,.22);text-decoration:none;color:var(--tinte);border:0;text-align:left;font-family:var(--fs);font-size:.95rem}
+.modus b{display:block;font-family:var(--fh);font-size:1.6rem;font-weight:400;color:var(--rinde)}
+.modus:nth-child(odd){transform:rotate(-.8deg)}.modus:nth-child(even){transform:rotate(.7deg)}
+.jetzt-monate{display:flex;flex-wrap:wrap;gap:.3rem}
+.toast{position:fixed;left:50%;bottom:calc(1.2rem + var(--sicher-u));transform:translateX(-50%);z-index:70;background:#fffdf6;color:var(--rinde);font-family:var(--fh);font-size:1.4rem;padding:.6rem 1.1rem;box-shadow:0 8px 24px rgba(0,0,0,.4);border-left:6px solid var(--moos);animation:toast 3s forwards}
+@keyframes toast{0%{opacity:0;transform:translate(-50%,10px)}10%,85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
+.deckblatt{display:grid;grid-template-columns:1.2fr 1fr;gap:1.4rem;align-items:center}
+@media (max-width:760px){.deckblatt{grid-template-columns:1fr}}
+.deckblatt .bilder{position:relative;min-height:300px}
+.deckblatt .bilder img{position:absolute;filter:drop-shadow(0 10px 16px rgba(40,25,10,.4))}
+.zahlen{display:flex;flex-wrap:wrap;gap:1rem;font-family:var(--fh);font-size:1.3rem;color:var(--tinte2)}
+.zahlen b{font-size:2rem;color:var(--moos);display:block;line-height:1}
+.pfote{position:absolute;opacity:.1;pointer-events:none}
+.liste-nachweis{font-family:var(--fb);font-size:.8rem;columns:2 300px;column-gap:1.5rem}
+.liste-nachweis p{break-inside:avoid;margin:.2rem 0 .5rem}
+footer{max-width:1060px;margin:0 auto;padding:0 1rem 2rem;color:#bfa77c;font-family:var(--fb);font-size:.8rem;text-align:center}
+footer a{color:#d9c08c}
+@media (max-width:600px){.seite{padding:1.2rem .9rem 1.6rem 1.5rem}.suche-mini input{width:6rem}.leiste .titel small{display:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="leiste">
+  <a class="zurueck" href="index.html#taverne" aria-label="Zurück zur Taverne">← Taverne</a>
+  <div class="titel">Friedrichs Waldbuch<small>für Bayern &amp; drumherum</small></div>
+  <form class="suche-mini" id="suche-mini" role="search"><input type="search" id="suchfeld" placeholder="Suchen …" aria-label="Im Waldbuch suchen"></form>
+  <button class="ton-knopf" id="ton-knopf" aria-label="Waldgeräusche an/aus" title="Waldgeräusche">🔇</button>
+</div>
+<nav class="register" id="register" aria-label="Register"></nav>
+<main id="main"><div class="seite" id="seite"><p class="hand" style="font-size:1.6rem">Friedrich blättert …</p></div></main>
+<footer>Ein Teil von <a href="index.html">Imres Tales</a>. Fotos von Wikimedia Commons unter freien Lizenzen – Urheber stehen bei jedem Bild und im <a href="#/nachweise">Bildnachweis</a>. Texte: nach bestem Wissen zum Lernen. <b>Kein Pilz und keine Wildpflanze wird allein nach diesem Buch gegessen.</b></footer>
+<script src="waldbuch-arten-1.js?v=1"></script>
+<script src="waldbuch-arten-2.js?v=1"></script>
+<script src="waldbuch-arten-3.js?v=1"></script>
+<script src="waldbuch-arten-4.js?v=1"></script>
+<script src="waldbuch-arten-5.js?v=1"></script>
+<script src="waldbuch.js?v=1"></script>
+<script src="waldbuch-spiel.js?v=1"></script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Tales never End – das unendliche Spielleiter-Spiel zu Imres Tales. Du sitzt hinter dem Schirm. Halte Macht, Realismus, Spaß und Tempo im Gleichgewicht, sonst kippt die Runde.">
+<meta name="theme-color" content="#140d09">
+<meta property="og:title" content="Tales never End – hinter dem Schirm">
+<meta property="og:description" content="Ein endloses Entscheidungsspiel aus Sicht des Spielleiters: Hunderte Karten, sterbende Helden, quengelnde Spieler und eine Chronik, die nie aufhört.">
+<meta property="og:image" content="https://imrestales.de/vorschau/tne-1.webp">
+<link rel="icon" href="favicon.svg">
+<link rel="stylesheet" href="schriften/schriften.css">
+<title>Tales never End</title>
+<style>
+/* Kerzenlicht, Holz und Pergament – bewusst ohne Blau. */
+:root{color-scheme:dark;--holz:#1d130d;--holz2:#2a1b12;--holz3:#3b271a;--linie:#5a3d27;--perg:#efe0c0;--perg2:#e2cc9f;--tinte:#2b1d12;--tinte2:#5b4430;
+  --gold:#e8b14e;--glut:#ff7a3a;--blut:#b8372f;--moos:#7fa64a;--violett:#a978d8;--text:#f3e6cc;--mute:#b39d80;
+  --fd:'IM Fell English SC','Palatino Linotype',Palatino,Georgia,serif;--fs:'Spectral',Georgia,serif;--fb:'Alegreya Sans','Trebuchet MS',system-ui,sans-serif;--fh:'Caveat','Comic Sans MS',cursive;
+  --sicher-u:env(safe-area-inset-bottom,0px);--sicher-o:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%;background:#0c0806;color:var(--text);overflow:hidden;overscroll-behavior:none}
+body{font-family:var(--fb);font-size:16px;line-height:1.4;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:var(--gold)}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;background:
+  radial-gradient(ellipse 70% 45% at 50% 38%,rgba(255,170,80,.16),transparent 70%),
+  repeating-linear-gradient(92deg,rgba(0,0,0,.18) 0 2px,transparent 2px 9px),
+  linear-gradient(180deg,#24170f 0%,#1a110b 55%,#120b07 100%);padding-top:var(--sicher-o)}
+#app::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 120% 90% at 50% 45%,transparent 55%,rgba(0,0,0,.65) 100%)}
+
+/* ---------- Kopf ---------- */
+.kopf{display:flex;align-items:center;gap:.5rem;padding:.45rem .7rem .2rem;z-index:3}
+.kopf a,.kopf button{display:inline-flex;align-items:center;justify-content:center;min-width:40px;height:40px;border-radius:12px;background:rgba(255,220,170,.06);border:1px solid rgba(232,177,78,.18);text-decoration:none;color:var(--text);font-size:1.05rem}
+.kopf a:hover,.kopf button:hover{background:rgba(255,220,170,.12)}
+.kopf .titel{flex:1;text-align:center;font-family:var(--fd);font-size:1.15rem;letter-spacing:.04em;color:#ffe2b0;text-shadow:0 0 14px rgba(255,150,60,.35);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kopf .titel small{display:block;font-family:var(--fb);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);text-shadow:none}
+
+/* ---------- Balken ---------- */
+.balken{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;padding:.25rem .8rem .35rem;max-width:560px;width:100%;margin:0 auto;z-index:3}
+.bk{position:relative;display:flex;flex-direction:column;align-items:center;gap:.15rem}
+.bk-punkt{height:10px;display:flex;align-items:center;justify-content:center}
+.bk-punkt i{display:block;width:0;height:0;border-radius:50%;background:#ffe7b8;box-shadow:0 0 8px rgba(255,200,120,.8);transition:all .18s}
+.bk-punkt i.klein{width:6px;height:6px}.bk-punkt i.mittel{width:9px;height:9px}.bk-punkt i.gross{width:12px;height:12px}
+.bk-punkt b{font-size:.7rem;line-height:1;color:#ffe7b8;margin-left:2px}
+.bk-icon{position:relative;width:58px;height:58px}
+.bk-icon svg{position:absolute;inset:0;width:100%;height:100%}
+.bk-name{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.bk-skala{position:relative;width:100%;max-width:110px;height:7px;border-radius:5px;background:rgba(0,0,0,.45);border:1px solid rgba(255,220,170,.12);overflow:hidden}
+.bk-skala .zone{position:absolute;top:0;bottom:0;left:30%;width:45%;background:rgba(127,166,74,.28)}
+.bk-skala .wert{position:absolute;top:0;bottom:0;left:0;background:linear-gradient(90deg,#c4652c,#e8b14e);transition:width .6s cubic-bezier(.3,1.3,.5,1)}
+.bk-skala .wert.warn{background:linear-gradient(90deg,#9c2e25,#e0573a)}
+.bk-pole{display:flex;justify-content:space-between;width:100%;max-width:110px;font-size:.58rem;color:#8f7a60;line-height:1}
+.bk.warn .bk-icon{animation:warnen 1s ease-in-out infinite}
+@keyframes warnen{50%{filter:drop-shadow(0 0 8px rgba(255,80,40,.9));transform:scale(1.06)}}
+.bk.stoss .bk-icon{animation:stoss .5s}
+@keyframes stoss{30%{transform:scale(1.18)}}
+
+/* ---------- Bühne & Karte ---------- */
+.buehne{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;padding:.2rem .8rem;z-index:2}
+#viz{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6}
+.kopfzeile{min-height:1.4rem;font-size:.8rem;color:var(--mute);text-align:center;max-width:520px;padding:0 .5rem;font-style:italic}
+.stapel{position:relative;width:min(88vw,380px);aspect-ratio:3/4;max-height:calc(100% - 4.8rem);margin:.3rem auto}
+@media (min-height:760px){.stapel{width:min(88vw,400px)}}
+.karte-hinten{position:absolute;inset:0;border-radius:20px;background:linear-gradient(160deg,#5b3a22,#3a2414);border:2px solid #6e4a2c;transform:translate(6px,8px) rotate(2deg);box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.karte-hinten.zwei{transform:translate(-5px,10px) rotate(-2.5deg);background:linear-gradient(160deg,#4d311d,#2f1d10)}
+.karte{position:absolute;inset:0;border-radius:20px;background:
+  radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.35),transparent 60%),
+  radial-gradient(ellipse at 80% 90%,rgba(120,70,20,.22),transparent 55%),
+  linear-gradient(170deg,var(--perg),var(--perg2));color:var(--tinte);box-shadow:0 18px 40px rgba(0,0,0,.6),inset 0 0 0 2px rgba(120,80,40,.35),inset 0 0 40px rgba(140,90,40,.25);
+  display:flex;flex-direction:column;align-items:center;padding:1rem 1.1rem .9rem;touch-action:none;cursor:grab;will-change:transform;transition:transform .35s cubic-bezier(.2,1.2,.4,1),opacity .3s}
+.karte.zieht{transition:none;cursor:grabbing}
+.karte.weg-l{transform:translate(-140%,40px) rotate(-28deg)!important;opacity:0}
+.karte.weg-r{transform:translate(140%,40px) rotate(28deg)!important;opacity:0}
+.karte.neu{animation:kommt .45s cubic-bezier(.2,1.3,.4,1)}
+@keyframes kommt{from{transform:translateY(-30px) scale(.92) rotate(-3deg);opacity:0}}
+.karte .wahl-schild{position:absolute;top:.8rem;left:.8rem;right:.8rem;min-height:2.6rem;display:flex;align-items:center;padding:.4rem .7rem;border-radius:12px;background:rgba(43,29,18,.92);color:#ffe9c0;font-weight:700;font-size:1rem;line-height:1.15;opacity:0;transition:opacity .12s;pointer-events:none;z-index:2}
+.karte .wahl-schild.r{justify-content:flex-end;text-align:right}
+.karte .portrait{width:min(34%,128px);aspect-ratio:1;margin-top:.2rem;flex:none}
+.karte .portrait svg{width:100%;height:100%;filter:drop-shadow(0 4px 6px rgba(60,30,10,.35))}
+.karte .sprecher{margin-top:.35rem;font-family:var(--fd);font-size:1.12rem;color:#4a2d16;text-align:center;line-height:1.1}
+.karte .rolle{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:#8a6a48;text-align:center;margin-top:.1rem}
+.karte .text{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--fs);font-size:clamp(.98rem,2.3vh,1.12rem);line-height:1.38;padding:.5rem .2rem;overflow:auto;min-height:0}
+.karte .text em{color:#7b3b1d;font-style:normal;font-weight:600}
+.karte .fuss{display:flex;justify-content:space-between;width:100%;font-size:.72rem;color:#8a6a48}
+.karte .wurf{position:absolute;right:.7rem;bottom:2.2rem;font-size:.72rem;font-weight:700;color:#7b3b1d;background:rgba(123,59,29,.1);border:1px dashed rgba(123,59,29,.4);border-radius:8px;padding:.15rem .4rem}
+.karte.folge{cursor:pointer}
+.karte.folge .text{font-size:clamp(1rem,2.4vh,1.15rem)}
+.karte .folge-kopf{font-family:var(--fd);font-size:1rem;color:#7b3b1d;margin-top:.4rem;text-align:center}
+.karte .weiter{font-size:.78rem;color:#8a6a48;animation:blinzeln 1.6s ease-in-out infinite}
+@keyframes blinzeln{50%{opacity:.35}}
+.karte .ereignisse{display:flex;flex-wrap:wrap;gap:.3rem;justify-content:center;margin:.2rem 0}
+.karte .ereignisse span{font-size:.75rem;padding:.12rem .45rem;border-radius:20px;background:rgba(123,59,29,.12);color:#5b3a1c;border:1px solid rgba(123,59,29,.25)}
+.karte .ereignisse span.tod{background:rgba(184,55,47,.16);color:#8e2a20;border-color:rgba(184,55,47,.4)}
+.karte .ereignisse span.gut{background:rgba(127,166,74,.18);color:#3f5d1c;border-color:rgba(127,166,74,.45)}
+
+.wahlen{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;width:min(92vw,420px);margin:.1rem auto 0}
+.wahlen button{min-height:3rem;padding:.45rem .6rem;border-radius:14px;border:1px solid rgba(232,177,78,.35);background:linear-gradient(180deg,rgba(80,52,30,.92),rgba(52,33,19,.94));color:#ffe9c0;font-weight:700;font-size:.92rem;line-height:1.15;box-shadow:0 4px 12px rgba(0,0,0,.4);display:flex;align-items:center;gap:.4rem}
+.wahlen button:hover,.wahlen button:focus-visible{border-color:var(--gold);outline:none;background:linear-gradient(180deg,rgba(100,66,36,.95),rgba(62,40,22,.95))}
+.wahlen button .pf{opacity:.6;font-size:1.1rem}
+.wahlen button.r{justify-content:flex-end;text-align:right}
+.wahlen.aus button{visibility:hidden}
+
+/* ---------- Tisch ---------- */
+.tisch{display:flex;gap:.4rem;justify-content:center;padding:.35rem .5rem .2rem;overflow-x:auto;scrollbar-width:none;z-index:3;max-width:100%}
+.tisch::-webkit-scrollbar{display:none}
+.platz{flex:none;width:86px;display:flex;flex-direction:column;align-items:center;text-align:center;padding:.3rem .2rem;border-radius:12px;background:rgba(0,0,0,.22);border:1px solid rgba(232,177,78,.12);position:relative;transition:transform .3s,background .3s}
+.platz.spricht{background:rgba(232,177,78,.14);border-color:rgba(232,177,78,.5);transform:translateY(-3px)}
+.platz.weg{opacity:.35}
+.platz svg{width:40px;height:40px}
+.platz .pn{font-size:.78rem;font-weight:700;line-height:1.05;margin-top:.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.platz .ph{font-size:.62rem;color:var(--mute);line-height:1.1;max-height:2.2em;overflow:hidden}
+.platz .laune{width:80%;height:4px;border-radius:3px;background:rgba(0,0,0,.5);margin-top:.2rem;overflow:hidden}
+.platz .laune i{display:block;height:100%;transition:width .5s,background .5s}
+.platz .blase{position:absolute;top:-1.6rem;left:50%;transform:translateX(-50%);background:var(--perg);color:var(--tinte);font-size:.7rem;font-weight:700;padding:.1rem .45rem;border-radius:10px;white-space:nowrap;animation:blase 2.4s forwards;pointer-events:none;z-index:4}
+@keyframes blase{0%{opacity:0;transform:translate(-50%,6px)}10%,75%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-8px)}}
+
+/* ---------- Fuß ---------- */
+.fussleiste{display:flex;align-items:center;gap:.5rem;padding:.25rem .7rem calc(.4rem + var(--sicher-u));z-index:3}
+.zaehler{flex:1;font-size:.74rem;color:var(--mute);line-height:1.2}
+.zaehler b{color:var(--text);font-weight:700}
+.werkzeuge{display:flex;gap:.35rem}
+.wz{position:relative;width:42px;height:42px;border-radius:12px;border:1px solid rgba(232,177,78,.3);background:rgba(60,40,24,.8);font-size:1.15rem;display:flex;align-items:center;justify-content:center}
+.wz:disabled{opacity:.3;cursor:default}
+.wz i{position:absolute;right:-4px;top:-4px;min-width:17px;height:17px;border-radius:9px;background:var(--glut);color:#2b1406;font-size:.66rem;font-weight:800;font-style:normal;display:flex;align-items:center;justify-content:center;padding:0 3px}
+
+/* ---------- Würfel ---------- */
+.wuerfel{position:absolute;left:50%;top:44%;width:120px;height:120px;margin:-60px 0 0 -60px;z-index:8;pointer-events:none}
+.wuerfel svg{width:100%;height:100%;filter:drop-shadow(0 8px 14px rgba(0,0,0,.6))}
+.wuerfel.rollt svg{animation:rollen .9s cubic-bezier(.3,.8,.4,1)}
+@keyframes rollen{0%{transform:translate(-160px,120px) rotate(-540deg) scale(.4)}70%{transform:translate(8px,-6px) rotate(20deg) scale(1.08)}100%{transform:none}}
+.wuerfel .erg{position:absolute;left:0;right:0;top:100%;text-align:center;font-family:var(--fd);font-size:1.3rem;color:#ffe2b0;text-shadow:0 2px 6px #000}
+.wuerfel.krit svg{filter:drop-shadow(0 0 18px rgba(255,210,90,1))}
+.wuerfel.patzer svg{filter:drop-shadow(0 0 18px rgba(230,60,40,1))}
+
+/* ---------- Fenster / Menüs ---------- */
+.schicht{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(10,6,3,.72);backdrop-filter:blur(3px);padding:1rem;animation:auf .25s}
+@keyframes auf{from{opacity:0}}
+.fenster{position:relative;width:min(560px,100%);max-height:calc(100% - 1rem);overflow:auto;border-radius:20px;background:linear-gradient(170deg,#3a2616,#24170d);border:1px solid rgba(232,177,78,.35);box-shadow:0 20px 60px rgba(0,0,0,.7);padding:1.2rem 1.2rem 1rem;user-select:text;-webkit-user-select:text}
+.fenster h2{margin:.1rem 0 .6rem;font-family:var(--fd);font-weight:400;font-size:1.6rem;color:#ffe2b0;line-height:1.1}
+.fenster h3{margin:1rem 0 .4rem;font-family:var(--fd);font-weight:400;font-size:1.15rem;color:var(--gold)}
+.fenster p{margin:.4rem 0;color:#e9dcc3}
+.fenster .zu{position:absolute;right:.7rem;top:.7rem;width:38px;height:38px;border-radius:10px;border:1px solid rgba(232,177,78,.3);background:rgba(0,0,0,.25);font-size:1.1rem}
+.knopf{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-height:2.8rem;padding:.5rem 1.1rem;border-radius:14px;border:1px solid rgba(232,177,78,.5);background:linear-gradient(180deg,#c4652c,#8f3f1a);color:#fff2dc;font-weight:800;font-size:1rem;letter-spacing:.02em;box-shadow:0 4px 14px rgba(0,0,0,.45);text-decoration:none}
+.knopf.zweit{background:rgba(255,220,170,.06);border-color:rgba(232,177,78,.3);color:var(--text);font-weight:700}
+.knopf:disabled{opacity:.4}
+.reihe{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.8rem}
+.liste{list-style:none;margin:.3rem 0;padding:0}
+.liste li{padding:.45rem .1rem;border-bottom:1px solid rgba(232,177,78,.12);font-size:.92rem}
+.liste li small{color:var(--mute)}
+.gitter{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.5rem}
+.kachel{padding:.6rem;border-radius:12px;background:rgba(0,0,0,.25);border:1px solid rgba(232,177,78,.15);font-size:.85rem}
+.kachel b{display:block;font-size:.95rem;color:#ffe2b0}
+.kachel.gesperrt{opacity:.45;filter:grayscale(.7)}
+.kachel .ic{font-size:1.4rem}
+.fort{height:8px;border-radius:5px;background:rgba(0,0,0,.4);overflow:hidden;margin:.3rem 0}
+.fort i{display:block;height:100%;background:linear-gradient(90deg,#c4652c,#e8b14e)}
+.schalter{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.55rem 0;border-bottom:1px solid rgba(232,177,78,.12)}
+.schalter input[type=range]{width:45%;accent-color:#e8b14e}
+.schalter input[type=checkbox]{width:22px;height:22px;accent-color:#e8b14e}
+.tabs{display:flex;gap:.3rem;flex-wrap:wrap;margin:.2rem 0 .6rem}
+.tabs button{padding:.35rem .7rem;border-radius:20px;border:1px solid rgba(232,177,78,.25);background:rgba(0,0,0,.2);font-size:.85rem}
+.tabs button[aria-selected=true]{background:rgba(232,177,78,.2);border-color:var(--gold);color:#ffe2b0}
+.hausregel{display:flex;gap:.6rem;align-items:flex-start;padding:.55rem;border-radius:12px;background:rgba(0,0,0,.22);border:1px solid rgba(232,177,78,.14);margin:.35rem 0;cursor:pointer}
+.hausregel input{margin-top:.2rem;width:20px;height:20px;accent-color:#e8b14e;flex:none}
+.hausregel.gesperrt{opacity:.45;cursor:default}
+.hausregel b{color:#ffe2b0}
+.hausregel small{display:block;color:var(--mute)}
+
+/* ---------- Titelbild ---------- */
+.titelbild{position:fixed;inset:0;z-index:15;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1.5rem;background:
+  radial-gradient(ellipse 60% 40% at 50% 42%,rgba(255,160,60,.22),transparent 70%),linear-gradient(180deg,#1c120b,#0d0805)}
+.titelbild .schirm{width:min(70vw,300px);margin-bottom:.4rem}
+.titelbild h1{margin:0;font-family:var(--fd);font-weight:400;font-size:clamp(2.4rem,10vw,4.4rem);line-height:.95;color:#ffe6b8;text-shadow:0 0 30px rgba(255,140,50,.55),0 4px 0 rgba(0,0,0,.5);animation:glut 4s ease-in-out infinite alternate}
+@keyframes glut{to{text-shadow:0 0 50px rgba(255,150,60,.8),0 4px 0 rgba(0,0,0,.5)}}
+.titelbild .unter{margin:.6rem 0 1.2rem;font-family:var(--fs);font-style:italic;color:#d8c3a0;max-width:30rem}
+.titelbild .knoepfe{display:flex;flex-direction:column;gap:.55rem;width:min(320px,100%)}
+.titelbild .knoepfe .knopf{width:100%}
+.titelbild .stand{margin-top:1rem;font-size:.8rem;color:var(--mute)}
+.titelbild .zurueck{position:absolute;left:.8rem;top:calc(.8rem + var(--sicher-o));font-size:.9rem;text-decoration:none;color:var(--mute)}
+.kerze{position:absolute;width:12px;height:30px;border-radius:50% 50% 45% 45%;background:radial-gradient(ellipse at 50% 70%,#fff6c8,#ffb648 45%,rgba(255,110,30,.0) 75%);filter:blur(.5px);animation:flackern 2.2s ease-in-out infinite alternate}
+@keyframes flackern{0%{transform:scale(1,1) translateY(0)}30%{transform:scale(.92,1.08) translateY(-1px)}60%{transform:scale(1.05,.95)}100%{transform:scale(.96,1.05) translateY(-2px)}}
+
+/* ---------- Ende ---------- */
+.ende-bild{font-size:3rem;text-align:center;margin:.2rem 0}
+.ende-text{font-family:var(--fs);font-size:1.08rem;line-height:1.45;color:#f0e2c6}
+.toast{position:fixed;left:50%;top:calc(4.6rem + var(--sicher-o));transform:translateX(-50%);z-index:30;background:linear-gradient(180deg,#5b3a1f,#3a2412);border:1px solid var(--gold);color:#ffe9c0;border-radius:14px;padding:.55rem .9rem;font-size:.88rem;box-shadow:0 8px 26px rgba(0,0,0,.6);animation:toast 3.6s forwards;max-width:92vw;text-align:center;pointer-events:none}
+.toast b{color:var(--gold)}
+@keyframes toast{0%{opacity:0;transform:translate(-50%,-12px)}8%,85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-10px)}}
+.leise{color:var(--mute);font-size:.82rem}
+@media (max-height:640px){.bk-icon{width:44px;height:44px}.bk-name,.bk-pole{display:none}.platz{width:74px}.platz svg{width:32px;height:32px}.karte .portrait{width:26%}.kopf{padding-top:.2rem}}
+@media (min-width:900px){.buehne{padding-top:.6rem}.tisch{gap:.6rem}.platz{width:104px}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+body.ruhig *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+</style>
+</head>
+<body>
+<div id="app" aria-live="polite">
+  <div class="kopf">
+    <a href="index.html#taverne" title="Zurück zur Taverne" aria-label="Zurück zur Taverne">←</a>
+    <div class="titel" id="kopftitel">Tales never End<small id="kopfunter">hinter dem Schirm</small></div>
+    <button id="knopf-log" title="Was bisher geschah" aria-label="Was bisher geschah">📜</button>
+    <button id="knopf-menue" title="Menü" aria-label="Menü">☰</button>
+  </div>
+  <div class="balken" id="balken"></div>
+  <div class="buehne" id="buehne">
+    <canvas id="viz"></canvas>
+    <div class="kopfzeile" id="kopfzeile"></div>
+    <div class="stapel" id="stapel">
+      <div class="karte-hinten zwei"></div><div class="karte-hinten"></div>
+    </div>
+    <div class="wahlen" id="wahlen">
+      <button id="wahl-l" type="button"><span class="pf">◀</span><span></span></button>
+      <button id="wahl-r" type="button" class="r"><span></span><span class="pf">▶</span></button>
+    </div>
+  </div>
+  <div class="tisch" id="tisch" aria-label="Spieler am Tisch"></div>
+  <div class="fussleiste">
+    <div class="zaehler" id="zaehler"></div>
+    <div class="werkzeuge" id="werkzeuge"></div>
+  </div>
+</div>
+<div id="schichten"></div>
+<script src="tne-klang.js?v=1"></script>
+<script src="tne-karten-1.js?v=1"></script>
+<script src="tne-karten-2.js?v=1"></script>
+<script src="tne-karten-3.js?v=1"></script>
+<script src="tne-karten-4.js?v=1"></script>
+<script src="tne-karten-5.js?v=1"></script>
+<script src="tne.js?v=1"></script>
+</body>
+</html>
