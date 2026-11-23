@@ -77,6 +77,7 @@
   }
   function frageFuer(a, nr) {
     const modi = ["name", "name", "bild", "merkmal", "merkmal", "monat"];
+    if (window.WB_MEHR && WB_MEHR.sinnHinweise(a).length) modi.push("sinne");
     if ((a.v || "").split(",").some(v => W.ART[v.trim()] && W.bilderVon(v.trim()).length)) modi.push("verwechslung", "verwechslung");
     if (a.kap === "tier" && a.spur) return spurFrage(a);
     return W.frageBauen(modi[Math.floor(Math.random() * modi.length)], a);
@@ -90,8 +91,9 @@
     box.innerHTML = '<h2 class="hand">Rex\' Spürnase</h2><div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap"><img src="rex-frei.webp" alt="Rex" style="height:110px;filter:drop-shadow(0 6px 8px rgba(40,25,10,.35))"><div style="flex:1;min-width:220px"><p style="margin:.2rem 0">Rex hat eine Fährte in der Nase. Folge ihm von Station zu Station – an jeder Station zeigt dir Friedrich etwas, das ihr gefunden habt. Wer richtig liegt, darf weiter. Am Ende wartet das Tier, dem ihr die ganze Zeit gefolgt seid.</p>' +
       '<p class="hand" style="font-size:1.4rem;margin:.3rem 0">Spürnasen-Rang: <b style="color:var(--moos)">' + R.name + "</b> · " + (S.punkte || 0) + " Punkte" + (R.naechst ? ' <span class="leise">(nächster Rang „' + R.naechst[1] + "“ ab " + R.naechst[0] + ")</span>" : "") + '</p><p class="leise">' + gefunden + " von " + W.ARTEN.length + " Arten selbst gefunden · " + (S.expeditionen || 0) + " Spurensuchen</p></div></div>" +
       '<div class="chips" role="group" aria-label="Jahreszeit"><button class="chip" data-s="1" aria-pressed="' + (S.saison !== false) + '">📅 nur was jetzt im ' + W.MONATE[W.heuteMonat - 1] + ' passt</button><button class="chip" data-s="0" aria-pressed="' + (S.saison === false) + '">🍂 ganzes Jahr</button></div>' +
-      '<h3 class="hand">Wohin geht\'s?</h3><div class="modi">' + GEBIETE.map(g => { const l = landschaft(g, -1, 6); return '<button class="modus" data-g="' + g.k + '" style="padding:0;overflow:hidden"><div style="height:90px">' + l.svg + '</div><div style="padding:.6rem .9rem"><b>' + g.name + "</b>" + esc(g.text) + "</div></button>"; }).join("") + "</div>" +
-      '<h3 class="hand">Mein Fundbuch</h3><div class="gitter" id="fundbuch"></div>';
+      '<h3 class="hand">Wohin geht\'s?</h3><div class="modi">' + GEBIETE.map(g => { const l = landschaft(g, -1, 6); return '<button class="modus" data-g="' + g.k + '" style="padding:0;overflow:hidden"><div style="height:90px">' + l.svg + '</div><div style="padding:.6rem .9rem"><b>' + g.name + "</b>" + esc(g.text) + (window.WB_MEHR ? WB_MEHR.gebietInfo(g) : "") + "</div></button>"; }).join("") + "</div>" +
+      (window.WB_MEHR ? WB_MEHR.faehrtenkarten() : "") +
+      '<h3 class="hand">Von Rex erschnüffelt</h3><p class="leise">Was du unterwegs richtig erkannt hast. Was du draußen wirklich findest, gehört ins <a href="#/fundbuch">Fundbuch</a>.</p><div class="gitter" id="fundbuch"></div>';
     const fb = box.querySelector("#fundbuch");
     const liste = W.ARTEN.filter(a => S.gefunden[a.id]);
     fb.innerHTML = liste.length ? liste.slice(-24).reverse().map(a => '<a class="klebe" href="#/art/' + a.id + '"><div class="bild"><img src="' + (W.hauptbild(a.id) || "") + '" alt="" loading="lazy"></div><div class="name">' + esc(a.de) + '</div><span class="gefunden">✓</span></a>').join("") : '<p class="leise">Noch leer. Rex scharrt schon mit den Pfoten.</p>';
@@ -112,7 +114,8 @@
     const Z = zustand; if (!Z) return;
     const letzte = Z.nr >= Z.arten.length;
     const a = letzte ? Z.ziel : Z.arten[Z.nr];
-    const f = letzte ? spurFrage(a, Z.g) : frageFuer(a, Z.nr);
+    let f = letzte ? spurFrage(a, Z.g) : frageFuer(a, Z.nr);
+    if (letzte && window.WB_MEHR && WB_MEHR.stimmeVon(a.id) && Math.random() < .5) { const x = W.frageBauen("stimme", a); if (x && x.ton) { x.frage = "Rex spitzt die Ohren. Wer ruft da?"; f = x; } }
     Z.frage = f;
     const l = landschaft(Z.g, Z.nr, Z.stationen);
     const p = l.pfad[Math.min(Z.nr, l.pfad.length - 1)];
@@ -120,10 +123,12 @@
       '<div style="position:relative;height:150px;margin:.6rem 0;border-radius:10px;overflow:hidden;box-shadow:inset 0 0 20px rgba(60,40,20,.3)">' + l.svg +
       '<img src="rex-frei.webp" alt="Rex" id="rex" style="position:absolute;height:64px;left:calc(' + (p[0] / 10) + '% - 30px);bottom:' + (260 - p[1]) / 260 * 150 + 'px;transition:left 1s ease-in-out;filter:drop-shadow(0 3px 4px rgba(0,0,0,.4))"><img src="friedrich-frei.webp" alt="" style="position:absolute;height:92px;left:1%;bottom:0;opacity:.95"></div>' +
       '<div class="karte-lern" style="transform:rotate(-.4deg)"><div class="frage">' + esc(letzte ? "Fast am Ziel! " + f.frage : f.frage) + "</div>" +
+      (f.ton && window.WB_MEHR ? WB_MEHR.tonKnopf(f) : "") +
       (f.spur ? '<div class="spur-bild">' + W.spurSvg(a.spur) + "</div>" : f.bild ? '<div class="fbild"><img src="' + f.bild + '" alt="Rätselbild"></div>' : "") +
       '<div class="antworten' + (f.bildwahl ? " bilder" : "") + '">' + f.antworten.map((x, i) => f.bildwahl ? '<button class="bildwahl" data-i="' + i + '" aria-label="Bild ' + (i + 1) + '"><img src="' + (W.hauptbild(x.id) || "") + '" alt=""></button>' : '<button data-i="' + i + '">' + esc(x.de) + "</button>").join("") + "</div>" +
       '<div class="reihe" style="justify-content:space-between;align-items:center"><button class="knopf klein hell" id="schnueffeln"' + (Z.hinweise && f.antworten.length > 2 ? "" : " disabled") + '>🐽 Rex schnüffeln lassen (' + Z.hinweise + ')</button><button class="knopf klein hell" id="abbrechen">Zurück zum Lager</button></div><div class="erklaerung" id="erkl"></div></div>';
     box.querySelector("#abbrechen").addEventListener("click", () => start(box));
+    if (window.WB_MEHR) WB_MEHR.tonVerdrahten(box);
     box.querySelector("#schnueffeln").addEventListener("click", e => {
       if (!Z.hinweise) return; Z.hinweise--; Z.hinweisGenutzt = true; e.target.disabled = true;
       ton("e_schnueffeln_1", .8);
@@ -141,10 +146,11 @@
     if (ok) { Z.serie++; Z.richtig++; p = (Z.hinweisGenutzt ? 5 : 10) + Math.min(10, (Z.serie - 1) * 2) + (f.modus === "verwechslung" ? 5 : 0) + (f.spur ? 10 : 0); Z.punkte += p; W.STAND.gefunden[a.id] = W.STAND.gefunden[a.id] || Date.now(); ton(f.spur ? "e_bellen_2" : "e_vogel_" + (1 + Math.floor(Math.random() * 8)), .6); }
     else { Z.serie = 0; ton("e_kraehe_3", .5); }
     Z.ergebnisse.push({ id: a.id, ok });
+    if (window.WB_MEHR) WB_MEHR.karteBeantwortet(f, ok);
     Z.hinweisGenutzt = false;
     W.speichern();
     const spruch = ok ? SPRUECHE_OK[Math.floor(Math.random() * SPRUECHE_OK.length)] : SPRUECHE_NEIN[Math.floor(Math.random() * SPRUECHE_NEIN.length)];
-    box.querySelector("#erkl").innerHTML = '<div class="notiz" style="margin:.6rem 0">' + "<b>" + spruch + "</b> " + (ok ? "+" + p + " Punkte. " : "Richtig ist <b>" + esc(a.de) + "</b>. ") + esc((f.erkl || a.k || "").slice(0, 240)) + (a.n && !ok ? "<br>" + esc(a.n.slice(0, 160)) : "") + '<span class="unterschrift">– Friedrich</span></div><div class="reihe"><button class="knopf" id="weiter">' + (Z.nr + 1 >= Z.stationen ? "Zum Ziel →" : "Rex folgen →") + '</button><a class="knopf hell klein" href="#/art/' + a.id + '" target="_blank" rel="noopener">Im Waldbuch nachschlagen ↗</a></div>';
+    box.querySelector("#erkl").innerHTML = '<div class="notiz" style="margin:.6rem 0">' + "<b>" + spruch + "</b> " + (ok ? "+" + p + " Punkte. " : "Richtig ist <b>" + esc(a.de) + "</b>. ") + esc((f.erkl || a.k || "").slice(0, 240)) + (a.n && !ok ? "<br>" + esc(a.n.slice(0, 160)) : "") + (window.WB_MEHR && window.WB_MERK && WB_MERK[a.id] ? '<br><span style="color:var(--moos)">Eselsbrücke: ' + esc(WB_MERK[a.id]) + "</span>" : "") + '<span class="unterschrift">– Friedrich</span></div><div class="reihe"><button class="knopf" id="weiter">' + (Z.nr + 1 >= Z.stationen ? "Zum Ziel →" : "Rex folgen →") + '</button><a class="knopf hell klein" href="#/art/' + a.id + '" target="_blank" rel="noopener">Im Waldbuch nachschlagen ↗</a></div>';
     const rex = box.querySelector("#rex");
     if (ok && rex) { rex.style.transform = "translateY(-10px) rotate(-6deg)"; setTimeout(() => { rex.style.transform = ""; }, 300); }
     box.querySelector("#weiter").addEventListener("click", () => {
@@ -168,11 +174,12 @@
       '<p class="hand" style="font-size:2.4rem;margin:.2rem 0;color:var(--ocker)">' + "★".repeat(sterne) + '<span style="opacity:.25">' + "★".repeat(3 - sterne) + "</span></p>" +
       "<p>" + Z.richtig + " von " + Z.stationen + " Stationen richtig · <b>" + (Z.punkte + bonus) + " Punkte</b>" + (bonus ? " (inkl. " + bonus + " Sternbonus)" : "") + "</p>" +
       (nachher !== vorher ? '<div class="notiz">Neuer Rang: <b>' + nachher + '</b>! Rex bekommt ein Würstchen. Du auch, wenn du magst.<span class="unterschrift">– Friedrich</span></div>' : "") +
-      (gefunden.length ? '<h3 class="hand">Neu im Fundbuch</h3><div class="verw">' + gefunden.map(e => '<a href="#/art/' + e.id + '"><img src="' + (W.hauptbild(e.id) || "") + '" alt="">' + esc(W.ART[e.id].de) + "</a>").join("") + "</div>" : "") +
+      (window.WB_MEHR ? WB_MEHR.spielEnde(Z.g, sterne, Z) : "") +
+      (gefunden.length ? '<h3 class="hand">Unterwegs erkannt</h3><div class="verw">' + gefunden.map(e => '<a href="#/art/' + e.id + '"><img src="' + (W.hauptbild(e.id) || "") + '" alt="">' + esc(W.ART[e.id].de) + "</a>").join("") + "</div>" : "") +
       '<div class="reihe"><button class="knopf" id="nochmal">🐾 Noch eine Fährte hier</button><button class="knopf hell" id="lager">Zurück zum Lager</button><a class="knopf hell" href="#/art/' + t.id + '">Über ' + esc(t.de) + " lesen</a></div></div></div>";
     box.querySelector("#nochmal").addEventListener("click", () => expedition(Z.g));
     box.querySelector("#lager").addEventListener("click", () => start(box));
   }
 
-  window.WB_SPIEL = { start, stopp };
+  window.WB_SPIEL = { start, stopp, GEBIETE };
 })();

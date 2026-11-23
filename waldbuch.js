@@ -203,7 +203,7 @@
   }
   function klebe(a) {
     const kap = KAP[a.kap] || KAPITEL[0];
-    return '<a class="klebe" href="#/art/' + a.id + '" style="--band:' + kap.band + '"><div class="bild">' + bildHtml(a.id) + "</div>" + marken(a) + '<div class="name">' + esc(a.de) + '</div><div class="lat">' + esc(a.wiss) + "</div>" + monatsBalken(a) + (STAND.gefunden[a.id] ? '<span class="gefunden" title="Auf einer Spurensuche gefunden">✓</span>' : "") + "</a>";
+    return '<a class="klebe" href="#/art/' + a.id + '" style="--band:' + kap.band + '"><div class="bild">' + bildHtml(a.id) + "</div>" + marken(a) + '<div class="name">' + esc(a.de) + '</div><div class="lat">' + esc(a.wiss) + "</div>" + monatsBalken(a) + (window.WB_MEHR ? WB_MEHR.fundMarke(a) : STAND.gefunden[a.id] ? '<span class="gefunden" title="Auf einer Spurensuche gefunden">✓</span>' : "") + "</a>";
   }
   function kalender(a) {
     const zeile = (name, arr, cls) => arr && arr.length ? '<div class="zeile"><b>' + name + "</b>" + MK.map((m, i) => '<i class="' + (arr.includes(i + 1) ? "an " + cls : "") + (i + 1 === heuteMonat ? " heute" : "") + '" title="' + MONATE[i] + '"></i>').join("") + "</div>" : "";
@@ -217,7 +217,7 @@
   /* ---------- Register ---------- */
   function register(aktiv) {
     const r = $("#register");
-    const extra = [["", "Deckblatt", "#efe2c2"], ["bestimmen", "🔍 Bestimmen", "#f1d38f"], ["jetzt", "📅 Was wächst jetzt?", "#e9c9a0"], ["doppelgaenger", "☠ Doppelgänger", "#e6a99a"], ["lernen", "🧠 Lernkiste", "#d8c0e0"], ["spiel", "🐾 Rex' Spürnase", "#f0b77c"], ["offline", "📥 Offline", "#d6cfa8"]];
+    const extra = [["", "Deckblatt", "#efe2c2"], ["bestimmen", "🔍 Bestimmen", "#f1d38f"], ["jetzt", "📅 Was wächst jetzt?", "#e9c9a0"], ["ausflug", "🥾 Ausflug", "#cfe0a8"], ["fundbuch", "📷 Fundbuch", "#f4dfa0"], ["album", "📒 Sammelalbum", "#e8c7a8"], ["doppelgaenger", "☠ Doppelgänger", "#e6a99a"], ["lernen", "🧠 Lernkiste", "#d8c0e0"], ["spiel", "🐾 Rex' Spürnase", "#f0b77c"], ["offline", "📥 Offline", "#d6cfa8"]];
     r.innerHTML = extra.slice(0, 1).map(([k, n, f]) => '<a class="reiter" href="#/' + k + '" style="background:' + f + '"' + (aktiv === k ? ' aria-current="page"' : "") + ">" + n + "</a>").join("") +
       KAPITEL.map(k => '<a class="reiter" href="#/kapitel/' + k.k + '" style="background:' + k.farbe + '"' + (aktiv === "kapitel/" + k.k ? ' aria-current="page"' : "") + ">" + k.name + "</a>").join("") +
       extra.slice(1).map(([k, n, f]) => '<a class="reiter" href="#/' + k + '" style="background:' + f + '"' + (aktiv === k ? ' aria-current="page"' : "") + ">" + n + "</a>").join("");
@@ -229,12 +229,13 @@
     const jetzt = ARTEN.filter(a => (a.kap === "pilz" ? a.fr : a.bl.concat(a.er)).includes(heuteMonat)).sort(() => Math.random() - .5).slice(0, 8);
     const gefunden = Object.keys(STAND.gefunden).length;
     seite('<div class="deckblatt"><div><p class="leise" style="font-family:var(--fb);letter-spacing:.14em;text-transform:uppercase">Notizen eines Waldläufers</p><h1 class="hand">Friedrichs Waldbuch</h1><p style="font-size:1.1rem">Was der Wald mich gelehrt hat – aufgeschrieben für alle, die mit offenen Augen gehen. Mit Fotos, Jahreskalender, giftigen Doppelgängern und den Spuren, die Rex schneller findet als ich.</p>' +
-      '<div class="zahlen"><span><b>' + ARTEN.length + "</b>Arten</span><span><b>" + Object.values(BILDER).reduce((s, b) => s + b.length, 0) + "</b>Fotos</span><span><b>" + KAPITEL.length + "</b>Kapitel</span><span><b>" + gefunden + "</b>selbst gefunden</span></div>" +
-      '<div class="reihe"><a class="knopf" href="#/spiel">🐾 Spurensuche mit Rex</a><a class="knopf hell" href="#/bestimmen">🔍 Etwas bestimmen</a><a class="knopf hell" href="#/lernen">🧠 Lernkiste</a><a class="knopf hell" href="#/doppelgaenger">☠ Doppelgänger</a><a class="knopf hell" href="#/offline">📥 Offline mitnehmen</a></div></div>' +
+      '<div class="zahlen"><span><b>' + ARTEN.length + "</b>Arten</span><span><b>" + Object.values(BILDER).reduce((s, b) => s + b.length, 0) + "</b>Fotos</span><span><b>" + KAPITEL.length + "</b>Kapitel</span><span><b>" + (window.WB_MEHR ? Object.keys(STAND.funde || {}).length : gefunden) + "</b>selbst gefunden</span></div>" +
+      '<div class="reihe"><a class="knopf" href="#/ausflug">🥾 Auf einen Ausflug</a><a class="knopf" href="#/spiel">🐾 Spurensuche mit Rex</a><a class="knopf hell" href="#/bestimmen">🔍 Etwas bestimmen</a><a class="knopf hell" href="#/fundbuch">📷 Mein Fundbuch</a><a class="knopf hell" href="#/lernen">🧠 Lernkiste</a><a class="knopf hell" href="#/doppelgaenger">☠ Doppelgänger</a><a class="knopf hell" href="#/offline">📥 Offline mitnehmen</a></div></div>' +
       '<div class="bilder" aria-hidden="true"><img src="friedrich-frei.webp" alt="" style="right:18%;bottom:0;height:300px"><img src="rex-frei.webp" alt="" style="right:0;bottom:0;height:150px"></div></div>' +
-      '<div class="notiz">Bevor du losziehst: Dieses Buch ist zum Lernen da. Ich habe mir Mühe gegeben, dass alles stimmt – aber ein Buch ersetzt keine Pilzberatung und keine erfahrene Hand. Wer sammelt, sammelt nur, was er sicher kennt, und nur so viel, wie er braucht. Geschützte Pflanzen bleiben stehen. Und Rex bleibt an der Leine, wenn Rehkitze im Gras liegen.<span class="unterschrift">– Friedrich</span></div>' +
+      '<div class="notiz">Bevor du losziehst: Dieses Buch ist zum Lernen da. Ich habe mir Mühe gegeben, dass alles stimmt – aber ein Buch ersetzt keine Pilzberatung und keine erfahrene Hand. Wer sammelt, sammelt nur, was er sicher kennt, und nur so viel, wie er braucht. Geschützte Pflanzen bleiben stehen. Und Rex bleibt an der Leine, wenn Rehkitze im Gras liegen.<span class="unterschrift">– Friedrich</span></div><div id="mehr-heute"></div>' +
       '<h3 class="hand">Gerade im ' + MONATE[heuteMonat - 1] + '</h3><div class="gitter">' + jetzt.map(klebe).join("") + '</div><p><a href="#/jetzt">Alles, was im ' + MONATE[heuteMonat - 1] + " wächst, blüht und reift →</a></p>" +
       '<h3 class="hand">Das Register</h3><div class="modi">' + KAPITEL.map(k => '<a class="modus" href="#/kapitel/' + k.k + '"><b>' + k.name + "</b>" + ARTEN.filter(a => a.kap === k.k).length + " Arten · " + esc(k.intro.split(".")[0]) + ".</a>").join("") + "</div>");
+    if (window.WB_MEHR) WB_MEHR.deck();
   }
   let kapFilter = "alle";
   function kapitel(k) {
@@ -258,18 +259,20 @@
     const vor = nachbarn[(idx + 1) % nachbarn.length], zur = nachbarn[(idx - 1 + nachbarn.length) % nachbarn.length];
     const verw = (a.v || "").split(",").map(s => s.trim()).filter(v => ART[v]);
     const merk = felderFuer(a).filter(([f]) => !leer(a[f])).map(([f, n]) => "<dt>" + n + "</dt><dd>" + esc(a[f]) + "</dd>").join("");
-    seite('<p class="leise"><a href="#/kapitel/' + a.kap + '">' + K.name + "</a> · " + esc(a.grp) + '</p><div class="art-kopf"><h1 class="hand">' + esc(a.de) + '</h1><span class="latein">' + esc(a.wiss) + '</span></div><p style="font-size:1.1rem;margin:.3rem 0 0">' + esc(a.k) + "</p>" +
+    seite('<p class="leise"><a href="#/kapitel/' + a.kap + '">' + K.name + "</a> · " + esc(a.grp) + '</p><div class="art-kopf"><h1 class="hand">' + esc(a.de) + '</h1><span class="latein">' + esc(a.wiss) + '</span></div><p style="font-size:1.1rem;margin:.3rem 0 0">' + esc(a.k) + '</p><div id="mehr-oben"></div>' +
       '<div class="art"><div class="galerie">' +
       (B.length ? '<div class="haupt" id="haupt" tabindex="0" role="button" aria-label="Foto vergrößern"><img src="pflanzen/bilder/' + B[0].f + '" alt="' + esc(a.de + " – " + (ASPEKT[B[0].a] || "")) + '" id="hauptbild"><div class="unter" id="hauptunter">' + esc(ASPEKT[B[0].a] || "Übersicht") + "</div></div>" +
         '<div class="daumen">' + B.map((b, i) => '<button data-i="' + i + '" aria-current="' + (i === 0) + '" aria-label="' + esc(ASPEKT[b.a] || "Foto") + '"><img src="pflanzen/bilder/' + b.f + '" alt="" loading="lazy"><span>' + esc(ASPEKT[b.a] || "Foto") + "</span></button>").join("") + "</div>"
         : '<div class="haupt"><div class="keinbild">Hier klebt bald ein Foto.<br>Friedrich ist noch unterwegs.</div></div>') +
       (a.kap === "tier" && a.spur ? '<h3 class="hand">So sieht die Spur aus</h3><div class="spur-bild">' + spurSvg(a.spur) + "</div>" : "") +
+      (a.kap === "tier" && window.WB_MEHR ? WB_MEHR.stimmeHtml(a) : "") +
       kalender(a) +
-      '</div><div><div class="steck"><dl><dt>Familie</dt><dd>' + esc(a.fam) + "</dd><dt>Gruppe</dt><dd>" + esc(a.grp) + '</dd><dt>Küche</dt><dd><span class="ess-schild ' + a.ess + '">' + E[1] + " " + E[0] + "</span>" + (a.schutz ? ' <span class="ess-schild bedingt">🛡 geschützt</span>' : "") + "</dd>" + (leer(a.o) ? "" : "<dt>Lebensraum</dt><dd>" + esc(a.o) + "</dd>") + (leer(a.by) ? "" : "<dt>In Bayern</dt><dd>" + esc(a.by) + "</dd>") + "</dl></div>" +
+      '</div><div><div id="mehr-fund"></div><div class="steck"><dl><dt>Familie</dt><dd>' + esc(a.fam) + "</dd><dt>Gruppe</dt><dd>" + esc(a.grp) + '</dd><dt>Küche</dt><dd><span class="ess-schild ' + a.ess + '">' + E[1] + " " + E[0] + "</span>" + (a.schutz ? ' <span class="ess-schild bedingt">🛡 geschützt</span>' : "") + "</dd>" + (leer(a.o) ? "" : "<dt>Lebensraum</dt><dd>" + esc(a.o) + "</dd>") + (leer(a.by) ? "" : "<dt>In Bayern</dt><dd>" + esc(a.by) + "</dd>") + "</dl></div>" +
       '<h3 class="hand">Woran ich sie erkenne</h3><dl class="merk">' + merk + "</dl>" +
       (leer(a.ku) ? "" : '<h3 class="hand">' + (a.kap === "tier" ? "Gut zu wissen" : "In Küche & Hausapotheke") + "</h3><p>" + esc(a.ku) + "</p>") +
       (leer(a.vo) ? "" : '<div class="warnung"><b>Vorsicht:</b> ' + esc(a.vo) + "</div>") +
       (verw.length ? '<h3 class="hand">Nicht verwechseln mit</h3><div class="verw">' + verw.map(v => '<a href="#/art/' + v + '">' + bildHtml(v, "mini") + esc(ART[v].de) + "</a>").join("") + "</div>" : "") +
+      '<div id="mehr-unterschied"></div>' +
       (leer(a.n) ? "" : '<div class="notiz">' + esc(a.n) + '<span class="unterschrift">– Friedrich</span></div>') +
       (leer(a.x) ? "" : "<p><b class=\"hand\" style=\"font-size:1.3rem;color:var(--ocker)\">Wusstest du?</b> " + esc(a.x) + "</p>") +
       "</div></div>" +
@@ -278,6 +281,7 @@
     const zeig = i => { const b = B[i]; $("#hauptbild").src = "pflanzen/bilder/" + b.f; $("#hauptunter").textContent = ASPEKT[b.a] || "Foto"; $("#seite").querySelectorAll(".daumen button").forEach((x, j) => x.setAttribute("aria-current", j === i)); aktuellesBild = i; };
     let aktuellesBild = 0;
     $("#seite").querySelectorAll(".daumen button").forEach(btn => btn.addEventListener("click", () => zeig(+btn.dataset.i)));
+    if (window.WB_MEHR) { WB_MEHR.art(a); WB_MEHR.tonVerdrahten($("#seite")); }
     const h = $("#haupt"); if (h && B.length) { const auf = () => lupe(a, B, aktuellesBild); h.addEventListener("click", auf); h.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); auf(); } }); }
   }
   function lupe(a, B, i) {
@@ -364,7 +368,7 @@
     seite('<h2 class="hand">Die Lernkiste</h2><p>Jede Art wandert durch fünf Fächer: Wer richtig erkannt wird, rutscht eins weiter nach hinten und kommt seltener dran. Wer falsch ist, muss zurück ins erste Fach. So lernt man den Wald, ohne zu büffeln.</p>' +
       '<div class="kisten">' + kisten.map((n, i) => '<div class="kiste"><b>' + n + "</b>Fach " + (i + 1) + "</div>").join("") + '<div class="kiste"><b>' + neu + "</b>noch neu</div></div>" +
       '<div class="chips" role="group" aria-label="Was lernen?">' + [["alle", "Alles"], ["pflanze", "Pflanzen"], ["baum", "Bäume"], ["kraut", "Kräuter"], ["beere", "Beeren"], ["pilz", "Pilze"], ["tier", "Tiere"]].map(([k, n]) => '<button class="chip" data-a="' + k + '" aria-pressed="' + (lernArt === k) + '">' + n + "</button>").join("") + "</div>" +
-      '<div class="modi">' + [["name", "Wer bin ich?", "Ein Foto – vier Namen."], ["bild", "Zeig mir …", "Ein Name – vier Fotos."], ["merkmal", "Merkmal-Rätsel", "Friedrich beschreibt, du rätst."], ["verwechslung", "Doppelgänger-Duell", "Welches ist das Richtige? Die gefährlichsten Paare."], ["monat", "Wann ist es soweit?", "Blüte, Frucht, Pilzzeit."]].map(([k, n, t]) => '<button class="modus" data-m="' + k + '"' + (lernModus === k ? ' style="outline:3px solid var(--ocker)"' : "") + "><b>" + n + "</b>" + t + "</button>").join("") + '</div><div id="lernfeld"></div>');
+      '<div class="modi">' + [["name", "Wer bin ich?", "Ein Foto – vier Namen."], ["bild", "Zeig mir …", "Ein Name – vier Fotos."], ["merkmal", "Merkmal-Rätsel", "Friedrich beschreibt, du rätst."], ["verwechslung", "Doppelgänger-Duell", "Welches ist das Richtige? Die gefährlichsten Paare."], ["monat", "Wann ist es soweit?", "Blüte, Frucht, Pilzzeit."], ["sinne", "Mit allen Sinnen", "Riechen, fühlen, lauschen – wer ist das?"]].concat(window.WB_MEHR && WB_MEHR.stimmenDa >= 4 ? [["stimme", "Wer ruft da?", "Tierstimmen erkennen."]] : []).map(([k, n, t]) => '<button class="modus" data-m="' + k + '"' + (lernModus === k ? ' style="outline:3px solid var(--ocker)"' : "") + "><b>" + n + "</b>" + t + "</button>").join("") + '</div><div id="lernfeld"></div>');
     const s = $("#seite");
     s.querySelectorAll("[data-a]").forEach(b => b.addEventListener("click", () => { lernArt = b.dataset.a; lernSeite(); }));
     s.querySelectorAll("[data-m]").forEach(b => b.addEventListener("click", () => { lernModus = b.dataset.m; lernSeite(); }));
@@ -372,6 +376,7 @@
   }
   function frageBauen(modus, a) {
     // gemeinsam mit dem Spiel genutzt
+    if (window.WB_MEHR) { const x = WB_MEHR.frage(modus, a); if (x) return x; if (modus === "sinne" || modus === "stimme") modus = "merkmal"; }
     const f = { a, modus, antworten: [], richtig: 0, frage: "", bild: null, erkl: "" };
     if (modus === "verwechslung") {
       const v = (a.v || "").split(",").map(x => x.trim()).filter(x => ART[x] && bilderVon(x).length);
@@ -397,24 +402,27 @@
     f.frage = "Wer bin ich?"; f.bild = hauptbild(a.id); f.antworten = [a].concat(falsche(a, 3, true)).sort(() => Math.random() - .5); f.richtig = f.antworten.indexOf(a); f.erkl = a.k; f.modus = "name"; return f;
   }
   function frageHtml(f) {
-    return '<div class="karte-lern"><div class="frage">' + esc(f.frage) + "</div>" + (f.bild ? '<div class="fbild"><img src="' + f.bild + '" alt="Rätselbild"></div>' : "") +
+    return '<div class="karte-lern' + (f.sinn ? " sinn" : "") + '"><div class="frage">' + esc(f.frage) + "</div>" + (f.ton && window.WB_MEHR ? WB_MEHR.tonKnopf(f) : "") + (f.bild ? '<div class="fbild"><img src="' + f.bild + '" alt="Rätselbild"></div>' : "") +
       '<div class="antworten' + (f.bildwahl ? " bilder" : "") + '">' + f.antworten.map((x, i) => f.bildwahl ? '<button class="bildwahl" data-i="' + i + '" aria-label="Bild ' + (i + 1) + '"><img src="' + (hauptbild(x.id) || "") + '" alt=""></button>' : '<button data-i="' + i + '">' + esc(x.de) + "</button>").join("") + '</div><div class="erklaerung" id="erkl"></div></div>';
   }
   function lernRunde() {
     const feld = $("#lernfeld"); if (!feld) return;
-    const pool = lernPool(lernArt).filter(a => lernModus !== "verwechslung" || (a.v || "").split(",").some(v => ART[v.trim()] && bilderVon(v.trim()).length));
+    const extra = window.WB_MEHR ? WB_MEHR.poolFilter(lernModus) : null;
+    const pool = (lernModus === "stimme" ? ARTEN.slice() : lernPool(lernArt)).filter(a => (lernModus !== "verwechslung" || (a.v || "").split(",").some(v => ART[v.trim()] && bilderVon(v.trim()).length)) && (!extra || extra(a)));
     if (pool.length < 4) { feld.innerHTML = '<p class="leise">Für diese Auswahl sind noch nicht genug Fotos eingeklebt.</p>'; return; }
     const a = naechsteLernkarte(pool);
     const f = frageBauen(lernModus, a);
     feld.innerHTML = frageHtml(f);
+    if (window.WB_MEHR) WB_MEHR.tonVerdrahten(feld);
     feld.querySelectorAll(".antworten button").forEach(b => b.addEventListener("click", () => {
       if (feld.dataset.fertig === "1") return;
       feld.dataset.fertig = "1";
       const i = +b.dataset.i, ok = i === f.richtig;
       feld.querySelectorAll(".antworten button").forEach((x, j) => x.classList.add(j === f.richtig ? "richtig" : j === i ? "falsch" : "x"));
       STAND.kiste[a.id] = ok ? Math.min(5, (STAND.kiste[a.id] || 1) + 1) : 1; speichern();
+      if (window.WB_MEHR) WB_MEHR.karteBeantwortet(f, ok);
       if (STAND.ton) Ton.kurz(ok ? "e_vogel_3" : "e_kraehe_2", .5);
-      $("#erkl").innerHTML = (ok ? "<b class=\"hand\" style=\"font-size:1.5rem;color:var(--moos)\">Richtig!</b> " : "<b class=\"hand\" style=\"font-size:1.5rem;color:var(--beere)\">Knapp daneben.</b> Richtig ist <a href=\"#/art/" + a.id + "\">" + esc(a.de) + "</a>. ") + esc(f.erkl).slice(0, 260) + ' <div class="reihe"><button class="knopf klein" id="weiter">Nächste Karte →</button><a class="knopf klein hell" href="#/art/' + a.id + '">Seite aufschlagen</a></div>';
+      $("#erkl").innerHTML = (ok ? "<b class=\"hand\" style=\"font-size:1.5rem;color:var(--moos)\">Richtig!</b> " : "<b class=\"hand\" style=\"font-size:1.5rem;color:var(--beere)\">Knapp daneben.</b> Richtig ist <a href=\"#/art/" + a.id + "\">" + esc(a.de) + "</a>. ") + esc(f.erkl).slice(0, 260) + (window.WB_MEHR ? WB_MEHR.merkHtml(a, true) : "") + ' <div class="reihe"><button class="knopf klein" id="weiter">Nächste Karte →</button><a class="knopf klein hell" href="#/art/' + a.id + '">Seite aufschlagen</a></div>';
       $("#weiter").addEventListener("click", () => { feld.dataset.fertig = "0"; lernRunde(); });
     }));
   }
@@ -431,8 +439,9 @@
     }
     paare.sort((x, y) => x[0] - y[0]);
     const seiteA = (a) => { const F = felderFuer(a); const wichtig = F.filter(([k]) => !leer(a[k])).slice(0, 3); return '<div class="klebe" style="transform:none"><a href="#/art/' + a.id + '" style="text-decoration:none;color:inherit"><div class="bild">' + bildHtml(a.id) + "</div>" + marken(a) + '<div class="name">' + esc(a.de) + '</div><div class="lat">' + esc(a.wiss) + '</div></a><span class="ess-schild ' + a.ess + '" style="font-size:.72rem;margin:.3rem 0;display:inline-block">' + (ESS[a.ess] || ESS.kein)[0] + '</span><dl class="merk" style="font-size:.88rem">' + wichtig.map(([k, n]) => "<dt style=\"font-size:1.1rem\">" + n + "</dt><dd>" + esc(a[k]) + "</dd>").join("") + "</dl></div>"; };
-    seite('<h2 class="hand">Doppelgänger</h2><div class="notiz">Hier klebe ich die Paare nebeneinander, die mir am meisten Angst machen: links das, was man sucht, rechts das, was einen ins Krankenhaus bringt. Schau dir jedes Paar lange an. Und wenn du dir einmal nicht sicher bist – stehen lassen.<span class="unterschrift">– Friedrich</span></div><div class="warnung"><b>Bei Vergiftungsverdacht:</b> Notruf 112 oder Giftnotruf München 089 19240. Pflanzen- oder Pilzreste mitnehmen.</div>' +
-      paare.map(([stufe, [a, b]]) => '<h3 class="hand">' + esc(a.de) + " oder " + esc(b.de) + "?" + (stufe === 0 ? ' <span class="ess-schild toedlich" style="font-size:.75rem;vertical-align:middle">lebensgefährlich</span>' : "") + '</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">' + seiteA(a) + seiteA(b) + "</div>").join(""));
+    seite('<h2 class="hand">Doppelgänger</h2><div class="notiz">Hier klebe ich die Paare nebeneinander, die mir am meisten Angst machen: links das, was man sucht, rechts das, was einen ins Krankenhaus bringt. Schau dir jedes Paar lange an. Und wenn du dir einmal nicht sicher bist – stehen lassen.<span class="unterschrift">– Friedrich</span></div><div class="warnung"><b>Bei Vergiftungsverdacht:</b> Notruf 112 oder Giftnotruf München 089 19240. Pflanzen- oder Pilzreste mitnehmen.</div><div id="mehr-pruefung"></div>' +
+      paare.map(([stufe, [a, b]]) => '<h3 class="hand">' + esc(a.de) + " oder " + esc(b.de) + "?" + (stufe === 0 ? ' <span class="ess-schild toedlich" style="font-size:.75rem;vertical-align:middle">lebensgefährlich</span>' : "") + (window.WB_MEHR ? " " + WB_MEHR.paarStempel(a, b) : "") + '</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">' + seiteA(a) + seiteA(b) + "</div>" + (window.WB_MEHR ? WB_MEHR.paarExtra(a, b) : "")).join(""));
+    if (window.WB_MEHR) WB_MEHR.doppel();
   }
 
   /* ---------- Offline ---------- */
@@ -440,7 +449,7 @@
   window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEreignis = e; });
   const swDa = "serviceWorker" in navigator && /^https?:$/.test(location.protocol);
   if (swDa) navigator.serviceWorker.register("waldbuch-sw.js", { scope: "./waldbuch" }).catch(() => {});
-  function alleBildUrls(nurHaupt) { const u = []; for (const a of ARTEN) bilderVon(a.id).forEach((b, i) => { if (!nurHaupt || i === 0) u.push("pflanzen/bilder/" + b.f); }); return u; }
+  function alleBildUrls(nurHaupt) { const u = []; for (const a of ARTEN) bilderVon(a.id).forEach((b, i) => { if (!nurHaupt || i === 0) u.push("pflanzen/bilder/" + b.f); }); if (!nurHaupt && window.WB_MEHR) u.push(...WB_MEHR.stimmenUrls()); return u; }
   async function gespeicherteBilder() { try { const c = await caches.open("waldbuch-bilder-v1"); return (await c.keys()).length; } catch (e) { return 0; } }
   let ladeLauf = null;
   async function ladeOffline(nurHaupt, aufFortschritt) {
@@ -510,13 +519,14 @@
     else if (teil === "nachweise") { register(""); nachweisSeite(); }
     else if (teil === "offline") { register("offline"); offlineSeite(); }
     else if (teil === "suche") { register(""); suchSeite(h.slice(6)); }
+    else if (window.WB_MEHR && WB_MEHR.seiten[teil]) { register(teil); WB_MEHR.seiten[teil](arg); }
     else { register(""); deckblatt(); }
   }
   $("#suche-mini").addEventListener("submit", e => { e.preventDefault(); const v = $("#suchfeld").value.trim(); if (v) location.hash = "#/suche/" + encodeURIComponent(v); });
   window.addEventListener("hashchange", route);
 
   /* ---------- Öffentliche Schnittstelle fürs Spiel ---------- */
-  window.WB = { ARTEN, ART, KAPITEL, MONATE, heuteMonat, bilderVon, hauptbild, bildFuer, spurSvg, frageBauen, frageHtml, falsche, STAND, speichern, Ton, esc, toast, bestimme };
+  window.WB = { ARTEN, ART, KAPITEL, MONATE, heuteMonat, bilderVon, hauptbild, bildFuer, bildHtml, spurSvg, frageBauen, frageHtml, falsche, STAND, speichern, Ton, esc, toast, bestimme, seite, route, register };
 
   fetch("pflanzen/bilder.json").then(r => r.ok ? r.json() : {}).catch(() => ({})).then(j => { BILDER = j || {}; route(); });
 })();

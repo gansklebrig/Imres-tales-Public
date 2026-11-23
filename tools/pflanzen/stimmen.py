@@ -22,28 +22,28 @@ os.makedirs(ZIEL, exist_ok=True)
 
 # id: (wissenschaftlicher Name, was zu hören sein soll (de), Suchwörter, gute Stichwörter im Titel)
 SUCHE = {
-    "reh": ("Capreolus capreolus", "Schreckbellen", ["Capreolus capreolus"], ["bark", "bell", "alarm", "call", "ruf", "schreck"]),
-    "rothirsch": ("Cervus elaphus", "Röhren in der Brunft", ["Cervus elaphus"], ["roar", "rut", "röhr", "brunft", "bell", "call"]),
-    "wildschwein": ("Sus scrofa", "Grunzen", ["Sus scrofa"], ["grunt", "grunz", "wild boar", "wildschwein", "call"]),
-    "gaemse": ("Rupicapra rupicapra", "Warnpfiff", ["Rupicapra rupicapra"], ["whistle", "pfiff", "alarm", "call"]),
-    "fuchs": ("Vulpes vulpes", "Bellen und Keckern", ["Vulpes vulpes"], ["bark", "bell", "scream", "call", "vocal"]),
-    "dachs": ("Meles meles", "Grunzen und Keckern", ["Meles meles"], ["call", "grunt", "vocal", "sound"]),
-    "feldhase": ("Lepus europaeus", "Klagen", ["Lepus europaeus"], ["call", "sound", "scream"]),
-    "eichhoernchen": ("Sciurus vulgaris", "Schimpfen", ["Sciurus vulgaris"], ["call", "alarm", "chatter", "scold", "sound"]),
-    "baummarder": ("Martes martes", "Keckern", ["Martes martes"], ["call", "sound", "vocal"]),
-    "luchs": ("Lynx lynx", "Ranzruf", ["Lynx lynx"], ["call", "mating", "sound", "vocal"]),
-    "wolf": ("Canis lupus", "Heulen", ["Canis lupus howl", "Canis lupus"], ["howl", "heul", "call"]),
-    "biber": ("Castor fiber", "Fiepen und Nagen", ["Castor fiber"], ["call", "sound", "kit", "vocal"]),
-    "fischotter": ("Lutra lutra", "Pfeifen", ["Lutra lutra"], ["call", "whistle", "sound", "vocal"]),
-    "igel": ("Erinaceus europaeus", "Schnaufen", ["Erinaceus europaeus"], ["sound", "snuff", "huff", "call"]),
-    "murmeltier": ("Marmota marmota", "Warnpfiff", ["Marmota marmota"], ["whistle", "pfiff", "alarm", "call"]),
-    "waschbaer": ("Procyon lotor", "Keckern und Fauchen", ["Procyon lotor"], ["call", "sound", "vocal"]),
-    "buntspecht": ("Dendrocopos major", "Trommeln", ["Dendrocopos major drumming", "Dendrocopos major"], ["drum", "trommel", "call", "song"]),
-    "waldkauz": ("Strix aluco", "Revierruf „Hu-huhuhuu“", ["Strix aluco"], ["song", "call", "hoot", "ruf", "territorial"]),
+    "reh": ("Capreolus capreolus", "Schreckbellen", ["Capreolus capreolus", "roe deer bark", "Reh bellt", "roe deer call"], ["roe deer", "reh"], ["bark", "bell", "alarm", "call", "ruf", "schreck"]),
+    "rothirsch": ("Cervus elaphus", "Röhren in der Brunft", ["Cervus elaphus", "red deer roar", "Hirsch röhrt"], ["red deer", "hirsch", "rothirsch"], ["roar", "rut", "röhr", "roehr", "brunft", "bell", "call"]),
+    "wildschwein": ("Sus scrofa", "Grunzen", ["Sus scrofa", "wild boar grunt", "Wildschwein"], ["wild boar", "wildschwein"], ["grunt", "grunz", "call"]),
+    "gaemse": ("Rupicapra rupicapra", "Warnpfiff", ["Rupicapra rupicapra", "chamois", "Gämse"], ["chamois", "gämse", "gemse"], ["whistle", "pfiff", "alarm", "call"]),
+    "fuchs": ("Vulpes vulpes", "Bellen und Keckern", ["Vulpes vulpes", "red fox bark"], ["red fox", "fuchs"], ["bark", "bell", "scream", "call", "vocal"]),
+    "dachs": ("Meles meles", "Grunzen und Keckern", ["Meles meles", "European badger"], ["european badger", "dachs"], ["call", "grunt", "vocal", "sound"]),
+    "feldhase": ("Lepus europaeus", "Klagen", ["Lepus europaeus", "European hare", "brown hare"], ["european hare", "brown hare", "feldhase"], ["call", "sound", "scream"]),
+    "eichhoernchen": ("Sciurus vulgaris", "Schimpfen", ["Sciurus vulgaris", "Eurasian red squirrel", "Eichhörnchen"], ["eurasian red squirrel", "eichhörnchen"], ["call", "alarm", "chatter", "scold", "sound"]),
+    "baummarder": ("Martes martes", "Keckern", ["Martes martes", "pine marten", "Baummarder"], ["pine marten", "baummarder"], ["call", "sound", "vocal"]),
+    "luchs": ("Lynx lynx", "Ranzruf", ["Lynx lynx", "Eurasian lynx", "Luchs"], ["eurasian lynx", "luchs"], ["call", "mating", "sound", "vocal"]),
+    "wolf": ("Canis lupus", "Heulen", ["Canis lupus howl", "wolf howl", "wolves howling", "Wolfsgeheul"], ["wolf howl", "wolves howl", "wolf howling", "wolfsgeheul", "heulen"], ["howl", "heul", "call"]),
+    "biber": ("Castor fiber", "Fiepen und Nagen", ["Castor fiber", "Eurasian beaver", "Biber"], ["eurasian beaver", "biber"], ["call", "sound", "kit", "vocal"]),
+    "fischotter": ("Lutra lutra", "Pfeifen", ["Lutra lutra", "Eurasian otter", "Fischotter"], ["eurasian otter", "fischotter"], ["call", "whistle", "sound", "vocal"]),
+    "igel": ("Erinaceus europaeus", "Schnaufen", ["Erinaceus europaeus", "hedgehog", "Igel"], ["hedgehog", "hegehog", "igel"], ["sound", "snuff", "huff", "call", "sleep"]),
+    "murmeltier": ("Marmota marmota", "Warnpfiff", ["Marmota marmota", "Alpine marmot", "Murmeltier"], ["alpine marmot", "murmeltier"], ["whistle", "pfiff", "alarm", "call"]),
+    "waschbaer": ("Procyon lotor", "Keckern und Fauchen", ["Procyon lotor", "raccoon", "Waschbär"], ["raccoon", "waschbär"], ["call", "sound", "vocal"]),
+    "buntspecht": ("Dendrocopos major", "Trommeln", ["Dendrocopos major drumming", "Dendrocopos major"], ["great spotted woodpecker", "buntspecht"], ["drum", "trommel", "call", "song"]),
+    "waldkauz": ("Strix aluco", "Revierruf „Hu-huhuhuu“", ["Strix aluco"], ["tawny owl", "waldkauz"], ["song", "call", "hoot", "ruf", "territorial"]),
 }
 FREI = re.compile(r"^(cc0|public domain|pd|cc[ -]by(-sa)?( \d\.\d)?|cc[ -]by(-sa)?[ -]\d\.\d.*|gfdl.*|attribution.*|copyrighted free use)", re.I)
 SCHLECHT = ["spectrogram", "sonagram", "sonogram", "playback", "imitation", "imitat", "lecture", "vortrag", "interview", "song by", "music", "musik",
-            "remix", "ringtone", "captive", "zoo", "pet ", "haustier", "domestic", "hausschwein", "dog", "hund", "pronunciation", "aussprache"]
+            "remix", "ringtone", "captive", "zoo", "orchestra", "festival", "carnaval", "fundación", "congress", "rep. ", "speech", "tamiasciurus", "american", "fennec", "pet ", "haustier", "domestic", "hausschwein", "dog", "hund", "pronunciation", "aussprache"]
 
 
 def hole(url, daten=None, versuche=6):
@@ -69,7 +69,7 @@ def text(s):
     return re.sub(r"\s+", " ", html.unescape(s)).strip()
 
 
-def kandidaten(id_, wiss, suchen, gut):
+def kandidaten(id_, wiss, suchen, namen, gut):
     titel = {}
     for q in suchen:
         for zusatz in ("filetype:audio", "filemime:audio/ogg", "filemime:audio/mpeg", "filemime:audio/x-wav"):
@@ -104,7 +104,8 @@ def kandidaten(id_, wiss, suchen, gut):
             continue
         beschr = text(g("ImageDescription"))[:400]
         such = (t + " " + beschr).lower()
-        if wl not in such and wl.split()[0] not in such:
+        # Der volle wissenschaftliche Name oder ein eindeutiger Trivialname muss vorkommen
+        if wl not in such and not any(n in t.lower() for n in namen):
             continue
         if any(s in such for s in SCHLECHT) or re.match(r"^(file|datei):[a-z]{2,3}-", t.lower()):
             continue
@@ -158,12 +159,16 @@ def main():
     neu = set()
     if os.path.exists(NEU):
         neu = {z.strip() for z in open(NEU) if z.strip() and not z.startswith("#")}
-    for id_, (wiss, was, suchen, gut) in SUCHE.items():
+    for id_, (wiss, was, suchen, namen, gut) in SUCHE.items():
         if id_ in meta and id_ not in neu and os.path.exists(os.path.join(ZIEL, meta[id_]["f"])):
             continue
         print("•", id_, wiss)
-        k = kandidaten(id_, wiss, suchen, gut)
+        k = kandidaten(id_, wiss, suchen, namen, gut)
         print("  ", len(k), "Kandidaten", [x["titel"] for x in k[:4]])
+        if not k and id_ in meta:  # alte (falsche) Aufnahme verwerfen
+            try: os.remove(os.path.join(ZIEL, meta[id_]["f"]))
+            except OSError: pass
+            del meta[id_]
         for c in k[:5]:
             try:
                 daten = hole(c["url"])
