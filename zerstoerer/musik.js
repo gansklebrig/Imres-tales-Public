@@ -55,7 +55,14 @@
     sitar: [48, 51, 54, 57, 60, 63, 66, 69, 72, 75, 78, 81, 84], cemb: [41, 44, 47, 50, 53, 56, 59, 62, 65, 68, 71, 74, 77, 80, 83, 86, 89],
     gitarre: [36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66, 69, 72, 75, 78, 81, 84], spiel: [60, 63, 66, 69, 72, 75, 78, 81, 84, 87, 90, 93, 96, 99, 102, 105],
     glas: [75, 78, 86], didge: [37], oboe: [58, 62, 65, 70, 74, 77, 82, 86, 89],
-    mbira: [46, 48, 50, 51, 53, 55, 56, 58, 60, 62, 63, 65, 67, 68, 70, 72, 73, 74, 75], akk: [53, 56, 59, 62, 65, 68, 71, 74, 77, 80, 83, 86, 89]
+    mbira: [46, 48, 50, 51, 53, 55, 56, 58, 60, 62, 63, 65, 67, 68, 70, 72, 73, 74, 75], akk: [53, 56, 59, 62, 65, 68, 71, 74, 77, 80, 83, 86, 89],
+    /* weitere Aufnahmen (VSCO 2 CE / VCSL, siehe klang/LIZENZ.txt): gestrichener Psalter, Handglocken, Volksharfe, Zither,
+       Okarina, Stimme, Fagott, Klarinette, Blockflöte */
+    psab: [70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90], hglo: [60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 81, 84, 86, 88, 90, 92, 94, 96],
+    fharfe: [36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92],
+    zit: [47, 49, 51, 54, 56, 59, 61, 63, 66, 68, 71, 73, 75, 78, 80, 83], oka: [60, 63, 66, 69, 72, 75, 78, 81, 84, 87, 90],
+    stimme: [57, 60, 63, 66, 69, 72, 75, 78, 81, 84, 87], fag: [34, 37, 41, 45, 46, 48, 55, 60, 63, 68, 69, 72],
+    klar: [50, 53, 58, 62, 65, 70, 74, 77, 82, 86, 90], bfl: [60, 63, 66, 69, 72, 75, 78, 81, 84, 87, 90, 93, 96]
   };
   function nearest(inst, midi) { const l = INST[inst]; let best = l[0]; for (const n of l) if (Math.abs(n - midi) < Math.abs(best - midi)) best = n; return best; }
   /* Ton in den Umfang des Instruments oktavieren, damit nichts unnatürlich weit verstimmt klingt */
@@ -74,7 +81,9 @@
     lager:    { root: 50, bpm: 66, scale: "hpan", drone: "didge", pad: null, mel: "hpan", col: "kal", calm: true, wave: "triangle" },
     passage:  { root: 50, bpm: 60, scale: "hpan", drone: "vc", pad: "ooh", mel: "hpan", col: "glas", calm: true },
     torhof:   { root: 50, bpm: 92, scale: "dorisch", drone: "vc", pad: "ooh", mel: "eh", col: "harfe", ost: "spic", bass: "kb", brass: "hornst", dr: ["taiko_36", "timp1", "marsch1"], tick: 7000 },
-    keller:   { root: 45, bpm: 84, scale: "phryg", drone: "rorg", pad: "ooh", mel: "koto", col: "kal", ost: "pizz", bass: "kb", brass: "pos", dr: ["riese1", "bodh1", "rahm_1"], tick: 4800 },
+    /* Keller: in der Ruhe gemütlich (Koto, Kalimba), im Kampf bedrohlich – Spiccato statt Pizzicato, b2-Akkorde, Posaunen mit kleiner Sekunde */
+    keller:   { root: 45, bpm: 84, scale: "phryg", drone: "rorg", pad: "ooh", mel: "koto", col: "kal", ost: "pizz", ostC: "spic", bass: "kb", brass: "pos", dr: ["riese1", "bodh1", "rahm_1"], tick: 4800,
+                acc: "drohung", progC: [[0, 1, 0, 6], [0, 1, 5, 1], [0, 6, 1, 0], [0, 0, 1, 1], [0, 5, 1, 4]] },
     hallen:   { root: 48, bpm: 96, scale: "harm", drone: "orgel", pad: "aah", mel: "bra", col: "cemb", ost: "spic", bass: "tuba", brass: "blech", dr: ["timp1", "marsch1", "snare1"], tick: 6500 },
     wehrgang: { root: 52, bpm: 104, scale: "dorisch", drone: "vc", pad: "aah", mel: "fl", col: "pfeife", ost: "spic", bass: "kb", brass: "trpst", dr: ["taiko_42", "marsch2", "snare2"], tick: 8000 },
     verlies:  { root: 43, bpm: 78, scale: "phryg", drone: "vctrem", pad: "ooh", mel: "cel", col: "spiel", ost: "pizz", bass: "kb", brass: "pos", dr: ["riese2", "bodh2", "schlitz1"], tick: 4200 },
@@ -83,12 +92,65 @@
     schlund:  { root: 44, bpm: 82, scale: "phryg", drone: "vctrem", pad: "ooh", mel: "kal", col: "shaku", ost: "pizz", bass: "kb", brass: "pos", dr: ["riese1", "taiko_36", "darb_1"], tick: 3800, pw: "square" },
     schmiede: { root: 46, bpm: 108, scale: "harm", drone: "vc", pad: "aah", mel: "mar", col: "cemb", ost: "spic", bass: "tuba", brass: "blech", dr: ["taiko_42", "riese3", "amboss"], tick: 5500 },
     zinnen:   { root: 49, bpm: 112, scale: "harm", drone: "vctrem", pad: "aah", mel: "oboe", col: "glock", ost: "spic", bass: "tuba", brass: "hornst", dr: ["taiko_36", "timp5", "snare1"], tick: 8500 },
-    see:      { root: 41, bpm: 80, scale: "phryg", drone: "rorg", pad: "ooh", mel: "harfe", col: "glas", ost: "pizz", bass: "kb", brass: "horn", dr: ["riese2", "bodh2", "rahm_2"], tick: 4000, pw: "square" },
+    /* Schwarzer See: F dorisch (die große Sexte als Leuchtalgen-Licht), langsam. Gestrichener Psalter schwebt, Handglocken
+       klingen wie unter Wasser (Tiefpass), Tropfen aus Celesta, Wellen in Lautstärke und Filter des Teppichs, tiefer Bordun,
+       gelegentliche Walgesänge (gleitender Sinus). Kampf: Volksharfe rieselt, Trommeln gedämpft, Rauschen schwappt wie Wasser. */
+    see:      { root: 41, bpm: 72, scale: "dorisch", drone: "vc", pad: "ooh", mel: "psab", col: "hglo", ost: "fharfe", bass: "kb", brass: "horn", dr: ["riese2", "bodh2", "rahm_2"],
+                tick: 1300, tickQ: 0.7, tickDec: 0.09, pw: "triangle", wave: "triangle", water: 1, drLP: 900, colLP: 1500,
+                progE: [[0, 5, 3, 6], [0, 2, 5, 3], [0, 6, 3, 5], [0, 3, 2, 5]], progC: [[0, 5, 6, 4], [0, 0, 5, 6], [0, 3, 6, 4]] },
     glut:     { root: 45, bpm: 114, scale: "harm", drone: "vc", pad: "aah", mel: "shanai", col: "sitar", ost: "spic", bass: "tuba", brass: "blech", dr: ["taiko_48", "riese3", "darb_2"], tick: 6000 },
     sturm:    { root: 47, bpm: 110, scale: "moll", drone: "vctrem", pad: "aah", mel: "eh", col: "harfe", ost: "spic", bass: "kb", brass: "hornst", dr: ["timp1", "taiko_36", "snare2"], tick: 9500 },
     boss1:    { root: 45, bpm: 126, scale: "harm", drone: "vctrem", pad: "aah", mel: "blech", col: "glock", ost: "spic", bass: "tuba", brass: "hornst", dr: ["taiko_36", "riese1", "snare1"], boss: true, tick: 7000 },
     final:    { root: 41, bpm: 132, scale: "harm", drone: "vctrem", pad: "aah", mel: "horn", col: "rgl", ost: "spic", bass: "tuba", brass: "blech", dr: ["riese1", "taiko_36", "snare2"], boss: true, tick: 6000 }
   };
+  /* Bossmusik je Boss: eigene Tonart, Tempo, Besetzung, ein Akzent (acc, siehe ACC) und ein Leitmotiv (mot: [Halbton über
+     dem Grundton, Start-Achtel, Länge]), das beim Auftritt erklingt und danach immer wieder in der Melodie auftaucht.
+     p2: Änderungen ab der zweiten Phase. Arenen rufen Z.music.set("boss1"/"final"), Wächter "boss1" – welcher Boss
+     gemeint ist, liest M.set aus Z.boss bzw. Z.ARENAS[Z.level.arena].boss. Unbekannte Bosse behalten boss1/final. */
+  const BOSSP = {
+    /* Glasstab, Alchemist der Roten Roben: Cembalo, klirrende Weingläser, nervöses Pizzicato; trinkt er die rote Phiole, übernimmt das Blech */
+    glasstab: { root: 52, bpm: 120, scale: "harm", drone: "vctrem", pad: "aah", mel: "cemb", col: "glas", ost: "pizz", bass: "kb", brass: "pos", dr: ["taiko_42", "snare1", "clave1"], tick: 9000, acc: "glas",
+      mot: [[0, 0, 1], [1, 1, 1], [0, 2, 1], [-1, 3, 1], [3, 4, 2], [7, 6, 2], [6, 8, 4]], p2: { mel: "blech", brass: "blech", bpm: 126 } },
+    /* falsche Erzpriesterin (Kuo-toa, Dienerin Demogorgons): phrygischer Tempelgesang, Volksharfe wie Wasser, Handglocken, Darbuka */
+    erzpriesterin: { root: 42, bpm: 96, scale: "phryg", drone: "rorg", pad: "ooh", mel: "stimme", col: "hglo", ost: "fharfe", bass: "kb", brass: "pos", dr: ["bodh2", "darb_1", "tamb_2"], tick: 2500, tickQ: 0.8, tickDec: 0.06, acc: "ritual", drLP: 2500,
+      mot: [[0, 0, 2], [1, 2, 2], [0, 4, 2], [-2, 6, 2], [0, 8, 6]], p2: { mel: "shanai", bpm: 104 } },
+    /* Bugbear und Nezna im Wachturm: Kriegstrommeln der Goblins, Horn, rohe Moll-Kraft */
+    bugbear: { root: 43, bpm: 116, scale: "moll", drone: "vc", pad: "aah", mel: "hornst", col: "mar", ost: "spic", bass: "tuba", brass: "blech", dr: ["taiko_36", "taiko_48", "marsch3"], tick: 6000, acc: "kriegstrommel",
+      mot: [[0, 0, 2], [0, 2, 1], [3, 3, 1], [5, 4, 2], [3, 6, 2], [0, 8, 4]], p2: { mel: "trpst", bpm: 122 } },
+    /* Wraith, Hüter von Khaems Grab: E phrygisch, langsam, Shakuhachi wie Atem, Schlitztrommel, rückwärts atmende Becken, Geisterchor */
+    wraith: { root: 40, bpm: 84, scale: "phryg", drone: "vctrem", pad: "ooh", mel: "shaku", col: "glas", ost: "pizz", bass: "kb", brass: "pos", dr: ["riese2", "schlitz1", "rahm_2"], tick: 3500, acc: "geist",
+      mot: [[0, 0, 4], [1, 4, 2], [-1, 6, 2], [6, 8, 8]] },
+    /* Wächter der Schmiede (Runengolem): F harmonisch Moll, Amboss auf 2 und 4, Marimba wie glühendes Metall */
+    schmiedewaechter: { root: 41, bpm: 104, scale: "harm", drone: "vc", pad: "aah", mel: "blech", col: "mar", ost: "spic", bass: "tuba", brass: "hornst", dr: ["riese3", "taiko_42", "amboss"], tick: 5000, acc: "amboss",
+      mot: [[0, 0, 2], [0, 2, 1], [0, 3, 1], [7, 4, 2], [8, 6, 2], [7, 8, 2], [11, 10, 2], [12, 12, 4]] },
+    /* Chasme, der summende Dämon: Cis phrygisch, schnell; Didgeridoo als Bordun (Cis ist sein Ton), Schellen surren in Sechzehnteln */
+    chasme: { root: 49, bpm: 132, scale: "phryg", drone: "didge", pad: "aah", mel: "shanai", col: "sitar", ost: "spic", bass: "kb", brass: "blech", dr: ["darb_2", "taiko_48", "schellen2"], tick: 9500, pw: "square", acc: "summen",
+      mot: [[0, 0, 1], [1, 1, 1], [0, 2, 1], [1, 3, 1], [0, 4, 1], [1, 5, 1], [7, 6, 2], [6, 8, 6]] },
+    /* Ilvara, die Gestaltwandlerin (Drow-Druidin): H dorisch, Okarina, Koto, Volksharfen-Läufe – wild und elegant */
+    ilvaraW: { root: 47, bpm: 108, scale: "dorisch", drone: "vc", pad: "ooh", mel: "oka", col: "koto", ost: "fharfe", bass: "kb", brass: "horn", dr: ["bodh2", "taiko_42", "rahm_1"], tick: 5000, acc: "wald",
+      mot: [[0, 0, 2], [2, 2, 1], [3, 3, 1], [7, 4, 4], [9, 8, 2], [7, 10, 2], [5, 12, 4]], p2: { mel: "shaku", bpm: 114 } },
+    /* der rasende Riese: E harmonisch Moll, schwer im halben Tempo, riesige Trommeln auf 1 und 3 */
+    riese: { root: 40, bpm: 92, scale: "harm", drone: "vc", pad: "aah", mel: "hornst", col: "glock", ost: "spic", bass: "tuba", brass: "blech", dr: ["riese1", "riese3", "taiko_36"], tick: 4500, acc: "riese",
+      mot: [[0, 0, 3], [0, 3, 1], [0, 4, 2], [1, 6, 2], [0, 8, 8]], p2: { bpm: 100 } },
+    /* Vrock, Geier aus dem Abyss: B harmonisch Moll, kreischende Pfeifen, Tremolo-Cluster der Geigen */
+    vrock: { root: 46, bpm: 124, scale: "harm", drone: "vctrem", pad: "aah", mel: "pfeife", col: "glock", ost: "spic", bass: "kb", brass: "trpst", dr: ["timp1", "snare2", "taiko_48"], tick: 8500, acc: "kreischen",
+      mot: [[12, 0, 1], [11, 1, 1], [8, 2, 2], [7, 4, 2], [1, 6, 2], [0, 8, 6]] },
+    /* Demogorgon, Fürst der Dämonen, im Herz des Sees: F phrygisch, Orgel, zwei Köpfe = Tritonus-Paare; Wasser und Walgesang bleiben */
+    demogorgon: { root: 41, bpm: 96, scale: "phryg", drone: "orgel", pad: "aah", mel: "horn", col: "rgl", ost: "spic", bass: "tuba", brass: "blech", dr: ["riese1", "riese2", "taiko_36"], tick: 3000, acc: "zwei", water: 0.5, drLP: 3500,
+      mot: [[0, 0, 2], [6, 2, 2], [1, 4, 2], [7, 6, 2], [0, 8, 8]], p2: { mel: "aah", bpm: 102 } },
+    /* Themberchaud, Meister der Flammen: G harmonisch Moll, majestätisch, Trompeten, Gong, knisternde Ticks */
+    themberchaud: { root: 43, bpm: 100, scale: "harm", drone: "vc", pad: "aah", mel: "trpst", col: "sitar", ost: "spic", bass: "tuba", brass: "blech", dr: ["taiko_36", "timp1", "darb_2"], tick: 7000, acc: "feuer",
+      mot: [[0, 0, 3], [3, 3, 1], [7, 4, 4], [8, 8, 2], [7, 10, 2], [11, 12, 2], [12, 14, 2]], p2: { bpm: 108 } },
+    /* Venomfang, der grüne Drache auf der Turmspitze: A dorisch, schnell, Klarinette schleicht, chromatisch rutschendes Pizzicato */
+    venomfang: { root: 45, bpm: 136, scale: "dorisch", drone: "vctrem", pad: "aah", mel: "klar", col: "glock", ost: "spic", bass: "kb", brass: "hornst", dr: ["taiko_42", "timp5", "snare1"], tick: 8000, acc: "gift",
+      mot: [[0, 0, 1], [1, 1, 1], [2, 2, 1], [3, 3, 1], [7, 4, 2], [6, 6, 2], [0, 8, 6]], p2: { mel: "oboe", bpm: 142 } },
+    /* die Weberin, Mutter des Schlunds (wahres Ende): Fis harmonisch Moll, Zither und Pizzicato spinnen ein Netz aus Sechzehnteln */
+    weberin: { root: 42, bpm: 120, scale: "harm", drone: "vctrem", pad: "aah", mel: "oboe", col: "zit", ost: "pizz", bass: "kb", brass: "pos", dr: ["taiko_36", "riese1", "schlitz2"], tick: 7000, acc: "netz",
+      mot: [[0, 0, 1], [3, 1, 1], [7, 2, 1], [6, 3, 1], [0, 4, 2], [11, 6, 2], [0, 8, 6]], p2: { mel: "aah", bpm: 126 } }
+  };
+  BOSSP.nezna = BOSSP.bugbear;
+  const BOSS_NAME = { glasstab: "Glasstab", erzpriesterin: "Erzpriesterin", bugbear: "Bugbear & Nezna", nezna: "Bugbear & Nezna", wraith: "Wraith", schmiedewaechter: "Schmiedewächter", chasme: "Chasme",
+    ilvaraW: "Ilvara", riese: "Rasender Riese", vrock: "Vrock", demogorgon: "Demogorgon", themberchaud: "Themberchaud", venomfang: "Venomfang", weberin: "Weberin" };
   /* Akkordfolgen (Stufen der Leiter, 0 = Tonika). Erkundung: zwei Takte je Akkord, Kampf: ein Takt. */
   const PROG_EXP = [[0, 5, 2, 6], [0, 3, 5, 4], [0, 6, 5, 6], [0, 2, 3, 0], [0, 5, 3, 6], [0, 3, 6, 2]];
   const PROG_CMB = [[0, 0, 5, 6], [0, 5, 3, 4], [0, 6, 5, 4], [0, 3, 0, 4], [0, 1, 0, 6], [0, 5, 6, 4]];
@@ -112,6 +174,8 @@
   /* Lautheitsangleich je Gebiet (dB, aus Offline-Messungen: mittlerer RMS über Erkundung/Kampf/Elite auf Torhof-Niveau)
      und Dämpfung der Erkundungsebenen, wo die Ruhe-Besetzung sonst zu nah am Kampf läge */
   const TRIM = { keller: 3, verlies: 3.5, hafen: 0.8, glocken: 1.9, schlund: 2.6, schmiede: 0.8, zinnen: 0.6, see: 2.7, glut: 0.4, sturm: 0.3, hallen: 0.2, wehrgang: -0.3 };
+  /* Lautheitsangleich der Bossmusik (dB, Offline-Messung auf Boss1-Niveau) */
+  const BTRIM = { glasstab: 0.4, erzpriesterin: 3, bugbear: -1.2, nezna: -1.2, wraith: 2, schmiedewaechter: 1.7, chasme: 0.5, ilvaraW: 1.7, riese: 0.8, demogorgon: 2 };
   const EXQ = { hafen: 0.78, wehrgang: 0.82 };
   const TIER_NAME = ["erkundung", "spannung", "kampf", "elite", "boss"];
   /* Ebenenpegel je Stufe (Erkundung, Spannung, Kampf, Elite, Boss) */
@@ -159,10 +223,13 @@
     };
     M.busExp = bus(1, 0, 0.45);      /* Bordun, Chor */
     M.busMel = bus(1, -0.12, 0.5);   /* Melodie */
-    M.busCol = bus(1, 0.3, 0.6);     /* Farbe */
+    /* Farbe und Trommeln laufen über je einen Tiefpass (offen bei 20 kHz; See: Glocken unter Wasser, gedämpfte Trommeln) */
+    const lpBus = (verb) => { const f = c.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 20000; f.Q.value = 0.6; f.connect(M.lay); const v = c.createGain(); v.gain.value = verb; f.connect(v); v.connect(verbIn); return f; };
+    M.colF = lpBus(0.6); M.drF = lpBus(0.2);
+    M.busCol = bus(1, 0.3, 0, M.colF);     /* Farbe */
     M.busTen = bus(0, 0, 0.3);       /* Spannung */
     M.busCmb = bus(0, 0.08, 0.25);   /* Ostinato, Bass, Blech */
-    M.busDr = bus(0, 0, 0.2);        /* Trommeln */
+    M.busDr = bus(0, 0, 0, M.drF);   /* Trommeln */
     M.busPuls = bus(0, 0, 0.08);     /* prozeduraler Pulsbass */
     M.busPerc = bus(0, 0, 0.12);     /* prozedurale Sub-Trommel und Ticks */
     M.busSt = bus(1, 0, 0.55, M.out); /* Stinger */
@@ -186,6 +253,11 @@
       o1.frequency.value = o2.frequency.value = 220; o1.connect(g); o2.connect(g); o1.start(); o2.start();
       P.v.push({ g, o: [o1, o2], m: 57 });
     }
+    /* Wellen (See): langsamer Sinus hebt und senkt Lautstärke und Filter des Teppichs und der Ruheebene; Tiefe 0 = aus */
+    const W = (M.wav = {});
+    W.o = c.createOscillator(); W.o.frequency.value = 0.085; W.amp = c.createGain(); W.amp.gain.value = 0; W.flt = c.createGain(); W.flt.gain.value = 0;
+    W.amp2 = c.createGain(); W.amp2.gain.value = 1.4;
+    W.o.connect(W.amp); W.o.connect(W.flt); W.amp.connect(P.g.gain); W.amp.connect(W.amp2); W.amp2.connect(M.busExp.gain); W.flt.connect(P.f.frequency); W.o.start();
     P.sub = c.createOscillator(); P.sub.type = "sine"; P.subG = c.createGain(); P.subG.gain.value = 0.07; P.sub.connect(P.subG); P.subG.connect(P.g); P.sub.start();
   }
 
@@ -214,6 +286,20 @@
     S.ns.start();
     S.ho = c.createOscillator(); S.ho.type = "sine"; S.ho.frequency.value = 48; S.hg = c.createGain(); S.hg.gain.value = 0;
     S.ho.connect(S.hg); S.hg.connect(M.out); S.ho.start();
+    /* Walgesang (See): Dreieck mit Vibrato, durch Bandpass, viel Hall; gleitet langsam zwischen Leitertönen */
+    S.wo = c.createOscillator(); S.wo.type = "triangle"; S.wo.frequency.value = 110;
+    S.wv = c.createOscillator(); S.wv.frequency.value = 4.2; S.wvg = c.createGain(); S.wvg.gain.value = 14; S.wv.connect(S.wvg); S.wvg.connect(S.wo.detune); S.wv.start();
+    S.wf = c.createBiquadFilter(); S.wf.type = "bandpass"; S.wf.frequency.value = 600; S.wf.Q.value = 1.6;
+    S.wg = c.createGain(); S.wg.gain.value = 0; S.wo.connect(S.wf); S.wf.connect(S.wg); S.wg.connect(M.busCol);
+    const wvb = c.createGain(); wvb.gain.value = 0.9; S.wg.connect(wvb); wvb.connect(M.verbIn); S.wo.start();
+  }
+  /* ein Walruf: von Ton a nach b gleiten (MIDI), Dauer d Sekunden */
+  function whale(t, a, b, d, v) {
+    const S = M.syn; if (!S || !S.wo) return;
+    const fa = hz(a), fb = hz(b);
+    S.wo.frequency.setValueAtTime(fa, t); S.wo.frequency.exponentialRampToValueAtTime(fb, t + d * 0.75);
+    S.wf.frequency.setValueAtTime(fa * 2.2, t); S.wf.frequency.exponentialRampToValueAtTime(fb * 2.2, t + d * 0.75);
+    S.wg.gain.setTargetAtTime(v, t, d * 0.18); S.wg.gain.setTargetAtTime(0, t + d * 0.6, d * 0.2);
   }
   const hz = m => 440 * Math.pow(2, (m - 69) / 12);
   /* ein Ton des Pulsbasses: Pegel und Filter springen weich auf und fallen ab */
@@ -353,16 +439,29 @@
   /* ---------- Gebiet setzen ---------- */
   const ambushFight = () => !!(Z.ambush && Z.ambush() && Z.ambush().state === "fight");
   const trialFight = () => { const S = Z.erkundung && Z.erkundung(); return !!(S && S.trial && S.trial.state === "fight"); };
-  M.set = (id) => {
+  /* welcher Boss ist gemeint? Arena → ihr Boss, sonst der lebende Boss (Wächter) */
+  function bossKey(id) {
+    if (id !== "boss1" && id !== "final") return id;
+    const lv = Z.level; let b = null;
+    if (lv && lv.arena && Z.ARENAS && Z.ARENAS[lv.arena]) b = Z.ARENAS[lv.arena].boss;
+    if (!b && Z.boss && !Z.boss.dead && !Z.bossDefeated) b = Z.boss.id;
+    return b && BOSSP[b] ? "b:" + b + ":" + id : id;
+  }
+  function profFor(key) {
+    if (key.startsWith("b:")) { const [, b, base] = key.split(":"); return Object.assign({}, PROF[base], BOSSP[b], { boss: true, bossId: b, base }); }
+    return PROF[key] || PROF.torhof;
+  }
+  M.set = (id0) => {
     M.init(); if (!A.ok) return;
+    const id = bossKey(id0);
     if (M.id === id) return;
     /* Hinterhalt und Prüfungskammer: Tonart des Gebiets behalten, nur in den vollen Kampf gehen */
-    if (id === "boss1" && M.prof && !M.prof.boss && ambushFight()) { M.ambush = true; M.stinger("hinterhalt"); return; }
-    if (id === "boss1" && M.prof && !M.prof.boss && trialFight()) { M.trialOn = true; M.push(0.8, 3); return; }
+    if (id0 === "boss1" && M.prof && !M.prof.boss && ambushFight()) { M.ambush = true; M.stinger("hinterhalt"); return; }
+    if (id0 === "boss1" && M.prof && !M.prof.boss && trialFight()) { M.trialOn = true; M.push(0.8, 3); return; }
     const prevBoss = M.prof && M.prof.boss, sameLevel = M.levelRef && M.levelRef === Z.level, hadProf = !!M.prof;
-    const prof = PROF[id] || PROF.torhof;
-    M.id = id; M.prof = prof; M.levelRef = Z.level; M.ambush = false;
-    M.trim = Math.pow(10, (TRIM[id] || 0) / 20); M.exq = EXQ[id] || 1;
+    const prof = profFor(id);
+    M.id = id; M.prof = prof; M.levelRef = Z.level; M.ambush = false; M.p2 = false;
+    M.trim = Math.pow(10, ((prof.bossId ? BTRIM[prof.bossId] : TRIM[id]) || 0) / 20); M.exq = EXQ[id] || 1;
     const now = A.ctx.currentTime;
     /* Boss tritt mitten im Gebiet auf: Rückwärts-Becken atmet ein, dann setzt alles auf einmal ein */
     let start = now + 0.35;
@@ -375,7 +474,8 @@
     M.next = start; M.step = 0; M.phraseN = 0; M.playRun = 0; M.restRun = 1; M.lastVar = M.lastVar2 = null;
     const R = Z.Rng(id.length * 131 + id.charCodeAt(0) * 7 + id.charCodeAt(id.length - 1));
     M.mel = newMotif(R, !!prof.boss); M.phrase = null;
-    M.progE = R.pick(PROG_EXP); M.progC = R.pick(PROG_CMB); M.ost = R.pick(OSTP);
+    if (prevBoss && !prof.boss) M.leit = null;
+    M.progE = R.pick(prof.progE || PROG_EXP); M.progC = R.pick(prof.progC || PROG_CMB); M.ost = R.pick(OSTP);
     M.combat = !!(prof.boss && Z.boss && !Z.bossDefeated); M.calmT = 0; M.rage = 0;
     if (!sameLevel) {
       M.C = M.combat ? 1 : 0; M.intensity = Math.min(M.intensity, 0.2); M.heat = 0; M.pushes.length = 0; M.leit = null;
@@ -389,8 +489,13 @@
     }
     if (M.syn) {
       const pw = prof.pw || "sawtooth"; if (M.syn.o1.type !== pw) M.syn.o1.type = pw;
-      M.syn.nf.frequency.setTargetAtTime(prof.tick || 7000, now, 0.2);
+      M.syn.nf.frequency.setTargetAtTime(prof.tick || 7000, now, 0.2); M.syn.nf.Q.setTargetAtTime(prof.tickQ || 1.4, now, 0.2);
     }
+    /* Klangfarbe des Gebiets: gedämpfte Trommeln, Farbe unter Wasser, Wellen im Teppich */
+    if (M.drF) M.drF.frequency.setTargetAtTime(prof.drLP || 20000, now, 0.3);
+    if (M.colF) M.colF.frequency.setTargetAtTime(prof.colLP || 20000, now, 0.3);
+    if (M.wav) { M.wav.amp.gain.setTargetAtTime(prof.water ? 0.15 * prof.water : 0, now, 1); M.wav.flt.gain.setTargetAtTime(prof.water ? 380 * prof.water : 0, now, 1); }
+    M.whaleT = 2;
     preload(prof);
     if (prof.boss && sameLevel && !prevBoss) M.stinger("boss");
   };
@@ -398,12 +503,13 @@
     const near = (inst, c, r) => INST[inst] && INST[inst].forEach(n => { if (Math.abs(n - c) < r) A.load(K(inst + "_" + n)); });
     near(p.drone, p.root - 12, 20); if (p.pad) near(p.pad, p.root + 12, 16); near(p.mel, p.root + 12, 22); near(p.col, p.root + 19, 22);
     if (p.ost) { near(p.ost, p.root - 4, 20); near(p.bass, p.root - 18, 16); near(p.brass, p.root + 4, 18); near("vlntrem", p.root + 24, 14); near("aah", p.root + 12, 14); near("trpst", p.root + 12, 14); }
+    if (p.ostC) near(p.ostC, p.root - 4, 20);
     near("timpt", p.root - 12, 10); near("pizz", p.root - 6, 14); near("glock", p.root + 36, 14); near("cel", p.root + 24, 12);
     (p.dr || []).forEach(d => A.load(K(d)));
     ["crash", "timproll", "beckenroll", "glock_91", "glock_96", "gong"].forEach(n => A.load(K(n)));
   }
   M.stop = () => { M.id = null; M.prof = null; if (M.pad && A.ctx) M.pad.g.gain.setTargetAtTime(0, A.ctx.currentTime, 0.8); };
-  M.key = () => { const p = M.prof || PROF.torhof; return { root: p.root, scale: p.scale, bpm: p.bpm, name: NN[p.root % 12] + " " + SC_NAME[p.scale] }; };
+  M.key = () => { const p = M.prof || PROF.torhof; return { root: p.root, scale: p.scale, bpm: p.bpm, name: NN[p.root % 12] + " " + SC_NAME[p.scale], boss: p.bossId ? BOSS_NAME[p.bossId] : null }; };
 
   /* ---------- Schübe anderer Module ---------- */
   let pushId = 0;
@@ -427,8 +533,8 @@
   const dealtMap = new WeakMap();
   function gameIntensity(dt) {
     const P = Z.player, lv = Z.level, parts = M.parts;
-    if (!P || !lv || P.dead) { M.heat = 0; M.eliteNear = false; for (const k in parts) parts[k] = 0; return 0; }
-    let s = 0, n = 0, elite = false, trial = false, dealt = 0;
+    if (!P || !lv || P.dead) { M.heat = 0; M.eliteNear = false; M.miniNear = false; for (const k in parts) parts[k] = 0; return 0; }
+    let s = 0, n = 0, elite = false, trial = false, dealt = 0, miniNear = false;
     for (const e of Z.enemies || []) {
       if (e.dead) continue;
       /* ausgeteilter Schaden (Anteil am Leben der Gegner) */
@@ -436,8 +542,11 @@
       if (!e.aware || e.dummy || e.ally || e.sleep) continue;
       const dx = Math.abs(e.x - P.x), dy = Math.abs(e.y - P.y); if (dx > 420 || dy > 260) continue;
       const near = clamp(1.2 - Math.hypot(dx, dy * 1.3) / 380, 0.15, 1);
-      s += near * (e.elite ? 2 : 1) * (e.def && e.def.boss ? 3 : 1); n++;
-      if (e.elite && near > 0.3) elite = true;
+      /* Mini-Bosse (nemesis.js) und Nemesis zählen wie starke Elites */
+      const mini = !!(e.nmMini || e.nm);
+      s += near * (e.elite ? 2 : 1) * (mini ? 2.5 : 1) * (e.def && e.def.boss ? 3 : 1); n++;
+      if ((e.elite || mini) && near > 0.3) elite = true;
+      if (mini && near > 0.3) miniNear = true;
       if (e.trial) trial = true;
     }
     /* Hitze: Treffer einstecken und Gegner fällen hält die Kampfmusik kurz am Leben */
@@ -456,7 +565,8 @@
     if (lv.hub) I = Math.min(I, 0.3);
     if (M.trialOn && !trialFight()) M.trialOn = false;
     if (M.trialOn) { trial = true; parts.trial = 0.7; I = Math.max(I, 0.7); }
-    M.eliteNear = elite; M.trial = trial;
+    if (miniNear) { parts.elite = 0.85; I = Math.max(I, 0.85); }
+    M.eliteNear = elite; M.trial = trial; M.miniNear = miniNear;
     if (Z.boss && !Z.bossDefeated && !Z.boss.dead) I = 1;
     M.ambush = ambushFight();
     if (M.ambush) I = Math.max(I, 0.9);
@@ -557,6 +667,53 @@
     while (M.next < now + 0.16 && guard++ < 16) { scheduleStep(M.next, beat, I); M.step++; M.next += beat; }
   };
 
+  /* ---------- Akzente je Gebiet/Boss (nur in Kampf, Elite, Boss) ---------- */
+  const ACC = {
+    /* Keller im Kampf: Posaunen-Stoß mit kleiner Sekunde, tiefes Geigen-Tremolo im Halbtonabstand, Pauke auf der Drei */
+    drohung: ({ p, t, st, bar, beat, tr, tone, chordStart }) => {
+      if (chordStart) { playNote("pos", tone(0, p.root - 12), t, 0.12, beat * 2.5, M.busCmb); playNote("pos", tone(0, p.root - 12) + 1, t + 0.01, 0.08, beat * 2, M.busCmb); }
+      if (st === 0 && bar % 2 === 0) { playNote("vctrem", p.root - 12, t, 0.09, beat * 16, M.busCmb); playNote("vctrem", p.root - 11, t, 0.06, beat * 16, M.busCmb); }
+      if (st === 4) playNote("timpt", tone(0, p.root - 12), t, 0.22 + 0.08 * (tr - 2), beat * 2, M.busCmb);
+    },
+    glas: ({ p, t, st, beat, tone, chordStart }) => {
+      if (st % 2 === 1 && Math.random() < 0.45) playNote("glas", tone(Math.floor(Math.random() * 3), p.root + 24), t, 0.06, beat * 3, M.busCol);
+      if (chordStart) for (let i = 0; i < 6; i++) playNote("cemb", tone(i % 4, p.root + 12 * (1 + Math.floor(i / 4))), t + i * beat * 0.5, 0.07, beat, M.busCmb);
+    },
+    ritual: ({ p, t, st, bar, beat, tone }) => {
+      if (st === 0 && bar % 2 === 0) [0, 2].forEach(i => playNote("ooh", tone(i, p.root), t, 0.08, beat * 16, M.busCmb));
+      if (st === 4) playNote("hglo", tone(bar % 2 ? 2 : 0, p.root + 24), t, 0.07, beat * 6, M.busCol);
+    },
+    kriegstrommel: ({ p, t, st, I }) => {
+      const a = st === 0 || st === 3 || st === 6; if (p.dr) hit(p.dr[1], t, a ? 0.42 : 0.16 + 0.1 * I, a ? 1 : 1.12);
+    },
+    geist: ({ p, t, st, bar, beat, tone }) => {
+      if (st === 0 && bar % 4 === 3) swell(t + beat * 8, 0.12);
+      if (st === 0 && bar % 2 === 0) { playNote("ooh", tone(0, p.root + 12), t, 0.07, beat * 14, M.busCmb); playNote("ooh", tone(0, p.root + 13), t, 0.04, beat * 14, M.busCmb); }
+    },
+    amboss: ({ t, st }) => { if (st === 2 || st === 6) hit("amboss", t, 0.16, 1 + rnd(-0.02, 0.02), M.busDr); },
+    summen: ({ p, t, st, bar, beat }) => {
+      tick(t + beat / 2, 0.035, 0.012);
+      if (st === 0 && bar % 2 === 0) hit("didgefx_" + (1 + Math.floor(Math.random() * 10)), t, 0.35, Math.pow(2, ((p.root - 37) % 12) / 12), M.busCmb);
+    },
+    wald: ({ p, t, beat, tone, chordStart }) => {
+      if (chordStart) for (let i = 0; i < 6; i++) playNote("fharfe", tone(i % 4, p.root + 12 * Math.floor(i / 4)), t + i * beat * 0.5, 0.09 - i * 0.008, beat * 3, M.busCmb);
+    },
+    riese: ({ p, t, st }) => { if (st === 0 || st === 4) { hit(st ? "riese3" : "riese1", t, 0.5, 0.9); kick(t, 0.7); } },
+    kreischen: ({ p, t, st, bar, beat }) => {
+      if (st === 0 && bar % 2 === 1) { playNote("vlntrem", p.root + 24, t, 0.05, beat * 6, M.busCmb); playNote("vlntrem", p.root + 25, t, 0.05, beat * 6, M.busCmb); }
+    },
+    zwei: ({ p, t, st, bar, beat, tone }) => {
+      if (st === 0 && bar % 2 === 0) { playNote("orgel", tone(0, p.root - 12), t, 0.08, beat * 15, M.busCmb); playNote("orgel", tone(0, p.root - 12) + 6, t, 0.06, beat * 15, M.busCmb); }
+    },
+    feuer: ({ p, t, st, bar }) => {
+      if (st === 0 && bar % 4 === 0) hit("gong", t, 0.12, 0.9, M.busCmb);
+      if (Math.random() < 0.35) tick(t + rnd(0, 0.1), 0.03, 0.008);
+    },
+    gift: ({ p, t, st, beat }) => { if (st >= 4) playNote("pizz", p.root + 12 - (st - 4), t, 0.09, beat * 0.8, M.busCmb); },
+    netz: ({ p, t, st, beat, tone }) => {
+      for (let k = 0; k < 2; k++) playNote(p.col, tone((st * 2 + k) % 4, p.root + 24), t + k * beat * 0.5, 0.045, beat * 0.8, M.busCol);
+    }
+  };
   function scheduleStep(t, beat, I) {
     const p = M.prof, st = M.step % 8, bar = Math.floor(M.step / 8), ph = M.step % 16;
     /* Stufenwechsel nur auf Grenzen: Kampf auf jede Viertel, Elite/Boss auf halbe Takte, abwärts auf die Eins */
@@ -573,7 +730,7 @@
     const chordStart = st === 0 && (!slow || bar % 2 === 0);
     if (st === 0 && bar % 8 === 0 && M.step > 0) {
       /* neue Akkordfolge alle 8 Takte, nie dieselbe zweimal */
-      const pool = combat ? PROG_CMB : PROG_EXP; let np; do { np = pick(pool); } while (np === prog && pool.length > 1);
+      const pool = combat ? (p.progC || PROG_CMB) : (p.progE || PROG_EXP); let np; do { np = pick(pool); } while (np === prog && pool.length > 1);
       if (combat) M.progC = np; else M.progE = np;
       if (Math.random() < 0.5) M.ost = pick(OSTP);
     }
@@ -635,11 +792,23 @@
     }
 
     /* --- Kampf, Elite, Boss --- */
+    /* --- Wasser (See, Demogorgon): Tropfen aus Celesta und seltene Walrufe, in jeder Stufe --- */
+    if (p.water) {
+      if (tr <= 1 && Math.random() < 0.09) playNote("cel", deg(p.scale, chord + pick([0, 2, 4, 7, 9, 11]), p.root + 36), t + beat * 0.5 * Math.floor(Math.random() * 2), 0.045, beat * 6, M.busCol);
+      if (st === 0 && (M.whaleT = (M.whaleT || 0) - 1) <= 0 && (tr <= 1 || Math.random() < 0.3)) {
+        M.whaleT = 10 + Math.floor(Math.random() * 10);
+        const a = deg(p.scale, pick([4, 5, 7]), p.root + 12), b = deg(p.scale, pick([0, 2, 9]), p.root + 12);
+        whale(t, a, b, beat * 8 * rnd(1.3, 2), 0.05 * p.water);
+        M.stats.whale = (M.stats.whale || 0) + 1;
+      }
+    }
+
+    /* --- Kampf, Elite, Boss --- */
     if (p.ost && combat) {
       const hi3 = tr >= 3, acc = st === 0 || st === 3 || st === 6; /* 3+3+2 */
-      const oi = M.ost[st];
-      playNote(p.ost, tone(oi, p.root - 12), t, (acc ? 0.22 : 0.14) + 0.04 * I, beat * 0.95, M.busCmb);
-      if ((I > 0.7 || hi3) && acc) playNote(p.ost, tone(oi, p.root), t, 0.1, beat * 0.9, M.busCmb);
+      const oi = M.ost[st], ost = p.ostC || p.ost;
+      playNote(ost, tone(oi, p.root - 12), t, (acc ? 0.22 : 0.14) + 0.04 * I, beat * 0.95, M.busCmb);
+      if ((I > 0.7 || hi3) && acc) playNote(ost, tone(oi, p.root), t, 0.1, beat * 0.9, M.busCmb);
       if (st === 0 || ((I > 0.65 || hi3) && (st === 3 || st === 6))) playNote(p.bass, tone(0, p.root - 24), t, st === 0 ? 0.3 : 0.2, beat * (st === 0 ? 3 : 2.2), M.busCmb);
       if (chordStart && p.brass && (I > 0.55 || hi3)) for (let i = 0; i < 3; i++) playNote(p.brass, tone(i, p.root), t + i * 0.008, 0.11, beat * 1.6, M.busCmb);
       if ((hi3 || I > 0.85 || M.rage > 0) && st === 0) for (const i of [1, 2]) playNote("vlntrem", tone(i, p.root + 24), t, 0.06 + 0.03 * M.rage, beat * 8.4, M.busCmb);
@@ -662,8 +831,16 @@
       /* Ticks: ab mittlerer Intensität Achtel, ab Elite Sechzehntel mit Betonung */
       if (hi3 || I > 0.6) {
         const v = hi3 ? 0.07 : 0.05;
-        tick(t, (st % 2 === 0 ? v : v * 0.6) * rnd(0.85, 1.1), st % 4 === 2 ? 0.05 : 0.022);
-        if (hi3) tick(t + beat / 2, v * 0.4 * rnd(0.8, 1.1));
+        const dm = p.tickDec ? p.tickDec / 0.022 : 1;
+        tick(t, (st % 2 === 0 ? v : v * 0.6) * rnd(0.85, 1.1), (st % 4 === 2 ? 0.05 : 0.022) * dm);
+        if (hi3) tick(t + beat / 2, v * 0.4 * rnd(0.8, 1.1), 0.022 * dm);
+      }
+      /* Akzent des Gebiets bzw. Bosses; Mini-Boss in der Nähe: Blech und Pauke auf jedem Akkord */
+      const fx = p.acc && ACC[p.acc];
+      if (fx) fx({ p, t, st, bar, beat, tr, I, tone, chordStart, hum });
+      if (M.miniNear && tr >= 3 && !p.boss) {
+        if (st === 0) { playNote("timpt", tone(0, p.root - 12), t, 0.3, beat * 3, M.busCmb); if (p.brass) [0, 1, 2].forEach(i => playNote(p.brass, tone(i, p.root), t, 0.09, beat * 3, M.busCmb)); }
+        if (st === 4 && bar % 2 === 1) playNote("timpt", tone(2, p.root - 12), t, 0.22, beat * 2, M.busCmb);
       }
       /* Pulsbass ab Elite: Sechzehntelraster, Grundton des Akkords, ab und zu die Quinte */
       if (hi3) {
@@ -758,6 +935,7 @@
       hit("gong", at, 0.25, 0.8, B);
       for (const i of [0, 1, 2]) playNote("aah", tn(i, p.root + 12, 0), at, 0.12, 3.5, B, 1);
       kick(at, 0.7);
+      if (p.mot) M.bossMotif(false, at + beat * 2);
     },
     phase: ({ p, t, tn, B }) => { /* Bossphase: Paukenwirbel → Schlag, Blech eine Stufe höher, Wut steigt */
       hit("timproll", t, 0.3, 1, B);
@@ -767,6 +945,9 @@
       const b = p.brass || "blech";
       for (let i = 0; i < 3; i++) playNote(b, tn(i, p.root + 1), tt, 0.14, 2, B, 1);
       M.rage = Math.min(1, M.rage + 0.6);
+      /* zweite Phase: Besetzung/Tempo des Bosses wechseln, Leitmotiv eine Oktave höher und lauter */
+      if (p.boss && p.p2 && !M.p2) { M.p2 = true; M.prof = Object.assign({}, p, p.p2); preload(M.prof); }
+      if (p.mot) M.bossMotif(true, tt + 0.6);
       duck(0.3, tt, 1.5);
     },
     sieg: ({ p, t, B }) => { /* Boss besiegt: aufgehellter Schlussakkord (Pikardie-Terz) */
@@ -861,6 +1042,20 @@
     return t;
   };
   M.motifs = () => Object.keys(MOTIFS);
+  /* Leitmotiv des Bosses: Blech (und das Melodie-Instrument) spielt es, danach zitiert die Melodie es eine Weile */
+  M.bossMotif = (wild, at) => {
+    const p = M.prof; if (!p || !p.mot || !A.ok || !M.out) return 0;
+    const beat = M.beat || 60 / p.bpm / 2, t = Math.max(at || 0, A.ctx.currentTime + 0.05), b = p.brass || "horn";
+    for (const [s0, st, l] of p.mot) {
+      const m = p.root + s0 + (wild ? 12 : 0);
+      playNote(b, m, t + st * beat, wild ? 0.14 : 0.12, beat * l + 0.08, M.busSt, 1);
+      playNote(p.mel, m + 12, t + st * beat, 0.07, beat * l + 0.08, M.busSt, 1);
+    }
+    if (wild) playNote("vlntrem", p.root + 24, t, 0.05, beat * 12, M.busSt, 1);
+    M.leit = { until: A.ctx.currentTime + 40, notes: p.mot.filter(n => n[1] < 16).map(([s0, st, l]) => ({ s: st, l, semi: s0 + (wild ? 12 : 0) })) };
+    M.stats.stingers["motiv:boss"] = (M.stats.stingers["motiv:boss"] || 0) + 1;
+    return t;
+  };
   /* Samen-Motive für nemesis.js (ruft Z.music.motiv(seed, o) auf, bevor es selbst spielt): dieselbe Gestalt je Samen,
      aber in Tonart, Leiter und Tempo des laufenden Gebiets und auf den nächsten halben Takt gesetzt.
      o: { major, shape:[Stufen], inst, vol }. Gibt den Startzeitpunkt zurück (≠ false → nemesis.js spielt nicht selbst). */
@@ -885,6 +1080,8 @@
     duck(0.25, t0, beat * s);
     M.stats.stingers["motiv:seed"] = (M.stats.stingers["motiv:seed"] || 0) + 1;
     M.heat = Math.max(M.heat || 0, 0.8);
+    /* Mini-Boss/Nemesis: die Melodie zitiert das Motiv eine Weile (jede zweite Phrase) */
+    M.leit = { until: A.ctx.currentTime + (o.leit || 18), notes: (() => { let q = 0; return sh.map((d, i) => { const n = { s: q, l: rh[i], semi: dg(d) - p.root }; q += rh[i]; return n; }).filter(n => n.s < 16); })() };
     return t0;
   };
 
