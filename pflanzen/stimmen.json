@@ -1,14 +1,4 @@
 {
- "biber": {
-  "autor": "Flopinot2012",
-  "beschr": "Three bars of Biber 's \" Rosenkrantzsonata \" n°XI, as heard, reconstructed for solo violin through a software, by the user",
-  "f": "biber.mp3",
-  "lizenz": "CC BY-SA 4.0",
-  "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-  "quelle": "https://commons.wikimedia.org/wiki/File:Biber_Sonata_XI_1_as_heard.flac",
-  "titel": "Biber Sonata XI 1 as heard.flac",
-  "was": "Fiepen und Nagen"
- },
  "buntspecht": {
   "autor": "Sander Pieterse",
   "beschr": "Grote Bonte Specht (Dendrocopos major) · call",
@@ -67,7 +57,7 @@
   "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
   "quelle": "https://commons.wikimedia.org/wiki/File:Male_roe_deer_growl.ogg",
   "titel": "Male roe deer growl.ogg",
-  "was": "Schreckbellen"
+  "was": "Ruf eines Rehbocks"
  },
  "rothirsch": {
   "autor": "Jugrü",
