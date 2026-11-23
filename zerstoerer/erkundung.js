@@ -133,6 +133,8 @@
     if (o.open) return;
     if (!hasKey()) {
       A.play("chain", { vol: 0.5 });
+      /* das Schild an der Tür (schilder.js) sagt schon, wo der Schlüssel liegt: dann nur ein kurzes „Verschlossen“ */
+      if (Z.schilder && Z.schilder.hat("schloss")) { toast("⚷ <b>" + L(["Verschlossen", "Locked"]) + "</b>", 1600, Pat(), { prio: 3 }); return; }
       toast("⚷ <b>" + L(["Verschlossen", "Locked"]) + "</b><small>" + L(["Der Schlüssel liegt in einem anderen Zweig.", "The key lies in another branch."]) + "</small>", 3000, Pat(), { prio: 3 });
       return;
     }
@@ -195,7 +197,8 @@
     if (!o.pool.length) o.pool = ["goblin"];
     o.state = "fight"; o.t = 0; o.wave = 0; sealTrial(o);
     A.play("gong", { vol: 0.7 }); FX.flashScreen && FX.flashScreen("#6a3a10", 0.3); FX.addShake(4);
-    toast("<b>" + L(["Prüfung", "Trial"]) + "</b><br><small>" + L(["Besiege alle Wellen. Dann gehört der Schatz dir.", "Defeat every wave. Then the treasure is yours."]) + "</small>", 2600, null, { prio: 2, art: "gefahr" });
+    /* Regeln stehen auf dem Schild am Altar (schilder.js) – sonst kurz als Meldung */
+    if (!(Z.schilder && Z.schilder.hat("pruefung"))) toast("<b>" + L(["Prüfung", "Trial"]) + "</b><br><small>" + L(["Besiege alle Wellen. Dann gehört der Schatz dir.", "Defeat every wave. Then the treasure is yours."]) + "</small>", 2600, null, { prio: 2, art: "gefahr" });
     Z.music && Z.music.set && Z.music.set("boss1");
     later(() => spawnWave(o), 700);
   }

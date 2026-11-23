@@ -1474,7 +1474,7 @@
     if (toastCd > 0 || !Z.meta || !Z.toast) return;
     const m = Z.meta; m.fallenSeen = m.fallenSeen || {};
     const sk = Z.trapSkin ? Z.trapSkin() : {}, biome = Z.level && Z.level.biome;
-    const tell = (key, n, d, x, y) => { if (m.fallenSeen[key] || !near(x, y, 150) || !vis(x, y, -20)) return false; m.fallenSeen[key] = 1; Z.saveMeta && Z.saveMeta(); toastCd = 6; /* Erstkontakt: kleine Zeile direkt an der Falle statt einer Meldung oben */ if (Z.ui && Z.ui.notify) Z.ui.notify("⚠ <b>" + L(n) + "</b><small>" + L(d) + "</small>", { prio: 1, art: "gefahr", ort: "welt", x, y: y - 6, dauer: 3400 }); else Z.toast("<b>" + L(n) + "</b><br><small>" + L(d) + "</small>", 3000); return true; };
+    const tell = (key, n, d, x, y) => { if (m.fallenSeen[key] || !near(x, y, 150) || !vis(x, y, -20)) return false; m.fallenSeen[key] = 1; Z.saveMeta && Z.saveMeta(); toastCd = 6; /* Erstkontakt: steht schon ein Warnschild davor (schilder.js), reicht das */ if (Z.schilder && Z.schilder.hat("falle:" + key)) return true; /* sonst kleine Zeile direkt an der Falle statt einer Meldung oben */ if (Z.ui && Z.ui.notify) Z.ui.notify("⚠ <b>" + L(n) + "</b><small>" + L(d) + "</small>", { prio: 1, art: "gefahr", ort: "welt", x, y: y - 6, dauer: 3400 }); else Z.toast("<b>" + L(n) + "</b><br><small>" + L(d) + "</small>", 3000); return true; };
     for (const tr of list) { const d = D[tr.k]; if (d && tell(tr.k, d.n, d.d, tr.x, tr.y || tr.fy)) return; }
     const CH = { pendel: "p", flamme: "f", stachel: "k", stein: "r", saege: "z" };
     for (const tr of Z.traps || []) {
@@ -1484,6 +1484,20 @@
     }
     void biome;
   }
+  /* Für die Warnschilder (schilder.js): alle noch unbekannten Fallen dieses Gebiets mit Name, Satz und Bodenpunkt */
+  Z.fallenNeu = function () {
+    const m = Z.meta || {}, seen = m.fallenSeen || {}, out = [], sk = Z.trapSkin ? Z.trapSkin() : {};
+    const fl = (x, y) => { try { return api.floorBelow(Math.floor(x / T), Math.floor(y / T)); } catch (_) { return y; } };
+    for (const tr of list) { const d = D[tr.k]; if (!d || seen[tr.k]) continue; const x = tr.x, y = tr.y || tr.fy || (tr.ay != null ? fl(x, tr.ay + 8) : null); if (Number.isFinite(x) && Number.isFinite(y)) out.push({ key: tr.k, n: d.n, d: d.d, x, y }); }
+    const CH = { pendel: "p", flamme: "f", stachel: "k", stein: "r", saege: "z" };
+    for (const tr of Z.traps || []) {
+      if (!NAMES0[tr.k]) continue;
+      const n = (sk.name && sk.name[CH[tr.k]]) || NAMES0[tr.k], key = tr.k + ":" + L(n); if (seen[key]) continue;
+      const x = tr.x != null ? tr.x : tr.ax, y = tr.k === "pendel" ? tr.ay + tr.len + 17 : tr.k === "stein" ? fl(x, tr.ay + 8) : tr.y;
+      if (Number.isFinite(x) && Number.isFinite(y)) out.push({ key, n, d: DESC0[tr.k], x, y });
+    }
+    return out;
+  };
   const up0 = Z.updateParcours;
   Z.updateParcours = function (dt) {
     if (up0) up0.apply(this, arguments);

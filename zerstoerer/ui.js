@@ -631,6 +631,8 @@
      Die volle Übersicht gibt es im Pausenmenü („Steuerung“). */
   ui.tutorial = () => {
     Z.meta.tut = true; Z.saveMeta();
+    /* Lernschilder in Lager und Torhof (schilder.js) zeigen die Steuerung an Ort und Stelle – dann keine Übersicht oben */
+    if (Z.schilder && Z.schilder.aktiv()) return;
     setTimeout(() => {
       if (touchy()) { ui.notify("<b>" + esc(t("tut")) + "</b><br><small>" + esc(t("ctrlTouch")) + "</small>", { prio: 2, art: "pergament", dauer: 9000, icon: "✋" }); return; }
       const k = a => ui.key(a) + " " + esc(L(ACT_NAMES[a]));

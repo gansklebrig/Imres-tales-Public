@@ -159,6 +159,8 @@
       const hand = slot === "a1" ? L(["Hand 1", "Hand 1"]) : L(["Hand 2", "Hand 2"]);
       const k = keyHint(slot) || (inp.device === "touch" ? L(["Knopf „Waffe " + (slot === "a1" ? 1 : 2) + "“", "button 'Weapon " + (slot === "a1" ? 1 : 2) + "'"]) : "");
       const both = P.slots.a1 && P.slots.a2;
+      /* Tasten stehen auf dem Schild am Ständer: dann nur kurz, was in welcher Hand liegt */
+      if (Z.schilder && Z.schilder.hat("staender")) { later(() => ui.notify("<b>" + esc(Z.itemTitle(it)) + "</b> " + L(["liegt in ", "is in "]) + hand, { prio: 1, art: "gold", icon: "⚒", dauer: 2600, key: "ständer" }), Z.presentItem ? 700 : 200); return; }
       later(() => ui.notify("<b>" + esc(Z.itemTitle(it)) + "</b> " + L(["liegt in ", "is in "]) + hand + " – " + L(["angreifen mit ", "attack with "]) + k +
         "<br><small>" + (both ? L(["Beide Hände voll. Nimmst du noch etwas, wählst du mit ", "Both hands full. Pick up another and choose with "]) + keyHint("a1") + " / " + keyHint("a2") + L([", welche Hand tauscht. Probier sie an der Puppe aus!", " which hand swaps. Try them on the dummy!"]) : L(["Eine Hand ist noch frei – nimm dir eine zweite Waffe.", "One hand is still free – take a second weapon."])) + "</small>", { prio: 2, art: "gold", icon: "⚒", dauer: 4200, key: "ständer" }), Z.presentItem ? 700 : 200);
     }
@@ -531,7 +533,9 @@
       const P = Z.player; if (!Z.level || !Z.level.hub || !P || P.slots.a1 || P.slots.a2) return;
       const g = Z.level.props.find(p => p.id === "G");
       const k = inp.device === "touch" ? "✋" : inp.label("use");
-      ui.say && g && ui.say(g.x * T + 8, g.y * T - 22, "Friedrich", L(["Der Waffenständer da drüben – nimm dir zwei Waffen mit. Taste „" + k + "“ zum Aufheben.", "The weapon rack over there – take two weapons. Press '" + k + "' to pick up."]), 5200);
+      /* die Taste steht auf dem Schild am Ständer – Friedrich zeigt nur hin */
+      const sign = Z.schilder && Z.schilder.hat("staender");
+      ui.say && g && ui.say(g.x * T + 8, g.y * T - 22, "Friedrich", sign ? L(["Der Waffenständer da drüben – nimm dir zwei Waffen mit. Lies das Schild.", "The weapon rack over there – take two weapons. Read the sign."]) : L(["Der Waffenständer da drüben – nimm dir zwei Waffen mit. Taste „" + k + "“ zum Aufheben.", "The weapon rack over there – take two weapons. Press '" + k + "' to pick up."]), 5200);
     }, 2200);
   }
 
@@ -578,7 +582,8 @@
     if (near && !ui.choiceActive && ui.worldLabel) {
       /* Schild über dem Gestell – im gemeinsamen Stil (Eisenplakette, Tastenkappen) */
       const cx = (x0 + x1) / 2, both = P.slots.a1 && P.slots.a2;
-      ui.worldLabel("staender", { x: cx, y: y - 42, cls: "zwei", art: "gold", jetzt: true,
+      /* steht das gemalte Schild über dem Gestell (schilder.js), braucht es keine Plakette mehr */
+      if (!(Z.schilder && Z.schilder.hat("staender"))) ui.worldLabel("staender", { x: cx, y: y - 42, cls: "zwei", art: "gold", jetzt: true,
         html: L(["Waffenständer", "Weapon rack"]) + "<small>" + (ui.key("use") || "✋") + " " + L(["aufheben", "pick up"]) + (both && ui.key("a1") ? " · " + ui.key("a1") + ui.key("a2") + " " + L(["Hand wählen", "choose hand"]) : " · " + L(["zwei Hände, zwei Waffen", "two hands, two weapons"])) + "</small>" });
       Z.pickups.forEach((p, i) => { if (p.rack && p.it && Math.abs(p.x - px) < 34) ui.worldLabel("staender" + i, { x: p.x, y: y - 28, text: Z.itemTitle(p.it), cls: "leise", jetzt: true }); });
     }

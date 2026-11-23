@@ -329,7 +329,7 @@
     let hit = null;
     if (G && G.crack.size) for (let tx = Math.floor(P.x / T) - 1; tx <= Math.floor((P.x + P.w) / T) + 1 && !hit; tx++) for (const ty of [fy, fy + 1]) { const c = G.crack.get(ty * lv.W + tx); if (c) { hit = c; break; } }
     if (hit && erde) { breakFloor(hit.gt); return; }
-    if (hit && !erde) { const k = "erde_no"; if (!G.hinted.has(k)) { G.hinted.add(k); notify("⛰ <b>" + L(["Der Boden knirscht", "The floor creaks"]) + "</b><small>" + L(["Nur ein Bodenstampfer mit der Erdrune bricht ihn.", "Only a ground pound with the Earth Rune breaks it."]) + "</small>", { prio: 1, ort: "welt", x: P.x + P.w / 2, y: P.y - 8, dauer: 3200 }); } }
+    if (hit && !erde) { const k = "erde_no"; if (!G.hinted.has(k) && !(Z.schilder && Z.schilder.hat("rune:" + hit.gt.cell))) { G.hinted.add(k); notify("⛰ <b>" + L(["Der Boden knirscht", "The floor creaks"]) + "</b><small>" + L(["Nur ein Bodenstampfer mit der Erdrune bricht ihn.", "Only a ground pound with the Earth Rune breaks it."]) + "</small>", { prio: 1, ort: "welt", x: P.x + P.w / 2, y: P.y - 8, dauer: 3200 }); } }
     if (erde) {
       /* Beben: weiterer Ring */
       const x = P.x + P.w / 2, y = P.y + P.h;
@@ -677,6 +677,8 @@
       const d = Math.hypot(gt.hx - px, (gt.hy - py) * 1.4);
       if (d > 130 || G.hinted.has(gt.cell)) continue;
       G.hinted.add(gt.cell);
+      /* steht ein Schild an der Sperre (schilder.js), erzählt das schon alles */
+      if (Z.schilder && Z.schilder.hat("rune:" + gt.cell)) continue;
       const owned = has(gt.kind), d2 = MR[gt.kind];
       notify((owned ? "ᛟ " : "? ") + "<b>" + esc(L(GATE_TXT[gt.kind])) + "</b><small>" + (owned ? L(["Deine ", "Your "]) + esc(L(d2.n)) + L([" hilft hier.", " helps here."]) : MM().gesehen[gt.kind] ? esc(L(d2.n)) + L([" nötig – im Lager dauerhaft freischalten.", " needed – unlock it for good at camp."]) : L(["Eine Rune könnte hier weiterhelfen.", "A rune might help here."])) + "</small>", { prio: owned ? 1 : 0, ort: "welt", x: gt.hx, y: gt.hy - 20, dauer: 3200, key: "gate_" + gt.cell });
     }
