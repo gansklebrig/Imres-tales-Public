@@ -27,7 +27,7 @@
 > Den Helden getrennte Aufgaben geben | t-4 l+2 bez-2 beide+3 | Zwei Handlungsstränge, ein bisschen mehr Arbeit für dich. Aber niemand muss heute Abend so tun als ob.
 
 § #bz_paar_schutz spieler bez:paar
-{held} wirft sich zwischen den Oger und {p2held}. Taktisch war das Unsinn. {name} schaut nicht zu {p2}, aber {p2} schaut zu {name}.
+{held} wirft sich zwischen den Oger und {p2held}. Taktisch war das Unsinn. // {name} schaut nicht zu {p2}. Aber {p2} schaut zu {name}.
 < Den Moment wirken lassen | s+4 l+2 m-3 bez+8 | Der Oger trifft {held} hart. Aber auf der Heimfahrt, erzählt man sich später, wurde viel gegrinst. | herzen
 > Würfeln wie immer | W12 m+3 ? s+3 : tod | {held} pariert den Hieb. Heldenhaft und unverschämt knapp. :: Der Oger trifft. {held} fällt – für {p2held}.
 
@@ -67,7 +67,7 @@ Am nächsten Tag schreibt dir {name}: „Danke fürs Fragen gestern. Wir reden g
 > Selbst trinken | m+3 bez-6 laune2-6 | Taktisch richtig. Später sagt {p2}: „Schon okay.“ Es ist nicht ganz okay.
 
 § #bz_fr_plan spieler bez:freunde
-{name} und {p2} haben vorher per Nachricht einen Plan ausgeheckt. Das merkst du daran, dass sie sich seit zehn Minuten angrinsen.
+{name} und {p2} haben vorher per Nachricht einen Plan ausgeheckt. // Das merkst du daran, dass sie sich seit zehn Minuten angrinsen.
 < Den Plan aufgehen lassen | s+5 t+3 l-2 bez+5 | Der Plan ist absurd, umständlich und funktioniert. Die beiden klatschen sich über den Tisch ab. | konfetti
 > Den Plan durchkreuzen | W12 l+3 ? s+4 : s-3 bez-1 beide-3 | Du durchkreuzt ihn – aber so, dass es noch besser wird. :: Der Plan scheitert an einem Detail. Die beiden schauen sich an wie zwei Kinder, denen das Eis runtergefallen ist.
 
@@ -107,7 +107,7 @@ Das Handy von {p2} klingelt: die Mutter der beiden. Sie will wissen, ob {name} a
 > „Das klärt ihr zuhause.“ | t+2 bez-3 | Es wird zuhause geklärt. Nicht leise, wie man hört.
 
 § #bz_wg_heim tisch bez:wg
-Die Runde findet heute in der WG von {name} und {p2} statt. In der Küche stapelt sich Geschirr, und es ist sehr klar, wessen Woche es war.
+Die Runde findet heute in der WG von {name} und {p2} statt. In der Küche stapelt sich Geschirr. // Es ist sehr klar, wessen Woche es war.
 < Gemeinsam abspülen, dann spielen | t-5 s+4 alle+3 bez+5 | Fünf Leute, eine Spüle, viele Meinungen über Spülmittel. Es wird ein guter Abend. | heilung
 > Nicht hinschauen | s+2 bez-3 | Niemand schaut hin. Irgendwann steht {p2} wortlos auf und spült. Sehr laut.
 
@@ -117,7 +117,7 @@ Die Runde findet heute in der WG von {name} und {p2} statt. In der Küche stapel
 > Ein Seil statt Vertrauen | l+3 t-2 | Mit Seil, Haken und Sicherung. Sehr sicher, sehr unpersönlich. Vermutlich besser so.
 
 § #bz_ex_date spieler bez:ex
-{p2} erwähnt beiläufig ein Date am Wochenende. {name} schaut auf einmal sehr konzentriert auf den Charakterbogen.
+{p2} erwähnt beiläufig ein Date am Wochenende. // {name} schaut auf einmal sehr konzentriert auf den Charakterbogen.
 < Schnell eine Kampfszene starten | m+3 t+4 laune+3 | Nichts lenkt so gut ab wie ein Rudel Goblins. {name} ist dir sichtbar dankbar. | schwerter
 > Nichts tun | laune-8 bez-4 | Das Gespräch läuft weiter. {name} lacht an den richtigen Stellen, nur etwas zu spät.
 
@@ -127,7 +127,7 @@ Beim Aufräumen helfen sich {name} und {p2} ohne ein Wort. Sie reichen sich Wür
 > Einen Witz darüber machen | s+3 bez-6 beide-3 | Beide lachen kurz. Der Moment ist vorbei.
 
 § #bz_sp_regel spieler bez:spannung
-{name} korrigiert {p2} zum dritten Mal heute bei einer Regel. {p2} atmet hörbar aus und legt die Würfel sehr ordentlich hin.
+{name} korrigiert {p2} zum dritten Mal heute bei einer Regel. // {p2} atmet hörbar aus und legt die Würfel sehr ordentlich hin.
 < „Danke. Ich entscheide das hier.“ | l+2 laune-4 laune2+5 bez+3 | Freundlich, aber klar. Danach ist es etwas ruhiger. {p2} wirkt erleichtert.
 > Nachschlagen | l+5 t-5 bez-6 laune2-6 | {name} hatte recht. Das macht es nicht besser.
 
@@ -152,7 +152,7 @@ Zwischen {name} und {p2} kracht es. Vordergründig geht es um eine Regel zum Fes
 > Eine Teamaufgabe für ihre beiden Helden | s+4 t-2 bez+5 laune+4 | Ein Rätsel für zwei. {name} redet zu schnell und lacht zu viel. {p2} scheint es nicht zu stören.
 
 § #bz_sw_witz spieler bez:schwarm
-{name} lacht über jeden Witz von {p2}. Auch über die, die gar keine waren. Gerade hat {p2} „Okay, ich würfel“ gesagt, und {name} hat gelacht.
+{name} lacht über jeden Witz von {p2}. Auch über die, die gar keine waren. Gerade hat {p2} „Okay, ich würfel“ gesagt. // {name} hat gelacht.
 < Weiterspielen, als wäre nichts | s+2 bez+2 | Es ist nichts. Nichts, das irgendwer kommentieren müsste.
 > Ein Kommentar vom Chaoten | s+4 laune-8 bez-3 | „Haha, {name} findet ja ALLES lustig, was {p2} sagt!“ {name} wird rot bis unter die Haare. Es ist sehr still.
 
@@ -162,7 +162,7 @@ Zwischen {name} und {p2} kracht es. Vordergründig geht es um eine Regel zum Fes
 > Ein Wolfsrudel greift an | m+3 t+4 laune-3 | Das Feuer, die Sterne, dann zwanzig Wölfe. Du bist ein schrecklicher Mensch, sagt der Blick von {name}. | nacht
 
 § #bz_sw_entscheidung tisch bez:schwarm kette
-Nach der Session bleiben {name} und {p2} noch draußen vor der Haustür stehen. Ziemlich lange. Die anderen gehen absichtlich langsam an ihnen vorbei.
+Nach der Session bleiben {name} und {p2} noch draußen vor der Haustür stehen. Ziemlich lange. // Die anderen gehen absichtlich langsam an ihnen vorbei.
 < (Das geht dich nichts an.) | W10 ? bez=paar beide+10 s+4 : bez=freunde beide+3 | In der Woche drauf kommen sie zusammen an. Keiner sagt etwas. Alle grinsen. :: Es bleibt bei einer sehr guten Freundschaft. Beide wirken erleichtert, dass es ausgesprochen ist. | herzen
 > Im Gruppenchat einen Witz darüber machen | s+3 bez-6 beide-8 | Ein Zwinker-Emoji. {name} antwortet nur mit einem Daumen. Du hättest es lassen sollen.
 
@@ -207,7 +207,7 @@ Nach der Session bleiben {name} und {p2} noch draußen vor der Haustür stehen. 
 > „Da ist keine Falle.“ | t+4 laune-3 l-1 | Da ist keine Falle. {name} glaubt es trotzdem nicht. Zu Recht, wie die nächste Tür zeigt.
 
 § #me_pechvogel spieler wenn:merk:pechvogel
-{name} hat in dieser Runde schon {nat1}-mal eine natürliche 1 gewürfelt. Gerade sammelt {name} alle W20 vom Tisch ein, um „den guten“ zu finden.
+{name} hat in dieser Runde schon {nat1}-mal eine natürliche 1 gewürfelt. // Gerade sammelt {name} alle W20 vom Tisch ein, um „den guten“ zu finden.
 < Einen deiner Würfel leihen | s+3 laune+8 | Dein Glückswürfel. Der erste Wurf damit: eine 1. Der Tisch explodiert vor Lachen. {name} auch, zum Glück. | lachen
 > „Es sind nicht die Würfel.“ | l+2 laune-5 | Statistisch hast du recht. Gefühlt nicht.
 ^ Würfel in ein Glas mit Salz legen | s+5 l-3 laune+5 | Ein uraltes Ritual, sagt der Veteran. Die Würfel liegen jetzt die ganze Session im Salz. Wirkt es? Wer weiß. | magie
@@ -248,7 +248,7 @@ Ein Händler in {ort} fragt, ob {held} zufällig {altheld} gekannt hat. Du hast 
 > Die anderen erklären lassen | s+3 alle+2 laune+4 | Drei Leute erzählen gleichzeitig alte Geschichten. {name} versteht kein Wort, lacht aber mit.
 
 § #me_alter_bogen spieler wenn:merk:verlust,kamp>1
-Beim Aufräumen findet {name} den Bogen von {altheld} aus „{altkampagne}“. Stufe {stufe}, Kaffeefleck, eine Telefonnummer, die keiner mehr kennt.
+Beim Aufräumen findet {name} den Bogen von {altheld} aus „{altkampagne}“. // Stufe {stufe}, Kaffeefleck, eine Telefonnummer, die keiner mehr kennt.
 < Vorlesen | s+4 t-4 alle+2 laune+5 | Die Notizen sind wirr, die Zeichnungen grausam, die Erinnerungen großartig. | staub
 > Einrahmen | l+2 laune+8 | Der Bogen hängt jetzt in der Küche. Ein Heldenschrein für Arme.
 

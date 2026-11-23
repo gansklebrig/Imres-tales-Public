@@ -45,7 +45,7 @@ Die Gruppe läuft in den Tod: zu viele Kultisten, keine Heilung. Du könntest ei
 
 § #dl_spotlight tisch schwer
 {name} hat sich wochenlang auf diese Szene vorbereitet, mit einem Brief in Charakter. Es ist 23:40. {p2} muss um sechs raus und gähnt.
-< Die Szene in voller Länge spielen | laune+12 laune2-10 t-6 s+2 | Der Brief wird vorgelesen. Er ist wunderschön. {p2} schläft kurz vor dem Ende im Sitzen ein und schämt sich am nächsten Tag dafür. | kerze
+< Die Szene in voller Länge spielen | laune+12 laune2-10 t-6 s+2 | Der Brief wird vorgelesen. Er ist wunderschön. // {p2} schläft kurz vor dem Ende im Sitzen ein. | kerze
 > Auf nächste Woche verschieben | laune-12 laune2+6 t+5 | „Klar, kein Problem.“ {name} faltet den Brief zusammen. Er wird nächste Woche nicht mehr ganz so wichtig sein.
 
 § #dl_regelfehler spieler schwer
@@ -111,7 +111,7 @@ Wird nächste Woche gespielt, obwohl {name} Prüfungen hat? Die Abstimmung steht
 § #dl_wahrheit spieler schwer
 {name} fragt dich nach der Session ganz ehrlich: „War {held} eigentlich wichtig für die Geschichte?“ Die ehrliche Antwort ist: bisher kaum.
 < Ehrlich sein – und es ändern | laune-6 l+3 vertrauen+12 >>dl_wahrheit2 | „Kaum. Aber das ändert sich.“ {name} ist kurz getroffen, dann nickt {er}. „Danke, dass du ehrlich bist.“
-> „Natürlich!“ | laune+6 vertrauen-4 | {name} strahlt. Und wartet von jetzt an auf den großen Moment, den du gerade versprochen hast, ohne es zu merken.
+> „Natürlich!“ | laune+6 vertrauen-4 | {name} strahlt. // Und wartet ab jetzt auf den großen Moment, den du gerade versprochen hast.
 
 § #dl_wahrheit2 sl kette
 Du hast {name} einen großen Moment versprochen. Heute könnte {held} ihn bekommen – auf Kosten der Szene von {p2held}.
@@ -134,7 +134,7 @@ Ein Goblin-Kind hat Essen gestohlen. Die Wache will es hängen. {name}: „Ist d
 > Milde | s+3 l-4 beide+4 alle-6 | Die beiden sind erleichtert. Die anderen merken sich das. Gut.
 
 § #dl_handel_mit_tod geist schwer wenn:gefallen
-Der Tod persönlich bietet einen Handel an: {tot} darf zurückkehren. Dafür nimmt er einen der Lebenden – du darfst wählen, wer.
+Der Tod persönlich bietet einen Handel an: {tot} darf zurückkehren. // Dafür nimmt er einen der Lebenden. Du darfst wählen, wen.
 < {held} geht | tod s+5 l-4 geist alle+2 | {tot} öffnet die Augen. {held} schließt sie. {name} nickt langsam: „Das war ein guter Tausch.“ Ist es? | geister
 > Den Handel ablehnen | l+4 s-2 | Der Tod lächelt. „Ich frage wieder.“ Und geht. | nebel
 
@@ -160,7 +160,7 @@ Seit dem Tod von {damalsheld} spielt {name} viel vorsichtiger. Heute setzt {held
 > Die Spannung behalten | s+2 vertrauen-5 laune-4 | „Wirst du sehen.“ {name} rollt mit den Augen.
 
 § #gr_aussprache tisch wenn:merk:groll
-Nach der Session bleibt {name} noch sitzen. „Darf ich ehrlich sein? Ich hab manchmal das Gefühl, du hast was gegen mich.“
+Nach der Session bleibt {name} noch sitzen. // „Darf ich ehrlich sein? Ich hab manchmal das Gefühl, du hast was gegen mich.“
 < Zuhören, wirklich zuhören | t-4 laune+12 vertrauen+18 | Es geht um ‚{damals}‘ und noch zwei, drei andere Kleinigkeiten. Am Ende umarmt ihr euch im Flur. | heilung
 > Abwiegeln | W11 ? laune-4 vertrauen-8 : geht | „Na gut.“ {name} geht. Es ist nicht gut. :: Zwei Tage später schreibt {name}, dass {er} erstmal eine Pause macht. Vielleicht für länger.
 

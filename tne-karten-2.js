@@ -10,12 +10,12 @@
 > Rausschmiss | l+5 s-4 laune-8 | Der Türsteher, ein Halbriese namens Bernd, wirft {held} auf die Straße.
 
 § #ch_tuer chaos
-{name} will die Tür nicht öffnen. {name} will die Tür ESSEN.
+{name} will die Tür nicht öffnen. // {name} will die Tür ESSEN.
 < Konstitutionswurf! | W13 s+10 l-8 ? m+3 : tod | {held} isst die Tür. Holzsplitter überall. Der Tisch ist sprachlos. :: {held} erstickt an einer Türklinke. Würdelos. | lachen
 > Das geht nicht | l+5 laune-6 | „Warum nicht?!“ – „Weil… weil Türen nicht essbar sind.“
 
 § #ch_huhn chaos
-{name}: „{held} adoptiert das Huhn. Es heißt jetzt General Gackerich und hat einen Rang.“
+{name}: „{held} adoptiert das Huhn.“ // „Es heißt jetzt General Gackerich und hat einen Rang.“
 < General Gackerich lebt! | s+10 l-6 +huhn >>ch_huhn2 | Das Huhn bekommt einen Mini-Helm. Es wird zur wichtigsten Figur der Kampagne. | federn
 > Das Huhn flieht | s+2 laune-5 | General Gackerich desertiert in der ersten Nacht.
 
@@ -35,7 +35,7 @@ Der Drache taucht wieder auf. Mit einem Strauß aus brennenden Rosen. Er will {h
 > Schluss machen | s+4 m-6 l+4 | Herbert verwüstet aus Liebeskummer ein Dorf. Konsequenzen! | drache
 
 § #ch_drachenliebe3 chaos kette wenn:drachenhochzeit einmal
-Die Drachenhochzeit! Herbert hat alle eingeladen: Zwerge, Elfen und {schurke}.
+Die Drachenhochzeit! Herbert hat alle eingeladen: Zwerge, Elfen … // und {schurke}.
 < Feiern! | s+12 m+6 l-8 drache | Es ist die beste Hochzeit aller Zeiten. Der Schurke weint gerührt in der zweiten Reihe. | konfetti
 > Einspruch! | t+8 s+6 W12 ? m+5 : tod | {npc} erhebt Einspruch. Chaos! Ein Kampf in Hochzeitskleidern! :: Herbert frisst den Störenfried. Und versehentlich {held}. | drache
 
@@ -55,7 +55,7 @@ Die Gruppe hat eine Stunde lang einen perfekten Plan ausgearbeitet. {name}: „I
 > Das Schwein ist ein Polymorph | s+8 l-4 t+4 | Das Schwein verwandelt sich in einen Magier, der SEHR sauer ist. | magie
 
 § #ch_feuer chaos
-„Kann ich die Taverne anzünden? Nur ein bisschen?“
+„Kann ich die Taverne anzünden?“ // „Nur ein bisschen?“
 < Nur ein bisschen | s+6 l-4 t+6 | Es war nicht nur ein bisschen. Die halbe Stadt sucht Wasser. | feuer
 > Der Wirt greift ein | l+4 s+3 m-3 | Der Wirt löscht mit Bier. Die Gruppe schuldet ihm 300 Gold.
 
@@ -115,7 +115,7 @@ Der Zauberer der Gruppe hat einen Teleportationsstab gefunden. {name} hat ihn si
 > Wegradieren | l+4 laune-6 | Du radierst. Man sieht es trotzdem noch ein bisschen.
 
 § #ch_alleinflucht chaos
-Die Gruppe ist umzingelt. {name}: „Ich opfere {aheld} und renne.“
+Die Gruppe ist umzingelt. {name} hat einen Plan. // „Ich opfere {aheld} und renne.“
 < Erlauben (oh je) | W12 s+6 t+6 ? tod2 m+3 : tod | {aheld} wird zurückgelassen. Der Tisch ist schockiert. Das wird nachwirken. :: Beide sterben. Das Karma war schnell. | schaedel
 > „Ihr seid ein Team!“ | l+3 alle+2 laune-6 | Die Gruppe kämpft sich gemeinsam frei. Mit Mühe.
 
@@ -135,7 +135,7 @@ Gerade als {schurkeN} zum Monolog ansetzen will, fragt {name}: „Wie alt bist d
 > Nach dem Kampf | t+4 laune-6 | Der Kampf wird plötzlich sehr schnell. Hunger beschleunigt.
 
 § #sn_chips snack
-Die Chips sind alle. {name} schaut dich an wie ein Paladin auf einen Untoten.
+Die Chips sind alle. // {name} schaut dich an wie ein Paladin auf einen Untoten.
 < Pause zum Einkaufen | t-10 s+4 laune+10 | Zwanzig Minuten Spätkauf-Mission. Ein episches Abenteuer für sich. | staub
 > Weiterspielen | s-5 laune-10 | {name} isst traurig die Krümel aus der Tüte.
 
@@ -155,7 +155,7 @@ Die Gruppentaverne „Goldene Gabel“ hat ein Problem: Ratten. Sehr große Ratt
 > Kammerjäger-Quest | m+5 t+3 | Ein Kampf im eigenen Keller. Bierfässer gehen zu Bruch. | schwerter
 
 § #sn_kekse snack
-{name} hat Kekse in Form von Monstern gebacken. „Wer den Beholder isst, hat Vorteil auf den nächsten Wurf.“
+{name} hat Kekse in Form von Monstern gebacken. // „Wer den Beholder isst, hat Vorteil auf den nächsten Wurf.“
 < Keks-Regel annehmen | s+8 m+3 l-3 | Alle essen strategisch Kekse. Der Drachen-Keks ist heiß umkämpft. | konfetti
 > Nur essen | s+5 t-3 | Die Kekse sind großartig. Das Spiel pausiert für 10 Minuten.
 
@@ -177,7 +177,7 @@ Die Gruppentaverne „Goldene Gabel“ hat ein Problem: Ratten. Sehr große Ratt
 § #sn_bauch snack
 {held} soll eine Woche hungern, weil der Proviant ausgegangen ist.
 < Realistisch: Erschöpfung | l+8 m-6 s-4 | Die Gruppe wird schwächer, gereizter, hungriger. Wie im echten Leben. | staub
-> Pilze im Wald | s+4 W10 ? m+3 : tod | Lecker! Und nur leicht halluzinogen. :: Das waren die anderen Pilze. Die tödlichen. | gift
+> Pilze im Wald | s+4 W10 ? m+3 : tod | Lecker! // Und nur leicht halluzinogen. :: Das waren die anderen Pilze. Die tödlichen. | gift
 
 § #sn_spaeter snack
 {name}: „Können wir die Pause bitte etwas länger machen? Ich hab noch Lasagne.“
@@ -360,7 +360,7 @@ Der Neuling fragt: „Darf ich den Schurken nicht einfach… nett fragen?“
 > Ist doch egal | t+5 s+2 | Die App hat Animationen und Soundeffekte. Bei jeder 20 explodiert Konfetti. | konfetti
 
 § #hd_lange handy wenn:t<35
-{name} gähnt. „Ich glaub, ich zock zwischendurch mal was am Handy, ruft mich, wenn ich dran bin.“
+{name} gähnt. // „Ich zock zwischendurch mal was am Handy. Ruft mich, wenn ich dran bin.“
 < Tempo machen | t+10 s+4 laune+15 | Zack, Kampf vorbei, neuer Ort, Verfolgungsjagd! {name} legt das Handy weg. | schwerter
 > „Okay…“ | laune-8 t-3 | {name} spielt jetzt Candy Crush. Die Gruppe verliert einen Mitstreiter.
 

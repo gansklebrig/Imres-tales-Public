@@ -67,7 +67,7 @@ Wie findet die Gruppe ihren ersten Auftrag?
 > Ein Fremder stirbt | s+5 l+2 t+5 | Ein Sterbender drückt {held} eine Karte in die Hand: „Bringt das… nach {ort}…“ Dann kippt er um. | schaedel
 
 § #st_ankommen tisch phase:start
-Es ist 19 Uhr. Eigentlich. Es ist 19:47 und {name} „steckt noch im Stau“.
+Es ist 19 Uhr. // Eigentlich. Es ist 19:47, und {name} „steckt noch im Stau“.
 < Ohne anfangen | t+6 laune-6 s-2 | Ihr legt los. {held} wird kurzerhand von einer Eule entführt.
 > Warten | t-8 s+3 alle+2 | Ihr wartet, quatscht und esst schon mal die Hälfte der Chips.
 
@@ -82,7 +82,7 @@ Es ist 19 Uhr. Eigentlich. Es ist 19:47 und {name} „steckt noch im Stau“.
 > Essen beim Spielen | s+3 l-2 | Krümel überall. Der Charakterbogen hat jetzt einen Fettfleck in Form eines Drachen.
 
 § #st_regelaenderung regel phase:start
-{name} hat das neue Regelbuch durchgelesen. „Es gibt 37 Änderungen, die wir ab heute beachten sollten.“
+{name} hat das neue Regelbuch durchgelesen. // „Es gibt 37 Änderungen, die wir ab heute beachten sollten.“
 < Alle einführen | l+12 t-8 laune+10 s-4 | Der Abend beginnt mit einem Vortrag. Mit Folien. | staub
 > Später vielleicht | l-3 s+3 laune-8 | „Wir spielen erst mal weiter wie bisher.“ {name} macht sich Notizen. Ominöse Notizen.
 
@@ -127,7 +127,7 @@ Zeit, Erfahrungspunkte zu verteilen.
 > Streng nach Regeln | l+6 m+2 | Alle bekommen exakt 340 EP. Niemand steigt auf. „Nächstes Mal bestimmt.“
 
 § #se_spaet tisch phase:ende
-Es ist 1:30 Uhr. Der Kampf ist noch nicht vorbei.
+Es ist 1:30 Uhr. // Der Kampf ist noch nicht vorbei.
 < Durchziehen | t-6 m+3 s+3 | Um 2:15 fällt der letzte Gegner. Alle sind halb tot, aber glücklich. | schwerter
 > Mitten im Kampf pausieren | t+4 s-4 l+2 | „Wir frieren den Kampf ein.“ Nächste Woche weiß niemand mehr, wer wo stand. | frage
 
@@ -167,7 +167,7 @@ Kurz vor dem Ende kommt heraus: {npc} hat die ganze Zeit für {schurkeN} gearbei
 > Das war ein Test | s+4 l-4 sieg | „Ich habe euch nur geprüft!“ Der Verräter war nie einer. Die Spieler sind verwirrt, aber zufrieden.
 
 § #fin_drache welt phase:finale
-Im Finale erhebt sich ein Drache über {ort}. Er war die ganze Zeit der eigentliche Strippenzieher.
+Im Finale erhebt sich ein Drache über {ort}. // Er war die ganze Zeit der eigentliche Strippenzieher.
 < Alle Kräfte vereint | W13 m+8 s+8 ? sieg lvl : tpk | Pfeile, Feuer, Gebete – der Drache stürzt brüllend vom Himmel. LEGENDÄR. :: Der Drache ist zu stark. Feuer überall. Das war's für die Helden. | drache
 > Verhandeln | W12 l+6 ? sieg s+5 : m-8 | Der Drache will nur seinen Hort zurück. Deal! :: Der Drache frisst den Unterhändler. Nicht alle, nur den einen. | gold
 
@@ -202,7 +202,7 @@ Das Finale läuft – und es ist schon 0:40 Uhr. Zwei Leute müssen morgen um 6 
 > Nur eine Klasse | m-6 l+4 laune-10 | „Das ist doch langweilig!“ {name} rechnet weiter.
 
 § #pg_schaden power
-„Ich mache… 147 Schaden.“ {name} hat irgendwas kombiniert, das du nicht ganz verstehst.
+„Ich mache …“ // „… 147 Schaden.“ {name} hat irgendwas kombiniert, das du nicht ganz verstehst.
 < Lass es zählen | m+10 s+3 l-4 | Der Endboss explodiert in der ersten Runde. Der Tisch ist geschockt. | explosion
 > Nachrechnen | l+6 t-8 W12 ? m-4 : m+6 | Es waren eigentlich 31. {name} gibt kleinlaut zu, etwas falsch gelesen zu haben. :: Es waren wirklich 147. Respekt. | staub
 
@@ -212,7 +212,7 @@ Das Finale läuft – und es ist schon 0:40 Uhr. Zwei Leute müssen morgen um 6 
 > Alle verstecken | m+12 l-5 s+2 | Jeder Dungeon ist jetzt ein Einkaufszentrum. {held} glänzt wie ein Weihnachtsbaum. | gold
 
 § #pg_tot power wenn:m<40
-{name}: „Mein Held ist SCHWACH. Ich hab das Gefühl, ich spiel einen Kartoffelsack.“
+{name}: „Mein Held ist SCHWACH.“ // „Ich hab das Gefühl, ich spiel einen Kartoffelsack.“
 < Upgrade-Quest | m+10 t-3 laune+12 | Eine Nebenquest zu einem mächtigen Artefakt. {name} ist wieder Feuer und Flamme. | funkeln
 > „Schwäche ist Charakter“ | l+4 laune-12 s-3 | {name} stöhnt sehr laut.
 
@@ -237,7 +237,7 @@ Das Finale läuft – und es ist schon 0:40 Uhr. Zwei Leute müssen morgen um 6 
 > Kurz halten | t+4 laune-4 | „Er fällt um.“ – „ER FÄLLT UM?!“
 
 § #pg_feuerball power
-{name}: „Feuerball. Auf alles. Auch auf die Geiseln.“
+{name}: „Feuerball. Auf alles.“ // „Auch auf die Geiseln.“
 < Konsequenzen! | l+8 s-4 m-3 | Die Stadt erklärt die Gruppe zu Gesuchten. Plakate hängen überall. | feuer
 > Die Geiseln waren Illusionen | s+5 l-8 m+4 | Glück gehabt! Aber eigentlich… war das nicht etwas zu praktisch? | explosion
 
@@ -247,7 +247,7 @@ Das Finale läuft – und es ist schon 0:40 Uhr. Zwei Leute müssen morgen um 6 
 > Nach dem Dungeon | l+4 laune-6 t-2 | {name} zählt die verbleibenden Räume. Laut.
 
 § #pg_pvp power
-{name} will {aheld} angreifen. „Der hat meine Beute geklaut!“
+{name} will {aheld} angreifen. // „Der hat meine Beute geklaut!“
 < PvP erlauben | W11 s+4 t+5 ? m+4 : tod2 s-6 | Ein kurzer Kampf, ein blaues Auge, dann vertragen sie sich. :: Der Streit eskaliert. {aheld} überlebt das nicht. Stimmung im Keller. | treffer
 > Kein PvP | l+3 s-2 alle+2 | „Klärt das außerhalb des Spiels.“ Die beiden schmollen um die Wette.
 
@@ -262,9 +262,9 @@ Das Finale läuft – und es ist schon 0:40 Uhr. Zwei Leute müssen morgen um 6 
 > Nein. | l+4 laune-10 | {name} murmelt „feige“ in den Würfelbeutel.
 
 § #pg_kampfrunde power
-Es ist der vierte Kampf heute. {name} will noch einen.
+Es ist der vierte Kampf heute. // {name} will noch einen.
 < Noch einer! | m+6 t+3 s-3 | {monster} greifen an. {name} jubelt. Der Rest gähnt. | schwerter
-> Rollenspiel-Szene | l+4 s+3 laune-8 | Die Gruppe besucht ein Teehaus. {name} wirft vor Frust einen W4 – barfuß drauftreten wird später jemand.
+> Rollenspiel-Szene | l+4 s+3 laune-8 | Die Gruppe besucht ein Teehaus. {name} wirft vor Frust einen W4 in die Ecke. // Barfuß drauftreten wird später jemand.
 
 § #pg_zufallsbeute power
 {name} plündert die Leiche des Goblins zum dritten Mal. „Ich suche nochmal gründlicher.“

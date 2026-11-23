@@ -95,7 +95,7 @@ Die Gruppe muss als Schauspieltruppe in eine Burg. {name} hat sofort ein ganzes 
 > Übermalen | l+2 s+2 | Das dritte Auge verschwindet. Aber alle wissen davon.
 
 § #mu_ukulele musik
-{name} holt die Ukulele raus. „Barradin-Style: Ich verzaubere den Wächter mit einem Lied!“
+{name} holt die Ukulele raus. // „Barradin-Style: Ich verzaubere den Wächter mit einem Lied!“
 < Echt singen lassen! | W10 s+10 t-4 ? m+3 : l-3 | Es ist erstaunlich gut. Der Wächter schläft ein. Zwei Spieler auch. :: Die Saite reißt. Der Wächter auch. Aus. | musik
 > Nur würfeln | t+3 laune-6 | {name} würfelt. 14. Die Ukulele bleibt traurig im Koffer.
 
@@ -120,7 +120,7 @@ Die Gruppe muss als Schauspieltruppe in eine Burg. {name} hat sofort ein ganzes 
 > Wirkt trotzdem | m+3 s+3 laune+5 | Die Wachen schlafen ein. Wahrscheinlich aus Selbstschutz. | zzz
 
 § #sp_pause spieler
-{name} muss mal kurz telefonieren. „Fünf Minuten!“
+{name} muss mal kurz telefonieren. // „Fünf Minuten!“
 < Weiter ohne | t+3 laune-4 | {held} wird währenddessen von einem Mimik-Stuhl angeknabbert. | lachen
 > Pause für alle | t-6 s+3 | Pause. Alle holen Getränke. Nach 20 Minuten geht's weiter.
 
@@ -145,9 +145,9 @@ Die Gruppe muss als Schauspieltruppe in eine Burg. {name} hat sofort ein ganzes 
 > Nichts dort | t+3 laune-4 | Es ist wirklich nur eine Wand. Diesmal.
 
 § #sp_schlaf spieler wenn:t<30
-{name} ist am Tisch eingeschlafen. Mit dem Kopf auf dem Würfelturm.
+{name} ist am Tisch eingeschlafen. // Mit dem Kopf auf dem Würfelturm.
 < Held schläft auch | s+4 t+2 | {held} schläft im Spiel ein. Ein Kobold malt {h_ihm} einen Schnurrbart. | zzz
-> Wecken mit Gong | s+5 t+5 laune-6 | GONG! {name} wirft vor Schreck Initiative. | glocke
+> Wecken mit Gong | s+5 t+5 laune-6 | GONG! // {name} wirft vor Schreck Initiative. | glocke
 
 § #sp_gold spieler
 {name} will {held}s gesamtes Gold für ein Pferd ausgeben. Ein besonderes Pferd.
@@ -177,7 +177,7 @@ Die Gruppe plant seit 45 Minuten den Einbruch in den Turm. Niemand hat bisher ge
 § #sp_kritfehl spieler
 {name} würfelt eine natürliche 1 beim Angriff.
 < Spektakulärer Patzer | s+8 m-3 | {held} stolpert, das Schwert fliegt, trifft einen Kronleuchter, der auf den Gegner fällt. Treffer?! | lachen
-> Einfach verfehlt | l+3 | Daneben. Ganz normal daneben.
+> Einfach verfehlt | l+3 | Daneben. // Ganz normal daneben.
 
 § #sp_zweifel spieler
 {name}: „Ist das eigentlich eine Falle? Das sieht aus wie eine Falle.“
@@ -200,7 +200,7 @@ Die Gruppe plant seit 45 Minuten den Einbruch in den Turm. Niemand hat bisher ge
 > Es war kompliziert | s+6 l-2 | {held} hat einen Ex. Einen Vampir. Er schreibt noch Briefe.
 
 § #sp_seil spieler
-„Wir haben doch ein Seil, oder? Jede Gruppe hat ein Seil.“
+„Wir haben doch ein Seil, oder?“ // „Jede Gruppe hat ein Seil.“
 < Niemand hat ein Seil | l+6 s+3 t-4 | Fünfzehn Meter Abgrund. Kein Seil. Großes Drama. | frage
 > Klar habt ihr ein Seil | t+5 l-3 | „Natürlich. 50 Fuß Hanfseil.“ Abenteuer gerettet.
 
@@ -215,7 +215,7 @@ Die Gruppe plant seit 45 Minuten den Einbruch in den Turm. Niemand hat bisher ge
 > Ein Hund riecht {held} | s+5 l+2 | Ein Hund schnüffelt an der leeren Luft und wedelt. Enttarnt! | lachen
 
 § #sp_schwimmen spieler
-{held} kann nicht schwimmen. Die Brücke ist gerade eingestürzt.
+{held} kann nicht schwimmen. // Die Brücke ist gerade eingestürzt.
 < Athletik-Wurf | W12 s+5 ? m+3 : tod | {held} paddelt panisch und schafft es. Wie ein nasser Hund. :: Blubb. Blubb. Stille. | wellen
 > {aheld} springt hinterher | l+3 s+3 | {aheld} zieht {held} am Schopf aus dem Wasser. Eine Lebensschuld ist entstanden.
 
@@ -245,12 +245,12 @@ Die Gruppe plant seit 45 Minuten den Einbruch in den Turm. Niemand hat bisher ge
 > Der Name ist vergeben | l+3 laune-4 | „Den gibt's schon. Er ist legendär.“
 
 § #ti_klingel tisch
-Es klingelt. Der Pizzabote. Mitten im Bosskampf.
+Es klingelt. Der Pizzabote. // Mitten im Bosskampf.
 < Kampf pausieren | t-6 s+5 | Pizzapause! Der Boss wartet. Geduldig. Er hat ja Zeit. | pizza
 > Einer geht | s+2 t+2 | Der Spieler an der Tür verpasst den wichtigsten Wurf des Abends.
 
 § #ti_nachbarn tisch
-Die Nachbarn klopfen gegen die Wand. Es ist 23:15 und der Barbar schreit seit einer Stunde.
+Die Nachbarn klopfen gegen die Wand. Es ist 23:15. // Der Barbar schreit seit einer Stunde.
 < Flüster-Modus | l+3 s+5 t-3 | Der Rest des Kampfes wird geflüstert. Es ist sehr spannend und sehr albern. | lachen
 > Musik lauter | s+4 l-2 | Jetzt klopfen auch die anderen Nachbarn.
 
@@ -266,7 +266,7 @@ Zwei Spieler streiten außerhalb des Spiels über Politik. Die Stimmung kippt.
 
 § #ti_tisch tisch
 Der Tisch ist voller Würfel, Chips, Charakterbögen und drei leeren Flaschen. Niemand findet mehr die Karte.
-< Aufräumen! | l+4 t-4 s-2 | Ordnung. Dann stellt jemand ein Glas auf die Karte. | staub
+< Aufräumen! | l+4 t-4 s-2 | Ordnung. // Dann stellt jemand ein Glas auf die Karte. | staub
 > Chaos akzeptieren | s+4 l-3 | Die Karte ist jetzt unter den Chips. Die Chips sind jetzt ein Gebirge.
 
 § #ti_mama tisch
@@ -342,10 +342,10 @@ Die Tischkatze springt auf den Tisch und schiebt einen Würfel ganz langsam übe
 § #ka_karte katze
 Die Katze hat sich auf die Karte gelegt. Genau auf den Ort, an den die Gruppe will.
 < Die Katze bleibt | s+5 l-3 | Ihr spielt um die Katze herum. Sie ist jetzt ein Gebirge im Spiel.
-> Sanft heben | l+2 | Sie faucht. Dann geht sie zur Würfelschale.
+> Sanft heben | l+2 | Sie faucht. // Dann geht sie zur Würfelschale.
 
 § #ka_spielen katze
-Die Katze hat einen W4 verschluckt. Oder jedenfalls ist er weg.
+Die Katze hat einen W4 verschluckt. // Oder jedenfalls ist er weg.
 < Panik! | t-8 s+3 katze | Ihr sucht zwanzig Minuten. Der Würfel ist unter dem Kühlschrank. Die Katze ist unschuldig. Diesmal. | frage
 > Ach, ein W4 | s+2 | Niemand vermisst W4s. Niemand.
 
@@ -367,7 +367,7 @@ Die Mitbewohnerin kommt heim und fragt: „Spielt ihr schon wieder dieses Drache
 § #gs_lieferant gast
 Der Pizzabote sieht die Würfel und sagt: „Oh, D&D! Ich spiel seit 15 Jahren!“
 < Er erzählt eine Geschichte | s+5 t-5 | Er erzählt von seinem Paladin, der einen Gott verprügelt hat. Er bekommt ein Stück Pizza.
-> Danke, tschüss | t+2 | Er geht. Er wirkt enttäuscht.
+> Danke, tschüss | t+2 | Er geht. // Er wirkt enttäuscht.
 
 § #gs_kind gast
 Ein Nachbarskind klingelt: „Darf ich mitspielen? Ich bin ein Drache.“

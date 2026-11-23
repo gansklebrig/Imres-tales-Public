@@ -772,6 +772,7 @@
     pronomen(f, anderer && heldG(anderer.held) === "w", "p2h_");
     return f;
   }
+  const ohnePause = t => String(t || "").replace(/\s*\/\/\s*/g, " ");
   const ersetze = (t, f) => satz(t.replace(/\{(\w+)\}/g, (_, k) => k === "npcN" ? String(f.npc).replace(/^(der|die|das) /, "") : f[k] != null ? f[k] : "{" + k + "}"));
   const satz = t => t.replace(/(^|[.!?]\s+|(?:^|[.!?:]\s*)„)([a-zäöü])/g, (m, a, b) => a + b.toUpperCase());
   function grossAnfang(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
@@ -1008,7 +1009,7 @@
     if (gesehen >= 250) erfolg("sammler");
     if (gesehen >= 500) erfolg("sammler2");
     const folgeText = grossAnfang(ersetze(folge || "", f));
-    RUN.k.log.push({ t: folgeText || o.label, sess: RUN.k.session });
+    RUN.k.log.push({ t: ohnePause(folgeText || o.label), sess: RUN.k.session });
     if (RUN.k.log.length > 80) RUN.k.log.shift();
     RUN.verlauf.push(o.label);
     // Effekt & Ton
@@ -1319,7 +1320,7 @@
       }
       if (x.weg) x.wegNotiert = true;
     }
-    if (schwer) { RUN.k.schwerLog = (RUN.k.schwerLog || []).concat({ t: ersetze(k.text, aktuelle.f).slice(0, 90), wahl: label }).slice(-12); }
+    if (schwer) { RUN.k.schwerLog = (RUN.k.schwerLog || []).concat({ t: ohnePause(ersetze(k.text, aktuelle.f)).slice(0, 90), wahl: label }).slice(-12); }
   }
 
   /* ---------- Sitzplätze mit gezeichneten Figuren ---------- */
@@ -1431,6 +1432,28 @@
   }
 
   let karteEl = null, sperre = false;
+  /* ---------- Text mit Pausen: Die Pointe kommt einen Takt später ----------
+     „//“ im Kartentext erzwingt eine Pause. Ohne Markierung bekommt ein kurzer
+     letzter Satz nach längerem Anlauf automatisch seinen eigenen Takt. */
+  function textHtml(t, auto) {
+    t = t || "";
+    let teile = t.split(/\s*\/\/\s*/).filter(Boolean);
+    if (teile.length === 1 && auto) {
+      // auto: "karte" = Entscheidungstext, "folge" = Ergebnis (dort sitzt die Pointe fast immer am Ende)
+      const saetze = t.match(/[^.!?…]+(?:[.!?…]+[“»"]?|$)\s*/g) || [t];
+      const minVor = auto === "folge" ? 12 : 36, maxEnde = auto === "folge" ? 70 : 52;
+      for (const n of [1, 2]) {
+        if (saetze.length <= n) break;
+        const ende = saetze.slice(-n).join(""), letzter = ende.trim(), vorher = t.slice(0, t.length - ende.length).trim();
+        if (letzter.length <= (n === 1 ? maxEnde : 50) && vorher.length >= minVor) { teile = [vorher, letzter]; break; }
+      }
+    }
+    const fmt = x => esc(x).replace(/„([^“]+)“/g, "„<em>$1</em>“");
+    if (teile.length === 1) return { html: fmt(teile[0]), dauer: 0 };
+    let html = '<span class="s0">' + fmt(teile[0]) + "</span>", dauer = 0, vorLen = teile[0].length;
+    for (let i = 1; i < teile.length; i++) { dauer += Math.min(2000, 500 + vorLen * 17); html += ' <span class="beat" style="animation-delay:' + dauer + 'ms">' + fmt(teile[i]) + "</span>"; vorLen = teile[i].length; }
+    return { html, dauer };
+  }
   function kartenTyp(ctx, k) { if (imBoss() || k.phase === "boss" || k.phase === "bossstart") return "boss"; if (ctx.chat) return "tisch"; return ctx.sym || (ctx.sp ? "spieler" : k.wer); }
   function bannerFuer(ctx, k, text) {
     const boss = imBoss() || k.phase === "boss" || k.phase === "bossstart";
@@ -1454,7 +1477,7 @@
     if (!aktuelle.banner) aktuelle.banner = bannerFuer(aktuelle.ctx, k, aktuelle.text);
     const el = document.createElement("div"); el.className = "karte neu t-" + typ + (k.selten ? " selten" : ""); el.setAttribute("role", "group"); el.setAttribute("aria-label", info.name);
     const wurf = k.opt.some(o => o.w.wurf);
-    el.innerHTML = '<div class="banner">' + aktuelle.banner + '</div>' + GR.rahmen(typ, k.selten) + (k.selten ? '<div class="glanz"></div><div class="selten-tag">✦ selten ✦</div>' : "") + '<div class="wahl-schild"></div><div class="portrait">' + info.svg + '</div><div class="sprecher">' + esc(info.name) + '</div><div class="rolle">' + esc(info.rolle) + '</div><div class="text"><span>' + esc(aktuelle.text).replace(/„([^“]+)“/g, "„<em>$1</em>“") + "</span></div>" +
+    el.innerHTML = '<div class="banner">' + aktuelle.banner + '</div>' + GR.rahmen(typ, k.selten) + (k.selten ? '<div class="glanz"></div><div class="selten-tag">✦ selten ✦</div>' : "") + '<div class="wahl-schild"></div><div class="portrait">' + info.svg + '</div><div class="sprecher">' + esc(info.name) + '</div><div class="rolle">' + esc(info.rolle) + '</div><div class="text"><span>' + textHtml(aktuelle.text, "karte").html + "</span></div>" +
       (wurf ? '<div class="wurf">🎲 Probe möglich</div>' : "") + '<div class="fuss"><span>' + esc(RUN.k.titel) + "</span><span>" + (RUN.k.ziel ? '<span title="Geheimes Ziel">🎯</span>' : "") + "</span></div>";
     st.appendChild(el); karteEl = el;
     const [l, r, m] = k.opt;
@@ -1481,7 +1504,7 @@
     let sx = 0, sy = 0, dx = 0, dy = 0, aktiv = false, id = null;
     const schild = el.querySelector(".wahl-schild");
     const drei = () => aktuelle && aktuelle.k.opt[2];
-    el.addEventListener("pointerdown", e => { if (sperre || el.classList.contains("folge")) return; aktiv = true; id = e.pointerId; sx = e.clientX; sy = e.clientY; dx = 0; dy = 0; el.setPointerCapture(id); el.classList.add("zieht"); el.classList.remove("neu"); Ton.start(); });
+    el.addEventListener("pointerdown", e => { el.classList.add("zeigen"); if (sperre || el.classList.contains("folge")) return; aktiv = true; id = e.pointerId; sx = e.clientX; sy = e.clientY; dx = 0; dy = 0; el.setPointerCapture(id); el.classList.add("zieht"); el.classList.remove("neu"); Ton.start(); });
     el.addEventListener("pointermove", e => {
       if (!aktiv || e.pointerId !== id) return;
       dx = e.clientX - sx; dy = drei() ? Math.min(0, e.clientY - sy) : 0;
@@ -1611,11 +1634,13 @@
     const st = $("#stapel");
     if (karteEl) karteEl.remove();
     const el = document.createElement("div"); el.className = "karte folge neu t-" + (erg.typ || "spieler"); el.tabIndex = 0;
+    const folgeTx = textHtml(erg.folge || "Die Geschichte geht weiter.", "folge");
+    el._beatBis = Date.now() + folgeTx.dauer + 350;
     const ev = erg.ereignisse.map(e => '<span class="' + (e.c || "") + '">' + esc(e.t) + "</span>").join("");
     const pfeile = "mlst".split("").filter(b => Math.round(erg.delta[b])).map(b => { const B = BALKEN.find(x => x.k === b), d = Math.round(RUN ? RUN.b[b] - erg.vorher[b] : erg.delta[b]); return d ? (B.name + " " + (d > 0 ? "+" : "") + d) : ""; }).filter(Boolean).join(" · ");
     const boss = RUN && RUN.k.boss && RUN.k.boss.letzt ? '<div class="bosstreffer ' + (RUN.k.boss.letzt < 0 ? "ja" : "nein") + '">' + (RUN.k.boss.letzt < 0 ? "Endgegner " + RUN.k.boss.letzt : "Endgegner erholt sich +" + RUN.k.boss.letzt) + "</div>" : "";
     if (RUN && RUN.k.boss) RUN.k.boss.letzt = 0;
-    el.innerHTML = (erg.banner ? '<div class="banner klein">' + erg.banner + "</div>" : "") + GR.rahmen(erg.typ || "spieler", false) + '<div class="folge-kopf">' + (erg.zoegern ? "Du hast zu lange gezögert …" : erg.wurf ? (erg.wurf.ok ? "Gelungen" : "Misslungen") : erg.schwer ? "Entschieden." : "Und dann …") + '</div>' + boss + '<div class="text"><span>' + esc(erg.folge || "Die Geschichte geht weiter.") + '</span></div><div class="ereignisse">' + ev + '</div><div class="fuss"><span>' + esc(pfeile) + '</span><span class="weiter">weiter ▸</span></div>';
+    el.innerHTML = (erg.banner ? '<div class="banner klein">' + erg.banner + "</div>" : "") + GR.rahmen(erg.typ || "spieler", false) + '<div class="folge-kopf">' + (erg.zoegern ? "Du hast zu lange gezögert …" : erg.wurf ? (erg.wurf.ok ? "Gelungen" : "Misslungen") : erg.schwer ? "Entschieden." : "Und dann …") + '</div>' + boss + '<div class="text"><span>' + folgeTx.html + '</span></div><div class="ereignisse">' + ev + '</div><div class="fuss"><span>' + esc(pfeile) + '</span><span class="weiter">weiter ▸</span></div>';
     st.appendChild(el); karteEl = el;
     Viz.zeige(erg.viz);
     if (!META.einst.ruhig) {
@@ -1631,11 +1656,15 @@
     for (const b of "mlst") if (Math.round(erg.delta[b])) { const e = document.querySelector('.bk[data-k="' + b + '"]'); if (e) { e.classList.remove("stoss"); void e.offsetWidth; e.classList.add("stoss"); } }
     blasen(erg);
     let weiter = false;
-    const los = () => { if (weiter) return; weiter = true; el.removeEventListener("click", los); nachFolge(); };
+    const los = () => {
+      if (weiter) return;
+      if (el._beatBis && Date.now() < el._beatBis) { el.classList.add("zeigen"); el._beatBis = 0; return; }   // erst die Pointe zeigen
+      weiter = true; el.removeEventListener("click", los); nachFolge();
+    };
     el.addEventListener("click", los);
     el.focus({ preventScroll: true });
     folgeWeiter = los;
-    if (META.einst.auto) setTimeout(los, 3200 + (erg.folge || "").length * 25);
+    if (META.einst.auto) setTimeout(() => { el._beatBis = 0; los(); }, 3200 + (erg.folge || "").length * 25 + folgeTx.dauer);
     speichern();
   }
 

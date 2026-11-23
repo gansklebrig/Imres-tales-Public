@@ -10,12 +10,12 @@ Im Dungeon steht eine verdächtig unauffällige Schatztruhe. {held} will sie öf
 > Echte Truhe | m+6 s+2 l-2 | Gold, ein Heiltrank und ein Zettel: „Diesmal nicht.“ | gold
 
 § #dg_falle sl
-Ein Gang voller Druckplatten. Die Gruppe hat keinen Schurken dabei, der Fallen findet.
+Ein Gang voller Druckplatten. // Und niemand in der Gruppe kann Fallen finden.
 < Vorsichtig tasten | l+6 t-8 s-4 | Eine Stunde Zentimeter für Zentimeter. Niemand stirbt. Alle sterben innerlich. | staub
 > Einfach rennen | W11 t+8 s+4 ? : tod2 | Pfeile zischen, Klingen sausen – alle kommen durch! :: Eine Platte zu viel. | pfeile
 
 § #dg_raetsel sl
-Eine Tür mit einem Rätsel. Die Spieler raten seit 30 Minuten falsch.
+Eine Tür mit einem Rätsel. // Die Spieler raten seit 30 Minuten falsch.
 < Hinweis geben | t+6 s+2 l-2 | „Denkt an… etwas mit Zähnen, das nie beißt.“ – „EIN KAMM!“ Jubel. | glocke
 > Sie sollen weiterraten | l+4 t-8 s-6 | Die Antwort war „Echo“. Niemand kommt drauf. Der Barbar tritt die Tür ein. | frage
 
@@ -40,7 +40,7 @@ Im tiefsten Raum des Dungeons schimmert ein Portal. Wohin es führt, weiß niema
 > Versiegeln | l+5 m+2 | Das Portal schließt sich. Irgendetwas dahinter seufzt enttäuscht.
 
 § #dg_schleim sl
-Ein Gallertwürfel füllt den ganzen Gang. In ihm schwimmen Münzen, ein Schwert und ein verwirrter Gnom.
+Ein Gallertwürfel füllt den ganzen Gang. In ihm schwimmen Münzen, ein Schwert … // und ein verwirrter Gnom.
 < Gnom retten | W11 s+6 l+2 ? m+3 : tod2 | Der Gnom ist ein Händler! Er gibt Rabatt auf Lebenszeit. :: Der Würfel ist hungrig. Sehr. | gift
 > Würfel umgehen | t-4 l+3 | Die Gruppe nimmt einen anderen Weg. Der Gnom winkt traurig.
 
@@ -55,12 +55,12 @@ Ein Kutscher bietet an, die Gruppe mitzunehmen. Er redet ununterbrochen.
 > Laufen | t-4 m+2 | Die Füße tun weh, aber die Ohren sind dankbar.
 
 § #rs_berg welt ort:berg
-Ein Gebirgspass. Lawinengefahr. Ein Ziegenhirte warnt: „Nicht heute.“
+Ein Gebirgspass. Lawinengefahr. Ein Ziegenhirte warnt: // „Nicht heute.“
 < Trotzdem rüber | W13 t+6 m+2 ? s+4 : tod | Eine dramatische Überquerung im Schneegestöber. Geschafft! :: Die Lawine kommt. | schnee
 > Abwarten | t-8 l+4 s-2 | Drei Tage in der Hirtenhütte. Viel Ziegenkäse. Sehr viel Ziegenkäse.
 
 § #rs_schiff welt ort:meer
-Die Gruppe reist per Schiff. Der Kapitän ist ein einbeiniger Halbling mit Papagei.
+Die Gruppe reist per Schiff. // Der Kapitän ist ein einbeiniger Halbling mit Papagei.
 < Seeschlacht! | W12 m+5 s+6 t+5 ? lvl : tod | Piraten entern – und werden zurückgeschlagen! Rum für alle! :: Ein Held geht über Bord. | wellen
 > Seekrankheit | s+5 l+3 m-3 | Alle sind seekrank. Der Papagei lacht. Drei Tage lang. | lachen
 
@@ -90,7 +90,7 @@ Die Diebesgilde verlangt einen Gefallen: Ein Bild aus dem Palast stehlen.
 > Austreten | l+4 s-4 -gilde | Die Gilde lässt {held} ziehen. Mit einem Messer im Tisch als Abschiedsgeschenk.
 
 § #st_gericht npc ort:stadt
-{held} steht vor Gericht. Der Vorwurf: Hühnerdiebstahl.
+{held} steht vor Gericht. Der Vorwurf: // Hühnerdiebstahl.
 < Verteidigungsrede | W12 l+6 s+6 ? : m-4 | Die Rede ist so gut, dass das Huhn freigesprochen wird. Wie auch immer das geht. :: Verurteilt zu drei Tagen Pranger. | federn
 > Flucht aus dem Saal | t+8 s+5 l-5 | Ein Sprung durchs Fenster! Jetzt ist die ganze Gruppe gesucht. | glocke
 
@@ -376,7 +376,7 @@ Du hast eine 3D-Karte aus Pappmaché gebaut. Sie nimmt den halben Tisch ein.
 
 § #gk_wiedergeburt gott wenn:tote>0
 {gott} bietet an, {tot} wiederzubeleben – im Tausch gegen einen Dienst.
-< Annehmen | m+5 l-4 s+5 | {tot} lebt! Aber schuldet jetzt einem Gott einen Gefallen. | sonne
+< Annehmen | m+5 l-4 s+5 | {tot} lebt! // Schuldet jetzt aber einem Gott einen Gefallen. | sonne
 > Ablehnen | l+5 s-3 | „Der Tod gehört zum Leben.“ Weise. Traurig.
 
 § #gk_prophet gott
@@ -412,7 +412,7 @@ In der Nacht heulen Wölfe ums Lager. Viele Wölfe.
 § #wd_vulkan welt
 Ein Vulkan bricht in der Nähe von {ort} aus.
 < Flucht! | t+10 W11 s+4 ? : tod2 | Eine wilde Flucht vor der Lava! Alle schaffen es! :: Einer war zu langsam. | feuer
-> Den Feuerdämon stellen | W15 m+8 s+6 ? lvl : tpk | Der Feuerdämon wird zurückgedrängt. Legenden! :: Lava. Viel Lava. | explosion
+> Den Feuerdämon stellen | W15 m+8 s+6 ? lvl : tpk | Der Feuerdämon wird zurückgedrängt. Legenden! :: Lava. // Viel Lava. | explosion
 
 § #rb_neueEdition regelbuch
 Eine neue Edition des Regelwerks ist erschienen. Alles ist anders.

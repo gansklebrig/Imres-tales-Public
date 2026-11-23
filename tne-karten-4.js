@@ -15,7 +15,7 @@ Deine subtilen Hinweise haben gewirkt. Ein Spieler sagt: „Moment… war {npc} 
 > „Keine Ahnung, wovon du redest“ | l+3 s+3 | Die Paranoia am Tisch steigt auf 100. Jeder NSC wird verhört.
 
 § #sl_railroad sl
-Die Gruppe will nach Süden. Dein ganzer Plot liegt im Norden.
+Die Gruppe will nach Süden. // Dein ganzer Plot liegt im Norden.
 < Sie umlenken | l+4 s-4 alle-4 | Eine Brücke ist eingestürzt. Im Süden. Und im Westen. Und im Osten. Seltsam.
 > Mitgehen und improvisieren | W12 s+6 ? l+3 : l-6 | Im Süden findest du spontan eine noch bessere Geschichte! :: Im Süden ist… nichts. Du erfindest panisch ein Dorf namens „Dorf“. | magie
 
@@ -40,7 +40,7 @@ Die Gruppe hat einen großartigen Plan gehabt. Wie belohnst du sie?
 > Ein magischer Gegenstand | m+8 l-2 | Die Gruppe findet {item}. Fast zu stark. | gold
 
 § #sl_tempo sl wenn:t<30
-Die Session zieht sich. Jemand hat begonnen, die Chipskrümel zu sortieren.
+Die Session zieht sich. // Jemand hat begonnen, die Chipskrümel zu sortieren.
 < Ninja-Angriff! | t+12 s+4 l-3 | Aus den Schatten springen Ninjas. Warum? Egal! Alle sind wach! | schwerter
 > Zeitsprung | t+10 l+2 | „Drei Tage später erreicht ihr {ort}.“ Erleichterung.
 
@@ -160,7 +160,7 @@ Ein Barde singt in der Taverne ein Lied über die Gruppe. Es ist nicht schmeiche
 > Schmuggeln | W12 s+5 ? m+2 : l+4 m-4 | Der Barbar versteckt seine Axt in einem Brotlaib. Erfolg! :: Das Brot ist zu klein für eine Zweihandaxt. | lachen
 
 § #npc_liebe npc
-{npc} hat sich in {held} verliebt. Schwer verliebt.
+{npc} hat sich in {held} verliebt. // Schwer verliebt.
 < Erwidern | s+6 l+2 t-3 | Eine zarte Romanze. {name} wird rot. | herzen
 > Freundlich abweisen | l+3 s+3 | {npcN} schreibt fortan traurige Gedichte über {held}. Sehr schlechte.
 
@@ -285,12 +285,12 @@ Riesige Pilze sprießen über Nacht in {ort}. Sie singen.
 > Abfackeln | m+3 l+2 s-2 | Die Pilze kreischen. Das war gemein. | feuer
 
 § #wf_glueck wuerfel
-Die Würfel sind heute heiß. {name} würfelt drei 20er hintereinander.
+Die Würfel sind heute heiß. // {name} würfelt drei 20er hintereinander.
 < Glück lassen | m+8 s+6 l-3 | Der Abend der Legenden! Alles gelingt! | wuerfelregen
 > Würfel prüfen | l+6 laune-6 | „Ist der gezinkt?“ Der Würfel wird untersucht. Er ist sauber. Nur verdammt glücklich.
 
 § #wf_pech wuerfel
-Heute würfelt niemand über 5. Keiner.
+Heute würfelt niemand über 5. // Keiner.
 < Würfel ins Gefängnis | s+6 l-2 | Die Würfel werden bestraft. Ein Holzkästchen dient als Kerker. | lachen
 > Durchhalten | m-6 s-4 l+3 | Die Gruppe kämpft sich durch einen Abend voller Fehlschläge. | treffer
 
@@ -315,7 +315,7 @@ Das Regelbuch klappt beim Fallen auf einer Seite auf: „Optionale Regel: Verlet
 > Zuklappen | l-3 s+2 | Manche Regeln bleiben besser optional.
 
 § #rb_errata regelbuch
-Eine neue Errata ist erschienen. Die Lieblingsfähigkeit der Gruppe wurde abgeschwächt.
+Eine neue Errata ist erschienen. // Die Lieblingsfähigkeit der Gruppe wurde abgeschwächt.
 < Übernehmen | l+6 m-6 alle-4 | Kollektives Murren. Aber es war wirklich zu stark.
 > Ignorieren | m+3 l-4 | „Wir spielen die alte Version.“ Irgendwo am Tisch zuckt ein Augenlid.
 
@@ -375,7 +375,7 @@ Ein Spieler fragt: „Glaubst du, wir sitzen in Wahrheit auch nur in einem Spiel
 > „Vielleicht…“ | s+6 l-6 | Gänsehaut am ganzen Tisch. Die Kerze flackert. | magie
 
 § #st_regen welt phase:start
-Draußen regnet es in Strömen. Im Spiel auch?
+Draußen regnet es in Strömen. // Im Spiel auch?
 < Ja, Regen | l+3 s+3 t-3 | Die Helden stapfen durch den Matsch. Es klingt drinnen wie draußen. | regen
 > Sonnenschein | s+4 t+3 | Im Spiel scheint die Sonne. Seelische Kompensation. | sonne
 
@@ -420,7 +420,7 @@ Alle gähnen. Die Kerze ist heruntergebrannt.
 > Noch ein letzter Wurf | W10 s+5 ? m+3 : s-3 | Ein letzter Glückswurf auf die Beute. Gold! :: Nur ein rostiger Löffel. | gold
 
 § #se_abstimmung tisch phase:ende
-Termin für nächste Woche finden. Drei können Dienstag, zwei Donnerstag.
+Termin für nächste Woche finden. // Drei können Dienstag, zwei Donnerstag.
 < Dienstag | t+3 alle-3 | Zwei sind traurig, aber es wird gespielt.
 > Umfrage-Tool | t-5 s-2 alle+2 | Nach vier Tagen Abstimmung: Samstag! Alle können. Wunder.
 
@@ -445,7 +445,7 @@ Die Helden begleiten eine Handelskarawane nach {ort}.
 > Überfall! | t+6 m+3 W10 ? s+4 : tod2 | Die Karawane wird überfallen – die Helden retten den Tag! :: Der Überfall fordert ein Opfer. | pfeile
 
 § #ks_erbe sl phase:kstart
-{held} erbt ein Schloss in {ort}. Es hat ein kleines Problem: Geister.
+{held} erbt ein Schloss in {ort}. Es hat ein kleines Problem: // Geister.
 < Geisterschloss! | s+6 l+3 | Ein Erbe mit Gespenstern. Die Kampagne hat ihren Mittelpunkt. | geister
 > Verkaufen | m+5 l+2 | Das Geld geht in Ausrüstung. Die Geister in die Nachbarschaft.
 

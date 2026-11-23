@@ -80,7 +80,7 @@ Ein Foto im Gruppenchat: winzig, zerknautscht, perfekt. Darunter schreibt {name}
 > Ganz entspannt einsteigen | t-2 laune+8 alle+3 krise- | Eine gemütliche Taverne, ein bisschen Gerede, ein paar Pläne. Genau richtig. | heilung
 
 § #kz_baby_2 spieler kette
-{name} ist wieder da – mit Babyphone. Es liegt direkt neben dem Schirm. Jedes Mal, wenn es knistert, hält der ganze Tisch den Atem an.
+{name} ist wieder da – mit Babyphone. Es liegt direkt neben dem Schirm. // Jedes Mal, wenn es knistert, hält der ganze Tisch den Atem an.
 < Flüsternd weiterspielen | s+4 l+2 t-3 laune+8 krise- | Die leiseste Kampfszene aller Zeiten. Der Barbar flüstert seinen Kampfschrei. | zzz
 > Lautstärke runter, sonst normal | t+2 laune+6 krise- | Nach zwanzig Minuten vergisst man das Babyphone. Bis es piept. Dann ist {name} weg. Und zehn Minuten später wieder da.
 
@@ -90,7 +90,7 @@ Ein Foto im Gruppenchat: winzig, zerknautscht, perfekt. Darunter schreibt {name}
 > „Termine sind Termine.“ | krise=job l+3 laune-6 >>kr_job_spaet | Klar, fair. Aber {name} ist danach ein bisschen still.
 
 § #kr_job_spaet spieler kette
-{name} kommt eine Stunde zu spät, direkt aus dem Büro, noch im Hemd. Isst kalte Pizza im Stehen und schaut alle zwei Minuten aufs Handy.
+{name} kommt eine Stunde zu spät, direkt aus dem Büro, noch im Hemd. Isst kalte Pizza im Stehen. // Und schaut alle zwei Minuten aufs Handy.
 < Kurze Zusammenfassung und rein ins Geschehen | t+3 laune+6 >>kr_job_laptop | „Ihr seid in einer Höhle, es riecht nach Schwefel, {held} hat Hunger.“ – „Kenn ich.“
 > Erst mal ankommen lassen | t-4 s+2 laune+4 >>kr_job_laptop | Zehn Minuten über den Job reden. Dann ist {name} angekommen. Wirklich angekommen.
 
@@ -100,7 +100,7 @@ Ein Foto im Gruppenchat: winzig, zerknautscht, perfekt. Darunter schreibt {name}
 > Ignorieren | t-4 s-3 >>kr_job_ende | Der Laptop bleibt auf. {held} steht die ganze Szene nur herum.
 
 § #kr_job_ende spieler kette
-Probezeit bestanden! {name} bringt eine Flasche Sekt mit und den festen Vorsatz, ab jetzt nie wieder so viel zu arbeiten.
+Probezeit bestanden! {name} bringt Sekt mit. // Und den festen Vorsatz, nie wieder so viel zu arbeiten.
 < Anstoßen | s+5 laune+12 alle+3 krise- | Auf feste Verträge, freie Donnerstage und {held}! | konfetti
 > Im Spiel: {held} wird im Orden befördert | s+3 l+2 laune+10 krise- | Mit Urkunde, Siegel und einer Rede des Großmeisters. {name} lacht: „Wie im echten Leben, nur mit Schwert.“ | krone
 
@@ -235,8 +235,8 @@ Der Boden des Saals ist ein riesiges Mosaik. Einige Fliesen glühen rot, andere 
 > Den Rätselteil überspringen | t+4 s+2 | Die Helden springen einfach drüber. Elegant ist anders.
 
 § #bk_power power phase:boss
-{name} steht auf. „{held} greift an. Mit allem. Ich hab mir diese Fähigkeit seit Stufe drei aufgespart.“
-< Volle Wucht | W12 m+4 ? boss-30 s+4 : m-3 laune-5 | Der Treffer sitzt. {schurkeN} taumelt. Der Tisch tobt. :: Daneben. {name} legt den Kopf auf den Tisch. | explosion
+{name} steht auf. „{held} greift an. Mit allem.“ // „Ich hab mir diese Fähigkeit seit Stufe drei aufgespart.“
+< Volle Wucht | W12 m+4 ? boss-30 s+4 : m-3 laune-5 | Der Treffer sitzt. {schurkeN} taumelt. Der Tisch tobt. :: Daneben. // {name} legt den Kopf auf den Tisch. | explosion
 > {schurkeN} pariert – aber es kostet Kraft | m-2 boss-10 laune-2 | Ein Funkenregen, ein Knurren, ein kleiner Riss in der Rüstung.
 
 § #bk_heilen spieler phase:boss
@@ -260,7 +260,7 @@ Der Boden des Saals ist ein riesiges Mosaik. Einige Fliesen glühen rot, andere 
 > „Hinter dem Schirm ist hinter dem Schirm.“ | t+3 laune-6 l-2 | {name} schreibt trotzdem mit. Du siehst es. {name} sieht, dass du es siehst.
 
 § #bk_snack snack phase:boss
-Mitten im Bosskampf kommt {name} mit einer frischen Ladung Nachos zurück. Der Kampf pausiert, weil wirklich alle Nachos wollen.
+Mitten im Bosskampf kommt {name} mit frischen Nachos zurück. // Der Kampf pausiert. Alle wollen Nachos.
 < Snackpause | s+5 t-5 alle+5 boss+5 | Die Nachos sind ausgezeichnet. Der Boss nutzt die Pause, um sich die Wunden zu verbinden. | pizza
 > „Nachos nach dem Kampf!“ | t+4 s-3 boss-6 | Hungrig kämpft es sich verbissener. Und schneller.
 
@@ -290,7 +290,7 @@ Mitten im Bosskampf kommt {name} mit einer frischen Ladung Nachos zurück. Der K
 > Leiser, bitte | l+2 laune-4 | Die Musik läuft weiter, auf Lautstärke 3. Dramatisch flüsternd.
 
 § #bk_kunst kunst phase:boss
-{name} hat den Boss während des Kampfes gezeichnet. Das Bild geht reihum. Er ist darauf furchteinflößend – und hat einen kleinen Schnurrbart.
+{name} hat den Boss während des Kampfes gezeichnet. Das Bild geht reihum. Er ist darauf furchteinflößend … // und hat einen kleinen Schnurrbart.
 < Den Schnurrbart kanonisch machen | s+6 l-4 boss-6 | Der Boss hat ab jetzt einen Schnurrbart. Er wirkt dadurch irgendwie verletzlich. | lachen
 > Bild bewundern, weiterkämpfen | s+3 t-2 laune+4 | Das Bild wird nach der Session eingerahmt.
 
@@ -315,12 +315,12 @@ Säulen bersten, Steine regnen. Der Saal verändert sich mit jeder Kampfrunde. I
 > In Deckung gehen | t-3 m+2 | Die Helden überleben den Steinregen. Der Boss auch.
 
 § #bk_wuerfel wuerfel phase:boss
-Alle würfeln gleichzeitig. Vier W20 rollen über den Tisch. Einer fällt herunter und verschwindet unter dem Sofa.
+Alle würfeln gleichzeitig. Vier W20 rollen über den Tisch. // Einer fällt herunter und verschwindet unter dem Sofa.
 < Der unterm Sofa zählt! | W10 s+6 l-2 ? boss-25 : boss+5 | Unterm Sofa liegt eine 18. Und ein Euro. Und ein alter Würfel von 2016. :: Unterm Sofa liegt eine 2. Und Staub. | wuerfelregen
 > Neu würfeln | t-2 W12 ? boss-15 : | Ordnung muss sein. Treffer. :: Ordnung muss sein. Daneben. | wuerfelregen
 
 § #bk_hp sl phase:boss wenn:bhp<45
-Laut deinen Notizen hat der Boss nur noch wenige Trefferpunkte. Die Spieler wissen das nicht und planen gerade einen umständlichen Rückzug.
+Laut deinen Notizen hat der Boss nur noch wenige Trefferpunkte. // Die Spieler wissen das nicht und planen gerade einen umständlichen Rückzug.
 < Andeuten: „Sieht … angeschlagen aus.“ | boss-15 t+3 s+3 | Ein Moment Stille. Dann stürmen alle gleichzeitig nach vorne. | schwerter
 > Schweigen und die Spannung genießen | t-3 s+2 l+2 | Der Rückzug ist toll gespielt. Völlig unnötig, aber toll.
 
@@ -340,13 +340,13 @@ Der Boss fällt gleich – viel zu früh. Du hast noch eine ganze dritte Phase v
 > Nacheinander würfeln | l+3 boss-12 | Ordentlich, aber unspektakulär. {p2} murmelt: „Wir hatten einen Namen dafür.“
 
 § #bk_altheld spieler phase:boss wenn:merk:verlust
-{name} steht auf. „Das ist für {altheld}.“
+{name} steht auf. // „Das ist für {altheld}.“
 < Würfeln | W11 ? boss-30 laune+10 s+4 : laune-4 | Für {altheld}. Der Tisch ist für eine Sekunde still, dann jubelt er. :: Daneben. Aber {name} nickt nur. „{altheld} hätte auch danebengehauen.“ | schwerter
 > Den Moment mit Inspiration belohnen | boss-15 laune+6 l+2 | Kein Würfel nötig. Manche Treffer schreibt man einfach. | funkeln
 
 § #bk_pech spieler phase:boss wenn:merk:pechvogel
-Alles hängt jetzt an {name}s Wurf. {name} hat diese Runde schon {nat1}-mal eine 1 gewürfelt.
-< Würfeln lassen | W8 ? boss-35 s+8 laune+15 : s+3 laune-5 | Eine 19! {name} springt auf. Der Pechvogel-Fluch ist gebrochen. Für heute. :: Eine 2. {name} lacht so verzweifelt, dass alle mitlachen müssen. | konfetti
+Alles hängt jetzt an {name}s Wurf. // {name} hat diese Runde schon {nat1}-mal eine 1 gewürfelt.
+< Würfeln lassen | W8 ? boss-35 s+8 laune+15 : s+3 laune-5 | Eine 19! {name} springt auf. Der Pechvogel-Fluch ist gebrochen. Für heute. :: Eine 2. // {name} lacht so verzweifelt, dass alle mitlachen müssen. | konfetti
 > Jemand anderes würfelt | t+2 W10 ? boss-15 : | Ein anderer Würfel, eine andere Hand. Treffer. {name} ist halb erleichtert, halb beleidigt. :: Auch der andere Würfel hat keine Lust. Es liegt doch nicht an {name}.
 
 § #bk_geist geist phase:boss
@@ -375,7 +375,7 @@ Plötzlich stürmt {npc} mit Verstärkung in den Saal. Die Helden hatten vor ein
 > Das Portal zerstören | W13 l+2 ? boss-20 s+4 : t-3 | Das Portal zerbricht. Kein Ausweg mehr. :: Das Portal zuckt, bleibt aber offen. | explosion
 
 § #bk_spaet tisch phase:boss
-Es ist halb eins. Der Bosskampf läuft seit zwei Stunden. Die erste Person gähnt so laut, dass der Boss kurz innehält.
+Es ist halb eins. Der Bosskampf läuft seit zwei Stunden. // Die erste Person gähnt so laut, dass der Boss kurz innehält.
 < Tempo: Die Diener fallen automatisch | t+6 l-3 boss-10 | Keine Würfe mehr für die Diener. Nur noch der Boss. Plötzlich sind alle wieder wach. | staub
 > Fünf Minuten Pause, Kaffee, weiter | t-4 alle+4 s+2 | Kaffee, Kekse, Klogang. Dann weiter, frischer als vorher.
 
@@ -406,7 +406,7 @@ Die Helden umzingeln {schurkeN}. Alle Würfel liegen bereit. Wer schlägt zuerst
 ^ Einen Toten zurückholen | l-6 s+8 alle+6 geist | {tot} öffnet die Augen. „Hab ich was verpasst?“ Jubel, Tränen, ein halber Herzinfarkt beim Spieler. | heilung
 
 § #sel_crossover gast selten
-Es klingelt. Vor der Tür steht eine andere Spielgruppe aus dem Haus. Sie haben sich im Stockwerk geirrt – mit Charakterbögen für ein völlig anderes Rollenspiel.
+Es klingelt. Vor der Tür steht eine andere Spielgruppe aus dem Haus. Sie haben sich im Stockwerk geirrt. // Mit Charakterbögen für ein völlig anderes Rollenspiel.
 < Crossover-Session! | s+10 l-8 t-4 alle+6 | Ein Cyberpunk-Hacker und ein Zwergenpriester teilen sich eine Taverne. Es ist der lustigste Abend des Jahres. | konfetti
 > Höflich wegschicken | l+2 t+2 | „Viel Spaß im vierten Stock!“ Durch die Decke hört man sie den ganzen Abend jubeln.
 ^ Ihre SL spielt einen NSC | s+6 l-2 xp+10 alle+3 | Der NSC ist ein verwirrter Raumschiffkapitän. Er wird Kult. | portal
@@ -478,7 +478,7 @@ Der Himmel über {ort} reißt auf. Dahinter: ein riesiges Auge. Es blinzelt einm
 ^ Zurückwinken | s+6 l-2 | Der Himmel reißt noch einmal auf. Das Auge wirkt … erfreut? | ausruf
 
 § #sel_schurke_kaffee schurke selten
-{schurke} sitzt inkognito in der Taverne, neben den Helden. Nicht, um zu kämpfen. Um zu reden. {schurkeN} wirkt müde.
+{schurke} sitzt inkognito in der Taverne, direkt neben den Helden. Nicht, um zu kämpfen. // Nur, um zu reden.
 < Zuhören | l+5 s+3 t-3 | Eine lange Geschichte über Fehler, Verrat und einen kaputten Traum. Die Helden zögern zum ersten Mal. | kerze
 > Sofort angreifen | W12 m+5 ? boss-20 s+4 : m-5 | Ein Überraschungsangriff in der Taverne. Krüge fliegen. :: {schurkeN} lächelt traurig und verschwindet im Rauch. | schwerter
 ^ Ein Bier ausgeben | s+5 l-3 +w_schurkenbier | Am Ende des Abends lachen Held und Schurke zusammen. Das wird das Finale sehr kompliziert machen. | lachen
@@ -502,7 +502,7 @@ Eine Bibliothekarin reicht {held} ein Buch: „{kampagne}“. Darin steht alles,
 ^ Bis zum Ende vorblättern | W13 ? s+6 plot+1 : l-6 t+4 | Auf der letzten Seite steht nur: „Und sie lebten.“ Das reicht. :: Die Seiten verbrennen beim Umblättern. Was blieb, war beunruhigend. | feuer
 
 § #fx_kruemel welt wenn:w_babydrache einmal
-Krümel, der Babydrache der Gruppe, ist gewachsen. Beim Frühstück hat er versehentlich die halbe Taverne angezündet und schaut jetzt sehr schuldbewusst.
+Krümel, der Babydrache der Gruppe, ist gewachsen. Beim Frühstück hat er die halbe Taverne angezündet. // Jetzt schaut er sehr schuldbewusst.
 < Krümel bleibt bei der Gruppe | m+6 s+4 l-3 | Die Taverne wird auf Kosten der Gruppe neu gebaut. Krümel trägt dabei die Balken. Ein guter Junge. | drache
 > Krümel zieht in die Berge | l+4 s+2 -w_babydrache | Ein letzter Blick über die Schulter, ein kleiner Rauchkringel zum Abschied. Der Tisch ist sehr still. | traenen
 

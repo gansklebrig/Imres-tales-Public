@@ -30,7 +30,7 @@
 > Zu lang | t+3 laune-6 | Die Hymne hat 47 Strophen. Ihr singt drei.
 
 § #ku2_portrait kunst
-{name} hat Porträts aller Helden gezeichnet. {aheld} sieht darauf deutlich heldenhafter aus als beschrieben.
+{name} hat Porträts aller Helden gezeichnet. // {aheld} sieht darauf deutlich heldenhafter aus als beschrieben.
 < Kanonisch! | s+6 m+3 laune+10 | {aheld} hat jetzt offiziell ein markantes Kinn und wehendes Haar. | funkeln
 > Realistisch bleiben | l+3 laune-6 | {name} zeichnet {aheld} nach: mit Doppelkinn und Kohlfleck.
 
@@ -72,7 +72,7 @@
 § #tk2_spionage taktik
 {name} schlägt vor, erst das Lager von {schurkeN} auszukundschaften.
 < Spionagemission | l+5 t-4 W12 ? m+5 : tod | Wertvolle Infos: Wachwechsel, Schwachstellen, Lieblingskuchen des Schurken. :: Der Spion wird entdeckt. | nacht
-> Keine Zeit | t+5 laune-6 | Blindflug. {name} schreibt „ICH HAB'S GESAGT“ auf einen Zettel und hält ihn hoch.
+> Keine Zeit | t+5 laune-6 | Blindflug. // {name} schreibt „ICH HAB'S GESAGT“ auf einen Zettel und hält ihn hoch.
 
 § #hd2_foto handy
 {name} macht ständig Fotos vom Spieltisch für Social Media.
@@ -90,7 +90,7 @@
 > „Ich bin die App“ | l-3 s+3 laune-6 | {name} schaut zwischen dir und dem Handy hin und her.
 
 § #hd2_akku handy wenn:t<40
-Der Akku von {name} ist leer. Plötzlich ist {er} voll dabei.
+Der Akku von {name} ist leer. // Plötzlich ist {er} voll dabei.
 < Spotlight geben | s+6 t+4 laune+15 | {held} rettet den Tag. Ohne Handy! Ein Wunder! | sonne
 > Ladekabel anbieten | t-3 laune+5 | Das Handy lädt. {name} schaut ihm sehnsüchtig zu.
 
