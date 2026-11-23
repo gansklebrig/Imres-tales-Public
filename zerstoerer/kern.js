@@ -184,6 +184,10 @@
   /* ---------------- Ton ---------------- */
   const A = (Z.audio = { ctx: null, buf: {}, loading: {}, vol: { master: 0.9, music: 0.55, sfx: 0.9, amb: 0.7 }, ok: false, loops: {}, lastPlay: {} });
   try { const v = JSON.parse(localStorage.getItem("imres-zerstoerer-ton") || "null"); if (v && typeof v === "object") for (const k in A.vol) if (typeof v[k] === "number" && isFinite(v[k])) A.vol[k] = Math.max(0, Math.min(1, v[k])); } catch (_) {}
+  /* Ton-Schalter (tonregler.js): Musik bzw. Effekte (samt Kulisse) schnell stumm, die Regler bleiben wie eingestellt */
+  A.musAn = () => !window.TonRegler || TonRegler.musik("zerstoerer");
+  A.fxAn = () => !window.TonRegler || TonRegler.effekte("zerstoerer");
+  if (window.TonRegler) TonRegler.anmelden("zerstoerer", { aendern: () => A.applyVol() });
   A.saveVol = () => { try { localStorage.setItem("imres-zerstoerer-ton", JSON.stringify(A.vol)); } catch (_) {} };
   A.init = () => {
     if (A.ctx) { if (A.ctx.state === "suspended") A.ctx.resume(); return; }
@@ -191,9 +195,9 @@
     const c = (A.ctx = new AC());
     A.out = c.createDynamicsCompressor(); A.out.threshold.value = -14; A.out.ratio.value = 4; A.out.connect(c.destination);
     A.master = c.createGain(); A.master.gain.value = A.vol.master; A.master.connect(A.out);
-    A.sfx = c.createGain(); A.sfx.gain.value = A.vol.sfx; A.sfx.connect(A.master);
-    A.mus = c.createGain(); A.mus.gain.value = A.vol.music; A.mus.connect(A.master);
-    A.amb = c.createGain(); A.amb.gain.value = A.vol.amb; A.amb.connect(A.master);
+    A.sfx = c.createGain(); A.sfx.gain.value = A.fxAn() ? A.vol.sfx : 0; A.sfx.connect(A.master);
+    A.mus = c.createGain(); A.mus.gain.value = A.musAn() ? A.vol.music : 0; A.mus.connect(A.master);
+    A.amb = c.createGain(); A.amb.gain.value = A.fxAn() ? A.vol.amb : 0; A.amb.connect(A.master);
     /* Hall für Höhlen und Hallen: synthetische Impulsantwort */
     A.verb = c.createConvolver(); A.verbGain = c.createGain(); A.verbGain.gain.value = 0.22;
     const len = c.sampleRate * 2.4, ir = c.createBuffer(2, len, c.sampleRate);
@@ -204,7 +208,7 @@
     A.master.disconnect(); A.master.connect(A.lp); A.lp.connect(A.out);
     A.ok = true;
   };
-  A.applyVol = () => { if (!A.ctx) return; A.master.gain.value = A.vol.master; A.sfx.gain.value = A.vol.sfx; A.mus.gain.value = A.vol.music; A.amb.gain.value = A.vol.amb; };
+  A.applyVol = () => { if (!A.ctx) return; A.master.gain.value = A.vol.master; A.sfx.gain.value = A.fxAn() ? A.vol.sfx : 0; A.mus.gain.value = A.musAn() ? A.vol.music : 0; A.amb.gain.value = A.fxAn() ? A.vol.amb : 0; };
   A.setVerb = v => { if (A.ctx) A.verbGain.gain.setTargetAtTime(v, A.ctx.currentTime, 0.4); };
   A.muffle = f => { if (A.ctx) A.lp.frequency.setTargetAtTime(f, A.ctx.currentTime, 0.12); };
   A.load = path => {

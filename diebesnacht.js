@@ -568,6 +568,10 @@
 
   /* ---------- Klang (eigene Synthese, keine Dateien) ---------- */
   let ac = null, rauschen = null, tonAn = lies("imres-diebesnacht-ton", "1") === "1";
+  /* Ton-Schalter (tonregler.js): die Lange Nacht hat nur Effekte, keine Musik */
+  if (window.TonRegler) tonAn = TonRegler.anmelden("diebesnacht", { musik: false, alt: { effekte: tonAn }, aendern: (art, an) => {
+    tonAn = an; schreib("imres-diebesnacht-ton", an ? "1" : "0"); if (tonKnopf) fussSetzen(); if (an) KLANG.klau();
+  } }).effekte;
   function audio() {
     if (!tonAn) return null;
     if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (_) { return null; } }
@@ -3532,7 +3536,8 @@
     skipKnopf = root.querySelector(".dn-skip");
     skipKnopf.addEventListener("click", nachstellungEnde);
     listeEl = root.querySelector(".dn-liste");
-    tonKnopf.addEventListener("click", () => { tonAn = !tonAn; schreib("imres-diebesnacht-ton", tonAn ? "1" : "0"); fussSetzen(); if (tonAn) KLANG.klau(); });
+    tonKnopf.addEventListener("click", () => { if (window.TonRegler) { TonRegler.setze("diebesnacht", "effekte", !tonAn); return; } tonAn = !tonAn; schreib("imres-diebesnacht-ton", tonAn ? "1" : "0"); fussSetzen(); if (tonAn) KLANG.klau(); });
+    if (window.TonRegler) TonRegler.anKarte("diebesnacht", root);
     pauseKnopf.addEventListener("click", pausieren);
     muenzKnopf.addEventListener("click", () => { if (zustand !== "spiel" || !S || S.muenzen <= 0) return; S.zielModus = !S.zielModus; S.schloss = null; muenzKnopfSetzen(); });
     tafel.addEventListener("click", tafelKlick);

@@ -263,7 +263,10 @@
       ctx = new AC(); fxGain = ctx.createGain(); atmoGain = ctx.createGain();
       fxGain.connect(ctx.destination); atmoGain.connect(ctx.destination); lautstaerke();
     }
-    function lautstaerke() { if (!ctx) return; fxGain.gain.value = META.einst.fx; atmoGain.gain.value = META.einst.atmo * 0.55; }
+    /* Ton-Schalter (tonregler.js): Atmosphäre („Musik“) und Effekte schnell stumm, Regler bleiben wie eingestellt */
+    const tonM = () => !window.TonRegler || TonRegler.musik("tne"), tonE = () => !window.TonRegler || TonRegler.effekte("tne");
+    if (window.TonRegler) TonRegler.anmelden("tne", { aendern: () => lautstaerke() });
+    function lautstaerke() { if (!ctx) return; fxGain.gain.value = tonE() ? META.einst.fx : 0; atmoGain.gain.value = tonM() ? META.einst.atmo * 0.55 : 0; }
     function datei(name) {
       if (A.has(name)) return "amb/" + name + ".mp3";
       if (V[name]) return "amb/" + name + "_" + (1 + Math.floor(Math.random() * V[name])) + ".mp3";
@@ -305,6 +308,7 @@
     }
     return { start, spiel, atmo, lautstaerke };
   })();
+  if (window.TonRegler) { const kopf = document.querySelector(".kopf"), log = document.getElementById("knopf-log"); if (kopf) kopf.insertBefore(TonRegler.knoepfe("tne"), log || null); }
   const vib = ms => { if (META.einst.vib && navigator.vibrate) try { navigator.vibrate(ms); } catch (e) { /* egal */ } };
 
   /* Atmosphäre je Ort */

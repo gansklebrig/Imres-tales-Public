@@ -569,7 +569,7 @@
     if (!A.ok) return;
     /* Kulisse tritt im Kampf zurück; bei wenig Leben schlägt das Herz */
     const I = Math.max(M.C || 0, (M.intensity || 0) * 0.6);
-    A.amb.gain.setTargetAtTime(A.vol.amb * (1 - 0.45 * I), A.ctx.currentTime, 0.5);
+    A.amb.gain.setTargetAtTime((A.fxAn && !A.fxAn() ? 0 : A.vol.amb) * (1 - 0.45 * I), A.ctx.currentTime, 0.5);
     const P = Z.player, low = P && !P.dead && Z.level && !Z.level.hub && P.hp < P.hpMax * 0.3;
     if (low && !AMB.heart) { AMB.heart = true; A.loop("herz", "amb/a_herzschlag.mp3", 0.55, A.sfx); }
     else if (!low && AMB.heart) { AMB.heart = false; A.stopLoop("herz", 0.8); }

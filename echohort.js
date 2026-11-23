@@ -861,21 +861,31 @@
     return d;
   })();
   const einstSichern = () => schreib("imres-echohort-einst", JSON.stringify(EINST));
+  /* Ton-Schalter (tonregler.js): Musik und Effekte schnell stumm – die Lautstärke-Regler bleiben wie eingestellt */
+  const tonM = () => !window.TonRegler || TonRegler.musik("echohort"), tonE = () => !window.TonRegler || TonRegler.effekte("echohort");
+  const pegelM = () => tonM() ? EINST.musik : 0, pegelE = () => tonE() ? EINST.effekte : 0;
+  if (window.TonRegler) TonRegler.anmelden("echohort", { aendern: (art, an) => {
+    audio(); busseSetzen();
+    if (art === "musik") {
+      if (!an) musikStop();
+      else if (zustand === "spiel" && S && S.R) musikStart(GEB[S.R.g].musik, MZ.lage);
+    } else if (an) KLANG.gold();
+  } });
 
   /* ---------- Klang: Effekte selbst berechnet, Musik aus den echten Instrumenten des Lautenwerks ---------- */
   let ac = null, rauschen = null, effektBus = null, musikBus = null;
   function busseSetzen() {
     if (!ac) return;
-    effektBus.gain.setTargetAtTime(EINST.effekte, ac.currentTime, 0.05);
-    musikBus.gain.setTargetAtTime(EINST.musik * 0.9, ac.currentTime, 0.05);
+    effektBus.gain.setTargetAtTime(pegelE(), ac.currentTime, 0.05);
+    musikBus.gain.setTargetAtTime(pegelM() * 0.9, ac.currentTime, 0.05);
   }
   function audio() {
-    if (EINST.effekte <= 0 && EINST.musik <= 0) return null;
+    if (pegelE() <= 0 && pegelM() <= 0) return null;
     if (!ac) {
       try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (_) { return null; }
       effektBus = ac.createGain(); effektBus.connect(ac.destination);
       musikBus = ac.createGain(); musikBus.connect(ac.destination);
-      effektBus.gain.value = EINST.effekte; musikBus.gain.value = EINST.musik * 0.9;
+      effektBus.gain.value = pegelE(); musikBus.gain.value = pegelM() * 0.9;
     }
     if (ac.state === "suspended") ac.resume();
     if (!rauschen) {
@@ -895,7 +905,7 @@
     const t0 = a.currentTime + (verz || 0);
     const o = a.createOscillator(); o.type = typ;
     o.frequency.setValueAtTime(f1, t0); o.frequency.exponentialRampToValueAtTime(f2, t0 + dauer);
-    if (EINST.effekte <= 0) return;
+    if (pegelE() <= 0) return;
     let ziel = huelle(a, effektBus, t0, laut, dauer);
     if (filt) { const b = a.createBiquadFilter(); b.type = filt[0]; b.frequency.value = filt[1]; b.Q.value = filt[2] || 1; b.connect(ziel); ziel = b; }
     o.connect(ziel); o.start(t0); o.stop(t0 + dauer + 0.05);
@@ -905,7 +915,7 @@
     const t0 = a.currentTime + (verz || 0);
     const q = a.createBufferSource(); q.buffer = rauschen;
     const b = a.createBiquadFilter(); b.type = typ; b.frequency.value = freq;
-    if (EINST.effekte <= 0) { return; }
+    if (pegelE() <= 0) { return; }
     q.connect(b); b.connect(huelle(a, effektBus, t0, laut, dauer));
     q.start(t0, Math.random() * 0.5); q.stop(t0 + dauer + 0.05);
   }
@@ -985,7 +995,7 @@
   /* weit weg von jeder Aufnahme (außerhalb der Lage) klingt sie verzerrt – dann die Oktave nehmen, in der eine nahe liegt */
   const inLage = (fam, midi) => { const k = PROBEN[fam]; if (!k) return midi; while (midi < k[0] - 3) midi += 12; while (midi > k[k.length - 1] + 3) midi -= 12; return midi; };
   function note(fam, midi, zeit, dauer, laut, rate) {
-    if (!ac || EINST.musik <= 0) return;
+    if (!ac || pegelM() <= 0) return;
     midi = inLage(fam, midi);
     const m = PROBEN[fam] ? naechste(fam, midi) : null, name = m == null ? fam : fam + "_" + m, b = probePuffer.get(name);
     if (!b) { probeLaden(name); return; }
@@ -1053,7 +1063,7 @@
   }
   function musikStart(k, lage) {
     /* Musik aus: nichts laden und keinen Takt laufen lassen – nur merken, wo wir sind, damit späteres Aufdrehen passt */
-    if (EINST.musik <= 0) { if (GEBIET_MUSIK[k]) { if (MZ.k !== k) MZ.st = null; MZ.k = k; MZ.lage = lage || 0; } return; }
+    if (pegelM() <= 0) { if (GEBIET_MUSIK[k]) { if (MZ.k !== k) MZ.st = null; MZ.k = k; MZ.lage = lage || 0; } return; }
     if (!audio() || !GEBIET_MUSIK[k]) return;
     const neuesGebiet = MZ.k !== k;
     MZ.k = k; MZ.lage = lage || 0;
@@ -1078,7 +1088,7 @@
     else if (vorher === 3 && n < 3 && MZ.bossStueck) { neuesStueck(false); MZ.pause = 2; }
   }
   function musikSignal(art) {
-    if (!MZ.an || !ac || EINST.musik <= 0 || !MZ.st) return;
+    if (!MZ.an || !ac || pegelM() <= 0 || !MZ.st) return;
     const z = ac.currentTime + 0.05, g = MZ.st.grund, L = MZ.st.leiter;
     if (art === "welle") { note("horn", g - 12, z, 0.5, 1.2); note("horn", g - 12 + L[4], z + 0.32, 0.9, 1.3); note("bodh1", 0, z, 1, 1); }
     else if (art === "geschafft") [0, 2, 4, 7].forEach((s, i) => note("harfe", g + 12 + L[s % 7] + (s >= 7 ? 12 : 0), z + i * 0.09, 1.2, 0.9));
@@ -1086,7 +1096,7 @@
   function musikStop() { if (!MZ.an) return; MZ.an = false; clearInterval(MZ.timer); naturStoppen(); }
   function tonDerStufe(st, stufe) { const n = st.leiter.length; return st.grund + st.leiter[((stufe % n) + n) % n] + 12 * Math.floor(stufe / n); }
   function musikTakt() {
-    if (!ac || !MZ.an || EINST.musik <= 0 || !MZ.st) return;
+    if (!ac || !MZ.an || pegelM() <= 0 || !MZ.st) return;
     while (MZ.naechste < ac.currentTime + 0.4) {
       const st = MZ.st, lage = MZ.lage, tempo = st.tempo * (lage >= 2 ? 1.08 : 1), achtel = 60 / tempo / 2, z = MZ.naechste;
       if (MZ.pause > 0) { // Atempause zwischen zwei Stücken: nur die Natur
@@ -5669,6 +5679,7 @@
     pauseKnopf = root.querySelector(".eh-pause");
     listeEl = root.querySelector(".eh-liste");
     tonKnopf.addEventListener("click", () => { if (zustand === "spiel") pausieren(); einstZeigen(); });
+    if (window.TonRegler) TonRegler.anKarte("echohort", root);
     schleier.addEventListener("input", einstEingabe);
     schleier.addEventListener("change", einstEingabe);
     pauseKnopf.addEventListener("click", pausieren);

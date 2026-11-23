@@ -365,6 +365,10 @@
 
   /* ---------- Klang (eigene Synthese, keine Dateien) ---------- */
   let ac = null, rauschen = null, tonAn = lies("imres-waldlauf-ton", "1") === "1";
+  /* Ton-Schalter (tonregler.js): die Jagd hat nur Effekte, keine Musik */
+  if (window.TonRegler) tonAn = TonRegler.anmelden("waldlauf", { musik: false, alt: { effekte: tonAn }, aendern: (art, an) => {
+    tonAn = an; schreib("imres-waldlauf-ton", an ? "1" : "0"); if (tonKnopf) fussSetzen(); if (an) KLANG.bellen();
+  } }).effekte;
   function audio() {
     if (!tonAn) return null;
     if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (_) { return null; } }
@@ -1939,7 +1943,8 @@
     tonKnopf = root.querySelector(".wl-ton");
     pauseKnopf = root.querySelector(".wl-pause");
     listeEl = root.querySelector(".wl-liste");
-    tonKnopf.addEventListener("click", () => { tonAn = !tonAn; schreib("imres-waldlauf-ton", tonAn ? "1" : "0"); fussSetzen(); if (tonAn) KLANG.bellen(); });
+    tonKnopf.addEventListener("click", () => { if (window.TonRegler) { TonRegler.setze("waldlauf", "effekte", !tonAn); return; } tonAn = !tonAn; schreib("imres-waldlauf-ton", tonAn ? "1" : "0"); fussSetzen(); if (tonAn) KLANG.bellen(); });
+    if (window.TonRegler) { const tr = TonRegler.knoepfe("waldlauf"); tr.classList.add("wl-tonregler"); buehne.appendChild(tr); }
     pauseKnopf.addEventListener("click", pausieren);
     vollKnopf = root.querySelector(".wl-voll"); rahmen = root.querySelector(".wl-rahmen");
     vollKnopf.addEventListener("click", vollbild);
@@ -2388,6 +2393,9 @@
 .wl-voll { position: absolute; top: calc(12% + 2.7rem); right: 10px; z-index: 6; width: 2rem; height: 2rem; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: rgba(9,8,15,.55); color: var(--vellum); font-size: .95rem; line-height: 1; cursor: pointer; display: grid; place-items: center; -webkit-tap-highlight-color: transparent; }
 .wl-voll:hover, .wl-voll:focus-visible { border-color: var(--ember); color: var(--ember); }
 .wl-buehne:not(.laeuft) .wl-voll { top: 8px; }
+.wl-buehne > .wl-tonregler { position: absolute; right: 10px; top: calc(12% + 5.2rem); z-index: 6; flex-direction: column; }
+.wl-buehne:not(.laeuft) > .wl-tonregler { top: calc(8px + 2.5rem); }
+.wl-tonregler button { width: 2rem; height: 2rem; border-radius: 50%; color: var(--vellum); }
 .wl-rahmen.voll { position: fixed; inset: 0; z-index: 9999; place-items: center; align-content: center; background: #050408; padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0); }
 #waldlauf .wl-rahmen.voll .wl-buehne { width: min(100vw, calc(100vh * .8), calc(100dvh * .8)) !important; max-width: none !important; border: 0; box-shadow: none; }
 /* niedrige Fenster (Handy quer, Handheld): Startknopf gleich unter den Titel, Hinweistext kleiner */

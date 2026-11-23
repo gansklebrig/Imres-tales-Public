@@ -1978,6 +1978,14 @@
     let an = lies("imres-charme-ton", "1") === "1";
     let musikLaut = parseFloat(lies("imres-charme-musik", ".7")), effektLaut = parseFloat(lies("imres-charme-effekte", "1"));
     if (!(musikLaut >= 0)) musikLaut = .7; if (!(effektLaut >= 0)) effektLaut = 1;
+    /* Ton-Schalter (tonregler.js): stumm schalten, ohne die eingestellte Lautstärke zu verlieren */
+    const mL = () => (!window.TonRegler || TonRegler.musik("charme")) ? musikLaut : 0;
+    const eL = () => (!window.TonRegler || TonRegler.effekte("charme")) ? effektLaut : 0;
+    if (window.TonRegler) TonRegler.anmelden("charme", { aendern: (art, an) => {
+      if (!ctx) return;
+      if (art === "musik") { if (musikAn) { musikBus.gain.cancelScheduledValues(jetzt()); musikBus.gain.setTargetAtTime(mL(), jetzt(), .1); } }
+      else effektBus.gain.setTargetAtTime(eL(), jetzt(), .05);
+    } });
     const puffer = {}, laden = {};
     let stimmen = 0;
     const FAM = {
@@ -1998,7 +2006,7 @@
       komp.threshold.value = -16; komp.knee.value = 12; komp.ratio.value = 4; komp.attack.value = .006; komp.release.value = .25;
       master.connect(komp); komp.connect(ctx.destination);
       musikBus = ctx.createGain(); musikBus.gain.value = 0; musikBus.connect(master);
-      effektBus = ctx.createGain(); effektBus.gain.value = effektLaut; effektBus.connect(master);
+      effektBus = ctx.createGain(); effektBus.gain.value = eL(); effektBus.connect(master);
       Object.keys(FAM).forEach(f => FAM[f].forEach(n => hole(f + "_" + n)));
       EINZEL.forEach(hole);
       return ctx;
@@ -2173,7 +2181,7 @@
       if (!ctx) return;
       if (soll && an) {
         if (!musikAn) { musikAn = true; naechsterTakt = jetzt() + .15; clearInterval(uhr); uhr = setInterval(ticken, 150); ticken(); }
-        musikBus.gain.cancelScheduledValues(jetzt()); musikBus.gain.setTargetAtTime(musikLaut, jetzt(), .4);
+        musikBus.gain.cancelScheduledValues(jetzt()); musikBus.gain.setTargetAtTime(mL(), jetzt(), .4);
       } else if (musikAn) {
         musikBus.gain.cancelScheduledValues(jetzt()); musikBus.gain.setTargetAtTime(0, jetzt(), .15);
         musikAn = false; clearInterval(uhr);
@@ -2184,7 +2192,7 @@
       if (!ctx || !musikAn) return;
       musikBus.gain.cancelScheduledValues(jetzt()); musikBus.gain.setValueAtTime(musikBus.gain.value, jetzt());
       musikBus.gain.linearRampToValueAtTime(0, jetzt() + .08);
-      musikBus.gain.setValueAtTime(0, jetzt() + dauer); musikBus.gain.linearRampToValueAtTime(musikLaut, jetzt() + dauer + 1.2);
+      musikBus.gain.setValueAtTime(0, jetzt() + dauer); musikBus.gain.linearRampToValueAtTime(mL(), jetzt() + dauer + 1.2);
     }
     return {
       init, fx, musik, stille,
@@ -2192,14 +2200,15 @@
       tempo: f => { SCHLAG = .68 * f; },
       laut: () => ({ musik: musikLaut, effekte: effektLaut }),
       setzeLaut(art, v) {
-        if (art === "musik") { musikLaut = v; schreib("imres-charme-musik", String(v)); if (ctx && musikAn) { musikBus.gain.cancelScheduledValues(jetzt()); musikBus.gain.setTargetAtTime(v, jetzt(), .1); } }
-        else { effektLaut = v; schreib("imres-charme-effekte", String(v)); if (ctx) effektBus.gain.setTargetAtTime(v, jetzt(), .05); }
+        if (art === "musik") { musikLaut = v; schreib("imres-charme-musik", String(v)); if (ctx && musikAn) { musikBus.gain.cancelScheduledValues(jetzt()); musikBus.gain.setTargetAtTime(mL(), jetzt(), .1); } }
+        else { effektLaut = v; schreib("imres-charme-effekte", String(v)); if (ctx) effektBus.gain.setTargetAtTime(eL(), jetzt(), .05); }
       },
       an: () => an,
       schalten() { an = !an; schreib("imres-charme-ton", an ? "1" : "0"); if (!an) musik(false); return an; }
     };
   })();
   const tonFx = (name, ...a) => { try { if (Ton.an()) Ton.fx[name](...a); } catch (_) {} };
+  if (window.TonRegler) TonRegler.anKarte("charme", root);
 
   /* ---------- Bild: Stimmungslicht, Disco, Regen, Steppenläufer, Stempel ---------- */
   const pracht = document.createElement("div");

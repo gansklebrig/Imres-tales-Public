@@ -436,6 +436,7 @@
     exit() { const x = document.exitFullscreen || document.webkitExitFullscreen; try { if (x) { const p = x.call(document); if (p && p.catch) p.catch(() => {}); } } catch (_) {} },
     toggle() { fs.on() ? fs.exit() : fs.enter(); }
   });
+  { const tp = document.getElementById("tonplatz"); if (tp && window.TonRegler) tp.replaceWith(TonRegler.knoepfe("zerstoerer")); }
   const fsBtn = document.getElementById("fsbtn");
   const fsSync = () => {
     if (fsBtn) { fsBtn.hidden = !fs.ok; fsBtn.textContent = fs.on() ? "🗗" : "⛶"; fsBtn.title = fs.label(); fsBtn.setAttribute("aria-label", fs.label()); }

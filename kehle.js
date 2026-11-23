@@ -554,7 +554,7 @@
   /* =================================================================
      KLANG: echte Aufnahmen aus klang/, berechneter Ersatz wenn sie fehlen
      ================================================================= */
-  let ctx = null, ausgang = null;
+  let ctx = null, ausgang = null, musikG = null, effektG = null;
   const KARTE = {
     gitarre: [36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66, 69, 72, 75, 78, 81, 84],
     kb: [28, 30, 31, 34, 36, 38, 40, 42, 44, 45, 49, 52, 56, 59],
@@ -580,10 +580,19 @@
       const komp = ctx.createDynamicsCompressor(); komp.threshold.value = -14; komp.ratio.value = 3;
       ausgang = ctx.createGain(); ausgang.gain.value = E.laut * E.laut;
       ausgang.connect(komp); komp.connect(ctx.destination);
+      /* Ton-Schalter: Musik (Begleitung, Vorsing- und Hilfstöne) und Effekte (Jubel, Abpraller, Tor-Klang) getrennt */
+      musikG = ctx.createGain(); musikG.connect(ausgang); effektG = ctx.createGain(); effektG.connect(ausgang); tonSchalterPegel();
     }
     if (ctx.state === "suspended" || ctx.state === "interrupted") { const p = ctx.resume(); if (p && p.catch) p.catch(() => {}); }
     return ctx;
   }
+  function tonSchalterPegel() {
+    if (!musikG) return;
+    musikG.gain.setTargetAtTime(!window.TonRegler || TonRegler.musik("kehle") ? 1 : 0, ctx.currentTime, .03);
+    effektG.gain.setTargetAtTime(!window.TonRegler || TonRegler.effekte("kehle") ? 1 : 0, ctx.currentTime, .03);
+  }
+  if (window.TonRegler) TonRegler.anmelden("kehle", { aendern: () => tonSchalterPegel() });
+  if (window.TonRegler) TonRegler.anKarte("kehle", root);
   const lautSetzen = () => { if (ausgang) ausgang.gain.setTargetAtTime(E.laut * E.laut, ctx.currentTime, .05); };
   /* Gemessene Verstimmung einzelner Aufnahmen in Cent (über die Obertöne bestimmt) – wird beim Abspielen ausgeglichen */
   const KORREKTUR = {"kb_28": -5, "kb_31": -12, "kb_36": 13, "kb_38": 8, "kb_40": -12, "kb_45": 9, "kb_56": -26, "kb_59": -13, "harfe_101": -30, "harfe_28": -23, "harfe_31": -27, "harfe_35": -16, "harfe_38": -7, "harfe_41": -8, "harfe_45": -5, "harfe_52": -5, "harfe_55": -9, "harfe_59": -14, "harfe_62": -13, "harfe_69": -11, "harfe_72": -11, "harfe_76": -12, "harfe_79": -4, "harfe_83": -9, "harfe_86": -7, "harfe_89": -6, "harfe_93": -19, "harfe_95": -10, "harfe_98": -8, "fl_93": 6, "tuba_50": -6, "tuba_53": -6, "tuba_58": 6, "orgel_36": -9, "orgel_42": -4, "orgel_54": 5, "vc_40": -10, "vc_77": 5};
@@ -1075,7 +1084,7 @@
     st.duett = duettAktiv(st); if (st.duett) zweiteStimme(st); else { st.zweite = null; st.noten.forEach(n => { n.harm = null; }); }
     const schieb = verschiebung(st);
     const ev = begleitung(st, schieb);
-    const bus = ctx.createGain(); bus.gain.value = E.kopf ? 1 : .55; bus.connect(ausgang);
+    const bus = ctx.createGain(); bus.gain.value = E.kopf ? 1 : .55; bus.connect(musikG || ausgang);
     S = { st, schieb, ev, ei: 0, t0: ctx.currentTime + .25, pause: false, tol: TOL[E.grad], ni: 0, spur: [], spurAll: [], letzteTv: null, punkte: 0, bonus: 0, urteil: null, serie: 0, besteSerie: 0,
       tonStatistik: {}, stumm: 0, gehoert: 0, funken: [], zeileJetzt: -1, ende: st.ende * st.spb, bus, wuerfe: [], laune: .5, insp: 1, letzteZeile: null, schnoerkel: 0, pub: publikumFuer(st),
       deko: kulisseWuerfeln(kulisseFuer(st)), vibrato: 0, harmZeit: 0, harmMax: 0, reakt: null };
@@ -1312,8 +1321,8 @@
     const z0 = S.t0 + z.z1 + .1;
     try { S.bus.gain.setTargetAtTime(0, z0, .25); } catch (_) {}
     const g0 = S.st.grund + S.schieb;
-    if (art === "sieg") { werfen("gut", 6); [0, 4, 7, 12].forEach((s, i) => spielen("harfe", lage(g0 + s, 55), z0 + .3 + i * .06, .3, 2, ausgang)); }
-    else [0, 3, 6].forEach((s, i) => spielen("pos", inLage("pos", g0 + s - 12), z0 + .3 + i * .25, .35, .6, ausgang));
+    if (art === "sieg") { werfen("gut", 6); [0, 4, 7, 12].forEach((s, i) => spielen("harfe", lage(g0 + s, 55), z0 + .3 + i * .06, .3, 2, effektG || ausgang)); }
+    else [0, 3, 6].forEach((s, i) => spielen("pos", inLage("pos", g0 + s - 12), z0 + .3 + i * .25, .35, .6, effektG || ausgang));
   }
   /* ---------- Bardische Inspiration ---------- */
   function inspirieren() {
@@ -2067,7 +2076,7 @@
     catch (_) { return; }
     const W = erg.wiedergabe, st = W.st;
     const ev = begleitung(st, W.schieb, { ohneFuehrung: true, duett: !!st.duett }).map(e => Object.assign({}, e, { laut: e.laut * .6 }));
-    const bus = ctx.createGain(); bus.gain.value = 1; bus.connect(ausgang);
+    const bus = ctx.createGain(); bus.gain.value = 1; bus.connect(musikG || ausgang);
     S = { st, schieb: W.schieb, ev, ei: 0, t0: ctx.currentTime + .3, pause: false, wiedergabe: true, spur: [], spurAll: W.spurAll, spurIdx: 0, punkte: W.punkte, bonus: W.bonus, ende: W.ende, bus,
       funken: [], wuerfe: [], laune: .6, insp: 0, letzteZeile: null, zeileJetzt: -1, pub: W.pub, tol: TOL[E.grad], stumm: 0, gehoert: 0, ni: 0, deko: W.deko ? Object.assign({}, W.deko, { cache: null, ckey: "" }) : null };
     const ms = st.noten.map(n => n.m);
@@ -2093,7 +2102,7 @@
     const schieb = verschiebung(st);
     vorbereitenNoten(st, schieb);
     const ev = begleitung(st, schieb, { fuehrImmer: true });
-    const bus = ctx.createGain(); bus.gain.value = 1; bus.connect(ausgang);
+    const bus = ctx.createGain(); bus.gain.value = 1; bus.connect(musikG || ausgang);
     S = { st, schieb, ev, ei: 0, t0: ctx.currentTime + .3, pause: false, wiedergabe: true, probe: true, spur: [], spurAll: [], spurIdx: 0, punkte: 0, bonus: 0, ende: st.ende * st.spb, bus,
       funken: [], wuerfe: [], laune: .5, insp: 0, letzteZeile: null, zeileJetzt: -1, pub: publikumFuer(st), tol: TOL[E.grad], stumm: 0, gehoert: 0, ni: 0, deko: kulisseWuerfeln(kulisseFuer(st)) };
     const ms = st.noten.map(n => n.m);
@@ -2214,7 +2223,7 @@
       einmessLive(e);
     }
   }
-  function tonBestaetigen(m) { audio(); spielen("harfe", Math.round(m), ctx.currentTime + .02, .3, 1.2, ausgang); }
+  function tonBestaetigen(m) { audio(); spielen("harfe", Math.round(m), ctx.currentTime + .02, .3, 1.2, musikG || ausgang); }
   function einmessAnzeige() { if (ansicht === "einmessen") zeigen(); }
   function einmessLive(e) {
     const el = panel.querySelector(".kh-mess"); if (!el) return;
@@ -2227,7 +2236,7 @@
   let bordun = null;
   function bordunStarten(m) {
     audio(); bordunStoppen();
-    const bus = ctx.createGain(); bus.gain.value = E.kopf ? .9 : .5; bus.connect(ausgang);
+    const bus = ctx.createGain(); bus.gain.value = E.kopf ? .9 : .5; bus.connect(musikG || ausgang);
     bordun = { m, bus, bis: ctx.currentTime + .05 };
     ["orgel_" + naechste("orgel", lage(m, 36)), "vc_" + naechste("vc", lage(m, 36)), "orgel_" + naechste("orgel", lage(m + 7, 43))].forEach(probeLaden);
     const weiter = () => {
@@ -2461,9 +2470,9 @@
     const sch = SCHULE[schule.lek].schritte[schule.schritt], z = schulZiele(), t0 = ctx.currentTime + .1;
     if (!z.length) return;
     let dauer;
-    if (sch.art === "echo") { z.forEach((m, i) => spielen("fl", inLage("fl", m), t0 + i * .6, .45, .55, ausgang)); dauer = z.length * .6 + .3; }
-    else if (sch.art === "folge") { z.forEach((m, i) => { spielen("harfe", lage(m, 52), t0 + i * .55, .32, 1, ausgang); spielen("ooh", m, t0 + i * .55, .3, .5, ausgang); }); dauer = z.length * .55 + .4; }
-    else { spielen("harfe", lage(z[0], 52), t0, .32, 1.8, ausgang); spielen("ooh", z[0], t0, .38, 1.6, ausgang); dauer = 1.7; }
+    if (sch.art === "echo") { z.forEach((m, i) => spielen("fl", inLage("fl", m), t0 + i * .6, .45, .55, musikG || ausgang)); dauer = z.length * .6 + .3; }
+    else if (sch.art === "folge") { z.forEach((m, i) => { spielen("harfe", lage(m, 52), t0 + i * .55, .32, 1, musikG || ausgang); spielen("ooh", m, t0 + i * .55, .3, .5, musikG || ausgang); }); dauer = z.length * .55 + .4; }
+    else { spielen("harfe", lage(z[0], 52), t0, .32, 1.8, musikG || ausgang); spielen("ooh", z[0], t0, .38, 1.6, musikG || ausgang); dauer = 1.7; }
     schule.ignorierBis = performance.now() + dauer * 1000; /* während des Vorspielens nicht werten (ohne Kopfhörer hört das Mikrofon mit) */
   }
   function schulLadenUndLos() {
@@ -2517,7 +2526,7 @@
   function schrittGeschafft() {
     const S2 = schule; S2.zustand = "geschafft"; cancelAnimationFrame(raf);
     const m = schulZiele()[0] || schulBasis(), t0 = ctx.currentTime + .05;
-    [0, 4, 7, 12].forEach((s2, i) => spielen("harfe", lage(m, 55) + s2, t0 + i * .07, .25, 1.2, ausgang));
+    [0, 4, 7, 12].forEach((s2, i) => spielen("harfe", lage(m, 55) + s2, t0 + i * .07, .25, 1.2, effektG || ausgang));
     const L = SCHULE[S2.lek];
     if (S2.schritt >= L.schritte.length - 1) lektionGeschafft();
     zeigen();
@@ -2654,7 +2663,7 @@
   function kgTon(m, laut) {
     if (!E.kgHilfe || !ctx) return;
     const t0 = ctx.currentTime + .02;
-    spielen("harfe", lage(m, 52), t0, .3 * (laut || 1), 1.2, ausgang); spielen("ooh", m, t0, .3 * (laut || 1), .9, ausgang);
+    spielen("harfe", lage(m, 52), t0, .3 * (laut || 1), 1.2, musikG || ausgang); spielen("ooh", m, t0, .3 * (laut || 1), .9, musikG || ausgang);
     if (!E.kopf) KG.ignorierBis = performance.now() + 900; /* ohne Kopfhörer: den eigenen Hilfston nicht als Stimme werten */
   }
   function kgRahmen() {
@@ -2714,14 +2723,14 @@
   function kgAbprall(tor) {
     KG.vx = -1.1; KG.warten = true; KG.bereit = 0; KG.wartZeit = 0; KG.letzterHilfston = 0;
     tor.abpraller++; KG.abpraller++; KG.wackel = 1; KG.flash = -1;
-    if (ctx) spielen("holz1", 0, ctx.currentTime + .01, .35, 0, ausgang);
+    if (ctx) spielen("holz1", 0, ctx.currentTime + .01, .35, 0, effektG || ausgang);
     if (E.kgHilfe) setTimeout(() => { if (KG && KG.stk.tore[KG.idx] === tor) kgTon(tor.m, .8); }, 450);
     for (let i = 0; i < 10; i++) KG.funken.push({ x: tor.x, p: KG.pAnz, vx: -Math.random() * .8, vy: (Math.random() - .5) * 6, t: 0, leben: .5, farbe: "235,226,204" });
   }
   function kgDurch(tor) {
     tor.durch = true; KG.idx++; KG.flash = 1;
     const pkt = Math.max(20, 100 - 30 * tor.abpraller); KG.punkte += pkt; if (!tor.abpraller) KG.perfekt++;
-    if (ctx) { const t0 = ctx.currentTime + .01; [0, 7, 12].forEach((s2, i) => spielen("harfe", lage(tor.m, 60) + s2, t0 + i * .05, .2, .9, ausgang)); }
+    if (ctx) { const t0 = ctx.currentTime + .01; [0, 7, 12].forEach((s2, i) => spielen("harfe", lage(tor.m, 60) + s2, t0 + i * .05, .2, .9, effektG || ausgang)); }
     if (!ruhig) for (let i = 0; i < 22; i++) KG.funken.push({ x: tor.x + tor.w, p: tor.m, vx: Math.random() * 1.6, vy: (Math.random() - .5) * 8, t: 0, leben: .8, farbe: tor.abpraller ? "159,224,143" : "255,210,122" });
     KG.glatt = null;
   }
