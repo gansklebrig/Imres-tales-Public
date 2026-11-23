@@ -33,7 +33,7 @@ Willst du vorher eine „Session Null“ machen, um Erwartungen am Tisch zu klä
 
 § #ks_karte kunst phase:kstart
 {name} hat eine Karte von {ort} gezeichnet – mit Flüssen, Bergen und einer sehr detaillierten Taverne. Sie passt nur leider nicht zu deiner.
-< Ihre Karte nehmen | l-4 s+6 laune+12 | {name} strahlt. Deine Welt hat jetzt einen Drachenberg, wo vorher ein See war. Egal!
+< {Seine} Karte nehmen | l-4 s+6 laune+12 | {name} strahlt. Deine Welt hat jetzt einen Drachenberg, wo vorher ein See war. Egal!
 > Deine behalten | l+5 laune-10 | „Oh. Okay.“ {name} faltet die Karte ganz langsam zusammen.
 
 § #ks_rueckkehr sl phase:kstart wenn:kamp>1
@@ -88,7 +88,7 @@ Es ist 19 Uhr. Eigentlich. Es ist 19:47 und {name} „steckt noch im Stau“.
 
 § #st_neuerHeld spieler phase:start
 {name}: „Ich hab übrigens einen neuen Charakter gebaut. Der alte langweilt mich.“
-< Na gut | held s+5 l-5 | {name} spielt jetzt {held}. Der alte Held „geht Kräuter sammeln“. Für immer.
+< Na gut | held s+5 l-5 | {name} würfelt einen neuen Helden. {held} „geht Kräuter sammeln“. Für immer.
 > Nein, weiter so | l+5 laune-8 | {name} spielt grummelnd {held} weiter. Mit sehr viel Seufzen.
 
 § #st_ort welt phase:start
@@ -159,10 +159,10 @@ Nach der Session explodiert der Gruppenchat mit Theorien, wer der Verräter ist.
 § #fin_boss schurke phase:finale
 Der letzte Abend. {schurke} steht vor den Helden. Die Luft knistert. „Ihr seid zu spät.“
 < Epischer Endkampf | W12 m+5 s+5 t+3 ? sieg lvl : tod2 s+3 | Würfel fliegen, Zauber krachen, {held} landet den letzten Treffer. {schurke} fällt! :: Der Kampf ist brutal. {schurke} entkommt durch ein Portal – nicht ohne ein Opfer zu fordern. | explosion
-> Reden statt kämpfen | W14 l+5 ? frieden s+6 : m-5 t-4 | Mit einer bewegenden Rede überzeugt die Gruppe {schurke}, aufzugeben. Tränen. Umarmungen. :: {schurke} lacht nur. „Worte? WORTE?“ Dann fliegt alles in die Luft. | herzen
+> Reden statt kämpfen | W14 l+5 ? frieden s+6 : m-5 t-4 | Mit einer bewegenden Rede bringt die Gruppe {schurkeN} zum Aufgeben. Tränen. Umarmungen. :: {schurke} lacht nur. „Worte? WORTE?“ Dann fliegt alles in die Luft. | herzen
 
 § #fin_verrat npc phase:finale
-Kurz vor dem Ende enthüllt sich {npc} als Verräter – in Diensten von {schurke}!
+Kurz vor dem Ende kommt heraus: {npc} hat die ganze Zeit für {schurkeN} gearbeitet!
 < Großer Plot-Twist | l+3 s+6 t+3 W11 ? sieg : tod2 | Die Gruppe kämpft sich trotzdem durch. Am Ende liegt der Schurke am Boden. :: Der Verrat kostet ein Leben. Aber die Geschichte ist erzählt. | ausruf
 > Das war ein Test | s+4 l-4 sieg | „Ich habe euch nur geprüft!“ Der Verräter war nie einer. Die Spieler sind verwirrt, aber zufrieden.
 
@@ -172,13 +172,13 @@ Im Finale erhebt sich ein Drache über {ort}. Er war die ganze Zeit der eigentli
 > Verhandeln | W12 l+6 ? sieg s+5 : m-8 | Der Drache will nur seinen Hort zurück. Deal! :: Der Drache frisst den Unterhändler. Nicht alle, nur den einen. | gold
 
 § #fin_ritual sl phase:finale
-Das Ritual von {schurke} ist fast vollendet. Die Helden haben eine Runde Zeit.
+Das Ritual von {schurkeN} ist fast vollendet. Die Helden haben eine Runde Zeit.
 < Spannung maximal | t+8 s+6 W10 ? sieg : tod | In letzter Sekunde zerbricht {held} den Kristall. Das Ritual scheitert! :: Zu spät. Das Ritual gelingt halb. {schurkeN} fliegt davon, die Welt zittert. | portal
 > Die Helden opfern etwas | l+6 s-3 m-4 sieg tod | {held} opfert sich für die anderen. Stille am Tisch. Dann Applaus. | schaedel
 
 § #fin_lachen chaos phase:finale
 Mitten im dramatischen Finale fragt {name}: „Kann ich {schurkeN} einfach eine Pizza anbieten?“
-< Würfel drauf | W15 s+10 l-8 ? frieden : tod | {schurkeN} hatte seit 300 Jahren keine Pizza mehr. Er weint. Er gibt auf. :: {schurkeN} hasst Ananas. {held} hatte Ananas drauf. Folgenreich. | pizza
+< Würfel drauf | W15 s+10 l-8 ? frieden : tod | {schurkeN} hatte seit 300 Jahren keine Pizza mehr. Tränen fließen. Die Waffen fallen. :: {schurkeN} hasst Ananas. {held} hatte Ananas drauf. Folgenreich. | pizza
 > „Nein.“ | l+4 s-4 t+3 W10 ? sieg : tod2 | Ernsthaft kämpft sich die Gruppe zum Sieg. :: Ernsthaft, aber erfolglos. Ein Held bleibt zurück. | schwerter
 
 § #fin_zeit tisch phase:finale
@@ -204,11 +204,11 @@ Das Finale läuft – und es ist schon 0:40 Uhr. Zwei Leute müssen morgen um 6 
 § #pg_schaden power
 „Ich mache… 147 Schaden.“ {name} hat irgendwas kombiniert, das du nicht ganz verstehst.
 < Lass es zählen | m+10 s+3 l-4 | Der Endboss explodiert in der ersten Runde. Der Tisch ist geschockt. | explosion
-> Nachrechnen | l+6 t-8 W12 ? m-4 : m+6 | Es waren eigentlich 31. {name} gibt kleinlaut zu, dass er was falsch gelesen hat. :: Es waren wirklich 147. Respekt. | staub
+> Nachrechnen | l+6 t-8 W12 ? m-4 : m+6 | Es waren eigentlich 31. {name} gibt kleinlaut zu, etwas falsch gelesen zu haben. :: Es waren wirklich 147. Respekt. | staub
 
 § #pg_items power
 {name} hat eine Liste mit 12 magischen Gegenständen, die {held} „unbedingt braucht“.
-< Einen davon | m+5 l+2 | {held} findet im nächsten Dungeon zufällig genau das Schwert, das er wollte.
+< Einen davon | m+5 l+2 | {held} findet im nächsten Dungeon zufällig genau das Schwert, das {h_er} wollte.
 > Alle verstecken | m+12 l-5 s+2 | Jeder Dungeon ist jetzt ein Einkaufszentrum. {held} glänzt wie ein Weihnachtsbaum. | gold
 
 § #pg_tot power wenn:m<40
@@ -287,11 +287,11 @@ Es ist der vierte Kampf heute. {name} will noch einen.
 > Ein Ghul springt raus | s+6 l-6 t+6 laune-15 | Schreck! Lachen! {name} ist fassungslos. „Das war MEIN MOMENT!“ | geister
 
 § #rp_romanze rolle
-{name} will, dass {held} eine Romanze mit {npc} beginnt.
-< Zarte Liebe | l+5 s+5 t-4 laune+10 +romanze | Zwischen Schwertkämpfen gibt es jetzt verstohlene Blicke. Der Tisch shippt. | herzen
+{name} will, dass {held} eine Romanze mit {npcN} beginnt.
+< Zarte Liebe | l+5 s+5 t-4 laune+10 +romanze >>rp_romanze2 | Zwischen Schwertkämpfen gibt es jetzt verstohlene Blicke. Der Tisch shippt. | herzen
 > Korb | s+3 laune-8 | {npcN} ist leider schon verheiratet. Mit einem Troll. Sehr glücklich.
 
-§ #rp_romanze2 npc wenn:romanze
+§ #rp_romanze2 npc kette wenn:romanze
 {npc} will {held} heimlich treffen. Ein Brief mit einer gepressten Blume liegt im Zimmer.
 < Romantisches Date | s+6 l+3 t-5 | Ein Spaziergang im Mondlicht. Der Rest des Tisches macht Kussgeräusche. | herzen
 > Eine Falle! | l+4 s+4 m-4 -romanze | Es war ein Doppelagent. {name} ist am Boden zerstört. | ausruf
@@ -337,8 +337,8 @@ Snorfi, der gerettete Goblin, kommt mit einem Geschenk: einer toten Ratte. Und e
 > „Der Schäfer weiß nichts“ | t+6 laune-6 | „Ich bin nur ein Schäfer.“ Der Satz wird zum Running Gag.
 
 § #rp_namen rolle
-{name} will den Namen von {held} ändern, weil er „nicht mehr zur Entwicklung passt“.
-< Zeremonie! | s+5 l+3 t-3 | Ein feierliches Namensritual. {held} heißt jetzt „{held} die Geläuterte“. | glocke
+{name} will {held} umbenennen. Der alte Name „passt nicht mehr zur Entwicklung“.
+< Zeremonie! | s+5 l+3 t-3 | Ein feierliches Namensritual. {held} heißt jetzt „{held}, {h_der} Geläuterte“. | glocke
 > Ein Spitzname reicht | s+3 | Ab jetzt nennen alle {held} nur noch „Bohne“. Für immer.
 
 § #rp_spaet rolle wenn:laune<35
@@ -414,16 +414,16 @@ Der Kampf beginnt. Wie wird die Initiative gehandhabt?
 § #rl_diagonal regel
 {name}: „Diagonal laufen kostet auf dem Raster doppelt. Jedes zweite Feld!“
 < Genau so | l+6 t-4 m-2 | Die Gruppe kommt nicht mehr an den Bogenschützen ran. Taktisch korrekt.
-> Raster weg! | t+5 s+3 l-4 laune-8 | „Wir spielen jetzt ohne Raster.“ {name} sieht aus, als hättest du seinen Hund getreten.
+> Raster weg! | t+5 s+3 l-4 laune-8 | „Wir spielen jetzt ohne Raster.“ {name} sieht aus, als hättest du {seinen} Hund getreten.
 
 § #rl_ausgerechnet regel wenn:laune<30
-{name} hat aufgehört zu reden. Er blättert nur noch stumm im Regelbuch und schüttelt den Kopf.
-< Lass ihn eine Regel bestimmen | l+8 laune+20 | {name} darf eine Regel festlegen. Er wählt Belastungsregeln. Natürlich.
+{name} hat aufgehört zu reden und blättert nur noch stumm im Regelbuch. Ab und zu ein Kopfschütteln.
+< {Er} darf eine Regel bestimmen | l+8 laune+20 | {name} darf eine Regel festlegen und wählt: Belastungsregeln. Natürlich.
 > Ansprechen | s+3 laune+8 t-4 | „Alles okay?“ – „Ja. Ich finde nur, Fallschaden ist zu niedrig.“
 
 § #rl_stealth regel
 {held} schleicht in voller Plattenrüstung. {name}: „Da gibt's Nachteil drauf!“
-< Nachteil | W14 l+5 ? s+6 : s+3 m-4 | Unfassbar: Er schafft es trotzdem! Die Wachen schlafen tief. :: KLONK. KLIRR. SCHEPPER. Alle Wachen wachen auf. | schwerter
+< Nachteil | W14 l+5 ? s+6 : s+3 m-4 | Unfassbar: {held} schafft es trotzdem! Die Wachen schlafen tief. :: KLONK. KLIRR. SCHEPPER. Alle Wachen wachen auf. | schwerter
 > Ohne Nachteil | l-5 m+3 laune-6 | Die Rüstung ist „sehr gut geölt“. {name} schnaubt.
 
 § #rl_zufall regel
@@ -432,7 +432,7 @@ Der Kampf beginnt. Wie wird die Initiative gehandhabt?
 > „Es ist eine Goblin-Region“ | s+5 l-2 | Die Gruppe findet heraus, warum: Ein Goblin-Imperium plant etwas Großes! | lachen
 
 § #rl_tod regel
-{name}: „Laut Regeln ist {aheld} jetzt tot. Er hat drei Rettungswürfe verpatzt.“
+{name}: „Laut Regeln ist {aheld} jetzt tot. Drei Rettungswürfe verpatzt.“
 < Regeln sind Regeln | l+8 tod2 s-3 | {aheld} stirbt. {anderer} schaut traurig auf den Charakterbogen. | schaedel
 > Eine göttliche Fügung | l-6 s+3 m+2 laune-10 | Ein Lichtstrahl. {aheld} lebt. {name} notiert: „Göttliche Willkür, Sitzung 7“.
 `);

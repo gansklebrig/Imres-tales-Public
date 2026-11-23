@@ -208,6 +208,9 @@ a{color:var(--gold)}
 .karte .portrait{position:relative;z-index:2;width:min(28cqw,19cqh,124px);margin-top:calc(25cqh - min(14cqw,9.5cqh,62px));border-radius:50%;background:radial-gradient(circle at 40% 35%,#fbf1da,#e2cc9f);box-shadow:0 0 0 3px #8a5a30,0 0 0 5px rgba(239,224,192,.9),0 8px 16px rgba(40,20,5,.45)}
 .karte .portrait svg{filter:none}
 .karte .sprecher,.karte .rolle,.karte .text,.karte .fuss,.karte .folge-kopf,.karte .ereignisse{position:relative;z-index:2}
+.karte .text{align-items:flex-start;font-size:clamp(.86rem,3.5cqh,1.12rem)}
+.karte .text>span{margin:auto 0}
+@container (max-height:470px){.karte .banner{height:19cqh}.karte .portrait{width:min(22cqw,15cqh,100px);margin-top:calc(19cqh - min(11cqw,7.5cqh,50px))}.karte .sprecher{font-size:1rem;margin-top:.2rem}.karte .rolle{font-size:.6rem}.karte .text{line-height:1.3;padding:.3rem .1rem}.karte .selten-tag{top:18cqh}.karte .wurf{bottom:1.6rem}}
 .karte.folge .folge-kopf{margin-top:calc(15cqh - .4rem);font-size:1.1rem}
 .karte .wahl-schild{z-index:4}
 .karte .wahl-schild.m{justify-content:center;text-align:center;background:rgba(120,80,10,.94);color:#fff3cf}
@@ -355,15 +358,15 @@ body.ruhig *{animation-duration:.01ms!important;transition-duration:.01ms!import
 </div>
 <div id="schichten"></div>
 <script src="tne-klang.js?v=1"></script>
-<script src="tne-karten-1.js?v=1"></script>
-<script src="tne-karten-2.js?v=1"></script>
-<script src="tne-karten-3.js?v=1"></script>
-<script src="tne-karten-4.js?v=1"></script>
-<script src="tne-karten-5.js?v=1"></script>
-<script src="tne-karten-6.js?v=1"></script>
-<script src="tne-karten-7.js?v=1"></script>
-<script src="tne-karten-8.js?v=1"></script>
+<script src="tne-karten-1.js?v=2"></script>
+<script src="tne-karten-2.js?v=2"></script>
+<script src="tne-karten-3.js?v=2"></script>
+<script src="tne-karten-4.js?v=2"></script>
+<script src="tne-karten-5.js?v=2"></script>
+<script src="tne-karten-6.js?v=2"></script>
+<script src="tne-karten-7.js?v=2"></script>
+<script src="tne-karten-8.js?v=2"></script>
 <script src="tne-grafik.js?v=1"></script>
-<script src="tne.js?v=2"></script>
+<script src="tne.js?v=3"></script>
 </body>
 </html>

@@ -45,31 +45,38 @@
 
   /* Spielertypen: was sie mögen (Bereiche der Balken), wie sie aussehen */
   const TYPEN = {
-    power: { titel: "Powergamer", farbe: "#c0442f", wunsch: { m: [55, 90] }, motto: "Will Schaden. Viel Schaden." },
-    rolle: { titel: "Rollenspielerin", farbe: "#8e5bb5", wunsch: { l: [40, 80], t: [25, 65] }, motto: "Spricht nur in der Stimme ihres Helden." },
-    regel: { titel: "Regelanwalt", farbe: "#7a6a3a", wunsch: { l: [50, 92] }, motto: "„Seite 193, zweiter Absatz.“" },
-    chaos: { titel: "Chaot", farbe: "#d9822b", wunsch: { s: [55, 96], t: [40, 95] }, motto: "Würfelt erst, fragt nie." },
-    snack: { titel: "Snackbeauftragter", farbe: "#a7713a", wunsch: { s: [40, 90], t: [10, 65] }, motto: "Hat Chips. Immer." },
-    taktik: { titel: "Taktikerin", farbe: "#6f8f3a", wunsch: { m: [40, 80], t: [15, 60] }, motto: "Hat Karopapier mitgebracht." },
+    power: { titel: "Powergamer", titelW: "Powergamerin", farbe: "#c0442f", wunsch: { m: [55, 90] }, motto: "Will Schaden. Viel Schaden." },
+    rolle: { titel: "Rollenspieler", titelW: "Rollenspielerin", farbe: "#8e5bb5", wunsch: { l: [40, 80], t: [25, 65] }, motto: "Spricht nur mit der Stimme des eigenen Helden." },
+    regel: { titel: "Regelanwalt", titelW: "Regelanwältin", farbe: "#7a6a3a", wunsch: { l: [50, 92] }, motto: "„Seite 193, zweiter Absatz.“" },
+    chaos: { titel: "Chaot", titelW: "Chaotin", farbe: "#d9822b", wunsch: { s: [55, 96], t: [40, 95] }, motto: "Würfelt erst, fragt nie." },
+    snack: { titel: "Snackbeauftragter", titelW: "Snackbeauftragte", farbe: "#a7713a", wunsch: { s: [40, 90], t: [10, 65] }, motto: "Hat Chips. Immer." },
+    taktik: { titel: "Taktiker", titelW: "Taktikerin", farbe: "#6f8f3a", wunsch: { m: [40, 80], t: [15, 60] }, motto: "Hat Karopapier mitgebracht." },
     neu: { titel: "Neuling", farbe: "#c9a24a", wunsch: { s: [45, 90], l: [10, 75] }, motto: "„Welcher Würfel ist der W12?“" },
-    veteran: { titel: "Veteran", farbe: "#8a5a3a", wunsch: { l: [45, 90], m: [20, 72] }, motto: "Spielt seit 1987. Hat Meinungen." },
-    handy: { titel: "Handy-Gucker", farbe: "#9c8a6a", wunsch: { t: [50, 95], s: [45, 95] }, motto: "„Hä, sind wir dran?“" },
+    veteran: { titel: "Veteran", titelW: "Veteranin", farbe: "#8a5a3a", wunsch: { l: [45, 90], m: [20, 72] }, motto: "Spielt seit 1987. Hat Meinungen." },
+    handy: { titel: "Handy-Gucker", titelW: "Handy-Guckerin", farbe: "#9c8a6a", wunsch: { t: [50, 95], s: [45, 95] }, motto: "„Hä, sind wir dran?“" },
     drama: { titel: "Theaterkind", farbe: "#b8376a", wunsch: { s: [40, 92], l: [25, 80] }, motto: "Jeder Satz ein Monolog." },
-    kunst: { titel: "Zeichnerin", farbe: "#5f8a5a", wunsch: { s: [35, 85], t: [10, 70] }, motto: "Zeichnet jeden NSC ins Heft." },
-    musik: { titel: "Musiker", farbe: "#c8853a", wunsch: { s: [45, 95] }, motto: "Hat die Ukulele dabei." }
+    kunst: { titel: "Zeichner", titelW: "Zeichnerin", farbe: "#5f8a5a", wunsch: { s: [35, 85], t: [10, 70] }, motto: "Zeichnet jeden NSC ins Heft." },
+    musik: { titel: "Musiker", titelW: "Musikerin", farbe: "#c8853a", wunsch: { s: [45, 95] }, motto: "Hat die Ukulele dabei." }
   };
   const SPIELERNAMEN = ["Kevin", "Lena", "Bernd", "Mia", "Tobi", "Svenja", "Horst", "Jule", "Ömer", "Paula", "Max", "Anni", "Dennis", "Sophie", "Jonas", "Kathi", "Flo", "Nina", "Basti", "Lea", "Marco", "Steffi", "Luca", "Ronja", "Yusuf", "Ida", "Hannes", "Mira", "Pit", "Zoe", "Benni", "Clara", "Uwe", "Gabi", "Timo", "Elif", "Rüdiger", "Jana", "Sepp", "Vroni", "Malte", "Frieda", "Kalle", "Merle", "Ole", "Aylin", "Detlef", "Josie"];
   const VOELKER = ["Mensch", "Elf", "Zwerg", "Halbling", "Gnom", "Halbork", "Tiefling", "Drachenblütiger", "Goblin", "Katzenmensch", "Echsenmensch", "Aasimar", "Halbelf", "Kobold", "Minotaurus", "Pilzling", "Frosch-Mensch", "Waldschrat"];
   const KLASSEN = ["Barbar", "Barde", "Kleriker", "Druide", "Kämpfer", "Mönch", "Paladin", "Waldläufer", "Schurke", "Zauberer", "Hexenmeister", "Magier", "Tüftler", "Alchemist"];
-  const HELDENNAMEN = ["Grimbold", "Ilvaria", "Thrain", "Morla", "Pip", "Zork", "Elandriel", "Bruno", "Kazrak", "Fenna", "Lirael", "Dorn", "Quix", "Sabeth", "Horgrim", "Ragnar", "Tilda", "Vex", "Yorrik", "Brumm", "Elowen", "Hilde", "Ottokar", "Zelphine", "Krümel", "Sir Reginald", "Bodo", "Gerlinde", "Xandor", "Mirabell", "Thokk", "Fidibus", "Ulla", "Wendelin", "Agathe", "Krogg", "Sunniva", "Balduin", "Esmeralda", "Timbo", "Rurik", "Lumi", "Gorm", "Isolde", "Kasimir", "Nessa", "Pankraz", "Ysolde", "Grünhilde", "Theobald", "Schattenklinge", "Nachtblut", "Moosbart", "Faelyn", "Brakk", "Odalys", "Rumpel", "Silvan", "Wanja", "Torvin", "Glimmer", "Hagen", "Jorinde", "Klaus der Kühne", "Mortimer", "Nimbus", "Orla", "Puck", "Rabia", "Sigurd", "Tamsin", "Urs", "Vilja", "Wolfram", "Xeno", "Yrsa", "Zappel", "Dunkelherz", "Sternenfunke", "Gundolf", "Hermine Hammerhand", "Bartholomäus"];
-  const EIGEN = ["hat Angst vor Türen", "spricht nur in Reimen", "trägt einen Eimer als Helm", "hat eine 14-seitige Hintergrundgeschichte", "ist heimlich ein Drache (sagt er)", "sammelt Löffel", "hat einen Hasen namens Bürgermeister", "vertraut keinen Treppen", "flirtet mit Statuen", "isst alles, was er findet", "hält sich für den Auserwählten", "hat Waisen-Hintergrund, Variante Nr. 7", "schreit bei jedem Angriff seinen Namen", "kann nicht lügen – versucht es trotzdem", "hat einen bösen Zwilling (angeblich)", "will eigentlich Bäcker werden", "redet mit seiner Waffe", "zählt jede Münze dreimal", "hat Höhenangst und fliegt trotzdem", "sucht seinen verlorenen Hut", "ist allergisch gegen Magie", "rettet jede Katze", "spricht mit Akzent, den keiner einordnen kann", "trägt nur Lila", "will jeden NSC adoptieren", "schläft in Rüstung", "hat einen Schwur, nie zu rennen", "ist sehr, sehr klein", "glaubt an Glückssocken", "verliert ständig Finger (vorübergehend)", "kann nur flüstern", "führt ein Tagebuch über Gegner-Frisuren", "hasst Goblins persönlich", "ist eigentlich drei Kobolde im Mantel", "will eine Taverne eröffnen", "fürchtet sich vor Hühnern", "liebt Fallen", "nennt sich selbst in der dritten Person", "hat noch nie gewonnen", "trägt den Schädel seines Lehrers bei sich", "summt beim Schleichen", "möchte nur geliebt werden", "rechnet alles in Käse um", "hat ein Haustier-Mimik", "vergisst jede Nacht seinen Namen", "ist sehr höflich zu Untoten", "ist offiziell tot (Papierkram)", "hat Schulden bei einem Gott", "spielt Flöte, schlecht", "kann nicht schwimmen, wohnt auf einem Boot"];
+  const HELDENNAMEN = ["Grimbold", "Ilvaria", "Thrain", "Morla", "Pip", "Zork", "Elandriel", "Bruno", "Kazrak", "Fenna", "Lirael", "Dorn", "Quix", "Sabeth", "Horgrim", "Ragnar", "Tilda", "Vex", "Yorrik", "Brumm", "Elowen", "Hilde", "Ottokar", "Zelphine", "Krümel", "Sir Reginald", "Bodo", "Gerlinde", "Xandor", "Mirabell", "Thokk", "Fidibus", "Ulla", "Wendelin", "Agathe", "Krogg", "Sunniva", "Balduin", "Esmeralda", "Timbo", "Rurik", "Lumi", "Gorm", "Isolde", "Kasimir", "Nessa", "Pankraz", "Ysolde", "Grünhilde", "Theobald", "Schattenklinge", "Nachtblut", "Moosbart", "Faelyn", "Brakk", "Odalys", "Rumpel", "Silvan", "Wanja", "Torvin", "Glimmer", "Hagen", "Jorinde", "Klaus Kühnbart", "Mortimer", "Nimbus", "Orla", "Puck", "Rabia", "Sigurd", "Tamsin", "Urs", "Vilja", "Wolfram", "Xeno", "Yrsa", "Zappel", "Dunkelherz", "Sternenfunke", "Gundolf", "Hermine Hammerhand", "Bartholomäus"];
+  // Grammatisches Geschlecht: Spielernamen stehen abwechselnd männlich/weiblich in der Liste
+  const typTitel = sp => (spG(sp) === "w" && TYPEN[sp.typ].titelW) || TYPEN[sp.typ].titel;
+  const HELDINNEN = new Set(["Ilvaria", "Morla", "Fenna", "Lirael", "Sabeth", "Tilda", "Elowen", "Hilde", "Zelphine", "Gerlinde", "Mirabell", "Ulla", "Agathe", "Sunniva", "Esmeralda", "Lumi", "Isolde", "Nessa", "Ysolde", "Grünhilde", "Faelyn", "Odalys", "Wanja", "Jorinde", "Orla", "Rabia", "Tamsin", "Vilja", "Yrsa", "Hermine Hammerhand", "Elandriel"]);
+  const spG = sp => sp.g || (SPIELERNAMEN.indexOf(sp.name) % 2 === 1 ? "w" : "m");
+  const heldG = h => h.g || (HELDINNEN.has(h.name) ? "w" : "m");
+  const PRON = { er: ["er", "sie"], ihn: ["ihn", "sie"], ihm: ["ihm", "ihr"], sein: ["sein", "ihr"], seine: ["seine", "ihre"], seinen: ["seinen", "ihren"], seinem: ["seinem", "ihrem"], seiner: ["seiner", "ihrer"], seines: ["seines", "ihres"], der: ["der", "die"], dem: ["dem", "der"], den: ["den", "die"], ein: ["ein", "eine"], einen: ["einen", "eine"], einem: ["einem", "einer"] };
+  function pronomen(f, w, vorsatz) { for (const k in PRON) { const v = PRON[k][w ? 1 : 0]; f[vorsatz + k] = v; f[vorsatz + k.charAt(0).toUpperCase() + k.slice(1)] = v.charAt(0).toUpperCase() + v.slice(1); } }
+  const EIGEN = ["hat Angst vor Türen", "spricht nur in Reimen", "trägt einen Eimer als Helm", "hat eine 14-seitige Hintergrundgeschichte", "ist heimlich ein Drache (angeblich)", "sammelt Löffel", "hat einen Hasen namens Bürgermeister", "vertraut keinen Treppen", "flirtet mit Statuen", "isst alles, was herumliegt", "hält sich für den Auserwählten", "hat Waisen-Hintergrund, Variante Nr. 7", "schreit bei jedem Angriff den eigenen Namen", "kann nicht lügen – versucht es trotzdem", "hat einen bösen Zwilling (angeblich)", "will eigentlich Bäcker werden", "redet mit der eigenen Waffe", "zählt jede Münze dreimal", "hat Höhenangst und fliegt trotzdem", "sucht einen verlorenen Hut", "ist allergisch gegen Magie", "rettet jede Katze", "spricht mit Akzent, den keiner einordnen kann", "trägt nur Lila", "will jeden NSC adoptieren", "schläft in Rüstung", "hat einen Schwur, nie zu rennen", "ist sehr, sehr klein", "glaubt an Glückssocken", "verliert ständig Finger (vorübergehend)", "kann nur flüstern", "führt ein Tagebuch über Gegner-Frisuren", "hasst Goblins persönlich", "ist eigentlich drei Kobolde im Mantel", "will eine Taverne eröffnen", "fürchtet sich vor Hühnern", "liebt Fallen", "nennt sich selbst in der dritten Person", "hat noch nie gewonnen", "trägt den Schädel des alten Lehrmeisters bei sich", "summt beim Schleichen", "möchte nur geliebt werden", "rechnet alles in Käse um", "hat ein Haustier-Mimik", "vergisst jede Nacht den eigenen Namen", "ist sehr höflich zu Untoten", "ist offiziell tot (Papierkram)", "hat Schulden bei einem Gott", "spielt Flöte, schlecht", "kann nicht schwimmen, wohnt auf einem Boot"];
   const ORTE = ["Nebelhain", "Grauwasser", "Kragenstein", "Zwielichtpass", "Rabenfels", "Moorbrück", "Eisenkamm", "Sonnfurt", "Salzhafen", "Krähenwinkel", "Tiefenbrunn", "Glimmertief", "Schattenmark", "Weidenau", "Bitterbach", "Hohenfrost", "Silberau", "Modergrund", "Brunnenwinkel", "Ascheklamm", "Goldhügel", "Mühlbach", "Wolkenstieg", "Knochenfurt", "Kesselsee", "Dornheim", "Fuchsbau", "Spiegelsand", "Wurzelgrund", "Sternfall"];
-  const SCHURKEN = ["Lord Mortax", "die Lich-Königin Velthra", "Gerhard der Unaussprechliche", "der Nekromant Bodo", "Xal'gorath der Hungernde", "Madame Morgana", "der Rote Baron von Kragenstein", "die Hexe vom Moor", "Großinquisitor Fenwick", "der Drache Schmorgoth", "Kultführer Ulf", "die Spinnenkönigin Arachnia", "Professor Dunkelmond", "der Goblinkönig Snirk", "Baron von Blutwurst", "die Schneekönigin Frosta", "der untote Steuereintreiber", "das Ding aus dem Brunnen", "der Pilzfürst Myzel", "Graf Zahnlos", "die Schattenweberin", "der Kobold-Imperator Knirps III.", "Magister Malvolio", "die Eiserne Äbtissin", "der Wurm unter dem Berg"];
+  const SCHURKEN = ["Lord Mortax", "die Lich-Königin Velthra", "Gerhard der Unaussprechliche", "der Nekromant Bodo", "Xal'gorath der Hungernde", "Madame Morgana", "Baron Rotbart von Kragenstein", "die Moorhexe Grete", "Großinquisitor Fenwick", "der Drache Schmorgoth", "Kultführer Ulf", "die Spinnenkönigin Arachnia", "Professor Dunkelmond", "der Goblinkönig Snirk", "Baron von Blutwurst", "die Schneekönigin Frosta", "Steuereintreiber Morbus der Untote", "die Brunnenkreatur Gluck", "der Pilzfürst Myzel", "Graf Zahnlos", "die Schattenweberin Nyx", "der Kobold-Imperator Knirps III.", "Magister Malvolio", "Äbtissin Ferra die Eiserne", "der Bergwurm Grollmaul"];
   const NPCS = ["Wirt Hubert", "die Kräuterfrau Gundel", "Hauptmann Brack", "der Händler Fizzlewick", "Schmiedin Hrodna", "Bürgermeister Pompelmus", "der mysteriöse Fremde im Umhang", "Bettler Ole", "Priesterin Aurelia", "der sprechende Rabe Kolk", "Bauer Jupp", "Barde Florian", "Gräfin von Zitterbach", "Zwerg Grombosch", "Hexe Schrumpelgund", "Gnom Pimpernell", "Stallbursche Tim", "Magierin Ysra", "die Wache Nr. 3", "Schankmaid Resi", "Fährmann Charon-Karl", "der alte Leuchtturmwärter", "Prinzessin Adelgunde", "Kaufmann Silbermund"];
   const MONSTER = ["Goblins", "Oger", "Kobolde", "Mimiks", "Gallertwürfel", "Eulenbären", "Trolle", "Ghule", "Lindwürmer", "Riesenratten", "Basilisken", "Harpyien", "Werwölfe", "Vampire", "Skelette", "Riesenspinnen", "Gargoyles", "Mantikore", "Schleime", "Golems", "Banditen", "wütende Gänseriche", "Kultisten", "Zombies", "Irrlichter", "Grottenschrate", "Echsenkrieger", "Höhlentrolle"];
   const DINGE = ["das Schwert +1 der Mittelmäßigkeit", "den Ring des ewigen Hungers", "eine Taschenuhr, die rückwärts läuft", "den Stab des Donnerns", "einen sprechenden Schädel", "die Stiefel der Eile", "einen Beutel mit unendlich Murmeln", "die Krone der Vergessenen", "ein verfluchtes Amulett", "den Kochlöffel der Macht", "ein Drachenei", "eine Schatzkarte mit einem X", "den Umhang der Unsichtbarkeit (nur montags)", "eine Laute aus Knochen", "den Kelch der Wahrheit", "einen Würfel, der immer 20 zeigt", "die Rüstung des Riesen (zu groß)", "ein Glas Mondlicht", "die Feder des Phönix", "eine Hose der Unverwundbarkeit"];
   const GOETTER = ["Fortunus", "Morna", "Gromm", "Mutter Sela", "Gouda", "Brutus", "Lunaria", "Pankratius der Gnädige"];
-  const TITELMUSTER = ["Der Fluch von {ort}", "Schatten über {ort}", "Die Krone von {ort}", "Das Grab von {schurke}", "Die Rückkehr von {schurke}", "{ort} brennt", "Die letzte Schenke vor {ort}", "Das Geheimnis von {ort}", "Die Pilzkriege von {ort}", "Der lange Winter von {ort}", "Die Erben von {ort}", "Die Prophezeiung von {ort}", "Ein Drache namens Steuern", "Die Hochzeit von {ort}", "Das Turnier von {ort}", "Die Gruft unter {ort}", "Das Lied von {ort}", "Der Zorn von {schurke}"];
+  const TITELMUSTER = ["Der Fluch von {ort}", "Schatten über {ort}", "Die Krone von {ort}", "{Schurke} erwacht", "{Schurke} kehrt zurück", "{ort} brennt", "Die letzte Schenke vor {ort}", "Das Geheimnis von {ort}", "Die Pilzkriege von {ort}", "Der lange Winter von {ort}", "Die Erben von {ort}", "Die Prophezeiung von {ort}", "Ein Drache namens Steuern", "Die Hochzeit von {ort}", "Das Turnier von {ort}", "Die Gruft unter {ort}", "Das Lied von {ort}", "{Schurke} schlägt zurück"];
 
   /* Kampagnen-Schauplätze bestimmen die Grund-Atmosphäre */
   const SCHAUPLATZ = ["wald", "dungeon", "stadt", "see", "berg", "sumpf", "schloss", "wueste"];
@@ -220,6 +227,8 @@
       k.text = text.join(" ");
       if (!k.opt[0] || !k.opt[1]) { console.warn("Karte ohne zwei Wahlen:", k.id || k.text.slice(0, 40)); continue; }
       if (k.krise) k.kette = true;
+      k.brauchtSp = /\{(name|held|klasse|volk|eigen|stufe|altheld|altkampagne|tode|nat1|nat20|kampagnen|krise|[Ee]r|[Ss]ein\w*|[Ii]hn|[Ii]hm|h_\w+)\}/.test([k.text, ...k.opt.flatMap(o => [o.label, o.folge])].join(" "));
+      k.folgekarte = k.wenn.some(b => /^[a-z][a-z_]*$/.test(b) && !["legende", "gefallen", "ruhig"].includes(b));
       if (!k.id) k.id = quelle + "_" + KARTEN.length;
       if (KARTE[k.id]) { console.warn("Doppelte Karten-ID:", k.id); k.id += "_" + KARTEN.length; }
       KARTEN.push(k); KARTE[k.id] = k;
@@ -521,10 +530,11 @@
   const hr = k => RUN && RUN.hr && RUN.hr.includes(k);
 
   function neuerHeld(sp, ahn) {
-    const name = ahn ? ahn.name.split(" ")[0] + (zz() < .5 ? " der Zweite" : " Junior") : wahl(HELDENNAMEN);
-    const h = { name, volk: wahl(VOELKER), klasse: wahl(KLASSEN), eigen: wahl(EIGEN), stufe: Math.max(1, RUN ? Math.round(durchschnittStufe() * .6) : 1), id: Math.random().toString(36).slice(2, 8) };
+    const name = ahn ? ahn.name.split(" ")[0] + (zz() < .5 ? " II." : " Junior") : wahl(HELDENNAMEN);
+    const h = { name, g: null, volk: wahl(VOELKER), klasse: wahl(KLASSEN), eigen: wahl(EIGEN), stufe: Math.max(1, RUN ? Math.round(durchschnittStufe() * .6) : 1), id: Math.random().toString(36).slice(2, 8) };
     if (sp.typ === "power" && zz() < .5) h.name = wahl(["Schattenklinge", "Nachtblut", "Dunkelherz", "Todesfaust", "Klingensturm"]);
     if (sp.typ === "rolle" && zz() < .5) h.eigen = "hat eine 14-seitige Hintergrundgeschichte";
+    h.g = HELDINNEN.has(h.name) ? "w" : "m";
     META.stats.helden++;
     return h;
   }
@@ -578,14 +588,14 @@
   function merkmale(sp) {
     memo(sp);
     const m = sp.mem, out = {};
-    if (m.nat1 >= 3 && m.nat1 > m.nat20 + 1) out.pechvogel = 1;
-    if (m.nat20 >= 3 && m.nat20 > m.nat1) out.glueckskind = 1;
+    if (m.nat1 >= 2 && m.nat1 > m.nat20) out.pechvogel = 1;
+    if (m.nat20 >= 2 && m.nat20 > m.nat1) out.glueckskind = 1;
     if (m.letzterTod != null && RUN.karten - m.letzterTod < 18) out.trauert = 1;
     if (sp.tode >= 3) out.verbittert = 1;
     if (sp.tode >= 2) out.paranoid = 1;
     if (m.kampagnen >= 2) out.stammgast = 1;
     if (m.erinnerung.length) out.verlust = 1;
-    if ((m.erfolge || 0) >= 10 && !sp.tode) out.uebermuetig = 1;
+    if ((m.erfolge || 0) >= 6 && !sp.tode) out.uebermuetig = 1;
     if (m.seit > 0 && RUN.karten - m.seit < 25) out.frisch = 1;
     return out;
   }
@@ -645,7 +655,7 @@
     const ort = wahl(ORTE);
     let schurke = wahl(SCHURKEN);
     if (META.welt.schurken.length && zz() < .25) schurke = wahl(META.welt.schurken);
-    const titel = wahl(TITELMUSTER).replace("{ort}", ort.replace(/^(den|die|das) /, "")).replace("{schurke}", schurke);
+    const titel = wahl(TITELMUSTER).replace("{ort}", ort.replace(/^(den|die|das) /, "")).replace("{Schurke}", schurke.charAt(0).toUpperCase() + schurke.slice(1));
     RUN.k = { nr: (RUN.k ? RUN.k.nr : 0) + 1, titel, ort, schurke, platz: wahl(SCHAUPLATZ), sessions: zi(4, 6) - (hr("kurz") ? 1 : 0), session: 0, karte: 0, akt: 1, flags: {}, benutzt: {}, tote: [], log: [], plot: 0, werkzeug: {} };
     const letztes = RUN.letztesZiel;
     RUN.k.ziel = wahl(ZIELE.filter(z => z.k !== letztes)).k; RUN.letztesZiel = RUN.k.ziel;
@@ -720,7 +730,9 @@
     if (k.krise && k.krisenwer) { const kand = aktiveSpieler().filter(s => s.typ === k.krisenwer); if (kand.length) return { sp: wahl(kand) }; }
     if (TYPEN[k.wer]) { const kand = aktiveSpieler().filter(s => s.typ === k.wer); return kand.length ? { sp: wahl(kand) } : null; }
     if (k.wer === "spieler") { const a = aktiveSpieler(); return a.length ? { sp: wahl(a) } : null; }
-    if (k.wer === "geist") { return RUN.k.tote.length || META.welt.gefallene.length ? { sym: "geist" } : null; }
+    const betroffen = () => { const a = aktiveSpieler(); return a.length ? wahl(a) : null; };
+    if (k.wer === "geist") { if (!(RUN.k.tote.length || META.welt.gefallene.length)) return null; return k.brauchtSp ? { sym: "geist", sp: betroffen() } : { sym: "geist" }; }
+    if (k.brauchtSp) { const b = betroffen(); return b ? { sym: k.wer, sp: b } : null; }
     return { sym: k.wer };
   }
   function fuelle(ctx) {
@@ -730,8 +742,8 @@
     const anderer = ctx.sp2 || ctx.sp || a[0];
     const mem = ctx.sp ? memo(ctx.sp).mem : null, erin = mem && mem.erinnerung.length ? mem.erinnerung[mem.erinnerung.length - 1] : null;
     const tot = RUN.k.tote.length ? RUN.k.tote[RUN.k.tote.length - 1] : (META.welt.gefallene.length ? wahl(META.welt.gefallene) : { name: "Grimbold" });
-    const leg = META.welt.legenden.length ? wahl(META.welt.legenden) : { name: "Grimbold der Erste", spieler: "jemand" };
-    return {
+    const leg = META.welt.legenden.length ? wahl(META.welt.legenden) : { name: "Grimbold Eisenfaust", spieler: "jemand" };
+    const f = {
       name: ctx.sp ? ctx.sp.name : "", held: ctx.sp ? ctx.sp.held.name : "", klasse: ctx.sp ? ctx.sp.held.klasse : "", volk: ctx.sp ? ctx.sp.held.volk : "", eigen: ctx.sp ? ctx.sp.held.eigen : "",
       anderer: anderer ? anderer.name : "", aheld: anderer ? anderer.held.name : "", aklasse: anderer ? anderer.held.klasse : "",
       schurke: RUN.k.schurke, schurkeN: RUN.k.schurke.replace(/^(der|die|das) /, ""), ort: RUN.k.ort, kampagne: RUN.k.titel, npc: (() => { const n = wahl(NPCS); return n; })(), monster: wahl(MONSTER), item: wahl(DINGE), gott: wahl(GOETTER),
@@ -740,9 +752,14 @@
       altheld: erin ? erin.held : "Grimbold", altkampagne: erin ? erin.kampagne : "der letzten Kampagne", tode: ctx.sp ? ctx.sp.tode : 0, kampagnen: mem ? mem.kampagnen : 0,
       nat1: mem ? mem.nat1 : 0, nat20: mem ? mem.nat20 : 0, wochen: zi(2, 6), monate: zi(2, 5), krise: ctx.sp && ctx.sp.krise ? KRISEN[ctx.sp.krise.art].name : ""
     };
+    pronomen(f, ctx.sp && spG(ctx.sp) === "w", "");
+    pronomen(f, ctx.sp && heldG(ctx.sp.held) === "w", "h_");
+    pronomen(f, anderer && spG(anderer) === "w", "p2_");
+    pronomen(f, anderer && heldG(anderer.held) === "w", "p2h_");
+    return f;
   }
   const ersetze = (t, f) => satz(t.replace(/\{(\w+)\}/g, (_, k) => k === "npcN" ? String(f.npc).replace(/^(der|die|das) /, "") : f[k] != null ? f[k] : "{" + k + "}"));
-  const satz = t => t.replace(/(^|[.!?]\s+|„)([a-zäöü])/g, (m, a, b) => a + b.toUpperCase());
+  const satz = t => t.replace(/(^|[.!?]\s+|(?:^|[.!?:]\s*)„)([a-zäöü])/g, (m, a, b) => a + b.toUpperCase());
   function grossAnfang(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
 
   /* ---------- Karte ziehen ---------- */
@@ -771,6 +788,9 @@
       if (!META.gesehen[k.id]) g *= 1.35;
       if (k.selten) g *= .3;
       if (k.bez) g *= 1.2;
+      if (k.folgekarte) g *= 5;
+      if (k.wenn.some(b => /^(merk:(pechvogel|glueckskind|trauert|verbittert|paranoid|uebermuetig|frisch)|bez[<>]|krise:|bezhat:)/.test(b))) g *= 2.5;
+      if (k.wenn.some(b => /^merk:(verlust|stammgast)$/.test(b))) g *= .45;
       out.push({ k, ctx, g });
     }
     return out;
@@ -794,6 +814,7 @@
         if (ctx && q.sp2 != null && RUN.spieler[q.sp2] && anwesend(RUN.spieler[q.sp2])) { ctx.sp2 = RUN.spieler[q.sp2]; const z = ctx.sp && bezZwischen(ctx.sp, ctx.sp2); if (z) ctx.bez = z; }
         if (ctx && k.bez && !ctx.bez) ctx = null;
         if (ctx && k.wer === "pausiert") ctx.chat = true;
+        if (ctx && !TYPEN[k.wer] && !["spieler", "pausiert"].includes(k.wer) && !k.bez) ctx.sym = k.wer;
         if (ctx && (!k.wenn.length || pruefe(k.wenn, ctx))) return { k, ctx };
         break;
       }
@@ -819,7 +840,7 @@
     if (leg) { sp.held = neuerHeld(sp, leg); sp.ahn = leg.name; }
     RUN.kandidat = sp;
     const a = aktiveSpieler();
-    let intro = "Es klingelt. Vor der Tür steht " + sp.name + " (" + TYPEN[sp.typ].titel + "). „Ich hab gehört, ihr sucht noch jemanden?“";
+    let intro = "Es klingelt. Vor der Tür steht " + sp.name + " (" + typTitel(sp) + "). „Ich hab gehört, ihr sucht noch jemanden?“";
     if (a.length && zz() < .45) {
       const f = wahl(a), art = wahl(["freunde", "freunde", "kollegen", "geschwister", "paar", "wg"]);
       sp.mit = { i: idx(f), typ: art };
@@ -1038,6 +1059,7 @@
       if (d) { a.laune = clamp(a.laune + d, 0, 100); b.laune = clamp(b.laune + d, 0, 100); }
       // Dinge beruhigen sich langsam von selbst
       if (z.typ === "spannung" && zz() < .06) z.wert = clamp(z.wert + 3, 0, 100);
+      else if (zz() < .05) z.wert = clamp(z.wert + zi(-7, 5), 0, 100);   // Alltag: mal besser, mal schlechter
     }
     // Wer in einer Krise steckt, ist nicht ganz bei der Sache
     for (const s of aktiveSpieler()) if (s.krise && zz() < .3) s.laune = clamp(s.laune - .6, 0, 100);
@@ -1206,7 +1228,7 @@
       const ausdruck = r ? REAK[r][0] : h === "kopf" ? "muede" : h === "schlaf" ? "schlaf" : null;
       const farbe = s.laune > 60 ? "#7fa64a" : s.laune > 35 ? "#e8b14e" : "#e0573a";
       const bz = bezVon(s).filter(x => anwesend(x.ander) || x.ander.pause).map(x => '<span title="' + esc(BEZ[x.z.typ].name + " mit " + x.ander.name + " (" + Math.round(x.z.wert) + ")") + '"' + (x.z.wert < 30 ? ' class="schlecht"' : "") + ">" + BEZ[x.z.typ].ic + "</span>").join("");
-      const titel = s.name + " – " + TYPEN[s.typ].titel + " · " + s.held.name + ", " + s.held.volk + "-" + s.held.klasse + " (Stufe " + s.held.stufe + "), " + s.held.eigen + " · Laune " + Math.round(s.laune) + (s.krise ? " · " + KRISEN[s.krise.art].name : "") + (pause ? " · pausiert" : "");
+      const titel = s.name + " – " + typTitel(s) + " · " + s.held.name + ", " + s.held.volk + "-" + s.held.klasse + " (Stufe " + s.held.stufe + "), " + s.held.eigen + " · Laune " + Math.round(s.laune) + (s.krise ? " · " + KRISEN[s.krise.art].name : "") + (pause ? " · pausiert" : "");
       const reak = r && REAK[r][1] ? REAK[r][1] : h === "handy" ? "📱" : h === "schlaf" ? "💤" : "";
       return '<div class="platz' + (s === sprecher ? " spricht" : "") + (r ? " r-" + r : "") + (h ? " h-" + h : "") + (pause ? " pausiert" : "") + '" data-i="' + i + '" title="' + esc(titel) + '"><div class="figur">' + GR.figur(s, ausdruck, { bg: pause ? "#cfc3ad" : "#efe0c0", rand: TYPEN[s.typ].farbe }) + (reak ? '<span class="reak">' + reak + "</span>" : "") + (s.krise ? '<span class="kr" title="' + esc(KRISEN[s.krise.art].name) + '">' + KRISEN[s.krise.art].ic + "</span>" : "") + (pause ? '<span class="kr">💬</span>' : "") + '</div><div class="pn">' + esc(s.name) + (bz ? '<span class="bz">' + bz + "</span>" : "") + '</div><div class="ph">' + (pause ? "pausiert" : esc(s.held.name) + "<br>" + esc(s.held.klasse) + " " + s.held.stufe) + '</div><div class="laune"><i style="width:' + s.laune + "%;background:" + farbe + '"></i></div></div>';
     }).join("");
@@ -1268,11 +1290,11 @@
     $("#werkzeuge").innerHTML = (k.ziel ? '<button class="wz ziel" data-ziel title="Geheimes Ziel dieser Kampagne" aria-label="Geheimes Ziel">🎯</button>' : "") + wz.map(w => { const r = werkzeugRest(w.k); return '<button class="wz" data-wz="' + w.k + '" title="' + esc(w.name + ": " + w.text) + '" aria-label="' + esc(w.name) + '"' + (r ? "" : " disabled") + ">" + w.ic + (r ? "<i>" + r + "</i>" : "") + "</button>"; }).join("");
   }
   function sprecherInfo(ctx, k) {
-    if (ctx.sp) {
-      let rolle = TYPEN[ctx.sp.typ].titel + " · spielt " + ctx.sp.held.name;
+    if (ctx.sp && !ctx.sym) {
+      let rolle = typTitel(ctx.sp) + " · spielt " + ctx.sp.held.name;
       if (ctx.chat) rolle = "im Gruppenchat";
-      else if (ctx.bez && ctx.sp2) rolle = TYPEN[ctx.sp.typ].titel + " · " + BEZ[ctx.bez.typ].ic + " " + ctx.sp2.name;
-      else if (ctx.sp.krise && (k.krise || /^kr_|^kz_/.test(k.id))) rolle = TYPEN[ctx.sp.typ].titel + " · " + KRISEN[ctx.sp.krise.art].ic + " " + KRISEN[ctx.sp.krise.art].name;
+      else if (ctx.bez && ctx.sp2) rolle = typTitel(ctx.sp) + " · " + BEZ[ctx.bez.typ].ic + " " + ctx.sp2.name;
+      else if (ctx.sp.krise && (k.krise || /^kr_|^kz_/.test(k.id))) rolle = typTitel(ctx.sp) + " · " + KRISEN[ctx.sp.krise.art].ic + " " + KRISEN[ctx.sp.krise.art].name;
       return { name: ctx.sp.name, rolle, svg: GR.figur(memo(ctx.sp), null, { rand: TYPEN[ctx.sp.typ].farbe }) };
     }
     const s = ctx.sym || k.wer;
@@ -1282,10 +1304,10 @@
   }
 
   let karteEl = null, sperre = false;
-  function kartenTyp(ctx, k) { if (imBoss() || k.phase === "boss" || k.phase === "bossstart") return "boss"; if (ctx.chat) return "tisch"; return ctx.sp ? "spieler" : (ctx.sym || k.wer); }
+  function kartenTyp(ctx, k) { if (imBoss() || k.phase === "boss" || k.phase === "bossstart") return "boss"; if (ctx.chat) return "tisch"; return ctx.sym || (ctx.sp ? "spieler" : k.wer); }
   function bannerFuer(ctx, k, text) {
     const boss = imBoss() || k.phase === "boss" || k.phase === "bossstart";
-    const szene = ctx.chat ? "chat" : GR.szeneFuer(k, text, ctx.sp ? "spieler" : (ctx.sym || k.wer), RUN.k.platz, boss);
+    const szene = ctx.chat ? "chat" : GR.szeneFuer(k, text, ctx.sym || (ctx.sp ? "spieler" : k.wer), RUN.k.platz, boss);
     const fort = RUN.k.karte / Math.max(1, RUN.k.laenge), r = zz();
     const zeit = szene === "tisch" ? (fort > .5 ? "nacht" : "abend") : r < .25 ? null : fort < .4 ? "tag" : fort < .75 ? "abend" : "nacht";
     return GR.banner(szene, GR.hash(k.id) ^ (RUN.karten * 2654435761), zeit);
@@ -1554,7 +1576,7 @@
       const mag = Object.keys(W).map(b => { const B = BALKEN.find(x => x.k === b); return B.name + " " + W[b][0] + "–" + W[b][1]; }).join(", ");
       const mk = Object.keys(merkmale(s)).filter(x => MERK_TEXT[x]).map(x => MERK_TEXT[x]);
       const erin = s.mem.erinnerung.slice(-3).map(e => e.held).join(", ");
-      return '<li style="display:flex;gap:.6rem;align-items:center"><span style="width:58px;flex:none">' + GR.figur(s, null, { rand: TYPEN[s.typ].farbe }) + "</span><span><b>" + esc(s.name) + "</b> – " + esc(TYPEN[s.typ].titel) + " <small>(Laune " + Math.round(s.laune) + ")</small>" + (s.krise ? " <small>" + KRISEN[s.krise.art].ic + " " + KRISEN[s.krise.art].name + "</small>" : "") + (s.pause ? " <small>💬 pausiert</small>" : "") + "<br><small>" + esc(TYPEN[s.typ].motto) + " Mag: " + esc(mag) + "</small><br>Spielt <b>" + esc(s.held.name) + "</b>, " + esc(s.held.volk + "-" + s.held.klasse) + ", Stufe " + s.held.stufe + " – " + esc(s.held.eigen) + (erin ? "<br><small>Vermisst noch: " + esc(erin) + "</small>" : "") + (mk.length ? "<br><small class='merk'>" + esc(mk.join(" · ")) + "</small>" : "") + "</span></li>";
+      return '<li style="display:flex;gap:.6rem;align-items:center"><span style="width:58px;flex:none">' + GR.figur(s, null, { rand: TYPEN[s.typ].farbe }) + "</span><span><b>" + esc(s.name) + "</b> – " + esc(typTitel(s)) + " <small>(Laune " + Math.round(s.laune) + ")</small>" + (s.krise ? " <small>" + KRISEN[s.krise.art].ic + " " + KRISEN[s.krise.art].name + "</small>" : "") + (s.pause ? " <small>💬 pausiert</small>" : "") + "<br><small>" + esc(TYPEN[s.typ].motto) + " Mag: " + esc(mag) + "</small><br>Spielt <b>" + esc(s.held.name) + "</b>, " + esc(s.held.volk + "-" + s.held.klasse) + ", Stufe " + s.held.stufe + " – " + esc(s.held.eigen) + (erin ? "<br><small>Vermisst noch: " + esc(erin) + "</small>" : "") + (mk.length ? "<br><small class='merk'>" + esc(mk.join(" · ")) + "</small>" : "") + "</span></li>";
     }).join("") + "</ul>" + (bz ? '<h3>Wer mit wem</h3><ul class="liste">' + bz + "</ul>" : "") + '<p class="leise">Fällt die Laune eines Spielers auf null, will er gehen. Beziehungen färben die Stimmung: Wer sich gerade nicht grün ist, zieht beide runter. Wer geht, nimmt manchmal jemanden mit.</p>');
   }
 
@@ -1626,18 +1648,28 @@
   zeichneBalken();
   if (RUN && RUN.k) { try { titelbild(); } catch (e) { RUN = null; titelbild(); } } else { RUN = null; titelbild(); }
   /* Testlauf ohne Oberfläche (für Balance-Prüfungen): TNE.sim(Runden, "gierig"|"zufall") */
-  function sim(n, art) {
+  let protokoll = null;
+  function sim(n, art, mitProtokoll) {
     const ergebnisse = [], metaAlt = JSON.stringify(META);
+    protokoll = mitProtokoll ? { gezogen: {}, phase: {}, fehler: {} } : null;
     for (let i = 0; i < n; i++) {
       neuerRunStill();
       let sicher = 0;
       while (RUN && sicher++ < 3000) {
+        if (imBoss() && !RUN.k.boss) RUN.k.boss = { hp: 100 };
         const x = ziehe(); const f = fuelle(x.ctx);
         aktuelle = { k: x.k, ctx: x.ctx, f, text: "" };
-        if (!x.k.sonder) RUN.k.benutzt[x.k.id] = 1;
+        if (!x.k.sonder) { RUN.k.benutzt[x.k.id] = 1; if (x.k.einmal || x.k.selten) RUN.einmal[x.k.id] = 1; }
+        if (protokoll) {
+          protokoll.gezogen[x.k.id] = (protokoll.gezogen[x.k.id] || 0) + 1;
+          const ph = phaseJetzt(); protokoll.phase[ph] = (protokoll.phase[ph] || 0) + 1;
+          for (const t of [x.k.text, ...x.k.opt.flatMap(o => [o.label, o.folge])]) {
+            const e = ersetze(t, f);
+            if (/\{\w+\}|undefined|null|NaN|\s,|^\s|\(\)|  /.test(e) || /(^|\s)(s|'s)\b/.test(e) && !/['’]s\b/.test(t)) (protokoll.fehler[x.k.id] = protokoll.fehler[x.k.id] || new Set()).add(e.slice(0, 140));
+          }
+        }
         let seite = Math.floor(zz() * x.k.opt.length);
         if (art === "gierig") { const sc = o => { const v = vorschauFuer(o); let s = 0; for (const b of "mlst") { let d = v[b]; if (d === "?") d = 0; const xx = RUN.b[b] + (d || 0) * STAERKE + DRIFT[b] * STAERKE * 2; s += Math.pow(xx - 52, 2); } return s; }; let best = Infinity; x.k.opt.forEach((o, i) => { const v = sc(o); if (v < best) { best = v; seite = i; } }); }
-        if (imBoss() && !RUN.k.boss) RUN.k.boss = { hp: 100 };
         anwenden(seite);
         const tot = balkenTot();
         if (tot) { ergebnisse.push({ ende: tot, karten: RUN.karten, kamp: RUN.kampagnenGeschafft || 0 }); RUN = null; break; }
@@ -1648,6 +1680,7 @@
     const alt = JSON.parse(metaAlt).stats;
     ergebnisse.stats = {}; for (const k of ["bosse", "ziele", "krisen", "bez", "selten", "kampagnen", "tode", "spieler", "wuerfe", "nat20", "nat1"]) ergebnisse.stats[k] = META.stats[k] - (alt[k] || 0);
     META = JSON.parse(metaAlt);
+    if (protokoll) { for (const k in protokoll.fehler) protokoll.fehler[k] = [...protokoll.fehler[k]]; ergebnisse.protokoll = protokoll; protokoll = null; }
     return ergebnisse;
   }
   function neuerRunStill() {
@@ -1658,6 +1691,18 @@
     neueKampagne();
   }
   /* Test-Hilfe: bestimmte Karte als nächste zeigen */
-  function testKarte(id, opt) { if (!RUN) return; opt = opt || {}; RUN.queue.unshift({ id, ab: 0, sp: opt.sp != null ? opt.sp : null, sp2: opt.sp2 != null ? opt.sp2 : null }); naechsteKarte(); }
+  function testKarte(id, opt) {
+    if (!RUN || !KARTE[id]) return; opt = opt || {};
+    const k = KARTE[id];
+    const ctx = sprecherFinden(k) || { sp: aktiveSpieler()[0] };
+    if (opt.sp != null) ctx.sp = RUN.spieler[opt.sp];
+    if (opt.sp2 != null) { ctx.sp2 = RUN.spieler[opt.sp2]; const z = bezZwischen(ctx.sp, ctx.sp2); if (z) ctx.bez = z; }
+    if (!TYPEN[k.wer] && !["spieler", "pausiert"].includes(k.wer) && !k.bez) ctx.sym = k.wer;
+    if (k.wer === "pausiert") ctx.chat = true;
+    const f = fuelle(ctx);
+    aktuelle = { k, ctx, f, text: ersetze(k.text, f) };
+    if (k.selten) { Viz.zeige("funkeln"); }
+    zeigeKarte();
+  }
   window.TNE = { sim, testKarte, zeichneTischbild, katzeLauf, staerke: v => { STAERKE = v; }, KARTEN, ZIEHBAR, META: () => META, RUN: () => RUN, akt: () => aktuelle, vorschau: vorschauFuer, Viz, stichwort, parseWirkung };
 })();

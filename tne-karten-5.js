@@ -27,7 +27,7 @@ Der Dungeon ist halb überflutet. Die Fackeln gehen aus.
 § #dg_boss npc
 Der Zwischenboss heißt {npcN}, hat einen Speer und schlechte Laune.
 < Harter Kampf | W12 m+3 t+4 ? lvl s+4 : tod | Der Zwischenboss fällt. Alle steigen auf! :: Der Speer trifft. | schwerter
-> Er hat Liebeskummer | s+8 l-3 t-3 | Statt zu kämpfen, hört die Gruppe sich seine Geschichte an. Er lässt sie durch. | herzen
+> Liebeskummer! | s+8 l-3 t-3 | Statt zu kämpfen, hört sich die Gruppe die ganze traurige Geschichte an. Danach darf sie durch. | herzen
 
 § #dg_kerker sl ort:dungeon
 Die Gruppe wird gefangen genommen und in einen Kerker gesperrt. Ohne Ausrüstung.
@@ -81,16 +81,16 @@ Die Gruppe erreicht die Hauptstadt. Hunderte Menschen, tausend Möglichkeiten.
 
 § #st_gilde npc ort:stadt
 Die Diebesgilde von {ort} bietet {held} eine Mitgliedschaft an.
-< Annehmen | s+6 m+4 l+2 +gilde | {held} bekommt einen Geheimnamen: „Schatten Nr. 7“. | nacht
+< Annehmen | s+6 m+4 l+2 +gilde >>st_gilde2 | {held} bekommt einen Geheimnamen: „Schatten Nr. 7“. | nacht
 > Ablehnen | l+3 s-2 | Die Gilde ist beleidigt. Ab jetzt fehlen ständig Kleinigkeiten.
 
-§ #st_gilde2 npc wenn:gilde
+§ #st_gilde2 npc kette wenn:gilde
 Die Diebesgilde verlangt einen Gefallen: Ein Bild aus dem Palast stehlen.
 < Der große Coup | W14 s+8 t+5 ? m+6 : tod | Der Einbruch gelingt spektakulär! Ezekiel wäre stolz. :: Die Wachen waren gewarnt. | ausruf
 > Austreten | l+4 s-4 -gilde | Die Gilde lässt {held} ziehen. Mit einem Messer im Tisch als Abschiedsgeschenk.
 
 § #st_gericht npc ort:stadt
-Ein Held wird vor Gericht gestellt: Er soll ein Huhn gestohlen haben.
+{held} steht vor Gericht. Der Vorwurf: Hühnerdiebstahl.
 < Verteidigungsrede | W12 l+6 s+6 ? : m-4 | Die Rede ist so gut, dass das Huhn freigesprochen wird. Wie auch immer das geht. :: Verurteilt zu drei Tagen Pranger. | federn
 > Flucht aus dem Saal | t+8 s+5 l-5 | Ein Sprung durchs Fenster! Jetzt ist die ganze Gruppe gesucht. | glocke
 
@@ -99,7 +99,7 @@ Ein Händler verkauft „garantiert echte“ Drachenschuppen-Rüstung.
 < Kaufen | m+6 l-4 W10 ? : m-6 | Sie ist echt! Unglaublich! :: Sie ist aus bemalter Pappe. Im Regen löst sie sich auf. | gold
 > Prüfen lassen | l+5 t-3 | Ein Zwerg prüft: Fälschung. Der Händler ist verschwunden.
 
-§ #st_bad tisch
+§ #st_bad welt
 Die Helden gönnen sich einen Tag im Badehaus.
 < Entspannungs-Session | s+5 t-8 alle+4 | Ein ganzer Abend nur Gespräche, Gerüchte und Seifenblasen. | wellen
 > Ein Attentat! | t+8 s+4 m+2 | Mitten im Dampfbad greifen Assassinen an. Nackt und mit Handtüchern wird gekämpft! | schwerter
@@ -170,32 +170,32 @@ Der Fluch auf {held} wird stärker. Nachts verwandelt sich der Held in einen Fro
 > Mit dem Fluch leben | s+8 l-4 | Nachts gibt es jetzt einen Frosch in der Gruppe. Er ist erstaunlich nützlich. | lachen
 
 § #k_wette1 spieler
-{name} wettet mit {npc}: Wenn die Gruppe {schurkeN} besiegt, bekommt sie ein Schloss.
-< Wette gilt | s+6 m+3 +wette | Handschlag. Zeugen. Ein Schloss steht auf dem Spiel! | gold
+{name} wettet mit {npcN}: Wenn die Gruppe {schurkeN} besiegt, bekommt sie ein Schloss.
+< Wette gilt | s+6 m+3 +wette >>>k_wette2 | Handschlag. Zeugen. Ein Schloss steht auf dem Spiel! | gold
 > Keine Wetten | l+3 s-2 | „Wir sind Profis.“ – „Seit wann?“
 
-§ #k_wette2 npc wenn:wette
-{npc} erinnert die Gruppe an die Wette. Und er hat schon das Schloss renovieren lassen. Für sich.
-< Er betrügt! | t+5 s+5 W12 ? m+5 : s-4 | Ein Duell um das Schloss! Gewonnen! :: Er hat einen besseren Anwalt. | schwerter
-> Es war nur Spaß | l+3 s+2 -wette | Alle lachen. Nur {npc} nicht. Er hatte schon Vorhänge gekauft.
+§ #k_wette2 npc kette wenn:wette
+{npc} erinnert die Gruppe an die Wette – und hat das Schloss schon renovieren lassen. Für sich selbst.
+< Betrug! | t+5 s+5 W12 ? m+5 : s-4 | Ein Duell um das Schloss! Gewonnen! :: Der bessere Anwalt sitzt leider auf der anderen Seite. | schwerter
+> Es war nur Spaß | l+3 s+2 -wette | Alle lachen. Nur {npcN} nicht. Die Vorhänge waren schon gekauft.
 
 § #k_rivale1 npc
 Eine rivalisierende Heldengruppe taucht auf: „Die Glorreichen Vier“. Sie sind besser ausgerüstet.
-< Rivalität! | s+6 t+4 +rivalen | Ab jetzt ist es ein Wettlauf. Wer schafft {schurkeN} zuerst? | ausruf
+< Rivalität! | s+6 t+4 +rivalen >>>k_rivale2 | Ab jetzt ist es ein Wettlauf. Wer schafft {schurkeN} zuerst? | ausruf
 > Zusammenarbeit | l+4 m+4 s-2 | Gemeinsam sind sie stark. Aber die anderen nehmen den Ruhm. | herzen
 
-§ #k_rivale2 npc wenn:rivalen
+§ #k_rivale2 npc kette wenn:rivalen
 „Die Glorreichen Vier“ haben den Dungeon vor euch geplündert. Nur ein Zettel: „Zu langsam!“
 < Rache! | m+4 t+6 s+4 | Die Gruppe sabotiert die Rivalen beim nächsten Abenteuer. Herrlich kindisch. | lachen
 > Sie geraten in Gefahr | l+4 s+5 W12 ? -rivalen m+4 : tod | Die Rivalen sind gefangen. Die Gruppe rettet sie. Jetzt sind sie Freunde. :: Die Rettung kostet einen Helden. | herzen
 
 § #tr_bierkrieg chaos trash
-Der Chaot erklärt der Nachbartaverne den Krieg. Grund: Das Bier ist zu warm.
+{name} lässt {held} der Nachbartaverne den Krieg erklären. Grund: Das Bier ist zu warm.
 < Bierkrieg! | s+10 l-8 t+5 | Katapulte mit Fässern, Schlachtrufe, ein Waffenstillstand bei Freibier. | explosion
 > Diplomatie | l+4 s+2 | Ein Friedensvertrag: Kalte Krüge für alle. | konfetti
 
 § #tr_pferd spieler trash
-{name}: „{held} heiratet sein Pferd.“
+{name}: „{held} heiratet {h_sein} Pferd.“
 < Hochzeit! | s+10 l-10 | Das Pferd trägt Schleier. Der Priester ist ratlos. Alle weinen vor Lachen. | herzen
 > Das Pferd lehnt ab | s+8 l-2 | Das Pferd schüttelt den Kopf und galoppiert davon. Herzschmerz. | traenen
 
@@ -210,9 +210,9 @@ Die Gruppe entdeckt: Der Mond ist ein Ei. Und es bekommt Risse.
 > In den Fluss werfen | s-2 l+3 | „Hallooo…“ *platsch*. Stille. Manche vermissen ihn. | wellen
 
 § #tr_barde chaos trash
-Der Barde will einen Endgegner mit einem Rap-Battle besiegen.
+{name} will den nächsten Endgegner mit einem Rap-Battle besiegen.
 < Würfel auf Darbietung | W14 s+12 l-6 ? m+3 : s-4 | Die Reime sind so hart, dass der Lich zu Staub zerfällt. :: Der Lich rappt zurück. Besser. Viel besser. | musik
-> Kein Rap | l+4 laune-8 | Der Barde murmelt Reime vor sich hin.
+> Kein Rap | l+4 laune-8 | {name} murmelt den Rest des Abends Reime vor sich hin.
 
 § #tr_zeitreise welt trash
 Die Gruppe wird in die Zeit zurückgeschleudert. Vor 1000 Jahren. Mit Wikingern. Und einem T-Rex.
@@ -220,9 +220,9 @@ Die Gruppe wird in die Zeit zurückgeschleudert. Vor 1000 Jahren. Mit Wikingern.
 > Sofort zurück | l+5 s-3 | Nur ein Flackern. Ein Wikingerhelm bleibt zurück. | portal
 
 § #hr_hardcore sl nurhr:hardcore
-Hausregel „Tod ist Tod“: Ein Held liegt bei null Trefferpunkten. Keine Wiederbelebung möglich.
-< Regel ist Regel | l+6 tod s-4 | Der Held stirbt. Endgültig. Der Tisch schweigt. Respekt. | schaedel
-> Rettungswurf | W12 ? s+6 : tod | Er schafft den Wurf! Mit einem Trefferpunkt! :: Die Würfel haben gesprochen. | wuerfelregen
+Hausregel „Tod ist Tod“: {held} liegt bei null Trefferpunkten. Keine Wiederbelebung möglich.
+< Regel ist Regel | l+6 tod s-4 | {held} stirbt. Endgültig. Der Tisch schweigt. Respekt. | schaedel
+> Rettungswurf | W12 ? s+6 : tod | {held} schafft den Wurf! Mit einem Trefferpunkt! :: Die Würfel haben gesprochen. | wuerfelregen
 
 § #hr_trash welt nurhr:trash trash
 Trash-Modus: Ein Bus fährt durch das mittelalterliche Dorf. Niemand weiß, warum.
@@ -240,8 +240,8 @@ Die Spieler kennen sich inzwischen so gut, dass sie Insider-Witze aus früheren 
 > Zurück zum Plot | t+4 l+3 | „Okay, okay – wo waren wir?“
 
 § #pl_bossvorbote schurke wenn:akt=3
-Die Helden spüren es: Die letzte Schlacht naht. {schurke} sammelt seine Armeen.
-< Kriegsrat halten | l+5 t-4 m+3 | Bündnisse werden geschmiedet, Pläne geschmiedet, Waffen geschmiedet. Viel Schmieden. | krieg
+Die Helden spüren es: Die letzte Schlacht naht. {schurke} sammelt Armeen.
+< Kriegsrat halten | l+5 t-4 m+3 | Bündnisse werden geschmiedet, Pläne geschmiedet, Waffen geschmiedet. Viel Schmieden. | schwerter
 > Direkt angreifen | t+8 m+4 W12 ? s+5 : tod | Ein Überraschungsangriff auf die Vorhut! Erfolg! :: Eine Falle. | schwerter
 
 § #pl_akt2 sl wenn:akt=2
@@ -250,7 +250,7 @@ Mitte der Kampagne. Die Geschichte braucht eine Wendung.
 > Ein neuer Verbündeter | s+5 m+4 | Ein mysteriöser Fremder schließt sich an. Er weiß zu viel. | ausruf
 
 § #pl_akt1 sl wenn:akt=1
-Die Gruppe hat noch keine Ahnung, wer {schurkeN} ist. Willst du ihn früh zeigen?
+Die Gruppe hat noch keine Ahnung, wer {schurkeN} ist. Zeigst du den Schurken schon jetzt?
 < Ja, ein Auftritt | s+5 t+4 l-2 | {schurke} zeigt sich kurz auf einem Turm. Blitze zucken. Gänsehaut. | blitz
 > Nein, Mysterium | l+5 t-3 | Nur Gerüchte. Schatten. Ein Name, der geflüstert wird.
 
@@ -265,7 +265,7 @@ Die Gruppe hat seit drei Sessions keinen Erfolg gehabt. Jeder Plan scheitert.
 > „Das ist Teil der Geschichte“ | s-6 l+5 laune-10 | {name} verschränkt die Arme. Vielleicht kommt die Wende noch.
 
 § #ex_pain3 tisch
-Ein Spieler erzählt, dass sein Tag furchtbar war. Er braucht heute einfach nur Spaß.
+{name} hatte einen furchtbaren Tag und braucht heute einfach nur Spaß.
 < Leichte Session | s+8 t+3 l-4 alle+4 | Ein albernes Abenteuer mit einem tanzenden Bären. Genau das Richtige. | musik
 > Normal weiterspielen | l+4 s-6 alle-3 | Die geplante düstere Szene kommt. Es war nicht der richtige Abend.
 
@@ -302,7 +302,7 @@ Die Stimmung ist ausgelassen. Willst du eine ernste Szene einstreuen?
 § #ex_regelstreit regel
 {name} weigert sich weiterzuspielen, bis geklärt ist, ob Pfeile im Regen schlechter fliegen.
 < Ausdiskutieren | l+6 s-8 t-6 laune+10 | 25 Minuten. Ergebnis: Ja, Nachteil. Niemand ist glücklich. | regen
-> Machtwort | s+2 t+4 laune-12 | „Pfeile fliegen normal.“ {name} schreibt es in sein Beschwerdebuch.
+> Machtwort | s+2 t+4 laune-12 | „Pfeile fliegen normal.“ {name} schreibt es in {sein} Beschwerdebuch.
 
 § #ex_tpkgefahr sl wenn:m<35
 Die Gruppe ist stark angeschlagen und läuft in einen Hinterhalt.
@@ -422,5 +422,5 @@ Eine neue Edition des Regelwerks ist erschienen. Alles ist anders.
 § #rb_kritkarte regelbuch
 Jemand bringt Kritische-Treffer-Karten mit: Jeder Krit zieht eine Karte mit besonderem Effekt.
 < Einführen | s+8 l-3 m+3 | „Du schlägst dem Ork den Helm über die Augen.“ Wunderbar! | schwerter
-> Nein danke | l+3 laune-0 | Die Karten liegen im Regal neben dem Kompendium.
+> Nein danke | l+3 s-1 | Die Karten liegen im Regal neben dem Kompendium.
 `);

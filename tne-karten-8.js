@@ -40,7 +40,7 @@ Letzte Session vor dem Umzug. Jemand hat einen Kuchen gebacken, der aussehen sol
 > Lieber nächstes Mal richtig | t+2 laune-3 | „Klar. Verstehe.“ Klingt nicht ganz so klar.
 
 § #kz_umzug spieler kette
-{name} ist zurück am Tisch – zum ersten Mal seit dem Umzug, mit dem Zug angereist und einer Tüte mit Spezialitäten aus der neuen Stadt. Niemand weiß, was davon man essen soll.
+{name} ist zurück – zum ersten Mal seit dem Umzug, mit dem Zug angereist und mit einer Tüte Spezialitäten aus der neuen Stadt. Was davon isst man eigentlich?
 < Großes Hallo | s+6 t-3 alle+6 laune+10 krise- | Die erste halbe Stunde wird nur geredet. Dann schmeckt jemand die Spezialität. Dann noch eine halbe Stunde. | konfetti
 > Weiterspielen, als wäre nie etwas gewesen | t+3 laune+8 krise- | {name} setzt sich auf den alten Platz, nimmt die Würfel und sagt: „Wo waren wir?“ Genau das hat {name} gebraucht.
 
@@ -52,7 +52,7 @@ Letzte Session vor dem Umzug. Jemand hat einen Kuchen gebacken, der aussehen sol
 § #kr_baby_start spieler krise:baby einmal
 {name} legt kommentarlos ein Ultraschallbild auf den Tisch, direkt neben die Würfel. Erst versteht es niemand. Dann alle gleichzeitig.
 < Session unterbrechen, anstoßen | s+8 t-5 alle+8 krise=baby >>kr_baby_muede | Es gibt Sekt aus Kaffeetassen und sehr viele Fragen. Die Kampagne kann warten. | konfetti
-> Im Spiel feiern lassen: Die Helden bekommen ein Fest | s+6 l-2 krise=baby >>kr_baby_muede | In der Taverne wird spontan ein Fest gegeben, ohne dass irgendein Held weiß, warum. Die Spieler wissen es. | musik
+> Ein Fest für die Helden | s+6 l-2 krise=baby >>kr_baby_muede | In der Taverne wird spontan ein Fest gegeben, ohne dass irgendein Held weiß, warum. Die Spieler wissen es. | musik
 
 § #kr_baby_muede spieler kette
 {name} schläft fast ein. Seit Wochen keine durchgeschlafene Nacht, und das Kind ist noch nicht einmal da. „Ich bin wach. Ich bin wach!“
@@ -67,7 +67,7 @@ Letzte Session vor dem Umzug. Jemand hat einen Kuchen gebacken, der aussehen sol
 § #kr_baby_geburt spieler kette
 Ein Foto im Gruppenchat: winzig, zerknautscht, perfekt. Darunter schreibt {name}: „Ich bin dann mal ein paar Wochen raus. Haltet meinen Platz warm.“
 < „Wir passen auf {held} auf.“ | alle+5 s+3 pause=2 | Die Antworten im Chat überschlagen sich. Irgendwer schickt ein Foto von einem winzigen gestrickten Drachen. | herzen
-> Eine Babysocke als Glücksbringer an den Schirm hängen | s+4 l-1 pause=2 | Sie hängt da jetzt. Jedes Mal, wenn eine 20 fällt, tippt jemand kurz dagegen. | funkeln
+> Babysocke als Glücksbringer | s+4 l-1 pause=2 | Sie hängt da jetzt. Jedes Mal, wenn eine 20 fällt, tippt jemand kurz dagegen. | funkeln
 
 § #pz_baby_nacht pausiert wenn:krise:baby
 {name} schreibt nachts um drei in den Chat: „Wach. Kind auch. Was macht eigentlich {held}?“
@@ -86,7 +86,7 @@ Ein Foto im Gruppenchat: winzig, zerknautscht, perfekt. Darunter schreibt {name}
 
 § #kr_job_start spieler krise:job einmal
 {name} hat einen neuen Job. Probezeit, viel Druck, neue Leute. „Ich schaff es vielleicht nicht jede Woche.“
-< „Dann spielen wir {held} mit, wenn du fehlst.“ | krise=job laune+6 l-2 >>kr_job_spaet | {name} lacht erleichtert. „Aber lasst ihn nicht sterben.“ – „Keine Versprechen.“
+< „Dann spielen wir {held} mit, wenn du fehlst.“ | krise=job laune+6 l-2 >>kr_job_spaet | {name} lacht erleichtert. „Aber lasst {h_ihn} nicht sterben.“ – „Keine Versprechen.“
 > „Termine sind Termine.“ | krise=job l+3 laune-6 >>kr_job_spaet | Klar, fair. Aber {name} ist danach ein bisschen still.
 
 § #kr_job_spaet spieler kette
@@ -110,7 +110,7 @@ Probezeit bestanden! {name} bringt eine Flasche Sekt mit und den festen Vorsatz,
 > „Ein Abend Ablenkung tut auch gut.“ | krise=pruefung s+3 >>kr_pruef_lernen | {name} bleibt. Die Karteikarten bleiben auch.
 
 § #kr_pruef_lernen spieler kette
-Zwischen zwei Kämpfen lässt sich {name} von den anderen mit Karteikarten abfragen. Der Regelanwalt ist darin erschreckend gut.
+Zwischen zwei Kämpfen lässt sich {name} von den anderen mit Karteikarten abfragen. {anderer} ist darin erschreckend gut.
 < Daraus ein Mini-Quiz machen | s+4 t-4 laune+6 pause=1 | Für jede richtige Antwort bekommt {held} einen Inspirationspunkt. Selten hat jemand so viel über Thermodynamik gelernt. | frage
 > Das Spiel geht vor | t+3 laune-4 pause=1 | Die Karteikarten verschwinden in der Tasche. Das schlechte Gewissen nicht.
 
@@ -127,7 +127,7 @@ Zwischen zwei Kämpfen lässt sich {name} von den anderen mit Karteikarten abfra
 § #kr_trenn_start spieler bez:paar krise:trennung einmal wenn:bez<45
 {name} und {p2} kommen heute getrennt. Sie setzen sich an entgegengesetzte Enden des Tisches. Keiner sagt etwas, aber alle wissen es.
 < Normal leiten, mit Fingerspitzengefühl | krise=trennung bez=ex bez-10 alle-3 t-2 >>kr_trenn_szene | Es ist ein seltsamer Abend. Aber er findet statt, und das ist schon viel.
-> Vor Beginn kurz fragen, ob beide heute spielen wollen | krise=trennung bez=ex laune+3 laune2+3 t-4 >>kr_trenn_szene | Beide nicken. Man merkt, wie dankbar sie sind, gefragt worden zu sein.
+> Vorher fragen, ob beide spielen wollen | krise=trennung bez=ex laune+3 laune2+3 t-4 >>kr_trenn_szene | Beide nicken. Man merkt, wie dankbar sie sind, gefragt worden zu sein.
 
 § #kr_trenn_szene spieler bez:ex kette
 Im Abenteuer steht schon lange eine Szene an, in der {held} und {p2held} zusammenarbeiten müssen. Du hattest sie vor Wochen vorbereitet.
@@ -137,7 +137,7 @@ Im Abenteuer steht schon lange eine Szene an, in der {held} und {p2held} zusamme
 § #kr_trenn_wahl spieler bez:ex kette
 {name} schreibt dir privat: „Ich weiß nicht, ob ich weiter kommen kann, wenn {p2} auch da ist. Ist nicht gegen irgendwen.“
 < Vorschlagen, eine Weile Pause zu machen | pause=2 laune+4 | {name} nimmt eine Auszeit. „Es ist kein Abschied“, schreibt {name}. Du glaubst es.
-> Ermutigen zu bleiben – die Runde ist auch für {name} da | W12 ? bez+10 laune+8 krise- : geht | {name} bleibt. Es wird mit jeder Woche ein bisschen normaler. :: Am nächsten Tag kommt eine lange, ehrliche Nachricht. Es geht nicht. Ein Stuhl bleibt leer.
+> Ermutigen zu bleiben | W12 ? bez+10 laune+8 krise- : geht | {name} bleibt. Es wird mit jeder Woche ein bisschen normaler. :: Am nächsten Tag kommt eine lange, ehrliche Nachricht. Es geht nicht. Ein Stuhl bleibt leer.
 
 § #kz_trennung spieler kette
 {name} ist wieder da. Die Begrüßung mit allen ist herzlich, mit einer Person etwas vorsichtig. Aber es geht.
@@ -145,8 +145,8 @@ Im Abenteuer steht schon lange eine Szene an, in der {held} und {p2held} zusamme
 > Erst mal eine ruhige Session | t-3 alle+2 laune+8 krise- | Eine Reise durch einen Herbstwald, nichts Dramatisches. Manchmal ist das genau richtig. | blaetter
 
 § #kr_fam_start spieler krise:familie einmal
-{name} sagt eine Stunde vor Beginn ab, nur per Nachricht: Der Vater liegt im Krankenhaus. Nichts Lebensbedrohliches, aber {name} fährt jetzt in die Heimat.
-< „Melde dich, wenn du was brauchst.“ Die Session findet statt | krise=familie pause=1 alle-2 | Es wird gespielt, aber immer wieder schaut jemand aufs Handy. {held} bleibt im Lager, „passt auf die Pferde auf“.
+{name} sagt eine Stunde vor Beginn ab, nur per Nachricht: {Sein} Vater liegt im Krankenhaus. Nichts Lebensbedrohliches, aber {name} fährt jetzt in die Heimat.
+< Spielen, aber in Gedanken dabei | krise=familie pause=1 alle-2 | Es wird gespielt, aber immer wieder schaut jemand aufs Handy. {held} bleibt im Lager, „passt auf die Pferde auf“.
 > Die Session absagen, alle schreiben {name} | krise=familie pause=1 t-6 s-2 alle+3 laune+8 | Statt zu spielen, kommen im Chat zwanzig Nachrichten zusammen. {name} schickt ein Herz zurück.
 
 § #pz_familie pausiert wenn:krise:familie
@@ -161,7 +161,7 @@ Im Abenteuer steht schon lange eine Szene an, in der {held} und {p2held} zusamme
 
 § #kr_tier_start spieler krise:haustier einmal
 {name} ist heute ungewöhnlich still. Später erzählt {name}, dass der alte Hund diese Woche eingeschläfert werden musste. Vierzehn Jahre alt.
-< Im Spiel taucht ein treuer Hund auf, der {held} folgt | s+3 l-1 laune+12 krise=haustier >>kr_tier_hund | {name} lächelt zum ersten Mal an diesem Abend. Der Hund im Spiel bekommt den Namen des echten. | herzen
+< Ein treuer Hund folgt {held} | s+3 l-1 laune+12 krise=haustier >>kr_tier_hund | {name} lächelt zum ersten Mal an diesem Abend. Der Hund im Spiel bekommt den Namen des echten. | herzen
 > Nicht thematisieren, einfach Ablenkung bieten | s+2 laune+4 krise=haustier >>kr_tier_hund | Ein Abend voller Abenteuer. {name} ist dankbar, dass keiner fragt.
 
 § #kr_tier_hund spieler kette
@@ -171,18 +171,18 @@ Der Hund im Spiel ist inzwischen der Liebling des ganzen Tisches. Gerade steht e
 
 § #kr_hoch_start spieler krise:hochzeit einmal
 {name} hat sich verlobt! Die Hochzeit ist in {monate} Monaten, und ab jetzt dreht sich jedes zweite Gespräch um Tischordnungen und Blumenschmuck.
-< Gratulieren! | s+5 alle+4 krise=hochzeit >>kr_hoch_plan | Es wird angestoßen, und der Barbar bietet an, die Rede zu halten. In Charakter. | konfetti
+< Gratulieren! | s+5 alle+4 krise=hochzeit >>kr_hoch_plan | Es wird angestoßen, und {anderer} bietet an, die Rede zu halten. In Charakter. | konfetti
 > „Sind wir eingeladen?“ | s+3 krise=hochzeit >>kr_hoch_plan | „Ihr sitzt an Tisch 7. Der heißt ‚Zum tänzelnden Pony‘. Das war nicht verhandelbar.“ | lachen
 
 § #kr_hoch_plan spieler kette
 {name} fragt, ob die Runde bei der Hochzeit einen Programmpunkt machen will. Vielleicht eine kleine Rede? Vielleicht in Charakter?
 < Ein Auftritt der Helden | s+8 l-3 t-3 laune+10 >>kr_hoch_tag | Es wird geprobt. Der Barde schreibt ein Lied. Es reimt sich auf „Würfelglück“. Leider auch auf „Stück für Stück“. | musik
-> Ein Gruppengeschenk: ein gerahmter Charakterbogen | s+4 l+2 laune+8 >>kr_hoch_tag | {held}, Stufe {stufe}, mit allen Unterschriften. Im Rahmen sieht der Kaffeefleck fast künstlerisch aus. | funkeln
+> Ein gerahmter Charakterbogen | s+4 l+2 laune+8 >>kr_hoch_tag | {held}, Stufe {stufe}, mit allen Unterschriften. Im Rahmen sieht der Kaffeefleck fast künstlerisch aus. | funkeln
 
 § #kr_hoch_tag spieler kette
-Die Hochzeit war wunderschön. Am Ende des Abends saß die halbe Runde mit Krawatten um den Kopf an Tisch 7 und hat um die letzte Brezel gewürfelt. {name} fliegt jetzt zwei Wochen weg.
+Die Hochzeit war wunderschön. Um Mitternacht würfelte die halbe Runde mit Krawatten um den Kopf an Tisch 7 um die letzte Brezel. Jetzt: Flitterwochen.
 < Gute Reise! | s+5 alle+5 pause=1 | Ein Postkartenfoto kommt drei Tage später: Strand, Sonnenuntergang, ein W20 im Sand. | sonne
-> Ein Flitterwochen-Abenteuer für {held} vorbereiten | s+4 l-2 xp+5 pause=1 | Wenn {name} zurückkommt, wartet ein Brief auf {held}: Ein geheimnisvoller Strand ruft.
+> Ein Flitterwochen-Abenteuer | s+4 l-2 xp+5 pause=1 | Wenn {name} zurückkommt, wartet ein Brief auf {held}: Ein geheimnisvoller Strand ruft.
 
 § #kz_hochzeit spieler kette
 {name} ist zurück, braun gebrannt und mit einem Souvenir-Würfel aus dem Urlaub. Er hat auf jeder Seite eine Sechs.
@@ -192,7 +192,7 @@ Die Hochzeit war wunderschön. Am Ende des Abends saß die halbe Runde mit Krawa
 § #kr_burn_start spieler krise:burnout einmal
 Nach der Session sagt {name} leise: „Ich weiß gerade nicht, ob ich das alles schaffe. Job, Familie, alles gleichzeitig. Liegt nicht an euch.“
 < „Nimm dir die Pause. Dein Platz bleibt frei.“ | krise=burnout pause=2 laune+6 | {name} nickt nur. An der Tür sagt {name}: „Danke, dass das okay ist.“
-> „Komm, wann du kannst. Ohne schlechtes Gewissen.“ | krise=burnout laune+8 >>kr_burn_mal | Kein Druck, keine Erwartungen. {name} wirkt einen Hauch leichter.
+> „Komm, wann du kannst.“ | krise=burnout laune+8 >>kr_burn_mal | Kein Druck, keine Erwartungen. {name} wirkt einen Hauch leichter.
 
 § #kr_burn_mal spieler kette
 {name} kommt heute nur für eine Stunde. Ohne Vorbereitung, ohne Würfel, mit einer Tasse Tee. „Ich will einfach dabei sein.“
@@ -217,7 +217,7 @@ Die Tür zum Thronsaal fliegt auf. {schurke} erhebt sich langsam vom Thron. „I
 § #bs_verwandlung schurke phase:bossstart
 {schurke} lacht. Dann verwandelt sich die Gestalt: größer, dunkler, mit viel zu vielen Zähnen. Der Bosskampf beginnt.
 < Licht aus, Musik an | s+6 t+3 | Jemand hat die Bossmusik schon vorbereitet. Gänsehaut am ganzen Tisch. | musik
-> Battlemap ausrollen | l+4 m+2 t-4 boss-6 | Drei Meter Papier, zwölf Minis, ein Lineal. Die Taktikerin bekommt glänzende Augen. | staub
+> Battlemap ausrollen | l+4 m+2 t-4 boss-6 | Drei Meter Papier, zwölf Minis, ein Lineal. Irgendwer am Tisch bekommt glänzende Augen. | staub
 
 § #bs_mini tisch phase:bossstart
 Der Moment ist da: Du stellst die große Boss-Miniatur auf den Tisch. Drei Wochen lang bemalt. Ein Raunen geht durch die Runde.
@@ -255,7 +255,7 @@ Der Boden des Saals ist ein riesiges Mosaik. Einige Fliesen glühen rot, andere 
 > „Das ist keine Waffe.“ | l+3 laune-6 | {name} schmollt. „Wär aber geil gewesen.“
 
 § #bk_regel regel phase:boss
-{name}: „Moment. Hat er Legendäre Resistenzen? Wie viele hat er schon benutzt? Ich führe Buch.“
+{name}: „Moment. Hat {schurkeN} Legendäre Resistenzen? Wie viele davon sind schon weg? Ich führe Buch.“
 < Offenlegen: noch eine | l+5 s-2 boss-6 | {name} nickt zufrieden und plant den nächsten Zauber genau darauf. | staub
 > „Hinter dem Schirm ist hinter dem Schirm.“ | t+3 laune-6 l-2 | {name} schreibt trotzdem mit. Du siehst es. {name} sieht, dass du es siehst.
 
@@ -305,8 +305,8 @@ Mitten im Bosskampf kommt {name} mit einer frischen Ladung Nachos zurück. Der K
 > Sofort ablehnen und zuschlagen | W10 m+3 ? boss-16 : boss+5 | „Hier ist meine Antwort!“ – Treffer. :: Die Antwort war laut, aber leider daneben. | schwerter
 
 § #bk_geisel schurke phase:boss
-{schurke} packt {npc} und hält eine Klinge an die Kehle. „Noch einen Schritt näher, und …“
-< Verhandeln | W13 l+4 ? boss-12 s+4 : tod2 | Ein Ablenkungsmanöver, ein Wurfdolch, {npc} ist frei! :: Die Verhandlung scheitert. Jemand bezahlt dafür. | ausruf
+{schurke} packt {npcN} und hält eine Klinge an die Kehle. „Noch einen Schritt näher, und …“
+< Verhandeln | W13 l+4 ? boss-12 s+4 : tod2 | Ein Ablenkungsmanöver, ein Wurfdolch, {npcN} ist frei! :: Die Verhandlung scheitert. Jemand bezahlt dafür. | ausruf
 > Angreifen, das Risiko eingehen | W11 m+4 ? boss-22 : l-3 s-4 | Der Angriff ist schneller als die Klinge. :: {npc} wird verletzt. Die Spieler schauen dich vorwurfsvoll an. | schwerter
 
 § #bk_einsturz welt phase:boss
@@ -321,7 +321,7 @@ Alle würfeln gleichzeitig. Vier W20 rollen über den Tisch. Einer fällt herunt
 
 § #bk_hp sl phase:boss wenn:bhp<45
 Laut deinen Notizen hat der Boss nur noch wenige Trefferpunkte. Die Spieler wissen das nicht und planen gerade einen umständlichen Rückzug.
-< Andeuten: „Er sieht … angeschlagen aus.“ | boss-15 t+3 s+3 | Ein Moment Stille. Dann stürmen alle gleichzeitig nach vorne. | schwerter
+< Andeuten: „Sieht … angeschlagen aus.“ | boss-15 t+3 s+3 | Ein Moment Stille. Dann stürmen alle gleichzeitig nach vorne. | schwerter
 > Schweigen und die Spannung genießen | t-3 s+2 l+2 | Der Rückzug ist toll gespielt. Völlig unnötig, aber toll.
 
 § #bk_zustark sl phase:boss wenn:bhp>70
@@ -331,7 +331,7 @@ Ehrlich gesagt: Du hast den Boss zu stark gebaut. Die Gruppe macht kaum Schaden,
 
 § #bk_zuschwach sl phase:boss wenn:bhp<30
 Der Boss fällt gleich – viel zu früh. Du hast noch eine ganze dritte Phase vorbereitet. Mit Tentakeln.
-< Er bekommt eine zweite Lebensleiste | boss+20 s+3 l-3 | „Ihr dachtet, das war's?“ Tentakel. Überall. Der Tisch stöhnt und freut sich gleichzeitig. | ausruf
+< Eine zweite Lebensleiste | boss+20 s+3 l-3 | „Ihr dachtet, das war's?“ Tentakel. Überall. Der Tisch stöhnt und freut sich gleichzeitig. | ausruf
 > Fallen lassen | boss-20 s+4 t+4 | Kein Tentakel heute. Die Phase landet im Ordner „nächstes Mal“.
 
 § #bk_team spieler bez:freunde/paar/geschwister/wg phase:boss
@@ -341,12 +341,12 @@ Der Boss fällt gleich – viel zu früh. Du hast noch eine ganze dritte Phase v
 
 § #bk_altheld spieler phase:boss wenn:merk:verlust
 {name} steht auf. „Das ist für {altheld}.“
-< Würfeln | W11 ? boss-30 laune+10 s+4 : laune-4 | Für {altheld}. Der Tisch ist für eine Sekunde still, dann jubelt er. | schwerter
+< Würfeln | W11 ? boss-30 laune+10 s+4 : laune-4 | Für {altheld}. Der Tisch ist für eine Sekunde still, dann jubelt er. :: Daneben. Aber {name} nickt nur. „{altheld} hätte auch danebengehauen.“ | schwerter
 > Den Moment mit Inspiration belohnen | boss-15 laune+6 l+2 | Kein Würfel nötig. Manche Treffer schreibt man einfach. | funkeln
 
 § #bk_pech spieler phase:boss wenn:merk:pechvogel
 Alles hängt jetzt an {name}s Wurf. {name} hat diese Runde schon {nat1}-mal eine 1 gewürfelt.
-< Würfeln lassen | W8 ? boss-35 s+8 laune+15 : s+3 laune-5 | Eine 19! {name} springt auf. Der Pechvogel-Fluch ist gebrochen. Für heute. | konfetti
+< Würfeln lassen | W8 ? boss-35 s+8 laune+15 : s+3 laune-5 | Eine 19! {name} springt auf. Der Pechvogel-Fluch ist gebrochen. Für heute. :: Eine 2. {name} lacht so verzweifelt, dass alle mitlachen müssen. | konfetti
 > Jemand anderes würfelt | t+2 W10 ? boss-15 : | Ein anderer Würfel, eine andere Hand. Treffer. {name} ist halb erleichtert, halb beleidigt. :: Auch der andere Würfel hat keine Lust. Es liegt doch nicht an {name}.
 
 § #bk_geist geist phase:boss
@@ -371,7 +371,7 @@ Plötzlich stürmt {npc} mit Verstärkung in den Saal. Die Helden hatten vor ein
 
 § #bk_flucht schurke phase:boss wenn:bhp<35
 {schurkeN} ist schwer verwundet und weicht Schritt für Schritt Richtung Portal zurück.
-< Hinterher! | W12 m+3 ? boss-30 : boss+12 | Ein letzter Sprung, ein letzter Hieb – der Boss geht zu Boden. :: Der Boss entkommt fast. Fast. Aber er gewinnt Zeit. | portal
+< Hinterher! | W12 m+3 ? boss-30 : boss+12 | Ein letzter Sprung, ein letzter Hieb – der Boss geht zu Boden. :: Der Boss entkommt fast. Fast. Aber gewinnt Zeit. | portal
 > Das Portal zerstören | W13 l+2 ? boss-20 s+4 : t-3 | Das Portal zerbricht. Kein Ausweg mehr. :: Das Portal zuckt, bleibt aber offen. | explosion
 
 § #bk_spaet tisch phase:boss
@@ -403,25 +403,25 @@ Die Helden umzingeln {schurkeN}. Alle Würfel liegen bereit. Wer schlägt zuerst
 {gott} erscheint der Gruppe persönlich – und gewährt einen einzigen Wunsch. Am Tisch wird es sehr laut und dann sehr still.
 < Macht für alle | m+10 lvl s+2 | Alle Helden steigen auf. Der Powergamer weint fast vor Glück. | krone
 > Frieden für {ort} | l+4 s+5 alle+8 | Das Land blüht auf. Die Spieler sind seltsam gerührt. | sonne
-^ Einen Gefallenen zurückholen | l-6 s+8 alle+6 geist | {tot} öffnet die Augen. „Hab ich was verpasst?“ Jubel, Tränen, ein halber Herzinfarkt beim Spieler. | heilung
+^ Einen Toten zurückholen | l-6 s+8 alle+6 geist | {tot} öffnet die Augen. „Hab ich was verpasst?“ Jubel, Tränen, ein halber Herzinfarkt beim Spieler. | heilung
 
 § #sel_crossover gast selten
 Es klingelt. Vor der Tür steht eine andere Spielgruppe aus dem Haus. Sie haben sich im Stockwerk geirrt – mit Charakterbögen für ein völlig anderes Rollenspiel.
 < Crossover-Session! | s+10 l-8 t-4 alle+6 | Ein Cyberpunk-Hacker und ein Zwergenpriester teilen sich eine Taverne. Es ist der lustigste Abend des Jahres. | konfetti
 > Höflich wegschicken | l+2 t+2 | „Viel Spaß im vierten Stock!“ Durch die Decke hört man sie den ganzen Abend jubeln.
-^ Ihre Spielleiterin darf heute einen NSC spielen | s+6 l-2 xp+10 alle+3 | Der NSC ist ein verwirrter Raumschiffkapitän. Er wird Kult. | portal
+^ Ihre SL spielt einen NSC | s+6 l-2 xp+10 alle+3 | Der NSC ist ein verwirrter Raumschiffkapitän. Er wird Kult. | portal
 
 § #sel_ei welt selten
 In einem Brunnen in {ort} schlüpft ein Drache aus einem Ei, das dort seit hundert Jahren lag. Er hält {held} für seine Mutter.
 < Aufziehen! | m+6 s+6 l-4 +w_babydrache | Der Babydrache frisst Stiefel, Kohlköpfe und einmal fast den Barden. Er heißt jetzt „Krümel“. | drache
 > In die Berge bringen | l+4 s+2 | Ein tränenreicher Abschied am Gipfel. Der Drache dreht sich noch einmal um. | wind
-^ Den Drachenforschern übergeben | m+3 l+3 s-2 xp+8 | Gute Bezahlung, schlechtes Gewissen. Jahre später besucht der Drache die Gruppe. Er ist groß geworden. Er ist nachtragend. | gold
+^ An Drachenforscher geben | m+3 l+3 s-2 xp+8 | Gute Bezahlung, schlechtes Gewissen. Jahre später besucht der Drache die Gruppe. Er ist groß geworden. Er ist nachtragend. | gold
 
 § #sel_wuerfelgott wuerfel selten
 Alle Würfel am Tisch zeigen plötzlich eine 20. Ohne dass jemand geworfen hat. Alle schauen dich an.
 < Ein Wunder! Es zählt | s+8 l-6 lvl | Niemand weiß, was gerade passiert ist. Alle steigen auf. | wuerfelregen
-> „Das zählt nicht. Neu werfen.“ | l+4 s-2 | Ordnung muss sein. Der Tisch protestiert lautstark.
-^ Die Würfel einrahmen, nie wieder benutzen | s+5 l+2 xp+15 | Sie liegen jetzt unter Glas. Neben einer Notiz: „Datum, Uhrzeit, alle 20.“ | funkeln
+> „Zählt nicht. Neu!“ | l+4 s-2 | Ordnung muss sein. Der Tisch protestiert lautstark.
+^ Würfel einrahmen | s+5 l+2 xp+15 | Sie liegen jetzt unter Glas. Neben einer Notiz: „Datum, Uhrzeit, alle 20.“ | funkeln
 
 § #sel_thronerbe welt selten
 Eine Hebamme erkennt ein Muttermal: {held} ist der verschollene Thronerbe von {ort}. Das war nicht geplant. Die Würfel wollten es so.
@@ -433,10 +433,10 @@ Eine Hebamme erkennt ein Muttermal: {held} ist der verschollene Thronerbe von {o
 Ein alter Freund aus deiner allerersten D&D-Runde vor zwanzig Jahren steht vor der Tür. Er hat zufällig gesehen, dass hier Licht brennt und Würfel klackern.
 < Mitspielen lassen | s+5 t-3 alle+3 | Er würfelt einen Helden in drei Minuten. „Wie Fahrradfahren.“ | konfetti
 > Erst mal ein Bier zusammen | t-5 s+3 laune+5 | Ihr redet über früher, über die Kampagne mit dem Turm und den einen Abend, als das Bett brannte. | lachen
-^ Er übernimmt heute den Schirm | s+6 l-3 xp+12 alle+5 | Du darfst zum ersten Mal seit Jahren selbst spielen. Dein Held stirbt nach zwölf Minuten. Es ist großartig. | funkeln
+^ Er leitet heute | s+6 l-3 xp+12 alle+5 | Du darfst zum ersten Mal seit Jahren selbst spielen. Dein Held stirbt nach zwölf Minuten. Es ist großartig. | funkeln
 
 § #sel_karte welt selten
-Die Gruppe findet eine Karte, auf der ihre ganze Kampagne eingezeichnet ist – inklusive Orten, die du noch gar nicht verraten hast. Und einem, den du selbst nicht kennst.
+Die Gruppe findet eine Karte ihrer ganzen Kampagne – mit Orten, die du noch gar nicht verraten hast. Und einem, den du selbst nicht kennst.
 < Dem unbekannten Ort folgen | t+4 s+6 l-4 +w_unbekannt | Ein Ort, den du jetzt improvisieren musst. Du schwitzt. Die Spieler lieben es. | portal
 > Die Karte verbrennen | l+3 s-2 | Zu viel Wissen ist gefährlich. Die Asche zeigt kurz ein Grinsen.
 ^ Die Karte verkaufen | m+5 t+3 | Ein Kartograf zahlt ein Vermögen. Und verschwindet mit sehr eiligen Schritten. | gold
@@ -450,7 +450,7 @@ Im Regelbuch steht eine handschriftliche Notiz, die angeblich niemand geschriebe
 § #sel_lied welt selten
 Ein fahrender Barde singt in der Taverne ein Lied über genau diese Heldengruppe. Es ist erstaunlich detailliert. Und nicht besonders schmeichelhaft.
 < Mitsingen | s+8 l-2 alle+3 | Am Ende singt die ganze Taverne mit. Auch die Strophe über {held} und das Schwein. | musik
-> Den Barden bezahlen, damit er aufhört | m-2 l+3 s+2 | Er hört auf. Und schreibt eine neue Strophe über Bestechung. | gold
+> Schweigegeld zahlen | m-2 l+3 s+2 | Er hört auf. Und schreibt eine neue Strophe über Bestechung. | gold
 ^ Den Barden anheuern | s+5 t+2 +w_barde | Ab jetzt reist ein Barde mit, der jede Peinlichkeit festhält. Für die Nachwelt. | musik
 
 § #sel_ahnenfest geist selten wenn:gefallen
@@ -461,15 +461,15 @@ In dieser einen Nacht des Jahres kehren alle gefallenen Helden der Chronik für 
 
 § #sel_katzenblick katze selten
 Die Tischkatze legt eine Pfote auf den Schirm und sieht dich lange an. Du schwörst: Sie hat genickt.
-< Sie bekommt eine Rolle als NSC | s+6 l-3 | Die Katze ist ab jetzt Hofmagierin von {ort}. Sie macht nichts. Sie ist perfekt. | magie
+< Die Katze wird NSC | s+6 l-3 | Die Katze ist ab jetzt Hofmagierin von {ort}. Sie macht nichts. Sie ist perfekt. | magie
 > Hochheben, weiterspielen | t+2 | Die Katze schnurrt. Du hättest schwören können, sie seufzt.
-^ Sie darf einen Würfel werfen | W10 ? s+8 lvl katze : s+4 katze | Die Pfote stößt den Würfel an: eine 20. Der Tisch flippt aus. :: Der Würfel rollt unters Sofa. Die Katze hinterher. Beide bleiben verschwunden. | wuerfelregen
+^ Die Katze würfelt | W10 ? s+8 lvl katze : s+4 katze | Die Pfote stößt den Würfel an: eine 20. Der Tisch flippt aus. :: Der Würfel rollt unters Sofa. Die Katze hinterher. Beide bleiben verschwunden. | wuerfelregen
 
 § #sel_tausch spieler selten
 Ein Fluch vertauscht die Körper von {held} und {p2held}. {name} und {p2} müssen die Charakterbögen tauschen.
-< Durchziehen bis zum Ende der Session | s+8 l-4 t-2 laune2+3 | {name} spielt den Helden von {p2} – besser als {p2}. Das gibt zu reden. | portal
-> Der Fluch hält nur eine Szene | s+4 t+2 | Lang genug für einen sehr peinlichen Moment in einem Badehaus. | lachen
-^ Die Spieler tauschen auch die Plätze | s+6 alle+4 t-3 | Am Ende tauscht der ganze Tisch. Völliges Chaos. Völlig großartig. | konfetti
+< Durchziehen bis Sessionende | s+8 l-4 t-2 laune2+3 | {name} spielt den Helden von {p2} – besser als {p2}. Das gibt zu reden. | portal
+> Nur für eine Szene | s+4 t+2 | Lang genug für einen sehr peinlichen Moment in einem Badehaus. | lachen
+^ Auch Plätze tauschen | s+6 alle+4 t-3 | Am Ende tauscht der ganze Tisch. Völliges Chaos. Völlig großartig. | konfetti
 
 § #sel_auge welt selten
 Der Himmel über {ort} reißt auf. Dahinter: ein riesiges Auge. Es blinzelt einmal. Dann schließt sich der Himmel wieder.
@@ -493,12 +493,42 @@ Eine Sternschnuppe schlägt im Wald neben dem Lager ein. Der Krater leuchtet noc
 Jemand hat ein altes Foto der Runde dabei, von vor vielen Jahren. Ein paar von heute sind noch drauf. Mit sehr, sehr viel schlimmeren Frisuren.
 < Herumgeben | s+6 t-3 alle+5 | Es wird gelacht, bis jemand Schluckauf hat. Dann wird es kurz still, weil auch Leute drauf sind, die nicht mehr kommen. | lachen
 > An die Wand hängen | l+2 alle+3 | Das Foto hängt jetzt neben dem Schirm. Ab und zu schaut jemand drauf.
-^ Ein Klassentreffen-Abenteuer planen | s+5 t-2 xp+10 | Die Helden treffen in der nächsten Session ihre jüngeren Ichs. Es wird chaotisch. | portal
+^ Ein Klassentreffen planen | s+5 t-2 xp+10 | Die Helden treffen in der nächsten Session ihre jüngeren Ichs. Es wird chaotisch. | portal
 
 § #sel_buch npc selten
 Eine Bibliothekarin in {ort} reicht {held} ein Buch. Der Titel: „{kampagne}“. Darin steht alles, was bisher geschah. Die letzten Seiten sind leer.
 < Weiterschreiben | l+3 s+5 xp+10 | {held} schreibt einen Satz. In der nächsten Session passiert genau das. | magie
 > Zurückgeben | l+4 | Die Bibliothekarin nickt. „Weise.“ Dann verschwindet sie zwischen den Regalen.
 ^ Bis zum Ende vorblättern | W13 ? s+6 plot+1 : l-6 t+4 | Auf der letzten Seite steht nur: „Und sie lebten.“ Das reicht. :: Die Seiten verbrennen beim Umblättern. Was blieb, war beunruhigend. | feuer
+
+§ #fx_kruemel welt wenn:w_babydrache einmal
+Krümel, der Babydrache der Gruppe, ist gewachsen. Beim Frühstück hat er versehentlich die halbe Taverne angezündet und schaut jetzt sehr schuldbewusst.
+< Krümel bleibt bei der Gruppe | m+6 s+4 l-3 | Die Taverne wird auf Kosten der Gruppe neu gebaut. Krümel trägt dabei die Balken. Ein guter Junge. | drache
+> Krümel zieht in die Berge | l+4 s+2 -w_babydrache | Ein letzter Blick über die Schulter, ein kleiner Rauchkringel zum Abschied. Der Tisch ist sehr still. | traenen
+
+§ #fx_gottschuld gott wenn:w_schuld_gott einmal
+{gott} kommt den Gefallen einfordern, der im Bosskampf versprochen wurde: Die Helden sollen den größten Tempel des Landes putzen. Mit Zahnbürsten.
+< Schrubben | t-6 s+4 l+3 -w_schuld_gott | Drei Tage. Viele Zahnbürsten. Am Ende glänzt der Tempel, und {gott} schenkt jedem einen Segen. Und eine neue Zahnbürste. | sonne
+> Nachverhandeln | W13 ? s+5 -w_schuld_gott : m-8 -w_schuld_gott | {gott} lacht und erlässt die Schuld. Für eine gute Geschichte. :: Göttlicher Zorn. Kurz, aber sehr gründlich. | blitz
+
+§ #fx_barde npc wenn:w_barde
+Der mitreisende Barde hat ein neues Lied fertig. Es handelt von der letzten Niederlage der Gruppe. Es hat einen Refrain. Der Refrain ist eingängig.
+< Zuhören | s+6 l-2 | In der nächsten Stadt singen es schon die Kinder. Die Gruppe ist berühmt. Auf eine Art. | musik
+> Den Barden entlassen | l+3 s-2 -w_barde | Er geht mit Würde und einer letzten Strophe über undankbare Helden. | musik
+
+§ #fx_auftraggeber schurke phase:kstart wenn:w_auftraggeber einmal
+Der Name aus dem letzten Finale ist zurück: ein Brief mit schwarzem Siegel. „Ihr habt meinen Diener besiegt. Kommt zu mir. Wenn ihr euch traut.“
+< Die Einladung annehmen | t+5 s+5 l+3 -w_auftraggeber | Die neue Kampagne beginnt mit einem Ziel. Am Tisch wird sofort spekuliert. | ausruf
+> Den Brief verbrennen | l+4 m+2 -w_auftraggeber | Die Asche formt kurz ein Gesicht. Es lächelt. | feuer
+
+§ #fx_schurkenbier schurke phase:finale wenn:w_schurkenbier
+{schurke} steht den Helden gegenüber – und erkennt die Leute vom Bier in der Taverne wieder. Ein kurzes Zögern.
+< Reden | W12 l+4 s+6 ? frieden : tod2 | „Wir haben schon mal zusammen gelacht.“ Das Schwert sinkt. Was für ein Ende. :: Das Zögern war kurz. Zu kurz. | herzen
+> Das Zögern nutzen | W11 m+5 ? sieg : tod | Ein schneller Schlag in den Moment des Zweifels. Sieg – mit einem bitteren Nachgeschmack. :: Das Zögern war gespielt. | schwerter
+
+§ #fx_unbekannt welt wenn:w_unbekannt einmal
+Die Gruppe erreicht den Ort, der auf keiner deiner Karten stand. Du hast immer noch keine Ahnung, was dort ist. Die Spieler schon – sie haben drei Theorien.
+< Die beste Theorie wird wahr | s+8 l-3 alle+5 -w_unbekannt | Es ist tatsächlich eine schwebende Bibliothek voller verlorener Socken. Die Spieler sind überzeugt, dass du das von Anfang an geplant hast. | portal
+> Etwas ganz anderes | W12 ? l+4 s+5 -w_unbekannt : l-6 s+2 -w_unbekannt | Ein stiller Garten mit Gräbern aller Helden, die noch nicht gestorben sind. Gänsehaut. :: Ein leeres Feld. Ein Schild: „Demnächst.“ Die Spieler sind empört. Zu Recht. | nebel
 
 `);

@@ -16,25 +16,25 @@
 
 § #ch_huhn chaos
 {name}: „{held} adoptiert das Huhn. Es heißt jetzt General Gackerich und hat einen Rang.“
-< General Gackerich lebt! | s+10 l-6 +huhn | Das Huhn bekommt einen Mini-Helm. Es wird zur wichtigsten Figur der Kampagne. | federn
+< General Gackerich lebt! | s+10 l-6 +huhn >>ch_huhn2 | Das Huhn bekommt einen Mini-Helm. Es wird zur wichtigsten Figur der Kampagne. | federn
 > Das Huhn flieht | s+2 laune-5 | General Gackerich desertiert in der ersten Nacht.
 
-§ #ch_huhn2 chaos wenn:huhn
+§ #ch_huhn2 chaos kette wenn:huhn
 General Gackerich, das Kampfhuhn, hat einen Gegner angegriffen und… gewonnen?
 < Beförderung! | s+10 m+4 l-6 | Gackerich ist jetzt Feldmarschall. Er hat eine Armee aus Wachteln. | federn
 > Das Huhn stirbt heroisch | s-4 l+5 -huhn | Ein Moment der Stille für General Gackerich. {name} hat echte Tränen. | traenen
 
 § #ch_verfuehren chaos
 „Ich versuche, den Drachen zu verführen.“ {name} meint es todernst.
-< Würfel auf Charisma | W17 s+12 l-8 ? +drachenliebe : tod | Der Drache errötet. Ein Rauchwölkchen in Herzform. Oh nein. Oh doch. | herzen
+< Würfel auf Charisma | W16 s+12 l-8 ? +drachenliebe >>ch_drachenliebe2 : tod | Der Drache errötet. Ein Rauchwölkchen in Herzform. Oh nein. Oh doch. :: Der Drache ist nicht geschmeichelt. Er ist hungrig. | herzen
 > Der Drache lacht | s+6 laune-4 | Der Drache lacht so sehr, dass er umfällt. Die Gruppe kann sich vorbeischleichen. | lachen
 
-§ #ch_drachenliebe2 chaos wenn:drachenliebe
+§ #ch_drachenliebe2 chaos kette wenn:drachenliebe
 Der Drache taucht wieder auf. Mit einem Strauß aus brennenden Rosen. Er will {held}.
-< Ja sagen | s+10 m+10 l-10 +drachenhochzeit | Es wird eine Verlobung. Der Drache heißt Herbert und ist sehr romantisch. | herzen
+< Ja sagen | s+10 m+10 l-10 +drachenhochzeit >>ch_drachenliebe3 | Es wird eine Verlobung. Der Drache heißt Herbert und ist sehr romantisch. | herzen
 > Schluss machen | s+4 m-6 l+4 | Herbert verwüstet aus Liebeskummer ein Dorf. Konsequenzen! | drache
 
-§ #ch_drachenliebe3 chaos wenn:drachenhochzeit einmal
+§ #ch_drachenliebe3 chaos kette wenn:drachenhochzeit einmal
 Die Drachenhochzeit! Herbert hat alle eingeladen: Zwerge, Elfen und {schurke}.
 < Feiern! | s+12 m+6 l-8 drache | Es ist die beste Hochzeit aller Zeiten. Der Schurke weint gerührt in der zweiten Reihe. | konfetti
 > Einspruch! | t+8 s+6 W12 ? m+5 : tod | {npc} erhebt Einspruch. Chaos! Ein Kampf in Hochzeitskleidern! :: Herbert frisst den Störenfried. Und versehentlich {held}. | drache
@@ -47,7 +47,7 @@ Die Drachenhochzeit! Herbert hat alle eingeladen: Zwerge, Elfen und {schurke}.
 § #ch_plan chaos
 Die Gruppe hat eine Stunde lang einen perfekten Plan ausgearbeitet. {name}: „Ich renn einfach rein.“
 < Konsequenzen | W12 s+8 t+8 ? m+5 : tod | Wunder geschehen: Der Ansturm funktioniert. Die Wachen sind zu verdutzt. :: {held} läuft in eine Speerreihe. Plan B. | schwerter
-> Die anderen halten ihn fest | l+4 laune-8 | {aheld} packt {held} am Kragen. „Halt. Still.“
+> Die anderen halten {held} fest | l+4 laune-8 | {aheld} packt {held} am Kragen. „Halt. Still.“
 
 § #ch_schwein chaos
 {name}: „{held} wirft sich auf das Schwein und reitet es in die Schlacht.“
@@ -57,11 +57,11 @@ Die Gruppe hat eine Stunde lang einen perfekten Plan ausgearbeitet. {name}: „I
 § #ch_feuer chaos
 „Kann ich die Taverne anzünden? Nur ein bisschen?“
 < Nur ein bisschen | s+6 l-4 t+6 | Es war nicht nur ein bisschen. Die halbe Stadt sucht Wasser. | feuer
-> Wirt erwischt ihn | l+4 s+3 m-3 | Der Wirt löscht mit Bier. Die Gruppe schuldet ihm 300 Gold.
+> Der Wirt greift ein | l+4 s+3 m-3 | Der Wirt löscht mit Bier. Die Gruppe schuldet ihm 300 Gold.
 
 § #ch_spitzname chaos
 {name} nennt {schurkeN} ab sofort nur noch „Schnuckelputz“.
-< Schurke hört es | s+8 l-4 t+4 | {schurkeN} ist so beleidigt, dass er persönlich angreift. Viel zu früh! | ausruf
+< Schurke hört es | s+8 l-4 t+4 | {schurkeN} ist so beleidigt, dass es sofort zum Angriff kommt. Viel zu früh! | ausruf
 > Bleibt hängen | s+6 l-5 | Bald sagen alle „Schnuckelputz“. Auch du. Es ruiniert jede ernste Szene. | lachen
 
 § #ch_nackt chaos
@@ -80,7 +80,7 @@ Der Zauberer der Gruppe hat einen Teleportationsstab gefunden. {name} hat ihn si
 > „Gleich!“ | t-3 laune-6 | Der Würfelturm fällt. Auf deine Notizen.
 
 § #ch_npc chaos
-{name} fragt {npc}: „Willst du mit uns abenteuern? Wir haben Snacks.“
+{name} fragt {npcN}: „Willst du mit uns abenteuern? Wir haben Snacks.“
 < Ja! | s+8 m+3 l-3 | {npcN} schließt sich an. Unvorbereitet. In Hausschuhen. | konfetti
 > „Nein, ich hab Kinder“ | l+4 s+3 | {npcN} bleibt. Aber gibt einen Rabatt.
 
@@ -90,7 +90,7 @@ Der Zauberer der Gruppe hat einen Teleportationsstab gefunden. {name} hat ihn si
 > Nur Bauchweh | s+6 t-3 | {held} hat sehr laute Bauchgeräusche. Schleichen ist vorbei. | lachen
 
 § #ch_wette chaos
-{name} wettet mit {npc}, dass {held} einen Bären im Armdrücken besiegt.
+{name} wettet mit {npcN}, dass {held} einen Bären im Armdrücken besiegt.
 < Bär holen! | W14 s+10 l-6 ? m+6 : tod | {held} gewinnt. Der Bär ist jetzt ein Fan. :: Der Bär gewinnt. Und isst den Verlierer. Das war die Wette. | treffer
 > Die Wette platzt | s+3 l+3 | Kein Bär verfügbar. Nur ein Dachs. Der Dachs gewinnt trotzdem.
 
@@ -192,12 +192,12 @@ Die Gruppentaverne „Goldene Gabel“ hat ein Problem: Ratten. Sehr große Ratt
 § #tk_raster taktik
 {name}: „Können wir die Kämpfe mit Miniaturen und Gelände spielen? Ich hab Styropor-Ruinen gebaut!“
 < Ja! | l+6 s+4 t-8 laune+12 | Die Ruinen sind großartig. Die Kämpfe dauern doppelt so lang. | staub
-> Theater des Geistes | t+5 l-3 laune-8 | „Stell dir vor, da sind Ruinen.“ {name} streichelt seine Styropor-Säule.
+> Theater des Geistes | t+5 l-3 laune-8 | „Stell dir vor, da sind Ruinen.“ {name} streichelt {seine} Styropor-Säule.
 
 § #tk_rueckzug taktik
 {name}: „Wir sollten uns zurückziehen. Die Gegner sind uns 3 zu 1 überlegen.“
 < Klug zurückziehen | l+6 m-3 t-3 | Ein geordneter Rückzug. Niemand stirbt. Langweilig, aber weise.
-> Die anderen wollen kämpfen | W13 s+6 t+5 ? m+5 lvl : tod | Gegen jede Chance gewinnt die Gruppe! Alle steigen auf! :: {name} hatte recht. Ein Held bleibt auf dem Feld. | treffer
+> Die anderen wollen kämpfen | W13 s+6 t+5 ? m+5 lvl : tod2 | Gegen jede Chance gewinnt die Gruppe! Alle steigen auf! :: {name} hatte recht. Ein Held bleibt auf dem Feld. | treffer
 
 § #tk_falle taktik
 {name} will eine elaborierte Falle für {monster} bauen: Seile, Fässer, Öl und ein Kronleuchter.
@@ -211,7 +211,7 @@ Die Gruppentaverne „Goldene Gabel“ hat ein Problem: Ratten. Sehr große Ratt
 
 § #tk_belagerung taktik
 {name}: „Was, wenn wir die Burg von {schurkeN} belagern? Mit Söldnern und Katapulten?“
-< Massenschlacht! | m+8 l+3 t-5 +armee | Die Gruppe heuert Söldner an. Ein Feldzug beginnt! | krieg
+< Massenschlacht! | m+8 l+3 t-5 +armee | Die Gruppe heuert Söldner an. Ein Feldzug beginnt! | schwerter
 > Zu groß | l+3 laune-6 | „Ihr seid vier Leute.“
 
 § #tk_armee npc wenn:armee
@@ -265,7 +265,7 @@ Der Neuling fragt: „Darf ich den Schurken nicht einfach… nett fragen?“
 > „Tot ist tot“ | l+5 s-4 laune-6 | {name} schaut den eigenen Charakterbogen jetzt sehr besorgt an.
 
 § #nb_freude neu
-{name} würfelt die erste 20 seines Lebens. Er springt auf.
+{name} würfelt die erste 20 {seines} Lebens. {Er} springt auf.
 < Groß feiern | s+10 m+4 laune+15 | Der ganze Tisch jubelt. Eine Legende ist geboren. | konfetti
 > Gelassen bleiben | s+3 laune+3 | „Schön. Du triffst.“ {name} grinst trotzdem den ganzen Abend.
 
@@ -285,17 +285,17 @@ Der Neuling fragt: „Darf ich den Schurken nicht einfach… nett fragen?“
 > „Innerhalb der Regeln“ | l+5 laune-4 | {name} liest das Regelbuch vom ersten Kapitel an. Ab morgen.
 
 § #nb_freund neu
-Der Neuling hat eine Freundin mitgebracht, die „nur mal zuschauen“ will.
-< Sie darf mitspielen | neu s+5 t-4 | Ab nächster Session ist sie dabei. Ihr Charakter heißt angeblich Glitzerfee 3000. | konfetti
-> Nur zuschauen | l+2 t+2 | Sie sitzt dabei und kommentiert jeden Wurf wie ein Fußballspiel.
+{name} hat jemanden mitgebracht, der „nur mal zuschauen“ will.
+< Darf mitspielen | neu s+5 t-4 | Ab nächster Session ist die Begleitung dabei. Der Charakter heißt angeblich Glitzerfee 3000. | konfetti
+> Nur zuschauen | l+2 t+2 | Der Besuch sitzt daneben und kommentiert jeden Wurf wie ein Fußballspiel.
 
 § #vt_frueher veteran
 {name}: „Früher, in der zweiten Edition, hätte {held} das gar nicht überlebt.“
 < Old-School-Regeln | l+6 m-6 laune+10 | Ab jetzt: Fallen töten sofort. Willkommen 1987. | schaedel
-> „Gut, dass wir jetzt spielen“ | s+3 laune-8 | {name} erzählt trotzdem die Geschichte von seinem Elf, der 1989 an einer Tür starb.
+> „Gut, dass wir jetzt spielen“ | s+3 laune-8 | {name} erzählt trotzdem die Geschichte von {seinem} Elf, der 1989 an einer Tür starb.
 
 § #vt_anekdote veteran
-{name} erzählt zum vierten Mal die Geschichte, wie seine Gruppe 1994 einen Gott getötet hat.
+{name} erzählt zum vierten Mal die Geschichte, wie {seine} Gruppe 1994 einen Gott getötet hat.
 < Zuhören | s+3 t-8 laune+10 | Die Geschichte wird jedes Mal besser. Diesmal waren es zwei Götter. | staub
 > Sanft unterbrechen | t+5 laune-8 | „Spannend! Aber zurück zu… “ {name} murmelt weiter.
 
@@ -305,9 +305,9 @@ Der Neuling hat eine Freundin mitgebracht, die „nur mal zuschauen“ will.
 > „Heute nicht“ | m+3 laune-5 | {name} zuckt mit den Schultern. „Du wirst es lernen.“
 
 § #vt_mentor veteran wenn:typ:neu
-{name} nimmt den Neuling unter seine Fittiche und erklärt ihm alles. Auch, was du falsch machst.
+{name} nimmt den Neuling unter {seine} Fittiche und erklärt alles. Auch, was du falsch machst.
 < Das ist schön | l+4 s+4 alle+5 | Der Neuling lernt schnell. Und hat jetzt Meinungen über Initiative. | herzen
-> „Ich bin der SL!“ | l+2 laune-8 | Der Veteran hebt die Hände. „Ich mein ja nur.“
+> „Ich bin der SL!“ | l+2 laune-8 | {name} hebt die Hände. „Ich mein ja nur.“
 
 § #vt_power veteran wenn:m>75
 {name}: „Die Gruppe ist viel zu stark. Wo ist die Herausforderung? Wo ist die ANGST?“
@@ -315,14 +315,14 @@ Der Neuling hat eine Freundin mitgebracht, die „nur mal zuschauen“ will.
 > „Lass ihnen den Spaß“ | m+3 laune-10 | {name} verschränkt die Arme und denkt an 1987.
 
 § #vt_regel veteran
-{name} und der Regelanwalt streiten über eine Regel, die es in dieser Edition nicht mehr gibt.
+{name} und {anderer} streiten über eine Regel, die es in dieser Edition gar nicht mehr gibt.
 < Du entscheidest | l+5 t+3 alle-3 | Du findest einen Kompromiss. Beide sind gleich unzufrieden.
 > Lass sie diskutieren | t-10 l+4 s-3 | Nach 25 Minuten einigen sie sich: Beide hatten recht. Irgendwie. | staub
 
 § #vt_wuerfel veteran
 {name} benutzt seit 30 Jahren denselben Glückswürfel. Gerade ist er unter den Tisch gerollt.
 < Suchaktion! | t-8 s+5 | Alle krabbeln unter den Tisch. Der Würfel zeigt 20. Er wird geehrt. | wuerfelregen
-> Ersatzwürfel | s-3 laune-10 | {name} würfelt mit einem fremden Würfel. Drei Einsen hintereinander. Er schweigt.
+> Ersatzwürfel | s-3 laune-10 | {name} würfelt mit einem fremden Würfel. Drei Einsen hintereinander. {name} schweigt.
 
 § #vt_karte veteran
 {name} erkennt, dass dein Dungeon fast exakt einem Abenteuer von 1983 entspricht.
@@ -335,14 +335,14 @@ Der Neuling hat eine Freundin mitgebracht, die „nur mal zuschauen“ will.
 > Nur eine Notlüge | l-3 laune-6 | „Die zählen nicht.“ – „Seit wann?“
 
 § #hd_handy handy
-{name} schaut seit zehn Minuten auf sein Handy. „Hä? Wir sind dran?“
-< Ihn ansprechen | t-3 laune+3 l+2 | „{held}, ein Ork steht vor dir.“ – „Oh! Äh! Ich greif an!“
+{name} schaut seit zehn Minuten aufs Handy. „Hä? Wir sind dran?“
+< Direkt ansprechen | t-3 laune+3 l+2 | „{held}, ein Ork steht vor dir.“ – „Oh! Äh! Ich greif an!“
 > Held entführen lassen | s+6 l-3 t+3 laune-5 | {held} wird von Harpyien entführt. {name} merkt es eine Stunde später. | lachen
 
 § #hd_memes handy
 {name} zeigt dem ganzen Tisch ein Meme. Dann noch eins. Und noch eins.
 < Lachen, dann weiter | s+6 t-6 | Die Memes sind gut. Das Spiel ruht 15 Minuten. | lachen
-> Handykorb! | l+4 laune-10 s+2 | Alle Handys kommen in einen Korb. {name} sieht aus, als hätte er ein Haustier verloren.
+> Handykorb! | l+4 laune-10 s+2 | Alle Handys kommen in einen Korb. {name} sieht aus, als hätte {er} ein Haustier verloren.
 
 § #hd_recherche handy
 {name} googelt mitten im Spiel die Werte des Monsters, gegen das ihr kämpft.

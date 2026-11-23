@@ -7,7 +7,7 @@
 § #sl_twist sl
 Du hast eine Idee für einen gewaltigen Plot-Twist: {npc} ist in Wahrheit {schurke} in Verkleidung!
 < Twist enthüllen | s+8 l-5 t+5 | Die Masken fallen! Der Tisch springt auf. Jemand wirft Chips. | ausruf
-> Subtil andeuten | l+5 t-3 +twist | Du streust kleine Hinweise. Nur einer am Tisch merkt es. Er sagt nichts. Noch.
+> Subtil andeuten | l+5 t-3 +twist | Du streust kleine Hinweise. Nur eine Person am Tisch merkt es. Und schweigt. Noch.
 
 § #sl_twist2 sl wenn:twist
 Deine subtilen Hinweise haben gewirkt. Ein Spieler sagt: „Moment… war {npc} etwa die ganze Zeit…?“
@@ -16,7 +16,7 @@ Deine subtilen Hinweise haben gewirkt. Ein Spieler sagt: „Moment… war {npc} 
 
 § #sl_railroad sl
 Die Gruppe will nach Süden. Dein ganzer Plot liegt im Norden.
-< Sie umlenken | l+4 s-4 laune-0 alle-4 | Eine Brücke ist eingestürzt. Im Süden. Und im Westen. Und im Osten. Seltsam.
+< Sie umlenken | l+4 s-4 alle-4 | Eine Brücke ist eingestürzt. Im Süden. Und im Westen. Und im Osten. Seltsam.
 > Mitgehen und improvisieren | W12 s+6 ? l+3 : l-6 | Im Süden findest du spontan eine noch bessere Geschichte! :: Im Süden ist… nichts. Du erfindest panisch ein Dorf namens „Dorf“. | magie
 
 § #sl_nsc sl
@@ -37,7 +37,7 @@ Hinter dem Schirm würfelst du: Der Oger trifft kritisch. Das würde {aheld} tö
 § #sl_belohnung sl
 Die Gruppe hat einen großartigen Plan gehabt. Wie belohnst du sie?
 < Inspiration für alle | s+6 m+3 alle+4 | Kleine Bonusmarken. Alle fühlen sich gesehen. | funkeln
-> Ein magischer Gegenstand | m+8 l-2 | Die Gruppe findet {item}. Er ist fast zu stark. | gold
+> Ein magischer Gegenstand | m+8 l-2 | Die Gruppe findet {item}. Fast zu stark. | gold
 
 § #sl_tempo sl wenn:t<30
 Die Session zieht sich. Jemand hat begonnen, die Chipskrümel zu sortieren.
@@ -87,7 +87,7 @@ Du hast 4 Stunden einen Dungeon vorbereitet. Die Gruppe will ihn umgehen.
 § #sl_zeichen sl
 Du merkst, dass einer der Spieler gerade sehr still ist.
 < In der Pause nachfragen | alle+4 t-3 | „Alles okay?“ – „Ja, nur müde.“ Danke fürs Fragen.
-> Einbinden | s+4 laune-0 | Der stille Held bekommt einen Moment im Rampenlicht.
+> Einbinden | s+4 alle+2 | Der stille Held bekommt einen Moment im Rampenlicht.
 
 § #sl_muede sl
 Du bist selbst todmüde. Die Spieler sind voller Energie.
@@ -115,12 +115,12 @@ Du hast vergessen, was du letzte Woche geplant hattest. Komplett.
 > Zugeben | s+4 l-3 alle+3 | „Ich hab's vergessen.“ Alle lachen. Ein Spieler hat zum Glück mitgeschrieben.
 
 § #sl_notizen sl
-Ein Spieler wirft einen Blick hinter deinen Schirm. Er sieht deine Notizen.
+Jemand am Tisch erhascht einen Blick hinter deinen Schirm. Direkt auf deine Notizen.
 < Notizen ändern | l-4 s+3 | Du schreibst schnell alles um. „Der Verräter ist… jetzt jemand anderes.“
-> Er schweigt | l+3 s+4 | Er nickt dir verschwörerisch zu. Ein Komplize.
+> Darauf vertrauen | l+3 s+4 | Ein kurzes, verschwörerisches Nicken. Du hast jetzt einen Komplizen am Tisch.
 
 § #npc_hilfe npc
-{npc} bittet die Helden um Hilfe: Ihre Ziege ist in einen Brunnen gefallen.
+{npc} bittet die Helden um Hilfe: Die Ziege ist in den Brunnen gefallen.
 < Ziegenrettung! | s+6 l+3 t-3 | Ein heldenhafter Abstieg in den Brunnen. Die Ziege beißt. Unten liegt aber ein Schatz! | gold
 > Keine Zeit | t+4 alle-2 | {npcN} weint. Die Ziege meckert. Der Plot geht weiter.
 
@@ -177,10 +177,10 @@ Ein Bauer bittet um Hilfe gegen den Steuereintreiber des Barons.
 § #sk_drohung schurke
 {schurke} erscheint als Projektion. „Ihr seid lästige Fliegen.“
 < Zurückdrohen | s+5 t+3 | „Fliegen? Wir sind HORNISSEN!“ – Der Schurke ist verwirrt. | magie
-> Ihn ausfragen | l+5 t-3 | Er verrät aus Eitelkeit einen Teil seines Plans. Typisch Schurke.
+> Ausfragen | l+5 t-3 | Aus reiner Eitelkeit verrät {schurkeN} einen Teil des Plans. Typisch Schurke.
 
 § #sk_angriff schurke
-Die Schergen von {schurke} überfallen das Lager bei Nacht.
+Die Schergen von {schurkeN} überfallen das Lager bei Nacht.
 < Kampf im Dunkeln | W12 m+3 t+5 ? lvl s+4 : tod | Die Gruppe wehrt den Angriff ab. Alle steigen auf! :: Der Überfall kostet ein Leben. Die Rache ist gewiss. | nacht
 > Flucht durch den Wald | t+5 l+3 m-3 | Eine panische Flucht durch die Bäume. Alle überleben. Gerade so. | wind
 
@@ -190,22 +190,22 @@ Die Schergen von {schurke} überfallen das Lager bei Nacht.
 > Ablehnen | l+3 m+3 | „Niemals!“ Ein großer, heroischer Moment. | krone
 
 § #sk_doppel2 schurke wenn:doppelspiel
-{schurke} wird misstrauisch. „Beweist eure Loyalität. Tötet {npc}.“
+{schurke} wird misstrauisch. „Beweist eure Loyalität. Tötet {npcN}.“
 < Täuschen | W14 s+6 l+3 ? -doppelspiel m+4 : tod | Ein inszenierter Tod mit Theaterblut! Der Schurke glaubt es! :: Der Schurke durchschaut den Trick. Ein Held bezahlt dafür. | ausruf
 > Auffliegen lassen | t+6 m+3 -doppelspiel | Die Tarnung fliegt auf. Kampf in der Schurkenburg! | schwerter
 
 § #sk_entkommen schurke
-Die Helden haben {schurke} gestellt. Doch er hat noch einen Fluchtweg.
+Die Helden haben {schurkeN} gestellt. Doch es gibt noch einen Fluchtweg.
 < Entkommen lassen | l+4 s-3 t+3 | „Wir sehen uns wieder!“ Der Schurke verschwindet in Rauch. Frustrierend. Aber gut für die Story. | nebel
 > Erwischen | m+6 s+5 t+5 l-3 | Ein Pfeil trifft den Umhang. Der Schurke stolpert. Gefangen! Aber was jetzt? | pfeile
 
 § #sk_komisch schurke trash
-{schurke} trägt heute einen pinken Umhang. Er sagt, es war ein Wasch-Unfall.
-< Den Umhang verspotten | s+10 l-5 | Der Schurke weint. Er hatte einen harten Tag. | lachen
+{schurke} trägt heute einen pinken Umhang. Angeblich ein Wasch-Unfall.
+< Den Umhang verspotten | s+10 l-5 | {schurkeN} weint. Harter Tag. | lachen
 > Ernst bleiben | l+4 s+2 | Die Gruppe ignoriert den Umhang tapfer. Fast.
 
 § #sk_mitleid schurke
-Die Helden erfahren die traurige Vorgeschichte von {schurke}.
+Die Helden erfahren die traurige Vorgeschichte von {schurkeN}.
 < Mitleid! | l+5 s+3 t-4 | Der Schurke hatte nie Freunde. Plötzlich ist alles komplizierter. | traenen
 > Egal, böse ist böse | m+3 t+3 | „Trotzdem ein Monster.“ Die Gruppe schärft ihre Waffen.
 
@@ -215,14 +215,14 @@ Die Helden erfahren die traurige Vorgeschichte von {schurke}.
 > Fake-Infos füttern | l+4 s+5 | Die Gruppe flüstert dem Pferd falsche Pläne ins Ohr. Genial. | ausruf
 
 § #sk_burg schurke
-Die Gruppe steht vor der Burg von {schurke}. Mauern, Fallen, Drachen.
+Die Gruppe steht vor der Burg von {schurkeN}. Mauern, Fallen, Drachen.
 < Frontal angreifen | W14 m+5 t+8 ? lvl : tod | Unglaublich, aber es klappt! :: Frontal war keine gute Idee. | explosion
 > Durch die Kanalisation | l+5 s+3 t-4 | Es stinkt. Aber niemand sieht sie kommen. | gift
 
 § #sk_rueckkehr schurke wenn:kamp>1
 {schurke} ist zurück! Aus einer früheren Geschichte, schlauer und wütender als je zuvor.
 < „Nicht schon wieder!“ | s+6 l+4 t+3 | Die Spieler erinnern sich an alte Narben. Alte Rechnungen! | ausruf
-> Diesmal fertigmachen | m+6 t+3 | Die Gruppe ist vorbereitet. Diesmal kommt er nicht davon.
+> Diesmal fertigmachen | m+6 t+3 | Die Gruppe ist vorbereitet. Diesmal gibt es kein Entkommen.
 
 § #we_sturm welt ort:sturm
 Ein Sturm zieht auf. Blitze zucken über {ort}.
@@ -261,7 +261,7 @@ Ein reisender Wundermarkt kommt in die Stadt. Mit Feuerspuckern und Zauberern!
 
 § #we_drache welt
 Ein Drache kreist über {ort}. Niemand weiß, was er will.
-< Mit ihm reden | W13 l+4 s+5 ? m+5 : tod | Er will nur seinen verlorenen Ball zurück. Ein Drachenball. | drache
+< Mit ihm reden | W13 l+4 s+5 ? m+5 : tod | Er will nur seinen verlorenen Ball zurück. Ein Drachenball. :: Er will Frühstück. Und es gibt nur eine Gruppe in Reichweite. | drache
 > Angreifen | W15 m+8 t+6 ? lvl : tpk | Der Drache stürzt! Legenden werden geschrieben! :: Das war ein Fehler. Ein großer, feuriger Fehler. | drache
 
 § #we_erdbeben welt
@@ -276,7 +276,7 @@ Ein unnatürlicher Nebel liegt über dem Moor. Stimmen flüstern Namen.
 
 § #we_krieg welt ort:krieg
 Zwei Königreiche erklären sich den Krieg. Die Gruppe steht genau dazwischen.
-< Für eine Seite kämpfen | m+5 t+5 l+3 | Ruhm in der Schlacht! Aber auch Feinde. | krieg
+< Für eine Seite kämpfen | m+5 t+5 l+3 | Ruhm in der Schlacht! Aber auch Feinde. | schwerter
 > Frieden stiften | W14 l+5 s+5 ? frieden : t+4 | Ein Wunder der Diplomatie: Die Könige reichen sich die Hand. :: Beide Seiten jagen jetzt die Gruppe. | herzen
 
 § #we_pilze welt trash
@@ -317,7 +317,7 @@ Das Regelbuch klappt beim Fallen auf einer Seite auf: „Optionale Regel: Verlet
 § #rb_errata regelbuch
 Eine neue Errata ist erschienen. Die Lieblingsfähigkeit der Gruppe wurde abgeschwächt.
 < Übernehmen | l+6 m-6 alle-4 | Kollektives Murren. Aber es war wirklich zu stark.
-> Ignorieren | m+3 l-4 | „Wir spielen die alte Version.“ Der Regelanwalt zuckt.
+> Ignorieren | m+3 l-4 | „Wir spielen die alte Version.“ Irgendwo am Tisch zuckt ein Augenlid.
 
 § #rb_monster regelbuch
 Im Monsterhandbuch findest du ein vergessenes Monster: den Kettenkrabbler.
@@ -336,8 +336,8 @@ Der Geist von {tot} erscheint der Gruppe. „Ihr habt mich vergessen…“
 
 § #gt_alt geist wenn:gefallen
 Ein Geist aus einer längst vergangenen Runde streift durch die Ruinen. Es ist {tot}.
-< Mit ihm sprechen | l+5 s+4 geist | Er erzählt von einer alten Gruppe, einem alten Kampf. Die Welt ist älter, als die Spieler dachten. | geister
-> Vorbeigehen | t+3 | Er schaut euch traurig nach.
+< Ansprechen | l+5 s+4 geist | {tot} erzählt von einer alten Gruppe, einem alten Kampf. Die Welt ist älter, als die Spieler dachten. | geister
+> Vorbeigehen | t+3 | Ein trauriger Blick folgt euch noch lange.
 
 § #go_gebet gott
 Ein Kleriker betet zu {gott}. Und {gott} antwortet. Persönlich.
@@ -382,7 +382,7 @@ Draußen regnet es in Strömen. Im Spiel auch?
 § #st_gewohnheit spieler phase:start
 Bevor es losgeht, will {name} das Würfelritual machen: Jeder Würfel wird einmal geküsst.
 < Mitmachen | s+6 t-3 | Der ganze Tisch küsst seine Würfel. Glück garantiert. | herzen
-> Losspielen | t+4 laune-4 | {name} küsst seine Würfel heimlich unter dem Tisch.
+> Losspielen | t+4 laune-4 | {name} küsst {seine} Würfel heimlich unter dem Tisch.
 
 § #st_neuegeschichte sl phase:start
 Heute gibt es einen neuen Schauplatz. Wohin?
@@ -406,8 +406,8 @@ Du hast eine neue Karte gezeichnet. Sie ist wunderschön. Und riesig.
 
 § #se_nachbesprechung spieler phase:ende
 Nach der Session will {name} noch eine halbe Stunde über Theorien reden.
-< Zuhören | s+5 t-4 laune+8 | Seine Theorie ist besser als dein Plot. Du klaust sie heimlich.
-> Schlafen gehen | t+3 laune-4 | „Gute Nacht!“ Er schreibt weiter im Chat.
+< Zuhören | s+5 t-4 laune+8 | Die Theorie ist besser als dein Plot. Du klaust sie heimlich.
+> Schlafen gehen | t+3 laune-4 | „Gute Nacht!“ {name} schreibt im Chat einfach weiter.
 
 § #se_epilog sl phase:ende
 Zum Abschluss der Session: Willst du eine Szene beim Schurken zeigen?
@@ -441,17 +441,17 @@ Ein ruhiger Ausklang: Die Helden sitzen auf einem Hügel und schauen in die Ster
 
 § #ks_karawane sl phase:kstart
 Die Helden begleiten eine Handelskarawane nach {ort}.
-< Ruhige Reise | l+4 t-3 | Gespräche mit Händlern, Gerüchte über {schurke}. | staub
+< Ruhige Reise | l+4 t-3 | Gespräche mit Händlern, Gerüchte über {schurkeN}. | staub
 > Überfall! | t+6 m+3 W10 ? s+4 : tod2 | Die Karawane wird überfallen – die Helden retten den Tag! :: Der Überfall fordert ein Opfer. | pfeile
 
 § #ks_erbe sl phase:kstart
-Ein Held erbt ein Schloss in {ort}. Es hat ein kleines Problem: Geister.
+{held} erbt ein Schloss in {ort}. Es hat ein kleines Problem: Geister.
 < Geisterschloss! | s+6 l+3 | Ein Erbe mit Gespenstern. Die Kampagne hat ihren Mittelpunkt. | geister
 > Verkaufen | m+5 l+2 | Das Geld geht in Ausrüstung. Die Geister in die Nachbarschaft.
 
 § #ks_prophezeiung sl phase:kstart
-Eine alte Frau prophezeit: „Einer von euch wird {schurkeN} stürzen – oder ihm dienen.“
-< Spannung! | l+4 s+5 t+2 | Jeder Spieler fragt sich, ob er gemeint ist. | magie
+Eine alte Frau prophezeit: „Einer von euch wird {schurkeN} stürzen. Oder zur rechten Hand werden.“
+< Spannung! | l+4 s+5 t+2 | Am Tisch fragt sich jeder, wer gemeint ist. | magie
 > Alte Frau ist verrückt | s+4 l-2 | „Sie sagt das jedem.“ Aber was, wenn nicht?
 
 § #ks_amnesie sl phase:kstart
@@ -465,7 +465,7 @@ In {ort} findet ein großes Turnier statt. Der Preis: {item}.
 > Den Betrug aufdecken | l+5 t+3 | Das Turnier ist manipuliert! Wer steckt dahinter? | ausruf
 
 § #fin_burg sl phase:finale
-Der Sturm auf die Burg von {schurke}. Alles kulminiert.
+Der Sturm auf die Burg von {schurkeN}. Alles kulminiert.
 < Alles oder nichts | W12 m+6 s+6 t+5 ? sieg lvl : tod tod2 | Die Tore fallen, der Schurke fällt. Jubel in {ort}! :: Ein hoher Preis. Doch {schurkeN} ist… verschwunden. | explosion
 > List und Tücke | W11 l+6 s+4 ? sieg : tod | Durch einen Geheimgang direkt in den Thronsaal! Überrumpelt! :: Der Geheimgang war eine Falle. | staub
 
@@ -481,6 +481,6 @@ Im letzten Moment greift {gott} ein. „Ich biete euch den Sieg – zu einem Pre
 
 § #fin_spiegel schurke phase:finale
 {schurke} enthüllt: „Ich bin, was ihr werdet, wenn ihr gewinnt.“
-< Trotzdem kämpfen | W12 m+4 l+3 ? sieg : tod | Die Gruppe siegt – und schwört, nie so zu werden. | treffer
+< Trotzdem kämpfen | W12 m+4 l+3 ? sieg : tod | Die Gruppe siegt – und schwört, nie so zu werden. :: Die Prophezeiung erfüllt sich nicht. Aber sie kostet ein Leben. | treffer
 > Den Kreis brechen | W14 l+6 s+4 ? frieden : m-5 | Die Gruppe zerbricht die Krone der Macht. Niemand herrscht. Frieden! :: Die Krone zerbricht nicht. | magie
 `);

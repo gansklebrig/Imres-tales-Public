@@ -11,7 +11,7 @@
 
 § #dr_tod drama
 {name} möchte, dass {held} einen dramatischen Heldentod stirbt. „Es wäre so poetisch!“
-< Gönn es ihm | tod s+6 l+4 laune+20 | Ein Opfer im Sonnenuntergang. Alle sind ergriffen. Dann würfelt {name} sofort einen neuen. | schaedel
+< Gönn es {ihm} | tod s+6 l+4 laune+20 | Ein Opfer im Sonnenuntergang. Alle sind ergriffen. Dann würfelt {name} sofort einen neuen. | schaedel
 > „Du bist zu wichtig“ | m+3 laune-8 | {name} ist enttäuscht, dass {held} weiterleben muss.
 
 § #dr_spotlight drama
@@ -21,23 +21,23 @@
 
 § #dr_verkleidung drama
 {name}: „{held} verkleidet sich als die Königin, um in den Palast zu kommen.“
-< Täuschen-Wurf | W14 s+10 l-4 ? m+4 : tod | Die Wachen verbeugen sich. Die echte Königin auch, aus Verwirrung. | krone
+< Täuschen-Wurf | W14 s+10 l-4 ? m+4 : m-6 | Die Wachen verbeugen sich. Die echte Königin auch, aus Verwirrung. :: Die Perücke rutscht im falschen Moment. Kerker statt Thronsaal. | krone
 > Die echte Königin steht da | s+8 t+5 | Zwei Königinnen. Ein Raum. Eine sehr peinliche Stille. | ausruf
 
 § #dr_akzent drama
 {name} spricht ab heute mit französischem Akzent, weil {held} „aus dem Süden kommt“.
 < Ganz Frankreich-Fantasy | s+8 l-3 | Plötzlich haben alle NSCs Akzente. Der Ork klingt wie ein Pariser Kellner. | lachen
-> Lieber nicht | l+3 laune-8 | {name} versucht es trotzdem. Er rutscht ins Italienische ab.
+> Lieber nicht | l+3 laune-8 | {name} versucht es trotzdem und rutscht ins Italienische ab.
 
 § #dr_tragik drama
-{name} hat heimlich eine tragische Wendung für {held} geplant: „Er ist eigentlich der Sohn von {schurkeN}!“
-< Einbauen! | l-3 s+8 t+3 laune+15 +sohn | Die Enthüllung platzt mitten in die Schlacht. Kollektives Kreischen. | ausruf
-> Nein, das ist dein Plot | l+5 laune-10 | „Er ist der Sohn eines Bäckers.“ {name} sinkt in sich zusammen.
+{name} hat heimlich eine tragische Wendung für {held} geplant: „{held} ist eigentlich das Kind von {schurkeN}!“
+< Einbauen! | l-3 s+8 t+3 laune+15 +sohn >>dr_sohn2 | Die Enthüllung platzt mitten in die Schlacht. Kollektives Kreischen. | ausruf
+> Nein, das ist dein Plot | l+5 laune-10 | „{held} ist das Kind eines Bäckers.“ {name} sinkt in sich zusammen.
 
-§ #dr_sohn2 schurke wenn:sohn
+§ #dr_sohn2 schurke kette wenn:sohn
 {schurke} hält inne. „{held}… mein Kind. Komm an meine Seite.“
 < Zum Schurken überlaufen | s+8 l-4 m+6 t+5 | {held} läuft über! Die Gruppe ist geschockt. Der Tisch tobt. | ausruf
-> „Niemals!“ | l+5 s+6 W12 ? m+5 : tod | {held} schlägt das Angebot aus. Ein Familiendrama in Rüstung. :: Der Kampf zwischen Vater und Kind endet tragisch. | treffer
+> „Niemals!“ | l+5 s+6 W12 ? m+5 : tod | {held} schlägt das Angebot aus. Ein Familiendrama in Rüstung. :: Das Familiendrama endet tragisch. | treffer
 
 § #dr_lied drama
 {name} will ein selbstgeschriebenes Lied über die Abenteuer der Gruppe vorsingen.
@@ -65,14 +65,14 @@ Die Gruppe muss als Schauspieltruppe in eine Burg. {name} hat sofort ein ganzes 
 > Nur kurz spielen | t+4 W12 ? s+5 : m-4 | Fünf Minuten Improtheater, dann rein. :: Die Wachen erkennen das Stück als Satire. Verhaftung! | ausruf
 
 § #ku_zeichnung kunst
-{name} hat {npc} gezeichnet – viel hübscher, als du ihn beschrieben hast.
-< So ist er jetzt | s+6 l-2 laune+12 | Der NSC wird zum Liebling der Gruppe. Alle wollen ihn retten. | herzen
-> Er ist eigentlich hässlich | l+3 laune-8 s+2 | {name} radiert seufzend einen Buckel dazu.
+{name} hat {npcN} gezeichnet – viel hübscher als in deiner Beschreibung.
+< Das Bild gilt ab jetzt | s+6 l-2 laune+12 | Der NSC wird zum Liebling der Gruppe. Alle wollen {npcN} beschützen. | herzen
+> In Wahrheit eher hässlich | l+3 laune-8 s+2 | {name} radiert seufzend einen Buckel dazu.
 
 § #ku_karte kunst
-{name} zeichnet während der Session ununterbrochen. Gerade hat sie nicht zugehört.
-< Kurz zusammenfassen | t-3 laune+5 | Sie zeigt dir ihre Zeichnung: Die Gruppe in einer epischen Pose. Wunderschön. | staub
-> Sie verpasst etwas | t+3 laune-5 s+2 | {held} steht plötzlich alleine vor einer Wache. „Wie bin ich hier hingekommen?“
+{name} zeichnet während der Session ununterbrochen. Gerade hat {er} nicht zugehört.
+< Kurz zusammenfassen | t-3 laune+5 | {name} zeigt dir die Zeichnung: Die Gruppe in einer epischen Pose. Wunderschön. | staub
+> Dann eben verpasst | t+3 laune-5 s+2 | {held} steht plötzlich alleine vor einer Wache. „Wie bin ich hier hingekommen?“
 
 § #ku_monster kunst
 {name} hat das Monster von letzter Woche gemalt. Es ist viel gruseliger als deine Beschreibung.
@@ -106,11 +106,11 @@ Die Gruppe muss als Schauspieltruppe in eine Burg. {name} hat sofort ein ganzes 
 
 § #mu_trommel musik
 {name} trommelt bei jedem Kampf auf dem Tisch. Die Würfel hüpfen.
-< Kampftrommeln! | s+6 t+6 | Die Atmosphäre ist wild. Ein Würfel fällt in die Chips. | krieg
+< Kampftrommeln! | s+6 t+6 | Die Atmosphäre ist wild. Ein Würfel fällt in die Chips. | schwerter
 > Bitte nicht | l+2 laune-8 | Die Würfel stehen still. {name}s Finger zucken.
 
-§ #mu_barde musik wenn:typ:chaos
-{name} und der Chaot bilden im Spiel eine Barden-Band. Name: „Die Wandelnden Würfel“.
+§ #mu_barde musik
+{name} und {anderer} gründen im Spiel eine Barden-Band. Name: „Die Wandelnden Würfel“.
 < Tournee! | s+10 l-5 t+3 | Die Gruppe spielt Konzerte in jeder Stadt. Der Plot wartet. Geduldig. | musik
 > Plot vor Musik | l+4 alle-3 | Die Band trennt sich nach einem Auftritt. Kreative Differenzen.
 
@@ -146,7 +146,7 @@ Die Gruppe muss als Schauspieltruppe in eine Burg. {name} hat sofort ein ganzes 
 
 § #sp_schlaf spieler wenn:t<30
 {name} ist am Tisch eingeschlafen. Mit dem Kopf auf dem Würfelturm.
-< Held schläft auch | s+4 t+2 | {held} schläft im Spiel ein. Ein Kobold malt ihm einen Schnurrbart. | zzz
+< Held schläft auch | s+4 t+2 | {held} schläft im Spiel ein. Ein Kobold malt {h_ihm} einen Schnurrbart. | zzz
 > Wecken mit Gong | s+5 t+5 laune-6 | GONG! {name} wirft vor Schreck Initiative. | glocke
 
 § #sp_gold spieler
@@ -165,8 +165,8 @@ Die Gruppe muss als Schauspieltruppe in eine Burg. {name} hat sofort ein ganzes 
 > Kampf zuerst | m+3 t+3 laune-8 | {monster} greifen auf dem Weg zum Markt an.
 
 § #sp_einschuechtern spieler
-{name} will {npc} verhören. „Ich lass mein Schwert ganz langsam schleifen. Ganz langsam.“
-< Einschüchtern | W12 s+5 ? l+4 m+3 : s-3 | {npcN} redet wie ein Wasserfall. :: {npcN} lacht und schleift sein eigenes, größeres Schwert. | schwerter
+{name} will {npcN} verhören. „Ich lass mein Schwert ganz langsam schleifen. Ganz langsam.“
+< Einschüchtern | W12 s+5 ? l+4 m+3 : s-3 | {npcN} redet wie ein Wasserfall. :: {npcN} lacht und schleift ein eigenes, größeres Schwert. | schwerter
 > Bestechen stattdessen | l+3 s+2 | Zehn Gold, und {npcN} erzählt alles. Und noch mehr.
 
 § #sp_plan spieler
@@ -190,8 +190,8 @@ Die Gruppe plant seit 45 Minuten den Einbruch in den Turm. Niemand hat bisher ge
 > Dachs flieht | s+2 l+3 | Der Dachs verschwindet im Unterholz. Er wird sich erinnern.
 
 § #sp_lieblings spieler
-{name} hat einen Lieblings-NSC: {npc}. Er fragt nach ihm in jeder Session.
-< Er bekommt eine Questline | l+3 s+6 laune+10 | {npcN} hat ein Geheimnis! Die Gruppe hilft. | herzen
+{name} hat einen Lieblings-NSC: {npc}. Jede Session kommt die Frage, was {npcN} gerade macht.
+< Eine eigene Questline | l+3 s+6 laune+10 | {npcN} hat ein Geheimnis! Die Gruppe hilft. | herzen
 > {npcN} stirbt | s-4 l+5 t+3 laune-15 | Der Lieblings-NSC stirbt. {name} schwört blutige Rache. Motivation! | schaedel
 
 § #sp_jemand spieler
@@ -211,17 +211,17 @@ Die Gruppe plant seit 45 Minuten den Einbruch in den Turm. Niemand hat bisher ge
 
 § #sp_unsichtbar spieler
 {name} will den ganzen Abend unsichtbar bleiben. „Ich bin einfach still dabei.“
-< Okay | t+3 | {held} folgt der Gruppe unsichtbar. Er hätte fast den Schatz verpasst.
-> Ein Hund riecht ihn | s+5 l+2 | Ein Hund schnüffelt an der leeren Luft und wedelt. Enttarnt! | lachen
+< Okay | t+3 | {held} folgt der Gruppe unsichtbar und hätte fast den Schatz verpasst.
+> Ein Hund riecht {held} | s+5 l+2 | Ein Hund schnüffelt an der leeren Luft und wedelt. Enttarnt! | lachen
 
 § #sp_schwimmen spieler
 {held} kann nicht schwimmen. Die Brücke ist gerade eingestürzt.
 < Athletik-Wurf | W12 s+5 ? m+3 : tod | {held} paddelt panisch und schafft es. Wie ein nasser Hund. :: Blubb. Blubb. Stille. | wellen
-> {aheld} rettet ihn | l+3 s+3 | {aheld} zieht {held} am Schopf aus dem Wasser. Er schuldet ihm jetzt was.
+> {aheld} springt hinterher | l+3 s+3 | {aheld} zieht {held} am Schopf aus dem Wasser. Eine Lebensschuld ist entstanden.
 
 § #sp_namevergessen spieler
-{name} hat vergessen, wie {held} heißt. „Ähm… Grim… Grom… der Zwerg halt.“
-< Neuer Name | s+5 l-3 | Ab jetzt heißt er „Der Zwerg halt“. Er hat es akzeptiert.
+{name} hat vergessen, wie {held} heißt. „Ähm… Grim… Grom… na, {h_der} mit dem Schwert.“
+< Neuer Name | s+5 l-3 | Ab jetzt heißt {held} offiziell „{h_Der} mit dem Schwert“. Klingt fast heldenhaft.
 > Bogen zeigen | l+2 | „Ach ja, {held}!“ {name} schreibt es sich groß auf die Hand.
 
 § #sp_ehrlich spieler
@@ -270,9 +270,9 @@ Der Tisch ist voller Würfel, Chips, Charakterbögen und drei leeren Flaschen. N
 > Chaos akzeptieren | s+4 l-3 | Die Karte ist jetzt unter den Chips. Die Chips sind jetzt ein Gebirge.
 
 § #ti_mama tisch
-Das Handy von {name} klingelt. Es ist seine Mutter. Sie will wissen, ob er schon gegessen hat.
+Das Handy von {name} klingelt. Es ist {seine} Mutter. Sie will wissen, ob {er} schon gegessen hat.
 < Grüße an Mama | s+6 t-3 | Der ganze Tisch ruft „Hallo!“. Mama will mitspielen. | lachen
-> Wegdrücken | t+2 laune-3 | Sie ruft dreimal an. Er muss doch rangehen.
+> Wegdrücken | t+2 laune-3 | Sie ruft dreimal an. {name} geht doch ran.
 
 § #ti_wuerfelweg tisch
 Ein Würfel rollt vom Tisch und verschwindet unter dem Sofa. Er zeigt… niemand weiß es.
@@ -280,9 +280,9 @@ Ein Würfel rollt vom Tisch und verschwindet unter dem Sofa. Er zeigt… niemand
 > Neu würfeln | l+3 | Unter dem Sofa findet ihr zwei weitere verschollene Würfel und eine Socke.
 
 § #ti_gast tisch
-Der Mitbewohner kommt heim und schaut euch beim Spielen zu. „Was macht ihr da?“
-< Einladen | s+5 neu t-4 | Er ist sofort Feuer und Flamme. Nächste Woche bringt er einen Charakter mit. | konfetti
-> „Wir lernen“ | l+2 s+3 | „Lernen? Mit Drachen?“ Er geht kopfschüttelnd in die Küche.
+Jemand aus der WG kommt heim und schaut euch beim Spielen zu. „Was macht ihr da?“
+< Einladen | s+5 neu t-4 | Sofort Feuer und Flamme. Nächste Woche gibt es einen Charakter mehr am Tisch. | konfetti
+> „Wir lernen“ | l+2 s+3 | „Lernen? Mit Drachen?“ Kopfschütteln, Abgang in die Küche.
 
 § #ti_corona tisch
 Zwei Spieler sind krank und spielen online zugeschaltet. Das WLAN ruckelt.
@@ -306,11 +306,11 @@ Alle haben heute nur zwei Stunden Zeit.
 
 § #ti_zettel tisch
 {name} schiebt dir heimlich einen Zettel zu: „{held} will {aheld} heimlich verraten.“
-< Erlauben | s+6 l+3 t+3 +verrat | Ein Geheimplot im Plot. Du grinst unauffällig. | ausruf
+< Erlauben | s+6 l+3 t+3 +verrat >>ti_verrat2 | Ein Geheimplot im Plot. Du grinst unauffällig. | ausruf
 > Zettel zurück | l+2 laune-6 | Du schreibst „Nein“ und ein Smiley darauf.
 
-§ #ti_verrat2 spieler wenn:verrat
-Der Verrat fliegt auf! {aheld} entdeckt den geheimen Brief.
+§ #ti_verrat2 spieler kette wenn:verrat
+Der Verrat fliegt auf! {aheld} kommt hinter den geheimen Plan von {held}.
 < Großes Drama | s+8 t+5 alle-4 | Schreie, Anklagen, Tränen. Bester Abend seit Monaten. | ausruf
 > Versöhnung | l+4 s+4 alle+4 | Es war ein Missverständnis. Fast. | herzen
 
@@ -361,7 +361,7 @@ Die Katze schläft auf dem Charakterbogen von {name}.
 
 § #gs_mutter gast
 Die Mitbewohnerin kommt heim und fragt: „Spielt ihr schon wieder dieses Drachending?“
-< Einladen | s+4 neu | Sie setzt sich dazu. Nächste Woche hat sie einen Charakter. | konfetti
+< Einmal würfeln lassen | s+4 t-3 | Sie würfelt einmal für einen Goblin, trifft und geht zufrieden ins Bett. „Okay. Verstehe.“ | konfetti
 > „Wir sind fast fertig“ | t+3 | Ihr seid nicht fast fertig.
 
 § #gs_lieferant gast

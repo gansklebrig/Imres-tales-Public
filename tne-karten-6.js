@@ -5,7 +5,7 @@
 (window.TNE_KARTEN = window.TNE_KARTEN || []).push(String.raw`
 
 § #mu2_hintergrund musik
-{name} will, dass jede Szene ihre eigene Hintergrundmusik bekommt. Er hat eine Liste mit 200 Liedern.
+{name} will, dass jede Szene ihre eigene Hintergrundmusik bekommt. {Er} hat eine Liste mit 200 Liedern.
 < Musik-Regie abgeben | s+6 l+2 t-4 laune+12 | {name} wird DJ der Runde. Der Bosskampf läuft zu Trommeln, die Taverne zu Dudelsack. | musik
 > Stille ist auch Musik | l+3 laune-8 | {name} summt trotzdem leise. Die Stille ist nicht still.
 
@@ -36,7 +36,7 @@
 
 § #ku2_karte kunst
 {name} zeichnet während der Session eine Karte des Dungeons mit – präziser als deine eigene.
-< Ihre Karte gilt | l+4 s+4 laune+10 | Die Gruppe navigiert nach ihrer Karte. Und findet einen Raum, den du nie geplant hast. | staub
+< {Seine} Karte gilt | l+4 s+4 laune+10 | Die Gruppe navigiert nach {seiner} Karte. Und findet einen Raum, den du nie geplant hast. | staub
 > Deine Karte gilt | l+2 laune-6 | „Da ist aber keine Tür.“ – „Doch.“ – „Auf meiner nicht.“
 
 § #ku2_comic kunst
@@ -50,9 +50,9 @@
 > Nicht in dieser Welt | l+4 laune-8 | Der Brillenkrabbler bleibt auf Papier. Er schaut traurig durch seine Brille.
 
 § #ku2_still kunst wenn:laune<30
-{name} zeichnet nicht mehr. Sie sitzt nur da und schaut auf die Würfel.
+{name} zeichnet nicht mehr. {Er} sitzt nur da und schaut auf die Würfel.
 < In der Pause fragen | alle+3 laune+20 t-3 | „Alles okay?“ – „Ja… es war nur grade so laut.“ Danke fürs Fragen. | herzen
-> Ruhige Szene | t-6 s+3 laune+12 | Eine stille Szene am See. Sie greift wieder zum Stift. | wellen
+> Ruhige Szene | t-6 s+3 laune+12 | Eine stille Szene am See. {name} greift wieder zum Stift. | wellen
 
 § #tk2_formation taktik
 {name} besteht darauf, dass die Gruppe in Formation marschiert: Tank vorne, Heiler Mitte, Schurke hinten.
@@ -80,7 +80,7 @@
 > Bitte weglegen | l+3 laune-8 | Das Handy verschwindet. Für fünf Minuten.
 
 § #hd2_nachricht handy
-{name} bekommt eine Nachricht und muss „ganz kurz“ antworten. Während seines Zuges.
+{name} bekommt eine Nachricht und muss „ganz kurz“ antworten. Mitten im eigenen Zug.
 < Zug überspringen | t+5 laune-5 | Die Initiative geht weiter. {held} steht einfach da.
 > Warten | t-6 s-3 | Alle warten. Die Nachricht wird lang. Sehr lang.
 
@@ -90,27 +90,27 @@
 > „Ich bin die App“ | l-3 s+3 laune-6 | {name} schaut zwischen dir und dem Handy hin und her.
 
 § #hd2_akku handy wenn:t<40
-Der Akku von {name} ist leer. Plötzlich ist er voll dabei.
+Der Akku von {name} ist leer. Plötzlich ist {er} voll dabei.
 < Spotlight geben | s+6 t+4 laune+15 | {held} rettet den Tag. Ohne Handy! Ein Wunder! | sonne
 > Ladekabel anbieten | t-3 laune+5 | Das Handy lädt. {name} schaut ihm sehnsüchtig zu.
 
 § #vt2_geschichte veteran
-{name} erzählt, dass er diese Kampagne schon einmal gespielt hat. 1996. Und er weiß, wer der Verräter ist.
+{name} erzählt, diese Kampagne schon einmal gespielt zu haben. 1996. Und {er} weiß, wer der Verräter ist.
 < Plot ändern | l-3 s+6 | Der Verräter ist jetzt jemand anderes. {name} ist verblüfft. Zum ersten Mal seit 1996. | ausruf
 > Schweigegelübde | l+4 laune-4 | {name} legt die Hand aufs Herz. Grinst aber vielsagend.
 
-§ #vt2_rat veteran
+§ #vt2_rat veteran wenn:typ:neu
 {name} flüstert dir in der Pause zu: „Gib dem Neuling mal einen großen Moment.“
-< Guter Rat | s+6 alle+5 | Der Neuling darf den Drachen ablenken. Er ist der Held des Abends. | konfetti
+< Guter Rat | s+6 alle+5 | Der Neuling am Tisch darf den Drachen ablenken und wird zur Heldenfigur des Abends. | konfetti
 > „Ich mach das schon“ | laune-5 l+2 | {name} hebt eine Augenbraue. „Wie du meinst.“
 
 § #vt2_tpk veteran
-{name} erzählt von seinem ersten TPK. „Alle tot. Wegen einer Tür. Es war wunderschön.“
+{name} erzählt von {seinem} ersten TPK. „Alle tot. Wegen einer Tür. Es war wunderschön.“
 < Sentimental | s+5 t-4 | Alle hören zu. Am Ende applaudiert der Tisch der Tür. | lachen
 > Grusel | l+3 s+3 | Die Spieler öffnen ab jetzt jede Tür mit einer 3-Meter-Stange.
 
 § #vt2_bleistift veteran
-{name} radiert seinen Charakterbogen seit 1998 immer wieder neu. Er ist dünn wie Pergament.
+{name} radiert {seinen} Charakterbogen seit 1998 immer wieder neu. Das Papier ist dünn wie Pergament.
 < Neuer Bogen | l+3 laune-6 | Der alte Bogen wird feierlich begraben. {name} weint ein bisschen.
 > Ehrfurcht | s+5 laune+8 | Der Bogen ist ein Artefakt. Er bekommt eine Schutzhülle. | krone
 
@@ -131,11 +131,11 @@ Die Katze spielt Fußball mit dem W20 von {name}. Er rollt unter das Sofa.
 
 § #gs2_nachbar gast
 Der Nachbar klingelt und beschwert sich über den Lärm. Dann sieht er die Miniaturen. „Ist das ein Beholder?“
-< Einladen | neu s+5 | Der Nachbar war in den 90ern Spielleiter. Nächste Woche ist er dabei. | konfetti
+< Einladen | s+5 alle+2 t-3 | Der Nachbar war in den 90ern Spielleiter und bleibt eine Stunde. Ab jetzt grüßt er im Treppenhaus mit „Initiative!“. | konfetti
 > Entschuldigen | l+3 t+2 | Ihr spielt leiser. Der Barbar flüstert seine Schlachtrufe.
 
 § #gs2_ex gast
-Der Ex von {name} schaut vorbei, um ein Buch abzuholen. Die Stimmung wird… seltsam.
+{name}s Ex schaut vorbei, um ein Buch abzuholen. Die Stimmung wird… seltsam.
 < Charakter-Moment | s-4 l+4 laune-8 | {held} hat plötzlich sehr viel Wut auf einen NSC, der verdächtig ähnlich aussieht.
 > Pause | t-4 alle+2 | Zehn Minuten Pause, dann ist alles wieder normal. Fast.
 

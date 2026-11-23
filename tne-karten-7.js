@@ -23,7 +23,7 @@
 
 § #bz_paar_auto spieler bez:paar
 {name} und {p2} sind zusammen gekommen und haben im Auto ganz offensichtlich gestritten. Beide reden nur noch mit dir, nicht miteinander.
-< Eine Szene, in der ihre Helden zusammenarbeiten müssen | W12 l+2 ? bez+10 s+4 beide+4 : bez-6 s-4 beide-4 | Irgendwo zwischen Fallgrube und Seil fangen die beiden wieder an, normal zu reden. Sogar über Echtes. :: Die Szene wird zur Fortsetzung des Streits mit Schwertern. Der Tisch starrt auf seine Würfel.
+< Ihre Helden müssen zusammenarbeiten | W12 l+2 ? bez+10 s+4 beide+4 : bez-6 s-4 beide-4 | Irgendwo zwischen Fallgrube und Seil fangen die beiden wieder an, normal zu reden. Sogar über Echtes. :: Die Szene wird zur Fortsetzung des Streits mit Schwertern. Der Tisch starrt auf seine Würfel.
 > Den Helden getrennte Aufgaben geben | t-4 l+2 bez-2 beide+3 | Zwei Handlungsstränge, ein bisschen mehr Arbeit für dich. Aber niemand muss heute Abend so tun als ob.
 
 § #bz_paar_schutz spieler bez:paar
@@ -38,7 +38,7 @@
 
 § #bz_paar_jahrestag spieler bez:paar einmal
 In der Pause flüstert {name} dir zu: Heute ist der Jahrestag mit {p2}. Ob du im Spiel vielleicht irgendetwas machen könntest? Nichts Großes.
-< Ein Sternschnuppenregen über dem Lager der Helden | s+5 l-2 bez+10 laune+6 laune2+8 | Du beschreibst ihn ganz beiläufig. {p2} merkt nach zwei Sätzen, was gerade passiert. Der Rest des Tisches tut so, als hätte er es nicht gemerkt. | sterne
+< Sternschnuppen über dem Lager | s+5 l-2 bez+10 laune+6 laune2+8 | Du beschreibst ihn ganz beiläufig. {p2} merkt nach zwei Sätzen, was gerade passiert. Der Rest des Tisches tut so, als hätte er es nicht gemerkt. | sterne
 > „Ich will nicht, dass es zu viel wird.“ | l+2 laune-3 | {name} nickt. Später, beim Abwasch, sagt {name}: „War vielleicht eh besser so.“ Ganz überzeugt klingt es nicht.
 
 § #bz_paar_kuehl spieler bez:paar wenn:bez<40
@@ -93,7 +93,7 @@ Das Handy von {p2} klingelt: die Mutter der beiden. Sie will wissen, ob {name} a
 
 § #bz_ko_excel spieler bez:kollegen
 {name} und {p2} fangen an, über ein Meeting von heute Nachmittag zu reden. Es geht um ein Excel-Problem. Es geht um eine Formatvorlage.
-< Ins Spiel holen: der Bürgermeister hat das gleiche Problem | s+4 l-2 t-2 bez+2 | Plötzlich soll {held} die Steuerrollen von {ort} retten. Mit „SVERWEIS“-Zauber. Die beiden sind begeistert. | staub
+< Der Bürgermeister hat dasselbe Problem | s+4 l-2 t-2 bez+2 | Plötzlich soll {held} die Steuerrollen von {ort} retten. Mit „SVERWEIS“-Zauber. Die beiden sind begeistert. | staub
 > „Feierabend ist Feierabend.“ | t+3 beide-2 | Beide lachen. „Stimmt. Sorry.“ Fünf Minuten später geht es wieder um die Formatvorlage.
 
 § #bz_ko_chef spieler bez:kollegen
@@ -103,12 +103,12 @@ Das Handy von {p2} klingelt: die Mutter der beiden. Sie will wissen, ob {name} a
 
 § #bz_wg_pfanne spieler bez:wg
 {name} und {p2} streiten leise, aber ausdauernd über den Putzplan. Es geht anscheinend um eine Pfanne. Die Pfanne steht seit Dienstag.
-< Im Spiel: ein verfluchter Kessel, den niemand spülen will | s+5 l-3 bez+3 | Am Ende spült ihn {held} – unter Protest. {p2} applaudiert. Der Streit ist erstaunlich schnell vergessen. | gift
+< Ein verfluchter Kessel im Spiel | s+5 l-3 bez+3 | Am Ende spült ihn {held} – unter Protest. {p2} applaudiert. Der Streit ist erstaunlich schnell vergessen. | gift
 > „Das klärt ihr zuhause.“ | t+2 bez-3 | Es wird zuhause geklärt. Nicht leise, wie man hört.
 
 § #bz_wg_heim tisch bez:wg
 Die Runde findet heute in der WG von {name} und {p2} statt. In der Küche stapelt sich Geschirr, und es ist sehr klar, wessen Woche es war.
-< Gemeinsam abspülen, dann spielen | t-5 s+4 alle+3 bez+5 | Zehn Leute, eine Spüle, viele Meinungen über Spülmittel. Es wird ein guter Abend. | heilung
+< Gemeinsam abspülen, dann spielen | t-5 s+4 alle+3 bez+5 | Fünf Leute, eine Spüle, viele Meinungen über Spülmittel. Es wird ein guter Abend. | heilung
 > Nicht hinschauen | s+2 bez-3 | Niemand schaut hin. Irgendwann steht {p2} wortlos auf und spült. Sehr laut.
 
 § #bz_ex_vertrauen spieler bez:ex
@@ -143,7 +143,7 @@ Zwischen {name} und {p2} kracht es. Vordergründig geht es um eine Regel zum Fes
 
 § #bz_sp_versoehnung spieler bez:spannung wenn:bez>60
 {name} und {p2} haben heute zum ersten Mal zusammen über einen Witz gelacht. Ein ehrliches Lachen. Der Rest des Tisches tut so, als wäre nichts.
-< Ihre Helden in ein gemeinsames Abenteuer schicken | s+4 bez=freunde bez+6 | Ein Nebenauftrag, nur die beiden. Sie kommen mit drei Goldstücken und einem Running Gag zurück. | konfetti
+< Ein gemeinsames Abenteuer | s+4 bez=freunde bez+6 | Ein Nebenauftrag, nur die beiden. Sie kommen mit drei Goldstücken und einem Running Gag zurück. | konfetti
 > Nichts erzwingen | bez+5 | Gut so. Manche Dinge wachsen besser, wenn keiner zuschaut.
 
 § #bz_sw_platz spieler bez:schwarm
@@ -224,7 +224,7 @@ Nach der Session bleiben {name} und {p2} noch draußen vor der Haustür stehen. 
 
 § #me_verlust_haendler spieler wenn:merk:verlust
 Ein Händler in {ort} fragt, ob {held} zufällig {altheld} gekannt hat. Du hast das nicht geplant. Es ist dir einfach so rausgerutscht.
-< Ausbauen: Er hat noch etwas, das {altheld} gehörte | laune+10 s+3 l-1 | Ein zerkratzter Talisman. {name} legt ihn ganz vorsichtig auf den neuen Bogen. | funkeln
+< Er hat noch etwas von {altheld} | laune+10 s+3 l-1 | Ein zerkratzter Talisman. {name} legt ihn ganz vorsichtig auf den neuen Bogen. | funkeln
 > Schnell weitererzählen | t+2 laune-2 | Der Händler zuckt mit den Schultern und verkauft weiter Kohl.
 
 § #me_rache spieler wenn:merk:verlust
