@@ -283,9 +283,21 @@ def nachschlag_art(art, ov, vorhanden, alle_wiss):
         k["asp"] |= set(asp)
         k["her"].add(herkunft)
 
-    for t in kategorie_dateien(kat, 400):
+    dateien, uks = kategorie_dateien(kat, 400), unterkategorien(kat)
+    if not dateien and not uks:
+        # Kategorie heißt auf Commons anders (neuer/alter Artname) – passende Kategorie suchen
+        for such in [art["wiss"], art["wiss"].replace(" ", "-"), art["de"]]:
+            r = api(action="query", list="search", srsearch=such, srnamespace=14, srlimit=5)
+            treffer = [x["title"] for x in r.get("query", {}).get("search", [])]
+            gut_t = [t for t in treffer if not any(w in t.lower() for w in ["illustration", "map", "herbari", "drawing", "stamp"])]
+            if gut_t:
+                kat = gut_t[0]; print("   Kategorie gefunden:", kat, flush=True)
+                dateien, uks = kategorie_dateien(kat, 400), unterkategorien(kat)
+                if dateien or uks:
+                    break
+    for t in dateien:
         dazu(t, herkunft="kat")
-    for uk in unterkategorien(kat)[:80]:
+    for uk in uks[:80]:
         name = uk.split(":", 1)[1]
         nl = " " + name.lower() + " "
         if any(w in nl for w in ["cultivar", "hybrid", "×", "herbari", "illustration", "drawing", "map", "dish", "food", "stamps", "in art",
