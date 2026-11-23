@@ -586,6 +586,7 @@
     return want.length ? Z.R.pick(want) : Z.R.pick(lack);
   }
   function spawnFind(kind, x, y, o) {
+    if (Z.freeSpot) { const s = Z.freeSpot(x, y, 10, 16, { r: 20 }); x = s.x; y = s.y; } /* platz.js: nie in der Wand */
     const f = Object.assign({ kind, x, y, t: Math.random() * 9, got: false }, o || {});
     if (kind === "stein" && !f.rune) f.rune = pickMech();
     if (kind === "stein" && !f.rune) return Z.spawnReward && Z.spawnReward("glut", x, y, { n: 2 });
@@ -861,9 +862,10 @@
       const P = Z.player; if (P) FX.ring(P.x + P.w / 2, P.y + 14, 36, d.col, 0.5, 3);
       openStele();
     };
-    /* Pausenmenü: Runengürtel und Familien */
+    /* Pausenmenü: Runengürtel und Familien – steht jetzt vollständig im Reiter „Ausrüstung“ (ui.js, Z.ui.gear);
+       nur ohne ihn (ältere Oberfläche) hier anhängen */
     const p0 = Z.ui.pause;
-    if (p0 && !p0._rn) {
+    if (p0 && !p0._rn && !Z.ui.gear) {
       Z.ui.pause = function () { const r = p0.apply(this, arguments); try { const h = pauseHTML(), box = document.querySelector("#modal .pausenmenue .p-info"); if (h && box) box.insertAdjacentHTML("beforeend", h); } catch (e) { console.error(e); } return r; };
       Z.ui.pause._rn = true;
     }

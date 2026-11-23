@@ -83,18 +83,29 @@
   }
   function groundY(x, y) { const g = W.groundBelow(x, y - 4, 60); return g != null ? g : y; }
   Z.groundY = groundY;
+  /* W8: Druckwelle/Spritzer nur mit Sichtlinie vom Zentrum (Mitte, Kopf oder Füße des Ziels) */
+  function blastSees(x, y, b) { const bx = b.x + b.w / 2; return W.los(x, y, bx, b.y + b.h / 2) || W.los(x, y, bx, b.y + 3) || W.los(x, y, bx, b.y + b.h - 3); }
+  Z.blastSees = blastSees;
+  /* Zentrum aus massivem Fels herausschieben (sonst sähe es von innen auf beide Seiten einer Wand) */
+  function freeCenter(x, y) {
+    if (!W.solidAt(x, y)) return [x, y];
+    for (const r of [3, 6, 9, 12]) for (const [dx, dy] of [[0, -1], [-1, 0], [1, 0], [0, 1], [-1, -1], [1, -1]]) if (!W.solidAt(x + dx * r, y + dy * r)) return [x + dx * r, y + dy * r];
+    return [x, y];
+  }
   function splashDamage(p, x, y, r) {
-    for (const e of Z.enemies) if (!e.dead && !p.hits.has(e) && U.dist(x, y, e.x + e.w / 2, e.y + e.h / 2) < r + e.w / 2) Z.hitEnemy(e, p.dmg, { eff: p.eff, src: "ranged", it: p.it, kb: 60 });
+    [x, y] = freeCenter(x, y);
+    for (const e of Z.enemies) if (!e.dead && !p.hits.has(e) && U.dist(x, y, e.x + e.w / 2, e.y + e.h / 2) < r + e.w / 2 && blastSees(x, y, e)) Z.hitEnemy(e, p.dmg, { eff: p.eff, src: "ranged", it: p.it, kb: 60 });
   }
   function explode(x, y, r, dmg, owner, eff) {
+    [x, y] = freeCenter(x, y);
     A.play("explode", { x, y, vol: 0.8 }); FX.addShake(5); FX.stop(0.04);
     FX.ring(x, y, r, "#ffb040", 0.3, 4);
     FX.burst(x, y, 26, { col: ["#ffd27a", "#ff6a2a", "#5a4a40"], sp: 200, life: 0.5, size: 3, kind: "spark", add: true });
     FX.burst(x, y, 12, { col: ["#4a4040", "#6a5a50"], sp: 80, life: 1, size: 6, kind: "smoke", g: -30 });
     /* auch zerstörbare Ausstattung trifft jede Explosion (auch die von Gegnern) */
     if (owner !== "p" && r > 0 && Z.ausstattungTreffer) { try { Z.ausstattungTreffer({ x: x - r, y: y - r, w: 2 * r, h: 2 * r }, { explo: true }); } catch (err) { console.error(err); } }
-    if (owner === "p") { for (const e of Z.enemies) if (!e.dead && U.dist(x, y, e.x + e.w / 2, e.y + e.h / 2) < r + e.w / 2) Z.hitEnemy(e, dmg, { eff: Object.assign({ burn: 1 }, eff || {}), kb: 200, kbUp: 160, src: "skill", heavy: true, dir: U.sign(e.x - x) || 1 }); Z.hitProps(r && { x: x - r, y: y - r, w: r * 2, h: r * 2 }, dmg); }
-    else { const P = Z.player; if (P && U.dist(x, y, P.x + P.w / 2, P.y + P.h / 2) < r + 6) Z.hurtPlayer(dmg, { x, kb: 220, unblockable: false }); for (const e of Z.enemies) if (!e.dead && U.dist(x, y, e.x + e.w / 2, e.y + e.h / 2) < r) Z.hitEnemy(e, dmg * 0.5, { kb: 120 }); }
+    if (owner === "p") { for (const e of Z.enemies) if (!e.dead && U.dist(x, y, e.x + e.w / 2, e.y + e.h / 2) < r + e.w / 2 && blastSees(x, y, e)) Z.hitEnemy(e, dmg, { eff: Object.assign({ burn: 1 }, eff || {}), kb: 200, kbUp: 160, src: "skill", heavy: true, dir: U.sign(e.x - x) || 1 }); Z.hitProps(r && { x: x - r, y: y - r, w: r * 2, h: r * 2 }, dmg); }
+    else { const P = Z.player; if (P && U.dist(x, y, P.x + P.w / 2, P.y + P.h / 2) < r + 6 && blastSees(x, y, P)) Z.hurtPlayer(dmg, { x, kb: 220, unblockable: false }); for (const e of Z.enemies) if (!e.dead && U.dist(x, y, e.x + e.w / 2, e.y + e.h / 2) < r && blastSees(x, y, e)) Z.hitEnemy(e, dmg * 0.5, { kb: 120 }); }
   }
   Z.explode = explode;
 
@@ -136,9 +147,20 @@
       if (k.trail && Math.random() < 0.6) FX.p({ x: p.x, y: p.y, vx: 0, vy: 0, life: 0.15, size: 1.2, col: k.trail, a: 0.5 });
       if (k.glow && Math.random() < dt * 40) FX.p({ x: p.x, y: p.y, vx: (Math.random() - 0.5) * 20, vy: -10, life: 0.3, size: 4, col: k.glow, kind: "glow", add: true });
       /* Wände */
-      if (!k.ghost && !k.ground && !k.anchor && W.solidAt(p.x, p.y)) {
-        if (p.bounce > 0) { p.bounce--; p.vx *= -0.8; p.x = ox; p.hits = new Set(); continue; }
-        p.wall = true; p.x = ox + (p.x - ox) * 0.6; p.y = oy + (p.y - oy) * 0.6; projEnd(p, p.x, p.y); Z.projs.splice(i, 1); continue;
+      /* W8: gefegt statt nur am Endpunkt – schnelle Geschosse schlüpfen nicht mehr durch Ecken oder dünne Wände;
+         Wellen (Lichtwelle, Glutsichel, Schrei) und der Anker gehen nicht mehr durch Wände */
+      if (!k.ground) {
+        const ht = W.solidAt(ox, oy) ? 0 : W.rayHit(ox, oy, p.x, p.y);
+        if (ht >= 0) {
+          const len = Math.hypot(p.x - ox, p.y - oy) || 1, u = Math.max(0, ht - 0.75 / len);
+          const hx = ox + (p.x - ox) * u, hy = oy + (p.y - oy) * u;
+          if (k.anchor) { p.x = hx; p.y = hy; if (!p.ret) { p.ret = true; p.hits = new Set(); A.play("hitMetal", { x: hx, y: hy, vol: 0.3, rate: 1.3 }); } }
+          else if (k.ghost) { FX.burst(hx, hy, 6, { col: k.col, sp: 60, life: 0.25, size: 2, kind: "spark", add: true }); p.dead = true; Z.projs.splice(i, 1); continue; }
+          else {
+            if (p.bounce > 0) { p.bounce--; p.vx *= -0.8; p.x = ox; p.y = oy; p.hits = new Set(); continue; }
+            p.wall = true; p.x = hx; p.y = hy; projEnd(p, p.x, p.y); Z.projs.splice(i, 1); continue;
+          }
+        }
       }
       /* Plattformen fangen Würfe auf */
       if ((k.lob || k.rain || k.shard) && p.vy > 0 && W.isPlat(Math.floor(p.x / T), Math.floor(p.y / T)) && oy < Math.floor(p.y / T) * T) { projEnd(p, p.x, Math.floor(p.y / T) * T); Z.projs.splice(i, 1); continue; }
@@ -256,6 +278,17 @@
   Z.spawnHazard = function (o) {
     const h = Object.assign({ t: 0, hits: new Set(), tick: 0, h: 20 }, o);
     if (h.kind === "rockspike" || h.kind === "roots") { const gy = W.groundBelow(h.x, h.y - 14, 40); if (gy == null) return; h.y = gy; }
+    /* W8: Wände blockieren – Stacheln/Ranken des Spielers nicht hinter Wänden, Atem/Strahl endet an der ersten Wand */
+    const P0 = Z.player;
+    if (h.owner === "p" && (h.kind === "rockspike" || h.kind === "roots") && P0 && !W.los(P0.x + P0.w / 2, P0.y + P0.h / 2, h.x, h.y - 8) && !W.los(P0.x + P0.w / 2, P0.y + 4, h.x, h.y - 8)) return;
+    /* Bodenflächen (Feuer, Gift, Lava, Giftwolke) breiten sich nicht durch Wände aus */
+    if ((h.kind === "fire" || h.kind === "poisonpool" || h.kind === "lava" || h.kind === "poisoncloud") && h.w > 0) {
+      const ty = Math.floor((h.y - 4) / T), half = h.w / 2; let L = half, R = half;
+      for (let d = 2; d < half; d += 3) if (W.solidT(W.tile(Math.floor((h.x - d) / T), ty))) { L = d; break; }
+      for (let d = 2; d < half; d += 3) if (W.solidT(W.tile(Math.floor((h.x + d) / T), ty))) { R = d; break; }
+      if (L < half || R < half) { h.w = Math.max(6, L + R); h.x += (R - L) / 2; }
+    }
+    if (h.kind === "breath" && h.w > 0) { const dir = h.dir > 0 ? 1 : -1, ty = Math.floor((h.y - 4) / T); for (let d = 4; d < h.w; d += 4) if (W.solidT(W.tile(Math.floor((h.x + dir * d) / T), ty))) { h.w = Math.max(6, d); break; } }
     if (h.kind === "rockspike") { A.play("rock", { x: h.x, vol: 0.4, gap: 0.05 }); FX.burst(h.x, h.y, 6, { col: Z.dustCol || "#8a7a70", sp: 90, ang: -Math.PI / 2, spread: 1.4, life: 0.4, size: 2.5, kind: "shard", g: 500 }); }
     Z.hazards.push(h); return h;
   };
@@ -416,8 +449,23 @@
   Z.spawnPickup = function (kind, x, y, o) {
     const p = Object.assign({ kind, x, y, vx: (Math.random() - 0.5) * 120, vy: -120 - Math.random() * 120, w: 6, h: 6, t: 0, onGround: false }, o);
     if (kind === "item" || kind === "scroll" || kind === "chest" || kind === "cursed" || kind === "food") { p.w = kind === "chest" || kind === "cursed" ? 18 : 12; p.h = kind === "chest" || kind === "cursed" ? 14 : 12; if (!o || o.vx == null) { p.vx = 0; p.vy = o && o.drop ? -160 : 0; } }
+    /* nie in Wänden/Decken oder unerreichbar (platz.js): Schwebendes braucht einen Stehplatz in Reichweite, Fallendes
+       freien Raum (und, wenn es fast senkrecht fällt, einen erreichbaren Landeplatz) */
+    if (Z.freeSpot && !p.rack && Z.level) try { placePickup(p); } catch (e) { console.error(e); }
     Z.pickups.push(p); return p;
   };
+  function placePickup(p) {
+    const mag = p.kind === "gold" || p.kind === "shard" || p.kind === "glut" || p.kind === "key";
+    if (mag || !p.float) {
+      let ok = Z.spotOK(p.x, p.y, p.w, p.h, { loose: true });
+      if (ok && !mag && Math.abs(p.vx) < 40) { const gy = W.groundBelow(p.x, p.y - 1, 26 * T); ok = gy != null && Z.spotOK(p.x, gy, p.w, p.h, { r: 24 }); }
+      if (ok) return;
+      const s = Z.freeSpot(p.x, p.y, p.w, p.h, mag ? { r: 24, maxR: 6 } : { r: 24 }); p.x = s.x; p.y = s.y;
+      if (!mag) p.vx = U.clamp(p.vx, -40, 40);
+      return;
+    }
+    const s = Z.freeSpot(p.x, p.y, p.w, p.h, { r: 24 }); p.x = s.x; p.y = s.y;
+  }
   Z.dropGold = (x, y, n) => {
     const P = Z.player; if (Z.has("goldgier")) n *= 1.6;
     n = Math.round(n); let coins = Math.min(12, Math.max(1, Math.round(n / 6)));
@@ -426,6 +474,7 @@
   Z.dropShards = (x, y, n) => { if (Z.has("splitterjaeger")) n *= 1.6; if (["a1", "a2", "s1", "s2"].some(s => Z.hasAff(Z.player.slots[s], "splitternd"))) n *= 1.3; n = Math.round(n); for (let i = 0; i < Math.min(8, n); i++) Z.spawnPickup("shard", x, y, { n: Math.ceil(n / Math.min(8, n)), vy: -80 - Math.random() * 100 }); };
   Z.updatePickups = function (dt) {
     const P = Z.player;
+    if (Z.unstickTick) Z.unstickTick(dt); /* platz.js: festsitzende Beute einmal pro Sekunde freiploppen */
     for (let i = Z.pickups.length - 1; i >= 0; i--) {
       const p = Z.pickups[i]; p.t += dt;
       const magnet = (p.kind === "gold" || p.kind === "shard" || p.kind === "glut" || p.kind === "key") && p.t > 0.45;
@@ -433,7 +482,7 @@
         const dx = P.x + P.w / 2 - p.x, dy = P.y + P.h / 2 - p.y, d = Math.hypot(dx, dy);
         if (d < (p.kind === "shard" || p.kind === "glut" || p.kind === "key" ? 400 : 90) || p.t > 2.5) { const sp = Math.min(500, 120 + p.t * 260); p.vx = dx / d * sp; p.vy = dy / d * sp; p.x += p.vx * dt; p.y += p.vy * dt; if (d < 10) { collect(p); Z.pickups.splice(i, 1); } continue; }
       }
-      if ((p.kind === "shard" || p.kind === "glut" || p.kind === "key") && p.t < 0.45) { p.vy += 300 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.96; continue; }
+      if ((p.kind === "shard" || p.kind === "glut" || p.kind === "key") && p.t < 0.45) { p.vy += 300 * dt; const nx = p.x + p.vx * dt, ny = p.y + p.vy * dt; /* nicht in Wände fliegen */ if (W.solidAt(nx, ny - 3)) { if (W.solidAt(nx, p.y - 3)) p.vx *= -0.4; else p.x = nx; if (W.solidAt(p.x, ny - 3)) p.vy *= -0.3; else p.y = ny; } else { p.x = nx; p.y = ny; } p.vx *= 0.96; continue; }
       if (!p.float) { p.vy = Math.min(p.vy + 900 * dt, 500); const ox = p.x; const b = { x: p.x - p.w / 2, y: p.y - p.h, w: p.w, h: p.h, vx: p.vx, vy: p.vy }; Z.moveBody(b, dt); p.x = b.x + p.w / 2; p.y = b.y + p.h; p.vx = b.vx; p.vy = b.vy; if (b.onGround) { p.vx *= 0.8; if (p.kind === "gold" && Math.abs(b.landV || 0) > 120) { p.vy = -(b.landV || 0) * 0.35; A.play("coin", { vol: 0.15, x: p.x, gap: 0.08 }); } } }
     }
   };

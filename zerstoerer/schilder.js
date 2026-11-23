@@ -49,7 +49,7 @@
   function keyName(a, dev) {
     if (dev === "touch") return { kind: "touch", s: L(TOUCH[a] || [a, a]) };
     if (dev === "pad") {
-      const i = inp.pad ? inp.pad[a] : null;
+      const i = inp.pad ? (a === "gear" && inp.pad.gear == null ? inp.pad.map : inp.pad[a]) : null;
       if (i != null) return { kind: "pad", s: inp.padButtonName ? inp.padButtonName(i) : PADK[i] || "?" };
       return { kind: "stick", s: a === "up" ? "▲" : a === "down" ? "▼" : "◐" };
     }
@@ -551,7 +551,7 @@
     leiter: () => ({ title: L(["Leiter", "Ladder"]), rows: [[K("up"), L([" hinauf   ", " climb   "]), K("down"), L([" hinab", " down"])]] }),
     sturz: () => ({ title: L(["Sturzangriff", "Plunge attack"]), icon: "waffen", rows: [[L(["In der Luft ", "In mid-air "]), K(["down", "a1"]), L([" – trifft hart beim Aufprall", " – hits hard on landing"])]] }),
     aufwaerts: () => ({ title: L(["Aufwärtsangriff", "Upward attack"]), icon: "waffen", rows: [[K(["up", "a1"]), L([" – mit jeder Waffe nach oben", " – any weapon, aimed up"])], [L(["in der Luft: einmal je Sprung Schwung nach oben", "in mid-air: one rising swing per jump"])]] }),
-    vorrat: () => ({ title: L(["Vor dem Tor", "Before the gate"]), icon: "trank", rows: [[K("potion"), L([" Heiltrank   ", " potion   "]), K("map"), L([" Karte   ", " map   "]), K("use"), L([" Türen & Truhen", " doors & chests"])]] }),
+    vorrat: () => ({ title: L(["Vor dem Tor", "Before the gate"]), icon: "trank", rows: [[K("potion"), L([" Heiltrank   ", " potion   "]), K("map"), L([" Karte   ", " map   "]), K("use"), L([" Türen & Truhen", " doors & chests"])]].concat(devNow() === "touch" ? [] : [[K("gear"), L([" halten: Ausrüstung ansehen", " hold: view gear"])]]) }),
     staender: () => { const P = Z.player, full = !!(P && P.slots && P.slots.a1 && P.slots.a2); return { title: L(["Waffenständer", "Weapon rack"]), icon: "waffen", rows: full ? [[K("a1"), L([" Hand 1   ", " hand 1   "]), K("a2"), L([" Hand 2", " hand 2"])], [L(["Hände voll? ", "Hands full? "]), K("use"), L([", dann ", ", then "]), K("a1"), "/", K("a2"), L([" tauscht", " swaps"])]] : [[K("use"), L([" aufheben", " pick up"])], [K("a1"), L([" Hand 1   ", " hand 1   "]), K("a2"), L([" Hand 2", " hand 2"])]] }; },
     puppe: () => ({ title: L(["Übungspuppe", "Training dummy"]), icon: "puppe", rows: [[K("a1"), K("a2"), L([" Waffen   ", " weapons   "]), K("s1"), K("s2"), L([" Fähigkeiten", " skills"])], [L(["Schild heben, kurz vor dem Treffer: ", "Raise a shield just before the hit: "]), L(["Parade", "parry"])]] }),
     parade: () => ({ title: L(["Parade", "Parry"]), icon: "schild", rows: [[L(["Schild heben, kurz vor dem Treffer", "Raise a shield just before the hit"])], [L(["Rotes ‼ nie blocken: ", "Red ‼ can't be blocked: "]), K("roll")]] })
@@ -561,7 +561,7 @@
   const TXK = {
     lauf: () => ({ rows: [[IC("schritt"), MV, L([" laufen", " move"])], [K("jump"), L([" springen", " jump"])]] }),
     rolle: () => ({ rows: [[K("roll"), L([" Rolle", " roll"])], [L(["kurz unverwundbar", "briefly invulnerable"])]] }),
-    vorrat: () => ({ rows: [[K("potion"), L([" Heiltrank", " potion"])], [K("map"), L([" Karte", " map"])]] }),
+    vorrat: () => ({ rows: [[K("potion"), L([" Heiltrank", " potion"])], [K("map"), L([" Karte", " map"])]].concat(devNow() === "touch" ? [] : [[K("gear"), L([" Ausrüstung", " gear"])]]) }),
     leiter: () => ({ rows: [[K("up"), L([" hinauf  ", " climb  "]), K("down"), L([" hinab", " down"])]] }),
     steg: () => ({ rows: [[K(["down", "jump"]), L([" durchfallen", " drop through"])]] }),
     doppel: () => ({ rows: [[K("jump"), K("jump"), L([" Doppelsprung", " double jump"])]] }),
@@ -848,7 +848,7 @@
   /* ======================= ZEICHNEN ======================= */
   function globalSig() {
     const dev = devNow();
-    const labs = dev === "touch" ? "" : ["left", "right", "up", "down", "jump", "roll", "a1", "a2", "s1", "s2", "use", "potion", "map"].map(a => keyName(a, dev).s).join(",");
+    const labs = dev === "touch" ? "" : ["left", "right", "up", "down", "jump", "roll", "a1", "a2", "s1", "s2", "use", "potion", "map", "gear"].map(a => keyName(a, dev).s).join(",");
     const fontsOK = document.fonts && document.fonts.check ? (document.fonts.check(F_TXT) && document.fonts.check(F_TTL) ? 1 : 0) : 1;
     return (Z.settings && Z.settings.lang) + "|" + dev + "|" + labs + "|" + fontsOK + "|" + kScale + "|" + (lo() ? 0 : 1);
   }

@@ -3125,6 +3125,7 @@
         if (ac.a.box && !ac.ausHit) {
           ac.ausHit = true; const sz = e.size || 1, [bx, by, bw, bh] = ac.a.box.map(v => v * sz), cx = e.x + e.w / 2, fy = e.y + e.h;
           const r = e.face > 0 ? { x: cx + bx, y: fy + by, w: bw, h: bh } : { x: cx - bx - bw, y: fy + by, w: bw, h: bh };
+          if (Z.clipHitBox) Z.clipHitBox(r, cx, e.y + e.h / 2, e.face); /* W8: Gegnerschläge enden an der Wand */
           hitArea(r, { hits: ac.a.k === "slam" ? 2 : 1, dir: e.face, src: "e" });
         }
         if (ac.a.k === "charge") { let set = actHit.get(ac); if (!set) { set = new Set(); actHit.set(ac, set); } hitArea(e, { hits: 2, dir: e.face, set, src: "e" }); }

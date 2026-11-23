@@ -108,6 +108,8 @@
   };
   /* Segenskugel: Wahl zwischen zwei Segen, ohne Preis */
   function blessOrb(x, y) {
+    /* nie in einer Wand/über dem Abgrund (platz.js); die zwei Kugeln der Teilung prüft ui.auslage */
+    if (Z.freeSpot) { const s = Z.freeSpot(x, y, 12, 26, { r: 22 }); x = s.x; y = s.y; }
     const o = { x, y, r: 26, h: 34, orb: true, t: Math.random() * 9, offer: null,
       label: () => L(["Segen wählen", "Choose a blessing"]),
       use: () => {

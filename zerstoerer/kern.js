@@ -35,15 +35,17 @@
   Z.R = Z.Rng((Date.now() ^ (Math.random() * 1e9)) >>> 0); /* Laufzeit-Zufall für Effekte und Kampf */
 
   /* ---------------- Eingabe ---------------- */
-  const ACTIONS = ["left", "right", "up", "down", "jump", "roll", "a1", "a2", "s1", "s2", "use", "potion", "pause", "map"];
+  const ACTIONS = ["left", "right", "up", "down", "jump", "roll", "a1", "a2", "s1", "s2", "use", "potion", "pause", "map", "gear"];
   /* Standardbelegung: je Aktion bis zu zwei Tasten */
   const KEYS0 = {
     left: ["KeyA", "ArrowLeft"], right: ["KeyD", "ArrowRight"], up: ["KeyW", "ArrowUp"], down: ["KeyS", "ArrowDown"],
     jump: ["Space", "KeyK"], roll: ["ShiftLeft", "KeyL"], a1: ["KeyJ", null], a2: ["KeyU", null], s1: ["KeyQ", "KeyI"], s2: ["KeyO", null],
-    use: ["KeyE", "Enter"], potion: ["KeyR", "KeyH"], pause: ["Escape", "KeyP"], map: ["KeyM", "Tab"]
+    use: ["KeyE", "Enter"], potion: ["KeyR", "KeyH"], pause: ["Escape", "KeyP"], map: ["KeyM", null],
+    gear: ["Tab", "KeyC"] /* Ausrüstung: halten = Schnellansicht (ui.js) */
   };
   /* Xbox-Layout (Standard-Gamepad): 0 A, 1 B, 2 X, 3 Y, 4 LB, 5 RB, 6 LT, 7 RT, 8 Ansicht, 9 Menü, 10 LS, 11 RS, 12–15 Steuerkreuz */
-  const PAD0 = { jump: 0, roll: 1, a1: 2, a2: 3, s1: 4, s2: 5, potion: 6, use: 7, map: 8, pause: 9 };
+  /* Ausrüstung: rechter Stick drücken (halten); zusätzlich „Ansicht“ halten statt antippen (ui.js) */
+  const PAD0 = { jump: 0, roll: 1, a1: 2, a2: 3, s1: 4, s2: 5, potion: 6, use: 7, map: 8, pause: 9, gear: 11 };
   const PADNAMES = ["A", "B", "X", "Y", "LB", "RB", "LT", "RT", "View", "Menu", "LS", "RS", "↑", "↓", "←", "→", "Xbox"];
   const inp = (Z.input = { held: {}, pressed: {}, released: {}, mouse: false, device: "keys", touch: false, vib: true, lastPad: null, axis: 0, padName: "", capture: null });
   ACTIONS.forEach(a => { inp.held[a] = false; inp.pressed[a] = false; inp.released[a] = false; });
@@ -66,11 +68,17 @@
   try { const k = JSON.parse(localStorage.getItem("imres-zerstoerer-tasten2") || "null"); if (k && typeof k === "object") for (const a of ACTIONS) if (Array.isArray(k[a])) { const v = [okCode(k[a][0]), okCode(k[a][1])]; if (v[0] || v[1]) inp.keys[a] = v; } } catch (_) {}
   /* F ist jetzt Vollbild: alte Belegung von F auf „Benutzen“ entfernen */
   try { if (!localStorage.getItem("imres-zerstoerer-fmig")) { inp.keys.use = inp.keys.use.map(c => (c === "KeyF" ? "Enter" : c)); localStorage.setItem("imres-zerstoerer-fmig", "1"); } } catch (_) {}
-  try { const p = JSON.parse(localStorage.getItem("imres-zerstoerer-pad") || "null"); if (p && typeof p === "object") for (const a in PAD0) if (Number.isInteger(p[a]) && p[a] >= 0 && p[a] < 12) inp.pad[a] = p[a]; } catch (_) {}
+  try { const p = JSON.parse(localStorage.getItem("imres-zerstoerer-pad") || "null"); if (p && typeof p === "object") { for (const a in PAD0) if (Number.isInteger(p[a]) && p[a] >= 0 && p[a] < 12) inp.pad[a] = p[a];
+    /* ältere Belegung ohne „Ausrüstung“: liegt der rechte Stick schon auf etwas anderem, bleibt Ausrüstung frei (Ansicht halten geht immer) */
+    if (!("gear" in p) && Object.keys(inp.pad).some(a => a !== "gear" && inp.pad[a] === PAD0.gear)) inp.pad.gear = null; } } catch (_) {}
   /* doppelte Knöpfe aus altem/kaputtem Speicher: dann lieber Standard */
   { const v = Object.values(inp.pad); if (new Set(v).size !== v.length) inp.pad = clone(PAD0); }
   /* jede Aktion braucht mindestens eine Taste */
   for (const a of ACTIONS) { if (!Array.isArray(inp.keys[a]) || inp.keys[a].length < 2) inp.keys[a] = [(inp.keys[a] || [])[0] || null, (inp.keys[a] || [])[1] || null]; if (!inp.keys[a][0] && !inp.keys[a][1]) inp.keys[a] = KEYS0[a].slice(); }
+  /* Tab gehörte früher zur Karte und ist jetzt „Ausrüstung halten“: alte Speicherstände umstellen; Standardtasten der
+     Ausrüstung, die der Spieler schon anders vergeben hat, bleiben frei (keine Doppelbelegung) */
+  try { if (!localStorage.getItem("imres-zerstoerer-gearmig")) { inp.keys.map = inp.keys.map.map(c => (c === "Tab" ? null : c)); if (!inp.keys.map[0] && !inp.keys.map[1]) inp.keys.map = ["KeyM", null]; localStorage.setItem("imres-zerstoerer-gearmig", "1"); } } catch (_) {}
+  inp.keys.gear = inp.keys.gear.map(c => (c && ACTIONS.some(a => a !== "gear" && inp.keys[a].includes(c)) ? null : c));
   let codeMap = {};
   inp.rebuild = () => { codeMap = {}; for (const a of ACTIONS) for (const c of inp.keys[a] || []) if (c) codeMap[c] = a; if (!codeMap.Escape) codeMap.Escape = "pause"; if (!codeMap.ShiftRight && inp.keys.roll.includes("ShiftLeft")) codeMap.ShiftRight = "roll"; };
   inp.rebuild();

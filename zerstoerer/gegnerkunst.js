@@ -104,6 +104,14 @@
   };
 
   /* ---------- Zeichnen: Namen der Techniken, Elite-Auren ---------- */
+  function qBubble(c, x, y, age, left) {
+    const pop = age < 0.18 ? 0.4 + 0.6 * (age / 0.18) : 1, a = Math.min(1, left / 0.5);
+    c.save(); c.globalAlpha = a; c.translate(x, y - (age < 0.18 ? (1 - age / 0.18) * 3 : 0) + Math.sin(age * 5) * 0.4); c.scale(pop, pop);
+    c.fillStyle = "rgba(20,14,12,.8)"; c.beginPath(); c.ellipse(0, -4, 4.2, 4.6, 0, 0, TAU); c.fill();
+    c.fillStyle = "#f4ead8"; c.beginPath(); c.ellipse(0, -4, 3.4, 3.8, 0, 0, TAU); c.fill();
+    c.fillStyle = "#b8742a"; c.font = "700 6px 'Alegreya Sans',sans-serif"; c.textAlign = "center"; c.fillText("?", 0, -1.8);
+    c.restore();
+  }
   const dp0 = Z.drawProjs;
   Z.drawProjs = function (c) {
     if (dp0) dp0.apply(this, arguments);
@@ -121,6 +129,8 @@
         c.fillStyle = ac.a.unblockable ? "#ff6a8a" : "#ffcf8a"; c.fillText(s, cx, y);
         c.globalAlpha = 1;
       }
+      /* W8: misstrauisch – kleines „?“ über dem Kopf (hat etwas gehört/gesehen, sucht) */
+      if (e.sus > 0 && !e.aware && !e.sleep && !(e.hidden > 0)) qBubble(c, cx + (e.face || 1) * e.w * 0.3, e.y - 3, e.qPop || 0, e.sus);
       if (!e.elite) continue;
       c.save(); c.globalCompositeOperation = "lighter";
       switch (e.elite) {

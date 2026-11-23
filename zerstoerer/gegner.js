@@ -202,6 +202,10 @@
   /* ======================= UPDATE ======================= */
   Z.updateEnemies = function (dt) {
     const P = Z.player;
+    /* W8: Sichtfaktor (Dunkelheit/Nebel) einmal je Bild, Lärm verarbeiten */
+    PM = sightMul();
+    if (P) playerNoise(P, dt);
+    if (noiseQ.length) hearAll();
     const lean = !!(Z.gq && Z.gq.lean);
     for (let i = Z.enemies.length - 1; i >= 0; i--) {
       const e = Z.enemies[i];
@@ -239,15 +243,186 @@
     }
   };
 
-  function canSee(e, P) {
-    if (!P || P.dead) return false;
-    if (P.invis > 0) return false;
-    const dx = P.x + P.w / 2 - (e.x + e.w / 2), dy = P.y + P.h / 2 - (e.y + e.h / 2);
-    const d = Math.hypot(dx, dy);
-    const sight = e.def.sight || 180;
-    if (d > sight * (e.aware ? 1.7 : 1)) return false;
-    if (!e.aware && Math.abs(dy) > 90) return false;
-    return W.los(e.x + e.w / 2, e.y + 4, P.x + P.w / 2, P.y + 8);
+  /* ======================= WAHRNEHMUNG (W8) =======================
+     Zustände: schlafend (leben.js) → ruhig/patrouillierend → misstrauisch („?“: hat etwas gehört oder kurz gesehen, sucht
+     die Stelle ab und beruhigt sich nach einigen Sekunden) → alarmiert (e.aware, „!“). Nur Alarmierte greifen an und
+     verfolgen. Sehen nur mit Sichtlinie über das Kachelraster; Sichtweite je Art, nach vorn weit, nach hinten kurz;
+     Finsternis/Dunkelheit und Nebel verkürzen sie, Ducken auch. Ganz nah (≈2,5 Kacheln) bemerkt jeder etwas.
+     Hören: Kampflärm, Explosionen, zerschlagene Ausstattung, Fallen, harte Landungen (Z.noise; Geräusche mit Ort
+     über A.play) – im Radius, durch Wände gedämpft. Wer selbst entdeckt, ruft nach kurzer Verzögerung (Ruf-Ring):
+     Verbündete mit Sichtlinie werden alarmiert, hinter Wänden nur misstrauisch. Alarm-Situationen (Hinterhalt,
+     Prüfung, Ereignisse, Mini-Bosse, Beschworene, Bossarenen) bleiben alarmiert.
+     Leistung: Sichtprüfung je Gegner etwa 8× pro Sekunde (versetzt), ruhende und schlafende Gegner werden nicht geprüft. */
+  const NEAR = 40, LOSE_T = 4, SUS_T = 5, PERC_DT = 0.12;
+  let PM = 1;
+  function sightMul() {
+    let m = 1;
+    if (Z.darkness > 0) m *= 0.55;
+    const wt = Z.wetter && Z.wetter(); if (wt && wt.mood === "nebel") m *= 0.75;
+    if (Z.hasPact && Z.hasPact("finster")) m *= 0.9;
+    return m;
+  }
+  Z.enemySightMul = () => PM;
+  const locked = e => !!(e.alarmLock || e.ambush || e.trial || e.nmEvent || e.nm || e.nmHunter || e.master || e.def.boss);
+  /* 0 = nichts, 1 = gespürt (ganz nah ohne Sicht), 2 = gesehen; setzt e._los (Sichtlinie zum Spieler, für Angriffe) */
+  function perceive(e, P) {
+    const ex = e.x + e.w / 2, pcx = P.x + P.w / 2, pcy = P.y + P.h / 2;
+    const dx = pcx - ex, dy = pcy - (e.y + e.h / 2), dist = Math.hypot(dx, dy);
+    if (dist > 560) { e._los = false; return 0; }
+    const los = W.los(ex, e.y + 4, pcx, P.y + 6) || W.los(ex, e.y + e.h / 2, pcx, pcy);
+    e._los = los;
+    if (P.dead || P.invis > 0) return 0;
+    if (dist < NEAR) return los ? 2 : 1;
+    if (!los) return 0;
+    const d = e.def;
+    let range = (d.sight || 180) * PM;
+    if (e.aware) range *= 1.7;
+    else {
+      const sus = e.sus > 0, front = dx * (e.face || 1) > -8;
+      range *= front ? (e.watch ? 1.25 : 1) * (sus ? 1.2 : 1) : (sus ? 0.6 : 0.35);
+      if (P.crouch) range *= 0.7;
+      if (!d.fly && Math.abs(dy) > (sus ? 140 : 90)) return 0;
+    }
+    return dist <= range ? 2 : 0;
+  }
+  function suspect(e, x, y, t) {
+    if (!e || e.dead || e.aware || e.sleep || e.def.boss) return;
+    const fresh = !(e.sus > 0);
+    e.sus = Math.max(e.sus || 0, t || SUS_T); e.susX = x; e.susY = y; e.susStill = 0;
+    if (fresh) { e.qPop = 0; const s = U.sign(x - (e.x + e.w / 2)); if (s) e.face = s; }
+  }
+  function alarm(e, how) {
+    if (!e || e.dead) return;
+    if (e.sleep) { if (Z.leben && Z.leben.wake) Z.leben.wake(e, how === "noise"); else e.sleep = false; }
+    if (e.aware) return;
+    e.aware = true; e.sus = 0; e.lostSight = 0;
+    e.alertT = how === "call" ? 0.25 + Z.R() * 0.2 : how === "noise" ? 0.35 : 0.5;
+    const P = Z.player; if (P) { const s = U.sign(P.x - e.x); if (s) e.face = s; }
+    if (e.def.snd && Z.R() < 0.6) A.play(e.def.snd, { x: e.x, y: e.y, vol: 0.4 });
+  }
+  Z.enemyAlarm = alarm; Z.enemySuspect = suspect;
+  /* Ruf: Verbündete mit Sichtlinie werden (leicht verzögert) alarmiert, gedämpft hinter Wänden nur misstrauisch */
+  function shout(e) {
+    const ex = e.x + e.w / 2, ey = e.y + 6, P = Z.player;
+    const lx = e.lkx != null ? e.lkx : P ? P.x + P.w / 2 : ex, ly = e.lky != null ? e.lky : P ? P.y + P.h : e.y + e.h;
+    let n = 0;
+    for (const o of Z.enemies) {
+      if (o === e || o.dead || o.aware || o.def.boss || o._rest || o.pendAl > 0) continue;
+      const ox = o.x + o.w / 2, oy = o.y + 6, d = Math.hypot(ox - ex, (oy - ey) * 1.3);
+      if (d > 230) continue;
+      if (d < 60 || W.los(ex, ey, ox, oy)) { o.pendAl = 0.22 + Z.R() * 0.35; o.called = true; n++; }
+      else if (d < 160 && !o.sleep) suspect(o, lx, ly, SUS_T);
+    }
+    if (n) {
+      FX.ring(ex, e.y + 2, 30, "#ffb070", 0.45, 2); FX.ring(ex, e.y + 2, 18, "#ff8a5a", 0.3, 1.5);
+      FX.text(ex, e.y - 14, L(["Alarm!", "Alarm!"]), "#ff8a6a");
+      A.play(e.def.undead ? "undead" : "monster", { vol: 0.3, x: e.x, rate: 0.85 });
+    }
+  }
+  /* ---------- Lärm ---------- */
+  const NOISE = { explode: 340, quake: 260, hitHeavy: 210, crit: 200, hitMetal: 180, hitFlesh: 160, hitBone: 160, block: 140, parry: 170, glass: 210, crate: 210, "break": 210,
+    rock: 170, swingHeavy: 120, slash: 90, swing: 80, whip: 100, punch: 110, chain: 130, arrowHit: 110, fireBig: 150, horn: 320, gong: 400, door: 170, roar: 200 };
+  const noiseQ = [];
+  /* Z.noise(x, y, Radius, {alarm}) – auch für andere Module (Fallen, Ereignisse) */
+  Z.noise = (x, y, r, o) => {
+    if (!(r > 0) || !isFinite(x) || !isFinite(y)) return;
+    for (const n of noiseQ) if (Math.abs(n.x - x) < 24 && Math.abs(n.y - y) < 24) { n.r = Math.max(n.r, r); n.alarm = n.alarm || !!(o && o.alarm); return; }
+    if (noiseQ.length < 10) noiseQ.push({ x, y, r, alarm: !!(o && o.alarm) });
+  };
+  { const play0 = A.play;
+    if (play0 && !play0.__laerm) {
+      const pw = function (name, o) {
+        const r = NOISE[name];
+        if (r && o && o.x != null && Z.player && Z.state !== "menu") { const P = Z.player, v = o.vol == null ? 1 : o.vol; Z.noise(o.x, o.y != null ? o.y : P.y + P.h / 2, r * U.clamp(0.55 + v * 0.6, 0.6, 1.15)); }
+        return play0.apply(this, arguments);
+      };
+      pw.__laerm = true; A.play = pw;
+    } }
+  function hearAll() {
+    for (const n of noiseQ) {
+      for (const e of Z.enemies) {
+        if (e.dead || e.aware || e._rest || e.def.boss || e.spawnT > 0) continue;
+        const ex = e.x + e.w / 2, ey = e.y + e.h / 2, d = Math.hypot(ex - n.x, (ey - n.y) * 1.25);
+        if (d > n.r) continue;
+        const clear = W.los(n.x, n.y - 3, ex, e.y + 4) || W.los(n.x, n.y - 3, ex, ey);
+        if (!clear && d * 2.2 > n.r) continue; /* durch Wände gedämpft */
+        if (e.sleep) { if (n.r >= 200 && d < n.r * 0.6 && Z.leben && Z.leben.wake) Z.leben.wake(e, false); continue; }
+        if ((n.alarm || n.r >= 300) && clear && d < n.r * 0.5) { alarm(e, "noise"); e.lkx = n.x; e.lky = n.y; continue; }
+        suspect(e, n.x, n.y, SUS_T);
+      }
+    }
+    noiseQ.length = 0;
+  }
+  /* Ezekiels eigener Lärm: Rennen (nicht geduckt) und harte Landungen */
+  let stepT = 0;
+  function playerNoise(P, dt) {
+    if (!P || P.dead) return;
+    if (P.justLanded && P.landV > 430) Z.noise(P.x + P.w / 2, P.y + P.h, U.clamp((P.landV - 300) * 0.45, 60, 170));
+    stepT -= dt;
+    if (stepT <= 0) { stepT = 0.3; if (P.onGround && !P.crouch && Math.abs(P.vx) > 150) Z.noise(P.x + P.w / 2, P.y + P.h - 4, 58); }
+  }
+  /* je Gegner und Bild: Wahrnehmung, Misstrauen, Ruf, Spur verlieren */
+  function senses(e, dt, P) {
+    const d = e.def;
+    if (e.sleep) { e._los = false; return false; }
+    e.seeT = (e.seeT == null ? Z.R() * PERC_DT : e.seeT) - dt;
+    if (e.seeT <= 0) { e.seeT = PERC_DT + Z.R() * 0.04; e._pv = perceive(e, P); }
+    const pv = e.lostT > 0 ? 0 : e._pv || 0, sees = pv === 2;
+    if (e.lostT > 0) e.lostT -= dt;
+    if (sees) { e.lkx = P.x + P.w / 2; e.lky = P.y + P.h; e.lostSight = 0; }
+    /* Ruf-Alarm von einem Kameraden */
+    if (e.pendAl > 0) { e.pendAl -= dt; if (e.pendAl <= 0 && !e.aware) { alarm(e, "call"); FX.text(e.x + e.w / 2, e.y - 10, "?!", "#e8c890"); } }
+    if (!e.aware) {
+      if (sees) alarm(e, "sight");
+      else if (pv === 1) suspect(e, P.x + P.w / 2, P.y + P.h, SUS_T);
+    } else if (!sees) {
+      e.lostSight = (e.lostSight || 0) + dt;
+      if (!locked(e) && (e.lostSight > LOSE_T || P.invis > 0 || e.lostT > 0)) {
+        e.aware = false; e.alertT = 0; e.called = false; e._wasAware = false;
+        suspect(e, e.lkx != null ? e.lkx : P.x + P.w / 2, e.lky != null ? e.lky : P.y + P.h, SUS_T);
+      }
+    }
+    /* frisch alarmiert (egal wodurch: gesehen, getroffen, Hinterhalt) → einmal rufen; Gerufene rufen nicht weiter */
+    if (e.aware && !e._wasAware) {
+      e.sus = 0; if (e.watch) e.watch = false;
+      if (!e.called && !d.boss && !e.master) { e.callT = 0.3 + Z.R() * 0.2; }
+      e.called = true; /* leben.js-Ruf (ohne Sichtlinie) übernehmen wir hier */
+      if (e.lkx == null) { e.lkx = P.x + P.w / 2; e.lky = P.y + P.h; }
+    }
+    e._wasAware = e.aware;
+    if (e.callT > 0) { e.callT -= dt; if (e.callT <= 0 && e.aware) shout(e); }
+    return sees;
+  }
+  /* Misstrauisch: zur gehörten/gesehenen Stelle gehen, umsehen, nach einer Weile beruhigen */
+  function search(e, dt) {
+    const d = e.def;
+    e.sus -= dt; e.qPop = (e.qPop || 0) + dt;
+    if (e.sus <= 0) { e.sus = 0; e.pDir = 0; e.patrol = 0.8 + Z.R(); return false; }
+    const dx = e.susX - (e.x + e.w / 2);
+    if (d.fly) {
+      e.vx = U.approach(e.vx, U.clamp(dx / 40, -1, 1) * d.spd * 0.45, 300 * dt);
+      e.vy = U.approach(e.vy, U.clamp((e.susY - 34 - (e.y + e.h / 2)) / 40, -1, 1) * d.spd * 0.3, 300 * dt);
+      if (Math.abs(dx) > 6) e.face = U.sign(dx);
+      const ob = e.ghost; if (d.ai === "phase") e.ghost = true; e.noPlat = true; Z.moveBody(e, dt); e.ghost = ob;
+      return true;
+    }
+    if (d.ai === "turret" || e.ceil || e.watch || d.spd === 0) {
+      if (Math.abs(dx) > 6) e.face = U.sign(dx);
+      if (!e.ceil) { e.vx = U.approach(e.vx, 0, 900 * dt); e.vy += (Z.ENEMY_GRAV || 1400) * dt; Z.moveBody(e, dt); }
+      return true;
+    }
+    let dir = 0;
+    if (Math.abs(dx) > 14 && e.susStill < 0.7) {
+      dir = U.sign(dx); const x0 = e.x;
+      moveToward(e, dt, dir, 0.6); e.face = dir;
+      if (Math.abs(e.x - x0) < 0.2) e.susStill += dt; else e.susStill = 0;
+    } else {
+      /* angekommen (oder kommt nicht weiter): umsehen */
+      e.susStill = Math.max(e.susStill, 0.7);
+      e.lookT = (e.lookT || 0) - dt; if (e.lookT <= 0) { e.lookT = 0.8 + Z.R() * 0.6; e.face = -(e.face || 1); }
+      moveToward(e, dt, 0, 0);
+    }
+    return true;
   }
 
   function think(e, dt, P) {
@@ -269,16 +444,8 @@
       Z.moveBody(e, dt);
       return;
     }
-    /* Wahrnehmung */
-    const sees = canSee(e, P) && !(e.lostT > 0);
-    if (e.lostT > 0) e.lostT -= dt;
-    if (sees && !e.aware) {
-      e.aware = true; e.alertT = 0.5;
-      if (d.snd && Z.R() < 0.6) A.play(d.snd, { x: e.x, y: e.y, vol: 0.4 });
-      /* Gruppe mitreißen */
-      for (const o of Z.enemies) if (o !== e && !o.aware && !o.dead && U.dist(o.x, o.y, e.x, e.y) < 110) { o.aware = true; o.alertT = 0.5 + Z.R() * 0.3; }
-    }
-    if (e.aware && !sees) { e.forget = (e.forget || 0) + dt; if (e.forget > 5 || P.invis > 0) { e.aware = false; e.forget = 0; } } else e.forget = 0;
+    /* Wahrnehmung (W8: siehe senses) */
+    senses(e, dt, P);
     if (e.alertT > 0) e.alertT -= dt;
     e.cd -= dt;
     const tgt = e.decoy && !e.decoy.dead ? { x: e.decoy.x, y: e.decoy.y, w: e.decoy.w, h: e.decoy.h } : P;
@@ -318,11 +485,13 @@
   function faceTo(e, dx) { if (Math.abs(dx) > 4) e.face = U.sign(dx); }
   function idle(e, dt) {
     const d = e.def;
+    if (e.sus > 0 && !e.aware && search(e, dt)) return;
     if (d.fly) { e.vx = Math.sin(e.anim * 0.8) * 20; e.vy = Math.cos(e.anim * 1.3) * 12; Z.moveBody(e, dt); return; }
     if (d.ai === "turret") { e.vx = 0; e.vy += (Z.ENEMY_GRAV || 1400) * dt; Z.moveBody(e, dt); return; }
     e.patrol -= dt;
-    if (e.patrol <= 0) { e.patrol = 1.5 + Z.R() * 2.5; e.pDir = Z.R() < 0.4 ? 0 : Z.R() < 0.5 ? -1 : 1; }
+    if (e.patrol <= 0) { e.patrol = 1.5 + Z.R() * 2.5; e.pDir = Z.R() < 0.4 ? 0 : Z.R() < 0.5 ? -1 : 1; if (e.pDir) e.face = e.pDir; /* W8: schaut, wohin es geht */ }
     moveToward(e, dt, e.pDir || 0, 0.35);
+    if (e.pDir) e.face = e.pDir;
   }
   /* Laufen mit Kantenprüfung */
   function moveToward(e, dt, dir, spd) {
@@ -398,7 +567,8 @@
       if (Math.abs(dy) > maxDy && !(d.fly && a.k !== "hit")) continue;
       if (a.k === "summon" && countMinions(e) >= (a.max || 4)) continue;
       if (a.k === "heal" && !Z.enemies.some(o => !o.dead && o !== e && o.hp < o.hpMax * 0.7 && U.dist(o.x, o.y, e.x, e.y) < 260)) continue;
-      if ((a.k === "shoot" || a.k === "lob" || a.k === "web" || a.k === "pull" || a.k === "beam") && !W.los(e.x + e.w / 2, e.y + 6, P.x + P.w / 2, P.y + 10)) continue;
+      /* W8: kein Angriff ohne Sichtlinie (gecacht aus der Wahrnehmung) – außer Beschwören/Heilen/Schild/Wachsen/Unsichtbar */
+      if (!NOLOS[a.k] && !hasLos(e, P)) continue;
       opts.push(a);
     }
     if (!opts.length) return false;
@@ -407,6 +577,11 @@
     for (const a of opts) { r -= a.w || 1; if (r <= 0) { pick = a; break; } }
     startAct(e, pick, P);
     return true;
+  }
+  const NOLOS = { summon: 1, heal: 1, shield: 1, grow: 1, invis: 1 };
+  function hasLos(e, P) {
+    if (e._los == null || e.seeT == null) e._los = W.los(e.x + e.w / 2, e.y + 4, P.x + P.w / 2, P.y + 6) || W.los(e.x + e.w / 2, e.y + e.h / 2, P.x + P.w / 2, P.y + P.h / 2);
+    return e._los;
   }
   const d0 = e => e.def || {};
   function countMinions(e) { return Z.enemies.filter(o => !o.dead && o.master === e).length; }
@@ -456,7 +631,7 @@
   function meleeCheck(e, a, P, mul) {
     if (!P || P.dead) return;
     const r = hitbox(e, a.box);
-    if (U.overlap(r, P)) { Z.hurtPlayer(dmgP(e, mul || a.dmg), { x: e.x + e.w / 2, kb: a.kb || 170, attacker: e, melee: true, unblockable: a.unblockable, parryable: !a.unblockable, eff: a.eff }); e.act && (e.act.hit = true); if (a.hitSfx) A.play(a.hitSfx, { x: e.x, vol: 0.5 }); }
+    if (U.overlap(r, P) && Z.meleeLos(e, P, r)) { Z.hurtPlayer(dmgP(e, mul || a.dmg), { x: e.x + e.w / 2, kb: a.kb || 170, attacker: e, melee: true, unblockable: a.unblockable, parryable: !a.unblockable, eff: a.eff }); e.act && (e.act.hit = true); if (a.hitSfx) A.play(a.hitSfx, { x: e.x, vol: 0.5 }); }
     for (const al of Z.allies) if (al.kind === "illusion" && U.overlap(r, al)) al.t += 1;
   }
   function onActStart(e, a, P, tgt) {
@@ -488,12 +663,15 @@
       }
       case "grab": {
         const r = hitbox(e, a.box);
-        if (P && U.overlap(r, P) && P.iframe <= 0 && !P.dead) { e.act.grab = true; P.grabbed = e; P.grabT = 0; P.mash = 0; FX.text(P.x + P.w / 2, P.y - 10, L(["Gepackt! Rütteln!", "Grabbed! Mash!"]), "#ffb070"); }
+        if (P && U.overlap(r, P) && P.iframe <= 0 && !P.dead && Z.meleeLos(e, P, r)) { e.act.grab = true; P.grabbed = e; P.grabT = 0; P.mash = 0; FX.text(P.x + P.w / 2, P.y - 10, L(["Gepackt! Rütteln!", "Grabbed! Mash!"]), "#ffb070"); }
         break;
       }
       case "spray": Z.spawnHazard({ kind: "breath", x: cx + e.face * 6, y: e.y + e.h * 0.35, w: a.len || 70, dir: e.face, life: a.act, dmg: dmgP(e, 0.45), owner: "e", eff: a.eff, col: a.col }); break;
       case "dive": { const t = P; const ang = Math.atan2(t.y + 10 - cy, t.x + t.w / 2 - cx); e.act.dv = [Math.cos(ang) * (a.spd || 280), Math.sin(ang) * (a.spd || 280)]; break; }
-      case "beam": Z.spawnHazard({ kind: "zone", x: cx + e.face * 140, y: e.y + e.h * 0.5 + 6, w: 280, hgt: 10, warn: 0, active: a.act, life: a.act, dmg: dmgP(e, 1.2), owner: "e", col: a.col }); FX.addShake(2); break;
+      case "beam": { /* W8: Strahl endet an der ersten Wand */
+        const by = e.y + e.h * 0.5 + 6 - 5, bty = Math.floor(by / T); let len = 280;
+        for (let q = 6; q < 280; q += 4) if (W.solidT(W.tile(Math.floor((cx + e.face * q) / T), bty))) { len = Math.max(10, q); break; }
+        Z.spawnHazard({ kind: "zone", x: cx + e.face * len / 2, y: e.y + e.h * 0.5 + 6, w: len, hgt: 10, warn: 0, active: a.act, life: a.act, dmg: dmgP(e, 1.2), owner: "e", col: a.col }); FX.addShake(2); break; }
       case "pull": {
         if (P && W.los(cx, cy, P.x + P.w / 2, P.y + 10)) { e.act.pull = true; e.act.tether = true; FX.text(P.x + P.w / 2, P.y - 8, L(["Gezogen!", "Pulled!"]), "#eee8f0"); }
         break;

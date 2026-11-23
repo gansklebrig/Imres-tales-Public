@@ -1390,12 +1390,14 @@
       if (get(x, y) === 1 && get(x - 1, y) === 0 && get(x + 1, y) === 0 && get(x, y - 1) === 0 && get(x, y + 1) === 0) set(x, y, 0);
     }
     /* Parcours: Gruben in lange Böden schlagen (nicht im Start-/Zielraum, nicht in Leiter-/Türspalten) */
-    carvePits({ get, set, cells, startCell, endCell }, R, B);
-    /* Gruben, unter denen ein Raum liegt, werden zu Schächten nach unten – mit Leiter zum Wiederhochklettern */
-    if (!ABYSS[biomeId]) voidToShafts({ get, set, cells, W, H }, R);
+    const carved = new Set();
+    carvePits({ get, set, cells, startCell, endCell, W, carved }, R, B);
+    /* Löcher im Boden: im Schloss führt jedes in die Etage darunter (Schacht, notfalls ein Grubenkeller im leeren
+       Raster darunter) – sonst wird es eine sichtbare Bodenfalle. Echte Abgründe nur noch in Schlund und Zinnen. */
+    const pitLog = resolvePits({ get, set, cells, W, H, gw, gh, carved, biome: biomeId, startCell }, R, B);
     /* Stacheln brauchen Boden */
     for (let y = 0; y < H - 1; y++) for (let x = 0; x < W; x++) if (get(x, y) === 3 && get(x, y + 1) !== 1) set(x, y + 1, 1);
-    const lv = { biome: biomeId, seed, W, H, tiles, marks, cells, path, gw, gh, startCell, endCell, flow: B.flow, out: !!B.out, gates };
+    const lv = { biome: biomeId, seed, W, H, tiles, marks, cells, path, gw, gh, startCell, endCell, flow: B.flow, out: !!B.out, gates, pitLog };
     lv.get = get; lv.set = set;
     placeSpecial(lv, R, B, opts);
     return lv;
@@ -1425,40 +1427,140 @@
         for (let gx = x0 + 2; gx + gl <= x1 - 1; gx++) { let bad = false; if (vert) for (let x = gx - 1; x <= gx + gl; x++) { const rel = x - ox; if (rel >= 8 && rel <= 15) bad = true; } if (!bad) opts.push(gx); }
         if (!opts.length) continue;
         const gx = opts[R.int(0, opts.length - 1)];
-        for (let x = gx; x < gx + gl; x++) for (let y = r; y <= Math.min(r + 2, oy + CH - 1); y++) { if (g(x, y) === 1) lv.set(x, y, 9); else break; }
+        for (let x = gx; x < gx + gl; x++) for (let y = r; y <= Math.min(r + 2, oy + CH - 1); y++) { if (g(x, y) === 1) { lv.set(x, y, 9); if (lv.carved) lv.carved.add(y * lv.W + x); } else break; }
         /* manchmal ein bröckelnder Steg über der Grube */
         if (gl >= 3 && R.chance(0.3)) for (let x = gx; x < gx + gl; x++) lv.set(x, r, 10);
       }
     }
   }
-  const ABYSS = { schlund: 1, glut: 1, sturm: 1, zinnen: 1 };
-  function voidToShafts(lv, R) {
-    const g = lv.get, done = new Set();
-    for (let y = 1; y < lv.H - 1; y++) for (let x = 1; x < lv.W - 1; x++) {
-      if (g(x, y) !== 9 || g(x, y - 1) === 9 || done.has(x + "," + y)) continue;
-      /* Lauf der Grube in dieser Zeile */
-      let x1 = x; while (g(x1 + 1, y) === 9) x1++;
-      for (let q = x; q <= x1; q++) done.add(q + "," + y);
-      const cy = Math.floor(y / CH), cxl = Math.floor(x / CW);
-      const below = lv.cells[cxl + "," + (cy + 1)];
-      /* nicht in Geheimräume durchbrechen (die bleiben hinter rissigen Wänden verborgen) */
-      if (!below || below.kind === "secret") continue;
-      /* Grube und Fels darunter bis in den unteren Raum öffnen */
-      let ok = true; const bottoms = [], undo = [];
-      const setU = (q, yy, v) => { undo.push([q, yy, g(q, yy)]); lv.set(q, yy, v); };
-      for (let q = x; q <= x1; q++) {
-        let yy = y; while (g(q, yy) === 9) { setU(q, yy, 0); yy++; }
-        let n = 0; while (n < 7 && (g(q, yy) === 1 || g(q, yy) === 7)) { setU(q, yy, 0); yy++; n++; }
-        if (n >= 7) ok = false;
-        let fy = yy; while (fy < lv.H - 1 && g(q, fy + 1) !== 1 && g(q, fy + 1) !== 2 && g(q, fy + 1) !== 8 && fy - y < 40) fy++;
-        bottoms.push(fy);
+  /* Echte Abgründe (Kachel 9) nur noch, wo sie hingehören: Felsspalten im Spinnenschlund und der Blick hinab über den Wolken
+     an den Zinnen. Überall sonst (Schloss, Turm, See, Glutgassen) gilt: ein Loch im Boden führt in die Etage darunter –
+     oder es ist sichtbar eine Bodenfalle (Stachelgrube, Lavarinne, Wasserbecken), sodass Schaden einen Grund hat. */
+  const ABYSS = (Z.ABYSS = { schlund: 1, zinnen: 1 });
+  const PIT_TRAP = (Z.PIT_TRAP = { schmiede: 5, glut: 5, hafen: 6, see: 6 }); /* sonst Stacheln (3) */
+  const PIT_LAVA_ONLY = { glut: 1 }; /* Glutgassen: Löcher sind Lavarinnen, keine Schächte */
+  const PIT_DROP = 9; /* Fallschaden ab 12 Kacheln (ebenen.js): Schächte bleiben mit Luft für einen Sprung darunter, sonst ein Zwischenpodest */
+  function resolvePits(lv, R, B) {
+    const g = lv.get, W = lv.W, H = lv.H, id = lv.biome, cells = lv.cells;
+    const log = [];
+    if (ABYSS[id]) return log;
+    const trapTile = PIT_TRAP[id] || 3, gentle = !(B.tier || 0);
+    /* Gruben ganz unten reichen bis in den Kartenrand: der bleibt Fels */
+    for (let x = 0; x < W; x++) for (const y of [0, H - 1]) if (g(x, y) === 9) lv.set(x, y, 1);
+    for (let y = 0; y < H; y++) for (const x of [0, W - 1]) if (g(x, y) === 9) lv.set(x, y, 1);
+    const cellAt = (x, y) => cells[Math.floor(x / CW) + "," + Math.floor(y / CH)];
+    const rockV = v => v === 1 || v === 7;
+    /* Zusammenhängende Löcher sammeln */
+    const done = new Uint8Array(W * H), comps = [];
+    for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+      if (g(x, y) !== 9 || done[y * W + x]) continue;
+      const q = [[x, y]], tiles = []; done[y * W + x] = 1;
+      while (q.length) {
+        const [a, b] = q.pop(); tiles.push([a, b]);
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = a + dx, ny = b + dy; if (nx < 1 || ny < 1 || nx >= W - 1 || ny >= H - 1 || done[ny * W + nx] || g(nx, ny) !== 9) continue; done[ny * W + nx] = 1; q.push([nx, ny]); }
       }
-      /* Leiter in der Mitte des Schachts vom unteren Boden bis zur Grubenkante */
-      const lx = Math.round((x + x1) / 2), bot = bottoms[lx - x];
-      /* zu dicker Fels: alles zurück, die Grube bleibt Grube (sonst hinge eine Leiter unter dem Abgrund) */
-      if (!ok) { for (let k = undo.length - 1; k >= 0; k--) lv.set(undo[k][0], undo[k][1], undo[k][2]); continue; }
-      for (let yy = bot; yy >= y; yy--) { const v = g(lx, yy); if (v === 0 || v === 2) lv.set(lx, yy, 4); else if (v !== 4) break; }
+      comps.push(tiles);
     }
+    /* Fall wie im Prüfer: bis die nächste Kachel nicht mehr Luft ist; Rückgabe Stehzeile oder -1 bei Gefahr darunter */
+    let lastHaz = 0;
+    const fallTo = (x, y) => { let yy = y; while (yy < H - 2 && g(x, yy + 1) === 0) yy++; const v = g(x, yy + 1); if (v === 1 || v === 2 || v === 4 || v === 7 || v === 8 || v === 10 || v === 11) return yy; /* auch bröckelnde Stege und Fährstrecken */ lastHaz = v * 100 + ((yy + 1) % CH); return -1; };
+    /* von unten nach oben: tiefere Löcher sind schon aufgelöst, wenn ein Schacht darüber in sie hineinführt */
+    comps.sort((a, b) => Math.min(...b.map(p => p[1])) - Math.min(...a.map(p => p[1])));
+    for (const tiles of comps) {
+      const cols = new Map();
+      for (const [x, y] of tiles) { const c = cols.get(x); if (!c) cols.set(x, [y, y]); else { c[0] = Math.min(c[0], y); c[1] = Math.max(c[1], y); } }
+      const xs = [...cols.keys()].sort((a, b) => a - b), x0 = xs[0], x1 = xs[xs.length - 1];
+      const top = Math.min(...xs.map(x => cols.get(x)[0])), bot = Math.max(...xs.map(x => cols.get(x)[1]));
+      const crumble = xs.some(x => g(x, cols.get(x)[0] - 1) === 10);
+      /* Stehzeile neben dem Loch: höchste Bodenkante links oder rechts davon (Parcoursräume haben Luft über der Grube) */
+      let stand = (crumble ? top - 1 : top) - 1;
+      for (const sx of [x0 - 1, x1 + 1]) for (let y = top - 1; y >= top - 5; y--) if (g(sx, y) === 0 && rockV(g(sx, y + 1))) { stand = Math.min(stand, y); break; }
+      const carvedPit = tiles.every(([x, y]) => lv.carved && lv.carved.has(y * W + x));
+      const up = cellAt(x0, top);
+      const undo = [], setU = (x, y, v) => { undo.push([x, y, g(x, y)]); lv.set(x, y, v); };
+      const rollback = () => { for (let k = undo.length - 1; k >= 0; k--) lv.set(undo[k][0], undo[k][1], undo[k][2]); undo.length = 0; };
+      const rec = { x0, x1, y: top, w: xs.length, cell: up ? up.x + "," + up.y : null, carved: carvedPit };
+      /* Leiter in der Mitte, freie Spalten bekommen bei zu tiefem Fall ein Zwischenpodest (Steg) */
+      const finishShaft = () => {
+        const lx = xs[(xs.length - 1) >> 1], lb = fallTo(lx, top);
+        if (lb < 0) return false;
+        for (let yy = lb; yy >= top; yy--) { const v = g(lx, yy); if (v === 0 || v === 2) setU(lx, yy, 4); else if (v !== 4) break; }
+        const free = xs.filter(x => x !== lx);
+        let s = stand, maxD = 0;
+        for (let k = 0; k < 4 && free.length; k++) {
+          let D = 0, bad = false;
+          for (const x of free) { const L = fallTo(x, s); if (L < 0) { bad = true; break; } D = Math.max(D, L - s); }
+          if (bad) return false;
+          if (!k) maxD = D;
+          rec.rest = D;
+          if (D <= PIT_DROP) break;
+          const p = s + 1 + Math.min(PIT_DROP, Math.ceil(D / 2));
+          let any = false; for (const x of free) if (g(x, p) === 0) { setU(x, p, 2); any = true; }
+          if (!any) break;
+          rec.podest = (rec.podest || 0) + 1; s = p - 1;
+        }
+        rec.drop = Math.max(maxD, lb - stand); return true;
+      };
+      if (!PIT_LAVA_ONLY[id]) {
+        /* 1) Schacht: Loch und Fels darunter öffnen, bis ein Raum kommt (nicht in Geheimräume, nicht durch den Kartenrand) */
+        let ok = true;
+        for (const x of xs) {
+          let yy = cols.get(x)[0];
+          while (g(x, yy) === 9) { setU(x, yy, 0); yy++; }
+          let n = 0;
+          while (rockV(g(x, yy))) { const c = cellAt(x, yy); if (n >= 12 || yy >= H - 2 || (c && c.kind === "secret")) { ok = false; rec.why = yy >= H - 2 ? "rand" : c && c.kind === "secret" ? "geheim" : "dick"; break; } setU(x, yy, 0); yy++; n++; }
+          if (!ok) break;
+          const v = g(x, yy), c = cellAt(x, yy);
+          if (!(v === 0 || v === 2 || v === 4 || v === 8 || v === 10 || v === 11) || !c || c.kind === "secret") { ok = false; rec.why = !c ? "leer" : c.kind === "secret" ? "geheim" : "ziel" + v; break; }
+        }
+        if (ok && finishShaft()) { rec.how = "schacht"; log.push(rec); continue; }
+        if (ok) rec.why = "gefahr" + lastHaz;
+        rollback();
+        /* 2) Grubenkeller: leerer Rasterplatz darunter → eine kleine Kammer mit Leiter zurück (wird zur Sackgasse mit Lohn) */
+        const cx = Math.floor(x0 / CW), cy = Math.floor(top / CH) + 1;
+        if (up && Math.floor(x1 / CW) === cx && cy < lv.gh && !cells[cx + "," + cy] && up.kind !== "secret") {
+          const ox = cx * CW, oy = cy * CH;
+          const Ls = U.clamp(stand + PIT_DROP, oy + 5, oy + 10), t0 = Math.max(oy + 1, Ls - 5);
+          const mid = Math.round((x0 + x1) / 2), half = R.int(6, 8);
+          const a = U.clamp(Math.min(x0 - 2, mid - half), ox + 2, ox + CW - 3), b = U.clamp(Math.max(x1 + 2, mid + half), ox + 2, ox + CW - 3);
+          for (const x of xs) for (let yy = cols.get(x)[0]; yy < t0; yy++) setU(x, yy, 0);
+          for (let yy = t0; yy <= Ls; yy++) for (let x = a; x <= b; x++) setU(x, yy, 0);
+          /* abgerundete Ecken und eine Nische, damit es nicht wie ein Kasten aussieht */
+          for (const [x, y] of [[a, t0], [b, t0], [a, t0 + 1], [b, t0 + 1]]) if (!xs.includes(x)) setU(x, y, 1);
+          if (R.chance(0.5)) { const nx = R.chance(0.5) ? a - 1 : b + 1; if (nx > ox + 1 && nx < ox + CW - 2) for (let yy = Ls - 2; yy <= Ls; yy++) setU(nx, yy, 0); }
+          if (finishShaft()) {
+            const nc = { x: cx, y: cy, need: { U: "P" }, kind: "side", depth: (up.depth || 0) + 1, dist: (up.dist != null ? up.dist : 0) + 1, root: up.root || (up.kind === "path" ? up : null), tpl: "grubenkeller", dead: true, pit: true };
+            if (!nc.root) delete nc.root;
+            cells[cx + "," + cy] = nc; up.need.D = up.need.D || "P";
+            rec.how = "keller"; log.push(rec); continue;
+          }
+          rollback();
+        }
+      }
+      /* 3) kein Weg nach unten: gefräste Gruben im Torhof (und mit etwas Glück auch sonst) einfach zuschütten,
+            sonst sichtbare Bodenfalle – flach, mit Fels darunter */
+      if (carvedPit && !PIT_LAVA_ONLY[id] && (gentle || !R.chance(Math.min(0.8, 0.2 + trapDens(B) * 0.6)))) {
+        for (const [x, y] of tiles) lv.set(x, y, 1);
+        if (crumble) for (const x of xs) if (g(x, top - 1) === 10) lv.set(x, top - 1, 1);
+        rec.how = "zu"; log.push(rec); continue;
+      }
+      if (gentle && !R.chance(0.45)) {
+        /* Torhof: eine harmlose Mulde (eine Kachel tief) statt Stacheln – man steigt einfach wieder heraus */
+        for (const x of xs) { const [t, b] = cols.get(x); for (let yy = t; yy <= b; yy++) lv.set(x, yy, 1); if (!crumble) lv.set(x, t, 0); else lv.set(x, t - 1, 0); }
+        rec.how = "mulde"; log.push(rec); continue;
+      }
+      for (const x of xs) {
+        const [t, b] = cols.get(x), deep = b > t && !crumble;
+        for (let yy = t; yy <= b; yy++) lv.set(x, yy, 1);
+        const ty = deep ? t + 1 : t;
+        if (deep) lv.set(x, t, 0);
+        lv.set(x, ty, trapTile);
+        if (trapTile !== 3 && deep) lv.set(x, t, trapTile === 6 ? 6 : 0); /* Becken: Wasser bis zum Rand, Lava etwas tiefer */
+        if (!rockV(g(x, ty + 1))) lv.set(x, ty + 1, 1);
+      }
+      rec.how = trapTile === 3 ? "stacheln" : trapTile === 5 ? "lava" : "wasser"; log.push(rec);
+    }
+    return log;
   }
   /* Fallen auf normale Räume streuen – je Gebiet passend */
   /* Jedes Gebiet hat sein eigenes Fallensystem (Mechanik und Zeichnung in fallen.js). Liste = Ziehgewicht (Mehrfachnennung);

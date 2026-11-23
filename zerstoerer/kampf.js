@@ -14,11 +14,74 @@
   W.isLadder = (tx, ty) => W.tile(tx, ty) === 4;
   /* Plattform: Steg, Treppe, oberste Leiterkachel */
   W.isPlat = (tx, ty) => { const v = W.tile(tx, ty); return v === 2 || v === 8 || v === 10 || (v === 4 && W.tile(tx, ty - 1) !== 4 && !W.solidT(W.tile(tx, ty - 1))); };
-  /* Sichtlinie (für Gegner) */
-  W.los = (x0, y0, x1, y1) => {
-    const d = Math.hypot(x1 - x0, y1 - y0), n = Math.ceil(d / 8);
-    for (let i = 1; i < n; i++) { const t = i / n; if (W.solidAt(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t)) return false; }
-    return true;
+  /* W8: Sichtlinie über das Kachelraster – Schritt für Schritt durch jede berührte Kachel (DDA statt Stichproben
+     alle 8 px, durch die Linien an Ecken vorbeischlüpften). Wände, rissige Wände und geschlossene Gitter (12) blockieren,
+     Stege/Leitern/Treppen nicht. Wo sich zwei massive Kacheln nur an der Ecke berühren, schlüpft nichts durch.
+     Rückgabe: Anteil t (0…1) der Strecke bis zur ersten massiven Kachel, sonst −1. Startkachel zählt nie,
+     Zielkachel nur mit endToo (Geschosse). */
+  const solidTT = (tx, ty) => W.solidT(W.tile(tx, ty));
+  function rayT(x0, y0, x1, y1, endToo) {
+    let tx = Math.floor(x0 / T), ty = Math.floor(y0 / T);
+    const ex = Math.floor(x1 / T), ey = Math.floor(y1 / T);
+    if (tx === ex && ty === ey) return -1;
+    const dx = x1 - x0, dy = y1 - y0, ax = Math.abs(dx), ay = Math.abs(dy), sx = dx > 0 ? 1 : -1, sy = dy > 0 ? 1 : -1;
+    const ddx = ax > 1e-9 ? T / ax : Infinity, ddy = ay > 1e-9 ? T / ay : Infinity;
+    let mx = ax > 1e-9 ? (sx > 0 ? (tx + 1) * T - x0 : x0 - tx * T) / ax : Infinity;
+    let my = ay > 1e-9 ? (sy > 0 ? (ty + 1) * T - y0 : y0 - ty * T) / ay : Infinity;
+    for (let n = 0; n < 512; n++) {
+      let t;
+      if (Math.abs(mx - my) < 1e-9) { t = mx; if (t > 1) return -1; if (solidTT(tx + sx, ty) && solidTT(tx, ty + sy)) return t; tx += sx; ty += sy; mx += ddx; my += ddy; }
+      else if (mx < my) { t = mx; if (t > 1) return -1; tx += sx; mx += ddx; }
+      else { t = my; if (t > 1) return -1; ty += sy; my += ddy; }
+      if (tx === ex && ty === ey) return endToo && solidTT(tx, ty) ? t : -1;
+      if (solidTT(tx, ty)) return t;
+    }
+    return -1;
+  }
+  /* Sichtlinie (Gegner, Zielhilfe, Nahkampf, Explosionen) */
+  W.los = (x0, y0, x1, y1) => rayT(x0, y0, x1, y1, false) < 0;
+  /* Strahl mit Zielkachel: Anteil bis zur Wand oder −1 (Geschosse, gefegt statt nur Endpunkt) */
+  W.rayHit = (x0, y0, x1, y1) => rayT(x0, y0, x1, y1, true);
+  /* Nahkampf-Sichtlinie: von Mitte bzw. Kopf des Angreifers a zu Mitte, Kopf oder nächstem getroffenen Punkt von b
+     (r = Treffer-Rechteck). Ein freies Paar genügt – so trifft man über Stufen und Kanten, aber nie durch eine Wand. */
+  Z.meleeLos = (a, b, r) => {
+    if (!a || !b) return true;
+    const ax = a.x + a.w / 2, ay = a.y + a.h / 2, at = a.y + Math.min(6, a.h * 0.3);
+    const bx = b.x + b.w / 2, by = b.y + b.h / 2, bt = b.y + Math.min(6, b.h * 0.3);
+    if (W.los(ax, ay, bx, by) || W.los(ax, at, bx, bt)) return true;
+    if (r) {
+      const x0 = Math.max(r.x, b.x), x1 = Math.min(r.x + r.w, b.x + b.w), y0 = Math.max(r.y, b.y), y1 = Math.min(r.y + r.h, b.y + b.h);
+      if (x1 > x0 && y1 > y0 && W.los(ax, ay, U.clamp(ax, x0, x1), U.clamp(ay, y0, y1))) return true;
+    }
+    return false;
+  };
+  /* Treffer-Rechteck an der ersten Wand vom Ursprung (ox, oy) aus abschneiden – waagrecht in Richtung dir bzw. nach oben
+     (up). Die Wandkachel selbst bleibt drin (rissige Wände sollen brechen), alles dahinter fällt weg.
+     Rückgabe: Aufprallpunkt {x, y, v} (v = Kachelwert), wenn die Klinge an einer Wand abprallt, sonst null. */
+  Z.clipHitBox = (r, ox, oy, dir, up) => {
+    if (!r || !W.lv) return null;
+    if (up) {
+      const tx = Math.floor(ox / T), top = Math.floor(r.y / T);
+      for (let ty = Math.floor(oy / T) - 1; ty >= top; ty--) {
+        const v = W.tile(tx, ty);
+        if (W.solidT(v)) { const cut = ty * T, over = (ty + 1) * T - r.y; if (r.y < cut) { const b = r.y + r.h; r.y = cut; r.h = Math.max(0, b - cut); } return over > 3 ? { x: ox, y: (ty + 1) * T, v } : null; }
+      }
+      return null;
+    }
+    const ty = Math.floor(oy / T), t0 = Math.floor(ox / T);
+    if (dir > 0) {
+      const far = Math.floor((r.x + r.w - 0.01) / T);
+      for (let tx = t0 + 1; tx <= far; tx++) { const v = W.tile(tx, ty); if (W.solidT(v)) { const wx = tx * T, cut = (tx + 1) * T; const over = r.x + r.w - wx; if (r.x + r.w > cut) r.w = Math.max(0, cut - r.x); return over > 3 ? { x: wx, y: oy, v } : null; } }
+    } else {
+      const far = Math.floor(r.x / T);
+      for (let tx = t0 - 1; tx >= far; tx--) { const v = W.tile(tx, ty); if (W.solidT(v)) { const wx = (tx + 1) * T, cut = tx * T; const over = wx - r.x; if (r.x < cut) { const R = r.x + r.w; r.x = cut; r.w = Math.max(0, R - cut); } return over > 3 ? { x: wx, y: oy, v } : null; } }
+    }
+    return null;
+  };
+  /* Rückmeldung: Klinge prallt an der Wand ab (kleiner Funke, heller Klang) */
+  Z.wallSpark = (x, y, dir) => {
+    FX.burst(x - (dir || 0) * 1, y, 5, { col: ["#fff0c8", "#ffc070"], sp: 90, ang: dir > 0 ? Math.PI : dir < 0 ? 0 : Math.PI / 2, spread: 1.4, life: 0.16, size: 1.3, kind: "spark", add: true });
+    A.play("block", { vol: 0.22, rate: 1.55, x, y, gap: 0.08 });
   };
   W.groundBelow = (px, py, max) => { for (let y = py; y < py + (max || 400); y += 4) { const tx = Math.floor(px / T), ty = Math.floor(y / T); if (W.solidT(W.tile(tx, ty)) || W.isPlat(tx, ty)) return ty * T; } return null; };
 
@@ -729,8 +792,15 @@
     const cx = P.x + P.w / 2, fy = P.y + P.h;
     const r = P.face > 0 ? { x: cx + bx, y: fy + by, w: bw, h: bh } : { x: cx - bx - bw, y: fy + by, w: bw, h: bh };
     if (c.spin) { r.x = cx - bw / 2 - 4; r.w = bw + 8; }
+    /* W8: Wände blockieren – Rechteck an der ersten Wand abschneiden (Klinge prallt ab), Ziele nur mit Sichtlinie */
+    const oy = P.y + P.h / 2;
+    let wh = null;
+    if (c.up) wh = Z.clipHitBox(r, cx, oy, 0, true);
+    if (c.spin) { const w1 = Z.clipHitBox(r, cx, oy, 1), w2 = Z.clipHitBox(r, cx, oy, -1); wh = w1 || w2; }
+    else wh = Z.clipHitBox(r, cx, oy, P.face) || wh;
+    if (wh && !a.wallFx && wh.v !== 7) { a.wallFx = true; Z.wallSpark(wh.x, wh.y, wh.x === cx ? 0 : wh.x > cx ? 1 : -1); }
     const targets = [];
-    for (const e of Z.enemies) if (!e.dead && !a.hit.has(e) && !(e.intro > 0) && U.overlap(r, e)) targets.push(e);
+    for (const e of Z.enemies) if (!e.dead && !a.hit.has(e) && !(e.intro > 0) && U.overlap(r, e) && Z.meleeLos(P, e, r)) targets.push(e);
     a.hitCountNow = a.hit.size + targets.length;
     for (const e of targets) {
       a.hit.add(e);
@@ -744,7 +814,7 @@
       a.it && a.it.aff.forEach(af => { const ad = Z.AFFIX[af]; if (ad.eff) for (const k in ad.eff) eff[k] = (eff[k] || 0) + ad.eff[k]; });
       if (Z.hasAff(a.it, "betaeubend") && Z.R() < 0.15) eff.stun = Math.max(eff.stun || 0, 0.8);
       if (c.pull && Z.metaLvl("kettenpeitsche") >= 3) eff.stun = Math.max(eff.stun || 0, 0.6);
-      Z.hitEnemy(e, dmg, { crit, kb, kbUp: c.kbUp || (crit ? 60 : 30), eff, src: "melee", it: a.it, heavy: c.heavy, wallSlam: c.wallSlam, dir: P.face, sfx: c.hitSnd });
+      Z.hitEnemy(e, dmg, { crit, kb, kbUp: c.kbUp || (crit ? 60 : 30), eff, src: "melee", it: a.it, heavy: c.heavy, wallSlam: c.wallSlam, dir: P.face, sfx: c.hitSnd, wallOk: true });
       if (a.d.leech) Z.healPlayer(dmg * a.d.leech);
       if (c.onHit) c.onHit(P, e, dmg, a);
       if (a.bash && Z.shieldHook) Z.shieldHook("bashHit", P, { a, e, dmg });
@@ -770,7 +840,9 @@
     FX.ring(P.x + P.w / 2, P.y + P.h, 46, "#ff8a5a", 0.35, 3);
     FX.burst(P.x + P.w / 2, P.y + P.h, 20, { col: [Z.dustCol || "#8a7a70", "#ff7a4a"], sp: 160, ang: -Math.PI / 2, spread: 2.8, life: 0.5, size: 3, kind: "smoke" });
     const r = { x: P.x - 34, y: P.y - 6, w: P.w + 68, h: P.h + 12 };
-    for (const e of Z.enemies) if (!e.dead && U.overlap(r, e)) Z.hitEnemy(e, dmg, { kb: 120, kbUp: 200, eff: { stun: 0.7 }, src: "melee", it, heavy: true, dir: U.sign(e.x - P.x) || 1 });
+    Z.clipHitBox(r, P.x + P.w / 2, P.y + P.h / 2, 1); Z.clipHitBox(r, P.x + P.w / 2, P.y + P.h / 2, -1);
+    Z.noise && Z.noise(P.x + P.w / 2, P.y + P.h, 240);
+    for (const e of Z.enemies) if (!e.dead && U.overlap(r, e) && Z.meleeLos(P, e, r)) Z.hitEnemy(e, dmg, { kb: 120, kbUp: 200, eff: { stun: 0.7 }, src: "melee", it, heavy: true, dir: U.sign(e.x - P.x) || 1, wallOk: true });
     Z.hitProps && Z.hitProps(r, dmg, null);
     P.vy = 0; P.diveRec = 0.32; P.diveRecPend = false;
   }
@@ -846,7 +918,7 @@
       case "rex": Z.spawnAlly("rex", cx, P.y + P.h - 14, { dmg: 9 * m, life: 12 }); A.play("bark"); break;
       case "spottlied":
         A.play("laugh", { vol: 0.5 }); FX.ring(cx, cy, 110, "#ffc24a", 0.6, 3);
-        for (const e of Z.enemies) if (!e.dead && U.dist(cx, cy, e.x + e.w / 2, e.y + e.h / 2) < 120) { addStatus(e, "weak", 6); addStatus(e, "fear", 1.2); FX.text(e.x + e.w / 2, e.y - 6, R2(["„Schwachkopf!“", "„Mistvieh!“", "„Ich hab Lieder über dich!“", "„Deine Mutter …“"], ['"Nitwit!"', '"Vermin!"', '"I wrote songs about you!"', '"Your mother…"']), "#ffc24a"); }
+        for (const e of Z.enemies) if (!e.dead && U.dist(cx, cy, e.x + e.w / 2, e.y + e.h / 2) < 120 && Z.meleeLos(P, e)) { addStatus(e, "weak", 6); addStatus(e, "fear", 1.2); FX.text(e.x + e.w / 2, e.y - 6, R2(["„Schwachkopf!“", "„Mistvieh!“", "„Ich hab Lieder über dich!“", "„Deine Mutter …“"], ['"Nitwit!"', '"Vermin!"', '"I wrote songs about you!"', '"Your mother…"']), "#ffc24a"); }
         FX.burst(cx, P.y, 10, { col: "#ffc24a", sp: 70, up: 50, life: 0.9, size: 3, kind: "glow", add: true });
         break;
       case "pfeilhagel": {
@@ -876,7 +948,8 @@
       }
       case "kraeuter": P.st.regen = 5; P.st.regenAmt = P.hpMax * 0.3 / 5; A.play("heal"); FX.burst(cx, cy, 14, { col: "#7fd36a", sp: 40, up: 30, life: 1, size: 2, kind: "leaf" }); break;
       case "kriegshorn": A.play("horn"); FX.ring(cx, cy, 90, "#c8a060", 0.5, 4); FX.addShake(4);
-        for (const e of Z.enemies) if (!e.dead && U.dist(cx, cy, e.x + e.w / 2, e.y + e.h / 2) < 95) addStatus(e, "stun", 2);
+        for (const e of Z.enemies) if (!e.dead && U.dist(cx, cy, e.x + e.w / 2, e.y + e.h / 2) < 95 && Z.meleeLos(P, e)) addStatus(e, "stun", 2);
+        Z.noise && Z.noise(cx, cy, 340, { alarm: true });
         break;
       case "sprengphiole": Z.spawnProj("bombe", cx, P.y + 6, f, { dmg: 34 * m, eff, vx: f * 200, vy: -200 }); A.play("glass", { vol: 0.4 }); break;
       case "darkinzorn": P.wrath = 8; A.play("roar", { vol: 0.6 }); FX.flashScreen("#ff2a1a", 0.25); FX.ring(cx, cy, 60, "#ff2a3a", 0.5, 4); break;
@@ -1008,6 +1081,15 @@
     if (!isFinite(e.hp)) e.hp = e.hpMax > 0 ? e.hpMax : 1;
     const P = Z.player;
     if (e.invuln > 0 && !o.dot) { FX.text(e.x + e.w / 2, e.y - 4, "—", "#a99a8b"); return 0; }
+    /* W8: Nahkampf nie durch Wände (Sturzangriff-Wellen, Schildstoß, Ringe anderer Module ohne eigene Prüfung) */
+    if (o.src === "melee" && !o.wallOk && !o.dot && P && !Z.meleeLos(P, e)) return 0;
+    /* W8: Überraschungsangriff – der erste Treffer auf einen ahnungslosen (nicht alarmierten) Gegner trifft kritisch, +50 %.
+       Gleiche Bedingung wie die Herausforderung „Meuchler“ (bilanz.js: Nah-/Fernkampftreffer gegen !e.aware). */
+    let surprise = false;
+    if (P && !o.dot && !o.crit && !e.aware && !e.def.boss && !e.dummy && !e.surprised && (o.src === "melee" || o.src === "ranged")) {
+      surprise = true; e.surprised = true; o = Object.assign({}, o, { crit: true });
+      FX.text(e.x + e.w / 2, e.y - 14, L(["Überrumpelt!", "Caught off guard!"]), "#ffd27a");
+    }
     /* Schild von vorn */
     if (e.def.front && !o.dot && o.src !== "parry" && e.st.stun <= 0 && !e.broken && P) {
       const fromFront = (P.x + P.w / 2 > e.x + e.w / 2) === (e.face > 0);
@@ -1017,7 +1099,7 @@
         e.vx = -e.face * 60; return 0;
       }
     }
-    let m = 1;
+    let m = surprise ? 1.5 : 1;
     if (e.st.mark > 0) m *= 1.25;
     if (e.st.weak > 0) m *= 1.3;
     if ((e.st.stun > 0 || e.st.root > 0) && Z.has("fesselnd")) m *= 1.6;
@@ -1067,7 +1149,7 @@
     A.play("zap", { vol: 0.7 }); if (fromSky) A.play("thunder", { vol: 0.35 });
     for (let i = 0; i < jumps; i++) {
       let best = null, bd = i === 0 ? 220 : 110;
-      for (const e of Z.enemies) { if (e.dead || hit.has(e)) continue; const d = U.dist(cx, cy, e.x + e.w / 2, e.y + e.h / 2); if (d < bd) { bd = d; best = e; } }
+      for (const e of Z.enemies) { if (e.dead || hit.has(e)) continue; const d = U.dist(cx, cy, e.x + e.w / 2, e.y + e.h / 2); if (d < bd && ((fromSky && i === 0) || W.los(cx, cy, e.x + e.w / 2, e.y + e.h / 2))) { bd = d; best = e; } } /* W8: springt nicht durch Wände */
       if (!best) break;
       hit.add(best);
       const tx = best.x + best.w / 2, ty = best.y + best.h / 2;

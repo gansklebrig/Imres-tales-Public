@@ -54,9 +54,9 @@
     tabsForge: [["Waffen", "Fähigkeiten", "Lager", "Glutschmiede"], ["Weapons", "Skills", "Camp", "Ember forge"]], tabsCodex: [["Waffen", "Fähigkeiten", "Gegner", "Bosse", "Enden", "Statistik"], ["Weapons", "Skills", "Enemies", "Bosses", "Endings", "Stats"]],
     ups: { trank: [["Zusätzlicher Heiltrank", "Extra healing potion"], ["Eine Ladung mehr pro Lauf.", "One more charge per run."]], zaeh: [["Zähigkeit", "Toughness"], ["+10 Leben pro Stufe.", "+10 health per level."]], klingen: [["Geschliffene Klingen", "Honed blades"], ["+5 % Schaden pro Stufe.", "+5% damage per level."]], haendler: [["Händlergunst", "Merchant's favour"], ["Händler verlangen 10 % weniger.", "Merchants charge 10% less."]] },
     tut: ["Steuerung", "Controls"],
-    ctrlKeys: ["<b>A/D</b> laufen · <b>Leertaste</b> springen (zweimal: Doppelsprung) · <b>Shift</b> rollen (unverwundbar)<br><b>J</b> / Linksklick: Waffe 1 · <b>U</b> / Rechtsklick: Waffe 2 · <b>Q</b> und <b>O</b>: Fähigkeiten<br><b>R</b> Heiltrank · <b>E</b> benutzen / aufheben · <b>W</b> Leiter hoch · <b>S + Leertaste</b> durch Stege fallen<br><b>W + Angriff</b>: Aufwärtsangriff · <b>S + Angriff</b> in der Luft: Sturzangriff · <b>M</b> Karte · <b>Esc</b> Pause",
-      "<b>A/D</b> move · <b>Space</b> jump (twice: double jump) · <b>Shift</b> roll (invulnerable)<br><b>J</b> / left click: weapon 1 · <b>U</b> / right click: weapon 2 · <b>Q</b> and <b>O</b>: skills<br><b>R</b> healing potion · <b>E</b> use / pick up · <b>W</b> climb ladder · <b>S + Space</b> drop through ledges<br><b>W + attack</b>: upward attack · <b>S + attack</b> in the air: plunge · <b>M</b> map · <b>Esc</b> pause"],
-    ctrlPad: ["<b>A</b> springen · <b>B</b> rollen · <b>X</b> Waffe 1 · <b>Y</b> Waffe 2 · <b>LB/RB</b> Fähigkeiten · <b>LT</b> Trank · <b>RT</b> benutzen · <b>Select</b> Karte · <b>Start</b> Pause · Stick hoch + Waffe: Aufwärtsangriff", "<b>A</b> jump · <b>B</b> roll · <b>X</b> weapon 1 · <b>Y</b> weapon 2 · <b>LB/RB</b> skills · <b>LT</b> potion · <b>RT</b> use · <b>Select</b> map · <b>Start</b> pause · stick up + weapon: upward attack"],
+    ctrlKeys: ["<b>A/D</b> laufen · <b>Leertaste</b> springen (zweimal: Doppelsprung) · <b>Shift</b> rollen (unverwundbar)<br><b>J</b> / Linksklick: Waffe 1 · <b>U</b> / Rechtsklick: Waffe 2 · <b>Q</b> und <b>O</b>: Fähigkeiten<br><b>R</b> Heiltrank · <b>E</b> benutzen / aufheben · <b>W</b> Leiter hoch · <b>S + Leertaste</b> durch Stege fallen<br><b>W + Angriff</b>: Aufwärtsangriff · <b>S + Angriff</b> in der Luft: Sturzangriff · <b>M</b> Karte · <b>Tab</b> Ausrüstung (halten) · <b>Esc</b> Pause",
+      "<b>A/D</b> move · <b>Space</b> jump (twice: double jump) · <b>Shift</b> roll (invulnerable)<br><b>J</b> / left click: weapon 1 · <b>U</b> / right click: weapon 2 · <b>Q</b> and <b>O</b>: skills<br><b>R</b> healing potion · <b>E</b> use / pick up · <b>W</b> climb ladder · <b>S + Space</b> drop through ledges<br><b>W + attack</b>: upward attack · <b>S + attack</b> in the air: plunge · <b>M</b> map · <b>Tab</b> gear (hold) · <b>Esc</b> pause"],
+    ctrlPad: ["<b>A</b> springen · <b>B</b> rollen · <b>X</b> Waffe 1 · <b>Y</b> Waffe 2 · <b>LB/RB</b> Fähigkeiten · <b>LT</b> Trank · <b>RT</b> benutzen · <b>Select</b> Karte (halten: Ausrüstung) · <b>RS</b> Ausrüstung · <b>Start</b> Pause · Stick hoch + Waffe: Aufwärtsangriff", "<b>A</b> jump · <b>B</b> roll · <b>X</b> weapon 1 · <b>Y</b> weapon 2 · <b>LB/RB</b> skills · <b>LT</b> potion · <b>RT</b> use · <b>Select</b> map (hold: gear) · <b>RS</b> gear · <b>Start</b> pause · stick up + weapon: upward attack"],
     ctrlTouch: ["Links ziehen: laufen, klettern. Rechts: Springen, Rolle, Waffen, Fähigkeiten, Trank. Das Hand-Symbol hebt auf und öffnet Türen.", "Drag on the left: move, climb. Right: jump, roll, weapons, skills, potion. The hand button picks up and opens doors."],
     tips: [["Leuchtet ein Gegner auf, holt er aus. Rolle hindurch – während der Rolle kann dich nichts treffen.", "When an enemy flashes, it's winding up. Roll through – nothing can hit you mid-roll."],
       ["Rote Doppel-Ausrufezeichen lassen sich nicht blocken. Ausweichen!", "Red double exclamation marks can't be blocked. Dodge!"],
@@ -84,6 +84,9 @@
   /* Symbol-Leinwände für die vier Plätze */
   const slotEls = {};
   ["a1", "a2", "s1", "s2"].forEach(s => { const el = $("#slot-" + s); slotEls[s] = { el, cv: el.querySelector("canvas"), cd: el.querySelector(".cd"), uid: -1, n: el.querySelector(".n"), k: el.querySelector(".k") }; });
+  /* Hinweis an der Schnellleiste: Taste für die Ausrüstungs-Schnellansicht (Tastatur/Controller, Touch: Plätze gedrückt halten) */
+  const hbAusr = document.createElement("div"); hbAusr.className = "hb-ausr"; hbAusr.hidden = true;
+  { const hb = document.querySelector("#hud .hb"); if (hb) hb.appendChild(hbAusr); }
   function drawSlot(s, it) {
     const se = slotEls[s], c = se.cv.getContext("2d"), dpr = 2;
     se.cv.width = 40 * dpr; se.cv.height = 40 * dpr; c.scale(dpr, dpr); c.clearRect(0, 0, 40, 40);
@@ -137,6 +140,8 @@
       se.el.classList.toggle("stumm", s[0] === "s" && P.st.silence > 0);
       const lab = inp.label(s); if (se.lab !== lab) { se.lab = lab; se.k.textContent = lab; se.k.hidden = !lab; }
     }
+    { const lab = touchy() ? "" : inp.device === "pad" ? inp.padButtonName(inp.pad.gear != null ? inp.pad.gear : inp.pad.map) : inp.label("gear"), k = lab + "|" + Z.settings.lang;
+      if (hbAusr._k !== k) { hbAusr._k = k; hbAusr.hidden = !lab || lab === "–"; hbAusr.innerHTML = "<kbd>" + esc(lab) + "</kbd><span>" + esc(L(["Ausrüstung", "Gear"])) + "</span>"; hbAusr.title = L(["Halten: Ausrüstung ansehen", "Hold: view gear"]); } }
     hudT -= dt;
     if (hudT <= 0) {
       hudT = 0.25;
@@ -232,6 +237,7 @@
         } };
       g.list.push(e); (Z.interacts = Z.interacts || []).push(e);
     });
+    if (Z.placeAuslage) try { Z.placeAuslage(g); } catch (err) { console.error(err); } /* platz.js: keine Kugel/Ware in der Wand */
     auslagen.push(g);
     return g;
   };
@@ -543,12 +549,15 @@
     if (inp.capture) return false;
     if (!title.hidden && !ui.modalOpen && (e.code === "Enter" || e.code === "Space")) { const b = title.querySelector("button:focus") || title.querySelector("button"); if (b) { b.click(); return true; } }
     if (!ui.modalOpen) {
-      if ((e.code === "KeyM" || e.code === "Tab") && Z.level) { toggleMap(); return true; }
+      /* Karte sofort umschalten (Tab gehört jetzt der Ausrüstung: halten = Schnellansicht) */
+      if (inp.keys.map.includes(e.code) && Z.level) { if (!e.repeat) toggleMap(); return true; }
       return false;
     }
     if (e.code === "Escape" || e.code === "KeyP") { if (!ui.noEsc) closeModal(); return true; }
     if (e.code === "PageUp" || e.code === "PageDown" || (!/^(Arrow|Key[WASDEJ]$|Enter|Space|Tab)/.test(e.code) && (inp.keys.s1.includes(e.code) || inp.keys.s2.includes(e.code)) && modal.querySelector(".reiter button"))) { if (!e.repeat) switchTab(e.code === "PageDown" || inp.keys.s2.includes(e.code) ? 1 : -1); return true; }
     if (["ArrowLeft", "ArrowRight", "KeyA", "KeyD"].includes(e.code) && adjustField(document.activeElement, /Right|KeyD/.test(e.code) ? 1 : -1)) return true;
+    /* Ausrüstungs-Taste (außer Tab, das bleibt Fokuswechsel) wechselt zwischen Pause und Ausrüstung */
+    if (e.code !== "Tab" && inp.keys.gear && inp.keys.gear.includes(e.code)) { if (!e.repeat) gearTabToggle(); return true; }
     if (e.code === "Tab") { moveFocus(e.shiftKey ? -1 : 1); return true; }
     if (["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "KeyW", "KeyS", "KeyA", "KeyD"].includes(e.code)) { if (document.activeElement && document.activeElement.tagName === "TEXTAREA" && /Arrow/.test(e.code)) return false; const d = /Down|KeyS/.test(e.code) ? [0, 1] : /Up|KeyW/.test(e.code) ? [0, -1] : /Right|KeyD/.test(e.code) ? [1, 0] : [-1, 0]; moveDir(d[0], d[1]); return true; }
     /* Knöpfe mit eigener Kurztaste (data-hotkey="a1" usw.), z. B. „anlegen statt …“ im Fluchfenster */
@@ -647,21 +656,311 @@
     openModal("<h2>" + esc(t("tut")) + '</h2><p class="steuer">' + dev + '</p><p class="tipp">' + esc(L(TX.tips[0])) + '</p><div class="knoepfe"><button data-act="close" autofocus>' + esc(t("back")) + "</button></div>", { cls: "schmal" });
   };
 
+  /* ======================= AUSRÜSTUNG =======================
+     Damit man nicht vergisst, was man trägt:
+     · Schnellansicht: Ausrüstungs-Taste halten (Tab / C, Controller: rechten Stick drücken oder „Ansicht“ halten) blendet
+       halbtransparent die Karten von Hand 1, Hand 2 und beiden Fähigkeiten über der Schnellleiste ein. Loslassen blendet
+       aus. Das Spiel läuft weiter (keine Zeitlupe – sonst wäre Halten ein Ausweich-Trick). Maus über einem Platz der
+       Schnellleiste (Touch: Platz gedrückt halten) zeigt nur dessen Karte.
+     · Vollansicht: Pausenmenü, Reiter „Ausrüstung“ (LB/RB bzw. die Fähigkeitstasten, oder die Ausrüstungs-Taste):
+       vollständige Waffenkarten, Fähigkeiten, Runengürtel & Familien, Bewegungs-Runen, Segen/Lied/Pakte/Fluch, Werte. */
+  const SLOT_N = { a1: ["Hand 1", "Hand 1"], a2: ["Hand 2", "Hand 2"], s1: ["Fähigkeit 1", "Skill 1"], s2: ["Fähigkeit 2", "Skill 2"] };
+  const nf = (v, d) => { const s = Number(v || 0).toFixed(d || 0); return en() ? s : s.replace(".", ","); };
+  const pc = v => (v < 0 ? "−" : "+") + Math.round(Math.abs(v) * 100) + (en() ? "%" : " %");
+  const CRIT = {
+    always: ["immer kritisch", "always crits"], backstab: ["von hinten oder gegen Ahnungslose", "from behind or vs unaware foes"],
+    stunned: ["gegen Betäubte und Gefesselte", "vs stunned or rooted foes"], multi: ["ab dem 3. Gegner im selben Hieb", "from the 3rd foe in one swing"],
+    tip: ["mit der Spitze (auf Abstand)", "with the tip (at a distance)"], tipUp: ["mit der Spitze nach oben", "with the tip, upward"],
+    air: ["gegen Gegner in der Luft", "vs airborne foes"], burning: ["gegen Brennende", "vs burning foes"], afterRoll: ["direkt nach einer Rolle", "right after a roll"],
+    poisoned: ["gegen Vergiftete", "vs poisoned foes"], bleeding: ["gegen Blutende", "vs bleeding foes"], far: ["auf große Entfernung", "at long range"]
+  };
+  const EFF_N = { bleed: ["Blutung", "Bleeding"], burn: ["Brand", "Burning"], poison: ["Gift", "Poison"], stun: ["Betäubung", "Stun"], slow: ["Verlangsamung", "Slow"], weak: ["Schwächung", "Weaken"], root: ["Fesseln", "Root"], freeze: ["Frost", "Frost"], shock: ["Blitz", "Shock"] };
+  const gearKbd = s => (touchy() ? "" : ui.key(s));
+  /* Taste(n) der Ausrüstung für das aktuelle Gerät, z. B. „[Tab]“ oder „[RS] / [View] halten“ */
+  function gearKeyHTML(hold) {
+    if (touchy()) return "";
+    if (inp.device === "pad") return (inp.pad.gear != null ? ui.kbd(inp.padButtonName(inp.pad.gear)) + " / " : "") + ui.kbd(inp.padButtonName(inp.pad.map)) + (hold ? " " + L(["halten", "hold"]) : "");
+    const k = inp.keys.gear && (inp.keys.gear[0] || inp.keys.gear[1]);
+    return k ? ui.kbd(inp.keyName(k)) + (hold ? " " + L(["halten", "hold"]) : "") : "";
+  }
+  ui.gearKeyHTML = gearKeyHTML;
+  const kindOf = (it, d) => (it.type === "skill" ? L(["Fähigkeit", "Skill"]) : d.kind === "ranged" ? L(["Fernkampf", "Ranged"]) : d.kind === "shield" ? L(["Schild", "Shield"]) : L(["Nahkampf", "Melee"]));
+  const klingen = () => (Z.meta && Z.meta.up && Z.meta.up.klingen) || 0;
+  const hasB = b => !!(Z.has && Z.has(b));
+  /* fester Schadensfaktor wie im Kampf (ohne kurzzeitige Zustände wie Zorn, Adrenalin, Klingentanz) */
+  const fixMul = it => Z.itemMul(it) * (1 + 0.05 * klingen()) * (hasB("zerbrechlich") ? 1.5 : 1);
+  const runeHas = (it, r) => !!(it && it.runes && it.runes.includes(r));
+  function effsOf(d) {
+    const out = {};
+    const add = (e, i) => { if (!e) return; for (const k in e) if (e[k]) (out[k] = out[k] || []).push(i); };
+    add(d.eff, 0); if (d.shoot) add(d.shoot.eff, 0); if (d.shield) { add(d.shield.bashEff, 0); }
+    if (d.combo) d.combo.forEach((c, i) => add(c.eff, i + 1));
+    return out;
+  }
+  function dotsOf(it, d) { const e = effsOf(d); return !!(e.burn || e.poison || e.bleed || (it.aff || []).some(a => /brennend|giftig|blutig/.test(a)) || runeHas(it, "brand") || runeHas(it, "gift")); }
+  /* Werte einer Waffe: [Bezeichnung, Wert] – schon mit allen festen Faktoren */
+  function weaponRows(it, d, kurz) {
+    const m = fixMul(it), r = v => Math.round(v * m), rows = [];
+    const spd = 1 + (Z.hasAff(it, "flink") ? 0.18 : 0) + (runeHas(it, "tempo") ? 0.15 : 0);
+    if (d.combo) {
+      const dm = d.combo.map(c => r(c.dmg)), dur = d.combo.reduce((a, c) => a + (c.pre || 0) + (c.act || 0) + (c.post || 0), 0) / spd, tot = dm.reduce((a, b) => a + b, 0);
+      rows.push([L(["Schaden je Hieb", "Damage per strike"]), dm.join(" · ")]);
+      rows.push(kurz ? [L(["Schaden/s", "Damage/s"]), "≈ " + Math.round(tot / dur)] : [L(["Kombo", "Combo"]), tot + L([" in ", " in "]) + nf(dur, 2) + " s · ≈ " + Math.round(tot / dur) + L([" je Sekunde", " per second"])]);
+      if (!kurz) {
+        const reach = Math.max(0, ...d.combo.map(c => (c.box ? (c.spin ? c.box[2] / 2 + 4 : c.box[0] + c.box[2]) : 0) + (c.lunge || 0) * 0.08)) / T;
+        rows.push([L(["Reichweite", "Reach"]), (reach < 1.9 ? L(["kurz", "short"]) : reach < 2.6 ? L(["mittel", "medium"]) : L(["weit", "long"])) + " · " + nf(reach, 1) + L([" Felder", " tiles"])]);
+        rows.push([L(["Tempo", "Speed"]), nf(d.combo.length / dur, 1) + L([" Hiebe/s", " strikes/s"]) + (spd > 1 ? " (" + pc(spd - 1) + ")" : "")]);
+      }
+    } else if (d.shoot) {
+      const s = d.shoot, mag = s.mag ? s.mag + (Z.metaLvl(it.id) >= 3 ? 2 : 0) : 0;
+      rows.push([L(["Schaden", "Damage"]), s.dmgFull ? r(s.dmg) + "–" + r(s.dmgFull) + (kurz ? "" : L([" (voll gespannt)", " (fully drawn)"])) : r(s.dmg) + (s.burst ? " ×" + s.burst : "")]);
+      if (!kurz) {
+        if (s.charge) rows.push([L(["Spannen", "Draw"]), nf(s.charge / (runeHas(it, "tempo") ? 1.15 : 1), 2) + " s"]);
+        else rows.push([L(["Tempo", "Speed"]), nf(spd / Math.max(0.05, (s.pre || 0.06) + (s.post || 0.15)), 1) + L([" Schuss/s", " shots/s"])]);
+        if (mag) rows.push([L(["Magazin", "Magazine"]), mag + L([" Schuss · Nachladen ", " shots · reload "]) + nf(s.reload || 0, 1) + " s"]);
+        rows.push([L(["Reichweite", "Reach"]), L(["Fernkampf", "Ranged"]) + (d.pierce ? L([" · durchschlägt", " · pierces"]) : "")]);
+      }
+    } else if (d.shield) {
+      const sh = d.shield;
+      rows.push([L(["Schildstoß", "Shield bash"]), String(r(sh.bash)) + (kurz ? "" : " · " + L(["Konter nach Parade ", "parry riposte "]) + r(sh.bash * 1.5))]);
+      rows.push([L(["Block", "Block"]), Math.round(sh.block * 100) + (en() ? "%" : " %") + L([" abgefangen", " absorbed"]) + (kurz ? "" : " · " + L(["Parade-Fenster ", "parry window "]) + nf(sh.parry, 2) + " s")]);
+      if (!kurz && sh.parryStun) rows.push([L(["Nach Parade", "After a parry"]), L(["Gegner ", "foe stunned "]) + nf(sh.parryStun, 1) + L([" s betäubt", " s"])]);
+    }
+    if (!d.shield) {
+      const cr = [];
+      if (d.crit) cr.push(L(CRIT[d.crit] || [d.crit, d.crit]));
+      if (d.combo) d.combo.forEach((c, i) => { if (c.crit && c.crit !== d.crit) cr.push(L(["Hieb ", "strike "]) + (i + 1) + ": " + L(CRIT[c.crit] || [c.crit, c.crit])); });
+      if (Z.hasAff(it, "meuchelnd")) cr.push(L(["von hinten", "from behind"]));
+      if (Z.hasAff(it, "kritisch")) cr.push(L(["15 % Chance", "15% chance"]));
+      const cm = (d.critMul || (d.combo && d.combo.find(c => c.critMul) || {}).critMul || 1.8) * (runeHas(it, "krit") ? 1.5 : 1);
+      rows.push([L(["Kritisch", "Critical"]), (cr.length ? cr.join(" · ") : L(["nur durch Faden, Rauch oder Konter", "only via thread, smoke or riposte"])) + " · ×" + nf(cm, 1)]);
+    }
+    return rows;
+  }
+  /* Eigenschaften: Faden, Brand/Gift/Blutung, Eigenschaften (Affixe), Besonderheiten */
+  function propsHTML(it, d, kurz) {
+    const out = [];
+    if (d.faden) out.push(kurz ? '<span class="as-faden">◈ ' + L(["Faden", "Thread"]) + "</span>" : '<li class="faden"><b>◈ ' + L(["Faden", "Thread"]) + "</b>: " + esc(L(Z.FADEN_TXT || ["markiert Gegner", "marks foes"])).replace(/^[^:]*:\s*/, "") + "</li>");
+    const ef = effsOf(d);
+    for (const k in ef) { const n = L(EFF_N[k] || [k, k]), at = ef[k].filter(Boolean); const cls = k === "poison" ? "gift" : ""; out.push(kurz ? '<span class="' + cls + '">' + esc(n) + "</span>" : '<li class="' + cls + '"><b>' + esc(n) + "</b>" + (at.length && d.combo && at.length < d.combo.length ? L([" bei Hieb ", " on strike "]) + at.join(", ") : L([" bei jedem Treffer", " on every hit"])) + "</li>"); }
+    for (const a of it.aff || []) { const A0 = Z.AFFIX[a]; if (!A0) continue; out.push(kurz ? '<span class="' + (a === "giftig" ? "gift" : "") + '">' + esc(L(A0.n)) + "</span>" : '<li class="' + (a === "giftig" ? "gift" : "") + '"><b>' + esc(L(A0.n)) + "</b>: " + esc(L(A0.d)) + "</li>"); }
+    if (!kurz) {
+      if (d.leech) out.push("<li><b>" + L(["Lebensraub", "Life drain"]) + "</b>: " + Math.round(d.leech * 100) + (en() ? "%" : " %") + "</li>");
+      if (d.killHeal) out.push("<li><b>" + L(["Heilung", "Healing"]) + "</b>: " + L(["jeder Kill ", "every kill "]) + Math.round(d.killHeal * 100) + (en() ? "%" : " %") + "</li>");
+      if (d.vsHoly) out.push("<li><b>" + L(["Heilig", "Holy"]) + "</b>: ×" + nf(d.vsHoly, 1) + L([" gegen Untote und Dämonen", " vs undead and demons"]) + "</li>");
+      if (d.superArmor) out.push("<li><b>" + L(["Unbeirrbar", "Unflinching"]) + "</b>: " + L(["Treffer unterbrechen den Schwung nicht", "hits don't interrupt the swing"]) + "</li>");
+    }
+    return out.join(kurz ? " · " : "");
+  }
+  function runesHTML(it, kurz) {
+    const rs = (it.runes || []).filter(k => Z.RUNES[k]); if (!rs.length) return "";
+    if (kurz) return rs.map(k => '<span style="color:' + Z.RUNES[k].col + '">' + Z.RUNES[k].ico + " " + esc(L(Z.RUNES[k].n)) + "</span>").join(" ");
+    const ra = Z.runeActive ? Z.runeActive() : { fam: {} };
+    return rs.map(k => { const R = Z.RUNES[k], F = R.fam && Z.RUNE_FAM && Z.RUNE_FAM[R.fam]; return '<li style="--c:' + R.col + '"><b style="color:' + R.col + '">' + R.ico + " " + esc(L(R.n)) + "</b>: " + esc(L(R.d)) + (F ? ' <small class="ag-fam" style="color:' + F.col + '">' + F.ico + " " + esc(L(F.n)) + " " + (ra.fam[R.fam] || 0) + "/3</small>" : "") + "</li>"; }).join("");
+  }
+  /* Skalierung: woraus die Kraft der Waffe besteht */
+  function scaleHTML(it) {
+    const P = Z.player, st = Z.itemStat(it), S0 = Z.STATS[st], n = P.stats[st] || 0, lv = Z.metaLvl(it.id), rows = [];
+    rows.push([L(["Fundstufe ", "Find tier "]) + (it.tier + 1), "×" + nf(Z.BAL.itemMul(it.tier), 2)]);
+    if (it.rar) rows.push([L(Z.RARITY[it.rar].n), pc(0.08 * it.rar)]);
+    rows.push(['<span style="color:' + S0.col + '">' + esc(L(S0.n)) + " " + n + "</span>", n ? pc(0.12 * n) : "±0"]);
+    if (lv) rows.push([L(["Nundros Schärfe ◆", "Nundro's sharpening ◆"]) + lv, pc(0.1 * lv)]);
+    if (it.plus) rows.push(['<span style="color:' + (Z.plusCol ? Z.plusCol(it.plus) : "#ffd27a") + '">' + L(["Schmiedestufe +", "Forge level +"]) + it.plus + "</span>", pc((Z.SCHMIEDE ? Z.SCHMIEDE.PLUS_DMG : 0.15) * it.plus)]);
+    if (Z.hasAff(it, "scharf")) rows.push([L(Z.AFFIX.scharf.n), pc(0.15)]);
+    if (it.cursed && Z.CURSE && Z.CURSE[it.cursed]) rows.push(['<span class="gefahr">☠ ' + esc(L(Z.CURSE[it.cursed].name)) + "</span>", "×" + nf(Z.CURSE[it.cursed].mul, 1)]);
+    if (klingen()) rows.push([L(["Geschliffene Klingen (Lager)", "Honed blades (camp)"]), pc(0.05 * klingen())]);
+    if (hasB("zerbrechlich")) rows.push([esc(L(Z.BLESS.zerbrechlich.n)), pc(0.5)]);
+    return '<table class="werte ag-skal">' + rows.map(x => "<tr><th>" + x[0] + "</th><td>" + x[1] + "</td></tr>").join("") + '<tr class="summe"><th>' + L(["Kraft gesamt", "Total power"]) + "</th><td>×" + nf(fixMul(it), 2) + "</td></tr></table>";
+  }
+  /* Was Segen, Runen-Familien und Zustände gerade an dieser Waffe ändern */
+  function buffsHTML(it, d) {
+    const P = Z.player, out = [], skill = it.type === "skill";
+    const B = (id, txt, on) => { if (hasB(id) && Z.BLESS[id]) out.push('<li class="k-' + Z.BLESS[id].k + (on ? " jetzt" : "") + '"><b>' + esc(L(Z.BLESS[id].n)) + "</b>: " + txt + (on ? ' <em>' + L(["jetzt aktiv", "active now"]) + "</em>" : "") + "</li>"); };
+    if (!skill) {
+      B("ersterSchlag", L(["erster Treffer je Gegner ×2", "first hit on each foe ×2"]));
+      B("darkinblut", L(["unter 50 % Leben +40 %", "below 50% health +40%"]), P.hp < P.hpMax * 0.5);
+      B("klingentanz", L(["nach einer Rolle 2 s lang +40 %", "+40% for 2 s after a roll"]), P.st && P.st.dance > 0);
+      B("kopfgeld", L(["je Kill +8 % für 6 s (bis 5)", "+8% per kill for 6 s (up to 5)"]) + (P.bounty ? " · " + P.bounty + "/5" : ""), P.bounty > 0);
+      B("fesselnd", L(["+60 % gegen Betäubte und Gefesselte", "+60% vs stunned and rooted foes"]));
+      B("netzweber", L(["jeder 5. Treffer fesselt", "every 5th hit roots"]));
+      B("vampir", L(["2 % des Schadens als Leben", "2% of damage as health"]));
+      if (dotsOf(it, d)) B("giftmeister", L(["Brand, Gift und Blutung dieser Waffe doppelt", "this weapon's burn, poison and bleed doubled"]));
+      if (d.kind === "shield") B("bollwerk", L(["jeder Block heilt 3 %", "every block heals 3%"]));
+    } else {
+      B("flinkeHaende", L(["lädt 30 % schneller", "recharges 30% faster"]));
+    }
+    if (P.wrath > 0) out.push('<li class="jetzt"><b>' + L(["Darkin-Zorn", "Darkin wrath"]) + "</b>: +60 % <em>" + L(["jetzt aktiv", "active now"]) + "</em></li>");
+    if (P.st && P.st.adrenalin > 0 && !skill) out.push('<li class="jetzt"><b>' + L(["Adrenalin", "Adrenaline"]) + "</b>: +25 % <em>" + L(["jetzt aktiv", "active now"]) + "</em></li>");
+    /* Familien, zu denen die Gravuren dieser Waffe beitragen */
+    const ra = Z.runeActive ? Z.runeActive() : { fam: {} }, seen = {};
+    for (const k of it.runes || []) { const f = Z.RUNES[k] && Z.RUNES[k].fam, F = f && Z.RUNE_FAM && Z.RUNE_FAM[f]; if (!F || seen[f]) continue; seen[f] = 1; const n = ra.fam[f] || 0; if (n >= 2) out.push('<li style="color:' + F.col + '"><b>' + F.ico + " " + esc(L(F.n)) + " " + n + "/3</b>: " + esc(L(F.b2)) + (n >= 3 ? " · " + esc(L(F.b3)) : "") + "</li>"); }
+    return out.join("");
+  }
+  /* volle Waffen-/Fähigkeitskarte (Pausenmenü) */
+  function gearCardFull(s) {
+    const P = Z.player, it = P.slots[s], kopf = '<div class="ag-platz">' + gearKbd(s) + " " + esc(L(SLOT_N[s])) + "</div>";
+    if (!it) {
+      const fist = s === "a1" && Z.WEAPONS.faeuste;
+      return '<button type="button" class="ag-karte leer" data-act="agKarte">' + kopf + (fist ? "<b>" + esc(L(fist.n)) + '</b><table class="werte">' + weaponRows({ id: "faeuste", tier: 0, rar: 0, aff: [] }, fist, false).map(x => "<tr><th>" + esc(x[0]) + "</th><td>" + esc(x[1]) + "</td></tr>").join("") + "</table>" : '<p class="hinweis">' + L(["leer", "empty"]) + "</p>") + "</button>";
+    }
+    const d = Z.itemDef(it); if (!d) return "";
+    const r = Z.RARITY[it.rar], st = Z.STATS[d.stat] || Z.STATS.brut, lvl = Z.metaLvl(it.id), skill = it.type === "skill";
+    let h = '<button type="button" class="ag-karte" data-act="agKarte" style="--rar:' + (it.cursed ? "#c040ff" : r.col) + '">' + kopf;
+    h += '<div class="ic-kopf"><b>' + esc(L(d.n)) + (it.plus ? ' <span class="plus" style="color:' + (Z.plusCol ? Z.plusCol(it.plus) : "#ffd27a") + '">+' + it.plus + "</span>" : "") + "</b>" + (lvl ? ' <span class="lv">◆' + lvl + "</span>" : "") +
+      "<small>" + esc(L(r.n)) + " · " + kindOf(it, d) + ' · <span style="color:' + st.col + '">' + esc(L(st.n)) + "</span> · " + L(["Fundstufe", "Tier"]) + " " + (it.tier + 1) + "</small></div>";
+    if (Z.curseCardHTML) h += Z.curseCardHTML(it);
+    h += '<div class="' + (skill ? "ag-innen1" : "ag-innen") + '"><div class="ag-l"><p class="ag-d">' + esc(L(d.d)) + "</p>";
+    if (skill) {
+      const cd = d.cd || 0, f = (hasB("flinkeHaende") ? 1 / 1.3 : 1) * (Z.hasPact && Z.hasPact("ungeduld") ? 1.5 : 1), left = P.cd[s] || 0;
+      h += '<table class="werte"><tr><th>' + L(["Abklingzeit", "Cooldown"]) + "</th><td>" + nf(cd, 0) + " s" + (Math.abs(f - 1) > 0.01 ? " → " + nf(cd * f, 1) + " s" : "") + "</td></tr><tr><th>" + L(["Jetzt", "Now"]) + "</th><td>" + (left > 0.05 ? L(["lädt noch ", "ready in "]) + nf(left, 1) + " s" : '<span class="bereit">' + L(["bereit", "ready"]) + "</span>") + "</td></tr><tr><th>" + L(["Kraft", "Power"]) + "</th><td>×" + nf(Z.itemMul(it), 2) + "</td></tr></table>";
+    } else h += '<table class="werte">' + weaponRows(it, d, false).map(x => "<tr><th>" + esc(x[0]) + "</th><td>" + esc(x[1]) + "</td></tr>").join("") + "</table>";
+    const pr = propsHTML(it, d, false); if (pr) h += '<h4>' + L(["Eigenschaften", "Traits"]) + '</h4><ul class="ag-liste">' + pr + "</ul>";
+    const rn = runesHTML(it, false); if (rn) h += "<h4>" + L(["Gravuren", "Engravings"]) + '</h4><ul class="ag-liste runen">' + rn + "</ul>";
+    if (d.master) h += '<p class="' + (lvl >= 3 ? "meister" : "ag-gesperrt") + '">' + esc(L(d.master)) + (lvl >= 3 ? "" : L([" (ab Nundros Schärfe 3)", " (from Nundro's sharpening 3)"])) + "</p>";
+    h += '</div><div class="ag-r">';
+    if (!skill) h += "<h4>" + L(["Skalierung", "Scaling"]) + "</h4>" + scaleHTML(it);
+    const bf = buffsHTML(it, d); if (bf) h += "<h4>" + L(["Wirkt gerade mit", "Currently boosted by"]) + '</h4><ul class="ag-liste ag-buffs">' + bf + "</ul>";
+    if (d.tags && d.tags.length) h += '<p class="tags">' + d.tags.map(x => "<span>" + esc(x) + "</span>").join("") + "</p>";
+    return h + "</div></div></button>";
+  }
+  /* kompakte Karte (Schnellansicht über der Schnellleiste) */
+  function gearCardQuick(s) {
+    const P = Z.player, it = P.slots[s], skill = s[0] === "s";
+    const kopf = '<div class="as-kopf">' + gearKbd(s) + " " + esc(L(SLOT_N[s])) + "</div>";
+    if (!it) { const fist = s === "a1" && Z.WEAPONS.faeuste; return '<div class="as-karte leer">' + kopf + (fist ? '<b class="as-name">' + esc(L(fist.n)) + "</b>" : '<span class="as-leer">' + L(["leer", "empty"]) + "</span>") + "</div>"; }
+    const d = Z.itemDef(it); if (!d) return "";
+    const r = Z.RARITY[it.rar], st = Z.STATS[d.stat] || Z.STATS.brut;
+    let h = '<div class="as-karte" style="--rar:' + (it.cursed ? "#c040ff" : r.col) + '">' + kopf + '<b class="as-name">' + esc(L(d.n)) + (it.plus ? ' <span style="color:' + (Z.plusCol ? Z.plusCol(it.plus) : "#ffd27a") + '">+' + it.plus + "</span>" : "") + "</b>" +
+      '<small class="as-art">' + esc(L(r.n)) + " · " + kindOf(it, d) + ' · <span style="color:' + st.col + '">' + esc(L(st.n)) + "</span>" + (it.cursed ? ' · <span class="gefahr">☠</span>' : "") + "</small>";
+    if (skill) {
+      const cd = d.cd || 0, f = (hasB("flinkeHaende") ? 1 / 1.3 : 1) * (Z.hasPact && Z.hasPact("ungeduld") ? 1.5 : 1), left = P.cd[s] || 0;
+      h += '<div class="as-z">' + L(["Abklingzeit ", "Cooldown "]) + nf(cd * f, cd * f < 10 && Math.abs(f - 1) > 0.01 ? 1 : 0) + " s · " + (left > 0.05 ? L(["noch ", "in "]) + Math.ceil(left) + " s" : '<span class="bereit">' + L(["bereit", "ready"]) + "</span>") + "</div>" +
+        '<div class="as-z as-d">' + esc(L(d.d)) + "</div>";
+    } else {
+      for (const x of weaponRows(it, d, true)) h += '<div class="as-z"><i>' + esc(x[0]) + "</i> " + esc(x[1]) + "</div>";
+    }
+    const pr = propsHTML(it, d, true), rn = runesHTML(it, true);
+    if (pr) h += '<div class="as-z as-eig">' + pr + "</div>";
+    if (rn) h += '<div class="as-z as-rn">' + rn + "</div>";
+    return h + "</div>";
+  }
+  /* Runengürtel, Familien, Bewegungs-Runen */
+  function runenBlock() {
+    const P = Z.player, ra = Z.runeActive ? Z.runeActive() : { keys: [], fam: {} }, belt = (P.runeBelt || []).filter(k => Z.RUNES[k]), mx = (Z.RUNE_NUM && Z.RUNE_NUM.guertel) || 3;
+    let h = "<h4>" + L(["Runengürtel", "Rune belt"]) + " " + belt.length + "/" + mx + "</h4>";
+    h += belt.length ? '<ul class="ag-liste runen">' + belt.map(k => { const R = Z.RUNES[k], F = R.fam && Z.RUNE_FAM[R.fam]; return '<li><b style="color:' + R.col + '">' + R.ico + " " + esc(L(R.n)) + "</b>: " + esc(L(R.d)) + (F ? ' <small class="ag-fam" style="color:' + F.col + '">' + F.ico + " " + esc(L(F.n)) + "</small>" : "") + "</li>"; }).join("") + "</ul>"
+      : '<p class="hinweis">' + L(["Leer – Runensteine liegen in der Feste. Gravuren an den Waffen zählen auch zu den Familien.", "Empty – rune stones lie in the keep. Weapon engravings count toward families too."]) + "</p>";
+    const fams = Object.keys(ra.fam || {}).filter(f => Z.RUNE_FAM && Z.RUNE_FAM[f]);
+    if (fams.length) {
+      h += "<h4>" + L(["Familien", "Families"]) + ' <small class="hinweis">' + L(["2 und 3 verschiedene Runen: Bonus", "2 and 3 different runes: bonus"]) + "</small></h4>";
+      h += '<ul class="ag-liste ag-fams">' + fams.map(f => { const F = Z.RUNE_FAM[f], n = ra.fam[f]; return '<li style="--c:' + F.col + '"><b style="color:' + F.col + '">' + F.ico + " " + esc(L(F.n)) + " " + "◆".repeat(Math.min(3, n)) + "◇".repeat(Math.max(0, 3 - n)) + "</b>" +
+        '<span class="' + (n >= 2 ? "an" : "aus") + '">2: ' + esc(L(F.b2)) + '</span><span class="' + (n >= 3 ? "an" : "aus") + '">3: ' + esc(L(F.b3)) + "</span></li>"; }).join("") + "</ul>";
+    }
+    const MR = Z.MOVE_RUNES || {}, frei = (Z.meta.runen && Z.meta.runen.frei) || {};
+    const mv = Object.keys(MR).filter(k => Z.runeAll || (Z.hasMoveRune && Z.hasMoveRune(k)));
+    if (mv.length) h += "<h4>" + L(["Bewegungs-Runen", "Movement runes"]) + '</h4><ul class="ag-liste">' + mv.map(k => '<li><b style="color:' + MR[k].col + '">ᛟ ' + esc(L(MR[k].n)) + "</b>" + (frei[k] ? "" : ' <small class="hinweis">' + L(["nur dieser Lauf", "this run only"]) + "</small>") + '<br><span class="ag-how">' + (Z.runeHow ? Z.runeHow(k)[0] : esc(L(MR[k].d))) + "</span></li>").join("") + "</ul>";
+    return h;
+  }
+  /* Ezekiel selbst: Leben, Tränke, Werte, Segen & Lied, Pakte, Fluch, Paarungen */
+  function selbstBlock() {
+    const P = Z.player, run = Z.run, st = P.stats;
+    let h = '<table class="werte"><tr><th>' + L(["Leben", "Health"]) + "</th><td>" + Math.ceil(Math.max(0, P.hp)) + " / " + P.hpMax + "</td></tr><tr><th>" + L(["Heiltränke", "Potions"]) + "</th><td>" + P.potions + " / " + P.potMax + "</td></tr>" +
+      (run ? "<tr><th>" + L(["Gold", "Gold"]) + "</th><td>" + U.fmt(P.gold) + "</td></tr>" + (P.glut ? "<tr><th>" + L(["Schmiedeglut", "Forge embers"]) + "</th><td>" + P.glut + "</td></tr>" : "") + (P.keys ? "<tr><th>" + L(["Schlüssel", "Keys"]) + "</th><td>" + P.keys + "</td></tr>" : "") : "") + "</table>";
+    h += "<h4>" + L(["Werte", "Stats"]) + '</h4><ul class="ag-liste ag-werte">' + ["brut", "takt", "ueber"].map(k => { const S0 = Z.STATS[k], n = st[k] || 0, cnt = ["a1", "a2", "s1", "s2"].filter(s => P.slots[s] && Z.itemStat(P.slots[s]) === k).length;
+      return '<li style="--c:' + S0.col + '"><b style="color:' + S0.col + '">' + esc(L(S0.n)) + " " + n + "</b> " + (n ? pc(0.12 * n) : "±0") + L([" Schaden", " damage"]) + (k === "ueber" ? L([", mehr Leben", ", more health"]) : "") + ' <small class="hinweis">' + cnt + L([" getragen", " carried"]) + "</small></li>"; }).join("") + "</ul>";
+    const song = run && run.lgSong;
+    h += "<h4>" + L(["Segen", "Blessings"]) + " " + P.bless.length + "/3</h4>" + (P.bless.length ? '<ul class="ag-liste ag-segen">' + P.bless.filter(b => Z.BLESS[b]).map(b => { const B0 = Z.BLESS[b]; return '<li class="k-' + B0.k + '"><b>' + (b === song ? "♪ " : "") + esc(L(B0.n)) + '</b> <small class="hinweis">' + esc(L(Z.BLESS_KIND[B0.k])) + (b === song ? L([" · Barradins Lied", " · Barradin's song"]) : "") + "</small><br>" + esc(L(B0.d)) + "</li>"; }).join("") + "</ul>" : '<p class="hinweis">' + L(["Noch kein Segen.", "No blessing yet."]) + "</p>");
+    if (run && run.pacts && run.pacts.length && Z.PACTS) h += "<h4>" + L(["Pakte", "Pacts"]) + " <small class=\"hinweis\">" + L(["Splitter ×", "shards ×"]) + nf(1 + 0.3 * run.pacts.length, 1) + '</small></h4><ul class="ag-liste ag-pakte">' + run.pacts.filter(k => Z.PACTS[k]).map(k => "<li><b>" + esc(L(Z.PACTS[k].n)) + "</b>: " + esc(L(Z.PACTS[k].d)) + "</li>").join("") + "</ul>";
+    if (P.curse > 0) h += '<p class="ag-fluch">☠ <b>' + L(["Fluch", "Curse"]) + "</b>: " + L(["noch ", ""]) + P.curse + L([" Kills ohne Treffer – jeder Treffer ist bis dahin tödlich.", " kills without a hit left – until then any hit is fatal."]) + "</p>";
+    const syn = (Z.SYNERGIES || []).filter(x => Z.synActive && Z.synActive(x.id));
+    if (syn.length) h += "<h4>" + L(["Paarungen", "Pairings"]) + '</h4><ul class="ag-liste">' + syn.map(x => "<li><b>" + esc(L(x.n)) + "</b>: " + esc(L(x.d)) + "</li>").join("") + "</ul>";
+    return h;
+  }
+  /* Reiter oben in Pausenmenü und Ausrüstung */
+  function pauseTabs(i) {
+    const k = gearKeyHTML(false);
+    return '<div class="reiter p-reiter"><button data-act="pTab" data-arg="0" class="' + (i === 0 ? "an" : "") + '">' + esc(t("pause")) + '</button><button data-act="pTab" data-arg="1" class="' + (i === 1 ? "an" : "") + '">' + L(["Ausrüstung", "Gear"]) + (k && i === 0 ? ' <span class="rt">' + k + "</span>" : "") + "</button></div>";
+  }
+  const ortHTML = () => { const run = Z.run; return esc(areaTitle()) + (run ? " · " + fmtTime(run.time) + (run.skulls ? " · " + "☠".repeat(run.skulls) : "") : ""); };
+  /* Vollansicht „Ausrüstung“ */
+  ui.gear = () => {
+    const P = Z.player; if (!P || !Z.level) return;
+    if (ui.modalOpen && !modal.querySelector(".pausenmenue, .ausruestung")) return;
+    const html = '<h2 class="p-kopf">' + L(["Ausrüstung", "Gear"]) + '<span class="p-ort">' + ortHTML() + "</span></h2>" + pauseTabs(1) +
+      '<div class="ag-haende">' + gearCardFull("a1") + gearCardFull("a2") + "</div>" +
+      '<div class="ag-unten"><div class="ag-spalte ag-faeh"><h3>' + L(["Fähigkeiten", "Skills"]) + "</h3>" + gearCardFull("s1") + gearCardFull("s2") + "</div>" +
+      '<div class="ag-spalte"><h3>' + L(["Runen", "Runes"]) + '</h3><button type="button" class="ag-karte ag-block" data-act="agKarte">' + runenBlock() + "</button></div>" +
+      '<div class="ag-spalte"><h3>Ezekiel</h3><button type="button" class="ag-karte ag-block" data-act="agKarte">' + selbstBlock() + "</button></div></div>" +
+      '<p class="hinweis ag-fuss">' + (touchy() ? "" : L(["Unterwegs: ", "On the move: "]) + gearKeyHTML(true) + L([" zeigt die Karten über der Schnellleiste – das Spiel läuft weiter.", " shows the cards above the quick bar – the game keeps running."])) + "</p>" +
+      '<div class="knoepfe"><button data-act="close">' + esc(t("resume")) + "</button></div>";
+    openModal(html, { cls: "breit ausruestung" });
+    /* lange Karten: oben anfangen (der Fokus auf Hand 1 soll nicht nach unten scrollen) */
+    setTimeout(() => { const b = modal.querySelector(".mbox"); if (b && modal.querySelector(".ausruestung")) b.scrollTop = 0; }, 45);
+  };
+  actions.pTab = i => { if (+i === 1) ui.gear(); else { const was = ui.modalOpen; if (was) { ui.onClose = null; modal.hidden = true; ui.modalOpen = false; } ui.pause(); } };
+  actions.agKarte = () => {};
+  /* Ausrüstungs-Taste im Pausenmenü/in der Ausrüstung: Reiter wechseln */
+  function gearTabToggle() {
+    if (modal.querySelector(".ausruestung")) { actions.pTab(0); return true; }
+    if (modal.querySelector(".pausenmenue")) { actions.pTab(1); return true; }
+    return false;
+  }
+  /* kurze Übersicht im Pausenmenü (statt Werte-/Segen-Chips): ein Knopf öffnet die Ausrüstung */
+  function pauseGearTeaser() {
+    const P = Z.player; if (!P) return "";
+    const name = s => { const it = P.slots[s]; if (!it) return ""; const d = Z.itemDef(it); return d ? '<span class="pt-h">' + gearKbd(s) + ' <b style="color:' + (it.cursed ? "#c040ff" : Z.RARITY[it.rar].col) + '">' + esc(Z.itemTitle ? Z.itemTitle(it) : L(d.n)) + "</b></span>" : ""; };
+    const st = P.stats || { brut: 0, takt: 0, ueber: 0 }, ra = Z.runeActive ? Z.runeActive() : { keys: [] };
+    const sum = ["brut", "takt", "ueber"].map(k => '<span style="color:' + Z.STATS[k].col + '">' + esc(L(Z.STATS[k].n)) + " " + st[k] + "</span>").join(" · ") +
+      " · " + L(["Segen ", "Blessings "]) + P.bless.length + "/3" + (ra.keys.length ? " · " + L(["Runen ", "Runes "]) + ra.keys.length : "") + (P.curse > 0 ? ' · <span class="gefahr">☠ ' + P.curse + "</span>" : "");
+    return "<h3>" + L(["Ausrüstung", "Gear"]) + '</h3><button class="p-ausr" data-act="pTab" data-arg="1"><span class="pt-reihe">' + ["a1", "a2", "s1", "s2"].map(name).join("") + '</span><small class="pt-sum">' + sum + '</small><small class="pt-mehr">' + L(["Alle Werte ansehen", "View all stats"]) + " ›</small></button>";
+  }
+  /* ---------- Schnellansicht über der Schnellleiste ---------- */
+  const ausEl = document.createElement("div"); ausEl.id = "ausr"; ausEl.hidden = true; document.body.appendChild(ausEl);
+  let ausSig = "", hoverSlot = null, mapHold = -1, mapAsGear = false;
+  ["a1", "a2", "s1", "s2"].forEach(s => {
+    const el = slotEls[s].el;
+    el.addEventListener("pointerenter", e => { if (e.pointerType === "mouse") hoverSlot = s; });
+    el.addEventListener("pointerleave", e => { if (e.pointerType === "mouse" && hoverSlot === s) hoverSlot = null; });
+    el.addEventListener("pointerdown", e => { if (e.pointerType !== "mouse") { hoverSlot = s; try { el.setPointerCapture(e.pointerId); } catch (_) {} } });
+    const off = e => { if (e.pointerType !== "mouse" && hoverSlot === s) hoverSlot = null; };
+    el.addEventListener("pointerup", off); el.addEventListener("pointercancel", off); el.addEventListener("lostpointercapture", off);
+  });
+  ui.gearQuickOpen = () => !ausEl.hidden;
+  function gearQuickTick() {
+    const P = Z.player;
+    const held = !!(inp.held.gear || mapAsGear), want = P && Z.level && !ui.modalOpen && title.hidden && (held || hoverSlot);
+    if (!want) { if (!ausEl.hidden) { ausEl.hidden = true; ausSig = ""; } return; }
+    const mode = held ? "alle" : hoverSlot;
+    const slots = mode === "alle" ? ["a1", "a2", "s1", "s2"] : [mode];
+    let sig = mode + "|" + Z.settings.lang + "|" + inp.device + "|" + (ui.touchOn ? 1 : 0) + "|" + inp.label("gear") + "|" + P.stats.brut + P.stats.takt + P.stats.ueber + "|" + P.bless.join(",") + "|" + (P.runeBelt || []).join(",") + "|" + (P.st && P.st.dance > 0 ? 1 : 0);
+    for (const s of slots) { const it = P.slots[s]; sig += "|" + (it ? it.uid + ":" + (it.plus || 0) + ":" + (it.runes || []).join(",") + ":" + (s[0] === "s" ? Math.ceil(P.cd[s] || 0) : "") : "-"); }
+    if (sig !== ausSig) {
+      ausSig = sig;
+      const fuss = touchy() ? "" : mode === "alle" ? '<div class="as-fuss">' + L(["Alle Werte: ", "All stats: "]) + ui.key("pause") + " " + esc(t("pause")) + " → " + L(["Ausrüstung", "Gear"]) + "</div>" : '<div class="as-fuss">' + gearKeyHTML(true) + ": " + L(["alle Plätze", "all slots"]) + "</div>";
+      ausEl.className = mode === "alle" ? "alle" : "eine";
+      ausEl.innerHTML = '<div class="as-reihe">' + slots.map(gearCardQuick).join("") + "</div>" + fuss;
+    }
+    if (ausEl.hidden) ausEl.hidden = false;
+    if (mode !== "alle") {
+      /* über dem Platz, im Bild gehalten (das Element steht unter zoom --hud) */
+      const r = slotEls[mode].el.getBoundingClientRect(), hz = hudZoom(), w = ausEl.offsetWidth, vw = innerWidth / hz;
+      sty(ausEl, "left", Math.round(U.clamp((r.left + r.width / 2) / hz - w / 2, 6, vw - w - 6)) + "px");
+      sty(ausEl, "bottom", Math.round((innerHeight - r.top) / hz + 10) + "px");
+    } else { sty(ausEl, "left", ""); sty(ausEl, "bottom", ""); }
+  }
+
   /* ---------- Pause ---------- */
   ui.pause = () => {
     if (ui.modalOpen || !Z.level) return;
     const inRun = !!Z.run, P = Z.player, run = Z.run;
     const tip = L(Z.R.pick(TX.tips));
-    /* rechts: Lage – Herausforderungen (bilanz.js setzt sie hinter den Tipp), Werte, Segen, Fluch */
-    const st = P && P.stats ? P.stats : null;
-    const werte = st ? '<div class="p-werte">' + ["brut", "takt", "ueber"].map(k => '<span style="color:' + Z.STATS[k].col + '" title="' + esc(L(Z.STATS[k].d)) + '">' + esc(L(Z.STATS[k].n)) + " " + st[k] + "</span>").join("") + "</div>" : "";
-    const segen = P && P.bless && P.bless.length ? '<div class="p-chips">' + P.bless.map(b => '<span class="k-' + Z.BLESS[b].k + '" title="' + esc(L(Z.BLESS[b].d)) + '">' + esc(L(Z.BLESS[b].n)) + "</span>").join("") + "</div>" : '<p class="hinweis">' + L(["Noch kein Segen.", "No blessing yet."]) + "</p>";
-    const fluch = P && P.curse > 0 ? '<div class="p-chips"><span class="fluch">☠ ' + L(["Fluch: noch ", "Curse: "]) + P.curse + L([" Kills ohne Treffer", " kills without a hit left"]) + "</span></div>" : "";
+    /* rechts: Lage – Herausforderungen (bilanz.js setzt sie hinter den Tipp) und eine kurze Ausrüstungs-Übersicht;
+       Werte, Segen, Runen und Fluch stehen vollständig im Reiter „Ausrüstung“ */
     const ort = esc(areaTitle()) + (run ? " · " + fmtTime(run.time) + (run.skulls ? " · " + "☠".repeat(run.skulls) : "") : "");
     const hin = { alle: L(["alle", "all"]), wenige: L(["wenige", "few"]), keine: L(["keine", "none"]) }[Z.settings.hinweise || "alle"];
-    openModal('<h2 class="p-kopf">' + esc(t("pause")) + '<span class="p-ort">' + ort + '</span></h2><div class="p-spalten"><div class="knoepfe senk"><button data-act="close" autofocus>' + esc(t("resume")) + '</button><button data-act="ctrl">' + esc(t("tut")) + '</button><button data-act="settings">' + esc(t("settings")) + '</button><button data-act="hinweise">' + L(["Hinweise: ", "Hints: "]) + hin + "</button>" + (fs.ok ? '<button data-act="fullscreen">' + esc(fs.label()) + "</button>" : "") +
+    openModal('<h2 class="p-kopf">' + esc(t("pause")) + '<span class="p-ort">' + ort + '</span></h2>' + pauseTabs(0) + '<div class="p-spalten"><div class="knoepfe senk"><button data-act="close" autofocus>' + esc(t("resume")) + '</button><button data-act="ctrl">' + esc(t("tut")) + '</button><button data-act="settings">' + esc(t("settings")) + '</button><button data-act="hinweise">' + L(["Hinweise: ", "Hints: "]) + hin + "</button>" + (fs.ok ? '<button data-act="fullscreen">' + esc(fs.label()) + "</button>" : "") +
       (inRun ? '<button data-act="abort" class="gefahr">' + esc(t("abort")) + "</button>" : "") + '<a class="btn" href="./#taverne">' + esc(t("tavern")) + '</a></div><div class="p-info"><p class="tipp">' + esc(tip) + "</p>" +
-      (inRun ? "<h3>" + L(["Werte & Segen", "Stats & blessings"]) + "</h3>" + werte + segen + fluch : "") + "</div></div>", { cls: "schmal pausenmenue" });
+      pauseGearTeaser() + "</div></div>", { cls: "schmal pausenmenue" });
   };
   /* Hinweise schnell umschalten: alle → wenige → keine */
   actions.hinweise = (_, b) => {
@@ -810,18 +1109,18 @@
 
   /* ---------- Steuerung belegen ---------- */
   const ACT_NAMES = { left: ["Links", "Left"], right: ["Rechts", "Right"], up: ["Hoch / Leiter", "Up / ladder"], down: ["Runter / Ducken", "Down / crouch"], jump: ["Springen", "Jump"], roll: ["Rolle", "Roll"],
-    a1: ["Waffe 1", "Weapon 1"], a2: ["Waffe 2", "Weapon 2"], s1: ["Fähigkeit 1", "Skill 1"], s2: ["Fähigkeit 2", "Skill 2"], use: ["Benutzen / Aufheben", "Use / pick up"], potion: ["Heiltrank", "Healing potion"], map: ["Karte", "Map"], pause: ["Pause", "Pause"] };
+    a1: ["Waffe 1", "Weapon 1"], a2: ["Waffe 2", "Weapon 2"], s1: ["Fähigkeit 1", "Skill 1"], s2: ["Fähigkeit 2", "Skill 2"], use: ["Benutzen / Aufheben", "Use / pick up"], potion: ["Heiltrank", "Healing potion"], map: ["Karte", "Map"], gear: ["Ausrüstung ansehen (halten)", "View gear (hold)"], pause: ["Pause", "Pause"] };
   function bindingSummary() {
     const pad = inp.device === "pad";
     const row = a => ui.kbd(pad ? inp.label(a) : inp.keyName(inp.keys[a][0] || inp.keys[a][1])) + " " + esc(L(ACT_NAMES[a]));
     return (pad ? L(["Linker Stick / Steuerkreuz laufen · ", "Left stick / D-pad move · "]) : ui.kbd(inp.keyName(inp.keys.left[0])) + ui.kbd(inp.keyName(inp.keys.right[0])) + " " + L(["laufen · ", "move · "])) +
-      ["jump", "roll", "a1", "a2", "s1", "s2", "potion", "use", "map", "pause"].map(row).join(" · ") + L([" · Oben + Angriff: Aufwärtsangriff (in der Luft: Aufwärts-Schwung)", " · Up + attack: upward attack (in the air: rising swing)"]) + (pad ? "" : L([" · Linksklick/Rechtsklick: Waffe 1/2 · Runter + Sprung: durch Stege fallen · Runter + Angriff in der Luft: Sturzangriff", " · Left/right click: weapon 1/2 · Down + jump: drop through ledges · Down + attack in the air: plunge"]));
+      ["jump", "roll", "a1", "a2", "s1", "s2", "potion", "use", "map", "gear", "pause"].filter(a => !pad || inp.pad[a] != null).map(row).join(" · ") + (pad ? " · " + ui.kbd(inp.padButtonName(inp.pad.map)) + " " + L(["halten: Ausrüstung", "hold: gear"]) : "") + L([" · Oben + Angriff: Aufwärtsangriff (in der Luft: Aufwärts-Schwung)", " · Up + attack: upward attack (in the air: rising swing)"]) + (pad ? "" : L([" · Linksklick/Rechtsklick: Waffe 1/2 · Runter + Sprung: durch Stege fallen · Runter + Angriff in der Luft: Sturzangriff", " · Left/right click: weapon 1/2 · Down + jump: drop through ledges · Down + attack in the air: plunge"]));
   }
   ui.controls = () => {
     const padOn = !!inp.lastPad;
     const cell = (a, kind, slot) => { const lab = kind === "pad" ? inp.padButtonName(inp.pad[a]) : inp.keyName(inp.keys[a][slot]); return '<button class="belegung" data-act="bind" data-arg="' + a + "|" + kind + "|" + slot + '">' + esc(lab) + "</button>"; };
     let rows = "";
-    for (const a in ACT_NAMES) rows += "<tr><th>" + esc(L(ACT_NAMES[a])) + "</th><td>" + cell(a, "key", 0) + "</td><td>" + cell(a, "key", 1) + "</td><td>" + (inp.pad[a] != null ? cell(a, "pad", 0) : '<span class="fix">' + (a === "left" || a === "right" || a === "up" || a === "down" ? L(["Stick + Kreuz", "Stick + D-pad"]) : "–") + "</span>") + "</td></tr>";
+    for (const a in ACT_NAMES) rows += "<tr><th>" + esc(L(ACT_NAMES[a])) + "</th><td>" + cell(a, "key", 0) + "</td><td>" + cell(a, "key", 1) + "</td><td>" + (inp.pad[a] !== undefined ? cell(a, "pad", 0) : '<span class="fix">' + (a === "left" || a === "right" || a === "up" || a === "down" ? L(["Stick + Kreuz", "Stick + D-pad"]) : "–") + "</span>") + "</td></tr>";
     openModal("<h2>" + L(["Steuerung", "Controls"]) + "</h2>" +
       '<p class="hinweis">' + (padOn ? "🎮 " + esc(inp.padName.replace(/\(.*?\)/g, "").trim() || L(["Controller verbunden", "Controller connected"])) : L(["Kein Controller erkannt – einmal einen Knopf drücken, dann erscheint er hier.", "No controller detected – press any button and it will appear here."])) + "</p>" +
       '<table class="belegtab"><thead><tr><th></th><th>' + L(["Taste", "Key"]) + "</th><th>" + L(["Zweite Taste", "Second key"]) + "</th><th>Controller</th></tr></thead><tbody>" + rows + "</tbody></table>" +
@@ -1196,10 +1495,20 @@
     syncPadHint();
     if (!title.hidden && !ui.modalOpen) { if (inp.pressed.jump || inp.pressed.use || inp.pressed.a1) { const b = title.querySelector("button:focus, a:focus") || title.querySelector("button"); if (b) b.click(); } if (inp.pressed.down || inp.pressed.up) { const bs = [...title.querySelectorAll("button, a")]; const i = bs.indexOf(document.activeElement); (bs[(i + (inp.pressed.down ? 1 : -1) + bs.length) % bs.length] || bs[0]).focus(); } inp.endFrame(); return; }
     if (inp.pressed.pause && !ui.choiceActive) { inp.consume("pause"); if (ui.modalOpen) { if (!ui.noEsc) closeModal(); } else ui.pause(); }
-    if (inp.pressed.map && !ui.modalOpen) { inp.consume("map"); toggleMap(); }
+    /* Controller „Ansicht“: antippen = Karte (beim Loslassen), halten = Ausrüstung. Die Tastatur hat eigene Tasten
+       (Karte schaltet sofort über onKey, Touch über den Kartenknopf) – inp.pressed.map kommt hier nur vom Controller. */
+    if (!ui.modalOpen) {
+      if (inp.pressed.map) { inp.consume("map"); mapHold = 0; mapAsGear = false; }
+      if (mapHold >= 0) {
+        if (inp.held.map) { mapHold += rdt; if (mapHold >= 0.3) mapAsGear = true; }
+        else { if (!mapAsGear) toggleMap(); mapHold = -1; mapAsGear = false; }
+      }
+    } else { mapHold = -1; mapAsGear = false; }
+    try { gearQuickTick(); } catch (e) { console.error(e); }
     if (ui.modalOpen) {
       if (inp.capture) { inp.endFrame(); return; }
       if (inp.pressed.s1 || inp.pressed.s2) switchTab(inp.pressed.s2 ? 1 : -1);
+      else if (inp.pressed.gear) { inp.consume("gear"); gearTabToggle(); }
       /* Gamepad in Menüs: Richtung mit Wiederholung beim Halten, A bestätigt, B zurück, rechter Stick blättert */
       const fe = document.activeElement;
       const dirNow = inp.held.up ? "u" : inp.held.down ? "d" : inp.held.left ? "l" : inp.held.right ? "r" : "";
