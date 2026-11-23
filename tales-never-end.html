@@ -190,6 +190,57 @@ a{color:var(--gold)}
 .toast b{color:var(--gold)}
 @keyframes toast{0%{opacity:0;transform:translate(-50%,-12px)}8%,85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-10px)}}
 .leise{color:var(--mute);font-size:.82rem}
+/* ---------- Schwere Entscheidungen ---------- */
+#app::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse 70% 60% at 50% 45%,rgba(0,0,0,0) 30%,rgba(8,3,1,.78) 100%);opacity:0;transition:opacity .7s}
+#app.schwer-moment::before{opacity:1}
+#app.schwer-moment .balken{filter:saturate(.6) brightness(.75);transition:filter .6s}
+.karte .schwer-siegel{position:absolute;z-index:4;top:calc(25cqh - 15px);right:12px;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;color:#f3e0c0;background:radial-gradient(circle at 35% 30%,#b3412f,#6e1d14);box-shadow:0 2px 6px rgba(0,0,0,.5),inset 0 0 0 2px rgba(255,200,160,.25);pointer-events:none}
+.karte.schwer{box-shadow:0 18px 44px rgba(0,0,0,.65),0 0 0 1px rgba(110,29,20,.45)}
+.karte.abwaegen{transition:transform .45s cubic-bezier(.2,1.2,.4,1);z-index:6}
+.karte.ab-l{transform:translate(-9%,6px) rotate(-5deg)}
+.karte.ab-r{transform:translate(9%,6px) rotate(5deg)}
+.karte.ab-o{transform:translate(0,-6%) rotate(-1deg)}
+.karte.abwaegen .text,.karte.abwaegen .portrait,.karte.abwaegen .sprecher,.karte.abwaegen .rolle{filter:blur(.6px);opacity:.5;transition:opacity .4s,filter .4s}
+.karte .buerde{position:absolute;z-index:7;left:6%;right:6%;top:30%;padding:.75rem .85rem .6rem;border-radius:14px;background:linear-gradient(170deg,rgba(40,16,10,.96),rgba(22,9,5,.97));color:#f3e0c0;box-shadow:0 12px 30px rgba(0,0,0,.6),inset 0 0 0 1px rgba(232,177,78,.35);animation:buerde .45s cubic-bezier(.2,1.3,.4,1);font-size:.88rem;line-height:1.3}
+.karte .buerde.weg{animation:buerdeWeg .35s forwards}
+@keyframes buerde{from{transform:translateY(16px) scale(.94);opacity:0}}
+@keyframes buerdeWeg{to{transform:scale(.9);opacity:0}}
+.buerde .b-kopf{font-family:var(--fd);letter-spacing:.12em;font-size:.72rem;text-transform:uppercase;color:#e8b14e}
+.buerde .b-wahl{font-family:var(--fd);font-size:1.05rem;margin:.15rem 0 .45rem;color:#ffe2b0}
+.buerde .b-wahl small{font-family:var(--fb);font-size:.75rem;color:#d69a70}
+.buerde ul{list-style:none;margin:0;padding:0;display:grid;gap:.28rem}
+.buerde li{display:flex;gap:.45rem;align-items:flex-start}
+.buerde li span{flex:none;width:1.4em;text-align:center}
+.buerde li.tod{color:#ff9f86;font-weight:700}
+.buerde li.schlecht{color:#f0b89a}
+.buerde li.gut{color:#c9dd9a}
+.buerde .b-fuss{margin-top:.55rem;font-size:.7rem;color:#b89a7a;text-align:center}
+.karte.besiegelt::after{content:"⚖";position:absolute;z-index:8;left:50%;top:44%;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:38px;color:#f3e0c0;background:radial-gradient(circle at 35% 30%,#c24a35,#6e1d14 70%);box-shadow:0 6px 18px rgba(0,0,0,.6),inset 0 0 0 4px rgba(255,190,150,.25);animation:siegel .5s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes siegel{from{transform:scale(2.6) rotate(-20deg);opacity:0}60%{opacity:1}to{transform:scale(1) rotate(-8deg);opacity:1}}
+.wahlen button.bestaetigen{border-color:#e8b14e;background:linear-gradient(180deg,rgba(150,52,30,.95),rgba(96,30,16,.95));color:#fff3cf;animation:bestaetigen 1.1s ease-in-out infinite}
+.wahlen button{position:relative}.wahlen button.bestaetigen{padding-bottom:1rem}.wahlen button.bestaetigen::after{content:"✓ nochmal = besiegeln";position:absolute;left:0;right:0;bottom:.2rem;text-align:center;font-size:.62rem;font-weight:600;color:#ffd9a0;letter-spacing:.04em}
+@keyframes bestaetigen{50%{box-shadow:0 0 0 3px rgba(232,177,78,.35),0 0 22px rgba(224,68,42,.5)}}
+.karte.weg-u{transform:translate(0,60%) rotate(4deg) scale(.85)!important;opacity:0;filter:grayscale(.8)}
+/* Zeitdruck */
+.karte .lunte{position:absolute;z-index:5;left:14px;right:14px;top:9px;height:6px;border-radius:4px;background:rgba(40,20,10,.35)}
+.karte .lunte i{position:absolute;left:0;top:0;bottom:0;width:100%;border-radius:4px;background:linear-gradient(90deg,#8e2a20,#e0442a,#ffb648);box-shadow:0 0 10px rgba(255,140,60,.8);transition:width .1s linear}
+.karte .lunte i::after{content:"";position:absolute;right:-4px;top:-4px;width:12px;height:12px;border-radius:50%;background:radial-gradient(circle,#fff3cf,#ffb648 45%,rgba(255,120,40,0) 70%);animation:funke .25s infinite alternate}
+.karte .lunte b{position:absolute;right:0;top:.55rem;font-size:.75rem;color:#fff3cf;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,.8)}
+@keyframes funke{to{transform:scale(1.5)}}
+.karte.eilt{animation:eilt .5s ease-in-out infinite}
+@keyframes eilt{25%{transform:translateX(-2px) rotate(-.4deg)}75%{transform:translateX(2px) rotate(.4deg)}}
+/* Prognose am Tisch */
+.tisch.prognose .platz{transition:transform .25s,border-color .25s,background .25s}
+.platz.p-plus{border-color:rgba(127,166,74,.75);background:rgba(60,90,30,.35)}
+.platz.p-minus{border-color:rgba(224,87,58,.75);background:rgba(110,30,20,.38)}
+.platz.p-tod{border-color:#ff6a4a;background:rgba(140,20,10,.5);transform:translateY(-4px)}
+.platz.p-bang{border-color:rgba(232,177,78,.75);background:rgba(120,80,10,.32)}
+.platz.p-egal{opacity:.72}
+.platz.p-plus .reak,.platz.p-minus .reak,.platz.p-tod .reak,.platz.p-bang .reak{font-weight:900;font-size:.8rem;right:-6px;top:-8px;padding:0 .25rem;border-radius:8px;background:rgba(20,10,5,.85);border:1px solid currentColor;line-height:1.3}
+.platz.p-plus .reak{color:#b5d77a}.platz.p-minus .reak{color:#ff9a7a}.platz.p-tod .reak{color:#fff;background:#8e2a20}.platz.p-bang .reak{color:#ffd27a}
+.schwerliste li small{color:var(--mute)}
+@media (max-height:640px){.karte .buerde{top:18%;font-size:.8rem;padding:.55rem .6rem .45rem}}
+
 /* ---------- Spieltisch von oben ---------- */
 #tischbild{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 #tischbild svg{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -367,7 +418,8 @@ body.ruhig *{animation-duration:.01ms!important;transition-duration:.01ms!import
 <script src="tne-karten-5.js?v=2"></script>
 <script src="tne-karten-6.js?v=2"></script>
 <script src="tne-karten-7.js?v=2"></script>
-<script src="tne-karten-8.js?v=2"></script>
+<script src="tne-karten-8.js?v=3"></script>
+<script src="tne-karten-9.js?v=1"></script>
 <script src="tne-grafik.js?v=1"></script>
 <script src="tonregler.js?v=1"></script>
 <script src="tne.js?v=4"></script>

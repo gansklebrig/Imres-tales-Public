@@ -496,7 +496,7 @@ Jemand hat ein altes Foto der Runde dabei, von vor vielen Jahren. Ein paar von h
 ^ Ein Klassentreffen planen | s+5 t-2 xp+10 | Die Helden treffen in der nächsten Session ihre jüngeren Ichs. Es wird chaotisch. | portal
 
 § #sel_buch npc selten
-Eine Bibliothekarin in {ort} reicht {held} ein Buch. Der Titel: „{kampagne}“. Darin steht alles, was bisher geschah. Die letzten Seiten sind leer.
+Eine Bibliothekarin reicht {held} ein Buch: „{kampagne}“. Darin steht alles, was bisher geschah. Die letzten Seiten sind leer.
 < Weiterschreiben | l+3 s+5 xp+10 | {held} schreibt einen Satz. In der nächsten Session passiert genau das. | magie
 > Zurückgeben | l+4 | Die Bibliothekarin nickt. „Weise.“ Dann verschwindet sie zwischen den Regalen.
 ^ Bis zum Ende vorblättern | W13 ? s+6 plot+1 : l-6 t+4 | Auf der letzten Seite steht nur: „Und sie lebten.“ Das reicht. :: Die Seiten verbrennen beim Umblättern. Was blieb, war beunruhigend. | feuer

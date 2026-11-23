@@ -212,22 +212,25 @@
           if (a === "wenn") k.wenn = v.split(",").filter(Boolean);
           else if (a === "g") k.g = +v;
           else k[a] = v;
-        } else if (t === "einmal" || t === "kette" || t === "wurfkarte" || t === "trash" || t === "selten") k[t] = true;
+        } else if (t === "einmal" || t === "kette" || t === "wurfkarte" || t === "trash" || t === "selten" || t === "schwer") k[t] = true;
         else if (t) k.wer = t;
       }
       const text = [];
       for (const z of zeilen) {
         const zz2 = z.trim();
         if (!zz2) continue;
-        if (zz2[0] === "<" || zz2[0] === ">" || zz2[0] === "^") {
+        if (zz2[0] === "<" || zz2[0] === ">" || zz2[0] === "^" || zz2[0] === "~") {
           const teile = zz2.slice(1).split("|").map(x => x.trim());
-          k.opt[zz2[0] === "<" ? 0 : zz2[0] === ">" ? 1 : 2] = { label: teile[0] || "…", w: parseWirkung(teile[1]), folge: teile[2] || "", viz: teile[3] || "" };
+          const ziel = zz2[0] === "~" ? "zoegern" : null;
+          (ziel ? (o => { k.zoegern = o; }) : (o => { k.opt[zz2[0] === "<" ? 0 : zz2[0] === ">" ? 1 : 2] = o; }))({ label: teile[0] || "…", w: parseWirkung(teile[1]), folge: teile[2] || "", viz: teile[3] || "" });
         } else text.push(zz2);
       }
       k.text = text.join(" ");
       if (!k.opt[0] || !k.opt[1]) { console.warn("Karte ohne zwei Wahlen:", k.id || k.text.slice(0, 40)); continue; }
       if (k.krise) k.kette = true;
       k.brauchtSp = /\{(name|held|klasse|volk|eigen|stufe|altheld|altkampagne|tode|nat1|nat20|kampagnen|krise|[Ee]r|[Ss]ein\w*|[Ii]hn|[Ii]hm|h_\w+)\}/.test([k.text, ...k.opt.flatMap(o => [o.label, o.folge])].join(" "));
+      const SCHWER_OPS = /^(tod2?|tpk|geht|pause=\d+|krise=\w+|bez=(ex|weg|spannung)|sieg|frieden|ende)$/;
+      k.schwer = k.schwer || !!k.eile || k.opt.some(o => { const ops = o.w.ok.concat(o.w.nein || []); return ops.some(x => SCHWER_OPS.test(x)) || ops.reduce((a, x) => { const m = x.match(/^[mlst]([+-]\d+)$/); return a + (m ? Math.abs(+m[1]) : 0); }, 0) >= 24; });
       k.folgekarte = k.wenn.some(b => /^[a-z][a-z_]*$/.test(b) && !["legende", "gefallen", "ruhig"].includes(b));
       if (!k.id) k.id = quelle + "_" + KARTEN.length;
       if (KARTE[k.id]) { console.warn("Doppelte Karten-ID:", k.id); k.id += "_" + KARTEN.length; }
@@ -601,6 +604,12 @@
     if (m.erinnerung.length) out.verlust = 1;
     if ((m.erfolge || 0) >= 6 && !sp.tode) out.uebermuetig = 1;
     if (m.seit > 0 && RUN.karten - m.seit < 25) out.frisch = 1;
+    const g = (m.groll || []).slice(-1)[0], dk = (m.dank || []).slice(-1)[0];
+    if (g && RUN.karten - g.karte < 70) out.groll = 1;
+    if (g && g.held && RUN.karten - g.karte < 90) out.heldgeopfert = 1;
+    if (dk && RUN.karten - dk.karte < 70) out.dank = 1;
+    if ((sp.vertrauen == null ? 60 : sp.vertrauen) < 32) out.misstrauisch = 1;
+    if ((sp.vertrauen || 0) > 84) out.vertraut = 1;
     return out;
   }
 
@@ -754,6 +763,7 @@
       tot: tot.name, legende: leg.name, zahl: zi(3, 17), stufe: ctx.sp ? ctx.sp.held.stufe : 1, sl: "du",
       p2: anderer ? anderer.name : "", p2held: anderer ? anderer.held.name : "", bez: ctx.bez ? BEZ[ctx.bez.typ].name : "",
       altheld: erin ? erin.held : "Grimbold", altkampagne: erin ? erin.kampagne : "der letzten Kampagne", tode: ctx.sp ? ctx.sp.tode : 0, kampagnen: mem ? mem.kampagnen : 0,
+      damals: mem && mem.groll && mem.groll.length ? mem.groll[mem.groll.length - 1].wahl : "das mit dem Oger", damalsheld: mem && mem.groll && mem.groll.length && mem.groll[mem.groll.length - 1].held ? mem.groll[mem.groll.length - 1].held : (erin ? erin.held : "Grimbold"), dankfuer: mem && mem.dank && mem.dank.length ? mem.dank[mem.dank.length - 1].wahl : "die Szene am Lagerfeuer",
       nat1: mem ? mem.nat1 : 0, nat20: mem ? mem.nat20 : 0, wochen: zi(2, 6), monate: zi(2, 5), krise: ctx.sp && ctx.sp.krise ? KRISEN[ctx.sp.krise.art].name : ""
     };
     pronomen(f, ctx.sp && spG(ctx.sp) === "w", "");
@@ -817,6 +827,7 @@
         let ctx = q.sp != null ? { sp: sp && !sp.weg ? sp : (sprecherFinden(k) || {}).sp } : sprecherFinden(k);
         if (ctx && q.sp2 != null && RUN.spieler[q.sp2] && anwesend(RUN.spieler[q.sp2])) { ctx.sp2 = RUN.spieler[q.sp2]; const z = ctx.sp && bezZwischen(ctx.sp, ctx.sp2); if (z) ctx.bez = z; }
         if (ctx && k.bez && !ctx.bez) ctx = null;
+        if (ctx && !ctx.sp && (TYPEN[k.wer] || k.wer === "spieler" || k.wer === "pausiert" || k.brauchtSp)) ctx = null;
         if (ctx && k.wer === "pausiert") ctx.chat = true;
         if (ctx && !TYPEN[k.wer] && !["spieler", "pausiert"].includes(k.wer) && !k.bez) ctx.sym = k.wer;
         if (ctx && (!k.wenn.length || pruefe(k.wenn, ctx))) return { k, ctx };
@@ -898,7 +909,7 @@
     return { r, ok, bonus, gefaelscht, extra };
   }
   function anwenden(seite) {
-    const k = aktuelle.k, o = k.opt[seite], ctx = aktuelle.ctx, f = aktuelle.f;
+    const k = aktuelle.k, o = seite === 3 ? k.zoegern : k.opt[seite], ctx = aktuelle.ctx, f = aktuelle.f;
     let ops = o.w.ok, folge = o.folge, wurf = null;
     let dc = o.w.wurf, bossHilfe = 0;
     if (dc && istLetzteSession() && RUN.k.karte >= RUN.k.laenge - 1 && RUN.k.boss) { bossHilfe = Math.round((100 - RUN.k.boss.hp) / 14); dc = Math.max(2, dc - bossHilfe); }
@@ -959,6 +970,7 @@
         else if (ctx.sp && ctx.sp2) ctx.bez = bezNeu(ctx.sp, ctx.sp2, m[1]);
       }
       else if ((m = op.match(/^bezneu=(\w+)$/))) { if (ctx.sp && ctx.sp2 && !bezZwischen(ctx.sp, ctx.sp2)) ctx.bez = bezNeu(ctx.sp, ctx.sp2, m[1], m[1] === "spannung" ? zi(30, 45) : zi(55, 70)); }
+      else if ((m = op.match(/^vertrauen([+-]\d+)$/))) { if (ctx.sp) ctx.sp.vertrauen = clamp((ctx.sp.vertrauen == null ? 60 : ctx.sp.vertrauen) + +m[1], 0, 100); }
       else if ((m = op.match(/^laune2([+-]\d+)$/))) { if (ctx.sp2) ctx.sp2.laune = clamp(ctx.sp2.laune + +m[1], 0, 100); }
       else if ((m = op.match(/^beide([+-]\d+)$/))) { [ctx.sp, ctx.sp2].forEach(x => { if (x) x.laune = clamp(x.laune + +m[1], 0, 100); }); }
       // Krisen
@@ -1051,7 +1063,8 @@
         if (v >= lo && v <= hi) d += 1.1; else d -= Math.min(4.5, (v < lo ? lo - v : v - hi) / 7 + .6);
       }
       for (const b of "mlst") if (RUN.b[b] < 15 || RUN.b[b] > 88) d -= 1.2;
-      s.laune = clamp(s.laune + (d < 0 ? d * faktor : d), 0, 100);
+      const vertrauen = s.vertrauen == null ? 60 : s.vertrauen;
+      s.laune = clamp(s.laune + (d < 0 ? d * faktor * (1.3 - vertrauen / 200) : d), 0, 100);
     }
     // Beziehungen färben die Stimmung
     for (const z of RUN.bez || []) {
@@ -1115,7 +1128,7 @@
     for (const b of "mlst") RUN.b[b] = Math.round(RUN.b[b] + (50 - RUN.b[b]) * .4);
     if (hatWerkzeug("legende")) aktiveSpieler().forEach(s => s.laune = clamp(s.laune + 12, 0, 100));
     aktiveSpieler().forEach(s => { s.laune = clamp(s.laune + 8, 0, 100); s.held = neuerHeld(s); });
-    const alt = { titel: k.titel, sieg: k.sieg, schurke: k.schurke, tote: k.tote.length, helden: ueberlebende, gehen, xp, ziel: zielErg, boss: k.boss ? k.boss.hp : null };
+    const alt = { titel: k.titel, sieg: k.sieg, schurke: k.schurke, tote: k.tote.length, helden: ueberlebende, gehen, xp, ziel: zielErg, boss: k.boss ? k.boss.hp : null, schwer: k.schwerLog || [] };
     neueKampagne();
     if (aktiveSpieler().length < 4) RUN.k.nachrueck = true;
     return alt;
@@ -1213,6 +1226,102 @@
     for (const op of ops) { const m = op.match(/^([mlst])([+-]\d+)$/); if (m) v[m[1]] = (v[m[1]] && Math.sign(v[m[1]]) !== Math.sign(+m[2])) ? "?" : (v[m[1]] || 0) + +m[2]; }
     return v;
   }
+  /* ---------- Prognose: Wie wird der Tisch reagieren? ----------
+     Für jede Wahl wird abgeschätzt, wie sich die Laune jedes Spielers verändert –
+     über die Balken (was der Spielertyp mag), direkte Wirkungen, Tod des eigenen
+     Helden, Gehen, Beziehungen. Bei Würfelproben gibt es zwei Zweige. */
+  function zufriedenheit(s, b) {
+    const W = TYPEN[s.typ].wunsch; let d = 0;
+    for (const x in W) { const v = b[x], [lo, hi] = W[x]; d += v >= lo && v <= hi ? 1.1 : -Math.min(4.5, (v < lo ? lo - v : v - hi) / 7 + .6); }
+    for (const x of "mlst") if (b[x] < 15 || b[x] > 88) d -= 1.2;
+    return d;
+  }
+  function prognose(seite) {
+    if (!aktuelle || !RUN) return null;
+    const k = aktuelle.k, o = seite === 3 ? k.zoegern : k.opt[seite], ctx = aktuelle.ctx;
+    if (!o) return null;
+    const eskal = STAERKE * (1 + Math.min(.6, (RUN.k.nr - 1) * .08));
+    const leute = aktiveSpieler(), zweige = o.w.wurf ? [o.w.ok, o.w.nein] : [o.w.ok];
+    const erg = zweige.map(ops => {
+      const b = Object.assign({}, RUN.b), d = new Map(leute.map(x => [x, 0])), tod = new Set(), geht = new Set(), pause = new Set();
+      let todIrgendwer = false, bezSchaden = 0;
+      const plus = (x, n) => { if (x && d.has(x)) d.set(x, d.get(x) + n); };
+      for (const op of ops) {
+        let m;
+        if ((m = op.match(/^([mlst])([+-]\d+)$/))) b[m[1]] = clamp(b[m[1]] + +m[2] * eskal, 0, 100);
+        else if ((m = op.match(/^laune([+-]\d+)$/))) plus(ctx.sp, +m[1]);
+        else if ((m = op.match(/^laune2([+-]\d+)$/))) plus(ctx.sp2, +m[1]);
+        else if ((m = op.match(/^beide([+-]\d+)$/))) { plus(ctx.sp, +m[1]); plus(ctx.sp2, +m[1]); }
+        else if ((m = op.match(/^alle([+-]\d+)$/))) leute.forEach(x => plus(x, +m[1]));
+        else if (op === "tod") { if (ctx.sp) tod.add(ctx.sp); else todIrgendwer = true; }
+        else if (op === "tod2") { if (ctx.sp2 && anwesend(ctx.sp2)) tod.add(ctx.sp2); else todIrgendwer = true; }
+        else if (op === "tpk") leute.forEach(x => tod.add(x));
+        else if (op === "geht") { if (ctx.sp) geht.add(ctx.sp); }
+        else if (/^pause=/.test(op)) { if (ctx.sp) pause.add(ctx.sp); }
+        else if ((m = op.match(/^bez([+-]\d+)$/))) { plus(ctx.sp, +m[1] * .4); plus(ctx.sp2, +m[1] * .4); if (+m[1] < 0) bezSchaden += -m[1]; }
+        else if ((m = op.match(/^bez=(\w+)$/))) { const n = ["ex", "weg", "spannung"].includes(m[1]) ? -10 : m[1] === "paar" ? 10 : 0; plus(ctx.sp, n); plus(ctx.sp2, n); if (n < 0) bezSchaden += 20; }
+        else if (op === "lvl") leute.forEach(x => plus(x, x.typ === "power" ? 6 : 3));
+        else if (op === "sieg") leute.forEach(x => plus(x, 5));
+      }
+      for (const x of leute) {
+        plus(x, (zufriedenheit(x, b) - zufriedenheit(x, RUN.b)) * 3.2);
+        if (tod.has(x)) { plus(x, x.typ === "chaos" ? -3 : x.typ === "drama" ? -6 : -13); for (const y of bezVon(x)) if (["paar", "freunde", "geschwister"].includes(y.z.typ)) plus(y.ander, -4); }
+      }
+      return { d, tod, geht, pause, todIrgendwer, bezSchaden, b };
+    });
+    const proSpieler = leute.map(x => {
+      const werte = erg.map(e => e.d.get(x));
+      return { sp: x, min: Math.min(...werte), max: Math.max(...werte), tod: erg.map(e => e.tod.has(x)), geht: erg.some(e => e.geht.has(x)), pause: erg.some(e => e.pause.has(x)) };
+    });
+    return { proSpieler, zweige: erg, wurf: o.w.wurf, o };
+  }
+  /* Was steht auf dem Spiel? – kurze, konkrete Zeilen */
+  function buerde(p) {
+    if (!p) return [];
+    const z = [], sicher = !p.wurf, bars = p.zweige[0].b;
+    for (const x of p.proSpieler) {
+      const tod = x.tod.every(Boolean) ? "stirbt" : x.tod.some(Boolean) ? "kann sterben" : null;
+      if (tod) z.push({ ic: "💀", t: x.sp.held.name + " (" + x.sp.name + ") " + tod, c: "tod" });
+      if (x.geht) z.push({ ic: "🚪", t: x.sp.name + " verlässt die Runde", c: "tod" });
+      if (x.pause) z.push({ ic: "💬", t: x.sp.name + " fehlt eine Weile", c: "schlecht" });
+    }
+    if (p.zweige.some(e => e.todIrgendwer)) z.push({ ic: "💀", t: "Irgendein Held kann sterben", c: "tod" });
+    const schlecht = p.proSpieler.filter(x => x.max <= -5 && !x.tod.some(Boolean)).sort((a, b) => a.max - b.max);
+    const gut = p.proSpieler.filter(x => x.min >= 5).sort((a, b) => b.min - a.min);
+    if (schlecht.length) z.push({ ic: "😠", t: schlecht.slice(0, 3).map(x => x.sp.name).join(", ") + (schlecht.length === 1 ? " wird" : " werden") + " es dir übel nehmen", c: "schlecht" });
+    const wackel = p.proSpieler.filter(x => x.min <= -5 && x.max >= 3);
+    if (wackel.length && !sicher) z.push({ ic: "🎲", t: "Hängt am Wurf: " + wackel.slice(0, 3).map(x => x.sp.name).join(", "), c: "" });
+    if (gut.length) z.push({ ic: "😊", t: gut.slice(0, 3).map(x => x.sp.name).join(", ") + (gut.length === 1 ? " wird" : " werden") + " es lieben", c: "gut" });
+    if (p.zweige.some(e => e.bezSchaden >= 10) && aktuelle.ctx.sp2) z.push({ ic: "💔", t: aktuelle.ctx.sp.name + " und " + aktuelle.ctx.sp2.name + ": das belastet", c: "schlecht" });
+    for (const B of BALKEN) {
+      const v = bars[B.k], d = v - RUN.b[B.k];
+      if (v <= 6 || v >= 94) z.push({ ic: "⚠️", t: B.name + " kippt fast", c: "tod" });
+      else if (Math.abs(d) >= 12) z.push({ ic: d > 0 ? "⬆" : "⬇", t: B.name + (d > 0 ? " steigt stark" : " stürzt ab"), c: "" });
+    }
+    return z.slice(0, 5);
+  }
+
+  /* ---------- Nachhall: Spieler merken sich, was du entschieden hast ---------- */
+  function nachhall(k, seite, launeVor, ereignisse, label) {
+    const schwer = k.schwer;
+    for (const x of aktiveSpieler().concat(RUN.spieler.filter(y => y.weg && launeVor[idx(y)] != null && !y.wegNotiert))) {
+      memo(x); const m = x.mem;
+      if (x.vertrauen == null) x.vertrauen = 60;
+      const d = x.laune - launeVor[idx(x)];
+      const heldTot = ereignisse.some(e => e.c === "tod" && e.t.includes("– " + x.name + " würfelt"));
+      const durchWurf = !!(aktuelle.k.opt[seite] && aktuelle.k.opt[seite].w.wurf);
+      if (d <= -7 || (heldTot && !durchWurf)) {
+        m.groll = (m.groll || []).concat({ wahl: label, karte: RUN.karten, held: heldTot ? (m.erinnerung.slice(-1)[0] || {}).held : null }).slice(-4);
+        x.vertrauen = clamp(x.vertrauen - (heldTot && !durchWurf ? 14 : schwer ? 9 : 5), 0, 100);
+      } else if (d >= 7) {
+        m.dank = (m.dank || []).concat({ wahl: label, karte: RUN.karten }).slice(-4);
+        x.vertrauen = clamp(x.vertrauen + (schwer ? 7 : 4), 0, 100);
+      }
+      if (x.weg) x.wegNotiert = true;
+    }
+    if (schwer) { RUN.k.schwerLog = (RUN.k.schwerLog || []).concat({ t: ersetze(k.text, aktuelle.f).slice(0, 90), wahl: label }).slice(-12); }
+  }
+
   /* ---------- Sitzplätze mit gezeichneten Figuren ---------- */
   const reaktion = {};
   const REAK = { jubel: ["lach", "🙌"], lachen: ["lach", "😂"], schock: ["schock", "😱"], kopf: ["traurig", ""], wuetend: ["wuetend", "💢"], traurig: ["traurig", "💧"], skeptisch: ["skeptisch", ""], stolz: ["stolz", "✨"], schlaf: ["schlaf", ""], handy: ["neutral", ""] };
@@ -1222,19 +1331,33 @@
     if ((s.typ === "handy" && (RUN.b.s < 48 || RUN.b.t < 35)) || (s.laune < 28 && s.typ !== "regel" && idx(s) % 3 === 0)) return "handy";
     return "";
   }
-  function zeichneTisch(sprecher) {
+  function progAusdruck(x) {
+    if (x.tod.every(Boolean)) return ["schock", "💀", "tod"];
+    if (x.geht) return ["traurig", "🚪", "tod"];
+    if (x.tod.some(Boolean)) return ["schock", "🎲💀", "bang"];
+    const lo = x.min, hi = x.max;
+    if (lo <= -5 && hi >= 3) return ["skeptisch", "🎲", "bang"];
+    if (hi <= -10) return ["wuetend", "▼▼", "minus"];
+    if (hi <= -4) return ["skeptisch", "▼", "minus"];
+    if (lo >= 9) return ["lach", "▲▲", "plus"];
+    if (lo >= 4) return ["grins", "▲", "plus"];
+    return ["neutral", "", "egal"];
+  }
+  function zeichneTisch(sprecher, prog) {
     const box = $("#tisch"); if (!RUN) { box.innerHTML = ""; return; }
     const jetzt = Date.now();
+    const pMap = prog ? new Map(prog.proSpieler.map(x => [x.sp, progAusdruck(x)])) : null;
+    box.classList.toggle("prognose", !!prog);
     box.innerHTML = RUN.spieler.filter(s => !s.weg).map(s => {
       memo(s);
-      const i = idx(s), r = reaktion[i] && reaktion[i].bis > jetzt ? reaktion[i].art : null;
-      const pause = !!s.pause, h = pause ? "" : haltung(s);
-      const ausdruck = r ? REAK[r][0] : h === "kopf" ? "muede" : h === "schlaf" ? "schlaf" : null;
+      const i = idx(s), pr = pMap && pMap.get(s), r = !pr && reaktion[i] && reaktion[i].bis > jetzt ? reaktion[i].art : null;
+      const pause = !!s.pause, h = pause || pr ? "" : haltung(s);
+      const ausdruck = pr ? pr[0] : r ? REAK[r][0] : h === "kopf" ? "muede" : h === "schlaf" ? "schlaf" : null;
       const farbe = s.laune > 60 ? "#7fa64a" : s.laune > 35 ? "#e8b14e" : "#e0573a";
       const bz = bezVon(s).filter(x => anwesend(x.ander) || x.ander.pause).map(x => '<span title="' + esc(BEZ[x.z.typ].name + " mit " + x.ander.name + " (" + Math.round(x.z.wert) + ")") + '"' + (x.z.wert < 30 ? ' class="schlecht"' : "") + ">" + BEZ[x.z.typ].ic + "</span>").join("");
       const titel = s.name + " – " + typTitel(s) + " · " + s.held.name + ", " + s.held.volk + "-" + s.held.klasse + " (Stufe " + s.held.stufe + "), " + s.held.eigen + " · Laune " + Math.round(s.laune) + (s.krise ? " · " + KRISEN[s.krise.art].name : "") + (pause ? " · pausiert" : "");
-      const reak = r && REAK[r][1] ? REAK[r][1] : h === "handy" ? "📱" : h === "schlaf" ? "💤" : "";
-      return '<div class="platz' + (s === sprecher ? " spricht" : "") + (r ? " r-" + r : "") + (h ? " h-" + h : "") + (pause ? " pausiert" : "") + '" data-i="' + i + '" title="' + esc(titel) + '"><div class="figur">' + GR.figur(s, ausdruck, { bg: pause ? "#cfc3ad" : "#efe0c0", rand: TYPEN[s.typ].farbe }) + (reak ? '<span class="reak">' + reak + "</span>" : "") + (s.krise ? '<span class="kr" title="' + esc(KRISEN[s.krise.art].name) + '">' + KRISEN[s.krise.art].ic + "</span>" : "") + (pause ? '<span class="kr">💬</span>' : "") + '</div><div class="pn">' + esc(s.name) + (bz ? '<span class="bz">' + bz + "</span>" : "") + '</div><div class="ph">' + (pause ? "pausiert" : esc(s.held.name) + "<br>" + esc(s.held.klasse) + " " + s.held.stufe) + '</div><div class="laune"><i style="width:' + s.laune + "%;background:" + farbe + '"></i></div></div>';
+      const reak = pr ? pr[1] : r && REAK[r][1] ? REAK[r][1] : h === "handy" ? "📱" : h === "schlaf" ? "💤" : "";
+      return '<div class="platz' + (s === sprecher ? " spricht" : "") + (r ? " r-" + r : "") + (h ? " h-" + h : "") + (pause ? " pausiert" : "") + (pr ? " p-" + pr[2] : "") + '" data-i="' + i + '" title="' + esc(titel) + '"><div class="figur">' + GR.figur(s, ausdruck, { bg: pause ? "#cfc3ad" : "#efe0c0", rand: TYPEN[s.typ].farbe }) + (reak ? '<span class="reak">' + reak + "</span>" : "") + (s.krise ? '<span class="kr" title="' + esc(KRISEN[s.krise.art].name) + '">' + KRISEN[s.krise.art].ic + "</span>" : "") + (pause ? '<span class="kr">💬</span>' : "") + '</div><div class="pn">' + esc(s.name) + (bz ? '<span class="bz">' + bz + "</span>" : "") + '</div><div class="ph">' + (pause ? "pausiert" : esc(s.held.name) + "<br>" + esc(s.held.klasse) + " " + s.held.stufe) + '</div><div class="laune"><i style="width:' + s.laune + "%;background:" + farbe + '"></i></div></div>';
     }).join("");
   }
   function reagieren(erg, ctx) {
@@ -1345,7 +1468,10 @@
     zeichneBalken(); zeichneTisch(aktuelle.ctx.sp); zeichneFuss();
     requestAnimationFrame(zeichneTischbild);
     zieherAn(el);
+    abwaegen = null; $("#app").classList.remove("schwer-moment"); ["l", "r", "m"].forEach(x => $("#wahl-" + x).classList.remove("bestaetigen"));
+    if (k.schwer && !k.sonder) { el.classList.add("schwer"); const sg = document.createElement("div"); sg.className = "schwer-siegel"; sg.title = "Schwere Entscheidung – du wirst zweimal gefragt"; sg.textContent = "⚖"; el.appendChild(sg); }
     sperre = false;
+    starteEile();
   }
 
 
@@ -1369,18 +1495,20 @@
       if (!aktiv || (e && e.pointerId !== id)) return;
       aktiv = false; el.classList.remove("zieht");
       const breite = Math.min(window.innerWidth, 420);
+      if (abwaegen != null && Math.abs(dx) < 8 && Math.abs(dy) < 8) { el.style.transform = ""; ziel = null; abwaegenEnde(); return; }
       if (drei() && dy < -90 && Math.abs(dy) > Math.abs(dx)) karteWeg(2);
       else if (Math.abs(dx) > breite * .28) karteWeg(dx < 0 ? 0 : 1);
-      else { el.style.transform = ""; schild.style.opacity = 0; ziel = null; markiere(null); }
+      else { el.style.transform = ""; ziel = null; if (abwaegen != null) markiere(abwaegen); else { schild.style.opacity = 0; markiere(null); } }
     };
     el.addEventListener("pointerup", ende); el.addEventListener("pointercancel", ende);
   }
 
   function markiere(seite) {
-    if (!aktuelle || !karteEl) return;
-    const schild = karteEl.querySelector(".wahl-schild");
-    if (seite == null) { zeichneBalken(); return; }
+    if (!aktuelle || !karteEl || sperre || karteEl.classList.contains("folge")) return;
+    const schild = karteEl.querySelector(".wahl-schild"); if (!schild) return;
+    if (seite == null) { zeichneBalken(); if (abwaegen == null) zeichneTisch(aktuelle.ctx.sp); return; }
     const o = aktuelle.k.opt[seite];
+    zeichneTisch(aktuelle.ctx.sp, prognose(seite));
     schild.textContent = ersetze(o.label, aktuelle.f) + (o.w.wurf ? "  🎲 " + o.w.wurf + "+" : "");
     schild.classList.toggle("r", seite === 1); schild.classList.toggle("m", seite === 2);
     zeichneBalken(vorschauFuer(o));
@@ -1389,27 +1517,83 @@
     const b = $("#wahl-" + s);
     b.addEventListener("click", () => { Ton.start(); karteWeg(i); });
     b.addEventListener("mouseenter", () => markiere(i)); b.addEventListener("focus", () => markiere(i));
-    b.addEventListener("mouseleave", () => markiere(null)); b.addEventListener("blur", () => markiere(null));
+    b.addEventListener("mouseleave", () => markiere(abwaegen)); b.addEventListener("blur", () => markiere(abwaegen));
   });
 
-  function karteWeg(seite, ueberspringen) {
+  /* ---------- Abwägen: schwere Entscheidungen wollen zweimal getroffen werden ---------- */
+  let abwaegen = null, eileTimer = null;
+  const grob = () => window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+  function abwaegenStart(seite) {
+    abwaegen = seite;
+    const el = karteEl; el.style.transform = "";
+    el.classList.remove("ab-l", "ab-r", "ab-o", "neu"); el.classList.add("abwaegen", seite === 0 ? "ab-l" : seite === 2 ? "ab-o" : "ab-r");
+    markiere(seite);
+    const schild = el.querySelector(".wahl-schild"); if (schild) schild.style.opacity = 1;
+    const p = prognose(seite), z = buerde(p), o = aktuelle.k.opt[seite];
+    let box = el.querySelector(".buerde"); if (!box) { box = document.createElement("div"); box.className = "buerde"; el.appendChild(box); }
+    box.innerHTML = '<div class="b-kopf">⚖ Schwere Entscheidung</div><div class="b-wahl">„' + esc(ersetze(o.label, aktuelle.f)) + "“" + (o.w.wurf ? " <small>🎲 " + o.w.wurf + "+</small>" : "") + "</div>" +
+      (z.length ? "<ul>" + z.map(x => '<li class="' + x.c + '"><span>' + x.ic + "</span>" + esc(x.t) + "</li>").join("") + "</ul>" : '<p class="leise">Keiner am Tisch wird es dir krummnehmen. Glaubst du.</p>') +
+      '<div class="b-fuss">' + (grob() ? "Nochmal in dieselbe Richtung wischen · Karte antippen nimmt zurück" : "Nochmal wählen, um es zu besiegeln · Esc nimmt zurück") + "</div>";
+    $("#app").classList.add("schwer-moment");
+    ["l", "r", "m"].forEach((x, i) => $("#wahl-" + x).classList.toggle("bestaetigen", i === seite));
+    Ton.spiel("a_herzschlag", .6); vib([15, 90, 15]);
+  }
+  function abwaegenEnde() {
+    abwaegen = null;
+    if (karteEl) { karteEl.classList.remove("abwaegen", "ab-l", "ab-r", "ab-o"); const b = karteEl.querySelector(".buerde"); if (b) b.remove(); const sch = karteEl.querySelector(".wahl-schild"); if (sch) sch.style.opacity = 0; }
+    $("#app").classList.remove("schwer-moment");
+    ["l", "r", "m"].forEach(x => $("#wahl-" + x).classList.remove("bestaetigen"));
+    if (aktuelle) markiere(null);
+  }
+  function starteEile() {
+    clearInterval(eileTimer);
+    const k = aktuelle.k, el = karteEl;
+    if (!k.eile || !k.zoegern || !el || META.einst.keineEile) return;
+    const dauer = (+k.eile || 12) * 1000; let rest = dauer;
+    const lunte = document.createElement("div"); lunte.className = "lunte"; lunte.innerHTML = "<i></i><b>⏳ " + Math.round(dauer / 1000) + "</b>"; el.appendChild(lunte);
+    Ton.spiel("a_uhr", .45);
+    eileTimer = setInterval(() => {
+      if (karteEl !== el || !aktuelle || aktuelle.k !== k) { clearInterval(eileTimer); return; }
+      if ($("#schichten").children.length || sperre) return;
+      rest -= 100;
+      lunte.firstChild.style.width = Math.max(0, rest / dauer * 100) + "%";
+      lunte.lastChild.textContent = "⏳ " + Math.ceil(Math.max(0, rest) / 1000);
+      if (rest <= 4000 && !el.classList.contains("eilt")) { el.classList.add("eilt"); Ton.spiel("a_herzschlag", .5); }
+      if (rest <= 0) { clearInterval(eileTimer); abwaegenEnde(); karteWeg(3, false, true); }
+    }, 100);
+  }
+
+  function karteWeg(seite, ueberspringen, zeitUm) {
     if (sperre || !aktuelle || !karteEl) return;
     if (seite === 2 && !aktuelle.k.opt[2]) return;
-    sperre = true;
+    if (seite === 3 && !aktuelle.k.zoegern) return;
+    if (!ueberspringen && !zeitUm && seite !== 3 && aktuelle.k.schwer && abwaegen !== seite && !META.einst.schnell) { abwaegenStart(seite); return; }
+    const besiegelt = abwaegen === seite && !zeitUm;
+    sperre = true; clearInterval(eileTimer);
     const el = karteEl;
+    if (besiegelt) {
+      el.classList.add("besiegelt"); Ton.spiel("gong", .55); vib([30, 50, 60]);
+      const b = el.querySelector(".buerde"); if (b) b.classList.add("weg");
+      setTimeout(() => { $("#app").classList.remove("schwer-moment"); weiterWeg(); }, 650);
+    } else weiterWeg();
+    function weiterWeg() {
+    abwaegen = null; ["l", "r", "m"].forEach(x => $("#wahl-" + x).classList.remove("bestaetigen"));
     el.classList.remove("zieht", "neu"); el.style.transform = "";
-    el.classList.add(seite === 0 ? "weg-l" : seite === 2 ? "weg-o" : "weg-r");
+    el.classList.add(seite === 0 ? "weg-l" : seite === 2 ? "weg-o" : seite === 3 ? "weg-u" : "weg-r");
     $("#wahlen").classList.add("aus");
     Ton.spiel("e_papier", .5);
     vib(12);
     if (ueberspringen) { setTimeout(() => { RUN.k.benutzt[aktuelle.k.id] = 1; naechsteKarte(); }, 330); return; }
     const launeVor = RUN.spieler.map(s => s.laune);
+    const kk = aktuelle.k, label = seite === 3 ? "zu lange gezögert" : ersetze(kk.opt[seite].label, aktuelle.f);
     const erg = anwenden(seite);
-    erg.launeVor = launeVor; erg.ctx = aktuelle.ctx; erg.banner = aktuelle.banner; erg.typ = kartenTyp(aktuelle.ctx, aktuelle.k);
+    nachhall(kk, seite, launeVor, erg.ereignisse, label);
+    erg.launeVor = launeVor; erg.ctx = aktuelle.ctx; erg.banner = aktuelle.banner; erg.typ = kartenTyp(aktuelle.ctx, aktuelle.k); erg.zoegern = seite === 3; erg.schwer = kk.schwer;
     setTimeout(() => {
       if (erg.wurf) zeigeWurf(erg, () => zeigeFolge(erg));
       else zeigeFolge(erg);
     }, 300);
+    }
   }
   function zeigeWurf(erg, fertig) {
     const w = erg.wurf, box = document.createElement("div"), set = wuerfelSet();
@@ -1431,7 +1615,7 @@
     const pfeile = "mlst".split("").filter(b => Math.round(erg.delta[b])).map(b => { const B = BALKEN.find(x => x.k === b), d = Math.round(RUN ? RUN.b[b] - erg.vorher[b] : erg.delta[b]); return d ? (B.name + " " + (d > 0 ? "+" : "") + d) : ""; }).filter(Boolean).join(" · ");
     const boss = RUN && RUN.k.boss && RUN.k.boss.letzt ? '<div class="bosstreffer ' + (RUN.k.boss.letzt < 0 ? "ja" : "nein") + '">' + (RUN.k.boss.letzt < 0 ? "Endgegner " + RUN.k.boss.letzt : "Endgegner erholt sich +" + RUN.k.boss.letzt) + "</div>" : "";
     if (RUN && RUN.k.boss) RUN.k.boss.letzt = 0;
-    el.innerHTML = (erg.banner ? '<div class="banner klein">' + erg.banner + "</div>" : "") + GR.rahmen(erg.typ || "spieler", false) + '<div class="folge-kopf">' + (erg.wurf ? (erg.wurf.ok ? "Gelungen" : "Misslungen") : "Und dann …") + '</div>' + boss + '<div class="text"><span>' + esc(erg.folge || "Die Geschichte geht weiter.") + '</span></div><div class="ereignisse">' + ev + '</div><div class="fuss"><span>' + esc(pfeile) + '</span><span class="weiter">weiter ▸</span></div>';
+    el.innerHTML = (erg.banner ? '<div class="banner klein">' + erg.banner + "</div>" : "") + GR.rahmen(erg.typ || "spieler", false) + '<div class="folge-kopf">' + (erg.zoegern ? "Du hast zu lange gezögert …" : erg.wurf ? (erg.wurf.ok ? "Gelungen" : "Misslungen") : erg.schwer ? "Entschieden." : "Und dann …") + '</div>' + boss + '<div class="text"><span>' + esc(erg.folge || "Die Geschichte geht weiter.") + '</span></div><div class="ereignisse">' + ev + '</div><div class="fuss"><span>' + esc(pfeile) + '</span><span class="weiter">weiter ▸</span></div>';
     st.appendChild(el); karteEl = el;
     Viz.zeige(erg.viz);
     if (!META.einst.ruhig) {
@@ -1509,7 +1693,7 @@
     Ton.spiel(alt.sieg ? "e_jubel" : "e_fernglocken", .8);
     Viz.zeige(alt.sieg ? "konfetti" : "nebel");
     const helden = alt.helden.map(h => "<li><b>" + esc(h.name) + "</b> <small>" + esc(h.volk + "-" + h.klasse + ", Stufe " + h.stufe + " · gespielt von " + h.spieler) + "</small></li>").join("");
-    const f = fenster('<h2>' + (alt.sieg ? "Sieg!" : "Kampagne beendet") + '</h2><p><b>„' + esc(alt.titel) + '“</b> ist zu Ende. ' + (alt.sieg ? esc(alt.schurke) + " ist besiegt." : esc(alt.schurke) + " ist entkommen … und wird wiederkehren.") + ' ' + (alt.tote ? alt.tote + " Helden sind gefallen." : "Niemand ist gefallen.") + '</p><h3>Neue Legenden</h3><ul class="liste">' + (helden || "<li>keine</li>") + '</ul>' + (alt.gehen.length ? "<p class='leise'>Nicht mehr dabei: " + esc(alt.gehen.join(", ")) + "</p>" : "") + '' + (alt.ziel ? '<div class="zielkarte ' + (alt.ziel.ok ? "ok" : "nein") + '"><span class="ic">' + alt.ziel.ic + "</span><b>Geheimes Ziel: " + esc(alt.ziel.name) + "</b><p>" + esc(alt.ziel.text) + "</p><small>" + (alt.ziel.ok ? "Geschafft! +30 Erfahrung" : "Leider nicht geschafft.") + "</small></div>" : "") + '<p><b>+' + (alt.xp + s.xp) + ' Erfahrung</b> · Die Chronik ist jetzt im Jahr ' + META.welt.jahr + '.</p><p class="leise">Die Runde bleibt zusammen. Neue Helden werden gewürfelt – eine neue Geschichte beginnt: <b>„' + esc(RUN.k.titel) + '“</b></p><div class="reihe"><button class="knopf" data-los>▶ Weiter erzählen</button></div>', { zu: false });
+    const f = fenster('<h2>' + (alt.sieg ? "Sieg!" : "Kampagne beendet") + '</h2><p><b>„' + esc(alt.titel) + '“</b> ist zu Ende. ' + (alt.sieg ? esc(alt.schurke) + " ist besiegt." : esc(alt.schurke) + " ist entkommen … und wird wiederkehren.") + ' ' + (alt.tote ? alt.tote + " Helden sind gefallen." : "Niemand ist gefallen.") + '</p><h3>Neue Legenden</h3><ul class="liste">' + (helden || "<li>keine</li>") + '</ul>' + (alt.gehen.length ? "<p class='leise'>Nicht mehr dabei: " + esc(alt.gehen.join(", ")) + "</p>" : "") + '' + (alt.schwer && alt.schwer.length ? '<h3>Entscheidungen, die bleiben</h3><ul class="liste schwerliste">' + alt.schwer.slice(-5).map(x => '<li><small>' + esc(x.t) + '…</small><br>⚖ <b>' + esc(x.wahl) + '</b></li>').join("") + '</ul>' : "") + (alt.ziel ? '<div class="zielkarte ' + (alt.ziel.ok ? "ok" : "nein") + '"><span class="ic">' + alt.ziel.ic + "</span><b>Geheimes Ziel: " + esc(alt.ziel.name) + "</b><p>" + esc(alt.ziel.text) + "</p><small>" + (alt.ziel.ok ? "Geschafft! +30 Erfahrung" : "Leider nicht geschafft.") + "</small></div>" : "") + '<p><b>+' + (alt.xp + s.xp) + ' Erfahrung</b> · Die Chronik ist jetzt im Jahr ' + META.welt.jahr + '.</p><p class="leise">Die Runde bleibt zusammen. Neue Helden werden gewürfelt – eine neue Geschichte beginnt: <b>„' + esc(RUN.k.titel) + '“</b></p><div class="reihe"><button class="knopf" data-los>▶ Weiter erzählen</button></div>', { zu: false });
     f.querySelector("[data-los]").addEventListener("click", () => { f.remove(); naechsteKarte(); });
     speichern();
   }
@@ -1569,7 +1753,7 @@
     const gef = W.gefallene.slice(-30).reverse().map(g => esc(g.name)).join(", ");
     fenster('<h2>Welt-Chronik</h2><p>Jahr <b>' + W.jahr + '</b>. ' + W.chronik.length + ' Geschichten wurden erzählt. Die Welt vergisst nichts.</p>' + (W.schurken.length ? "<p class='leise'>Noch auf freiem Fuß: " + esc(W.schurken.join(", ")) + "</p>" : "") + '<h3>Geschichten</h3><ul class="liste">' + (ch || "<li class='leise'>Noch keine – beende deine erste Kampagne.</li>") + '</ul><h3>Legenden</h3><ul class="liste">' + (leg || "<li class='leise'>Noch keine.</li>") + "</ul><h3>Gefallene</h3><p class='leise'>" + (gef || "Noch niemand. Noch.") + "</p>");
   }
-  const MERK_TEXT = { pechvogel: "Pechvogel – würfelt auffällig oft die 1", glueckskind: "Glückskind – die Würfel lieben", trauert: "trauert noch um den letzten Helden", verbittert: "hat schon zu viele Helden verloren", paranoid: "traut keiner Truhe mehr", stammgast: "Stammgast seit mehreren Kampagnen", uebermuetig: "fühlt sich langsam unbesiegbar", frisch: "noch ganz neu in dieser Runde" };
+  const MERK_TEXT = { groll: "nimmt dir eine Entscheidung übel", heldgeopfert: "hat dir nicht verziehen, dass du den Helden geopfert hast", dank: "ist dir für eine Entscheidung dankbar", misstrauisch: "traut deinen Entscheidungen nicht mehr", vertraut: "würde dir blind folgen", pechvogel: "Pechvogel – würfelt auffällig oft die 1", glueckskind: "Glückskind – die Würfel lieben", trauert: "trauert noch um den letzten Helden", verbittert: "hat schon zu viele Helden verloren", paranoid: "traut keiner Truhe mehr", stammgast: "Stammgast seit mehreren Kampagnen", uebermuetig: "fühlt sich langsam unbesiegbar", frisch: "noch ganz neu in dieser Runde" };
   function tischFenster() {
     if (!RUN) { fenster("<h2>Am Tisch</h2><p>Gerade läuft keine Runde.</p>"); return; }
     const leute = RUN.spieler.filter(s => !s.weg);
@@ -1580,16 +1764,16 @@
       const mag = Object.keys(W).map(b => { const B = BALKEN.find(x => x.k === b); return B.name + " " + W[b][0] + "–" + W[b][1]; }).join(", ");
       const mk = Object.keys(merkmale(s)).filter(x => MERK_TEXT[x]).map(x => MERK_TEXT[x]);
       const erin = s.mem.erinnerung.slice(-3).map(e => e.held).join(", ");
-      return '<li style="display:flex;gap:.6rem;align-items:center"><span style="width:58px;flex:none">' + GR.figur(s, null, { rand: TYPEN[s.typ].farbe }) + "</span><span><b>" + esc(s.name) + "</b> – " + esc(typTitel(s)) + " <small>(Laune " + Math.round(s.laune) + ")</small>" + (s.krise ? " <small>" + KRISEN[s.krise.art].ic + " " + KRISEN[s.krise.art].name + "</small>" : "") + (s.pause ? " <small>💬 pausiert</small>" : "") + "<br><small>" + esc(TYPEN[s.typ].motto) + " Mag: " + esc(mag) + "</small><br>Spielt <b>" + esc(s.held.name) + "</b>, " + esc(s.held.volk + "-" + s.held.klasse) + ", Stufe " + s.held.stufe + " – " + esc(s.held.eigen) + (erin ? "<br><small>Vermisst noch: " + esc(erin) + "</small>" : "") + (mk.length ? "<br><small class='merk'>" + esc(mk.join(" · ")) + "</small>" : "") + "</span></li>";
+      return '<li style="display:flex;gap:.6rem;align-items:center"><span style="width:58px;flex:none">' + GR.figur(s, null, { rand: TYPEN[s.typ].farbe }) + "</span><span><b>" + esc(s.name) + "</b> – " + esc(typTitel(s)) + " <small>(Laune " + Math.round(s.laune) + " · Vertrauen in dich " + Math.round(s.vertrauen == null ? 60 : s.vertrauen) + ")</small>" + (s.krise ? " <small>" + KRISEN[s.krise.art].ic + " " + KRISEN[s.krise.art].name + "</small>" : "") + (s.pause ? " <small>💬 pausiert</small>" : "") + "<br><small>" + esc(TYPEN[s.typ].motto) + " Mag: " + esc(mag) + "</small><br>Spielt <b>" + esc(s.held.name) + "</b>, " + esc(s.held.volk + "-" + s.held.klasse) + ", Stufe " + s.held.stufe + " – " + esc(s.held.eigen) + (erin ? "<br><small>Vermisst noch: " + esc(erin) + "</small>" : "") + (mk.length ? "<br><small class='merk'>" + esc(mk.join(" · ")) + "</small>" : "") + "</span></li>";
     }).join("") + "</ul>" + (bz ? '<h3>Wer mit wem</h3><ul class="liste">' + bz + "</ul>" : "") + '<p class="leise">Fällt die Laune eines Spielers auf null, will er gehen. Beziehungen färben die Stimmung: Wer sich gerade nicht grün ist, zieht beide runter. Wer geht, nimmt manchmal jemanden mit.</p>');
   }
 
   function regelFenster() {
-    fenster('<h2>So wird gespielt</h2><p>Du bist die Spielleitung. Jede Karte ist ein Moment am Spieltisch. <b>Wische nach links oder rechts</b> (oder tippe auf die Knöpfe, am PC: ← / →), um zu entscheiden.</p><h3>Die vier Balken</h3><p><b>Macht</b> (mickrig ↔ OP), <b>Realismus</b> (Schwachsinn ↔ Bürokratie), <b>Spaß</b> (Pain ↔ Albern-Kollaps), <b>Tempo</b> (zäh ↔ gehetzt). Der grüne Bereich liegt etwa zwischen der Mitte und drei Vierteln. Läuft ein Balken <b>ganz leer oder ganz voll</b>, kippt die Runde – Spielende.</p><p>Beim Zielen zeigen Punkte über den Balken, welche sich bewegen (groß = viel). Ab Spielleiter-Stufe 2 siehst du auch die Richtung.</p><h3>Die Spieler</h3><p>Jeder Spielertyp mag andere Balkenstände. Ist ein Balken lange außerhalb ihres Geschmacks, sinkt die Laune – bei null wollen sie gehen. Unter zwei Spielern ist die Runde vorbei.</p><h3>Würfel</h3><p>Manche Wahl verlangt eine Probe (🎲 12 = mindestens 12 auf dem W20). Eine 20 gelingt immer, eine 1 nie. Im Spielleiter-Buch sammelst du Würfelsets – jedes klingt und sieht anders aus.</p><h3>Die Menschen am Tisch</h3><p>Manche Spieler sind befreundet, Geschwister, ein Paar oder können sich gerade nicht leiden. Das färbt die Laune beider. Spieler merken sich, was ihnen passiert ist: gefallene Helden, Pech beim Würfeln, wie lange sie schon dabei sind. Und manchmal kommt das echte Leben dazwischen – ein Umzug, ein Baby, ein neuer Job. Dann pausiert jemand und meldet sich im Gruppenchat.</p><h3>Bosskampf & Ziele</h3><p>In der letzten Session jeder Kampagne wartet der Endgegner. Jeder Treffer im Bosskampf macht das Finale leichter. Jede Kampagne hat außerdem ein <b>geheimes Ziel</b> (🎯 unten rechts). <b>Seltene Karten</b> glänzen golden und haben eine dritte Wahl: nach oben wischen oder ↑.</p><h3>Für immer</h3><p>Sessions werden zu Kampagnen, Kampagnen zur Welt-Chronik. Überlebende Helden werden Legenden, Schurken kehren zurück. Deine Spielleiter-Stufe, Werkzeuge, Hausregeln und Erfolge bleiben auch nach dem Ende einer Runde.</p><p class="leise">Tastatur: ← / → oder A / D wählen, ↑ / W für die dritte Wahl, Leertaste weiter, M Menü.</p>');
+    fenster('<h2>So wird gespielt</h2><p>Du bist die Spielleitung. Jede Karte ist ein Moment am Spieltisch. <b>Wische nach links oder rechts</b> (oder tippe auf die Knöpfe, am PC: ← / →), um zu entscheiden.</p><h3>Die vier Balken</h3><p><b>Macht</b> (mickrig ↔ OP), <b>Realismus</b> (Schwachsinn ↔ Bürokratie), <b>Spaß</b> (Pain ↔ Albern-Kollaps), <b>Tempo</b> (zäh ↔ gehetzt). Der grüne Bereich liegt etwa zwischen der Mitte und drei Vierteln. Läuft ein Balken <b>ganz leer oder ganz voll</b>, kippt die Runde – Spielende.</p><p>Beim Zielen zeigen Punkte über den Balken, welche sich bewegen (groß = viel). Ab Spielleiter-Stufe 2 siehst du auch die Richtung.</p><h3>Die Spieler</h3><p>Jeder Spielertyp mag andere Balkenstände. Ist ein Balken lange außerhalb ihres Geschmacks, sinkt die Laune – bei null wollen sie gehen. Unter zwei Spielern ist die Runde vorbei.</p><h3>Würfel</h3><p>Manche Wahl verlangt eine Probe (🎲 12 = mindestens 12 auf dem W20). Eine 20 gelingt immer, eine 1 nie. Im Spielleiter-Buch sammelst du Würfelsets – jedes klingt und sieht anders aus.</p><h3>Die Menschen am Tisch</h3><p>Manche Spieler sind befreundet, Geschwister, ein Paar oder können sich gerade nicht leiden. Das färbt die Laune beider. Spieler merken sich, was ihnen passiert ist: gefallene Helden, Pech beim Würfeln, wie lange sie schon dabei sind. Und manchmal kommt das echte Leben dazwischen – ein Umzug, ein Baby, ein neuer Job. Dann pausiert jemand und meldet sich im Gruppenchat.</p><h3>Schwere Entscheidungen</h3><p>Wenn du eine Wahl antippst oder die Karte anziehst, siehst du an den Gesichtern am Tisch, wer sich freut (▲), wer sauer wird (▼) und wessen Held in Gefahr ist (💀). Karten mit rotem ⚖-Siegel sind schwer: Du wirst gefragt, ob du das wirklich willst, und siehst, was auf dem Spiel steht. Manchmal brennt oben eine Lunte – wer zu lange zögert, lässt die Zeit entscheiden. Spieler merken sich deine Entscheidungen: Wer sich übergangen fühlt, verliert das Vertrauen in dich, nimmt Rückschläge schwerer und spricht dich irgendwann darauf an.</p><h3>Bosskampf & Ziele</h3><p>In der letzten Session jeder Kampagne wartet der Endgegner. Jeder Treffer im Bosskampf macht das Finale leichter. Jede Kampagne hat außerdem ein <b>geheimes Ziel</b> (🎯 unten rechts). <b>Seltene Karten</b> glänzen golden und haben eine dritte Wahl: nach oben wischen oder ↑.</p><h3>Für immer</h3><p>Sessions werden zu Kampagnen, Kampagnen zur Welt-Chronik. Überlebende Helden werden Legenden, Schurken kehren zurück. Deine Spielleiter-Stufe, Werkzeuge, Hausregeln und Erfolge bleiben auch nach dem Ende einer Runde.</p><p class="leise">Tastatur: ← / → oder A / D wählen, ↑ / W für die dritte Wahl, Leertaste weiter, M Menü.</p>');
   }
   function einstellungen() {
     const e = META.einst;
-    const f = fenster('<h2>Einstellungen</h2><div class="schalter"><span>Atmosphäre (Hintergrundklang)</span><input type="range" min="0" max="1" step="0.05" value="' + e.atmo + '" data-e="atmo"></div><div class="schalter"><span>Effekte</span><input type="range" min="0" max="1" step="0.05" value="' + e.fx + '" data-e="fx"></div><div class="schalter"><span>Vibration</span><input type="checkbox" data-e="vib"' + (e.vib ? " checked" : "") + '></div><div class="schalter"><span>Automatisch weiterblättern</span><input type="checkbox" data-e="auto"' + (e.auto ? " checked" : "") + '></div><div class="schalter"><span>Weniger Bewegung</span><input type="checkbox" data-e="ruhig"' + (e.ruhig ? " checked" : "") + '></div><h3>Spielstand</h3><p class="leise">Alles wird nur in diesem Browser gespeichert.</p><div class="reihe"><button class="knopf zweit" data-loesch>Alles zurücksetzen</button></div><p class="leise">Klänge: echte Aufnahmen aus der Bühne von imrestales.de (freie Lizenzen, siehe amb/).</p>');
+    const f = fenster('<h2>Einstellungen</h2><div class="schalter"><span>Atmosphäre (Hintergrundklang)</span><input type="range" min="0" max="1" step="0.05" value="' + e.atmo + '" data-e="atmo"></div><div class="schalter"><span>Effekte</span><input type="range" min="0" max="1" step="0.05" value="' + e.fx + '" data-e="fx"></div><div class="schalter"><span>Schwere Entscheidungen ohne Rückfrage</span><input type="checkbox" data-e="schnell"' + (e.schnell ? " checked" : "") + '></div><div class="schalter"><span>Ohne Zeitdruck (keine ablaufende Lunte)</span><input type="checkbox" data-e="keineEile"' + (e.keineEile ? " checked" : "") + '></div><div class="schalter"><span>Vibration</span><input type="checkbox" data-e="vib"' + (e.vib ? " checked" : "") + '></div><div class="schalter"><span>Automatisch weiterblättern</span><input type="checkbox" data-e="auto"' + (e.auto ? " checked" : "") + '></div><div class="schalter"><span>Weniger Bewegung</span><input type="checkbox" data-e="ruhig"' + (e.ruhig ? " checked" : "") + '></div><h3>Spielstand</h3><p class="leise">Alles wird nur in diesem Browser gespeichert.</p><div class="reihe"><button class="knopf zweit" data-loesch>Alles zurücksetzen</button></div><p class="leise">Klänge: echte Aufnahmen aus der Bühne von imrestales.de (freie Lizenzen, siehe amb/).</p>');
     f.addEventListener("input", ev => { const i = ev.target.closest("[data-e]"); if (!i) return; e[i.dataset.e] = i.type === "checkbox" ? i.checked : +i.value; Ton.start(); Ton.lautstaerke(); document.body.classList.toggle("ruhig", e.ruhig); speichern(); });
     f.querySelector("[data-loesch]").addEventListener("click", () => confirmFenster("Wirklich alles löschen – Stufe, Erfolge, Chronik?", () => { META = metaNeu(); RUN = null; speichern(); location.reload(); }));
   }
@@ -1639,10 +1823,12 @@
   $("#werkzeuge").addEventListener("click", e => { if (e.target.closest("[data-ziel]")) { zielFenster(); return; } const b = e.target.closest("[data-wz]"); if (!b || b.disabled || sperre) return; Ton.start(); werkzeugNutzen(b.dataset.wz); });
   document.addEventListener("keydown", e => {
     if ($("#schichten").children.length || titelEl) { if (e.key === "Escape") { const s = $("#schichten").lastElementChild; if (s && s.zu && s.querySelector(".zu")) s.zu(); } return; }
+    if (e.key === "Escape" && abwaegen != null) { abwaegenEnde(); return; }
     if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") { if (folgeWeiter) folgeWeiter(); else karteWeg(0); e.preventDefault(); }
     else if ((e.key === "ArrowUp" || e.key === "w" || e.key === "W") && !folgeWeiter && aktuelle && aktuelle.k.opt[2]) { karteWeg(2); e.preventDefault(); }
     else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") { if (folgeWeiter) folgeWeiter(); else karteWeg(1); e.preventDefault(); }
     else if ((e.key === " " || e.key === "Enter") && folgeWeiter) { folgeWeiter(); e.preventDefault(); }
+    else if ((e.key === " " || e.key === "Enter") && abwaegen != null) { karteWeg(abwaegen); e.preventDefault(); }
     else if (e.key === "m" || e.key === "M") menue();
   });
   document.addEventListener("visibilitychange", () => { if (document.hidden) speichern(); });
@@ -1674,7 +1860,9 @@
         }
         let seite = Math.floor(zz() * x.k.opt.length);
         if (art === "gierig") { const sc = o => { const v = vorschauFuer(o); let s = 0; for (const b of "mlst") { let d = v[b]; if (d === "?") d = 0; const xx = RUN.b[b] + (d || 0) * STAERKE + DRIFT[b] * STAERKE * 2; s += Math.pow(xx - 52, 2); } return s; }; let best = Infinity; x.k.opt.forEach((o, i) => { const v = sc(o); if (v < best) { best = v; seite = i; } }); }
-        anwenden(seite);
+        const launeVorSim = RUN.spieler.map(s => s.laune);
+        const ergSim = anwenden(seite);
+        nachhall(x.k, seite, launeVorSim, ergSim.ereignisse, ersetze(x.k.opt[seite].label, f));
         const tot = balkenTot();
         if (tot) { ergebnisse.push({ ende: tot, karten: RUN.karten, kamp: RUN.kampagnenGeschafft || 0 }); RUN = null; break; }
         if (sessionVorbei()) { sessionAbschluss(); if (RUN.k.session >= RUN.k.sessions) kampagneAbschluss(); else neueSession(); }
