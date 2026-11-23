@@ -106,10 +106,13 @@
   Z.itemPrice = it => Math.round((60 + 40 * it.tier) * (1 + 0.6 * it.rar) * (Z.meta && Z.meta.up && Z.meta.up.haendler ? 1 - 0.1 * Z.meta.up.haendler : 1));
 
   /* ======================= SPIELER ======================= */
+  /* Bewegungskonstanten (px, s). Feinschliff W3: Sprung mit Scheitel-Schwebe, kräftigerem Fallen, kleinerem Mindesthüpfer,
+     schnellerem Wenden, großzügigeren Leitern und Ecken. Physik rechnet mit Mittelpunktverfahren → bei 30–240 Hz gleich. */
   const C = (Z.PC = {
-    RUN: 156, ACC_G: 2900, DEC_G: 3600, ACC_A: 2300, DEC_A: 1600,
-    GRAV: 1420, FALL: 1.18, MAXFALL: 430, JUMP: 405, DJUMP: 360, CUT: 0.5, COYOTE: 0.11, JBUF: 0.15,
-    ROLL: 0.3, ROLLSPD: 300, ROLLCD: 0.12, DODGE: 0.1, CLIMB: 110, H: 28, HC: 17, CRAWL: 0.42
+    RUN: 156, ACC_G: 2900, DEC_G: 3600, TURN_G: 4400, ACC_A: 2300, DEC_A: 1600, TURN_A: 2900,
+    GRAV: 1420, FALL: 1.35, FALLV: 150, MAXFALL: 430, FASTFALL: 1.35, JUMP: 412, DJUMP: 366, CUT: 0.4, MINJ: 0.05,
+    HANG: 0.45, HANGV: 100, COYOTE: 0.11, JBUF: 0.15, CORNER: 6, POP: 6, LEDGE: 0.15,
+    ROLL: 0.3, ROLLSPD: 300, ROLLCD: 0.12, DODGE: 0.1, ROLLIF: 0.22, CLIMB: 110, LADDERX: 11, H: 28, HC: 17, CRAWL: 0.42
   });
   Z.newPlayer = () => {
     const P = {
@@ -170,7 +173,13 @@
       const l = P.ledge; l.t += dt; const k = U.ease(Math.min(1, l.t / l.dur));
       P.x = U.lerp(l.x0, l.x1, k > 0.5 ? (k - 0.5) * 2 : 0); P.y = U.lerp(l.y0, l.y1, Math.min(1, k * 1.6));
       P.vx = 0; P.vy = 0;
-      if (l.t >= l.dur) { P.ledge = null; P.onGround = true; P.airJumps = 1; }
+      /* Kante → Sprung: Sprung (auch gepuffert) bricht das Hochziehen ab und springt wie vom Boden ab */
+      if (P.jumpBuf > 0 && l.t >= 0.05 && !(P.diveRec > 0)) {
+        P.ledge = null; P.airJumps = 1; P.coyote = 0;
+        P.vx = (h || l.face || P.face) * C.RUN * (h ? 1 : 0.6);
+        doJump(P, C.JUMP); return;
+      }
+      if (l.t >= l.dur) { P.ledge = null; P.onGround = true; P.airJumps = 1; P.coyote = C.COYOTE; }
       return;
     }
     /* ---------- Trank trinken ---------- */
@@ -179,15 +188,25 @@
       if (P.drinkT <= 0) { const heal = Math.round(P.hpMax * 0.55); healP(P, heal); P.rally = 0; FX.burst(P.x + P.w / 2, P.y + 8, 16, { col: ["#ff6a6a", "#ffb0a0"], sp: 50, up: 40, life: 0.8, size: 2, kind: "glow", add: true }); A.play("heal"); }
     }
     /* ---------- Leiter ---------- */
-    const cx = P.x + P.w / 2, tcx = Math.floor(cx / T);
-    const ladderHere = W.isLadder(tcx, Math.floor((P.y + P.h - 2) / T)) || W.isLadder(tcx, Math.floor((P.y + 4) / T));
-    const ladderBelow = W.isLadder(tcx, Math.floor((P.y + P.h + 2) / T));
+    const cx = P.x + P.w / 2;
+    /* Leitern großzügig greifen: auch die Nachbarspalte, wenn ihre Mitte höchstens LADDERX px entfernt ist */
+    const ladCol = (test) => { const t0 = Math.floor(cx / T); if (test(t0)) return t0; const t1 = cx - t0 * T < T / 2 ? t0 - 1 : t0 + 1; return Math.abs(cx - (t1 * T + T / 2)) <= C.LADDERX && test(t1) ? t1 : null; };
+    const hereCol = ladCol(tx => W.isLadder(tx, Math.floor((P.y + P.h - 2) / T)) || W.isLadder(tx, Math.floor((P.y + 4) / T)));
+    const belowCol = ladCol(tx => W.isLadder(tx, Math.floor((P.y + P.h + 2) / T)));
+    const ladderHere = hereCol != null, ladderBelow = belowCol != null;
     if (!P.climbing && !P.act && P.rollT <= 0 && P.hurtT <= 0) {
       if ((inp.held.up && ladderHere) || (inp.held.down && P.onGround && ladderBelow && !ladderHere)) {
-        P.climbing = true; P.x = tcx * T + T / 2 - P.w / 2; P.vx = 0; P.vy = 0; P.airJumps = 1;
-        if (inp.held.down && ladderBelow && !ladderHere) P.y += 6;
+        const col = ladderHere ? hereCol : belowCol;
+        /* seitlich nur so weit schieben, wie kein Fels im Weg ist */
+        const nx = col * T + T / 2 - P.w / 2;
+        let blocked = false; for (let ty = Math.floor(P.y / T); ty <= Math.floor((P.y + P.h - 0.01) / T); ty++) if (W.solidT(W.tile(Math.floor(nx / T), ty)) || W.solidT(W.tile(Math.floor((nx + P.w - 0.01) / T), ty))) blocked = true;
+        if (!blocked) {
+          P.climbing = true; P.ladTx = col; P.x = nx; P.vx = 0; P.vy = 0; P.airJumps = 1; P.coyote = 0;
+          if (inp.held.down && ladderBelow && !ladderHere) P.y += 6;
+        }
       }
     }
+    const tcx = P.climbing && P.ladTx != null ? P.ladTx : Math.floor(cx / T);
     if (P.climbing) {
       const v = (inp.held.down ? 1 : 0) - (inp.held.up ? 1 : 0);
       P.vy = v * C.CLIMB; P.vx = 0; P.anim.climb = (P.anim.climb || 0) + Math.abs(v) * dt * 8;
@@ -197,7 +216,8 @@
         const top = Math.floor((P.y + P.h - 2) / T); P.y = top * T - P.h; P.climbing = false; P.onGround = true; P.vy = 0;
       } else if (!stillLadder) { P.climbing = false; }
       else { P.y = nextY; if (v > 0) { const fb = Math.floor((P.y + P.h) / T); if (W.solidT(W.tile(tcx, fb))) { P.y = fb * T - P.h; P.climbing = false; P.onGround = true; } } }
-      if (P.jumpBuf > 0) { P.climbing = false; P.jumpBuf = 0; if (!inp.held.down) { P.vy = -C.JUMP * 0.8; P.vx = h * C.RUN; A.play("jump", { vol: 0.5 }); } }
+      /* Leiter → Sprung: über doJump, damit variable Sprunghöhe/Schwebe wie beim Bodensprung greifen (vorher blieb ein alter „losgelassen“-Zustand hängen) */
+      if (P.jumpBuf > 0) { P.climbing = false; P.jumpBuf = 0; if (!inp.held.down) { P.vx = h * C.RUN; doJump(P, C.JUMP * 0.8); P.coyote = 0; } }
       if (h && !inp.held.up && !inp.held.down && P.onGround) P.climbing = false;
       if (take(P, "roll")) { P.climbing = false; startRoll(P, h || P.face); }
       if (P.climbing) { if (P.anim.climb > 1) { P.anim.climb = 0; } return; }
@@ -287,7 +307,14 @@
       if (P.st.slow > 0) target *= 0.55;
       if (P.st.web > 0) target *= 0.3;
       if (P.diveRec > 0 && P.onGround) target *= 0.2;
-      const acc = P.onGround ? (Math.abs(target) > Math.abs(P.vx) || U.sign(target) !== U.sign(P.vx) ? C.ACC_G : C.DEC_G) : (h ? C.ACC_A : C.DEC_A);
+      /* Beschleunigung: Wenden (Ziel entgegen der Bewegung) besonders schnell, Loslassen bremst kräftig (kein Rutschen);
+         in der Luft bleibt Überschwung (z. B. Rollsprung) etwas erhalten, statt sofort auf Laufgeschwindigkeit gekappt zu werden */
+      const turning = target !== 0 && P.vx !== 0 && U.sign(target) !== U.sign(P.vx);
+      let acc;
+      if (P.onGround) acc = turning ? C.TURN_G : Math.abs(target) > Math.abs(P.vx) ? C.ACC_G : C.DEC_G;
+      else if (!h) acc = C.DEC_A;
+      else if (turning) acc = C.TURN_A;
+      else acc = Math.abs(target) >= Math.abs(P.vx) ? C.ACC_A : C.DEC_A * 0.25;
       if (!(P.act && P.act.lungeT > 0)) P.vx = U.approach(P.vx, target, acc * dt);
       if (h && (!P.act || P.act.type === "shield" && false || P.act.phase === "post" && P.act.type !== "shield")) { if (!P.act || P.act.phase === "post") P.face = h; }
       if (h && !P.act) P.face = h;
@@ -299,37 +326,54 @@
     if (P.onGround && P.diveRecPend) { P.diveRecPend = false; P.diveRec = Math.max(P.diveRec || 0, 0.24); }
     if (P.onGround && !(P.diveRec > 0)) P.diveLock = false;
     if (!locked && P.jumpBuf > 0 && !(P.diveRec > 0) && (!P.act || P.act.phase === "post" || P.act.type === "shield" || P.act.type === "charge")) {
-      if (inp.held.down && P.onGround && P.onPlat) { P.dropT = 0.22; P.jumpBuf = 0; P.y += 2; P.onGround = false; }
+      /* Durchfallen: Coyote löschen, sonst würde ein zweiter Druck gleich wieder hinaufspringen */
+      if (inp.held.down && P.onGround && P.onPlat) { P.dropT = 0.22; P.jumpBuf = 0; P.y += 2; P.onGround = false; P.coyote = 0; }
       else if (P.coyote > 0) { doJump(P, C.JUMP); P.coyote = 0; }
       else if (P.airJumps > 0) { P.airJumps--; doJump(P, C.DJUMP, true); }
     }
-    P.jumpT = (P.jumpT || 0) + dt;
+    /* variable Sprunghöhe: Loslassen kappt den Aufstieg, frühestens nach MINJ (kurzes Antippen = kleiner Hüpfer).
+       Der Schnitt wird zeitgenau ausgeglichen, damit die Hüpferhöhe nicht von der Bildrate abhängt. */
     if (!inp.held.jump && P.jumpHeld) P.jumpRel = true;
-    if (P.jumpRel && P.jumpT >= 0.085 && P.vy < 0 && !P.cut) { P.vy *= C.CUT; P.cut = true; }
-    if (!inp.held.jump && P.jumpT >= 0.085) P.jumpHeld = false;
+    const jt0 = P.jumpT || 0; P.jumpT = jt0 + dt;
+    if (P.jumpRel && P.jumpT >= C.MINJ && P.vy < 0 && !P.cut) {
+      const early = Math.max(0, C.MINJ - jt0);
+      P.y += P.vy * (1 - C.CUT) * early; P.vy *= C.CUT; P.cut = true;
+    }
+    if (!inp.held.jump && P.jumpT >= C.MINJ) P.jumpHeld = false;
     /* Sturzangriff: in der Luft unten + Angriff */
     if (!P.onGround && !locked && inp.held.down && (P.buf.a1 > 0 || P.buf.a2 > 0) && (!P.act || P.act.phase === "post") && !P.plunge && !P.diveLock && P.vy > -260) {
       const s = P.buf.a1 > 0 ? "a1" : "a2"; if (P.act) endAct(P); const it = P.slots[s], d = it ? Z.WEAPONS[it.id] : Z.WEAPONS.faeuste;
       if (d && Z.diveStart && Z.diveStart(P, s, it, d)) { P.buf[s] = 0; if (P.plunge && !(Z.pogoOn && Z.pogoOn(P))) P.diveLock = true; }
       else if (d && d.kind === "melee") { P.buf[s] = 0; P.plunge = true; P.plungeItem = it; P.vy = 640; P.vx = 0; if (!(Z.pogoOn && Z.pogoOn(P))) P.diveLock = true; A.play("swingHeavy", { vol: 0.7 }); }
     }
-    /* Schwerkraft */
+    /* Schwerkraft: stetige Faktoren (Scheitel-Schwebe bei gehaltenem Sprung, kräftigeres Fallen, Schnellfall mit Unten)
+       und Mittelpunktverfahren → Sprungkurve praktisch unabhängig von der Schrittweite */
+    let vyEnd = null;
     if (!P.onGround) {
-      let g = C.GRAV;
-      if (P.vy > 0) g *= C.FALL;
-      if (Math.abs(P.vy) < 70 && inp.held.jump && !P.cut) g *= 0.55;
-      if (P.act && P.act.type === "melee" && P.act.phase !== "post" && !P.plunge) g *= P.act.airHover ? 0.25 : 0.6;
-      if (P.act && P.act.type === "charge") g *= 0.6;
-      if (inp.held.down && P.vy > 0 && !P.plunge) g *= 1.35;
-      P.vy = Math.min(P.vy + g * dt, P.plunge ? 700 : inp.held.down ? C.MAXFALL * 1.3 : C.MAXFALL);
+      const hang = inp.held.jump && P.jumpHeld && !P.cut, down = inp.held.down && !P.plunge;
+      const cap = P.plunge ? 700 : inp.held.down ? C.MAXFALL * 1.3 : C.MAXFALL;
+      let gk = 1;
+      if (P.act && P.act.type === "melee" && P.act.phase !== "post" && !P.plunge) gk *= P.act.airHover ? 0.25 : 0.6;
+      if (P.act && P.act.type === "charge") gk *= 0.6;
+      const gOf = v => {
+        let g = C.GRAV * gk;
+        if (v > 0) { const r = Math.min(1, v / C.FALLV); g *= 1 + (C.FALL - 1) * r; if (down) g *= 1 + (C.FASTFALL - 1) * r; }
+        if (hang) g *= C.HANG + (1 - C.HANG) * Math.min(1, Math.abs(v) / C.HANGV);
+        return g;
+      };
+      const v0 = P.vy, vm = Math.min(v0 + gOf(v0) * dt * 0.5, cap);
+      vyEnd = Math.min(v0 + gOf(vm) * dt, cap);
+      P.vy = vm;
     }
     const preVy = P.vy;
     if (P.vy < 0) cornerNudge(P, dt);
+    if (!P.onGround && h && !locked) stepPop(P, h, dt);
     Z.moveBody(P, dt);
+    if (vyEnd != null && !P.onGround && !P.hitCeil) P.vy = vyEnd;
     pushOutOfEnemies(P);
     /* Landung */
     if (P.justLanded) {
-      P.cut = false; P.anim.land = Math.min(1, preVy / 500);
+      P.cut = false; P.jumpHeld = false; P.anim.land = Math.min(1, preVy / 500);
       if (preVy > 200) { FX.burst(P.x + P.w / 2, P.y + P.h, Math.round(preVy / 70), { col: Z.dustCol || "#8a7a70", sp: 60, ang: -Math.PI / 2, spread: 2.6, life: 0.45, size: 2.5, kind: "smoke", g: -20 }); A.play("land", { vol: U.clamp(preVy / 600, 0.25, 0.8), x: P.x, y: P.y }); }
       if (P.plunge) plungeLand(P);
     }
@@ -365,19 +409,44 @@
     }
   }
   function startRoll(P, dir) {
-    P.rollT = C.ROLL; P.rollDir = dir; P.face = dir; P.iframe = Math.max(P.iframe, C.DODGE); P.dodgeT = C.DODGE; P.dodged = false; P.rolls = (P.rolls || 0) + 1;
+    /* klare Unverwundbarkeit: ROLLIF (≈ 2/3 der Rolle); das „Ausgewichen!“-Fenster (DODGE) bleibt kurz */
+    P.rollT = C.ROLL; P.rollDir = dir; P.face = dir; P.iframe = Math.max(P.iframe, C.ROLLIF); P.dodgeT = C.DODGE; P.dodged = false; P.rolls = (P.rolls || 0) + 1;
     if (P.rolls >= 2 && Z.has("schattenroll")) { P.invis = 1.2; P.rolls = 0; }
     if (P.plunge) P.plunge = false;
     A.play("roll", { vol: 0.5 });
     FX.burst(P.x + P.w / 2, P.y + P.h - 2, 6, { col: Z.dustCol || "#8a7a70", sp: 50, ang: Math.PI + (dir > 0 ? 0 : Math.PI), spread: 0.8, life: 0.35, size: 2.5, kind: "smoke" });
   }
-  /* Eckenkorrektur: stößt nur eine Kopfkante an eine Deckenecke (bis 5 px), rutscht man daran vorbei statt abzuprallen */
+  /* ist der Körper an (x, y) frei von festem Fels? */
+  const bodyFree = (x, y, w, h) => {
+    for (let ty = Math.floor(y / T); ty <= Math.floor((y + h - 0.01) / T); ty++)
+      for (let tx = Math.floor((x + 0.01) / T); tx <= Math.floor((x + w - 0.01) / T); tx++) if (W.solidT(W.tile(tx, ty))) return false;
+    return true;
+  };
+  /* Eckenkorrektur: stößt nur eine Kopfkante an eine Deckenecke (bis CORNER px), rutscht man daran vorbei statt abzuprallen.
+     Bevorzugt die Seite, in die gesteuert wird; prüft den ganzen Körper (auch seitlich), damit nichts in Wände geschoben wird. */
   function cornerNudge(P, dt) {
-    const ty = Math.floor((P.y + P.vy * dt) / T); if (ty === Math.floor(P.y / T)) return;
-    const l = Math.floor((P.x + 0.5) / T), r = Math.floor((P.x + P.w - 0.5) / T);
-    const sl = W.solidT(W.tile(l, ty)), sr = W.solidT(W.tile(r, ty));
-    if (sl && !sr) { const push = (l + 1) * T - P.x; if (push > 0 && push <= 5 && !W.solidT(W.tile(Math.floor((P.x + push + P.w - 0.5) / T), ty))) P.x += push + 0.01; }
-    else if (sr && !sl) { const push = P.x + P.w - r * T; if (push > 0 && push <= 5 && !W.solidT(W.tile(Math.floor((P.x - push + 0.5) / T), ty))) P.x -= push + 0.01; }
+    const ny = P.y + P.vy * dt;
+    if (Math.floor(ny / T) === Math.floor(P.y / T) || bodyFree(P.x, ny, P.w, P.h)) return;
+    const pref = (inp.held.right ? 1 : 0) - (inp.held.left ? 1 : 0) || U.sign(P.vx) || 1;
+    for (let o = 1; o <= C.CORNER; o++) for (const d of [pref, -pref]) {
+      const nx = P.x + d * o;
+      if (bodyFree(nx, ny, P.w, P.h) && bodyFree(nx, P.y, P.w, P.h)) { P.x = nx; return; }
+    }
+  }
+  /* Kantenschub: in der Luft knapp (bis POP px) unter einer Kante gegen sie gesteuert → hinaufschieben, Schwung bleibt.
+     Größere Höhenunterschiede übernimmt der Kantengriff (tryLedge). */
+  function stepPop(P, h, dt) {
+    if (P.vy < -120 || P.plunge || P.act || P.rollT > 0) return;
+    const probe = Math.max(0.6, Math.abs(P.vx * dt) + 0.1);
+    const fx = h > 0 ? P.x + P.w + probe : P.x - probe, tx = Math.floor(fx / T);
+    const feet = P.y + P.h, tyF = Math.floor((feet - 0.01) / T);
+    if (!W.solidT(W.tile(tx, tyF))) return;
+    const top = tyF * T, depth = feet - top;
+    if (depth <= 0 || depth > C.POP) return;
+    const ny = top - P.h, nx = P.x + h * probe;
+    if (!bodyFree(P.x, ny, P.w, P.h) || !bodyFree(nx, ny, P.w, P.h)) return;
+    P.y = ny; if (P.vy > 0) P.vy = 0;
+    if (Math.abs(P.vx) < C.RUN * 0.5) P.vx = h * C.RUN * 0.5;
   }
   function tryLedge(P, h) {
     const frontX = h > 0 ? P.x + P.w + 2 : P.x - 2, tx = Math.floor(frontX / T);
@@ -395,13 +464,20 @@
       if (W.solidT(W.tile(Math.floor((P.x + P.w / 2) / T), ty - 2)) || W.solidT(W.tile(Math.floor((P.x + P.w / 2) / T), ty - 1))) continue;
       /* nicht diagonal an einer Felsecke über dem Kopf vorbeischlüpfen */
       if (W.solidT(W.tile(Math.floor((P.x + (h > 0 ? P.w - 1 : 0)) / T), ty - 1)) && W.solidT(W.tile(Math.floor((P.x + (h > 0 ? P.w - 1 : 0)) / T), ty - 2))) continue;
-      P.ledge = { t: 0, dur: 0.17, x0: P.x, y0: P.y, x1, y1: topY - P.h };
+      P.ledge = { t: 0, dur: C.LEDGE, x0: P.x, y0: P.y, x1, y1: topY - P.h, face: h };
       P.vx = 0; P.vy = 0; P.face = h; A.play("jump", { vol: 0.3, rate: 0.8 });
       return;
     }
   }
+  /* Trefferfläche gegenüber Fallen: etwas kleiner als die Figur, damit knappe Manöver belohnt werden.
+     Seiten je 2,5 px, Kopf 4 px, Füße 2 px; beim Rollen nur die untere Körperhälfte. Für parcours.js/fallen.js gedacht. */
+  Z.playerHurtBox = function (P) {
+    P = P || Z.player; if (!P) return { x: 0, y: 0, w: 0, h: 0 };
+    const sx = 2.5, top = P.rollT > 0 ? Math.max(4, P.h * 0.45) : P.crouch ? 3 : 4, bot = 2;
+    return { x: P.x + sx, y: P.y + top, w: Math.max(2, P.w - sx * 2), h: Math.max(4, P.h - top - bot) };
+  };
   function hazards(P, dt) {
-    const tx0 = Math.floor((P.x + 2) / T), tx1 = Math.floor((P.x + P.w - 2) / T), tyF = Math.floor((P.y + P.h - 3) / T), tyM = Math.floor((P.y + P.h * 0.5) / T);
+    const hb = Z.playerHurtBox(P), tx0 = Math.floor(hb.x / T), tx1 = Math.floor((hb.x + hb.w) / T), tyF = Math.floor((P.y + P.h - 3) / T), tyM = Math.floor((P.y + P.h * 0.5) / T);
     let spike = false, liquid = 0;
     for (let tx = tx0; tx <= tx1; tx++) {
       const a = W.tile(tx, tyF), b = W.tile(tx, tyM);
@@ -461,7 +537,7 @@
   function startMelee(P, slot, it, d) {
     /* Umdrehen beim Zuschlagen: wer in die andere Richtung drückt, schlägt dorthin */
     { const hh = (inp.held.right ? 1 : 0) - (inp.held.left ? 1 : 0); if (hh) P.face = hh; }
-    const speed = 1 + (Z.hasAff(it, "flink") ? 0.18 : 0) + (P.wrath > 0 ? 0.1 : 0);
+    const speed = 1 + (Z.hasAff(it, "flink") ? 0.18 : 0) + (P.wrath > 0 ? 0.1 : 0) + (Z.hasRune && Z.hasRune(it, "tempo") ? 0.15 : 0);
     let step = P.combo[slot] % d.combo.length;
     const c = d.combo[step];
     P.act = { slot, it, d, def: c, type: "melee", step, phase: "pre", t: 0, speed, hit: new Set(), lungeT: 0, airHover: !P.onGround && !P.usedHover };
@@ -475,7 +551,7 @@
     { const hh = (inp.held.right ? 1 : 0) - (inp.held.left ? 1 : 0); if (hh) P.face = hh; }
     const s = d.shoot;
     if (s.mag) { const m = P.mag[slot] || { n: s.mag + (Z.metaLvl(it.id) >= 3 ? 2 : 0), t: 0 }; P.mag[slot] = m; if (m.n <= 0) return; }
-    P.act = { slot, it, d, def: { pre: s.pre || 0.06, act: 0.02, post: s.post || 0.15 }, type: "shot", phase: "pre", t: 0, speed: 1 + (Z.hasAff(it, "flink") ? 0.18 : 0), fired: 0 };
+    P.act = { slot, it, d, def: { pre: s.pre || 0.06, act: 0.02, post: s.post || 0.15 }, type: "shot", phase: "pre", t: 0, speed: 1 + (Z.hasAff(it, "flink") ? 0.18 : 0) + (Z.hasRune && Z.hasRune(it, "tempo") ? 0.15 : 0), fired: 0 };
     const tgt = nearestEnemy(P, 260, false); if (tgt && Z.settings.autoAim && !inp.held.left && !inp.held.right) P.face = tgt.x + tgt.w / 2 > P.x + P.w / 2 ? 1 : -1;
     else if (inp.held.left && !inp.held.right) P.face = -1; else if (inp.held.right) P.face = 1;
   }
@@ -513,7 +589,7 @@
     if (a.type === "shieldDown") { if (a.t > 0.08) endAct(P); return; }
     if (a.type === "charge") {
       if (a.phase === "charge") {
-        a.charge = Math.min(1, a.charge + dt / a.d.shoot.charge);
+        a.charge = Math.min(1, a.charge + dt / a.d.shoot.charge * (Z.hasRune && Z.hasRune(a.it, "tempo") ? 1.15 : 1));
         if (inp.held.left && !inp.held.right) P.face = -1; else if (inp.held.right && !inp.held.left) P.face = 1;
         if (a.charge >= 1 && !a.full) { a.full = true; FX.ring(P.x + P.w / 2 + P.face * 10, P.y + 10, 10, "#ffd27a", 0.25); A.play("ui", { vol: 0.35, rate: 1.6 }); }
         if (!inp.held[a.slot]) {
@@ -573,6 +649,8 @@
     if ((Z.has("darkinblut") || Z.hasAff(it, "zornig")) && P.hp < P.hpMax * 0.5) m *= 1.4;
     if (P.st.dance > 0) m *= 1.4;
     if (P.bounty) m *= 1 + 0.08 * P.bounty;
+    /* Adrenalin nach einem perfekten Ausweichen (schmiede.js): kurz +25 % Schaden */
+    if (P.st.adrenalin > 0) m *= 1.25;
     m *= 1 + 0.05 * ((Z.meta && Z.meta.up && Z.meta.up.klingen) || 0);
     return base * m;
   }
@@ -767,7 +845,7 @@
     if (!isFinite(P.hp)) P.hp = P.hpMax;
     if ((P.iframe > 0 || P.ledge) && !o.force) {
       if (P.dodgeT > 0 && !P.dodged && !o.hazard) {
-        P.dodged = true; P.counterT = 1.2; Z.stats.dodges = (Z.stats.dodges || 0) + 1;
+        P.dodged = true; P.counterT = 1.2; P.st.adrenalin = 3; Z.stats.dodges = (Z.stats.dodges || 0) + 1; Z.onPerfectDodge && Z.onPerfectDodge(P);
         FX.stop(0.04); FX.slowmo(0.3, 0.16); FX.text(P.x + P.w / 2, P.y - 10, L(["Ausgewichen!", "Dodged!"]), "#ffe08a", true);
         FX.ring(P.x + P.w / 2, P.y + 12, 18, "#ffe08a", 0.25, 2); A.play("parry", { vol: 0.35, rate: 1.6 }); Z.input.rumble(0.25, 60);
       }
@@ -858,7 +936,7 @@
     if (st.poison > 0) { st.poison -= dt; const fast = !isPlayer && Z.player && ["a1", "a2"].some(s => Z.player.slots[s] && Z.player.slots[s].id === "drachenzahn") && Z.metaLvl("drachenzahn") >= 3; if (doTick || (fast && st.tick === 0.25)) dot(t, base * 0.35 * st.poisonN * mult, "#9ad04a", isPlayer); if (st.poison <= 0) st.poisonN = 0; if (Math.random() < dt * 8) FX.p({ x: t.x + Math.random() * t.w, y: t.y + Math.random() * t.h * 0.5, vx: 0, vy: -20, life: 0.6, size: 2, col: "#9ad04a", kind: "bubble" }); }
     if (st.bleed > 0) { st.bleed -= dt; if (doTick) dot(t, base * 0.3 * st.bleedN * mult * (Math.abs(t.vx) > 20 ? 1.6 : 1), "#e04040", isPlayer); if (st.bleed <= 0) st.bleedN = 0; if (Math.random() < dt * 10) FX.p({ x: t.x + Math.random() * t.w, y: t.y + t.h * 0.4, vx: 0, vy: 10, g: 300, life: 0.4, size: 1.5, col: "#a01818", kind: "drop" }); }
     if (st.regen > 0) { st.regen -= dt; if (doTick) Z.healPlayer(st.regenAmt * 0.5); }
-    for (const k of ["stun", "root", "slow", "mark", "weak", "fear", "web", "smoke", "dance", "silence"]) if (st[k] > 0) st[k] -= dt;
+    for (const k of ["stun", "root", "slow", "mark", "weak", "fear", "web", "smoke", "dance", "silence", "adrenalin", "hmark", "sunder"]) if (st[k] > 0) st[k] -= dt;
   }
   Z.statusTick = statusTick;
   function dot(t, n, col, isPlayer) {

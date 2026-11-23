@@ -7,42 +7,138 @@
   const hash = (x, y) => { let h = (x * 374761393 + y * 668265263) ^ 0x5bd1e995; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
   const rich = () => !Z.gq || Z.gq.level === -1 ? (Z.gq ? Z.gq.layers !== false : true) : Z.gq.level >= 2;
 
-  /* ---------- Lichtstrahlen (Weltkoordinaten, nach dem Licht – leuchten über die Dunkelheit) ---------- */
+  /* ---------- Lichtstrahlen (Weltkoordinaten, nach dem Licht – leuchten über die Dunkelheit) ----------
+     Kleine Fenster werfen schmale, schräge Strahlen, große Bogenfenster breite Mondbahnen. Jeder Strahl endet dort,
+     wo er auf Boden trifft, und legt dort einen weichen Lichtfleck hin. Läuft Ezekiel oder ein Gegner hindurch, wirft
+     er einen Schatten in den Strahl (ausgeschnitten per Clip), und der Staub in diesem Schatten verschwindet. */
+  const WARMSH = { spires: 1, embercity: 1, forge: 1 };
+  /* Fensterlicht: in Glutgebieten warm, sonst Himmelslicht der Tageszeit (Z.zeit().win), ohne sie silbrig-violett */
+  const shaftRGB = () => { if (WARMSH[(Z.biome || {}).bg]) return "255,214,160"; const z = Z.zeit ? Z.zeit() : null; return z && Z.gfx.lightRGB ? Z.gfx.lightRGB(z.win).join(",") : "236,226,248"; };
+  /* Horizontdunst in der Farbe des Himmelshorizonts (bzw. der Tageszeit), aufgehellt – nie ein grauer Streifen */
+  function hazeRGB(zt, B) {
+    const h = (zt && zt.H && zt.H.sky ? zt.H.sky[2] : B && B.sky ? B.sky[2] : "#c8b0b0"), n = parseInt(h.slice(1), 16), L = v => Math.min(255, (v * 1.25 + 30) | 0);
+    let r = L(n >> 16), g = L((n >> 8) & 255), b = L(n & 255); if (b > r) r = b; return r + "," + g + "," + b;
+  }
+  let SL = null, SLlv = null, SLop = null;
+  /* Strahlen des Levels (einmal je Level berechnet): Ursprung, Neigung s (dx je dy), Länge bis zum Boden, Breiten */
+  function shaftList() {
+    const lv = Z.level, ops = Z.gfx && Z.gfx.openings;
+    if (SL && SLlv === lv && SLop === ops) return SL;
+    SL = []; SLlv = lv; SLop = ops; if (!lv) return SL;
+    const W = Z.world, solid = (x, y) => W && W.solidAt ? W.solidAt(x, y) : false;
+    const reach = (x, y, s, max) => { for (let k = 6; k < max; k += 4) if (solid(x + s * k, y + k)) return { len: k, hit: true }; return { len: max, hit: false }; };
+    for (const d of lv.decor || []) {
+      if (d.kind !== "window" || (Z.gfx.sky && Z.gfx.sky[d.y * lv.W + d.x]) || (Z.gfx.isOpen && Z.gfx.isOpen(d.x, d.y))) continue;
+      const x = d.x * T + 8, y = d.y * T + 6, s = 0.42, r = reach(x, y + 4, s, 170);
+      SL.push({ k: "win", x, y, s, len: r.len, hit: r.hit, w0: 10, w1: 10 + 34 * r.len / 150, a: 0.11, ph: d.x * 1.7 + d.y, dust: 9, id: "w" + d.x + "," + d.y });
+    }
+    const B = Z.biome || {};
+    if (ops && B.open === "arch") for (const o of ops) {
+      if (o.blind) continue;
+      const L = o.x0 * T, R = (o.x1 + 1) * T, Tp = o.y0 * T, Bt = (o.y1 + 1) * T, oy = Tp + 10, full = Bt + 102 - oy, s = 85 / full, cx = (L + R) / 2;
+      const r = reach(cx, Bt, s, 150), len = Math.min(full, Bt - oy + r.len);
+      SL.push({ k: "arch", x: cx, y: oy, s, len, hit: r.hit, w0: R - L - 12, w1: R - L - 6, a: 0.05, ph: o.x0 * 0.9, dust: 16, id: "a" + o.x0 + "," + o.y0 });
+    }
+    return SL;
+  }
+  Z.prachtShafts = () => shaftList(); /* für Tests */
+  /* Figuren, die Strahlen verdecken: Rechtecke x, y, w, h (einmal je Bild) */
+  const OCC = []; let occFrame = -1;
+  function occluders() {
+    if (occFrame === Z.gfx.frame) return OCC; occFrame = Z.gfx.frame; OCC.length = 0;
+    const P = Z.player; if (P && !P.dead && !(P.invis > 0)) OCC.push(P.x + 1, P.y - 3, P.w - 2, P.h + 3);
+    for (const e of Z.enemies) if (!e.dead && !(e.hidden > 0) && !(e.def && e.def.shape === "wisp")) OCC.push(e.x, e.y, e.w, e.h);
+    for (const a of Z.allies || []) if (a && a.x != null && a.w) OCC.push(a.x, a.y, a.w, a.h || 20);
+    return OCC;
+  }
+  /* Schatten der Figuren aus dem Strahl ausschneiden (je Schatten ein Clip – Überlappungen bleiben dunkel) */
+  function clipShadows(c, b) {
+    const O = occluders(), yE = b.y + b.len, Y = yE + 30; let n = 0;
+    for (let i = 0; i < O.length; i += 4) {
+      const x0 = O[i], y0 = O[i + 1], x1 = x0 + O[i + 2], y1 = y0 + O[i + 3];
+      if (y1 < b.y || y0 > yE) continue;
+      const cy = Math.max(b.y, Math.min(yE, (y0 + y1) / 2)), u = (cy - b.y) / b.len, bx = b.x + b.s * (cy - b.y), hw = (b.w0 + (b.w1 - b.w0) * u) / 2;
+      if (x1 < bx - hw || x0 > bx + hw) continue;
+      c.beginPath(); c.rect(b.x - 300, b.y - 60, 600 + b.len, b.len + 200);
+      c.moveTo(x0, y0); c.lineTo(x1, y0); c.lineTo(x1 + b.s * (Y - y0), Y); c.lineTo(x0 + b.s * (Y - y1), Y); c.lineTo(x0, y1); c.closePath();
+      c.clip("evenodd"); n++;
+    }
+    return n;
+  }
+  function inShadow(mx, my, s) {
+    const O = OCC;
+    for (let i = 0; i < O.length; i += 4) { const y0 = O[i + 1], y1 = y0 + O[i + 3]; if (my < y0) continue; const yc = Math.min(my, (y0 + y1) / 2), bx = mx - s * (my - yc); if (bx >= O[i] && bx <= O[i] + O[i + 2]) return true; }
+    return false;
+  }
+  function beamPath(c, b) {
+    const ex = b.x + b.s * b.len, ey = b.y + b.len;
+    c.beginPath(); c.moveTo(b.x - b.w0 / 2, b.y); c.lineTo(b.x + b.w0 / 2, b.y); c.lineTo(ex + b.w1 / 2, ey); c.lineTo(ex - b.w1 / 2, ey); c.closePath();
+  }
   function shafts(c, cam, t) {
-    const lv = Z.level; if (!lv || !lv.decor) return;
+    const L = shaftList(); if (!L.length) return;
+    const lvl = Z.gfx.lq ? Z.gfx.lq() : 2, rgb = shaftRGB();
+    occluders();
     c.save(); c.globalCompositeOperation = "lighter";
-    for (const d of lv.decor) {
-      if (d.kind !== "window" || (Z.gfx.sky && Z.gfx.sky[d.y * lv.W + d.x])) continue;
-      const x = d.x * T + 8, y = d.y * T + 6;
-      if (x < cam.x - 160 || x > cam.x + cam.w + 60 || y < cam.y - 40 || y > cam.y + cam.h) continue;
-      const sv = Z.sightAt ? Math.min(1, Z.sightAt(x, y) * 1.4) : 1; if (sv < 0.04) continue;
-      const len = 150, slant = 0.42, w0 = 10, w1 = 44, a = ((0.09 + 0.025 * Math.sin(t * 0.7 + d.x)) * sv).toFixed(3);
-      const g = c.createLinearGradient(x, y, x + len * slant, y + len); g.addColorStop(0, "rgba(255,226,170," + a + ")"); g.addColorStop(1, "rgba(255,210,150,0)");
-      c.fillStyle = g; c.beginPath(); c.moveTo(x - w0 / 2, y); c.lineTo(x + w0 / 2, y); c.lineTo(x + len * slant + w1 / 2, y + len); c.lineTo(x + len * slant - w1 / 2, y + len); c.closePath(); c.fill();
-      /* Staub im Strahl */
-      for (let i = 0; i < 7; i++) {
-        const k = (hash(d.x * 7 + i, d.y) + t * (0.02 + hash(i, d.x) * 0.03)) % 1, yy = y + k * len * 0.9, xx = x + k * len * 0.9 * slant + (hash(i, d.y) - 0.5) * (w0 + (w1 - w0) * k) + Math.sin(t * 0.8 + i) * 2;
-        c.globalAlpha = 0.5 * Math.sin(k * Math.PI); c.fillStyle = "#fff0d0"; c.fillRect(xx, yy, 0.9, 0.9);
+    for (const b of L) {
+      const ex = b.x + b.s * b.len, ey = b.y + b.len;
+      if (Math.max(b.x, ex) + b.w1 < cam.x || Math.min(b.x, ex) - b.w1 > cam.x + cam.w || ey < cam.y || b.y > cam.y + cam.h) continue;
+      const sv = Z.sightAt ? Math.min(1, Z.sightAt(b.x, b.y + 10) * 1.4) : 1; if (sv < 0.04) continue;
+      const a = b.a * (0.82 + 0.18 * Math.sin(t * 0.7 + b.ph)) * sv;
+      c.save();
+      const sh = clipShadows(c, b);
+      const g = c.createLinearGradient(b.x, b.y, ex, ey); g.addColorStop(0, "rgba(" + rgb + "," + a.toFixed(3) + ")"); g.addColorStop(0.7, "rgba(" + rgb + "," + (a * 0.45).toFixed(3) + ")"); g.addColorStop(1, "rgba(" + rgb + "," + (b.hit ? a * 0.25 : 0).toFixed(3) + ")");
+      c.fillStyle = g; beamPath(c, b); c.fill();
+      /* feine Lichtbahnen im Strahl, die langsam wandern (Gottesstrahlen) */
+      if (lvl >= 3) {
+        for (let i = 0; i < 3; i++) {
+          const u = 0.5 + 0.38 * Math.sin(t * (0.13 + i * 0.05) + b.ph + i * 2.1), ww = 0.12 + 0.08 * Math.sin(t * 0.21 + i + b.ph);
+          const x0 = b.x - b.w0 / 2 + b.w0 * u, x1 = ex - b.w1 / 2 + b.w1 * u, h0 = b.w0 * ww / 2, h1 = b.w1 * ww / 2;
+          c.globalAlpha = 0.55; c.beginPath(); c.moveTo(x0 - h0, b.y); c.lineTo(x0 + h0, b.y); c.lineTo(x1 + h1, ey); c.lineTo(x1 - h1, ey); c.closePath(); c.fill();
+        }
+        c.globalAlpha = 1;
+      }
+      c.restore();
+      /* Lichtfleck auf dem Boden (fällt mit dem Schatten zusammen nicht weg – der liegt im Strahl) */
+      if (b.hit) {
+        const pw = b.w1 * 1.15, ph = 5 + b.w1 * 0.12, pa = Math.min(1, a * 3.2);
+        const gp = c.createRadialGradient(ex, ey, 0, ex, ey, pw / 2); gp.addColorStop(0, "rgba(" + rgb + "," + pa.toFixed(3) + ")"); gp.addColorStop(1, "rgba(" + rgb + ",0)");
+        c.save(); c.translate(ex, ey - 1); c.scale(1, ph / pw * 2); c.translate(-ex, -ey); c.fillStyle = gp; c.fillRect(ex - pw / 2, ey - pw / 2, pw, pw); c.restore();
+      }
+      /* tanzender Staub: steigt und sinkt langsam, funkelt, fehlt im Schatten */
+      const n = Math.round(b.dust * (lvl >= 3 ? 1.6 : 1));
+      for (let i = 0; i < n; i++) {
+        const k = (hash(b.ph * 7 + i, 3) + t * (0.012 + hash(i, b.ph) * 0.025)) % 1, yy = b.y + k * b.len * 0.95;
+        const wB = b.w0 + (b.w1 - b.w0) * k, xx = b.x + k * b.len * 0.95 * b.s + (hash(i, b.ph * 3) - 0.5) * wB * 0.9 + Math.sin(t * (0.6 + hash(i, 5) * 0.5) + i) * 2.4, y2 = yy + Math.sin(t * 0.9 + i * 1.3) * 1.6;
+        if (sh && inShadow(xx, y2, b.s)) continue;
+        const tw = 0.55 + 0.45 * Math.sin(t * (2 + hash(i, 9) * 3) + i * 2.3), sz = hash(i, 11) < 0.2 ? 1.3 : 0.8;
+        c.globalAlpha = 0.6 * Math.sin(k * Math.PI) * tw * sv; c.fillStyle = "#fff4e4"; c.fillRect(xx, y2, sz, sz);
       }
       c.globalAlpha = 1;
     }
     c.restore();
   }
-
-  /* ---------- Mondlicht durch große Bogenfenster: breite, sehr schwache Bahnen schräg in den Raum ---------- */
-  function archShafts(c, cam, t) {
-    const B = Z.biome || {}, ops = Z.gfx && Z.gfx.openings; if (!ops || !ops.length || B.open !== "arch") return;
-    c.save(); c.globalCompositeOperation = "lighter";
-    for (const o of ops) {
-      if (o.blind) continue;
-      const L = o.x0 * T, R = (o.x1 + 1) * T, Tp = o.y0 * T, Bt = (o.y1 + 1) * T;
-      if (R + 200 < cam.x || L > cam.x + cam.w || Bt + 200 < cam.y || Tp > cam.y + cam.h) continue;
-      const len = 170, sl = 0.5, a = 0.035 + 0.01 * Math.sin(t * 0.4 + o.x0);
-      const g = c.createLinearGradient(L, Tp, L + len * sl, Tp + len); g.addColorStop(0, "rgba(240,222,205," + a + ")"); g.addColorStop(1, "rgba(240,222,205,0)");
-      c.fillStyle = g; c.beginPath(); c.moveTo(L + 6, Tp + 10); c.lineTo(R - 6, Tp + 10); c.lineTo(R - 6 + len * sl, Bt + len * 0.6); c.lineTo(L + 6 + len * sl, Bt + len * 0.6); c.closePath(); c.fill();
+  /* Lichtflecken der Strahlen auch in die Farbkarte (färben Boden und Figuren silbrig bzw. warm) */
+  if (Z.gfx.lightGather) Z.gfx.lightGather.push(function (add, cam, t, lvl) {
+    if (lvl < 2 || !Z.level) return;
+    const L = shaftList(), rgb = shaftRGB();
+    for (const b of L) { if (!b.hit) continue; const ex = b.x + b.s * b.len, ey = b.y + b.len; if (ex < cam.x - 80 || ex > cam.x + cam.w + 80 || ey < cam.y - 60 || ey > cam.y + cam.h + 60) continue; add(ex, ey - 6, b.w1 * 0.9 + 12, "rgb(" + rgb + ")", b.k === "arch" ? 0.22 : 0.3, 0); add(b.x + b.s * b.len * 0.4, b.y + b.len * 0.4, b.w1 * 0.7, "rgb(" + rgb + ")", 0.12, 0); }
+    /* leuchtende Teilchen (Glut, Funken, Sporen, Glühwürmchen) werfen winzige Lichter */
+    const parts = Z.fx && Z.fx.parts; if (!parts) return; let n = 0, max = lvl >= 3 ? 26 : 16;
+    for (let i = parts.length - 1; i >= 0 && n < max; i--) { const p = parts[i]; if (p.kind !== "glow" || !p.add || !p.col) continue; if (p.x < cam.x || p.x > cam.x + cam.w || p.y < cam.y || p.y > cam.y + cam.h) continue; add(p.x, p.y, 14 + (p.size || 1) * 5, p.col, 0.32, 0); n++; }
+  });
+  /* sanfte Lichtwellen: Runen atmen alle paar Sekunden einen violetten Ring aus, der über Wände und Boden läuft */
+  const ringSpr = (() => { let s = null; return () => { if (s) return s; s = document.createElement("canvas"); s.width = s.height = 64; const g = s.getContext("2d"), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, "rgba(255,255,255,0)"); gr.addColorStop(0.62, "rgba(255,255,255,0)"); gr.addColorStop(0.8, "rgba(255,255,255,1)"); gr.addColorStop(0.92, "rgba(255,255,255,.3)"); gr.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return s; }; })();
+  const tintSpr = {};
+  function tinted(rgb) { const k = rgb; if (tintSpr[k]) return tintSpr[k]; const s = document.createElement("canvas"); s.width = s.height = 64; const g = s.getContext("2d"); g.drawImage(ringSpr(), 0, 0); g.globalCompositeOperation = "source-in"; g.fillStyle = "rgb(" + rgb + ")"; g.fillRect(0, 0, 64, 64); return (tintSpr[k] = s); }
+  if (Z.gfx.colorOver) Z.gfx.colorOver.push(function (l, X0, Y0, sx, sy, LW, LH, t) {
+    const lv = Z.level; if (!lv || !lv.lights || Z.darkness > 0) return;
+    for (const d of lv.lights) {
+      if (d.kind !== "rune" && d.kind !== "greenfire" && d.kind !== "altar") continue;
+      const per = d.kind === "rune" ? 6.5 : 9, u = ((t + hash(d.x, d.y) * per) % per) / 2.6; if (u >= 1) continue;
+      const x = (d.x * T + 8 - X0) * sx, y = (d.y * T - 6 - Y0) * sy, R = (14 + u * 150) * sx; if (x < -R || y < -R || x > LW + R || y > LH + R) continue;
+      l.globalAlpha = 0.5 * (1 - u) * Math.min(1, u * 6); l.drawImage(tinted(d.kind === "rune" ? "190,110,255" : d.kind === "altar" ? "255,214,140" : "110,255,130"), x - R, y - R, R * 2, R * 2);
     }
-    c.restore();
-  }
+  });
 
   /* ---------- Vordergrund-Silhouetten (Bildschirmkoordinaten, schneller als die Welt: Tiefe) ----------
      Vorgezeichnete Schattenrisse mit schwachem Randlicht: Säulen mit Basis und Kapitell, Bogenansätze,
@@ -105,9 +201,23 @@
     c.restore();
   }
 
-  /* ---------- Farbstimmung: warmes Oben, schweres Unten ---------- */
-  let grade = null, gradeKey = "", gradeFrame = -1;
-  /* bevorzugt in die Lichtkarte (spart einen Vollbild-Durchgang) */
+  /* ---------- Farbstimmung je Gebiet ----------
+     Zwei Teile, beide ohne eigenen Vollbild-Durchgang:
+     1. In der Dunkelheitskarte: leichte Tönung oben und schwere Tiefe unten (wie bisher).
+     2. Als Grundton der Lichtkarte (Z.gfx.colorBase; sie liegt mit „multiply“ über der Szene, weiß = neutral):
+        Tönung des Umgebungslichts mit Farbtemperatur-Verlauf von oben nach unten. Weil Lichtquellen die Karte
+        weiß/farbig aufhellen, wirken die Schatten kühl-violett (bzw. je Gebiet getönt) und das Licht warm und klar –
+        das gibt Tiefe und Kontrast. Kein Blau: kühle Töne sind silbrig-violett. Werte: [oben], [Mitte], [unten]. */
+  const GRADE = {
+    castle: [[238, 228, 248], [232, 226, 238], [222, 206, 234]], camp: [[238, 228, 248], [232, 226, 238], [222, 206, 234]],
+    ramparts: [[240, 230, 250], [234, 228, 238], [222, 208, 232]], harbour: [[234, 230, 242], [228, 224, 232], [214, 206, 228]],
+    storm: [[228, 236, 224], [222, 228, 218], [206, 214, 204]], spires: [[255, 228, 206], [246, 218, 214], [228, 198, 216]],
+    cellar: [[255, 238, 214], [242, 230, 226], [220, 204, 230]], halls: [[255, 236, 208], [246, 232, 224], [224, 206, 228]], passage: [[255, 236, 212], [244, 232, 226], [224, 208, 228]],
+    dungeon: [[236, 242, 216], [226, 230, 218], [208, 204, 220]], belltower: [[254, 236, 216], [238, 230, 228], [216, 204, 228]],
+    chasm: [[240, 216, 254], [228, 212, 240], [214, 194, 234]], forge: [[255, 228, 198], [250, 218, 206], [232, 198, 212]],
+    lake: [[222, 242, 228], [214, 232, 220], [200, 220, 208]], embercity: [[255, 224, 194], [252, 212, 200], [234, 194, 202]]
+  };
+  let grade = null, gradeKey = "", gradeFrame = -1, cbase = null, cbaseKey = "";
   if (Z.gfx.lightOver) Z.gfx.lightOver.push(function (l, X0, Y0, sx, sy, LW, LH) {
     if (!rich() || !Z.level) return;
     gradeSprite(); l.drawImage(grade, 0, 0, LW, LH); gradeFrame = Z.gfx.frame;
@@ -122,10 +232,43 @@
     }
     return grade;
   }
+  /* Grundton der Lichtkarte: senkrechter Verlauf der Umgebungstönung, an den Rändern ein Hauch dunkler */
+  Z.gfx.colorBase = function () {
+    const B = Z.biome || {}, lv = Z.level, zt = Z.zeit ? Z.zeit() : null, outside = !!(lv && (lv.out || lv.hub)) || B.open === "arch";
+    const key = (B.bg || "") + (outside ? "o" : "") + (zt ? zt.k + (zt.moonBright * 4 | 0) : "");
+    if (cbase && cbaseKey === key) return cbase;
+    cbaseKey = key; cbase = cbase || document.createElement("canvas"); cbase.width = 32; cbase.height = 18;
+    let P = GRADE[B.bg] || [[250, 238, 228], [238, 232, 232], [222, 212, 228]];
+    /* Tageszeit dezent einmischen (tageszeit.js): Dämmerung gold/rosa, Nacht silbrig und etwas dunkler, Blutmond Rotstich.
+       Draußen und hinter Bogenfenstern stärker, tief drinnen kaum. */
+    if (zt && zt.amb) {
+      const a = Z.gfx.lightRGB ? Z.gfx.lightRGB(zt.amb) : [255, 255, 255], f0 = outside ? 0.24 : 0.07, dim = zt.k === "nacht" ? 0.95 - 0.04 * (1 - zt.moonBright) : zt.k === "blut" ? 0.95 : 1;
+      const tint = (v, f) => v.map((c, i) => Math.min(255, (c * (1 - f) + c * (a[i] / 255) * f) * dim) | 0);
+      P = [tint(P[0], f0), tint(P[1], f0 * 0.8), tint(P[2], f0 * (zt.k === "blut" ? 0.9 : 0.55))];
+    }
+    const g = cbase.getContext("2d"), s = v => "rgb(" + v.join(",") + ")";
+    const lg = g.createLinearGradient(0, 0, 0, 18); lg.addColorStop(0, s(P[0])); lg.addColorStop(0.5, s(P[1])); lg.addColorStop(1, s(P[2])); g.fillStyle = lg; g.fillRect(0, 0, 32, 18);
+    const rg = g.createRadialGradient(16, 9, 4, 16, 9, 19); rg.addColorStop(0, "rgba(255,255,255,.06)"); rg.addColorStop(1, "rgba(0,0,0,.08)"); g.fillStyle = rg; g.fillRect(0, 0, 32, 18);
+    return cbase;
+  };
   function colorGrade(c, W, H) {
     if (gradeFrame === Z.gfx.frame && Z.gfx.lightMerged && Z.gfx.lightMerged()) return;
     gradeSprite();
     c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = "source-over"; c.drawImage(grade, 0, 0, W, H); c.restore();
+  }
+  /* ---------- Filmkorn: sehr fein, animiert, kaum sichtbar (nur Stufe 3 „Ultra“) ---------- */
+  let grainCv = null, grainPat = null, grainCtx = null;
+  function grain(c, W, H, t) {
+    if (!grainCv) {
+      grainCv = document.createElement("canvas"); grainCv.width = grainCv.height = 96; const g = grainCv.getContext("2d"), id = g.createImageData(96, 96);
+      let s = 1234567; const rnd = () => ((s = (s * 1103515245 + 12345) >>> 0) / 4294967296);
+      for (let i = 0; i < id.data.length; i += 4) { const v = rnd(), w = v > 0.5; id.data[i] = id.data[i + 1] = id.data[i + 2] = w ? 255 : 0; id.data[i + 3] = (Math.abs(v - 0.5) * 2) ** 2 * 22; }
+      g.putImageData(id, 0, 0);
+    }
+    if (grainCtx !== c) { grainPat = c.createPattern(grainCv, "repeat"); grainCtx = c; }
+    const f = Math.floor(t * 24), ox = (hash(f, 1) * 96) | 0, oy = (hash(f, 2) * 96) | 0;
+    c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = "source-over"; c.globalAlpha = 0.3;
+    c.translate(-ox, -oy); c.fillStyle = grainPat; c.fillRect(0, 0, W + 96, H + 96); c.restore();
   }
 
   /* ---------- Nachbilder: Rolle, Rollsprung, Blinken ---------- */
@@ -156,12 +299,14 @@
     const k = key + col; if (sprites[k]) return sprites[k];
     const cv = document.createElement("canvas"); cv.width = w; cv.height = h; const g = cv.getContext("2d");
     for (let i = 0; i < 14; i++) {
-      const r = h * (0.25 + hash(i, seed) * 0.3), x = w * (0.18 + hash(seed, i) * 0.64), y = h * (0.45 + (hash(i * 3, seed) - 0.5) * 0.4);
+      const x = w * (0.18 + hash(seed, i) * 0.64), y = h * (0.45 + (hash(i * 3, seed) - 0.5) * 0.4);
+      /* Radius nie über den Leinwandrand hinaus – sonst entstehen harte Rechteckkanten */
+      const r = Math.min(h * (0.25 + hash(i, seed) * 0.3), x - 1, w - x - 1, y - 1, h - y - 1); if (r < 3) continue;
       const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, col.replace("A", "0.55")); gr.addColorStop(0.6, col.replace("A", "0.25")); gr.addColorStop(1, col.replace("A", "0"));
       g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2);
     }
     /* heller Rand oben (Mondlicht) */
-    g.globalCompositeOperation = "source-atop"; const lg = g.createLinearGradient(0, 0, 0, h); lg.addColorStop(0, "rgba(255,236,210,.35)"); lg.addColorStop(0.5, "rgba(255,236,210,0)"); g.fillStyle = lg; g.fillRect(0, 0, w, h);
+    g.globalCompositeOperation = "source-atop"; const lg = g.createLinearGradient(0, 0, 0, h); const rim = (Z.zeit && Z.zeit() && Z.gfx.lightRGB) ? Z.gfx.lightRGB(Z.zeit().light).join(",") : "255,236,210"; lg.addColorStop(0, "rgba(" + rim + ",.35)"); lg.addColorStop(0.5, "rgba(" + rim + ",0)"); g.fillStyle = lg; g.fillRect(0, 0, w, h);
     return (sprites[k] = cv);
   }
   const rgba = (hex, f) => { const n = parseInt(hex.slice(1), 16); const r = Math.min(255, (n >> 16) * f + 20) | 0, g = Math.min(255, ((n >> 8) & 255) * f + 16) | 0, b = Math.min(255, (n & 255) * f + 14) | 0; return "rgba(" + r + "," + g + "," + b + ",A)"; };
@@ -175,7 +320,7 @@
       /* Wolkenbänke in zwei Tiefen */
       for (const [pf, n, sc, sp, a] of [[0.05, 5, 1, 3, 0.45], [0.1, 4, 1.4, 6, 0.6]]) {
         if (!full && pf > 0.06) continue;
-        const spr = cloudSprite("c" + pf, rgba(B.sky[2], 1.25), 220, 70, pf * 100);
+        const zt = Z.zeit ? Z.zeit() : null, spr = cloudSprite("c" + pf + (zt ? zt.k : ""), rgba(zt && zt.H ? zt.H.sky[2] : B.sky[2], 1.25), 220, 70, pf * 100);
         const span = 900;
         for (let i = 0; i < n; i++) {
           const bx = ((hash(i, pf * 7) * span + t * sp) % span) - 200, by = LH * (0.12 + hash(pf * 9, i) * 0.32);
@@ -194,7 +339,7 @@
           for (let i = 0; i < 7; i++) { const x = bx - dir * (i % 2 ? i * 6 : i * 5) , y = y0 + (i % 2 ? i * 2.5 : -i * 0.5) + Math.sin(t * 2 + i) * 1.5, w = Math.sin(t * 9 + i * 1.3) * 1.8; c.beginPath(); c.moveTo(x - 3, y - w); c.lineTo(x, y); c.lineTo(x + 3, y - w); c.stroke(); }
         }
         /* Sternschnuppen in klaren Nächten */
-        if (kind === "castle" || kind === "camp" || kind === "harbour" || kind === "ramparts") {
+        if (!Z.zeit && (kind === "castle" || kind === "camp" || kind === "harbour" || kind === "ramparts")) { /* mit tageszeit.js zeichnet die den Himmel samt Sternschnuppen */
           const k = (t % 9) / 9, n = Math.floor(t / 9);
           if (k < 0.08 && hash(n, 11) > 0.4) { const sx = cam.x + cam.w * hash(n, 2), sy = oy + LH * 0.08 + hash(n, 4) * 40, d = k / 0.08; c.save(); c.globalCompositeOperation = "lighter"; const g = c.createLinearGradient(sx + d * 70, sy + d * 25, sx + d * 70 - 30, sy + d * 25 - 11); g.addColorStop(0, "rgba(255,250,230," + (1 - d) + ")"); g.addColorStop(1, "rgba(255,250,230,0)"); c.strokeStyle = g; c.lineWidth = 1; c.beginPath(); c.moveTo(sx + d * 70, sy + d * 25); c.lineTo(sx + d * 70 - 30, sy + d * 25 - 11); c.stroke(); c.restore(); }
         }
@@ -205,8 +350,8 @@
             if (kind === "storm" && k < 0.12) { const lx = cam.x + cam.w * hash(n, 9); c.save(); c.strokeStyle = "rgba(255,255,240,.85)"; c.lineWidth = 1.2; c.beginPath(); let x = lx, y = oy + LH * 0.1; c.moveTo(x, y); for (let i = 0; i < 6; i++) { x += (hash(n, i) - 0.5) * 24; y += LH * 0.07; c.lineTo(x, y); } c.stroke(); c.restore(); } }
         }
         /* Dunst am Horizont, langsam ziehend */
-        const hy = oy + LH * 0.6; c.save(); c.globalAlpha = 0.22;
-        for (let i = 0; i < 3; i++) { const x = cam.x - ((t * (4 + i * 2) + i * 140) % 300), g = c.createLinearGradient(0, hy - 14, 0, hy + 14); g.addColorStop(0, "rgba(220,200,200,0)"); g.addColorStop(0.5, "rgba(220,200,200,.6)"); g.addColorStop(1, "rgba(220,200,200,0)"); c.fillStyle = g; c.fillRect(x, hy - 14 + i * 9, cam.w + 320, 28); }
+        const hy = oy + LH * 0.6, zt = Z.zeit ? Z.zeit() : null, hz = hazeRGB(zt, B); c.save(); c.globalAlpha = zt && (zt.k === "nacht" || zt.k === "blut") ? 0.14 : 0.22;
+        for (let i = 0; i < 3; i++) { const x = cam.x - ((t * (4 + i * 2) + i * 140) % 300), g = c.createLinearGradient(0, hy - 14, 0, hy + 14); g.addColorStop(0, "rgba(" + hz + ",0)"); g.addColorStop(0.5, "rgba(" + hz + ",.6)"); g.addColorStop(1, "rgba(" + hz + ",0)"); c.fillStyle = g; c.fillRect(x, hy - 14 + i * 9, cam.w + 320, 28); }
         c.restore();
       }
     } else if (full) {
@@ -259,9 +404,10 @@
   Z.drawBeforePlayer = function (c) { drawGhosts(c); };
   Z.drawAfterLight = function (c, cam, W, H, t) {
     if (!rich()) return;
-    shafts(c, cam, t);
-    archShafts(c, cam, t);
+    if (!Z.gfx.off || !Z.gfx.off.shafts) shafts(c, cam, t);
     foreground(c, cam, W, H, Z.gfx.scale);
     colorGrade(c, W, H);
+    /* Filmkorn nur auf Ultra: kostet in Software-Darstellung einen ganzen Vollbild-Durchgang */
+    if (Z.gfx.lq && Z.gfx.lq() >= 3 && !(Z.gfx.off && Z.gfx.off.grain)) grain(c, W, H, t);
   };
 })();

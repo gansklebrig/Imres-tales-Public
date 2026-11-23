@@ -15,7 +15,7 @@
     close: ["Schließen", "Close"], back: ["Zurück", "Back"], yes: ["Ja", "Yes"], no: ["Nein", "No"],
     intro: ["Barradin erzählt:<br><br>Eines Nachts war Ezekiels Platz am Feuer leer. Nur ein Brief lag dort, versiegelt mit einer Spinne aus schwarzem Wachs: <i>„The Destroyer. Die Spinne erwartet dich.“</i><br><br>Am Horizont stand eine Feste, die am Abend noch nicht dagewesen war. Fäden spannten sich von ihren Türmen bis in die Wolken, und in ihren Hallen warteten alle, die wir je besiegt haben. Oder etwas, das so aussah.<br><br>Ezekiel ging hinein. Ohne Waffe. Natürlich.",
       "Barradin tells:<br><br>One night Ezekiel's place by the fire was empty. Only a letter lay there, sealed with a spider of black wax: <i>'The Destroyer. The Spider awaits you.'</i><br><br>On the horizon stood a keep that had not been there that evening. Threads stretched from its towers into the clouds, and in its halls waited everyone we had ever defeated. Or something that looked like them.<br><br>Ezekiel went in. Without a weapon. Of course."],
-    startRun: ["Die Feste betreten?", "Enter the keep?"], startRunTxt: ["Du beginnst mit leeren Händen. Alles, was du findest, bleibt nur für diesen Lauf. Seelensplitter, die du in Durchgängen ablieferst, bleiben.", "You begin empty-handed. Everything you find lasts only for this run. Soul shards delivered at passages are kept."],
+    startRun: ["Die Feste betreten?", "Enter the keep?"], startRunTxt: ["Du nimmst mit, was du in den Händen hältst – die Waffen vom Ständer vor dem Tor. Alles, was du findest, bleibt nur für diesen Lauf. Seelensplitter, die du in Durchgängen ablieferst, bleiben.", "You take what you hold in your hands – the weapons from the rack by the gate. Everything you find lasts only for this run. Soul shards delivered at passages are kept."],
     go: ["Hinein", "Go in"],
     died: ["Gefallen", "Fallen"], diedSub: ["„Noch nicht“ war es diesmal nicht.", "This time it wasn't 'not yet'."],
     kills: ["Erschlagen", "Slain"], time: ["Zeit", "Time"], gold: ["Gold", "Gold"], shardsKept: ["Splitter im Lager", "Shards in camp"], shardsLost: ["Splitter verloren", "Shards lost"], reached: ["Erreicht", "Reached"], parries: ["Paraden", "Parries"], secrets: ["Geheimgänge", "Secrets"],
@@ -26,7 +26,7 @@
     buy: ["Kaufen", "Buy"], sold: ["Verkauft", "Sold"], noGold: ["Zu wenig Gold.", "Not enough gold."], noShards: ["Zu wenige Splitter.", "Not enough shards."],
     shards: ["Seelensplitter", "Soul shards"], level: ["Stufe", "Level"], upgrade: ["Schärfen", "Sharpen"], luck: ["Fundglück", "Find luck"], max: ["Meister", "Master"],
     unknown: ["??? – noch nie gefunden", "??? – never found"], findChance: ["Fundchance", "Find chance"], from: ["ab", "from"],
-    tabsForge: [["Waffen", "Fähigkeiten", "Lager"], ["Weapons", "Skills", "Camp"]], tabsCodex: [["Waffen", "Fähigkeiten", "Gegner", "Bosse", "Enden", "Statistik"], ["Weapons", "Skills", "Enemies", "Bosses", "Endings", "Stats"]],
+    tabsForge: [["Waffen", "Fähigkeiten", "Lager", "Glutschmiede"], ["Weapons", "Skills", "Camp", "Ember forge"]], tabsCodex: [["Waffen", "Fähigkeiten", "Gegner", "Bosse", "Enden", "Statistik"], ["Weapons", "Skills", "Enemies", "Bosses", "Endings", "Stats"]],
     ups: { trank: [["Zusätzlicher Heiltrank", "Extra healing potion"], ["Eine Ladung mehr pro Lauf.", "One more charge per run."]], zaeh: [["Zähigkeit", "Toughness"], ["+10 Leben pro Stufe.", "+10 health per level."]], klingen: [["Geschliffene Klingen", "Honed blades"], ["+5 % Schaden pro Stufe.", "+5% damage per level."]], haendler: [["Händlergunst", "Merchant's favour"], ["Händler verlangen 10 % weniger.", "Merchants charge 10% less."]] },
     tut: ["Steuerung", "Controls"],
     ctrlKeys: ["<b>A/D</b> laufen · <b>Leertaste</b> springen (zweimal: Doppelsprung) · <b>Shift</b> rollen (unverwundbar)<br><b>J</b> / Linksklick: Waffe 1 · <b>U</b> / Rechtsklick: Waffe 2 · <b>Q</b> und <b>O</b>: Fähigkeiten<br><b>R</b> Heiltrank · <b>E</b> benutzen / aufheben · <b>W</b> Leiter hoch · <b>S + Leertaste</b> durch Stege fallen<br><b>S + Angriff</b> in der Luft: Sturzangriff · <b>M</b> Karte · <b>Esc</b> Pause",
@@ -38,7 +38,10 @@
       ["Wer getroffen wurde, kann verlorenes Leben kurz zurückholen: sofort zurückschlagen.", "When you're hit, you can win lost health back for a moment: strike back immediately."],
       ["Rissige Wände lassen sich zerschlagen. Dahinter wartet oft etwas.", "Cracked walls can be smashed. Something often waits behind them."],
       ["Seelensplitter sind erst sicher, wenn ein Durchgang erreicht ist.", "Soul shards are only safe once you reach a passage."],
-      ["Jede Waffe hat ihre eigene Bedingung für kritische Treffer. Das Fundbuch weiß mehr.", "Every weapon has its own condition for critical hits. The ledger knows more."]],
+      ["Jede Waffe hat ihre eigene Bedingung für kritische Treffer. Das Fundbuch weiß mehr.", "Every weapon has its own condition for critical hits. The ledger knows more."],
+      ["Schmiedeglut sammeln, am Glutamboss Waffen bis +5 aufwerten – bei +2 und +4 wählst du eine Runen-Gravur.", "Collect forge embers and upgrade weapons up to +5 at an ember anvil – at +2 and +4 you choose a rune engraving."],
+      ["Fernkampftreffer markieren Gegner mit einem Faden. Der nächste Nahkampfhieb darauf trifft garantiert kritisch.", "Ranged hits mark enemies with a thread. Your next melee strike on them is a guaranteed crit."],
+      ["Perfekt ausgewichen? Drei Sekunden Adrenalin: +25 % Schaden. Kill-Ketten vervielfachen das Gold.", "Perfect dodge? Three seconds of adrenaline: +25% damage. Kill chains multiply gold."]],
     endings: {
       tiefe: [["Der Faden der Tiefe", "The Thread of the Deep"], ["Als Demogorgon versinkt, reißt irgendwo unter dem See ein Faden. Ezekiel steht bis zu den Knien im schwarzen Wasser und sieht den Wellen nach, bis sie still sind.<br><br>Später, am Feuer, will ich wissen, wie es war. Ich frage dreimal.<br>„Nass.“<br><br>Rex legt ihm den Kopf aufs Knie. Ezekiel lässt ihn.", "As Demogorgon sinks, somewhere beneath the lake a thread snaps. Ezekiel stands knee-deep in black water and watches the waves until they are still.<br><br>Later, by the fire, I want to know how it was. I ask three times.<br>'Wet.'<br><br>Rex lays his head on his knee. Ezekiel lets him."]],
       glut: [["Der Faden der Glut", "The Thread of Embers"], ["Themberchaud liegt still auf seinem Gold. Ezekiel steigt über den Hort hinweg, ohne hinzusehen. Fast.<br><br>Eine einzige Münze steckt er ein. Am Feuer drückt er sie Echo in die Hand.<br>„Für die Gruppenkasse.“<br><br>Echo starrt die Münze an, dann Ezekiel, dann wieder die Münze. Er wird sie nie ausgeben.", "Themberchaud lies still upon his gold. Ezekiel steps over the hoard without looking. Almost.<br><br>He pockets a single coin. By the fire he presses it into Echo's hand.<br>'For the group fund.'<br><br>Echo stares at the coin, then at Ezekiel, then at the coin again. He will never spend it."]],
@@ -62,8 +65,12 @@
     const d = it ? Z.itemDef(it) : s === "a1" ? Z.WEAPONS.faeuste : null;
     se.el.style.setProperty("--rar", it ? Z.RARITY[it.rar].col : "#3d3140");
     se.el.classList.toggle("leer", !d);
-    if (d) { Z.drawIcon(c, d.icon, 20, 21, 26, d.col); se.el.title = L(d.n); }
-    se.n.textContent = d ? L(d.n) : ""; se.el.classList.add("neu"); clearTimeout(se.nt); se.nt = setTimeout(() => se.el.classList.remove("neu"), 2200);
+    if (d) { Z.drawIcon(c, d.icon, 20, 21, 26, d.col); se.el.title = it && Z.itemTitle ? Z.itemTitle(it) : L(d.n); }
+    se.n.textContent = d ? (it && Z.itemTitle ? Z.itemTitle(it) : L(d.n)) : "";
+    /* Schmiedestufe: Abzeichen und Glanz am Rahmen */
+    const pl = it && it.plus ? it.plus : 0;
+    if (pl) { se.el.dataset.plus = "+" + pl; se.el.style.setProperty("--plc", Z.plusCol ? Z.plusCol(pl) : "#ffd27a"); } else { delete se.el.dataset.plus; }
+    se.el.classList.toggle("geschmiedet", !!pl); se.el.classList.add("neu"); clearTimeout(se.nt); se.nt = setTimeout(() => se.el.classList.remove("neu"), 2200);
   }
   /* ======================= HUD ======================= */
   let hudT = 0, mapT = 0;
@@ -80,7 +87,7 @@
     $("#bank").textContent = U.fmt(Z.meta.shards);
     for (const s of ["a1", "a2", "s1", "s2"]) {
       const it = P.slots[s], se = slotEls[s];
-      const key = it ? it.uid : s === "a1" ? -2 : -3;
+      const key = it ? it.uid + "|" + (it.plus || 0) : s === "a1" ? -2 : -3;
       if (se.uid !== key) { se.uid = key; drawSlot(s, it); }
       let k = 0;
       if (s[0] === "s" && it && Z.SKILLS[it.id]) k = P.cd[s] / (Z.SKILLS[it.id].cd || 1);
@@ -99,7 +106,7 @@
     if (hudT <= 0) {
       hudT = 0.25;
       $("#bless").innerHTML = P.bless.map(b => '<span title="' + esc(L(Z.BLESS[b].d)) + '" class="k-' + Z.BLESS[b].k + '">' + esc(L(Z.BLESS[b].n)) + "</span>").join("") +
-        (P.stats.brut + P.stats.takt + P.stats.ueber ? '<span class="st"><b style="color:' + Z.STATS.brut.col + '">' + P.stats.brut + '</b> <b style="color:' + Z.STATS.takt.col + '">' + P.stats.takt + '</b> <b style="color:' + Z.STATS.ueber.col + '">' + P.stats.ueber + "</b></span>" : "") +
+        (P.stats.brut + P.stats.takt + P.stats.ueber || Z.run ? '<span class="st"><b style="color:' + Z.STATS.brut.col + '">' + P.stats.brut + '</b> <b style="color:' + Z.STATS.takt.col + '">' + P.stats.takt + '</b> <b style="color:' + Z.STATS.ueber.col + '">' + P.stats.ueber + "</b></span>" : "") +
         (P.curse > 0 ? '<span class="fluch">' + L(["Fluch", "Curse"]) + " " + P.curse + "</span>" : "");
       const run = Z.run;
       $("#area").innerHTML = esc(Z.level.hub ? L(Z.biome.name) : Z.level.passage ? t("fountain").replace(/.*/, L(["Durchgang", "Passage"])) : Z.areaName(Z.level.id)) +
@@ -113,7 +120,7 @@
     /* Interaktions-Hinweis */
     const o = Z.interactTarget;
     if (o && !ui.modalOpen && !ui.choiceActive && !P.dead) {
-      const [sx, sy] = worldToScreen(o.type === "pickup" ? o.p.x : (o.d || o.s).x * T + 8, o.type === "pickup" ? o.p.y - 22 : ((o.d || o.s).y + 1) * T - 40);
+      const [sx, sy] = o.type === "obj" ? worldToScreen(o.o.x, o.o.y - (o.o.h || 30)) : worldToScreen(o.type === "pickup" ? o.p.x : (o.d || o.s).x * T + 8, o.type === "pickup" ? o.p.y - (o.p.rack ? 30 : 22) : ((o.d || o.s).y + 1) * T - 40);
       const hz = hudZoom();
       prompt.hidden = false; prompt.style.transform = "translate(" + Math.round(sx / hz) + "px," + Math.round(sy / hz) + "px) translate(-50%,-100%)";
       const key = inp.device === "touch" ? "✋" : inp.label("use");
@@ -124,6 +131,7 @@
     mapT -= dt; if (mapT <= 0) { mapT = 0.2; drawMinimap(); }
   }
   function promptLabel(o) {
+    if (o.type === "obj") return o.o.label ? o.o.label() : t("use");
     if (o.type === "pickup") { const p = o.p; if (p.kind === "item") return t("take"); if (p.kind === "scroll") return t("read"); if (p.kind === "food") return t("eat") + ": " + L((p.food || Z.FOOD[0]).n); return t("open"); }
     if (o.type === "door") return o.d.kind === "gate" ? L(["Die Feste der Fäden", "The Keep of Threads"]) : t("enter") + ": " + Z.areaName(o.d.to);
     if (o.type === "npc") return { B: L(["Barradin · Fundbuch", "Barradin · Ledger"]), A: L(["Nundro · Schmiede", "Nundro · Forge"]), G: L(["Friedrich", "Friedrich"]), E: L(["Echo", "Echo"]), C: t("skullT"), F: L(["Lagerfeuer", "Campfire"]), Y: L(["Trainingspuppe", "Training dummy"]), R: "Rex" }[o.s.id] || t("talk");
@@ -134,16 +142,18 @@
     const d = Z.itemDef(it), r = Z.RARITY[it.rar], st = Z.STATS[d.stat];
     const kind = it.type === "skill" ? L(["Fähigkeit", "Skill"]) : d.kind === "ranged" ? L(["Fernkampf", "Ranged"]) : d.kind === "shield" ? L(["Schild", "Shield"]) : L(["Nahkampf", "Melee"]);
     const lvl = Z.metaLvl(it.id);
-    return (Z.curseCardHTML ? Z.curseCardHTML(it) : "") + '<div class="ic-kopf" style="--rar:' + (it.cursed ? "#c040ff" : r.col) + '"><b>' + esc(L(d.n)) + "</b>" + (lvl ? ' <span class="lv">+' + lvl + "</span>" : "") + '<small>' + esc(L(r.n)) + " · " + kind + ' · <span style="color:' + st.col + '">' + esc(L(st.n)) + "</span> · " + L(["Stufe", "Tier"]) + " " + (it.tier + 1) + "</small></div>" +
+    return (Z.curseCardHTML ? Z.curseCardHTML(it) : "") + '<div class="ic-kopf" style="--rar:' + (it.cursed ? "#c040ff" : r.col) + '"><b>' + esc(L(d.n)) + (it.plus ? ' <span class="plus" style="color:' + (Z.plusCol ? Z.plusCol(it.plus) : "#ffd27a") + '">+' + it.plus + "</span>" : "") + "</b>" + (lvl ? ' <span class="lv" title="' + esc(L(["Nundros Schärfe (dauerhaft)", "Nundro's sharpening (permanent)"])) + '">◆' + lvl + "</span>" : "") + '<small>' + esc(L(r.n)) + " · " + kind + ' · <span style="color:' + st.col + '">' + esc(L(st.n)) + "</span> · " + L(["Stufe", "Tier"]) + " " + (it.tier + 1) + "</small></div>" +
       '<p>' + esc(L(d.d)) + "</p>" + (it.aff.length ? '<ul class="aff">' + it.aff.map(a => "<li>" + esc(L(Z.AFFIX[a].n)) + ": " + esc(L(Z.AFFIX[a].d)) + "</li>").join("") + "</ul>" : "") +
       (d.tags ? '<p class="tags">' + d.tags.map(x => "<span>" + esc(x) + "</span>").join("") + "</p>" : "") +
       (lvl >= 3 && d.master ? '<p class="meister">' + esc(L(d.master)) + "</p>" : "") +
+      (Z.cardExtraHTML ? Z.cardExtraHTML(it, cmp) : "") +
       (cmp ? '<p class="mul">' + L(["Kraft", "Power"]) + ": ×" + Z.itemMul(it).toFixed(2) + "</p>" : "");
   }
   function showCard(o) {
     if (o.type !== "pickup" || o.p.kind !== "item") { card.hidden = true; return; }
     const it = o.p.it;
-    if (card.dataset.uid !== String(it.uid)) { card.innerHTML = itemCardHTML(it, true); card.dataset.uid = it.uid; }
+    const ck = it.uid + "|" + (it.plus || 0) + "|" + (it.runes || []).join(",");
+    if (card.dataset.uid !== ck) { card.innerHTML = itemCardHTML(it, true); card.dataset.uid = ck; }
     const [sx, sy] = worldToScreen(o.p.x, o.p.y - 40);
     card.hidden = false;
     const w = card.offsetWidth, h = card.offsetHeight;
@@ -178,6 +188,9 @@
     }
     for (const d of lv.doors) if (d.kind === "exit" && (Z.explored[d.y * lv.W + d.x] || big)) { mmc.fillStyle = "#ffd27a"; mmc.fillRect((d.x - ox) * scale - 1, (d.y - oy) * scale - 2, scale + 2, scale + 3); }
     for (const p of Z.pickups) if ((p.kind === "item" || p.kind === "chest" || p.kind === "scroll") && Z.explored[Math.floor(p.y / T - 1) * lv.W + Math.floor(p.x / T)]) { mmc.fillStyle = p.kind === "scroll" ? "#ffd27a" : "#7fd36a"; mmc.fillRect((p.x / T - ox) * scale - 1, (p.y / T - 1 - oy) * scale - 1, 3, 3); }
+    /* Händlerin, Schrein, Glutamboss: kleine Symbole, sobald man die Stelle gesehen hat (Händlerin immer – man hört sie) */
+    for (const ev of Z.abEvents || []) if (!ev.done && (ev.k === "haendler" || (ev.k === "schrein" && Z.explored[Math.floor(ev.y / T - 1) * lv.W + Math.floor(ev.x / T)]))) { const x = (ev.x / T - ox) * scale, y = (ev.y / T - 1 - oy) * scale; mmc.fillStyle = ev.k === "haendler" ? "#ffb060" : "#c890ff"; mmc.beginPath(); mmc.moveTo(x, y - 3); mmc.lineTo(x + 3, y); mmc.lineTo(x, y + 3); mmc.lineTo(x - 3, y); mmc.closePath(); mmc.fill(); }
+    for (const a of Z.anvils || []) if (a.used < a.charges) { mmc.fillStyle = "#ff8a2a"; mmc.fillRect((a.x / T - ox) * scale - 2, (a.y / T - 1 - oy) * scale - 1, 4, 2); }
     mmc.fillStyle = "#ff5a3a"; mmc.fillRect(((P.x + P.w / 2) / T - ox) * scale - 2, ((P.y + P.h / 2) / T - oy) * scale - 2, 4, 4);
   }
 
@@ -541,6 +554,7 @@
       if (P.mag[s]) delete P.mag[s];
       P.combo[s] = 0;
       if (!Z.presentItem) { A.play("pickup", { vol: 0.6 }); Z.fx.text(P.x + P.w / 2, P.y - 12, L(Z.itemDef(it).n), Z.RARITY[it.rar].col, true); }
+      if (Z.onPlaced) Z.onPlaced(it, s, p, old);
       Z.fx.burst(P.x + P.w / 2, P.y + 10, 14, { col: [Z.RARITY[it.rar].col, "#fff"], sp: 80, up: 40, life: 0.5, size: 2, kind: "spark", add: true });
     };
     if (!P.slots[sA]) return place(sA);
@@ -548,8 +562,10 @@
     /* beide belegt: Auswahl */
     ui.choiceActive = { p, sA, sB, place, dev: inp.device };
     const key = s => inp.device === "touch" || (ui.touchOn && inp.device !== "pad") ? "" : inp.label(s);
-    choice.innerHTML = '<div class="ch-kopf">' + esc(t("replace")) + ": " + '<b style="color:' + Z.RARITY[it.rar].col + '">' + esc(L(Z.itemDef(it).n)) + "</b></div>" +
-      [sA, sB].map(s => '<button data-slot="' + s + '">' + (key(s) ? "<kbd>" + esc(key(s)) + "</kbd> " : "") + esc(L(Z.itemDef(P.slots[s]).n)) + '<small style="color:' + Z.RARITY[P.slots[s].rar].col + '">' + esc(L(Z.RARITY[P.slots[s].rar].n)) + "</small></button>").join("") +
+    const ttl = x => (Z.itemTitle ? Z.itemTitle(x) : L(Z.itemDef(x).n));
+    const hand = s => (isSkill ? "" : L(s === "a1" ? ["Hand 1: ", "Hand 1: "] : ["Hand 2: ", "Hand 2: "]));
+    choice.innerHTML = '<div class="ch-kopf">' + esc(t("replace")) + ": " + '<b style="color:' + Z.RARITY[it.rar].col + '">' + esc(ttl(it)) + "</b></div>" +
+      [sA, sB].map(s => '<button data-slot="' + s + '">' + (key(s) ? "<kbd>" + esc(key(s)) + "</kbd> " : "") + esc(hand(s) + ttl(P.slots[s])) + '<small style="color:' + Z.RARITY[P.slots[s].rar].col + '">' + esc(L(Z.RARITY[P.slots[s].rar].n)) + "</small></button>").join("") +
       '<button data-slot="x" class="abbr">' + (key("roll") ? "<kbd>" + key("roll") + "</kbd> " : "") + esc(t("cancel")) + "</button>";
     choice.hidden = false;
   };
@@ -570,9 +586,15 @@
   /* ---------- Schriftrolle ---------- */
   ui.scrollChoice = () => {
     const P = Z.player;
+    /* Welche getragenen Dinge profitieren? Zeigt konkret Schaden vorher → nachher */
+    const gear = s => ["a1", "a2", "s1", "s2"].map(k => P.slots[k]).filter(x => x && Z.itemStat(x) === s);
+    const kb = i => (inp.device === "keys" && !ui.touchOn ? "<kbd>" + (i + 1) + "</kbd> " : "");
     openModal("<h2>" + esc(t("scrollT")) + "</h2><p>" + esc(t("scrollD")) + '</p><div class="rollen">' +
-      ["brut", "takt", "ueber"].map((s, i) => '<button data-act="stat" data-arg="' + s + '" style="--c:' + Z.STATS[s].col + '"' + (i === 0 ? " autofocus" : "") + "><b>" + esc(L(Z.STATS[s].n)) + " " + P.stats[s] + " → " + (P.stats[s] + 1) + "</b><small>" + esc(L(Z.STATS[s].d)) + "</small></button>").join("") +
-      "</div>", { cls: "schmal", noEsc: true });
+      ["brut", "takt", "ueber"].map((s, i) => { const g = gear(s), n = P.stats[s];
+        const hp = 14 + (s === "ueber" ? 14 : 0);
+        const ben = g.length ? g.map(x => esc(Z.itemTitle ? Z.itemTitle(x) : L(Z.itemDef(x).n)) + " +" + Math.round(12 / (1 + 0.12 * n)) + " %").join(", ") : L(["Nichts Getragenes in dieser Farbe", "Nothing you carry in this colour"]);
+        return '<button data-act="stat" data-arg="' + s + '" data-key="' + (i + 1) + '" style="--c:' + Z.STATS[s].col + '"' + (i === 0 ? " autofocus" : "") + "><b>" + kb(i) + esc(L(Z.STATS[s].n)) + " " + n + " → " + (n + 1) + "</b><small>" + esc(L(Z.STATS[s].d)) + '</small><small class="nutzen">' + L(["Jetzt: ", "Now: "]) + ben + " · +" + hp + L([" Leben", " health"]) + "</small></button>"; }).join("") +
+      "</div>", { cls: "schmal rollenwahl", noEsc: true });
   };
   actions.stat = s => { const P = Z.player; P.stats[s]++; const before = P.hpMax; Z.recalcPlayer(); P.hp += P.hpMax - before; closeModal(); A.play("holy", { vol: 0.5 }); Z.fx.text(P.x + P.w / 2, P.y - 14, L(Z.STATS[s].n) + " +1", Z.STATS[s].col, true); Z.fx.burst(P.x + P.w / 2, P.y + 10, 20, { col: Z.STATS[s].col, sp: 60, up: 60, life: 0.8, size: 2.5, kind: "glow", add: true }); };
 
@@ -618,6 +640,8 @@
           '<div class="kauf"><button data-act="wlvl" data-arg="' + id + '"' + (lvl >= 5 || M.shards < c1 ? " disabled" : "") + ">" + (lvl >= 5 ? esc(t("max")) : esc(t("upgrade")) + " " + (lvl + 1) + " · " + c1 + "◆") + '</button><button data-act="luck" data-arg="' + id + '"' + (luck >= 3 || M.shards < c2 ? " disabled" : "") + ">" + esc(t("luck")) + " " + "★".repeat(luck) + "☆".repeat(3 - luck) + (luck < 3 ? " · " + c2 + "◆" : "") + "</button></div></div>";
       }
       body += "</div>";
+    } else if (forgeTab === 3 && Z.forgeGlutHTML) {
+      body += Z.forgeGlutHTML();
     } else {
       body += '<div class="liste">';
       for (const k in TX.ups) {

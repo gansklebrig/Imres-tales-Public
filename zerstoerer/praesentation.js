@@ -227,6 +227,7 @@
         const jx = Math.cos(ph) * 9 * (1 - fan) + (i - 1) * 7 * fan, jy = -Math.abs(Math.sin(ph)) * 14 * (1 - fan) - 2 * fan;
         drawItem(c, it, x + jx, y + jy, size * 0.75, (1 - fan) * ph * 2 + (i - 1) * 0.35 * fan, alpha);
       }
+      fadenRing(c, p, d, x, y, u, t, rise, alpha);
       drawFront(c, p, x, y);
       return banner(c, p, W, H);
     } else if (st === "zauber" || st === "gabe") {
@@ -244,11 +245,23 @@
         c.stroke(); c.globalAlpha = (1 - s) * 0.25; c.fillStyle = rc; c.fill(); c.restore();
       }
     }
+    fadenRing(c, p, d, x, y, u, t, rise, alpha);
     drawItem(c, it, x, y, size, ang, alpha);
     /* Glanzlicht über die Waffe */
     if (u > peak && u < peak + 0.2) { const s = span(u, peak, peak + 0.2); c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = (1 - Math.abs(s - 0.5) * 2) * 0.8; halo(c, x, y + 10 - s * 20, 7, "rgba(255,255,255,.9)", 1); c.restore(); }
     drawFront(c, p, x, y);
     banner(c, p, W, H);
+  }
+  /* Faden-Stück: ein goldener Faden umkreist die Waffe, zwei Rauten-Marken laufen mit */
+  function fadenRing(c, p, d, x, y, u, t, rise, alpha) {
+    if (d.faden && !p.cursed && u > 0.15) {
+      const a = span(u, 0.15, 0.35) * alpha, r0 = 14 + rise * 4;
+      c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = a * 0.7; c.strokeStyle = "#ffd27a"; c.lineWidth = 0.8; c.beginPath();
+      for (let i = 0; i <= 40; i++) { const q = i / 40 * TAU + t * 2.2, rr = r0 + Math.sin(q * 3 + t * 4) * 2; const px = x + Math.cos(q) * rr, py = y + Math.sin(q) * rr * 0.55; i ? c.lineTo(px, py) : c.moveTo(px, py); }
+      c.stroke(); c.globalAlpha = a;
+      for (let k = 0; k < 2; k++) { const q = t * 2.2 + k * Math.PI, px = x + Math.cos(q) * r0, py = y + Math.sin(q) * r0 * 0.55; c.save(); c.translate(px, py); c.rotate(t * 3); c.fillStyle = "#ffd27a"; c.beginPath(); c.moveTo(0, -2.6); c.lineTo(2.6, 0); c.lineTo(0, 2.6); c.lineTo(-2.6, 0); c.closePath(); c.fill(); c.restore(); }
+      c.restore();
+    }
   }
   function drawFront(c, p, x, y) {
     if (p.cursed && p.chainsOn) {
@@ -274,11 +287,13 @@
     c.globalAlpha = a; c.textAlign = "center"; c.textBaseline = "middle";
     if (p.cursed) { c.font = "700 " + Math.round(fs * 0.48) + "px " + fd; c.fillStyle = "#ff9af0"; c.fillText("☠ " + L(Z.CURSE[it.cursed].name).toUpperCase() + " ☠", W / 2 + shake, cy - fs * 0.95); }
     c.font = Math.round(fs) + "px " + fd; c.shadowColor = p.cursed ? "#c040ff" : r.col; c.shadowBlur = fs * 0.5;
-    c.fillStyle = p.cursed ? "#f0d0ff" : r.col; c.fillText(L(d.n), W / 2 + shake, cy);
+    c.fillStyle = p.cursed ? "#f0d0ff" : r.col; c.fillText(Z.itemTitle ? Z.itemTitle(it) : L(d.n), W / 2 + shake, cy);
     c.shadowBlur = 0; c.font = "600 " + Math.round(fs * 0.42) + "px " + (getComputedStyle(document.documentElement).getPropertyValue("--fb") || "sans-serif");
     const pw = it.power && Z.CPOWER && Z.CPOWER[it.power];
     c.fillStyle = pw ? "#ff9af0" : "#d8c8b8";
-    c.fillText(pw ? "✦ " + L(pw.n) + " ✦" : L(r.n) + (it.aff && it.aff.length ? " · " + it.aff.map(k => L(Z.AFFIX[k].n)).join(" · ") : ""), W / 2, cy + fs * 0.85);
+    c.fillText(pw ? "✦ " + L(pw.n) + " ✦" : L(r.n) + (it.aff && it.aff.length ? " · " + it.aff.map(k => L(Z.AFFIX[k].n)).join(" · ") : "") + (it.runes && it.runes.length && Z.RUNES ? " · ᚱ " + it.runes.map(k => L(Z.RUNES[k].n)).join(" · ") : ""), W / 2, cy + fs * 0.85);
+    /* Faden-Stücke: eigene goldene Zeile mit kurzer Erklärung */
+    if (d.faden && !p.cursed) { c.font = "700 " + Math.round(fs * 0.36) + "px " + (getComputedStyle(document.documentElement).getPropertyValue("--fb") || "sans-serif"); c.fillStyle = "#ffd27a"; c.fillText("◈ " + L(["Faden – Treffer markieren, Nahkampf vollstreckt kritisch", "Thread – hits mark, melee executes with a crit"]), W / 2, cy + fs * 1.45); }
     c.restore();
   }
 

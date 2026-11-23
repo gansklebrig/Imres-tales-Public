@@ -194,12 +194,22 @@
     else { ax = P.x + P.w / 2 - P.face * 3; ay = P.y + (roll ? P.h - 9 : P.crouch ? 4 : 7); }
     pts[0].x = ax; pts[0].y = ay;
     /* Wind: Grundwind + Böen; Fahrtwind entsteht von selbst durch die Verlet-Trägheit */
-    const wind = (Z.windX || 0) + Math.sin(P.time * 2.3) * 8 + Math.sin(P.time * 5.7 + 1) * 3;
+    /* Böen draußen kräftiger als drinnen; dazu sanftes Atmen des Stoffs */
+    const outside = !!(Z.level && (Z.level.out || (Z.biome && Z.biome.open)));
+    const gust = (Math.sin(P.time * 2.3) * 8 + Math.sin(P.time * 5.7 + 1) * 3 + Math.sin(P.time * 0.7) * 4) * (outside ? 1 : 0.45);
+    const wind = (Z.windX || 0) + gust;
     const damp = P.onGround ? 0.9 : 0.93;
+    /* Fahrtwind-Flattern (Welle läuft den Umhang hinunter) und Ruck beim Zurechtschütteln */
+    const spd = Math.min(1, Math.abs(P.vx) / 160) + (P.onGround ? 0 : Math.min(0.6, Math.abs(P.vy) / 600));
+    const kick = P.capeKick > 0 ? P.capeKick : 0;
+    if (kick > 0) P.capeKick = Math.max(0, kick - dt * 1.4);
     for (let i = 1; i < CAPE_N; i++) {
       const p = pts[i]; const vx = (p.x - p.ox) * damp, vy = (p.y - p.oy) * damp;
       p.ox = p.x; p.oy = p.y;
-      p.x += vx + (wind - P.face * 12) * dt * dt * 60; p.y += vy + 400 * dt * dt;
+      const f = i / CAPE_N;
+      const flut = spd > 0.2 ? Math.sin(P.time * 17 - i * 1.1) * spd * f * 0.32 : 0;
+      p.x += vx + (wind - P.face * (4 + 10 * Math.min(1, spd))) * dt * dt * 60; p.y += vy + 400 * dt * dt + flut;
+      if (kick > 0) { p.x += Math.sin(P.time * 31 + i * 0.8) * kick * f * 0.9; p.y -= kick * f * 0.35; }
     }
     const bx = P.x + P.w / 2;
     for (let k = 0; k < 3; k++) for (let i = 1; i < CAPE_N; i++) {
@@ -292,7 +302,7 @@
   function computePose(T, P, time, S) {
     const A = P.anim, act = P.act;
     poseBase(T);
-    WI.icon = null; WI.col = "#fff"; WI.ang = 0; WI.ext = 0; WI.icon2 = null; WI.ang2 = 0; WI.grip2 = null; WI.hand2Icon = null; WI.back = null; WI.glowHand = null; WI.shieldBack = null; WI.bowDraw = 0; WI.punchBack = false; WI.hand2Col = null; WI.hurt = 0; WI.flask = 0;
+    WI.icon = null; WI.col = "#fff"; WI.ang = 0; WI.ext = 0; WI.icon2 = null; WI.ang2 = 0; WI.grip2 = null; WI.hand2Icon = null; WI.back = null; WI.glowHand = null; WI.shieldBack = null; WI.bowDraw = 0; WI.punchBack = false; WI.hand2Col = null; WI.hurt = 0; WI.flask = 0; WI.wallHands = false; WI.headTurn = 0;
     const speed = Math.abs(P.vx);
     const run = P.onGround && speed > 30 && !(act && act.phase !== "post" && act.type !== "shield" && act.type !== "charge");
     const dead = P.dead;
@@ -408,6 +418,8 @@
       if (d) { WI.icon = d.icon; WI.col = d.col; WI.icon2 = null; }
       setH(T, "F", 1.25, -0.2); setH(T, "B", 1.35, -0.3); WI.ang = PI / 2 - 0.05; WI.grip2 = d && W2H[d.icon] ? (GRIP2[d.icon] || -3) : null;
     }
+    if (!act && !P.plunge && !P.ledge && !P.climbing) poseExtras(T, P, time, S, run);
+    else { S.idleT = 0; S.gest = null; }
     /* ---- Trank ---- */
     if (P.drinkT > 0) {
       const k = Math.sin(cl(1 - P.drinkT / 0.42, 0, 1) * PI);
@@ -423,6 +435,81 @@
       if (P.onGround) { T.fFx = lp(T.fFx, 4.5, k); T.fFy = lp(T.fFy, -2.8, k); T.hy += 0.8 * k; }
       WI.hurt = k;
     } else WI.hurt = 0;
+  }
+
+  /* ---- Wandkontakt und Leerlauf-Gesten ---- */
+  function heldAny() { const h = Z.input && Z.input.held; if (!h) return false; for (const k in h) if (h[k]) return true; return false; }
+  function poseExtras(T, P, time, S, run) {
+    const dt = S.pdt || 0;
+    const W = Z.world, h = Z.input && Z.input.held;
+    const push = h ? (h.right ? 1 : 0) - (h.left ? 1 : 0) : 0;
+    /* Wand: gegen eine Wand drücken (am Boden: anstemmen; in der Luft: Hand und Fuß streifen die Wand) */
+    let wall = false;
+    if (W && push && push === P.face && Math.abs(P.vx) < 25 && !P.crouch && !(P.hurtT > 0) && !(P.drinkT > 0)) {
+      const wx = P.face > 0 ? P.x + P.w + 1.5 : P.x - 1.5;
+      if (W.solidAt(wx, P.y + P.h * 0.35) && W.solidAt(wx, P.y + P.h * 0.75)) wall = true;
+    }
+    if (wall) {
+      const wl = P.w / 2 + 0.6; /* Wandfläche, lokal */
+      T.key = "wall"; T.blendD = 0.12;
+      if (P.onGround) {
+        const br = Math.sin(time * 5) * 0.25; /* angestrengtes Schieben */
+        T.lean = 0.38; T.hx = -1.6; T.hy = -11.6 + br * 0.3; T.head = 0.05; T.fFx = 1.4; T.fBx = -6.2; T.toeB = 0.9; T.toeF = 0.2; T.tab = -0.3;
+        T.handAbsF = [wl - 0.6, -17.2 + br * 0.4]; T.handAbsB = [wl - 0.9, -13.6 - br * 0.3]; WI.wallHands = true; if (WI.icon && !W2H[WI.icon]) WI.ang = -1.8; if (WI.icon2) WI.ang2 = -1.6;
+      } else {
+        const sl = cl(P.vy / 300, 0, 1);
+        T.lean = 0.12; T.head = -0.15; T.fFx = wl - 2.2; T.fFy = -5; T.toeF = -0.6; T.fBx = -2; T.fBy = -1; T.toeB = 0.6;
+        T.handAbsF = [wl - 0.6, -21 - sl * 1.5]; T.handAbsB = [-3, -9]; T.tab = 0.4; WI.wallHands = true; if (WI.icon && !W2H[WI.icon]) WI.ang = -1.3;
+        /* Funken/Staub beim Rutschen an der Wand */
+        if (P.vy > 120 && Math.random() < dt * 14 && !lowGfx()) Z.fx.p({ x: P.face > 0 ? P.x + P.w + 1 : P.x - 1, y: P.y + 5, vx: -P.face * 10, vy: -20, life: 0.4, size: 1.6, col: Z.dustCol || "#8a7a70", kind: "smoke", a: 0.6 });
+      }
+      S.idleT = 0; S.gest = null; return;
+    }
+    /* Leerlauf: nach einigen Sekunden Stillstand kleine Gesten */
+    const still = P.onGround && !run && Math.abs(P.vx) < 5 && !P.crouch && !P.lookUp && !P.lookDown && !(P.hurtT > 0) && !(P.drinkT > 0) && T.key === "idle" && !heldAny();
+    if (!still) { S.idleT = 0; S.gest = null; return; }
+    S.idleT = (S.idleT || 0) + dt;
+    if (!S.gest && S.idleT > (S.nextG || 3.4)) {
+      const list = ["shoulder", "look", "shake", "look", "shoulder", "breath"];
+      S.gi = ((S.gi == null ? -1 : S.gi) + 1) % list.length;
+      S.gest = { k: list[S.gi], t: 0, d: list[S.gi] === "look" ? 3.0 : list[S.gi] === "shake" ? 1.6 : 2.6 };
+    }
+    const G = S.gest; if (!G) return;
+    G.t += dt;
+    if (G.t >= G.d) { S.gest = null; S.idleT = 0; S.nextG = 4.5 + ((S.gi * 1.7) % 3); return; }
+    const u = G.t / G.d, env = eio(cl(Math.min(u / 0.2, (1 - u) / 0.2), 0, 1));
+    if (G.k === "shoulder") {
+      /* Waffe schultern (Einhänder) bzw. Zweihänder vor sich aufstützen */
+      if (WI.icon && W2H[WI.icon]) {
+        const tap = u > 0.35 && u < 0.5 ? Math.sin((u - 0.35) / 0.15 * PI) * 0.6 : 0; /* Waffe tippt auf den Boden */
+        const hFx = lp(T.hFx, 5.6, env), hFy = lp(T.hFy, 4.4 - tap, env);
+        T.hFx = hFx; T.hFy = hFy; WI.ang = angLp(WI.ang, PI / 2 - 0.12, env); WI.grip2 = lp(0, -2.5, env) || null;
+        T.lean = lp(T.lean, 0.16, env); T.hx = lp(T.hx, -0.6, env); T.fBx = lp(T.fBx, -4.2, env);
+      } else if (WI.icon) {
+        const sw = Math.sin(u * PI * 3) * 0.08 * env;
+        T.hFx = lp(T.hFx, 0.8, env); T.hFy = lp(T.hFy, -2.6, env); WI.ang = angLp(WI.ang, -2.75 + sw, env);
+        setH(T, "B", lp(PI / 2 + 0.22, PI / 2 - 0.5, env), lp(-0.3, -1.6, env)); /* andere Hand in die Hüfte */
+        T.lean = lp(T.lean, 0.0, env); T.head = lp(T.head, -0.12, env);
+      } else { T.hFx = lp(T.hFx, 2.5, env); T.hFy = lp(T.hFy, 4.5, env); }
+    } else if (G.k === "look") {
+      /* umsehen: erst nach vorn in die Ferne, dann über die Schulter nach hinten */
+      const a = u < 0.4 ? Math.sin(u / 0.4 * PI) : 0, b = u > 0.38 ? cl(Math.min((u - 0.38) / 0.12, (0.95 - u) / 0.12), 0, 1) : 0;
+      T.head = lp(T.head, -0.22, a * env); T.lean = lp(T.lean, 0.0, env); T.hx += Math.sin(u * PI) * 0.4;
+      WI.headTurn = eio(b); /* 0 = nach vorn, 1 = nach hinten */
+      if (b > 0) { T.lean -= 0.04 * b; T.head += 0.08 * b; }
+    } else if (G.k === "shake") {
+      /* Umhang zurechtschütteln: Schultern zucken, Umhang bekommt einen Ruck */
+      const s = Math.sin(u * PI * 4) * env;
+      T.hy += -Math.abs(s) * 0.7; T.lean += s * 0.05; T.hx += s * 0.5;
+      setH(T, "B", lp(PI / 2 + 0.22, PI / 2 + 1.1, env), -0.6 + s * 0.3);
+      if (!P.capeKick || P.capeKick < 0.2) P.capeKick = 1;
+    } else if (G.k === "breath") {
+      /* tief durchatmen: Brust hebt sich, Kopf in den Nacken */
+      const s = Math.sin(u * PI);
+      T.hy -= s * 0.6 * env; T.lean = lp(T.lean, -0.04, s * env); T.head = lp(T.head, -0.3, s * env);
+      setH(T, "F", lp(PI / 2 - 0.18, PI / 2 - 0.4, s * env), -0.4); setH(T, "B", lp(PI / 2 + 0.22, PI / 2 + 0.5, s * env), -0.3);
+      if (WI.icon && !W2H[WI.icon]) WI.ang = Math.atan2(T.hFy, T.hFx) + 0.55;
+    }
   }
 
   /* Waffe in Ruhe: erste Waffe in der vorderen Hand, Schild auf dem Rücken */
@@ -597,14 +684,29 @@
   }
 
   /* Überblendung zwischen Zuständen */
+  /* Winkel auf kürzestem Weg überblenden */
+  function angLp(a, b, k) { let d = (b - a) % TAU; if (d > PI) d -= TAU; else if (d < -PI) d += TAU; return a + d * k; }
   function blendPose(S, T, dt) {
-    if (!S.cur) { S.cur = {}; for (const k of PK) S.cur[k] = T[k]; S.key = T.key; return S.cur; }
-    if (S.key !== T.key) { S.from = Object.assign({}, S.cur); S.bt = 0; S.bd = T.blendD || 0.1; S.key = T.key; }
+    if (!S.cur) { S.cur = {}; for (const k of PK) S.cur[k] = T[k]; S.key = T.key; S.ww = 0; return S.cur; }
+    if (S.key !== T.key) {
+      if (!S.from) S.from = {};
+      Object.assign(S.from, S.cur); S.bt = 0; S.bd = T.blendD || 0.1;
+      const was = S.key || "", now = T.key || "";
+      /* Anschluss zwischen Kombo-Schlägen: der neue Schlag holt aus der Endhaltung des alten heraus aus */
+      if (now.startsWith("melee") && was.startsWith("melee")) S.bd = Math.max(S.bd, 0.075);
+      /* zurück in die Ruhe nach einem Angriff: weich ausschwingen statt einrasten */
+      else if ((was.startsWith("melee") || was === "shot" || was === "bash" || was === "skill") && (now === "idle" || now === "run")) S.bd = Math.max(S.bd, 0.16);
+      else if (was === "wall" || now === "wall") S.bd = Math.max(S.bd, 0.12);
+      /* Waffenwinkel mit überblenden (sonst springt die Klinge beim Zustandswechsel) */
+      S.fromA = S.lastA; S.fromA2 = S.lastA2; S.fromIcon = S.lastIcon; S.fromIcon2 = S.lastIcon2;
+      S.key = T.key; S.blending = true;
+    }
     S.bt += dt;
-    const w = S.from ? 1 - cl(S.bt / S.bd, 0, 1) : 0;
+    const w = S.blending ? 1 - cl(S.bt / S.bd, 0, 1) : 0;
     const ww = w * w * (3 - 2 * w);
     for (const k of PK) S.cur[k] = ww > 0 ? lp(T[k], S.from[k], ww) : T[k];
-    if (w <= 0) S.from = null;
+    if (w <= 0) S.blending = false;
+    S.ww = ww;
     return S.cur;
   }
 
@@ -679,15 +781,39 @@
     ell(c, 3.2, -0.7, 1.5, 1.4, EZ.bone); c.fillStyle = "#1a1010"; c.fillRect(3.1, -1.1, 0.6, 0.5); c.fillRect(3.9, -1.1, 0.5, 0.5);
     circ(c, -2.6, 0.2, 0.9, EZ.bone2);
   }
-  function drawTabard(c, p, time) {
-    /* vorderer Wappenrock: hängt vom Gürtel, schwingt mit */
-    const sw = p.tab + Math.sin(time * 2.6) * 0.06;
+  /* Gürtelteile: Lederriemen mit Knochenamulett (hinten) und Beutel (Seite) – Pendel in Weltlage */
+  function drawTrinkets(c, S, rot) {
+    const a1 = PI / 2 + (S.b1 || 0) - rot, a2 = PI / 2 + (S.b2 || 0) - rot;
+    /* Beutel an der Seite */
+    const bx = -1.2, by = 0.4, ex = bx + Math.cos(a2) * 2.2, ey = by + Math.sin(a2) * 2.2;
+    limb(c, bx, by, ex, ey, 0.6, "#2a1c16");
+    c.save(); c.translate(ex, ey); c.rotate(a2 - PI / 2);
+    ell(c, 0, 1.3, 1.4, 1.5, "#3a2418"); poly(c, [-1.4, 0.4, 1.4, 0.4, 1, 1.3, -1, 1.3], "#4e3222");
+    c.restore();
+    /* Riemen mit Knochenamulett hinten */
+    const rx = -3.8, ry = 0.2, mx = rx + Math.cos(a1) * 2, my = ry + Math.sin(a1) * 2, kx = mx + Math.cos(a1 + (S.b1v || 0) * 0.02) * 1.8, ky = my + Math.sin(a1 + (S.b1v || 0) * 0.02) * 1.8;
+    line(c, [rx, ry, mx, my, kx, ky], 0.55, "#3a2a22");
+    c.save(); c.translate(kx, ky); c.rotate(a1 - PI / 2);
+    poly(c, [-0.7, 0, 0.7, 0, 0.55, 1.3, 0, 2, -0.55, 1.3], EZ.bone2);
+    c.restore();
+  }
+  function drawTabard(c, p, time, springA) {
+    /* vorderer Wappenrock: hängt vom Gürtel, federt der Bewegung hinterher */
+    const sw = (springA != null ? springA : p.tab) + Math.sin(time * 2.6) * 0.05;
     const tx = 2.4 + Math.sin(sw) * 4.5, ty = 5 - Math.abs(sw) * 1.1;
     c.fillStyle = EZ.cloth2; c.beginPath(); c.moveTo(1, -0.4); c.lineTo(3.8, -0.5); c.quadraticCurveTo(3.6 + sw * 2, 2.6, tx + 1.1, ty); c.lineTo(tx, ty + 1); c.lineTo(tx - 1.1, ty); c.quadraticCurveTo(1.2 + sw * 2, 2.6, 1, -0.4); c.fill();
     c.strokeStyle = "#8a1a1a"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(2.4, 0.2); c.quadraticCurveTo(2.4 + sw * 2.2, 2.6, tx, ty + 0.4); c.stroke();
   }
-  function drawHead(c, P, glowK, time, alpha, hurt, wrath) {
+  function drawHead(c, P, glowK, time, alpha, hurt, wrath, rotW) {
     /* Kopf-Ursprung: Nacken; oben = −y */
+    /* Kapuzenzipfel hinten: Stoffzunge, die als Pendel nachschwingt */
+    if (SECV && rotW != null) {
+      const a = PI / 2 + 0.55 + (SECV.hd || 0) - rotW, a2 = a + cl((SECV.hdv || 0) * 0.04, -0.6, 0.6);
+      const x0 = -4.3, y0 = -1.5, x1 = x0 + Math.cos(a) * 2.6, y1 = y0 + Math.sin(a) * 2.6, x2 = x1 + Math.cos(a2) * 2.4, y2 = y1 + Math.sin(a2) * 2.4;
+      const nx = -Math.sin(a), ny = Math.cos(a);
+      poly(c, [-4.6, -3.6, x1 - nx * 1.1, y1 - ny * 1.1, x2, y2, x1 + nx * 0.9, y1 + ny * 0.9, -3.4, 0.6], EZ.hood2);
+      limb(c, x1, y1, x2, y2, 0.5, "#3e0a0c");
+    }
     /* Kapuze */
     poly(c, [-3.9, 1.2, -4.8, -2.8, -3.8, -6.8, -0.6, -8.6, 3, -8.1, 5.1, -5.6, 5.7, -2.4, 4.9, 0.6, 2, 1.6], EZ.hood);
     poly(c, [-3.9, 1.2, -4.8, -2.8, -3.8, -6.8, -1.6, -7.6, -2.4, -2.4, -1.4, 1.5], EZ.hood2);
@@ -717,10 +843,147 @@
     } else { c.fillStyle = "#2a1410"; c.fillRect(2.9, -3.6, 1.7, 0.6); }
   }
 
+  /* ---------- Sekundärbewegung, Waffenspur, Glanz ---------- */
+  /* Waffenspitze lokal (Griff am Ursprung): [innen x,y, außen x,y] – daraus wird die Wischspur aufgespannt */
+  const TIP = { sickles: [5, 0, 13, -2], sickle: [5, 0, 13, -2], dagger: [4, 0, 13.5, 0], dawn: [8, 0, 30, 0], hammer: [13, 0, 25, 0], scythe: [22, -4, 12, -21],
+    whip: [4, 0, 20, 0], spear: [24, 0, 40, 0], axe: [14, 0, 23, -6], club: [10, 0, 31, -2], rapier: [11, 0, 27.5, 0], scimitar: [5, -1, 19, -2], claw: [2, 0, 14, -1],
+    anchor: [8, 0, 24, 0], stonefist: [0, 0, 7, 0], fist: [0, 0, 5.5, 0], krallen: [1, 0, 12, 0], staff: [12, 0, 25, 0], eiszapfen: [8, 0, 24, 0] };
+  const tipOf = icon => TIP[icon] || (W2H[icon] ? [10, 0, 28, 0] : [6, 0, 18, 0]);
+  /* Spurfarbe: Waffenfarbe, bläuliche Töne werden warm umgefärbt (kein Blau im Spiel) */
+  const TCOL = new Map();
+  function trailCol(col) {
+    let r = TCOL.get(col); if (r) return r;
+    r = col;
+    const m = /^#([0-9a-f]{6})$/i.exec(col || "");
+    if (m) { const n = parseInt(m[1], 16), R = n >> 16, G = (n >> 8) & 255, B = n & 255; const mx = Math.max(R, G, B), mn = Math.min(R, G, B); if (mx - mn > 30) { let h = mx === R ? ((G - B) / (mx - mn)) % 6 : mx === G ? (B - R) / (mx - mn) + 2 : (R - G) / (mx - mn) + 4; h *= 60; if (h < 0) h += 360; if (h > 185 && h < 255) r = "#ffd8b0"; } } else r = "#ffd8b0";
+    if (TCOL.size > 100) TCOL.clear(); TCOL.set(col, r); return r;
+  }
+  /* gedämpfte Feder: Wert v, Tempo w, Ziel z */
+  function spring(o, kv, kw, z, k, d, dt) { o[kw] += ((z - o[kv]) * k - o[kw] * d) * dt; o[kv] += o[kw] * dt; }
+  /* Pendel (Gürtelteile, Kapuzenzipfel): Winkel zur Senkrechten, angetrieben von Beschleunigung und Fahrtwind */
+  function pendulum(S, ka, kw, L, ax, drag, dt) {
+    const a = S[ka];
+    S[kw] += (-(620 / L) * Math.sin(a) - S[kw] * 7 + (ax / L) * Math.cos(a) * 0.9 + drag * Math.cos(a)) * dt; /* + = nach hinten */
+    S[ka] = cl(a + S[kw] * dt, -1.6, 1.6);
+  }
+  function secPre(S, P, dt, time) {
+    const vx = P.vx || 0, vy = P.vy || 0;
+    if (S.pvx == null) { S.pvx = vx; S.pvy = vy; S.pg = !!P.onGround; S.tabA = 0; S.tabV = 0; S.b1 = 0; S.b1v = 0; S.b2 = 0; S.b2v = 0; S.hd = 0; S.hdv = 0; S.lq = 0; S.lqv = 0; S.look = 0; S.lookV = 0; S.ax = 0; S.trail = []; S.breathT = 0; }
+    if (dt > 0) {
+      const ax = cl((vx - S.pvx) / dt, -2500, 2500);
+      S.ax = lp(S.ax, ax * P.face, 0.5);
+      /* Landung: Stauchfeder mit Nachfedern; Absprung: kurzes Strecken */
+      if (P.onGround && !S.pg && !P.climbing && !P.dead) S.lqv += 3 + cl(S.pvy / 520, 0, 1.2) * 13;
+      if (!P.onGround && S.pg && vy < -150) S.lqv -= 6;
+      spring(S, "lq", "lqv", 0, 430, 17, dt); S.lq = cl(S.lq, -0.6, 1);
+      const drag = (vx * P.face) * 0.3 + (P.onGround ? 0 : -Math.abs(vy) * 0.05);
+      const bob = P.onGround && Math.abs(vx) > 40 ? Math.sin((P.anim.run || 0) * TAU) * 30 : 0;
+      pendulum(S, "b1", "b1v", 3.6, S.ax + bob, drag * 0.9, dt);
+      pendulum(S, "b2", "b2v", 2.8, S.ax - bob * 0.7, drag * 0.7, dt);
+      pendulum(S, "hd", "hdv", 4.2, S.ax * 0.8, drag * 1.2 - (Z.windX || 0) * 2 * P.face, dt);
+    }
+    S.pvx = vx; S.pvy = vy; S.pg = !!P.onGround;
+  }
+  /* nächster wacher Gegner vor Ezekiel → Kopf dreht sich hin (alle paar Bilder gesucht) */
+  function lookTarget(S, P) {
+    S.lf = (S.lf || 0) + 1;
+    if (S.lf % 6 === 0) {
+      S.le = null; let best = 1e9; const cx = P.x + P.w / 2, cy = P.y + 6;
+      if (Z.enemies) for (const e of Z.enemies) {
+        if (e.dead || !e.aware || e.hidden > 0) continue;
+        const dx = (e.x + e.w / 2 - cx) * P.face, dy = e.y + e.h * 0.4 - cy;
+        if (dx < 6 || dx > 130 || Math.abs(dy) > 70) continue;
+        const d = dx + Math.abs(dy) * 1.5; if (d < best) { best = d; S.le = e; }
+      }
+    }
+    const e = S.le; if (!e || e.dead) return 0;
+    const dx = Math.max(6, (e.x + e.w / 2 - P.x - P.w / 2) * P.face), dy = e.y + e.h * 0.4 - P.y - 6;
+    return cl(Math.atan2(dy, dx) * 0.6, -0.32, 0.36);
+  }
+  /* Waffenspur: Ring aus Abtastungen im Figurenraum (Ursprung zwischen den Füßen, Blick +x) */
+  const TRAIL_MAX = 14;
+  function trailPush(S, Fm, icon, time, cls) {
+    const tp = tipOf(icon), tr = S.trail;
+    const hx = Fm.e, hy = Fm.f;
+    const ix = Fm.a * tp[0] + Fm.c * tp[1] + Fm.e, iy = Fm.b * tp[0] + Fm.d * tp[1] + Fm.f;
+    const ox = Fm.a * tp[2] + Fm.c * tp[3] + Fm.e, oy = Fm.b * tp[2] + Fm.d * tp[3] + Fm.f;
+    const s = { hx, hy, ia: Math.atan2(iy - hy, ix - hx), ir: Math.hypot(ix - hx, iy - hy), oa: Math.atan2(oy - hy, ox - hx), or: Math.hypot(ox - hx, oy - hy), t: time };
+    const last = tr[tr.length - 1];
+    /* große Sprünge zwischen zwei Bildern mit Zwischenschritten füllen (Bogen um die Hand statt gerader Kante) */
+    if (last && time - last.t < 0.06) {
+      let da = s.oa - last.oa; if (da > PI) da -= TAU; else if (da < -PI) da += TAU;
+      const n = Math.min(5, Math.floor(Math.abs(da) / 0.22));
+      for (let i = 1; i <= n; i++) { const k = i / (n + 1); tr.push({ hx: lp(last.hx, hx, k), hy: lp(last.hy, hy, k), ia: angLp(last.ia, s.ia, k), ir: lp(last.ir, s.ir, k), oa: angLp(last.oa, s.oa, k), or: lp(last.or, s.or, k), t: lp(last.t, time, k) }); }
+    }
+    tr.push(s); while (tr.length > TRAIL_MAX * 2) tr.shift();
+    S.trCls = cls;
+  }
+  function drawTrail(c, S, time, col, alpha) {
+    const tr = S.trail, cls = S.trCls || "blade";
+    const life = cls === "heavy" ? 0.15 : cls === "fist" ? 0.08 : cls === "stab" ? 0.09 : 0.11;
+    while (tr.length && time - tr[0].t > life) tr.shift();
+    const n = tr.length; if (n < 2) return;
+    const pa = c.globalAlpha, po = c.globalCompositeOperation;
+    c.globalCompositeOperation = "lighter";
+    /* Außen- (Schneide) und Innenkante; die Innenkante zieht sich mit dem Alter zur Schneide hin zusammen → sichelförmig */
+    const wIn = cls === "heavy" ? 0.42 : cls === "blade" ? 0.55 : cls === "stab" ? 0.75 : cls === "fist" ? 0.3 : 0.85;
+    const OX = TRX, OY = TRY, IX = TRX2, IY = TRY2;
+    for (let i = 0; i < n; i++) {
+      const s = tr[i], u = cl(1 - (time - s.t) / life, 0, 1);
+      OX[i] = s.hx + Math.cos(s.oa) * s.or; OY[i] = s.hy + Math.sin(s.oa) * s.or;
+      const ix = s.hx + Math.cos(s.ia) * s.ir, iy = s.hy + Math.sin(s.ia) * s.ir, k = wIn * u * u;
+      IX[i] = lp(OX[i], ix, k); IY[i] = lp(OY[i], iy, k);
+    }
+    /* drei Altersstufen als je eine Fläche (keine Nahtlinien zwischen Einzelvierecken) */
+    const base = (cls === "heavy" ? 0.36 : 0.3) * (cls === "fist" ? 0.8 : 1);
+    c.fillStyle = col;
+    const B = 3;
+    for (let b = 0; b < B; b++) {
+      const i0 = Math.floor(b * (n - 1) / B), i1 = Math.min(n - 1, Math.floor((b + 1) * (n - 1) / B) + 1);
+      if (i1 - i0 < 1) continue;
+      c.globalAlpha = pa * base * (b + 1) / B;
+      c.beginPath(); c.moveTo(OX[i0], OY[i0]);
+      for (let i = i0 + 1; i <= i1; i++) c.lineTo(OX[i], OY[i]);
+      for (let i = i1; i >= i0; i--) c.lineTo(IX[i], IY[i]);
+      c.closePath(); c.fill();
+    }
+    /* heller Schneidenkern als ein Linienzug: dünn am alten Ende, kräftig an der Klinge */
+    c.lineCap = "round"; c.lineJoin = "round";
+    c.strokeStyle = cls === "heavy" ? "#ffc080" : "#fff6e6";
+    const half = Math.max(0, Math.floor(n / 2) - 1);
+    c.globalAlpha = pa * 0.35; c.lineWidth = cls === "heavy" ? 1 : 0.6;
+    c.beginPath(); c.moveTo(OX[0], OY[0]); for (let i = 1; i <= half + 1 && i < n; i++) c.lineTo(OX[i], OY[i]); c.stroke();
+    c.globalAlpha = pa * 0.8; c.lineWidth = cls === "heavy" ? 1.5 : 0.9;
+    c.beginPath(); c.moveTo(OX[half], OY[half]); for (let i = half + 1; i < n; i++) c.lineTo(OX[i], OY[i]); c.stroke();
+    /* Wucht-Waffen: glühender Außenrand */
+    if (cls === "heavy") {
+      c.strokeStyle = "#ff5a1a"; c.lineWidth = 2.4; c.globalAlpha = pa * 0.22;
+      c.beginPath(); for (let i = half; i < n; i++) { const s = tr[i], x = OX[i] + Math.cos(s.oa) * 1.1, y = OY[i] + Math.sin(s.oa) * 1.1; if (i === half) c.moveTo(x, y); else c.lineTo(x, y); } c.stroke();
+    }
+    c.globalAlpha = pa; c.globalCompositeOperation = po;
+  }
+  const TRX = new Float32Array(TRAIL_MAX * 2 + 8), TRY = new Float32Array(TRAIL_MAX * 2 + 8), TRX2 = new Float32Array(TRAIL_MAX * 2 + 8), TRY2 = new Float32Array(TRAIL_MAX * 2 + 8);
+  /* Punkt aus dem aktuellen Zeichenraum in Weltkoordinaten (für Partikel an Hörnern/Mund) */
+  function toWorld(c, M0inv, x, y) {
+    const m = c.getTransform(), X = m.a * x + m.c * y + m.e, Y = m.b * x + m.d * y + m.f;
+    return [M0inv.a * X + M0inv.c * Y + M0inv.e, M0inv.b * X + M0inv.d * Y + M0inv.f];
+  }
+  /* kalte Gebiete: Atemwolken */
+  const COLD = { zinnen: 1, sturm: 1, wehrgang: 1, hafen: 1, see: 1 };
+  function isCold() {
+    const lv = Z.level; if (!lv) return false;
+    if (lv.hub) return false;
+    const bid = lv.biome || (lv.base) || ""; if (COLD[bid]) return true;
+    const w = Z.biome && Z.biome.weather; return !!(w && (w.includes("rain") || w.includes("drizzle") || w.includes("snow")));
+  }
+  let SECV = null; /* Sekundärwerte für die Teilzeichner (Kopf, Rumpf) */
+
   Z.drawPlayer = function (c, P, time) {
     if (!P.cape) capeInit(P);
     const S = pstate(P);
-    const dt = S.lt == null ? 0 : cl(time - S.lt, 0, 0.1); S.lt = time;
+    const dt = S.lt == null ? 0 : cl(time - S.lt, 0, 0.1); S.lt = time; S.pdt = dt;
+    secPre(S, P, dt, time);
+    const low = lowGfx();
     const flick = P.iframe > 0 && P.hurtT <= 0 && P.rollT <= 0 && !P.ledge && Math.floor(time * 20) % 2 === 0 && P.iframe < 0.7 && P.iframe > 0.05 && !(P.act && P.act.dash);
     const alpha = P.invis > 0 ? 0.28 : flick ? 0.45 : 1;
     const cx = P.x + P.w / 2, fy = P.y + P.h;
@@ -750,8 +1013,27 @@
     }
     /* ---- Pose bestimmen und überblenden ---- */
     computePose(TG, P, time, S);
-    const p = blendPose(S, TG, dt);
     const T = TG;
+    if (T.key === "wall" && T.handAbsF) {
+      /* Wandhände relativ zur Schulter der Zielpose, damit sie mit überblendet werden */
+      pHx = T.hx; pHy = T.hy; pC = Math.cos(T.lean); pS = Math.sin(T.lean);
+      toF(0.6, -10.4, SF); toF(-1.8, -10.2, SB);
+      T.hFx = T.handAbsF[0] - SF[0]; T.hFy = T.handAbsF[1] - SF[1]; T.hBx = T.handAbsB[0] - SB[0]; T.hBy = T.handAbsB[1] - SB[1]; T.handAbsF = null; T.handAbsB = null;
+    }
+    const p = blendPose(S, TG, dt);
+    /* Waffenwinkel überblenden (gleiche Waffe vorher/nachher) */
+    if (S.ww > 0) {
+      if (WI.icon && S.fromIcon === WI.icon && S.fromA != null && !(P.act && P.act.def && P.act.def.spin)) WI.ang = angLp(WI.ang, S.fromA, S.ww);
+      if (WI.icon2 && S.fromIcon2 === WI.icon2 && S.fromA2 != null) WI.ang2 = angLp(WI.ang2, S.fromA2, S.ww);
+    }
+    S.lastA = WI.ang; S.lastA2 = WI.ang2; S.lastIcon = WI.icon; S.lastIcon2 = WI.icon2;
+    /* Wappenrock federt der Pose hinterher, Kopf dreht sich zu nahen Gegnern */
+    if (dt > 0) {
+      spring(S, "tabA", "tabV", p.tab - cl(S.ax / 1400, -0.7, 0.7) + (P.onGround ? 0 : cl(-P.vy / 900, -0.5, 0.5)), 160, 9, dt);
+      spring(S, "look", "lookV", (P.dead || WI.headTurn > 0) ? 0 : lookTarget(S, P), 70, 13, dt);
+    }
+    SECV = S;
+    const headA = p.head + (S.look || 0);
     pHx = p.hx; pHy = p.hy; pC = Math.cos(p.lean); pS = Math.sin(p.lean);
     const deadK = P.dead && S.deadT0 != null ? cl((time - S.deadT0 - 0.6) / 1.2, 0, 1) : 0;
     const glowK = (wrath ? 1.4 : 1) * (1 - deadK);
@@ -764,9 +1046,17 @@
     }
     /* Umhang (in Weltkoordinaten) */
     drawCape(c, P, alpha, time, glowK);
+    const M0 = c.getTransform(); let M0inv = null;
+    const wantEmb = !low && !P.dead && (wrath || Math.abs(P.vx) > 140 || (P.act && P.act.type === "melee" && P.act.phase === "act")) && Math.random() < dt * (wrath ? 22 : 7);
+    let wantBreath = false;
+    if (!P.dead && dt > 0 && isCold()) { S.breathT -= dt; if (S.breathT <= 0) { wantBreath = true; S.breathT = Math.abs(P.vx) > 60 ? 0.9 : 2.3; } }
+    if (wantEmb || wantBreath) M0inv = M0.inverse();
     c.save(); c.translate(cx, fy); c.scale(P.face, 1); c.globalAlpha = alpha;
     /* Streckung im Sprung, Stauchung beim Fallen (Squash & Stretch) */
     if (!P.onGround && !P.climbing && !P.ledge && !P.dead) { const k = cl(-P.vy / 420, -1, 1); if (k > 0.15) c.scale(1 - k * 0.06, 1 + k * 0.08); else if (k < -0.6) c.scale(1.03, 0.97); }
+    /* Landefeder: Stauchen beim Aufkommen, leichtes Nachfedern; Strecken beim Absprung */
+    if (Math.abs(S.lq) > 0.004 && !P.dead && !P.climbing) { const q = S.lq; c.scale(1 + q * 0.09, 1 - q * 0.11); }
+    const F0 = c.getTransform();
     if (T.rot) { c.translate(0, T.rotY); c.rotate(T.rot); c.translate(0, -T.rotY); }
     if (T.sx !== 1 || T.sy !== 1) c.scale(T.sx, T.sy);
     if (P.dead && T.rot) c.translate(0, -2 * Math.min(1, T.rot / 0.84));
@@ -796,22 +1086,49 @@
     /* ---- Rumpf ---- */
     c.save(); c.translate(p.hx, p.hy); c.rotate(p.lean);
     drawTorso(c, p, glowK, time, WI.hurt);
-    drawTabard(c, p, time);
+    drawTrinkets(c, S, p.lean + (T.rot || 0));
+    drawTabard(c, p, time, S.tabA);
     /* hinterer Schulterpanzer */
     poly(c, [-5.6, -12.4, -2.6, -14.6, 0.6, -13, -0.6, -10.4, -4.6, -10], "#140d0f");
     poly(c, [-3.6, -13.8, -6, -17.4, -1.8, -14.2], "#100a0c");
     /* Kopf */
-    c.save(); c.translate(1.1, -12.4); c.rotate(p.head);
-    drawHead(c, P, glowK, time, alpha, WI.hurt, wrath);
+    c.save(); c.translate(1.1, -12.4); c.rotate(headA);
+    if (WI.headTurn > 0) { let hs = Math.cos(WI.headTurn * PI); if (Math.abs(hs) < 0.18) hs = hs < 0 ? -0.18 : 0.18; c.translate(0.6, 0); c.scale(hs, 1); c.translate(-0.6, 0); }
+    drawHead(c, P, glowK, time, alpha, WI.hurt, wrath, p.lean + headA + (T.rot || 0));
+    /* Glut an den Hornspitzen (bei Tempo, Zorn, im Schlag) */
+    if (wantEmb) { const tipH = Math.random() < 0.5 ? [7.2, -16.2] : [-6.9, -16.4]; const w = toWorld(c, M0inv, tipH[0], tipH[1]); Z.fx.p({ x: w[0], y: w[1], vx: -P.vx * 0.25 + (Math.random() - 0.5) * 12, vy: -18 - Math.random() * 16, life: 0.45, size: 1.3, col: wrath ? "#ff4a2a" : "#ff8a3a", kind: "glow", add: true }); }
+    /* Atemwolke aus der Maske */
+    if (wantBreath) { const w = toWorld(c, M0inv, 5.6, -1.2); for (let i = 0; i < 2; i++) Z.fx.p({ x: w[0] + P.face * i, y: w[1], vx: P.face * (10 + i * 6) + P.vx * 0.3, vy: -4 - i * 3, life: 0.9 + i * 0.3, size: 1.4 + i * 0.5, col: "#e8e2dc", kind: "smoke", a: 0.55, drag: 0.94 }); }
     c.restore();
     c.restore();
     /* ---- vorderer Arm, Waffe, Schulterpanzer ---- */
+    /* Waffenspur (unter dem Arm, über dem Körper) */
+    const act = P.act, swingOn = !low && act && act.type === "melee" && WI.icon && !P.dead && (act.phase === "act" || (act.phase === "post" && act.t < 0.05) || P.plunge);
+    if (S.trail && S.trail.length && (S.trFace !== P.face)) S.trail.length = 0;
+    S.trFace = P.face;
+    if (!low && S.trail && S.trail.length) { c.save(); c.setTransform(F0); drawTrail(c, S, time, trailCol(S.trCol || WI.col || "#ffd8b0"), alpha); c.restore(); }
     const fA = drawArm(c, SF[0], SF[1], hFx, hFy, T.eF, true, glowK, time);
     if (WI.icon && !(WI.icon2 && WI.punchBack && FISTS[WI.icon] && false)) {
       c.save(); c.translate(fA[0], fA[1]); c.rotate(WI.ang);
       weapon(c, WI.icon, WI.col, time, WI.icon === "bow" || WI.icon === "whip" || WI.icon === "xbow" ? ext : 0);
+      if (swingOn) {
+        const sm = act.def && act.def.smear, cls = FISTS[WI.icon] ? "fist" : (sm && sm.stab) || WI.icon === "spear" && !(sm && !sm.stab) ? "stab" : WI.icon === "whip" ? "whip" : W2H[WI.icon] || (act.def && act.def.heavy) ? "heavy" : "blade";
+        trailPush(S, F0.inverse().multiply(c.getTransform()), WI.icon, time, cls); S.trCol = WI.col;
+      }
+      /* Glanz beim Aufladen: Lichtpunkt wandert die Klinge entlang, voll geladen blitzt die Spitze */
+      let gl = 0;
+      if (act && act.type === "charge") gl = cl(act.charge || 0, 0, 1);
+      else if (act && act.type === "melee" && act.phase === "pre" && act.def && (act.def.heavy || W2H[WI.icon])) gl = cl(act.t / Math.max(0.01, act.def.pre), 0, 1);
+      if (gl > 0.25 && !P.dead) {
+        const tp = tipOf(WI.icon), run = (time * 3.2) % 1, gx = lp(tp[0], tp[2], run), gy = lp(tp[1], tp[3], run);
+        const pa = c.globalAlpha; c.globalCompositeOperation = "lighter";
+        c.globalAlpha = pa * (gl - 0.25) * 1.2 * Math.sin(run * PI); star4(c, gx, gy, 1.6 + gl, "#fff4dc", time * 4);
+        if (gl > 0.92) { const pu = 0.7 + 0.3 * Math.sin(time * 30); c.globalAlpha = pa * pu; star4(c, tp[2], tp[3], 3.4 * pu + 1, "#fffaf0", 0.3); c.globalAlpha = pa; glow(c, tp[2], tp[3], 7, "rgba(255,220,150,.8)", pu); }
+        c.globalAlpha = pa; c.globalCompositeOperation = "source-over";
+      }
       c.restore();
     }
+    if (!swingOn && S.trail && S.trail.length && act && act.type === "melee" && act.phase === "pre") S.trail.length = 0;
     if (WI.flask > 0) { c.save(); c.translate(fA[0], fA[1]); c.rotate(-0.6 - WI.flask * 1.2); poly(c, [-1.6, 0, 1.6, 0, 2.2, -4.6, 0.8, -5.2, -0.8, -5.2, -2.2, -4.6], "#e8d8d0"); poly(c, [-1.3, -0.4, 1.3, -0.4, 1.8, -3.4, -1.8, -3.4], "#c02a2a"); limb(c, 0, -5.2, 0, -6.4, 1.3, "#8a6a40"); glow(c, 0, -2.5, 5, "rgba(255,80,80,.5)", alpha); c.restore(); }
     if (WI.glowHand) { glow(c, fA[0] + 1.5, fA[1], 7, "rgba(255,150,70,.6)", alpha); circ(c, fA[0] + 1.5, fA[1], 1.2, "#ffe0b0"); }
     drawHand(c, fA[0], fA[1], true);
@@ -902,6 +1219,114 @@
   /* Wie stark sich der ganze Körper beim Ausholen/Schlagen neigt */
   const LEANF = { wolf: 0.35, wolfrider: 0.35, rat: 0.3, spider: 0.25, crab: 0.3, blob: 0, bloat: 0.3, wisp: 0, sac: 0, ray: 0.3, stirge: 0.4, harpy: 0.6, wraith: 0.6, golem: 0.6, golemBig: 0.6, dummy: 0, dragon: 0.25, demogorgon: 0, wasp: 0.35, vulture: 0.5, giant: 0.7 };
 
+  /* Animationsgedächtnis je Gegner: geglättete Geschwindigkeit (Gewicht/Neigung), Rückstoß-Feder,
+     eingefrorene Zeit, Aufmerksam-Werden. Nur kleine Zahlen, kein Zeichnen. */
+  const EST = new WeakMap();
+  function estate(e, time) {
+    let s = EST.get(e);
+    if (!s) { s = { lt: time, sv: e.vx || 0, kr: 0, kv: 0, kd: 1, fz: null, fa: 0, am: 0.5, pa: e.alertT || 0, sq: 0, sqv: 0, air: !e.onGround }; EST.set(e, s); }
+    const dt = cl(time - s.lt, 0, 0.05); s.lt = time; s.dt = dt;
+    return s;
+  }
+  /* niedrige Grafikstufe („Handheld“): weniger Zusatzschmuck */
+  const lowGfx = () => !!(Z.gq && (Z.gq.level === 0 || (Z.gq.level === -1 && Z.gq.part < 0.3)));
+  Z.lowGfx = lowGfx;
+  /* vierzackiger Stern (Betäubung, Glanz) */
+  function star4(c, x, y, r, col, rot) {
+    c.fillStyle = col; c.beginPath();
+    for (let i = 0; i < 8; i++) { const a = (rot || 0) + i * PI / 4, rr = i % 2 ? r * 0.32 : r; if (i) c.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); else c.moveTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); }
+    c.closePath(); c.fill();
+  }
+  Z.draw.star4 = star4;
+  /* Flammenzunge (Spitze nach oben), Höhe h, Breite w */
+  function flame(c, x, y, w, h, col, sway) {
+    c.fillStyle = col; c.beginPath(); c.moveTo(x - w, y);
+    c.quadraticCurveTo(x - w * 1.05, y - h * 0.55, x + sway, y - h);
+    c.quadraticCurveTo(x + w * 1.05, y - h * 0.55, x + w, y);
+    c.quadraticCurveTo(x, y + w * 0.7, x - w, y); c.fill();
+  }
+  /* Zustands-Überlagerungen in Weltkoordinaten (nach der Gestalt) */
+  function statusFx(c, e, d, time, S, low) {
+    const x = e.x, y = e.y, w = e.w, h = e.h, cx = x + w / 2;
+    const st = e.st || {};
+    /* Eis: Kristallpanzer an den Füßen und Kanten, Reif-Funkeln (kein Blau: weiß, grünlich-grau) */
+    if (e.frozenT > 0) {
+      const a = Math.min(1, e.frozenT * 3);
+      c.save(); c.globalAlpha *= a;
+      const n = Math.max(3, Math.min(7, Math.round(w / 5)));
+      for (let i = 0; i < n; i++) {
+        const u = (i + 0.5) / n, bx = x + u * w, hh = Math.min(h * 0.42, 3 + h * (0.12 + 0.2 * Math.abs(Math.sin(i * 2.7 + 1)))), ww = w / n * 0.62 + 0.8;
+        const tilt = (u - 0.5) * 3;
+        poly(c, [bx - ww, y + h + 0.5, bx - ww * 0.4 + tilt * 0.3, y + h - hh, bx + tilt, y + h - hh - ww * 0.8, bx + ww * 0.5 + tilt * 0.3, y + h - hh * 0.8, bx + ww, y + h + 0.5], i % 2 ? "rgba(236,246,242,.72)" : "rgba(214,232,226,.66)");
+        limb(c, bx - ww * 0.25, y + h - 1, bx + tilt * 0.8, y + h - hh - ww * 0.5, 0.5, "rgba(255,255,255,.9)");
+      }
+      /* Splitterkappe oben und Reif-Linien */
+      poly(c, [cx - w * 0.35, y + 2, cx - w * 0.1, y - 2.5, cx + w * 0.05, y + 1, cx + w * 0.3, y - 1.5, cx + w * 0.4, y + 2.5], "rgba(240,250,246,.7)");
+      c.strokeStyle = "rgba(255,255,255,.55)"; c.lineWidth = 0.5; c.beginPath();
+      c.moveTo(x + 1, y + h * 0.3); c.lineTo(x + w * 0.3, y + h * 0.45); c.lineTo(x + w * 0.2, y + h * 0.65);
+      c.moveTo(x + w - 1, y + h * 0.2); c.lineTo(x + w * 0.7, y + h * 0.4); c.stroke();
+      if (!low) for (let i = 0; i < 3; i++) { const ph = (time * 0.9 + i * 0.37) % 1; if (ph < 0.35) { const s = Math.sin(ph / 0.35 * PI); star4(c, x + w * ((i * 0.37 + 0.2) % 1), y + h * ((i * 0.61 + 0.15) % 1), 2.2 * s, "rgba(255,255,255,.95)", 0.4); } }
+      c.restore();
+    }
+    /* Brennen: Flammenzungen auf dem Körper (additiv), dunkle Rußkante */
+    if (st.burn > 0 && !(e.frozenT > 0)) {
+      const a = Math.min(1, st.burn * 2);
+      c.save(); c.globalAlpha *= a; c.globalCompositeOperation = "lighter";
+      const n = low ? 2 : Math.max(2, Math.min(5, Math.round(w / 6)));
+      for (let i = 0; i < n; i++) {
+        const u = (i + 0.5) / n, fx = x + w * (0.15 + u * 0.7), ph = time * 9 + i * 2.1;
+        const fh = h * (0.32 + 0.12 * Math.sin(ph)) + 2, fw = 1.6 + w * 0.06, base = y + h * (0.45 + 0.35 * ((i * 0.53) % 1));
+        flame(c, fx, base, fw, fh, "rgba(255,90,20,.55)", Math.sin(ph * 1.3) * 1.5);
+        flame(c, fx, base, fw * 0.55, fh * 0.62, "rgba(255,210,110,.75)", Math.sin(ph * 1.3) * 1.1);
+      }
+      c.restore();
+      glow(c, cx, y + h * 0.5, h * 0.75, "rgba(255,110,30,.35)", a);
+    }
+    /* Gift: aufsteigende grüne Bläschen, Tropfen, fahler Schimmer */
+    if (st.poison > 0) {
+      const a = Math.min(1, st.poison * 2);
+      c.save(); c.globalAlpha *= a;
+      const n = low ? 2 : 4;
+      for (let i = 0; i < n; i++) {
+        const ph = (time * 0.8 + i * 0.29) % 1, bx = x + w * ((i * 0.41 + 0.2) % 1) + Math.sin(time * 4 + i) * 1.2, by = y + h * 0.5 - ph * (h * 0.6 + 6);
+        const r = 0.8 + ((i * 7) % 3) * 0.35 + ph * 0.5;
+        c.globalAlpha = a * (ph < 0.85 ? 0.9 : (1 - ph) / 0.15 * 0.9);
+        c.strokeStyle = "#9ad04a"; c.lineWidth = 0.6; c.beginPath(); c.arc(bx, by, r, 0, TAU); c.stroke();
+        circ(c, bx - r * 0.35, by - r * 0.35, r * 0.3, "rgba(220,255,170,.8)");
+      }
+      const dp = (time * 1.3) % 1; c.globalAlpha = a * (1 - dp); circ(c, x + w * 0.6, y + h * 0.55 + dp * h * 0.45, 0.7, "#7ab03a");
+      c.restore();
+      glow(c, cx, y + h * 0.5, h * 0.6, "rgba(140,210,60,.28)", a * (0.7 + 0.3 * Math.sin(time * 5)));
+    }
+    /* Betäubung: kreisende Sterne (und bei großen Gegnern zwei Vögelchen) über dem Kopf */
+    if (st.stun > 0 && !(e.frozenT > 0) && !e.dead) {
+      const hy = y - 4 - (d.boss ? 4 : 0), rx = Math.max(5, w * 0.45), ry = 2.2;
+      const n = d.boss || d.heavy ? 4 : 3;
+      for (let i = 0; i < n; i++) {
+        const a = time * 5 + i * TAU / n, sx = cx + Math.cos(a) * rx, sy = hy + Math.sin(a) * ry, front = Math.sin(a) > 0;
+        const sz = (front ? 2.4 : 1.7) * (0.9 + 0.1 * Math.sin(time * 12 + i));
+        if ((d.boss || d.heavy) && i % 2) {
+          /* Vögelchen: zwei flatternde Bögen */
+          const fl = Math.sin(time * 22 + i) * 1.1;
+          c.strokeStyle = front ? "#f0e6d8" : "#a8a098"; c.lineWidth = 0.8; c.beginPath(); c.moveTo(sx - 2.2, sy - fl); c.quadraticCurveTo(sx - 1, sy - 1.2, sx, sy); c.quadraticCurveTo(sx + 1, sy - 1.2, sx + 2.2, sy - fl); c.stroke();
+        } else star4(c, sx, sy, sz, front ? "#ffe48a" : "#c8a050", a);
+      }
+      if (!low) glow(c, cx, hy, rx + 3, "rgba(255,220,120,.25)");
+    }
+  }
+  /* „!“-Sprechblase beim Aufmerksam-Werden (weiß, rund – bewusst anders als die gelben Angriffs-Warnungen) */
+  function alertBubble(c, x, y, u) {
+    const pop = u < 0.25 ? eb(u / 0.25) : 1, fade = u > 0.8 ? 1 - (u - 0.8) / 0.2 : 1;
+    if (fade <= 0) return;
+    c.save(); c.globalAlpha *= fade; c.translate(x, y - (u < 0.25 ? (1 - u / 0.25) * 3 : 0)); c.scale(pop, pop);
+    c.fillStyle = "rgba(20,14,12,.85)"; c.beginPath(); c.ellipse(0, -4, 4.4, 4.8, 0, 0, TAU); c.fill();
+    poly(c, [-1.6, 0, 1.2, 0, -2.4, 2.8], "rgba(20,14,12,.85)");
+    c.fillStyle = "#fff4e4"; c.beginPath(); c.ellipse(0, -4, 3.6, 4, 0, 0, TAU); c.fill();
+    poly(c, [-1, -0.5, 0.6, -0.5, -1.8, 1.8], "#fff4e4");
+    c.fillStyle = "#c0281e"; c.fillRect(-0.7, -7, 1.4, 3.6); c.fillRect(-0.7, -2.6, 1.4, 1.3);
+    c.restore();
+  }
+
   Z.drawEnemy = function (c, e, time) {
     const d = e.def;
     if (e.ceil && !e.aware) { /* Spinne an der Decke: Faden */ limb(c, e.x + e.w / 2, e.y - 60, e.x + e.w / 2, e.y + 2, 0.5, "rgba(230,230,240,.5)"); }
@@ -909,6 +1334,10 @@
     const k = col => (flash ? "#fff6ea" : col);
     const cx = e.x + e.w / 2, fy = e.y + e.h;
     const act = e.act, pre = act && act.phase === "pre";
+    const ES = estate(e, time), edt = ES.dt, low = lowGfx();
+    /* Einfrieren: Zeit und Bewegung bleiben stehen */
+    const frozen = e.frozenT > 0 && !e.dead;
+    if (frozen) { if (ES.fz == null) { ES.fz = time; ES.fa = e.anim; } time = ES.fz; } else ES.fz = null;
     setQ(e, time);
     let alpha = e.hidden > 0 ? 0.12 : 1;
     if (e.spawnT > 0) alpha *= 1 - e.spawnT / 0.4;
@@ -936,32 +1365,84 @@
     /* ---- Ganzkörper-Bewegung: Anspannen, Zuschlagen, Rückstoß ---- */
     const lf = LEANF[shape] != null ? LEANF[shape] : 1;
     const piv = d.fly ? -hLoc * 0.5 : 0;
+    const moving = !frozen && Math.abs(e.vx) > 15 && e.onGround;
+    const tA = frozen ? ES.fa : e.anim;
+    const phase = tA * (Math.abs(e.vx) / 18 + 2);
+    /* Feder für Landungen (Gegner springen/fallen auch) */
+    const onG = e.onGround !== false || d.fly;
+    if (onG && ES.air && !d.fly && !dead) ES.sqv -= 9;
+    ES.air = !onG;
+    ES.sqv += (-ES.sq * 260 - ES.sqv * 16) * edt; ES.sq += ES.sqv * edt;
+    /* geglättete Geschwindigkeit → Beschleunigung → Gewichtsneigung */
+    const vk = 1 - Math.exp(-edt * 7);
+    const accel = frozen ? 0 : (e.vx || 0) - ES.sv; ES.sv += accel * vk;
+    /* Rückstoß-Feder: zieht zum Zielwinkel, schwingt nach dem Treffer kurz über */
+    let kTarget = 0;
+    if (Q.hurt > 0 && !frozen) { if (e.kbT > 0 && Math.abs(e.vx) > 20) ES.kd = e.vx * e.face > 0 ? -1 : 1; kTarget = -0.26 * Q.hurt * (lf || 0.5) * ES.kd; }
+    if (Math.abs(kTarget) > Math.abs(ES.kr) || kTarget * ES.kr < 0) { ES.kr = kTarget; ES.kv = 0; } /* Treffer wirkt sofort */
+    ES.kv += ((kTarget - ES.kr) * 300 - ES.kv * 15) * edt; ES.kr += ES.kv * edt;
     if (!dead) {
-      let rot = 0, sx = 1, sy = 1, ox = 0;
+      let rot = 0, sx = 1, sy = 1, ox = 0, oy = 0;
       if (Q.ph === "pre") { const p = eo(Q.pre); rot = -0.1 * p * lf; sy = 1 - 0.07 * p * (lf ? 1 : 0); sx = 1 + 0.05 * p * (lf ? 1 : 0); ox = -1 * p * lf + shake(0.6); }
       else if (Q.ph === "act") { const p = eo(Q.act); rot = lp(-0.1, 0.12, p) * lf; sx = lp(1.05, 1.03, p); sy = lp(0.93, 0.98, p); ox = lp(-1, 1.2, p) * lf; }
       else if (Q.ph === "post") { const p = 1 - Q.post; rot = 0.12 * p * lf; ox = 1.2 * p * lf; }
-      if (Q.hurt > 0) { rot -= 0.24 * Q.hurt * (lf || 0.5); ox -= 1.6 * Q.hurt; sx *= 1 + 0.06 * Q.hurt; sy *= 1 - 0.05 * Q.hurt; }
-      if (ox) c.translate(ox, 0);
+      /* Rückstoß: Federwinkel statt starrer Neigung; Körper rutscht nach hinten und wird gestaucht */
+      if (Q.hurt > 0) { ox -= 1.6 * Q.hurt * ES.kd; sx *= 1 + 0.06 * Q.hurt; sy *= 1 - 0.05 * Q.hurt; }
+      rot += ES.kr;
+      /* Gewicht im Lauf: nach vorn lehnen, beim Bremsen/Anfahren nachgeben; schwere Gestalten stauchen bei jedem Auftritt */
+      if (moving && !d.fly) {
+        const spd = cl(Math.abs(e.vx) / 90, 0, 1);
+        rot += 0.05 * spd * (lf || 0.4);
+        const heavyW = d.heavy || d.boss || (e.size || 1) > 1.25;
+        const contact = Math.pow(1 - Math.abs(Math.sin(phase)), 4);
+        if (heavyW) { sy *= 1 - 0.035 * contact; sx *= 1 + 0.025 * contact; }
+        else oy += contact * 0.35;
+      }
+      if (!frozen) rot += cl(accel * e.face / 260, -1, 1) * 0.1 * (lf || 0.3) * (d.fly ? 0.6 : 1);
+      if (d.fly && !frozen) rot += cl((e.vx || 0) * e.face / 400, -0.2, 0.2);
+      /* Landefeder */
+      if (Math.abs(ES.sq) > 0.002) { sy *= 1 + ES.sq * 0.06; sx *= 1 - ES.sq * 0.045; }
+      /* Aufmerksam werden: kurzes Zusammenzucken mit Hüpfer */
+      if (e.alertT > 0 && e.aware && !frozen) {
+        if (e.alertT > ES.pa + 0.01) ES.am = Math.max(0.2, e.alertT);
+        const u = 1 - e.alertT / ES.am;
+        if (u < 0.18) { const q = u / 0.18; sy *= 1 - 0.12 * Math.sin(q * PI) ; sx *= 1 + 0.08 * Math.sin(q * PI); }
+        else if (u < 0.6) { const q = (u - 0.18) / 0.42; oy -= Math.sin(q * PI) * (d.fly ? 1.5 : 2.6); rot -= Math.sin(q * PI) * 0.08 * (lf || 0.4); }
+      }
+      ES.pa = e.alertT || 0;
+      /* Betäubt: schwankt benommen um die Füße */
+      if (e.st && e.st.stun > 0 && !frozen) { rot += Math.sin(time * 6.5) * 0.11 * (lf ? Math.min(1, lf + 0.3) : 0.4); ox += Math.sin(time * 3.2) * 0.6; sy *= 1 - 0.03 * (0.5 + 0.5 * Math.sin(time * 13)); }
+      /* Bosse atmen sichtbar, solange sie nicht angreifen */
+      if (d.boss && !Q.ph && !moving && !frozen) { const br = Math.sin(time * 1.7); sy *= 1 + 0.022 * br; sx *= 1 - 0.011 * br; }
+      if (ox || oy) c.translate(ox, oy);
       if (rot) { c.translate(0, piv); c.rotate(rot); c.translate(0, -piv); }
       if (sx !== 1 || sy !== 1) { c.translate(0, piv); c.scale(sx, sy); c.translate(0, -piv); }
     } else {
       /* ---- Tod ---- */
       const kd = Q.dead, dt0 = Q.deadT;
       const ty = d.boss ? BOSSD[shape] || "boss" : DEATH[shape] || "fall";
-      if (ty === "fall" || ty === "boss") { const kk = eb(cl(dt0 / (d.boss ? 0.8 : 0.3), 0, 1)); c.translate(-2.5 * kk, -1.6 * kk); c.rotate(-PI / 2 * 0.92 * kk); if (d.boss && d.fly) c.translate(0, -dt0 * 30); }
-      else if (ty === "splat") { c.scale(1 + kd * 0.9, 1 - kd * 0.78); }
-      else if (ty === "burst") { const kk = eo(kd); c.translate(0, -hLoc * 0.4); c.scale(1 + kk * 0.5, 1 + kk * 0.35); c.translate(0, hLoc * 0.4); }
-      else if (ty === "fade") { c.translate(0, -8 * eo(kd)); c.scale(1 - 0.35 * kd, 1 + 0.4 * kd); c.globalAlpha *= 1 - kd * 0.6; }
-      else if (ty === "flip") { const kk = eo(kd); c.translate(0, -hLoc * 0.45); c.scale(1, lp(1, -0.85, kk)); c.translate(0, hLoc * 0.45); }
+      if (ty === "fall" || ty === "boss") {
+        /* kippt mit Schwung um, prallt einmal kurz vom Boden ab */
+        const dur = d.boss ? 0.8 : 0.3, kk = eb(cl(dt0 / dur, 0, 1));
+        const bt = (dt0 - dur) / (dur * 0.6), bounce = bt > 0 && bt < 1 ? Math.sin(bt * PI) * (1 - bt) * 1.8 : 0;
+        c.translate(-2.5 * kk, -1.6 * kk - bounce); c.rotate(-PI / 2 * 0.92 * kk + bounce * 0.05); if (d.boss && d.fly) c.translate(0, -dt0 * 30);
+      }
+      else if (ty === "splat") { const wob = Math.sin(dt0 * 38) * Math.exp(-dt0 * 9) * 0.25; c.scale(1 + kd * 0.9 + wob, 1 - kd * 0.78 - wob * 0.6); }
+      else if (ty === "burst") { const kk = eo(kd), tr = Math.sin(dt0 * 70) * (1 - kd) * 0.06; c.translate(0, -hLoc * 0.4); c.scale(1 + kk * 0.5 + tr, 1 + kk * 0.35 - tr); c.translate(0, hLoc * 0.4); }
+      else if (ty === "fade") { c.translate(Math.sin(dt0 * 14) * 1.5 * kd, -8 * eo(kd)); c.scale(1 - 0.35 * kd, 1 + 0.4 * kd); c.globalAlpha *= 1 - kd * 0.6; }
+      else if (ty === "flip") { const kk = eo(kd), hop = Math.sin(cl(dt0 / 0.3, 0, 1) * PI) * 3.5; c.translate(0, -hLoc * 0.45 - hop); c.scale(1, lp(1, -0.85, kk)); c.translate(0, hLoc * 0.45); }
       else if (ty === "side") { const kk = eo(kd); c.translate(0, -1 * kk); c.scale(1, 1 - 0.35 * kk); c.rotate(0.15 * kk); }
       else if (ty === "drop") { const tt = Math.min(dt0, 0.45); c.translate(0, piv + tt * tt * 160); c.rotate(tt * 6); c.translate(0, -piv); }
-      else if (ty === "sink") { c.translate(0, eo(cl(dt0 / 1.4, 0, 1)) * hLoc * 0.5); }
-      else if (ty === "scatter") { const kk = eo(kd); c.rotate(-0.25 * kk); c.scale(1 + 0.25 * kk, 1 - 0.6 * kk); }
-      else if (ty === "crumbleBig") { c.scale(1 + kd * 0.15, 1 - kd * 0.45); }
+      else if (ty === "sink") { c.translate(Math.sin(dt0 * 30) * (1 - cl(dt0 / 1.4, 0, 1)) * 1.2, eo(cl(dt0 / 1.4, 0, 1)) * hLoc * 0.5); }
+      else if (ty === "scatter") { const kk = eo(kd); c.rotate(-0.25 * kk + Math.sin(dt0 * 40) * 0.04 * (1 - kd)); c.scale(1 + 0.25 * kk, 1 - 0.6 * kk); }
+      else if (ty === "crumbleBig") { c.translate(Math.sin(dt0 * 50) * (1 - kd) * 0.8, 0); c.scale(1 + kd * 0.15, 1 - kd * 0.45); }
     }
-    (SHAPES[shape] || SHAPES.human)(c, e, d, k, e.anim, Math.abs(e.vx) > 15 && e.onGround, e.anim * (Math.abs(e.vx) / 18 + 2), legacyAk(), time);
+    (SHAPES[shape] || SHAPES.human)(c, e, d, k, tA, moving, phase, legacyAk(), time);
     c.restore();
+    /* Zustände: Eis, Feuer, Gift, Benommenheit */
+    if (!dead && (e.frozenT > 0 || (e.st && (e.st.burn > 0 || e.st.poison > 0 || e.st.stun > 0)))) statusFx(c, e, d, time, ES, low);
+    /* Aufmerksam geworden */
+    if (e.alertT > 0 && e.aware && !dead && !d.boss && !pre) alertBubble(c, cx + e.face * e.w * 0.3, e.y - 3, 1 - e.alertT / ES.am);
     /* Glyphe über dem Kopf */
     if (pre && !d.boss && act.t > 0.05) {
       const red = act.a.glyph === "!!" || act.a.unblockable;
@@ -983,7 +1464,7 @@
     }
     /* Statussymbole */
     const icons = [];
-    if (e.st.stun > 0) icons.push(["✦", "#ffd27a"]); if (e.st.root > 0) icons.push(["⌇", "#9ad04a"]); if (e.st.weak > 0) icons.push(["♪", "#ffc24a"]); if (e.st.mark > 0) icons.push(["◎", "#c88a4a"]); if (e.st.fear > 0) icons.push(["?", "#ffc24a"]);
+    /* Betäubung zeigen die kreisenden Sterne */ if (e.st.root > 0) icons.push(["⌇", "#9ad04a"]); if (e.st.weak > 0) icons.push(["♪", "#ffc24a"]); if (e.st.mark > 0) icons.push(["◎", "#c88a4a"]); if (e.st.fear > 0) icons.push(["?", "#ffc24a"]);
     if (icons.length && !dead) { c.font = "700 7px sans-serif"; c.textAlign = "center"; icons.forEach((ic, i) => { c.fillStyle = ic[1]; c.fillText(ic[0], cx - (icons.length - 1) * 4 + i * 8 + (ic[0] === "✦" ? Math.sin(time * 8) * 2 : 0), e.y - 12); }); }
   };
   /* alter Schwungwert (−1 Ausholen … +1 Schlag), stetig statt sprunghaft */

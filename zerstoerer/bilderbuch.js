@@ -58,7 +58,8 @@
   function P(c, R, pal, H, s) {
     const o = { c, R, pal, H, s,
       lights: [], flags: [], drapes: [], smoke: [], spin: [], swings: [], bobs: [], movers: [], gears: [], beams: [], falls: [], glows: [], flames: [],
-      flocks: [], walkers: [], mists: [], glints: [], sparks: [], motes: [], drips: [], bolts: [], spiders: [], eyes: [], wanders: [], shafts: [], ripples: [], lava: [], chands: [] };
+      flocks: [], walkers: [], mists: [], glints: [], sparks: [], motes: [], drips: [], bolts: [], spiders: [], eyes: [], wanders: [], shafts: [], ripples: [], lava: [], chands: [],
+      trains: [], lanterns: [], water: [] };
     o.hz = (col, d) => mix(col, pal.fog, d);
     return o;
   }
@@ -133,7 +134,8 @@
     c.fillStyle = rgba(shade(col, 0.22), 0.25); c.fill(hi); c.fillStyle = rgba(shade(col, -0.35), 0.3); c.fill(lo); c.fillStyle = rgba(shade(col, -0.55), 0.55); c.fill(mo);
     c.restore();
   }
-  function rimLight(o, x, y, h, a) { o.c.fillStyle = rgba(o.pal.light, a || 0.25); o.c.fillRect(x, y, 0.6, h); }
+  /* Kantenlicht (Mond/Sonne): Stärke je Tageszeit (pal.rimK) */
+  function rimLight(o, x, y, h, a) { const k = o.pal.rimK || 1; o.c.fillStyle = rgba(o.pal.light, (a || 0.25) * k); o.c.fillRect(x, y, k > 1.2 ? 0.9 : 0.6, h); }
 
   /* ---------- Fenster ---------- */
   const WARM = "#ffcf7a";
@@ -941,6 +943,13 @@
     o.movers.push({ x: x + 25 * s, top: base - 46 * s, y0: base - 30 * s, y1: base - 8 * s, ph: R() * 9, fr: 0.25, kind: "hook", s });
   }
 
+  /* Laternenzug entlang eines Pfades (Polylinie); sichtbar je nach Tageszeit */
+  function train(o, pts, op) {
+    const cum = [0]; for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+    o.trains.push(Object.assign({ pts, cum, len: cum[cum.length - 1], n: 6, gap: 7, v: 4, s: 0.6, ph: o.R() * 400 }, op || {}));
+  }
+  const pathOf = (x0, x1, step, yf) => { const p = []; for (let x = x0; step > 0 ? x <= x1 : x >= x1; x += step) p.push([x, yf(x)]); return p; };
+
   /* ======================= SEITEN JE GEBIET ======================= */
   const PAGES = {
     /* ---------- Torhof: Burgpanorama mit Dorf ---------- */
@@ -969,6 +978,11 @@
       for (let x = 1040; x < 1430; x += 13 + R() * 9) house(o, x, vy(x) + 6, 9 + R() * 8, 8 + R() * 6, { far: 0.3 });
       church(o, 1236, vy(1236) + 4, 0.8, 0.28);
       for (let x = 20; x < 140; x += 14 + R() * 9) house(o, x, vy(x) + 6, 9 + R() * 7, 8 + R() * 5, { far: 0.32 });
+      /* Laternenzüge: vom Dorf hinauf zum Burgtor, ein zweiter fern über die Hügel; Himmelslaternen über dem Dorf */
+      train(o, pathOf(1200, 724, -12, x => vy(x) + 5.5), { n: 7, gap: 7.5, v: 4.5, s: 0.62 });
+      train(o, pathOf(240, 640, 16, x => hy(x) + 3), { n: 5, gap: 5, v: 3, s: 0.38, far: 1 });
+      o.lanterns.push({ x: 1236, y: vy(1236) - 6, rise: 240, spread: 70, n: 7 }, { x: 70, y: vy(70) - 4, rise: 200, spread: 40, n: 4 });
+      o.water.push({ y0: 299, y1: 309 });
       /* Hauptburg auf ihrem Felsen */
       const cy0 = sinF(262, [[8, 9, 1]]);
       crag(o, jag(R, 360, 1020, x => cy0(x) + Math.pow(Math.abs(x - 690) / 330, 3) * 36, 9, 5), H, o.hz(pal.rock, 0.06), { moss: pal.ivy[1] });
@@ -1001,6 +1015,9 @@
       farCastle(o, 770, hfs[0](770) - 2, 0.36, 0.5);
       bridgeArches(o, 735, 800, 266, 2, 276, o.hz(pal.stone, 0.42), 3, { under: o.hz("#120a0e", 0.4) });
       for (const x of [330, 1180]) windmill(o, x, hfs[1](x) + 4, 0.7, 0.45);
+      train(o, pathOf(360, 640, 14, x => hfs[1](x) + 3), { n: 6, gap: 5, v: 3, s: 0.42, far: 1 });
+      train(o, pathOf(1160, 920, -14, x => hfs[1](x) + 3), { n: 5, gap: 5, v: 2.6, s: 0.42, far: 1 });
+      o.lanterns.push({ x: 770, y: hfs[0](770) - 4, rise: 190, spread: 80, n: 6 });
       for (let k = 0; k < 12; k++) { const fx = R() * PW, b = R() < 0.5 ? 1 : 2; for (let i = 0; i < 12; i++) { const x = fx + (R() - 0.5) * 60; wrapX(o, x - 4, 8, xx => tree(o, xx, hfs[b](xx) + 4 + R() * 6, 6 + R() * 6, { cols: pal.leaf.map(cc => o.hz(cc, 0.45 - b * 0.1)), trunk: o.hz("#2a1c14", 0.4) })); } }
       /* zwei Mauerzüge im Zickzack vom Vordergrund ins Tal */
       const chains = [
@@ -1135,6 +1152,9 @@
       for (let t = 0; t < 6; t++) { const f = 0.42 - t * 0.06; for (let x = 900 + R() * 10; x < PW - 10; x += 13 + R() * 8) { const b = hill(x) + 8 + t * 16; if (b > 306) continue; house(o, x, b, 9 + R() * 7, 10 + R() * 8, { far: f, smoke: 0.4 }); } }
       tower(o, 1410, hill(1410) + 4, 22, 120, o.hz(pal.stone, 0.42), { head: "cren", far: 0.42 }); tower(o, 1450, hill(1450) + 4, 14, 140, o.hz(pal.stone, 0.42), { head: "spire", far: 0.42 }); tower(o, 1350, hill(1350) + 4, 16, 90, o.hz(pal.stone, 0.42), { head: "cone", far: 0.42 });
       church(o, 1170, hill(1170) + 8, 0.7, 0.34);
+      train(o, pathOf(905, 1470, 12, x => hill(x) + 9), { n: 7, gap: 6, v: 3.6, s: 0.5, far: 1 });
+      o.lanterns.push({ x: 700, y: 296, rise: 230, spread: 90, n: 8 }, { x: 1200, y: hill(1200), rise: 160, spread: 50, n: 4 });
+      o.water.push({ y0: sea + 2, y1: 298 });
       /* Hafenmole mit Bögen, Lagerhäuser mit Ladeluken, Kräne */
       bridgeArches(o, 380, 1536, 300, 3, 318, o.hz(pal.stone, 0.15), 22, { under: "#0e0a0e" });
       for (let x = 400; x < 1500; x += 70 + R() * 30) {
@@ -1636,6 +1656,18 @@
     if (kind === "lake") pal.water = mix("#183a2a", sky[2], 0.35);
     if (kind === "harbour") pal.water = nb(mix(sky[1], "#2a2030", 0.4));
     if (!out) pal.lit = 0.4;
+    /* Tageszeit (tageszeit.js): Kantenlicht, Fensteranteil, Dunst */
+    const zt = Z.zeit && Z.zeit(); pal.zt = zt;
+    if (zt) {
+      if (out) {
+        pal.light = nb(mix(pal.light, zt.light, 0.75));
+        pal.lit = kind === "storm" ? zt.lit * 0.6 : zt.lit;
+        pal.rimK = zt.k === "nacht" ? 0.7 + 1.1 * zt.moonBright : zt.k === "blut" ? 1.6 : 1.35;
+        if (zt.k === "morgen") pal.fog = nb(mix(pal.fog, "#f0c4bc", 0.3));
+        else if (zt.k === "abend") pal.fog = nb(mix(pal.fog, "#7a3a52", 0.42));
+        else if (zt.k === "blut") pal.fog = nb(mix(pal.fog, "#4a1018", 0.3));
+      } else pal.light = nb(mix(pal.light, zt.win, 0.25));
+    }
     return pal;
   }
   function kindOf(B, lv) {
@@ -1676,6 +1708,9 @@
     const pal = palette(B, kind);
     const o = P(c, R, pal, H, s);
     try { fn(o, H); } catch (err) { console.error("bilderbuch", kind, err); }
+    const tF = performance.now();
+    o.zt = pal.zt;
+    try { zeitPage(o, c, H); } catch (err) { console.error("bilderbuch zeit", err); }
     /* Luftperspektive: zum Himmel hin leicht verblassen, unten satter */
     const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, rgba(pal.sky1, 0.16)); g.addColorStop(0.6, rgba(pal.fog, 0.06)); g.addColorStop(1, rgba("#000", 0.12));
     c.globalCompositeOperation = "source-atop"; c.fillStyle = g; c.fillRect(0, 0, PW, H); c.globalCompositeOperation = "source-over";
@@ -1686,7 +1721,62 @@
     /* Mittel (Stufe 1): ruhige Lichter und Strahlen einmal einbacken statt jedes Bild additiv zu malen
        (nur bei deckenden Innenseiten – dort sieht „lighter“ eingebacken genauso aus) */
     if (q <= 1 && opaque) bakeStatic(o, c);
-    page = { cv, s, sx, sy, H, o, kind, lvRef: lv, q, opaque, ms: +(performance.now() - t0).toFixed(1) };
+    /* Umriss des Landes (für Wolkenschatten), dann Tiefenunschärfe (Stufe 2/3) */
+    if (!opaque && o.zt && o.zt.out) try { o.landPath = landPath(cv, H); } catch (err) { o.landPath = null; }
+    let out = cv; const tD = performance.now();
+    if (q >= 2 && Z.zeitBlur) try { out = dofPage(cv, opaque); } catch (err) { console.error("bilderbuch dof", err); out = cv; }
+    const tE = performance.now();
+    page = { cv: out, s, sx, sy, H, o, kind, lvRef: lv, q, opaque, ms: +(tE - t0).toFixed(1), prof: { paint: +(tF - t0).toFixed(1), rest: +(tD - tF).toFixed(1), dof: +(tE - tD).toFixed(1) } };
+  }
+  /* ======================= TAGESZEIT AUF DER SEITE ======================= */
+  const GRADE = {
+    abend: [[0, "#ffb070", 0.08], [0.4, "#c05a50", 0.06], [0.7, "#5a2040", 0.16], [1, "#2a0c20", 0.34]],
+    nacht: [[0, "#c8b8d8", 0.05], [0.35, "#1a1028", 0.22], [1, "#08040c", 0.42]],
+    morgen: [[0, "#ffe4dc", 0.22], [0.5, "#f8bcb4", 0.1], [0.76, "#6a3050", 0.08], [1, "#2a1028", 0.24]],
+    blut: [[0, "#ff4a30", 0.12], [0.4, "#3a0608", 0.26], [1, "#120204", 0.46]]
+  };
+  function zeitPage(o, c, H) {
+    const zt = o.zt; if (!zt) return;
+    if (!zt.out) {
+      /* innen nur dezent: das Licht durch die Fenster nimmt die Farbe der Stunde an */
+      const k = { abend: 1.3, nacht: 0.85, morgen: 1.05, blut: 1.15 }[zt.k] || 1;
+      for (const s of o.shafts) { s.col = nb(mix(s.col, zt.win, 0.6)); s.a *= k; }
+      for (const l of o.lights) if (l.soft) l.col = nb(mix(l.col, zt.win, 0.45));
+      return;
+    }
+    const st = GRADE[zt.k]; if (!st) return;
+    const g = c.createLinearGradient(0, 0, 0, H); for (const [u, col, a] of st) g.addColorStop(u, rgba(col, a * (zt.storm ? 0.7 : 1)));
+    c.save(); c.globalCompositeOperation = "source-atop"; c.fillStyle = g; c.fillRect(0, 0, PW, H); c.restore();
+    /* erleuchtete Fenster wieder voll leuchten lassen (die Tönung hat sie mitgedunkelt) */
+    for (const l of o.lights) if (l.wx != null && l.ww > 1.2) { c.fillStyle = l.col; winPath(c, l.wx + l.ww * 0.2, l.wy + l.ww * 0.2, l.ww * 0.6, l.wh - l.ww * 0.32, l.k); c.fill(); }
+    /* Morgengrauen: rosiger Nebel in den Tälern, Blutmond: roter Dunst */
+    if (zt.mist > 0.25) {
+      const col = zt.k === "morgen" ? "#ffe0d8" : zt.k === "blut" ? "#8a2020" : "#e0b0a0";
+      for (const m of o.mists.slice()) { mist(o, m.y - 6, m.h * 1.4, col, 0.22 * zt.mist); o.mists.push({ y: m.y - 10, h: m.h * 1.3, a: Math.min(0.65, m.a * zt.mist * 1.2), sp: m.sp * 1.5 + 1, col }); }
+    }
+    /* Mondnacht: kühles Glänzen auf dem Wasser verstärkt, Abend: Gold */
+    if (zt.k === "abend" || zt.k === "morgen") for (const g2 of o.glints) if (!g2.dot) g2.col = zt.k === "abend" ? "#ffc070" : "#ffd0c0";
+    if (zt.k === "blut") for (const g2 of o.glints) if (!g2.dot) g2.col = "#ff7050";
+  }
+  /* Landumriss (oberste deckende Zeile je Spalte) als Pfad */
+  function landPath(cv, H) {
+    const w = 192, h = Math.ceil(H / 4), t = document.createElement("canvas"); t.width = w; t.height = h;
+    const g = t.getContext("2d", { willReadFrequently: true }); g.drawImage(cv, 0, 0, w, h); const d = g.getImageData(0, 0, w, h).data;
+    const p = new Path2D(); p.moveTo(-2, H + 2);
+    for (let x = 0; x < w; x++) { let y = 0; while (y < h && d[(y * w + x) * 4 + 3] < 200) y++; p.lineTo((x + 0.5) * PW / w, Math.min(H, y * H / h + 2)); }
+    p.lineTo(PW + 2, H + 2); p.closePath(); return p;
+  }
+  /* Tiefenunschärfe: hintere Staffeln weicher als vordere, einmal beim Bau */
+  function dofPage(cv, opaque) {
+    const s = cv.width / PW, back = Z.zeitBlur(cv, 1.05 * s, true), front = Z.zeitBlur(cv, 0.38 * s, true);
+    const t = document.createElement("canvas"); t.width = cv.width; t.height = cv.height; const g = t.getContext("2d");
+    g.drawImage(back, 0, 0); g.globalCompositeOperation = "destination-in";
+    const gr = g.createLinearGradient(0, 0, 0, cv.height); gr.addColorStop(0, "#000"); gr.addColorStop(0.56, "#000"); gr.addColorStop(0.84, "rgba(0,0,0,0)"); g.fillStyle = gr; g.fillRect(0, 0, t.width, t.height);
+    const f = front.getContext("2d"); f.drawImage(t, 0, 0);
+    /* Ränder oben/unten: scharfes Original darunter, damit nichts durchscheint */
+    const e = Math.ceil(5 * s); f.save(); f.globalCompositeOperation = "destination-over"; f.beginPath(); f.rect(0, 0, cv.width, e); f.rect(0, cv.height - e, cv.width, e); f.clip(); f.drawImage(cv, 0, 0); f.restore();
+    if (opaque) { f.save(); f.globalCompositeOperation = "destination-over"; f.drawImage(cv, 0, 0); f.restore(); }
+    return front;
   }
   /* deckt die Seite vollständig? (verkleinert prüfen – billig) */
   function isOpaque(cv) {
@@ -1999,8 +2089,79 @@
       }
       glow(c, b.x, b.y1, 60, "#c8ff90", 0.7 * I); c.globalAlpha = 1; c.globalCompositeOperation = "source-over";
     }
+    /* ---- Tageszeit: Laternenzüge, Himmelslaternen, Wolkenschatten, Mondpfad ---- */
+    if (o.zt && o.zt.out) zeitLive(c, o, t, cam, ox, vis, X0, X1, rich);
     c.restore();
   }
+  function zeitLive(c, o, t, cam, ox, vis, X0, X1, rich) {
+    const zt = o.zt, k = zt.k, night = k !== "morgen";
+    /* Laternen- und Fackelzüge (Blutmond: verhüllte Gestalten mit roten Fackeln) */
+    if (night) for (const T of o.trains) {
+      if (T.far && !rich) continue;
+      const span = T.len + T.n * T.gap, D = ((t * T.v + T.ph) % span + span) % span;
+      for (let i = 0; i < T.n; i++) {
+        const d = D - i * T.gap; if (d < 0 || d > T.len) continue;
+        let j = 1; while (j < T.cum.length - 1 && T.cum[j] < d) j++;
+        const a0 = T.pts[j - 1], a1 = T.pts[j], u = (d - T.cum[j - 1]) / Math.max(0.001, T.cum[j] - T.cum[j - 1]);
+        const x = a0[0] + (a1[0] - a0[0]) * u, y = a0[1] + (a1[1] - a0[1]) * u; if (!vis(x, y - 4, 16)) continue;
+        const dir = a1[0] >= a0[0] ? 1 : -1, s = T.s, e = Math.min(1, d / 12, (T.len - d) / 12);
+        const w = { kind: k === "blut" ? "monk" : i % 3 === 1 ? "guard" : "lamp", s, ph: i * 1.7 + T.ph };
+        c.globalAlpha = e; figure(c, w, x, y, dir, t, rich);
+        const tx = x + dir * 1.6 * s, ty = y - (k === "blut" ? 7 : 3.4) * s, lc = k === "blut" ? "#ff4a2a" : WARM;
+        if (k === "blut") flame(c, tx, ty, 0.5 * s, t, i * 2.3, false); else { c.fillStyle = lc; c.fillRect(tx - 0.6 * s, ty - 0.6 * s, 1.2 * s, 1.4 * s); }
+        c.globalCompositeOperation = "lighter"; glow(c, tx, ty, (T.far ? 7 : 10) * Math.max(0.6, s), lc, (0.55 + 0.1 * Math.sin(t * 9 + i)) * e); c.globalAlpha = 1; c.globalCompositeOperation = "source-over";
+      }
+    }
+    c.globalAlpha = 1;
+    /* Himmelslaternen steigen langsam aus dem Dorf auf */
+    if (rich && (k === "abend" || k === "nacht") && !zt.storm) {
+      const wind = (Z.windX || 6) * 0.02;
+      for (let li = 0; li < o.lanterns.length; li++) {
+        const L = o.lanterns[li];
+        for (let j = 0; j < L.n; j++) {
+          const hj = hsh(li * 31 + j), P = 46 + hj * 30, u = frac(t / P + hj * 7.3);
+          const x = L.x + (hsh(j * 3 + li) - 0.5) * L.spread + u * (40 + 60 * wind) + Math.sin(t * 0.4 + j * 2) * 3, y = L.y - u * L.rise - hsh(j * 5) * 10;
+          if (!vis(x, y, 10)) continue;
+          const a = Math.min(1, u * 8) * (1 - smooth(0.7, 1, u)), s = 1.1 - u * 0.5, fl = 0.85 + 0.15 * Math.sin(t * 7 + j * 3);
+          c.globalCompositeOperation = "lighter"; glow(c, x, y, 7 * s, "#ffb050", 0.55 * a * fl); c.globalCompositeOperation = "source-over";
+          c.globalAlpha = a; c.fillStyle = "#ffd890"; c.beginPath(); c.moveTo(x - 1.1 * s, y - 1.6 * s); c.lineTo(x + 1.1 * s, y - 1.6 * s); c.lineTo(x + 0.8 * s, y + 1.2 * s); c.lineTo(x - 0.8 * s, y + 1.2 * s); c.closePath(); c.fill();
+          c.fillStyle = "#c86a2a"; c.fillRect(x - 1.1 * s, y - 1.8 * s, 2.2 * s, 0.4 * s); c.fillStyle = "#fff4c0"; c.fillRect(x - 0.35 * s, y + 0.4 * s, 0.7 * s, 0.6 * s);
+        }
+      }
+      c.globalAlpha = 1;
+    }
+    /* Wolkenschatten und Lichtflecken wandern über das Land */
+    if (rich && o.landPath && !zt.storm) {
+      const lightOk = k !== "nacht" || zt.moonBright > 0.45;
+      c.save(); c.clip(o.landPath);
+      for (let i = 0; i < 5; i++) {
+        const rx = 140 + hsh(i * 7) * 160, ry = 26 + hsh(i * 11) * 26, vx = 5 + hsh(i * 13) * 5, span = PW + rx * 2;
+        const x = ((hsh(i) * span + t * vx) % span) - rx, y = 210 + hsh(i * 17) * 130;
+        for (const dx of [0, -PW, PW]) {
+          const xx = x + dx; if (xx + rx < X0 || xx - rx > X1) continue;
+          if (i % 2 === 0 || !lightOk) { c.globalAlpha = k === "nacht" ? 0.18 + 0.12 * zt.moonBright : 0.2; c.drawImage(glowSpr("#0a0610", true), xx - rx, y - ry, rx * 2, ry * 2); }
+          else { c.globalCompositeOperation = "lighter"; c.globalAlpha = k === "nacht" ? 0.07 : 0.11; c.drawImage(glowSpr(zt.light, true), xx - rx, y - ry, rx * 2, ry * 2); c.globalCompositeOperation = "source-over"; }
+        }
+      }
+      c.restore(); c.globalAlpha = 1;
+    }
+    /* Mondpfad: flirrendes Licht auf dem Wasser genau unter dem Mond */
+    if (rich && o.water.length && (k === "nacht" || k === "blut") && Z.zeitMoons) {
+      const col = k === "blut" ? "#ff6a40" : "#f4e8e4", br = k === "blut" ? 0.9 : zt.moonBright;
+      if (br > 0.15) {
+        c.globalCompositeOperation = "lighter"; c.fillStyle = col;
+        for (const m of Z.zeitMoons(cam)) {
+          const mx = m.x - ox; if (mx < X0 - 60 || mx > X1 + 60) continue;
+          for (const W of o.water) for (let y = W.y0, r = 0; y < W.y1; y += 1.6, r++) {
+            const sp = 2 + (y - W.y0) * 0.45, n = 2 + (r & 1);
+            for (let q = 0; q < n; q++) { const h = hsh(r * 7 + q * 131), f = Math.sin(t * (1.5 + h * 2) + h * 40); if (f < 0.1) continue; c.globalAlpha = f * 0.55 * br * (1 - (y - W.y0) / (W.y1 - W.y0) * 0.5); c.fillRect(mx + (h - 0.5) * sp * 2 + Math.sin(t * 0.8 + r) * 1.5, y, 2 + h * 4, 0.6); }
+          }
+        }
+        c.globalAlpha = 1; c.globalCompositeOperation = "source-over";
+      }
+    }
+  }
+  const smooth = (a, b, v) => { const u = Math.max(0, Math.min(1, (v - a) / (b - a))); return u * u * (3 - 2 * u); };
   function chainLive(c, x, y0, y1) { c.strokeStyle = "#3a3430"; c.lineWidth = 0.6; c.setLineDash([1.2, 0.8]); c.beginPath(); c.moveTo(x, y0); c.lineTo(x, y1); c.stroke(); c.setLineDash([]); }
 
   /* ======================= EINHÄNGEN: zwischen ferner Ebene und Mittelgrund ======================= */
@@ -2035,4 +2196,6 @@
     }
   }
   Z.bilderbuchKinds = Object.keys(PAGES);
+  /* Farbhelfer für andere Module */
+  Z.bbKit = { PW, mix, shade, rgba, nb, glowSpr, hsh };
 })();

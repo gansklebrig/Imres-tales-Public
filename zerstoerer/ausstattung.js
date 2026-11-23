@@ -6,7 +6,10 @@
    tropfendes Wasser. Statische Teile werden einmal in Sprites gemalt (Schattierung, Maserung, Glanz, Gebrauchsspuren),
    nur Flammen, Pendel, Ketten und Tiere werden jedes Bild neu gezeichnet.
    Flammen und Glut werden nach dem Licht gemalt (gecachte Glow-Sprites) und schneiden sparsam Löcher ins Dunkel.
-   Vordergrund: gemalte Silhouetten mit Randlicht und weicher Tiefenunschärfe (Parallaxe 1.5), zur Bildmitte durchscheinend. */
+   Vordergrund: gemalte Silhouetten mit Randlicht und weicher Tiefenunschärfe (Parallaxe 1.5), zur Bildmitte durchscheinend.
+   Zerbrechlich: Treffer, Geschosse, Explosionen und Gegnerschläge lassen die Stücke wackeln, reißen, auslaufen und zerbrechen
+   (Teile aus dem Sprite geschnitten, mit Physik, bleiben abgedunkelt liegen); Wandschmuck fällt, Hängendes reißt ab,
+   Kerzen verlöschen, Tiere fliehen. Schnittstellen: Z.ausstattungFlammen, Z.ausstattungKetten, Z.ausstattungImpuls, Z.ausstattungTreffer. */
 (function () {
   "use strict";
   const Z = window.Z, T = Z.TILE, CW = Z.CW, CH = Z.CH;
@@ -197,16 +200,29 @@
   }
   const FQ = [], GQ = [], HQ = []; let FQn = 0, GQn = 0, HQn = 0;
   let cx0 = 0, cy0 = 0, cf0 = 1, cvis = 1;
+  /* Zustand beim Malen eines Stücks: Requisit, Flammenzähler, Drehung (Wackeln/Schwingen) um den Drehpunkt, Schnappschuss-Modus */
+  let curP = null, curFi = 0, curRot = 0, curPy = 0, capture = false, WX = 0, WY = 0, TT = 0;
+  function wpos(lx, ly) { const xf = lx * cf0; if (!curRot) { WX = cx0 + xf; WY = cy0 + ly; return; } const co = Math.cos(curRot), si = Math.sin(curRot), dy = ly - curPy; WX = cx0 + xf * co - dy * si; WY = cy0 + curPy + xf * si + dy * co; }
+  /* dauerhafter Zustand je Flamme eines Requisits (Neigung l, Neigungsgeschwindigkeit v) – auch für weltspuren.js */
+  function flameState(p, i, s, k) { const a = p.fst || (p.fst = []); let st = a[i]; if (!st) st = a[i] = { p, i, s, k: k || "w", l: 0, v: 0, x: 0, y: 0, seen: -9, col: FCOL[k || "w"] || FCOL.w }; return st; }
+  const FCOL = { w: "255,176,90", e: "255,120,50", g: "130,255,90", p: "205,120,255" };
   /* Flamme an lokaler Position (wird nach dem Licht gemalt) */
-  function fl(lx, ly, s, ph, k) { if (FQn >= 90 || cvis < 0.05) return; const q = FQ[FQn] || (FQ[FQn] = {}); FQn++; q.x = cx0 + lx * cf0; q.y = cy0 + ly; q.s = s; q.ph = ph || 0; q.k = k || "w"; q.v = cvis; }
+  function fl(lx, ly, s, ph, k) {
+    if (capture) return; let st = null;
+    if (curP) { const i = curFi++; if (curP.out || curP.broken) return; st = flameState(curP, i, s, k); }
+    if (FQn >= 90 || cvis < 0.05) { if (st) { wpos(lx, ly); st.x = WX; st.y = WY; st.seen = TT; } return; }
+    const q = FQ[FQn] || (FQ[FQn] = {}); FQn++; wpos(lx, ly); q.x = WX; q.y = WY; q.s = s; q.ph = ph || 0; q.k = k || "w"; q.v = cvis; q.l = st ? st.l : 0;
+    if (st) { st.x = WX; st.y = WY; st.s = s; st.seen = TT; }
+  }
   /* reiner Schein (Glut, Pilzlicht, Runen) */
-  function glow(lx, ly, r, a, k) { if (GQn >= 60 || cvis < 0.05) return; const q = GQ[GQn] || (GQ[GQn] = {}); GQn++; q.x = cx0 + lx * cf0; q.y = cy0 + ly; q.r = r; q.a = a * cvis; q.k = k || "w"; }
+  function glow(lx, ly, r, a, k) { if (capture || GQn >= 60 || cvis < 0.05 || (curP && curP.broken)) return; const q = GQ[GQn] || (GQ[GQn] = {}); GQn++; wpos(lx, ly); q.x = WX; q.y = WY; q.r = r; q.a = a * cvis; q.k = k || "w"; }
   /* Loch im Dunkel (sparsam) */
-  function hole(lx, ly, r, a) { if (HQn >= 24 || cvis < 0.05) return; const q = HQ[HQn] || (HQ[HQn] = {}); HQn++; q.x = cx0 + lx * cf0; q.y = cy0 + ly; q.r = r; q.a = a; }
+  function hole(lx, ly, r, a) { if (capture || HQn >= 24 || cvis < 0.05 || (curP && (curP.out || curP.broken))) return; const q = HQ[HQn] || (HQ[HQn] = {}); HQn++; wpos(lx, ly); q.x = WX; q.y = WY; q.r = r; q.a = a; }
   const FLC = { w: ["rgba(255,150,60,.85)", "rgba(255,214,120,.95)", "rgba(255,252,230,1)"], g: ["rgba(60,200,60,.85)", "rgba(150,255,110,.95)", "rgba(235,255,220,1)"], e: ["rgba(255,90,30,.85)", "rgba(255,160,60,.95)", "rgba(255,230,160,1)"], p: ["rgba(170,80,255,.8)", "rgba(220,150,255,.9)", "rgba(250,230,255,1)"] };
-  function drawFlame(c, x, y, s, t, ph, k) {
-    const f = 0.84 + 0.16 * Math.sin(t * 13 + ph) * Math.sin(t * 7.3 + ph * 2), sw = (Z.windX || 0) * 0.012 + Math.sin(t * 3.1 + ph) * 0.22 + Math.sin(t * 17 + ph) * 0.06, cl = FLC[k] || FLC.w;
-    const h = 3.2 * s * f;
+  function drawFlame(c, x, y, s, t, ph, k, l) {
+    l = l || 0;
+    const f = 0.84 + 0.16 * Math.sin(t * 13 + ph) * Math.sin(t * 7.3 + ph * 2), sw = (Z.windX || 0) * 0.012 + Math.sin(t * 3.1 + ph) * 0.22 + Math.sin(t * 17 + ph) * 0.06 + l * 0.9, cl = FLC[k] || FLC.w;
+    const h = 3.2 * s * f * (1 - Math.min(0.4, Math.abs(l) * 0.3));
     c.fillStyle = cl[0]; c.beginPath(); c.moveTo(x - 0.95 * s, y); c.bezierCurveTo(x - 1.1 * s, y - h * 0.45, x + sw * s * 0.4, y - h * 0.7, x + sw * s * 2, y - h); c.bezierCurveTo(x + sw * s * 0.4 + 0.5 * s, y - h * 0.6, x + 1.1 * s, y - h * 0.4, x + 0.95 * s, y); c.quadraticCurveTo(x, y + 0.7 * s, x - 0.95 * s, y); c.fill();
     E(c, x + sw * s * 0.5, y - h * 0.32, 0.55 * s, h * 0.3, cl[1]); E(c, x + sw * s * 0.2, y - h * 0.18, 0.3 * s, h * 0.16, cl[2]);
   }
@@ -217,7 +233,7 @@
     for (let i = 0; i < FQn; i++) {
       const q = FQ[i], f = 0.8 + 0.2 * Math.sin(t * 9 + q.ph) * Math.sin(t * 5.3 + q.ph * 2), r = 15 * q.s;
       c.globalAlpha = 0.3 * f * q.v; c.drawImage(glowSpr(q.k), q.x - r, q.y - 1.6 * q.s - r, r * 2, r * 2);
-      c.globalAlpha = 0.9 * q.v; drawFlame(c, q.x, q.y, q.s, t, q.ph, q.k);
+      c.globalAlpha = 0.9 * q.v; drawFlame(c, q.x, q.y, q.s, t, q.ph, q.k, q.l);
     }
     c.restore(); c.globalAlpha = 1;
   }
@@ -552,6 +568,8 @@
       c.restore();
     } },
     katze: { at: "f", crit: true, noflip: true, w: 1, a(c, p, t) {
+      if (p.gone && t < p.gone) return;
+      if (p.panic) { const u = t - p.panic; if (u > 2.4 || u < 0) { p.gone = t + 18 + Math.random() * 15; p.panic = 0; p.kx = 0; return; } katzeFlucht(c, p, t, u); return; }
       const cols = [["#c07a3a", "#8a4a1a", "#e8b070"], ["#2a2426", "#141012", "#4a4244"], ["#8a8280", "#5a5250", "#c8c0b8"]][p.v];
       const wach = nahe(cx0, cy0 - 6, 56); p.aw = (p.aw || 0) + ((wach ? 1 : 0) - (p.aw || 0)) * 0.06; const aw = p.aw;
       const br = 1 + Math.sin(t * 1.8 + p.s * 9) * 0.04 * (1 - aw);
@@ -574,11 +592,17 @@
     } },
     huhn: { at: "f", crit: true, noflip: true, w: 1, a(c, p, t) {
       const cols = [["#e8e0d0", "#c8c0b0"], ["#a8642a", "#7a4418"], ["#2a2426", "#4a4244"]][p.v];
-      const scared = nahe(cx0, cy0 - 6, 40); if (scared && !p.sc) p.sc = t; if (!scared && p.sc && t - p.sc > 2) p.sc = 0;
+      const dt = Math.min(0.05, Math.max(0, t - (p.lt || t))); p.lt = t;
+      const pan = p.panic && t - p.panic < 2.2;
+      const scared = nahe(cx0, cy0 - 6, 40) || pan; if (scared && !p.sc) p.sc = t; if (!scared && p.sc && t - p.sc > 2) p.sc = 0;
+      /* Panik: gackernd und flatternd davon, ein paar Federn fliegen */
+      if (pan && p.pf !== p.panic) { p.pf = p.panic; if (rich()) for (let i = 0; i < 3; i++) tok("feder", cx0 + (p.cx || 0), cy0 - 5, p.pdir, 0.4); }
       const ph = (t * 0.6 + p.s * 7) % 3, peck = !p.sc && ph < 0.7 ? Math.max(0, Math.sin(ph / 0.7 * PI * 3)) : 0;
       const jump = p.sc ? Math.abs(Math.sin((t - p.sc) * 9)) * 3 * Math.max(0, 1 - (t - p.sc) / 1.5) : 0;
-      if (p.cx == null) p.cx = 0; p.cx += Math.sin(t * 0.21 + p.s * 30) * 0.05; p.cx = Math.max(p.ra * 0.5, Math.min(p.rb * 0.5, p.cx));
-      const dir = Math.cos(t * 0.21 + p.s * 30) > 0 ? 1 : -1;
+      if (p.cx == null) p.cx = 0;
+      if (pan) { p.cx += p.pdir * 80 * dt; p.cx = Math.max(p.ra, Math.min(p.rb, p.cx)); }
+      else { p.cx += Math.sin(t * 0.21 + p.s * 30) * 0.05; if (p.cx < p.ra * 0.5) p.cx += 6 * dt; else if (p.cx > p.rb * 0.5) p.cx -= 6 * dt; }
+      const dir = pan ? p.pdir : Math.cos(t * 0.21 + p.s * 30) > 0 ? 1 : -1;
       c.save(); c.translate(p.cx, -jump); c.scale(dir, 1);
       E(c, 0, 0.2 + jump, 3.4, 0.6, "rgba(0,0,0,.35)");
       Ln(c, "#d8a040", 0.4, [-0.6, -2, -0.8, 0]); Ln(c, "#d8a040", 0.4, [0.8, -2, 1, 0]);
@@ -595,6 +619,36 @@
     taube: { at: "f", crit: true, noflip: true, w: 1, a(c, p, t) { vogel(c, p, t, ["#8a8486", "#5a5456", "#c8a080", "#6a7060"]); } }
   });
   const rich = () => !Z.gq || Z.gq.level !== 0;
+  /* Katze erschrickt: Buckel und Fauchen zur Gefahr hin, dann gestreckt davon */
+  function katzeFlucht(c, p, t, u) {
+    const cols = [["#c07a3a", "#8a4a1a", "#e8b070"], ["#2a2426", "#141012", "#4a4244"], ["#8a8280", "#5a5250", "#c8c0b8"]][p.v];
+    const dt = Math.min(0.05, Math.max(0, t - (p.lt || t))); p.lt = t;
+    if (u >= 0.45) p.kx = (p.kx || 0) + p.pdir * 150 * dt;
+    c.save(); c.translate(p.kx || 0, 0);
+    if (u < 0.45) {
+      c.scale(-p.pdir, 1); const q = Math.min(1, u * 8);
+      E(c, 0, 0.2, 7, 1.1, "rgba(0,0,0,.4)");
+      for (const lx of [-4, -2.6, 3, 4.4]) Ln(c, cols[0], 1.1, [lx, -4.5 * q - 1, lx + (lx > 0 ? 0.4 : -0.4), 0]);
+      c.fillStyle = cols[0]; c.beginPath(); c.moveTo(-5.4, -3.6); c.bezierCurveTo(-5, -9 - 3 * q, 4, -9 - 3 * q, 5.2, -4); c.lineTo(4, -2.4); c.bezierCurveTo(2, -5 - 2 * q, -3, -5 - 2 * q, -4.4, -2.2); c.closePath(); c.fill();
+      c.strokeStyle = cols[1]; c.lineWidth = 0.4; for (let k = 0; k < 7; k++) { const a = -2.4 + k * 0.5, bx = Math.cos(a) * 4.8, by = -6 - 2.6 * q + Math.sin(a) * 2; c.beginPath(); c.moveTo(bx, by); c.lineTo(bx * 1.1, by - 1.2 * q); c.stroke(); }
+      c.strokeStyle = cols[0]; c.lineWidth = 1.8; c.lineCap = "round"; c.beginPath(); c.moveTo(-5, -4.4); c.quadraticCurveTo(-8, -8, -7, -12 - q); c.stroke();
+      c.strokeStyle = cols[1]; c.lineWidth = 0.35; for (let k = 0; k < 6; k++) { const ty = -6 - k * 1.1; Ln(c, cols[1], 0.35, [-7.4, ty, -8.6, ty - 0.4]); Ln(c, cols[1], 0.35, [-6.4, ty, -5.4, ty - 0.5]); } c.lineCap = "butt";
+      const hx = 6.4, hy = -4.6; E(c, hx, hy, 2.4, 2, cols[0]); P(c, cols[0], [hx - 2.2, hy - 0.6, hx - 3.4, hy - 1.6, hx - 1.4, hy - 1.6]); P(c, cols[0], [hx + 0.4, hy - 1.8, hx + 1.8, hy - 2.6, hx + 1.8, hy - 1]);
+      E(c, hx + 1.4, hy + 0.9, 1, 0.8, "#3a1212"); P(c, "#f0e8e0", [hx + 0.8, hy + 0.4, hx + 1, hy + 1.2, hx + 1.2, hy + 0.4]);
+      E(c, hx + 0.2, hy - 0.4, 0.55, 0.45, "#c8d84a"); B(c, hx + 0.1, hy - 0.8, 0.2, 0.8, "#0a0806");
+      Ln(c, "rgba(240,230,220,.5)", 0.15, [hx + 2, hy + 0.5, hx + 4.4, hy - 0.4]);
+    } else {
+      c.scale(p.pdir, 1); if (u > 1.9) c.globalAlpha = Math.max(0, 1 - (u - 1.9) / 0.5);
+      const r = Math.sin(t * 38), b = Math.abs(Math.cos(t * 38)) * 0.8;
+      E(c, 0, 0.2, 6, 0.9, "rgba(0,0,0,.35)");
+      Ln(c, cols[1], 1, [3 + r * 2.4, -3 - b, 4.6 + r * 3.4, 0]); Ln(c, cols[1], 1, [-3.4 - r * 2.4, -3 - b, -5 - r * 3.4, 0]);
+      E(c, 0, -3.6 - b, 6.6, 2.1, cols[0]); E(c, -0.6, -4.8 - b, 4.6, 0.8, cols[2]);
+      Ln(c, cols[0], 1, [3.4 - r * 2.2, -3 - b, 5 - r * 3, 0]); Ln(c, cols[0], 1, [-2.8 + r * 2.2, -3 - b, -4.6 + r * 3, 0]);
+      c.strokeStyle = cols[0]; c.lineWidth = 1.4; c.lineCap = "round"; c.beginPath(); c.moveTo(-6, -4 - b); c.quadraticCurveTo(-9, -5 - b, -11.5, -4 + r * 0.6); c.stroke(); c.lineCap = "butt";
+      const hx = 7, hy = -5 - b; E(c, hx, hy, 2.2, 1.8, cols[0]); P(c, cols[0], [hx - 1.4, hy - 1, hx - 2.8, hy - 2.2, hx - 0.4, hy - 1.6]); E(c, hx + 0.8, hy - 0.4, 0.5, 0.4, "#c8d84a");
+    }
+    c.restore(); c.globalAlpha = 1;
+  }
   /* Vogel: pickt, schaut sich um, hüpft; fliegt auf, wenn man näher kommt, und kehrt später zurück */
   function vogel(c, p, t, pal) {
     if (p.gone && t < p.gone) return;
@@ -954,8 +1008,9 @@
       let target = 18 + Math.sin(t * 0.4 + p.s * 30) * 8 + p.s * 14;
       if (P0 && Math.abs(P0.x + P0.w / 2 - wx) < 36 && P0.y > cy0) target = Math.min(p.fall - 6, Math.max(10, P0.y - cy0 - 4));
       if (P0 && Math.abs(P0.x + P0.w / 2 - wx) < 14) target = 6;
+      const zip = p.zip && t < p.zip; if (zip) target = 2.5;
       target = Math.min(target, p.fall - 6);
-      p.l = p.l == null ? target : p.l + (target - p.l) * 0.03;
+      p.l = p.l == null ? target : p.l + (target - p.l) * (zip ? 0.12 : 0.03);
       const y = p.l, sw = Math.sin(t * 0.9 + p.s * 9) * 0.8;
       Ln(c, "rgba(230,226,236,.45)", 0.25, [0, 0, sw, y - 2]);
       c.save(); c.translate(sw, y);
@@ -1622,7 +1677,10 @@
       for (let k = 0; k < 6; k++) E(c, -4 + R() * 8, -4 - R() * 12, 0.9, 0.6, "#2a5a3a");
     }, a(c, p, t) { const g = 0.6 + 0.4 * Math.sin(t * 1.3 + p.s * 9); E(c, -2.2, -15, 1, 1.4, "rgba(200,255,140," + g + ")"); E(c, 2.2, -15, 1, 1.4, "rgba(200,255,140," + g + ")"); glow(0, -15, 8, 0.4 * g, "g"); } },
     schilf: { at: "f", w: 2, box: [-14, -28, 14, 3], a(c, p, t) {
-      c.lineCap = "round"; for (let k = 0; k < 10; k++) { const rx = -10 + k * 2.2, h = 10 + hash(k, p.s) * 14, sw = Math.sin(t * 1.3 + k + p.s * 9) * 1.5; c.strokeStyle = k % 2 ? "#4a6a3a" : "#3a5a2e"; c.lineWidth = 0.7; c.beginPath(); c.moveTo(rx, 0); c.quadraticCurveTo(rx + sw * 0.5, -h * 0.5, rx + sw, -h); c.stroke(); if (k % 3 === 0) { E(c, rx + sw, -h + 1.4, 0.8, 2.4, "#6a4a2a"); Ln(c, "#4a6a3a", 0.3, [rx + sw, -h - 1, rx + sw * 1.1, -h - 3]); } if (k % 2) { c.fillStyle = "#3a5a2e"; c.beginPath(); c.moveTo(rx, 0); c.quadraticCurveTo(rx + 3 + sw, -h * 0.4, rx + 5 + sw, -h * 0.55); c.quadraticCurveTo(rx + 3 + sw, -h * 0.35, rx + 0.8, 0); c.fill(); } } c.lineCap = "butt";
+      /* abgemäht wächst das Schilf langsam nach; wer hindurchläuft, biegt es zur Seite */
+      let grow = 1; if (p.cut) { grow = Math.max(0, Math.min(1, (t - p.cutT - 15) / 45)); if (grow >= 1) { p.cut = false; p.dmg = 0; } }
+      const bend = p.bendT ? (p.bend || 0) * 4 * Math.exp(-(t - p.bendT) * 2.5) : 0;
+      c.lineCap = "round"; for (let k = 0; k < 10; k++) { const rx = -10 + k * 2.2, h = 2.4 + (7.6 + hash(k, p.s) * 14) * grow, sw = (Math.sin(t * 1.3 + k + p.s * 9) * 1.5 + bend) * (0.3 + 0.7 * grow); c.strokeStyle = k % 2 ? "#4a6a3a" : "#3a5a2e"; c.lineWidth = 0.7; c.beginPath(); c.moveTo(rx, 0); c.quadraticCurveTo(rx + sw * 0.5, -h * 0.5, rx + sw, -h); c.stroke(); if (k % 3 === 0 && grow > 0.7) { E(c, rx + sw, -h + 1.4, 0.8, 2.4, "#6a4a2a"); Ln(c, "#4a6a3a", 0.3, [rx + sw, -h - 1, rx + sw * 1.1, -h - 3]); } if (k % 2) { c.fillStyle = "#3a5a2e"; c.beginPath(); c.moveTo(rx, 0); c.quadraticCurveTo(rx + 3 + sw, -h * 0.4, rx + 5 + sw, -h * 0.55); c.quadraticCurveTo(rx + 3 + sw, -h * 0.35, rx + 0.8, 0); c.fill(); } } c.lineCap = "butt";
     } },
     saeulenstumpf: { at: "f", w: 1, box: [-10, -24, 10, 3], s(c, R, v) {
       const m = "#5a6a64"; shadow(c, 0, 0.5, 7, 1.2, 0.45); stein(c, [-7, 0, -7, -3, 7, -3, 7, 0], sh(m, -0.15), R);
@@ -1684,7 +1742,7 @@
     } },
     krabbe: { at: "f", crit: true, run: true, noflip: true, w: 1, a(c, p, t) {
       const dt = Math.min(0.05, Math.max(0, t - (p.lt || t))); p.lt = t; if (p.rx == null) { p.rx = 0; p.dir = 1; p.wait = 1; }
-      const scared = nahe(cx0 + p.rx, cy0 - 3, 40); let mv = false;
+      const scared = nahe(cx0 + p.rx, cy0 - 3, 40) || p.scare > t; let mv = false;
       if (p.wait > 0 && !scared) p.wait -= dt; else { mv = true; p.rx += p.dir * (scared ? 60 : 18) * dt; if (p.rx < p.ra || p.rx > p.rb) { p.rx = Math.max(p.ra, Math.min(p.rb, p.rx)); p.dir = -p.dir; p.wait = scared ? 0 : 1 + Math.random() * 3; } }
       c.save(); c.translate(p.rx, 0); E(c, 0, 0.2, 3.6, 0.6, "rgba(0,0,0,.35)");
       for (const sd of [-1, 1]) for (let k = 0; k < 3; k++) { const wg = mv ? Math.sin(t * 30 + k * 2 + sd) * 0.6 : 0; Ln(c, "#a8402a", 0.4, [sd * 1.6, -1.6, sd * (3 + k * 0.6), -2.4 + wg, sd * (3.4 + k * 0.8), 0]); }
@@ -1945,32 +2003,43 @@
   const WARM = [];
   function warmTick() { let budget = 3; while (WARM.length && budget > 0) { const w = WARM.shift(); if (w[0] === "fg") { if (!simple()) fgSprite(w[1], w[2], w[3]); budget -= 3; } else { spriteOf(w[0], w[1]); budget--; } } }
   const load0 = Z.loadArea;
-  Z.loadArea = function () { const r = load0.apply(this, arguments); try { setup(Z.level); } catch (e) { console.error(e); } return r; };
+  Z.loadArea = function () { const r = load0.apply(this, arguments); try { setup(Z.level); initBreak(); } catch (e) { console.error(e); } return r; };
 
   /* ======================= Zeichnen ======================= */
   function paint(c, p, t, x, y) {
     const d = K[p.kind]; if (!d) return;
     const flip = p.f < 0 && !d.noflip;
-    c.save(); c.translate(x, y); if (flip) c.scale(-1, 1);
-    cx0 = x; cy0 = y; cf0 = flip ? -1 : 1;
-    if (d.s) { const s = spriteOf(p.kind, p.v); if (d.breath) { const k = 1 + Math.sin(t * d.breath[1] + p.s * 7) * d.breath[0]; c.save(); c.scale(k, k); c.drawImage(s.cv, s.l, s.t, s.w, s.h); c.restore(); } else c.drawImage(s.cv, s.l, s.t, s.w, s.h); }
-    if (d.fls) for (let i = 0; i < d.fls.length; i++) { const q = d.fls[i]; if (q[3] != null && q[3] !== p.v) continue; fl(q[0], q[1], q[2], p.s * 40 + i * 1.7, q[4]); }
+    if (p.broken) { paintBroken(c, p, t, x, y, d, flip); return; }
+    /* Wackeln (Boden, Drehpunkt unten), Schwingen (Decke: Aufhängung, Wand: Nagel oben) */
+    const ang = (p.wob || 0) + (p.sw ? p.sw.a : 0), py = d.at === "w" && d.box ? d.box[1] + 3 : 0;
+    if (p.shk > 0) x += Math.sin(t * 70 + p.s * 9) * 0.8 * Math.min(1, p.shk * 8);
+    c.save(); c.translate(x, y); if (ang) { c.translate(0, py); c.rotate(ang); c.translate(0, -py); } if (flip) c.scale(-1, 1);
+    cx0 = x; cy0 = y; cf0 = flip ? -1 : 1; curP = d.crit ? null : p; curFi = 0; curRot = ang; curPy = py;
+    if (d.s) {
+      const s = p.dspr || spriteOf(p.kind, p.v);
+      if (d.breath) { const k = 1 + Math.sin(t * d.breath[1] + p.s * 7) * d.breath[0]; c.save(); c.scale(k, k); c.drawImage(s.cv, s.l, s.t, s.w, s.h); c.restore(); } else c.drawImage(s.cv, s.l, s.t, s.w, s.h);
+      /* kurzer Aufhellblitz beim Treffer */
+      if (p.fla > 0) { c.globalCompositeOperation = "lighter"; c.globalAlpha = Math.min(0.45, p.fla * 5); c.drawImage(s.cv, s.l, s.t, s.w, s.h); c.globalAlpha = 1; c.globalCompositeOperation = "source-over"; }
+    }
+    if (d.fls) for (let i = 0; i < d.fls.length; i++) { const q = d.fls[i]; if (q[3] != null && q[3] !== p.v) { curFi++; continue; } fl(q[0], q[1], q[2], p.s * 40 + i * 1.7, q[4]); }
     if (d.holeR) hole(d.holeR[0], d.holeR[1], d.holeR[2], d.holeR[3]);
     if (d.a && !(simple() && d.crit && !d.must)) d.a(c, p, t);
-    c.restore();
+    c.restore(); curP = null; curRot = 0; curPy = 0;
   }
   const dwp0 = Z.drawWorldProps;
   Z.drawWorldProps = function (c, t) {
-    FQn = 0; GQn = 0; HQn = 0;
+    FQn = 0; GQn = 0; HQn = 0; TT = t;
     if (WARM.length && Z.level === lvRef) warmTick();
     if (Z.level === lvRef && props.length) {
       const cam = Z.cam, sa = Z.sightAt;
+      if (!simple()) try { drawLayerBack(c, t); } catch (e) { console.error(e); }
       for (const p of props) {
         const x = p.x * T + 8, y = p.L === 2 || p.L === 4 ? p.y * T : (p.y + 1) * T;
         if (x < cam.x - 70 || x > cam.x + cam.w + 70 || y < cam.y - 70 || y > cam.y + cam.h + 120) continue;
         cvis = sa ? Math.min(1, sa(x, y - 10) * 1.4) : 1;
         paint(c, p, t, x, y);
       }
+      if (!simple()) try { drawLayerFront(c, t); } catch (e) { console.error(e); }
     }
     if (dwp0) dwp0.apply(this, arguments);
   };
@@ -2368,7 +2437,7 @@
   Z.drawAfterLight = function (c, cam, W, H, t) {
     if (al0) al0.apply(this, arguments);
     if (Z.level === lvRef && !simple()) flush(c, t);
-    else if (Z.level === lvRef && FQn) { /* einfache Grafik: nur die Flammen, ohne Schein */ c.save(); c.globalCompositeOperation = "lighter"; for (let i = 0; i < FQn; i++) { const q = FQ[i]; drawFlame(c, q.x, q.y, q.s, t, q.ph, q.k); } c.restore(); }
+    else if (Z.level === lvRef && FQn) { /* einfache Grafik: nur die Flammen, ohne Schein */ c.save(); c.globalCompositeOperation = "lighter"; for (let i = 0; i < FQn; i++) { const q = FQ[i]; drawFlame(c, q.x, q.y, q.s, t, q.ph, q.k, q.l); } c.restore(); }
     const B0 = Z.biome || {}, lv = Z.level; if (!lv || lv.hub || lv.arena || lv.passage) return;
     if (simple()) return;
     const kinds = FGK[B0.bg]; if (!kinds) return;
@@ -2399,6 +2468,842 @@
     }
     c.restore();
   };
+
+
+  /* ======================= Zerbrechliche Ausstattung =======================
+     Treffer (Waffen, Geschosse, Explosionen, Gegnerschläge, fliegende Gegner) lassen die Requisiten wackeln, reißen,
+     auslaufen und schließlich zerbrechen. Die Bruchstücke werden aus dem vorgemalten Sprite geschnitten (jedes Teil
+     passt also genau zum Stück), fliegen mit Physik, prallen ab und bleiben als abgedunkelte Trümmer liegen.
+     Dazu je Material Späne, Scherben, Stoffetzen, Stroh, Seiten oder Steinbrocken, auslaufende Flüssigkeit mit Pfütze,
+     Wandschmuck, der herunterfällt und schief lehnt, Hängendes, das reißt, Kerzen, die verlöschen, kurze Flämmchen,
+     Tiere, die vor dem Kampf fliehen. Alles rein dekorativ: keine Kollision, kein Schaden, gedeckte Farben.
+     Grafikstufe 0: zerbricht schlicht (kurzer Splitterregen, keine Trümmer, keine Pfützen). */
+  const SOLID = v => v === 1 || v === 7 || v === 12, PLAT = v => v === 2 || v === 8 || v === 10;
+  const tileAt = (tx, ty) => { const lv = Z.level; return lv ? lv.get(tx, ty) : 1; };
+  function groundY(x, y) { const tx = Math.floor(x / T); let ty = Math.floor(y / T); for (let k = 0; k < 40; k++, ty++) { const v = tileAt(tx, ty); if (SOLID(v)) return ty * T; if (PLAT(v) && ty * T >= y - 3) return ty * T; } return y + 4000; }
+  function floorRun(x, gy) { const ty = Math.round(gy / T), t0 = Math.floor(x / T); let a = t0, b = t0; const ok = tx => { const v = tileAt(tx, ty); return (SOLID(v) || PLAT(v)) && !SOLID(tileAt(tx, ty - 1)); }; while (a > t0 - 8 && ok(a - 1)) a--; while (b < t0 + 8 && ok(b + 1)) b++; return [a * T, (b + 1) * T]; }
+  const rnd = Math.random, sgn = v => (v > 0 ? 1 : v < 0 ? -1 : 0), clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+  const lvl = () => (Z.gq ? Z.gq.level : 2);
+  const WS = () => (Z.weltspuren && Z.level === lvRef ? Z.weltspuren : null);
+  const playS = (n, vol, rate, x, gap) => { if (A()) A().play(n, { vol, rate, x, gap }); };
+  const A = () => Z.audio;
+
+  /* Materialien: Splitterfarben, frische Bruchkante, Klang (Treffer/Bruch), Partikelart */
+  const MAT = {
+    holz: { c: ["#7a5432", "#5a3a20", "#9a7448", "#c8a070"], e: "rgba(236,204,156,.7)", hit: ["crate", 0.3, 1.35], brk: ["break", 0.6, 1], pk: "shard", dark: "rgba(20,12,6,.55)" },
+    fass: { c: ["#6a4428", "#4a2e18", "#8a6440", "#5a5456"], e: "rgba(230,196,150,.7)", hit: ["crate", 0.32, 1.1], brk: ["break", 0.65, 0.85], pk: "shard", dark: "rgba(20,12,6,.55)" },
+    kiste: { c: ["#7a5432", "#5a3a20", "#a07a4a", "#c8a070"], e: "rgba(236,204,156,.7)", hit: ["crate", 0.32, 1.25], brk: ["crate", 0.65, 0.95], pk: "shard", dark: "rgba(20,12,6,.55)" },
+    glas: { c: ["#efe8d4", "#d8d0b4", "#fffbea", "#8a5a2a", "#5a2a1a"], e: "rgba(255,252,236,.85)", hit: ["glass", 0.22, 1.5], brk: ["glass", 0.55, 1], pk: "shard", dark: "rgba(255,250,235,.6)" },
+    ton: { c: ["#a0603a", "#7a4428", "#c08060", "#5a3020"], e: "rgba(232,190,150,.75)", hit: ["rock", 0.22, 1.7], brk: ["glass", 0.45, 0.6], pk: "shard", dark: "rgba(40,16,8,.5)" },
+    stein: { c: ["#8a8278", "#6a625a", "#a89e92", "#4a443e"], e: "rgba(222,214,202,.7)", hit: ["rock", 0.32, 1.15], brk: ["rock", 0.7, 0.85], pk: "shard", dark: "rgba(20,16,14,.5)" },
+    metall: { c: ["#6a6466", "#9a9496", "#4a4446", "#b8b2ae"], e: "rgba(240,236,230,.75)", hit: ["hitMetal", 0.28, 1.2], brk: ["hitMetal", 0.45, 0.8], pk: "shard", dark: "rgba(16,14,16,.5)" },
+    stoff: { c: ["#8a3a3a", "#c8b8a0", "#6a5a4a", "#a88a5a"], e: null, hit: ["slash", 0.2, 1.3], brk: ["slash", 0.32, 0.9], pk: "leaf", dark: "rgba(16,10,8,.5)" },
+    stroh: { c: ["#c8a858", "#a88838", "#e0c878", "#8a6a28"], e: null, hit: ["slash", 0.16, 0.7], brk: ["break", 0.32, 1.45], pk: "leaf", dark: "rgba(30,20,6,.45)" },
+    papier: { c: ["#efe4c8", "#d8c8a0", "#c8b48a"], e: null, hit: ["scroll", 0.3, 1], brk: ["scroll", 0.45, 0.9], pk: "leaf", dark: "rgba(40,30,16,.4)" },
+    knochen: { c: ["#d8cfb8", "#b8b098", "#8a8270"], e: "rgba(255,250,236,.75)", hit: ["hitBone", 0.28, 1.2], brk: ["hitBone", 0.5, 0.9], pk: "shard", dark: "rgba(30,26,20,.45)" },
+    pilz: { c: ["#c8a8b8", "#a87a98", "#e8d8c8", "#8a6a5a"], e: null, hit: ["slime", 0.22, 1.3], brk: ["slime", 0.42, 1], pk: "dot", dark: "rgba(20,10,20,.45)" },
+    ei: { c: ["#e8e0c8", "#c8c0a8", "#d8d0c0"], e: null, hit: ["slime", 0.2, 1.5], brk: ["slime", 0.45, 0.8], pk: "dot", dark: "rgba(30,26,20,.4)" },
+    kristall: { c: ["#e0b8ff", "#f4e4ff", "#b888e8"], e: "rgba(255,245,255,.9)", hit: ["gem", 0.3, 1.2], brk: ["glass", 0.55, 1.25], pk: "shard", dark: "rgba(30,10,40,.4)" },
+    essen: { c: ["#e8c060", "#c89a40", "#a8302a", "#8a5a2a"], e: null, hit: ["hitFlesh", 0.16, 1.4], brk: ["hitFlesh", 0.28, 1.1], pk: "dot", dark: "rgba(30,16,6,.45)" },
+    koralle: { c: ["#c86a5a", "#e89a7a", "#a84a3a"], e: "rgba(255,220,200,.7)", hit: ["rock", 0.22, 1.5], brk: ["rock", 0.45, 1.3], pk: "shard", dark: "rgba(30,10,8,.45)" }
+  };
+  /* Flüssigkeiten (nie blau: Wasser bleibt grau-oliv) */
+  const LQ = { wein: ["74,12,24", 0.72], bier: ["122,78,20", 0.62], wasser: ["78,76,64", 0.42], oel: ["42,30,12", 0.7], suppe: ["94,66,32", 0.66], schleim: ["168,160,112", 0.55] };
+
+  /* Je Art: m Material, hp Treffer bis zum Bruch, no unzerstörbar (nur Klang/Wackeln), wf Verhalten an Wand/Decke
+     (fall: fällt und lehnt, shatter: zerspringt an Ort und Stelle, paper: flattert, roll: rollt davon, drop: Hängendes reißt ab),
+     liq/lq Flüssigkeit und Menge, leak: läuft schon beim ersten Treffer aus, spill: Inhalt (Token:Anzahl), hitSpill: Inhalt je Treffer,
+     gold/food: Beutechance, fire: brennende Lichter (verlöschen, kurzes Flämmchen), ring: Glocke, swing: schwingt, scatter: wirbelt Partikel auf,
+     heavy: Krater und Beben, land: Material beim Aufschlagen */
+  const C = {
+    esstisch: { m: "holz", hp: 3, fire: 1, food: 0.15, liq: "wein", lq: 0.3, spill: "teller:2,apfel:2,brot:1,becher:1" },
+    stuhl: { m: "holz", hp: 1 }, hocker: { m: "holz", hp: 1 }, bank: { m: "holz", hp: 2 },
+    wachtisch: { m: "holz", hp: 3, fire: 1, gold: 0.25, liq: "bier", lq: 0.25, spill: "wuerfel:3,becher:1,karte:3" },
+    lesepult: { m: "holz", hp: 2, fire: 1, spill: "buch:1,seite:6", hitSpill: "seite:1" },
+    kerzenstaender: { m: "metall", hp: 2, fire: 1, spill: "kerze:3" },
+    truhe: { m: "kiste", hp: 3, gold: 0.75, goldN: 2.2 },
+    teppich: { no: 1, m: "stoff", soft: 1 },
+    karren: { m: "holz", hp: 4, gold: 0.15, heavy: 1, spill: "scheit:2" },
+    heu: { m: "stroh", hp: 2, scatter: 1, spill: "heu:8" },
+    waffenstaender: { m: "holz", hp: 2, snd2: "hitMetal", spill: "speer:2" },
+    faesser: { m: "fass", hp: 2, liq: "bier", lq: 1, leak: 1, gold: 0.15 },
+    kisten: { m: "kiste", hp: 2, gold: 0.22 },
+    brunnen: { no: 1, m: "stein" },
+    hackklotz: { m: "holz", hp: 3, spill: "scheit:2" },
+    holzstapel: { m: "holz", hp: 2, spill: "scheit:4" },
+    trog: { m: "holz", hp: 2, liq: "wasser", lq: 0.8 },
+    zielscheibe: { m: "stroh", hp: 2, scatter: 1, spill: "heu:5" },
+    apfelkorb: { m: "stroh", hp: 1, food: 0.2, spill: "apfel:6" },
+    eimer: { m: "holz", hp: 1, liq: "wasser", lq: 0.5 },
+    fassregal: { m: "fass", hp: 4, liq: "wein", lq: 1.2, leak: 1, gold: 0.2, heavy: 1 },
+    weinfass: { m: "fass", hp: 3, liq: "wein", lq: 1.3, leak: 1, gold: 0.12 },
+    vorratsregal: { m: "holz", hp: 3, food: 0.15, gold: 0.15, spill: "zwiebel:3,brot:1,krug:2" },
+    saecke: { m: "stoff", hp: 2, food: 0.12, scatter: 1, spill: "korn:14" },
+    kaese: { m: "essen", hp: 1, food: 0.3, spill: "kaese:3" },
+    krugreihe: { m: "ton", hp: 2, liq: "wein", lq: 0.7 },
+    kartoffelkiste: { m: "kiste", hp: 1, food: 0.12, spill: "kartoffel:6" },
+    besen: { m: "holz", hp: 1, spill: "heu:4" },
+    kessel: { no: 1, m: "metall", snd: ["hitMetal", 0.35, 0.7] },
+    kuechentisch: { m: "holz", hp: 3, food: 0.12, spill: "zwiebel:2,teller:1,brot:1" },
+    buecherregal: { m: "holz", hp: 4, spill: "buch:7,seite:9", hitSpill: "seite:2,buch:1", heavy: 1 },
+    ruestung: { m: "metall", hp: 3, snd2: "block" },
+    globus: { m: "holz", hp: 2, spill: "seite:2" },
+    standuhr: { m: "holz", hp: 3, spill: "zahnrad:4", snd2: "bell", heavy: 1 },
+    harfe: { m: "holz", hp: 2, ring: ["bell", 0.12, 2.2] },
+    sessel: { m: "stoff", hp: 3, spill: "feder:8", scatter: 1 },
+    buestensaeule: { m: "stein", hp: 3, heavy: 1 },
+    kamin: { no: 1, m: "stein" },
+    kanonenkugeln: { no: 1, m: "metall" }, kanone: { no: 1, m: "metall", snd: ["hitMetal", 0.35, 0.6] },
+    pulverfass: { m: "fass", hp: 1, pulver: 1 },
+    koecherfass: { m: "fass", hp: 2, spill: "pfeil:5" },
+    kohlebecken: { m: "metall", hp: 2, fire: 2, spill: "glut:6", snd2: "fire" },
+    streckbank: { m: "holz", hp: 5, heavy: 1 },
+    stroh: { no: 1, m: "stroh", scatter: 1, soft: 1 },
+    napf: { m: "ton", hp: 1, liq: "suppe", lq: 0.3 },
+    knochen: { m: "knochen", hp: 1, spill: "knochen:3" },
+    folterstuhl: { m: "holz", hp: 3 },
+    jungfrau: { no: 1, m: "metall", snd: ["hitMetal", 0.4, 0.55] },
+    bodenkaefig: { no: 1, m: "metall", snd: ["chain", 0.3, 1] },
+    netze: { no: 1, m: "stoff", soft: 1 },
+    anker: { no: 1, m: "metall", snd: ["hitMetal", 0.4, 0.5] },
+    tauwerk: { no: 1, m: "stoff", soft: 1 },
+    fischkorb: { m: "stroh", hp: 1, food: 0.1, spill: "fisch:3" },
+    poller: { no: 1, m: "holz" },
+    hummerkorb: { m: "holz", hp: 1 },
+    boot: { no: 1, m: "holz" },
+    seekiste: { m: "kiste", hp: 2, gold: 0.35 },
+    ruderbuendel: { m: "holz", hp: 2 },
+    zahnradkiste: { m: "kiste", hp: 2, spill: "zahnrad:5" },
+    kleineglocke: { no: 1, m: "metall", ring: ["bell", 0.3, 1.3] },
+    grosseglocke: { no: 1, m: "metall", ring: ["gong", 0.3, 1] },
+    winde: { no: 1, m: "holz" },
+    uhrtisch: { m: "holz", hp: 3, fire: 1, spill: "zahnrad:4" },
+    eiersack: { m: "ei", hp: 1, liq: "schleim", lq: 0.4, spinnen: 4 },
+    pilze: { m: "pilz", hp: 1, sporen: 1 },
+    knochenhaufen: { m: "knochen", hp: 2, spill: "knochen:5", scatter: 1 },
+    kristall: { m: "kristall", hp: 3 },
+    kokon_boden: { m: "ei", hp: 2, spill: "knochen:2", spinnen: 2 },
+    kaefer: { no: 1, m: "ei" },
+    pilzring: { no: 1, m: "pilz", sporen: 1 },
+    amboss: { no: 1, m: "metall", snd: ["anvil", 0.35, 1] },
+    schleifstein: { m: "stein", hp: 3 },
+    runensteine: { m: "stein", hp: 3 },
+    esse: { no: 1, m: "stein" },
+    wassertrog: { no: 1, m: "stein" },
+    barren: { no: 1, m: "metall" },
+    ruestungsstaender: { m: "metall", hp: 2, snd2: "block" },
+    gussform: { no: 1, m: "stein" },
+    ballista: { no: 1, m: "holz" },
+    statue: { m: "stein", hp: 4, heavy: 1 },
+    wasserspeier: { m: "stein", hp: 3, heavy: 1 },
+    fahnenmast: { no: 1, m: "holz" },
+    truemmer: { no: 1, m: "stein" }, kandelaber_um: { no: 1, m: "metall" }, dornen: { no: 1, m: "holz" },
+    giftpilze: { m: "pilz", hp: 1, sporen: 1 },
+    muscheln: { no: 1, m: "koralle" },
+    goetze: { m: "stein", hp: 3 },
+    schilf: { cut: 1, m: "stroh", hp: 1 },
+    saeulenstumpf: { no: 1, m: "stein" },
+    korallen: { m: "koralle", hp: 2 },
+    fischgraeten: { no: 1, m: "knochen" },
+    opferschale: { m: "stein", hp: 2 },
+    amphore: { m: "ton", hp: 1, liq: "oel", lq: 0.7, gold: 0.15 },
+    wrackkiste: { m: "kiste", hp: 2, gold: 0.3 },
+    kohlenkarren: { no: 1, m: "metall" }, gruenfeuer: { no: 1, m: "stein" }, schmelztiegel: { no: 1, m: "metall" }, schlacke: { no: 1, m: "stein" }, erzhaufen: { no: 1, m: "stein" },
+    duergarstatue: { m: "stein", hp: 4, heavy: 1 },
+    /* Wand */
+    schild: { m: "metall", hp: 2, wf: "fall", land: ["block", 0.4, 1] },
+    wandlaterne: { m: "metall", hp: 1, wf: "fall", fire: 1, land: ["glass", 0.4, 1.1] },
+    steckbrief: { m: "papier", hp: 1, wf: "paper" },
+    hufeisen: { m: "metall", hp: 1, wf: "fall", land: ["hitMetal", 0.3, 1.5] },
+    werkzeugbrett: { m: "holz", hp: 2, wf: "shatter", snd2: "hitMetal" },
+    flaschenregal: { m: "glas", hp: 2, wf: "shatter", liq: "wein", lq: 0.6 },
+    wuerste: { m: "essen", hp: 1, wf: "shatter", food: 0.25 },
+    zwiebelzopf: { m: "essen", hp: 1, wf: "shatter", food: 0.1, spill: "zwiebel:3" },
+    pfannen: { m: "metall", hp: 2, wf: "shatter", snd2: "block" },
+    wandkerze: { m: "metall", hp: 1, wf: "fall", fire: 1, land: ["hitMetal", 0.25, 1.6] },
+    wandregal: { m: "holz", hp: 2, wf: "shatter", spill: "krug:1" },
+    portraet: { m: "holz", hp: 2, wf: "fall", land: ["crate", 0.4, 0.8] },
+    wandteppich: { m: "stoff", hp: 2, wf: "fall", swing: "stoff", land: ["slash", 0.2, 0.6] },
+    geweih: { m: "knochen", hp: 2, wf: "fall", land: ["hitBone", 0.35, 0.9] },
+    spiegel: { m: "glas", hp: 1, wf: "fall", landShatter: 1 },
+    wandleuchter: { m: "metall", hp: 1, wf: "fall", fire: 1, land: ["hitMetal", 0.3, 1.3] },
+    wappen: { m: "holz", hp: 2, wf: "fall", land: ["crate", 0.4, 0.9] },
+    landschaft: { m: "holz", hp: 2, wf: "fall", land: ["crate", 0.4, 0.85] },
+    schluesselbrett: { m: "holz", hp: 1, wf: "shatter", snd2: "coin" },
+    fesseln: { no: 1, m: "metall", swing: "kette", snd: ["chain", 0.3, 1.1] },
+    strichliste: { no: 1, m: "stein", flat: 1 }, kritzelei: { no: 1, m: "stein", flat: 1 }, kerkerfenster: { no: 1, m: "metall", flat: 1 }, runentafel: { no: 1, m: "stein", flat: 1 }, kuo_glyphen: { no: 1, m: "stein", flat: 1 },
+    peitschen: { m: "stoff", hp: 1, wf: "fall", swing: "seil" },
+    rettungsring: { m: "stoff", hp: 1, wf: "roll" },
+    netzwand: { no: 1, m: "stoff", soft: 1 },
+    steuerrad: { m: "holz", hp: 3, wf: "roll", land: ["crate", 0.35, 0.8] },
+    reuse: { m: "stroh", hp: 1, wf: "fall" },
+    schiffsglocke: { no: 1, m: "metall", swing: "kette", ring: ["bell", 0.3, 1.1] },
+    ruder_x: { m: "holz", hp: 2, wf: "shatter" },
+    zahnrad: { m: "metall", hp: 1, wf: "roll" },
+    seilrolle: { m: "holz", hp: 1, wf: "roll" },
+    uhrblatt: { m: "holz", hp: 3, wf: "shatter", spill: "zahnrad:3", snd2: "bell" },
+    werkzeugbrett_fein: { m: "holz", hp: 2, wf: "shatter", snd2: "hitMetal", spill: "zahnrad:2" },
+    wandpilze: { m: "pilz", hp: 1, wf: "shatter", sporen: 1 },
+    eier_wand: { m: "ei", hp: 1, wf: "shatter", liq: "schleim", lq: 0.3, spinnen: 2 },
+    gespinst: { no: 1, m: "ei", soft: 1 },
+    zangen: { m: "metall", hp: 1, wf: "shatter" },
+    werkzeugwand: { m: "holz", hp: 2, wf: "shatter", snd2: "hitMetal" },
+    schwertwand: { m: "metall", hp: 2, wf: "shatter", snd2: "block" },
+    banner_zerrissen: { no: 1, m: "stoff", swing: "stoff", soft: 1 },
+    ranken_w: { no: 1, m: "stroh", leaves: 1, soft: 1 },
+    algen: { no: 1, m: "stroh", soft: 1 },
+    muschelwand: { no: 1, m: "koralle" },
+    ketten: { no: 1, m: "metall", swing: "kette", snd: ["chain", 0.3, 1] },
+    rohre: { no: 1, m: "metall", snd: ["hitMetal", 0.25, 0.7] },
+    /* Decke */
+    laterne_h: { m: "metall", hp: 2, wf: "drop", swing: "kette", fire: 1, landShatter: 1, land: ["glass", 0.5, 1] },
+    kraeuter: { m: "stroh", hp: 2, wf: "drop", swing: "seil", leaves: 1, landShatter: 1 },
+    kronleuchter_k: { m: "metall", hp: 3, wf: "drop", swing: "kette", fire: 1, landShatter: 1, heavy: 1, spill: "kerze:4", land: ["hitMetal", 0.6, 0.7] },
+    haengekaefig: { no: 1, m: "metall", swing: "kette", snd: ["chain", 0.35, 0.9], snd2: "hitBone" },
+    ketten_h: { no: 1, m: "metall", swing: "kette", snd: ["chain", 0.35, 1] },
+    netz_h: { no: 1, m: "stoff", swing: "seil", soft: 1 },
+    trockenfisch: { m: "essen", hp: 1, wf: "drop", swing: "seil", landShatter: 1, food: 0.12, spill: "fisch:3" },
+    glockenseil: { no: 1, m: "stoff", swing: "seil", ring: ["bell", 0.16, 0.8], soft: 1 },
+    flaschenzug: { no: 1, m: "holz", swing: "kette", snd: ["chain", 0.3, 1.1] },
+    kokon_h: { m: "ei", hp: 2, wf: "drop", swing: "faden", landShatter: 1, spill: "knochen:2", liq: "schleim", lq: 0.25 },
+    ranken_h: { no: 1, m: "stroh", swing: "seil", leaves: 1, soft: 1 },
+    wurzeln: { no: 1, m: "holz", swing: "seil", soft: 1 },
+    algen_h: { no: 1, m: "stroh", swing: "seil", soft: 1 },
+    kranhaken: { no: 1, m: "metall", swing: "kette", snd: ["chain", 0.35, 0.9] }
+  };
+  /* Trefferflächen von Hängendem, das (auch) in der Animation gemalt wird – lokal, Ursprung an der Decke */
+  const HANG = {
+    laterne_h: v => [-4.5, 12 + v * 3, 4.5, 25 + v * 3], kronleuchter_k: () => [-11.5, 9, 11.5, 18.5],
+    haengekaefig: v => [-6.6, 9 + v * 3, 6.6, 29 + v * 3], ketten_h: () => [-5, 1, 6, 24], kranhaken: v => [-5.5, 1, 5.5, 25 + v * 6],
+    glockenseil: v => [-3, 1, 3, 37 + v * 8], flaschenzug: v => [-3, 1, 3, 23 + v * 4], kokon_h: v => [-4.6, 14 + v * 6, 4.6, 33 + v * 6],
+    algen_h: () => [-9.5, 0, 9.5, 24]
+  };
+
+  /* ---------- Alpha-Maske eines Sprites (einmal je Sprite) ---------- */
+  function alphaOf(s) {
+    if (s.al) return s.al;
+    const W = s.cv.width, H = s.cv.height, res = W / s.w;
+    let a = null; try { const d = s.cv.getContext("2d").getImageData(0, 0, W, H).data; a = new Uint8Array(W * H); for (let i = 0; i < W * H; i++) a[i] = d[i * 4 + 3]; } catch (e) { a = null; }
+    let x0 = W, y0 = H, x1 = -1, y1 = -1;
+    if (a) for (let y = 0; y < H; y += 1) for (let x = 0; x < W; x += 1) if (a[y * W + x] > 50) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 < 0) { x0 = 0; y0 = 0; x1 = W - 1; y1 = H - 1; }
+    s.al = { a, W, H, res, bb: [s.l + x0 / res, s.t + y0 / res, s.l + (x1 + 1) / res, s.t + (y1 + 1) / res] };
+    return s.al;
+  }
+  function baseSprite(p) { const d = K[p.kind]; return d && d.s ? spriteOf(p.kind, p.v) : null; }
+  /* Trefferrechteck in Weltkoordinaten (genaue Umrisse aus der Alpha-Maske) */
+  function rectOf(p) {
+    const d = K[p.kind]; if (!d) return null;
+    const X = p.x * T + 8, Y = p.L === 2 || p.L === 4 ? p.y * T : (p.y + 1) * T, f = p.f < 0 && !d.noflip ? -1 : 1;
+    let bb = null;
+    if (HANG[p.kind]) bb = HANG[p.kind](p.v);
+    else if (d.s) { if (!p.bb) { const s = spriteOf(p.kind, p.v); p.bb = alphaOf(s).bb; } bb = p.bb; }
+    else if (d.box) bb = d.box;
+    else if (p.kind === "schilf") bb = [-12, -24, 12, 0];
+    if (!bb) return null;
+    let x0 = bb[0], x1 = bb[2]; if (f < 0) { x0 = -bb[2]; x1 = -bb[0]; }
+    const sw = p.sw ? p.sw.a : 0, ox = d.at === "c" && sw ? -Math.sin(sw) * (bb[1] + bb[3]) / 2 : 0;
+    return { x: X + x0 + ox, y: Y + bb[1], w: x1 - x0, h: bb[3] - bb[1], X, Y, f };
+  }
+  const ov = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+
+  /* ---------- Listen ---------- */
+  let PCS = [], DROPS = [], PUD = [], FIRES = [], EMIT = [], SMOKE = [], CLK = 0, swingList = [];
+  const actHit = new WeakMap(), projHit = new WeakMap();
+  const maxFly = () => (lvl() >= 2 ? 70 : 34), maxRest = () => (lvl() >= 2 ? 160 : 60), maxPieces = () => (lvl() >= 2 ? 9 : 5);
+  function resetBreak() { PCS = []; DROPS = []; PUD = []; FIRES = []; EMIT = []; SMOKE = []; swingList = []; }
+
+  /* ---------- Teile aus einem Sprite schneiden ---------- */
+  /* s: {cv,l,t,w,h}; al: Alpha-Maske; region [x0,y0,x1,y1] lokal; n: Höchstzahl; mat: Material (frische Kanten) */
+  function cutSprite(s, al, region, n, mat) {
+    const res = al.res, [rx0, ry0, rx1, ry1] = region, bw = rx1 - rx0, bh = ry1 - ry0;
+    if (bw < 1 || bh < 1) return [];
+    const cell = n >= 8 ? 9 : 13;
+    let cols = clamp(Math.round(bw / cell), 1, 4), rows = clamp(Math.round(bh / cell), 1, 5);
+    while (cols * rows > n) { if (cols >= rows && cols > 1) cols--; else rows--; }
+    const tri = cols * rows * 2 <= n && cols * rows <= 4;
+    const V = []; for (let j = 0; j <= rows; j++) { V.push([]); for (let i = 0; i <= cols; i++) { const inner = i > 0 && i < cols && j > 0 && j < rows; V[j].push([rx0 + i * bw / cols + (inner ? (rnd() - 0.5) * bw / cols * 0.6 : 0), ry0 + j * bh / rows + (inner ? (rnd() - 0.5) * bh / rows * 0.6 : (j > 0 && j < rows ? (rnd() - 0.5) * bh / rows * 0.3 : 0))]); } }
+    /* Kante innen? (nicht auf dem Rand des Bereichs) */
+    const onB = (a, b) => (a[0] === b[0] && (a[0] <= rx0 + 0.01 || a[0] >= rx1 - 0.01)) || (a[1] === b[1] && (a[1] <= ry0 + 0.01 || a[1] >= ry1 - 0.01));
+    const polys = [];
+    for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+      const a = V[j][i], b = V[j][i + 1], c = V[j + 1][i + 1], d = V[j + 1][i];
+      if (tri) { if (rnd() < 0.5) { polys.push([a, b, c], [a, c, d]); } else { polys.push([a, b, d], [b, c, d]); } } else polys.push([a, b, c, d]);
+    }
+    const out = [], A = al.a, W = al.W, H = al.H;
+    for (const poly of polys) {
+      let mx0 = 1e9, my0 = 1e9, mx1 = -1e9, my1 = -1e9; for (const q of poly) { mx0 = Math.min(mx0, q[0]); mx1 = Math.max(mx1, q[0]); my0 = Math.min(my0, q[1]); my1 = Math.max(my1, q[1]); }
+      const px0 = clamp(Math.floor((mx0 - s.l) * res), 0, W - 1), px1 = clamp(Math.ceil((mx1 - s.l) * res), 0, W - 1), py0 = clamp(Math.floor((my0 - s.t) * res), 0, H - 1), py1 = clamp(Math.ceil((my1 - s.t) * res), 0, H - 1);
+      const pp = poly.map(q => [(q[0] - s.l) * res, (q[1] - s.t) * res]);
+      const inside = (x, y) => { let r = false; for (let i = 0, j = pp.length - 1; i < pp.length; j = i++) { const xi = pp[i][0], yi = pp[i][1], xj = pp[j][0], yj = pp[j][1]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) r = !r; } return r; };
+      let cnt = 0, ox0 = 1e9, oy0 = 1e9, ox1 = -1, oy1 = -1; const st = res >= 3 ? 2 : 1;
+      for (let y = py0; y <= py1; y += st) for (let x = px0; x <= px1; x += st) { if (A && A[y * W + x] <= 50) continue; if (!inside(x + 0.5, y + 0.5)) continue; cnt++; if (x < ox0) ox0 = x; if (x > ox1) ox1 = x; if (y < oy0) oy0 = y; if (y > oy1) oy1 = y; }
+      if (cnt * st * st < 14 * res * res / 9) continue;
+      ox0 = Math.max(0, ox0 - st); oy0 = Math.max(0, oy0 - st); ox1 = Math.min(W - 1, ox1 + st); oy1 = Math.min(H - 1, oy1 + st);
+      const cw = ox1 - ox0 + 1, ch = oy1 - oy0 + 1, cv = document.createElement("canvas"); cv.width = cw; cv.height = ch;
+      const g = cv.getContext("2d"); g.translate(-ox0, -oy0);
+      g.save(); g.beginPath(); pp.forEach((q, i) => (i ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1]))); g.closePath(); g.clip(); g.drawImage(s.cv, 0, 0); g.restore();
+      if (mat && mat.e) { g.globalCompositeOperation = "source-atop"; g.strokeStyle = mat.e; g.lineWidth = Math.max(1, res * 0.55); g.beginPath(); for (let i = 0; i < poly.length; i++) { const a = poly[i], b = poly[(i + 1) % poly.length]; if (onB(a, b)) continue; g.moveTo(pp[i][0], pp[i][1]); g.lineTo(pp[(i + 1) % poly.length][0], pp[(i + 1) % poly.length][1]); } g.stroke(); g.globalCompositeOperation = "source-over"; }
+      out.push({ cv, w: cw / res, h: ch / res, lx: s.l + (ox0 + cw / 2) / res, ly: s.t + (oy0 + ch / 2) / res });
+    }
+    return out;
+  }
+  /* ganzes Sprite (auf den sichtbaren Umriss beschnitten) als ein Stück */
+  function wholePiece(s, al) {
+    const [x0, y0, x1, y1] = al.bb, res = al.res, px0 = Math.floor((x0 - s.l) * res), py0 = Math.floor((y0 - s.t) * res), cw = Math.max(1, Math.ceil((x1 - x0) * res)), ch = Math.max(1, Math.ceil((y1 - y0) * res));
+    const cv = document.createElement("canvas"); cv.width = cw; cv.height = ch; cv.getContext("2d").drawImage(s.cv, -px0, -py0);
+    return { cv, w: cw / res, h: ch / res, lx: (x0 + x1) / 2, ly: (y0 + y1) / 2 };
+  }
+  /* Trümmerrest: unteres Stück mit gezackter Bruchkante, abgedunkelt */
+  function stumpOf(s, al, hr, mat) {
+    const [x0, , x1, y1] = al.bb, res = al.res, top = y1 - hr;
+    const cv = document.createElement("canvas"), cw = Math.ceil((x1 - x0) * res) + 2, ch = Math.ceil((hr + 3) * res); cv.width = cw; cv.height = ch;
+    const g = cv.getContext("2d"); g.scale(res, res); g.translate(-x0, -(top - 2.5));
+    const pts = []; for (let x = x0; x <= x1 + 0.01; x += 2 + rnd() * 1.5) pts.push([x, top + rnd() * 2.6 - (rnd() < 0.2 ? 1.5 : 0)]); pts.push([x1, top + rnd() * 2]);
+    g.save(); g.beginPath(); g.moveTo(x0, y1 + 1); pts.forEach(q => g.lineTo(q[0], q[1])); g.lineTo(x1, y1 + 1); g.closePath(); g.clip(); g.drawImage(s.cv, s.l, s.t, s.w, s.h);
+    if (mat && mat.e) { g.globalCompositeOperation = "source-atop"; g.strokeStyle = mat.e; g.lineWidth = 0.55; g.beginPath(); pts.forEach((q, i) => (i ? g.lineTo(q[0], q[1] + 0.3) : g.moveTo(q[0], q[1] + 0.3))); g.stroke(); }
+    g.globalCompositeOperation = "source-atop"; g.fillStyle = "rgba(14,9,6,.3)"; g.fillRect(x0 - 1, top - 3, x1 - x0 + 2, hr + 6); g.restore();
+    return { cv, l: x0, t: top - 2.5, w: cw / res, h: ch / res };
+  }
+  /* beschädigtes Sprite: Kopie, auf die Risse, Dellen und Kerben gemalt werden (nur auf deckende Pixel) */
+  function damage(p, hx, hy, k, mat) {
+    const base = baseSprite(p); if (!base) return;
+    if (!p.dspr) { const cv = document.createElement("canvas"); cv.width = base.cv.width; cv.height = base.cv.height; cv.getContext("2d").drawImage(base.cv, 0, 0); p.dspr = { cv, l: base.l, t: base.t, w: base.w, h: base.h, al: alphaOf(base) }; }
+    const s = p.dspr, al = s.al, res = al.res, g = s.cv.getContext("2d");
+    g.save(); g.scale(res, res); g.translate(-s.l, -s.t); g.globalCompositeOperation = "source-atop"; g.lineCap = "round"; g.lineJoin = "round";
+    const [x0, y0, x1, y1] = al.bb, n = 1 + k;
+    for (let i = 0; i < n; i++) {
+      let x = clamp(hx + (rnd() - 0.5) * 6, x0 + 1, x1 - 1), y = clamp(hy + (rnd() - 0.5) * 6, y0 + 1, y1 - 1);
+      if (mat === MAT.metall) { /* Delle */ g.fillStyle = "rgba(0,0,0,.35)"; g.beginPath(); g.ellipse(x, y, 1.6 + rnd(), 1 + rnd() * 0.6, rnd() * 3, 0, TAU); g.fill(); g.strokeStyle = "rgba(255,250,240,.45)"; g.lineWidth = 0.35; g.beginPath(); g.arc(x - 0.3, y - 0.3, 1.5, PI * 1.1, PI * 1.7); g.stroke(); continue; }
+      if (mat === MAT.stoff || mat === MAT.stroh) { /* Riss im Stoff */ g.strokeStyle = "rgba(10,6,4,.75)"; g.lineWidth = 0.7; g.beginPath(); g.moveTo(x - 2, y - 1); g.lineTo(x + 0.4, y + 0.6); g.lineTo(x + 2.4, y - 0.4); g.stroke(); continue; }
+      const vert = mat === MAT.holz || mat === MAT.fass || mat === MAT.kiste, star = mat === MAT.glas || mat === MAT.kristall;
+      const arms = star ? 5 : 1 + (rnd() < 0.5 ? 1 : 0);
+      for (let a = 0; a < arms; a++) {
+        let ang = star ? a / arms * TAU + rnd() * 0.5 : vert ? (rnd() < 0.5 ? -PI / 2 : PI / 2) + (rnd() - 0.5) * 0.5 : rnd() * TAU, px = x, py = y;
+        const len = (star ? 3 : 5) + rnd() * (star ? 4 : 7);
+        const path = [[px, py]]; for (let l = 0; l < len; l += 1.4) { ang += (rnd() - 0.5) * (vert ? 0.35 : 0.9); px += Math.cos(ang) * 1.4; py += Math.sin(ang) * 1.4; path.push([px, py]); }
+        g.strokeStyle = star ? "rgba(255,255,245,.55)" : mat ? mat.dark : "rgba(0,0,0,.5)"; g.lineWidth = star ? 0.3 : 0.55; g.beginPath(); path.forEach((q, i) => (i ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1]))); g.stroke();
+        if (!star && mat && mat.e) { g.strokeStyle = mat.e.replace(/[\d.]+\)$/, ".35)"); g.lineWidth = 0.25; g.beginPath(); path.forEach((q, i) => (i ? g.lineTo(q[0] + 0.35, q[1] + 0.35) : g.moveTo(q[0] + 0.35, q[1] + 0.35))); g.stroke(); }
+      }
+      if (vert && rnd() < 0.6) { g.fillStyle = "rgba(20,10,4,.55)"; g.beginPath(); g.ellipse(x, y, 0.8, 0.5, 0, 0, TAU); g.fill(); }
+    }
+    g.restore();
+  }
+
+  /* ---------- Kleine Inhalte (Token), einmal gemalt ---------- */
+  const TOKC = new Map();
+  const TOK = {
+    apfel: (c, R) => { apfel(c, 0, 0, 1.4, R() < 0.5 ? "#a8302a" : R() < 0.5 ? "#b8a030" : "#7a8a2a"); return [3.4, 3.6]; },
+    kartoffel: (c, R) => { E(c, 0, 0, 1.6, 1.15, "#9a7a4a"); E(c, -0.5, -0.4, 0.6, 0.35, "rgba(255,230,180,.3)"); E(c, 0.6, 0.2, 0.2, 0.2, "#5a4020"); return [3.6, 2.8]; },
+    zwiebel: (c, R) => { E(c, 0, 0.2, 1.5, 1.4, "#c8884a"); Ln(c, "#a86a30", 0.25, [0, -1.2, 0, 1.4]); P(c, "#8a6a3a", [-0.3, -1.1, 0, -2.4, 0.3, -1.1]); return [3.4, 4.2]; },
+    brot: (c) => { brot(c, 0, 1.4, 4); return [5, 3]; },
+    kaese: (c) => { P(c, "#e8c060", [-2, 1, 2, 1, 2, -0.4, -2, 0.6]); E(c, 0.4, 0.2, 0.4, 0.3, "#c89a30"); return [4.4, 2.4]; },
+    fisch: (c, R) => { E(c, 0, 0, 2.6, 0.9, R() < 0.5 ? "#b8a070" : "#a89060"); P(c, "#8a7a50", [2.4, 0, 3.8, -1, 3.8, 1]); B(c, -2, -0.3, 0.4, 0.4, "#1a1414"); return [7, 2.4]; },
+    teller: (c) => { E(c, 0, 0, 3, 0.8, "#c8c0b4"); E(c, 0, -0.1, 2, 0.5, "#b0a89c"); return [6.2, 1.8]; },
+    becher: (c) => { becher(c, 0, 2, "#b8923a"); return [3, 4.4]; },
+    krug: (c) => { krug(c, 0, 2.6, 5.2, "#8a5a3a"); return [4.6, 5.4]; },
+    wuerfel: (c, R) => { B(c, -0.8, -0.8, 1.6, 1.6, "#e8e0d0"); B(c, -0.3, -0.3, 0.4, 0.4, "#2a1a1a"); return [1.8, 1.8]; },
+    karte: (c, R) => { B(c, -1, -1.4, 2, 2.8, "#e8dcc0"); B(c, -0.4, -0.4, 0.8, 0.8, R() < 0.5 ? "#a82a2a" : "#2a2224"); return [2.2, 3]; },
+    buch: (c, R) => { const col = ["#6a2a2a", "#2a4a2a", "#5a4a2a", "#4a2a4a", "#7a5a2a"][(R() * 5) | 0]; buch(c, -1.4, -2.4, 2.8, 4.8, col, R); return [3, 5]; },
+    seite: (c) => { B(c, -1.4, -1.8, 2.8, 3.6, "#ece2c6"); for (let k = 0; k < 4; k++) B(c, -1, -1.2 + k * 0.8, 2 - (k % 2) * 0.6, 0.2, "rgba(60,40,30,.45)"); return [3, 3.8]; },
+    feder: (c, R) => { const col = R() < 0.5 ? "#ece4d6" : "#c8b8a0"; E(c, 0, 0, 1.8, 0.5, col, 0.2); Ln(c, "rgba(120,100,80,.6)", 0.15, [-1.8, 0.2, 1.8, -0.2]); return [4, 1.4]; },
+    kerze: (c) => { kerze(c, 0, 2, 4, 1.1); return [1.4, 5.4]; },
+    scheit: (c, R) => { wood(c, -3.5, -1, 7, 2, "#6a4428", R, false); E(c, 3.5, 0, 0.6, 1, "#a07a4a"); return [8, 2.4]; },
+    speer: (c) => { B(c, -7, -0.3, 13, 0.6, "#6a4a2a"); P(c, "#a8a6a2", [6, -0.9, 8.4, 0, 6, 0.9]); return [16, 2]; },
+    pfeil: (c) => { B(c, -4, -0.2, 8, 0.4, "#7a5a32"); P(c, "#9a9896", [4, -0.6, 5.2, 0, 4, 0.6]); P(c, "#e8e0d0", [-4, 0, -4.8, -0.8, -3, 0]); return [10.4, 1.8]; },
+    zahnrad: (c, R) => { const r = 1.2 + R() * 1; c.fillStyle = R() < 0.5 ? "#a8823a" : "#8a8486"; zahnradF(c, 0, 0, r, 8, 0.6); c.fill(); E(c, 0, 0, r * 0.35, r * 0.35, "#2a2224"); return [r * 2 + 1.6, r * 2 + 1.6]; },
+    knochen: (c, R) => { if (R() < 0.3) { schaedel(c, 0, 0, 1.8, R() - 0.5); return [4, 4.4]; } knochen(c, -2.4, 0, 2.4, 0, 0.7); return [6, 1.8]; },
+    heu: (c, R) => { for (let k = 0; k < 4; k++) Ln(c, ["#c8a858", "#a88838", "#e0c878"][k % 3], 0.3, [-2 + R(), -0.6 + R() * 1.2, 2 - R(), -0.6 + R() * 1.2]); return [4.6, 1.6]; },
+    korn: (c, R) => { E(c, 0, 0, 0.5, 0.35, R() < 0.5 ? "#d8c088" : "#b89a60"); return [1.2, 1]; },
+    glut: (c) => { E(c, 0, 0, 0.9, 0.7, "#ff8a3a"); E(c, -0.2, -0.2, 0.4, 0.3, "#ffd27a"); return [2, 1.6]; }
+  };
+  const FLUTTER = { seite: 1, feder: 1, heu: 1, karte: 1 };
+  function tokSprite(type) {
+    const v = (rnd() * 3) | 0, key = type + v; let o = TOKC.get(key); if (o) return o;
+    const res = 3, cv = document.createElement("canvas"); cv.width = cv.height = 60; const g = cv.getContext("2d"); g.scale(res, res); g.translate(10, 10);
+    const sz = TOK[type](g, Z.Rng((strSeed(type) + v * 31) >>> 0));
+    const cw = Math.ceil(sz[0] * res) + 2, ch = Math.ceil(sz[1] * res) + 2, out = document.createElement("canvas"); out.width = cw; out.height = ch; out.getContext("2d").drawImage(cv, -(30 - cw / 2), -(30 - ch / 2));
+    o = { cv: out, w: cw / res, h: ch / res }; TOKC.set(key, o); return o;
+  }
+
+  /* ---------- Stücke in die Welt werfen ---------- */
+  function addPiece(o) {
+    let fly = 0; for (const q of PCS) if (q.st < 2) fly++;
+    if (fly >= maxFly()) return null;
+    const q = Object.assign({ x: 0, y: 0, vx: 0, vy: 0, r: 0, vr: 0, f: 1, st: 0, t: 0, a: 1, sy: 1, gtx: -99999, gy: 0, mode: "" }, o);
+    PCS.push(q); return q;
+  }
+  function throwPieces(list, X, Y, f, hx, dir, force, wall) {
+    let area = 0; for (const pc of list) area += pc.w * pc.h;
+    for (const pc of list) {
+      const wx = X + pc.lx * f, wy = Y + pc.ly, m = Math.sqrt(pc.w * pc.h / 40) + 0.6, away = sgn(wx - hx) || dir || 1;
+      const k = force / m;
+      addPiece({ cv: pc.cv, w: pc.w, h: pc.h, x: wx, y: wy, f,
+        vx: wall ? (rnd() - 0.5) * 40 * k + away * 20 : away * (30 + rnd() * 90) * k + dir * 40 * force + (rnd() - 0.5) * 30,
+        vy: wall ? -10 - rnd() * 50 * k : -(50 + rnd() * 150) * k * (0.5 + Math.min(1, (Y - wy) / 30)),
+        vr: (rnd() - 0.5) * 14 * k, r: 0 });
+    }
+  }
+  function spill(spec, x, y, dir, force) {
+    if (!spec || lvl() < 1) return;
+    for (const part of spec.split(",")) {
+      const [type, nS] = part.split(":"); let n = +nS || 1; if (lvl() < 2) n = Math.ceil(n / 2);
+      if (type === "korn") { burst(x, y - 4, n * 2, ["#d8c088", "#b89a60", "#c8a870"], 110, "dot", 1.2, 600); for (let i = 0; i < Math.min(5, n); i++) tok("korn", x + (rnd() - 0.5) * 10, y - 3, dir, force * 0.6); continue; }
+      if (type === "glut") { for (let i = 0; i < n; i++) { const q = tok("glut", x + (rnd() - 0.5) * 8, y - 6, dir, force); if (q) { q.glut = 4 + rnd() * 4; } } continue; }
+      for (let i = 0; i < n; i++) tok(type, x + (rnd() - 0.5) * 12, y - 4 - rnd() * 8, dir, force);
+    }
+  }
+  function tok(type, x, y, dir, force) {
+    if (!TOK[type]) return null;
+    const s = tokSprite(type), fl = !!FLUTTER[type];
+    return addPiece({ cv: s.cv, w: s.w, h: s.h, x, y, f: rnd() < 0.5 ? -1 : 1, vx: (dir * 40 + (rnd() - 0.5) * 120) * force * (fl ? 0.6 : 1), vy: -(60 + rnd() * 140) * force * (fl ? 0.7 : 1), vr: (rnd() - 0.5) * 16, mode: fl ? "flutter" : "", ph: rnd() * TAU, tok: type });
+  }
+  function burst(x, y, n, cols, sp, kind, size, g) {
+    if (!Z.fx) return; if (lvl() < 2) n = Math.ceil(n / 2);
+    for (let i = 0; i < n; i++) { const a = -PI / 2 + (rnd() - 0.5) * 2.6, v = sp * (0.35 + rnd() * 0.8); Z.fx.p({ x: x + (rnd() - 0.5) * 6, y: y + (rnd() - 0.5) * 4, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 0.5 + rnd() * 0.6, size: size * (0.6 + rnd() * 0.8), col: cols[(rnd() * cols.length) | 0], g: g || 600, drag: kind === "leaf" ? 0.93 : 0.985, kind, vr: (rnd() - 0.5) * 14 }); }
+  }
+  function dust(x, y, n, s) { if (!Z.fx || lvl() < 1) return; for (let i = 0; i < n; i++) Z.fx.p({ x: x + (rnd() - 0.5) * 14 * s, y: y - rnd() * 6, vx: (rnd() - 0.5) * 50, vy: -10 - rnd() * 25, life: 0.8 + rnd() * 0.7, size: 3 + rnd() * 3 * s, col: "rgba(150,138,124,.55)", kind: "smoke", drag: 0.93, g: -15 }); }
+
+  /* ---------- Flüssigkeit ---------- */
+  function emitter(x, y, dir, lq, amt, life, spread) {
+    if (lvl() < 1 || !LQ[lq]) return;
+    EMIT.push({ x, y, dir, lq, rate: 24 * amt, t: 0, life, spread: spread || 0.25 });
+    if (EMIT.length > 8) EMIT.shift();
+  }
+  function splash(x, y, lq, n, sp) {
+    if (lvl() < 1 || !LQ[lq]) return;
+    for (let i = 0; i < n && DROPS.length < 160; i++) { const a = -PI / 2 + (rnd() - 0.5) * 2.4, v = sp * (0.3 + rnd()); DROPS.push({ x: x + (rnd() - 0.5) * 8, y: y - rnd() * 6, vx: Math.cos(a) * v, vy: Math.sin(a) * v, lq, gy: groundY(x, y - 8) }); }
+  }
+  function puddleAdd(x, gy, lq, amt) {
+    let best = null; for (const u of PUD) if (u.lq === lq && Math.abs(u.y - gy) < 2 && Math.abs(u.x - x) < u.hw + 6) { best = u; break; }
+    if (!best) {
+      if (PUD.length >= 22) PUD.splice(PUD.findIndex(u => u.wet <= 0) >= 0 ? PUD.findIndex(u => u.wet <= 0) : 0, 1);
+      const run = floorRun(x, gy); if (x < run[0] || x > run[1]) return;
+      best = { x, y: gy, hw: 1.5, tw: 3, lq, wet: 1, t: 0, run, seed: rnd() * 9 }; PUD.push(best);
+    }
+    best.tw = Math.min(30, best.tw + amt); best.wet = 1; best.t = Math.min(best.t, 2);
+    best.x += (x - best.x) * 0.05;
+  }
+
+  /* ---------- Kleine Brände, Rauchfahnen ---------- */
+  function smallFire(x, gy, n, life) {
+    if (lvl() < 1) return;
+    for (let i = 0; i < n && FIRES.length < 10; i++) FIRES.push({ x: x + (rnd() - 0.5) * 14, y: gy, t: -rnd() * 0.3, life: (life || 3) * (0.7 + rnd() * 0.6), s: 0.45 + rnd() * 0.35, ph: rnd() * 9 });
+    playS("fire", 0.22, 1.3, x, 0.2);
+    const ws = WS(); if (ws && ws.decal) try { ws.decal("brand", x, gy, { s: 0.45, fresh: 1 }); } catch (e) {}
+  }
+  function wisp(x, y) { if (lvl() >= 1) SMOKE.push({ x, y, t: 0, life: 2.5 + rnd(), ph: rnd() * 9 }); if (SMOKE.length > 24) SMOKE.shift(); }
+  function douse(p) { if (!p.fst || p.out) return; p.out = true; for (const st of p.fst) if (st && st.seen > TT - 1) wisp(st.x, st.y - 2); }
+
+  /* ---------- Impuls: alles in der Nähe reagiert (Flammen, Ketten, Tiere, kleine Stücke) ---------- */
+  function impulse(x, y, s, dir) {
+    if (Z.level !== lvRef || !props.length) return;
+    const R = 70 + s * 90;
+    for (const p of props) {
+      const X = p.x * T + 8, Y = p.L === 2 || p.L === 4 ? p.y * T : (p.y + 1) * T, dx = X - x, dy = Y - 8 - y, dist = Math.hypot(dx, dy);
+      const d = K[p.kind];
+      if (d.crit) { if (dist < 110 + s * 120) scare(p, X, x, s); continue; }
+      if (dist > R + 30) continue;
+      const k = Math.max(0, 1 - dist / (R + 30)), sd = sgn(dx) || dir || 1;
+      if (p.sw) p.sw.va += sd * k * s * (p.sw.kind === "stoff" ? 0.5 : 0.9) / (1 + p.sw.len / 50);
+      if (p.fst) for (const st of p.fst) if (st) { st.v += sgn(st.x - x || sd) * k * s * 8; if (s >= 0.9 && st.s < 0.75 && k > 0.35 && rnd() < 0.5 * k) douse(p); }
+      if (!p.broken && d.at === "f" && s >= 0.8 && k > 0.3 && C[p.kind] && !C[p.kind].no) { p.wv = (p.wv || 0) + sd * k * s * 1.2 / (1 + (p.bb ? (p.bb[3] - p.bb[1]) / 30 : 1)); }
+    }
+  }
+  function scare(p, X, x, s) {
+    const away = X >= x ? 1 : -1;
+    switch (p.kind) {
+      case "ratte": if (!(p.hide > 0) && !p.flee) { p.flee = true; p.wait = 0; p.dir = away; if (rnd() < 0.5) playS("rat", 0.12, 1.2, X, 0.4); } break;
+      case "huhn": case "katze": if (!p.panic || TT - p.panic > 3.5) { p.panic = TT; p.pdir = away; } break;
+      case "kraehe": case "moewe": case "taube": if (p.flyT == null && !(p.gone && TT < p.gone)) { p.flyT = TT; p.fdir = away; } break;
+      case "fledermaus": if (p.flyT == null && !(p.gone && TT < p.gone)) p.flyT = TT; break;
+      case "spinne": p.zip = TT + 5 + rnd() * 3; break;
+      case "krabbe": p.scare = TT + 2.5; p.dir = away; break;
+    }
+  }
+
+  /* ---------- Treffer ---------- */
+  /* o: { hits, dir, x, y (Trefferpunkt), force, expl, src } */
+  function hitProp(p, o) {
+    const cfg = C[p.kind], d = K[p.kind]; if (!cfg || p.broken || !d) return false;
+    if (cfg.flat && !o.expl) return false;
+    if ((p.hcd || 0) > CLK) return false; p.hcd = CLK + 0.1;
+    const r = rectOf(p); if (!r) return false;
+    const mat = MAT[cfg.m] || MAT.holz, dir = o.dir || 1, hx = clamp(o.x, r.x, r.x + r.w), hy = clamp(o.y, r.y, r.y + r.h);
+    const lx = (hx - r.X) * r.f, ly = hy - r.Y, big = r.h > 30 || r.w > 40;
+    p.fla = 0.08; p.shk = 0.18;
+    /* Wackeln, Schwingen, schief hängen */
+    if (p.sw) { p.sw.va += dir * (p.sw.kind === "stoff" ? 1.4 : 2.2) * (o.expl ? 2 : 1) / (1 + p.sw.len / 40); if (d.at === "w" && !cfg.no) p.sw.rest = clamp(p.sw.rest + dir * (0.04 + rnd() * 0.08), -0.28, 0.28); }
+    else if (d.at === "f") p.wv = (p.wv || 0) + dir * (cfg.no ? 0.6 : 3.2) / (1 + r.h / 26);
+    impulse(hx, hy, o.expl ? 1.2 : 0.45, dir);
+    /* Klang */
+    const sn = cfg.snd || mat.hit; playS(sn[0], sn[1], sn[2] * (0.92 + rnd() * 0.16), hx);
+    if (cfg.ring) playS(cfg.ring[0], cfg.ring[1], cfg.ring[2] * (0.95 + rnd() * 0.1), hx, 0.25);
+    if (cfg.snd2 && rnd() < 0.6) playS(cfg.snd2, 0.18, 1.2, hx, 0.15);
+    if (simple()) { if (!cfg.no) { p.dmg = (p.dmg || 0) + (o.hits || 1); if (p.dmg >= (cfg.hp || 1)) breakProp(p, o, r, cfg, mat); } return true; }
+    /* Splitter, Staub, Fetzen */
+    if (!cfg.soft) burst(hx, hy, cfg.no ? 2 : 4, mat.c, 90, mat.pk, mat.pk === "leaf" ? 1.6 : 1.3, mat.pk === "leaf" ? 160 : 650);
+    if (cfg.scatter || cfg.leaves) burst(hx, hy, 6, cfg.leaves ? ["#4a6a3a", "#3a5a2e", "#5a7a3a"] : mat.c, 70, "leaf", 1.8, 140);
+    if (cfg.sporen) sporen(hx, hy, 6);
+    if (cfg.cut) { p.cut = true; p.cutT = TT; burst(r.X, r.Y - 8, 10, ["#4a6a3a", "#3a5a2e", "#6a4a2a"], 110, "leaf", 2, 200); playS("slash", 0.25, 1.1, hx); p.broken = false; p.dmg = 99; return true; }
+    if (cfg.no) { if (d.at === "f" && big) dust(hx, r.Y, 1, 0.6); return true; }
+    p.dmg = (p.dmg || 0) + (o.hits || 1);
+    if (p.dmg >= cfg.hp) { breakProp(p, o, r, cfg, mat); return true; }
+    /* Schaden sichtbar: Risse, Dellen; Fässer bekommen ein Leck, Regale verlieren Seiten */
+    damage(p, lx, ly, Math.ceil(p.dmg / cfg.hp * 2), mat);
+    if (cfg.leak && cfg.liq && !p.leak) { p.leak = true; emitter(hx, clamp(hy, r.y + r.h * 0.35, r.Y - 4), dir, cfg.liq, 0.5, 5); playS("splash", 0.2, 1.3, hx, 0.2); }
+    if (cfg.hitSpill) spill(cfg.hitSpill, hx, hy, dir, 0.6);
+    if (cfg.fire && rnd() < 0.5) douse(p);
+    return true;
+  }
+  function sporen(x, y, n) { if (!Z.fx) return; for (let i = 0; i < n; i++) Z.fx.p({ x: x + (rnd() - 0.5) * 10, y: y - rnd() * 6, vx: (rnd() - 0.5) * 30, vy: -8 - rnd() * 14, life: 1.6 + rnd(), size: 1 + rnd(), col: "rgba(232,214,170,.75)", kind: "dot", drag: 0.95, g: -4 }); }
+
+  function breakProp(p, o, r, cfg, mat) {
+    const d = K[p.kind], dir = o.dir || 1, X = r.X, Y = r.Y, f = r.f, force = o.expl ? 1.7 : o.hits >= 2 ? 1.25 : 1;
+    p.broken = true; p.brT = TT; p.dmg = cfg.hp;
+    Z.stats && (Z.stats.zerbrochen = (Z.stats.zerbrochen || 0) + 1);
+    const cxw = r.x + r.w / 2, cyw = r.y + r.h / 2;
+    const bs = mat.brk; playS(bs[0], bs[1], bs[2] * (0.9 + rnd() * 0.2), cxw);
+    if (cfg.snd2) playS(cfg.snd2, 0.3, 0.95, cxw, 0.1);
+    loot(p, cfg, cxw, r.y + r.h * 0.4, d);
+    if (cfg.fire) { douse(p); if (cfg.wf !== "fall" && cfg.wf !== "drop") smallFire(X, groundY(X, Y - 4), cfg.fire >= 2 ? 3 : 1 + (rnd() < 0.5 ? 1 : 0), 3); }
+    impulse(cxw, cyw, cfg.heavy ? 1 : 0.6, dir);
+    if (simple()) { burst(cxw, cyw, 8, mat.c, 140, "shard", 2.2, 700); if (d.at === "w" || d.at === "c") p.gone = true; return; }
+    const ws = WS();
+    if (cfg.heavy) { Z.fx && Z.fx.addShake && Z.fx.addShake(2.5); dust(cxw, Y, 5, 1.4); if (ws) try { ws.impact(cxw, Y - 4, 0.8, { dir }); if (mat === MAT.stein) ws.crater(cxw, Y - 2, 0.7, 3); } catch (e) {} }
+    else if (ws && ws.impact) try { ws.impact(cxw, cyw, 0.35, { dir, noDust: true }); } catch (e) {}
+    /* Wand und Decke: herunterfallen statt zerspringen */
+    if (cfg.wf === "fall" || cfg.wf === "paper" || cfg.wf === "roll" || cfg.wf === "drop") { dropWhole(p, r, cfg, mat, dir, d); return; }
+    const base = baseSprite(p); if (!base) { burst(cxw, cyw, 10, mat.c, 140, mat.pk, 2, 700); return; }
+    const s = p.dspr || base, al = alphaOf(base), bb = al.bb, wall = d.at === "w";
+    /* Rest am Boden: unteres Stück mit Bruchkante */
+    let region = bb.slice();
+    if (!wall && bb[3] - bb[1] > 9) { const hr = clamp((bb[3] - bb[1]) * 0.22, 3, 9); p.rest = stumpOf(s, al, hr, mat); region[3] = bb[3] - hr + 1.5; }
+    else p.rest = null;
+    if (wall) { p.gone = true; p.ghost = ghostOf(p); }
+    const pcs = cutSprite(s, al, region, maxPieces(), mat);
+    throwPieces(pcs, X, Y, f, o.x, dir, force, wall);
+    /* Material-Splitter */
+    burst(cxw, cyw, mat.pk === "leaf" ? 10 : 12, mat.c, 150 * force, mat.pk, mat.pk === "leaf" ? 2 : 1.6, mat.pk === "leaf" ? 160 : 700);
+    if (mat === MAT.stein || mat === MAT.ton || mat === MAT.kristall) dust(cxw, Y, mat === MAT.stein ? 4 : 2, 1);
+    if (mat === MAT.holz || mat === MAT.kiste || mat === MAT.fass) burst(cxw, cyw, 6, ["#c8a070", "#e0c090", "#8a6440"], 160 * force, "shard", 0.9, 800);
+    if (cfg.scatter) burst(cxw, cyw, 10, mat.c, 120, "leaf", 2.2, 140);
+    if (cfg.sporen) sporen(cxw, cyw, 14);
+    spill(cfg.spill, cxw, cyw, dir, force);
+    if (cfg.liq) { const gy = groundY(X, Y - 6); splash(cxw, Math.min(cyw, gy - 6), cfg.liq, Math.round(18 * cfg.lq), 120 * force); emitter(X + (rnd() - 0.5) * 6, wall ? cyw : Y - 3, dir, cfg.liq, 0.6 * cfg.lq, 2.5); puddleAdd(X, gy, cfg.liq, 6 * cfg.lq); playS("splash", 0.4, 0.95, cxw, 0.2); }
+    if (cfg.pulver) { if (Z.fx) for (let i = 0; i < 12; i++) Z.fx.p({ x: cxw + (rnd() - 0.5) * 12, y: cyw, vx: (rnd() - 0.5) * 80, vy: -20 - rnd() * 50, life: 1 + rnd(), size: 4 + rnd() * 4, col: "rgba(60,56,54,.6)", kind: "smoke", drag: 0.92, g: -10 }); for (let i = 0; i < 6; i++) Z.fx && Z.fx.p({ x: cxw, y: cyw, vx: (rnd() - 0.5) * 160, vy: -40 - rnd() * 100, life: 0.4, size: 1.2, col: "#ffb040", kind: "spark", add: true, g: 300 }); playS("fire", 0.2, 1.6, cxw); if (ws) try { ws.decal("brand", X, groundY(X, Y - 4), { s: 0.55 }); } catch (e) {} }
+    if (cfg.spinnen) spiders(cxw, Y, cfg.spinnen);
+  }
+  function loot(p, cfg, x, y, d) {
+    if (!Z.R || Z.level !== lvRef) return;
+    const R = Z.R, tier = Z.run ? Z.run.tier || 0 : 0, gm = Z.BAL && Z.BAL.goldMul ? Z.BAL.goldMul(tier) : 1;
+    const gch = cfg.gold != null ? cfg.gold : cfg.m === "kiste" || cfg.m === "fass" ? 0.16 : cfg.m === "holz" ? 0.04 : 0;
+    try {
+      if (gch && R() < gch) Z.dropGold(x, y, Math.max(1, Math.round((2 + R() * 5) * gm * (cfg.goldN || 1))));
+      if (cfg.food && Z.FOOD && R() < cfg.food) Z.spawnPickup("food", x, y, { food: R.pick(Z.FOOD), drop: true });
+      if ((cfg.m === "kiste" || cfg.m === "fass") && R() < 0.015 && Z.dropShards) Z.dropShards(x, y, 1);
+    } catch (e) { console.error(e); }
+  }
+  /* Spinnenjunge huschen aus Eiersäcken (rein dekorativ) */
+  const SPID = [];
+  function spiders(x, gy, n) { if (lvl() < 2) n = Math.ceil(n / 2); for (let i = 0; i < n && SPID.length < 16; i++) SPID.push({ x: x + (rnd() - 0.5) * 8, y: groundY(x, gy - 6), vx: (rnd() < 0.5 ? -1 : 1) * (40 + rnd() * 50), t: 0, life: 1.6 + rnd() * 1.4, ph: rnd() * 9 }); }
+
+  /* Wandschmuck/Hängendes fällt als Ganzes */
+  function snapshot(p, d) {
+    const hr = HANG[p.kind] ? HANG[p.kind](p.v) : null, base = baseSprite(p);
+    if (!d.a || !hr) { const s = p.dspr || base; return s ? { s, al: alphaOf(base) } : null; }
+    const bx0 = Math.min(hr[0], base ? base.l : 0) - 3, by0 = Math.min(hr[1], base ? base.t : 0) - 3, bx1 = Math.max(hr[2], base ? base.l + base.w : 0) + 3, by1 = Math.max(hr[3], base ? base.t + base.h : 0) + 4;
+    const res = 3, cv = document.createElement("canvas"); cv.width = Math.ceil((bx1 - bx0) * res); cv.height = Math.ceil((by1 - by0) * res);
+    const g = cv.getContext("2d"); g.scale(res, res); g.translate(-bx0, -by0);
+    capture = true; const sw = p.sw; p.sw = null; try { d.a(g, p, TT); } catch (e) { console.error(e); } capture = false; p.sw = sw;
+    const s = { cv, l: bx0, t: by0, w: bx1 - bx0, h: by1 - by0 };
+    /* Aufhängung (Bügel und oberste Kettenglieder) bleibt an der Decke: oben abschneiden */
+    g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cv.width, Math.max(0, (hr[1] - by0 - 0.5) * res)); g.restore();
+    return { s, al: alphaOf(s) };
+  }
+  function dropWhole(p, r, cfg, mat, dir, d) {
+    const sn = snapshot(p, d); p.gone = true; if (!sn) return;
+    const wp = wholePiece(sn.s, sn.al), X = r.X, Y = r.Y, f = r.f;
+    const ang = p.sw ? p.sw.a : 0;
+    const q = addPiece({ cv: wp.cv, w: wp.w, h: wp.h, x: X + wp.lx * f, y: Y + wp.ly, f, r: ang, vx: dir * (cfg.wf === "drop" ? 20 : 30) + (rnd() - 0.5) * 20, vy: cfg.wf === "drop" ? 10 : -30 - rnd() * 30, vr: dir * (cfg.wf === "drop" ? 1 : 2.4) * (0.5 + rnd()), mode: cfg.wf === "paper" ? "flutter" : cfg.wf === "roll" ? "roll" : cfg.landShatter ? "shatter" : "lie", cfg, mat, big: 1, ph: rnd() * 9 });
+    if (!q) return;
+    if (cfg.wf === "paper") { q.vy = -20; q.vr = (rnd() - 0.5) * 3; }
+    if (d.at === "c") { p.stub = cfg.swing || "kette"; playS(cfg.swing === "kette" ? "chain" : "slash", 0.35, 1, X, 0.1); }
+    if (cfg.fire) q.lit = 1;
+    if (cfg.leaves) burst(r.x + r.w / 2, r.y + r.h / 2, 10, ["#5a7a3a", "#7a8a4a", "#6a5a3a"], 80, "leaf", 2, 120);
+    if (d.at === "w") { p.ghost = ghostOf(p); playS("door", 0.08, 1.8, X, 0.3); }
+  }
+  /* heller Abdruck an der Wand, wo das Stück hing, mit Nagel */
+  function ghostOf(p) {
+    const base = baseSprite(p); if (!base) return null; const al = alphaOf(base), [x0, y0, x1, y1] = al.bb;
+    const res = 2, cv = document.createElement("canvas"); cv.width = Math.ceil((x1 - x0) * res) + 2; cv.height = Math.ceil((y1 - y0) * res) + 2;
+    const g = cv.getContext("2d"); g.scale(res, res); g.translate(-x0, -y0); g.drawImage(base.cv, base.l, base.t, base.w, base.h);
+    g.globalCompositeOperation = "source-in"; g.fillStyle = "rgba(255,236,206,.06)"; g.fillRect(x0 - 1, y0 - 1, x1 - x0 + 2, y1 - y0 + 2);
+    g.globalCompositeOperation = "source-over"; g.fillStyle = "rgba(0,0,0,.22)"; g.fillRect(x0, y1 - 0.6, x1 - x0, 0.6);
+    E(g, (x0 + x1) / 2, y0 + 2.5, 0.55, 0.55, "#1e1a1a"); E(g, (x0 + x1) / 2 - 0.15, y0 + 2.35, 0.2, 0.2, "rgba(255,240,220,.6)");
+    return { cv, l: x0, t: y0, w: cv.width / res, h: cv.height / res };
+  }
+  /* ein fallendes Ganzstück schlägt auf */
+  function landWhole(q) {
+    const cfg = q.cfg, mat = q.mat || MAT.holz, x = q.x, gy = q.gy;
+    if (q.lit) { smallFire(x, gy, 1 + (rnd() < 0.6 ? 1 : 0), 2.6); }
+    if (cfg.land) playS(cfg.land[0], cfg.land[1], cfg.land[2] * (0.92 + rnd() * 0.16), x);
+    impulse(x, gy - 4, cfg.heavy ? 1.1 : 0.4, sgn(q.vx) || 1);
+    if (cfg.heavy) { Z.fx && Z.fx.addShake && Z.fx.addShake(3); dust(x, gy, 6, 1.4); const ws = WS(); if (ws) try { ws.impact(x, gy - 4, 1, {}); } catch (e) {} }
+    if (q.mode === "shatter") {
+      const s = { cv: q.cv, l: -q.w / 2, t: -q.h / 2, w: q.w, h: q.h };
+      const al = alphaOf(s), pcs = cutSprite(s, al, al.bb, maxPieces(), mat);
+      for (const pc of pcs) { const co = Math.cos(q.r), si = Math.sin(q.r), lx = pc.lx * q.f, ly = pc.ly; addPiece({ cv: pc.cv, w: pc.w, h: pc.h, x: x + lx * co - ly * si, y: q.y + lx * si + ly * co, f: q.f, r: q.r, vx: (rnd() - 0.5) * 120 + q.vx * 0.3, vy: -40 - rnd() * 110, vr: (rnd() - 0.5) * 12 }); }
+      const bs = mat.brk; playS(bs[0], bs[1], bs[2], x); if (mat !== MAT.glas && cfg.landShatter && cfg.fire) playS("glass", 0.4, 1.1, x, 0.05);
+      burst(x, gy - 3, 12, mat.c, 140, mat.pk, 1.5, 700);
+      if (cfg.spill) spill(cfg.spill, x, gy - 3, sgn(q.vx) || 1, 0.8);
+      if (cfg.liq) { splash(x, gy - 4, cfg.liq, 10, 90); puddleAdd(x, gy, cfg.liq, 6 * (cfg.lq || 0.5)); playS("splash", 0.3, 1, x, 0.1); }
+      if (cfg.spinnen) spiders(x, gy, cfg.spinnen);
+      return true;
+    }
+    burst(x, gy - 2, 4, mat.c, 60, mat.pk, 1.2, 600);
+    return false;
+  }
+
+  /* ---------- Treffer verteilen ---------- */
+  function hitArea(r, o) {
+    if (Z.level !== lvRef || !props.length || !r) return 0;
+    let n = 0;
+    for (const p of props) {
+      if (p.broken || K[p.kind].crit) { if (K[p.kind].crit && !p.broken) { const X = p.x * T + 8 + (p.rx || p.cx || 0), Y = p.L === 4 ? p.y * T + (p.l || 10) : (p.y + 1) * T - 4; if (X > r.x - 6 && X < r.x + r.w + 6 && Y > r.y - 8 && Y < r.y + r.h + 8) hitCritter(p, X, Y, o); } continue; }
+      const pr = rectOf(p); if (!pr || !ov(r, pr)) continue;
+      if (o.set) { if (o.set.has(p)) continue; o.set.add(p); }
+      const hx = clamp(r.x + r.w / 2, pr.x, pr.x + pr.w), hy = clamp(r.y + r.h / 2, pr.y, pr.y + pr.h);
+      if (hitProp(p, { hits: o.hits, dir: o.dir || (sgn(pr.x + pr.w / 2 - (r.x + r.w / 2)) || 1), x: hx, y: hy, expl: o.expl, src: o.src })) n++;
+    }
+    return n;
+  }
+  function hitCritter(p, X, Y, o) {
+    if ((p.ccd || 0) > CLK) return; p.ccd = CLK + 1;
+    scare(p, X, X - (o.dir || 1) * 10, 1);
+    if (p.kind === "huhn") { for (let i = 0; i < (lvl() >= 2 ? 7 : 3); i++) tok("feder", X + (rnd() - 0.5) * 6, Y - 4, o.dir || 1, 0.5); }
+    if (p.kind === "katze") burst(X, Y - 4, 4, ["#8a6a4a", "#5a4a40"], 40, "leaf", 1, 60);
+  }
+
+  /* ---------- Einhängen: Waffentreffer, Explosionen, Gegnertreffer ---------- */
+  const hp0 = Z.hitProps;
+  Z.hitProps = function (r, dmg, act) {
+    try {
+      if (r && Z.level === lvRef && props.length) {
+        const expl = !act && r.w >= 70 && r.h >= 50, P = Z.player;
+        let set = null; if (act) { set = actHit.get(act); if (!set) { set = new Set(); actHit.set(act, set); } }
+        const heavy = act && act.def && (act.def.heavy || act.def.spin);
+        hitArea(r, { hits: expl ? 9 : act ? (heavy ? 2 : 1) : 2, dir: act && P ? P.face : 0, expl, set, src: "p" });
+      }
+    } catch (e) { console.error(e); }
+    return hp0 ? hp0.apply(this, arguments) : undefined;
+  };
+  const he0 = Z.hitEnemy;
+  Z.hitEnemy = function (e, dmg, o) {
+    const n = he0.apply(this, arguments);
+    try { if (n > 0 && e && !(o && (o.dot || o.fx)) && Z.level === lvRef) impulse(e.x + e.w / 2, e.y + e.h / 2, o && (o.heavy || o.crit) ? 0.7 : 0.35, o && o.dir); } catch (err) { console.error(err); }
+    return n;
+  };
+  const ex0 = Z.explode;
+  Z.explode = function (x, y, r, dmg, owner, eff) {
+    const res = ex0.apply(this, arguments);
+    try {
+      if (Z.level === lvRef) {
+        const R = r || 40; impulse(x, y, 1.4, 0);
+        if (owner !== "p") hitArea({ x: x - R, y: y - R, w: R * 2, h: R * 2 }, { hits: 9, expl: true, src: "e" });
+      }
+    } catch (err) { console.error(err); }
+    return res;
+  };
+
+  /* ---------- Takt: Gegnerschläge, Geschosse, Physik ---------- */
+  function enemyHits() {
+    for (const e of Z.enemies || []) {
+      if (e.dead) continue;
+      const ac = e.act;
+      if (ac && ac.phase === "act" && ac.a) {
+        if (ac.a.box && !ac.ausHit) {
+          ac.ausHit = true; const sz = e.size || 1, [bx, by, bw, bh] = ac.a.box.map(v => v * sz), cx = e.x + e.w / 2, fy = e.y + e.h;
+          const r = e.face > 0 ? { x: cx + bx, y: fy + by, w: bw, h: bh } : { x: cx - bx - bw, y: fy + by, w: bw, h: bh };
+          hitArea(r, { hits: ac.a.k === "slam" ? 2 : 1, dir: e.face, src: "e" });
+        }
+        if (ac.a.k === "charge") { let set = actHit.get(ac); if (!set) { set = new Set(); actHit.set(ac, set); } hitArea(e, { hits: 2, dir: e.face, set, src: "e" }); }
+      }
+      /* zurückgeschleuderte Gegner krachen in Möbel */
+      if (Math.abs(e.vx || 0) > 240 && (e.ausCd || 0) < CLK) { if (hitArea(e, { hits: 1, dir: sgn(e.vx), src: "e" })) e.ausCd = CLK + 0.3; }
+    }
+  }
+  function projHits() {
+    for (const q of Z.projs || []) {
+      if (q.dead || q.t > (q.life || 9)) continue;
+      const rr = Math.max(3, q.r || 3), r = { x: q.x - rr, y: q.y - rr, w: rr * 2, h: rr * 2 };
+      let set = projHit.get(q); if (!set) { set = new Set(); projHit.set(q, set); }
+      hitArea(r, { hits: 1, dir: sgn(q.vx) || q.dir || 1, set, src: q.owner });
+    }
+  }
+  function playerTouch(dt) {
+    const P = Z.player; if (!P || P.dead) return;
+    const pr = { x: P.x, y: P.y, w: P.w, h: P.h }, mv = Math.abs(P.vx || 0);
+    for (const p of props) {
+      if (p.broken) continue; const d = K[p.kind]; if (d.crit) continue;
+      if (!p.sw && !(d.at === "f" && mv > 60)) continue;
+      const r = rectOf(p); if (!r || !ov(pr, r)) continue;
+      const cfg = C[p.kind];
+      if (p.sw && d.at === "c") { p.sw.va += (P.vx || 0) * 0.0035 * dt * 60 / (1 + p.sw.len / 40); if (mv > 90 && (p.tcd || 0) < CLK && cfg && cfg.snd && cfg.snd[0] === "chain") { p.tcd = CLK + 0.8; playS("chain", 0.12, 1.2, r.X, 0.3); } if (cfg && cfg.ring && mv > 120 && (p.tcd || 0) < CLK) { p.tcd = CLK + 1.2; playS(cfg.ring[0], cfg.ring[1] * 0.6, cfg.ring[2], r.X, 0.5); } }
+      else if (d.at === "f" && cfg && !cfg.no && r.h < 28 && (p.tcd || 0) < CLK) {
+        p.tcd = CLK + 0.6; p.wv = (p.wv || 0) + sgn(P.vx) * 1.4;
+        /* rollend räumt Ezekiel kleine Dinge um */
+        if (P.rollT > 0 && cfg.hp <= 1) hitProp(p, { hits: 1, dir: sgn(P.vx) || 1, x: r.x + r.w / 2, y: r.y + r.h / 2 });
+      }
+      if (cfg && cfg.cut && mv > 40 && !p.cut) { p.bend = sgn(P.vx); p.bendT = TT; }
+    }
+  }
+  function physics(dt) {
+    const g = 900;
+    /* Wackeln und Schwingen */
+    for (const p of props) {
+      if (p.fla > 0) p.fla -= dt; if (p.shk > 0) p.shk -= dt;
+      if (p.wv || p.wob) { p.wv = (p.wv || 0) + (-(p.wob || 0) * 260 - p.wv * 9) * dt; p.wob = clamp((p.wob || 0) + p.wv * dt, -0.35, 0.35); if (Math.abs(p.wob) < 0.0005 && Math.abs(p.wv) < 0.005) { p.wob = 0; p.wv = 0; } }
+      const s = p.sw; if (s && !p.broken) { s.va += (-(s.a - s.rest) * s.k - s.va * s.c) * dt; s.a = clamp(s.a + s.va * dt, -1.2, 1.2); }
+      if (p.fst) for (const st of p.fst) if (st) { st.v += (-st.l * 60 - st.v * 7) * dt; st.l = clamp(st.l + st.v * dt, -1.6, 1.6); }
+    }
+    /* Stücke */
+    let rest = 0;
+    for (let i = PCS.length - 1; i >= 0; i--) {
+      const q = PCS[i]; q.t += dt;
+      if (q.glut) { q.glut -= dt; if (q.glut <= 0) { q.glut = 0; q.cool = 1; } }
+      if (q.fade) { q.a -= dt * 1.2; if (q.a <= 0) { PCS.splice(i, 1); continue; } }
+      if (q.st === 2) { rest++; continue; }
+      const tx = Math.floor(q.x / T); if (tx !== q.gtx || q.y > q.gy) { q.gtx = tx; q.gy = groundY(q.x, q.y - 2); }
+      if (q.mode === "flutter") { q.vy = Math.min(q.vy + g * 0.25 * dt, 26 + Math.sin(q.t * 3 + q.ph) * 6); q.vx = q.vx * Math.pow(0.3, dt) + Math.sin(q.t * 2.6 + q.ph) * 40 * dt; q.r = Math.sin(q.t * 3 + q.ph) * 0.9; }
+      else { q.vy += g * dt; q.vx *= Math.pow(0.85, dt); }
+      const nx = q.x + q.vx * dt, ntx = Math.floor(nx / T), ty = Math.floor((q.y - 1) / T);
+      if (ntx !== tx && SOLID(tileAt(ntx, ty))) { q.vx *= -0.35; q.vr *= 0.6; } else q.x = nx;
+      q.y += q.vy * dt; q.r += q.vr * dt;
+      const co = Math.abs(Math.cos(q.r)), si = Math.abs(Math.sin(q.r)), he = (co * q.h * q.sy + si * q.w) / 2;
+      if (q.y + he >= q.gy) {
+        q.y = q.gy - he;
+        if (q.big && !q.landed) { q.landed = true; if (landWhole(q)) { PCS.splice(i, 1); continue; } if (q.mode === "roll") { q.vx = (sgn(q.vx) || (rnd() < 0.5 ? -1 : 1)) * (50 + rnd() * 40); q.vy = 0; } if (q.mode === "lie") { q.vy *= -0.15; q.vx *= 0.4; } }
+        if (q.mode === "roll") { q.vy = 0; q.vx *= Math.pow(0.55, dt); q.vr = q.vx / Math.max(2, Math.min(q.w, q.h) / 2); if (Math.abs(q.vx) < 6) settle(q); continue; }
+        if (q.mode === "flutter") { settle(q); continue; }
+        if (q.vy > 70) { q.vy *= -0.28; q.vx *= 0.6; q.vr *= 0.5; if (rnd() < 0.35 && q.t > 0.2) playS(q.tok === "apfel" || q.tok === "kartoffel" ? "hitFlesh" : "crate", 0.05, 1.9, q.x, 0.06); }
+        else { q.vy = 0; q.vx *= Math.pow(0.02, dt); q.vr *= Math.pow(0.02, dt); if (Math.abs(q.vx) < 8) settle(q); }
+      }
+      if (q.y > q.gy + 600 || q.t > 14) PCS.splice(i, 1);
+    }
+    if (rest > maxRest()) { let k = rest - maxRest(); for (const q of PCS) { if (k <= 0) break; if (q.st === 2 && !q.fade) { q.fade = 1; k--; } } }
+    /* Tropfen und Pfützen */
+    for (let i = EMIT.length - 1; i >= 0; i--) {
+      const e = EMIT[i]; e.t += dt; if (e.t >= e.life) { EMIT.splice(i, 1); continue; }
+      const k = 1 - e.t / e.life; let n = e.rate * k * dt; while (n > 0 && DROPS.length < 160) { if (n < 1 && rnd() > n) break; n--; DROPS.push({ x: e.x, y: e.y, vx: e.dir * (30 + rnd() * 30) * (0.4 + k) + (rnd() - 0.5) * 12, vy: -10 + rnd() * 20, lq: e.lq, gy: groundY(e.x, e.y) }); }
+    }
+    for (let i = DROPS.length - 1; i >= 0; i--) {
+      const q = DROPS[i]; q.vy += g * dt; q.x += q.vx * dt; q.y += q.vy * dt;
+      if (q.y >= q.gy) { puddleAdd(q.x, q.gy, q.lq, 0.45); if (rnd() < 0.25 && Z.fx) Z.fx.p({ x: q.x, y: q.gy - 1, vx: (rnd() - 0.5) * 40, vy: -30 - rnd() * 30, life: 0.25, size: 0.8, col: "rgba(" + LQ[q.lq][0] + ",.8)", g: 500 }); DROPS.splice(i, 1); continue; }
+      if (q.y > q.gy + 400) DROPS.splice(i, 1);
+    }
+    for (const u of PUD) { u.t += dt; u.hw += (u.tw - u.hw) * Math.min(1, dt * 1.5); if (u.t > 25) u.wet = Math.max(0, 1 - (u.t - 25) / 50); }
+    for (let i = FIRES.length - 1; i >= 0; i--) { const f = FIRES[i]; f.t += dt; if (f.t > f.life) { wisp(f.x, f.y - 3); FIRES.splice(i, 1); continue; } if (f.t > 0 && rnd() < dt * 6 && Z.fx && lvl() >= 2) Z.fx.p({ x: f.x + (rnd() - 0.5) * 3, y: f.y - 4, vx: (rnd() - 0.5) * 16, vy: -30 - rnd() * 30, life: 0.5 + rnd() * 0.4, size: 0.9, col: "#ffb060", kind: "spark", add: true, g: -20 }); }
+    for (let i = SMOKE.length - 1; i >= 0; i--) { const s = SMOKE[i]; s.t += dt; if (s.t > s.life) SMOKE.splice(i, 1); }
+    for (let i = SPID.length - 1; i >= 0; i--) { const s = SPID[i]; s.t += dt; const nx = s.x + s.vx * dt; if (SOLID(tileAt(Math.floor(nx / T), Math.floor((s.y - 2) / T))) || !(SOLID(tileAt(Math.floor(nx / T), Math.floor(s.y / T))) || PLAT(tileAt(Math.floor(nx / T), Math.floor(s.y / T))))) s.vx = -s.vx; else s.x = nx; if (s.t > s.life) SPID.splice(i, 1); }
+  }
+  /* zur Ruhe kommen: flach hinlegen, Ganzstücke lehnen schief, Papier liegt flach */
+  function settle(q) {
+    q.vx = 0; q.vy = 0; q.vr = 0;
+    if (q.mode === "lie") { const lean = (q.r > 0 ? 1 : -1) * (0.12 + rnd() * 0.2); q.r = lean; }
+    else if (q.mode === "flutter") { q.r = (rnd() - 0.5) * 0.3; q.sy = 0.35; }
+    else if (q.mode !== "roll") { const flatA = q.w >= q.h ? 0 : PI / 2, cands = [flatA, flatA + PI, flatA - PI]; let best = cands[0]; for (const c of cands) { const a = ((q.r - c) % TAU + TAU + PI) % TAU - PI; if (Math.abs(a) < Math.abs(((q.r - best) % TAU + TAU + PI) % TAU - PI)) best = c; } q.r = best + (rnd() - 0.5) * 0.25; }
+    const co = Math.abs(Math.cos(q.r)), si = Math.abs(Math.sin(q.r)), he = (co * q.h * q.sy + si * q.w) / 2; q.y = q.gy - he + 0.4;
+    q.st = 2;
+    /* liegende Trümmer abdunkeln, damit sie Hintergrund bleiben (einmal ins Teil gemalt) */
+    if (!q.dark && q.cv) { q.dark = 1; const g = q.cv.getContext("2d"); g.globalCompositeOperation = "source-atop"; g.fillStyle = q.big ? "rgba(10,6,4,.22)" : "rgba(12,8,6,.38)"; g.fillRect(0, 0, q.cv.width, q.cv.height); g.globalCompositeOperation = "source-over"; }
+  }
+
+  const tk0 = Z.ebenenTick;
+  Z.ebenenTick = function (dt) {
+    if (tk0) tk0(dt);
+    if (Z.level !== lvRef || !props.length) return;
+    CLK += dt;
+    try { enemyHits(); projHits(); playerTouch(dt); physics(dt); } catch (e) { console.error(e); }
+  };
+
+  /* ---------- Zeichnen ---------- */
+  function paintBroken(c, p, t, x, y, d, flip) {
+    if (p.rest) { c.save(); c.translate(x, y); if (flip) c.scale(-1, 1); c.drawImage(p.rest.cv, p.rest.l, p.rest.t, p.rest.w, p.rest.h); c.restore(); }
+    if (p.ghost) { const gh = p.ghost; c.save(); c.translate(x, y); if (flip) c.scale(-1, 1); c.drawImage(gh.cv, gh.l, gh.t, gh.w, gh.h); c.restore(); }
+    if (d.at === "c" && p.gone) {
+      /* Bügel bleibt, ein Stück Kette/Seil baumelt nach */
+      c.save(); c.translate(x, y); if (flip) c.scale(-1, 1);
+      if (d.s) { const s = spriteOf(p.kind, p.v); c.drawImage(s.cv, s.l, s.t, s.w, s.h); }
+      const a = p.sw ? p.sw.a : Math.sin(t * 1.4 + p.s * 9) * 0.1; c.rotate(a);
+      if (p.stub === "kette") kette(c, 0, 1, 0, 7, "#3a3436");
+      else if (p.stub === "seil") { seil(c, [0, 1, 0, 6], "#a08050", 0.5); for (let k = 0; k < 3; k++) Ln(c, "#c8a870", 0.2, [0, 6, -0.8 + k * 0.8, 7.6]); }
+      else if (p.stub === "faden") Ln(c, "rgba(230,226,236,.45)", 0.3, [0, 0, 0.4, 6]);
+      c.restore();
+    }
+  }
+  function drawLayerBack(c, t) {
+    /* Pfützen und Flecken unter allem */
+    const cam = Z.cam;
+    for (const u of PUD) {
+      if (u.x < cam.x - 40 || u.x > cam.x + cam.w + 40 || u.y < cam.y - 20 || u.y > cam.y + cam.h + 20) continue;
+      const L = LQ[u.lq], a = L[1] * (0.55 + 0.45 * u.wet), hw = u.hw;
+      c.save(); c.beginPath(); c.rect(u.run[0], u.y - 4, u.run[1] - u.run[0], 8); c.clip();
+      c.fillStyle = "rgba(" + L[0] + "," + a + ")"; c.beginPath(); c.ellipse(u.x, u.y + 0.3, hw, 0.9 + hw * 0.05, 0, 0, TAU); c.fill();
+      for (let k = 0; k < 3; k++) { const ox = Math.sin(u.seed + k * 2.1) * hw * 0.7; c.beginPath(); c.ellipse(u.x + ox, u.y + 0.3, hw * 0.3, 0.7, 0, 0, TAU); c.fill(); }
+      if (u.wet > 0.05) { c.fillStyle = "rgba(255,240,220," + 0.18 * u.wet + ")"; c.fillRect(u.x - hw * 0.5, u.y - 0.25, hw * 0.6, 0.35); }
+      c.restore();
+    }
+  }
+  function drawLayerFront(c, t) {
+    const cam = Z.cam, x0 = cam.x - 40, x1 = cam.x + cam.w + 40, y0 = cam.y - 40, y1 = cam.y + cam.h + 60;
+    for (const q of PCS) {
+      if (q.x < x0 || q.x > x1 || q.y < y0 || q.y > y1) continue;
+      c.save(); c.translate(q.x, q.y); c.rotate(q.r); c.scale(q.f, q.sy);
+      if (q.a < 1) c.globalAlpha = q.a;
+      c.drawImage(q.cv, -q.w / 2, -q.h / 2, q.w, q.h);
+      if (q.glut > 0) { c.globalCompositeOperation = "lighter"; c.globalAlpha = Math.min(1, q.glut / 3) * (0.6 + 0.4 * Math.sin(t * 7 + q.ph)); c.drawImage(q.cv, -q.w / 2, -q.h / 2, q.w, q.h); }
+      c.restore();
+      if (q.lit && !q.landed && !simple()) Z.ausFlamme(q.x, q.y - q.h * 0.2, 0.5, q.ph, "w");
+    }
+    for (const q of DROPS) { if (q.x < x0 || q.x > x1 || q.y < y0 || q.y > y1) continue; c.fillStyle = "rgba(" + LQ[q.lq][0] + ",.85)"; c.fillRect(q.x - 0.45, q.y - 0.9, 0.9, 1.8); }
+    /* Strahl aus dem Leck */
+    for (const e of EMIT) { if (e.x < x0 || e.x > x1) continue; const k = 1 - e.t / e.life; c.strokeStyle = "rgba(" + LQ[e.lq][0] + "," + (0.75 * k) + ")"; c.lineWidth = 0.6 + k * 0.8; c.beginPath(); c.moveTo(e.x, e.y); const vx = e.dir * 45 * (0.4 + k); for (let s = 0.05; s < 0.6; s += 0.05) { const xx = e.x + vx * s, yy = e.y + 450 * s * s; if (yy > groundY(e.x, e.y) ) break; c.lineTo(xx, yy); } c.stroke(); }
+    for (const s of SPID) { if (s.x < x0 || s.x > x1) continue; const lg2 = Math.sin(s.t * 40 + s.ph) * 0.6; c.globalAlpha = Math.min(1, (s.life - s.t) * 3); E(c, s.x, s.y - 1, 1.1, 0.8, "#2a2028"); for (const sd of [-1, 1]) for (let k = 0; k < 3; k++) Ln(c, "#1a1418", 0.25, [s.x + sd * 0.4, s.y - 1, s.x + sd * (1.6 + k * 0.3), s.y - 0.2 + (k % 2 ? lg2 : -lg2) * 0.4]); c.globalAlpha = 1; }
+    for (const s of SMOKE) { const u = s.t / s.life; for (let k = 0; k < 3; k++) { const uu = Math.min(1, u + k * 0.12); E(c, s.x + Math.sin(uu * 6 + s.ph) * 2 * uu + (Z.windX || 0) * uu * 0.05, s.y - uu * 14, 0.6 + uu * 2.4, 0.6 + uu * 2.4, "rgba(120,112,108," + 0.22 * (1 - uu) * Math.min(1, s.t * 4) + ")"); } }
+    for (const f of FIRES) { if (f.t < 0) continue; const k = Math.min(1, f.t * 4) * Math.min(1, (f.life - f.t) / 0.8); Z.ausFlamme(f.x, f.y - 0.5, f.s * k, f.ph, "w"); if (lvl() >= 2) Z.ausSchein(f.x, f.y - 3, 9 * k, 0.25 * k, "e"); if (rnd() < 0.08 && Z.fx) Z.fx.p({ x: f.x, y: f.y - 5, vx: (rnd() - 0.5) * 8, vy: -14, life: 1.2, size: 2.4, col: "rgba(90,84,82,.5)", kind: "smoke", g: -6, drag: 0.96 }); }
+  }
+
+  /* ---------- Schnittstellen für andere Module ---------- */
+  /* Flammen der Requisiten (Weltkoordinaten), die gerade sichtbar sind: { x, y, s (Größe), k (Art), col ("r,g,b"), l (Neigung), v (Neigungsgeschwindigkeit), p, i }.
+     Andere Module dürfen v anstoßen (v += …) – integriert wird hier. Dazu die kurzen Flämmchen am Boden (ohne l/v). */
+  Z.ausstattungFlammen = () => {
+    const out = []; if (Z.level !== lvRef) return out;
+    for (const p of props) if (p.fst && !p.out && !p.broken) for (const st of p.fst) if (st && st.seen > TT - 0.3) out.push(st);
+    for (const f of FIRES) if (f.t > 0) out.push({ x: f.x, y: f.y, s: f.s, k: "w", col: FCOL.w, l: 0, v: 0, floor: true });
+    return out;
+  };
+  /* Schwingfähiges (Ketten, Seile, Fäden, Stoffbahnen): { x, y (Aufhängung, Welt), len, a (Winkel), va, kind, p }.
+     Anstoßen über va += …; Feder und Dämpfung rechnet die Ausstattung. */
+  Z.ausstattungKetten = () => (Z.level === lvRef ? swingList.filter(s => s.kind !== "nagel" && !s.p.broken && !s.p.gone) : []);
+  /* allgemeiner Stoß an einer Stelle (Stärke s≈0..1.5): Flammen neigen sich, Ketten schwingen, Tiere fliehen */
+  Z.ausstattungImpuls = (x, y, s, dir) => { try { impulse(x, y, s || 0.5, dir || 0); } catch (e) { console.error(e); } };
+  /* ein Rechteck trifft die Ausstattung (z. B. für neue Waffen oder Fallen) */
+  Z.ausstattungTreffer = (r, o) => hitArea(r, Object.assign({ hits: 1, dir: 0 }, o || {}));
+  Z._zerbr = { C, MAT, LQ, HANG, rectOf, hitProp, breakProp: p => { const cfg = C[p.kind]; if (!cfg || p.broken) return; const r = rectOf(p); breakProp(p, { hits: 9, dir: 1, x: r.x + r.w / 2, y: r.y + r.h / 2 }, r, cfg, MAT[cfg.m] || MAT.holz); }, state: () => ({ pieces: PCS.length, flying: PCS.filter(q => q.st < 2).length, drops: DROPS.length, puddles: PUD.length, fires: FIRES.length, emit: EMIT.length, broken: props.filter(p => p.broken).length, swings: swingList.length }), lists: () => ({ PCS, PUD, FIRES, DROPS }) };
+
+  /* nach dem Aufbau eines Gebiets: Schwinger anlegen, Listen leeren */
+  function initBreak() {
+    resetBreak(); SPID.length = 0; CLK = 0;
+    for (const p of props) {
+      const cfg = C[p.kind], d = K[p.kind]; if (!cfg || d.crit || !(cfg.swing || (d.at === "w" && (cfg.wf === "fall" || cfg.wf === "paper" || cfg.wf === "roll")))) continue;
+      const X = p.x * T + 8, Y = d.at === "c" ? p.y * T : (p.y + 1) * T;
+      let len = 20;
+      if (HANG[p.kind]) len = HANG[p.kind](p.v)[3]; else if (d.box) len = d.box[3] - d.box[1];
+      const sw = { p, x: X, y: d.at === "w" && d.box ? Y + d.box[1] + 3 : Y, len, a: 0, va: 0, rest: 0, kind: cfg.swing || "nagel", k: d.at === "c" ? 900 / (len + 10) : 140, c: d.at === "c" ? 0.9 : 2.6 };
+      p.sw = sw; swingList.push(sw);
+    }
+  }
 
   /* Flammen/Schein/Licht in Weltkoordinaten für andere Module (z. B. Spuren) */
   Z.ausFlamme = (x, y, s, ph, k) => { const a = cx0, b = cy0, f = cf0, v = cvis; cx0 = x; cy0 = y; cf0 = 1; cvis = Z.sightAt ? Math.min(1, Z.sightAt(x, y - 6) * 1.4) : 1; fl(0, 0, s, ph, k); cx0 = a; cy0 = b; cf0 = f; cvis = v; };

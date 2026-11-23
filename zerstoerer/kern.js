@@ -132,6 +132,7 @@
 
   /* Gamepad abfragen. Richtungen: linker Stick und Steuerkreuz. Trigger zählen ab halbem Druck. */
   let padPrev = [], captureArmed = false;
+  const padV = { up: false, down: false }; /* Hysterese-Zustand der Stick-Senkrechten */
   inp.pollPad = () => {
     const pads = navigator.getGamepads ? navigator.getGamepads() : [];
     let p = null; for (const g of pads) if (g && g.connected) { p = g; break; }
@@ -150,9 +151,19 @@
       }
       captureArmed = false;
       const dz = (Z.settings && Z.settings.dead) || 0.35;
-      const ax = p.axes[0] || 0, ay = p.axes[1] || 0;
-      src.pad.left = ax < -dz || now[14]; src.pad.right = ax > dz || now[15];
-      src.pad.up = ay < -Math.max(0.5, dz) || now[12]; src.pad.down = ay > Math.max(0.5, dz) || now[13];
+      let ax = p.axes[0] || 0, ay = p.axes[1] || 0;
+      /* runde Totzone (kein Eckenzittern) */
+      if (Math.hypot(ax, ay) < dz * 0.8) { ax = 0; ay = 0; }
+      /* waagrecht: ab Totzone, außer der Stick zeigt fast senkrecht (Leiter klettern ohne seitliches Abrutschen) */
+      const horiz = Math.abs(ax) > dz && Math.abs(ax) > Math.abs(ay) * 0.36;
+      src.pad.left = (horiz && ax < 0) || now[14]; src.pad.right = (horiz && ax > 0) || now[15];
+      /* hoch/runter: Kegel um die Senkrechte (±50°) mit Hysterese – ein leicht nach unten geneigter Laufstick
+         löst kein Ducken/Kriechen, Durchfallen oder Schnellfallen mehr aus */
+      const vOn = Math.max(0.5, dz), vk = padV;
+      const dn = vk.down ? ay > 0.4 && ay > Math.abs(ax) * 0.6 : ay > vOn && ay > Math.abs(ax) * 0.84;
+      const upv = vk.up ? ay < -0.4 && -ay > Math.abs(ax) * 0.6 : ay < -vOn && -ay > Math.abs(ax) * 0.84;
+      vk.down = dn; vk.up = upv; inp.axis = horiz ? ax : 0;
+      src.pad.up = upv || now[12]; src.pad.down = dn || now[13];
       for (const a in inp.pad) if (now[inp.pad[a]]) src.pad[a] = true;
       if (now.some(Boolean) || Math.abs(ax) > dz || Math.abs(ay) > 0.5) inp.device = "pad";
       if (!inp.padName) inp.padName = p.id || "";
@@ -449,10 +460,14 @@
   cam.update = (dt, p) => {
     if (!p) return;
     /* Blick voraus in Laufrichtung, vertikal mit Totzone, beim Fallen weiter nach unten schauen */
-    const wantLook = p.face * (Math.abs(p.vx) > 40 ? 52 : 26);
-    cam.look = U.approach(cam.look, wantLook, dt * 90);
-    let wantY = p.vy > 260 ? 48 : p.lookDown ? 60 : p.lookUp ? -50 : -10;
-    cam.lookY = U.approach(cam.lookY, wantY, dt * (p.vy > 260 ? 220 : 120));
+    /* stetig statt sprunghaft: Vorlauf wächst mit der Laufgeschwindigkeit, kurzes Antippen/Wenden reißt die Kamera nicht herum */
+    const run = Math.min(1, Math.abs(p.vx) / 156);
+    const wantLook = p.face * (26 + 26 * run * run);
+    cam.look = U.approach(cam.look, wantLook, dt * (Math.sign(wantLook) !== Math.sign(cam.look) ? 70 : 90));
+    /* beim Fallen stufenlos nach unten vorausblicken (ab ~200 px/s, voll bei Endgeschwindigkeit) */
+    const fall = U.clamp((p.vy - 200) / 230, 0, 1);
+    let wantY = fall > 0 && !p.onGround && !p.climbing ? -10 + 62 * fall : p.lookDown ? 60 : p.lookUp ? -50 : -10;
+    cam.lookY = U.approach(cam.lookY, wantY, dt * (fall > 0 ? 220 : 120));
     let tx = p.x + p.w / 2 + cam.look - cam.w / 2, ty = p.y + p.h / 2 + cam.lookY - cam.h / 2;
     if (cam.lock) { tx = U.lerp(tx, cam.lock.x - cam.w / 2, cam.lock.k); ty = U.lerp(ty, cam.lock.y - cam.h / 2, cam.lock.k); }
     const kx = 1 - Math.pow(0.0009, dt), ky = 1 - Math.pow(p.onGround || p.climbing ? 0.0006 : 0.004, dt);

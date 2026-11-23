@@ -49,9 +49,9 @@
       shield: { block: 0.85, parry: 0.18, bash: 12, parryStun: 1.2 }, tags: ["start"]
     },
     jagdbogen: {
-      n: ["Einfacher Jagdbogen", "Plain Hunting Bow"], kind: "ranged", stat: "takt", find: null, tier: 0, icon: "bow", col: "#b89a6a",
+      faden: true, n: ["Einfacher Jagdbogen", "Plain Hunting Bow"], kind: "ranged", stat: "takt", find: null, tier: 0, icon: "bow", col: "#b89a6a",
       d: ["Halten zum Spannen. Voll gespannte Pfeile treffen härter. Kein Zauber, nur Holz und Sehne.", "Hold to draw. Fully drawn arrows hit harder. No magic, just wood and string."],
-      shoot: { charge: 0.75, minCharge: 0.12, post: 0.18, proj: "pfeil", dmg: 8, dmgFull: 24, sw: "bow" }, tags: ["start"]
+      shoot: { charge: 0.75, minCharge: 0.12, post: 0.18, proj: "pfeil", dmg: 8, dmgFull: 24, sw: "bow" }, tags: ["start", "Faden"]
     },
     sicheln: {
       n: ["Ezekiels Sicheln", "Ezekiel's Sickles"], kind: "melee", stat: "brut", find: "haeufig", tier: 0, icon: "sickles", col: "#ff5a4e",
@@ -98,13 +98,13 @@
       ], crit: "multi", critMul: 2, killHeal: 0.03, tags: ["Gruppen", "Heilung"], master: ["Meisterschaft: Jeder Kill verlängert den nächsten Schwung.", "Mastery: each kill widens the next sweep."]
     },
     kettenpeitsche: {
-      n: ["Kettenpeitsche", "Chain Whip"], kind: "melee", stat: "takt", find: "selten", tier: 0, icon: "whip", col: "#c8a070",
+      faden: true, n: ["Kettenpeitsche", "Chain Whip"], kind: "melee", stat: "takt", find: "selten", tier: 0, icon: "whip", col: "#c8a070",
       d: ["Sehr große Reichweite. Die Spitze trifft kritisch. Der dritte Schlag reißt Gegner zu dir heran.", "Huge reach. The tip crits. The third lash yanks enemies toward you."],
       combo: [
         { pre: 0.08, act: 0.06, post: 0.12, dmg: 11, box: [6, -26, 74, 12], lunge: 0, kb: 30, sw: "whip", whip: true, smear: { r: 70, a0: -0.25, a1: 0.05, th: 2 } },
         { pre: 0.08, act: 0.06, post: 0.12, dmg: 11, box: [6, -22, 74, 12], lunge: 0, kb: 30, sw: "whip", whip: true, smear: { r: 70, a0: 0.2, a1: -0.05, th: 2 } },
         { pre: 0.12, act: 0.08, post: 0.22, dmg: 15, box: [6, -28, 80, 18], lunge: 0, kb: -260, sw: "whip", whip: true, pull: true, smear: { r: 76, a0: -0.3, a1: 0.1, th: 3 } }
-      ], crit: "tip", critMul: 2.2, tags: ["Reichweite", "Kontrolle"], master: ["Meisterschaft: Herangezogene Gegner sind kurz betäubt.", "Mastery: yanked enemies are briefly stunned."]
+      ], crit: "tip", critMul: 2.2, tags: ["Reichweite", "Kontrolle", "Faden"], master: ["Meisterschaft: Herangezogene Gegner sind kurz betäubt.", "Mastery: yanked enemies are briefly stunned."]
     },
     scherenspeer: {
       n: ["Krebsscherenspeer", "Crab-Claw Spear"], kind: "melee", stat: "ueber", find: "selten", tier: 1, icon: "spear", col: "#d8706a",
@@ -188,9 +188,9 @@
       shoot: { pre: 0.08, post: 0.12, proj: "bolzen", dmg: 16, mag: 3, reload: 0.9, sw: "xbow" }, crit: "far", critMul: 2, tags: ["Fernkampf", "Durchschlag"], master: ["Meisterschaft: Fünf Bolzen pro Magazin.", "Mastery: five bolts per magazine."]
     },
     wurfmesser: {
-      n: ["Wurfmesser", "Throwing Knives"], kind: "ranged", stat: "brut", find: "haeufig", tier: 0, icon: "knives", col: "#d0c8c0",
+      faden: true, n: ["Wurfmesser", "Throwing Knives"], kind: "ranged", stat: "brut", find: "haeufig", tier: 0, icon: "knives", col: "#d0c8c0",
       d: ["Drei Messer in schneller Folge. Jedes lässt bluten. Kritisch gegen Blutende.", "Three knives in quick succession. Each causes bleeding. Crits against bleeding enemies."],
-      shoot: { pre: 0.03, post: 0.08, proj: "messer", dmg: 6, burst: 3, burstGap: 0.07, sw: "throwK" }, crit: "bleeding", critMul: 2, tags: ["Fernkampf", "Blutung"], master: ["Meisterschaft: Messer prallen einmal ab.", "Mastery: knives ricochet once."]
+      shoot: { pre: 0.03, post: 0.08, proj: "messer", dmg: 6, burst: 3, burstGap: 0.07, sw: "throwK" }, crit: "bleeding", critMul: 2, tags: ["start", "Fernkampf", "Blutung", "Faden"], master: ["Meisterschaft: Messer prallen einmal ab.", "Mastery: knives ricochet once."]
     },
     phiolen: {
       n: ["Glasstabs Phiolen", "Glasstaff's Vials"], kind: "ranged", stat: "takt", find: "selten", tier: 1, icon: "vial", col: "#7fd36a",
@@ -203,9 +203,9 @@
       shoot: { pre: 0.12, post: 0.3, proj: "blitz", dmg: 18, chain: 4, sw: "zap" }, eff: { stun: 0.3 }, tags: ["Kettenblitz", "Kontrolle"], master: ["Meisterschaft: Sechs Sprünge.", "Mastery: six jumps."]
     },
     netzdruese: {
-      n: ["Ettercap-Drüse", "Ettercap Gland"], kind: "ranged", stat: "ueber", find: "selten", tier: 1, icon: "web", col: "#e8e0e8",
+      faden: true, n: ["Ettercap-Drüse", "Ettercap Gland"], kind: "ranged", stat: "ueber", find: "selten", tier: 1, icon: "web", col: "#e8e0e8",
       d: ["Verschießt klebrige Netze. Getroffene sind gefesselt und nehmen mehr Schaden.", "Shoots sticky webs. Victims are rooted and take more damage."],
-      shoot: { pre: 0.08, post: 0.2, proj: "netz", dmg: 4, sw: "web" }, eff: { root: 2.2, mark: 3 }, tags: ["Kontrolle"], master: ["Meisterschaft: Netze kleben auch an weiteren Gegnern dahinter.", "Mastery: webs also stick to enemies behind."]
+      shoot: { pre: 0.08, post: 0.2, proj: "netz", dmg: 4, sw: "web" }, eff: { root: 2.2, mark: 3 }, tags: ["Kontrolle", "Faden"], master: ["Meisterschaft: Netze kleben auch an weiteren Gegnern dahinter.", "Mastery: webs also stick to enemies behind."]
     },
     /* ---------- Schilde ---------- */
     turmschild: {
@@ -294,6 +294,21 @@
   };
   Z.AFFIX_SKILL = ["scharf", "brennend", "giftig", "betaeubend", "kritisch", "flink", "zornig", "jagend", "splitternd"];
 
+  /* ======================= RUNEN-GRAVUREN (schmiede.js) =======================
+     Am Glutamboss bei +2 und +4 eine von drei zur Wahl. Farben bewusst ohne Blau. */
+  Z.RUNES = {
+    brand: { n: ["Brandrune", "Brand Rune"], col: "#ff7a2a", ico: "🔥", d: ["Jeder Treffer entzündet.", "Every hit ignites."] },
+    gift: { n: ["Giftrune", "Venom Rune"], col: "#9ad04a", ico: "☣", d: ["Jeder Treffer vergiftet.", "Every hit poisons."] },
+    kette: { n: ["Kettenblitz", "Chain Spark"], col: "#f0e060", ico: "ϟ", d: ["20 % Chance: Ein Blitz springt auf 3 Gegner (40 % Schaden).", "20% chance: a spark leaps to 3 enemies (40% damage)."] },
+    raub: { n: ["Lebensraub", "Life Thief"], col: "#e0545a", ico: "♥", d: ["4 % des Schadens fließen als Leben zurück.", "4% of damage dealt flows back as health."] },
+    wucht: { n: ["Wucht", "Impact"], col: "#d8a060", ico: "⬢", d: ["+60 % Rückstoß; schwere Treffer betäuben kurz.", "+60% knockback; heavy hits briefly stun."] },
+    krit: { n: ["Henkersrune", "Executioner"], col: "#ffb040", ico: "✶", d: ["Kritische Treffer machen +50 % Schaden.", "Critical hits deal +50% damage."] },
+    tempo: { n: ["Flinke Rune", "Swift Rune"], col: "#c8e070", ico: "»", d: ["+15 % Angriffstempo, Bögen spannen schneller.", "+15% attack speed, bows draw faster."], noShield: true },
+    bruch: { n: ["Rüstungsbruch", "Sunder"], col: "#c890ff", ico: "⛏", d: ["Treffer reißen die Rüstung auf: +6 % Schaden je Stapel (bis 5).", "Hits tear armour: +6% damage per stack (up to 5)."] },
+    jagd: { n: ["Jägerrune", "Hunter Rune"], col: "#e5b454", ico: "☩", d: ["+30 % gegen Elite-Gegner und Bosse.", "+30% vs elites and bosses."] },
+    echo: { n: ["Echoschlag", "Echo Strike"], col: "#d890ff", ico: "◎", d: ["Jeder 4. Treffer hallt nach: ein zweiter Treffer mit 50 %.", "Every 4th hit echoes: a second hit for 50%."] }
+  };
+
   /* ======================= ESSEN (Heilung aus Kisten und Fässern) ======================= */
   Z.FOOD = [
     { n: ["Pilzbraten", "Mushroom Roast"], heal: 0.25 }, { n: ["Schwarzbrot", "Black Bread"], heal: 0.15 }, { n: ["Algensaft mit Honig", "Algae Juice with Honey"], heal: 0.12 },
@@ -306,14 +321,18 @@
       ["Wenn du Glasstab triffst: Grüß ihn nicht von mir.", "If you meet Glasstaff: don't say hi from me."],
       ["Das Fundbuch? Ich führe Buch über jede Waffe, die du findest. Und über jede, die du verlierst. Das zweite Buch ist dicker.", "The ledger? I keep track of every weapon you find. And every one you lose. The second book is thicker."],
       ["Ich habe ein neues Lied über dich. Es hat nur eine Zeile. Sie lautet: „…“", "I wrote a new song about you. It has one line. It goes: '…'"]],
-    G: [["Nimm Rex nicht mit da rein. Er … ach. Er ist schon weg, oder?", "Don't take Rex in there. He… oh. He's already gone, isn't he?"],
+    G: [["Die Waffen am Ständer vor dem Tor sind für dich. Zwei Hände, zwei Waffen. Probier sie an der Puppe.", "The weapons on the rack by the gate are yours. Two hands, two weapons. Try them on the dummy."],
+      ["Erst mit dem Bogen markieren, dann mit der Klinge zu Ende bringen. Ein Faden, ein Schnitt.", "Mark with the bow first, then finish with the blade. One thread, one cut."],
+      ["Nimm Rex nicht mit da rein. Er … ach. Er ist schon weg, oder?", "Don't take Rex in there. He… oh. He's already gone, isn't he?"],
       ["Die Bogenschützen auf dem Wehrgang zielen gut. Roll dich ab. Immer abrollen.", "The archers on the ramparts aim well. Roll. Always roll."],
       ["Wenn ein Gegner aufleuchtet, holt er aus. Dann ist der Moment für deine Rolle – oder deinen Schild.", "When an enemy flashes, it's winding up. That's the moment for your roll – or your shield."]],
     E: [["Bring Gold mit. Viel Gold. Für die Gruppenkasse.", "Bring gold. Lots of gold. For the group fund."],
       ["Die Seelensplitter? Gib sie Nundro. Ich hätte sie lieber verkauft.", "The soul shards? Give them to Nundro. I'd rather have sold them."],
       ["Kein Wind da drin. Kein Himmel. Nur Stein und Fäden. Viel Spaß.", "No wind in there. No sky. Only stone and threads. Have fun."]],
     A: [["Zeig mir, was du gefunden hast. Jede Waffe, die du einmal getragen hast, kann ich schärfen.", "Show me what you've found. Any weapon you've carried once, I can sharpen."],
-      ["Finden musst du sie trotzdem selbst. Ich schmiede Glück nicht. Nur Stahl.", "You still have to find them yourself. I don't forge luck. Only steel."]],
+      ["Finden musst du sie trotzdem selbst. Ich schmiede Glück nicht. Nur Stahl.", "You still have to find them yourself. I don't forge luck. Only steel."],
+      ["Siehst du in der Feste einen glühenden Amboss: Das ist meiner. Bring Glut und Gold, dann hämmert er für dich.", "If you see a glowing anvil in the keep: that's mine. Bring embers and gold and it will hammer for you."],
+      ["Bei Stufe zwei und vier frisst der Stahl eine Rune. Wähl gut – herausschlagen lässt sie sich nicht.", "At level two and four the steel swallows a rune. Choose well – you can't knock it out again."]],
     R: [["Wuff.", "Woof."], ["Rex wedelt. Er hat einen Stock gefunden. Er hält ihn für eine legendäre Waffe.", "Rex wags. He found a stick. He thinks it's a legendary weapon."]],
     C: [["Die Schädel an deinem Gürtel. Jeder einzelne macht die Feste grausamer – und die Beute besser.", "The skulls on your belt. Each one makes the keep crueller – and the loot better."]]
   };

@@ -7,7 +7,7 @@
 
   /* ======================= META-SPEICHER ======================= */
   const KEY = "imres-zerstoerer-v1";
-  const META0 = () => ({ v: 1, shards: 0, wlvl: {}, luck: {}, found: {}, up: { trank: 0, zaeh: 0, klingen: 0, haendler: 0 }, skulls: 0, skullSel: 0, endings: {}, runs: 0, wins: 0, best: { time: 0, kills: 0 }, seen: {}, bosses: {}, intro: false, tut: false });
+  const META0 = () => ({ v: 1, shards: 0, wlvl: {}, luck: {}, found: {}, up: { trank: 0, zaeh: 0, klingen: 0, haendler: 0 }, skulls: 0, skullSel: 0, endings: {}, runs: 0, wins: 0, best: { time: 0, kills: 0 }, seen: {}, bosses: {}, intro: false, tut: false, forge: {} });
   Z.meta = META0();
   try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); if (s && s.v === 1) {
     /* gegen kaputte Speicherstände absichern: Objektfelder nur als Objekt, Zahlen nur endlich */
@@ -26,6 +26,11 @@
   /* Sondergebiete für die Darstellung */
   const HUB_B = { flow: "flat", out: true, name: ["Das Lager vor der Feste", "The Camp before the Keep"], sky: ["#1a1020", "#4a2434", "#8a4a3a"], wall: "#2a2224", brick: "#1a1416", tile: { base: "#3e3a30", light: "#6a5e44", dark: "#1e1a14", det: "#4a4a30", top: "moss", topCol: "#4a5a2a" }, plat: "#6a4a30", dark: 0.32, ambCol: "#4a2a2a", bg: "camp", weather: ["fireflies", "leaves"], props: {}, amb: { loops: [["amb/a_lagerfeuer.mp3", 0.5], ["amb/a_nacht.mp3", 0.35]], one: [["e_eule_", 4, 14]] } };
   const PASS_B = { flow: "flat", name: ["Durchgang", "Passage"], sky: ["#140c0c", "#24160e", "#2e1c12"], wall: "#3a2a22", brick: "#261a14", tile: { base: "#5a4a3a", light: "#8a7058", dark: "#221a14", det: "#6a5440", top: "carpet", topCol: "#6a1a1a" }, plat: "#6e4a2c", dark: 0.35, ambCol: "#5a3a1a", bg: "passage", weather: ["dust", "embers"], props: {}, amb: { loops: [["amb/a_feuer1.mp3", 0.3], ["amb/a_halle.mp3", 0.2]], one: [] } };
+
+  /* Lager: Ankunftspunkt links vom Waffenständer, damit der Weg zum Tor an der Start-Ausrüstung vorbeiführt */
+  Z.interacts = [];
+  const hub0 = Z.genHub;
+  Z.genHub = function () { const lv = hub0.apply(this, arguments); if (lv && lv.start) lv.start = { x: Math.min(lv.start.x, 53), y: lv.start.y }; return lv; };
 
   /* ======================= ZUSATZ-GEGNER: Trainingspuppe ======================= */
   Z.ENEMIES.puppe = { n: ["Trainingspuppe", "Training Dummy"], shape: "dummy", w: 14, h: 30, hp: 40, dmg: 0, spd: 0, ai: "turret", sight: 0, gold: 0, noBlock: true, heavy: true, atks: [], poise: 99 };
@@ -66,7 +71,11 @@
     const seed = (Date.now() ^ (Math.random() * 1e9)) >>> 0;
     Z.run = { seed, area: "torhof", tier: 0, skulls: Z.meta.skullSel || 0, route: ["torhof"], doorsOpen: true, t0: performance.now(), time: 0, shardsBank: 0, bossesBeaten: [], firstWeaponGiven: false };
     Z.stats = { kills: 0, gold: 0, parries: 0, secrets: 0 };
+    /* Ausrüstung aus dem Lager mitnehmen: was man am Waffenständer aufgehoben hat, trägt man in die Feste */
+    const prevP = Z.player, keep = Z.level && Z.level.hub && prevP && prevP.slots ? { a1: prevP.slots.a1, a2: prevP.slots.a2 } : null;
     const P = (Z.player = Z.newPlayer());
+    if (keep) { P.slots.a1 = keep.a1 || null; P.slots.a2 = keep.a2 || null; }
+    Z.run.fromHub = !!keep;
     P.potMax = P.potions = 2 + (Z.meta.up.trank || 0);
     Z.recalcPlayer(); P.hp = P.hpMax;
     Z.meta.runs++; Z.saveMeta();
@@ -77,6 +86,7 @@
     opts = opts || {};
     Z.enemies.length = 0; Z.projs.length = 0; Z.hazards.length = 0; Z.allies.length = 0; Z.pickups.length = 0; Z.propsLive.length = 0; Z.stuck.length = 0; Z.bolts.length = 0; if (Z.gadgets) Z.gadgets.length = 0; if (Z.player) { Z.player.grapple = null; Z.player.shieldOut = null; }
     FX.parts.length = 0; FX.texts.length = 0; Z.darkness = 0; Z.boss = null; Z.bossDefeated = false;
+    Z.interacts = []; /* frei platzierte Dinge mit Benutzen-Taste (Glutamboss, Segensorb …) */
     let lv, B;
     if (id === "lager") { lv = Z.genHub(); B = HUB_B; Z.run = null; }
     else if (id === "passage") { lv = Z.genPassage(opts.from, opts.to); B = PASS_B; }
@@ -160,7 +170,8 @@
     Z.recalcPlayer(); P.hp = P.hpMax;
     for (const p of lv.props) if (p.id === "Y") { const e = Z.spawnEnemy("puppe", p.x * T + 8, (p.y + 1) * T, { tier: 0 }); e.dummy = true; e.hp = e.hpMax = 99999; }
     Z.allies.push({ kind: "campRex", x: 45 * T, y: 11 * T + 3, w: 16, h: 13, face: -1, t: 0, life: 1e9, run: 0, state: "sit", st: 0 });
-    /* Im Lager liegen Waffen aus der Schmiede zum Ausprobieren an der Trainingspuppe */
+    /* Start-Ausrüstung liegt am Waffenständer vor dem Tor – mit den echten Aufhebe-Tasten nehmen (schmiede.js) */
+    if (Z.setupRack) Z.setupRack(lv);
   }
   function setupArena(lv, R) {
     const A2 = Z.ARENAS[lv.arena];
@@ -225,6 +236,7 @@
       else if (!b.warden) Z.dropItem(cx, b.y + b.h - 4, { boss: true, src: b.id });
       Z.spawnPickup("food", cx - 20, b.y + b.h - 4, { food: Z.FOOD[3], drop: true });
     }, 900);
+    Z.onBossDown && Z.onBossDown(b);
     Z.ui.bossDown(b);
     run.doorsOpen = true; Z.cam.lock = null;
     Z.music.target = 0;
@@ -244,6 +256,7 @@
     for (const p of Z.pickups) if (["item", "scroll", "chest", "cursed", "food"].includes(p.kind) && !p.open) consider({ type: "pickup", p }, p.x, p.y, 24);
     for (const d of lv.doors) if (d.kind === "exit" || d.kind === "gate") consider({ type: "door", d }, d.x * T + 8, (d.y + 1) * T, 26);
     for (const s of lv.props) if (s.kind === "npc" || s.kind === "station") consider({ type: s.kind, s }, s.x * T + 8, (s.y + 1) * T, 28);
+    for (const o of Z.interacts || []) if (!o.off && (!o.ok || o.ok())) consider({ type: "obj", o }, o.x, o.y, o.r || 26);
     return best;
   }
   function interact(o) {
@@ -253,11 +266,11 @@
       if (p.kind === "item") return Z.ui.offerItem(p);
       if (p.kind === "scroll") { Z.pickups.splice(Z.pickups.indexOf(p), 1); A.play("scroll"); return Z.ui.scrollChoice(); }
       if (p.kind === "food") { Z.pickups.splice(Z.pickups.indexOf(p), 1); const f = p.food || Z.FOOD[0]; Z.healPlayer(P.hpMax * f.heal); A.play("potion", { vol: 0.5 }); FX.text(P.x + P.w / 2, P.y - 14, L(f.n), "#e8c890"); return; }
-      if (p.kind === "chest") { p.open = true; A.play("chest"); FX.burst(p.x, p.y - 8, 20, { col: ["#ffd27a", "#fff0c0"], sp: 120, up: 60, life: 0.6, size: 2, kind: "spark", add: true }); Z.dropGold(p.x, p.y - 10, 25 * Z.BAL.goldMul(Z.run.tier)); Z.dropItem(p.x, p.y - 10, { chest: true }); if (Z.R() < 0.3) Z.spawnPickup("food", p.x, p.y - 10, { food: Z.R.pick(Z.FOOD), drop: true }); return; }
+      if (p.kind === "chest") { p.open = true; A.play("chest"); FX.burst(p.x, p.y - 8, 20, { col: ["#ffd27a", "#fff0c0"], sp: 120, up: 60, life: 0.6, size: 2, kind: "spark", add: true }); Z.dropGold(p.x, p.y - 10, 25 * Z.BAL.goldMul(Z.run.tier)); Z.dropItem(p.x, p.y - 10, { chest: true }); Z.onChestOpen && Z.onChestOpen(p, false); if (Z.R() < 0.3) Z.spawnPickup("food", p.x, p.y - 10, { food: Z.R.pick(Z.FOOD), drop: true }); return; }
       if (p.kind === "cursed") {
         const open = it => {
           p.open = true; A.play("chest"); FX.burst(p.x, p.y - 8, 24, { col: ["#c040ff", "#ff9af0"], sp: 120, up: 60, life: 0.7, size: 2, kind: "spark", add: true });
-          Z.dropGold(p.x, p.y - 10, 80 * Z.BAL.goldMul(Z.run.tier)); Z.dropItem(p.x, p.y - 10, { elite: true }); Z.dropShards(p.x, p.y, 10);
+          Z.dropGold(p.x, p.y - 10, 80 * Z.BAL.goldMul(Z.run.tier)); Z.dropItem(p.x, p.y - 10, { elite: true }); Z.dropShards(p.x, p.y, 10); Z.onChestOpen && Z.onChestOpen(p, true);
           return it ? Z.spawnPickup("item", p.x + 10, p.y - 10, { it, drop: true, vy: -200, vx: 30 }) : null;
         };
         if (Z.ui.cursedChest) return Z.ui.cursedChest(p, open);
@@ -271,6 +284,7 @@
       if (!Z.run.doorsOpen) { Z.toast(L(["Der Weg ist versperrt, solange der Wächter lebt.", "The way is barred while the warden lives."])); A.play("chain"); return; }
       return goThrough(d.to);
     }
+    if (o.type === "obj") return o.o.use();
     if (o.type === "npc") return Z.ui.npc(o.s.id);
     if (o.type === "station") return Z.ui.station(o.s.id);
   }

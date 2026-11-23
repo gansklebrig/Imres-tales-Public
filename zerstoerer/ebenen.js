@@ -1,5 +1,5 @@
 /* Ezekiel – The Destroyer · Ebenen, Türen und Nebel
-   - Fallschaden ab großer Höhe (mit Rolle kurz vor der Landung: abrollen, kein Schaden) – auch für Gegner.
+   - Fallschaden ab großer Höhe (ab ~12 Kacheln, höchstens 20 %) (mit Rolle kurz vor der Landung: abrollen, kein Schaden) – auch für Gegner.
    - Gegner springen nicht mehr von selbst in Abgründe oder Schächte.
    - Türen zwischen Räumen: man sieht nicht, was dahinter liegt, bis man sie aufstößt.
    - Unerforschte Räume liegen im Nebel und werden erst beim Betreten sichtbar.
@@ -28,7 +28,7 @@
     /* Türen auf Pfad- und Seitenverbindungen nach rechts */
     for (const k in lv.cells) {
       const c = lv.cells[k], r = lv.cells[(c.x + 1) + "," + c.y];
-      if (!r || !c.need.R || c.need.R === "X" || r.kind === "secret" || Math.random() > 0.5) continue;
+      if (!r || !c.need.R || c.need.R === "X" || c.need.R === "G" || r.kind === "secret" || Math.random() > 0.5) continue;
       const x = (c.x + 1) * CW, y0 = c.y * CH + 8;
       let ok = true; for (let y = y0; y <= y0 + 2; y++) if (lv.get(x, y) !== 0) ok = false;
       if (!W.solidT(lv.get(x, y0 + 3)) && !W.isPlat(x, y0 + 3)) ok = false;
@@ -38,11 +38,16 @@
       doors.push({ x, y0, open: 0, opening: false, cells: [c.x + "," + c.y, r.x + "," + r.y] });
     }
     /* Sackgassen belohnen */
-    const hasLoot = (c) => (Z.pickups || []).some(p => Math.floor(p.x / T / CW) === c.x && Math.floor(p.y / T / CH) === c.y && ["chest", "item", "scroll", "food", "cursed"].includes(p.kind));
+    /* (die großen Karten planen ihre Nebenzweige selbst – lv.rewards/lv.feats, siehe erkundung.js; hier nur noch
+       Sackgassen, für die dort nichts vorgesehen ist) */
+    const inCell = (c, x, y) => Math.floor(x / CW) === c.x && Math.floor(y / CH) === c.y;
+    const hasLoot = (c) => (Z.pickups || []).some(p => Math.floor(p.x / T / CW) === c.x && Math.floor(p.y / T / CH) === c.y && ["chest", "item", "scroll", "food", "cursed"].includes(p.kind)) ||
+      (lv.rewards || []).some(r => inCell(c, r.x, r.y)) || (lv.feats || []).some(f => f.t !== "mouth" && f.t !== "lock" && inCell(c, f.x, f.y));
+    const planned = !!lv.rewards;
     for (const k in lv.cells) {
       const c = lv.cells[k]; if (c === lv.startCell || c === lv.endCell) continue;
-      const exits = ["L", "R", "U", "D"].filter(s => c.need[s]).length;
-      if ((c.kind === "side" || c.kind === "secret" || exits <= 1) && !hasLoot(c)) {
+      const exits = ["L", "R", "U", "D"].filter(s => c.need[s] && c.need[s] !== "G").length;
+      if ((planned ? exits <= 1 : (c.kind === "side" || c.kind === "secret" || exits <= 1)) && !hasLoot(c)) {
         for (let i = 0; i < 200; i++) {
           const x = c.x * CW + 2 + ((Math.random() * (CW - 4)) | 0), y = c.y * CH + 2 + ((Math.random() * (CH - 4)) | 0);
           if (!Z.standable(lv, x, y, 2) || (lv.reach && !lv.reach[y * lv.W + x] && c.kind !== "secret")) continue;
@@ -50,7 +55,7 @@
           if (r < 0.45) Z.spawnPickup("chest", px, py, { vx: 0, vy: 0 });
           else if (r < 0.65) Z.spawnPickup("scroll", px, py, { vx: 0, vy: 0 });
           else if (r < 0.85) Z.spawnPickup("food", px, py, { food: Z.R.pick(Z.FOOD), vx: 0, vy: 0 });
-          else for (let n = 0; n < 6; n++) Z.spawnPickup("gold", px, py - 4, { n: 6, vx: (Math.random() - 0.5) * 60, vy: -80 });
+          else Z.spawnPickup("chest", px, py, { vx: 0, vy: 0 }); /* (lose Münzen flögen nach 2,5 s quer durchs Gebiet zum Spieler) */
           break;
         }
       }
@@ -207,10 +212,10 @@
     }
   }
   function landed(P) {
-    const h = P.y - P.peakY; if (h <= 10 * T || P.plunge || P._noFall) return;
+    const h = P.y - P.peakY; if (h <= 12 * T || P.plunge || P._noFall) return; /* größere Karten mit Türmen/Kellern: erst ab ~12 Kacheln */
     if (P.rollT > 0 || (P._rollPress && P.time - P._rollPress < 0.18)) { FX.text(P.x + P.w / 2, P.y - 10, L(["Abgerollt!", "Rolled!"]), "#ffe08a"); A.play("roll", { vol: 0.6 }); if (P.rollT <= 0) { P.rollT = 0.18; P.rollDir = P.face; } return; }
     /* milder als zuvor: in den Tiefen-Gebieten führt der Weg oft durch Schächte nach unten (Leitern sind da, aber Springen soll nicht ein Viertel des Lebens kosten) */
-    const frac = Math.min(0.25, (h - 10 * T) / (T * 40) + 0.04);
+    const frac = Math.min(0.2, (h - 12 * T) / (T * 60) + 0.04);
     const n = Math.round(P.hpMax * frac);
     Z.hurtPlayer(n, { x: P.x, kb: 0, unblockable: true, hazard: true, force: true, fall: true });
     P.hurtT = 0.25; FX.addShake(6); A.play("land", { vol: 0.9, rate: 0.7 });

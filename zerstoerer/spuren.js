@@ -7,7 +7,8 @@
    ein Liebesbrief, der nie ankam, ein verkohlter Magier vor seinem Brandfleck, ein Zwerg mit zerbrochener Spitzhacke,
    ein Barde mit zerrissener Laute – und eine Truhe, die Zähne hatte.
    Jede Szene wird einmal ausführlich in ein Sprite gemalt; nur Rauch, Glut, Fliegen und Kleintiere bewegen sich.
-   Wer nah herangeht, liest eingeritzte Worte. */
+   Wer nah herangeht, liest eingeritzte Worte. Treffer lassen Knochen klappern, Pergamente flattern, Glut stieben,
+   die Laute nachklingen und die Zahntruhe schnappen; Fliegen stieben auseinander. */
 (function () {
   "use strict";
   const Z = window.Z, T = Z.TILE, CW = Z.CW, CH = Z.CH, L = v => Z.L(v), A = Z.audio;
@@ -558,6 +559,8 @@
   }
 
   /* ======================= Zeichnen ======================= */
+  /* aufgescheuchte Fliegen kommen nach ein paar Sekunden zurück */
+  const scat = s => s.scat && performance.now() - s.scat < 4000;
   const flamme = (x, y, sz, ph, k) => { if (Z.ausFlamme) Z.ausFlamme(x, y, sz, ph, k); };
   const schein = (x, y, r, a, k) => { if (Z.ausSchein) Z.ausSchein(x, y, r, a, k); };
   const licht = (x, y, r, a) => { if (Z.ausLicht) Z.ausLicht(x, y, r, a); };
@@ -569,7 +572,7 @@
       const f = s.flip || 1, sp = sprite(s), X = lx => x + lx * f;
       if (s.kind !== "kokon") { c.save(); c.translate(x, gy); c.scale(f, 1); c.drawImage(sp.cv, sp.l, sp.t, sp.w, sp.h); c.restore(); }
       switch (s.kind) {
-        case "abenteurer": { const u = (t * 0.4 + s.seed) % 1; c.fillStyle = "rgba(120,110,110," + 0.25 * (1 - u) + ")"; c.beginPath(); c.arc(X(17) + Math.sin(u * 5) * 2, gy - 2 - u * 16, 1 + u * 3, 0, TAU); c.fill(); fliegen(c, X(-3), gy - 14, t, 2, s.seed); break; }
+        case "abenteurer": { const u = (t * 0.4 + s.seed) % 1; c.fillStyle = "rgba(120,110,110," + 0.25 * (1 - u) + ")"; c.beginPath(); c.arc(X(17) + Math.sin(u * 5) * 2, gy - 2 - u * 16, 1 + u * 3, 0, TAU); c.fill(); if (!scat(s)) fliegen(c, X(-3), gy - 14, t, 2, s.seed); break; }
         case "lager": {
           const e = 0.35 + 0.3 * Math.sin(t * 2 + s.seed); schein(X(4), gy - 1, 10, e * 0.6, "e");
           for (let k = 0; k < 5; k++) E(c, X(1 + k * 1.6), gy - 1 - (k % 2) * 0.6, 0.6, 0.4, "rgba(255," + (90 + 60 * Math.sin(t * 3 + k) | 0) + ",30," + (0.5 + 0.4 * Math.sin(t * 2.3 + k * 1.7)) + ")");
@@ -581,7 +584,8 @@
           schein(x, gy - 3, 22, 0.25 + 0.1 * Math.sin(t * 3), "p"); licht(x, gy - 6, 50, 0.5); break;
         }
         case "kokon": {
-          const hy = gy - 46, sw = Math.sin(t * 0.8 + s.seed) * 2, tw = Math.sin(t * 4.3 + s.seed) > 0.96 ? Math.sin(t * 40) * 0.08 : 0;
+          const wb = s.wob ? Math.max(0, 1 - (performance.now() - s.wob) / 1500) : 0;
+          const hy = gy - 46, sw = Math.sin(t * 0.8 + s.seed) * 2 + Math.sin(t * 9) * 5 * wb, tw = Math.sin(t * 4.3 + s.seed) > 0.96 ? Math.sin(t * 40) * 0.08 : 0;
           c.strokeStyle = "rgba(230,224,236,.6)"; c.lineWidth = 0.5; c.beginPath(); c.moveTo(x, hy - 44); c.lineTo(x + sw, hy); c.stroke();
           for (let k = 0; k < 8; k++) { c.strokeStyle = "rgba(230,224,236,.22)"; c.lineWidth = 0.3; c.beginPath(); c.moveTo(x + sw, hy); c.lineTo(x + Math.cos(k) * 30, hy - 30 + Math.sin(k * 2) * 10); c.stroke(); }
           c.save(); c.translate(x + sw, hy + 13); c.rotate(sw * 0.03 + tw);
@@ -599,7 +603,7 @@
           break;
         }
         case "kartenzeichner": { const u = Math.sin(t * 1.3 + s.seed) * 0.5 + Math.sin(t * 3.1) * 0.2; c.save(); c.translate(X(-8), gy - 0.6); c.rotate(u * 0.25 * f); c.fillStyle = "#e8dcc0"; c.beginPath(); c.moveTo(0, 0); c.lineTo(4 * f, -0.4 - Math.max(0, u) * 2); c.lineTo(4.4 * f, 0.4); c.closePath(); c.fill(); c.restore(); flamme(X(26), gy - 2.6, 0.4, s.seed); licht(X(26), gy - 4, 30, 0.35); break; }
-        case "haendler": fliegen(c, X(-30), gy - 4, t, 3, s.seed); break;
+        case "haendler": if (!scat(s)) fliegen(c, X(-30), gy - 4, t, 3, s.seed); break;
         case "liebesbrief": { const g = 0.5 + 0.5 * Math.sin(t * 0.9 + s.seed); schein(X(14.6), gy - 1, 3, 0.2 * g, "w"); break; }
         case "magier": {
           const g = 0.5 + 0.5 * Math.sin(t * 2.2 + s.seed); schein(X(-25.2), gy - 5, 8, 0.35 * g + 0.1, "p");
@@ -610,6 +614,7 @@
         case "zwerg": { const tw = Math.max(0, Math.sin(t * 2.4 + s.seed)) ** 8; if (tw > 0.05) { c.save(); c.globalCompositeOperation = "lighter"; c.fillStyle = "rgba(255,200,220," + tw + ")"; c.fillRect(X(21.2) - 0.2, gy - 4.6, 0.4, 2.6); c.fillRect(X(21.2) - 1.3, gy - 3.5, 2.6, 0.4); c.restore(); } break; }
         case "barde": { const k = Math.sin(t * 0.6 + s.seed) > 0.85; if (k) { c.save(); c.globalAlpha = 0.6; c.translate(X(2), gy - 5); c.rotate(-0.9 * f); Ln(c, "#fff0c0", 0.2, [-3 * f, -0.4 + Math.sin(t * 60) * 0.3, 14.6 * f, -0.4]); c.restore(); } break; }
         case "mimik": {
+          const sn = s.snap ? (performance.now() - s.snap) / 1000 : 9; if (sn < 0.5) { const k = Math.sin(sn / 0.5 * PI); c.fillStyle = "rgba(20,10,8,.8)"; c.beginPath(); c.ellipse(X(0), gy - 9, 9, 2 + k * 3, 0, 0, TAU); c.fill(); for (let q = -3; q <= 3; q++) { c.fillStyle = "#e8e0d0"; c.beginPath(); c.moveTo(X(q * 2.4 - 0.8), gy - 9 - k * 2.6); c.lineTo(X(q * 2.4 + 0.8), gy - 9 - k * 2.6); c.lineTo(X(q * 2.4), gy - 9 - k * 0.6); c.fill(); } }
           const br = Math.sin(t * 1.3 + s.seed); c.fillStyle = "#a83a4a"; c.beginPath(); c.moveTo(X(-2), gy - 9.6); c.quadraticCurveTo(X(4 + br), gy - 6 + br * 0.6, X(7 + br * 1.4), gy - 2); c.quadraticCurveTo(X(4), gy - 3.4, X(0), gy - 8.4); c.fill();
           if (Math.sin(t * 0.7 + s.seed) > 0.97) { E(c, X(-3), gy - 14.4, 1.3, 0.25, "#6a3a22"); } break;
         }
@@ -618,6 +623,38 @@
   }
   const dwp0 = Z.drawWorldProps;
   Z.drawWorldProps = function (c, t) { if (dwp0) dwp0.apply(this, arguments); if (Z.level === lvRef) draw(c, t); };
+
+  /* ======================= Reaktionen auf Treffer =======================
+     Die Szenen bleiben stehen (sie erzählen etwas und tragen Beute), aber sie reagieren: Knochen klappern und
+     verlieren Splitter, Pergamente und Briefe flattern auf, die Glut des Lagers stiebt, die Laute klingt nach,
+     die Truhe mit Zähnen schnappt zu, Fliegen stieben auseinander. Rein dekorativ; Stufe 0: nur der Klang. */
+  const rnd = Math.random;
+  const PAPER = ["#efe4c8", "#d8c8a0", "#e8dcc0"], BONEC = [BONE, BONE2, "#b8b098"];
+  function reactHit(sp, hx, hy, dir, strong) {
+    const now = performance.now(); if ((sp.rcd || 0) > now) return; sp.rcd = now + 450; sp.scat = now;
+    const FX = Z.fx, rich = !Z.gq || Z.gq.level >= 1, x = sp.x * T + 8, gy = (sp.y + 1) * T;
+    const p = (o, n) => { if (FX && rich) for (let i = 0; i < n; i++) FX.p(Object.assign({ x: hx + (rnd() - 0.5) * 12, y: hy - rnd() * 6, vx: dir * (20 + rnd() * 60) + (rnd() - 0.5) * 40, vy: -40 - rnd() * 80, life: 0.8 + rnd() * 0.6, vr: (rnd() - 0.5) * 12 }, typeof o === "function" ? o() : o)); };
+    switch (sp.kind) {
+      case "kartenzeichner": case "liebesbrief":
+        A.play("scroll", { vol: 0.3, x: hx }); p(() => ({ size: 2.2, col: PAPER[(rnd() * 3) | 0], kind: "leaf", g: 70, drag: 0.92, life: 2 + rnd() }), sp.kind === "kartenzeichner" ? 6 : 3); break;
+      case "lager":
+        A.play("fire", { vol: 0.2, rate: 1.5, x: hx }); p(() => ({ x: x + 4 * (sp.flip || 1), y: gy - 2, size: 1, col: rnd() < 0.5 ? "#ffb060" : "#ff7a30", kind: "spark", add: true, g: 200, vy: -60 - rnd() * 90 }), 10); p({ size: 4, col: "rgba(120,110,110,.4)", kind: "smoke", g: -20, drag: 0.94 }, 3); break;
+      case "barde": A.play("bell", { vol: 0.14, rate: 2.3 + rnd() * 0.3, x: hx }); p({ size: 1.2, col: "#c8a870", kind: "shard", g: 600 }, 3); break;
+      case "mimik": A.play("bite", { vol: 0.35, x: hx }); sp.snap = now; p({ size: 1.4, col: "#7a5432", kind: "shard", g: 700 }, 4); break;
+      case "kokon": A.play("slime", { vol: 0.2, x: hx }); sp.wob = now; break;
+      case "ertrunken": A.play("splash", { vol: 0.2, rate: 1.3, x: hx }); p({ size: 1, col: "rgba(150,148,128,.7)", kind: "dot", g: 600 }, 6); break;
+      default: A.play("hitBone", { vol: strong ? 0.35 : 0.22, x: hx }); p(() => ({ size: 1.1, col: BONEC[(rnd() * 3) | 0], kind: "shard", g: 700 }), strong ? 6 : 3); if (FX && rich) p({ size: 3, col: "rgba(150,138,124,.45)", kind: "smoke", g: -15, drag: 0.93, vy: -15 }, 2);
+    }
+  }
+  function spurRect(sp) { const b = BOX[sp.kind] || DEFBOX, x = sp.x * T + 8, gy = (sp.y + 1) * T, f = sp.flip || 1; const x0 = f > 0 ? b[0] : -b[2], x1 = f > 0 ? b[2] : -b[0]; return { x: x + x0 + 6, y: gy + b[1] + 6, w: x1 - x0 - 12, h: b[3] - b[1] - 6 }; }
+  function hitSpuren(r, dir, strong) {
+    if (!r || Z.level !== lvRef) return;
+    for (const sp of list) { const q = spurRect(sp); if (r.x < q.x + q.w && r.x + r.w > q.x && r.y < q.y + q.h && r.y + r.h > q.y) reactHit(sp, Math.max(q.x, Math.min(q.x + q.w, r.x + r.w / 2)), Math.max(q.y, Math.min(q.y + q.h, r.y + r.h / 2)), dir || 1, strong); }
+  }
+  const hp0 = Z.hitProps;
+  Z.hitProps = function (r, dmg, act) { try { hitSpuren(r, act && Z.player ? Z.player.face : 0, !act); } catch (e) { console.error(e); } return hp0 ? hp0.apply(this, arguments) : undefined; };
+  const ex0 = Z.explode;
+  Z.explode = function (x, y, r, dmg, owner) { const res = ex0.apply(this, arguments); try { if (owner !== "p") { const R = r || 40; hitSpuren({ x: x - R, y: y - R, w: R * 2, h: R * 2 }, 0, true); } } catch (e) { console.error(e); } return res; };
   Z.spuren = () => list;
   /* Prüfhilfe: alle Arten nebeneinander */
   Z._spuren = { NOTES, szene, sprite, draw: (c, kind, t, extra) => { const s = Object.assign({ kind, x: 0, y: 0, seed: 7, flip: 1, wall: -1, trap: "p", note: NOTES[kind][0] }, extra || {}); const keep = list; list = [s]; const cam = Z.cam, cx = cam.x, cy = cam.y; cam.x = -200; cam.y = -200; draw(c, t || 0); cam.x = cx; cam.y = cy; list = keep; } };

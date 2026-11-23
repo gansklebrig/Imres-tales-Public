@@ -74,6 +74,8 @@
     if (k.rock) { FX.burst(hitX, hitY, 14, { col: ["#7a6a5a", "#5a4a3a"], sp: 140, ang: -Math.PI / 2, spread: 2.6, life: 0.6, size: 3, kind: "shard", g: 500 }); A.play("rock", { x: hitX, vol: 0.6 }); FX.addShake(3); }
     if (k.fire && !k.splash) FX.burst(hitX, hitY, 10, { col: ["#ffb040", "#ff6a2a"], sp: 90, life: 0.3, size: 2, kind: "spark", add: true });
     if (p.kind === "pfeil" || p.kind === "bolzen" || p.kind === "e_pfeil" || p.kind === "e_bolzen") { if (p.wall) { Z.stuck.push({ x: hitX, y: hitY, rot: Math.atan2(p.vy, p.vx), t: 0, col: k.col }); A.play("arrowHit", { x: hitX, vol: 0.4 }); } }
+    /* Wurfmesser bleiben mit einem hellen „Tock“ kurz in der Wand stecken und zittern nach */
+    if (p.kind === "messer" && p.wall && !p.bounced) { Z.stuck.push({ x: hitX, y: hitY, rot: Math.atan2(p.vy, p.vx), t: 0, col: k.col, knife: true }); A.play("arrowHit", { x: hitX, vol: 0.35, rate: 1.35 }); FX.burst(hitX, hitY, 4, { col: ["#fff0d0", "#c8c0b4"], sp: 70, life: 0.18, size: 1.2, kind: "spark", add: true }); }
     if (p.kind === "falle") {}
     if (k.shard) { FX.burst(hitX, hitY, 8, { col: ["#d8f0e0", "#a0c0b0"], sp: 100, life: 0.4, size: 2, kind: "shard", g: 600 }); A.play("glass", { x: hitX, vol: 0.4 }); }
     if (k.coin) { A.play("coin", { x: hitX, vol: 0.4 }); }
@@ -89,6 +91,8 @@
     FX.ring(x, y, r, "#ffb040", 0.3, 4);
     FX.burst(x, y, 26, { col: ["#ffd27a", "#ff6a2a", "#5a4a40"], sp: 200, life: 0.5, size: 3, kind: "spark", add: true });
     FX.burst(x, y, 12, { col: ["#4a4040", "#6a5a50"], sp: 80, life: 1, size: 6, kind: "smoke", g: -30 });
+    /* auch zerstörbare Ausstattung trifft jede Explosion (auch die von Gegnern) */
+    if (owner !== "p" && r > 0 && Z.ausstattungTreffer) { try { Z.ausstattungTreffer({ x: x - r, y: y - r, w: 2 * r, h: 2 * r }, { explo: true }); } catch (err) { console.error(err); } }
     if (owner === "p") { for (const e of Z.enemies) if (!e.dead && U.dist(x, y, e.x + e.w / 2, e.y + e.h / 2) < r + e.w / 2) Z.hitEnemy(e, dmg, { eff: Object.assign({ burn: 1 }, eff || {}), kb: 200, kbUp: 160, src: "skill", heavy: true, dir: U.sign(e.x - x) || 1 }); Z.hitProps(r && { x: x - r, y: y - r, w: r * 2, h: r * 2 }, dmg); }
     else { const P = Z.player; if (P && U.dist(x, y, P.x + P.w / 2, P.y + P.h / 2) < r + 6) Z.hurtPlayer(dmg, { x, kb: 220, unblockable: false }); for (const e of Z.enemies) if (!e.dead && U.dist(x, y, e.x + e.w / 2, e.y + e.h / 2) < r) Z.hitEnemy(e, dmg * 0.5, { kb: 120 }); }
   }
@@ -161,8 +165,8 @@
           if (!p.pierce && !k.trap) { if (p.onEnd && !p.ended) { p.ended = true; p.onEnd(p, p.x, p.y); } p.dead = true; break; }
         }
       } else if (P && !P.dead) {
-        const r = p.r;
-        if (p.x + r > P.x + 2 && p.x - r < P.x + P.w - 2 && p.y + r > P.y + 3 && p.y - r < P.y + P.h - 1 && !p.hits.has(P)) { /* etwas kleinere Trefferfläche: faires Ausweichen */
+        const r = p.r, B = k.trap && Z.playerHurtBox ? Z.playerHurtBox(P) : { x: P.x + 2, y: P.y + 3, w: P.w - 4, h: P.h - 4 };
+        if (p.x + r > B.x && p.x - r < B.x + B.w && p.y + r > B.y && p.y - r < B.y + B.h && !p.hits.has(P)) { /* etwas kleinere Trefferfläche: faires Ausweichen */
           p.hits.add(P);
           if (k.web) { if (P.iframe <= 0 && !(P.act && P.act.type === "shield")) { Z.addStatus(P, "web", 2, true); FX.text(P.x + P.w / 2, P.y - 8, L(["Eingesponnen!", "Webbed!"]), "#eee8f0"); A.play("web"); } p.dead = true; continue; }
           const hurt = Z.hurtPlayer(p.dmg, { x: p.x - p.vx * 0.05, kb: k.rock ? 220 : 120, proj: k.parry !== false ? p : null, parryable: k.parry !== false, eff: p.eff });
@@ -179,7 +183,12 @@
   Z.stuck = [];
 
   Z.drawProjs = function (c) {
-    for (const s of Z.stuck) { c.save(); c.translate(s.x, s.y); c.rotate(s.rot); c.globalAlpha = Math.min(1, (4 - s.t)); c.fillStyle = s.col; c.fillRect(-7, -0.5, 7, 1); c.restore(); }
+    for (const s of Z.stuck) {
+      c.save(); c.translate(s.x, s.y); c.rotate(s.rot); c.globalAlpha = Math.min(1, (4 - s.t));
+      if (s.knife) { c.rotate(Math.sin(s.t * 60) * 0.25 * Math.max(0, 1 - s.t * 3)); c.fillStyle = "#4a3a30"; c.fillRect(-7, -1, 3.4, 2); c.fillStyle = "#8a6a40"; c.fillRect(-3.8, -1.4, 0.8, 2.8); c.fillStyle = s.col; c.beginPath(); c.moveTo(1, 0); c.lineTo(-3, -1.3); c.lineTo(-3, 1.3); c.fill(); }
+      else { c.fillStyle = s.col; c.fillRect(-7, -0.5, 7, 1); }
+      c.restore();
+    }
     c.globalAlpha = 1;
     for (const p of Z.projs) {
       const k = p.k;
@@ -195,7 +204,10 @@
           if (p.critAlways) { c.globalCompositeOperation = "lighter"; c.fillStyle = "rgba(255,210,120,.5)"; c.fillRect(-len - 4, -1.5, len + 6, 3); }
           break;
         }
-        case "messer": case "e_dolch": c.rotate(p.rot); c.fillStyle = k.col; c.beginPath(); c.moveTo(5, 0); c.lineTo(-2, -1.5); c.lineTo(-2, 1.5); c.fill(); c.fillStyle = "#4a3a30"; c.fillRect(-5, -1, 3, 2); break;
+        case "messer": case "e_dolch":
+          /* Wurfmesser: kurzer heller Wirbelschweif, dann die rotierende Klinge */
+          if (p.kind === "messer" && p.owner === "p") { c.save(); c.globalCompositeOperation = "lighter"; c.strokeStyle = "rgba(255,235,200,.35)"; c.lineWidth = 1; c.beginPath(); c.arc(0, 0, 4.2, p.rot + Math.PI, p.rot + Math.PI * 1.8); c.stroke(); c.restore(); }
+          c.rotate(p.rot); c.fillStyle = k.col; c.beginPath(); c.moveTo(5, 0); c.lineTo(-2, -1.5); c.lineTo(-2, 1.5); c.fill(); c.fillStyle = "#4a3a30"; c.fillRect(-5, -1, 3, 2); break;
         case "phiole": case "e_phiole": case "bombe": case "e_bombe": {
           c.rotate(p.rot); c.fillStyle = k.col; c.beginPath(); c.arc(0, 1, 3, 0, 6.283); c.fill(); c.fillRect(-1, -4, 2, 3); c.fillStyle = "#e0d8c0"; c.fillRect(-1.2, -5, 2.4, 1.4);
           if (k.fuse || p.kind === "bombe") { c.rotate(-p.rot); c.globalCompositeOperation = "lighter"; c.fillStyle = Math.random() < 0.5 ? "#ffd27a" : "#ff6a1a"; c.fillRect(-1, -7, 2, 2); }
@@ -416,18 +428,21 @@
     const P = Z.player;
     for (let i = Z.pickups.length - 1; i >= 0; i--) {
       const p = Z.pickups[i]; p.t += dt;
-      const magnet = (p.kind === "gold" || p.kind === "shard") && p.t > 0.45;
+      const magnet = (p.kind === "gold" || p.kind === "shard" || p.kind === "glut" || p.kind === "key") && p.t > 0.45;
       if (magnet && P && !P.dead) {
         const dx = P.x + P.w / 2 - p.x, dy = P.y + P.h / 2 - p.y, d = Math.hypot(dx, dy);
-        if (d < (p.kind === "shard" ? 400 : 90) || p.t > 2.5) { const sp = Math.min(500, 120 + p.t * 260); p.vx = dx / d * sp; p.vy = dy / d * sp; p.x += p.vx * dt; p.y += p.vy * dt; if (d < 10) { collect(p); Z.pickups.splice(i, 1); } continue; }
+        if (d < (p.kind === "shard" || p.kind === "glut" || p.kind === "key" ? 400 : 90) || p.t > 2.5) { const sp = Math.min(500, 120 + p.t * 260); p.vx = dx / d * sp; p.vy = dy / d * sp; p.x += p.vx * dt; p.y += p.vy * dt; if (d < 10) { collect(p); Z.pickups.splice(i, 1); } continue; }
       }
-      if (p.kind === "shard" && p.t < 0.45) { p.vy += 300 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.96; continue; }
+      if ((p.kind === "shard" || p.kind === "glut" || p.kind === "key") && p.t < 0.45) { p.vy += 300 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.96; continue; }
       if (!p.float) { p.vy = Math.min(p.vy + 900 * dt, 500); const ox = p.x; const b = { x: p.x - p.w / 2, y: p.y - p.h, w: p.w, h: p.h, vx: p.vx, vy: p.vy }; Z.moveBody(b, dt); p.x = b.x + p.w / 2; p.y = b.y + p.h; p.vx = b.vx; p.vy = b.vy; if (b.onGround) { p.vx *= 0.8; if (p.kind === "gold" && Math.abs(b.landV || 0) > 120) { p.vy = -(b.landV || 0) * 0.35; A.play("coin", { vol: 0.15, x: p.x, gap: 0.08 }); } } }
     }
   };
   function collect(p) {
     const P = Z.player;
     if (p.kind === "gold") { P.gold += p.n; A.play("coin", { vol: 0.3, gap: 0.04 }); Z.stats.gold = (Z.stats.gold || 0) + p.n; if (Z.has("goldgier")) Z.healPlayer(0.5); }
+    /* Schmiedeglut und Schlüssel (schmiede.js) */
+    if (p.kind === "glut") { P.glut = (P.glut || 0) + (p.n || 1); Z.stats.glut = (Z.stats.glut || 0) + (p.n || 1); A.play("fire", { vol: 0.35, gap: 0.05, rate: 1.5 }); FX.text(P.x + P.w / 2, P.y - 10, "+" + (p.n || 1) + " " + L(["Glut", "Ember"]), "#ff9a3a"); FX.p({ x: P.x + P.w / 2, y: P.y + 10, vx: 0, vy: -20, life: 0.35, size: 12, col: "#ff7a2a", kind: "glow", add: true }); }
+    if (p.kind === "key") { P.keys = (P.keys || 0) + 1; A.play("chain", { vol: 0.4, rate: 1.6 }); FX.text(P.x + P.w / 2, P.y - 10, L(["Schlüssel", "Key"]), "#ffd27a", true); }
     if (p.kind === "shard") { P.shards += p.n; A.play("gem", { vol: 0.35, gap: 0.05, rate: 1.4 }); FX.p({ x: P.x + P.w / 2, y: P.y + 10, vx: 0, vy: -20, life: 0.3, size: 10, col: "#ff5a8a", kind: "glow", add: true }); }
   }
   Z.drawPickups = function (c, time) {
@@ -436,16 +451,52 @@
       const bob = p.float || p.kind === "item" || p.kind === "scroll" ? Math.sin(time * 3 + p.x) * 2 - 4 : 0;
       switch (p.kind) {
         case "gold": { const s = Math.abs(Math.sin(time * 6 + p.x)); c.fillStyle = "#c08a2a"; c.fillRect(-2 * s - 0.5, -4, 4 * s + 1, 4); c.fillStyle = "#ffd27a"; c.fillRect(-1.5 * s, -3.5, 3 * s, 2); break; }
+        case "glut": {
+          /* Schmiedeglut: glühender Splitter mit Funken */
+          c.globalCompositeOperation = "lighter"; const pu = 0.75 + 0.25 * Math.sin(time * 9 + p.x);
+          const g = c.createRadialGradient(0, -2, 0, 0, -2, 9); g.addColorStop(0, "#fff0c0"); g.addColorStop(0.35, "rgba(255,140,40," + pu + ")"); g.addColorStop(1, "rgba(200,40,10,0)"); c.fillStyle = g; c.fillRect(-9, -11, 18, 18);
+          c.globalCompositeOperation = "source-over"; c.fillStyle = "#ff8a2a"; c.beginPath(); c.moveTo(0, -6); c.lineTo(3, -2); c.lineTo(0, 2); c.lineTo(-3, -2); c.closePath(); c.fill(); c.fillStyle = "#ffe0a0"; c.fillRect(-0.8, -4, 1.6, 3);
+          if (Math.random() < 0.08) FX.p({ x: p.x + (Math.random() - 0.5) * 6, y: p.y - 4, vx: (Math.random() - 0.5) * 20, vy: -40, life: 0.5, size: 1.2, col: "#ffb060", kind: "spark", add: true });
+          break;
+        }
+        case "key": {
+          const b = Math.sin(time * 3 + p.x) * 1.5; c.translate(0, b - 4);
+          Z.draw.glow(c, 0, -3, 10, "rgba(255,210,120,.45)");
+          c.strokeStyle = "#ffd27a"; c.lineWidth = 1.6; c.beginPath(); c.arc(-3, -3, 2.4, 0, 6.283); c.stroke();
+          c.fillStyle = "#ffd27a"; c.fillRect(-0.6, -3.8, 6, 1.6); c.fillRect(3.4, -3.8, 1.4, 3.4); c.fillRect(1.4, -3.8, 1.2, 2.6);
+          break;
+        }
         case "shard": { c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(0, 0, 0, 0, 0, 7); g.addColorStop(0, "#ffe0f0"); g.addColorStop(0.4, "#ff5a8a"); g.addColorStop(1, "rgba(160,20,60,0)"); c.fillStyle = g; c.fillRect(-7, -7, 14, 14); break; }
         case "item": case "scroll": case "food": {
+          if (p.kind === "item" && p.rack) {
+            /* Waffenständer im Lager (schmiede.js): aufrecht angelehnt, sanftes Glänzen statt Lichtsäule */
+            const d = Z.itemDef(p.it), pc = Z.plusCol ? Z.plusCol(p.it.plus || 0) : "#ffd27a";
+            c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = 0.28 + 0.12 * Math.sin(time * 2.4 + p.x * 0.1); Z.draw.glow(c, 0, -10, 14, pc); c.restore();
+            c.save(); c.translate(0, -13); if (p.it.type !== "skill" && d.kind !== "shield") c.rotate(-0.79); Z.drawIcon(c, d.icon, 0, 0, 21, d.col); c.restore();
+            const gl = (time * 0.45 + p.x * 0.013) % 1; if (gl < 0.12) { const k = gl / 0.12; c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = Math.sin(k * Math.PI); c.fillStyle = "#fff6d8"; c.translate(-3 + k * 6, -18 + k * 14); c.rotate(0.785); c.fillRect(-0.6, -4, 1.2, 8); c.fillRect(-4, -0.6, 8, 1.2); c.restore(); }
+            if (p.it.plus) { c.font = "800 6px 'Alegreya Sans',sans-serif"; c.textAlign = "center"; c.fillStyle = "rgba(14,8,10,.8)"; c.fillRect(4, -25, 11, 7); c.fillStyle = pc; c.fillText("+" + p.it.plus, 9.5, -19.6); }
+            break;
+          }
           c.translate(0, bob);
           /* Lichtsäule wie in einem Schrein */
           const col = p.kind === "item" ? Z.RARITY[p.it.rar].col : p.kind === "scroll" ? "#ffd27a" : "#e8c890";
           c.globalCompositeOperation = "lighter"; c.globalAlpha = 0.18 + 0.08 * Math.sin(time * 3);
           const g = c.createLinearGradient(0, -60, 0, 4); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, col); c.fillStyle = g; c.fillRect(-6, -60 - bob, 12, 64);
           c.globalAlpha = 1; c.globalCompositeOperation = "source-over";
-          if (p.kind === "item") Z.drawIcon(c, Z.itemDef(p.it).icon, 0, -6, 13, Z.itemDef(p.it).col);
-          else if (p.kind === "scroll") { c.fillStyle = "#e8d8b0"; c.fillRect(-5, -10, 10, 8); c.fillStyle = "#c0a070"; c.fillRect(-6, -11, 12, 2); c.fillRect(-6, -3, 12, 2); c.fillStyle = Z.STATS[p.stat || "brut"].col; c.fillRect(-1.5, -8, 3, 4); }
+          if (p.kind === "item") {
+            Z.drawIcon(c, Z.itemDef(p.it).icon, 0, -6, 13, Z.itemDef(p.it).col);
+            /* Schmiedestufe (+1 … +5) als kleines Abzeichen */
+            if (p.it.plus) { const pc = Z.plusCol ? Z.plusCol(p.it.plus) : "#ffd27a"; c.font = "800 6px 'Alegreya Sans',sans-serif"; c.textAlign = "center"; c.fillStyle = "rgba(14,8,10,.8)"; c.fillRect(4, -17, 11, 7); c.fillStyle = pc; c.fillText("+" + p.it.plus, 9.5, -11.6); }
+          }
+          else if (p.kind === "scroll") {
+            /* Werte-Schriftrolle: größer, mit dreifarbigem Runenkranz (Brutalität, Taktik, Überleben) – gut sichtbar */
+            const cols = [Z.STATS.brut.col, Z.STATS.takt.col, Z.STATS.ueber.col];
+            c.save(); c.globalCompositeOperation = "lighter"; Z.draw.glow(c, 0, -6, 15 + Math.sin(time * 3) * 2, "rgba(255,210,122,.35)");
+            for (let i = 0; i < 3; i++) { const q = time * 1.6 + i * 2.094; c.fillStyle = cols[i]; c.globalAlpha = 0.85; c.beginPath(); c.arc(Math.cos(q) * 10, -6 + Math.sin(q) * 4, 1.6, 0, 6.283); c.fill(); }
+            c.restore();
+            c.fillStyle = "#efe0b8"; c.fillRect(-6, -12, 12, 11); c.fillStyle = "#c0a070"; c.fillRect(-7.5, -13, 15, 2.4); c.fillRect(-7.5, -2.4, 15, 2.4);
+            for (let i = 0; i < 3; i++) { c.fillStyle = cols[i]; c.fillRect(-4 + i * 3, -9, 2, 5); }
+          }
           else { c.fillStyle = "#a0603a"; c.beginPath(); c.ellipse(0, -5, 6, 4, 0, 0, 6.283); c.fill(); c.fillStyle = "#e0a070"; c.beginPath(); c.ellipse(-1, -6, 4, 2.2, 0, 0, 6.283); c.fill(); }
           break;
         }

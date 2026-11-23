@@ -17,6 +17,7 @@
   const KITS = {
     sb: { n: ["Schwert & Bogen", "Sword & bow"], d: ["Kurzschwert für die Nähe, Jagdbogen für die Ferne.", "Shortsword up close, hunting bow at range."], a1: "kurzschwert", a2: "jagdbogen" },
     ss: { n: ["Schwert & Schild", "Sword & shield"], d: ["Zuschlagen und parieren – der sichere Weg.", "Strike and parry – the safe way."], a1: "kurzschwert", a2: "holzschild" },
+    sm: { n: ["Schwert & Wurfmesser", "Sword & knives"], d: ["Zuschlagen und Messer werfen – die Messer markieren mit einem Faden, das Schwert vollstreckt.", "Strike and throw knives – the knives mark with a thread, the sword executes."], a1: "kurzschwert", a2: "wurfmesser" },
     bs: { n: ["Bogen & Schild", "Bow & shield"], d: ["Für Geübte: Abstand halten, Geschosse zurückwerfen – keine Nahkampfwaffe.", "For the skilled: keep your distance, deflect projectiles – no melee weapon."], a1: "jagdbogen", a2: "holzschild" }
   };
   Z.KITS = KITS;
@@ -37,7 +38,7 @@
 
   /* ======================= HELDEN & UMHÄNGE ======================= */
   const HEROES = {
-    Z: { n: ["Ezekiel", "Ezekiel"], d: ["Der Zerstörer. Ausgewogen, Darkin-Blut, startet mit nichts.", "The Destroyer. Balanced, Darkin blood, starts with nothing."] },
+    Z: { n: ["Ezekiel", "Ezekiel"], d: ["Der Zerstörer. Ausgewogen, Darkin-Blut, nimmt nur mit, was am Ständer liegt.", "The Destroyer. Balanced, Darkin blood, takes only what lies on the rack."] },
     G: { n: ["Friedrich", "Friedrich"], d: ["Waldläufer: startet mit Bogen, Dreifachsprung, Pfeile +20 % Schaden, 10 % weniger Leben.", "Ranger: starts with a bow, triple jump, arrows +20% damage, 10% less health."], unlock: ["Freischalten: ersten Boss oder Wächter besiegen.", "Unlock: defeat your first boss or warden."] },
     B: { n: ["Barradin", "Barradin"], d: ["Barde: startet mit dem Spottlied, alle 12 s Inspiration (+40 % Schaden für 4 s), +50 % Gold.", "Bard: starts with the mocking song, inspiration every 12 s (+40% damage for 4 s), +50% gold."], unlock: ["Freischalten: 10 Paraden in einem Durchgang.", "Unlock: 10 parries in one run."] },
     E: { n: ["Echo", "Echo"], d: ["Druidin: startet mit Echos Blitz, gleitet mit gehaltenem Sprung, jede Münze heilt.", "Druid: starts with Echo's lightning, glides while holding jump, every coin heals."], unlock: ["Freischalten: 1.000 Gold in einem Durchgang.", "Unlock: 1,000 gold in one run."] }
@@ -119,12 +120,22 @@
     const heroes = Object.keys(HEROES).map(k => b("abHero", k, sel.hero === k, L(HEROES[k].n), !m.heroes[k], m.heroes[k] ? L(HEROES[k].d) : "🔒 " + L(HEROES[k].unlock))).join("");
     const capes = Object.keys(CAPES).filter(k => m.capes[k]).map(k => '<button class="umhang' + (sel.cape === k ? " an" : "") + '" data-act="abCape" data-arg="' + k + '" title="' + esc(L(CAPES[k].n)) + '" style="--a:' + CAPES[k].c[0] + ";--b:" + CAPES[k].c[1] + '"></button>').join("");
     const pacts = Object.keys(PACTS).map(k => b("abPact", k, sel.pacts.includes(k), L(PACTS[k].n), false, L(PACTS[k].d))).join("");
-    const kits = Object.keys(KITS).map(k => b("abKit", k, sel.kit === k, L(KITS[k].n), false, L(KITS[k].d))).join("");
+    /* Ausrüstung kommt jetzt vom Waffenständer im Lager. Hier nur ein Blick auf die Hände –
+       sind sie leer, eine freundliche Warnung mit Schnellwahl (Nundro reicht die Waffen herüber). */
+    const P0 = Z.player, hands = P0 && P0.slots ? [P0.slots.a1, P0.slots.a2] : [null, null];
+    const hk = a => { const k = inp.device === "touch" ? "" : inp.label(a); return k ? "<kbd>" + esc(k) + "</kbd> " : ""; };
+    const handTxt = (it, i) => '<span class="hand' + (it ? "" : " leer") + '">' + hk(i ? "a2" : "a1") + L(i ? ["Hand 2: ", "Hand 2: "] : ["Hand 1: ", "Hand 1: "]) + (it ? '<b style="color:' + (Z.plusCol && it.plus ? Z.plusCol(it.plus) : Z.RARITY[it.rar].col) + '">' + esc(Z.itemTitle ? Z.itemTitle(it) : L(Z.itemDef(it).n)) + "</b>" : "<i>" + L(["leer", "empty"]) + "</i>") + "</span>";
+    const empty = !hands[0] && !hands[1], oneEmpty = !hands[0] || !hands[1];
+    const kits = oneEmpty || sel.kitUsed ? Object.keys(KITS).map(k => b("abKit", k, sel.kitUsed === k, L(KITS[k].n), false, L(KITS[k].d))).join("") : "";
+    const gearHTML = '<div class="haende">' + handTxt(hands[0], 0) + handTxt(hands[1], 1) + "</div>" +
+      (empty ? '<p class="warnung">' + L(["Mit leeren Händen? Am Waffenständer vor dem Tor liegen Waffen – oder Nundro reicht dir schnell welche:", "Empty-handed? There are weapons on the rack by the gate – or Nundro quickly hands you some:"]) + "</p>"
+        : oneEmpty ? '<p class="hinweis">' + L(["Eine Hand ist noch frei. Schnell auffüllen?", "One hand is still free. Fill it quickly?"]) + "</p>" : "") +
+      (kits ? '<div class="wahlen">' + kits + "</div>" : "");
     const n = sel.pacts.length;
     const sk = Z.meta.skullSel || 0;
     ui().open("<h2>" + L(["Die Feste betreten", "Enter the keep"]) + "</h2>" +
       "<h3>" + L(["Held", "Hero"]) + '</h3><div class="wahlen">' + heroes + "</div>" +
-      "<h3>" + L(["Ausrüstung", "Gear"]) + ' <small class="hinweis">' + L(["Zwei einfache Waffen für den Anfang – alles Bessere findest du unterwegs", "Two plain weapons to start – anything better you find on the way"]) + '</small></h3><div class="wahlen">' + kits + "</div>" +
+      "<h3>" + L(["Ausrüstung", "Gear"]) + ' <small class="hinweis">' + L(["Was du in den Händen hältst, nimmst du mit – alles Bessere findest du unterwegs", "What you hold, you take along – anything better you find on the way"]) + "</small></h3>" + gearHTML +
       "<h3>" + L(["Umhang", "Cape"]) + ' <small class="hinweis">' + Object.keys(m.capes).length + "/" + Object.keys(CAPES).length + '</small></h3><div class="umhaenge">' + capes + "</div>" +
       "<h3>" + L(["Pakte", "Pacts"]) + ' <small class="hinweis">' + L(["Jeder Pakt: +30 % Seelensplitter, bessere Beute", "Each pact: +30% soul shards, better loot"]) + (n ? " · " + L(["aktiv: ", "active: "]) + n + " (×" + (1 + 0.3 * n).toFixed(1) + ")" : "") + '</small></h3><div class="wahlen pakte">' + pacts + "</div>" +
       (sk ? '<p class="schaedel">' + "☠".repeat(sk) + " " + L(["Schädel aktiv", "skulls active"]) + "</p>" : "") +
@@ -136,9 +147,21 @@
     act.abHero = k => { if (!M().heroes[k]) return; sel.hero = k; ui().close(); startModal(); refocus(k); };
     act.abCape = k => { sel.cape = k; M().cape = k; applyCape(); ui().close(); startModal(); refocus(k); };
     act.abPact = k => { const i = sel.pacts.indexOf(k); if (i >= 0) sel.pacts.splice(i, 1); else sel.pacts.push(k); ui().close(); startModal(); refocus(k); };
-    act.abKit = k => { sel.kit = k; ui().close(); startModal(); refocus(k); };
+    /* Schnellwahl: legt die Waffen des Pakets in die freien Hände (im Lager) */
+    act.abKit = k => {
+      sel.kit = k; const kit = KITS[k], P = Z.player;
+      const mk = id => (Z.rackItem ? Z.rackItem(id) : Z.makeItem(id, 0, 0));
+      if (kit && P && P.slots) {
+        if (sel.kitUsed) { P.slots.a1 = mk(kit.a1); P.slots.a2 = mk(kit.a2); }   /* erneut gewählt: beide Hände tauschen */
+        else { const ids = [kit.a1, kit.a2].filter(id => !["a1", "a2"].some(s => P.slots[s] && P.slots[s].id === id)); for (const s of ["a1", "a2"]) if (!P.slots[s] && ids.length) P.slots[s] = mk(ids.shift()); }
+        sel.kitUsed = k; A.play("unsheathe", { vol: 0.5 });
+      }
+      ui().close(); startModal(); setTimeout(() => { const el = document.querySelector('#modal [data-act="abGo"]'); if (el) el.focus(); }, 30);
+    };
     act.abGo = () => { const m = M(); m.kit = sel.kit; m.hero = sel.hero; m.cape = sel.cape; m.pactSel = sel.pacts.slice(); Z.saveMeta(); ui().close(); Z.startRun(); };
     act.abAch = () => { ui().close(); achModal(true); };
+    act.abShrine = b => shrineTake(b);
+    act.abTrade = a => trade(a);
     act.abAchBack = arg => { ui().close(); if (arg === "start") startModal(); };
     ui().startRunConfirm = () => { sel = null; startModal(); };
   }
@@ -195,10 +218,13 @@
     if (!run.heroGiven && Z.level && !Z.level.hub) {
       run.heroGiven = true;
       const give = (id, slot) => { const it = Z.makeItem(id, 0, 1); P.slots[slot] = it; Z.meta.found[id] = true; };
+      /* Wer mit ganz leeren Händen losgeht (oder direkt startet), bekommt das gewohnte Paket – nie mit bloßen Fäusten in die Feste */
       const kit = KITS[M().kit] || KITS.sb;
-      if (!P.slots.a1) P.slots.a1 = Z.makeItem(kit.a1, 0, 0);
-      if (!P.slots.a2) P.slots.a2 = Z.makeItem(kit.a2, 0, 0);
-      if (h === "G") give("bogen", "a2"); if (h === "B") give("spottlied", "s1"); if (h === "E") give("echoblitz", "s1");
+      if (!P.slots.a1 && !P.slots.a2) {
+        P.slots.a1 = Z.rackItem ? Z.rackItem(kit.a1) : Z.makeItem(kit.a1, 0, 0); P.slots.a2 = Z.rackItem ? Z.rackItem(kit.a2) : Z.makeItem(kit.a2, 0, 0);
+        if (run.fromHub) setTimeout(() => Z.toast && Z.toast(L(["Nundro hat dir hinterhergerufen und ", "Nundro called after you and threw you "]) + "<b>" + esc(L(Z.WEAPONS[kit.a1].n)) + "</b>" + L([" und ", " and "]) + "<b>" + esc(L(Z.WEAPONS[kit.a2].n)) + "</b>" + L([" zugeworfen.", "."]), 3600), 1600);
+      }
+      if (h === "G" && (!P.slots.a2 || Z.WEAPONS[P.slots.a2.id].find == null)) give("bogen", "a2"); if (h === "B") give("spottlied", "s1"); if (h === "E") give("echoblitz", "s1");
       if (M().bonus.startwaffe) { const ids = Object.keys(Z.meta.found || {}).filter(id => Z.WEAPONS[id] && Z.WEAPONS[id].kind && id !== "faeuste" && !Z.WEAPONS[id].legendaryOnly); if (ids.length && (!P.slots.a1 || Z.WEAPONS[P.slots.a1.id].find == null)) give(Z.R.pick(ids), "a1"); }
     }
     if (h === "G" && P.onGround) P.airJumps = 2;
@@ -241,7 +267,7 @@
 
   /* ======================= RAUM-EREIGNISSE ======================= */
   let evs = [];
-  const EVN = { schrein: ["Verfluchter Schrein", "Cursed Shrine"], brunnen: ["Wunschbrunnen", "Wishing Well"], wette: ["Barradins Wette", "Barradin's Bet"], kaefig: ["Gefangener im Käfig", "Caged Prisoner"], dieb: ["Goldgoblin", "Gold Goblin"] };
+  const EVN = { haendler: ["Fahrende Händlerin", "Wandering Trader"], schrein: ["Verfluchter Schrein", "Cursed Shrine"], brunnen: ["Wunschbrunnen", "Wishing Well"], wette: ["Barradins Wette", "Barradin's Bet"], kaefig: ["Gefangener im Käfig", "Caged Prisoner"], dieb: ["Goldgoblin", "Gold Goblin"] };
   function spotFar(lv, from, n) {
     for (let i = 0; i < 400; i++) { const x = 3 + ((Math.random() * (lv.W - 6)) | 0), y = 3 + ((Math.random() * (lv.H - 6)) | 0); if (Z.standable(lv, x, y, 3) && Z.standable(lv, x - 1, y, 3) && Z.standable(lv, x + 1, y, 3) && Math.abs(x - from.x) + Math.abs(y - from.y) > (n || 30) && !(lv.doors || []).some(d => Math.abs(d.x - x) < 5 && Math.abs(d.y - y) < 4)) return { x, y }; }
     return null;
@@ -251,13 +277,20 @@
     if (lv && lv.arena && Z.ARENAS[lv.arena] && Z.ARENAS[lv.arena].final && M().bonus.riss) lv.riftPending = true;
     if (!lv || lv.hub || lv.arena || lv.passage || !Z.run) return;
     const n = (Math.random() < 0.65 ? 1 : 0) + (Math.random() < (M().bonus.glueck ? 0.5 : 0.22) ? 1 : 0);
-    const kinds = ["schrein", "brunnen", "wette", "kaefig", "dieb"];
-    for (let i = 0; i < n; i++) {
-      const k = Z.R.pick(kinds), p = spotFar(lv, lv.start); if (!p) continue;
+    const kinds = ["brunnen", "wette", "kaefig", "dieb"];
+    /* Händlerin und Schrein mit „Mitleidszähler“: ca. jedes 2.–3. Gebiet, spätestens nach drei Gebieten ohne */
+    const run = Z.run, plan = [];
+    run.sinceTrader = (run.sinceTrader || 0) + 1; run.sinceShrine = (run.sinceShrine || 0) + 1;
+    if (Math.random() < 0.1 + 0.18 * run.sinceTrader || run.sinceTrader >= 3) { plan.push("haendler"); run.sinceTrader = 0; }
+    if (Math.random() < 0.05 + 0.15 * run.sinceShrine || run.sinceShrine >= 4) { plan.push("schrein"); run.sinceShrine = 0; }
+    for (let i = 0; i < n; i++) plan.push(Z.R.pick(kinds));
+    for (const k of plan) {
+      const p = spotFar(lv, lv.start, k === "haendler" ? 18 : 30); if (!p) continue;
       const x = p.x * T + 8, y = (p.y + 1) * T;
       if (k === "dieb") { const e = Z.spawnEnemy("goblin", x, y); if (e) { e.thief = true; e.hpMax = e.hp = Math.round(e.hpMax * 2.5); e.def = Object.assign({}, e.def, { spd: 135, atks: [] }); e.t0 = 0; evs.push({ k, e, x, y, done: false }); } }
       else evs.push({ k, x, y, done: false, t: 0 });
     }
+    if (evs.some(e => e.k === "haendler")) setTimeout(() => { if (Z.level === lv && Z.toast) Z.toast("⚖ <b>" + L(["Fahrende Händlerin", "Wandering Trader"]) + "</b><br><small>" + L(["Irgendwo in diesem Gebiet klimpert ihr Karren – folge der Laterne.", "Somewhere in this area her cart is jingling – follow the lantern."]) + "</small>", 3400); }, 9000);
     /* Runen-Fragmente in Geheimräumen */
     const RUNE = { verlies: "tiefe", schmiede: "glut", zinnen: "himmel" };
     const rk = RUNE[lv.biome];
@@ -287,7 +320,8 @@
           if (ev.t0 > 24) { FX.burst(e.x + e.w / 2, e.y + e.h / 2, 16, { col: ["#a99a8b", "#ffd27a"], sp: 80, life: 0.5, size: 3, kind: "smoke" }); e.dead = true; e.deadT = 9; ev.done = true; FX.text(e.x + e.w / 2, e.y - 10, L(["Hihihi!", "Teehee!"]), "#ffd27a"); }
           break;
         }
-        case "schrein": if (near(ev) && use) { inp.consume("use"); const ids = Object.keys(Z.BLESS).filter(b => !P.bless.includes(b)); if (ids.length) { const b = Z.R.pick(ids); P.bless.push(b); P.hpMax = Math.max(20, Math.round(P.hpMax * 0.8)); P.hp = Math.min(P.hp, P.hpMax); FX.flashScreen("#a040ff", 0.4); A.play("magic", { vol: 0.7, rate: 0.6 }); FX.text(P.x + P.w / 2, P.y - 14, L(Z.BLESS[b].n), "#c890ff", true); Z.toast(L(["Der Schrein nimmt ein Fünftel deines Lebens und schenkt: ", "The shrine takes a fifth of your life and grants: "]) + "<b>" + esc(L(Z.BLESS[b].n)) + "</b><br><small>" + esc(L(Z.BLESS[b].d)) + "</small>", 4200); } finish(ev); } break;
+        case "schrein": if (near(ev) && use) { inp.consume("use"); shrineChoice(ev); } break;
+        case "haendler": if (near(ev, 26) && use) { inp.consume("use"); traderEvent(ev); } break;
         case "brunnen": if (near(ev) && use) { inp.consume("use"); if (P.gold >= 60) { P.gold -= 60; const r = Math.random(); A.play("splash", { vol: 0.6 }); FX.burst(ev.x, ev.y - 10, 16, { col: ["#ffd27a", "#c0e0d0"], sp: 80, up: 60, life: 0.7, size: 2, kind: "glow", add: true }); if (r < 0.35) { Z.healPlayer(P.hpMax); Z.toast(L(["Das Wasser heilt dich vollständig.", "The water heals you completely."]), 2600); } else if (r < 0.7) { Z.dropItem(ev.x, ev.y - 10, { chest: true }); Z.toast(L(["Etwas glänzt im Wasser …", "Something glitters in the water…"]), 2600); } else if (r < 0.9) { P.potions = Math.min(P.potMax + 1, P.potions + 1); P.potMax = Math.max(P.potMax, P.potions); Z.toast(L(["Ein voller Trank treibt nach oben.", "A full potion floats up."]), 2600); } else { Z.toast(L(["Nichts. Echo kichert irgendwo.", "Nothing. Somewhere, Echo giggles."]), 2600); } finish(ev); } else { Z.toast(L(["Der Brunnen will 60 Gold.", "The well wants 60 gold."]), 2000); } } break;
         case "kaefig": if (near(ev, 26) && use) { inp.consume("use"); finish(ev); A.play("chain", { vol: 0.8 }); FX.burst(ev.x, ev.y - 10, 18, { col: ["#9a8a7a", "#5a4a40"], sp: 120, life: 0.5, size: 2.4, kind: "shard", g: 500 }); Z.dropShards(ev.x, ev.y - 8, 25); Z.toast(L(["„Danke, Gehörnter! Nimm das – Nundro wird staunen.“", "\"Thanks, horned one! Take this – Nundro will be amazed.\""]), 3000); } break;
         case "wette":
@@ -303,6 +337,53 @@
       }
     }
   }
+  /* Verfluchter Schrein: Wahl zwischen zwei Segen (oder keinem). Preis: ein Fünftel des Lebens. */
+  function shrineChoice(ev) {
+    const P = Z.player; const ids = Z.R.shuffle(Object.keys(Z.BLESS).filter(b => !P.bless.includes(b))).slice(0, 2);
+    if (!ids.length) { finish(ev); return; }
+    const kb = i => (inp.device === "keys" && !ui().touchOn ? "<kbd>" + (i + 1) + "</kbd> " : "");
+    ui().open("<h2>" + L(["Verfluchter Schrein", "Cursed Shrine"]) + '</h2><p class="hinweis">' + L(["Zwei Segen flackern im violetten Licht. Der Schrein nimmt ein Fünftel deines Lebens – für einen davon.", "Two blessings flicker in the violet light. The shrine takes a fifth of your life – for one of them."]) + '</p><div class="rollen">' +
+      ids.map((b, i) => { const d = Z.BLESS[b]; return '<button data-act="abShrine" data-arg="' + b + '" data-key="' + (i + 1) + '" class="k-' + d.k + '"' + (i === 0 ? " autofocus" : "") + "><b>" + kb(i) + esc(L(d.n)) + '</b><small class="art">' + esc(L(Z.BLESS_KIND[d.k])) + "</small><small>" + esc(L(d.d)) + "</small></button>"; }).join("") +
+      '</div><div class="knoepfe"><button data-act="close">' + L(["Nichts opfern", "Sacrifice nothing"]) + "</button></div>", { cls: "schmal" });
+    shrineEv = ev;
+  }
+  let shrineEv = null;
+  function shrineTake(b) {
+    const P = Z.player, ev = shrineEv; shrineEv = null; ui().close(); if (!ev || ev.done || !Z.BLESS[b]) return;
+    P.bless.push(b); P.hpMax = Math.max(20, Math.round(P.hpMax * 0.8)); P.hp = Math.min(P.hp, P.hpMax);
+    FX.flashScreen("#a040ff", 0.4); A.play("magic", { vol: 0.7, rate: 0.6 }); FX.text(P.x + P.w / 2, P.y - 14, L(Z.BLESS[b].n), "#c890ff", true);
+    Z.toast(L(["Der Schrein nimmt ein Fünftel deines Lebens und schenkt: ", "The shrine takes a fifth of your life and grants: "]) + "<b>" + esc(L(Z.BLESS[b].n)) + "</b><br><small>" + esc(L(Z.BLESS[b].d)) + "</small>", 4200);
+    finish(ev);
+  }
+  /* Fahrende Händlerin (Echo verkleidet?): eine Waffe mit Rabatt – oder ein Glücksbeutel mit Risiko */
+  let tradeEv = null;
+  function traderEvent(ev) {
+    const P = Z.player; tradeEv = ev;
+    if (!ev.it) ev.it = Z.rollItem({ kind: "weapon", rar: [20, 50, 25, 5] });
+    const tier = Z.run ? Z.run.tier : 0, price = ev.it ? Math.round(Z.itemPrice(ev.it) * 0.6) : 0, bag = Math.round(90 * (1 + 0.5 * tier));
+    ev.price = price; ev.bag = bag;
+    const k = (n) => (inp.device === "keys" && !ui().touchOn ? "<kbd>" + n + "</kbd> " : "");
+    ui().open("<h2>" + L(["Fahrende Händlerin", "Wandering Trader"]) + ' <span class="bank">' + U.fmt(P.gold) + " ● " + L(["Gold", "Gold"]) + '</span></h2><p class="hinweis">„' + L(["Psst. Ein Stück, frisch aus einer Truhe, die niemandem gehört hat. Oder du greifst in den Beutel. Kein Umtausch.", "Psst. A piece fresh from a chest that belonged to no one. Or you reach into the bag. No refunds."]) + '“</p><div class="liste">' +
+      (ev.it && !ev.sold ? '<div class="zeile ware"><div class="ic">' + ui().itemCardHTML(ev.it, true) + '</div><div class="kauf"><button data-act="abTrade" data-arg="buy" data-key="1" autofocus' + (P.gold < price ? " disabled" : "") + ">" + k(1) + U.fmt(price) + " ● <small>(−40 %)</small></button></div></div>" : "") +
+      '<div class="zeile"><div><b>' + L(["Glücksbeutel", "Lucky bag"]) + "</b><small>" + L(["40 %: 2 Schmiedeglut · 25 %: seltene Waffe · 15 %: Schriftrolle · 20 %: ein Stein. Ein Griff pro Begegnung.", "40%: 2 forge embers · 25%: rare weapon · 15%: scroll · 20%: a rock. One grab per encounter."]) + '</small></div><div class="kauf"><button data-act="abTrade" data-arg="bag" data-key="2"' + (P.gold < bag || ev.bagUsed ? " disabled" : "") + ">" + k(2) + (ev.bagUsed ? L(["leer", "empty"]) : U.fmt(bag) + " ●") + "</button></div></div>" +
+      '</div><div class="knoepfe"><button data-act="close">' + L(["Weitergehen", "Move on"]) + "</button></div>", { cls: "breit" });
+  }
+  function trade(arg) {
+    const P = Z.player, ev = tradeEv; if (!ev) return;
+    if (arg === "buy" && ev.it && !ev.sold && P.gold >= ev.price) {
+      P.gold -= ev.price; ev.sold = true; A.play("coin", { vol: 0.6 }); ui().close();
+      Z.spawnPickup("item", ev.x + 14, ev.y - 4, { it: ev.it, vx: 0, vy: -120 }); Z.toast(L(["„Gern geschehen. Ich war nie hier.“", "\"My pleasure. I was never here.\""]), 2600);
+    } else if (arg === "bag" && !ev.bagUsed && P.gold >= ev.bag) {
+      P.gold -= ev.bag; ev.bagUsed = true; ui().close(); A.play("coin", { vol: 0.5 });
+      const r = Math.random(), x = ev.x + 10, y = ev.y - 8;
+      if (r < 0.4) { Z.spawnReward ? Z.spawnReward("glut", x, y, { n: 2 }) : null; Z.toast(L(["Zwei glühende Splitter. Die Händlerin pustet sich die Finger.", "Two glowing shards. The trader blows on her fingers."]), 2600); }
+      else if (r < 0.65) { Z.dropItem(x, y, { elite: true, kind: "weapon" }); Z.toast(L(["„Oh. Das war eigentlich meins.“", "\"Oh. That was actually mine.\""]), 2600); }
+      else if (r < 0.8) { Z.spawnPickup("scroll", x, y, { vx: 0, vy: -150, stat: Z.R.pick(["brut", "takt", "ueber"]) }); Z.toast(L(["Eine Schriftrolle der Macht!", "A scroll of power!"]), 2400); }
+      else { Z.toast(L(["Ein Stein. Ein sehr schöner Stein. Echo hätte gelacht.", "A rock. A very nice rock. Echo would have laughed."]), 2600); A.play("rock", { vol: 0.4 }); }
+    }
+    if (ev.sold && ev.bagUsed) finish(ev);
+  }
+
   /* Zeichnen der Ereignisse */
   function drawEvents(c, t) {
     const lab = inp.device === "touch" ? "✋" : inp.label("use");
@@ -314,6 +395,14 @@
       if (ev.k === "brunnen") { ell(c, x, y - 4, 14, 5, "#4a4448"); ell(c, x, y - 5, 11, 3.4, ev.done ? "#2a3a36" : "#4a7a6a"); c.fillStyle = "#3a3438"; c.fillRect(x - 13, y - 22, 2, 18); c.fillRect(x + 11, y - 22, 2, 18); c.fillRect(x - 13, y - 24, 26, 3); if (!ev.done && Math.random() < 0.05) FX.p({ x: x + (Math.random() - 0.5) * 16, y: y - 6, vx: 0, vy: -10, life: 0.8, size: 1.4, col: "#ffd27a", kind: "glow", add: true }); tag(ev, L(["60 Gold opfern", "Offer 60 gold"])); }
       if (ev.k === "kaefig") { if (!ev.done) { Z.drawNPC(c, "A", x, y, t, 1); c.strokeStyle = "#5a5056"; c.lineWidth = 1.2; for (let i = -10; i <= 10; i += 4) { c.beginPath(); c.moveTo(x + i, y); c.lineTo(x + i, y - 26); c.stroke(); } c.fillStyle = "#4a4046"; c.fillRect(x - 12, y - 28, 24, 3); c.fillRect(x - 12, y - 2, 24, 2); tag(ev, L(["Befreien", "Free"])); } }
       if (ev.k === "wette") { if (!ev.done || ev.on) { Z.drawNPC(c, "B", x, y, t, Z.player && Z.player.x > x ? 1 : -1); if (!ev.on) tag(ev, L(["Wette annehmen", "Take the bet"])); } }
+      if (ev.k === "haendler" && !ev.done) {
+        /* kleiner Karren mit Plane, Laterne und der Händlerin */
+        c.fillStyle = "#4a3020"; c.fillRect(x - 16, y - 10, 26, 8); c.fillStyle = "#2a1a10"; Z.draw.circ(c, x - 11, y - 2, 3, "#2a1a10"); Z.draw.circ(c, x + 5, y - 2, 3, "#2a1a10");
+        c.fillStyle = "#7a2a3a"; c.beginPath(); c.moveTo(x - 17, y - 10); c.quadraticCurveTo(x - 3, y - 24, x + 11, y - 10); c.fill();
+        c.save(); c.globalCompositeOperation = "lighter"; glow(c, x + 12, y - 18, 10 + Math.sin(t * 4) * 1.5, "rgba(255,190,90,.5)"); c.restore(); circ(c, x + 12, y - 18, 1.6, "#ffd27a");
+        Z.drawNPC(c, "E", x + 18, y, t, Z.player && Z.player.x > x ? 1 : -1);
+        tag(ev, L(["Handeln", "Trade"]));
+      }
       if (ev.k === "rune" && !ev.done) { const b = Math.sin(t * 2) * 2; c.save(); c.globalCompositeOperation = "lighter"; glow(c, x, y - 12 + b, 16, "rgba(220,200,255,.55)"); c.restore(); poly(c, [x, y - 20 + b, x + 5, y - 12 + b, x, y - 4 + b, x - 5, y - 12 + b], "#d8d0e8"); poly(c, [x, y - 17 + b, x + 2.5, y - 12 + b, x, y - 7 + b, x - 2.5, y - 12 + b], "#c03a5a"); }
     }
     /* Riss im Netz */
