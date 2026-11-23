@@ -9,6 +9,8 @@ on:
       - heldensturm.html
       - heldensturm-erzaehler.js
       - heldensturm-sw.js
+      - heldensturm-ton.js
+      - tonregler.js
       - "audio/heldensturm/**"
       - "klang/**"
       - "heldensturm-clips/**"
@@ -38,6 +40,7 @@ jobs:
             /tools/android/
             /tools/vertonung/heldensturm-de.json
             /heldensturm*
+            /tonregler.js
             /klang/
             /amb/
             /audio/heldensturm/

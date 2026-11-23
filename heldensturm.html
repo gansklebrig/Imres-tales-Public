@@ -6374,7 +6374,7 @@ function npcDwarfFace(c,t,skin,skinS,ph,brow){hC(c,0,-15,7.6,skin,HOL,0.9);hQ(c,
  hEye(c,-2.9,-16,'#3a2814',t,ph,1.15);hEye(c,2.9,-16,'#3a2814',t,ph,1.15);
  ln(c,brow,1.4,-5,-18.4,-1.2,-17.8);ln(c,brow,1.4,1.2,-17.8,5,-18.4)}
 
-/* Gundren Felsensucher: dunkle Haut, langer schwarzer Flechtbart mit Goldperlen, großer grauer Hut, heller Mantel mit Fellkragen */
+/* Gundren: dunkle Haut, langer schwarzer Flechtbart mit Goldperlen, großer grauer Hut, heller Mantel mit Fellkragen */
 function npcGundren(c,t,step,ga){const g=Math.sin(t*1.1);
  npcBoots(c,0,'#5a3a22','#a8adb5','#c8c0b0');
  hQ(c,'#4a4038',HOL,0.8,q=>{q.rect(-8,6,7,6);q.rect(1,6,7,6)});
@@ -23057,8 +23057,8 @@ const NP_FIG={
   dank:['Gundren hatte recht: eine Extraportion Gold für euch!'],aerger:['Schon gut! Ich find den Weg allein. Irgendwann.','Kein Problem. Ich frag die nächsten Helden.'],fehl:['Das war knapp … beim nächsten Mal klappt es.'],
   folgeGut:{t:'Da seid ihr ja! Ein paar Freunde aus Phandalin wollen euch helfen.',lohn:'verstaerkung',wer:'Elmars Freundin'},folgeAerger:{t:'Ach, ihr. Ich hab den Weg auch ohne euch gefunden. Fast.'},
   q:{echo:'Extraportion Gold, sagst du?',barradin:'Ein Lied über einen verirrten Bauern? Kommt!'}},
- gundren:{n:'Gundren Felssucher',titel:'Händler aus Neverwinter',art:'gundren',orte:[0,5],auf:['karren_gundren','bote_gundren'],
-  gruss:['Meine Helden! Gundren Felssucher – der Mann mit den Briefen.'],wieder:['Meine besten Leute! Schon das {n}. Mal hier. Auf gute Geschäfte!'],lauf:['Ihr schon wieder? Gut so – ich hab noch was.','Meine Lieblingshelden! Kurz Zeit?'],
+ gundren:{n:'Gundren',titel:'Händler aus Neverwinter',art:'gundren',orte:[0,5],auf:['karren_gundren','bote_gundren'],
+  gruss:['Meine Helden! Gundren – der Mann mit den Briefen.'],wieder:['Meine besten Leute! Schon das {n}. Mal hier. Auf gute Geschäfte!'],lauf:['Ihr schon wieder? Gut so – ich hab noch was.','Meine Lieblingshelden! Kurz Zeit?'],
   dank:['Auf gute Geschäfte! Ihr seid jeden Kupferling wert.'],aerger:['Verstehe. Geschäft ist Geschäft.','Kein Problem – ein andermal!'],fehl:['Der Karren ist hin. Die Lords werden toben.'],
   folgeGut:{t:'Für meine besten Leute: ein kleiner Vorschuss!',lohn:'kiste'},folgeAerger:{t:'Ach, ihr. Mein Karren hat es trotzdem geschafft. Knapp.'},
   q:{echo:'Gold? Wo?',friedrich:'Rex, bewach den Karren.'}},
@@ -23108,7 +23108,7 @@ const NP_FIG={
 /* Empfänger von Nachrichten (keine eigenen Aufträge) */
 const NP_EMPF={
  kundschafterin:{n:'Kundschafterin der Allianz',art:{m:{rock:'#4a6a3a',rockS:'#3a5430',hose:'#3a3a2a',haut:'#e0b890',hautS:'#c89c74',haar:'#8a5a2a',kapuze:'#3e5a32'}}},
- gundren:{n:'Gundren Felssucher',art:'gundren'},
+ gundren:{n:'Gundren',art:'gundren'},
  spaeher:{n:'Späher der Allianz',art:{m:{rock:'#6a5a3a',rockS:'#54462c',hose:'#3a3226',haut:'#d8b090',hautS:'#be946e',kapuze:'#5a4a30',bart:'#4a3020'}}},
  getreue:{n:'Eine Getreue Ploopploopeens',art:{m:{rock:'#4a7a6a',rockS:'#3a6256',hose:'#3a5048',fisch:'#5a9a86',fischS:'#4a8070'}}},
  wache:{n:'Stadtwache von Gracklstugh',art:{m:{rock:'#5a5a62',rockS:'#46464e',hose:'#3a3a40',haut:'#8d929c',hautS:'#737882',helm:'#6e7078',bart:'#3a3a3e',guertel:'#2a2a2e',schwert:1}}}};
@@ -41111,18 +41111,18 @@ const guardId=d=>{try{return Object.keys(GUARDS).find(k=>GUARDS[k]===d)||''}catc
 const nahFeinde=(r)=>{let n=0;for(const e of G.enemies)if(!e.dead&&!e.ally&&d2(e,P)<r*r)n++;return n};
 const ort=()=>{try{return STAGES[G.stage].ort|0}catch(e){return 0}};
 const IN=(id,L)=>L.indexOf(id)>=0;
-function auftritt(id,boss){const I=id;const hv=held;const held=(k,o)=>hv(k,Object.assign({warte:9,force:1},o||{}));
- if(IN(I,['schreifels','steinriese','duergarHuene','spinnenstatue','riese','schmiedewaechter']))held('b_fels',{p:0.8});
- if(IN(I,['goblinHauptmann','hoehlenwache','turmwache','eintreiber','kerkerwache','stadtvogt','peitschenmeister','goblinboss','bugbear']))held('b_langsam',{p:0.6});
- if(IN(I,['chasme','blaehzombie','brutmutter','bugbear','vrock','demogorgon']))held('b_mistvieh',{p:0.7});
- if(IN(I,['riese','bugbear','demogorgon','steinriese','duergarHuene']))held('e_gross',{p:0.7});
- if(IN(I,['leitwolf','bugbear']))held('e_bett',{p:0.8});
- if(IN(I,['venomfang','themberchaud','salamander']))held('e_eidechse',{p:0.9});
- if(IN(I,['riesenspinneW','fadenmeister','brutmutter']))held('e_asche',{p:0.7});
- if(IN(I,['vrock','chasme']))held('e_aasgeier',{p:0.9});
- if(IN(I,['demogorgon','vrock','wraith','themberchaud','erzpriesterin']))held('z_bluten',{p:0.7});
- if(IN(I,['chasme','schreifels','goblinboss','demogorgon']))held('z_ruhe',{p:0.7});
- if(!boss)held('z_kommt',{p:0.25})}
+function auftritt(id,boss){const I=id;const sagA=(k,o)=>held(k,Object.assign({warte:9,force:1},o||{}));
+ if(IN(I,['schreifels','steinriese','duergarHuene','spinnenstatue','riese','schmiedewaechter']))sagA('b_fels',{p:0.8});
+ if(IN(I,['goblinHauptmann','hoehlenwache','turmwache','eintreiber','kerkerwache','stadtvogt','peitschenmeister','goblinboss','bugbear']))sagA('b_langsam',{p:0.6});
+ if(IN(I,['chasme','blaehzombie','brutmutter','bugbear','vrock','demogorgon']))sagA('b_mistvieh',{p:0.7});
+ if(IN(I,['riese','bugbear','demogorgon','steinriese','duergarHuene']))sagA('e_gross',{p:0.7});
+ if(IN(I,['leitwolf','bugbear']))sagA('e_bett',{p:0.8});
+ if(IN(I,['venomfang','themberchaud','salamander']))sagA('e_eidechse',{p:0.9});
+ if(IN(I,['riesenspinneW','fadenmeister','brutmutter']))sagA('e_asche',{p:0.7});
+ if(IN(I,['vrock','chasme']))sagA('e_aasgeier',{p:0.9});
+ if(IN(I,['demogorgon','vrock','wraith','themberchaud','erzpriesterin']))sagA('z_bluten',{p:0.7});
+ if(IN(I,['chasme','schreifels','goblinboss','demogorgon']))sagA('z_ruhe',{p:0.7});
+ if(!boss)sagA('z_kommt',{p:0.25})}
 {const b0=bossIntroFx;bossIntroFx=function(b,def){const r=b0.apply(this,arguments);try{const id=bossId(def);later(2.4,()=>auftritt(id,1))}catch(e){}return r}}
 {const g0=guardIntroFx;guardIntroFx=function(e,def){const r=g0.apply(this,arguments);try{const id=guardId(def);later(1.8,()=>auftritt(id,0))}catch(x){}return r}}
 /* Kills */
@@ -41928,6 +41928,16 @@ hook('hit',(e,o,amt,crit)=>{const t=rsT();if(!t||!o||o.rsF||!e)return;
  if(t.hi>=2&&crit&&!o.dot&&!(P.rsHiT>G.time)){const f=andere(e,240);if(f){P.rsHiT=G.time+0.15;linie(e,f,'#f8e8a0');dealDmg(f,amt*0.4,{rsF:1,lightning:1,noCrit:1,dmK:'reso'})}}
  if(t.kl>=3&&crit&&!o.dot&&!(P.rsKlT>G.time)&&Math.random()<0.25){const f=andere(e,260);if(f){P.rsKlT=G.time+0.2;if(G.fxs.length<170)G.fxs.push({k:'tracer',x:e.x,y:e.y-8,x2:f.x,y2:f.y-8,c:'#fff1c2',w:3,t:0,life:0.24});sparks(f.x,f.y-8,'#fff2d8',4,200);dealDmg(f,amt*0.6,{rsF:1,noCrit:1,dmK:'reso'})}}
  if(t.ru>=2&&o.pet){const w=Math.floor(G.time);if(P.rsRuW!==w){P.rsRuW=w;P.rsRuS=0}const h=Math.min(P.st.maxHp*0.004,P.st.maxHp*0.02-(P.rsRuS||0));if(h>0){P.rsRuS=(P.rsRuS||0)+h;heal(h)}}});
+/* ---------- Spürbarkeit: auch die erste Stufe jeder Schule hinterlässt ein kleines, eigenes Zeichen (nicht im Ultra-leicht-Modus) ---------- */
+const deko=()=>!leicht()&&!(window.__hsULTRA&&__hsULTRA.on);
+hook('hit',(e,o,amt,crit)=>{const t=rsT();if(!t||!o||!e||o.dot||!deko())return;const n=G.time;
+ if(t.kl&&crit&&!(P.rsFxK>n)){P.rsFxK=n+0.12;sparks(e.x,e.y-e.r*0.45,'#fff1c2',3,190)}
+ if(t.hi&&o.basic&&!(P.rsFxH>n)){P.rsFxH=n+0.25;sparks(e.x,e.y-e.r*0.4,'#f0dc6a',2,150)}
+ if(t.bl&&!(P.rsFxB>n)){P.rsFxB=n+0.45;sparks(P.x,P.y-14,'#e8505a',2,70)}
+ if(t.ru&&o.pet&&!(P.rsFxR>n)){P.rsFxR=n+0.4;sparks(e.x,e.y-e.r*0.4,'#dcb47a',2,120)}
+ if(t.ba&&kontrolliert(e)&&!(e.rsFxA>n)){e.rsFxA=n+0.7;ring(e.x,e.y,e.r+10,'#ffb8d0',0.35,2)}
+ if(t.wi&&(e.root>0||vergiftet(e))&&!(e.rsFxW>n)){e.rsFxW=n+0.8;sparks(e.x,e.y-e.r*0.3,'#9fd06a',2,90)}});
+hook('tick',dt=>{const t=rsT();if(!t||!t.sc||!(P.rsSchT>G.time)||!deko())return;P.rsFxS=(P.rsFxS||0)-dt;if(P.rsFxS<=0){P.rsFxS=0.09;puffs(P.x,P.y,'#3a2246',1,16,8)}});
 /* ---------- Kills ---------- */
 hook('kill',(e,o)=>{const t=rsT();if(!t||!e)return;const x=e.x,y=e.y,A=P.st.area||1;
  if(t.gl>=2&&brennt(e)&&!(P.rsGlK>G.time)){P.rsGlK=G.time+0.12;const R=(t.gl>=3?125:90)*A;aoe(x,y,R,P.st.dmg*0.8,{rsF:1,dmK:'reso',onHit:f=>dot(f,'burn',P.st.dmg*0.45,3)});explodeFx(x,y,R*0.75,'#ff8a3a');if(!leicht())embers(x,y,'#ffb04a',8,R*0.5);sfxAt('boom',x,y)}
@@ -41952,7 +41962,7 @@ hook('roll',a=>{const t=rsT();if(!t)return;if(t.sc)P.rsSchT=G.time+1.5;
  if(t.sc>=3&&!(P.rsSc3>G.time)){P.rsSc3=G.time+1.1;const x=P.x,y=P.y;if(G.fxs.length<170)G.fxs.push({k:'shade',x,y,t:0,life:1});puffs(x,y,'#3a2246',5,40,12);
   later(1,()=>{const R=110*(P.st.area||1);aoe(x,y,R,sk(1.5),{fear:1,fx:x,fy:y,rsF:1,dmK:'reso'});ring(x,y,R,'#b48ae8',0.45,5);puffs(x,y,'#4a2a5a',10,90,16);sparks(x,y,'#d8b8ff',8,200);sfxAt('magic',x,y)})}});
 /* ---------- Gold ---------- */
-if(typeof heroGold==='function'){const hg=heroGold;heroGold=function(q){const r=hg.apply(this,arguments);try{if(q&&q.rs&&q.rs.t.gi>=2&&!RS.aus){q.rsGoldN=Math.min(15,(q.rsGoldT>G.time?q.rsGoldN||0:0)+1);q.rsGoldT=G.time+6}}catch(e){rsErr(e)}return r}}
+if(typeof heroGold==='function'){const hg=heroGold;heroGold=function(q){const r=hg.apply(this,arguments);try{if(q&&q.rs&&q.rs.t.gi>=1&&!RS.aus&&deko()&&!(q.rsFxG>G.time)){q.rsFxG=G.time+0.3;sparks(q.x,q.y-16,'#ffd04a',3,120)}if(q&&q.rs&&q.rs.t.gi>=2&&!RS.aus){q.rsGoldN=Math.min(15,(q.rsGoldT>G.time?q.rsGoldN||0:0)+1);q.rsGoldT=G.time+6}}catch(e){rsErr(e)}return r}}
 /* ---------- Karten: Stand neu berechnen ---------- */
 if(typeof fkNimm==='function'){const fn=fkNimm;fkNimm=function(q){const r=fn.apply(this,arguments);try{if(r&&q){if(q===P)recalc();else withP(q,()=>recalc())}}catch(e){rsErr(e)}return r}}
 
@@ -42020,7 +42030,7 @@ function baumNach(){css();const w=scr.querySelector('.tree-wrap');if(!w)return;i
  if(map){if(!map.querySelector('.rsMap')){map.insertAdjacentHTML('beforeend',mapHtml());const m=map.querySelector('.rsMap');for(const k of['pointerdown','mousedown','touchstart','wheel'])m.addEventListener(k,e=>e.stopPropagation(),{passive:true})}}
  else{const br=w.querySelector('.barrow');if(br&&!w.querySelector('.rsRow')){br.insertAdjacentHTML('afterend',zeile(P)+(G.rsInfo?info(P,G.rsInfo):''))}}
  for(const b of w.querySelectorAll('.node[data-id],.stn[data-id]')){const tg=T[b.dataset.id];if(!tg||b.querySelector('.rsDots'))continue;b.insertAdjacentHTML('beforeend',`<span class="rsDots">${tg.split(',').map(k=>SCH[k]?`<i style="background:${SCH[k].c}"></i>`:'').join('')}</span>`)}
- const td=w.querySelector('.tdet');if(td&&G.treeSel&&T[G.treeSel]&&!td.querySelector('.rsTd')){const tg=T[G.treeSel].split(',').filter(k=>SCH[k]);const r=rank(G.treeSel);
+ const td=w.querySelector('.tdet');const nd=G.treeSel&&P.hero.tree.find(n=>n.id===G.treeSel);if(td&&nd&&T[G.treeSel]&&!td.querySelector('.rsTd')&&td.textContent.indexOf(nd.name)>=0){const tg=T[G.treeSel].split(',').filter(k=>SCH[k]);const r=rank(G.treeSel);
   const h=r?`<div class="rsTd">Zählt zu ${tg.map(k=>`<span class="rsTag" style="--c:${SCH[k].c}">${SCH[k].ic} ${SCH[k].n} ${(P.rs&&P.rs.c[k])||0}</span>`).join('')}</div>`:`<div class="rsTd">Passt zu ${vorschau(P,tg)}</div>`;
   const anker=td.querySelector('.tds')||td.querySelector('.tdmore');if(anker)anker.insertAdjacentHTML('afterend',h);else td.insertAdjacentHTML('beforeend',h)}}
 document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('[data-act="rs-info"]');if(!b)return;ev.stopPropagation();ev.preventDefault();try{audioInit();sfx('ui');const k=b.dataset.k;G.rsInfo=G.rsInfo===k?null:k;
@@ -42054,7 +42064,7 @@ function beutelNach(){const d=scr.querySelector('#idet2');if(!d||d.querySelector
 (function(){try{if(window.__hsKONTER)return;
 const KO=window.__hsKONTER={v:1,aus:0,n:0,konter:0,blosse:0,err:[]};
 const kErr=e=>{if(KO.err.length<20)KO.err.push(String(e&&e.stack||e).slice(0,300))};
-const FENSTER=0.42;
+const FENSTER=0.42,VOR=0.45; /* VOR: so lange vor dem Schlag funkelt ein Nahkampfgegner – und so früh darf die Rolle kommen */
 /* Übungspuppe im Lager (siehe Paket „steinkreis“): ab 25 perfekten Ausweichrollen 3 s Konterfenster, ab 150 Konter +150 % */
 const kZahl=()=>G.mode==='taeglich'?0:(SAVE.koN|0);const kFenster=()=>kZahl()>=25?3:2.5,kMul=()=>kZahl()>=150?2.5:2.2;
 const RUF={barradin:['Olé!','Daneben, Schätzchen!','Zu langsam!','Und Pirouette!'],echo:['Hm.','Zu langsam.','Nö.','Knapp vorbei.'],friedrich:['Daneben!','Gesehen.','Nicht heute.','Ruhig bleiben.'],ezekiel:['Fast.','Langweilig.','Nächstes Mal vielleicht.','Hm.']};
@@ -42084,8 +42094,8 @@ hook('tick',dt=>{if(KO.aus||!P||!frisch(P))return;const R=P.r+4;for(const p of G
        Ausweichen, sobald der Schlag gekommen wäre – auch wenn die Rolle aus der Reichweite herausführt. */
 const FERN0={ranged:1,caster:1,netter:1,healer:1,still:1,thief:1};
 hook('roll',a=>{if(KO.aus||!P||P.down)return;let best=9,be=null;
- query(P.x,P.y,190,e=>{if(e.dead||e.stun>0||e.fearT>0||!(e.hitCd>0&&e.hitCd<0.32))return;const d=e.def;if(!d||FERN0[d.k]||d.kite)return;const lim=e.r+P.r+34;const dx=e.x-P.x,dy=e.y-P.y;if(dx*dx+dy*dy>lim*lim)return;if(e.hitCd<best){best=e.hitCd;be=e}});
- if(be){const q=P,e=be;later(Math.max(0.03,best),()=>{try{if(frisch(q)&&!e.dead)perfekt(q,e)}catch(x){kErr(x)}})}});
+ query(P.x,P.y,190,e=>{if(e.dead||e.stun>0||e.fearT>0||!(e.hitCd>0&&e.hitCd<VOR))return;const d=e.def;if(!d||FERN0[d.k]||d.kite)return;const lim=e.r+P.r+34;const dx=e.x-P.x,dy=e.y-P.y;if(dx*dx+dy*dy>lim*lim)return;if(e.hitCd<best){best=e.hitCd;be=e}});
+ if(be){const q=P,e=be,r0=q.roll;later(Math.max(0.03,best),()=>{try{if(q.roll===r0&&G.time-r0<VOR+0.15&&!q.down&&!e.dead)perfekt(q,e)}catch(x){kErr(x)}})}});
 /* 2,3,5) Schaden: Konter, Fokus, Blöße */
 hook('dmgMul',(e,o)=>{if(KO.aus||!P)return 1;let m=1;
  if(P.pdT>G.time&&!(o&&(o.dot||o.pet||o.rsF))){m*=kMul();P.pdUse=1}
@@ -42099,8 +42109,8 @@ function stern(c,x,y,s){c.beginPath();c.moveTo(x,y-s);c.lineTo(x+s*0.28,y-s*0.28
 const FERN={ranged:1,caster:1,netter:1,healer:1,still:1,thief:1};
 hook('draw',(t,c)=>{if(KO.aus||G.state!=='play'||!P||P.down)return;try{
  c.save();c.fillStyle='#ffe9a0';
- query(P.x,P.y,170,e=>{if(e.dead||e.boss||e.guard||e.stun>0||e.fearT>0||!(e.hitCd>0&&e.hitCd<0.3))return;const d=e.def;if(!d||FERN[d.k]||d.kite)return;
-  const lim=e.r+P.r+34;const dx=e.x-P.x,dy=e.y-P.y;if(dx*dx+dy*dy>lim*lim)return;const a=1-e.hitCd/0.3;c.globalAlpha=0.35+0.65*a;stern(c,e.x+e.r*0.55,e.y-e.r-12,3+4*a)});
+ query(P.x,P.y,170,e=>{if(e.dead||e.boss||e.guard||e.stun>0||e.fearT>0||!(e.hitCd>0&&e.hitCd<VOR))return;const d=e.def;if(!d||FERN[d.k]||d.kite)return;
+  const lim=e.r+P.r+34;const dx=e.x-P.x,dy=e.y-P.y;if(dx*dx+dy*dy>lim*lim)return;const a=1-e.hitCd/VOR;c.globalAlpha=0.45+0.55*a;stern(c,e.x+e.r*0.55,e.y-e.r-14,5+5*a);c.globalAlpha=0.3+0.4*a;c.strokeStyle='#ffe9a0';c.lineWidth=1.5;c.beginPath();c.ellipse(e.x,e.y+e.r*0.6,e.r*1.1,e.r*0.42,0,0,TAU);c.stroke()});
  const B=G.boss&&!G.boss.dead?G.boss:G.guardE&&!G.guardE.dead?G.guardE:null;
  if(B){const tt=G.time;
   if(B.koRas){c.globalAlpha=0.22+0.16*Math.sin(tt*6);c.strokeStyle='#ff5a3a';c.lineWidth=3;c.beginPath();c.ellipse(B.x,B.y+B.r*0.55,B.r*1.35,B.r*0.5,0,0,TAU);c.stroke();c.globalAlpha*=0.6;c.lineWidth=6;c.beginPath();c.ellipse(B.x,B.y+B.r*0.55,B.r*1.6,B.r*0.6,0,0,TAU);c.stroke()}
@@ -42143,8 +42153,8 @@ css();
    Neu: sechs Pakt-Ereignisse im selben Würfelbildschirm (gleiche Chips, gleiche Gruppenprobe im Mehrspieler). Ihre Angebote
    richten sich nach dem eigenen Build – die eigene stärkste Schule vertiefen, die zweite ausbauen oder etwas Neues wagen –
    und jeder Pakt hat einen klaren Preis (Leben, Gegnerschaden, Heiltrank, Gold oder Punkte einer anderen Schule).
-   Pakte sind Einträge in P.mods (k:'rsPakt'), werden also mit dem Lauf gespeichert, im Zwischenbildschirm und im Pausemenü
-   aufgeführt und zählen sofort für die Resonanzen (Ankündigung, wenn eine Stufe erwacht).
+   Pakte sind Einträge in P.mods (k:'rsPakt'), werden also mit dem Lauf gespeichert,
+   im Talentbaum (◈ neben den Resonanzen) aufgeführt und zählen sofort für die Resonanzen (Ankündigung, wenn eine Stufe erwacht).
      · Der Kristall der neun Klänge – vertiefen (−8 % Leben), ausbauen (Gold) oder Neues wagen (gratis); Barradin singt mit
      · Der Preis der Macht – +3 in der stärksten Schule gegen härtere Gegner, oder umschmieden (eine Schule gegen eine andere)
      · Die Glutschale – Glut gegen Leben; Echo weiß, worauf es ankommt
@@ -42176,7 +42186,7 @@ PK.exPakt=exPakt;
 /* Nachteile der Pakte */
 hook('stats',s=>{for(const m of P.mods||[])if(m&&m.k==='rsPakt'&&m.hp)s.hpP+=m.hp});
 hook('hurtMul',()=>{let f=1;for(const m of P&&P.mods||[])if(m&&m.k==='rsPakt'&&m.edmg)f*=1+m.edmg;return f});
-const ab1=()=>!PK.aus&&(G.stage|0)>=1;
+const ab1=()=>!PK.aus&&(G.stage|0)>=1&&!(window.__hsRESO&&__hsRESO.aus)&&!(window.__hsFREI&&__hsFREI.reso&&!__hsFREI.reso());
 const EVS=[
  {id:'rs_kristall',w:1.4,when:ab1,t:'Der Kristall der neun Klänge',
   txt:'In einer Felsnische summt ein Kristall – neun Töne zugleich, und jeder zieht an etwas anderem in euch. Barradin summt schon mit, bevor jemand fragen kann.',
@@ -42295,6 +42305,61 @@ function css(){if(document.getElementById('stCss'))return;const s=document.creat
 if(typeof showLager==='function'){const sl=showLager;showLager=function(){const r=sl.apply(this,arguments);try{css();const w=scr.querySelector('.lager-wrap');if(w&&!w.querySelector('.stKreis')){const ch=w.querySelector('.lager-chips');if(ch)ch.insertAdjacentHTML('afterend',kartenHtml());else w.insertAdjacentHTML('beforeend',kartenHtml())}}catch(e){sErr(e)}return r}}
 }catch(e){console.error('steinkreis',e);window.__hsSTEIN={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/steinkreis» */
+/* «frei» */
+/* ================= Paket „frei“: Schritt für Schritt freischalten – window.__hsFREI =================
+   Neue Spieler sahen in den ersten Minuten alles auf einmal (sieben Absätze Talentbaum-Erklärung, Resonanzen ab dem ersten
+   Talentpunkt, Pakt-Ereignisse auf der zweiten Stufe). Jetzt wächst das Spiel mit der Erfahrung:
+   Erfahrung = höchste je erreichte Heldenstufe (SAVE.frei.lv, über alle Helden und Plätze; bestehende Spielstände übernehmen
+   ihren Bestwert aus den Heldendaten).
+     · Talentbaum-Hinweis in Etappen: Stufe 1 nur das Nötige (Punkt, Kern, Antippen, Leiste) – ab 8 kommen Brückensterne und
+       Meisterschaft dazu, ab 10 Resonanzen, ab 17 äußere Brücken und Spitzentalente. Jede Etappe einmal, mit „Neu:“ markiert.
+     · Resonanzen ab Erfahrung 10 (vorher weder Wirkung noch Anzeige), beim Freischalten Banner und kurze Erklärung.
+     · Pakt-Ereignisse erst, wenn die Resonanzen freigeschaltet sind.
+   Abschaltbar: __hsFREI.aus=1 (alles sofort frei). */
+(function(){try{if(window.__hsFREI)return;
+const FR=window.__hsFREI={v:1,aus:0,err:[]};const fErr=e=>{if(FR.err.length<20)FR.err.push(String(e&&e.stack||e).slice(0,300))};
+const RS=window.__hsRESO;const RESO_AB=10;
+function bestAlt(){let b=0;try{const H=SAVE.heroes||{};for(const k in H){const h=H[k]||{};b=Math.max(b,h.lvl|0,h.level|0,h.best|0,h.maxLv|0)}
+ for(const s of (SAVE.slots||[])){if(!s)continue;const hs=s.heroes||{};for(const k in hs){const h=hs[k]||{};b=Math.max(b,h.lvl|0,h.level|0,h.maxLv|0)}if(s.run&&s.run.P)b=Math.max(b,s.run.P.level|0);if(s.lvl)b=Math.max(b,s.lvl|0)}}catch(e){}return b}
+function stand(){if(!SAVE.frei){SAVE.frei={lv:bestAlt()}}return SAVE.frei}
+FR.erf=()=>{if(FR.aus)return 99;const f=stand();const l=(typeof P!=='undefined'&&P&&P.hero&&!G.bot)?(P.level|0):0;if(l>(f.lv|0)){f.lv=l}return Math.max(f.lv|0,l)};
+FR.reso=()=>FR.erf()>=RESO_AB||(G&&G.bot);
+/* ---------- Resonanzen sperren/freigeben ---------- */
+let war=null;
+function resoPruef(ansage){if(!RS)return;const an=FR.reso();if(war===an)return;const vorher=war;war=an;RS.aus=an?0:1;
+ if(an&&vorher===false&&ansage&&!G.bot){try{if(P&&P.hero)recalc()}catch(e){}
+  const f=stand();if(!f.resoT){f.resoT=1;persist();
+   if(G.state==='play')banner('Neu: Resonanzen','Fähigkeiten, Karten und Ausrüstung verstärken sich jetzt gegenseitig','#ffd27a',{dur:3,size:34,y:H*0.3});
+   later(0.5,()=>toast('<b>Neu freigeschaltet: Resonanzen.</b> Jede Fähigkeit, Schicksalskarte, jedes Set und Waffenelement gehört zu einer Schule. Ab 3 / 6 / 10 Punkten einer Schule erwacht eine Stufe mit eigener Wirkung – im Talentbaum zeigen farbige Punkte, was wozu passt.','#ffd27a',{sofort:1}))}}
+ else if(an&&P&&P.hero){try{recalc()}catch(e){}}}
+FR.pruef=resoPruef;
+resoPruef(false);
+hook('tick',()=>{const n=performance.now();if(n-(FR.t||0)<1000)return;FR.t=n;try{resoPruef(true)}catch(e){fErr(e)}});
+if(typeof startRun==='function'){const sr=startRun;startRun=function(){war=null;const r=sr.apply(this,arguments);try{resoPruef(false)}catch(e){fErr(e)}return r}}
+/* ---------- Talentbaum-Hinweis in Etappen ---------- */
+const ETAP=[
+ {ab:1,L:['Jede Stufe bringt einen <b>Talentpunkt</b>. Dein erster geht an einen der Sterne direkt am <b>Kern</b> – jeder Spielstil ist offen.','Einmal antippen zeigt einen Stern, noch einmal antippen lernt ihn. Ziehen verschiebt, zwei Finger oder das Mausrad zoomen.','<b>Aktive</b> Fähigkeiten kommen in die <b>Leiste</b> (1–6): Fähigkeit wählen, dann einen Platz antippen. <b>Passive</b> wirken immer.']},
+ {ab:8,L:['<b>Brückensterne</b> verbinden zwei Äste (innen ab Stufe 8, außen ab 17).','Ab 8 Punkten in einem Ast gibt es eine <b>Meisterschaft</b>.']},
+ {ab:RESO_AB,L:['<b>Resonanzen</b>: Die farbigen Punkte unter den Sternen zeigen ihre Schule. Ab 3 / 6 / 10 Punkten einer Schule erwacht eine Stufe – unten links im Sternbild antippen für Details.']},
+ {ab:17,L:['<b>Spitzentalente</b> (die äußersten Sterne eines Asts) brauchen genug Punkte im eigenen Ast – über Brücken erreichst du nur die Zwischensterne.']}];
+FR.ETAP=ETAP;
+function etappe(){const e=FR.erf();let i=0;for(let k=0;k<ETAP.length;k++)if(e>=ETAP[k].ab)i=k;return i}
+if(typeof hinwHtml==='function'){const hh=hinwHtml;hinwHtml=function(k){if(k!=='tree'||FR.aus)return hh.apply(this,arguments);try{
+  SAVE.hinw=SAVE.hinw||{};const i=etappe();
+  /* alte Spielstände: wer den großen Hinweis schon bestätigt hat, kennt Etappe 0, 1 und 3 bereits */
+  if(SAVE.hinw.tree&&!SAVE.hinw.tree_e0){SAVE.hinw.tree_e0=1;SAVE.hinw.tree_e1=1;SAVE.hinw.tree_e3=1}
+  let erste=-1;for(let j=0;j<=i;j++)if(!SAVE.hinw['tree_e'+j]){erste=j;break}if(erste<0)return'';
+  const zeig=[];for(let j=erste;j<=i;j++)if(!SAVE.hinw['tree_e'+j])for(const x of ETAP[j].L)zeig.push((j>0&&erste>0?'<b style="color:#ffd27a">Neu:</b> ':'')+x);
+  return`<div class="hinw"><ul>${zeig.map(x=>`<li>${x}</li>`).join('')}</ul><button class="btn small gold" data-act="hinw-ok" data-k="tree_bis${i}">Verstanden</button></div>`}catch(e){fErr(e);return hh.apply(this,arguments)}}}
+/* Hinweiskasten und „Wähle deinen ersten Stern“ überlappten sich: den Stern-Hinweis unter den Kasten schieben */
+function lagePruef(){const w=scr&&scr.querySelector('.tree-wrap');if(!w)return;const h=w.querySelector('.hinw'),k=w.querySelector('.spkhint');if(!h||!k)return;const m=k.offsetParent||k.parentNode;if(!m||!m.getBoundingClientRect)return;
+ const hb=h.getBoundingClientRect(),kb=k.getBoundingClientRect();if(kb.top<hb.bottom&&kb.bottom>hb.top){k.style.top=Math.round(hb.bottom-m.getBoundingClientRect().top+8)+'px'}}
+if(typeof renderTree==='function'){const rt=renderTree;renderTree=function(){const r=rt.apply(this,arguments);try{lagePruef();requestAnimationFrame(lagePruef)}catch(e){fErr(e)}return r}}
+/* „Verstanden“ für eine Etappe bestätigt alle bis dorthin */
+document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('[data-act="hinw-ok"]');if(!b)return;const k=b.dataset.k||'';const m=/^tree_bis(\d+)$/.exec(k);if(!m)return;
+ SAVE.hinw=SAVE.hinw||{};for(let j=0;j<=+m[1];j++)SAVE.hinw['tree_e'+j]=1;SAVE.hinw.tree=1},true);
+}catch(e){console.error('frei',e);window.__hsFREI={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/frei» */
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
