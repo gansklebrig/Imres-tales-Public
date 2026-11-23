@@ -5,6 +5,8 @@
   "use strict";
   const Z = window.Z, T = Z.TILE;
   const hash = (x, y) => { let h = (x * 374761393 + y * 668265263) ^ 0x5bd1e995; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+  /* weiche Sprites in Bildschirmgröße zwischengespeichert kopieren (bild.js), sonst wie drawImage */
+  const DS = (c, s, x, y, w, h) => Z.gfx.drawScaled ? Z.gfx.drawScaled(c, s, x, y, w, h) : c.drawImage(s, x, y, w, h);
   const rich = () => !Z.gq || Z.gq.level === -1 ? (Z.gq ? Z.gq.layers !== false : true) : Z.gq.level >= 2;
 
   /* ---------- Lichtstrahlen (Weltkoordinaten, nach dem Licht – leuchten über die Dunkelheit) ----------
@@ -196,7 +198,7 @@
       c.globalAlpha = Z.gfx.fgAlpha ? Z.gfx.fgAlpha("p" + i, x, y, w, h, a0) : a0;
       if (c.globalAlpha < 0.01) continue;
       if (kind === "chain" || kind === "rope") { const sway = Math.sin(Z.gfx.time * 0.6 + i) * 0.03; c.save(); c.translate(x + w / 2, y); c.rotate(sway); c.drawImage(spr, -w / 2, 0, w, h); c.restore(); }
-      else c.drawImage(spr, x, y, w, h);
+      else DS(c, spr, x, y, w, h);
     }
     c.restore();
   }
@@ -325,7 +327,7 @@
         for (let i = 0; i < n; i++) {
           const bx = ((hash(i, pf * 7) * span + t * sp) % span) - 200, by = LH * (0.12 + hash(pf * 9, i) * 0.32);
           const wx = bx + Math.floor((cam.x - px(pf) - bx) / span) * span + px(pf);
-          for (const o of [0, span]) { const x = wx + o; if (x > cam.x + cam.w || x + 220 * sc < cam.x) continue; c.globalAlpha = a * (0.6 + hash(i, 3) * 0.4); c.drawImage(spr, x, oy + by, 220 * sc, 70 * sc); }
+          for (const o of [0, span]) { const x = wx + o; if (x > cam.x + cam.w || x + 220 * sc < cam.x) continue; c.globalAlpha = a * (0.6 + hash(i, 3) * 0.4); DS(c, spr, x, oy + by, 220 * sc, 70 * sc); }
         }
       }
       c.globalAlpha = 1;

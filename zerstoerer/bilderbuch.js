@@ -50,7 +50,9 @@
     else { g.addColorStop(0, rgba(col, 1)); g.addColorStop(0.18, rgba(col, 0.55)); g.addColorStop(0.5, rgba(col, 0.16)); g.addColorStop(1, rgba(col, 0)); }
     c.fillStyle = g; c.fillRect(0, 0, 64, 64); GLOW.set(key, cv); return cv;
   }
-  function glow(c, x, y, r, col, a, soft) { if (a <= 0.01) return; c.globalAlpha = a > 1 ? 1 : a; c.drawImage(glowSpr(col, soft), x - r, y - r, r * 2, r * 2); }
+  /* LIVE: nur beim Zeichnen der Lebendig-Schicht über G.drawScaled (Leuchten in Bildschirmgröße zwischengespeichert) */
+  let LIVE = false;
+  function glow(c, x, y, r, col, a, soft) { if (a <= 0.01) return; c.globalAlpha = a > 1 ? 1 : a; if (LIVE && G.drawScaled) G.drawScaled(c, glowSpr(col, soft), x - r, y - r, r * 2, r * 2); else c.drawImage(glowSpr(col, soft), x - r, y - r, r * 2, r * 2); }
   /* eingebackenes Leuchten im Gemälde */
   function bake(o, x, y, r, col, a) { const c = o.c; c.globalCompositeOperation = "lighter"; glow(c, x, y, r, col, a); c.globalAlpha = 1; c.globalCompositeOperation = "source-over"; }
 
@@ -1695,7 +1697,9 @@
   /* ======================= SEITE BAUEN ======================= */
   let page = null;
   function build() {
-    const B = Z.biome, lv = Z.level; page = null; if (!B || !lv) return;
+    const B = Z.biome, lv = Z.level;
+    if (page && G.dropLayer) { if (page.cv) G.dropLayer(page.cv); if (page.o && page.o.mists) for (const m of page.o.mists) if (m.cv) G.dropLayer(m.cv); }
+    page = null; if (!B || !lv) return;
     const kind = kindOf(B, lv), fn = PAGES[kind]; if (!fn) return;
     const q = curQ(); if (q === 0) { page = { none: true, lvRef: lv, q, H: Math.ceil(Z.cam.h + 120) }; return; }
     const t0 = performance.now();
@@ -1834,6 +1838,10 @@
     else { c.fillRect(x - 0.9 * s, y - 5.4 * s, 1.8 * s, 3.2 * s); c.beginPath(); c.arc(x, y - 6.2 * s, 0.8 * s, 0, TAU); c.fill(); c.beginPath(); c.moveTo(x - 1 * s, y - 6.4 * s); c.lineTo(x, y - 7.8 * s); c.lineTo(x + 1 * s, y - 6.4 * s); c.fill(); c.beginPath(); c.moveTo(x + dir * 1.1 * s, y - 9.5 * s); c.lineTo(x + dir * 1.1 * s, y - 0.4 * s); c.stroke(); c.beginPath(); c.moveTo(x + dir * 0.6 * s, y - 9.5 * s); c.lineTo(x + dir * 1.1 * s, y - 11 * s); c.lineTo(x + dir * 1.6 * s, y - 9.5 * s); c.fill(); c.beginPath(); c.moveTo(x - dir * 0.8 * s, y - 5.2 * s); c.lineTo(x - dir * 2.2 * s, y - 2.2 * s + Math.sin(t * 2 + w.ph) * 0.3); c.lineTo(x - dir * 0.6 * s, y - 2.4 * s); c.fill(); }
   }
   function drawLive(c, ox, oy, t, cam, q) {
+    LIVE = true;
+    try { drawLive0(c, ox, oy, t, cam, q); } finally { LIVE = false; }
+  }
+  function drawLive0(c, ox, oy, t, cam, q) {
     const o = page.o, rich = q >= 2;
     const X0 = cam.x - ox, X1 = X0 + cam.w, Y0 = cam.y - oy, Y1 = Y0 + cam.h;
     const vis = (x, y, r) => x > X0 - r && x < X1 + r && y > Y0 - r && y < Y1 + r;
@@ -1926,8 +1934,9 @@
       const a = w.amp * Math.sin(t * w.fr * PI + w.ph);
       c.save(); c.translate(w.x, w.y); c.rotate(a); c.drawImage(w.sp.cv, -w.sp.px, -w.sp.py, w.sp.w, w.sp.h);
       for (let i = 0; i < w.sp.flames.length; i++) { const [fx, fy] = w.sp.flames[i]; flame(c, fx, fy + 0.4, 0.45, t, i * 1.7 + w.ph); }
-      c.globalCompositeOperation = "lighter"; const cy0 = w.sp.flames[0][1]; glow(c, 0, cy0, 46, "#ffc060", 0.32 + 0.05 * Math.sin(t * 7 + w.ph)); c.globalAlpha = 1; c.globalCompositeOperation = "source-over";
       c.restore();
+      /* Schein außerhalb der Drehung (kreisrund – gleiches Bild, aber pixelgenau kopierbar) */
+      const cy0 = w.sp.flames[0][1]; c.globalCompositeOperation = "lighter"; glow(c, w.x - Math.sin(a) * cy0, w.y + Math.cos(a) * cy0, 46, "#ffc060", 0.32 + 0.05 * Math.sin(t * 7 + w.ph)); c.globalAlpha = 1; c.globalCompositeOperation = "source-over";
     }
     for (const b of o.bobs) {
       let x = b.x0; if (b.v) { const L = b.x1 - b.x0; x = b.x0 + (((t * b.v + b.ph) % L) + L) % L; }
@@ -1985,7 +1994,7 @@
     for (const s of o.smoke) {
       if (!vis(s.x + 10, s.y - 25 * s.s, 45 * s.s)) continue;
       const spr = glowSpr(s.dark ? o.smokeDark : o.smokeCol, true);
-      for (let k = 0; k < np; k++) { const u = frac(t * 0.2 * (0.7 + s.s * 0.3) + s.ph + k / np), px = s.x + Math.sin(u * 4 + s.ph) * 2 * u + u * 16 * wind * s.s, py = s.y - u * 46 * s.s, r = (1.5 + u * 8) * s.s; c.globalAlpha = (1 - u) * Math.min(1, u * 6) * 0.55; c.drawImage(spr, px - r, py - r, r * 2, r * 2); }
+      for (let k = 0; k < np; k++) { const u = frac(t * 0.2 * (0.7 + s.s * 0.3) + s.ph + k / np), px = s.x + Math.sin(u * 4 + s.ph) * 2 * u + u * 16 * wind * s.s, py = s.y - u * 46 * s.s, r = (1.5 + u * 8) * s.s; c.globalAlpha = (1 - u) * Math.min(1, u * 6) * 0.55; G.drawScaled ? G.drawScaled(c, spr, px - r, py - r, r * 2, r * 2) : c.drawImage(spr, px - r, py - r, r * 2, r * 2); }
     }
     c.globalAlpha = 1;
     /* ---- Flammen ---- */
@@ -1998,7 +2007,9 @@
       if (m.y + m.h < Y0 || m.y > Y1) continue;
       const off = ((t * m.sp) % PW + PW) % PW, a0 = Math.max(0, X0), a1 = Math.min(PW, X1); if (a1 <= a0) continue;
       c.globalAlpha = m.a; let x = a0;
-      while (x < a1 - 0.01) { const sx = ((x - off) % PW + PW) % PW, seg = Math.min(a1 - x, PW - sx); c.drawImage(m.cv, sx * m.ms, 0, Math.max(1, seg * m.ms), m.cv.height, x, m.y, seg, m.h); x += seg; }
+      /* als Ebene in Bildschirmauflösung kopieren (bild.js G.blitLayer), sonst wie bisher vergrößert */
+      if (G.blitLayer) { const y0 = Math.max(m.y, Y0 - 2), y1 = Math.min(m.y + m.h, Y1 + 2); if (y1 > y0) for (let k = Math.floor((a0 - off) / PW); off + k * PW < a1; k++) { const L = off + k * PW; G.blitLayer(c, m.cv, PW, m.h, L, m.y, Math.max(a0, L), y0, Math.min(a1, L + PW), y1); } }
+      else while (x < a1 - 0.01) { const sx = ((x - off) % PW + PW) % PW, seg = Math.min(a1 - x, PW - sx); c.drawImage(m.cv, sx * m.ms, 0, Math.max(1, seg * m.ms), m.cv.height, x, m.y, seg, m.h); x += seg; }
       c.globalAlpha = 1;
     }
     /* ---- Funken, Staub, Sporen, Glühwürmchen, Glanzlichter ---- */
@@ -2093,6 +2104,7 @@
     if (o.zt && o.zt.out) zeitLive(c, o, t, cam, ox, vis, X0, X1, rich);
     c.restore();
   }
+  const DS = (c, s, x, y, w, h) => G.drawScaled ? G.drawScaled(c, s, x, y, w, h) : c.drawImage(s, x, y, w, h);
   function zeitLive(c, o, t, cam, ox, vis, X0, X1, rich) {
     const zt = o.zt, k = zt.k, night = k !== "morgen";
     /* Laternen- und Fackelzüge (Blutmond: verhüllte Gestalten mit roten Fackeln) */
@@ -2139,8 +2151,8 @@
         const x = ((hsh(i) * span + t * vx) % span) - rx, y = 210 + hsh(i * 17) * 130;
         for (const dx of [0, -PW, PW]) {
           const xx = x + dx; if (xx + rx < X0 || xx - rx > X1) continue;
-          if (i % 2 === 0 || !lightOk) { c.globalAlpha = k === "nacht" ? 0.18 + 0.12 * zt.moonBright : 0.2; c.drawImage(glowSpr("#0a0610", true), xx - rx, y - ry, rx * 2, ry * 2); }
-          else { c.globalCompositeOperation = "lighter"; c.globalAlpha = k === "nacht" ? 0.07 : 0.11; c.drawImage(glowSpr(zt.light, true), xx - rx, y - ry, rx * 2, ry * 2); c.globalCompositeOperation = "source-over"; }
+          if (i % 2 === 0 || !lightOk) { c.globalAlpha = k === "nacht" ? 0.18 + 0.12 * zt.moonBright : 0.2; DS(c, glowSpr("#0a0610", true), xx - rx, y - ry, rx * 2, ry * 2); }
+          else { c.globalCompositeOperation = "lighter"; c.globalAlpha = k === "nacht" ? 0.07 : 0.11; DS(c, glowSpr(zt.light, true), xx - rx, y - ry, rx * 2, ry * 2); c.globalCompositeOperation = "source-over"; }
         }
       }
       c.restore(); c.globalAlpha = 1;
@@ -2187,7 +2199,8 @@
     let x = Math.floor((cam.x - ox) / PW) * PW + ox;
     for (; x < cam.x + cam.w; x += PW) {
       const vx0 = Math.max(x, cam.x - 2), vx1 = Math.min(x + PW, cam.x + cam.w + 2); if (vx1 <= vx0) continue;
-      const kx = page.sx, ky = page.sy; c.drawImage(page.cv, (vx0 - x) * kx, (y0 - py) * ky, (vx1 - vx0) * kx, (y1 - y0) * ky, vx0, y0, vx1 - vx0, y1 - y0);
+      if (G.blitLayer) G.blitLayer(c, page.cv, PW, page.H, x, py, vx0, y0, vx1, y1);
+      else { const kx = page.sx, ky = page.sy; c.drawImage(page.cv, (vx0 - x) * kx, (y0 - py) * ky, (vx1 - vx0) * kx, (y1 - y0) * ky, vx0, y0, vx1 - vx0, y1 - y0); }
     }
     /* Leben auch für Elemente, die über die Seitennaht ragen */
     for (x = Math.floor((cam.x - ox) / PW) * PW + ox - PW; x < cam.x + cam.w; x += PW) {

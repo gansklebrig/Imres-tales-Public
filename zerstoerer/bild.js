@@ -15,7 +15,7 @@
   const hash = (x, y) => { let h = (x * 374761393 + y * 668265263) ^ 0x5bd1e995; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
 
   G.setLevel = function (level, biome) {
-    lv = level; B = biome; G.chunks.clear(); G.layers = null; fgState.clear();
+    lv = level; B = biome; G.chunks.clear(); G.layers = null; fgState.clear(); G.dropCaches();
     Z.dustCol = shade(B.tile.light, -0.15); Z.tileCol = B.tile.base;
     /* Innen/Außen: Spalten ohne Decke zeigen den Himmel */
     G.sky = new Uint8Array(lv.W * lv.H);
@@ -35,6 +35,7 @@
   const LW = 640; /* Breite einer Kachel des Hintergrunds (wiederholt sich) */
   G.buildLayers = function () {
     if (!B) return;
+    if (G.layers && G.dropLayer) { G.dropLayer(G.layers.far.cv); G.dropLayer(G.layers.mid.cv); }
     const H = Math.ceil((Z.cam.h + 120));
     const mk = s => { const cv = document.createElement("canvas"); cv.width = Math.ceil(LW * s); cv.height = Math.ceil(H * s); const c = cv.getContext("2d"); const sx = cv.width / LW, sy = cv.height / H; c.scale(sx, sy); return { cv, c, s, sx, sy, H }; };
     const far = mk(Math.min(G.scale, 1.15)), mid = mk(Math.min(G.scale, 1.7));
@@ -249,6 +250,80 @@
       c.restore();
     }
   }
+  /* ---------- Ebenen in Bildschirmauflösung zwischenspeichern ----------
+     Ferne und mittlere Ebene sowie die Bilderbuchseite sind kleiner gemalt (1,15×, 1,7×, 1,6×) und mussten bisher
+     jedes Bild beim Vergrößern neu gefiltert werden – in Software-Darstellung rund 5 ms je Ebene. Jetzt wird jede
+     Ebene einmal (in Streifen von 1024 px, höchstens einer je Bild) mit derselben bilinearen Vergrößerung auf
+     Bildschirmgröße gebracht und danach nur noch pixelgenau kopiert: gleiches Aussehen, etwa ein Drittel der Kosten.
+     Fehlt ein Streifen noch oder ist das Speicherbudget erschöpft, wird wie bisher direkt vergrößert gezeichnet. */
+  const LCACHE = new Map(), LC_TW = 1024, LC_MAX = 28e6; let lcPix = 0, lcFrame = -1, lcMade = 0;
+  function lcEvict(minAge) {
+    for (const [k, e] of LCACHE) if (G.frame - e.used > minAge) { for (const t of e.tiles) if (t) lcPix -= t.width * t.height; LCACHE.delete(k); }
+  }
+  /* src (beliebig groß gemalt) deckt das Weltrechteck Ww × Hw ab, liegt bei (wx, wy); sichtbar: vx0…vx1, vy0…vy1 */
+  G.blitLayer = function (c, src, Ww, Hw, wx, wy, vx0, vy0, vx1, vy1) {
+    const m = c.getTransform(), a = m.a;
+    if (m.b || m.c || Math.abs(m.d - a) > 1e-6 || Z.gq && Z.gq.level === 0) { c.drawImage(src, (vx0 - wx) * src.width / Ww, (vy0 - wy) * src.height / Hw, (vx1 - vx0) * src.width / Ww, (vy1 - vy0) * src.height / Hw, vx0, vy0, vx1 - vx0, vy1 - vy0); return; }
+    let e = LCACHE.get(src);
+    const CW = Math.round(Ww * a), CH = Math.round(Hw * a);
+    if (e && (e.CW !== CW || e.CH !== CH || e.sw !== src.width)) { for (const t of e.tiles) if (t) lcPix -= t.width * t.height; LCACHE.delete(src); e = null; }
+    if (!e) { lcEvict(90); e = { CW, CH, sw: src.width, tiles: [], used: G.frame }; LCACHE.set(src, e); }
+    e.used = G.frame;
+    if (lcFrame !== G.frame) { lcFrame = G.frame; lcMade = 0; }
+    const DX = Math.round(a * wx + m.e), DY = Math.round(a * wy + m.f), cw = c.canvas.width, chh = c.canvas.height;
+    const X0 = Math.max(DX, 0, Math.floor(a * vx0 + m.e)), X1 = Math.min(DX + CW, cw, Math.ceil(a * vx1 + m.e));
+    const Y0 = Math.max(DY, 0, Math.floor(a * vy0 + m.f)), Y1 = Math.min(DY + CH, chh, Math.ceil(a * vy1 + m.f));
+    if (X1 <= X0 || Y1 <= Y0) return;
+    const kx = src.width / CW, ky = src.height / CH;
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    for (let k = Math.floor((X0 - DX) / LC_TW), k1 = Math.floor((X1 - 1 - DX) / LC_TW); k <= k1; k++) {
+      const t0 = k * LC_TW, lx0 = Math.max(X0 - DX, t0), lx1 = Math.min(X1 - DX, t0 + LC_TW, CW), ly0 = Y0 - DY, h = Y1 - Y0, w = lx1 - lx0;
+      if (w <= 0) continue;
+      let t = e.tiles[k];
+      if (!t && lcMade < 1) {
+        const tw = Math.min(LC_TW, CW - t0);
+        if (lcPix + tw * CH > LC_MAX) lcEvict(2);
+        if (lcPix + tw * CH <= LC_MAX) {
+          t = document.createElement("canvas"); t.width = tw; t.height = CH; const g = t.getContext("2d");
+          g.imageSmoothingEnabled = true; g.setTransform(1 / kx, 0, 0, 1 / ky, -t0, 0); g.drawImage(src, 0, 0);
+          e.tiles[k] = t; lcPix += tw * CH; lcMade++;
+        }
+      }
+      if (t) c.drawImage(t, lx0 - t0, ly0, w, h, DX + lx0, DY + ly0, w, h);
+      else c.drawImage(src, lx0 * kx, ly0 * ky, w * kx, h * ky, DX + lx0, DY + ly0, w, h);
+    }
+    c.setTransform(m);
+  };
+  /* neues Gebiet: vergrößerte Ebenen und Sprites des alten freigeben */
+  G.dropLayer = src => { const e = LCACHE.get(src); if (!e) return; for (const t of e.tiles) if (t) lcPix -= t.width * t.height; LCACHE.delete(src); };
+  G.dropCaches = () => { LCACHE.clear(); lcPix = 0; SCACHE.clear(); scPix = 0; };
+  G.layerCacheInfo = () => ({ entries: LCACHE.size, mpix: +(lcPix / 1e6).toFixed(2), sprites: SCACHE.size, spix: +(scPix / 1e6).toFixed(2) });
+  /* ---------- weiche Sprites (Leuchten, Wolken, Schatten) in Bildschirmgröße ----------
+     Ein 64-px-Leuchtfleck, der jedes Bild auf 300 px vergrößert wird, kostet in Software-Darstellung das Drei- bis
+     Vierfache einer pixelgenauen Kopie. G.drawScaled(c, spr, x, y, w, h) zeichnet wie c.drawImage(spr, x, y, w, h),
+     legt aber je Sprite und Bildschirmgröße (in 4-%-Stufen) einmal eine vergrößerte Fassung an und kopiert diese
+     ganzzahlig (Mittelpunkt bleibt, Größe weicht höchstens 2 % ab – bei weichen Flecken unsichtbar). Gedreht,
+     gespiegelt, winzig oder riesig: wie bisher. Höchstens 8 neue Fassungen je Bild, Speicher begrenzt. */
+  const SCACHE = new Map(), SC_MAX = 14e6; let scPix = 0, scFrame = -1, scMade = 0, sprIds = 0;
+  G.drawScaled = function (c, spr, x, y, w, h, m) {
+    if (!(w > 0 && h > 0)) return;
+    m = m || c.getTransform();
+    const dw = w * m.a, dh = h * m.d;
+    if (m.b || m.c || !(dw >= 20 && dh >= 6) || dw > 2600 || dh > 1400 || (Z.gq && Z.gq.level === 0)) { c.drawImage(spr, x, y, w, h); return; }
+    const kw = Math.round(Math.log(dw) * 25), kh = Math.round(Math.log(dh) * 25);
+    const id = spr._sid || (spr._sid = ++sprIds), key = id * 1048576 + kw * 1024 + kh;
+    let s = SCACHE.get(key);
+    if (!s) {
+      if (scFrame !== G.frame) { scFrame = G.frame; scMade = 0; }
+      if (scMade >= 8) { c.drawImage(spr, x, y, w, h); return; }
+      const W = Math.max(1, Math.round(Math.exp(kw / 25))), H2 = Math.max(1, Math.round(Math.exp(kh / 25)));
+      if (scPix + W * H2 > SC_MAX) { SCACHE.clear(); scPix = 0; }
+      s = document.createElement("canvas"); s.width = W; s.height = H2; const g = s.getContext("2d"); g.imageSmoothingEnabled = true; g.drawImage(spr, 0, 0, W, H2);
+      SCACHE.set(key, s); scPix += W * H2; scMade++;
+    }
+    const X = Math.round(m.a * x + m.e + (dw - s.width) / 2), Y = Math.round(m.d * y + m.f + (dh - s.height) / 2);
+    c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(s, X, Y); c.setTransform(m);
+  };
   function drawLayers(c, cam) {
     const L = G.layers; if (!L) return;
     /* deckt die Bilderbuchseite alles, sind Himmel und ferne Ebene unsichtbar: zwei Vollbild-Durchgänge gespart */
@@ -264,7 +339,7 @@
       for (; x < cam.x + cam.w; x += LW) {
         /* nur den sichtbaren Ausschnitt kopieren */
         const vx0 = Math.max(x, cam.x - 2), vx1 = Math.min(x + LW, cam.x + cam.w + 2); if (vx1 <= vx0) continue;
-        const kx = layer.sx, ky = layer.sy; c.drawImage(layer.cv, (vx0 - x) * kx, (y0 - oy) * ky, (vx1 - vx0) * kx, (y1 - y0) * ky, vx0, y0, vx1 - vx0, y1 - y0);
+        G.blitLayer(c, layer.cv, LW, L.H, x, oy, vx0, y0, vx1, y1);
       }
       /* lebendige Ferne zwischen den Ebenen: Wolken, Vögel, Sternschnuppen, Fledermäuse … */
       if (layer === L.far && Z.drawBackLife) Z.drawBackLife(c, cam, G.time, B, oy, L.H);
@@ -1256,22 +1331,46 @@
     if (ch) { G.chunks.delete(key); G.chunks.set(key, ch); return ch; }
     const s = chunkScale(), cw = Math.ceil(CH_W * T * s), chh = Math.ceil(CH_H * T * s);
     let cv = null;
-    if (G.chunks.size > 20) { const k0 = G.chunks.keys().next().value, old = G.chunks.get(k0); G.chunks.delete(k0); if (old && old.cv.width === cw && old.cv.height === chh) cv = old.cv; }
+    if (G.chunks.size > (chunkDevOK() ? 16 : 20)) { const k0 = G.chunks.keys().next().value, old = G.chunks.get(k0); G.chunks.delete(k0); if (old && !old.dev && old.cv.width === cw && old.cv.height === chh) cv = old.cv; }
     if (!cv) { cv = document.createElement("canvas"); cv.width = cw; cv.height = chh; }
     const c = cv.getContext("2d"); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = 1; c.globalCompositeOperation = "source-over"; c.clearRect(0, 0, cw, chh); c.scale(s, s); c.translate(-cx * CH_W * T, -cy * CH_H * T);
     try { paintTiles(c, cx * CH_W, cy * CH_H, CH_W, CH_H); } catch (e) { console.error(e); }
     ch = { cv }; G.chunks.set(key, ch); return ch;
   }
+  /* Chunks in Bildschirmauflösung (ab Stufe „Hoch“): Ein Chunk wird mit 3× gemalt und bisher jedes Bild auf den
+     Bildmaßstab (z. B. 3,6×) vergrößert – das kostet in Software-Darstellung rund 5 ms je Vollbild. Jetzt wird er
+     einmal (höchstens einer je Bild) genau auf das Bildschirmpixelraster vergrößert – dieselbe bilineare
+     Vergrößerung, ausgerichtet auf die ganzzahligen Bildschirmpixel der Welt – und danach pixelgenau kopiert.
+     Danach braucht es nur noch die vergrößerte Fassung (die kleine wird freigegeben). */
+  const chunkDevOK = () => lq() >= 2 && G.scale > chunkScale() + 0.01 && G.scale <= 4.6;
+  let chDevFrame = -1, chDevMade = 0;
+  function chunkDev(ch, cx, cy, S) {
+    if (chDevFrame !== G.frame) { chDevFrame = G.frame; chDevMade = 0; }
+    if (chDevMade >= 1) return null;
+    chDevMade++;
+    const s = chunkScale();
+    const wx = cx * CH_W * T * S, wy = cy * CH_H * T * S, gx = Math.round(wx), gy = Math.round(wy);
+    const w = Math.round((cx + 1) * CH_W * T * S) - gx, h = Math.round((cy + 1) * CH_H * T * S) - gy;
+    const d = document.createElement("canvas"); d.width = w; d.height = h; const g = d.getContext("2d");
+    g.imageSmoothingEnabled = true; g.setTransform(S / s, 0, 0, S / s, wx - gx, wy - gy); g.drawImage(ch.cv, 0, 0);
+    ch.cv = d; ch.dev = { S, gx, gy };
+    return ch.dev;
+  }
   function drawTiles(c, cam) {
     const det = detail(); if (G.det !== det) { G.det = det; G.chunks.clear(); }
+    const S = G.scale, m = c.getTransform(), ex = Math.round(m.e), ey = Math.round(m.f);
+    /* pixelgenau nur bei reiner, ganzzahlig verschobener Skalierung mit dem Bildmaßstab (sonst wie bisher) */
+    const aligned = !m.b && !m.c && Math.abs(m.a - S) < 1e-6 && Math.abs(m.d - S) < 1e-6 && Math.abs(m.e - ex) < 0.01 && Math.abs(m.f - ey) < 0.01, devOK = aligned && chunkDevOK();
     const cx0 = Math.floor(cam.x / (CH_W * T)), cx1 = Math.floor((cam.x + cam.w) / (CH_W * T));
     const cy0 = Math.floor(cam.y / (CH_H * T)), cy1 = Math.floor((cam.y + cam.h) / (CH_H * T));
     let built = 0;
     for (let cy = cy0; cy <= cy1; cy++) for (let cx = cx0; cx <= cx1; cx++) {
       if (cx < 0 || cy < 0 || cx * CH_W >= lv.W || cy * CH_H >= lv.H) continue;
       if (!G.chunks.has(cx + "," + cy)) built++;
-      const ch = chunkCanvas(cx, cy);
-      c.drawImage(ch.cv, cx * CH_W * T, cy * CH_H * T, CH_W * T, CH_H * T);
+      const ch = chunkCanvas(cx, cy), dv = ch.dev || (devOK ? chunkDev(ch, cx, cy, S) : null);
+      if (dv && aligned && dv.S === S) { c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(ch.cv, dv.gx + ex, dv.gy + ey); c.setTransform(m); }
+      else if (dv) c.drawImage(ch.cv, dv.gx / dv.S, dv.gy / dv.S, ch.cv.width / dv.S, ch.cv.height / dv.S);
+      else c.drawImage(ch.cv, cx * CH_W * T, cy * CH_H * T, CH_W * T, CH_H * T);
     }
     /* vorausschauend: höchstens einen Nachbar-Chunk pro Bild vorbereiten (in Blickrichtung zuerst) */
     if (!built) {
@@ -1800,9 +1899,20 @@
      nicht mehr als die alte Dunkelheitskarte. Überlagerungen anderer Module (Sichtnebel, Regen, Vignette) malen
      weiterhin dunkel mit „source-over“ hinein und wirken damit genauso abdunkelnd wie zuvor. */
   const HOLE_K = 0.86, HOLE_C = 0.42, COL_K = 1.1, TINT_K = 0.5;
+  /* Hilfskarten in halber Auflösung der Lichtkarte: A sammelt alles Additive (Aufhellung, Mond, Runenwellen,
+     farbige Lichter), T alle Farbtönungen (Produkt, weiß = neutral). Lichtflecken sind weich – in halber Auflösung
+     sehen sie gleich aus, kosten aber nur ein Viertel der Pixel. Mathematisch dasselbe wie vorher direkt in der
+     Karte: „lighter“ ist eine Summe, „multiply“ ein Produkt; beide werden je mit EINER Kopie aufgetragen. */
+  function subCanvas(k, LW, LH) {
+    const w = Math.max(8, Math.ceil(LW / 2)), h = Math.max(6, Math.ceil(LH / 2));
+    let cv = G[k];
+    if (!cv || cv.width !== w || cv.height !== h) { cv = G[k] = document.createElement("canvas"); cv.width = w; cv.height = h; }
+    return cv;
+  }
   function mulPass(c, cam, W, H, dark, lvl) {
-    const l = lightCanvas(W, H), LW = G.light.width, LH = G.light.height, sx = LW / cam.w, sy = LH / cam.h, t = G.time;
+    const l = lightCanvas(W, H), LW = G.light.width, LH = G.light.height, t = G.time;
     lightSprites();
+    const A = subCanvas("lightA", LW, LH), a2 = A.getContext("2d"), AW = A.width, AH = A.height, sx = AW / cam.w, sy = AH / cam.h;
     /* Umgebungslicht: Farbstimmung (weiß = neutral) × (1 − Dunkelheit) */
     l.globalCompositeOperation = "source-over"; l.globalAlpha = 1;
     const base = G.colorBase ? G.colorBase() : null;
@@ -1810,10 +1920,11 @@
     const amb = Math.max(0, Math.min(1, (1 - dark) * 1.16)), av = (amb * 255) | 0; /* ×1,16 gleicht die Tönung aus */
     l.globalCompositeOperation = "multiply"; l.fillStyle = "rgb(" + av + "," + av + "," + av + ")"; l.fillRect(0, 0, LW, LH);
     /* Aufhellen (wie die alten Löcher, nur additiv weiß): je dunkler das Gebiet, desto mehr holt ein Licht heraus */
-    l.globalCompositeOperation = "lighter";
+    a2.globalCompositeOperation = "source-over"; a2.globalAlpha = 1; a2.clearRect(0, 0, AW, AH);
+    a2.globalCompositeOperation = "lighter";
     const hk = Math.max(0.05, dark) * HOLE_K;
-    const hole = (x, y, r, a) => { const X = (x - cam.x) * sx, Y = (y - cam.y) * sy, Rr = r * sx; if (X < -Rr || Y < -Rr || X > LW + Rr || Y > LH + Rr) return; l.globalAlpha = Math.min(1, a * hk); l.drawImage(G.holeW, X - Rr, Y - Rr, Rr * 2, Rr * 2); };
-    const cone = (x, y, w, hh, a) => { const X = (x - cam.x) * sx, Y = (y - cam.y) * sy, Ww = w * sx, Hh = hh * sy; if (X < -Ww || X > LW + Ww || Y > LH || Y < -Hh) return; l.globalAlpha = Math.min(1, a * hk); l.drawImage(G.coneW, X - Ww / 2, Y, Ww, Hh); };
+    const hole = (x, y, r, a) => { const X = (x - cam.x) * sx, Y = (y - cam.y) * sy, Rr = r * sx; if (X < -Rr || Y < -Rr || X > AW + Rr || Y > AH + Rr) return; a2.globalAlpha = Math.min(1, a * hk); a2.drawImage(G.holeW, X - Rr, Y - Rr, Rr * 2, Rr * 2); };
+    const cone = (x, y, w, hh, a) => { const X = (x - cam.x) * sx, Y = (y - cam.y) * sy, Ww = w * sx, Hh = hh * sy; if (X < -Ww || X > AW + Ww || Y > AH || Y < -Hh) return; a2.globalAlpha = Math.min(1, a * hk); a2.drawImage(G.coneW, X - Ww / 2, Y, Ww, Hh); };
     /* hole mit optionaler Farbe (5. Wert) – rückwärtsverträglich für Z.lightExtra */
     const holeC = (x, y, r, a, col) => { hole(x, y, r, a); if (col) pushL(x, y, r * 0.9, colRGB(col), (a == null ? 0.6 : a) * 0.9, 0); };
     cutHoles(hole, cone, holeC, t, HOLE_C);
@@ -1821,28 +1932,37 @@
     const mm = Z.darkness > 0 || G.off.moon ? null : moonMap();
     if (mm) {
       const x0 = Math.max(0, Math.floor(cam.x / T) - 2), y0 = Math.max(0, Math.floor(cam.y / T) - 2), x1 = Math.min(mm.width, Math.ceil((cam.x + cam.w) / T) + 2), y1 = Math.min(mm.height, Math.ceil((cam.y + cam.h) / T) + 2);
-      if (x1 > x0 && y1 > y0) { l.globalAlpha = Math.min(1, (0.2 + 0.03 * Math.sin(t * 0.21)) * (0.4 + dark) * skyLight().k); l.imageSmoothingEnabled = true; l.drawImage(mm, x0, y0, x1 - x0, y1 - y0, (x0 * T - cam.x) * sx, (y0 * T - cam.y) * sy, (x1 - x0) * T * sx, (y1 - y0) * T * sy); }
+      if (x1 > x0 && y1 > y0) { a2.globalAlpha = Math.min(1, (0.2 + 0.03 * Math.sin(t * 0.21)) * (0.4 + dark) * skyLight().k); a2.imageSmoothingEnabled = true; a2.drawImage(mm, x0, y0, x1 - x0, y1 - y0, (x0 * T - cam.x) * sx, (y0 * T - cam.y) * sy, (x1 - x0) * T * sx, (y1 - y0) * T * sy); }
     }
     /* Blitz: silbrig-violettes Aufleuchten */
-    if (Z.darkness <= 0 && Z.flashLight > 0) { l.globalAlpha = Math.min(1, Z.flashLight); l.fillStyle = "rgb(" + MOON.join(",") + ")"; l.fillRect(0, 0, LW, LH); }
-    if (lvl >= 2) for (const f of G.colorOver) { l.globalAlpha = 1; try { f(l, cam.x, cam.y, sx, sy, LW, LH, t); } catch (e) { console.error(e); } l.globalCompositeOperation = "lighter"; }
+    if (Z.darkness <= 0 && Z.flashLight > 0) { a2.globalAlpha = Math.min(1, Z.flashLight); a2.fillStyle = "rgb(" + MOON.join(",") + ")"; a2.fillRect(0, 0, AW, AH); }
+    if (lvl >= 2) for (const f of G.colorOver) { a2.globalAlpha = 1; try { f(a2, cam.x, cam.y, sx, sy, AW, AH, t); } catch (e) { console.error(e); } a2.globalCompositeOperation = "lighter"; }
     /* farbige Lichter */
     const ck = COL_K * (0.6 + 0.4 * Math.min(1, dark * 1.6));
+    let nT = 0;
     for (let i = 0; i < LQn; i++) {
       const q = LQ[i], X = (q.x - cam.x) * sx, Y = (q.y - cam.y) * sy, R = q.r * sx;
-      if (X < -R || Y < -R || X > LW + R || Y > LH + R) continue;
-      const a = q.a * ck; l.globalAlpha = a > 1 ? 1 : a; l.drawImage(lightSpr(q.c), X - R, Y - R, R * 2, R * 2);
+      if (X < -R || Y < -R || X > AW + R || Y > AH + R) continue;
+      const a = q.a * ck; a2.globalAlpha = a > 1 ? 1 : a; a2.drawImage(lightSpr(q.c), X - R, Y - R, R * 2, R * 2); nT++;
     }
+    a2.globalAlpha = 1;
+    l.globalCompositeOperation = "lighter"; l.globalAlpha = 1; l.imageSmoothingEnabled = true; l.drawImage(A, 0, 0, LW, LH);
     /* Tönen: wo die Karte schon (fast) weiß ist, kann Addieren keine Farbe mehr zeigen – darum zusätzlich
        „multiply“ mit dem Farbfleck: Ergebnis = Karte × mix(weiß, Lichtfarbe, Deckkraft). So färbt eine Fackel auch
        die hell erleuchtete Umgebung des Spielers warm, eine Rune violett, ohne sie dunkel zu machen. */
-    l.globalCompositeOperation = "multiply";
-    for (let i = 0; i < LQn && !G.off.tint; i++) {
-      const q = LQ[i], X = (q.x - cam.x) * sx, Y = (q.y - cam.y) * sy, R = q.r * sx * 0.9;
-      if (X < -R || Y < -R || X > LW + R || Y > LH + R) continue;
-      const a = q.a * TINT_K; l.globalAlpha = a > 1 ? 1 : a; l.drawImage(lightSpr(q.c), X - R, Y - R, R * 2, R * 2);
+    if (nT && !G.off.tint) {
+      const Tn = subCanvas("lightT", LW, LH), t2 = Tn.getContext("2d");
+      t2.globalCompositeOperation = "source-over"; t2.globalAlpha = 1; t2.fillStyle = "#fff"; t2.fillRect(0, 0, AW, AH);
+      t2.globalCompositeOperation = "multiply";
+      for (let i = 0; i < LQn; i++) {
+        const q = LQ[i], X = (q.x - cam.x) * sx, Y = (q.y - cam.y) * sy, R = q.r * sx * 0.9;
+        if (X < -R || Y < -R || X > AW + R || Y > AH + R) continue;
+        const a = q.a * TINT_K; t2.globalAlpha = a > 1 ? 1 : a; t2.drawImage(lightSpr(q.c), X - R, Y - R, R * 2, R * 2);
+      }
+      t2.globalAlpha = 1;
+      l.globalCompositeOperation = "multiply"; l.drawImage(Tn, 0, 0, LW, LH);
     }
-    overlays(l, cam, sx, sy);
+    overlays(l, cam, LW / cam.w, LH / cam.h);
     c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.imageSmoothingEnabled = true;
     c.globalCompositeOperation = "multiply"; c.drawImage(G.light, 0, 0, W, H);
     if (lvl >= 2 && !G.off.bloom) bloom(c, cam, W, H, t);
@@ -1850,6 +1970,7 @@
     return true;
   }
   /* Schein um helle Quellen (Bloom-Andeutung) und nasse Spiegelungen – additiv, klein, nur wo sichtbar */
+  const IDM = new DOMMatrix();
   function bloom(c, cam, W, H, t) {
     c.globalCompositeOperation = "lighter";
     const k = W / cam.w, wet = wetness(), sight = Z.sightAt;
@@ -1858,13 +1979,13 @@
       const X = (q.x - cam.x) * k, Y = (q.y - cam.y) * k, R = q.b * k * (0.85 + 0.15 * Math.min(1, q.a * 2));
       if (X < -R * 3 || Y < -R * 3 || X > W + R * 3 || Y > H + R * 3) continue;
       const sv = sight ? Math.min(1, sight(q.x, q.y) * 1.5) : 1; if (sv < 0.05) continue;
-      c.globalAlpha = Math.min(1, q.a * 0.34 * sv); c.drawImage(lightSpr(q.c), X - R, Y - R, R * 2, R * 2);
+      c.globalAlpha = Math.min(1, q.a * 0.34 * sv); G.drawScaled(c, lightSpr(q.c), X - R, Y - R, R * 2, R * 2, IDM);
       if (wet > 0) {
         const fy = floorUnder(q.x, q.y); if (fy == null) continue;
         const Fy = (fy - cam.y) * k, d = (fy - q.y) / 90, ww = (6 + q.b * 0.3) * k, hh = (16 + q.b * 0.9) * k * (1 - d * 0.4);
         if (d > 1) continue;
         c.globalAlpha = Math.min(1, q.a * 0.5 * wet * (1 - d) * sv * (0.85 + 0.15 * Math.sin(t * 3.1 + q.x)));
-        c.drawImage(lightSpr(q.c), X - ww / 2, Fy - hh * 0.12, ww, hh);
+        G.drawScaled(c, lightSpr(q.c), X - ww / 2, Fy - hh * 0.12, ww, hh, IDM);
       }
     }
     c.globalAlpha = 1;
@@ -2012,6 +2133,6 @@
     const P = Z.player;
     if (P && P.hp < P.hpMax * 0.3 && !P.dead) { if (!G.vigR) { G.vigR = document.createElement("canvas"); G.vigR.width = 160; G.vigR.height = 90; const v = G.vigR.getContext("2d"); const g = v.createRadialGradient(80, 45, 26, 80, 45, 84); g.addColorStop(0, "rgba(140,0,0,0)"); g.addColorStop(1, "rgba(140,0,0,1)"); v.fillStyle = g; v.fillRect(0, 0, 160, 90); } c.globalAlpha = (0.3 - P.hp / P.hpMax) / 0.3 * (0.6 + 0.2 * Math.sin(t * 5)); c.drawImage(G.vigR, 0, 0, W, H); c.globalAlpha = 1; }
     if (!merged && (!Z.gq || Z.gq.vignette !== false)) c.drawImage(vigSprite(), 0, 0, W, H);
-    if (pf) { const n = performance.now(); pf.post = (pf.post || 0) + n - t0; }
+    if (pf) { c.getImageData(0, 0, 1, 1); const n = performance.now(); pf.post = (pf.post || 0) + n - t0; }
   };
 })();

@@ -46,7 +46,9 @@
     else { g.addColorStop(0, rgba(col, 1)); g.addColorStop(0.2, rgba(col, 0.5)); g.addColorStop(0.55, rgba(col, 0.14)); g.addColorStop(1, rgba(col, 0)); }
     c.fillStyle = g; c.fillRect(0, 0, 64, 64); GL.set(key, cv); return cv;
   }
-  function glow(c, x, y, rx, ry, col, a, soft) { if (a <= 0.004) return; c.globalAlpha = a > 1 ? 1 : a; c.drawImage(glowSpr(col, soft), x - rx, y - ry, rx * 2, ry * 2); }
+  /* LIVE: beim Zeichnen je Bild über G.drawScaled (Leuchten in Bildschirmgröße zwischengespeichert, bild.js) */
+  let LIVE = false;
+  function glow(c, x, y, rx, ry, col, a, soft) { if (a <= 0.004) return; c.globalAlpha = a > 1 ? 1 : a; if (LIVE && G.drawScaled) G.drawScaled(c, glowSpr(col, soft), x - rx, y - ry, rx * 2, ry * 2); else c.drawImage(glowSpr(col, soft), x - rx, y - ry, rx * 2, ry * 2); }
 
   /* ======================= DIE STUNDEN ======================= */
   /* sky: Zenit, Mitte, Horizont · k: Tönungsstärke draußen · light: Kantenlicht (Mond/Sonne) · win: Licht durch Fenster
@@ -449,33 +451,56 @@
     BANDS.set(key, cv); return cv;
   }
 
+  /* Polarlicht-Schleier: in eine kleine Leinwand (≈ 40 % der Bildschirmauflösung) gemalt, dort auf den Himmel über der
+     Horizontlinie beschnitten und mit EINER Kopie additiv aufgetragen. Vorher: ~300 vergrößerte Streifen direkt im
+     Bild unter einer Beschneidung mit dem Horizontpfad (in Software-Darstellung bis zu 10 ms) – der Schleier ist
+     weich, in der kleineren Auflösung sieht er gleich aus. */
+  let AU = null;
+  function drawAurora(c, cam, t, oy, z) {
+    const sets = AURORA[z.k] || AURORA.nacht, H = sky.H, ox = cam.x * (1 - PFX);
+    /* Höhenbereich der Schleier (Ebenenkoordinaten), auf den sichtbaren Ausschnitt begrenzt */
+    const y0w = Math.max(Math.min(H * 0.2 + 18 - 14, H * 0.28 + 18 - 22.4) - 82, cam.y - oy - 2), y1w = Math.min(H * 0.28 + 18 + 22.4 + 10, cam.y + cam.h - oy + 2);
+    if (y1w <= y0w) return;
+    const R = Math.min(1.5, G.scale || 1.5), AW = Math.ceil(cam.w * R) + 2, AH = Math.ceil((y1w - y0w) * R) + 2;
+    if (!AU || AU.width !== AW || AU.height !== AH) { AU = document.createElement("canvas"); AU.width = AW; AU.height = AH; }
+    const a = AU.getContext("2d");
+    a.setTransform(1, 0, 0, 1, 0, 0); a.globalAlpha = 1; a.globalCompositeOperation = "source-over"; a.clearRect(0, 0, AW, AH);
+    a.setTransform(R, 0, 0, R, -cam.x * R, -(oy + y0w) * R);
+    const U = new Path2D();
+    for (let x0 = Math.floor((cam.x - ox) / LW) * LW + ox; x0 < cam.x + cam.w; x0 += LW) U.addPath(sky.path, new DOMMatrix([1, 0, 0, 1, x0, oy]));
+    a.save(); a.clip(U); a.globalCompositeOperation = "lighter";
+    for (let x0 = Math.floor((cam.x - ox) / LW) * LW + ox; x0 < cam.x + cam.w; x0 += LW) {
+      const X0 = cam.x - x0, X1 = X0 + cam.w;
+      a.save(); a.translate(x0, oy);
+      for (let k = 0; k < 2; k++) {
+        const spr = auroraSpr(sets[k]), yb = H * (0.2 + k * 0.08) + 18, amp = 10 + k * 6, step = 3;
+        const xs = Math.max(-4, Math.floor(X0 / step) * step - step), xe = Math.min(LW + 4, X1 + step);
+        for (let x = xs; x <= xe; x += step) {
+          const u = x / LW * TAU;
+          const y = yb + Math.sin(u * 2 + t * 0.07 + k) * amp + Math.sin(u * 5 - t * 0.11 + k * 2) * amp * 0.4;
+          const h = 34 + 30 * (0.5 + 0.5 * Math.sin(u * 3 + t * 0.13 + k * 3)) + 16 * Math.sin(u * 11 + t * 0.21);
+          const ray = 0.7 + 0.3 * Math.sin(u * 41 + t * 0.6 + k * 5) * Math.sin(u * 17 - t * 0.4);
+          const al = (0.1 + 0.15 * Math.pow(0.5 + 0.5 * Math.sin(u * 4 - t * 0.35 + k * 1.7), 2)) * (0.55 + 0.45 * Math.sin(u * 1 + t * 0.05 + k)) * ray * (z.k === "abend" ? 0.5 : 1);
+          if (al < 0.015) continue;
+          a.globalAlpha = al; a.drawImage(spr, x - step * 0.5, y - h * ray, step * 2.2, h * ray + 8);
+        }
+      }
+      a.restore();
+    }
+    a.restore();
+    c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = 1; c.imageSmoothingEnabled = true;
+    c.drawImage(AU, 0, 0, AW, AH, cam.x, oy + y0w, AW / R, AH / R); c.restore();
+  }
   function drawSkyLive(c, cam, t, oy) {
     const st = state(); if (!st || !sky || !sky.path || sky.H !== Math.ceil(Z.cam.h + 120)) return;
     const q = qLevel(), rich = q >= 2, z = st.z;
     const ox = cam.x * (1 - PFX);
+    if (rich && st.aurora) drawAurora(c, cam, t, oy, z);
     let x0 = Math.floor((cam.x - ox) / LW) * LW + ox;
     for (; x0 < cam.x + cam.w; x0 += LW) {
       const X0 = cam.x - x0, X1 = X0 + cam.w; /* sichtbarer Bereich in Kachelkoordinaten */
       c.save(); c.translate(x0, oy); c.clip(sky.path);
       c.globalCompositeOperation = "lighter";
-      /* Polarlicht-Schleier */
-      if (rich && st.aurora) {
-        const sets = AURORA[z.k] || AURORA.nacht;
-        for (let k = 0; k < 2; k++) {
-          const spr = auroraSpr(sets[k]), yb = sky.H * (0.2 + k * 0.08) + 18, amp = 10 + k * 6, step = 3;
-          const xs = Math.max(-4, Math.floor(X0 / step) * step - step), xe = Math.min(LW + 4, X1 + step);
-          for (let x = xs; x <= xe; x += step) {
-            const u = x / LW * TAU;
-            const y = yb + Math.sin(u * 2 + t * 0.07 + k) * amp + Math.sin(u * 5 - t * 0.11 + k * 2) * amp * 0.4;
-            const h = 34 + 30 * (0.5 + 0.5 * Math.sin(u * 3 + t * 0.13 + k * 3)) + 16 * Math.sin(u * 11 + t * 0.21);
-            const ray = 0.7 + 0.3 * Math.sin(u * 41 + t * 0.6 + k * 5) * Math.sin(u * 17 - t * 0.4);
-            const a = (0.1 + 0.15 * Math.pow(0.5 + 0.5 * Math.sin(u * 4 - t * 0.35 + k * 1.7), 2)) * (0.55 + 0.45 * Math.sin(u * 1 + t * 0.05 + k)) * ray * (z.k === "abend" ? 0.5 : 1);
-            if (a < 0.015) continue;
-            c.globalAlpha = a; c.drawImage(spr, x - step * 0.5, y - h * ray, step * 2.2, h * ray + 8);
-          }
-        }
-        c.globalAlpha = 1;
-      }
       /* funkelnde Sterne */
       for (const s of sky.twinkle) {
         if (s.x < X0 - 4 || s.x > X1 + 4) continue;
@@ -511,7 +536,7 @@
       /* ziehende Wolkenbänder (hinter den Bergen) */
       if (rich) for (const b of sky.bands) {
         const spr = bandSpr(b), w = b.w * 1.4, h = Math.max(10, b.h * 4), x = ((b.x0 + t * b.sp) % (LW + w) + LW + w) % (LW + w) - w;
-        for (const dx of [0, -LW - w]) { const xx = x + dx; if (xx + w < X0 || xx > X1) continue; c.globalAlpha = 0.85; c.drawImage(spr, xx, b.y - h / 2, w, h); }
+        for (const dx of [0, -LW - w]) { const xx = x + dx; if (xx + w < X0 || xx > X1) continue; c.globalAlpha = 0.85; if (G.drawScaled) G.drawScaled(c, spr, xx, b.y - h / 2, w, h); else c.drawImage(spr, xx, b.y - h / 2, w, h); }
         c.globalAlpha = 1;
       }
       /* Fledermäuse vor dem Blutmond bzw. Vollmond */
@@ -546,7 +571,7 @@
     if (Z.level && !(Z.bilderbuchCovers && Z.bilderbuchCovers())) { const tA = performance.now();
       /* über der fernen Ebene: Zenitfarbe statt der (getönten) Horizontfarbe, die bild.js als Grund füllt */
       if (sky && oy > cam.y - 1 && B && B.sky) { c.fillStyle = shade(B.sky[0], -0.25); c.fillRect(cam.x - 2, cam.y - 2, cam.w + 4, oy - cam.y + 3); }
-      try { drawSkyLive(c, cam, t, oy); } catch (err) { console.error("tageszeit live", err); sky = null; } Z.zeitLiveMs = performance.now() - tA; }
+      try { LIVE = true; drawSkyLive(c, cam, t, oy); } catch (err) { console.error("tageszeit live", err); sky = null; } finally { LIVE = false; } Z.zeitLiveMs = performance.now() - tA; }
     if (life0) return life0.apply(this, arguments);
   };
 
