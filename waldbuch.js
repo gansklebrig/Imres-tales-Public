@@ -217,7 +217,7 @@
   /* ---------- Register ---------- */
   function register(aktiv) {
     const r = $("#register");
-    const extra = [["", "Deckblatt", "#efe2c2"], ["bestimmen", "🔍 Bestimmen", "#f1d38f"], ["jetzt", "📅 Was wächst jetzt?", "#e9c9a0"], ["lernen", "🧠 Lernkiste", "#d8c0e0"], ["spiel", "🐾 Rex' Spürnase", "#f0b77c"]];
+    const extra = [["", "Deckblatt", "#efe2c2"], ["bestimmen", "🔍 Bestimmen", "#f1d38f"], ["jetzt", "📅 Was wächst jetzt?", "#e9c9a0"], ["doppelgaenger", "☠ Doppelgänger", "#e6a99a"], ["lernen", "🧠 Lernkiste", "#d8c0e0"], ["spiel", "🐾 Rex' Spürnase", "#f0b77c"]];
     r.innerHTML = extra.slice(0, 1).map(([k, n, f]) => '<a class="reiter" href="#/' + k + '" style="background:' + f + '"' + (aktiv === k ? ' aria-current="page"' : "") + ">" + n + "</a>").join("") +
       KAPITEL.map(k => '<a class="reiter" href="#/kapitel/' + k.k + '" style="background:' + k.farbe + '"' + (aktiv === "kapitel/" + k.k ? ' aria-current="page"' : "") + ">" + k.name + "</a>").join("") +
       extra.slice(1).map(([k, n, f]) => '<a class="reiter" href="#/' + k + '" style="background:' + f + '"' + (aktiv === k ? ' aria-current="page"' : "") + ">" + n + "</a>").join("");
@@ -230,7 +230,7 @@
     const gefunden = Object.keys(STAND.gefunden).length;
     seite('<div class="deckblatt"><div><p class="leise" style="font-family:var(--fb);letter-spacing:.14em;text-transform:uppercase">Notizen eines Waldläufers</p><h1 class="hand">Friedrichs Waldbuch</h1><p style="font-size:1.1rem">Was der Wald mich gelehrt hat – aufgeschrieben für alle, die mit offenen Augen gehen. Mit Fotos, Jahreskalender, giftigen Doppelgängern und den Spuren, die Rex schneller findet als ich.</p>' +
       '<div class="zahlen"><span><b>' + ARTEN.length + "</b>Arten</span><span><b>" + Object.values(BILDER).reduce((s, b) => s + b.length, 0) + "</b>Fotos</span><span><b>" + KAPITEL.length + "</b>Kapitel</span><span><b>" + gefunden + "</b>selbst gefunden</span></div>" +
-      '<div class="reihe"><a class="knopf" href="#/spiel">🐾 Spurensuche mit Rex</a><a class="knopf hell" href="#/bestimmen">🔍 Etwas bestimmen</a><a class="knopf hell" href="#/lernen">🧠 Lernkiste</a></div></div>' +
+      '<div class="reihe"><a class="knopf" href="#/spiel">🐾 Spurensuche mit Rex</a><a class="knopf hell" href="#/bestimmen">🔍 Etwas bestimmen</a><a class="knopf hell" href="#/lernen">🧠 Lernkiste</a><a class="knopf hell" href="#/doppelgaenger">☠ Doppelgänger</a></div></div>' +
       '<div class="bilder" aria-hidden="true"><img src="friedrich-frei.webp" alt="" style="right:18%;bottom:0;height:300px"><img src="rex-frei.webp" alt="" style="right:0;bottom:0;height:150px"></div></div>' +
       '<div class="notiz">Bevor du losziehst: Dieses Buch ist zum Lernen da. Ich habe mir Mühe gegeben, dass alles stimmt – aber ein Buch ersetzt keine Pilzberatung und keine erfahrene Hand. Wer sammelt, sammelt nur, was er sicher kennt, und nur so viel, wie er braucht. Geschützte Pflanzen bleiben stehen. Und Rex bleibt an der Leine, wenn Rehkitze im Gras liegen.<span class="unterschrift">– Friedrich</span></div>' +
       '<h3 class="hand">Gerade im ' + MONATE[heuteMonat - 1] + '</h3><div class="gitter">' + jetzt.map(klebe).join("") + '</div><p><a href="#/jetzt">Alles, was im ' + MONATE[heuteMonat - 1] + " wächst, blüht und reift →</a></p>" +
@@ -398,7 +398,7 @@
   }
   function frageHtml(f) {
     return '<div class="karte-lern"><div class="frage">' + esc(f.frage) + "</div>" + (f.bild ? '<div class="fbild"><img src="' + f.bild + '" alt="Rätselbild"></div>' : "") +
-      '<div class="antworten">' + f.antworten.map((x, i) => f.bildwahl ? '<button class="bildwahl" data-i="' + i + '" aria-label="Bild ' + (i + 1) + '"><img src="' + (hauptbild(x.id) || "") + '" alt=""></button>' : '<button data-i="' + i + '">' + esc(x.de) + "</button>").join("") + '</div><div class="erklaerung" id="erkl"></div></div>';
+      '<div class="antworten' + (f.bildwahl ? " bilder" : "") + '">' + f.antworten.map((x, i) => f.bildwahl ? '<button class="bildwahl" data-i="' + i + '" aria-label="Bild ' + (i + 1) + '"><img src="' + (hauptbild(x.id) || "") + '" alt=""></button>' : '<button data-i="' + i + '">' + esc(x.de) + "</button>").join("") + '</div><div class="erklaerung" id="erkl"></div></div>';
   }
   function lernRunde() {
     const feld = $("#lernfeld"); if (!feld) return;
@@ -417,6 +417,22 @@
       $("#erkl").innerHTML = (ok ? "<b class=\"hand\" style=\"font-size:1.5rem;color:var(--moos)\">Richtig!</b> " : "<b class=\"hand\" style=\"font-size:1.5rem;color:var(--beere)\">Knapp daneben.</b> Richtig ist <a href=\"#/art/" + a.id + "\">" + esc(a.de) + "</a>. ") + esc(f.erkl).slice(0, 260) + ' <div class="reihe"><button class="knopf klein" id="weiter">Nächste Karte →</button><a class="knopf klein hell" href="#/art/' + a.id + '">Seite aufschlagen</a></div>';
       $("#weiter").addEventListener("click", () => { feld.dataset.fertig = "0"; lernRunde(); });
     }));
+  }
+
+  /* ---------- Doppelgänger ---------- */
+  function doppelSeite() {
+    const paare = [], gesehen = new Set();
+    for (const a of ARTEN) for (const v of (a.v || "").split(",").map(x => x.trim()).filter(x => ART[x])) {
+      const b = ART[v], key = [a.id, b.id].sort().join("|");
+      if (gesehen.has(key)) continue; gesehen.add(key);
+      const gefahr = ["toedlich", "giftig"].includes(a.ess) || ["toedlich", "giftig"].includes(b.ess);
+      const essbar = ["essbar", "bedingt"].includes(a.ess) || ["essbar", "bedingt"].includes(b.ess);
+      if (gefahr && essbar) paare.push([a.ess === "toedlich" || b.ess === "toedlich" ? 0 : 1, a.ess === "essbar" || a.ess === "bedingt" ? [a, b] : [b, a]]);
+    }
+    paare.sort((x, y) => x[0] - y[0]);
+    const seiteA = (a) => { const F = felderFuer(a); const wichtig = F.filter(([k]) => !leer(a[k])).slice(0, 3); return '<div class="klebe" style="transform:none"><a href="#/art/' + a.id + '" style="text-decoration:none;color:inherit"><div class="bild">' + bildHtml(a.id) + "</div>" + marken(a) + '<div class="name">' + esc(a.de) + '</div><div class="lat">' + esc(a.wiss) + '</div></a><span class="ess-schild ' + a.ess + '" style="font-size:.72rem;margin:.3rem 0;display:inline-block">' + (ESS[a.ess] || ESS.kein)[0] + '</span><dl class="merk" style="font-size:.88rem">' + wichtig.map(([k, n]) => "<dt style=\"font-size:1.1rem\">" + n + "</dt><dd>" + esc(a[k]) + "</dd>").join("") + "</dl></div>"; };
+    seite('<h2 class="hand">Doppelgänger</h2><div class="notiz">Hier klebe ich die Paare nebeneinander, die mir am meisten Angst machen: links das, was man sucht, rechts das, was einen ins Krankenhaus bringt. Schau dir jedes Paar lange an. Und wenn du dir einmal nicht sicher bist – stehen lassen.<span class="unterschrift">– Friedrich</span></div><div class="warnung"><b>Bei Vergiftungsverdacht:</b> Notruf 112 oder Giftnotruf München 089 19240. Pflanzen- oder Pilzreste mitnehmen.</div>' +
+      paare.map(([stufe, [a, b]]) => '<h3 class="hand">' + esc(a.de) + " oder " + esc(b.de) + "?" + (stufe === 0 ? ' <span class="ess-schild toedlich" style="font-size:.75rem;vertical-align:middle">lebensgefährlich</span>' : "") + '</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">' + seiteA(a) + seiteA(b) + "</div>").join(""));
   }
 
   /* ---------- Suche & Nachweise ---------- */
@@ -441,6 +457,7 @@
     else if (teil === "art") { const a = ART[arg]; register(a ? "kapitel/" + a.kap : ""); artSeite(arg); }
     else if (teil === "bestimmen") { register("bestimmen"); bestimmenSeite(); }
     else if (teil === "jetzt") { register("jetzt"); jetztSeite(); }
+    else if (teil === "doppelgaenger") { register("doppelgaenger"); doppelSeite(); }
     else if (teil === "lernen") { register("lernen"); lernSeite(); }
     else if (teil === "spiel") { register("spiel"); if (window.WB_SPIEL) window.WB_SPIEL.start($("#seite")); }
     else if (teil === "nachweise") { register(""); nachweisSeite(); }

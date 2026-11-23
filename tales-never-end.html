@@ -45,7 +45,7 @@ a{color:var(--gold)}
 .bk-punkt b{font-size:.7rem;line-height:1;color:#ffe7b8;margin-left:2px}
 .bk-icon{position:relative;width:58px;height:58px}
 .bk-icon svg{position:absolute;inset:0;width:100%;height:100%}
-.bk-name{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.bk-name{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);line-height:1}
 .bk-skala{position:relative;width:100%;max-width:110px;height:7px;border-radius:5px;background:rgba(0,0,0,.45);border:1px solid rgba(255,220,170,.12);overflow:hidden}
 .bk-skala .zone{position:absolute;top:0;bottom:0;left:30%;width:45%;background:rgba(127,166,74,.28)}
 .bk-skala .wert{position:absolute;top:0;bottom:0;left:0;background:linear-gradient(90deg,#c4652c,#e8b14e);transition:width .6s cubic-bezier(.3,1.3,.5,1)}
@@ -188,7 +188,8 @@ a{color:var(--gold)}
 .toast b{color:var(--gold)}
 @keyframes toast{0%{opacity:0;transform:translate(-50%,-12px)}8%,85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-10px)}}
 .leise{color:var(--mute);font-size:.82rem}
-@media (max-height:640px){.bk-icon{width:44px;height:44px}.bk-name,.bk-pole{display:none}.platz{width:74px}.platz svg{width:32px;height:32px}.karte .portrait{width:26%}.kopf{padding-top:.2rem}}
+@media (max-width:400px){.bk-pole{display:none}}
+@media (max-height:640px){.bk-icon{width:44px;height:44px}.bk-pole{display:none}.platz{width:74px}.platz svg{width:32px;height:32px}.karte .portrait{width:26%}.kopf{padding-top:.2rem}}
 @media (min-width:900px){.buehne{padding-top:.6rem}.tisch{gap:.6rem}.platz{width:104px}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 body.ruhig *{animation-duration:.01ms!important;transition-duration:.01ms!important}

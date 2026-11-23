@@ -931,7 +931,7 @@
   }
   function zeichneBalken(vorschau) {
     const box = $("#balken");
-    if (!box.children.length) box.innerHTML = BALKEN.map(b => '<div class="bk" data-k="' + b.k + '" title="' + b.name + ': ' + b.lo + ' ↔ ' + b.hi + '"><div class="bk-punkt"></div><div class="bk-icon"></div><div class="bk-skala"><div class="zone"></div><div class="wert"></div></div><div class="bk-pole"><span>' + b.lo + "</span><span>" + b.hi + '</span></div></div>').join("");
+    if (!box.children.length) box.innerHTML = BALKEN.map(b => '<div class="bk" data-k="' + b.k + '" title="' + b.name + ': ' + b.lo + ' ↔ ' + b.hi + '"><div class="bk-punkt"></div><div class="bk-icon"></div><div class="bk-name">' + b.name + '</div><div class="bk-skala"><div class="zone"></div><div class="wert"></div></div><div class="bk-pole"><span>' + b.lo + "</span><span>" + b.hi + '</span></div></div>').join("");
     if (!RUN) return;
     for (const b of BALKEN) {
       const el = box.querySelector('[data-k="' + b.k + '"]'), v = RUN.b[b.k];
