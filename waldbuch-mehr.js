@@ -195,8 +195,7 @@
   }
   function fotoGross(src, titel) {
     if (!src || src.endsWith("/")) return;
-    const d = document.createElement("div"); d.className = "lupe"; d.innerHTML = '<img src="' + src + '" alt=""><div class="text"><b>' + esc(titel) + '</b>Dein eigenes Foto</div><button class="zu" aria-label="Schließen">✕</button>';
-    d.addEventListener("click", () => d.remove()); document.body.appendChild(d);
+    W.bildLupe([{ src, titel, asp: "Dein eigenes Foto" }], 0);
   }
 
   /* ---------- Fundbuch-Seite ---------- */
@@ -398,7 +397,7 @@
     const fotos = W.bilderVon(ziel.id).filter(b => b.a !== "spur"), foto = fotos[Math.floor(Math.random() * fotos.length)] || W.bilderVon(ziel.id)[0];
     const st = S.paare[p.k] || { s: 0 };
     const opts = mischen([ziel, anderes]);
-    feld.innerHTML = '<div class="karte-lern pruef"><div class="frage">Welches von beiden ist das?</div><div class="fbild"><img src="pflanzen/bilder/' + foto.f + '" alt="Prüfungsbild"></div><p class="leise" style="text-align:center;margin:.3rem 0">' + esc(({ haupt: "Übersicht", habitus: "Wuchs", blatt: "Blatt", rinde: "Rinde", bluete: "Blüte", frucht: "Frucht", knospe: "Knospe", unterseite: "Unterseite", schnitt: "Schnitt", jung: "jung" })[foto.a] || "Foto") + ' · Serie: <span class="serie-punkte">' + "●".repeat(st.s || 0) + "○".repeat(3 - (st.s || 0)) + '</span></p><div class="antworten">' + opts.map((x, i) => '<button data-i="' + i + '">' + esc(x.de) + "</button>").join("") + '</div><div class="erklaerung" id="pruef-erkl"></div></div>';
+    feld.innerHTML = '<div class="karte-lern pruef"><div class="frage">Welches von beiden ist das?</div>' + W.fotoKarussell(ziel.id, false, W.bilderVon(ziel.id).indexOf(foto)) + '<p class="leise" style="text-align:center;margin:.3rem 0">Serie: <span class="serie-punkte">' + "●".repeat(st.s || 0) + "○".repeat(3 - (st.s || 0)) + '</span></p><div class="antworten">' + opts.map((x, i) => '<button data-i="' + i + '">' + esc(x.de) + "</button>").join("") + '</div><div class="erklaerung" id="pruef-erkl"></div></div>';
     let fertig = false;
     feld.querySelectorAll(".antworten button").forEach(b => b.addEventListener("click", () => {
       if (fertig) return; fertig = true;

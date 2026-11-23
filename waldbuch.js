@@ -284,16 +284,144 @@
     if (window.WB_MEHR) { WB_MEHR.art(a); WB_MEHR.tonVerdrahten($("#seite")); }
     const h = $("#haupt"); if (h && B.length) { const auf = () => lupe(a, B, aktuellesBild); h.addEventListener("click", auf); h.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); auf(); } }); }
   }
-  function lupe(a, B, i) {
-    const d = document.createElement("div"); d.className = "lupe"; d.setAttribute("role", "dialog"); d.setAttribute("aria-modal", "true");
-    const zeig = () => { const b = B[i]; d.innerHTML = '<img src="pflanzen/bilder/' + b.f + '" alt="' + esc(a.de) + '"><div class="text"><b>' + esc(a.de + " – " + (ASPEKT[b.a] || "")) + "</b>" + (b.beschr ? esc(b.beschr.slice(0, 200)) + "<br>" : "") + "Foto: " + esc(b.autor) + " · <a href=\"" + esc(b.lizenzurl || b.quelle) + '" target="_blank" rel="noopener">' + esc(b.lizenz) + '</a> · <a href="' + esc(b.quelle) + '" target="_blank" rel="noopener">Quelle</a></div><button class="zu" aria-label="Schließen">✕</button>' + (B.length > 1 ? '<button class="zur" aria-label="Vorheriges">‹</button><button class="vor" aria-label="Nächstes">›</button>' : ""); };
+  function lupe(a, B, i) { bildLupe(lupenListe(a.id, true), i); }
+
+  /* ---------- Bildlupe: Zoomen (Finger, Doppeltipp, Mausrad, +/−) und Blättern ---------- */
+  function lupenListe(id, mitName) {
+    return bilderVon(id).map(b => ({ src: "pflanzen/bilder/" + b.f, asp: ASPEKT[b.a] || "", titel: mitName ? ART[id].de : "", beschr: mitName ? b.beschr : "", autor: b.autor, lizenz: b.lizenz, lizenzurl: b.lizenzurl, quelle: mitName ? b.quelle : "", hd: hdUrl(b.quelle) }));
+  }
+  // Schärferes Original von Wikimedia Commons fürs Hineinzoomen (online); offline bleibt das eingebaute Foto.
+  function hdUrl(q) {
+    const m = /\/wiki\/File:(.+)$/.exec(q || ""); if (!m) return "";
+    let n = m[1]; try { n = decodeURIComponent(n); } catch (e) {}
+    return "https://commons.wikimedia.org/wiki/Special:FilePath/" + encodeURIComponent(n) + "?width=2200";
+  }
+  function bildLupe(L, i) {
+    if (!L.length) return;
+    const vorher = document.activeElement;
+    const d = document.createElement("div"); d.className = "lupe zoombar"; d.setAttribute("role", "dialog"); d.setAttribute("aria-modal", "true"); d.setAttribute("aria-label", "Bild vergrößert");
+    d.innerHTML = '<div class="zoom-flaeche"><img alt="" draggable="false"></div><div class="text"></div>' +
+      '<div class="zoom-knoepfe"><button class="zoom-minus" aria-label="Verkleinern">−</button><button class="zoom-eins" aria-label="Ganzes Bild">⤢</button><button class="zoom-plus" aria-label="Vergrößern">+</button></div>' +
+      '<button class="zu" aria-label="Schließen">✕</button>' + (L.length > 1 ? '<button class="zur" aria-label="Vorheriges Bild">‹</button><button class="vor" aria-label="Nächstes Bild">›</button>' : "");
+    const fl = d.querySelector(".zoom-flaeche"), img = fl.querySelector("img"), tx = d.querySelector(".text");
+    let s = 1, x = 0, y = 0;
+    const MAX = 6;
+    const grenzen = () => {
+      const mx = Math.max(0, (img.offsetWidth * s - fl.clientWidth) / 2), my = Math.max(0, (img.offsetHeight * s - fl.clientHeight) / 2);
+      x = Math.max(-mx, Math.min(mx, x)); y = Math.max(-my, Math.min(my, y));
+    };
+    const setz = sanft => { grenzen(); img.style.transition = sanft ? "transform .22s ease-out" : "none"; img.style.transform = "translate(" + x + "px," + y + "px) scale(" + s + ")"; d.classList.toggle("gezoomt", s > 1.01); if (s > 1.5) hdHolen(); };
+    const punkt = (cx, cy) => { const r = fl.getBoundingClientRect(); return [cx - r.left - r.width / 2, cy - r.top - r.height / 2]; };
+    const zoomAuf = (ns, px, py, sanft) => { ns = Math.max(1, Math.min(MAX, ns)); const ux = (px - x) / s, uy = (py - y) / s; s = ns; x = px - ux * s; y = py - uy * s; if (s === 1) { x = 0; y = 0; } setz(sanft); };
+    let hdGeladen = false, nr = 0;
+    const einpassen = () => {
+      const nw = img.naturalWidth, nh = img.naturalHeight; if (!nw || !nh || img.dataset.hd) { if (!img.dataset.hd) return; }
+      const cs = getComputedStyle(fl), aw = fl.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 10, ah = fl.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 10;
+      const rw = +img.dataset.rw || nw, rh = +img.dataset.rh || nh, f = Math.min(aw / rw, ah / rh);
+      img.style.width = Math.round(rw * f) + "px"; img.style.height = Math.round(rh * f) + "px"; setz(false);
+    };
+    const hdHolen = () => {
+      const b = L[i]; if (hdGeladen || !b.hd || !navigator.onLine) return; hdGeladen = true;
+      const meins = nr, h = new Image();
+      h.onload = () => { if (meins !== nr || !h.naturalWidth) return; img.dataset.hd = "1"; img.src = h.src; d.classList.add("scharf"); };
+      h.src = b.hd;
+    };
+    const zeig = () => {
+      const b = L[i]; s = 1; x = 0; y = 0; nr++; hdGeladen = false; d.classList.remove("scharf");
+      delete img.dataset.hd; delete img.dataset.rw; delete img.dataset.rh; img.style.width = img.style.height = "";
+      setz(false); img.src = b.src;
+      tx.innerHTML = "<b>" + esc((b.titel ? b.titel + (b.asp ? " – " : "") : "") + (b.asp || (b.titel ? "" : "Foto"))) + (L.length > 1 ? ' <small>' + (i + 1) + " / " + L.length + "</small>" : "") + "</b>" +
+        (b.beschr ? esc(String(b.beschr).slice(0, 200)) + "<br>" : "") +
+        (b.autor ? "Foto: " + esc(b.autor) + " · " + (b.lizenzurl ? '<a href="' + esc(b.lizenzurl) + '" target="_blank" rel="noopener">' + esc(b.lizenz) + "</a>" : esc(b.lizenz || "")) + (b.quelle ? ' · <a href="' + esc(b.quelle) + '" target="_blank" rel="noopener">Quelle</a>' : "") : "") +
+        '<span class="zoom-tipp">Mit zwei Fingern oder Doppeltipp zoomen' + (L.length > 1 ? ", wischen zum Blättern" : "") + "</span>";
+    };
+    const blaettern = n => { if (L.length < 2) return; i = (i + n + L.length) % L.length; zeig(); };
+    const zu = () => { d.remove(); document.removeEventListener("keydown", taste); window.removeEventListener("resize", groesse); if (vorher && vorher.focus) vorher.focus(); };
+    const taste = e => { if (e.key === "Escape") zu(); else if (e.key === "ArrowRight") blaettern(1); else if (e.key === "ArrowLeft") blaettern(-1); else if (e.key === "+" || e.key === "=") zoomAuf(s * 1.5, 0, 0, true); else if (e.key === "-") zoomAuf(s / 1.5, 0, 0, true); };
+    // Finger & Maus
+    const P = new Map(); let start = null, letzterTipp = 0, bewegt = false;
+    fl.addEventListener("pointerdown", e => {
+      fl.setPointerCapture(e.pointerId); P.set(e.pointerId, [e.clientX, e.clientY]); bewegt = false;
+      const pts = [...P.values()];
+      if (pts.length === 1) start = { typ: 1, cx: e.clientX, cy: e.clientY, x, y, t: Date.now() };
+      else if (pts.length === 2) { const [a, b] = pts; start = { typ: 2, dist: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, s, mid: punkt((a[0] + b[0]) / 2, (a[1] + b[1]) / 2), x, y }; }
+    });
+    fl.addEventListener("pointermove", e => {
+      if (!P.has(e.pointerId) || !start) return;
+      P.set(e.pointerId, [e.clientX, e.clientY]);
+      const pts = [...P.values()];
+      if (start.typ === 2 && pts.length >= 2) {
+        const [a, b] = pts, dist = Math.hypot(a[0] - b[0], a[1] - b[1]), mid = punkt((a[0] + b[0]) / 2, (a[1] + b[1]) / 2);
+        const ns = Math.max(1, Math.min(MAX, start.s * dist / start.dist));
+        const ux = (start.mid[0] - start.x) / start.s, uy = (start.mid[1] - start.y) / start.s;
+        s = ns; x = mid[0] - ux * s; y = mid[1] - uy * s; bewegt = true; setz(false);
+      } else if (start.typ === 1) {
+        const dx = e.clientX - start.cx, dy = e.clientY - start.cy;
+        if (Math.abs(dx) + Math.abs(dy) > 8) bewegt = true;
+        if (s > 1.01) { x = start.x + dx; y = start.y + dy; setz(false); }
+        else if (L.length > 1) { img.style.transition = "none"; img.style.transform = "translateX(" + dx + "px)"; }
+      }
+    });
+    const hoch = e => {
+      if (!P.has(e.pointerId)) return;
+      P.delete(e.pointerId);
+      if (start && start.typ === 2) { if (P.size === 1) { const [p] = [...P.values()]; start = { typ: 1, cx: p[0], cy: p[1], x, y, t: Date.now() }; bewegt = true; } else start = null; return; }
+      if (!start) return;
+      const dx = e.clientX - start.cx;
+      if (s <= 1.01 && L.length > 1 && Math.abs(dx) > 60 && bewegt) { blaettern(dx < 0 ? 1 : -1); start = null; return; }
+      if (s <= 1.01) setz(true);
+      if (!bewegt) {
+        const jetzt = Date.now();
+        if (jetzt - letzterTipp < 320) { letzterTipp = 0; const [px, py] = punkt(e.clientX, e.clientY); zoomAuf(s > 1.01 ? 1 : 2.5, px, py, true); }
+        else { letzterTipp = jetzt; if (e.target !== img && s <= 1.01) setTimeout(() => { if (letzterTipp === jetzt) zu(); }, 330); }
+      }
+      start = null;
+    };
+    fl.addEventListener("pointerup", hoch); fl.addEventListener("pointercancel", hoch);
+    fl.addEventListener("wheel", e => { e.preventDefault(); const [px, py] = punkt(e.clientX, e.clientY); zoomAuf(s * (e.deltaY < 0 ? 1.25 : 0.8), px, py, false); }, { passive: false });
+    d.addEventListener("click", e => {
+      const k = e.target.closest("button"); if (!k) return;
+      if (k.classList.contains("zu")) zu(); else if (k.classList.contains("vor")) blaettern(1); else if (k.classList.contains("zur")) blaettern(-1);
+      else if (k.classList.contains("zoom-plus")) zoomAuf(s * 1.6, 0, 0, true); else if (k.classList.contains("zoom-minus")) zoomAuf(s / 1.6, 0, 0, true); else if (k.classList.contains("zoom-eins")) zoomAuf(1, 0, 0, true);
+    });
+    img.addEventListener("load", () => { if (!img.dataset.hd) { img.dataset.rw = img.naturalWidth; img.dataset.rh = img.naturalHeight; } einpassen(); });
+    const groesse = () => einpassen(); window.addEventListener("resize", groesse);
     zeig();
-    const zu = () => { d.remove(); document.removeEventListener("keydown", taste); };
-    const taste = e => { if (e.key === "Escape") zu(); if (e.key === "ArrowRight") { i = (i + 1) % B.length; zeig(); } if (e.key === "ArrowLeft") { i = (i - 1 + B.length) % B.length; zeig(); } };
-    d.addEventListener("click", e => { if (e.target === d || e.target.classList.contains("zu")) zu(); else if (e.target.classList.contains("vor")) { i = (i + 1) % B.length; zeig(); } else if (e.target.classList.contains("zur")) { i = (i - 1 + B.length) % B.length; zeig(); } });
     document.addEventListener("keydown", taste);
     document.body.appendChild(d);
+    d.querySelector(".zu").focus({ preventScroll: true });
   }
+
+  /* Fotostreifen im Rätsel: alle Fotos einer Art, antippen = vergrößern. Ohne Namen, damit nichts verraten wird. */
+  function fotoKarussell(id, mitName, start) {
+    const B = bilderVon(id); if (!B.length) return "";
+    const i0 = Math.max(0, Math.min(B.length - 1, start || 0));
+    return '<div class="fbild karussell" data-id="' + id + '"' + (mitName ? ' data-name="1"' : "") + ' data-i="' + i0 + '">' +
+      '<div class="fb-rahmen"><img src="pflanzen/bilder/' + B[i0].f + '" alt="Rätselbild – antippen zum Vergrößern"><span class="fb-asp">' + esc(ASPEKT[B[i0].a] || "Foto") + "</span>" +
+      '<button class="fb-lupe" aria-label="Vergrößern">🔍</button>' +
+      (B.length > 1 ? '<button class="fb-zur" aria-label="Vorheriges Bild">‹</button><button class="fb-vor" aria-label="Nächstes Bild">›</button>' : "") + "</div>" +
+      (B.length > 1 ? '<div class="fb-leiste">' + B.map((b, j) => '<button class="fb-mini' + (j === i0 ? " an" : "") + '" data-j="' + j + '" aria-label="Bild ' + (j + 1) + ": " + esc(ASPEKT[b.a] || "Foto") + '"><img src="pflanzen/bilder/' + b.f + '" alt="" loading="lazy"></button>').join("") + "</div>" : "") + "</div>";
+  }
+  function karussellSetzen(k, j) {
+    const B = bilderVon(k.dataset.id); if (!B.length) return;
+    j = (j + B.length) % B.length; k.dataset.i = j;
+    k.querySelector(".fb-rahmen img").src = "pflanzen/bilder/" + B[j].f;
+    k.querySelector(".fb-asp").textContent = ASPEKT[B[j].a] || "Foto";
+    k.querySelectorAll(".fb-mini").forEach((m, n) => m.classList.toggle("an", n === j));
+  }
+  function bildwahlLupe(id) { return '<span class="bw-lupe" role="button" tabindex="0" data-zoom-id="' + id + '" aria-label="Alle Fotos vergrößern">🔍<small>' + bilderVon(id).length + "</small></span>"; }
+  // Ein Zuhörer für alle Rätsel (Lernkiste, Spürnase, Prüfung)
+  document.addEventListener("click", e => {
+    const z = e.target.closest("[data-zoom-id]");
+    if (z) { e.preventDefault(); e.stopPropagation(); bildLupe(lupenListe(z.dataset.zoomId, false), 0); return; }
+    const k = e.target.closest(".karussell"); if (!k) return;
+    const i = +k.dataset.i || 0;
+    if (e.target.closest(".fb-vor")) karussellSetzen(k, i + 1);
+    else if (e.target.closest(".fb-zur")) karussellSetzen(k, i - 1);
+    else if (e.target.closest(".fb-mini")) karussellSetzen(k, +e.target.closest(".fb-mini").dataset.j);
+    else if (e.target.closest(".fb-lupe") || e.target.closest(".fb-rahmen img")) bildLupe(lupenListe(k.dataset.id, !!k.dataset.name), i);
+  }, true);
+  document.addEventListener("keydown", e => { const z = e.target.closest && e.target.closest("[data-zoom-id]"); if (z && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); e.stopPropagation(); bildLupe(lupenListe(z.dataset.zoomId, false), 0); } }, true);
 
   /* ---------- Bestimmen ---------- */
   let bestTag = new Set(), bestText = "", bestGruppe = "pflanze";
@@ -389,7 +517,7 @@
         const was = a.kap === "pilz" ? "Wann erscheinen die Fruchtkörper von" : a.kap === "tier" ? "Wann kommen die Jungen von" : "Wann blüht";
         const mitte = arr[Math.floor(arr.length / 2)];
         const opts = [mitte]; while (opts.length < 4) { const m = 1 + Math.floor(Math.random() * 12); if (!arr.includes(m) && !opts.includes(m)) opts.push(m); }
-        f.frage = was + " " + a.de + "?"; f.bild = hauptbild(a.id); f.antworten = opts.sort((x, y) => x - y).map(m => ({ de: MONATE[m - 1], m })); f.richtig = f.antworten.findIndex(o => o.m === mitte); f.erkl = (a.kap === "pilz" ? "Fruchtkörper: " : a.kap === "tier" ? "Jungtiere: " : "Blüte: ") + arr.map(m => MONATE[m - 1]).join(", "); f.modus = modus; return f;
+        f.frage = was + " " + a.de + "?"; f.bild = hauptbild(a.id); f.bildId = a.id; f.bildName = true; f.antworten = opts.sort((x, y) => x - y).map(m => ({ de: MONATE[m - 1], m })); f.richtig = f.antworten.findIndex(o => o.m === mitte); f.erkl = (a.kap === "pilz" ? "Fruchtkörper: " : a.kap === "tier" ? "Jungtiere: " : "Blüte: ") + arr.map(m => MONATE[m - 1]).join(", "); f.modus = modus; return f;
       }
     }
     if (modus === "merkmal") {
@@ -400,11 +528,12 @@
       f.frage = "„" + n + ": " + text + "“"; f.antworten = [a].concat(falsche(a, 3, true)).sort(() => Math.random() - .5); f.richtig = f.antworten.indexOf(a); f.erkl = a.de + " – " + a.k; f.modus = modus; return f;
     }
     if (modus === "bild") { f.frage = "Zeig mir: " + a.de; f.antworten = [a].concat(falsche(a, 3, true)).sort(() => Math.random() - .5); f.richtig = f.antworten.indexOf(a); f.bildwahl = true; f.erkl = a.k; f.modus = modus; return f; }
-    f.frage = "Wer bin ich?"; f.bild = hauptbild(a.id); f.antworten = [a].concat(falsche(a, 3, true)).sort(() => Math.random() - .5); f.richtig = f.antworten.indexOf(a); f.erkl = a.k; f.modus = "name"; return f;
+    f.frage = "Wer bin ich?"; f.bild = hauptbild(a.id); f.bildId = a.id; f.antworten = [a].concat(falsche(a, 3, true)).sort(() => Math.random() - .5); f.richtig = f.antworten.indexOf(a); f.erkl = a.k; f.modus = "name"; return f;
   }
+  function raetselBild(f) { return f.bildId ? fotoKarussell(f.bildId, !!f.bildName) : f.bild ? '<div class="fbild"><img src="' + f.bild + '" alt="Rätselbild"></div>' : ""; }
   function frageHtml(f) {
-    return '<div class="karte-lern' + (f.sinn ? " sinn" : "") + '"><div class="frage">' + esc(f.frage) + "</div>" + (f.ton && window.WB_MEHR ? WB_MEHR.tonKnopf(f) : "") + (f.bild ? '<div class="fbild"><img src="' + f.bild + '" alt="Rätselbild"></div>' : "") +
-      '<div class="antworten' + (f.bildwahl ? " bilder" : "") + '">' + f.antworten.map((x, i) => f.bildwahl ? '<button class="bildwahl" data-i="' + i + '" aria-label="Bild ' + (i + 1) + '"><img src="' + (hauptbild(x.id) || "") + '" alt=""></button>' : '<button data-i="' + i + '">' + esc(x.de) + "</button>").join("") + '</div><div class="erklaerung" id="erkl"></div></div>';
+    return '<div class="karte-lern' + (f.sinn ? " sinn" : "") + '"><div class="frage">' + esc(f.frage) + "</div>" + (f.ton && window.WB_MEHR ? WB_MEHR.tonKnopf(f) : "") + raetselBild(f) +
+      '<div class="antworten' + (f.bildwahl ? " bilder" : "") + '">' + f.antworten.map((x, i) => f.bildwahl ? '<button class="bildwahl" data-i="' + i + '" aria-label="Bild ' + (i + 1) + '"><img src="' + (hauptbild(x.id) || "") + '" alt="">' + bildwahlLupe(x.id) + "</button>" : '<button data-i="' + i + '">' + esc(x.de) + "</button>").join("") + '</div><div class="erklaerung" id="erkl"></div></div>';
   }
   function lernRunde() {
     const feld = $("#lernfeld"); if (!feld) return;
@@ -527,7 +656,7 @@
   window.addEventListener("hashchange", route);
 
   /* ---------- Öffentliche Schnittstelle fürs Spiel ---------- */
-  window.WB = { ARTEN, ART, KAPITEL, MONATE, heuteMonat, bilderVon, hauptbild, bildFuer, bildHtml, spurSvg, frageBauen, frageHtml, falsche, STAND, speichern, Ton, esc, toast, bestimme, seite, route, register };
+  window.WB = { ARTEN, ART, KAPITEL, MONATE, heuteMonat, bilderVon, hauptbild, bildFuer, bildHtml, spurSvg, frageBauen, frageHtml, falsche, bildLupe, lupenListe, fotoKarussell, raetselBild, bildwahlLupe, STAND, speichern, Ton, esc, toast, bestimme, seite, route, register };
 
   fetch("pflanzen/bilder.json").then(r => r.ok ? r.json() : {}).catch(() => ({})).then(j => { BILDER = j || {}; route(); });
 })();
