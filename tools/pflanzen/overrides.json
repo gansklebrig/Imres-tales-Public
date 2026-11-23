@@ -1,12 +1,14 @@
 {
  "adlerfarn": {
   "minus": [
-   "File:Fougère gros plan.jpg"
+   "File:Fougère gros plan.jpg",
+   "File:Lothar Path - Black Forest National Park - Pteridium aquilinum 01.jpg"
   ]
  },
  "alpenrose": {
   "minus": [
-   "File:Sienes dl Tëune sun Danter la Montes Resciesa Gherdëina .jpg"
+   "File:Sienes dl Tëune sun Danter la Montes Resciesa Gherdëina .jpg",
+   "File:Pastura de Resciesa cun ciavei tëunesc y Odles Gherdëina.jpg"
   ]
  },
  "arnika": {
@@ -14,21 +16,40 @@
    "File:Arnica montana MHNT.BOT.2011.18.5.jpg"
   ]
  },
+ "aronstab": {
+  "minus": [
+   "File:Arum maculatum (26447741523).jpg",
+   "File:BTurm Unna 20190501 5.jpg"
+  ]
+ },
  "austernseitling": {
   "minus": [
    "File:Pleurotus ostreatus (Oyster Mushroom, D= Austernseitling, F= Pleurote en forme d'huître ou P. en coquille, NL= Gewone oesterzwam) white spores and causes white rot, young and grown up at Chestnut trees (kastanjebomen) - panoramio.jpg",
-   "File:Pleurotus ostreatus (Oyster Mushroom, D= Austernseitling, F= Pleurote en forme d'huître ou P. en coquille, NL= Gewone oesterzwam) white spores and causes white rot. At the same spot of the photo from 3 years ago (see l - panoramio.jpg"
+   "File:Pleurotus ostreatus (Oyster Mushroom, D= Austernseitling, F= Pleurote en forme d'huître ou P. en coquille, NL= Gewone oesterzwam) white spores and causes white rot. At the same spot of the photo from 3 years ago (see l - panoramio.jpg",
+   "File:Pleurotus ostreatus 1848.jpg",
+   "File:Pleurotus ostreatus (Oyster Mushroom, D= Austernseitling, F= Pleurote en forme d'huître ou P. en coquille, NL= Gewone oesterzwam) white spores and causes white rot, in a normal grey and a rare light brown variant toget - panoramio.jpg",
+   "File:Pleurotus ostreatus (Oyster Mushroom, D= Austernseitling, F= Pleurote en forme d'huître ou P. en coquille, NL= Gewone oesterzwam) white spores and causes white rot, at the Parkweg in lots of hail and ice after a frosty - panoramio.jpg",
+   "File:Entzia - Tronco 02.jpg"
   ]
  },
  "bartflechte": {
   "minus": [
-   "File:Lichen floridus — Flora Batava — Volume v11.jpg"
+   "File:Lichen floridus — Flora Batava — Volume v11.jpg",
+   "File:Vereda Caniçal-Boca do Risco, Parque Natural da Madeira - 2018-04-08 - IMG 3638.jpg",
+   "File:Vereda Caniçal-Boca do Risco, Parque Natural da Madeira - 2018-04-08 - IMG 3625.jpg",
+   "File:Vereda Caniçal-Boca do Risco, Parque Natural da Madeira - 2018-04-08 - IMG 3610.jpg",
+   "File:Albeck Seebachern Lärchen am Fahrweg zum Anderle Kreuz 22112017 2111.jpg"
   ]
  },
  "baummarder": {
   "minus": [
    "File:Martes martes (Pine marten) & Martes foina (Beach marten) fur skins.jpg",
-   "File:Martes martes 03 MWNH 846.jpg"
+   "File:Martes martes 03 MWNH 846.jpg",
+   "File:Marder on Tour.jpg",
+   "File:Edles Pelzwerk - Vierfüßige Tiere Quadruped IX.(2).jpg",
+   "File:Mård som retat kråkor.jpg",
+   "File:Marder1.JPG",
+   "File:European pine marten (Martes martes) Drenthe.jpg"
   ]
  },
  "beinwell": {
@@ -38,10 +59,35 @@
    "File:Symphytum officinale (s. str.) sl2.jpg"
   ]
  },
+ "berberitze": {
+  "minus": [
+   "File:Blooming barberry (Berberis vulgaris 'Atropurpurea').jpg",
+   "File:Alnarp (Sweden) - Berberis orientalis.jpg",
+   "File:Berberis vulgaris TK 2023-10-23 1.jpg",
+   "File:Babí léto, Česká Lípa Špičák.jpg",
+   "File:Berberis vulgaris in Jardin des Plantes de Toulouse.jpg"
+  ]
+ },
  "bergulme": {
   "minus": [
    "File:Tree stumps in Stockholm in June 2020 (2 av 3).jpg",
-   "File:Tree stumps in Stockholm in June 2020 (3 av 3).jpg"
+   "File:Tree stumps in Stockholm in June 2020 (3 av 3).jpg",
+   "File:Wych Elm (Ulmus glabra) fallen leaves - Oslo, Norway 2020-12-23.jpg"
+  ]
+ },
+ "biber": {
+  "minus": [
+   "File:Passage Castor fiber Ardennes 0021.JPG",
+   "File:The actual Beaverslide.jpg",
+   "File:Passage Castor fiber Ardennes 0019.JPG",
+   "File:Kalter-Gang-Pellendorf-north.JPG",
+   "File:Biberburg an der Briese.jpg"
+  ]
+ },
+ "birkenpilz": {
+  "minus": [
+   "File:Mushroom Säppi.jpg",
+   "File:Leccinum scabrum all angles and cut.jpg"
   ]
  },
  "breitwegerich": {
@@ -51,57 +97,108 @@
    "File:Broadleaf plantain in the middle of road 162, Brastad.jpg"
   ]
  },
+ "brennnessel": {
+  "minus": [
+   "File:Urtica dioica kz3.JPG",
+   "File:След от выкопанной железной трубы в заброшенных садах у Кургана Бессмертия.jpg",
+   "File:Gooseberry and Nettle plants.jpg"
+  ]
+ },
  "brombeere": {
   "minus": [
-   "File:Rubi fruticosi folium 119245.jpg"
+   "File:Rubi fruticosi folium 119245.jpg",
+   "File:Barbaira - Château de Miramont 06.jpg",
+   "File:Семя ежевики.jpg",
+   "File:Radevormwald - Rubus fruticosus 01 ies ies.jpg"
   ]
  },
  "brunnenkresse": {
   "minus": [
    "File:Anbau Brunnenkresse Erfurt.jpg",
-   "File:Nasturtium officinale (s. str.) sl43.jpg"
+   "File:Nasturtium officinale (s. str.) sl43.jpg",
+   "File:ကန်ဇွန်းရွက်.jpg"
   ]
  },
  "buntspecht": {
   "minus": [
    "File:Dendrocopos major MHNT 232.jpg",
-   "File:Dendrocopos minor 291108.jpg"
+   "File:Dendrocopos minor 291108.jpg",
+   "File:Great Spotted Woodpecker - Dendrocopos major - Juvenile (54573078746).jpg",
+   "File:Woodpecker in an oak tree 01.jpg"
   ]
  },
  "buschwindroeschen": {
   "minus": [
-   "File:Anemone nemorosa sl39.jpg"
+   "File:Anemone nemorosa sl39.jpg",
+   "File:Following the sun... On \"Explore\" - Flickr - Many thanks for all your likes and comments. Great.jpg"
   ]
  },
  "dachs": {
   "minus": [
-   "File:N24 Beckerich – barrage partiel pour terrier de blaireau 2019f.jpg"
+   "File:N24 Beckerich – barrage partiel pour terrier de blaireau 2019f.jpg",
+   "File:Борсук (cropped).jpg",
+   "File:European badger (Meles meles taxus) Drenthe.jpg",
+   "File:N24 Beckerich – barrage partiel pour terrier de blaireau 2019a.jpg",
+   "File:N24 Beckerich – barrage partiel pour terrier de blaireau 2019d.jpg",
+   "File:N24 Beckerich – barrage partiel pour terrier de blaireau 2019e.jpg"
+  ]
+ },
+ "dost": {
+  "minus": [
+   "File:Origanum vulgare young plant 2.JPG",
+   "File:Oregano (Origanum vulgaris) Blattverfärbung--Josef Schlaghecken.jpg"
   ]
  },
  "eberesche": {
   "minus": [
    "File:Sorbus aucuparia Tauerntal 20220824.jpg",
-   "File:Vogelbeerenbaum auf Pitzberg Seiseralm.jpg"
+   "File:Vogelbeerenbaum auf Pitzberg Seiseralm.jpg",
+   "File:Lijsterbes (Sorbus). 31-03-2024 (d.j.b.) 02.jpg"
   ]
  },
  "edelkastanie": {
   "minus": [
-   "File:Tronco de Castanea sativa.Trasalba. Amoeiro. Galiza.jpg"
+   "File:Tronco de Castanea sativa.Trasalba. Amoeiro. Galiza.jpg",
+   "File:Anaco de tronco partido á metade aínda vivo de Castanea Sativa. Trasalba. Amoeiro. Galiza.jpg"
+  ]
+ },
+ "efeu": {
+  "minus": [
+   "File:Hedera helix mit Reif Pernegg 20170128 03.jpg",
+   "File:Hedera helix mit Reif Pernegg 20170128 02.jpg",
+   "File:Hedera helix-Lierre-Bourgeon de Fleur-20200730.jpg",
+   "File:Hedera helix mit Reif Pernegg 20170128 01.jpg",
+   "File:2025-09-08 10 53 47 English ivy blooming along Alexander Road in West Windsor Township, Mercer County, New Jersey.jpg",
+   "File:Dülmen, Mauer am Wettebach -- 2026 -- 2194.jpg",
+   "File:Dülmen, Mauer am Wettebach -- 2026 -- 2192.jpg"
   ]
  },
  "eibe": {
   "minus": [
-   "File:Taxus, leaf, Etzold green 1.jpg"
+   "File:Taxus, leaf, Etzold green 1.jpg",
+   "File:Taxus uitgezaaid in een knotwilg. 28-07-2019. (d.j.b). 02.jpg",
+   "File:Taxus uitgezaaid in een knotwilg. 28-07-2019. (d.j.b). 06.jpg"
   ]
  },
  "eichhoernchen": {
   "minus": [
-   "File:Eastern Grey Squirrel in St James's Park, London - Nov 2006 edit.jpg"
+   "File:Eastern Grey Squirrel in St James's Park, London - Nov 2006 edit.jpg",
+   "File:Eichhörnchen(Sciuridae) Biosphärenreservat-Mittelelbe.jpg",
+   "File:DSC 0767Белочка на ветках 2 Дендропарк Новосибирск.png",
+   "File:DSC 0765Белочка на ветках 1 Дендропарк Новосибирск.png",
+   "File:Eichhörnchen in Mainz-Hechtsheim.jpg"
+  ]
+ },
+ "einbeere": {
+  "minus": [
+   "File:Paris quadrifolia kz05.jpg"
   ]
  },
  "eisenhut": {
   "minus": [
-   "File:Aconitum napellus MHNT.BOT.2007.52.9.jpg"
+   "File:Aconitum napellus MHNT.BOT.2007.52.9.jpg",
+   "File:Aconitum napellus 011.JPG",
+   "File:Puccinia actaeae-agropyri on Monk's-hood - Aconitum napellus (43516903374).jpg"
   ]
  },
  "elsbeere": {
@@ -111,24 +208,38 @@
  },
  "enzian": {
   "minus": [
-   "File:Stlupëc y ciuc sun Resciesa.jpg"
+   "File:Stlupëc y ciuc sun Resciesa.jpg",
+   "File:Gentiana acaulis L. 2.jpg",
+   "File:Gentiana acaulis L. 1.jpg"
   ]
  },
  "esche": {
   "minus": [
-   "File:Baum frisst Schild.JPG"
+   "File:Baum frisst Schild.JPG",
+   "File:Xanthoria parietina - Common yellow lichen - on a branch of an ash tree - Fraxinus excelsior - 01.jpg",
+   "File:Fraxinus excelsior sl5.jpg",
+   "File:Physcia stellaris together with Xanthoria parietina - on a branch of an ash tree - Fraxinus excelsior - 02.jpg"
+  ]
+ },
+ "falscherpfifferling": {
+  "minus": [
+   "File:Hygrophoropsis aurantiaca - Liesbos, Breda, North Brabant, NL (15131612236).jpg"
   ]
  },
  "faulbaum": {
   "minus": [
    "File:Frangulae cortex 060103.jpg",
    "File:Rhamnus frangula 14 ies.jpg",
-   "File:4 ant A4 Lapas medzio 600dpi.jpg"
+   "File:4 ant A4 Lapas medzio 600dpi.jpg",
+   "File:Frangula alnus subsp. baetica kz01.jpg",
+   "File:Frangula alnus 2018-07-06 3593.jpg"
   ]
  },
  "feldhase": {
   "minus": [
-   "File:Junghase mit inneren Verletzungen.jpg"
+   "File:Junghase mit inneren Verletzungen.jpg",
+   "File:European hare (Lepus europaeus) Marken 2.jpg",
+   "File:European hare (Lepus europaeus) suffers from myxomatosis sl1.jpg"
   ]
  },
  "felsenbirne": {
@@ -136,41 +247,80 @@
    "File:Amelanchier ovalis aux bourgeons débourrés.jpg"
   ]
  },
+ "fichte": {
+  "minus": [
+   "File:FirBud.jpg",
+   "File:Picea abies 001.jpg",
+   "File:Tak wond van een spar (Picea) bedekt met schimmel 01.jpg",
+   "File:Tree fungi in Val Vigezzo - Toceno VCO, Piedmont, Italy 2020-09-12.jpg"
+  ]
+ },
  "fichtenreizker": {
   "minus": [
-   "File:Lactarius scrobicolatus Grubiger Milchling Bula Gherdëina te bosch.jpg"
+   "File:Lactarius scrobicolatus Grubiger Milchling Bula Gherdëina te bosch.jpg",
+   "File:Edible fungi in basket 2025 G3.jpg",
+   "File:Edible fungi in basket 2025 G2.jpg"
+  ]
+ },
+ "fingerhut": {
+  "minus": [
+   "File:Digitalis purpurea 2020-09-18 2612.jpg"
   ]
  },
  "fischotter": {
   "minus": [
-   "File:Lutra lutra 03 MWNH 414.jpg"
+   "File:Lutra lutra 03 MWNH 414.jpg",
+   "File:Animal tracks; Lutra lutrara.jpg",
+   "File:Animal tracks; Lutra lutra; detail.jpg",
+   "File:Pacifastacus leniusculus 02 by-dpc.jpg"
   ]
  },
  "fliegenpilz": {
   "minus": [
-   "File:Reindeer in Ljungdalen 2012 02.jpg"
+   "File:Reindeer in Ljungdalen 2012 02.jpg",
+   "File:Amanita muscaria var. formosa pic 3.jpg",
+   "File:Amanita muscaria var. formosa pic 2.jpg",
+   "File:Amanita muscaria var. guessowii, large and small.jpg",
+   "File:Amanita muscaria - Ida Brennodden.png",
+   "File:Amanita muscaria var. formosa pic 1.jpg",
+   "File:Amanita muscaria var. guessowii, medium.jpg"
   ]
  },
  "frauentaeubling": {
   "minus": [
-   "File:Russula cutefracta-Cooke-2.jpg"
+   "File:Russula cutefracta-Cooke-2.jpg",
+   "File:Russula xyanoxantha. (31226596521).jpg",
+   "File:Russula cyanoxantha 438636541.jpg",
+   "File:Frauen-Täubling Russula cyanoxantha.jpg",
+   "File:Russula cyanoxantha 439373759.jpg",
+   "File:Frauentaeubling jung (3).jpg",
+   "File:Russula cutefracta-Cooke.jpg"
   ]
  },
  "fuchs": {
   "minus": [
-   "File:RenardCrâne.jpg"
+   "File:RenardCrâne.jpg",
+   "File:Black Fox Kit Stare (53610349382).jpg"
   ]
  },
  "gaemse": {
   "minus": [
-   "File:Gämse, Rupicapra rupicapra.JPG"
+   "File:Gämse, Rupicapra rupicapra.JPG",
+   "File:Hohneck (Réserve naturelle nationale de Frankenthal-Missheimle, Parc naturel régional des Ballons des Vosges) 01.jpg"
   ]
  },
  "gaensebluemchen": {
   "minus": [
    "File:Poster flowers 3 colours.jpg",
    "File:Nootjes van Madeliefje 2.jpg",
-   "File:Bellis perennis-Pâquerette-Feuilles-20160428.jpg"
+   "File:Bellis perennis-Pâquerette-Feuilles-20160428.jpg",
+   "File:Brühl 2024 - Mönchweiher und Gänseblümchen.jpg"
+  ]
+ },
+ "gallenroehrling": {
+  "minus": [
+   "File:Tylopilus felleus (36357248463).jpg",
+   "File:Катюжанський Гірчак DSC 0033.jpg"
   ]
  },
  "giersch": {
@@ -180,7 +330,11 @@
  },
  "gifthaeubling": {
   "minus": [
-   "File:Galerina marginata (10.3897-BDJ.12.e125727) Figure 2.jpg"
+   "File:Galerina marginata (10.3897-BDJ.12.e125727) Figure 2.jpg",
+   "File:Galerina marginata 390009089.jpg",
+   "File:Galerina marginata 63831.jpg",
+   "File:Galerinamarginata.jpg",
+   "File:Galerina marginata plages.jpg"
   ]
  },
  "glucke": {
@@ -190,24 +344,39 @@
  },
  "gruenerknollenblaetterpilz": {
   "minus": [
-   "File:Death cap (Amantia phalloides) spores.png"
+   "File:Death cap (Amantia phalloides) spores.png",
+   "File:Amanita phalloides, muscaria TK 2022-09-18 1.jpg",
+   "File:Amanita phalloides group.jpg"
   ]
  },
  "gundermann": {
   "minus": [
    "File:Verruigd biotoop. Locatie, natuurterrein Beekdal Linde Bekhofplas 01.jpg",
-   "File:Verruigd biotoop. Locatie, natuurterrein Beekdal Linde Bekhofplas 02.jpg"
+   "File:Verruigd biotoop. Locatie, natuurterrein Beekdal Linde Bekhofplas 02.jpg",
+   "File:1228 Wildblumen am Straßenrand am Weg \"Bei der Nordgeismarer Brücke\".jpg",
+   "File:1226 Wildblumen am Straßenrand am Weg \"Bei der Nordgeismarer Brücke\".jpg"
+  ]
+ },
+ "guterheinrich": {
+  "minus": [
+   "File:Plants from Passo Pordoi 14.jpg",
+   "File:Flower Wedding Master Files 0016.jpg"
   ]
  },
  "haarmuetzenmoos": {
   "minus": [
    "File:Wood sorrel and haircap moss.jpg",
-   "File:Leaves and reflections in a mossy puddle 3.jpg"
+   "File:Leaves and reflections in a mossy puddle 3.jpg",
+   "File:Björnnäset naturreservat - björnmossa.jpg",
+   "File:Leaves and reflections in a mossy puddle 5.jpg",
+   "File:Slope into Gullmarsskogen ravine 1.jpg",
+   "File:Haircap moss, Appalachian barren-strawberry in Vermont 033e.jpg"
   ]
  },
  "haengebirke": {
   "minus": [
-   "File:Betulae folium 126034.jpg"
+   "File:Betulae folium 126034.jpg",
+   "File:PIH 2018 Silver Birch (Betula pendula) sapling leaf bud in Haapastensyrjä Finland.jpg"
   ]
  },
  "hainbuche": {
@@ -215,9 +384,29 @@
    "File:Carpinus betulus1 cross beentree.jpg"
   ]
  },
+ "hallimasch": {
+  "minus": [
+   "File:Armillaria mellea20140913 120.jpg",
+   "File:Armillaria mellea, (12453140343).jpg",
+   "File:Honey Mushroom Button (4037073609).jpg",
+   "File:Armillaria mellea20140913 117.jpg"
+  ]
+ },
+ "hartriegel": {
+  "minus": [
+   "File:Cornus sanguinea 06.2025 (1).jpg",
+   "File:Cornus sanguinea 4 RF.jpg"
+  ]
+ },
  "hasel": {
   "minus": [
-   "File:Дерев'яно-кам'яна квітка у ліщинових пелюстках - 20261008 160739.jpg"
+   "File:Дерев'яно-кам'яна квітка у ліщинових пелюстках - 20261008 160739.jpg",
+   "File:Still-Leben Aprikosen und Haselnüsse 29072014 255.jpg"
+  ]
+ },
+ "heckenkirsche": {
+  "minus": [
+   "File:Atlas roslin pl Wiciokrzew pospolity 6941 7332.jpg"
   ]
  },
  "herbsttrompete": {
@@ -228,27 +417,46 @@
  },
  "herbstzeitlose": {
   "minus": [
-   "File:Bergtocht van Val Sinestra via Vnà naar Zuort. 16-09-2019. (actm.) 24.jpg"
+   "File:Bergtocht van Val Sinestra via Vnà naar Zuort. 16-09-2019. (actm.) 24.jpg",
+   "File:Bergtocht van Val Sinestra via Vnà naar Zuort. 16-09-2019. (actm.) 23.jpg",
+   "File:2026-11-03 Herbst in Hannover 0285.jpg",
+   "File:Gorbea - Camino Mairulegorreta 11.jpg"
   ]
  },
  "hexenroehrling": {
   "minus": [
-   "File:2004-11-14 Boletus erythropus var junquilleus crop.jpg"
+   "File:2004-11-14 Boletus erythropus var junquilleus crop.jpg",
+   "File:Ruhland, Ortrander Str. bei Hausnr. 9a, Flockenstieliger Hexenröhrling, kleiner Hexenring, Sommer 01.jpg"
+  ]
+ },
+ "himbeere": {
+  "minus": [
+   "File:Грицики - 20260715 153508.jpg"
+  ]
+ },
+ "hirtentaeschel": {
+  "minus": [
+   "File:Starr-141030-2732-Capsella bursa pastoris-habit-HVC HNP-Maui (25248280325).jpg"
   ]
  },
  "holunder": {
   "minus": [
-   "File:Echt judasoor (Auricularia auricula-judae) op een stam van een vlier. 15-02-2024. (actm.) 15-02-2024. (actm.).jpg"
+   "File:Echt judasoor (Auricularia auricula-judae) op een stam van een vlier. 15-02-2024. (actm.) 15-02-2024. (actm.).jpg",
+   "File:Pörtschach Winklern 10.-Oktober-Straße 67 Fensterbalken Holunder 21062024 1156.jpg",
+   "File:Stuttgart-Rotenberg IMG 2844.jpg"
   ]
  },
  "hopfen": {
   "minus": [
-   "File:Humulus lupulus 011.JPG"
+   "File:Humulus lupulus 011.JPG",
+   "File:Humulus lupulus kz26.jpg",
+   "File:Country Shower in LO.jpg"
   ]
  },
  "huflattich": {
   "minus": [
-   "File:Farfarae folium 107094.jpg"
+   "File:Farfarae folium 107094.jpg",
+   "File:097 Waldweg im Schmelzeberg, Winterstrauch.jpg"
   ]
  },
  "hundspetersilie": {
@@ -256,9 +464,16 @@
    "File:Aethusa cynapium seeds.jpg"
   ]
  },
+ "hundsrose": {
+  "minus": [
+   "File:Rosa canina, Rosaceae 03.jpg",
+   "File:Rosa canina plant (24).jpg"
+  ]
+ },
  "igel": {
   "minus": [
-   "File:Bubo bubo winter 1.jpg"
+   "File:Bubo bubo winter 1.jpg",
+   "File:Baby Erinaceus europaeus (14).jpg"
   ]
  },
  "johanniskraut": {
@@ -270,7 +485,8 @@
  "judasohr": {
   "minus": [
    "File:Auricularia auricula-judae (Jelly Ear, D= Judasohr, Chinamorchel, F= Oreille de Judas, NL= Echt Judasoor) white spores and cause white rot, on a beechbranch at Hoge Erf Schaarsbergen - panoramio.jpg",
-   "File:Auricularia auricula-judae (Jelly Ear, D= Judasohr, Chinamorchel, F= Oreille de Judas, NL= Echt Judasoor) white spores and cause white rot, at Vlier trees, a typical tree for this mushroom - panoramio.jpg"
+   "File:Auricularia auricula-judae (Jelly Ear, D= Judasohr, Chinamorchel, F= Oreille de Judas, NL= Echt Judasoor) white spores and cause white rot, at Vlier trees, a typical tree for this mushroom - panoramio.jpg",
+   "File:Auricularia auricula-judae (Jelly Ear, D= Judasohr, Chinamorchel, F= Oreille de Judas, NL= Echt Judasoor) white spores and cause white rot, on a Beech branch and a panoramic view of Hoge Erf Schaarsbergen - panoramio.jpg"
   ]
  },
  "kamille": {
@@ -281,12 +497,32 @@
  },
  "karbolchampignon": {
   "minus": [
-   "File:Karbol-Champignion2.png"
+   "File:Karbol-Champignion2.png",
+   "File:Agaricus xanthodermus ts1.jpg"
+  ]
+ },
+ "kartoffelbovist": {
+  "minus": [
+   "File:Coloured Figures of English Fungi or Mushrooms - t. 268.png",
+   "File:Boletus parasiticus on Scleroderma citrinum (underside).jpg"
   ]
  },
  "klatschmohn": {
   "minus": [
-   "File:Poster papaver 3a.jpg"
+   "File:Poster papaver 3a.jpg",
+   "File:Papaver rhoeas foglie uso alimentare.jpg"
+  ]
+ },
+ "knoblauchsrauke": {
+  "minus": [
+   "File:Alliaria petiolata 2018-04-20 9089.jpg"
+  ]
+ },
+ "kornelkirsche": {
+  "minus": [
+   "File:Drieň obyčajný (Cornus mas) -1.jpg",
+   "File:Cornus mas MHNT.BOT.2015.34.42.jpg",
+   "File:Xanthoria parietina - -Common orange lichen - Gewöhnliche Gelbflechte - 01.jpg"
   ]
  },
  "laerche": {
@@ -296,23 +532,44 @@
  },
  "latsche": {
   "minus": [
-   "File:Pinus montana Atlas Alpenflora.jpg"
+   "File:Pinus montana Atlas Alpenflora.jpg",
+   "File:Jastrabia veža from dolina Zeleného plesa.jpg",
+   "File:Ciofes dinsta te Ncisles Gherdëina.jpg",
+   "File:Chamerion angustifolium Wierzbówka kiprzyca 2023-08-25 Dolina Roztoki 04.jpg"
   ]
  },
  "leberbluemchen": {
   "minus": [
    "File:Hepatica SHINKU nur schauen nicht anfassen.jpg",
-   "File:Common Hepatica-Favourite Flowers Garden Greenhouse-1-0027-5.png"
+   "File:Common Hepatica-Favourite Flowers Garden Greenhouse-1-0027-5.png",
+   "File:Liverwort, Tegernsee.jpg"
+  ]
+ },
+ "liguster": {
+  "minus": [
+   "File:Ligustrum vulgare flowers TK 2022-06-10 1.jpg",
+   "File:Ligustrum vulgare 2017-09-29 6517.jpg",
+   "File:Ligustrum vulgare opening bud.jpg",
+   "File:Ligustrum vulgare 2017-09-29 6516.jpg",
+   "File:Ligustrum vulgare buds leaves.jpg",
+   "File:Gewöhnlicher Liguster in einem Hattinger Vorgarten.jpg"
   ]
  },
  "lorchel": {
   "minus": [
-   "File:2011-04-26 Gyromitra esculenta Spores 66581.jpg"
+   "File:2011-04-26 Gyromitra esculenta Spores 66581.jpg",
+   "File:Gyromitra esculenta (49572178278).jpg",
+   "File:Прионежский р-н, окрестности Нигишламбы, строчок (1).jpg",
+   "File:Прионежский р-н, окрестности Нигишламбы, строчки.jpg",
+   "File:Gyromitra esculenta (Brüggen, Deutschland) 3.jpg",
+   "File:Gyromitra esculenta (Brüggen, Deutschland) 2.jpg"
   ]
  },
  "lungenkraut": {
   "minus": [
-   "File:Pulmonaria officinalis (s. str.) sl6.jpg"
+   "File:Pulmonaria officinalis (s. str.) sl6.jpg",
+   "File:Pulmonaria officinalis (s. str.) sl34.jpg",
+   "File:Pulmonaria officinalis - Chelsea Physic Garden - DSC02764.jpg"
   ]
  },
  "maedesuess": {
@@ -325,23 +582,39 @@
   "minus": [
    "File:Upper Rhenish Master - The little Garden of Paradise - Google Art Project.jpg",
    "File:Wuppertal Parkanlage Vorwerk 2018 159.jpg",
-   "File:Beech, ferns and lily of the valley in Gullmarsskogen 1.jpg"
+   "File:Beech, ferns and lily of the valley in Gullmarsskogen 1.jpg",
+   "File:Convallaria majalis kz04.jpg",
+   "File:Lily of the Valley - Convallaria majalis (26507364634).jpg"
   ]
  },
  "malve": {
   "minus": [
    "File:FloraRome (3).JPG",
-   "File:Barßel - Mühlenweg 03 ies.jpg"
+   "File:Barßel - Mühlenweg 03 ies.jpg",
+   "File:Barßel - Mühlenweg 04 ies.jpg"
+  ]
+ },
+ "marone": {
+  "minus": [
+   "File:Imleria badia - bay bolete (48812525908).jpg",
+   "File:Maronenröhling.jpg",
+   "File:Польські гриби.jpg",
+   "File:2010-09-25 Boletus badius.png"
   ]
  },
  "mehlbeere": {
   "minus": [
-   "File:Echte Mehlbeere (Sorbus aria s. str.) mit Früchten in der Herbrechtinger Heide(Schwäbische Alb, Baden-Württemberg), 10. September 2014.jpg"
+   "File:Echte Mehlbeere (Sorbus aria s. str.) mit Früchten in der Herbrechtinger Heide(Schwäbische Alb, Baden-Württemberg), 10. September 2014.jpg",
+   "File:Sorbus-aria-goe02.jpg",
+   "File:Mehlbeere Sorbus aria Papinstr. Neuaubing Muenchen-5.jpg"
   ]
  },
  "morchel": {
   "minus": [
-   "File:Morchella esculenta-1-bsi-yercaud-salem-India.jpg"
+   "File:Morchella esculenta-1-bsi-yercaud-salem-India.jpg",
+   "File:Morchella esculenta 362922838.jpg",
+   "File:Coloured Figures of English Fungi or Mushrooms - t. 51.png",
+   "File:Morchella esculenta-2-bsi-yercaud-salem-India.jpg"
   ]
  },
  "murmeltier": {
@@ -350,21 +623,47 @@
    "File:Phylogenetic Tree of Rodentia.jpg"
   ]
  },
+ "pantherpilz": {
+  "minus": [
+   "File:Several growing stadia of a Amanita pantherina (Panthercap, D= Pantherpilz, NL= Panteramaniet) - panoramio.jpg",
+   "File:Amanita pantherina sencer.JPG",
+   "File:Western panther amanita 3.jpg",
+   "File:Western panther amanita 2.jpg",
+   "File:Western panther amanita 1.jpg"
+  ]
+ },
  "parasol": {
   "minus": [
    "File:20240928 xl 1055-Hexenring, Feenringe, Riesenschirmling, Macrolepiota procera 2.jpg",
-   "File:Macrolepiota 439035721.jpg"
+   "File:Macrolepiota 439035721.jpg",
+   "File:Riesenschirmpilz (Macrolepiota procera) 2.JPG",
+   "File:Edible fungi harvest 2020 G1.jpg",
+   "File:Edible fungi caps 2024 G1.jpg"
   ]
  },
  "perlpilz": {
   "minus": [
-   "File:Amanita rubescens 547402670.jpg"
+   "File:Amanita rubescens 547402670.jpg",
+   "File:Amanita rubescens 08.2025 (1).jpg",
+   "File:Amanita rubescens 2025 G1.jpg",
+   "File:Rötende Wulstling (Amanita rubescens) 20220917 (3).jpg"
   ]
  },
  "pfaffenhuetchen": {
   "minus": [
    "File:Euonymus europaeus 23-05-2006 19.07.22.JPG",
-   "File:Pörtschach Winklern 10.-Oktober-Straße 67 Gewöhnlicher Spindelstrauch 25062024 1169.jpg"
+   "File:Pörtschach Winklern 10.-Oktober-Straße 67 Gewöhnlicher Spindelstrauch 25062024 1169.jpg",
+   "File:20190319 Euonymus europaeus 1.jpg"
+  ]
+ },
+ "pfifferling": {
+  "minus": [
+   "File:Aspect de petites girolles dans la foret..jpg",
+   "File:Pfifferling Ostenfeld.JPG",
+   "File:Pfifferling Ostenfeld (1).JPG",
+   "File:Лисички. Ноябрь. - panoramio.jpg",
+   "File:Катюжанський Лисички DSC 0038.jpg",
+   "File:Épicéas serrés.jpg"
   ]
  },
  "preiselbeere": {
@@ -375,24 +674,34 @@
  },
  "reh": {
   "minus": [
-   "File:Capreolus capreolus 03.2025 (2).jpg"
+   "File:Capreolus capreolus 03.2025 (2).jpg",
+   "File:Roe deer tracks in snow in Tuntorp.jpg",
+   "File:Rehkitz im Gras.jpg",
+   "File:Capreolus capreolus 03.2025 (1).jpg"
   ]
  },
  "rentierflechte": {
   "minus": [
    "File:Braundünenlandschaft auf Spiekeroog 05.jpg",
-   "File:Braundünenlandschaft auf Spiekeroog 04.jpg"
+   "File:Braundünenlandschaft auf Spiekeroog 04.jpg",
+   "File:Flat Tub Wildlife Management Area Rocky Hammock Ldg Rd reindeer moss b.jpg",
+   "File:Cladonia rangiferina 01(js), Traill Island (Greenland).jpg",
+   "File:Braundünenlandschaft auf Spiekeroog 08.jpg",
+   "File:Braundünenlandschaft auf Spiekeroog 02.jpg"
   ]
  },
  "riesenbaerenklau": {
   "minus": [
-   "File:Korina 2015-06-08 Heracleum mantegazzianum.jpg"
+   "File:Korina 2015-06-08 Heracleum mantegazzianum.jpg",
+   "File:Korina 2015-06-08 Heracleum mantegazzianum 4.jpg"
   ]
  },
  "riesenbovist": {
   "minus": [
    "File:DeWayne Young with Mushroom - DPLA - 48ec7092cbeceb4491cc6c122e27529d.jpg",
-   "File:Langermanninia gigantea (Reuzenbovist) in a horsemeadow near Werkhoven - panoramio.jpg"
+   "File:Langermanninia gigantea (Reuzenbovist) in a horsemeadow near Werkhoven - panoramio.jpg",
+   "File:Edible and poisonous mushrooms (PL. 7) (8515009419).jpg",
+   "File:Coloured Figures of English Fungi or Mushrooms - t. 332.png"
   ]
  },
  "robinie": {
@@ -402,38 +711,83 @@
  },
  "roetelritterling": {
   "minus": [
-   "File:Edible fungi in basket 2022 G5.jpg"
+   "File:Edible fungi in basket 2022 G5.jpg",
+   "File:Рядовка фіолетова IMG 3826.jpg",
+   "File:Lepista nuda (49188510893).jpg",
+   "File:Coloured Figures of English Fungi or Mushrooms - t. 209.png"
+  ]
+ },
+ "rosskastanie": {
+  "minus": [
+   "File:Waiblingen - Altstadt - Kirchbrücke - Blick auf Nikolauskirche und Bürgermühle mit blühender Kastanie (1).jpg"
   ]
  },
  "rotbuche": {
   "minus": [
-   "File:Fagus sylvatica cross section Silesian Beskids.jpg"
+   "File:Fagus sylvatica cross section Silesian Beskids.jpg",
+   "File:European Beech (32581194337).jpg",
+   "File:Door beukenblad gegroeide Krokus (Crocus) 01.jpg"
+  ]
+ },
+ "roterholunder": {
+  "minus": [
+   "File:Kościeliski Potok Dolina Kościeliska 2023-08-22 13.jpg"
   ]
  },
  "rothirsch": {
   "minus": [
-   "File:Professional stalker standing next to red deer stag Ardnamurchan Estate Scotland darker 01.png"
+   "File:Professional stalker standing next to red deer stag Ardnamurchan Estate Scotland darker 01.png",
+   "File:Edelhert - red deer - Cervus elaphus 02.jpg"
   ]
  },
  "rotkappe": {
   "minus": [
    "File:Edible fungi in basket 2016 G1.jpg",
-   "File:Espenrotkappe-1.jpg"
+   "File:Espenrotkappe-1.jpg",
+   "File:Leccinum versipelle (32681845148).jpg"
+  ]
+ },
+ "rotklee": {
+  "minus": [
+   "File:1507 Weißer Steinklee, Echter Steinklee und Roter Wiesenklee im Nemphetal.jpg",
+   "File:Trifolium pratense fields (02).jpg",
+   "File:Cupido argiades - Tailed cupid.jpg",
+   "File:Trifolium pratense plant DC1.jpg"
   ]
  },
  "salweide": {
   "minus": [
-   "File:SalWeideSeedsCloseUp-jpg.jpg"
+   "File:SalWeideSeedsCloseUp-jpg.jpg",
+   "File:Cherkas'kyi district, Cherkas'ka oblast, Ukraine - panoramio (1007).jpg"
   ]
  },
  "samtfussruebling": {
   "minus": [
-   "File:Flammulina velutipes Spores.jpg"
+   "File:Flammulina velutipes Spores.jpg",
+   "File:In Arnhem there are several lanes with - sometimes young - chesnut trees that are infected by Flammulina velutipes (GB= Winter mushroom, Golden needle mushroom, Velvet stem, Enoki, D= Gemeiner Samtfußrübling, F= Col - panoramio.jpg",
+   "File:Young enokitake mushrooms (10843432586).jpg",
+   "File:Грибы на стволе дерева, Ташкентский ботанический сад.jpg"
+  ]
+ },
+ "sanddorn": {
+  "minus": [
+   "File:2015.07.10.-01-Zwochau--Sanddorn.jpg"
+  ]
+ },
+ "satanspilz": {
+  "minus": [
+   "File:Steyrschlucht 28.jpg",
+   "File:Frankenwarte 10.08.2016 Satan's Bolete - Rubroboletus satanas (28615873174).jpg",
+   "File:Frankenwarte 10.08.2016 Satan's Bolete - Rubroboletus satanas (28600650264).jpg",
+   "File:Staritsa RubroboletusSatanas 019 0168.jpg"
   ]
  },
  "sauerampfer": {
   "minus": [
-   "File:Wiese Sauerampfer.jpg"
+   "File:Wiese Sauerampfer.jpg",
+   "File:Sauerampfer4519.JPG",
+   "File:نبات الحميضة، الزاوية، ليبيا.jpg",
+   "File:Feuille d'oseille.jpg"
   ]
  },
  "schachtelhalm": {
@@ -445,13 +799,16 @@
   "minus": [
    "File:Natureza. Valverde. Vilarromarís. Oroso. Galiza-7.jpg",
    "File:Achillea millefolium occidentalis seeds.jpg",
-   "File:2026 Xardín no Parque da Alameda. Santiago de Compostela. Galiza.jpg"
+   "File:2026 Xardín no Parque da Alameda. Santiago de Compostela. Galiza.jpg",
+   "File:Achillea millefolium kz12.jpg",
+   "File:Achillea millefolium kz17.jpg"
   ]
  },
  "scharbockskraut": {
   "minus": [
    "File:Ficaria verna sl9.jpg",
-   "File:Ficaria verna sl2.jpg"
+   "File:Ficaria verna sl2.jpg",
+   "File:Ficaria verna 2018-04-27 9466.jpg"
   ]
  },
  "schierling": {
@@ -464,13 +821,23 @@
  "schlehe": {
   "minus": [
    "File:Древесинатерн.jpg",
-   "File:Flore avec touffe dans le marais du Conseiller.jpg"
+   "File:Flore avec touffe dans le marais du Conseiller.jpg",
+   "File:Prunus spinosa blackthorn sloe Hatfield Park Hatfield Broad Oak Essex England 03.jpg",
+   "File:Prunus spinosa blackthorn sloe Hatfield Park Hatfield Broad Oak Essex England 02.jpg"
   ]
  },
  "schluesselblume": {
   "minus": [
    "File:Primula veris MHNT.BOT.2011.3.11.jpg",
-   "File:Primula veris habitat TK 2021-04-22 1.jpg"
+   "File:Primula veris habitat TK 2021-04-22 1.jpg",
+   "File:Primula veris with unripe fruits.jpg"
+  ]
+ },
+ "schneeball": {
+  "minus": [
+   "File:Viburnum opulus 05.2025 (1).jpg",
+   "File:Viburnum opulus - guelder rose - 52388162262.jpg",
+   "File:Viburnum opulus (14114032079).jpg"
   ]
  },
  "schneegloeckchen": {
@@ -478,9 +845,27 @@
    "File:Galanthus Nivalis, sneeuwklokje. 12-02-2024. (d.j.b.).jpg"
   ]
  },
+ "schwarzerle": {
+  "minus": [
+   "File:Locatie, Natuurterrein De Famberhorst. (Alnus). Elzentak met katjes boven bevroren poel 01.jpg"
+  ]
+ },
  "schwefelkopf": {
   "minus": [
-   "File:Cuticule hypholoma .jpg"
+   "File:Cuticule hypholoma .jpg",
+   "File:Dülmen, Wildpark -- 2020 -- 3260.jpg",
+   "File:Hypholoma fasciculare. (40573801984).jpg",
+   "File:2026-04-02 Z5-3250 Achim-Lammerts Hypholoma-fasciculare.jpg"
+  ]
+ },
+ "schwefelporling": {
+  "minus": [
+   "File:Tachlovicka vrba-sirovec-2017-08-I.jpg"
+  ]
+ },
+ "seidelbast": {
+  "minus": [
+   "File:Daphne mezereum Näsiä IM8914 C.JPG"
   ]
  },
  "silberweide": {
@@ -491,6 +876,12 @@
  "sommerlinde": {
   "minus": [
    "File:Roßleithen NDOÖ 324 Rumpelmayrlinde-3884.jpg"
+  ]
+ },
+ "speitaeubling": {
+  "minus": [
+   "File:Russula emetica in Dilijan Armenia.jpg",
+   "File:Champignon.Autriche.DSCF0346.jpg"
   ]
  },
  "spitzwegerich": {
@@ -505,57 +896,111 @@
    "File:Modell der Blüte von Ribes grossularia (Ribes uva-crispa, Stachelbeere) -Brendel Nr. 11-.jpg"
   ]
  },
+ "stechpalme": {
+  "minus": [
+   "File:Fleur mâle houx 6 mai2016b.jpg",
+   "File:(MHNT) Ilex aquifolium.jpg",
+   "File:Ilex aquifolium - roots 01.jpg"
+  ]
+ },
  "steinpilz": {
   "minus": [
    "File:Boletus edulis pores aging.jpg",
-   "File:Boletus edulis details.jpg"
+   "File:Boletus edulis details.jpg",
+   "File:Habitat Fichtensteinpilz 01.jpg",
+   "File:Boletus edulis 7 - 2011.08.07.jpg",
+   "File:Habitat Fichtensteinpilz 02.jpg",
+   "File:Boletus edulis (penny bun, cep, porcino or porcini) (40828913842).jpg"
   ]
  },
  "stieleiche": {
   "minus": [
-   "File:Quercus robur - Filicifolia.JPG"
+   "File:Quercus robur - Filicifolia.JPG",
+   "File:Chêne, colza, Jura (vertical).jpg",
+   "File:Dülmen, Wildpark, Baum am Herzteich -- 2022 -- 0365-7.jpg"
+  ]
+ },
+ "stockschwamm": {
+  "minus": [
+   "File:Kuehneromyces mutabilis LC0075.jpg",
+   "File:Kuehneromyces mutabilis 2026 G2.jpg"
   ]
  },
  "sumpfdotterblume": {
   "minus": [
    "File:Caltha palustris MHNT.BOT.2005.0.967.jpg",
-   "File:Caltha palustris alba 03.JPG"
+   "File:Caltha palustris alba 03.JPG",
+   "File:Caltha palustris (marsh marigold) (Gooseberry Falls State Park, Minnesota, USA) 1 (21890496353).jpg",
+   "File:Caltha palustris var. palustris syn. Caltha laeta Knieć górska 2023-08-23 02.jpg"
   ]
  },
  "taubnessel": {
   "minus": [
    "File:Lamium album 2019-03-24 7801.jpg",
-   "File:Lamium album sl16.jpg"
+   "File:Lamium album sl16.jpg",
+   "File:Яснотка белая.jpg"
   ]
  },
  "thymian": {
   "minus": [
    "File:Breitblättriger Thymian an der Felswand.jpg",
    "File:Thymus pulegioides subsp. pulegioides sl18.jpg",
-   "File:Thymus pulegioides subsp. pulegioides sl12.jpg"
+   "File:Thymus pulegioides subsp. pulegioides sl12.jpg",
+   "File:De associatie van vetkruid en tijm (Sedo-Thymetum) op een zandige oeverwal.jpg",
+   "File:A vegetation aspect of the association Sedo-Thymetum.jpg"
   ]
  },
  "tollkirsche": {
+  "cat": "Category:Atropa bella-donna",
   "minus": [
    "File:Bellona-Summer Garden-Saint Petersburg.jpg",
-   "File:Albrecht Dürer, Witch Riding on a Goat, c. 1500-1501, NGA 6674.jpg"
+   "File:Albrecht Dürer, Witch Riding on a Goat, c. 1500-1501, NGA 6674.jpg",
+   "File:Atropa belladonna 'Lutea' Pokrzyk wilcza jagoda 2020-07-28 01.jpg",
+   "File:Atropa belladonna 'Lutea' Pokrzyk wilcza jagoda 2020-07-28 04.jpg",
+   "File:Atropa belladonna 'Lutea' Pokrzyk wilcza jagoda 2019-10-26 03.jpg"
   ]
  },
  "torfmoos": {
   "minus": [
    "File:Crowberry on Sphagnum, Hove Burn, Hermaness - geograph.org.uk - 7837083.jpg",
-   "File:Cover of Sphagnum Moss for Plant Propagation.jpg"
+   "File:Cover of Sphagnum Moss for Plant Propagation.jpg",
+   "File:Sarcoleotia turficola 316324.jpg",
+   "File:Sphagnum moss in glass bottle.jpg"
+  ]
+ },
+ "traubeneiche": {
+  "minus": [
+   "File:Marton Oak information board.jpg"
+  ]
+ },
+ "traubenkirsche": {
+  "minus": [
+   "File:Prunus padus kz24.jpg"
   ]
  },
  "trollblume": {
   "minus": [
    "File:Trollius-yellow-many.jpg",
-   "File:Trollius europaeus habitat - wooded meadow in Keila.jpg"
+   "File:Trollius europaeus habitat - wooded meadow in Keila.jpg",
+   "File:Łan przekwitłego pełnika.JPG",
+   "File:Habitat Pedicularis foliosa Trollius europaeus Pulsatilla alpina.JPG"
   ]
  },
  "trompetenpfifferling": {
   "minus": [
-   "File:Craterellus lutescens vs Craterellus tubaeformis side by side.jpg"
+   "File:Craterellus lutescens vs Craterellus tubaeformis side by side.jpg",
+   "File:(Craterellus tubaeformis 4) - Flickr - Tero Karppinen.jpg",
+   "File:Coloured Figures of English Fungi or Mushrooms - t. 47.png"
+  ]
+ },
+ "tuerkenbund": {
+  "minus": [
+   "File:Lilium Martagon blanch sun Frea.jpg"
+  ]
+ },
+ "vogelkirsche": {
+  "minus": [
+   "File:Wannbach Kirschgarten Luftbild-20220501-RM-105402.jpg"
   ]
  },
  "vogelmiere": {
@@ -568,55 +1013,106 @@
  "wacholder": {
   "minus": [
    "File:Cerdaña, flora 1991 07.jpg",
-   "File:Sun peaks alpine flowers in full bloom. (19434786858).jpg"
+   "File:Sun peaks alpine flowers in full bloom. (19434786858).jpg",
+   "File:Brandenburg, Eingangsbereich zum Truppenübungsplatz Oberlausitz West NIK 5880.JPG",
+   "File:Juniperus communis Quarry island Mingan.jpg",
+   "File:Flowers among junipers.JPG"
   ]
  },
  "walderdbeere": {
   "minus": [
    "File:Fragaria vesca - Cimetière du Père-Lachaise 01.jpg",
-   "File:217 Echtes Leinkraut, Heidenelke und Flockenblumen am Fußweg von den Helfensteinen zum Hohen Dörnberg auf den Hohen Dörnberg.jpg"
+   "File:217 Echtes Leinkraut, Heidenelke und Flockenblumen am Fußweg von den Helfensteinen zum Hohen Dörnberg auf den Hohen Dörnberg.jpg",
+   "File:Lippenblüter zwischen Guckaisee und Kohlstöcken, Hessische Rhön.jpg",
+   "File:Green leaves of wild strawberry with small red berry on a background of gray stone.jpg"
   ]
  },
  "waldkauz": {
   "minus": [
-   "File:Einzelteile aus Gewölle.jpg"
+   "File:Einzelteile aus Gewölle.jpg",
+   "File:Strix aluco in Vantaa 1.jpg",
+   "File:Amgueddfa Cymru - Tylluan Frech yn bwydo cywion mewn gwair - Tawny Owl feeding young in lay - 75737.jpeg",
+   "File:Amgueddfa Cymru - Tylluan Frech ar fonyn coeden - Tawny Owl on tree stump (Bens) - 75738.jpeg",
+   "File:Strix aluco in the Teufelsbruch swamp.jpg"
   ]
  },
  "waldkiefer": {
   "minus": [
-   "File:Pine log cross-sections, Teutendorf, 2016-09-17.jpg"
+   "File:Pine log cross-sections, Teutendorf, 2016-09-17.jpg",
+   "File:The glade with the flowers. The pine-trees. July 2007. - Полянка с цветами. Сосны. Июль 2007. - panoramio.jpg",
+   "File:Specht-Tintling bei Zeil am Main.jpg",
+   "File:Collecting resin in north Euboea Greece.jpg"
+  ]
+ },
+ "waldmeister": {
+  "minus": [
+   "File:Gaillet odorant @ Bois des Glières @ Doussard (51222758554).jpg"
+  ]
+ },
+ "waldrebe": {
+  "minus": [
+   "File:20180405Clematis vitalba.jpg"
   ]
  },
  "walnuss": {
   "minus": [
    "File:Polyporus squamosus 2010 G1.jpg",
-   "File:Juglans regia Echte Walnußfrucht 3.JPG"
+   "File:Juglans regia Echte Walnußfrucht 3.JPG",
+   "File:Polyporus squamosus 2010 G2.jpg",
+   "File:Polyporus squamosus 2010 G3.jpg"
   ]
  },
  "waschbaer": {
   "minus": [
-   "File:Procyon lotor 01 MWNH 328.JPG"
+   "File:Procyon lotor 01 MWNH 328.JPG",
+   "File:Common Raccoon in a Tree.jpg"
   ]
  },
  "wasserminze": {
   "minus": [
-   "File:Mentha aquatica sl16.jpg"
+   "File:Mentha aquatica sl16.jpg",
+   "File:Mentha aquatica sl10.jpg"
   ]
  },
  "wegwarte": {
   "minus": [
    "File:Asteracea poster 3.jpg",
-   "File:Cichorium intybus sl22.jpg"
+   "File:Cichorium intybus sl22.jpg",
+   "File:Cichorium intybus habit1 (12112696354).jpg",
+   "File:Asteracea poster.jpg",
+   "File:Zuckerhut (Cichorium intybus var. foliosum) Jungpflanzen--Josef Schlaghecken.jpg"
   ]
  },
  "weissdorn": {
   "minus": [
-   "File:Crataegus monogyna MHNT.BOT.2023.13.42.jpg"
+   "File:Crataegus monogyna MHNT.BOT.2023.13.42.jpg",
+   "File:Crataegus monogyna MHNT.BOT.2007.40.2.jpg",
+   "File:Espino albar - Parque Lineal del Manzanares - Section II - Madrid 01.jpg"
+  ]
+ },
+ "weisstanne": {
+  "minus": [
+   "File:Anémones hépatiques et jeune pousse de conifère (avril 2022).JPG"
   ]
  },
  "wiesenchampignon": {
   "minus": [
-   "File:Wiesenchamp5.jpg"
+   "File:Wiesenchamp5.jpg",
+   "File:Agaricus campestris 20230813 101640.jpg",
+   "File:Agaricus campestris (meadow mushroom).jpg",
+   "File:Agaricus campestris IMG 20200907 132426.jpg",
+   "File:Agaricus campestris garden 050830B.JPG",
+   "File:Modell von Agaricus campestris (Wiesenchampignon, Feld-Edelpilz) (2).jpg",
+   "File:Agaricus campestris 051011A.JPG",
+   "File:Agaricus campestris (Field- or Meadow Mushroom, D= Wiesenegerling or Wiesen-Champignon, NL= Gewone weidechampignon) near Steenderen - panoramio.jpg"
+  ]
+ },
+ "wiesenkerbel": {
+  "minus": [
+   "File:Doberaner Münster, NW view, 2025-06-25.jpg",
+   "File:Boswal om bloemenweide. Locatie, Natuurterrein De Famberhorst 02.jpg",
+   "File:Boswal om bloemenweide. Locatie, Natuurterrein De Famberhorst 01.jpg",
+   "File:Fietspad om Langweerderwielen (Langwarder Wielen). Oostkant 02.jpg"
   ]
  },
  "wiesenknopf": {
@@ -627,12 +1123,16 @@
  },
  "wiesensalbei": {
   "minus": [
-   "File:Salvia pratensis sl2.jpg"
+   "File:Salvia pratensis sl2.jpg",
+   "File:Salvia pratensis in natural monument Sysli louky u Lodenice in 2011 (8).JPG",
+   "File:Salvia pratensis MHNT.BOT.2007.40.29.jpg"
   ]
  },
  "wiesenschaumkraut": {
   "minus": [
-   "File:Philaenusspumarius1.jpg"
+   "File:Philaenusspumarius1.jpg",
+   "File:Cardamine pratensis young plant 1.JPG",
+   "File:Jung-Koch-Quentell Wall Chart Wiesenschaumkraut.jpg"
   ]
  },
  "wildapfel": {
@@ -642,12 +1142,16 @@
  },
  "wildbirne": {
   "minus": [
-   "File:Pear Rust - Gymnosporangium sabinae on Pyrus cf. pyraster (30658500877).jpg"
+   "File:Pear Rust - Gymnosporangium sabinae on Pyrus cf. pyraster (30658500877).jpg",
+   "File:Pear Rust - Gymnosporangium sabinae on Pyrus cf. pyraster (43707660010).jpg",
+   "File:Pear Rust - Gymnosporangium sabinae on Pyrus cf. pyraster (31732241088).jpg",
+   "File:Pear Rust - Gymnosporangium sabinae on Pyrus cf. pyraster (31648416178).jpg"
   ]
  },
  "wildemoehre": {
   "minus": [
-   "File:Daucus carota subsp. maximus MHNT.BOT.2007.40.407.jpg"
+   "File:Daucus carota subsp. maximus MHNT.BOT.2007.40.407.jpg",
+   "File:Möhrenfeld südlich von Annendaal III.jpg"
   ]
  },
  "wildschwein": {
@@ -658,31 +1162,45 @@
  "winterlinde": {
   "minus": [
    "File:Tiliae flos 267302.jpg",
-   "File:Wiener Naturdenkmal 100 - Winterlinde (Währing) n.JPG"
+   "File:Wiener Naturdenkmal 100 - Winterlinde (Währing) n.JPG",
+   "File:Tilia cordata flowers in a jar.jpg",
+   "File:Ten seedlings with different types of cotyledon or seed leav Wellcome V0044555.jpg"
   ]
  },
  "wolf": {
   "minus": [
    "File:Lupa Capitolina, Rome.jpg",
    "File:Canis lupus arctos qtl1.jpg",
-   "File:Japanese Wolf.jpg"
+   "File:Japanese Wolf.jpg",
+   "File:Pup howling (24264599208).jpg",
+   "File:Zes zwarte pups in Artis geboren Moeder wolf met de zes kleintjes, Bestanddeelnr 915-2802.jpg",
+   "File:Le dernier loup - Les coulisses - les loups sur le tournage 10.png",
+   "File:Zes zwarte pups in Artis geboren Moeder wolf met de zes kleintjes, Bestanddeelnr 915-2803.jpg",
+   "File:Vochtige rand van een heidepaadje, hier met kleine pioniervegetatie van het dwergbiezen-verbond (Nanocyperion).jpg",
+   "File:Zes zwarte pups in Artis geboren Moeder wolf met de zes kleintjes, Bestanddeelnr 915-2805.jpg"
   ]
  },
  "zirbe": {
   "minus": [
-   "File:Juac Odles Cisles d'insta.jpg"
+   "File:Juac Odles Cisles d'insta.jpg",
+   "File:Ncisles y Odles uduidal Col Raiser Gherdëina.jpg"
   ]
  },
  "zitterpappel": {
   "minus": [
-   "File:Tree Stumps-147675.jpg"
+   "File:Tree Stumps-147675.jpg",
+   "File:Juneberry and aspen trees in Tuntorp 2.jpg",
+   "File:Juneberry and aspen trees in Tuntorp 3.jpg",
+   "File:Juneberry and aspen trees in Tuntorp 1.jpg"
   ]
  },
  "zunderschwamm": {
   "minus": [
    "File:Tiny, tiny mushrooms (max 3 cm) with up Jews ear and down Pycnoporus cinnabarinus and a very young Fomes fomentarius, adorable - panoramio.jpg",
    "File:Fomes fomentarius inside 2009 G1.jpg",
-   "File:Fomes fomentarius Pores (2276157838).jpg"
+   "File:Fomes fomentarius Pores (2276157838).jpg",
+   "File:Fomes fomentarius 3.jpg",
+   "File:Fomes fomentarius IMGP6699.jpg"
   ]
  }
 }
