@@ -74,11 +74,6 @@ Es ist 22:10. {name} gähnt und sagt den gefährlichsten Satz des Abends: // „
 < Noch eine Szene! | s+3 t-2 laune-6 | Die Szene ist gut. {name} schaut trotzdem alle fünf Minuten auf die Uhr.
 > Feierabend | t+6 alle+2 s-2 | Früher habt ihr bis vier gespielt. Heute ist halb elf ein Erfolg. // Alle sind ein bisschen erleichtert.
 
-§ #ab30_kita spieler
-{name}s Handy vibriert. Die Kita-Gruppe: 47 neue Nachrichten. // Es geht um eine verschwundene Matschhose.
-< Gemeinsam ermitteln | s+5 t-4 alle+2 | Nach zehn Minuten Detektivarbeit steht fest: Die Hose ist bei Familie Krause. // Der Tisch ist stolzer als nach jedem Drachen. | frage
-> Stummschalten | t+2 laune-2 | Das Handy vibriert in der Hosentasche weiter. // Den ganzen Abend.
-
 § #ab30_lesebrille spieler
 {name} hält den Charakterbogen beim Lesen immer weiter weg. // Und weiter. Und weiter.
 < Jemand reicht wortlos eine Lesebrille | s+5 alle+2 | Es ist nicht die erste Lesebrille am Tisch. // Es ist die dritte.
@@ -174,11 +169,6 @@ Heute hat {name} Geburtstag. Niemand hat es erwähnt. // {name} glaubt, alle hab
 < Überraschung! | s+8 alle+4 laune+15 | Licht aus, Kühlschranktür auf: eine Torte mit einem W20 aus Marzipan. // Fünf schiefe Stimmen singen. | konfetti
 > Erst nach der Session | laune-8 s+2 | Zwei Stunden lang ist {name} ein bisschen still. // Dann kommt die Torte, und es war es wert. | konfetti
 
-§ #wh_kind gast
-{name} hat heute das Kind dabei, acht Jahre alt. Es darf zuschauen. // Nach zehn Minuten will es einen eigenen Helden.
-< Einen Helden würfeln lassen | s+8 t-6 alle+6 | Die Heldin heißt Prinzessin Feuerpups und hat ein fliegendes Pferd. // Sie rettet die Gruppe. Zweimal. | konfetti
-> Darf für den Drachen würfeln | s+4 l+2 | Eine 20. // Das Kind ist sehr stolz und sehr gnadenlos. | drache
-
 § #wh_oma tisch
 Die Oma von {name} ruft an. Sie hat gehört, ihr spielt „dieses Drachen-Ding“, und will wissen, wer gewinnt.
 < Laut stellen, alle erklären | s+6 t-5 alle+4 | Die Oma findet, der Spielleiter sei zu streng. // Sie wird ab jetzt einmal im Monat angerufen. Für Feedback. | lachen
@@ -195,7 +185,7 @@ Die Session ist vorbei. Die Würfel sind schon in den Beuteln, aber keiner steht
 > Fürs Finale aufheben | l+2 alle+3 | Die Würfel liegen jetzt in einer kleinen Kiste. // Jeder schaut ab und zu hinein.
 
 § #wh_erste_karte gast
-Ein Nachbarskind hat für die Runde eine Karte von {ort} gemalt. Mit Buntstiften. Und einem Drachen, der Pommes isst.
+{name} hat für die Runde eine Karte von {ort} gemalt. Mit Buntstiften. // Und einem Drachen, der Pommes isst.
 < Die Karte gilt ab sofort | s+6 l-4 alle+4 | Die Gruppe reist jetzt nach Buntstift. // Der Pommes-Drache wird ein wichtiger Verbündeter. | drache
 > An die Wand hängen | l+2 laune+3 | Gleich neben dem Schirm. // Die schönste Karte der ganzen Kampagne.
 
@@ -207,7 +197,7 @@ Die Stadtwache hat die Gruppe entdeckt. Zwei Gassen: eine zum Hafen, eine zum Ma
 
 § #sp_atmen sl schwer
 Du wirst ganz leise und beschreibst ein Geräusch hinter der Tür. Ein Atmen. // Am Tisch hält jemand die Chips mitten auf dem Weg zum Mund an.
-< Die Tür aufreißen | W12 s+6 ? m+5 alle+3 : tod | Es ist ein Kind, das sich versteckt hat. Alle atmen aus. :: Es ist kein Kind. | schaedel
+< Die Tür aufreißen | W12 s+6 ? m+5 alle+3 : tod | Es ist ein Bettler, der sich versteckt hat. Alle atmen aus. :: Es ist kein Bettler. | schaedel
 > Die Tür verrammeln | t-4 l+3 s+2 | Die ganze Nacht kratzt es am Holz. // Niemand am Tisch geht danach allein in den Flur.
 
 § #sp_fackel sl schwer eile:12
@@ -240,7 +230,7 @@ Seit drei Tagen folgt eine Ente {held}. Sie sagt nichts. Sie schaut nur. // Heut
 Beim Umbau findet {name} eine Zeitkapsel, 1999 im Garten der Eltern vergraben. Darin: ein Brief ans zukünftige Ich, eine Sammelkarte, ein gemalter Drache.
 < Den Brief vorlesen | s+8 alle+6 l+2 | „Liebes Ich aus der Zukunft, spielst du noch Rollenspiele?“ // Ja. Ja, tut {er}. | herzen
 > Die Sammelkarte anschauen | m+6 laune+5 | Die Karte ist heute 400 Euro wert. // {name} behält sie trotzdem. | gold
-^ Der Drache wird der nächste Endgegner | s+6 l-4 xp+10 | Der Wachsmalstift-Drache wird der Endgegner der nächsten Kampagne. // Den Namen hat ein siebenjähriges Kind gewählt: Feuerkacke. | drache
+^ Der Drache wird der nächste Endgegner | s+6 l-4 xp+10 | Der Wachsmalstift-Drache wird der Endgegner der nächsten Kampagne. // Den Namen hat {name} sich 1999 ausgedacht: Feuerkacke. | drache
 
 § #sel_erdgeisterfest welt selten
 In {ort} feiern die Erdgeister ihr Fest: Trommeln, Lichter, alle tanzen bis zum Morgengrauen. // Die Musik klingt verdächtig nach 1996.

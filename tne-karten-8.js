@@ -49,41 +49,6 @@ Letzte Session vor dem Umzug. Jemand hat einen Kuchen gebacken, der aussehen sol
 < Die Sessions für diese Tage etwas länger planen | t-4 s+4 laune+12 krise- | Jeder zweite Donnerstag wird zum besonderen Donnerstag. | herzen
 > Einen Fahrkosten-Topf aufstellen | l+3 alle+3 laune+8 krise- | Ein Schuhkarton mit „Zugtopf“ steht ab jetzt neben den Chips. Er ist erstaunlich voll.
 
-§ #kr_baby_start spieler krise:baby einmal
-{name} legt kommentarlos ein Ultraschallbild auf den Tisch, direkt neben die Würfel. Erst versteht es niemand. Dann alle gleichzeitig.
-< Session unterbrechen, anstoßen | s+8 t-5 alle+8 krise=baby >>kr_baby_muede | Es gibt Sekt aus Kaffeetassen und sehr viele Fragen. Die Kampagne kann warten. | konfetti
-> Ein Fest für die Helden | s+6 l-2 krise=baby >>kr_baby_muede | In der Taverne wird spontan ein Fest gegeben, ohne dass irgendein Held weiß, warum. Die Spieler wissen es. | musik
-
-§ #kr_baby_muede spieler kette
-{name} schläft fast ein. Seit Wochen keine durchgeschlafene Nacht, und das Kind ist noch nicht einmal da. „Ich bin wach. Ich bin wach!“
-< {held} hält Nachtwache – eine ruhige Szene | t-3 laune+5 >>kr_baby_namen | Eine leise Szene am Feuer. {name} bleibt wach. Fast. | nacht
-> Mit Kaffee weitermachen | laune-3 t+2 >>kr_baby_namen | Drei Espresso später ist {name} wach. Sehr wach. Etwas zu wach.
-
-§ #kr_baby_namen spieler kette
-{name} fragt den Tisch nach Namensideen fürs Kind. Der erste Vorschlag lautet „Grimbold“. Niemand lacht. Dann alle.
-< Eine Namens-Abstimmung als Mini-Spiel | s+6 t-4 laune+6 >>kr_baby_geburt | Auf der Liste stehen am Ende „Mila“, „Theo“ und „Drachenherz“. Einer davon wird es. Vermutlich nicht der letzte. | lachen
-> Zurück zum Abenteuer | t+3 >>kr_baby_geburt | Die Namensfrage wird vertagt. {name} notiert sich trotzdem heimlich „Elandriel“.
-
-§ #kr_baby_geburt spieler kette
-Ein Foto im Gruppenchat: winzig, zerknautscht, perfekt. Darunter schreibt {name}: „Ich bin dann mal ein paar Wochen raus. Haltet meinen Platz warm.“
-< „Wir passen auf {held} auf.“ | alle+5 s+3 pause=2 | Die Antworten im Chat überschlagen sich. Irgendwer schickt ein Foto von einem winzigen gestrickten Drachen. | herzen
-> Babysocke als Glücksbringer | s+4 l-1 pause=2 | Sie hängt da jetzt. Jedes Mal, wenn eine 20 fällt, tippt jemand kurz dagegen. | funkeln
-
-§ #pz_baby_nacht pausiert wenn:krise:baby
-{name} schreibt nachts um drei in den Chat: „Wach. Kind auch. Was macht eigentlich {held}?“
-< Eine kleine Geschichte zurückschreiben | l+2 laune+10 xp+3 | Du schreibst, was {held} gerade erlebt. Fünf Absätze. Am Morgen kommt zurück: „Hab's beim Füttern gelesen. Danke.“ | sterne
-> Ein Gute-Nacht-Emoji | laune+2 | 🌙. Es kommt ein Daumen zurück. Und ein Foto von einem sehr wachen Baby.
-
-§ #kz_baby spieler kette
-{name} ist zurück. Augenringe, Spucktuch über der Schulter, aber die Würfel in der Hand. „Ich hab drei Stunden. Lasst sie zählen.“
-< Volle Action | s+5 t+4 laune+10 krise- | Explosionen, Verfolgungsjagd, ein Drache. {name} strahlt wie seit Wochen nicht. | explosion
-> Ganz entspannt einsteigen | t-2 laune+8 alle+3 krise- | Eine gemütliche Taverne, ein bisschen Gerede, ein paar Pläne. Genau richtig. | heilung
-
-§ #kz_baby_2 spieler kette
-{name} ist wieder da – mit Babyphone. Es liegt direkt neben dem Schirm. // Jedes Mal, wenn es knistert, hält der ganze Tisch den Atem an.
-< Flüsternd weiterspielen | s+4 l+2 t-3 laune+8 krise- | Die leiseste Kampfszene aller Zeiten. Der Barbar flüstert seinen Kampfschrei. | zzz
-> Lautstärke runter, sonst normal | t+2 laune+6 krise- | Nach zwanzig Minuten vergisst man das Babyphone. Bis es piept. Dann ist {name} weg. Und zehn Minuten später wieder da.
-
 § #kr_job_start spieler krise:job einmal
 {name} hat einen neuen Job. Probezeit, viel Druck, neue Leute. „Ich schaff es vielleicht nicht jede Woche.“
 < „Dann spielen wir {held} mit, wenn du fehlst.“ | krise=job laune+6 l-2 >>kr_job_spaet | {name} lacht erleichtert. „Aber lasst {h_ihn} nicht sterben.“ – „Keine Versprechen.“
@@ -513,7 +478,7 @@ Krümel, der Babydrache der Gruppe, ist gewachsen. Beim Frühstück hat er die h
 
 § #fx_barde npc wenn:w_barde
 Der mitreisende Barde hat ein neues Lied fertig. Es handelt von der letzten Niederlage der Gruppe. Es hat einen Refrain. Der Refrain ist eingängig.
-< Zuhören | s+6 l-2 | In der nächsten Stadt singen es schon die Kinder. Die Gruppe ist berühmt. Auf eine Art. | musik
+< Zuhören | s+6 l-2 | In der nächsten Stadt singen es schon die Barden. Die Gruppe ist berühmt. Auf eine Art. | musik
 > Den Barden entlassen | l+3 s-2 -w_barde | Er geht mit Würde und einer letzten Strophe über undankbare Helden. | musik
 
 § #fx_auftraggeber schurke phase:kstart wenn:w_auftraggeber einmal

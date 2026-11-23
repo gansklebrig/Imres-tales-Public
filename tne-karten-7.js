@@ -19,7 +19,7 @@
 § #bz_paar_insider spieler bez:paar
 {name} und {p2} lachen über etwas, das nur die beiden verstehen. Es hat mit „dem Ding in Italien“ zu tun. Der Rest des Tisches wartet höflich.
 < Kurz lachen lassen | s+2 t-3 bez+4 alle-1 | Nach einer Minute wischt sich {p2} die Tränen weg. „Sorry. Okay. Wir sind da.“ | lachen
-> „Leute, wir sind im Dungeon.“ | t+3 bez-2 beide-2 | Beide richten sich auf wie ertappte Schulkinder. Der Dungeon geht weiter.
+> „Leute, wir sind im Dungeon.“ | t+3 bez-2 beide-2 | Beide richten sich auf, als wären sie ertappt worden. Der Dungeon geht weiter.
 
 § #bz_paar_auto spieler bez:paar
 {name} und {p2} sind zusammen gekommen und haben im Auto ganz offensichtlich gestritten. Beide reden nur noch mit dir, nicht miteinander.

@@ -22,9 +22,9 @@ Die Brücke reißt. {held} hängt am einen Seil, {p2held} am anderen. Nur eins l
 ~ Zögern | tod tod2 s-6 | Während du überlegst, reißen beide Seile. Niemand am Tisch sagt etwas. Das ist schlimmer als jeder Protest. | schaedel
 
 § #dl_gegengift npc schwer
-Ein Gegengift, zwei Vergiftete: {held} und die kleine Tochter von {npcN}. Niemand sagt etwas.
-< Für {held} | l+4 m+2 laune+4 alle-6 | {held} lebt. Das Mädchen nicht. Die Gruppe verlässt das Dorf noch in derselben Nacht. Am Tisch wird lange über Notwendigkeit geredet. | traenen
-> Für das Kind | tod s+3 l+3 alle+4 | Das Mädchen schlägt die Augen auf. {held} lächelt noch einmal, dann nicht mehr. Ein Ende, über das man noch Jahre redet. | heilung
+Ein Gegengift, zwei Vergiftete: {held} und die Schwester von {npcN}. Niemand sagt etwas.
+< Für {held} | l+4 m+2 laune+4 alle-6 | {held} lebt. Die Schwester nicht. Die Gruppe verlässt das Dorf noch in derselben Nacht. Am Tisch wird lange über Notwendigkeit geredet. | traenen
+> Für die Schwester | tod s+3 l+3 alle+4 | Die Schwester schlägt die Augen auf. {held} lächelt noch einmal, dann nicht mehr. Ein Ende, über das man noch Jahre redet. | heilung
 
 § #dl_wuerfel_drehen wuerfel schwer eile:10
 Hinter dem Schirm: eine 20. Der Oger trifft kritisch, {held} wäre tot – {name}s Herzensheld. Niemand hat den Wurf gesehen.
@@ -54,7 +54,7 @@ Die Gruppe läuft in den Tod: zu viele Kultisten, keine Heilung. Du könntest ei
 > Lassen – es war ein ehrlicher Fehler | l-4 laune+2 laune2-8 | Niemand erfährt es. Außer {p2}, zwei Sessions später, beim Nachlesen. Dann wird es unangenehm.
 
 § #dl_toeten spieler schwer
-{name} will die gefangene Kultistin hinrichten lassen. Sie hat Kinder ermordet. {p2}: „Wir sind doch nicht die Bösen.“ Deine Welt.
+{name} will die gefangene Kultistin hinrichten lassen. Sie hat ein ganzes Dorf ermordet. {p2}: „Wir sind doch nicht die Bösen.“ Deine Welt.
 < Die Welt lässt es zu | l+4 m+3 laune+6 laune2-10 | Es passiert. Die Szene ist kurz und kalt. Am Tisch redet danach niemand für eine Minute. | schaedel
 > Die Wache greift ein | l+3 laune-8 laune2+6 | Die Stadtwache übernimmt. Ein Gericht, ein Urteil – nach dem Gesetz von {ort}. {name} murmelt: „Bürokratie.“
 ^ Die Kultistin bittet um ein letztes Wort | s+3 l+2 t-4 beide+2 | Was sie sagt, verändert alles: Der Befehl kam von jemandem, den die Gruppe kennt. Der Streit am Tisch ist plötzlich egal.
@@ -83,9 +83,9 @@ Der Verräter ist enttarnt: {p2held}. {p2} hat das wochenlang geheim gespielt, m
 ~ Zögern | s-3 laune2-8 | Du zögerst so lange, dass die Szene verpufft. {p2} sagt: „Ich dachte, das wird der große Moment.“
 
 § #dl_leutnant sl schwer
-Ein Leutnant von {schurkeN} liegt besiegt am Boden. Ein Junge stellt sich vor ihn: „Nicht! Das ist mein Vater!“
+Ein Leutnant von {schurkeN} liegt besiegt am Boden. Ein junger Mann stellt sich vor ihn: „Nicht! Das ist mein Vater!“
 < Gnade | l+3 s+3 laune-4 +w_leutnant | Die Gruppe lässt beide gehen. Ob das ein Fehler war, wird sich zeigen. | herzen
-> Der Leutnant weiß zu viel | m+4 l+4 laune+3 alle-5 | Es ist schnell vorbei. Der Junge rennt weg. Am Tisch fühlt sich niemand wie ein Held.
+> Der Leutnant weiß zu viel | m+4 l+4 laune+3 alle-5 | Es ist schnell vorbei. Der junge Mann rennt weg. Am Tisch fühlt sich niemand wie ein Held.
 
 § #dl_leutnant2 npc wenn:w_leutnant
 Ein junger Mann in feindlichen Farben hält die Gruppe auf. „Ihr habt meinen Vater verschont.“ Er zeigt auf eine Geheimtür.
@@ -124,8 +124,8 @@ Du hast {name} einen großen Moment versprochen. Heute könnte {held} ihn bekomm
 > Um eine letzte Session bitten | l+4 laune-6 t-2 | {name} willigt ein. Es wird ein würdiger Abschied, aber man merkt, dass {name} innerlich schon weiter ist.
 
 § #dl_goblinkind npc schwer
-Ein Goblin-Kind hat Essen gestohlen. Die Wache will es hängen. {name}: „Ist doch nur ein Goblin.“ {p2} ist entsetzt.
-< Für das Kind einstehen | l+3 s+2 laune-6 laune2+8 m-2 | Die Gruppe zahlt die Strafe. Das Goblin-Kind folgt ihnen danach in sicherem Abstand. Es heißt, sagt es, Pips.
+Ein alter Goblin hat Essen gestohlen. Die Wache will ihn hängen. {name}: „Ist doch nur ein Goblin.“ {p2} ist entsetzt.
+< Für den Goblin einstehen | l+3 s+2 laune-6 laune2+8 m-2 | Die Gruppe zahlt die Strafe. Der alte Goblin folgt ihnen danach in sicherem Abstand. Er heißt, sagt er, Pips.
 > Nicht eingreifen | m+3 laune+3 laune2-12 bezneu=spannung | Die Szene endet abrupt. {p2} geht kurz auf den Balkon. Es ist nur ein Spiel. Trotzdem.
 
 § #dl_freund_im_weg spieler schwer bez:freunde/paar/geschwister
@@ -139,8 +139,8 @@ Der Tod persönlich bietet einen Handel an: {tot} darf zurückkehren. // Dafür 
 > Den Handel ablehnen | l+4 s-2 | Der Tod lächelt. „Ich frage wieder.“ Und geht. | nebel
 
 § #dl_leben_retten welt schwer eile:12
-Ein Schiff sinkt. Im Wasser: Kinder aus dem Dorf – und der Händler mit dem einzigen Plan zur Festung. Ein Boot.
-< Die Kinder | l+5 s+3 alle+4 plot-1 | Alle Kinder kommen an Land. Der Plan sinkt mit dem Händler. Der Weg zur Festung wird lang. | wellen
+Ein Schiff sinkt. Im Wasser: die Fischer aus dem Dorf – und der Händler mit dem einzigen Plan zur Festung. Ein Boot.
+< Die Fischer | l+5 s+3 alle+4 plot-1 | Alle Fischer kommen an Land. Der Plan sinkt mit dem Händler. Der Weg zur Festung wird lang. | wellen
 > Den Händler | m+5 plot+1 alle-8 | Der Plan ist gerettet. Am Strand bleibt es still. Niemand will darüber reden. | wellen
 ~ Zögern | W12 ? l+3 s+4 : alle-10 s-4 | Ihr springt einfach alle ins Wasser. Irgendwie schafft ihr es, alle zu retten. Glück. :: Ihr springt zu spät. | wellen
 

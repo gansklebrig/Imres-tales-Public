@@ -82,7 +82,7 @@ Der Zauberer der Gruppe hat einen Teleportationsstab gefunden. {name} hat ihn si
 § #ch_npc chaos
 {name} fragt {npcN}: „Willst du mit uns abenteuern? Wir haben Snacks.“
 < Ja! | s+8 m+3 l-3 | {npcN} schließt sich an. Unvorbereitet. In Hausschuhen. | konfetti
-> „Nein, ich hab Kinder“ | l+4 s+3 | {npcN} bleibt. Aber gibt einen Rabatt.
+> „Nein, ich bin verheiratet“ | l+4 s+3 | {npcN} bleibt. Aber gibt einen Rabatt.
 
 § #ch_gift chaos
 „Ich trinke den unbekannten Trank. Alle drei. Gleichzeitig.“

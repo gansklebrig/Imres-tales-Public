@@ -139,11 +139,6 @@ Der Nachbar klingelt und beschwert sich über den Lärm. Dann sieht er die Minia
 < Charakter-Moment | s-4 l+4 laune-8 | {held} hat plötzlich sehr viel Wut auf einen NSC, der verdächtig ähnlich aussieht.
 > Pause | t-4 alle+2 | Zehn Minuten Pause, dann ist alles wieder normal. Fast.
 
-§ #gs2_kinder gast
-Die Kinder des Gastgebers wollen auch mitspielen. Sofort.
-< Kinder-Abenteuer | s+8 l-6 t-3 | Heute kämpfen die Helden gegen das Kitzelmonster. Alle haben Spaß. | konfetti
-> Bettzeit | l+2 s-2 | Mit dem Versprechen eines eigenen Abenteuers am Wochenende gehen sie ins Bett.
-
 § #lg_jahr sl wenn:kamp>2
 Die Welt-Chronik ist inzwischen dick wie ein Regelbuch. Die Spieler fragen nach der Geschichte ihrer Welt.
 < Geschichtsstunde | l+6 s+4 t-6 | Du erzählst von alten Helden, Schurken und gefallenen Städten. Andächtige Stille. | staub

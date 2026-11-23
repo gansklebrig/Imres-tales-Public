@@ -271,7 +271,7 @@ Die Gruppe hat seit drei Sessions keinen Erfolg gehabt. Jeder Plan scheitert.
 
 § #ex_pain4 sl
 Du bemerkst, dass die Spieler sich sichtlich quälen: Die Kampagne ist zu düster geworden.
-< Ein Lichtblick | s+10 l-3 | Ein Dorffest, ein gerettetes Kind, ein lachender Zwerg. Atmen. | sonne
+< Ein Lichtblick | s+10 l-3 | Ein Dorffest, ein geretteter Esel, ein lachender Zwerg. Atmen. | sonne
 > Die Dunkelheit ist das Thema | s-8 l+6 | Es bleibt düster. Wer durchhält, wird es nie vergessen. | nacht
 
 § #ex_pain5 welt
@@ -380,7 +380,7 @@ Du hast eine 3D-Karte aus Pappmaché gebaut. Sie nimmt den halben Tisch ein.
 > Ablehnen | l+5 s-3 | „Der Tod gehört zum Leben.“ Weise. Traurig.
 
 § #gk_prophet gott
-{gott} spricht durch ein Kind: „Der Verräter sitzt an eurem Tisch.“
+{gott} spricht durch einen Bettler: „Der Verräter sitzt an eurem Tisch.“
 < Paranoia! | s+6 l+3 t-4 | Jeder verdächtigt jeden. Großartig. | ausruf
 > Es meint den Wirt | s+4 l-2 | Der Wirt war es. Er hat das Bier verwässert. Skandal!
 

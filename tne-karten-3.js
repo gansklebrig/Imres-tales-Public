@@ -154,11 +154,6 @@ Die Gruppe muss als Schauspieltruppe in eine Burg. {name} hat sofort ein ganzes 
 < Ein Einhorn! | m+6 s+5 l-5 | Das Pferd ist ein Einhorn. Es hat Allergien. | funkeln
 > Ein normales Pferd | l+5 s+2 | Das Pferd heißt Gaul. Es ist zufrieden.
 
-§ #sp_bruder spieler
-{name}: „Mein kleiner Bruder will heute mal mitspielen. Er ist neun.“
-< Kinderfreundlich | s+8 l-5 t-3 | Heute kämpft die Gruppe gegen Kitzelmonster. Der Bruder hat den Spaß seines Lebens. | konfetti
-> Er darf zuschauen | l+3 laune-4 | Der Bruder schaut zehn Minuten zu und fragt dann, wann der Drache kommt.
-
 § #sp_frisch spieler
 {name} hat heute keine Lust auf Kämpfe. „Können wir nicht einfach einkaufen gehen? Im Spiel?“
 < Shoppingtour! | s+6 l+2 t-5 m+4 | Ein Markttag in {ort}. Feilschen, Gerüchte, ein verfluchter Hut. | gold
@@ -196,7 +191,7 @@ Die Gruppe plant seit 45 Minuten den Einbruch in den Turm. Niemand hat bisher ge
 
 § #sp_jemand spieler
 {name}: „Ist {held} eigentlich verheiratet? Ich hab vergessen, was ich mir ausgedacht hab.“
-< Ja, glücklich | l+3 s+4 | {held} hat eine Frau, drei Kinder und eine Ziege daheim.
+< Ja, glücklich | l+3 s+4 | {held} hat eine Frau, drei Hühner und eine Ziege daheim.
 > Es war kompliziert | s+6 l-2 | {held} hat einen Ex. Einen Vampir. Er schreibt noch Briefe.
 
 § #sp_seil spieler
@@ -368,11 +363,6 @@ Die Mitbewohnerin kommt heim und fragt: „Spielt ihr schon wieder dieses Drache
 Der Pizzabote sieht die Würfel und sagt: „Oh, D&D! Ich spiel seit 15 Jahren!“
 < Er erzählt eine Geschichte | s+5 t-5 | Er erzählt von seinem Paladin, der einen Gott verprügelt hat. Er bekommt ein Stück Pizza.
 > Danke, tschüss | t+2 | Er geht. // Er wirkt enttäuscht.
-
-§ #gs_kind gast
-Ein Nachbarskind klingelt: „Darf ich mitspielen? Ich bin ein Drache.“
-< Drache zu Besuch | s+8 l-5 | Ein kleiner Drache besucht die Gruppe. Er will nur spielen. | drache
-> Morgen vielleicht | l+2 s+2 | Das Kind malt euch zum Abschied einen Drachen.
 
 § #gs_alte gast wenn:kamp>1
 Ein ehemaliger Spieler aus einer früheren Runde schaut vorbei. „Na? Lebt mein alter Held noch?“

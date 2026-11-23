@@ -145,9 +145,9 @@ Jemand am Tisch erhascht einen Blick hinter deinen Schirm. Direkt auf deine Noti
 > Kürzen | t+5 s+2 | „Drei Felle reichen auch.“ – „Wirklich?“ – „Wirklich.“
 
 § #npc_kind npc
-Ein Kind läuft weinend auf die Helden zu. „Ein Monster hat meinen Teddy!“
+Eine alte Dame läuft weinend auf die Helden zu. „Ein Monster hat meinen Teddy!“
 < Teddy-Mission! | s+6 l+3 t+3 W10 ? m+3 : tod | Das Monster war ein einsamer Kobold. Er gibt den Teddy zurück und weint. :: Das Monster war kein Kobold. Es war ein Mantikor. | herzen
-> Das Kind ist eine Falle | s+4 l-3 m-3 | Das Kind ist ein Gestaltwandler! Was für ein Klischee. Es funktioniert trotzdem. | ausruf
+> Die Dame ist eine Falle | s+4 l-3 m-3 | Die Dame ist ein Gestaltwandler! Was für ein Klischee. Es funktioniert trotzdem. | ausruf
 
 § #npc_bard npc
 Ein Barde singt in der Taverne ein Lied über die Gruppe. Es ist nicht schmeichelhaft.
