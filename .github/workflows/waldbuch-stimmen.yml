@@ -1,0 +1,45 @@
+# Holt frei lizenzierte Tierstimmen (Wikimedia Commons) für Friedrichs Waldbuch nach pflanzen/stimmen/.
+name: Waldbuch-Tierstimmen holen
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - tools/pflanzen/stimmen.py
+      - tools/pflanzen/stimmen-neu.txt
+      - .github/workflows/waldbuch-stimmen.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: waldbuch-stimmen
+  cancel-in-progress: false
+
+jobs:
+  holen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            tools/pflanzen
+            pflanzen
+      - name: ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+      - name: Holen
+        run: python3 tools/pflanzen/stimmen.py
+      - name: Sichern
+        run: |
+          git config user.name "Waldbuch-Stimmen"
+          git config user.email "actions@users.noreply.github.com"
+          git add pflanzen/stimmen pflanzen/stimmen.json
+          git diff --cached --quiet && echo "nichts Neues" && exit 0
+          git commit -q -m "Waldbuch: Tierstimmen von Wikimedia Commons geholt"
+          for i in 1 2 3 4 5; do
+            git pull -q --rebase origin main && git push -q origin HEAD:main && exit 0
+            sleep 10
+          done
+          exit 1
