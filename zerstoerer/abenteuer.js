@@ -411,9 +411,11 @@
     const lab = inp.device === "touch" ? "✋" : inp.label("use");
     /* Benutzen-Hinweis im gemeinsamen Stil (Eisenplakette + Tastenkappe) */
     const tag = (ev, txt) => { if (!near(ev, 30) || ev.done || ev.welt || (Z.ui && Z.ui.choiceActive)) return; if (Z.ui && Z.ui.worldLabel) Z.ui.worldLabel("ev" + Math.round(ev.x) + "_" + Math.round(ev.y), { x: ev.x, y: ev.y - 36, html: (Z.ui.key("use") || "✋") + " " + esc(txt), jetzt: true }); };
+    const cam = Z.cam;
     for (const ev of evs) {
       if (ev.k === "dieb") continue;
       const x = ev.x, y = ev.y;
+      if (x < cam.x - 60 || x > cam.x + cam.w + 60 || y < cam.y - 10 || y > cam.y + cam.h + 60) continue; /* nur im Bild */
       if (ev.k === "schrein") { c.fillStyle = "#2a2030"; c.fillRect(x - 7, y - 22, 14, 22); poly(c, [x - 9, y - 22, x + 9, y - 22, x, y - 30], "#3a2a44"); if (!ev.done) { c.save(); c.globalCompositeOperation = "lighter"; glow(c, x, y - 14, 18 + Math.sin(t * 3) * 3, "rgba(170,80,255,.5)"); c.restore(); circ(c, x, y - 14, 2.4, "#d0a0ff"); } tag(ev, L(["Opfern", "Sacrifice"])); }
       if (ev.k === "brunnen") { ell(c, x, y - 4, 14, 5, "#4a4448"); ell(c, x, y - 5, 11, 3.4, ev.done ? "#2a3a36" : "#4a7a6a"); c.fillStyle = "#3a3438"; c.fillRect(x - 13, y - 22, 2, 18); c.fillRect(x + 11, y - 22, 2, 18); c.fillRect(x - 13, y - 24, 26, 3); if (!ev.done && Math.random() < 0.05) FX.p({ x: x + (Math.random() - 0.5) * 16, y: y - 6, vx: 0, vy: -10, life: 0.8, size: 1.4, col: "#ffd27a", kind: "glow", add: true }); tag(ev, L(["60 Gold opfern", "Offer 60 gold"])); }
       if (ev.k === "kaefig") { if (!ev.done) { Z.drawNPC(c, "A", x, y, t, 1); c.strokeStyle = "#5a5056"; c.lineWidth = 1.2; for (let i = -10; i <= 10; i += 4) { c.beginPath(); c.moveTo(x + i, y); c.lineTo(x + i, y - 26); c.stroke(); } c.fillStyle = "#4a4046"; c.fillRect(x - 12, y - 28, 24, 3); c.fillRect(x - 12, y - 2, 24, 2); tag(ev, L(["Befreien", "Free"])); } }

@@ -362,7 +362,9 @@
          ergibt auf 60-, 90-, 120- und 144-Hz-Schirmen gleich weiche Bewegung ohne Ruckeln. */
       let first = true;
       if (sdt > 0) {
-        const n = Math.min(8, Math.max(1, Math.ceil(sdt / STEP - 0.01))), h = sdt / n;
+        /* Handheld (Stufe 0): Teilschritte ≤ 1/60 s – halbiert die Rechenlast; moveBody unterteilt ohnehin in ≤ 5-px-Schritte */
+        const st = Z.gq && Z.gq.lean ? STEP * 2 : STEP;
+        const n = Math.min(8, Math.max(1, Math.ceil(sdt / st - 0.01))), h = sdt / n;
         for (let i = 0; i < n; i++) { tick(h, first); first = false; }
         inp.endFrame();
       }

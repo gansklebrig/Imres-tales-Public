@@ -54,9 +54,9 @@
     tabsForge: [["Waffen", "Fähigkeiten", "Lager", "Glutschmiede"], ["Weapons", "Skills", "Camp", "Ember forge"]], tabsCodex: [["Waffen", "Fähigkeiten", "Gegner", "Bosse", "Enden", "Statistik"], ["Weapons", "Skills", "Enemies", "Bosses", "Endings", "Stats"]],
     ups: { trank: [["Zusätzlicher Heiltrank", "Extra healing potion"], ["Eine Ladung mehr pro Lauf.", "One more charge per run."]], zaeh: [["Zähigkeit", "Toughness"], ["+10 Leben pro Stufe.", "+10 health per level."]], klingen: [["Geschliffene Klingen", "Honed blades"], ["+5 % Schaden pro Stufe.", "+5% damage per level."]], haendler: [["Händlergunst", "Merchant's favour"], ["Händler verlangen 10 % weniger.", "Merchants charge 10% less."]] },
     tut: ["Steuerung", "Controls"],
-    ctrlKeys: ["<b>A/D</b> laufen · <b>Leertaste</b> springen (zweimal: Doppelsprung) · <b>Shift</b> rollen (unverwundbar)<br><b>J</b> / Linksklick: Waffe 1 · <b>U</b> / Rechtsklick: Waffe 2 · <b>Q</b> und <b>O</b>: Fähigkeiten<br><b>R</b> Heiltrank · <b>E</b> benutzen / aufheben · <b>W</b> Leiter hoch · <b>S + Leertaste</b> durch Stege fallen<br><b>S + Angriff</b> in der Luft: Sturzangriff · <b>M</b> Karte · <b>Esc</b> Pause",
-      "<b>A/D</b> move · <b>Space</b> jump (twice: double jump) · <b>Shift</b> roll (invulnerable)<br><b>J</b> / left click: weapon 1 · <b>U</b> / right click: weapon 2 · <b>Q</b> and <b>O</b>: skills<br><b>R</b> healing potion · <b>E</b> use / pick up · <b>W</b> climb ladder · <b>S + Space</b> drop through ledges<br><b>S + attack</b> in the air: plunge · <b>M</b> map · <b>Esc</b> pause"],
-    ctrlPad: ["<b>A</b> springen · <b>B</b> rollen · <b>X</b> Waffe 1 · <b>Y</b> Waffe 2 · <b>LB/RB</b> Fähigkeiten · <b>LT</b> Trank · <b>RT</b> benutzen · <b>Select</b> Karte · <b>Start</b> Pause", "<b>A</b> jump · <b>B</b> roll · <b>X</b> weapon 1 · <b>Y</b> weapon 2 · <b>LB/RB</b> skills · <b>LT</b> potion · <b>RT</b> use · <b>Select</b> map · <b>Start</b> pause"],
+    ctrlKeys: ["<b>A/D</b> laufen · <b>Leertaste</b> springen (zweimal: Doppelsprung) · <b>Shift</b> rollen (unverwundbar)<br><b>J</b> / Linksklick: Waffe 1 · <b>U</b> / Rechtsklick: Waffe 2 · <b>Q</b> und <b>O</b>: Fähigkeiten<br><b>R</b> Heiltrank · <b>E</b> benutzen / aufheben · <b>W</b> Leiter hoch · <b>S + Leertaste</b> durch Stege fallen<br><b>W + Angriff</b>: Aufwärtsangriff · <b>S + Angriff</b> in der Luft: Sturzangriff · <b>M</b> Karte · <b>Esc</b> Pause",
+      "<b>A/D</b> move · <b>Space</b> jump (twice: double jump) · <b>Shift</b> roll (invulnerable)<br><b>J</b> / left click: weapon 1 · <b>U</b> / right click: weapon 2 · <b>Q</b> and <b>O</b>: skills<br><b>R</b> healing potion · <b>E</b> use / pick up · <b>W</b> climb ladder · <b>S + Space</b> drop through ledges<br><b>W + attack</b>: upward attack · <b>S + attack</b> in the air: plunge · <b>M</b> map · <b>Esc</b> pause"],
+    ctrlPad: ["<b>A</b> springen · <b>B</b> rollen · <b>X</b> Waffe 1 · <b>Y</b> Waffe 2 · <b>LB/RB</b> Fähigkeiten · <b>LT</b> Trank · <b>RT</b> benutzen · <b>Select</b> Karte · <b>Start</b> Pause · Stick hoch + Waffe: Aufwärtsangriff", "<b>A</b> jump · <b>B</b> roll · <b>X</b> weapon 1 · <b>Y</b> weapon 2 · <b>LB/RB</b> skills · <b>LT</b> potion · <b>RT</b> use · <b>Select</b> map · <b>Start</b> pause · stick up + weapon: upward attack"],
     ctrlTouch: ["Links ziehen: laufen, klettern. Rechts: Springen, Rolle, Waffen, Fähigkeiten, Trank. Das Hand-Symbol hebt auf und öffnet Türen.", "Drag on the left: move, climb. Right: jump, roll, weapons, skills, potion. The hand button picks up and opens doors."],
     tips: [["Leuchtet ein Gegner auf, holt er aus. Rolle hindurch – während der Rolle kann dich nichts treffen.", "When an enemy flashes, it's winding up. Roll through – nothing can hit you mid-roll."],
       ["Rote Doppel-Ausrufezeichen lassen sich nicht blocken. Ausweichen!", "Red double exclamation marks can't be blocked. Dodge!"],
@@ -102,14 +102,16 @@
   /* DOM nur anfassen, wenn sich etwas ändert */
   const hudCache = {};
   function setTxt(id, v, hide) { const c = hudCache[id] || (hudCache[id] = { el: document.getElementById(id) }); if (!c.el) return; if (c.v !== v) { c.el.textContent = v; c.v = v; } if (c.h !== !!hide) { c.el.hidden = !!hide; c.h = !!hide; } }
+  function sty(el, k, v) { if (el && el["_st" + k] !== v) { el["_st" + k] = v; el.style[k] = v; } }
   function setHTML(id, v) { const c = hudCache[id] || (hudCache[id] = { el: document.getElementById(id) }); if (c.el && c.v !== v) { c.el.innerHTML = v; c.v = v; } }
   const areaTitle = () => (Z.level.hub ? L(Z.biome.name) : Z.level.passage ? L(["Durchgang", "Passage"]) : Z.areaName(Z.level.id));
   function updateHud(dt) {
     const P = Z.player; if (!P || !Z.level) return;
     const hp = Math.max(0, P.hp), mx = P.hpMax;
-    $("#hpfill").style.width = (hp / mx * 100) + "%";
-    $("#hprally").style.width = (Math.min(mx, hp + P.rally) / mx * 100) + "%";
-    $("#hptxt").textContent = Math.ceil(hp) + " / " + mx;
+    /* Leistung (Handheld): DOM nur bei Änderung anfassen – jede Schreibung erzwingt sonst Stil/Layout je Bild */
+    sty($("#hpfill"), "width", (hp / mx * 100) + "%");
+    sty($("#hprally"), "width", (Math.min(mx, hp + P.rally) / mx * 100) + "%");
+    setTxt("hptxt", Math.ceil(hp) + " / " + mx);
     $("#hpbar").classList.toggle("fluch", P.curse > 0);
     setHTML("pots", Array.from({ length: P.potMax }, (_, i) => '<i class="' + (i < P.potions ? "voll" : "") + '"></i>').join(""));
     /* kompakt: Gold immer, getragene Splitter nur wenn vorhanden, Lager-Bank nur im Lager, Fluch nur wenn aktiv */
@@ -130,7 +132,7 @@
         if (!wd || !wd.shoot) delete P.mag[s];
         else { P.mag[s].t -= dt; k = P.mag[s].t / (wd.shoot.reload || 1); if (P.mag[s].t <= 0) P.mag[s].n = wd.shoot.mag + (Z.metaLvl(it.id) >= 3 ? 2 : 0); }
       }
-      se.cd.style.height = Math.max(0, Math.min(1, k)) * 100 + "%";
+      sty(se.cd, "height", Math.max(0, Math.min(1, k)) * 100 + "%");
       se.el.classList.toggle("aktiv", !!(P.act && P.act.slot === s));
       se.el.classList.toggle("stumm", s[0] === "s" && P.st.silence > 0);
       const lab = inp.label(s); if (se.lab !== lab) { se.lab = lab; se.k.textContent = lab; se.k.hidden = !lab; }
@@ -147,18 +149,18 @@
     if (areaShow > 0) areaShow -= dt;
     /* Boss */
     const b = Z.boss;
-    if (b && !Z.bossDefeated && !b.def.noBar) { bossbar.hidden = false; $("#bossfill").style.width = Math.max(0, b.hp / b.hpMax * 100) + "%"; }
+    if (b && !Z.bossDefeated && !b.def.noBar) { bossbar.hidden = false; sty($("#bossfill"), "width", Math.max(0, b.hp / b.hpMax * 100) + "%"); }
     else bossbar.hidden = true;
     /* Interaktions-Hinweis */
     const o = proxyOf(Z.interactTarget);
     if (o && !ui.modalOpen && !ui.choiceActive && !P.dead) {
       const [sx, sy] = o.type === "obj" ? worldToScreen(o.o.x, o.o.y - (o.o.h || 30)) : worldToScreen(o.type === "pickup" ? o.p.x : (o.d || o.s).x * T + 8, o.type === "pickup" ? o.p.y - (o.p.rack ? 30 : 22) : ((o.d || o.s).y + 1) * T - 40);
       const hz = hudZoom();
-      prompt.hidden = false; prompt.style.transform = "translate(" + Math.round(sx / hz) + "px," + Math.round(sy / hz) + "px) translate(-50%,-100%)";
+      if (prompt.hidden) prompt.hidden = false; sty(prompt, "transform", "translate(" + Math.round(sx / hz) + "px," + Math.round(sy / hz) + "px) translate(-50%,-100%)");
       const key = inp.device === "touch" ? "✋" : inp.label("use");
-      prompt.innerHTML = '<kbd>' + key + "</kbd> " + esc(promptLabel(o));
+      const ph = '<kbd>' + key + "</kbd> " + esc(promptLabel(o)); if (prompt._h !== ph) { prompt._h = ph; prompt.innerHTML = ph; }
       showCard(o);
-    } else { prompt.hidden = true; card.hidden = true; }
+    } else { if (!prompt.hidden) prompt.hidden = true; if (!card.hidden) card.hidden = true; }
     /* Karte */
     mapT -= dt; if (mapT <= 0) { mapT = 0.2; drawMinimap(); }
   }
@@ -290,7 +292,8 @@
   };
   function rgbaHex(h, a) { const n = parseInt(String(h).replace("#", "").padEnd(6, "0").slice(0, 6), 16); return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")"; }
   const cvEl = document.getElementById("cv");
-  function worldToScreen(x, y) { const k = Z.gfx.scale / (cvEl.width / (cvEl.clientWidth || 1)); return [(x - Z.cam.x) * k, (y - Z.cam.y) * k]; }
+  /* CSS-Breite aus dem Stil (von resize gesetzt) statt clientWidth – liest kein Layout und erzwingt so keinen Reflow je Bild */
+  function worldToScreen(x, y) { const k = Z.gfx.scale / (cvEl.width / (parseFloat(cvEl.style.width) || cvEl.clientWidth || 1)); return [(x - Z.cam.x) * k, (y - Z.cam.y) * k]; }
   /* Hinweis und Karte stehen unter CSS-zoom (--hud): Bildschirmkoordinaten durch den Zoom teilen, sonst rutschen sie auf großen Bildschirmen weg */
   let hudZ = 1, hudZT = 0;
   function hudZoom() { const n = performance.now(); if (n - hudZT > 500) { hudZT = n; hudZ = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hud")) || 1; } return hudZ; }
@@ -418,7 +421,7 @@
   /* Element mit Unterkante-Mitte an eine Weltposition hängen (CSS-zoom des HUD berücksichtigt) */
   function placeAt(el, wx, wy, dy) {
     const [sx, sy] = worldToScreen(wx, wy), hz = hudZoom();
-    el.style.transform = "translate(" + Math.round(sx / hz) + "px," + Math.round(sy / hz + (dy || 0)) + "px) translate(-50%,-100%)";
+    sty(el, "transform", "translate(" + Math.round(sx / hz) + "px," + Math.round(sy / hz + (dy || 0)) + "px) translate(-50%,-100%)");
   }
   ui.placeAt = placeAt;
 
@@ -465,7 +468,7 @@
   Z.bossSay = msg => ui.toast("<i>" + esc(msg) + "</i>", 2200);
   ui.onArea = (id, B, lv) => {
     hud.hidden = false; title.hidden = true;
-    areaShow = 5.5; ui.clearLabels(); ui.choiceActive = null; choice.hidden = true;
+    areaShow = 5.5; ui.clearLabels(); ui.choiceActive = null; choice.hidden = true; bubble.hidden = true; /* Sprechblase gehört zum alten Gebiet */
     if (lv.passage) try { passageAuslage(lv); } catch (e) { console.error(e); }
     if (lv.hub) ui.banner(L(B.name), L(["Hier beginnt jeder Lauf. Mit leeren Händen.", "Every run begins here. Empty-handed."]));
     else if (lv.passage) ui.banner(L(["Durchgang", "Passage"]), L(["Weiter nach: ", "Onward to: "]) + Z.areaName(lv.to));
@@ -500,7 +503,7 @@
     if (ui.modalOpen && ui.noEsc && !opts.noEsc && !opts.force) { if (modalQueue.length < 4) modalQueue.push([html, opts]); return; }
     if (inp.capture) inp.capture = null;
     modal.innerHTML = '<div class="mbox ' + (opts.cls || "") + '">' + html + "</div>";
-    modal.hidden = false; ui.modalOpen = true; Z.paused = true; ui.onClose = opts.onClose || null; ui.noEsc = !!opts.noEsc;
+    modal.hidden = false; ui.modalOpen = true; { const bb = document.getElementById("bubble"); if (bb) bb.hidden = true; } Z.paused = true; ui.onClose = opts.onClose || null; ui.noEsc = !!opts.noEsc;
     /* Schutz vor „Durchrutschen“: Knopf/Taste, mit der das Fenster geöffnet wurde (z. B. Benutzen beim Aufheben),
        oder ein prellender Trigger lösen hier nichts aus – erst nach dem Loslassen bzw. nach einer kurzen Schonzeit */
     confirmGuard.t = performance.now(); confirmGuard.held = { jump: inp.held.jump, a1: inp.held.a1, use: inp.held.use };
@@ -690,6 +693,7 @@
       sl("master", L(["Gesamtlautstärke", "Master volume"]), v.master) + sl("music", L(["Musik", "Music"]), v.music) + sl("sfx", L(["Effekte", "Effects"]), v.sfx) + sl("amb", L(["Geräuschkulisse", "Ambience"]), v.amb) +
       '<label class="regler">' + L(["Bildschirmwackeln", "Screen shake"]) + '<input type="range" min="0" max="100" value="' + Math.round(s.shake * 100) + '" data-shake="1"></label>' +
       '<label class="regler">' + L(["Größe der Touch-Knöpfe", "Touch button size"]) + '<input type="range" min="70" max="140" value="' + Math.round(s.touchSize * 100) + '" data-touch="1"></label>' +
+      '<label class="schalter">' + L(["Textgröße", "Text size"]) + ' <select data-textsize="1">' + [["klein", L(["klein", "small"])], ["normal", L(["normal", "normal"])], ["gross", L(["groß", "large"])], ["riesig", L(["sehr groß", "very large"])]].map(([v, n]) => '<option value="' + v + '"' + ((s.textSize || "normal") === v ? " selected" : "") + ">" + esc(n) + "</option>").join("") + "</select></label>" +
       '<label class="schalter">' + L(["Hinweise im Spiel", "In-game hints"]) + ' <select data-hint="1">' + [["alle", L(["alle", "all"])], ["wenige", L(["wenige (nur Wichtiges)", "few (important only)"])], ["keine", L(["keine", "none"])]].map(([v, n]) => '<option value="' + v + '"' + ((s.hinweise || "alle") === v ? " selected" : "") + ">" + esc(n) + "</option>").join("") + "</select></label>" +
       ck("cinePan", L(["Kamerafahrt zum Ausgang beim Betreten", "Camera pan to the exit on arrival"]), !!s.cinePan) + ck("presentOff", L(["Fundvorführung aus", "Turn off item showcase"]), !!s.presentOff) +
       ck("showDmg", L(["Schadenszahlen", "Damage numbers"]), s.showDmg) + ck("flashes", L(["Bildschirmblitze", "Screen flashes"]), s.flashes) + ck("vib", L(["Vibration", "Vibration"]), s.vib !== false) +
@@ -705,6 +709,7 @@
     modal.querySelector("[data-dead]").oninput = e => { Z.settings.dead = e.target.value / 100; };
     modal.querySelector("[data-touch]").oninput = e => { Z.settings.touchSize = e.target.value / 100; touchSync(); };
     modal.querySelectorAll("[data-set]").forEach(c => c.onchange = () => { Z.settings[c.dataset.set] = c.checked; if (c.dataset.set === "vib") inp.vib = c.checked; });
+    modal.querySelector("[data-textsize]").onchange = e => { Z.settings.textSize = e.target.value; Z.saveSettings(); fitText(); const sel = modal.querySelector("[data-textsize]"); if (sel) sel.focus({ preventScroll: true }); };
     modal.querySelector("[data-hint]").onchange = e => { Z.settings.hinweise = e.target.value; Z.saveSettings(); };
     modal.querySelector("[data-lang]").onchange = e => { Z.settings.lang = e.target.value; Z.saveSettings(); closeModal(); for (const k in slotEls) slotEls[k].uid = -9; ui.settings(); };
   };
@@ -810,7 +815,7 @@
     const pad = inp.device === "pad";
     const row = a => ui.kbd(pad ? inp.label(a) : inp.keyName(inp.keys[a][0] || inp.keys[a][1])) + " " + esc(L(ACT_NAMES[a]));
     return (pad ? L(["Linker Stick / Steuerkreuz laufen · ", "Left stick / D-pad move · "]) : ui.kbd(inp.keyName(inp.keys.left[0])) + ui.kbd(inp.keyName(inp.keys.right[0])) + " " + L(["laufen · ", "move · "])) +
-      ["jump", "roll", "a1", "a2", "s1", "s2", "potion", "use", "map", "pause"].map(row).join(" · ") + (pad ? "" : L([" · Linksklick/Rechtsklick: Waffe 1/2 · Runter + Sprung: durch Stege fallen · Runter + Angriff in der Luft: Sturzangriff", " · Left/right click: weapon 1/2 · Down + jump: drop through ledges · Down + attack in the air: plunge"]));
+      ["jump", "roll", "a1", "a2", "s1", "s2", "potion", "use", "map", "pause"].map(row).join(" · ") + L([" · Oben + Angriff: Aufwärtsangriff (in der Luft: Aufwärts-Schwung)", " · Up + attack: upward attack (in the air: rising swing)"]) + (pad ? "" : L([" · Linksklick/Rechtsklick: Waffe 1/2 · Runter + Sprung: durch Stege fallen · Runter + Angriff in der Luft: Sturzangriff", " · Left/right click: weapon 1/2 · Down + jump: drop through ledges · Down + attack in the air: plunge"]));
   }
   ui.controls = () => {
     const padOn = !!inp.lastPad;
@@ -904,7 +909,15 @@
   /* Sprechblase über einer Figur im Lager */
   const bubble = $("#bubble"); let bubbleT = 0, bubbleAt = null;
   ui.say = (wx, wy, who, txt, ms) => { bubble.innerHTML = (who ? "<b>" + esc(who) + "</b>" : "") + esc(txt); bubble.hidden = false; bubbleAt = [wx, wy]; bubbleT = (ms || 4200) / 1000; };
-  function bubbleTick(dt) { if (bubble.hidden) return; bubbleT -= dt; if (bubbleT <= 0 || ui.modalOpen) { bubble.hidden = true; return; } const [x, y] = worldToScreen(bubbleAt[0], bubbleAt[1]); bubble.style.transform = "translate(" + Math.round(x) + "px," + Math.round(y) + "px) translate(-50%,-100%)"; }
+  /* steht unter zoom (--hud): Bildschirmkoordinaten durch den Zoom teilen und die Blase im sichtbaren Bereich halten */
+  function bubbleTick(dt) {
+    if (bubble.hidden) return; bubbleT -= dt; if (bubbleT <= 0 || ui.modalOpen) { bubble.hidden = true; return; }
+    const [x, y] = worldToScreen(bubbleAt[0], bubbleAt[1]), hz = hudZoom(), w = bubble.offsetWidth, h = bubble.offsetHeight;
+    const vw = innerWidth / hz, m = 8;
+    const bx = Math.max(m, Math.min(vw - w - m, x / hz - w / 2)), by = Math.max(m, y / hz - h);
+    bubble.style.transform = "translate(" + Math.round(bx) + "px," + Math.round(by) + "px)";
+    bubble.style.setProperty("--zipfel", Math.round(Math.max(12, Math.min(w - 12, x / hz - bx))) + "px");
+  }
   ui.npc = id => {
     const lines = Z.CAMP_TALK[id];
     const s = Z.level.props.find(p => p.id === id);
@@ -1213,17 +1226,33 @@
   /* Splitter-Anzeige: Bank im Lager */
   document.addEventListener("visibilitychange", () => { if (document.hidden && Z.level && !ui.modalOpen && Z.run) ui.pause(); });
 
-  /* Handheld / kleine Bildschirme (z. B. 640×480, 800×480): Schrift im HUD nie winzig, Fenster kompakter.
-     pracht.js setzt --hud/--ui nach Bildschirmgröße; hier nur eine Untergrenze für kleine Bildschirme. */
-  function fitKlein() {
+  /* ---------- Schriftgröße: Oberfläche wächst mit der Bildschirmhöhe ----------
+     Hier ist die letzte Instanz für --hud (HUD, Meldungen, Weltschilder, Sprechblasen) und --ui (alle Fenster):
+     pracht.js setzt beim Größenwechsel Vorschläge, fitText läuft danach (setTimeout) und überschreibt sie.
+     Maßstab ist die HÖHE (Ultrawide 3440×1440 = 2560×1440); die Breite begrenzt nur bei schmalen Fenstern.
+     Ziel: Fließtext in Fenstern ≈ 1,8–1,9 % der Bildschirmhöhe (1080p ≈ 21 px, 1440p ≈ 28 px), kleine Texte ≥ ~1,3 %.
+     Einstellung „Textgröße“ (Z.settings.textSize: klein/normal/gross/riesig) multipliziert beides. */
+  const TEXTSIZE = { klein: 0.86, normal: 1, gross: 1.17, riesig: 1.34 };
+  ui.textFactor = () => TEXTSIZE[Z.settings.textSize] || 1;
+  function fitText() {
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
     const H = innerHeight, W = innerWidth, de = document.documentElement, klein = H <= 620 || W <= 900;
+    const coarse = matchMedia("(pointer: coarse)").matches, tg = ui.textFactor();
     de.classList.toggle("handheld", klein);
-    if (!klein) return;
-    const cur = parseFloat(de.style.getPropertyValue("--hud")) || 1;
-    de.style.setProperty("--hud", Math.max(cur, Math.min(1, H / 500)).toFixed(3));
+    let hud, uiz;
+    if (coarse) { hud = clamp(Math.min(H / 420, W / 860), 0.78, 1.25); uiz = clamp(H / 430, 0.8, 1.15); }
+    else { hud = clamp(Math.min(W / 1280, H / 720), 0.72, 3.2); uiz = clamp(Math.min(W / 1150, Math.max(H / 780, Math.min(1, H / 700))), 0.88, 3.2); }
+    if (klein) hud = Math.max(hud, Math.min(1, H / 500));
+    /* HUD wächst mit der Textgröße nur gedämpft mit (Spielfeld frei halten) */
+    hud *= 1 + (tg - 1) * 0.6; uiz *= tg;
+    /* nie so groß, dass ein schmales Fenster (520 px) nicht mehr in die Breite passt oder die Höhe unter ~400 px fällt */
+    uiz = Math.min(uiz, Math.max(0.8, W / 560), Math.max(0.8, H / 400));
+    de.style.setProperty("--hud", hud.toFixed(3)); de.style.setProperty("--ui", uiz.toFixed(3)); de.style.setProperty("--tg", tg.toFixed(2));
+    de.dataset.textgroesse = Z.settings.textSize || "normal";
     hudZT = 0;
   }
-  addEventListener("resize", () => setTimeout(fitKlein, 0)); addEventListener("orientationchange", () => setTimeout(fitKlein, 260)); fitKlein();
+  ui.applyText = fitText;
+  addEventListener("resize", () => setTimeout(fitText, 0)); addEventListener("orientationchange", () => setTimeout(fitText, 260)); fitText();
 
   /* Start */
   showTitle();

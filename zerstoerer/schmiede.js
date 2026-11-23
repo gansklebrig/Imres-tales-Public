@@ -633,7 +633,7 @@
     "@media (max-height:560px){.glutamboss .gb-bild{max-width:330px;margin:0 auto 4px}.glutamboss h2{margin-bottom:4px}}",
     ".glutamboss .bank .gld{color:#e5b454}.glutamboss .bank .glt{color:#ffa040;margin-left:8px}",
     ".gb-haende{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}",
-    ".gb-hand{border:1px solid #33241f;border-radius:6px;padding:8px 10px;background:rgba(255,235,200,.03)}.gb-kopf{font-size:11px;color:#a99a8b;font-weight:800;margin-bottom:3px}",
+    ".gb-hand{border:1px solid #33241f;border-radius:6px;padding:8px 10px;background:rgba(255,235,200,.03)}.gb-kopf{font-size:12px;color:#a99a8b;font-weight:800;margin-bottom:3px}",
     ".gb-name{font-size:16px}.gb-runen span{margin-right:6px;font-weight:700}.gb-pips{display:flex;gap:4px;margin:4px 0}.gb-pips i{width:10px;height:10px;transform:rotate(45deg);background:#3a2c2c;border:1px solid #5a4040;display:block}.gb-pips i.an{background:var(--pc);border-color:var(--pc);box-shadow:0 0 6px var(--pc)}",
     ".werte{border-collapse:collapse;margin:4px 0;font-size:12.5px;width:100%}.werte th{text-align:left;color:#a99a8b;font-weight:700;padding:1px 8px 1px 0}.werte td{padding:1px 4px;font-variant-numeric:tabular-nums}.werte .pf{color:#6a5a5a}.werte .neu{color:#ffd27a;font-weight:800}",
     ".gb-hand button{width:100%;margin-top:6px;padding:7px 10px;border-radius:6px;border:1px solid #5e4a3c;border-top-color:#7a624c;border-bottom-color:#160f0c;background:linear-gradient(#3e2a1c,#2a1a10);color:#f0e6d4;font-weight:800;text-align:left;box-shadow:0 2px 0 rgba(0,0,0,.45)}.gb-hand button:focus,.gb-hand button:hover:not(:disabled){border-color:#e5b454;box-shadow:0 0 14px rgba(229,180,84,.3)}.gb-hand button:disabled{opacity:.5}",
@@ -642,7 +642,7 @@
     ".runen3 button{border-color:var(--c)!important}.runen3 .rz{color:var(--c);font-size:20px}",
     ".haende{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 6px}.haende .hand{padding:4px 10px;border-radius:6px;border:1px solid #33241f;background:rgba(255,235,200,.03);font-size:13px}.haende .hand.leer{border-color:#c23b3f}",
     ".warnung{color:#ffb090;font-weight:700;border-left:3px solid #c23b3f;padding-left:8px;margin:4px 0}",
-    ".rollen .nutzen{color:#e8c890;font-size:11px}"
+    ".rollen .nutzen{color:#e8c890;font-size:12px}"
   ].join("\n");
   document.head.appendChild(css);
   let hudEls = null;

@@ -26,13 +26,13 @@
   --eisen:#140e0d;--eisen2:#241a16;--eisen3:#3b2e28;--eisenk:#6e5a48;
   --samt:#1f1117;--samt2:#2b1820;
   --perg:#ecdcb4;--perg2:#d3b986;--tinte:#2a1810;--tinte2:#5a3a24;
-  --text:#f0e6d4;--mute:#ab9c8c;--mute2:#7d6f63;
+  --text:#f0e6d4;--mute:#ab9c8c;--mute2:#9a8b7b;
   --gold:#e5b454;--gold2:#ffd27a;--gold3:#8a6420;
   --blut:#c23b3f;--blut2:#7a1418;--blood:#c23b3f;
   --rune:#b07cff;--rune2:#5a2a8a;
   --gift:#7fd36a;--good:#e5b454;--ember:#ff7a3a;
   --fd:'IM Fell English SC','Palatino Linotype',Palatino,Georgia,serif;--fb:'Alegreya Sans','Trebuchet MS',system-ui,sans-serif;
-  --fs-xs:11px;--fs-s:13px;--fs-m:15px;--fs-l:18px;--fs-xl:24px;--fs-xxl:32px;
+  --fs-xs:12px;--fs-s:13px;--fs-m:15px;--fs-l:18px;--fs-xl:24px;--fs-xxl:32px;
   --sp1:4px;--sp2:8px;--sp3:12px;--sp4:16px;--sp5:24px;
   --rad:6px;--weich:cubic-bezier(.2,.75,.25,1);
   /* sicherer 16:9-Bereich (Ultrawide): HUD bleibt im Blickfeld */
@@ -99,7 +99,7 @@ body:has(#padhint:not([hidden])) .mbox{max-height:calc((100vh - 70px) / var(--ui
 .slot canvas{width:40px;height:40px;position:absolute;left:4px;top:4px}
 .slot .cd{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.65);border-radius:0 0 5px 5px}
 .slot .k{position:absolute;top:-9px;left:-8px;font-size:10px!important;margin:0}
-.slot .n{opacity:0;transition:opacity .4s;position:absolute;bottom:-15px;left:50%;transform:translateX(-50%);font-size:10px;white-space:nowrap;color:var(--mute);font-weight:700;text-shadow:0 1px 2px #000;max-width:62px;overflow:hidden;text-overflow:ellipsis}
+.slot .n{opacity:0;transition:opacity .4s;position:absolute;bottom:-15px;left:50%;transform:translateX(-50%);font-size:11px;white-space:nowrap;color:var(--mute);font-weight:700;text-shadow:0 1px 2px #000;max-width:62px;overflow:hidden;text-overflow:ellipsis}
 .slot.neu .n,.slot:hover .n{opacity:1}
 .slot:hover .n{max-width:none;z-index:3}
 .slot.aktiv{border-color:#fff3c0;box-shadow:0 0 0 1px #000,0 0 12px rgba(255,220,140,.5)}
@@ -122,7 +122,7 @@ body:has(#padhint:not([hidden])) .mbox{max-height:calc((100vh - 70px) / var(--ui
 .ic-kopf .lv{color:var(--gold);font-weight:800}
 #card p,.ic p{margin:4px 0}
 .aff{margin:4px 0;padding-left:16px;color:#e8d0a0}
-.tags span{display:inline-block;font-size:10px;padding:0 6px;margin:0 3px 3px 0;border-radius:8px;background:#2a1e22;color:var(--mute)}
+.tags span{display:inline-block;font-size:11px;padding:0 6px;margin:0 3px 3px 0;border-radius:8px;background:#2a1e22;color:var(--mute)}
 .meister{color:var(--gold)}.gesperrt{color:#6a5a5a}
 .mul{color:var(--mute);font-size:var(--fs-xs)}
 .ic-fluch{background:linear-gradient(90deg,#3a1046,#1a0a20);border:1px solid var(--rune);border-radius:6px;padding:4px 7px;margin-bottom:5px;font-size:12px;color:#e8c8ff}
@@ -132,11 +132,11 @@ body:has(#padhint:not([hidden])) .mbox{max-height:calc((100vh - 70px) / var(--ui
 #choice .ch-reihe{display:flex;gap:6px}
 #choice button{flex:1;background:linear-gradient(#3a2a24,#241915);border:1px solid #5e4a3c;border-radius:6px;padding:5px 8px;text-align:left;font-size:var(--fs-s);line-height:1.25;color:var(--text)}
 #choice button:hover{border-color:var(--gold)}
-#choice button small{display:block;font-size:10px}
+#choice button small{display:block;font-size:11px}
 #choice .abbr{color:var(--mute);flex:0 0 auto;text-align:center;font-size:var(--fs-xs);padding:3px 8px}
-#bubble{position:fixed;left:0;top:0;z-index:12;pointer-events:none;max-width:min(320px,70vw);background:linear-gradient(#f2e4c2,#e2cc9c);color:var(--tinte);border:1px solid #8a6a3a;border-radius:8px;padding:6px 10px;font-size:var(--fs-s);line-height:1.35;box-shadow:0 6px 20px rgba(0,0,0,.5)}
-#bubble::after{content:"";position:absolute;left:50%;bottom:-7px;margin-left:-7px;border:7px solid transparent;border-bottom:0;border-top-color:#e2cc9c}
-#bubble b{display:block;font-family:var(--fd);font-weight:400;font-size:var(--fs-s);color:var(--blut2);letter-spacing:.02em}
+#bubble{position:fixed;left:0;top:0;z-index:12;pointer-events:none;width:max-content;max-width:min(340px,calc(80vw / var(--hud,1)));background:linear-gradient(#f2e4c2,#e2cc9c);color:var(--tinte);border:1px solid #8a6a3a;border-radius:8px;padding:6px 11px 7px;font-size:var(--fs-m);line-height:1.38;box-shadow:0 6px 20px rgba(0,0,0,.5);zoom:var(--hud,1)}
+#bubble::after{content:"";position:absolute;left:var(--zipfel,50%);bottom:-7px;margin-left:-7px;border:7px solid transparent;border-bottom:0;border-top-color:#e2cc9c}
+#bubble b{display:block;font-family:var(--fd);font-weight:400;font-size:var(--fs-m);color:var(--blut2);letter-spacing:.02em;line-height:1.2}
 
 /* Weltschilder (Z.ui.worldLabel): kleine Plaketten, die an Weltpositionen hängen */
 #welt{position:fixed;inset:0;z-index:11;pointer-events:none;overflow:hidden}
@@ -164,6 +164,11 @@ body:has(#padhint:not([hidden])) .mbox{max-height:calc((100vh - 70px) / var(--ui
 .meldung.sieg{border-color:var(--gold3);border-left-color:var(--gold);background:linear-gradient(rgba(58,38,18,.95),rgba(26,16,10,.95));box-shadow:0 0 0 1px #000,0 0 24px rgba(229,180,84,.25)}
 .meldung.sieg .mt b{font-family:var(--fd);font-weight:400;font-size:var(--fs-m);letter-spacing:.02em}
 .meldung.pergament{background:linear-gradient(#efe0bc,#dcc597);color:var(--tinte);border-color:#8a6a3a;border-left-color:var(--blut2)}.meldung.pergament .mt b{color:var(--blut2);font-family:var(--fd);font-weight:400}.meldung.pergament small{color:var(--tinte2)}.meldung.pergament .mi{color:var(--tinte2)}
+/* Fund-Plakette (praesentation.js): Name des neuen Stücks über Ezekiel – HTML statt Leinwand, damit scharf */
+.fundplakette{position:fixed;left:0;top:0;z-index:13;pointer-events:none;text-align:center;padding:5px 16px 6px 14px;border-left:3px solid var(--rar,var(--gold));zoom:var(--hud,1);max-width:min(560px,calc(90vw / var(--hud,1)));transition:none}
+.fundplakette b{display:block;font-family:var(--fd);font-weight:400;font-size:var(--fs-xl);line-height:1.15;color:var(--rar,var(--gold));text-shadow:0 0 10px color-mix(in srgb,var(--rar,#e5b454) 45%,transparent),0 2px 3px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fundplakette small{display:block;font-weight:700;font-size:var(--fs-s);color:#e0d2c2;margin-top:1px}
+.fundplakette.verflucht{border-color:#7a3aa0}.fundplakette.verflucht b{color:#f0d0ff}.fundplakette.verflucht small,.fundplakette.kraft small{color:#e8b8ff}
 /* Weltmeldung: kurze Zeile, die an einer Stelle in der Welt aufsteigt */
 .weltmeldung{position:absolute;left:0;top:0;padding:3px 9px;font-size:var(--fs-s);font-weight:700;white-space:nowrap;max-width:320px;zoom:var(--hud,1);transition:opacity .4s}
 .weltmeldung small{display:block;font-weight:600;white-space:normal;max-width:300px}
@@ -175,10 +180,10 @@ body.banner-an .meldung:not(.p3){opacity:0!important}
 #card .ic-tasten .gefahr{color:#ff9a8a}
 /* alte Einzel-Toast-Fläche (bleibt für Kompatibilität, wird nicht mehr benutzt) */
 #toast{display:none!important}
-#banner{position:fixed;left:50%;top:30%;transform:translate(-50%,-50%);z-index:13;text-align:center;pointer-events:none;opacity:0;transition:opacity .8s;width:min(720px,92vw)}
+#banner{position:fixed;left:50%;top:30%;transform:translate(-50%,-50%);z-index:13;text-align:center;pointer-events:none;opacity:0;transition:opacity .8s;width:min(720px,calc(92vw / var(--hud,1)));zoom:var(--hud,1)}
 #banner.an{opacity:1}#banner.weg{opacity:0}
-#banner b{display:block;font-family:var(--fd);font-weight:400;font-size:clamp(28px,5vw,52px);color:var(--gold);text-shadow:0 3px 14px #000,0 0 30px rgba(255,120,60,.35);letter-spacing:.02em}
-#banner small{display:block;font-size:clamp(13px,1.8vw,17px);color:#e8d8c4;text-shadow:0 2px 8px #000;margin-top:4px;font-style:italic}
+#banner b{display:block;font-family:var(--fd);font-weight:400;font-size:38px;line-height:1.1;color:var(--gold);text-shadow:0 3px 14px #000,0 0 30px rgba(255,120,60,.35);letter-spacing:.02em}
+#banner small{display:block;font-size:var(--fs-m);color:#f0e2cc;text-shadow:0 1px 3px #000,0 0 10px #000,0 2px 8px #000;margin-top:4px;font-style:italic}
 #fade{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .35s;z-index:40}
 #fade.an{opacity:1}
 
@@ -218,14 +223,14 @@ button:disabled{opacity:.45;cursor:default}
 .zeile{display:flex;gap:10px;align-items:center;background:rgba(255,235,200,.03);border:1px solid #33241f;border-radius:6px;padding:7px 9px}
 .zeile>div:not(.kauf){flex:1;min-width:0}
 .zeile b{display:block}
-.zeile small{display:block;color:var(--mute);font-size:12px}
+.zeile small{display:block;color:var(--mute);font-size:12.5px}
 .zeile small.fund{color:#c8a878}
-.zeile.unbekannt{opacity:.55}
+.zeile.unbekannt{opacity:.8;filter:saturate(.45)}
 .zeile .lv{color:var(--gold)}
 .zeile .ico{flex:none;width:32px;height:32px}
 .zeile .ico canvas{width:32px;height:32px}
 .kauf{display:flex;flex-direction:column;gap:4px;flex:none}
-.kauf button{padding:5px 10px;font-size:12px;white-space:nowrap}
+.kauf button{padding:5px 10px;font-size:13px;white-space:nowrap}
 .ware .ic{font-size:12px}
 .rollen{display:flex;flex-direction:column;gap:8px;margin-top:8px}
 .rollen button{background:linear-gradient(#2a1a1e,#1a1014);border:1px solid var(--c,#5e4a3c);border-left-width:4px;border-radius:7px;padding:9px 12px;text-align:left;box-shadow:0 2px 0 rgba(0,0,0,.45)}
@@ -254,7 +259,7 @@ button:disabled{opacity:.45;cursor:default}
 .einst h3{margin:10px 0 0}
 .regler b{float:right;color:var(--gold);font-size:var(--fs-s)}
 .bericht{width:100%;box-sizing:border-box;background:#120c0e;color:#e8dccb;border:1px solid #4a3236;border-radius:6px;padding:8px;font:12px/1.35 ui-monospace,Consolas,monospace;resize:vertical;white-space:pre-wrap;word-break:break-word;overflow:auto}
-#diagHint{position:fixed;left:50%;top:58px;transform:translateX(-50%);z-index:30;pointer-events:none;white-space:nowrap;font:700 13px/1.3 var(--fb);color:var(--gold2);background:linear-gradient(rgba(36,22,26,.94),rgba(20,12,15,.94));border:1px solid var(--eisen3);border-radius:6px;padding:5px 12px}
+#diagHint{position:fixed;left:50%;top:58px;zoom:var(--hud,1);transform:translateX(-50%);z-index:30;pointer-events:none;white-space:nowrap;font:700 13px/1.3 var(--fb);color:var(--gold2);background:linear-gradient(rgba(36,22,26,.94),rgba(20,12,15,.94));border:1px solid var(--eisen3);border-radius:6px;padding:5px 12px}
 .regler{display:flex;flex-direction:column;font-size:var(--fs-s);color:var(--mute)}
 .regler input{accent-color:var(--gold);width:100%}
 .schalter{display:flex;align-items:center;gap:8px;font-size:14px}
@@ -288,7 +293,7 @@ button:disabled{opacity:.45;cursor:default}
 .wahl:focus,.wahl:hover:not([disabled]){border-color:var(--gold2)}
 .pakte .wahl.an{border-color:var(--blut);background:linear-gradient(#3a1418,#240c10)}
 .umhaenge{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}.umhang{width:34px;height:34px;border-radius:6px;border:2px solid #3e2c30;background:linear-gradient(var(--a),var(--b));padding:0}.umhang.an{border-color:var(--gold);box-shadow:0 0 10px rgba(229,180,84,.5)}
-.erfolge{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px}.erfolg{display:flex;flex-direction:column;gap:1px;padding:6px 8px;border:1px solid #3a2a2e;border-radius:6px;opacity:.6}.erfolg.ja{opacity:1;border-color:var(--gold)}.erfolg span{font-size:12px}.erfolg small{font-size:var(--fs-xs);color:var(--gold)}
+.erfolge{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px}.erfolg{display:flex;flex-direction:column;gap:1px;padding:6px 8px;border:1px solid #3a2a2e;border-radius:6px;opacity:.8;filter:saturate(.45)}.erfolg.ja{opacity:1;filter:none;border-color:var(--gold)}.erfolg span{font-size:12px}.erfolg small{font-size:var(--fs-xs);color:var(--gold)}
 .bilanz{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:6px;margin:8px 0}
 .bk{background:rgba(255,235,200,.04);border:1px solid #33241f;border-radius:6px;padding:6px 8px;display:flex;flex-direction:column;gap:1px}
 .bk b{font-size:19px;color:var(--gold);line-height:1.1;font-variant-numeric:tabular-nums}.bk span{font-size:12px;font-weight:700}.bk small{font-size:var(--fs-xs);color:var(--mute)}
@@ -300,17 +305,17 @@ button:disabled{opacity:.45;cursor:default}
 
 /* ---------- Titel ---------- */
 #title{position:fixed;inset:0;z-index:45;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 72%,rgba(140,30,20,.38),rgba(0,0,0,0) 60%),linear-gradient(#0c080a,#1a0c10 70%,#2a0e10)}
-.tbox{text-align:center;padding:20px}
-.ttl{font-family:var(--fd);font-size:clamp(58px,11vw,128px);color:#ff5a3a;line-height:.95;text-shadow:0 0 40px rgba(255,80,40,.45),0 6px 0 #3a0a0a}
-.tsub{font-family:var(--fd);font-size:clamp(17px,2.6vw,26px);color:var(--gold);margin-top:6px;letter-spacing:.03em}
-.tzier{display:block;width:min(420px,70vw);height:14px;margin:14px auto 0;background:linear-gradient(90deg,rgba(229,180,84,0),rgba(229,180,84,.55) 45%,rgba(229,180,84,.55) 55%,rgba(229,180,84,0)) center/100% 1px no-repeat;position:relative}
+.tbox{text-align:center;padding:20px;zoom:var(--ui,1);max-height:calc(100vh / var(--ui,1));overflow:auto;scrollbar-width:none}
+.ttl{font-family:var(--fd);font-size:clamp(46px,calc(11vw / var(--ui,1)),96px);color:#ff5a3a;line-height:.95;text-shadow:0 0 40px rgba(255,80,40,.45),0 6px 0 #3a0a0a}
+.tsub{font-family:var(--fd);font-size:clamp(16px,calc(2.6vw / var(--ui,1)),24px);color:var(--gold);margin-top:6px;letter-spacing:.03em}
+.tzier{display:block;width:min(420px,calc(70vw / var(--ui,1)));height:14px;margin:14px auto 0;background:linear-gradient(90deg,rgba(229,180,84,0),rgba(229,180,84,.55) 45%,rgba(229,180,84,.55) 55%,rgba(229,180,84,0)) center/100% 1px no-repeat;position:relative}
 .tzier::after{content:"◆";position:absolute;left:50%;top:50%;transform:translate(-50%,-52%);color:var(--blut);font-size:12px;text-shadow:0 0 0 #000}
 .tbtn{display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:30px}
-.tbtn button,.tbtn a{min-width:260px;background:linear-gradient(#3a2a24,#241915);border:1px solid #5e4a3c;border-top-color:#7a624c;border-bottom-color:#160f0c;border-radius:7px;padding:11px 22px;font-family:var(--fd);font-size:20px;letter-spacing:.03em;color:var(--text);text-decoration:none;box-shadow:0 0 0 1px #000,0 3px 0 rgba(0,0,0,.5);transition:border-color .12s,box-shadow .12s,filter .12s}
+.tbtn button,.tbtn a{min-width:min(260px,calc(80vw / var(--ui,1)));background:linear-gradient(#3a2a24,#241915);border:1px solid #5e4a3c;border-top-color:#7a624c;border-bottom-color:#160f0c;border-radius:7px;padding:11px 22px;font-family:var(--fd);font-size:20px;letter-spacing:.03em;color:var(--text);text-decoration:none;box-shadow:0 0 0 1px #000,0 3px 0 rgba(0,0,0,.5);transition:border-color .12s,box-shadow .12s,filter .12s}
 .tbtn button:hover,.tbtn a:hover,.tbtn button:focus{border-color:var(--gold);box-shadow:0 0 0 1px #000,0 0 22px rgba(255,120,60,.3);filter:brightness(1.12)}
 .tbtn a{font-family:var(--fb);font-size:var(--fs-s);font-weight:700;min-width:0;background:none;border-color:transparent;box-shadow:none;color:var(--mute)}
-.tfoot{margin-top:26px;color:var(--mute);font-size:var(--fs-s)}
-.thilfe{margin-top:14px;color:var(--mute);font-size:var(--fs-s);display:flex;gap:14px;justify-content:center}
+.tfoot{margin-top:26px;color:var(--mute);font-size:var(--fs-m)}
+.thilfe{margin-top:14px;color:var(--mute);font-size:var(--fs-m);display:flex;gap:14px;justify-content:center}
 
 /* ---------- Touch ---------- */
 #touch{position:fixed;inset:0;z-index:11;pointer-events:none;--ts:1}
@@ -343,7 +348,7 @@ button:disabled{opacity:.45;cursor:default}
 /* Handheld / kleine Bildschirme: größere Ziele, weniger Rahmen */
 .klein .knoepfe button,.klein .knoepfe .btn{padding:9px 14px;min-height:38px}
 .klein .mbox{background:var(--samtflaeche)}
-#dreh{position:fixed;left:50%;bottom:30%;transform:translateX(-50%);z-index:9;display:none;color:var(--mute);font-size:var(--fs-s);background:rgba(14,9,12,.8);border-radius:8px;padding:6px 12px;pointer-events:none}
+#dreh{position:fixed;left:50%;bottom:30%;zoom:var(--hud,1);transform:translateX(-50%);z-index:9;display:none;color:var(--mute);font-size:var(--fs-s);background:rgba(14,9,12,.8);border-radius:8px;padding:6px 12px;pointer-events:none}
 /* Handheld (ui.js setzt .handheld bei kleinen Bildschirmen): kompakte Fenster, Meldungen höher, große Ziele */
 .handheld #meldungen{top:calc(env(safe-area-inset-top,0px) + 40px);width:min(420px,70vw)}
 .handheld .mbox{padding:12px 16px}
@@ -400,53 +405,53 @@ button:disabled{opacity:.45;cursor:default}
 <div id="modal" hidden></div>
 <div id="title"></div>
 <div id="fade"></div>
-<script src="tonregler.js?v=1"></script>
-<script src="zerstoerer/kern.js?v=24"></script>
-<script src="zerstoerer/welt.js?v=24"></script>
-<script src="zerstoerer/daten.js?v=26"></script>
-<script src="zerstoerer/kampf.js?v=24"></script>
-<script src="zerstoerer/steuerung.js?v=24"></script>
-<script src="zerstoerer/geschosse.js?v=24"></script>
-<script src="zerstoerer/gegner.js?v=26"></script>
-<script src="zerstoerer/bosse.js?v=24"></script>
-<script src="zerstoerer/bossphasen.js?v=24"></script>
-<script src="zerstoerer/figuren.js?v=24"></script>
-<script src="zerstoerer/werkzeuge.js?v=24"></script>
-<script src="zerstoerer/bild.js?v=24"></script>
-<script src="zerstoerer/pracht.js?v=24"></script>
-<script src="zerstoerer/grafik.js?v=24"></script>
-<script src="zerstoerer/musik.js?v=25"></script>
-<script src="zerstoerer/klang.js?v=24"></script>
-<script src="zerstoerer/spiel.js?v=24"></script>
-<script src="zerstoerer/lager.js?v=24"></script>
-<script src="zerstoerer/parcours.js?v=24"></script>
-<script src="zerstoerer/fallen.js?v=25"></script>
-<script src="zerstoerer/bilanz.js?v=26"></script>
-<script src="zerstoerer/kampfkunst.js?v=24"></script>
-<script src="zerstoerer/hintergrund.js?v=24"></script>
-<script src="zerstoerer/bilderbuch.js?v=24"></script>
-<script src="zerstoerer/tageszeit.js?v=24"></script>
-<script src="zerstoerer/abenteuer.js?v=24"></script>
-<script src="zerstoerer/fluch.js?v=24"></script>
-<script src="zerstoerer/fluchkraft.js?v=24"></script>
-<script src="zerstoerer/ebenen.js?v=24"></script>
-<script src="zerstoerer/erkundung.js?v=25"></script>
-<script src="zerstoerer/spuren.js?v=24"></script>
-<script src="zerstoerer/effekte.js?v=24"></script>
-<script src="zerstoerer/hinterhalt.js?v=24"></script>
-<script src="zerstoerer/leben.js?v=24"></script>
-<script src="zerstoerer/gegnerkunst.js?v=24"></script>
-<script src="zerstoerer/nemesis.js?v=26"></script>
-<script src="zerstoerer/wetter.js?v=24"></script>
-<script src="zerstoerer/ausstattung.js?v=24"></script>
-<script src="zerstoerer/ausgleich.js?v=26"></script>
-<script src="zerstoerer/ui.js?v=26"></script>
-<script src="zerstoerer/praesentation.js?v=24"></script>
-<script src="zerstoerer/schmiede.js?v=25"></script>
-<script src="zerstoerer/runen.js?v=25"></script>
-<script src="zerstoerer/tagebuch.js?v=24"></script>
-<script src="zerstoerer/schilder.js?v=25"></script>
-<script src="zerstoerer/weltspuren.js?v=24"></script>
-<script src="zerstoerer/uebergang.js?v=24"></script>
+<script src="tonregler.js?v=28"></script>
+<script src="zerstoerer/kern.js?v=28"></script>
+<script src="zerstoerer/welt.js?v=28"></script>
+<script src="zerstoerer/daten.js?v=28"></script>
+<script src="zerstoerer/kampf.js?v=28"></script>
+<script src="zerstoerer/steuerung.js?v=28"></script>
+<script src="zerstoerer/geschosse.js?v=28"></script>
+<script src="zerstoerer/gegner.js?v=28"></script>
+<script src="zerstoerer/bosse.js?v=28"></script>
+<script src="zerstoerer/bossphasen.js?v=28"></script>
+<script src="zerstoerer/figuren.js?v=28"></script>
+<script src="zerstoerer/werkzeuge.js?v=28"></script>
+<script src="zerstoerer/bild.js?v=28"></script>
+<script src="zerstoerer/pracht.js?v=28"></script>
+<script src="zerstoerer/grafik.js?v=28"></script>
+<script src="zerstoerer/musik.js?v=28"></script>
+<script src="zerstoerer/klang.js?v=28"></script>
+<script src="zerstoerer/spiel.js?v=28"></script>
+<script src="zerstoerer/lager.js?v=28"></script>
+<script src="zerstoerer/parcours.js?v=28"></script>
+<script src="zerstoerer/fallen.js?v=28"></script>
+<script src="zerstoerer/bilanz.js?v=28"></script>
+<script src="zerstoerer/kampfkunst.js?v=28"></script>
+<script src="zerstoerer/hintergrund.js?v=28"></script>
+<script src="zerstoerer/bilderbuch.js?v=28"></script>
+<script src="zerstoerer/tageszeit.js?v=28"></script>
+<script src="zerstoerer/abenteuer.js?v=28"></script>
+<script src="zerstoerer/fluch.js?v=28"></script>
+<script src="zerstoerer/fluchkraft.js?v=28"></script>
+<script src="zerstoerer/ebenen.js?v=28"></script>
+<script src="zerstoerer/erkundung.js?v=28"></script>
+<script src="zerstoerer/spuren.js?v=28"></script>
+<script src="zerstoerer/effekte.js?v=28"></script>
+<script src="zerstoerer/hinterhalt.js?v=28"></script>
+<script src="zerstoerer/leben.js?v=28"></script>
+<script src="zerstoerer/gegnerkunst.js?v=28"></script>
+<script src="zerstoerer/nemesis.js?v=28"></script>
+<script src="zerstoerer/wetter.js?v=28"></script>
+<script src="zerstoerer/ausstattung.js?v=28"></script>
+<script src="zerstoerer/ausgleich.js?v=28"></script>
+<script src="zerstoerer/ui.js?v=28"></script>
+<script src="zerstoerer/praesentation.js?v=28"></script>
+<script src="zerstoerer/schmiede.js?v=28"></script>
+<script src="zerstoerer/runen.js?v=28"></script>
+<script src="zerstoerer/tagebuch.js?v=28"></script>
+<script src="zerstoerer/schilder.js?v=28"></script>
+<script src="zerstoerer/weltspuren.js?v=28"></script>
+<script src="zerstoerer/uebergang.js?v=28"></script>
 </body>
 </html>

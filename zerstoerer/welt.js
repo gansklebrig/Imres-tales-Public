@@ -1161,6 +1161,12 @@
           if (ok) j0 = s0;
         }
         if (j0 < 0) return back("spalt");
+        /* W7: hinter dem Spalt (in der Kammer) muss fester Boden kommen – sonst trägt der Schattensprint einen direkt in einen
+           Abgrund, auf bröckelnde Stege oder eine Fährstrecke und man landet wieder vor dem Spalt („Rune geht nicht“). */
+        for (let j = j0 + 4; j <= j0 + 6; j++) {
+          const x = bx + dir * j; let y = oy + 11; while (y < oy + 16 && (lv.get(x, y) === 0 || lv.get(x, y) === 6)) y++;
+          const f = lv.get(x, y); if (!(f === 1 || f === 7 || f === 2 || f === 8 || f === 4)) return back("spaltboden");
+        }
         for (let j = j0; j < j0 + 4; j++) {
           const x = bx + dir * j; let top = oy + 7; while (top > oy && lv.get(x, top) !== 1 && lv.get(x, top) !== 7) top--;
           if (lv.get(x, top) !== 1 && lv.get(x, top) !== 7) return back("spaltdecke");

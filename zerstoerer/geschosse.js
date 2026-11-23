@@ -446,7 +446,10 @@
     if (p.kind === "shard") { P.shards += p.n; A.play("gem", { vol: 0.35, gap: 0.05, rate: 1.4 }); FX.p({ x: P.x + P.w / 2, y: P.y + 10, vx: 0, vy: -20, life: 0.3, size: 10, col: "#ff5a8a", kind: "glow", add: true }); }
   }
   Z.drawPickups = function (c, time) {
+    const cam = Z.cam;
     for (const p of Z.pickups) {
+      /* nur was im Bild liegt (Lichtsäulen reichen 64 hoch) */
+      if (p.x < cam.x - 40 || p.x > cam.x + cam.w + 40 || p.y < cam.y - 20 || p.y > cam.y + cam.h + 80) continue;
       c.save(); c.translate(p.x, p.y);
       const bob = p.float || p.kind === "item" || p.kind === "scroll" ? Math.sin(time * 3 + p.x) * 2 - 4 : 0;
       switch (p.kind) {

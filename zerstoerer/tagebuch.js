@@ -213,7 +213,9 @@
   Z.drawWorldProps = function (c, t) {
     if (dwp0) dwp0.apply(this, arguments);
     if (Z.level !== lvRef) return;
-    for (const s of signs) drawSign(c, s);
+    /* Wegweiser nur im Bild zeichnen (große Karten, Text je Bild) */
+    const cam = Z.cam;
+    for (const s of signs) { const x = s.x * T + 8, y = (s.y + 1) * T; if (x < cam.x - 90 || x > cam.x + cam.w + 90 || y < cam.y - 10 || y > cam.y + cam.h + 50) continue; drawSign(c, s); }
     for (const s of scouts) drawScout(c, s, t);
     drawPage(c, t);
   };

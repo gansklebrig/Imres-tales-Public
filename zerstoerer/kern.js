@@ -200,7 +200,8 @@
     A.amb = c.createGain(); A.amb.gain.value = A.fxAn() ? A.vol.amb : 0; A.amb.connect(A.master);
     /* Hall für Höhlen und Hallen: synthetische Impulsantwort */
     A.verb = c.createConvolver(); A.verbGain = c.createGain(); A.verbGain.gain.value = 0.22;
-    const len = c.sampleRate * 2.4, ir = c.createBuffer(2, len, c.sampleRate);
+    /* Handheld: kürzere Impulsantwort (die Faltung kostet auf schwachen Kernen spürbar Audio-Rechenzeit) */
+    const len = Math.floor(c.sampleRate * (Z.gq && Z.gq.lean ? (Z.gq.mini ? 0.8 : 1.3) : 2.4)), ir = c.createBuffer(2, len, c.sampleRate);
     for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2); }
     A.verb.buffer = ir; A.verb.connect(A.verbGain); A.verbGain.connect(A.master);
     /* Dämpfung bei wenig Leben / Pause: Tiefpass über allem */
@@ -313,6 +314,9 @@
     const path = list[Math.floor(Math.random() * list.length)];
     const b = A.buf[path];
     if (!b) { if (b === undefined) A.load(path); return; }
+    /* Handheld: höchstens 10 (minimal 7) Effekte gleichzeitig – der Audio-Thread der kleinen ARM-Kerne kommt sonst nicht nach */
+    const q = Z.gq || {};
+    if (q.lean && A.live >= (q.mini ? 7 : 10) && !o.must) return;
     let vol = o.vol == null ? 1 : o.vol, pan = o.pan || 0;
     if (o.x != null && Z.cam) {
       const dx = o.x - (Z.cam.x + Z.cam.w / 2), dy = (o.y || 0) - (Z.cam.y + Z.cam.h / 2);
@@ -332,6 +336,7 @@
     s.connect(g); if (p) { p.pan.value = pan; g.connect(p); p.connect(o.bus || A.sfx); } else g.connect(o.bus || A.sfx);
     if (o.verb !== 0) { const vg = A.ctx.createGain(); vg.gain.value = isFinite(o.verb) && o.verb ? o.verb : 0.6; g.connect(vg); vg.connect(A.verb); }
     if (o.dur && isFinite(o.dur)) { g.gain.setValueAtTime(vol, now + o.dur * 0.7); g.gain.linearRampToValueAtTime(0, now + o.dur); s.stop(now + o.dur + 0.02); }
+    A.live = (A.live || 0) + 1; s.onended = () => { A.live--; };
     s.start(now + (isFinite(o.delay) ? Math.max(0, o.delay) : 0), isFinite(o.offset) ? Math.max(0, o.offset) : 0);
     return s;
   };

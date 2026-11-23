@@ -276,33 +276,36 @@
     }
     drawSparks(c);
   }
-  /* Name des Fundes: kleine Plakette direkt über Ezekiel (statt eines Bandes quer über den Bildschirm) */
+  /* Name des Fundes: kleine Plakette direkt über Ezekiel (statt eines Bandes quer über den Bildschirm).
+     Als HTML-Element (.fundplakette) statt auf der Leinwand: scharf in jeder Auflösung und mit --hud/Textgröße skaliert. */
+  let plEl = null, plKey = "";
+  function plakette() {
+    if (!plEl) { plEl = document.createElement("div"); plEl.className = "fundplakette eisen"; plEl.hidden = true; document.body.appendChild(plEl); }
+    return plEl;
+  }
+  function plaketteAus() { if (plEl && !plEl.hidden) { plEl.hidden = true; plKey = ""; } }
   function banner(c, p, W, H) {
     const u = p.t / p.dur, a = span(u, 0.08, 0.22) * (1 - span(u, 0.82, 1));
-    if (a <= 0) return;
+    if (a <= 0) { plaketteAus(); return; }
     const it = p.it, d = Z.itemDef(it), r = Z.RARITY[it.rar], P = Z.player; if (!P) return;
-    const S = Z.gfx.scale || 1, cam = Z.cam;
-    const css = getComputedStyle(document.documentElement), fd = css.getPropertyValue("--fd") || "serif", fb = css.getPropertyValue("--fb") || "sans-serif";
-    const fs = clamp(Math.min(W, H) * 0.03, 13, 30);
+    const S = Z.gfx.scale || 1, cam = Z.cam, el = plakette();
     const name = Z.itemTitle ? Z.itemTitle(it) : L(d.n);
     const pw = it.power && Z.CPOWER && Z.CPOWER[it.power];
     const sub = p.cursed ? "☠ " + L(Z.CURSE[it.cursed].name) : pw ? "✦ " + L(pw.n) : L(r.n) + (it.aff && it.aff.length ? " · " + it.aff.map(k => L(Z.AFFIX[k].n)).join(" · ") : "") + (it.runes && it.runes.length && Z.RUNES ? " · ᚱ " + it.runes.map(k => L(Z.RUNES[k].n)).join(" · ") : "") + (d.faden && !p.cursed ? " · ◈ " + L(["Faden", "Thread"]) : "");
-    c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
-    c.font = Math.round(fs) + "px " + fd; const w1 = c.measureText(name).width;
-    c.font = "700 " + Math.round(fs * 0.5) + "px " + fb; const w2 = c.measureText(sub).width;
-    const bw = Math.max(w1, w2) + fs * 1.4, bh = fs * 2.05;
-    const cx = clamp((P.x + P.w / 2 - cam.x) * S, bw / 2 + 8, W - bw / 2 - 8), cy = clamp((P.y - 44 - cam.y) * S - (1 - span(u, 0.08, 0.22)) * 6, bh + 70, H - 90);
-    c.globalAlpha = a * 0.92;
-    const g = c.createLinearGradient(0, cy - bh, 0, cy); g.addColorStop(0, "rgba(36,22,26,.95)"); g.addColorStop(1, "rgba(20,12,15,.95)");
-    c.fillStyle = g; c.fillRect(cx - bw / 2, cy - bh, bw, bh);
-    c.strokeStyle = p.cursed ? "#7a3aa0" : "#5a4638"; c.lineWidth = 1.5; c.strokeRect(cx - bw / 2 + 0.5, cy - bh + 0.5, bw - 1, bh - 1);
-    c.fillStyle = p.cursed ? "#c040ff" : r.col; c.fillRect(cx - bw / 2, cy - bh, 3, bh);
-    c.globalAlpha = a; c.textAlign = "center"; c.textBaseline = "middle";
-    c.font = Math.round(fs) + "px " + fd; c.shadowColor = p.cursed ? "#c040ff" : r.col; c.shadowBlur = fs * 0.35;
-    c.fillStyle = p.cursed ? "#f0d0ff" : r.col; c.fillText(name, cx, cy - bh * 0.62);
-    c.shadowBlur = 0; c.font = "700 " + Math.round(fs * 0.5) + "px " + fb; c.fillStyle = p.cursed || pw ? "#e8b8ff" : "#d8c8b8";
-    c.fillText(sub, cx, cy - bh * 0.24);
-    c.restore();
+    const key = name + "|" + sub + "|" + !!p.cursed;
+    if (key !== plKey) {
+      plKey = key; el.innerHTML = "<b>" + esc(name) + "</b><small>" + esc(sub) + "</small>";
+      el.classList.toggle("verflucht", !!p.cursed); el.classList.toggle("kraft", !!pw);
+      el.style.setProperty("--rar", p.cursed ? "#c040ff" : r.col);
+    }
+    el.hidden = false;
+    /* Leinwand-Pixel → CSS-Pixel → durch den HUD-Zoom teilen */
+    const cv = c.canvas, k = (cv.clientWidth || W) / W, hz = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hud")) || 1;
+    const w = el.offsetWidth, h = el.offsetHeight, vw = innerWidth / hz, vh = innerHeight / hz;
+    const x = (P.x + P.w / 2 - cam.x) * S * k / hz, y = ((P.y - 44 - cam.y) * S * k) / hz - (1 - span(u, 0.08, 0.22)) * 6;
+    const bx = clamp(x - w / 2, 8, vw - w - 8), by = clamp(y - h, 60, vh - h - 70);
+    el.style.transform = "translate(" + Math.round(bx) + "px," + Math.round(by) + "px)";
+    el.style.opacity = a.toFixed(3);
   }
 
   /* in jedes Bild einhängen */
@@ -315,7 +318,7 @@
       if (Object.values(P.slots).includes(pend)) { const it = pend; pend = null; Z.presentItem(it); }
       else if (!ui.choiceActive && !ui.modalOpen) pend = null;
     }
-    if (!pres) return;
+    if (!pres) { plaketteAus(); return; }
     const cardEl = document.getElementById("card"); if (cardEl) cardEl.hidden = true;
     if (!ui.modalOpen) stepPresent(dt);
     if (pres) drawPresent(c, cam, W, H);

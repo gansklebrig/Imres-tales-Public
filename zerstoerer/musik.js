@@ -242,16 +242,18 @@
      dessen Grenzfrequenz langsam atmet. Die Stimmen gleiten bei jedem Akkordwechsel (Stimmführung: kleinste Bewegung). */
   function buildPad() {
     const c = A.ctx, P = (M.pad = { v: [], cur: null });
+    const lean = !!(Z.gq && Z.gq.lean);
     P.f = c.createBiquadFilter(); P.f.type = "lowpass"; P.f.frequency.value = 700; P.f.Q.value = 0.7;
     P.g = c.createGain(); P.g.gain.value = 0; P.f.connect(P.g); P.g.connect(M.lay);
     const vs = c.createGain(); vs.gain.value = 0.6; P.g.connect(vs); vs.connect(M.verbIn);
     P.lfo = c.createOscillator(); P.lfo.frequency.value = 0.07; P.lfoG = c.createGain(); P.lfoG.gain.value = 220; P.lfo.connect(P.lfoG); P.lfoG.connect(P.f.frequency); P.lfo.start();
     for (let i = 0; i < 3; i++) {
       const g = c.createGain(); g.gain.value = 0.03; g.connect(P.f);
-      const o1 = c.createOscillator(), o2 = c.createOscillator();
-      o1.type = "sawtooth"; o2.type = "sawtooth"; o1.detune.value = -7 - i; o2.detune.value = 6 + i;
-      o1.frequency.value = o2.frequency.value = 220; o1.connect(g); o2.connect(g); o1.start(); o2.start();
-      P.v.push({ g, o: [o1, o2], m: 57 });
+      const o1 = c.createOscillator(), o2 = lean ? null : c.createOscillator();
+      o1.type = "sawtooth"; o1.detune.value = -7 - i; o1.frequency.value = 220; o1.connect(g); o1.start();
+      /* Handheld: ein Sägezahn je Stimme statt zwei verstimmter (halbe Oszillatorlast im Audio-Thread) */
+      if (o2) { o2.type = "sawtooth"; o2.detune.value = 6 + i; o2.frequency.value = 220; o2.connect(g); o2.start(); } else g.gain.value = 0.042;
+      P.v.push({ g, o: o2 ? [o1, o2] : [o1], m: 57 });
     }
     /* Wellen (See): langsamer Sinus hebt und senkt Lautstärke und Filter des Teppichs und der Ruheebene; Tiefe 0 = aus */
     const W = (M.wav = {});
@@ -351,7 +353,7 @@
   /* ---------- Einzelnoten aus Aufnahmen ---------- */
   function playNote(inst, midi, when, vol, dur, bus, prio) {
     if (!A.ok || !M.out || !INST[inst]) return;
-    if (M.live > 110 && !prio) { M.stats.skipped++; return; } /* Notbremse für die Stimmenzahl */
+    if (M.live > voiceCap(prio)) { M.stats.skipped++; return; } /* Notbremse für die Stimmenzahl (Handheld: wenige Stimmen, Audio-Thread schonen) */
     midi = fit(inst, midi);
     const n = nearest(inst, midi), path = K(inst + "_" + n), b = A.buf[path];
     if (!b) { if (b === undefined) A.load(path); return; }
@@ -366,7 +368,7 @@
   /* Schlagwerk / Einzelklang */
   function hit(name, when, vol, rate, bus, rev) {
     if (!A.ok || !M.out) return;
-    if (M.live > 110) { M.stats.skipped++; return; }
+    if (M.live > voiceCap(false)) { M.stats.skipped++; return; }
     const path = K(name); let b = A.buf[path]; if (!b) { if (b === undefined) A.load(path); return; }
     if (rev) b = reversed(path, b);
     const c = A.ctx; when = Math.max(when, c.currentTime + 0.005);
@@ -375,6 +377,8 @@
     track(s, g); s.start(when);
     return b.duration / (rate || 1);
   }
+  /* Stimmen-Obergrenze: am PC 110, auf Handheld 14 (wichtige Noten 18), auf „minimal“ 10 (13) */
+  function voiceCap(prio) { const q = Z.gq || {}; return q.mini ? (prio ? 13 : 10) : q.lean ? (prio ? 18 : 14) : 110; }
   /* Knoten nach dem Verklingen wieder lösen und mitzählen */
   function track(s, g) {
     M.live++; M.stats.notes++;

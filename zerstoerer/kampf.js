@@ -201,7 +201,7 @@
         const nx = col * T + T / 2 - P.w / 2;
         let blocked = false; for (let ty = Math.floor(P.y / T); ty <= Math.floor((P.y + P.h - 0.01) / T); ty++) if (W.solidT(W.tile(Math.floor(nx / T), ty)) || W.solidT(W.tile(Math.floor((nx + P.w - 0.01) / T), ty))) blocked = true;
         if (!blocked) {
-          P.climbing = true; P.ladTx = col; P.x = nx; P.vx = 0; P.vy = 0; P.airJumps = 1; P.coyote = 0;
+          P.climbing = true; P.ladTx = col; P.x = nx; P.vx = 0; P.vy = 0; P.airJumps = 1; P.coyote = 0; P.upAirUsed = 0;
           if (inp.held.down && ladderBelow && !ladderHere) P.y += 6;
         }
       }
@@ -259,6 +259,13 @@
         const it = P.slots[s];
         const d = it ? Z.WEAPONS[it.id] : s === "a1" ? Z.WEAPONS.faeuste : null;
         if (!d) { take(P, s); continue; }
+        /* W7: Oben + Angriff → Aufwärtsangriff jeder Waffe (aufwaerts.js); Bögen zielen beim Spannen nach oben (fireBow).
+           Leitern haben Vorrang (das Klettern beginnt oben schon, bevor hier etwas ankommt). */
+        if (P.buf[s] > 0 && inp.held.up && Z.upAttack && !(d.kind === "ranged" && d.shoot.charge) &&
+            (!P.act || (P.act.phase === "post" && (P.act.slot !== s || P.act.t > (P.act.def.post || 0.1) * 0.25)) || P.act.type === "shieldDown")) {
+          if (P.act) endAct(P);
+          if (Z.upAttack(P, s, it || null, d)) { P.buf[s] = 0; continue; }
+        }
         if (d.kind === "shield") {
           const free = !P.act || P.act.phase === "post";
           if (P.shieldOut && P.shieldOut.slot === s) { take(P, s); continue; }
@@ -320,7 +327,7 @@
       if (h && !P.act) P.face = h;
     }
     /* ---------- Springen ---------- */
-    if (P.onGround) { P.coyote = C.COYOTE; P.airJumps = 1; P.plungeOK = true; } else P.coyote -= dt;
+    if (P.onGround) { P.coyote = C.COYOTE; P.airJumps = 1; P.plungeOK = true; P.upAirUsed = 0; } else P.coyote -= dt;
     /* Nach einem Sturzangriff kurz durchatmen: erst wieder springen, dann erneut stürzen */
     if (P.diveRec > 0) P.diveRec -= dt;
     if (P.onGround && P.diveRecPend) { P.diveRecPend = false; P.diveRec = Math.max(P.diveRec || 0, 0.24); }
@@ -563,7 +570,7 @@
   }
   function startCharge(P, slot, it, d) {
     { const hh = (inp.held.right ? 1 : 0) - (inp.held.left ? 1 : 0); if (hh) P.face = hh; }
-    P.act = { slot, it, d, def: { pre: 0, act: 0, post: d.shoot.post }, type: "charge", phase: "charge", t: 0, charge: 0 };
+    P.act = { slot, it, d, def: { pre: 0, act: 0, post: d.shoot.post }, type: "charge", phase: "charge", t: 0, charge: 0, upAim: !!inp.held.up };
     A.play("bow", { vol: 0.25, rate: 0.7 });
   }
   function startShield(P, slot, it, d) {
@@ -596,6 +603,7 @@
     if (a.type === "charge") {
       if (a.phase === "charge") {
         a.charge = Math.min(1, a.charge + dt / a.d.shoot.charge * (Z.hasRune && Z.hasRune(a.it, "tempo") ? 1.15 : 1));
+        a.upAim = !!inp.held.up; /* Zielrichtung folgt dem Stick/der Taste, solange gespannt wird */
         if (inp.held.left && !inp.held.right) P.face = -1; else if (inp.held.right && !inp.held.left) P.face = 1;
         if (a.charge >= 1 && !a.full) { a.full = true; FX.ring(P.x + P.w / 2 + P.face * 10, P.y + 10, 10, "#ffd27a", 0.25); A.play("ui", { vol: 0.35, rate: 1.6 }); }
         if (!inp.held[a.slot]) {
@@ -611,11 +619,12 @@
       if (a.type === "melee") {
         a.lungeV = c.lunge || 0; a.lungeT = c.lunge ? (c.dash ? c.act : 0.09) : 0;
         if (c.dash) { P.iframe = Math.max(P.iframe, c.act + 0.05); a.dash = true; }
+        if (a.upLift) { a.upLift = false; upLift(P, true); } /* W7: Aufwärts-Schwung hebt erst im Schlag an */
         A.play(c.sw || "swing", { vol: 0.55, x: P.x, y: P.y, rate: c.heavy ? 0.85 : 1 });
         const sm = c.smear;
         if (sm) {
           const col = a.d.col || "#ff5a4e";
-          FX.smear({ x: P.x + P.w / 2 + (sm.stab ? P.face * 4 : 0), y: P.y + P.h - 16, dir: P.face, r: sm.r, a0: sm.a0, a1: sm.a1, th: sm.th, life: c.heavy ? 0.2 : 0.14, col: col, core: "#fff6e0", a: 0.85, stab: sm.stab });
+          FX.smear({ x: P.x + P.w / 2 + (sm.stab ? P.face * 4 : 0) + P.face * (sm.ox || 0), y: P.y + P.h - 16 + (sm.oy || 0), dir: P.face, r: sm.r, a0: sm.a0, a1: sm.a1, th: sm.th, life: c.heavy ? 0.2 : 0.14, col: col, core: "#fff6e0", a: 0.85, stab: sm.stab });
         }
         if (c.proj === "anker") Z.spawnProj("anker", P.x + P.w / 2, P.y + 10, P.face, { dmg: dmgOf(P, a.it, c.dmg), it: a.it });
       }
@@ -647,6 +656,36 @@
     return best;
   }
   Z.nearestEnemy = nearestEnemy;
+  /* Schattenschritt: nächster Gegner (auch hinter einem, auf Plattformen darüber/darunter), für den es neben ihm einen
+     freien Landeplatz mit Sichtlinie gibt – bevorzugt in seinem Rücken, sonst vor ihm. */
+  function shadowStepTarget(P) {
+    const pcx = P.x + P.w / 2, pcy = P.y + P.h / 2, list = [];
+    for (const e of Z.enemies) {
+      if (e.dead || e.hidden || e.intro > 0) continue;
+      const ex = e.x + e.w / 2, ey = e.y + e.h / 2, dx = ex - pcx, dy = ey - pcy;
+      if (Math.abs(dy) > 120) continue;
+      const d = Math.hypot(dx, dy * 1.3);
+      if (d > 260) continue;
+      if (!W.los(pcx, P.y + 10, ex, ey) && !W.los(pcx, P.y + 10, ex, e.y + 4)) continue;
+      list.push({ e, d });
+    }
+    list.sort((a, b) => a.d - b.d);
+    for (const { e } of list) {
+      const ex = e.x + e.w / 2, ey = e.y + e.h / 2;
+      const back = e.face > 0 ? -1 : e.face < 0 ? 1 : (U.sign(ex - pcx) || 1);
+      for (const side of [back, -back]) {
+        const x = ex + side * (e.w / 2 + 10) - P.w / 2;
+        for (const lift of [0, 4, 8, 12, 16]) {
+          const y = e.y + e.h - P.h - lift;
+          if (!bodyFree(x, y, P.w, P.h)) continue;
+          if (!W.los(ex, ey, x + P.w / 2, y + P.h / 2)) break;
+          return { e, x, y, face: -side };
+        }
+      }
+    }
+    return null;
+  }
+  Z.shadowStepTarget = shadowStepTarget;
   Z.dmgOf = dmgOf;
   function dmgOf(P, it, base) {
     let m = it ? Z.itemMul(it) : 1 + 0.12 * P.stats.brut;
@@ -670,6 +709,7 @@
       case "stunned": crit = e.st.stun > 0 || e.st.root > 0; break;
       case "multi": crit = a.hitCountNow >= 3; break;
       case "tip": crit = Math.abs(e.x + e.w / 2 - (P.x + P.w / 2)) > 52; break;
+      case "tipUp": crit = P.y + 6 - (e.y + e.h / 2) > 52; break; /* Peitsche nach oben: die Spitze trifft weit oben */
       case "air": crit = !e.onGround || e.def.fly; break;
       case "burning": crit = e.st.burn > 0; break;
       case "afterRoll": crit = P.afterRoll > 0; break;
@@ -755,7 +795,10 @@
   }
   function fireShot(P, a) {
     const n0 = Z.projs.length;
+    if (a.up && Z.upShotSpecial && Z.upShotSpecial(P, a)) return;
     fireShot0(P, a);
+    /* W7: Aufwärtsschuss – dieselben Geschosse, nach oben gedreht (aufwaerts.js) */
+    if (a.up && Z.upShotAim) { Z.upShotAim(P, a, n0); return; }
     aimFix(P, n0);
   }
   function fireShot0(P, a) {
@@ -785,7 +828,9 @@
     const n = full && Z.metaLvl("bogen") >= 3 ? 3 : 1;
     const n0 = Z.projs.length;
     for (let i = 0; i < n; i++) Z.spawnProj("pfeil", x, y, P.face, { dmg, it: a.it, eff, pierce: full, critAlways: full, speed: U.lerp(380, 640, k), vy: (i - (n - 1) / 2) * 50 });
-    aimFix(P, n0);
+    /* W7: Oben gehalten (beim Spannen oder Loslassen) → schräg bzw. gerade nach oben schießen */
+    if ((a.upAim || inp.held.up) && Z.upShotAim) { a.up = true; Z.upShotAim(P, a, n0); }
+    else aimFix(P, n0);
     A.play("bow", { vol: 0.6 }); if (full) FX.addShake(2);
   }
 
@@ -820,10 +865,13 @@
         for (let i = 0; i < 5; i++) later(() => Z.spawnHazard({ kind: "rockspike", x: cx + f * (26 + i * 20), y: P.y + P.h, w: 16, life: 0.5, dmg: 16 * m, owner: "p", kbUp: 340, once: true, eff }), i * 75);
         break;
       case "schattenschritt": {
-        const e = nearestEnemy(P, 200, true);
-        if (e) { const side = e.face > 0 ? -1 : 1; P.x = e.x + e.w / 2 + side * (e.w / 2 + 10) - P.w / 2; P.y = e.y + e.h - P.h; Z.unstick(P); P.face = -side; FX.burst(cx, cy, 16, { col: ["#a060ff", "#2a1a3a"], sp: 90, life: 0.4, size: 3, kind: "smoke" }); A.play("shadow");
+        /* W7: Ziel und Landeplatz zusammen suchen – vorher nur Gegner bis 200 px und 70 px Höhenunterschied, Landeplatz
+           ungeprüft (Z.unstick schob einen dann u. U. hinter die Wand), und ohne Ziel geschah gar nichts (kein Hinweis). */
+        const st = shadowStepTarget(P);
+        if (st) { const e = st.e; FX.burst(cx, cy, 16, { col: ["#a060ff", "#2a1a3a"], sp: 90, life: 0.4, size: 3, kind: "smoke" }); P.x = st.x; P.y = st.y; P.vx = 0; P.vy = Math.min(P.vy, 0); P.face = st.face; P.rollT = 0; P.iframe = Math.max(P.iframe, 0.15); A.play("shadow");
+          FX.burst(P.x + P.w / 2, P.y + P.h / 2, 12, { col: ["#a060ff", "#2a1a3a"], sp: 60, life: 0.35, size: 3, kind: "smoke" });
           later(() => { if (!e.dead) { Z.hitEnemy(e, 30 * m * 2, { crit: true, kb: 60, src: "skill", it, eff }); FX.smear({ x: P.x + P.w / 2, y: P.y + 12, dir: P.face, r: 22, a0: -0.4, a1: 0.3, th: 4, life: 0.14, col: "#a060ff", core: "#fff", stab: true }); } }, 60); }
-        else P.cd[slot] = 0.5;
+        else { P.cd[slot] = 0.4; FX.text(cx, P.y - 8, L(["Kein Ziel in Reichweite", "No target in range"]), "#c8a8ff"); FX.burst(cx, cy, 6, { col: ["#a060ff", "#2a1a3a"], sp: 30, life: 0.3, size: 2, kind: "smoke" }); A.play("ui", { vol: 0.35 }); }
         break;
       }
       case "kraeuter": P.st.regen = 5; P.st.regenAmt = P.hpMax * 0.3 / 5; A.play("heal"); FX.burst(cx, cy, 14, { col: "#7fd36a", sp: 40, up: 30, life: 1, size: 2, kind: "leaf" }); break;
@@ -1028,6 +1076,129 @@
       cx = tx; cy = ty;
     }
     if (!hit.size) Z.bolts.push({ x0: x, y0: y, x1: x + (P ? P.face : 1) * 90, y1: y + (Math.random() - 0.5) * 30, t: 0, life: 0.15, col: "#fff2a0" });
+  };
+
+  /* ======================= AUFWÄRTSANGRIFF (W7) =======================
+     Oben + Angriffstaste der jeweiligen Hand: eigener Angriff nach oben für jede Waffe, am Boden und in der Luft.
+     In der Luft hebt der erste Aufwärtsangriff je Sprung kurz an (Nahkampf) bzw. bremst den Fall (Fernkampf) – erst
+     nach Bodenkontakt, Leiter oder Kante wieder (P.upAirUsed), wie beim Sturzangriff kein Endlos-Schweben.
+     Nahkampf läuft als normaler Schlag (P.act.type "melee", def.up) über meleeHits → Runen, Gravuren, Faden,
+     Adrenalin, Ausstattung (Z.hitProps/Z.ausstattungTreffer) wirken wie gewohnt. Fernkampf: dieselben Geschosse wie
+     der normale Schuss, nach oben gedreht. Posen: figuren.js poseUp/poseShot (act.up). */
+  const UP_CLS = {
+    fist: "faust", stonefist: "faust",
+    hammer: "wucht", club: "wucht", flegel: "wucht", anchor: "wucht",
+    scythe: "sense", kampfstab: "sense",
+    spear: "stoss", hellebarde: "stoss",
+    whip: "peitsche"
+  };
+  Z.UP_NAMES = {
+    klinge: ["Aufwärtsschnitt", "Rising Slash"], stich: ["Himmelsstich", "Sky Thrust"], faust: ["Aufwärtshaken", "Uppercut"], wucht: ["Himmelsschlag", "Sky Smash"],
+    sense: ["Mondsichel", "Crescent Sweep"], stoss: ["Pfeiler", "Pillar Thrust"], peitsche: ["Peitschenknall nach oben", "Rising Lash"], schild: ["Schildheber", "Shield Lift"],
+    schuss: ["Steilschuss", "Sky Shot"]
+  };
+  const upClass = d => {
+    if (d.kind === "shield") return "schild";
+    if (d.kind === "ranged") return "schuss";
+    if (UP_CLS[d.icon]) return UP_CLS[d.icon];
+    const c0 = d.combo && d.combo[0];
+    return c0 && c0.smear && c0.smear.stab ? "stich" : "klinge";
+  };
+  Z.upClass = upClass;
+  /* Schlagdaten je Gattung: Kasten [x, y, w, h] relativ zu (Körpermitte, Füße), Spur (smear) mit Winkeln (0 = vorn, −π/2 = oben) */
+  const UP_DEF = {
+    klinge: { box: [-10, -58, 38, 46], sm: { r: 26, a0: 0.9, a1: -2.5, th: 8, oy: -4 }, kbUp: 300 },
+    stich: { box: [-5, -66, 20, 52], sm: { r: 30, a0: -1.64, a1: -1.5, th: 3, stab: true, oy: -2 }, kbUp: 260 },
+    faust: { box: [-3, -58, 24, 44], sm: { r: 18, a0: 0.5, a1: -1.9, th: 5, oy: -4 }, kbUp: 340 },
+    wucht: { box: [-18, -66, 50, 56], sm: { r: 34, a0: 1.5, a1: -2.8, th: 12, oy: -6 }, kbUp: 380, slow: 1.25 },
+    sense: { box: [-36, -64, 72, 50], sm: { r: 38, a0: 0.5, a1: -3.6, th: 10, oy: -6 }, kbUp: 280 },
+    stoss: { box: [-6, -88, 22, 74], sm: { r: 48, a0: -1.62, a1: -1.5, th: 4, stab: true, oy: -2 }, kbUp: 260 },
+    peitsche: { box: [-9, -110, 24, 96], sm: { r: 84, a0: -1.64, a1: -1.5, th: 2, stab: true, oy: -2 }, kbUp: 120, crit: "tipUp" },
+    schild: { box: [-8, -60, 30, 42], sm: { r: 18, a0: -0.9, a1: -2.2, th: 10, oy: -6 }, kbUp: 360 }
+  };
+  const avgDmg = d => (d.combo && d.combo.length ? d.combo.reduce((a, c) => a + (c.dmg || 0), 0) / d.combo.length : 10);
+  const big = e => e.def && (e.def.boss || e.def.heavy);
+  function upLift(P, melee) {
+    if (P.onGround) return;
+    if (P.upAirUsed) return;
+    P.upAirUsed = 1;
+    if (melee) { P.vy = Math.min(P.vy, -210); P.cut = true; }
+    else P.vy = Math.min(P.vy, -70);
+  }
+  Z.upAttack = function (P, s, it, d) {
+    if (!d || P.climbing || P.grapple) return false;
+    const cls = upClass(d), air = !P.onGround;
+    { const hh = (inp.held.right ? 1 : 0) - (inp.held.left ? 1 : 0); if (hh) P.face = hh; }
+    if (cls === "schuss") {
+      const sh = d.shoot;
+      if (sh.mag) { const m = P.mag[s] || { n: sh.mag + (Z.metaLvl(it.id) >= 3 ? 2 : 0), t: 0 }; P.mag[s] = m; if (m.n <= 0) return true; }
+      P.act = { slot: s, it, d, def: { pre: sh.pre || 0.06, act: 0.02, post: sh.post || 0.15 }, type: "shot", phase: "pre", t: 0, up: true, upAng: upAngle(P), speed: 1 + (Z.hasAff(it, "flink") ? 0.18 : 0) + (Z.hasRune && Z.hasRune(it, "tempo") ? 0.15 : 0), fired: 0 };
+      upLift(P, false);
+      return true;
+    }
+    const U0 = UP_DEF[cls], c0 = (d.combo && d.combo[0]) || {};
+    const heavy = cls === "wucht" || cls === "sense" || !!c0.heavy;
+    const dmg = cls === "schild" ? d.shield.bash * 1.15 : avgDmg(d) * 1.1;
+    let pre = Math.max(0.05, (c0.pre || 0.07) * 1.15) * (U0.slow || 1) * (air && heavy ? 0.7 : 1) /* in der Luft holen schwere Waffen kürzer aus */; if (air) pre = Math.min(pre, 0.22);
+    const act = Math.max(0.08, c0.act || 0.08), post = Math.max(0.14, (c0.post || 0.12) * 1.2);
+    const eff = Object.assign({}, c0.eff || {}); if (cls === "schild") eff.stun = Math.max(eff.stun || 0, 0.6); if (cls === "wucht") eff.stun = Math.max(eff.stun || 0, 0.5);
+    const def = { up: true, cls, pre, act, post, dmg, box: U0.box, lunge: 0, kb: 30, kbUp: U0.kbUp, sw: cls === "schild" ? "punch" : c0.sw || "slash", hitSnd: cls === "schild" ? "hitMetal" : c0.hitSnd,
+      heavy, eff, crit: U0.crit || c0.crit, smear: Object.assign({}, U0.sm),
+      onHit: air ? null : (P2, e) => { if (!big(e) && !e.def.fly && e.st && !(e.st.root > 0)) { e.vy = Math.min(e.vy || 0, cls === "wucht" ? -440 : -380); e.onGround = false; e.kbT = Math.max(e.kbT || 0, 0.35); Z.addStatus(e, "stun", 0.5); } } };
+    P.act = { slot: s, it, d, def, type: "melee", step: 8, phase: "pre", t: 0, up: true, speed: 1 + (Z.hasAff(it, "flink") ? 0.18 : 0) + (P.wrath > 0 ? 0.1 : 0) + (Z.hasRune && Z.hasRune(it, "tempo") ? 0.15 : 0), hit: new Set(), lungeT: 0, airHover: air };
+    P.combo[s] = 0; P.comboT[s] = 0; P.usedHover = air;
+    P.act.upLift = air;
+    A.play("swing", { vol: 0.25, rate: 1.35 });
+    return true;
+  };
+  /* Zielwinkel nach oben (lokal, negativ = oben): Gegner schräg oder senkrecht darüber anvisieren (Zielhilfe), sonst
+     mit Seitwärtsdruck schräg (≈ 55°), ohne gerade nach oben (≈ 82°) */
+  function upAngle(P) {
+    const h = (inp.held.right ? 1 : 0) - (inp.held.left ? 1 : 0);
+    let ang = h ? -0.96 : -1.43;
+    const x = P.x + P.w / 2, y = P.y + 4;
+    let best = null, bd = 320;
+    for (const e of Z.enemies) {
+      if (e.dead || e.hidden || e.intro > 0) continue;
+      const dx = (e.x + e.w / 2 - x) * P.face, dy = e.y + e.h / 2 - y;
+      if (dy > -16) continue;
+      const a = Math.atan2(dy, dx); /* −π … 0 */
+      if (a < -1.85 || a > -0.45) continue;
+      const dd = Math.hypot(dx, dy); if (dd < bd && W.los(x, y, e.x + e.w / 2, e.y + e.h / 2)) { bd = dd; best = a; }
+    }
+    if (best != null && (Z.settings.autoAim !== false)) ang = best;
+    return ang;
+  }
+  Z.upAngle = upAngle;
+  /* Geschosse ab Index n0 nach oben drehen und über den Kopf setzen */
+  Z.upShotAim = function (P, a, n0) {
+    const ang = a.upAng != null ? a.upAng : (a.upAng = upAngle(P)), f = P.face, ca = Math.cos(ang), sa = Math.sin(ang);
+    const x = P.x + P.w / 2 + f * 3, y = P.y + 3;
+    for (let i = n0; i < Z.projs.length; i++) {
+      const p = Z.projs[i]; if (p.owner !== "p") continue;
+      p.x = x; p.y = y; p.up = true;
+      if (p.k && p.k.lob) { p.vx = f * (ang < -1.2 ? 50 : 120) + (p.vx - f * 170) * 0.3; p.vy = -440 + (p.vy + 220) * 0.4; continue; }
+      const sp = Math.hypot(p.vx, p.vy) || 400, lx = p.vx * f, ly = p.vy, base = Math.atan2(ly, lx);
+      /* Streuung (Fächer, Salve) bleibt als Winkelabstand erhalten */
+      const spread = Math.abs(base) < 0.9 ? base : 0, a2 = ang + spread;
+      p.vx = Math.cos(a2) * sp * f; p.vy = Math.sin(a2) * sp;
+      void ca; void sa;
+    }
+  };
+  /* Sonderfälle ohne Geschoss: Blitzstab – Blitzsäule nach oben bis zur Decke, springt dann weiter */
+  Z.upShotSpecial = function (P, a) {
+    const s = a.d.shoot; if (s.proj !== "blitz") return false;
+    a.fired = (a.fired || 0) + 1;
+    const x = P.x + P.w / 2 + P.face * 2, y = P.y + 2, base = dmgOf(P, a.it, s.dmg);
+    const eff = Object.assign({ stun: 0.3 }, a.d.eff || {}); a.it && a.it.aff.forEach(af => { const ad = Z.AFFIX[af]; if (ad.eff) for (const k in ad.eff) eff[k] = (eff[k] || 0) + ad.eff[k]; });
+    let top = y; while (top > y - 260 && !W.solidAt(x, top - 4)) top -= 4;
+    Z.bolts.push({ x0: x, y0: y, x1: x + (Math.random() - 0.5) * 6, y1: top, t: 0, life: 0.24, col: "#fff2a0" });
+    A.play(s.sw || "zap", { vol: 0.55 });
+    let first = null;
+    for (const e of Z.enemies) if (!e.dead && !(e.intro > 0) && Math.abs(e.x + e.w / 2 - x) < e.w / 2 + 12 && e.y + e.h > top && e.y < y) { Z.hitEnemy(e, base * 1.1, { eff, src: "ranged", it: a.it, kb: 20 }); if (!first || e.y > first.y) first = e; }
+    if (first) Z.chainLightning(P, first.x + first.w / 2, first.y + first.h / 2, base * 0.6, 2, eff, a.it);
+    Z.ausstattungTreffer && Z.ausstattungTreffer({ x: x - 10, y: top - 6, w: 20, h: y - top + 6 }, { hits: 1, dir: 0 });
+    return true;
   };
   Z.bolts = [];
 })();

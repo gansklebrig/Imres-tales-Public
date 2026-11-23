@@ -397,7 +397,27 @@
       return pg && !pg.none && pg.cv ? pg : null;
     } catch (_) { return null; }
   }
-  function canvasSize() { const cv = document.getElementById("cv"); return [cv.width, cv.height]; }
+  /* Buchseiten liegen auf einer eigenen Leinwand (#buchcv) in Bildschirmauflösung:
+     die Spiel-Leinwand rechnet auf großen Bildschirmen mit verringerter Auflösung (z. B. 0,35–0,55 bei 1440p) –
+     Schrift auf ihr wäre unscharf. Pixelzahl begrenzt (hohe Qualität 5,2 MP ≈ 3440×1440, sonst 2,4 MP). */
+  let ov = null, ovc = null, ovOn = false;
+  function ovSize() {
+    const w = innerWidth, h = innerHeight, maxP = qLevel() >= 2 ? 5.2e6 : 2.4e6;
+    let d = Math.min(window.devicePixelRatio || 1, 2); if (w * h * d * d > maxP) d = Math.sqrt(maxP / (w * h));
+    return [Math.max(1, Math.round(w * d)), Math.max(1, Math.round(h * d))];
+  }
+  function overlay() {
+    if (!ov) {
+      ov = document.createElement("canvas"); ov.id = "buchcv"; ov.setAttribute("aria-hidden", "true");
+      ov.style.cssText = "position:fixed;inset:0;width:100%;height:100%;pointer-events:none;display:none";
+      const cv = document.getElementById("cv"); if (cv && cv.parentNode) cv.parentNode.insertBefore(ov, cv.nextSibling); else document.body.appendChild(ov);
+      ovc = ov.getContext("2d");
+    }
+    const [w, h] = ovSize(); if (ov.width !== w || ov.height !== h) { ov.width = w; ov.height = h; }
+    return ov;
+  }
+  function overlayShow(v) { if (ovOn === v) return; ovOn = v; if (ov) { ov.style.display = v ? "block" : "none"; if (!v) ovc.clearRect(0, 0, ov.width, ov.height); } }
+  function canvasSize() { return ovSize(); }
   function newPage(info) {
     const [W, H] = canvasSize();
     return { cv: buildPage(W, H, info), hold: info.hold || 1, low: !!info.low, info };
@@ -900,8 +920,9 @@
       drawPlate(c, W, H);
       drawPanScreen(c, W, H);
       drawGold(c);
-      drawBook(c, W, H);
-    } catch (e) { console.error("uebergang", e); book = null; pan = null; suck = null; hudHide(false); }
+      if (book) { const o = overlay(); ovc.setTransform(1, 0, 0, 1, 0, 0); ovc.clearRect(0, 0, o.width, o.height); drawBook(ovc, o.width, o.height); overlayShow(true); }
+      else overlayShow(false);
+    } catch (e) { console.error("uebergang", e); book = null; pan = null; suck = null; hudHide(false); overlayShow(false); }
     return res;
   };
 
@@ -971,7 +992,7 @@
     finally {
       muteBanner = false;
       if (fancy) {
-        try { const [W, H] = canvasSize(); plate = { t: 0, dur: 4.2, pl: buildPlate(W, H, e), e, intro: e.def.intro ? L(e.def.intro) : "", lv: Z.level }; A.play("horn", { vol: 0.35, delay: 0.25 }); }
+        try { const cvm = document.getElementById("cv"), W = cvm.width, H = cvm.height; plate = { t: 0, dur: 4.2, pl: buildPlate(W, H, e), e, intro: e.def.intro ? L(e.def.intro) : "", lv: Z.level }; A.play("horn", { vol: 0.35, delay: 0.25 }); }
         catch (err) { console.error(err); plate = null; banner0.call(ui, L(e.def.n), e.def.intro ? L(e.def.intro) : L(e.def.title || ["", ""]), 4200); }
       }
     }

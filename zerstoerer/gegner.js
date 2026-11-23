@@ -202,6 +202,7 @@
   /* ======================= UPDATE ======================= */
   Z.updateEnemies = function (dt) {
     const P = Z.player;
+    const lean = !!(Z.gq && Z.gq.lean);
     for (let i = Z.enemies.length - 1; i >= 0; i--) {
       const e = Z.enemies[i];
       if (e.dead) { e.deadT += dt; if (e.deadT > (e.def.boss ? 99 : 0.6)) Z.enemies.splice(i, 1); continue; }
@@ -213,7 +214,9 @@
       } else { if (!isFinite(e.vx)) e.vx = 0; if (!isFinite(e.vy)) e.vy = 0; e._okx = e.x; e._oky = e.y; }
       /* weit weg: schlafen lassen (Leistung) */
       const far = Math.abs(e.x - P.x) > 520 || Math.abs(e.y - P.y) > 360;
-      if (far && !e.def.boss && !e.aware) continue;
+      /* Handheld: auch wache Gegner ruhen, wenn sie weit außerhalb des Bildes sind (über 1,5 Bildbreiten) – wie in Dead Cells */
+      e._rest = far && !e.def.boss && (!e.aware || (lean && (Math.abs(e.x - P.x) > 760 || Math.abs(e.y - P.y) > 480)));
+      if (e._rest) continue;
       e.anim += dt; e.flash = Math.max(0, e.flash - dt); e.spawnT = Math.max(0, e.spawnT - dt);
       if (e.invuln > 0) e.invuln -= dt;
       if (e.broken > 0) { e.broken -= dt; if (e.broken <= 0) e.guard = 0; }
@@ -226,9 +229,9 @@
     }
     /* Trennung, damit sich Gegner nicht stapeln */
     for (let i = 0; i < Z.enemies.length; i++) {
-      const a = Z.enemies[i]; if (a.dead || a.def.fly || a.def.boss) continue;
+      const a = Z.enemies[i]; if (a.dead || a.def.fly || a.def.boss || a._rest) continue;
       for (let j = i + 1; j < Z.enemies.length; j++) {
-        const b = Z.enemies[j]; if (b.dead || b.def.fly || b.def.boss) continue;
+        const b = Z.enemies[j]; if (b.dead || b.def.fly || b.def.boss || b._rest) continue;
         if (Math.abs(a.y - b.y) > 10) continue;
         const dx = (b.x + b.w / 2) - (a.x + a.w / 2), min = (a.w + b.w) * 0.42;
         if (Math.abs(dx) < min) { const push = (min - Math.abs(dx)) * 0.5 * (U.sign(dx) || 1); if (!a.act) a.x -= push * 0.5; if (!b.act) b.x += push * 0.5; }

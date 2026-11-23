@@ -934,14 +934,25 @@
     for (const s of stations) if (s.placed && s.draw && vis(cam, s.x - 30, s.x + 30)) { try { s.draw(c, s.x, s.y, t); } catch (_) {} }
   }
   /* Zahlen auf dem Gedenkstein (lebendig, damit nichts neu gemalt werden muss) */
+  /* Text und Stufenrauten als kleines Bild zwischenspeichern (5 px je Welteinheit) – Schrift je Bild ist auf Handhelds teuer */
+  let stoneTx = null;
   function stoneText(c, x, gy, t, st) {
+    const M = Z.meta, key = (M.runs || 0) + "|" + (M.deaths || 0) + "|" + st + "|" + L(["Läufe", "runs"]) + "|" + (document.fonts ? document.fonts.status : "");
+    if (!stoneTx || stoneTx.key !== key) {
+      const K = 5, cv = stoneTx && stoneTx.cv || document.createElement("canvas"); cv.width = 24 * K; cv.height = 26 * K;
+      const g = cv.getContext("2d"); g.setTransform(K, 0, 0, K, 0, 0); g.clearRect(0, 0, 24, 26);
+      stoneTextRaw(g, 12, 28, st); stoneTx = { key, cv };
+    }
+    c.drawImage(stoneTx.cv, x - 12, gy - 28, 24, 26);
+    if (st >= 2 && !lo()) { c.save(); c.globalCompositeOperation = "lighter"; glow(c, x + 13, gy - 7, 6 + Math.sin(t * 7) * 0.8, "rgba(255,190,100,.45)"); c.restore(); Z.flame && Z.flame(c, x + 13, gy - 6, 0.35, "#ffb060"); }
+  }
+  function stoneTextRaw(c, x, gy, st) {
     const M = Z.meta;
     c.save(); c.textAlign = "center"; c.font = "700 4.6px 'IM Fell English SC',serif"; c.fillStyle = "rgba(230,214,190,.85)";
     c.fillText(String(M.runs || 0), x, gy - 22); c.font = "700 2.8px 'Alegreya Sans',sans-serif"; c.fillStyle = "rgba(220,200,180,.7)"; c.fillText(L(["Läufe", "runs"]), x, gy - 19);
     c.font = "700 3.8px 'IM Fell English SC',serif"; c.fillStyle = "rgba(230,180,170,.8)"; c.fillText("† " + (M.deaths || 0), x, gy - 13.4);
     for (let i = 0; i < STAGES.length; i++) { const on = i <= st; poly(c, [x - 7.5 + i * 3, gy - 9.6, x - 6.5 + i * 3, gy - 8.6, x - 7.5 + i * 3, gy - 7.6, x - 8.5 + i * 3, gy - 8.6], on ? "#e5b454" : "rgba(40,30,30,.6)"); }
     c.restore();
-    if (st >= 2 && !lo()) { c.save(); c.globalCompositeOperation = "lighter"; glow(c, x + 13, gy - 7, 6 + Math.sin(t * 7) * 0.8, "rgba(255,190,100,.45)"); c.restore(); Z.flame && Z.flame(c, x + 13, gy - 6, 0.35, "#ffb060"); }
   }
   function drawLights(c, cam, t) {
     const poles = camp.poles, y0 = 12 * T - 58, low = lo();
@@ -1670,7 +1681,7 @@
     ".lager .lg-zitat{font-family:var(--fb);font-style:italic;color:var(--tinte,#2a1810);background:linear-gradient(170deg,var(--perg,#ecdcb4),var(--perg2,#d3b986));border:1px solid #8a6a3a;border-radius:4px;padding:5px 10px;margin:2px 0;font-size:var(--fs-s,13px);line-height:1.35;box-shadow:inset 0 0 18px rgba(120,80,30,.3)}",
     ".lager .lg-liste{display:flex;flex-direction:column;gap:5px}",
     ".lager .lg-stufe{display:flex;gap:10px;align-items:center;padding:6px 9px;border:1px solid #33241f;border-radius:6px;background:rgba(255,235,200,.03)}",
-    ".lager .lg-stufe.hat{border-color:var(--gold3,#8a6420);background:rgba(229,180,84,.06)}.lager .lg-stufe.zu{opacity:.55}",
+    ".lager .lg-stufe.hat{border-color:var(--gold3,#8a6420);background:rgba(229,180,84,.06)}.lager .lg-stufe.zu{opacity:.78;filter:saturate(.5)}",
     ".lager .lg-stufe.naechste{border-color:var(--gold,#e5b454);box-shadow:0 0 12px rgba(229,180,84,.14)}",
     ".lager .lg-txt{flex:1;min-width:0}.lager .lg-txt b{color:var(--text,#f0e6d4);font-size:var(--fs-m,15px)}.lager .lg-stufe.hat .lg-txt b{color:var(--gold,#e5b454)}.lager .lg-txt small{display:block;color:var(--mute,#ab9c8c);font-size:12.5px;line-height:1.3}",
     ".lager .lg-pip{width:11px;height:11px;flex:none;transform:rotate(45deg);border:1px solid #5e4a3c;background:#241a16}.lager .lg-pip.an{background:var(--pc,var(--gold,#e5b454));border-color:var(--gold2,#ffd27a);box-shadow:0 0 6px rgba(229,180,84,.6)}",
@@ -1678,20 +1689,20 @@
     ".lager h3 .lg-rest{font-size:var(--fs-xs,11px);color:var(--mute,#ab9c8c);font-weight:700;margin-left:6px}",
     ".lager .lg-wahl{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:6px}",
     ".lager .lg-wahl button,.lager .lg-runenwahl button{display:flex;flex-direction:column;gap:2px;text-align:left;background:linear-gradient(#2a1a1e,#1a1014);border:1px solid var(--c,#5e4a3c);border-left-width:4px;border-radius:7px;padding:7px 10px;box-shadow:0 2px 0 rgba(0,0,0,.45);color:var(--text,#f0e6d4)}",
-    ".lager .lg-wahl button b,.lager .lg-runenwahl button b{color:var(--c,var(--gold,#e5b454))}.lager .lg-wahl button small,.lager .lg-runenwahl button small{color:var(--mute,#ab9c8c);font-size:11.5px;line-height:1.25}",
+    ".lager .lg-wahl button b,.lager .lg-runenwahl button b{color:var(--c,var(--gold,#e5b454))}.lager .lg-wahl button small,.lager .lg-runenwahl button small{color:var(--mute,#ab9c8c);font-size:12.5px;line-height:1.25}",
     ".lager .lg-wahl button:not(:disabled):hover,.lager .lg-wahl button:focus,.lager .lg-runenwahl button:not(:disabled):hover,.lager .lg-runenwahl button:focus{box-shadow:0 0 0 1px var(--c,var(--gold,#e5b454)),0 0 16px rgba(229,180,84,.18);filter:brightness(1.1)}",
     ".lager .lg-wahl button.an{box-shadow:0 0 0 2px var(--gold,#e5b454),0 0 16px rgba(229,180,84,.35)}.lager .lg-lieder button{--c:#e5b454}",
     ".lager .lg-hand{grid-column:1/-1}.lager .lg-hand>b{color:var(--text,#f0e6d4)}.lager .lg-runen span{margin-right:6px;font-weight:800}.lager .lg-runenwahl{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:6px;margin-top:4px}",
     ".lager .lg-band{display:flex;gap:3px;margin:6px 0 4px;flex-wrap:wrap}.lager .lg-band span{flex:1;min-width:84px;text-align:center;font-size:var(--fs-xs,11px);font-weight:800;padding:3px 4px;border-radius:4px;background:#1a1014;color:var(--mute2,#7d6f63);border:1px solid #33241f}.lager .lg-band span.an{background:linear-gradient(#4a3220,#2a1a10);color:var(--gold2,#ffd27a);border-color:var(--gold3,#8a6420)}",
     ".lager .lg-fort{height:6px;background:#1a1014;border:1px solid #33241f;border-radius:3px;overflow:hidden}.lager .lg-fort i{display:block;height:100%;background:linear-gradient(90deg,var(--blut2,#7a1418),var(--gold,#e5b454))}",
-    ".lager .lg-klein{font-size:12px;margin:3px 0}",
+    ".lager .lg-klein{font-size:12.5px;margin:3px 0}",
     ".lager .lg-leute{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:6px}.lager .lg-person{display:flex;gap:7px;align-items:flex-start;padding:5px 7px;border:1px solid #33241f;border-radius:6px;background:rgba(255,235,200,.03);font-size:12.5px;line-height:1.25}",
     ".lager .lg-person canvas{width:22px;height:22px;flex:none;border-radius:3px;box-shadow:0 0 0 1px var(--eisen3,#3b2e28)}.lager .lg-person b{color:var(--gold,#e5b454)}.lager .lg-person small{color:var(--mute,#ab9c8c)}",
-    ".lager .lg-person.fehlt b{color:var(--mute,#ab9c8c)}.lager .lg-geruecht{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-style:italic;font-size:11px;color:var(--mute2,#7d6f63)!important}",
+    ".lager .lg-person.fehlt b{color:var(--mute,#ab9c8c)}.lager .lg-geruecht{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-style:italic;font-size:12px;color:var(--mute2,#9a8b7b)!important}",
     ".lager .lg-rek{border-collapse:collapse;font-size:12.5px;width:100%;color:var(--tinte,#2a1810);background:linear-gradient(170deg,var(--perg,#ecdcb4),var(--perg2,#d3b986));border:1px solid #8a6a3a;border-radius:4px;display:block;padding:4px 8px}",
     ".lager .lg-rek tbody{display:flex;flex-wrap:wrap}.lager .lg-rek tr{display:flex;width:50%;justify-content:space-between;padding:1px 10px 1px 0}.lager .lg-rek th{text-align:left;font-weight:700;color:var(--tinte2,#5a3a24)}.lager .lg-rek td{font-weight:800;font-variant-numeric:tabular-nums}",
     "@media (max-width:640px){.lager .lg-leute{grid-template-columns:repeat(2,1fr)}.lager .lg-rek tr{width:100%}}",
-    "@media (max-height:600px){.lager canvas.lg-bild{width:44px;height:52px}.lager .lg-stufe{padding:3px 7px}.lager .lg-txt small{font-size:11.5px}.lager .lg-leute{gap:3px}.lager .lg-person{padding:3px 6px}}"
+    "@media (max-height:600px){.lager canvas.lg-bild{width:44px;height:52px}.lager .lg-stufe{padding:3px 7px}.lager .lg-txt small{font-size:12px}.lager .lg-leute{gap:3px}.lager .lg-person{padding:3px 6px}}"
   ].join("\n");
   document.head.appendChild(css);
 

@@ -13,32 +13,46 @@
     { n: ["Handheld (schlank)", "Handheld (lean)"], res: 0.6, part: 0.2, light: 8, weather: false, fog: false, layers: false, critters: false, vignette: false, maxPix: 1100 * 640 },
     { n: ["Mittel", "Medium"], res: 0.8, part: 0.65, light: 6, weather: true, fog: true, layers: true, critters: false, vignette: true, maxPix: 1400 * 820 },
     { n: ["Hoch", "High"], res: 1, part: 1, light: 4, weather: true, fog: true, layers: true, critters: true, vignette: true, maxPix: 1600 * 940 },
-    { n: ["Ultra", "Ultra"], res: 1, part: 1, light: 3, weather: true, fog: true, layers: true, critters: true, vignette: true, maxPix: 2560 * 1440 }
+    { n: ["Ultra", "Ultra"], res: 1, part: 1, light: 3, weather: true, fog: true, layers: true, critters: true, vignette: true, maxPix: 2560 * 1440 },
+    /* „Handheld minimal“ (R36S/RK3326 & Co.): wie Stufe 0 (q.level = 0), dazu kleineres Bild, noch weniger Partikel und Musik ohne Hall */
+    { n: ["Handheld (minimal)", "Handheld (minimal)"], res: 0.5, part: 0.1, light: 8, weather: false, fog: false, layers: false, critters: false, vignette: false, maxPix: 900 * 540, mini: true }
   ];
+  const MINI = 4;
   Z.GFX_PRESETS = PRESETS;
   const KEYS = ["res", "part", "light", "weather", "fog", "layers", "critters", "vignette", "maxPix"];
   const S = Z.settings;
   if (!S.gfx || typeof S.gfx !== "object") S.gfx = { preset: "auto", fpsCap: 0 };
   const touchDev = matchMedia && matchMedia("(pointer: coarse)").matches;
-  /* kleiner Bildschirm (Handhelds wie RG353V/R36S: 640×480) oder sehr schwaches Gerät → Handheld-Stufe */
-  const smallScr = (screen.width || innerWidth) * (screen.height || innerHeight) <= 800 * 600;
-  const weakDev = (navigator.hardwareConcurrency || 8) <= 2 || (navigator.deviceMemory && navigator.deviceMemory <= 2);
-  let autoLvl = smallScr || weakDev ? 0 : touchDev || (navigator.hardwareConcurrency || 8) <= 4 ? 1 : 2;
-  try { const a = +sessionStorage.getItem("imres-zerstoerer-autolvl"); if (a >= 0 && a <= 3 && sessionStorage.getItem("imres-zerstoerer-autolvl") != null && !(smallScr || weakDev)) autoLvl = Math.min(autoLvl, a); } catch (_) {}
+  /* Handheld-Erkennung: kleiner Bildschirm (RG353V/R36S: 640×480), ARM-Linux-Browser (Handheld-Betriebssysteme),
+     wenige Kerne oder wenig Speicher → Stufe 0; 1 GB oder weniger (R36S) → „Handheld minimal“.
+     autoLvl: -1 = minimal, 0…3 = Stufen */
+  const scrPix = (screen.width || innerWidth) * (screen.height || innerHeight), winPix = innerWidth * innerHeight;
+  const smallScr = scrPix <= 800 * 600 || (winPix > 0 && winPix <= 800 * 600);
+  const ua = navigator.userAgent || "", plat = navigator.platform || "";
+  const armLinux = /Linux/i.test(ua + plat) && !/Android/i.test(ua) && /aarch64|arm/i.test(ua + " " + plat);
+  const cores = navigator.hardwareConcurrency || 8, mem = navigator.deviceMemory || 0;
+  const weakDev = cores <= 2 || (mem && mem <= 2) || armLinux;
+  const tinyDev = mem && mem <= 1;
+  let autoLvl = tinyDev ? -1 : smallScr || weakDev ? 0 : touchDev || cores <= 4 ? 1 : 2;
+  const presetOf = l => (l < 0 ? PRESETS[MINI] : PRESETS[l]);
+  try { const raw = sessionStorage.getItem("imres-zerstoerer-autolvl"), a = +raw; if (raw != null && a >= -1 && a <= 3) autoLvl = Math.min(autoLvl, a); } catch (_) {}
   Z.gq = {};
   Z.applyGfx = function (noResize) {
     const g = S.gfx;
-    const base = g.preset === "auto" ? PRESETS[autoLvl] : g.preset === "custom" ? PRESETS[2] : PRESETS[+g.preset] || PRESETS[2];
+    const base = g.preset === "auto" ? presetOf(autoLvl) : g.preset === "custom" ? PRESETS[2] : PRESETS[+g.preset] || PRESETS[2];
     const q = {};
     for (const k of KEYS) q[k] = g.preset === "custom" && g.c && g.c[k] != null ? g.c[k] : base[k];
     q.fpsCap = g.fpsCap || 0;
-    q.level = g.preset === "auto" ? autoLvl : g.preset === "custom" ? -1 : +g.preset;
+    q.level = g.preset === "auto" ? Math.max(0, autoLvl) : g.preset === "custom" ? -1 : +g.preset === MINI ? 0 : +g.preset;
+    /* schlanker Handheld-Weg (Stufe 0 bzw. „Handheld minimal“): weniger Teilschritte, gedrosselte Nebenrechnungen, sparsamer Ton */
+    q.lean = base === PRESETS[0] || base === PRESETS[MINI];
+    q.mini = base === PRESETS[MINI];
     Z.gq = q;
     if (!noResize && Z.resize) Z.resize();
   };
   Z.gfxName = function () {
     const g = S.gfx;
-    if (g.preset === "auto") return L(["Automatisch", "Automatic"]) + " (" + L(PRESETS[autoLvl].n) + ")";
+    if (g.preset === "auto") return L(["Automatisch", "Automatic"]) + " (" + L(presetOf(autoLvl).n) + ")";
     if (g.preset === "custom") return L(["Eigene", "Custom"]);
     return L((PRESETS[+g.preset] || PRESETS[2]).n);
   };
@@ -52,20 +66,24 @@
   };
   Z.applyGfx(true);
 
-  /* Automatik: läuft das Spiel dauerhaft zu langsam, eine Stufe herunter (nur nach unten, kein Hin und Her) */
-  let autoAcc = 0, autoN = 0, autoT = 0, autoGrace = 6;
+  /* Automatik: läuft das Spiel zu langsam, herunterschalten (nur nach unten, kein Hin und Her).
+     Prüffenster 2,5 s; bei deutlichem Ruckeln (< 30 fps) sofort auf Handheld (schlank), darunter (< 24 fps) auf minimal. */
+  let autoAcc = 0, autoN = 0, autoT = 0, autoGrace = 4;
   Z.gfxAutoTick = function (dt, playing) {
     if (S.gfx.preset !== "auto" || !playing || document.hidden || Z.diag.busy) { autoAcc = 0; autoN = 0; autoT = 0; return; }
     if (autoGrace > 0) { autoGrace -= dt; return; }
     autoAcc += dt; autoN++; autoT += dt;
-    if (autoT >= 5) {
+    if (autoT >= 2.5) {
       const fps = autoN / autoAcc; autoAcc = 0; autoN = 0; autoT = 0;
       const cap = Z.gq.fpsCap || 60;
-      if (fps < Math.min(48, cap * 0.8) && autoLvl > 0) {
-        autoLvl--; try { sessionStorage.setItem("imres-zerstoerer-autolvl", autoLvl); } catch (_) {}
-        Z.applyGfx(); autoGrace = 4;
-        Z.toast && Z.toast(L(["Grafik automatisch angepasst: ", "Graphics adjusted automatically: "]) + "<b>" + L(PRESETS[autoLvl].n) + "</b>", 2600);
-        Z.diag.note("Auto-Grafik → " + PRESETS[autoLvl].n[0] + " (" + fps.toFixed(0) + " fps)");
+      let to = autoLvl;
+      if (fps < Math.min(48, cap * 0.8) && autoLvl > 0) to = fps < 30 ? 0 : autoLvl - 1;
+      else if (autoLvl === 0 && fps < Math.min(24, cap * 0.6)) to = -1;
+      if (to !== autoLvl) {
+        autoLvl = to; try { sessionStorage.setItem("imres-zerstoerer-autolvl", autoLvl); } catch (_) {}
+        Z.applyGfx(); autoGrace = 3;
+        Z.toast && Z.toast(L(["Grafik automatisch angepasst: ", "Graphics adjusted automatically: "]) + "<b>" + L(presetOf(autoLvl).n) + "</b>", 2600);
+        Z.diag.note("Auto-Grafik → " + presetOf(autoLvl).n[0] + " (" + fps.toFixed(0) + " fps)");
       }
     }
   };

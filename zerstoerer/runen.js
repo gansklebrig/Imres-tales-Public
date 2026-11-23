@@ -196,6 +196,8 @@
       return;
     }
     const h = (inp.held.right ? 1 : 0) - (inp.held.left ? 1 : 0);
+    /* Kettenrune: „Benutzen“ in der Luft zieht ebenfalls zur nächsten Öse (so steht es in der Beschreibung – fehlte bisher) */
+    if (inp.pressed.use && has("kette") && !P.onGround && !P.climbing && !P.ringHang && !P.ledge) { const r = nearestRing(P); if (r) { startPull(P, r); P.time += dt; return; } }
     /* Hängen an der Öse: Sprung zählt wie vom Boden (Coyote), Runter lässt los */
     const hang = P.ringHang;
     if (hang) {
@@ -235,7 +237,9 @@
     /* Schattenrune: Schattensprint */
     const shadow = has("schatten");
     P.rollMul = shadow ? SH.MUL : null;
-    if (shadow && P.rollT > 0 && !P.onGround && P.sprintAirNow) { gk = 0; P.vy = 0; }
+    /* W7: auch ein am Boden begonnener Sprint fällt nicht mehr, wenn er über eine Kante hinausträgt (vorher: aus dem
+       Schattenspalt heraus direkt in einen Abgrund dahinter → zurückgesetzt vor den Spalt) */
+    if (shadow && P.rollT > 0 && !P.onGround && (P.sprintAirNow || P.sprintGround)) { gk = 0; P.vy = Math.min(P.vy, 0); if (P.sprintGround) P.vy = 0; }
     if (!hang) P.gMul = gk;
     /* Erdrune: Runter + Angriff in der Luft stampft immer – auch mit Fernkampfwaffe in der Hand (sonst nur Sturzschüsse) */
     if (has("erde") && !P.onGround && !P.plunge && !P.climbing && inp.held.down && P.vy > -260 && !P.diveLock && !(P.act && P.act.phase !== "post") && P.rollT <= 0) {
@@ -266,8 +270,8 @@
     }
     if (P.onGround || P.climbing || P.ledge) { P.j3 = false; P.sprintAir = false; P.rnAirHits = 0; }
     /* Rolle begonnen? */
-    if (P.rollT > 0 && pre.rollT <= 0) onRollStart(P);
-    if (P.rollT <= 0) P.sprintAirNow = false;
+    if (P.rollT > 0 && pre.rollT <= 0) onRollStart(P, pre.onGround);
+    if (P.rollT <= 0) { P.sprintAirNow = false; P.sprintGround = false; }
     /* Schattengestalt: flach während des Sprints, aufrichten sobald Platz ist */
     if (has("schatten") && P.rollT > 0 && !P.shadowForm && P.h > SH.H) { P.y += P.h - SH.H; P.h = SH.H; P.shadowForm = true; P.crouch = false; }
     if (P.shadowForm) {
@@ -290,9 +294,10 @@
     tickWorld(P, dt);
   }
 
-  function onRollStart(P) {
+  function onRollStart(P, pre0Ground) {
     if (has("schatten")) {
       if (!P.onGround && !P.sprintAir) { P.sprintAir = true; P.sprintAirNow = true; P.vy = 0; }
+      P.sprintGround = !!pre0Ground;
       FX.burst(P.x + P.w / 2, P.y + P.h - 6, 10, { col: ["#b77cff", "#3a1a4a", "#ff5a8a"], sp: 70, ang: P.rollDir > 0 ? Math.PI : 0, spread: 1, life: 0.4, size: 2.4, kind: "smoke" });
       A.play("shadow", { vol: 0.35, rate: 1.3 });
     }
@@ -611,14 +616,16 @@
   }
   /* Tutorial-Moment in der Welt: kurze Zeile mit der Steuerung über Ezekiel, dazu (falls vorhanden) ein Wegweiser
      zur passenden Sperre dieses Gebiets. Beim ersten Mal ausführlich, danach kurz. */
+  /* W7: jede Zeile nennt die Taste(n) – Tastatur, Controller oder Touch, wie gerade benutzt (Z.ui.key) */
   const HOW = {
     kralle: () => [L(["Gegen eine Wand drücken: rutschen", "Press into a wall: slide"]) + " · " + keyHint("jump") + " " + L(["abstoßen", "kick off"]), L(["Zur Wand hin springen klettert höher.", "Jumping toward the wall climbs higher."])],
-    schatten: () => [keyHint("roll") + " " + L(["Schattensprint: weiter, in der Luft ohne Fallen", "Shadow sprint: further, no falling in the air"]), L(["Flach genug für Schattenspalten.", "Flat enough for shadow slits."])],
-    schwingen: () => [L(["Dritter Sprung in der Luft", "A third jump in the air"]) + " · " + keyHint("jump") + " " + L(["halten: gleiten", "hold: glide"]), L(["Aufwinde tragen dich hinauf.", "Updrafts carry you up."])],
-    erde: () => [L(["Runter + Angriff in der Luft: Bodenstampfer", "Down + attack in the air: ground pound"]), L(["Bricht rissige Böden.", "Smashes cracked floors."])],
-    kette: () => [L(["In der Luft ohne Sprünge: ", "Airborne with no jumps left: "]) + keyHint("jump") + " " + L(["zur Öse", "to the ring"]), L(["Runter lässt los.", "Down lets go."])],
+    schatten: () => [keyHint("roll") + " " + L(["Rolle wird Schattensprint: weiter, in der Luft ohne Fallen", "Roll becomes a shadow sprint: further, no falling in the air"]), L(["Flach genug für Schattenspalten – einfach hineinrollen.", "Flat enough for shadow slits – just roll in."])],
+    schwingen: () => [keyHint("jump") + " " + L(["in der Luft: dritter Sprung", "in the air: third jump"]) + " · " + keyHint("jump") + " " + L(["halten: gleiten", "hold: glide"]), L(["Aufwinde tragen dich hinauf.", "Updrafts carry you up."])],
+    erde: () => [keyHint("down") + " + " + keyHint("a1") + " " + L(["in der Luft: Bodenstampfer", "in the air: ground pound"]), L(["Bricht rissige Böden.", "Smashes cracked floors."])],
+    kette: () => [L(["In der Luft ohne Sprünge: ", "Airborne with no jumps left: "]) + keyHint("jump") + " " + L(["oder", "or"]) + " " + keyHint("use") + " " + L(["zur Öse", "to the ring"]), L(["Runter lässt los.", "Down lets go."])],
     nebel: () => [keyHint("roll") + " " + L(["Rolle wird Nebel: durch Nebelgitter", "Roll turns to mist: through mist grates"]), L(["Geschosse gehen durch dich hindurch.", "Projectiles pass through you."])]
   };
+  Z.runeHow = k => (HOW[k] ? HOW[k]() : ["", ""]);
   function tutorial(k, first) {
     const P = Z.player, m = MM(), d = MR[k], how = HOW[k] ? HOW[k]() : ["", ""];
     const long = !m.tut[k]; m.tut[k] = 1; Z.saveMeta && Z.saveMeta();
@@ -879,7 +886,8 @@
     recalcActive();
     const mv = Object.keys(MR).filter(k => has(k));
     let h = "";
-    if (mv.length) h += "<h3>" + L(["Bewegungs-Runen", "Movement runes"]) + '</h3><div class="p-chips">' + mv.map(k => '<span style="color:' + MR[k].col + '" title="' + esc(L(MR[k].d)) + '">ᛟ ' + esc(L(MR[k].n)) + (MM().frei[k] ? "" : " ·" + L(["Lauf", "run"])) + "</span>").join("") + "</div>";
+    /* W7: mit Bedienzeile (Taste), damit man im Pausenmenü nachlesen kann, wie die Rune ausgelöst wird */
+    if (mv.length) h += "<h3>" + L(["Bewegungs-Runen", "Movement runes"]) + "</h3>" + mv.map(k => '<p class="hinweis rn-how"><b style="color:' + MR[k].col + '" title="' + esc(L(MR[k].d)) + '">ᛟ ' + esc(L(MR[k].n)) + (MM().frei[k] ? "" : " · " + L(["Lauf", "run"])) + "</b> " + HOW[k]()[0] + "</p>").join("");
     if (!ACT.any) return h;
     h += "<h3>" + L(["Runen & Familien", "Runes & families"]) + "</h3>";
     const belt = P.runeBelt || [];

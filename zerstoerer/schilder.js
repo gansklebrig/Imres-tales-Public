@@ -34,7 +34,7 @@
   const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 
   /* ======================= LERNFORTSCHRITT ======================= */
-  const NEED = { lauf: 2, sprung: 3, doppel: 2, steg: 1, leiter: 1, rolle: 2, h1: 2, h2: 2, faeh: 1, trank: 1, karte: 1, sturz: 1, parade: 1, aufheben: 1, amboss: 1, schloss: 1, pruefung: 1, hebel: 1 };
+  const NEED = { lauf: 2, sprung: 3, doppel: 2, steg: 1, leiter: 1, rolle: 2, h1: 2, h2: 2, faeh: 1, trank: 1, karte: 1, sturz: 1, aufwaerts: 1, parade: 1, aufheben: 1, amboss: 1, schloss: 1, pruefung: 1, hebel: 1 };
   const SM = () => { const m = Z.meta || (Z.meta = {}); if (!m.schilder || typeof m.schilder !== "object") m.schilder = {}; const s = m.schilder; if (!s.l || typeof s.l !== "object") s.l = {}; return s; };
   const known = k => (SM().l[k] | 0) >= (NEED[k] || 1);
   const allKnown = ks => !ks || !ks.length || ks.every(known);
@@ -550,6 +550,7 @@
     stegHub: () => ({ title: L(["Holzsteg", "Wooden ledge"]), rows: [[K("jump"), K("jump"), L([" Doppelsprung hinauf", " double jump up"])], [K(["down", "jump"]), L([" durchfallen", " drop through"])]] }),
     leiter: () => ({ title: L(["Leiter", "Ladder"]), rows: [[K("up"), L([" hinauf   ", " climb   "]), K("down"), L([" hinab", " down"])]] }),
     sturz: () => ({ title: L(["Sturzangriff", "Plunge attack"]), icon: "waffen", rows: [[L(["In der Luft ", "In mid-air "]), K(["down", "a1"]), L([" – trifft hart beim Aufprall", " – hits hard on landing"])]] }),
+    aufwaerts: () => ({ title: L(["Aufwärtsangriff", "Upward attack"]), icon: "waffen", rows: [[K(["up", "a1"]), L([" – mit jeder Waffe nach oben", " – any weapon, aimed up"])], [L(["in der Luft: einmal je Sprung Schwung nach oben", "in mid-air: one rising swing per jump"])]] }),
     vorrat: () => ({ title: L(["Vor dem Tor", "Before the gate"]), icon: "trank", rows: [[K("potion"), L([" Heiltrank   ", " potion   "]), K("map"), L([" Karte   ", " map   "]), K("use"), L([" Türen & Truhen", " doors & chests"])]] }),
     staender: () => { const P = Z.player, full = !!(P && P.slots && P.slots.a1 && P.slots.a2); return { title: L(["Waffenständer", "Weapon rack"]), icon: "waffen", rows: full ? [[K("a1"), L([" Hand 1   ", " hand 1   "]), K("a2"), L([" Hand 2", " hand 2"])], [L(["Hände voll? ", "Hands full? "]), K("use"), L([", dann ", ", then "]), K("a1"), "/", K("a2"), L([" tauscht", " swaps"])]] : [[K("use"), L([" aufheben", " pick up"])], [K("a1"), L([" Hand 1   ", " hand 1   "]), K("a2"), L([" Hand 2", " hand 2"])]] }; },
     puppe: () => ({ title: L(["Übungspuppe", "Training dummy"]), icon: "puppe", rows: [[K("a1"), K("a2"), L([" Waffen   ", " weapons   "]), K("s1"), K("s2"), L([" Fähigkeiten", " skills"])], [L(["Schild heben, kurz vor dem Treffer: ", "Raise a shield just before the hit: "]), L(["Parade", "parry"])]] }),
@@ -564,14 +565,15 @@
     leiter: () => ({ rows: [[K("up"), L([" hinauf  ", " climb  "]), K("down"), L([" hinab", " down"])]] }),
     steg: () => ({ rows: [[K(["down", "jump"]), L([" durchfallen", " drop through"])]] }),
     doppel: () => ({ rows: [[K("jump"), K("jump"), L([" Doppelsprung", " double jump"])]] }),
-    sturz: () => ({ rows: [[L(["in der Luft ", "in mid-air "]), K(["down", "a1"]), L([" Sturzangriff", " plunge"])]] })
+    sturz: () => ({ rows: [[L(["in der Luft ", "in mid-air "]), K(["down", "a1"]), L([" Sturzangriff", " plunge"])]] }),
+    aufwaerts: () => ({ rows: [[K(["up", "a1"]), L([" nach oben schlagen", " strike upward"])], [L(["auch Fliegendes", "hits flyers too"])]] })
   };
   const RUNE_HOW = {
     kralle: () => [L(["an die Wand drücken, ", "press into a wall, "]), K("jump"), L([" abstoßen", " kick off"])],
     schatten: () => [K("roll"), L([" Schattensprint – flach durch Spalten", " shadow sprint – flat through slits"])],
     schwingen: () => [L(["dritter Sprung, ", "third jump, "]), K("jump"), L([" halten: gleiten", " hold: glide"])],
     erde: () => [L(["in der Luft ", "in mid-air "]), K(["down", "a1"]), L([" Bodenstampfer", " ground pound"])],
-    kette: () => [L(["in der Luft ", "in mid-air "]), K("jump"), L([" zur Öse", " to the ring"])],
+    kette: () => [L(["in der Luft ", "in mid-air "]), K("jump"), L([" oder ", " or "]), K("use"), L([" zur Öse", " to the ring"])],
     nebel: () => [K("roll"), L([" als Nebel durch das Gitter", " as mist through the grate"])]
   };
   const GATE_T = { kralle: ["Kratzspuren im Schacht", "Claw marks in the shaft"], kette: ["Ösen unter der Decke", "Rings under the ceiling"], schwingen: ["Warmer Aufwind", "Warm updraft"], erde: ["Rissiger, hohler Boden", "Cracked, hollow floor"], nebel: ["Nebelgitter", "Mist grate"], schatten: ["Ein schmaler Spalt", "A narrow slit"] };
@@ -720,7 +722,9 @@
     if (lernOK(["trank", "karte"])) place(lv, lern("vorrat", ["trank", "karte"], TXK.vorrat), st.x - 2, st.y, Object.assign({ dir: -1 }, near));
     if (lernOK(["rolle"])) place(lv, lern("rolle", ["rolle"], TXK.rolle), st.x + 10, st.y, Object.assign({ dir: 1 }, near));
     /* Merkmale sammeln (nur erreichbare Standplätze) */
-    const lad = [], steg = [], step = [], edge = [];
+    const lad = [], steg = [], step = [], edge = [], up = [];
+    /* W7 Aufwärtsangriff: unter Flugstellen der Gegner bzw. unter einem Steg 4–7 Kacheln über dem Kopf */
+    const flyAt = new Set((lv.spawns || []).filter(sp => sp.fly).map(sp => sp.x + "," + sp.y));
     const MAXD = 90;
     for (let y = 1; y < lv.H - 1; y++) for (let x = 1; x < lv.W - 1; x++) {
       if (!Z.standable(lv, x, y, 2)) continue;
@@ -728,6 +732,7 @@
       const below = tileAt(lv, x, y + 1);
       if (tileAt(lv, x + 1, y) === 4 || tileAt(lv, x - 1, y) === 4) if (tileAt(lv, x + 1, y - 2) === 4 || tileAt(lv, x - 1, y - 2) === 4) lad.push([d, x, y, tileAt(lv, x + 1, y) === 4 ? -1 : 1]);
       if (below === 2 && tileAt(lv, x - 1, y + 1) === 2 && tileAt(lv, x + 1, y + 1) === 2) steg.push([d, x, y]);
+      if (d > 14 && tileAt(lv, x, y - 1) === 0 && tileAt(lv, x, y - 2) === 0) { let fly = false; for (let k = 2; k <= 6 && !fly; k++) for (let q = -2; q <= 2; q++) if (flyAt.has((x + q) + "," + (y - k))) { fly = true; break; } let plat = false; for (let k = 4; k <= 7; k++) if (tileAt(lv, x, y - k) === 2) plat = true; if (fly || plat) up.push([d - (fly ? 20 : 0), x, y, 0]); }
       for (const dd of [-1, 1]) {
         /* Wandstufe von 5–7 Kacheln: Doppelsprung */
         if (tileAt(lv, x + dd, y) === 1) for (let hh = 5; hh <= 7; hh++) { let ok = true; for (let k = 0; k < hh; k++) if (tileAt(lv, x + dd, y - k) !== 1) { ok = false; break; } if (ok && Z.standable(lv, x + dd, y - hh, 2)) { step.push([d, x, y, -dd]); break; } }
@@ -738,6 +743,7 @@
     const by = a => a.sort((p, q) => p[0] - q[0]);
     const tryList = (arr, id, keys, content, opt) => { if (!lernOK(keys)) return; for (const [, x, y, dir] of by(arr).slice(0, 12)) if (place(lv, lern(id, keys, content), x + (dir || 0) * 2, y, Object.assign({ dir: dir || 0, r: 4, dy: 1 }, opt || {}))) return; };
     tryList(lad, "leiter", ["leiter"], TXK.leiter);
+    tryList(up, "aufwaerts", ["aufwaerts"], TXK.aufwaerts, { r: 8, dy: 2 });
     tryList(steg, "steg", ["steg"], TXK.steg, { floor: v => v === 2, dy: 0, r: 3, lift: 13 });
     tryList(step, "doppel", ["doppel"], TXK.doppel);
     tryList(edge, "sturz", ["sturz"], TXK.sturz);
@@ -825,12 +831,13 @@
     if (P.rollT > 0 && !(prev.roll > 0)) learn("rolle");
     if (P.drinkT > 0 && !(prev.drink > 0)) learn("trank");
     if (P.plunge && !prev.pl) learn("sturz");
+    if (P.act && P.act.up && !prev.up) learn("aufwaerts");
     const H = inp.held;
     if (H.a1 && !prev.a1 && P.slots && P.slots.a1) learn("h1");
     if (H.a2 && !prev.a2 && P.slots && P.slots.a2) learn("h2");
     if ((H.s1 && !prev.s1 && P.slots && P.slots.s1) || (H.s2 && !prev.s2 && P.slots && P.slots.s2)) learn("faeh");
     if (H.map && !prev.map) learn("karte");
-    prev.g = P.onGround; prev.aj = P.airJumps; prev.drop = P.dropT; prev.cl = P.climbing; prev.roll = P.rollT; prev.drink = P.drinkT; prev.pl = P.plunge;
+    prev.g = P.onGround; prev.aj = P.airJumps; prev.drop = P.dropT; prev.cl = P.climbing; prev.roll = P.rollT; prev.drink = P.drinkT; prev.pl = P.plunge; prev.up = !!(P.act && P.act.up);
     prev.a1 = H.a1; prev.a2 = H.a2; prev.s1 = H.s1; prev.s2 = H.s2; prev.map = H.map;
   }
   const sh0 = Z.shieldHook;

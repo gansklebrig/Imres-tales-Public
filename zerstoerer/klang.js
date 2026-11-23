@@ -46,8 +46,11 @@
     if (net || !A.ok) return net;
     const c = A.ctx; net = {};
     /* großer Hall */
-    net.hall = c.createConvolver(); net.hall.buffer = hallIR(c, 4.2);
-    net.hallOut = c.createGain(); net.hallOut.gain.value = 0.5; net.hall.connect(net.hallOut); net.hallOut.connect(A.master);
+    /* Handheld: kurzer Hall; „minimal“: ohne zweite Faltung (stummer, nicht angeschlossener Knoten wird nicht gerechnet) */
+    const q = Z.gq || {};
+    if (q.mini) { net.hall = c.createGain(); net.hall.gain.value = 0; net.noHall = true; }
+    else { net.hall = c.createConvolver(); net.hall.buffer = hallIR(c, q.lean ? 1.8 : 4.2); }
+    net.hallOut = c.createGain(); net.hallOut.gain.value = 0.5; if (!net.noHall) { net.hall.connect(net.hallOut); net.hallOut.connect(A.master); }
     /* Tropfhall: Verzögerung mit gefilterter Rückkopplung, leicht nach rechts versetzt, zweite Linie links */
     net.dl = c.createDelay(1.5); net.dl.delayTime.value = 0.27;
     net.dl2 = c.createDelay(1.5); net.dl2.delayTime.value = 0.27 * 1.5;
@@ -179,5 +182,15 @@
 
   /* in den Takt der Musik einhängen (läuft auch während der Pause weiter) */
   const upd0 = M.update;
-  M.update = function (dt) { const r = upd0.apply(this, arguments); try { KL.tick(dt || 0); } catch (e) { if (!KL.err) { KL.err = 1; console.error(e); } } return r; };
+  /* Handheld: Beobachter nur ~10× je Sekunde (Stinger kommen höchstens 0,1 s später),
+     der Musik-Takt selbst höchstens ~20× je Sekunde (Vorlauf der Planung 0,16 s – reicht) */
+  let klAcc = 0, muAcc = 0;
+  M.update = function (dt) {
+    let r;
+    if (Z.gq && Z.gq.lean) { muAcc += dt || 0; if (muAcc >= 0.045) { r = upd0.call(this, muAcc); muAcc = 0; } }
+    else r = upd0.apply(this, arguments);
+    klAcc += dt || 0;
+    if (!(Z.gq && Z.gq.lean) || klAcc >= 0.1) { const d = klAcc; klAcc = 0; try { KL.tick(d); } catch (e) { if (!KL.err) { KL.err = 1; console.error(e); } } }
+    return r;
+  };
 })();

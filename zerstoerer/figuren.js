@@ -406,7 +406,8 @@
     /* ---- Waffen und Handlungen ---- */
     const curW = act && act.d && (act.type === "melee" || act.type === "shot" || act.type === "charge" || act.type === "shield" || act.type === "shieldDown") ? act.d : null;
     if (curW) { WI.icon = curW.icon; WI.col = curW.col; }
-    if (curW && act.type === "melee" && act.bash) poseBash(T, P, act);
+    if (curW && act.type === "melee" && act.def && act.def.up) poseUp(T, P, act, time);
+    else if (curW && act.type === "melee" && act.bash) poseBash(T, P, act);
     else if (curW && act.type === "melee") poseMelee(T, P, act, time);
     else if (curW && act.type === "shot") poseShot(T, P, act, time);
     else if (curW && act.type === "charge") poseCharge(T, P, act, time);
@@ -614,6 +615,62 @@
     WI.ang = ang;
     if (sm.stab && act.phase === "act") WI.ext = 0;
   }
+  /* W7 Aufwärtsangriff: Ausholen (in die Knie, Waffe tief), Schlag (Körper streckt sich, Blick nach oben), Nachschwung.
+     Gattungen aus kampf.js (def.cls): klinge, stich, faust, wucht, sense, stoss, peitsche, schild */
+  function poseUp(T, P, act, time) {
+    const d = act.d, def = act.def, icon = d.icon, cls = def.cls, two = !!W2H[icon], ph = act.phase;
+    const kPre = ph === "pre" ? cl(act.t / Math.max(0.01, def.pre), 0, 1) : 1;
+    const kAct = ph === "act" ? cl(act.t / Math.max(0.01, def.act), 0, 1) : ph === "post" ? 1 : 0;
+    const kPost = ph === "post" ? cl(act.t / Math.max(0.01, def.post || 0.1), 0, 1) : 0;
+    const air = !P.onGround, rise = ph === "pre" ? 0 : ph === "act" ? eo(kAct) : 1 - kPost * 0.5;
+    T.key = "up" + cls; T.blendD = 0.035;
+    /* Körper: erst sammeln, dann nach oben strecken */
+    T.lean = ph === "pre" ? lp(0.05, 0.22, eo(kPre)) : lp(0.22, -0.2, rise);
+    T.head = ph === "pre" ? lp(-0.1, -0.3, kPre) : lp(-0.3, -0.62, rise);
+    T.hx = ph === "pre" ? -0.6 * kPre : lp(-0.6, 0.6, rise);
+    if (!air) {
+      const crouch = ph === "pre" ? eo(kPre) : 1 - rise;
+      T.hy = lp(-13.4, -10.6, crouch); T.fFx = lp(3.4, 4.4, crouch); T.fBx = lp(-3, -4.2, crouch); T.toeB = 0.6 * rise; T.toeF = 0.4 * rise;
+    } else { T.fFx = 2.6; T.fFy = lp(-3, -1, rise); T.fBx = -1.8; T.fBy = lp(-2, 1.5, rise); T.toeB = 0.8; T.toeF = 0.5; T.hy = -13; }
+    const hand = (aa, r) => { T.hFx = Math.cos(aa) * r; T.hFy = Math.sin(aa) * r; };
+    let ang;
+    if (cls === "stich" || cls === "stoss") {
+      /* Stoß senkrecht nach oben: Hand von der Brust über den Kopf */
+      const reach = ph === "pre" ? lp(0.4, 0.1, eo(kPre)) : ph === "act" ? lp(0.1, 1, eb(kAct)) : lp(1, 0.8, kPost);
+      T.hFx = lp(2.5, 1.6, reach); T.hFy = lp(3, -10.2, reach); ang = -PI / 2 + lp(0.35, 0.1, reach);
+      if (two) WI.grip2 = GRIP2[icon] || -6; else setH(T, "B", PI / 2 + 0.7, -0.6);
+    } else if (cls === "peitsche") {
+      if (ph === "pre") { T.hFx = lp(4, -2, eo(kPre)); T.hFy = lp(4, 6, eo(kPre)); ang = lp(0.3, 2.3, eo(kPre)); WI.ext = 0; }
+      else { const k = ph === "act" ? eo(kAct) : 1; T.hFx = lp(-2, 2, k); T.hFy = lp(6, -9.6, k); ang = lp(2.3, -1.57, k); WI.ext = 1; }
+      setH(T, "B", PI / 2 + 0.8, -0.6);
+    } else if (cls === "schild") {
+      const k = ph === "pre" ? 0 : ph === "act" ? eo(kAct) : 1 - kPost * 0.3;
+      T.hFx = lp(5, 2.2, k); T.hFy = lp(3, -9.4, k); ang = lp(-0.1, -1.5, k);
+      setH(T, "B", 0.9, -1.4);
+    } else if (cls === "faust") {
+      /* Aufwärtshaken: Faust tief, dann steil nach oben, andere Faust deckt */
+      const k = ph === "pre" ? 0 : ph === "act" ? eb(kAct) : 1 - kPost * 0.2;
+      T.hFx = lp(lp(3.5, 2, kPre), 3.6, k); T.hFy = lp(lp(3, 5, kPre), -9.6, k); ang = lp(0.5, -1.4, k);
+      setH(T, "B", 1.1, -2.1); WI.icon2 = icon;
+    } else {
+      /* Bögen (Klinge, Wucht, Sense/Stab): von unten-vorn (bzw. hinten bei schweren Waffen) über den Kopf */
+      const sm = def.smear || { a0: 0.9, a1: -2.5 }, heavy = cls === "wucht" || cls === "sense";
+      const wind = heavy ? Math.min(2.6, sm.a0 + 0.7) : sm.a0 + 0.25, end = sm.a1 + 0.15;
+      if (ph === "pre") ang = lp(0.6, wind, eo(kPre));
+      else if (ph === "act") ang = lp(wind, end, eo(kAct));
+      else ang = lp(end, end + 0.25, kPost);
+      const reach = ph === "pre" ? lp(8.6, 7.4, kPre) : ph === "act" ? lp(7.4, 10, eo(kAct)) : lp(10, 9, kPost);
+      hand(cl(ang, -2.7, 2.4), reach);
+      if (two) WI.grip2 = GRIP2[icon] || -3;
+      else if (DUAL[icon]) {
+        const lag = ph === "act" ? cl(kAct - 0.35, 0, 1) / 0.65 : ph === "post" ? 1 : 0;
+        const a2 = ph === "pre" ? wind + 0.4 : lp(wind + 0.4, end + 0.5, eo(lag));
+        T.hBx = Math.cos(cl(a2, -2.7, 2.4)) * 8.4 + 1.5; T.hBy = Math.sin(cl(a2, -2.7, 2.4)) * 8.4; WI.icon2 = icon; WI.ang2 = a2 - 0.4;
+      } else setH(T, "B", ph === "pre" ? PI / 2 - 0.4 : PI / 2 + 0.9, -0.7);
+      if (ph === "pre" && heavy && kPre > 0.6) T.hx += jit(time, 1) * 0.3;
+    }
+    WI.ang = ang;
+  }
   function poseBash(T, P, act) {
     const def = act.def, ph = act.phase;
     const k = ph === "pre" ? -cl(act.t / Math.max(0.01, def.pre), 0, 1) : ph === "act" ? 1 : 1 - cl(act.t / Math.max(0.01, def.post), 0, 1) * 0.6;
@@ -624,6 +681,7 @@
     setH(T, "B", PI / 2 + 0.7, -0.5); WI.ang = -0.1;
   }
   function poseShot(T, P, act, time) {
+    if (act.up) return poseShotUp(T, P, act);
     const d = act.d, icon = d.icon, ph = act.phase;
     const def = act.def;
     const k = ph === "pre" ? cl(act.t / Math.max(0.01, def.pre), 0, 1) : ph === "act" ? 1 : 1 + cl(act.t / Math.max(0.01, def.post), 0, 1);
@@ -652,7 +710,34 @@
       if (W2H[icon]) WI.grip2 = GRIP2[icon] || -6;
     }
   }
+  /* W7: Schuss/Wurf nach oben – Arm und Waffe zeigen in den Zielwinkel (act.upAng), Würfe holen tief aus */
+  function poseShotUp(T, P, act) {
+    const d = act.d, icon = d.icon, ph = act.phase, def = act.def;
+    const k = ph === "pre" ? cl(act.t / Math.max(0.01, def.pre), 0, 1) : ph === "act" ? 1 : 1 + cl(act.t / Math.max(0.01, def.post), 0, 1);
+    const aim = act.upAng != null ? act.upAng : -1.3, ca = Math.cos(aim), sa = Math.sin(aim);
+    T.key = "shotUp"; T.blendD = 0.04; T.lean = -0.12; T.head = lp(-0.3, -0.6, Math.min(1, k));
+    if (P.onGround) { T.fFx = 3.8; T.fBx = -3.8; T.hy = -12.6; }
+    if (icon === "bow" || icon === "xbow") {
+      T.hFx = ca * 9.6; T.hFy = sa * 9.6; WI.ang = aim;
+      if (icon === "bow") { T.hBx = ca * 4; T.hBy = sa * 4; WI.ext = k <= 1 ? k : 0; } else WI.grip2 = -4;
+    } else if (icon === "knives" || icon === "schleuder" || icon === "web" || icon === "vial") {
+      if (k <= 1) { T.hFx = lp(3, -2, eo(k)); T.hFy = lp(4, 7, eo(k)); WI.ang = lp(0.4, 2.2, eo(k)); }
+      else { const kk = Math.min(1, eo(cl(k - 1, 0, 1)) * 2.5); T.hFx = lp(-2, ca * 9.6, kk); T.hFy = lp(7, sa * 9.6, kk); WI.ang = aim; if ((icon === "knives" || icon === "vial") && k > 1.1) WI.icon = null; }
+      setH(T, "B", PI / 2 + 0.8, -0.6);
+    } else {
+      const kk = k <= 1 ? 0 : Math.min(1, eo(cl(k - 1, 0, 1)) * 2);
+      T.hFx = lp(3, ca * 9.4, kk); T.hFy = lp(2, sa * 9.4, kk); WI.ang = lp(-1.0, aim, kk); WI.glowHand = d.col || "#ffd27a";
+      setH(T, "B", 0.2, -0.4); if (W2H[icon]) WI.grip2 = GRIP2[icon] || -6;
+    }
+  }
   function poseCharge(T, P, act, time) {
+    if (act.upAim && act.d.icon === "bow") {
+      const ch = cl(act.charge || 0, 0, 1), aim = Z.upAngle ? Z.upAngle(P) : -1.3, ca = Math.cos(aim), sa = Math.sin(aim);
+      T.key = "chargeUp"; T.blendD = 0.06; T.hFx = ca * 9.4; T.hFy = sa * 9.4; WI.ang = aim; WI.ext = ch;
+      T.hBx = ca * (6.4 - ch * 6); T.hBy = sa * (6.4 - ch * 6); T.lean = -0.14; T.head = -0.5;
+      if (P.onGround) { T.fFx = 4.4; T.fBx = -4.6; T.hy = -11.8; }
+      return;
+    }
     const ch = cl(act.charge || 0, 0, 1);
     T.key = "charge"; T.blendD = 0.06;
     T.hFx = 9.4; T.hFy = -0.8 + (ch > 0.98 ? jit(time, 2) * 0.3 : 0); WI.ang = -0.05; WI.ext = ch;

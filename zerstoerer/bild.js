@@ -1614,15 +1614,20 @@
   G._drawTiles = drawTiles; G._light = (c, W, H) => { G.frame++; return lightPass(c, Z.cam, W, H); }; /* für Tests */
 
   /* Türen und Stationen */
+  const DOORG = new WeakMap();
   function drawDoors(c, t) {
+    const cam = Z.cam;
     for (const d of lv.doors) {
       const px = d.x * T + 8, py = d.y * T + 16;
+      /* außerhalb des Bildes nichts zeichnen (große Karten haben viele Türen) */
+      if (px < cam.x - 60 || px > cam.x + cam.w + 60 || py < cam.y - 10 || py > cam.y + cam.h + 80) continue;
       if (d.kind === "entry") { c.fillStyle = shade(B.wall, -0.5); c.fillRect(px - 10, py - 32, 20, 32); c.beginPath(); c.arc(px, py - 32, 10, Math.PI, 0); c.fill(); c.fillStyle = "#3a2a1a"; c.fillRect(px - 8, py - 30, 16, 30); continue; }
       if (d.kind === "gate") { c.fillStyle = "#1a1418"; c.fillRect(px - 16, py - 44, 32, 44); c.beginPath(); c.arc(px, py - 44, 16, Math.PI, 0); c.fill(); c.fillStyle = "rgba(255,80,60,.25)"; c.fillRect(px - 12, py - 40, 24, 40); c.strokeStyle = "rgba(220,210,230,.5)"; c.lineWidth = 0.6; for (let k = 0; k < 6; k++) { c.beginPath(); c.moveTo(px, py - 52); c.lineTo(px - 16 + k * 6.4, py); c.stroke(); } D.glow(c, px, py - 24, 30, "rgba(255,90,60,.25)"); continue; }
       const dir = Z.exitDir(null, d.to), locked = d.locked && !Z.run.doorsOpen;
       const col = dir === "down" ? "#b080ff" : dir === "up" ? "#ffd27a" : dir === "boss" ? "#ff5a4e" : "#e8a070";
       c.fillStyle = "#1a1214"; c.fillRect(px - 12, py - 36, 24, 36); c.beginPath(); c.arc(px, py - 36, 12, Math.PI, 0); c.fill();
-      const g = c.createLinearGradient(0, py - 44, 0, py); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, col); c.save(); c.globalAlpha = locked ? 0.15 : 0.35 + 0.1 * Math.sin(t * 3 + d.x); c.globalCompositeOperation = "lighter"; c.fillStyle = g; c.fillRect(px - 10, py - 44, 20, 44); c.restore();
+      /* Verlauf je Tür einmal anlegen (Weltkoordinaten, hängt nur an Lage und Farbe) */
+      let dg = DOORG.get(d); if (!dg || dg.col !== col || dg.c !== c) { const g0 = c.createLinearGradient(0, py - 44, 0, py); g0.addColorStop(0, "rgba(0,0,0,0)"); g0.addColorStop(1, col); dg = { g: g0, col, c }; DOORG.set(d, dg); } const g = dg.g; c.save(); c.globalAlpha = locked ? 0.15 : 0.35 + 0.1 * Math.sin(t * 3 + d.x); c.globalCompositeOperation = "lighter"; c.fillStyle = g; c.fillRect(px - 10, py - 44, 20, 44); c.restore();
       c.strokeStyle = shade(B.tile.light, -0.1); c.lineWidth = 2; c.beginPath(); c.moveTo(px - 12, py); c.lineTo(px - 12, py - 36); c.arc(px, py - 36, 12, Math.PI, 0); c.lineTo(px + 12, py); c.stroke();
       /* Richtungssymbol */
       c.fillStyle = col; c.save(); c.translate(px, py - 52);

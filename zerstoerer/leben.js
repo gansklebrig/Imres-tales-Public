@@ -74,19 +74,21 @@
   Z.drawProjs = function (c) {
     if (dp0) dp0.apply(this, arguments);
     if (Z.level !== lvRef) return;
-    const t = Z.gfx.time || 0, cam = Z.cam;
+    const t = Z.gfx.time || 0, cam = Z.cam, lean = !!(Z.gq && Z.gq.lean);
     c.save();
     for (const e of Z.enemies) {
-      if (e.dead || e.x < cam.x - 40 || e.x > cam.x + cam.w + 40) continue;
+      if (e.dead || e.x < cam.x - 40 || e.x > cam.x + cam.w + 40 || e.y < cam.y - 60 || e.y > cam.y + cam.h + 40) continue;
       if (e.sleep && e.zz) {
         c.font = "700 7px 'Alegreya Sans',sans-serif"; c.textAlign = "center";
-        for (const z of e.zz) { z.t += 1 / 60; const u = Math.min(1, z.t / 2.4); c.globalAlpha = 1 - u; c.fillStyle = "#e8e0ff"; c.font = "700 " + (5 + u * 5) + "px 'Alegreya Sans',sans-serif"; c.fillText("z", z.x + Math.sin(z.t * 3) * 3 + u * 6, z.y - u * 18); }
+        /* Handheld: eine feste Schriftgröße (jedes neue c.font wird geparst – teuer auf schwachen Kernen) */
+        for (const z of e.zz) { z.t += 1 / 60; const u = Math.min(1, z.t / 2.4); c.globalAlpha = 1 - u; c.fillStyle = "#e8e0ff"; if (!lean) c.font = "700 " + (5 + u * 5) + "px 'Alegreya Sans',sans-serif"; c.fillText("z", z.x + Math.sin(z.t * 3) * 3 + u * 6, z.y - u * 18); }
         e.zz = e.zz.filter(z => z.t < 2.4); c.globalAlpha = 1;
       }
       if (e.watch && !e.aware) {
         const lx = e.x + e.w / 2 + e.face * (e.w * 0.6), ly = e.y + e.h * 0.45 + Math.sin(t * 2 + e.x) * 0.6;
         c.strokeStyle = "#2a2420"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(lx, ly - 5); c.lineTo(lx, ly - 2); c.stroke();
         c.fillStyle = "#3a3028"; c.fillRect(lx - 2, ly - 2, 4, 5); c.fillStyle = "#ffcf7a"; c.fillRect(lx - 1.2, ly - 1.2, 2.4, 3.2);
+        if (lean) continue; /* Handheld: Laterne ohne Lichthof und Blickkegel (zwei Verläufe je Wache und Bild) */
         c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(lx, ly, 0, lx, ly, 26); g.addColorStop(0, "rgba(255,200,120,.28)"); g.addColorStop(1, "rgba(255,180,90,0)"); c.fillStyle = g; c.beginPath(); c.arc(lx, ly, 26, 0, Math.PI * 2); c.fill();
         /* Blickkegel */
         const k = c.createLinearGradient(lx, 0, lx + e.face * 80, 0); k.addColorStop(0, "rgba(255,200,120,.10)"); k.addColorStop(1, "rgba(255,200,120,0)"); c.fillStyle = k; c.beginPath(); c.moveTo(lx, ly); c.lineTo(lx + e.face * 80, ly - 18); c.lineTo(lx + e.face * 80, ly + 14); c.closePath(); c.fill();
