@@ -49,18 +49,6 @@
 "w": 880
 },
 {
-"a": "jung",
-"autor": "Pierre-Jacques DESPA",
-"beschr": "Close-up of a young common bracken (Pteridium aquilinum)",
-"f": "adlerfarn-5.webp",
-"h": 585,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Foug%C3%A8re_gros_plan.jpg",
-"titel": "File:Fougère gros plan.jpg",
-"w": 880
-},
-{
 "a": "weitere",
 "autor": "Krzysztof Ziarnek, Kenraiz",
 "beschr": "Pteridium aquilinum in oak forest in Gniewino Commune, N Poland",
@@ -133,18 +121,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Odles_Cisles_y_Mastle_pinus_Cembra.jpg",
 "titel": "File:Odles Cisles y Mastle pinus Cembra.jpg",
 "w": 880
-},
-{
-"a": "habitus",
-"autor": "This Photo was taken by Wolfgang Moroder . Feel free to use my photos, but please mention me as the author and send me a",
-"beschr": "Die Raschötz Alm in Gröden mit Geisler Spitzen, Südtirol - UNESCO Welterbe Naturpark Puez-Geisler .",
-"f": "alpenrose-6.webp",
-"h": 422,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Sienes_dl_T%C3%ABune_sun_Danter_la_Montes_Resciesa_Gherd%C3%ABina_.jpg",
-"titel": "File:Sienes dl Tëune sun Danter la Montes Resciesa Gherdëina .jpg",
-"w": 880
 }
 ],
 "arnika": [
@@ -195,18 +171,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Arnica_montana_-_Echte_Arnika,_Blattrosette_202726295.jpg",
 "titel": "File:Arnica montana - Echte Arnika, Blattrosette 202726295.jpg",
 "w": 660
-},
-{
-"a": "frucht",
-"autor": "Roger Culos",
-"beschr": "Arnica montana , früchte und samen",
-"f": "arnika-5.webp",
-"h": 622,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Arnica_montana_MHNT.BOT.2011.18.5.jpg",
-"titel": "File:Arnica montana MHNT.BOT.2011.18.5.jpg",
-"w": 880
 },
 {
 "a": "bluete",
@@ -321,30 +285,6 @@
 "w": 880
 },
 {
-"a": "unterseite",
-"autor": "Henk Monster",
-"beschr": "Pleurotus ostreatus (Oyster Mushroom, D= Austernseitling, F= Pleurote en forme d'huître ou P. en coquille, NL= Gewone oesterzwam) white spores and causes white rot. At the same spot of the photo from 3 years ago (see lef",
-"f": "austernseitling-3.webp",
-"h": 876,
-"lizenz": "CC BY 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Pleurotus_ostreatus_(Oyster_Mushroom,_D%3D_Austernseitling,_F%3D_Pleurote_en_forme_d%27hu%C3%AEtre_ou_P._en_coquille,_NL%3D_Gewone_oesterzwam)_white_spores_and_causes_white_rot._At_the_same_spot_of_the_photo_from_3_years_ago_(see_l_-_panoramio.jpg",
-"titel": "File:Pleurotus ostreatus (Oyster Mushroom, D= Austernseitling, F= Pleurote en forme d'huître ou P. en coquille, NL= Gewone oesterzwam) white spores and causes white rot. At the same spot of the photo from 3 years ago (see l - panoramio.jpg",
-"w": 880
-},
-{
-"a": "jung",
-"autor": "Henk Monster",
-"beschr": "Pleurotus ostreatus (Oyster Mushroom, D= Austernseitling, F= Pleurote en forme d'huître ou P. en coquille, NL= Gewone oesterzwam) white spores and causes white rot, young and grown up at Chestnut trees (kastanjebomen) Ar",
-"f": "austernseitling-4.webp",
-"h": 880,
-"lizenz": "CC BY 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Pleurotus_ostreatus_(Oyster_Mushroom,_D%3D_Austernseitling,_F%3D_Pleurote_en_forme_d%27hu%C3%AEtre_ou_P._en_coquille,_NL%3D_Gewone_oesterzwam)_white_spores_and_causes_white_rot,_young_and_grown_up_at_Chestnut_trees_(kastanjebomen)_-_panoramio.jpg",
-"titel": "File:Pleurotus ostreatus (Oyster Mushroom, D= Austernseitling, F= Pleurote en forme d'huître ou P. en coquille, NL= Gewone oesterzwam) white spores and causes white rot, young and grown up at Chestnut trees (kastanjebomen) - panoramio.jpg",
-"w": 660
-},
-{
 "a": "weitere",
 "autor": "Dominicus Johannes Bergsma",
 "beschr": "gewone oesterzwam ( Pleurotus ostreatus ). on an Sambucus nigra .",
@@ -383,7 +323,7 @@
 "w": 880
 },
 {
-"a": "bluete",
+"a": "knospe",
 "autor": "Dominicus Johannes Bergsma",
 "beschr": "Flower bud of a Heracleum (plant) . Focus stack of 15 photos.",
 "f": "baerenklau-3.webp",
@@ -419,7 +359,7 @@
 "w": 880
 },
 {
-"a": "weitere",
+"a": "blatt",
 "autor": "Luis Miguel Bugallo Sánchez",
 "beschr": "Heracleum sphondylium . Conxo Banquet Forest, Santiago de Compostela, Galicia (Spain).",
 "f": "baerenklau-6.webp",
@@ -555,7 +495,7 @@
 "w": 880
 },
 {
-"a": "frucht",
+"a": "jung",
 "autor": "Daniel Kraft",
 "beschr": "A very young seedling of ramson (allium ursinum) in Sihlwald, Zurich.",
 "f": "baerlauch-5.webp",
@@ -618,18 +558,6 @@
 },
 {
 "a": "weitere",
-"autor": "Jan Kops",
-"beschr": ":Usnea barbata (Linnaeus) Weber ex F.H. Wiggers 1780 Cladonia rangiferina (Linnaeus) Weber ex F.H. Wiggers 1780, syn. Lichen rangiferinus Linnaeus 1753",
-"f": "bartflechte-4.webp",
-"h": 880,
-"lizenz": "Public domain",
-"lizenzurl": "",
-"quelle": "https://commons.wikimedia.org/wiki/File:Lichen_floridus_%E2%80%94_Flora_Batava_%E2%80%94_Volume_v11.jpg",
-"titel": "File:Lichen floridus — Flora Batava — Volume v11.jpg",
-"w": 625
-},
-{
-"a": "weitere",
 "autor": "Koichi Oda",
 "beschr": "w/ Nikon 1V3 +10-30mm",
 "f": "bartflechte-5.webp",
@@ -656,14 +584,14 @@
 "baummarder": [
 {
 "a": "haupt",
-"autor": "Klaus Rassinger und Gerhard Cammerer , Museum Wiesbaden",
-"beschr": "Baummarder Martes martes , Schädel, Coll. Museum Wiesbaden",
-"f": "baummarder-1.webp",
-"h": 588,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Martes_martes_03_MWNH_846.jpg",
-"titel": "File:Martes martes 03 MWNH 846.jpg",
+"autor": "Charles J. Sharp",
+"beschr": "European pine marten ( Martes martes ), Drenthe, Netherlands",
+"f": "baummarder-4.webp",
+"h": 587,
+"lizenz": "CC BY-SA 4.0",
+"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
+"quelle": "https://commons.wikimedia.org/wiki/File:European_pine_marten_(Martes_martes)_Drenthe_3.jpg",
+"titel": "File:European pine marten (Martes martes) Drenthe 3.jpg",
 "w": 880
 },
 {
@@ -676,30 +604,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:MartesMartes.jpg",
 "titel": "File:MartesMartes.jpg",
-"w": 880
-},
-{
-"a": "zeichen",
-"autor": "Mickey Bohnacker, Presse-Fotograf, Frankfurt/Main",
-"beschr": "Baummarder ( Martes martes ) & Steinmarder-Felle ( Martes foina ) . Aus der Fellsammlung der ehemaligen Bundes-Pelzfachschule (heute Frankfurter Schule für Bekleidung und Mode , Frankfurt/Main. Gesammelt unter Studiendir",
-"f": "baummarder-3.webp",
-"h": 880,
-"lizenz": "Public domain",
-"lizenzurl": "",
-"quelle": "https://commons.wikimedia.org/wiki/File:Martes_martes_(Pine_marten)_%26_Martes_foina_(Beach_marten)_fur_skins.jpg",
-"titel": "File:Martes martes (Pine marten) & Martes foina (Beach marten) fur skins.jpg",
-"w": 667
-},
-{
-"a": "weitere",
-"autor": "Charles J. Sharp",
-"beschr": "European pine marten ( Martes martes ), Drenthe, Netherlands",
-"f": "baummarder-4.webp",
-"h": 587,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:European_pine_marten_(Martes_martes)_Drenthe_3.jpg",
-"titel": "File:European pine marten (Martes martes) Drenthe 3.jpg",
 "w": 880
 },
 {
@@ -729,18 +633,6 @@
 "w": 660
 },
 {
-"a": "habitus",
-"autor": "Stefan.lefnaer",
-"beschr": "Kroneninnenseite mit Staubfäden Taxonym: Symphytum officinale (s. str.) ss Fischer et al. EfÖLS 2008 ISBN 978-3-85474-187-9 Fundort: Rohrwald, Bezirk Korneuburg, Niederösterreich - ca. 300 m ü. A. Standort: feuchter Wald",
-"f": "beinwell-2.webp",
-"h": 880,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Symphytum_officinale_(s._str.)_sl2.jpg",
-"titel": "File:Symphytum officinale (s. str.) sl2.jpg",
-"w": 774
-},
-{
 "a": "bluete",
 "autor": "Andreas Eichler",
 "beschr": "Gemeiner Beinwell - Symphytum officinale. Aufgenommen in Mannheim, Kirschgartshäuser Schläge am Bruchgraben, Baden-Württemberg, Deutschland.",
@@ -763,30 +655,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Symphytum_officinale_12_ies.jpg",
 "titel": "File:Symphytum officinale 12 ies.jpg",
 "w": 800
-},
-{
-"a": "frucht",
-"autor": "Hans Stuessi",
-"beschr": "Compilation of seeds with elaiosomes . These seeds are dispersed by ants, known as myrmecochory . Starting from top left: Borago officinalis · Chelidonium majus · Corydalis cava · Corydalis sempervirens Cytisus scoparius",
-"f": "beinwell-5.webp",
-"h": 572,
-"lizenz": "CC BY 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Compilation_of_seeds_with_elaiosomes.jpg",
-"titel": "File:Compilation of seeds with elaiosomes.jpg",
-"w": 880
-},
-{
-"a": "weitere",
-"autor": "DeHehenried",
-"beschr": "Borsten am Stiel (Echte Beinwell)",
-"f": "beinwell-6.webp",
-"h": 880,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Symphytum_officinale_Stiel.jpg",
-"titel": "File:Symphytum officinale Stiel.jpg",
-"w": 880
 }
 ],
 "berberitze": [
@@ -940,30 +808,6 @@
 "bergulme": [
 {
 "a": "haupt",
-"autor": "Frankie Fouganthin",
-"beschr": "Tree stumps from wych elm (ulmus glabra) in Stockholm in June 2020.",
-"f": "bergulme-1.webp",
-"h": 611,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Tree_stumps_in_Stockholm_in_June_2020_(3_av_3).jpg",
-"titel": "File:Tree stumps in Stockholm in June 2020 (3 av 3).jpg",
-"w": 880
-},
-{
-"a": "habitus",
-"autor": "Frankie Fouganthin",
-"beschr": "Tree stumps from wych elm (ulmus glabra) in Stockholm in June 2020.",
-"f": "bergulme-2.webp",
-"h": 616,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Tree_stumps_in_Stockholm_in_June_2020_(2_av_3).jpg",
-"titel": "File:Tree stumps in Stockholm in June 2020 (2 av 3).jpg",
-"w": 880
-},
-{
-"a": "blatt",
 "autor": "ForestDim",
 "beschr": "Ulmus glabra (Wych elm or Scots elm) - leaf and fruits",
 "f": "bergulme-3.webp",
@@ -1014,6 +858,18 @@
 "biber": [
 {
 "a": "haupt",
+"autor": "Ryzhkov Sergey",
+"beschr": "Типовий представник фауни Національного природного парку \"Слобожанський\"",
+"f": "biber-5.webp",
+"h": 587,
+"lizenz": "CC BY-SA 4.0",
+"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
+"quelle": "https://commons.wikimedia.org/wiki/File:%D0%A0%D1%96%D1%87%D0%BA%D0%BE%D0%B2%D0%B8%D0%B9_%D0%B1%D0%BE%D0%B1%D0%B5%D1%80_(Castor_fiber).jpg",
+"titel": "File:Річковий бобер (Castor fiber).jpg",
+"w": 880
+},
+{
+"a": "zeichen",
 "autor": "Sciencia58",
 "beschr": "Von Bibern benagter und gefällter Baum am Neckarufer in Heidelberg östlich der Alten Brücke",
 "f": "biber-1.webp",
@@ -1058,18 +914,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Liasgrube_Unterst%C3%BCrmig_Biberburg-20250419-RM-170141.jpg",
 "titel": "File:Liasgrube Unterstürmig Biberburg-20250419-RM-170141.jpg",
-"w": 880
-},
-{
-"a": "weitere",
-"autor": "Ryzhkov Sergey",
-"beschr": "Типовий представник фауни Національного природного парку \"Слобожанський\"",
-"f": "biber-5.webp",
-"h": 587,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:%D0%A0%D1%96%D1%87%D0%BA%D0%BE%D0%B2%D0%B8%D0%B9_%D0%B1%D0%BE%D0%B1%D0%B5%D1%80_(Castor_fiber).jpg",
-"titel": "File:Річковий бобер (Castor fiber).jpg",
 "w": 880
 }
 ],
@@ -1233,42 +1077,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Broadleaf_Plantain_Spike.jpg",
 "titel": "File:Broadleaf Plantain Spike.jpg",
 "w": 587
-},
-{
-"a": "blatt",
-"autor": "W.carter",
-"beschr": "Broadleaf plantain ( Plantago major ) on a refuge island in the middle of road 162 through Brastad, Lysekil Municipality, Sweden.",
-"f": "breitwegerich-4.webp",
-"h": 587,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Broadleaf_plantain_in_the_middle_of_road_162,_Brastad.jpg",
-"titel": "File:Broadleaf plantain in the middle of road 162, Brastad.jpg",
-"w": 880
-},
-{
-"a": "frucht",
-"autor": "Stefan.lefnaer",
-"beschr": "Frucht Taxonym: Plantago major subsp. major ss Fischer et al. EfÖLS 2008 ISBN 978-3-85474-187-9 Fundort: An der Schanze, Donaufeld, Wien-Floridsdorf - ca. 160 m ü. A. Standort: Brache",
-"f": "breitwegerich-5.webp",
-"h": 468,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Plantago_major_subsp._major_sl20.jpg",
-"titel": "File:Plantago major subsp. major sl20.jpg",
-"w": 880
-},
-{
-"a": "blatt",
-"autor": "W.carter",
-"beschr": "A field with mixed intercropping of oat ( Avena sativa ) and rye ( Secale cereale ) in Brastad, Lysekil Municipality, Sweden. The track by the field is abundant with broadleaf plantain ( Plantago major ). The left field ",
-"f": "breitwegerich-6.webp",
-"h": 587,
-"lizenz": "CC0",
-"lizenzurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-"quelle": "https://commons.wikimedia.org/wiki/File:Field_with_mixed_intercropping_of_oat_and_rye.jpg",
-"titel": "File:Field with mixed intercropping of oat and rye.jpg",
-"w": 880
 }
 ],
 "brennnessel": [
@@ -1395,19 +1203,7 @@
 "w": 880
 },
 {
-"a": "blatt",
-"autor": "Rillke",
-"beschr": "getrocknete Brombeerblätter",
-"f": "brombeere-5.webp",
-"h": 660,
-"lizenz": "CC BY-SA 3.0 de",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
-"quelle": "https://commons.wikimedia.org/wiki/File:Rubi_fruticosi_folium_119245.jpg",
-"titel": "File:Rubi fruticosi folium 119245.jpg",
-"w": 880
-},
-{
-"a": "weitere",
+"a": "bluete",
 "autor": "Dominicus Johannes Bergsma",
 "beschr": "This is a photo or sound file made in De Alde Feanen National Park in the Netherlands, with the main subject of the file in the category: flora",
 "f": "brombeere-6.webp",
@@ -1467,30 +1263,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Nasturtium_officinale_(s._str.)_sl23.jpg",
 "titel": "File:Nasturtium officinale (s. str.) sl23.jpg",
 "w": 880
-},
-{
-"a": "frucht",
-"autor": "Stefan.lefnaer",
-"beschr": "Geöffnete Schote mit zweireihig angeordneten Samen Taxonym: Nasturtium officinale ss Fischer et al. EfÖLS 2008 ISBN 978-3-85474-187-9 Fundort: Senningbach bei Hatzenbach, Bezirk Korneuburg, Niederösterreich - 180 m ü. A.",
-"f": "brunnenkresse-5.webp",
-"h": 880,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Nasturtium_officinale_(s._str.)_sl43.jpg",
-"titel": "File:Nasturtium officinale (s. str.) sl43.jpg",
-"w": 764
-},
-{
-"a": "zeichen",
-"autor": "TomKidd",
-"beschr": "Der traditionelle Anbau der Brunnenkresse in Erfurt.",
-"f": "brunnenkresse-6.webp",
-"h": 660,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Anbau_Brunnenkresse_Erfurt.jpg",
-"titel": "File:Anbau Brunnenkresse Erfurt.jpg",
-"w": 880
 }
 ],
 "buntspecht": [
@@ -1516,30 +1288,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Juvenile_male_Great_Spotted_Woodpecker,_18_June_2021.jpg",
 "titel": "File:Juvenile male Great Spotted Woodpecker, 18 June 2021.jpg",
-"w": 880
-},
-{
-"a": "zeichen",
-"autor": "Zaltys",
-"beschr": "Lesser Spotted Woodpecker (Picoides minor). Photo taken from a winter feeding site in Finland.",
-"f": "buntspecht-3.webp",
-"h": 880,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Dendrocopos_minor_291108.jpg",
-"titel": "File:Dendrocopos minor 291108.jpg",
-"w": 660
-},
-{
-"a": "weitere",
-"autor": "Didier Descouens",
-"beschr": "Ei von Buntspecht . Sammlung von : Jacques Perrin de Brichambaut.",
-"f": "buntspecht-4.webp",
-"h": 842,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Dendrocopos_major_MHNT_232.jpg",
-"titel": "File:Dendrocopos major MHNT 232.jpg",
 "w": 880
 },
 {
@@ -1615,18 +1363,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Anemone_nemorosa_IP0204155.jpg",
 "titel": "File:Anemone nemorosa IP0204155.jpg",
 "w": 880
-},
-{
-"a": "weitere",
-"autor": "Stefan.lefnaer",
-"beschr": "Rhizom Taxonym: Anemone nemorosa ss Fischer et al. EfÖLS 2008 ISBN 978-3-85474-187-9 Fundort: Ernstbrunner Wald 700 m NNE Forsthaus Ödenkirchenwald, Bezirk Mistelbach, Niederösterreich - ca. 280 m.ü.A. Standort: Frischer",
-"f": "buschwindroeschen-6.webp",
-"h": 660,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Anemone_nemorosa_sl39.jpg",
-"titel": "File:Anemone nemorosa sl39.jpg",
-"w": 880
 }
 ],
 "dachs": [
@@ -1664,18 +1400,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/2.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Badger_on_the_track_-_geograph.org.uk_-_3529249.jpg",
 "titel": "File:Badger on the track - geograph.org.uk - 3529249.jpg",
-"w": 880
-},
-{
-"a": "zeichen",
-"autor": "Cayambe",
-"beschr": "Beckerich, National Highway 24 in Luxembourg: partial road block around a locally damaged road surface. The damage is due to the construction of a sett by the European badger in the underground.",
-"f": "dachs-4.webp",
-"h": 517,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:N24_Beckerich_%E2%80%93_barrage_partiel_pour_terrier_de_blaireau_2019f.jpg",
-"titel": "File:N24 Beckerich – barrage partiel pour terrier de blaireau 2019f.jpg",
 "w": 880
 },
 {
@@ -1729,7 +1453,7 @@
 "w": 880
 },
 {
-"a": "blatt",
+"a": "weitere",
 "autor": "GT1976",
 "beschr": "Origanum vulgare (oregano) und Buphthalmum salicifolium (Ochsenauge) am Dürrenstein (Ybbstaler Alpen)",
 "f": "dost-4.webp",
@@ -1741,7 +1465,7 @@
 "w": 880
 },
 {
-"a": "frucht",
+"a": "blatt",
 "autor": "Krzysztof Ziarnek, Kenraiz",
 "beschr": "Origanum vulgare seedling. Plant cultivated in Szczecin, NW Poland (seeds collected in nature)",
 "f": "dost-5.webp",
@@ -1779,19 +1503,7 @@
 "w": 843
 },
 {
-"a": "habitus",
-"autor": "This Photo was taken by Wolfgang Moroder . Feel free to use my photos, but please mention me as the author and send me a",
-"beschr": "Vogelbeerenbaum Sorbus aucuparia und Zirben Pinus cembra auf den Pitzberg 2109 m. Seiseralm, Südtirol Gröden",
-"f": "eberesche-2.webp",
-"h": 588,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Vogelbeerenbaum_auf_Pitzberg_Seiseralm.jpg",
-"titel": "File:Vogelbeerenbaum auf Pitzberg Seiseralm.jpg",
-"w": 880
-},
-{
-"a": "blatt",
+"a": "knospe",
 "autor": "Dominicus Johannes Bergsma",
 "beschr": "New leaf from one Sorbus . opens up. Focus stack of 12 photos.",
 "f": "eberesche-3.webp",
@@ -1812,18 +1524,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Sorbus_aucuparia_Lentizellen.jpg",
 "titel": "File:Sorbus aucuparia Lentizellen.jpg",
-"w": 880
-},
-{
-"a": "frucht",
-"autor": "Uoaei1",
-"beschr": "Vogelbeere (Eberesche, Sorbus aucuparia )",
-"f": "eberesche-5.webp",
-"h": 587,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Sorbus_aucuparia_Tauerntal_20220824.jpg",
-"titel": "File:Sorbus aucuparia Tauerntal 20220824.jpg",
 "w": 880
 },
 {
@@ -1853,7 +1553,7 @@
 "w": 748
 },
 {
-"a": "habitus",
+"a": "frucht",
 "autor": "Fir0002",
 "beschr": "Geöffnete Früchte des Kastanienbaums ( Esskastanie )",
 "f": "edelkastanie-2.webp",
@@ -1874,18 +1574,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Leaf_of_Castanea_sativa.jpg",
 "titel": "File:Leaf of Castanea sativa.jpg",
-"w": 880
-},
-{
-"a": "rinde",
-"autor": "Luis Miguel Bugallo Sánchez (Lmbuga)",
-"beschr": "Trunk of Castanea Sativa in the recreation area of Trasalba. Amoeiro. Galicia (Spain).",
-"f": "edelkastanie-4.webp",
-"h": 587,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Tronco_de_Castanea_sativa.Trasalba._Amoeiro._Galiza.jpg",
-"titel": "File:Tronco de Castanea sativa.Trasalba. Amoeiro. Galiza.jpg",
 "w": 880
 },
 {
@@ -2087,18 +1775,6 @@
 "w": 880
 },
 {
-"a": "blatt",
-"autor": "User:Micropix",
-"beschr": "Taxus , leaf, Etzold green. Dorsiventral, no resin ducts, no sclerenchymatic hypodermis.",
-"f": "eibe-3.webp",
-"h": 587,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Taxus,_leaf,_Etzold_green_1.jpg",
-"titel": "File:Taxus, leaf, Etzold green 1.jpg",
-"w": 880
-},
-{
 "a": "rinde",
 "autor": "Nasenbär",
 "beschr": "Ureibe bei Steibis , Stamm",
@@ -2182,18 +1858,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by/2.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Squirrel_posing.jpg",
 "titel": "File:Squirrel posing.jpg",
-"w": 880
-},
-{
-"a": "weitere",
-"autor": "Diliff",
-"beschr": "Grauhörnchen ( Sciurus carolinensis ) im St James's Park, London, England.",
-"f": "eichhoernchen-5.webp",
-"h": 679,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Eastern_Grey_Squirrel_in_St_James%27s_Park,_London_-_Nov_2006_edit.jpg",
-"titel": "File:Eastern Grey Squirrel in St James's Park, London - Nov 2006 edit.jpg",
 "w": 880
 }
 ],
@@ -2321,18 +1985,6 @@
 "w": 880
 },
 {
-"a": "frucht",
-"autor": "Roger Culos",
-"beschr": "Aconitum napellus, Blaue Eisenhut, früchte und samen",
-"f": "eisenhut-5.webp",
-"h": 552,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Aconitum_napellus_MHNT.BOT.2007.52.9.jpg",
-"titel": "File:Aconitum napellus MHNT.BOT.2007.52.9.jpg",
-"w": 880
-},
-{
 "a": "weitere",
 "autor": "Tuxyso",
 "beschr": "Blick vom Almkopf / Alpkopf bei Bichlbach Richtung Norden / Reutte",
@@ -2359,7 +2011,7 @@
 "w": 651
 },
 {
-"a": "habitus",
+"a": "frucht",
 "autor": "/Eigenes Foto Rolf Schulte",
 "beschr": "Früchte eines Elsbeerbaums ( Sorbus torminalis ) in Hildesheim OT Marienrode",
 "f": "elsbeere-2.webp",
@@ -2371,7 +2023,7 @@
 "w": 880
 },
 {
-"a": "blatt",
+"a": "frucht",
 "autor": "Rosenzweig",
 "beschr": "Früchte und Blätter einer Elsbeere ( Sorbus torminalis ), fotografiert in Weinsberg",
 "f": "elsbeere-3.webp",
@@ -2383,7 +2035,7 @@
 "w": 880
 },
 {
-"a": "rinde",
+"a": "habitus",
 "autor": "Rainer Lippert",
 "beschr": "Die Elsbeere bei Herpersdorf, einem Ortsteil von Oberscheinfeld , ist mit ihren über drei Meter Stammumfang die zweitstärkste Elsbeere in Deutschland, zugleich wird sie in der Literatur als die schönste ihrer Art angeseh",
 "f": "elsbeere-4.webp",
@@ -2392,18 +2044,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Elsbeere_Herpersdorf.jpg",
 "titel": "File:Elsbeere Herpersdorf.jpg",
-"w": 880
-},
-{
-"a": "frucht",
-"autor": "Das Ohr in der Wikipedia auf Deutsch ( Originaltext: Philipp Zinger )",
-"beschr": "Holz der Elsbeere ( Sorbus torminalis ), gemessertes Furnier, geölt, nicht geschliffen",
-"f": "elsbeere-5.webp",
-"h": 448,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "http://creativecommons.org/licenses/by-sa/3.0/",
-"quelle": "https://commons.wikimedia.org/wiki/File:Elsbeere_Holz.jpg",
-"titel": "File:Elsbeere Holz.jpg",
 "w": 880
 },
 {
@@ -2420,6 +2060,18 @@
 }
 ],
 "enzian": [
+{
+"a": "haupt",
+"autor": "Petar Milošević",
+"beschr": "Macro photography of Gentiana acaulis (stemless gentian) in Ljubljana Botanical Garden, Slovenia. Diameter of flower is around 15-20 mm.",
+"f": "enzian-3.webp",
+"h": 688,
+"lizenz": "CC BY-SA 4.0",
+"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
+"quelle": "https://commons.wikimedia.org/wiki/File:Gentiana_acaulis_(stemless_gentian).jpg",
+"titel": "File:Gentiana acaulis (stemless gentian).jpg",
+"w": 880
+},
 {
 "a": "haupt",
 "autor": "Rainer Burkard, Graz",
@@ -2445,18 +2097,6 @@
 "w": 880
 },
 {
-"a": "bluete",
-"autor": "Petar Milošević",
-"beschr": "Macro photography of Gentiana acaulis (stemless gentian) in Ljubljana Botanical Garden, Slovenia. Diameter of flower is around 15-20 mm.",
-"f": "enzian-3.webp",
-"h": 688,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Gentiana_acaulis_(stemless_gentian).jpg",
-"titel": "File:Gentiana acaulis (stemless gentian).jpg",
-"w": 880
-},
-{
 "a": "frucht",
 "autor": "Agnieszka Kwiecień, Nova",
 "beschr": "Gentiana acaulis seedling, cultivated in Wrocław University Botanical Garden, Wrocław, Poland.",
@@ -2479,18 +2119,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Gentiana_acaulis_Seckau_20160528.jpg",
 "titel": "File:Gentiana acaulis Seckau 20160528.jpg",
 "w": 880
-},
-{
-"a": "weitere",
-"autor": "This Photo was taken by Wolfgang Moroder . Feel free to use my photos, but please mention me as the author and send me a",
-"beschr": "Enzianbüschel (Stängelloser Enzian - Gentiana acaulis ) auf der Raschötzer Alm in Gröden",
-"f": "enzian-6.webp",
-"h": 623,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Stlup%C3%ABc_y_ciuc_sun_Resciesa.jpg",
-"titel": "File:Stlupëc y ciuc sun Resciesa.jpg",
-"w": 880
 }
 ],
 "esche": [
@@ -2504,18 +2132,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by/2.5",
 "quelle": "https://commons.wikimedia.org/wiki/File:Fraxinus_excelsior_001.jpg",
 "titel": "File:Fraxinus excelsior 001.jpg",
-"w": 880
-},
-{
-"a": "habitus",
-"autor": "Alchemist-hp in der Wikipedia auf Deutsch ( www.pse-mendelejew.de )",
-"beschr": "Schönes Beispiel einer Überwallung an einer Gemeinen Esche (Hungriger einäugiger Baum frißt Schild auf)",
-"f": "esche-2.webp",
-"h": 587,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Baum_frisst_Schild.JPG",
-"titel": "File:Baum frisst Schild.JPG",
 "w": 880
 },
 {
@@ -2655,18 +2271,6 @@
 "w": 880
 },
 {
-"a": "blatt",
-"autor": "Proportional Grid Study",
-"beschr": "Dynamics of leaf proportion, Simple buckthorn (Lat. Frangula alnus, syn. Rhamnus Frangula).",
-"f": "faulbaum-3.webp",
-"h": 621,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:4_ant_A4_Lapas_medzio_600dpi.jpg",
-"titel": "File:4 ant A4 Lapas medzio 600dpi.jpg",
-"w": 880
-},
-{
 "a": "bluete",
 "autor": "Frank Vincentz",
 "beschr": "Rhamnus frangula",
@@ -2677,30 +2281,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Rhamnus_frangula_07_ies.jpg",
 "titel": "File:Rhamnus frangula 07 ies.jpg",
 "w": 800
-},
-{
-"a": "frucht",
-"autor": "Frank Vincentz",
-"beschr": "Rhamnus frangula",
-"f": "faulbaum-5.webp",
-"h": 700,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "http://creativecommons.org/licenses/by-sa/3.0/",
-"quelle": "https://commons.wikimedia.org/wiki/File:Rhamnus_frangula_14_ies.jpg",
-"titel": "File:Rhamnus frangula 14 ies.jpg",
-"w": 800
-},
-{
-"a": "rinde",
-"autor": "Rillke",
-"beschr": "getrocknete Faulbaumrinde",
-"f": "faulbaum-6.webp",
-"h": 660,
-"lizenz": "CC BY-SA 3.0 de",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
-"quelle": "https://commons.wikimedia.org/wiki/File:Frangulae_cortex_060103.jpg",
-"titel": "File:Frangulae cortex 060103.jpg",
-"w": 880
 }
 ],
 "feldahorn": [
@@ -2741,7 +2321,7 @@
 "w": 880
 },
 {
-"a": "rinde",
+"a": "habitus",
 "autor": "Nasenbär",
 "beschr": "Feldahorn ( Acer campestre ) bei Haindlfing (Landkreis Freising), mit einem Stammumfang von ca. 3,60 m einer der stärksten Feldahorne Deutschlands",
 "f": "feldahorn-4.webp",
@@ -2800,18 +2380,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Wachsamer_Feldhase_in_Birkholz_bei_Bernau.jpg",
 "titel": "File:Wachsamer Feldhase in Birkholz bei Bernau.jpg",
-"w": 880
-},
-{
-"a": "spur",
-"autor": "Sciencia58",
-"beschr": "Junghase mit inneren Verletzungen und Speichelspuren eines wildernden Hundes",
-"f": "feldhase-3.webp",
-"h": 660,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Junghase_mit_inneren_Verletzungen.jpg",
-"titel": "File:Junghase mit inneren Verletzungen.jpg",
 "w": 880
 },
 {
@@ -2898,18 +2466,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by/2.5",
 "quelle": "https://commons.wikimedia.org/wiki/File:Amelanchier_ovalis_fruits.jpg",
 "titel": "File:Amelanchier ovalis fruits.jpg",
-"w": 880
-},
-{
-"a": "knospe",
-"autor": "Adrien BENOIT à la GUILLAUME",
-"beschr": "Amelanchier ovalis : bourgeons fleurs et feuilles débourrés (Trièves, Isère, Auvergne-Rhône Alpes, France)",
-"f": "felsenbirne-6.webp",
-"h": 660,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Amelanchier_ovalis_aux_bourgeons_d%C3%A9bourr%C3%A9s.jpg",
-"titel": "File:Amelanchier ovalis aux bourgeons débourrés.jpg",
 "w": 880
 }
 ],
@@ -3001,7 +2557,7 @@
 "w": 880
 },
 {
-"a": "habitus",
+"a": "weitere",
 "autor": "Irene Andersson (irenea) ; Anders Janols",
 "beschr": "Fruit bodies of the milk mushroom Lactarius fennoscandicus Verbeken & Vesterh. Specimens photographed in Dalarna, Sweden.",
 "f": "fichtenreizker-2.webp",
@@ -3025,7 +2581,7 @@
 "w": 880
 },
 {
-"a": "jung",
+"a": "schnitt",
 "autor": "Th. Kuhnigk",
 "beschr": "Zwei junge Fruchtkörper von L. deterrimus . Fundort Selters /Taunus",
 "f": "fichtenreizker-4.webp",
@@ -3034,18 +2590,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
 "quelle": "https://commons.wikimedia.org/wiki/File:Lactarius_deterrimus_(2).JPG",
 "titel": "File:Lactarius deterrimus (2).JPG",
-"w": 880
-},
-{
-"a": "weitere",
-"autor": "This Photo was taken by Wolfgang Moroder . Feel free to use my photos, but please mention me as the author and send me a",
-"beschr": "Grubiger Milchling, Grubiger Milchling (Lactarius scrobiculatus), Pilz in der Nähe von Pufels am Schnürlsteig in Gröden .",
-"f": "fichtenreizker-5.webp",
-"h": 588,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Lactarius_scrobicolatus_Grubiger_Milchling_Bula_Gherd%C3%ABina_te_bosch.jpg",
-"titel": "File:Lactarius scrobicolatus Grubiger Milchling Bula Gherdëina te bosch.jpg",
 "w": 880
 }
 ],
@@ -3171,18 +2715,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:%D0%92%D0%B8%D0%B4%D1%80%D0%B0.jpg",
 "titel": "File:Видра.jpg",
 "w": 880
-},
-{
-"a": "weitere",
-"autor": "Klaus Rassinger und Gerhard Cammerer , Museum Wiesbaden",
-"beschr": "Fischotter Lutra lutra , Schädel, Coll. Museum Wiesbaden",
-"f": "fischotter-5.webp",
-"h": 585,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Lutra_lutra_03_MWNH_414.jpg",
-"titel": "File:Lutra lutra 03 MWNH 414.jpg",
-"w": 880
 }
 ],
 "flaschenstaeubling": [
@@ -3294,18 +2826,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Amanita_muscaria_var._guessowii,_medium.jpg",
 "titel": "File:Amanita muscaria var. guessowii, medium.jpg",
-"w": 880
-},
-{
-"a": "jung",
-"autor": "Arild Vågen",
-"beschr": "Reindeer ( Rangifer tarandus ) in Ljungdalen, Berg Municipality, Jämtland County, Sweden.",
-"f": "fliegenpilz-5.webp",
-"h": 754,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Reindeer_in_Ljungdalen_2012_02.jpg",
-"titel": "File:Reindeer in Ljungdalen 2012 02.jpg",
 "w": 880
 }
 ],
@@ -3495,18 +3015,6 @@
 "w": 880
 },
 {
-"a": "schnitt",
-"autor": "Mordecai Cubitt Cooke",
-"beschr": "Ilustrations of British Fungi (Hymenomycetes), to serve as an atlas to the \"Handbook of British Fungi\". by Mordecai Cubitt Cooke; Published 1881 by Williams and Norgate in London. (English). Plate 1024. Page 293 RUSSULA ",
-"f": "frauentaeubling-4.webp",
-"h": 880,
-"lizenz": "Public domain",
-"lizenzurl": "",
-"quelle": "https://commons.wikimedia.org/wiki/File:Russula_cutefracta-Cooke-2.jpg",
-"titel": "File:Russula cutefracta-Cooke-2.jpg",
-"w": 542
-},
-{
 "a": "jung",
 "autor": "Thomas Pruß",
 "beschr": "Die Herstellung, Bearbeitung oder Freigabe dieser Datei wurde durch das Community-Budget von Wikimedia Deutschland unterstützt. Weitere Dateien, die mit Unterstützung von Wikimedia Deutschland hier veröffentlicht wurden,",
@@ -3522,6 +3030,18 @@
 "fuchs": [
 {
 "a": "haupt",
+"autor": "Gregory \"Slobirdr\" Smith",
+"beschr": "Rotfuchs ( Vulpes vulpes ) in der Nähe von Nome, Alaska, USA",
+"f": "fuchs-5.webp",
+"h": 636,
+"lizenz": "CC BY-SA 2.0",
+"lizenzurl": "https://creativecommons.org/licenses/by-sa/2.0",
+"quelle": "https://commons.wikimedia.org/wiki/File:Alaska_Red_Fox_(Vulpes_vulpes).jpg",
+"titel": "File:Alaska Red Fox (Vulpes vulpes).jpg",
+"w": 880
+},
+{
+"a": "jung",
 "autor": "Peter.shaman",
 "beschr": "Fox cub in the bushes",
 "f": "fuchs-1.webp",
@@ -3545,7 +3065,7 @@
 "w": 880
 },
 {
-"a": "zeichen",
+"a": "spur",
 "autor": "K.Khedrup",
 "beschr": "Fußabdruck vom Rotfuchs, Luxemburg",
 "f": "fuchs-3.webp",
@@ -3554,30 +3074,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Footprint_of_Vulpes_vulpes.jpg",
 "titel": "File:Footprint of Vulpes vulpes.jpg",
-"w": 880
-},
-{
-"a": "weitere",
-"autor": "Didier Descouens",
-"beschr": "Rotfuchs (Vulpes vulpes) - Schädel Größe: 14.5 cm",
-"f": "fuchs-4.webp",
-"h": 586,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:RenardCr%C3%A2ne.jpg",
-"titel": "File:RenardCrâne.jpg",
-"w": 880
-},
-{
-"a": "jung",
-"autor": "Gregory \"Slobirdr\" Smith",
-"beschr": "Rotfuchs ( Vulpes vulpes ) in der Nähe von Nome, Alaska, USA",
-"f": "fuchs-5.webp",
-"h": 636,
-"lizenz": "CC BY-SA 2.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/2.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Alaska_Red_Fox_(Vulpes_vulpes).jpg",
-"titel": "File:Alaska Red Fox (Vulpes vulpes).jpg",
 "w": 880
 }
 ],
@@ -3616,18 +3112,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:20170401_kozica_Ko%C5%84czysty_Wierch_5537.jpg",
 "titel": "File:20170401 kozica Kończysty Wierch 5537.jpg",
-"w": 880
-},
-{
-"a": "jung",
-"autor": "Böhringer Friedrich",
-"beschr": "Die Gämse ( Rupicapra rupicapra ), vor der Rechtschreibreform “Gemse” und in der Jägersprache “Gams” oder Gamswild, ist eine in Europa und Kleinasien beheimatete Art der Ziegenartigen. *** Im Bild ein ausgestoßenes Jungt",
-"f": "gaemse-4.webp",
-"h": 610,
-"lizenz": "CC BY-SA 2.5",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/2.5",
-"quelle": "https://commons.wikimedia.org/wiki/File:G%C3%A4mse,_Rupicapra_rupicapra.JPG",
-"titel": "File:Gämse, Rupicapra rupicapra.JPG",
 "w": 880
 },
 {
@@ -3679,42 +3163,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Bellis_March_2014-1.jpg",
 "titel": "File:Bellis March 2014-1.jpg",
 "w": 880
-},
-{
-"a": "blatt",
-"autor": "Daniel VILLAFRUELA .",
-"beschr": "Leaves of a Daisy .",
-"f": "gaensebluemchen-4.webp",
-"h": 880,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Bellis_perennis-P%C3%A2querette-Feuilles-20160428.jpg",
-"titel": "File:Bellis perennis-Pâquerette-Feuilles-20160428.jpg",
-"w": 880
-},
-{
-"a": "frucht",
-"autor": "KrisMaes",
-"beschr": "Nootjes van Bellis perennis (Madeliefje) gevonden in een grasperkje in een tuin in België.",
-"f": "gaensebluemchen-5.webp",
-"h": 880,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Nootjes_van_Madeliefje_2.jpg",
-"titel": "File:Nootjes van Madeliefje 2.jpg",
-"w": 851
-},
-{
-"a": "bluete",
-"autor": "Alvesgaspar",
-"beschr": "Poster of nine flowers in three colours. From top to bottom and left to right: 1 - Osteospermum ecklonis 2 - Calendula officinalis 3 - Cistus crispus 4 - Osteospermum ecklonis 5 - Zinnia elegans 6 - Glebionis coronaria 7",
-"f": "gaensebluemchen-6.webp",
-"h": 880,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Poster_flowers_3_colours.jpg",
-"titel": "File:Poster flowers 3 colours.jpg",
-"w": 823
 }
 ],
 "gallenroehrling": [
@@ -3793,18 +3241,6 @@
 "w": 660
 },
 {
-"a": "habitus",
-"autor": "Stefan.lefnaer",
-"beschr": "Habitus Taxonym: Aegopodium podagraria ss Fischer et al. EfÖLS 2008 ISBN 978-3-85474-187-9 Fundort: beim Steinberg bei Niederhollabrunn, Bezirk Korneuburg, Niederösterreich - ca. 300 m ü. A. Standort: Gebüsch",
-"f": "giersch-2.webp",
-"h": 880,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Aegopodium_podagraria_sl1.jpg",
-"titel": "File:Aegopodium podagraria sl1.jpg",
-"w": 660
-},
-{
 "a": "bluete",
 "autor": "Cbaile19",
 "beschr": "Goutweed ( Aegopodium podagraria ) blooming in Bird Park, Mount Lebanon, Pennsylvania",
@@ -3879,18 +3315,6 @@
 "w": 880
 },
 {
-"a": "unterseite",
-"autor": "Bertazzo-Silva et al. (2024)",
-"beschr": "Figure 2 Galerina marginata . A Basidiome in Laboratory; B Spores; C Basidia; D Pleurocystidia; E, F Cheilocystidia; G Caulocystidia; H Lamellar trama; I, J Pileipellis. Scale bar in B, C, D, E, F, G, H and J - 10 μm. In",
-"f": "gifthaeubling-3.webp",
-"h": 880,
-"lizenz": "CC BY 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Galerina_marginata_(10.3897-BDJ.12.e125727)_Figure_2.jpg",
-"titel": "File:Galerina marginata (10.3897-BDJ.12.e125727) Figure 2.jpg",
-"w": 530
-},
-{
 "a": "weitere",
 "autor": "Matej Frančeškin",
 "beschr": "Galerina marginata in Trnovski gozd, Slovenia",
@@ -3941,18 +3365,6 @@
 "w": 880
 },
 {
-"a": "unterseite",
-"autor": "Henk Monster",
-"beschr": "At 4 locations near Hotel Warnsborn there are Sparassis crispa (Wood Cauliflower, D= Krause Gluck or Fette Henne, F= Sparassis crépu Syn. chou-fleur, NL= Grote sponszwam) white spores and causes white rot, found begin Se",
-"f": "glucke-3.webp",
-"h": 587,
-"lizenz": "CC BY 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:At_4_locations_near_Hotel_Warnsborn_there_are_Sparassis_crispa_(Wood_Cauliflower,_D%3D_Krause_Gluck_or_Fette_Henne,_F%3D_Sparassis_cr%C3%A9pu_Syn._chou-fleur,_NL%3D_Grote_sponszwam)_white_spores_and_causes_white_rot,_found_begin_-_panoramio.jpg",
-"titel": "File:At 4 locations near Hotel Warnsborn there are Sparassis crispa (Wood Cauliflower, D= Krause Gluck or Fette Henne, F= Sparassis crépu Syn. chou-fleur, NL= Grote sponszwam) white spores and causes white rot, found begin - panoramio.jpg",
-"w": 880
-},
-{
 "a": "schnitt",
 "autor": "Dick Culbert from Gibsons, B.C., Canada",
 "beschr": "The Cauliflower Fungus is large, widespread, complex and edible. This is a cross section.",
@@ -3991,7 +3403,7 @@
 "w": 741
 },
 {
-"a": "habitus",
+"a": "jung",
 "autor": "Susulyka",
 "beschr": "fiatal gyilkos galóca",
 "f": "gruenerknollenblaetterpilz-2.webp",
@@ -4001,18 +3413,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Amanita_phalloides_young_specimen.jpg",
 "titel": "File:Amanita phalloides young specimen.jpg",
 "w": 660
-},
-{
-"a": "unterseite",
-"autor": "Nikita Karasik",
-"beschr": "The photography illustetes spores of death cap ( Amantia phalloides ). Spores are located in juice and remains of death cap mushroom.",
-"f": "gruenerknollenblaetterpilz-3.webp",
-"h": 660,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Death_cap_(Amantia_phalloides)_spores.png",
-"titel": "File:Death cap (Amantia phalloides) spores.png",
-"w": 880
 },
 {
 "a": "jung",
@@ -4027,7 +3427,7 @@
 "w": 880
 },
 {
-"a": "blatt",
+"a": "weitere",
 "autor": "Reinhold Möller Ermell",
 "beschr": "Grüner Knollenblätterpilz (Amanita phalloides) im Bruderwald in Bamberg",
 "f": "gruenerknollenblaetterpilz-5.webp",
@@ -4051,18 +3451,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Glechoma_hederacea_-_Keila.jpg",
 "titel": "File:Glechoma hederacea - Keila.jpg",
 "w": 782
-},
-{
-"a": "habitus",
-"autor": "Dominicus Johannes Bergsma",
-"beschr": "overgrown biotope. Location, nature Beekdal Linde Bekhofplas in the Netherlands.",
-"f": "gundermann-2.webp",
-"h": 587,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Verruigd_biotoop._Locatie,_natuurterrein_Beekdal_Linde_Bekhofplas_02.jpg",
-"titel": "File:Verruigd biotoop. Locatie, natuurterrein Beekdal Linde Bekhofplas 02.jpg",
-"w": 880
 },
 {
 "a": "bluete",
@@ -4089,7 +3477,7 @@
 "w": 880
 },
 {
-"a": "frucht",
+"a": "blatt",
 "autor": "Krzysztof Ziarnek, Kenraiz",
 "beschr": "Glechoma hederacea (seedling) in Parsów near Karlino, NW Poland",
 "f": "gundermann-5.webp",
@@ -4098,18 +3486,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Glechoma_hederacea_kz13.jpg",
 "titel": "File:Glechoma hederacea kz13.jpg",
-"w": 880
-},
-{
-"a": "habitus",
-"autor": "Dominicus Johannes Bergsma",
-"beschr": "overgrown biotope. Location, nature Beekdal Linde Bekhofplas in the Netherlands.",
-"f": "gundermann-6.webp",
-"h": 489,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Verruigd_biotoop._Locatie,_natuurterrein_Beekdal_Linde_Bekhofplas_01.jpg",
-"titel": "File:Verruigd biotoop. Locatie, natuurterrein Beekdal Linde Bekhofplas 01.jpg",
 "w": 880
 }
 ],
@@ -4213,18 +3589,6 @@
 "w": 880
 },
 {
-"a": "blatt",
-"autor": "W.carter",
-"beschr": "Reflection of trees in a puddle with autumn leaves, formed among the common haircap moss ( Polytrichum commune ) by west Myrstigen, Brastad, Lysekil Municipality, Sweden.",
-"f": "haarmuetzenmoos-3.webp",
-"h": 587,
-"lizenz": "CC0",
-"lizenzurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-"quelle": "https://commons.wikimedia.org/wiki/File:Leaves_and_reflections_in_a_mossy_puddle_3.jpg",
-"titel": "File:Leaves and reflections in a mossy puddle 3.jpg",
-"w": 880
-},
-{
 "a": "frucht",
 "autor": "ImagePerson",
 "beschr": "Taken on camels Hump Trail in Vermont - Mostly haircap moss (Polytrichum commune) with a sprinkling of the leaves of Appalachian barren-strawberry (Geum fragarioides)",
@@ -4246,18 +3610,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Polytrichum_commune_in_natural_monument_Knez_u_Hrazan_(1).JPG",
 "titel": "File:Polytrichum commune in natural monument Knez u Hrazan (1).JPG",
-"w": 880
-},
-{
-"a": "weitere",
-"autor": "W.carter",
-"beschr": "Wood sorrel ( Oxalis acetosella ) and haircap moss ( Polytrichum commune ) after rain in the spruce forest above Holma Boat Club, Lysekil Municipality, Sweden.",
-"f": "haarmuetzenmoos-6.webp",
-"h": 587,
-"lizenz": "CC0",
-"lizenzurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-"quelle": "https://commons.wikimedia.org/wiki/File:Wood_sorrel_and_haircap_moss.jpg",
-"titel": "File:Wood sorrel and haircap moss.jpg",
 "w": 880
 }
 ],
@@ -4287,18 +3639,6 @@
 "w": 880
 },
 {
-"a": "blatt",
-"autor": "Rillke",
-"beschr": "getrocknete Birkenblätter",
-"f": "haengebirke-3.webp",
-"h": 660,
-"lizenz": "CC BY-SA 3.0 de",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
-"quelle": "https://commons.wikimedia.org/wiki/File:Betulae_folium_126034.jpg",
-"titel": "File:Betulae folium 126034.jpg",
-"w": 880
-},
-{
 "a": "rinde",
 "autor": "Michielverbeek",
 "beschr": "Arnhem-Delhuyzen, the lower part of the trunk of several silver birches",
@@ -4323,7 +3663,7 @@
 "w": 660
 },
 {
-"a": "bluete",
+"a": "habitus",
 "autor": "Dietmar Rabich",
 "beschr": "Naturschutzgebiet „ Westruper Heide “ während der Heideblüte, Haltern am See , Nordrhein-Westfalen , Deutschland Die Westruper Heide (im Volksmund manchmal auch „ Flaesheimer Heide“) ist ein Naturschutzgebiet in Haltern ",
 "f": "haengebirke-6.webp",
@@ -4338,18 +3678,6 @@
 "hainbuche": [
 {
 "a": "haupt",
-"autor": "unbekannt",
-"beschr": "",
-"f": "hainbuche-1.webp",
-"h": 658,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "http://creativecommons.org/licenses/by-sa/3.0/",
-"quelle": "https://commons.wikimedia.org/wiki/File:Carpinus_betulus1_cross_beentree.jpg",
-"titel": "File:Carpinus betulus1 cross beentree.jpg",
-"w": 880
-},
-{
-"a": "habitus",
 "autor": "Willow",
 "beschr": "Hainbuche ( Carpinus betulus ), Ort: Glashütter Wiesen im Hunsrück, Rheinland-Pfalz, Deutschland",
 "f": "hainbuche-2.webp",
@@ -4361,7 +3689,7 @@
 "w": 880
 },
 {
-"a": "blatt",
+"a": "knospe",
 "autor": "Uoaei1",
 "beschr": "Blattknospe der Hainbuche ( Carpinus betulus )",
 "f": "hainbuche-3.webp",
@@ -4447,7 +3775,7 @@
 "w": 880
 },
 {
-"a": "schnitt",
+"a": "weitere",
 "autor": "Bff",
 "beschr": "Cut washed fruiting bodies of Honey fungus . Moscow region, Russia.",
 "f": "hallimasch-4.webp",
@@ -4605,18 +3933,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Abel%C3%A1s_en_Celanova_-_Galiza.jpg",
 "titel": "File:Abelás en Celanova - Galiza.jpg",
 "w": 880
-},
-{
-"a": "rinde",
-"autor": "Микола Василечко",
-"beschr": "Дерев'яно-кам'яна квітка у ліщинових пелюстках, створена Миколою Василечком",
-"f": "hasel-6.webp",
-"h": 880,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:%D0%94%D0%B5%D1%80%D0%B5%D0%B2%27%D1%8F%D0%BD%D0%BE-%D0%BA%D0%B0%D0%BC%27%D1%8F%D0%BD%D0%B0_%D0%BA%D0%B2%D1%96%D1%82%D0%BA%D0%B0_%D1%83_%D0%BB%D1%96%D1%89%D0%B8%D0%BD%D0%BE%D0%B2%D0%B8%D1%85_%D0%BF%D0%B5%D0%BB%D1%8E%D1%81%D1%82%D0%BA%D0%B0%D1%85_-_20261008_160739.jpg",
-"titel": "File:Дерев'яно-кам'яна квітка у ліщинових пелюстках - 20261008 160739.jpg",
-"w": 660
 }
 ],
 "heckenkirsche": [
@@ -4696,6 +4012,18 @@
 "heidelbeere": [
 {
 "a": "haupt",
+"autor": "Abrget47j",
+"beschr": "Bilberries and leaves on a twig.",
+"f": "heidelbeere-5.webp",
+"h": 589,
+"lizenz": "CC BY-SA 3.0",
+"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
+"quelle": "https://commons.wikimedia.org/wiki/File:Lahemaa_mustikad.jpg",
+"titel": "File:Lahemaa mustikad.jpg",
+"w": 880
+},
+{
+"a": "haupt",
 "autor": "Arild Vågen",
 "beschr": "Forest in Ryssbergen (literally translated in English: the Russian hills), Sicklaön. Nacka",
 "f": "heidelbeere-1.webp",
@@ -4731,7 +4059,7 @@
 "w": 880
 },
 {
-"a": "bluete",
+"a": "blatt",
 "autor": "Robert Flogaus-Faust",
 "beschr": "Heidelbeerpflanze ( Vaccinium myrtillus ) mit Blüten, zwischen Visperterminen und Gspon , Wallis , Schweiz",
 "f": "heidelbeere-4.webp",
@@ -4743,19 +4071,7 @@
 "w": 792
 },
 {
-"a": "blatt",
-"autor": "Abrget47j",
-"beschr": "Bilberries and leaves on a twig.",
-"f": "heidelbeere-5.webp",
-"h": 589,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Lahemaa_mustikad.jpg",
-"titel": "File:Lahemaa mustikad.jpg",
-"w": 880
-},
-{
-"a": "weitere",
+"a": "habitus",
 "autor": "Johann Jaritz",
 "beschr": "Heidelbeer-Sträucher am Wanderweg 341 in Sankt Oswald, Marktgemeinde Eberstein im Görtschitztal , Bezirk Bezirk Sankt Veit in Kärnten , Österreich , Europäische Union",
 "f": "heidelbeere-6.webp",
@@ -4779,30 +4095,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:2011-11-20_Craterellus_cornucopioides_(L.)_Pers_183522_cropped.jpg",
 "titel": "File:2011-11-20 Craterellus cornucopioides (L.) Pers 183522 cropped.jpg",
 "w": 689
-},
-{
-"a": "habitus",
-"autor": "Cooke, M. C.; Society for Promoting Christian Knowledge (Great Britain)",
-"beschr": "PL. 7. ■Street bread '« C/ EDIBLE MUSHROOMS.",
-"f": "herbsttrompete-2.webp",
-"h": 880,
-"lizenz": "Public domain",
-"lizenzurl": "",
-"quelle": "https://commons.wikimedia.org/wiki/File:Edible_and_poisonous_mushrooms_(PL._7)_(8515009419).jpg",
-"titel": "File:Edible and poisonous mushrooms (PL. 7) (8515009419).jpg",
-"w": 543
-},
-{
-"a": "unterseite",
-"autor": "James Sowerby",
-"beschr": "This is plate 74 from James Sowerby 's Coloured Figures of English Fungi or Mushrooms . See below for more details.",
-"f": "herbsttrompete-3.webp",
-"h": 880,
-"lizenz": "Public domain",
-"lizenzurl": "",
-"quelle": "https://commons.wikimedia.org/wiki/File:Coloured_Figures_of_English_Fungi_or_Mushrooms_-_t._74.png",
-"titel": "File:Coloured Figures of English Fungi or Mushrooms - t. 74.png",
-"w": 488
 },
 {
 "a": "weitere",
@@ -4843,18 +4135,6 @@
 "w": 880
 },
 {
-"a": "habitus",
-"autor": "Agnes Monkelbaan",
-"beschr": "Mountain tour from Val Sinestra via Vnà to Zuort . View on the area of Zuort.",
-"f": "herbstzeitlose-2.webp",
-"h": 611,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Bergtocht_van_Val_Sinestra_via_Vn%C3%A0_naar_Zuort._16-09-2019._(actm.)_24.jpg",
-"titel": "File:Bergtocht van Val Sinestra via Vnà naar Zuort. 16-09-2019. (actm.) 24.jpg",
-"w": 880
-},
-{
 "a": "bluete",
 "autor": "Andreas Eichler",
 "beschr": "Herbst-Zeitlose - Colchicum autumnale. Aufgenommen im Kühkopf, Stockstadt, Hessen, Deutschland.",
@@ -4879,7 +4159,7 @@
 "w": 880
 },
 {
-"a": "frucht",
+"a": "blatt",
 "autor": "AnRo0002",
 "beschr": "Herbstzeitlose ( Colchicum autumnale ) am Orchideenpfad im Naturschutzgebiet Südlicher Bliesgau/Auf der Lohe",
 "f": "herbstzeitlose-5.webp",
@@ -4939,35 +4219,11 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:2012-07-12_Boletus_erythropus_2_crop.jpg",
 "titel": "File:2012-07-12 Boletus erythropus 2 crop.jpg",
 "w": 880
-},
-{
-"a": "weitere",
-"autor": "Boletus_junquilleus_JPG2.jpg : Jean-Pol GRANDMONT derivative work: Ak ccm",
-"beschr": "Boletus junquilleus (Belgique)/(Belgium), forêt de hêtres et de chênes./beeches and oaks forest.",
-"f": "hexenroehrling-4.webp",
-"h": 675,
-"lizenz": "CC BY 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:2004-11-14_Boletus_erythropus_var_junquilleus_crop.jpg",
-"titel": "File:2004-11-14 Boletus erythropus var junquilleus crop.jpg",
-"w": 880
 }
 ],
 "himbeere": [
 {
 "a": "haupt",
-"autor": "Ypsilon from Finland",
-"beschr": "Small raspberries on their plant",
-"f": "himbeere-1.webp",
-"h": 660,
-"lizenz": "CC0",
-"lizenzurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-"quelle": "https://commons.wikimedia.org/wiki/File:Small_raspberries_growing.jpg",
-"titel": "File:Small raspberries growing.jpg",
-"w": 880
-},
-{
-"a": "habitus",
 "autor": "Yoba Gogh",
 "beschr": "Raspberry fruit and tree in Ait Amira, Agadir, Morocco",
 "f": "himbeere-2.webp",
@@ -4976,6 +4232,18 @@
 "lizenzurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
 "quelle": "https://commons.wikimedia.org/wiki/File:Rubus_Idaeus.jpg",
 "titel": "File:Rubus Idaeus.jpg",
+"w": 880
+},
+{
+"a": "habitus",
+"autor": "Ypsilon from Finland",
+"beschr": "Small raspberries on their plant",
+"f": "himbeere-1.webp",
+"h": 660,
+"lizenz": "CC0",
+"lizenzurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+"quelle": "https://commons.wikimedia.org/wiki/File:Small_raspberries_growing.jpg",
+"titel": "File:Small raspberries growing.jpg",
 "w": 880
 },
 {
@@ -5115,7 +4383,7 @@
 "w": 880
 },
 {
-"a": "habitus",
+"a": "frucht",
 "autor": "Taubenflieger68",
 "beschr": "Reife Holunderbeeren im Spätsommer, noch am Baum.",
 "f": "holunder-2.webp",
@@ -5127,7 +4395,7 @@
 "w": 880
 },
 {
-"a": "blatt",
+"a": "knospe",
 "autor": "DidierFy",
 "beschr": "Feuilles de Sureau noir apparaissant mi-janvier. Près de Namur, Belgique.",
 "f": "holunder-3.webp",
@@ -5139,7 +4407,7 @@
 "w": 880
 },
 {
-"a": "bluete",
+"a": "habitus",
 "autor": "Johann Jaritz",
 "beschr": "Hollerbusch an einem Wohnhaus in der 10. Oktoberstraße 69 in Winklern, Gemeinde Pörtschach am Wörther See , Bezirk Klagenfurt Land, Kärnten , Österreich , EU",
 "f": "holunder-4.webp",
@@ -5160,18 +4428,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Holunder_unreife_Fr%C3%BCchte.JPG",
 "titel": "File:Holunder unreife Früchte.JPG",
-"w": 880
-},
-{
-"a": "rinde",
-"autor": "Agnes Monkelbaan",
-"beschr": "A rain-soaked jelly ear ( Auricularia auricula-judae ), family Auriculariaceae , on a stem of a Sambucus . Focus stack of 20 photos.",
-"f": "holunder-6.webp",
-"h": 587,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Echt_judasoor_(Auricularia_auricula-judae)_op_een_stam_van_een_vlier._15-02-2024._(actm.)_15-02-2024._(actm.).jpg",
-"titel": "File:Echt judasoor (Auricularia auricula-judae) op een stam van een vlier. 15-02-2024. (actm.) 15-02-2024. (actm.).jpg",
 "w": 880
 }
 ],
@@ -5227,18 +4483,6 @@
 {
 "a": "frucht",
 "autor": "H. Zell",
-"beschr": "Echter Hopfen, reife Fruchtstände; Stutensee, Deutschland.",
-"f": "hopfen-5.webp",
-"h": 660,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Humulus_lupulus_011.JPG",
-"titel": "File:Humulus lupulus 011.JPG",
-"w": 880
-},
-{
-"a": "frucht",
-"autor": "H. Zell",
 "beschr": "Echter Hopfen, Fruchtstände; Karlsruhe, Deutschland.",
 "f": "hopfen-6.webp",
 "h": 880,
@@ -5284,18 +4528,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Tussilago_farfara_3_RF.jpg",
 "titel": "File:Tussilago farfara 3 RF.jpg",
-"w": 880
-},
-{
-"a": "blatt",
-"autor": "Rillke",
-"beschr": "getrocknete Huflattichblätter",
-"f": "huflattich-4.webp",
-"h": 660,
-"lizenz": "CC BY-SA 3.0 de",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
-"quelle": "https://commons.wikimedia.org/wiki/File:Farfarae_folium_107094.jpg",
-"titel": "File:Farfarae folium 107094.jpg",
 "w": 880
 },
 {
@@ -5374,18 +4606,6 @@
 },
 {
 "a": "frucht",
-"autor": "Steve Hurst @ USDA-NRCS PLANTS Database",
-"beschr": "Fools Parsley. Seeds from Gembloux, Belgium.",
-"f": "hundspetersilie-5.webp",
-"h": 585,
-"lizenz": "Public domain",
-"lizenzurl": "",
-"quelle": "https://commons.wikimedia.org/wiki/File:Aethusa_cynapium_seeds.jpg",
-"titel": "File:Aethusa cynapium seeds.jpg",
-"w": 880
-},
-{
-"a": "frucht",
 "autor": "Stefan.lefnaer",
 "beschr": "Früchte Taxonym: Aethusa cynapium subsp. elata ss Fischer et al. EfÖLS 2008 ISBN 978-3-85474-187-9 Fundort: Rohrwald, Bezirk Korneuburg, Niederösterreich - ca. 260 m ü. A. Standort: Feuchter Wald",
 "f": "hundspetersilie-6.webp",
@@ -5423,7 +4643,7 @@
 "w": 880
 },
 {
-"a": "blatt",
+"a": "bluete",
 "autor": "Humoyun Mehridinov",
 "beschr": "Ташкентский ботанический сад: Ташкент",
 "f": "hundsrose-3.webp",
@@ -5497,7 +4717,7 @@
 "w": 880
 },
 {
-"a": "spur",
+"a": "zeichen",
 "autor": "Anneli Salo",
 "beschr": "Feces of a hedgehog (Erinaceus europaeus) in Kerava, Finland",
 "f": "igel-3.webp",
@@ -5519,18 +4739,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Erinaceus_europaeus_(36672175356).jpg",
 "titel": "File:Erinaceus europaeus (36672175356).jpg",
 "w": 880
-},
-{
-"a": "weitere",
-"autor": "Kamil. Corrections: Piotr_J",
-"beschr": "Eurasian Eagle Owl ( Bubo bubo ), Poland",
-"f": "igel-5.webp",
-"h": 880,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "http://creativecommons.org/licenses/by-sa/3.0/",
-"quelle": "https://commons.wikimedia.org/wiki/File:Bubo_bubo_winter_1.jpg",
-"titel": "File:Bubo bubo winter 1.jpg",
-"w": 845
 }
 ],
 "johanniskraut": [
@@ -5545,18 +4753,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Hypericum_perforatum_Dziurawiec_zwyczajny_2020-07-12_02.jpg",
 "titel": "File:Hypericum perforatum Dziurawiec zwyczajny 2020-07-12 02.jpg",
 "w": 660
-},
-{
-"a": "habitus",
-"autor": "TheTechnician27",
-"beschr": "St. John's wort in the herb harden at Meadowbrook Park in Urbana, Illinois",
-"f": "johanniskraut-2.webp",
-"h": 660,
-"lizenz": "CC0",
-"lizenzurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-"quelle": "https://commons.wikimedia.org/wiki/File:St._John%27s_wort.jpg",
-"titel": "File:St. John's wort.jpg",
-"w": 880
 },
 {
 "a": "bluete",
@@ -5583,18 +4779,6 @@
 "w": 880
 },
 {
-"a": "frucht",
-"autor": "Sciencia58",
-"beschr": "Johanniskraut mit Früchten im September in Rheinland Pfalz",
-"f": "johanniskraut-5.webp",
-"h": 689,
-"lizenz": "CC0",
-"lizenzurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-"quelle": "https://commons.wikimedia.org/wiki/File:Hypericum_perforatum_with_fruits_1.jpg",
-"titel": "File:Hypericum perforatum with fruits 1.jpg",
-"w": 880
-},
-{
 "a": "bluete",
 "autor": "Didier Descouens",
 "beschr": "Echte Johanniskraut - Blüte und Knospen",
@@ -5618,30 +4802,6 @@
 "lizenzurl": "http://creativecommons.org/licenses/by-sa/3.0/",
 "quelle": "https://commons.wikimedia.org/wiki/File:Hirneola_auricula-judae_(xndr)_cropped.jpg",
 "titel": "File:Hirneola auricula-judae (xndr) cropped.jpg",
-"w": 880
-},
-{
-"a": "habitus",
-"autor": "Henk Monster",
-"beschr": "Auricularia auricula-judae (Jelly Ear, D= Judasohr, Chinamorchel, F= Oreille de Judas, NL= Echt Judasoor) white spores and cause white rot, at Vlier trees, a typical tree for this mushroom",
-"f": "judasohr-2.webp",
-"h": 733,
-"lizenz": "CC BY 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Auricularia_auricula-judae_(Jelly_Ear,_D%3D_Judasohr,_Chinamorchel,_F%3D_Oreille_de_Judas,_NL%3D_Echt_Judasoor)_white_spores_and_cause_white_rot,_at_Vlier_trees,_a_typical_tree_for_this_mushroom_-_panoramio.jpg",
-"titel": "File:Auricularia auricula-judae (Jelly Ear, D= Judasohr, Chinamorchel, F= Oreille de Judas, NL= Echt Judasoor) white spores and cause white rot, at Vlier trees, a typical tree for this mushroom - panoramio.jpg",
-"w": 880
-},
-{
-"a": "unterseite",
-"autor": "Henk Monster",
-"beschr": "Auricularia auricula-judae (Jelly Ear, D= Judasohr, Chinamorchel, F= Oreille de Judas, NL= Echt Judasoor) white spores and cause white rot, on a beechbranch at Hoge Erf Schaarsbergen",
-"f": "judasohr-3.webp",
-"h": 814,
-"lizenz": "CC BY 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Auricularia_auricula-judae_(Jelly_Ear,_D%3D_Judasohr,_Chinamorchel,_F%3D_Oreille_de_Judas,_NL%3D_Echt_Judasoor)_white_spores_and_cause_white_rot,_on_a_beechbranch_at_Hoge_Erf_Schaarsbergen_-_panoramio.jpg",
-"titel": "File:Auricularia auricula-judae (Jelly Ear, D= Judasohr, Chinamorchel, F= Oreille de Judas, NL= Echt Judasoor) white spores and cause white rot, on a beechbranch at Hoge Erf Schaarsbergen - panoramio.jpg",
 "w": 880
 },
 {
@@ -5707,30 +4867,6 @@
 "w": 880
 },
 {
-"a": "blatt",
-"autor": "Stefan.lefnaer",
-"beschr": "Stängel mit Laubblatt Taxonym: Matricaria chamomilla ss Fischer et al. EfÖLS 2008 ISBN 978-3-85474-187-9 Fundort: Teich bei Michelstetten, Bezirk Mistelbach, Niederösterreich - ca. 250 m.ü.A. Standort: Teichufer",
-"f": "kamille-4.webp",
-"h": 880,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Matricaria_chamomilla_sl8.jpg",
-"titel": "File:Matricaria chamomilla sl8.jpg",
-"w": 709
-},
-{
-"a": "frucht",
-"autor": "Krzysztof Ziarnek, Kenraiz",
-"beschr": "Matricaria chamomilla in the Botanischer Garten, Berlin-Dahlem",
-"f": "kamille-5.webp",
-"h": 587,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Matricaria_chamomilla_kz07.jpg",
-"titel": "File:Matricaria chamomilla kz07.jpg",
-"w": 880
-},
-{
 "a": "weitere",
 "autor": "JackyM59",
 "beschr": "Camomille sauvage (Matricaria chamomilla) et coquelicots (Papaver rhoeas) au bord d'un champ d'orge (Hordeum vulgare)",
@@ -5767,18 +4903,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Agaricus_xanthoderma_pink_gills.jpg",
 "titel": "File:Agaricus xanthoderma pink gills.jpg",
 "w": 880
-},
-{
-"a": "schnitt",
-"autor": "Jens Röder",
-"beschr": "Gekochter Karbol-Champigion. Beim Kochen verfärbt sich der vorher weiße Pilze mit braun bis rotbraunen Lammellen intensiv gelb und der Phenolgeruch, der im rohen Zustand nicht immer wahrnehmbar ist, tritt besonders deutl",
-"f": "karbolchampignon-3.webp",
-"h": 880,
-"lizenz": "CC BY-SA 3.0 de",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
-"quelle": "https://commons.wikimedia.org/wiki/File:Karbol-Champignion2.png",
-"titel": "File:Karbol-Champignion2.png",
-"w": 820
 },
 {
 "a": "jung",
@@ -5831,7 +4955,7 @@
 "w": 880
 },
 {
-"a": "unterseite",
+"a": "weitere",
 "autor": "Norbert Nagel",
 "beschr": "Dickschaliger Kartoffelbovist (Scleroderma citrinum), oben bereits geöffnet zum Freisetzen von Sporen. Region: Hessen, Deutschland. Das abgebildete Exemplar hatte einen Durchmesser von etwa 2-3 cm.",
 "f": "kartoffelbovist-3.webp",
@@ -5855,7 +4979,7 @@
 "w": 880
 },
 {
-"a": "jung",
+"a": "schnitt",
 "autor": "G.V.Kolbe",
 "beschr": "Cross-section of an unidentified young puffball mushroom (with parts of mycelium) found on the edge of a forest path in Alsace (67), France.",
 "f": "kartoffelbovist-5.webp",
@@ -5905,7 +5029,7 @@
 "w": 880
 },
 {
-"a": "blatt",
+"a": "frucht",
 "autor": "Fischer.H",
 "beschr": "Klatschmohn - Kapselfruchtknoten mit Blattläusen",
 "f": "klatschmohn-4.webp",
@@ -5927,18 +5051,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Mohnkapsel_Schnee-20210125-RM-104740.jpg",
 "titel": "File:Mohnkapsel Schnee-20210125-RM-104740.jpg",
 "w": 660
-},
-{
-"a": "bluete",
-"autor": "Alvesgaspar",
-"beschr": "A poster showing three different stages of a Common Poppy flower ( Papaver rhoeas ): bud, flower and fruit (capsule).",
-"f": "klatschmohn-6.webp",
-"h": 352,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Poster_papaver_3a.jpg",
-"titel": "File:Poster papaver 3a.jpg",
-"w": 880
 }
 ],
 "knoblauchsrauke": [
@@ -5991,7 +5103,7 @@
 "w": 880
 },
 {
-"a": "frucht",
+"a": "blatt",
 "autor": "Salicyna",
 "beschr": "Czosnaczek pospolity ( Alliaria petiolata ) - siewki. Ogród Botaniczny UMCS w Lublinie.",
 "f": "knoblauchsrauke-5.webp",
@@ -6053,7 +5165,7 @@
 "w": 880
 },
 {
-"a": "bluete",
+"a": "habitus",
 "autor": "Uoaei1",
 "beschr": "Kornelkirsche ( Cornus mas ) in Blüte am Hegerberg bei Kasten , Niederösterreich",
 "f": "kornelkirsche-4.webp",
@@ -6100,18 +5212,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Bietschhorn_et_m%C3%A9l%C3%A8zes,_Lauchernalp,_Valais.jpg",
 "titel": "File:Bietschhorn et mélèzes, Lauchernalp, Valais.jpg",
-"w": 880
-},
-{
-"a": "habitus",
-"autor": "This Photo was taken by Wolfgang Moroder . Feel free to use my photos, but please mention me as the author and send me a",
-"beschr": "Almwiese Juac mit Zirbel Kiefer und Lerchenbäume. Die Geislerspitzen, die Mastlé- und Cislesalm im Hintergrund. Naturpark Puez-Geisler in den Südtiroler Dolomiten.",
-"f": "laerche-2.webp",
-"h": 395,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Juac_Odles_Cisles_d%27insta.jpg",
-"titel": "File:Juac Odles Cisles d'insta.jpg",
 "w": 880
 },
 {
@@ -6166,18 +5266,6 @@
 "latsche": [
 {
 "a": "haupt",
-"autor": "Anton Hartinger",
-"beschr": "Pinus montana ( Pinus mugo )",
-"f": "latsche-1.webp",
-"h": 880,
-"lizenz": "Public domain",
-"lizenzurl": "",
-"quelle": "https://commons.wikimedia.org/wiki/File:Pinus_montana_Atlas_Alpenflora.jpg",
-"titel": "File:Pinus montana Atlas Alpenflora.jpg",
-"w": 602
-},
-{
-"a": "habitus",
 "autor": "Agnieszka Kwiecień, Nova",
 "beschr": "Mountain Pine type subspecies ( Pinus mugp subsp. mugo ), seed cones, natural habitat in Tatra Mountains, Poland.",
 "f": "latsche-2.webp",
@@ -6240,30 +5328,6 @@
 "leberbluemchen": [
 {
 "a": "haupt",
-"autor": "Edward Step, F.L.S.",
-"beschr": "Common Hepatica Plate No. 5, from Favourite Flowers or Favourite flowers of garden and greenhouse by Edward Step, F.L.S. the cultural directions edited by William Watson F.R.H.S. Assistant Curator, Royal Gardens, Kew; il",
-"f": "leberbluemchen-1.webp",
-"h": 880,
-"lizenz": "Public domain",
-"lizenzurl": "",
-"quelle": "https://commons.wikimedia.org/wiki/File:Common_Hepatica-Favourite_Flowers_Garden_Greenhouse-1-0027-5.png",
-"titel": "File:Common Hepatica-Favourite Flowers Garden Greenhouse-1-0027-5.png",
-"w": 553
-},
-{
-"a": "habitus",
-"autor": "Nalagtus",
-"beschr": "Hepatica on display at plant exchange in Botanical garden Berlin in Spring 2016. Prices in Euro",
-"f": "leberbluemchen-2.webp",
-"h": 560,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Hepatica_SHINKU_nur_schauen_nicht_anfassen.jpg",
-"titel": "File:Hepatica SHINKU nur schauen nicht anfassen.jpg",
-"w": 880
-},
-{
-"a": "bluete",
 "autor": "En-cas-de-soleil",
 "beschr": "Anemone hepatica in a clearing in Tofta, Gotland, Sweden.",
 "f": "leberbluemchen-3.webp",
@@ -6388,6 +5452,18 @@
 "loewenzahn": [
 {
 "a": "haupt",
+"autor": "George Chernilevsky",
+"beschr": "Common Dandelion (Taraxacum officinale). Wild field in Vinnytsia rajon, Ukraine.",
+"f": "loewenzahn-3.webp",
+"h": 484,
+"lizenz": "CC BY-SA 4.0",
+"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
+"quelle": "https://commons.wikimedia.org/wiki/File:Common_dandelion_2021_G2.jpg",
+"titel": "File:Common dandelion 2021 G2.jpg",
+"w": 880
+},
+{
+"a": "haupt",
 "autor": "Dominicus Johannes Bergsma",
 "beschr": "Flowery grassland in Beekdal Linde. Location, nature Beekdal Linde Bekhofplas in the Netherlands.",
 "f": "loewenzahn-1.webp",
@@ -6408,18 +5484,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Bloemrijk_grasland_in_Beekdal_Linde._Locatie,_natuurterrein_Beekdal_Linde_Bekhofplas_04.jpg",
 "titel": "File:Bloemrijk grasland in Beekdal Linde. Locatie, natuurterrein Beekdal Linde Bekhofplas 04.jpg",
-"w": 880
-},
-{
-"a": "bluete",
-"autor": "George Chernilevsky",
-"beschr": "Common Dandelion (Taraxacum officinale). Wild field in Vinnytsia rajon, Ukraine.",
-"f": "loewenzahn-3.webp",
-"h": 484,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Common_dandelion_2021_G2.jpg",
-"titel": "File:Common dandelion 2021 G2.jpg",
 "w": 880
 },
 {
@@ -6483,18 +5547,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Gyromitra_caroliniana_44297.jpg",
 "titel": "File:Gyromitra caroliniana 44297.jpg",
 "w": 679
-},
-{
-"a": "unterseite",
-"autor": "This image was created by user Ron Pastorino (Ronpast) at Mushroom Observer , a source for mycological images. You can c",
-"beschr": "For more information about this, see the observation page at Mushroom Observer.",
-"f": "lorchel-3.webp",
-"h": 660,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:2011-04-26_Gyromitra_esculenta_Spores_66581.jpg",
-"titel": "File:2011-04-26 Gyromitra esculenta Spores 66581.jpg",
-"w": 880
 },
 {
 "a": "weitere",
@@ -6609,18 +5661,6 @@
 "w": 880
 },
 {
-"a": "bluete",
-"autor": "Stefan.lefnaer",
-"beschr": "Blütenstand Taxonym: Pulmonaria officinalis ss Fischer et al. EfÖLS 2008 ISBN 978-3-85474-187-9 Fundort: Stocketwald südöstlich von Ladendorf, Bezirk Mistelbach, Niederösterreich - ca. 250 m ü. A. Standort: trocken-warme",
-"f": "lungenkraut-3.webp",
-"h": 554,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Pulmonaria_officinalis_(s._str.)_sl6.jpg",
-"titel": "File:Pulmonaria officinalis (s. str.) sl6.jpg",
-"w": 880
-},
-{
 "a": "blatt",
 "autor": "Pattedyr",
 "beschr": "lungwort, common lungwort",
@@ -6683,18 +5723,6 @@
 "w": 659
 },
 {
-"a": "bluete",
-"autor": "Flocci Nivis",
-"beschr": "Ein Echtes Mädesüß ( Filipendula ulmaria ) in der Saaraue Güdingen. Im Hintergrund sieht man die Saar, welche Licht reflektiert, welches man als Bokeh sieht auf dem Bild.",
-"f": "maedesuess-3.webp",
-"h": 589,
-"lizenz": "CC BY 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:20200701_Filipendula_ulmaria.jpg",
-"titel": "File:20200701 Filipendula ulmaria.jpg",
-"w": 880
-},
-{
 "a": "blatt",
 "autor": "FreddyKrueger 19:17, 11. Mai 2008 (CEST)",
 "beschr": "Mädesüß",
@@ -6707,7 +5735,7 @@
 "w": 880
 },
 {
-"a": "frucht",
+"a": "blatt",
 "autor": "Pegeka",
 "beschr": "Spiralig zusammenstehende Nüsschen des Echten Mädesüß mit Käfer",
 "f": "maedesuess-5.webp",
@@ -6716,18 +5744,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:N%C3%BCsschen_.jpg",
 "titel": "File:Nüsschen .jpg",
-"w": 880
-},
-{
-"a": "habitus",
-"autor": "Strobilomyces",
-"beschr": "Meadowsweet ( Filipendula ulmaria ) in a meadow near Baiersbronn in the Black Forest.",
-"f": "maedesuess-6.webp",
-"h": 587,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Filipendula_ulmaria_Baiersbronn_20090811_2169.JPG",
-"titel": "File:Filipendula ulmaria Baiersbronn 20090811 2169.JPG",
 "w": 880
 }
 ],
@@ -6808,30 +5824,6 @@
 "maigloeckchen": [
 {
 "a": "haupt",
-"autor": "W.carter",
-"beschr": "Beech ( Fagus sylvatica ), ostrich ferns ( Matteuccia struthiopteris ), lily of the valley ( Convallaria majalis ) and wood horsetail ( Equisetum sylvaticum ) in Gullmarsskogen nature reserve, Lysekil Municipality, Swede",
-"f": "maigloeckchen-1.webp",
-"h": 587,
-"lizenz": "CC0",
-"lizenzurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-"quelle": "https://commons.wikimedia.org/wiki/File:Beech,_ferns_and_lily_of_the_valley_in_Gullmarsskogen_1.jpg",
-"titel": "File:Beech, ferns and lily of the valley in Gullmarsskogen 1.jpg",
-"w": 880
-},
-{
-"a": "habitus",
-"autor": "Atamari",
-"beschr": "Parkanlage Vorwerk, Wuppertal",
-"f": "maigloeckchen-2.webp",
-"h": 588,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Wuppertal_Parkanlage_Vorwerk_2018_159.jpg",
-"titel": "File:Wuppertal Parkanlage Vorwerk 2018 159.jpg",
-"w": 880
-},
-{
-"a": "bluete",
 "autor": "Ivar Leidus",
 "beschr": "Maiglöckchen",
 "f": "maigloeckchen-3.webp",
@@ -6865,18 +5857,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Maigl.JPG",
 "titel": "File:Maigl.JPG",
 "w": 660
-},
-{
-"a": "weitere",
-"autor": "Oberrheinischer Meister",
-"beschr": "",
-"f": "maigloeckchen-6.webp",
-"h": 677,
-"lizenz": "Public domain",
-"lizenzurl": "",
-"quelle": "https://commons.wikimedia.org/wiki/File:Upper_Rhenish_Master_-_The_little_Garden_of_Paradise_-_Google_Art_Project.jpg",
-"titel": "File:Upper Rhenish Master - The little Garden of Paradise - Google Art Project.jpg",
-"w": 880
 }
 ],
 "malve": [
@@ -6893,18 +5873,6 @@
 "w": 660
 },
 {
-"a": "habitus",
-"autor": "Frank Vincentz",
-"beschr": "Mühlenweg in Barßel",
-"f": "malve-2.webp",
-"h": 587,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Bar%C3%9Fel_-_M%C3%BChlenweg_03_ies.jpg",
-"titel": "File:Barßel - Mühlenweg 03 ies.jpg",
-"w": 880
-},
-{
 "a": "bluete",
 "autor": "Andreas Eichler",
 "beschr": "Wilde Malve - Malva sylvestris. Aufgenommen am See in Pfingstberg, Mannheim-Rheinau, Baden-Württemberg, Deutschland.",
@@ -6917,7 +5885,7 @@
 "w": 880
 },
 {
-"a": "blatt",
+"a": "bluete",
 "autor": "Belladonna2 at de.wikipedia",
 "beschr": "Rüsselkäfer Malvapion malvae an der Basis der Staubblattsäule von Malva sylvestris",
 "f": "malve-4.webp",
@@ -6938,18 +5906,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Malva_sylvestris_seeds.jpg",
 "titel": "File:Malva sylvestris seeds.jpg",
-"w": 880
-},
-{
-"a": "weitere",
-"autor": "Notafly2",
-"beschr": "Flora. Parco Caffarella, Rome, Italy July. Malva sylvestris",
-"f": "malve-6.webp",
-"h": 660,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:FloraRome_(3).JPG",
-"titel": "File:FloraRome (3).JPG",
 "w": 880
 }
 ],
@@ -7029,7 +5985,7 @@
 "w": 660
 },
 {
-"a": "habitus",
+"a": "frucht",
 "autor": "Julie Anne Workman",
 "beschr": "Berries and leaves of the tree Sorbus aria . Photographed in Vivary Park, Taunton, Somerset, UK.",
 "f": "mehlbeere-2.webp",
@@ -7038,18 +5994,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Sorbus_aria-3420.jpg",
 "titel": "File:Sorbus aria-3420.jpg",
-"w": 880
-},
-{
-"a": "frucht",
-"autor": "Steffen Hammel",
-"beschr": "Echte Mehlbeere (Sorbus aria s. str.) mit Früchten in der Herbrechtinger Heide(Schwäbische Alb, Baden-Württemberg), 10. September 2014",
-"f": "mehlbeere-3.webp",
-"h": 660,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Echte_Mehlbeere_(Sorbus_aria_s._str.)_mit_Fr%C3%BCchten_in_der_Herbrechtinger_Heide(Schw%C3%A4bische_Alb,_Baden-W%C3%BCrttemberg),_10._September_2014.jpg",
-"titel": "File:Echte Mehlbeere (Sorbus aria s. str.) mit Früchten in der Herbrechtinger Heide(Schwäbische Alb, Baden-Württemberg), 10. September 2014.jpg",
 "w": 880
 },
 {
@@ -7103,18 +6047,6 @@
 "w": 880
 },
 {
-"a": "unterseite",
-"autor": "Yercaud-elango",
-"beschr": "Morchellaceae-Common morel,sponge morel;Yellow sponge with large pits and ridges raised on a stem.",
-"f": "morchel-3.webp",
-"h": 660,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Morchella_esculenta-1-bsi-yercaud-salem-India.jpg",
-"titel": "File:Morchella esculenta-1-bsi-yercaud-salem-India.jpg",
-"w": 880
-},
-{
 "a": "weitere",
 "autor": "Achim Lammerts (Syntaxys)",
 "beschr": "Eine Speisemorchel (Morchella esculenta) inmitten von Bärlauch, aufgenommen im Auwald des FFH-Gebiets „Hördter Rheinaue“ bei Kuhardt in der Südpfalz; Durchmesser ca. 4-5 cm, Höhe ca. 8 cm. Dieses Bild zeigt das Schutzgeb",
@@ -7153,18 +6085,6 @@
 "w": 880
 },
 {
-"a": "habitus",
-"autor": "M ralser",
-"beschr": "The phylogenetic tree was derived from multiple whole-genome alignments of protein-coding and noncoding sequences from available rodent genomes (about 94 Mbp alignment per species) [ 1 ]",
-"f": "murmeltier-2.webp",
-"h": 639,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Phylogenetic_Tree_of_Rodentia.jpg",
-"titel": "File:Phylogenetic Tree of Rodentia.jpg",
-"w": 644
-},
-{
 "a": "zeichen",
 "autor": "Böhringer Friedrich",
 "beschr": "Das Alpenmurmeltier (Marmota marmota) ist ein vor allem in den Alpen verbreitetes Nagetier. Es ist nach dem Biber und dem Stachelschwein das drittgrößte in Europa vorkommende Nagetier. Jungtiere des Alpenmurmeltieres err",
@@ -7186,18 +6106,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Marmottes_DSCF5000.jpg",
 "titel": "File:Marmottes DSCF5000.jpg",
-"w": 880
-},
-{
-"a": "weitere",
-"autor": "H. Zell",
-"beschr": "Marmota marmota , Sciuridae, Alpenmurmeltier; Ausgelassenes Murmeltierfett; Nationalparkzentrum, Zernez, Schweiz.",
-"f": "murmeltier-5.webp",
-"h": 660,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Marmota_marmota_02_.jpg",
-"titel": "File:Marmota marmota 02 .jpg",
 "w": 880
 }
 ],
@@ -7289,7 +6197,7 @@
 "w": 739
 },
 {
-"a": "habitus",
+"a": "jung",
 "autor": "Victor M. Vicente Selvas",
 "beschr": "Amanita pantherina, an old specimen near Quercus ilex tree, Castelltallat, Catalonia",
 "f": "pantherpilz-2.webp",
@@ -7363,30 +6271,6 @@
 "w": 880
 },
 {
-"a": "unterseite",
-"autor": "Matej Frančeškin",
-"beschr": "Macrolepiota spores",
-"f": "parasol-3.webp",
-"h": 675,
-"lizenz": "CC BY 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Macrolepiota_439035721.jpg",
-"titel": "File:Macrolepiota 439035721.jpg",
-"w": 880
-},
-{
-"a": "schnitt",
-"autor": "Molgreen",
-"beschr": "Ausschnitt: Hexenring, Feenringe, Gewöhnlicher Riesenschirmling, Macrolepiota procera",
-"f": "parasol-4.webp",
-"h": 223,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:20240928_xl_1055-Hexenring,_Feenringe,_Riesenschirmling,_Macrolepiota_procera_2.jpg",
-"titel": "File:20240928 xl 1055-Hexenring, Feenringe, Riesenschirmling, Macrolepiota procera 2.jpg",
-"w": 880
-},
-{
 "a": "jung",
 "autor": "George Chernilevsky",
 "beschr": "A young Parasol mushroom. Ukraine.",
@@ -7423,18 +6307,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Amanita_rubescens_-_Den_Treek,_Utrecht,_NL_2021_(7).jpg",
 "titel": "File:Amanita rubescens - Den Treek, Utrecht, NL 2021 (7).jpg",
 "w": 660
-},
-{
-"a": "unterseite",
-"autor": "Matej Frančeškin",
-"beschr": "Blusher ( Amanita rubescens ) spores",
-"f": "perlpilz-3.webp",
-"h": 675,
-"lizenz": "CC BY 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Amanita_rubescens_547402670.jpg",
-"titel": "File:Amanita rubescens 547402670.jpg",
-"w": 880
 },
 {
 "a": "jung",
@@ -7475,18 +6347,6 @@
 "w": 880
 },
 {
-"a": "habitus",
-"autor": "Johann Jaritz",
-"beschr": "Euonymus europaeus in der 10.-Oktober-Straße 69, Gemeinde Pörtschach am Wörther See , Bezirk Klagenfurt Land, Kärnten , Österreich , EU",
-"f": "pfaffenhuetchen-2.webp",
-"h": 586,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:P%C3%B6rtschach_Winklern_10.-Oktober-Stra%C3%9Fe_67_Gew%C3%B6hnlicher_Spindelstrauch_25062024_1169.jpg",
-"titel": "File:Pörtschach Winklern 10.-Oktober-Straße 67 Gewöhnlicher Spindelstrauch 25062024 1169.jpg",
-"w": 880
-},
-{
 "a": "blatt",
 "autor": "R. A. Nonenmacher",
 "beschr": "Euonymus europaeus - Town of Skaneateles, Onondaga County, New York",
@@ -7496,18 +6356,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Euonymus_europaeus_leaf_above_0013.jpg",
 "titel": "File:Euonymus europaeus leaf above 0013.jpg",
-"w": 880
-},
-{
-"a": "bluete",
-"autor": "Me",
-"beschr": "This photo shows the flowers of Euonymus europaeus",
-"f": "pfaffenhuetchen-4.webp",
-"h": 660,
-"lizenz": "Public domain",
-"lizenzurl": "",
-"quelle": "https://commons.wikimedia.org/wiki/File:Euonymus_europaeus_23-05-2006_19.07.22.JPG",
-"titel": "File:Euonymus europaeus 23-05-2006 19.07.22.JPG",
 "w": 880
 },
 {
@@ -7536,6 +6384,18 @@
 }
 ],
 "pfifferling": [
+{
+"a": "haupt",
+"autor": "Thomas Pruß",
+"beschr": "Die Herstellung, Bearbeitung oder Freigabe dieser Datei wurde durch das Community-Budget von Wikimedia Deutschland unterstützt. Weitere Dateien, die mit Unterstützung von Wikimedia Deutschland hier veröffentlicht wurden,",
+"f": "pfifferling-4.webp",
+"h": 703,
+"lizenz": "CC BY-SA 3.0",
+"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
+"quelle": "https://commons.wikimedia.org/wiki/File:Pfifferlingjung02.JPG",
+"titel": "File:Pfifferlingjung02.JPG",
+"w": 880
+},
 {
 "a": "haupt",
 "autor": "Сарапулов",
@@ -7573,18 +6433,6 @@
 "w": 880
 },
 {
-"a": "jung",
-"autor": "Thomas Pruß",
-"beschr": "Die Herstellung, Bearbeitung oder Freigabe dieser Datei wurde durch das Community-Budget von Wikimedia Deutschland unterstützt. Weitere Dateien, die mit Unterstützung von Wikimedia Deutschland hier veröffentlicht wurden,",
-"f": "pfifferling-4.webp",
-"h": 703,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Pfifferlingjung02.JPG",
-"titel": "File:Pfifferlingjung02.JPG",
-"w": 880
-},
-{
 "a": "weitere",
 "autor": "Sapin88",
 "beschr": "Épicéas en rangs serrés, Le Tholy, Vosges",
@@ -7600,27 +6448,15 @@
 "preiselbeere": [
 {
 "a": "haupt",
-"autor": "Motohiro Sunouchi",
-"beschr": "Plant derived from Mt. Nishibetsu, Hokkaido, Japan Taxonomy Family: ツツジ科 Ericaceae Subfamily: スノキ亜科 Vaccinoideae Genus: スノキ属 Vaccinium Distribution: Subarctic & Temp. Northern Hemisphere. Synonyms: Myrtillus exigua Buban",
-"f": "preiselbeere-1.webp",
-"h": 587,
-"lizenz": "CC BY 2.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/2.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Vaccinium_vitis-idaea_%27Nishibetsu%27_L.,_Sp._Pl._1-_351_(1753)._-_52159760580.jpg",
-"titel": "File:Vaccinium vitis-idaea 'Nishibetsu' L., Sp. Pl. 1- 351 (1753). - 52159760580.jpg",
-"w": 880
-},
-{
-"a": "habitus",
-"autor": "Motohiro Sunouchi",
-"beschr": "Plant derived from Mt. Nishibetsu, Hokkaido, Japan Taxonomy Family ツツジ科 Ericaceae Subfamily スノキ亜科 Vaccinoideae Genus スノキ属 Vaccinium Distribution Subarctic & Temp. Northern Hemisphere. Synonyme Myrtillus exigua .mw-parser",
-"f": "preiselbeere-2.webp",
-"h": 587,
+"autor": "Robert Flogaus-Faust",
+"beschr": "Preiselbeere ( Vaccinium vitis-idaea ) zwischen Riedji und Gspon , Schweiz",
+"f": "preiselbeere-6.webp",
+"h": 880,
 "lizenz": "CC BY 4.0",
 "lizenzurl": "https://creativecommons.org/licenses/by/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Vaccinium_vitis-idaea_%27Nishibetsu%27_L.-_Sp._Pl._1-_351_(1753)._20220619_214715.jpg",
-"titel": "File:Vaccinium vitis-idaea 'Nishibetsu' L.- Sp. Pl. 1- 351 (1753). 20220619 214715.jpg",
-"w": 880
+"quelle": "https://commons.wikimedia.org/wiki/File:Vaccinium_vitis-idaea_2_RF.jpg",
+"titel": "File:Vaccinium vitis-idaea 2 RF.jpg",
+"w": 749
 },
 {
 "a": "frucht",
@@ -7657,18 +6493,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Icy_LingonBerry.jpg",
 "titel": "File:Icy LingonBerry.jpg",
 "w": 880
-},
-{
-"a": "frucht",
-"autor": "Robert Flogaus-Faust",
-"beschr": "Preiselbeere ( Vaccinium vitis-idaea ) zwischen Riedji und Gspon , Schweiz",
-"f": "preiselbeere-6.webp",
-"h": 880,
-"lizenz": "CC BY 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Vaccinium_vitis-idaea_2_RF.jpg",
-"titel": "File:Vaccinium vitis-idaea 2 RF.jpg",
-"w": 749
 }
 ],
 "reh": [
@@ -7697,19 +6521,7 @@
 "w": 880
 },
 {
-"a": "spur",
-"autor": "DidierFy",
-"beschr": "Couchette de Chevreuil européen. Près de Namur, Belgique.",
-"f": "reh-3.webp",
-"h": 660,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Capreolus_capreolus_03.2025_(2).jpg",
-"titel": "File:Capreolus capreolus 03.2025 (2).jpg",
-"w": 880
-},
-{
-"a": "zeichen",
+"a": "weitere",
 "autor": "Frank Liebig",
 "beschr": "Reh in Mecklenburg",
 "f": "reh-4.webp",
@@ -7781,30 +6593,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Braund%C3%BCnenlandschaft_auf_Spiekeroog_02.jpg",
 "titel": "File:Braundünenlandschaft auf Spiekeroog 02.jpg",
 "w": 880
-},
-{
-"a": "frucht",
-"autor": "Stephan Sprinz",
-"beschr": "Braundünenlandschaft von Spiekeroog Die Nordseite der Braundünen sind oft mit der kälteliebenden schwarzen Krähenbeere ( Empetrum nigrum ) bewachsen, auf der Südseite findet man oft Rentierflechte ( Cladonia rangiferina ",
-"f": "rentierflechte-5.webp",
-"h": 587,
-"lizenz": "CC BY 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Braund%C3%BCnenlandschaft_auf_Spiekeroog_04.jpg",
-"titel": "File:Braundünenlandschaft auf Spiekeroog 04.jpg",
-"w": 880
-},
-{
-"a": "frucht",
-"autor": "Stephan Sprinz",
-"beschr": "Braundünenlandschaft von Spiekeroog Die Nordseite der Braundünen sind oft mit der kälteliebenden schwarzen Krähenbeere ( Empetrum nigrum ) bewachsen, auf der Südseite findet man oft Rentierflechte ( Cladonia rangiferina ",
-"f": "rentierflechte-6.webp",
-"h": 587,
-"lizenz": "CC BY 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Braund%C3%BCnenlandschaft_auf_Spiekeroog_05.jpg",
-"titel": "File:Braundünenlandschaft auf Spiekeroog 05.jpg",
-"w": 880
 }
 ],
 "riesenbaerenklau": [
@@ -7833,7 +6621,7 @@
 "w": 544
 },
 {
-"a": "bluete",
+"a": "jung",
 "autor": "Katrin Schneider / korina.info",
 "beschr": "Riesen-Bärenklau ( Heracleum mantegazzianum ), blühend",
 "f": "riesenbaerenklau-3.webp",
@@ -7842,18 +6630,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Korina_2013-07-01_Heracleum_mantegazzianum_22.jpg",
 "titel": "File:Korina 2013-07-01 Heracleum mantegazzianum 22.jpg",
-"w": 880
-},
-{
-"a": "blatt",
-"autor": "Katrin Schneider / korina.info",
-"beschr": "Riesen-Bärenklau ( Heracleum mantegazzianum ), Blätter",
-"f": "riesenbaerenklau-4.webp",
-"h": 587,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Korina_2015-06-08_Heracleum_mantegazzianum.jpg",
-"titel": "File:Korina 2015-06-08 Heracleum mantegazzianum.jpg",
 "w": 880
 },
 {
@@ -7885,18 +6661,6 @@
 {
 "a": "haupt",
 "autor": "Henk Monster",
-"beschr": "Langermanninia gigantea (Reuzenbovist) in a horsemeadow near Werkhoven",
-"f": "riesenbovist-1.webp",
-"h": 586,
-"lizenz": "CC BY 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Langermanninia_gigantea_(Reuzenbovist)_in_a_horsemeadow_near_Werkhoven_-_panoramio.jpg",
-"titel": "File:Langermanninia gigantea (Reuzenbovist) in a horsemeadow near Werkhoven - panoramio.jpg",
-"w": 880
-},
-{
-"a": "habitus",
-"autor": "Henk Monster",
 "beschr": "A giant Langermannia gigantea (or Calvatia gigantea) in this mountain meadow (GB= Giant puffball, D= Riesenbovist, NL= Reuzenbovist) mushroom (some 300 mm) near Les Chapelles in the Isere Valley",
 "f": "riesenbovist-2.webp",
 "h": 583,
@@ -7907,7 +6671,7 @@
 "w": 880
 },
 {
-"a": "unterseite",
+"a": "weitere",
 "autor": "Rosser1954",
 "beschr": "Mature Giant Puffball (Calvatia gigantea), Auchincruive, Ayrshire - spore body",
 "f": "riesenbovist-3.webp",
@@ -7929,18 +6693,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:2026-09-07_12_20_00_Giant_puffball_within_Ann_M._Banchoff_Park_in_the_Mountainview_section_of_Ewing_Township,_Mercer_County,_New_Jersey.jpg",
 "titel": "File:2026-09-07 12 20 00 Giant puffball within Ann M. Banchoff Park in the Mountainview section of Ewing Township, Mercer County, New Jersey.jpg",
 "w": 880
-},
-{
-"a": "jung",
-"autor": "unbekannt",
-"beschr": "Young, kneeling behind a 25 pound 11 ounce giant puffball mushroom found by his father, H. W. Young, near the Mississippi river in northeast Minneapolis.",
-"f": "riesenbovist-5.webp",
-"h": 880,
-"lizenz": "Public domain",
-"lizenzurl": "",
-"quelle": "https://commons.wikimedia.org/wiki/File:DeWayne_Young_with_Mushroom_-_DPLA_-_48ec7092cbeceb4491cc6c122e27529d.jpg",
-"titel": "File:DeWayne Young with Mushroom - DPLA - 48ec7092cbeceb4491cc6c122e27529d.jpg",
-"w": 669
 }
 ],
 "robinie": [
@@ -7993,18 +6745,6 @@
 "w": 880
 },
 {
-"a": "frucht",
-"autor": "Bff",
-"beschr": "Robinia pseudoacacia L. Young seedlings of False acacia . The age of the plants is 3 months.",
-"f": "robinie-5.webp",
-"h": 660,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Robinia_pseudoacacia20170523_7772.jpg",
-"titel": "File:Robinia pseudoacacia20170523 7772.jpg",
-"w": 880
-},
-{
 "a": "bluete",
 "autor": "Daniela Kloth",
 "beschr": "blühende Robinie, Havelland",
@@ -8052,18 +6792,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Lepista_nuda_2022_G1.jpg",
 "titel": "File:Lepista nuda 2022 G1.jpg",
-"w": 880
-},
-{
-"a": "weitere",
-"autor": "George Chernilevsky",
-"beschr": "Essbarer Violetter Rötelritterling ( Collybia nuda , Lepista nuda , Clitocybe nuda ) gepflückt im Korb. Ausbeute einer Pilzsuche im Rajon Winnyzja, Ukraine",
-"f": "roetelritterling-4.webp",
-"h": 800,
-"lizenz": "CC BY 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Edible_fungi_in_basket_2022_G5.jpg",
-"titel": "File:Edible fungi in basket 2022 G5.jpg",
 "w": 880
 },
 {
@@ -8191,18 +6919,6 @@
 "w": 880
 },
 {
-"a": "rinde",
-"autor": "Crusier",
-"beschr": "Fagus sylvatica trunks cross section, Beskid Śląski, Polska",
-"f": "rotbuche-4.webp",
-"h": 707,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Fagus_sylvatica_cross_section_Silesian_Beskids.jpg",
-"titel": "File:Fagus sylvatica cross section Silesian Beskids.jpg",
-"w": 880
-},
-{
 "a": "frucht",
 "autor": "Roger Culos",
 "beschr": "Rotbuche , früchte und samen",
@@ -8241,7 +6957,7 @@
 "w": 660
 },
 {
-"a": "habitus",
+"a": "frucht",
 "autor": "Stefan.lefnaer",
 "beschr": "Habitus Taxonym: Sambucus racemosa ss Fischer et al. EfÖLS 2008 ISBN 978-3-85474-187-9 Fundort: Schwarzwald nächst dem Kaisertisch, Bezirk Hollabrunn, Niederösterreich - ca. 290 m ü. A. Standort: Schlagfläche",
 "f": "roterholunder-2.webp",
@@ -8253,7 +6969,7 @@
 "w": 880
 },
 {
-"a": "blatt",
+"a": "knospe",
 "autor": "Jean-Pol GRANDMONT",
 "beschr": "Roter Holunder",
 "f": "roterholunder-3.webp",
@@ -8315,18 +7031,6 @@
 "w": 880
 },
 {
-"a": "habitus",
-"autor": "FieldsportsChannel.tv",
-"beschr": "Niall Rowantree, professional stalker and gamekeeper of West Highland Hunting, standing next to a filthy red deer stag shot by a guest hunter on Ardnamurchan Estate in Scotland during the rut, 2017-09-15",
-"f": "rothirsch-2.webp",
-"h": 517,
-"lizenz": "CC BY 2.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/2.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Professional_stalker_standing_next_to_red_deer_stag_Ardnamurchan_Estate_Scotland_darker_01.png",
-"titel": "File:Professional stalker standing next to red deer stag Ardnamurchan Estate Scotland darker 01.png",
-"w": 880
-},
-{
 "a": "spur",
 "autor": "Emőke Dénes",
 "beschr": "The hoofprint of a Western European Red Deer (Cervus elaphus elaphus) in Richmond Park, London, England.",
@@ -8339,7 +7043,7 @@
 "w": 880
 },
 {
-"a": "zeichen",
+"a": "weitere",
 "autor": "Pjt56 --- If you use the picture outside Wikipedia I would appreciate a short e-mail to pjt56@gmx.net or a message on my",
 "beschr": "Sardischer Hirsch ( Cervus elaphus corsicanus ), Parco regionale dei Sette fratelli, Sardinien.",
 "f": "rothirsch-4.webp",
@@ -8374,30 +7078,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
 "quelle": "https://commons.wikimedia.org/wiki/File:Leccinum_versipelle_LC0366.jpg",
 "titel": "File:Leccinum versipelle LC0366.jpg",
-"w": 880
-},
-{
-"a": "schnitt",
-"autor": "Albin Schmalfuß",
-"beschr": "Im Text beschreibt Michael (1898) den Anschnitt violett, die Stielschuppen schwärzlich, Standort bei Birken. Es dürfte sich also um die Birken-Rotkappe Leccinum versipelle handeln.",
-"f": "rotkappe-2.webp",
-"h": 872,
-"lizenz": "Public domain",
-"lizenzurl": "",
-"quelle": "https://commons.wikimedia.org/wiki/File:Espenrotkappe-1.jpg",
-"titel": "File:Espenrotkappe-1.jpg",
-"w": 600
-},
-{
-"a": "weitere",
-"autor": "George Chernilevsky",
-"beschr": "Picked edible fungi ( Leccinum versipelle ) in basket. Trophies of a mushroom hunt. Ukraine, Ivano-Frankivsk oblast, Yaremche.",
-"f": "rotkappe-3.webp",
-"h": 690,
-"lizenz": "Public domain",
-"lizenzurl": "",
-"quelle": "https://commons.wikimedia.org/wiki/File:Edible_fungi_in_basket_2016_G1.jpg",
-"titel": "File:Edible fungi in basket 2016 G1.jpg",
 "w": 880
 },
 {
@@ -8525,18 +7205,6 @@
 "w": 880
 },
 {
-"a": "blatt",
-"autor": "Rolf Süssbrich",
-"beschr": "Samen der Sal-Weide in Nahaufnahme. Oben links: Anhaftende Flugsamen an Blatt",
-"f": "salweide-3.webp",
-"h": 399,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:SalWeideSeedsCloseUp-jpg.jpg",
-"titel": "File:SalWeideSeedsCloseUp-jpg.jpg",
-"w": 880
-},
-{
 "a": "rinde",
 "autor": "Christian Ferrer",
 "beschr": "Tree trunk on the shore of the Vézoles Lake. Fraisse-sur-Agout - Hérault - France",
@@ -8596,18 +7264,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Flammulina_velutipes_on_a_tree.jpg",
 "titel": "File:Flammulina velutipes on a tree.jpg",
-"w": 880
-},
-{
-"a": "unterseite",
-"autor": "Myzemil",
-"beschr": "Gemeiner Samtfußrübling Flammulina velutipes Sporen in Wasser",
-"f": "samtfussruebling-3.webp",
-"h": 659,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Flammulina_velutipes_Spores.jpg",
-"titel": "File:Flammulina velutipes Spores.jpg",
 "w": 880
 },
 {
@@ -8747,7 +7403,7 @@
 "w": 880
 },
 {
-"a": "jung",
+"a": "weitere",
 "autor": "ionafraser",
 "beschr": "Rubroboletus satanas",
 "f": "satanspilz-4.webp",
@@ -8830,18 +7486,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Rumex_acetosa_(subsp._acetosa)_sl40.jpg",
 "titel": "File:Rumex acetosa (subsp. acetosa) sl40.jpg",
-"w": 880
-},
-{
-"a": "habitus",
-"autor": "own work",
-"beschr": "Mit de:Wiesen-Sauerampfe überwachsene Wiese",
-"f": "sauerampfer-6.webp",
-"h": 660,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Wiese_Sauerampfer.jpg",
-"titel": "File:Wiese Sauerampfer.jpg",
 "w": 880
 }
 ],
@@ -8970,18 +7614,6 @@
 },
 {
 "a": "weitere",
-"autor": "Kenraiz",
-"beschr": "Equisetum arvense as weed in sugar beet field",
-"f": "schachtelhalm-5.webp",
-"h": 587,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Equisetum_arvense_weed_kz1.JPG",
-"titel": "File:Equisetum arvense weed kz1.JPG",
-"w": 880
-},
-{
-"a": "weitere",
 "autor": "Walter Siegmund (talk)",
 "beschr": "Field Horsetail, Common Horsetail",
 "f": "schachtelhalm-6.webp",
@@ -9029,42 +7661,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Achillea_millefolium_-_roosa_harilik_raudrohi_Valingu.jpg",
 "titel": "File:Achillea millefolium - roosa harilik raudrohi Valingu.jpg",
 "w": 587
-},
-{
-"a": "blatt",
-"autor": "Luis Miguel Bugallo Sánchez",
-"beschr": "Hyacinthoides spec. , Trachycarpus fortunei, Hedera helix, Cenchrus purpurascens. Achillea millefolium, Aesculus hippocastanum. Alameda Park of Santiago de Compostela, Galicia (Spain).",
-"f": "schafgarbe-4.webp",
-"h": 587,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:2026_Xard%C3%ADn_no_Parque_da_Alameda._Santiago_de_Compostela._Galiza.jpg",
-"titel": "File:2026 Xardín no Parque da Alameda. Santiago de Compostela. Galiza.jpg",
-"w": 880
-},
-{
-"a": "frucht",
-"autor": "Steve Hurst @ USDA-NRCS PLANTS Database",
-"beschr": "Western Yarrow. Seeds. From Nevada, USA.",
-"f": "schafgarbe-5.webp",
-"h": 585,
-"lizenz": "Public domain",
-"lizenzurl": "",
-"quelle": "https://commons.wikimedia.org/wiki/File:Achillea_millefolium_occidentalis_seeds.jpg",
-"titel": "File:Achillea millefolium occidentalis seeds.jpg",
-"w": 880
-},
-{
-"a": "blatt",
-"autor": "Luis Miguel Bugallo Sánchez (Lmbuga)",
-"beschr": "Achillea millefolium in Valverde, Vilarromarís, Oroso, Galicia, Spain",
-"f": "schafgarbe-6.webp",
-"h": 880,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Natureza._Valverde._Vilarromar%C3%ADs._Oroso._Galiza-7.jpg",
-"titel": "File:Natureza. Valverde. Vilarromarís. Oroso. Galiza-7.jpg",
-"w": 880
 }
 ],
 "scharbockskraut": [
@@ -9105,30 +7701,6 @@
 "w": 880
 },
 {
-"a": "blatt",
-"autor": "Stefan.lefnaer",
-"beschr": "Laubblatt, die Hydathode (heller Punkt in der Mitte) befindet sich an der Spitze eines undeutlichen Blattrandkerbzahns, die Kerben zwischen den Kerbzähnen sind sehr eng Taxon: Knöllchen-Scharbockskraut, Ficaria verna sub",
-"f": "scharbockskraut-4.webp",
-"h": 819,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Ficaria_verna_sl2.jpg",
-"titel": "File:Ficaria verna sl2.jpg",
-"w": 880
-},
-{
-"a": "frucht",
-"autor": "Stefan.lefnaer",
-"beschr": "Verkümmerte Früchte Taxonym: Ficaria verna ss Fischer et al. EfÖLS 2008 ISBN 978-3-85474-187-9 Fundort: bei Niederhollabrunn, Bezirk Korneuburg, Niederösterreich - ca. 350 m ü. A. Standort: Gebüsch",
-"f": "scharbockskraut-5.webp",
-"h": 880,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Ficaria_verna_sl9.jpg",
-"titel": "File:Ficaria verna sl9.jpg",
-"w": 637
-},
-{
 "a": "weitere",
 "autor": "Andreas Eichler",
 "beschr": "Frühlings-Scharbockskraut ( Ficaria verna ). Aufgenommen in Mannheim im Käfertaler Wald, Baden-Württemberg, Deutschland.",
@@ -9144,30 +7716,6 @@
 "schierling": [
 {
 "a": "haupt",
-"autor": "Stefan.lefnaer",
-"beschr": "Fruchtstand Taxonym: Conium maculatum ss Fischer et al. EfÖLS 2008 ISBN 978-3-85474-187-9 (det. W. Adler 2015-09-05) Fundort: Erlwiesen Bernhardsthal, Bezirk Mistelbach, Niederösterreich - ca. 160 m ü. A. Standort: Feuch",
-"f": "schierling-1.webp",
-"h": 880,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Conium_maculatum_sl2.jpg",
-"titel": "File:Conium maculatum sl2.jpg",
-"w": 800
-},
-{
-"a": "habitus",
-"autor": "José Luis Romero Rego",
-"beschr": "Conium maculatum",
-"f": "schierling-2.webp",
-"h": 587,
-"lizenz": "CC BY-SA 2.0 fr",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/2.0/fr/deed.en",
-"quelle": "https://commons.wikimedia.org/wiki/File:Conium_maculatum_plant_(07).jpg",
-"titel": "File:Conium maculatum plant (07).jpg",
-"w": 880
-},
-{
-"a": "bluete",
 "autor": "Famartin",
 "beschr": "Poison Hemlock flowers on the banks of the Delaware and Raritan Feeder Canal in the Mountainview section of Ewing Township, Mercer County, New Jersey",
 "f": "schierling-3.webp",
@@ -9177,6 +7725,18 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:2023-05-31_18_54_51_Poison_Hemlock_flowers_on_the_banks_of_the_Delaware_and_Raritan_Feeder_Canal_in_the_Mountainview_section_of_Ewing_Township,_Mercer_County,_New_Jersey.jpg",
 "titel": "File:2023-05-31 18 54 51 Poison Hemlock flowers on the banks of the Delaware and Raritan Feeder Canal in the Mountainview section of Ewing Township, Mercer County, New Jersey.jpg",
 "w": 880
+},
+{
+"a": "haupt",
+"autor": "Stefan.lefnaer",
+"beschr": "Fruchtstand Taxonym: Conium maculatum ss Fischer et al. EfÖLS 2008 ISBN 978-3-85474-187-9 (det. W. Adler 2015-09-05) Fundort: Erlwiesen Bernhardsthal, Bezirk Mistelbach, Niederösterreich - ca. 160 m ü. A. Standort: Feuch",
+"f": "schierling-1.webp",
+"h": 880,
+"lizenz": "CC BY-SA 4.0",
+"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
+"quelle": "https://commons.wikimedia.org/wiki/File:Conium_maculatum_sl2.jpg",
+"titel": "File:Conium maculatum sl2.jpg",
+"w": 800
 },
 {
 "a": "blatt",
@@ -9189,30 +7749,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Conium_maculatum_leaf_(21).jpg",
 "titel": "File:Conium maculatum leaf (21).jpg",
 "w": 834
-},
-{
-"a": "frucht",
-"autor": "Didier Descouens",
-"beschr": "Gefleckte Schierling , Früchte",
-"f": "schierling-5.webp",
-"h": 778,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Conium_maculatum_MHNT.BOT.2005.0.956_graines.jpg",
-"titel": "File:Conium maculatum MHNT.BOT.2005.0.956 graines.jpg",
-"w": 880
-},
-{
-"a": "frucht",
-"autor": "Didier Descouens",
-"beschr": "Gefleckte Schierling , Doppeldolde und Früchte.",
-"f": "schierling-6.webp",
-"h": 625,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Conium_maculatum_MHNT.BOT.2005.0.956.jpg",
-"titel": "File:Conium maculatum MHNT.BOT.2005.0.956.jpg",
-"w": 880
 }
 ],
 "schlehe": [
@@ -9253,18 +7789,6 @@
 "w": 880
 },
 {
-"a": "bluete",
-"autor": "Touam (Hervé Agnoux)",
-"beschr": "Grasses; purple flower: fr:lavande de mer (Limonium vulgare Mill) ; bush: sloe ( en:Prunus spinosa ). In the marshes of Le Conseiller, fr:Le Verdon-sur-Mer . Photo taken during a visit to the marshes organised by the ass",
-"f": "schlehe-4.webp",
-"h": 588,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Flore_avec_touffe_dans_le_marais_du_Conseiller.jpg",
-"titel": "File:Flore avec touffe dans le marais du Conseiller.jpg",
-"w": 880
-},
-{
 "a": "frucht",
 "autor": "AnRo0002",
 "beschr": "Schlehdorn ( Prunus spinosa ) bei Reilingen",
@@ -9274,18 +7798,6 @@
 "lizenzurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
 "quelle": "https://commons.wikimedia.org/wiki/File:20150611Prunus_spinosa3.jpg",
 "titel": "File:20150611Prunus spinosa3.jpg",
-"w": 880
-},
-{
-"a": "rinde",
-"autor": "Vladlen Terezhe",
-"beschr": "Древесина тёрна (Prúnus spinósa) на срезе. Спиленное дерево росло в городе Междуреченске Кемеровской области.",
-"f": "schlehe-6.webp",
-"h": 587,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:%D0%94%D1%80%D0%B5%D0%B2%D0%B5%D1%81%D0%B8%D0%BD%D0%B0%D1%82%D0%B5%D1%80%D0%BD.jpg",
-"titel": "File:Древесинатерн.jpg",
 "w": 880
 }
 ],
@@ -9300,18 +7812,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Echte_Schl%C3%BCsselblume_NSG_Niedernfeld.jpg",
 "titel": "File:Echte Schlüsselblume NSG Niedernfeld.jpg",
-"w": 880
-},
-{
-"a": "habitus",
-"autor": "T. Kebert",
-"beschr": "Primula veris, Křivoklátsko PLA, Czechia",
-"f": "schluesselblume-2.webp",
-"h": 587,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Primula_veris_habitat_TK_2021-04-22_1.jpg",
-"titel": "File:Primula veris habitat TK 2021-04-22 1.jpg",
 "w": 880
 },
 {
@@ -9336,18 +7836,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Primula_veris_Pierwiosnek_lekarski_2022-04-16_Rezerwat_Podwale_02.jpg",
 "titel": "File:Primula veris Pierwiosnek lekarski 2022-04-16 Rezerwat Podwale 02.jpg",
-"w": 880
-},
-{
-"a": "frucht",
-"autor": "Roger Culos",
-"beschr": "Gewürzsträucher Echte Schlüsselblume , früchte und samen",
-"f": "schluesselblume-5.webp",
-"h": 576,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Primula_veris_MHNT.BOT.2011.3.11.jpg",
-"titel": "File:Primula veris MHNT.BOT.2011.3.11.jpg",
 "w": 880
 },
 {
@@ -9389,7 +7877,7 @@
 "w": 647
 },
 {
-"a": "blatt",
+"a": "bluete",
 "autor": "Flocci Nivis",
 "beschr": "Ein gemeiner Schneeball ( Viburnum opulus ) an der Nauwies im Staatsforst Saarbrücken. Auf einigen der Blütenblätter befinden sich kleine Wassertropfen.",
 "f": "schneeball-3.webp",
@@ -9425,7 +7913,7 @@
 "w": 880
 },
 {
-"a": "rinde",
+"a": "knospe",
 "autor": "User:JrawX",
 "beschr": "Viburnum opulus bark on a blurred background",
 "f": "schneeball-6.webp",
@@ -9464,18 +7952,6 @@
 },
 {
 "a": "bluete",
-"autor": "Dominicus Johannes Bergsma",
-"beschr": "Galanthus nivalis double-flowered Snowdrop. Focus stack of 44 photos.",
-"f": "schneegloeckchen-3.webp",
-"h": 704,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Galanthus_Nivalis,_sneeuwklokje._12-02-2024._(d.j.b.).jpg",
-"titel": "File:Galanthus Nivalis, sneeuwklokje. 12-02-2024. (d.j.b.).jpg",
-"w": 880
-},
-{
-"a": "blatt",
 "autor": "Schnobby",
 "beschr": "Blüte von Schneeglöckchen mit sechs Blütenblättern",
 "f": "schneegloeckchen-4.webp",
@@ -9635,7 +8111,7 @@
 "w": 831
 },
 {
-"a": "bluete",
+"a": "habitus",
 "autor": "Cayambe",
 "beschr": "Luxembourg Kockelscheuer: pond scum, mainly consisting of pollen and further remains of the male flowers of the Common Alder ( Alnus glutinosa ).",
 "f": "schwarzerle-6.webp",
@@ -9682,18 +8158,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Hypholoma_fasciculare_(note_slighty_green_gills)_in_Repty,_Tarnowskie_G%C3%B3ry,_Poland,_September_2021.jpg",
 "titel": "File:Hypholoma fasciculare (note slighty green gills) in Repty, Tarnowskie Góry, Poland, September 2021.jpg",
-"w": 880
-},
-{
-"a": "schnitt",
-"autor": "B59210",
-"beschr": "cuticule hypholoma",
-"f": "schwefelkopf-4.webp",
-"h": 495,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Cuticule_hypholoma_.jpg",
-"titel": "File:Cuticule hypholoma .jpg",
 "w": 880
 },
 {
@@ -9859,7 +8323,7 @@
 "w": 880
 },
 {
-"a": "habitus",
+"a": "unterseite",
 "autor": "Rosser1954",
 "beschr": "Hydnum repandum. The Hedgehog Fungus spore bearing spines structures. Lainshaw Woods, Stewarton.",
 "f": "semmelstoppel-2.webp",
@@ -9871,7 +8335,7 @@
 "w": 880
 },
 {
-"a": "unterseite",
+"a": "weitere",
 "autor": "LonMcGregor",
 "beschr": "This is the view of the underside of a chantrelle mushroom, usually distinguished by the \"trumpet\" shape",
 "f": "semmelstoppel-3.webp",
@@ -9933,19 +8397,7 @@
 "w": 880
 },
 {
-"a": "blatt",
-"autor": "Stefan.lefnaer",
-"beschr": "Männliche Blüte mit zwei Staubblättern und kahlem Deckblatt Taxonym: Salix alba ss Fischer et al. EfÖLS 2008 ISBN 978-3-85474-187-9 Fundort: Bahnhof Wien-Jedlersdorf, Wien-Floridsdorf - ca. 160 m ü. A. Standort: Ruderalf",
-"f": "silberweide-3.webp",
-"h": 455,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Salix_alba_sl2.jpg",
-"titel": "File:Salix alba sl2.jpg",
-"w": 880
-},
-{
-"a": "rinde",
+"a": "habitus",
 "autor": "Achim Lammerts (Syntaxys)",
 "beschr": "Eine etwa 120 bis 180 Jahre alte Silberweide (Salix alba) im Auwald bei Neupotz, einem Teilbereich des FFH-Gebiets „Hördter Rheinaue“; Durchmesser des Stamms ca. 2 Meter. Dieses Bild zeigt das Schutzgebiet in der World D",
 "f": "silberweide-4.webp",
@@ -10019,18 +8471,6 @@
 "w": 880
 },
 {
-"a": "rinde",
-"autor": "Isiwal",
-"beschr": "Diese Datei zeigt das Naturdenkmal in Oberösterreich mit der ID nd324 .",
-"f": "sommerlinde-4.webp",
-"h": 660,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Ro%C3%9Fleithen_NDO%C3%96_324_Rumpelmayrlinde-3884.jpg",
-"titel": "File:Roßleithen NDOÖ 324 Rumpelmayrlinde-3884.jpg",
-"w": 880
-},
-{
 "a": "frucht",
 "autor": "Petr Filippov",
 "beschr": "Vejdova lípa, Pastviny, Czech Republic",
@@ -10093,7 +8533,7 @@
 "w": 660
 },
 {
-"a": "schnitt",
+"a": "unterseite",
 "autor": "James Johnstone from Ecclefechan, Scotland",
 "beschr": "Possibly a Sickener (Russula emetica) or a Beechwood Sickener (Russula nobilis). Russula emetica is found under conifers; its cap becomes depressed when fully mature and the cap cuticle peels more readily. It is just as ",
 "f": "speitaeubling-4.webp",
@@ -10227,42 +8667,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:(MHNT)_Andrena_subopaca_on_Plantago_lanceolata.jpg",
 "titel": "File:(MHNT) Andrena subopaca on Plantago lanceolata.jpg",
 "w": 675
-},
-{
-"a": "blatt",
-"autor": "Rillke",
-"beschr": "getrocknete Spitzwegerichblätter",
-"f": "spitzwegerich-4.webp",
-"h": 660,
-"lizenz": "CC BY-SA 3.0 de",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
-"quelle": "https://commons.wikimedia.org/wiki/File:Plantaginis_lanceolatae_herba_092203.jpg",
-"titel": "File:Plantaginis lanceolatae herba 092203.jpg",
-"w": 880
-},
-{
-"a": "frucht",
-"autor": "Richard Bartz",
-"beschr": "Die Listspinne ( Pisaura mirabilis ), auch Raubspinne oder Brautgeschenkspinne genannt, gehört zur Familie der Raubspinnen (Pisauridae) und zur Überfamilie der Lycosoidea. Der Spitzwegerich ( Plantago lanceolata ), auch ",
-"f": "spitzwegerich-5.webp",
-"h": 880,
-"lizenz": "CC BY-SA 2.5",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/2.5",
-"quelle": "https://commons.wikimedia.org/wiki/File:Pisaura_mirabilis_on_Plantago_lanceolata.jpg",
-"titel": "File:Pisaura mirabilis on Plantago lanceolata.jpg",
-"w": 595
-},
-{
-"a": "bluete",
-"autor": "Blood Red Sandman",
-"beschr": "A small tortoiseshell butterfly ( Aglais urticae ) attempting to insert its proboscis into the wrapping film of a multipack of Highland Spring mineral water. This photograph was taken on the public footpath from Millpark",
-"f": "spitzwegerich-6.webp",
-"h": 587,
-"lizenz": "CC BY 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Small_tortoiseshell_(Aglais_urticae)_mistaking_litter_for_flower,_Oban,_July_2020.jpg",
-"titel": "File:Small tortoiseshell (Aglais urticae) mistaking litter for flower, Oban, July 2020.jpg",
-"w": 880
 }
 ],
 "stachelbeere": [
@@ -10303,18 +8707,6 @@
 "w": 766
 },
 {
-"a": "bluete",
-"autor": "David Ludwig",
-"beschr": "Modell der Sammlung des Botanischen Museums in Greifswald",
-"f": "stachelbeere-4.webp",
-"h": 880,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Modell_der_Bl%C3%BCte_von_Ribes_grossularia_(Ribes_uva-crispa,_Stachelbeere)_-Brendel_Nr._11-.jpg",
-"titel": "File:Modell der Blüte von Ribes grossularia (Ribes uva-crispa, Stachelbeere) -Brendel Nr. 11-.jpg",
-"w": 724
-},
-{
 "a": "blatt",
 "autor": "Krzysztof Golik",
 "beschr": "Ribes uva-crispa in Jardin Botanique de l'Aubrac, Saint-Chély-d'Aubrac, Aveyron, France",
@@ -10353,7 +8745,7 @@
 "w": 880
 },
 {
-"a": "habitus",
+"a": "rinde",
 "autor": "Rosser1954",
 "beschr": "Holly tree lenticels at St John's Kirk, Lochwinnoch.",
 "f": "stechpalme-2.webp",
@@ -10365,7 +8757,7 @@
 "w": 880
 },
 {
-"a": "blatt",
+"a": "habitus",
 "autor": "Basotxerri",
 "beschr": "Ilex aquifolium in the Jarindo mountain area. Álava, Basque Country, Spain",
 "f": "stechpalme-3.webp",
@@ -10439,18 +8831,6 @@
 "w": 880
 },
 {
-"a": "unterseite",
-"autor": "Kami (1) Alinja (2) James Lindsey (3a) Cactusleroydlapatee (3b) Ernie (4) derivative work: Toffel ( talk )",
-"beschr": "Einige Detailaufnahmen des Fichtensteinpilzes: (1) Hut, (2) Stielnetz (3a, 3b) Poren, (4) Fleisch",
-"f": "steinpilz-3.webp",
-"h": 608,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Boletus_edulis_details.jpg",
-"titel": "File:Boletus edulis details.jpg",
-"w": 880
-},
-{
 "a": "schnitt",
 "autor": "Kornowski",
 "beschr": "Boletus edulis (English: cep, penny bun, porcino or porcini) Scetion",
@@ -10461,18 +8841,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Boletus_edulis_Bull._Section.jpg",
 "titel": "File:Boletus edulis Bull. Section.jpg",
 "w": 730
-},
-{
-"a": "jung",
-"autor": "Ude",
-"beschr": "Röhren unterhalb des Hutes von Boletus edulis im jungen Stadium (links) und reifen Stadium (rechts). Im jungen Stadium sind die Röhren noch mit Mycel versiegelt. Die Mehrheit der Röhren hat einen unregelmäßigen Querschni",
-"f": "steinpilz-5.webp",
-"h": 333,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Boletus_edulis_pores_aging.jpg",
-"titel": "File:Boletus edulis pores aging.jpg",
-"w": 880
 }
 ],
 "stieleiche": [
@@ -10498,18 +8866,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:D%C3%BClmen,_Wildpark,_Baum_am_Herzteich_--_2022_--_0338-40.jpg",
 "titel": "File:Dülmen, Wildpark, Baum am Herzteich -- 2022 -- 0338-40.jpg",
-"w": 880
-},
-{
-"a": "blatt",
-"autor": "Genet",
-"beschr": "Quercus robur Filicifolia",
-"f": "stieleiche-3.webp",
-"h": 702,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "http://creativecommons.org/licenses/by-sa/3.0/",
-"quelle": "https://commons.wikimedia.org/wiki/File:Quercus_robur_-_Filicifolia.JPG",
-"titel": "File:Quercus robur - Filicifolia.JPG",
 "w": 880
 },
 {
@@ -10599,7 +8955,7 @@
 "w": 880
 },
 {
-"a": "weitere",
+"a": "unterseite",
 "autor": "Achim Lammerts (Syntaxys)",
 "beschr": ".mw-parser-output .messagebox{margin:4px 0;width:auto;border-collapse:collapse;border:2px solid var(--border-color-progressive,#6485d1);background-color:var(--background-color-neutral-subtle,#fbfcff);color:var(--color-ba",
 "f": "stockschwamm-5.webp",
@@ -10637,18 +8993,6 @@
 "w": 880
 },
 {
-"a": "bluete",
-"autor": "H. Zell",
-"beschr": "Caltha palustris var. alba , Ranunculaceae, Weiße Sumpfdotterblume, Blüte; Heidi’s Blumenweg, St. Moritz, Engadin, Schweiz, ca. 2000 m.ü.M.",
-"f": "sumpfdotterblume-3.webp",
-"h": 660,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Caltha_palustris_alba_03.JPG",
-"titel": "File:Caltha palustris alba 03.JPG",
-"w": 880
-},
-{
 "a": "blatt",
 "autor": "Alpsdake",
 "beschr": "Leaf of Caltha palustris var. nipponica in Mount Mominuka, Gifu prefecture, Japan.",
@@ -10658,18 +9002,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Caltha_palustris_var._nipponica_leaf.JPG",
 "titel": "File:Caltha palustris var. nipponica leaf.JPG",
-"w": 880
-},
-{
-"a": "frucht",
-"autor": "Didier Descouens",
-"beschr": "Sumpfdotterblume , reife Früchte und Samen",
-"f": "sumpfdotterblume-5.webp",
-"h": 593,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Caltha_palustris_MHNT.BOT.2005.0.967.jpg",
-"titel": "File:Caltha palustris MHNT.BOT.2005.0.967.jpg",
 "w": 880
 },
 {
@@ -10699,18 +9031,6 @@
 "w": 660
 },
 {
-"a": "habitus",
-"autor": "Stefan.lefnaer",
-"beschr": "Kronenoberlippe mit langen Haaren Taxonym: Lamium album ss Fischer et al. EfÖLS 2008 ISBN 978-3-85474-187-9 Fundort: \"Brunnleiten\" im Ernstbrunner Wald SSE Patzmannsdorf, Bezirk Mistelbach, Niederösterreich - ca. 340 m ü",
-"f": "taubnessel-2.webp",
-"h": 347,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Lamium_album_sl16.jpg",
-"titel": "File:Lamium album sl16.jpg",
-"w": 880
-},
-{
 "a": "bluete",
 "autor": "Johannes Robalotoff",
 "beschr": "Blüten der Weissen Taubnessel (Lamium album), von unten gesehen. Naturpark Rhein-Taunus. Natürliches Sonnenlicht, schwarzer Karton als Hintergrund.",
@@ -10732,18 +9052,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Lamium_album_2017-04-14_7012.jpg",
 "titel": "File:Lamium album 2017-04-14 7012.jpg",
-"w": 880
-},
-{
-"a": "frucht",
-"autor": "Salicyna",
-"beschr": "Lamium album seedling, Gmina Police , West Pomeranian Voivodeship, Poland.",
-"f": "taubnessel-5.webp",
-"h": 660,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Lamium_album_2019-03-24_7801.jpg",
-"titel": "File:Lamium album 2019-03-24 7801.jpg",
 "w": 880
 },
 {
@@ -10785,30 +9093,6 @@
 "w": 880
 },
 {
-"a": "bluete",
-"autor": "Stefan.lefnaer",
-"beschr": "Blüte (☿-Individuum) Taxonym: Thymus pulegioides subsp. pulegioides ss Fischer et al. EfÖLS 2008 ISBN 978-3-85474-187-9 Fundort: bei Griesbach, Groß-Gerungs, Bezirk Zwettl, Niederösterreich - ca. 800 m ü. A. Standort: We",
-"f": "thymian-3.webp",
-"h": 880,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Thymus_pulegioides_subsp._pulegioides_sl12.jpg",
-"titel": "File:Thymus pulegioides subsp. pulegioides sl12.jpg",
-"w": 554
-},
-{
-"a": "blatt",
-"autor": "Stefan.lefnaer",
-"beschr": "Scheinquirle mit Tragblättern (♀-Individuum) Taxonym: Thymus pulegioides subsp. pulegioides ss Fischer et al. EfÖLS 2008 ISBN 978-3-85474-187-9 Fundort: bei Komau, Bezirk Freistadt, Oberösterreich - ca. 850 m ü. A. Stand",
-"f": "thymian-4.webp",
-"h": 880,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Thymus_pulegioides_subsp._pulegioides_sl18.jpg",
-"titel": "File:Thymus pulegioides subsp. pulegioides sl18.jpg",
-"w": 760
-},
-{
 "a": "frucht",
 "autor": "Agnieszka Kwiecień, Nova",
 "beschr": "Broad-leaved thyme ( Thymus pulegioides ) growing in a meadow by the Widawa River, Sołtysowice, Wrocław, Poland.",
@@ -10818,18 +9102,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Thymus_pulegioides_Macierzanka_zwyczajna_2020-12-30_So%C5%82tysowice_02.jpg",
 "titel": "File:Thymus pulegioides Macierzanka zwyczajna 2020-12-30 Sołtysowice 02.jpg",
-"w": 880
-},
-{
-"a": "zeichen",
-"autor": "Ursula Jaeger",
-"beschr": "Breitblättriger Thymian an der Felswand. Aufgenommen im Naturpark Nagelfluhkette",
-"f": "thymian-6.webp",
-"h": 633,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Breitbl%C3%A4ttriger_Thymian_an_der_Felswand.jpg",
-"titel": "File:Breitblättriger Thymian an der Felswand.jpg",
 "w": 880
 }
 ],
@@ -10881,30 +9153,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Atropabelladonna.jpg",
 "titel": "File:Atropabelladonna.jpg",
 "w": 880
-},
-{
-"a": "weitere",
-"autor": "Albrecht Dürer",
-"beschr": "",
-"f": "tollkirsche-5.webp",
-"h": 880,
-"lizenz": "CC0",
-"lizenzurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-"quelle": "https://commons.wikimedia.org/wiki/File:Albrecht_D%C3%BCrer,_Witch_Riding_on_a_Goat,_c._1500-1501,_NGA_6674.jpg",
-"titel": "File:Albrecht Dürer, Witch Riding on a Goat, c. 1500-1501, NGA 6674.jpg",
-"w": 553
-},
-{
-"a": "zeichen",
-"autor": "Yair Haklai",
-"beschr": "Bellona by Alvise Tagliapietra at Summer Garden.",
-"f": "tollkirsche-6.webp",
-"h": 880,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Bellona-Summer_Garden-Saint_Petersburg.jpg",
-"titel": "File:Bellona-Summer Garden-Saint Petersburg.jpg",
-"w": 660
 }
 ],
 "torfmoos": [
@@ -10921,18 +9169,6 @@
 "w": 880
 },
 {
-"a": "habitus",
-"autor": "United States Department of Agriculture: J. L. Creech R. F. Dowdle W. O. Hawley",
-"beschr": "Cover of Farmers' Bulletin no. 2085 Sphagnum moss for plant propagation (1955)",
-"f": "torfmoos-2.webp",
-"h": 880,
-"lizenz": "Public domain",
-"lizenzurl": "",
-"quelle": "https://commons.wikimedia.org/wiki/File:Cover_of_Sphagnum_Moss_for_Plant_Propagation.jpg",
-"titel": "File:Cover of Sphagnum Moss for Plant Propagation.jpg",
-"w": 552
-},
-{
 "a": "blatt",
 "autor": "Bojana Matić",
 "beschr": "Sphagnum sp. sa kojim raste Drosera rotundifolia",
@@ -10942,18 +9178,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Sphagnum2.jpg",
 "titel": "File:Sphagnum2.jpg",
-"w": 880
-},
-{
-"a": "frucht",
-"autor": "Mike Pennington",
-"beschr": "Crowberry on Sphagnum, Hove Burn, Hermaness",
-"f": "torfmoos-4.webp",
-"h": 407,
-"lizenz": "CC BY-SA 2.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/2.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Crowberry_on_Sphagnum,_Hove_Burn,_Hermaness_-_geograph.org.uk_-_7837083.jpg",
-"titel": "File:Crowberry on Sphagnum, Hove Burn, Hermaness - geograph.org.uk - 7837083.jpg",
 "w": 880
 },
 {
@@ -11132,15 +9356,15 @@
 "trollblume": [
 {
 "a": "haupt",
-"autor": "Ivar Leidus",
-"beschr": "Habitat of globeflower – wooded meadow in Keila, Northwestern Estonia",
-"f": "trollblume-1.webp",
-"h": 495,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Trollius_europaeus_habitat_-_wooded_meadow_in_Keila.jpg",
-"titel": "File:Trollius europaeus habitat - wooded meadow in Keila.jpg",
-"w": 880
+"autor": "Robert Flogaus-Faust",
+"beschr": "Trollblume ( Trollius europaeus ), Umgebung der Laghi di Fusine, Italien",
+"f": "trollblume-6.webp",
+"h": 880,
+"lizenz": "CC BY 4.0",
+"lizenzurl": "https://creativecommons.org/licenses/by/4.0",
+"quelle": "https://commons.wikimedia.org/wiki/File:Trollius_europaeus_RF.jpg",
+"titel": "File:Trollius europaeus RF.jpg",
+"w": 814
 },
 {
 "a": "habitus",
@@ -11152,18 +9376,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Yellow_flower_looking_over_Abisko_national_park.jpg",
 "titel": "File:Yellow flower looking over Abisko national park.jpg",
-"w": 880
-},
-{
-"a": "bluete",
-"autor": "Osmo Lundell",
-"beschr": "Trollius flowers",
-"f": "trollblume-3.webp",
-"h": 587,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Trollius-yellow-many.jpg",
-"titel": "File:Trollius-yellow-many.jpg",
 "w": 880
 },
 {
@@ -11189,18 +9401,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Trollius_europaeus_seed_head_-_Keila.jpg",
 "titel": "File:Trollius europaeus seed head - Keila.jpg",
 "w": 880
-},
-{
-"a": "weitere",
-"autor": "Robert Flogaus-Faust",
-"beschr": "Trollblume ( Trollius europaeus ), Umgebung der Laghi di Fusine, Italien",
-"f": "trollblume-6.webp",
-"h": 880,
-"lizenz": "CC BY 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Trollius_europaeus_RF.jpg",
-"titel": "File:Trollius europaeus RF.jpg",
-"w": 814
 }
 ],
 "trompetenpfifferling": [
@@ -11227,18 +9427,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Cantharellus_tubaeformis_T67.jpg",
 "titel": "File:Cantharellus tubaeformis T67.jpg",
 "w": 880
-},
-{
-"a": "unterseite",
-"autor": "Alex Ex",
-"beschr": "Side by side comparison of related fungi species Craterellus lutescens and Craterellus tubaeformis, demonstrating differences in cap surface and hymenium (September 21, 2026, near Ramsau bei Berchtesgaden, Germany)",
-"f": "trompetenpfifferling-3.webp",
-"h": 880,
-"lizenz": "CC BY 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Craterellus_lutescens_vs_Craterellus_tubaeformis_side_by_side.jpg",
-"titel": "File:Craterellus lutescens vs Craterellus tubaeformis side by side.jpg",
-"w": 581
 },
 {
 "a": "weitere",
@@ -11427,18 +9615,6 @@
 "w": 754
 },
 {
-"a": "habitus",
-"autor": "Dietmar Rabich",
-"beschr": "Eiskristalle auf Pflanzen am Feldrand in der Bauerschaft Dernekamp, Kirchspiel , Dülmen , Nordrhein-Westfalen , Deutschland",
-"f": "vogelmiere-2.webp",
-"h": 660,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:D%C3%BClmen,_Dernekamp,_Eiskristalle_--_2021_--_4597.jpg",
-"titel": "File:Dülmen, Dernekamp, Eiskristalle -- 2021 -- 4597.jpg",
-"w": 880
-},
-{
 "a": "bluete",
 "autor": "Antony-22",
 "beschr": "Wildflowers along Four Mile Run in Arlington, Virginia in 2021",
@@ -11461,30 +9637,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Stellaria_ruderalis_sl20.jpg",
 "titel": "File:Stellaria ruderalis sl20.jpg",
 "w": 760
-},
-{
-"a": "frucht",
-"autor": "Roger Culos",
-"beschr": "Gewöhnliche Vogelmiere , früchte und samen",
-"f": "vogelmiere-5.webp",
-"h": 699,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Stellaria_media_MHNT.BOT.2008.1.33.jpg",
-"titel": "File:Stellaria media MHNT.BOT.2008.1.33.jpg",
-"w": 880
-},
-{
-"a": "habitus",
-"autor": "Dietmar Rabich",
-"beschr": "Eiskristalle auf Pflanzen am Feldrand in der Bauerschaft Dernekamp, Kirchspiel , Dülmen , Nordrhein-Westfalen , Deutschland",
-"f": "vogelmiere-6.webp",
-"h": 660,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:D%C3%BClmen,_Dernekamp,_Eiskristalle_--_2021_--_4599.jpg",
-"titel": "File:Dülmen, Dernekamp, Eiskristalle -- 2021 -- 4599.jpg",
-"w": 880
 }
 ],
 "wacholder": [
@@ -11525,18 +9677,6 @@
 "w": 880
 },
 {
-"a": "bluete",
-"autor": "Murray Foubister",
-"beschr": "Sun peaks alpine flowers in full bloom...",
-"f": "wacholder-4.webp",
-"h": 587,
-"lizenz": "CC BY-SA 2.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/2.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Sun_peaks_alpine_flowers_in_full_bloom._(19434786858).jpg",
-"titel": "File:Sun peaks alpine flowers in full bloom. (19434786858).jpg",
-"w": 880
-},
-{
 "a": "frucht",
 "autor": "Ivar Leidus",
 "beschr": "Früchte des Gemeinen Wacholder (Ø 6–9 mm)",
@@ -11547,47 +9687,11 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Juniperus_communis_fruits_-_Keila.jpg",
 "titel": "File:Juniperus communis fruits - Keila.jpg",
 "w": 704
-},
-{
-"a": "rinde",
-"autor": "LBM1948",
-"beschr": "Trunk of a dead Juniper [Juniperus communis subsp.alpina] . Baixa Cerdanya, Catalonia, Spain",
-"f": "wacholder-6.webp",
-"h": 584,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Cerda%C3%B1a,_flora_1991_07.jpg",
-"titel": "File:Cerdaña, flora 1991 07.jpg",
-"w": 880
 }
 ],
 "walderdbeere": [
 {
 "a": "haupt",
-"autor": "Kersti Nebelsiek",
-"beschr": "Echtes Leinkraut ( Galium verum ), Heidenelke ( Dianthus deltoides ), Flockenblumen ( Centaurea ) und Schafgarbe ( Achillea ), außerdem sind noch die Blätter von einer Erdbeere ( Fragaria vesca ) zu sehen. Dahinter Rosen",
-"f": "walderdbeere-1.webp",
-"h": 660,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:217_Echtes_Leinkraut,_Heidenelke_und_Flockenblumen_am_Fu%C3%9Fweg_von_den_Helfensteinen_zum_Hohen_D%C3%B6rnberg_auf_den_Hohen_D%C3%B6rnberg.jpg",
-"titel": "File:217 Echtes Leinkraut, Heidenelke und Flockenblumen am Fußweg von den Helfensteinen zum Hohen Dörnberg auf den Hohen Dörnberg.jpg",
-"w": 880
-},
-{
-"a": "habitus",
-"autor": "FreCha",
-"beschr": "Fraisiers des bois (Fragaria vesca) au Cimetière du Père-Lachaise.",
-"f": "walderdbeere-2.webp",
-"h": 587,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Fragaria_vesca_-_Cimeti%C3%A8re_du_P%C3%A8re-Lachaise_01.jpg",
-"titel": "File:Fragaria vesca - Cimetière du Père-Lachaise 01.jpg",
-"w": 880
-},
-{
-"a": "frucht",
 "autor": "Ivar Leidus",
 "beschr": "Fruit of wild strawberry",
 "f": "walderdbeere-3.webp",
@@ -11661,18 +9765,6 @@
 "w": 880
 },
 {
-"a": "zeichen",
-"autor": "JohannBotanik",
-"beschr": "Einzelteile aus dem Gewölle eines Waldkauzes",
-"f": "waldkauz-3.webp",
-"h": 880,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Einzelteile_aus_Gew%C3%B6lle.jpg",
-"titel": "File:Einzelteile aus Gewölle.jpg",
-"w": 613
-},
-{
 "a": "weitere",
 "autor": "Anil Öztas",
 "beschr": "Waldkauz (Strix aluco) im Stadtwald von Neuss",
@@ -11732,18 +9824,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Pinus_sylvestris_2020_G2.jpg",
 "titel": "File:Pinus sylvestris 2020 G2.jpg",
-"w": 880
-},
-{
-"a": "rinde",
-"autor": "Radomianin",
-"beschr": "Querschnitte frisch gefällter Waldkiefernstämme ( Pinus sylvestris ) aus einer Durchforstung auf einem Holzpolter nahe Teutendorf (Sanitz). Deutlich erkennbar sind der breite Splintholzbereich und die frischen Harzaustri",
-"f": "waldkiefer-4.webp",
-"h": 587,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Pine_log_cross-sections,_Teutendorf,_2016-09-17.jpg",
-"titel": "File:Pine log cross-sections, Teutendorf, 2016-09-17.jpg",
 "w": 880
 },
 {
@@ -11933,18 +10013,6 @@
 "w": 880
 },
 {
-"a": "habitus",
-"autor": "Böhringer Friedrich",
-"beschr": "Die Echte Walnuss ( Juglans regia ) ist ein sommergrüner Laubbaum aus der Familie der Walnussgewächse (Juglandaceae).",
-"f": "walnuss-2.webp",
-"h": 610,
-"lizenz": "CC BY-SA 2.5",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/2.5",
-"quelle": "https://commons.wikimedia.org/wiki/File:Juglans_regia_Echte_Walnussfrucht_3.jpg",
-"titel": "File:Juglans regia Echte Walnußfrucht 3.JPG",
-"w": 880
-},
-{
 "a": "blatt",
 "autor": "Rasbak",
 "beschr": "Gnomonia leptostyla on Juglans regia Buccaneer",
@@ -11957,19 +10025,7 @@
 "w": 660
 },
 {
-"a": "rinde",
-"autor": "George Chernilevsky",
-"beschr": "Bracket fungi Dryad's saddle Polyporus squamosus on the Common walnut Juglans regia . Ukraine.",
-"f": "walnuss-4.webp",
-"h": 673,
-"lizenz": "Public domain",
-"lizenzurl": "",
-"quelle": "https://commons.wikimedia.org/wiki/File:Polyporus_squamosus_2010_G1.jpg",
-"titel": "File:Polyporus squamosus 2010 G1.jpg",
-"w": 880
-},
-{
-"a": "frucht",
+"a": "habitus",
 "autor": "JLPC",
 "beschr": "Common walnuts ( Juglans regia ) in winter, near Blanzac-Porcheresse, Charente, France.",
 "f": "walnuss-5.webp",
@@ -12041,18 +10097,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Procyon_lotor_qtl6.jpg",
 "titel": "File:Procyon lotor qtl6.jpg",
 "w": 880
-},
-{
-"a": "weitere",
-"autor": "Klaus Rassinger und Gerhard Cammerer , Museum Wiesbaden",
-"beschr": "Waschbär Procyon lotor , Schädel, Coll. Museum Wiesbaden",
-"f": "waschbaer-5.webp",
-"h": 585,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Procyon_lotor_01_MWNH_328.JPG",
-"titel": "File:Procyon lotor 01 MWNH 328.JPG",
-"w": 880
 }
 ],
 "wasserminze": [
@@ -12115,18 +10159,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Mentha_aquatica_kz03.jpg",
 "titel": "File:Mentha aquatica kz03.jpg",
 "w": 880
-},
-{
-"a": "bluete",
-"autor": "Stefan.lefnaer",
-"beschr": "Blüte Taxonym: Mentha aquatica s. str. ss Fischer et al. EfÖLS 2008 ISBN 978-3-85474-187-9 Fundort: Teich am Leopoldauer Anger, Wien-Floridsdorf - ca. 160 m ü. A. Standort: Teichufer",
-"f": "wasserminze-6.webp",
-"h": 733,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Mentha_aquatica_sl16.jpg",
-"titel": "File:Mentha aquatica sl16.jpg",
-"w": 880
 }
 ],
 "wegwarte": [
@@ -12177,30 +10209,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Cichorium_intybus_sl11.jpg",
 "titel": "File:Cichorium intybus sl11.jpg",
 "w": 660
-},
-{
-"a": "frucht",
-"autor": "Stefan.lefnaer",
-"beschr": "Achäne mit kurzem Pappus Taxonym: Cichorium intybus ss Fischer et al. EfÖLS 2008 ISBN 978-3-85474-187-9 Fundort: Donauinsel bei der Nordbrücke, Wien-Floridsdorf - ca. 160 m ü. A. (leg. 2016-09-30) Standort: Böschung",
-"f": "wegwarte-5.webp",
-"h": 765,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Cichorium_intybus_sl22.jpg",
-"titel": "File:Cichorium intybus sl22.jpg",
-"w": 880
-},
-{
-"a": "bluete",
-"autor": "Alvesgaspar , Tony Wills (10)",
-"beschr": "A poster of twelve different species of flowers of the family Asteraceae , belonging to the three most representative subfamilies: Asteroideae , Cichorioideae and Carduoideae : Yellow Chamomille - Anthemis tinctoria (Ast",
-"f": "wegwarte-6.webp",
-"h": 880,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Asteracea_poster_3.jpg",
-"titel": "File:Asteracea poster 3.jpg",
-"w": 669
 }
 ],
 "weissdorn": [
@@ -12262,18 +10270,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:(MHNT)_Crataegus_monogyna_-_Fruits.jpg",
 "titel": "File:(MHNT) Crataegus monogyna - Fruits.jpg",
-"w": 880
-},
-{
-"a": "rinde",
-"autor": "Roger Culos",
-"beschr": "Crataegus monogyna , Eingriffelige Weißdorn, holz",
-"f": "weissdorn-6.webp",
-"h": 587,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Crataegus_monogyna_MHNT.BOT.2023.13.42.jpg",
-"titel": "File:Crataegus monogyna MHNT.BOT.2023.13.42.jpg",
 "w": 880
 }
 ],
@@ -12461,18 +10457,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:2010-08-07_Agaricus_campestris_gills.jpg",
 "titel": "File:2010-08-07 Agaricus campestris gills.jpg",
 "w": 880
-},
-{
-"a": "jung",
-"autor": "de:Benutzer:Appaloosa",
-"beschr": "Junge Wiesenchampignons.",
-"f": "wiesenchampignon-5.webp",
-"h": 660,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "http://creativecommons.org/licenses/by-sa/3.0/",
-"quelle": "https://commons.wikimedia.org/wiki/File:Wiesenchamp5.jpg",
-"titel": "File:Wiesenchamp5.jpg",
-"w": 880
 }
 ],
 "wiesenkerbel": [
@@ -12597,30 +10581,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Sanguisorba_minor_leaf7_(14343498979).jpg",
 "titel": "File:Sanguisorba minor leaf7 (14343498979).jpg",
 "w": 880
-},
-{
-"a": "frucht",
-"autor": "Roger Culos",
-"beschr": "Kleine Wiesenknopf , früchte und samen",
-"f": "wiesenknopf-5.webp",
-"h": 660,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Sanguisorba_minor_MHNT.BOT.2007.40.139.jpg",
-"titel": "File:Sanguisorba minor MHNT.BOT.2007.40.139.jpg",
-"w": 880
-},
-{
-"a": "frucht",
-"autor": "Krzysztof Ziarnek, Kenraiz",
-"beschr": "Sanguisorba minor (fruit). Moczyły near Szczecin, NW Poland",
-"f": "wiesenknopf-6.webp",
-"h": 629,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Sanguisorba_minor_kz10.jpg",
-"titel": "File:Sanguisorba minor kz10.jpg",
-"w": 880
 }
 ],
 "wiesensalbei": [
@@ -12670,18 +10630,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Leaf_of_Salvia_pratensis_in_natural_monument_Sysli_louky_u_Lodenice_in_2011.JPG",
 "titel": "File:Leaf of Salvia pratensis in natural monument Sysli louky u Lodenice in 2011.JPG",
-"w": 880
-},
-{
-"a": "frucht",
-"autor": "Stefan.lefnaer",
-"beschr": "Fruchtstand (leg.: 2015-06-13) Taxonym: Salvia pratensis ss Fischer et al. EfÖLS 2008 ISBN 978-3-85474-187-9 Fundort: bei Niederhollabrunn, Bezirk Korneuburg, Niederösterreich - ca. 350 m ü. A. Standort: Wiese",
-"f": "wiesensalbei-5.webp",
-"h": 646,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Salvia_pratensis_sl2.jpg",
-"titel": "File:Salvia pratensis sl2.jpg",
 "w": 880
 },
 {
@@ -12747,19 +10695,7 @@
 "w": 549
 },
 {
-"a": "frucht",
-"autor": "Elke Freese",
-"beschr": "Wiesenschaumzikade ( Philaenus spumarius f. quadrimaculata )",
-"f": "wiesenschaumkraut-5.webp",
-"h": 687,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "http://creativecommons.org/licenses/by-sa/3.0/",
-"quelle": "https://commons.wikimedia.org/wiki/File:Philaenusspumarius1.jpg",
-"titel": "File:Philaenusspumarius1.jpg",
-"w": 880
-},
-{
-"a": "bluete",
+"a": "habitus",
 "autor": "Dominicus Johannes Bergsma",
 "beschr": "Flowery grassland in Beekdal Linde. Location, nature Beekdal Linde Bekhofplas in the Netherlands.",
 "f": "wiesenschaumkraut-6.webp",
@@ -12795,18 +10731,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Wildapfelbaum,_Malus_sylvestris.jpg",
 "titel": "File:Wildapfelbaum, Malus sylvestris.jpg",
 "w": 880
-},
-{
-"a": "blatt",
-"autor": "Stefan.lefnaer",
-"beschr": "Kahle Kelchblätter Taxonym: Malus sylvestris ss Fischer et al. EfÖLS 2008 ISBN 978-3-85474-187-9 Fundort: Rohrwald, Bezirk Korneuburg, Niederösterreich - ca. 300 m ü. A. Standort: Eichen-Hainbuchen-Wald",
-"f": "wildapfel-3.webp",
-"h": 880,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Malus_sylvestris_sl4.jpg",
-"titel": "File:Malus sylvestris sl4.jpg",
-"w": 783
 },
 {
 "a": "rinde",
@@ -12871,18 +10795,6 @@
 "w": 880
 },
 {
-"a": "blatt",
-"autor": "Björn S...",
-"beschr": "Pear Rust - Gymnosporangium sabinae on Pyrus cf. pyraster",
-"f": "wildbirne-3.webp",
-"h": 587,
-"lizenz": "CC BY-SA 2.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/2.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Pear_Rust_-_Gymnosporangium_sabinae_on_Pyrus_cf._pyraster_(30658500877).jpg",
-"titel": "File:Pear Rust - Gymnosporangium sabinae on Pyrus cf. pyraster (30658500877).jpg",
-"w": 880
-},
-{
 "a": "rinde",
 "autor": "AndersenAnders",
 "beschr": "Stammfuß einer älteren Wildbirne in Thüringen",
@@ -12933,7 +10845,7 @@
 "w": 880
 },
 {
-"a": "habitus",
+"a": "bluete",
 "autor": "Christian Fischer",
 "beschr": "Wilde Möhre ( Daucus carota ); blühende Dolde. In der Mitte erkennt man eine dunkel-purpurfarbene, sterile Blüte (sogenannte \"Mohrenblüte\" oder \"Scheininsekt\"). Damit ahmt die Pflanze ein Insekt nach, um \"richtige\" Insek",
 "f": "wildemoehre-2.webp",
@@ -12969,18 +10881,6 @@
 "w": 880
 },
 {
-"a": "frucht",
-"autor": "Roger Culos",
-"beschr": "karotte , früchte und samen",
-"f": "wildemoehre-5.webp",
-"h": 644,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Daucus_carota_subsp._maximus_MHNT.BOT.2007.40.407.jpg",
-"titel": "File:Daucus carota subsp. maximus MHNT.BOT.2007.40.407.jpg",
-"w": 880
-},
-{
 "a": "weitere",
 "autor": "Alvesgaspar",
 "beschr": "Wild Carrot, this umbel about 8cm diameter.",
@@ -13004,18 +10904,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Wildsau_im_wilderlebnispark_daun.jpg",
 "titel": "File:Wildsau im wilderlebnispark daun.jpg",
-"w": 880
-},
-{
-"a": "habitus",
-"autor": "KKPCW",
-"beschr": "イノシシの骨格標本。名古屋市の東山動植物園で撮影。",
-"f": "wildschwein-2.webp",
-"h": 630,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Skeletal_specimen_of_Wild_boar.jpg",
-"titel": "File:Skeletal specimen of Wild boar.jpg",
 "w": 880
 },
 {
@@ -13043,7 +10931,7 @@
 "w": 880
 },
 {
-"a": "weitere",
+"a": "jung",
 "autor": "Sander van der Wel",
 "beschr": "A baby Wild Boar ( Sus scrofa ) in a wildlife park in the Netherlands",
 "f": "wildschwein-5.webp",
@@ -13093,18 +10981,6 @@
 "w": 660
 },
 {
-"a": "rinde",
-"autor": "Michael Kranewitter",
-"beschr": "Dieses Bild wurde im Rahmen des Wettbewerbs Wiki Loves Earth 2014 hochgeladen.",
-"f": "winterlinde-4.webp",
-"h": 587,
-"lizenz": "CC BY-SA 3.0 at",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0/at/deed.en",
-"quelle": "https://commons.wikimedia.org/wiki/File:Wiener_Naturdenkmal_100_-_Winterlinde_(W%C3%A4hring)_n.JPG",
-"titel": "File:Wiener Naturdenkmal 100 - Winterlinde (Währing) n.JPG",
-"w": 880
-},
-{
 "a": "frucht",
 "autor": "Didier Descouens",
 "beschr": "Winter-Linde , reife Früchte",
@@ -13114,18 +10990,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:Tilia_cordata_MHNT.BOT.2004.0.780.jpg",
 "titel": "File:Tilia cordata MHNT.BOT.2004.0.780.jpg",
-"w": 880
-},
-{
-"a": "bluete",
-"autor": "Rillke",
-"beschr": "getrocknete Lindenblüten",
-"f": "winterlinde-6.webp",
-"h": 660,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Tiliae_flos_267302.jpg",
-"titel": "File:Tiliae flos 267302.jpg",
 "w": 880
 }
 ],
@@ -13143,18 +11007,6 @@
 "w": 880
 },
 {
-"a": "habitus",
-"autor": "Momotarou2012",
-"beschr": "Stuffed Specimen of Honshu wolf (Japanese Wolf, Canis hodophilax ). Exhibit in the National Museum of Nature and Science , Tokyo , Japan .",
-"f": "wolf-2.webp",
-"h": 660,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Japanese_Wolf.jpg",
-"titel": "File:Japanese Wolf.jpg",
-"w": 880
-},
-{
 "a": "spur",
 "autor": "Unknown (Fish & Wildlife Service employee)",
 "beschr": "Wolfsspuren in oberflächlich angetrocknetem, tonigem Untergrund",
@@ -13165,30 +11017,6 @@
 "quelle": "https://commons.wikimedia.org/wiki/File:Canis_lupus_tracks.jpg",
 "titel": "File:Canis lupus tracks.jpg",
 "w": 781
-},
-{
-"a": "zeichen",
-"autor": "Quartl",
-"beschr": "Polarwolf ( Canis lupus arctos ) im Wildpark Lüneburger Heide.",
-"f": "wolf-4.webp",
-"h": 622,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Canis_lupus_arctos_qtl1.jpg",
-"titel": "File:Canis lupus arctos qtl1.jpg",
-"w": 880
-},
-{
-"a": "weitere",
-"autor": "unbekannt",
-"beschr": "Kapitolinische Wölfin ( Lupa Capitolina ) : Wölfin mit Romulus und Remus, Bronze, 12. Jahrhundert n. Chr. (laut C14-Datierung; nach traditioneller Sicht etruskisch aus dem 5. Jahrhundert v. Chr.), Zwillinge hinzugefügt i",
-"f": "wolf-5.webp",
-"h": 573,
-"lizenz": "CC0",
-"lizenzurl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-"quelle": "https://commons.wikimedia.org/wiki/File:Lupa_Capitolina,_Rome.jpg",
-"titel": "File:Lupa Capitolina, Rome.jpg",
-"w": 880
 }
 ],
 "wurmfarn": [
@@ -13253,7 +11081,7 @@
 "w": 665
 },
 {
-"a": "weitere",
+"a": "frucht",
 "autor": "Doc. RNDr. Josef Reischig, CSc.",
 "beschr": "This image comes from the archive of Josef Reischig and is part of the 384 pictures kindly donated by the authorship heirs under CC BY SA 3.0 license as a part of Wikimedia Czech Republic 's GLAM initiative.",
 "f": "wurmfarn-6.webp",
@@ -13279,19 +11107,7 @@
 "w": 589
 },
 {
-"a": "habitus",
-"autor": "This Photo was taken by Wolfgang Moroder . Feel free to use my photos, but please mention me as the author and send me a",
-"beschr": "Almwiese Juac mit Zirbel Kiefer und Lerchenbäume. Die Geislerspitzen, die Mastlé- und Cislesalm im Hintergrund. Naturpark Puez-Geisler in den Südtiroler Dolomiten.",
-"f": "zirbe-2.webp",
-"h": 395,
-"lizenz": "CC BY-SA 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Juac_Odles_Cisles_d%27insta.jpg",
-"titel": "File:Juac Odles Cisles d'insta.jpg",
-"w": 880
-},
-{
-"a": "blatt",
+"a": "frucht",
 "autor": "de:Benutzer:Tigerente",
 "beschr": "Swiss Pine ( Pinus cembra ) cone and foliage, originally harvested south of Hochmölbing, Totes Gebirge, Austria.",
 "f": "zirbe-3.webp",
@@ -13353,18 +11169,6 @@
 "w": 660
 },
 {
-"a": "habitus",
-"autor": "Jonatan Svensson Glad",
-"beschr": "Tree stumps",
-"f": "zitterpappel-2.webp",
-"h": 588,
-"lizenz": "CC BY-SA 4.0",
-"lizenzurl": "https://creativecommons.org/licenses/by-sa/4.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Tree_Stumps-147675.jpg",
-"titel": "File:Tree Stumps-147675.jpg",
-"w": 880
-},
-{
 "a": "blatt",
 "autor": "Willow",
 "beschr": "Espenblätter (Populus tremula) bei Marburg, Hessen, Deutschland",
@@ -13389,7 +11193,7 @@
 "w": 880
 },
 {
-"a": "frucht",
+"a": "habitus",
 "autor": "W.carter",
 "beschr": "Red juneberry tree ( Amelanchier lamarckii ) and yellow aspen ( Populus tremula ) in autumn in Tuntorp.",
 "f": "zitterpappel-5.webp",
@@ -13436,42 +11240,6 @@
 "lizenzurl": "https://creativecommons.org/licenses/by-sa/3.0",
 "quelle": "https://commons.wikimedia.org/wiki/File:National_nature_reserve_Rezabinec_a_Rezabinecke_tune_in_autumn_2011_(12).JPG",
 "titel": "File:National nature reserve Rezabinec a Rezabinecke tune in autumn 2011 (12).JPG",
-"w": 880
-},
-{
-"a": "unterseite",
-"autor": "Jason Hollinger",
-"beschr": "Scientific Name: Fomes fomentarius Common Name: Birch Conk Certainty: positive 20080127, Clearwater, BC, Canada",
-"f": "zunderschwamm-3.webp",
-"h": 660,
-"lizenz": "CC BY 2.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/2.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Fomes_fomentarius_Pores_(2276157838).jpg",
-"titel": "File:Fomes fomentarius Pores (2276157838).jpg",
-"w": 880
-},
-{
-"a": "schnitt",
-"autor": "George Chernilevsky",
-"beschr": "Zunderschwamm ( Fomes fomentarius ). Schnitt durch einen Fruchtkörper.",
-"f": "zunderschwamm-4.webp",
-"h": 733,
-"lizenz": "Public domain",
-"lizenzurl": "",
-"quelle": "https://commons.wikimedia.org/wiki/File:Fomes_fomentarius_inside_2009_G1.jpg",
-"titel": "File:Fomes fomentarius inside 2009 G1.jpg",
-"w": 880
-},
-{
-"a": "jung",
-"autor": "Henk Monster",
-"beschr": "Tiny, tiny mushrooms (max 3 cm) with up Jews ear and down Pycnoporus cinnabarinus and a very young Fomes fomentarius: adorable!",
-"f": "zunderschwamm-5.webp",
-"h": 593,
-"lizenz": "CC BY 3.0",
-"lizenzurl": "https://creativecommons.org/licenses/by/3.0",
-"quelle": "https://commons.wikimedia.org/wiki/File:Tiny,_tiny_mushrooms_(max_3_cm)_with_up_Jews_ear_and_down_Pycnoporus_cinnabarinus_and_a_very_young_Fomes_fomentarius,_adorable_-_panoramio.jpg",
-"titel": "File:Tiny, tiny mushrooms (max 3 cm) with up Jews ear and down Pycnoporus cinnabarinus and a very young Fomes fomentarius, adorable - panoramio.jpg",
 "w": 880
 }
 ]
