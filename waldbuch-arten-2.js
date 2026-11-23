@@ -404,7 +404,7 @@
   o: "Kahlschläge, Waldränder, Lichtungen.",
   by: "Überall.",
   ku: "Roh, Marmelade, Sirup. Junge Blätter als Tee.",
-  vo: "Auf Fuchsbandwurm-Angst: In Bayern ist das Risiko sehr gering, waschen oder erhitzen beruhigt.",
+  vo: "Fuchsbandwurm: Ansteckungen beim Menschen sind sehr selten, aber Bayern gehört zu den stärker betroffenen Gebieten (etwa jeder dritte bis vierte Fuchs trägt ihn). Bodennah Gesammeltes gründlich waschen, am sichersten über 60 °C erhitzen – Einfrieren tötet die Eier nicht.",
   v: "brombeere",
   n: "Himbeere: Die Frucht ist innen hohl wie ein Fingerhut. Brombeere: Der Zapfen kommt mit. Rex: frisst beides.",
   x: "–" },

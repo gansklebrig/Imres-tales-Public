@@ -425,25 +425,37 @@
     ["ohr", "👂", "Friedrich lauscht", /\b(ruf\w*|laut\w*|bellt|bellen|röhr\w*|pfeif\w*|pfiff\w*|trommel\w*|schnauf\w*|knurr\w*|fiep\w*|heul\w*|keckert|keckern|grunz\w*|zirp\w*)\b/i]
   ];
   const sinnCache = {};
+  const rxEsc = t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  /* Kosten nur bei sicher essbaren Arten ohne giftigen Doppelgänger; Fühlen nie bei tödlichen Arten. */
+  const kostbar = a => a.ess === "essbar" && a.kap !== "pilz" && !(a.v || "").split(",").some(v => ART[v.trim()] && /giftig|toedlich/.test(ART[v.trim()].ess));
   function sinnHinweise(a) {
     if (sinnCache[a.id]) return sinnCache[a.id];
-    const felder = ["b", "r", "blt", "f", "kn", "wu", "ku", "n", "x"];
-    const namen = [a.de, a.wiss, ...a.de.split(/[\s\-()]+/).filter(w => w.length > 3)];
+    const felder = ["b", "r", "blt", "f", "kn", "wu"];
+    const namen = [a.de, a.wiss, ...a.de.split(/[\s\-()]+/).filter(w => w.length > 3)].filter(Boolean).sort((x, y) => y.length - x.length);
     const out = [];
-    for (const k of felder) {
+    for (const k of felder.concat(kostbar(a) ? ["ku"] : [])) {
       if (!a[k]) continue;
       for (const satz of String(a[k]).split(/(?<=[.!?])\s+/)) {
-        if (satz.length < 22 || satz.length > 220) continue;
+        if (satz.length < 20 || satz.length > 220) continue;
         for (const [sinn, em, titel, re] of SINN) {
-          if (!re.test(satz)) continue;
-          if (sinn === "zunge" && (!essbar(a) || a.kap === "pilz")) continue;
+          const m = re.exec(satz); if (!m) continue;
+          if (satz.length < (sinn === "ohr" ? 20 : 32)) continue;
+          if (sinn === "zunge" && !kostbar(a)) continue;
+          if (sinn !== "zunge" && k === "ku") continue;
+          if (sinn === "hand" && a.ess === "toedlich") continue;
           if (sinn === "ohr" && a.kap !== "tier") continue;
-          let t = satz; namen.forEach(w => { if (w) t = t.split(w).join("…"); });
-          out.push({ sinn, em, titel, text: t }); break;
+          let t = satz; namen.forEach(w => { t = t.replace(new RegExp(rxEsc(w), "gi"), "…"); });
+          out.push({ sinn, em, titel, text: t, wort: m[1].toLowerCase().slice(0, 5) }); break;
         }
       }
     }
     return (sinnCache[a.id] = out);
+  }
+  /* Falsche Antworten dürfen nicht dasselbe Sinnesmerkmal beschrieben haben. */
+  function sinnFalsche(a, wort) {
+    const txt = x => ["b", "r", "blt", "f", "kn", "wu", "ku", "k"].map(k => x[k] || "").join(" ").toLowerCase();
+    const gut = W.falsche(a, 12, true).filter(x => !txt(x).includes(wort));
+    return gut.slice(0, 3);
   }
   const STIMMEN = {}; let stimmenGeladen = false;
   fetch("pflanzen/stimmen.json").then(r => r.ok ? r.json() : {}).catch(() => ({})).then(j => { Object.assign(STIMMEN, j || {}); stimmenGeladen = true; if (/^#\/(lernen|art\/)/.test(location.hash)) W.route(); });
@@ -452,7 +464,8 @@
     if (modus === "sinne") {
       const h = sinnHinweise(a); if (!h.length) return null;
       const x = h[Math.floor(Math.random() * h.length)];
-      const ant = mischen([a].concat(W.falsche(a, 3, true)));
+      const fa = sinnFalsche(a, x.wort); if (fa.length < 3) return null;
+      const ant = mischen([a].concat(fa));
       return { a, modus, sinn: x.em, frage: x.em + " " + x.titel + ": „" + x.text + "“", antworten: ant, richtig: ant.indexOf(a), erkl: a.de + " – " + a.k };
     }
     if (modus === "stimme") {
