@@ -193,7 +193,7 @@
       FX.text(pcx(P), P.y - 14, freed ? L(["Befreit!", "Broke free!"]) : L(["Geschleudert!", "Hurled!"]), freed ? "#7fd36a" : "#ff8a5a", true);
       A.play(freed ? "slime" : "whip", { vol: 0.8 });
     }
-    if (a) { setArm(a, freed ? "retract" : "stuck", hd.tx); if (!freed) { a.tx = U.clamp(a.tx, AR().x0 + 20, AR().x1 - 20); a.sd = 1.2; } }
+    if (a) { setArm(a, freed ? "retract" : "stuck", hd.tx); if (!freed) { a.tx = U.clamp(a.tx, AR().x0 + 20, AR().x1 - 20); a.sd = 1.2; a.stuckDmg = 0; } }
   }
   function holdTick(e, P, dt) {
     const d = e.dg, hd = d.held, inp = Z.input, a = hd.arm;
@@ -348,7 +348,7 @@
 
   const MV = {
     hammer: { nm: N("Tentakelhammer", "Tentacle Hammer"), pre: 0.35, dur: 9, post: 0.55, sfx: "monster", w: 1.35,
-      start: (e, P, m) => { m.clk = 0; hammerScript(e, m, Math.min(3, PV(e, 1, 2, 3) + (skulls() >= 3 && e.phase >= 1 ? 1 : 0))); if (once(e, "hammerHint")) hint(P, "Schatten! Weg da!", "Shadow! Move!"); },
+      start: (e, P, m) => { m.clk = 0; hammerScript(e, m, Math.min(3, PV(e, 1, 2, 3) + (skulls() >= 4 && e.phase >= 1 ? 1 : 0))); if (once(e, "hammerHint")) hint(P, "Schatten! Weg da!", "Shadow! Move!"); },
       preTick: (e, P, dt, m) => { m.clk += dt; hammerRun(e, P, dt, m); },
       tick: (e, P, dt, m) => { m.clk += dt; hammerRun(e, P, dt, m); if (hammerDone(m) && m.t > 0.1) m.dur = m.t; },
       abort: (e, P, m) => { for (const s of m.strikes || []) if (s.a && s.st !== "done") setArm(s.a, "retract"); } },
@@ -526,7 +526,7 @@
   function update(e, dt, P) {
     const d = st(e);
     d.t += dt;
-    if (!d.introSet) { d.introSet = true; e.intro = 3.6; e.idle = 0.6; d.introT = 0; A.play("splash", { vol: 1, rate: 0.5 }); A.play("quake", { vol: 0.6 }); }
+    if (!d.introSet) { d.introSet = true; e.intro = 4.0; e.idle = 0.6; d.introT = 0; A.play("splash", { vol: 1, rate: 0.5 }); A.play("quake", { vol: 0.6 }); }
     if (e.intro > 0) introTick(e, dt);
     else d.rise = 1;
     /* Phasenmaschine und Techniken (bossphasen.js) */
@@ -534,7 +534,7 @@
     if (e.dead) return;
     if (e.trans) transAnim(e, dt); else d.quarrel = Math.max(0, d.quarrel - dt * 3);
     d.rage = e.phase >= 2 ? 1 : e.phase >= 1 ? 0.5 : 0;
-    e.tempoBonus = 1 + 0.04 * skulls(); /* Totenköpfe: kürzere Pausen (Vorwarnungen bleiben gleich lang) */
+    e.tempoBonus = 1 + 0.03 * skulls(); /* Totenköpfe: kürzere Pausen (Vorwarnungen bleiben gleich lang) */
     d.lift = U.approach(d.lift, d.liftT, dt * 12);
     d.bob = Math.sin(d.t * 0.9) * 2.4;
     d.lean = U.approach(d.lean, P ? cl((pcx(P) - d.cx) / 300, -1, 1) : 0, dt * 0.8);
@@ -563,11 +563,11 @@
   }
   function introTick(e, dt) {
     const d = e.dg; d.introT += dt;
-    d.rise = cl((d.introT - 0.5) / 2.6, 0, 1);
-    for (const h of d.heads) { h.jawT = d.introT > 2.4 && d.introT < 3.3 ? 1 : 0.1; h.rearT = d.introT > 2.4 && d.introT < 3.3 ? 0.7 : 0; }
+    d.rise = cl((d.introT - 0.7) / 2.7, 0, 1);
+    for (const h of d.heads) { h.jawT = d.introT > 2.9 && d.introT < 3.8 ? 1 : 0.1; h.rearT = d.introT > 2.9 && d.introT < 3.8 ? 0.7 : 0; }
     if (!low() && R() < dt * 40) FX.p({ x: d.cx + (R() - 0.5) * 220, y: d.wl + 2, vx: 0, vy: -20 - R() * 30, life: 0.6, size: 1.5 + R() * 2, col: "#c8d0c0", kind: "bubble" });
-    if (d.introT > 0.5 && !d.deathFx.s1) { d.deathFx.s1 = 1; FX.burst(d.cx, d.wl, 40, { col: ["#1a2a20", COL.foam, "#5a7a64"], sp: 260, ang: -Math.PI / 2, spread: 1.2, life: 1.1, size: 2.2, kind: "drop", g: 420 }); A.play("splash", { vol: 1, rate: 0.45 }); FX.addShake(6); }
-    if (d.introT > 2.4 && !d.deathFx.s2) { d.deathFx.s2 = 1; A.play("roar", { vol: 1, rate: 0.7 }); A.play("monster", { vol: 0.8, rate: 0.6, delay: 0.2 }); FX.addShake(10); FX.flashScreen("#3a2050", 0.2); }
+    if (d.introT > 0.7 && !d.deathFx.s1) { d.deathFx.s1 = 1; FX.burst(d.cx, d.wl, 40, { col: ["#1a2a20", COL.foam, "#5a7a64"], sp: 260, ang: -Math.PI / 2, spread: 1.2, life: 1.1, size: 2.2, kind: "drop", g: 420 }); A.play("splash", { vol: 1, rate: 0.45 }); FX.addShake(6); }
+    if (d.introT > 2.9 && !d.deathFx.s2) { d.deathFx.s2 = 1; A.play("roar", { vol: 1, rate: 0.7 }); A.play("monster", { vol: 0.8, rate: 0.6, delay: 0.2 }); FX.addShake(10); FX.flashScreen("#3a2050", 0.2); }
     FX.addShake(2 + 3 * d.rise * (1 - d.rise));
   }
   /* Tod: brüllen, erschlaffen, versinken – und irgendwo unter dem See reißt ein Faden */
@@ -735,7 +735,7 @@
       c.lineCap = "round"; c.lineJoin = "round";
       for (let pass = 0; pass < 3; pass++) {
         if (pass === 2 && flash) break;
-        c.strokeStyle = pass === 0 ? ink : flash ? "#fff6ea" : pass === 1 ? "#5a4458" : "#a8707e";
+        c.strokeStyle = pass === 0 ? ink : flash ? "#fff6ea" : pass === 1 ? "#45334a" : "#9a6474";
         for (let i = 1; i < n; i += 2) {
           const j = Math.min(n - 1, i + 1), w = lp(w0, w1, Math.pow(i / (n - 1), 0.8));
           c.lineWidth = pass === 0 ? w + 2.4 : pass === 1 ? w : w * 0.32;
@@ -944,7 +944,7 @@
     if (dk >= 1) return;
     if (e.dead) { c.save(); c.globalAlpha = 1 - dk; c.beginPath(); c.rect(Z.cam.x - 50, Z.cam.y - 50, Z.cam.w + 100, FY - Z.cam.y + 50); c.clip(); }
     for (const a of d.arms) {
-      tentacle(c, a.p, a.n, a.wound > 0 ? 11 : 15, 2.2, a === flashA || a.hit > 0.7, t, a.ph, lowQ, a.wound > 0 ? 1 : 0);
+      tentacle(c, a.p, a.n, a.wound > 0 ? 11 : 15, a.mode === "stuck" || a.mode === "hold" ? 5 : 2.2, a === flashA || a.hit > 0.7, t, a.ph, lowQ, a.wound > 0 ? 1 : 0);
       if (a.mode === "stuck") { /* Risse im Stein, wo er steckt */
         c.strokeStyle = "rgba(10,6,10,.8)"; c.lineWidth = 1; for (let k = -2; k <= 2; k++) { c.beginPath(); c.moveTo(a.tx, FY); c.lineTo(a.tx + k * 7, FY + 4 + Math.abs(k)); c.stroke(); }
       }

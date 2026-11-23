@@ -841,9 +841,10 @@
   }
   function drawHand(c, x, y, front) { circ(c, x, y, front ? 1.7 : 1.6, front ? "#2c2022" : "#1e1618"); circ(c, x + 0.5, y - 0.4, 0.7, front ? "#4a3a3c" : "#2a1e20"); }
 
-  function drawTorso(c, p, glowK, time, hurt) {
-    /* lokaler Rumpf: Ursprung Hüfte, oben = −y */
+  function drawTorso(c, p, glowK, time, hurt, part) {
+    /* lokaler Rumpf: Ursprung Hüfte, oben = −y. part: 1 = nur fester Teil (Sprite), 2 = nur glühender Kern */
     const br = Math.sin(time * 2.2) * 0.15;
+    if (part !== 2) {
     /* Rückenplatte und hinterer Lendenschurz */
     poly(c, [-3.6, 0.5, -5.2, 5.5 + Math.sin(time * 3) * 0.3, -2.2, 4.6, -1, 0.5], EZ.cloth2);
     /* Rumpf */
@@ -854,6 +855,8 @@
     /* Bauchschienen */
     limb(c, -3.6, -2.4, 4.2, -2.6, 0.6, "#120c0e"); limb(c, -3.8, -4.2, 4.6, -4.5, 0.6, "#120c0e");
     limb(c, -3, -3.3, 4.2, -3.5, 0.6, "#3a2c2e");
+    }
+    if (part !== 1) {
     /* Darkin-Kern: Riss im Brustpanzer, glüht und pulsiert */
     const pulse = 0.6 + 0.4 * Math.sin(time * 3 + 1);
     const g = glowK * (0.55 + pulse * 0.45);
@@ -861,6 +864,8 @@
     c.beginPath(); c.moveTo(-2, -5.6); c.lineTo(0.6, -7.6); c.lineTo(3.4, -6.4); c.moveTo(0.6, -7.6); c.lineTo(1.4, -10.6); c.moveTo(0.6, -7.6); c.lineTo(-1.6, -9.6); c.stroke();
     circ(c, 0.9, -7.8, 1.15, glowK > 0.3 ? "#ff8a2a" : "#5a2a1a"); circ(c, 0.9, -7.8, 0.5, glowK > 0.3 ? "#ffe0a0" : "#6a3a2a");
     if (g > 0.05) glow(c, 0.9, -7.8, 5.5 + hurt * 3, "rgba(255,110,40,.5)", g);
+    }
+    if (part === 2) return;
     /* Gürtel mit Schädelschnalle */
     limb(c, -4.4, -0.6, 4.2, -0.8, 1.7, EZ.belt); limb(c, -4.2, -1.2, 4, -1.4, 0.4, "#5a4232");
     ell(c, 3.2, -0.7, 1.5, 1.4, EZ.bone); c.fillStyle = "#1a1010"; c.fillRect(3.1, -1.1, 0.6, 0.5); c.fillRect(3.9, -1.1, 0.5, 0.5);
@@ -889,29 +894,33 @@
     c.fillStyle = EZ.cloth2; c.beginPath(); c.moveTo(1, -0.4); c.lineTo(3.8, -0.5); c.quadraticCurveTo(3.6 + sw * 2, 2.6, tx + 1.1, ty); c.lineTo(tx, ty + 1); c.lineTo(tx - 1.1, ty); c.quadraticCurveTo(1.2 + sw * 2, 2.6, 1, -0.4); c.fill();
     c.strokeStyle = "#8a1a1a"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(2.4, 0.2); c.quadraticCurveTo(2.4 + sw * 2.2, 2.6, tx, ty + 0.4); c.stroke();
   }
-  function drawHead(c, P, glowK, time, alpha, hurt, wrath, rotW) {
-    /* Kopf-Ursprung: Nacken; oben = −y */
+  function drawHead(c, P, glowK, time, alpha, hurt, wrath, rotW, part) {
+    /* Kopf-Ursprung: Nacken; oben = −y. part: 1 = fester Teil (Sprite), 2 = nur Kapuzenzipfel, 3 = nur Leuchten */
     /* Kapuzenzipfel hinten: Stoffzunge, die als Pendel nachschwingt */
-    if (SECV && rotW != null) {
+    if (SECV && rotW != null && (!part || part === 2)) {
       const a = PI / 2 + 0.55 + (SECV.hd || 0) - rotW, a2 = a + cl((SECV.hdv || 0) * 0.04, -0.6, 0.6);
       const x0 = -4.3, y0 = -1.5, x1 = x0 + Math.cos(a) * 2.6, y1 = y0 + Math.sin(a) * 2.6, x2 = x1 + Math.cos(a2) * 2.4, y2 = y1 + Math.sin(a2) * 2.4;
       const nx = -Math.sin(a), ny = Math.cos(a);
       poly(c, [-4.6, -3.6, x1 - nx * 1.1, y1 - ny * 1.1, x2, y2, x1 + nx * 0.9, y1 + ny * 0.9, -3.4, 0.6], EZ.hood2);
       limb(c, x1, y1, x2, y2, 0.5, "#3e0a0c");
     }
+    if (part === 2) return;
+    const hg = wrath ? 1 : 0;
+    if (part !== 3) {
     /* Kapuze */
     poly(c, [-3.9, 1.2, -4.8, -2.8, -3.8, -6.8, -0.6, -8.6, 3, -8.1, 5.1, -5.6, 5.7, -2.4, 4.9, 0.6, 2, 1.6], EZ.hood);
     poly(c, [-3.9, 1.2, -4.8, -2.8, -3.8, -6.8, -1.6, -7.6, -2.4, -2.4, -1.4, 1.5], EZ.hood2);
     limb(c, -0.6, -8.4, 3, -7.9, 0.5, "#a82020");
     /* Hörner: schwarz, nach hinten oben gebogen, mit Rillen */
-    const hg = wrath ? 1 : 0;
     c.fillStyle = EZ.horn;
     c.beginPath(); c.moveTo(-1.8, -7.2); c.quadraticCurveTo(-9, -9.8, -7, -16.6); c.quadraticCurveTo(-5.8, -11.8, 0.4, -8.3); c.fill();
     c.beginPath(); c.moveTo(2, -7.9); c.quadraticCurveTo(3.4, -13.6, 7.4, -16.4); c.quadraticCurveTo(4.8, -12, 4.6, -7.4); c.fill();
     c.strokeStyle = hg ? "#c02a1a" : EZ.hornHi; c.lineWidth = 0.5;
     c.beginPath(); c.moveTo(-4.6, -9.4); c.lineTo(-3.4, -8.6); c.moveTo(-6.2, -11.6); c.lineTo(-5, -11.2); c.moveTo(-6.8, -13.8); c.lineTo(-5.8, -13.6);
     c.moveTo(3, -10.6); c.lineTo(4.4, -10.4); c.moveTo(4.2, -12.8); c.lineTo(5.4, -12.8); c.stroke();
-    if (hg) { glow(c, 7, -15.6, 4, "rgba(255,60,30,.7)", alpha); glow(c, -6.8, -15.8, 4, "rgba(255,60,30,.7)", alpha); }
+    }
+    if (hg && part !== 1) { glow(c, 7, -15.6, 4, "rgba(255,60,30,.7)", alpha); glow(c, -6.8, -15.8, 4, "rgba(255,60,30,.7)", alpha); }
+    if (part !== 3) {
     /* Gesichtsöffnung im Schatten */
     poly(c, [0.6, -6.3, 4.3, -5.9, 5.3, -2.5, 4.4, 0.1, 1.1, 0.6], "#0e0809");
     /* Knochenmaske */
@@ -919,13 +928,16 @@
     poly(c, [1.9, -1.6, 4.9, -1.4, 4.5, -0.4, 2.6, 0.1], EZ.bone2);
     c.fillStyle = "#2a1a14"; for (let i = 0; i < 3; i++) c.fillRect(2.6 + i * 0.75, -0.9, 0.35, 0.8);
     /* glühende Augen */
+    }
     const blink = P.anim && P.anim.blink > 0 ? 0.25 : 1;
     const eh = (hurt > 0.3 ? 0.5 : 1) * blink;
     if (glowK > 0.02) {
-      c.fillStyle = "#ff6a1a"; c.fillRect(2.9, -3.9, 1.7, 1.15 * eh); c.fillRect(4.9, -3.7, 0.8, 0.95 * eh);
-      c.fillStyle = "#ffd0a0"; c.fillRect(3.3, -3.7, 0.7, 0.6 * eh);
-      glow(c, 4, -3.3, wrath ? 8 : 6, wrath ? "rgba(255,50,30,.85)" : "rgba(255,90,30,.75)", alpha * glowK);
-    } else { c.fillStyle = "#2a1410"; c.fillRect(2.9, -3.6, 1.7, 0.6); }
+      if (part !== 3) {
+        c.fillStyle = "#ff6a1a"; c.fillRect(2.9, -3.9, 1.7, 1.15 * eh); c.fillRect(4.9, -3.7, 0.8, 0.95 * eh);
+        c.fillStyle = "#ffd0a0"; c.fillRect(3.3, -3.7, 0.7, 0.6 * eh);
+      }
+      if (part !== 1) glow(c, 4, -3.3, wrath ? 8 : 6, wrath ? "rgba(255,50,30,.85)" : "rgba(255,90,30,.75)", alpha * glowK);
+    } else if (part !== 3) { c.fillStyle = "#2a1410"; c.fillRect(2.9, -3.6, 1.7, 0.6); }
   }
 
   /* ---------- Sekundärbewegung, Waffenspur, Glanz ---------- */
@@ -1063,6 +1075,24 @@
   }
   let SECV = null; /* Sekundärwerte für die Teilzeichner (Kopf, Rumpf) */
 
+  /* vorderer Schulterpanzer (über dem Oberarm), Ursprung Schulter */
+  function shoulderF(c) {
+    poly(c, [-1.4, -2.6, -4.6, -5.8, -0.2, -3], "#100a0c"); poly(c, [-2.8, -1.4, -6.4, -2.8, -2.6, 0], "#100a0c");
+    ell(c, 0, 0.2, 3.4, 2.7, "#1a1214", -0.2);
+    ell(c, 0.2, -0.3, 2.7, 2, "#2c2024", -0.2);
+    c.strokeStyle = EZ.edge; c.lineWidth = 0.6; c.beginPath(); c.ellipse(0, 0.2, 3.1, 2.4, -0.2, PI * 1.05, PI * 1.85); c.stroke();
+    limb(c, -2.6, 1.6, 2.6, 1.0, 0.6, "#120c0e");
+  }
+  /* Waffen ohne Zeitabhängigkeit dürfen auf Stufe 0 aus dem Sprite-Zwischenspeicher kommen (Bogen/Peitsche: Spannung in 1/8-Stufen) */
+  const WSPR = new Set(["sickles", "sickle", "dagger", "dawn", "hammer", "scythe", "whip", "spear", "axe", "club", "rapier", "scimitar", "claw", "anchor", "stonefist", "fist", "bow", "xbow", "knives", "vial", "web", "shield", "goldshield", "thornshield"]);
+  function weaponP(c, icon, col, t, ext, pps) {
+    if (pps && WSPR.has(icon)) {
+      const eq = Math.round((ext || 0) * 8) / 8, key = "PW|" + pps + "|" + icon + "|" + col + "|" + eq;
+      if (partSpr(c, key, 20, 48, 30, 20, pps, g => weapon(g, icon, col, 0, eq))) return;
+    }
+    weapon(c, icon, col, t, ext);
+  }
+
   Z.drawPlayer = function (c, P, time) {
     if (!P.cape) capeInit(P);
     const S = pstate(P);
@@ -1132,6 +1162,10 @@
     /* Umhang (in Weltkoordinaten) */
     drawCape(c, P, alpha, time, glowK);
     const M0 = c.getTransform(); let M0inv = null;
+    /* Stufe 0: feste Teile (Rumpf, Kopf, Schulterpanzer, Waffen) aus dem Sprite-Zwischenspeicher, doppelt aufgelöst (drehen sauber);
+       Gliedmaßen (IK), Umhang, Wappenrock, Pendel und alles Leuchten bleiben dynamisch */
+    let pps = 0;
+    if (Z.gq && Z.gq.lean && !Z.sprOff) { pps = Math.max(1, Math.round(Math.hypot(M0.a, M0.b) * 4) / 2); sprTick(); }
     const wantEmb = !low && !P.dead && (wrath || Math.abs(P.vx) > 140 || (P.act && P.act.type === "melee" && P.act.phase === "act")) && Math.random() < dt * (wrath ? 22 : 7);
     let wantBreath = false;
     if (!P.dead && dt > 0 && isCold()) { S.breathT -= dt; if (S.breathT <= 0) { wantBreath = true; S.breathT = Math.abs(P.vx) > 60 ? 0.9 : 2.3; } }
@@ -1159,18 +1193,19 @@
     /* ---- hinteres Bein, hinterer Arm ---- */
     drawLeg(c, hipB[0], hipB[1], p.fBx, p.fBy - 1.3, p.toeB, false, glowK, time);
     /* Schild auf dem Rücken */
-    if (WI.shieldBack && !P.dead) { const q = [0, 0]; toF(-4.4, -6.5, q); c.save(); c.translate(q[0], q[1]); c.rotate(p.lean + 0.2); c.scale(0.7, 0.7); weapon(c, WI.shieldBack.icon, WI.shieldBack.col, time); c.restore(); }
+    if (WI.shieldBack && !P.dead) { const q = [0, 0]; toF(-4.4, -6.5, q); c.save(); c.translate(q[0], q[1]); c.rotate(p.lean + 0.2); c.scale(0.7, 0.7); weaponP(c, WI.shieldBack.icon, WI.shieldBack.col, time, 0, pps); c.restore(); }
     const bA = drawArm(c, SB[0], SB[1], hBx, hBy, T.eB, false, glowK, time);
     /* hintere Hand: zweite Klinge, Bogensehne, Faust */
-    if (WI.icon2 && !WI.punchBack) { c.save(); c.translate(bA[0], bA[1]); c.rotate(WI.ang2); weapon(c, WI.icon2, WI.col, time); c.restore(); }
-    else if (WI.icon2 && WI.punchBack) { c.save(); c.translate(bA[0], bA[1]); c.rotate(0); weapon(c, WI.icon2, WI.col, time); c.restore(); }
-    if (WI.hand2Icon) { c.save(); c.translate(bA[0], bA[1]); c.rotate(Math.atan2(bA[1] - bA[3], bA[0] - bA[2]) + 0.5); weapon(c, WI.hand2Icon, WI.hand2Col, time); c.restore(); }
+    if (WI.icon2 && !WI.punchBack) { c.save(); c.translate(bA[0], bA[1]); c.rotate(WI.ang2); weaponP(c, WI.icon2, WI.col, time, 0, pps); c.restore(); }
+    else if (WI.icon2 && WI.punchBack) { c.save(); c.translate(bA[0], bA[1]); c.rotate(0); weaponP(c, WI.icon2, WI.col, time, 0, pps); c.restore(); }
+    if (WI.hand2Icon) { c.save(); c.translate(bA[0], bA[1]); c.rotate(Math.atan2(bA[1] - bA[3], bA[0] - bA[2]) + 0.5); weaponP(c, WI.hand2Icon, WI.hand2Col, time, 0, pps); c.restore(); }
     drawHand(c, bA[0], bA[1], false);
     /* ---- vorderes Bein (unter dem Wappenrock) ---- */
     drawLeg(c, hipF[0], hipF[1], p.fFx, p.fFy - 1.3, p.toeF, true, glowK, time);
     /* ---- Rumpf ---- */
     c.save(); c.translate(p.hx, p.hy); c.rotate(p.lean);
-    drawTorso(c, p, glowK, time, WI.hurt);
+    if (pps && partSpr(c, "PT|" + pps, 7, 8, 14, 7, pps, g => drawTorso(g, p, 1, 0, 0, 1))) drawTorso(c, p, glowK, time, WI.hurt, 2);
+    else drawTorso(c, p, glowK, time, WI.hurt);
     drawTrinkets(c, S, p.lean + (T.rot || 0));
     drawTabard(c, p, time, S.tabA);
     /* hinterer Schulterpanzer */
@@ -1179,7 +1214,13 @@
     /* Kopf */
     c.save(); c.translate(1.1, -12.4); c.rotate(headA);
     if (WI.headTurn > 0) { let hs = Math.cos(WI.headTurn * PI); if (Math.abs(hs) < 0.18) hs = hs < 0 ? -0.18 : 0.18; c.translate(0.6, 0); c.scale(hs, 1); c.translate(-0.6, 0); }
-    drawHead(c, P, glowK, time, alpha, WI.hurt, wrath, p.lean + headA + (T.rot || 0));
+    const rotW = p.lean + headA + (T.rot || 0);
+    if (pps) {
+      const hk = "PH|" + pps + "|" + (wrath ? 1 : 0) + (WI.hurt > 0.3 ? 1 : 0) + (P.anim && P.anim.blink > 0 ? 1 : 0) + (glowK > 0.02 ? 1 : 0);
+      drawHead(c, P, glowK, time, alpha, WI.hurt, wrath, rotW, 2);
+      if (!partSpr(c, hk, 11, 9, 19, 4, pps, g => drawHead(g, P, glowK, 0, 1, WI.hurt, wrath, rotW, 1))) drawHead(c, P, glowK, time, alpha, WI.hurt, wrath, rotW, 1);
+      drawHead(c, P, glowK, time, alpha, WI.hurt, wrath, rotW, 3);
+    } else drawHead(c, P, glowK, time, alpha, WI.hurt, wrath, rotW);
     /* Glut an den Hornspitzen (bei Tempo, Zorn, im Schlag) */
     if (wantEmb) { const tipH = Math.random() < 0.5 ? [7.2, -16.2] : [-6.9, -16.4]; const w = toWorld(c, M0inv, tipH[0], tipH[1]); Z.fx.p({ x: w[0], y: w[1], vx: -P.vx * 0.25 + (Math.random() - 0.5) * 12, vy: -18 - Math.random() * 16, life: 0.45, size: 1.3, col: wrath ? "#ff4a2a" : "#ff8a3a", kind: "glow", add: true }); }
     /* Atemwolke aus der Maske */
@@ -1195,7 +1236,7 @@
     const fA = drawArm(c, SF[0], SF[1], hFx, hFy, T.eF, true, glowK, time);
     if (WI.icon && !(WI.icon2 && WI.punchBack && FISTS[WI.icon] && false)) {
       c.save(); c.translate(fA[0], fA[1]); c.rotate(WI.ang);
-      weapon(c, WI.icon, WI.col, time, WI.icon === "bow" || WI.icon === "whip" || WI.icon === "xbow" ? ext : 0);
+      weaponP(c, WI.icon, WI.col, time, WI.icon === "bow" || WI.icon === "whip" || WI.icon === "xbow" ? ext : 0, pps);
       if (swingOn) {
         const sm = act.def && act.def.smear, cls = FISTS[WI.icon] ? "fist" : (sm && sm.stab) || WI.icon === "spear" && !(sm && !sm.stab) ? "stab" : WI.icon === "whip" ? "whip" : W2H[WI.icon] || (act.def && act.def.heavy) ? "heavy" : "blade";
         trailPush(S, F0.inverse().multiply(c.getTransform()), WI.icon, time, cls); S.trCol = WI.col;
@@ -1219,11 +1260,7 @@
     drawHand(c, fA[0], fA[1], true);
     /* vorderer Schulterpanzer (über dem Oberarm) */
     c.save(); c.translate(SF[0], SF[1]); c.rotate(p.lean * 0.5 + (Math.atan2(fA[3] - SF[1], fA[2] - SF[0]) - PI / 2) * 0.3);
-    poly(c, [-1.4, -2.6, -4.6, -5.8, -0.2, -3], "#100a0c"); poly(c, [-2.8, -1.4, -6.4, -2.8, -2.6, 0], "#100a0c");
-    ell(c, 0, 0.2, 3.4, 2.7, "#1a1214", -0.2);
-    ell(c, 0.2, -0.3, 2.7, 2, "#2c2024", -0.2);
-    c.strokeStyle = EZ.edge; c.lineWidth = 0.6; c.beginPath(); c.ellipse(0, 0.2, 3.1, 2.4, -0.2, PI * 1.05, PI * 1.85); c.stroke();
-    limb(c, -2.6, 1.6, 2.6, 1.0, 0.6, "#120c0e");
+    if (!(pps && partSpr(c, "PS|" + pps, 8, 5, 7, 4, pps, shoulderF))) shoulderF(c);
     c.restore();
     /* Treffer: kurzes rotes Aufleuchten */
     if (WI.hurt > 0.3) glow(c, p.hx, p.hy - 8, 12, "rgba(255,40,30,.5)", alpha * WI.hurt);
@@ -1412,6 +1449,142 @@
     c.restore();
   }
 
+  /* ---------- Sprite-Zwischenspeicher für Gegner-Gestalten (nur Stufe 0 / Handheld) ----------
+     Die Gestalt (Gliedmaßen, Waffe, Gesicht) wird je Gegnerart × Zustand × quantisiertem Bild einmal in eine kleine
+     Leinwand gezeichnet (beim ersten Bedarf, höchstens wenige je Bild) und danach nur noch per drawImage gesetzt.
+     Ganzkörper-Bewegung (Ausholen-Neigung, Rückstoß, Stauchen, Tod), Blickrichtung (Spiegelung), Leuchten der
+     Vorwarnung, Zustände, Glyphen und Balken bleiben dynamisch. Speicher: LRU-Obergrenze (32 MB, minimal 20 MB).
+     Bilder je Zyklus: Ruhe 16 (2 s, 8 B/s), Lauf 8 je Schritt-Zyklus, Ausholen 6 (letztes = voll ausgeholt), Schlag 6, Nachlauf 4, Tod 9. */
+  const SPR = new Map(), SPRBIG = new WeakMap(), DID = new WeakMap();
+  let sprDid = 0, sprFrame = -1, sprMade = 0, sprScratch = null, sprSg = null;
+  const SPRS = { hit: 0, miss: 0, fall: 0, evict: 0 };
+  /* Sammelseiten (Atlas) 512×512 = 1 MB; Obergrenze 32 Seiten (minimal 20); verdrängt wird die am längsten unbenutzte Seite */
+  const PAGE = 512, PAGES = [];
+  let curPg = null;
+  const sprMaxPages = () => (Z.gq && Z.gq.mini ? 20 : 32);
+  function defId(d) { let i = DID.get(d); if (!i) { i = ++sprDid; DID.set(d, i); } return i; }
+  function pageAlloc(bw, bh) {
+    const pw = bw + 2, ph = bh + 2; /* 1 px Rand gegen Überblenden beim Filtern */
+    if (pw > PAGE || ph > PAGE) return null;
+    if (curPg) { if (curPg.x + pw > PAGE) { curPg.x = 0; curPg.y += curPg.rh; curPg.rh = 0; } if (curPg.y + ph > PAGE) curPg = null; }
+    if (!curPg) {
+      let pg = null;
+      if (PAGES.length >= sprMaxPages()) {
+        for (const q of PAGES) if (q.used < sprFrame && (!pg || q.used < pg.used)) pg = q;
+        if (!pg) return null;
+        for (const k of pg.keys) SPR.delete(k);
+        pg.keys.length = 0; pg.g.clearRect(0, 0, PAGE, PAGE); SPRS.evict++;
+      } else {
+        const cv = document.createElement("canvas"); cv.width = cv.height = PAGE;
+        pg = { cv, g: cv.getContext("2d"), keys: [], used: 0 }; PAGES.push(pg);
+      }
+      pg.x = 0; pg.y = 0; pg.rh = 0; curPg = pg;
+    }
+    const r = curPg; const sx = r.x + 1, sy = r.y + 1; r.x += pw; if (ph > r.rh) r.rh = ph; r.used = sprFrame;
+    return { pg: r, sx, sy };
+  }
+  /* In Zwischenleinwand zeichnen (Rahmen lokal: links L, rechts R, oben U, unten D; Maßstab ps), benutzten Bereich
+     suchen und in eine Sammelseite kopieren. Rückgabe null = nicht möglich (zu groß, Fehler), {pg:null} = leer.
+     edge (falls übergeben) wird gesetzt, wenn der Inhalt an den Rahmen stößt. */
+  function sprMake(key, L, R, U, D, ps, draw, edge) {
+    const W = Math.ceil((L + R) * ps), H = Math.ceil((U + D) * ps);
+    if (W > 640 || H > 640 || W < 1 || H < 1) return null;
+    if (!sprScratch) { sprScratch = document.createElement("canvas"); sprScratch.width = sprScratch.height = 160; sprSg = sprScratch.getContext("2d", { willReadFrequently: true }); }
+    if (sprScratch.width < W || sprScratch.height < H) { sprScratch.width = Math.max(sprScratch.width, W); sprScratch.height = Math.max(sprScratch.height, H); }
+    const g = sprSg;
+    g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = "source-over"; g.clearRect(0, 0, W, H);
+    g.save(); g.setTransform(ps, 0, 0, ps, L * ps, U * ps);
+    try { draw(g); } catch (err) { g.restore(); return null; }
+    g.restore(); g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = "source-over";
+    /* benutzten Bereich suchen (Deckkraft > 2/255) */
+    const px = new Uint32Array(g.getImageData(0, 0, W, H).data.buffer);
+    let x0 = W, x1 = -1, y0 = H, y1 = -1;
+    for (let y = 0; y < H; y++) {
+      const o = y * W; let a = -1, b = -1;
+      for (let x = 0; x < W; x++) if ((px[o + x] >>> 24) > 2) { a = x; break; }
+      if (a < 0) continue;
+      for (let x = W - 1; x >= a; x--) if ((px[o + x] >>> 24) > 2) { b = x; break; }
+      if (y < y0) y0 = y; y1 = y; if (a < x0) x0 = a; if (b > x1) x1 = b;
+    }
+    if (x1 < 0) return { pg: null };
+    if (edge && (x0 === 0 || y0 === 0 || x1 === W - 1 || y1 === H - 1)) edge.hit = true;
+    const bw = x1 - x0 + 1, bh = y1 - y0 + 1, slot = pageAlloc(bw, bh);
+    if (!slot) return null;
+    slot.pg.g.drawImage(sprScratch, x0, y0, bw, bh, slot.sx, slot.sy, bw, bh); slot.pg.keys.push(key);
+    return { pg: slot.pg, sx: slot.sx, sy: slot.sy, sw: bw, sh: bh, x: x0 / ps - L, y: y0 / ps - U, w: bw / ps, h: bh / ps };
+  }
+  const EDGE = { hit: false };
+  /* Gegner-Gestalt: Rahmen aus Körpergröße; stößt sie an, wird der Rahmen für diese Art vergrößert (nächster Aufbau) */
+  function sprBuild(key, fn, e, d, k, t, mv, ph, ak, time, ps, hLoc) {
+    const big = SPRBIG.get(d) || 1, s = e.size || 1;
+    const R = (Math.max(hLoc * 1.6, e.w / s * 1.3, 24) + 10) * big, up = (hLoc * 1.9 + 16) * big, dn = (hLoc * 0.6 + 10) * big;
+    EDGE.hit = false;
+    const r = sprMake(key, R, R, up, dn, ps, g => fn(g, e, d, k, t, mv, ph, ak, time), EDGE);
+    if (EDGE.hit && big < 2.2) SPRBIG.set(d, big * 1.4);
+    return r;
+  }
+  /* Treffer-Blitz aus dem normalen Bild ableiten (billig, ohne Gestalt neu zu zeichnen) */
+  function sprFlash(key, s) {
+    if (!s.pg) return s;
+    const slot = pageAlloc(s.sw, s.sh); if (!slot || !s.pg.keys.length) return null;
+    const g = slot.pg.g;
+    g.drawImage(s.pg.cv, s.sx, s.sy, s.sw, s.sh, slot.sx, slot.sy, s.sw, s.sh);
+    g.globalCompositeOperation = "source-atop"; g.globalAlpha = 0.88; g.fillStyle = "#fff6ea"; g.fillRect(slot.sx, slot.sy, s.sw, s.sh);
+    g.globalCompositeOperation = "source-over"; g.globalAlpha = 1; slot.pg.keys.push(key);
+    return { pg: slot.pg, sx: slot.sx, sy: slot.sy, sw: s.sw, sh: s.sh, x: s.x, y: s.y, w: s.w, h: s.h };
+  }
+  function sprTick() { const fr = Z.gfx ? Z.gfx.frame : 0; if (fr !== sprFrame) { sprFrame = fr; sprMade = 0; } }
+  /* Bauteil (Spieler) aus dem Zwischenspeicher setzen; false → selbst zeichnen */
+  function partSpr(c, key, L, R, U, D, ps, draw) {
+    const s = sprGet(key, () => sprMake(key, L, R, U, D, ps, draw));
+    if (!s) return false;
+    if (s.pg) c.drawImage(s.pg.cv, s.sx, s.sy, s.sw, s.sh, s.x, s.y, s.w, s.h);
+    return true;
+  }
+  function sprGet(key, mk) {
+    const s = SPR.get(key);
+    if (s) { SPRS.hit++; if (s.pg) s.pg.used = sprFrame; return s; }
+    if (sprMade >= (Z.gq && Z.gq.mini ? 2 : 3)) { SPRS.fall++; return null; } /* Aufbau-Budget je Bild erschöpft: diesmal direkt zeichnen */
+    sprMade++; SPRS.miss++;
+    const n = mk(); if (!n) return null;
+    SPR.set(key, n);
+    return n;
+  }
+  /* Gestalt per Sprite zeichnen; false → Aufrufer zeichnet wie bisher. Q ist bereits gesetzt (setQ). */
+  function sprShape(c, e, d, fn, k, flash, tA, moving, phase, ps, hLoc) {
+    let fk, qt, qph = 0;
+    const q0 = Q.pre, q1 = Q.act, q2 = Q.post, q3 = Q.hurt, q4 = Q.deadT, q5 = Q.dead, q6 = Q.time;
+    sprTick();
+    if (e.dead) { const b = Math.min(8, (Q.deadT / 0.07) | 0); fk = "D" + b; Q.deadT = (b + 0.5) * 0.07; Q.dead = cl(Q.deadT / 0.3, 0, 1); qt = 0; }
+    else {
+      let wb = -1;
+      if (moving) { wb = ((((phase % TAU) + TAU) % TAU) / TAU * 8) | 0; qph = (wb + 0.5) * TAU / 8; }
+      if (Q.ph === "pre") { const b = Math.min(5, (Q.pre * 6) | 0); Q.pre = (b + 1) / 6; fk = "p" + b; qt = 0.5; }
+      else if (Q.ph === "act") { const b = Math.min(5, (Q.act * 6) | 0); Q.act = (b + 0.5) / 6; fk = "a" + b + Q.alt; qt = 0.5; }
+      else if (Q.ph === "post") { const b = Math.min(3, (Q.post * 4) | 0); Q.post = (b + 0.5) / 4; fk = "o" + b; qt = 0.5; }
+      else if (wb >= 0) { fk = "w"; qt = wb * 0.25; }
+      else { const b = ((tA * 8) | 0) % 16; fk = "i" + b; qt = b / 8; }
+      if (wb >= 0) fk += "m" + wb;
+      if (Q.ph) fk += Q.kind;
+      /* Rückstoß zeigt die Ganzkörper-Feder; in der Gestalt nur „getroffen ja/nein“ */
+      if (Q.hurt > 0.4) { Q.hurt = 0.8; fk += "h"; } else Q.hurt = 0;
+    }
+    Q.time = qt;
+    const st = e.st;
+    const key = defId(d) + "|" + ((ps * 4 + 0.5) | 0) + "|" + fk + (!d.fly && !e.onGround ? (e.vy < 0 ? "u" : "f") : "") +
+      (e.aware && !Q.ph && !e.dead ? "w" : "") + ((st && st.stun > 0) || e.broken > 0 ? "s" : "") + (e.sleep ? "z" : "") + (e.revealed ? "r" : "") + (e.grounded ? "g" : "") + (e.wob > 0 ? "b" : "");
+    const psq = Math.max(0.5, Math.round(ps * 4) / 4);
+    const ak = legacyAk();
+    let s = sprGet(key, () => sprBuild(key, fn, e, d, col => col, qt, moving, qph, ak, qt, psq, hLoc));
+    if (s && flash) { const s0 = s; s = sprGet(key + "!", () => sprFlash(key + "!", s0)); }
+    Q.pre = q0; Q.act = q1; Q.post = q2; Q.hurt = q3; Q.deadT = q4; Q.dead = q5; Q.time = q6;
+    if (!s) return false;
+    if (s.pg) c.drawImage(s.pg.cv, s.sx, s.sy, s.sw, s.sh, s.x, s.y, s.w, s.h);
+    return true;
+  }
+  Z.figSpr = { stats: () => ({ n: SPR.size, mb: PAGES.length, hit: SPRS.hit, miss: SPRS.miss, fall: SPRS.fall, evict: SPRS.evict }),
+    clear: () => { SPR.clear(); for (const q of PAGES) { q.keys.length = 0; q.g.clearRect(0, 0, PAGE, PAGE); } curPg = null; PAGES.length = 0; }, keys: () => [...SPR.keys()] };
+
   Z.drawEnemy = function (c, e, time) {
     const d = e.def;
     if (e.ceil && !e.aware) { /* Spinne an der Decke: Faden */ limb(c, e.x + e.w / 2, e.y - 60, e.x + e.w / 2, e.y + 2, 0.5, "rgba(230,230,240,.5)"); }
@@ -1446,6 +1619,9 @@
     const dead = e.dead;
     c.scale(e.face * s, s);
     const shape = d.shape;
+    /* Stufe 0: Gestalt aus dem Sprite-Zwischenspeicher (Pixelmaßstab vor der Ganzkörper-Bewegung bestimmen) */
+    let sprPs = 0;
+    if (Z.gq && Z.gq.lean && !Z.sprOff && !d.boss && shape !== "dummy") { const m = c.getTransform(); sprPs = Math.hypot(m.a, m.b); }
     const hLoc = e.h / s; /* Körperhöhe in lokalen Einheiten */
     /* ---- Ganzkörper-Bewegung: Anspannen, Zuschlagen, Rückstoß ---- */
     const lf = LEANF[shape] != null ? LEANF[shape] : 1;
@@ -1522,7 +1698,8 @@
       else if (ty === "scatter") { const kk = eo(kd); c.rotate(-0.25 * kk + Math.sin(dt0 * 40) * 0.04 * (1 - kd)); c.scale(1 + 0.25 * kk, 1 - 0.6 * kk); }
       else if (ty === "crumbleBig") { c.translate(Math.sin(dt0 * 50) * (1 - kd) * 0.8, 0); c.scale(1 + kd * 0.15, 1 - kd * 0.45); }
     }
-    (SHAPES[shape] || SHAPES.human)(c, e, d, k, tA, moving, phase, legacyAk(), time);
+    const shFn = SHAPES[shape] || SHAPES.human;
+    if (!(sprPs > 0 && sprShape(c, e, d, shFn, k, flash, tA, moving, phase, sprPs, hLoc))) shFn(c, e, d, k, tA, moving, phase, legacyAk(), time);
     c.restore();
     /* Zustände: Eis, Feuer, Gift, Benommenheit */
     if (!dead && (e.frozenT > 0 || (e.st && (e.st.burn > 0 || e.st.poison > 0 || e.st.stun > 0)))) statusFx(c, e, d, time, ES, low);

@@ -440,25 +440,27 @@
   function tilePath(H, pick, x0, y0, x1, y1) { const c = H.c, T = H.T; c.beginPath(); let any = false; for (let y = y0; y < y1; y++) { let s = -1; for (let x = x0; x <= x1; x++) { const on = x < x1 && pick(x, y); if (on && s < 0) s = x; else if (!on && s >= 0) { c.rect(s * T, y * T, (x - s) * T, T); any = true; s = -1; } } } return any; }
   /* großflächige Patina: weiche Farbwolken in Weltkoordinaten (8-px-Zellen, weich vergrößert) */
   function patina(H, rock) {
-    const { c, x0, y0, x1, y1, T, B, vnoise } = H, P = PAT[B.bg] || PAT.castle, K = 8;
-    const X0 = (x0 - 1) * T, Y0 = (y0 - 1) * T, w = Math.ceil((x1 - x0 + 2) * T / K), h = Math.ceil((y1 - y0 + 2) * T / K);
+    const { c, x0, y0, x1, y1, T, B, vnoise, lv, PR } = H, P = PAT[B.bg] || PAT.castle, K = 4;
+    const X0 = (x0 - 1) * T, Y0 = (y0 - 1) * T, w = (x1 - x0 + 2) * T / K, h = (y1 - y0 + 2) * T / K;
     const cv = tmpCv(w, h), g = cv.getContext("2d"), id = g.createImageData(w, h), d = id.data;
     const dk = P[0].split(",").map(Number), lt = P[1].split(",").map(Number), ft = P[2].split(",").map(Number), str = P[3] * (rock ? 0.7 : 1);
+    const pick = rock ? (x, y) => H.inLv(x, y) && H.sol(x, y) && PR.dep[y * lv.W + x] <= 3 : H.isWall;
+    let tyL = -1, txL = -1, on = false, fbL = 0;
     for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
-      const wx = X0 + i * K + 4, wy = Y0 + j * K + 4, tx = Math.floor(wx / T), ty = Math.floor(wy / T);
+      const wx = X0 + i * K + 2, wy = Y0 + j * K + 2, tx = (wx / T) | 0, ty = (wy / T) | 0;
+      if (tx !== txL || ty !== tyL) { txL = tx; tyL = ty; on = pick(tx, ty); fbL = on && !rock ? H.floorBelow(tx, ty, 2) : 0; }
+      if (!on) continue;
       const n = vnoise(wx / 150, wy / 110) * 0.6 + vnoise(wx / 47 + 11, wy / 39 + 5) * 0.3 + vnoise(wx / 13 + 3, wy / 11) * 0.1;
       const o = (j * w + i) * 4;
       let r = 0, gg = 0, b = 0, a = 0;
-      if (n > 0.56) { [r, gg, b] = dk; a = Math.min(0.42, (n - 0.56) * 1.6) * str; }
-      else if (n < 0.36) { [r, gg, b] = lt; a = Math.min(0.12, (0.36 - n) * 0.5) * str; }
+      if (n > 0.56) { r = dk[0]; gg = dk[1]; b = dk[2]; a = Math.min(0.42, (n - 0.56) * 1.6) * str; }
+      else if (n < 0.36) { r = lt[0]; gg = lt[1]; b = lt[2]; a = Math.min(0.12, (0.36 - n) * 0.5) * str; }
       /* Fuß der Wand: feuchte, bemooste bzw. verrußte Zone (nur Wand) */
-      if (!rock) { const fb = H.inLv(tx, ty) ? H.floorBelow(tx, ty, 2) : 0; if (fb) { const dy = fb * T - (wy - ty * T); const k = Math.max(0, 1 - dy / 30) * (0.2 + vnoise(wx / 20, 3.3) * 0.3) * str; if (k > a * 0.8) { r = ft[0]; gg = ft[1]; b = ft[2]; a = Math.max(a, k); } } }
+      if (fbL) { const dy = fbL * T - (wy - ty * T); const k = Math.max(0, 1 - dy / 30) * (0.2 + vnoise(wx / 20, 3.3) * 0.3) * str; if (k > a * 0.8) { r = ft[0]; gg = ft[1]; b = ft[2]; a = Math.max(a, k); } }
       d[o] = r; d[o + 1] = gg; d[o + 2] = b; d[o + 3] = a * 255;
     }
     g.putImageData(id, 0, 0);
-    c.save(); c.imageSmoothingEnabled = true;
-    if (tilePath(H, rock ? (x, y) => H.inLv(x, y) && H.sol(x, y) && H.PR.dep[y * H.lv.W + x] <= 3 : H.isWall, x0 - 1, y0 - 1, x1 + 1, y1 + 1)) { c.clip(); c.drawImage(cv, 0, 0, w, h, X0, Y0, w * K, h * K); }
-    c.restore();
+    c.imageSmoothingEnabled = true; c.drawImage(cv, 0, 0, w, h, X0, Y0, w * K, h * K);
   }
   /* unregelmäßiger Umriss (für Flickwerk und Putz) */
   function blob(c, cx, cy, rx, ry, seed, H, n) { n = n || 9; c.beginPath(); for (let k = 0; k <= n; k++) { const a = k / n * TAU, q = 0.72 + H.hash(seed * 7 + k % n, seed) * 0.5, x = cx + Math.cos(a) * rx * q, y = cy + Math.sin(a) * ry * q; k ? c.lineTo(x, y) : c.moveTo(x, y); } c.closePath(); }
@@ -475,9 +477,8 @@
   function wall(H) {
     const { c, x0, y0, x1, y1, T, B, st, PAL, lit, mixH, rgba, h3, isWall, floorBelow } = H, bg = B.bg, wl = st.wall;
     patina(H, false);
+    /* kein Clip nötig: Fels, Öffnungen und Himmel werden danach darübergemalt bzw. ausgeschnitten */
     c.save();
-    if (!tilePath(H, isWall, x0 - 1, y0 - 1, x1 + 1, y1 + 1)) { c.restore(); return; }
-    c.clip();
     const hiS = rgba(lit(B.wall, 0.4), 0.35);
     for (let y = y0 - 4; y < y1 + 4; y++) for (let x = x0 - 4; x < x1 + 4; x++) {
       if (!isWall(x, y)) continue;
