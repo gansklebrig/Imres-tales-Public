@@ -924,7 +924,7 @@
         lv.feats.push({ t: "key", x: kp[0], y: kp[1], id: 0 });
         lv.feats.push({ t: "lock", x, y0, side, cell: key(v.x, v.y), id: 0 });
         /* Schatz der Kammer: Waffe, Schmiedeglut, Gold – ab Stufe 2 auch eine Schriftrolle */
-        const tre = ["waffe", "glut", "gold"]; if (tier >= 2 || R() < 0.4) tre.push("rolle");
+        const tre = ["waffe", "glut", "gold"]; if (tier >= 3 || R() < 0.25) tre.push("rolle"); /* Schriftrollen sparsam: Karten sind größer geworden */
         R.shuffle(inner);
         tre.forEach((k, i) => { const p = inner.find(([a, b]) => okSpot(a, b)); if (p) { take(p); lv.rewards.push({ kind: k, x: p[0], y: p[1], tier: 3, cell: key(v.x, v.y), vault: true }); } });
         lv.secretsList.push({ k: "vault", cell: key(v.x, v.y) });
@@ -958,7 +958,7 @@
       const f = rest.length > 1 ? i / (rest.length - 1) : 0, sec = c.kind === "secret";
       let k;
       if (role.get(c) === "lever") k = R() < 0.5 ? "gold" : "heil"; /* Abkürzung ist schon Lohn genug */
-      else if (f < 0.28 || sec) { k = R() < 0.5 ? "rolle" : "waffe"; if (k === "rolle" && nRolle >= (gentle ? 1 : 2)) k = "waffe"; if (k === "waffe" && nWaffe >= 2) k = "glut"; }
+      else if (f < 0.28 || sec) { k = R() < 0.5 ? "rolle" : "waffe"; if (k === "rolle" && nRolle >= (gentle ? 0 : 1)) k = "waffe"; if (k === "waffe" && nWaffe >= 2) k = "glut"; }
       else if (f < 0.62) k = R() < 0.65 ? "glut" : "segen";
       else k = R() < 0.6 ? "gold" : "heil";
       if (k === "rolle") nRolle++; if (k === "waffe") nWaffe++;
@@ -1283,8 +1283,8 @@
       if (pl === "tor") {
         const fy = floorAt(x, y); if (fy < 0 || !free(x, fy)) return false;
         if (!(standable(lv, x - 1, fy, 3) && standable(lv, x + 1, fy, 3) && g(x, fy + 1) === 1)) return false;
-        let h = 0; while (h < 8 && g(x, fy - h - 1) === 0) h++;
-        if (h < 2 || h > 6 || !solid(g(x, fy - h - 1))) return false;
+        let h = 0; while (h < 10 && g(x, fy - h - 1) === 0) h++;
+        if (h < 2 || h > 9 || !solid(g(x, fy - h - 1))) return false; /* auch unter höheren Bögen (Torhof hat hohe Räume) */
         add(kind, x, fy, { h: h + 1 }); return true;
       }
       if (pl === "decke" || pl === "pendel") {

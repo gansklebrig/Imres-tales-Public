@@ -28,7 +28,7 @@
     if (Z.spawnReward) {
       switch (kind) {
         case "gold": return Z.spawnReward("gold", x, y, { n: 26 + q * 22 });
-        case "glut": return Z.spawnReward("glut", x, y, { n: q >= 3 ? 3 : q >= 2 ? 2 : 1 });
+        case "glut": return Z.spawnReward("glut", x, y, { n: q >= 3 ? 2 : 1 });
         case "waffe": return Z.spawnReward("waffe", x, y, { drop: true, rar: q >= 3 ? [8, 40, 40, 12] : q >= 2 ? [20, 45, 28, 7] : [35, 45, 16, 4], plus: q >= 3 && R() < 0.5 ? 1 : 0 });
         case "rolle": return Z.spawnReward("rolle", x, y, { drop: true });
         case "heil": return Z.spawnReward("heil", x, y, { drop: true, big: q >= 1 });
@@ -221,9 +221,14 @@
     let alive = o.mine.filter(e => !e.dead && Z.enemies.includes(e) && !(e._trOut > 4));
     alive.forEach(e => (e.aware = true));
     if (o.nAlive !== alive.length) { o.nAlive = alive.length; o.prog = o.t; }
-    if (alive.length && o.wave >= o.waves && o.t - (o.prog || 0) > 15) alive = [];
+    /* Stillstand (Gegner hängt fest oder versteckt sich): erst zweimal in die Kammermitte zurückholen, erst danach zählt die Welle als geschafft */
+    if (alive.length && o.t - (o.prog || 0) > 15) {
+      o.fetch = (o.fetch || 0) + 1; o.prog = o.t;
+      if (o.fetch <= 2 && o.spots && o.spots.length) for (const e of alive) { const [x, y] = Z.R.pick(o.spots); e.x = x * T + 8 - e.w / 2; e.y = (y + 1) * T - e.h - (e.def.fly ? 20 : 0); e.vx = e.vy = 0; e._trOut = 0; FX.burst(e.x + e.w / 2, e.y + e.h - 6, 12, { col: ["#2a1a10", "#6a3a10", "#c07a2a"], sp: 60, life: 0.6, size: 3, kind: "smoke", g: -20 }); }
+      else if (o.wave >= o.waves) alive = [];
+    }
     if (!alive.length && o.t > 3) {
-      if (o.wave < o.waves && !o.pending) { o.pending = true; o.t = 0; o.mine = []; FX.text(P.x + P.w / 2, P.y - 20, L(["Nächste Welle!", "Next wave!"]), "#ffb060", true); A.play("horn", { vol: 0.4 }); later(() => spawnWave(o), 800); }
+      if (o.wave < o.waves && !o.pending) { o.pending = true; o.t = 0; o.prog = 0; o.fetch = 0; o.mine = []; FX.text(P.x + P.w / 2, P.y - 20, L(["Nächste Welle!", "Next wave!"]), "#ffb060", true); A.play("horn", { vol: 0.4 }); later(() => spawnWave(o), 800); }
       else if (o.wave >= o.waves) winTrial(o);
     }
     if (o.t > 75) winTrial(o, true);

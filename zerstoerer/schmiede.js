@@ -202,7 +202,7 @@
     const rows = now.map((r, i) => "<tr><th>" + esc(r[0]) + "</th><td>" + esc(r[1]) + '</td><td class="pf">→</td><td class="neu">' + esc(nx[i][1]) + "</td></tr>").join("");
     const runeNote = RUNE_AT.includes(p + 1) ? '<p class="gb-rune">ᚱ ' + L(["Bei +" + (p + 1) + " wählst du eine Runen-Gravur (1 aus 3).", "At +" + (p + 1) + " you choose a rune engraving (1 of 3)."]) + "</p>" : "";
     return head + name + pips + '<table class="werte">' + rows + "</table>" + runeNote +
-      '<button data-act="smForge" data-arg="' + s + '" data-hand="' + s + '"' + (ok ? "" : " disabled") + ">" + keyHint(s) + " " + L(["Aufwerten auf +", "Upgrade to +"]) + (p + 1) + ' <small class="kosten"><span class="' + (P.gold >= c.gold ? "" : "fehlt") + '">' + c.gold + ' ●</span> <span class="' + ((P.glut || 0) >= c.glut ? "" : "fehlt") + '">' + c.glut + " ✦</span></small></button></div>";
+      '<button data-act="smForge" data-arg="' + s + '" data-hand="' + s + '" data-hotkey="' + s + '"' + (ok ? "" : " disabled") + ">" + keyHint(s) + " " + L(["Aufwerten auf +", "Upgrade to +"]) + (p + 1) + ' <small class="kosten"><span class="' + (P.gold >= c.gold ? "" : "fehlt") + '">' + c.gold + ' ●</span> <span class="' + ((P.glut || 0) >= c.glut ? "" : "fehlt") + '">' + c.glut + " ✦</span></small></button></div>";
   }
   function renderAnvil(note) {
     const P = Z.player, a = anvilNow; if (!a) return;
@@ -477,19 +477,19 @@
     if ([3, 5, 8, 12].includes(n)) { const P = Z.player; if (P) { FX.text(P.x + P.w / 2, P.y - 26, L(["Kette ", "Chain "]) + n + " · " + L(["Gold ×", "Gold ×"]) + chainMul(n).toFixed(2).replace(/0$/, "").replace(/\.$/, ""), "#ffd27a", true); A.play("coin", { vol: 0.5, rate: 0.8 + n * 0.03 }); } }
     const cx = e.x + e.w / 2, cy = e.y + e.h / 2;
     if (e.elite) {
-      if (Z.R() < 0.6 * glutMul()) Z.spawnReward("glut", cx, cy, { n: tierNow() >= 4 && Z.R() < 0.4 ? 2 : 1 });
+      if (Z.R() < 0.35 * glutMul()) Z.spawnReward("glut", cx, cy, { n: tierNow() >= 4 && Z.R() < 0.25 ? 2 : 1 });
       if (Z.R() < 0.1) Z.spawnReward("rolle", cx, e.y + e.h, { drop: true });
-    } else if (Z.R() < 0.012 * glutMul()) Z.spawnReward("glut", cx, cy, { n: 1 });
+    } else if (Z.R() < 0.006 * glutMul()) Z.spawnReward("glut", cx, cy, { n: 1 });
     return r;
   };
   /* Truhen und Bosse (Haken aus spiel.js) */
   Z.onChestOpen = function (p, cursed) {
     if (Z.chChest) Z.chChest();
     if (cursed) Z.spawnReward("glut", p.x, p.y - 8, { n: 1 });
-    else if (Z.R() < 0.25 * glutMul()) Z.spawnReward("glut", p.x, p.y - 8, { n: 1 });
+    else if (Z.R() < 0.12 * glutMul()) Z.spawnReward("glut", p.x, p.y - 8, { n: 1 });
   };
   Z.onBossDown = function (b) {
-    later(() => Z.spawnReward("glut", b.x + b.w / 2, b.y + b.h / 2, { n: b.warden ? 2 : 3 }), 600);
+    later(() => Z.spawnReward("glut", b.x + b.w / 2, b.y + b.h / 2, { n: b.warden ? 1 : 2 }), 600);
   };
 
   /* Herausforderungen: siehe bilanz.js (Z.chStart / Z.chEnd / Z.chHUD) */
@@ -508,6 +508,7 @@
         /* Rückfall: jedes zweite Gebiet ein Amboss nahe dem Eingang, falls die Karte keinen gesetzt hat */
         for (let d = 4; d < 14; d++) { let done = false; for (const s of [1, -1]) { const tx = lv.start.x + s * d; if (Z.standable(lv, tx, lv.start.y, 3) && Z.standable(lv, tx + 1, lv.start.y, 3) && !(lv.doors || []).some(q => Math.abs(q.x - tx) < 3 && Math.abs(q.y - lv.start.y) < 3)) { Z.placeAnvilTile(tx, lv.start.y); done = true; break; } } if (done) break; }
       }
+      if (Z.fallenClear) Z.fallenClear();
       if (!lv.hub && !lv.passage && Z.run && Z.chStart) Z.chStart(lv);
       if (done.length && Z.chPayLater) later(() => { if (Z.level === lv) Z.chPayLater(done); }, 1100);
       if (lv.hub) hubHints(lv);
@@ -619,6 +620,7 @@
     ".fadeninfo{margin:4px 0;font-size:12px;color:#ffd27a;border-left:2px solid #e5b454;padding-left:6px}.fadeninfo .fz{font-weight:800}",
     ".ic-kopf .plus{font-weight:800}.plusinfo{margin:3px 0;font-weight:700;font-size:12px}.runen{margin:4px 0;padding-left:4px;list-style:none;font-size:12px}.runen li{margin:1px 0}",
     ".glutamboss .gb-bild{display:block;width:100%;max-width:640px;height:auto;margin:2px auto 6px;border-radius:10px;border:1px solid #4a2a20;box-shadow:0 0 30px rgba(255,110,40,.18)}",
+    "@media (max-height:560px){.glutamboss .gb-bild{max-width:330px;margin:0 auto 4px}.glutamboss h2{margin-bottom:4px}}",
     ".glutamboss .bank .gld{color:#e5b454}.glutamboss .bank .glt{color:#ffa040;margin-left:8px}",
     ".gb-haende{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}",
     ".gb-hand{border:1px solid #3d2a2e;border-radius:9px;padding:8px 10px;background:rgba(36,20,22,.55)}.gb-kopf{font-size:11px;color:#a99a8b;font-weight:800;margin-bottom:3px}",

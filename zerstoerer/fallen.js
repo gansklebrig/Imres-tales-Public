@@ -597,7 +597,7 @@
       if (fast && Math.random() < dt * 3) play("swing", tr.x, tr.hy, { vol: 0.3, rate: 0.7 });
       if (tr.ext > 0.6) {
         const R = 11 + tr.ext * 11;
-        const hitIt = b => { const nx = U.clamp(tr.x, b.x, b.x + b.w), ny = U.clamp(tr.hy, b.y, b.y + b.h), dd = Math.hypot(tr.x - nx, tr.hy - ny); return dd < R && dd > 2; };
+        const hitIt = b => { const nx = U.clamp(tr.x, b.x, b.x + b.w), ny = U.clamp(tr.hy, b.y, b.y + b.h), dd = Math.hypot(tr.x - nx, tr.hy - ny); return dd < R; }; /* auch wer direkt an der Nabe klebt, wird getroffen */
         if (P && hitIt(HB(P))) hp(0.12, tr.x, { kb: 220, kbUp: 200, eff: { bleed: 1 } });
         foes(e => hitIt(e), e => he(tr, e, 40, null, { bleed: 2 }));
       }
@@ -627,7 +627,7 @@
         let on = P && P.onGround && ov(top, box(P.x, P.y + P.h - 2, P.w, 3));
         if (!on) foes(e => !e.def.fly && ov(top, box(e.x, e.y + e.h - 2, e.w, 3)), () => { on = true; });
         if (on) { tr.st = "knarr"; tr.t = 0; play(amb("e_tuerknarren_", 4), tr.x, tr.y, { vol: 0.6, rate: 1.2 }); }
-      } else if (tr.st === "knarr") { if (Math.random() < dt * 20) FX.p({ x: tr.x + (Math.random() - 0.5) * 22, y: tr.y, vx: 0, vy: 20, g: 300, life: 0.4, size: 1, col: "#5a4a3a", kind: "shard" }); if (tr.t > 0.45) { tr.st = "auf"; tr.t = 0; play("door", tr.x, tr.y, { vol: 0.5 }); play("chain", tr.x, tr.y, { vol: 0.3, rate: 1.7 }); } }
+      } else if (tr.st === "knarr") { if (Math.random() < dt * 20) FX.p({ x: tr.x + (Math.random() - 0.5) * 22, y: tr.y, vx: 0, vy: 20, g: 300, life: 0.4, size: 1, col: "#5a4a3a", kind: "shard" }); if (tr.t > 0.55) { tr.st = "auf"; tr.t = 0; play("door", tr.x, tr.y, { vol: 0.5 }); play("chain", tr.x, tr.y, { vol: 0.3, rate: 1.7 }); } }
       else if (tr.st === "auf") {
         tr.o = Math.min(1, tr.o + dt * 8);
         if (tr.t < 0.5) { const pit = box(tr.x - 11, tr.y - 8, 22, 8); if (P && ov(pit, HB(P))) hp(0.12, tr.x, { kb: 120, kbUp: 320, eff: { bleed: 1 } }); foes(e => !e.def.fly && ov(pit, e), e => he(tr, e, 45, { kbUp: 260 }, { bleed: 2 })); }
@@ -783,11 +783,11 @@
   /* ---------- GLOCKENTURM: Glocke, Gegengewicht, Zahnrad ---------- */
   def("glocke", {
     g: "glocken", n: ["Sturmglocke", "Storm bell"], d: ["Am Umkehrpunkt glüht der Rand – dann dröhnt sie. Die Schallwelle wirft zurück und betäubt Gegner.", "Its rim glows at the turning point – then it tolls. The sound wave knocks back and stuns enemies."],
-    init(tr, R) { tr.len = U.clamp(tr.fy - tr.ay - 28, 28, 120); tr.amp = 0.7; tr.per = 3.4 + R() * 0.4; tr.toll = 0; },
+    init(tr, R) { tr.len = U.clamp(tr.fy - tr.ay - 28, 28, 190); /* reicht auch in hohen Räumen bis auf Kopfhöhe */ tr.amp = 0.7; tr.per = 3.4 + R() * 0.4; tr.toll = 0; },
     upd(tr, dt, P) {
       const ph = clock * 6.283 / tr.per + tr.ph, a = Math.sin(ph) * tr.amp; tr.a = a;
       tr.bx = tr.x + Math.sin(a) * tr.len; tr.by = tr.ay + Math.cos(a) * tr.len;
-      tr.pre = Math.max(0, Math.sin(ph)) > 0.9 ? (Math.sin(ph) - 0.9) * 10 : 0;
+      tr.pre = Math.sin(ph) > 0.5 ? (Math.sin(ph) - 0.5) * 2 : 0; /* Rand glüht ≈0,5 s vor dem Schlag auf */
       if (Math.sin(ph) > 0.995 && !tr.tolled) { tr.tolled = true; play("bell", tr.bx, tr.by, { vol: 0.8, rate: 0.8 }); waves.push({ x: tr.bx, y: tr.by + 6, r: 4, max: 76, t: 0, life: 0.7, src: tr, hitP: false }); FX.addShake(1.5); }
       else if (Math.sin(ph) < 0.7) tr.tolled = false;
       if (P && circRect(tr.bx, tr.by + 6, 10, HB(P))) hp(0.13, tr.bx, { kb: 230, kbUp: 200 });
@@ -1408,6 +1408,7 @@
   };
 
   /* ======================= AUFBAU ======================= */
+  const STICKY = { netzfalle: 1, baerenfalle: 1, algen: 1, netz: 1 };
   Z.setupFallen = function (lv, extra, rnd) {
     list.length = 0; shots.length = 0; minis.length = 0; pools.length = 0; waves.length = 0;
     if (!lv || !extra || !extra.length) return;
@@ -1427,9 +1428,43 @@
       if (bad(m.x, fr)) continue;
       if (!reachNear(m.x, fr)) continue;
       if (list.some(o => Math.abs((o.x || 0) - tr.x) < 40 && Math.abs((o.y || o.fy || 0) - (tr.y || tr.fy)) < 40)) continue;
+      /* Festhaltefallen (Netz, Bärenfalle, Algen) nie direkt an Abgrund, Stacheln oder Flüssigkeit */
+      if (STICKY[m.t]) { let bad2 = false; for (let dx = -3; dx <= 3 && !bad2; dx++) for (let dy = -1; dy <= 2; dy++) { const v = lv.get(m.x + dx, fr + dy); if (v === 9 || v === 3 || v === 5 || v === 6) { bad2 = true; break; } } if (bad2) continue; }
+      /* nicht direkt neben eine Grundfalle (Stacheln, Säge …): sonst Doppeltreffer, z. B. Netz + Stacheln */
+      const ty0 = tr.y || tr.fy;
+      if ((Z.traps || []).some(o => o.k !== "feder" && Math.abs((o.x != null ? o.x : o.ax != null ? o.ax : ((o.x0 || 0) + (o.x1 || 0)) / 2) - tr.x) < 44 && Math.abs((o.y != null ? o.y : o.fy != null ? o.fy : ty0) - ty0) < 40)) continue;
       d.init && d.init(tr, rnd);
       list.push(tr);
     }
+  };
+
+  /* Nach dem kompletten Gebietsaufbau (Ereignisse, Erkundung, Amboss stehen fest): Fallen, deren Wirkbereich
+     einen Start, eine Tür, einen Amboss, die Händlerin/einen Schrein, Schlüssel, Hebel, Prüfung, Truhe oder
+     Fundstück berührt, werden entfernt – dort soll man in Ruhe stehen und bedienen können. */
+  Z.fallenClear = function () {
+    const lv = Z.level; if (!lv || !list.length) return 0;
+    const pts = [];
+    const add = (x, y) => { if (isFinite(x) && isFinite(y)) pts.push([x, y]); };
+    if (lv.start) add(lv.start.x * T + 8, (lv.start.y + 1) * T);
+    for (const d of lv.doors || []) add(d.x * T + 8, (d.y + 1) * T);
+    for (const a of Z.anvils || []) add(a.x, a.y);
+    for (const e of Z.abEvents || []) if (e.k !== "dieb") add(e.x, e.y);
+    const S = Z.erkundung && Z.erkundung();
+    if (S) { for (const o of [].concat(S.keys, S.levers, S.locks, S.shrines, S.rewards)) if (o) add(o.x, o.y); if (S.trial) add(S.trial.x, S.trial.y); }
+    for (const p of Z.pickups || []) if (p.kind !== "gold") add(p.x + (p.w || 0) / 2, p.y + (p.h || 0));
+    for (const it of Z.interacts || []) add(it.x, it.y);
+    const zone = tr => {
+      const at = (Z.TRAPPLACE || {})[tr.k] || "boden", fy = tr.y != null && at !== "decke" && at !== "pendel" ? tr.y : tr.fy;
+      if (at === "wand") { const r = Math.min(tr.range || (tr.run || 6) * T, 7 * T); return [tr.dir > 0 ? tr.wx : tr.wx - r, tr.dir > 0 ? tr.wx + r : tr.wx, fy]; }
+      if (tr.x0 != null) return [tr.x0, tr.x1, fy];
+      const w = at === "pendel" ? 3 * T : 22; return [tr.x - w, tr.x + w, fy];
+    };
+    let n = 0;
+    for (let i = list.length - 1; i >= 0; i--) {
+      const [a, b, fy] = zone(list[i]);
+      if (pts.some(([x, y]) => x > a - 26 && x < b + 26 && Math.abs(y - fy) < 40)) { list.splice(i, 1); n++; }
+    }
+    return n;
   };
 
   /* ======================= UPDATE ======================= */

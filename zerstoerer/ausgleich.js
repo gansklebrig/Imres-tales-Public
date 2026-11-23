@@ -6,7 +6,8 @@
 (function () {
   "use strict";
   const Z = window.Z;
-  Z.BAL.enemyHp = t => 1 + 0.55 * t;
+  /* + Ausgleich für die Waffenstufen (+0 … +5, je +15 %): in der Tiefe erwartet man +2 … +4 – Gegner bleiben bei 2–3 Treffern */
+  Z.BAL.enemyHp = t => (1 + 0.55 * t) * (1 + 0.07 * t);
   const MUL = { melee: 1.4, dive: 1.4, parry: 1.2, ranged: 0.92, skill: 1.1 };
   const hit0 = Z.hitEnemy;
   Z.hitEnemy = function (e, dmg, o) {

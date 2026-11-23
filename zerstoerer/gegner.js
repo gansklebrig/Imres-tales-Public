@@ -205,6 +205,12 @@
     for (let i = Z.enemies.length - 1; i >= 0; i--) {
       const e = Z.enemies[i];
       if (e.dead) { e.deadT += dt; if (e.deadT > (e.def.boss ? 99 : 0.6)) Z.enemies.splice(i, 1); continue; }
+      /* Schutz: ungültige Position (NaN aus Rückstoß/Teilung durch 0) auf den letzten gültigen Stand zurücksetzen */
+      if (!isFinite(e.x) || !isFinite(e.y)) {
+        if (!Z._nanWarn) { Z._nanWarn = 1; console.warn("Gegner mit ungültiger Position zurückgesetzt:", e.id); }
+        if (e._okx != null) { e.x = e._okx; e.y = e._oky; } else { e.dead = true; e.deadT = 99; continue; }
+        e.vx = 0; e.vy = 0;
+      } else { if (!isFinite(e.vx)) e.vx = 0; if (!isFinite(e.vy)) e.vy = 0; e._okx = e.x; e._oky = e.y; }
       /* weit weg: schlafen lassen (Leistung) */
       const far = Math.abs(e.x - P.x) > 520 || Math.abs(e.y - P.y) > 360;
       if (far && !e.def.boss && !e.aware) continue;

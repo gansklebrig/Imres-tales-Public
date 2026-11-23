@@ -145,7 +145,7 @@
     const x0 = Math.max(0, Math.floor(cam.x / T) - 1), x1 = Math.min(lv.W - 1, Math.ceil((cam.x + cam.w) / T) + 1);
     const y0 = Math.max(0, Math.floor(cam.y / T) - 1), y1 = Math.min(lv.H - 1, Math.ceil((cam.y + cam.h) / T) + 1);
     const w = x1 - x0 + 1, h = y1 - y0 + 1;
-    if (w <= 0 || h <= 0) return null;
+    if (!(w > 0 && h > 0) || !isFinite(w + h)) return null; /* ungültige Kamera (NaN) nicht weiterreichen */
     if (!ofs) { ofs = document.createElement("canvas"); ofc = ofs.getContext("2d"); }
     if (ofs.width !== w || ofs.height !== h) { ofs.width = w; ofs.height = h; ofImg = null; }
     if (!ofImg) ofImg = ofc.createImageData(w, h);

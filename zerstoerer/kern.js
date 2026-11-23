@@ -316,14 +316,19 @@
       vol *= U.clamp(1.25 - Math.hypot(dx, dy) / (Z.cam.w * 0.85), 0, 1);
       if (vol < 0.02) return;
     }
+    /* ungültige Werte (z. B. NaN-Position eines Gegners) würden AudioParam-Fehler werfen */
+    if (!isFinite(vol)) return;
+    if (!isFinite(pan)) pan = 0;
+    let rate = (o.rate || 1) * (1 + (Math.random() - 0.5) * (o.vary == null ? 0.12 : o.vary));
+    if (!isFinite(rate) || rate <= 0) rate = 1;
     const s = A.ctx.createBufferSource(); s.buffer = b;
-    s.playbackRate.value = (o.rate || 1) * (1 + (Math.random() - 0.5) * (o.vary == null ? 0.12 : o.vary));
+    s.playbackRate.value = rate;
     const g = A.ctx.createGain(); g.gain.value = vol;
     const p = A.ctx.createStereoPanner ? A.ctx.createStereoPanner() : null;
     s.connect(g); if (p) { p.pan.value = pan; g.connect(p); p.connect(o.bus || A.sfx); } else g.connect(o.bus || A.sfx);
-    if (o.verb !== 0) { const vg = A.ctx.createGain(); vg.gain.value = o.verb || 0.6; g.connect(vg); vg.connect(A.verb); }
-    if (o.dur) { g.gain.setValueAtTime(vol, now + o.dur * 0.7); g.gain.linearRampToValueAtTime(0, now + o.dur); s.stop(now + o.dur + 0.02); }
-    s.start(now + (o.delay || 0), o.offset || 0);
+    if (o.verb !== 0) { const vg = A.ctx.createGain(); vg.gain.value = isFinite(o.verb) && o.verb ? o.verb : 0.6; g.connect(vg); vg.connect(A.verb); }
+    if (o.dur && isFinite(o.dur)) { g.gain.setValueAtTime(vol, now + o.dur * 0.7); g.gain.linearRampToValueAtTime(0, now + o.dur); s.stop(now + o.dur + 0.02); }
+    s.start(now + (isFinite(o.delay) ? Math.max(0, o.delay) : 0), isFinite(o.offset) ? Math.max(0, o.offset) : 0);
     return s;
   };
   /* Endlosschleifen (Geräuschkulisse der Bühne): mit Überblendung */

@@ -284,7 +284,7 @@
     if (e.code === "Tab") { moveFocus(e.shiftKey ? -1 : 1); return true; }
     if (["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "KeyW", "KeyS", "KeyA", "KeyD"].includes(e.code)) { if (document.activeElement && document.activeElement.tagName === "TEXTAREA" && /Arrow/.test(e.code)) return false; const d = /Down|KeyS/.test(e.code) ? [0, 1] : /Up|KeyW/.test(e.code) ? [0, -1] : /Right|KeyD/.test(e.code) ? [1, 0] : [-1, 0]; moveDir(d[0], d[1]); return true; }
     /* Knöpfe mit eigener Kurztaste (data-hotkey="a1" usw.), z. B. „anlegen statt …“ im Fluchfenster */
-    for (const hb of modal.querySelectorAll("[data-hotkey]")) { const ks = inp.keys[hb.dataset.hotkey]; if (ks && ks.includes(e.code) && !hb.disabled) { if (!e.repeat) hb.click(); return true; } }
+    for (const hb of modal.querySelectorAll("[data-hotkey]")) { const ks = inp.keys[hb.dataset.hotkey]; if (ks && ks.includes(e.code)) { if (!e.repeat && !hb.disabled && confirmOk()) hb.click(); return true; } } /* auch gesperrt: Taste nicht als „Bestätigen“ auf ein anderes Element durchreichen */
     if (e.code === "Enter" || e.code === "Space" || e.code === "KeyE" || e.code === "KeyJ") {
       /* gehaltene Taste (Wiederholung) und Tastendruck direkt beim Öffnen lösen nichts aus */
       if (e.repeat || !confirmOk()) return true;
