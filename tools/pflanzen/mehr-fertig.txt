@@ -14,6 +14,7 @@ bergahorn
 bergulme
 biber
 birkenpilz
+birkenporling
 breitwegerich
 brennnessel
 brombeere
@@ -67,6 +68,7 @@ heckenkirsche
 heidelbeere
 herbsttrompete
 herbstzeitlose
+hexenroehrling
 himbeere
 hirtentaeschel
 holunder
@@ -89,12 +91,14 @@ leberbluemchen
 liguster
 loewenzahn
 lorchel
+luchs
 lungenkraut
 maedesuess
 maerzenbecher
 maigloeckchen
 malve
 marone
+mehlbeere
 morchel
 murmeltier
 nachtschatten
@@ -149,6 +153,7 @@ stockschwamm
 sumpfdotterblume
 taubnessel
 thymian
+tollkirsche
 torfmoos
 traubeneiche
 traubenkirsche
