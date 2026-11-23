@@ -303,7 +303,8 @@
     }).join("");
   }
 
-  /* ---------- Kopf: Kerzenschein, Einladung, „Heute in der Taverne“ ---------- */
+  /* ---------- Kopf: Kerzenschein und Einladung ---------- */
+  /* Spiel des Tages – wird auf der Startseite im Taverne-Tor gezeigt (wegweiser.js) */
   const TAGES = ["heldensturm", "jagd", "nacht", "hort", "auftritt", "kehle"];
   function heutigesSpiel() {
     const tag = Math.floor((Date.now() - new Date().getTimezoneOffset() * 6e4) / 864e5);
@@ -311,8 +312,7 @@
     return l[tag % l.length];
   }
   function kopfBauen() {
-    const T = t(), M = m(), sp = heutigesSpiel(), alle = sichtbare();
-    const s = T.spiele[sp.key], f = fortschritt(sp.key);
+    const M = m(), alle = sichtbare();
     const rekorde = alle.filter(x => fortschritt(x.key).rekord).length, neue = alle.filter(istNeu).length;
     const funken = Array.from({ length: 16 }, (_, i) => '<span style="--x:' + Math.round(Math.random() * 100) + "%;--d:" + (4 + Math.random() * 5).toFixed(1) + "s;--v:" + (-Math.random() * 8).toFixed(1) + "s;--g:" + (2 + Math.random() * 3).toFixed(1) + 'px"></span>').join("");
     kopf.innerHTML =
@@ -323,18 +323,7 @@
         '<p class="sk-kopf-satz">' + esc(M.kopfText) + "</p>" +
         '<p class="sk-kopf-chips"><span>🎲 ' + esc(M.spiele(alle.length)) + "</span>" + (rekorde ? "<span>🏆 " + esc(M.rekorde(rekorde)) + "</span>" : "") + (neue ? '<span class="neu">✨ ' + esc(M.neuZahl(neue)) + "</span>" : "") +
           '<button type="button" class="sk-ton" aria-pressed="' + tonAn + '">' + (tonAn ? "🔊 " : "🔈 ") + esc(tonAn ? M.tonAn : M.tonAus) + "</button></p>" +
-      "</div>" +
-      '<div class="sk-heute" style="--farbe:' + sp.farbe + '">' +
-        '<p class="sk-heute-label">✦ ' + esc(M.heute) + " ✦</p>" +
-        '<div class="sk-heute-bild" data-spiel="' + sp.key + '">' +
-          (ruhig ? '<img src="' + sp.bilder[0] + '" alt="">' : '<video muted loop playsinline preload="none" poster="' + sp.bilder[0] + '">' + quellen(sp.clip) + "</video>") +
-          '<img class="sk-heute-held" src="' + sp.held + '" alt="" loading="lazy">' +
-        "</div>" +
-        '<div class="sk-heute-text"><b>' + esc(s.titel) + "</b><i>" + esc(M.spruch[sp.key]) + "</i>" + (f.gespielt && f.zeilen.length && sp.key !== "probe" ? '<span class="sk-stand">' + esc(f.zeilen.join(" · ")) + "</span>" : "") + "</div>" +
-        '<div class="sk-heute-knoepfe"><a class="sk-heute-los" href="' + losHref(sp) + '" data-gesehen="' + sp.key + '">' + esc(f.weiter ? M.weiter : M.jetzt) + (sp.extern ? " ↗" : "") + "</a>" +
-          '<button type="button" class="sk-heute-mehr" data-spiel="' + sp.key + '">' + esc(M.mehr) + "</button></div>" +
       "</div>";
-    const v = kopf.querySelector("video"); if (v && sektion.classList.contains("aktiv")) { v.muted = true; const pr = v.play(); if (pr && pr.catch) pr.catch(() => {}); }
   }
   kopf.addEventListener("click", e => {
     const tk = e.target.closest(".sk-ton");
@@ -624,8 +613,8 @@
 #taverne .tav-karte { scroll-margin-top: 4.5rem; }
 .saal-kopf {
   position: relative; overflow: hidden; isolation: isolate; margin-bottom: clamp(1.4rem, 4vw, 2.4rem);
-  display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(1rem, 3vw, 2.5rem); align-items: center;
-  min-height: clamp(380px, 46vw, 500px); padding: clamp(1.4rem, 4vw, 2.8rem);
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(1rem, 3vw, 2.5rem); align-items: center;
+  min-height: clamp(240px, 28vw, 360px); padding: clamp(1.4rem, 4vw, 2.8rem);
   border: 1px solid rgba(224,160,70,.45); background: #120e14;
   box-shadow: 0 30px 70px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,210,140,.05);
 }
@@ -881,7 +870,7 @@ html.saal-dialog-offen { overflow: hidden; }
 @media (max-height: 500px) and (orientation: landscape) {
   #taverne section.part, section.part#taverne { padding-block: .8rem 1.5rem; }
   #taverne .bereich-zurueck { margin-bottom: .5rem; }
-  .saal-kopf { grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); min-height: 0; padding: .7rem; gap: .7rem; margin-bottom: .8rem; align-items: center; }
+  .saal-kopf { grid-template-columns: minmax(0, 1fr); min-height: 0; padding: .7rem; gap: .7rem; margin-bottom: .8rem; align-items: center; }
   .sk-kopf-text { gap: .35rem; }
   .sk-kopf-label { font-size: .62rem; letter-spacing: .18em; }
   .sk-kopf-titel { font-size: clamp(1.6rem, 6.5vh, 2.3rem); }
