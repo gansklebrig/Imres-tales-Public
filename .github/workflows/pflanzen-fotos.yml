@@ -12,9 +12,15 @@ on:
       - tools/pflanzen/holen.py
       - .github/workflows/pflanzen-fotos.yml
   workflow_dispatch:
+    inputs:
+      modus:
+        description: "leer = fehlende Arten holen, mehr = zusätzliche Referenzfotos für alle Arten"
+        required: false
+        default: ""
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: pflanzen-fotos
@@ -33,12 +39,15 @@ jobs:
       - name: Pillow
         run: pip install --quiet pillow
       - name: Holen
+        env:
+          MODUS: ${{ github.event.inputs.modus }}
         run: python3 tools/pflanzen/holen.py
       - name: Sichern
         run: |
           git config user.name "Waldbuch-Fotos"
           git config user.email "actions@users.noreply.github.com"
           git add pflanzen
+          [ -f tools/pflanzen/mehr-fertig.txt ] && git add tools/pflanzen/mehr-fertig.txt
           git diff --cached --quiet && echo "nichts Neues" && exit 0
           git commit -q -m "Waldbuch: Fotos von Wikimedia Commons geholt"
           for i in 1 2 3 4 5; do
@@ -46,3 +55,11 @@ jobs:
             sleep 10
           done
           exit 1
+      - name: Weiter, falls noch Arten offen sind
+        if: github.event.inputs.modus == 'mehr'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rest=$(cat "$RUNNER_TEMP/waldbuch-rest" 2>/dev/null || echo 0)
+          echo "offen: $rest"
+          if [ "$rest" -gt 0 ]; then gh workflow run pflanzen-fotos.yml --ref main -f modus=mehr -R "$GITHUB_REPOSITORY"; fi

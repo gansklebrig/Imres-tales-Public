@@ -251,7 +251,187 @@ def speichern(art, wahl):
     return eintraege
 
 
+# ---------- Nachschlag: mehr Referenzfotos je Art (MODUS=mehr) ----------
+# Vorhandene, von Hand gesichtete Bilder bleiben unangetastet; es kommen weitere dazu, bis jede Ansicht
+# mehrfach vertreten ist (z. B. grüne Sommerblätter UND Herbstlaub, Rinde jung und alt).
+ZIEL_N = {"baum": 14, "strauch": 13, "beere": 12, "kraut": 12, "blume": 12, "farn": 10, "pilz": 12, "tier": 12}
+QUOTE = {
+    "baum": {"habitus": 3, "blatt": 3, "rinde": 2, "frucht": 2, "bluete": 2, "knospe": 2},
+    "strauch": {"habitus": 2, "blatt": 3, "bluete": 2, "frucht": 3, "rinde": 1, "knospe": 1},
+    "beere": {"habitus": 2, "frucht": 4, "bluete": 3, "blatt": 3},
+    "kraut": {"habitus": 3, "bluete": 3, "blatt": 3, "frucht": 1, "jung": 2},
+    "blume": {"habitus": 3, "bluete": 4, "blatt": 3, "frucht": 2},
+    "farn": {"habitus": 4, "blatt": 4, "frucht": 2},
+    "pilz": {"habitus": 5, "unterseite": 3, "schnitt": 2, "jung": 2},
+    "tier": {"habitus": 6, "spur": 3, "zeichen": 3},
+}
+HERBST = ["autumn", "herbst", "fall ", "fall-", "dry", "dried", "droog", " dor ", "dor blad", "withered", "welk", "dead", "winter",
+          "herfst", "automne", "otoño", "autunno", "brown leaves", "laubfärbung", "fall colo", "foliage colo", "senescen"]
+FREMD_UK = [" and ", " vs", "comparison", "vergleich", "confus", "lookalike", "verwechsl", "insects", "fungi on", "galls", "pests",
+            "diseases", "lichens on", "parasit", "uses of", " in use", "products", "wood", "cultivated", "garden", "cultivar", "hybrid"]
+
+
+def nachschlag_art(art, ov, vorhanden, alle_wiss):
+    kat = ov.get("cat") or ("Category:" + art["wiss"])
+    kandidaten = {}
+
+    def dazu(t, asp=(), herkunft=""):
+        t = t.replace("_", " ")
+        if not t.startswith("File:"):
+            t = "File:" + t
+        k = kandidaten.setdefault(t, {"asp": set(), "her": set()})
+        k["asp"] |= set(asp)
+        k["her"].add(herkunft)
+
+    for t in kategorie_dateien(kat, 400):
+        dazu(t, herkunft="kat")
+    for uk in unterkategorien(kat)[:80]:
+        name = uk.split(":", 1)[1]
+        nl = " " + name.lower() + " "
+        if any(w in nl for w in ["cultivar", "hybrid", "×", "herbari", "illustration", "drawing", "map", "dish", "food", "stamps", "in art",
+                                  "people", "taxiderm", "skull", "skelet", "museum", "zoo", "captivity", "dead", "hunting"] + FREMD_UK):
+            continue
+        asp = aspekte_von(name)
+        if not asp and not any(w in nl for w in ["in germany", "in bavaria", "in bayern", "deutschland", "austria", "österreich", "switzerland",
+                                                   "in autumn", "in winter", "in spring", "in summer", "habitus", "forma", "subsp", "var.", "by "]):
+            continue
+        for t in kategorie_dateien(uk, 120):
+            dazu(t, asp, "uk")
+    for t in ov.get("plus", []):
+        dazu(t, herkunft="plus")
+    minus = {("File:" + m.replace("_", " ")) if not m.startswith("File:") else m.replace("_", " ") for m in ov.get("minus", [])}
+    schon = {e.get("titel") for e in vorhanden}
+    eigen = art["wiss"].lower()
+    fremd = [w for w in alle_wiss if w != eigen and not eigen.startswith(w) and not w.startswith(eigen)]
+    titel = [t for t in kandidaten if t not in minus and t not in schon and re.search(r"\.(jpe?g|png|webp)$", t, re.I)]
+    titel = [t for t in titel if "plus" in kandidaten[t]["her"] or not schlecht(t.split(":", 1)[1].rsplit(".", 1)[0])]
+    titel = [t for t in titel if not any(f in t.lower().replace("_", " ") for f in fremd)]
+    ii = infos(titel)
+    gut = []
+    for t in titel:
+        i = ii.get(t)
+        if not i:
+            continue
+        em = i.get("extmetadata", {})
+        g = lambda k: (em.get(k) or {}).get("value", "")  # noqa
+        lizenz = text(g("LicenseShortName"))
+        if not FREI.match(lizenz):
+            continue
+        w, h = i.get("width", 0), i.get("height", 0)
+        if min(w, h) < 700 or i.get("mime") not in ("image/jpeg", "image/png", "image/webp"):
+            continue
+        if w / max(1, h) > 2.4 or h / max(1, w) > 2.2:
+            continue
+        beschr = text(g("ImageDescription"))[:400]
+        bl = " " + beschr.lower() + " "
+        if any(n in bl for n in ["herbarium", "illustration", "drawing", "zeichnung", "map of", "verbreitungskarte", "microscop", "mikroskop", "cultivar", "zoo ", "captive"]):
+            continue
+        if any(f in bl for f in fremd):
+            continue  # zeigt laut Beschreibung (auch) eine andere Art aus dem Buch
+        name = t.split(":", 1)[1]
+        asp = aspekte_von(name) | aspekte_von(beschr[:200]) | kandidaten[t]["asp"]
+        punkte = math.log(max(1, w * h)) * 0.6
+        bew = g("Assessments").lower()
+        if any(x in bew for x in ["featured", "quality", "poty", "valued"]):
+            punkte += 3.5
+        if "uk" in kandidaten[t]["her"]:
+            punkte += 0.8
+        herbst = any(x in (" " + name.lower() + " " + bl) for x in HERBST)
+        gut.append({"titel": t, "url": i.get("thumburl") or i["url"], "w": w, "h": h, "asp": asp, "p": punkte, "herbst": herbst,
+                    "autor": text(g("Artist"))[:120] or "unbekannt", "lizenz": lizenz, "lizenzurl": g("LicenseUrl"),
+                    "quelle": i.get("descriptionurl", ""), "beschr": beschr[:220]})
+    gut.sort(key=lambda x: -x["p"])
+
+    n_ziel = ZIEL_N.get(art["kap"], 12)
+    zaehl = {}
+    for e in vorhanden:
+        a = "habitus" if e["a"] == "haupt" else e["a"]
+        zaehl[a] = zaehl.get(a, 0) + 1
+    gruen = sum(1 for e in vorhanden if e["a"] == "blatt" and not any(x in (" " + (e.get("titel", "") + " " + e.get("beschr", "")).lower() + " ") for x in HERBST))
+    autoren = {}
+    for e in vorhanden:
+        autoren[e.get("autor")] = autoren.get(e.get("autor"), 0) + 1
+    wahl, genommen = [], set()
+    frei = lambda x: x["titel"] not in genommen and autoren.get(x["autor"], 0) < 3  # noqa: E731
+
+    def nimm(x, a):
+        x = dict(x); x["aspekt"] = a; wahl.append(x); genommen.add(x["titel"])
+        autoren[x["autor"]] = autoren.get(x["autor"], 0) + 1
+        zaehl[a] = zaehl.get(a, 0) + 1
+
+    platz = lambda: len(vorhanden) + len(wahl) < n_ziel  # noqa: E731
+    # Grüne Blätter zuerst – Herbstlaub allein reicht nicht zum Erkennen
+    if art["kap"] not in ("pilz", "tier"):
+        while gruen < 2 and platz():
+            x = next((x for x in gut if frei(x) and "blatt" in x["asp"] and not x["herbst"] and len(x["asp"]) <= 2), None)
+            if not x:
+                break
+            nimm(x, "blatt"); gruen += 1
+    for runde in range(4):
+        for a, soll in QUOTE.get(art["kap"], {}).items():
+            if not platz() or zaehl.get(a, 0) >= soll:
+                continue
+            x = next((x for x in gut if frei(x) and a in x["asp"] and len(x["asp"]) <= 2), None) or \
+                next((x for x in gut if frei(x) and a in x["asp"]), None)
+            if x:
+                nimm(x, a)
+    for x in gut:
+        if not platz():
+            break
+        if frei(x):
+            nimm(x, sorted(x["asp"])[0] if x["asp"] else "weitere")
+    return wahl, len(gut)
+
+
+def nachschlag():
+    arten = json.load(open(os.path.join(HIER, "arten.json"), encoding="utf-8"))
+    ovp = os.path.join(HIER, "overrides.json")
+    ov = json.load(open(ovp, encoding="utf-8")) if os.path.exists(ovp) else {}
+    meta = json.load(open(META, encoding="utf-8"))
+    fertigp = os.path.join(HIER, "mehr-fertig.txt")
+    fertig = {z.strip() for z in open(fertigp, encoding="utf-8")} if os.path.exists(fertigp) else set()
+    alle_wiss = sorted({a["wiss"].lower() for a in arten})
+    start = time.time()
+    rest = 0
+    for art in arten:
+        if art["id"] in fertig or art["id"] not in meta:
+            continue
+        if time.time() - start > 95 * 60:
+            rest += 1
+            continue
+        print("•", art["id"], art["wiss"], flush=True)
+        vorhanden = meta[art["id"]]
+        try:
+            wahl, n = nachschlag_art(art, ov.get(art["id"], {}), vorhanden, alle_wiss)
+        except Exception as e:  # noqa
+            print("   Art fehlgeschlagen:", e, file=sys.stderr)
+            rest += 1
+            continue
+        nr = max([int(m.group(1)) for e in vorhanden for m in [re.search(r"-(\d+)\.webp$", e["f"])] if m] or [0]) + 1
+        neu = []
+        for x in wahl:
+            try:
+                roh = hole(x["url"]); time.sleep(0.35)
+                im = Image.open(io.BytesIO(roh)).convert("RGB")
+                im.thumbnail((880, 880), Image.LANCZOS)
+                name = "%s-%d.webp" % (art["id"], nr); nr += 1
+                im.save(os.path.join(ZIEL, name), "WEBP", quality=72, method=6)
+                neu.append({"f": name, "a": x["aspekt"], "w": im.width, "h": im.height, "autor": x["autor"], "lizenz": x["lizenz"],
+                            "lizenzurl": x["lizenzurl"], "quelle": x["quelle"], "titel": x["titel"], "beschr": x["beschr"], "neu": 1})
+            except Exception as e:  # noqa
+                print("   Bild übersprungen:", x["titel"], e, file=sys.stderr)
+        meta[art["id"]] = vorhanden + neu
+        print("   %d Kandidaten, +%d → %d Bilder: %s" % (n, len(neu), len(meta[art["id"]]), ", ".join(e["a"] for e in neu)), flush=True)
+        json.dump(meta, open(META, "w", encoding="utf-8"), ensure_ascii=False, indent=0, sort_keys=True)
+        fertig.add(art["id"])
+        open(fertigp, "w", encoding="utf-8").write("\n".join(sorted(fertig)) + "\n")
+    print("REST", rest)
+    open(os.path.join(os.environ.get("RUNNER_TEMP", "/tmp"), "waldbuch-rest"), "w").write(str(rest))
+
+
 def main():
+    if os.environ.get("MODUS") == "mehr":
+        return nachschlag()
     arten = json.load(open(os.path.join(HIER, "arten.json"), encoding="utf-8"))
     ov = {}
     if os.path.exists(os.path.join(HIER, "overrides.json")):
