@@ -1,0 +1,15 @@
+{
+ "name": "Friedrichs Waldbuch – Imres Tales",
+ "short_name": "Waldbuch",
+ "description": "Wald-Lexikon für Bayern mit Bestimmungshilfe und Rex' Spurensuche – auch offline.",
+ "lang": "de",
+ "start_url": "waldbuch.html",
+ "scope": "./",
+ "display": "standalone",
+ "background_color": "#2e2416",
+ "theme_color": "#2e2416",
+ "icons": [
+  { "src": "waldbuch-icon-192.png", "sizes": "192x192", "type": "image/png" },
+  { "src": "waldbuch-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+ ]
+}

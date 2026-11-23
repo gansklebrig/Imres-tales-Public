@@ -217,7 +217,7 @@
   /* ---------- Register ---------- */
   function register(aktiv) {
     const r = $("#register");
-    const extra = [["", "Deckblatt", "#efe2c2"], ["bestimmen", "🔍 Bestimmen", "#f1d38f"], ["jetzt", "📅 Was wächst jetzt?", "#e9c9a0"], ["doppelgaenger", "☠ Doppelgänger", "#e6a99a"], ["lernen", "🧠 Lernkiste", "#d8c0e0"], ["spiel", "🐾 Rex' Spürnase", "#f0b77c"]];
+    const extra = [["", "Deckblatt", "#efe2c2"], ["bestimmen", "🔍 Bestimmen", "#f1d38f"], ["jetzt", "📅 Was wächst jetzt?", "#e9c9a0"], ["doppelgaenger", "☠ Doppelgänger", "#e6a99a"], ["lernen", "🧠 Lernkiste", "#d8c0e0"], ["spiel", "🐾 Rex' Spürnase", "#f0b77c"], ["offline", "📥 Offline", "#d6cfa8"]];
     r.innerHTML = extra.slice(0, 1).map(([k, n, f]) => '<a class="reiter" href="#/' + k + '" style="background:' + f + '"' + (aktiv === k ? ' aria-current="page"' : "") + ">" + n + "</a>").join("") +
       KAPITEL.map(k => '<a class="reiter" href="#/kapitel/' + k.k + '" style="background:' + k.farbe + '"' + (aktiv === "kapitel/" + k.k ? ' aria-current="page"' : "") + ">" + k.name + "</a>").join("") +
       extra.slice(1).map(([k, n, f]) => '<a class="reiter" href="#/' + k + '" style="background:' + f + '"' + (aktiv === k ? ' aria-current="page"' : "") + ">" + n + "</a>").join("");
@@ -230,7 +230,7 @@
     const gefunden = Object.keys(STAND.gefunden).length;
     seite('<div class="deckblatt"><div><p class="leise" style="font-family:var(--fb);letter-spacing:.14em;text-transform:uppercase">Notizen eines Waldläufers</p><h1 class="hand">Friedrichs Waldbuch</h1><p style="font-size:1.1rem">Was der Wald mich gelehrt hat – aufgeschrieben für alle, die mit offenen Augen gehen. Mit Fotos, Jahreskalender, giftigen Doppelgängern und den Spuren, die Rex schneller findet als ich.</p>' +
       '<div class="zahlen"><span><b>' + ARTEN.length + "</b>Arten</span><span><b>" + Object.values(BILDER).reduce((s, b) => s + b.length, 0) + "</b>Fotos</span><span><b>" + KAPITEL.length + "</b>Kapitel</span><span><b>" + gefunden + "</b>selbst gefunden</span></div>" +
-      '<div class="reihe"><a class="knopf" href="#/spiel">🐾 Spurensuche mit Rex</a><a class="knopf hell" href="#/bestimmen">🔍 Etwas bestimmen</a><a class="knopf hell" href="#/lernen">🧠 Lernkiste</a><a class="knopf hell" href="#/doppelgaenger">☠ Doppelgänger</a></div></div>' +
+      '<div class="reihe"><a class="knopf" href="#/spiel">🐾 Spurensuche mit Rex</a><a class="knopf hell" href="#/bestimmen">🔍 Etwas bestimmen</a><a class="knopf hell" href="#/lernen">🧠 Lernkiste</a><a class="knopf hell" href="#/doppelgaenger">☠ Doppelgänger</a><a class="knopf hell" href="#/offline">📥 Offline mitnehmen</a></div></div>' +
       '<div class="bilder" aria-hidden="true"><img src="friedrich-frei.webp" alt="" style="right:18%;bottom:0;height:300px"><img src="rex-frei.webp" alt="" style="right:0;bottom:0;height:150px"></div></div>' +
       '<div class="notiz">Bevor du losziehst: Dieses Buch ist zum Lernen da. Ich habe mir Mühe gegeben, dass alles stimmt – aber ein Buch ersetzt keine Pilzberatung und keine erfahrene Hand. Wer sammelt, sammelt nur, was er sicher kennt, und nur so viel, wie er braucht. Geschützte Pflanzen bleiben stehen. Und Rex bleibt an der Leine, wenn Rehkitze im Gras liegen.<span class="unterschrift">– Friedrich</span></div>' +
       '<h3 class="hand">Gerade im ' + MONATE[heuteMonat - 1] + '</h3><div class="gitter">' + jetzt.map(klebe).join("") + '</div><p><a href="#/jetzt">Alles, was im ' + MONATE[heuteMonat - 1] + " wächst, blüht und reift →</a></p>" +
@@ -435,6 +435,53 @@
       paare.map(([stufe, [a, b]]) => '<h3 class="hand">' + esc(a.de) + " oder " + esc(b.de) + "?" + (stufe === 0 ? ' <span class="ess-schild toedlich" style="font-size:.75rem;vertical-align:middle">lebensgefährlich</span>' : "") + '</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">' + seiteA(a) + seiteA(b) + "</div>").join(""));
   }
 
+  /* ---------- Offline ---------- */
+  let installEreignis = null;
+  window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEreignis = e; });
+  const swDa = "serviceWorker" in navigator && /^https?:$/.test(location.protocol);
+  if (swDa) navigator.serviceWorker.register("waldbuch-sw.js", { scope: "./waldbuch" }).catch(() => {});
+  function alleBildUrls(nurHaupt) { const u = []; for (const a of ARTEN) bilderVon(a.id).forEach((b, i) => { if (!nurHaupt || i === 0) u.push("pflanzen/bilder/" + b.f); }); return u; }
+  async function gespeicherteBilder() { try { const c = await caches.open("waldbuch-bilder-v1"); return (await c.keys()).length; } catch (e) { return 0; } }
+  let ladeLauf = null;
+  async function ladeOffline(nurHaupt, aufFortschritt) {
+    const c = await caches.open("waldbuch-bilder-v1");
+    const urls = alleBildUrls(nurHaupt), da = new Set((await c.keys()).map(r => new URL(r.url).pathname));
+    const offen = urls.filter(u => !da.has(new URL(u, location.href).pathname));
+    let fertig = urls.length - offen.length, fehler = 0;
+    aufFortschritt(fertig, urls.length, fehler);
+    ladeLauf = { stopp: false };
+    const lauf = ladeLauf;
+    const arbeiter = async () => { while (offen.length && !lauf.stopp) { const u = offen.shift(); try { const r = await fetch(u, { cache: "no-cache" }); if (!r.ok) throw 0; await c.put(new URL(u, location.href).pathname, r); } catch (e) { fehler++; } fertig++; aufFortschritt(fertig, urls.length, fehler); } };
+    await Promise.all([1, 2, 3, 4, 5, 6].map(arbeiter));
+    try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch (e) { /* egal */ }
+    return { fertig, gesamt: urls.length, fehler };
+  }
+  async function offlineSeite() {
+    const alle = alleBildUrls(false).length, haupt = alleBildUrls(true).length;
+    const da = swDa ? await gespeicherteBilder() : 0;
+    let platz = "";
+    try { const est = await navigator.storage.estimate(); platz = "Speicher belegt: ca. " + Math.round((est.usage || 0) / 1048576) + " MB"; } catch (e) { /* egal */ }
+    seite('<h2 class="hand">Das Waldbuch mitnehmen</h2><div class="notiz">Im Wald gibt es selten Netz. Darum kannst du dir das ganze Buch aufs Handy legen: Texte, Bestimmungshilfe, Lernkiste und Rex\' Spürnase funktionieren dann ohne Internet. Die Fotos lädst du einmal herunter – danach ist alles da, auch mitten im Bayerischen Wald.<span class="unterschrift">– Friedrich</span></div>' +
+      (swDa ? '<h3 class="hand">1. Fotos herunterladen</h3><p>Gespeichert: <b id="off-zahl">' + da + "</b> von " + alle + ' Fotos. <span class="leise">' + platz + '</span></p><div class="offline-fort"><i id="off-balken" style="width:' + Math.round(da / alle * 100) + '%"></i></div><p class="leise" id="off-text"></p>' +
+        '<div class="reihe"><button class="knopf" data-l="alle">📥 Alle Fotos (' + alle + ', ca. 85 MB)</button><button class="knopf hell" data-l="haupt">Nur Titelbilder (' + haupt + ', ca. 18 MB)</button><button class="knopf hell klein" data-l="stopp">Anhalten</button><button class="knopf hell klein" data-l="weg">Fotos wieder löschen</button></div><p class="leise">Am besten im WLAN. Texte und Programm sind schon gespeichert, sobald du das Waldbuch einmal geöffnet hast. Fotos, die du dir online ansiehst, werden ebenfalls mitgespeichert.</p>' +
+        '<h3 class="hand">2. Als App auf den Startbildschirm</h3><p>Dann öffnet sich das Waldbuch wie eine eigene App – mit Rex als Symbol.</p><div class="reihe"><button class="knopf" id="installieren">📲 Waldbuch installieren</button></div><p class="leise" id="inst-text">Falls der Knopf nichts tut: In Chrome auf Android oben rechts im Menü (⋮) „Zum Startbildschirm hinzufügen“ bzw. „App installieren“ wählen. Auf dem iPhone in Safari über „Teilen“ → „Zum Home-Bildschirm“.</p>'
+        : '<div class="warnung">Dein Browser unterstützt keinen Offline-Speicher. Öffne das Waldbuch in Chrome, Firefox, Edge oder Safari über imrestales.de.</div>'));
+    if (!swDa) return;
+    const s = $("#seite");
+    const zeig = (f, g, fe) => { const z = $("#off-zahl"); if (!z) return; $("#off-balken").style.width = Math.round(f / g * 100) + "%"; $("#off-text").textContent = f + " / " + g + (fe ? " · " + fe + " Fehler (später erneut versuchen)" : ""); };
+    s.querySelectorAll("[data-l]").forEach(b => b.addEventListener("click", async () => {
+      const w = b.dataset.l;
+      if (w === "stopp") { if (ladeLauf) ladeLauf.stopp = true; return; }
+      if (w === "weg") { await caches.delete("waldbuch-bilder-v1"); toast("Fotos gelöscht."); offlineSeite(); return; }
+      s.querySelectorAll("[data-l=alle],[data-l=haupt]").forEach(x => x.disabled = true);
+      const r = await ladeOffline(w === "haupt", zeig);
+      $("#off-zahl") && ($("#off-zahl").textContent = await gespeicherteBilder());
+      toast(r.fehler ? "Fertig – " + r.fehler + " Fotos fehlen noch." : "Fertig! Das Waldbuch ist offline bereit.");
+      s.querySelectorAll("[data-l=alle],[data-l=haupt]").forEach(x => x.disabled = false);
+    }));
+    $("#installieren").addEventListener("click", async () => { if (installEreignis) { installEreignis.prompt(); installEreignis = null; } else $("#inst-text").style.fontWeight = "700"; });
+  }
+
   /* ---------- Suche & Nachweise ---------- */
   function suchSeite(text) {
     const t = norm(text);
@@ -461,6 +508,7 @@
     else if (teil === "lernen") { register("lernen"); lernSeite(); }
     else if (teil === "spiel") { register("spiel"); if (window.WB_SPIEL) window.WB_SPIEL.start($("#seite")); }
     else if (teil === "nachweise") { register(""); nachweisSeite(); }
+    else if (teil === "offline") { register("offline"); offlineSeite(); }
     else if (teil === "suche") { register(""); suchSeite(h.slice(6)); }
     else { register(""); deckblatt(); }
   }
@@ -470,5 +518,5 @@
   /* ---------- Öffentliche Schnittstelle fürs Spiel ---------- */
   window.WB = { ARTEN, ART, KAPITEL, MONATE, heuteMonat, bilderVon, hauptbild, bildFuer, spurSvg, frageBauen, frageHtml, falsche, STAND, speichern, Ton, esc, toast, bestimme };
 
-  fetch("pflanzen/bilder.json?v=" + Math.floor(Date.now() / 3600000)).then(r => r.ok ? r.json() : {}).catch(() => ({})).then(j => { BILDER = j || {}; route(); });
+  fetch("pflanzen/bilder.json").then(r => r.ok ? r.json() : {}).catch(() => ({})).then(j => { BILDER = j || {}; route(); });
 })();
