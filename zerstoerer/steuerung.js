@@ -15,8 +15,21 @@
     lastRumble = P.time; inp.rumble(s, ms);
   };
   let skidT = 0;
+  /* W9 Treppen: Figur um P.stepOff versetzt zeichnen (Stufe hinauf/hinab weich nachgezogen, siehe stepUp/stickDown in kampf.js).
+     figuren.js lädt erst nach dieser Datei → Umhüllung beim ersten Spieler-Update. */
+  let drawWrapped = false;
+  const wrapDraw = () => {
+    const d0 = Z.drawPlayer; if (!d0 || drawWrapped) return; drawWrapped = true;
+    Z.drawPlayer = function (c, P, t) {
+      const o = P && P === Z.player ? P.stepOff || 0 : 0;
+      if (!o || !c || !c.translate) return d0.apply(this, arguments);
+      c.save(); c.translate(0, o);
+      try { return d0.apply(this, arguments); } finally { c.restore(); }
+    };
+  };
   const up0 = Z.updatePlayer;
   Z.updatePlayer = function (P, dt) {
+    wrapDraw();
     const wasGround = P.onGround, vy0 = P.vy, vx0 = P.vx, aj0 = P.airJumps, ledge0 = !!P.ledge;
     const r = up0.apply(this, arguments);
     if (!P || P.dead) return r;

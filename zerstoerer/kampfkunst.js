@@ -71,6 +71,7 @@
   };
   const POGO = { pfahl: 1, meuchel: 1, meteor: 1, schild: 1 };
   function diveTick(P, dt) {
+    diveClock += dt; if (P.bebenT > 0) P.bebenT -= dt;
     if (P.onGround) P.diveShots = 0;
     /* Hängender Sturz (Leiter, Gebietswechsel, Boden ohne Landung): beenden, sonst wirbelt er endlos weiter */
     if (P.plunge && (P.onGround || P.climbing || P.ledge || P.grapple || P.dead || P.grabbed)) { P.plunge = false; P.diveStyle = null; P.diveRecPend = false; }
@@ -85,7 +86,8 @@
       if (!alive(e) || !U.overlap(r, e)) continue;
       if (st === "wirbel") { const k = Math.floor(P.diveT / 0.07); if (P.diveHits.has(e.uid + "_" + k)) continue; e.uid = e.uid || Math.random(); P.diveHits.add(e.uid + "_" + k); Z.hitEnemy(e, Z.dmgOf(P, it, base(d) * 0.32), { src: "melee", it, kb: 20, kbUp: 40, dir: U.sign(e.x - P.x) || 1 }); continue; }
       if (POGO[st]) {
-        Z.hitEnemy(e, Z.dmgOf(P, it, base(d) * (st === "meuchel" ? 1.6 : 1.3)), { src: "melee", it, crit: st === "meuchel", kb: 60, kbUp: 120, heavy: true, eff: st === "schild" ? { stun: 1 } : st === "meteor" ? { stun: 0.5 } : null, dir: P.face });
+        { const n = diveMul(e); if (Z.stats) Z.stats.divesHit = (Z.stats.divesHit || 0) + 1; /* W9: auch Abprall-Treffer (Teufels-Pogo) mit abnehmendem Ertrag, Betäubung nur beim ersten */
+          Z.hitEnemy(e, Z.dmgOf(P, it, base(d) * (st === "meuchel" ? 1.6 : 1.3)) * DIVE_DR[n], { src: "melee", it, crit: st === "meuchel" && n === 0, kb: 60, kbUp: 120, heavy: n === 0, eff: n > 0 ? null : st === "schild" ? { stun: 1 } : st === "meteor" ? { stun: 0.5 } : null, dir: P.face }); }
         if (Z.pogoOn && Z.pogoOn(P)) { P.plunge = false; P.diveStyle = null; P.vy = -470; P.vx *= 0.4; P.airJumps = 1; P.cut = true; P.diveShots = 0; P.diveLock = false; FX.ring(P.x + P.w / 2, P.y + P.h, 26, "#ff6ae0", 0.3, 3); }
         else { P.plunge = false; P.diveStyle = null; P.vy = -120; P.vx = -P.face * 60; P.airJumps = 0; P.cut = true; P.diveShots = 0; P.diveLock = true; P.diveRecPend = true; }
         FX.stop(0.06); FX.ring(P.x + P.w / 2, P.y + P.h, 18, "#ffd27a", 0.25, 3);
@@ -94,15 +96,30 @@
       }
     }
   }
+  /* W9 (Abuse-Bot): Sturzangriff-Spam aus kleinen Hüpfern war 7–20× so stark wie die Kombo (Kriegshammer/Keule/Zweihänder/Flegel
+     „Erdbeben“: Elite in 0,8 s, Dauer-Betäubung). Jetzt: je Ziel abnehmender Ertrag für Sturz-Treffer kurz hintereinander
+     (1 → 0,6 → 0,4 → 0,25; nach 1,6 s Pause wieder voll) und Betäubung nur beim ersten Sturz-Treffer der Reihe.
+     Der erste Sturz in eine Gruppe bleibt voll; schwere Erdbeben-Stürze brauchen etwas länger zum Aufstehen. */
+  const DIVE_DR = [1, 0.6, 0.4, 0.25];
+  let diveClock = 0;
+  Z.kkClock = () => diveClock; /* Spielzeit-Uhr für Abklingzeiten in kampf.js (Schild) */
+  function diveMul(e) {
+    const n = e._dvT != null && diveClock - e._dvT < 1.6 ? Math.min(DIVE_DR.length - 1, (e._dvN || 0) + 1) : 0;
+    e._dvT = diveClock; e._dvN = n; return n;
+  }
   Z.diveLand = function (P) {
     const st = P.diveStyle; P.diveStyle = null; if (!st) return false;
     const it = P.plungeItem, d = P.diveD || wd(it), cx = P.x + P.w / 2, fy = P.y + P.h, b = base(d);
-    const ring = (rad, dmg, o, col) => { FX.ring(cx, fy, rad, col || "#ff8a5a", 0.35, 4); for (const e of Z.enemies) if (alive(e) && Math.abs(e.x + e.w / 2 - cx) < rad && Math.abs(e.y + e.h - fy) < 34) Z.hitEnemy(e, dmg, Object.assign({ src: "melee", it, heavy: true, dir: U.sign(e.x - P.x) || 1 }, o)); Z.hitProps && Z.hitProps({ x: cx - rad, y: fy - 30, w: rad * 2, h: 34 }, dmg, null); };
+    let landed = false;
+    const hitDive = (e, dmg, o) => { const n = diveMul(e); if (!landed && Z.stats) { landed = true; Z.stats.divesHit = (Z.stats.divesHit || 0) + 1; } o = Object.assign({ src: "melee", it, heavy: n === 0, dir: U.sign(e.x - P.x) || 1 }, o); if (n > 0 && o.eff && (o.eff.stun || o.eff.root)) { o.eff = Object.assign({}, o.eff); delete o.eff.stun; delete o.eff.root; o.kbUp = Math.min(o.kbUp || 0, 60); } Z.hitEnemy(e, dmg * DIVE_DR[n], o); };
+    const ring = (rad, dmg, o, col) => { FX.ring(cx, fy, rad, col || "#ff8a5a", 0.35, 4); for (const e of Z.enemies) if (alive(e) && Math.abs(e.x + e.w / 2 - cx) < rad && Math.abs(e.y + e.h - fy) < 34) hitDive(e, dmg, o); Z.hitProps && Z.hitProps({ x: cx - rad, y: fy - 30, w: rad * 2, h: 34 }, dmg, null); };
     const dust = n => FX.burst(cx, fy, n, { col: [Z.dustCol || "#8a7a70", "#ff7a4a"], sp: 170, ang: -Math.PI / 2, spread: 2.8, life: 0.5, size: 3, kind: "smoke" });
     A.play("land", { vol: 0.8 }); P.vy = 0; P.diveRec = 0.32; P.diveRecPend = false;
     switch (st) {
-      case "beben": FX.addShake(10); FX.stop(0.08); A.play("quake", { vol: 0.8 }); dust(30); ring(92, Z.dmgOf(P, it, b * 2.2), { kb: 120, kbUp: 300, eff: { stun: 1.3 } }, "#e5a43a");
-        for (const dir of [-1, 1]) for (let i = 0; i < 3; i++) later(() => Z.spawnHazard({ kind: "rockspike", x: cx + dir * (30 + i * 20), y: fy, w: 14, life: 0.45, dmg: Z.dmgOf(P, it, b * 0.6), owner: "p", kbUp: 320, once: true }), i * 70); break;
+      case "beben": { FX.addShake(10); FX.stop(0.08); A.play("quake", { vol: 0.8 }); dust(30); const fresh = !(P.bebenT > 0); ring(92, Z.dmgOf(P, it, b * 1.7), { kb: 120, kbUp: 300, eff: { stun: 0.9 } }, "#e5a43a");
+        /* Steinspitzen nur, wenn das letzte Erdbeben eine Weile her ist (sonst Spitzen-Teppich beim Hüpfen) */
+        if (fresh) for (const dir of [-1, 1]) for (let i = 0; i < 3; i++) later(() => Z.spawnHazard({ kind: "rockspike", x: cx + dir * (30 + i * 20), y: fy, w: 14, life: 0.45, dmg: Z.dmgOf(P, it, b * 0.5), owner: "p", kbUp: 320, once: true }), i * 70);
+        P.bebenT = 1.2; P.diveRecX = 0.16; break; }
       case "meteor": FX.addShake(6); dust(18); ring(56, Z.dmgOf(P, it, b * 1.6), { kb: 80, kbUp: 380 }); break;
       case "morgen": FX.addShake(6); dust(14); ring(50, Z.dmgOf(P, it, b * 1.4), { kb: 100, kbUp: 200 }, "#ffd27a"); for (const dir of [-1, 1]) Z.spawnProj("lichtwelle", cx + dir * 10, P.y + 8, dir, { dmg: Z.dmgOf(P, it, b * 0.8), it }); FX.flashScreen("#fff0c0", 0.2); break;
       case "mond": FX.addShake(5); dust(12); ring(40, Z.dmgOf(P, it, b), { kb: 80 }); for (const dir of [-1, 1]) Z.spawnProj("glutsichel", cx + dir * 10, P.y + 12, dir, { dmg: Z.dmgOf(P, it, b * 0.9), it }); break;
@@ -113,6 +130,7 @@
       case "schild": FX.addShake(5); dust(12); A.play("block", { vol: 0.8, rate: 0.7 }); ring(50, Z.dmgOf(P, it, (d.shield ? d.shield.bash : 10) * 1.5), { kb: 160, kbUp: 160, eff: { stun: 1.4 } }, "#e8e0d8"); P.iframe = Math.max(P.iframe, 0.25); break;
       default: return false;
     }
+    if (P.diveRecX) { P.diveRec += P.diveRecX; P.diveRecX = 0; }
     FX.text(cx, P.y - 10, L(DIVEN[st] || ["Sturz", "Dive"]), "#ffd27a");
     return true;
   };

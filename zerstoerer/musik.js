@@ -137,7 +137,7 @@
       mot: [[12, 0, 1], [11, 1, 1], [8, 2, 2], [7, 4, 2], [1, 6, 2], [0, 8, 6]] },
     /* Demogorgon, Fürst der Dämonen, im Herz des Sees: F phrygisch, Orgel, zwei Köpfe = Tritonus-Paare; Wasser und Walgesang bleiben */
     demogorgon: { root: 41, bpm: 96, scale: "phryg", drone: "orgel", pad: "aah", mel: "horn", col: "rgl", ost: "spic", bass: "tuba", brass: "blech", dr: ["riese1", "riese2", "taiko_36"], tick: 3000, acc: "zwei", water: 0.5, drLP: 3500,
-      mot: [[0, 0, 2], [6, 2, 2], [1, 4, 2], [7, 6, 2], [0, 8, 8]], p2: { mel: "aah", bpm: 102 } },
+      mot: [[0, 0, 2], [6, 2, 2], [1, 4, 2], [7, 6, 2], [0, 8, 8]], p2: { mel: "aah", bpm: 102 }, p3: { mel: "blech", brass: "blech", bpm: 110, water: 0.8 } },
     /* Themberchaud, Meister der Flammen: G harmonisch Moll, majestätisch, Trompeten, Gong, knisternde Ticks */
     themberchaud: { root: 43, bpm: 100, scale: "harm", drone: "vc", pad: "aah", mel: "trpst", col: "sitar", ost: "spic", bass: "tuba", brass: "blech", dr: ["taiko_36", "timp1", "darb_2"], tick: 7000, acc: "feuer",
       mot: [[0, 0, 3], [3, 3, 1], [7, 4, 4], [8, 8, 2], [7, 10, 2], [11, 12, 2], [12, 14, 2]], p2: { bpm: 108 } },
@@ -464,7 +464,7 @@
     if (id0 === "boss1" && M.prof && !M.prof.boss && trialFight()) { M.trialOn = true; M.push(0.8, 3); return; }
     const prevBoss = M.prof && M.prof.boss, sameLevel = M.levelRef && M.levelRef === Z.level, hadProf = !!M.prof;
     const prof = profFor(id);
-    M.id = id; M.prof = prof; M.levelRef = Z.level; M.ambush = false; M.p2 = false;
+    M.id = id; M.prof = prof; M.levelRef = Z.level; M.ambush = false; M.p2 = false; M.p3 = false;
     M.trim = Math.pow(10, ((prof.bossId ? BTRIM[prof.bossId] : TRIM[id]) || 0) / 20); M.exq = EXQ[id] || 1;
     const now = A.ctx.currentTime;
     /* Boss tritt mitten im Gebiet auf: Rückwärts-Becken atmet ein, dann setzt alles auf einmal ein */
@@ -951,6 +951,8 @@
       M.rage = Math.min(1, M.rage + 0.6);
       /* zweite Phase: Besetzung/Tempo des Bosses wechseln, Leitmotiv eine Oktave höher und lauter */
       if (p.boss && p.p2 && !M.p2) { M.p2 = true; M.prof = Object.assign({}, p, p.p2); preload(M.prof); }
+      /* dritte Phase (Demogorgon: „Der Abgrund öffnet sich“): noch eine Besetzung/Tempostufe */
+      else if (p.boss && p.p3 && M.p2 && !M.p3) { M.p3 = true; M.prof = Object.assign({}, p, p.p3); preload(M.prof); }
       if (p.mot) M.bossMotif(true, tt + 0.6);
       duck(0.3, tt, 1.5);
     },

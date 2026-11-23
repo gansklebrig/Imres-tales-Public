@@ -3,7 +3,7 @@
 (function () {
   "use strict";
   const Z = window.Z, U = Z.U, T = Z.TILE, FX = Z.fx, D = Z.draw;
-  const G = (Z.gfx = { scale: 2, bs: 2, chunks: new Map(), layers: null, light: null, time: 0 });
+  const G = (Z.gfx = { scale: 2, bs: 2, chunks: new Map(), layers: null, light: null, time: 0, tileHooks: [] });
   let lv = null, B = null;
 
   /* Farbe aufhellen/abdunkeln (#rrggbb) */
@@ -1274,6 +1274,10 @@
     if (det >= 1) wallFeatures(c, st, x0, y0, x1, y1, det, GR); /* Handheld: schlichte Wände ohne Pfeiler/Nischen */
     PT && PT("feat");
     wallDirt(c, st, x0, y0, x1, y1, det);
+    /* Zusatzschmuck aus pracht.js (nur ab Stufe 2, einmal je Chunk): Flickwerk, Patina, Ritzungen … */
+    const HK = det >= 2 && G.tileHooks.length ? { c, x0, y0, x1, y1, det, st, lv, B, PR, PAL, sol, isWall, inLv, floorBelow, solidV, isPlatV, lit, mixH, rgba, hash, h3, vnoise, fr, setCR, masonry, chips, runeGlyph, T, D } : null;
+    const hook = k => { if (HK) for (const f of G.tileHooks) try { f(k, HK); } catch (e) { console.error(e); } };
+    hook("wall");
     PT && PT("dirt");
     wallAO(c, x0, y0, x1, y1, GR);
     /* 3) Himmel und Arenafenster freistellen */
@@ -1316,12 +1320,14 @@
       if (v === 7) crackedWall(c, x, y, x * T, y * T);
     }
     PT && PT("rock");
+    hook("rock");
     /* Laufflächen (auch eine Reihe unterhalb, damit Gras über die Chunkgrenze ragt) und Unterseiten */
     for (let y = y0; y <= y1; y++) for (let x = x0 - 1; x <= x1; x++) if (inLv(x, y) && sol(x, y) && !sol(x, y - 1) && !(y === 0 && lv.out) && get(x, y - 1) !== 9) topper(c, x, y, det);
     if (det >= 1) for (let y = y0 - 1; y < y1; y++) for (let x = x0; x < x1; x++) if (inLv(x, y) && sol(x, y) && !sol(x, y + 1) && lv.get(x, y + 1) !== 9 && !PR.clear[(y + 1) * W + x]) hanger(c, st, x, y, det);
     PT && PT("top");
     /* 7) Stege, Leitern, Stacheln */
     fixtures(c, x0, y0, x1, y1, det);
+    hook("fix");
     PT && PT("fix");
     if (PT) { c.getImageData(0, 0, 1, 1); PT("raster"); }
   }
@@ -2109,6 +2115,8 @@
     const mark = k => { if (pf) { c.getImageData(0, 0, 1, 1); const n = tm(); pf[k] = (pf[k] || 0) + n - t0; t0 = n; } };
     const lay = !Z.gq || Z.gq.layers !== false;
     if (Z.noLayers) {} else if (lay && (B.open || lv.out || lv.hub || lv.arena)) { drawLayers(c, cam); if (!Z.gq || Z.gq.critters !== false) { updCritters(dt, cam); drawCritters(c, cam); } } else { c.fillStyle = B.wall; c.fillRect(cam.x - 2, cam.y - 2, cam.w + 4, cam.h + 4); } mark("layers");
+    /* Riesen im Hintergrund (Demogorgon im Herz des Sees): hinter Boden und Plattformen */
+    Z.drawBehindTiles && Z.drawBehindTiles(c, cam, t);
     drawTiles(c, cam); mark("tiles");
     drawLiquids(c, cam, t);
     drawDecor(c, cam, t);

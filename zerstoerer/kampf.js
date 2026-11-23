@@ -442,7 +442,12 @@
     const preVy = P.vy;
     if (P.vy < 0) cornerNudge(P, dt);
     if (!P.onGround && h && !locked) stepPop(P, h, dt);
+    /* W9 Treppen: am Boden Stufen bis 1 Kachel hinaufsteigen (statt an jeder Stufe hängenzubleiben); abwärts am Boden kleben */
+    if (P.onGround && P.vy >= 0) stepUp(P, P.vx ? U.sign(P.vx) : h, dt);
+    const g0 = P.onGround && P.vy >= 0;
     Z.moveBody(P, dt);
+    if (g0 && !P.onGround) stickDown(P);
+    if (P.stepOff) P.stepOff = U.approach(P.stepOff, 0, dt * (90 + Math.abs(P.vx)));
     if (vyEnd != null && !P.onGround && !P.hitCeil) P.vy = vyEnd;
     pushOutOfEnemies(P);
     /* Landung */
@@ -523,6 +528,39 @@
     if (!bodyFree(P.x, ny, P.w, P.h) || !bodyFree(nx, ny, P.w, P.h)) return;
     P.y = ny; if (P.vy > 0) P.vy = 0;
     if (Math.abs(P.vx) < C.RUN * 0.5) P.vx = h * C.RUN * 0.5;
+  }
+  /* W9 Treppen. Die Stufen der Karten sind massive 1-Kachel-Absätze (16 px, Figur 28 px). Früher blieb man am Boden an
+     jeder Stufe hängen (nur Springen half), und abwärts fiel man je Stufe ~0,14 s – länger als die Coyote-Zeit: ein Sprung
+     wurde dann zum niedrigeren Doppelsprung, verbrauchte ihn oder ging verloren.
+     stepUp: am Boden gegen einen Absatz bis 1 Kachel Höhe laufen → oben weiterlaufen, sofern die Figur dort Platz hat.
+     stickDown: wer am Boden über eine Stufe bis 1 Kachel Tiefe läuft, bleibt am Boden (kein Luftzustand).
+     P.stepOff: nur fürs Bild – der Höhenversatz wird weich nachgezogen (Figur und Kamera), die Physik springt. */
+  function stepUp(P, dir, dt) {
+    if (!dir || P.plunge || P.climbing || P.ledge || P.grapple || P.shadowForm) return;
+    const probe = Math.max(0.6, Math.abs(P.vx * dt) + 0.1);
+    const fx = dir > 0 ? P.x + P.w + probe : P.x - probe, tx = Math.floor(fx / T);
+    const feet = P.y + P.h, tyF = Math.floor((feet - 0.01) / T);
+    if (!W.solidT(W.tile(tx, tyF))) return;
+    const top = tyF * T, depth = feet - top;
+    if (depth <= 0.01 || depth > T + 0.01) return;
+    const ny = top - P.h, nx = P.x + dir * probe;
+    if (!bodyFree(P.x, ny, P.w, P.h) || !bodyFree(nx, ny, P.w, P.h)) return;
+    P.y = ny; P.stepOff = U.clamp((P.stepOff || 0) + depth, -2 * T, 2 * T);
+  }
+  function stickDown(P) {
+    if (P.dropT > 0 || P.plunge || P.climbing || P.ledge || P.grapple || P.vy < 0) return;
+    const feet = P.y + P.h, x0 = Math.floor((P.x + 0.5) / T), x1 = Math.floor((P.x + P.w - 0.5) / T);
+    for (let ty = Math.floor(feet / T); ty * T <= feet + T + 0.01; ty++) {
+      const top = ty * T; if (top < feet - 0.01) continue;
+      let hit = false;
+      for (let tx = x0; tx <= x1; tx++) if (W.solidT(W.tile(tx, ty)) || (!P.noPlat && W.isPlat(tx, ty))) { hit = true; break; }
+      if (!hit) continue;
+      const d = top - feet;
+      if (d > T + 0.01) return;
+      P.y = top - P.h; P.vy = 0; P.onGround = true; P.onPlat = !W.solidT(W.tile(x0, ty)) && !W.solidT(W.tile(x1, ty)); P.justLanded = false;
+      P.stepOff = U.clamp((P.stepOff || 0) - d, -2 * T, 2 * T);
+      return;
+    }
   }
   function tryLedge(P, h) {
     const frontX = h > 0 ? P.x + P.w + 2 : P.x - 2, tx = Math.floor(frontX / T);
@@ -636,15 +674,22 @@
     P.act = { slot, it, d, def: { pre: 0, act: 0, post: d.shoot.post }, type: "charge", phase: "charge", t: 0, charge: 0, upAim: !!inp.held.up };
     A.play("bow", { vol: 0.25, rate: 0.7 });
   }
+  /* W9 (Abuse-Bot): Schild-Tippen im Takt hielt jeden Gegner dauerhaft betäubt (Schildstoß 0,45 s Betäubung je 0,35 s) und
+     legte das Paradefenster fast lückenlos – Elite in 4 s ohne einen Treffer. Jetzt: wer den Schild binnen 0,45 s erneut hebt,
+     bekommt kein Paradefenster (Parade belohnt Timing, nicht Hämmern); Schildstoß höchstens alle 0,6 s, und dasselbe Ziel wird
+     von Schildstößen nur alle 1,6 s betäubt (dazwischen kurzer Ruck). */
+  const kClock = () => (Z.kkClock ? Z.kkClock() : (Z.run ? Z.run.time : 0));
   function startShield(P, slot, it, d) {
     if (P.act) endAct(P);
     P.act = { slot, it, d, def: { post: 0.12 }, type: "shield", phase: "hold", t: 0 };
-    P.parryT = d.shield.parry * (Z.parryScale ? Z.parryScale() : 1) * (Z.metaLvl(it ? it.id : "") >= 3 && it && it.id === "goldschild" ? 1.2 : 1);
+    const now = kClock(), mash = P._shUp != null && now - P._shUp < 0.45 && now >= P._shUp; P._shUp = now;
+    P.parryT = mash ? 0 : d.shield.parry * (Z.parryScale ? Z.parryScale() : 1) * (Z.metaLvl(it ? it.id : "") >= 3 && it && it.id === "goldschild" ? 1.2 : 1);
     A.play("block", { vol: 0.3, rate: 1.3 });
   }
   /* Schildstoß: kurzer Stoß nach vorn, wenig Schaden, betäubt; jeder Schild hat eigene Wirkungen (werkzeuge.js) */
   function startBash(P, slot, it, d) {
     const sh = d.shield;
+    { const now = kClock(); if (P._bashAt != null && now - P._bashAt < 0.6 && now >= P._bashAt) { if (P.act && P.act.type === "shield") { P.act.phase = "post"; P.act.type = "shieldDown"; P.act.t = 0; } return; } P._bashAt = now; }
     if (Z.shieldHook && Z.shieldHook("bashStart", P, { slot, it, d }) === false) return;
     const c = Object.assign({ pre: 0.05, act: 0.1, post: 0.2, dmg: sh.bash, box: [-2, -28, 24, 28], lunge: 170, kb: 230, kbUp: 90, sw: "punch", heavy: true, hitSnd: "hitMetal",
       eff: Object.assign({ stun: 0.45 }, sh.bashEff || {}), smear: { r: 16, a0: -0.3, a1: 0.3, th: 10, stab: true } }, sh.bashDef || {});
@@ -813,8 +858,10 @@
       const eff = Object.assign({}, c.eff || {}, a.d.eff || {});
       a.it && a.it.aff.forEach(af => { const ad = Z.AFFIX[af]; if (ad.eff) for (const k in ad.eff) eff[k] = (eff[k] || 0) + ad.eff[k]; });
       if (Z.hasAff(a.it, "betaeubend") && Z.R() < 0.15) eff.stun = Math.max(eff.stun || 0, 0.8);
+      let bashRep = false;
+      if (a.bash) { const now = kClock(); if (e._bashStunAt != null && now - e._bashStunAt < 1.6 && now >= e._bashStunAt) { eff.stun = 0; bashRep = true; } else e._bashStunAt = now; }
       if (c.pull && Z.metaLvl("kettenpeitsche") >= 3) eff.stun = Math.max(eff.stun || 0, 0.6);
-      Z.hitEnemy(e, dmg, { crit, kb, kbUp: c.kbUp || (crit ? 60 : 30), eff, src: "melee", it: a.it, heavy: c.heavy, wallSlam: c.wallSlam, dir: P.face, sfx: c.hitSnd, wallOk: true });
+      Z.hitEnemy(e, dmg, { crit, kb, kbUp: c.kbUp || (crit ? 60 : 30), eff, src: "melee", it: a.it, heavy: c.heavy && !bashRep, wallSlam: c.wallSlam, dir: P.face, sfx: c.hitSnd, wallOk: true });
       if (a.d.leech) Z.healPlayer(dmg * a.d.leech);
       if (c.onHit) c.onHit(P, e, dmg, a);
       if (a.bash && Z.shieldHook) Z.shieldHook("bashHit", P, { a, e, dmg });

@@ -17,7 +17,10 @@
   /* Feinabgleich je Boss nach Prüfstand (kampf.py, Standardausrüstung, Bot-Zeit nach ×2,0): Ziel Bot 40–90 s (Spieler länger).
      Themberchaud (fliegt, lange Phasen) lag schon bei 120–137 s, Riese/Ilvara/Chasme bei 20–35 s. In echten Läufen (schwächere Ausrüstung) Riese/Chasme dann zu zäh → 1,3/1,2. */
   const BOSS_F = { riese: 1.3, ilvaraW: 1.6, chasme: 1.2, demogorgon: 1.3, venomfang: 1.2, themberchaud: 0.75, bugbear: 1.8 /* Kontrollläufe: Wachturm noch 20 s */ };
-  Z.BAL.bossHp = (t, id) => 2.0 * (BOSS_F[id] || 1);
+  /* W9 (Spielermeldung „zäh, aber zu leicht“): Grundfaktor 2,0 → 1,75. Dafür mehr Gefahr statt mehr Leben: Angriffsfenster
+     (1,5-facher Schaden), Kombos, Wut unter 20 %, Anti-Cheese, Lebensraub-Deckel und Signatur-Techniken (bossphasen.js, Abschnitt 6).
+     Prüfstand /home/claude/test/w9_boss (kampf.py, Stil „stark“ = Speer +5): vorher Stufe-3-Bosse 22–48 s, Wächter 13–90 s. */
+  Z.BAL.bossHp = (t, id) => 1.75 * (BOSS_F[id] || 1);
   const MUL = { melee: 1.4, dive: 1.4, parry: 1.2, ranged: 0.92, skill: 1.1 };
   const hit0 = Z.hitEnemy;
   Z.hitEnemy = function (e, dmg, o) {
@@ -39,6 +42,12 @@
   WTUNE("kampfstab", d => d.combo.forEach((c, i) => { c.dmg = [12, 12, 13, 13, 24][i]; })); /* 8/8/9/9/16 → 12/12/13/13/24 */
   WTUNE("anker", d => d.combo.forEach((c, i) => { c.dmg = [38, 34][i]; }));                 /* 30/26 → 38/34 */
   WTUNE("steinfaust", d => d.combo.forEach((c, i) => { c.dmg = [17, 17, 28][i]; }));        /* 13/13/22 → 17/17/28 */
+  /* W9: Lebensraub wirkt gegen Bosse und Mini-Bosse gedrosselt (halbe Wirkung, höchstens ~1,2 % Leben/s; bossphasen.js Abschnitt 6) – in den Beschreibungen vermerken */
+  const LSN = [" (gegen Bosse gedrosselt)", " (dampened against bosses)"];
+  const addNote = d => { if (d && Array.isArray(d) && !String(d[0]).includes("Bosse")) { d[0] += LSN[0]; d[1] += LSN[1]; } };
+  if (Z.BLESS && Z.BLESS.vampir) addNote(Z.BLESS.vampir.d);
+  if (Z.AFFIX && Z.AFFIX.vampirisch) addNote(Z.AFFIX.vampirisch.d);
+  if (Z.RUNES && Z.RUNES.raub) addNote(Z.RUNES.raub.d);
   /* Tiefe: 0 im Torhof, steigt mit jeder Gebietsstufe */
   const depth = () => (Z.run ? (Z.run.tier || 0) + (Z.run.skulls || 0) * 0.5 : 0);
   Z.parryScale = () => 1 / (1 + 0.14 * depth());

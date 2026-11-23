@@ -156,7 +156,7 @@
     labor: { tier: 3, boss: "glasstab", name: ["Glasstabs Labor", "Glasstaff's Laboratory"], base: "verlies", exits: ["schlund", "schmiede"], music: "boss1", w: 46, h: 18, kind: "lab" },
     erzpriesterin: { tier: 3, boss: "erzpriesterin", name: ["Der Tempelsteg", "The Temple Pier"], base: "hafen", exits: ["schlund", "schmiede", "zinnen"], music: "boss1", w: 48, h: 18, kind: "pier" },
     wachturm: { tier: 3, boss: "bugbear", name: ["Der Wachturm", "The Watchtower"], base: "glocken", exits: ["schmiede", "zinnen"], music: "boss1", w: 46, h: 18, kind: "tower" },
-    demogorgon: { tier: 6, boss: "demogorgon", final: "tiefe", name: ["Das Herz des Sees", "The Heart of the Lake"], base: "see", exits: [], music: "final", w: 56, h: 20, kind: "lakeboss" },
+    demogorgon: { tier: 6, boss: "demogorgon", final: "tiefe", name: ["Das Herz des Sees", "The Heart of the Lake"], base: "see", exits: [], music: "final", w: 44, h: 20, kind: "lakeboss" },
     themberchaud: { tier: 6, boss: "themberchaud", final: "glut", name: ["Der Hort im Glutlicht", "The Hoard in Emberlight"], base: "glut", exits: [], music: "final", w: 56, h: 20, kind: "hoard" },
     venomfang: { tier: 6, boss: "venomfang", final: "himmel", name: ["Die Turmspitze", "The Tower Top"], base: "sturm", exits: [], music: "final", w: 56, h: 20, kind: "towertop" }
   });
@@ -694,6 +694,59 @@
   });
   for (const id in LAYOUT) if (BIOMES[id]) { BIOMES[id].grid0 = BIOMES[id].grid; BIOMES[id].grid = LAYOUT[id].grid; }
 
+  /* ======================= SCHLEIFEN =======================
+     Das Schloss soll sich wie ein Gebäude anfühlen, durch das man streifen kann – nicht wie ein Baum aus Sackgassen.
+     Benachbarte Räume, die im Wegenetz weit auseinander liegen, bekommen einen Durchgang: nebeneinander eine Tür bzw.
+     ein Durchbruch, übereinander ein Treppenhaus mit Leiter. Bevorzugt werden die Enden langer Zweige und Räume, von
+     denen der Weg zurück zum Hauptweg ein großer Umweg wäre. Ein Teil der Sackgassen bleibt (kurz, mit Lohn: Truhe,
+     Schrein, Prüfung, Runenkammer); Hauptweg-Räume werden nicht untereinander kurzgeschlossen, Wege nach vorn auf den
+     Hauptweg bleiben Gittertore mit Hebel (wie in growBranches). */
+  function addLoops(R, cells, gw, gh, lay, conn, key) {
+    const D4 = { L: [-1, 0], R: [1, 0], U: [0, -1], D: [0, 1] };
+    const live = () => Object.keys(cells).map(k => cells[k]).filter(c => c.kind !== "secret");
+    const nbs = c => { const out = []; for (const s2 in D4) { const v = c.need[s2]; if (!v || v === "X") continue; const o = cells[key(c.x + D4[s2][0], c.y + D4[s2][1])]; if (o && o.kind !== "secret") out.push(o); } return out; };
+    const bfs = a => { const d = new Map([[a, 0]]), q = [a]; for (let h = 0; h < q.length; h++) { const c = q[h]; for (const o of nbs(c)) if (!d.has(o)) { d.set(o, d.get(c) + 1); q.push(o); } } return d; };
+    const isLeaf = c => c.kind !== "path" && nbs(c).length === 1;
+    /* Länge der Sackgasse, an deren Ende c liegt */
+    const armLen = c => { let n = 1, prev = c, cur = nbs(c)[0]; while (cur && cur.kind !== "path" && nbs(cur).length === 2 && n < 30) { const nx = nbs(cur).find(o => o !== prev); prev = cur; cur = nx; n++; } return n; };
+    const all0 = live(), leaves0 = all0.filter(isLeaf).length;
+    const keepLeaves = Math.max(3, Math.ceil(leaves0 * (lay.gentle ? 0.75 : 0.72)));
+    const want = Math.max(1, Math.round(all0.length * (lay.gentle ? 0.05 : 0.1)));
+    let made = 0;
+    for (let round = 0; round < want * 3 && made < want; round++) {
+      const cs = live(), leaves = cs.filter(isLeaf).length, cand = [];
+      for (const a of cs) {
+        const da = bfs(a);
+        for (const s2 of ["R", "D"]) {
+          const b = cells[key(a.x + D4[s2][0], a.y + D4[s2][1])];
+          if (!b || b.kind === "secret" || a.need[s2]) continue;
+          if (a.kind === "path" && b.kind === "path") continue;
+          const d = da.get(b); if (d != null && d < 3) continue; /* schon nah verbunden: kein Gewinn */
+          const la = isLeaf(a), lb = isLeaf(b);
+          if ((la || lb) && leaves <= keepLeaves && !(la && lb)) continue; /* genug lohnende Sackgassen behalten */
+          if ((la && armLen(a) < 2) || (lb && armLen(b) < 2)) continue; /* kurze Sackgassen (ein Raum) bleiben: dort liegt der Lohn */
+          /* Hauptweg-Anschluss: nach vorn nur waagrecht als Gittertor (Zweigseite öffnet), nach hinten offen */
+          const side = a.kind === "path" ? b : b.kind === "path" ? a : null, pc = side ? (side === a ? b : a) : null;
+          let gate = false;
+          if (side) {
+            const ri = side.root ? side.root.idx : 0;
+            if (pc.idx > ri + 1) { if (s2 !== "R") continue; gate = true; }
+          }
+          let w = 1 + (d == null ? 6 : Math.min(8, d)) * 0.6;
+          if (la) w += 2 + armLen(a); if (lb) w += 2 + armLen(b);
+          if (s2 === "D") w *= 0.75; /* Treppenhäuser etwas seltener als Türen */
+          if (gate) w *= 0.5;
+          cand.push({ a, b, s2, gate, w });
+        }
+      }
+      if (!cand.length) break;
+      let sum = 0; cand.forEach(c => (sum += c.w)); let pk = R() * sum, ch = cand[0]; for (const c of cand) { pk -= c.w; if (pk <= 0) { ch = c; break; } }
+      if (ch.gate) { const br = ch.a.kind === "path" ? ch.b : ch.a; conn([ch.a.x, ch.a.y], [ch.b.x, ch.b.y], "G"); br.gate = true; }
+      else conn([ch.a.x, ch.a.y], [ch.b.x, ch.b.y]);
+      ch.a.loop = ch.b.loop = true; made++;
+    }
+  }
+
   /* Erzeugt den Hauptweg durch das Raumraster je nach Richtung des Gebiets */
   function makePath(R, gw, gh, flow, lay) {
     const path = [], has = (x, y) => path.some(p => p[0] === x && p[1] === y);
@@ -788,6 +841,8 @@
       }
       armId++;
     }
+    /* Schleifen und Durchbrüche (siehe addLoops) – vor den Geheimkammern, damit diese hinter rissigen Wänden bleiben */
+    addLoops(R, cells, gw, gh, lay, conn, key);
     /* geheime Kammern: an Zweigen (oder selten am Hauptweg) hinter rissigen Wänden */
     const spots = [];
     for (let y = 0; y < gh; y++) for (let x = 0; x < gw; x++) {
@@ -1487,16 +1542,23 @@
         for (let yy = lb; yy >= top; yy--) { const v = g(lx, yy); if (v === 0 || v === 2) setU(lx, yy, 4); else if (v !== 4) break; }
         const free = xs.filter(x => x !== lx);
         let s = stand, maxD = 0;
-        for (let k = 0; k < 4 && free.length; k++) {
+        for (let k = 0; k < 8 && free.length; k++) {
           let D = 0, bad = false;
-          for (const x of free) { const L = fallTo(x, s); if (L < 0) { bad = true; break; } D = Math.max(D, L - s); }
+          for (const x of free) {
+            /* ein bröckelnder Steg über dem Loch zählt nicht (er bricht weg), ebenso das eben gesetzte Podest (man lässt sich durchfallen) */
+            const s1 = g(x, s + 1) === 10 || (k && g(x, s + 1) === 2) ? s + 1 : s, L = fallTo(x, s1);
+            if (L < 0) { bad = true; break; } D = Math.max(D, L - s);
+          }
           if (bad) return false;
           if (!k) maxD = D;
           rec.rest = D;
           if (D <= PIT_DROP) break;
-          const p = s + 1 + Math.min(PIT_DROP, Math.ceil(D / 2));
-          let any = false; for (const x of free) if (g(x, p) === 0) { setU(x, p, 2); any = true; }
-          if (!any) break;
+          /* Podest möglichst in der Mitte, sonst etwas höher, wo der Schacht frei ist */
+          let p = s + 1 + Math.min(PIT_DROP, Math.ceil(D / 2));
+          const okRow = y => free.every(x => g(x, y) === 0 || g(x, y) === 4) && free.some(x => g(x, y) === 0);
+          while (p > s + 3 && !okRow(p)) p--;
+          if (!okRow(p)) break;
+          for (const x of free) if (g(x, p) === 0) setU(x, p, 2);
           rec.podest = (rec.podest || 0) + 1; s = p - 1;
         }
         rec.drop = Math.max(maxD, lb - stand); return true;
@@ -2226,27 +2288,27 @@
         "#..P..............................B.......D..#",
         "##############################################",
         "##############################################"]; break;
-      case "lakeboss": rows = [
-        "########################################################",
-        "#......................................................#",
-        "#......................................................#",
-        "#......................................................#",
-        "#......................................................#",
-        "#......................................................#",
-        "#......................................................#",
-        "#......................................................#",
-        "#.........------......................------...........#",
-        "#......................................................#",
-        "#......................................................#",
-        "#......................................................#",
-        "#....------..........--------...........------.........#",
-        "#......................................................#",
-        "#......................................................#",
-        "#......................................................#",
-        "#..P....................B..............................#",
-        "########################################################",
-        "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
-        "########################################################"]; break;
+      case "lakeboss": rows = [ /* Herz des Sees: schmale Steininsel vor dem schwarzen See (Demogorgon ragt dahinter auf, demogorgon.js) */
+        "############################################",
+        "#..........................................#",
+        "#..........................................#",
+        "#..........................................#",
+        "#..........................................#",
+        "#..........................................#",
+        "#..........................................#",
+        "#..........................................#",
+        "#......-----....................-----......#",
+        "#..........................................#",
+        "#..........................................#",
+        "#..........................................#",
+        "#...-----.........--------.........-----...#",
+        "#..........................................#",
+        "#..........................................#",
+        "#..........................................#",
+        "#..P.................B.....................#",
+        "############################################",
+        "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
+        "############################################"]; break;
       case "hoard": rows = [
         "########################################################",
         "#......................................................#",

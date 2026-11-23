@@ -2461,20 +2461,23 @@
   mbDef("ratten", { size: 1.25, n: ["Mutter Nagezahn", "Mother Gnawtooth"], title: ["Königin der Kanalratten", "Queen of the Sewer Rats"], areas: ["torhof", "keller"], seed: 3301,
     hint: ["Ab halber Kraft gräbt sie sich ein – achte auf den Boden.", "Below half she burrows – watch the ground."],
     def: { shape: "nm_ratten", c: "#5a4a40", t: "#c89a8a", w: 30, h: 18, hp: 8, dmg: 1.1, spd: 118, ai: "pack", snd: "rat", poise: 0.45,
-      atks: [{ k: "leap", r: [30, 130], pre: 0.55, act: 0.5, post: 0.45, cd: 1.6, box: [0, -18, 30, 18], jump: [290, -250], sfx: "bite", name: ["Sprungbiss", "Pounce Bite"] },
+      atks: [{ k: "leap", r: [30, 130], pre: 0.55, act: 0.5, post: 0.45, cd: 1.6, box: [0, -18, 30, 18], jump: [290, -250], sfx: "bite", open: 0.5, name: ["Sprungbiss", "Pounce Bite"] },
+        { k: "mark", hz: "zone", n: 4, hw: 26, hh: 20, warn: 0.85, life: 0.4, r: [40, 240], pre: 0.6, act: 0.1, post: 0.5, cd: 5.5, col: "#9ad04a", eff: { poison: 1 }, sfx: "slime", w: 0.7, name: ["Seuchenpfützen", "Plague Puddles"] },
         { k: "hit", r: [0, 30], pre: 0.38, act: 0.1, post: 0.35, cd: 0.8, box: [0, -16, 28, 16], sfx: "bite", w: 0.8, name: ["Nagezahn", "Gnaw"] },
         { k: "summon", r: [0, 260], pre: 0.85, act: 0.1, post: 0.5, cd: 8, spawn: ["ratte", "ratte", "ratte"], max: 6, sfx: "rat", w: 0.6, name: ["Rattenflut", "Rat Flood"] },
         { k: "lob", proj: "e_gift", n: 3, r: [50, 200], pre: 0.7, act: 0.1, post: 0.5, cd: 4.5, sfx: "slime", w: 0.6, name: ["Seuchenspucke", "Plague Spit"] }] },
-    p2: [{ k: "nm", nm: "wuehlen", r: [40, 280], pre: 0.55, act: 1.5, post: 0.55, cd: 5.5, glyph: "!!", sfx: "rock", w: 1.2, dy: 140, track: false, name: ["Wühlangriff", "Burrow Strike"] }],
+    p2: [{ k: "nm", nm: "wuehlen", r: [40, 280], pre: 0.55, act: 1.5, post: 0.55, cd: 5.5, glyph: "!!", sfx: "rock", w: 1.2, dy: 140, track: false, open: 1.1, name: ["Wühlangriff", "Burrow Strike"] },
+      { k: "charge", r: [60, 280], pre: 0.7, act: 0.9, post: 0.6, cd: 6, box: [0, -18, 30, 18], spd: 320, armor: true, glyph: "!!", kb: 260, sfx: "rat", w: 0.8, open: 0.9, name: ["Rattenwalze", "Rat Stampede"] }],
     say: { intro: [["Meine Kinder haben Hunger, Gehörnter. Großen Hunger.", "My children are hungry, horned one. Very hungry."]], p2: [["Unter die Erde, meine Lieben!", "Underground, my darlings!"]], die: [["Meine … Kinder …", "My … children …"]] } });
   mbDef("haeuptling", { size: 1.25, n: ["Krumschnabel der Hauer", "Crookbeak the Tusker"], title: ["Goblin-Kriegshäuptling", "Goblin Warchief"], areas: ["torhof", "wehrgang"], seed: 5507,
     hint: ["Weich dem Ansturm aus – an Wänden prallt der Keiler ab.", "Dodge the charge – the boar stuns itself on walls."],
     def: { shape: "nm_keiler", c: "#5a4a3a", t: "#6f9a3a", w: 26, h: 28, hp: 9, dmg: 1.25, spd: 128, ai: "charger", snd: "goblin", poise: 0.6,
-      atks: [{ k: "charge", r: [50, 280], pre: 0.75, act: 1.0, post: 0.7, cd: 2.6, box: [0, -24, 30, 24], spd: 340, armor: true, glyph: "!!", kb: 300, sfx: "roar", hitSfx: "hitHeavy", name: ["Keileransturm", "Boar Charge"] },
+      atks: [{ k: "charge", r: [50, 280], pre: 0.75, act: 1.0, post: 0.7, cd: 2.6, box: [0, -24, 30, 24], spd: 340, armor: true, glyph: "!!", kb: 300, sfx: "roar", hitSfx: "hitHeavy", open: 1.0, name: ["Keileransturm", "Boar Charge"] },
         { k: "hit", r: [0, 34], pre: 0.42, act: 0.1, post: 0.4, cd: 0.8, box: [0, -22, 32, 20], sfx: "bite", w: 0.8, name: ["Hauerstoß", "Tusk Gore"] },
         { k: "volley", proj: "e_bombe", n: 4, r: [60, 240], pre: 0.85, act: 0.1, post: 0.5, cd: 4.5, sfx: "swing", w: 0.7, name: ["Bombenteppich", "Bomb Carpet"] },
         { k: "summon", r: [0, 260], pre: 0.9, act: 0.1, post: 0.5, cd: 9, spawn: ["goblin", "goblinBogen"], max: 4, sfx: "horn", w: 0.5, name: ["Kriegshorn", "War Horn"] }] },
-    p2: [{ k: "volley", proj: "e_glut", n: 6, r: [60, 260], pre: 0.85, act: 0.1, post: 0.5, cd: 5, sfx: "fire", w: 0.8, name: ["Feuerbomben", "Fire Bombs"] }],
+    p2: [{ k: "volley", proj: "e_glut", n: 6, r: [60, 260], pre: 0.85, act: 0.1, post: 0.5, cd: 5, sfx: "fire", w: 0.8, name: ["Feuerbomben", "Fire Bombs"] },
+      { k: "mark", hz: "zone", n: 5, hw: 24, hh: 34, warn: 0.95, life: 0.35, r: [30, 260], pre: 0.6, act: 0.1, post: 0.6, cd: 6, col: "rgba(255,140,50,.95)", eff: { burn: 1 }, sfx: "horn", w: 0.8, open: 0.8, name: ["Sprengfallen", "Blast Traps"] }],
     say: { intro: [["Hoho! Der Hornkopf! Der Keiler hat schon lange keinen Zerstörer mehr gefressen!", "Hoho! Hornhead! The boar hasn't eaten a destroyer in ages!"]], p2: [["Zündet die guten Bomben an!", "Light the good bombs!"]], die: [["Mein … Schwein …", "My … pig …"]] } });
   mbDef("kerker", { size: 1.2, n: ["Eisenschloss", "Ironlock"], title: ["Kerkermeister der Spinne", "The Spider's Jailer"], areas: ["keller", "verlies"], seed: 7121,
     hint: ["Wo ein Schatten fällt, fällt gleich ein Käfig.", "Where a shadow falls, a cage soon follows."],
@@ -2484,7 +2487,8 @@
         { k: "nm", nm: "kaefig", r: [30, 230], pre: 0.7, act: 0.2, post: 0.5, cd: 4.5, sfx: "chain", dy: 160, w: 0.9, name: ["Käfigsturz", "Cage Drop"] },
         { k: "hit", r: [0, 32], pre: 0.45, act: 0.1, post: 0.45, cd: 0.8, box: [0, -28, 32, 26], sfx: "punch", w: 0.7, name: ["Kerkerfaust", "Jailer's Fist"] }] },
     p2: [{ k: "summon", r: [0, 260], pre: 0.8, act: 0.1, post: 0.5, cd: 9, spawn: ["skelett", "zombie"], max: 3, sfx: "chain", w: 0.6, name: ["Zellen öffnen", "Open the Cells"] },
-      { k: "combo", n: 4, gap: 0.2, r: [0, 44], pre: 0.75, act: 0.1, post: 0.6, cd: 4, box: [-30, -30, 60, 30], armor: true, glyph: "!!", sfx: "chain", hitSfx: "hitHeavy", w: 0.7, name: ["Kettenwirbel", "Chain Whirl"] }],
+      { k: "combo", n: 4, gap: 0.2, r: [0, 44], pre: 0.75, act: 0.1, post: 0.6, cd: 4, box: [-30, -30, 60, 30], armor: true, glyph: "!!", sfx: "chain", hitSfx: "hitHeavy", w: 0.7, open: 1.0, name: ["Kettenwirbel", "Chain Whirl"] },
+      { k: "slam", r: [0, 60], pre: 0.8, act: 0.12, post: 0.6, cd: 4.5, box: [-10, -30, 60, 30], wave: true, armor: true, glyph: "!!", sfx: "anvil", hitSfx: "hitHeavy", w: 0.7, name: ["Zellentür", "Cell Door"] }],
     say: { intro: [["Noch ein Gefangener. Deine Zelle ist schon gefegt.", "Another prisoner. Your cell's already swept."]], p2: [["Alle Zellen auf! Holt ihn euch!", "Open every cell! Get him!"]], die: [["Die Schlüssel … nimm sie … sie passen eh nirgends …", "The keys … take them … they fit nothing anyway …"]] } });
   mbDef("weberin", { size: 1.2, n: ["Die Weberin", "The Weaver"], title: ["Mutter des Schlunds", "Mother of the Chasm"], areas: ["schlund", "see"], seed: 8803,
     hint: ["Ab halber Kraft verschwindet sie nach oben – folge dem Faden.", "Below half she vanishes upward – follow the thread."],
@@ -2493,14 +2497,16 @@
         { k: "leap", r: [40, 150], pre: 0.5, act: 0.6, post: 0.45, cd: 2, jump: [300, -280], box: [0, -18, 32, 18], eff: { poison: 1 }, sfx: "bite", name: ["Giftsprung", "Venom Leap"] },
         { k: "summon", r: [0, 260], pre: 0.85, act: 0.1, post: 0.5, cd: 8, spawn: ["spinnchen", "spinnchen", "spinnchen"], max: 6, sfx: "slime", w: 0.6, name: ["Brut", "Brood"] },
         { k: "hit", r: [0, 34], pre: 0.36, act: 0.1, post: 0.4, cd: 0.8, box: [0, -18, 34, 18], eff: { poison: 1 }, sfx: "bite", w: 0.8, name: ["Klauenbiss", "Fang Bite"] }] },
-    p2: [{ k: "nm", nm: "faden", r: [0, 300], pre: 0.5, act: 1.6, post: 0.6, cd: 6, glyph: "!!", sfx: "web", dy: 220, track: false, w: 1.2, name: ["Fadensturz", "Thread Drop"] }],
+    p2: [{ k: "nm", nm: "faden", r: [0, 300], pre: 0.5, act: 1.6, post: 0.6, cd: 6, glyph: "!!", sfx: "web", dy: 220, track: false, w: 1.2, open: 1.2, name: ["Fadensturz", "Thread Drop"] },
+      { k: "mark", hz: "strike", n: 3, hw: 18, warn: 0.85, life: 0.3, r: [0, 280], pre: 0.6, act: 0.1, post: 0.5, cd: 5, col: "rgba(240,220,236,1)", sfx: "web", w: 0.9, name: ["Fadenfall", "Thread Fall"] }],
     say: { intro: [["Ein Faden mehr in meinem Netz. Ein roter.", "One more thread in my web. A red one."]], p2: [["Sieh nach oben, kleiner Faden.", "Look up, little thread."]], die: [["Die Spinne … wird … weiterweben …", "The Spider … will … keep weaving …"]] } });
   mbDef("amboss", { size: 1.2, n: ["Amboss", "Anvil"], title: ["Der Schmiedegolem", "The Forge Golem"], areas: ["schmiede", "glut"], seed: 6203,
     hint: ["Schwerfällig – aber wehe, der Hammer trifft. Feuer kümmert ihn nicht.", "Lumbering – but woe if the hammer lands. Fire doesn't faze it."],
     def: { shape: "nm_amboss", c: "#5e5658", t: "#ff7a2a", w: 26, h: 34, hp: 12, dmg: 1.5, spd: 48, ai: "walker", armor: 0.2, metal: true, poise: 0.75, immune: ["burn", "bleed", "poison"],
-      atks: [{ k: "slam", r: [0, 50], pre: 0.85, act: 0.12, post: 0.7, cd: 1.6, box: [-8, -38, 58, 38], armor: true, wave: true, glyph: "!!", sfx: "quake", hitSfx: "hitHeavy", name: ["Hammerschlag", "Hammer Blow"] },
+      atks: [{ k: "slam", r: [0, 50], pre: 0.85, act: 0.12, post: 0.7, cd: 1.6, box: [-8, -38, 58, 38], armor: true, wave: true, glyph: "!!", sfx: "quake", hitSfx: "hitHeavy", open: 0.7, name: ["Hammerschlag", "Hammer Blow"] },
         { k: "volley", proj: "e_glut", n: 5, r: [60, 240], pre: 0.8, act: 0.1, post: 0.5, cd: 4, sfx: "fire", w: 0.7, name: ["Funkenregen", "Spark Rain"] },
-        { k: "beam", r: [50, 280], pre: 1.0, act: 0.6, post: 0.7, cd: 5, col: "rgba(255,140,40,.9)", glyph: "!!", sfx: "fireBig", w: 0.6, name: ["Glutstrahl", "Ember Beam"] },
+        { k: "beam", r: [50, 280], pre: 1.0, act: 0.6, post: 0.7, cd: 5, col: "rgba(255,140,40,.9)", glyph: "!!", sfx: "fireBig", w: 0.6, open: 1.0, name: ["Glutstrahl", "Ember Beam"] },
+        { k: "charge", r: [60, 260], pre: 0.85, act: 1.0, post: 0.7, cd: 6, box: [0, -32, 30, 32], spd: 260, armor: true, glyph: "!!", kb: 300, sfx: "anvil", hitSfx: "hitHeavy", w: 0.6, name: ["Glutwalze", "Ember Roll"] },
         { k: "hit", r: [0, 36], pre: 0.5, act: 0.1, post: 0.5, cd: 0.9, box: [0, -30, 36, 26], sfx: "anvil", hitSfx: "hitHeavy", w: 0.8, name: ["Ambossfaust", "Anvil Fist"] }] },
     p2: [{ k: "mark", hz: "column", n: 3, hw: 22, warn: 0.9, life: 0.7, r: [40, 260], pre: 0.6, act: 0.1, post: 0.5, cd: 4.5, col: "rgba(255,120,40,.85)", eff: { burn: 1 }, sfx: "fireBig", w: 0.9, name: ["Esse", "Forge Vents"] }],
     say: { intro: [["*Ein Dröhnen wie ein Hammer auf hohlem Eisen.*", "*A booming like a hammer on hollow iron.*"]], p2: [["*Die Risse glühen weiß. Er läuft heiß.*", "*The cracks glow white. It's running hot.*"]], die: [["*Das Feuer in seiner Brust erlischt.*", "*The fire in its chest goes out.*"]] } });
@@ -2508,7 +2514,8 @@
     hint: ["Der Anker kommt zurück – zweimal ausweichen.", "The anchor comes back – dodge twice."],
     def: { shape: "nm_kapitaen", c: "#3a3a2a", t: "#8a6a3a", skin: "#9aa890", w: 14, h: 28, hp: 9, dmg: 1.25, spd: 95, ai: "duelist", undead: true, poise: 0.45,
       atks: [{ k: "combo", n: 3, gap: 0.18, r: [0, 34], pre: 0.42, act: 0.08, post: 0.45, cd: 1.1, box: [0, -24, 32, 22], sfx: "slash", name: ["Säbelwirbel", "Cutlass Flurry"] },
-        { k: "nm", nm: "anker", r: [40, 190], pre: 0.65, act: 0.9, post: 0.5, cd: 3.6, glyph: "!!", sfx: "chain", dy: 40, w: 1, name: ["Ankerwurf", "Anchor Throw"] },
+        { k: "nm", nm: "anker", r: [40, 190], pre: 0.65, act: 0.9, post: 0.5, cd: 3.6, glyph: "!!", sfx: "chain", dy: 40, w: 1, open: 0.8, name: ["Ankerwurf", "Anchor Throw"] },
+        { k: "volley", proj: "e_bombe", n: 3, r: [60, 240], pre: 0.8, act: 0.1, post: 0.5, cd: 5.5, sfx: "explode", w: 0.6, name: ["Pulverfass", "Powder Keg"] },
         { k: "shoot", proj: "e_bolzen", r: [60, 280], pre: 0.85, act: 0.05, post: 0.5, cd: 3, lockAim: 0.3, aimLine: true, sfx: "explode", w: 0.6, name: ["Steinschloss", "Flintlock"] },
         { k: "lunge", r: [30, 100], pre: 0.45, act: 0.2, post: 0.45, cd: 2, lunge: 330, box: [0, -22, 28, 20], sfx: "slash", w: 0.7, name: ["Entern!", "Board 'em!"] }] },
     p2: [{ k: "slam", r: [0, 260], pre: 0.85, act: 0.12, post: 0.6, cd: 4.5, box: [-10, -24, 20, 24], wave: true, armor: true, glyph: "!!", sfx: "splash", w: 0.9, dy: 60, name: ["Flutwelle", "Tidal Wave"] },
@@ -2518,9 +2525,10 @@
     hint: ["Spring über die Glockenwellen.", "Jump over the bell waves."],
     def: { shape: "nm_laeuter", c: "#8a6a3a", t: "#ffd27a", w: 22, h: 30, hp: 8, dmg: 1.2, spd: 72, ai: "flyer", fly: true, keep: [70, 140], undead: true, poise: 0.5, immune: ["poison", "bleed"],
       atks: [{ k: "nm", nm: "glocke", r: [0, 220], pre: 0.85, act: 0.2, post: 0.6, cd: 3.5, glyph: "!!", sfx: "bell", w: 1.1, name: ["Glockenschlag", "Bell Strike"] },
-        { k: "dive", r: [0, 170], pre: 0.75, act: 0.7, post: 0.6, cd: 3, box: [-4, -26, 30, 26], spd: 300, glyph: "!!", sfx: "bell", w: 0.9, name: ["Klöppelsturz", "Clapper Dive"] },
+        { k: "dive", r: [0, 170], pre: 0.75, act: 0.7, post: 0.6, cd: 3, box: [-4, -26, 30, 26], spd: 300, glyph: "!!", sfx: "bell", w: 0.9, open: 1.0, name: ["Klöppelsturz", "Clapper Dive"] },
         { k: "shoot", proj: "e_schall", r: [40, 240], pre: 0.6, act: 0.05, post: 0.5, cd: 2.5, sfx: "roar", w: 0.8, name: ["Schallwelle", "Sound Wave"] }] },
-    p2: [{ k: "mark", hz: "strike", n: 3, hw: 20, warn: 0.9, r: [0, 300], pre: 0.7, act: 0.1, post: 0.5, cd: 5, col: "rgba(255,220,150,1)", sfx: "thunder", w: 0.9, name: ["Totengeläut", "Death Toll"] }],
+    p2: [{ k: "mark", hz: "strike", n: 3, hw: 20, warn: 0.9, r: [0, 300], pre: 0.7, act: 0.1, post: 0.5, cd: 5, col: "rgba(255,220,150,1)", sfx: "thunder", w: 0.9, name: ["Totengeläut", "Death Toll"] },
+      { k: "shoot", proj: "e_schall", n: 3, spread: 0.5, r: [40, 260], pre: 0.75, act: 0.05, post: 0.5, cd: 4.5, glyph: "!!", sfx: "bell", w: 0.8, name: ["Dreiklang", "Triad"] }],
     say: { intro: [["DONG. Wem schlägt die Stunde? DONG. Dir.", "DONG. For whom tolls the hour? DONG. For you."]], p2: [["DONG – DONG – DONG!", "DONG – DONG – DONG!"]], die: [["… dong …", "… dong …"]] } });
   mbDef("dornvater", { size: 1.2, n: ["Der Dornenvater", "The Thornfather"], title: ["Ältester der Blights", "Eldest of the Blights"], areas: ["zinnen", "sturm"], seed: 1717,
     hint: ["Wurzeln brechen dort hervor, wo der Boden grünt.", "Roots burst where the ground turns green."],
@@ -2528,7 +2536,8 @@
       atks: [{ k: "mark", hz: "zone", n: 3, hw: 24, hh: 30, warn: 0.8, life: 0.5, r: [30, 260], pre: 0.7, act: 0.1, post: 0.5, cd: 3.5, col: "#5a8a30", eff: { root: 1.2 }, sfx: "roots", name: ["Wurzelfeld", "Root Field"] },
         { k: "pull", r: [50, 200], pre: 0.6, act: 0.45, post: 0.5, cd: 4.5, glyph: "!!", sfx: "roots", w: 0.7, name: ["Rankenzug", "Vine Pull"] },
         { k: "shoot", proj: "e_nadel", n: 7, spread: 0.9, r: [30, 220], pre: 0.7, act: 0.05, post: 0.5, cd: 3, sfx: "insect", w: 0.8, name: ["Dornensalve", "Thorn Volley"] },
-        { k: "slam", r: [0, 50], pre: 0.85, act: 0.12, post: 0.7, cd: 2.2, box: [-10, -40, 60, 40], wave: true, armor: true, glyph: "!!", sfx: "quake", hitSfx: "hitHeavy", name: ["Stampfen", "Stomp"] }] },
+        { k: "slam", r: [0, 50], pre: 0.85, act: 0.12, post: 0.7, cd: 2.2, box: [-10, -40, 60, 40], wave: true, armor: true, glyph: "!!", sfx: "quake", hitSfx: "hitHeavy", open: 0.7, name: ["Stampfen", "Stomp"] },
+        { k: "volley", proj: "e_gift", n: 4, r: [60, 240], pre: 0.75, act: 0.1, post: 0.5, cd: 5, sfx: "slime", w: 0.6, name: ["Sporenkapseln", "Spore Pods"] }] },
     p2: [{ k: "summon", r: [0, 260], pre: 0.8, act: 0.1, post: 0.5, cd: 7, spawn: ["zweigBlight", "zweigBlight"], max: 4, sfx: "roots", w: 0.7, name: ["Blightbrut", "Blight Brood"] }],
     say: { intro: [["Knarrr … Ein roter Spross … reif zum Brechen …", "Creak … A red sprout … ripe for breaking …"]], p2: [["Wachst, meine Zweige! WACHST!", "Grow, my twigs! GROW!"]], die: [["… zurück … zur Erde …", "… back … to the earth …"]] } });
   mbDef("ilvara", { size: 1.12, n: ["Ilvara Nachtklinge", "Ilvara Nightblade"], title: ["Klingentänzerin der Drow", "Drow Blade Dancer"], areas: ["hallen", "wehrgang"], seed: 9091,
@@ -2536,8 +2545,9 @@
     def: { shape: "nm_ilvara", c: "#2a2236", t: "#c8304a", skin: "#4a3e5e", w: 12, h: 24, hp: 7.5, dmg: 1.25, spd: 148, ai: "duelist", poise: 0.4,
       atks: [{ k: "combo", n: 4, gap: 0.15, r: [0, 34], pre: 0.42, act: 0.08, post: 0.45, cd: 1.1, box: [-6, -22, 34, 20], sfx: "slash", name: ["Klingenwirbel", "Blade Whirl"] },
         { k: "teleport", behind: true, r: [40, 220], pre: 0.4, act: 0.05, post: 0.25, cd: 4.5, sfx: "shadow", w: 0.6, name: ["Schattenschritt", "Shadow Step"] },
+        { k: "mark", hz: "strike", n: 4, hw: 16, warn: 0.8, life: 0.25, r: [30, 260], pre: 0.55, act: 0.1, post: 0.5, cd: 5.5, col: "rgba(200,48,74,.95)", sfx: "shadow", w: 0.6, name: ["Mondfall", "Moonfall"] },
         { k: "shoot", proj: "e_dolch", n: 5, spread: 0.6, r: [50, 220], pre: 0.6, act: 0.05, post: 0.45, cd: 3.5, sfx: "throwK", w: 0.7, name: ["Dolchfächer", "Dagger Fan"] },
-        { k: "lunge", r: [30, 110], pre: 0.5, act: 0.22, post: 0.5, cd: 2.5, lunge: 380, box: [-4, -22, 30, 20], glyph: "!!", sfx: "stab", w: 0.8, name: ["Mondsichel", "Crescent"] }] },
+        { k: "lunge", r: [30, 110], pre: 0.5, act: 0.22, post: 0.5, cd: 2.5, lunge: 380, box: [-4, -22, 30, 20], glyph: "!!", sfx: "stab", w: 0.8, open: 0.6, name: ["Mondsichel", "Crescent"] }] },
     p2: [{ k: "summon", r: [0, 260], pre: 0.7, act: 0.1, post: 0.4, cd: 10, spawn: ["drowWache"], max: 2, sfx: "shadow", w: 0.5, name: ["Schattenschwestern", "Shadow Sisters"] }],
     say: { intro: [["Tanz mit mir, Oberflächenteufel. Einen Tanz nur.", "Dance with me, surface devil. Just one dance."]], p2: [["Schwestern! Der Tanz wird schneller!", "Sisters! The dance quickens!"]], die: [["Ein … schöner … Tanz …", "A … lovely … dance …"]] } });
 
@@ -2548,8 +2558,10 @@
     const e = Z.spawnEnemy("mb_" + id, x, y, { tier: tierN() }); if (!e) return null;
     e.nmMini = D; e.def = Object.assign({}, e.def); e.nmP = 1; e.nmRoom = o.cell || null; e.nmNoSeal = !!o.noSeal; e.nmSealed = [];
     /* W6-Balancing: Mini-Bosse fielen in 2–6 s (Bot) – Ziel 30–60 s für Spieler → Leben ×3,5 (vorher ×1) */
-    const MBHP = { ratten: 2.5, keiler: 2.3, kerker: 2.2, kapitaen: 2.4, ilvara: 2.8, weberin: 2.0, amboss: 1, dorn: 1.1, laeuter: 1.1 }; /* je Wächter nach Prüfstand (2. Runde): 6–9 s → 15–25 s */
-    e.hp = e.hpMax = Math.round(e.hpMax * 3.5 * (MBHP[id] || 1));
+    /* W9: Schlüssel korrigiert (keiler/kapitaen/dorn griffen nie – Ids sind haeuptling/salzbart/dornvater; Krumschnabel fiel mit Speer +5 in 4 s).
+       Grundfaktor 3,5 → 4,2 – dafür jetzt Angriffsfenster, ein Angriff mehr und Wut unter 25 % (Prüfstand w9_boss: starke Ausrüstung 4–33 s) */
+    const MBHP = { ratten: 2.5, haeuptling: 2.3, kerker: 2.2, salzbart: 2.4, ilvara: 2.8, weberin: 2.0, amboss: 1, dornvater: 1.1, laeuter: 1.1 }; /* je Wächter nach Prüfstand (2. Runde): 6–9 s → 15–25 s */
+    e.hp = e.hpMax = Math.round(e.hpMax * 4.2 * (MBHP[id] || 1));
     if (tierN() === 0) { e.hp = e.hpMax = Math.round(e.hpMax * 0.75); e.dmgMul *= 0.85; }
     if (o.aware) e.aware = true;
     mbLive.push(e);
@@ -2573,6 +2585,21 @@
     FX.ring(e.x + e.w / 2, e.y + e.h / 2, 40, "#ffb040", 0.5, 3); FX.addShake(4); A.play("roar", { x: e.x, vol: 0.6 });
     wtext(e.x + e.w / 2, e.y - 28, L(["Zweite Phase!", "Second phase!"]), { col: "#ffb070", size: 9, life: 2 });
     if (Z.music && Z.music.stinger) Z.music.stinger("phase");
+  }
+  /* W9: Schwachpunkt – kurz benommen, 1,5-facher Schaden (Z.hitEnemy-Hülle in bossphasen.js, Abschnitt 6) */
+  function mbOpen(e, sec) {
+    sec *= tierN() === 0 ? 1.3 : 1;
+    e.st.stun = Math.max(e.st.stun || 0, sec); e.openT = sec; e.openMax = sec; e.act = null; e.cd = Math.max(e.cd || 0, 0.3);
+    wtext(e.x + e.w / 2, e.y - 16, L(["Schwachpunkt!", "Weak spot!"]), { col: "#ffe08a", size: 8, life: 1.4 });
+    FX.ring(e.x + e.w / 2, e.y + e.h * 0.4, 18 + e.w * 0.5, "#ffe08a", 0.4, 2); A.play("parry", { x: e.x, vol: 0.4 });
+  }
+  /* W9: Wut – schneller, kürzere Pausen */
+  function mbWut(e) {
+    e.wut = true;
+    e.def = Object.assign({}, e.def, { spd: (e.def.spd || 80) * 1.1, atks: e.def.atks.map(a => Object.assign({}, a, { cd: (a.cd || 1) * (tierN() === 0 ? 0.9 : 0.78) })) });
+    e.cd = Math.min(e.cd || 0, 0.4);
+    wtext(e.x + e.w / 2, e.y - 28, L(["Wut!", "Fury!"]), { col: "#ff5a3a", size: 10, life: 1.8 });
+    FX.ring(e.x + e.w / 2, e.y + e.h / 2, 50, "#ff3a2a", 0.5, 4); FX.addShake(5); A.play(e.def.snd || "roar", { x: e.x, vol: 0.7, rate: 0.85 });
   }
   function mbDeath(e) {
     const D = e.nmMini, x = e.x + e.w / 2, y = e.y + e.h;
@@ -2601,6 +2628,12 @@
       }
       if (d < 460) e.aware = true;
       if (e.nmP === 1 && e.hp < e.hpMax * 0.5) mbPhase2(e);
+      /* W9: Angriffsfenster nach schweren Angriffen (a.open), Wut unter 25 % */
+      if (e.openT > 0) { e.openT -= dt; if (e.openT <= 0 || !(e.st.stun > 0)) e.openT = 0; }
+      const pa = e._mbAct;
+      if (pa && pa !== e.act && pa.phase === "post" && pa.a && pa.a.open && !e.dead) mbOpen(e, pa.a.open);
+      e._mbAct = e.act;
+      if (!e.wut && e.hp > 0 && e.hp < e.hpMax * 0.25) mbWut(e);
     }
   }
   function mbDraw(c, t) {

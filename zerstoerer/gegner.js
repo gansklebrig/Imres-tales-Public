@@ -464,6 +464,7 @@
     faceTo(e, dx);
     /* Angriff auswählen */
     if (tryAttack(e, dx, dy, adx, P)) return;
+    if (stuckBelow(e, dt, P, dx, dy, adx)) return;
     /* Bewegung je nach Verhalten */
     const ai = d.ai;
     if (d.fly) { flyMove(e, dt, tgt, dx, dy); return; }
@@ -579,6 +580,24 @@
     return true;
   }
   const NOLOS = { summon: 1, heal: 1, shield: 1, grow: 1, invis: 1 };
+  /* W9 (Abuse-Bot „sichere Stelle“): Wer hoch über reinen Nahkämpfern steht, die nicht hinaufkommen, und von dort schießt, war
+     in ~1/4 der Fälle völlig ungefährdet. Jetzt: steht ein wacher Nahkämpfer 1,6 s ratlos darunter (Spieler ≥ 2,5 Kacheln höher,
+     in Sicht), hebt er einen Stein auf und wirft (lesbares Ausholen 0,55 s, 55 % Schaden, nicht parierbar wie alle Steine),
+     danach alle ~2,6 s. Gegner mit eigenem Fernkampf, Flieger, Türme und Bosse bleiben unverändert. */
+  const ROCK = { k: "lob", proj: "e_stein", r: [0, 240], pre: 0.55, act: 0.05, post: 0.4, cd: 2.6, dy: 400, sfx: "swing", name: ["Steinwurf", "Rock Throw"] };
+  const RANGED_K = { shoot: 1, lob: 1, volley: 1, beam: 1, mark: 1, web: 1, pull: 1, teleport: 1, dive: 1 };
+  function stuckBelow(e, dt, P, dx, dy, adx) {
+    const d = e.def;
+    if (d.fly || d.boss || d.ai === "turret" || e.ceil || e.master || !P || P.dead) return false;
+    if (e._rangedK == null) e._rangedK = (d.atks || []).some(a => RANGED_K[a.k]);
+    if (e._rangedK) return false;
+    const stuck = e.onGround && dy < -40 && adx < 190 && P.onGround && hasLos(e, P) && Math.abs(e.vx) < 40;
+    e.unrT = stuck ? (e.unrT || 0) + dt : Math.max(0, (e.unrT || 0) - dt * 2);
+    if (e.unrT < 1.6 || e.cd > 0 || e.spawnT > 0) return false;
+    startAct(e, ROCK, P); e.act.dmgMul = 0.55; e.act.fast = 1; e.act.feint = false;
+    FX.text(e.x + e.w / 2, e.y - 10, "!", "#ffb070");
+    return true;
+  }
   function hasLos(e, P) {
     if (e._los == null || e.seeT == null) e._los = W.los(e.x + e.w / 2, e.y + 4, P.x + P.w / 2, P.y + 6) || W.los(e.x + e.w / 2, e.y + e.h / 2, P.x + P.w / 2, P.y + P.h / 2);
     return e._los;
@@ -642,7 +661,7 @@
       case "lunge": e.vx = e.face * (a.lunge || 200); break;
       case "shoot": if (!a.gap) fire(e, a, P); break;
       case "volley": for (let i = 0; i < (a.n || 5); i++) { const tx = e.act.aim.x + (i - (a.n - 1) / 2) * 26; Z.aimProj(a.proj, cx, cy, tx, Z.groundY(tx, P.y + P.h) - 2, { dmg: dmgP(e, 0.8) }).g = 400; } break;
-      case "lob": for (let i = 0; i < (a.n || 1); i++) Z.aimProj(a.proj, cx, cy - 4, e.act.aim.x + (i ? (Z.R() - 0.5) * 60 : 0), e.act.aim.y + 6, { dmg: dmgP(e) }); break;
+      case "lob": for (let i = 0; i < (a.n || 1); i++) Z.aimProj(a.proj, cx, cy - 4, e.act.aim.x + (i ? (Z.R() - 0.5) * 60 : 0), e.act.aim.y + 6, { dmg: dmgP(e, e.act.dmgMul || 1) }); break;
       case "web": Z.aimProj(a.proj, cx, cy, e.act.aim.x, e.act.aim.y, { dmg: 0 }); break;
       case "leap": { const [vx, vy] = a.jump || [240, -220]; const dist = Math.abs(tgt.x - e.x); e.vx = e.face * Math.min(vx, dist * 2.2 + 60); e.vy = vy; e.onGround = false; break; }
       case "slam": meleeCheck(e, a, P); FX.addShake(4); FX.burst(cx + e.face * 18, e.y + e.h, 12, { col: Z.dustCol || "#8a7a70", sp: 120, ang: -Math.PI / 2, spread: 2.6, life: 0.5, size: 3, kind: "smoke" });

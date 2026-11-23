@@ -128,7 +128,7 @@
     { id: "blitz", ico: "⚡", art: "zaehl", grp: "kills", n: ["Schnellste Klinge", "Swiftest Blade"], d: ["{n} Kills in den ersten 30 Sekunden", "{n} kills in the first 30 seconds"], need: t => 5 + Math.floor(t / 2), prog: c => c.earlyKills, frist: 30, rw: t => ({ k: "gold", n: goldN(50) }) },
     { id: "krit", ico: "✶", art: "zaehl", n: ["Kritiker", "Critic"], d: ["{n} kritische Treffer", "{n} critical hits"], need: t => 10 + 2 * t, prog: c => st("crits") - c.s0.crits, arena: true, rw: t => ({ k: "rolle" }) },
     { id: "rund", ico: "◎", art: "zaehl", n: ["Rundumschlag", "Sweep"], d: ["Mit einem Schlag {n} Gegner treffen", "Hit {n} enemies with one swing"], need: t => 3, prog: c => c.bestSweep, ok: () => has(d => d.kind === "melee"), rw: t => ({ k: "gold", n: goldN(60) }) },
-    { id: "sturz", ico: "⇣", art: "zaehl", n: ["Meteor", "Meteor"], d: ["{n} Sturzangriffe", "{n} plunge attacks"], need: t => 3, prog: c => st("dives") - c.s0.dives, rw: t => ({ k: "splitter", n: 12 + 3 * t }) },
+    { id: "sturz", ico: "⇣", art: "zaehl", n: ["Meteor", "Meteor"], d: ["{n} Sturzangriffe", "{n} plunge attacks"], need: t => 3, prog: c => st("divesHit") - c.s0.divesHit /* W9: nur Stürze, die treffen (vorher zählte jeder Sturz ins Leere: 3× Runter+Angriff = Splitter) */, ok: () => has(d => d.kind === "melee" || d.kind === "shield"), rw: t => ({ k: "splitter", n: 12 + 3 * t }) },
     { id: "adrenalin", ico: "♨", art: "zaehl", n: ["Adrenalinrausch", "Adrenaline Rush"], d: ["{n} Kills mit Adrenalin (nach perfektem Ausweichen)", "{n} kills under adrenaline (after a perfect dodge)"], need: t => 3, prog: c => c.adrenKills, rw: t => ({ k: "glut", n: 1 }) },
     { id: "gabe", ico: "✧", art: "zaehl", n: ["Gabenkundig", "Gifted"], d: ["{n} Kills mit Fähigkeiten", "{n} kills with skills"], need: t => 4 + Math.floor(t / 2), prog: c => c.skillKills, ok: () => hasSkill(), rw: t => ({ k: "splitter", n: 15 + 4 * t }) },
     { id: "beid", ico: "⇄", art: "zaehl", n: ["Beidhändig", "Ambidextrous"], d: ["Je {n} Kills mit Hand 1 und Hand 2", "{n} kills each with hand 1 and hand 2"], need: t => 3 + Math.floor(t / 3), prog: c => Math.min(c.handKills.a1, c.handKills.a2), ok: () => slots().length === 2, rw: t => ({ k: "glut", n: 1 }) },
@@ -159,7 +159,7 @@
   Z.chState = () => C;
   function ctxNew(lv) {
     const P = Z.player, s = S();
-    const s0 = {}; for (const k of ["markCrits", "parries", "dodges", "trapKills", "fallKills", "crits", "dives", "zerbrochen", "gold", "hitsTaken", "potions", "rolls", "skills"]) s0[k] = s[k] || 0;
+    const s0 = {}; for (const k of ["markCrits", "parries", "dodges", "trapKills", "fallKills", "crits", "dives", "divesHit", "zerbrochen", "gold", "hitsTaken", "potions", "rolls", "skills"]) s0[k] = s[k] || 0;
     const er = Z.erkundung && Z.erkundung(), sec0 = lv.secretsTotal || (er && er.lv === lv ? er.total : 0) || 0, found0 = er && er.lv === lv ? er.found.size : 0;
     const brk0 = Z.propsLive.filter(p => p.kind === "breakable" && p.dead).length;
     return {

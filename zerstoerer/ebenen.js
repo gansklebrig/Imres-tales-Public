@@ -192,8 +192,17 @@
   function fallTick(dt) {
     const P = Z.player;
     if (P && !P.dead) {
-      if (P.onGround || P.climbing || P.ledge || P.grapple) { if (P._wasAir && P.peakY != null && !P.climbing) landed(P); P.peakY = P.y; P._wasAir = false; }
-      else { P._wasAir = true; P.peakY = Math.min(P.peakY == null ? P.y : P.peakY, P.y); if (P.vy < -100) P.peakY = Math.min(P.peakY, P.y); }
+      if (P.onGround || P.climbing || P.ledge || P.grapple) { if (P._wasAir && P.peakY != null && !P.climbing) landed(P); P.peakY = P.y; P._peak0 = null; P._wasAir = false; }
+      else {
+        /* Abfangen: ein Schwung nach oben mitten im Fall (Doppelsprung, Sprungfeder, Schwingen, Ösen-Abstoß …) setzt die
+           Fallhöhe neu an – wer kurz vor dem Aufprall noch springt, fällt danach nur noch die Resthöhe */
+        if (P._wasAir && P.peakY != null && (P._vyPrev || 0) > 60 && P.vy < -150) {
+          if (P._peak0 == null || P.peakY < P._peak0) P._peak0 = P.peakY;
+          P.peakY = P.y;
+        }
+        P._wasAir = true; P.peakY = Math.min(P.peakY == null ? P.y : P.peakY, P.y); if (P.vy < -100) P.peakY = Math.min(P.peakY, P.y);
+      }
+      P._vyPrev = P.vy;
       if (Z.input.pressed.roll) P._rollPress = P.time;
       reveal(P);
     }
@@ -212,7 +221,13 @@
     }
   }
   function landed(P) {
-    const h = P.y - P.peakY; if (h <= 12 * T || P.plunge || P._noFall) return; /* größere Karten mit Türmen/Kellern: erst ab ~12 Kacheln */
+    const h = P.y - P.peakY, h0 = P._peak0 != null ? P.y - P._peak0 : h; P._peak0 = null;
+    if (h <= 12 * T && h0 > 12 * T && !P.plunge && !P._noFall) {
+      /* abgefangen: ohne den Sprung wäre es ein harter Aufprall geworden – dezente Rückmeldung */
+      FX.text(P.x + P.w / 2, P.y - 10, L(["Abgefangen!", "Caught it!"]), "#ffe08a");
+      FX.burst(P.x + P.w / 2, P.y + P.h, 8, { col: Z.dustCol || "#8a7a70", sp: 70, ang: -Math.PI / 2, spread: 2.6, life: 0.4, size: 2.2, kind: "smoke" });
+    }
+    if (h <= 12 * T || P.plunge || P._noFall) return; /* größere Karten mit Türmen/Kellern: erst ab ~12 Kacheln */
     if (P.rollT > 0 || (P._rollPress && P.time - P._rollPress < 0.18)) { FX.text(P.x + P.w / 2, P.y - 10, L(["Abgerollt!", "Rolled!"]), "#ffe08a"); A.play("roll", { vol: 0.6 }); if (P.rollT <= 0) { P.rollT = 0.18; P.rollDir = P.face; } return; }
     /* milder als zuvor: in den Tiefen-Gebieten führt der Weg oft durch Schächte nach unten (Leitern sind da, aber Springen soll nicht ein Viertel des Lebens kosten) */
     const frac = Math.min(0.2, (h - 12 * T) / (T * 60) + 0.04);

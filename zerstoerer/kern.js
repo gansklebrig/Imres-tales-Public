@@ -490,7 +490,7 @@
     const fall = U.clamp((p.vy - 200) / 230, 0, 1);
     let wantY = fall > 0 && !p.onGround && !p.climbing ? -10 + 62 * fall : p.lookDown ? 60 : p.lookUp ? -50 : -10;
     cam.lookY = U.approach(cam.lookY, wantY, dt * (fall > 0 ? 220 : 120));
-    let tx = p.x + p.w / 2 + cam.look - cam.w / 2, ty = p.y + p.h / 2 + cam.lookY - cam.h / 2;
+    let tx = p.x + p.w / 2 + cam.look - cam.w / 2, ty = p.y + (p.stepOff || 0) + p.h / 2 + cam.lookY - cam.h / 2; /* stepOff: Treppenstufen weich (kampf.js) */
     if (cam.lock) { tx = U.lerp(tx, cam.lock.x - cam.w / 2, cam.lock.k); ty = U.lerp(ty, cam.lock.y - cam.h / 2, cam.lock.k); }
     const kx = 1 - Math.pow(0.0009, dt), ky = 1 - Math.pow(p.onGround || p.climbing ? 0.0006 : 0.004, dt);
     cam.x += (tx - cam.x) * kx; cam.y += (ty - cam.y) * ky;

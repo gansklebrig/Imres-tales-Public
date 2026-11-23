@@ -244,23 +244,13 @@
     }
   });
 
-  /* ---------- DEMOGORGON (Ende der Tiefe) ---------- */
+  /* ---------- DEMOGORGON (Ende der Tiefe) ----------
+     Nur die Grunddaten. Kampf (3 Phasen, Techniken, Seelenhunger), Gestalt (Rig mit zwei Köpfen und Tentakeln) und Arena: demogorgon.js */
   B.demogorgon = base({
-    n: ["Demogorgon", "Demogorgon"], title: ["Fürst der Dämonen", "Prince of Demons"], shape: "demogorgon", c: "#6a4a2a", t: "#ffd27a", w: 70, h: 110, size: 1.0, hp: 80, dmg: 1.5, idleT: 0.5, demon: true, fixed: true, noBlock: true,
-    intro: ["Der See beginnt zu kochen. Zwei Köpfe, zwei Tentakel, Fell, unter dem flüssiges Gold glüht. Demogorgon steigt empor.", "The lake begins to boil. Two heads, two tentacles, fur glowing with liquid gold. Demogorgon rises."],
-    outro: ["Demogorgon sinkt zurück in die Tiefe, beide Köpfe brüllen ein letztes Mal. Dann wird der See still. Diesmal wirklich.", "Demogorgon sinks back into the depths, both heads roaring one last time. Then the lake falls silent. This time for real."],
-    init: e => { e.x = W.lv.W * T / 2 - e.w / 2; e.y = (W.lv.H - 3) * T - e.h + 30; e.grounded = true; },
-    phases: [{ at: 1, moves: ["tentakel", "blick", "schrei", "rochen"] }, { at: 0.6, moves: ["tentakel", "doppelblick", "schrei", "rochen", "wellen"], enter: e => { roar(e, L(["Beide Köpfe kreischen gleichzeitig!", "Both heads shriek at once!"])); e.rage = true; } }, { at: 0.25, moves: ["tentakel", "doppelblick", "wellen", "tentakelsturm"], enter: e => { roar(e, L(["Demogorgon rast!", "Demogorgon rages!"])); FX.flashScreen("#ffd27a", 0.4); } }],
-    move: (e, P, dt) => { face(e, P); e.vx = 0; e.y = U.lerp(e.y, (W.lv.H - 3) * T - e.h + 30 + Math.sin(e.anim) * 4, dt * 2); e.vy = 0; },
-    moves: {
-      tentakel: { pre: 0.6, dur: 1.2, post: 0.5, sfx: "monster", act: (e, P) => { const n = e.rage ? 3 : 2; for (let i = 0; i < n; i++) setTimeout(() => { if (!e.dead) { const x = P.x + P.w / 2 + (R() - 0.5) * 30; Z.spawnHazard({ kind: "column", x, y: Z.groundY(x, arena().floor - 8), w: 34, hgt: 300, warn: 0.75, life: 0.35, dmg: dmg(e, 1.2), owner: "e", col: "rgba(200,140,80,.6)" }); setTimeout(() => { FX.addShake(7); A.play("quake", { vol: 0.6 }); }, 750); } }, i * 420); } },
-      blick: { pre: 0.9, dur: 0.6, post: 0.6, sfx: "magic", act: (e, P) => { const high = R() < 0.5; const y = arena().floor - (high ? 34 : 8); Z.spawnHazard({ kind: "zone", x: W.lv.W * T / 2, y: y + 6, w: W.lv.W * T, hgt: 12, active: 0.6, life: 0.6, dmg: dmg(e, 1.1), owner: "e", col: "rgba(255,230,120,.9)" }); FX.text(P.x + P.w / 2, P.y - 16, high ? L(["Rollen!", "Roll!"]) : L(["Springen!", "Jump!"]), "#ffd27a", true); FX.addShake(4); } },
-      doppelblick: { pre: 0.9, dur: 1.2, post: 0.6, sfx: "magic", act: (e, P) => { const y1 = arena().floor - 8, y2 = arena().floor - 40; Z.spawnHazard({ kind: "zone", x: W.lv.W * T / 2, y: y1 + 6, w: W.lv.W * T, hgt: 12, active: 0.5, life: 0.5, dmg: dmg(e, 1.1), owner: "e", col: "rgba(255,230,120,.9)" }); setTimeout(() => { if (!e.dead) Z.spawnHazard({ kind: "zone", x: W.lv.W * T / 2, y: y2 + 6, w: W.lv.W * T, hgt: 12, active: 0.5, life: 0.5, warn: 0.5, dmg: dmg(e, 1.1), owner: "e", col: "rgba(255,230,120,.9)" }); }, 650); FX.text(P.x + P.w / 2, P.y - 16, L(["Springen … dann rollen!", "Jump… then roll!"]), "#ffd27a", true); } },
-      schrei: { pre: 1.0, dur: 0.4, post: 0.6, sfx: "roar", act: (e, P) => { FX.ring(cxOf(e), e.y + 30, 300, "#ffd27a", 0.7, 6); FX.addShake(12); if (P.rollT <= 0) { Z.addStatus(P, "silence", 5, true); Z.addStatus(P, "slow", 2, true); FX.text(P.x + P.w / 2, P.y - 16, L(["Alle Magie erlischt!", "All magic fades!"]), "#ffd27a", true); } } },
-      rochen: { pre: 0.6, dur: 0.3, post: 0.5, sfx: "magic", cond: e => Z.enemies.filter(o => o.master === e && !o.dead).length < 4, act: e => { for (let i = 0; i < 3; i++) { const m = Z.spawnEnemy("rochen", (R() < 0.5 ? 4 : W.lv.W - 4) * T, (6 + i * 2) * T, { tier: e.tier }); if (m) { m.aware = true; m.master = e; } } } },
-      wellen: { pre: 0.8, dur: 1.2, post: 0.5, sfx: "splash", act: (e, P) => { for (const s of [-1, 1]) for (let i = 0; i < 2; i++) setTimeout(() => { if (!e.dead) Z.spawnProj("e_welle", cxOf(e) + s * 50, arena().floor - 6, s, { dmg: dmg(e, 1), life: 3, speed: 190 }); }, i * 600); A.play("splash"); } },
-      tentakelsturm: { pre: 0.7, dur: 2.0, post: 0.6, sfx: "monster", act: (e, P) => { for (let i = 0; i < 8; i++) setTimeout(() => { if (!e.dead) { const x = 3 * T + R() * (W.lv.W - 6) * T; Z.spawnHazard({ kind: "column", x, y: Z.groundY(x, arena().floor - 8), w: 30, hgt: 300, warn: 0.7, life: 0.3, dmg: dmg(e, 1.1), owner: "e", col: "rgba(200,140,80,.6)" }); } }, i * 230); } }
-    }
+    n: ["Demogorgon", "Demogorgon"], title: ["Fürst der Dämonen", "Prince of Demons"], shape: "demogorgon", c: "#3a2a36", t: "#c8ff6a", w: 68, h: 120, size: 1.0, hp: 80, dmg: 1.6, idleT: 0.55, demon: true, fixed: true, noBlock: true,
+    intro: ["Der schwarze See wölbt sich. Zwei Pavianköpfe, Tentakel statt Arme – Demogorgon steigt aus der Tiefe.", "The black lake bulges. Two baboon heads, tentacles for arms – Demogorgon rises from the deep."],
+    outro: ["Demogorgon versinkt im schwarzen Wasser, beide Köpfe kreischen ein letztes Mal. Dann wird der See still. Diesmal wirklich.", "Demogorgon sinks into the black water, both heads shrieking one last time. Then the lake falls silent. This time for real."],
+    phases: [{ at: 1, moves: [] }], moves: {}
   });
 
   /* ---------- THEMBERCHAUD (Ende der Glut) ---------- */
