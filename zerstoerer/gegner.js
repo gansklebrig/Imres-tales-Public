@@ -186,7 +186,7 @@
       hp *= 3.4; e.dmgMul *= 1.3; e.size *= 1.18; e.w = Math.round(e.w * 1.18); e.h = Math.round(e.h * 1.18); e.x = x - e.w / 2; e.y = y - e.h;
       if (e.elite === "gepanzert") e.armorUp = 0;
     }
-    if (d.boss) hp = HP * d.hp * Z.BAL.enemyHp(tier) * Z.BAL.skullHp(run.skulls || 0);
+    if (d.boss) hp = HP * d.hp * Z.BAL.enemyHp(tier) * Z.BAL.skullHp(run.skulls || 0) * (Z.BAL.bossHp ? Z.BAL.bossHp(tier, id) : 1); /* W6: bossHp aus ausgleich.js */
     e.hp = e.hpMax = Math.round(hp);
     e.ghost = !!d.ghost;
     if (d.fly) { e.baseY = e.y; }

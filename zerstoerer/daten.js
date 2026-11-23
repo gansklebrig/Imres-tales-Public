@@ -418,8 +418,10 @@
     enemyHp: t => 1 + 0.8 * t,
     enemyDmg: t => 1 + 0.32 * t,
     itemMul: t => 1 + 0.42 * t,
-    skullHp: s => 1 + 0.35 * s,
+    skullHp: s => 1 + 0.25 * s, /* W6: vorher 1 + 0,35s – mit der steileren Lebenskurve wurden 3 Totenköpfe zur Zähigkeitsprobe (Bot: ~10× Tode) */
     skullDmg: s => 1 + 0.22 * s,
-    goldMul: t => 1 + 0.6 * t
+    /* W6-Balancing: Gold je Lauf lag bei ~5500 (haupt), Aufwerten einer Waffe auf +5 kostet ~1500. Mit 1 + 0,3t blieben
+       am Laufende noch 1000–3700 übrig → 1 + 0,2t (vorher 1 + 0,6t): Aufwerten + gelegentlich Händlerin, nicht alles */
+    goldMul: t => 1 + 0.2 * t
   };
 })();

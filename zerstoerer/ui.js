@@ -923,7 +923,8 @@
   const FIND_COST = { haeufig: 1, selten: 1.3, rar: 1.7, legende: 2.4 };
   const lvlCost = (d, l) => Math.round((18 + 26 * l) * FIND_COST[d.find || "haeufig"]);
   const luckCost = l => [30, 70, 140][l];
-  const upCost = (k, l) => ({ trank: [60, 150][l], zaeh: 25 * (l + 1), klingen: 40 * (l + 1), haendler: 50 * (l + 1) }[k]);
+  /* W6-Balancing (Meta-Kampagne mit Bot): Zähigkeit und Klingen waren nach ~5 Läufen voll (+50 Leben, +25 % Schaden) – vorher 25·(l+1) / 40·(l+1) */
+  const upCost = (k, l) => ({ trank: [60, 150][l], zaeh: 40 * (l + 1), klingen: 60 * (l + 1), haendler: 50 * (l + 1) }[k]);
   const upMax = { trank: 2, zaeh: 5, klingen: 5, haendler: 3 };
   let forgeTab = 0;
   ui.forge = (tab) => {

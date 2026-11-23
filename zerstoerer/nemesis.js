@@ -2071,8 +2071,9 @@
     let id = EV.forceNext || null; EV.forceNext = null;
     if (!id) {
       const first = routeN() <= 1;
-      let p = first ? 0.16 : run.evSince >= 3 ? 0.85 : run.evSince >= 2 ? 0.5 : 0.12;
-      if (live.length) p *= 0.6; if (KGS) p *= 0.5; if (MBS) p *= 0.7;
+      /* W6-Balancing: gemessen ~1 Ereignis je 5 Gebiete (Ziel 1 je 2–3) – vorher 0,16 / 0,85 / 0,5 / 0,12, Mini-Boss-Abschlag ×0,7 */
+      let p = first ? 0.2 : run.evSince >= 3 ? 0.95 : run.evSince >= 2 ? 0.75 : 0.4;
+      if (live.length) p *= 0.6; if (KGS) p *= 0.5; if (MBS) p *= 0.8;
       if (Z.R() > p) return;
       const pool = EVLIST.filter(k => !run.evSeen.includes(k) && (!first || EVD[k].gentle) && (!EVD[k].ok || EVD[k].ok(lv)));
       if (!pool.length) return;
@@ -2546,6 +2547,9 @@
     o = o || {}; const D = MBD[id]; if (!D) return null;
     const e = Z.spawnEnemy("mb_" + id, x, y, { tier: tierN() }); if (!e) return null;
     e.nmMini = D; e.def = Object.assign({}, e.def); e.nmP = 1; e.nmRoom = o.cell || null; e.nmNoSeal = !!o.noSeal; e.nmSealed = [];
+    /* W6-Balancing: Mini-Bosse fielen in 2–6 s (Bot) – Ziel 30–60 s für Spieler → Leben ×3,5 (vorher ×1) */
+    const MBHP = { ratten: 2.5, keiler: 2.3, kerker: 2.2, kapitaen: 2.4, ilvara: 2.8, weberin: 2.0, amboss: 1, dorn: 1.1, laeuter: 1.1 }; /* je Wächter nach Prüfstand (2. Runde): 6–9 s → 15–25 s */
+    e.hp = e.hpMax = Math.round(e.hpMax * 3.5 * (MBHP[id] || 1));
     if (tierN() === 0) { e.hp = e.hpMax = Math.round(e.hpMax * 0.75); e.dmgMul *= 0.85; }
     if (o.aware) e.aware = true;
     mbLive.push(e);
@@ -2624,8 +2628,9 @@
     let id = MB.forceNext || null; MB.forceNext = null;
     if (!id) {
       if (routeN() <= 1) return;
-      let p = run.mbSince >= 3 ? 0.7 : run.mbSince >= 2 ? 0.42 : 0.15;
-      if (EVS) p *= 0.5; if (live.length) p *= 0.7;
+      /* W6-Balancing: gemessen ~1 Mini-Boss je 3–4 Gebiete (Ziel 1 je 2) – vorher 0,7 / 0,42 / 0,15, Ereignis-Abschlag ×0,5 */
+      let p = run.mbSince >= 3 ? 0.9 : run.mbSince >= 2 ? 0.65 : 0.35;
+      if (EVS) p *= 0.75; if (live.length) p *= 0.7;
       if (Z.R() > p) return;
       const l = Object.keys(MBD).filter(k => MBD[k].areas.includes(lv.biome) && !run.mbSeen.includes(k));
       if (!l.length) return; id = Z.R.pick(l);
