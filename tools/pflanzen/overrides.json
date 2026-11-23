@@ -565,6 +565,18 @@
    "File:Gyromitra esculenta (Brüggen, Deutschland) 2.jpg"
   ]
  },
+ "luchs": {
+  "suche": [
+   [
+    "Lynx lynx",
+    "habitus"
+   ],
+   [
+    "Eurasian lynx track snow",
+    "spur"
+   ]
+  ]
+ },
  "lungenkraut": {
   "minus": [
    "File:Pulmonaria officinalis (s. str.) sl6.jpg",
@@ -723,10 +735,25 @@
   ]
  },
  "rotbuche": {
+  "gruen": 3,
   "minus": [
    "File:Fagus sylvatica cross section Silesian Beskids.jpg",
    "File:European Beech (32581194337).jpg",
    "File:Door beukenblad gegroeide Krokus (Crocus) 01.jpg"
+  ],
+  "suche": [
+   [
+    "Fagus sylvatica leaves",
+    "blatt"
+   ],
+   [
+    "Fagus sylvatica leaf summer",
+    "blatt"
+   ],
+   [
+    "Rotbuche Blätter",
+    "blatt"
+   ]
   ]
  },
  "roterholunder": {

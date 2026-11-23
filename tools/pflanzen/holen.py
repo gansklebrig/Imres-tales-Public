@@ -311,6 +311,11 @@ def nachschlag_art(art, ov, vorhanden, alle_wiss):
             dazu(t, asp, "uk")
     for t in ov.get("plus", []):
         dazu(t, herkunft="plus")
+    # gezielte Dateisuche, z. B. {"suche": [["Fagus sylvatica leaves", "blatt"]]}
+    for such, asp in ov.get("suche", []):
+        r = api(action="query", list="search", srsearch=such, srnamespace=6, srlimit=40)
+        for x in r.get("query", {}).get("search", []):
+            dazu(x["title"], [asp] if asp else [], "suche")
     minus = {("File:" + m.replace("_", " ")) if not m.startswith("File:") else m.replace("_", " ") for m in ov.get("minus", [])}
     schon = {e.get("titel") for e in vorhanden}
     eigen = art["wiss"].lower()
@@ -374,7 +379,7 @@ def nachschlag_art(art, ov, vorhanden, alle_wiss):
     platz = lambda: len(vorhanden) + len(wahl) < n_ziel  # noqa: E731
     # Grüne Blätter zuerst – Herbstlaub allein reicht nicht zum Erkennen
     if art["kap"] not in ("pilz", "tier"):
-        while gruen < 2 and platz():
+        while gruen < ov.get("gruen", 2) and platz():
             x = next((x for x in gut if frei(x) and "blatt" in x["asp"] and not x["herbst"] and len(x["asp"]) <= 2), None)
             if not x:
                 break
