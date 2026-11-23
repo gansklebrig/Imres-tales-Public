@@ -22,7 +22,7 @@ os.makedirs(ZIEL, exist_ok=True)
 
 # id: (wissenschaftlicher Name, was zu hören sein soll (de), Suchwörter, gute Stichwörter im Titel)
 SUCHE = {
-    "reh": ("Capreolus capreolus", "Schreckbellen", ["Capreolus capreolus", "roe deer bark", "Reh bellt", "roe deer call"], ["roe deer", "reh"], ["bark", "bell", "alarm", "call", "ruf", "schreck"]),
+    "reh": ("Capreolus capreolus", "Ruf eines Rehbocks", ["Capreolus capreolus", "roe deer bark", "Reh bellt", "roe deer call"], ["roe deer", "reh"], ["bark", "bell", "alarm", "call", "ruf", "schreck"]),
     "rothirsch": ("Cervus elaphus", "Röhren in der Brunft", ["Cervus elaphus", "red deer roar", "Hirsch röhrt"], ["red deer", "hirsch", "rothirsch"], ["roar", "rut", "röhr", "roehr", "brunft", "bell", "call"]),
     "wildschwein": ("Sus scrofa", "Grunzen", ["Sus scrofa", "wild boar grunt", "Wildschwein"], ["wild boar", "wildschwein"], ["grunt", "grunz", "call"]),
     "gaemse": ("Rupicapra rupicapra", "Warnpfiff", ["Rupicapra rupicapra", "chamois", "Gämse"], ["chamois", "gämse", "gemse"], ["whistle", "pfiff", "alarm", "call"]),
@@ -33,7 +33,7 @@ SUCHE = {
     "baummarder": ("Martes martes", "Keckern", ["Martes martes", "pine marten", "Baummarder"], ["pine marten", "baummarder"], ["call", "sound", "vocal"]),
     "luchs": ("Lynx lynx", "Ranzruf", ["Lynx lynx", "Eurasian lynx", "Luchs"], ["eurasian lynx", "luchs"], ["call", "mating", "sound", "vocal"]),
     "wolf": ("Canis lupus", "Heulen", ["Canis lupus howl", "wolf howl", "wolves howling", "Wolfsgeheul"], ["wolf howl", "wolves howl", "wolf howling", "wolfsgeheul", "heulen"], ["howl", "heul", "call"]),
-    "biber": ("Castor fiber", "Fiepen und Nagen", ["Castor fiber", "Eurasian beaver", "Biber"], ["eurasian beaver", "biber"], ["call", "sound", "kit", "vocal"]),
+    "biber": ("Castor fiber", "Fiepen und Nagen", ["Castor fiber", "Eurasian beaver"], ["eurasian beaver", "beaver kit"], ["call", "sound", "kit", "vocal"]),
     "fischotter": ("Lutra lutra", "Pfeifen", ["Lutra lutra", "Eurasian otter", "Fischotter"], ["eurasian otter", "fischotter"], ["call", "whistle", "sound", "vocal"]),
     "igel": ("Erinaceus europaeus", "Schnaufen", ["Erinaceus europaeus", "hedgehog", "Igel"], ["hedgehog", "hegehog", "igel"], ["sound", "snuff", "huff", "call", "sleep"]),
     "murmeltier": ("Marmota marmota", "Warnpfiff", ["Marmota marmota", "Alpine marmot", "Murmeltier"], ["alpine marmot", "murmeltier"], ["whistle", "pfiff", "alarm", "call"]),
@@ -43,7 +43,7 @@ SUCHE = {
 }
 FREI = re.compile(r"^(cc0|public domain|pd|cc[ -]by(-sa)?( \d\.\d)?|cc[ -]by(-sa)?[ -]\d\.\d.*|gfdl.*|attribution.*|copyrighted free use)", re.I)
 SCHLECHT = ["spectrogram", "sonagram", "sonogram", "playback", "imitation", "imitat", "lecture", "vortrag", "interview", "song by", "music", "musik",
-            "remix", "ringtone", "captive", "zoo", "orchestra", "festival", "carnaval", "fundación", "congress", "rep. ", "speech", "tamiasciurus", "american", "fennec", "pet ", "haustier", "domestic", "hausschwein", "dog", "hund", "pronunciation", "aussprache"]
+            "remix", "ringtone", "captive", "zoo", "orchestra", "festival", "sonata", "sonate", "carnaval", "fundación", "congress", "rep. ", "speech", "tamiasciurus", "american", "fennec", "pet ", "haustier", "domestic", "hausschwein", "dog", "hund", "pronunciation", "aussprache"]
 
 
 def hole(url, daten=None, versuche=6):

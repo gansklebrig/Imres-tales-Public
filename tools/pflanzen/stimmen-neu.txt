@@ -1,19 +1,2 @@
-# einmalig neu holen
-reh
-rothirsch
-wildschwein
-gaemse
-fuchs
-dachs
-feldhase
-eichhoernchen
-baummarder
-luchs
-wolf
 biber
-fischotter
-igel
-murmeltier
-waschbaer
-buntspecht
-waldkauz
+reh

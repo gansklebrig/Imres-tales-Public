@@ -502,7 +502,7 @@
     const drei = sortiert.slice(0, 3);
     const gestern = new Date(); gestern.setDate(gestern.getDate() - 1);
     const H = S.log[heute()] || { k: 0, r: 0, f: 0 }, G = S.log[tagVon(gestern)] || null, serie = serieTage();
-    const grund = a => a.kap === "pilz" ? "Pilzzeit" : a.bl.includes(m) ? "blüht jetzt" : a.fr.includes(m) ? (giftig(a) ? "giftige Früchte" : "Früchte reif") : "Sammelzeit";
+    const grund = a => a.kap === "pilz" ? (giftig(a) ? "Giftpilz – kennenlernen!" : "Pilzzeit") : a.bl.includes(m) ? "blüht jetzt" : a.fr.includes(m) ? (giftig(a) ? "giftige Früchte" : "Früchte reif") : "Sammelzeit";
     box.innerHTML = '<div class="heute-wald"><div class="hw-kopf"><h3 class="hand">Heute im Wald</h3><span class="leise">' + new Date().toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" }) + "</span></div>" +
       '<div class="hw-arten">' + drei.map(a => '<a class="hw-art" href="#/art/' + a.id + '">' + W.bildHtml(a.id) + '<span class="hw-grund">' + esc(grund(a)) + '</span><b>' + esc(a.de) + "</b>" + (MERK[a.id] ? "<small>" + esc(MERK[a.id].length > 110 ? MERK[a.id].slice(0, 108).replace(/\s\S*$/, "") + " …" : MERK[a.id]) + "</small>" : "") + "</a>").join("") + "</div>" +
       '<div class="hw-stand"><span>' + (serie ? "🔥 <b>" + serie + "</b> " + (serie === 1 ? "Tag" : "Tage") + " in Folge" : "🔥 Heute eine Serie starten") + "</span><span>Heute: <b>" + H.k + "</b> Karten" + (H.k ? " (" + H.r + " richtig)" : "") + (H.f ? " · <b>" + H.f + "</b> Funde" : "") + "</span>" + (G ? "<span>Gestern: " + G.k + " Karten" + (G.k ? ", " + G.r + " richtig" : "") + (G.f ? ", " + G.f + " Funde" : "") + "</span>" : "") + "</div>" +

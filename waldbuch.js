@@ -370,8 +370,9 @@
       '<div class="chips" role="group" aria-label="Was lernen?">' + [["alle", "Alles"], ["pflanze", "Pflanzen"], ["baum", "Bäume"], ["kraut", "Kräuter"], ["beere", "Beeren"], ["pilz", "Pilze"], ["tier", "Tiere"]].map(([k, n]) => '<button class="chip" data-a="' + k + '" aria-pressed="' + (lernArt === k) + '">' + n + "</button>").join("") + "</div>" +
       '<div class="modi">' + [["name", "Wer bin ich?", "Ein Foto – vier Namen."], ["bild", "Zeig mir …", "Ein Name – vier Fotos."], ["merkmal", "Merkmal-Rätsel", "Friedrich beschreibt, du rätst."], ["verwechslung", "Doppelgänger-Duell", "Welches ist das Richtige? Die gefährlichsten Paare."], ["monat", "Wann ist es soweit?", "Blüte, Frucht, Pilzzeit."], ["sinne", "Mit allen Sinnen", "Riechen, fühlen, lauschen – wer ist das?"]].concat(window.WB_MEHR && WB_MEHR.stimmenDa >= 4 ? [["stimme", "Wer ruft da?", "Tierstimmen erkennen."]] : []).map(([k, n, t]) => '<button class="modus" data-m="' + k + '"' + (lernModus === k ? ' style="outline:3px solid var(--ocker)"' : "") + "><b>" + n + "</b>" + t + "</button>").join("") + '</div><div id="lernfeld"></div>');
     const s = $("#seite");
-    s.querySelectorAll("[data-a]").forEach(b => b.addEventListener("click", () => { lernArt = b.dataset.a; lernSeite(); }));
-    s.querySelectorAll("[data-m]").forEach(b => b.addEventListener("click", () => { lernModus = b.dataset.m; lernSeite(); }));
+    const zumFeld = () => { const f = $("#lernfeld"); if (f && window.innerWidth < 900) f.scrollIntoView({ block: "start" }); };
+    s.querySelectorAll("[data-a]").forEach(b => b.addEventListener("click", () => { lernArt = b.dataset.a; lernSeite(); zumFeld(); }));
+    s.querySelectorAll("[data-m]").forEach(b => b.addEventListener("click", () => { lernModus = b.dataset.m; lernSeite(); zumFeld(); }));
     lernRunde();
   }
   function frageBauen(modus, a) {
