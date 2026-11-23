@@ -5,7 +5,7 @@
   "use strict";
   const Z = window.Z, U = Z.U, T = Z.TILE, FX = Z.fx, A = Z.audio, W = Z.world, L = v => Z.L(v);
   const { limb, circ, poly, ell, glow } = Z.draw;
-  let traps = [], movers = [], crumbles = [], voidTops = [];
+  let traps = [], movers = [], crumbles = [], voidTops = [], voidRuns = [];
   /* Gebietsfarben der Grundfallen: Stachel im Keller rostig, in der Schmiede glühend, im Schlund aus Chitin … */
   const SKIN0 = { spike: "iron", m0: "#5a5256", m1: "#8a8286", m2: "#d8d0d4", wood: "#5a4030", fl: ["#ff6a1a", "#ffd27a", "#fff6dc"], burn: "burn", blade: ["#b8b0b4", "#f0ece8"], hot: 0 };
   const SKINS = {
@@ -36,7 +36,7 @@
 
   /* ======================= AUFBAU ======================= */
   Z.setupParcours = function (lv) {
-    traps.length = 0; movers.length = 0; crumbles.length = 0; voidTops.length = 0;
+    traps.length = 0; movers.length = 0; crumbles.length = 0; voidTops.length = 0; voidRuns.length = 0;
     if (!lv) return;
     const list = (lv.traps || []).slice(), used = new Set(), key = m => m.x + "," + m.y;
     const R = Z.Rng ? Z.Rng((lv.seed || 1) ^ 0x51ab) : Math.random;
@@ -64,7 +64,7 @@
     for (let y = 0; y < lv.H; y++) for (let x = 0; x < lv.W; x++) {
       const v = lv.get(x, y);
       if (v === 10 && lv.get(x - 1, y) !== 10) { let x1 = x; while (lv.get(x1 + 1, y) === 10) x1++; crumbles.push({ x0: x, x1, y, st: "ok", t: 0 }); }
-      if (v === 9 && lv.get(x, y - 1) !== 9) voidTops.push([x, y]);
+      if (v === 9 && lv.get(x, y - 1) !== 9) { voidTops.push([x, y]); const r = voidRuns[voidRuns.length - 1]; if (r && r.y === y && r.x1 === x - 1) r.x1 = x; else voidRuns.push({ x0: x, x1: x, y }); }
     }
     if (Z.setupFallen) try { Z.setupFallen(lv, extra, rnd); } catch (e) { console.error(e); }
   };
@@ -216,6 +216,8 @@
   const lightPrev = Z.lightExtra;
   Z.lightExtra = function (hole) {
     if (lightPrev) lightPrev(hole);
+    /* Zinnen: aus den Abgründen scheint der brennende Himmel herauf */
+    if (voidRuns.length && Z.level && Z.level.biome === "zinnen") { const cam = Z.cam; for (const r of voidRuns) { const px = (r.x0 + r.x1 + 1) * T / 2, py = (r.y + 1) * T; if (px > cam.x - 60 && px < cam.x + cam.w + 60 && py > cam.y - 60 && py < cam.y + cam.h + 60) hole(px, py, 20 + (r.x1 - r.x0 + 1) * 7, 0.4, "#ff7a3a"); } }
     for (const tr of traps) {
       if (tr.k === "flamme" && tr.state === "fire") hole(tr.x, tr.y - 30, 80, 0.9, skin.fl[0]);
       else if (tr.k === "flamme" && tr.state === "warn") hole(tr.x, tr.y - 4, 26, 0.5, skin.fl[0]);
@@ -229,6 +231,7 @@
   Z.drawParcours = function (c, t) {
     const cam = Z.cam, vis = (x, y, m) => x > cam.x - (m || 60) && x < cam.x + cam.w + (m || 60) && y > cam.y - (m || 60) - 120 && y < cam.y + cam.h + (m || 60);
     const B = Z.biome || {}, plat = B.plat || "#6a5040";
+    if (voidRuns.length) drawVoids(c, t, B, vis);
     /* bröckelnde Stege */
     for (const cr of crumbles) {
       if (cr.st === "gone") { if (cr.t > 3.0) { c.save(); c.globalAlpha = (cr.t - 3) / 0.6 * 0.4; for (let x = cr.x0; x <= cr.x1; x++) { c.fillStyle = plat; c.fillRect(x * T, cr.y * T, T, 5); } c.restore(); } continue; }
@@ -358,6 +361,31 @@
       }
     }
   };
+  /* Echte Abgründe (Spinnenschlund, Zinnen) deutlich als Gefahr: Licht bzw. Dunst aus der Tiefe, abgebrochene Kanten,
+     im Schlund Netzfäden über dem Spalt. Verläufe einmal je Gebiet gebacken (lokal 0…2 Kacheln, per translate verschoben). */
+  const VOID_COL = { zinnen: ["rgba(255,120,50,0)", "rgba(255,105,40,.42)", "#ffb070"], schlund: ["rgba(120,60,130,0)", "rgba(150,80,170,.46)", "#d8c8e8"] };
+  let voidG = null, voidGK = "";
+  function drawVoids(c, t, B, vis) {
+    const id = (Z.level && Z.level.biome) || "", col = VOID_COL[id] || ["rgba(0,0,0,0)", "rgba(110,40,30,.3)", "#c8a090"];
+    if (voidGK !== id || !voidG) { voidGK = id; voidG = c.createLinearGradient(0, 0, 0, 2 * T); voidG.addColorStop(0, col[0]); voidG.addColorStop(1, col[1]); }
+    const TL = B.tile || {}, dk = TL.dark || "#1a1214", lo = Z.gq && Z.gq.level === 0;
+    for (const r of voidRuns) {
+      const px = r.x0 * T, w = (r.x1 - r.x0 + 1) * T, py = r.y * T;
+      if (!vis(px + w / 2, py, w)) continue;
+      c.save(); c.translate(0, py); c.fillStyle = voidG; c.fillRect(px, 3, w, 2 * T - 3); c.restore();
+      /* abgebrochene Kante links und rechts: Zacken, die in die Tiefe hängen */
+      c.fillStyle = dk;
+      for (const [ex, d] of [[px, 1], [px + w, -1]]) { c.beginPath(); c.moveTo(ex, py); c.lineTo(ex + d * 4, py); c.lineTo(ex + d * 1.5, py + 7); c.lineTo(ex + d * 3, py + 9); c.lineTo(ex, py + 15); c.closePath(); c.fill(); }
+      /* Warnschimmer an der Kante (pulsierend) */
+      c.save(); c.globalAlpha = 0.28 + 0.14 * Math.sin(t * 2.2 + r.x0); c.fillStyle = col[2]; c.fillRect(px, py + 1, w, 1); c.restore();
+      if (id === "schlund" && !lo && w <= 9 * T) {
+        /* zwei, drei Netzfäden über dem Spalt */
+        c.strokeStyle = "rgba(216,208,224,.45)"; c.lineWidth = 0.6; c.beginPath();
+        for (let k = 0; k < 3; k++) { const y0 = py + 2 + k * 4, sag = 6 + k * 3 + Math.sin(t * 1.3 + k + r.x0) * 1.2; c.moveTo(px - 2, y0); c.quadraticCurveTo(px + w / 2, y0 + sag, px + w + 2, y0 + (k % 2 ? 2 : 0)); }
+        c.stroke();
+      }
+    }
+  }
   /* Stachelreihe je Gebiet */
   function drawSpikes(c, x0, y0, hh, t, lo) {
     const S = skin;

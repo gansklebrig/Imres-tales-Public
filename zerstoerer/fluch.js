@@ -68,7 +68,8 @@
   const draw0 = Z.drawParcours;
   Z.drawParcours = function (c, t) {
     if (draw0) draw0(c, t);
-    for (const p of Z.pickups) if (p.kind === "item" && p.it && p.it.cursed) {
+    const cam = Z.cam;
+    for (const p of Z.pickups) if (p.kind === "item" && p.it && p.it.cursed && p.x > cam.x - 40 && p.x < cam.x + cam.w + 40 && p.y > cam.y - 30 && p.y < cam.y + cam.h + 40) {
       c.save(); c.globalCompositeOperation = "lighter"; glow(c, p.x, p.y - 8, 14 + p.it.cursed * 4 + Math.sin(t * 5) * 2, "rgba(170,40,255,.5)"); c.restore();
       if (Math.random() < 0.15) FX.p({ x: p.x + (Math.random() - 0.5) * 10, y: p.y - 6, vx: 0, vy: -24, life: 0.8, size: 1.8, col: "#c040ff", kind: "glow", add: true });
     }

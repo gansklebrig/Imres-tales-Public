@@ -52,7 +52,9 @@
         e.aware = false; e.pDir = 0; e.patrol = 9; e.vx = 0;
         const hear = P.crouch ? 26 : loud ? 110 : 52;
         if (d < hear) wake(e, false);
-        if (Math.random() < dt * 0.8) e.zz = (e.zz || []).concat([{ t: 0, x: ex + e.face * 3, y: e.y - 2 }]).slice(-3);
+        /* Zzz nur für Schläfer im Bild anlegen (reine Anzeige) */
+        const cm = Z.cam;
+        if (Math.random() < dt * 0.8 && ex > cm.x - 40 && ex < cm.x + cm.w + 40 && ey > cm.y - 60 && ey < cm.y + cm.h + 40) { const zz = e.zz || (e.zz = []); zz.push({ t: 0, x: ex + e.face * 3, y: e.y - 2 }); if (zz.length > 3) zz.shift(); }
         continue;
       }
       if (e.watch && !e.aware) { e.pDir = 0; e.patrol = 9; e.vx = 0; if (Math.random() < dt * 0.15) e.face = -e.face; }

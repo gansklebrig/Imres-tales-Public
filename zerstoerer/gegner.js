@@ -333,7 +333,7 @@
     if (play0 && !play0.__laerm) {
       const pw = function (name, o) {
         const r = NOISE[name];
-        if (r && o && o.x != null && Z.player && Z.state !== "menu") { const P = Z.player, v = o.vol == null ? 1 : o.vol; Z.noise(o.x, o.y != null ? o.y : P.y + P.h / 2, r * U.clamp(0.55 + v * 0.6, 0.6, 1.15)); }
+        if (r && o && o.x != null && Z.player) { const P = Z.player, v = o.vol == null ? 1 : o.vol; Z.noise(o.x, o.y != null ? o.y : P.y + P.h / 2, r * U.clamp(0.55 + v * 0.6, 0.6, 1.15)); }
         return play0.apply(this, arguments);
       };
       pw.__laerm = true; A.play = pw;
@@ -378,7 +378,7 @@
     } else if (!sees) {
       e.lostSight = (e.lostSight || 0) + dt;
       if (!locked(e) && (e.lostSight > LOSE_T || P.invis > 0 || e.lostT > 0)) {
-        e.aware = false; e.alertT = 0; e.called = false; e._wasAware = false;
+        e.aware = false; e.alertT = 0; e.called = false; e._wasAware = false; e.surprised = false; /* beruhigt sich → kann wieder überrumpelt werden */
         suspect(e, e.lkx != null ? e.lkx : P.x + P.w / 2, e.lky != null ? e.lky : P.y + P.h, SUS_T);
       }
     }

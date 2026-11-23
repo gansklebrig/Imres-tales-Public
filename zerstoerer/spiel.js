@@ -376,6 +376,7 @@
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     if (Z.level) Z.gfx.render(ctx, VW, VH, Z.paused ? 0 : dt);
     else { ctx.fillStyle = "#0c080c"; ctx.fillRect(0, 0, VW, VH); }
+    Z._work = (Z._work || 0) + performance.now() - now; Z._workN = (Z._workN || 0) + 1; /* Rechenzeit je Bild für die Grafik-Automatik */
   }
   function tick(dt, first) {
     const P = Z.player, lv = Z.level;

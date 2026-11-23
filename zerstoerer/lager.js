@@ -1453,8 +1453,11 @@
     }
   }
   function drawCaptives(c, t) {
+    const cam = Z.cam;
     for (const k of caps) {
       const x = k.x, y = k.y;
+      /* nur im Bild (Faden des Kokons reicht weit nach oben) */
+      if (x < cam.x - 200 || x > cam.x + cam.w + 200 || y + 40 < cam.y || y - 300 > cam.y + cam.h) continue;
       if (k.freed) {
         if (k.id === "lied" || k.t > 3.2) continue;
         const a = 1 - k.t / 3.2, dir = Z.player && Z.player.x > x ? -1 : 1;

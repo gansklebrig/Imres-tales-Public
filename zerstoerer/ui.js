@@ -206,10 +206,13 @@
     if (card.dataset.uid !== ck) { card.innerHTML = (it ? itemCardHTML(it, true) : html0) + foot; card.dataset.uid = ck; }
     const ax = o.type === "obj" ? o.o.x : o.p.x, ay = o.type === "obj" ? o.o.y - (o.o.h || 30) - 10 : o.p.y - 40;
     const [sx, sy] = worldToScreen(ax, ay);
-    card.hidden = false;
-    const w = card.offsetWidth, h = card.offsetHeight;
+    const wasHidden = card.hidden; if (wasHidden) card.hidden = false;
+    /* Größe nur neu messen, wenn Inhalt/Sichtbarkeit wechselt (sonst erzwingt offsetWidth je Bild ein Layout) */
+    const nowT = performance.now(), m = card._wh;
+    if (!m || wasHidden || m.ck !== ck || nowT - m.t > 500) card._wh = { w: card.offsetWidth, h: card.offsetHeight, ck, t: nowT };
+    const w = card._wh.w, h = card._wh.h;
     const hz = hudZoom(), vw = innerWidth / hz, vh = innerHeight / hz;
-    card.style.transform = "translate(" + Math.round(U.clamp(sx / hz - w / 2, 8, vw - w - 8)) + "px," + Math.round(U.clamp(sy / hz - h - 24, 60, vh - h - 8)) + "px)";
+    sty(card, "transform", "translate(" + Math.round(U.clamp(sx / hz - w / 2, 8, vw - w - 8)) + "px," + Math.round(U.clamp(sy / hz - h - 24, 60, vh - h - 8)) + "px)");
   }
 
   /* ======================= AUSLAGE IN DER WELT =======================

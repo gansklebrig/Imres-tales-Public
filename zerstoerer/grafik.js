@@ -70,21 +70,29 @@
      Prüffenster 2,5 s; bei deutlichem Ruckeln (< 30 fps) sofort auf Handheld (schlank), darunter (< 24 fps) auf minimal. */
   let autoAcc = 0, autoN = 0, autoT = 0, autoGrace = 4;
   Z.gfxAutoTick = function (dt, playing) {
-    if (S.gfx.preset !== "auto" || !playing || document.hidden || Z.diag.busy) { autoAcc = 0; autoN = 0; autoT = 0; return; }
+    if (!playing || document.hidden || Z.diag.busy) { autoAcc = 0; autoN = 0; autoT = 0; return; }
     if (autoGrace > 0) { autoGrace -= dt; return; }
     autoAcc += dt; autoN++; autoT += dt;
-    if (autoT >= 2.5) {
-      const fps = autoN / autoAcc; autoAcc = 0; autoN = 0; autoT = 0;
-      const cap = Z.gq.fpsCap || 60;
-      let to = autoLvl;
-      if (fps < Math.min(48, cap * 0.8) && autoLvl > 0) to = fps < 30 ? 0 : autoLvl - 1;
-      else if (autoLvl === 0 && fps < Math.min(24, cap * 0.6)) to = -1;
-      if (to !== autoLvl) {
-        autoLvl = to; try { sessionStorage.setItem("imres-zerstoerer-autolvl", autoLvl); } catch (_) {}
-        Z.applyGfx(); autoGrace = 3;
-        Z.toast && Z.toast(L(["Grafik automatisch angepasst: ", "Graphics adjusted automatically: "]) + "<b>" + L(presetOf(autoLvl).n) + "</b>", 2600);
-        Z.diag.note("Auto-Grafik → " + presetOf(autoLvl).n[0] + " (" + fps.toFixed(0) + " fps)");
-      }
+    if (autoT < 2.5) return;
+    const fps = autoN / autoAcc; autoAcc = 0; autoN = 0; autoT = 0;
+    const cap = Z.gq.fpsCap || 60;
+    /* Handheld-Gleichtakt: schafft das Gerät keine ~50 fps, gleichmäßig 30 fps statt springender 33/50/66-ms-Bilder
+       (fühlt sich ruhiger an). Nur ohne eigene Bildratengrenze; braucht ein Bild wieder deutlich weniger als 11 ms
+       Rechenzeit, wird die Grenze aufgehoben. Z._work: Rechenzeit je Bild (spiel.js). */
+    const work = Z._workN ? Z._work / Z._workN : 0; Z._work = 0; Z._workN = 0;
+    if (Z.gq.lean && !Z.gq.fpsCap) {
+      if (!Z.gq.autoCap && fps < 50) Z.gq.autoCap = 30;
+      else if (Z.gq.autoCap && work > 0 && work < 11) Z.gq.autoCap = 0;
+    } else Z.gq.autoCap = 0;
+    if (S.gfx.preset !== "auto") return;
+    let to = autoLvl;
+    if (fps < Math.min(48, cap * 0.8) && autoLvl > 0) to = fps < 30 ? 0 : autoLvl - 1;
+    else if (autoLvl === 0 && fps < Math.min(24, cap * 0.6)) to = -1;
+    if (to !== autoLvl) {
+      autoLvl = to; try { sessionStorage.setItem("imres-zerstoerer-autolvl", autoLvl); } catch (_) {}
+      Z.applyGfx(); autoGrace = 3;
+      Z.toast && Z.toast(L(["Grafik automatisch angepasst: ", "Graphics adjusted automatically: "]) + "<b>" + L(presetOf(autoLvl).n) + "</b>", 2600);
+      Z.diag.note("Auto-Grafik → " + presetOf(autoLvl).n[0] + " (" + fps.toFixed(0) + " fps)");
     }
   };
 
@@ -270,7 +278,7 @@
 
   /* ======================= Bildratengrenze & Automatik einhängen ======================= */
   Z.frameGate = function (t) {
-    const cap = Z.gq.fpsCap; if (!cap) return true;
+    const cap = Z.gq.fpsCap || Z.gq.autoCap; if (!cap) return true;
     const per = 1000 / cap;
     if (Z._lastDraw && t - Z._lastDraw < per - 1.5) return false;
     Z._lastDraw = Z._lastDraw && t - Z._lastDraw < per * 2 ? Z._lastDraw + per : t;
