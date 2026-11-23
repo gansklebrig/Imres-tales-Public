@@ -188,6 +188,136 @@ a{color:var(--gold)}
 .toast b{color:var(--gold)}
 @keyframes toast{0%{opacity:0;transform:translate(-50%,-12px)}8%,85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-10px)}}
 .leise{color:var(--mute);font-size:.82rem}
+/* ---------- Spieltisch von oben ---------- */
+#tischbild{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#tischbild svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+#tischbild .tding{animation:tding .6s ease-out both;animation-delay:var(--d)}
+@keyframes tding{from{opacity:0}}
+.balken{position:relative}
+.balken::before{content:"";position:absolute;inset:-4px 0 -2px;background:radial-gradient(ellipse 60% 100% at 50% 50%,rgba(15,9,5,.62),rgba(15,9,5,0) 85%);z-index:-1;pointer-events:none}
+.tisch{position:relative}
+.tisch::before{content:"";position:absolute;inset:-14px 0 0;background:linear-gradient(180deg,rgba(15,9,5,0),rgba(15,9,5,.55) 40%);z-index:-1;pointer-events:none}
+
+/* ---------- Karte: Szenenbild, Rahmen, Sprecherarten ---------- */
+.karte{container-type:size;overflow:hidden;padding-top:0}
+.karte .banner{position:absolute;left:0;right:0;top:0;height:25cqh;overflow:hidden;border-radius:20px 20px 0 0;pointer-events:none}
+.karte .banner svg{width:100%;height:100%;display:block}
+.karte .banner::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:28%;background:linear-gradient(180deg,rgba(239,224,192,0),var(--perg))}
+.karte .banner.klein{height:15cqh;opacity:.85}
+.karte .rahmen{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.karte .portrait{position:relative;z-index:2;width:min(28cqw,19cqh,124px);margin-top:calc(25cqh - min(14cqw,9.5cqh,62px));border-radius:50%;background:radial-gradient(circle at 40% 35%,#fbf1da,#e2cc9f);box-shadow:0 0 0 3px #8a5a30,0 0 0 5px rgba(239,224,192,.9),0 8px 16px rgba(40,20,5,.45)}
+.karte .portrait svg{filter:none}
+.karte .sprecher,.karte .rolle,.karte .text,.karte .fuss,.karte .folge-kopf,.karte .ereignisse{position:relative;z-index:2}
+.karte.folge .folge-kopf{margin-top:calc(15cqh - .4rem);font-size:1.1rem}
+.karte .wahl-schild{z-index:4}
+.karte .wahl-schild.m{justify-content:center;text-align:center;background:rgba(120,80,10,.94);color:#fff3cf}
+.karte.weg-o{transform:translate(0,-140%) rotate(-4deg) scale(.9)!important;opacity:0}
+.karte.t-schurke{background:radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.18),transparent 60%),linear-gradient(170deg,#e0caa0,#c9a878)}
+.karte.t-schurke .sprecher{color:#5a1a14}
+.karte.t-geist{background:radial-gradient(ellipse at 50% 30%,rgba(255,255,255,.5),transparent 65%),linear-gradient(170deg,#ece7dc,#d4cdbf);color:#3b342c}
+.karte.t-gott{background:radial-gradient(ellipse at 50% 22%,rgba(255,240,190,.9),transparent 60%),linear-gradient(170deg,#f6e3b0,#e6c47a)}
+.karte.t-tisch{background:repeating-linear-gradient(180deg,transparent 0 23px,rgba(140,170,110,.22) 23px 24px),linear-gradient(170deg,#fbf6e8,#efe5cd)}
+.karte.t-regelbuch{background:radial-gradient(ellipse at 50% 50%,transparent 60%,rgba(120,60,20,.18)),linear-gradient(170deg,#f3e8cf,#e4d0a6)}
+.karte.t-welt{background:radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.3),transparent 60%),linear-gradient(170deg,#ecdcb4,#d9c08c)}
+.karte.t-boss{background:radial-gradient(ellipse at 50% 30%,rgba(255,120,60,.25),transparent 60%),linear-gradient(170deg,#3a1610,#1c0907);color:#f3e0c0;box-shadow:0 18px 50px rgba(0,0,0,.7),0 0 30px rgba(224,68,42,.45),inset 0 0 0 2px rgba(224,68,42,.5)}
+.karte.t-boss .sprecher{color:#ffcf9a}.karte.t-boss .rolle,.karte.t-boss .fuss{color:#d69a70}.karte.t-boss .text em{color:#ffb070}
+.karte.t-boss .banner::after{background:linear-gradient(180deg,rgba(28,9,7,0),#2a0f0b)}
+.karte.t-boss .portrait{box-shadow:0 0 0 3px #a8302a,0 0 18px rgba(255,90,40,.7)}
+.karte.t-boss .folge-kopf{color:#ffb070}.karte.t-boss .ereignisse span{color:#f3e0c0;background:rgba(255,200,150,.1)}
+.karte.t-boss .wurf{color:#ffb070;border-color:rgba(255,176,112,.5)}
+.karte.selten{box-shadow:0 18px 40px rgba(0,0,0,.6),0 0 26px rgba(232,177,78,.55),inset 0 0 0 2px rgba(232,177,78,.8)}
+.karte.selten .glanz{position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(115deg,transparent 30%,rgba(255,246,210,.55) 45%,rgba(232,177,78,.25) 52%,transparent 64%);background-size:250% 100%;animation:glanz 3.2s ease-in-out infinite;mix-blend-mode:soft-light}
+@keyframes glanz{0%{background-position:120% 0}60%,100%{background-position:-60% 0}}
+.karte .selten-tag{position:absolute;top:24cqh;left:50%;transform:translate(-50%,-50%);z-index:3;font-family:var(--fd);font-size:.75rem;letter-spacing:.2em;color:#8a5a10;background:linear-gradient(90deg,#e8b14e,#fff3cf,#e8b14e);padding:.05rem .7rem;border-radius:20px;box-shadow:0 2px 6px rgba(0,0,0,.3);display:none}
+.karte.tot{filter:grayscale(1) sepia(.15) contrast(.95);transition:filter 1.2s}
+.karte .riss{position:absolute;inset:0;z-index:5;pointer-events:none;animation:riss .5s ease-out}
+.karte .riss svg{width:100%;height:100%}
+@keyframes riss{from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0 0 0 0)}}
+.randfeuer{position:absolute;inset:-6px;z-index:6;pointer-events:none;animation:randfeuer 2.2s ease-out forwards;filter:blur(2px)}
+.randfeuer svg{width:100%;height:100%;overflow:visible}
+@keyframes randfeuer{0%{opacity:0}12%{opacity:1}70%{opacity:.9}100%{opacity:0}}
+.drachenflug{position:absolute;left:0;top:6%;width:min(110vw,900px);z-index:7;pointer-events:none;animation:drachenflug 3.1s cubic-bezier(.4,.1,.6,.9) forwards}
+.drachenflug svg{width:100%;overflow:visible}
+.drachenflug .fluegel{transform-origin:220px 100px;animation:fluegel .38s ease-in-out infinite alternate}
+.drachenflug .feuerstrahl{opacity:0;animation:strahl 3.1s forwards}
+@keyframes drachenflug{0%{transform:translate(-100%,40px) scale(.7)}50%{transform:translate(10%,-10px) scale(1)}100%{transform:translate(110vw,-60px) scale(.8)}}
+@keyframes fluegel{from{transform:scaleY(1)}to{transform:scaleY(-.55)}}
+@keyframes strahl{0%,32%{opacity:0}38%,58%{opacity:1}66%,100%{opacity:0}}
+.bossleiste{display:flex;align-items:center;gap:.5rem;justify-content:center;font-style:normal;font-family:var(--fd);color:#ffcf9a}
+.bossleiste span{max-width:40vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bossleiste b{position:relative;width:min(46vw,220px);height:10px;border-radius:6px;background:rgba(0,0,0,.6);border:1px solid rgba(224,68,42,.6);overflow:hidden}
+.bossleiste b i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#8e2a20,#e0442a,#ff7a3a);transition:width .8s cubic-bezier(.3,1.3,.5,1)}
+.bossleiste small{font-family:var(--fb);font-size:.72rem;color:#d69a70;white-space:nowrap}
+@media (max-width:480px){.bossleiste span{max-width:30vw;font-size:.8rem}.wahlen.drei button{font-size:.78rem;padding:.35rem .4rem;min-height:2.6rem}}
+.bossleiste.besiegt{color:#e8b14e}.bossleiste.besiegt b i{background:#5a3d27}
+.bosstreffer{position:relative;z-index:2;margin-top:.2rem;font-weight:800;font-size:.9rem;padding:.1rem .6rem;border-radius:12px}
+.bosstreffer.ja{color:#ffcf9a;background:rgba(224,68,42,.35)}.bosstreffer.nein{color:#f3e0c0;background:rgba(0,0,0,.25)}
+
+/* ---------- Drei Wahlen (seltene Karten) ---------- */
+.wahlen.drei{grid-template-columns:1fr .9fr 1fr}
+.wahlen button.m{justify-content:center;text-align:center;flex-direction:column;gap:.1rem;border-color:#e8b14e;background:linear-gradient(180deg,rgba(150,104,30,.95),rgba(96,62,16,.95));color:#fff3cf}
+.wahlen button.m .pf{opacity:.85;font-size:.8rem}
+
+/* ---------- Sitzplätze mit Figuren ---------- */
+.platz .figur{position:relative;width:50px;height:50px;transition:transform .4s}
+.platz .figur svg{width:100%;height:100%}
+.platz .reak{position:absolute;right:-8px;top:-6px;font-size:.95rem;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6));animation:reak .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes reak{from{transform:scale(0)}}
+.platz .kr{position:absolute;left:-8px;bottom:-4px;font-size:.8rem;background:rgba(20,12,6,.75);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(232,177,78,.4)}
+.platz .bz{margin-left:.15rem;font-size:.6rem;letter-spacing:-.05em}
+.platz .bz .schlecht{filter:grayscale(1);opacity:.7}
+.platz.pausiert{opacity:.55;border-style:dashed}
+.platz.r-jubel .figur{animation:jubel .45s ease-in-out 3 alternate}
+@keyframes jubel{from{transform:translateY(0) rotate(-4deg)}to{transform:translateY(-12px) rotate(5deg) scale(1.08)}}
+.platz.r-lachen .figur{animation:lachen .18s linear 10 alternate}
+@keyframes lachen{from{transform:rotate(-5deg)}to{transform:rotate(5deg) translateY(-2px)}}
+.platz.r-schock .figur{animation:schock .5s cubic-bezier(.2,1.8,.4,1)}
+@keyframes schock{30%{transform:translateY(-9px) scale(1.12)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+.platz.r-wuetend .figur{animation:wuetend .12s linear 8 alternate}
+@keyframes wuetend{from{transform:translateX(-2px)}to{transform:translateX(2px)}}
+.platz.r-kopf .figur,.platz.h-kopf .figur{transform:translateY(12px) rotate(-8deg) scale(.95);clip-path:inset(0 0 22% 0)}
+.platz.r-kopf .figur::after,.platz.h-kopf .figur::after{content:"";position:absolute;left:-6px;right:-6px;bottom:20%;height:5px;border-radius:3px;background:#6b4a2c}
+.platz.h-schlaf .figur,.platz.r-schlaf .figur{transform:rotate(14deg);animation:atmen 2.6s ease-in-out infinite}
+@keyframes atmen{50%{transform:rotate(14deg) scale(1.04)}}
+.platz.h-handy .figur{transform:translateY(3px) rotate(-3deg)}
+.platz.h-handy .reak{right:auto;left:50%;top:auto;bottom:-2px;transform:translateX(-50%);font-size:1rem;filter:drop-shadow(0 0 6px rgba(255,210,122,.9))}
+.platz.r-traurig .figur{transform:translateY(4px)}
+.platz.r-stolz .figur{animation:stolz .6s ease-out}
+@keyframes stolz{40%{transform:translateY(-5px) scale(1.1)}}
+.platz .reak{pointer-events:none}
+
+/* ---------- Katze läuft durchs Bild ---------- */
+.katzelauf{position:absolute;bottom:calc(8.6rem + var(--sicher-u));left:-130px;width:110px;z-index:5;pointer-events:none;animation:katzelauf 9.5s linear forwards}
+.katzelauf svg{width:100%;overflow:visible}
+.katzelauf .bein{transform-box:fill-box;transform-origin:50% 0;animation:schritt .32s ease-in-out infinite alternate}
+.katzelauf .b2{animation-delay:-.32s}
+.katzelauf .schwanz{transform-box:fill-box;transform-origin:100% 100%;animation:schwanz 1.2s ease-in-out infinite alternate}
+@keyframes katzelauf{0%{transform:translateX(0)}42%{transform:translateX(50vw)}52%{transform:translateX(50vw)}100%{transform:translateX(calc(100vw + 260px))}}
+@keyframes schritt{from{transform:rotate(-18deg)}to{transform:rotate(18deg)}}
+@keyframes schwanz{from{transform:rotate(-10deg)}to{transform:rotate(14deg)}}
+
+/* ---------- Ziele, Würfel, Beziehungen ---------- */
+.zielkarte{margin:.6rem 0;padding:.7rem .8rem;border-radius:14px;background:linear-gradient(170deg,rgba(232,177,78,.14),rgba(0,0,0,.2));border:1px solid rgba(232,177,78,.4)}
+.zielkarte .ic{font-size:1.6rem;float:left;margin-right:.5rem}
+.zielkarte b{color:#ffe2b0}.zielkarte p{margin:.2rem 0}
+.zielkarte.ok{border-color:#7fa64a;background:linear-gradient(170deg,rgba(127,166,74,.2),rgba(0,0,0,.2))}
+.zielkarte.nein{opacity:.75}
+.wz.ziel{background:rgba(120,80,10,.6);border-color:rgba(232,177,78,.6)}
+.wgitter{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+.wkachel{text-align:center;display:flex;flex-direction:column;align-items:center;gap:.2rem;color:inherit}
+.wkachel svg{width:64px;height:64px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.5))}
+.wkachel small{color:var(--mute);font-size:.72rem}
+.wkachel.aktiv{border-color:var(--gold);background:rgba(232,177,78,.16);box-shadow:0 0 0 1px var(--gold)}
+.goldkachel{border-color:rgba(232,177,78,.6);background:linear-gradient(160deg,rgba(232,177,78,.2),rgba(0,0,0,.2))}
+.bezzeile{display:grid;grid-template-columns:1fr auto;gap:.1rem .6rem;align-items:center}
+.bezzeile small{color:var(--mute)}
+.bezwert{grid-column:1/3;height:5px;border-radius:3px;background:rgba(0,0,0,.4);overflow:hidden;display:block}
+.bezwert i{display:block;height:100%}
+.merk{color:#d8b880!important}
+.wuerfel .erg small{display:block;font-family:var(--fb);font-size:.8rem;color:#ffcf9a}
+@media (max-height:640px){.platz .figur{width:40px;height:40px}}
+@media (min-width:900px){.platz .figur{width:58px;height:58px}}
+
 @media (max-width:400px){.bk-pole{display:none}}
 @media (max-height:640px){.bk-icon{width:44px;height:44px}.bk-pole{display:none}.platz{width:74px}.platz svg{width:32px;height:32px}.karte .portrait{width:26%}.kopf{padding-top:.2rem}}
 @media (min-width:900px){.buehne{padding-top:.6rem}.tisch{gap:.6rem}.platz{width:104px}}
@@ -197,6 +327,7 @@ body.ruhig *{animation-duration:.01ms!important;transition-duration:.01ms!import
 </head>
 <body>
 <div id="app" aria-live="polite">
+  <div id="tischbild" aria-hidden="true"></div>
   <div class="kopf">
     <a href="index.html#taverne" title="Zurück zur Taverne" aria-label="Zurück zur Taverne">←</a>
     <div class="titel" id="kopftitel">Tales never End<small id="kopfunter">hinter dem Schirm</small></div>
@@ -212,6 +343,7 @@ body.ruhig *{animation-duration:.01ms!important;transition-duration:.01ms!import
     </div>
     <div class="wahlen" id="wahlen">
       <button id="wahl-l" type="button"><span class="pf">◀</span><span></span></button>
+      <button id="wahl-m" type="button" class="m" hidden><span class="pf">▲</span><span></span></button>
       <button id="wahl-r" type="button" class="r"><span></span><span class="pf">▶</span></button>
     </div>
   </div>
@@ -229,6 +361,9 @@ body.ruhig *{animation-duration:.01ms!important;transition-duration:.01ms!import
 <script src="tne-karten-4.js?v=1"></script>
 <script src="tne-karten-5.js?v=1"></script>
 <script src="tne-karten-6.js?v=1"></script>
-<script src="tne.js?v=1"></script>
+<script src="tne-karten-7.js?v=1"></script>
+<script src="tne-karten-8.js?v=1"></script>
+<script src="tne-grafik.js?v=1"></script>
+<script src="tne.js?v=2"></script>
 </body>
 </html>
