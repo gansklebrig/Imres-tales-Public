@@ -248,7 +248,7 @@
      Nur die Grunddaten. Kampf (3 Phasen, Techniken, Seelenhunger), Gestalt (Rig mit zwei Köpfen und Tentakeln) und Arena: demogorgon.js */
   B.demogorgon = base({
     n: ["Demogorgon", "Demogorgon"], title: ["Fürst der Dämonen", "Prince of Demons"], shape: "demogorgon", c: "#3a2a36", t: "#c8ff6a", w: 68, h: 120, size: 1.0, hp: 80, dmg: 1.6, idleT: 0.55, demon: true, fixed: true, noBlock: true,
-    intro: ["Der schwarze See wölbt sich. Zwei Pavianköpfe, Tentakel statt Arme – Demogorgon steigt aus der Tiefe.", "The black lake bulges. Two baboon heads, tentacles for arms – Demogorgon rises from the deep."],
+    intro: ["Der schwarze See wölbt sich. Zwei Pavianköpfe, Tentakel statt Arme – Demogorgon steigt aus der Tiefe. Er hungert nach Seelen: Heilung nährt ihn.", "The black lake bulges. Two baboon heads, tentacles for arms – Demogorgon rises from the deep. He hungers for souls: healing feeds him."],
     outro: ["Demogorgon versinkt im schwarzen Wasser, beide Köpfe kreischen ein letztes Mal. Dann wird der See still. Diesmal wirklich.", "Demogorgon sinks into the black water, both heads shrieking one last time. Then the lake falls silent. This time for real."],
     phases: [{ at: 1, moves: [] }], moves: {}
   });

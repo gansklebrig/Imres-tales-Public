@@ -119,8 +119,11 @@
         /* kein Fenster: die Kugel teilt sich in zwei Fäden-Kugeln in der Welt – hingehen, Benutzen nimmt eine */
         if (ui.auslage && ui.segenKugel && o.offer.length) {
           o.off = true; A.play("magic", { vol: 0.5 }); FX.burst(o.x, o.y - 22, 20, { col: ["#ffd27a", "#ff8a5a", "#fff"], sp: 90, up: 30, life: 0.7, size: 2, kind: "glow", add: true });
+          /* W9: mit drei Segen öffnet die Wahl das Tausch-Fenster (gibt false zurück) – nach einem Tausch muss die Kugel trotzdem
+             erlöschen, sonst ließ sich die zweite Kugel auch noch eintauschen (zwei Segen aus einer Kugel) */
           ui.auslage({ key: "segenskugel" + Math.round(o.x), x: o.x, y: o.y, abstand: 30, hoch: 38, einmal: true,
-            items: o.offer.map(b => ui.segenKugel(b, () => { if (Z.player.bless.length >= 3) { ui.actions.bless(b); return false; } ui.actions.bless(b); })) });
+            aktiv: () => !(o.snap != null && Z.player && Z.player.bless.join("|") !== o.snap),
+            items: o.offer.map(b => ui.segenKugel(b, () => { if (Z.player.bless.length >= 3) { o.snap = Z.player.bless.join("|"); ui.actions.bless(b); return false; } ui.actions.bless(b); })) });
           ui.notify(L(["Zwei Segen – nimm einen", "Two blessings – take one"]), { prio: 3, art: "magie", ort: "welt", x: o.x, y: o.y - 46, dauer: 2400 });
           return;
         }

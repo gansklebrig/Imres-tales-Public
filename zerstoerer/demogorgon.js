@@ -73,7 +73,7 @@
       case "sweep": { bez(o, n, r.x, r.y, lp(r.x, a.tx, 0.5), FY - 46, a.tx, FY - 7); break; }
       case "reach": case "hold": { bez(o, n, r.x, r.y, lp(r.x, a.tx, 0.45), Math.min(r.y, a.ty) - 60, a.tx, a.ty); if (a.mode === "hold") wobble(o, n, t, 4, 11); break; }
       default: { /* Ruhe, Rückzug, Tod: rollt sich farnartig ein und wogt */
-        const dead = a.mode === "dead", ang0 = dead ? 1.35 : a.k ? 0.62 : -0.38, curl = dead ? 0.5 : a.k ? 2.1 : -2.7, L0 = dead ? 12 : a.k ? 9.5 : 10.5;
+        const dead = a.mode === "dead", ang0 = dead ? 1.35 : a.k ? 0.35 : -0.38, curl = dead ? 0.5 : a.k ? -1.9 : -2.7, L0 = dead ? 12 : a.k ? 8.2 : 10.5;
         const sway = dead ? 0.05 : 0.2 + 0.12 * d.rage;
         let x = r.x, y = r.y; o[0] = x; o[1] = y;
         for (let i = 1; i < n; i++) {
@@ -101,7 +101,7 @@
     }
     p[0] = o[0]; p[1] = o[1];
     const FY = d.FY;
-    for (let i = 1; i < n; i++) { const j = i * 2; if (p[j + 1] > FY - 2 && !overHole(e, p[j])) { p[j + 1] = FY - 2; if (v[j + 1] > 0) v[j + 1] *= -0.2; } }
+    if (a.mode !== "dead") for (let i = 1; i < n; i++) { const j = i * 2; if (p[j + 1] > FY - 2 && !overHole(e, p[j])) { p[j + 1] = FY - 2; if (v[j + 1] > 0) v[j + 1] *= -0.2; } }
     /* Schleim tropft von hängenden Tentakeln */
     if (!low() && R() < dt * 1.2) { const i = 6 + ((R() * (n - 8)) | 0); FX.p({ x: p[i * 2], y: p[i * 2 + 1] + 2, vx: 0, vy: 20, g: 420, life: 0.7, size: 1.6, col: "#9ab070", kind: "drop" }); }
   }
@@ -118,7 +118,7 @@
     const d = e.dg, r = headRest(e, h);
     let tx = P ? pcx(P) : d.bx, ty = P ? pcy(P) : d.FY;
     if (d.quarrel > 0) { const o = d.heads[1 - h.i]; tx = o.x; ty = o.y; }
-    h.f = U.approach(h.f, tx > h.x + 4 ? 1 : tx < h.x - 4 ? -1 : h.f, dt * 5.5);
+    h.f = U.approach(h.f, tx > h.x + 10 ? 1 : tx < h.x - 10 ? -1 : h.f, dt * 7);
     h.rear = U.approach(h.rear, h.rearT, dt * 4); h.lunge = U.approach(h.lunge, h.lungeT, dt * (h.lungeT > h.lunge ? 9 : 2.6));
     h.jaw = U.approach(h.jaw, h.jawT, dt * 7); h.throat = U.approach(h.throat, h.throatT, dt * 3); h.stare = U.approach(h.stare, h.stareT, dt * 2.5);
     let x = r.x - h.side * 8 * h.rear, y = r.y - 14 * h.rear;
@@ -141,7 +141,7 @@
     if (h.jaw > 0.35 && R() < dt * 4) { const m = mouth(h, 14, 9); FX.p({ x: m.x, y: m.y, vx: 0, vy: 10, g: 300, life: 0.8, size: 1.6, col: h.i ? "#e0a0a0" : "#c8e890", kind: "drop" }); }
   }
   /* Punkt im Kopf-Rahmen (Blickrichtung rechts) → Welt */
-  function mouth(h, lx, ly) { const fs = h.f >= 0 ? Math.max(0.3, h.f) : Math.min(-0.3, h.f), ca = Math.cos(h.ang), sa = Math.sin(h.ang); const X = lx * ca - ly * sa, Y = lx * sa + ly * ca; return { x: h.x + X * fs, y: h.y + Y }; }
+  function mouth(h, lx, ly) { const fs = h.f >= 0 ? Math.max(0.6, h.f) : Math.min(-0.6, h.f), ca = Math.cos(h.ang), sa = Math.sin(h.ang); const X = lx * ca - ly * sa, Y = lx * sa + ly * ca; return { x: h.x + X * fs, y: h.y + Y }; }
 
   /* ======================= 3. TREFFERZONEN, SEELENHUNGER, GRIFF, WAHNSINN ======================= */
   function parts(e) {
@@ -152,7 +152,7 @@
       let x0 = 1e9, x1 = -1e9; for (let i = a.n - 7; i < a.n; i++) { x0 = Math.min(x0, a.p[i * 2]); x1 = Math.max(x1, a.p[i * 2]); }
       out.push({ k: "arm", a, x: x0 - 6, y: FY - 30, w: Math.max(30, x1 - x0 + 12), h: 30, mul: 1.6 });
     }
-    for (const h of d.heads) if (h.lunge > 0.6) out.push({ k: "head", h, x: h.x - 20, y: h.y - 18, w: 40, h: 36, mul: 1.6 });
+    for (const hd of d.heads) if (hd.lunge > 0.6) out.push({ k: "head", hd, x: hd.x - 20, y: hd.y - 18, w: 40, h: 36, mul: 1.6 });
     return out;
   }
   function placeBox(e, P) {
@@ -487,16 +487,16 @@
   }
   D.phases = [
     { at: 1, name: N("Fürst der Dämonen", "Prince of Demons"), moves: ["hammer", "fegen", "speien", "kreischen", "biss", "griff"] },
-    { at: 0.65, name: N("Zwei Köpfe, ein Wahn", "Two Heads, One Madness"), quote: N("Aameul: „Er gehört MIR!“ – Hathradiah: „Schweig, Bruder. Er gehört UNS.“", "Aameul: \"He is MINE!\" – Hathradiah: \"Silence, brother. He is OURS.\""),
+    { at: 0.7, name: N("Zwei Köpfe, ein Wahn", "Two Heads, One Madness"), quote: N("Aameul: „Er gehört MIR!“ – Hathradiah: „Schweig, Bruder. Er gehört UNS.“", "Aameul: \"He is MINE!\" – Hathradiah: \"Silence, brother. He is OURS.\""),
       aura: "#c86aff", tempo: 1.12, transDur: 2.9,
       moves: ["hammer", "fegen", "gitter", "speien", "kreischen", "biss", "griff", "blick", "brut"],
       enter: e => { const d = e.dg; d.floodT = 7; e.nextMv = "gitter"; FX.addShake(8); A.play("splash", { vol: 1, rate: 0.6 }); say("Der See steigt – Wellen rollen über die Insel.", "The lake rises – waves roll over the island."); },
       arena: (e, dt, P, s) => BP.every(s, "see", dt, 8.5, () => waves(e)) },
-    { at: 0.3, name: N("Der Abgrund öffnet sich", "The Abyss Opens"), quote: N("Beide Köpfe zugleich: „WIR SIND DER SEE. WIR SIND DIE TIEFE.“", "Both heads at once: \"WE ARE THE LAKE. WE ARE THE DEEP.\""),
+    { at: 0.35, name: N("Der Abgrund öffnet sich", "The Abyss Opens"), quote: N("Beide Köpfe zugleich: „WIR SIND DER SEE. WIR SIND DIE TIEFE.“", "Both heads at once: \"WE ARE THE LAKE. WE ARE THE DEEP.\""),
       aura: "#ff4a3a", tempo: 1.3, transDur: 3.1,
       moves: ["hammer", "fegen", "gitter", "speien", "kreischen", "biss", "griff", "blick", "sog", "raserei", "brut"],
       enter: e => {
-        const d = e.dg, H = Z.level.H; d.floodT = 0; d.liftT = 16; d.whirlT = 0.35; e.nextMv = "sog";
+        const d = e.dg, H = Z.level.H; d.floodT = 0; d.liftT = 9; d.whirlT = 0.35; e.nextMv = "sog";
         const c = Math.floor(Z.level.W / 2);
         later(0.3, () => breakTiles(e, c - 12, c - 10, H - 3, true));
         later(0.75, () => breakTiles(e, c + 9, c + 11, H - 3, true));
@@ -534,6 +534,7 @@
     if (e.dead) return;
     if (e.trans) transAnim(e, dt); else d.quarrel = Math.max(0, d.quarrel - dt * 3);
     d.rage = e.phase >= 2 ? 1 : e.phase >= 1 ? 0.5 : 0;
+    e.tempoBonus = 1 + 0.04 * skulls(); /* Totenköpfe: kürzere Pausen (Vorwarnungen bleiben gleich lang) */
     d.lift = U.approach(d.lift, d.liftT, dt * 12);
     d.bob = Math.sin(d.t * 0.9) * 2.4;
     d.lean = U.approach(d.lean, P ? cl((pcx(P) - d.cx) / 300, -1, 1) : 0, dt * 0.8);
@@ -553,6 +554,8 @@
     if (d.held && P) { if (P.dead) d.held = null; }
     if (d.holes.length) safeSpot(e);
     if (R() < dt * 1.3) d.ripples.push({ x: d.bx + (R() - 0.5) * 90, y: d.wl + 1, t: 0, life: 1.6, r: 40 + R() * 30 });
+    /* Wasser rinnt vom Leib (nach dem Auftauchen stärker) */
+    if (!low() && R() < dt * (e.intro > 0 ? 30 : 5)) { const x = d.bx + (R() - 0.5) * 150; FX.p({ x, y: d.sy - 4 + R() * 30, vx: (R() - 0.5) * 6, vy: 20, g: 520, life: 0.9, size: 1.5, col: "rgba(200,215,205,.8)", kind: "drop" }); }
     placeBox(e, P);
     /* Kamera: zur Mitte geneigt, damit der Fürst im Bild bleibt */
     const lk = Z.cam.lock;
@@ -666,7 +669,8 @@
     g.beginPath(); g.moveTo(0, -84); g.lineTo(0, -30);
     g.moveTo(-10, -74); g.lineTo(0, -64); g.lineTo(10, -74);
     g.moveTo(-8, -48); g.lineTo(0, -40); g.lineTo(8, -48);
-    g.moveTo(-18, -60); g.arc(-22, -60, 4, 0, TAU); g.moveTo(26, -60); g.arc(22, -60, 4, 0, TAU);
+    g.moveTo(-17, -66); g.quadraticCurveTo(-27, -60, -19, -52); g.moveTo(17, -66); g.quadraticCurveTo(27, -60, 19, -52);
+    g.moveTo(-6, -92); g.lineTo(0, -86); g.lineTo(6, -92);
   }
   const HD = { w: 70, h: 64, ox: 30, oy: 32, res: 3 };
   function paintHead(g, i, flash) {
@@ -727,9 +731,18 @@
   const TL = new Float32Array(64), TR = new Float32Array(64), NX = new Float32Array(32), NY = new Float32Array(32);
   function tentacle(c, p, n, w0, w1, flash, t, ph, lowQ, hurtK) {
     const ink = COL.ink;
-    if (lowQ) {
-      c.lineCap = "round"; c.strokeStyle = flash ? "#fff6ea" : COL.skin;
-      for (let i = 1; i < n; i += 2) { const j = Math.min(n - 1, i + 1); c.lineWidth = lp(w0, w1, Math.pow(i / (n - 1), 0.8)); c.beginPath(); c.moveTo(p[(i - 1) * 2], p[(i - 1) * 2 + 1]); c.lineTo(p[i * 2], p[i * 2 + 1]); c.lineTo(p[j * 2], p[j * 2 + 1]); c.stroke(); }
+    if (lowQ) { /* Handheld: drei Striche je Abschnitt (Umriss, Haut, heller Bauch) – gut lesbar, billig */
+      c.lineCap = "round"; c.lineJoin = "round";
+      for (let pass = 0; pass < 3; pass++) {
+        if (pass === 2 && flash) break;
+        c.strokeStyle = pass === 0 ? ink : flash ? "#fff6ea" : pass === 1 ? "#5a4458" : "#a8707e";
+        for (let i = 1; i < n; i += 2) {
+          const j = Math.min(n - 1, i + 1), w = lp(w0, w1, Math.pow(i / (n - 1), 0.8));
+          c.lineWidth = pass === 0 ? w + 2.4 : pass === 1 ? w : w * 0.32;
+          const oy = pass === 2 ? w * 0.22 : 0;
+          c.beginPath(); c.moveTo(p[(i - 1) * 2], p[(i - 1) * 2 + 1] + oy); c.lineTo(p[i * 2], p[i * 2 + 1] + oy); c.lineTo(p[j * 2], p[j * 2 + 1] + oy); c.stroke();
+        }
+      }
       return;
     }
     let sy = 0;
@@ -820,7 +833,7 @@
     c.globalAlpha = 1;
   }
   function headDraw(c, e, h, t) {
-    const d = e.dg, S = SPR, fs = h.f >= 0 ? Math.max(0.3, h.f) : Math.min(-0.3, h.f), flash = (e.flash > 0 && e.dgPart && e.dgPart.h === h) || h.hit > 0.6;
+    const d = e.dg, S = SPR, fs = h.f >= 0 ? Math.max(0.6, h.f) : Math.min(-0.6, h.f), flash = (e.flash > 0 && e.dgPart && e.dgPart.hd === h) || h.hit > 0.6;
     const nb = neckBase(e, h), hb = mouth(h, -12, 8), lowQ = low();
     /* Hals: dicker, zottiger Schlauch */
     const mx = (nb.x + hb.x) / 2 + h.side * 8, my = Math.min(nb.y, hb.y) - 8 + sstep(h.lunge) * 30;
@@ -916,14 +929,27 @@
     }
     /* Wasser-Tentakel */
     for (const s of d.spouts) spoutDraw(c, e, s, t, lowQ);
-    /* Arm-Tentakel */
+    /* Löcher in der Insel: schwarzes Wasser mit Schaumrand */
+    for (const h of d.holes) {
+      const y = FY + 9;
+      c.fillStyle = COL.water; c.fillRect(h[0], y, h[1] - h[0], 22);
+      c.strokeStyle = "rgba(205,215,200,.45)"; c.lineWidth = 0.8; c.beginPath();
+      for (let x = h[0]; x <= h[1]; x += 4) { const yy = y + Math.sin(x * 0.3 + t * 3) * 0.8; x === h[0] ? c.moveTo(x, yy) : c.lineTo(x, yy); }
+      c.stroke();
+      if (!lowQ && R() < 0.08) FX.p({ x: h[0] + R() * (h[1] - h[0]), y: y + 2, vx: 0, vy: -14, life: 0.6, size: 1.2 + R(), col: "#c8d0c0", kind: "bubble" });
+    }
+    /* Arm-Tentakel (beim Tod: versinken hinter der Inselkante, verblassen) */
     const flashA = e.flash > 0 && e.dgPart && e.dgPart.k === "arm" ? e.dgPart.a : null;
+    const dk = e.dead ? cl(((e.deadT || 0) - 1.2) / 2, 0, 1) : 0;
+    if (dk >= 1) return;
+    if (e.dead) { c.save(); c.globalAlpha = 1 - dk; c.beginPath(); c.rect(Z.cam.x - 50, Z.cam.y - 50, Z.cam.w + 100, FY - Z.cam.y + 50); c.clip(); }
     for (const a of d.arms) {
       tentacle(c, a.p, a.n, a.wound > 0 ? 11 : 15, 2.2, a === flashA || a.hit > 0.7, t, a.ph, lowQ, a.wound > 0 ? 1 : 0);
       if (a.mode === "stuck") { /* Risse im Stein, wo er steckt */
         c.strokeStyle = "rgba(10,6,10,.8)"; c.lineWidth = 1; for (let k = -2; k <= 2; k++) { c.beginPath(); c.moveTo(a.tx, FY); c.lineTo(a.tx + k * 7, FY + 4 + Math.abs(k)); c.stroke(); }
       }
     }
+    if (e.dead) { c.restore(); return; }
     /* Säureklumpen */
     for (const g of d.globs) {
       const k = g.t / g.dur, x = lp(g.x0, g.x1, k), y = lp(g.y0, g.y1, k) - Math.sin(k * Math.PI) * g.arc;
@@ -1065,21 +1091,26 @@
   const hit0 = Z.hitEnemy;
   Z.hitEnemy = function (e, v, o) {
     if (!isDemo(e) || !e.dg || e.dead || (o && o.src === "cap")) return hit0.apply(this, arguments);
-    const d = e.dg, q = e.dgPart; o = o || {};
+    const d = e.dg, q = e.dgPart, P = Z.player; o = o || {};
     let m = q ? q.mul : 1; if (o.dot) m = Math.min(1, m);
-    const hp0 = e.hp, r = hit0.call(this, e, v * m, o), done = hp0 - e.hp, P = Z.player;
+    /* Heilung innerhalb des Treffers (Gegenwehr, Vampirisch …) gesammelt messen, damit der Seelenhunger sie einmal anteilig frisst */
+    const hp0 = e.hp, php0 = P ? P.hp : 0; inHit++;
+    let r; try { r = hit0.call(this, e, v * m, o); } finally { inHit--; }
+    const done = hp0 - e.hp;
+    if (P && !P.dead && P.hp > php0 && !(e.intro > 0)) { const gain = P.hp - php0, stolen = gain * (skulls() >= 2 ? 0.6 : 0.5); P.hp -= stolen; try { hunger(e, stolen, P); } catch (_) {} }
     if (done > 0 && q) {
       if (q.k === "arm") { q.a.hit = 1; q.a.stuckDmg += done; if (q.a.stuckDmg > e.hpMax * 0.035 && q.a.mode === "stuck") rip(e, q.a); }
-      else if (q.k === "head") { q.h.hit = 1; q.h.shake = 0.6; }
+      else if (q.k === "head") { q.hd.hit = 1; q.hd.shake = 0.6; }
       else if (!o.dot) { d.torsoHit = 1; if (P && once(e, "armor")) FX.text(pcx(P), P.y - 24, L(["Schuppenpanzer! Tentakel und Köpfe sind verwundbarer.", "Scale armour! Tentacles and heads are softer."]), "#d8c8b0", true); }
     }
     return r;
   };
   /* Seelenhunger: Heilung (außer Tränken) wird zum Teil gefressen */
+  let inHit = 0;
   const heal0 = Z.healPlayer;
   Z.healPlayer = function (n) {
     const b = live(), P = Z.player;
-    if (b && P && !(b.intro > 0) && typeof n === "number" && isFinite(n) && n > 0) {
+    if (b && P && !inHit && !(b.intro > 0) && typeof n === "number" && isFinite(n) && n > 0) {
       const share = skulls() >= 2 ? 0.6 : 0.5, stolen = n * share, r = heal0.call(this, n - stolen);
       try { hunger(b, stolen, P); } catch (_) {}
       return r;

@@ -130,7 +130,7 @@
       atks: [{ k: "slam", r: [0, 44], pre: 0.8, act: 0.12, post: 0.7, cd: 1, box: [-10, -36, 54, 36], armor: true, wave: true, sfx: "quake", hitSfx: "hitHeavy", glyph: "!!" },
              { k: "beam", r: [40, 260], pre: 0.9, act: 0.4, post: 0.6, cd: 3.5, sfx: "rune", col: "rgba(255,170,60,.85)", w: 0.7 }] },
     duergar: { n: ["Duergar", "Duergar"], shape: "duergar", c: "#4a4246", t: "#ff6a2a", skin: "#7a7a82", w: 12, h: 19, hp: 1.6, dmg: 1.15, spd: 80, ai: "walker", sight: 200, gold: 10, metal: true,
-      atks: [{ k: "grow", r: [0, 200], pre: 0.7, act: 0.05, post: 0.3, cd: 99, sfx: "roar", once: true, w: 2 },
+      atks: [{ k: "grow", r: [0, 200], pre: 0.7, act: 0.05, post: 0.3, cd: 0.8 /* W9: vorher 99 – nach dem Wachsen griff der Duergar ~100 s lang nicht mehr an (once verhindert ohnehin ein zweites Wachsen) */, sfx: "roar", once: true, w: 2 },
              { k: "hit", r: [0, 32], pre: 0.45, act: 0.1, post: 0.45, cd: 0.7, box: [-2, -20, 32, 20], sfx: "axe", hitSfx: "hitMetal" },
              { k: "invis", r: [60, 220], pre: 0.4, act: 0.05, post: 0.1, cd: 6, sfx: "shadow", w: 0.4 }] },
     duergarArmbrust: { n: ["Duergar-Armbrustschütze", "Duergar Crossbowman"], shape: "duergar", c: "#4a4248", t: "#c8501a", skin: "#7a7a82", xbow: 1, w: 12, h: 19, hp: 1.1, dmg: 1.1, spd: 70, ai: "ranged", keep: [100, 220], sight: 260, gold: 10, metal: true,
@@ -636,7 +636,7 @@
       if (ac.t >= a.act + (a.n && a.gap && !["shoot"].includes(a.k) ? (a.n - 1) * a.gap : 0) + (a.k === "shoot" && a.gap ? (a.n - 1) * a.gap : 0)) { ac.phase = "post"; ac.t = 0; onActEnd(e, a, P); }
     } else {
       if (!d.fly) e.vx = U.approach(e.vx, 0, 900 * dt); else { e.vx *= 0.92; e.vy *= 0.92; }
-      if (ac.t >= a.post) { e.act = null; e.cd = (a.cd || 0.6) * (0.75 + Z.R() * 0.5) * (e.elite === "wuetend" ? 0.6 : 1); }
+      if (ac.t >= a.post) { e.act = null; e.cd = (a.once ? Math.min(a.cd || 0.6, 1.2) /* W9: Einmal-Fähigkeiten (Wachsen, Wolfsgeheul …) legten den Gegner sonst 7–100 s still */ : (a.cd || 0.6)) * (0.75 + Z.R() * 0.5) * (e.elite === "wuetend" ? 0.6 : 1); }
     }
     e.noPlat = !!d.fly;
     if (d.ai === "phase") { const g = e.ghost; e.ghost = true; Z.moveBody(e, dt); e.ghost = g; } else Z.moveBody(e, dt);

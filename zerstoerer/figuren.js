@@ -2727,40 +2727,40 @@
       const sw = Math.sin(t * 1.2) * 2;
       const gaze = (m === "blick" || m === "doppelblick") && Q.ph;
       const scream = m === "schrei" && Q.ph;
-      glow(c, 0, -60, 90, "rgba(255,200,90,.18)");
+      glow(c, 0, -60, 90, "rgba(200,120,255,.14)");
       /* Leib */
-      ell(c, 0, -40, 26, 34, k("#4a3020"));
-      ell(c, -8, -46, 14, 22, k("#3a2418"));
-      for (let i = 0; i < 9; i++) { const yy = -70 + i * 7, xx = Math.sin(i * 1.7) * 14; c.save(); c.globalCompositeOperation = "lighter"; c.strokeStyle = "rgba(255,200,90," + (0.35 + 0.25 * Math.sin(t * 2 + i) + (scream ? 0.3 * charge() : 0)).toFixed(2) + ")"; c.lineWidth = 1.2; c.beginPath(); c.moveTo(xx - 6, yy); c.quadraticCurveTo(xx, yy + 3, xx + 7, yy - 1); c.stroke(); c.restore(); }
+      ell(c, 0, -40, 26, 34, k("#2b2130"));
+      ell(c, -8, -46, 14, 22, k("#3a2b3e"));
+      for (let i = 0; i < 9; i++) { const yy = -70 + i * 7, xx = Math.sin(i * 1.7) * 14; c.save(); c.globalCompositeOperation = "lighter"; c.strokeStyle = "rgba(232,200,106," + (0.25 + 0.25 * Math.sin(t * 2 + i) + (scream ? 0.3 * charge() : 0)).toFixed(2) + ")"; c.lineWidth = 1.2; c.beginPath(); c.moveTo(xx - 6, yy); c.quadraticCurveTo(xx, yy + 3, xx + 7, yy - 1); c.stroke(); c.restore(); }
       /* Saugnapf-Reihe auf dem Bauch */
-      for (let i = 0; i < 5; i++) { circ(c, 6, -58 + i * 8, 2, k("#6a4a30")); circ(c, 6, -58 + i * 8, 1, k("#2a1810")); }
+      for (let i = 0; i < 5; i++) { circ(c, 6, -58 + i * 8, 2, k("#5e3a4a")); circ(c, 6, -58 + i * 8, 1, k("#2a1018")); }
       /* Beine */
-      limb(c, -12, -12, -18, 10, 8, k("#3a4a30")); limb(c, 12, -12, 18, 10, 8, k("#3a4a30"));
-      for (const s of [-1, 1]) for (let i = -1; i <= 1; i++) limb(c, s * 18, 10, s * 18 + i * 4 + s * 2, 14, 2, k("#2a3a24"));
+      limb(c, -12, -12, -18, 10, 8, k("#2e2232")); limb(c, 12, -12, 18, 10, 8, k("#2e2232"));
+      for (const s of [-1, 1]) for (let i = -1; i <= 1; i++) limb(c, s * 18, 10, s * 18 + i * 4 + s * 2, 14, 2, k("#1a1219"));
       /* Tentakel-Arme: holen beim Ausholen aus, peitschen beim Angriff */
       const lash = m === "tentakel" || m === "tentakelsturm";
       const tent = (side, ph2) => {
         const up = lash ? (Q.ph === "pre" ? -20 * cr : Q.ph === "act" ? 14 * Math.sin(Q.time * 12 + ph2) : 0) : 0;
         const ex = side * 46 + Math.sin(t * 2.4 + ph2) * 6 + (lash && Q.ph === "act" ? side * 8 : 0), ey = -20 + up;
-        c.strokeStyle = k("#6a7a4a"); c.lineWidth = 6; c.lineCap = "round"; c.beginPath(); c.moveTo(side * 20, -58); c.bezierCurveTo(side * 40, -70 + Math.sin(t * 2 + ph2) * 10 + up, side * 52, -40 + Math.cos(t * 1.7 + ph2) * 14 + up * 0.5, ex, ey); c.stroke();
-        c.strokeStyle = k("#8a9a5a"); c.lineWidth = 1.4; c.setLineDash([1.6, 3]); c.beginPath(); c.moveTo(side * 22, -60); c.bezierCurveTo(side * 40, -72 + Math.sin(t * 2 + ph2) * 10 + up, side * 50, -42 + Math.cos(t * 1.7 + ph2) * 14 + up * 0.5, ex, ey - 2); c.stroke(); c.setLineDash([]);
-        c.strokeStyle = k("#6a7a4a"); c.lineWidth = 3; c.beginPath(); c.moveTo(ex, ey); c.lineTo(side * 52, ey + 8); c.moveTo(ex, ey); c.lineTo(side * 40, ey + 10); c.stroke();
+        c.strokeStyle = k("#3a2a3c"); c.lineWidth = 6; c.lineCap = "round"; c.beginPath(); c.moveTo(side * 20, -58); c.bezierCurveTo(side * 40, -70 + Math.sin(t * 2 + ph2) * 10 + up, side * 52, -40 + Math.cos(t * 1.7 + ph2) * 14 + up * 0.5, ex, ey); c.stroke();
+        c.strokeStyle = k("#d8a6a8"); c.lineWidth = 1.4; c.setLineDash([1.6, 3]); c.beginPath(); c.moveTo(side * 22, -60); c.bezierCurveTo(side * 40, -72 + Math.sin(t * 2 + ph2) * 10 + up, side * 50, -42 + Math.cos(t * 1.7 + ph2) * 14 + up * 0.5, ex, ey - 2); c.stroke(); c.setLineDash([]);
+        c.strokeStyle = k("#3a2a3c"); c.lineWidth = 3; c.beginPath(); c.moveTo(ex, ey); c.lineTo(side * 52, ey + 8); c.moveTo(ex, ey); c.lineTo(side * 40, ey + 10); c.stroke();
       };
       tent(-1, 0); tent(1, 1.5);
       /* zwei Pavianköpfe: beim Blick leuchten die Augen gleißend, beim Schrei reißen die Mäuler auf */
       const head = (hx, hy, ph2, side) => {
         hy += Math.sin(t * 2 + ph2) * 2 - (scream ? 6 * charge() : 0);
-        limb(c, hx * 0.4, -70, hx, hy + 6, 8, k("#4a3020"));
+        limb(c, hx * 0.4, -70, hx, hy + 6, 8, k(side < 0 ? "#1e1c14" : "#2a1618"));
         c.save(); c.translate(hx, hy); c.rotate(side * (Math.sin(t * 0.9 + ph2) * 0.08) + (scream ? -side * 0.2 * charge() : 0));
-        ell(c, 0, 0, 11, 9, k("#5a3a24"));
-        poly(c, [-10, -4, -14, -10, -7, -7], k("#3a2418")); poly(c, [10, -4, 14, -10, 7, -7], k("#3a2418"));
-        ell(c, 4 * side, 3, 6, 4.5, k("#8a3a3a")); circ(c, 4 * side - 1.6, 2, 0.9, k("#2a1010")); circ(c, 4 * side + 1.6, 2, 0.9, k("#2a1010"));
+        ell(c, 0, 0, 11, 9, k("#2e2228"));
+        poly(c, [-10, -4, -14, -10, -7, -7], k("#cfc4b0")); poly(c, [10, -4, 14, -10, 7, -7], k("#cfc4b0"));
+        ell(c, 4 * side, 3, 6, 4.5, k("#5e2c6c")); limb(c, 4 * side, -1, 4 * side, 6, 1.6, k("#a82436")); circ(c, 4 * side - 1.6, 2, 0.9, k("#2a1010")); circ(c, 4 * side + 1.6, 2, 0.9, k("#2a1010"));
         const op = scream ? charge() * 4 : Q.ph ? 1 : 0;
         poly(c, [-6, 5, 6, 5, 4, 8 + op * 1.6, -4, 8 + op * 1.6], k("#2a0a0a"));
         for (let i = 0; i < 4; i++) poly(c, [-3 + i * 2.5, 5, -2 + i * 2.5, 9 + op * 0.4, -1 + i * 2.5, 5], k("#f0f0d0"));
         const eg = gaze ? 1 + charge() * 2 : 1;
-        c.fillStyle = k(gaze ? "#fffbe0" : "#ffe04a"); c.fillRect(-5, -3, 3, 2); c.fillRect(1, -3, 3, 2);
-        glow(c, -1, -2, 10 * eg, "rgba(255,230,80,.6)");
+        c.fillStyle = k(gaze ? "#fffbe0" : side < 0 ? "#b8ff4a" : "#ff6a3a"); c.fillRect(-5, -3, 3, 2); c.fillRect(1, -3, 3, 2);
+        glow(c, -1, -2, 10 * eg, side < 0 ? "rgba(184,255,74,.6)" : "rgba(255,106,58,.6)");
         c.restore();
       };
       head(-16, -90 + sw, 0, -1); head(16, -92 - sw, 2, 1);

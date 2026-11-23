@@ -1648,7 +1648,7 @@
       const fight = !!(e.nmMini || (bossFight() && !(o && o.dot)));
       if (!fight) return h0.call(this, e, v, o);
       LS.depth++; const c0 = LS.ctx; LS.ctx = true;
-      try { return h0.call(this, e, v, o); } finally { LS.depth--; LS.ctx = c0; LS.frame = FRAME; }
+      try { return h0.call(this, e, v, o); } finally { LS.depth--; LS.ctx = c0; LS.frame = FRAME; if (e.nmMini && e.nmGuardT > 0 && !(e.openT > 0)) { e.kbT = 0; e.stagger = 0; } }
     };
     const hp0 = Z.healPlayer;
     Z.healPlayer = function (n) {

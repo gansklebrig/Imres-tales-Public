@@ -2559,9 +2559,10 @@
     e.nmMini = D; e.def = Object.assign({}, e.def); e.nmP = 1; e.nmRoom = o.cell || null; e.nmNoSeal = !!o.noSeal; e.nmSealed = [];
     /* W6-Balancing: Mini-Bosse fielen in 2–6 s (Bot) – Ziel 30–60 s für Spieler → Leben ×3,5 (vorher ×1) */
     /* W9: Schlüssel korrigiert (keiler/kapitaen/dorn griffen nie – Ids sind haeuptling/salzbart/dornvater; Krumschnabel fiel mit Speer +5 in 4 s).
-       Grundfaktor 3,5 → 4,2 – dafür jetzt Angriffsfenster, ein Angriff mehr und Wut unter 25 % (Prüfstand w9_boss: starke Ausrüstung 4–33 s) */
+       Grundfaktor 3,5 → 5,0 – sie fielen auch mit Standardausrüstung in 7–15 s (Bot), weil Dauer-Rückstoß sie lähmte; jetzt „Standhaft“,
+       Angriffsfenster, ein Angriff mehr und Wut unter 25 % (Prüfstand w9_boss: starke Ausrüstung vorher 4–33 s) */
     const MBHP = { ratten: 2.5, haeuptling: 2.3, kerker: 2.2, salzbart: 2.4, ilvara: 2.8, weberin: 2.0, amboss: 1, dornvater: 1.1, laeuter: 1.1 }; /* je Wächter nach Prüfstand (2. Runde): 6–9 s → 15–25 s */
-    e.hp = e.hpMax = Math.round(e.hpMax * 4.2 * (MBHP[id] || 1));
+    e.hp = e.hpMax = Math.round(e.hpMax * 5.0 * (MBHP[id] || 1));
     if (tierN() === 0) { e.hp = e.hpMax = Math.round(e.hpMax * 0.75); e.dmgMul *= 0.85; }
     if (o.aware) e.aware = true;
     mbLive.push(e);
@@ -2585,6 +2586,21 @@
     FX.ring(e.x + e.w / 2, e.y + e.h / 2, 40, "#ffb040", 0.5, 3); FX.addShake(4); A.play("roar", { x: e.x, vol: 0.6 });
     wtext(e.x + e.w / 2, e.y - 28, L(["Zweite Phase!", "Second phase!"]), { col: "#ffb070", size: 9, life: 2 });
     if (Z.music && Z.music.stinger) Z.music.stinger("phase");
+  }
+  /* W9: Standhaft – Mini-Bosse ließen sich mit starken Waffen dauerhaft unterbrechen (Prüfstand: oft nur 1 Angriff je Kampf, 0 Schaden).
+     Nach zwei Unterbrechungen binnen 3 s sind sie 3 s lang standhaft (orangefarbener Ring); Betäuben wirkt nur halb. */
+  {
+    const stag0 = Z.staggerEnemy, canc0 = Z.cancelEnemyAct, st0 = Z.addStatus;
+    const guard = e => {
+      if (!e || !e.nmMini || e.dead) return false;
+      if (e.nmGuardT > 0) return true;
+      const now = e.anim || 0; e.nmStag = (e.nmStag || []).filter(t => now - t < 3); e.nmStag.push(now);
+      if (e.nmStag.length >= 3) { e.nmStag = []; e.nmGuardT = 3; wtext(e.x + e.w / 2, e.y - 20, L(["Standhaft!", "Steadfast!"]), { col: "#ffb070", size: 8, life: 1.2 }); FX.ring(e.x + e.w / 2, e.y + e.h / 2, 16 + e.w * 0.5, "#ffb070", 0.35, 2); A.play("block", { x: e.x, vol: 0.5 }); return true; }
+      return false;
+    };
+    if (stag0) Z.staggerEnemy = function (e, t) { if (guard(e)) return; return stag0.apply(this, arguments); };
+    if (canc0) Z.cancelEnemyAct = function (e) { if (e && e.nmMini && e.nmGuardT > 0) return; return canc0.apply(this, arguments); };
+    if (st0) Z.addStatus = function (t, k, v, isPlayer) { if (!isPlayer && t && t.nmMini && (k === "stun" || k === "root")) { if (t.nmGuardT > 0) return; v *= 0.5; } return st0.call(this, t, k, v, isPlayer); };
   }
   /* W9: Schwachpunkt – kurz benommen, 1,5-facher Schaden (Z.hitEnemy-Hülle in bossphasen.js, Abschnitt 6) */
   function mbOpen(e, sec) {
@@ -2630,6 +2646,11 @@
       if (e.nmP === 1 && e.hp < e.hpMax * 0.5) mbPhase2(e);
       /* W9: Angriffsfenster nach schweren Angriffen (a.open), Wut unter 25 % */
       if (e.openT > 0) { e.openT -= dt; if (e.openT <= 0 || !(e.st.stun > 0)) e.openT = 0; }
+      /* Dauer-Rückstoß (jeder Treffer = 0,18 s Taumeln) sperrte die KI ganz – nach 1,4 s Sperre wird er standhaft */
+      const locked = (e.kbT > 0 || e.stagger > 0 || e.st.stun > 0) && !(e.openT > 0);
+      e.nmLock = Math.max(0, (e.nmLock || 0) + (locked ? dt : -dt * 0.6));
+      if (e.nmLock > 1.4 && !(e.nmGuardT > 0)) { e.nmLock = 0; e.nmGuardT = 3; wtext(e.x + e.w / 2, e.y - 20, L(["Standhaft!", "Steadfast!"]), { col: "#ffb070", size: 8, life: 1.2 }); FX.ring(e.x + e.w / 2, e.y + e.h / 2, 16 + e.w * 0.5, "#ffb070", 0.35, 2); A.play("block", { x: e.x, vol: 0.5 }); e.cd = Math.min(e.cd || 0, 0.15); }
+      if (e.nmGuardT > 0) { e.nmGuardT -= dt; if (!(e.openT > 0)) { e.st.stun = 0; e.stagger = 0; e.kbT = 0; } if (Math.random() < dt * 12) FX.p({ x: e.x + Math.random() * e.w, y: e.y + Math.random() * e.h, vx: 0, vy: -30, life: 0.35, size: 1.6, col: "#ffb070", kind: "glow", add: true }); }
       const pa = e._mbAct;
       if (pa && pa !== e.act && pa.phase === "post" && pa.a && pa.a.open && !e.dead) mbOpen(e, pa.a.open);
       e._mbAct = e.act;

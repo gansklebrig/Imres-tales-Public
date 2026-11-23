@@ -863,6 +863,9 @@
       if (c.pull && Z.metaLvl("kettenpeitsche") >= 3) eff.stun = Math.max(eff.stun || 0, 0.6);
       Z.hitEnemy(e, dmg, { crit, kb, kbUp: c.kbUp || (crit ? 60 : 30), eff, src: "melee", it: a.it, heavy: c.heavy && !bashRep, wallSlam: c.wallSlam, dir: P.face, sfx: c.hitSnd, wallOk: true });
       if (a.d.leech) Z.healPlayer(dmg * a.d.leech);
+      /* W9: Meisterschaft Schattendolch (stand nur im Text): Krit → 0,6 s unsichtbar, höchstens alle 4 s (sonst Endlos-Schleife:
+         unsichtbar → Gegner ahnungslos → Meuchel-Krit → wieder unsichtbar) */
+      if (crit && a.it && a.it.id === "schattendolch" && Z.metaLvl("schattendolch") >= 3) { const now = kClock(); if (!(P._sdInv != null && now - P._sdInv < 4 && now >= P._sdInv)) { P._sdInv = now; P.invis = Math.max(P.invis, 0.6); FX.burst(P.x + P.w / 2, P.y + 14, 10, { col: ["#a060ff", "#2a1a3a"], sp: 50, life: 0.35, size: 3, kind: "smoke" }); } }
       if (c.onHit) c.onHit(P, e, dmg, a);
       if (a.bash && Z.shieldHook) Z.shieldHook("bashHit", P, { a, e, dmg });
     }
