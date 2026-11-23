@@ -122,7 +122,8 @@
     if (key === "charme") { const b = json("imres-charme-buch") || {}; d.erobert = Object.values(b).filter(v => v === "erobert").length; d.rekord = parseInt(lies("imres-charme-rekord"), 10) || 0; }
     if (key === "kehle") { const w = json("imres-kehle-weg"), r = json("imres-kehle-rekorde") || {}; d.sterne = w && Array.isArray(w.sterne) ? w.sterne.reduce((a, b) => a + (+b || 0), 0) : 0;
       d.max = ((window.KEHLE_LIEDER && window.KEHLE_LIEDER.weg) || []).length * 3 || 30; d.rekord = Object.values(r).reduce((a, b) => Math.max(a, +b || 0), 0); }
-    const zeilen = m().stand[key](d).filter(Boolean);
+    const sf = m().stand[key]; /* neue Spiele ohne eigene Fortschrittszeile dürfen den Saal nicht lahmlegen */
+    const zeilen = typeof sf === "function" ? (sf(d) || []).filter(Boolean) : [];
     const gespielt = key === "probe" ? true : zeilen.length > 0 || d.gespielt;
     return { zeilen, gespielt, weiter: !!d.weiter, rekord: !!(d.rekord || d.sterne || d.laeufe) };
   }
