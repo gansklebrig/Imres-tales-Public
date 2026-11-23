@@ -1,0 +1,1 @@
+# Arten, deren Fotos neu geholt werden sollen (eine id pro Zeile). Leer = nur fehlende holen.
