@@ -79,6 +79,8 @@
      pw = Wellenform des Pulsbasses, tick = Farbe der Rasselticks (Bandpass-Mitte in Hz). */
   const PROF = {
     lager:    { root: 50, bpm: 66, scale: "hpan", drone: "didge", pad: null, mel: "hpan", col: "kal", calm: true, wave: "triangle" },
+    /* Titelmenü: dieselbe Tonart wie das Lager (D, Handpan-Moll), noch langsamer; gestrichener Psalter singt, Handpan tropft als Farbe */
+    titel:    { root: 50, bpm: 56, scale: "hpan", drone: "vc", pad: "ooh", mel: "psab", col: "hpan", calm: true, wave: "triangle", titel: true },
     passage:  { root: 50, bpm: 60, scale: "hpan", drone: "vc", pad: "ooh", mel: "hpan", col: "glas", calm: true },
     torhof:   { root: 50, bpm: 92, scale: "dorisch", drone: "vc", pad: "ooh", mel: "eh", col: "harfe", ost: "spic", bass: "kb", brass: "hornst", dr: ["taiko_36", "timp1", "marsch1"], tick: 7000 },
     /* Keller: in der Ruhe gemütlich (Koto, Kalimba), im Kampf bedrohlich – Spiccato statt Pizzicato, b2-Akkorde, Posaunen mit kleiner Sekunde */
@@ -506,7 +508,61 @@
     if (!b && Z.boss && !Z.boss.dead && !Z.bossDefeated) b = Z.boss.id;
     return b && BOSSP[b] ? "b:" + b + ":" + id : id;
   }
+  /* ---------- Lager: wächst mit dem Lager ----------
+     Stufe (Z.lager.stage(), 0…5) macht die Besetzung reicher; jede gerettete Figur (Z.lager.residents()) bekommt eine eigene
+     kleine Stimme mit Motiv. Motive in Stufen der Tonleiter über dem laufenden Akkord (passen also immer), [Stufe, Achtel, Länge].
+     Z.music._lager = { stage, res:[…] } überschreibt das für Tests/Hörproben. */
+  const RESV = {
+    edda:   { i: "oka", o: 24, pan: -0.5, v: 0.08, n: [[0, 0, 2], [2, 2, 2], [4, 4, 3], [7, 8, 6]] },                 /* Kundschafterin: Okarina schaut in die Weite */
+    quirin: { i: "mbira", o: 24, pan: 0.45, v: 0.07, n: [[4, 0, 1], [5, 1, 1], [4, 2, 1], [2, 3, 1], [4, 6, 1], [7, 7, 1], [4, 10, 2]] }, /* Alchemist: es blubbert */
+    sigrun: { i: "hglo", o: 24, pan: -0.25, v: 0.07, n: [[0, 0, 6], [4, 6, 6], [7, 12, 4]] },                         /* Runenleserin: Handglocken */
+    wendel: { i: "fag", o: 0, pan: 0.3, v: 0.09, n: [[0, 0, 3], [-1, 4, 2], [0, 6, 2], [2, 8, 6]] },                   /* Bestienmeister: Fagott brummt */
+    jori:   { hit: "amboss", pan: 0.6, v: 0.045, pat: [0, 3, 6, 8, 11, 14] },                                           /* Schmiedelehrling: leises Ambossklingen */
+    lied:   { i: "zit", o: 12, pan: -0.6, v: 0.08, n: [[0, 0, 1], [2, 1, 1], [4, 2, 1], [7, 3, 3], [4, 8, 1], [2, 9, 1], [0, 10, 4]] }, /* Barradin: Zither */
+    alwin:  { i: "klar", o: 12, pan: 0.15, v: 0.07, n: [[4, 0, 3], [3, 4, 2], [2, 6, 2], [1, 8, 4], [0, 12, 4]] },     /* Chronist: Klarinette erzählt */
+    lotte:  { i: "akk", o: 12, pan: 0.5, v: 0.05, chord: true, n: [[0, 2, 1], [0, 6, 1], [0, 10, 1], [0, 14, 1]] },     /* Händlerin: Akkordeon auf den Offbeats */
+    mira:   { i: "stimme", o: 12, pan: 0, v: 0.07, n: [[7, 0, 4], [5, 4, 4], [4, 8, 8]] }                               /* Mira: eine Stimme seufzt */
+  };
+  function lagerInfo() {
+    const o = M._lager; if (o) return { stage: o.stage | 0, res: (o.res || []).filter(id => RESV[id]) };
+    const L = Z.lager; let stage = 0, res = [];
+    try { stage = L && L.stage ? L.stage() | 0 : 0; res = L && L.residents ? L.residents().filter(id => RESV[id]) : []; } catch (_) {}
+    return { stage, res };
+  }
+  function lagerProf(base) {
+    const I = lagerInfo(), p = Object.assign({}, base, { lager: true, lst: I.stage, lres: I.res, rk: 0 });
+    if (I.stage >= 1) p.pad = "ooh";   /* ab „Feuerstellen“: Chor-Teppich */
+    return p;
+  }
+  function lagerPreload(p) {
+    for (const id of p.lres) { const r = RESV[id]; if (r.hit) { A.load(K(r.hit)); continue; } (INST[r.i] || []).forEach(n => { if (Math.abs(n - (p.root + r.o + 5)) < 16) A.load(K(r.i + "_" + n)); }); }
+    if (p.lst >= 2) (INST.kb || []).forEach(n => { if (Math.abs(n - (p.root - 12)) < 10) A.load(K("kb_" + n)); });
+    if (p.lst >= 3) ["rahm_1", "rahm_2"].forEach(n => A.load(K(n)));
+    if (p.lst >= 4) (INST.psab || []).forEach(n => { if (n < p.root + 40) A.load(K("psab_" + n)); });
+  }
+  /* je Schritt im Lager: Stufen-Schichten und die Stimmen der Bewohner */
+  function lagerStep(p, t, st, bar, ph, beat, chord, tone, chordStart, hum) {
+    if (st === 0 && bar % 8 === 0) { const I = lagerInfo(); p.lst = I.stage; p.lres = I.res; } /* im Lager gekauft/eingezogen: beim nächsten 8-Takt-Abschnitt hörbar */
+    const S = p.lst;
+    if (S >= 2 && st === 0) playNote("kb", tone(0, p.root - 12), t, 0.12, beat * 3, M.busExp);                       /* Hütten: warmer Bass auf der Eins */
+    if (S >= 3) { if (st === 0) hit("rahm_1", t, 0.16, 0.9, M.busCol); else if (st === 5) hit("rahm_2", t, 0.09, 1, M.busCol); } /* Palisade: Rahmentrommel, Herzschlag */
+    if (S >= 4 && st === 0 && bar % 4 === 0) { playNote("psab", tone(2, p.root + 24), t, 0.04, beat * 24, M.busCol); playNote("psab", tone(0, p.root + 24), t + beat * 2, 0.035, beat * 22, M.busCol); } /* Banner: Psalter schimmert */
+    if (S >= 5 && chordStart && bar % 4 === 0) for (const i of [0, 1, 2]) playNote("aah", tone(i, p.root + 12), t, 0.04, beat * 30, M.busExp); /* Feste: Chor öffnet sich */
+    /* Bewohner: zu Beginn jeder Phrase ist einer dran (der Reihe nach); in Atempausen der Handpan voll, sonst manchmal leise dazu */
+    if (ph === 0 && p.lres.length) {
+      const id = p.lres[p.rk++ % p.lres.length], r = RESV[id], solo = !M.phrase;
+      if (!solo && Math.random() > 0.35) return;
+      const vk = solo ? 1 : 0.55; M.stats.lagerStimme = M.stats.lagerStimme || {}; M.stats.lagerStimme[id] = (M.stats.lagerStimme[id] || 0) + 1;
+      if (r.hit) { for (const s0 of r.pat) hit(r.hit, t + s0 * beat + rnd(-0.004, 0.006), r.v * vk * (s0 % 8 === 0 ? 1.3 : 1), 1.02 + rnd(-0.02, 0.02), M.busCol); return; }
+      for (const [d, s0, l] of r.n) {
+        const at = t + s0 * beat + rnd(-0.004, 0.008);
+        if (r.chord) { for (const i of [0, 1, 2]) playNote(r.i, tone(i, p.root + r.o), at, r.v * vk, beat * l * 0.9, M.busCol); }
+        else playNote(r.i, deg(p.scale, chord + d, p.root + r.o), at, r.v * vk, beat * l * 1.3 + 0.1, M.busCol);
+      }
+    }
+  }
   function profFor(key) {
+    if (key === "lager") return lagerProf(PROF.lager);
     if (key.startsWith("b:")) { const [, b, base] = key.split(":"); return Object.assign({}, PROF[base], BOSSP[b], { boss: true, bossId: b, base }); }
     return PROF[key] || PROF.torhof;
   }
@@ -555,6 +611,7 @@
     if (M.colF) M.colF.frequency.setTargetAtTime(prof.colLP || 20000, now, 0.3);
     if (M.wav) { M.wav.amp.gain.setTargetAtTime(prof.water ? 0.15 * prof.water : 0, now, 1); M.wav.flt.gain.setTargetAtTime(prof.water ? 380 * prof.water : 0, now, 1); }
     M.whaleT = 2;
+    if (prof.lager) lagerPreload(prof);
     if (!sameLevel && !M.ruheFix) { M.ruheA = null; M.ruheB = null; pickRuhe("grund"); }
     preload(prof);
     if (prof.boss && sameLevel && !prevBoss) M.stinger("boss");
@@ -673,7 +730,13 @@
   }
 
   /* ---------- Hauptschleife: Zustände, Mischung, Taktgeber ---------- */
+  /* Titelmenü: Ton braucht eine erste Eingabe (Autoplay-Regeln) – die erste Taste/Berührung auf dem Titelbild startet die Titelmusik;
+     wird das Titelbild wieder gezeigt (Lauf aufgegeben), kehrt sie zurück. Das Lager übernimmt beim Start mit der üblichen Überblendung. */
+  const titleOn = () => { const el = document.getElementById("title"); return !!(el && !el.hidden); };
+  const startTitle = () => { if (!titleOn() || !A.init) return; A.init(); if (A.ok && M.id !== "titel") M.set("titel"); };
+  addEventListener("pointerdown", startTitle, true); addEventListener("keydown", startTitle, true);
   M.update = (dt) => {
+    if (A.ok && titleOn() && M.id !== "titel") M.set("titel");
     if (!A.ok || !M.prof || !M.out) return;
     hookSettings();
     const p = M.prof, c = A.ctx, now = c.currentTime, D = DYN[dynMode()];
@@ -846,6 +909,7 @@
       if (chordStart && Math.random() < 0.35) { const upw = Math.random() < 0.6; for (let i = 0; i < 4; i++) playNote(p.col, tone(upw ? i : 3 - i, p.root + 12), t + i * beat * 0.5, 0.11 - i * 0.012, beat * 4, M.busCol); }
       else if (!M.phrase && (st === 2 || st === 5) && Math.random() < 0.18) playNote(p.col, deg(p.scale, pick([0, 2, 4, 7, 9]) + chord, p.root + 19), hum(), 0.08, beat * 5, M.busCol);
     }
+    if (p.lager && tr <= 1) lagerStep(p, t, st, bar, ph, beat, chord, tone, chordStart, hum);
     /* Melodie (Leitmotiv-Noten tragen „semi“: Halbtöne über dem Grundton, auch chromatisch) */
     if (M.phrase) {
       for (const n of M.phrase) if (n.s === ph) {

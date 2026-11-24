@@ -2976,7 +2976,9 @@
   function impulse(x, y, s, dir) {
     if (Z.level !== lvRef || !props.length) return;
     const R = 70 + s * 90;
-    for (const p of props) {
+    let list = props;
+    if (auCull()) { list = near(x - R - 30, x + R + 30); pruef(list, p => { const d = K[p.kind]; if (!d || d.crit) return false; const X = p.x * T + 8, Y = p.L === 2 || p.L === 4 ? p.y * T : (p.y + 1) * T; return Math.hypot(X - x, Y - 8 - y) <= R + 30; }); }
+    for (const p of list) {
       const X = p.x * T + 8, Y = p.L === 2 || p.L === 4 ? p.y * T : (p.y + 1) * T, dx = X - x, dy = Y - 8 - y, dist = Math.hypot(dx, dy);
       const d = K[p.kind];
       if (d.crit) { if (dist < 110 + s * 120) scare(p, X, x, s); continue; }
@@ -3142,11 +3144,45 @@
     return false;
   }
 
+  /* ---------- Handheld (lean): Raster über die Lage der Requisiten ----------
+     Treffer, Stöße und Berührung fragen nur die Spalten (64 px) um den Wirkbereich ab statt aller 100–400 Requisiten.
+     Rand M = größte Ausdehnung einer Requisite um ihren Ankerpunkt (samt Schwingen) + 8 px; Tiere (bewegen sich) sind immer dabei.
+     Prüfschalter Z.ausCull (sonst folgt er Z.gq.lean); Z.ausPruef zählt Fehlgriffe. */
+  const auCull = () => (Z.ausCull != null ? Z.ausCull : !!(Z.gq && Z.gq.lean));
+  let IX = null, qStamp = 0;
+  function index() {
+    if (IX && IX.ref === props && IX.n === props.length) return IX;
+    const cols = new Map(), crit = []; let M = 0;
+    props.forEach((p, i) => {
+      p._ix = i; const d = K[p.kind]; if (!d) return;
+      if (d.crit) { crit.push(p); return; }
+      const X = p.x * T + 8, r = rectOf(p);
+      if (r) M = Math.max(M, X - r.x, r.x + r.w - X, (Math.abs(r.y - r.Y) + Math.abs(r.y + r.h - r.Y)) / 2 + Math.max(X - r.x, r.x + r.w - X));
+      const c = Math.floor(X / 64); let l = cols.get(c); if (!l) cols.set(c, (l = [])); l.push(p);
+    });
+    return (IX = { ref: props, n: props.length, cols, crit, M: M + 8 });
+  }
+  /* Kandidaten für den waagrechten Bereich x0…x1 (Ankerpunkte); Reihenfolge: Tiere, dann Spalten (die Reihenfolge ändert nur,
+     welcher Splitter/Klang zuerst entsteht – nicht, was getroffen wird) */
+  function near(x0, x1) {
+    const I = index(), st = ++qStamp, out = [];
+    for (const p of I.crit) { p._qs = st; out.push(p); }
+    for (let c = Math.floor((x0 - I.M) / 64), c1 = Math.floor((x1 + I.M) / 64); c <= c1; c++) { const l = I.cols.get(c); if (l) for (let i = 0; i < l.length; i++) { const p = l[i]; if (p._qs !== st) { p._qs = st; out.push(p); } } }
+    return out;
+  }
+  /* Selbstprüfung: hätte die volle Liste etwas getroffen, das die Vorauswahl nicht enthält? */
+  function pruef(list, test) {
+    const PR = Z.ausPruef; if (!PR) return; const has = new Set(list); PR.n++;
+    for (const p of props) if (!has.has(p) && test(p)) PR.fehl++;
+  }
+
   /* ---------- Treffer verteilen ---------- */
   function hitArea(r, o) {
     if (Z.level !== lvRef || !props.length || !r) return 0;
     let n = 0;
-    for (const p of props) {
+    let list = props;
+    if (auCull()) { list = near(r.x, r.x + r.w); pruef(list, p => { const d = K[p.kind]; if (!d || p.broken || d.crit) return false; const pr = rectOf(p); return !!pr && ov(r, pr); }); }
+    for (const p of list) {
       if (p.broken || K[p.kind].crit) { if (K[p.kind].crit && !p.broken) { const X = p.x * T + 8 + (p.rx || p.cx || 0), Y = p.L === 4 ? p.y * T + (p.l || 10) : (p.y + 1) * T - 4; if (X > r.x - 6 && X < r.x + r.w + 6 && Y > r.y - 8 && Y < r.y + r.h + 8) hitCritter(p, X, Y, o); } continue; }
       const pr = rectOf(p); if (!pr || !ov(r, pr)) continue;
       if (o.set) { if (o.set.has(p)) continue; o.set.add(p); }
@@ -3222,7 +3258,8 @@
   function playerTouch(dt) {
     const P = Z.player; if (!P || P.dead) return;
     const pr = { x: P.x, y: P.y, w: P.w, h: P.h }, mv = Math.abs(P.vx || 0);
-    for (const p of props) {
+    const list = auCull() ? near(P.x, P.x + P.w) : props;
+    for (const p of list) {
       if (p.broken) continue; const d = K[p.kind]; if (d.crit) continue;
       if (!p.sw && !(d.at === "f" && mv > 60)) continue;
       const r = rectOf(p); if (!r || !ov(pr, r)) continue;
@@ -3236,15 +3273,27 @@
       if (cfg && cfg.cut && mv > 40 && !p.cut) { p.bend = sgn(P.vx); p.bendT = TT; }
     }
   }
+  let physN = 0, UNR = [];
   function physics(dt) {
     const g = 900;
-    /* Wackeln und Schwingen */
-    for (const p of props) {
+    /* Wackeln und Schwingen. Handheld: ruhende Requisiten außerhalb des Bildes werden übersprungen – gerechnet werden die im Bild
+       (Rand 32 px + Ausdehnung) und alle, die sich noch bewegen (UNR); jeder 8. Schritt geht die ganze Liste durch und sammelt UNR neu */
+    let list = props, cullP = auCull() && Z.cam;
+    if (cullP) {
+      physN++;
+      if (physN % 8 === 0) { UNR = []; }
+      else { const cam = Z.cam; list = near(cam.x - 32, cam.x + cam.w + 32); const st = qStamp; for (const p of UNR) if (p._qs !== st) { p._qs = st; list.push(p); } }
+    }
+    const unr = cullP ? [] : null;
+    for (const p of list) {
+      if (unr && !(p.fla > 0) && !(p.shk > 0) && !p.wv && !p.wob && (!p.sw || p.broken || (Math.abs(p.sw.va) < 1e-4 && Math.abs(p.sw.a - p.sw.rest) < 1e-4)) && (!p.fst || p.fst.every(st => !st || (Math.abs(st.v) < 1e-4 && Math.abs(st.l) < 1e-4)))) continue;
+      if (unr) unr.push(p);
       if (p.fla > 0) p.fla -= dt; if (p.shk > 0) p.shk -= dt;
       if (p.wv || p.wob) { p.wv = (p.wv || 0) + (-(p.wob || 0) * 260 - p.wv * 9) * dt; p.wob = clamp((p.wob || 0) + p.wv * dt, -0.35, 0.35); if (Math.abs(p.wob) < 0.0005 && Math.abs(p.wv) < 0.005) { p.wob = 0; p.wv = 0; } }
       const s = p.sw; if (s && !p.broken) { s.va += (-(s.a - s.rest) * s.k - s.va * s.c) * dt; s.a = clamp(s.a + s.va * dt, -1.2, 1.2); }
       if (p.fst) for (const st of p.fst) if (st) { st.v += (-st.l * 60 - st.v * 7) * dt; st.l = clamp(st.l + st.v * dt, -1.6, 1.6); }
     }
+    if (unr) UNR = unr;
     /* Stücke */
     let rest = 0;
     for (let i = PCS.length - 1; i >= 0; i--) {
@@ -3388,6 +3437,7 @@
   Z.ausSchein = (x, y, r, al, k) => { const a = cx0, b = cy0, f = cf0, v = cvis; cx0 = x; cy0 = y; cf0 = 1; cvis = Z.sightAt ? Math.min(1, Z.sightAt(x, y - 6) * 1.4) : 1; glow(0, 0, r, al, k); cx0 = a; cy0 = b; cf0 = f; cvis = v; };
   Z.ausLicht = (x, y, r, al) => { const a = cx0, b = cy0, f = cf0; cx0 = x; cy0 = y; cf0 = 1; hole(0, 0, r, al); cx0 = a; cy0 = b; cf0 = f; };
   Z.ausstattung = () => props;
+  Z._ausIX = () => { const I = index(); return { M: I.M, cols: I.cols.size, crit: I.crit.length, n: I.n }; };
   /* Prüfhilfe: einzelnes Stück an den Ursprung malen */
   Z._aus = { K, SETS, SCN, spriteOf, SPR, FGD, fgSprite, paint: (c, kind, v, f, t) => { FQn = GQn = HQn = 0; cvis = 1; const p = { kind, v: v || 0, s: (v || 0) / 3 + 0.1, f: f || 1, x: 0, y: 0, ra: -40, rb: 40, fall: 60 }; paint(c, p, t || 0, 0, 0); flush(c, t || 0); }, flushNow: flush };
 })();
