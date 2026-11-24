@@ -535,7 +535,7 @@
        · flache Räume: eine Bodengruppe auf einen Sims (springt gestaffelt herab)
        · in Räumen mit Bodenfalle: eine Nahkampfgruppe 2–5 Kacheln HINTER die Falle (vom Eingang aus gesehen) – die Falle wird Teil des Kampfs
      Fair: nur erreichbare Plätze, Abstand zum Eingang, höchstens 2 Umstellungen je Raum. */
-  const AU = { an: true, fernAnteil: 0.6 };
+  const AU = { an: true, fernAnteil: 0.6, fernAnteilFrueh: 0.35 /* W9 R19 */ };
   Z.aufstellung = AU;
   function aufstellung(lv) {
     if (!AU.an || !lv || lv.hub || lv.arena || lv.passage || !lv.cells) return;
@@ -564,7 +564,7 @@
       for (const g of groups) {
         if (n >= 2) break; const d = g.es[0].def; if (!(d.ai === "ranged" || d.ai === "caster") || d.fly) continue;
         const fy = Math.floor((g.hy - 2) / T); if (floor - fy >= 3) continue;
-        if (Math.random() > AU.fernAnteil) continue;
+        if (Math.random() > (((Z.BIOMES[lv.biome] || {}).tier || 0) <= 2 ? AU.fernAnteilFrueh : AU.fernAnteil)) continue; /* W9 R19: Stufe 0–2 weniger Simsschützen (frühe Tode frischer Läufe seit v=96 ×5) */
         const sp = [];
         for (let y = Math.max(c.y * CH + 1, floor - 7); y <= floor - 3; y++) for (let x = c.x * CW + 2; x < c.x * CW + CW - 2; x++) {
           if (!frei(x, y)) continue;

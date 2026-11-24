@@ -221,12 +221,35 @@
     return head + name + pips + '<table class="werte">' + rows + "</table>" + runeNote +
       '<button data-act="smForge" data-arg="' + s + '" data-hand="' + s + '" data-hotkey="' + s + '"' + (ok ? "" : " disabled") + ">" + keyHint(s) + " " + L(["Aufwerten auf +", "Upgrade to +"]) + (p + 1) + ' <small class="kosten"><span class="' + (P.gold >= c.gold ? "" : "fehlt") + '">' + c.gold + ' ●</span> <span class="' + ((P.glut || 0) >= c.glut ? "" : "fehlt") + '">' + c.glut + " ✦</span></small></button></div>";
   }
+  /* W9 R19 „Umschmieden“: die Hälfte des Plus (abgerundet) einer Waffe geht auf die andere über – die alte Waffe fällt dabei auf +0
+     (Runen bleiben, wo sie sind). Kostet einen Ambossschlag, kein Gold, keine Glut. Hin und her lohnt nicht: jeder Schritt halbiert. */
+  function umPlan() {
+    const P = Z.player; const A1 = P.slots.a1, A2 = P.slots.a2;
+    if (!isWeapon(A1) || !isWeapon(A2)) return null;
+    let best = null;
+    for (const [von, nach] of [["a1", "a2"], ["a2", "a1"]]) { const q = P.slots[von], z = P.slots[nach], h = Math.floor((q.plus || 0) / 2); if (h > (z.plus || 0) && (!best || h - (z.plus || 0) > best.gain)) best = { von, nach, h, gain: h - (z.plus || 0) }; }
+    return best;
+  }
+  function umRow() {
+    const P = Z.player, u = umPlan(); if (!u) return "";
+    const q = P.slots[u.von], z = P.slots[u.nach];
+    return '<div class="gb-um"><button data-act="smUm">' + L(["Umschmieden: ", "Reforge: "]) + esc(Z.itemTitle(q)) + " → " + esc(L(Z.itemDef(z).n)) + " +" + u.h +
+      ' <small>' + L(["(alte Waffe fällt auf +0 · 1 Schlag, kein Gold)", "(old weapon drops to +0 · 1 strike, no gold)"]) + "</small></button></div>";
+  }
+  ui.actions.smUm = () => {
+    const P = Z.player, a = anvilNow, u = umPlan(); if (!a || anim || !u || a.used >= a.charges) return;
+    const q = P.slots[u.von], z = P.slots[u.nach];
+    a.used++; z.plus = u.h; q.plus = 0; Z.stats.umgeschmiedet = (Z.stats.umgeschmiedet || 0) + 1;
+    A.play("anvil", { vol: 0.6 }); Z.recalcPlayer && Z.recalcPlayer();
+    if (a.used >= a.charges) { ui.close(); Z.toast(L(["Umgeschmiedet: ", "Reforged: "]) + esc(Z.itemTitle(z)), 2600); return; }
+    renderAnvil(L(["Umgeschmiedet: ", "Reforged: "]) + esc(Z.itemTitle(z)) + ".");
+  };
   function renderAnvil(note) {
     const P = Z.player, a = anvilNow; if (!a) return;
     const left = a.charges - a.used;
     const html = '<div class="glutamboss"><h2>' + L(["Glutamboss", "Ember Anvil"]) + ' <span class="bank"><span class="gld">' + U.fmt(P.gold) + ' ●</span> <span class="glt">' + (P.glut || 0) + " ✦ " + L(["Glut", "Embers"]) + '</span></span></h2><canvas class="gb-bild" width="640" height="220"></canvas>' +
       '<p class="hinweis">' + (note || L(["Gold und Schmiedeglut machen den Stahl stärker: +15 % Schaden je Stufe, bis +5. Dieser Amboss hält noch ", "Gold and forge embers make steel stronger: +15% damage per level, up to +5. This anvil can take "]) + left + L([left === 1 ? " Schlag aus." : " Schläge aus.", left === 1 ? " more strike." : " more strikes."])) + "</p>" +
-      '<div class="gb-haende">' + handRow("a1") + handRow("a2") + '</div><div class="knoepfe"><button data-act="close" autofocus>' + L(["Fertig", "Done"]) + "</button></div></div>";
+      '<div class="gb-haende">' + handRow("a1") + handRow("a2") + '</div>' + umRow() + '<div class="knoepfe"><button data-act="close" autofocus>' + L(["Fertig", "Done"]) + "</button></div></div>";
     if (ui.modalOpen) { ui.onClose = null; ui.close(); }
     ui.open(html, { cls: "breit", onClose: () => { cancelAnimationFrame(raf); safeFinish(); anvilNow = null; anim = null; } });
     const first = document.querySelector('#modal [data-act="smForge"]:not([disabled])'); if (first) setTimeout(() => first.focus(), 30);
