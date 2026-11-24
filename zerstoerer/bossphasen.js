@@ -644,7 +644,7 @@
         act: (e, P, m) => { m.k = 0; m.s = "aim"; m.st = 0; },
         tick: (e, P, dt, m) => {
           m.st += dt;
-          if (m.s === "aim") { e.vx *= 0.85; e.vy *= 0.85; if (m.st < 0.3) m.aim = { x: pcx(P), y: P.y + 14 }; if (m.st > 0.5) { const a = Math.atan2(m.aim.y - (e.y + 10), m.aim.x - cxOf(e)); m.vx = Math.cos(a) * 470; m.vy = Math.sin(a) * 470; m.s = "dash"; m.st = 0; m.hit = false; A.play("insect", { vol: 0.6 }); } }
+          if (m.s === "aim") { e.vx *= 0.85; e.vy *= 0.85; if (m.st < 0.3) m.aim = { x: pcx(P), y: P.y + 14 }; if (m.st > 0.58 /* W9 12. Runde: 0,5 → 0,58 wie die übrigen Ziellinien-Stöße (0,2 s nach dem Einrasten war unter Reaktionszeit) */) { const a = Math.atan2(m.aim.y - (e.y + 10), m.aim.x - cxOf(e)); m.vx = Math.cos(a) * 470; m.vy = Math.sin(a) * 470; m.s = "dash"; m.st = 0; m.hit = false; A.play("insect", { vol: 0.6 }); } }
           else { e.vx = m.vx; e.vy = m.vy; if (!m.hit) m.hit = melee(e, { x: e.x, y: e.y, w: e.w, h: e.h }, 1.0); if (m.st > 0.4 || e.onGround || e.hitWall) { m.k++; m.s = "aim"; m.st = 0; m.aim = null; e.vy = -120; if (m.k >= 3) m.t = 99; } }
         } },
       /* Blutsauger: Sturz mit Ziellinie; trifft er, heilt die Chasme und der Spieler blutet */

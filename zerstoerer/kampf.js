@@ -631,7 +631,7 @@
         if (Z.flutSicher && Z.flutSicher(P)) { const now = P.time || 0, kampf = (Z.boss && !Z.bossDefeated) || Z.enemies.some(e => !e.dead && e.aware && Math.abs(e.x - P.x) < 260 && Math.abs(e.y - P.y) < 200); frei = !kampf && !(P._flutT != null && now - P._flutT < 8 && now >= P._flutT); if (frei) P._flutT = now; }
         /* W9 11. Runde: übersprungener Schaden (< 1 s nach Rücksetzen) gibt keinen neuen Schutz und verlängert das Fenster nicht – sonst an Dauerwasser-/Lavakanten 100 % geschützt */
         if (frei) { P._flutFrei = true; P._hzSkip = false; } else { P._hzSkip = (P._hzRT != null && (P.time || 0) - P._hzRT >= 0 && (P.time || 0) - P._hzRT < 1); if (!P._hzSkip) Z.hurtPlayer(Math.round(P.hpMax * 0.08), { x: P.x, unblockable: true, hazard: true, force: true }); } }
-      if (P.lastSafe) { P.x = P.lastSafe.x; P.y = P.lastSafe.y; P.h = C.H; P.crouch = false; P.vx = 0; P.vy = 0; if (!P._hzSkip) { P.iframe = Math.max(P.iframe, P._flutFrei ? 0.3 : liquid === 6 ? 0.6 : 1); /* Wasser kostet nur 8 %: kürzerer Schutz, sonst billiger Dauerschutz an der Kante */ P._hzRT = P.time || 0; } P._flutFrei = false; P._hzSkip = false; }
+      if (P.lastSafe) { P.x = P.lastSafe.x; P.y = P.lastSafe.y; P.h = C.H; P.crouch = false; P.vx = 0; P.vy = 0; if (!P._hzSkip) { P.iframe = Math.max(P.iframe, P._flutFrei ? 0.3 : liquid === 6 ? 0.4 : 1); /* Wasser kostet nur 8 %: kürzerer Schutz (W9 R11 0,6, R12 0,4), sonst billiger Dauerschutz an der Kante */ P._hzRT = P.time || 0; } P._flutFrei = false; P._hzSkip = false; }
     }
   }
   function pushOutOfEnemies(P) {
