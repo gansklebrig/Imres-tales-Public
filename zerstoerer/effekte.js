@@ -384,7 +384,7 @@
       y = Math.min(y, H * 0.6);
       c.shadowColor = banner.n >= 5 ? "#ff3a2a" : "#ff9a3a"; c.shadowBlur = fs * 0.5; c.fillStyle = banner.n >= 5 ? "#ffb0a0" : "#ffd8a0";
       c.fillText(banner.txt, x + (Math.random() - 0.5) * (banner.n >= 5 ? 3 : 0), y);
-      c.shadowBlur = 0; c.font = "700 " + Math.round(fs * 0.45) + "px " + (getComputedStyle(document.documentElement).getPropertyValue("--fb") || "sans-serif"); c.fillStyle = "#e8d8c8"; c.fillText("× " + banner.n, x, y + fs * 0.72);
+      c.shadowBlur = 0; c.font = "700 " + Math.round(fs * 0.45) + "px " + (getComputedStyle(document.documentElement).getPropertyValue("--fb") || "sans-serif"); c.fillStyle = "#e8d8c8"; c.fillText("× " + banner.n + (banner.gold ? "  ·  " + banner.gold : ""), x, y + fs * 0.72); /* R43: Gold-Kette aus dem Text-Verwalter */
       c.restore();
     }
   }
@@ -420,6 +420,7 @@
   const load0 = Z.loadArea;
   Z.loadArea = function () { fx = []; ghosts = []; souls = []; chain = { n: 0, t: 0 }; banner = null; lines = null; return load0.apply(this, arguments); };
   (Z.rueckHooks = Z.rueckHooks || []).push({ id: "effekte", load: () => { fx = []; ghosts = []; souls = []; chain = { n: 0, t: 0 }; banner = null; lines = null; } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
+  Z._kettenBanner = () => banner; /* R43: Text-Verwalter hängt „Gold ×…“ an das Kettenband */
 })();
 
 /* Ezekiel – The Destroyer · Kampf-Optik II (Grafik-Runde 11)
@@ -1296,6 +1297,7 @@
   FX.text = function (x, y, txt, col, big) {
     const r = t0.apply(this, arguments);
     try {
+      if (window.Z.texte && window.Z.texte.an()) return r; /* R43: der Text-Verwalter ordnet beim Zeichnen */
       const L = FX.texts, n = L[L.length - 1]; if (!n) return r;
       const cm = window.Z.cam, dir = cm && n.y - cm.y < 40 ? 1 : -1; /* am oberen Bildrand nach unten stapeln */
           for (let k = 0; k < 4; k++) { let hit = false; for (let i = 0; i < L.length - 1; i++) { const o = L[i]; if (o.t < o.life * 0.8 && Math.abs(o.x - n.x) < (n.big || o.big ? 60 : 24) && Math.abs(o.y - n.y) < (n.big || o.big ? 12 : 8)) { n.y = o.y + dir * (n.big || o.big ? 13 : 9); hit = true; } } if (!hit) break; }
@@ -2298,5 +2300,220 @@
       for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const o = y * w + x; let m = tmp[o]; for (let k = 1; k <= 2; k++) { const p = k * 0.2; if (y - k >= 0 && tmp[o - k * w] + p < m) m = tmp[o - k * w] + p; if (y + k < h && tmp[o + k * w] + p < m) m = tmp[o + k * w] + p; } fA[o] = m; }
     }
     return rich ? [30, 19, 12] : [26, 16, 11];
+  };
+})();
+
+/* Ezekiel – The Destroyer · Text-Verwalter für Schwebetexte (W11 Runde 43, Grafik)
+   Im Getümmel stapelten sich Schadenszahlen, „Alarm!“, „Kette 3 · Gold ×1.25“, Boss-Hinweise und Gegnernamen
+   übereinander. Alle Aufrufer bleiben unverändert (FX.text aus kern.js); der Verwalter hängt sich an FX.text und FX.draw:
+   – Einordnen nach Inhalt: Boss-/Lernhinweise (lang, groß) > Schaden an Ezekiel > Heilung/Wichtiges > Schaden an Gegnern
+     > Kette/Gold > Alarm/„!“/„?!“.
+   – Zusammenfassen: Schadenszahlen am selben Ziel (≤0,45 s) werden addiert und ploppen auf; gleiche Texte in der Nähe
+     werden nicht doppelt gezeigt („Alarm! ×3“); „Kette n · Gold ×…“ hängt sich an das Kettenband („Doppelt!“ …) am
+     Bildrand, statt über Ezekiel zu schweben; Alarm-Ringe mehrerer Gegner im selben Augenblick nur einmal.
+   – Ordnen beim Zeichnen: Wichtiges zuerst platziert, alles andere weicht nach oben (am oberen Bildrand nach unten)
+     aus – gleitend, mit Haltewunsch, statt zu springen; Elite-/Nemesis-Namen, Angriffsnamen und Weltschilder (ui.js)
+     sind Hindernisse. Höchstzahl gleichzeitig: Handheld 7, Stufe 0: 9, sonst 12 – der Rest blendet aus.
+   – Gezeichnet nach dem Licht (vorher in FX.drawSmears vor dem Licht: im Dunkeln gedämpft, vom Sichtnebel verdeckt).
+     Boss-Hinweise bleiben etwas länger stehen und steigen langsamer; ab Stufe 1 auf einer dunklen Unterlage.
+   Schalter Z.gfx.off.texte → altes Verhalten. Prüfhilfe Z.texte.dbg(). Kein Blau. */
+(function () {
+  "use strict";
+  const Z = window.Z, FX = Z && Z.fx; if (!FX || !FX.text || !FX.drawSmears) return;
+  const G = Z.gfx;
+  const an = () => !(G && G.off && G.off.texte);
+  const lean = () => !!(Z.gq && (Z.gq.lean || Z.gq.mini));
+  const rich = () => !lean() && (!Z.gq || !(Z.gq.level <= 0));
+  const ALARM = new Set(["!", "?!", "?", "Alarm!", "„Wer da?“", "\"Who's there?\"", "Quiek!", "Squeak!", "Klapper …", "Rattle…"]);
+  const NUM = /^[+\-−]?\d+$/;
+  let seq = 0, last = 0, dbgLast = null;
+  function classify(t) {
+    const s = String(t.txt).trim(); t._b = t._b || ++seq;
+    if (NUM.test(s)) {
+      t._v = Math.abs(parseInt(s.replace("−", "-"), 10)) || 0;
+      if (s[0] === "+") { t._c = "heil"; t._pr = 3; }
+      else if (s[0] === "-" || s[0] === "−") { t._c = "dmgP"; t._pr = 4; }
+      else { t._c = "dmgE"; t._pr = t.big ? 3 : 2; }
+    } else if (s === "—") { t._c = "dmgE"; t._pr = 1.5; t._v = -1; }
+    else if (ALARM.has(s)) { t._c = "alarm"; t._pr = 1; }
+    else if (/^(Kette|Chain) \d/.test(s)) { t._c = "kette"; t._pr = 1.5; }
+    else if (t.big && s.length >= 14) { t._c = "hinweis"; t._pr = 5; }
+    else { t._c = "info"; t._pr = t.big ? 3.5 : 2.5; }
+  }
+  /* ---------- Entstehen: einordnen, zusammenfassen, Lebensdauer für Hinweise ---------- */
+  const t0 = FX.text;
+  FX.text = function (x, y, txt, col, big) {
+    const L = FX.texts, n0 = L.length, r = t0.apply(this, arguments);
+    if (!an()) return r;
+    try {
+      const n = L[L.length - 1]; if (!n || n.t !== 0 || n.txt !== String(txt) || (L.length === n0 && n0 < 60)) return r;
+      classify(n);
+      const s = n.txt.trim();
+      if (n._c === "kette") {
+        const b = Z._kettenBanner && Z._kettenBanner();
+        if (b && b.t < 1.05) { b.gold = s.replace(/^[^·]*·\s*/, ""); if (b.t > 0.55) b.t = 0.55; L.pop(); return r; }
+      }
+      for (let i = L.length - 2; i >= 0; i--) {
+        const o = L[i]; if (o._pr == null) classify(o);
+        if (o._c !== n._c || o.t > o.life * 0.75) continue;
+        if ((n._c === "dmgE" || n._c === "dmgP" || n._c === "heil") && n._v > 0 && o._v > 0) {
+          if (o.col !== n.col || o.t > 0.45 || Math.abs(o.x - n.x) > 18 || Math.abs((o.y0 != null ? o.y0 : o.y) - n.y) > 30) continue;
+          o._v += n._v; o.txt = (n._c === "heil" ? "+" : n._c === "dmgP" ? "-" : "") + o._v; o.t = Math.min(o.t, 0.1); o.vy = Math.min(o.vy, n.vy * 0.6);
+          o._bump = 0.16; o.big = o.big || n.big; if (n.big && o._pr < 3) o._pr = 3; L.pop(); return r;
+        }
+        if (o.txt === n.txt && Math.abs(o.x - n.x) < 150 && Math.abs(o.y - n.y) < 90) {
+          o._n = (o._n || 1) + 1; o.t = Math.min(o.t, 0.15);
+          if (s === "Alarm!") o.txt = s + " ×" + o._n;
+          L.pop(); return r;
+        }
+      }
+      n.y0 = n.y;
+      if (n._c === "hinweis") { n.life = Math.min(2.6, 1.15 + s.length * 0.028); n.vy = -20; }
+      /* zu viele Nebensachen: die älteste geht */
+      let low = 0; for (const o of L) if (o._pr <= 1.5) low++;
+      if (low > 5) { const i = L.findIndex(o => o._pr <= 1.5); if (i >= 0 && L[i] !== n) L.splice(i, 1); }
+    } catch (e) { console.error(e); }
+    return r;
+  };
+  /* Alarm-Ringe: rufen mehrere Gegner im selben Augenblick, nur ein Ringpaar je Stelle */
+  const r0 = FX.ring;
+  if (r0) FX.ring = function (x, y, r, col, life) {
+    if (an() && (col === "#ffb070" && r === 30 || col === "#ff8a5a" && r === 18)) {
+      for (const o of FX.rings) if (o.col === col && o.r === r && o.t < 0.25 && Math.abs(o.x - x) < 110 && Math.abs(o.y - y) < 60) return;
+    }
+    return r0.apply(this, arguments);
+  };
+  /* ---------- Zeichnen: Original ohne Texte, die Texte selbst nach dem Licht ---------- */
+  const EMPTY = [];
+  const d0 = FX.drawSmears; /* kern.js zeichnet die Schwebetexte am Ende von FX.drawSmears */
+  if (d0) FX.drawSmears = function (c) {
+    if (!an()) return d0.apply(this, arguments);
+    const keep = FX.texts; FX.texts = EMPTY;
+    try { return d0.apply(this, arguments); } finally { FX.texts = keep; if (EMPTY.length) { for (const t of EMPTY) keep.push(t); EMPTY.length = 0; } }
+  };
+  const FONT = sz => "800 " + sz + "px 'Alegreya Sans',sans-serif";
+  /* Trefferwucht lesbar: gesammelte Schadenszahlen wachsen mit der Summe (ab Stufe 1; Handheld/Stufe 0 fest) */
+  const szOf = t => { const b0 = t.big ? 11 : 8; if (t._c !== "dmgE" || !(t._v > 0) || !rich()) return b0; return Math.min(t.big ? 13 : 11, b0 + Math.max(0, Math.log2(t._v / 12)) * 1.1); };
+  function obstacles(cam) {
+    const out = [];
+    try { const lr = Z.ui && Z.ui.labelRects && Z.ui.labelRects(); if (lr) for (const b of lr) out.push(b); } catch (_) {}
+    for (const e of Z.enemies || []) {
+      if (e.dead || e.hidden > 0 || e.disguise) continue;
+      const cx = e.x + e.w / 2; if (cx < cam.x - 60 || cx > cam.x + cam.w + 60 || e.y < cam.y - 60 || e.y > cam.y + cam.h + 40) continue;
+      if (e.elite && !(e.def && e.def.boss)) { const hw = Math.max(16, e.w + 4) * 0.5 + 18; out.push({ x0: cx - hw, y0: e.y - 18, x1: cx + hw, y1: e.y - 8 }); }
+      const ac = e.act; if (ac && ac.a && ac.a.name && ac.phase !== "post") { const yy = e.y - (e.elite ? 22 : 14); out.push({ x0: cx - 26, y0: yy - 7, x1: cx + 26, y1: yy + 2 }); }
+      if (e.nmPlate) { const p = e.nmPlate, top = e.y - 31; out.push({ x0: cx - p.w / 2, y0: top, x1: cx + p.w / 2, y1: top + p.h + 4 }); }
+    }
+    return out;
+  }
+  const hit = (b, L) => { for (const o of L) if (b.x0 < o.x1 && b.x1 > o.x0 && b.y0 < o.y1 && b.y1 > o.y0) return true; return false; };
+  function layout(c, L, dt, cam) {
+    const LN = lean(), MAX = LN ? 7 : Z.gq && Z.gq.level === 0 ? 9 : 12;
+    const vis = [];
+    for (const t of L) {
+      if (t._pr == null) classify(t);
+      if (t.x < cam.x - 80 || t.x > cam.x + cam.w + 80 || t.y < cam.y - 60 || t.y > cam.y + cam.h + 60) continue;
+      vis.push(t);
+    }
+    vis.sort((a, b) => b._pr - a._pr || a._b - b._b);
+    const obs = obstacles(cam), placed = [];
+    let shown = 0, fs = 0;
+    for (const t of vis) {
+      const sz = szOf(t);
+      if (t._wt !== t.txt || t._ws !== sz) { if (fs !== sz) { c.font = FONT(sz); fs = sz; } t._w = c.measureText(t.txt).width; t._wt = t.txt; t._ws = sz; }
+      const w = t._w + 3, h = sz + 1, hw = w / 2;
+      let tA = 1, tgt = t._ty != null ? t._ty : 0;
+      if (shown >= MAX) { tA = 0; if ((t._a || 0) < 0.05) t.t = Math.max(t.t, t.life * 0.92); }
+      else {
+        const bx = Math.max(cam.x + hw + 2, Math.min(cam.x + cam.w - hw - 2, t.x));
+        t._bx = bx;
+        const dir = t.y - cam.y < h * 2 + 6 ? 1 : -1, step = h + 1;
+        const sd = hw + 7, kurz = w < 44, tries = [];
+        if (t._ty != null) tries.push([t._tx || 0, t._ty]);
+        tries.push([0, 0], [0, dir * step]);
+        if (kurz) tries.push([-sd, 0], [sd, 0]);
+        tries.push([0, dir * 2 * step]);
+        if (kurz) tries.push([-sd, dir * step], [sd, dir * step]);
+        tries.push([0, dir * 3 * step], [0, -dir * step], [0, dir * 4 * step], [0, -dir * 2 * step]);
+        let ok = false, box = null, tx = 0;
+        for (const [ox, oy] of tries) {
+          const yy = t.y + oy, xx = Math.max(cam.x + hw + 2, Math.min(cam.x + cam.w - hw - 2, bx + ox));
+          if (yy - sz < cam.y + 1 || yy > cam.y + cam.h - 2) continue;
+          box = { x0: xx - hw, y0: yy - sz, x1: xx + hw, y1: yy + 2 };
+          if (!hit(box, placed) && !(t._pr < 5 && hit(box, obs))) { tx = xx - bx; tgt = oy; ok = true; break; }
+        }
+        if (!ok) { tx = 0; if (t._pr < 3) tA = 0; else { tgt = dir * step; box = { x0: bx - hw, y0: t.y + tgt - sz, x1: bx + hw, y1: t.y + tgt + 2 }; } }
+        if (tA > 0) { placed.push(box); shown++; }
+        t._tx = tx;
+      }
+      if (t._oy == null) { t._oy = tgt; t._ox = t._tx || 0; t._a = tA; }
+      t._ty = tgt;
+      const kk = Math.min(1, dt * 16); t._oy += (tgt - t._oy) * kk; t._ox += ((t._tx || 0) - t._ox) * kk; t._a += (tA - t._a) * Math.min(1, dt * 12);
+    }
+    return vis;
+  }
+  function drawTexts(c, cam) {
+    const L = FX.texts; if (!L.length) return;
+    const now = performance.now(), raw = Math.min(0.05, (now - (last || now)) / 1000); last = now;
+    const dt = Z.paused || (Z.ui && Z.ui.modalOpen) ? 0 : raw;
+    c.save();
+    const vis = layout(c, L, dt, cam), R = rich();
+    c.textAlign = "center"; c.textBaseline = "alphabetic"; c.lineJoin = "round";
+    let fs = 0;
+    /* unwichtiges zuerst, Wichtiges obenauf */
+    for (let i = vis.length - 1; i >= 0; i--) {
+      const t = vis[i], k = t.t / t.life, fa = (k > 0.7 ? (1 - k) / 0.3 : 1) * (t._a == null ? 1 : t._a);
+      if (fa <= 0.02) continue;
+      if (t._bump > 0) t._bump = Math.max(0, t._bump - dt);
+      const pop = (t.t < 0.08 ? 1 + (0.08 - t.t) * 8 : 1) * (1 + (t._bump || 0) * 1.6);
+      const sz = szOf(t), x = (t._bx != null ? t._bx : t.x) + (t._ox || 0), y = t.y + (t._oy || 0);
+      c.globalAlpha = fa;
+      if (R && t._pr >= 5) {
+        const w = (t._w || sz * t.txt.length * 0.5) + 8, h = sz + 5;
+        c.fillStyle = "rgba(18,10,8,.52)"; c.beginPath(); if (c.roundRect) c.roundRect(x - w / 2, y - sz - 1, w, h, 3); else c.rect(x - w / 2, y - sz - 1, w, h); c.fill();
+        c.fillStyle = "rgba(255,200,120,.22)"; c.fillRect(x - w / 2 + 3, y + 3.2, w - 6, 0.6);
+      }
+      const fz = Math.round(sz * pop * 2) / 2;
+      if (fz !== fs) { c.font = FONT(fz); fs = fz; }
+      c.lineWidth = 2.5; c.strokeStyle = "rgba(0,0,0,.85)"; c.strokeText(t.txt, x, y); c.fillStyle = t.col; c.fillText(t.txt, x, y);
+    }
+    c.restore(); c.globalAlpha = 1;
+    dbgLast = vis.map(t => ({ txt: t.txt, c: t._c, pr: t._pr, a: +(t._a || 0).toFixed(2), x: Math.round((t._bx || t.x) + (t._ox || 0)), y: Math.round(t.y + (t._oy || 0)) }));
+  }
+  function reg() {
+    const al0 = Z.drawAfterLight;
+    Z.drawAfterLight = function (c, cam) {
+      if (al0) al0.apply(this, arguments);
+      if (!an()) return;
+      try { drawTexts(c, cam || Z.cam); } catch (e) { console.error(e); }
+    };
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", reg); else setTimeout(reg, 0);
+  Z.texte = { an, dbg: () => dbgLast, n: () => FX.texts.length };
+
+  /* ---------- Einschlag einer Zonen-Gefahr („mark“-Angriffe, Boss-Zonen; geschosse.js ruft Z.zonenBlitz) ----------
+     Vorher: 0,3 s ein flaches, additives Rechteck in Orange hinter Ezekiel. Jetzt: weicher Lichtvorhang vom Boden nach
+     oben, seitlich ausgeblendet, darunter ein heller Bodenstreif (ab Stufe 1). Sprite je Farbe, auch Stufe 0 billig. */
+  const ZS = new Map(), PC = document.createElement("canvas").getContext("2d");
+  function zoneSpr(col) {
+    let cv = ZS.get(col); if (cv) return cv;
+    PC.fillStyle = "#ffb040"; PC.fillStyle = col || "#ffb040"; let s = PC.fillStyle, rgb = "255,176,64";
+    if (s[0] === "#") { const n = parseInt(s.slice(1), 16); rgb = (n >> 16) + "," + ((n >> 8) & 255) + "," + (n & 255); } else { const m = /rgba?\(([^)]*)\)/.exec(s); if (m) rgb = m[1].split(",").slice(0, 3).map(v => +v | 0).join(","); }
+    cv = document.createElement("canvas"); cv.width = 32; cv.height = 32; const g = cv.getContext("2d");
+    const v = g.createLinearGradient(0, 0, 0, 32); v.addColorStop(0, "rgba(" + rgb + ",0)"); v.addColorStop(0.45, "rgba(" + rgb + ",.42)"); v.addColorStop(0.85, "rgba(" + rgb + ",.85)"); v.addColorStop(1, "rgba(" + rgb + ",1)");
+    g.fillStyle = v; g.fillRect(0, 0, 32, 32);
+    g.globalCompositeOperation = "destination-in";
+    const hz = g.createLinearGradient(0, 0, 32, 0); hz.addColorStop(0, "rgba(0,0,0,0)"); hz.addColorStop(0.22, "rgba(0,0,0,1)"); hz.addColorStop(0.78, "rgba(0,0,0,1)"); hz.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = hz; g.fillRect(0, 0, 32, 32);
+    if (ZS.size > 24) ZS.clear(); ZS.set(col, cv); return cv;
+  }
+  Z.zonenBlitz = function (c, h, at) {
+    if (G && G.off && G.off.zonenblitz) return false;
+    const k = 1 - at / 0.3; if (k <= 0) return true;
+    const hh = h.hgt || 30, x0 = h.x - h.w / 2, top = h.y - hh, ext = Math.min(10, hh * 0.3);
+    c.globalCompositeOperation = "lighter";
+    c.globalAlpha = Math.min(1, k * 1.15); c.drawImage(zoneSpr(h.col || "#ffb040"), x0 - 4, top - ext, h.w + 8, hh + ext + 1);
+    if (rich() && Z.glowSprite) { c.globalAlpha = k; const gs = Z.glowSprite(h.col && h.col[0] === "#" ? h.col : "#ffb040"); c.drawImage(gs, x0 - 8, h.y - 6, h.w + 16, 10); c.drawImage(gs, h.x - h.w * 0.3, h.y - 3, h.w * 0.6, 5); }
+    return true;
   };
 })();

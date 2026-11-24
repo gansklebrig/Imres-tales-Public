@@ -410,6 +410,7 @@
           c.fillStyle = g; c.fillRect(h.x - h.w / 2, h.y - hh, h.w, hh); break;
         }
         case "zone": {
+          if (at < 0.3 && Z.zonenBlitz && Z.zonenBlitz(c, h, at)) break; /* W11 R43 (Grafik): weicher Einschlag statt flachem Orange-Rechteck (effekte.js) */
           if (at < 0.3) { c.globalCompositeOperation = "lighter"; c.globalAlpha = 1 - at / 0.3; c.fillStyle = h.col || "#ffb040"; c.fillRect(h.x - h.w / 2, h.y - (h.hgt || 30), h.w, h.hgt || 30); }
           break;
         }

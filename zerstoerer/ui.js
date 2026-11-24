@@ -466,6 +466,18 @@
       if (!off) placeAt(l.el, l.x, l.y, l.dy);
     }
   }
+  /* W11 R43 (nur Optik): sichtbare Weltschilder als Rechtecke in Weltkoordinaten – Schwebetexte (effekte.js,
+     Text-Verwalter) weichen ihnen aus. Zwischengespeichert (≤ alle 120 ms neu gemessen). */
+  let lrT = 0, lrC = [];
+  ui.labelRects = () => {
+    const now = performance.now(); if (now - lrT < 120) return lrC; lrT = now; lrC = [];
+    const cv = document.getElementById("cv"), cam = Z.cam; if (!cv || !cam || !labels.size) return lrC;
+    const b = cv.getBoundingClientRect(); if (!(b.width > 0)) return lrC;
+    const kx = cam.w / b.width, ky = cam.h / b.height;
+    for (const [, l] of labels) { if (l.el.classList.contains("aus")) continue; const r = l.el.getBoundingClientRect(); if (!(r.width > 0)) continue;
+      lrC.push({ x0: cam.x + (r.left - b.left) * kx, y0: cam.y + (r.top - b.top) * ky, x1: cam.x + (r.right - b.left) * kx, y1: cam.y + (r.bottom - b.top) * ky }); }
+    return lrC;
+  };
   ui.clearLabels = () => { for (const [, l] of labels) l.el.remove(); labels.clear(); for (const w of worldNotes) w.el.remove(); worldNotes = []; };
 
   /* Z.toast bleibt für alle Module: Priorität und Farbe aus dem Inhalt schätzen */
