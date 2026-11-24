@@ -542,12 +542,12 @@ const SND={
  note:()=>{const m=arpTon();harfeTon(m,0.28,1.1)||tone(mtof(m),0.16,'triangle',0.04)},
  bstab:()=>{SND.stab();const m=arpTon()-12;harfeTon(m,0.15,0.55)||tone(mtof(m),0.1,'triangle',0.03)},
  bcrit:()=>{const {L,grund}=akkLage(62,86);const top=L.slice(0,4);top.forEach((m,i)=>harfeTon(m,0.24,1.6,i*0.035));let g=grund;while(g<79)g+=12;smp(g>=91?'glock_96':'glock_91',0.14,{r:Math.pow(2,(g-(g>=91?96:91))/12),d:0.12,len:1.4})||bell(mtof(g),0.5,0.04,0.12);thump(190,60,0.1,0.12)},
- stab:()=>{whoosh(0.11,3200,1100,0.2,1.6);smp('clave1',0.06,{r:1.6,len:0.1});thump(300,120,0.05,0.05)},
+ stab:()=>{whoosh(0.11,3200,1100,0.2,1.6);smp('clave1',0.06,{r:akkF(101,106)/2018,len:0.1});thump(300,120,0.05,0.05)},
  slash:()=>{const f=akkF(76,88);whoosh(0.16,f*1.5,f*0.38,0.24,1.3);nz(0.05,'highpass',5000,null,0.04);tone(akkF(88,100),0.09,'sine',0.009)},
  claw:()=>{const f=akkF(62,74);whoosh(0.2,f*2.2,f*0.55,0.34,1.1);smp('bodh2',0.12,{r:0.8,len:0.3});const g=akkF(38,50);thump(g*2,g,0.12,0.12)},
  cleave:()=>{whoosh(0.34,1500,180,0.42,0.8);smp('bd',0.3,{r:1.3,len:0.6});thump(110,40,0.25,0.25)},
  thorn:()=>{const f=akkF(84,96);whoosh(0.1,f*1.1,f*0.5,0.11,2.4);tone(akkF(67,79),0.07,'sine',0.02)},
- bow:()=>{const f=akkF(86,98);whoosh(0.13,f*1.2,f*0.42,0.15,2.4);smp('clave1',0.08,{r:1.5,len:0.12});const g=akkF(50,62);tone(g,0.11,'triangle',0.055,g*0.66);tone(g*2,0.06,'sine',0.018)},
+ bow:()=>{const f=akkF(86,98);whoosh(0.13,f*1.2,f*0.42,0.15,2.4);smp('clave1',0.08,{r:akkF(100,105)/2018,len:0.12});const g=akkF(50,62);tone(g,0.11,'triangle',0.055,g*0.66);tone(g*2,0.06,'sine',0.018)},
  throw:()=>{const f=akkF(88,100);whoosh(0.1,f*1.3,f*0.65,0.13,2.4);bell(akkF(91,103),0.07,0.008)},
  hit:()=>{smp(pick(['holz1','holz2']),0.045,{r:0.6+Math.random()*0.2,len:0.12});const g=akkF(43,55);thump(g*1.3,g*0.5,0.08,0.12);nz(0.06,'lowpass',2200,500,0.07)},
  crit:()=>{if(P&&P.id==='barradin')return SND.bcrit();thump(200,50,0.12,0.2);nz(0.05,'highpass',3000,null,0.12);const {L}=akkLage(84,96);bell(mtof(L[0]||88),0.3,0.035);whoosh(0.12,5000,2000,0.08,2)},
@@ -16977,15 +16977,15 @@ function slBarHtml(mode){const a=SPL.ask,n=SPL.sel,s=n?slSum(n):null;
  if(mode==='new')return`<div class="slbar"><div class="msg">Wähle einen Platz für das neue Abenteuer. Belegte Plätze werden nach Rückfrage überschrieben.</div><button class="slbtn" data-act="sl-back">‹ Zurück</button></div>`;
  return`<div class="slbar"><div class="msg">${s?`<b>${esc(s.m.n)}</b> – ${esc(HEROES[s.h].name)}, Stufe ${s.lv}${s.run?' · '+esc(s.run):''} · ${fmt(s.gold)} Gold`:'Wähle einen Spielstand.'}</div>
   <button class="slbtn" data-act="sl-back">‹ Zurück</button>${s?`<button class="slbtn" data-act="sl-ren">Umbenennen</button><button class="slbtn red" data-act="sl-del">Löschen</button><button class="slbtn gold" data-act="sl-load" data-sl-def="1">Laden</button>`:''}</div>`}
-function slNewHtml(){return`<div class="slm"><div class="slp">${slHead('Neues Spiel · Schritt 1 von 3','Platz wählen','')}${slGridHtml('new')}${slBarHtml('new')}</div>${slFoot()}</div>`}
+function slNewHtml(){return`<div class="slm"><div class="slp">${slHead('Neues Spiel · Schritt 1 von 4','Platz wählen','')}${slGridHtml('new')}${slBarHtml('new')}</div>${slFoot()}</div>`}
 function slLoadHtml(){return`<div class="slm"><div class="slp">${slHead('Spiel laden',`Spielstände <span style="font-size:.5em;color:var(--mute);font-family:var(--fb)">${slList().length} / ${SL_N}</span>`,'')}${slGridHtml('load')}${slBarHtml('load')}</div>${slFoot()}</div>`}
-function slHeroHtml(){const W=SPL.nw||{};return`<div class="slm"><div class="slp">${slHead(`Neues Spiel · Platz ${W.n} · Schritt 2 von 3`,'Held wählen','Mit wem ziehst du los? Im Lager kannst du später jederzeit auch die anderen Helden spielen.')}
+function slHeroHtml(){const W=SPL.nw||{};return`<div class="slm"><div class="slp">${slHead(`Neues Spiel · Platz ${W.n} · Schritt 2 von 4`,'Held wählen','Mit wem ziehst du los? Im Lager kannst du später jederzeit auch die anderen Helden spielen.')}
  <div class="slheroes">${HERO_IDS.map(id=>`<button class="slhero" style="--hc:${HCOL[id]}" data-act="sl-nhero" data-id="${id}" ${W.h===id?'data-sl-def="1"':''}><canvas data-hero="${id}" width="160" height="160"></canvas><span class="nm">${esc(HEROES[id].name)}</span><span class="cl">${esc(HEROES[id].cls)}</span><span class="rl">${esc(HEROES[id].role)}</span></button>`).join('')}</div>
  <div class="slbar"><button class="slbtn" data-act="sl-back">‹ Zurück</button></div></div>${slFoot()}</div>`}
 function slModeHtml(){const W=SPL.nw||{},acc=slAccMax(),hc=W.mode==='hard';if(okHero(W.h))G.sel=W.h;const ch=[];
  const c=(d,hd,t,dis)=>`<button class="slchip ${W.d===d&&!!W.hd===!!hd?'on':''}" data-act="sl-ndiff" data-d="${d}" ${hd?'data-h="1"':''} ${dis?'disabled':''}>${t}</button>`;
  ch.push(c(0,0,'Normal'));ch.push(c(0,1,'Schwer'));for(let d=1;d<=Math.min(Math.max(acc,1),4);d++)ch.push(c(d,0,esc(diffName(d)),d>acc));
- return`<div class="slm" style="--hc:${HCOL[W.h]||'#e5b454'}"><div class="slp">${slHead(`Neues Spiel · Platz ${W.n} · ${esc(HEROES[W.h]?HEROES[W.h].name:'')} · Schritt 3 von 3`,'Wie willst du spielen?','')}
+ return`<div class="slm" style="--hc:${HCOL[W.h]||'#e5b454'}"><div class="slp">${slHead(`Neues Spiel · Platz ${W.n} · ${esc(HEROES[W.h]?HEROES[W.h].name:'')} · Schritt 4 von 4`,'Wie willst du spielen?','')}
  <div class="slmodes">
   <button class="slmode ${hc?'':'on'}" data-act="sl-nmode" data-v="soft" ${hc?'':'data-sl-def="1"'}><span class="t">✦ Softcore · Roguelite</span><p>Heldenstufe, Talente und Ausrüstung bleiben von Lauf zu Lauf. Jeder besiegte Ort-Boss öffnet ein Portal als neuen Startpunkt.</p></button>
   <button class="slmode hc ${hc?'on':''}" data-act="sl-nmode" data-v="hard"><span class="t">☠ Hardcore</span><p>Jeder Lauf beginnt von vorn – stirbt der Held, sind Stufe, Talente und Ausrüstung verloren. Nur Gold und Lager-Verbesserungen bleiben. Dafür zählt jeder Lauf für die Bestenliste.</p></button>
@@ -20119,7 +20119,7 @@ function offHtml(){const st=OFF.st,f=OFF.fort,z=OFF.zip;
    <p>Die <b>komplette App</b> mit allem drin (≈ 140 MB): startet wie ein eigenes Spiel, ohne Browser, mit Controller und eigenem Update-Knopf. Spielstände liegen getrennt von der Website.</p>
    <div class="offrow"><button class="slbtn" onclick="location.href='${APK}'">APK herunterladen</button></div>
    <p class="offh">Danach die Datei öffnen und „Aus dieser Quelle installieren“ erlauben.</p></div>`;
- const pcp=OFF.datei||MOBIL?'':`<div class="offk"><div class="eyebrow">Windows · Linux</div><h3>Als Programm installieren</h3>
+ const pcp=OFF.datei||MOBIL||window.__hsPC?'':`<div class="offk"><div class="eyebrow">Windows · Linux</div><h3>Als Programm installieren</h3>
    <p>Heldensturm als <b>eigenes Programm</b> (≈ 260 MB): nutzt die Grafikkarte voll aus – auch wenn dein Browser das Spiel bremst –, läuft offline, im echten Vollbild und mit der Grafikstufe „Legendär“. Spielstände liegen getrennt von der Website.</p>
    <div class="offrow"><button class="slbtn gold" data-act="off-pc" data-v="Heldensturm-Setup.exe">Für Windows</button><button class="slbtn" data-act="off-pc" data-v="Heldensturm.AppImage">Für Linux</button></div>
    <p class="offh">Windows warnt beim ersten Start („Der Computer wurde geschützt“): „Weitere Informationen“ → „Trotzdem ausführen“. Linux: Datei ausführbar machen und starten.</p></div>`;
@@ -29970,6 +29970,14 @@ function vo(key){let V=T2.vo[key];if(!V)V=T2.vo[key]={end:new Float64Array(4),g:
 function spielen(ctx,dest,t,b,vol,rate,lay,layVol){const s=ctx.createBufferSource();s.buffer=b;s.playbackRate.value=rate;const g=ctx.createGain();g.gain.value=vol;s.connect(g);
  if(lay){const s2=ctx.createBufferSource();s2.buffer=lay;const g2=layVol/vol;if(g2>0.98&&g2<1.02)s2.connect(g);else{const gg=ctx.createGain();gg.gain.value=g2;s2.connect(gg);gg.connect(g)}s2.start(t)}
  g.connect(dest);s.start(t);return g}
+/* Klingende Waffen (Klingen-Nachhall, Sehnen) auf den nächsten Akkordton der laufenden Musik stimmen – vorher lagen die festen
+   Teiltöne (z. B. Rapier 3150 Hz, Degen 2200 Hz) zufällig zwischen den Halbtönen und klangen gegen Musik und Klangwelt schief.
+   Ungestimmte Geräusche (Wusch, Holz, Fleisch) behalten die kleine Streuung. */
+const T2_GRUND={a:{rapier:3150,degen:2200,sichel:3800,schwert:1900,dolche:4200,krumm:2300,langbogen:118,kurzbogen:232,komposit:68,armbrust:162},h:{rapier:4200,wmesser:3300}};
+function t2Stimm(art,kind){const f=T2_GRUND[kind]&&T2_GRUND[kind][art];if(!f)return Math.pow(2,(t2R()-0.5)*0.066);
+ const H=harm(),akk=H&&H.akk&&H.akk.length?H.akk:[62,65,69],pc=new Set(akk.map(m=>((m%12)+12)%12));const m0=69+12*Math.log2(f/440);
+ let best=0,bd=99;for(let d=-6;d<=6;d++){const m=Math.round(m0)+d;if(pc.has(((m%12)+12)%12)){const e=Math.abs(m-m0);if(e<bd){bd=e;best=m-m0}}}
+ return Math.pow(2,best/12)}
 function t2Ton(kind,art,el,leg){const m0=window.__t2Mess?t2N():0;try{return t2Ton0(kind,art,el,leg)}finally{if(m0)T2.ms+=t2N()-m0}}
 function t2Ton0(kind,art,el,leg){if(!AC||!SFXB)return false;const D=K[art];if(!D)return false;const now=AC.currentTime;
  /* Stimmen: je Art und insgesamt begrenzt – sonst bündeln (jüngste Stimme etwas lauter) */
@@ -29978,7 +29986,7 @@ function t2Ton0(kind,art,el,leg){if(!AC||!SFXB)return false;const D=K[art];if(!D
  if(act>=mx||glob>=MAXG){T2.n.bund++;const g=last>=0?V.g[last]:null;if(g&&V.base[last]){try{g.gain.value=Math.min(V.base[last]*1.6,g.gain.value*1.12)}catch(e){}}return true}
  let b=null,rate=1;
  if(D.instr&&(kind==='a'||kind==='h')){const I=instr(art,kind,harm());b=I.b;rate=I.r}
- else{const v=(T2.art[art]=(T2.art[art]|0)+1)&1;b=hW(art,kind,v,0,1)||hW(art,kind,0,0,1);rate=Math.pow(2,(t2R()-0.5)*0.066)}
+ else{const v=(T2.art[art]=(T2.art[art]|0)+1)&1;b=hW(art,kind,v,0,1)||hW(art,kind,0,0,1);rate=t2Stimm(art,kind)}
  if(!b){T2.n.ersatz=(T2.n.ersatz|0)+1;try{if(kind==='h')SND.hit();else if(D.instr)SND.note();else if(K[art]&&ARTEN.indexOf(art)<12)SND.slash();else SND.bow()}catch(e){}return true}
  const vol=(GAIN[kind][art]||0.18)*(0.92+t2R()*0.14)*(leg?1.08:1);
  const el2=el||(leg?5:0),lay=el2?hE(el2):null,lv=el2?vol*(kind==='h'?(el2===5?0.3:0.42):(el2===5?0.2:0.26)):0;
@@ -42518,6 +42526,289 @@ document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.
  SAVE.hinw=SAVE.hinw||{};for(let j=0;j<=+m[1];j++)SAVE.hinw['tree_e'+j]=1;SAVE.hinw.tree=1},true);
 }catch(e){console.error('frei',e);window.__hsFREI={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/frei» */
+/* «attr» */
+/* ================= Paket „attr“: Attribute wie in D&D – Charakter-Builder, Punkte, Anforderungen der Gegenstände – window.__hsATTR =================
+   Sechs Attribute: Stärke (STÄ), Geschick (GES), Konstitution (KON), Intelligenz (INT), Weisheit (WEI), Charisma (CHA).
+   · Jeder Held hat ein Grundprofil aus seiner D&D-Rolle (Summe 72 wie das Standard-Array):
+       Barradin  STÄ 8  GES 14 KON 12 INT 13 WEI 10 CHA 15  – Barde: Charisma, flinke Klinge, etwas Arkanes
+       Echo      STÄ 10 GES 13 KON 14 INT 12 WEI 15 CHA 8   – Druide: Weisheit, zäh, mürrisch
+       Friedrich STÄ 12 GES 15 KON 13 INT 10 WEI 14 CHA 8   – Waldläufer: Geschick, Weisheit (Rex)
+       Ezekiel   STÄ 14 GES 15 KON 13 INT 12 WEI 10 CHA 8   – Goliath-Schurke: Geschick und Stärke
+   · Punkte: 5 beim Erschaffen (Charakter-Builder), danach 1 Punkt alle 5 Heldenstufen. Gespeichert je Spielplatz und Held als
+     Reihenfolge der Punkte (SAVE.heroes[id].attr.s). Es zählen immer die ersten 5 + Stufe/5 Einträge – stirbt ein Hardcore-Held
+     und fängt bei Stufe 1 an, gelten automatisch nur noch die Punkte aus dem Builder.
+   · Wirkung je verteiltem Punkt (das Grundprofil selbst ändert die bisherige Balance nicht):
+       STÄ +4 % Schaden mit Stärke-Waffen und -Fähigkeiten          GES +4 % mit Geschick-Waffen/-Fähigkeiten, +0,5 % Krit
+       KON +5 % Leben                                              INT +4 % mit Intelligenz-Fähigkeiten, −1 % Abklingzeit
+       WEI +4 % mit Weisheits-Fähigkeiten und Begleitern            CHA +4 % mit Charisma-Fähigkeiten, +2 % Kontrolldauer, +2 % Gold
+     Welche Fähigkeit zu welchem Attribut gehört, folgt dem Ast (z. B. Barradin: Verzauberung/Glamour = CHA, Ranken/Illusion = INT,
+     Klingentanz = GES). Normale Angriffe skalieren mit dem Hauptattribut der getragenen Waffe – wie gut man mit ihr umgeht.
+   · Würfelproben in Ereignissen: +1 je 2 verteilte Punkte im passenden Attribut (Auftreten = CHA, Athletik = STÄ …).
+   · Anforderungen: Jede Waffe, Rüstung und jeder Schmuck verlangt ein Hauptattribut (und oft ein zweites, 3 niedriger) –
+     schwere Klingen und Panzer Stärke, Bögen und leichte Klingen Geschick, Instrumente Charisma, Ruten und Roben Intelligenz,
+     Druidenstäbe Weisheit. Höhe: 8 + Gegenstandsstufe/6 (+1 selten, +2 episch, +3 legendär/Set; Ringe 2 weniger).
+     Unerfüllt: nicht anlegbar. Schon getragene Gegenstände (z. B. aus älteren Spielständen) bleiben am Körper, wirken aber nur zur
+     Hälfte, bis die Anforderung erfüllt ist. Beute neigt zu Grundtypen, die zum Helden passen (aber nicht nur).
+   · Oberflächen: Builder-Schritt bei „Neues Spiel“ (erster Stern + 5 Punkte, „Empfohlen“), Attribut-Seite im Beutel,
+     Hinweis bei freien Punkten, Anforderungen in jeder Gegenstandsbeschreibung, Umverteilen im Lager gegen Gold.
+   Abschaltbar: __hsATTR.aus=1 */
+(function(){try{if(window.__hsATTR)return;
+const A=window.__hsATTR={v:1,aus:0,err:[]};const aErr=e=>{if(A.err.length<30)A.err.push(String(e&&e.stack||e).slice(0,300))};
+const K=['st','ge','ko','in','we','ch'];
+const AN={st:{n:'Stärke',k:'STÄ',c:'#e8785a',w:'Stärke-Waffen und -Fähigkeiten +4 % Schaden'},ge:{n:'Geschick',k:'GES',c:'#a8d46a',w:'Geschick-Waffen und -Fähigkeiten +4 % Schaden, +0,5 % Krit'},
+ ko:{n:'Konstitution',k:'KON',c:'#e0a860',w:'+5 % Leben'},in:{n:'Intelligenz',k:'INT',c:'#c4a0f0',w:'Intelligenz-Fähigkeiten +4 % Schaden, −1 % Abklingzeit'},
+ we:{n:'Weisheit',k:'WEI',c:'#e8dca0',w:'Weisheits-Fähigkeiten und Begleiter +4 % Schaden'},ch:{n:'Charisma',k:'CHA',c:'#ff9ccc',w:'Charisma-Fähigkeiten +4 % Schaden, +2 % Kontrolldauer, +2 % Gold'}};
+A.K=K;A.AN=AN;
+const BASIS={barradin:{st:8,ge:14,ko:12,in:13,we:10,ch:15},echo:{st:10,ge:13,ko:14,in:12,we:15,ch:8},friedrich:{st:12,ge:15,ko:13,in:10,we:14,ch:8},ezekiel:{st:14,ge:15,ko:13,in:12,we:10,ch:8}};
+A.BASIS=BASIS;
+/* Ast → Attribut (Reihenfolge wie HEROES[id].branches) */
+const AST={barradin:['ch','in','in','ge','ch'],echo:['in','st','we','we','we'],friedrich:['ge','ge','we','we','in'],ezekiel:['ge','st','ge','ge','in']};
+const HAUPT={barradin:'ch',echo:'we',friedrich:'ge',ezekiel:'ge'},BEGL={barradin:'ch',echo:'we',friedrich:'we',ezekiel:'in'};
+/* Grundtyp → [Hauptattribut, Nebenattribut] */
+const REQ={'Rapier':['ge'],'Degen':['ge','st'],'Stockdegen':['ge','ch'],'Laute':['ch'],'Flöte':['ch','ge'],'Harfe':['ch','in'],
+ 'Druidenstab':['we'],'Sichel':['we','ge'],'Totemkeule':['st','we'],'Mistelzweig':['we'],'Dornenzweig':['we','ko'],'Eichenrute':['in','we'],
+ 'Jagdmesser':['ge'],'Kurzschwert':['ge','st'],'Waldaxt':['st'],'Langbogen':['ge','st'],'Kurzbogen':['ge'],'Kompositbogen':['ge','we'],'Armbrust':['ge','ko'],
+ 'Dolchpaar':['ge'],'Krummschwert':['ge','st'],'Goliath-Klinge':['st','ko'],'Wurfmesser':['ge'],'Wurfsterne':['ge','we'],'Schattendolche':['ge','in'],
+ 'Lederkappe':['ge'],'Eisenhelm':['st'],'Hörnerhelm':['st','ko'],'Kapuze':['ge'],'Stirnreif':['in','ch'],'Topfhelm':['ko'],
+ 'Wams':['ch'],'Kettenhemd':['st'],'Schuppenpanzer':['st','ko'],'Robe':['in'],'Brigantine':['ko'],'Lederrüstung':['ge'],
+ 'Lederhandschuhe':['ge'],'Panzerhandschuhe':['st'],'Fingerlinge':['ge'],'Armschienen':['ko'],'Kampfhandschuhe':['st'],
+ 'Ring':['in'],'Siegelring':['ch'],'Band':['we'],'Reif':['in'],'Knochenring':['we']};
+A.REQ=REQ;
+const PROBE={'Auftreten':'ch','Überzeugen':'ch','Einschüchtern':'ch','Athletik':'st','Heimlichkeit':'ge','Fingerfertigkeit':'ge','Willenskraft':'we','Überleben':'we','Weisheit':'we','Wahrnehmung':'we','Tierkunde':'we','Heilkunde':'we','Naturkunde':'in','Religion':'in','Handwerk':'in'};
+const RBON=[0,0,1,2,3,3];
+const an=()=>!A.aus&&!(G.mode==='taeglich'&&G.daily&&G.daily.ohneAttr);
+/* ---------- Speicher ---------- */
+function hz(id){if(!SAVE.heroes||!okHero(id))return null;return SAVE.heroes[id]||null}
+function seq(id){const h=hz(id);const s=h&&h.attr&&typeof h.attr.s==='string'?h.attr.s:'';return s.replace(/[^0-5]/g,'')}
+function setSeq(id,s){if(!SAVE.heroes)SAVE.heroes={};if(!SAVE.heroes[id])SAVE.heroes[id]={up:{},best:-1,runs:0,clears:0};const h=SAVE.heroes[id];h.attr=h.attr&&typeof h.attr==='object'?h.attr:{};h.attr.s=String(s).replace(/[^0-5]/g,'').slice(0,60)}
+A.seq=seq;A.setSeq=setSeq;
+{const hf=heroFix;heroFix=function(x,id){const h=hf.apply(this,arguments);try{if(h&&isObj(x)&&isObj(x.attr)){const a={};if(typeof x.attr.s==='string')a.s=x.attr.s.replace(/[^0-5]/g,'').slice(0,60);if(typeof x.attr.st==='string'&&HEROES[id].tree.some(n=>n.id===x.attr.st))a.st=x.attr.st;if(x.attr.v)a.v=1;h.attr=a}}catch(e){aErr(e)}return h}}
+const gesamt=q=>5+Math.floor(((q&&q.level)|0)/5);
+function verteilt(q){if(!q||!q.id)return{};const s=(q.atS!=null?q.atS:seq(q.id)).slice(0,gesamt(q)),o={};for(const ch of s){const k=K[+ch];o[k]=(o[k]||0)+1}return o}
+function frei(q){if(!q||!q.id)return 0;const s=q.atS!=null?q.atS:seq(q.id);return Math.max(0,gesamt(q)-s.length)}
+function wert(q,k){const b=(BASIS[q.id]||{})[k]||10;return b+((verteilt(q)[k])|0)}
+const mod=w=>Math.floor((w-10)/2),modS=w=>{const m=mod(w);return(m>=0?'+':'')+m};
+A.verteilt=verteilt;A.frei=frei;A.wert=wert;
+/* Nur der eigene Spielplatz-Held hat gespeicherte Punkte; weitere lokale/online Mitspieler: Grundprofil */
+function eigen(q){return q&&(q===PL[0]||!G.mp)&&!(typeof NET!=='undefined'&&NET.role==='guest')}
+function qSeq(q){if(!eigen(q))return'';return seq(q.id)}
+function sync(q){if(!q||!q.id)return;q.atS=G.bot?(q.atS||''):qSeq(q)}
+/* ---------- Anforderungen ---------- */
+function req(it){if(!it||!it.base)return null;const r=REQ[it.base];if(!r)return null;const il=(it.ilvl|0),ra=it.rar|0;let p=9+Math.floor(il/15)+(RBON[ra]||0);if(it.slot==='ring')p-=3;p=Math.max(8,Math.min(20,p));
+ const o=[{k:r[0],v:p}];if(r[1])o.push({k:r[1],v:Math.max(8,p-4)});return o}
+A.req=req;
+function erfuellt(q,it){if(!an()||!q||!q.id||!it)return true;const r=req(it);if(!r)return true;for(const x of r)if(wert(q,x.k)<x.v)return false;return true}
+A.erfuellt=erfuellt;
+const reqTxt=(q,it,kurz)=>{const r=req(it);if(!r)return'';return r.map(x=>{const ok=!q||wert(q,x.k)>=x.v;return`<span class="atRq ${ok?'ok':'no'}" style="--c:${AN[x.k].c}">${AN[x.k].k} ${x.v}${!ok&&!kurz?` <small>(du: ${wert(q,x.k)})</small>`:''}</span>`}).join(' ')};
+/* geschwächte Kopie für getragene, (noch) nicht erfüllte Gegenstände */
+const SCHW=new WeakMap();
+function schwach(it){let c=SCHW.get(it);if(c)return c;c=Object.assign({},it);if(c.wdmg)c.wdmg=Math.max(1,Math.round(c.wdmg*0.5));if(c.armor)c.armor=Math.round(c.armor*0.5);if(c.hp)c.hp=Math.round(c.hp*0.5);
+ if(Array.isArray(it.aff))c.aff=it.aff.map(a=>Object.assign({},a,{v:typeof a.v==='number'?(a.k==='ls'||a.k==='regen'?Math.round(a.v*5)/10:Math.round(a.v*0.5)):a.v}));delete c.pow;c.atSchwach=1;SCHW.set(it,c);return c}
+{const cs=computeStats;computeStats=function(eq){try{if(an()&&eq&&P&&P.id){let n=null;for(const k of SLOTS){const it=eq[k];if(it&&!it.atSchwach&&!erfuellt(P,it)){n=n||Object.assign({},eq);n[k]=schwach(it)}}if(n)return cs.call(this,n)}}catch(e){aErr(e)}return cs.apply(this,arguments)}}
+/* Anlegen sperren */
+function sperrMeldung(it){const r=req(it)||[];const f=r.filter(x=>wert(P,x.k)<x.v).map(x=>`${AN[x.k].n} ${x.v} (du: ${wert(P,x.k)})`).join(', ');return`<b>Noch zu schwer:</b> braucht ${f}. Verteile Attributpunkte im Beutel → Attribute.`}
+if(typeof equipFromBag==='function'){const ef=equipFromBag;equipFromBag=function(i){try{const it=P&&P.bag&&P.bag[i];if(it&&!erfuellt(P,it)){if(!G.bot){sfx('nope');toast(sperrMeldung(it),'#ff9a7a')}return}}catch(e){aErr(e)}return ef.apply(this,arguments)}}
+if(typeof itemDelta==='function'){const idl=itemDelta;itemDelta=function(it){try{if(it&&P&&!erfuellt(P,it))return -1}catch(e){aErr(e)}return idl.apply(this,arguments)}}
+/* Beschreibung */
+if(typeof itemLines==='function'){const il0=itemLines;itemLines=function(it){const L=il0.apply(this,arguments);try{if(an()&&it&&req(it)&&Array.isArray(L)){const ok=!P||!P.id||erfuellt(P,it);const istEq=P&&P.eq&&Object.values(P.eq).indexOf(it)>=0;
+   L.unshift(`<span class="atRL ${ok?'':'no'}">Benötigt ${reqTxt(P&&P.id?P:null,it)}${!ok?(istEq?' – <b>wirkt nur zur Hälfte</b>':' – <b>noch nicht anlegbar</b>'):''}</span>`)}}catch(e){aErr(e)}return L}}
+/* Beute neigt zu passenden Grundtypen */
+if(typeof makeItem==='function'){const mi=makeItem;const eins=function(slot,il,rar,heroId){let it=mi.apply(this,arguments);try{if(an()&&it&&heroId&&BASIS[heroId]&&slot!=='weapon'&&slot!=='ranged'&&rar!==4){const r=REQ[it.base];if(r&&BASIS[heroId][r[0]]<12&&Math.random()<0.6&&BASES[slot]){const pool=BASES[slot].filter(b=>REQ[b]&&BASIS[heroId][REQ[b][0]]>=12);if(pool.length){const nb=pick(pool);if(it.name===it.base)it.name=nb;else if(it.name&&it.name.indexOf(it.base)===0)it.name=nb+it.name.slice(it.base.length);it.base=nb}}}}catch(e){aErr(e)}return it};
+ /* Beute, die der eigene Held nicht tragen kann, wird meist neu gewürfelt (sonst wäre die Hälfte der Funde Schrott) */
+ makeItem=function(slot,il,rar,heroId){let it=eins.apply(this,arguments);try{if(an()&&it&&heroId&&rar!==4&&typeof P!=='undefined'&&P&&P.id===heroId&&!G.bot){for(let v=0;v<2&&!erfuellt(P,it)&&Math.random()<0.7;v++)it=eins.call(this,slot,il,rar,heroId)}}catch(e){aErr(e)}return it}}
+/* ---------- Wirkung ---------- */
+function astAttr(q,id){const tr=(q.hero&&q.hero.tree)||[];const n=tr.find(x=>x.id===id);if(!n)return null;const L=AST[q.id];return L&&n.b>=0&&n.b<L.length?L[n.b]:HAUPT[q.id]}
+A.astAttr=astAttr;
+function waffeAttr(q,melee){const it=q.eq&&q.eq[melee?'weapon':'ranged'];const r=it&&REQ[it.base];if(r)return r[0];const L=melee?HEROES[q.id].meleeW:HEROES[q.id].rangedW;const w=L&&L[0]&&REQ[L[0].n];return w?w[0]:HAUPT[q.id]}
+const SKC={};
+function quelleAttr(q,o){if(o.pet)return BEGL[q.id];if(o.basic)return waffeAttr(q,!!o.melee);let k='';try{k=dmSrc(o)}catch(e){}if(!k)return null;if(k==='pet:rex'||k.indexOf('pet:')===0)return BEGL[q.id];
+ const c=q.id+'|'+k;if(c in SKC)return SKC[c];const r=astAttr(q,k);SKC[c]=r;return r}
+hook('stats',s=>{if(!an()||!P||!P.id)return;sync(P);const v=verteilt(P);if(v.ge)s.crit+=0.005*v.ge;if(v.ko)s.hpP+=0.05*v.ko;if(v.in)s.cdr+=0.01*v.in;if(v.ch){s.ctrlP+=0.02*v.ch;s.gold+=0.02*v.ch}});
+hook('dmgMul',(e,o)=>{if(!an()||!P||!P.id||!o)return 1;const v=verteilt(P);let n=0;for(const k in v)n+=v[k];if(!n)return 1;const a=quelleAttr(P,o);return a&&v[a]?1+0.04*v[a]:1});
+/* ---------- Würfelproben ---------- */
+if(typeof ev2Start==='function'){const es=ev2Start;ev2Start=function(ev){const r=es.apply(this,arguments);try{if(an()&&G.ev&&G.ev.ev&&G.ev.ev.opts){for(const o of G.ev.ev.opts){if(!o||!o.skill||!PROBE[o.skill])continue;if(!o.atB0)o.atB0=Object.assign({},o.bonus||{});const b=Object.assign({},o.atB0);
+   for(const q of mpL()){if(!q||!q.id)continue;const z=Math.floor(((verteilt(q)[PROBE[o.skill]])|0)/2);if(z)b[q.id]=(b[q.id]||0)+z}o.bonus=b}if(typeof ev2Render==='function')ev2Render()}}catch(e){aErr(e)}return r}}
+/* ---------- Lauf: Punkte holen, ersten Stern aus dem Builder anwenden ---------- */
+if(typeof startRun==='function'){const sr=startRun;startRun=function(){const r=sr.apply(this,arguments);try{if(P&&P.id&&an()){sync(P);
+  const h=hz(P.id);const st=h&&h.attr&&h.attr.st;if(st&&!G.bot){const n=P.hero.tree.find(x=>x.id===st);const leer=!Object.keys(P.ranks||{}).some(k=>P.ranks[k]>0);if(n&&leer&&P.sp>0&&canLearn(n)){learn(n)}delete h.attr.st;persist()}
+  recalc();P.atLv=P.level;if(frei(P)>0&&!G.bot)later(2.2,()=>{if(frei(P)>0)toast(`<b>${frei(P)} Attributpunkt${frei(P)>1?'e':''} frei.</b> Verteile sie im Beutel unter „Attribute“.`,'#ffd27a',{sofort:1})})}}catch(e){aErr(e)}return r}}
+/* Stufenaufstieg: alle 5 Stufen ein Punkt */
+hook('tick',()=>{if(!an()||!P||!P.id||G.mp&&P!==PL[0])return;if(P.atLv==null){P.atLv=P.level;return}if(P.level!==P.atLv){const alt=Math.floor(P.atLv/5),neu=Math.floor(P.level/5);P.atLv=P.level;if(neu>alt){if(G.bot){botVerteil(P)}else{sfx('level');toast(`<b>Neuer Attributpunkt!</b> Stufe ${P.level} – verteile ihn im Beutel unter „Attribute“.`,'#ffd27a',{sofort:1})}}}});
+/* ---------- Empfehlung ---------- */
+function empf(id,stern,n,vorhanden){const tr=HEROES[id].tree;const nd=stern&&tr.find(x=>x.id===stern);const ast=nd?AST[id][nd.b]:HAUPT[id];
+ const w=nd&&nd.b!=null?null:null;const plan=[ast,ast,'ko',ast,HAUPT[id]===ast?(ast==='st'?'ge':'ko'):HAUPT[id]];const out=[];let i=0;while(out.length<n){out.push(plan[i%plan.length]);i++}return out}
+A.empf=empf;
+function hauptAst(q){const c={};for(const id in q.ranks||{}){const r=q.ranks[id]|0;if(!r)continue;const a=astAttr(q,id);if(a)c[a]=(c[a]||0)+r}let b=null,bv=0;for(const k in c)if(c[k]>bv){bv=c[k];b=k}return b||HAUPT[q.id]}
+function botVerteil(q){const n=frei(q);if(n<=0)return;const a=hauptAst(q);const pl=[a,a,'ko',a,(a==='st'?'ge':HAUPT[q.id]===a?'ko':HAUPT[q.id])];let s=q.atS||'';for(let i=0;i<n;i++)s+=K.indexOf(pl[(s.length)%pl.length]);q.atS=s;withP(q,()=>recalc())}
+A.botVerteil=botVerteil;
+/* ---------- Attribut-Seite (im Beutel) ---------- */
+let entwurf=null;
+function ansichtHtml(){const q=P;sync(q);const f=frei(q)-(entwurf?entwurf.length:0),v=verteilt(q),ev={};for(const ch of (entwurf||''))ev[K[+ch]]=(ev[K[+ch]]||0)+1;
+ return`<div class="wrap narrow atWrap"><div class="inv-head"><div><div class="eyebrow">${esc(q.hero.name)} · Stufe ${q.level}</div><h2 style="margin:0">Attribute</h2></div>
+  <div class="row atAkt" style="gap:6px;flex-wrap:wrap;justify-content:flex-end">${entwurf&&entwurf.length?`<button class="btn small" data-act="at-reset">Zurücksetzen</button><button class="btn small gold" data-act="at-ok">Übernehmen (${entwurf.length})</button>`:f>0?`<button class="btn small" data-act="at-empf">Empfohlen verteilen</button>`:''}<button class="btn small" data-act="at-zu">‹ Beutel</button></div></div>
+  <p class="muted atInfo">${f>0?`<b style="color:#ffd27a">${f} Punkt${f>1?'e':''} frei.</b> `:''}5 Punkte beim Erschaffen, danach einer alle 5 Stufen. Neu verteilen geht im Lager.</p>
+  <div class="atGrid">${K.map(k=>{const a=AN[k],w=wert(q,k)+(ev[k]|0),pv=(v[k]|0)+(ev[k]|0);return`<div class="atRow" style="--c:${a.c}"><span class="atK">${a.k}</span><span class="atN">${a.n}</span><span class="atW">${w}<small>${modS(w)}</small></span>
+   <span class="atE">${pv?`<b>+${pv}</b> · `:''}${a.w}</span><button class="btn small atPlus" data-act="at-plus" data-k="${k}" ${f>0?'':'disabled'} aria-label="${a.n} erhöhen">+</button></div>`}).join('')}</div>
+  <div class="row atBar"><span class="muted atHint">Waffen &amp; Rüstung verlangen Attribute – im Beutel steht bei jedem Gegenstand, was er braucht.</span></div></div>`}
+function zeigAnsicht(){css();showScreen(ansichtHtml(),'overlay',true);PADNAV.dirty=true}
+A.oeffnen=function(){if(G.state!=='play')return;if(G.overlay!=='inv')openOverlay('inv');G.atAns=1;entwurf=null;zeigAnsicht()};
+if(typeof renderInv==='function'){const ri=renderInv;renderInv=function(){if(G.atAns&&G.overlay==='inv'&&P&&P.id&&an()){try{zeigAnsicht();return}catch(e){aErr(e)}}const r=ri.apply(this,arguments);try{if(an()&&P&&P.id)beutelKnopf()}catch(e){aErr(e)}return r}}
+{const oo=openOverlay;openOverlay=function(k){if(k==='inv')G.atAns=0;return oo.apply(this,arguments)}}
+{const co=closeOverlay;closeOverlay=function(){G.atAns=0;entwurf=null;return co.apply(this,arguments)}}
+function beutelKnopf(){const h=scr.querySelector('.inv-head');if(!h||h.querySelector('.atBtn'))return;css();const f=frei(P);const b=document.createElement('button');b.className='btn small atBtn'+(f?' gold':'');b.dataset.act='at-open';b.innerHTML=`◆ Attribute${f?` <b>· ${f} frei</b>`:''}`;
+ const ziel=h.querySelector('.row')||h;ziel.insertBefore(b,ziel.firstChild)}
+document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('[data-act^="at-"]');if(!b||b.disabled)return;const a=b.dataset.act;ev.stopPropagation();ev.preventDefault();try{audioInit();
+ if(a==='at-open'){sfx('ui');A.oeffnen();return}
+ if(a==='at-zu'){sfx('ui');G.atAns=0;entwurf=null;renderInv();return}
+ if(!P||!P.id)return;
+ if(a==='at-plus'){const k=b.dataset.k;if(frei(P)-(entwurf?entwurf.length:0)<=0)return;entwurf=(entwurf||'')+K.indexOf(k);sfx('ui');zeigAnsicht();const nb=scr.querySelector(`.atPlus[data-k="${k}"]`);if(nb&&!nb.disabled)try{nb.focus({preventScroll:true})}catch(e){}return}
+ if(a==='at-reset'){entwurf=null;sfx('ui');zeigAnsicht();return}
+ if(a==='at-empf'){const n=frei(P);const pl=[hauptAst(P),hauptAst(P),'ko',hauptAst(P),HAUPT[P.id]];let s='';const basis=qSeq(P).length;for(let i=0;i<n;i++)s+=K.indexOf(pl[(basis+i)%pl.length]);entwurf=s;sfx('ui');zeigAnsicht();return}
+ if(a==='at-ok'){if(!entwurf)return;setSeq(P.id,qSeq(P)+entwurf);entwurf=null;sync(P);recalc();persist();sfx('level');zeigAnsicht();toast('<b>Attribute verteilt.</b>','#ffd27a');return}
+ }catch(e){aErr(e)}},true);
+/* HUD-Hinweis bei freien Punkten */
+let hEl=null,hS='';
+hook('tick',()=>{if(G.mp&&P!==PL[0])return;const n=performance.now();if(n-(A.hT||0)<500)return;A.hT=n;try{const f=an()&&P&&P.id&&!G.bot?frei(P):0;const s=f?`◆ ${f} Attributpunkt${f>1?'e':''}`:'';
+ if(!hEl||!hEl.isConnected){const pn=document.querySelector('#hud .top .panel');if(!pn)return;hEl=document.createElement('button');hEl.id='atHud';hEl.dataset.act='at-open';hEl.type='button';pn.appendChild(hEl);css();hS=null}
+ if(s!==hS){hS=s;hEl.textContent=s;hEl.hidden=!s}}catch(e){aErr(e)}});
+/* ---------- Charakter-Builder bei „Neues Spiel“ ---------- */
+function bauHtml(){const W=SPL.nw||{},h=W.h;const H0=HEROES[h];if(!H0)return'';const B=W.bau=W.bau||{s:'',st:null};
+ const L=H0.tree.filter(n=>n.row===0);if(!B.st&&L[0])B.st=L[0].id;const n=5-B.s.length,v={};for(const c of B.s)v[K[+c]]=(v[K[+c]]||0)+1;
+ const br=H0.branches||[];
+ return`<div class="slm" style="--hc:${HCOL[h]||'#e5b454'}"><div class="slp">${slHead(`Neues Spiel · Platz ${W.n} · ${esc(H0.name)} · Schritt 3 von 4`,'Held formen','Wähle die erste Fähigkeit und verteile 5 Attributpunkte – beides wächst später weiter.')}
+ <div class="atBau"><div class="atSp"><div class="eyebrow">Erste Fähigkeit</div>${L.map(x=>{const a=AST[h][x.b],brn=br[x.b]&&(br[x.b].n||br[x.b].name||br[x.b])||'';let d='';try{d=String(x.d(1)).replace(/<[^>]*>/g,'').replace(/\s*\[[^\]]*\]\s*/g,' ')}catch(e){}
+   return`<button class="atSk ${B.st===x.id?'on':''}" data-act="atb-st" data-id="${x.id}" ${B.st===x.id?'data-sl-def="1"':''}><span class="t"><b>${esc(x.name)}</b> <span class="muted">· ${esc(typeof brn==='string'?brn:'')}</span> <span class="atTg" style="--c:${AN[a].c}">${AN[a].k}</span></span><span class="d">${esc(d.slice(0,120))}${d.length>120?'…':''}</span></button>`}).join('')}</div>
+ <div class="atSp"><div class="eyebrow">Attribute · <b style="color:${n?'#ffd27a':'inherit'}">${n} frei</b></div>${K.map(k=>{const a=AN[k],w=BASIS[h][k]+(v[k]|0);return`<div class="atRow sm" style="--c:${a.c}"><span class="atK">${a.k}</span><span class="atW">${w}<small>${modS(w)}</small></span><span class="atE">${a.w}</span>
+   <button class="slbtn atM" data-act="atb-m" data-k="${k}" ${v[k]?'':'disabled'} aria-label="${a.n} senken">−</button><button class="slbtn atP" data-act="atb-p" data-k="${k}" ${n>0?'':'disabled'} aria-label="${a.n} erhöhen">+</button></div>`}).join('')}
+   <div class="row" style="gap:6px;margin-top:6px"><button class="slbtn" data-act="atb-empf">Empfohlen</button><button class="slbtn" data-act="atb-null" ${B.s?'':'disabled'}>Zurücksetzen</button></div></div></div>
+ <div class="slbar"><button class="slbtn" data-act="sl-back">‹ Zurück</button><button class="slbtn gold" data-act="atb-weiter" ${n>0?'':'data-sl-def="1"'}>${n>0?`Weiter (${n} Punkte offen)`:'Weiter ›'}</button></div></div>${slFoot()}</div>`}
+if(typeof slRender==='function'){const sr0=slRender;slRender=function(keep){if(SPL.view==='nbau'&&!A.aus){try{unseedRng();G.state='title';G.paused=false;hud.hidden=true;stageCv=null;css();showScreen(bauHtml(),'slscr',false);slFit();PADNAV.dirty=true;return}catch(e){aErr(e)}}return sr0.apply(this,arguments)}}
+document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('[data-act]');if(!b||b.disabled||A.aus)return;const a=b.dataset.act;try{
+ if(a==='sl-nhero'&&SPL.view==='nhero'){const id=b.dataset.id;if(!okHero(id))return;ev.stopImmediatePropagation();ev.preventDefault();audioInit();sfx('ui');const alt=SPL.nw||{};SPL.nw=Object.assign(alt,{h:id,mode:alt.mode||'soft',d:alt.d||0,hd:alt.hd||0});if(!alt.bau||alt.bauH!==id){SPL.nw.bau={s:'',st:null};SPL.nw.bauH=id}G.sel=id;SPL.view='nbau';SPL.ask=null;showTitle();return}
+ if(a==='sl-back'&&(SPL.view==='nbau'||SPL.view==='nmode')){ev.stopImmediatePropagation();ev.preventDefault();sfx('ui');SPL.view=SPL.view==='nbau'?'nhero':'nbau';SPL.ask=null;showTitle();return}
+ if(a.indexOf('atb-')!==0||SPL.view!=='nbau')return;ev.stopImmediatePropagation();ev.preventDefault();audioInit();const B=SPL.nw.bau;
+ if(a==='atb-st'){B.st=b.dataset.id;sfx('ui')}
+ else if(a==='atb-p'){if(B.s.length<5){B.s+=K.indexOf(b.dataset.k);sfx('ui')}}
+ else if(a==='atb-m'){const i=B.s.lastIndexOf(String(K.indexOf(b.dataset.k)));if(i>=0){B.s=B.s.slice(0,i)+B.s.slice(i+1);sfx('ui')}}
+ else if(a==='atb-null'){B.s='';sfx('ui')}
+ else if(a==='atb-empf'){B.s=empf(SPL.nw.h,B.st,5).map(k=>K.indexOf(k)).join('');sfx('ui')}
+ else if(a==='atb-weiter'){if(B.s.length<5)B.s+=empf(SPL.nw.h,B.st,5).slice(B.s.length).map(k=>K.indexOf(k)).join('');sfx('ui');SPL.view='nmode';SPL.ask=null;showTitle();return}
+ const fk=b.dataset.k?`[data-act="${a}"][data-k="${b.dataset.k}"]`:b.dataset.id?`[data-act="${a}"][data-id="${b.dataset.id}"]`:`[data-act="${a}"]`;showTitle();const nb=scr.querySelector(fk);if(nb&&!nb.disabled)try{nb.focus({preventScroll:true})}catch(e){}else{const w=scr.querySelector('[data-act="atb-weiter"]');if(w)try{w.focus({preventScroll:true})}catch(e){}}
+ }catch(e){aErr(e)}},true);
+/* Spielplatz anlegen: Builder-Ergebnis speichern */
+document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('[data-act="sl-nstart"]');if(!b||b.disabled||A.aus)return;const W=SPL.nw;if(!W||!W.bau||!W.h)return;const bau={h:W.h,s:W.bau.s,st:W.bau.st};
+ setTimeout(()=>{try{setSeq(bau.h,bau.s);const h=SAVE.heroes[bau.h];if(bau.st)h.attr.st=bau.st;h.attr.v=1;persist()}catch(e){aErr(e)}},0)},true);
+/* ---------- Lager: neu verteilen ---------- */
+const preis=n=>Math.max(100,n*40);
+function lagerHtml(id){const s=seq(id);if(!s.length)return'';const p=preis(s.length);
+ return`<div class="card atLg"><div class="eyebrow">Attribute · ${esc(HEROES[id].name)}</div><div class="atLgW">${K.map(k=>{let n=0;for(const c of s)if(K[+c]===k)n++;return`<span style="--c:${AN[k].c}"><b>${AN[k].k}</b> ${BASIS[id][k]+n}</span>`}).join('')}</div>
+  <div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><button class="btn small" data-act="atl-neu" data-id="${id}" ${(SAVE.gold|0)>=p?'':'disabled'}>${A.frag===id?`Wirklich? Alle Punkte frei · ${p} Gold`:`Neu verteilen · ${p} Gold`}</button><span class="muted" style="font-size:12px">Alle Punkte werden frei – verteile sie beim nächsten Aufbruch im Beutel neu.</span></div></div>`}
+if(typeof showLager==='function'){const sl=showLager;showLager=function(){const r=sl.apply(this,arguments);try{if(!A.aus){css();const w=scr.querySelector('.lager-wrap');const id=G.sel;if(w&&okHero(id)&&!w.querySelector('.atLg')){const h=lagerHtml(id);if(h){const z=w.querySelector('.stKreis')||w.querySelector('.lager-chips');if(z)z.insertAdjacentHTML('afterend',h);else w.insertAdjacentHTML('beforeend',h)}}}}catch(e){aErr(e)}return r}}
+document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('[data-act="atl-neu"]');if(!b||b.disabled)return;ev.stopPropagation();ev.preventDefault();try{const id=b.dataset.id;audioInit();
+ if(A.frag!==id){A.frag=id;sfx('ui')}else{const p=preis(seq(id).length);if((SAVE.gold|0)<p)return;SAVE.gold-=p;setSeq(id,'');A.frag=null;persist();sfx('coin');toast(`<b>Attribute von ${esc(HEROES[id].name)} zurückgesetzt.</b> Verteile die Punkte beim nächsten Aufbruch im Beutel.`,'#ffd27a',{sofort:1})}
+ showLager()}catch(e){aErr(e)}},true);
+/* ---------- Aussehen ---------- */
+function css(){if(document.getElementById('atCss'))return;const s=document.createElement('style');s.id='atCss';s.textContent=`
+.atGrid{display:flex;flex-direction:column;gap:5px;margin:6px 0}
+.atRow{display:grid;grid-template-columns:3.2em 7.5em 3.6em 1fr auto;align-items:center;gap:8px;padding:5px 8px;border-radius:9px;background:rgba(255,255,255,.035);border-left:3px solid var(--c)}
+.atRow .atK{font-weight:800;color:var(--c);letter-spacing:.05em}.atRow .atN{font-weight:700}.atRow .atW{font-weight:800;font-size:1.15em}.atRow .atW small{font-size:.7em;opacity:.65;margin-left:3px}
+.atRow .atE{font-size:.85em;opacity:.85;line-height:1.25}.atRow .atE b{color:var(--c)}
+.atRow.sm{grid-template-columns:3em 3.2em 1fr auto auto;gap:6px;padding:3px 6px}.atRow.sm .atE{font-size:.78em}
+.atPlus,.atP,.atM{min-width:2.2em;font-weight:800}
+.atWrap .inv-head{padding-right:112px;gap:8px}.slm .slbar{pointer-events:none}.slm .slbar>*{pointer-events:auto}
+.atInfo{font-size:13px;margin:2px 0 4px}.atBar{gap:8px;align-items:center;flex-wrap:wrap}.atHint{font-size:12px}
+.atBau{display:flex;gap:14px;align-items:stretch;flex:1 1 auto;min-height:0}.atSp{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:5px}
+.atSk{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;padding:5px 9px;border-radius:9px;border:1px solid rgba(229,180,84,.22);background:rgba(255,255,255,.03);color:inherit;font:inherit;cursor:pointer}
+.atSk.on{border-color:var(--hc,#e5b454);background:rgba(229,180,84,.12);box-shadow:0 0 0 1px var(--hc,#e5b454) inset}
+.atSk .t{font-size:.95em}.atSk .d{font-size:.78em;opacity:.78;line-height:1.25}
+.atTg{display:inline-block;padding:0 5px;border-radius:6px;border:1px solid var(--c);color:var(--c);font-size:.75em;font-weight:800}
+.atRL{display:block;font-size:.92em}.atRL.no{color:#ff9a7a}.atRq{display:inline-block;padding:0 6px;border-radius:7px;border:1px solid var(--c);color:var(--c);font-weight:800;margin-right:3px}.atRq.no{border-color:#ff7a5a;color:#ff9a7a;background:rgba(255,90,60,.1)}.atRq small{font-weight:600;opacity:.85}
+#atHud{display:block;margin-top:4px;font:800 11px/1.4 "Alegreya Sans",sans-serif;padding:1px 8px;border-radius:9px;border:1px solid #ffd27a;background:rgba(40,26,16,.85);color:#ffd27a;cursor:pointer;pointer-events:auto;animation:atPuls 1s ease-in-out infinite alternate}
+#atHud[hidden]{display:none}
+@keyframes atPuls{from{box-shadow:0 0 0 0 rgba(255,210,122,0)}to{box-shadow:0 0 9px 1px rgba(255,210,122,.5)}}
+.atLg{margin-top:10px;padding:9px 12px}.atLgW{display:flex;gap:10px;flex-wrap:wrap;margin:4px 0 6px;font-size:14px}.atLgW b{color:var(--c)}
+@media (max-width:760px),(max-height:440px){.atBau{gap:8px}.atRow{grid-template-columns:3em 1fr 3.2em auto;gap:5px;padding:3px 6px}.atRow .atE{display:none}.atRow.sm{grid-template-columns:2.8em 3em 1fr auto auto}.atRow.sm .atE{display:block;font-size:.7em}.atSk .d{display:none}.atHint{display:none}}
+@media (max-width:560px){.atBau{flex-direction:column}}
+`;document.head.appendChild(s)}
+css();
+}catch(e){console.error('attr',e);window.__hsATTR={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/attr» */
+/* «geleit1» */
+/* ================= Paket „geleit1“: das erste Karren-Geleit fair – window.__hsGELEIT1 =================
+   Beim allerersten Geleit konnte ein Zufall den Karren sofort zerlegen: ein Hinterhalt aus Wolfsreitern direkt neben dem
+   Karren (Gegnerauswahl nach Stufenfortschritt = die härtesten Gegner der Stufe) oder die „Riesen-Runde“ mitten im Geleit.
+   Bis zum ersten geschafften Geleit (SAVE.geleitOk) gilt deshalb:
+     · keine seltenen Ereignisse (Riesen-Runde, Winzlinge, Gänsemarsch …) während das Geleit läuft – sie kommen danach
+     · Hinterhalte: ein Gegner weniger, weiter weg (Zeit zum Hinlaufen), nur Gegner vom Anfang der Stufe, keine Wölfe/Reiter/Großen
+     · der Karren hält 50 % mehr aus
+   Ab dem zweiten Geleit ist alles wie gewohnt. Abschaltbar: __hsGELEIT1.aus=1 */
+(function(){try{if(window.__hsGELEIT1)return;
+const GL=window.__hsGELEIT1={v:1,aus:0,err:[]};const gErr=e=>{if(GL.err.length<20)GL.err.push(String(e&&e.stack||e).slice(0,300))};
+const lauf=()=>{const O=G.obj;return !!(O&&!O.done&&O.k==='eskorte')};
+GL.erst=()=>!GL.aus&&!(SAVE&&SAVE.geleitOk)&&!G.mp;
+const sanft=()=>GL.erst()&&lauf();
+const karren=()=>G.allies&&G.allies.find(x=>x.sub==='karren');
+/* harmlose Gegner: kein Tier/Reiter, nicht groß, nicht schnell */
+const harmlos=d=>d&&(d.size||1)<=1.15&&(d.sp||80)<=95&&d.k!=='tank'&&d.k!=='fast'&&!/wolf|reiter|bär|baer|oger|riese|troll/i.test(String(d.n||d.name||''));
+let imTrupp=0;
+if(typeof pickFoe==='function'){const pf=pickFoe;pickFoe=function(prog){if(!imTrupp||!sanft())return pf.apply(this,arguments);let f=null;try{for(let i=0;i<10;i++){f=pf.call(this,0);if(harmlos(f))return f}}catch(e){gErr(e)}return f||pf.apply(this,arguments)}}
+if(typeof wlTrupp==='function'){const wt=wlTrupp;wlTrupp=function(ax,ay,n,laut,d0,d1){if(!sanft())return wt.apply(this,arguments);imTrupp=1;try{
+  /* Mittelpunkt vom Karren wegrücken, damit der Trupp nicht direkt am Karren auftaucht */
+  const a=karren();if(a&&!a.dead){const g=Math.atan2(ay-a.y,ax-a.x);ax=a.x+Math.cos(g)*260;ay=a.y+Math.sin(g)*260}
+  return wt.call(this,ax,ay,Math.max(2,(n|0)-1),laut,Math.max(d0||0,560),Math.max(d1||0,760))}finally{imTrupp=0}}}
+/* seltene Ereignisse während des ersten Geleits aufschieben */
+if(typeof rareStart==='function'){const rs=rareStart;rareStart=function(k){if(sanft()){G.rareT=Math.max(G.rareT||0,8);return}return rs.apply(this,arguments)}}
+hook('tick',()=>{try{const O=G.obj;if(!O||O.k!=='eskorte')return;const a=karren();
+  if(!O.done&&a&&!a.dead&&GL.erst()&&!a.g1){a.g1=1;a.maxHp*=1.5;a.hp*=1.5}
+  if(O.done&&a&&!a.dead&&a.hp>0&&!G.bot&&!(SAVE&&SAVE.geleitOk)){SAVE.geleitOk=1;persist()}}catch(e){gErr(e)}});
+}catch(e){console.error('geleit1',e);window.__hsGELEIT1={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/geleit1» */
+/* «beute2» */
+/* ================= Paket „beute2“: weniger, dafür bessere Beute – window.__hsBEUTE2 =================
+   Rückmeldung: Man wird von Anfang an mit Gegenständen überflutet. Jetzt (an der Stelle, an der Beute auf den Boden fällt):
+     · Gewöhnliche Funde fallen nur noch zu 25 %, magische zu 45 % – der Rest wird zu ein paar Goldmünzen
+     · was übrig bleibt, ist etwas öfter eine Stufe besser (magisch → selten 10 %, selten → episch 6 %)
+     · Legendäres, Uraltes, Sets, Boss-Beute und besondere Gegenstände bleiben unangetastet (Glücks-Garantie ebenso)
+   Ergebnis (gemessen über 20 000 Würfe der normalen Beute): rund 40 % weniger Gegenstände, Seltene und Epische zusammen
+   etwas häufiger als vorher, Legendäre unverändert. Abschaltbar: __hsBEUTE2.aus=1 */
+(function(){try{if(window.__hsBEUTE2)return;
+const B2=window.__hsBEUTE2={v:1,aus:0,err:[],n:{rein:0,gold:0,auf:0}};const bErr=e=>{if(B2.err.length<20)B2.err.push(String(e&&e.stack||e).slice(0,300))};
+B2.BLEIB=[0.25,0.45];B2.AUF=[0,0.10,0.06];
+const normal=it=>it&&typeof it==='object'&&!it.anc&&!it.set&&!it.uniq&&!it.ld&&!it.fav&&!it.q&&!it.quest&&!it.krone&&it.base&&(it.rar|0)<=2&&
+ ['weapon','ranged','helm','armor','gloves','ring'].indexOf(it.slot)>=0;
+B2.wandeln=function(it){/* liefert null (→ Gold) oder den (evtl. aufgewerteten) Gegenstand */
+ if(B2.aus||!normal(it))return it;const r=it.rar|0;
+ if(r<=1&&Math.random()>B2.BLEIB[r])return null;
+ if(Math.random()<(B2.AUF[r]||0)){try{const h=it.for||(P&&P.id);const n=makeItem(it.slot,it.ilvl|0,r+1,h);if(n){if(it.for!==undefined)n.for=it.for;B2.n.auf++;return n}}catch(e){bErr(e)}}
+ return it};
+if(typeof dropItem==='function'){const di=dropItem;dropItem=function(x,y,it){try{if(!B2.aus&&!(G&&G.netGuestRun)&&normal(it)){B2.n.rein++;const n=B2.wandeln(it);
+  if(!n){B2.n.gold++;try{spGold(x,y,1+((it.rar|0)>0?1:0),0.6)}catch(e){}return}it=n}}catch(e){bErr(e)}return di.call(this,x,y,it)}}
+}catch(e){console.error('beute2',e);window.__hsBEUTE2={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/beute2» */
+/* «wurfton» */
+/* ================= Paket „wurfton“: der Würfel verrät nichts mehr vorab – window.__hsWURFTON =================
+   Bei den Ereignissen zwischen den Stufen wird das Ergebnis sofort ausgewertet, die Würfel-Animation läuft erst danach.
+   Die Folgen (Gold-Klimpern, Treffer-Schmerz, Segen, Fluch, Gegenstand …) spielten ihre Klänge und Meldungen aber schon
+   beim Auswerten – man hörte also vor dem Fallen des Würfels, ob es geklappt hat.
+   Jetzt: Während eine Wahl ausgewertet wird und solange der Würfel rollt, werden Klänge und Einblendungen zurückgehalten
+   (nur Würfeln, Klackern und Knopf-Klick laufen) und erst nach dem Lande-Klang nachgespielt. Abschaltbar: __hsWURFTON.aus=1 */
+(function(){try{if(window.__hsWURFTON)return;
+const WT=window.__hsWURFTON={v:1,aus:0,err:[],n:{gehalten:0}};const wErr=e=>{if(WT.err.length<20)WT.err.push(String(e&&e.stack||e).slice(0,300))};
+const FREI={ui:1,wuerfel:1,hit:1,fluch:1};
+let tief=0,Q=[],iv=0;
+const rollt=()=>!!(G.ev&&G.ev.res&&G.ev.res.rolling);
+const halten=()=>!WT.aus&&(tief>0||rollt());
+function abspielen(){if(halten())return;if(Q.length&&!WT.nach){WT.nach=performance.now()+260}if(performance.now()<(WT.nach||0))return;
+ const q=Q;Q=[];WT.nach=0;clearInterval(iv);iv=0;for(const [f,t,a] of q){try{f.apply(t,a)}catch(e){wErr(e)}}}
+function merk(f,t,a){Q.push([f,t,a]);WT.n.gehalten++;if(Q.length>60)Q.shift();if(!iv)iv=setInterval(abspielen,60)}
+if(typeof sfx==='function'){const s0=sfx;sfx=function(n){if(halten()&&!FREI[n]){merk(s0,this,arguments);return}return s0.apply(this,arguments)}}
+if(typeof toast==='function'){const t0=toast;toast=function(){if(halten()){merk(t0,this,arguments);return}return t0.apply(this,arguments)}}
+if(typeof banner==='function'){const b0=banner;banner=function(){if(halten()){merk(b0,this,arguments);return}return b0.apply(this,arguments)}}
+if(typeof chooseEvent==='function'){const c0=chooseEvent;chooseEvent=function(){tief++;try{return c0.apply(this,arguments)}finally{tief--;if(Q.length&&!iv)iv=setInterval(abspielen,60)}}}
+/* der Lande-Klang selbst darf durch */
+if(typeof ev2LandFx==='function'){const l0=ev2LandFx;ev2LandFx=function(){const a=WT.aus;WT.aus=1;try{return l0.apply(this,arguments)}finally{WT.aus=a;WT.nach=performance.now()+260}}}
+}catch(e){console.error('wurfton',e);window.__hsWURFTON={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/wurfton» */
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================

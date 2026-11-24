@@ -72,6 +72,7 @@
   }
   const load0 = Z.loadArea;
   Z.loadArea = function () { const r = load0.apply(this, arguments); try { setup(Z.level); } catch (e) { console.error(e); } return r; };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "tagebuch", save: () => ({ page, signs, scouts, lvRef }), load: s => { ({ page, signs, scouts, lvRef } = s); } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
 
   /* ---------- Lesen ---------- */
   function pageHTML(i, fresh) {

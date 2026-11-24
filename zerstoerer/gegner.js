@@ -127,7 +127,7 @@
       atks: [{ k: "summon", r: [0, 260], pre: 0.8, act: 0.05, post: 0.5, cd: 4, spawn: ["spinnchen", "spinnchen"], max: 5, sfx: "slime" }], death: "spiders" },
     /* ---------------- Runenschmiede ---------------- */
     runenfunke: { n: ["Runenfunke", "Rune Spark"], shape: "wisp", c: "#ffb040", t: "#fff0c0", w: 10, h: 10, hp: 0.6, dmg: 0.9, spd: 70, ai: "flyer", fly: true, keep: [80, 160], sight: 240, gold: 4, metal: false,
-      atks: [{ k: "shoot", proj: "e_funke", n: 3, gap: 0.18, r: [30, 240], pre: 0.6, act: 0.4, post: 0.5, cd: 1.8, sfx: "rune" }] },
+      atks: [{ k: "shoot", proj: "e_funke", n: 3, gap: 0.18, r: [30, 240], pre: 0.6, act: 0.4, post: 0.5, cd: 2.3 /* W9 R16: 1,8 → 2,3 (Schmiede: Nicht-Boss-Schaden 1,85 LP/min statt ~1,2 wie übrige Stufen) */, sfx: "rune" }] },
     runenwaechter: { n: ["Runenwächter", "Rune Warden"], shape: "golem", c: "#5a6070", t: "#ffb040", size: 1.5, w: 20, h: 32, hp: 4, dmg: 1.6, spd: 50, ai: "walker", armor: 0.3, metal: true, heavy: true, poise: 0.4, sight: 200, gold: 18, immune: ["bleed", "poison"],
       atks: [{ k: "slam", r: [0, 44], pre: 0.8, act: 0.12, post: 0.7, cd: 1, box: [-10, -36, 54, 36], armor: true, wave: true, sfx: "quake", hitSfx: "hitHeavy", glyph: "!!" },
              { k: "beam", r: [40, 260], pre: 0.9, act: 0.4, post: 0.6, cd: 3.5, sfx: "rune", col: "rgba(255,170,60,.85)", w: 0.7 }] },
@@ -136,7 +136,7 @@
              { k: "hit", r: [0, 32], pre: 0.45, act: 0.1, post: 0.45, cd: 0.7, box: [-2, -20, 32, 20], sfx: "axe", hitSfx: "hitMetal" },
              { k: "invis", r: [60, 220], pre: 0.4, act: 0.05, post: 0.1, cd: 6, sfx: "shadow", w: 0.4 }] },
     duergarArmbrust: { n: ["Duergar-Armbrustschütze", "Duergar Crossbowman"], shape: "duergar", c: "#4a4248", t: "#c8501a", skin: "#7a7a82", xbow: 1, w: 12, h: 19, hp: 1.1, dmg: 1.1, spd: 70, ai: "ranged", keep: [100, 220], sight: 260, gold: 10, metal: true,
-      atks: [{ k: "shoot", proj: "e_bolzen", r: [50, 280], pre: 0.7, act: 0.05, post: 0.4, cd: 1.4, sfx: "xbow", aimLine: true, eff: { burn: 1 } }] },
+      atks: [{ k: "shoot", proj: "e_bolzen", r: [50, 280], pre: 0.7, act: 0.05, post: 0.4, cd: 1.8 /* W9 R16: 1,4 → 1,8 (größter Einzelposten in der Schmiede) */, sfx: "xbow", aimLine: true, eff: { burn: 1 } }] },
     schmiedegeist: { n: ["Schmiedegeist", "Forge Spirit"], shape: "wraith", c: "#4a2a1a", t: "#ff8a2a", w: 13, h: 22, hp: 1.4, dmg: 1.2, spd: 80, ai: "phase", fly: true, ghost: true, sight: 230, gold: 8, immune: ["burn", "poison", "bleed"],
       atks: [{ k: "spray", r: [0, 70], pre: 0.6, act: 0.6, post: 0.5, cd: 2.2, len: 70, sfx: "fireBig", col: "rgba(255,150,50,.6)", eff: { burn: 1 } },
              { k: "teleport", r: [0, 200], pre: 0.3, act: 0.05, post: 0.2, cd: 3, sfx: "fire", w: 0.6 }] },
@@ -287,7 +287,7 @@
     e.dmgMul = DMG * (d.dmg || 1) * Z.BAL.enemyDmg(tier) * Z.BAL.skullDmg(run.skulls || 0);
     if (o.elite) {
       e.elite = Z.R.pick(Object.keys(ELITE));
-      hp *= 5.2 /* 5. Runde 4,6 → 5,2 (Ziel 3–10 s) */ /* W9: 3,4 → 3,8 (Elites fielen in 0,4–7 s); 3. Runde → 4,2 (K6: 1–6 s); 4. Runde → 4,6 (K7: 0,6–6,6 s) */; e.dmgMul *= 1.3; e.size *= 1.18; e.w = Math.round(e.w * 1.18); e.h = Math.round(e.h * 1.18); e.x = x - e.w / 2; e.y = y - e.h;
+      hp *= 6.0 /* 8. Runde 5,2 → 6,0 (K12 Median 1,4–5,1 s) */ /* 5. Runde 4,6 → 5,2 (Ziel 3–10 s) */ /* W9: 3,4 → 3,8 (Elites fielen in 0,4–7 s); 3. Runde → 4,2 (K6: 1–6 s); 4. Runde → 4,6 (K7: 0,6–6,6 s) */; e.dmgMul *= 1.3; e.size *= 1.18; e.w = Math.round(e.w * 1.18); e.h = Math.round(e.h * 1.18); e.x = x - e.w / 2; e.y = y - e.h;
       if (e.elite === "gepanzert") e.armorUp = 0;
     }
     if (d.boss) hp = HP * d.hp * Z.BAL.enemyHp(tier) * Z.BAL.skullHp(run.skulls || 0) * (Z.BAL.bossHp ? Z.BAL.bossHp(tier, id) : 1); /* W6: bossHp aus ausgleich.js */
@@ -429,6 +429,23 @@
     if (!KG(e, "alarm") && e.def.snd && Z.R() < 0.6) A.play(e.def.snd, { x: e.x, y: e.y, vol: 0.4 });
   }
   Z.enemyAlarm = alarm; Z.enemySuspect = suspect;
+  /* W17 Alarm: „Alarm!“/„?!“ über einer Figur höchstens einmal je Wach-Phase (Merker, beim Beruhigen gelöscht) und zusätzlich
+     mit Abklingzeit je Figur (Alarm 8 s wie leben.js R19, „?!“ SUS_T); gar nicht erst gezeigt für Figuren außerhalb des Bildes
+     oder auf einer anderen Ebene ohne Sichtlinie zu Ezekiel. Vorher: flackernde Wachheit/Kettenrufe → Säulen aus „Alarm!“/„?!“.
+     Nur die Anzeige – Ruf, Klang und Alarmierung bleiben. Auch für leben.js (Z.enemyAlarmText). */
+  const AL_CD = { "Alarm!": 8, "?!": SUS_T };
+  function alarmText(e, txt, col, dy) {
+    if (!e || e.dead) return false;
+    const k = txt === "?!" ? "_qPh" : "_alPh", now = performance.now() / 1000, tk = k + "T";
+    if (e[k] || now - (e[tk] || -99) < (AL_CD[txt] || 5)) return false;
+    e[k] = true; e[tk] = now;
+    const cx = e.x + e.w / 2, cm = Z.cam, P = Z.player;
+    if (cm && (cx < cm.x - 24 || cx > cm.x + cm.w + 24 || e.y < cm.y - 40 || e.y > cm.y + cm.h + 20)) return false;
+    if (P && Math.abs(e.y + e.h - (P.y + P.h)) > 56 && !W.los(cx, e.y + 4, P.x + P.w / 2, P.y + 6)) return false;
+    FX.text(cx, e.y - (dy || 10), txt, col);
+    return true;
+  }
+  Z.enemyAlarmText = alarmText;
   /* Ruf: Verbündete mit Sichtlinie werden (leicht verzögert) alarmiert, gedämpft hinter Wänden nur misstrauisch */
   function shout(e) {
     const CR = e.def.callR || 230;
@@ -447,7 +464,7 @@
     }
     if (n) {
       FX.ring(ex, e.y + 2, 30, "#ffb070", 0.45, 2); FX.ring(ex, e.y + 2, 18, "#ff8a5a", 0.3, 1.5);
-      FX.text(ex, e.y - 14, L(["Alarm!", "Alarm!"]), "#ff8a6a");
+      alarmText(e, L(["Alarm!", "Alarm!"]), "#ff8a6a", 14); /* W17 Alarm */
       A.play(e.def.undead ? "undead" : "monster", { vol: 0.3, x: e.x, rate: 0.85 });
     }
   }
@@ -501,9 +518,13 @@
     if (e.seeT <= 0) { e.seeT = PERC_DT + Z.R() * 0.04; e._pv = perceive(e, P); }
     const pv = e.lostT > 0 ? 0 : e._pv || 0, sees = pv === 2;
     if (e.lostT > 0) e.lostT -= dt;
+    /* W17 Alarm: von außen geweckt (Treffer durch Geschoss/Gefahr/Verbündete, leben.js, Ereignisse – ohne alarm()) → die Zeit ohne
+       Sicht zählt ab jetzt; vorher blieb lostSight aus der letzten Phase stehen (> LOSE_T) und die Figur beruhigte sich im selben
+       Bild wieder: Wachheit flackerte bis 60×/s, jede neue Phase durfte wieder rufen */
+    if (e.aware && !e._wasAware) e.lostSight = 0;
     if (sees) { e.lkx = P.x + P.w / 2; e.lky = P.y + P.h; e.lostSight = 0; }
     /* Ruf-Alarm von einem Kameraden */
-    if (e.pendAl > 0) { e.pendAl -= dt; if (e.pendAl <= 0 && !e.aware) { alarm(e, "call"); FX.text(e.x + e.w / 2, e.y - 10, "?!", "#e8c890"); } }
+    if (e.pendAl > 0) { e.pendAl -= dt; if (e.pendAl <= 0 && !e.aware) { alarm(e, "call"); alarmText(e, "?!", "#e8c890", 10); } }
     if (!e.aware) {
       if (sees) alarm(e, "sight");
       else if (pv === 1) suspect(e, P.x + P.w / 2, P.y + P.h, SUS_T);
@@ -511,6 +532,7 @@
       e.lostSight = (e.lostSight || 0) + dt;
       if (!locked(e) && (e.lostSight > LOSE_T || P.invis > 0 || e.lostT > 0)) {
         e.aware = false; e.alertT = 0; e.called = false; e._wasAware = false; e.surprised = false; /* beruhigt sich → kann wieder überrumpelt werden */
+        e._alPh = false; e._qPh = false; /* W17 Alarm: neue Phase darf wieder „Alarm!“/„?!“ zeigen (Abklingzeit gilt weiter) */
         suspect(e, e.lkx != null ? e.lkx : P.x + P.w / 2, e.lky != null ? e.lky : P.y + P.h, SUS_T);
       }
     }
@@ -1028,7 +1050,7 @@
     if (!o || o.dead || o.aware || e.fetchT <= 0) { e.fetchDone = true; e.fetchO = null; return false; }
     const ddx = o.x + o.w / 2 - (e.x + e.w / 2);
     if (Math.abs(ddx) < 26) {
-      alarm(o, "call"); o.lkx = P.x + P.w / 2; o.lky = P.y + P.h; FX.text(o.x + o.w / 2, o.y - 10, "?!", "#e8c890"); A.play("rat", { x: e.x, vol: 0.6, rate: 1.5 });
+      alarm(o, "call"); o.lkx = P.x + P.w / 2; o.lky = P.y + P.h; alarmText(o, "?!", "#e8c890", 10); /* W17 Alarm */ A.play("rat", { x: e.x, vol: 0.6, rate: 1.5 });
       e.fetchDone = true; e.fetchO = null; return false;
     }
     moveToward(e, dt, U.sign(ddx), 1.3); e.face = U.sign(ddx) || e.face;

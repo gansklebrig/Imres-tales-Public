@@ -203,7 +203,10 @@
     const c = (A.ctx = new AC());
     A.out = c.createDynamicsCompressor(); A.out.threshold.value = -14; A.out.ratio.value = 4; A.out.connect(c.destination);
     A.master = c.createGain(); A.master.gain.value = A.vol.master; A.master.connect(A.out);
-    A.sfx = c.createGain(); A.sfx.gain.value = A.fxAn() ? A.vol.sfx : 0; A.sfx.connect(A.master);
+    A.sfx = c.createGain(); A.sfx.gain.value = A.fxAn() ? A.vol.sfx : 0;
+    /* R9 Gesamtmischung: Effekte-Dichte ausgleichen („Fader-Reiten“, klang.js stellt es ~10× je Sekunde nach der Zahl
+       gleichzeitiger Effekte): dichte Kampfphasen bis −4 dB, damit Kampfbeginn/-ende keine Sprünge > 4 dB machen */
+    A.ride = c.createGain(); A.ride.gain.value = 1; A.sfx.connect(A.ride); A.ride.connect(A.master);
     A.mus = c.createGain(); A.mus.gain.value = A.musAn() ? A.vol.music : 0; A.mus.connect(A.master);
     A.amb = c.createGain(); A.amb.gain.value = A.fxAn() ? A.vol.amb : 0; A.amb.connect(A.master);
     /* Hall für Höhlen und Hallen: synthetische Impulsantwort */
@@ -212,6 +215,9 @@
     const len = Math.floor(c.sampleRate * (Z.gq && Z.gq.lean ? (Z.gq.mini ? 0.8 : 1.3) : 2.4)), ir = c.createBuffer(2, len, c.sampleRate);
     for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2); }
     A.verb.buffer = ir; A.verb.connect(A.verbGain); A.verbGain.connect(A.master);
+    /* R19: Hall-Sendewege hinter den Lautstärkereglern – vorher liefen Effekt- und Musik-Hall an Musik-/Effekte-Regler vorbei
+       (bei „alles aus“ blieb ein Rest von −44 dB) */
+    A.verbS = c.createGain(); A.verbM = c.createGain(); A.verbA = c.createGain(); for (const n of [A.verbS, A.verbM, A.verbA]) n.connect(A.verb);
     /* Dämpfung bei wenig Leben / Pause: Tiefpass über allem */
     A.lp = c.createBiquadFilter(); A.lp.type = "lowpass"; A.lp.frequency.value = 20000;
     A.master.disconnect(); A.master.connect(A.lp); A.lp.connect(A.out);
@@ -219,9 +225,11 @@
        (gemessen ≤ 0,3 dB); gegen seltene Spitzen aus vielen gleichzeitigen Treffern/Stingern schützt erst dieser */
     A.lim = c.createDynamicsCompressor(); A.lim.threshold.value = -1.5; A.lim.knee.value = 0; A.lim.ratio.value = 20; A.lim.attack.value = 0.002; A.lim.release.value = 0.12;
     A.out.disconnect(); A.out.connect(A.lim); A.lim.connect(c.destination);
-    A.ok = true;
+    A.verbVol(); A.ok = true;
   };
-  A.applyVol = () => { if (!A.ctx) return; A.master.gain.value = A.vol.master; A.sfx.gain.value = A.fxAn() ? A.vol.sfx : 0; A.mus.gain.value = A.musAn() ? A.vol.music : 0; A.amb.gain.value = A.fxAn() ? A.vol.amb : 0; };
+  A.applyVol = () => { if (!A.ctx) return; A.master.gain.value = A.vol.master; A.sfx.gain.value = A.fxAn() ? A.vol.sfx : 0; A.mus.gain.value = A.musAn() ? A.vol.music : 0; A.amb.gain.value = A.fxAn() ? A.vol.amb : 0; A.verbVol(); };
+  /* Hall-Sendewege folgen den Reglern (Effekte relativ zu 0,9, Musik zu 0,55, Kulisse zu 0,7 – den Vorgaben, auf die der Hall abgestimmt ist) */
+  A.verbVol = () => { if (!A.verbS) return; A.verbS.gain.value = A.fxAn() ? A.vol.sfx / 0.9 : 0; A.verbM.gain.value = A.musAn() ? A.vol.music / 0.55 : 0; A.verbA.gain.value = A.fxAn() ? A.vol.amb / 0.7 : 0; };
   A.setVerb = v => { if (A.ctx) A.verbGain.gain.setTargetAtTime(v, A.ctx.currentTime, 0.4); };
   A.muffle = f => { if (A.ctx) A.lp.frequency.setTargetAtTime(f, A.ctx.currentTime, 0.12); };
   A.load = path => {
@@ -325,13 +333,31 @@
     const key = name + (o.tag || "");
     if (A.lastPlay[key] && now - A.lastPlay[key] < (o.gap != null ? o.gap : 0.035)) return; /* nicht zu oft dasselbe */
     A.lastPlay[key] = now;
+    /* R13: Häufung desselben Geräuschs (z. B. 16 Splitter einer Nova, Glas im Sekundentakt): ab dem 4. Mal binnen 0,4 s
+       leiser, ab dem 9. still – der erste Schlag bleibt voll, die Kaskade wird zum Rieseln statt zum Dauerfeuer */
+    /* R19 Warnklänge (Telegrafie: Gegner-Ausholen, Boss-Großangriff im Ansatz, Fallen, Einsturz) kommen immer durch: keine Häufungs-/
+       Gedränge-Dämpfung, keine Handheld-Grenze; beim Boss-Ansatz weicht die Musik kurz */
+    const bmv = Z.boss && Z.boss.mv, warn = !!(o.warn || (bmv && bmv.stage === "pre" && (bmv.t || 0) < 0.05 && !o.tag));
+    if (warn && bmv && bmv.stage === "pre" && Z.music && Z.music.duck && !(A.warnDuck > now - 0.5)) { A.warnDuck = now; Z.music.duck(0.35, 0.5); }
+    if (warn) o = Object.assign({}, o, { must: true });
+    const hd = A.dense || (A.dense = {}), h = hd[key] && now - hd[key].t < 0.4 ? hd[key] : (hd[key] = { t: now, n: 0 });
+    h.n++; let dense = h.n <= 3 ? 1 : h.n <= 8 ? 0.55 : 0;
+    /* R19 Dauerfeuer über längere Zeit (Botlauf: „monster“ bis 60×/s, Netz 6×/s): mehr als 10 Aufrufe in einer Sekunde → für den Rest
+       der Sekunde höchstens alle 0,25 s und leiser; die ersten bleiben voll, Warnklänge ausgenommen */
+    const hs = A.denseS || (A.denseS = {}), w1 = hs[key] && now - hs[key].t < 1 ? hs[key] : (hs[key] = { t: now, n: 0, last: -9 });
+    w1.n++; if (w1.n > 10 && !o.must) { if (now - w1.last < 0.25) return; dense = Math.min(dense || 0.55, 0.55); }
+    w1.last = now;
+    if (!dense && !o.must) return;
     const path = list[Math.floor(Math.random() * list.length)];
     const b = A.buf[path];
     if (!b) { if (b === undefined) A.load(path); return; }
     /* Handheld: höchstens 10 (minimal 7) Effekte gleichzeitig – der Audio-Thread der kleinen ARM-Kerne kommt sonst nicht nach */
     const q = Z.gq || {};
     if (q.lean && A.live >= (q.mini ? 7 : 10) && !o.must) return;
-    let vol = o.vol == null ? 1 : o.vol, pan = o.pan || 0;
+    /* R15: Gedränge – klingen schon mehr als 12 Effekte (Desktop ohne Stimmengrenze, späte Läufe mit Bogen/Wurfmessern/Krits:
+       bis 32 gleichzeitig, Bugbear-Kampf -11 LUFS/0 dBFS), wird jeder neue Effekt um √(12/live) leiser; Handheld (Grenze 10/7) unberührt */
+    const crowd = A.live > 12 && !o.must ? Math.sqrt(12 / A.live) : 1;
+    let vol = (o.vol == null ? 1 : o.vol) * (o.must ? 1 : dense) * crowd, pan = o.pan || 0;
     if (o.x != null && Z.cam) {
       const dx = o.x - (Z.cam.x + Z.cam.w / 2), dy = (o.y || 0) - (Z.cam.y + Z.cam.h / 2);
       pan = U.clamp(dx / (Z.cam.w * 0.6), -0.9, 0.9);
@@ -353,7 +379,7 @@
       /* „Handheld minimal“: Hall über wenige gemeinsame Sende-Wege (gestuft) statt eines eigenen Gain-Knotens je Geräusch
          (A.bundleVerb: Prüfschalter für Vorher/Nachher-Messungen, sonst nicht gesetzt) */
       if (A.bundleVerb != null ? A.bundleVerb : q.mini) g.connect(verbSend(vv));
-      else { const vg = A.ctx.createGain(); vg.gain.value = vv; g.connect(vg); vg.connect(A.verb); }
+      else { const vg = A.ctx.createGain(); vg.gain.value = vv; g.connect(vg); vg.connect((o.bus === A.amb ? A.verbA : o.bus === A.mus ? A.verbM : A.verbS) || A.verb); }
     }
     A.live = (A.live || 0) + 1; s.onended = () => { A.live--; };
     const t0 = now + (isFinite(o.delay) ? Math.max(0, o.delay) : 0);
@@ -368,7 +394,7 @@
     let k = 0; for (let i = 1; i < VSTEP.length; i++) if (Math.abs(VSTEP[i] - v) < Math.abs(VSTEP[k] - v)) k = i;
     if (A.vsendCtx !== A.ctx) { A.vsend = []; A.vsendCtx = A.ctx; } /* neuer Kontext (z. B. Prüfstand mit OfflineAudioContext): Sende-Wege neu anlegen */
     const S = A.vsend;
-    if (!S[k]) { S[k] = A.ctx.createGain(); S[k].gain.value = VSTEP[k]; S[k].connect(A.verb); }
+    if (!S[k]) { S[k] = A.ctx.createGain(); S[k].gain.value = VSTEP[k]; S[k].connect(A.verbS || A.verb); }
     return S[k];
   }
   /* Endlosschleifen (Geräuschkulisse der Bühne): mit Überblendung */

@@ -669,6 +669,607 @@
       "#######--#....#--#######",
       "#######..#....#..#######",
       "##########....##########"] },
+    /* ---------- W13 R6: Gebietsvorlagen (bio: nur dort) – eigenes Spielgefühl je Gebiet, siehe /home/claude/test/w13_karte/r6/neue_tpl.py ---------- */
+    { n: "fasslager", bio: ["keller", "hafen"], pk: true, r: [
+      "########################",
+      "#......................#",
+      "#o.bb.....w.......bb...#",
+      "####..............##...#",
+      "#......----..----......#",
+      "#..........F...........#",
+      "#.b..................b.#",
+      "#.##..--........--..##.#",
+      "........................",
+      "........................",
+      "..E...................E.",
+      "########################",
+      "########################",
+      "########################"] },
+    { n: "weinregal", bio: ["keller"], r: [
+      "##########....##########",
+      "#......................#",
+      "#ob.b.b...........b.b..#",
+      "#-----........H...-----#",
+      "#.............H........#",
+      "#.....b.b.....H..b.....#",
+      "#....-----....H.-----..#",
+      "#.............H........#",
+      "..............H.........",
+      "..............H.........",
+      "..E...b.b.....H....E....",
+      "########################",
+      "########################",
+      "########################"] },
+    { n: "zisterne", bio: ["keller", "verlies"], pk: true, r: [
+      "########################",
+      "#......................#",
+      "#.........F............#",
+      "#......................#",
+      "#...----........----...#",
+      "#......................#",
+      "#..........--..........#",
+      "#......................#",
+      "........................",
+      "........................",
+      "..E..................E..",
+      "####qqq#qqq#qqq#qqqq####",
+      "####qqq#qqq#qqq#qqqq####",
+      "########################"] },
+    { n: "zweigalerie", bio: ["hallen"], r: [
+      "##########....##########",
+      "#......................#",
+      "#..w......L.......w....#",
+      "#......................#",
+      "#.E..................E.#",
+      "#------...--..--...----#",
+      "#......................#",
+      "#......................#",
+      "........................",
+      "........................",
+      "...E.....b....b.....E...",
+      "########################",
+      "########################",
+      "########################"] },
+    { n: "thronsaal", bio: ["hallen", "torhof"], r: [
+      "########################",
+      "#......................#",
+      "#...w......T.......w...#",
+      "#.........###..........#",
+      "#.........#.#..........#",
+      "#..##.............##...#",
+      "#..##.....F.......##...#",
+      "#..##..----..----.##...#",
+      "...##.............##....",
+      "...##.............##....",
+      "..E##......E......##.E..",
+      "#####..##.....##..######",
+      "########################",
+      "########################"] },
+    { n: "bankett", bio: ["hallen", "keller"], r: [
+      "########################",
+      "#......................#",
+      "#....w.....L.....w.....#",
+      "#......................#",
+      "#......................#",
+      "#.....F................#",
+      "#......................#",
+      "#......................#",
+      "........................",
+      "...b................b...",
+      "..E.----------------..E.",
+      "########################",
+      "########################",
+      "########################"] },
+    { n: "zellengang", bio: ["verlies"], r: [
+      "########################",
+      "#.#..#..#..#..#..#..#..#",
+      "#.#.E#..#.T#..#.E#..#..#",
+      "#.#--#..#--#..#--#..#..#",
+      "#......................#",
+      "#......................#",
+      "#..........F...........#",
+      "#...---..........---...#",
+      "........................",
+      "........................",
+      "..E...........k......E..",
+      "########################",
+      "########################",
+      "########################"] },
+    { n: "folterkeller", bio: ["verlies", "schmiede"], pk: true, r: [
+      "##########....##########",
+      "#......................#",
+      "#..p..............p....#",
+      "#......................#",
+      "#......----..----......#",
+      "#......................#",
+      "#......................#",
+      "#..--..............--..#",
+      "........................",
+      "........................",
+      "..E......zzzzzz......E..",
+      "########################",
+      "########################",
+      "########################"] },
+    { n: "wagenhof", bio: ["torhof"], r: [
+      "########################",
+      "#......................#",
+      "#......w.........w.....#",
+      "#......................#",
+      "#.........----.........#",
+      "#......................#",
+      "#...bb.............bb..#",
+      "#..----...........----.#",
+      "........................",
+      "........................",
+      "..E..bb....bbb....bb.E..",
+      "########################",
+      "########################",
+      "########################"] },
+    { n: "zugbruecke", bio: ["torhof", "wehrgang"], pk: true, r: [
+      "########################",
+      "#......................#",
+      "#....w.............w...#",
+      "#......................#",
+      "#......................#",
+      "#..........F...........#",
+      "#......................#",
+      "#......................#",
+      "........................",
+      "........................",
+      "..E..................E..",
+      "####mmmmmmmmmmmmmmmm####",
+      "####^^^^^^^^^^^^^^^^####",
+      "########################"] },
+    { n: "schiessscharten", bio: ["wehrgang", "zinnen"], pk: true, r: [
+      "########################",
+      "#......................#",
+      "#..w.......w........w..#",
+      "#......................#",
+      "#......................#",
+      "#####..............#####",
+      "#####>............<#####",
+      "#####..............#####",
+      "........................",
+      "........................",
+      "..E.......--.........E..",
+      "########################",
+      "########################",
+      "########################"] },
+    { n: "zinnenpfad", bio: ["wehrgang", "zinnen", "sturm"], r: [
+      "##########....##########",
+      "#......................#",
+      "#......................#",
+      "#.....----.....----....#",
+      "#......................#",
+      "#..----.....F.....----.#",
+      "#......................#",
+      "#.......----..----.....#",
+      "........................",
+      "........................",
+      "..E.##....##..##....##E.",
+      "######..####..####..####",
+      "######..####..####..####",
+      "########################"] },
+    { n: "wachturmtreppe", bio: ["wehrgang", "glocken", "sturm"], r: [
+      "##########....##########",
+      "#..........H...........#",
+      "#..........H.......w...#",
+      "#.....-----H----.......#",
+      "#..........H...........#",
+      "#..E.......H...........#",
+      "#.....-----H-----......#",
+      "#..........H...........#",
+      "...........H............",
+      "...........H............",
+      "..E........H.........E..",
+      "########...H...#########",
+      "##########.H..##########",
+      "##########....##########"] },
+    { n: "windkante", bio: ["zinnen", "sturm"], pk: true, r: [
+      "########################",
+      "#......................#",
+      "#......................#",
+      "#..........F...........#",
+      "#......................#",
+      "#......................#",
+      "#......cc....cc........#",
+      "#......................#",
+      "........................",
+      "........................",
+      "..E..................E..",
+      "#####cc###cccc###cc#####",
+      "#####AA###AAAA###AA#####",
+      "#####AA###AAAA###AA#####"] },
+    { n: "truemmerfeld", bio: ["sturm", "torhof"], r: [
+      "########################",
+      "#......................#",
+      "#...........w..........#",
+      "#......................#",
+      "#......##..............#",
+      "#.....####.....##......#",
+      "#..............##......#",
+      "#..##.....---......##..#",
+      "...##..............##...",
+      "........................",
+      "..E....b.##....b.....E..",
+      "########################",
+      "########################",
+      "########################"] },
+    { n: "kai", bio: ["hafen", "see"], pk: true, r: [
+      "########################",
+      "#......................#",
+      "#...w..............w...#",
+      "#......................#",
+      "#......................#",
+      "#.........F............#",
+      "#......................#",
+      "#......----..----......#",
+      "........................",
+      "........................",
+      "..E.bb................E.",
+      "######mmmmmmmmmmmm######",
+      "######~~~~~~~~~~~~######",
+      "########################"] },
+    { n: "stelzensteg", bio: ["hafen", "see"], r: [
+      "########################",
+      "#......................#",
+      "#......................#",
+      "#.........F............#",
+      "#......................#",
+      "#....---.......---.....#",
+      "#......................#",
+      "#........---...........#",
+      "........................",
+      "........................",
+      "..E.................E...",
+      "####--.--.--.--.--.-####",
+      "####qqqqqqqqqqqqqqqq####",
+      "########################"] },
+    { n: "korallengrotte", bio: ["see", "schlund"], r: [
+      "########################",
+      "###....##......##....###",
+      "##......................",
+      "#.........F.............",
+      "#....##........##.....##",
+      "#...####..----.####...##",
+      "#......................#",
+      "#..--..............--..#",
+      "........................",
+      "........................",
+      "..E......##..##......E..",
+      "###....######.#....#####",
+      "#######~~~~~~~~~########",
+      "########################"] },
+    { n: "tempelstufen", bio: ["see", "glut"], r: [
+      "##########....##########",
+      "#......................#",
+      "#......................#",
+      "#.........####.........#",
+      "#.......########.......#",
+      "#......................#",
+      "#.....##########.......#",
+      "#....############......#",
+      "........................",
+      "........................",
+      "..E..................E..",
+      "########################",
+      "########################",
+      "########################"] },
+    { n: "glockenstuhl", bio: ["glocken"], r: [
+      "##########....##########",
+      "#......................#",
+      "#....p.....H......p....#",
+      "#..........H...........#",
+      "#..-----...H...-----...#",
+      "#..........H...........#",
+      "#.......---H---........#",
+      "#..........H...........#",
+      "...........H............",
+      "...........H............",
+      "..E........H.........E..",
+      "########################",
+      "########################",
+      "########################"] },
+    { n: "uhrwerk", bio: ["glocken", "schmiede"], pk: true, r: [
+      "########################",
+      "#......................#",
+      "#...w..............w...#",
+      "#......................#",
+      "#....--..........--....#",
+      "#......................#",
+      "#........mmmmmmm.......#",
+      "#......................#",
+      "........................",
+      "........................",
+      "..E......zzzzzz......E..",
+      "########################",
+      "########################",
+      "########################"] },
+    { n: "spinnennetz", bio: ["schlund"], pk: true, r: [
+      "########################",
+      "#......................#",
+      "#......................#",
+      "#.........F............#",
+      "#......................#",
+      "#...---....---....---..#",
+      "#......................#",
+      "#......---.....---.....#",
+      "........................",
+      "........................",
+      "..E..................E..",
+      "####....----....----####",
+      "####AAAAAAAAAAAAAAAA####",
+      "####AAAAAAAAAAAAAAAA####"] },
+    { n: "tropfsteinhoehle", bio: ["schlund", "keller"], r: [
+      "########################",
+      "##.#..#.##...#..##.#..##",
+      "#..#....#.....#...#....#",
+      "#.......F..............#",
+      "#......................#",
+      "#.....###......###.....#",
+      "#....#####....#####....#",
+      "#......................#",
+      "........................",
+      "........................",
+      "..E......##..##......E..",
+      "#####.#######.##.#######",
+      "########################",
+      "########################"] },
+    { n: "foerderband", bio: ["schmiede"], pk: true, r: [
+      "########################",
+      "#......................#",
+      "#....r........r........#",
+      "#......................#",
+      "#......................#",
+      "#.........F............#",
+      "#......................#",
+      "#......................#",
+      "........................",
+      "........................",
+      "..E..................E..",
+      "####mmmmmmmmmmmmmmmm####",
+      "####~~~~~~~~~~~~~~~~####",
+      "########################"] },
+    { n: "schlackerinne", bio: ["schmiede", "glut"], pk: true, r: [
+      "########################",
+      "#......................#",
+      "#......................#",
+      "#..........F...........#",
+      "#......................#",
+      "#......----....----....#",
+      "#......................#",
+      "#..--..............--..#",
+      "........................",
+      "........................",
+      "..E..##..........##..E..",
+      "########~~~##~~~########",
+      "########~~~##~~~########",
+      "########################"] },
+    { n: "ambosshalle", bio: ["schmiede"], r: [
+      "########################",
+      "#......................#",
+      "#...w......p.......w...#",
+      "#......................#",
+      "#......................#",
+      "#..---............---..#",
+      "#......................#",
+      "#.......##....##.......#",
+      "........##....##........",
+      "........................",
+      "..E..b.........b.....E..",
+      "########################",
+      "########################",
+      "########################"] },
+    { n: "lavafluss", bio: ["glut"], pk: true, r: [
+      "########################",
+      "#......................#",
+      "#......................#",
+      "#..........F...........#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "........................",
+      "........................",
+      "..E..................E..",
+      "####~~~###~~~###~~~#####",
+      "####~~~###~~~###~~~#####",
+      "########################"] },
+    { n: "zisterne_o", bio: ["keller", "verlies"], pk: true, r: [
+      "##########....##########",
+      "#......................#",
+      "#.........F............#",
+      "#......................#",
+      "#...----........----...#",
+      "#......................#",
+      "#..........--..........#",
+      "#......................#",
+      "........................",
+      "........................",
+      "..E..................E..",
+      "####qqq#qqq#qqq#qqqq####",
+      "####qqq#qqq#qqq#qqqq####",
+      "########################"] },
+    { n: "zweigalerie_u", bio: ["hallen"], r: [
+      "##########....##########",
+      "#......................#",
+      "#..w......L.......w....#",
+      "#......................#",
+      "#.E..................E.#",
+      "#------...--..--...----#",
+      "#......................#",
+      "#......................#",
+      "........................",
+      "........................",
+      "...E.....b....b.....E...",
+      "##########....##########",
+      "##########....##########",
+      "##########....##########"] },
+    { n: "zellengang_u", bio: ["verlies"], r: [
+      "########################",
+      "#.#..#..#..#..#..#..#..#",
+      "#.#.E#..#.T#..#.E#..#..#",
+      "#.#--#..#--#..#--#..#..#",
+      "#......................#",
+      "#......................#",
+      "#..........F...........#",
+      "#...---..........---...#",
+      "........................",
+      "........................",
+      "..E...........k......E..",
+      "##########....##########",
+      "##########....##########",
+      "##########....##########"] },
+    { n: "wagenhof_o", bio: ["torhof"], r: [
+      "##########....##########",
+      "#......................#",
+      "#......w.........w.....#",
+      "#......................#",
+      "#.........----.........#",
+      "#......................#",
+      "#...bb.............bb..#",
+      "#..----...........----.#",
+      "........................",
+      "........................",
+      "..E..bb....bbb....bb.E..",
+      "########################",
+      "########################",
+      "########################"] },
+    { n: "schiessscharten_o", bio: ["wehrgang", "zinnen"], pk: true, r: [
+      "##########....##########",
+      "#......................#",
+      "#..w.......w........w..#",
+      "#......................#",
+      "#......................#",
+      "#####..............#####",
+      "#####>............<#####",
+      "#####..............#####",
+      "........................",
+      "........................",
+      "..E.......--.........E..",
+      "########################",
+      "########################",
+      "########################"] },
+    { n: "truemmerfeld_o", bio: ["sturm", "torhof"], r: [
+      "##########....##########",
+      "#......................#",
+      "#...........w..........#",
+      "#......................#",
+      "#......##..............#",
+      "#.....####.....##......#",
+      "#..............##......#",
+      "#..##.....---......##..#",
+      "...##..............##...",
+      "........................",
+      "..E....b.##....b.....E..",
+      "########################",
+      "########################",
+      "########################"] },
+    { n: "stelzensteg_o", bio: ["hafen", "see"], r: [
+      "##########....##########",
+      "#......................#",
+      "#......................#",
+      "#.........F............#",
+      "#......................#",
+      "#....---.......---.....#",
+      "#......................#",
+      "#........---...........#",
+      "........................",
+      "........................",
+      "..E.................E...",
+      "####--.--.--.--.--.-####",
+      "####qqqqqqqqqqqqqqqq####",
+      "########################"] },
+    { n: "korallengrotte_o", bio: ["see", "schlund"], r: [
+      "##########....##########",
+      "###....##......##....###",
+      "##......................",
+      "#.........F.............",
+      "#....##........##.....##",
+      "#...####..----.####...##",
+      "#......................#",
+      "#..--..............--..#",
+      "........................",
+      "........................",
+      "..E......##..##......E..",
+      "###....######.#....#####",
+      "#######~~~~~~~~~########",
+      "########################"] },
+    { n: "tempelstufen_u", bio: ["see", "glut"], r: [
+      "##########....##########",
+      "#......................#",
+      "#......................#",
+      "#.........####.........#",
+      "#.......########.......#",
+      "#......................#",
+      "#.....##########.......#",
+      "#....############......#",
+      "........................",
+      "........................",
+      "..E..................E..",
+      "##########....##########",
+      "##########....##########",
+      "##########....##########"] },
+    { n: "glockenstuhl_u", bio: ["glocken"], r: [
+      "##########....##########",
+      "#......................#",
+      "#....p.....H......p....#",
+      "#..........H...........#",
+      "#..-----...H...-----...#",
+      "#..........H...........#",
+      "#.......---H---........#",
+      "#..........H...........#",
+      "...........H............",
+      "...........H............",
+      "..E........H.........E..",
+      "##########....##########",
+      "##########....##########",
+      "##########....##########"] },
+    { n: "spinnennetz_o", bio: ["schlund"], pk: true, r: [
+      "##########....##########",
+      "#......................#",
+      "#......................#",
+      "#.........F............#",
+      "#......................#",
+      "#...---....---....---..#",
+      "#......................#",
+      "#......---.....---.....#",
+      "........................",
+      "........................",
+      "..E..................E..",
+      "####....----....----####",
+      "####AAAAAAAAAAAAAAAA####",
+      "####AAAAAAAAAAAAAAAA####"] },
+    { n: "schlackerinne_o", bio: ["schmiede", "glut"], pk: true, r: [
+      "##########....##########",
+      "#......................#",
+      "#......................#",
+      "#..........F...........#",
+      "#......................#",
+      "#......----....----....#",
+      "#......................#",
+      "#..--..............--..#",
+      "........................",
+      "........................",
+      "..E..##..........##..E..",
+      "########~~~##~~~########",
+      "########~~~##~~~########",
+      "########################"] },
+    { n: "ambosshalle_u", bio: ["schmiede"], r: [
+      "########################",
+      "#......................#",
+      "#...w......p.......w...#",
+      "#......................#",
+      "#......................#",
+      "#..---............---..#",
+      "#......................#",
+      "#.......##....##.......#",
+      "........##....##........",
+      "........................",
+      "..E..b.........b.....E..",
+      "##########....##########",
+      "##########....##########",
+      "##########....##########"] },
   ];
   /* Prüfen und Öffnungen bestimmen */
   TPL.forEach(t => {
@@ -851,7 +1452,8 @@
     let nFree = 0; for (let y = 0; y < gh; y++) for (let x = 0; x < gw; x++) if (!cells[key(x, y)]) nFree++;
     const nSecret = Math.min(3, Math.max(1, Math.round(nFree * 0.08)));
     const target = Math.max(2, Math.round(nFree * (lay.fill != null ? lay.fill : 0.8)) - nSecret);
-    const maxArm = lay.arm || 4;
+    /* W13 R23 (Nutzerwunsch: weniger lange Sackgassen-Wege): Zweige um einen Raum kürzer (mind. 2) – gleiche Füllung, also mehr, aber kürzere Zweige */
+    const maxArm = Z.armKuerzer !== true ? (lay.arm || 4) : Math.max(2, (lay.arm || 4) - 1); /* R23: kürzere Zweige vorerst aus (mehr Sackgassen 108→148) – mit Z.armKuerzer = true einschaltbar */
     let added = 0, armId = 0, guard = 0;
     while (added < target && guard++ < 400) {
       const anchors = [];
@@ -859,7 +1461,7 @@
         const c = cells[k]; if (c.kind === "secret") continue;
         const fn = freeNb(c); if (!fn.length) continue;
         /* lieber vom Hauptweg abzweigen, tiefe Zweige nur selten weiter verlängern */
-        anchors.push({ c, fn, w: c.kind === "path" ? 3 : 1.4 / (1 + c.depth * 0.6) });
+        anchors.push({ c, fn, w: c.kind === "path" ? 3 : 1.4 / (1 + c.depth * (Z.flacheZweige === true ? 1.6 : 0.6)) * (Z.armKuerzer === true && !lay.gentle && c.depth >= 2 ? 0.35 : 1) }); /* R23: Ketten ab Tiefe 2 seltener verlängern */ /* W13 R22: Z.flacheZweige (nur Versuch, aus): brachte kaum kürzere Rückwege und 2 Torhof-Karten mit Ausgang nur per Maximalsprung */
       }
       if (!anchors.length) break;
       let sum = 0; anchors.forEach(a => (sum += a.w));
@@ -885,14 +1487,45 @@
         const end = arm[arm.length - 1];
         const nbs = N4.map(([ex, ey]) => cells[key(end.x + ex, end.y + ey)]).filter(o => o && o !== end.parent && o.arm !== armId && o.kind !== "secret");
         const cand = nbs.filter(o => o.kind !== "path" || Math.abs(o.idx - root.idx) >= 3);
+        let made = false;
         if (cand.length && R.chance(0.5)) {
           const o = R.pick(cand);
           /* Abkürzung nach vorn auf den Hauptweg: Gittertor (waagrecht), sonst offene Schleife */
-          if (o.kind === "path" && o.idx > root.idx && (o.y === end.y || o.y === end.y + 1)) { conn([end.x, end.y], [o.x, o.y], "G"); end.gate = true; }
-          else if (o.kind !== "path" || o.idx < root.idx) conn([end.x, end.y], [o.x, o.y]);
+          if (o.kind === "path" && o.idx > root.idx && (o.y === end.y || o.y === end.y + 1)) { conn([end.x, end.y], [o.x, o.y], "G"); end.gate = true; made = true; }
+          else if (o.kind !== "path" || o.idx < root.idx) { conn([end.x, end.y], [o.x, o.y]); made = true; }
+        }
+        /* W13 R21: lange Zweige (≥ 3 Räume), deren Ende NEBEN oder ÜBER einem späteren Hauptweg-Raum liegt, bekommen immer ein Gittertor
+           mit Hebel auf der Zweigseite – eine Einbahn-Tür zurück auf den Hauptweg (ohne zusätzliche Zufallszüge: übrige Karte bleibt gleich) */
+        if (!made && Z.mehrTore !== false && (end.depth || 0) >= 3) {
+          /* W13 R22 (Nutzerwunsch: wenige Sackgassen): Vorrang 1) späterer Hauptweg daneben/darunter → Gittertor, 2) Hauptweg darüber →
+             Falltür mit Leiter, die sich vom Zweig aus öffnet, 3) früherer Hauptweg oder ein anderer Zweig → offene Schleife */
+          const o = nbs.find(q => q.kind === "path" && q.idx >= root.idx && (q.y === end.y || q.y === end.y + 1));
+          const oben = !o && nbs.find(q => q.kind === "path" && q.idx >= root.idx && q.y === end.y - 1);
+          const offen = !o && !oben && (nbs.find(q => q.kind === "path") || nbs.find(q => q.kind === "side" && q.root && q.root.idx >= root.idx));
+          if (o) { conn([end.x, end.y], [o.x, o.y], "G"); end.gate = true; }
+          else if (oben) { conn([end.x, end.y], [oben.x, oben.y], "G"); end.gate = true; end.gateUnten = true; }
+          else if (offen) conn([end.x, end.y], [offen.x, offen.y]);
         }
       }
       armId++;
+    }
+    /* W13 R22: zweiter Durchgang, wenn alle Zweige stehen – jetzt sind die Nachbarn bekannt (beim Wachsen fehlten sie noch in 2 von 3 Fällen).
+       Tiefe Zweigenden (≥ 3 Nebenräume) ohne zweiten Ausgang bekommen einen Rückweg nach vorn: Gittertor zum späteren Hauptweg (daneben/darunter
+       bzw. Falltür hinauf), sonst eine offene Verbindung zu einem Nachbarzweig, der näher am Hauptweg liegt. */
+    if (Z.mehrTore !== false) {
+      const offenN = c => ["L", "R", "U", "D"].filter(s2 => c.need[s2]).length;
+      const kidsOf = new Map(); for (const k in cells) { const c = cells[k]; if (c.parent) { if (!kidsOf.has(c.parent)) kidsOf.set(c.parent, []); kidsOf.get(c.parent).push(c); } }
+      for (const k in cells) {
+        const end = cells[k]; if (end.kind !== "side" || (end.depth || 0) < 3 || offenN(end) >= 2 || (kidsOf.get(end) || []).some(q => q.kind === "side")) continue;
+        const root = end.root; if (!root) continue;
+        const nbs = N4.map(([ex, ey]) => cells[key(end.x + ex, end.y + ey)]).filter(o => o && o !== end.parent && o.kind !== "secret");
+        const o = nbs.find(q => q.kind === "path" && q.idx >= root.idx && (q.y === end.y || q.y === end.y + 1));
+        const oben = !o && nbs.find(q => q.kind === "path" && q.idx >= root.idx && q.y === end.y - 1);
+        const nah = !o && !oben && nbs.filter(q => q.kind === "side" && q.root && q.root.idx >= root.idx && (q.depth || 0) < end.depth - 1).sort((a, b) => (a.depth || 0) - (b.depth || 0))[0];
+        if (o) { conn([end.x, end.y], [o.x, o.y], "G"); end.gate = true; }
+        else if (oben) { conn([end.x, end.y], [oben.x, oben.y], "G"); end.gate = true; end.gateUnten = true; }
+        else if (nah) conn([end.x, end.y], [nah.x, nah.y]);
+      }
     }
     /* Schleifen und Durchbrüche (siehe addLoops) – vor den Geheimkammern, damit diese hinter rissigen Wänden bleiben */
     addLoops(R, cells, gw, gh, lay, conn, key);
@@ -1035,7 +1668,7 @@
     let best = null, bs = 1e9;
     for (let attempt = 0; attempt < 40; attempt++) {
       const lv = tryGen(biomeId, (seed + attempt * 7919) >>> 0, opts);
-      if (lv && validate(lv)) { lv.attempts = attempt + 1; if (!Z.noEase) ease(lv); settle(lv); plan(lv); specials(lv); if (!Z.noRuneGates) runeGates(lv); unwall(lv); assignRooms(lv); return lv; }
+      if (lv && validate(lv)) { lv.attempts = attempt + 1; if (Z.run) { const u = (Z.run._tplUse = Z.run._tplUse || {}); for (const k in lv.cells) { const t = lv.cells[k].tpl; if (t) u[t] = (u[t] || 0) + 1; } } if (!Z.noEase) ease(lv); settle(lv); plan(lv); specials(lv); if (!Z.noRuneGates) runeGates(lv); cracks(lv); tides(lv); faehrLeitern(lv); if (!Z.noAbkuerzung) abkuerzungen(lv); unwall(lv); assignRooms(lv); if (attempt < 30 && !Z.noEase && !comfyAusgaenge(lv)) continue; /* W13 R23: Ausgang nur per Maximalsprung → nächster Versuch */ return lv; }
       /* Notfall: die beste Karte merken (alle Ausgänge erreichbar, möglichst wenige Festsitz-Stellen) */
       const sc = lv && lv.stuck ? lv.stuck.length : 1e8;
       if (lv && sc < bs) { bs = sc; best = lv; }
@@ -1114,7 +1747,7 @@
       if (g.flut) return; /* Flutkammer (specials): Hebel gesetzt */
       const c = cells[g.branch]; if (!c) return;
       const gx = g.vert ? g.x + 1.5 : g.side < 0 ? g.x : g.x + 1;
-      const sp = spotsOf(c, 2, false).filter(([x, y]) => g.vert ? Math.abs(x - gx) >= 3 && Math.abs(x - gx) <= 9 && y >= g.y0 - 6 && y < g.y0 : Math.abs(x - gx) <= 9 && Math.abs(x - gx) >= 2 && y >= g.y0 - 3 && y <= g.y0 + 4).sort((a, b) => Math.abs(a[0] - gx) - Math.abs(b[0] - gx));
+      const sp = spotsOf(c, 2, false).filter(([x, y]) => g.vert ? Math.abs(x - gx) >= 3 && Math.abs(x - gx) <= 9 && (g.unten ? y > g.y0 + 2 && y <= g.y0 + 10 : y >= g.y0 - 6 && y < g.y0) : Math.abs(x - gx) <= 9 && Math.abs(x - gx) >= 2 && y >= g.y0 - 3 && y <= g.y0 + 4).sort((a, b) => Math.abs(a[0] - gx) - Math.abs(b[0] - gx));
       if (!sp.length) return;
       /* offen geprüft: auch mit offenem Tor darf niemand irgendwo feststecken */
       const old = g.tiles.map(([x, y]) => lv.get(x, y)); g.tiles.forEach(([x, y, v]) => lv.set(x, y, v || 0));
@@ -1534,6 +2167,59 @@
      Beide Räume behalten mindestens zwei andere Ausgänge, kein Raum geht verloren, die bequeme Erreichbarkeit bleibt.
      Prüfschalter: Z.specialForce = true (immer, wenn möglich) / false (nie). Ergebnis: lv.specials, lv.flood. */
   const SPECIAL = (Z.SPECIAL = { wehrgang: "bruecke", zinnen: "bruecke", sturm: "bruecke", hafen: "flut", see: "flut", schmiede: "kran", glut: "kran" });
+  /* W13 R20: Abkürzungen am Ende langer Nebenketten. Messung (r20): 200 Kettenenden mit ≥ 3 Nebenräumen auf 52 Karten; 52 grenzen an einen
+     Hauptweg-Raum, 20 davon liegen direkt DARÜBER. Dort wird ein Fallschacht (2 breit) vom Kettenende in den Hauptweg-Raum gegraben: Der Rückweg
+     schrumpft auf einen Sprung hinab. Geprüft wie die Sonderräume: alle Räume bleiben (bequem) erreichbar, kein Festsitzen, keine Türen/Fallen/Funde
+     im Schacht. Der Schacht ist höher als ein bequemer Sprung – also eine Einbahn-Abkürzung nach unten. */
+  /* W13 R24 (Leiter-Agent, Torhof-Seed 448840687): Leiter endet direkt unter einer Fährstrecke (Kachel 11 – für die Physik Luft, nur die Fähre
+     trägt). Von der Leiterspitze kommt man nicht auf die Fähre (Kopf steckt im Wagen) → Grube ohne Ausweg. Der Prüfer hält 11 für einen Steg und
+     merkt das nicht. Lösung: über jeder solchen Leiterspitze ein fester Absatz (3 Kacheln Steg 2) in der Fährstrecke – von dort steigt man auf die
+     vorbeikommende Fähre wie von jedem Steg. */
+  function faehrLeitern(lv) {
+    const W = lv.W, H = lv.H, g = lv.get; lv.faehrAbsatz = [];
+    for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+      if (g(x, y) !== 11 || g(x, y + 1) !== 4) continue;
+      for (const xx of [x - 1, x, x + 1]) if (g(xx, y) === 11 || g(xx, y) === 0) lv.set(xx, y, 2);
+      lv.faehrAbsatz.push([x, y]);
+    }
+  }
+  function abkuerzungen(lv) {
+    if (!lv.cells || lv.hub || lv.arena || lv.passage) return;
+    const W = lv.W, g = lv.get, cells = Object.keys(lv.cells).map(k => lv.cells[k]), key = (x, y) => x + "," + y;
+    const kids = new Map(); for (const c of cells) if (c.parent) { if (!kids.has(c.parent)) kids.set(c.parent, []); kids.get(c.parent).push(c); }
+    const tiefe = c => { let d = 0, x = c; while (x && x.kind === "side") { d++; x = x.parent; } return d; };
+    const roomsOf = rc => { const s2 = new Set(); for (let i = 0; i < rc.length; i++) if (rc[i]) s2.add(Math.floor((i % W) / CW) + "," + Math.floor(((i / W) | 0) / CH)); return s2; };
+    const comfyRooms = () => { const c = { W, H: lv.H, get: g, start: lv.start, doors: lv.doors, cells: lv.cells }; validate(c, null, true); return roomsOf(c.reach); };
+    if (!validate(lv)) return;
+    const full0 = roomsOf(lv.reach), comfy0 = comfyRooms();
+    const keepOk = () => { if (!validate(lv)) return false; const f1 = roomsOf(lv.reach); for (const k of full0) if (!f1.has(k)) return false; const c1 = comfyRooms(); for (const k of comfy0) if (!c1.has(k)) return false; return true; };
+    const nahDing = (x, y0, y1) => (lv.doors || []).some(d => Math.abs(d.x - x) < 4 && d.y >= y0 - 3 && d.y <= y1 + 3) || (lv.traps || []).some(t => Math.abs(t.x - x) < 3 && t.y >= y0 - 2 && t.y <= y1 + 2) ||
+      (lv.rewards || []).some(r => Math.abs(r.x - x) < 3 && r.y >= y0 - 2 && r.y <= y1 + 2) || (lv.feats || []).some(f => Math.abs(f.x - x) < 3 && (f.y != null ? f.y : f.y0) >= y0 - 2 && (f.y != null ? f.y : f.y0) <= y1 + 2);
+    lv.abkuerzungen = [];
+    for (const c of cells) {
+      if (c.kind !== "side" || (kids.get(c) || []).some(k => k.kind === "side") || tiefe(c) < 3) continue;
+      const unten = lv.cells[key(c.x, c.y + 1)]; if (!unten || unten.kind !== "path") continue;
+      if (c.need.D || unten.need.U) continue; /* schon verbunden (Leiter/Rundweg) – keine Abkürzung nötig */
+      let wurzel = c; while (wurzel && wurzel.kind === "side") wurzel = wurzel.parent;
+      if (!wurzel || (unten.dist || 0) < (wurzel.dist || 0)) continue; /* nur wenn man damit VORAN kommt (nicht hinter die Abzweigung zurück) */
+      const fr = (c.y + 1) * CH - 1; /* untere Randreihe des Kettenendes */
+      for (let x = c.x * CW + 3; x < c.x * CW + CW - 4; x++) {
+        /* oben: Stehplatz auf dem Boden des Kettenendes; darunter nur Fels (1) bis zur Luft im Hauptweg-Raum */
+        let yf = -1; for (let y = fr - 1; y > c.y * CH; y--) if (g(x, y) === 0 && g(x + 1, y) === 0 && g(x, y + 1) === 1 && g(x + 1, y + 1) === 1) { yf = y; break; }
+        if (yf < 0) continue;
+        let y = yf + 1, ok = true; while (y < (c.y + 1) * CH + CH - 2 && (g(x, y) !== 0 || g(x + 1, y) !== 0)) { if (!((g(x, y) === 1 || g(x, y) === 0) && (g(x + 1, y) === 1 || g(x + 1, y) === 0))) { ok = false; break; } y++; }
+        if (!ok || y >= (c.y + 1) * CH + CH - 2 || y - yf - 1 < 2 || y - yf - 1 > 6) continue;
+        if (Math.floor(y / CH) !== c.y + 1) continue; /* Luft muss im Hauptweg-Raum liegen */
+        /* W13 R22 (Balance-Meldung): von unten nicht hochspringbar – Fallhöhe bis zum Boden darunter mindestens 7 Kacheln */
+        { let gy = y; while (gy < lv.H - 2 && g(x, gy + 1) === 0 && g(x + 1, gy + 1) === 0) gy++; if (gy - yf < 7) continue; }
+        if (nahDing(x, yf, y + 6)) continue;
+        const ch = []; for (let yy = yf + 1; yy < y; yy++) for (const xx of [x, x + 1]) if (g(xx, yy) !== 0) { ch.push([xx, yy, g(xx, yy)]); lv.set(xx, yy, 0); }
+        if (keepOk()) { lv.abkuerzungen.push({ x, y0: yf, y1: y, cell: key(c.x, c.y), to: key(unten.x, unten.y) }); break; }
+        for (let i = ch.length - 1; i >= 0; i--) lv.set(ch[i][0], ch[i][1], ch[i][2]); validate(lv);
+      }
+    }
+    validate(lv);
+  }
   function specials(lv) {
     lv.specials = []; const kind = SPECIAL[lv.biome]; if (!kind || !lv.cells) return;
     const R = Z.Rng(((lv.seed || 1) ^ 0x5bec1) >>> 0);
@@ -1619,14 +2305,213 @@
     }
   }
   Z._specials = specials;
+  /* ======================= W13 R5: ZERSTÖRBARE UMGEBUNG („The Destroyer“) =======================
+     Wucht-Risse: rissiges Mauerwerk (Kachel 7), das nur starke Treffer zerschlagen – Wucht-Schläge der Kombos (heavy/spin),
+     Schildstoß, Sturzangriff/Stampfer, Explosionen (erkundung.js filtert leichte Treffer heraus):
+       wand    – Abkürzung zwischen zwei benachbarten Räumen, die im Raumgraph weit auseinander liegen (≥ 4 Räume Umweg)
+       versteck– kleine Kammer in dickem Fels hinter einer rissigen Wand (seitlich) oder unter einem rissigen Boden, mit Lohn
+     Morsche Böden: dünne Steinsimse (eine Kachel dick, Luft darunter), die als Holzbohlen gezeichnet werden und unter einer
+     schweren Landung (Sturz ≥ 4 Kacheln oder Sturzangriff) wegbrechen – Abkürzung nach unten, unten ist schon erreichbar.
+     Jedes Stück wird geprüft: geschlossen ändert sich nichts (7 und 1 sind fest), geöffnet – einzeln und alle zusammen –
+     sitzt niemand fest und alle Ausgänge bleiben erreichbar. Nie auf dem Hauptweg nötig (geschlossen = alter Zustand).
+     Ergebnis: lv.wucht [{k, tiles:[[x,y]], cell, ...}], lv.wuchtSet (Kachel-Indizes), lv.morsch [{x0, x1, y, cell}].
+     Prüfschalter: Z.noCracks = true (keine), Z.crackForce = true (so viele wie möglich, für Tests). */
+  function cracks(lv) {
+    lv.wucht = []; lv.morsch = []; lv.wuchtSet = new Set();
+    if (Z.noCracks || !lv.cells || !lv.reach) return;
+    const R = Z.Rng(((lv.seed || 1) ^ 0xc7ac4) >>> 0), force = !!Z.crackForce;
+    const W = lv.W, H = lv.H, g = lv.get, cells = lv.cells, key = (x, y) => x + "," + y;
+    const cellAt = (x, y) => cells[key(Math.floor(x / CW), Math.floor(y / CH))];
+    const fixed = new Set();
+    for (const rg of lv.runeGates || []) fixed.add(rg.cell);
+    for (const f of lv.feats || []) if (f.t === "lock" || f.t === "trial") fixed.add(f.cell);
+    if (lv.warden && lv.warden.cell) fixed.add(key(lv.warden.cell.x, lv.warden.cell.y));
+    const okCell = c => c && c.kind !== "secret" && !fixed.has(key(c.x, c.y)) && !c.pit;
+    const busy = (x, y) => lv.doors.some(d => Math.abs(d.x - x) < 4 && Math.abs(d.y - y) < 4) || (lv.feats || []).some(f => f.x != null && Math.abs(f.x - x) < 3 && Math.abs(f.y - y) < 3) ||
+      (lv.rewards || []).some(o => Math.abs(o.x - x) < 2 && Math.abs(o.y - y) < 2) || (lv.flood && lv.flood.has(y * W + x));
+    /* alle bisher geöffneten zusammen + das neue: kein Festsitz, Ausgänge erreichbar */
+    const opened = []; /* [x, y, Wert geöffnet, Wert geschlossen] */
+    const testOpen = extra => {
+      const all = opened.concat(extra);
+      for (const [x, y, vo] of all) lv.set(x, y, vo);
+      const okAll = validate(lv);
+      for (const [x, y, , vc] of all) lv.set(x, y, vc);
+      if (!okAll) { validate(lv); return false; }
+      for (const [x, y, vo] of extra) lv.set(x, y, vo);
+      const okOne = validate(lv);
+      for (const [x, y, , vc] of extra) lv.set(x, y, vc);
+      validate(lv); return okOne;
+    };
+    const nWand = force ? 3 : R() < 0.55 ? 1 : R() < 0.5 ? 2 : 0, nVers = force ? 2 : R() < 0.6 ? 1 : 0, nMorsch = force ? 2 : R() < 0.55 ? 1 : 0;
+    /* --- Abkürzungswände --- */
+    if (nWand) {
+      const open = v => v === true || v === "P";
+      const dist = (a, b) => { const D4 = [["L", -1, 0], ["R", 1, 0], ["U", 0, -1], ["D", 0, 1]], d = new Map([[a, 0]]), q = [a]; for (let h = 0; h < q.length; h++) { const c = q[h]; if (c === b) return d.get(c); for (const [s2, dx, dy] of D4) { if (!open(c.need[s2])) continue; const o = cells[key(c.x + dx, c.y + dy)]; if (o && !d.has(o)) { d.set(o, d.get(c) + 1); q.push(o); } } } return 99; };
+      const cand = [];
+      for (const k in cells) {
+        const a = cells[k], b = cells[key(a.x + 1, a.y)];
+        if (!okCell(a) || !okCell(b) || a.need.R) continue;
+        const dd = dist(a, b); if (dd < 4) continue;
+        /* Tunnelhöhe 3 auf irgendeiner Bodenhöhe, auf der beide Räume einen Boden an der Trennwand haben – die kürzeste */
+        const bx = (a.x + 1) * CW; let best = null;
+        for (let y0 = a.y * CH + 2; y0 <= a.y * CH + CH - 5; y0++) {
+          const solidCol = x => g(x, y0) === 1 && g(x, y0 + 1) === 1 && g(x, y0 + 2) === 1;
+          const airCol = x => [0, 1, 2].every(i => g(x, y0 + i) === 0);
+          let lx = bx - 1; while (lx > bx - 9 && solidCol(lx)) lx--;
+          let rx = bx; while (rx < bx + 8 && solidCol(rx)) rx++;
+          if (lx === bx - 1 && rx === bx) continue;
+          if (!airCol(lx) || !airCol(rx) || rx - lx - 1 > 10) continue;
+          let ok = g(lx, y0 + 3) === 1 && g(rx, y0 + 3) === 1 && lv.reach[(y0 + 2) * W + lx] && lv.reach[(y0 + 2) * W + rx];
+          for (let x = lx + 1; x < rx && ok; x++) if (g(x, y0 + 3) !== 1 || g(x, y0 - 1) !== 1) ok = false;
+          if (!ok || busy(lx, y0 + 2) || busy(rx, y0 + 2)) continue;
+          if (!best || rx - lx < best.rx - best.lx) best = { lx, rx, y0 };
+        }
+        if (!best) continue;
+        const { lx, rx, y0 } = best;
+        cand.push({ a, b, lx, rx, y0, w: dd + R() * 2 });
+      }
+      /* dazu: bestehende Türen auf Rundwegen, die zugemauert werden (Umweg 3–8 Räume, beide Räume behalten ≥ 2 Ausgänge) –
+         zerschlagen öffnet die Abkürzung wieder; ohne Zerschlagen bleibt alles erreichbar (geprüft) */
+      const deg = c => ["L", "R", "U", "D"].filter(s2 => open(c.need[s2])).length;
+      for (const k in cells) {
+        const a = cells[k], b = cells[key(a.x + 1, a.y)];
+        if (!okCell(a) || !okCell(b) || a.need.R !== true || deg(a) < 3 || deg(b) < 3) continue;
+        const bx = (a.x + 1) * CW, y0 = a.y * CH + 8;
+        if (![0, 1, 2].every(i => g(bx - 1, y0 + i) === 0 && g(bx, y0 + i) === 0) || g(bx - 1, y0 + 3) !== 1 || g(bx, y0 + 3) !== 1) continue;
+        a.need.R = undefined; const dd = dist(a, b); a.need.R = true;
+        if (dd < 3 || dd > 8) continue;
+        cand.push({ a, b, lx: bx - 2, rx: bx + 1, y0, w: dd + R() * 2, tuer: true });
+      }
+      const rooms = () => { const s2 = new Set(); for (let i = 0; i < lv.reach.length; i++) if (lv.reach[i]) s2.add(Math.floor((i % W) / CW) + "," + Math.floor(((i / W) | 0) / CH)); return s2; };
+      const comfyR = () => { const c = { W, H, get: g, start: lv.start, doors: lv.doors, cells }; validate(c, null, true); const s2 = new Set(); for (let i = 0; i < c.reach.length; i++) if (c.reach[i]) s2.add(Math.floor((i % W) / CW) + "," + Math.floor(((i / W) | 0) / CH)); return s2; };
+      const rooms0 = rooms(), comfy0 = comfyR();
+      cand.sort((p, q) => q.w - p.w);
+      for (const c of cand) {
+        if (lv.wucht.filter(o => o.k === "wand").length >= nWand) break;
+        if (lv.wucht.some(o => o.k === "wand" && (o.a === key(c.a.x, c.a.y) || o.b === key(c.b.x, c.b.y)))) continue;
+        const tiles = []; for (let x = c.lx + 1; x < c.rx; x++) for (let y = c.y0; y <= c.y0 + 2; y++) tiles.push([x, y, 0, 7]);
+        if (c.tuer) {
+          /* zumauern und prüfen: kein Raum verloren, bequem erreichbar wie zuvor */
+          for (const [x, y] of tiles) lv.set(x, y, 7);
+          let ok = validate(lv); if (ok) { const r1 = rooms(); for (const k of rooms0) if (!r1.has(k)) ok = false; }
+          if (ok) { const c1 = comfyR(); for (const k of comfy0) if (!c1.has(k)) ok = false; }
+          if (!ok) { for (const [x, y] of tiles) lv.set(x, y, 0); validate(lv); continue; }
+          delete c.a.need.R; delete c.b.need.L;
+        }
+        if (!testOpen(tiles)) { if (c.tuer) { for (const [x, y] of tiles) lv.set(x, y, 0); c.a.need.R = true; c.b.need.L = true; validate(lv); } continue; }
+        for (const [x, y] of tiles) { lv.set(x, y, 7); lv.wuchtSet.add(y * W + x); } opened.push(...tiles);
+        lv.wucht.push({ k: "wand", tuer: !!c.tuer, tiles: tiles.map(([x, y]) => [x, y]), a: key(c.a.x, c.a.y), b: key(c.b.x, c.b.y), cell: key(c.a.x, c.a.y) });
+      }
+    }
+    /* --- Verstecke: seitlich in dicken Fels (3 hoch) oder unter dem Boden (2 tief) --- */
+    if (nVers) {
+      const cand = [];
+      for (let y = 2; y < H - 3; y++) for (let x = 2; x < W - 2; x++) {
+        if (!lv.reach[y * W + x] || !standable(lv, x, y, 3) || g(x, y + 1) !== 1) continue;
+        const c = cellAt(x, y); if (!okCell(c) || c === lv.startCell || busy(x, y)) continue;
+        const inC = (xx, yy) => xx > 0 && xx < W - 1 && yy > 0 && yy < H - 1 && !(cellAt(xx, yy) && cellAt(xx, yy).kind === "secret");
+        for (const d of [-1, 1]) {
+          /* seitlich: Riss bei x+d, Kammer x+2d..x+3d, Spalten x+d..x+4d in den Zeilen y-3..y+1 fest (Kammer rundum Fels) */
+          let ok = true;
+          for (let i = 1; i <= 4 && ok; i++) { const xx = x + d * i; if (!inC(xx, y - 3) || !inC(xx, y + 1)) ok = false; for (let yy = y - 3; yy <= y + 1 && ok; yy++) if (g(xx, yy) !== 1) ok = false; }
+          if (ok) cand.push({ k: "seite", x, y, d });
+        }
+        /* unten: Boden x-1..x+1 in Zeile y+1 rissig, Kammer y+2..y+3, ringsum fest */
+        let ok = true;
+        for (let xx = x - 2; xx <= x + 2 && ok; xx++) for (let yy = y + 1; yy <= y + 4 && ok; yy++) if (g(xx, yy) !== 1 || !inC(xx, yy)) ok = false;
+        for (let xx = x - 1; xx <= x + 1 && ok; xx++) if (!standable(lv, xx, y, 3)) ok = false;
+        if (ok) cand.push({ k: "boden", x, y });
+      }
+      R.shuffle(cand);
+      for (const c of cand) {
+        if (lv.wucht.filter(o => o.k === "versteck").length >= nVers) break;
+        if (lv.wucht.some(o => Math.abs((o.x || 0) - c.x) < 30 && Math.abs((o.y || 0) - c.y) < 14)) continue;
+        const crack = [], pocket = []; let spot;
+        if (c.k === "seite") {
+          for (let yy = c.y - 2; yy <= c.y; yy++) crack.push([c.x + c.d, yy, 0, 1]);
+          for (let i = 2; i <= 3; i++) for (let yy = c.y - 2; yy <= c.y; yy++) pocket.push([c.x + c.d * i, yy]);
+          spot = [c.x + c.d * 2, c.y];
+        } else {
+          for (let xx = c.x - 1; xx <= c.x + 1; xx++) crack.push([xx, c.y + 1, 0, 1]);
+          for (let xx = c.x - 1; xx <= c.x + 1; xx++) for (let yy = c.y + 2; yy <= c.y + 3; yy++) pocket.push([xx, yy]);
+          spot = [c.x, c.y + 3];
+        }
+        for (const [x, y] of pocket) lv.set(x, y, 0);
+        if (!testOpen(crack)) { for (const [x, y] of pocket) lv.set(x, y, 1); validate(lv); continue; }
+        for (const [x, y] of crack) { lv.set(x, y, 7); lv.wuchtSet.add(y * W + x); } opened.push(...crack);
+        const cell = cellAt(c.x, c.y), r = R();
+        lv.rewards.push({ kind: r < 0.55 ? "gold" : r < 0.82 ? "glut" : "heil", x: spot[0], y: spot[1], tier: 1, cell: key(cell.x, cell.y), versteck: true });
+        lv.wucht.push({ k: "versteck", art: c.k, tiles: crack.map(([x, y]) => [x, y]), x: c.x, y: c.y, cell: key(cell.x, cell.y) });
+      }
+    }
+    /* --- morsche Böden: dünne Simse über erreichbarem Raum, mit 4 Kacheln Luft darüber (Sprung + Sturzangriff geht immer) --- */
+    if (nMorsch) {
+      const cand = [];
+      for (let y = 3; y < H - 4; y++) for (let x = 2; x < W - 4; x++) {
+        let ok = true;
+        for (let xx = x; xx < x + 3 && ok; xx++) if (g(xx, y) !== 1 || g(xx, y - 1) !== 0 || g(xx, y - 2) !== 0 || g(xx, y - 3) !== 0 || g(xx, y - 4) !== 0 || g(xx, y + 1) !== 0 || !lv.reach[(y - 1) * W + xx] || lv.wuchtSet.has(y * W + xx)) ok = false;
+        if (!ok) continue;
+        const c = cellAt(x, y); if (!okCell(c) || cellAt(x + 2, y) !== c || busy(x + 1, y - 1)) continue;
+        /* darunter: in höchstens 9 Kacheln fester Boden, und dort ist man schon */
+        for (let xx = x; xx < x + 3 && ok; xx++) { let yy = y + 1; while (yy < H - 1 && yy - y < 10 && (g(xx, yy) === 0)) yy++; const v = g(xx, yy); if (!(v === 1 || v === 2) || yy - y >= 10 || !lv.reach[(yy - 1) * W + xx]) ok = false; }
+        if (ok) cand.push({ x, y });
+      }
+      R.shuffle(cand);
+      for (const c of cand) {
+        if (lv.morsch.length >= nMorsch) break;
+        if (lv.morsch.some(o => Math.abs(o.x0 - c.x) < 24 && Math.abs(o.y - c.y) < 14)) continue;
+        const tiles = [[c.x, c.y, 0, 1], [c.x + 1, c.y, 0, 1], [c.x + 2, c.y, 0, 1]];
+        if (!testOpen(tiles)) continue;
+        opened.push(...tiles);
+        const cl = cellAt(c.x, c.y);
+        lv.morsch.push({ x0: c.x, x1: c.x + 2, y: c.y, cell: key(cl.x, cl.y) });
+      }
+    }
+    validate(lv);
+  }
+  Z._cracks = cracks;
+  /* ======================= W13 R7: GEZEITEN (Zisterne, Stelzensteg) =======================
+     Das Vorlagen-Wasser (q) ist „sicher“ wie die Flutkammer (lv.flood: kein Schaden, zurück an einen trockenen Platz).
+     Darüber steigt das Wasser in einem langsamen Zyklus um bis zu 2 Reihen (erkundung.js: Ebbe 6 s, steigen 2 s, Flut 5 s,
+     fallen 2 s; Vorwarnung: Gurgeln + Blasen). Die Flut ändert keine Kacheln (das kostete je Wechsel eine Neuberechnung der
+     Grafik): erkundung.js zeichnet das Wasser darüber und setzt wer hineingerät sicher zurück. Der Prüfer kennt nur die Ebbe –
+     die Flut ist reines Weg-Timing.
+     lv.tides: [{cell, rows: [[x, y, stufe]], safe: [[x, y]]}] (stufe 1 = erste Reihe über dem Wasser, 2 = zweite). */
+  function tides(lv) {
+    lv.tides = [];
+    const q = lv.qTiles || []; if (!q.length) return;
+    const W = lv.W, g = lv.get;
+    lv.flood = lv.flood || new Set(); for (const i of q) lv.flood.add(i);
+    const byCell = new Map();
+    for (const i of q) { const x = i % W, y = (i / W) | 0, k = Math.floor(x / CW) + "," + Math.floor(y / CH); if (!byCell.has(k)) byCell.set(k, []); byCell.get(k).push([x, y]); }
+    for (const [k, ts] of byCell) {
+      const c = lv.cells[k]; if (!c || !/^(zisterne|stelzensteg)/.test(c.tpl || "")) continue;
+      /* über die ganze Beckenbreite: 1–2 Reihen über der Wasseroberfläche (Stege/Steine ragen heraus, das Wasser steht drumherum) */
+      const yw = Math.min(...ts.map(t => t[1])), xa = Math.min(...ts.map(t => t[0])), xb = Math.max(...ts.map(t => t[0]));
+      const rows = [];
+      for (let s2 = 1; s2 <= 2; s2++) for (let x = xa; x <= xb; x++) if (g(x, yw - s2) === 0) rows.push([x, yw - s2, s2]);
+      if (!rows.length) continue;
+      const tideSet = new Set(rows.map(([x, y]) => y * W + x));
+      /* trockene Plätze im Raum (für das Zurücksetzen bei Flut): erreichbar, nicht unter/neben steigendem Wasser */
+      const safe = spotsIn(lv, c, 2, false).filter(([x, y]) => lv.reach && lv.reach[y * W + x] && !tideSet.has(y * W + x) && !tideSet.has((y + 1) * W + x) && !tideSet.has((y - 1) * W + x));
+      if (!safe.length) continue;
+      /* was bei Flut unter Wasser stünde: Bodengegner weg, Beute/Lohn auf einen trockenen Platz */
+      const wet = (x, y) => tideSet.has(Math.floor(y) * W + Math.floor(x)) || tideSet.has((Math.floor(y) + 1) * W + Math.floor(x));
+      lv.spawns = lv.spawns.filter(o => o.fly || !wet(o.x, o.y));
+      let si = 0; for (const o of (lv.loot || []).concat(lv.rewards || [])) if (wet(o.x, o.y)) { const p2 = safe[si++ % safe.length]; o.x = p2[0]; o.y = p2[1]; }
+      if (lv.tides.length < 2) lv.tides.push({ cell: k, rows, safe, xa, xb, yw }); /* höchstens 2 je Karte (das Wasser ohne Gezeiten bleibt) */
+    }
+  }
+  Z._tides = tides;
   /* W13 Runde 2: BEQUEME WEGE. Der Prüfer rechnet mit Maximalsprüngen (6 hoch, 7 weit); für echte Spieler (und Handheld)
      ist das grenzwertig. Jede Stelle, die nur mit einem solchen Sprung erreichbar ist, bekommt einen Zwischensteg
      (3 Kacheln Brett, von unten durchspringbar) etwa in der Mitte des Sprungs – solange danach weiterhin niemand
      feststecken kann. Messung danach: validate(lv, null, true) = höchstens 4 hoch / 5 weit. */
+  function comfyAusgaenge(lv) { const c = { W: lv.W, H: lv.H, get: lv.get, start: lv.start, doors: lv.doors, cells: lv.cells }; validate(c, null, true); return lv.doors.filter(d => d.kind === "exit").every(d => c.reach[d.y * lv.W + d.x]); }
   function ease(lv) {
     const W = lv.W, H = lv.H, g = lv.get, tried = new Set();
-    const busy = (x, y) => lv.doors.some(d => Math.abs(d.x - x) < 3 && Math.abs(d.y - y) < 3) || (lv.loot || []).some(o => Math.abs(o.x - x) < 2 && Math.abs(o.y - y) < 2) ||
-      (lv.traps || []).some(o => Math.abs(o.x - x) < 2 && Math.abs(o.y - y) < 2) || (lv.spawns || []).some(o => Math.abs(o.x - x) < 1 && Math.abs(o.y - y) < 2);
+    const busy = (x, y) => lv.doors.some(d => Math.abs(d.x - x) < 2 && Math.abs(d.y - y) < 2) || /* W13 R7: Stege dürfen nah an Türen (Zugang zur Tür) */ (lv.loot || []).some(o => Math.abs(o.x - x) < 2 && Math.abs(o.y - y) < 2) ||
+      (!forceT && (lv.traps || []).some(o => Math.abs(o.x - x) < 2 && Math.abs(o.y - y) < 2)) || (lv.spawns || []).some(o => Math.abs(o.x - x) < 1 && Math.abs(o.y - y) < 2);
     const secretAt = (x, y) => { const c = lv.cells[Math.floor(x / CW) + "," + Math.floor(y / CH)]; return !c || c.kind === "secret"; };
     const okPlank = (x0, x1, row) => {
       if (row < 2 || row >= H - 1) return false;
@@ -1636,12 +2521,24 @@
       }
       return true;
     };
-    lv.eased = [];
-    for (let it = 0; it < 16 && lv.eased.length < 10; it++) {
+    lv.eased = []; let forceT = false; /* W13 R7: für Ausgänge dürfen Fallen dem Steg weichen */
+    /* W13 R7: Ausgänge zuerst – solange eine Tür nur per Maximalsprung erreichbar ist, die Kante wählen, die ihr am nächsten führt
+       (vorher konnte das Steg-Budget an anderer Stelle aufgebraucht sein: 1 von 390 Karten); dafür etwas mehr Budget */
+    const exitsP = lv.doors.filter(d => d.kind === "exit");
+    for (let it = 0; it < 40 && lv.eased.length < 20; it++) { /* W13 R23: mehr Budget, solange ein Ausgang nur per Maximalsprung erreichbar ist (mehr, kürzere Zweige) */
       const c = { W, H, get: g, start: lv.start, doors: lv.doors, cells: lv.cells }; validate(c, null, true); const rc = c.reach;
       const f = { W, H, get: g, start: lv.start, doors: lv.doors, cells: lv.cells, _wantEdges: true }; validate(f); const [ea, eb] = f._edges;
-      let pick = -1;
-      for (let k = 0; k < ea.length; k++) { if (!rc[ea[k]] || rc[eb[k]] || tried.has(ea[k] + ">" + eb[k])) continue; pick = k; break; }
+      const openEx = exitsP.filter(d => !rc[d.y * W + d.x]);
+      if (!openEx.length && (lv.eased.length >= 10 || it >= 16)) break; /* wie bisher; nur für Türen mehr Budget */
+      if (!openEx.length && lv.eased.length >= 13) break;
+      if (openEx.length && it >= 24 && lv.eased.length >= 13 && it >= 36) break;
+      let pick = -1, bd = 1e9; forceT = openEx.length > 0;
+      for (let k = 0; k < ea.length; k++) {
+        if (!rc[ea[k]] || rc[eb[k]] || tried.has(ea[k] + ">" + eb[k])) continue;
+        if (!openEx.length) { pick = k; break; }
+        const bx2 = eb[k] % W, by2 = (eb[k] / W) | 0; let d = 1e9; for (const e of openEx) d = Math.min(d, Math.abs(e.x - bx2) + Math.abs(e.y - by2) * 1.5);
+        if (d < bd) { bd = d; pick = k; }
+      }
       if (pick < 0) break;
       const A = ea[pick], Bt = eb[pick]; tried.add(A + ">" + Bt);
       const ax = A % W, ay = (A / W) | 0, bx = Bt % W, by = (Bt / W) | 0, dy = ay - by, dx = bx - ax;
@@ -1653,7 +2550,7 @@
           if (!okPlank(mx - 1, mx + 1, row)) continue;
           for (let x = mx - 1; x <= mx + 1; x++) lv.set(x, row, 2);
           const c2 = { W, H, get: g, start: lv.start, doors: lv.doors, cells: lv.cells }; validate(c2, null, true);
-          if (c2.reach[Bt] && validate(lv)) { lv.eased.push([mx - 1, mx + 1, row]); done = true; break; }
+          if (c2.reach[Bt] && validate(lv)) { lv.eased.push([mx - 1, mx + 1, row]); done = true; if (forceT && lv.traps) lv.traps = lv.traps.filter(o => !(o.x >= mx - 2 && o.x <= mx + 2 && Math.abs(o.y - (row - 1)) < 2)); break; }
           for (let x = mx - 1; x <= mx + 1; x++) lv.set(x, row, 0);
         }
         if (done) break;
@@ -1664,6 +2561,7 @@
   Z._ease = ease;
   Z._tryGen = (b, s, o) => tryGen(b, s, o || {}); /* für Tests */
   const FERRY_BOOST = 1.75;
+  const TPL_BIO_W = 2.2, TPL_REP = 1.2, TPL_RUN = 0.12; /* W13 R6: Gewicht der Gebietsvorlagen, Dämpfung je Wiederholung in einer Karte */
   function tryGen(biomeId, seed, opts) {
     const B = BIOMES[biomeId], R = Z.Rng(seed);
     const [gw, gh] = B.grid;
@@ -1696,12 +2594,16 @@
     const set = (x, y, v) => { if (x >= 0 && y >= 0 && x < W && y < H) tiles[y * W + x] = v; };
     const get = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? 1 : tiles[y * W + x]);
     const startCell = cells[key(path[0][0], path[0][1])], endCell = cells[key(path[path.length - 1][0], path[path.length - 1][1])];
+    const tplUse = {}; /* W13 R6: Zählung je Karte (Wiederholungsdämpfung) */
+    const qTiles = []; /* W13 R7: Wasser aus Vorlagen (q) */
+    const runUse = Z.run && Z.run._tplUse ? Z.run._tplUse : null;
     for (const k in cells) {
       const c = cells[k], n = c.need;
       const leaf = c.kind !== "path" && ["L", "R", "U", "D"].filter(s2 => n[s2]).length === 1;
       /* passende Vorlage: muss alle benötigten Öffnungen haben; Sackgassen bevorzugt für Seitenräume */
       const candidates = [];
       TPL.forEach(t => {
+        if (t.bio && !t.bio.includes(biomeId)) return; /* W13 R6: Gebietsvorlagen nur in ihren Gebieten */
         for (const mir of [false, true]) {
           const L = mir ? t.R : t.L, Rr = mir ? t.L : t.R;
           if (n.L && !L) continue; if (n.R && !Rr) continue; if (n.U && !t.U) continue; if (n.D && !t.D) continue;
@@ -1717,6 +2619,10 @@
           /* W13 Runde 2: mehr Rundwege heißen weniger Räume mit nur links/rechts – Fähre und Sägewerk (beliebt) passen nur dort;
              etwas stärker gewichten, damit sie so oft vorkommen wie vor den Rundwegen (≈ 60 je 100 Karten) */
           if (t.n === "faehre" || t.n === "saegewerk") w *= FERRY_BOOST;
+          /* W13 R6: Gebietsvorlagen bevorzugt; schon oft benutzte Vorlagen werden seltener (weniger Wiederholungsgefühl) */
+          if (t.bio) w *= TPL_BIO_W;
+          const nu = tplUse[t.n] || 0; if (nu) w /= 1 + nu * TPL_REP;
+          const ru = runUse && runUse[t.n] || 0; if (ru) w /= 1 + ru * TPL_RUN; /* … und über den Lauf (frühere Gebiete) */
           /* weniger überflüssige Öffnungen = natürlicher */
           const extra = (L && !n.L) + (Rr && !n.R) + (t.U && !n.U) + (t.D && !n.D);
           w /= 1 + extra * 0.25;
@@ -1726,7 +2632,7 @@
       let sum = 0; candidates.forEach(c2 => (sum += c2.w));
       let pick = R() * sum, chosen = candidates[0];
       for (const c2 of candidates) { pick -= c2.w; if (pick <= 0) { chosen = c2; break; } }
-      c.tpl = chosen.t.n; c.dead = !!chosen.t.dead;
+      c.tpl = chosen.t.n; c.dead = !!chosen.t.dead; tplUse[chosen.t.n] = (tplUse[chosen.t.n] || 0) + 1;
       const rows = chosen.mir ? mirrorRows(chosen.t.r) : chosen.t.r;
       const ox = c.x * CW, oy = c.y * CH;
       for (let r = 0; r < CH; r++)
@@ -1735,9 +2641,9 @@
           let v = 0;
           if (ch === "#") v = 1; else if (ch === "-") v = 2; else if (ch === "^") v = 3; else if (ch === "H") v = 4; else if (ch === "~") v = B.hazard === "water" ? 6 : B.hazard === "lava" ? 5 : 3;
           else if (ch === "X") v = 7; else if (ch === "?") v = R.chance(0.5) ? 1 : 0;
-          else if (ch === "A") v = 9; else if (ch === "c") v = 10; else if (ch === "m") v = 11;
+          else if (ch === "A") v = 9; else if (ch === "c") v = 10; else if (ch === "m") v = 11; else if (ch === "q") { v = 6; qTiles.push((oy + r) * W + ox + q); } /* W13 R7: echtes Wasser (Gezeiten, sicher) */
           set(ox + q, oy + r, v);
-          if ("ETSFbwpfkrjz<>m".includes(ch)) marks.push({ t: ch === "<" || ch === ">" ? (chosen.mir ? (ch === "<" ? ">" : "<") : ch) : ch, x: ox + q, y: oy + r, cell: c });
+          if ("ETSFbwpfkrjz<>moL".includes(ch)) marks.push({ t: ch === "<" || ch === ">" ? (chosen.mir ? (ch === "<" ? ">" : "<") : ch) : ch, x: ox + q, y: oy + r, cell: c });
         }
       /* nicht benötigte Öffnungen verschließen, geheime Öffnungen mit rissiger Wand */
       const seal = (side, val) => {
@@ -1770,7 +2676,9 @@
         /* W13: geöffnet wird die Falltür zum Treppenhaus – in Spalte 11 eine Leiter (dritter Wert = Kachel nach dem Öffnen),
            darunter hängt schon die Leiter im Hauptweg-Raum: man kommt also auch wieder hinauf (kein Einweg) */
         for (let q = 0; q < 4; q++) tiles.push([x + q, y0, q === 1 ? 4 : 0], [x + q, y0 + 1, q === 1 ? 4 : 0], [x + q, y0 + 2, q === 1 ? 4 : 0]);
-        gates.push({ x, y0, tiles, vert: true, branch: key(c.x, c.y), other: key(o.x, o.y), side: 0, open: false });
+        /* W13 R22: liegt der Zweig UNTEN (o.gateUnten), öffnet der Hebel im unteren Raum die Falltür – die Leiter führt dann hinauf */
+        if (o.gateUnten) gates.push({ x, y0, tiles, vert: true, unten: true, branch: key(o.x, o.y), other: key(c.x, c.y), side: 0, open: false });
+        else gates.push({ x, y0, tiles, vert: true, branch: key(c.x, c.y), other: key(o.x, o.y), side: 0, open: false });
       }
     }
     /* Außengebiete: oberste Raumreihe ohne Decke, damit der Himmel zu sehen ist */
@@ -1809,7 +2717,7 @@
     const pitLog = resolvePits({ get, set, cells, W, H, gw, gh, carved, biome: biomeId, startCell }, R, B);
     /* Stacheln brauchen Boden */
     for (let y = 0; y < H - 1; y++) for (let x = 0; x < W; x++) if (get(x, y) === 3 && get(x, y + 1) !== 1) set(x, y + 1, 1);
-    const lv = { biome: biomeId, seed, W, H, tiles, marks, cells, path, gw, gh, startCell, endCell, flow: B.flow, out: !!B.out, gates, pitLog };
+    const lv = { biome: biomeId, seed, W, H, tiles, marks, cells, path, gw, gh, startCell, endCell, flow: B.flow, out: !!B.out, gates, pitLog, qTiles };
     lv.get = get; lv.set = set;
     placeSpecial(lv, R, B, opts);
     return lv;
@@ -1819,7 +2727,7 @@
     const g = lv.get, chance = B.pits != null ? B.pits : 0.9;
     for (const k in lv.cells) {
       const c = lv.cells[k];
-      if (c === lv.startCell || c === lv.endCell || c.kind === "secret" || !R.chance(c.kind === "path" ? chance : chance * 0.4)) continue;
+      if (c === lv.startCell || c === lv.endCell || c.kind === "secret" || /^(fasslager|weinregal|zisterne|stelzensteg)/.test(c.tpl || "") || !R.chance(c.kind === "path" ? chance : chance * 0.4)) continue; /* W13 R7: Fassrinne und Gezeitenbecken ohne Gruben */
       const ox = c.x * CW, oy = c.y * CH, runs = [];
       for (let r = oy + 4; r <= oy + CH - 2; r++) {
         let x0 = -1;
@@ -2029,11 +2937,13 @@
   Z.trapDens = trapDens;
   function sprinkleTraps(lv, R, B, avoid) {
     const list = (TRAPKINDS[lv.biome] || "").split(" ").filter(Boolean); if (!list.length) return; lv.traps = lv.traps || [];
-    const g = lv.get, solid = v => v === 1 || v === 7, taken = [], dens = trapDens(B), tier = B.tier || 0;
+    /* W13 R17: Gebietsvariante „Fallengänge“ (abenteuer.js Z.fallenFaktor): eigener Faktor, engere Abstände und mehr Versuche je Raum */
+    const vf = (Z.fallenFaktor && Z.fallenFaktor()) || 1;
+    const g = lv.get, solid = v => v === 1 || v === 7, taken = [], dens = Math.min(vf > 1 ? 3.2 : 1.8, trapDens(B) * vf), tier = B.tier || 0, gap = vf > 1 ? 4 : 5;
     const st = lv.start || { x: -99, y: -99 };
     /* im ersten Gebiet: die ersten Schritte bleiben frei, Fallen erst ein gutes Stück hinter dem Eingang */
     const farFromStart = (x, y) => tier > 0 || Math.abs(x - st.x) + Math.abs(y - st.y) > 26;
-    const free = (x, y) => !avoid(x, y) && farFromStart(x, y) && !taken.some(([a, b]) => Math.abs(a - x) < 5 && Math.abs(b - y) < 3) && !(lv.traps || []).some(t => Math.abs(t.x - x) < 4 && Math.abs(t.y - y) < 3);
+    const free = (x, y) => !avoid(x, y) && farFromStart(x, y) && !taken.some(([a, b]) => Math.abs(a - x) < gap && Math.abs(b - y) < 3) && !(lv.traps || []).some(t => Math.abs(t.x - x) < gap - 1 && Math.abs(t.y - y) < 3);
     const add = (t, x, y, o) => { lv.traps.push(Object.assign({ t, x, y }, o || {})); taken.push([x, y]); };
     const floorAt = (x, y) => { for (let yy = y; yy < y + 10 && yy < lv.H - 1; yy++) if (standable(lv, x, yy, 3)) return yy; return -1; };
     const ceilAt = (x, y) => { for (let yy = y; yy > y - 10 && yy > 0; yy--) if (g(x, yy) === 0 && solid(g(x, yy - 1))) return yy; return -1; };
@@ -2097,7 +3007,7 @@
       let want = 0; for (let q = p; q > 0; q -= 1) if (R.chance(Math.min(1, q))) want++;
       if (want && tier > 0 && R.chance(0.3)) want++;
       const ox = c.x * CW, oy = c.y * CH;
-      for (let n = 0, tries = 0; n < want && tries < 40; tries++) {
+      for (let n = 0, tries = 0; n < want && tries < 40 * vf; tries++) {
         const kind = list[R.int(0, list.length - 1)], x = ox + R.int(2, CW - 3), y = oy + R.int(1, CH - 3);
         if (tryPlace(kind, x, y)) n++;
       }
@@ -2189,6 +3099,9 @@
         for (const u of used) sc2 -= Math.max(0, 4 - (Math.abs(c.x - u.x) + Math.abs(c.y - u.y))) * 3;
         if (used.includes(c)) sc2 -= 50;
         if (c === lv.endCell) sc2 += 2.5;
+        /* W13 R19 (Balance-Meldung): in Wächtergebieten liegen alle Ausgänge im Wächterraum (= endCell) – sonst stand man vor
+           verschlossenen Türen und musste den Wächter woanders suchen (Zinnen/Schmiede/Glut: bis 10 von 12 Karten) */
+        if (B.warden) sc2 += c === lv.endCell ? 100 : -100;
         if (c.kind === "path") sc2 += 1.2;
         /* Kante zählt voll nur bei passender Weglänge – sonst rückte der Ausgang zu nah an den Eingang (Balance) */
         const ed = edgeOf(c, ex.v); sc2 += ed.s * (exits.length === 1 ? (dd >= Ls * exLo && dd <= Ls * exHi ? 3.2 : 0.3) : dd >= Ls * exLo - 0.5 && dd <= Ls * exHi + 1 ? 1.4 : 0.3); /* nur ein Ausgang (Glut, Hafen …): Kante zählt mehr */
@@ -2231,6 +3144,9 @@
       if (m.t === "S" && scrolls < 3 && R.chance(0.65)) { lv.loot.push({ kind: "scroll", x: m.x, y: m.y }); scrolls++; }
       if (m.t === "b" && !nearDoor(m.x, m.y)) lv.props.push({ kind: "breakable", x: m.x, y: m.y });
       if (m.t === "w") lv.decor.push({ kind: "window", x: m.x, y: m.y });
+      /* W13 R7: Fassrutsche (rollende Fässer) und Kronleuchter zum Schwingen (erkundung.js) */
+      if (m.t === "o" && (lv.rollers || []).length < 2) (lv.rollers = lv.rollers || []).push({ x: m.x, y: m.y, cell: m.cell.x + "," + m.cell.y, dir: m.x - m.cell.x * CW < CW / 2 ? 1 : -1 });
+      if (m.t === "L" && (lv.swings || []).length < 2) (lv.swings = lv.swings || []).push({ x: m.x, y: m.y, cell: m.cell.x + "," + m.cell.y });
       if ("pfkrjz<>m".includes(m.t)) {
         /* keine Falle direkt am Eingang (Federn und Fähren bleiben – sie gehören zum Weg) */
         if ("fkrz<>".includes(m.t) && Math.abs(m.x - startPx) < 9 && Math.abs(m.y - startPy) < 6) continue;

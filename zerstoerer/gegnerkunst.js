@@ -168,6 +168,7 @@
   };
   const load0 = Z.loadArea;
   Z.loadArea = function () { bombs = []; if (Z.webStrips) Z.webStrips.length = 0; if (Z.player) Z.player.rustT = 0; return load0.apply(this, arguments); };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "gegnerkunst", load: () => { bombs = []; } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
   let noteCv = null;
   function noteSpr() {
     if (noteCv) return noteCv;

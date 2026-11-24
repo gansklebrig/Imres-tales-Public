@@ -564,7 +564,10 @@
     const tmp = mk(4, 4).getContext("2d");
     let fs = s * 7.4; tmp.font = fs + "px " + FD; fs = fitFont(tmp, name, "$px " + FD, fs, W * 0.6);
     const tw = tmp.measureText(name).width;
-    const bw = clamp(tw + s * 26, W * 0.34, W * 0.82), bh = title ? s * 14.5 : s * 10.5, tail = s * 11, pad = s * 3;
+    /* W11 R27 (Grafik): gemaltes Boss-Porträt (figuren.js) als Wappen am linken Bandende; das Band wird dafür breiter */
+    let por = null; try { por = Z.bossPortraetBild ? Z.bossPortraetBild(e.def) : null; } catch (_) { por = null; }
+    const bh0 = title ? s * 14.5 : s * 10.5, md = por ? bh0 * 1.32 : 0;
+    const bw = clamp(tw + s * 26 + md * 1.3, W * 0.34, W * 0.86), bh = bh0, tail = s * 11, pad = s * 3;
     const cv = mk(bw + tail * 2 + pad * 2, bh + s * 10), c = cv.getContext("2d"), x0 = pad + tail, y0 = s * 3.5;
     /* Bandenden (hinten, gefaltet): ragen nach außen, gegabelt */
     for (const k of [-1, 1]) {
@@ -588,6 +591,12 @@
     c.fillStyle = RED; c.font = (fs * 1.0).toFixed(1) + "px " + FD; c.fillText(name.charAt(0), cx - tw / 2 + c.measureText(name.charAt(0)).width / 2, ny);
     for (const k of [-1, 1]) { c.fillStyle = RED; diamond(c, cx + k * (tw / 2 + s * 4), ny - fs * 0.3, s * 1.4); c.fillStyle = GOLD; diamond(c, cx + k * (tw / 2 + s * 4), ny - fs * 0.3, s * 0.6); }
     if (title) { c.fillStyle = "#5a2a18"; fitFont(c, title, "italic $px " + FI, s * 3.6, bw * 0.8); c.fillText(title, cx, y0 + bh * 0.83); }
+    if (por) {
+      const mx = x0 + md * 0.42, my = y0 + bh / 2;
+      /* Schlagschatten auf dem Band, dann das Medaillon */
+      c.save(); c.fillStyle = "rgba(40,10,4,.45)"; c.beginPath(); c.ellipse(mx + s * 0.6, my + s * 1.1, md / 2, md / 2, 0, 0, TAU); c.fill(); c.restore();
+      c.drawImage(por, mx - md / 2, my - md / 2, md, md);
+    }
     return { cv, s, bh, y0 };
   }
   function drawPlate(c, W, H) {

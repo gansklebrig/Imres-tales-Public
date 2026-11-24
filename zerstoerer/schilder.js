@@ -548,7 +548,7 @@
     doppel: () => ({ title: L(["Hoch hinaus", "Up high"]), icon: "schritt", rows: [[K("jump"), L([" in der Luft noch einmal: ", " again in mid-air: "]), L(["Doppelsprung", "double jump"])]] }),
     steg: () => ({ title: L(["Steg", "Ledge"]), rows: [[K(["down", "jump"]), L([" durchfallen", " drop through"])]] }),
     stegHub: () => ({ title: L(["Holzsteg", "Wooden ledge"]), rows: [[K("jump"), K("jump"), L([" Doppelsprung hinauf", " double jump up"])], [K(["down", "jump"]), L([" durchfallen", " drop through"])]] }),
-    leiter: () => ({ title: L(["Leiter", "Ladder"]), rows: [[K("up"), L([" hinauf   ", " climb   "]), K("down"), L([" hinab", " down"])]] }),
+    leiter: () => ({ title: L(["Leiter", "Ladder"]), rows: [[K("up"), L([" hinauf   ", " climb   "]), K("down"), L([" hinab", " down"])], [K("jump"), L([" abspringen   ", " jump off   "]), K("a1"), L([" Angriff von der Leiter", " attack off the ladder"])]] }), /* W16 Leiter */
     sturz: () => ({ title: L(["Sturzangriff", "Plunge attack"]), icon: "waffen", rows: [[L(["In der Luft ", "In mid-air "]), K(["down", "a1"]), L([" – trifft hart beim Aufprall", " – hits hard on landing"])]] }),
     aufwaerts: () => ({ title: L(["Aufwärtsangriff", "Upward attack"]), icon: "waffen", rows: [[K(["up", "a1"]), L([" – mit jeder Waffe nach oben", " – any weapon, aimed up"])], [L(["in der Luft: einmal je Sprung Schwung nach oben", "in mid-air: one rising swing per jump"])]] }),
     vorrat: () => ({ title: L(["Vor dem Tor", "Before the gate"]), icon: "trank", rows: [[K("potion"), L([" Heiltrank   ", " potion   "]), K("map"), L([" Karte   ", " map   "]), K("use"), L([" Türen & Truhen", " doors & chests"])]].concat(devNow() === "touch" ? [] : [[K("gear"), L([" halten: Ausrüstung ansehen", " hold: view gear"])]]) }),
@@ -913,6 +913,7 @@
   const load0 = Z.loadArea;
   /* Plätze erst beim ersten Bild suchen: dann haben alle Module (auch die später geladenen) ihr Gebiet aufgebaut */
   Z.loadArea = function () { const r = load0.apply(this, arguments); S.lv = null; S.list = []; return r; };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "schilder", load: () => { S.lv = null; S.list = []; } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
   /* Hinweis-Stufe geändert: Lernschilder neu aufbauen (z. B. „keine“ → „alle“) */
   /* … und bei Sprachwechsel (andere Textbreiten) die Plätze neu suchen */
   let hlPrev = null;

@@ -518,10 +518,12 @@
     for (const e of Z.enemies) {
       if (e.dead || !e.act) continue;
       if (e.act.phase !== "act" || e.act.t > 0.12) continue;
-      const d = Math.hypot(e.x + e.w / 2 - x, e.y + e.h / 2 - y); if (d < bd) { bd = d; best = e; }
+      const dx = e.x + e.w / 2 - x, dy = e.y + e.h / 2 - y; if (dx > bd || -dx > bd || dy > bd || -dy > bd) continue; /* W9: billige Vorauswahl (Handheld) */
+      const d = Math.hypot(dx, dy); if (d < bd) { bd = d; best = e; }
     }
     if (best) return best;
-    for (const e of Z.enemies) { if (e.dead) continue; const d = Math.hypot(e.x + e.w / 2 - x, e.y + e.h / 2 - y); if (d < bd && d < 70) { bd = d; best = e; } }
+    bd = 70;
+    for (const e of Z.enemies) { if (e.dead) continue; const dx = e.x + e.w / 2 - x, dy = e.y + e.h / 2 - y; if (dx > bd || -dx > bd || dy > bd || -dy > bd) continue; const d = Math.hypot(dx, dy); if (d < bd) { bd = d; best = e; } }
     return best;
   }
   const sp0 = Z.spawnProj;
@@ -544,7 +546,7 @@
     for (const q of Z.projs) if (q.owner === "e" && q.nmSrc && Math.abs(q.x - cx) < 18 && Math.abs(q.y - cy) < 22) return q.nmSrc;
     if (o.x != null) for (const h of Z.hazards) if (h.owner === "e" && h.nmSrc && Math.abs(h.x - o.x) < 1) return h.nmSrc;
     let best = null, bd = 150;
-    for (const e of Z.enemies) { if (e.dead || !e.aware) continue; const d = Math.hypot(e.x + e.w / 2 - cx, e.y + e.h / 2 - cy); if (d < bd) { bd = d; best = e; } }
+    for (const e of Z.enemies) { if (e.dead || !e.aware) continue; const dx = e.x + e.w / 2 - cx, dy = e.y + e.h / 2 - cy; if (dx > bd || -dx > bd || dy > bd || -dy > bd) continue; const d = Math.hypot(dx, dy); if (d < bd) { bd = d; best = e; } }
     return best;
   }
   function hitKind(o, e) {
@@ -757,7 +759,7 @@
     const P = Z.player; if (!P) return;
     for (let i = live.length - 1; i >= 0; i--) {
       const e = live[i];
-      if (e.dead || !Z.enemies.includes(e)) { live.splice(i, 1); continue; }
+      if (e.dead || !inLv(e)) { live.splice(i, 1); continue; }
       const rec = e.nm, cx = e.x + e.w / 2, cy = e.y + e.h / 2, d = distP(cx, cy);
       if (e.nmTaunt > 0) e.nmTaunt -= dt;
       if (e.nmOpen > 0) e.nmOpen -= dt;
@@ -934,6 +936,11 @@
   /* eigene Angriffsarten: Angriffe mit k: "nm" und nm: "<name>" laufen über die normale Gegner-KI
      (Ausholen mit Glühen und „!“, Name über dem Kopf, Erholung) – was im Schlag passiert, steht hier */
   const NMACT = {};
+  /* W9 (Handheld): „lebt e noch in diesem Gebiet?“ – statt Z.enemies.includes (je Aufruf ein Durchlauf) einmal je Bild eine Menge */
+  let lvSet = null, lvSetF = -1, lvFrame = 0;
+  let lvSetN = -1, lvArr = null;
+  function inLv(e) { if (lvSetF !== lvFrame || !lvSet || lvSetN !== Z.enemies.length || lvArr !== Z.enemies) { lvSet = new Set(Z.enemies); lvSetF = lvFrame; lvSetN = Z.enemies.length; lvArr = Z.enemies; } return lvSet.has(e); }
+  NM._frame = () => { lvFrame++; };
   function specialTick(dt) {
     for (const e of Z.enemies) {
       if (e.dead || !e.act || !e.act.a || e.act.a.k !== "nm") continue;
@@ -1467,7 +1474,7 @@
     tick(s) {
       if (s.state === "run") Z.darkness = Math.max(Z.darkness || 0, 0.3);
       if (s.state !== "run") return;
-      const alive = s.foes.filter(e => !e.dead && Z.enemies.includes(e)).length;
+      const alive = s.foes.filter(e => !e.dead && inLv(e)).length;
       if ((alive === 0 && s.t > 3) || s.t > 45) return "ok";
     },
     draw(s, c, t) {
@@ -1587,7 +1594,7 @@
     tick(s, dt) {
       s.red = U.clamp(s.red + (s.state === "run" || s.state === "warn" ? dt : -dt) * 0.6, 0, 1);
       if (s.state !== "run") return;
-      const alive = s.foes.filter(e => !e.dead && Z.enemies.includes(e)).length;
+      const alive = s.foes.filter(e => !e.dead && inLv(e)).length;
       if (s.pend <= 0 && alive <= (s.wave < s.waves ? 1 : 0)) { if (s.wave >= s.waves) { if (alive === 0) return "ok"; } else this.next(s); }
       if (s.t > 120) return "fail";
     },
@@ -1769,7 +1776,7 @@
       if (Z.music && Z.music.push) Z.music.push(0.5, 6);
     },
     tick(s, dt) {
-      const alive = s.cult.filter(e => !e.dead && Z.enemies.includes(e));
+      const alive = s.cult.filter(e => !e.dead && inLv(e));
       const P = Z.player;
       for (const e of alive) {
         /* in Trance: hört erst auf zu singen, wenn er getroffen wird oder Ezekiel direkt vor ihm steht */
@@ -1850,7 +1857,7 @@
     start(s) { evBanner(this.n, ["Besiege die Wachen und öffne den Käfig.", "Defeat the guards and open the cage."], [], { seal: "⛓", life: 3.4 }); },
     open(s) {
       if (s.open) return;
-      const g = s.guards.find(e => !e.dead && Z.enemies.includes(e) && Math.abs(e.x - s.x) < 170);
+      const g = s.guards.find(e => !e.dead && inLv(e) && Math.abs(e.x - s.x) < 170);
       if (g) { g.aware = true; say({ x: s.x - 6, y: s.y - 22, w: 12, h: 20, gone: true }, L(["Die Wachen! Hinter dir!", "The guards! Behind you!"]), { x: s.x, y: s.y - 22, who: this.who(s), life: 2 }); A.play("chain", { vol: 0.4 }); return; }
       s.open = true; s.openT = 0; A.play("chain", { x: s.x, vol: 0.8 }); A.play("door", { x: s.x, vol: 0.5 });
       FX.burst(s.x, s.y - 12, 18, { col: ["#9a8a7a", "#ffd27a"], sp: 100, life: 0.6, size: 2, kind: "shard", g: 500 });
@@ -2582,8 +2589,8 @@
        Angriffsfenster, ein Angriff mehr und Wut unter 25 % (Prüfstand w9_boss: starke Ausrüstung vorher 4–33 s) */
     /* W9 (3. Runde, Prüfstand kampf.py Standardausrüstung): Ratten 22 s, Keiler 24, Kerker 22, Weberin 19, Dornvater 18 s → ×1,5 (Ziel 30–60 s);
        Kapitän 37 s, Amboss 44 s bleiben. In Läufen mit guter Ausrüstung (K6) lagen Mini-Bosse bei 6–33 s. */
-    const MBHP = { ratten: 3.75, haeuptling: 3.4, kerker: 3.3, salzbart: 2.4, ilvara: 2.8, weberin: 3.0, amboss: 1, dornvater: 1.65, laeuter: 1.4 }; /* vorher 2,5/2,3/2,2/2,4/2,8/2,0/1/1,1/1,1 */
-    e.hp = e.hpMax = Math.round(e.hpMax * 5.0 * (MBHP[id] || 1));
+    const MBHP = { ratten: 4.3 /* 6. Runde: 21–50 s */, haeuptling: 3.4, kerker: 3.3, salzbart: 2.4, ilvara: 2.3, weberin: 3.0, amboss: 1, dornvater: 1.4, laeuter: 1.2 }; /* vorher 2,5/2,3/2,2/2,4/2,8/2,0/1/1,1/1,1; 6. Runde Fernkampf-Prüfstand: Läuter 154 s, Dornvater 78–90 s, Ilvara 334 s → etwas weniger */
+    e.hp = e.hpMax = Math.round(e.hpMax * 5.75 /* W9 8. Runde: 24 Prüfstand-Kämpfe Median 36 s, 12 unter 30 s → +15 % */ * (MBHP[id] || 1));
     if (tierN() === 0) { e.hp = e.hpMax = Math.round(e.hpMax * 0.75); e.dmgMul *= 0.85; }
     if (o.aware) e.aware = true;
     mbLive.push(e);
@@ -2656,7 +2663,7 @@
     const P = Z.player; if (!P) return;
     for (let i = mbLive.length - 1; i >= 0; i--) {
       const e = mbLive[i];
-      if (e.dead || !Z.enemies.includes(e)) { mbLive.splice(i, 1); continue; }
+      if (e.dead || !inLv(e)) { mbLive.splice(i, 1); continue; }
       const cx = e.x + e.w / 2, cy = e.y + e.h / 2, d = distP(cx, cy);
       if (!e.nmIntro) {
         if (!e.nmOmen && d < 470 && !P.dead) { e.nmOmen = true; overHead(L(Z.R.pick([["Etwas Großes atmet in der Nähe …", "Something big is breathing nearby…"], ["Der Boden zittert unter schweren Schritten.", "The floor trembles under heavy steps."], ["Knochen. Viele Knochen. Hier wohnt jemand.", "Bones. Lots of bones. Someone lives here."]])), "#e8c890", 2.8); A.play(e.def.snd || "roar", { x: cx, vol: 0.25, rate: 0.7 }); }
@@ -2852,6 +2859,7 @@
     if (lv && lv.hub && NM.refreshWanted) NM.refreshWanted();
     return r;
   };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "nemesis", save: () => ({ live, KGS, EVS, MBS, tr: TRAPS.slice(), mk: MARKS.slice(), ro: ROCKS.slice(), gh: GH.slice(), mb: mbLive.slice() }), load: s => { const put = (a, v) => { a.length = 0; for (const x of v) a.push(x); }; live = s.live; KGS = s.KGS; EVS = s.EVS; MBS = s.MBS; put(TRAPS, s.tr); put(MARKS, s.mk); put(ROCKS, s.ro); put(GH, s.gh); put(mbLive, s.mb); SAY.length = 0; WT.length = 0; BAN = null; pan = null; lastHit = null; } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
   const newRun0 = Z.newRun;
   Z.newRun = function () {
     const r = newRun0.apply(this, arguments);
@@ -2862,6 +2870,7 @@
   const tick0 = Z.ebenenTick;
   Z.ebenenTick = function (dt) {
     if (tick0) tick0(dt);
+    NM._frame();
     if (!Z.level) return;
     for (const s of SAY) s.t += dt; for (let i = SAY.length - 1; i >= 0; i--) if (SAY[i].t > SAY[i].life) SAY.splice(i, 1);
     for (const w of WT) w.t += dt; for (let i = WT.length - 1; i >= 0; i--) if (WT[i].t > WT[i].life) WT.splice(i, 1);

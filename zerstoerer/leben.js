@@ -22,6 +22,7 @@
   }
   const load0 = Z.loadArea;
   Z.loadArea = function () { const r = load0.apply(this, arguments); try { setup(Z.level); } catch (e) { console.error(e); } return r; };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "leben", save: () => lvRef, load: s => { lvRef = s; } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
 
   function wake(e, loud) {
     if (!e.sleep) return;
@@ -62,14 +63,19 @@
       }
       if (e.watch && !e.aware) { e.pDir = 0; e.patrol = 9; e.vx = 0; if (Math.random() < dt * 0.15) e.face = -e.face; }
       /* Ruf: wer entdeckt, alarmiert die Nachbarn */
-      if (e.aware && !e.called && !e.def.boss) {
-        e.called = true; if (e.watch) e.watch = false;
+      /* R19: gegner.js setzt „called“ beim Beruhigen zurück – flackert die Wachheit, rief dieselbe Figur bis zu 60× je Sekunde „Alarm“
+         (Klang „monster“, im Botlauf bis 3600×/min). Je Figur höchstens alle 8 s ein Alarmruf. */
+      if (e.alarmCd > 0) e.alarmCd -= dt;
+      if (e.aware && !e.called && !e.def.boss && !(e.alarmCd > 0)) {
+        e.called = true; e.alarmCd = 8; if (e.watch) e.watch = false;
         let any = false;
         for (const o of Z.enemies) {
           if (o === e || o.dead || o.aware || o.def.boss) continue;
-          if (Math.abs(o.x - e.x) < 170 && Math.abs(o.y - e.y) < 90) { any = true; setTimeout(() => { if (o.dead) return; if (o.sleep) { if (Math.random() < 0.6) wake(o, false); } else { o.aware = true; o.alertT = 0.2; FX.text(o.x + o.w / 2, o.y - 10, "?!", "#e8c890"); } }, 300 + Math.random() * 400); }
+          if (Math.abs(o.x - e.x) < 170 && Math.abs(o.y - e.y) < 90) { any = true; const lv0 = Z.level; setTimeout(() => { if (o.dead || Z.level !== lv0) return; if (o.sleep) { if (Math.random() < 0.6) wake(o, false); } else if (!o.aware) { o.aware = true; o.alertT = 0.2; o.called = true; if (Z.enemyAlarmText) Z.enemyAlarmText(o, "?!", "#e8c890", 10); else FX.text(o.x + o.w / 2, o.y - 10, "?!", "#e8c890"); } }, 300 + Math.random() * 400); }
         }
-        if (any) { FX.text(e.x + e.w / 2, e.y - 14, L(["Alarm!", "Alarm!"]), "#ff8a6a"); A.play(e.def.undead ? "undead" : "monster", { vol: 0.3, x: e.x, rate: 0.85 }); }
+        /* W17 Alarm: Zeitgeber nur im selben Gebiet und nur für noch Ahnungslose; Gerufene rufen nicht weiter (called, wie gegner.js pendAl –
+           vorher rief jeder Gerufene selbst wieder: Kettenalarm); „Alarm!“/„?!“ über gegner.js Z.enemyAlarmText (einmal je Phase, nur im Bild/mit Sicht) */
+        if (any) { if (Z.enemyAlarmText) Z.enemyAlarmText(e, L(["Alarm!", "Alarm!"]), "#ff8a6a", 14); else FX.text(e.x + e.w / 2, e.y - 14, L(["Alarm!", "Alarm!"]), "#ff8a6a"); A.play(e.def.undead ? "undead" : "monster", { vol: 0.3, x: e.x, rate: 0.85 }); }
       }
     }
   };

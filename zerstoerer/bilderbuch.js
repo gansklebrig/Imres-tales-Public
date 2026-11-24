@@ -270,6 +270,7 @@
   /* op: head (cone|spire|cren|broken|dome|onion|none), far (0 nah … 1 fern), roof, garg, bart, oriel, ivy, wk, lit, wander, round, door, drapes */
   function tower(o, x, base, w, h, col, op) {
     op = op || {}; const { c, R, pal } = o; const far = op.far || 0;
+    if (o.bauten) o.bauten.push([x, base, w, h]); /* R42: Prüfhilfe Z.bbBauten (Bauwerk-Fuß) */
     const top = base - h, roof = op.roof || o.hz(R.pick(pal.roofs), far * 0.8);
     const ch = w > 26 ? 4.4 : w > 14 ? 3.6 : 3;
     const pl = h > 40 && op.plinth !== false ? Math.min(h * 0.08, 8) : 0;
@@ -1050,15 +1051,20 @@
     spires(o, H) {
       const { c, R, pal } = o; const cl = nb(mix(pal.sky1, "#3a1424", 0.25)), clLit = mix(pal.sky2, "#ffe0a0", 0.55);
       /* ferne Nadeln */
-      for (let i = 0; i < 26; i++) { const x = R() * PW, w = 5 + R() * 10, h = 90 + R() * 190; wrapX(o, x, w, xx => tower(o, xx, 300, w, h, o.hz(pal.stone, 0.72 + R() * 0.1), { far: 0.85, head: R() < 0.7 ? "spire" : "cren", lit: 0.25 })); }
+      /* R41 (Nutzerwunsch: nichts schwebt): jede Nadel steht auf einer Felsspitze, die aus dem Wolkenmeer bis zum Seitenrand reicht */
+      const fuss = !(G.off && G.off.bauwerkfuss);
+      const peak = (xx, w, b, k, col) => { const cx = xx + w / 2; crag(o, jag(R, xx - w * 1.6, xx + w * 2.6, X => b - 2 + Math.abs(X - cx) * k, 4, 2.5), H + 2, col, {}); };
+      for (let i = 0; i < 26; i++) { const x = R() * PW, w = 5 + R() * 10, h = 90 + R() * 190; wrapX(o, x, w, xx => { if (fuss) peak(xx, w, 300, 0.9, o.hz(pal.rock, 0.74)); tower(o, xx, 300, w, h, o.hz(pal.stone, 0.72 + R() * 0.1), { far: 0.85, head: R() < 0.7 ? "spire" : "cren", lit: 0.25 }); }); }
       mist(o, 200, 100, pal.fog, 0.5);
       for (let i = 0; i < 18; i++) cloud(o, R() * PW - 40, 270 + R() * 20, 90 + R() * 120, 30 + R() * 20, o.hz(cl, 0.55), o.hz(clLit, 0.3), { back: true });
       /* schwebende Felsinseln mit Ruinen (bewegen sich sacht) */
       for (let i = 0; i < 5; i++) {
         const w = 36 + R() * 40, x = 120 + i * 300 + R() * 80, y = 70 + R() * 120;
+        /* R41: statt frei schwebend auf einer schlanken Felsnadel (wie Meteora), die bis zum Seitenrand reicht */
+        if (fuss) { const rc = o.hz(pal.rock, 0.25); crag(o, [[x - w * 0.8, H + 2], [x - w * 0.55, y + w * 1.8], [x - w * 0.42, y + w * 0.9], [x - w * 0.36, y + w * 0.3], [x - w * 0.05, y + w * 0.36], [x + w * 0.34, y + w * 0.28], [x + w * 0.42, y + w * 1.0], [x + w * 0.58, y + w * 2.0], [x + w * 0.85, H + 2]], H + 2, rc, {}); }
         const sp = mkSprite(o, w + 20, w * 1.6 + 60, w / 2 + 10, 40, so => {
           const sc = so.c, rc = o.hz(pal.rock, 0.25);
-          const pts = [[-w / 2, 0]]; for (let k = 1; k < 8; k++) pts.push([-w / 2 + k * w / 8 + (R() - 0.5) * 4, (Math.sin(k / 8 * PI) * w * 1.1) * (0.6 + R() * 0.5)]); pts.push([w / 2, 0]);
+          const pts = [[-w / 2, 0]]; for (let k = 1; k < 8; k++) pts.push([-w / 2 + k * w / 8 + (R() - 0.5) * 4, (Math.sin(k / 8 * PI) * w * (fuss ? 0.5 : 1.1)) * (0.6 + R() * 0.5)]); pts.push([w / 2, 0]);
           sc.fillStyle = rc; sc.beginPath(); sc.moveTo(-w / 2, 0); for (const p of pts) sc.lineTo(p[0], p[1]); sc.closePath(); sc.fill();
           sc.fillStyle = rgba(shade(rc, -0.5), 0.5); sc.beginPath(); sc.moveTo(0, 0); for (const p of pts.slice(4)) sc.lineTo(p[0], p[1]); sc.closePath(); sc.fill();
           sc.strokeStyle = rgba(shade(rc, -0.5), 0.6); sc.lineWidth = 0.4; sc.beginPath(); for (let yy = 4; yy < w; yy += 4) { sc.moveTo(-w / 2, yy); sc.lineTo(w / 2, yy + (R() - 0.5) * 3); } sc.stroke();
@@ -1068,12 +1074,14 @@
           else { body(so, -w * 0.3, -10, w * 0.6, 10, o.hz(pal.stone, 0.2)); for (let k = 0; k < 3; k++) { sc.fillStyle = "#0d080b"; winPath(sc, -w * 0.25 + k * w * 0.2, -8, w * 0.1, 8, "arch"); sc.fill(); } }
           chain(so, w * 0.3, 0, 30, "#3a3430"); chain(so, -w * 0.35, 0, 22, "#3a3430");
         });
-        o.bobs.push({ sp, x0: x, x1: x, y, v: 0, ph: R() * 9, amp: 4, fr: 0.25 + R() * 0.15, rot: 0.02 });
+        if (fuss) { R(); R(); c.drawImage(sp.cv, x - sp.px, y - sp.py, sp.w, sp.h); } /* R41: fest auf der Nadel, in die Seite gebacken (gleicher Dunst wie die Nadel) */
+        else o.bobs.push({ sp, x0: x, x1: x, y, v: 0, ph: R() * 9, amp: 4, fr: 0.25 + R() * 0.15, rot: 0.02 });
       }
       /* große gotische Spitzen mit Strebebögen und Brücken */
       const sp = []; for (let i = 0; i < 6; i++) sp.push([60 + i * 250 + R() * 80, 16 + R() * 12, 190 + R() * 80]);
       for (let i = 0; i < sp.length; i++) {
         const [x, w, h] = sp[i], col = o.hz(pal.stone, 0.22);
+        if (fuss) peak(x - w * 0.4, w * 1.8, 332, 0.6, o.hz(pal.rock, 0.3)); /* R41: Felsgipfel unter der Spitze */
         if (i < sp.length - 1 && R() < 0.8) { const [x2, w2] = sp[i + 1], by = 330 - h * (0.45 + R() * 0.2); c.fillStyle = shade(col, -0.1); c.beginPath(); c.moveTo(x + w, by); c.lineTo(x2, by); c.lineTo(x2, by + 4); c.quadraticCurveTo((x + w + x2) / 2, by + 26, x + w, by + 4); c.fill(); balustrade(o, x + w, x2, by, col, 3); o.walkers.push({ x0: x + w + 3, x1: x2 - 3, y0: by - 0.2, y1: by - 0.2, v: 3, ph: R() * 40, kind: R() < 0.5 ? "lamp" : "guard", s: 0.9, torch: true }); }
         /* Strebebögen */
         for (const d of [-1, 1]) { const bx = d < 0 ? x - 24 : x + w + 24; c.fillStyle = shade(col, -0.15); c.fillRect(bx - 3, 330 - h * 0.35, 6, h * 0.35); coneRoof(o, bx, 330 - h * 0.35, 7, 18, o.hz(pal.roofs[2], 0.2), { plain: true, flag: 0.2 }); c.strokeStyle = shade(col, -0.05); c.lineWidth = 2.4; c.beginPath(); c.moveTo(bx, 330 - h * 0.33); c.quadraticCurveTo(bx + (d < 0 ? 10 : -10), 330 - h * 0.55, d < 0 ? x : x + w, 330 - h * 0.6); c.stroke(); }
@@ -1094,7 +1102,8 @@
     storm(o, H) {
       const { c, R, pal } = o;
       range(o, 210, 140, o.hz(pal.rock, 0.72), 17, { lit: 0.12, ks: [4, 6, 9, 15, 23, 37] });
-      for (let i = 0; i < 6; i++) { const x = R() * PW; tower(o, x, 230, 8 + R() * 8, 40 + R() * 60, o.hz(pal.stone, 0.72), { far: 0.8, head: "broken" }); }
+      /* R41: ferne Turmstümpfe stehen auf Felskuppen bis zum Rand (vorher schwebten sie über dem Dunst) */
+      for (let i = 0; i < 6; i++) { const x = R() * PW, w = 8 + R() * 8, h = 40 + R() * 60; if (!(G.off && G.off.bauwerkfuss)) { const cx = x + w / 2; crag(o, jag(R, x - w * 2.2, x + w * 3.2, X => 227 + Math.abs(X - cx) * 0.45, 5, 2.5), H + 2, o.hz(pal.rock, 0.7), {}); } tower(o, x, 230, w, h, o.hz(pal.stone, 0.72), { far: 0.8, head: "broken" }); }
       mist(o, 180, 80, pal.fog, 0.45);
       const hy = sinF(270, [[14, 2, 2], [6, 5, 1], [3, 13, 0.3]]); hillsF(o, hy, o.hz(pal.rock, 0.45));
       for (let i = 0; i < 26; i++) { const x = R() * PW; wrapX(o, x - 10, 20, xx => deadTree(o, xx, hy(xx) + 3, 14 + R() * 18, o.hz("#1a1612", 0.45))); }
@@ -1526,6 +1535,16 @@
       const { c, R, pal } = o; const rock = pal.rock, st = pal.stone;
       body(o, 0, 0, PW, H, o.hz(rock, 0.55), 0.1); rockTex(o, 0, 0, PW, H, o.hz(rock, 0.55), 900);
       const glowBand = c.createLinearGradient(0, 120, 0, H); glowBand.addColorStop(0, "rgba(255,90,20,0)"); glowBand.addColorStop(1, "rgba(255,90,20,.25)"); c.fillStyle = glowBand; c.fillRect(0, 120, PW, H - 120);
+      /* R19: obere Höhle nicht mehr flach – Gesteinsbänke mit Glutkanten, Magmaadern, große Tropfsteine, Hängestege */
+      for (let b = 0; b < 4; b++) { const by = 18 + b * 26 + R() * 8; c.fillStyle = o.hz(rock, 0.22 - b * 0.02); c.beginPath(); c.moveTo(0, by);
+        for (let x = 0; x <= PW; x += 24) c.lineTo(x, by + Math.sin(x * 0.013 + b) * 5 + (R() - 0.5) * 4); c.lineTo(PW, by + 9); for (let x = PW; x >= 0; x -= 24) c.lineTo(x, by + 9 + Math.sin(x * 0.02 + b * 2) * 3); c.closePath(); c.fill();
+        c.strokeStyle = "rgba(255,150,70,.4)"; c.lineWidth = 1.2; c.beginPath(); c.moveTo(0, by); for (let x = 0; x <= PW; x += 24) c.lineTo(x, by + Math.sin(x * 0.013 + b) * 5); c.stroke(); }
+      for (let v = 0; v < 16; v++) { let x = R() * PW, y = 4 + R() * 40; c.strokeStyle = "rgba(255,120,30,.7)"; c.lineWidth = 1.6; c.beginPath(); c.moveTo(x, y);
+        for (let k = 0; k < 7; k++) { x += (R() - 0.5) * 22; y += 6 + R() * 10; c.lineTo(x, y); } c.stroke(); c.strokeStyle = "rgba(255,220,140,.55)"; c.lineWidth = 0.6; c.stroke(); }
+      for (let i = 0; i < 14; i++) { const x = R() * PW, w = 12 + R() * 22, h = 40 + R() * 80; c.fillStyle = o.hz(rock, 0.12); c.beginPath(); c.moveTo(x - w / 2, 0); c.quadraticCurveTo(x - w * 0.2, h * 0.6, x, h); c.quadraticCurveTo(x + w * 0.2, h * 0.6, x + w / 2, 0); c.fill(); c.fillStyle = "rgba(255,120,50,.14)"; c.fillRect(x - 0.6, h * 0.3, 1.2, h * 0.6); }
+      for (let i = 0; i < 4; i++) { const x0 = R() * PW, x1 = x0 + 120 + R() * 160, y = 60 + R() * 40; c.strokeStyle = o.hz(st, 0.35); c.lineWidth = 2; c.beginPath(); c.moveTo(x0, y); c.quadraticCurveTo((x0 + x1) / 2, y + 16, x1, y); c.stroke();
+        c.lineWidth = 0.8; c.beginPath(); for (let k = 0; k <= 8; k++) { const u = k / 8, xx = x0 + (x1 - x0) * u, yy = y + 4 * 16 * u * (1 - u); c.moveTo(xx, yy); c.lineTo(xx, yy - 6); } c.stroke();
+        if (R() < 0.6) { c.fillStyle = "rgba(255,170,80,.6)"; c.fillRect((x0 + x1) / 2 - 1, y + 10, 2, 2); } }
       /* ferne Stadtterrassen an der Höhlenwand */
       for (let t = 0; t < 4; t++) { const base = 150 + t * 36, f = 0.62 - t * 0.06; for (let x = R() * 10; x < PW; x += 8 + R() * 6) { const w = 6 + R() * 6, h = 6 + R() * 12, col = o.hz(st, f); c.fillStyle = col; c.fillRect(x, base - h, w, h + 36); if (R() < 0.5) { c.fillStyle = "#ffa040"; c.globalAlpha = 0.7; c.fillRect(x + w / 2 - 0.6, base - h + 2, 1.2, 1.4); c.globalAlpha = 1; } } }
       mist(o, 120, 140, "#5a2a10", 0.4);
@@ -1710,7 +1729,7 @@
     const c = cv.getContext("2d"); c.scale(sx, sy);
     const R = Rng(((B.name[0].length * 7919) ^ ((lv.seed || 7) * 31)) >>> 0);
     const pal = palette(B, kind);
-    const o = P(c, R, pal, H, s);
+    const o = P(c, R, pal, H, s); o.bauten = [];
     try { fn(o, H); } catch (err) { console.error("bilderbuch", kind, err); }
     const tF = performance.now();
     o.zt = pal.zt;
@@ -1772,7 +1791,7 @@
   }
   /* Tiefenunschärfe: hintere Staffeln weicher als vordere, einmal beim Bau */
   function dofPage(cv, opaque) {
-    const s = cv.width / PW, back = Z.zeitBlur(cv, 1.05 * s, true), front = Z.zeitBlur(cv, 0.38 * s, true);
+    const s = cv.width / PW, back = Z.zeitBlur(cv, 0.7 * s, true) /* W11 R35: 1,05 → 0,7 – nahe Höhlenöffnungen (Glutgassen) wirkten verschmiert */, front = Z.zeitBlur(cv, 0.38 * s, true);
     const t = document.createElement("canvas"); t.width = cv.width; t.height = cv.height; const g = t.getContext("2d");
     g.drawImage(back, 0, 0); g.globalCompositeOperation = "destination-in";
     const gr = g.createLinearGradient(0, 0, 0, cv.height); gr.addColorStop(0, "#000"); gr.addColorStop(0.56, "#000"); gr.addColorStop(0.84, "rgba(0,0,0,0)"); g.fillStyle = gr; g.fillRect(0, 0, t.width, t.height);
@@ -1813,6 +1832,7 @@
   /* deckt die Bilderbuchseite gerade das ganze Bild? Dann braucht es weder Himmel noch ferne Ebene darunter */
   Z.bilderbuchCovers = () => !!(page && !page.none && page.opaque && page.lvRef === Z.level && page.q === curQ() && Math.abs(page.H - Math.ceil(Z.cam.h + 120)) <= 2);
   Z.bilderbuchPage = () => page;
+  Z.bbBauten = () => (page && page.o && page.o.bauten) || [];
   Z.bilderbuchBuild = () => { build(); return page && page.ms; };
   /* Prüfhilfe: ganze Seite samt Leben in ein Bild malen */
   Z.bilderbuchDump = function (t, sc) {
@@ -2202,7 +2222,8 @@
     if (!page || page.lvRef !== Z.level || page.q !== q || Math.abs(page.H - Math.ceil(Z.cam.h + 120)) > 2) build();
     if (!page || page.none) return;
     const lvH = Z.level.H * Z.TILE;
-    const ox = cam.x * (1 - PF), py = cam.y - (cam.y - (lvH - cam.h) * 0.5) * PY - 30;
+    /* R41: senkrechten Versatz begrenzen – die Seite deckt immer den ganzen Ausschnitt (Bauwerke behalten ihren Fuß im Bild) */
+    const ox = cam.x * (1 - PF), py = Math.max(cam.y + cam.h + 2 - page.H, Math.min(cam.y - 2, cam.y - (cam.y - (lvH - cam.h) * 0.5) * PY - 30));
     const o = page.o;
     /* Innenräume: Ränder ober- und unterhalb der Seite füllen */
     if (o.topFill && py > cam.y) { c.fillStyle = o.topFill; c.fillRect(cam.x - 2, cam.y - 2, cam.w + 4, py - cam.y + 3); }

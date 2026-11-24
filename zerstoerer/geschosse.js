@@ -45,6 +45,8 @@
     const k = PK[kind]; o = o || {};
     const sp = o.speed || k.speed;
     const p = Object.assign({ kind, k, x, y, vx: o.vx != null ? o.vx : dir * sp, vy: o.vy || 0, g: k.g, r: k.r, life: o.life || k.life, t: 0, dmg: o.dmg || 5, owner: kind.startsWith("e_") ? "e" : "p", pierce: o.pierce || k.pierce, hits: new Set(), dir: dir || 1, rot: 0 }, o);
+    /* W9 10. Runde: Nahschuss – Schüsse entstehen vor der Figur; ein Gegner, in dem man steht, wurde übersprungen (Bogen/Schleuder 0 Schaden). Erste Trefferprüfung reicht zurück bis zur Körpermitte. */
+    if (p.owner === "p" && Z.player && !o.vx && !o.vy && kind !== "regenpfeil" && Math.abs(x - (Z.player.x + Z.player.w / 2)) < 24 && Math.abs(y - (Z.player.y + Z.player.h / 2)) < 24) p.ox = Z.player.x + Z.player.w / 2;
     if (kind === "regenpfeil") { p.vx = (Math.random() - 0.5) * 30; p.vy = 300; }
     if (k.homing && Z.player) { const P = Z.player; const a = Math.atan2(P.y + 14 - y, P.x + P.w / 2 - x); p.vx = Math.cos(a) * sp; p.vy = Math.sin(a) * sp; }
     Z.projs.push(p); return p;
@@ -170,7 +172,8 @@
         for (const e of Z.enemies) {
           if (e.dead || p.hits.has(e) || e.intro > 0) continue;
           const r = p.r + (k.wave ? 6 : 0);
-          if (p.x + r < e.x || p.x - r > e.x + e.w || p.y + r < e.y || p.y - r > e.y + e.h) continue;
+          const xl = p.ox != null ? Math.min(p.ox, p.x) : p.x, xr = p.ox != null ? Math.max(p.ox, p.x) : p.x;
+          if (xr + r < e.x || xl - r > e.x + e.w || p.y + r < e.y || p.y - r > e.y + e.h) continue;
           if (k.trap && !p.armed) continue;
           p.hits.add(e);
           const crit = p.critAlways || (p.crit === "far" && P && Math.abs(e.x - P.x) > 130) || (p.it && Z.WEAPONS[p.it.id] && Z.WEAPONS[p.it.id].crit === "bleeding" && e.st.bleed > 0) || (P && P.st.smoke > 0);
@@ -186,6 +189,7 @@
           if (p.onHitE) p.onHitE(p, e);
           if (!p.pierce && !k.trap) { if (p.onEnd && !p.ended) { p.ended = true; p.onEnd(p, p.x, p.y); } p.dead = true; break; }
         }
+        p.ox = null;
       } else if (P && !P.dead) {
         const r = p.r, B = k.trap && Z.playerHurtBox ? Z.playerHurtBox(P) : { x: P.x + 2, y: P.y + 3, w: P.w - 4, h: P.h - 4 };
         if (p.x + r > B.x && p.x - r < B.x + B.w && p.y + r > B.y && p.y - r < B.y + B.h && !p.hits.has(P)) { /* etwas kleinere Trefferfläche: faires Ausweichen */
@@ -341,11 +345,21 @@
       c.save();
       if (warn) {
         /* Vorwarnung: pulsierende Bodenmarkierung */
-        const k = h.t / h.warn, pulse = 0.4 + 0.4 * Math.sin(h.t * 30);
-        c.globalAlpha = 0.25 + 0.35 * k;
-        c.fillStyle = h.warnCol || "#ff3a2a";
-        if (h.kind === "strike" || h.kind === "column") { c.fillRect(h.x - h.w / 2, h.y - (h.hgt || 400), h.w, h.hgt || 400); c.globalAlpha = pulse; c.fillRect(h.x - h.w / 2, h.y - 3, h.w, 3); }
-        else { c.fillRect(h.x - h.w / 2, h.y - 4, h.w, 4); c.globalAlpha = pulse * 0.5; c.fillRect(h.x - h.w / 2, h.y - (h.hgt || 24) * k, h.w, (h.hgt || 24) * k); }
+        /* W11 R23 (Grafik): weiche, lesbare Telegrafie statt flacher Rechtecke – Verlauf zum Boden, schräge
+           Schraffur, die nach unten läuft, helle Seitenkanten, pulsierende Bodenmarke; je näher der Einschlag, desto
+           dichter und heller (nur Zeichnung, Trefferlogik unverändert) */
+        const k = h.t / h.warn, pulse = 0.5 + 0.5 * Math.sin(h.t * (14 + k * 16)), col = h.warnCol || "#ff3a2a";
+        const lo = !!(Z.gq && (Z.gq.lean || Z.gq.mini)), x0 = h.x - h.w / 2, w = h.w;
+        const col2 = (a) => { const n = parseInt(String(col).slice(1), 16); return isNaN(n) ? "rgba(255,58,42," + a + ")" : "rgba(" + (n >> 16) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")"; };
+        const tall = h.kind === "strike" || h.kind === "column", hh = tall ? (h.hgt || 400) : (h.hgt || 24) * (0.4 + 0.6 * k), top = h.y - hh;
+        const g = c.createLinearGradient(0, top, 0, h.y); g.addColorStop(0, col2(0)); g.addColorStop(0.7, col2((0.1 + 0.18 * k).toFixed(3))); g.addColorStop(1, col2((0.28 + 0.3 * k).toFixed(3)));
+        c.fillStyle = g; c.fillRect(x0, top, w, hh);
+        if (!lo) { c.save(); c.beginPath(); c.rect(x0, top, w, hh); c.clip(); c.strokeStyle = col2((0.1 + 0.16 * k).toFixed(3)); c.lineWidth = 1.2;
+          const off = (h.t * 40) % 10; c.beginPath(); for (let yy = top - w + off; yy < h.y; yy += 10) { c.moveTo(x0, yy); c.lineTo(x0 + w, yy + w * 0.6); } c.stroke(); c.restore(); }
+        const eg = c.createLinearGradient(0, top, 0, h.y); eg.addColorStop(0, col2(0)); eg.addColorStop(1, col2((0.45 + 0.4 * pulse * k).toFixed(3)));
+        c.fillStyle = eg; c.fillRect(x0, top, 1.2, hh); c.fillRect(x0 + w - 1.2, top, 1.2, hh);
+        c.globalAlpha = 0.35 + 0.5 * pulse; c.fillStyle = col2(0.85); c.beginPath(); c.ellipse(h.x, h.y - 1, w / 2 + 2, 2.2, 0, 0, Math.PI * 2); c.fill();
+        c.globalAlpha = 1; c.fillStyle = "rgba(255,240,220," + (0.25 + 0.4 * pulse * k).toFixed(3) + ")"; c.fillRect(x0 + 1, h.y - 1.2, w - 2, 0.8);
         c.restore(); continue;
       }
       c.globalAlpha = fade;
@@ -396,6 +410,7 @@
           c.fillStyle = g; c.fillRect(h.x - h.w / 2, h.y - hh, h.w, hh); break;
         }
         case "zone": {
+          if (at < 0.3 && Z.zonenBlitz && Z.zonenBlitz(c, h, at)) break; /* W11 R43 (Grafik): weicher Einschlag statt flachem Orange-Rechteck (effekte.js) */
           if (at < 0.3) { c.globalCompositeOperation = "lighter"; c.globalAlpha = 1 - at / 0.3; c.fillStyle = h.col || "#ffb040"; c.fillRect(h.x - h.w / 2, h.y - (h.hgt || 30), h.w, h.hgt || 30); }
           break;
         }
@@ -471,7 +486,7 @@
     n = Math.round(n); let coins = Math.min(12, Math.max(1, Math.round(n / 6)));
     for (let i = 0; i < coins; i++) Z.spawnPickup("gold", x, y, { n: Math.ceil(n / coins) });
   };
-  Z.dropShards = (x, y, n) => { if (Z.has("splitterjaeger")) n *= 1.6; if (["a1", "a2", "s1", "s2"].some(s => Z.hasAff(Z.player.slots[s], "splitternd"))) n *= 1.3; n = Math.round(n); for (let i = 0; i < Math.min(8, n); i++) Z.spawnPickup("shard", x, y, { n: Math.ceil(n / Math.min(8, n)), vy: -80 - Math.random() * 100 }); };
+  Z.dropShards = (x, y, n) => { n *= Z.BAL && Z.BAL.shardMul ? Z.BAL.shardMul : 1; if (Z.has("splitterjaeger")) n *= 1.6; if (["a1", "a2", "s1", "s2"].some(s => Z.hasAff(Z.player.slots[s], "splitternd"))) n *= 1.3; n = Math.round(n); for (let i = 0; i < Math.min(8, n); i++) Z.spawnPickup("shard", x, y, { n: Math.ceil(n / Math.min(8, n)), vy: -80 - Math.random() * 100 }); };
   Z.updatePickups = function (dt) {
     const P = Z.player;
     if (Z.unstickTick) Z.unstickTick(dt); /* platz.js: festsitzende Beute einmal pro Sekunde freiploppen */

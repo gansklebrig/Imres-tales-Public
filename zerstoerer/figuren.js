@@ -1179,6 +1179,8 @@
     }
     /* ---- Pose bestimmen und überblenden ---- */
     computePose(TG, P, time, S);
+    /* W11 R45: Schwebe-Schlag von der Leiter (P.ladHov) – Beine angezogen, Fußspitzen gestreckt, statt hängender Sprungbeine */
+    if (P.ladHov > 0 && !P.onGround && !P.climbing && !P.dead) { const k = Math.min(1, P.ladHov / 0.15); TG.fFy = Math.min(TG.fFy, -3.4 * k); TG.fBy = Math.min(TG.fBy, -2.2 * k); TG.fFx += 0.8 * k; TG.toeF = Math.max(TG.toeF || 0, 0.8 * k); TG.toeB = Math.max(TG.toeB || 0, 0.9 * k); }
     const T = TG;
     if (T.key === "wall" && T.handAbsF) {
       /* Wandhände relativ zur Schulter der Zielpose, damit sie mit überblendet werden */
@@ -3884,4 +3886,287 @@
       if (!lo && Math.random() < 0.5) Z.fx.p({ x: cx + (Math.random() - 0.5) * 14, y: P.y + P.h - Math.random() * 8, vx: 0, vy: -30 - Math.random() * 20, life: 0.7, size: 1.3, col: Math.random() < 0.5 ? "#ffe0a0" : "#ffb060", kind: "glow", add: true });
     }
   }
+})();
+
+/* Ezekiel – The Destroyer · Gemalte Porträts für Sprechblasen (W11 Runde 25)
+   Z.portraet(name, text) → Bild-URL (oder null): kleines Brustbild im Pergament-Medaillon für die NSC des Lagers
+   (Edda, Quirin, Sigrun, Wendel, Jori, Barradin, Alwin, Lotte, Mira), die fahrende Händlerin und den Verfluchten.
+   Aussehen nach den Figuren in lager.js/figuren.js; der Gesichtsausdruck wird aus dem Satz geschätzt
+   (froh, ernst, traurig, aufgeregt, fragend). Einmal gemalt, danach aus dem Zwischenspeicher. Kein Blau. */
+(function () {
+  const Z = window.Z; if (!Z) return;
+  const LOOK = {
+    edda: { skin: "#e8c09a", hair: "#8a4a22", hs: "kurz", hat: "feder", cloth: "#6a4628", cloth2: "#c8902a", scarf: 1 },
+    quirin: { skin: "#e0b48e", hair: null, hs: "glatze", beard: "#ece4d4", cloth: "#5e6e26", cloth2: "#3e4a18", goggles: 1, age: 1 },
+    sigrun: { skin: "#e4c0a4", hair: "#b8b4b0", hs: "zoepfe", hood: "#7a2234", cloth: "#5a1a28", rune: 1, age: 1 },
+    wendel: { skin: "#d8a47e", hair: "#a8401c", hs: "kurz", beard: "#b04a20", cloth: "#7a5a36", cloth2: "#5a3e22", fur: 1, whistle: 1, broad: 1 },
+    jori: { skin: "#ecc29c", hair: "#5a3a22", hs: "kurz", hat: "muetze", cloth: "#7a4e2c", cloth2: "#4a3222", soot: 1, young: 1 },
+    barradin: { skin: "#ecccaa", hair: "#e8d090", hs: "lang", hat: "barde", cloth: "#6a2a6a", cloth2: "#8a3a2a", ears: 1 },
+    alwin: { skin: "#dcb898", hair: "#c8c4bc", hs: "duenn", cloth: "#2a2430", cloth2: "#4a3e30", glasses: 1, age: 2 },
+    lotte: { skin: "#ecc29e", hair: "#6a3a1e", hs: "kurz", scarfHead: "#c8402a", cloth: "#b03a24", cloth2: "#efe2c4", apron: 1 },
+    mira: { skin: "#e6be98", hair: "#2a1a16", hs: "lang", cloth: "#a87a32", cloth2: "#c03a5a", threads: 1 },
+    haendlerin: { skin: "#d8aa82", hair: "#3a2418", hs: "lang", hood: "#4a4226", cloth: "#5a3a22", cloth2: "#c8902a", earring: 1 },
+    verfluchter: { skin: "#9a8a90", hair: null, hs: "glatze", hood: "#241a24", cloth: "#1e161e", cloth2: "#3a2a3a", cursed: 1 }
+  };
+  const ALIAS = [["edda", "edda"], ["quirin", "quirin"], ["sigrun", "sigrun"], ["wendel", "wendel"], ["jori", "jori"], ["barradin", "barradin"], ["alwin", "alwin"], ["lotte", "lotte"], ["mira", "mira"], ["händlerin", "haendlerin"], ["trader", "haendlerin"], ["verfluch", "verfluchter"], ["cursed", "verfluchter"]];
+  function who(name) { const n = String(name || "").toLowerCase(); for (const [k, v] of ALIAS) if (n.includes(k)) return v; return null; }
+  function mood(txt) {
+    const s = String(txt || "");
+    if (/(tot|verloren|leider|allein|vermiss|tränen|grab|nie wieder|dead|lost|alone|miss|sorry|tears|…$|\.\.\.$)/i.test(s)) return "traurig";
+    if (/(hinter dir|vorsicht|achtung|lauf|weg hier|wächter|behind you|watch out|run)/i.test(s) || (s.match(/!/g) || []).length >= 2) return "aufgeregt";
+    if (/\?\s*["“”«»]?\s*$/.test(s) || /\?$/.test(s.trim())) return "fragend";
+    if (/(danke|gern|gut|schön|freu|ha!|haha|wunderbar|perfekt|thank|good|great|glad|lovely|well done)/i.test(s) || /!/.test(s)) return "froh";
+    return "ernst";
+  }
+  const cache = new Map();
+  function paint(L, md) {
+    const S = 96, cv = document.createElement("canvas"); cv.width = cv.height = S; const c = cv.getContext("2d"), TAU = Math.PI * 2;
+    const E = (x, y, rx, ry, col, r0) => { c.fillStyle = col; c.beginPath(); c.ellipse(x, y, rx, ry, r0 || 0, 0, TAU); c.fill(); };
+    const P = (col, pts) => { c.fillStyle = col; c.beginPath(); c.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) c.lineTo(pts[i], pts[i + 1]); c.closePath(); c.fill(); };
+    const Ln = (col, w, pts) => { c.strokeStyle = col; c.lineWidth = w; c.lineCap = "round"; c.beginPath(); c.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) c.lineTo(pts[i], pts[i + 1]); c.stroke(); };
+    /* Medaillon: Pergamentgrund mit warmer Vignette, Holzrand */
+    c.save(); c.beginPath(); c.arc(48, 48, 44, 0, TAU); c.clip();
+    const bg = c.createRadialGradient(44, 38, 6, 48, 48, 50); bg.addColorStop(0, L.cursed ? "#5a4458" : "#f4e4c0"); bg.addColorStop(0.7, L.cursed ? "#2a1e2a" : "#d8bc88"); bg.addColorStop(1, L.cursed ? "#140c14" : "#9a7a4a");
+    c.fillStyle = bg; c.fillRect(0, 0, S, S);
+    if (L.rune) { c.globalAlpha = 0.35; Ln("#a04a8a", 2, [74, 20, 74, 34]); Ln("#a04a8a", 2, [74, 22, 80, 27, 74, 31]); Ln("#a04a8a", 2, [18, 30, 24, 22, 24, 36]); c.globalAlpha = 1; }
+    const sk = L.skin, dk = "rgba(60,30,20,.22)", hx = 48, hy = L.broad ? 46 : 44, hr = L.young ? 15.5 : 16.5;
+    /* Haar hinten / Kapuze hinten */
+    if (L.hood) P(L.hood, [hx - 26, 98, hx - 25, hy - 6, hx - 14, hy - 26, hx, hy - 30, hx + 14, hy - 26, hx + 25, hy - 6, hx + 26, 98]);
+    if (L.hs === "lang") P(L.hair, [hx - 18, hy - 6, hx - 21, hy + 26, hx - 10, hy + 30, hx + 10, hy + 30, hx + 21, hy + 26, hx + 18, hy - 6]);
+    /* Schultern und Kleidung */
+    const sw = L.broad ? 40 : 34;
+    E(hx, 100, sw, 30, L.cloth);
+    c.fillStyle = "rgba(0,0,0,.18)"; c.beginPath(); c.ellipse(hx + 10, 102, sw * 0.7, 26, 0, 0, TAU); c.fill();
+    if (L.fur) for (let k = 0; k < 14; k++) { const a = Math.PI + k / 13 * Math.PI; E(hx + Math.cos(a) * (sw - 4), 80 + Math.abs(Math.sin(a)) * 2 + (k % 2) * 2, 5, 4, k % 2 ? "#a88a62" : "#8a6c48"); }
+    if (L.apron) P(L.cloth2, [hx - 12, 76, hx + 12, 76, hx + 16, 98, hx - 16, 98]);
+    if (L.cloth2 && !L.apron && !L.fur) P(L.cloth2, [hx - 7, 70, hx + 7, 70, hx + 4, 98, hx - 4, 98]);
+    /* Hals */
+    E(hx, hy + 20, 7, 8, sk); E(hx, hy + 22, 7, 5, dk);
+    if (L.scarf) { E(hx, hy + 25, 15, 6, L.cloth2); E(hx + 6, hy + 33, 5, 9, L.cloth2, 0.3); Ln("rgba(90,50,10,.5)", 1, [hx - 12, hy + 25, hx + 12, hy + 26]); }
+    if (L.whistle) { Ln("#3a2a1a", 1, [hx - 9, hy + 22, hx, hy + 36, hx + 9, hy + 22]); E(hx, hy + 38, 2.6, 4, "#c8a060"); }
+    if (L.threads) { Ln("#c03a5a", 1.6, [hx - 22, 92, hx - 14, 90]); Ln("#c03a5a", 1.2, [hx - 22, 95, hx - 14, 93]); }
+    /* Ohren */
+    if (L.ears) { P(sk, [hx - 15, hy - 1, hx - 27, hy - 12, hx - 16, hy + 6]); P(sk, [hx + 15, hy - 1, hx + 27, hy - 12, hx + 16, hy + 6]); }
+    else { E(hx - 16, hy + 2, 3, 5, sk); E(hx + 16, hy + 2, 3, 5, sk); }
+    if (L.earring) E(hx + 16, hy + 9, 1.6, 1.6, "#e8c060");
+    /* Kopf mit Licht von oben links */
+    E(hx, hy, hr, hr * 1.17, sk);
+    const sh = c.createLinearGradient(hx - hr, 0, hx + hr, 0); sh.addColorStop(0.55, "rgba(0,0,0,0)"); sh.addColorStop(1, "rgba(70,30,20,.28)"); c.fillStyle = sh; c.beginPath(); c.ellipse(hx, hy, hr, hr * 1.17, 0, 0, TAU); c.fill();
+    E(hx - 9, hy + 7, 4, 2.6, "rgba(220,110,90,.22)"); E(hx + 9, hy + 7, 4, 2.6, "rgba(220,110,90,.22)");
+    if (L.soot) { E(hx + 8, hy + 8, 4, 2.4, "rgba(40,30,30,.35)"); E(hx - 5, hy - 10, 3, 1.6, "rgba(40,30,30,.25)"); }
+    if (L.cursed) { const g = c.createLinearGradient(0, hy - 20, 0, hy + 10); g.addColorStop(0, "rgba(10,4,12,.85)"); g.addColorStop(1, "rgba(10,4,12,.15)"); c.fillStyle = g; c.beginPath(); c.ellipse(hx, hy, hr, hr * 1.17, 0, 0, TAU); c.fill(); }
+    /* Haar vorn */
+    const H = L.hair;
+    if (L.hs === "kurz") { P(H, [hx - hr - 1, hy + 2, hx - hr, hy - 10, hx - 8, hy - hr - 4, hx + 8, hy - hr - 4, hx + hr, hy - 10, hx + hr + 1, hy + 2, hx + 12, hy - 8, hx + 2, hy - 12, hx - 10, hy - 7]); }
+    if (L.hs === "lang") { P(H, [hx - hr - 2, hy + 14, hx - hr - 1, hy - 10, hx - 6, hy - hr - 5, hx + 10, hy - hr - 3, hx + hr + 1, hy - 8, hx + hr + 2, hy + 14, hx + 13, hy - 4, hx + 4, hy - 13, hx - 8, hy - 11, hx - 13, hy - 2]); }
+    if (L.hs === "zoepfe") { P(H, [hx - hr, hy - 2, hx - 8, hy - hr - 3, hx + 8, hy - hr - 3, hx + hr, hy - 2, hx + 6, hy - 12, hx - 6, hy - 12]); for (const sd of [-1, 1]) for (let k = 0; k < 5; k++) E(hx + sd * (hr + 1), hy + 6 + k * 6, 3.6, 3.4, k % 2 ? "#a8a4a0" : H); }
+    if (L.hs === "duenn") { P(H, [hx - hr - 1, hy + 4, hx - hr, hy - 8, hx - 11, hy - 11, hx - 12, hy + 2]); P(H, [hx + hr + 1, hy + 4, hx + hr, hy - 8, hx + 11, hy - 11, hx + 12, hy + 2]); Ln("rgba(200,196,188,.7)", 1, [hx - 6, hy - hr - 1, hx + 2, hy - hr + 1]); }
+    if (L.hs === "glatze" && !L.hood) { E(hx - 5, hy - 13, 5, 2.5, "rgba(255,240,220,.35)"); }
+    /* Elfenohren ragen durchs Haar */
+    if (L.ears) { P(L.skin, [hx - hr + 1, hy + 1, hx - 28, hy - 13, hx - hr + 1, hy + 7]); P(L.skin, [hx + hr - 1, hy + 1, hx + 28, hy - 13, hx + hr - 1, hy + 7]); Ln("rgba(120,60,40,.35)", 1, [hx - hr - 1, hy + 2, hx - 24, hy - 9]); Ln("rgba(120,60,40,.35)", 1, [hx + hr + 1, hy + 2, hx + 24, hy - 9]); }
+    /* Kopfbedeckung */
+    if (L.hood) { c.fillStyle = L.hood; c.beginPath(); c.moveTo(hx - hr - 6, hy + 18); c.quadraticCurveTo(hx - hr - 6, hy - hr - 12, hx, hy - hr - 12); c.quadraticCurveTo(hx + hr + 6, hy - hr - 12, hx + hr + 6, hy + 18); c.lineTo(hx + hr - 1, hy + 10); c.quadraticCurveTo(hx + hr, hy - hr + 2, hx, hy - hr + 1); c.quadraticCurveTo(hx - hr, hy - hr + 2, hx - hr + 1, hy + 10); c.closePath(); c.fill();
+      Ln("rgba(255,220,190,.18)", 1.2, [hx - hr - 4, hy + 10, hx - hr - 3, hy - 8, hx - 8, hy - hr - 9]); }
+    if (L.hat === "feder") { P("#5a3a22", [hx - hr - 3, hy - 10, hx - 10, hy - hr - 10, hx + 12, hy - hr - 9, hx + hr + 3, hy - 9]); Ln("#3a2414", 2, [hx - hr - 3, hy - 9, hx + hr + 3, hy - 8]); c.strokeStyle = "#c83a2a"; c.lineWidth = 3; c.beginPath(); c.moveTo(hx + 8, hy - hr - 8); c.quadraticCurveTo(hx + 22, hy - hr - 18, hx + 30, hy - hr - 10); c.stroke(); }
+    if (L.hat === "muetze") { E(hx, hy - hr + 1, hr + 2, 9, "#4a3a2e"); Ln("#2e241c", 2.4, [hx - hr - 2, hy - hr + 6, hx + hr + 2, hy - hr + 6]); }
+    if (L.hat === "barde") { P("#4a2a5a", [hx - hr - 6, hy - 9, hx - 10, hy - hr - 12, hx + 10, hy - hr - 14, hx + hr + 5, hy - 9]); Ln("#3a1a4a", 2.6, [hx - hr - 6, hy - 9, hx + hr + 6, hy - 9]); c.strokeStyle = "#e04a4a"; c.lineWidth = 2.4; c.beginPath(); c.moveTo(hx - 6, hy - hr - 10); c.quadraticCurveTo(hx - 20, hy - hr - 26, hx - 34, hy - hr - 20); c.stroke(); }
+    if (L.scarfHead) { c.fillStyle = L.scarfHead; c.beginPath(); c.moveTo(hx - hr - 2, hy + 2); c.quadraticCurveTo(hx - hr - 2, hy - hr - 8, hx, hy - hr - 8); c.quadraticCurveTo(hx + hr + 2, hy - hr - 8, hx + hr + 2, hy + 2); c.quadraticCurveTo(hx + 2, hy - 16, hx - hr - 2, hy + 2); c.fill(); E(hx + hr, hy + 4, 4, 5, L.scarfHead); for (let k = 0; k < 4; k++) E(hx - 10 + k * 7, hy - hr - 1, 1.2, 1.2, "#efe2c4"); }
+    /* Bart */
+    if (L.beard) { c.fillStyle = L.beard; c.beginPath(); c.moveTo(hx - hr + 1, hy + 2); c.quadraticCurveTo(hx - hr + 2, hy + (L.broad ? 34 : 28), hx, hy + (L.broad ? 38 : 32)); c.quadraticCurveTo(hx + hr - 2, hy + (L.broad ? 34 : 28), hx + hr - 1, hy + 2); c.quadraticCurveTo(hx + 8, hy + 10, hx, hy + 10); c.quadraticCurveTo(hx - 8, hy + 10, hx - hr + 1, hy + 2); c.fill();
+      Ln("rgba(0,0,0,.18)", 1, [hx - 6, hy + 18, hx - 4, hy + 28]); Ln("rgba(0,0,0,.18)", 1, [hx + 5, hy + 18, hx + 4, hy + 28]); }
+    /* Gesicht je Stimmung */
+    const ey = hy - 1, ex = 6.5;
+    if (L.cursed) { for (const sd of [-1, 1]) { const g = c.createRadialGradient(hx + sd * ex, ey, 0, hx + sd * ex, ey, 6); g.addColorStop(0, "rgba(230,170,255,1)"); g.addColorStop(0.35, "rgba(180,80,220,.7)"); g.addColorStop(1, "rgba(120,40,160,0)"); c.fillStyle = g; c.fillRect(hx + sd * ex - 6, ey - 6, 12, 12); } }
+    else if (md === "froh") { for (const sd of [-1, 1]) Ln("#2a1a14", 1.8, [hx + sd * ex - 2.6, ey + 0.6, hx + sd * ex, ey - 1.4, hx + sd * ex + 2.6, ey + 0.6]); }
+    else for (const sd of [-1, 1]) { E(hx + sd * ex, ey, 2.2, md === "aufgeregt" ? 2.8 : 2.4, "#fff8ee"); E(hx + sd * ex + 0.3, ey + 0.3, 1.5, 1.7, "#2a1a14"); E(hx + sd * ex - 0.3, ey - 0.5, 0.5, 0.5, "#fff"); }
+    if (L.age) { Ln("rgba(80,40,30,.3)", 0.8, [hx - ex - 4, ey + 3, hx - ex - 2, ey + 4]); Ln("rgba(80,40,30,.3)", 0.8, [hx + ex + 4, ey + 3, hx + ex + 2, ey + 4]); if (L.age > 1) Ln("rgba(80,40,30,.25)", 0.8, [hx - 6, hy - 12, hx + 6, hy - 12]); }
+    /* Brauen */
+    const bc = L.cursed ? "rgba(0,0,0,0)" : L.beard ? L.beard : L.hair || "#6a4a3a", by = ey - 5;
+    const brow = (sd, inner, outer) => Ln(bc, 2, [hx + sd * 3, by + inner, hx + sd * 10, by + outer]);
+    if (md === "froh") { brow(-1, -1.5, -1.5); brow(1, -1.5, -1.5); }
+    else if (md === "traurig") { brow(-1, -2, 1); brow(1, -2, 1); }
+    else if (md === "aufgeregt") { brow(-1, 1.2, -2.2); brow(1, 1.2, -2.2); }
+    else if (md === "fragend") { brow(-1, 0, 0); brow(1, -2.5, -3.5); }
+    else { brow(-1, 0, -0.5); brow(1, 0, -0.5); }
+    /* Nase */
+    Ln("rgba(90,40,30,.45)", 1.3, [hx + 0.5, ey + 2, hx + 2, ey + 8, hx - 1, ey + 9]);
+    /* Mund */
+    const my = hy + 13;
+    if (L.beard) E(hx, my, 6, 2.2, L.beard);
+    if (L.cursed) Ln("rgba(20,8,20,.8)", 1.4, [hx - 4, my, hx + 4, my + 0.5]);
+    else if (md === "froh") { c.fillStyle = "#7a2a22"; c.beginPath(); c.moveTo(hx - 6, my - 1); c.quadraticCurveTo(hx, my + 6, hx + 6, my - 1); c.quadraticCurveTo(hx, my + 2, hx - 6, my - 1); c.fill(); }
+    else if (md === "traurig") { c.strokeStyle = "#6a2a22"; c.lineWidth = 1.5; c.beginPath(); c.moveTo(hx - 5, my + 2); c.quadraticCurveTo(hx, my - 2, hx + 5, my + 2); c.stroke(); }
+    else if (md === "aufgeregt") { E(hx, my + 1, 3.6, 3.2, "#4a1a16"); E(hx, my + 2.6, 2, 1, "#a04a3a"); }
+    else if (md === "fragend") { E(hx + 1.5, my, 2, 1.8, "#5a2420"); }
+    else Ln("#6a2a22", 1.5, [hx - 4.5, my, hx + 4.5, my]);
+    /* Brille / Schutzbrille */
+    if (L.glasses) { c.strokeStyle = "#3a2a1a"; c.lineWidth = 1.2; for (const sd of [-1, 1]) { c.beginPath(); c.arc(hx + sd * ex, ey, 4.2, 0, TAU); c.stroke(); } Ln("#3a2a1a", 1.2, [hx - 2.2, ey, hx + 2.2, ey]); c.fillStyle = "rgba(255,240,210,.18)"; c.fillRect(hx - ex - 3, ey - 3, 2, 2); }
+    if (L.goggles) { Ln("#4a2e1a", 3, [hx - hr, hy - 9, hx + hr, hy - 9]); for (const sd of [-1, 1]) { E(hx + sd * 6, hy - 10, 5, 4.2, "#b06a2a"); E(hx + sd * 6, hy - 10, 3.2, 2.6, "#e8c890"); E(hx + sd * 6 - 1, hy - 11, 1, 0.8, "#fff"); } }
+    c.restore();
+    /* Rahmen: gemalter Holz-/Messingring */
+    c.strokeStyle = "#5a3a1e"; c.lineWidth = 4; c.beginPath(); c.arc(48, 48, 44, 0, TAU); c.stroke();
+    c.strokeStyle = "rgba(232,200,130,.7)"; c.lineWidth = 1.2; c.beginPath(); c.arc(48, 48, 41.6, Math.PI * 1.05, Math.PI * 1.75); c.stroke();
+    c.strokeStyle = "rgba(30,16,8,.6)"; c.lineWidth = 1; c.beginPath(); c.arc(48, 48, 46, 0, TAU); c.stroke();
+    return cv.toDataURL();
+  }
+  Z.portraetStimmung = mood;
+  Z.portraet = function (name, txt) {
+    try { const id = who(name); if (!id) return null; const md = mood(txt), k = id + ":" + md; let u = cache.get(k); if (!u) { u = paint(LOOK[id], md); cache.set(k, u); } return u; }
+    catch (e) { console.error(e); return null; }
+  };
+})();
+
+/* Ezekiel – The Destroyer · Gegner- und Bossbilder aus den echten Figuren (W11 Runde 26)
+   Z.gegnerBild(def, o) → Canvas: die Figur wird mit Z.drawEnemy in Ruhehaltung auf eine Leinwand gemalt, auf ihren
+   Umriss zugeschnitten und eingepasst (Fundbuch: Gegner/Bosse). o.dunkel → nur Schattenriss (noch nicht begegnet).
+   Z.bossPortraet(def) → Bild-URL: Kopf und Schultern des Bosses im Medaillon-Stil der NSC-Porträts, aber bedrohlich
+   (Glutgrund, rote Vignette, dunkler Eisenring mit Dornen). Kein Blau. Ergebnisse werden zwischengespeichert. */
+(function () {
+  const Z = window.Z; if (!Z || !Z.drawEnemy) return;
+  const raw = new Map(), cache = new Map();
+  function render(d) {
+    let r = raw.get(d); if (r) return r;
+    const s = d.size || 1, w = d.w || 16, h = d.h || 20, SC = 4, pad = 80;
+    const cv = document.createElement("canvas"); cv.width = Math.ceil((w * 4 + pad) * SC); cv.height = Math.ceil((h * 2.2 + pad) * SC);
+    const c = cv.getContext("2d");
+    const e = { def: d, x: 0, y: 0, w, h, face: 1, anim: 0.3, vx: 0, vy: 0, onGround: true, st: {}, size: s, hp: d.hp || 1, hpMax: d.hp || 1, aware: true, id: "bild" + Math.random(), kind: d.id, flash: 0, act: null, tele: 0, intro: 0 };
+    c.save(); c.scale(SC, SC); c.translate(cv.width / SC / 2 - w / 2, cv.height / SC - pad / 2 - h);
+    const gq = Z.gq; try { if (gq) Z.gq = Object.assign({}, gq, { lean: false }); Z.drawEnemy(c, e, 1.0); } catch (err) { console.error(err); } finally { Z.gq = gq; }
+    c.restore();
+    /* Umriss suchen */
+    const id = c.getImageData(0, 0, cv.width, cv.height).data; let x0 = cv.width, y0 = cv.height, x1 = -1, y1 = -1;
+    for (let y = 0; y < cv.height; y += 2) for (let x = 0; x < cv.width; x += 2) if (id[(y * cv.width + x) * 4 + 3] > 110) { /* Schein (Glühen) zählt nicht zum Umriss */ if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    /* Körpersäule (ohne seitlich ragende Waffen/Stäbe): oberster Punkt = Scheitel, für das Bossporträt */
+    const cxp = cv.width / 2, hw = w * SC * 0.22; let bt = cv.height;
+    for (let y = 0; y < cv.height && bt === cv.height; y += 2) for (let x = Math.floor(cxp - hw); x < cxp + hw; x += 2) if (id[(y * cv.width + x) * 4 + 3] > 110) { bt = y; break; }
+    r = x1 < 0 ? null : { cv, x0, y0, x1: x1 + 2, y1: y1 + 2, cx: cxp, bt, bw: w * SC, bh: h * SC };
+    raw.set(d, r); return r;
+  }
+  Z.gegnerBild = function (d, o) {
+    o = o || {}; const W = o.w || 64, H = o.h || 64, key = (o.key || d.id || d.n && d.n[0]) + W + "x" + H + (o.dunkel ? "d" : "");
+    let out = cache.get(key); if (out) return out;
+    out = document.createElement("canvas"); out.width = W; out.height = H; const c = out.getContext("2d");
+    const r = render(d);
+    if (r) {
+      const bw = r.x1 - r.x0, bh = r.y1 - r.y0, k = Math.min((W - 6) / bw, (H - 6) / bh), dw = bw * k, dh = bh * k;
+      c.imageSmoothingQuality = "high";
+      if (o.dunkel) { const t = document.createElement("canvas"); t.width = W; t.height = H; const tc = t.getContext("2d"); tc.drawImage(r.cv, r.x0, r.y0, bw, bh, (W - dw) / 2, H - 3 - dh, dw, dh); tc.globalCompositeOperation = "source-in"; tc.fillStyle = "rgba(96,74,70,.7)"; /* Schattenriss, auf dunklem Fenstergrund noch erkennbar */ tc.fillRect(0, 0, W, H); c.drawImage(t, 0, 0); }
+      else { c.save(); c.globalAlpha = 0.3; c.fillStyle = "#000"; c.beginPath(); c.ellipse(W / 2, H - 3, dw * 0.4, 2.2, 0, 0, Math.PI * 2); c.fill(); c.restore(); c.drawImage(r.cv, r.x0, r.y0, bw, bh, (W - dw) / 2, H - 3 - dh, dw, dh); }
+    }
+    /* Schein, der über den Umriss hinausreicht, weich auslaufen lassen statt an der Bildkante abzuschneiden */
+    c.save(); c.globalCompositeOperation = "destination-out";
+    for (const [x0, y0, x1, y1, rx, ry, rw, rh] of [[0, 0, 7, 0, 0, 0, 7, H], [W, 0, W - 7, 0, W - 7, 0, 7, H], [0, 0, 0, 7, 0, 0, W, 7]]) { const g = c.createLinearGradient(x0, y0, x1, y1); g.addColorStop(0, "rgba(0,0,0,1)"); g.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = g; c.fillRect(rx, ry, rw, rh); }
+    c.restore();
+    cache.set(key, out); return out;
+  };
+  /* Leinwand statt URL (sofort zeichenbar, z. B. im Boss-Titelband von uebergang.js) */
+  Z.bossPortraetBild = function (d) { if (!d || !Z.bossPortraet(d)) return null; return cache.get("boss:" + (d.id || d.n[0]) + ":cv") || null; };
+  Z.bossPortraet = function (d) {
+    if (!d) return null; const key = "boss:" + (d.id || d.n[0]); let u = cache.get(key); if (u) return u;
+    try {
+      const r = render(d); if (!r) return null;
+      const S = 96, cv = document.createElement("canvas"); cv.width = cv.height = S; const c = cv.getContext("2d"), TAU = Math.PI * 2;
+      c.save(); c.beginPath(); c.arc(48, 48, 44, 0, TAU); c.clip();
+      const bg = c.createRadialGradient(48, 60, 4, 48, 52, 54); bg.addColorStop(0, "#8a2a14"); bg.addColorStop(0.45, "#4a120c"); bg.addColorStop(1, "#120608"); c.fillStyle = bg; c.fillRect(0, 0, S, S);
+      /* Glutfunken im Grund */
+      for (let i = 0; i < 14; i++) { const a = i * 2.39, rr = 16 + (i * 37 % 26); c.fillStyle = "rgba(255," + (120 + (i * 29 % 80)) + ",60," + (0.25 + (i % 3) * 0.12) + ")"; c.fillRect(48 + Math.cos(a) * rr, 50 + Math.sin(a) * rr * 0.8, 1.6, 1.6); }
+      /* Kopf und Schultern: oberer Teil des Umrisses (bei breiten Gestalten etwas mehr) */
+      /* Ausschnitt um Kopf und Schultern: Mitte der Körpersäule, oben am Scheitel */
+      const HEAD = { dragon: [0.3, 0.6, 1.05], spider: [0.22, 0.55, 1.15] }, hd = HEAD[d.shape]; /* breite Gestalten: Kopf liegt vorn (Blickrichtung) */
+      const side = hd ? r.bw * hd[1] * 1.2 : Math.max(r.bw * 1.5, r.bh * 0.6), sx = r.cx + (hd ? r.bw * hd[0] : 0) - side / 2, sy = hd ? Math.max(0, r.y1 - r.bh * hd[2]) : Math.max(0, r.bt - side * 0.1);
+      c.drawImage(r.cv, sx, sy, side, side, 4, 8, 88, 88);
+      /* Randlicht von unten (Glut) und Vignette */
+      const vg = c.createRadialGradient(48, 44, 22, 48, 48, 50); vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(20,0,0,.75)"); c.fillStyle = vg; c.fillRect(0, 0, S, S);
+      const lo = c.createLinearGradient(0, 60, 0, 96); lo.addColorStop(0, "rgba(255,90,30,0)"); lo.addColorStop(1, "rgba(255,90,30,.28)"); c.globalCompositeOperation = "lighter"; c.fillStyle = lo; c.fillRect(0, 0, S, S); c.globalCompositeOperation = "source-over";
+      c.restore();
+      /* Eisenring mit Dornen */
+      c.fillStyle = "#1c1416"; for (let i = 0; i < 12; i++) { const a = i / 12 * TAU - Math.PI / 2; c.beginPath(); c.moveTo(48 + Math.cos(a - 0.09) * 44, 48 + Math.sin(a - 0.09) * 44); c.lineTo(48 + Math.cos(a) * 47.5, 48 + Math.sin(a) * 47.5); c.lineTo(48 + Math.cos(a + 0.09) * 44, 48 + Math.sin(a + 0.09) * 44); c.fill(); }
+      c.strokeStyle = "#2a2024"; c.lineWidth = 5; c.beginPath(); c.arc(48, 48, 44, 0, TAU); c.stroke();
+      c.strokeStyle = "rgba(255,120,60,.55)"; c.lineWidth = 1.2; c.beginPath(); c.arc(48, 48, 41.4, Math.PI * 0.15, Math.PI * 0.85); c.stroke();
+      c.strokeStyle = "rgba(200,170,160,.35)"; c.lineWidth = 1; c.beginPath(); c.arc(48, 48, 46.4, Math.PI * 1.1, Math.PI * 1.6); c.stroke();
+      u = cv.toDataURL(); cache.set(key, u); cache.set(key + ":cv", cv); return u;
+    } catch (e) { console.error(e); return null; }
+  };
+})();
+
+/* Ezekiel – The Destroyer · Gemalte Siegel und Abzeichen (W11 Runde 27)
+   Z.siegel(motiv, o) → Canvas 96×96 (Z.siegelURL → Bild-URL): Medaille im Stil der Porträts – geprägter Metallrand
+   (o.stufe: bronze, silber, gold, blut), Grund mit Glanz, Motiv als Prägung; o.gesperrt → stumpfer Schattenriss mit
+   Kette. o.band → Bandschleife unten. Motive: tod, sieg, schwert, schild, krone, schaedel, stern, karte, truhe, flamme,
+   auge, feder, rune, glocke, zahnrad, pfote, faden, muenze, trank, blitz, herz, sanduhr, pfeil, tor; sonst Z.drawIcon.
+   Für Laufbilanz (Tod/Sieg) und Erfolge. Kein Blau. */
+(function () {
+  const Z = window.Z; if (!Z) return;
+  const TAU = Math.PI * 2, cache = new Map();
+  const MET = { bronze: ["#f0b884", "#a8643a", "#5a2e16"], silber: ["#f4ecdc", "#a8a096", "#4e4842"], gold: ["#fff0b0", "#d8a038", "#6a4410"], blut: ["#ffb0a0", "#b0302a", "#4a0c0a"] };
+  const GRUND = { bronze: ["#7a4a2a", "#3a2014"], silber: ["#5a5450", "#262220"], gold: ["#8a5a1a", "#3a2408"], blut: ["#6a1410", "#240606"] };
+  function glyph(c, m, ink) {
+    c.fillStyle = ink; c.strokeStyle = ink; c.lineCap = "round"; c.lineJoin = "round";
+    const P = pts => { c.beginPath(); c.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) c.lineTo(pts[i], pts[i + 1]); c.closePath(); c.fill(); };
+    const L = (w, pts) => { c.lineWidth = w; c.beginPath(); c.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) c.lineTo(pts[i], pts[i + 1]); c.stroke(); };
+    const O = (x, y, r) => { c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill(); };
+    switch (m) {
+      case "tod": case "schaedel":
+        c.beginPath(); c.arc(0, -3, 13, Math.PI * 0.85, Math.PI * 0.15); c.lineTo(8, 12); c.lineTo(-8, 12); c.closePath(); c.fill();
+        c.save(); c.globalCompositeOperation = "destination-out"; O(-5, -2, 3.8); O(5, -2, 3.8); P([0, 3, -2, 7, 2, 7]); for (const x of [-4, 0, 4]) c.fillRect(x - 0.8, 9, 1.6, 4); c.restore();
+        if (m === "tod") { c.save(); c.globalCompositeOperation = "destination-out"; L(1.6, [3, -16, 0, -8, 4, -4, 1, 2]); c.restore(); }
+        break;
+      case "sieg":
+        O(0, -2, 7); for (let i = 0; i < 12; i++) { const a = i / 12 * TAU; P([Math.cos(a - 0.12) * 9, -2 + Math.sin(a - 0.12) * 9, Math.cos(a) * 14, -2 + Math.sin(a) * 14, Math.cos(a + 0.12) * 9, -2 + Math.sin(a + 0.12) * 9]); }
+        for (const sd of [-1, 1]) for (let k = 0; k < 5; k++) { const a = Math.PI / 2 + sd * (0.5 + k * 0.32); c.save(); c.translate(Math.cos(a) * 17, Math.sin(a) * 17); c.rotate(a + sd * 1.2); c.beginPath(); c.ellipse(0, 0, 2.2, 4.4, 0, 0, TAU); c.fill(); c.restore(); }
+        break;
+      case "schwert": P([-2, 10, -2, -14, 0, -18, 2, -14, 2, 10]); c.fillRect(-8, 8, 16, 3); c.fillRect(-1.6, 11, 3.2, 6); O(0, 18, 2.4); break;
+      case "schild": c.beginPath(); c.moveTo(-12, -12); c.lineTo(12, -12); c.lineTo(11, 2); c.quadraticCurveTo(8, 12, 0, 16); c.quadraticCurveTo(-8, 12, -11, 2); c.closePath(); c.fill(); c.save(); c.globalCompositeOperation = "destination-out"; L(2, [0, -9, 0, 12]); L(2, [-9, -2, 9, -2]); c.restore(); break;
+      case "krone": P([-14, 8, -14, -6, -7, 1, 0, -12, 7, 1, 14, -6, 14, 8]); c.fillRect(-14, 9, 28, 4); break;
+      case "stern": c.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 6.5 : 15; c.lineTo(Math.cos(a) * r, Math.sin(a) * r); } c.closePath(); c.fill(); break;
+      case "karte": P([-14, -10, -5, -13, 5, -10, 14, -13, 14, 11, 5, 14, -5, 11, -14, 14]); c.save(); c.globalCompositeOperation = "destination-out"; c.setLineDash([2.5, 2.5]); L(1.4, [-9, 6, -2, -2, 4, 2, 9, -6]); c.setLineDash([]); L(1.6, [7, -9, 11, -5]); L(1.6, [11, -9, 7, -5]); c.restore(); break;
+      case "truhe": c.fillRect(-14, -2, 28, 14); c.beginPath(); c.moveTo(-14, -2); c.quadraticCurveTo(0, -16, 14, -2); c.fill(); c.save(); c.globalCompositeOperation = "destination-out"; c.fillRect(-14, -3, 28, 1.6); c.fillRect(-2.5, -4, 5, 6); c.restore(); break;
+      case "flamme": c.beginPath(); c.moveTo(0, -17); c.quadraticCurveTo(13, -2, 9, 8); c.quadraticCurveTo(5, 15, 0, 15); c.quadraticCurveTo(-6, 15, -9, 8); c.quadraticCurveTo(-12, -2, -3, -6); c.quadraticCurveTo(-3, 0, 1, 1); c.quadraticCurveTo(4, -8, 0, -17); c.fill(); break;
+      case "auge": c.beginPath(); c.moveTo(-16, 0); c.quadraticCurveTo(0, -14, 16, 0); c.quadraticCurveTo(0, 14, -16, 0); c.fill(); c.save(); c.globalCompositeOperation = "destination-out"; O(0, 0, 6); c.restore(); O(0, 0, 3.4); break;
+      case "feder": c.beginPath(); c.moveTo(-12, 15); c.quadraticCurveTo(-4, -6, 12, -16); c.quadraticCurveTo(10, 2, -9, 12); c.fill(); L(1.4, [-14, 17, -6, 8]); break;
+      case "rune": L(3, [0, -15, 0, 15]); L(3, [0, -11, 9, -4, 0, 3]); L(3, [0, 3, -8, 11]); break;
+      case "glocke": c.beginPath(); c.moveTo(-12, 10); c.quadraticCurveTo(-10, -12, 0, -13); c.quadraticCurveTo(10, -12, 12, 10); c.closePath(); c.fill(); c.fillRect(-14, 9, 28, 3); O(0, 15, 3); O(0, -15, 2.4); break;
+      case "zahnrad": O(0, 0, 10); for (let i = 0; i < 8; i++) { c.save(); c.rotate(i / 8 * TAU); c.fillRect(-3, -15, 6, 6); c.restore(); } c.save(); c.globalCompositeOperation = "destination-out"; O(0, 0, 4); c.restore(); break;
+      case "pfote": c.beginPath(); c.ellipse(0, 6, 8, 7, 0, 0, TAU); c.fill(); for (const [x, y] of [[-10, -4], [-4, -10], [4, -10], [10, -4]]) { c.beginPath(); c.ellipse(x, y, 3.2, 4.2, x * 0.04, 0, TAU); c.fill(); } break;
+      case "faden": c.lineWidth = 2.4; c.beginPath(); for (let i = 0; i <= 40; i++) { const u = i / 40, a = u * TAU * 2.2; c.lineTo(Math.cos(a) * (4 + u * 10), Math.sin(a) * (4 + u * 10)); } c.stroke(); break;
+      case "muenze": O(0, 0, 13); c.save(); c.globalCompositeOperation = "destination-out"; c.lineWidth = 1.6; c.beginPath(); c.arc(0, 0, 10, 0, TAU); c.stroke(); c.font = "bold 14px serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("Z", 0, 1); c.restore(); break;
+      case "trank": c.beginPath(); c.arc(0, 5, 11, 0, TAU); c.fill(); c.fillRect(-4, -14, 8, 10); c.fillRect(-6, -16, 12, 3); c.save(); c.globalCompositeOperation = "destination-out"; c.fillRect(-11, 2, 22, 1.6); c.restore(); break;
+      case "blitz": P([3, -17, -10, 2, -1, 2, -4, 17, 10, -3, 1, -3]); break;
+      case "herz": c.beginPath(); c.moveTo(0, 14); c.bezierCurveTo(-18, 2, -12, -16, 0, -6); c.bezierCurveTo(12, -16, 18, 2, 0, 14); c.fill(); break;
+      case "sanduhr": P([-10, -15, 10, -15, 1, 0, 10, 15, -10, 15, -1, 0]); c.fillRect(-12, -17, 24, 3); c.fillRect(-12, 14, 24, 3); break;
+      case "pfeil": L(2.6, [-13, 13, 11, -11]); P([13, -13, 3, -11, 11, -3]); P([-13, 13, -14, 6, -9, 9]); P([-13, 13, -6, 14, -9, 9]); break;
+      case "tor": c.beginPath(); c.moveTo(-13, 15); c.lineTo(-13, -2); c.quadraticCurveTo(-13, -15, 0, -15); c.quadraticCurveTo(13, -15, 13, -2); c.lineTo(13, 15); c.closePath(); c.fill(); c.save(); c.globalCompositeOperation = "destination-out"; for (const x of [-6, 0, 6]) c.fillRect(x - 1, -10, 2, 25); c.restore(); break;
+      default: if (Z.drawIcon) { c.save(); Z.drawIcon(c, m, 0, 0, 30, ink); c.restore(); } else O(0, 0, 8);
+    }
+  }
+  Z.siegel = function (motiv, o) {
+    o = o || {}; const st = MET[o.stufe] ? o.stufe : "gold", lock = !!o.gesperrt, key = motiv + "|" + st + "|" + (lock ? 1 : 0) + "|" + (o.band ? 1 : 0);
+    let cv = cache.get(key); if (cv) return cv;
+    cv = document.createElement("canvas"); cv.width = cv.height = 96; const c = cv.getContext("2d");
+    const M = lock ? ["#6a5e58", "#3a322e", "#1a1614"] : MET[st], G = lock ? ["#2a2220", "#120e0c"] : GRUND[st];
+    if (o.band) { for (const sd of [-1, 1]) { c.fillStyle = lock ? "#2a2020" : st === "blut" ? "#5a0e0a" : "#7a1a12"; c.beginPath(); c.moveTo(48 + sd * 6, 66); c.lineTo(48 + sd * 22, 95); c.lineTo(48 + sd * 15, 88); c.lineTo(48 + sd * 10, 95); c.lineTo(48 + sd * 2, 70); c.fill(); } }
+    /* geprägter Rand mit Zacken */
+    c.save(); c.translate(48, 46);
+    c.fillStyle = M[2]; c.beginPath(); for (let i = 0; i < 48; i++) { const a = i / 48 * TAU, r = i % 2 ? 37 : 39.5; c.lineTo(Math.cos(a) * r, Math.sin(a) * r); } c.closePath(); c.fill();
+    const rg = c.createLinearGradient(-36, -36, 36, 36); rg.addColorStop(0, M[0]); rg.addColorStop(0.45, M[1]); rg.addColorStop(1, M[2]);
+    c.fillStyle = rg; c.beginPath(); c.arc(0, 0, 35.5, 0, TAU); c.fill();
+    const gg = c.createRadialGradient(-8, -10, 4, 0, 0, 30); gg.addColorStop(0, G[0]); gg.addColorStop(1, G[1]);
+    c.fillStyle = gg; c.beginPath(); c.arc(0, 0, 29, 0, TAU); c.fill();
+    c.strokeStyle = lock ? "rgba(0,0,0,.4)" : "rgba(0,0,0,.45)"; c.lineWidth = 1.2; c.beginPath(); c.arc(0, 0, 29, 0, TAU); c.stroke();
+    c.strokeStyle = lock ? "rgba(140,120,110,.25)" : "rgba(255,240,210,.35)"; c.setLineDash([1.2, 2.6]); c.beginPath(); c.arc(0, 0, 32.5, 0, TAU); c.stroke(); c.setLineDash([]);
+    /* Motiv: dunkle Prägekante, dann Metall */
+    const g2 = document.createElement("canvas"); g2.width = g2.height = 96; const gc = g2.getContext("2d"); gc.translate(48, 46); gc.scale(1.15, 1.15); glyph(gc, motiv, "#fff");
+    const tint = (col) => { const t = document.createElement("canvas"); t.width = t.height = 96; const tc = t.getContext("2d"); tc.drawImage(g2, 0, 0); tc.globalCompositeOperation = "source-in"; if (typeof col === "string") tc.fillStyle = col; else { const lg = tc.createLinearGradient(0, 20, 0, 76); lg.addColorStop(0, col[0]); lg.addColorStop(1, col[1]); tc.fillStyle = lg; } tc.fillRect(0, 0, 96, 96); return t; };
+    c.restore();
+    c.drawImage(tint("rgba(0,0,0,.6)"), 1.2, 1.8);
+    c.drawImage(tint(lock ? ["#5a504a", "#322a26"] : [M[0], M[1]]), 0, 0);
+    if (!lock) { c.globalAlpha = 0.5; c.drawImage(tint("rgba(255,250,230,.8)"), -0.8, -0.8); c.globalAlpha = 1; c.drawImage(tint([M[0], M[1]]), 0, 0); }
+    /* Glanz oben links */
+    if (!lock) { c.save(); c.translate(48, 46); c.globalCompositeOperation = "lighter"; const hl = c.createRadialGradient(-14, -18, 1, -14, -18, 22); hl.addColorStop(0, "rgba(255,240,210,.32)"); hl.addColorStop(1, "rgba(255,240,210,0)"); c.fillStyle = hl; c.beginPath(); c.arc(0, 0, 35, 0, TAU); c.fill(); c.restore(); }
+    /* gesperrt: Kette quer */
+    if (lock) { c.save(); c.translate(48, 46); c.rotate(-0.5); c.strokeStyle = "#4a423e"; c.lineWidth = 2.2; for (let x = -40; x <= 40; x += 9) { c.beginPath(); c.ellipse(x, 0, 5, x / 9 % 2 ? 1.6 : 3.2, 0, 0, TAU); c.stroke(); } c.fillStyle = "#3a322e"; c.fillRect(-6, -3, 12, 11); c.beginPath(); c.arc(0, -3, 4.5, Math.PI, 0); c.lineWidth = 2; c.stroke(); c.restore(); }
+    cache.set(key, cv); return cv;
+  };
+  const urls = new Map();
+  Z.siegelURL = function (motiv, o) { const cv = Z.siegel(motiv, o), k = cv; let u = urls.get(k); if (!u) { u = cv.toDataURL(); urls.set(k, u); } return u; };
 })();

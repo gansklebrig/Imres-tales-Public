@@ -403,21 +403,22 @@
         act: (e, P, m) => { const dir = pcx(P) > cxOf(e) ? 1 : -1; floorSweep(e, cxOf(e), dir, 520, { warn: 0.5, gap: 0.026, col: "#ffe080", m: 0.9, sfx: "zap" }); if (e.phase >= 2) later(0.5, () => { if (alive(e)) floorSweep(e, cxOf(e), -dir, 520, { warn: 0.5, gap: 0.026, col: "#ffe080", m: 0.9, sfx: "zap" }); }); FX.text(pcx(P), P.y - 16, L(["Springen!", "Jump!"]), "#ffe080", true); } },
       /* Gebet: Kanalisieren – genug Schaden unterbricht sie, sonst heilt sie und ruft Gläubige */
       gebet: { name: N("Gebet an Demogorgon", "Prayer to Demogorgon"), pre: 0.45, dur: 2.4, post: 0.6, sfx: "dark", w: 0.8,
-        cond: e => e.hp < e.hpMax * 0.92,
+        cond: e => e.hp < e.hpMax * 0.92 && (e._gebetN || 0) < 3, /* W9 6. Runde: höchstens 3 Gebete je Kampf (Bot-Lauf: 600 s Patt, sie heilte schneller als der Nahkampf-Bot schlug) */
         start: (e, P, m) => { m.chan = 0; },
         act: (e, P, m) => { m.chan = 0; FX.text(cxOf(e), e.y - 18, L(["Unterbrich sie!", "Interrupt her!"]), "#ffd27a", true); A.play("dark", { vol: 0.7 }); },
         tick: (e, P, dt, m) => {
           e.vx = 0;
           if (R() < dt * 30) { const a = R() * TAU; FX.p({ x: cxOf(e) + Math.cos(a) * 40, y: e.y + 14 + Math.sin(a) * 30, vx: -Math.cos(a) * 80, vy: -Math.sin(a) * 60, life: 0.5, size: 2, col: "#e5b454", kind: "glow", add: true }); }
           if (m.t > 1.6 && !m.warned) { m.warned = true; tele({ k: "ring", x: cxOf(e), y: feet(e) - 20, r: 80, dur: 0.8, col: "#ff3a2a" }); }
-          if (m.chan >= e.hpMax * 0.07 && !m.broke) {
+          if (m.chan >= e.hpMax * 0.05 && !m.broke) { /* W9: Unterbrechen ab 5 % statt 7 % */
             m.broke = true; m.t = 99; e.st.stun = 2.2;
             FX.text(cxOf(e), e.y - 14, L(["Unterbrochen!", "Interrupted!"]), "#ffe08a", true); A.play("parry", { vol: 0.7 }); FX.ring(cxOf(e), e.y + 14, 40, "#ffe08a", 0.4, 3); FX.addShake(4);
           }
         },
         end: (e, P, m) => {
+          e._gebetN = (e._gebetN || 0) + 1;
           if (m.broke) return;
-          e.hp = Math.min(e.hpMax, e.hp + e.hpMax * 0.06); FX.text(cxOf(e), e.y - 14, L(["Demogorgon antwortet …", "Demogorgon answers…"]), "#e5b454", true);
+          e.hp = Math.min(e.hpMax, e.hp + e.hpMax * 0.05); FX.text(cxOf(e), e.y - 14, L(["Demogorgon antwortet …", "Demogorgon answers…"]), "#e5b454", true);
           zone(e, cxOf(e), feet(e), 160, 56, 0, 1.1, { col: "rgba(229,180,84,.9)", eff: { stun: 0.3 } }); FX.ring(cxOf(e), feet(e) - 20, 80, "#e5b454", 0.4, 4); A.play("thunder", { vol: 0.6 });
           if (minions(e) < 2) summon(e, "kuotoa", 1, 70); /* W9: Gläubige trafen öfter als die Priesterin selbst */
         } },
@@ -643,7 +644,7 @@
         act: (e, P, m) => { m.k = 0; m.s = "aim"; m.st = 0; },
         tick: (e, P, dt, m) => {
           m.st += dt;
-          if (m.s === "aim") { e.vx *= 0.85; e.vy *= 0.85; if (m.st < 0.3) m.aim = { x: pcx(P), y: P.y + 14 }; if (m.st > 0.5) { const a = Math.atan2(m.aim.y - (e.y + 10), m.aim.x - cxOf(e)); m.vx = Math.cos(a) * 470; m.vy = Math.sin(a) * 470; m.s = "dash"; m.st = 0; m.hit = false; A.play("insect", { vol: 0.6 }); } }
+          if (m.s === "aim") { e.vx *= 0.85; e.vy *= 0.85; if (m.st < 0.3) m.aim = { x: pcx(P), y: P.y + 14 }; if (m.st > 0.58 /* W9 12. Runde: 0,5 → 0,58 wie die übrigen Ziellinien-Stöße (0,2 s nach dem Einrasten war unter Reaktionszeit) */) { const a = Math.atan2(m.aim.y - (e.y + 10), m.aim.x - cxOf(e)); m.vx = Math.cos(a) * 470; m.vy = Math.sin(a) * 470; m.s = "dash"; m.st = 0; m.hit = false; A.play("insect", { vol: 0.6 }); } }
           else { e.vx = m.vx; e.vy = m.vy; if (!m.hit) m.hit = melee(e, { x: e.x, y: e.y, w: e.w, h: e.h }, 1.0); if (m.st > 0.4 || e.onGround || e.hitWall) { m.k++; m.s = "aim"; m.st = 0; m.aim = null; e.vy = -120; if (m.k >= 3) m.t = 99; } }
         } },
       /* Blutsauger: Sturz mit Ziellinie; trifft er, heilt die Chasme und der Spieler blutet */
@@ -974,6 +975,7 @@
   /* Beim Gebietswechsel alles abräumen */
   const la0 = Z.loadArea;
   Z.loadArea = function () { Q = []; TELE.length = 0; OBJ = []; return la0.apply(this, arguments); };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "bossphasen", load: () => { Q = []; TELE.length = 0; OBJ = []; } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
 
   /* Lebensbalken: Phasenmarken und Phasenfarbe */
   let barFor = null;
@@ -1022,14 +1024,18 @@
         case "floor": {
           const w = t.w;
           c.globalAlpha = 0.35 + 0.45 * k; c.fillStyle = t.col; c.fillRect(t.x - w / 2, t.y - 3, w, 3);
-          c.globalAlpha = (0.15 + 0.25 * pulse) * (0.4 + k); c.fillRect(t.x - w / 2, t.y - 3 - 14 * k, w, 14 * k);
+          { /* W11 R23 (Grafik): weicher Verlauf statt Rechteck */ const hh = 6 + 18 * k, g = c.createLinearGradient(0, t.y - 3 - hh, 0, t.y - 3); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, t.col);
+            c.globalAlpha = (0.2 + 0.3 * pulse) * (0.4 + k); c.fillStyle = g; c.fillRect(t.x - w / 2, t.y - 3 - hh, w, hh); c.fillStyle = t.col; }
           c.globalAlpha = 0.5 + 0.5 * pulse; c.beginPath(); c.moveTo(t.x - 3, t.y - 20 - 4 * pulse); c.lineTo(t.x + 3, t.y - 20 - 4 * pulse); c.lineTo(t.x, t.y - 15 - 4 * pulse); c.fill();
           if (late) { c.globalAlpha = 0.6 * pulse; c.fillStyle = "#fff2d0"; c.fillRect(t.x - w / 2, t.y - 1.5, w, 1.5); }
           break;
         }
         case "band": {
           const w = t.x1 - t.x0;
-          c.globalAlpha = (0.12 + 0.22 * pulse) * (0.5 + k); c.fillStyle = t.col; c.fillRect(t.x0, t.y - t.h, w, t.h);
+          { /* W11 R23 (Grafik): Band mit Verlauf und laufender Schraffur */ const g = c.createLinearGradient(0, t.y - t.h, 0, t.y); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, t.col);
+            c.globalAlpha = (0.2 + 0.25 * pulse) * (0.5 + k); c.fillStyle = g; c.fillRect(t.x0, t.y - t.h, w, t.h);
+            if (!(Z.gq && Z.gq.lean)) { c.save(); c.beginPath(); c.rect(t.x0, t.y - t.h, w, t.h); c.clip(); c.strokeStyle = t.col; c.lineWidth = 1; c.globalAlpha = 0.18 + 0.2 * k; const off = (t.t * 30) % 8; c.beginPath(); for (let xx = t.x0 - t.h + off; xx < t.x0 + w; xx += 8) { c.moveTo(xx, t.y); c.lineTo(xx + t.h, t.y - t.h); } c.stroke(); c.restore(); }
+            c.fillStyle = t.col; }
           c.globalAlpha = 0.55 + 0.35 * k; c.fillRect(t.x0, t.y - t.h, w, 1); c.fillRect(t.x0, t.y - 1, w, 1);
           if (t.arrow) { c.globalAlpha = 0.6 * pulse; const n = Math.max(1, Math.floor(w / 60)); for (let i = 0; i < n; i++) { const ax = t.x0 + (i + 0.5) * w / n + t.arrow * ((t.t * 60) % 20), ay = t.y - t.h / 2; c.beginPath(); c.moveTo(ax - t.arrow * 4, ay - 4); c.lineTo(ax + t.arrow * 3, ay); c.lineTo(ax - t.arrow * 4, ay + 4); c.fill(); } }
           if (late) { c.globalAlpha = 0.5 * pulse; c.fillStyle = "#fff2d0"; c.fillRect(t.x0, t.y - t.h, w, 1.2); }
@@ -1250,6 +1256,19 @@
         /* 5. Runde: Spieler auf einem Sims knapp über dem Wächter (Ilvara: 112 px darüber, Durchbruch ohne Platz) – nach 12 s ohne Treffer
            „durchschaut“ ihn der Wächter: Säulen unter dem Sims treiben ihn herunter (lesbare Vorwarnung wie beim Stillstehen) */
         if (!far && feet(e) - (P.y + P.h) > 60 && s.pat > 12 && P.onGround) { s.pat = 0; punish(e, P); }
+        /* 7. Runde (K12: Schmiedewächter 530 s): umgekehrt – der Wächter steht auf einem Sims ÜBER dem Spieler und kommt nicht herunter */
+        /* 8. Runde (K13: Chasme 515 s über einem Nahkampf-Bot): Flieger, die 12 s nur über dem Spieler schweben, stoßen herab */
+        else if (!far && (P.y + P.h) - feet(e) > 40 && s.pat > 12 && e.def.fly) {
+          s.pat = 0; const dv = Object.keys(e.def.moves).find(k => /stich|sturz|dive|blutsauger/.test(k)); if (dv) { e.nextMv = dv; e.idle = Math.min(e.idle || 0, 0.05); }
+        }
+        else if (!far && (P.y + P.h) - feet(e) > 60 && s.pat > 12 && P.onGround && !e.def.fly) {
+          s.pat = 0;
+          if (!breakThrough(e, P)) { const side = pcx(P) < cxOf(e) ? 1 : -1; e.x = pcx(P) + side * 70 - e.w / 2; e.y = standY(P) - e.h - 1; e.vx = 0; e.vy = 0; Z.unstick(e); FX.burst(cxOf(e), feet(e) - 6, 20, { col: [Z.dustCol || "#8a7a70", "#c8b8a0"], sp: 160, ang: -Math.PI / 2, spread: 2.4, life: 0.5, size: 3, kind: "smoke" }); A.play("quake", { vol: 0.5 }); }
+        }
+        /* W9 14. Runde (Chasme 300/600 s, 2 von ~45 Prüfstand-Kämpfen: Flieger nah am Spieler, aber 35 s ohne jeden Treffer): Flieger setzt sich
+           sichtbar auf Spielerhöhe neben ihn und stößt zu – nur bei echtem Stillstand, sonst greift nichts davon */
+        if (s.hp2 == null || e.hp < s.hp2 - 1) { s.hp2 = e.hp; s.pat2 = 0; } else s.pat2 = (s.pat2 || 0) + dt;
+        if (e.def.fly && !far && s.pat2 > 35) { s.pat2 = 0; const side = pcx(P) < cxOf(e) ? 1 : -1; FX.burst(cxOf(e), e.y + e.h / 2, 14, { col: ["#3a3030", "#5a4a40"], sp: 80, life: 0.5, size: 3, kind: "smoke" }); e.x = pcx(P) + side * 60 - e.w / 2; e.y = P.y + P.h - e.h - 6; e.vx = 0; e.vy = 0; Z.unstick(e); const dv = Object.keys(e.def.moves).find(k => /stich|sturz|dive|blutsauger/.test(k)); if (dv) { e.nextMv = dv; e.idle = Math.min(e.idle || 0, 0.3); } }
         if (!far) s.pat = Math.min(s.pat, 12.5);
         if (s.pat > 15 && (P.onGround || s.pat > 25)) {
           s.pat = 0; const b = e.box, out = pcx(P) < b.x0 - 8 || pcx(P) > b.x1 + 8 || P.y + P.h > b.y1 + 260 || P.y < b.top - 80;
@@ -1350,8 +1369,8 @@
           if (m.next <= 0 && m.k < n) {
             m.next = 0.78; m.k++;
             const a = AR(), side = m.k % 2 ? 1 : -1, x = U.clamp(pcx(P) + side * (30 + R() * 30), a.x0 + 30, a.x1 - 30), fy = standY(P), last = m.k >= n;
-            tele({ k: "ring", x, y: fy - 16, r: 40, dur: W0(0.55), col: "#ff3a2a" });
-            later(W0(0.55), () => {
+            tele({ k: "ring", x, y: fy - 16, r: 40, dur: W0(0.7), col: "#ff3a2a" }); /* W9 R16: 0,55 → 0,7 s (Labor häufiger früher Tod: drei Einschläge in 1,5 s, 44 % LP) */
+            later(W0(0.7), () => {
               if (!alive(e)) return;
               FX.burst(cxOf(e), e.y + 14, 14, { col: ["#ff3a2a", "#8a1a2a"], sp: 90, life: 0.4, size: 3, kind: "smoke" });
               e.x = x - e.w / 2; e.y = fy - e.h - 1; Z.unstick(e); e.vy = 0;
@@ -1788,6 +1807,13 @@
         if (ox < b.x0 - 24 || ox > b.x1 + 24 || oy < b.top - 40 || oy > b.y1 + 40) continue;
         FX.burst(ox, o.y + o.h / 2, 12, { col: ["#3a3030", "#5a4a40"], sp: 60, life: 0.6, size: 4, kind: "smoke" });
         o.dead = true; o.deadT = 99; o.noLoot = true;
+      }
+      /* W9 13. Runde (Trank-Ökonomie): Stufe-4/5-Gebiete sind lang; die Tränke gehen dort vor dem Wächter an Fallen und Fernkämpfer
+         (K17/K18: Vorschaden 1–5 × LP). Wer ohne Trank vor dem Wächter steht, findet am Eingang einen – einmal je Gebiet, nur bei 0 Tränken. */
+      const lv = Z.level, P = Z.player;
+      if (b && b.warden && lv && !lv._w9Trank && P && !P.dead && (P.potions || 0) < 1 && (P.potMax || 0) > 0) {
+        lv._w9Trank = true; P.potions = 1; A.play("coin", { vol: 0.5, rate: 0.8 });
+        FX.text(pcx(P), P.y - 18, L(["Ein vergessener Heiltrank am Eingang (+1)", "A forgotten potion by the entrance (+1)"]), "#8ae08a", true);
       }
     } catch (err) { console.error(err); }
     return e;

@@ -74,8 +74,13 @@
     S = { lv, t: 0, found: new Set(), total: lv.secretsTotal || 0, rewards: [], keys: [], locks: [], levers: [], shrines: [], mouths: [], trial: null, exitTip: false, lockTip: 0, cellsIn: new Set() };
     const secretCells = new Set((lv.secretsList || []).filter(s => s.k === "secret").map(s => s.cell));
     S.secretCells = secretCells;
+    S.hints = geheimHinweise(lv, R); /* W13 R10: leise Hinweise auf Geheimkammern */
     /* W13 R4 Sonderräume (welt.js specials): Kranplattformen */
     S.kraene = (lv.specials || []).filter(o => o.k === "kran").map(o => ({ x: o.x, w: o.w, y0: o.yTop, y1: o.yBot, y: o.yBot, dir: -1, sp: 54, pause: 1.2, dy: 0 }));
+    /* W13 R7: rollende Fässer, Kronleuchter zum Schwingen, Gezeiten */
+    S.rollers = (lv.rollers || []).map(r => ({ x: (r.x + 0.5) * T, y: (r.y + 1) * T, dir: r.dir, cx: +r.cell.split(",")[0], cy: +r.cell.split(",")[1], t: 1.5 + R() * 1.5, warn: false, barrels: [] }));
+    S.swings = (lv.swings || []).map(o => { let ay = o.y; while (ay > 0 && lv.get(o.x, ay - 1) !== 1) ay--; const L0 = U.clamp((o.y - ay) * T + 3 * T, 48, 96); return { ax: (o.x + 0.5) * T, ay: ay * T, L: L0, th: 0, om: 0, cool: 0, t: R() * 9 }; });
+    S.tides = (lv.tides || []).map(td => ({ td, ph: R() * 15, lvl: 0 }));
     S.specials = lv.specials || [];
     /* Fundstücke */
     for (const r of lv.rewards || []) S.rewards.push({ kind: r.kind, x: r.x * T + 8, y: (r.y + 1) * T, q: r.tier || 0, cell: r.cell, vault: !!r.vault, open: false, t: R() * 9, secret: !!r.secret });
@@ -111,6 +116,7 @@
   }
   const load0 = Z.loadArea;
   Z.loadArea = function () { if (S && S.trial && S.trial.state === "fight") unsealTrial(S.trial, true); const r = load0.apply(this, arguments); try { setup(Z.level); } catch (e) { console.error(e); } return r; };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "erkundung", save: () => S, load: s => { S = s; } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
 
   function spawnGuard(lv, f, R) {
     const B = Z.BIOMES[lv.biome]; if (!B || !Z.spawnEnemy) return;
@@ -157,7 +163,7 @@
     A.play("chain", { vol: 0.8, rate: 0.8 }); A.play("door", { vol: 0.6, rate: 0.7 }); FX.addShake(4);
     for (const [x, y] of g.tiles) FX.burst(x * T + 8, y * T + 8, 3, { col: [Z.dustCol || "#8a7a70"], sp: 50, life: 0.6, size: 3, kind: "smoke" });
     if (g.flut) { for (let i = 0; i < g.tiles.length; i += 3) { const [x, y] = g.tiles[i]; FX.burst(x * T + 8, y * T + 4, 2, { col: ["#4a7a6a", "#9ac0b0"], sp: 60, ang: Math.PI / 2, spread: 1, life: 0.7, size: 2 }); } A.play("splash", { vol: 0.8 }); }
-    if (g.flut) { found("gate" + o.f.gate, L(["Gurgelnd läuft das Wasser ab – der Durchgang ist frei.", "With a gurgle the water drains away – the passage is clear."])); return; }
+    if (g.flut) { Z.achEv && Z.achEv("flut"); found("gate" + o.f.gate, L(["Gurgelnd läuft das Wasser ab – der Durchgang ist frei.", "With a gurgle the water drains away – the passage is clear."])); return; }
     found("gate" + o.f.gate, g.vert ? L(["Eine Falltür führt zurück zum Hauptweg.", "A trapdoor leads back to the main path."]) : L(["Das Gittertor ist offen – eine Abkürzung.", "The portcullis is open – a shortcut."]));
   }
   function useShrine(o) {
@@ -282,10 +288,14 @@
     const lv = Z.level; if (!lv || !lv.flood) return false;
     const tx = Math.floor((P.x + P.w / 2) / T), ty = Math.floor((P.y + P.h - 3) / T);
     let hit = false; for (const yy of [ty, Math.floor((P.y + P.h * 0.5) / T)]) if (lv.flood.has(yy * lv.W + tx) && lv.get(tx, yy) === 6) hit = true;
+    /* Gezeiten (W13 R7): zurück auf den nächsten trockenen Platz des Raums (nicht auf den letzten Platz, der jetzt unter Wasser steht) */
+    if (hit && S && S.tides) { const k = Math.floor(tx / CW) + "," + Math.floor(ty / CH), td = S.tides.find(o => o.td.cell === k);
+      if (td) { let b = null, bd = 1e9; for (const [x, y] of td.td.safe) { const d = Math.abs(x - tx) + Math.abs(y - ty) * 2; if (d < bd && lv.get(x, y) !== 6 && lv.get(x, y + 1) !== 6) { bd = d; b = [x, y]; } } if (b) P.lastSafe = { x: b[0] * T + 8 - P.w / 2, y: (b[1] + 1) * T - P.h }; } }
     if (hit && (Z.time0 ? Z.time0() : performance.now() / 1000) - flutTip > 20) { flutTip = Z.time0 ? Z.time0() : performance.now() / 1000; toast(L(["Zu tief zum Durchwaten. Irgendwo muss sich das Wasser ablassen lassen.", "Too deep to wade. There must be a way to drain it."]), 2600, { x: P.x + P.w / 2, y: P.y - 12 }, { prio: 1 }); }
     return hit;
   };
   function drawKran(c, m, t) {
+    if (Z.sonderPracht && Z.sonderPracht()) return; /* effekte.js zeichnet die schöne Fassung (alle Stufen) */
     const x = m.x, w = m.w, top = m.y0 - 3 * T;
     /* Ausleger oben und Seil */
     c.fillStyle = "#3a2a20"; c.fillRect(x - 6, top - 3, w + 12, 4); c.fillRect(x + w / 2 - 2, top - 3, 4, 10);
@@ -297,6 +307,7 @@
     const a = (m.y / 9) % (Math.PI * 2); c.save(); c.translate(x + w / 2, top - 1); c.rotate(a); c.fillStyle = "#5a5058"; c.fillRect(-4, -1, 8, 2); c.fillRect(-1, -4, 2, 8); c.restore();
   }
   function drawTruemmer(c, o, t) {
+    if (Z.sonderPracht && Z.sonderPracht()) return; /* effekte.js zeichnet die schöne Fassung (alle Stufen) */
     /* eingestürzter Übergang: Geröllhaufen vor der zugeschütteten Öffnung, abgebrochene Bohlen auf beiden Seiten */
     const x = o.x * T, y = (o.y0 + 3) * T;
     const R = n => { const v = Math.sin(n * 12.9898 + o.x * 78.233) * 43758.5453; return v - Math.floor(v); };
@@ -304,6 +315,300 @@
     c.fillStyle = "#6a4a2c"; c.save(); c.translate(x - 22, y - 3); c.rotate(-0.35); c.fillRect(0, 0, 18, 3); c.restore();
     c.save(); c.translate(x + 40, y - 9); c.rotate(0.5); c.fillRect(0, 0, 16, 3); c.restore();
     c.fillStyle = "rgba(40,30,26,.55)"; for (let i = 0; i < 5; i++) c.fillRect(x + R(i + 20) * 30, o.y0 * T + R(i + 30) * 40, 3, 2); /* Risse im Schutt */
+  }
+
+  /* ======================= W13 R7: Raum-Mechaniken ======================= */
+  /* Rollende Fässer (Fasslager, Marke „o“): alle 3,6 s rollt ein Fass aus der Rutsche, 0,9 s vorher rumpelt es und staubt.
+     Draufspringen federt ab (wie ein Stampfer), seitlich getroffen kostet 7 % und das Fass zerbricht. Nur in Spielernähe. */
+  const solidAt = (x, y) => { const v = Z.level.get(Math.floor(x / T), Math.floor(y / T)); return v === 1 || v === 7 || v === 12; };
+  const floorAt = (x, y) => { const v = Z.level.get(Math.floor(x / T), Math.floor(y / T)); return v === 1 || v === 7 || v === 12 || v === 2 || v === 10; };
+  function rollTick(dt, P) {
+    for (const ro of S.rollers) {
+      const near = Math.abs(ro.x - P.x) < 700 && Math.abs(ro.y - P.y) < 420;
+      if (near) {
+        ro.t -= dt;
+        if (ro.t < 0.9 && !ro.warn) { ro.warn = true; A.play("rock", { vol: 0.35, rate: 0.55, x: ro.x }); FX.burst(ro.x, ro.y - 8, 6, { col: ["#8a7a6a", "#6a5a50"], sp: 40, life: 0.6, size: 2, g: 300 }); }
+        if (ro.t <= 0) { ro.t = 3.6; ro.warn = false; ro.barrels.push({ x: ro.x, y: ro.y - 7, vx: ro.dir * 95, vy: 0, r: 7, rot: 0, life: 14 }); }
+      }
+      for (let i = ro.barrels.length - 1; i >= 0; i--) {
+        const b = ro.barrels[i]; let gone = false;
+        b.life -= dt; b.vy = Math.min(520, b.vy + 1400 * dt);
+        const ny = b.y + b.vy * dt;
+        if (b.vy >= 0 && floorAt(b.x, ny + b.r)) { b.y = Math.floor((ny + b.r) / T) * T - b.r; b.vy = 0; } else b.y = ny;
+        const nx = b.x + b.vx * dt;
+        if (solidAt(nx + Math.sign(b.vx) * b.r, b.y)) gone = true; else b.x = nx;
+        b.rot += b.vx * dt / b.r;
+        const v = Z.level.get(Math.floor(b.x / T), Math.floor(b.y / T));
+        if (v === 3 || v === 5 || v === 6 || v === 9 || b.life <= 0 || Math.floor(b.x / T / CW) !== ro.cx || Math.floor(b.y / T / CH) !== ro.cy) gone = true;
+        if (!gone && !P.dead && Math.abs(P.x + P.w / 2 - b.x) < P.w / 2 + b.r - 2 && P.y + P.h > b.y - b.r && P.y < b.y + b.r) {
+          if (P.vy > 40 && P.y + P.h - (b.y - b.r) < 10) { P.vy = -330; P.onGround = false; A.play("crate", { vol: 0.4, rate: 1.3, x: b.x }); Z.achEv && Z.achEv("fass"); }
+          else if (!(P.iframe > 0)) { Z.hurtPlayer(Math.round(P.hpMax * 0.07), { x: b.x, kb: 180 }); gone = true; }
+        }
+        if (gone) { ro.barrels.splice(i, 1); if (near) { A.play("break", { vol: 0.4, x: b.x }); FX.burst(b.x, b.y, 10, { col: ["#7a5432", "#5a3a20", "#9a7448"], sp: 120, life: 0.6, size: 2.5, kind: "shard", g: 700 }); } }
+      }
+    }
+  }
+  /* Kronleuchter (Galerie/Bankett, Marke „L“): im Sprung anspringen → man hängt daran und schwingt; links/rechts gibt Schwung,
+     Springen lässt mit dem Schwung los (dazu ein kleiner Satz nach oben), runter lässt einfach los. Danach 0,5 s nicht greifbar. */
+  let swingTip = false;
+  function swingTick(dt, P) {
+    for (const s2 of S.swings) {
+      s2.t += dt; if (s2.cool > 0) s2.cool -= dt;
+      const hx = s2.ax + Math.sin(s2.th) * s2.L, hy = s2.ay + Math.cos(s2.th) * s2.L;
+      if (P._swing === s2) {
+        const inp = Z.input;
+        if (P.dead || P.climbing || P.hurtT > 0.2 || inp.pressed.jump || inp.held.down) {
+          P._swing = null; s2.cool = 0.5;
+          if (!P.dead && inp.pressed.jump) { P.vx = U.clamp(s2.L * s2.om * Math.cos(s2.th), -340, 340); P.vy = Math.min(-230, -s2.L * s2.om * Math.sin(s2.th) - 230); A.play("jump", { vol: 0.5 }); }
+          continue;
+        }
+        let acc = -(1420 / s2.L) * Math.sin(s2.th);
+        /* Schwung holen: Drücken in Bewegungsrichtung pumpt (wie auf einer Schaukel), dagegen bremst nicht */
+        const dirI = (inp.held.right ? 1 : 0) - (inp.held.left ? 1 : 0); if (dirI && dirI * s2.om >= -0.05) acc += 7.5 * dirI;
+        s2.om = (s2.om + acc * dt) * (1 - 0.12 * dt);
+        let th = s2.th + s2.om * dt; if (Math.abs(th) > 1.25) { th = Math.sign(th) * 1.25; s2.om *= -0.4; }
+        const nx = s2.ax + Math.sin(th) * s2.L, ny = s2.ay + Math.cos(th) * s2.L;
+        /* Körper (unter den Händen) prallt an Wänden ab */
+        if (solidAt(nx - P.w / 2 + 1, ny + 2) || solidAt(nx + P.w / 2 - 1, ny + 2) || solidAt(nx, ny + P.h - 2)) { s2.om *= -0.4; }
+        else s2.th = th;
+        const qx = s2.ax + Math.sin(s2.th) * s2.L, qy = s2.ay + Math.cos(s2.th) * s2.L;
+        P.x = qx - P.w / 2; P.y = qy - 2; P.vx = 0; P.vy = 0; P.onGround = false; P.face = s2.om >= 0 ? 1 : -1;
+        if (P.airJumps != null && P.airJumps < 1) P.airJumps = 1;
+        continue;
+      }
+      /* ruhig hängend: leichtes Pendeln */
+      if (Math.abs(s2.om) > 0.01 || Math.abs(s2.th) > 0.01) { s2.om = (s2.om - (1420 / s2.L) * Math.sin(s2.th) * dt) * (1 - 0.8 * dt); s2.th += s2.om * dt; }
+      if (s2.cool <= 0 && !P._swing && !P.onGround && !P.climbing && !P.dead && Math.abs(P.x + P.w / 2 - hx) < 14 && Math.abs(P.y + 6 - hy) < 16) {
+        P._swing = s2; s2.th = U.clamp(Math.atan2(P.x + P.w / 2 - s2.ax, Math.max(8, P.y - s2.ay)), -1.1, 1.1); s2.om = U.clamp(P.vx / s2.L, -3, 3);
+        A.play("chain", { vol: 0.5, rate: 1.2 });
+        if (!swingTip) { swingTip = true; toast(L(["Am Kronleuchter: ← → für Schwung, Springen lässt mit Schwung los.", "On the chandelier: ← → to swing, jump to let go with momentum."]), 3200, { x: hx, y: hy - 20 }, { prio: 1 }); }
+      }
+    }
+  }
+  /* Gezeiten (Zisterne/Stelzensteg): 15-s-Zyklus – Ebbe 6 s, steigen, Flut 5 s, fallen; 1,5 s vor dem Steigen gurgelt es
+     und Blasen steigen auf. Wasser ist sicher (Z.flutSicher: zurück auf einen trockenen Platz, kein Schaden). */
+  function tideTick(dt, P) {
+    for (const o of S.tides) {
+      o.ph = (o.ph + dt) % 15;
+      /* Wasserhöhe über der Ebbe-Linie in Pixeln: Ebbe 0–6 s, steigen 6–8 s, Flut 8–13 s, fallen 13–15 s */
+      const ph = o.ph, h = ph < 6 ? 0 : ph < 8 ? (ph - 6) / 2 * 2 * T : ph < 13 ? 2 * T : (15 - ph) / 2 * 2 * T;
+      o.h = h;
+      const td = o.td, [cx, cy] = td.cell.split(",").map(Number), near = Math.abs(cx * CW * T + CW * T / 2 - P.x) < 700 && Math.abs(cy * CH * T + CH * T / 2 - P.y) < 400;
+      if (!near) continue;
+      if (ph > 4.5 && ph - dt <= 4.5) { A.play("splash", { vol: 0.35, rate: 0.5 }); for (const [x, y, s2] of td.rows) if (s2 === 1 && Math.random() < 0.5) FX.burst(x * T + 8, (y + 1) * T, 1, { col: ["#9ac0b0", "#c8e0d0"], sp: 20, ang: -Math.PI / 2, spread: 0.4, life: 0.8, size: 1.5, g: -40 }); }
+      if (h < 3 || P.dead) continue;
+      /* wer im gestiegenen Wasser steht: sicher zurück auf den nächsten trockenen Platz (wie die Flutkammer, kein Schaden) */
+      const feet = P.y + P.h - 3, mx = P.x + P.w / 2;
+      if (mx >= td.xa * T && mx < (td.xb + 1) * T && feet > td.yw * T - h + 4 && feet < td.yw * T + 2) {
+        const tx = Math.floor(mx / T), ty = Math.floor(feet / T);
+        if (!td.rows.some(([x, y]) => x === tx && y === ty)) continue; /* auf einem herausragenden Steg/Stein ist es trocken */
+        let b = null, bd = 1e9; for (const [x, y] of td.safe) { const d = Math.abs(x - tx) + Math.abs(y - ty) * 2; if (d < bd) { bd = d; b = [x, y]; } }
+        if (!b) continue;
+        A.play("splash", { vol: 0.6 }); FX.burst(mx, feet, 12, { col: ["#4a6a5a", "#8aa090"], sp: 90, ang: -Math.PI / 2, spread: 1.2, life: 0.5, g: 400, size: 2 });
+        /* Balance (Exploit): Rücksetzen mit Unverwundbarkeit nur ohne Kampf in der Nähe (kein wacher Gegner < 260 px, kein Boss) und höchstens
+           alle 8 s – gleiche Regel und gleicher Zeitgeber wie die Flutkammer (kampf.js, P._flutT). Sonst wie normales Wasser: 8 % Schaden, kein Extra-Schutz. */
+        const pt = P.time || 0, kampf = (Z.boss && !Z.bossDefeated) || Z.enemies.some(e => !e.dead && e.aware && Math.abs(e.x - P.x) < 260 && Math.abs(e.y - P.y) < 200);
+        const frei = !kampf && !(P._flutT != null && pt - P._flutT < 8 && pt >= P._flutT);
+        P.x = b[0] * T + 8 - P.w / 2; P.y = (b[1] + 1) * T - P.h; P.vx = P.vy = 0; P._swing = null; Z.achEv && Z.achEv("flutNass");
+        if (frei) { P._flutT = pt; P.iframe = Math.max(P.iframe || 0, 0.3); }
+        else if (!(P._hzRT != null && pt - P._hzRT >= 0 && pt - P._hzRT < 1)) { P._hzRT = pt; const if0 = P.iframe || 0; Z.hurtPlayer(Math.round(P.hpMax * 0.08), { x: P.x, unblockable: true, hazard: true, force: true }); P.iframe = if0; /* kein Treffer-Schutz geschenkt */ }
+        const now = S.t; if (!o.tip || now - o.tip > 20) { o.tip = now; toast(L(["Die Flut steigt – warte auf die Ebbe.", "The tide is rising – wait for low water."]), 2400, { x: P.x + P.w / 2, y: P.y - 10 }, { prio: 1 }); }
+      }
+    }
+  }
+  function drawTide(c, o, t) {
+    const h = o.h || 0; if (h < 0.5) return;
+    const td = o.td, top = td.yw * T - h;
+    c.fillStyle = "rgba(48,96,82,.62)";
+    for (const [x, y] of td.rows) { const y0 = Math.max(y * T, top), y1 = (y + 1) * T; if (y1 > y0) c.fillRect(x * T, y0, T, y1 - y0); }
+    c.fillStyle = "rgba(170,215,190,.55)";
+    for (let x = td.xa * T; x < (td.xb + 1) * T; x += 3) if (td.rows.some(([tx, ty]) => tx === Math.floor(x / T) && ty === Math.floor((top + 1) / T))) c.fillRect(x, top + Math.sin(x * 0.4 + t * 6) * 0.8, 2, 1);
+  }
+  function drawBarrels(c, ro) {
+    /* Rutsche: dunkler Bogen an der Wand */
+    c.fillStyle = "rgba(20,12,8,.7)"; c.beginPath(); c.arc(ro.x - ro.dir * 6, ro.y - 9, 9, Math.PI, 0); c.fill(); c.fillRect(ro.x - ro.dir * 6 - 9, ro.y - 9, 18, 9);
+    if (ro.warn) { c.fillStyle = "rgba(255,190,90,.8)"; c.font = "bold 10px serif"; c.textAlign = "center"; c.fillText("!", ro.x - ro.dir * 6, ro.y - 20); }
+    for (const b of ro.barrels) {
+      c.save(); c.translate(b.x, b.y); c.rotate(b.rot);
+      c.fillStyle = "#6a4426"; c.beginPath(); c.arc(0, 0, b.r, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = "#3a2414"; c.lineWidth = 1.2; c.beginPath(); c.arc(0, 0, b.r - 1.5, 0, Math.PI * 2); c.stroke();
+      c.fillStyle = "#8a8a8a"; c.fillRect(-b.r, -1, b.r * 2, 2); c.fillRect(-1, -b.r, 2, b.r * 2);
+      c.restore();
+    }
+  }
+  function drawSwing(c, s2, t) {
+    const hx = s2.ax + Math.sin(s2.th) * s2.L, hy = s2.ay + Math.cos(s2.th) * s2.L;
+    c.strokeStyle = "#5a5058"; c.lineWidth = 1.5; c.beginPath(); c.moveTo(s2.ax, s2.ay); c.lineTo(hx, hy); c.stroke();
+    c.fillStyle = "#c8a050"; c.fillRect(hx - 12, hy, 24, 3); c.fillRect(hx - 1.5, hy - 4, 3, 5);
+    for (const dx of [-11, -4, 4, 11]) { c.fillStyle = "#f0e6c8"; c.fillRect(hx + dx - 1, hy - 5, 2, 5); const f = 0.7 + 0.3 * Math.sin(t * 9 + dx); c.fillStyle = "rgba(255,200,110," + f.toFixed(2) + ")"; c.fillRect(hx + dx - 1, hy - 8, 2, 3); }
+  }
+
+  /* ======================= W13 R5: zerstörbare Umgebung ======================= */
+  /* Wucht-Risse (welt.js cracks, lv.wuchtSet): leichte Treffer prallen ab (Kachel für diesen Treffer kurz fest),
+     Wucht-Schläge (heavy/spin), Schildstoß, Sturzangriff und Explosionen (ohne Angriffsobjekt) brechen sie. */
+  let wuchtTip = 0, morschTip = null;
+  const hpW0 = Z.hitProps;
+  Z.hitProps = function (r, dmg, act) {
+    const lv = Z.level;
+    if (!r || !lv || !lv.wuchtSet || !lv.wuchtSet.size) return hpW0 ? hpW0.apply(this, arguments) : undefined;
+    const heavy = !act || !!(act.def && (act.def.heavy || act.def.spin)) || !!act.bash;
+    const tmp = [];
+    for (let ty = Math.floor(r.y / T); ty <= Math.floor((r.y + r.h) / T); ty++) for (let tx = Math.floor(r.x / T); tx <= Math.floor((r.x + r.w) / T); tx++) {
+      const i = ty * lv.W + tx; if (!lv.wuchtSet.has(i) || lv.get(tx, ty) !== 7) continue;
+      if (heavy) { lv.wuchtSet.delete(i); Z.stats && (Z.stats.wucht = (Z.stats.wucht || 0) + 1); }
+      else { lv.set(tx, ty, 1); tmp.push([tx, ty]); }
+    }
+    const res = hpW0 ? hpW0.apply(this, arguments) : undefined;
+    for (const [x, y] of tmp) lv.set(x, y, 7);
+    if (tmp.length) {
+      const [x, y] = tmp[0]; A.play("rock", { vol: 0.35, rate: 1.6 }); FX.burst(x * T + 8, y * T + 8, 4, { col: [Z.tileCol || "#6a5a50", "#9a8a7a"], sp: 50, life: 0.5, size: 2, g: 500 });
+      const now = S ? S.t : 0;
+      if (now - wuchtTip > 25) { wuchtTip = now; toast(L(["Es bröckelt nur – ein Wuchtschlag, Schildstoß oder Sturzangriff könnte es brechen.", "It only crumbles – a heavy blow, shield bash or dive attack could break it."]), 2800, { x: x * T + 8, y: y * T - 6 }, { prio: 1 }); }
+    }
+    return res;
+  };
+  /* ======================= W13 R10: leise Hinweise auf Geheimkammern =======================
+     Messung (r10/geheim.py, Raum-Bot ohne Vorwissen, 13 Gebiete × 2): 29 von 47 Rissen kamen überhaupt ins Bild – der einzige Hinweis war
+     bisher das Rissbild selbst. Jetzt, alle dezent und nur solange die Kammer unentdeckt ist:
+       · Luftzug: feine Staubfäden wehen aus der Rissfläche in den Raum (nur bis ~13 Kacheln um die Figur, alle ~0,7 s ein Faden)
+       · Ratte: einmal je Riss huscht eine Ratte bis zu 12 Kacheln am Boden entlang zum Riss und verschwindet darin
+       · hohler Klang: Treffer auf feste Wand bis 2 Kacheln neben dem Riss klingen hohl (Klang-Hook Z.geheimKlang("hohl", x, y))
+       · selten (≈15 %): ein Kreidekreuz an der Rissfläche, in der Nähe ein leiser Satz
+     Grafik kann über Z.geheimRisse() (Flächen je Kammer) z. B. Steinfarbe/Spinnweben anpassen. */
+  function geheimHinweise(lv, R) {
+    const out = [], W = lv.W, air = v => v === 0 || v === 2 || v === 4 || v === 8 || v === 10;
+    for (const k in lv.cells) {
+      const c = lv.cells[k]; if (c.kind !== "secret") continue;
+      const inSec = (x, y) => x >= c.x * CW && x < c.x * CW + CW && y >= c.y * CH && y < c.y * CH + CH;
+      const seen = new Set(), q = [];
+      for (let y = c.y * CH - 1; y <= c.y * CH + CH; y++) for (let x = c.x * CW - 1; x <= c.x * CW + CW; x++) if (lv.get(x, y) === 7) { seen.add(y * W + x); q.push([x, y]); }
+      while (q.length) { const [x, y] = q.pop(); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const i = (y + dy) * W + x + dx; if (!seen.has(i) && lv.get(x + dx, y + dy) === 7) { seen.add(i); q.push([x + dx, y + dy]); } } }
+      const faces = [];
+      for (const i of seen) { const x = i % W, y = (i / W) | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, -1], [0, 1]]) if (air(lv.get(x + dx, y + dy)) && !inSec(x + dx, y + dy)) { faces.push({ x, y, dx, dy }); break; } }
+      if (!faces.length) continue;
+      const wucht = [...seen].some(i => lv.wuchtSet && lv.wuchtSet.has(i));
+      /* Rattenweg: Bodenkachel vor einer seitlichen Rissfläche, von dort 4–6 Kacheln begehbar weg vom Riss */
+      let rat = null;
+      for (const f of faces) {
+        if (!f.dx) continue; const fx = f.x + f.dx, fy = f.y;
+        if (!Z.standable(lv, fx, fy, 1)) continue;
+        let n = 0; while (n < 12 && Z.standable(lv, fx + f.dx * (n + 1), fy, 1)) n++;
+        if (n >= 3) { rat = { x0: (fx + f.dx * n) * T + 8, x1: f.x * T + 8 - f.dx * 6, y: (fy + 1) * T, dir: -f.dx }; break; }
+      }
+      out.push({ cell: k, faces, wucht, rat, ratDone: false, ratLive: null, mark: R() < 0.15 ? faces[(R() * faces.length) | 0] : null, markTip: false, t: R() * 2 });
+    }
+    return out;
+  }
+  Z.geheimRisse = () => (S && S.hints ? S.hints.filter(h => !S.found.has("secret:" + h.cell)).map(h => ({ cell: h.cell, faces: h.faces.filter(f => S.lv.get(f.x, f.y) === 7) })) : []);
+  const offen = h => S.found.has("secret:" + h.cell) || !h.faces.some(f => S.lv.get(f.x, f.y) === 7);
+  function hintTick(dt, P) {
+    const px = P.x + P.w / 2, py = P.y + P.h / 2;
+    for (const h of S.hints) {
+      if (offen(h)) { h.ratLive = null; continue; }
+      const f0 = h.faces[0], d = Math.hypot(f0.x * T + 8 - px, f0.y * T + 8 - py) / T;
+      /* Luftzug (nicht bei Wucht-Rissen – die bröckeln schon) */
+      if (!h.wucht && d < 13 && (h.t -= dt) <= 0) {
+        h.t = 0.55 + Math.random() * 0.4;
+        const f = h.faces[(Math.random() * h.faces.length) | 0], sx = f.x * T + 8 + f.dx * 8, sy = f.y * T + 8 + f.dy * 8 + (Math.random() - 0.5) * (f.dx ? 12 : 2);
+        FX.p({ x: sx + (f.dy ? (Math.random() - 0.5) * 12 : 0), y: sy, vx: f.dx * (14 + Math.random() * 10) + (Math.random() - 0.5) * 4, vy: f.dy * 12 - 3 + (Math.random() - 0.5) * 4, life: 1.6, size: 1, col: "#d8cfc0", kind: "smoke", g: -6, drag: 0.985 });
+      }
+      /* Ratte */
+      /* Ratte: startet, sobald ihr Startpunkt (bis 12 Kacheln vor dem Riss) nahe der Figur ist – sie läuft dann zum Riss und lockt hin */
+      if (h.rat && !h.ratDone && Math.abs(h.rat.x0 - px) < 12 * T && Math.abs(h.rat.y - P.y - P.h) < 4 * T) { h.ratDone = true; h.ratLive = { x: h.rat.x0, t: 0 }; }
+      if (h.ratLive) {
+        const r = h.ratLive; r.t += dt; r.x += h.rat.dir * 95 * dt;
+        if ((h.rat.dir > 0 && r.x >= h.rat.x1) || (h.rat.dir < 0 && r.x <= h.rat.x1)) {
+          h.ratLive = null; if (Z.geheimKlang) Z.geheimKlang("ratte", h.rat.x1, h.rat.y); else A.play("rat", { vol: 0.25, x: h.rat.x1 });
+          FX.burst(h.rat.x1 + h.rat.dir * 4, h.rat.y - 3, 3, { col: ["#8a7a6a"], sp: 20, life: 0.4, size: 1.5, g: 200 });
+        }
+      }
+      /* Kreidekreuz: leiser Satz in der Nähe */
+      if (h.mark && !h.markTip && Math.abs(h.mark.x * T + 8 - px) < 50 && Math.abs(h.mark.y * T + 8 - py) < 40) {
+        h.markTip = true; toast(L(["Jemand hat ein Kreuz an diese Wand gekritzelt.", "Someone scratched a cross onto this wall."]), 2600, { x: h.mark.x * T + 8, y: h.mark.y * T - 6 }, { prio: 2 });
+      }
+    }
+  }
+  function drawHints(c, t, vis) {
+    /* Zeichnung W11 R34 (Grafik-Agent): Kreidekreuz als zwei raue Kreidestriche mit Abrieb, Ratte mit Fell-Verlauf,
+       Ohr, Auge, Schnurrhaaren, trippelnden Beinen und geschwungenem Schwanz. Logik unverändert. */
+    for (const h of S.hints) {
+      if (offen(h)) continue;
+      if (h.mark && vis(h.mark.x * T, h.mark.y * T)) {
+        const x = h.mark.x * T + 8 + h.mark.dx * 6, y = h.mark.y * T + 8, sd = (h.mark.x * 7 + h.mark.y * 13) % 5;
+        c.save(); c.lineCap = "round";
+        /* Abrieb: weicher, heller Schleier */
+        c.fillStyle = "rgba(235,228,212,.08)"; c.beginPath(); c.ellipse(x, y, 5, 4.4, 0.3, 0, 6.283); c.fill();
+        for (const [ax, ay, bx, by] of [[-3.4, -3.6, 3.2, 3.4], [3.4, -3.2, -3.0, 3.6]]) {
+          c.strokeStyle = "rgba(238,232,218,.55)"; c.lineWidth = 1.1; c.beginPath(); c.moveTo(x + ax, y + ay); c.quadraticCurveTo(x + (ax + bx) / 2 + 0.4, y + (ay + by) / 2 - 0.3, x + bx, y + by); c.stroke();
+          /* raue Kreidekörner entlang des Strichs */
+          c.fillStyle = "rgba(245,240,228,.5)"; for (let k = 0; k < 5; k++) { const u = (k + 0.5) / 5, jx = ((k * 37 + sd * 11) % 7 - 3) * 0.15, jy = ((k * 53 + sd * 5) % 7 - 3) * 0.15; c.fillRect(x + ax + (bx - ax) * u + jx - 0.35, y + ay + (by - ay) * u + jy - 0.35, 0.7, 0.7); }
+        }
+        c.restore();
+      }
+      const r = h.ratLive; if (!r) continue;
+      const x = r.x, y = h.rat.y, s = h.rat.dir, run = r.t * 38, wob = Math.sin(run) * 0.5;
+      c.save();
+      /* Schatten */
+      c.fillStyle = "rgba(0,0,0,.25)"; c.beginPath(); c.ellipse(x, y - 0.2, 4.2, 0.9, 0, 0, 6.283); c.fill();
+      /* Schwanz */
+      c.strokeStyle = "#7a5a50"; c.lineWidth = 0.8; c.lineCap = "round"; c.beginPath(); c.moveTo(x - s * 3.4, y - 2.2); c.bezierCurveTo(x - s * 6, y - 0.6 + wob, x - s * 7.5, y - 3.5 - wob, x - s * 10, y - 2.4); c.stroke();
+      /* Beine (trippeln) */
+      c.strokeStyle = "#2a201c"; c.lineWidth = 0.7; for (const [bx, ph] of [[-2, 0], [2, Math.PI]]) { const k = Math.sin(run + ph) * 1.1; c.beginPath(); c.moveTo(x + s * bx, y - 1.4); c.lineTo(x + s * (bx + k), y); c.stroke(); }
+      /* Körper mit Fell-Verlauf */
+      const g = c.createLinearGradient(0, y - 5, 0, y - 0.5); g.addColorStop(0, "#7a6658"); g.addColorStop(1, "#3a2e28"); c.fillStyle = g;
+      c.beginPath(); c.ellipse(x, y - 2.6 + wob * 0.3, 3.8, 2.3, s * -0.08, 0, 6.283); c.fill();
+      /* Kopf, spitze Schnauze */
+      c.beginPath(); c.moveTo(x + s * 2.4, y - 4.2); c.quadraticCurveTo(x + s * 5.2, y - 3.6, x + s * 6.2, y - 2.2); c.quadraticCurveTo(x + s * 4.2, y - 1.2, x + s * 2.4, y - 1.4); c.closePath(); c.fill();
+      c.fillStyle = "#c08a80"; c.beginPath(); c.arc(x + s * 6.1, y - 2.3, 0.45, 0, 6.283); c.fill(); /* Nase */
+      c.fillStyle = "#6a5048"; c.beginPath(); c.ellipse(x + s * 3.2, y - 4.4, 1, 1.2, 0, 0, 6.283); c.fill(); c.fillStyle = "#a07868"; c.beginPath(); c.ellipse(x + s * 3.2, y - 4.4, 0.5, 0.7, 0, 0, 6.283); c.fill(); /* Ohr */
+      c.fillStyle = "#e8d0a0"; c.fillRect(x + s * 4.4 - 0.4, y - 3.4, 0.8, 0.8); /* Auge mit Glanz */
+      c.strokeStyle = "rgba(220,210,190,.45)"; c.lineWidth = 0.3; c.beginPath(); c.moveTo(x + s * 5.6, y - 2.4); c.lineTo(x + s * 7.4, y - 3.1); c.moveTo(x + s * 5.6, y - 2.2); c.lineTo(x + s * 7.4, y - 1.9); c.stroke(); /* Schnurrhaare */
+      c.strokeStyle = "rgba(255,236,210,.35)"; c.lineWidth = 0.6; c.beginPath(); c.ellipse(x, y - 2.6 + wob * 0.3, 3.8, 2.3, s * -0.08, Math.PI * 1.15, Math.PI * 1.85); c.stroke(); /* Randlicht oben, damit sie vor dunklen Wänden lesbar bleibt */
+      c.restore();
+    }
+  }
+  /* hohler Klang: Treffer auf feste Wand nahe einem unentdeckten Riss */
+  let hohlT = 0;
+  const hpH0 = Z.hitProps;
+  Z.hitProps = function (r, dmg, act) {
+    const res = hpH0 ? hpH0.apply(this, arguments) : undefined;
+    try {
+      if (r && act && S && S.hints && S.hints.length && Z.level === S.lv && (S.t || 0) - hohlT > 0.4) {
+        const x0 = Math.floor(r.x / T), x1 = Math.floor((r.x + r.w) / T), y0 = Math.floor(r.y / T), y1 = Math.floor((r.y + r.h) / T);
+        let hit = null;
+        for (const h of S.hints) { if (offen(h) || hit) continue; for (const f of h.faces) { if (hit) break; for (let ty = y0; ty <= y1 && !hit; ty++) for (let tx = x0; tx <= x1; tx++) { const v = S.lv.get(tx, ty); if (v === 1 && Math.abs(tx - f.x) + Math.abs(ty - f.y) <= 2) { hit = [tx, ty]; break; } } } }
+        if (hit) { hohlT = S.t || 0; const hx = hit[0] * T + 8, hy = hit[1] * T + 8; if (Z.geheimKlang) Z.geheimKlang("hohl", hx, hy); else A.play("crate", { vol: 0.35, rate: 0.55, x: hx }); FX.burst(hx, hy, 3, { col: [Z.tileCol || "#6a5a50", "#9a8a7a"], sp: 30, life: 0.5, size: 1.6, g: 400 }); }
+      }
+    } catch (err) { console.error(err); }
+    return res;
+  };
+  /* Morsche Böden (lv.morsch): brechen unter einer schweren Landung (Sturz ≥ 4 Kacheln oder Sturzangriff) */
+  function morschTick(P) {
+    const lv = S.lv;
+    if (!P.onGround || P._kran) { P._mPeak = P._mPeak == null ? P.y : Math.min(P._mPeak, P.y); P._mAir = true; return; }
+    const fall = P._mPeak != null ? P.y - P._mPeak : 0, wasAir = P._mAir; P._mPeak = null; P._mAir = false;
+    const fy = Math.floor((P.y + P.h + 1) / T);
+    for (const m of lv.morsch) {
+      if (m.broken || fy !== m.y || P.x + P.w <= m.x0 * T || P.x >= (m.x1 + 1) * T) continue;
+      if (wasAir && (fall >= 4 * T || (P.diveRec || 0) > 0.2)) { breakMorsch(m, P); return; }
+      if (morschTip !== lv) { morschTip = lv; A.play("stepWood", { vol: 0.5, rate: 0.6 }); toast(L(["Die Bohlen knarren bedrohlich …", "The planks creak ominously…"]), 2200, { x: P.x + P.w / 2, y: P.y - 8 }, { prio: 0 }); }
+    }
+  }
+  function breakMorsch(m, P) {
+    const lv = S.lv; m.broken = true;
+    for (let x = m.x0; x <= m.x1; x++) lv.set(x, m.y, 0);
+    Z.dirtyTiles && Z.dirtyTiles(m.x0, m.y);
+    A.play("break", { vol: 0.8 }); A.play("crate", { vol: 0.5, rate: 0.7 }); FX.addShake(4);
+    FX.burst((m.x0 + 1.5) * T, m.y * T + 8, 22, { col: ["#7a5432", "#5a3a20", "#9a7448"], sp: 150, life: 0.9, size: 3, kind: "shard", g: 700, drag: 0.98 });
+    if (P) { P.onGround = false; P.vy = Math.max(P.vy, 120); }
+    Z.stats && (Z.stats.morsch = (Z.stats.morsch || 0) + 1);
+  }
+  function drawMorsch(c, m) {
+    const x = m.x0 * T, y = m.y * T, w = (m.x1 - m.x0 + 1) * T;
+    c.fillStyle = "#5a3e26"; c.fillRect(x - 1, y, w + 2, 7); c.fillStyle = "#7a5634"; c.fillRect(x - 1, y, w + 2, 2);
+    c.fillStyle = "#3a2616"; for (let i = 1; i < 6; i++) c.fillRect(x + (w / 6) * i, y, 1, 7); /* Fugen */
+    c.strokeStyle = "rgba(25,15,8,.9)"; c.lineWidth = 1; c.beginPath(); c.moveTo(x + w * 0.3, y + 1); c.lineTo(x + w * 0.42, y + 4); c.lineTo(x + w * 0.38, y + 7); c.moveTo(x + w * 0.66, y); c.lineTo(x + w * 0.6, y + 5); c.stroke(); /* Risse */
+    c.fillStyle = "rgba(10,6,4,.55)"; c.fillRect(x, y + 7, w, 9); /* Hohlraum unter den Bohlen */
   }
 
   /* ======================= Ablauf ======================= */
@@ -326,6 +631,10 @@
     }
     if (S.trial) trialTick(S.trial, dt);
     if (S.kraene.length) kranTick(dt, P);
+    if (S.rollers.length) rollTick(dt, P);
+    if (S.swings.length) swingTick(dt, P);
+    if (S.tides.length) tideTick(dt, P);
+    if (S.lv.morsch && S.lv.morsch.length) morschTick(P);
     const bt = erTakt(dt); if (!(bt > 0)) return;
     S.t += bt;
     zielTick(bt, px, py);
@@ -333,9 +642,16 @@
     for (const k of S.keys) k.t += bt;
     for (const o of S.levers) if (o.pulled && o.a < 1) o.a = Math.min(1, o.a + bt * 4);
     for (const s of S.shrines) s.t += bt;
+    /* W13 R5: bröckelnder Putz an Wucht-Rissen im Bild – kleine Staubkrümel als Hinweis */
+    if (S.lv.wucht && S.lv.wucht.length && (S.putzT = (S.putzT || 0) - bt) <= 0) {
+      S.putzT = 0.45; const cam = Z.cam;
+      for (const o of S.lv.wucht) { const tl = o.tiles.filter(([x, y]) => S.lv.get(x, y) === 7); if (!tl.length) continue; const [x, y] = tl[(Math.random() * tl.length) | 0];
+        if (cam && x * T > cam.x - 16 && x * T < cam.x + cam.w + 16 && y * T > cam.y - 16 && y * T < cam.y + cam.h + 16) FX.burst(x * T + 2 + Math.random() * 12, y * T + 14, 1, { col: ["#8a7a6a", "#6a5a50"], sp: 10, ang: Math.PI / 2, spread: 0.5, life: 0.8, size: 1.5, g: 300 }); }
+    }
     /* Geheimkammern: gefunden, sobald man drinsteht */
     const ck = Math.floor(px / T / CW) + "," + Math.floor((P.y + P.h / 2) / T / CH);
     if (S.secretCells.has(ck)) found("secret:" + ck, L(["Eine verborgene Kammer.", "A hidden chamber."]));
+    if (S.hints && S.hints.length) hintTick(bt, P);
     /* vor dem Ausgang: Bilanz der Geheimnisse */
     if (!S.exitTip && S.total > 0) for (const d of S.lv.doors) if (d.kind === "exit" && Math.abs(d.x * T + 8 - px) < 70 && Math.abs((d.y + 1) * T - py) < 40) {
       S.exitTip = true;
@@ -449,6 +765,11 @@
     for (const k of S.keys) if (vis(k.x, k.y)) drawKey(c, k, t);
     for (const m of S.kraene || []) if (m.x > vx0 - 40 && m.x < vx1 && m.y1 > vy0 && m.y0 - 60 < vy1) drawKran(c, m, t);
     for (const o of S.specials || []) if (o.k === "bruecke" && vis(o.x * T, o.y0 * T)) drawTruemmer(c, o, t);
+    for (const m of S.lv.morsch || []) if (!m.broken && vis(m.x0 * T, m.y * T)) drawMorsch(c, m);
+    for (const ro of S.rollers || []) if (vis(ro.x, ro.y) || ro.barrels.length) drawBarrels(c, ro);
+    for (const s2 of S.swings || []) if (vis(s2.ax, s2.ay + s2.L)) drawSwing(c, s2, t);
+    for (const o of S.tides || []) if (vis(o.td.xa * T, o.td.yw * T)) drawTide(c, o, t);
+    if (S.hints && S.hints.length) drawHints(c, t, vis);
   };
   /* Licht: Fundstücke, Schreine und Laternen leuchten durch die Dunkelheit (alle Grafikstufen) */
   const le0 = Z.lightExtra;

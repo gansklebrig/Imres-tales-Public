@@ -25,6 +25,7 @@
   }
   const load0 = Z.loadArea;
   Z.loadArea = function () { if (amb && amb.state === "fight") unseal(true); const r = load0.apply(this, arguments); try { if (Z.formSquads) Z.formSquads(Z.level); /* W10: Trupps mit Rollen */ } catch (e) { console.error(e); } try { setup(Z.level); } catch (e) { console.error(e); } return r; };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "hinterhalt", save: () => amb, load: s => { amb = s; } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
 
   const solid = v => v === 1 || v === 7 || v === 12;
   function seal() {

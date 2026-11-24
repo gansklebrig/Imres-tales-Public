@@ -2,7 +2,8 @@
    A) BEWEGUNGS-RUNEN (Z.MOVE_RUNES, daten.js): Krallenrune (Wandrutschen/Wandsprung), Schattenrune (Schattensprint,
       flach durch Schattenspalten), Darkin-Schwingen (dritter Sprung, Gleiten, Aufwinde), Erdrune (Bodenstampfer bricht
       rissige Böden), Kettenrune (Enterhaken an Ösen), Nebelrune (in der Rolle durch Nebelgitter).
-      Im Lauf gefunden (Runensockel) gilt die Rune für den Lauf; an der Runenstele im Lager mit Seelensplittern dauerhaft.
+      W15: Am Runensockel gefunden ist die Rune sofort und dauerhaft aktiv (Z.meta.runen.frei, kein Gürtelplatz, keine
+      Freischaltung mehr; alte Stände: gesehen → frei). Die Runenstele im Lager zeigt nur noch, welche fehlen.
       Die Karten (welt.js runeGates) sperren Nebenkammern mit diesen Fähigkeiten – Hauptweg und Ausgänge nie.
    B) SPIELWEISE-RUNEN (Z.RUNES mit mech, Familien Z.RUNE_FAM): wirken, solange die gravierte Waffe in der Hand liegt
       oder der Runenstein im Runengürtel steckt (max. Z.RUNE_NUM.guertel). Familienbonus bei 2 bzw. 3 verschiedenen
@@ -22,7 +23,13 @@
 
   /* ======================= SPEICHER ======================= */
   /* Z.meta.runen = { frei: {k:1} dauerhaft, gesehen: {k:1}, tut: {k:1} } · Z.run.moveRunes = {k:1} (dieser Lauf) */
-  const MM = () => { const m = Z.meta; if (!m.runen || typeof m.runen !== "object") m.runen = {}; const r = m.runen; r.frei = r.frei || {}; r.gesehen = r.gesehen || {}; r.tut = r.tut || {}; return r; };
+  /* W15 Runen: eine gefundene Bewegungs-Rune ist sofort und dauerhaft aktiv (keine Ausrüst-/Freischalt-Pflicht mehr).
+     Alte Spielstände: alles, was schon gefunden war (gesehen), gilt als gebunden (frei) – einmalig, Merker r.w15. */
+  const MM = () => {
+    const m = Z.meta; if (!m.runen || typeof m.runen !== "object") m.runen = {}; const r = m.runen; r.frei = r.frei || {}; r.gesehen = r.gesehen || {}; r.tut = r.tut || {};
+    if (!r.w15) { r.w15 = 1; let n = 0; for (const k in r.gesehen) if (MR[k] && !r.frei[k]) { r.frei[k] = 1; n++; } if (n && Z.saveMeta) try { Z.saveMeta(); } catch (_) {} }
+    return r;
+  };
   const runMR = () => (Z.run ? (Z.run.moveRunes = Z.run.moveRunes || {}) : null);
   Z.hasMoveRune = k => { const m = MM(); if (m.frei[k]) return true; const r = runMR(); return !!(r && r[k]); };
   /* Testschalter: Z.runeAll = true → alle Bewegungs-Runen */
@@ -99,6 +106,16 @@
   Z.moveBody = function (b, dt) {
     if (b && b._mist && b === Z.player) { mistPass = true; try { return mb0.call(this, b, dt); } finally { mistPass = false; } }
     return mb0.call(this, b, dt);
+  };
+  /* W15: Nebel – feindliche Geschosse gehen durch Ezekiel hindurch (fehlte: sie wurden an ihm zerstört und trafen nach den
+     Roll-Unverwundbarkeitsframes sogar). Während des Nebels zählt Ezekiel für jedes Geschoss als „schon getroffen“. */
+  const up0p = Z.updateProjs;
+  if (up0p) Z.updateProjs = function () {
+    const P = Z.player;
+    if (!P || !P._mist || P.dead) return up0p.apply(this, arguments);
+    const tmp = [];
+    for (const p of Z.projs) if (p && p.owner !== "p" && p.hits && !p.hits.has(P)) { p.hits.add(P); tmp.push(p); }
+    try { return up0p.apply(this, arguments); } finally { for (const p of tmp) p.hits.delete(P); }
   };
   const overGrate = P => {
     if (!G || !G.nGrate) return false;
@@ -249,7 +266,10 @@
     P._mist = has("nebel") && (P.rollT > 0 || overGrate(P));
     if (P._mist && P.rollT <= 0 && overGrate(P)) { P.vx = (P.rollDir || P.face) * 150; }
     const pre = { plunge: P.plunge, rollT: P.rollT, jumpT: P.jumpT || 0, onGround: P.onGround, vy: P.vy, x: P.x, y: P.y };
-    upd0.call(this, P, dt);
+    /* W15: als Nebel gilt das Gitter für das GANZE Spieler-Update als offen – vorher nur in moveBody; die Stufe hinauf
+       (stepUp in kampf.js) sah das Gitter noch als Wand, und Gitter über einer 1-Kachel-Stufe blieben zu („Nebel geht nicht“) */
+    if (P._mist) { mistPass = true; try { upd0.call(this, P, dt); } finally { mistPass = false; } }
+    else upd0.call(this, P, dt);
     post(P, dt, pre, h);
   };
 
@@ -359,7 +379,7 @@
   }
 
   /* ======================= WELT-EFFEKTE DER SPIELWEISE-RUNEN ======================= */
-  let blades = [], booms = [], puddles = [], tickT = 0, stormT = 0, chainDepth = 0;
+  let blades = [], booms = [], puddles = [], tickT = 0, stormT = 0, chainDepth = 0, chainHit = null;
   function resetLevelFx() { blades = []; booms = []; puddles = []; const P = Z.player; if (P) { P.rnCharge = P.rnCharge || 0; } }
   function spawnBlade(x, y, home) {
     if (blades.length > 8) blades.shift();
@@ -459,6 +479,7 @@
     if (fromHand && o.kb && on("fallensteller")) o = Object.assign({}, o, { kb: o.kb * RN.falleKb });
     if (fromHand && o.src === "melee" && !o.crit && P.rnCritReady > 0 && fam("schatten", 2)) { P.rnCritReady = 0; P.rnCritCd = 3; dmg *= 1.6; o = Object.assign({}, o, { crit: true }); FX.text(ecx(e), e.y - 14, L(["Schattenstoß!", "Shadow strike!"]), "#b77cff", true); }
     if (fromHand && o.src === "melee" && air && on("schwebeklinge")) { P.rnAirHits = (P.rnAirHits || 0) + 1; if (P.rnAirHits % 3 === 0 && !o.crit) { dmg *= 1.6; o = Object.assign({}, o, { crit: true }); } }
+    if (chainDepth && chainHit) chainHit.add(e);
     if (chainDepth && on("gewitter")) { const fx = ecx(e), fy = e.y + e.h; if (puddles.length < 8 && !puddles.some(p => Math.abs(p.x - fx) < 24 && Math.abs(p.y - fy) < 12)) { const gy = W.groundBelow(fx, e.y + e.h - 4, 60); if (gy != null) puddles.push({ x: fx, y: gy, t: 0 }); } }
     const r = hitR.call(this, e, dmg, o);
     if (!(r > 0)) return r;
@@ -520,19 +541,26 @@
   Z.chainLightning = function (P, x, y, dmg, jumps, eff, it, sky) {
     recalcActive();
     if (fam("sturm", 2)) { jumps += 1; eff = Object.assign({ stun: 0.25 }, eff || {}); }
+    if (!chainDepth) chainHit = new Set();
     chainDepth++;
     let r;
     try { r = chainR.call(this, P, x, y, dmg, jumps, eff, it, sky); } finally { chainDepth--; }
-    /* über Pfützen und Wasser weiter springen */
+    /* W15: über Pfützen weiter springen – zu Gegnern, die der Blitz noch NICHT getroffen hat (vorher traf die Pfütze meist
+       nur den Gegner, der ohnehin darauf stand: keine größere Reichweite). Eine Pfütze wirkt, wenn der Einschlag oder ein
+       getroffener Gegner in ihrer Nähe ist; Reichweite ab der Pfütze 110 px × (1 + pfuetzeWeit). */
     if (on("gewitter") && !chainDepth && puddles.length) {
-      const lv = W.lv;
+      const hitSet = chainHit; chainHit = null;
+      const near = p => U.dist(x, y, p.x, p.y) < 220 || [...hitSet].some(e => U.dist(ecx(e), e.y + e.h, p.x, p.y) < 60);
       for (const p of puddles.slice()) {
-        if (p.zap > 0.4 && p.t - p.zap < 0.4) continue; p.zap = p.t;
+        if (p.zap != null && p.t - p.zap < 0.25) continue;
+        if (!near(p)) continue;
         let tg = null, bd = 110 * (1 + RN.pfuetzeWeit);
-        for (const e of Z.enemies) if (alive(e)) { const d = U.dist(p.x, p.y - 6, ecx(e), ecy(e)); if (d < bd && d > 4) { bd = d; tg = e; } }
-        if (tg && U.dist(x, y, p.x, p.y) < 220) { Z.bolts && Z.bolts.push({ x0: p.x, y0: p.y - 2, x1: ecx(tg), y1: ecy(tg), t: 0, life: 0.2, col: "#f0e060" }); busy++; try { Z.hitEnemy(tg, dmg * 0.5, { src: "ranged", it, kb: 10, eff: { stun: 0.2 }, col: "#f0e060" }); } finally { busy--; } }
+        for (const e of Z.enemies) if (alive(e) && !hitSet.has(e)) { const d = U.dist(p.x, p.y - 6, ecx(e), ecy(e)); if (d < bd) { bd = d; tg = e; } }
+        if (!tg) continue;
+        p.zap = p.t; hitSet.add(tg);
+        Z.bolts && Z.bolts.push({ x0: p.x, y0: p.y - 2, x1: ecx(tg), y1: ecy(tg), t: 0, life: 0.2, col: "#f0e060" });
+        busy++; try { Z.hitEnemy(tg, dmg * 0.5, { src: "ranged", it, kb: 10, eff: { stun: 0.2 }, col: "#f0e060" }); } finally { busy--; }
       }
-      void lv;
     }
     return r;
   };
@@ -567,6 +595,7 @@
   let finds = [];
   const la1 = Z.loadArea;
   Z.loadArea = function () { finds = []; return la1.apply(this, arguments); };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "runen", save: () => ({ G, finds }), load: s => { G = s.G; finds = s.finds; resetLevelFx(); const P = Z.player; if (P) { P.ringHang = null; P.ringPull = null; P.capV = null; P.gMul = null; P.shadowForm = false; P._mist = false; if (P.h !== C.H && !P.crouch) { P.y -= C.H - P.h; P.h = C.H; } } } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
   function mechPool() {
     const P = Z.player, shield = P && ["a1", "a2"].some(s => { const d = Z.itemDef(P.slots[s]); return d && d.kind === "shield"; });
     recalcActive();
@@ -604,15 +633,17 @@
     drawReward(c, r, t) { return r.kind === "runenstein" || r.kind === "bewegung"; },
     spawnStone: (x, y, rune) => spawnFind("stein", x, y, { rune }),
     spawnAltar: (x, y, rune) => spawnFind("sockel", x, y, { rune }),
-    grantMove, addBelt, finds: () => finds, gates: () => (G ? G.gates : []), level: () => G, _setup: lv => { prepLevel(lv); setupLevel(lv); }
+    grantMove, addBelt, _fx: () => ({ blades, booms, puddles }), finds: () => finds, gates: () => (G ? G.gates : []), level: () => G, _setup: lv => { prepLevel(lv); setupLevel(lv); }
   };
   function grantMove(k, silent) {
     if (!MR[k]) return;
-    const m = MM(), rr = runMR(); if (rr) rr[k] = 1; const first = !m.gesehen[k]; m.gesehen[k] = 1; Z.saveMeta && Z.saveMeta();
+    /* W15: sofort dauerhaft gebunden (frei) – vorher nur für diesen Lauf, im nächsten Lauf war die Rune „weg“ */
+    const m = MM(), rr = runMR(); if (rr) rr[k] = 1; const first = !m.frei[k]; m.gesehen[k] = 1; m.frei[k] = 1; Z.saveMeta && Z.saveMeta();
     const P = Z.player; if (!P || silent) return;
     const d = MR[k];
     FX.burst(P.x + P.w / 2, P.y + 10, 34, { col: [d.col, "#fff0c0", "#ff8a3a"], sp: 150, up: 60, life: 1, size: 2.4, kind: "glow", add: true });
     FX.ring(P.x + P.w / 2, P.y + 14, 40, d.col, 0.5, 3); FX.slowmo && FX.slowmo(0.5, 0.35); A.play("rune", { vol: 0.8 }); A.play("holy", { vol: 0.4 });
+    if (Z.runenWeihe) Z.runenWeihe(P, d.col, k, true); /* W11 R45: Lichtsäule + Glyphe */
     tutorial(k, first);
   }
   /* Tutorial-Moment in der Welt: kurze Zeile mit der Steuerung über Ezekiel, dazu (falls vorhanden) ein Wegweiser
@@ -630,9 +661,11 @@
   function tutorial(k, first) {
     const P = Z.player, m = MM(), d = MR[k], how = HOW[k] ? HOW[k]() : ["", ""];
     const long = !m.tut[k]; m.tut[k] = 1; Z.saveMeta && Z.saveMeta();
-    notify("ᛟ <b>" + esc(L(d.n)) + "</b><small>" + how[0] + (long ? " · " + how[1] : "") + "</small>", { prio: 2, ort: "welt", x: P.x + P.w / 2, y: P.y - 30, dauer: long ? 6500 : 3500, key: "rune_" + k });
+    /* W15: klare Einblendung „Neue Fähigkeit: …“ mit Taste – über Ezekiel und (Prio 3, auch bei sparsamen Hinweisen) im Meldungsbereich */
+    const head = (first ? L(["Neue Fähigkeit: ", "New ability: "]) : "") + esc(L(d.n));
+    notify("ᛟ <b>" + head + "</b><small>" + how[0] + (long ? " · " + how[1] : "") + "</small>", { prio: 3, ort: "welt", x: P.x + P.w / 2, y: P.y - 30, dauer: long ? 7000 : 4000, key: "rune_" + k });
+    if (first) notify("ᛟ <b>" + head + "</b> <small>" + how[0] + " · " + L(["sofort aktiv, für immer gebunden", "active now, bound for good"]) + "</small>", { prio: 3, dauer: 8000, art: "magie", key: "rune_neu_" + k });
     if (G) { const gt = G.gates.find(g => g.kind === k); if (gt) { gt.lit = 12; } }
-    void first;
   }
   function addBelt(k) {
     const P = Z.player; if (!P || !Z.RUNES[k]) return;
@@ -649,6 +682,7 @@
     const n = ACT.fam[r.fam] || 0;
     notify((r.ico || "ᚱ") + " <b>" + esc(L(r.n)) + "</b> <small>" + esc(L(f.n)) + (n >= 2 ? " · " + L(["Familienbonus ", "Set bonus "]) + n + ": " + esc(L(n >= 3 ? f.b3 : f.b2)) : "") + (out ? " · " + L(["ersetzt ", "replaces "]) + esc(L(Z.RUNES[out].n)) : "") + "</small>", { prio: 2, ort: "welt", x: P.x + P.w / 2, y: P.y - 30, dauer: 4200, art: "magie" });
     FX.ring(P.x + P.w / 2, P.y + 14, 30, r.col, 0.4, 3); A.play("rune", { vol: 0.6 }); A.play("gem", { vol: 0.4 });
+    if (Z.runenWeihe) Z.runenWeihe(P, r.col, "stein", false); /* W11 R45 */
   }
   function tickFinds(P, dt) {
     for (const f of finds) {
@@ -688,7 +722,7 @@
       /* steht ein Schild an der Sperre (schilder.js), erzählt das schon alles */
       if (Z.schilder && Z.schilder.hat("rune:" + gt.cell)) continue;
       const owned = has(gt.kind), d2 = MR[gt.kind];
-      notify((owned ? "ᛟ " : "? ") + "<b>" + esc(L(GATE_TXT[gt.kind])) + "</b><small>" + (owned ? L(["Deine ", "Your "]) + esc(L(d2.n)) + L([" hilft hier.", " helps here."]) : MM().gesehen[gt.kind] ? esc(L(d2.n)) + L([" nötig – im Lager dauerhaft freischalten.", " needed – unlock it for good at camp."]) : L(["Eine Rune könnte hier weiterhelfen.", "A rune might help here."])) + "</small>", { prio: owned ? 1 : 0, ort: "welt", x: gt.hx, y: gt.hy - 20, dauer: 3200, key: "gate_" + gt.cell });
+      notify((owned ? "ᛟ " : "? ") + "<b>" + esc(L(GATE_TXT[gt.kind])) + "</b><small>" + (owned ? L(["Deine ", "Your "]) + esc(L(d2.n)) + L([" hilft hier.", " helps here."]) : L(["Eine Rune könnte hier weiterhelfen.", "A rune might help here."])) + "</small>", { prio: owned ? 1 : 0, ort: "welt", x: gt.hx, y: gt.hy - 20, dauer: 3200, key: "gate_" + gt.cell });
     }
   }
   /* Hinweise und Funde laufen im Spieler-Update mit */
@@ -797,6 +831,18 @@
   };
   /* Spieler: Schwingen beim Gleiten, Schattengestalt, Nebel, Kette zur Öse */
   const dpl0 = Z.drawPlayer;
+  /* W11 R45: Spielerbild auf eine Zwischenleinwand (gleiche Auflösung wie das Bild), für echte Durchsichtigkeit */
+  let GCV = null;
+  function ghost(c, P, t, self, args) {
+    try {
+      const S = (Z.gfx && Z.gfx.scale) || 2, x0 = Math.floor(P.x - 40), y0 = Math.floor(P.y - 56), w = P.w + 80, h = P.h + 80;
+      if (!GCV) GCV = document.createElement("canvas");
+      const W2 = Math.ceil(w * S), H2 = Math.ceil(h * S); if (GCV.width !== W2 || GCV.height !== H2) { GCV.width = W2; GCV.height = H2; }
+      const g = GCV.getContext("2d"); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, W2, H2); g.setTransform(S, 0, 0, S, -x0 * S, -y0 * S);
+      dpl0.call(self, g, P, t);
+      return { cv: GCV, x: x0, y: y0, w, h };
+    } catch (e) { console.error(e); return null; }
+  }
   Z.drawPlayer = function (c, P, t) {
     if (!P || P !== Z.player) return dpl0.apply(this, arguments);
     const x = P.x + P.w / 2;
@@ -820,7 +866,25 @@
     if (P.ringHang || P.ringPull) {
       const r = (P.ringHang || P.ringPull).r; c.strokeStyle = "#c8a070"; c.lineWidth = 1.4; c.setLineDash([2, 1.5]); c.beginPath(); c.moveTo(x + P.face * 3, P.y + 6); c.lineTo(r.x * T + 8, r.y * T + 8); c.stroke(); c.setLineDash([]);
     }
-    if (P._mist && P.rollT > 0) { c.save(); c.globalAlpha = 0.4; const r = dpl0.apply(this, arguments); c.restore(); return r; }
+    /* W15: Nebelgestalt deutlicher – blasse Nebelwolke (warmes Grau-Rosé, kein Blau), Ezekiel nur schemenhaft darin */
+    if (!(P._mist && (P.rollT > 0 || overGrate(P))) && P._mistH) P._mistH = null; /* W11 R45 */
+    if (P._mist && (P.rollT > 0 || overGrate(P))) {
+      c.save();
+      const cx = x, cy = P.y + P.h * 0.55, pulse = 1 + 0.08 * Math.sin(t * 18);
+      const g = c.createRadialGradient(cx, cy, 2, cx, cy, 20 * pulse); g.addColorStop(0, "rgba(240,226,232,.55)"); g.addColorStop(0.6, "rgba(200,184,192,.28)"); g.addColorStop(1, "rgba(160,140,150,0)");
+      c.fillStyle = g; c.beginPath(); c.ellipse(cx, cy, 20 * pulse, 15 * pulse, 0, 0, TAU); c.fill();
+      /* W11 R45: sichtbar durchscheinend – zwei verwehende Nachbilder auf der Bahn, Gestalt leicht gestreckt, warmer Saum */
+      const MH = P._mistH || (P._mistH = []); MH.unshift([P.x, P.y]); if (MH.length > 9) MH.length = 9;
+      const lv0 = Z.gq && (Z.gq.lean || Z.gq.level === 0);
+      /* Die Figur setzt globalAlpha intern zurück – darum erst auf eine Zwischenleinwand, dann mit Deckkraft aufs Bild
+         (vorher wirkte das 0,3 aus W15 nie: Ezekiel war im Nebel voll deckend) */
+      const gh = ghost(c, P, t, this, arguments);
+      if (gh) { if (!lv0) for (const [k, al] of [[8, 0.12], [4, 0.2]]) { const h = MH[Math.min(k, MH.length - 1)]; if (!h || (h[0] === P.x && h[1] === P.y)) continue; c.globalAlpha = al; c.drawImage(gh.cv, gh.x + h[0] - P.x, gh.y + h[1] - P.y, gh.w, gh.h); } c.globalAlpha = 0.42; c.drawImage(gh.cv, gh.x, gh.y, gh.w, gh.h); }
+      const r = gh ? undefined : dpl0.apply(this, arguments); c.restore();
+      if (!lv0) { c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = 0.22; c.strokeStyle = "#f4e6ec"; c.lineWidth = 1; c.beginPath(); c.ellipse(cx, cy, 11 * pulse, 14 * pulse, 0, 0, TAU); c.stroke(); c.restore(); }
+      c.save(); c.globalAlpha = 0.5; c.fillStyle = "#f0e4ea"; for (let i = 0; i < 3; i++) { const a = t * 6 + i * 2.1; c.beginPath(); c.ellipse(cx + Math.cos(a) * 9, cy + Math.sin(a) * 5, 5, 2.5, 0, 0, TAU); c.fill(); } c.restore();
+      return r;
+    }
     const r = dpl0.apply(this, arguments);
     if (P.wallT > 0.05) { c.save(); c.globalCompositeOperation = "lighter"; const wx = P.wallDir > 0 ? P.x + P.w : P.x; c.strokeStyle = "rgba(255,179,71,.6)"; c.lineWidth = 1; for (let i = 0; i < 3; i++) { c.beginPath(); c.moveTo(wx, P.y + 6 + i * 2); c.lineTo(wx - P.wallDir * 2, P.y + 2 + i * 2 - 4); c.stroke(); } c.restore(); }
     return r;
@@ -844,7 +908,7 @@
   /* ======================= LAGER: RUNENSTELE ======================= */
   function steleHTML() {
     const M = Z.meta, m = MM();
-    let h = '<h2>' + L(["Runenstele", "Rune Stele"]) + ' <small>' + L(["Bewegungs-Runen dauerhaft binden", "Bind movement runes for good"]) + '</small></h2><p class="hinweis">' + L(["Einmal in der Feste gefunden, lässt sich eine Rune hier mit Seelensplittern dauerhaft binden.", "Once found in the keep, a rune can be bound here for good with soul shards."]) + ' <span class="bank">' + U.fmt(M.shards) + " ◆</span></p><div class=\"rn-liste\">";
+    let h = '<h2>' + L(["Runenstele", "Rune Stele"]) + ' <small>' + L(["Deine Bewegungs-Runen", "Your movement runes"]) + '</small></h2><p class="hinweis">' + L(["Eine in der Feste gefundene Bewegungs-Rune ist sofort und für immer an dich gebunden. Hier siehst du, welche dir noch fehlen.", "A movement rune found in the keep is bound to you at once and for good. Here you can see which ones you still lack."]) + ' <span class="bank">' + U.fmt(M.shards) + " ◆</span></p><div class=\"rn-liste\">";
     let i = 0;
     for (const k in MR) {
       const d = MR[k], frei = !!m.frei[k], seen = !!m.gesehen[k]; i++;
@@ -909,7 +973,10 @@
     ".rn-liste{display:flex;flex-direction:column;gap:5px;margin:6px 0}",
     ".rn-zeile{display:flex;gap:10px;align-items:center;padding:6px 9px;border:1px solid #33241f;border-left:4px solid var(--c);border-radius:6px;background:rgba(255,235,200,.03)}",
     ".rn-zeile.frei{background:rgba(229,180,84,.07)}.rn-txt{flex:1;min-width:0}.rn-txt b{color:var(--c)}.rn-txt small{display:block;color:var(--mute,#ab9c8c);font-size:12.5px;line-height:1.3}",
-    ".rn-ok{color:var(--gold,#e5b454);font-weight:800;font-size:18px;padding:0 12px}.rn-zeile button{min-width:80px}"
+    ".rn-ok{color:var(--gold,#e5b454);font-weight:800;font-size:18px;padding:0 12px}.rn-zeile button{min-width:80px}",
+    /* W15: Bewegungs-Runen im Ausrüstungsfenster als „aktiv“ */
+    ".ag-aktiv{display:inline-block;margin-left:4px;padding:0 6px;border:1px solid #8ac040;border-radius:9px;color:#b8e070;font-size:11.5px;font-weight:800;line-height:16px;background:rgba(138,192,64,.12)}",
+    ".ag-bew .ag-rd{color:var(--mute,#ab9c8c);font-size:11.5px;line-height:1.3}"
   ].join("\n");
   document.head.appendChild(css);
   if (document.readyState === "complete") setTimeout(wireUI, 0); else window.addEventListener("load", () => setTimeout(wireUI, 0));
@@ -929,5 +996,61 @@
       out.push(pool.splice(i, 1)[0]);
     }
     return out;
+  };
+})();
+
+/* W11 R45 (Grafik): Runen-Weihe – feierlicher Einsammel-Moment. Lichtsäule in der Runenfarbe (von den Füßen hinauf,
+   schmaler werdend, additiv), Bodenring, aufsteigende Glyphe je Bewegungsrune (Kralle: drei Krallenhiebe, Schatten:
+   Sichel, Schwingen: Flügelpaar, Erde: Berg mit Riss, Kette: zwei Glieder, Nebel: drei Wellen; Runenstein: Raute mit
+   Kerbe) und echtes Licht (Z.addLight). Gemalt hinter Ezekiel (Z.drawBeforePlayer). Dauer 1,7 s (Bewegungsrune) bzw. 1,1 s
+   (Stein). Stufe 0/lean: ohne Verlauf und Funkenregen. Kein Blau. Schalter Z.gfx.off.runenweihe. */
+(function () {
+  "use strict";
+  const Z = window.Z, TAU = Math.PI * 2;
+  const W = [];
+  const lo = () => { const q = Z.gq; return !!(q && (q.lean || q.level === 0)); };
+  Z.runenWeihe = (P, col, kind, big) => {
+    if (Z.gfx && Z.gfx.off && Z.gfx.off.runenweihe) return;
+    W.push({ P, col: col || "#ffd27a", kind, dur: big ? 1.7 : 1.1, t: 0, big, lv: Z.level, t0: performance.now() });
+    if (W.length > 4) W.shift();
+  };
+  function glyph(c, kind, s) {
+    c.beginPath();
+    switch (kind) {
+      case "kralle": for (let i = -1; i <= 1; i++) { c.moveTo(i * 4 - 2, -7); c.quadraticCurveTo(i * 4 + 2, 0, i * 4 - 1, 7); } break;
+      case "schatten": c.arc(0, 0, 7, -1.9, 1.9); c.arc(3, 0, 5.4, 1.75, -1.75, true); c.closePath(); break;
+      case "schwingen": for (const d of [-1, 1]) { c.moveTo(0, 2); c.quadraticCurveTo(d * 5, -7, d * 10, -4); c.lineTo(d * 7, 0); c.lineTo(d * 9, 1); c.lineTo(d * 4, 4); } break;
+      case "erde": c.moveTo(-9, 6); c.lineTo(-2, -6); c.lineTo(2, -1); c.lineTo(5, -4); c.lineTo(10, 6); c.closePath(); c.moveTo(-1, -3); c.lineTo(1, 1); c.lineTo(-1, 3); c.lineTo(0, 6); break;
+      case "kette": c.ellipse(-3.5, -2.5, 4, 2.6, -0.6, 0, TAU); c.moveTo(7.5, 2.5); c.ellipse(3.5, 2.5, 4, 2.6, -0.6, 0, TAU); break;
+      case "nebel": for (let i = -1; i <= 1; i++) { c.moveTo(-8, i * 4.5); c.bezierCurveTo(-4, i * 4.5 - 3, -1, i * 4.5 + 3, 3, i * 4.5); c.quadraticCurveTo(6, i * 4.5 - 2.5, 8, i * 4.5); } break;
+      default: c.moveTo(0, -8); c.lineTo(6, 0); c.lineTo(0, 8); c.lineTo(-6, 0); c.closePath(); c.moveTo(-2, -2); c.lineTo(2, 2); c.moveTo(0, -4); c.lineTo(0, 4);
+    }
+  }
+  const bp0 = Z.drawBeforePlayer;
+  Z.drawBeforePlayer = function (c) {
+    if (bp0) bp0.apply(this, arguments);
+    if (!W.length) return;
+    const now = performance.now(), L = lo();
+    for (let i = W.length - 1; i >= 0; i--) {
+      const w = W[i]; w.t = (now - w.t0) / 1000;
+      if (w.t >= w.dur || w.lv !== Z.level) { W.splice(i, 1); continue; }
+      const P = w.P, u = w.t / w.dur, env = u < 0.12 ? u / 0.12 : u > 0.6 ? Math.max(0, (1 - u) / 0.4) : 1;
+      const x = P.x + P.w / 2, fy = P.y + P.h, H = w.big ? 120 : 80, bw = (w.big ? 13 : 9) * (1 - u * 0.5);
+      c.save(); c.globalCompositeOperation = "lighter";
+      /* Lichtsäule */
+      if (!L) { const g = c.createLinearGradient(0, fy, 0, fy - H); g.addColorStop(0, w.col); g.addColorStop(0.5, w.col); g.addColorStop(1, "rgba(0,0,0,0)"); c.globalAlpha = 0.32 * env; c.fillStyle = g; c.fillRect(x - bw, fy - H, bw * 2, H); c.globalAlpha = 0.5 * env; c.fillStyle = "#fff0d8"; c.fillRect(x - bw * 0.22, fy - H * 0.85, bw * 0.44, H * 0.85); }
+      else { c.globalAlpha = 0.28 * env; c.fillStyle = w.col; c.fillRect(x - bw * 0.5, fy - H * 0.7, bw, H * 0.7); }
+      /* Bodenring */
+      c.globalAlpha = 0.7 * env; c.strokeStyle = w.col; c.lineWidth = 1.4; c.beginPath(); c.ellipse(x, fy - 1, 10 + u * 22, 2.6 + u * 4, 0, 0, TAU); c.stroke();
+      /* Glyphe steigt auf */
+      const gy = fy - 34 - (w.big ? 30 : 18) * Math.min(1, u * 1.6), sc = (w.big ? 1.25 : 0.95) * (0.6 + 0.4 * Math.min(1, u * 3));
+      c.translate(x, gy); c.scale(sc, sc); c.lineCap = "round"; c.lineJoin = "round";
+      glyph(c, w.kind, 1); c.globalAlpha = 0.35 * env; c.strokeStyle = w.col; c.lineWidth = 4; c.stroke();
+      c.globalAlpha = 0.95 * env; c.strokeStyle = "#fff4dc"; c.lineWidth = 1.2; c.stroke();
+      c.restore();
+      /* aufsteigende Funken */
+      if (!L && Math.random() < 0.5 * env && Z.fx) Z.fx.p({ x: x + (Math.random() - 0.5) * bw * 1.6, y: fy - Math.random() * 20, vx: 0, vy: -50 - Math.random() * 40, life: 0.7, size: 1.4, col: Math.random() < 0.5 ? w.col : "#fff0c0", kind: "glow", add: true });
+      if (Z.addLight) Z.addLight(x, fy - 30, w.big ? 90 : 60, w.col, 0.55 * env);
+    }
   };
 })();

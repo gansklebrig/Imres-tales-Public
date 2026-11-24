@@ -350,7 +350,7 @@
     donnersprung: { mech: true, fam: "sturm", n: ["Donnersprung", "Thunder Leap"], col: "#f0e060", ico: "⇑",
       d: ["Jeder " + RN.donnerN + ". Sprung entlädt eine Schockwelle, die betäubt.", "Every " + RN.donnerN + "rd jump releases a stunning shockwave."] },
     gewitter: { mech: true, fam: "sturm", n: ["Gewitterpfütze", "Storm Puddle"], col: "#e8d050", ico: "☔",
-      d: ["Blitztreffer hinterlassen geladene Pfützen; Kettenblitze springen über Pfützen und Wasser " + pc(RN.pfuetzeWeit) + " % weiter.", "Lightning hits leave charged puddles; chain lightning leaps " + pc(RN.pfuetzeWeit) + "% further across puddles and water."] },
+      d: ["Kettenblitz-Treffer hinterlassen geladene Pfützen; von dort springt der nächste Kettenblitz " + pc(RN.pfuetzeWeit) + " % weiter zu einem noch nicht getroffenen Gegner.", "Chain lightning hits leave charged puddles; from there the next chain leaps " + pc(RN.pfuetzeWeit) + "% further to a foe it hasn't hit yet."] },
     fadenriss: { mech: true, fam: "faden", n: ["Fadenriss", "Thread Rend"], col: "#ffd27a", ico: "⋔",
       d: ["Faden-Krits spalten sich: " + RN.rissN + " Splitterfäden treffen nahe Gegner (" + pc(RN.rissDmg) + " %) und markieren sie.", "Thread crits split: " + RN.rissN + " splinter threads hit nearby foes (" + pc(RN.rissDmg) + "%) and mark them."] },
     fallensteller: { mech: true, fam: "faden", n: ["Fallensteller", "Trapper"], col: "#e5b454", ico: "⊓",
@@ -424,6 +424,9 @@
        am Laufende noch 1000–3700 übrig → 1 + 0,2t (vorher 1 + 0,6t): Aufwerten + gelegentlich Händlerin, nicht alles */
     /* W9 (Kontrollläufe K1, haupt, unsterblich): Gold ein 4000–5200, ausgegeben 1500–2800, Rest 1000–3100 – Gold war nie knapp,
        begrenzt haben nur Glut und Amboss-Schläge. Jetzt 15 % weniger Gold und teureres Schmieden (schmiede.js goldCost) */
+    /* W9 6. Runde (Meta-Kampagne mit Bot, 20 Läufe): erster Sieg schon nach 3 Läufen, ab Lauf 8 jeder zweite – Meta wuchs zu schnell
+       (≈ 420 Splitter je Lauf). Splitter-Funde ×0,7 → erster Sieg für gute Spieler eher nach 8–15 Läufen */
+    shardMul: 0.7,
     goldMul: t => 0.82 * (1 + 0.2 * t) /* W9 3. Runde: 0,85 → 0,8 (gründlich blieben 1100–5600 Gold übrig); 4. Runde Kompromiss 0,82 (gründlich sonst nur +4) */
   };
 })();

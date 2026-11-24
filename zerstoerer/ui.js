@@ -147,8 +147,10 @@
       hudT = 0.25;
       /* Segen und Werte stehen jetzt im Pausenmenü; der Gebietsname zeigt sich nur nach dem Betreten (und auf der großen Karte) */
       const run = Z.run, an = areaShow > 0 || bigMap;
-      setHTML("area", esc(areaTitle()) + (run && an ? '<small>' + fmtTime(run.time) + (run.skulls ? " · " + "☠".repeat(run.skulls) : "") + (run.gnade ? ' · <span class="gnade-hud" title="' + esc(L(["Hilfsmodus Barmherzigkeit", "Assist mode Mercy"])) + '">✚</span>' : "") + "</small>" : ""));
-      $("#area").classList.toggle("still", !an);
+      /* W11 R38 (Grafik): Gebietsvariante dauerhaft am Ortsnamen („Das Verlies · ☠ Unruhige Brut“), Farbe je Variante */
+      const gv = Z.gebietVariante && Z.gebietVariante(), gvC = gv ? ({ gold: "#f0c860", brut: "#e87060", fallen: "#a8c890" })[gv.id] || "#e8d8b0" : "";
+      setHTML("area", esc(areaTitle()) + (gv ? '<span class="var-hud" style="color:' + gvC + '"> · <span class="var-ico">' + esc(gv.ico) + "</span> " + esc(L(gv.n)) + "</span>" : "") + (run && an ? '<small>' + fmtTime(run.time) + (run.skulls ? " · " + "☠".repeat(run.skulls) : "") + (run.gnade ? ' · <span class="gnade-hud" title="' + esc(L(["Hilfsmodus Barmherzigkeit", "Assist mode Mercy"])) + '">✚</span>' : "") + "</small>" : ""));
+      $("#area").classList.toggle("still", !an && !gv); $("#area").classList.toggle("varonly", !an && !!gv);
       $("#fps").textContent = Z.settings.fps ? (Z.fps || 0) + " fps" : "";
     }
     if (areaShow > 0) areaShow -= dt;
@@ -203,7 +205,7 @@
     const html0 = it ? null : o.type === "obj" && o.o.cardHTML ? (typeof o.o.cardHTML === "function" ? o.o.cardHTML() : o.o.cardHTML) : null;
     if ((!it && !html0) || ui.choiceActive) { card.hidden = true; return; }
     const foot = cardFoot(o, it || {});
-    const ck = (it ? it.uid + "|" + (it.plus || 0) + "|" + (it.runes || []).join(",") : html0) + "|" + foot;
+    const ck = (it ? it.uid + "|" + (it.plus || 0) + "|" + (it.runes || []).join(",") : html0) + "|" + foot + (ui.kampfNah ? "|k" : ""); /* W11 R44: Größe neu messen, wenn die Karte im Kampf einklappt */
     if (card.dataset.uid !== ck) { card.innerHTML = (it ? itemCardHTML(it, true) : html0) + foot; card.dataset.uid = ck; }
     const ax = o.type === "obj" ? o.o.x : o.p.x, ay = o.type === "obj" ? o.o.y - (o.o.h || 30) - 10 : o.p.y - 40;
     const [sx, sy] = worldToScreen(ax, ay);
@@ -224,6 +226,7 @@
      Station-Stellvertreter: steht man an einer Lager-/Durchgangs-Station, für die eine Auslage existiert,
      gilt das nächste Stück der Auslage (Hinweis, Karte, Benutzen). */
   const auslagen = [];
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "ui", save: () => auslagen.slice(), load: s => { auslagen.length = 0; for (const g of s) auslagen.push(g); } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
   ui.auslage = o => {
     for (let i = auslagen.length - 1; i >= 0; i--) if (auslagen[i].key === o.key || auslagen[i].lv !== Z.level) { const g0 = auslagen[i]; Z.interacts = (Z.interacts || []).filter(x => x.g !== g0); auslagen.splice(i, 1); }
     const g = { key: o.key, lv: Z.level, o, list: [], zu: false, station: o.station || null };
@@ -359,7 +362,11 @@
   function noteShow(n) {
     const el = document.createElement("div");
     el.className = "meldung eisen p" + n.prio + (n.art ? " " + n.art : "");
-    el.innerHTML = (n.icon ? '<span class="mi">' + n.icon + "</span>" : "") + '<span class="mt">' + n.html + "</span>";
+    /* W11 R27 (nur Optik): freigeschalteter Erfolg → kurzes gemaltes Siegel mit Glanz statt Pokal-Zeichen (figuren.js Z.siegelURL;
+       Siegel des Erfolgs aus abenteuer.js Z.erfolgSiegel(html) → {motiv, stufe, selten}, sonst goldener Stern) */
+    let ico = n.icon;
+    if (n.icon === "🏆" && Z.siegelURL) { try { const w = Z.erfolgSiegel ? Z.erfolgSiegel(n.html) : null, ai = !w && Z.achSiegelInfo ? Z.achSiegelInfo(n.html) : null; ico = '<img class="siegel" alt="" src="' + (w && w.motiv ? Z.siegelURL(w.motiv, { stufe: w.stufe || "gold", band: w.stufe === "gold" || w.stufe === "blut" }) : ai && ai.url ? ai.url : Z.siegelURL("stern", { stufe: "gold" })) + '">'; if (w && w.selten) el.classList.add("selten"); el.classList.add("erfolg-siegel"); } catch (_) { ico = n.icon; } }
+    el.innerHTML = (ico ? '<span class="mi">' + ico + "</span>" : "") + '<span class="mt">' + n.html + "</span>";
     if (n.prio >= 2) notesEl.prepend(el); else notesEl.appendChild(el);
     void el.offsetWidth; el.classList.add("an");
     n.el = el; n.t = 0; notes.push(n); ui.lastNote = el;
@@ -398,8 +405,35 @@
     noteShow(n);
     return n.el;
   };
+  /* W11 R44 (nur Optik): Kampf in der Nähe – ein aufmerksamer Gegner nahe Ezekiel (≈ 17×10 Kacheln) – lässt Meldungen,
+     Weltmeldungen („Geheimnis 1/7“), Fundkarte und Herausforderungstafel zurücktreten: kleiner, blasser, ohne Zusatzzeile,
+     Weltmeldungen rücken über die Köpfe. An sofort, aus 1,2 s nach dem letzten Treffer der Prüfung. body.kampfnah. */
+  const knCss = document.createElement("style");
+  knCss.textContent = [
+    "#meldungen{transition:opacity .25s,transform .3s}body.kampfnah #meldungen{opacity:.5;transform:translateX(-50%) scale(.82);transform-origin:50% 0}body.kampfnah #meldungen.gedimmt{opacity:.16}",
+    "body.kampfnah #meldungen small{display:none}",
+    "body.kampfnah #card{opacity:.78}body.kampfnah #card>p,body.kampfnah #card>ul,body.kampfnah #card>.ic-tasten{display:none}",
+    "body.kampfnah #hfzeile.an{opacity:.42}body.kampfnah #hfzeile .hz small,body.kampfnah #hfzeile .hw{display:none}",
+    "body.kampfnah .weltmeldung{opacity:.55}body.kampfnah .weltmeldung small{display:none}"
+  ].join("\n");
+  document.head.appendChild(knCss);
+  let knT = 0, knChk = 0; ui.kampfNah = false;
+  function kampfNahTick(dt) {
+    knChk -= dt; if (knChk > 0) return; knChk = 0.15;
+    const P = Z.player; let hit = false;
+    if (P && !P.dead && Z.level && !Z.level.hub && !(G_off() && G_off().kampfnah)) {
+      const px = P.x + P.w / 2, py = P.y + P.h / 2;
+      for (const e of Z.enemies || []) if (!e.dead && e.aware && Math.abs(e.x + (e.w || 0) / 2 - px) < 270 && Math.abs(e.y + (e.h || 0) / 2 - py) < 160) { hit = true; break; }
+    }
+    knT = hit ? 1.2 : Math.max(0, knT - 0.15);
+    const on = knT > 0;
+    if (on !== ui.kampfNah) { ui.kampfNah = on; document.body.classList.toggle("kampfnah", on); }
+  }
+  const G_off = () => Z.gfx && Z.gfx.off;
   function noteTick(dt) {
+    try { kampfNahTick(dt); } catch (e) { console.error(e); } /* W11 R44 */
     if (ui.verdeckt) dt = 0; /* Kapitelseite liegt darüber: Meldungen warten */
+    if (ui._bpLeft > 0) { ui._bpLeft -= dt; if (ui._bpLeft <= 0) document.body.classList.remove("bossplatte"); } /* W11 R25: Boss-Titelband (nur Lage) */
     /* großer Gebietsname (Banner) sichtbar: Stimmungs-/Info-Meldungen warten unsichtbar, Antworten (prio 3) bleiben */
     const ban = !banner.hidden && banner.classList.contains("an");
     document.body.classList.toggle("banner-an", ban);
@@ -413,7 +447,8 @@
     for (const w of worldNotes.slice()) {
       w.t += dt;
       if (w.t >= w.dur || w.lv !== Z.level) { worldNotes = worldNotes.filter(x => x !== w); w.el.style.opacity = "0"; setTimeout(() => w.el.remove(), 420); continue; }
-      placeAt(w.el, w.x, w.y, -16 - w.t * 8);
+      w.kn = (w.kn || 0) + ((ui.kampfNah ? 1 : 0) - (w.kn || 0)) * Math.min(1, dt * 6); /* W11 R44: im Kampf über die Köpfe */
+      placeAt(w.el, w.x, w.y, -16 - w.t * 8 - w.kn * 52);
       w.el.style.opacity = w.t > w.dur - 0.5 ? "0" : "";
     }
   }
@@ -458,6 +493,18 @@
       if (!off) placeAt(l.el, l.x, l.y, l.dy);
     }
   }
+  /* W11 R43 (nur Optik): sichtbare Weltschilder als Rechtecke in Weltkoordinaten – Schwebetexte (effekte.js,
+     Text-Verwalter) weichen ihnen aus. Zwischengespeichert (≤ alle 120 ms neu gemessen). */
+  let lrT = 0, lrC = [];
+  ui.labelRects = () => {
+    const now = performance.now(); if (now - lrT < 120) return lrC; lrT = now; lrC = [];
+    const cv = document.getElementById("cv"), cam = Z.cam; if (!cv || !cam || !labels.size) return lrC;
+    const b = cv.getBoundingClientRect(); if (!(b.width > 0)) return lrC;
+    const kx = cam.w / b.width, ky = cam.h / b.height;
+    for (const [, l] of labels) { if (l.el.classList.contains("aus")) continue; const r = l.el.getBoundingClientRect(); if (!(r.width > 0)) continue;
+      lrC.push({ x0: cam.x + (r.left - b.left) * kx, y0: cam.y + (r.top - b.top) * ky, x1: cam.x + (r.right - b.left) * kx, y1: cam.y + (r.bottom - b.top) * ky }); }
+    return lrC;
+  };
   ui.clearLabels = () => { for (const [, l] of labels) l.el.remove(); labels.clear(); for (const w of worldNotes) w.el.remove(); worldNotes = []; };
 
   /* Z.toast bleibt für alle Module: Priorität und Farbe aus dem Inhalt schätzen */
@@ -490,7 +537,14 @@
   };
   ui.bossIntro = e => {
     $("#bossname").innerHTML = esc(L(e.def.n)) + (e.def.title ? "<small>" + esc(L(e.def.title)) + "</small>" : "");
+    /* W11 R26 (nur Optik): gemaltes Boss-Porträt (figuren.js, Z.bossPortraet) als Wappen am linken Ende der Boss-Leiste */
+    { let im = bossbar.querySelector("img.boss-portraet"); const u = Z.bossPortraet ? Z.bossPortraet(e.def) : null;
+      if (u) { if (!im) { im = document.createElement("img"); im.className = "boss-portraet"; im.alt = ""; bossbar.prepend(im); } im.src = u; } else if (im) im.remove(); }
     ui.banner(L(e.def.n), e.def.intro ? L(e.def.intro) : L(e.def.title || ["", ""]), 4200);
+    /* W11 R27 (nur Optik): einfache Grafik zeigt statt des gemalten Bands das Textbanner – auch dort das Boss-Porträt */
+    { const bb = banner.querySelector("b"), u = Z.bossPortraet ? Z.bossPortraet(e.def) : null; if (u && bb && bb.textContent === L(e.def.n)) { const im = document.createElement("img"); im.className = "boss-portraet"; im.alt = ""; im.src = u; banner.prepend(im); } }
+    /* W11 R25 (nur Lage): solange das Boss-Titelband steht, rücken Meldungen darunter (CSS body.bossplatte) */
+    document.body.classList.add("bossplatte"); ui._bpLeft = 4.6; /* zählt in noteTick mit der Spielzeit herunter, wie das Band selbst */
   };
   ui.bossDown = b => { setTimeout(() => ui.banner(L(["Besiegt", "Defeated"]) + ": " + L(b.def.n), b.def.outro ? L(b.def.outro) : "", 6000), 700); };
 
@@ -863,7 +917,8 @@
     }
     const MR = Z.MOVE_RUNES || {}, frei = (Z.meta.runen && Z.meta.runen.frei) || {};
     const mv = Object.keys(MR).filter(k => Z.runeAll || (Z.hasMoveRune && Z.hasMoveRune(k)));
-    if (mv.length) h += "<h4>" + L(["Bewegungs-Runen", "Movement runes"]) + '</h4><ul class="ag-liste">' + mv.map(k => '<li><b style="color:' + MR[k].col + '">ᛟ ' + esc(L(MR[k].n)) + "</b>" + (frei[k] ? "" : ' <small class="hinweis">' + L(["nur dieser Lauf", "this run only"]) + "</small>") + '<br><span class="ag-how">' + (Z.runeHow ? Z.runeHow(k)[0] : esc(L(MR[k].d))) + "</span></li>").join("") + "</ul>";
+    /* W15 Runen: Bewegungs-Runen sind ab dem Fund immer aktiv (kein Gürtelplatz) – sichtbar als „aktiv“ */
+    if (mv.length) h += "<h4>" + L(["Bewegungs-Runen", "Movement runes"]) + ' <small class="hinweis">' + L(["immer aktiv, kein Gürtelplatz nötig", "always active, no belt slot needed"]) + '</small></h4><ul class="ag-liste ag-bew">' + mv.map(k => '<li class="rn-aktiv"><b style="color:' + MR[k].col + '">ᛟ ' + esc(L(MR[k].n)) + '</b> <span class="ag-aktiv">✓ ' + L(["aktiv", "active"]) + "</span>" + (frei[k] || Z.runeAll ? "" : ' <small class="hinweis">' + L(["nur dieser Lauf", "this run only"]) + "</small>") + '<br><span class="ag-how">' + (Z.runeHow ? Z.runeHow(k)[0] : esc(L(MR[k].d))) + '</span><br><small class="ag-rd">' + esc(L(MR[k].d)) + "</small></li>").join("") + "</ul>";
     return h;
   }
   /* Ezekiel selbst: Leben, Tränke, Werte, Segen & Lied, Pakte, Fluch, Paarungen */
@@ -1399,7 +1454,10 @@
   /* ---------- Lager: Figuren ---------- */
   /* Sprechblase über einer Figur im Lager */
   const bubble = $("#bubble"); let bubbleT = 0, bubbleAt = null;
-  ui.say = (wx, wy, who, txt, ms) => { bubble.innerHTML = (who ? "<b>" + esc(who) + "</b>" : "") + esc(txt); bubble.hidden = false; bubbleAt = [wx, wy]; bubbleT = (ms || 4200) / 1000; };
+  ui.say = (wx, wy, who, txt, ms) => { bubble.innerHTML = (who ? "<b>" + esc(who) + "</b>" : "") + esc(txt); bubble.hidden = false; bubbleAt = [wx, wy]; bubbleT = (ms || 4200) / 1000;
+    /* W11 R25 (nur Optik): gemaltes Porträt des Sprechers (figuren.js, Z.portraet), Ausdruck passend zum Satz */
+    const pu = who && Z.portraet ? Z.portraet(who, txt) : null; bubble.classList.toggle("mit-bild", !!pu);
+    if (pu) { const im = document.createElement("img"); im.className = "portraet"; im.alt = ""; im.src = pu; bubble.prepend(im); } };
   /* steht unter zoom (--hud): Bildschirmkoordinaten durch den Zoom teilen und die Blase im sichtbaren Bereich halten */
   function bubbleTick(dt) {
     if (bubble.hidden) return; bubbleT -= dt; if (bubbleT <= 0 || ui.modalOpen) { bubble.hidden = true; return; }
@@ -1460,7 +1518,11 @@
     openModal("<h2>" + esc(t("forge")) + ' <span class="bank">' + U.fmt(M.shards) + " ◆ " + esc(t("shards")) + "</span></h2>" + '<p class="hinweis">' + L(["Jede Waffe, die du einmal getragen hast, kann hier geschärft werden. Fundglück macht sie in der Feste häufiger. Finden musst du sie trotzdem.", "Any weapon you have carried once can be sharpened here. Find luck makes it more common in the keep. You still have to find it."]) + "</p>" + body + '<div class="knoepfe"><button data-act="close">' + esc(t("close")) + "</button></div>", { cls: "breit" });
     drawIcons();
   };
-  function drawIcons() { modal.querySelectorAll(".ico[data-icon]").forEach(el => { const cv = document.createElement("canvas"); cv.width = 64; cv.height = 64; const c = cv.getContext("2d"); c.scale(2, 2); Z.drawIcon(c, el.dataset.icon, 16, 17, 22, el.dataset.col); el.appendChild(cv); }); }
+  /* W11 R26 (nur Optik): Fundbuch-Gegner und -Bosse mit gemalten Bildern der echten Figuren (figuren.js) – unbekannte als Schattenriss */
+  function drawBeasts() { if (!Z.gegnerBild) return; modal.querySelectorAll(".ico.vieh").forEach(el => { try { const bo = el.dataset.boss, d = bo ? Z.BOSSDEF[bo] : Z.ENEMIES[el.dataset.gegner]; if (!d) return;
+    const kn = el.dataset.k === "1", bp = bo && kn && Z.bossPortraet ? Z.bossPortraet(d) : null, im = document.createElement("img"); im.alt = "";
+    im.src = bp || Z.gegnerBild(d, { w: 96, h: 96, dunkel: !kn, key: bo || el.dataset.gegner }).toDataURL(); el.appendChild(im); } catch (e) { console.error(e); } }); }
+  function drawIcons() { drawBeasts(); modal.querySelectorAll(".ico[data-icon]").forEach(el => { const cv = document.createElement("canvas"); cv.width = 64; cv.height = 64; const c = cv.getContext("2d"); c.scale(2, 2); Z.drawIcon(c, el.dataset.icon, 16, 17, 22, el.dataset.col); el.appendChild(cv); }); }
   actions.forgeTab = i => ui.forge(i);
   actions.wlvl = id => { const M = Z.meta, d = Z.WEAPONS[id] || Z.SKILLS[id], l = M.wlvl[id] || 0, c = lvlCost(d, l); if (M.shards < c || l >= 5) return; M.shards -= c; M.wlvl[id] = l + 1; Z.saveMeta(); A.play("anvil", { vol: 0.7 }); ui.forge(); };
   actions.luck = id => { const M = Z.meta, l = M.luck[id] || 0, c = luckCost(l); if (M.shards < c || l >= 3) return; M.shards -= c; M.luck[id] = l + 1; Z.saveMeta(); A.play("gem", { vol: 0.6 }); ui.forge(); };
@@ -1486,9 +1548,9 @@
         body += '<div class="zeile' + (found ? "" : " unbekannt") + '"><span class="ico" data-icon="' + d.icon + '" data-col="' + (found ? d.col : "#3a3236") + '"></span><div><b>' + (found ? esc(L(d.n)) : "???") + "</b><small>" + (found ? esc(L(d.d)) : esc(t("unknown"))) + '</small><small class="fund">' + esc(L(Z.FIND[d.find].n)) + " · " + esc(t("findChance")) + " ≈ " + ch + (d.only ? " · " + L(["Orte: ", "Places: "]) + d.only.map(o => Z.BOSSDEF[o] && !Z.BIOMES[o] && !Z.ARENAS[o] ? L(Z.BOSSDEF[o].n) : Z.areaName(o)).join(", ") : "") + (d.tags ? " · " + d.tags.join(", ") : "") + "</small></div></div>";
       }
     } else if (codexTab === 2) {
-      for (const id in Z.ENEMIES) { if (id === "puppe" || id === "glutlingKlein") continue; const d = Z.ENEMIES[id], n = M.seen[id] || 0; body += '<div class="zeile' + (n ? "" : " unbekannt") + '"><div><b>' + (n ? esc(L(d.n)) : "???") + "</b><small>" + (n ? L(["Erschlagen: ", "Slain: "]) + n + " · " + d.atks.length + L([" Angriffe", " attacks"]) + (d.undead ? L([" · untot", " · undead"]) : "") + (d.demon ? L([" · Dämon", " · demon"]) : "") + (d.front ? L([" · Schild vorn – von hinten angreifen", " · shield in front – attack from behind"]) : "") : "") + "</small></div></div>"; }
+      for (const id in Z.ENEMIES) { if (id === "puppe" || id === "glutlingKlein") continue; const d = Z.ENEMIES[id], n = M.seen[id] || 0; body += '<div class="zeile' + (n ? "" : " unbekannt") + '"><span class="ico vieh" data-gegner="' + id + '" data-k="' + (n ? 1 : 0) + '"></span><div><b>'  + (n ? esc(L(d.n)) : "???") + "</b><small>" + (n ? L(["Erschlagen: ", "Slain: "]) + n + " · " + d.atks.length + L([" Angriffe", " attacks"]) + (d.undead ? L([" · untot", " · undead"]) : "") + (d.demon ? L([" · Dämon", " · demon"]) : "") + (d.front ? L([" · Schild vorn – von hinten angreifen", " · shield in front – attack from behind"]) : "") : "") + "</small></div></div>"; }
     } else if (codexTab === 3) {
-      for (const id in Z.BOSSDEF) { if (id === "nezna") continue; const d = Z.BOSSDEF[id], b = M.bosses[id]; body += '<div class="zeile' + (b ? "" : " unbekannt") + '"><div><b>' + (b ? esc(L(d.n)) : "???") + "</b><small>" + (b ? esc(L(d.title || ["", ""])) + " · " + L(["Begegnet ", "Met "]) + b.seen + "× · " + L(["Besiegt ", "Defeated "]) + b.won + "×" : "") + "</small></div></div>"; }
+      for (const id in Z.BOSSDEF) { if (id === "nezna") continue; const d = Z.BOSSDEF[id], b = M.bosses[id]; body += '<div class="zeile' + (b ? "" : " unbekannt") + '"><span class="ico vieh boss" data-boss="' + id + '" data-k="' + (b ? 1 : 0) + '"></span><div><b>'  + (b ? esc(L(d.n)) : "???") + "</b><small>" + (b ? esc(L(d.title || ["", ""])) + " · " + L(["Begegnet ", "Met "]) + b.seen + "× · " + L(["Besiegt ", "Defeated "]) + b.won + "×" : "") + "</small></div></div>"; }
     } else if (codexTab === 4) {
       for (const k of ["tiefe", "glut", "himmel", "alle"]) { const got = M.endings[k]; body += '<div class="zeile' + (got ? "" : " unbekannt") + '"><div><b>' + (got ? esc(L(TX.endings[k][0])) : "???") + "</b><small>" + (got ? L(TX.endings[k][1]).slice(0, 160).replace(/<br>/g, " ") + " …" : k === "alle" ? L(["Erreiche alle drei Enden.", "Reach all three endings."]) : L(["Ein Ende der Feste. Welcher Weg führt dorthin?", "An ending of the keep. Which path leads there?"])) + "</small></div></div>"; }
     } else {
@@ -1612,6 +1674,21 @@
     return '<div class="stats"><div><b>' + (Z.stats.kills || 0) + "</b>" + esc(t("kills")) + "</div><div><b>" + fmtTime(run.time) + "</b>" + esc(t("time")) + "</div><div><b>" + U.fmt(Z.stats.gold || 0) + "</b>" + esc(t("gold")) + "</div><div><b>" + (Z.stats.parries || 0) + "</b>" + esc(t("parries")) + "</div><div><b>" + run.shardsBank + "</b>" + esc(t("shardsKept")) + "</div>" + (P && P.shards ? "<div><b>" + P.shards + "</b>" + esc(t("shardsLost")) + "</div>" : "") + "</div>" +
       '<p class="hinweis">' + esc(t("reached")) + ": " + (run.route || []).map(r => esc(Z.areaName(r))).join(" → ") + "</p>";
   }
+  /* W11 R27 (nur Optik): Laufbilanz (Tod, Umkehr, Sieg) schmücken – gemaltes Siegel über dem Titel (figuren.js Z.siegelURL),
+     roter bzw. goldener Schein, Kacheln erscheinen nacheinander, leere Werte treten zurück. Greift, sobald die Bilanz im
+     Fenster steht (auch aus der Warteschlange oder von anderen Modulen umhüllt). */
+  new MutationObserver(() => { try {
+    const bx = modal.querySelector(".mbox"), bl = bx && bx.querySelector(".bilanz"); if (!bl || bx.classList.contains("geschmueckt")) return;
+    bx.classList.add("geschmueckt"); const sieg = !!bx.querySelector("h2.ende"), h2 = bx.querySelector("h2"), um = !sieg && h2 && h2.textContent === L(["Umgekehrt", "Turned back"]);
+    bx.classList.add(sieg ? "bilanz-sieg" : "bilanz-tod");
+    const sch = document.createElement("div"); sch.className = "bilanz-schein"; bx.prepend(sch);
+    if (Z.siegelURL && h2) { const im = document.createElement("img"); im.className = "bilanz-siegel"; im.alt = ""; im.src = sieg ? Z.siegelURL("sieg", { stufe: "gold", band: true }) : um ? Z.siegelURL("tor", { stufe: "silber" }) : Z.siegelURL("tod", { stufe: "blut", band: true }); h2.before(im); }
+    /* R28: getragener Titel des Spielers unter der Überschrift */
+    { const tt = Z.achTitel ? Z.achTitel() : ""; if (tt && h2) { const p = document.createElement("p"); p.className = "bilanz-titel"; p.innerHTML = "Ezekiel · <b>„" + esc(tt) + "“</b>"; h2.after(p); } }
+    /* R28: Fenster beginnt oben (Siegel und Titel sichtbar), auch wenn der Fokus auf dem Knopf unten liegt */
+    for (const ms of [0, 60, 250]) setTimeout(() => { bx.scrollTop = 0; modal.scrollTop = 0; }, ms);
+    bl.querySelectorAll(".bk").forEach((k, i) => { k.style.setProperty("--i", i); const v = (k.querySelector("b") || {}).textContent || ""; if (/^(0|0 m|0:00)$/.test(v.trim())) k.classList.add("leer"); });
+  } catch (e) { console.error(e); } }).observe(modal, { childList: true });
   ui.deathScreen = o => {
     openModal("<h2>" + esc(o && o.abort ? L(["Umgekehrt", "Turned back"]) : t("died")) + '</h2><p class="unter">' + esc(o && o.abort ? L(["Ezekiel kehrt um. Ohne ein Wort.", "Ezekiel turns back. Without a word."]) : t("diedSub")) + "</p>" + statsHTML() + gnadeNote() + '<p class="tipp">' + esc(L(Z.R.pick(TX.tips))) + '</p><div class="knoepfe"><button data-act="toCamp" autofocus>' + esc(t("camp")) + "</button></div>", { cls: "breit todfenster", noEsc: true });
   };

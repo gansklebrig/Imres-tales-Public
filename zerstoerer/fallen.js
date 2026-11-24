@@ -23,7 +23,7 @@
   const tier = () => (Z.run ? Z.run.tier || 0 : 0);
   const sc = n => n * (1 + tier() * 0.35);
   const amb = (b, n) => "amb/" + b + (1 + ((Math.random() * n) | 0)) + ".mp3";
-  function play(name, x, y, o) { if (!near(x, y, 520)) return; A.play(name, Object.assign({ x, y }, o || {})); }
+  function play(name, x, y, o) { if (!near(x, y, 520)) return; A.play(name, Object.assign({ x, y, warn: true }, o || {})); } /* R19: Fallen = Warnklänge (immer hörbar) */
   /* Treffer am Spieler: Schaden als Anteil am Leben (über parcours.js skaliert), Status nur bei echtem Treffer */
   function hp(frac, x, o) { const P = P0(); if (!P) return false; return Z.hurtPlayer(api.dmgFrac(frac), Object.assign({ x, kb: 180, kbUp: 200, parryable: false, trap: true }, o || {})); }
   function he(tr, e, dmg, o, st) {

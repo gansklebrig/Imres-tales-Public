@@ -1983,6 +1983,7 @@
     props = []; lvRef = lv; SPR.clear();
     if (!lv || lv.hub || lv.arena || lv.passage || !lv.cells) return;
     const set = SETS[lv.biome]; if (!set) return;
+    try { if (Z.gfx && Z.gfx.prepTiles && Z.level === lv) Z.gfx.prepTiles(); } catch (e) { console.error(e); } /* W11 R44: Fenster-/Arena-Öffnungen schon bei der Platzierung kennen – Wandschmuck (Banner, Wappen, Schilde, Laternen) nie frei vor dem Fenster */
     const R = Z.Rng(((lv.seed || 4) * 9301 + 49297) >>> 0);
     const g = lv.get, sky = (x, y) => Z.gfx.sky && Z.gfx.sky[y * lv.W + x];
     const sp = Z.spuren ? Z.spuren() : [];
@@ -2081,6 +2082,7 @@
   function warmTick() { let budget = 3; while (WARM.length && budget > 0) { const w = WARM.shift(); if (w[0] === "fg") { if (!simple()) fgSprite(w[1], w[2], w[3]); budget -= 3; } else { spriteOf(w[0], w[1]); budget--; } } }
   const load0 = Z.loadArea;
   Z.loadArea = function () { const r = load0.apply(this, arguments); try { setup(Z.level); initBreak(); } catch (e) { console.error(e); } return r; };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "ausstattung", save: () => ({ props, lvRef }), load: s => { props = s.props; lvRef = s.lvRef; UNR = []; initBreak(); } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
 
   /* ======================= Zeichnen ======================= */
   function paint(c, p, t, x, y) {
@@ -2329,7 +2331,7 @@
       c.strokeStyle = "#160e0b"; c.lineWidth = 4; for (let k = -6; k < 10; k++) { c.beginPath(); c.moveTo(8 + k * 24, 44); c.lineTo(8 + k * 24 + 190, H + 20); c.stroke(); c.beginPath(); c.moveTo(W - 8 - k * 24, 44); c.lineTo(W - 8 - k * 24 - 190, H + 20); c.stroke(); }
       for (let r = 0; r < 7; r++) for (let q = 0; q < 7; q++) { const x = 20 + q * 24 + (r % 2) * 12, y = 66 + r * 24; if (x > W - 14 || R() < 0.2) continue; E(c, x, y, 6, 6, "#0c0a08"); E(c, x, y, 2.6, 2.6, R() < 0.5 ? "#14100a" : "#1a0c0c"); E(c, x - 2, y - 2, 1.4, 1.4, "rgba(255,220,180,.07)"); }
     } },
-    gitter: { W: 170, H: 260, paint(c, R, W, H) {
+    gitter: { W: 170, H: 260, rimA: 0.14, paint(c, R, W, H) { /* R24: dünne Stäbe – schwaches Randlicht, sonst wirken sie grau-oliv statt als Silhouette */
       const y0 = H * 0.36; c.fillStyle = lg(c, 0, y0, 0, y0 + 10, [D4, D1]); c.fillRect(20, y0, W - 40, 10); c.fillRect(20, y0 + 80, W - 40, 7);
       for (let x = 30, k = 0; x < W - 30; x += 18, k++) { c.fillStyle = lg(c, x, 0, x + 6, 0, [D4, D2, D0]); if (k === 3) { c.beginPath(); c.moveTo(x, y0); c.quadraticCurveTo(x + 14, y0 + 60, x, H); c.lineTo(x + 6, H); c.quadraticCurveTo(x + 20, y0 + 60, x + 6, y0); c.fill(); } else c.fillRect(x, y0 - 14, 6, H); E(c, x + 3, y0 - 14, 4, 3, D3); }
       for (let x = 30; x < W - 30; x += 18) { rivet(c, x + 3, y0 + 5, 1.6); rivet(c, x + 3, y0 + 83, 1.4); }
@@ -2503,7 +2505,7 @@
     /* Randlicht: Maske minus versetzte Maske → helle Kante oben links */
     const r = mk(); r.c.drawImage(m.cv, 0, 0); r.c.globalCompositeOperation = "source-in"; r.c.fillStyle = RIM[bg] || "#ffc896"; r.c.fillRect(0, 0, r.cv.width, r.cv.height);
     r.c.globalCompositeOperation = "destination-out"; r.c.drawImage(m.cv, 2.6 * RS, 2.2 * RS);
-    m.c.save(); m.c.setTransform(1, 0, 0, 1, 0, 0); m.c.globalCompositeOperation = "source-atop"; m.c.globalAlpha = 0.4; m.c.drawImage(r.cv, 0, 0); m.c.restore();
+    m.c.save(); m.c.setTransform(1, 0, 0, 1, 0, 0); m.c.globalCompositeOperation = "source-atop"; m.c.globalAlpha = d.rimA != null ? d.rimA : 0.4; m.c.drawImage(r.cv, 0, 0); m.c.restore();
     if (d.em) { m.c.save(); d.em(m.c, R, W, H); m.c.restore(); }
     /* weiche Tiefenunschärfe */
     const o = mk(); if ("filter" in o.c) o.c.filter = "blur(" + (1.4 * RS).toFixed(1) + "px)"; o.c.drawImage(m.cv, 0, 0);
@@ -2532,7 +2534,9 @@
       const mid = Math.abs(x + w / 2 - cam.w / 2) / (cam.w * 0.5);
       const al0 = Math.max(0.28, Math.min(1, (mid - 0.15) / 0.55));
       /* nie vor Spieler, Gegnern, Geschossen, Gefahren oder Truhen/Türen: dann fast ganz ausblenden */
-      const al = Z.gfx.fgAlpha ? Z.gfx.fgAlpha("a" + i, x, y, w, h, al0) : al0;
+      let al = Z.gfx.fgAlpha ? Z.gfx.fgAlpha("a" + i, x, y, w, h, al0) : al0;
+      /* W11 R33: über unerkundetem Dunkel (Sichtnebel) tritt der Vordergrund zurück – sonst stehen helle Randkanten im Schwarz */
+      if (Z.sightAt && al > 0.01) { let sv = 0; for (const fy of [0.3, 0.6, 0.9]) sv = Math.max(sv, Z.sightAt(cam.x + x + w / 2, cam.y + y + h * fy)); al *= 0.2 + 0.8 * Math.min(1, sv * 1.3); }
       if (al < 0.01) continue;
       c.save(); c.globalAlpha = al;
       const mir = (kind === "spinnwebe" || kind === "vorhang") && x + w / 2 > cam.w / 2;

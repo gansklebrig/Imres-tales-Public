@@ -297,10 +297,13 @@
       wrap(x, w, xx => {
         /* weicher Schatten/Dunst um das Band */
         glow(c, xx, y, w * 0.6, h * 2.4, body, 0.35, true); c.globalAlpha = 1;
-        for (const [ox, oy2, rx, ry, rr] of puffs) { c.fillStyle = rgba(rr < 0.5 ? body : shade(body, -0.15), 0.55 + rr * 0.3); c.beginPath(); c.ellipse(xx + ox, y + oy2, rx, Math.max(0.8, ry), 0, 0, TAU); c.fill(); }
+        /* R42: weiche Bäusche (elliptischer Verlauf) statt harter Ovale; Schalter off.wolkenweich = alte Fassung */
+        const hart = !!(G.off && G.off.wolkenweich);
+        const se = (x2, y2, rx, ry, col, al) => { if (hart) { c.fillStyle = rgba(col, al); c.beginPath(); c.ellipse(x2, y2, rx, ry, 0, 0, TAU); c.fill(); return; } c.save(); c.translate(x2, y2); c.scale(rx * 1.12, ry * 1.35); const g = c.createRadialGradient(0, 0, 0, 0, 0, 1); g.addColorStop(0, rgba(col, Math.min(1, al * 1.05))); g.addColorStop(0.7, rgba(col, al * 0.8)); g.addColorStop(1, rgba(col, 0)); c.fillStyle = g; c.fillRect(-1, -1, 2, 2); c.restore(); };
+        for (const [ox, oy2, rx, ry, rr] of puffs) se(xx + ox, y + oy2, rx, Math.max(0.8, ry), rr < 0.5 ? body : shade(body, -0.15), 0.55 + rr * 0.3);
         if (litK > 0.05) {
           c.globalCompositeOperation = "lighter";
-          for (const [ox, oy2, rx, ry, rr] of puffs) { c.fillStyle = rgba(litC, (0.12 + rr * 0.22) * litK); c.beginPath(); c.ellipse(xx + ox + (rr - 0.5) * 4, y + oy2 + (low ? ry * 0.55 : -ry * 0.55), rx * 0.8, Math.max(0.5, ry * 0.32), 0, 0, TAU); c.fill(); }
+          for (const [ox, oy2, rx, ry, rr] of puffs) se(xx + ox + (rr - 0.5) * 4, y + oy2 + (low ? ry * 0.55 : -ry * 0.55), rx * 0.8, Math.max(0.5, ry * 0.32), litC, (0.12 + rr * 0.22) * litK * (hart ? 1 : 1.2));
           c.globalCompositeOperation = "source-over";
         }
       });
@@ -448,10 +451,17 @@
   /* Band-Sprite für ziehende Wolken */
   const BANDS = new Map();
   function bandSpr(b) {
-    const key = b.body + b.litC + (b.litK * 10 | 0) + sky.k; let s = BANDS.get(key); if (s) return s;
+    const key = b.body + b.litC + (b.litK * 10 | 0) + sky.k + (G.off && G.off.wolkenweich ? "h" : ""); let s = BANDS.get(key); if (s) return s;
     const cv = document.createElement("canvas"); cv.width = 256; cv.height = 32; const c = cv.getContext("2d");
     const R = Z.Rng(key.length * 97 + 13), lowLit = sky.k === "abend" || sky.k === "morgen";
-    for (let k = 0; k < 9; k++) { const x = 20 + R() * 216, w = 30 + R() * 70, h = 4 + R() * 7; c.fillStyle = rgba(b.body, 0.35 + R() * 0.25); c.beginPath(); c.ellipse(x, 16 + (R() - 0.5) * 6, w / 2, h / 2, 0, 0, TAU); c.fill(); if (b.litK > 0.05) { c.fillStyle = rgba(b.litC, (0.2 + R() * 0.3) * b.litK); c.beginPath(); c.ellipse(x, 16 + (lowLit ? h * 0.35 : -h * 0.35), w / 2 * 0.8, 1, 0, 0, TAU); c.fill(); } }
+    if (G.off && G.off.wolkenweich) { for (let k = 0; k < 9; k++) { const x = 20 + R() * 216, w = 30 + R() * 70, h = 4 + R() * 7; c.fillStyle = rgba(b.body, 0.35 + R() * 0.25); c.beginPath(); c.ellipse(x, 16 + (R() - 0.5) * 6, w / 2, h / 2, 0, 0, TAU); c.fill(); if (b.litK > 0.05) { c.fillStyle = rgba(b.litC, (0.2 + R() * 0.3) * b.litK); c.beginPath(); c.ellipse(x, 16 + (lowLit ? h * 0.35 : -h * 0.35), w / 2 * 0.8, 1, 0, 0, TAU); c.fill(); } } BANDS.set(key, cv); return cv; }
+    /* R42: weiche Wolkenbänder statt harter Ovale – Leib aus weichen Bäuschen (elliptische Verläufe), Licht der Stunde nur
+       innerhalb des Leibs (source-atop) an der Sonnen-/Mondseite, feine Schlieren; seitlich weich auslaufend */
+    const soft = (x, y, rx, ry, col, a0) => { c.save(); c.translate(x, y); c.scale(rx, ry); const g = c.createRadialGradient(0, 0, 0, 0, 0, 1); g.addColorStop(0, rgba(col, a0)); g.addColorStop(0.55, rgba(col, a0 * 0.6)); g.addColorStop(1, rgba(col, 0)); c.fillStyle = g; c.fillRect(-1, -1, 2, 2); c.restore(); };
+    const puffs = []; for (let k = 0; k < 11; k++) { const x = 18 + R() * 220, w = 34 + R() * 70, h = 5 + R() * 6, y = 16 + (R() - 0.5) * 5; puffs.push([x, y, w, h]); soft(x, y, w / 2, h / 2 + 1.5, b.body, 0.5 + R() * 0.25); }
+    if (b.litK > 0.05) { c.globalCompositeOperation = "source-atop"; for (const [x, y, w, h] of puffs) soft(x + (R() - 0.5) * 8, y + (lowLit ? h * 0.45 : -h * 0.45), w * 0.42, h * 0.32 + 1, b.litC, (0.45 + R() * 0.35) * b.litK); c.globalCompositeOperation = "source-over"; }
+    c.globalCompositeOperation = "source-atop"; for (let k = 0; k < 5; k++) { const y = 10 + R() * 12, x = R() * 200; const g = c.createLinearGradient(x, 0, x + 60, 0); g.addColorStop(0, rgba(b.body, 0)); g.addColorStop(0.5, rgba(shade(b.body, -0.25), 0.35)); g.addColorStop(1, rgba(b.body, 0)); c.fillStyle = g; c.fillRect(x, y, 60, 0.8); } c.globalCompositeOperation = "source-over";
+    { const g = c.createLinearGradient(0, 0, 256, 0); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(0.1, "rgba(0,0,0,1)"); g.addColorStop(0.9, "rgba(0,0,0,1)"); g.addColorStop(1, "rgba(0,0,0,0)"); c.globalCompositeOperation = "destination-in"; c.fillStyle = g; c.fillRect(0, 0, 256, 32); c.globalCompositeOperation = "source-over"; }
     BANDS.set(key, cv); return cv;
   }
 
