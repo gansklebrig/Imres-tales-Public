@@ -1153,7 +1153,7 @@
   }
 
   /* ---------- Durchbruch: Bodenboss taucht neben dem Spieler auf ---------- */
-  function breakThrough(e, P) {
+  function breakThrough(e, P, loose) {
     const air = e.def.fly && !e.grounded, bw = e.w, bh = e.h, W = Z.world, b = e.box || AR();
     const fy = air ? P.y - 30 : standY(P);
     if (b.y1 != null && (fy > b.y1 + 8 || fy - bh < b.top - 40)) return false; /* Spieler hat den Wächterraum verlassen */
@@ -1167,7 +1167,7 @@
     const near = side => [reach, reach + 14, reach + 30, reach + 50].map(v => side * v);
     const first = cxOf(e) > pcx(P) ? 1 : -1;
     for (const d of air ? [60, -60, 90, -90, 120, -120] : near(first).concat(near(-first))) {
-      const x = pcx(P) + (air ? (cxOf(e) > pcx(P) ? d : -d) : d); if (x < b.x0 + bw / 2 || x > b.x1 - bw / 2 || !free(x) || !path(x)) continue;
+      const x = pcx(P) + (air ? (cxOf(e) > pcx(P) ? d : -d) : d); if (x < b.x0 + bw / 2 || x > b.x1 - bw / 2 || !free(x) || (!loose && !path(x)) || (loose && !W.los(x, fy - bh / 2, pcx(P), P.y + P.h / 2))) continue;
       FX.burst(cxOf(e), e.y + e.h / 2, 18, { col: [Z.dustCol || "#8a7a70", "#3a3030"], sp: 100, life: 0.6, size: 4, kind: "smoke" });
       tele({ k: "ring", x, y: fy - bh / 2, r: bw / 2 + 16, dur: 0.6, col: e.aura || "#ff6a3a" });
       e.hidden = 0.6; e.invuln = Math.max(e.invuln || 0, 0.6); e.vx = 0; e.vy = 0; e.idle = Math.max(e.idle || 0, 1.0);
@@ -1217,7 +1217,11 @@
       } else s.stuck = 0;
       s.lx = e.x;
       /* Wächterraum nach unten offen (Bot fiel durch Löcher im Boden): der Kampfbereich wächst mit, statt dass der Wächter zurückspringt */
-      if (e.box && e.box.warden && pcx(P) > e.box.x0 - 16 && pcx(P) < e.box.x1 + 16 && P.y + P.h > e.box.y1 && P.y + P.h < e.box.y1 + 260) e.box.y1 = P.y + P.h + 24;
+      if (e.box && e.box.warden && !e.def.fixed) {
+        const bx = e.box, py = P.y + P.h;
+        if (pcx(P) > bx.x0 - 200 && pcx(P) < bx.x1 + 200 && py > bx.y1 && py < bx.y1 + 480) bx.y1 = py + 24;
+        if (py > bx.top && py < bx.y1 + 24) { if (pcx(P) < bx.x0 && pcx(P) > bx.x0 - 200) bx.x0 = pcx(P) - 40; if (pcx(P) > bx.x1 && pcx(P) < bx.x1 + 200) bx.x1 = pcx(P) + 40; }
+      }
       /* Unerreichbar? (zu groß für Durchgänge, Spieler auf Plattform/Gegenseite) – nach 5 s ohne Annäherung bricht der Bodenboss neben dem Spieler durch */
       if (!e.def.fixed && !e.def.keepAway) { /* auch Flieger: der Vrock hing im Bot-Lauf 130 s über einer Decke fest */
         const dd = Math.hypot(pcx(P) - cxOf(e), (P.y + P.h) - feet(e));
@@ -1228,7 +1232,7 @@
         if (blocked || (!e.def.fly && s.noTouch > 8)) s.farT += dt; /* Wand/Decke dazwischen: zählt immer */
         else if (dd > (e.def.fly ? 190 : 150)) { if (s.best == null || dd < s.best - 20) { s.best = dd; s.farT = 0; } else s.farT += dt; } else { s.best = null; s.farT = 0; }
         s.btCd = Math.max(0, (s.btCd || 0) - dt);
-        if (s.farT > (easy() ? 7 : 5) && !s.btCd && !e.mv && (P.onGround || s.farT > 7) && !(e.st.stun > 0)) { if (breakThrough(e, P)) { s.farT = 0; s.best = null; s.btCd = 10; s.btN = (s.btN || 0) + 1; } else s.farT -= 1; }
+        if (s.farT > (easy() ? 7 : 5) && !s.btCd && !e.mv && (P.onGround || s.farT > 7) && !(e.st.stun > 0)) { if (breakThrough(e, P, (s.btFail || 0) >= 2)) { s.farT = 0; s.best = null; s.btCd = 10; s.btN = (s.btN || 0) + 1; s.btFail = 0; } else { s.farT -= 1; s.btFail = (s.btFail || 0) + 1; } }
       }
       /* Wut */
       if (!e.wut && e.hp < e.hpMax * 0.2 && e.hp > 0) enrage(e, P);

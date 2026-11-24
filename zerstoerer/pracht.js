@@ -692,7 +692,7 @@
   function roomPlan(H, dec) {
     const lv = H.lv;
     if (rpLv === lv && rpProps === decProps && rpList) return rpList;
-    rpLv = lv; rpProps = decProps; rpList = [];
+    rpLv = lv; rpProps = decProps; rpList = []; const tRP = performance.now();
     if (lv.hub || lv.arena || !lv.roomFns) return rpList;
     const CW = Z.CW, CH = Z.CH, h3 = H.h3, taken = [];
     const free = (ox, oy, w, h) => !taken.some(t => ox < t[0] + t[2] + 1 && ox + w + 1 > t[0] && oy < t[1] + t[3] + 1 && oy + h + 1 > t[1]);
@@ -715,6 +715,7 @@
         if (hit) { taken.push(hit); rpList.push({ kind, x: hit[0], y: hit[1], w: hit[2], h: hit[3], r: h3(hit[0], hit[1], 904), fn: lv.roomFns[k], fl: !!hit[4] }); got++; }
       }
     }
+    G.rpMs = +(performance.now() - tRP).toFixed(2);
     return rpList;
   }
   function setPieces(H) {
@@ -964,7 +965,7 @@
     altarbild(c, x, y, w, h, H, r) {
       const cx = x + w / 2, top = y + 4, bot = y + h - 4, cw = 26, ww = 13, gold = "#b8903a";
       sh(c, x + 6, top + 2, w - 10, bot - top, 0.45);
-      const panel = (px, pw, py, pointed) => { c.fillStyle = "#6a4a1a"; if (pointed) lancet(c, px - 1.5, py - 1.5, pw + 3, bot + 1.5); else c.rect(px - 1.5, py - 1.5, pw + 3, bot - py + 3); c.fill(); c.save(); c.beginPath(); if (pointed) lancet(c, px, py, pw, bot); else c.rect(px, py, pw, bot - py); c.clip(); const g = c.createLinearGradient(0, py, 0, bot); g.addColorStop(0, "#c8a048"); g.addColorStop(1, "#7a5a22"); c.fillStyle = g; c.fillRect(px, py, pw, bot - py); c.fillStyle = "rgba(255,240,200,.12)"; for (let k = 0; k < 12; k++) c.fillRect(px + H.h3(k, px | 0, 1450) * pw, py + H.h3(k, py | 0, 1451) * (bot - py), 1, 1); return () => c.restore(); };
+      const panel = (px, pw, py, pointed) => { c.fillStyle = "#6a4a1a"; if (pointed) lancet(c, px - 1.5, py - 1.5, pw + 3, bot + 1.5); else c.rect(px - 1.5, py - 1.5, pw + 3, bot - py + 3); c.fill(); c.save(); c.beginPath(); if (pointed) lancet(c, px, py, pw, bot); else c.rect(px, py, pw, bot - py); c.clip(); const g = c.createLinearGradient(0, py, 0, bot); g.addColorStop(0, "#a8883c"); g.addColorStop(1, "#6a4a1c"); c.fillStyle = g; c.fillRect(px, py, pw, bot - py); c.fillStyle = "rgba(255,240,200,.12)"; for (let k = 0; k < 12; k++) c.fillRect(px + H.h3(k, px | 0, 1450) * pw, py + H.h3(k, py | 0, 1451) * (bot - py), 1, 1); return () => c.restore(); };
       let done = panel(cx - cw / 2, cw, top, true);
       c.fillStyle = "#f0d890"; c.globalAlpha = 0.6; c.beginPath(); c.arc(cx, top + 15, 6.5, 0, TAU); c.fill(); c.globalAlpha = 1;
       c.fillStyle = "#e8c8a0"; c.beginPath(); c.arc(cx, top + 15, 3, 0, TAU); c.fill();

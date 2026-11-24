@@ -1973,6 +1973,8 @@
     truemmerhalle: { scn: [{ f: [["truemmer", -1.6], ["statue", 0], ["truemmer", 1.6]] }], floor: ["truemmer", "statue", "knochen"], wall: ["ranken_w"] },
     schatz: { scn: [{ f: [["truhe", -1.2], ["kisten", 1.2]] }], floor: ["truhe", "kisten"], wall: ["wappen", "wandleuchter"] }
   });
+  /* Schlüsselstück je Raumtyp: steht gut sichtbar nahe der Raummitte (Prop-Feld key: true – z. B. für Lichtinseln in pracht.js) */
+  const ROOMKEY = (Z.ROOMKEY = {"wachstube": "wachtisch", "stall": "trog", "unterstand": "amboss", "uebungsplatz": "zielscheibe", "schuppen": "karren", "kueche": "kessel", "weinkeller": "weinfass", "vorratskammer": "vorratsregal", "gesindestube": "kuechentisch", "brunnenkammer": "brunnen", "bankettsaal": "esstisch", "anrichte": "krugreihe", "bibliothek": "buecherregal", "kapelle": "statue", "ahnengalerie": "buestensaeule", "schlafgemach": "kamin", "ruestkammer": "ruestung", "geschuetzstand": "kanone", "kaserne": "wachtisch", "schuetzenstand": "zielscheibe", "waerterstube": "wachtisch", "zellenblock": "bodenkaefig", "folterkammer": "streckbank", "gebeinhaus": "knochenhaufen", "lagerhaus": "kisten", "bootsschuppen": "boot", "taverne": "weinfass", "fischerkate": "fischkorb", "zollstube": "wachtisch", "glockenstube": "grosseglocke", "uhrwerk": "winde", "uhrmacher": "uhrtisch", "taubenschlag": "kisten", "seilkammer": "winde", "brutkammer": "eiersack", "beutelager": "knochenhaufen", "pilzgrotte": "pilzring", "kristallhoehle": "kristall", "essenhalle": "esse", "giesserei": "schmelztiegel", "glut:giesserei": "schmelztiegel", "erzlager": "kohlenkarren", "waffenkammer": "waffenstaender", "runenkammer": "runensteine", "wehrturm": "ballista", "speiergalerie": "wasserspeier", "tempel": "goetze", "opferstaette": "opferschale", "wrackhalde": "wrackkiste", "korallengarten": "korallen", "schrein": "duergarstatue", "schlackehalde": "schlacke", "sturm:kapelle": "statue", "giftgarten": "giftpilze", "sturm:wachstube": "truemmer", "truemmerhalle": "statue", "schatz": "truhe"});
   const roomSet = (lv, cell) => cell && cell.fn ? ROOMSET[lv.biome + ":" + cell.fn] || ROOMSET[cell.fn] || null : null;
   let props = [], lvRef = null;
   const LAYER = { w: 0, c: 2, f: 1 };
@@ -2005,6 +2007,14 @@
       /* alle Bodenplätze dieser Zelle (3 Kacheln Kopffreiheit, kein Steg) */
       const spots = []; for (let y = oy + 1; y < oy + CH - 1; y++) for (let x = ox + 1; x < ox + CW - 1; x++) if (floorOK(x, y, 1)) spots.push([x, y]);
       let scene = false;
+      /* Schlüsselstück zuerst: Bodenplatz möglichst nah an der Raummitte (und weit unten im Raum, wo man läuft) */
+      let keyed = false;
+      const kk = RS && (ROOMKEY[lv.biome + ":" + cell.fn] || ROOMKEY[cell.fn]);
+      if (kk && K[kk] && spots.length > 4) {
+        const w = K[kk].w || 1, cx = ox + CW / 2;
+        const cand = spots.filter(([x, y]) => floorOK(x, y, w, head(kk)) && !blocked(x, y, w)).sort((a, b) => (Math.abs(a[0] - cx) - a[1] * 0.3) - (Math.abs(b[0] - cx) - b[1] * 0.3));
+        if (cand.length) { const [x, y] = cand[0]; mk(kk, x, y, { g: 1, key: true }); keyed = true; }
+      }
       /* Szene: mehrere Stücke als Gruppe */
       if (scnL && spots.length > 6 && R() < (RS ? 0.95 : 0.75)) {
         for (let tries = 0; tries < 40 && !scene; tries++) {
@@ -2023,7 +2033,7 @@
         }
       }
       /* Einzelstücke am Boden */
-      let n = (scene ? 0 : 1) + (R() < 0.6 ? 1 : 0) + (R() < 0.3 ? 1 : 0);
+      let n = (scene ? 0 : 1) + (R() < 0.6 ? 1 : 0) + (R() < 0.3 ? 1 : 0) - (keyed ? 1 : 0); /* Schlüsselstück zählt mit (gleiche Stückzahl) */
       for (let tries = 0; tries < 40 && n > 0 && spots.length; tries++) {
         const kind = R.pick(fl), w = K[kind].w || 1, [x, y] = R.pick(spots);
         if (!floorOK(x, y, w, head(kind)) || blocked(x, y, w)) continue;

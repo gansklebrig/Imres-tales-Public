@@ -950,8 +950,11 @@
       if (L.includes("ende")) s += nbs(c).length <= 1 ? 2 : -0.5;
       for (const o of nbs(c)) if (o.fn && d.neben.includes(o.fn)) s += 2.5;
       if ((c._sp || 0) < 6) s -= 3; /* zu wenig Boden für Möbel */
+      /* Partnerräume (Küche, Bankettsaal, Essenhalle …) lieber dort, wo verbundene freie Nachbarn Platz für ihre Nebenräume lassen */
+      if (partner.has(id)) s += Math.min(3, nbs(c).filter(o => !o.fn && free.includes(o) && (o._sp || 0) >= 6).length) * 0.9;
       return s;
     };
+    const partner = new Set(); for (const id in defs) for (const q of defs[id].neben) partner.add(q);
     /* jede Raumart einmal, dann zweite Runde für die Mehrfach-Arten; Nachbar-Regeln greifen, weil Partner früher stehen */
     /* große Karten: von jeder Mehrfach-Art entsprechend mehr (wie ein größeres Gebäude) */
     const ids = Object.keys(defs), maxAssign = Math.ceil(free.length * 0.75), mul = Math.max(1, free.length / 12);
@@ -961,7 +964,10 @@
       for (const id of ids) {
         if ((used.get(id) || 0) >= cap(id) || (round > 0 && (used.get(id) || 0) > round) || n >= maxAssign) continue;
         let best = null, bs = -1e9;
-        for (const c of free) { if (c.fn) continue; const v = score(c, id); if (v > bs) { bs = v; best = c; } }
+        /* Nebenräume (Vorratskammer, Anrichte, Gießerei …) zuerst direkt neben einem Partner; ab der zweiten Runde nur noch dort */
+        const nb = defs[id].neben, adj = nb.length ? free.filter(c => !c.fn && nbs(c).some(o => o.fn && nb.includes(o.fn))) : [];
+        const pool = adj.length ? adj : nb.length && round > 0 ? [] : free;
+        for (const c of pool) { if (c.fn) continue; const v = score(c, id); if (v > bs) { bs = v; best = c; } }
         if (!best || bs < -1) continue;
         best.fn = id; used.set(id, (used.get(id) || 0) + 1); n++;
       }
@@ -970,6 +976,18 @@
   }
   Z.assignRooms = assignRooms;
   Z.roomFnDef = (biome, id) => (ROOMFN[biome] && ROOMFN[biome][id]) || ROOMSPEC[id] || null;
+  /* ÖFFENTLICHE ABFRAGE (für Grafik, Wandschmuck, Licht, Klang …):
+     Z.raumTyp(cx, cy)        → Raumtyp der Rasterzelle (Zellkoordinaten, je 24×14 Kacheln) oder null
+     Z.raumTypAt(tx, ty)      → dasselbe für eine Kachelposition
+     Rückgabe: { id, name: [de, en], col, ico, lage, neben, cell }  (id z. B. "kueche", "bibliothek", "zellenblock",
+     Sonderräume "geheim", "schatz", "grube"). Das Feld liegt auch direkt an der Zelle: Z.level.cells["cx,cy"].fn;
+     lv.roomFns = { "cx,cy": id }. Schlüsselstücke der Ausstattung tragen in Z.ausstattung() das Feld key: true. */
+  Z.raumTyp = (cx, cy) => {
+    const lv = Z.level, c = lv && lv.cells && lv.cells[cx + "," + cy]; if (!c || !c.fn) return null;
+    const d = Z.roomFnDef(lv.biome, c.fn); if (!d) return null;
+    return { id: c.fn, name: d.n, col: d.col, ico: d.ico, lage: d.lage, neben: d.neben, cell: c };
+  };
+  Z.raumTypAt = (tx, ty) => Z.raumTyp(Math.floor(tx / CW), Math.floor(ty / CH));
 
   /* Baut eine Karte für ein Gebiet. Gibt {w,h,tiles,spawns,...} in Kacheln zurück. */
   Z.genLevel = function (biomeId, seed, opts) {
