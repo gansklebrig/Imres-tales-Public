@@ -1442,7 +1442,7 @@
   function carve(c, k, x, y, r, lit, col) {
     c.fillStyle = "rgba(255,240,220,.22)"; shape(c, k, x + 0.7, y + 0.7, r); c.fill();
     c.fillStyle = "#1e181c"; shape(c, k, x, y, r); c.fill();
-    if (lit) { c.fillStyle = col; shape(c, k, x, y, r * 0.78); c.fill(); if (!lean()) { c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = 0.5; c.fillStyle = col; shape(c, k, x, y, r * 1.25); c.fill(); c.restore(); } }
+    if (lit) { c.fillStyle = col; shape(c, k, x, y, r * 0.78); c.fill(); c.strokeStyle = "rgba(30,20,24,.6)"; c.lineWidth = 0.6; c.stroke(); if (!lean()) { c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = 0.5; c.fillStyle = col; shape(c, k, x, y, r * 1.25); c.fill(); c.restore(); } }
   }
   function tablet(c, ev, t, RZ, s) {
     const n = ev.levers.length, w = 16 + n * 15, h = 32, x0 = ev.x - w / 2, y0 = ev.y - 44;
@@ -1472,23 +1472,26 @@
   }
   function lever(c, ev, i, t, RZ, s) {
     const l = ev.levers[i], x = l.x, y = l.y, idx = ev.seq.indexOf(i), ok = ev.done || (idx >= 0 && idx < ev.prog && l.down), wrong = l.down && !ok && ev.resetT > 0;
+    const py = y - 27, col = RZ[l.sym].col;
+    /* R31: Plakette sitzt auf einem Eisenpfosten hinter dem Hebel (hängt nicht mehr frei in der Luft) */
+    c.fillStyle = "#2a2428"; c.fillRect(x - 1.2, py + 5, 2.4, y - 6 - (py + 5)); c.fillStyle = "#5a5258"; c.fillRect(x - 1.2, py + 5, 0.8, y - 6 - (py + 5));
+    c.fillStyle = "#5a3e18"; c.fillRect(x - 6.5, py - 6.5, 13, 13);
+    const pg = c.createLinearGradient(0, py - 6, 0, py + 6); pg.addColorStop(0, "#e8c070"); pg.addColorStop(1, "#8a5e20"); c.fillStyle = pg; c.fillRect(x - 6, py - 6, 12, 12);
+    c.fillStyle = "#6a4a1a"; c.fillRect(x - 6, py + 5, 12, 1); c.fillStyle = "#fff0c0"; c.fillRect(x - 6, py - 6, 12, 0.7);
+    c.fillStyle = "#7a5a2a"; for (const [dx, dy] of [[-4.6, -4.6], [4.6, -4.6], [-4.6, 4.2], [4.6, 4.2]]) c.fillRect(x + dx - 0.5, py + dy - 0.5, 1, 1);
+    c.fillStyle = "#3a2410"; shape(c, l.sym, x, py, 3.6); c.fill();
+    /* R31: leuchtendes Zeichen mit dunkler Kontur – auch das cremefarbene Kreis-Zeichen hebt sich vom Messing ab */
+    if (ok || ev.done) { c.fillStyle = col; shape(c, l.sym, x, py, 2.8); c.fill(); c.strokeStyle = "#3a2410"; c.lineWidth = 0.7; c.stroke(); }
+    if (!lean() && (ok || wrong)) { c.save(); c.globalCompositeOperation = "lighter"; const rgb = wrong ? "255,70,50" : col === "#efe6d0" ? "255,236,200" : hexRgb(col); const g = c.createRadialGradient(x, py, 1, x, py, 16); g.addColorStop(0, "rgba(" + rgb + "," + (wrong ? 0.6 : 0.45) + ")"); g.addColorStop(1, "rgba(" + rgb + ",0)"); c.fillStyle = g; c.fillRect(x - 16, py - 16, 32, 32); c.restore(); }
     /* Grundplatte mit Schlitz und Nieten */
     c.fillStyle = "#2a2226"; c.fillRect(x - 8, y - 6, 16, 6); c.fillStyle = "#4a4044"; c.fillRect(x - 7, y - 5.5, 14, 4.5);
     c.fillStyle = "#141012"; c.fillRect(x - 5, y - 4, 10, 1.4);
     c.fillStyle = "#7a6e66"; for (const dx of [-5.5, 5.5]) { c.beginPath(); c.arc(x + dx, y - 2, 0.9, 0, TAU); c.fill(); }
-    /* Schaft mit Knauf */
+    /* Schaft mit Knauf, vor dem Pfosten */
     c.save(); c.translate(x, y - 4); c.rotate(-0.75 + l.a * 1.5);
     c.fillStyle = "#5a3a22"; c.fillRect(-1.3, -14, 2.6, 14); c.fillStyle = "#8a5e3a"; c.fillRect(-1.3, -14, 0.9, 14);
     c.fillStyle = "#2e2a2e"; c.beginPath(); c.arc(0, -15, 2.6, 0, TAU); c.fill(); c.fillStyle = "#8a8288"; c.beginPath(); c.arc(-0.8, -15.8, 0.9, 0, TAU); c.fill();
     c.restore();
-    /* Plakette mit Zeichen */
-    const py = y - 26, col = RZ[l.sym].col;
-    c.fillStyle = "#5a3e18"; c.fillRect(x - 6.5, py - 6.5, 13, 13);
-    const pg = c.createLinearGradient(0, py - 6, 0, py + 6); pg.addColorStop(0, "#e8c070"); pg.addColorStop(1, "#8a5e20"); c.fillStyle = pg; c.fillRect(x - 6, py - 6, 12, 12);
-    c.fillStyle = "#6a4a1a"; c.fillRect(x - 6, py + 5, 12, 1); c.fillStyle = "#fff0c0"; c.fillRect(x - 6, py - 6, 12, 0.7);
-    c.fillStyle = "#3a2410"; shape(c, l.sym, x, py, 3.6); c.fill();
-    c.fillStyle = ok || ev.done ? col : "rgba(60,36,14,.0)"; if (ok || ev.done) { shape(c, l.sym, x, py, 2.8); c.fill(); }
-    if (!lean() && (ok || wrong)) { c.save(); c.globalCompositeOperation = "lighter"; const gc = wrong ? "255,70,50" : col === "#efe6d0" ? "255,240,210" : null; const g = c.createRadialGradient(x, py, 1, x, py, 16); const rgb = gc || hexRgb(col); g.addColorStop(0, "rgba(" + rgb + "," + (wrong ? 0.6 : 0.45) + ")"); g.addColorStop(1, "rgba(" + rgb + ",0)"); c.fillStyle = g; c.fillRect(x - 16, py - 16, 32, 32); c.restore(); }
   }
   function hexRgb(h) { const n = parseInt(h.slice(1), 16); return ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255); }
   Z.raetselGemalt = function (c, ev, t, RZ) {
@@ -1515,4 +1518,48 @@
     for (const ev of Z.abEvents || []) { if (ev.k !== "raetsel") continue; if (ev.done) add(ev.x, ev.y - 30, 50, "#ffc870", 0.4, 0); else add(ev.x, ev.y - 30, 34, "#ffd8a0", 0.18, 0);
       ev.levers.forEach((l, i) => { const k = ev.seq.indexOf(i); if (ev.done || (k >= 0 && k < ev.prog && l.down)) add(l.x, l.y - 26, 26, "#ffd27a", 0.3, 0); }); }
   });
+})();
+
+/* Ezekiel – The Destroyer · Geheimkammer-Hinweise, gemalt (W11 Runde 31; Daten Z.geheimRisse() aus erkundung.js)
+   Dezent, aber erkennbar – nur solange die Kammer unentdeckt ist:
+   – abweichende Steinfarbe: die Rissfläche ist eine Spur heller/fahler (neuer vermauert), Fugen dunkler und ungleichmäßig;
+   – offene Fuge: dort, wo die Fläche an Luft grenzt, eine dunkle Schattenfuge, die sacht „atmet“ (Luftzug);
+   – ein kleines Spinnennetz in einer Ecke der Fläche (nicht bei jeder, ≈ jede zweite).
+   Kein Blau; auch lean (gehört zum Spiel), dort ohne Netz. Schalter Z.gfx.off.geheimhinweis. */
+(function () {
+  const Z = window.Z, G = Z.gfx, T = 16; if (!G) return;
+  const lean = () => !!(Z.gq && (Z.gq.lean || Z.gq.mini));
+  const hh = (x, y, s) => { const v = Math.sin(x * 127.1 + y * 311.7 + s * 74.7) * 43758.5453; return v - Math.floor(v); };
+  const dp0 = Z.drawParcours;
+  Z.drawParcours = function (c, t) {
+    if (dp0) dp0.apply(this, arguments);
+    if (G.off && G.off.geheimhinweis) return;
+    try {
+      if (!Z.geheimRisse) return;
+      const cam = Z.cam, tt = performance.now() / 1000, lo = lean();
+      for (const r of Z.geheimRisse()) {
+        for (const f of r.faces) {
+          const px = f.x * T, py = f.y * T; if (px < cam.x - T || px > cam.x + cam.w + T || py < cam.y - T || py > cam.y + cam.h + T) continue;
+          /* fahlerer Stein, ungleichmäßige Fugen */
+          c.fillStyle = "rgba(232,218,196,.075)"; c.fillRect(px, py, T, T);
+          c.fillStyle = "rgba(20,14,12,.28)"; const my = py + 6 + ((hh(f.x, f.y, 1) * 4) | 0); c.fillRect(px, my, T, 1); c.fillRect(px + 4 + ((hh(f.x, f.y, 2) * 8) | 0), py, 1, my - py); c.fillRect(px + 2 + ((hh(f.x, f.y, 3) * 10) | 0), my + 1, 1, py + T - my - 1);
+          /* atmende Schattenfuge zur Luftseite */
+          const a = 0.32 + 0.14 * Math.sin(tt * 1.7 + f.x * 0.9 + f.y * 0.7);
+          c.fillStyle = "rgba(10,6,6," + a.toFixed(3) + ")";
+          if (f.dx > 0) c.fillRect(px + T - 1.5, py + 1, 1.5, T - 2); else if (f.dx < 0) c.fillRect(px, py + 1, 1.5, T - 2);
+          else if (f.dy > 0) c.fillRect(px + 1, py + T - 1.5, T - 2, 1.5); else if (f.dy < 0) c.fillRect(px + 1, py, T - 2, 1.5);
+        }
+        /* Spinnennetz an einer Ecke (eine Fläche je Kammer) */
+        if (!lo && r.faces.length && hh(r.faces[0].x, r.faces[0].y, 9) < 0.55) {
+          const f = r.faces[0], ox = f.dx < 0 ? f.x * T : f.x * T + T, oy = f.y * T, sx = f.dx < 0 ? 1 : -1;
+          if (!(ox < cam.x - 20 || ox > cam.x + cam.w + 20)) {
+            c.strokeStyle = "rgba(225,215,200,.28)"; c.lineWidth = 0.5; c.beginPath();
+            for (let k = 0; k <= 4; k++) { const ang = k / 4 * Math.PI / 2; c.moveTo(ox, oy); c.lineTo(ox + sx * Math.cos(ang) * 9, oy + Math.sin(ang) * 9); }
+            for (const rr of [3.5, 6.5]) { c.moveTo(ox + sx * rr, oy); for (let k = 1; k <= 4; k++) { const ang = k / 4 * Math.PI / 2; c.lineTo(ox + sx * Math.cos(ang) * rr, oy + Math.sin(ang) * rr); } }
+            c.stroke();
+          }
+        }
+      }
+    } catch (e) { console.error(e); }
+  };
 })();

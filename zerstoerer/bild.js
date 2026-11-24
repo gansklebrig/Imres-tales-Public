@@ -376,14 +376,15 @@
 
   /* W11 R30: Lager auf Stufe 0 (ohne Parallaxe-Ebenen): statt flacher Wandfarbe EIN vorgebackenes Nachtbild in halber
      Auflösung – Himmel, Sterne, Mond, Hügel, Burgsilhouette mit Fenstern. Ersetzt die Vollbildfüllung durch eine
-     Vollbildkopie (gleiche Größenordnung), wird nur bei Größenwechsel neu gebacken. Schalter Z.gfx.off.lagerhimmel. */
+     1:1-Vollbildkopie (gleiche Größenordnung), wird nur bei Größenwechsel neu gebacken. Schalter Z.gfx.off.lagerhimmel. */
   function hubBack(c, cam) {
-    const w = Math.max(64, Math.ceil(cam.w / 2)), h = Math.max(48, Math.ceil(cam.h / 2));
+    /* R31: in voller Leinwandgröße gebacken → 1:1-Kopie ohne Skalierung/Glättung (billiger als die skalierte Kopie) */
+    const w = c.canvas.width, h = c.canvas.height, ks = Math.max(1, w / 640);
     let hb = G.hubBack;
     if (!hb || hb.width !== w || hb.height !== h) {
       hb = G.hubBack = document.createElement("canvas"); hb.width = w; hb.height = h; const g = hb.getContext("2d"), R = Z.Rng(7771);
       const sk = g.createLinearGradient(0, 0, 0, h); sk.addColorStop(0, "#1c1222"); sk.addColorStop(0.55, "#3a2236"); sk.addColorStop(0.8, "#4a2a34"); sk.addColorStop(1, "#2a1a1e"); g.fillStyle = sk; g.fillRect(0, 0, w, h);
-      for (let i = 0; i < 55; i++) { const x = R() * w, y = R() * h * 0.55, a = 0.3 + R() * 0.6, sz = R() < 0.1 ? 1 : 0.55; g.fillStyle = "rgba(255,240,225," + a.toFixed(2) + ")"; g.fillRect(x, y, sz, sz); }
+      for (let i = 0; i < 55; i++) { const x = R() * w, y = R() * h * 0.55, a = 0.3 + R() * 0.6, sz = Math.round((R() < 0.1 ? 1.6 : 1) * ks); g.fillStyle = "rgba(255,240,225," + a.toFixed(2) + ")"; g.fillRect(x, y, sz, sz); }
       const mx = w * 0.62, my = h * 0.16, mr = Math.max(6, h * 0.05);
       const halo = g.createRadialGradient(mx, my, mr, mx, my, mr * 5); halo.addColorStop(0, "rgba(240,220,230,.22)"); halo.addColorStop(1, "rgba(240,220,230,0)"); g.fillStyle = halo; g.fillRect(mx - mr * 5, my - mr * 5, mr * 10, mr * 10);
       g.fillStyle = "#e8dcd8"; g.beginPath(); g.arc(mx, my, mr, 0, TAU); g.fill(); g.fillStyle = "rgba(160,140,150,.35)"; for (const [dx, dy, r] of [[-0.3, -0.2, 0.25], [0.25, 0.1, 0.18], [-0.05, 0.35, 0.14]]) { g.beginPath(); g.arc(mx + dx * mr, my + dy * mr, r * mr, 0, TAU); g.fill(); }
@@ -401,7 +402,7 @@
       g.fillStyle = "#190f16"; for (let x = 0; x < w; x += 3 + R() * 4) { const th = h * (0.04 + R() * 0.05); g.beginPath(); g.moveTo(x - th * 0.35, h * 0.84); g.lineTo(x, h * 0.84 - th); g.lineTo(x + th * 0.35, h * 0.84); g.fill(); }
       g.fillRect(0, h * 0.84, w, h * 0.16);
     }
-    c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.imageSmoothingEnabled = true; c.drawImage(hb, 0, 0, c.canvas.width, c.canvas.height); c.restore();
+    c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = 1; c.globalCompositeOperation = "copy"; c.drawImage(hb, 0, 0); c.restore();
   }
 
   /* ======================= KACHELN ======================= */
