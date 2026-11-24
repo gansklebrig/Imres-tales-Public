@@ -90,7 +90,36 @@
       g.fillStyle = "rgba(12,8,12,.7)"; g.beginPath(); g.arc(x, y, fs * 0.62, 0, 6.283); g.fill();
       g.fillStyle = d.col || "#d8c8a0"; g.fillText(d.ico, x, y + 0.5);
     }
+    /* W13: offene, noch nicht betretene Durchgänge – kleines goldenes Dreieck am Rand eines gesehenen Raums, das in den
+       unbekannten Nachbarraum zeigt. So sieht man auf der Karte, wo es noch weitergeht (und wo sich Rundwege schließen). */
+    const D4 = { L: [-1, 0], R: [1, 0], U: [0, -1], D: [0, 1] }, ms = big ? Math.max(3.5, Math.min(7, scale * 2.2)) : 2.6;
+    const gateOpen = (a, b) => (lv.gates || []).some(gt => gt.open && ((gt.branch === a && gt.other === b) || (gt.branch === b && gt.other === a)));
+    const pulse = 0.75 + 0.25 * Math.sin((Z.time || performance.now() / 1000) * 3);
+    for (const k in lv.cells) {
+      if (!seen.has(k)) continue;
+      const c = lv.cells[k];
+      for (const s2 in D4) {
+        const v = c.need[s2]; if (!v || v === "X") continue;
+        const nk = (c.x + D4[s2][0]) + "," + (c.y + D4[s2][1]), n = lv.cells[nk];
+        if (!n || n.kind === "secret" || seen.has(nk)) continue;
+        if (v === "G" && !gateOpen(k, nk)) continue;
+        const tx = s2 === "L" ? c.x * CW + 0.5 : s2 === "R" ? (c.x + 1) * CW - 0.5 : c.x * CW + 12;
+        const ty = s2 === "U" ? c.y * CH + 0.5 : s2 === "D" ? (c.y + 1) * CH - 0.5 : c.y * CH + 9.5;
+        /* nur, wenn man die Öffnung selbst schon gesehen hat (Kartennebel) */
+        if (Z.explored) { const ix = Math.floor(tx) - D4[s2][0], iy = Math.floor(ty) - D4[s2][1]; let ex = false; for (let q = -1; q <= 1 && !ex; q++) { const jx = ix + (D4[s2][1] ? q : 0), jy = iy + (D4[s2][0] ? q : 0); if (Z.explored[jy * lv.W + jx]) ex = true; } if (!ex) continue; }
+        const x = (tx - ox) * scale, y = (ty - oy) * scale, [dx, dy] = D4[s2];
+        if (x < -10 || y < -10 || x > vw * scale + 10 || y > vh * scale + 10) continue;
+        g.beginPath(); g.moveTo(x + dx * ms * 1.3, y + dy * ms * 1.3); g.lineTo(x - dy * ms - dx * ms * 0.4, y + dx * ms - dy * ms * 0.4); g.lineTo(x + dy * ms - dx * ms * 0.4, y - dx * ms - dy * ms * 0.4); g.closePath();
+        g.fillStyle = "rgba(255,210,122," + pulse.toFixed(2) + ")"; g.strokeStyle = "rgba(20,12,10,.85)"; g.lineWidth = 1; g.fill(); g.stroke();
+      }
+    }
     g.restore();
+  };
+  Z.offeneDurchgaenge = function () { /* für Tests/andere Module: [{cell, side, to}] offen, Nachbar noch nicht betreten */
+    const lv = Z.level, out = []; if (!lv || !lv.cells) return out;
+    const D4 = { L: [-1, 0], R: [1, 0], U: [0, -1], D: [0, 1] };
+    for (const k in lv.cells) { if (!seen.has(k)) continue; const c = lv.cells[k]; for (const s2 in D4) { const v = c.need[s2]; if (!v || v === "X" || v === "G") continue; const nk = (c.x + D4[s2][0]) + "," + (c.y + D4[s2][1]); const n = lv.cells[nk]; if (n && n.kind !== "secret" && !seen.has(nk)) out.push({ cell: k, side: s2, to: nk }); } }
+    return out;
   };
 
   /* ======================= Türen ======================= */

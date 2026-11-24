@@ -1035,7 +1035,7 @@
     let best = null, bs = 1e9;
     for (let attempt = 0; attempt < 40; attempt++) {
       const lv = tryGen(biomeId, (seed + attempt * 7919) >>> 0, opts);
-      if (lv && validate(lv)) { lv.attempts = attempt + 1; settle(lv); plan(lv); if (!Z.noRuneGates) runeGates(lv); unwall(lv); assignRooms(lv); return lv; }
+      if (lv && validate(lv)) { lv.attempts = attempt + 1; if (!Z.noEase) ease(lv); settle(lv); plan(lv); if (!Z.noRuneGates) runeGates(lv); unwall(lv); assignRooms(lv); return lv; }
       /* Notfall: die beste Karte merken (alle Ausgänge erreichbar, möglichst wenige Festsitz-Stellen) */
       const sc = lv && lv.stuck ? lv.stuck.length : 1e8;
       if (lv && sc < bs) { bs = sc; best = lv; }
@@ -1522,7 +1522,51 @@
     if (lv.traps) lv.traps = lv.traps.filter(t => !solid(t.x, t.y));
   }
   Z._unwall = unwall;
+  /* W13 Runde 2: BEQUEME WEGE. Der Prüfer rechnet mit Maximalsprüngen (6 hoch, 7 weit); für echte Spieler (und Handheld)
+     ist das grenzwertig. Jede Stelle, die nur mit einem solchen Sprung erreichbar ist, bekommt einen Zwischensteg
+     (3 Kacheln Brett, von unten durchspringbar) etwa in der Mitte des Sprungs – solange danach weiterhin niemand
+     feststecken kann. Messung danach: validate(lv, null, true) = höchstens 4 hoch / 5 weit. */
+  function ease(lv) {
+    const W = lv.W, H = lv.H, g = lv.get, tried = new Set();
+    const busy = (x, y) => lv.doors.some(d => Math.abs(d.x - x) < 3 && Math.abs(d.y - y) < 3) || (lv.loot || []).some(o => Math.abs(o.x - x) < 2 && Math.abs(o.y - y) < 2) ||
+      (lv.traps || []).some(o => Math.abs(o.x - x) < 2 && Math.abs(o.y - y) < 2) || (lv.spawns || []).some(o => Math.abs(o.x - x) < 1 && Math.abs(o.y - y) < 2);
+    const secretAt = (x, y) => { const c = lv.cells[Math.floor(x / CW) + "," + Math.floor(y / CH)]; return !c || c.kind === "secret"; };
+    const okPlank = (x0, x1, row) => {
+      if (row < 2 || row >= H - 1) return false;
+      for (let x = x0; x <= x1; x++) {
+        if (x < 1 || x >= W - 1 || g(x, row) !== 0 || g(x, row - 1) !== 0 || g(x, row - 2) !== 0 || secretAt(x, row) || busy(x, row - 1)) return false;
+        if (g(x, row + 1) === 4 || g(x, row - 3) === 4) return false; /* nicht in Leiterschächte */
+      }
+      return true;
+    };
+    lv.eased = [];
+    for (let it = 0; it < 16 && lv.eased.length < 10; it++) {
+      const c = { W, H, get: g, start: lv.start, doors: lv.doors, cells: lv.cells }; validate(c, null, true); const rc = c.reach;
+      const f = { W, H, get: g, start: lv.start, doors: lv.doors, cells: lv.cells, _wantEdges: true }; validate(f); const [ea, eb] = f._edges;
+      let pick = -1;
+      for (let k = 0; k < ea.length; k++) { if (!rc[ea[k]] || rc[eb[k]] || tried.has(ea[k] + ">" + eb[k])) continue; pick = k; break; }
+      if (pick < 0) break;
+      const A = ea[pick], Bt = eb[pick]; tried.add(A + ">" + Bt);
+      const ax = A % W, ay = (A / W) | 0, bx = Bt % W, by = (Bt / W) | 0, dy = ay - by, dx = bx - ax;
+      const hs = dy > 0 ? [Math.ceil(dy / 2), Math.floor(dy / 2), Math.ceil(dy / 2) + 1].filter(h => h >= 0 && h <= 4) : [0, 1, -1];
+      let done = false;
+      for (const h of hs) {
+        for (const off of [0, -1, 1, -2, 2]) {
+          const mx = ax + Math.round(dx / 2) + off, row = ay - h + 1;
+          if (!okPlank(mx - 1, mx + 1, row)) continue;
+          for (let x = mx - 1; x <= mx + 1; x++) lv.set(x, row, 2);
+          const c2 = { W, H, get: g, start: lv.start, doors: lv.doors, cells: lv.cells }; validate(c2, null, true);
+          if (c2.reach[Bt] && validate(lv)) { lv.eased.push([mx - 1, mx + 1, row]); done = true; break; }
+          for (let x = mx - 1; x <= mx + 1; x++) lv.set(x, row, 0);
+        }
+        if (done) break;
+      }
+    }
+    validate(lv); /* lv.reach/back/stuck wieder zum endgültigen Stand */
+  }
+  Z._ease = ease;
   Z._tryGen = (b, s, o) => tryGen(b, s, o || {}); /* für Tests */
+  const FERRY_BOOST = 1.75;
   function tryGen(biomeId, seed, opts) {
     const B = BIOMES[biomeId], R = Z.Rng(seed);
     const [gw, gh] = B.grid;
@@ -1573,6 +1617,9 @@
           /* Startraum: ruhiger Boden – keine Parcours-/Gefahrenräume direkt am Eingang */
           if (c === startCell && (t.pk || t.n === "bruecke" || t.n === "grube")) w *= 0.02;
           if (t.pk) w *= (c.kind === "path" ? (B.parcours != null ? B.parcours : 9) : 1) * (t.U || t.D ? 0.45 : 1);
+          /* W13 Runde 2: mehr Rundwege heißen weniger Räume mit nur links/rechts – Fähre und Sägewerk (beliebt) passen nur dort;
+             etwas stärker gewichten, damit sie so oft vorkommen wie vor den Rundwegen (≈ 60 je 100 Karten) */
+          if (t.n === "faehre" || t.n === "saegewerk") w *= FERRY_BOOST;
           /* weniger überflüssige Öffnungen = natürlicher */
           const extra = (L && !n.L) + (Rr && !n.R) + (t.U && !n.U) + (t.D && !n.D);
           w /= 1 + extra * 0.25;
@@ -2047,7 +2094,7 @@
         if (c === lv.endCell) sc2 += 2.5;
         if (c.kind === "path") sc2 += 1.2;
         /* Kante zählt voll nur bei passender Weglänge – sonst rückte der Ausgang zu nah an den Eingang (Balance) */
-        const ed = edgeOf(c, ex.v); sc2 += ed.s * (dd >= Ls * exLo - 0.5 && dd <= Ls * exHi + 1 ? 1.4 : 0.3);
+        const ed = edgeOf(c, ex.v); sc2 += ed.s * (exits.length === 1 ? (dd >= Ls * exLo && dd <= Ls * exHi ? 3.2 : 0.3) : dd >= Ls * exLo - 0.5 && dd <= Ls * exHi + 1 ? 1.4 : 0.3); /* nur ein Ausgang (Glut, Hafen …): Kante zählt mehr */
         sc2 += R() * 0.5;
         let spots = spotsIn(lv, c, 3, true); if (!spots.length) spots = spotsIn(lv, c, 3, false);
         spots = spots.filter(p => !chosen.some(q => Math.abs(q[0] - p[0]) < 4 && Math.abs(q[1] - p[1]) < 3) && Math.abs(p[0] - st[0]) + Math.abs(p[1] - st[1]) > 14);
@@ -2162,7 +2209,9 @@
      [{x0,x1,y0,y1}] Aufwindschächte (nur mit glide) }. Nebelgitter und rissige Böden öffnet der Aufrufer über die Kacheln.
      Zwischenknoten (an der Wand, an der Öse, oben im Aufwind) sind keine Stehplätze; sie gehören nur zur Runen-Prüfung.
      Ohne ab läuft die Prüfung genau wie bisher. */
-  function validate(lv, ab) {
+  function validate(lv, ab, comfy) {
+    /* W13: comfy = „bequeme“ Reichweite für echte Spieler/Handheld: höchstens 4 hoch (5/4/3 weit), waagrecht 5 weit */
+    const UPN = comfy ? 4 : 6, WIDE = comfy ? 5 : 7;
     /* Abgrund zählt als unbetretbar, bröckelnde Stege und Fährstrecken wie Stege */
     const W = lv.W, H = lv.H, N = W * H;
     /* Kacheln einmal vorab umsetzen (schneller als je Abfrage über lv.get – die großen Karten haben 2–3× so viele Plätze) */
@@ -2210,9 +2259,9 @@
       /* Durch Stege fallen */
       if (g(x, y + 1) === 2 || g(x, y + 1) === 8) push(x, fall(x, y + 1));
       /* Springen nach oben: Kopfraum über dem Startplatz frei, dann waagrecht in Zielhöhe (Füße und Kopf frei) */
-      for (let dy = 1; dy <= 6; dy++) {
+      for (let dy = 1; dy <= UPN; dy++) {
         if (!passable(g(x, y - dy - 1)) && g(x, y - dy - 1) !== 2) break;
-        const maxDx = dy <= 2 ? 6 : dy <= 3 ? 5 : dy <= 5 ? 4 : 2;
+        const maxDx = comfy ? (dy <= 2 ? 5 : dy <= 3 ? 4 : 3) : dy <= 2 ? 6 : dy <= 3 ? 5 : dy <= 5 ? 4 : 2;
         for (let dx = -maxDx; dx <= maxDx; dx++) {
           const tx = x + dx, ty = y - dy;
           if (!canStand(tx, ty)) continue;
@@ -2222,7 +2271,7 @@
         }
       }
       /* weite Sprünge auf gleicher Höhe / nach unten: über die Lücke in Kopfhöhe, dann senkrecht hinab */
-      for (let dx = -7; dx <= 7; dx++) {
+      for (let dx = -WIDE; dx <= WIDE; dx++) {
         if (!dx) continue;
         const s = U.sign(dx); let ok = true;
         for (let k = s; k !== dx + s; k += s) if (!air(g(x + k, y - 1)) || !air(g(x + k, y - 2)) && Math.abs(k) > 1) { ok = false; break; }
