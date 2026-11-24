@@ -232,7 +232,9 @@
     if (ofs.width !== w || ofs.height !== h) { ofs.width = w; ofs.height = h; ofImg = null; }
     if (!ofImg) { ofImg = ofc.createImageData(w, h); fA = new Float32Array(w * h); fB = new Float32Array(w * h); }
     const D = ofImg.data;
-    const memA = lv.out ? 0.38 : 0.52, unA = lv.out ? 0.7 : 0.88;
+    /* W11 R20 (Grafik): Stufe 0/lean – Erkundetes heller (Gedächtnis), Unerkundetes etwas weniger schwarz; nur Helligkeit */
+    const leanFog = !!(Z.gq && (Z.gq.lean || Z.gq.level === 0));
+    const memA = leanFog ? (lv.out ? 0.26 : 0.32) : lv.out ? 0.38 : 0.52, unA = leanFog ? (lv.out ? 0.58 : 0.72) : lv.out ? 0.7 : 0.88;
     for (let ty = y1; ty >= y0; ty--) { /* von unten nach oben: Himmelsreihen nehmen die oberste Kartenreihe */
       let o = (ty - y0) * w, i = Math.max(0, ty) * lv.W + x0;
       const fade = ty < 0 ? Math.max(0, 1 + ty / 4) : 1, o0 = (0 - y0) * w;

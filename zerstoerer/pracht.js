@@ -3139,3 +3139,35 @@
   };
   Z.lagerWachsDbg = () => { const p = plan; return p ? { st: p.st, n: p.n, items: p.items.map(i => [i.k, Math.round(i.x / T)]) } : null; };
 })();
+
+/* Ezekiel – The Destroyer · Himmel in Lücken und Schächten (W11 Runde 20, Kachel-Haken, Stufe 2+)
+   Wo der Himmel durch Lücken unter Stegen/Bohlen (Hafen-Pier) oder durch tiefe, schmale Schächte (Zinnen, Sturm)
+   scheint, war bisher nur die flache rosa Himmelsfarbe zu sehen. Jetzt: unter Stegen ein Schlagschatten von oben,
+   in Schächten nach unten zunehmender Dunst und Schatten der Schachtwände. Einmal je Chunk gemalt, kostet je Bild nichts. */
+(function () {
+  "use strict";
+  const Z = window.Z, G = Z.gfx; if (!G || !G.tileHooks) return;
+  G.tileHooks.push(function (k, H) {
+    if (k !== "fix" || (G.off && G.off.luecken)) return;
+    const { c, x0, x1, y0, y1, T, lv } = H; if (!G.isOpen) return;
+    const solidT = (x, y) => { const v = lv.get(x, y); return v === 1 || v === 7 || v === 2 || v === 8; };
+    for (let y = Math.max(y0, 3); y <= y1; y++) for (let x = x0; x < x1; x++) {
+      const v0 = lv.get(x, y), px = x * T, py = y * T;
+      /* Lücken im Steg (Kachel 8 über Wasser/Luft, z. B. Hafen-Arena): Schatten statt durchscheinendem Himmel */
+      if (v0 === 8 && (lv.out || lv.arena)) { const vb = lv.get(x, y + 1); if (vb === 6 || vb === 0 || vb === 5) { const g = c.createLinearGradient(0, py + 3, 0, py + T); g.addColorStop(0, "rgba(16,10,12,.85)"); g.addColorStop(1, "rgba(16,10,12,.55)"); c.fillStyle = g; c.fillRect(px, py + 3, T, T - 3); c.fillStyle = "rgba(90,62,40,.6)"; c.fillRect(px + 2 + ((x * 5) % 7), py + 3, 1.4, T - 5); } continue; }
+      if (v0 !== 0 || !G.isOpen(x, y)) continue;
+      /* unter einem Steg / einer Decke */
+      if (solidT(x, y - 1)) { const g = c.createLinearGradient(0, py, 0, py + T * 1.4); g.addColorStop(0, "rgba(14,8,10,.62)"); g.addColorStop(1, "rgba(14,8,10,0)"); c.fillStyle = g; c.fillRect(px, py, T, T); continue; }
+      /* schmaler Schacht: Wände links und rechts in 1–2 Kacheln, darüber mindestens 3 offene Kacheln */
+      const wl = solidT(x - 1, y) || solidT(x - 2, y), wr = solidT(x + 1, y) || solidT(x + 2, y);
+      if (!wl || !wr) continue;
+      let d = 0; for (let yy = y - 1; yy > 0 && d < 12 && !solidT(x, yy); yy--) d++;
+      if (d < 3) continue;
+      const a = Math.min(0.42, 0.12 + (d - 3) * 0.035);
+      c.fillStyle = "rgba(24,14,20," + a.toFixed(3) + ")"; c.fillRect(px, py, T, T);
+      if (solidT(x - 1, y)) { c.fillStyle = "rgba(10,6,8,.3)"; c.fillRect(px, py, 4, T); }
+      if (solidT(x + 1, y)) { c.fillStyle = "rgba(10,6,8,.22)"; c.fillRect(px + T - 3, py, 3, T); }
+      if (((x * 7 + y * 3) % 5) === 0) { c.fillStyle = "rgba(230,210,220,.05)"; c.fillRect(px + 4, py, 6, T); }
+    }
+  });
+})();

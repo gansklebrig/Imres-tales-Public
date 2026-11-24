@@ -133,16 +133,16 @@
             /* R19: Spinnfäden statt Drahtgitter – leicht durchhängende Speichen, Fangfäden als Bögen zwischen den Speichen,
                nach außen dünner; vereinzelt Tautropfen */
             const ax = 328, ay = H * 0.58 - 140, sp = [];
-            for (let i = 0; i < 9; i++) sp.push([220 + i * 28 + (i % 3 - 1) * 6, H * 0.75 - (i % 2) * 6]);
-            m.strokeStyle = "rgba(220,210,230,.16)"; m.lineWidth = 0.45;
+            for (let i = 0; i < 6; i++) sp.push([215 + i * 44 + (i % 3 - 1) * 10, H * 0.75 - (i % 2) * 10 - hash(i, 3) * 14]); /* R20: weniger, unregelmäßiger */
+            m.strokeStyle = "rgba(220,210,230,.1)"; m.lineWidth = 0.4;
             for (const [ex, ey] of sp) { m.beginPath(); m.moveTo(ax, ay); m.quadraticCurveTo((ax + ex) / 2 + (ex - ax) * 0.06, (ay + ey) / 2 + 6, ex, ey); m.stroke(); }
             const at = (k, r) => { const [ex, ey] = sp[k], u = r / 140, mx = (ax + ex) / 2 + (ex - ax) * 0.06, my = (ay + ey) / 2 + 6; return [(1 - u) * (1 - u) * ax + 2 * (1 - u) * u * mx + u * u * ex, (1 - u) * (1 - u) * ay + 2 * (1 - u) * u * my + u * u * ey]; };
-            for (let r = 18, n = 0; r < 128; r += 15 + n * 1.5, n++) {
-              m.strokeStyle = "rgba(220,210,230," + (0.2 - n * 0.018).toFixed(3) + ")"; m.beginPath();
-              for (let k = 0; k < sp.length; k++) { const [x, y] = at(k, r); if (!k) m.moveTo(x, y); else { const [px2, py2] = at(k - 1, r); m.quadraticCurveTo((px2 + x) / 2, (py2 + y) / 2 + 3 + r * 0.03, x, y); } }
+            for (let r = 26, n = 0; r < 110; r += 24 + n * 4, n++) {
+              m.strokeStyle = "rgba(220,210,230," + (0.12 - n * 0.02).toFixed(3) + ")"; m.beginPath();
+              for (let k = 0; k < sp.length; k++) { const [x, y] = at(k, r); if (!k) m.moveTo(x, y); else { const [px2, py2] = at(k - 1, r); m.quadraticCurveTo((px2 + x) / 2, (py2 + y) / 2 + 5 + r * 0.06, x, y); } }
               m.stroke();
             }
-            m.fillStyle = "rgba(240,236,250,.4)"; for (let k = 0; k < 7; k++) { const [x, y] = at((k * 4) % 9, 30 + k * 13); m.fillRect(x - 0.6, y - 0.6, 1.2, 1.2); }
+            m.fillStyle = "rgba(240,236,250,.4)"; for (let k = 0; k < 5; k++) { const [x, y] = at((k * 4) % 6, 30 + k * 15); m.fillRect(x - 0.6, y - 0.6, 1.2, 1.2); }
             m.fillStyle = "rgba(255,90,60,.8)"; m.fillRect(326, H * 0.58 - 100, 3, 5); });
         }
         break;
@@ -2249,7 +2249,9 @@
     if (camX != null) cam = { x: camX, y: camY, w: cam.w, h: cam.h };
     if (lvl >= 1 && !G.off.color) { gather(cam, t, lvl, dt); return mulPass(c, cam, W, H, dark, lvl); }
     LQn = 0; EXT.length = 0; for (let i = FLASH.length - 1; i >= 0; i--) { FLASH[i].t += dt; if (FLASH[i].t >= FLASH[i].life) FLASH.splice(i, 1); }
-    return darkPass(c, cam, W, H, dark);
+    /* R20: Stufe 0 – dunkle Burg, aber Spielrelevantes erkennbar: Grunddunkel um gut ein Viertel gesenkt (Dunkelheits-
+       Ereignisse bleiben voll) */
+    return darkPass(c, cam, W, H, Z.darkness > 0 ? dark : Math.min(0.46, dark * 0.74));
   }
   function lightCanvas(W, H) {
     const LD = (Z.gq && Z.gq.light) || 4; if (!G.light || G.light.width !== Math.ceil(W / LD) || G.light.height !== Math.ceil(H / LD)) { G.light = document.createElement("canvas"); G.light.width = Math.ceil(W / LD); G.light.height = Math.ceil(H / LD); G.lc = G.light.getContext("2d"); }
