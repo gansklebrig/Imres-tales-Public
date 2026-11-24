@@ -652,6 +652,8 @@
     }
     /* W13: seltene Zeitrennen-Kammer (Sanduhr-Sockel, Ringe in der Nähe einsammeln) */
     if (Math.random() < (Z.rennenChance != null ? Z.rennenChance : 0.14)) { try { const ev = setupRennen(lv); if (ev) { evs.push(ev); rennenInteract(ev); } } catch (err) { console.error(err); } }
+    /* W13 R13: lange Nebenketten beleben (leere Enden → Fundstelle, lange Ketten → Vorratsnische) */
+    if (Z.kettenAn !== false) { try { setupKetten(lv); } catch (err) { console.error(err); } }
     /* W13 R11: Heilquelle an einer Kreuzung des Hauptwegs (Stufe 1–3): jetzt trinken oder Flasche füllen */
     if (Math.random() < (Z.quelleChance != null ? Z.quelleChance : QUELLE.chance(lv))) { try { const ev = setupQuelle(lv); if (ev) { evs.push(ev); quelleInteract(ev); } } catch (err) { console.error(err); } }
     /* W13 R9: Hebelrätsel in einem Geheimraum (nie auf dem Hauptweg) */
@@ -724,6 +726,73 @@
     }
     const limit = Math.max(8, Math.round((way * T / Z.PC.RUN * 1.15 + 2) * Z.rennenFaktor)); /* Bot (R8): braucht im Mittel 1,03 × Weg/Laufen → ~25 % Rest */
     return { k: "rennen", x: p.x * T + 8, y: (p.y + 1) * T, done: false, t: 0, on: false, tries: 0, limit, way: Math.round(way), rings: order.map(r => ({ x: r.x * T + 8, y: r.y * T + 4, got: false })) };
+  }
+  /* ======================= NEBENKETTEN (W13 R13) ======================= */
+  /* Messung (r13/ketten2.py, 13 Gebiete × 5): 243 Nebenketten mit ≥ 3 Räumen, davon 62 (26 %) ohne jede Belohnung und ohne Geheimkammer –
+     man läuft 3–7 Räume weit für nichts. Jetzt:
+       · leeres Kettenende (≥ 3 Räume, nirgends ein Fund, keine Geheimkammer dahinter) → „Überreste eines Abenteurers“ zum Durchsuchen,
+         mit leisem Goldschimmer (von Weitem sichtbar: das Ende lohnt sich)
+       · Ketten ab 4 Räumen → in der Mitte eine Vorratsnische (2–3 zerbrechliche Kisten/Töpfe, normale Kistenbeute)
+     Keine zusätzlichen Gegner. Werte (FUND) als Vorschlag für Balance. */
+  const FUND = { gold: t => 20 + 10 * t, essen: 0.35, rolle: 0.1 };
+  Z.FUND = FUND;
+  function setupKetten(lv) {
+    if (!lv || !lv.cells || lv.hub || lv.arena || lv.passage) return;
+    const cells = Object.keys(lv.cells).map(k => lv.cells[k]), kids = new Map(), key = c => c.x + "," + c.y;
+    for (const c of cells) if (c.parent) { if (!kids.has(c.parent)) kids.set(c.parent, []); kids.get(c.parent).push(c); }
+    const rew = new Set((lv.rewards || []).map(r => r.cell));
+    const walk = x => { const ks = (kids.get(x) || []).filter(k => k.kind === "side"); if (!ks.length) return [[x]]; const out = []; for (const k of ks) for (const pth of walk(k)) out.push([x].concat(pth)); return out; };
+    const leaves = new Set(), mids = new Set();
+    for (const c of cells) {
+      if (c.kind !== "side" || !c.parent || c.parent.kind !== "path") continue;
+      for (const ch of walk(c)) {
+        if (ch.length < 3) continue;
+        const leaf = ch[ch.length - 1], secretBehind = (kids.get(leaf) || []).some(k => k.kind === "secret");
+        if (!ch.some(x => rew.has(key(x))) && !secretBehind) leaves.add(leaf);
+        if (ch.length >= 4) mids.add(ch[Math.floor(ch.length / 2)]);
+      }
+    }
+    const W = lv.W;
+    const spots = (c, wide) => { const sp = []; for (let y = c.y * Z.CH + 1; y < c.y * Z.CH + Z.CH - 1; y++) for (let x = c.x * Z.CW + 2; x < c.x * Z.CW + Z.CW - 2; x++) {
+      if (!Z.standable(lv, x, y, 2) || (lv.reach && !lv.reach[y * W + x]) || (lv.doors || []).some(d => Math.abs(d.x - x) < 4 && Math.abs(d.y - y) < 3)) continue;
+      if (wide && !(Z.standable(lv, x + 1, y, 2) && Z.standable(lv, x + 2, y, 2) && lv.get(x + 1, y + 1) === lv.get(x, y + 1) && lv.get(x + 2, y + 1) === lv.get(x, y + 1))) continue;
+      if (Z.propsLive.some(p => Math.abs(p.x - x * T) < 40 && Math.abs(p.y - y * T) < 24) || evs.some(e => Math.abs(e.x - x * T) < 48 && Math.abs(e.y - (y + 1) * T) < 32)) continue;
+      sp.push([x, y]); } return sp; };
+    for (const c of leaves) {
+      /* tief im Raum: weit weg vom Elternraum */
+      const sp = spots(c, false); if (!sp.length) continue;
+      const px = c.parent.x * Z.CW + Z.CW / 2, py = c.parent.y * Z.CH + Z.CH / 2;
+      sp.sort((a, b) => Math.hypot(b[0] - px, b[1] - py) - Math.hypot(a[0] - px, a[1] - py));
+      const [x, y] = sp[0]; evs.push({ k: "fund", x: x * T + 8, y: (y + 1) * T, done: false, t: Math.random() * 9, cell: key(c) }); fundInteract(evs[evs.length - 1]);
+    }
+    for (const c of mids) {
+      const sp = spots(c, true); if (!sp.length) continue;
+      const [x, y] = sp[(Math.random() * sp.length) | 0], n = Math.random() < 0.5 ? 2 : 3;
+      for (let i = 0; i < n; i++) Z.propsLive.push({ kind: "breakable", style: Z.R.pick(["crate", "pot", "barrel"]), x: (x + i) * T + 1, y: y * T + 2, w: 14, h: 14, hp: 1, nische: true });
+    }
+  }
+  const FUNDTXT = [["Ein Rucksack, halb vermodert. Darin klimpert es.", "A backpack, half rotten. Something clinks inside."], ["Jemand ist hier nicht weitergekommen. Seine Taschen schon.", "Someone didn't get any further. Their pockets did."],
+    ["Eine Feldflasche, ein Messer, ein paar Münzen – und eine Karte, die genau hierher führt.", "A canteen, a knife, a few coins – and a map that leads exactly here."], ["Ein Lager in der Sackgasse. Die Asche ist kalt.", "A camp in the dead end. The ashes are cold."]];
+  function fundInteract(ev) {
+    (Z.interacts = Z.interacts || []).push({ x: ev.x, y: ev.y, r: 22, h: 34, ok: () => !ev.done, label: () => L(["Durchsuchen", "Search"]), use: () => fundNimm(ev) });
+  }
+  function fundNimm(ev) {
+    const P = Z.player; if (ev.done || !P) return; ev.done = true; finish(ev);
+    const t = Z.run ? Z.run.tier : 0, g = Math.round(FUND.gold(t));
+    A.play("coin", { vol: 0.5, x: ev.x }); for (let i = 0; i < 5; i++) Z.spawnPickup("gold", ev.x, ev.y - 8, { n: Math.ceil(g / 5), vx: (Math.random() - 0.5) * 120, vy: -150 - Math.random() * 80 });
+    if (Math.random() < FUND.essen && Z.FOOD) Z.spawnPickup("food", ev.x + 6, ev.y - 6, { food: Z.R.pick(Z.FOOD), drop: true });
+    if (Math.random() < FUND.rolle) Z.spawnPickup("scroll", ev.x - 6, ev.y - 6, { vx: 0, vy: -140, stat: Z.R.pick(["brut", "takt", "ueber"]) });
+    Z.toast(L(Z.R.pick(FUNDTXT)), 3000);
+    X().funde = (X().funde || 0) + 1;
+  }
+  function drawFund(c, ev, t) {
+    if (Z.fundGemalt && Z.fundGemalt(c, ev, t)) return;
+    const x = ev.x, y = ev.y;
+    /* Rucksack und Knochen; solange undurchsucht ein leiser Goldschimmer */
+    if (!ev.done) { c.save(); c.globalCompositeOperation = "lighter"; glow(c, x, y - 6, 16 + Math.sin(t * 2 + ev.t) * 2, "rgba(255,200,110,.22)"); c.restore(); }
+    c.fillStyle = "#e0d6c0"; c.fillRect(x - 9, y - 2, 7, 2); circ(c, x - 10, y - 4, 2.4, "#e0d6c0");
+    c.fillStyle = ev.done ? "#4a3a2a" : "#6a4a2a"; c.fillRect(x - 1, y - 9, 9, 9); c.fillStyle = "#3a2a1a"; c.fillRect(x - 1, y - 9, 9, 2); c.fillRect(x + 6, y - 7, 2, 5);
+    if (!ev.done && Math.random() < 0.04) FX.p({ x: x + 3 + (Math.random() - 0.5) * 6, y: y - 10, vx: 0, vy: -12, life: 0.7, size: 1.2, col: "#ffd27a", kind: "spark", add: true });
   }
   /* ======================= HEILQUELLE (W13 R11) ======================= */
   /* Balance meldete: vor Stufe 4 sind die Tränke meist leer. Selten steht an einer Kreuzung des Hauptwegs (Raum mit ≥ 3 Ausgängen,
@@ -1008,6 +1077,7 @@
     for (const ev of evs) {
       if (ev.k === "dieb") continue;
       if (ev.k === "raetsel") { drawRaetsel(c, ev, t); continue; }
+      if (ev.k === "fund") { const cam = Z.cam; if (!(ev.x < cam.x - 60 || ev.x > cam.x + cam.w + 60 || ev.y < cam.y - 10 || ev.y > cam.y + cam.h + 60)) drawFund(c, ev, t); continue; }
       if (ev.k === "quelle") { const cam = Z.cam; if (!(ev.x < cam.x - 60 || ev.x > cam.x + cam.w + 60 || ev.y < cam.y - 10 || ev.y > cam.y + cam.h + 60)) drawQuelle(c, ev, t); continue; }
       const x = ev.x, y = ev.y;
       if (x < cam.x - 60 || x > cam.x + cam.w + 60 || y < cam.y - 10 || y > cam.y + cam.h + 60) continue; /* nur im Bild */
