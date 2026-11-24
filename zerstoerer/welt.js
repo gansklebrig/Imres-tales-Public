@@ -1452,7 +1452,8 @@
     let nFree = 0; for (let y = 0; y < gh; y++) for (let x = 0; x < gw; x++) if (!cells[key(x, y)]) nFree++;
     const nSecret = Math.min(3, Math.max(1, Math.round(nFree * 0.08)));
     const target = Math.max(2, Math.round(nFree * (lay.fill != null ? lay.fill : 0.8)) - nSecret);
-    const maxArm = lay.arm || 4;
+    /* W13 R23 (Nutzerwunsch: weniger lange Sackgassen-Wege): Zweige um einen Raum kürzer (mind. 2) – gleiche Füllung, also mehr, aber kürzere Zweige */
+    const maxArm = Z.armKuerzer !== true ? (lay.arm || 4) : Math.max(2, (lay.arm || 4) - 1); /* R23: kürzere Zweige vorerst aus (mehr Sackgassen 108→148) – mit Z.armKuerzer = true einschaltbar */
     let added = 0, armId = 0, guard = 0;
     while (added < target && guard++ < 400) {
       const anchors = [];
@@ -1460,7 +1461,7 @@
         const c = cells[k]; if (c.kind === "secret") continue;
         const fn = freeNb(c); if (!fn.length) continue;
         /* lieber vom Hauptweg abzweigen, tiefe Zweige nur selten weiter verlängern */
-        anchors.push({ c, fn, w: c.kind === "path" ? 3 : 1.4 / (1 + c.depth * (Z.flacheZweige === true ? 1.6 : 0.6)) }); /* W13 R22: Z.flacheZweige (nur Versuch, aus): brachte kaum kürzere Rückwege und 2 Torhof-Karten mit Ausgang nur per Maximalsprung */
+        anchors.push({ c, fn, w: c.kind === "path" ? 3 : 1.4 / (1 + c.depth * (Z.flacheZweige === true ? 1.6 : 0.6)) * (Z.armKuerzer === true && !lay.gentle && c.depth >= 2 ? 0.35 : 1) }); /* R23: Ketten ab Tiefe 2 seltener verlängern */ /* W13 R22: Z.flacheZweige (nur Versuch, aus): brachte kaum kürzere Rückwege und 2 Torhof-Karten mit Ausgang nur per Maximalsprung */
       }
       if (!anchors.length) break;
       let sum = 0; anchors.forEach(a => (sum += a.w));
@@ -1667,7 +1668,7 @@
     let best = null, bs = 1e9;
     for (let attempt = 0; attempt < 40; attempt++) {
       const lv = tryGen(biomeId, (seed + attempt * 7919) >>> 0, opts);
-      if (lv && validate(lv)) { lv.attempts = attempt + 1; if (Z.run) { const u = (Z.run._tplUse = Z.run._tplUse || {}); for (const k in lv.cells) { const t = lv.cells[k].tpl; if (t) u[t] = (u[t] || 0) + 1; } } if (!Z.noEase) ease(lv); settle(lv); plan(lv); specials(lv); if (!Z.noRuneGates) runeGates(lv); cracks(lv); tides(lv); if (!Z.noAbkuerzung) abkuerzungen(lv); unwall(lv); assignRooms(lv); return lv; }
+      if (lv && validate(lv)) { lv.attempts = attempt + 1; if (Z.run) { const u = (Z.run._tplUse = Z.run._tplUse || {}); for (const k in lv.cells) { const t = lv.cells[k].tpl; if (t) u[t] = (u[t] || 0) + 1; } } if (!Z.noEase) ease(lv); settle(lv); plan(lv); specials(lv); if (!Z.noRuneGates) runeGates(lv); cracks(lv); tides(lv); if (!Z.noAbkuerzung) abkuerzungen(lv); unwall(lv); assignRooms(lv); if (attempt < 30 && !Z.noEase && !comfyAusgaenge(lv)) continue; /* W13 R23: Ausgang nur per Maximalsprung → nächster Versuch */ return lv; }
       /* Notfall: die beste Karte merken (alle Ausgänge erreichbar, möglichst wenige Festsitz-Stellen) */
       const sc = lv && lv.stuck ? lv.stuck.length : 1e8;
       if (lv && sc < bs) { bs = sc; best = lv; }
@@ -2494,6 +2495,7 @@
      ist das grenzwertig. Jede Stelle, die nur mit einem solchen Sprung erreichbar ist, bekommt einen Zwischensteg
      (3 Kacheln Brett, von unten durchspringbar) etwa in der Mitte des Sprungs – solange danach weiterhin niemand
      feststecken kann. Messung danach: validate(lv, null, true) = höchstens 4 hoch / 5 weit. */
+  function comfyAusgaenge(lv) { const c = { W: lv.W, H: lv.H, get: lv.get, start: lv.start, doors: lv.doors, cells: lv.cells }; validate(c, null, true); return lv.doors.filter(d => d.kind === "exit").every(d => c.reach[d.y * lv.W + d.x]); }
   function ease(lv) {
     const W = lv.W, H = lv.H, g = lv.get, tried = new Set();
     const busy = (x, y) => lv.doors.some(d => Math.abs(d.x - x) < 2 && Math.abs(d.y - y) < 2) || /* W13 R7: Stege dürfen nah an Türen (Zugang zur Tür) */ (lv.loot || []).some(o => Math.abs(o.x - x) < 2 && Math.abs(o.y - y) < 2) ||
@@ -2511,11 +2513,13 @@
     /* W13 R7: Ausgänge zuerst – solange eine Tür nur per Maximalsprung erreichbar ist, die Kante wählen, die ihr am nächsten führt
        (vorher konnte das Steg-Budget an anderer Stelle aufgebraucht sein: 1 von 390 Karten); dafür etwas mehr Budget */
     const exitsP = lv.doors.filter(d => d.kind === "exit");
-    for (let it = 0; it < 24 && lv.eased.length < 13; it++) {
+    for (let it = 0; it < 40 && lv.eased.length < 20; it++) { /* W13 R23: mehr Budget, solange ein Ausgang nur per Maximalsprung erreichbar ist (mehr, kürzere Zweige) */
       const c = { W, H, get: g, start: lv.start, doors: lv.doors, cells: lv.cells }; validate(c, null, true); const rc = c.reach;
       const f = { W, H, get: g, start: lv.start, doors: lv.doors, cells: lv.cells, _wantEdges: true }; validate(f); const [ea, eb] = f._edges;
       const openEx = exitsP.filter(d => !rc[d.y * W + d.x]);
       if (!openEx.length && (lv.eased.length >= 10 || it >= 16)) break; /* wie bisher; nur für Türen mehr Budget */
+      if (!openEx.length && lv.eased.length >= 13) break;
+      if (openEx.length && it >= 24 && lv.eased.length >= 13 && it >= 36) break;
       let pick = -1, bd = 1e9; forceT = openEx.length > 0;
       for (let k = 0; k < ea.length; k++) {
         if (!rc[ea[k]] || rc[eb[k]] || tried.has(ea[k] + ">" + eb[k])) continue;

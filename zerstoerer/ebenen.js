@@ -625,7 +625,10 @@
     seen.add(wc.x + "," + wc.y);
     A.play("roar", { vol: 0.22, rate: 0.55, delay: 0.3 }); FX.addShake && FX.addShake(2);
     if (Z.ui && Z.ui.notify) Z.ui.notify(L(["Ein Rastplatz. Hinter der nächsten Tür regt sich etwas Großes …", "A resting place. Beyond the next door, something large stirs…"]), { prio: 1, art: "gefahr", dauer: 3200 });
-    if (!Z.cam.lock) { const tx = wc.x * CW * T + CW * T / 2, ty = wc.y * CH * T + CH * T / 2; peekLock = { x: (P.x + tx * 2) / 3, y: (P.y + ty * 2) / 3, k: 0.12 }; Z.cam.lock = peekLock; peekT = 1.6; }
+    /* W13 R23: kein Kamerablick, solange der Rückweg offen ist (Kamerasperre schließt ihn sonst mit Grund „boss“) oder der Vorraum der Startraum ist */
+    const rwOffen = (() => { try { const b = Z.rueckweg && Z.rueckweg.zustand && Z.rueckweg.zustand().back; return !!(b && (b.st === "open" || b.st === "opening")); } catch (_) { return false; } })();
+    const startK = lv.startCell ? lv.startCell.x + "," + lv.startCell.y : null;
+    if (!Z.cam.lock && !rwOffen && D.V0 !== startK) { const tx = wc.x * CW * T + CW * T / 2, ty = wc.y * CH * T + CH * T / 2; peekLock = { x: (P.x + tx * 2) / 3, y: (P.y + ty * 2) / 3, k: 0.12 }; Z.cam.lock = peekLock; peekT = 1.6; }
   }
   Z.ebenenTick = function (dt) { const r = et0 ? et0.apply(this, arguments) : undefined; try { dramaTick(dt); } catch (e) { console.error(e); } return r; };
   /* Rastfeuer zeichnen (Grafik kann übermalen: Z.rastGemalt(c, r, t)) */

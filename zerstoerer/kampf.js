@@ -289,11 +289,12 @@
       else { P.y = nextY; if (v > 0) { const fb = Math.floor((P.y + P.h) / T); if (W.solidT(W.tile(tcx, fb))) { P.y = fb * T - P.h; P.climbing = false; P.onGround = true; } } }
       const letGo = (t) => { P.climbing = false; P.ladNoTx = tcx; P.ladNo = t; }; /* W16 Leiter */
       /* Leiter → Sprung: über doJump, damit variable Sprunghöhe/Schwebe wie beim Bodensprung greifen (vorher blieb ein alter „losgelassen“-Zustand hängen).
-         W16 Leiter: mit Richtung seitlich weg (voller Laufschwung, Spalte kurz gesperrt), ohne Richtung kurzer Hüpfer nach oben –
-         mit gehaltenem Hoch fängt man die Leiter danach wieder (Leiterhüpfer), sonst fällt man. Runter + Sprung = fallen lassen. */
+         W16 Leiter: mit Richtung seitlich weg (voller Laufschwung, Spalte kurz gesperrt), ohne Richtung kurzer Hüpfer nach oben
+         und fallen (mit gehaltenem Hoch: einfach weiterklettern, Nachrunde). Runter + Sprung = fallen lassen. */
       if (P.climbing && P.jumpBuf > 0) {
         P.jumpBuf = 0;
         if (inp.held.down) { letGo(0.16); P.vy = Math.max(P.vy, 60); }
+        else if (!h && inp.held.up) { /* W16 Leiter Nachrunde: Sprung ohne Richtung bei gehaltenem Hoch = weiterklettern (kein Hüpfer–Wiedergreifen–Kreislauf, Luftsprung bleibt) */ }
         else { letGo(h ? 0.3 : 0.2); P.vx = h * C.RUN; P.face = h || P.face; doJump(P, C.JUMP * (h ? 0.85 : 0.8)); P.coyote = 0; P.airJumps = 1; }
       }
       if (P.climbing && h && !inp.held.up && !inp.held.down && P.onGround) P.climbing = false;
