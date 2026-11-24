@@ -549,3 +549,10 @@
   const load0 = Z.loadArea;
   Z.loadArea = function () { W.length = 0; pv.trail.length = 0; return load0.apply(this, arguments); };
 })();
+
+/* W11 R15: Auflage für Gittertore, Falltüren und Hebel (Code in tageszeit.js) – hier eingehängt, weil effekte.js nach
+   erkundung.js geladen wird und so über dessen schlichten Toren zeichnet */
+(function () {
+  const Z = window.Z, d0 = Z.drawParcours;
+  Z.drawParcours = function (c, t) { if (d0) d0.apply(this, arguments); if (Z.toreAuf) Z.toreAuf(c, t); };
+})();

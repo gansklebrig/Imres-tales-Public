@@ -1442,12 +1442,20 @@
   }
 
   /* ======================= REQUISITEN ======================= */
+  const DASH_KETTE = [1.6, 0.9], DASH_NONE = [];
   function drawDecor(c, cam, t, front) {
+    const miniD = !!(Z.gq && Z.gq.mini);
     for (const d of lv.decor) {
       const px = d.x * T + 8, py = d.y * T + 16;
       if (px < cam.x - 60 || px > cam.x + cam.w + 60 || py < cam.y - 60 || py > cam.y + cam.h + 80) continue;
       const fl = Math.sin(t * 9 + d.x) * 0.5 + Math.sin(t * 13 + d.y) * 0.5;
       if (FANCY[d.kind] && fancyOn()) { drawFancy(c, d, px, py, t); continue; }
+      /* Handheld minimal (Runde 15): Ketten und Banner als schlichte Formen statt Glied für Glied */
+      if (miniD && (d.kind === "chain" || d.kind === "banner")) {
+        if (d.kind === "chain") { const len = 32 + (d.s || 0) * 20, sw = Math.sin(t * 1.1 + d.x) * 2; c.strokeStyle = "#3a3430"; c.lineWidth = 1.4; c.beginPath(); c.moveTo(px, py - 16); c.lineTo(px + sw, py - 16 + len); c.stroke(); }
+        else { const y = py - 31; c.fillStyle = "#3a2a1a"; c.fillRect(px - 7, y - 1, 14, 1.6); c.fillStyle = B.bg === "storm" ? "#2e3a24" : "#7a1a20"; c.beginPath(); c.moveTo(px - 5.5, y); c.lineTo(px + 5.5, y); c.lineTo(px + 5.5, y + 22); c.lineTo(px, y + 18); c.lineTo(px - 5.5, y + 22); c.fill(); }
+        continue;
+      }
       switch (d.kind) {
         case "torch": {
           /* Wandfackel: genietete Halterung, geschwungener Arm, umwickelter Schaft, Pechkopf */
@@ -1463,7 +1471,7 @@
             const mt = d._mt;
             if (mt.pole) { c.fillStyle = "#2a1c12"; c.fillRect(px - 0.9, y + 2, 1.8, mt.pole - y - 2); c.fillStyle = "#4a3220"; c.fillRect(px - 0.9, y + 2, 0.6, mt.pole - y - 2); c.fillStyle = "#3a3430"; c.fillRect(px - 2.4, mt.pole - 3, 4.8, 3); c.fillRect(px - 1.6, y + 1, 3.2, 2); }
             else {
-              const top = mt.chain || y - 40; c.strokeStyle = "#2a2522"; c.lineWidth = 0.8; c.setLineDash([1.6, 0.9]); c.beginPath(); c.moveTo(px - 3, y + 3); c.lineTo(px, top); c.lineTo(px + 3, y + 3); c.stroke(); c.setLineDash([]);
+              const top = mt.chain || y - 40; c.strokeStyle = "#2a2522"; c.lineWidth = 0.8; c.setLineDash(DASH_KETTE); c.beginPath(); c.moveTo(px - 3, y + 3); c.lineTo(px, top); c.lineTo(px + 3, y + 3); c.stroke(); c.setLineDash(DASH_NONE);
               c.fillStyle = "#2a2420"; c.beginPath(); c.moveTo(px - 4, y + 1); c.lineTo(px + 4, y + 1); c.lineTo(px + 2.4, y + 4.5); c.lineTo(px - 2.4, y + 4.5); c.fill(); c.fillStyle = "#6a5a4a"; c.fillRect(px - 4, y + 1, 8, 0.6);
             }
             flame(c, px, y - 3, 1.05 + fl * 0.15, "#ff9a3a");
@@ -1501,7 +1509,7 @@
           break; }
         case "chandelier": { /* eiserner Radleuchter an drei Ketten */
           const sw = Math.sin(t * 0.8 + d.x) * 1.5, cy = py + 8;
-          c.strokeStyle = "#2a2218"; c.lineWidth = 0.6; c.setLineDash([1.4, 0.8]); c.beginPath(); c.moveTo(px, py - 16); c.lineTo(px + sw, cy - 8); c.moveTo(px + sw, cy - 8); c.lineTo(px + sw - 10, cy); c.moveTo(px + sw, cy - 8); c.lineTo(px + sw + 10, cy); c.moveTo(px + sw, cy - 8); c.lineTo(px + sw, cy); c.stroke(); c.setLineDash([]);
+          c.strokeStyle = "#2a2218"; c.lineWidth = 0.6; c.setLineDash([1.4, 0.8]); c.beginPath(); c.moveTo(px, py - 16); c.lineTo(px + sw, cy - 8); c.moveTo(px + sw, cy - 8); c.lineTo(px + sw - 10, cy); c.moveTo(px + sw, cy - 8); c.lineTo(px + sw + 10, cy); c.moveTo(px + sw, cy - 8); c.lineTo(px + sw, cy); c.stroke(); c.setLineDash(DASH_NONE);
           D.circ(c, px + sw, cy - 8, 1.2, "#5a4a2a");
           c.fillStyle = "#3a2a14"; c.beginPath(); c.ellipse(px + sw, cy + 1, 11, 2.2, 0, 0, 6.283); c.fill(); c.fillStyle = "#6a5020"; c.beginPath(); c.ellipse(px + sw, cy, 11, 1.8, 0, 0, 6.283); c.fill(); c.fillStyle = "#2a1c0e"; c.beginPath(); c.ellipse(px + sw, cy, 8.5, 1, 0, 0, 6.283); c.fill();
           c.fillStyle = "#6a5020"; for (const k of [-1, 1]) { c.beginPath(); c.moveTo(px + sw + k * 9, cy + 1.5); c.quadraticCurveTo(px + sw + k * 10, cy + 5, px + sw + k * 7, cy + 5.5); c.lineTo(px + sw + k * 7.5, cy + 4.5); c.quadraticCurveTo(px + sw + k * 9, cy + 4, px + sw + k * 8, cy + 1.5); c.fill(); }
@@ -2074,16 +2082,17 @@
 
   /* Löcher in die Dunkelheit: für beide Lichtwege dieselbe Liste (Spieler, Lichtquellen, Gefahren, Geschosse …) */
   /* ck < 1: im Farblicht-Weg übernimmt das farbige Licht einen Teil der Aufhellung (sonst wäre alles schon weiß) */
+  const HOLE_BIG = { forge: 90, brazier: 80, chandelier: 90, campfire: 120, greenfire: 70, fountain: 60, altar: 60 }; /* einmal angelegt statt je Licht und Bild (GC-Spitzen auf Handhelds) */
   function cutHoles(hole0, cone0, holeC0, t, ck) {
     const P = Z.player;
     if (P) {
       let r = Z.darkness > 0 ? 70 : 150;
-      if (["a1", "a2"].some(s => P.slots[s] && P.slots[s].id === "dawnbringer")) r += 70;
+      if ((P.slots.a1 && P.slots.a1.id === "dawnbringer") || (P.slots.a2 && P.slots.a2.id === "dawnbringer")) r += 70;
       hole0(P.x + P.w / 2, P.y + 10, r, 0.95);
     }
     if (Z.darkness > 0) return;
     const k = ck || 1, hole = k < 1 ? (x, y, r, a) => hole0(x, y, r, a * k) : hole0, cone = k < 1 ? (x, y, w, h, a) => cone0(x, y, w, h, a * k) : cone0, holeC = k < 1 ? (x, y, r, a, col) => holeC0(x, y, r, a * (col ? k : 1), col) : holeC0;
-    for (const d of lv.lights) { const f = 1 + Math.sin(t * 9 + d.x) * 0.06 + Math.sin(t * 23 + d.y) * 0.04; const big = { forge: 90, brazier: 80, chandelier: 90, campfire: 120, greenfire: 70, fountain: 60, altar: 60 }[d.kind] || (d.kind === "mushroom" ? 40 : d.kind === "window" ? 60 : d.kind === "candle" ? 34 : 70); hole(d.x * T + 8, d.y * T + (d.kind === "torch" ? -6 : 6), big * f, d.kind === "window" ? 0.6 : 0.9);
+    for (const d of lv.lights) { const f = 1 + Math.sin(t * 9 + d.x) * 0.06 + Math.sin(t * 23 + d.y) * 0.04; const big = HOLE_BIG[d.kind] || (d.kind === "mushroom" ? 40 : d.kind === "window" ? 60 : d.kind === "candle" ? 34 : 70); hole(d.x * T + 8, d.y * T + (d.kind === "torch" ? -6 : 6), big * f, d.kind === "window" ? 0.6 : 0.9);
       if (d.kind === "chandelier" || d.kind === "lantern") cone(d.x * T + 8, d.y * T + 10, 90 * f, 130, 0.45); }
     for (const h of Z.hazards) if (h.kind === "fire" || h.kind === "column" || h.kind === "strike" || (h.kind === "breath")) hole(h.x, h.y - 10, 60, 0.8);
     for (const p of Z.projs) if (p.k.glow || p.kind === "lichtwelle" || p.kind === "e_feuerball") hole(p.x, p.y, 40, 0.8);
@@ -2126,9 +2135,21 @@
     G.lightFrame = G.frame;
   }
   /* Stufe 0 (Handheld): klassische Dunkelheitskarte – Löcher ausgeschnitten, „source-over“ über die Szene (unverändert) */
+  /* Handheld (lean, Runde 15): Dunkelheit und Lichtlöcher nur jedes 2. Bild neu in eine Grundkarte; dazwischen wird
+     die Grundkarte um die Kamerabewegung verschoben übernommen. Überlagerungen (Sichtnebel) laufen weiter je Bild. */
+  let dpBase = null, dpCam = null, dpFrame = -9, dpKey = "";
   function darkPass(c, cam, W, H, dark) {
     if (dark < 0.05) return false;
     const l = lightCanvas(W, H), sx = G.light.width / cam.w, sy = G.light.height / cam.h, t = G.time;
+    const lean = Z.gq && Z.gq.lean && !(G.off && G.off.lichtVoll), key = G.light.width + "x" + G.light.height + "|" + (lv && lv.seed) + "|" + dark.toFixed(3);
+    if (lean && dpBase && dpKey === key && G.frame - dpFrame === 1 && !(Z.flashLight > 0) && !FLASH.length) {
+      l.globalCompositeOperation = "copy"; l.globalAlpha = 1; l.drawImage(dpBase, (dpCam.x - cam.x) * sx, (dpCam.y - cam.y) * sy); l.globalCompositeOperation = "source-over";
+      /* Ränder, die durch die Verschiebung frei werden, mit Dunkelheit füllen */
+      l.globalCompositeOperation = "destination-over"; l.fillStyle = "rgba(" + G.darkRGB + "," + dark + ")"; l.fillRect(0, 0, G.light.width, G.light.height); l.globalCompositeOperation = "source-over";
+      overlays(l, cam, sx, sy);
+      c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.imageSmoothingEnabled = true; c.drawImage(G.light, 0, 0, W, H); c.restore();
+      return true;
+    }
     l.globalCompositeOperation = "source-over"; l.clearRect(0, 0, G.light.width, G.light.height);
     if (G.darkCol !== B.ambCol) { G.darkCol = B.ambCol; const n = parseInt((B.ambCol || "#202020").slice(1), 16); G.darkRGB = [((n >> 16) * 0.12) | 0, (((n >> 8) & 255) * 0.12) | 0, ((n & 255) * 0.12) | 0].join(","); }
     l.fillStyle = "rgba(" + G.darkRGB + "," + dark + ")"; l.fillRect(0, 0, G.light.width, G.light.height);
@@ -2137,6 +2158,7 @@
     const cone = (x, y, w, hh, a) => { const X = (x - cam.x) * sx, Y = (y - cam.y) * sy, Ww = w * sx, Hh = hh * sy; if (X < -Ww || X > G.light.width + Ww || Y > G.light.height || Y < -Hh) return; l.globalAlpha = a; l.drawImage(G.coneSpr, X - Ww / 2, Y, Ww, Hh); };
     cutHoles(hole, cone, hole, t);
     if (Z.darkness <= 0 && Z.flashLight > 0) { l.globalAlpha = 1; l.fillStyle = "rgba(0,0,0," + Z.flashLight + ")"; l.fillRect(0, 0, G.light.width, G.light.height); }
+    if (lean) { if (!dpBase || dpBase.width !== G.light.width || dpBase.height !== G.light.height) { dpBase = document.createElement("canvas"); dpBase.width = G.light.width; dpBase.height = G.light.height; } const bc = dpBase.getContext("2d"); bc.globalCompositeOperation = "copy"; bc.globalAlpha = 1; bc.drawImage(G.light, 0, 0); dpCam = dpCam || {}; dpCam.x = cam.x; dpCam.y = cam.y; dpFrame = G.frame; dpKey = key; }
     overlays(l, cam, sx, sy);
     c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.imageSmoothingEnabled = true; c.drawImage(G.light, 0, 0, W, H); c.restore();
     return true;

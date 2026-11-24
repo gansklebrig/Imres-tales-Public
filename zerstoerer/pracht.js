@@ -2968,7 +2968,7 @@
     c.save(); c.setTransform(S, 0, 0, S, -cam.x * S, -cam.y * S);
     const pPl = new Path2D(), pFl = new Path2D(), pLd = new Path2D(), pSh = new Path2D(), pLdS = new Path2D(), pSp = new Path2D(), pSpB = new Path2D(); let nSp = 0;
     /* helle Gebiete (Glut, Schmiede, Turmspitze) brauchen kräftigere Kanten */
-    const B = Z.biome || {}, hot = B.bg === "embercity" || B.bg === "forge" || B.bg === "spires", kp = hot ? 0.6 : 0.38, kl = hot ? 0.45 : 0.32;
+    const B = Z.biome || {}, hot = B.bg === "embercity" || B.bg === "forge" || B.bg === "spires", hell = hot || lv.out || B.bg === "castle" || B.bg === "ramparts" || B.bg === "camp", kp = hell ? 0.6 : 0.38, kl = hell ? 0.45 : 0.36;
     let nPl = 0, nFl = 0, nLd = 0;
     for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
       const v = lv.get(x, y); if (v === 0) continue;
