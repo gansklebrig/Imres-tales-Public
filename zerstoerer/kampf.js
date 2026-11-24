@@ -257,14 +257,21 @@
     const hereCol = ladCol(tx => W.isLadder(tx, Math.floor((P.y + P.h - 2) / T)) || W.isLadder(tx, Math.floor((P.y + 4) / T)));
     const belowCol = ladCol(tx => W.isLadder(tx, Math.floor((P.y + P.h + 2) / T)));
     const ladderHere = hereCol != null, ladderBelow = belowCol != null;
-    if (!P.climbing && !P.act && P.rollT <= 0 && P.hurtT <= 0) {
+    /* W16 Leiter: Greifsperre nach dem Loslassen (Absprung/Rolle/Fallenlassen), damit ein gehaltenes Hoch die Figur nicht
+       im selben Augenblick wieder an dieselbe Leiter klebt. ladNoTx = gesperrte Spalte, ladNo = Restzeit. */
+    if (P.ladNo > 0) P.ladNo -= dt; else P.ladNoTx = null;
+    if (P.ladHov > 0) P.ladHov -= dt;
+    const ladAtk = ["a1", "a2", "s1", "s2"].some(s => P.buf[s] > 0); /* W16 Leiter: Hoch + Angriff neben der Leiter = Aufwärtsangriff, nicht Greifen */
+    if (!P.climbing && (!P.act || P.act.phase === "post") && P.rollT <= 0 && P.hurtT <= 0 && !P.plunge && !P.grapple && !P.ledge && !P.shadowForm && !ladAtk) {
       if ((inp.held.up && ladderHere) || (inp.held.down && P.onGround && ladderBelow && !ladderHere)) {
         const col = ladderHere ? hereCol : belowCol;
         /* seitlich nur so weit schieben, wie kein Fels im Weg ist */
         const nx = col * T + T / 2 - P.w / 2;
-        let blocked = false; for (let ty = Math.floor(P.y / T); ty <= Math.floor((P.y + P.h - 0.01) / T); ty++) if (W.solidT(W.tile(Math.floor(nx / T), ty)) || W.solidT(W.tile(Math.floor((nx + P.w - 0.01) / T), ty))) blocked = true;
+        let blocked = !!(P.ladNo > 0 && P.ladNoTx === col); /* W16 Leiter */
+        for (let ty = Math.floor(P.y / T); ty <= Math.floor((P.y + P.h - 0.01) / T); ty++) if (W.solidT(W.tile(Math.floor(nx / T), ty)) || W.solidT(W.tile(Math.floor((nx + P.w - 0.01) / T), ty))) blocked = true;
         if (!blocked) {
-          P.climbing = true; P.ladTx = col; P.x = nx; P.vx = 0; P.vy = 0; P.airJumps = 1; P.coyote = 0; P.upAirUsed = 0;
+          if (P.act) endAct(P); /* W16 Leiter: Nachlauf eines Angriffs darf das Wiedergreifen nicht blockieren */
+          P.climbing = true; P.ladTx = col; P.x = nx; P.vx = 0; P.vy = 0; P.airJumps = 1; P.coyote = 0; P.upAirUsed = 0; P.ladHov = 0;
           if (inp.held.down && ladderBelow && !ladderHere) P.y += 6;
         }
       }
@@ -273,16 +280,50 @@
     if (P.climbing) {
       const v = (inp.held.down ? 1 : 0) - (inp.held.up ? 1 : 0);
       P.vy = v * C.CLIMB; P.vx = 0; P.anim.climb = (P.anim.climb || 0) + Math.abs(v) * dt * 8;
+      if (h) P.face = h; /* W16 Leiter: Links/Rechts dreht die Blickrichtung, ohne loszulassen */
       const nextY = P.y + P.vy * dt;
       const stillLadder = W.isLadder(tcx, Math.floor((nextY + P.h - 2) / T)) || W.isLadder(tcx, Math.floor((nextY + P.h * 0.5) / T));
       if (!stillLadder && v < 0) { /* oben angekommen: auf die Leiterkante stellen */
         const top = Math.floor((P.y + P.h - 2) / T); P.y = top * T - P.h; P.climbing = false; P.onGround = true; P.vy = 0;
       } else if (!stillLadder) { P.climbing = false; }
       else { P.y = nextY; if (v > 0) { const fb = Math.floor((P.y + P.h) / T); if (W.solidT(W.tile(tcx, fb))) { P.y = fb * T - P.h; P.climbing = false; P.onGround = true; } } }
-      /* Leiter → Sprung: über doJump, damit variable Sprunghöhe/Schwebe wie beim Bodensprung greifen (vorher blieb ein alter „losgelassen“-Zustand hängen) */
-      if (P.jumpBuf > 0) { P.climbing = false; P.jumpBuf = 0; if (!inp.held.down) { P.vx = h * C.RUN; doJump(P, C.JUMP * 0.8); P.coyote = 0; } }
-      if (h && !inp.held.up && !inp.held.down && P.onGround) P.climbing = false;
-      if (take(P, "roll")) { P.climbing = false; startRoll(P, h || P.face); }
+      const letGo = (t) => { P.climbing = false; P.ladNoTx = tcx; P.ladNo = t; }; /* W16 Leiter */
+      /* Leiter → Sprung: über doJump, damit variable Sprunghöhe/Schwebe wie beim Bodensprung greifen (vorher blieb ein alter „losgelassen“-Zustand hängen).
+         W16 Leiter: mit Richtung seitlich weg (voller Laufschwung, Spalte kurz gesperrt), ohne Richtung kurzer Hüpfer nach oben –
+         mit gehaltenem Hoch fängt man die Leiter danach wieder (Leiterhüpfer), sonst fällt man. Runter + Sprung = fallen lassen. */
+      if (P.climbing && P.jumpBuf > 0) {
+        P.jumpBuf = 0;
+        if (inp.held.down) { letGo(0.16); P.vy = Math.max(P.vy, 60); }
+        else { letGo(h ? 0.3 : 0.2); P.vx = h * C.RUN; P.face = h || P.face; doJump(P, C.JUMP * (h ? 0.85 : 0.8)); P.coyote = 0; P.airJumps = 1; }
+      }
+      if (P.climbing && h && !inp.held.up && !inp.held.down && P.onGround) P.climbing = false;
+      /* W16 Leiter: seitlich auf einen Absatz neben der Leiter treten (Füße höchstens 7 px über/unter dessen Oberkante) */
+      if (P.climbing && h && !inp.held.up && !inp.held.down) {
+        const sx = tcx + h, feet = P.y + P.h;
+        for (const ty of [Math.floor((feet - 7) / T), Math.floor((feet + 7) / T)]) {
+          const top = ty * T; if (Math.abs(feet - top) > 7) continue;
+          if (!(W.solidT(W.tile(sx, ty)) || W.isPlat(sx, ty))) continue;
+          if (!bodyFree(P.x + h * 4, top - P.h, P.w, P.h)) continue;
+          P.y = top - P.h; P.vy = 0; P.onGround = true; letGo(0.25); break;
+        }
+      }
+      /* W16 Leiter: Rolle = seitlicher Absprung mit Ausweichen (kleiner Hopser, Spalte kurz gesperrt) */
+      if (P.climbing && take(P, "roll")) { letGo(0.35); startRoll(P, h || P.face); P.vy = -170; P.airJumps = 1; }
+      /* W16 Leiter: Trank auch an der Leiter */
+      if (P.climbing && take(P, "potion")) {
+        if (P.potions > 0 && P.hp < P.hpMax && P.drinkT <= 0) { P.potions--; P.drinkT = 0.42; A.play("potion"); }
+        else if (P.potions <= 0) { FX.text(P.x + P.w / 2, P.y - 6, L(["Leer", "Empty"]), "#a99a8b"); A.play("ui", { vol: 0.4 }); }
+      }
+      /* W16 Leiter: Angriff/Fähigkeit löst von der Leiter – mit kurzer Schwebe (ladHov), Blick zu Links/Rechts oder zum
+         nächsten Gegner (Zielhilfe im Schacht). Danach greift gehaltenes Hoch die Leiter wieder. Runter + Angriff = Sturzangriff. */
+      if (P.climbing && P.hurtT <= 0) {
+        const ok = s => P.buf[s] > 0 && (s === "a1" || (P.slots[s] && (s[0] === "a" || (P.cd[s] <= 0 && !(P.st.silence > 0)))));
+        if (["a1", "a2", "s1", "s2"].some(ok)) {
+          P.climbing = false; P.ladNoTx = null; P.ladNo = 0; P.ladHov = 0.3; P.ladAtkNow = true; P.usedHover = false; P.vx = 0; P.vy = Math.min(P.vy, 0) * 0.3;
+          if (h) P.face = h;
+          else { const tg = nearestEnemy(P, 110, true); if (tg) P.face = tg.x + tg.w / 2 > P.x + P.w / 2 ? 1 : -1; }
+        }
+      }
       if (P.climbing) { if (P.anim.climb > 1) { P.anim.climb = 0; } return; }
     }
 
@@ -359,6 +400,7 @@
         else if (P.potions <= 0) { FX.text(P.x + P.w / 2, P.y - 6, L(["Leer", "Empty"]), "#a99a8b"); A.play("ui", { vol: 0.4 }); }
       }
     }
+    if (P.ladAtkNow) { P.ladAtkNow = false; if (P.act && P.act.type === "melee") { P.act.fromLadder = true; const tg = nearestEnemy(P, 110, true); if (tg) P.act.ladDy = U.clamp(tg.y + tg.h / 2 - (P.y + P.h - 15), -26, 26); } } /* W16 Leiter: Zielhilfe im Schacht (meleeHits) */
     if (P.act) updateAct(P, dt);
 
     /* ---------- Laufen ---------- */
@@ -429,6 +471,7 @@
       if (P.act && P.act.type === "melee" && P.act.phase !== "post" && !P.plunge) gk *= P.act.airHover ? 0.25 : 0.6;
       if (P.act && P.act.type === "charge") gk *= 0.6;
       if (P.gMul != null && !P.plunge) gk *= P.gMul; /* Schattensprint, Schweben, Aufwind (runen.js) */
+      if (P.ladHov > 0 && !P.plunge) gk *= 0.12; /* W16 Leiter: kurze Schwebe nach Angriff von der Leiter */
       const gOf = v => {
         let g = C.GRAV * gk;
         if (v > 0) { const r = Math.min(1, v / C.FALLV); g *= 1 + (C.FALL - 1) * r; if (down) g *= 1 + (C.FASTFALL - 1) * r; }
@@ -845,6 +888,7 @@
     const cx = P.x + P.w / 2, fy = P.y + P.h;
     const r = P.face > 0 ? { x: cx + bx, y: fy + by, w: bw, h: bh } : { x: cx - bx - bw, y: fy + by, w: bw, h: bh };
     if (c.spin) { r.x = cx - bw / 2 - 4; r.w = bw + 8; }
+    if (a.fromLadder) { r.y += (a.ladDy || 0) - 8; r.h += 16; } /* W16 Leiter: Schlag von der Leiter reicht höher/tiefer (Gegner im Schacht neben/unter der Leiter) */
     /* W8: Wände blockieren – Rechteck an der ersten Wand abschneiden (Klinge prallt ab), Ziele nur mit Sichtlinie */
     const oy = P.y + P.h / 2;
     let wh = null;
