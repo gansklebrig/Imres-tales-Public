@@ -116,7 +116,7 @@
     const dust = n => FX.burst(cx, fy, n, { col: [Z.dustCol || "#8a7a70", "#ff7a4a"], sp: 170, ang: -Math.PI / 2, spread: 2.8, life: 0.5, size: 3, kind: "smoke" });
     A.play("land", { vol: 0.8 }); P.vy = 0; P.diveRec = 0.32; P.diveRecPend = false;
     switch (st) {
-      case "beben": { FX.addShake(10); FX.stop(0.08); A.play("quake", { vol: 0.8 }); dust(30); const fresh = !(P.bebenT > 0); ring(92, Z.dmgOf(P, it, b * 1.7), { kb: 120, kbUp: 300, eff: { stun: 0.9 } }, "#e5a43a");
+      case "beben": { FX.addShake(10); FX.stop(0.08); A.play("quake", { vol: 0.8 }); dust(30); const fresh = !(P.bebenT > 0); ring(92, Z.dmgOf(P, it, b * 1.7), { kb: 120, kbUp: 300, eff: { stun: 0.7 } }, "#e5a43a");
         /* Steinspitzen nur, wenn das letzte Erdbeben eine Weile her ist (sonst Spitzen-Teppich beim Hüpfen) */
         if (fresh) for (const dir of [-1, 1]) for (let i = 0; i < 3; i++) later(() => Z.spawnHazard({ kind: "rockspike", x: cx + dir * (30 + i * 20), y: fy, w: 14, life: 0.45, dmg: Z.dmgOf(P, it, b * 0.5), owner: "p", kbUp: 320, once: true }), i * 70);
         P.bebenT = 1.2; P.diveRecX = 0.16; break; }
