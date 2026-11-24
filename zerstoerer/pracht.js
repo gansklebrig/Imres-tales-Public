@@ -2949,3 +2949,45 @@
     try { draw(c, cam, t, true); } catch (e) { console.error(e); } c.restore();
   };
 })();
+
+/* Ezekiel – The Destroyer · Lesbarkeit (Grafik-Runde 13, ab Stufe 1)
+   Nach all den Schichten müssen Laufflächen sofort erkennbar sein. Nach dem Lichtdurchgang werden darum die Oberkanten
+   von Stegen und festem Boden, die Holme der Leitern und die Spitzen von Stacheln mit feinen, warmen Lichtkanten betont
+   (Stege am deutlichsten, Boden dezent). Gegner-Geschosse bekommen einen dunklen Rand und einen hellen Kern, damit sie
+   auch vor Lava und hellem Himmel lesbar bleiben. Ein Pfad je Art und Bild. Stufe 0 / lean unverändert. */
+(function () {
+  "use strict";
+  const Z = window.Z, G = Z.gfx, T = Z.TILE, TAU = Math.PI * 2;
+  const on = () => { const q = Z.gq; if (q && q.lean) return false; if (G.off && G.off.lesbar) return false; return !q || (q.level === -1 ? true : q.level >= 1); };
+  const al0 = Z.drawAfterLight;
+  Z.drawAfterLight = function (c, cam, Wd, Hd, t) {
+    if (al0) al0.apply(this, arguments);
+    const lv = Z.level; if (!lv || !on()) return;
+    const S = G.scale || 2, x0 = Math.max(0, Math.floor(cam.x / T)), x1 = Math.min(lv.W - 1, Math.ceil((cam.x + cam.w) / T)), y0 = Math.max(1, Math.floor(cam.y / T)), y1 = Math.min(lv.H - 1, Math.ceil((cam.y + cam.h) / T));
+    const sol = v => v === 1 || v === 7, see = Z.sightAt;
+    c.save(); c.setTransform(S, 0, 0, S, -cam.x * S, -cam.y * S);
+    const pPl = new Path2D(), pFl = new Path2D(), pLd = new Path2D(), pSh = new Path2D();
+    let nPl = 0, nFl = 0, nLd = 0;
+    for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+      const v = lv.get(x, y); if (v === 0) continue;
+      const px = x * T, py = y * T;
+      /* nur, was Ezekiel sehen kann (im Sichtnebel bleibt das Unbekannte dunkel) */
+      if (see && see(px + 8, py - 4) < 0.35) continue;
+      const up = lv.get(x, y - 1);
+      if (v === 2 && up !== 2) { pPl.rect(px, py, T, 0.9); pSh.rect(px, py + 3.4, T, 0.8); nPl++; }
+      else if (sol(v) && (up === 0 || up === 4)) { pFl.rect(px, py, T, 0.7); nFl++; }
+      else if (v === 4) { pLd.rect(px + 2.4, py, 0.6, T); pLd.rect(px + 11.4, py, 0.6, T); nLd++; }
+    }
+    if (nFl) { c.fillStyle = "rgba(255,236,206,.10)"; c.fill(pFl); }
+    if (nPl) { c.fillStyle = "rgba(0,0,0,.3)"; c.fill(pSh); c.fillStyle = "rgba(255,232,196,.38)"; c.fill(pPl); }
+    if (nLd) { c.fillStyle = "rgba(255,232,196,.16)"; c.fill(pLd); }
+    /* Gegner-Geschosse: dunkler Rand, heller Kern */
+    for (const q of Z.projs || []) {
+      if (q.owner !== "e" || q.x < cam.x - 10 || q.x > cam.x + cam.w + 10 || q.y < cam.y - 10 || q.y > cam.y + cam.h + 10) continue;
+      const r = Math.max(2.2, (q.r || 2) + 1.2);
+      c.strokeStyle = "rgba(10,6,8,.55)"; c.lineWidth = 1.2; c.beginPath(); c.arc(q.x, q.y, r + 0.8, 0, TAU); c.stroke();
+      c.fillStyle = "rgba(255,248,230,.55)"; c.beginPath(); c.arc(q.x, q.y, Math.max(0.8, r * 0.35), 0, TAU); c.fill();
+    }
+    c.restore();
+  };
+})();

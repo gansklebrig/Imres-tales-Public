@@ -3454,6 +3454,73 @@
     slug(c, e, d, k, t) { c.fillStyle = "rgba(240,255,200,.35)"; c.beginPath(); c.ellipse(2, -4.6, 6, 0.8, -0.1, 0, Math.PI * 2); c.fill(); c.fillStyle = "rgba(255,255,255,.45)"; c.beginPath(); c.ellipse(-4.5, -12.5, 2.2, 1, -0.6, 0, Math.PI * 2); c.fill(); },
     rustmonster(c, e, d, k, t, mv) { if (mv && Math.random() < 0.2) Z.fx.p({ x: e.x + e.w / 2 + (Math.random() - 0.5) * e.w, y: e.y + e.h * 0.4, vx: (Math.random() - 0.5) * 20, vy: -10, life: 0.6, size: 1, col: Math.random() < 0.5 ? "#a0501e" : "#c87a3a", kind: "shard", g: 300 }); }
   };
+  /* ---------- Bosse (Grafik-Runde 13, ab Stufe 2, nie lean) ----------
+     Für alle Bosse: sichtbare Phasen – ab halber Lebenskraft steigen Glut/Funken in Bossfarbe auf und beim Schwellen-
+     übertritt (50 %, 25 %) fallen Rüstungs- bzw. Körperteile ab; unter 25 % Wut: pulsierender Hof hinter dem Körper,
+     schnelleres Funkeln. Dazu Sekundärbewegung für die schwächer wirkenden Bosse: Wraith (wehende Schattenfetzen,
+     Seelenfunken), Chasme (flirrende Flügel, Summlinien, Tropfen am Rüssel), Vrock (lose Federn, Sporenwolke), Weberin
+     (Seidenfaden nach oben, Augenkranz, Sanduhr-Zeichnung), Glasstab (kreisende Glasscherben, Runenkreis). */
+  const BKEY = new WeakMap();
+  const bossKey = d => { if (!d || !d.boss || !Z.BOSSDEF) return null; let k = BKEY.get(d); if (k !== undefined) return k; k = null; for (const id in Z.BOSSDEF) if (Z.BOSSDEF[id] === d || (Z.BOSSDEF[id].shape === d.shape && Z.BOSSDEF[id].c === d.c)) { k = id; break; } BKEY.set(d, k); return k; };
+  const hx2rgb = h => { const n = parseInt(String(h || "#ff8040").slice(1), 16); return ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255); };
+  const BOSS13 = {
+    wraith(c, e, d, k, t) { for (let i = 0; i < 4; i++) { const sw = Math.sin(t * 2.4 + i * 1.3) * 3; c.fillStyle = "rgba(20,14,30," + (0.55 - i * 0.1).toFixed(2) + ")"; c.beginPath(); c.moveTo(-6 + i * 4, -8); c.quadraticCurveTo(-8 + i * 4 + sw, 2, -10 + i * 4 + sw * 1.8, 8 + i * 2); c.lineTo(-3 + i * 4, -6); c.fill(); }
+      if (Math.random() < 0.3) Z.fx.p({ x: e.x + e.w / 2 + (Math.random() - 0.5) * e.w, y: e.y + e.h * 0.4, vx: (Math.random() - 0.5) * 10, vy: -16, life: 0.9, size: 1.2, col: "#b890ff", kind: "glow", g: -10, add: true }); },
+    chasme(c, e, d, k, t) { const fl = Math.sin(t * 40); c.fillStyle = "rgba(230,230,220,.14)"; for (const s2 of [-1, 1]) { c.beginPath(); c.ellipse(-2, -18 + s2 * 2, 16, 5 + fl * 2, -0.4 * s2, 0, Math.PI * 2); c.fill(); }
+      c.strokeStyle = "rgba(255,255,240,.25)"; c.lineWidth = 0.4; for (let i = 0; i < 3; i++) { c.beginPath(); c.arc(-4, -16, 20 + i * 4, -2.4 + (t * 2 + i) % 0.6, -2.0 + (t * 2 + i) % 0.6); c.stroke(); }
+      if (Math.random() < 0.08) Z.fx.p({ x: e.x + e.w / 2 + e.face * e.w * 0.5, y: e.y + e.h * 0.6, vx: 0, vy: 20, life: 0.7, size: 1.2, col: "#c03a2a", kind: "drop", g: 400 }); },
+    vrock(c, e, d, k, t) { if (Math.random() < 0.06) Z.fx.p({ x: e.x + Math.random() * e.w, y: e.y + e.h * 0.3, vx: (Math.random() - 0.5) * 20, vy: 10, life: 2.2, size: 1.8, col: "#2a2a24", kind: "leaf", g: 60, drag: 0.94 });
+      if (Math.random() < 0.15) Z.fx.p({ x: e.x + e.w / 2 + (Math.random() - 0.5) * e.w, y: e.y + e.h * 0.5, vx: (Math.random() - 0.5) * 12, vy: -6, life: 1.4, size: 1.6, col: "rgba(150,140,90,.6)", kind: "smoke", g: -4 });
+      c.strokeStyle = "rgba(255,230,200,.18)"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(-10, -26); c.quadraticCurveTo(0, -34, 14, -30); c.stroke(); },
+    weberin(c, e, d, k, t) { c.strokeStyle = "rgba(230,220,240,.35)"; c.lineWidth = 0.5; c.beginPath(); c.moveTo(-10, -18); c.lineTo(-10 + Math.sin(t) * 1.5, -140); c.stroke();
+    },
+    glasstab(c, e, d, k, t) { for (let i = 0; i < 4; i++) { const a = t * 1.4 + i * Math.PI / 2, x = Math.cos(a) * 12, y = -18 + Math.sin(a) * 4; c.fillStyle = "rgba(220,240,230," + (0.5 + 0.3 * Math.sin(a)).toFixed(2) + ")"; c.save(); c.translate(x, y); c.rotate(a * 2); c.beginPath(); c.moveTo(0, -2.4); c.lineTo(1.4, 1); c.lineTo(-1.2, 1.4); c.fill(); c.restore(); }
+      c.strokeStyle = "rgba(229,180,84," + (0.3 + 0.15 * Math.sin(t * 2)).toFixed(2) + ")"; c.lineWidth = 0.6; c.beginPath(); c.ellipse(0, -0.5, 14, 2.4, 0, 0, Math.PI * 2); c.stroke(); for (let i = 0; i < 8; i++) { const a = t * 0.5 + i / 8 * Math.PI * 2; c.fillStyle = "rgba(229,180,84,.5)"; c.fillRect(Math.cos(a) * 12 - 0.5, -0.5 + Math.sin(a) * 2 - 0.5, 1, 1); } }
+  };
+  function bossPhase(c, e, d, k, t, before) {
+    const f = e.hpMax ? e.hp / e.hpMax : 1, rgb = hx2rgb(d.t || d.c);
+    if (before) {
+      if (f < 0.25) { const a = 0.22 + 0.14 * Math.sin(t * 9); const g = c.createRadialGradient(0, -e.h * 0.5, 2, 0, -e.h * 0.5, Math.max(e.w, e.h) * 0.9); g.addColorStop(0, "rgba(255,60,40," + a.toFixed(2) + ")"); g.addColorStop(1, "rgba(255,60,40,0)"); c.fillStyle = g; c.beginPath(); c.arc(0, -e.h * 0.5, Math.max(e.w, e.h) * 0.9, 0, Math.PI * 2); c.fill(); }
+      return;
+    }
+    const ph = f < 0.25 ? 2 : f < 0.5 ? 1 : 0;
+    if (e._ph13 == null) e._ph13 = ph;
+    if (ph > e._ph13) { e._ph13 = ph; Z.fx.burst(e.x + e.w / 2, e.y + e.h * 0.4, 10 + ph * 6, { col: [d.c || "#5a5a5a", d.t || "#ffd27a", "#3a3434"], sp: 160, ang: -Math.PI / 2, spread: 2.6, life: 1.1, size: 2.4, kind: "shard", g: 600, drag: 0.96 }); Z.fx.ring && Z.fx.ring(e.x + e.w / 2, e.y + e.h / 2, 40 + e.w, "rgba(" + rgb + ",.8)", 0.4, 3); }
+    if (ph >= 1 && Math.random() < (ph === 2 ? 0.5 : 0.22)) Z.fx.p({ x: e.x + Math.random() * e.w, y: e.y + e.h * (0.2 + Math.random() * 0.6), vx: (Math.random() - 0.5) * 16, vy: -24 - Math.random() * 24, life: 0.8, size: 1.1 + ph * 0.3, col: "rgb(" + rgb + ")", kind: "glow", g: -20, add: true });
+  }
+  for (const sh of ["human", "kuotoa", "bugbear", "wraith", "golem", "wasp", "druidin", "giant", "vulture", "dragon", "spider"]) {
+    const f0 = SHAPES[sh]; if (!f0) continue;
+    SHAPES[sh] = function (c, e, d, k, t, mv, ph, ak) {
+      const on = d && d.boss && R12() && !flashOf(k) && e && !e.dead && !(Z.gfx && Z.gfx.off && Z.gfx.off.bosspracht);
+      if (!on) return f0.apply(this, arguments);
+      const key = bossKey(d);
+      c.save(); try { bossPhase(c, e, d, k, t, true); } catch (err) { } c.restore();
+      const r = f0.apply(this, arguments);
+      c.save(); try { if (key && BOSS13[key]) BOSS13[key](c, e, d, k, t); bossPhase(c, e, d, k, t, false); } catch (err) { } c.restore();
+      return r;
+    };
+  }
+  /* ---------- Ältere Gegner (Grafik-Runde 13, ab Stufe 2, nie lean) ----------
+     Gleiche Telegrafie wie die neuen Arten (Warnhof am Boden im Anlauf) und etwas Sekundärbewegung: Skelette mit
+     glimmenden Augenhöhlen und Knochenstaub, Zombies mit Fliegenschwarm, Kuo-Toa mit Wassertropfen und Glanz,
+     Ratten mit zuckendem Schwanzstaub. */
+  const OLD13X = {
+    skel(c, e, d, k, t, mv) { c.fillStyle = "rgba(160,255,190," + (0.35 + 0.2 * Math.sin(t * 3)).toFixed(2) + ")"; c.beginPath(); c.arc(1.6, -e.h + 4.2, 1.6, 0, Math.PI * 2); c.fill(); if (mv && Math.random() < 0.15) Z.fx.p({ x: e.x + e.w / 2, y: e.y + e.h - 2, vx: (Math.random() - 0.5) * 12, vy: -8, life: 0.5, size: 1, col: "#d8d0bc", kind: "dot", g: 80 }); },
+    zombie(c, e, d, k, t) { c.fillStyle = "rgba(20,16,12,.8)"; for (let i = 0; i < 4; i++) { const a = t * (4 + i) + i * 1.7, r = 6 + i * 1.5; c.fillRect(Math.cos(a) * r, -e.h + 2 + Math.sin(a * 1.3) * 3, 1, 0.8); } },
+    kuotoa(c, e, d, k, t) { c.fillStyle = "rgba(230,255,240,.28)"; c.beginPath(); c.ellipse(-1.5, -e.h * 0.6, 1.2, e.h * 0.18, 0.1, 0, Math.PI * 2); c.fill(); if (Math.random() < 0.05) Z.fx.p({ x: e.x + e.w / 2 + (Math.random() - 0.5) * e.w, y: e.y + e.h * 0.5, vx: 0, vy: 10, life: 0.6, size: 1, col: "#b8e0c8", kind: "drop", g: 400 }); },
+    rat(c, e, d, k, t, mv) { if (mv && Math.random() < 0.12) Z.fx.p({ x: e.x + e.w / 2 - e.face * e.w * 0.5, y: e.y + e.h - 1, vx: -e.face * 10, vy: -6, life: 0.4, size: 1, col: Z.dustCol || "#8a7a70", kind: "dot", g: 60 }); }
+  };
+  const OLDSKIP = new Set(NEU12.concat(["dummy"]));
+  for (const sh of Object.keys(SHAPES)) {
+    if (OLDSKIP.has(sh)) continue; const f0 = SHAPES[sh]; if (typeof f0 !== "function") continue;
+    SHAPES[sh] = function (c, e, d, k, t, mv, ph, ak) {
+      const on = d && !d.boss && R12() && !flashOf(k) && e && !e.dead;
+      if (on && Q.ph === "pre" && !d.fly) { const a = 0.25 + 0.25 * Math.sin(t * 18), red = e.act && e.act.a && (e.act.a.glyph === "!!" || e.act.a.unblockable), w = Math.max(8, e.w * 0.9); c.fillStyle = red ? "rgba(255,70,50," + (a * (0.6 + Q.pre * 0.6)).toFixed(2) + ")" : "rgba(255,190,90," + (a * (0.5 + Q.pre * 0.5)).toFixed(2) + ")"; c.beginPath(); c.ellipse(0, -0.5, w * (0.7 + Q.pre * 0.5), 1.8, 0, 0, Math.PI * 2); c.fill(); }
+      const r = f0.apply(this, arguments);
+      if (on && OLD13X[sh]) { c.save(); try { OLD13X[sh](c, e, d, k, t, mv); } catch (err) { } c.restore(); }
+      return r;
+    };
+  }
   for (const sh of NEU12) {
     const f0 = SHAPES[sh]; if (!f0) continue;
     SHAPES[sh] = function (c, e, d, k, t, mv, ph, ak) {
