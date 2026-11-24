@@ -127,22 +127,22 @@
       mot: [[0, 0, 2], [0, 2, 1], [3, 3, 1], [5, 4, 2], [3, 6, 2], [0, 8, 4]], p2: { mel: "trpst", bpm: 122 } },
     /* Wraith, Hüter von Khaems Grab: E phrygisch, langsam, Shakuhachi wie Atem, Schlitztrommel, rückwärts atmende Becken, Geisterchor */
     wraith: { root: 40, bpm: 84, scale: "phryg", drone: "vctrem", pad: "ooh", mel: "shaku", col: "glas", ost: "pizz", bass: "kb", brass: "pos", dr: ["riese2", "schlitz1", "rahm_2"], tick: 3500, acc: "geist",
-      mot: [[0, 0, 4], [1, 4, 2], [-1, 6, 2], [6, 8, 8]] },
+      mot: [[0, 0, 4], [1, 4, 2], [-1, 6, 2], [6, 8, 8]], p2: { mel: "aah", bpm: 90 } }, /* R18: Phase 2 – der Geisterchor übernimmt das Motiv */
     /* Wächter der Schmiede (Runengolem): F harmonisch Moll, Amboss auf 2 und 4, Marimba wie glühendes Metall */
     schmiedewaechter: { root: 41, bpm: 104, scale: "harm", drone: "vc", pad: "aah", mel: "blech", col: "mar", ost: "spic", bass: "tuba", brass: "hornst", dr: ["riese3", "taiko_42", "amboss"], tick: 5000, acc: "amboss",
-      mot: [[0, 0, 2], [0, 2, 1], [0, 3, 1], [7, 4, 2], [8, 6, 2], [7, 8, 2], [11, 10, 2], [12, 12, 4]] },
+      mot: [[0, 0, 2], [0, 2, 1], [0, 3, 1], [7, 4, 2], [8, 6, 2], [7, 8, 2], [11, 10, 2], [12, 12, 4]], p2: { mel: "trpst", bpm: 110 } }, /* R18: Phase 2 Trompeten, schneller */
     /* Chasme, der summende Dämon: Cis phrygisch, schnell; Didgeridoo als Bordun (Cis ist sein Ton), Schellen surren in Sechzehnteln */
     chasme: { root: 49, bpm: 132, scale: "phryg", drone: "didge", pad: "aah", mel: "shanai", col: "sitar", ost: "spic", bass: "kb", brass: "blech", dr: ["darb_2", "taiko_48", "schellen2"], tick: 9500, pw: "square", acc: "summen",
-      mot: [[0, 0, 1], [1, 1, 1], [0, 2, 1], [1, 3, 1], [0, 4, 1], [1, 5, 1], [7, 6, 2], [6, 8, 6]] },
+      mot: [[0, 0, 1], [1, 1, 1], [0, 2, 1], [1, 3, 1], [0, 4, 1], [1, 5, 1], [7, 6, 2], [6, 8, 6]], p2: { mel: "sitar", bpm: 140 } }, /* R18: Phase 2 Sitar surrt das Motiv */
     /* Ilvara, die Gestaltwandlerin (Drow-Druidin): H dorisch, Okarina, Koto, Volksharfen-Läufe – wild und elegant */
     ilvaraW: { root: 47, bpm: 108, scale: "dorisch", drone: "vc", pad: "ooh", mel: "oka", col: "koto", ost: "fharfe", bass: "kb", brass: "horn", dr: ["bodh2", "taiko_42", "rahm_1"], tick: 5000, acc: "wald",
       mot: [[0, 0, 2], [2, 2, 1], [3, 3, 1], [7, 4, 4], [9, 8, 2], [7, 10, 2], [5, 12, 4]], p2: { mel: "shaku", bpm: 114 } },
     /* der rasende Riese: E harmonisch Moll, schwer im halben Tempo, riesige Trommeln auf 1 und 3 */
     riese: { root: 40, bpm: 92, scale: "harm", drone: "vc", pad: "aah", mel: "hornst", col: "glock", ost: "spic", bass: "tuba", brass: "blech", dr: ["riese1", "riese3", "taiko_36"], tick: 4500, acc: "riese",
-      mot: [[0, 0, 3], [0, 3, 1], [0, 4, 2], [1, 6, 2], [0, 8, 8]], p2: { bpm: 100 } },
+      mot: [[0, 0, 3], [0, 3, 1], [0, 4, 2], [1, 6, 2], [0, 8, 8]], p2: { mel: "blech", bpm: 100 } },
     /* Vrock, Geier aus dem Abyss: B harmonisch Moll, kreischende Pfeifen, Tremolo-Cluster der Geigen */
     vrock: { root: 46, bpm: 124, scale: "harm", drone: "vctrem", pad: "aah", mel: "pfeife", col: "glock", ost: "spic", bass: "kb", brass: "trpst", dr: ["timp1", "snare2", "taiko_48"], tick: 8500, acc: "kreischen",
-      mot: [[12, 0, 1], [11, 1, 1], [8, 2, 2], [7, 4, 2], [1, 6, 2], [0, 8, 6]] },
+      mot: [[12, 0, 1], [11, 1, 1], [8, 2, 2], [7, 4, 2], [1, 6, 2], [0, 8, 6]], p2: { mel: "trpst", bpm: 130 } }, /* R18: Phase 2 Trompeten kreischen mit */
     /* Demogorgon, Fürst der Dämonen, im Herz des Sees: F phrygisch, Orgel, zwei Köpfe = Tritonus-Paare; Wasser und Walgesang bleiben */
     demogorgon: { root: 41, bpm: 96, scale: "phryg", drone: "orgel", pad: "aah", mel: "horn", col: "rgl", ost: "spic", bass: "tuba", brass: "blech", dr: ["riese1", "riese2", "taiko_36"], tick: 3000, acc: "zwei", water: 0.5, drLP: 3500,
       mot: [[0, 0, 2], [6, 2, 2], [1, 4, 2], [7, 6, 2], [0, 8, 8]], p2: { mel: "aah", bpm: 102 }, p3: { mel: "blech", brass: "blech", bpm: 110, water: 0.8 } },
@@ -801,15 +801,16 @@
     if (p.calm || D.k === 0) return 0;
     let w = M.want === 4 ? (I > 0.42 ? 2 : 0) : M.want;
     const fight = M.ambush || M.trial;
+    /* R18: Raum frei (letzter Gegner besiegt, klang.js) – die Nachwirkung der Kills (Hitze/Schub) zieht nicht mehr in den Kampf zurück */
+    const frei = M.raumFrei && A.ctx && A.ctx.currentTime - M.raumFrei < 20;
     /* hinauf */
-    if (I >= D.inK || fight) w = Math.max(w, 2); else if (I >= 0.12) w = Math.max(w, 1);
+    if ((I >= D.inK && !frei) || fight) w = Math.max(w, 2); else if (I >= 0.12 && !frei) w = Math.max(w, 1);
     if ((M.eliteNear && I >= 0.45) || I >= 0.93 || M.ambush) w = Math.max(w, 3);
     /* hinunter – jeweils erst nach einer Haltezeit */
     if (w === 3) { if (!M.eliteNear && !M.ambush && I < 0.62) { H[3] += dt; if (H[3] > 2.5) { w = 2; H[3] = 0; } } else H[3] = 0; }
-    /* R17: letzter Gegner im Kampf besiegt (klang.js setzt M.raumFrei) – nach 1,2 statt 3,5 s zurück in die Ruhe */
-    const frei = M.raumFrei && A.ctx && A.ctx.currentTime - M.raumFrei < 5;
+    /* R17: letzter Gegner im Kampf besiegt (klang.js setzt M.raumFrei) – nach 1,2 statt 3,5 s zurück in die Ruhe (frei: oben) */
     if (w === 2) { if (!fight && (I < 0.2 || frei)) { H[2] += dt; if (H[2] > (frei ? 1.2 : 3.5)) { w = I > 0.08 ? 1 : 0; H[2] = 0; } } else H[2] = 0; }
-    if (w === 1) { if (I < 0.06) { H[1] += dt; if (H[1] > 2) { w = 0; H[1] = 0; } } else H[1] = 0; }
+    if (w === 1) { if (I < 0.06 || frei) { H[1] += dt; if (H[1] > (frei ? 2.5 : 2)) { w = 0; H[1] = 0; } } else H[1] = 0; }
     return w;
   }
   /* Stufe übernehmen (auf dem Taktgeber, Zeitpunkt t) */
@@ -966,7 +967,8 @@
     /* Stufenwechsel nur auf Grenzen: Kampf auf jede Viertel, Elite/Boss auf halbe Takte, abwärts auf die Eins */
     if (M.want !== M.tier) {
       /* R16: zurück in die Ruhe nur auf den Beginn einer Zwei-Takt-Phrase (vorher: jede Eins) */
-      const w = M.want, ok = w > M.tier ? (w <= 2 ? st % 2 === 0 : st % 4 === 0) : (st === 0 && (w >= 2 || M.tier < 2 || bar % 2 === 0));
+      const raum = M.raumFrei && A.ctx.currentTime - M.raumFrei < 20; /* R18: nach dem letzten Gegner auf die nächste Eins */
+      const w = M.want, ok = w > M.tier ? (w <= 2 ? st % 2 === 0 : st % 4 === 0) : (st === 0 && (w >= 2 || M.tier < 2 || bar % 2 === 0 || raum));
       const vorher = M.tier;
       if (ok) commitTier(w, t);
       /* R16 harmonischer Anschluss: beim Einstieg in den Kampf die Kampf-Akkordfolge so drehen, dass sie mit dem gerade klingenden
@@ -1272,7 +1274,14 @@
     amboss: (p, t) => [0, 0.5, 1].forEach((d, i) => hit("amboss", t + 0.6 + d, 0.18 - i * 0.05, 1, M.busSt)),
     feuer: (p, t) => hit("gong", t + 0.6, 0.16, 0.9, M.busSt),
     riese: (p, t) => { hit("riese1", t, 0.5, 0.85, M.busSt); kick(t, 0.8); },
-    netz: (p, t) => [0, 4, 7, 12, 16].forEach((d, i) => playNote(p.col || "cel", p.root + 24 + d, t + 0.6 + i * 0.1, 0.05, 1.5, M.busSt, 2))
+    netz: (p, t) => [0, 4, 7, 12, 16].forEach((d, i) => playNote(p.col || "cel", p.root + 24 + d, t + 0.6 + i * 0.1, 0.05, 1.5, M.busSt, 2)),
+    /* R18: bisher ohne eigenen Schluss – Chasme: Sitar-Triller auf der Quinte verebbt; Ilvara: Okarina ruft, Koto antwortet abwärts;
+       Vrock: Pfeife stürzt in Halbtönen ab; Demogorgon: Tritonus der zwei Köpfe löst sich in die reine Quinte; Venomfang: Pizzicato rutscht chromatisch auf den Grundton */
+    summen: (p, t) => { for (let i = 0; i < 8; i++) playNote("sitar", p.root + 12 + (i % 2 ? 8 : 7), t + 0.6 + i * 0.07, 0.06 - i * 0.005, 0.5, M.busSt, 2); },
+    wald: (p, t) => { [7, 9, 12].forEach((d, i) => playNote("oka", p.root + 24 + d, t + 0.6 + i * 0.16, 0.06, 1.2, M.busSt, 2)); [12, 9, 7, 4, 0].forEach((d, i) => playNote("koto", p.root + 12 + d, t + 1.2 + i * 0.12, 0.06, 1.6, M.busSt, 2)); },
+    kreischen: (p, t) => [12, 11, 10, 9, 8, 7].forEach((d, i) => playNote("pfeife", p.root + 24 + d, t + 0.6 + i * 0.09, 0.05 - i * 0.006, 0.6, M.busSt, 2)),
+    zwei: (p, t) => { playNote("orgel", p.root, t + 0.6, 0.07, 1.6, M.busSt, 2); playNote("orgel", p.root + 6, t + 0.6, 0.06, 1.2, M.busSt, 2); playNote("orgel", p.root + 7, t + 1.7, 0.07, 2.6, M.busSt, 2); playNote("orgel", p.root + 12, t + 1.7, 0.05, 2.6, M.busSt, 2); },
+    gift: (p, t) => [6, 5, 4, 3, 2, 1, 0].forEach((d, i) => playNote("pizz", p.root + 12 + d, t + 0.6 + i * 0.08, 0.09, 0.8, M.busSt, 2))
   };
   const STINGERS = {
     kampf: ({ p, t, o, beat, tn, B }) => { /* Einsatz: tiefer Schlag, Becken, Blechstoß – auf die Taktgrenze */
@@ -1398,7 +1407,16 @@
       duck(gr ? 0.45 : 0.3, t, gr ? 2.8 : 1.5);
       void b; void t0;
     },
-    tod: ({ p, t, B }) => { /* tiefer Chor sinkt herab */
+    tod: ({ p, t: t0, B }) => { /* tiefer Chor sinkt herab */
+      /* R18 Niederlage im Bosskampf: der Boss „triumphiert“ – die ersten Töne seines Leitmotivs in seiner Melodiestimme, breit und
+         eine Oktave tiefer; danach erst der Chor */
+      let t = t0;
+      if (p.boss && p.mot && p.mot.length) {
+        const mot = p.mot.slice(0, 4), b0 = 0.24;
+        mot.forEach(([s0, st, l]) => playNote(p.mel || "horn", p.root + s0, t0 + st * b0, 0.12, b0 * l + 0.3, B, 2));
+        if (p.dr) hit(p.dr[0], t0, 0.5, 0.85, B);
+        t = t0 + Math.min(2.2, Math.max(...mot.map(n => n[1] + n[2])) * b0) + 0.2; M.stats.bossTod = (M.stats.bossTod || 0) + 1;
+      }
       [0, -2, -4].forEach((d, i) => playNote("ooh", deg(p.scale, d, p.root + 12), t + i * 0.9, 0.12, 2.4, B, 1));
       playNote("vc", p.root - 12, t, 0.2, 4, B, 1);
       hit("gong", t + 0.1, 0.18, 0.7, B);

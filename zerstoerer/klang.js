@@ -1419,6 +1419,44 @@
     if (n > 0 && M.raumFrei) M.raumFrei = 0; /* neue Gegner: kein schneller Ausstieg */
     FG.nah = n; FG.kills = k;
   }
+  /* R18 Gittertor-Abkürzung (erkundung.js pullLever, Z.erkundung().levers[].pulled, g.vert = Falltür, g.flut = Flutgitter) – nach Zustand:
+     Hebel rastet (tiefer Riegel), Kettenwinde läuft an (Kettenglieder immer schneller), Gitter hebt sich knirschend (Staub, Knarren),
+     oben rastet es ein (Metallschlag; Falltür: Holzschlag), dann leise Kalimba 1-3-5 „Weg frei“. Hooks chain/door ersetzen den alten Klang
+     nur im selben Moment; sonst Nachholen im Takt. Flutgitter behält sein Wasser (splash). */
+  const GT = { stats: { hebel: 0, nachgeholt: 0 }, t: -9 }; KL.gittertor = GT;
+  const gtLevers = () => { const S = Z.erkundung && Z.erkundung(); return (S && S.levers) || []; };
+  function gtKlang(o) {
+    o._kl = true; GT.stats.hebel++; GT.t = A.ctx.currentTime;
+    const x = o.x, y = o.y - 10, g = o.g || {}, gx = g.tiles && g.tiles.length ? g.tiles[0][0] * (Z.TILE || 16) + 8 : x, gy = g.tiles && g.tiles.length ? g.tiles[0][1] * (Z.TILE || 16) : y;
+    wshot(AM("e_riegel_" + (1 + ((Math.random() * 4) | 0))), x, y, { vol: 0.35, rate: 0.7, verb: 0.3, gap: 0, tag: "gt1" });
+    [0.18, 0.36, 0.52, 0.66, 0.78, 0.88, 0.96].forEach((d, i) => wshot(pk(SRS.kette), gx, gy, { vol: 0.1 + i * 0.012, rate: 0.85 + i * 0.05, delay: d, verb: 0.4, gap: 0, tag: "gtk" + i, far: 1.4 }));
+    wshot(pk(SRS.knarz), gx, gy, { vol: 0.16, rate: 0.7, delay: 0.3, verb: 0.5, gap: 0, tag: "gtn", far: 1.4 });
+    dustNoise(gx, gy, 0.05, 1.2);
+    if (g.vert) wshot(KS("fx_im_impactplank_medium_002"), gx, gy, { vol: 0.32, rate: 0.75, delay: 1.05, verb: 0.4, gap: 0, tag: "gte", far: 1.4 });
+    else wshot(KS("fx_im_impactmetal_heavy_003"), gx, gy, { vol: 0.24, rate: 0.85, delay: 1.05, verb: 0.5, gap: 0, tag: "gte", far: 1.4 });
+    if (!g.flut) [0, 2, 4].forEach((d, i) => tuned("kal", d, 2, 0.07, 1.25 + i * 0.1, "gtw" + i));
+  }
+  function gtJetzt() { const o = gtLevers().find(o => o.pulled && !o._kl && o._klInit); if (!o) return false; gtKlang(o); return true; }
+  function gtTick() {
+    for (const o of gtLevers()) if (!o._klInit) { o._klInit = true; if (o.pulled) o._kl = true; }
+    const o = gtLevers().find(o => o.pulled && !o._kl); if (o) { GT.stats.nachgeholt++; gtKlang(o); }
+  }
+  /* R18 Fallschacht-Abkürzung (welt.js lv.abkuerzungen [{x, y0, y1}], 2 Kacheln breit): wer hinabfällt, hört die Luft vorbeiziehen
+     (fallender Wisch, tiefer werdend) – einmal je Sturz; die Landung macht der normale Aufprall */
+  const FS = { in: false, stats: { sturz: 0 } }; KL.fallschacht = FS;
+  function fsTick() {
+    const P = Z.player, lv = Z.level; if (!P || !lv || !lv.abkuerzungen || !lv.abkuerzungen.length) { FS.in = false; return; }
+    const T = Z.TILE || 16, tx = Math.floor((P.x + P.w / 2) / T), ty = Math.floor((P.y + P.h / 2) / T);
+    const drin = lv.abkuerzungen.some(a => tx >= a.x && tx <= a.x + 1 && ty > a.y0 && ty < a.y1);
+    if (drin && !FS.in && P.vy > 60) {
+      FS.stats.sturz++; if (!A.ok) return; const c = A.ctx; if (!noiseB || noiseB.sampleRate !== c.sampleRate) mkNoise();
+      const t = c.currentTime + 0.01, s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+      s.buffer = RISS.white || noiseB; s.loop = true; f.type = "bandpass"; f.Q.value = 1.2; f.frequency.setValueAtTime(2400, t); f.frequency.exponentialRampToValueAtTime(500, t + 0.9);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.06, t + 0.25); g.gain.linearRampToValueAtTime(0, t + 0.95);
+      s.connect(f); f.connect(g); g.connect(A.sfx); s.start(t); s.stop(t + 1); s.onended = () => { try { s.disconnect(); f.disconnect(); g.disconnect(); } catch (_) {} };
+    }
+    FS.in = drin;
+  }
   /* R15 Befreiter Kundschafter (abenteuer.js, Z.helferAktiv()): beim Losgehen ein kurzer Ruf, beim Abschied ein Gruß (Formant-Laute
      wie die Lager-Figuren), Treffer als leichter Dolchstich (KL.treffer, src "helfer") statt des alten „slash“ (Hook nur direkt danach). */
   const HL = { an: false, lv: null, hitT: -9, stats: { ruf: 0, abschied: 0, treffer: 0 } }; KL.helfer = HL;
@@ -1466,6 +1504,7 @@
   if (A) A.hook = Object.assign(A.hook || {}, {
     splash: o => quSplash(),
     parry: o => fgParry(),
+    door: o => !!(A.ctx && A.ctx.currentTime - GT.t < 0.02), /* R18: Tür-Klang des Gittertor-Hebels (gleicher Moment) */
     slash: o => !!(A.ctx && A.ctx.currentTime - HL.hitT < 0.03),
     rock: o => raeFalsch() || bkFall(),
     hitHeavy: o => bkImpact(),
@@ -1481,7 +1520,7 @@
     anvil: o => { if (Z.ui && Z.ui.modalOpen && !o._m) { A.play("anvil", Object.assign({}, o, { vol: (o.vol || 1) * 0.7, _m: 1, noHook: true })); return true; } return false; },
     /* Rückweg-Tor erlischt (rueckweg.js spielt genau dann „chain“ 0,28/0,9 mit x): Aufschlag des Fallgitters nach 0,56 s, Rückprall nach 0,73 s – wie die Grafik */
     chain: o => {
-      if (raePull() || raeZurueck()) return true; /* R15: nach Zustand statt Parametern */
+      if (raePull() || raeZurueck() || gtJetzt()) return true; /* R15: nach Zustand statt Parametern; R18 Gittertor */
       if (o && o.vol === 0.28 && o.rate === 0.9 && o.x != null && Z.rueckweg) { VS.stats.tor++; const y = Z.player ? Z.player.y : 0;
         wshot(KS("fx_im_impactmetal_heavy_000"), o.x, y, { vol: 0.42, rate: 0.75, delay: 0.56, gap: 0, tag: "rwa", verb: 0.5 });
         wshot(KS("fx_im_impactmetal_heavy_003"), o.x, y, { vol: 0.16, rate: 1.1, delay: 0.73, gap: 0, tag: "rwr", verb: 0.4 });
@@ -1623,7 +1662,7 @@
     /* Raumkulisse und Gegnerstimmen */
     try { roomTick(dt); observe(dt); climbTick(dt); transitTick(dt); } catch (e) { if (!KL.err3) { KL.err3 = 1; console.error(e); } }
     try { sonderTick(dt); } catch (e) { if (!KL.err7) { KL.err7 = 1; console.error(e); } }
-    try { raeTick(); quStateTick(P); fuTick(); hlTick(); bkTick(); fgTick(); } catch (e) { if (!KL.err9) { KL.err9 = 1; console.error(e); } } /* R15: Rätsel/Quelle nach Zustand */
+    try { raeTick(); quStateTick(P); fuTick(); hlTick(); bkTick(); fgTick(); gtTick(); fsTick(); } catch (e) { if (!KL.err9) { KL.err9 = 1; console.error(e); } } /* R15: Rätsel/Quelle nach Zustand */
     try { rueckTick(dt); } catch (e) { if (!KL.err8) { KL.err8 = 1; console.error(e); } }
     try { tplTick(dt); } catch (e) { if (!KL.err9) { KL.err9 = 1; console.error(e); } }
     try { bewegTick(dt); } catch (e) { if (!KL.err10) { KL.err10 = 1; console.error(e); } }
@@ -1642,6 +1681,11 @@
     let r;
     if (Z.gq && Z.gq.lean) { muAcc += dt || 0; if (muAcc >= 0.045) { r = upd0.call(this, muAcc); muAcc = 0; } }
     else r = upd0.apply(this, arguments);
+    /* R18 Karte auf/zu (ui.js toggleMap setzt Z.ui.mapPing; kein eigener Klang): leises Papierrascheln, öffnend ein Kalimbaton hinauf, schließend hinab */
+    try { const mp = (Z.ui && Z.ui.mapPing) || 0; if (KL.mapPing === undefined) KL.mapPing = mp;
+      else if (mp !== KL.mapPing) { KL.mapPing = mp; KL.karteOffen = !KL.karteOffen; if (A.ok && !Z.quiet) {
+        shot(AM("e_papier_" + (1 + ((Math.random() * 3) | 0))), { vol: 0.12, rate: KL.karteOffen ? 1.1 : 0.95, verb: 0.15, gap: 0.2, tag: "karte", must: true });
+        tuned("kal", KL.karteOffen ? 4 : 2, 2, 0.05, 0.06, "karte2"); KL.stats.karte = (KL.stats.karte || 0) + 1; } } } catch (_) {}
     klAcc += dt || 0;
     if (!(Z.gq && Z.gq.lean) || klAcc >= 0.1) { const d = klAcc; klAcc = 0; try { KL.tick(d); } catch (e) { if (!KL.err) { KL.err = 1; console.error(e); } } }
     return r;
