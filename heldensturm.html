@@ -25485,9 +25485,14 @@ function ka2HallenKammern(K,s,B,ports){const ax=ka2Achse(K,s,B);if(!ax)return nu
 /* Seitenraum mit zweitem Durchgang in denselben Abschnitt: kleiner Rundweg statt Sackgasse */
 function ka2Schleife(K,s){const sec=K.sec[s];if(!sec||!sec.seite||sec.ka2S)return;sec.ka2S=1;if(Math.random()>KA2.schleife)return;const par=K.sec[sec.parent];if(!par)return;const C=K.C;
  const t1=K.tore.find(t=>t.typ==='seite'&&t.b===s);if(!t1)return;const o1=t1.P.t-t1.P.base;const opts=[];for(let off=10;off<=C-11;off++)if(Math.abs(off-o1)>=12)opts.push(off);if(!opts.length)return;
- const P_=kaPort(K,par.cell,sec.cell,C,{w:3,m:3,off:pick(opts)});
- /* Anschluss an den (schon ausgeformten) Elternabschnitt: nächste Bodenzelle suchen */
- const n=K.n;let best=-1,bd=1e9;for(let c=0;c<n*n;c++){if(K.M[c]||K.sid[c]!==par.k)continue;const d=Math.hypot(c%n-P_.pa.i,((c/n)|0)-P_.pa.j);if(d<bd){bd=d;best=c}}if(best<0||bd>16)return;
+ /* Echter Rundweg: der zweite Durchgang mündet dort in den Elternabschnitt, wo der Fußweg vom ersten Durchgang am weitesten ist
+    (vorher: zufällige Stelle – beide Gänge trafen oft denselben Flur, man kam genau dort wieder heraus, wo man hineinging). */
+ const n=K.n;const parZ=[];for(let c=0;c<n*n;c++)if(!K.M[c]&&K.sid[c]===par.k)parZ.push(c);if(!parZ.length)return;
+ const nahe=(pi,pj)=>{let bc=-1,bd=1e9;for(const c of parZ){const d=Math.hypot(c%n-pi,((c/n)|0)-pj);if(d<bd){bd=d;bc=c}}return[bc,bd]};
+ let dW=null;try{const q0=nahe(t1.pa.i,t1.pa.j);if(q0[0]>=0)dW=kaFlut(K,[q0[0]],K.lo)}catch(e){dW=null}
+ let P_=null,best=-1,bd=1e9,bw=-1e9;for(const off of opts){const Q=kaPort(K,par.cell,sec.cell,C,{w:3,m:3,off});const q=nahe(Q.pa.i,Q.pa.j);if(q[0]<0||q[1]>20)continue;
+  const w=(dW&&dW[q[0]]>=0?dW[q[0]]:0)-q[1]*1.5+Math.abs(off-o1)*0.3+Math.random()*3;if(w>bw){bw=w;P_=Q;best=q[0];bd=q[1]}}
+ if(!P_||best<0)return;
  kaDurchgang(K,P_,par.k,s);kaLinie(K,P_.pa.i,P_.pa.j,best%n,(best/n)|0,3,par.k,null,0.06);
  const tor={g:K.tore.length,a:par.k,b:s,P:P_,typ:'seite',los:'offen',main:0,fl:null,pa:P_.pa,pb:P_.pb,ka2:1};K.tore.push(tor);par.ports.push(P_.pa);sec.ports.push(P_.pb);KA2.st.schleife=(KA2.st.schleife||0)+1}
 {const fo0=kaFormOrganisch;kaFormOrganisch=function(K,s,B,ports,o){if(!ka2An()||!KA2.form||!K||!K.sec)return fo0.apply(this,arguments);try{if(K.sec[s]&&K.sec[s].seite)ka2Schleife(K,s);const r=ka2Organisch(K,s,B,ports,o||{});if(r)return r}catch(er){console.error('ka2Organisch',er)}return fo0.apply(this,arguments)}}
@@ -40339,7 +40344,7 @@ window.__hsPRAEG={v:1,n:0};
 /* ================= Paket „gold2“: Hehler und Wette am Lagerfeuer – window.__hsGOLD2 =================
    Hehler: verhüllte Ware (Waffe/Rüstung/Schmuck) in drei Güten, Chancen stehen offen dran, Preis steigt mit Stufe und
    jedem Kauf im Lauf. Wette auf dich selbst: nächste Stufe ohne Heiltrank / nie unter 30 % Leben / beides – Einsatz
-   10 % oder 25 % des Goldes, Gewinn doppelt (beides dreifach). Kein Automat, keine Endlos-Würfe. */
+   10 % oder 25 % des Goldes (nach Level gedeckelt), Gewinn doppelt (beides dreifach). Kein Automat, keine Endlos-Würfe. */
 window.__hsGOLD2={v:1,kauf:0,wette:0,gew:0};
 (function(){try{
  const GD=window.__hsGOLD2;const ORANGE='#e5b454';
@@ -40353,7 +40358,10 @@ window.__hsGOLD2={v:1,kauf:0,wette:0,gew:0};
   try{persist()}catch(e){}return txt}
  /* ---- Wette ---- */
  const WETTEN=[{k:'trank',n:'Ohne Heiltrank',d:'Die nächste Stufe ohne einen einzigen Heiltrank.',x:2},{k:'heil',n:'Nie unter 30 % Leben',d:'Dein Leben fällt in der nächsten Stufe nie unter 30 %.',x:2},{k:'beides',n:'Beides',d:'Ohne Heiltrank und nie unter 30 % Leben.',x:3}];
- const einsatz=f=>Math.max(50,Math.round(SAVE.gold*f/10)*10);
+ /* Einsatz gedeckelt (wächst mit dem Level, nicht mit dem Goldbestand): sonst ließ sich das Gold Stufe für Stufe um 25–50 % vermehren –
+    über einen Lauf das Tausendfache. Kleiner Einsatz höchstens 100 + 40 je Level, großer das 2,5-Fache. */
+ const deckel=f=>Math.round((100+40*((P&&P.level)||1))*(f>=0.25?2.5:1)/10)*10;
+ const einsatz=f=>Math.max(50,Math.min(deckel(f),Math.round(SAVE.gold*f/10)*10));
  function wetteSetzen(w,f){const e=einsatz(f);if(SAVE.gold<e)return false;SAVE.gold-=e;G.wette={k:w.k,x:w.x,e,st:G.stage+1,trank:0,min:1,tod:0};GD.wette++;sfx('coin');try{persist()}catch(x){}return true}
  {const up=usePotion;usePotion=function(){const p0=P&&P.pots;const r=up.apply(this,arguments);try{const W=G.wette;if(W&&G.stage===W.st&&P.pots<p0)W.trank=1}catch(e){}return r}}
  hook('tick',()=>{const W=G.wette;if(!W||G.stage!==W.st||G.state!=='play'||!P||(G.mp&&PL[0]&&P!==PL[0]))return;W.min=Math.min(W.min,P.hp/P.st.maxHp);if(P.down)W.tod=1});
@@ -40380,7 +40388,7 @@ window.__hsGOLD2={v:1,kauf:0,wette:0,gew:0};
   <div class="g2grid">${L.map(x=>`<span class="g2klein">mind. selten ${x.c.sel} % · legendär ${String(x.c.leg).replace('.',',')} %</span>`).join('')}</div>
   ${msg?`<p>${msg}</p>`:''}<div class="g2row"><button class="btn" data-g2="zu">Zurück zum Feuer</button></div>`)}
  function wette(msg){const W=G.wette;
-  ov(`<h3>Wette auf dich selbst</h3>${W?`<p>Läuft schon: <b>${WETTEN.find(x=>x.k===W.k).n}</b> um ${fmt(W.e)} Gold – Gewinn ${fmt(W.e*W.x)}.</p>`:`<p>Für die nächste Stufe. Gewinnst du, bekommst du den Einsatz doppelt (bei „Beides“ dreifach) zurück. Dein Gold: <b>${fmt(SAVE.gold)}</b></p>
+  ov(`<h3>Wette auf dich selbst</h3>${W?`<p>Läuft schon: <b>${WETTEN.find(x=>x.k===W.k).n}</b> um ${fmt(W.e)} Gold – Gewinn ${fmt(W.e*W.x)}.</p>`:`<p>Für die nächste Stufe. Gewinnst du, bekommst du den Einsatz doppelt (bei „Beides“ dreifach) zurück. Der Einsatz ist nach deinem Level begrenzt. Dein Gold: <b>${fmt(SAVE.gold)}</b></p>
   ${WETTEN.map((w,i)=>`<div class="g2grid" style="grid-template-columns:1fr auto auto;align-items:center"><span><b>${w.n}</b><br><span class="g2klein">${w.d}</span></span><button class="btn" data-g2="wette" data-i="${i}" data-f="0.1" ${SAVE.gold<einsatz(0.1)?'disabled':''}>${fmt(einsatz(0.1))}</button><button class="btn" data-g2="wette" data-i="${i}" data-f="0.25" ${SAVE.gold<einsatz(0.25)?'disabled':''}>${fmt(einsatz(0.25))}</button></div>`).join('')}`}
   ${msg?`<p>${msg}</p>`:''}<div class="g2row"><button class="btn" data-g2="zu">Zurück zum Feuer</button></div>`)}
  GD.hehler=()=>hehler();GD.wetteUI=()=>wette();

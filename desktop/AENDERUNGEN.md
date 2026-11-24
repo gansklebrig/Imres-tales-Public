@@ -16,10 +16,17 @@ Jeder Punkt lässt sich einzeln zurücknehmen (Schalter in Klammern).
 
 **Karten**
 - Seitenräume bekommen häufiger einen zweiten Durchgang (`KA2.schleife` 0,55 → 0,85)
+- Der zweite Durchgang mündet jetzt dort in den Hauptabschnitt, wo der Fußweg vom ersten am weitesten ist (vorher zufällig –
+  oft landeten beide Gänge im selben Flur). Man geht durch den Seitenraum hindurch statt hinein und wieder heraus.
 - Paket „rundweg“: tiefe Sackgassen innerhalb eines Abschnitts bekommen einen Durchbruch, wenn der Hauptweg dadurch nicht kürzer wird
-  (`__hsKA3.KA3.an=0` schaltet ab). Greift selten (etwa jede zehnte Stufe).
-- Messung über alle 35 Stufen (je 3 Karten): Summe der Sackgassen-Tiefe je Stufe im Schnitt 8980 → 7570 px, Rundwege 1,4 → 1,7.
-  Befund: Die meisten verbleibenden Sackgassen sind Seitenräume, die nur am selben Gang hängen – das ist die nächste Baustelle.
+  (`__hsKA3.KA3.an=0` schaltet ab). Greift selten (etwa jede siebte Stufe).
+- Messung über alle 35 Stufen (je 3 Karten): Umweg-Taschen je Stufe 6,1 → 5,0; ihre Tiefe zusammen 8980 → 7370 px (−18 %);
+  Rundwege 1,4 → 1,8. In Wald, Höhlen und Gassen deutlich besser, in Hallen kaum Änderung.
+- Befund aus den Kartenbildern: Echte Gang-Sackgassen gibt es kaum noch. Was die Messung in Hallen-Stufen noch als „Tasche“ zählt,
+  sind vor allem die Ecken großer Säle abseits der kürzesten Linie – kein Umkehren nötig.
 
 **Balancing / Gameplay**
-- noch nichts geändert
+- Wette am Lagerfeuer: Einsatz nach Level gedeckelt (klein 100 + 40 je Level, groß das 2,5-Fache). Vorher 10/25 % des gesamten Goldes –
+  wer jede Stufe „ohne Heiltrank“ wettete, vermehrte sein Gold um 25 % je Stufe (über einen Lauf mehr als das Tausendfache), mit „Beides“ um 50 %.
+- Bot-Läufe (tools/heldensturm-pruef/sim.js): alle 20 Äste, je 3 Läufe über die ersten 3 Stufen auf Normal.
+  Zeit je Stufe 230–355 s, kein Ast fällt klar ab oder dominiert → am Frühspiel nichts geändert. Spätere Stufen stehen noch aus.
