@@ -1486,11 +1486,18 @@
         const end = arm[arm.length - 1];
         const nbs = N4.map(([ex, ey]) => cells[key(end.x + ex, end.y + ey)]).filter(o => o && o !== end.parent && o.arm !== armId && o.kind !== "secret");
         const cand = nbs.filter(o => o.kind !== "path" || Math.abs(o.idx - root.idx) >= 3);
+        let made = false;
         if (cand.length && R.chance(0.5)) {
           const o = R.pick(cand);
           /* Abkürzung nach vorn auf den Hauptweg: Gittertor (waagrecht), sonst offene Schleife */
-          if (o.kind === "path" && o.idx > root.idx && (o.y === end.y || o.y === end.y + 1)) { conn([end.x, end.y], [o.x, o.y], "G"); end.gate = true; }
-          else if (o.kind !== "path" || o.idx < root.idx) conn([end.x, end.y], [o.x, o.y]);
+          if (o.kind === "path" && o.idx > root.idx && (o.y === end.y || o.y === end.y + 1)) { conn([end.x, end.y], [o.x, o.y], "G"); end.gate = true; made = true; }
+          else if (o.kind !== "path" || o.idx < root.idx) { conn([end.x, end.y], [o.x, o.y]); made = true; }
+        }
+        /* W13 R21: lange Zweige (≥ 3 Räume), deren Ende NEBEN oder ÜBER einem späteren Hauptweg-Raum liegt, bekommen immer ein Gittertor
+           mit Hebel auf der Zweigseite – eine Einbahn-Tür zurück auf den Hauptweg (ohne zusätzliche Zufallszüge: übrige Karte bleibt gleich) */
+        if (!made && Z.mehrTore !== false && arm.length >= 3) {
+          const o = nbs.find(q => q.kind === "path" && q.idx >= root.idx && (q.y === end.y || q.y === end.y + 1));
+          if (o) { conn([end.x, end.y], [o.x, o.y], "G"); end.gate = true; }
         }
       }
       armId++;

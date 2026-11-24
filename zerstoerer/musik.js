@@ -227,7 +227,9 @@
     M.lp = c.createBiquadFilter(); M.lp.type = "lowpass"; M.lp.frequency.value = 20000; M.lp.Q.value = 0.5; M.lp.connect(A.mus);
     /* R16: Hochpass 32 Hz (Subsonik aus Pauke/Kick/Bass-Aufnahmen tiefer gestimmt), dann Tiefpass wie gehabt */
     M.hp = c.createBiquadFilter(); M.hp.type = "highpass"; M.hp.frequency.value = 38; M.hp.Q.value = 0.6; M.hp.connect(M.lp);
-    M.out = c.createGain(); M.out.gain.value = 0.62; M.out.connect(M.hp);
+    /* R17: Glocke bei 100 Hz, nur im Kampf abgesenkt (Ostinato/Bass/Pauke/Bordun stapeln sich dort); M.eqKdB = Tiefe (Prüfstand) */
+    M.eqK = c.createBiquadFilter(); M.eqK.type = "peaking"; M.eqK.frequency.value = 95; M.eqK.Q.value = 1.4; M.eqK.gain.value = 0; M.eqK.connect(M.hp);
+    M.out = c.createGain(); M.out.gain.value = 0.62; M.out.connect(M.eqK);
     M.xf = c.createGain(); M.xf.gain.value = 1; M.xf.connect(M.out);
     M.lay = c.createGain(); M.lay.gain.value = 1; M.lay.connect(M.xf);
     const verbIn = c.createGain(); verbIn.gain.value = 1; verbIn.connect(A.verb); M.verbIn = verbIn;
@@ -804,7 +806,9 @@
     if ((M.eliteNear && I >= 0.45) || I >= 0.93 || M.ambush) w = Math.max(w, 3);
     /* hinunter – jeweils erst nach einer Haltezeit */
     if (w === 3) { if (!M.eliteNear && !M.ambush && I < 0.62) { H[3] += dt; if (H[3] > 2.5) { w = 2; H[3] = 0; } } else H[3] = 0; }
-    if (w === 2) { if (!fight && I < 0.2) { H[2] += dt; if (H[2] > 3.5) { w = I > 0.08 ? 1 : 0; H[2] = 0; } } else H[2] = 0; }
+    /* R17: letzter Gegner im Kampf besiegt (klang.js setzt M.raumFrei) – nach 1,2 statt 3,5 s zurück in die Ruhe */
+    const frei = M.raumFrei && A.ctx && A.ctx.currentTime - M.raumFrei < 5;
+    if (w === 2) { if (!fight && (I < 0.2 || frei)) { H[2] += dt; if (H[2] > (frei ? 1.2 : 3.5)) { w = I > 0.08 ? 1 : 0; H[2] = 0; } } else H[2] = 0; }
     if (w === 1) { if (I < 0.06) { H[1] += dt; if (H[1] > 2) { w = 0; H[1] = 0; } } else H[1] = 0; }
     return w;
   }
@@ -897,6 +901,7 @@
     /* R15 Dichte-Ausgleich (Desktop, keine Stimmengrenze): klingen mehr als 30 Musikstimmen (Boss Phase 3 + Wut + Stinger: bis 75),
        wird der Satz weich um √(30/Stimmen) zurückgenommen (höchstens auf 0,6, ~1 s geglättet) – Handheld (≤ 30) unberührt */
     const dz = clamp(Math.sqrt(30 / Math.max(30, M.live || 0)), 0.6, 1); M.dichteG = (M.dichteG || 1) + (dz - (M.dichteG || 1)) * Math.min(1, dt * 1.2);
+    if (M.eqK) M.eqK.gain.setTargetAtTime((M.tier || 0) >= 2 ? (M.eqKdB != null ? M.eqKdB : -3) : 0, now, 0.8);
     M.out.gain.setTargetAtTime(0.62 * (M.trim || 1) * bossUp * (paused ? 0.6 : 1) * (1 - 0.15 * M.low) * M.dichteG, now, 0.2);
     /* Wut der Bossphase klingt langsam ab, bleibt aber, solange der Boss lebt */
     if (M.rage > 0 && !(Z.boss && !Z.bossDefeated)) M.rage = Math.max(0, M.rage - dt * 0.2);

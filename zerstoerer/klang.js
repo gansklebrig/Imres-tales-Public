@@ -1139,6 +1139,14 @@
       RW.v = want; A.loopVol("rw_schimmer", want * 0.5 * (normOf(path, -32) || 0.5), want > 0.01 ? 0.8 : 0.35);
     } else if (RW.on && !open) { RW.on = false; A.stopLoop("rw_schimmer", 0.6); }
     if (open && gate && want > 0.05) { RW.t -= dt; if (RW.t <= 0) { RW.t = 1.3 + Math.random() * 1.6; const pr = rwTone([0, 2, 4, 7, 9][(Math.random() * 5) | 0], 3); if (pr) wshot(pr.path, gx + (Math.random() - 0.5) * 20, gy, { vol: 0.06, rate: pr.rate, vary: 0, verb: 0.85, gap: 0, tag: "rws" }); } }
+    /* R17 Tor öffnet sich: warmes Aufgehen – Handglocken Grundton/Terz/Quinte nacheinander, darunter leiser Chor (Grundton+Quinte),
+       langsam anschwellend; nur wenn man es hört (Tor nah genug) */
+    if (st === "opening" && RW.st !== "opening" && gate) {
+      const [v] = posMix(gx, gy, 1.1);
+      if (v > 0.05) { RW.stats.oeffnen = (RW.stats.oeffnen || 0) + 1; const r = M.prof ? M.prof.root : 50;
+        [0, 2, 4].forEach((d, i) => { const pr = M.probe && M.probe("hglo", M.ton(d, r + 24)); if (pr) wshot(pr.path, gx, gy, { vol: 0.07 + i * 0.01, rate: pr.rate, vary: 0, verb: 0.8, delay: 0.15 + i * 0.28, gap: 0, tag: "rwo" + i, far: 1.1 }); });
+        if (!gq().lean && M.note) [0, 4].forEach((d, i) => M.note("ooh", M.ton(d, r + 12), A.ctx.currentTime + 0.2 + i * 0.05, 0.035, 2.6, roomBus() || undefined)); }
+    }
     /* Gnade erlischt */
     if (st === "closing" && RW.st !== "closing" && gate) {
       RW.stats.schliessen++;
@@ -1150,8 +1158,11 @@
       RW.stats.blende++;
       M.duck && M.duck(0.6, 0.9);
       A.muffle && A.muffle(700);
-      setTimeout(() => { if (!(Z.ui && Z.ui.modalOpen) && !(Z.player && Z.player.dead)) A.muffle && A.muffle(20000); }, 560);
+      later(0.56, () => { if (!(Z.ui && Z.ui.modalOpen) && !(Z.player && Z.player.dead)) A.muffle && A.muffle(20000); }); /* R17: Audio-Uhr statt setTimeout */
       shot(AM("e_windstoss_1"), { vol: 0.22, rate: 1.15, verb: 0.6, gap: 0, tag: "rwb" });
+      /* R17 warmer Durchgang: Harfe abwärts in den Grundton (heimkehren), eine Handglocke klingt auf der anderen Seite nach */
+      [7, 4, 2, 0].forEach((d, i) => tuned("harfe", d, 1, 0.07 - i * 0.008, 0.05 + i * 0.07, "rwh" + i));
+      { const pr = M.probe && M.probe("hglo", M.ton(0, (M.prof ? M.prof.root : 50) + 24)); if (pr) shot(pr.path, { vol: 0.06, rate: pr.rate, vary: 0, verb: 0.9, delay: 0.62, gap: 0, tag: "rwg" }); }
     }
     RW.st = st;
   }
@@ -1372,6 +1383,42 @@
     for (const b of l) if (!BK.live.has(b)) { BK.live.add(b); if (!b.fall && b.t < 0.4) bkWarn(b); else b._kf = b.fall; }
     for (const b of BK.live) { if (b.fall && !b._kf) { BK.stats.nachgeholt++; bkFallKlang(b); } if (!l.includes(b)) { if (bkLanded(b)) { BK.stats.nachgeholt++; bkAufschlag(b); } else BK.live.delete(b); } }
   }
+  /* R17 Spielgefühl: Perfektes Ausweichen (Z.stats.dodges steigt, kampf.js spielt dann „parry“ leise) – Luftzug-Wisch und zwei Harfentöne
+     aufwärts; Parade (P.parryT > 0 im selben Moment) – heller Zweiklang (Grundton+Quinte, Glocke) über dem Metall, darunter ein Paukenschlag,
+     die Musik weicht kurz (gefühlte Zeitlupe). Letzter Gegner im Kampf besiegt – kurzer Ausklang (Harfe abwärts zum Grundton, Chor) und
+     schnellerer Rückweg in die Ruhe (M.raumFrei). Alles in der Tonart, leise; Handheld: ohne Chor. */
+  const FG = { dodges: -1, stats: { ausweichen: 0, parade: 0, raumFrei: 0 }, nah: 0, kills: 0 }; KL.gefuehl = FG;
+  function whoosh(vol, len) {
+    if (!A.ok) return; const c = A.ctx; if (!noiseB || noiseB.sampleRate !== c.sampleRate) mkNoise();
+    const t = c.currentTime + 0.005, s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+    s.buffer = RISS.white || noiseB; s.loop = true; f.type = "bandpass"; f.Q.value = 1.6; f.frequency.setValueAtTime(900, t); f.frequency.exponentialRampToValueAtTime(3800, t + len * 0.6);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + len * 0.3); g.gain.linearRampToValueAtTime(0, t + len);
+    s.connect(f); f.connect(g); g.connect(A.sfx); s.start(t); s.stop(t + len + 0.05); s.onended = () => { try { s.disconnect(); f.disconnect(); g.disconnect(); } catch (_) {} };
+  }
+  function fgParry() {
+    const P = Z.player, st = Z.stats || {}; if (!P) return false;
+    if (FG.dodges < 0) FG.dodges = st.dodges || 0;
+    if ((st.dodges || 0) > FG.dodges) { FG.dodges = st.dodges; FG.stats.ausweichen++; whoosh(0.05, 0.28); tuned("harfe", 4, 2, 0.06, 0.03, "fgd1"); tuned("harfe", 7, 2, 0.05, 0.1, "fgd2"); return false; }
+    if (P.parryT > 0) {
+      FG.stats.parade++;
+      tuned("glock", 0, 3, 0.09, 0.01, "fgp1"); tuned("glock", 4, 3, 0.06, 0.02, "fgp2");
+      if (M.probe) { const pr = M.probe("timpt", ton(0, (M.prof ? M.prof.root : 50) - 12)); if (pr && A.buf[pr.path]) shot(pr.path, { vol: 0.12, rate: pr.rate, vary: 0, gap: 0.1, verb: 0.3, tag: "fgp3", must: true }); }
+      M.duck && M.duck(0.3, 0.35);
+    }
+    return false;
+  }
+  function fgTick() {
+    const P = Z.player; if (!P || P.dead || !Z.level || Z.level.hub) { FG.nah = 0; return; }
+    let n = 0; for (const e of Z.enemies || []) if (!e.dead && !e.hidden && e.aware && !e.ally && Math.abs(e.x - P.x) < 460 && Math.abs(e.y - P.y) < 260) n++;
+    const k = (Z.stats && Z.stats.kills) || 0;
+    if (FG.nah > 0 && n === 0 && k > FG.kills && (M.tier || 0) >= 2 && !(Z.boss && !Z.bossDefeated)) {
+      FG.stats.raumFrei++; M.raumFrei = A.ctx.currentTime;
+      [7, 4, 2, 0].forEach((d, i) => tuned("harfe", d, 1, 0.07 - i * 0.008, 0.35 + i * 0.1, "fgr" + i));
+      if (!gq().lean) [0, 4].forEach((d, i) => tuned("ooh", d, 1, 0.035, 0.75 + i * 0.02, "fgc" + i));
+    }
+    if (n > 0 && M.raumFrei) M.raumFrei = 0; /* neue Gegner: kein schneller Ausstieg */
+    FG.nah = n; FG.kills = k;
+  }
   /* R15 Befreiter Kundschafter (abenteuer.js, Z.helferAktiv()): beim Losgehen ein kurzer Ruf, beim Abschied ein Gruß (Formant-Laute
      wie die Lager-Figuren), Treffer als leichter Dolchstich (KL.treffer, src "helfer") statt des alten „slash“ (Hook nur direkt danach). */
   const HL = { an: false, lv: null, hitT: -9, stats: { ruf: 0, abschied: 0, treffer: 0 } }; KL.helfer = HL;
@@ -1418,6 +1465,7 @@
   }
   if (A) A.hook = Object.assign(A.hook || {}, {
     splash: o => quSplash(),
+    parry: o => fgParry(),
     slash: o => !!(A.ctx && A.ctx.currentTime - HL.hitT < 0.03),
     rock: o => raeFalsch() || bkFall(),
     hitHeavy: o => bkImpact(),
@@ -1575,7 +1623,7 @@
     /* Raumkulisse und Gegnerstimmen */
     try { roomTick(dt); observe(dt); climbTick(dt); transitTick(dt); } catch (e) { if (!KL.err3) { KL.err3 = 1; console.error(e); } }
     try { sonderTick(dt); } catch (e) { if (!KL.err7) { KL.err7 = 1; console.error(e); } }
-    try { raeTick(); quStateTick(P); fuTick(); hlTick(); bkTick(); } catch (e) { if (!KL.err9) { KL.err9 = 1; console.error(e); } } /* R15: Rätsel/Quelle nach Zustand */
+    try { raeTick(); quStateTick(P); fuTick(); hlTick(); bkTick(); fgTick(); } catch (e) { if (!KL.err9) { KL.err9 = 1; console.error(e); } } /* R15: Rätsel/Quelle nach Zustand */
     try { rueckTick(dt); } catch (e) { if (!KL.err8) { KL.err8 = 1; console.error(e); } }
     try { tplTick(dt); } catch (e) { if (!KL.err9) { KL.err9 = 1; console.error(e); } }
     try { bewegTick(dt); } catch (e) { if (!KL.err10) { KL.err10 = 1; console.error(e); } }
