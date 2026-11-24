@@ -776,3 +776,284 @@
   Z.drawAfterLight = function (c, cam) { if (dal0) dal0.apply(this, arguments); try { flickOver(c, cam); } catch (e) { console.error(e); } };
   Z.umweltDbg = () => ({ act: act.size, rats: rats.length, ratList: rats.map(r => [r.x0, r.x1, r.y, r.t, r.dur]), books: books.length, gust: !!gustOn, boss: BI && { t: BI.t, cam: BI.cam, shape: BI.shape } });
 })();
+
+/* Ezekiel – The Destroyer · Angriffsspuren je Waffe (W11 Runde 18, ab Stufe 1; lean: die schlichte Sichel aus kern.js)
+   Ezekiels Nahkampf-Sicheln (FX.smear mit core "#fff6e0") werden markiert und hier gezeichnet:
+   – Klinge: spitz zulaufende Sichel mit hellem Schneiden-Rand; breit bei Zweihändern/Sensen/Äxten, schmal bei
+     Dolch/Rapier/Sicheln;
+   – Wucht (Hammer, Keule, Anker, Fäuste): schwere, dumpfe Sichel + Druckwelle am Boden vor Ezekiel;
+   – Stoß (Speer, Hellebarde, Rapier-Stoß): gerade Stoßlinie mit Spitze und Geschwindigkeitsstrichen;
+   – Peitsche: Schlinge (geschwungene, auslaufende Schleife).
+   Farbe: Waffenfarbe, bei Element-Zusatz (brennend, giftig, blutig, betäubend, Eis/Feuer im Namen) die Elementfarbe.
+   Kombo-Schritte steigern die Spur (dicker, heller, Nachbild ab Schritt 2, Funken ab Schritt 3). Kein Blau.
+   Schalter Z.gfx.off.spuren. */
+(function () {
+  const Z = window.Z, FX = Z.fx, G = Z.gfx, TAU = Math.PI * 2;
+  if (!FX || !FX.smear || !FX.drawSmears) return;
+  const lean = () => !!(Z.gq && (Z.gq.lean || Z.gq.mini || Z.gq.level === 0));
+  const off = () => !!(G.off && G.off.spuren);
+  const BROAD = { zweihaender: 1, scythe: 1, axe: 1, dawn: 1, hellebarde: 1 };
+  const THIN = { dagger: 1, knives: 1, rapier: 1, sickles: 1, sickle: 1, scimitar: 1, krallen: 1, claw: 1 };
+  const BLUNT = { hammer: 1, club: 1, anchor: 1, fist: 1, stonefist: 1, kampfstab: 1, staff: 1 };
+  const ELEM = { brennend: "#ff8a2a", giftig: "#9ad040", blutig: "#d0202a", betaeubend: "#ffe070" };
+  function elemCol(it, id, base) {
+    for (const a of (it && it.aff) || []) if (ELEM[a]) return ELEM[a];
+    if (/eis|frost/i.test(id)) return "#e8e4f0"; if (/feuer|glut|brand|flamm|drach/i.test(id)) return "#ff8a2a";
+    return base;
+  }
+  const s0 = FX.smear;
+  FX.smear = function (o) {
+    try {
+      const P = Z.player, a = P && P.act;
+      if (o && o.core === "#fff6e0" && a && a.type === "melee" && a.d && Math.abs(o.x - (P.x + P.w / 2)) < 40) {
+        const id = (a.it && a.it.id) || "", icon = a.d.icon;
+        o.ez = { icon, step: a.step | 0, col: elemCol(a.it, id, o.col), kind: o.stab ? "stoss" : icon === "whip" ? "peitsche" : BLUNT[icon] ? "wucht" : "klinge", heavy: !!(a.def && a.def.heavy) || !!BROAD[icon], thin: !!THIN[icon], gy: P.y + P.h };
+      }
+    } catch (e) { console.error(e); }
+    return s0.apply(this, arguments);
+  };
+  const d0 = FX.drawSmears;
+  FX.drawSmears = function (c) {
+    if (off() || lean() || !FX.smears.some(s => s.ez)) return d0.apply(this, arguments);
+    const all = FX.smears; FX.smears = all.filter(s => !s.ez);
+    try { d0.apply(this, arguments); } finally { FX.smears = all; }
+    c.save(); c.globalCompositeOperation = "lighter";
+    for (const s of all) if (s.ez) try { draw(c, s); } catch (e) { console.error(e); }
+    c.restore(); c.globalAlpha = 1; c.globalCompositeOperation = "source-over";
+  };
+  function crescent(c, r, th, a0, a1, ccw, col, alpha) {
+    /* spitz zulaufend: Innenkante als Kurve, die an beiden Enden die Außenkante trifft */
+    const n = 14; c.globalAlpha = alpha; c.fillStyle = col; c.beginPath();
+    for (let i = 0; i <= n; i++) { const u = i / n, a = a0 + (a1 - a0) * u; c.lineTo(Math.cos(a) * r, Math.sin(a) * r); }
+    for (let i = n; i >= 0; i--) { const u = i / n, a = a0 + (a1 - a0) * u, w = th * Math.sin(Math.PI * Math.min(1, u * 1.15)) ** 0.8; c.lineTo(Math.cos(a) * (r - w), Math.sin(a) * (r - w)); }
+    c.closePath(); c.fill();
+  }
+  function draw(c, s) {
+    const e = s.ez, k = s.t / s.life, st = Math.min(3, e.step), boost = 1 + st * 0.22, a = (1 - k) * (s.a || 0.85) * Math.min(1.25, boost);
+    const a0 = s.a0, a1 = s.a0 + (s.a1 - s.a0) * Math.min(1, k * 3.5 + 0.35);
+    c.save(); c.translate(s.x, s.y); c.scale(s.dir, 1); c.rotate(s.rot || 0);
+    if (e.kind === "stoss") {
+      const L = (s.r + 16) * Math.min(1, k * 4 + 0.3) * boost, w = (e.heavy ? 3.2 : 2) * boost;
+      c.globalAlpha = a; c.fillStyle = e.col; c.beginPath(); c.moveTo(-6, -w * 0.5); c.lineTo(L, 0); c.lineTo(-6, w * 0.5); c.closePath(); c.fill();
+      c.globalAlpha = a * 0.9; c.fillStyle = "#fff6e0"; c.beginPath(); c.moveTo(0, -w * 0.18); c.lineTo(L + 2, 0); c.lineTo(0, w * 0.18); c.closePath(); c.fill();
+      c.strokeStyle = e.col; c.lineWidth = 0.6; c.globalAlpha = a * 0.6;
+      for (let i = 0; i < 3; i++) { const yy = (i - 1) * (w + 2.5), x0 = -4 - i * 3 + k * 10; c.beginPath(); c.moveTo(x0, yy); c.lineTo(x0 + L * 0.55, yy); c.stroke(); }
+    } else if (e.kind === "peitsche") {
+      const R = s.r, u = Math.min(1, k * 3 + 0.3);
+      c.lineCap = "round";
+      for (let pass = 0; pass < 2; pass++) {
+        c.strokeStyle = pass ? "#fff6e0" : e.col; c.globalAlpha = a * (pass ? 0.8 : 1); c.lineWidth = (pass ? 0.8 : 2.2) * boost;
+        c.beginPath(); c.moveTo(-2, -4);
+        c.bezierCurveTo(R * 0.6 * u, -R * 0.9, R * 1.2 * u, -R * 0.1, R * 0.7 * u, R * 0.25 * u);
+        c.bezierCurveTo(R * 0.4 * u, R * 0.5 * u, R * 0.9 * u, R * 0.6 * u, R * 1.35 * u, R * 0.15);
+        c.stroke();
+      }
+    } else {
+      const ccw = s.a1 < s.a0, th = (s.th || 6) * (e.heavy ? 1.6 : e.thin ? 0.55 : 1) * boost * (1 - k * 0.4);
+      if (st >= 2) crescent(c, s.r * 0.86, th * 0.8, a0 - 0.25 * Math.sign(s.a1 - s.a0), a1 - 0.25 * Math.sign(s.a1 - s.a0), ccw, e.col, a * 0.35);
+      crescent(c, s.r, th, a0, a1, ccw, e.kind === "wucht" ? mixDark(e.col) : e.col, a);
+      /* Schneide: heller Rand außen */
+      c.globalAlpha = a * (e.kind === "wucht" ? 0.5 : 0.95); c.strokeStyle = "#fff6e0"; c.lineWidth = e.thin ? 0.6 : 1;
+      c.beginPath(); c.arc(0, 0, s.r - 0.4, a0 + (a1 - a0) * 0.12, a1, ccw); c.stroke();
+    }
+    c.restore();
+    if (e.kind === "wucht" && k > 0.25) { /* Druckwelle am Boden vor Ezekiel */
+      const q = (k - 0.25) / 0.75, x = s.x + s.dir * (s.r * 0.9), y = e.gy - 1, R = 6 + q * (18 + st * 6) * (e.heavy ? 1.3 : 1);
+      c.globalAlpha = (1 - q) * 0.7; c.strokeStyle = e.col; c.lineWidth = 2 * (1 - q) + 0.5;
+      c.beginPath(); c.ellipse(x, y, R, R * 0.28, 0, Math.PI, TAU); c.stroke();
+      c.globalAlpha = (1 - q) * 0.5; c.strokeStyle = "#fff0d0"; c.lineWidth = 0.7; c.beginPath(); c.ellipse(x, y, R * 0.7, R * 0.2, 0, Math.PI, TAU); c.stroke();
+    }
+    if (st >= 3 && !s.ezSp) { s.ezSp = 1; FX.burst(s.x + s.dir * s.r * 0.8, s.y - 4, 6, { col: [e.col, "#fff6e0"], sp: 120, life: 0.3, size: 1.4, kind: "spark", add: true }); }
+  }
+  function mixDark(h) { if (!/^#[0-9a-f]{6}$/i.test(h)) return h; const n = parseInt(h.slice(1), 16), r = n >> 16 & 255, g = n >> 8 & 255, b = n & 255; return "rgb(" + (r * 0.8 | 0) + "," + (g * 0.72 | 0) + "," + (b * 0.65 | 0) + ")"; }
+})();
+
+/* Ezekiel – The Destroyer · Gegner-Tod je Familie (W11 Runde 18, ab Stufe 1; lean: nur Asche/Glut aus gegner.js)
+   Zusätzlich zum Aschezerfall: Knochen fallen auseinander (Schädel + Knochen springen, bleiben liegen), Schleim
+   zerplatzt (Tropfen + Lache), Geister verwehen (Schleier ziehen seitlich davon, nichts bleibt), Konstrukte zerspringen
+   (Splitter mit Drehung, Trümmer bleiben), Insekten bleiben als Panzer auf dem Rücken liegen, Feuerwesen hinterlassen
+   Brandfleck und Glut, alle übrigen eine dunkle Leiche. Reste liegen ~4 s und verblassen. Höchstens 70 Teile.
+   Schalter Z.gfx.off.tod. Kein Blau. */
+(function () {
+  const Z = window.Z, FX = Z.fx, G = Z.gfx, TAU = Math.PI * 2;
+  if (!Z.killEnemy) return;
+  const lean = () => !!(Z.gq && (Z.gq.lean || Z.gq.mini || Z.gq.level === 0));
+  const FAM = { skel: "knochen", blob: "schleim", cube: "schleim", slug: "schleim", bloat: "schleim", sac: "schleim", myconid: "schleim",
+    wraith: "geist", wisp: "geist", bellghost: "geist", golem: "konstrukt", armor: "konstrukt", gargoyle: "konstrukt", mimic: "konstrukt", rustmonster: "konstrukt",
+    spider: "insekt", stirge: "insekt", ettercap: "insekt", drider: "insekt", crab: "insekt", salamander: "feuer", mephit: "feuer", firebat: "feuer" };
+  const D = []; /* Reste: {k, x, y, vx, vy, r, vr, t, life, rest, col, w, h, ...} */
+  let lvRef = null, lastT = 0;
+  const solid = (x, y) => Z.world && Z.world.solidAt(x, y);
+  function groundBelow(x, y) { for (let i = 0; i < 6; i++) if (solid(x, y + i * 8 + 1)) return Math.floor((y + i * 8 + 1) / 16) * 16; return null; }
+  function add(o) { o.t = 0; if (D.length > 70) D.splice(0, D.length - 70); D.push(o); return o; }
+  function hexA(h, a, k) { if (!/^#[0-9a-f]{6}$/i.test(h || "")) h = "#5a4a44"; const n = parseInt(h.slice(1), 16), m = k == null ? 1 : k; return "rgba(" + ((n >> 16 & 255) * m | 0) + "," + ((n >> 8 & 255) * m | 0) + "," + ((n & 255) * m | 0) + "," + a.toFixed(3) + ")"; }
+  function death(e) {
+    const d = e.def || {}, fam = FAM[d.shape] || (d.undead && d.shape === "zombie" ? "leiche" : "leiche");
+    const cx = e.x + e.w / 2, cy = e.y + e.h / 2, gy = groundBelow(cx, e.y + e.h - 2), col = d.c || "#6a5a50", col2 = d.t || "#3a3030", f = e.face || 1;
+    if (fam === "knochen") {
+      add({ k: "schaedel", x: cx, y: e.y + 4, vx: (Math.random() - 0.5) * 90, vy: -160, r: 0, vr: (Math.random() - 0.5) * 14, life: 4.5, col: "#e8e2d0" });
+      for (let i = 0; i < 5; i++) add({ k: "knochen", x: cx + (Math.random() - 0.5) * 8, y: cy, vx: (Math.random() - 0.5) * 160, vy: -80 - Math.random() * 140, r: Math.random() * 3, vr: (Math.random() - 0.5) * 20, life: 4 + Math.random(), col: "#dcd4c0", w: 5 + Math.random() * 3 });
+    } else if (fam === "schleim") {
+      for (let i = 0; i < 12; i++) FX.p({ x: cx, y: cy, vx: (Math.random() - 0.5) * 220, vy: -60 - Math.random() * 180, g: 600, drag: 0.99, life: 1.2, size: 1.8 + Math.random() * 1.5, col, kind: "drop", collide: true });
+      if (gy != null) add({ k: "lache", x: cx, y: gy, life: 4.5, col, w: e.w * 0.9 + 6, rest: 1 });
+    } else if (fam === "geist") {
+      for (let i = 0; i < 12; i++) FX.p({ x: cx + (Math.random() - 0.5) * e.w, y: e.y + Math.random() * e.h, vx: f * (30 + Math.random() * 50) + (Math.random() - 0.5) * 20, vy: -20 - Math.random() * 30, drag: 0.97, life: 1.4 + Math.random() * 0.6, size: 5 + Math.random() * 5, col: "#c8bcc8", kind: "smoke", a: 0.35 });
+      for (let i = 0; i < 6; i++) FX.p({ x: cx, y: cy, vx: (Math.random() - 0.5) * 40, vy: -40 - Math.random() * 40, life: 1, size: 1.4, col: col2 && /^#/.test(col2) ? col2 : "#e0d0ff", kind: "glow", add: true });
+    } else if (fam === "konstrukt") {
+      for (let i = 0; i < 9; i++) add({ k: "splitter", x: cx + (Math.random() - 0.5) * e.w * 0.6, y: cy + (Math.random() - 0.5) * e.h * 0.6, vx: (Math.random() - 0.5) * 200, vy: -100 - Math.random() * 160, r: Math.random() * 6, vr: (Math.random() - 0.5) * 18, life: 4 + Math.random(), col: i % 3 ? col : col2, w: 2.5 + Math.random() * 3.5 });
+      FX.burst(cx, cy, 10, { col: ["#8a8078", "#6a625a"], sp: 80, life: 0.7, size: 3, kind: "smoke", g: -10 });
+    } else if (fam === "insekt") {
+      add({ k: "panzer", x: cx, y: cy, vx: f * -30, vy: -120, r: 0, vr: f * 8, life: 4.2, col, w: Math.max(6, e.w * 0.6), rr: Math.PI });
+    } else if (fam === "feuer") {
+      FX.burst(cx, cy, 14, { col: ["#ff8a2a", "#ffc060", "#ff5a2a"], sp: 140, life: 0.7, size: 1.6, kind: "ember", add: true, g: 120 });
+      if (gy != null) add({ k: "brand", x: cx, y: gy, life: 4.5, w: e.w + 8, rest: 1 });
+    } else {
+      if (gy != null && e.w < 60) add({ k: "leiche", x: cx, y: gy, life: 4, col, col2, w: Math.max(8, e.w * 0.9), h: Math.max(3, Math.min(7, e.h * 0.22)), f, rest: 1 });
+    }
+  }
+  const k0 = Z.killEnemy;
+  Z.killEnemy = function (e, o) {
+    const was = e && e.dead, r = k0.apply(this, arguments);
+    try { if (e && !was && e.dead && !(e.def && e.def.boss) && !lean() && !(G.off && G.off.tod) && Z.level) death(e); } catch (err) { console.error(err); }
+    return r;
+  };
+  function tick() {
+    const now = performance.now() / 1000, dt = Math.min(0.05, lastT ? now - lastT : 0.016); lastT = now;
+    if (Z.level !== lvRef) { lvRef = Z.level; D.length = 0; }
+    if (Z.paused) return;
+    for (let i = D.length - 1; i >= 0; i--) {
+      const o = D[i]; o.t += dt; if (o.t > o.life) { D.splice(i, 1); continue; }
+      if (o.rest) continue;
+      o.vy += 620 * dt; o.x += o.vx * dt; o.y += o.vy * dt; o.r += (o.vr || 0) * dt;
+      if (solid(o.x, o.y + 1.5)) { o.y = Math.floor((o.y + 1.5) / 16) * 16 - 1.2; if (Math.abs(o.vy) > 90) { o.vy *= -0.35; o.vx *= 0.6; o.vr = (o.vr || 0) * 0.5; } else { o.vy = 0; o.vx = 0; o.vr = 0; o.rest = 1; if (o.k === "panzer") o.r = Math.PI; } }
+      if (solid(o.x + Math.sign(o.vx) * 2, o.y - 2)) o.vx *= -0.4;
+    }
+  }
+  function draw(c) {
+    const cam = Z.cam;
+    for (const o of D) {
+      if (o.x < cam.x - 40 || o.x > cam.x + cam.w + 40 || o.y < cam.y - 40 || o.y > cam.y + cam.h + 40) continue;
+      const a = Math.min(1, (o.life - o.t) / 1.2);
+      c.save(); c.globalAlpha = a; c.translate(o.x, o.y);
+      if (o.k === "schaedel") { c.rotate(o.r); c.fillStyle = o.col; c.beginPath(); c.arc(0, -2.2, 2.6, 0, TAU); c.fill(); c.fillRect(-1.6, -0.5, 3.2, 1.8); c.fillStyle = "#2a2020"; c.fillRect(-1.5, -2.8, 1.1, 1.1); c.fillRect(0.5, -2.8, 1.1, 1.1); }
+      else if (o.k === "knochen") { c.rotate(o.r); c.fillStyle = o.col; const w = o.w; c.fillRect(-w / 2, -0.6, w, 1.2); c.beginPath(); c.arc(-w / 2, -0.7, 0.9, 0, TAU); c.arc(-w / 2, 0.7, 0.9, 0, TAU); c.arc(w / 2, -0.7, 0.9, 0, TAU); c.arc(w / 2, 0.7, 0.9, 0, TAU); c.fill(); }
+      else if (o.k === "lache") { const g = Math.min(1, o.t / 0.25); c.fillStyle = hexA(o.col, 0.75, 0.8); c.beginPath(); c.ellipse(0, -0.8, o.w / 2 * g, 1.6 * g, 0, 0, TAU); c.fill(); c.fillStyle = "rgba(255,250,230,.35)"; c.fillRect(-o.w * 0.2 * g, -1.6, o.w * 0.15 * g, 0.5); }
+      else if (o.k === "splitter") { c.rotate(o.r); c.fillStyle = o.col; c.beginPath(); c.moveTo(-o.w / 2, o.w / 3); c.lineTo(0, -o.w / 2); c.lineTo(o.w / 2, o.w / 4); c.closePath(); c.fill(); c.fillStyle = "rgba(255,240,220,.25)"; c.fillRect(-o.w / 4, -o.w / 4, o.w / 3, 0.6); }
+      else if (o.k === "panzer") { c.rotate(o.r); c.fillStyle = hexA(o.col, 1, 0.7); c.beginPath(); c.ellipse(0, 0, o.w / 2, o.w / 3.2, 0, 0, TAU); c.fill(); c.strokeStyle = hexA(o.col, 1, 0.45); c.lineWidth = 0.7; c.beginPath(); for (let i = -1; i <= 1; i++) { c.moveTo(i * o.w / 5, -o.w / 4); c.quadraticCurveTo(i * o.w / 4, -o.w / 2.2, i * o.w / 6 + 1, -o.w / 1.8); } c.stroke(); }
+      else if (o.k === "brand") { c.fillStyle = "rgba(20,10,8,.55)"; c.beginPath(); c.ellipse(0, -0.6, o.w / 2, 1.8, 0, 0, TAU); c.fill(); if (o.t < 2.5) { c.globalCompositeOperation = "lighter"; c.globalAlpha = a * (1 - o.t / 2.5) * 0.7; c.fillStyle = "#ff7a2a"; for (let i = 0; i < 4; i++) c.fillRect((i - 1.5) * o.w / 5, -1.4, 1.2, 1.2); } }
+      else if (o.k === "leiche") { c.scale(o.f, 1); c.fillStyle = hexA(o.col, 0.95, 0.55); c.beginPath(); c.ellipse(0, -o.h / 2, o.w / 2, o.h / 2, 0, 0, TAU); c.fill(); c.fillStyle = hexA(o.col2 || o.col, 0.95, 0.5); c.beginPath(); c.arc(o.w / 2 - 1, -o.h * 0.55, Math.min(3, o.h * 0.55), 0, TAU); c.fill(); }
+      c.restore();
+    }
+  }
+  const dp0 = Z.drawParcours;
+  Z.drawParcours = function (c, t) { if (dp0) dp0.apply(this, arguments); try { tick(); if (D.length) draw(c); } catch (e) { console.error(e); } };
+  Z.todDbg = () => D.map(o => o.k);
+})();
+
+/* Ezekiel – The Destroyer · Sonderräume (W11 Runde 18): Kran, eingestürzte Brücke, Flutkammer
+   Daten aus welt.js (lv.specials) und erkundung.js (Z._kraene(): {x,w,y0,y1,y}); gezeichnet NACH der schlichten
+   Fassung in erkundung.js (dieser Haken liegt weiter außen) und deckt sie weitgehend ab.
+   – Kran: Holzpfosten auf dem oberen Boden, Ausleger mit Strebe, drehende Seilrolle, zwei Ketten aus Gliedern,
+     Plattform aus Bohlen mit Geländer, Gegengewicht (Steinblock) fährt gegenläufig.
+   – Brücke: abgebrochene Bogenansätze über der verschütteten Öffnung, herabhängende Bohlen (pendeln), Mauerrisse,
+     rieselnder Staub.
+   – Flutkammer: Ablaufgitter am Beckenboden (unter Wasser sichtbar); nach dem Hebel sinkt das Wasser in 1,6 s
+     sichtbar ab, mit Strudel über dem Gitter und Blasen; danach nasser Glanz. Grün/Türkis, kein Blau.
+   Alle Stufen (spielrelevant), Zierde (Staub, Blasen, Glanz) erst ab Stufe 1. Schalter Z.gfx.off.sonder. */
+(function () {
+  const Z = window.Z, FX = Z.fx, G = Z.gfx, T = 16, TAU = Math.PI * 2;
+  const lean = () => !!(Z.gq && (Z.gq.lean || Z.gq.mini || Z.gq.level === 0));
+  const R = (n, s) => { const v = Math.sin(n * 12.9898 + s * 78.233) * 43758.5453; return v - Math.floor(v); };
+  const drain = new WeakMap();
+  function chain(c, x0, y0, x1, y1, col) {
+    const L = Math.hypot(x1 - x0, y1 - y0), n = Math.max(2, Math.floor(L / 3)); c.strokeStyle = col; c.lineWidth = 0.8;
+    for (let i = 0; i < n; i++) { const u = (i + 0.5) / n, x = x0 + (x1 - x0) * u, y = y0 + (y1 - y0) * u; c.beginPath(); if (i % 2) c.ellipse(x, y, 0.7, 1.5, 0, 0, TAU); else c.ellipse(x, y, 1.2, 1.5, 0, 0, TAU); c.stroke(); }
+  }
+  function kran(c, m, t) {
+    const x = m.x, w = m.w, top = m.y0 - 3 * T, px = x + w + 6, wood = "#5a3e26", woodL = "#8a6844", iron = "#4a4448";
+    /* Pfosten auf dem oberen Boden, Ausleger, Strebe */
+    c.fillStyle = wood; c.fillRect(px - 2.5, top - 4, 5, m.y0 - top + 4); c.fillStyle = woodL; c.fillRect(px - 2.5, top - 4, 1, m.y0 - top + 4);
+    c.fillStyle = wood; c.fillRect(x - 8, top - 6, w + 22, 5); c.fillStyle = woodL; c.fillRect(x - 8, top - 6, w + 22, 1);
+    c.save(); c.translate(px, top + 18); c.rotate(-0.9); c.fillStyle = wood; c.fillRect(-1.6, -22, 3.2, 22); c.restore();
+    c.fillStyle = iron; c.fillRect(px - 3.5, top - 6.5, 7, 2); c.fillRect(px - 3.5, top + 14, 7, 1.6);
+    /* Seilrolle */
+    const cx = x + w / 2, cy = top + 1, ang = m.y / 7;
+    c.fillStyle = "#3a2c20"; c.beginPath(); c.arc(cx, cy, 5, 0, TAU); c.fill(); c.strokeStyle = "#8a7a60"; c.lineWidth = 0.8; c.beginPath(); c.arc(cx, cy, 4, 0, TAU); c.stroke();
+    c.strokeStyle = "#6a5a48"; c.lineWidth = 0.9; c.beginPath(); for (let i = 0; i < 3; i++) { const a = ang + i * Math.PI / 3; c.moveTo(cx - Math.cos(a) * 4, cy - Math.sin(a) * 4); c.lineTo(cx + Math.cos(a) * 4, cy + Math.sin(a) * 4); } c.stroke();
+    c.fillStyle = iron; c.beginPath(); c.arc(cx, cy, 1.3, 0, TAU); c.fill();
+    /* Ketten zur Plattform */
+    chain(c, cx - 4, cy + 2, x + 3, m.y - 9, "#9a9088"); chain(c, cx + 4, cy + 2, x + w - 3, m.y - 9, "#9a9088");
+    c.strokeStyle = iron; c.lineWidth = 1; c.beginPath(); c.moveTo(x + 3, m.y - 9); c.lineTo(x + 1, m.y); c.moveTo(x + 3, m.y - 9); c.lineTo(x + 7, m.y); c.moveTo(x + w - 3, m.y - 9); c.lineTo(x + w - 1, m.y); c.moveTo(x + w - 3, m.y - 9); c.lineTo(x + w - 7, m.y); c.stroke();
+    /* Plattform: Bohlen mit Geländer */
+    c.fillStyle = "#6a4a2c"; c.fillRect(x - 1, m.y, w + 2, 5); c.fillStyle = "#9a7a52"; c.fillRect(x - 1, m.y, w + 2, 1.2);
+    c.fillStyle = "rgba(0,0,0,.35)"; for (let i = 1; i < 4; i++) c.fillRect(x + i * w / 4, m.y + 1, 0.7, 4);
+    c.fillStyle = iron; c.fillRect(x - 1, m.y + 4, w + 2, 1.2);
+    c.fillStyle = wood; c.fillRect(x - 1, m.y - 9, 1.6, 9); c.fillRect(x + w - 0.6, m.y - 9, 1.6, 9); c.fillRect(x - 1, m.y - 9, 3, 1.2); c.fillRect(x + w - 2, m.y - 9, 3, 1.2);
+    /* Gegengewicht: hängt am Ausleger-Ende, fährt gegenläufig */
+    const gx = x + w + 12, span = Math.max(1, m.y1 - m.y0), gy = top + 10 + (1 - (m.y - m.y0) / span) * Math.min(3 * T, span * 0.4);
+    chain(c, gx, top - 1, gx, gy, "#8a8078");
+    c.fillStyle = "#6a625a"; c.fillRect(gx - 4.5, gy, 9, 8); c.fillStyle = "#8a8278"; c.fillRect(gx - 4.5, gy, 9, 1.2); c.fillStyle = "#4a443e"; c.fillRect(gx - 4.5, gy + 4, 9, 0.7);
+  }
+  function bruecke(c, o, t) {
+    const x = o.x * T, y = o.y0 * T, w = 2 * T, h = 3 * T, rich = !lean();
+    /* Mauerrisse über und in der verschütteten Öffnung */
+    c.strokeStyle = "rgba(20,14,12,.7)"; c.lineWidth = 0.9; c.beginPath();
+    for (let k = 0; k < 4; k++) { let cx = x + w * (0.2 + 0.6 * R(k, o.x)), cy = y - 6 + R(k + 3, o.x) * 10; c.moveTo(cx, cy); for (let s = 0; s < 4; s++) { cx += (R(k * 7 + s, o.x) - 0.5) * 9; cy += 4 + R(k * 5 + s, o.y0) * 6; c.lineTo(cx, cy); } }
+    c.stroke();
+    /* abgebrochene Bogenansätze links und rechts */
+    for (const sd of [-1, 1]) {
+      const bx = sd < 0 ? x - 2 : x + w + 2, n = 3;
+      for (let i = 0; i < n; i++) { const a0 = sd < 0 ? Math.PI + i * 0.32 : -i * 0.32 - 0.3, a1 = a0 + 0.3; const cx = sd < 0 ? bx + 22 : bx - 22, cy = y + 10;
+        c.fillStyle = i % 2 ? "#6a625c" : "#7a7068"; c.beginPath(); c.arc(cx, cy, 24, a0, a1); c.arc(cx, cy, 18, a1, a0, true); c.closePath(); c.fill(); }
+      /* hängende Bohle */
+      const sw = Math.sin(t * 1.3 + sd) * 0.08; c.save(); c.translate(sd < 0 ? x + 3 : x + w - 3, y + h - 6); c.rotate((sd < 0 ? 1.15 : -1.15) + sw); c.fillStyle = "#6a4a2c"; c.fillRect(-1.5, 0, 3, 14); c.fillStyle = "#8a6a44"; c.fillRect(-1.5, 0, 0.8, 14); c.fillStyle = "#3a2a1c"; c.fillRect(-1.5, 12, 3, 2); c.restore();
+    }
+    if (rich && Math.random() < 0.04) FX.p({ x: x + Math.random() * w, y: y - 4, vx: 0, vy: 15, g: 120, life: 1.2, size: 1, col: Z.dustCol || "#8a7a70", kind: "dot" });
+  }
+  function flut(c, o, t) {
+    const lv = Z.level, g = (lv.gates || [])[o.gate]; if (!g) return;
+    const x0 = o.x0 * T, x1 = (o.x1 + 1) * T;
+    let s = drain.get(g); if (!s) { s = { t0: g.open ? -1 : null }; drain.set(g, s); }
+    /* Beckenform aus den Flut-Kacheln (g.tiles): je Spalte tiefste Kachel; Gitter über der tiefsten Stelle der Mitte */
+    if (!s.cols) { s.cols = new Map(); let mn = 1e9; for (const [tx, ty] of g.tiles) { const c0 = s.cols.get(tx); if (!c0) s.cols.set(tx, [ty, ty]); else { c0[0] = Math.min(c0[0], ty); c0[1] = Math.max(c0[1], ty); } mn = Math.min(mn, ty); }
+      s.top = mn; const mid = Math.round((o.x0 + o.x1) / 2); let best = null; for (const [tx, v] of s.cols) if (!best || Math.abs(tx - mid) < Math.abs(best[0] - mid) || (Math.abs(tx - mid) === Math.abs(best[0] - mid) && v[1] > best[1][1])) best = [tx, v]; s.gx = best ? best[0] * T + 8 : (x0 + x1) / 2; s.gy = best ? (best[1][1] + 1) * T : (o.bot + 1) * T; }
+    const floor = s.gy, topY = s.top * T, cx = s.gx;
+    if (g.open && s.t0 === null) s.t0 = t;
+    const d = s.t0 === null ? 0 : s.t0 < 0 ? 1 : Math.min(1, (t - s.t0) / 1.6);
+    /* Ablaufgitter im Beckenboden */
+    c.fillStyle = "#14100e"; c.fillRect(cx - 14, floor - 2, 28, 3);
+    c.fillStyle = "#4a4448"; c.fillRect(cx - 15, floor - 3, 30, 1.4); for (let i = 0; i <= 7; i++) c.fillRect(cx - 14 + i * 4, floor - 3, 1.2, 4);
+    c.fillStyle = "#7a7278"; c.fillRect(cx - 15, floor - 3, 30, 0.5);
+    if (d > 0 && d < 1) {
+      /* sinkender Wasserspiegel (die Kacheln sind schon leer) */
+      const e = d * d * (3 - 2 * d), lvl = topY + (floor - topY) * e;
+      for (const [tx, v] of s.cols) { const yb = (v[1] + 1) * T; if (yb <= lvl) continue; const ya = Math.max(lvl, v[0] * T);
+        c.fillStyle = "rgba(40,86,72,.62)"; c.fillRect(tx * T, ya, T, yb - ya);
+        if (ya === lvl) { c.fillStyle = "rgba(150,200,170,.6)"; for (let x = tx * T; x < tx * T + T; x += 3) c.fillRect(x, lvl + Math.sin(x * 0.4 + t * 9) * 0.8, 2, 0.8); } }
+      /* Strudel über dem Gitter */
+      c.save(); c.translate(cx, Math.max(lvl + 3, floor - 10)); c.strokeStyle = "rgba(190,230,200,.7)"; c.lineWidth = 0.8;
+      for (let k = 0; k < 3; k++) { c.beginPath(); for (let i = 0; i < 26; i++) { const a = -t * 9 + i * 0.45 + k * TAU / 3, r = 1 + i * 0.5 * (1 - d * 0.5); c.lineTo(Math.cos(a) * r, Math.sin(a) * r * 0.35); } c.stroke(); }
+      c.restore();
+      if (!lean() && Math.random() < 0.5) FX.p({ x: cx + (Math.random() - 0.5) * 20, y: floor - 3, vx: (Math.random() - 0.5) * 10, vy: -20 - Math.random() * 20, life: 0.6, size: 1.2, col: "#b8e0c8", kind: "bubble" });
+    } else if (d >= 1 && s.t0 !== null && !lean()) {
+      /* nasser Glanz am Beckenboden, verblasst */
+      const age = s.t0 < 0 ? 99 : t - s.t0 - 1.6; if (age < 8) { c.fillStyle = "rgba(160,210,180," + (0.25 * (1 - age / 8)).toFixed(3) + ")"; for (const [tx, v] of s.cols) c.fillRect(tx * T, (v[1] + 1) * T - 1, T, 1); }
+    }
+  }
+  /* Merker für erkundung.js: die schlichte Fassung darf entfallen (siehe Bericht: eine Zeile in drawKran/drawTruemmer) */
+  Z.sonderPracht = () => !(G.off && G.off.sonder);
+  const dp0 = Z.drawParcours;
+  Z.drawParcours = function (c, t) {
+    if (dp0) dp0.apply(this, arguments);
+    const lv = Z.level; if (!lv || !lv.specials || !lv.specials.length || (G.off && G.off.sonder)) return;
+    try {
+      const cam = Z.cam, vis = (x, y, m) => x > cam.x - (m || 80) && x < cam.x + cam.w + (m || 80) && y > cam.y - 120 && y < cam.y + cam.h + 120;
+      const tt = performance.now() / 1000;
+      for (const m of (Z._kraene ? Z._kraene() : [])) if (m.x > cam.x - 80 && m.x < cam.x + cam.w + 80 && m.y1 > cam.y - 80 && m.y0 - 60 < cam.y + cam.h) kran(c, m, tt);
+      for (const o of lv.specials) {
+        if (o.k === "bruecke" && vis(o.x * T, o.y0 * T)) bruecke(c, o, tt);
+        else if (o.k === "flut" && vis(o.x0 * T, o.top * T, 120)) flut(c, o, tt);
+      }
+    } catch (e) { console.error(e); }
+  };
+})();

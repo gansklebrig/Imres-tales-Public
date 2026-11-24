@@ -2997,3 +2997,132 @@
     c.restore();
   };
 })();
+
+/* Ezekiel – The Destroyer · Das Lager wächst sichtbar (W11 Runde 18, ab Stufe 1, nicht lean)
+   Ergänzt lager.js (Zelte → Hütten → Palisade …) um Leben, das mit Lagerstufe (Z.lager.stage()), Zahl der Geretteten
+   und Lager-Upgrades wächst – auf freien Bodenplätzen (fern von Bewohnern/Stationen, Türen und Deko):
+   Stufe ≥1 Werkbank mit Handwerker (hämmert, Späne), ≥2 Gärtchen (Pflanzen wachsen mit den Geretteten) mit Gießerin,
+   ≥3 Holzplatz mit Holzhacker und Wäscheleine, ≥4 Wimpelgirlanden über dem Lager, ≥5 Spielmann mit Laute (Noten).
+   Lagerfeuer und Feuerkörbe brennen mit jeder Stufe größer (Flammen + Funken). Frisches Lager: nichts davon.
+   Schalter Z.gfx.off.lagerwachs. Kein Blau. */
+(function () {
+  "use strict";
+  const Z = window.Z, G = Z.gfx, T = Z.TILE, TAU = Math.PI * 2;
+  const on = () => { const q = Z.gq; if (q && (q.lean || q.mini)) return false; return !q || q.level === -1 || q.level >= 1; };
+  const hash = i => { let h = Math.imul((i | 0) ^ 0x9e3779b9, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+  let plan = null;
+  function stageNow() { try { return Z.lager && Z.lager.stage ? Z.lager.stage() : 0; } catch (_) { return 0; } }
+  function resN() { const m = Z.meta && Z.meta.lager; return m && m.res ? Object.keys(m.res).length : 0; }
+  function makePlan() {
+    const lv = Z.level, st = stageNow(), n = resN();
+    const key = lv.seed + "|" + st + "|" + n + "|" + lv.W;
+    if (plan && plan.lv === lv && plan.key === key) return plan;
+    /* Bodenplätze: Luft über festem Boden, zwei Kacheln Kopffreiheit */
+    const block = [];
+    for (const i of Z.interacts || []) block.push(i.x);
+    for (const d of lv.doors || []) block.push(d.x * T + 8);
+    for (const d of lv.decor || []) block.push(d.x * T + 8);
+    if (lv.start) block.push(lv.start.x * T + 8);
+    for (const l of lv.lights || []) if (l.kind === "campfire" || l.kind === "forge") block.push(l.x * T + 8, l.x * T - 16, l.x * T + 32); /* Lagerfeuer, Esse */
+    const free = [];
+    for (let x = 3; x < lv.W - 3; x++) {
+      let fy = -1; for (let y = lv.H - 2; y > 2; y--) if (lv.get(x, y) === 0 && lv.get(x, y - 1) === 0 && lv.get(x, y - 2) === 0 && (lv.get(x, y + 1) === 1 || lv.get(x, y + 1) === 7)) { fy = y; break; }
+      if (fy < 0) continue; const px = x * T + 8; if (block.some(b => Math.abs(b - px) < 44)) continue;
+      free.push([px, (fy + 1) * T]);
+    }
+    /* zusammenhängende Strecken zu Plätzen von ~3 Kacheln */
+    const spots = []; let last = -99;
+    for (const f of free) { if (f[0] - last >= 56) { const run = free.filter(g => g[1] === f[1] && g[0] >= f[0] && g[0] <= f[0] + 40); if (run.length >= 3) { spots.push([f[0] + 20, f[1]]); last = f[0]; } } }
+    const want = [];
+    if (st >= 1) want.push("werkbank");
+    if (st >= 2) want.push("garten", "garten");
+    if (st >= 3) want.push("holz", "waesche");
+    if (st >= 5) want.push("spielmann");
+    const items = [];
+    /* gleichmäßig über die freien Plätze verteilen */
+    for (let i = 0; i < want.length && spots.length; i++) { const k = Math.min(spots.length - 1, Math.floor((i + 0.5) / want.length * spots.length)); const s = spots.splice(k, 1)[0]; items.push({ k: want[i], x: s[0], y: s[1], s: hash(i * 7 + st) }); }
+    plan = { lv, key, st, n, items, lights: (lv.lights || []).filter(d => d.kind === "campfire" || d.kind === "forge" || d.kind === "brazier") };
+    return plan;
+  }
+  const SIL = "#2a1c18", SKIN = "#c89878";
+  function person(c, x, y, face, col, arm, t) {
+    c.fillStyle = col; c.beginPath(); c.moveTo(x - 3.6, y); c.lineTo(x - 2.8, y - 9); c.quadraticCurveTo(x, y - 11.5, x + 2.8, y - 9); c.lineTo(x + 3.6, y); c.fill();
+    c.fillStyle = SKIN; c.beginPath(); c.arc(x + face * 0.6, y - 12.6, 2.2, 0, TAU); c.fill();
+    c.fillStyle = "#3a2418"; c.fillRect(x - 2.2 + face * 0.3, y - 15, 4.4, 1.4);
+    if (arm != null) { c.strokeStyle = col; c.lineWidth = 1.5; c.beginPath(); c.moveTo(x + face * 1.5, y - 8.5); const ax = x + face * (1.5 + Math.cos(arm) * 5), ay = y - 8.5 + Math.sin(arm) * 5; c.lineTo(ax, ay); c.stroke(); return [ax, ay]; }
+    return null;
+  }
+  function drawItem(c, it, t, st, n) {
+    const x = it.x, y = it.y, f = it.s < 0.5 ? 1 : -1;
+    if (it.k === "werkbank") {
+      c.fillStyle = "#5a3a22"; c.fillRect(x - 10, y - 8, 20, 2.5); c.fillStyle = "#3e2816"; c.fillRect(x - 9, y - 6, 2, 6); c.fillRect(x + 7, y - 6, 2, 6);
+      c.fillStyle = "#8a6a40"; c.fillRect(x - 6, y - 10, 8, 2); c.fillStyle = "#6a6470"; c.fillRect(x + 3, y - 10.5, 4, 1.5);
+      const hit = (t * 2.2 + it.s) % 1, a = hit < 0.6 ? -1.9 + hit / 0.6 * 1.2 : -0.7 - (hit - 0.6) / 0.4 * 1.2;
+      const h = person(c, x - 14 * f, y, f, "#6a4a2e", a, t);
+      if (h) { c.fillStyle = "#4a4048"; c.fillRect(h[0] - 1.2, h[1] - 1.6, 2.6, 2); }
+      if (hit < 0.06 && Math.random() < 0.6) Z.fx.p({ x: x - 4 * f, y: y - 10, vx: (Math.random() - 0.5) * 50, vy: -40, g: 300, life: 0.4, size: 1, col: "#e8c890", kind: "dot" });
+    } else if (it.k === "garten") {
+      const g = Math.min(1, 0.35 + n * 0.08);
+      c.fillStyle = "#4a3222"; c.fillRect(x - 14, y - 3, 28, 3); c.fillStyle = "#6a4a2e"; c.fillRect(x - 14, y - 3.4, 28, 0.8);
+      for (let i = 0; i < 6; i++) { const px = x - 11 + i * 4.4, h = (4 + hash(i + it.s * 99) * 5) * g, sw = Math.sin(t * 1.5 + i) * 0.8;
+        c.strokeStyle = "#5a8a3a"; c.lineWidth = 1; c.beginPath(); c.moveTo(px, y - 3); c.quadraticCurveTo(px + sw, y - 3 - h * 0.6, px + sw * 1.4, y - 3 - h); c.stroke();
+        c.fillStyle = i % 3 === 0 ? "#8ab04a" : "#6a9a3a"; c.beginPath(); c.ellipse(px + sw * 1.4 - 1.2, y - 3 - h * 0.7, 1.6, 0.8, -0.5, 0, TAU); c.ellipse(px + sw * 1.4 + 1.2, y - 3 - h * 0.8, 1.6, 0.8, 0.5, 0, TAU); c.fill();
+        if (g > 0.7 && i % 2 === 0) { c.fillStyle = i % 4 === 0 ? "#d04a2a" : "#e8a030"; c.beginPath(); c.arc(px + sw * 1.4, y - 3 - h, 1.2, 0, TAU); c.fill(); } }
+      if (it.s > 0.5) { /* Gießerin */ const tilt = 0.4 + Math.sin(t * 1.2) * 0.3; const h = person(c, x + 18, y, -1, "#7a3a3a", Math.PI - tilt, t);
+        if (h) { c.fillStyle = "#7a7068"; c.fillRect(h[0] - 3, h[1] - 1, 4, 3); if (Math.sin(t * 1.2) > 0) { c.fillStyle = "rgba(200,220,190,.7)"; for (let k = 0; k < 3; k++) c.fillRect(h[0] - 4 - k * 1.5, h[1] + 2 + ((t * 30 + k * 4) % 10), 0.6, 1.4); } } }
+      else { /* Vogelscheuche */ c.strokeStyle = "#5a3a22"; c.lineWidth = 1.2; c.beginPath(); c.moveTo(x + 16, y); c.lineTo(x + 16, y - 18); c.moveTo(x + 11, y - 13); c.lineTo(x + 21, y - 13); c.stroke(); c.fillStyle = "#8a6a3a"; c.beginPath(); c.arc(x + 16, y - 19, 2.4, 0, TAU); c.fill(); c.fillStyle = "#5a3a2a"; c.fillRect(x + 13, y - 22.5, 6, 1.4); c.fillStyle = "#7a4a3a"; c.fillRect(x + 13, y - 13, 6, 6); }
+    } else if (it.k === "holz") {
+      c.fillStyle = "#5a3a22"; for (let r = 0; r < 3; r++) for (let k = 0; k < 4 - r; k++) { c.beginPath(); c.arc(x + 8 + k * 4.4 + r * 2.2, y - 2.2 - r * 3.8, 2.1, 0, TAU); c.fill(); }
+      c.fillStyle = "#c8a070"; for (let r = 0; r < 3; r++) for (let k = 0; k < 4 - r; k++) { c.beginPath(); c.arc(x + 8 + k * 4.4 + r * 2.2, y - 2.2 - r * 3.8, 1.1, 0, TAU); c.fill(); }
+      c.fillStyle = "#4a3020"; c.fillRect(x - 12, y - 4, 7, 4); c.fillStyle = "#8a6a44"; c.fillRect(x - 11.5, y - 4.6, 6, 0.8);
+      const ph = (t * 0.9 + it.s) % 1, a = ph < 0.55 ? -2.4 + ph / 0.55 * 0.4 : ph < 0.7 ? -2.0 + (ph - 0.55) / 0.15 * 2.4 : 0.4;
+      const h = person(c, x - 19, y, 1, "#5a4a3a", a, t);
+      if (h) { c.strokeStyle = "#5a3a22"; c.lineWidth = 1.1; c.beginPath(); c.moveTo(h[0], h[1]); c.lineTo(h[0] + Math.cos(a) * 5, h[1] + Math.sin(a) * 5); c.stroke(); c.fillStyle = "#8a8490"; c.fillRect(h[0] + Math.cos(a) * 5 - 1.2, h[1] + Math.sin(a) * 5 - 1.2, 2.6, 2.6); }
+      if (ph > 0.69 && ph < 0.72 && Math.random() < 0.8) Z.fx.burst(x - 8, y - 5, 4, { col: ["#e0c090", "#a07a50"], sp: 60, ang: -Math.PI / 2, spread: 2, g: 300, life: 0.5, size: 1.2, kind: "dot" });
+    } else if (it.k === "waesche") {
+      c.strokeStyle = "#4a3222"; c.lineWidth = 1.4; c.beginPath(); c.moveTo(x - 18, y); c.lineTo(x - 18, y - 22); c.moveTo(x + 18, y); c.lineTo(x + 18, y - 22); c.stroke();
+      c.strokeStyle = "#a89880"; c.lineWidth = 0.5; c.beginPath(); c.moveTo(x - 18, y - 21); c.quadraticCurveTo(x, y - 16, x + 18, y - 21); c.stroke();
+      const cols = ["#c8b8a0", "#8a3a2a", "#e0d0b0", "#6a7a3a", "#b88a4a"], wind = (Z.windX || 0) * 0.02;
+      for (let i = 0; i < 5; i++) { const u = (i + 0.5) / 5, px = x - 18 + u * 36, py = y - 21 + Math.sin(u * Math.PI) * 5, sw = Math.sin(t * 2.2 + i * 1.3) * 1.6 + wind * 6, w = 4 + hash(i) * 3, h = 5 + hash(i + 5) * 4;
+        c.fillStyle = cols[i]; c.beginPath(); c.moveTo(px - w / 2, py); c.lineTo(px + w / 2, py); c.lineTo(px + w / 2 + sw, py + h); c.lineTo(px - w / 2 + sw, py + h); c.fill(); }
+    } else if (it.k === "spielmann") {
+      c.fillStyle = "#4a3020"; c.fillRect(x - 5, y - 4, 10, 4);
+      const strum = Math.sin(t * 9) * 0.3;
+      person(c, x, y - 4, 1, "#6a2a4a", null, t);
+      c.fillStyle = "#a0703a"; c.beginPath(); c.ellipse(x + 3, y - 10, 3.2, 2.4, -0.5, 0, TAU); c.fill(); c.strokeStyle = "#6a4a2a"; c.lineWidth = 1; c.beginPath(); c.moveTo(x + 4, y - 11); c.lineTo(x + 10, y - 16); c.stroke();
+      c.strokeStyle = "#6a2a4a"; c.lineWidth = 1.4; c.beginPath(); c.moveTo(x + 1, y - 13); c.lineTo(x + 3.5, y - 10 + strum); c.stroke();
+      c.fillStyle = "rgba(255,220,150,.85)"; c.font = "7px serif";
+      for (let k = 0; k < 3; k++) { const u = (t * 0.35 + k / 3) % 1; c.globalAlpha = Math.sin(u * Math.PI); c.fillText(k % 2 ? "♪" : "♫", x + 6 + u * 14 + Math.sin(u * 8) * 2, y - 18 - u * 26); }
+      c.globalAlpha = 1;
+    }
+  }
+  /* Wimpelgirlanden: über die Lagerbreite, unter dem oberen Rand des Bildes */
+  function pennants(c, cam, t, p) {
+    const lv = Z.level, xs = []; for (let x = 6; x < lv.W - 6; x += 9) xs.push(x * T);
+    const fy = p.items.length ? p.items[0].y : (lv.H - 2) * T, y0 = fy - 76, cols = ["#b8302a", "#e0a030", "#6a8a3a", "#8a3a6a", "#d8c8a0"];
+    for (let i = 0; i < xs.length - 1; i++) {
+      const a = xs[i], b = xs[i + 1]; if (b < cam.x - 20 || a > cam.x + cam.w + 20) continue;
+      const sag = 10 + hash(i) * 6, sw = Math.sin(t * 1.3 + i) * 1.5;
+      c.strokeStyle = "rgba(60,40,30,.9)"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(a, y0); c.quadraticCurveTo((a + b) / 2, y0 + sag * 2 + sw, b, y0); c.stroke();
+      for (let k = 1; k < 9; k++) { const u = k / 9, px = a + (b - a) * u, py = y0 + 4 * sag * u * (1 - u) + sw * 4 * u * (1 - u) * 2, fl = Math.sin(t * 4 + k + i) * 1.2;
+        c.fillStyle = cols[(k + i) % cols.length]; c.beginPath(); c.moveTo(px - 2.6, py); c.lineTo(px + 2.6, py); c.lineTo(px + fl * 0.5, py + 6); c.fill(); }
+    }
+  }
+  const ml0 = Z.drawMidLife;
+  Z.drawMidLife = function (c, cam, t) {
+    if (ml0) ml0.apply(this, arguments);
+    const lv = Z.level; if (!lv || !lv.hub || !on() || (G.off && G.off.lagerwachs)) return;
+    try {
+      const p = makePlan(); if (!p.st) return;
+      for (const it of p.items) if (it.x > cam.x - 40 && it.x < cam.x + cam.w + 40) drawItem(c, it, t, p.st, p.n);
+      if (p.st >= 4) pennants(c, cam, t, p);
+      /* Feuer wachsen mit der Stufe */
+      const k = p.st / 5;
+      for (const d of p.lights) { const x = d.x * T + 8, y = (d.y + 1) * T - 4, big = d.kind === "forge" ? 1 + ((Z.meta.up && Z.meta.up.klingen) || 0) / 3 : 1; if (x < cam.x - 30 || x > cam.x + cam.w + 30) continue;
+        c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = 0.25 * k * (0.85 + 0.15 * Math.sin(t * 9 + x));
+        Z.draw.glow(c, x, y - 4, (16 + 18 * k) * big, "#ffa040"); c.restore();
+        if (Math.random() < 0.15 * k * big) Z.fx.p({ x: x + (Math.random() - 0.5) * 8, y: y - 6, vx: (Math.random() - 0.5) * 10, vy: -50 - Math.random() * 40, life: 0.9, size: 1.2, col: "#ffc060", kind: "ember", add: true }); }
+    } catch (e) { console.error(e); }
+  };
+  Z.lagerWachsDbg = () => { const p = plan; return p ? { st: p.st, n: p.n, items: p.items.map(i => [i.k, Math.round(i.x / T)]) } : null; };
+})();

@@ -753,7 +753,7 @@
     const lv = Z.level; if (!lv || !lv.gates || !lv.gates.length || off()) return;
     const S = stil();
     for (const g of lv.gates) {
-      if (!g.lever || !visG(g, g.vert ? 40 : 0)) continue;
+      if (!g.lever || g.flut || !visG(g, g.vert ? 40 : 0)) continue; /* Flutkammer-Abläufe zeichnet effekte.js */
       const s = st(g, t), x = g.x * T, y = g.y0 * T;
       if (!g.vert) {
         const w = 2 * T, h = 3 * T, d = prog(s, t, 0.8);
@@ -818,7 +818,7 @@
     const lv = Z.level; if (!lv || !lv.gates || !lv.gates.length || off()) return;
     const S = stil();
     for (const g of lv.gates) {
-      if (!g.lever || !visG(g, g.vert ? 40 : 0)) continue;
+      if (!g.lever || g.flut || !visG(g, g.vert ? 40 : 0)) continue; /* Flutkammer-Abläufe zeichnet effekte.js */
       const s = st(g, t), x = g.x * T, y = g.y0 * T;
       if (!g.vert) {
         const w = 2 * T, h = 3 * T, d = prog(s, t, 0.8);
