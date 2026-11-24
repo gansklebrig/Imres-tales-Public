@@ -3009,6 +3009,9 @@
         for (const u of used) sc2 -= Math.max(0, 4 - (Math.abs(c.x - u.x) + Math.abs(c.y - u.y))) * 3;
         if (used.includes(c)) sc2 -= 50;
         if (c === lv.endCell) sc2 += 2.5;
+        /* W13 R19 (Balance-Meldung): in Wächtergebieten liegen alle Ausgänge im Wächterraum (= endCell) – sonst stand man vor
+           verschlossenen Türen und musste den Wächter woanders suchen (Zinnen/Schmiede/Glut: bis 10 von 12 Karten) */
+        if (B.warden) sc2 += c === lv.endCell ? 100 : -100;
         if (c.kind === "path") sc2 += 1.2;
         /* Kante zählt voll nur bei passender Weglänge – sonst rückte der Ausgang zu nah an den Eingang (Balance) */
         const ed = edgeOf(c, ex.v); sc2 += ed.s * (exits.length === 1 ? (dd >= Ls * exLo && dd <= Ls * exHi ? 3.2 : 0.3) : dd >= Ls * exLo - 0.5 && dd <= Ls * exHi + 1 ? 1.4 : 0.3); /* nur ein Ausgang (Glut, Hafen …): Kante zählt mehr */

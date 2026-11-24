@@ -703,8 +703,10 @@
   /* ======================= RAUM-EREIGNISSE ======================= */
   let evs = [];
   const EVN = { haendler: ["Fahrende Händlerin", "Wandering Trader"], schrein: ["Verfluchter Schrein", "Cursed Shrine"], brunnen: ["Wunschbrunnen", "Wishing Well"], wette: ["Barradins Wette", "Barradin's Bet"], kaefig: ["Gefangener im Käfig", "Caged Prisoner"], dieb: ["Goldgoblin", "Gold Goblin"] };
+  /* R19: Plätze von Hebeln, Schreinen, Schlüsseln, Ambossen und Truhen der Karte (welt.js feats/rewards) – dort nichts Benutzbares dazustellen */
+  const belegt = (lv, x, y) => (lv.feats || []).some(f => f.t !== "mouth" && Math.abs(f.x - x) <= 2 && Math.abs((f.y != null ? f.y : f.y0) - y) <= 3) || (lv.rewards || []).some(r => Math.abs(r.x - x) <= 2 && Math.abs(r.y - y) <= 2);
   function spotFar(lv, from, n) {
-    for (let i = 0; i < 400; i++) { const x = 3 + ((Math.random() * (lv.W - 6)) | 0), y = 3 + ((Math.random() * (lv.H - 6)) | 0); if (Z.standable(lv, x, y, 3) && Z.standable(lv, x - 1, y, 3) && Z.standable(lv, x + 1, y, 3) && Math.abs(x - from.x) + Math.abs(y - from.y) > (n || 30) && !(lv.doors || []).some(d => Math.abs(d.x - x) < 5 && Math.abs(d.y - y) < 4)) return { x, y }; }
+    for (let i = 0; i < 400; i++) { const x = 3 + ((Math.random() * (lv.W - 6)) | 0), y = 3 + ((Math.random() * (lv.H - 6)) | 0); if (Z.standable(lv, x, y, 3) && Z.standable(lv, x - 1, y, 3) && Z.standable(lv, x + 1, y, 3) && Math.abs(x - from.x) + Math.abs(y - from.y) > (n || 30) && !(lv.doors || []).some(d => Math.abs(d.x - x) < 5 && Math.abs(d.y - y) < 4) && !belegt(lv, x, y)) return { x, y }; }
     return null;
   }
   function setupEvents(lv) {
@@ -727,13 +729,14 @@
       else evs.push({ k, x, y, done: false, t: 0 });
     }
     /* W13: seltene Zeitrennen-Kammer (Sanduhr-Sockel, Ringe in der Nähe einsammeln) */
-    if (Math.random() < (Z.rennenChance != null ? Z.rennenChance : 0.14)) { try { const ev = setupRennen(lv); if (ev) { evs.push(ev); rennenInteract(ev); } } catch (err) { console.error(err); } }
+    const PF = Z.ladeProfil = Z.ladeProfil || {}, tm = (k, f) => { const t0 = performance.now(); try { f(); } catch (err) { console.error(err); } PF[k] = (PF[k] || 0) + performance.now() - t0; };
+    if (Math.random() < (Z.rennenChance != null ? Z.rennenChance : 0.14)) tm("rennen", () => { const ev = setupRennen(lv); if (ev) { evs.push(ev); rennenInteract(ev); } });
     /* W13 R13: lange Nebenketten beleben (leere Enden → Fundstelle, lange Ketten → Vorratsnische) */
-    if (Z.kettenAn !== false) { try { setupKetten(lv); } catch (err) { console.error(err); } }
+    if (Z.kettenAn !== false) tm("ketten", () => setupKetten(lv));
     /* W13 R11: Heilquelle an einer Kreuzung des Hauptwegs (Stufe 1–3): jetzt trinken oder Flasche füllen */
-    if (Math.random() < (Z.quelleChance != null ? Z.quelleChance : QUELLE.chance(lv))) { try { const ev = setupQuelle(lv); if (ev) { evs.push(ev); quelleInteract(ev); } } catch (err) { console.error(err); } }
+    if (Math.random() < (Z.quelleChance != null ? Z.quelleChance : QUELLE.chance(lv))) tm("quelle", () => { const ev = setupQuelle(lv); if (ev) { evs.push(ev); quelleInteract(ev); } });
     /* W13 R9: Hebelrätsel in einem Geheimraum (nie auf dem Hauptweg) */
-    if (Math.random() < (Z.raetselChance != null ? Z.raetselChance : 0.45)) { try { const ev = setupRaetsel(lv); if (ev) { evs.push(ev); raetselInteract(ev); } } catch (err) { console.error(err); } }
+    if (Math.random() < (Z.raetselChance != null ? Z.raetselChance : 0.45)) tm("raetsel", () => { const ev = setupRaetsel(lv); if (ev) { evs.push(ev); raetselInteract(ev); } });
     if (evs.some(e => e.k === "haendler")) setTimeout(() => { if (Z.level === lv && Z.ui && Z.ui.notify) Z.ui.notify("⚖ <b>" + L(["Fahrende Händlerin", "Wandering Trader"]) + "</b><br><small>" + L(["Irgendwo klimpert ihr Karren – folge der Laterne (Karte).", "Her cart is jingling somewhere – follow the lantern (map)."]) + "</small>", { prio: 2, art: "gold", dauer: 3400 }); }, 9000);
     /* Runen-Fragmente in Geheimräumen */
     const RUNE = { verlies: "tiefe", schmiede: "glut", zinnen: "himmel" };
@@ -748,7 +751,9 @@
   }
   const load0 = Z.loadArea;
   Z.loadArea = function (id) { try { varWahl(id); } catch (err) { console.error(err); } const r = load0.apply(this, arguments); try { varAnsage(); } catch (err) { console.error(err); } try { setupEvents(Z.level); } catch (err) { console.error(err); } return r; };
-  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "abenteuer", save: () => evs, load: s => { evs = s || []; Z.abEvents = evs; } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "abenteuer", save: () => { /* R19: laufendes Zeitrennen endet beim Gebietswechsel (sonst Uhr-Pause per Rückweg); Brocken fallen nicht ins andere Gebiet */
+    for (const ev of evs) if (ev.k === "rennen" && ev.on) { ev.on = false; for (const r of ev.rings) r.got = false; }
+    brocken.length = 0; return evs; }, load: s => { evs = s || []; Z.abEvents = evs; } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
   function near(ev, d) { const P = Z.player; return P && Math.abs(P.x + P.w / 2 - ev.x) < (d || 22) && Math.abs(P.y + P.h - ev.y) < 26; }
   function finish(ev) { ev.done = true; M().events = (M().events || 0) + 1; if (Z.run) Z.run.events++; Z.saveMeta(); }
   /* ======================= ZEITRENNEN ======================= */
@@ -757,7 +762,9 @@
   /* Wegkosten über die echten Kachelkanten des Erreichbarkeitsprüfers (welt.js validate): Dijkstra je Teilstück.
      Kosten in „Laufkacheln“: waagrecht 1, hinauf 1,7 je Kachel (Sprung/Leiter), hinab 0,5 je Kachel. */
   function rennenGraph(lv, p) {
-    const f = { W: lv.W, H: lv.H, get: lv.get, start: { x: p.x, y: p.y }, doors: [], cells: lv.cells, _wantEdges: true };
+    /* R19: nur ein Ausschnitt um den Sockel (Ringe liegen ±22/±9 Kacheln) – spart die Prüfung der ganzen Karte */
+    const bx0 = p.x - 32, bx1 = p.x + 32, by0 = p.y - 16, by1 = p.y + 16, boxGet = (x, y) => (x < bx0 || x > bx1 || y < by0 || y > by1 ? 1 : lv.get(x, y));
+    const f = { W: lv.W, H: lv.H, get: boxGet, start: { x: p.x, y: p.y }, doors: [], cells: lv.cells, _wantEdges: true };
     Z.validateLevel(f); const [ea, eb] = f._edges || [[], []], N = lv.W * lv.H, W = lv.W;
     const head = new Int32Array(N).fill(-1), nxt = new Int32Array(ea.length), cost = new Float64Array(ea.length);
     for (let k = 0; k < ea.length; k++) { nxt[k] = head[ea[k]]; head[ea[k]] = k; const dx = Math.abs((ea[k] % W) - (eb[k] % W)), dy = ((eb[k] / W) | 0) - ((ea[k] / W) | 0); cost[k] = Math.max(dx, 0.3) + (dy < 0 ? -dy * 1.7 : dy * 0.5); }
@@ -834,7 +841,7 @@
     const spots = (c, wide) => { const sp = []; for (let y = c.y * Z.CH + 1; y < c.y * Z.CH + Z.CH - 1; y++) for (let x = c.x * Z.CW + 2; x < c.x * Z.CW + Z.CW - 2; x++) {
       if (!Z.standable(lv, x, y, 2) || (lv.reach && !lv.reach[y * W + x]) || (lv.doors || []).some(d => Math.abs(d.x - x) < 4 && Math.abs(d.y - y) < 3)) continue;
       if (wide && !(Z.standable(lv, x + 1, y, 2) && Z.standable(lv, x + 2, y, 2) && lv.get(x + 1, y + 1) === lv.get(x, y + 1) && lv.get(x + 2, y + 1) === lv.get(x, y + 1))) continue;
-      if (Z.propsLive.some(p => Math.abs(p.x - x * T) < 40 && Math.abs(p.y - y * T) < 24) || evs.some(e => Math.abs(e.x - x * T) < 48 && Math.abs(e.y - (y + 1) * T) < 32)) continue;
+      if (Z.propsLive.some(p => Math.abs(p.x - x * T) < 40 && Math.abs(p.y - y * T) < 24) || evs.some(e => Math.abs(e.x - x * T) < 48 && Math.abs(e.y - (y + 1) * T) < 32) || belegt(lv, x, y)) continue;
       sp.push([x, y]); } return sp; };
     for (const c of leaves) {
       /* tief im Raum: weit weg vom Elternraum */
@@ -927,6 +934,8 @@
   const quelleHeil = () => QUELLE.heal + (Z.lager && Z.lager.level && Z.lager.level("quirin", "quellwasser") >= 1 ? QUELLE.quirin : 0);
   const QUELLE = { heal: 0.4, quirin: 0.2, chance: lv => { const t = Z.run ? Z.run.tier : 0; return t >= 1 && t <= 3 ? 0.35 : 0; } };
   Z.QUELLE = QUELLE;
+  /* R19: kein Ereignis direkt neben einem anderen (sonst greift Benutzen das falsche Ding) */
+  const evNah = (x, y) => evs.some(e => { const pts = [[e.x, e.y]].concat((e.levers || []).map(l => [l.x, l.y])); return pts.some(([ex, ey]) => Math.abs(ex - (x * T + 8)) < 40 && Math.abs(ey - (y + 1) * T) < 32); });
   function setupQuelle(lv) {
     const W = lv.W, D4 = { L: [-1, 0], R: [1, 0], U: [0, -1], D: [0, 1] };
     const cands = Object.keys(lv.cells || {}).map(k => lv.cells[k]).filter(c => c.kind === "path" && Object.keys(D4).filter(s2 => c.need[s2]).length >= 3);
@@ -935,7 +944,7 @@
       if (c.x + "," + c.y === startK) continue;
       const mx = c.x * Z.CW + Z.CW / 2, my = c.y * Z.CH + Z.CH / 2, sp = [];
       for (let y = c.y * Z.CH + 1; y < c.y * Z.CH + Z.CH - 1; y++) for (let x = c.x * Z.CW + 2; x < c.x * Z.CW + Z.CW - 2; x++)
-        if ((!lv.reach || lv.reach[y * W + x]) && Z.standable(lv, x, y, 3) && Z.standable(lv, x - 1, y, 3) && Z.standable(lv, x + 1, y, 3) && !(lv.doors || []).some(d => Math.abs(d.x - x) < 4 && Math.abs(d.y - y) < 3) && !(lv.morsch || []).some(m => Math.abs(m.y - (y + 1)) <= 1 && x >= m.x0 - 2 && x <= m.x1 + 2) && !(lv.traps || []).some(q => Math.abs(q.x - x) < 3 && Math.abs(q.y - y) < 3)) sp.push([x, y]);
+        if ((!lv.reach || lv.reach[y * W + x]) && Z.standable(lv, x, y, 3) && Z.standable(lv, x - 1, y, 3) && Z.standable(lv, x + 1, y, 3) && !(lv.doors || []).some(d => Math.abs(d.x - x) < 4 && Math.abs(d.y - y) < 3) && !(lv.morsch || []).some(m => Math.abs(m.y - (y + 1)) <= 1 && x >= m.x0 - 2 && x <= m.x1 + 2) && !(lv.traps || []).some(q => Math.abs(q.x - x) < 3 && Math.abs(q.y - y) < 3) && !evNah(x, y) && !belegt(lv, x, y)) sp.push([x, y]);
       if (!sp.length) continue;
       sp.sort((a, b) => Math.abs(a[0] - mx) + Math.abs(a[1] - my) - Math.abs(b[0] - mx) - Math.abs(b[1] - my));
       const [x, y] = sp[0];
@@ -985,14 +994,16 @@
       /* nicht auf Truhen, Schlüsseln, Schreinen o. Ä. (sonst greift Benutzen das falsche Ding) */
       const busy = [].concat((lv.rewards || []).map(r => [r.x, r.y]), (lv.feats || []).map(q => [q.x, q.y != null ? q.y : q.y0]), (lv.loot || []).map(q => [q.x, q.y]));
       for (let y = c.y * Z.CH + 1; y < c.y * Z.CH + Z.CH - 1; y++) for (let x = c.x * Z.CW + 1; x < c.x * Z.CW + Z.CW - 1; x++)
-        if (reach[y * W + x] && Z.standable(lv, x, y, 2) && !busy.some(([bx, by]) => Math.abs(bx - x) <= 2 && Math.abs(by - y) <= 2)) sp.push({ x, y });
+        if (reach[y * W + x] && Z.standable(lv, x, y, 2) && !busy.some(([bx, by]) => Math.abs(bx - x) <= 2 && Math.abs(by - y) <= 2) && !evNah(x, y)) sp.push({ x, y });
       if (sp.length < n + 1) continue;
+      /* R19: Raumprüfungen nur im Kammer-Ausschnitt (alles außerhalb gilt als Fels) */
+      const inBox = (x, y) => (x < c.x * Z.CW - 1 || x > c.x * Z.CW + Z.CW || y < c.y * Z.CH - 1 || y > c.y * Z.CH + Z.CH ? 1 : lv.get(x, y));
       /* Tafel zuerst; Hebel nur, was von der Tafel aus OHNE weitere Risse erreichbar ist (alles in einem Zug lösbar) */
       let tab = null, levers = null;
       for (const t0 of Z.R.shuffle(sp.slice()).slice(0, 4)) {
-        const g2 = { W: lv.W, H: lv.H, get: lv.get, start: t0, doors: [], cells: lv.cells }; Z.validateLevel(g2, null, true);
+        const g2 = { W: lv.W, H: lv.H, get: inBox, start: t0, doors: [], cells: lv.cells }; Z.validateLevel(g2, null, true);
         const pick = [];
-        for (const q of Z.R.shuffle(sp.filter(q => q !== t0 && g2.reach[q.y * W + q.x]))) { if (pick.length >= n) break; if ([t0].concat(pick).every(r => Math.abs(r.x - q.x) >= 3 || Math.abs(r.y - q.y) >= 3)) { const g3 = { W: lv.W, H: lv.H, get: lv.get, start: q, doors: [], cells: lv.cells }; Z.validateLevel(g3, null, true); if (g3.reach[t0.y * W + t0.x]) pick.push(q); /* auch zurück zur Tafel – keine Einbahn-Falle */ } }
+        for (const q of Z.R.shuffle(sp.filter(q => q !== t0 && g2.reach[q.y * W + q.x]))) { if (pick.length >= n) break; if ([t0].concat(pick).every(r => Math.abs(r.x - q.x) >= 3 || Math.abs(r.y - q.y) >= 3)) { const g3 = { W: lv.W, H: lv.H, get: inBox, start: q, doors: [], cells: lv.cells }; Z.validateLevel(g3, null, true); if (g3.reach[t0.y * W + t0.x]) pick.push(q); /* auch zurück zur Tafel – keine Einbahn-Falle */ } }
         if (pick.length >= n) { tab = t0; levers = pick.sort((a, b) => a.x - b.x || a.y - b.y); break; }
       }
       if (!tab) continue;

@@ -600,7 +600,7 @@
   let peekT = 0, peekLock = null;
   const et0 = Z.ebenenTick;
   function dramaTick(dt) {
-    if (Z.level && Z.level._dramaPend) { Z.level._dramaPend = false; drama(Z.level); try { aufstellung(Z.level); } catch (e) { console.error(e); } }
+    if (Z.level && Z.level._dramaPend) { Z.level._dramaPend = false; const PF = Z.ladeProfil = Z.ladeProfil || {}; let t0 = performance.now(); drama(Z.level); PF.drama = (PF.drama || 0) + performance.now() - t0; t0 = performance.now(); try { aufstellung(Z.level); } catch (e) { console.error(e); } PF.aufstellung = (PF.aufstellung || 0) + performance.now() - t0; }
     const lv = Z.level, P = Z.player, D = lv && lv._drama; if (!D || !P) return;
     if (peekT > 0) { peekT -= dt; if (peekT <= 0 && Z.cam.lock === peekLock) Z.cam.lock = null; }
     if (!D.V0 || D.blick || lv.wardenSpawned) return;
