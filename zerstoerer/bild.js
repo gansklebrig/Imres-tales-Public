@@ -579,7 +579,7 @@
   const inLv = (x, y) => x >= 0 && y >= 0 && x < PR.W && y < PR.H;
   /* begehbare Rückwand: frei, kein Himmel, kein Fenster, kein Abgrund */
   const isWall = (x, y) => inLv(x, y) && !PR.sol[y * PR.W + x] && !PR.clear[y * PR.W + x] && !PR.win[y * PR.W + x] && lv.get(x, y) !== 9;
-  const isPlatV = v => v === 2 || v === 8 || v === 10;
+  const isPlatV = v => v === 2 || v === 8 || v === 10 || v === 11; /* R21: 11 = Förderband-Schiene (Karte), wie ein Steg begehbar */
   /* Abstand (in Kacheln) zum nächsten Boden unter einer Wandkachel, 0 = keiner in Reichweite */
   function floorBelow(x, y, max) { for (let k = 1; k <= max; k++) { const v = lv.get(x, y + k); if (solidV(v) || isPlatV(v)) return k; if (v === 9) return 0; } return 0; }
 
@@ -1211,8 +1211,8 @@
     const plD = lit(pl, -0.35), plL = lit(pl, 0.22), plS = lit(pl, -0.5);
     for (let y = y0; y <= y1; y++) for (let x = x0; x < x1; x++) {
       const v = get(x, y), px = x * T, py = y * T;
-      if (v === 2 || v === 8) {
-        const L = !(get(x - 1, y) === 2 || get(x - 1, y) === 8), R = !(get(x + 1, y) === 2 || get(x + 1, y) === 8);
+      if (v === 2 || v === 8 || v === 11) { /* R21: 11 = Förderband-Schiene */
+        const pl = v2 => v2 === 2 || v2 === 8 || v2 === 11, L = !pl(get(x - 1, y)), R = !pl(get(x + 1, y));
         if (B.webPlat) {
           c.strokeStyle = "rgba(0,0,0,.3)"; c.lineWidth = 1.6; c.beginPath(); c.moveTo(px, py + 2.5); c.quadraticCurveTo(px + 8, py + 4.5, px + 16, py + 2.5); c.stroke();
           c.strokeStyle = "rgba(236,230,242,.9)"; c.lineWidth = 1.3; c.beginPath(); c.moveTo(px, py + 1); c.quadraticCurveTo(px + 8, py + 3, px + 16, py + 1); c.stroke();
@@ -2251,7 +2251,7 @@
     LQn = 0; EXT.length = 0; for (let i = FLASH.length - 1; i >= 0; i--) { FLASH[i].t += dt; if (FLASH[i].t >= FLASH[i].life) FLASH.splice(i, 1); }
     /* R20: Stufe 0 – dunkle Burg, aber Spielrelevantes erkennbar: Grunddunkel um gut ein Viertel gesenkt (Dunkelheits-
        Ereignisse bleiben voll) */
-    return darkPass(c, cam, W, H, Z.darkness > 0 ? dark : Math.min(0.46, dark * 0.74));
+    return darkPass(c, cam, W, H, Z.darkness > 0 ? dark : Math.min(0.42, dark * 0.74));
   }
   function lightCanvas(W, H) {
     const LD = (Z.gq && Z.gq.light) || 4; if (!G.light || G.light.width !== Math.ceil(W / LD) || G.light.height !== Math.ceil(H / LD)) { G.light = document.createElement("canvas"); G.light.width = Math.ceil(W / LD); G.light.height = Math.ceil(H / LD); G.lc = G.light.getContext("2d"); }

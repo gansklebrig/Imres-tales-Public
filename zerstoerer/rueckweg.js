@@ -247,16 +247,32 @@
   Z.newRun = function () { back = null; fwd = null; return nr0.apply(this, arguments); };
 
   /* ======================= ZEICHNEN ======================= */
+  /* W11 R21 (Grafik): Optik auf Pracht-Niveau – Schimmer mit aufsteigenden Hitzeschlieren im Torbogen, warme Lichtsäule
+     nach oben, Glutfunken, Bodenlicht; in den letzten 5 s stottert das Licht und wird schwächer; beim Erlöschen fällt ein
+     schweres Fallgitter (Nieten, Querstreben, Spitzen) mit Aufprall, Funken und Staub und BLEIBT danach sichtbar
+     geschlossen. Lean: schlichtes Schimmern, einfaches Gitter. Logik unverändert (nur Zeichnen). */
+  function grate(c, x, y0, y1, lo) {
+    const h = y1 - y0; if (h <= 0) return;
+    c.fillStyle = "rgba(0,0,0,.35)"; for (let k = -6; k <= 6; k += 4) c.fillRect(x + k + 0.2, y0 + 1, 1.8, h);
+    c.fillStyle = "#3e3638"; for (let k = -6; k <= 6; k += 4) c.fillRect(x + k - 0.9, y0, 1.8, h - 2);
+    for (let yy = y1 - 6; yy > y0 + 2; yy -= 9) c.fillRect(x - 8, yy, 16, 1.6);
+    for (let k = -6; k <= 6; k += 4) { c.beginPath(); c.moveTo(x + k - 1.2, y1 - 2); c.lineTo(x + k, y1 + 1.2); c.lineTo(x + k + 1.2, y1 - 2); c.fill(); }
+    if (!lo) { c.fillStyle = "#8a8088"; for (let k = -6; k <= 6; k += 4) c.fillRect(x + k - 0.9, y0, 0.5, h - 2); for (let yy = y1 - 6; yy > y0 + 2; yy -= 9) for (let k = -6; k <= 6; k += 4) c.fillRect(x + k - 0.4, yy + 0.3, 0.9, 0.9); }
+  }
   function drawGate(c, t) {
-    const b = back; if (!b || b.lv !== Z.level || b.st === "closed") return;
+    const b = back; if (!b || b.lv !== Z.level) return;
     const cam = Z.cam, x = b.gx, y = b.gy;
-    if (x < cam.x - 60 || x > cam.x + cam.w + 60 || y < cam.y - 60 || y > cam.y + cam.h + 80) return;
+    if (x < cam.x - 60 || x > cam.x + cam.w + 60 || y < cam.y - 90 || y > cam.y + cam.h + 80) return;
+    const lo = lean();
+    if (b.st === "closed") { c.save(); grate(c, x, y - 38, y, lo); c.restore(); return; }
     const open = b.st === "opening" ? Math.min(1, b.t / OPEN_S) : 1;
     const close = b.st === "closing" ? Math.min(1, b.closeT / CLOSE_S) : 0;
-    const life = b.st === "open" || b.st === "opening" || b.st === "going" ? 1 - Math.max(0, (b.t - GRACE_S + 5) / 5) * 0.45 : 1; /* die letzten 5 s etwas schwächer */
-    const glow = open * (1 - close) * life, lo = lean();
+    const left = GRACE_S - b.t, ending = (b.st === "open" || b.st === "going") && left < 5;
+    const life = ending ? 0.45 + 0.55 * Math.max(0, left / 5) : 1;
+    /* Stottern in den letzten 5 s: kurze Aussetzer, häufiger je näher am Ende */
+    const stut = ending && !lo && Math.sin(t * (9 + (5 - left) * 4)) * Math.sin(t * 3.7) > 0.55 ? 0.45 : 1;
+    const glow = open * (1 - close) * life * stut;
     c.save();
-    /* schlichter Torbogen, wenn das Gebiet keinen Eingang hat */
     if (!b.entry) {
       c.globalAlpha = 1 - close * 0.6;
       c.fillStyle = "#3a302a"; c.fillRect(x - 11, y - 32, 4, 32); c.fillRect(x + 7, y - 32, 4, 32);
@@ -264,43 +280,57 @@
       c.fillStyle = "rgba(20,12,8,.75)"; c.fillRect(x - 7, y - 30, 14, 30); c.beginPath(); c.arc(x, y - 30, 7, Math.PI, 0); c.fill();
       c.globalAlpha = 1;
     }
-    /* warmes Schimmern im Durchgang */
     if (glow > 0.01) {
       const fl = 0.85 + 0.15 * Math.sin(t * 5.3) * Math.sin(t * 2.1 + 1);
       c.globalCompositeOperation = "lighter";
+      const arch = () => { c.beginPath(); c.moveTo(x - 8, y); c.lineTo(x - 8, y - 30); c.arc(x, y - 30, 8, Math.PI, 0); c.lineTo(x + 8, y); c.closePath(); };
       const g = c.createLinearGradient(0, y - 38, 0, y);
-      g.addColorStop(0, "rgba(255,170,80,0)"); g.addColorStop(0.35, "rgba(255,170,80," + (0.32 * glow * fl).toFixed(3) + ")"); g.addColorStop(1, "rgba(255,214,140," + (0.55 * glow * fl).toFixed(3) + ")");
-      c.fillStyle = g; c.beginPath(); c.moveTo(x - 8, y); c.lineTo(x - 8, y - 30); c.arc(x, y - 30, 8, Math.PI, 0); c.lineTo(x + 8, y); c.closePath(); c.fill();
+      g.addColorStop(0, "rgba(255,170,80," + (0.08 * glow).toFixed(3) + ")"); g.addColorStop(0.35, "rgba(255,170,80," + (0.32 * glow * fl).toFixed(3) + ")"); g.addColorStop(1, "rgba(255,200,120," + (0.48 * glow * fl).toFixed(3) + ")");
+      c.fillStyle = g; arch(); c.fill();
       if (!lo) {
-        const rg = c.createRadialGradient(x, y - 14, 2, x, y - 14, 34);
-        rg.addColorStop(0, "rgba(255,190,110," + (0.22 * glow * fl).toFixed(3) + ")"); rg.addColorStop(1, "rgba(255,190,110,0)");
-        c.fillStyle = rg; c.fillRect(x - 34, y - 48, 68, 52);
-        /* Glutfunken steigen im Tor */
+        /* Hitzeschlieren: helle Bänder wandern im Bogen nach oben */
+        c.save(); arch(); c.clip();
+        for (let k = 0; k < 3; k++) { const u = (t * 0.45 + k / 3) % 1, yy = y - u * 40; c.fillStyle = "rgba(255,230,170," + (0.22 * glow * Math.sin(u * Math.PI)).toFixed(3) + ")";
+          c.beginPath(); c.moveTo(x - 9, yy); c.quadraticCurveTo(x, yy - 3 + Math.sin(t * 3 + k) * 2, x + 9, yy); c.lineTo(x + 9, yy + 2.2); c.quadraticCurveTo(x, yy - 0.8, x - 9, yy + 2.2); c.fill(); }
+        c.restore();
+        /* Lichtsäule nach oben */
+        const lg = c.createLinearGradient(0, y - 110, 0, y - 20);
+        lg.addColorStop(0, "rgba(255,180,90,0)"); lg.addColorStop(1, "rgba(255,190,100," + (0.18 * glow * fl).toFixed(3) + ")");
+        c.fillStyle = lg; c.beginPath(); c.moveTo(x - 7, y - 20); c.lineTo(x - 12, y - 110); c.lineTo(x + 12, y - 110); c.lineTo(x + 7, y - 20); c.closePath(); c.fill();
+        const rg = c.createRadialGradient(x, y - 14, 2, x, y - 14, 38);
+        rg.addColorStop(0, "rgba(255,190,110," + (0.24 * glow * fl).toFixed(3) + ")"); rg.addColorStop(1, "rgba(255,190,110,0)");
+        c.fillStyle = rg; c.fillRect(x - 38, y - 52, 76, 56);
+        /* Glutfunken: steigen im Tor und darüber in der Säule */
+        for (let i = 0; i < 10; i++) { const ph = (t * (0.3 + (i % 3) * 0.08) + i / 10) % 1, sx = x + Math.sin(i * 2.3 + t * 1.7) * (4 + ph * 5), sy = y - 2 - ph * 70;
+          c.fillStyle = "rgba(255," + (200 + (i % 3) * 18) + ",140," + (0.9 * glow * (1 - ph)).toFixed(3) + ")"; c.fillRect(sx, sy, i % 4 ? 1 : 1.6, i % 4 ? 1 : 1.6); }
+      } else {
         c.fillStyle = "rgba(255,220,150," + (0.8 * glow).toFixed(3) + ")";
-        for (let i = 0; i < 6; i++) { const ph = (t * 0.35 + i / 6) % 1, sx = x + Math.sin(i * 2.3 + t * 1.7) * 5; c.fillRect(sx, y - 2 - ph * 30, 1, 1); }
+        for (let i = 0; i < 4; i++) { const ph = (t * 0.35 + i / 4) % 1, sx = x + Math.sin(i * 2.3 + t * 1.7) * 5; c.fillRect(sx, y - 2 - ph * 30, 1, 1); }
       }
-      /* Bodenlicht */
-      c.fillStyle = "rgba(255,190,110," + (0.25 * glow * fl).toFixed(3) + ")"; c.beginPath(); c.ellipse(x, y, 16, 2.2, 0, 0, TAU); c.fill();
+      c.fillStyle = "rgba(255,190,110," + (0.28 * glow * fl).toFixed(3) + ")"; c.beginPath(); c.ellipse(x, y, 18, 2.4, 0, 0, TAU); c.fill();
       c.globalCompositeOperation = "source-over";
     }
-    /* Schließen: ein Fallgitter rauscht herab, Staub */
+    /* Schließen: schweres Fallgitter fällt (beschleunigt), prallt kurz zurück, Funken und Staub */
     if (b.st === "closing" || close > 0) {
-      const u = Math.min(1, close * 1.6), fall = u * u, gy = y - 34 + fall * 34;
-      c.globalAlpha = 1 - Math.max(0, (close - 0.75) / 0.25) * 0.5;
-      c.fillStyle = "#2a2220"; for (let k = -6; k <= 6; k += 4) c.fillRect(x + k - 0.8, y - 38, 1.6, gy - (y - 38));
-      c.fillRect(x - 8, gy - 1.5, 16, 1.6); c.fillRect(x - 8, gy - 12, 16, 1.2);
-      c.globalAlpha = 1;
+      const u = Math.min(1, close * 1.6), fall = u < 1 ? u * u : 1, bounce = u >= 1 ? Math.max(0, Math.sin((close - 0.625) / 0.375 * Math.PI * 2)) * 2.5 * (1 - close) : 0;
+      const gy = y - 38 + fall * 38 - bounce;
+      c.save(); c.beginPath(); c.rect(x - 10, y - 44, 20, 46); c.clip(); grate(c, x, gy - 38, gy, lo); c.restore();
       if (u >= 1 && !b.dust) {
         b.dust = true;
-        if (!lo) FX.burst(x, y - 2, 12, { col: ["#6a5a4a", "#8a7a68"], sp: 50, up: 20, life: 0.7, size: 2.5, kind: "smoke", g: -10 });
+        if (!lo) { FX.burst(x, y - 2, 14, { col: ["#6a5a4a", "#8a7a68"], sp: 55, up: 20, life: 0.8, size: 2.6, kind: "smoke", g: -10 }); FX.burst(x, y - 1, 10, { col: ["#ffd890", "#ff9a4a"], sp: 110, ang: -Math.PI / 2, spread: 2.2, life: 0.35, size: 1.3, kind: "spark", add: true, g: 300 }); }
         FX.addShake && FX.addShake(1.5);
       }
     }
     c.restore();
-    /* Schild „Zurück nach …“ im Stil der Weltschilder */
-    const near = Z.interactTarget && Z.interactTarget.type === "obj" && Z.interactTarget.o === b.o; /* steht er davor, zeigt der Benutzen-Hinweis denselben Text */
+    const near = Z.interactTarget && Z.interactTarget.type === "obj" && Z.interactTarget.o === b.o;
     if ((b.st === "open" || b.st === "opening") && !near) { try { Z.ui.worldLabel("rueckweg", { x, y: y - 44, text: b.label, art: "gold", cls: "rueck", jetzt: true }); } catch (_) {} }
   }
+  /* W11 R21: warmes Licht des offenen Tors in der Lichtkarte (ab Stufe 1) */
+  if (Z.gfx && Z.gfx.lightGather) Z.gfx.lightGather.push(function (add) {
+    const b = back; if (!b || b.lv !== Z.level || b.st === "closed" || b.st === "closing") return;
+    const left = GRACE_S - b.t, k = left < 5 ? 0.45 + 0.55 * Math.max(0, left / 5) : 1;
+    add(b.gx, b.gy - 16, 70, "#ffb060", 0.4 * k, 0);
+  });
   const al0 = Z.drawAfterLight;
   Z.drawAfterLight = function (c, cam, W2, H2, t) { if (al0) al0.apply(this, arguments); try { drawGate(c, t || 0); } catch (e) { console.error("rueckweg", e); } };
 

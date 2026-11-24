@@ -3171,3 +3171,87 @@
     }
   });
 })();
+
+/* Ezekiel – The Destroyer · Neue Raumvorlagen (W11 Runde 21, Kachel-Haken, Stufe 2+; einmal je Chunk)
+   Nach c.tpl der Rasterzelle (welt.js): Fasslager (Fassregal mit großen Fassböden an der Rückwand), Galerie/Zweigalerie
+   (Ahnenbilder in Goldrahmen, Wandleuchter-Schein), Zellengang (vergitterte Zellenfenster mit Dunkel), Stelzensteg (Stelzen
+   unter den Stegen bis Wasser/Boden), Glockenstuhl (Holzgerüst mit Andreaskreuzen), Schießscharten (schmale Scharten mit
+   Himmel), Förderband/Schlackerinne (Kachel 11: Gurt mit Rollen und Kettenglied; Rinne mit Glutrand).
+   Nur auf Rückwand-Kacheln, nie über Stegen/Leitern. Schalter Z.gfx.off.vorlagen. Kein Blau. */
+(function () {
+  "use strict";
+  const Z = window.Z, G = Z.gfx; if (!G || !G.tileHooks) return;
+  const CW = () => Z.CW || 24, CH = () => Z.CH || 14;
+  const h = (a, b) => { const v = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return v - Math.floor(v); };
+  function freeWall(H, x, y, w, hh) { for (let yy = y; yy < y + hh; yy++) for (let xx = x; xx < x + w; xx++) { if (!H.isWall(xx, yy)) return false; const v = H.lv.get(xx, yy); if (v === 2 || v === 4 || v === 8) return false; } return true; }
+  /* freie Rückwandplätze w×hh in den Zeilen r0..r1 der Zelle, höchstens n, mit Abstand */
+  function spots(H, ox, oy, w, hh, n, r0, r1) { const out = []; for (let ty = oy + r0; ty <= oy + r1 && out.length < n; ty++) for (let tx = ox + 1; tx <= ox + CW() - 1 - w && out.length < n; tx++) { if (out.some(q => Math.abs(q[0] - tx) < w + 2 && Math.abs(q[1] - ty) < hh + 1)) continue; if (freeWall(H, tx, ty, w, hh)) out.push([tx, ty]); } return out; }
+  const P = {
+    fasslager(H, ox, oy) { const { c, T } = H;
+      for (const [tx, ty] of spots(H, ox, oy, 3, 2, 3, 1, 9)) {
+        const x = tx * T, y = ty * T; c.fillStyle = "#2a1a10"; c.fillRect(x - 2, y + 30, 52, 3); c.fillRect(x, y - 2, 3, 34); c.fillRect(x + 45, y - 2, 3, 34);
+        for (let j = 0; j < 2; j++) { const cx = x + 13 + j * 22, cy = y + 15, r = 10;
+          c.fillStyle = "#5a3a22"; c.beginPath(); c.arc(cx, cy, r, 0, 6.283); c.fill(); c.strokeStyle = "#2e2a2a"; c.lineWidth = 1.6; c.beginPath(); c.arc(cx, cy, r - 0.8, 0, 6.283); c.stroke(); c.beginPath(); c.arc(cx, cy, r * 0.55, 0, 6.283); c.stroke();
+          c.strokeStyle = "rgba(0,0,0,.35)"; c.lineWidth = 0.6; for (let s = -2; s <= 2; s++) { c.beginPath(); c.moveTo(cx + s * 3.5, cy - r + 1.5); c.lineTo(cx + s * 3.5, cy + r - 1.5); c.stroke(); }
+          c.fillStyle = "#3a2214"; c.fillRect(cx - 1.2, cy + 3, 2.4, 3); c.fillStyle = "rgba(255,220,170,.12)"; c.beginPath(); c.arc(cx - 2, cy - 3, r * 0.6, 3.6, 5.2); c.fill(); } } },
+    galerie(H, ox, oy) { const { c, T } = H;
+      for (const [tx, ty] of spots(H, ox, oy, 2, 2, 4, 1, 8)) {
+        const x = tx * T + 2, y = ty * T + 2, w = 28, hh = 26, hu = h(tx, ty);
+        c.fillStyle = "#8a6a2a"; c.fillRect(x - 2, y - 2, w + 4, hh + 4); c.fillStyle = "#c8a050"; c.fillRect(x - 2, y - 2, w + 4, 1);
+        c.fillStyle = hu < 0.5 ? "#3a2220" : "#2a2a1e"; c.fillRect(x, y, w, hh);
+        c.fillStyle = "#c89878"; c.beginPath(); c.ellipse(x + w / 2, y + 10, 4.5, 5.5, 0, 0, 6.283); c.fill();
+        c.fillStyle = hu < 0.5 ? "#6a1a1a" : "#3a4a2a"; c.beginPath(); c.moveTo(x + 5, y + hh); c.quadraticCurveTo(x + w / 2, y + 12, x + w - 5, y + hh); c.fill();
+        c.fillStyle = "rgba(255,220,160,.07)"; c.fillRect(x, y, w, hh * 0.4); } },
+    zellengang(H, ox, oy) { const { c, T } = H;
+      let k = 0; for (const [tx, ty] of spots(H, ox, oy, 2, 2, 4, 1, 8)) { k++;
+        const x = tx * T + 4, y = ty * T + 4, w = 24, hh = 20;
+        c.fillStyle = "#4a4448"; c.fillRect(x - 3, y - 3, w + 6, hh + 6); c.fillStyle = "#0a0608"; c.fillRect(x, y, w, hh);
+        if (h(tx, k) < 0.35) { c.fillStyle = "rgba(255,190,90,.85)"; c.fillRect(x + 8, y + 8, 1.4, 1.4); c.fillRect(x + 12, y + 8, 1.4, 1.4); }
+        c.fillStyle = "#5a5458"; for (let b = 1; b < 5; b++) c.fillRect(x + b * w / 5 - 0.8, y, 1.6, hh); c.fillRect(x, y + hh / 2 - 0.8, w, 1.6);
+        c.fillStyle = "rgba(0,0,0,.4)"; c.fillRect(x - 3, y + hh + 3, w + 6, 2); } },
+    glockenstuhl(H, ox, oy) { const { c, T } = H;
+      const x0 = (ox + 3) * T, x1 = (ox + CW() - 3) * T, y0 = (oy + 1) * T, y1 = (oy + 10) * T;
+      c.strokeStyle = "rgba(60,40,26,.85)"; c.lineWidth = 4;
+      for (let x = x0; x <= x1; x += (x1 - x0) / 3) { c.beginPath(); c.moveTo(x, y0); c.lineTo(x, y1); c.stroke(); }
+      c.lineWidth = 3; for (let i = 0; i < 3; i++) { const a = x0 + i * (x1 - x0) / 3, b = a + (x1 - x0) / 3; c.beginPath(); c.moveTo(a, y0 + 4); c.lineTo(b, y1 - 4); c.moveTo(b, y0 + 4); c.lineTo(a, y1 - 4); c.stroke(); }
+      c.lineWidth = 5; c.beginPath(); c.moveTo(x0 - 6, y0 + 2); c.lineTo(x1 + 6, y0 + 2); c.stroke();
+      c.strokeStyle = "rgba(255,220,170,.12)"; c.lineWidth = 1; c.beginPath(); c.moveTo(x0 - 6, y0); c.lineTo(x1 + 6, y0); c.stroke(); },
+    schiessscharten(H, ox, oy) { const { c, T } = H;
+      for (const [tx, ty] of spots(H, ox, oy, 1, 3, 5, 1, 8)) {
+        const x = tx * T + 6, y = ty * T + 4, hh = 36;
+        c.fillStyle = "rgba(0,0,0,.45)"; c.fillRect(x - 3, y - 2, 10, hh + 4);
+        const g = c.createLinearGradient(0, y, 0, y + hh); g.addColorStop(0, "rgba(220,150,120,.55)"); g.addColorStop(1, "rgba(120,60,70,.45)"); c.fillStyle = g; c.fillRect(x, y, 3.5, hh);
+        c.fillRect(x - 3, y + hh / 2 - 1, 9.5, 2.5); c.fillStyle = "rgba(255,230,200,.18)"; c.fillRect(x - 3, y - 2, 1, hh + 4); } },
+    stelzensteg(H, ox, oy) { const { c, T, lv } = H;
+      for (let y = oy; y < oy + CH(); y++) for (let x = ox; x < ox + CW(); x++) {
+        if (lv.get(x, y) !== 2) continue; const L = lv.get(x - 1, y) !== 2, R2 = lv.get(x + 1, y) !== 2; if (!L && !R2 && (x - ox) % 4) continue;
+        let yy = y + 1; while (yy < oy + CH() + 2 && lv.get(x, yy) === 0) yy++;
+        const px = x * T + (L ? 3 : R2 ? T - 6 : 7), top = (y + 1) * T - 1, bot = yy * T + (lv.get(x, yy) === 6 ? 6 : 0);
+        if (bot - top < 8) continue;
+        c.fillStyle = "#4a3422"; c.fillRect(px, top, 3.4, bot - top); c.fillStyle = "#6a4c30"; c.fillRect(px, top, 1, bot - top);
+        c.strokeStyle = "rgba(160,140,100,.6)"; c.lineWidth = 0.8; c.beginPath(); c.moveTo(px - 1, top + 6); c.lineTo(px + 4.4, top + 9); c.stroke(); } },
+    foerderband(H, ox, oy) { const { c, T, lv } = H;
+      for (let y = oy; y < oy + CH(); y++) for (let x = ox; x < ox + CW(); x++) { if (lv.get(x, y) !== 11) continue; const px = x * T, py = y * T;
+        c.fillStyle = "#2a2426"; c.fillRect(px, py, T, 5); c.fillStyle = "#4a4246"; c.fillRect(px, py, T, 1.2);
+        c.fillStyle = "rgba(0,0,0,.5)"; for (let k = 2; k < T; k += 4) c.fillRect(px + k, py + 1.4, 1, 3);
+        for (const rx of [4, 12]) { c.fillStyle = "#3a3438"; c.beginPath(); c.arc(px + rx, py + 7.5, 2.6, 0, 6.283); c.fill(); c.fillStyle = "#8a8088"; c.fillRect(px + rx - 0.6, py + 6.9, 1.2, 1.2); } } },
+    schlackerinne(H, ox, oy) { const { c, T, lv } = H;
+      for (let y = oy; y < oy + CH(); y++) for (let x = ox; x < ox + CW(); x++) { const v = lv.get(x, y); if (v !== 5) continue; if (lv.get(x, y - 1) === 5) continue;
+        for (const sd of [-1, 1]) if (lv.get(x + sd, y) === 1) { const px = sd < 0 ? x * T - 3 : x * T + T; c.fillStyle = "rgba(255,120,40,.35)"; c.fillRect(px, y * T - 2, 3, 6); } } }
+  };
+  P.zweigalerie = P.zweigalerie_u = P.galerie; P.zellengang_u = P.zellengang; P.glockenstuhl_u = P.glockenstuhl; P.schiessscharten_o = P.schiessscharten;
+  P.stelzensteg_o = P.stelzensteg; P.schlackerinne_o = P.schlackerinne;
+  G.tileHooks.push(function (k, H) {
+    if ((k !== "wall" && k !== "fix") || (G.off && G.off.vorlagen)) return;
+    const lv = H.lv; if (!lv.cells) return;
+    const cx0 = Math.floor(H.x0 / CW()), cx1 = Math.floor((H.x1 - 1) / CW()), cy0 = Math.floor(H.y0 / CH()), cy1 = Math.floor((H.y1 - 1) / CH());
+    for (let cy = cy0; cy <= cy1; cy++) for (let cx = cx0; cx <= cx1; cx++) {
+      const cell = lv.cells[cx + "," + cy]; if (!cell || !cell.tpl) continue;
+      const f = P[cell.tpl]; if (!f) continue;
+      const stage = cell.tpl.startsWith("stelzen") || cell.tpl.startsWith("foerder") || cell.tpl.startsWith("schlacke") ? "fix" : "wall";
+      if (stage !== k) continue;
+      try { f(H, cx * CW(), cy * CH()); } catch (e) { console.error(e); }
+    }
+  });
+  /* Förderband auch auf lean: Kachel 11 hat sonst nur die Bohlen aus bild.js – reicht dort */
+})();
