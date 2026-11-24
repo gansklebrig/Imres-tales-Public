@@ -370,7 +370,7 @@
        Satz (0), weicht aber, wenn Kernstimmen (Ostinato, Bass, Melodie, Blech-Akkorde, Trommeln) bei voller Grenze eine Stimme brauchen.
        Auf Handheld (Grenze 14) gingen im Bosskampf sonst über die Hälfte aller Noten verloren, auch Ostinato und Bass. */
     const fig = prio === -1; if (fig) prio = 0;
-    if (M.live > voiceCap(prio) && !(prio === 2 && yieldVoice()) && !(!fig && yieldVoice(true))) { if (fig) { M.stats.skipFig = (M.stats.skipFig || 0) + 1; return; } M.stats.skipped++; const sb = M.stats.skipBy || (M.stats.skipBy = {}); sb[inst] = (sb[inst] || 0) + 1; if (prio === 2) M.stats.skipSt = (M.stats.skipSt || 0) + 1; return; } /* Notbremse für die Stimmenzahl (Handheld: wenige Stimmen, Audio-Thread schonen) */
+    if (M.live > voiceCap(prio) && !(prio === 2 && yieldVoice(false, true)) && !(!fig && yieldVoice(true))) { if (fig) { M.stats.skipFig = (M.stats.skipFig || 0) + 1; return; } M.stats.skipped++; const sb = M.stats.skipBy || (M.stats.skipBy = {}); sb[inst] = (sb[inst] || 0) + 1; if (prio === 2) M.stats.skipSt = (M.stats.skipSt || 0) + 1; return; } /* Notbremse für die Stimmenzahl (Handheld: wenige Stimmen, Audio-Thread schonen) */
     midi = fit(inst, midi);
     const n = nearest(inst, midi), path = K(inst + "_" + n), b = A.buf[path];
     if (!b) { if (b === undefined) A.load(path); return; }
@@ -386,7 +386,7 @@
   function hit(name, when, vol, rate, bus, rev, imp) {
     if (!A.ok || !M.out) return;
     const pr = bus && bus === M.busSt ? 2 : imp ? 1 : false; /* imp: Schlag auf der Eins (Kern, Grenze „wichtig“) */
-    if (M.live > voiceCap(pr) && !(pr && yieldVoice()) && !yieldVoice(true)) { M.stats.skipped++; const sb = M.stats.skipBy || (M.stats.skipBy = {}); sb["hit:" + name] = (sb["hit:" + name] || 0) + 1; return; }
+    if (M.live > voiceCap(pr) && !(pr && yieldVoice(false, pr === 2)) && !yieldVoice(true)) { M.stats.skipped++; const sb = M.stats.skipBy || (M.stats.skipBy = {}); sb["hit:" + name] = (sb["hit:" + name] || 0) + 1; return; }
     const path = K(name); let b = A.buf[path]; if (!b) { if (b === undefined) A.load(path); return; }
     if (rev) b = reversed(path, b);
     const c = A.ctx; when = Math.max(when, c.currentTime + 0.005);
@@ -411,22 +411,24 @@
   M._voc = () => { const o = {}; for (const v of VOC) if (!v.freed) { const k = (v.st ? "s:" : v.fig ? "f:" : "k:") + v.i; o[k] = (o[k] || 0) + 1; } return o; };
   function track(s, g, st, end, fig) {
     M.live++; M.stats.notes++;
-    const v = { s, g, st, end: end || 0, fig: !!fig, i: curInst }; VOC.add(v);
+    const v = { s, g, st, end: end || 0, fig: !!fig, i: curInst, t0: A.ctx.currentTime }; VOC.add(v);
     s.onended = () => { if (!v.freed) M.live--; VOC.delete(v); try { s.disconnect(); g.disconnect(); } catch (_) {} };
   }
   /* Stimmen des Satzes (nicht der Stinger) schnell ausblenden und beenden – für den Bosstod-Stinger */
-  function freeVoices(n) {
+  function freeVoices(n, alle) { /* alle: auch Stinger-Stimmen (Prüfstand beim Wechsel des Audio-Kontexts) */
     const c = A.ctx, now = c.currentTime; let k = 0;
-    for (const v of VOC) { if (v.st || v.freed) continue; v.freed = true; M.live--; try { v.g.gain.cancelScheduledValues(now); v.g.gain.setTargetAtTime(0, now, 0.05); v.s.stop(now + 0.3); } catch (_) {} if (++k >= n) break; }
+    for (const v of VOC) { if ((v.st && !alle) || v.freed) continue; v.freed = true; M.live--; try { v.g.gain.cancelScheduledValues(now); v.g.gain.setTargetAtTime(0, now, 0.05); v.s.stop(now + 0.3); } catch (_) {} if (++k >= n) break; }
     return k;
   }
   M.freeVoices = freeVoices;
   /* Vorrang (Stinger prio 2: Bossauftritt, Bossphase, Kampfbeginn, Hinterhalt, Sieg): ist auch die erweiterte Grenze voll,
      weicht statt der Stinger-Note die Satz-Stimme, die am frühesten ohnehin endet (kurz ausgeblendet) – so gehen auf
      Handheld (Grenze 14/18 bzw. 10/13) keine Stinger-Noten verloren und die Stimmenzahl bleibt trotzdem begrenzt */
-  function yieldVoice(figOnly) {
+  function yieldVoice(figOnly, alteSt) {
     let best = null;
     for (const v of VOC) if (!v.st && !v.freed && (!figOnly || v.fig) && (!best || v.end < best.end)) best = v;
+    /* R14: neue Stinger-Note und kein Satz-Ton mehr frei – dann weicht der Ausklang eines älteren Stingers (≥ 1 s alt, endet am frühesten) */
+    if (!best && alteSt) { const now = A.ctx.currentTime; for (const v of VOC) if (v.st && !v.freed && now - (v.t0 || 0) >= 1 && (!best || v.end < best.end)) best = v; if (best) M.stats.yieldSt = (M.stats.yieldSt || 0) + 1; }
     if (!best) return false;
     const now = A.ctx.currentTime; best.freed = true; M.live--; M.stats.yielded = (M.stats.yielded || 0) + 1;
     try { best.g.gain.cancelScheduledValues(now); best.g.gain.setTargetAtTime(0, now, 0.03); best.s.stop(now + 0.2); } catch (_) {}
@@ -629,7 +631,7 @@
     M.combat = !!(prof.boss && Z.boss && !Z.bossDefeated); M.calmT = 0; M.rage = 0;
     if (!sameLevel) {
       M.C = M.combat ? 1 : 0; M.intensity = Math.min(M.intensity, 0.2); M.heat = 0; M.pushes.length = 0; M.leit = null;
-      M.tier = M.want = M.combat ? 4 : 0; M.hold = [0, 0, 0, 0]; M.tierName = TIER_NAME[M.tier]; /* R13: Name mitziehen (blieb sonst auf „kampf“ stehen) */
+      M.tier = M.want = M.combat ? 4 : 0; M.hold = [0, 0, 0, 0]; M.tierName = TIER_NAME[M.tier]; M.bossBarN = 0; /* R13: Name mitziehen (blieb sonst auf „kampf“ stehen) */
     }
     if (M.pad) M.pad.cur = null;
     if (M.pad) {
@@ -1032,7 +1034,13 @@
          16tel-Ticks, Pulsbass). Halftime während der Zeitlupe (Schlag auf 1 und 3). Tom-Fill, wenn eine Elite einsetzt.
          Boss: Phase 2 Spiccato-16tel + Bassverdopplung, Phase 3 tiefer Chor-Orgelpunkt + Fill alle 2 Takte; Wut: Blech-Cluster
          (Grundton + kleine Sekunde), Posaunen-Stöße, Wirbel alle 4 Takte. */
-      const boss = tr === 4, KA = boss ? "voll" : (M.kampfA || "voll"), kB = M.kampfBars || 0;
+      /* R14: lange Wächter-/Bosskämpfe (Stufe 4: 1–2 min ohne Phasenwechsel) – alle 24 Takte 4 Takte „wechsel“ (Backbeat,
+         Ostinato oktaviert, Filter wandert) als Zwischenspiel, damit der Satz nicht 2 Minuten gleich kreist */
+      const boss = tr === 4;
+      if (boss && st === 0 && M.bossBarAt !== t) { M.bossBarAt = t; M.bossBarN = (M.bossBarN || 0) + 1; } else if (!boss) M.bossBarN = 0;
+      const bZw = boss && M.bossBarN % 24 >= 17 && M.bossBarN % 24 <= 20;
+      if (bZw && st === 0 && M.bossBarN % 24 === 17) M.stats.bossZw = (M.stats.bossZw || 0) + 1;
+      const KA = boss ? (bZw ? "wechsel" : "voll") : (M.kampfA || "voll"), kB = M.kampfBars || 0;
       const brk = KA === "breakdown" && kB < 6, build = KA === "breakdown" && kB >= 6, drv = KA === "treiben", alt = KA === "wechsel";
       const half = !!M.half, bph = boss ? M.bossPh || 0 : 0, wut = boss && !!M.wut;
       const fill = !boss && M.want === 3 && M.tier === 2 && st % 4 >= 2;
@@ -1251,12 +1259,14 @@
       if (p.mot && p.mot.length) {
         const mot = p.mot.slice(0, 5), b0 = Math.min(beat, 0.3) * 1.5, end = Math.min(9, Math.max(...mot.map(n => n[1] + n[2])));
         hit("crash", t0, 0.14, 0.8, B); if (p.dr) hit(p.dr[0], t0, 0.75, 0.9, B); kick(t0, 0.6);
+        /* R14 Handheld: Grenze 18+12 – ohne Oktavverdopplung, Pauke nur auf erster und letzter Note (sonst fehlten ~14 von 40 Noten) */
+        const thin = !!(Z.gq && Z.gq.lean), nM = mot.filter(n => n[1] < end).length;
         mot.forEach(([s0, st, l], i) => {
           if (st >= end) return;
           const m = p.root + s0, k = 1 - i / (mot.length + 2);
-          playNote(p.brass || "horn", m, t0 + st * b0, 0.22 * k * tc, b0 * l + 0.1, B, 2);
-          playNote(p.mel || "vc", m + 12, t0 + st * b0, 0.1 * k * tc, b0 * l + 0.1, B, 2);
-          playNote("timpt", p.root - 12, t0 + st * b0, 0.2 * k * tc, b0 * 1.5, B, 2);
+          playNote(p.brass || "horn", m, t0 + st * b0, 0.22 * k * tc * (thin ? 1.1 : 1), b0 * l + 0.1, B, 2);
+          if (!thin) playNote(p.mel || "vc", m + 12, t0 + st * b0, 0.1 * k * tc, b0 * l + 0.1, B, 2);
+          if (!thin || i === 0 || i === nM - 1) playNote("timpt", p.root - 12, t0 + st * b0, 0.2 * k * tc, b0 * 1.5, B, 2);
         });
         playNote("vctrem", p.root - 12, t0, 0.1, end * b0, B, 2);
         if (p.dr) hit(p.dr[1] || p.dr[0], t0 + end * b0 - b0, 0.45, 0.85, B);
@@ -1269,10 +1279,11 @@
       const r = p.root, maj = [r, r + 4, r + 7, r + 12];
       const b = p.brass || "blech";
       const kk = (p.mot ? 1.35 : 1) * tc; /* nach dem gebrochenen Leitmotiv trägt der Schlussakkord mehr */
+      const th2 = !!(Z.gq && Z.gq.lean), majS = th2 ? [r, r + 4, r + 7] : maj; /* Handheld: Dreiklang statt Vierklang, Chor Grundton + Terz, Harfe 4 */
       [0, 0.18, 0.36].forEach((d, i) => playNote(b, maj[i], t + d, 0.13 * kk, 0.5, B, 2));
-      maj.forEach(m => playNote(b, m, t + 0.6, 0.12 * kk, 3.2, B, 2));
-      maj.forEach(m => playNote("aah", m + 12, t + 0.6, 0.08 * kk, 4, B, 2));
-      for (let i = 0; i < 6; i++) playNote("harfe", maj[i % 4] + 12 * (1 + Math.floor(i / 4)), t + 0.6 + i * 0.09, 0.1 * kk, 2.5, B, 2);
+      majS.forEach(m => playNote(b, m, t + 0.6, 0.12 * kk * (th2 ? 1.1 : 1), 3.2, B, 2));
+      (th2 ? [r, r + 4] : maj).forEach(m => playNote("aah", m + 12, t + 0.6, 0.08 * kk * (th2 ? 1.2 : 1), 4, B, 2));
+      for (let i = 0; i < (th2 ? 4 : 6); i++) playNote("harfe", maj[i % 4] + 12 * (1 + Math.floor(i / 4)), t + 0.6 + i * 0.09, 0.1 * kk, 2.5, B, 2);
       duck(0.5, t, 3.5);
     },
     /* Erfolg freigeschaltet (R12): kurze Fanfare in der Tonart, je Kategorie gefärbt; o.gross = seltener/schwerer Erfolg → prächtiger
@@ -1301,7 +1312,7 @@
       if (o.titel) [7, 4, 0].forEach((d, i) => playNote("glock", deg(p.scale, d, r + 24), tEnd + (gr ? 0.9 : 0.5) + i * 0.16, 0.07, 1.6, B, 2));
       if (gr) {
         hit("timproll", t - 0.05, 0.18, 1, B); hit("crash", tEnd, 0.16, 1, B); kick(tEnd, 0.5);
-        [0, 2, 4].forEach(d => playNote("aah", deg(p.scale, d, r), tEnd, 0.07, 3.4, B, 2));
+        (Z.gq && Z.gq.lean ? [0, 4] : [0, 2, 4]).forEach(d => playNote("aah", deg(p.scale, d, r), tEnd, 0.07, 3.4, B, 2)); /* Handheld: Chor zweistimmig */
         playNote(ins, top + 12, tEnd + 0.2, 0.08, 1.8, B, 2);
       }
       duck(gr ? 0.45 : 0.3, t, gr ? 2.8 : 1.5);

@@ -648,6 +648,68 @@
     if (level <= 0.01) { s.idle = (s.idle || 0) + 1; if (s.idle > 40) { s.dead = true; TR[slotKey] = null; setTimeout(() => { try { s.src && s.src.stop(); s.g.disconnect(); } catch (_) {} }, 4000); } }
     else s.idle = 0;
   }
+  /* R14 Geheimnis-Hinweise (erkundung.js, W13 R10): Luftzug an unentdeckter Rissfläche – leises Pfeifen aus Rauschen durch einen
+     schmalen Bandpass, gestimmt auf die Quinte der Tonart (drei Oktaven über dem Grundton), darunter ein weicher Lufthauch;
+     hörbar ab ~7 Kacheln, lauter je näher, mit Böen; im Kampf leiser, im Lager/Arena/„minimal“ nie. Ort und Seite aus Z.geheimRisse(). */
+  const RISS = { slot: null, f: 0, x: 0, scanT: 0, gT: 0, stats: { luftzug: 0, hohl: 0, ratte: 0 } };
+  KL.riss = RISS;
+  function rissSlot() {
+    const c = A.ctx; if (!noiseB || noiseB.sampleRate !== c.sampleRate) mkNoise();
+    if (!RISS.white || RISS.white.sampleRate !== c.sampleRate) { const wb = RISS.white = c.createBuffer(1, c.sampleRate * 2, c.sampleRate), d = wb.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+    const s = { src: c.createBufferSource(), srcW: c.createBufferSource(), bp: c.createBiquadFilter(), lp: c.createBiquadFilter(), gw: c.createGain(), ga: c.createGain(), g: c.createGain(), pn: c.createStereoPanner ? c.createStereoPanner() : null };
+    s.src.buffer = noiseB; s.src.loop = true; s.srcW.buffer = RISS.white; s.srcW.loop = true;
+    s.bp.type = "bandpass"; s.bp.Q.value = 16; s.lp.type = "bandpass"; s.lp.frequency.value = 520; s.lp.Q.value = 0.9;
+    s.gw.gain.value = 1; s.ga.gain.value = 0.5; s.g.gain.value = 0;
+    s.srcW.connect(s.bp); s.bp.connect(s.gw); s.gw.connect(s.g); s.src.connect(s.lp); s.lp.connect(s.ga); s.ga.connect(s.g);
+    if (s.pn) { s.g.connect(s.pn); s.pn.connect(roomBus() || A.amb); } else s.g.connect(roomBus() || A.amb);
+    s.src.start(0, Math.random() * 1.5); s.srcW.start(0, Math.random() * 1.5); return s;
+  }
+  function rissTick(dt, lv, P) {
+    const now = A.ctx.currentTime;
+    RISS.scanT -= dt;
+    if (RISS.scanT <= 0) {
+      RISS.scanT = gq().lean ? 0.5 : 0.25;
+      let best = 1e9, bx = 0;
+      if (!lv.hub && !lv.arena && Z.geheimRisse) {
+        const px = P.x + P.w / 2, py = P.y + P.h / 2, T = Z.TILE || 16;
+        for (const h of Z.geheimRisse()) for (const f of h.faces) { const d = Math.hypot(f.x * T + 8 + f.dx * 8 - px, (f.y * T + 8 - py) * 1.2) / T; if (d < best) { best = d; bx = f.x * T + 8; } }
+      }
+      const kampf = (M.tier || 0) >= 2 ? 0.35 : 1;
+      RISS.f = best < 7 ? Math.pow(1 - best / 7, 1.4) * kampf : 0; RISS.x = bx; RISS.d = best;
+      if (RISS.f > 0.02) RISS.stats.luftzug++;
+    }
+    let s = RISS.slot;
+    if (RISS.f > 0.02 && !s) {
+      s = RISS.slot = rissSlot();
+      const hz = 440 * Math.pow(2, ((ton(4, (M.prof ? M.prof.root : 50)) + 36) - 69) / 12); s.hz = Math.min(2400, Math.max(900, hz));
+      s.bp.frequency.value = s.hz;
+    }
+    if (!s) return;
+    /* Böen: alle 1,2–3 s neues Ziel (60–100 %), Tonhöhe schwankt leicht mit */
+    if ((RISS.gT -= dt) <= 0) { RISS.gT = 1.2 + Math.random() * 1.8; s.gust = 0.6 + Math.random() * 0.4; s.bp.frequency.setTargetAtTime(s.hz * (0.985 + s.gust * 0.025), now, 0.5); }
+    const lvl = RISS.f * 0.16 * (s.gust || 0.8);
+    s.g.gain.setTargetAtTime(lvl, now, RISS.f > 0.02 ? 0.5 : 0.8);
+    if (s.pn) { const dx = RISS.x - (Z.cam ? Z.cam.x + Z.cam.w / 2 : P.x); s.pn.pan.setTargetAtTime(clamp(dx / 260, -0.7, 0.7), now, 0.3); }
+    if (RISS.f <= 0.02) { s.idle = (s.idle || 0) + dt; if (s.idle > 6) { RISS.slot = null; const o = s; o.g.gain.setTargetAtTime(0, now, 0.2); setTimeout(() => { try { o.src.stop(); o.srcW.stop(); o.g.disconnect(); } catch (_) {} }, 1500); } }
+    else s.idle = 0;
+  }
+  /* Klang-Hook aus erkundung.js: hohler „Tock“ bei Treffer an fester Wand neben dem Riss (Holzklopfen, tief, mit spätem
+     dumpfem Nachhall aus dem Hohlraum), Ratte verschwindet im Riss (Fiepen + Rieseln) */
+  Z.geheimKlang = (k, x, y) => {
+    try {
+      if (!A.ok || Z.quiet) return;
+      if (k === "hohl") {
+        RISS.stats.hohl++;
+        wshot(pk([KS("fx_fo_wooden_02"), KS("fx_im_impactplank_medium_002")]), x, y, { vol: 0.7, rate: 0.62, verb: 0.15, gap: 0.05, tag: "hohl1" });
+        wshot(KS("fx_fo_wooden_02"), x, y, { vol: 0.3, rate: 0.48, delay: 0.085, verb: 0.7, gap: 0.05, tag: "hohl2" });
+        tone({ x: x - 4, y: y - 4, w: 8, h: 8 }, "timpt", ton(0, (M.prof ? M.prof.root : 50)) - 12, A.ctx.currentTime + 0.01, 0.12, 1, 0.5);
+      } else if (k === "ratte") {
+        RISS.stats.ratte++;
+        A.play("rat", { vol: 0.22, x, rate: 1.15 });
+        wshot(pk(RA("n_kies_", 8)), x, y, { vol: 0.1, rate: 1.4, delay: 0.12, verb: 0.3, gap: 0.1, tag: "ratk" });
+      }
+    } catch (_) {}
+  };
   function shaftDepth() {
     const P = Z.player, lv = Z.level, T = Z.TILE || 16; if (!P || !lv || !lv.get) return 0;
     const tx = Math.floor((P.x + P.w / 2) / T), ty0 = Math.floor((P.y + P.h + 1) / T);
@@ -694,7 +756,9 @@
       windLevel("wind", "a_wind_n1", 2600, 1, torF * 0.7);
       TR.scanT -= dt; if (TR.scanT <= 0) { TR.scanT = q.lean ? 0.5 : 0.25; TR.zugF = lv.hub || lv.arena ? 0 : shaftDepth(); if (TR.zugF > 0.1) TR.stats.schacht++; }
       windLevel("zug", "a_heulwind", 700, 0.8, TR.zugF * 0.8);
+      rissTick(dt, lv, P);
     }
+    quTick(dt, lv, P);
     /* Belohnungsnischen */
     const S = Z.erkundung && Z.erkundung(); if (!S || !S.rewards || S.lv !== lv || q.mini || (M.tier || 0) >= 2) return;
     let near = null, nd = 1e9;
@@ -770,7 +834,7 @@
     } catch (e) { /* still */ }
   };
   /* Prüfstand (test/w12_klang): Klangnetz für einen neuen AudioContext neu aufbauen */
-  KL._reset = () => { LATER.length = 0; TR.wind = TR.zug = null; TR.doors = new Set(); net = null; RM.bus = null; RM.slot = null; RM.cur = RM.pend = null; RM.force = null; W.lv = null; DR.upTo = -1e9; DR.until = 0; KV.lastIdle = 0; };
+  KL._reset = () => { LATER.length = 0; RISS.slot = null; TR.wind = TR.zug = TR.quelle = null; TR.doors = new Set(); net = null; RM.bus = null; RM.slot = null; RM.cur = RM.pend = null; RM.force = null; W.lv = null; DR.upTo = -1e9; DR.until = 0; KV.lastIdle = 0; };
   KL._alle = () => { const l = []; for (const g in GR) l.push(...GR[g]); for (const id in RK2) { const d = RK2[id]; if (d.loop) l.push(AM(d.loop[0])); for (const o of d.one || []) for (let i = 1; i <= o[1]; i++) l.push(AM(o[0] + i)); } return l; };
   KL.raumJetzt = () => ({ raum: RM.cur, groesse: KL.raumGroesse || 1, hall: KL.R, loop: RM.slot && RM.slot.name });
   /* Prüfhilfe: Raum erzwingen (ohne Kachelposition) */
@@ -804,9 +868,10 @@
   };
   /* Staubwolke: gefiltertes Rauschen, das aufbraust und mit sinkendem Tiefpass verweht (ein Puffer, je Einsatz zwei Knoten + Filter) */
   let noiseB = null;
+  function mkNoise() { const c = A.ctx; noiseB = c.createBuffer(1, c.sampleRate * 2, c.sampleRate); const d = noiseB.getChannelData(0); let b = 0; for (let i = 0; i < d.length; i++) { b = b * 0.97 + (Math.random() * 2 - 1) * 0.03; d[i] = b * 6; } }
   function dustNoise(x, y, vol, len) {
     const [v, pan] = posMix(x, y, 1.2); if (v < 0.03 || !A.ok) return;
-    const c = A.ctx; if (!noiseB || noiseB.sampleRate !== c.sampleRate) { noiseB = c.createBuffer(1, c.sampleRate * 2, c.sampleRate); const d = noiseB.getChannelData(0); let b = 0; for (let i = 0; i < d.length; i++) { b = b * 0.97 + (Math.random() * 2 - 1) * 0.03; d[i] = b * 6; } }
+    const c = A.ctx; if (!noiseB || noiseB.sampleRate !== c.sampleRate) mkNoise();
     const t = c.currentTime + 0.02, L = len || 1.6, s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain(), pn = c.createStereoPanner ? c.createStereoPanner() : null;
     s.buffer = noiseB; s.loop = true; f.type = "lowpass"; f.frequency.setValueAtTime(2600, t); f.frequency.exponentialRampToValueAtTime(260, t + L);
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * v, t + 0.08); g.gain.setTargetAtTime(0, t + 0.25, L / 3.5);
@@ -1193,7 +1258,51 @@
     tuned("glock", 0, 3, 0.1, 0.78, "raeb"); tuned("glock", 4, 3, 0.07, 0.84, "raec");
     return true;
   }
+  /* R14 Heilquelle (abenteuer.js HEILQUELLE, Z.abEvents ev.k "quelle", ev.done = versiegt) – nur beobachtet:
+     Raumklang: Rinnsal-Schleife nahe einer aktiven Quelle (ab ~10 Kacheln, lauter je näher; im Kampf leiser).
+     quelleNimm spielt „splash“ 0,7 mit x der Quelle, danach Heilung bzw. +1 Trank: an dieser Stelle (Hook) eigene Klänge –
+     Trinken: Schöpfen + Schlucke + aufsteigender Kalimba-Ton; Füllen: Flasche + Glucksen mit steigender Tonhöhe + Korken + Glocke;
+     danach Versiegen: Rinnsal blendet aus, letzte Tropfen werden langsamer, fallende Töne 4-2-0. */
+  const QU = { stats: { trinken: 0, fuellen: 0, versiegt: 0, nah: 0 }, pre: null }; KL.quelle = QU;
+  const quEvs = () => (Z.abEvents || []).filter(e => e && e.k === "quelle");
+  function quTick(dt, lv, P) {
+    if (lv.hub) { windLevel("quelle", "a_rinnsal", 5200, 1, 0); return; }
+    const T = Z.TILE || 16, px = P.x + P.w / 2, py = P.y + P.h; let best = 1e9;
+    for (const ev of quEvs()) { if (ev.done) continue; const d = Math.hypot(ev.x - px, (ev.y - py) * 1.3) / T; if (d < best) best = d; }
+    if (best < 30 && QU.pre !== lv) { QU.pre = lv; preload(RA("n_trinken_", 16).concat(RA("n_blubb_", 3), RA("n_tropfen_", 23).slice(0, 8), [KS("fx_rp_bottle"), KS("fx_wn_trank")])); }
+    const f = best < 10 ? Math.pow(1 - best / 10, 1.3) * ((M.tier || 0) >= 2 ? 0.45 : 1) : 0;
+    if (f > 0.02) QU.stats.nah++;
+    windLevel("quelle", "a_rinnsal", 5200, 1, gq().mini ? 0 : f * 1.1);
+  }
+  function quKlang(ev, art) {
+    const x = ev.x, y = ev.y - 10, r = M.prof ? M.prof.root : 50;
+    if (art === "trinken") {
+      QU.stats.trinken++;
+      wshot(pk(RA("n_platsch_", 10)), x, y, { vol: 0.16, rate: 1.35, verb: 0.3, gap: 0, tag: "qu1" });
+      wshot(pk(RA("n_trinken_", 16)), x, y, { vol: 0.42, delay: 0.18, verb: 0.2, gap: 0, tag: "qu2" });
+      [0, 2, 4].forEach((d, i) => tuned("kal", d, 2, 0.08, 0.45 + i * 0.11, "qut" + i));
+    } else {
+      QU.stats.fuellen++;
+      wshot(KS("fx_rp_bottle"), x, y, { vol: 0.32, rate: 1.05, verb: 0.25, gap: 0, tag: "qu1" });
+      [1, 1.22, 1.5].forEach((rt, i) => wshot(pk(RA("n_blubb_", 3)), x, y, { vol: 0.2, rate: rt, delay: 0.15 + i * 0.17, verb: 0.3, gap: 0, tag: "qub" + i }));
+      wshot(KS("fx_wn_trank"), x, y, { vol: 0.22, rate: 1.3, delay: 0.72, verb: 0.2, gap: 0, tag: "quk" });
+      tuned("glock", 4, 3, 0.07, 0.8, "qug");
+    }
+    /* Versiegen */
+    QU.stats.versiegt++;
+    [0.0, 0.35, 0.8, 1.4].forEach((d, i) => wshot(pk(RA("n_tropfen_", 23)), x, y, { vol: 0.14 - i * 0.025, rate: 1.1 - i * 0.06, delay: 1.0 + d, verb: 0.6, gap: 0, tag: "qud" + i }));
+    [4, 2, 0].forEach((d, i) => tuned("kal", d, 1, 0.05 - i * 0.008, 1.1 + i * 0.3, "quv" + i));
+  }
+  function quSplash(o) {
+    if (!o || o.vol !== 0.7 || o.x == null) return false;
+    const ev = quEvs().find(e => e.done && !e._kl && e.x === o.x); if (!ev) return false;
+    ev._kl = true; const P = Z.player, pot0 = P ? P.potions : 0, hp0 = P ? P.hp : 0;
+    /* gleich danach entscheidet quelleNimm: Heilung (trinken) oder +1 Trank (füllen) */
+    Promise.resolve().then(() => { try { quKlang(ev, P && P.potions > pot0 && !(P.hp > hp0) ? "fuellen" : "trinken"); } catch (_) {} });
+    return true;
+  }
   if (A) A.hook = Object.assign(A.hook || {}, {
+    splash: o => quSplash(o),
     rock: o => (o && o.x != null && o.rate === 0.7 && o.vol === 0.4 ? raeFalsch(o) : false),
     ui: o => {
       const r = o.rate || 1; VS.stats.menue++;
@@ -1255,7 +1364,11 @@
       const kat = achKat(a), gross = achGross(a); ER.stats.fanfare++; ER.stats.kat[kat] = (ER.stats.kat[kat] || 0) + 1; ER.last = { id: a.id, kat, gross };
       const now = A.ctx.currentTime, kurz = !gross && ER.lastT != null && now - ER.lastT < 5 && now >= ER.lastT; /* R13: Häufung → Nachschlag */
       ER.serie = kurz ? (ER.serie || 0) + 1 : 0; ER.lastT = now; if (kurz) ER.stats.kurz = (ER.stats.kurz || 0) + 1;
-      M.stinger("erfolg", { kat, gross, stufe: a.siegel && a.siegel.stufe, titel: !!(a.r && a.r.titel), kurz, n: ER.serie }); ER.last.stufe = a.siegel && a.siegel.stufe; ER.last.titel = !!(a.r && a.r.titel); ER.last.kurz = kurz; return true;
+      const eo = { kat, gross, stufe: a.siegel && a.siegel.stufe, titel: !!(a.r && a.r.titel), kurz, n: ER.serie };
+      /* R14: kommt der Erfolg mit dem Sieg-Stinger (Boss-/Wächtertod), erst nach dessen Schlussakkord – sonst gingen auf Handheld
+         die Fanfaren-Noten an der Stimmengrenze verloren und beides verschwimmt */
+      const sg = M.lastSting && M.lastSting.sieg, wait = sg && now - sg < 3.4 && now >= sg ? sg + 3.4 - now : 0;
+      if (wait > 0) { ER.stats.nachSieg = (ER.stats.nachSieg || 0) + 1; later(wait, () => M.stinger("erfolg", eo)); } else M.stinger("erfolg", eo); ER.last.stufe = a.siegel && a.siegel.stufe; ER.last.titel = !!(a.r && a.r.titel); ER.last.kurz = kurz; return true;
     }
   });
   function hookEnde() {
