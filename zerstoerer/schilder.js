@@ -913,6 +913,7 @@
   const load0 = Z.loadArea;
   /* Plätze erst beim ersten Bild suchen: dann haben alle Module (auch die später geladenen) ihr Gebiet aufgebaut */
   Z.loadArea = function () { const r = load0.apply(this, arguments); S.lv = null; S.list = []; return r; };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "schilder", load: () => { S.lv = null; S.list = []; } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
   /* Hinweis-Stufe geändert: Lernschilder neu aufbauen (z. B. „keine“ → „alle“) */
   /* … und bei Sprachwechsel (andere Textbreiten) die Plätze neu suchen */
   let hlPrev = null;

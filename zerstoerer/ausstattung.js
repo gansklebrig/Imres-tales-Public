@@ -2081,6 +2081,7 @@
   function warmTick() { let budget = 3; while (WARM.length && budget > 0) { const w = WARM.shift(); if (w[0] === "fg") { if (!simple()) fgSprite(w[1], w[2], w[3]); budget -= 3; } else { spriteOf(w[0], w[1]); budget--; } } }
   const load0 = Z.loadArea;
   Z.loadArea = function () { const r = load0.apply(this, arguments); try { setup(Z.level); initBreak(); } catch (e) { console.error(e); } return r; };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "ausstattung", save: () => ({ props, lvRef }), load: s => { props = s.props; lvRef = s.lvRef; UNR = []; initBreak(); } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
 
   /* ======================= Zeichnen ======================= */
   function paint(c, p, t, x, y) {

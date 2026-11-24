@@ -53,6 +53,7 @@
   }
   const load0 = Z.loadArea;
   Z.loadArea = function () { const r = load0.apply(this, arguments); try { setup(Z.level); } catch (e) { console.error(e); } return r; };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "wetter", save: () => ({ W, w: Z.biome ? Z.biome.weather : null }), load: s => { W = s.W; if (Z.biome && s.w) Z.biome.weather = s.w; } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
 
   /* ---------- Ereignisse ---------- */
   function lightning() {

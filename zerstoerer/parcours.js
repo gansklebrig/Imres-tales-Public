@@ -70,6 +70,7 @@
   };
   const load0 = Z.loadArea;
   Z.loadArea = function () { const r = load0.apply(this, arguments); try { Z.setupParcours(Z.level); } catch (e) { console.error(e); } return r; };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "parcours", save: () => [traps, movers, crumbles, voidTops, voidRuns].map(a => a.slice()), load: s => { [traps, movers, crumbles, voidTops, voidRuns].forEach((a, i) => { a.length = 0; for (const x of s[i]) a.push(x); }); } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
 
   /* ======================= TREFFER ======================= */
   function hitP(tr, frac, x, o) {

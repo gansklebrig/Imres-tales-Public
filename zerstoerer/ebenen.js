@@ -64,6 +64,7 @@
   }
   const load0 = Z.loadArea;
   Z.loadArea = function () { const r = load0.apply(this, arguments); try { setup(Z.level); } catch (e) { console.error(e); } return r; };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "ebenen", save: () => ({ doors, seen, lvRef, lastRoom, entered, enterLv, vis, mem, tvis, visLv }), load: s => { ({ doors, seen, lvRef, lastRoom, entered, enterLv, vis, mem, tvis, visLv } = s); Z.lvDoors = doors; fogT = 0; } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
   const cellOf = (x, y) => Math.floor(x / T / CW) + "," + Math.floor(y / T / CH);
   function reveal(P) { const k = cellOf(P.x + P.w / 2, P.y + P.h / 2); if (!seen.has(k)) { seen.add(k); fogT = 0; } if (k !== lastRoom) { lastRoom = k; enterRoom(k, P); } }
   /* ======================= Räume mit Funktion (welt.js assignRooms) =======================

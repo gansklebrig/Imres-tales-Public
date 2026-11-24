@@ -732,6 +732,7 @@
   function setup(lv) { lvRef = lv; cur = null; stay = []; visit = { n: 0, used: {} }; next = rnd(14, 40); }
   const load0 = Z.loadArea;
   Z.loadArea = function () { const r = load0.apply(this, arguments); try { setup(Z.level); } catch (e) { console.error(e); } return r; };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "wunder", save: () => ({ cur, lvRef, next, visit, stay }), load: s => { ({ cur, lvRef, next, visit, stay } = s); } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
   function begin(d, forced) {
     const k = ctx(), s = { def: d, t: 0, seen: 0, leave: false, forced };
     try { if (d.start(s, k) === false) return false; } catch (e) { console.error(e); return false; }

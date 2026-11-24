@@ -207,6 +207,7 @@
   }
   const load0 = Z.loadArea;
   Z.loadArea = function () { const r = load0.apply(this, arguments); try { setup(Z.level); } catch (e) { console.error(e); } return r; };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "spuren", save: () => ({ list, lvRef }), load: s => { list = s.list; lvRef = s.lvRef; } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
 
   /* ---------- Lesen ---------- */
   const tick0 = Z.ebenenTick;

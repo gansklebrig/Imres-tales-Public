@@ -262,6 +262,7 @@
   }
   function interact(o) {
     const P = Z.player, lv = Z.level;
+    if (Z.rueckweg) Z.rueckweg.benutzt(o); /* W14: jede Benutzung beendet die Rückweg-Gnade (rueckweg.js) */
     if (o.type === "pickup") {
       const p = o.p;
       if (p.kind === "item") return Z.ui.offerItem(p);
@@ -283,18 +284,23 @@
       if (d.kind === "gate") return Z.ui.startRunConfirm();
       if (d.locked && !Z.run.doorsOpen) { Z.toast(L(["Verriegelt. Erst der Wächter.", "Locked. The warden first."])); A.play("chain"); return; }
       if (!Z.run.doorsOpen) { Z.toast(L(["Der Weg ist versperrt, solange der Wächter lebt.", "The way is barred while the warden lives."])); A.play("chain"); return; }
-      return goThrough(d.to);
+      return goThrough(d.to, d);
     }
     if (o.type === "obj") return o.o.use();
     if (o.type === "npc") return Z.ui.npc(o.s.id);
     if (o.type === "station") return Z.ui.station(o.s.id);
   }
-  function goThrough(to) {
-    const lv = Z.level;
+  function goThrough(to, d) {
+    const lv = Z.level, P = Z.player, RW = Z.rueckweg;
+    /* W14 Rückweg-Gnade: nach dem Zurückgehen führt dieselbe Tür wieder in das gemerkte Folgegebiet (gleicher Zustand, kein neues Laden) */
+    if (RW && d && RW.vor(d)) return;
+    const pos = P ? { x: P.x, y: P.y, face: P.face } : null;
     A.play("door", { vol: 0.7 });
     Z.ui.fade(() => {
+      let snap = null; try { snap = RW && d && Z.level === lv ? RW.capture(d, pos) : null; } catch (e) { console.error(e); }
       if (lv.passage) { Z.run.route.push(to); Z.loadArea(to); }
       else { Z.loadArea("passage", { from: lv.id, to }); }
+      if (snap) try { RW.arrive(snap); } catch (e) { console.error(e); }
     });
   }
   Z.startRun = function () {
@@ -378,13 +384,21 @@
     else { ctx.fillStyle = "#0c080c"; ctx.fillRect(0, 0, VW, VH); }
     Z._work = (Z._work || 0) + performance.now() - now; Z._workN = (Z._workN || 0) + 1; /* Rechenzeit je Bild für die Grafik-Automatik */
   }
+  /* W14: „Oben“ betritt Türen nur außerhalb des Kampfs – sonst würde ein Aufwärtsschlag/-schuss am Ausgang aus Versehen hindurchführen
+     (die Benutzen-Taste geht immer) */
+  function upDoorOk(P) {
+    if (P.act || P.hurtT > 0 || inp.held.a1 || inp.held.a2 || inp.held.s1 || inp.held.s2) return false;
+    if (P.buf) for (const k in P.buf) if (P.buf[k] > 0) return false;
+    for (const e of Z.enemies) if (!e.dead && e.aware && !e.dummy && Math.abs(e.x - P.x) < 180 && Math.abs(e.y - P.y) < 120) return false;
+    return true;
+  }
   function tick(dt, first) {
     const P = Z.player, lv = Z.level;
     if (!first) { for (const k in inp.pressed) inp.pressed[k] = false; }
     /* Interaktion */
     Z.interactTarget = findInteract();
     if (inp.pressed.use && Z.interactTarget && !P.dead && !(Z.ui && Z.ui.choiceActive)) { inp.consume("use"); interact(Z.interactTarget); }
-    if (inp.pressed.up && Z.interactTarget && Z.interactTarget.type === "door" && P.onGround && !P.climbing && !W.isLadder(Math.floor((P.x + P.w / 2) / T), Math.floor((P.y + P.h - 4) / T))) { interact(Z.interactTarget); }
+    if (inp.pressed.up && Z.interactTarget && (Z.interactTarget.type === "door" || (Z.interactTarget.type === "obj" && Z.interactTarget.o.tor)) && upDoorOk(P) && P.onGround && !P.climbing && !W.isLadder(Math.floor((P.x + P.w / 2) / T), Math.floor((P.y + P.h - 4) / T))) { interact(Z.interactTarget); }
     Z.updatePlayer(P, dt);
     Z.capeUpdate(P, dt);
     Z.updateEnemies(dt);

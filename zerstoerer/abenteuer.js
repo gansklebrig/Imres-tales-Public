@@ -304,6 +304,7 @@
   }
   const load0 = Z.loadArea;
   Z.loadArea = function (id) { const r = load0.apply(this, arguments); try { setupEvents(Z.level); } catch (err) { console.error(err); } return r; };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "abenteuer", save: () => evs, load: s => { evs = s || []; Z.abEvents = evs; } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
   function near(ev, d) { const P = Z.player; return P && Math.abs(P.x + P.w / 2 - ev.x) < (d || 22) && Math.abs(P.y + P.h - ev.y) < 26; }
   function finish(ev) { ev.done = true; M().events = (M().events || 0) + 1; if (Z.run) Z.run.events++; Z.saveMeta(); }
   function evTick(dt) {

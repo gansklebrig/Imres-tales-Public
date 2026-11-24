@@ -1034,6 +1034,7 @@
   /* ======================= Hooks ======================= */
   const load0 = Z.loadArea;
   Z.loadArea = function () { const r = load0.apply(this, arguments); try { setup(Z.level); } catch (err) { console.error(err); } return r; };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "weltspuren", load: (s, lv) => setup(lv) }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
 
   const tick0 = Z.ebenenTick;
   Z.ebenenTick = function (dt) { if (tick0) tick0(dt); try { tick(dt); } catch (err) { console.error(err); } };

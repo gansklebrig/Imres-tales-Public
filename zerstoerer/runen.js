@@ -567,6 +567,7 @@
   let finds = [];
   const la1 = Z.loadArea;
   Z.loadArea = function () { finds = []; return la1.apply(this, arguments); };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "runen", save: () => ({ G, finds }), load: s => { G = s.G; finds = s.finds; resetLevelFx(); const P = Z.player; if (P) { P.ringHang = null; P.ringPull = null; P.capV = null; P.gMul = null; P.shadowForm = false; P._mist = false; if (P.h !== C.H && !P.crouch) { P.y -= C.H - P.h; P.h = C.H; } } } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
   function mechPool() {
     const P = Z.player, shield = P && ["a1", "a2"].some(s => { const d = Z.itemDef(P.slots[s]); return d && d.kind === "shield"; });
     recalcActive();

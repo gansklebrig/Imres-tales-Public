@@ -224,6 +224,7 @@
      Station-Stellvertreter: steht man an einer Lager-/Durchgangs-Station, für die eine Auslage existiert,
      gilt das nächste Stück der Auslage (Hinweis, Karte, Benutzen). */
   const auslagen = [];
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "ui", save: () => auslagen.slice(), load: s => { auslagen.length = 0; for (const g of s) auslagen.push(g); } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
   ui.auslage = o => {
     for (let i = auslagen.length - 1; i >= 0; i--) if (auslagen[i].key === o.key || auslagen[i].lv !== Z.level) { const g0 = auslagen[i]; Z.interacts = (Z.interacts || []).filter(x => x.g !== g0); auslagen.splice(i, 1); }
     const g = { key: o.key, lv: Z.level, o, list: [], zu: false, station: o.station || null };

@@ -161,6 +161,7 @@
   };
   const la0 = Z.loadArea;
   Z.loadArea = function () { for (let i = fl.length - 1; i >= 0; i--) if (fl[i].k !== "mond") fl.splice(i, 1); return la0.apply(this, arguments); };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "fluchkraft", load: () => { for (let i = fl.length - 1; i >= 0; i--) if (fl[i].k !== "mond") fl.splice(i, 1); } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
   /* in die Zeichen- und Spielschleife einhängen */
   const d0 = Z.drawParcours;
   Z.drawParcours = function (c, t) { if (d0) d0(c, t); Z.drawFluchkraft(c, t); };
