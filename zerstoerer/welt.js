@@ -1668,7 +1668,8 @@
     let best = null, bs = 1e9;
     for (let attempt = 0; attempt < 40; attempt++) {
       const lv = tryGen(biomeId, (seed + attempt * 7919) >>> 0, opts);
-      if (lv && validate(lv)) { lv.attempts = attempt + 1; if (Z.run) { const u = (Z.run._tplUse = Z.run._tplUse || {}); for (const k in lv.cells) { const t = lv.cells[k].tpl; if (t) u[t] = (u[t] || 0) + 1; } } if (!Z.noEase) ease(lv); settle(lv); plan(lv); specials(lv); if (!Z.noRuneGates) runeGates(lv); cracks(lv); tides(lv); faehrLeitern(lv); if (!Z.noAbkuerzung) abkuerzungen(lv); unwall(lv); assignRooms(lv); if (attempt < 30 && !Z.noEase && !comfyAusgaenge(lv)) continue; /* W13 R23: Ausgang nur per Maximalsprung → nächster Versuch */ return lv; }
+      if (lv && validate(lv)) { lv.attempts = attempt + 1; if (Z.run) { const u = (Z.run._tplUse = Z.run._tplUse || {}); for (const k in lv.cells) { const t = lv.cells[k].tpl; if (t) u[t] = (u[t] || 0) + 1; } } if (!Z.noEase) ease(lv); settle(lv); plan(lv); specials(lv); if (!Z.noRuneGates) runeGates(lv); cracks(lv); tides(lv); if (!Z.noFaehrAbsatz) faehrLeitern(lv); if (!Z.noAbkuerzung) abkuerzungen(lv); unwall(lv); assignRooms(lv); if (attempt < 30 && !Z.noEase && !comfyAusgaenge(lv)) continue; /* W13 R23: Ausgang nur per Maximalsprung → nächster Versuch */
+        if (attempt < 30 && !Z.noFaehrPruef && !faehrSicher(lv)) continue; /* W13 R25: Fährstrecke von unten nicht betretbar – sonst Grube ohne Ausweg → nächster Versuch */ return lv; }
       /* Notfall: die beste Karte merken (alle Ausgänge erreichbar, möglichst wenige Festsitz-Stellen) */
       const sc = lv && lv.stuck ? lv.stuck.length : 1e8;
       if (lv && sc < bs) { bs = sc; best = lv; }
@@ -2175,6 +2176,34 @@
      trägt). Von der Leiterspitze kommt man nicht auf die Fähre (Kopf steckt im Wagen) → Grube ohne Ausweg. Der Prüfer hält 11 für einen Steg und
      merkt das nicht. Lösung: über jeder solchen Leiterspitze ein fester Absatz (3 Kacheln Steg 2) in der Fährstrecke – von dort steigt man auf die
      vorbeikommende Fähre wie von jedem Steg. */
+  /* W13 R25: Prüfung mit Fährstrecke (11) als fester Kachel: trägt von oben (die Fähre kommt immer wieder), lässt aber niemanden von unten
+     hindurch (der Wagen ist dann im Weg). Muss überall erreichbar/rückkehrbar bleiben – sonst entsteht ein „nur per Fähre“-Festsitzen. */
+  function faehrSicher(lv) {
+    /* Wer durch eine leere Fährstrecke fällt (Wagen gerade woanders), landet darunter. Von jedem solchen Landeplatz muss ein Ausgang erreichbar
+       sein, wenn die Strecke als fester Block zählt (von unten kommt man nicht durch den Wagen, von oben trägt er). */
+    const W = lv.W, H = lv.H, g = lv.get, lands = new Set();
+    const solid = v => v === 1 || v === 7 || v === 12;
+    for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+      if (g(x, y) !== 11) continue;
+      const gef = v => v === 3 || v === 5 || v === 6 || v === 9; /* Stacheln, Lava, Wasser, Abgrund: setzen auf den letzten sicheren Platz zurück */
+      let yy = y + 1; while (yy < H - 1 && !solid(g(x, yy + 1)) && g(x, yy + 1) !== 2 && g(x, yy + 1) !== 8 && g(x, yy + 1) !== 4 && g(x, yy + 1) !== 10 && !gef(g(x, yy + 1)) && !gef(g(x, yy))) yy++;
+      if (gef(g(x, yy + 1)) || gef(g(x, yy))) continue;
+      if (yy > y) lands.add(yy * W + x);
+    }
+    if (!lands.size) return true;
+    const get1 = (x, y) => { const v = g(x, y); return v === 11 ? 1 : v; };
+    const exits = (lv.doors || []).filter(d => d.kind === "exit");
+    let n = 0;
+    for (const i of lands) {
+      if (n++ > 40) break;
+      const f = { W, H, get: get1, start: { x: i % W, y: (i / W) | 0 }, doors: [], cells: lv.cells };
+      validate(f);
+      if (!f.reach) continue;
+      if (!exits.some(d => f.reach[d.y * W + d.x] || f.reach[d.y * W + d.x - 1] || f.reach[d.y * W + d.x + 1])) { if (Z.faehrStat) { Z.faehrStat.fehl++; (Z.faehrStat.bsp = Z.faehrStat.bsp || []).push([lv.biome, i % W, (i / W) | 0]); } return false; }
+    }
+    if (Z.faehrStat) Z.faehrStat.ok++;
+    return true;
+  }
   function faehrLeitern(lv) {
     const W = lv.W, H = lv.H, g = lv.get; lv.faehrAbsatz = [];
     for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
