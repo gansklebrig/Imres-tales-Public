@@ -2330,7 +2330,7 @@
       c.strokeStyle = "#160e0b"; c.lineWidth = 4; for (let k = -6; k < 10; k++) { c.beginPath(); c.moveTo(8 + k * 24, 44); c.lineTo(8 + k * 24 + 190, H + 20); c.stroke(); c.beginPath(); c.moveTo(W - 8 - k * 24, 44); c.lineTo(W - 8 - k * 24 - 190, H + 20); c.stroke(); }
       for (let r = 0; r < 7; r++) for (let q = 0; q < 7; q++) { const x = 20 + q * 24 + (r % 2) * 12, y = 66 + r * 24; if (x > W - 14 || R() < 0.2) continue; E(c, x, y, 6, 6, "#0c0a08"); E(c, x, y, 2.6, 2.6, R() < 0.5 ? "#14100a" : "#1a0c0c"); E(c, x - 2, y - 2, 1.4, 1.4, "rgba(255,220,180,.07)"); }
     } },
-    gitter: { W: 170, H: 260, paint(c, R, W, H) {
+    gitter: { W: 170, H: 260, rimA: 0.14, paint(c, R, W, H) { /* R24: dünne Stäbe – schwaches Randlicht, sonst wirken sie grau-oliv statt als Silhouette */
       const y0 = H * 0.36; c.fillStyle = lg(c, 0, y0, 0, y0 + 10, [D4, D1]); c.fillRect(20, y0, W - 40, 10); c.fillRect(20, y0 + 80, W - 40, 7);
       for (let x = 30, k = 0; x < W - 30; x += 18, k++) { c.fillStyle = lg(c, x, 0, x + 6, 0, [D4, D2, D0]); if (k === 3) { c.beginPath(); c.moveTo(x, y0); c.quadraticCurveTo(x + 14, y0 + 60, x, H); c.lineTo(x + 6, H); c.quadraticCurveTo(x + 20, y0 + 60, x + 6, y0); c.fill(); } else c.fillRect(x, y0 - 14, 6, H); E(c, x + 3, y0 - 14, 4, 3, D3); }
       for (let x = 30; x < W - 30; x += 18) { rivet(c, x + 3, y0 + 5, 1.6); rivet(c, x + 3, y0 + 83, 1.4); }
@@ -2504,7 +2504,7 @@
     /* Randlicht: Maske minus versetzte Maske → helle Kante oben links */
     const r = mk(); r.c.drawImage(m.cv, 0, 0); r.c.globalCompositeOperation = "source-in"; r.c.fillStyle = RIM[bg] || "#ffc896"; r.c.fillRect(0, 0, r.cv.width, r.cv.height);
     r.c.globalCompositeOperation = "destination-out"; r.c.drawImage(m.cv, 2.6 * RS, 2.2 * RS);
-    m.c.save(); m.c.setTransform(1, 0, 0, 1, 0, 0); m.c.globalCompositeOperation = "source-atop"; m.c.globalAlpha = 0.4; m.c.drawImage(r.cv, 0, 0); m.c.restore();
+    m.c.save(); m.c.setTransform(1, 0, 0, 1, 0, 0); m.c.globalCompositeOperation = "source-atop"; m.c.globalAlpha = d.rimA != null ? d.rimA : 0.4; m.c.drawImage(r.cv, 0, 0); m.c.restore();
     if (d.em) { m.c.save(); d.em(m.c, R, W, H); m.c.restore(); }
     /* weiche Tiefenunschärfe */
     const o = mk(); if ("filter" in o.c) o.c.filter = "blur(" + (1.4 * RS).toFixed(1) + "px)"; o.c.drawImage(m.cv, 0, 0);

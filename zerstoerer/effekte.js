@@ -376,7 +376,8 @@
       const fs = Math.max(14, Math.min(W, H) * 0.045) * s * (1 + Math.min(0.5, (banner.n - 2) * 0.1));
       const fd = getComputedStyle(document.documentElement).getPropertyValue("--fd") || "serif";
       c.save(); c.globalAlpha = a; c.textAlign = "right"; c.textBaseline = "middle"; c.font = Math.round(fs) + "px " + fd;
-      const x = W - W * 0.04, y = H * 0.26;
+      /* R24: in der 16:9-Spalte des HUD bleiben (UWQHD) und unter den Musik-/Ton-Knöpfen rechts (Handheld) */
+      const colW = Math.min(W, H * 16 / 9), x = W / 2 + colW / 2 - colW * 0.04, y = H * 0.35;
       c.shadowColor = banner.n >= 5 ? "#ff3a2a" : "#ff9a3a"; c.shadowBlur = fs * 0.5; c.fillStyle = banner.n >= 5 ? "#ffb0a0" : "#ffd8a0";
       c.fillText(banner.txt, x + (Math.random() - 0.5) * (banner.n >= 5 ? 3 : 0), y);
       c.shadowBlur = 0; c.font = "700 " + Math.round(fs * 0.45) + "px " + (getComputedStyle(document.documentElement).getPropertyValue("--fb") || "sans-serif"); c.fillStyle = "#e8d8c8"; c.fillText("× " + banner.n, x, y + fs * 0.72);
@@ -1256,5 +1257,21 @@
       for (const s2 of S.swings || []) if (vis(s2.ax, s2.ay + s2.L)) swing(c, s2, tt);
       for (const o of S.tides || []) { const [cx, cy] = o.td.cell.split(",").map(Number); if (vis(cx * Z.CW * T + Z.CW * 8, cy * Z.CH * T + Z.CH * 8, 300)) tides(c, o, tt); }
     } catch (e) { console.error(e); }
+  };
+})();
+
+/* W11 R24: Schwebetexte stapeln statt überlappen (z. B. „Kette 3 …“ und „Kette 5 …“ kurz nacheinander):
+   ein neuer Text, der dicht auf einem noch lebenden landet, rückt darüber. Nur Lage, Inhalt/Dauer unverändert. */
+(function () {
+  const FX = window.Z && window.Z.fx; if (!FX || !FX.text) return;
+  const t0 = FX.text;
+  FX.text = function (x, y, txt, col, big) {
+    const r = t0.apply(this, arguments);
+    try {
+      const L = FX.texts, n = L[L.length - 1]; if (!n) return r;
+      const cm = window.Z.cam, dir = cm && n.y - cm.y < 40 ? 1 : -1; /* am oberen Bildrand nach unten stapeln */
+          for (let k = 0; k < 4; k++) { let hit = false; for (let i = 0; i < L.length - 1; i++) { const o = L[i]; if (o.t < o.life * 0.8 && Math.abs(o.x - n.x) < (n.big || o.big ? 60 : 24) && Math.abs(o.y - n.y) < (n.big || o.big ? 12 : 8)) { n.y = o.y + dir * (n.big || o.big ? 13 : 9); hit = true; } } if (!hit) break; }
+    } catch (_) {}
+    return r;
   };
 })();
