@@ -1156,6 +1156,7 @@
   function breakThrough(e, P) {
     const air = e.def.fly && !e.grounded, bw = e.w, bh = e.h, W = Z.world, b = e.box || AR();
     const fy = air ? P.y - 30 : standY(P);
+    if (b.y1 != null && (fy > b.y1 + 8 || fy - bh < b.top - 40)) return false; /* Spieler hat den Wächterraum verlassen */
     const free = (x) => { if (air) { for (let yy = fy - bh - 2; yy < fy + 2; yy += 6) for (let xx = x - bw / 2 - 2; xx < x + bw / 2 + 2; xx += 6) if (W.solidAt(xx, yy)) return false; return W.los(x, fy - bh / 2, pcx(P), P.y + P.h / 2); } for (let yy = fy - bh + 2; yy < fy - 2; yy += 6) for (let xx = x - bw / 2 + 1; xx < x + bw / 2; xx += 6) if (W.solidAt(xx, yy)) return false; return W.solidAt(x, fy + 2) || W.isPlat(Math.floor(x / 16), Math.floor((fy + 2) / 16)); };
     for (const d of air ? [60, -60, 90, -90, 120, -120] : [90, -90, 120, -120, 70, -70, 150, -150]) {
       const x = pcx(P) + (cxOf(e) > pcx(P) ? d : -d); if (x < b.x0 + bw || x > b.x1 - bw || !free(x)) continue;
@@ -1207,6 +1208,8 @@
         if (s.stuck > 0.9) { s.stuck = 0; e.vy = -460; e.onGround = false; e.vx = U.sign(pcx(P) - cxOf(e)) * 150; A.play("jump", { vol: 0.5, rate: 0.7 }); FX.burst(cxOf(e), feet(e), 10, { col: Z.dustCol || "#8a7a70", sp: 90, life: 0.4, size: 3, kind: "smoke" }); }
       } else s.stuck = 0;
       s.lx = e.x;
+      /* Wächterraum nach unten offen (Bot fiel durch Löcher im Boden): der Kampfbereich wächst mit, statt dass der Wächter zurückspringt */
+      if (e.box && e.box.warden && pcx(P) > e.box.x0 - 16 && pcx(P) < e.box.x1 + 16 && P.y + P.h > e.box.y1 && P.y + P.h < e.box.y1 + 260) e.box.y1 = P.y + P.h + 24;
       /* Unerreichbar? (zu groß für Durchgänge, Spieler auf Plattform/Gegenseite) – nach 5 s ohne Annäherung bricht der Bodenboss neben dem Spieler durch */
       if (!e.def.fixed && !e.def.keepAway) { /* auch Flieger: der Vrock hing im Bot-Lauf 130 s über einer Decke fest */
         const dd = Math.hypot(pcx(P) - cxOf(e), (P.y + P.h) - feet(e));
