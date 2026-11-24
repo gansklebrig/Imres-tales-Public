@@ -13,6 +13,9 @@ Jeder Punkt lässt sich einzeln zurücknehmen (Schalter in Klammern).
 - Neue Effekte nur auf „Legendär“: Sonnenstrahlen (`__hsGLFX.k.strahlen=0` schaltet ab), Kaustik auf Teichen (`__hsGLFX.k.kaustik=0`),
   12 statt 8 Schatten werfende Lichter
 - Automatik: im PC-Programm beginnt sie bei „Legendär“, im Browser wie bisher bei „Episch“
+- Dächer in Dörfern und Städten neu gemalt (Paket „dach“, alle Stufen außer Minimal): Verlauf je Dachfläche, einzelne Ziegel und
+  Schieferplatten, Strohlagen, First mit Firstziegeln, Giebelbretter, Moos und Ruß, Gauben mit Licht bei Nacht. Wird einmal in die
+  Kartenkachel gemalt und kostet im Spiel nichts. (`__hsDACH.an=0` bringt die alten Dächer zurück)
 
 **Karten**
 - Seitenräume bekommen häufiger einen zweiten Durchgang (`KA2.schleife` 0,55 → 0,85)
