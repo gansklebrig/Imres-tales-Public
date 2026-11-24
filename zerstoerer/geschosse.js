@@ -45,6 +45,8 @@
     const k = PK[kind]; o = o || {};
     const sp = o.speed || k.speed;
     const p = Object.assign({ kind, k, x, y, vx: o.vx != null ? o.vx : dir * sp, vy: o.vy || 0, g: k.g, r: k.r, life: o.life || k.life, t: 0, dmg: o.dmg || 5, owner: kind.startsWith("e_") ? "e" : "p", pierce: o.pierce || k.pierce, hits: new Set(), dir: dir || 1, rot: 0 }, o);
+    /* W9 10. Runde: Nahschuss – Schüsse entstehen vor der Figur; ein Gegner, in dem man steht, wurde übersprungen (Bogen/Schleuder 0 Schaden). Erste Trefferprüfung reicht zurück bis zur Körpermitte. */
+    if (p.owner === "p" && Z.player && !o.vx && !o.vy && kind !== "regenpfeil" && Math.abs(x - (Z.player.x + Z.player.w / 2)) < 24 && Math.abs(y - (Z.player.y + Z.player.h / 2)) < 24) p.ox = Z.player.x + Z.player.w / 2;
     if (kind === "regenpfeil") { p.vx = (Math.random() - 0.5) * 30; p.vy = 300; }
     if (k.homing && Z.player) { const P = Z.player; const a = Math.atan2(P.y + 14 - y, P.x + P.w / 2 - x); p.vx = Math.cos(a) * sp; p.vy = Math.sin(a) * sp; }
     Z.projs.push(p); return p;
@@ -170,7 +172,8 @@
         for (const e of Z.enemies) {
           if (e.dead || p.hits.has(e) || e.intro > 0) continue;
           const r = p.r + (k.wave ? 6 : 0);
-          if (p.x + r < e.x || p.x - r > e.x + e.w || p.y + r < e.y || p.y - r > e.y + e.h) continue;
+          const xl = p.ox != null ? Math.min(p.ox, p.x) : p.x, xr = p.ox != null ? Math.max(p.ox, p.x) : p.x;
+          if (xr + r < e.x || xl - r > e.x + e.w || p.y + r < e.y || p.y - r > e.y + e.h) continue;
           if (k.trap && !p.armed) continue;
           p.hits.add(e);
           const crit = p.critAlways || (p.crit === "far" && P && Math.abs(e.x - P.x) > 130) || (p.it && Z.WEAPONS[p.it.id] && Z.WEAPONS[p.it.id].crit === "bleeding" && e.st.bleed > 0) || (P && P.st.smoke > 0);
@@ -186,6 +189,7 @@
           if (p.onHitE) p.onHitE(p, e);
           if (!p.pierce && !k.trap) { if (p.onEnd && !p.ended) { p.ended = true; p.onEnd(p, p.x, p.y); } p.dead = true; break; }
         }
+        p.ox = null;
       } else if (P && !P.dead) {
         const r = p.r, B = k.trap && Z.playerHurtBox ? Z.playerHurtBox(P) : { x: P.x + 2, y: P.y + 3, w: P.w - 4, h: P.h - 4 };
         if (p.x + r > B.x && p.x - r < B.x + B.w && p.y + r > B.y && p.y - r < B.y + B.h && !p.hits.has(P)) { /* etwas kleinere Trefferfläche: faires Ausweichen */

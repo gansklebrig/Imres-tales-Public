@@ -361,9 +361,9 @@
     const el = document.createElement("div");
     el.className = "meldung eisen p" + n.prio + (n.art ? " " + n.art : "");
     /* W11 R27 (nur Optik): freigeschalteter Erfolg → kurzes gemaltes Siegel mit Glanz statt Pokal-Zeichen (figuren.js Z.siegelURL;
-       Motiv/Stufe kann abenteuer.js über Z.erfolgSiegel(html) → { motiv, stufe } liefern) */
+       Siegel des Erfolgs aus abenteuer.js Z.erfolgSiegel(html) → {motiv, stufe, selten}, sonst goldener Stern) */
     let ico = n.icon;
-    if (n.icon === "🏆" && Z.siegelURL) { try { const w = (Z.erfolgSiegel && Z.erfolgSiegel(n.html)) || {}; ico = '<img class="siegel" alt="" src="' + Z.siegelURL(w.motiv || "stern", { stufe: w.stufe || "gold" }) + '">'; el.classList.add("erfolg-siegel"); } catch (_) { ico = n.icon; } }
+    if (n.icon === "🏆" && Z.siegelURL) { try { const w = Z.erfolgSiegel ? Z.erfolgSiegel(n.html) : null, ai = !w && Z.achSiegelInfo ? Z.achSiegelInfo(n.html) : null; ico = '<img class="siegel" alt="" src="' + (w && w.motiv ? Z.siegelURL(w.motiv, { stufe: w.stufe || "gold", band: w.stufe === "gold" || w.stufe === "blut" }) : ai && ai.url ? ai.url : Z.siegelURL("stern", { stufe: "gold" })) + '">'; if (w && w.selten) el.classList.add("selten"); el.classList.add("erfolg-siegel"); } catch (_) { ico = n.icon; } }
     el.innerHTML = (ico ? '<span class="mi">' + ico + "</span>" : "") + '<span class="mt">' + n.html + "</span>";
     if (n.prio >= 2) notesEl.prepend(el); else notesEl.appendChild(el);
     void el.offsetWidth; el.classList.add("an");
@@ -1641,6 +1641,10 @@
     bx.classList.add(sieg ? "bilanz-sieg" : "bilanz-tod");
     const sch = document.createElement("div"); sch.className = "bilanz-schein"; bx.prepend(sch);
     if (Z.siegelURL && h2) { const im = document.createElement("img"); im.className = "bilanz-siegel"; im.alt = ""; im.src = sieg ? Z.siegelURL("sieg", { stufe: "gold", band: true }) : um ? Z.siegelURL("tor", { stufe: "silber" }) : Z.siegelURL("tod", { stufe: "blut", band: true }); h2.before(im); }
+    /* R28: getragener Titel des Spielers unter der Überschrift */
+    { const tt = Z.achTitel ? Z.achTitel() : ""; if (tt && h2) { const p = document.createElement("p"); p.className = "bilanz-titel"; p.innerHTML = "Ezekiel · <b>„" + esc(tt) + "“</b>"; h2.after(p); } }
+    /* R28: Fenster beginnt oben (Siegel und Titel sichtbar), auch wenn der Fokus auf dem Knopf unten liegt */
+    for (const ms of [0, 60, 250]) setTimeout(() => { bx.scrollTop = 0; modal.scrollTop = 0; }, ms);
     bl.querySelectorAll(".bk").forEach((k, i) => { k.style.setProperty("--i", i); const v = (k.querySelector("b") || {}).textContent || ""; if (/^(0|0 m|0:00)$/.test(v.trim())) k.classList.add("leer"); });
   } catch (e) { console.error(e); } }).observe(modal, { childList: true });
   ui.deathScreen = o => {

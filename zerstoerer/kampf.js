@@ -464,7 +464,9 @@
     P.safeT -= dt;
     if (P.onGround && !P.onPlat && P.safeT <= 0) {
       const tx = Math.floor((P.x + P.w / 2) / T), ty = Math.floor((P.y + P.h + 1) / T);
-      if (W.tile(tx, ty) === 1 && ![3, 5, 6, 9].includes(W.tile(tx - 1, ty - 1)) && ![3, 5, 6].includes(W.tile(tx + 1, ty - 1)) && W.tile(tx - 1, ty) === 1 && W.tile(tx + 1, ty) === 1) { P.lastSafe = { x: P.x, y: P.y + P.h - C.H }; P.safeT = 0.3; }
+      /* W9 10. Runde: Rücksetzpunkt mit 2 Kacheln Abstand zu Lava/Wasser/Stacheln/Abgrund und mittig auf der Kachel – sonst Tod-Schleifen (Rücksetzen an die Kante, nächster Schritt wieder in der Lava) */
+      const bad = v => v === 3 || v === 5 || v === 6 || v === 9;
+      if (W.tile(tx, ty) === 1 && !bad(W.tile(tx - 1, ty - 1)) && !bad(W.tile(tx + 1, ty - 1)) && !bad(W.tile(tx - 2, ty - 1)) && !bad(W.tile(tx + 2, ty - 1)) && !bad(W.tile(tx - 2, ty)) && !bad(W.tile(tx + 2, ty)) && W.tile(tx - 1, ty) === 1 && W.tile(tx + 1, ty) === 1) { P.lastSafe = { x: tx * T + T / 2 - P.w / 2, y: P.y + P.h - C.H }; P.safeT = 0.3; }
     }
     /* Schritte */
     if (P.onGround && Math.abs(P.vx) > 40) {
@@ -621,14 +623,14 @@
       else { P.vy = -330; P.y -= 2; }
     }
     if (liquid && P.y + P.h > Math.floor((P.y + P.h - 3) / T) * T + 6) {
-      if (liquid === 5) { if (P.iframe <= 0 || true) Z.hurtPlayer(Math.round(P.hpMax * 0.18), { x: P.x, unblockable: true, hazard: true, force: true }); addStatus(P, "burn", 2, true); }
+      if (liquid === 5) { /* W9 10. Runde: binnen 1 s nach einem Rücksetzen kein zweiter Lava-Schaden (Rücksetzen bleibt) */ if (!(P._hzRT != null && (P.time || 0) - P._hzRT >= 0 && (P.time || 0) - P._hzRT < 1)) Z.hurtPlayer(Math.round(P.hpMax * 0.18), { x: P.x, unblockable: true, hazard: true, force: true }); addStatus(P, "burn", 2, true); }
       else { A.play("splash", { x: P.x, y: P.y }); FX.burst(P.x + P.w / 2, P.y + P.h, 14, { col: ["#4a6a5a", "#8aa090"], sp: 90, ang: -Math.PI / 2, spread: 1.2, life: 0.5, g: 400, size: 2 }); /* W9 6. Runde (Abuse): die kostenlose Flutkammer (W13 R4) war ein Fluchtknopf – reinspringen = Teleport an die sichere Stelle + 1 s
            unverwundbar, beliebig oft, auch mitten im Kampf. Kostenlos jetzt nur ohne Kampf in der Nähe (kein wacher Gegner < 260 px, kein Boss)
            und höchstens alle 8 s; dann nur kurz unverwundbar. Sonst wie normales Wasser (8 %). */
         let frei = false;
         if (Z.flutSicher && Z.flutSicher(P)) { const now = P.time || 0, kampf = (Z.boss && !Z.bossDefeated) || Z.enemies.some(e => !e.dead && e.aware && Math.abs(e.x - P.x) < 260 && Math.abs(e.y - P.y) < 200); frei = !kampf && !(P._flutT != null && now - P._flutT < 8 && now >= P._flutT); if (frei) P._flutT = now; }
-        if (!frei) Z.hurtPlayer(Math.round(P.hpMax * 0.08), { x: P.x, unblockable: true, hazard: true, force: true }); else P._flutFrei = true; }
-      if (P.lastSafe) { P.x = P.lastSafe.x; P.y = P.lastSafe.y; P.h = C.H; P.crouch = false; P.vx = 0; P.vy = 0; P.iframe = Math.max(P.iframe, P._flutFrei ? 0.3 : 1); P._flutFrei = false; }
+        if (!frei && !(P._hzRT != null && (P.time || 0) - P._hzRT >= 0 && (P.time || 0) - P._hzRT < 1)) Z.hurtPlayer(Math.round(P.hpMax * 0.08), { x: P.x, unblockable: true, hazard: true, force: true }); else P._flutFrei = true; }
+      if (P.lastSafe) { P.x = P.lastSafe.x; P.y = P.lastSafe.y; P.h = C.H; P.crouch = false; P.vx = 0; P.vy = 0; P.iframe = Math.max(P.iframe, P._flutFrei ? 0.3 : 1); P._flutFrei = false; P._hzRT = P.time || 0; }
     }
   }
   function pushOutOfEnemies(P) {

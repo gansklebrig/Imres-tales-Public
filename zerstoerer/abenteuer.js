@@ -105,7 +105,7 @@
     const m = M(); if (!a || m.ach[a.id]) return; m.ach[a.id] = Date.now();
     if (a.r.cape) m.capes[a.r.cape] = 1; if (a.r.hero) m.heroes[a.r.hero] = 1; if (a.r.bonus) m.bonus[a.r.bonus] = 1;
     Z.saveMeta(); A.play("holy", { vol: 0.6 });
-    if (Z.ui && Z.ui.notify) Z.ui.notify("🏆 <b>" + L(["Erfolg: ", "Achievement: "]) + esc(L(a.n)) + "</b><br><small>" + esc(rewardText(a.r)) + "</small>", { prio: 1, art: "sieg", dauer: 3600 }); else Z.toast && Z.toast("🏆 <b>" + esc(L(a.n)) + "</b>", 4200);
+    if (Z.ui && Z.ui.notify) Z.ui.notify("🏆 <b>" + L(["Erfolg: ", "Achievement: "]) + esc(L(a.n)) + "</b><br><small>" + esc(rewardText(a.r)) + '</small><i data-ach="' + a.id + '" hidden></i>', { prio: 1, art: "sieg", dauer: 3600 }); else Z.toast && Z.toast("🏆 <b>" + esc(L(a.n)) + "</b>", 4200);
   }
   let achT = 0;
   function achTick(dt) { achT -= dt; if (achT > 0) return; achT = 1; for (const a of ACH) if (!M().ach[a.id]) { let ok = false; try { ok = a.ok(); } catch (_) {} if (ok) { grant(a); break; } } }
@@ -212,6 +212,7 @@
     mk("spass", "f_pazifist", ["Pazifist", "Pacifist"], ["Ein Gebiet verlassen, ohne einen einzigen Gegner zu erledigen.", "Leave an area without finishing a single enemy."], null, TT("der Sanfte", "the Gentle")),
     mk("spass", "f_nass", ["Nasse Füße", "Wet Feet"], ["Dreimal von der steigenden Flut erwischt werden.", "Get caught by the rising tide three times."], () => (X().nass || 0) >= 3, TT("Wasserratte", "Water Rat"), () => [X().nass || 0, 3]),
     mk("spass", "f_goblin", ["Goldgräber", "Gold Digger"], ["Drei Goldgoblins erwischen (insgesamt).", "Catch three gold goblins (total)."], () => (X().dieb || 0) >= 3, TT("Goblinschreck", "Goblin's Bane"), () => [X().dieb || 0, 3]),
+    mk("spass", "f_rennen", ["Gegen die Uhr", "Against the Clock"], ["Eine Zeitrennen-Kammer schaffen.", "Beat a time trial chamber."], () => (X().rennen || 0) >= 1, TT("Sanduhrjäger", "Hourglass Hunter")),
     mk("spass", "f_faust", ["Mit bloßen Fäusten", "Bare-Knuckle"], ["10 Gegner in einem Durchgang mit bloßen Fäusten erledigen.", "Finish 10 enemies bare-handed in one run."], () => ((S().killsBy || {}).faeuste || 0) >= 10, TT("Faustkämpfer", "the Brawler"), () => [(S().killsBy || {}).faeuste || 0, 10])
   ];
   for (const a of NEU) ACH.push(a);
@@ -238,8 +239,40 @@
     bossW.push(mk("bosse", "b_alle", ["Trophäenwand", "Trophy Wall"], ["Jeden Boss und Wächter mindestens einmal besiegen.", "Defeat every boss and warden at least once."], () => ids.every(id => (M().bosses || {})[id] && M().bosses[id].won > 0), { cape: "koenig" }, () => [ids.filter(id => (M().bosses || {})[id] && M().bosses[id].won > 0).length, ids.length]));
     ins("boss", bossW);
     ins("nh_voll", ids.map(id => { const nm = bossN(id); return mk("makellos", "nh_" + id, ["Unberührt: " + nm[0], "Untouched: " + nm[1]], [nm[0] + " besiegen, ohne getroffen zu werden.", "Defeat " + enThe(nm[1]) + " without being hit."], () => !!X().nhB[id], TT("Tänzer", "the Dancer")); }));
+    enrich();
   }
   Z.achBuild = buildDyn;
+  /* Klang/Grafik-Schnittstelle: kat (Kategorie), selten (Fanfare), siegel {motiv, stufe} je Erfolg */
+  const KATN = { tempo: "tempo", kampf: "technik", makellos: "nohit", erkunden: "erkundung", bosse: "bosse", sammeln: "sammeln", spass: "kurios", geschichte: "geschichte" };
+  const SELTEN = ["nh_lauf", "t_lauf12", "b_schaedel5", "b_alle", "k_meister", "wahr", "alle", "nh_gebiet3", "b_mini", "s_feste", "e_gebiete", "k_rollkette", "nh_weberin", "nh_demogorgon"];
+  const GOLD = ["t_lauf20", "t_boss", "t_waechter", "k_parkette", "k_serie15", "k_ueber", "k_elite", "b_schaedel3", "nh_heil", "e_geheim5", "s_bewohner", "s_plus5", "s_banner", "f_fass", "f_tarzan", "f_rennen", "zorn", "runen", "tagebuch", "pakt", "b_weberin", "b_demogorgon", "s_gold", "s_waffen"];
+  const BRONZE = ["erstesblut", "ende", "boss", "e_kran", "e_flut", "e_rueck", "nh_voll", "f_pazifist", "f_nass", "e_morsch", "zaeh", "gold", "hundert", "ereignis", "befreier", "spuren", "s_umhang"];
+  const MOTIV_K = { tempo: "sanduhr", kampf: "schwert", makellos: "schild", erkunden: "karte", bosse: "krone", sammeln: "truhe", spass: "stern", geschichte: "faden" };
+  const MOTIV = { erstesblut: "schwert", hundert: "tod", parade: "schild", ausweichen: "feder", boss: "krone", gold: "muenze", ohnetrank: "trank", federleicht: "feder", fallen: "zahnrad",
+    serie: "flamme", sturz: "pfeil", paarung: "herz", pakt: "tod", ende: "faden", alle: "faden", runen: "rune", wahr: "faden", sammler: "truhe", zorn: "blitz", zaeh: "herz", ereignis: "stern",
+    tagebuch: "karte", hinterhalt: "auge", befreier: "tor", spuren: "pfote", schleicher: "auge", wette: "muenze",
+    t_lauf20: "blitz", t_lauf12: "blitz", t_boss: "sanduhr", t_waechter: "sanduhr", k_parkette: "schild", k_rollkette: "feder", k_auf: "pfeil", k_sturz: "blitz", k_schild: "schild", k_konter: "schwert",
+    k_umg: "zahnrad", k_leuchter: "glocke", k_serie15: "flamme", k_ueber: "auge", k_elite: "tod", k_meister: "sieg", nh_gebiet: "schild", nh_gebiet3: "schild", nh_lauf: "herz", nh_heil: "trank", nh_voll: "herz",
+    e_geheim: "auge", e_geheim5: "truhe", e_geheim25: "auge", e_karte: "karte", e_gebiete: "karte", e_wucht: "zahnrad", e_morsch: "zahnrad", e_flut: "tor", e_kran: "zahnrad", e_rueck: "tor", e_wunder: "stern",
+    s_palisade: "tor", s_banner: "krone", s_feste: "krone", s_bewohner: "herz", s_plus5: "flamme", s_segen3: "stern", s_gold: "muenze", s_waffen: "schwert", s_umhang: "faden",
+    f_fass: "zahnrad", f_tarzan: "glocke", f_pazifist: "herz", f_nass: "trank", f_goblin: "muenze", f_faust: "schwert", f_rennen: "sanduhr", b_mini: "tod", b_schaedel3: "schaedel", b_schaedel5: "schaedel", b_alle: "sieg" };
+  function enrich() {
+    for (const a of ACH) {
+      a.kat = KATN[a.c] || "geschichte";
+      a.selten = SELTEN.includes(a.id);
+      const stufe = a.selten ? "blut" : GOLD.includes(a.id) || /^nh_/.test(a.id) && a.id.length > 9 && !["nh_gebiet", "nh_voll", "nh_heil", "nh_lauf"].includes(a.id) ? "gold" : BRONZE.includes(a.id) || /^b_/.test(a.id) && a.c === "bosse" && !/^b_(mini|schaedel|alle)/.test(a.id) ? "bronze" : "silber";
+      a.siegel = { motiv: MOTIV[a.id] || (/^k_w_/.test(a.id) ? (a.id === "k_w_schild" ? "schild" : a.id === "k_w_schuss" ? "pfeil" : "schwert") : /^nh_/.test(a.id) ? "schild" : /^b_/.test(a.id) ? "krone" : /^t_/.test(a.id) ? "sanduhr" : MOTIV_K[a.c] || "stern"), stufe };
+    }
+  }
+  enrich();
+  /* Z.erfolgSiegel(htmlOderId) → { motiv, stufe, id, kat, selten } – erkennt die id, die Erfolgs-Meldung (data-ach) oder den Namen */
+  Z.erfolgSiegel = function (q) {
+    q = String(q || ""); let a = ACH.find(x => x.id === q);
+    if (!a) { const m = /data-ach="([^"]+)"/.exec(q); if (m) a = ACH.find(x => x.id === m[1]); }
+    if (!a) a = ACH.find(x => q.includes(esc(L(x.n)) + "</b>")) || ACH.find(x => q.includes(esc(L(x.n))));
+    if (!a) return null;
+    return { motiv: a.siegel.motiv, stufe: a.siegel.stufe, id: a.id, kat: a.kat, selten: a.selten };
+  };
   /* Testhaken: Liste, alle erfüllten sofort prüfen, erzwingen, zurücksetzen */
   Z.achTest = {
     list: () => ACH.map(a => ({ id: a.id, c: a.c, done: !!M().ach[a.id], p: a.p ? (() => { try { return a.p(); } catch (_) { return null; } })() : null })),
@@ -260,8 +293,9 @@
     } catch (err) { console.error(err); }
   };
   /* Gebiet verlassen (nur über Z.loadArea – der Rückweg setzt Gebiete ohne loadArea ein und löst hier nichts aus) */
-  function areaDone(to) {
+  function areaDone(to, opts) {
     const A2 = RA(), lv = Z.level, P = Z.player; if (!A2 || !lv || !P || P.dead || !to || to === "lager") return;
+    if (to !== "passage" || !opts || opts.from !== lv.id) return; /* nur der echte Ausgang (spiel.js: Gebiet → Passage), kein Neustart/Testsprung */
     const id = lv.id; if (!id || lv.hub || lv.arena || lv.passage || !TEMPO[id]) return;
     const a = A2.ar[id]; if (!a || a.done) return; a.done = true;
     const fair = !gnade();
@@ -280,7 +314,7 @@
   function onKill(e, o) {
     const A2 = RA(), P = Z.player; if (!A2 || !P || o.self) return;
     const run = Z.run, now = run.time || 0;
-    if (Z.level && Z.level.id) areaRec(A2, Z.level.id).kills++;
+    if (Z.level && Z.level.id && o.src !== "trap" && o.src !== "fall") areaRec(A2, Z.level.id).kills++; /* Pazifist: Fallen/Stürze zählen nicht */
     const act = P.act;
     const mel = o.src === "melee";
     if (act && act.up && (mel || o.src === "ranged")) A2.up++;
@@ -421,17 +455,38 @@
   let achTab = "geschichte", achFrom = false;
   const titelOf = id => { const a = getA(id); return a && a.r.titel && M().ach[id] ? L(a.r.titel) : ""; };
   Z.achTitel = () => titelOf(M().titel);
+  /* ---- Darstellung (W11 R28, Grafik-Agent): gemalte Siegel je Erfolg (figuren.js Z.siegelURL). Motiv/Stufe aus
+     a.siegel bzw. Z.erfolgSiegel(id) (Karten-Agent), sonst geraten aus Kategorie und Stichworten. Nur Bild, keine Logik. ---- */
+  const KMOT = { geschichte: "feder", tempo: "sanduhr", kampf: "schwert", makellos: "schild", erkunden: "karte", bosse: "schaedel", sammeln: "truhe", spass: "stern" };
+  const WMOT = [[/parade|block|schild/, "schild"], [/ausweich|roll|dodge/, "feder"], [/gold|muenz|reich|geld/, "muenze"], [/rune/, "rune"], [/tagebuch|seite|chronik/, "feder"], [/serie|kette|streak|blitz|schnell|tempo|minute/, "blitz"],
+    [/fall|abgrund|sturz|tief/, "pfeil"], [/trank|heil/, "trank"], [/boss|waechter|drache|demogorgon|riese|wraith/, "schaedel"], [/glocke/, "glocke"], [/flut|wasser|see|hafen/, "flamme"], [/feuer|glut|flamm|brand/, "flamme"],
+    [/rex|tier|pfote|wendel/, "pfote"], [/faden|weberin|spinne/, "faden"], [/karte|erkund|geheim|raum|tor/, "karte"], [/truhe|schatz|sammler|fund/, "truhe"], [/herz|leben|zaeh|tod/, "herz"], [/auge|schleich|lautlos|ueberrasch/, "auge"],
+    [/zahnrad|uhrwerk|kran|hebel/, "zahnrad"], [/krone|alle|ende|sieg/, "krone"], [/zeit|uhr|sanduhr/, "sanduhr"], [/pakt|fluch/, "rune"]];
+  function achSiegel(a, ok) {
+    if (!Z.siegelURL) return "";
+    let w = a.siegel || null; if (!w) { try { w = Z.erfolgSiegel ? Z.erfolgSiegel(a.id) : null; } catch (_) { w = null; } } if (!w || typeof w !== "object") w = {};
+    const id = String(a.id || "").toLowerCase(), kat = a.kat || a.c;
+    let mot = w.motiv; if (!mot) for (const [re, m] of WMOT) if (re.test(id)) { mot = m; break; } if (!mot) mot = KMOT[kat] || "stern";
+    const sel = w.stufe || ({ gewoehnlich: "bronze", selten: "silber", episch: "gold", legendaer: "gold", 1: "bronze", 2: "silber", 3: "gold" })[a.selten] || (kat === "bosse" ? "blut" : a.r && a.r.titel ? "gold" : a.p ? "silber" : "bronze");
+    /* Sieg über einen bestimmten Boss: freigeschaltet mit dem gemalten Boss-Porträt (figuren.js) */
+    const bm = /^b_([a-zA-Z]+)$/.exec(a.id || ""), bd = bm && Z.BOSSDEF && Z.BOSSDEF[bm[1]];
+    if (ok && bd && Z.bossPortraet) { const u = Z.bossPortraet(bd); if (u) return '<img class="ach-siegel boss" alt="" src="' + u + '">'; }
+    return '<img class="ach-siegel" alt="" src="' + Z.siegelURL(mot, ok ? { stufe: sel, band: sel === "gold" || sel === "blut" } : { gesperrt: true }) + '">';
+  }
+  /* für die Freischalt-Einblendung (ui.js): Erfolg am Namen im Meldungstext erkennen */
+  Z.achSiegelInfo = function (html) { try { const t = String(html || ""); const a = ACH.find(x => t.includes(esc(L(x.n)))); if (!a) return null; const m = /src="([^"]+)"/.exec(achSiegel(a, true)); return m ? { url: m[1] } : null; } catch (_) { return null; } };
   function achModal(fromStart, tab) {
     buildDyn(); achCss();
     if (fromStart != null) achFrom = !!fromStart; if (tab && KAT.some(k => k.id === tab)) achTab = tab;
     const m = M(), done = ACH.filter(a => m.ach[a.id]).length;
     const tabs = '<div class="reiter ach-reiter">' + KAT.map(k => { const l = ACH.filter(a => a.c === k.id), d = l.filter(a => m.ach[a.id]).length;
-      return '<button data-act="abAchTab" data-arg="' + k.id + '" class="' + (k.id === achTab ? "an" : "") + '">' + k.i + " " + esc(L(k.n)) + " <small>" + d + "/" + l.length + "</small></button>"; }).join("") + "</div>";
+      const ki = Z.siegelURL ? '<img class="ach-reiter-siegel" alt="" src="' + Z.siegelURL(KMOT[k.id] || "stern", d === l.length && l.length ? { stufe: "gold" } : { stufe: "bronze" }) + '">' : k.i + " ";
+      return '<button data-act="abAchTab" data-arg="' + k.id + '" class="' + (k.id === achTab ? "an" : "") + '">' + ki + esc(L(k.n)) + " <small>" + d + "/" + l.length + "</small></button>"; }).join("") + "</div>";
     const rows = ACH.filter(a => a.c === achTab).map(a => {
       const ok = !!m.ach[a.id]; let bar = "";
       if (a.p && !ok) { let p = null; try { p = a.p(); } catch (_) {} if (p && p[1] > 0) { const v = Math.max(0, Math.min(p[0], p[1])); bar = '<i class="ach-balken"><i style="width:' + Math.round(v / p[1] * 100) + '%"></i></i><em class="ach-zahl">' + U.fmt(Math.floor(v)) + " / " + U.fmt(p[1]) + "</em>"; } }
       const tit = ok && a.r.titel, an = tit && m.titel === a.id;
-      return '<button class="erfolg ach2' + (ok ? " ja" : "") + (an ? " titel-an" : "") + '"' + (tit ? ' data-act="abTitel" data-arg="' + a.id + '"' : ' data-act="abNix"') + "><b>" + (ok ? "🏆 " : "· ") + esc(L(a.n)) + "</b><span>" + esc(L(a.d)) + "</span>" + bar + "<small>" + esc(rewardText(a.r)) + (tit ? (an ? L([" · getragen", " · worn"]) : L([" · anlegen", " · wear"])) : "") + "</small></button>";
+      return '<button class="erfolg ach2' + (ok ? " ja" : "") + (a.selten ? " selten" : "") + (an ? " titel-an" : "") + '"' + (tit ? ' data-act="abTitel" data-arg="' + a.id + '"' : ' data-act="abNix"') + ">" + achSiegel(a, ok) + '<div class="ach-text"><b>' + esc(L(a.n)) + "</b><span>" + esc(L(a.d)) + "</span>" + bar + "<small>" + esc(rewardText(a.r)) + (tit ? (an ? L([" · getragen", " · worn"]) : L([" · anlegen", " · wear"])) : "") + "</small></div></button>";
     }).join("");
     const runes = ["tiefe", "glut", "himmel"].map(k => (m.runes[k] ? "◆" : "◇")).join(" ");
     const tt = titelOf(m.titel);
@@ -452,7 +507,27 @@
       ".ach-balken i{display:block;height:100%;background:linear-gradient(90deg,#8a1414,#e5b454)}" +
       ".ach-zahl{font-style:normal;font-size:var(--fs-xs,11px);color:#c8b090}" +
       ".ach-reiter button small{opacity:.75;font-weight:400}" +
-      "@media (min-width:2200px){.erfolge.ach2l{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}.erfolg.ach2 span{font-size:14px}}";
+      "@media (min-width:2200px){.erfolge.ach2l{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}.erfolg.ach2 span{font-size:14px}}" +
+      /* W11 R28 (Grafik): Siegel links, Text rechts; Balken als eiserne Rinne mit Glut; gesperrte Karten gedämpft; Reiter mit kleinen Siegeln */
+      "button.erfolg.ach2{display:flex;flex-direction:row;gap:10px;align-items:center;padding:8px 10px;border:1px solid #3a2a24;border-radius:8px;position:relative}" +
+      "button.erfolg.ach2 .ach-text{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}" +
+      "button.erfolg.ach2 b{font-family:var(--fd);font-weight:400;font-size:var(--fs-m,15px);color:#f0dcc0;letter-spacing:.02em}" +
+      "button.erfolg.ach2.ja b{color:var(--gold)}" +
+      "button.erfolg.ach2:not(.ja){background:linear-gradient(#1e1614,#141010)}button.erfolg.ach2:not(.ja) b{color:#b8a898}button.erfolg.ach2:not(.ja) span{color:#a89888}" +
+      "button.erfolg.ach2.ja{background:radial-gradient(circle at 34px 50%,rgba(229,180,84,.13),rgba(0,0,0,0) 60px),linear-gradient(#2c1f1a,#1c1412);border-color:#5a4430}" +
+      ".ach-siegel{width:52px;height:52px;flex:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.7))}" +
+      "button.erfolg.ach2:not(.ja) .ach-siegel{opacity:.8}" +
+      "button.erfolg.ach2.ja:hover .ach-siegel,button.erfolg.ach2.ja:focus .ach-siegel{transform:rotate(-6deg) scale(1.06);transition:transform .2s}" +
+      ".ach-balken{height:8px!important;margin:5px 0 2px!important;background:linear-gradient(#0c0708,#1c1012)!important;border:1px solid #000!important;border-radius:3px!important;box-shadow:0 0 0 1px var(--eisen3,#4a3a34),inset 0 1px 3px rgba(0,0,0,.7);position:relative}" +
+      ".ach-balken i{background:linear-gradient(#ffc070,#d06a1e 50%,#7a2a10)!important;box-shadow:inset 0 1px 0 rgba(255,230,180,.45),1px 0 5px rgba(255,140,50,.5)}" +
+      ".ach-zahl{font-variant-numeric:tabular-nums}" +
+      ".ach-reiter{flex-wrap:wrap}.ach-reiter button{display:inline-flex;align-items:center;gap:5px}.ach-reiter-siegel{width:22px;height:22px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.7))}" +
+      ".handheld .ach-siegel{width:44px;height:44px}.handheld .ach-reiter-siegel{width:18px;height:18px}" +
+      "button.erfolg.ach2.selten.ja{border-color:#7a2a1c;background:radial-gradient(circle at 34px 50%,rgba(220,70,40,.2),rgba(0,0,0,0) 62px),linear-gradient(#2e1a16,#1c1210)}" +
+      "button.erfolg.ach2.selten b::after{content:' ◆';color:#d0503a;font-size:.8em}" +
+      /* Liste unter dem UI-Zoom (UWQHD: --ui 2) nicht höher als der Bildschirm, damit „Zurück“ sichtbar bleibt */
+      ".erfolge.ach2l{max-height:min(calc(54vh / var(--ui,1)),900px)!important}" +
+      "@media (min-width:2200px){.ach-siegel{width:64px;height:64px}}";
     document.head.appendChild(st);
   }
 
@@ -573,6 +648,8 @@
       if (k === "dieb") { const e = Z.spawnEnemy("goblin", x, y); if (e) { e.thief = true; e.hpMax = e.hp = Math.round(e.hpMax * 2.5); e.def = Object.assign({}, e.def, { spd: 135, atks: [] }); e.t0 = 0; evs.push({ k, e, x, y, done: false }); } }
       else evs.push({ k, x, y, done: false, t: 0 });
     }
+    /* W13: seltene Zeitrennen-Kammer (Sanduhr-Sockel, Ringe in der Nähe einsammeln) */
+    if (Math.random() < (Z.rennenChance != null ? Z.rennenChance : 0.14)) { try { const ev = setupRennen(lv); if (ev) evs.push(ev); } catch (err) { console.error(err); } }
     if (evs.some(e => e.k === "haendler")) setTimeout(() => { if (Z.level === lv && Z.ui && Z.ui.notify) Z.ui.notify("⚖ <b>" + L(["Fahrende Händlerin", "Wandering Trader"]) + "</b><br><small>" + L(["Irgendwo klimpert ihr Karren – folge der Laterne (Karte).", "Her cart is jingling somewhere – follow the lantern (map)."]) + "</small>", { prio: 2, art: "gold", dauer: 3400 }); }, 9000);
     /* Runen-Fragmente in Geheimräumen */
     const RUNE = { verlies: "tiefe", schmiede: "glut", zinnen: "himmel" };
@@ -590,6 +667,58 @@
   (Z.rueckHooks = Z.rueckHooks || []).push({ id: "abenteuer", save: () => evs, load: s => { evs = s || []; Z.abEvents = evs; } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
   function near(ev, d) { const P = Z.player; return P && Math.abs(P.x + P.w / 2 - ev.x) < (d || 22) && Math.abs(P.y + P.h - ev.y) < 26; }
   function finish(ev) { ev.done = true; M().events = (M().events || 0) + 1; if (Z.run) Z.run.events++; Z.saveMeta(); }
+  /* ======================= ZEITRENNEN ======================= */
+  /* Sockel mit Sanduhr; Benutzen startet die Uhr, 5 goldene Ringe liegen in Reichweite (gleiche oder Nachbarzellen, keine Geheimräume).
+     Zeit = geschätzter Weg (waagrecht + 1,6 × senkrecht) / Laufgeschwindigkeit × 1,8 + 5 s. Scheitern kostet nichts – bis zu 3 Versuche. */
+  function setupRennen(lv) {
+    const p = spotFar(lv, lv.start, 24); if (!p) return null;
+    const cellOf = (x, y) => lv.cells && lv.cells[Math.floor(x / Z.CW) + "," + Math.floor(y / Z.CH)];
+    const c0 = cellOf(p.x, p.y); if (!c0 || c0.kind === "secret" || (lv.reach && !lv.reach[p.y * lv.W + p.x])) return null;
+    const cand = [];
+    for (let i = 0; i < 900 && cand.length < 60; i++) {
+      const x = p.x - 22 + ((Math.random() * 45) | 0), y = p.y - 9 + ((Math.random() * 16) | 0);
+      if (x < 2 || y < 2 || x >= lv.W - 2 || y >= lv.H - 2) continue;
+      const c = cellOf(x, y); if (!c || c.kind === "secret") continue;
+      if (Math.abs(x - p.x) + Math.abs(y - p.y) < 6 || !Z.standable(lv, x, y, 2) || (lv.reach && !lv.reach[y * lv.W + x])) continue;
+      if ((lv.doors || []).some(d => Math.abs(d.x - x) < 3 && Math.abs(d.y - y) < 3)) continue;
+      cand.push({ x, y });
+    }
+    const rings = [];
+    for (const q of cand) { if (rings.length >= 5) break; if (rings.every(r => Math.abs(r.x - q.x) + Math.abs(r.y - q.y) >= 6)) rings.push(q); }
+    if (rings.length < 4) return null;
+    /* Weg schätzen: nächster Nachbar ab dem Sockel */
+    let cur = p, left = rings.slice(), way = 0; const order = [];
+    while (left.length) { let bi = 0, bd = 1e9; left.forEach((r, i) => { const d = Math.abs(r.x - cur.x) + 1.6 * Math.abs(r.y - cur.y); if (d < bd) { bd = d; bi = i; } }); way += bd; cur = left.splice(bi, 1)[0]; order.push(cur); }
+    const limit = Math.round(way * T / Z.PC.RUN * 1.8 + 5);
+    return { k: "rennen", x: p.x * T + 8, y: (p.y + 1) * T, done: false, t: 0, on: false, tries: 0, limit, rings: order.map(r => ({ x: r.x * T + 8, y: r.y * T + 4, got: false })) };
+  }
+  function rennenTick(ev, dt, use) {
+    const P = Z.player;
+    if (!ev.on) {
+      if (near(ev, 26) && use) {
+        inp.consume("use"); ev.on = true; ev.left = ev.limit; ev.tries++; for (const r of ev.rings) r.got = false;
+        A.play("gong", { vol: 0.5, rate: 1.4 }); FX.ring(ev.x, ev.y - 14, 40, "#ffd27a", 0.5, 2);
+        Z.toast("⏳ <b>" + L(["Zeitrennen", "Time trial"]) + "</b><small>" + L(["Sammle alle " + ev.rings.length + " Ringe in " + ev.limit + " Sekunden.", "Collect all " + ev.rings.length + " rings in " + ev.limit + " seconds."]) + "</small>", 3000);
+      }
+      return;
+    }
+    const sec = Math.ceil(ev.left); ev.left -= dt;
+    if (Math.ceil(ev.left) !== sec && sec <= 6 && sec > 1) { FX.text(P.x + P.w / 2, P.y - 18, sec - 1 + " s", "#ffc24a"); A.play("ui", { vol: 0.3, rate: 1.6 }); }
+    for (const r of ev.rings) if (!r.got && Math.abs(P.x + P.w / 2 - r.x) < 15 && Math.abs(P.y + P.h / 2 - r.y) < 20) {
+      r.got = true; A.play("coin", { vol: 0.55, rate: 1 + 0.08 * ev.rings.filter(q => q.got).length }); FX.burst(r.x, r.y, 12, { col: ["#ffd27a", "#fff2c0"], sp: 90, life: 0.5, size: 2, kind: "glow", add: true });
+    }
+    const got = ev.rings.filter(r => r.got).length;
+    if (got >= ev.rings.length) {
+      ev.on = false; finish(ev); A.play("holy", { vol: 0.6 }); FX.flashScreen("#ffd27a", 0.25);
+      Z.dropItem(P.x + P.w / 2, P.y, { chest: true }); P.gold += 40 + 20 * ev.rings.length; FX.text(P.x + P.w / 2, P.y - 22, L(["Geschafft! ", "Done! "]) + Math.max(0, ev.left).toFixed(1) + " s", "#ffd27a", true);
+      X().rennen = (X().rennen || 0) + 1; give("f_rennen"); return;
+    }
+    if (ev.left <= 0 || P.dead) {
+      ev.on = false; for (const r of ev.rings) r.got = false;
+      if (ev.tries >= 3) { finish(ev); Z.toast(L(["Die Sanduhr zerspringt. Keine weiteren Versuche.", "The hourglass shatters. No more tries."]), 2600); A.play("break", { vol: 0.5 }); }
+      else Z.toast(L(["Zu langsam (" + got + "/" + ev.rings.length + "). Noch " + (3 - ev.tries) + " Versuch(e) am Sockel.", "Too slow (" + got + "/" + ev.rings.length + "). " + (3 - ev.tries) + " more tr" + (3 - ev.tries === 1 ? "y" : "ies") + " at the pedestal."]), 2800);
+    }
+  }
   function evTick(dt) {
     const P = Z.player; if (!P || !Z.level) return;
     const use = inp.pressed.use && !Z.interactTarget && !(Z.ui && (Z.ui.modalOpen || Z.ui.choiceActive));
@@ -618,6 +747,7 @@
             else if (ev.left <= 0) { ev.on = false; finish(ev); Z.toast(L(["Barradin: „Zu langsam. Die Ballade wird kürzer.“", "Barradin: \"Too slow. The ballad gets shorter.\""]), 3000); }
           }
           break;
+        case "rennen": rennenTick(ev, dt, use); break;
         case "rune": if (near(ev, 18)) { ev.done = true; M().runes[ev.rk] = 1; Z.saveMeta(); FX.flashScreen("#d8d0e8", 0.5); A.play("holy", { vol: 0.8 }); FX.burst(ev.x, ev.y - 10, 30, { col: ["#d8d0e8", "#c03a5a", "#fff"], sp: 120, up: 40, life: 1, size: 2.4, kind: "glow", add: true }); const n = Object.keys(M().runes).length; Z.toast("◆ <b>" + L(["Runen-Fragment gefunden", "Rune fragment found"]) + " (" + n + "/3)</b><br><small>" + L(n >= 3 ? ["Alle drei! Nach dem nächsten Endboss öffnet sich ein Riss im Netz …", "All three! After the next final boss, a rift in the web will open…"] : ["Irgendwo im Netz zuckt etwas.", "Somewhere in the web, something twitches."]) + "</small>", 4600); } break;
       }
     }
@@ -712,6 +842,17 @@
         Z.drawNPC(c, "E", x + 18, y, t, Z.player && Z.player.x > x ? 1 : -1);
         tag(ev, L(["Handeln", "Trade"]));
       }
+      if (ev.k === "rennen") {
+        c.fillStyle = "#3a3236"; c.fillRect(x - 8, y - 12, 16, 12); c.fillStyle = "#4a4046"; c.fillRect(x - 10, y - 14, 20, 3);
+        if (!ev.done) {
+          const sy = y - 30; c.fillStyle = "#8a6a3a"; c.fillRect(x - 7, sy - 1, 14, 2); c.fillRect(x - 7, sy + 15, 14, 2);
+          poly(c, [x - 5, sy + 1, x + 5, sy + 1, x + 0.8, sy + 8, x + 5, sy + 15, x - 5, sy + 15, x - 0.8, sy + 8], "rgba(255,230,180,.35)");
+          const f = ev.on ? Math.max(0, ev.left / ev.limit) : 1; poly(c, [x - 4 * f, sy + 7 - 5 * f, x + 4 * f, sy + 7 - 5 * f, x, sy + 8], "#e5b454"); poly(c, [x - 4, sy + 14, x + 4, sy + 14, x, sy + 14 - 5 * (1 - f)], "#e5b454");
+          c.save(); c.globalCompositeOperation = "lighter"; glow(c, x, sy + 8, 14 + Math.sin(t * 3) * 2, "rgba(255,200,100,.35)"); c.restore();
+          if (!ev.on) tag(ev, L(["Zeitrennen starten", "Start time trial"]) + " (" + ev.limit + " s)");
+        }
+        if (ev.on) for (const r of ev.rings) if (!r.got) { const b = Math.sin(t * 4 + r.x) * 2; c.save(); c.globalCompositeOperation = "lighter"; glow(c, r.x, r.y + b, 13, "rgba(255,210,120,.45)"); c.restore(); c.strokeStyle = "#ffd27a"; c.lineWidth = 2; c.beginPath(); c.ellipse(r.x, r.y + b, 5 + Math.sin(t * 5) * 1.5, 7, 0, 0, 6.283); c.stroke(); }
+      }
       if (ev.k === "rune" && !ev.done) { const b = Math.sin(t * 2) * 2; c.save(); c.globalCompositeOperation = "lighter"; glow(c, x, y - 12 + b, 16, "rgba(220,200,255,.55)"); c.restore(); poly(c, [x, y - 20 + b, x + 5, y - 12 + b, x, y - 4 + b, x - 5, y - 12 + b], "#d8d0e8"); poly(c, [x, y - 17 + b, x + 2.5, y - 12 + b, x, y - 7 + b, x - 2.5, y - 12 + b], "#c03a5a"); }
     }
     /* Riss im Netz */
@@ -777,8 +918,8 @@
       return r;
     };
     const l0 = Z.loadArea;
-    Z.loadArea = function (id) {
-      try { areaDone(id); } catch (err) { console.error(err); }
+    Z.loadArea = function (id, opts) {
+      try { areaDone(id, opts); } catch (err) { console.error(err); }
       const r = l0.apply(this, arguments);
       lvLoaded = Z.level;
       try { const lv = Z.level; if (Z.run && lv && TEMPO[lv.id] && !lv.arena && !lv.passage) { const x = X(); if (!x.bio[lv.id]) { x.bio[lv.id] = 1; Z.saveMeta(); } } } catch (_) {}

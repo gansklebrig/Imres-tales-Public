@@ -504,7 +504,7 @@
   Z.onChestOpen = function (p, cursed) {
     if (Z.chChest) Z.chChest();
     if (cursed) Z.spawnReward("glut", p.x, p.y - 8, { n: 1 });
-    else if (Z.R() < 0.18 /* W9 9. Runde: 0,12 → 0,18 */ * glutMul()) Z.spawnReward("glut", p.x, p.y - 8, { n: 1 });
+    else if (Z.R() < 0.22 /* W9 9./10. Runde: 0,12 → 0,18 → 0,22 (Truhen liegen meist abseits: hilft gründlichen Läufen, Hauptweg bleibt knapp) */ * glutMul()) Z.spawnReward("glut", p.x, p.y - 8, { n: 1 });
   };
   Z.onBossDown = function (b) {
     later(() => Z.spawnReward("glut", b.x + b.w / 2, b.y + b.h / 2, { n: b.warden ? 1 : 2 }), 600);
