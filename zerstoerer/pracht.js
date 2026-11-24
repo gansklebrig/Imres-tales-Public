@@ -404,7 +404,9 @@
 
   /* ---------- Einhängen in das Bild ---------- */
   Z.drawBeforePlayer = function (c) { drawGhosts(c); };
+  const alBase = Z.drawAfterLight; /* R17: frühere Haken (figuren.js) erhalten */
   Z.drawAfterLight = function (c, cam, W, H, t) {
+    if (alBase) try { alBase.apply(this, arguments); } catch (e) { console.error(e); }
     if (!rich()) return;
     if (!Z.gfx.off || !Z.gfx.off.shafts) shafts(c, cam, t);
     foreground(c, cam, W, H, Z.gfx.scale);

@@ -1847,6 +1847,77 @@
   /* Flamme: Hof, äußere Zunge, Kern und weißer Docht – alles additiv */
   /* frei sichtbarer Hintergrund (Himmel, Fenster, Arena): dort gibt es keine Wand für Wandschmuck */
   G.isOpen = (x, y) => { if (!lv || x < 0 || y < 0 || x >= lv.W || y >= lv.H) return false; const i = y * lv.W + x; return !!((G.sky && G.sky[i]) || (PR && (PR.win[i] || PR.clear[i]))); };
+  /* ======================= BEUTE (W11 R17) =======================
+     Vor den Fundstücken (geschosse.js): Bodenschein in Seltenheitsfarbe, bei Legendärem langsam kreisende Strahlen.
+     Danach: Gold glitzert (Sternfunkeln), Funde ab „Selten“ und Schriftrollen/Splitter steigen Lichtfunken auf,
+     Schriftrollen bekommen eine weiche, hellere Lichtsäule. Aufgehobenes fliegt als kleines Licht zum HUD
+     (Gold → Goldanzeige, Splitter/Glut → Splitter, Waffe → Waffenfeld, Rolle → Segen, Essen → Lebensbalken).
+     Lean: nur Bodenschein und Gold-Funkeln, kein Flug. Schalter Z.gfx.off.beute. */
+  const PK_SEEN = new Map(); let pkFly = [], pkLv = null;
+  const PK_TARGET = { gold: "gold", shard: "shards", glut: "shards", item: "slot-a1", scroll: "bless", food: "hpbar", key: "area" };
+  function pkCol(p) { return p.kind === "item" && p.it && Z.RARITY[p.it.rar] ? Z.RARITY[p.it.rar].col : p.kind === "gold" ? "#ffd27a" : p.kind === "shard" ? "#ff6a9a" : p.kind === "glut" ? "#ffa040" : p.kind === "scroll" ? "#ffd27a" : p.kind === "key" ? "#ffd27a" : "#e8c890"; }
+  function pickupBack(c, t) {
+    if (G.off && G.off.beute) return; const cam = Z.cam, lo = Z.gq && (Z.gq.lean || Z.gq.mini);
+    for (const p of Z.pickups) {
+      if (p.rack || p.x < cam.x - 40 || p.x > cam.x + cam.w + 40 || p.y < cam.y - 20 || p.y > cam.y + cam.h + 40) continue;
+      if (p.kind !== "item" && p.kind !== "scroll" && p.kind !== "shard") continue;
+      const col = pkCol(p), rar = p.kind === "item" && p.it ? p.it.rar | 0 : 1;
+      c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = 0.24 + 0.05 * rar + 0.06 * Math.sin(t * 2.5 + p.x);
+      c.translate(p.x, p.y); c.scale(1, 0.32); Z.draw.glow(c, 0, -2, 14 + rar * 3, col); c.restore();
+      if (rar >= 3 && !lo) {
+        c.save(); c.globalCompositeOperation = "lighter"; c.translate(p.x, p.y - 10 + Math.sin(t * 3 + p.x) * 2 - 4);
+        for (let i = 0; i < 4; i++) { c.rotate(t * 0.6 + i * Math.PI / 4); c.globalAlpha = 0.16; c.fillStyle = col; c.fillRect(-0.8, -15, 1.6, 30); }
+        c.restore();
+      }
+    }
+  }
+  function hudPoint(id) {
+    const el = document.getElementById(id), cv = document.getElementById("cv"); if (!el || !cv) return null;
+    const r = el.getBoundingClientRect(), q = cv.getBoundingClientRect(); if (!r.width || !q.width) return null;
+    const cam = Z.cam; return [cam.x + (r.left + r.width / 2 - q.left) / q.width * cam.w, cam.y + (r.top + r.height / 2 - q.top) / q.height * cam.h];
+  }
+  function pickupFront(c, t) {
+    if (G.off && G.off.beute) return; const cam = Z.cam, lo = Z.gq && (Z.gq.lean || Z.gq.mini), P = Z.player;
+    if (pkLv !== Z.level) { pkLv = Z.level; PK_SEEN.clear(); pkFly = []; }
+    const now = new Set();
+    for (const p of Z.pickups) {
+      now.add(p);
+      if (p.x < cam.x - 40 || p.x > cam.x + cam.w + 40 || p.y < cam.y - 20 || p.y > cam.y + cam.h + 40) continue;
+      if (P && !lo) PK_SEEN.set(p, { x: p.x, y: p.y - 6, kind: p.kind, col: pkCol(p), near: Math.abs(p.x - (P.x + P.w / 2)) < 44 && Math.abs(p.y - (P.y + P.h)) < 52 });
+      if (p.kind === "gold") { /* Glitzern: kurzer Vierstrahlstern je Münze, versetzt */
+        const ph = (t * 0.8 + (p.x * 0.137 % 1)) % 1; if (ph < 0.09) { const k = Math.sin(ph / 0.09 * Math.PI), L = 1 + 3 * k;
+          c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = 0.9 * k; c.fillStyle = "#fff4d0"; c.fillRect(p.x - L + 0.5, p.y - 3.2, L * 2, 0.6); c.fillRect(p.x + 0.2, p.y - 2.9 - L, 0.6, L * 2); c.restore(); }
+        continue;
+      }
+      if (lo || p.rack) continue;
+      const rar = p.kind === "item" && p.it ? p.it.rar | 0 : p.kind === "scroll" || p.kind === "shard" ? 2 : 0;
+      if (rar >= 1 && Math.random() < 0.05 * rar) Z.fx.p({ x: p.x + (Math.random() - 0.5) * 10, y: p.y - 2, vx: 0, vy: -18 - Math.random() * 14, life: 0.9, size: 1.1, col: pkCol(p), kind: "glow", add: true });
+      if (p.kind === "scroll") { /* Segen-Rolle: zweite, weichere und hellere Lichtsäule */
+        c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = 0.12 + 0.06 * Math.sin(t * 2 + p.x);
+        const g = c.createLinearGradient(0, p.y - 90, 0, p.y); g.addColorStop(0, "rgba(255,210,122,0)"); g.addColorStop(0.7, "rgba(255,220,150,.6)"); g.addColorStop(1, "rgba(255,240,200,.9)");
+        c.fillStyle = g; c.fillRect(p.x - 3, p.y - 90, 6, 90); c.globalAlpha *= 0.5; c.fillRect(p.x - 9, p.y - 70, 18, 70); c.restore();
+      }
+    }
+    /* verschwundene Funde in Spielernähe: Flug zum HUD */
+    for (const [p, o] of PK_SEEN) if (!now.has(p)) { PK_SEEN.delete(p); if (o.near && pkFly.length < 24) { const tg = hudPoint(PK_TARGET[o.kind] || "gold"); if (tg) pkFly.push({ x0: o.x, y0: o.y, tx: tg[0] - cam.x, ty: tg[1] - cam.y, t: 0, dur: 0.45 + Math.random() * 0.15, col: o.col, big: o.kind === "item" || o.kind === "scroll" }); } }
+    if (PK_SEEN.size > 400) PK_SEEN.clear();
+  }
+  let pkT = 0;
+  function pkFlyDraw(c) {
+    const cam = Z.cam; const dt = Math.max(0, Math.min(0.05, G.time - pkT)); pkT = G.time;
+    if (pkFly.length) {
+      c.save(); c.globalCompositeOperation = "lighter";
+      for (let i = pkFly.length - 1; i >= 0; i--) {
+        const f = pkFly[i]; f.t += dt; const u = Math.min(1, f.t / f.dur), e = u * u * (3 - 2 * u);
+        /* Ziel folgt der Kamera (HUD ist fest am Bildschirm) */
+        const tx = cam.x + f.tx, ty = cam.y + f.ty, mx = (f.x0 + tx) / 2, my = Math.min(f.y0, ty) - 30;
+        const x = (1 - e) * (1 - e) * f.x0 + 2 * (1 - e) * e * mx + e * e * tx, y = (1 - e) * (1 - e) * f.y0 + 2 * (1 - e) * e * my + e * e * ty;
+        c.globalAlpha = 0.9 * (1 - u * 0.4); Z.draw.glow(c, x, y, f.big ? 9 : 5, f.col); c.globalAlpha = 1; c.fillStyle = "#fff6e0"; c.fillRect(x - 0.8, y - 0.8, 1.6, 1.6);
+        if (u >= 1) pkFly.splice(i, 1);
+      }
+      c.restore();
+    }
+  }
   let FG = 0; /* Zugluft der gerade gezeichneten Kerze */
   function flame(c, x, y, s, col) {
     if (Z.gq && Z.gq.level === 0) { /* Handheld: eine einfache Flamme ohne Schein */
@@ -2387,7 +2458,7 @@
     Z.drawMidLife && Z.drawMidLife(c, cam, t); mark("decor");
     drawDoors(c, t);
     Z.drawWorldProps && Z.drawWorldProps(c, t);
-    Z.drawPickups(c, t);
+    pickupBack(c, t); Z.drawPickups(c, t); pickupFront(c, t);
     Z.drawHazards(c, t);
     Z.drawParcours && Z.drawParcours(c, t); mark("misc");
     for (const e of Z.enemies) if (e.def.boss && e.def.shape === "demogorgon") Z.drawEnemy(c, e, t);
@@ -2404,6 +2475,7 @@
     fog(c, cam);
     const merged = lightPass(c, cam, W, H, -ox, -oy); mark("light");
     Z.drawAfterLight && Z.drawAfterLight(c, cam, W, H, t);
+    if (pkFly.length) pkFlyDraw(c); else pkT = G.time;
     /* Bildschirmblitz und Vignette */
     c.setTransform(1, 0, 0, 1, 0, 0);
     if (FX.flash > 0 && Z.settings.flashes) { c.globalAlpha = FX.flash * 0.6; c.fillStyle = FX.flashCol; c.fillRect(0, 0, W, H); c.globalAlpha = 1; }

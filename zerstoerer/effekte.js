@@ -688,8 +688,9 @@
     }
     if (gustOn) { const g = gustOn; g.t += dt; const u = g.t / g.dur, k = u >= 1 ? 0 : Math.sin(Math.PI * u) * (0.75 + 0.25 * Math.sin(g.t * 17));
       for (const d of g.list) d.gust = k;
+      { const P = Z.player; Z.zugWind = P && Math.floor((P.x + P.w / 2) / T / Z.CW) === g.cx && Math.floor((P.y + P.h / 2) / T / Z.CH) === g.cy ? k * 32 * ((g.cx + g.cy) % 2 ? 1 : -1) : 0; }
       if (u > 0.3 && u < 0.7 && rnd() < dt * 6) { const d = g.list[(rnd() * g.list.length) | 0]; if (d) FX.p({ x: d.x * T + 8, y: d.y * T + 2, vx: 14, vy: -12, life: 1, size: 2.5, col: "#9a8e84", kind: "smoke", a: 0.4 }); }
-      if (u >= 1) { for (const d of g.list) d.gust = 0; gustOn = null; } }
+      if (u >= 1) { for (const d of g.list) d.gust = 0; gustOn = null; Z.zugWind = 0; } }
   }
   function drawScenes(c) {
     const cam = Z.cam;
@@ -758,7 +759,7 @@
   let last = 0;
   function tick() {
     const now = performance.now(), dt = Math.min(0.05, last ? (now - last) / 1000 : 0.016); last = now;
-    if (Z.level !== lvRef) { lvRef = Z.level; act.clear(); SC.clear(); rats = []; books = []; gustOn = null; if (BI) { endCam(); BI = null; } }
+    if (Z.level !== lvRef) { lvRef = Z.level; act.clear(); SC.clear(); rats = []; books = []; gustOn = null; Z.zugWind = 0; if (BI) { endCam(); BI = null; } }
     if (Z.paused) return;
     hcd -= dt; scd -= dt;
     if (!off("umwelt") && FX.shake > 5 && scd <= 0 && Z.player) { scd = 0.7; const cam = Z.cam; for (let i = 0; i < 3; i++) dust(cam.x + rnd() * cam.w, Z.player.y, 2, 16); }

@@ -197,7 +197,15 @@
     /* Böen draußen kräftiger als drinnen; dazu sanftes Atmen des Stoffs */
     const outside = !!(Z.level && (Z.level.out || (Z.biome && Z.biome.open)));
     const gust = (Math.sin(P.time * 2.3) * 8 + Math.sin(P.time * 5.7 + 1) * 3 + Math.sin(P.time * 0.7) * 4) * (outside ? 1 : 0.45);
-    const wind = (Z.windX || 0) + gust;
+    /* W11 R17: Zugluft aus Schächten (effekte.js setzt Z.zugWind im Raum des Spielers) */
+    const wind = (Z.windX || 0) + gust + (Z.zugWind || 0);
+    /* W11 R17: Absprung reißt den Umhang nach unten, Landung lässt ihn nachsacken und kurz aufschlagen */
+    const airNow = !P.onGround;
+    if (P._capeAir !== undefined && airNow !== P._capeAir) {
+      const jump = airNow && P.vy < -150, land = !airNow && (P._capeVy || 0) > 250;
+      if (jump || land) for (let i = 1; i < CAPE_N; i++) { const f = i / CAPE_N, q = pts[i]; if (jump) q.oy -= 2.2 * f; else { q.oy -= 1.6 * f; q.ox += P.face * 1.2 * f; } }
+    }
+    P._capeAir = airNow; P._capeVy = P.vy;
     const damp = P.onGround ? 0.9 : 0.93;
     /* Fahrtwind-Flattern (Welle läuft den Umhang hinunter) und Ruck beim Zurechtschütteln */
     const spd = Math.min(1, Math.abs(P.vx) / 160) + (P.onGround ? 0 : Math.min(0.6, Math.abs(P.vy) / 600));
@@ -536,6 +544,39 @@
       WI.ang = Math.atan2(T.hFy, T.hFx) + (run ? 0.75 : 0.55);
     }
     if (DUAL[main.icon]) { WI.icon2 = main.icon; WI.ang2 = Math.atan2(T.hBy, T.hBx) + 0.6; }
+    if (!(Z.gfx.off && Z.gfx.off.haltung)) stance(T, P, main, run, time);
+  }
+  /* W11 R17: Haltung je Waffe in Ruhe und Lauf (nur am Boden, nicht geduckt/schauend) –
+     Zweihänder: breiter, schwerer Stand und vorgebeugter Lauf; Stangenwaffen: aufrecht neben sich, im Lauf gesenkt;
+     Dolche: tief, Klinge im Rückhandgriff; Rapier: En-garde mit erhobener hinterer Hand; Fäuste/Sicheln/Krallen:
+     Deckung mit federndem Wippen; Bogen: Bogen gesenkt, Sehnenhand an der Hüfte; Stab: aufgestützt. */
+  const POLE = { spear: 1, hellebarde: 1, kampfstab: 1, scythe: 1 };
+  function stance(T, P, d, run, time) {
+    if (!P.onGround || P.crouch || P.lookUp || P.lookDown || P.drinkT > 0 || (T.key !== "idle" && T.key !== "run")) return;
+    const ic = d.icon, idle = T.key === "idle", br = Math.sin(time * 2.2);
+    if (POLE[ic]) {
+      if (idle) { setH(T, "F", 1.25, -1.5); WI.ang = -1.62 + br * 0.02; T.lean = 0.02; }
+      else { setH(T, "F", 0.9, -1.1); WI.ang = -0.35; T.lean += 0.06; }
+    } else if (W2H[ic] && d.kind === "melee" && ic !== "staff" && ic !== "eiszapfen") {
+      if (idle) { T.fFx += 1; T.fBx -= 1; T.hy += 0.7; T.lean += 0.03; T.head = -0.05; }
+      else T.lean += 0.1;
+    } else if (ic === "dagger" || ic === "knives") {
+      if (idle) { T.hy += 1.3; T.fFx += 0.8; T.fBx -= 0.6; T.lean += 0.12; setH(T, "F", 0.55, -1.25); setH(T, "B", 0.75, -1.6); WI.ang = 1.9 + br * 0.04; }
+      else { T.lean += 0.1; WI.ang = 1.8; }
+    } else if (ic === "rapier") {
+      if (idle) { setH(T, "F", 0.2, -0.55); WI.ang = -0.22 + br * 0.03; setH(T, "B", -2.3, -1.1); T.fFx += 1.4; T.fBx -= 0.4; T.lean = -0.02; }
+    } else if (DUAL[ic]) {
+      const bob = idle ? Math.abs(Math.sin(time * 4.2)) * 0.6 : 0;
+      setH(T, "F", 0.35, -1.85); setH(T, "B", 0.15, -1.95); T.hy += 0.6 + bob; T.lean += 0.08;
+      if (idle) { T.fFx += 0.8; T.fBx -= 0.6; }
+      WI.ang = Math.atan2(T.hFy, T.hFx) - 0.4; if (WI.icon2) WI.ang2 = Math.atan2(T.hBy, T.hBx) - 0.4;
+    } else if (ic === "bow" || ic === "xbow") {
+      if (idle) { setH(T, "B", PI / 2 - 0.5, -0.9); T.lean = 0.0; }
+    } else if (ic === "staff" || ic === "eiszapfen") {
+      if (idle) { setH(T, "F", 0.95, -0.75); WI.ang = -1.6; T.lean = 0.0; }
+    } else if (d.kind === "melee") {
+      if (!idle) WI.ang = Math.atan2(T.hFy, T.hFx) + 1.0;
+    }
   }
 
   /* Nahkampf: Ausholen (Körper spannt sich), Schlag (Ausfallschritt), Nachschwung */
@@ -3778,4 +3819,69 @@
     else { c.rotate(-0.78); c.translate(-8, 0); weapon(c, icon, col || "#fff", 0); }
     c.restore();
   };
+})();
+
+/* Ezekiel – The Destroyer · Ezekiel: Ausrüstung, Treffer, Heilung (W11 Runde 17)
+   – Sichtbare Lauf-Ausrüstung aus den Segen: Schulterplatte (Panzer-Segen; Steinhaut = Steinplatte), Amulett an
+     einer Kette, dessen Stein die Farbe des zuletzt gewählten Segens trägt (Glaskanone rot, Erholung blutrot,
+     Kontrolle violett, Nutzen gold) und mit der Zahl der Segen größer wird.
+   – Treffer: kurzes helles Aufblitzen (warmweiß, dann rot), dazu ein paar Funken; die Rückstoß-Pose kommt aus dem Rig.
+   – Heilung: warmer, goldener Schimmer mit aufsteigenden Funken (nicht lean).
+   Alles nach dem Körper gezeichnet; Schalter Z.gfx.off.ezekiel2. */
+(function () {
+  const Z = window.Z, TAU = Math.PI * 2;
+  const KCOL = { glas: "#ff4a3a", heil: "#c0203a", cc: "#b070d0", nutz: "#ffd060", tank: "#d8c8a8" };
+  const st = new WeakMap(), LAST = { P: null, S: null, time: 0 };
+  Z.ezDbg = () => LAST.S && { hurt: LAST.S.hurt, heal: LAST.S.heal, same: LAST.P === Z.player };
+  const al0 = Z.drawAfterLight;
+  Z.drawAfterLight = function (c) {
+    if (al0) al0.apply(this, arguments);
+    const P = LAST.P, S = LAST.S; if (!P || !S || P !== Z.player || P.dead || (Z.gfx.off && Z.gfx.off.ezekiel2)) return;
+    const cx = P.x + P.w / 2;
+    if (S.hurt > 0) { const k = S.hurt / 0.28; c.save(); c.globalAlpha = 0.8 * k; Z.draw.glow(c, cx, P.y + P.h * 0.45, 14 + 8 * (1 - k), k > 0.5 ? "#fff0e0" : "#ff5a3a"); c.restore(); }
+    if (S.heal > 0) { const k = S.heal / 0.9, pu = 0.6 + 0.4 * Math.sin(LAST.time * 9); c.save(); c.globalAlpha = 0.5 * k * pu; Z.draw.glow(c, cx, P.y + P.h * 0.5, 20, "#ffc870"); c.restore(); }
+  };
+  const lean = () => !!(Z.gq && (Z.gq.lean || Z.gq.mini));
+  const d0 = Z.drawPlayer;
+  Z.drawPlayer = function (c, P, time) {
+    const r = d0.apply(this, arguments);
+    try { if (!(Z.gfx.off && Z.gfx.off.ezekiel2)) extras(c, P, time); } catch (e) { console.error(e); }
+    return r;
+  };
+  function extras(c, P, time) {
+    let S = st.get(P); if (!S) { S = { hp: P.hp, hurt: 0, heal: 0, lt: performance.now() / 1000, hurt0: 0 }; st.set(P, S); }
+    const nowR = performance.now() / 1000, dt = Math.max(0, Math.min(0.1, nowR - S.lt)); S.lt = nowR; /* Echtzeit: time läuft bei Zeitlupe/Trefferstopp anders */
+    const cx = P.x + P.w / 2, lo = lean();
+    if (((P.hurtT || 0) > 0 && !(S.hurt0 > 0)) || (P.hp < S.hp - 0.5 && S.hurt <= 0.05)) { S.hurt = 0.28; if (!lo) Z.fx.burst(cx, P.y + 12, 5, { col: ["#ffe8d8", "#ff6a4a"], sp: 70, life: 0.25, size: 1.6, kind: "spark", add: true }); }
+    S.hurt0 = P.hurtT || 0;
+    if (P.hp > S.hp + 0.5 && !P.dead) S.heal = 0.9;
+    S.hp = P.hp; S.hurt = Math.max(0, S.hurt - dt); S.heal = Math.max(0, S.heal - dt);
+    if (P.dead || P.invis > 0) return;
+    /* Ausrüstung */
+    const A = P.capeA, bl = P.bless || [];
+    if (A && bl.length && !(P.rollT > 0) && !P.climbing) {
+      const f = P.face || 1, nx = A.x + f * 2.5, ny = A.y;
+      let tank = false, stone = false, last = null;
+      for (const id of bl) { const b = Z.BLESS && Z.BLESS[id]; if (!b) continue; if (b.k === "tank") { tank = true; if (id === "steinhaut") stone = true; } else last = b.k; }
+      if (tank) { /* Schulterplatte über der vorderen Schulter */
+        const sx = nx + f * 0.6, sy = ny + 2.6;
+        c.fillStyle = stone ? "#5e574e" : "#45404a"; c.beginPath(); c.ellipse(sx, sy, 2.8, 1.9, f * -0.3, Math.PI, TAU); c.closePath(); c.fill();
+        c.fillStyle = stone ? "#8e8576" : "#8a8290"; c.beginPath(); c.ellipse(sx, sy - 0.5, 2.1, 0.9, f * -0.3, Math.PI, TAU); c.closePath(); c.fill();
+        c.fillStyle = stone ? "#3a352e" : "#26222a"; c.fillRect(sx - 2.8, sy - 0.2, 5.6, 0.6);
+      }
+      if (last) { /* Amulett an einer Kette, Stein in Segenfarbe */
+        const col = KCOL[last], ax = nx + f * 1.4, ay = ny + 6.2, rr = Math.min(1.5, 0.9 + bl.length * 0.15);
+        c.strokeStyle = "#b0905a"; c.lineWidth = 0.5; c.beginPath(); c.moveTo(nx - f * 1, ny + 1); c.quadraticCurveTo(ax - f * 0.5, ay - 1.5, ax, ay - rr); c.stroke();
+        c.fillStyle = "#c8a050"; c.beginPath(); c.arc(ax, ay, rr + 0.45, 0, TAU); c.fill();
+        c.fillStyle = col; c.beginPath(); c.arc(ax, ay, rr, 0, TAU); c.fill();
+        c.fillStyle = "rgba(255,255,240,.8)"; c.fillRect(ax - rr * 0.5, ay - rr * 0.6, 0.7, 0.7);
+        if (!lo) { c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = 0.35 + 0.15 * Math.sin(time * 3); Z.draw.glow(c, ax, ay, 4, col); c.restore(); }
+      }
+    }
+    /* Treffer-Blitz und Heil-Schimmer werden nach dem Licht gezeichnet (sonst schluckt die Dunkelheit sie) */
+    LAST.P = P; LAST.S = S; LAST.time = time;
+    if (S.heal > 0) {
+      if (!lo && Math.random() < 0.5) Z.fx.p({ x: cx + (Math.random() - 0.5) * 14, y: P.y + P.h - Math.random() * 8, vx: 0, vy: -30 - Math.random() * 20, life: 0.7, size: 1.3, col: Math.random() < 0.5 ? "#ffe0a0" : "#ffb060", kind: "glow", add: true });
+    }
+  }
 })();
