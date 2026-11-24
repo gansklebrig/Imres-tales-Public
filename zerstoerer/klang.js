@@ -121,7 +121,8 @@
     const b = A.buf[path]; if (!b) return null;
     const d = b.getChannelData(0), n = d.length, st = Math.max(1, Math.floor(n / 30000)); let s = 0, k = 0, pk = 1e-4;
     for (let i = 0; i < n; i += st) { s += d[i] * d[i]; k++; }
-    for (let i = 0; i < n; i++) { const v = d[i] < 0 ? -d[i] : d[i]; if (v > pk) pk = v; }
+    const ps = n > 200000 ? 5 : 1; /* lange Schleifen: Spitze grob abtasten (sonst Millisekunden-Spitze im Spiel) */
+    for (let i = 0; i < n; i += ps) { const v = d[i] < 0 ? -d[i] : d[i]; if (v > pk) pk = v; }
     const db = 10 * Math.log10(s / Math.max(1, k) + 1e-10);
     /* nie mehr anheben, als die Spitze verträgt (lang ausklingende Glocken haben wenig Effektivwert, aber einen harten Anschlag) */
     return (NORM[key] = clamp(Math.min(Math.pow(10, (target - db) / 20), 0.7 / pk), 0.25, 4));

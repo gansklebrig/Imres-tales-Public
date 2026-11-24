@@ -215,6 +215,10 @@
     /* Dämpfung bei wenig Leben / Pause: Tiefpass über allem */
     A.lp = c.createBiquadFilter(); A.lp.type = "lowpass"; A.lp.frequency.value = 20000;
     A.master.disconnect(); A.master.connect(A.lp); A.lp.connect(A.out);
+    /* Begrenzer am Ende der Kette (hart, −1,5 dBFS): der Kompressor davor (−14 dB, 4:1, weiches Knie) greift im Spiel kaum
+       (gemessen ≤ 0,3 dB); gegen seltene Spitzen aus vielen gleichzeitigen Treffern/Stingern schützt erst dieser */
+    A.lim = c.createDynamicsCompressor(); A.lim.threshold.value = -1.5; A.lim.knee.value = 0; A.lim.ratio.value = 20; A.lim.attack.value = 0.002; A.lim.release.value = 0.12;
+    A.out.disconnect(); A.out.connect(A.lim); A.lim.connect(c.destination);
     A.ok = true;
   };
   A.applyVol = () => { if (!A.ctx) return; A.master.gain.value = A.vol.master; A.sfx.gain.value = A.fxAn() ? A.vol.sfx : 0; A.mus.gain.value = A.musAn() ? A.vol.music : 0; A.amb.gain.value = A.fxAn() ? A.vol.amb : 0; };
