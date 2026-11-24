@@ -33,8 +33,36 @@
   };
   Z.PACTS = PACTS;
   const pact = id => !!(Z.run && Z.run.pacts && Z.run.pacts.includes(id));
-  Z.hasPact = pact;
+  /* W13 R16: Gebietsvariante „Fallengänge“ nutzt die Fallen-Regel des Pakts (welt.js trapDens) – nur für dieses Gebiet */
+  Z.hasPact = id => pact(id) || (id === "fallen" && varAktiv("fallen"));
   const npacts = () => (Z.run && Z.run.pacts ? Z.run.pacts.length : 0);
+  /* ======================= GEBIETSVARIANTEN (W13 R16) =======================
+     Selten (Vorschlag 18 % je Gebiet ab Stufe 1, höchstens 2 je Lauf, nie Torhof/Arena) bekommt ein Gebiet eine Variante mit eigener Regel,
+     Gefahr und besserer Beute (Beute wie ein Pakt mehr). Angekündigt beim Betreten. Werte als Vorschlag für Balance. */
+  const VARIANTEN = {
+    fallen: { n: ["Fallengänge", "Trapped Halls"], d: ["Doppelt so viele Fallen – und bessere Beute.", "Twice as many traps – and better loot."], ico: "⚠" },
+    brut: { n: ["Unruhige Brut", "Restless Brood"], d: ["Jeder siebte Gegner ist ein Elite-Gegner – und bessere Beute.", "One in seven enemies is an elite – and better loot."], ico: "☠", elite: 0.15 },
+    gold: { n: ["Goldader", "Gold Vein"], d: ["+60 % Gold, ein Goldgoblin treibt sich herum – aber Gegner treffen 15 % härter.", "+60% gold, a gold goblin roams about – but enemies hit 15% harder."], ico: "●", gold: 0.6, dmg: 1.15 }
+  };
+  const VAR = { chance: 0.18, max: 2 };
+  Z.VARIANTEN = VARIANTEN; Z.VARIANTE_OPT = VAR;
+  function varAktiv(k) { const v = Z.run && Z.run._var; if (!v || v.id !== k) return false; return Z.run._varLaden || (Z.level && Z.level.id === v.area); }
+  Z.gebietVariante = () => { const v = Z.run && Z.run._var; return v && Z.level && Z.level.id === v.area ? Object.assign({ id: v.id }, VARIANTEN[v.id]) : null; };
+  function varWahl(id) {
+    const run = Z.run; if (!run || !id || !Z.BIOMES || !Z.BIOMES[id] || id === "torhof" || (Z.BIOMES[id].tier || 0) < 1) { if (run) run._varLaden = false; return; }
+    if (run._var && run._var.area === id) { run._varLaden = true; return; } /* gleiches Gebiet erneut (z. B. Test) */
+    run._var = null; run._varLaden = false;
+    const erzwungen = Z.varianteErzwingen;
+    if (erzwungen || ((run._varN || 0) < VAR.max && Math.random() < VAR.chance)) {
+      const k = erzwungen && VARIANTEN[erzwungen] ? erzwungen : Z.R.pick(Object.keys(VARIANTEN));
+      run._var = { id: k, area: id }; run._varN = (run._varN || 0) + 1; run._varLaden = true;
+    }
+  }
+  function varAnsage() {
+    const run = Z.run; if (!run) return; run._varLaden = false;
+    const v = Z.gebietVariante(); if (!v) return;
+    setTimeout(() => { if (Z.gebietVariante() && Z.ui && Z.ui.notify) Z.ui.notify(v.ico + " <b>" + esc(L(v.n)) + "</b><br><small>" + esc(L(v.d)) + "</small>", { prio: 1, art: "gefahr", dauer: 5200, key: "variante" }); }, 3400);
+  }
 
   /* ======================= HELDEN & UMHÄNGE ======================= */
   const HEROES = {
@@ -197,6 +225,7 @@
     mk("erkunden", "e_rueck", ["Kein Weg zu weit", "No Road Too Far"], ["Den Rückweg in ein früheres Gebiet nutzen.", "Use the way back into an earlier area."], null, TT("Heimkehrer", "Homecomer")),
     mk("erkunden", "e_raetsel", ["Rätselmeister", "Puzzle Master"], ["Ein Hebelrätsel in einem Geheimraum lösen.", "Solve a lever puzzle in a secret room."], () => (X().raetsel || 0) >= 1, TT("Rätselmeister", "Puzzle Master")),
     mk("erkunden", "e_raetsel5", ["Schlossknacker", "Lockbreaker"], ["5 Hebelrätsel lösen (insgesamt).", "Solve 5 lever puzzles (total)."], () => (X().raetsel || 0) >= 5, TT("Schlossknacker", "Lockbreaker"), () => [X().raetsel || 0, 5]),
+    mk("erkunden", "e_variante", ["Wechselhafte Feste", "Shifting Keep"], ["Ein Gebiet mit besonderer Variante (Fallengänge, Unruhige Brut, Goldader) abschließen.", "Clear an area with a special variant (Trapped Halls, Restless Brood, Gold Vein)."], null, TT("Wetterfest", "Weatherproof")),
     mk("erkunden", "e_wunder", ["Staunender", "Wonderstruck"], ["3 verschiedene Wunder sehen.", "See 3 different wonders."], () => Z.wunder && Z.wunder.seen() >= 3, TT("Staunender", "the Wonderstruck"), () => [Z.wunder ? Z.wunder.seen() : 0, 3]),
     /* Sammeln & Lager */
     mk("sammeln", "s_palisade", ["Palisade", "Palisade"], ["Das Lager wächst zur Palisade.", "The camp grows to a palisade."], () => Z.lager && Z.lager.stage() >= 3, TT("Lagerhauptmann", "Camp Captain"), () => [Z.lager ? Z.lager.stage() : 0, 3]),
@@ -257,7 +286,7 @@
     k_umg: "zahnrad", k_leuchter: "glocke", k_serie15: "flamme", k_ueber: "auge", k_elite: "tod", k_meister: "sieg", nh_gebiet: "schild", nh_gebiet3: "schild", nh_lauf: "herz", nh_heil: "trank", nh_voll: "herz",
     e_geheim: "auge", e_geheim5: "truhe", e_geheim25: "auge", e_karte: "karte", e_gebiete: "karte", e_wucht: "zahnrad", e_morsch: "zahnrad", e_flut: "tor", e_kran: "zahnrad", e_rueck: "tor", e_wunder: "stern",
     s_palisade: "tor", s_banner: "krone", s_feste: "krone", s_bewohner: "herz", s_plus5: "flamme", s_segen3: "stern", s_gold: "muenze", s_waffen: "schwert", s_umhang: "faden",
-    f_fass: "zahnrad", f_tarzan: "glocke", f_pazifist: "herz", f_nass: "trank", f_goblin: "muenze", f_faust: "schwert", f_rennen: "sanduhr", e_raetsel: "zahnrad", e_raetsel5: "rune", b_mini: "tod", b_schaedel3: "schaedel", b_schaedel5: "schaedel", b_alle: "sieg" };
+    f_fass: "zahnrad", f_tarzan: "glocke", f_pazifist: "herz", f_nass: "trank", f_goblin: "muenze", f_faust: "schwert", f_rennen: "sanduhr", e_raetsel: "zahnrad", e_raetsel5: "rune", e_variante: "stern", b_mini: "tod", b_schaedel3: "schaedel", b_schaedel5: "schaedel", b_alle: "sieg" };
   function enrich() {
     for (const a of ACH) {
       a.kat = KATN[a.c] || "geschichte";
@@ -305,6 +334,7 @@
     if (fair && a.dmg <= 0 && a.t > 15) { give("nh_gebiet"); A2.nhAreas++; }
     if (fair && P.hp >= P.hpMax - 0.5) give("nh_voll");
     if (!a.kills) give("f_pazifist");
+    if (Z.run._var && Z.run._var.area === id) give("e_variante");
     const S2 = Z.erkundung && Z.erkundung();
     if (S2 && S2.lv === lv && S2.total > 0 && S2.found.size >= S2.total) { give("e_geheim"); X().gA = (X().gA || 0) + 1; }
     const need = Object.keys(lv.cells || {}).filter(k => lv.cells[k].kind !== "secret");
@@ -558,16 +588,18 @@
   Z.spawnEnemy = function (id, x, y, o) {
     o = o || {};
     if (pact("elite") && !o.elite && Z.R() < 0.25 && Z.ENEMIES[id] && !Z.ENEMIES[id].boss) o = Object.assign({}, o, { elite: true });
+    if (varAktiv("brut") && !o.elite && Z.R() < VARIANTEN.brut.elite && Z.ENEMIES[id] && !Z.ENEMIES[id].boss && !/^mb_/.test(id)) o = Object.assign({}, o, { elite: true });
     const e = spawn0(id, x, y, o);
     if (e && !e.def.boss) {
       if (pact("raserei")) e.def = Object.assign({}, e.def, { spd: (e.def.spd || 80) * 1.3 });
       if (pact("blutzoll")) e.dmgMul *= 1.5;
     }
     if (e && e.def.boss && pact("blutzoll")) e.dmgMul *= 1.25;
+    if (e && !e.def.boss && varAktiv("gold")) e.dmgMul *= VARIANTEN.gold.dmg;
     return e;
   };
   const roll0 = Z.rollItem;
-  Z.rollItem = function (o) { o = Object.assign({}, o || {}); const n = npacts(); if (n) { const r = (o.rar || [70, 24, 5, 1]).slice(); r[0] /= 1 + 0.35 * n; r[2] *= 1 + 0.2 * n; r[3] *= 1 + 0.25 * n; o.rar = r; } return roll0(o); };
+  Z.rollItem = function (o) { o = Object.assign({}, o || {}); const n = npacts() + (Z.gebietVariante() ? 1 : 0); /* Variante: Beute wie ein Pakt mehr */ if (n) { const r = (o.rar || [70, 24, 5, 1]).slice(); r[0] /= 1 + 0.35 * n; r[2] *= 1 + 0.2 * n; r[3] *= 1 + 0.25 * n; o.rar = r; } return roll0(o); };
 
   /* ======================= Laufender Lauf: Helden-Kräfte, Pakt-Wirkungen ======================= */
   let prev = null;
@@ -591,7 +623,7 @@
     if (h === "E" && !P.onGround && inp.held.jump && P.vy > 70 && !P.plunge && !P.climbing) { P.vy = 70; if (Math.random() < dt * 20) FX.p({ x: P.x + P.w / 2 + (Math.random() - 0.5) * 16, y: P.y + 6, vx: 0, vy: 20, life: 0.6, size: 2, col: "#e8e0d0", kind: "leaf", vr: 3 }); }
     if (h === "B") { prev.insp -= dt; if (prev.insp <= 0) { prev.insp = 12; P.st.dance = 4; FX.text(P.x + P.w / 2, P.y - 12, "♪ " + L(["Inspiration!", "Inspiration!"]), "#ffc24a", true); A.play("laugh", { vol: 0.3, rate: 1.3 }); FX.ring(P.x + P.w / 2, P.y + 12, 30, "#ffc24a", 0.4, 2); } }
     const dg = P.gold - prev.gold;
-    if (dg > 0) { if (h === "B") P.gold += Math.round(dg * 0.5); if (h === "E") Z.healPlayer(Math.max(1, dg * 0.08)); M().totalGold += dg; }
+    if (dg > 0) { if (varAktiv("gold")) P.gold += Math.round(dg * VARIANTEN.gold.gold); if (h === "B") P.gold += Math.round(dg * 0.5); if (h === "E") Z.healPlayer(Math.max(1, dg * 0.08)); M().totalGold += dg; }
     prev.gold = P.gold;
     const ds = P.shards - prev.shards; if (ds > 0 && npacts()) P.shards += Math.round(ds * 0.3 * npacts()); prev.shards = P.shards;
     for (const k of ["s1", "s2"]) { if (P.cd[k] > prev.cd[k] + 0.3 && pact("ungeduld")) P.cd[k] *= 1.5; prev.cd[k] = P.cd[k]; }
@@ -644,6 +676,7 @@
     if (Math.random() < 0.1 + 0.18 * run.sinceTrader || run.sinceTrader >= 3) { plan.push("haendler"); run.sinceTrader = 0; }
     if (Math.random() < 0.05 + 0.15 * run.sinceShrine || run.sinceShrine >= 4) { plan.push("schrein"); run.sinceShrine = 0; }
     for (let i = 0; i < n; i++) plan.push(Z.R.pick(kinds));
+    if (varAktiv("gold") && !plan.includes("dieb")) plan.push("dieb");
     for (const k of plan) {
       const p = spotFar(lv, lv.start, k === "haendler" ? 18 : 30); if (!p) continue;
       const x = p.x * T + 8, y = (p.y + 1) * T;
@@ -671,7 +704,7 @@
     if (lv.arena && Z.ARENAS[lv.arena] && Z.ARENAS[lv.arena].final && M().bonus.riss) lv.riftPending = true;
   }
   const load0 = Z.loadArea;
-  Z.loadArea = function (id) { const r = load0.apply(this, arguments); try { setupEvents(Z.level); } catch (err) { console.error(err); } return r; };
+  Z.loadArea = function (id) { try { varWahl(id); } catch (err) { console.error(err); } const r = load0.apply(this, arguments); try { varAnsage(); } catch (err) { console.error(err); } try { setupEvents(Z.level); } catch (err) { console.error(err); } return r; };
   (Z.rueckHooks = Z.rueckHooks || []).push({ id: "abenteuer", save: () => evs, load: s => { evs = s || []; Z.abEvents = evs; } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
   function near(ev, d) { const P = Z.player; return P && Math.abs(P.x + P.w / 2 - ev.x) < (d || 22) && Math.abs(P.y + P.h - ev.y) < 26; }
   function finish(ev) { ev.done = true; M().events = (M().events || 0) + 1; if (Z.run) Z.run.events++; Z.saveMeta(); }
@@ -832,6 +865,7 @@
   }
   function drawHelfer(c, t) {
     const a = helfer; if (!a || Z.level !== a.lv) return;
+    if (Z.helferGemalt && Z.helferGemalt(c, a, t, HELFER)) return; /* W11 R37 (Grafik): gemalte Fassung in effekte.js */
     const cx = a.x + a.w / 2, fy = a.y + a.h, left = HELFER.dauer - a.t;
     c.save(); if (left < 4 && Math.floor(t * 8) % 2) c.globalAlpha = 0.55;
     Z.drawNPC(c, "A", cx, fy, t * (Math.abs(a.vx) > 20 ? 3 : 1), a.face);

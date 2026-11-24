@@ -1894,3 +1894,234 @@
     for (const ev of Z.abEvents || []) { if (ev.k !== "fund" || ev.done) continue; if (cam && (ev.x < cam.x - 60 || ev.x > cam.x + cam.w + 60 || ev.y < cam.y - 40 || ev.y > cam.y + cam.h + 60)) continue; add(ev.x + 4, ev.y - 8, 30, "#ffc870", 0.3, 0); }
   });
 })();
+
+/* Ezekiel – The Destroyer · Schützen auf Simsen sofort erkennbar (W11 Runde 37; Aufstellung ebenen.js)
+   Erkannt wird jeder Fern-/Zaubergegner (def.ai ranged/caster, nicht fliegend), der an einer Simskante steht
+   (daneben Luft ohne Boden, wie in ebenen.js) – einmal je Gegner bestimmt (WeakMap).
+   Ab Stufe 1 (nicht lean/mini):
+   – Silhouette gegen den Hintergrund: weicher warmer Hof hinter der Figur (vor dem Gegner gezeichnet) und eine
+     dunkle Schlagschatten-Kante unter dem Sims; kleines Licht in der Lichtkarte, damit er nicht im Dunkel verschwindet;
+   – Zielblick, sobald er ins Bild kommt: Augen-/Zielglanz (Vierstrahlstern) und eine kurze, verblassende Visierlinie
+     zu Ezekiel (1,2 s, nach dem Licht, immer lesbar); danach dezentes Glimmen am Auge, bis er tot ist.
+   Kein Blau (Bernstein/Rot). Schalter Z.gfx.off.sims. */
+(function () {
+  const Z = window.Z, G = Z.gfx, TAU = Math.PI * 2, T = 16; if (!G) return;
+  const lean = () => !!(Z.gq && (Z.gq.lean || Z.gq.mini));
+  const lvl = () => (Z.gq ? Z.gq.level || 0 : 0);
+  const off = () => (G.off && G.off.sims) || lean() || lvl() < 1;
+  const INFO = new WeakMap();
+  function info(e) {
+    let s = INFO.get(e); if (s && s.lv === Z.level && Math.abs(e.x - s.px) < 24 && Math.abs(e.y - s.py) < 16) return s; /* neu prüfen, wenn er den Platz verlässt */
+    const seen = s && s.lv === Z.level ? s.seenT : -1;
+    const d = e.def || {}, lv = Z.level; let sims = false;
+    if (lv && (d.ai === "ranged" || d.ai === "caster") && !d.fly && !e.dead) {
+      const x = Math.floor((e.x + e.w / 2) / T), y = Math.floor((e.y + e.h - 1) / T);
+      if (lv.get(x, y + 1) !== 0) sims = [-2, -1, 1, 2].some(dx => lv.get(x + dx, y) === 0 && lv.get(x + dx, y + 1) === 0 && lv.get(x + dx, y + 2) === 0);
+    }
+    s = { lv, sims, seenT: seen, px: e.x, py: e.y }; INFO.set(e, s); return s;
+  }
+  const onScreen = (e, cam, m) => e.x + e.w > cam.x - m && e.x < cam.x + cam.w + m && e.y + e.h > cam.y - m && e.y < cam.y + cam.h + m;
+  const list = () => { const out = [], cam = Z.cam; if (!cam || !Z.enemies) return out; for (const e of Z.enemies) { if (e.dead || e.hidden > 0 || !onScreen(e, cam, 0)) continue; const s = info(e); if (s.sims) out.push([e, s]); } return out; };
+  const eye = e => [e.x + e.w / 2 + (e.face || 1) * e.w * 0.22, e.y + e.h * 0.22];
+  /* hinter der Figur: Hof + Kantenschatten (vor den Gegnern gezeichnet) */
+  const dp0 = Z.drawParcours;
+  Z.drawParcours = function (c, t) {
+    if (dp0) dp0.apply(this, arguments);
+    if (off()) return;
+    try {
+      const now = performance.now() / 1000;
+      for (const [e, s] of list()) {
+        if (s.seenT < 0) s.seenT = now;
+        const cx = e.x + e.w / 2, cy = e.y + e.h * 0.5, r = Math.max(e.w, e.h) * 1.25, a = 0.2 + 0.05 * Math.sin(now * 2 + cx);
+        const g = c.createRadialGradient(cx, cy, 1, cx, cy, r); g.addColorStop(0, "rgba(255,170,90," + a.toFixed(3) + ")"); g.addColorStop(0.6, "rgba(200,90,50," + (a * 0.45).toFixed(3) + ")"); g.addColorStop(1, "rgba(200,90,50,0)");
+        c.fillStyle = g; c.fillRect(cx - r, cy - r, r * 2, r * 2);
+        const fy = e.y + e.h; c.fillStyle = "rgba(10,6,6,.45)"; c.fillRect(cx - 14, fy, 28, 2.2); c.fillStyle = "rgba(255,200,140,.28)"; c.fillRect(cx - 12, fy - 0.6, 24, 0.6);
+      }
+    } catch (err) { console.error(err); }
+  };
+  /* nach dem Licht: Zielglanz, Visierlinie, Glimmen */
+  const al0 = Z.drawAfterLight;
+  Z.drawAfterLight = function (c) {
+    if (al0) al0.apply(this, arguments);
+    if (off()) return;
+    try {
+      const now = performance.now() / 1000, P = Z.player;
+      c.save(); c.globalCompositeOperation = "lighter";
+      for (const [e, s] of list()) {
+        const [ex, ey] = eye(e), u = s.seenT < 0 ? 1 : (now - s.seenT) / 1.2;
+        if (u < 1) {
+          const a = u < 0.15 ? u / 0.15 : 1 - (u - 0.15) / 0.85, R = 3 + 6 * a;
+          c.fillStyle = "rgba(255,220,150," + a.toFixed(3) + ")"; c.beginPath(); c.moveTo(ex, ey - R); c.lineTo(ex + 0.9, ey); c.lineTo(ex, ey + R); c.lineTo(ex - 0.9, ey); c.closePath(); c.fill(); c.fillRect(ex - R, ey - 0.45, R * 2, 0.9);
+          if (P) { const px = P.x + P.w / 2, py = P.y + P.h * 0.4, k = Math.min(1, u * 2.5); c.strokeStyle = "rgba(255,110,60," + (0.45 * a).toFixed(3) + ")"; c.lineWidth = 0.8; c.setLineDash([3, 3]); c.lineDashOffset = -now * 20; c.beginPath(); c.moveTo(ex, ey); c.lineTo(ex + (px - ex) * k, ey + (py - ey) * k); c.stroke(); c.setLineDash([]); }
+        }
+        const gl = 0.35 + 0.25 * Math.sin(now * 3 + ex * 0.1);
+        c.fillStyle = "rgba(255,150,80," + (gl * 0.35).toFixed(3) + ")"; c.beginPath(); c.arc(ex, ey, 2.4, 0, TAU); c.fill();
+        c.fillStyle = "rgba(255,210,150," + gl.toFixed(3) + ")"; c.fillRect(ex - 0.6, ey - 0.6, 1.2, 1.2);
+      }
+      c.restore();
+    } catch (err) { console.error(err); }
+  };
+  if (G.lightGather) G.lightGather.push(function (add) {
+    if (off()) return; let n = 0;
+    for (const [e] of list()) { if (n++ > 4) break; add(e.x + e.w / 2, e.y + e.h * 0.5, 34, "#ffb070", 0.32, 0); }
+  });
+  Z.simsDbg = dt => list().map(([e, s]) => { if (dt != null) s.seenT = performance.now() / 1000 - dt; return [e.def && e.def.n && e.def.n[0], Math.round(e.x), Math.round(e.y), s.seenT]; });
+})();
+
+/* Ezekiel – The Destroyer · Vorratsnischen hinter Nischen-Kisten (W11 Runde 37; Kisten mit p.nische aus abenteuer.js)
+   Kein Eingriff in fremde Dateien: Z.drawWorldProps wird umhüllt und die Nische VOR der ganzen bisherigen Kette
+   (also hinter den Kisten aus spiel.js) gemalt. Ab Stufe 1 (nicht lean/mini):
+   in die Rückwand eingelassene Bogennische (Steinrahmen mit Schlussstein, dunkle Tiefe mit Verlauf), Regalbrett auf
+   zwei Konsolen mit Vorräten (Krüge, Flaschen, Sack, Seilrolle, Kerzenstummel), Stroh am Boden; ab Stufe 2 brennt der
+   Kerzenstummel (Licht). Höhe richtet sich nach freier Luft (2–3 Kacheln). Schalter Z.gfx.off.nische. Kein Blau. */
+(function () {
+  const Z = window.Z, G = Z.gfx, TAU = Math.PI * 2, T = 16; if (!G) return;
+  const lean = () => !!(Z.gq && (Z.gq.lean || Z.gq.mini));
+  const lvl = () => (Z.gq ? Z.gq.level || 0 : 0);
+  const off = () => (G.off && G.off.nische) || lean() || lvl() < 1;
+  const hh = (a, b) => { const v = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return v - Math.floor(v); };
+  let cache = null;
+  function groups() {
+    const lv = Z.level; if (cache && cache.lv === lv && cache.n === Z.propsLive.length) return cache.g;
+    const ps = Z.propsLive.filter(p => p.nische).sort((a, b) => a.y - b.y || a.x - b.x), g = [];
+    for (const p of ps) { const last = g[g.length - 1]; if (last && last.y === p.y + 14 && p.x - last.x1 <= 18) last.x1 = p.x + p.w; else g.push({ x0: p.x, x1: p.x + p.w, y: p.y + 14 }); }
+    for (const q of g) { /* freie Höhe über dem Boden (Kacheln), 2–3 */
+      const ty = Math.round(q.y / T) - 1; let hTiles = 0;
+      for (let k = 0; k < 3; k++) { let free = true; for (let x = Math.floor((q.x0 - 6) / T); x <= Math.floor((q.x1 + 6) / T); x++) if (lv.get(x, ty - k) !== 0) free = false; if (!free) break; hTiles++; }
+      q.h = Math.max(1.6, hTiles) * T - 4; q.seed = q.x0 * 0.13 + q.y * 0.07;
+    }
+    cache = { lv, n: Z.propsLive.length, g }; return g;
+  }
+  function niche(c, q, now, rich) {
+    const x0 = q.x0 - 7, x1 = q.x1 + 7, w = x1 - x0, y = q.y, top = y - q.h, ar = Math.min(w / 2, 10), cx = (x0 + x1) / 2;
+    const path = (i) => { c.beginPath(); c.moveTo(x0 + i, y); c.lineTo(x0 + i, top + ar); c.quadraticCurveTo(x0 + i, top + i, cx, top + i); c.quadraticCurveTo(x1 - i, top + i, x1 - i, top + ar); c.lineTo(x1 - i, y); c.closePath(); };
+    /* Steinrahmen */
+    c.fillStyle = "#4a4240"; path(-3); c.fill();
+    c.strokeStyle = "rgba(20,14,12,.55)"; c.lineWidth = 0.7; c.beginPath(); for (let k = 0; k < 4; k++) { const yy = y - 6 - k * (q.h / 4); if (yy < top + ar) break; c.moveTo(x0 - 3, yy); c.lineTo(x0, yy); c.moveTo(x1, yy); c.lineTo(x1 + 3, yy); } c.stroke();
+    c.fillStyle = "#5e5452"; c.fillRect(cx - 2.5, top - 3.5, 5, 5); /* Schlussstein */
+    c.fillStyle = "rgba(255,235,210,.16)"; c.fillRect(x0 - 3, top + ar, 1, y - top - ar);
+    /* Tiefe */
+    const g = c.createLinearGradient(0, top, 0, y); g.addColorStop(0, "#120c0a"); g.addColorStop(1, "#2a1e18"); c.fillStyle = g; path(0); c.fill();
+    c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(x0, top + ar, 3, y - top - ar);
+    /* Regalbrett mit Konsolen */
+    const sy = Math.max(top + ar + 6, y - 22);
+    if (y - sy >= 14) {
+      c.fillStyle = "#3a2414"; c.fillRect(x0 + 2, sy + 1.5, 2, 4); c.fillRect(x1 - 4, sy + 1.5, 2, 4);
+      c.fillStyle = "#6a4426"; c.fillRect(x0 + 1, sy, w - 2, 2); c.fillStyle = "#8a5e34"; c.fillRect(x0 + 1, sy, w - 2, 0.6);
+      let xx = x0 + 3, i = 0;
+      while (xx < x1 - 6 && i < 8) { const k = hh(q.seed, i), item = (k * 5) | 0;
+        if (item === 0) { c.fillStyle = "#8a5a3a"; c.beginPath(); c.ellipse(xx + 2.2, sy - 2.6, 2.2, 2.6, 0, 0, TAU); c.fill(); c.fillStyle = "#5a3a22"; c.fillRect(xx + 1.2, sy - 6, 2, 1.2); xx += 6; }
+        else if (item === 1) { c.fillStyle = k > 0.1 ? "#3a5a2a" : "#6a2a2a"; c.fillRect(xx, sy - 5, 2, 5); c.fillRect(xx + 0.5, sy - 7, 1, 2); c.fillStyle = "rgba(255,240,210,.35)"; c.fillRect(xx + 0.3, sy - 4.5, 0.5, 3); xx += 4; }
+        else if (item === 2) { c.fillStyle = "#8a7a54"; c.beginPath(); c.ellipse(xx + 3, sy - 3, 3, 3.2, 0, 0, TAU); c.fill(); c.strokeStyle = "#4a3a22"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(xx + 2, sy - 6); c.lineTo(xx + 4, sy - 5.6); c.stroke(); xx += 7.5; }
+        else if (item === 3) { c.strokeStyle = "#a08050"; c.lineWidth = 1; c.beginPath(); c.ellipse(xx + 3, sy - 2, 2.8, 1.6, 0, 0, TAU); c.stroke(); c.beginPath(); c.ellipse(xx + 3, sy - 3.4, 2.2, 1.2, 0, 0, TAU); c.stroke(); xx += 7; }
+        else { c.fillStyle = "#e8dcc0"; c.fillRect(xx, sy - 3.5, 1.6, 3.5); c.fillStyle = "#5a4a3a"; c.fillRect(xx - 0.6, sy - 0.6, 2.8, 0.6);
+          if (rich) { const f = 1 + Math.sin(now * 11 + q.seed) * 0.15; c.fillStyle = "#ffb050"; c.beginPath(); c.moveTo(xx - 0.3, sy - 3.6); c.quadraticCurveTo(xx + 0.8, sy - 3.6 - 3.4 * f, xx + 1.9, sy - 3.6); c.fill(); c.fillStyle = "#fff0c0"; c.fillRect(xx + 0.5, sy - 4.6, 0.6, 0.9); q.candle = [xx + 0.8, sy - 5]; }
+          xx += 5; }
+        xx += 1; i++; }
+    }
+    /* Stroh am Boden */
+    c.strokeStyle = "rgba(200,170,90,.55)"; c.lineWidth = 0.5; c.beginPath();
+    for (let i = 0; i < 9; i++) { const sx = x0 + 1 + hh(q.seed, 20 + i) * (w - 2), a = (hh(q.seed, 30 + i) - 0.5) * 1.2; c.moveTo(sx, y - 0.3); c.lineTo(sx + Math.cos(a) * 3, y - 0.3 - Math.abs(Math.sin(a)) * 2); }
+    c.stroke();
+  }
+  const dwp0 = Z.drawWorldProps;
+  Z.drawWorldProps = function (c, t) {
+    if (!off()) try {
+      const cam = Z.cam, now = performance.now() / 1000, rich = lvl() >= 2;
+      for (const q of groups()) { if (q.x1 < cam.x - 40 || q.x0 > cam.x + cam.w + 40 || q.y < cam.y - 10 || q.y - 60 > cam.y + cam.h) continue; niche(c, q, now, rich); }
+    } catch (e) { console.error(e); }
+    if (dwp0) return dwp0.apply(this, arguments);
+  };
+  if (G.lightGather) G.lightGather.push(function (add, cam) {
+    if (off() || lvl() < 2) return;
+    for (const q of groups()) { if (!q.candle) continue; if (cam && (q.x1 < cam.x - 60 || q.x0 > cam.x + cam.w + 60)) continue; add(q.candle[0], q.candle[1], 26, "#ffb060", 0.35, 2); }
+  });
+  Z.nischeDbg = () => groups();
+})();
+
+/* Ezekiel – The Destroyer · Befreiter Gefangener als Mitkämpfer, gemalt (W11 Runde 37; Logik abenteuer.js HELFER,
+   Haken Z.helferGemalt in drawHelfer – eine Zeile). Ab Stufe 1 (nicht lean/mini – dort schlichte Fassung):
+   – Zieh-Effekt in den ersten 0,7 s: der Dolch blitzt (Glanzstern, Funken), kleiner Lichtring;
+   – Angriffspose: Ausfallschritt (Figur kippt nach vorn, rückt vor), Dolch sticht/schlägt mit Bogenspur (Sichel);
+   – geschmiedeter Dolch: Klinge mit Grat und Glanzkante, Parierstange, umwickelter Griff, Knauf;
+   – Bodenring in Grün-Gold (Verbündeter, vom Gegner unterscheidbar), ab Stufe 2 Licht;
+   – letzte 4 s: Flackern mit wachsendem Takt, aufsteigende Staubfunken (er „verblasst“);
+   – Nachteleportieren (Sprung > 60 px zwischen zwei Bildern): Rauchwolke an alter und neuer Stelle.
+   Kein Blau. Schalter Z.gfx.off.helfer. */
+(function () {
+  const Z = window.Z, G = Z.gfx, TAU = Math.PI * 2; if (!G) return;
+  const lean = () => !!(Z.gq && (Z.gq.lean || Z.gq.mini));
+  const lvl = () => (Z.gq ? Z.gq.level || 0 : 0);
+  const off = () => (G.off && G.off.helfer) || lean() || lvl() < 1;
+  const ST = new WeakMap(), puffs = []; let last = null;
+  function puff(x, y) { for (let i = 0; i < 7; i++) puffs.push({ x: x + (Math.random() - 0.5) * 14, y: y - Math.random() * 18, r: 3 + Math.random() * 3, vx: (Math.random() - 0.5) * 20, vy: -10 - Math.random() * 14, t0: performance.now() / 1000, life: 0.55 + Math.random() * 0.3 }); }
+  function dagger(c, len) {
+    c.fillStyle = "#3a2414"; c.fillRect(-1.1, 0, 2.2, 3.4); c.fillStyle = "#7a5a3a"; for (let i = 0; i < 3; i++) c.fillRect(-1.1, 0.4 + i * 1.1, 2.2, 0.5);
+    c.fillStyle = "#b08a4a"; c.beginPath(); c.arc(0, 4, 1.2, 0, TAU); c.fill();
+    c.fillStyle = "#8a6a3a"; c.fillRect(-2.8, -0.9, 5.6, 1.2);
+    c.fillStyle = "#b8b0a0"; c.beginPath(); c.moveTo(-1.2, -0.9); c.lineTo(1.2, -0.9); c.lineTo(0.5, -len + 1.5); c.lineTo(0, -len); c.lineTo(-0.5, -len + 1.5); c.closePath(); c.fill();
+    c.fillStyle = "#eae6dc"; c.fillRect(-0.15, -len + 2, 0.5, len - 3);
+  }
+  /* R37: vor den Gegnern verdeckten Gegner-Körper ihn (stand im Nahkampf genau auf dem Ziel) – deshalb hier nur merken
+     und erst in Z.drawBeforePlayer (nach den Gegnern, vor Ezekiel) malen */
+  let pend = null;
+  Z.helferGemalt = function (c, a, t, H) {
+    if (off()) return false;
+    pend = [a, t, H]; return true;
+  };
+  const bp0 = Z.drawBeforePlayer;
+  Z.drawBeforePlayer = function (c) {
+    if (bp0) bp0.apply(this, arguments);
+    const p = pend; pend = null; if (!p || off()) return;
+    paint(c, p[0], p[1], p[2]);
+  };
+  function paint(c, a, t, H) {
+    try {
+      const now = performance.now() / 1000, rich = lvl() >= 2;
+      let s = ST.get(a); if (!s) { s = { t0: now, px: a.x, py: a.y, lastSwing: 0 }; ST.set(a, s); }
+      if (Math.hypot(a.x - s.px, a.y - s.py) > 60) { puff(s.px + a.w / 2, s.py + a.h); puff(a.x + a.w / 2, a.y + a.h); }
+      s.px = a.x; s.py = a.y;
+      const cx = a.x + a.w / 2, fy = a.y + a.h, left = H.dauer - a.t, age = now - s.t0;
+      last = { x: cx, y: fy - 10, t: now };
+      /* Flackern in den letzten 4 s: Takt wird schneller */
+      let alpha = 1; if (left < 4) { const f = 4 + (4 - left) * 3; alpha = Math.sin(now * f * Math.PI) > 0 ? 1 : 0.4 + left * 0.08; }
+      /* Bodenring */
+      c.save(); c.globalAlpha = 0.55 * alpha; c.strokeStyle = "rgba(170,220,120,.8)"; c.lineWidth = 0.8; c.beginPath(); c.ellipse(cx, fy - 0.3, 8 + Math.sin(now * 3) * 0.6, 1.8, 0, 0, TAU); c.stroke();
+      c.strokeStyle = "rgba(255,210,120,.5)"; c.beginPath(); c.ellipse(cx, fy - 0.3, 5.5, 1.1, 0, 0, TAU); c.stroke(); c.restore();
+      /* Figur mit Ausfallschritt */
+      const sw = a.swing, lunge = sw > 0 ? Math.sin(Math.min(1, (1 - sw) * 1.4) * Math.PI) : 0;
+      c.save(); c.globalAlpha = alpha;
+      c.translate(cx + a.face * lunge * 3, fy); c.rotate(a.face * lunge * 0.14); c.translate(-cx, -fy);
+      Z.drawNPC(c, "A", cx, fy, t * (Math.abs(a.vx) > 20 ? 3 : 1), a.face);
+      /* Dolch in der Hand: Ruhe schräg vorn, Hieb von oben nach vorn-unten */
+      const hx = cx + a.face * 5, hy = fy - 12;
+      const ang = sw > 0 ? (-1.9 + (1 - sw) * 3.2) : 0.55 + Math.sin(now * 2.2) * 0.05;
+      c.translate(hx, hy); c.scale(a.face, 1); c.rotate(ang); dagger(c, 10); c.restore();
+      /* Hiebspur */
+      if (sw > 0.05) { c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = sw * alpha; c.translate(hx, hy); c.scale(a.face, 1);
+        c.fillStyle = "rgba(255,235,190,.6)"; c.beginPath(); c.arc(0, 0, 13, -1.9, -1.9 + (1 - sw) * 3.2); c.arc(0, 0, 9, -1.9 + (1 - sw) * 3.2, -1.9, true); c.closePath(); c.fill(); c.restore(); }
+      /* Zieh-Effekt */
+      if (age < 0.7) { const u = age / 0.7, A2 = Math.sin(u * Math.PI); c.save(); c.globalCompositeOperation = "lighter";
+        const gx = hx + a.face * 2, gy = hy - 8, R = 2 + 6 * A2; c.fillStyle = "rgba(255,245,215," + A2.toFixed(2) + ")"; c.beginPath(); c.moveTo(gx, gy - R); c.lineTo(gx + 0.8, gy); c.lineTo(gx, gy + R); c.lineTo(gx - 0.8, gy); c.closePath(); c.fill(); c.fillRect(gx - R, gy - 0.4, R * 2, 0.8);
+        c.strokeStyle = "rgba(255,220,150," + (1 - u).toFixed(2) + ")"; c.lineWidth = 1; c.beginPath(); c.ellipse(cx, fy - 10, 6 + u * 14, 8 + u * 16, 0, 0, TAU); c.stroke(); c.restore(); }
+      /* Verblassen: Staubfunken */
+      if (left < 4 && rich) { c.save(); c.globalCompositeOperation = "lighter"; for (let i = 0; i < 6; i++) { const u = (now * 0.8 + i / 6) % 1, x = cx + Math.sin(i * 2.3 + now) * 6, y = fy - 4 - u * 26; c.fillStyle = "rgba(230,220,170," + ((1 - u) * 0.7).toFixed(2) + ")"; c.fillRect(x - 0.5, y - 0.5, 1, 1); } c.restore(); }
+    } catch (e) { console.error(e); }
+  }
+  /* Rauchwolken (auch wenn er gerade verschwunden ist) */
+  const dp0 = Z.drawParcours;
+  Z.drawParcours = function (c, t) {
+    if (dp0) dp0.apply(this, arguments);
+    if (!puffs.length) return;
+    const now = performance.now() / 1000;
+    for (let i = puffs.length - 1; i >= 0; i--) { const p = puffs[i], u = (now - p.t0) / p.life; if (u >= 1) { puffs.splice(i, 1); continue; }
+      const x = p.x + p.vx * u * p.life, y = p.y + p.vy * u * p.life, r = p.r * (1 + u * 1.6), a = (1 - u) * 0.75;
+      c.fillStyle = "rgba(60,50,46," + (a * 0.6).toFixed(3) + ")"; c.beginPath(); c.arc(x + 0.8, y + 0.8, r, 0, TAU); c.fill();
+      c.fillStyle = "rgba(170,158,140," + a.toFixed(3) + ")"; c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill();
+      c.fillStyle = "rgba(220,210,190," + (a * 0.5).toFixed(3) + ")"; c.beginPath(); c.arc(x - r * 0.3, y - r * 0.3, r * 0.45, 0, TAU); c.fill(); }
+  };
+  if (G.lightGather) G.lightGather.push(function (add) {
+    if (off() || lvl() < 2 || !last || performance.now() / 1000 - last.t > 0.25) return;
+    add(last.x, last.y, 30, "#e0f0a0", 0.25, 0);
+  });
+})();
