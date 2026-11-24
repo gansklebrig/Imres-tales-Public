@@ -1983,6 +1983,7 @@
     props = []; lvRef = lv; SPR.clear();
     if (!lv || lv.hub || lv.arena || lv.passage || !lv.cells) return;
     const set = SETS[lv.biome]; if (!set) return;
+    try { if (Z.gfx && Z.gfx.prepTiles && Z.level === lv) Z.gfx.prepTiles(); } catch (e) { console.error(e); } /* W11 R44: Fenster-/Arena-Öffnungen schon bei der Platzierung kennen – Wandschmuck (Banner, Wappen, Schilde, Laternen) nie frei vor dem Fenster */
     const R = Z.Rng(((lv.seed || 4) * 9301 + 49297) >>> 0);
     const g = lv.get, sky = (x, y) => Z.gfx.sky && Z.gfx.sky[y * lv.W + x];
     const sp = Z.spuren ? Z.spuren() : [];

@@ -611,6 +611,7 @@
         const len = 32 + (d.s || 0) * 20; w.cd -= dt;
         for (const b of bs) if (w.cd <= 0 && Math.abs(b.vx) > 40 && b.x < px + 3 && b.x + b.w > px - 3 && b.y < py - 16 + len && b.y + b.h > py - 10) { w.va += clamp(b.vx * 0.0025, -0.8, 0.8); w.cd = 0.4; if (Math.abs(b.vx) > 100) A.play("chain", { vol: 0.07, rate: 1.4 + rnd() * 0.3, x: px, gap: 0.2 }); }
       }
+      if (w.kind === "banner" && Z.gfx.bannerOk && !Z.gfx.bannerOk(d)) { w.a = 0; w.va = 0; if (w.hid) { w.hid = false; d.kind = w.kind; } continue; } /* W11 R44: unpassende Banner schwingen nie ins Bild */
       const om = w.kind === "chain" ? 2.3 : 3.1, dm = w.kind === "chain" ? 0.7 : 1.6;
       w.va += (-w.a * om * om - w.va * dm) * dt; w.va = clamp(w.va, -1.6, 1.6); w.a = clamp(w.a + w.va * dt, -0.6, 0.6);
       const act = Math.abs(w.a) > 0.004 || Math.abs(w.va) > 0.02;
@@ -974,6 +975,7 @@
     const pts = []; for (let k = 0; k <= 4; k++) pts.push([px + w / 2 + sway(k), y + (k / 4) * h + lift(k)]);
     const tipL = [px - w / 2 + Math.sin(t * 2 + d.x) * 2 * wind + sw(4), y + h + lift(4)], mid = [px + sway(3) * 0.5 + sw(3) * 0.5, y + h - 5 + lift(3)];
     const shape = () => { c.beginPath(); c.moveTo(px - w / 2, y); for (const q of pts) c.lineTo(q[0], q[1]); c.lineTo(mid[0], mid[1]); c.lineTo(tipL[0], tipL[1]); c.closePath(); };
+    if (Z.gfx.bannerMount) Z.gfx.bannerMount(c, px, y, shape, rich()); /* W11 R44 */
     c.fillStyle = col; shape(); c.fill();
     c.save(); shape(); c.clip();
     c.fillStyle = "rgba(0,0,0,.22)"; for (let k = 0; k < 3; k++) { const fx = px - w / 2 + 2 + k * 3.6 + Math.sin(t * 2 + d.x + k) * 0.8 + sw(2) * 0.5; c.fillRect(fx, y, 1.3, h); }

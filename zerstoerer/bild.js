@@ -1673,8 +1673,9 @@
       if (FANCY[d.kind] && fancyOn()) { drawFancy(c, d, px, py, t); continue; }
       /* Handheld minimal (Runde 15): Ketten und Banner als schlichte Formen statt Glied für Glied */
       if (miniD && (d.kind === "chain" || d.kind === "banner")) {
+        if (d.kind === "banner" && !G.bannerOk(d)) continue; /* W11 R44 */
         if (d.kind === "chain") { const len = 32 + (d.s || 0) * 20, sw = Math.sin(t * 1.1 + d.x) * 2; c.strokeStyle = "#3a3430"; c.lineWidth = 1.4; c.beginPath(); c.moveTo(px, py - 16); c.lineTo(px + sw, py - 16 + len); c.stroke(); }
-        else { const y = py - 31; c.fillStyle = "#3a2a1a"; c.fillRect(px - 7, y - 1, 14, 1.6); c.fillStyle = B.bg === "storm" ? "#2e3a24" : "#7a1a20"; c.beginPath(); c.moveTo(px - 5.5, y); c.lineTo(px + 5.5, y); c.lineTo(px + 5.5, y + 22); c.lineTo(px, y + 18); c.lineTo(px - 5.5, y + 22); c.fill(); }
+        else { const y = py - 31; c.fillStyle = "#1e1a18"; c.fillRect(px - 1.5, y - 7, 3, 3); c.fillStyle = "#3a2a1a"; c.fillRect(px - 0.4, y - 5, 0.8, 4); /* W11 R44: Haken */ c.fillStyle = "#3a2a1a"; c.fillRect(px - 7, y - 1, 14, 1.6); c.fillStyle = B.bg === "storm" ? "#2e3a24" : "#7a1a20"; c.beginPath(); c.moveTo(px - 5.5, y); c.lineTo(px + 5.5, y); c.lineTo(px + 5.5, y + 22); c.lineTo(px, y + 18); c.lineTo(px - 5.5, y + 22); c.fill(); }
         continue;
       }
       switch (d.kind) {
@@ -1749,7 +1750,7 @@
           c.fillStyle = "rgba(255,230,180,.35)"; c.fillRect(lx - 3.4, ly + 0.4, 6.8, 0.4);
           D.glow(c, lx, ly + 3.5, 18, "rgba(255,180,90,.4)"); break; }
         case "banner": { /* Wappenbanner: Stange mit Knäufen, Borte, Stickerei, Schwalbenschwanz und Quasten */
-          if (lv.out && G.sky && G.sky[Math.max(0, d.y - 2) * lv.W + d.x] && G.sky[Math.max(0, d.y - 3) * lv.W + d.x] && !(lv.get(d.x - 1, d.y - 2) === 1 || lv.get(d.x + 1, d.y - 2) === 1)) break; /* R22: nicht frei im Himmel */
+          if (!G.bannerOk(d)) break; /* W11 R44: fest je Karte, nur an echter Wand (ersetzt R22-Himmelsprüfung) */
           /* d.swing (optional, Bogenmaß, etwa −0,6 … 0,6): Auslenkung durch einen Stoß – siehe Kopfkommentar „Schwingen“ */
           const w = 11, h = 24, y = py - 31, wind = (Z.windX || 0) / 20 + 1, a = +d.swing || 0;
           const col = B.bg === "spires" ? "#4a1a1a" : B.bg === "storm" ? "#2e3a24" : B.bg === "halls" ? "#8a1a22" : "#7a1a20";
@@ -1759,6 +1760,7 @@
           const pts = []; for (let k = 0; k <= 4; k++) pts.push([px + w / 2 + sway(k), y + (k / 4) * h + lift(k)]);
           const tipL = [px - w / 2 + Math.sin(t * 2 + d.x) * 2 * wind + sw(4), y + h + lift(4)], mid = [px + sway(3) * 0.5 + sw(3) * 0.5, y + h - 5 + lift(3)];
           const shape = () => { c.beginPath(); c.moveTo(px - w / 2, y); for (const q of pts) c.lineTo(q[0], q[1]); c.lineTo(mid[0], mid[1]); c.lineTo(tipL[0], tipL[1]); c.closePath(); };
+          G.bannerMount(c, px, y, shape, lq() >= 1 && !(Z.gq && Z.gq.lean)); /* W11 R44: Wandhaken + Schatten */
           c.fillStyle = col; shape(); c.fill();
           /* Faltenschatten */
           c.save(); shape(); c.clip();
@@ -2080,6 +2082,73 @@
   /* Flamme: Hof, äußere Zunge, Kern und weißer Docht – alles additiv */
   /* frei sichtbarer Hintergrund (Himmel, Fenster, Arena): dort gibt es keine Wand für Wandschmuck */
   G.isOpen = (x, y) => { if (!lv || x < 0 || y < 0 || x >= lv.W || y >= lv.H) return false; const i = y * lv.W + x; return !!((G.sky && G.sky[i]) || (PR && (PR.win[i] || PR.clear[i]))); };
+  /* W11 R44: Wandbanner fest und nur dort, wo sie passen. Vorher: bild.js versteckte Banner vor Himmel nur über eine
+     schwache Himmelsprüfung (nicht Fenster/Arena), weltspuren.js malte schwingende Banner (Treffer, Explosionen) ganz ohne
+     Prüfung – darum tauchten sie im Kampf frei vor dem Himmel auf und verschwanden, sobald sie ausgependelt waren.
+     Jetzt einmal je Karte (Cache je Vorberechnung PR, Ergebnis unabhängig von Kamera, Zeit, Stufe): Fläche hinter Haken,
+     Stange und Tuch (3×4 Kacheln) ist echte Wand (kein Himmel/Fenster/Arena-Öffnung, keine Leiter/Plattform), der Rand
+     (5×6) höchstens zu einem Drittel offen; nicht bei Türen, Hebeln, Schlüsseln, Schätzen, Ösen, Abkürzungen, anderem
+     Wandschmuck. Steht der Platz vor einer Öffnung, rückt das Banner (wie Fackeln) an den nächsten Mauerpfeiler (≤ 6).
+     Mindestabstand 14×7 Kacheln; fester Seed je Gebiet+Position lässt rund 60 % stehen. Lager (hub) ist von Hand gesetzt
+     und bleibt. Schalter Z.gfx.off.bannerfix (alte Prüfung), Prüfhilfe Z.gfx.bannerDbg(), Z.gfx.bannerReset(). */
+  let BOK = null, BOKpr = null, BOKlv = null;
+  function bannerScan() {
+    BOK = new Set(); BOKpr = PR; BOKlv = lv;
+    const W = lv.W, get = lv.get, seed = (lv.seed | 0) ^ ((B && B.bg ? B.bg.length * 7919 : 0));
+    const marks = [];
+    for (const k of ["doors", "feats", "specials", "rewards", "runeGates", "rings", "abkuerzungen", "secretsList", "loot"]) { const a = lv[k]; if (Array.isArray(a)) for (const o of a) { const y = o && (o.y != null ? o.y : o.y1 != null ? o.y1 : o.y0); if (o && o.x != null && y != null && o.x < W) { marks.push({ x: o.x, y }); if (o.y0 != null && o.y0 !== y) marks.push({ x: o.x, y: o.y0 }); } } }
+    for (const o of lv.props || []) if (o && o.x != null && o.y != null) marks.push(o);
+    const list = (lv.decor || []).filter(d => d.kind === "banner" || d.kind === "_ws_banner").sort((a, b) => a.x - b.x || a.y - b.y);
+    const walls = (lv.decor || []).filter(d => d.kind !== "banner" && d.kind !== "_ws_banner" && d.kind !== "chain"); /* anderer Wandschmuck */
+    try { if (Z.ausstattung) for (const p of Z.ausstattung()) if (p.wall) walls.push(p); } catch (e) { }
+    const kept = [];
+    for (const d of list) {
+      if (lv.hub) { BOK.add(d); continue; }
+      /* Stelle prüfen: Haken, Stange, Tuch (3×4 Kacheln) vor Wand, Rand höchstens teilweise offen, keine Leiter */
+      const fits = (cx, cy) => {
+        if (cx < 2 || cy < 4 || cx >= W - 2 || cy >= lv.H - 2) return "rand";
+        if (get(cx, cy) !== 0) return "kachel";
+        let n = 0;
+        for (let dy = -4; dy <= 1; dy++) for (let dx = -2; dx <= 2; dx++) {
+          const x = cx + dx, y = cy + dy, v = get(x, y), inner = Math.abs(dx) <= 1 && dy >= -3 && dy <= 0, op = G.isOpen(x, y);
+          if (inner && op) return "offen"; /* Himmel, Fenster, Arena-Öffnung hinter Haken, Stange, Tuch */
+          if (v === 4 && dy >= -3) return "leiter";
+          if (inner && v !== 0 && v !== 1 && v !== 7) return "kachel"; /* Plattform, Flüssigkeit, Gefahr hinter dem Tuch */
+          if (!inner && op) n++;
+        }
+        if (n > 6) return "splitter"; /* nur ein Wandsplitter zwischen Öffnungen */
+        for (const o of marks) if (Math.abs(o.x - cx) < 4 && Math.abs(o.y - cy) < 4) return "ereignis";
+        for (const o of walls) if (o !== d && Math.abs(o.x - cx) < 3 && Math.abs(o.y - cy) < 3) return "wandschmuck";
+        return "";
+      };
+      /* wie Fackeln: liegt der Platz vor einer Öffnung, rückt das Banner an den nächsten Mauerpfeiler (≤ 6 Kacheln) */
+      let why = fits(d.x, d.y), nx = d.x;
+      if (why === "offen" || why === "splitter") for (let k = 1; k <= 6; k++) { const a = fits(d.x - k, d.y), b2 = fits(d.x + k, d.y); if (!a || !b2) { nx = !a ? d.x - k : d.x + k; why = ""; break; } }
+      let ok = !why;
+      if (ok) for (const k of kept) if (Math.abs(k.x - nx) < 14 && Math.abs(k.y - d.y) < 7) { ok = false; why = "abstand"; break; }
+      if (ok && hash((d._bx0 != null ? d._bx0 : d.x) * 13 + seed, d.y * 7 + 3) > 0.6) { ok = false; why = "seltener"; } /* seltener, aber fest je Karte */
+      if (ok && nx !== d.x) { d._bx0 = d._bx0 == null ? d.x : d._bx0; d.x = nx; }
+      d._bw = why || "ok";
+      if (ok) { BOK.add(d); kept.push(d); }
+    }
+  }
+  G.bannerOk = d => {
+    if (!lv) return false;
+    if (G.off && G.off.bannerfix) return !(lv.out && G.sky && G.sky[Math.max(0, d.y - 2) * lv.W + d.x] && G.sky[Math.max(0, d.y - 3) * lv.W + d.x] && !(lv.get(d.x - 1, d.y - 2) === 1 || lv.get(d.x + 1, d.y - 2) === 1));
+    if (!PR || PR.W !== lv.W || PR.H !== lv.H) prep();
+    if (BOKpr !== PR || BOKlv !== lv || !BOK) bannerScan();
+    return BOK.has(d);
+  };
+  G.bannerReset = () => { for (const d of (lv && lv.decor) || []) if (d._bx0 != null) { d.x = d._bx0; delete d._bx0; } BOK = null; };
+  G.bannerDbg = () => { const all = (lv && lv.decor || []).filter(d => d.kind === "banner" || d.kind === "_ws_banner"); return { alle: all.length, sichtbar: all.filter(G.bannerOk).length, pos: all.map(d => [d.x, d.y, G.bannerOk(d) ? 1 : 0, d._bw]) }; };
+  /* W11 R44: sichtbare Befestigung – eiserner Wandhaken mit Platte und Niet, Kordel zu den Knäufen, ab Stufe 1 Schatten des
+     Tuchs auf der Wand (shape = Umriss des Tuchs). Stufe 0/lean nur Haken. */
+  G.bannerMount = (c, px, y, shape, rich) => {
+    if (rich && shape) { c.save(); c.translate(1.4, 1.8); c.fillStyle = "rgba(12,6,8,.3)"; shape(); c.fill(); c.restore(); }
+    c.fillStyle = "#1e1a18"; c.fillRect(px - 1.6, y - 8.4, 3.2, 3.4); c.fillStyle = "#4a423c"; c.fillRect(px - 1.6, y - 8.4, 3.2, 0.6);
+    c.strokeStyle = "#2a2522"; c.lineWidth = 0.7; c.beginPath(); c.arc(px, y - 5.2, 1.1, 0, Math.PI); c.stroke();
+    c.fillStyle = "#8a7a6a"; c.fillRect(px - 0.4, y - 7.4, 0.8, 0.8);
+  };
   /* ======================= BEUTE (W11 R17) =======================
      Vor den Fundstücken (geschosse.js): Bodenschein in Seltenheitsfarbe, bei Legendärem langsam kreisende Strahlen.
      Danach: Gold glitzert (Sternfunkeln), Funde ab „Selten“ und Schriftrollen/Splitter steigen Lichtfunken auf,

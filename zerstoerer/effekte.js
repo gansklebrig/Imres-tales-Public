@@ -1299,6 +1299,8 @@
     try {
       if (window.Z.texte && window.Z.texte.an()) return r; /* R43: der Text-Verwalter ordnet beim Zeichnen */
       const L = FX.texts, n = L[L.length - 1]; if (!n) return r;
+      /* W17 Alarm (Schalter texte aus): gleicher Ruf („Alarm!“, „?!“, „!“) dicht neben einem noch lebenden gleichen → nicht stapeln, weglassen */
+      if ((n.txt === "Alarm!" || n.txt === "?!" || n.txt === "!") && n.t === 0) { for (let i = 0; i < L.length - 1; i++) { const o = L[i]; if (o.txt === n.txt && o.t < o.life * 0.8 && Math.abs(o.x - n.x) < 60 && Math.abs(o.y - n.y) < 40) { L.pop(); return r; } } }
       const cm = window.Z.cam, dir = cm && n.y - cm.y < 40 ? 1 : -1; /* am oberen Bildrand nach unten stapeln */
           for (let k = 0; k < 4; k++) { let hit = false; for (let i = 0; i < L.length - 1; i++) { const o = L[i]; if (o.t < o.life * 0.8 && Math.abs(o.x - n.x) < (n.big || o.big ? 60 : 24) && Math.abs(o.y - n.y) < (n.big || o.big ? 12 : 8)) { n.y = o.y + dir * (n.big || o.big ? 13 : 9); hit = true; } } if (!hit) break; }
     } catch (_) {}
@@ -2361,9 +2363,9 @@
           o._v += n._v; o.txt = (n._c === "heil" ? "+" : n._c === "dmgP" ? "-" : "") + o._v; o.t = Math.min(o.t, 0.1); o.vy = Math.min(o.vy, n.vy * 0.6);
           o._bump = 0.16; o.big = o.big || n.big; if (n.big && o._pr < 3) o._pr = 3; L.pop(); return r;
         }
-        if (o.txt === n.txt && Math.abs(o.x - n.x) < 150 && Math.abs(o.y - n.y) < 90) {
+        if ((o._base || o.txt) === n.txt && Math.abs(o.x - n.x) < 150 && Math.abs(o.y - n.y) < 90) { /* W17 Alarm: _base – nach „Alarm! ×2“ passte der nächste Ruf nicht mehr und legte einen zweiten Text an */
           o._n = (o._n || 1) + 1; o.t = Math.min(o.t, 0.15);
-          if (s === "Alarm!") o.txt = s + " ×" + o._n;
+          if (s === "Alarm!") { o._base = s; o.txt = s + " ×" + o._n; }
           L.pop(); return r;
         }
       }

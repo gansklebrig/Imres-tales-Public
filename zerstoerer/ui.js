@@ -205,7 +205,7 @@
     const html0 = it ? null : o.type === "obj" && o.o.cardHTML ? (typeof o.o.cardHTML === "function" ? o.o.cardHTML() : o.o.cardHTML) : null;
     if ((!it && !html0) || ui.choiceActive) { card.hidden = true; return; }
     const foot = cardFoot(o, it || {});
-    const ck = (it ? it.uid + "|" + (it.plus || 0) + "|" + (it.runes || []).join(",") : html0) + "|" + foot;
+    const ck = (it ? it.uid + "|" + (it.plus || 0) + "|" + (it.runes || []).join(",") : html0) + "|" + foot + (ui.kampfNah ? "|k" : ""); /* W11 R44: Größe neu messen, wenn die Karte im Kampf einklappt */
     if (card.dataset.uid !== ck) { card.innerHTML = (it ? itemCardHTML(it, true) : html0) + foot; card.dataset.uid = ck; }
     const ax = o.type === "obj" ? o.o.x : o.p.x, ay = o.type === "obj" ? o.o.y - (o.o.h || 30) - 10 : o.p.y - 40;
     const [sx, sy] = worldToScreen(ax, ay);
@@ -405,7 +405,33 @@
     noteShow(n);
     return n.el;
   };
+  /* W11 R44 (nur Optik): Kampf in der Nähe – ein aufmerksamer Gegner nahe Ezekiel (≈ 17×10 Kacheln) – lässt Meldungen,
+     Weltmeldungen („Geheimnis 1/7“), Fundkarte und Herausforderungstafel zurücktreten: kleiner, blasser, ohne Zusatzzeile,
+     Weltmeldungen rücken über die Köpfe. An sofort, aus 1,2 s nach dem letzten Treffer der Prüfung. body.kampfnah. */
+  const knCss = document.createElement("style");
+  knCss.textContent = [
+    "#meldungen{transition:opacity .25s,transform .3s}body.kampfnah #meldungen{opacity:.5;transform:translateX(-50%) scale(.82);transform-origin:50% 0}body.kampfnah #meldungen.gedimmt{opacity:.16}",
+    "body.kampfnah #meldungen small{display:none}",
+    "body.kampfnah #card{opacity:.78}body.kampfnah #card>p,body.kampfnah #card>ul,body.kampfnah #card>.ic-tasten{display:none}",
+    "body.kampfnah #hfzeile.an{opacity:.42}body.kampfnah #hfzeile .hz small,body.kampfnah #hfzeile .hw{display:none}",
+    "body.kampfnah .weltmeldung{opacity:.55}body.kampfnah .weltmeldung small{display:none}"
+  ].join("\n");
+  document.head.appendChild(knCss);
+  let knT = 0, knChk = 0; ui.kampfNah = false;
+  function kampfNahTick(dt) {
+    knChk -= dt; if (knChk > 0) return; knChk = 0.15;
+    const P = Z.player; let hit = false;
+    if (P && !P.dead && Z.level && !Z.level.hub && !(G_off() && G_off().kampfnah)) {
+      const px = P.x + P.w / 2, py = P.y + P.h / 2;
+      for (const e of Z.enemies || []) if (!e.dead && e.aware && Math.abs(e.x + (e.w || 0) / 2 - px) < 270 && Math.abs(e.y + (e.h || 0) / 2 - py) < 160) { hit = true; break; }
+    }
+    knT = hit ? 1.2 : Math.max(0, knT - 0.15);
+    const on = knT > 0;
+    if (on !== ui.kampfNah) { ui.kampfNah = on; document.body.classList.toggle("kampfnah", on); }
+  }
+  const G_off = () => Z.gfx && Z.gfx.off;
   function noteTick(dt) {
+    try { kampfNahTick(dt); } catch (e) { console.error(e); } /* W11 R44 */
     if (ui.verdeckt) dt = 0; /* Kapitelseite liegt darüber: Meldungen warten */
     if (ui._bpLeft > 0) { ui._bpLeft -= dt; if (ui._bpLeft <= 0) document.body.classList.remove("bossplatte"); } /* W11 R25: Boss-Titelband (nur Lage) */
     /* großer Gebietsname (Banner) sichtbar: Stimmungs-/Info-Meldungen warten unsichtbar, Antworten (prio 3) bleiben */
@@ -421,7 +447,8 @@
     for (const w of worldNotes.slice()) {
       w.t += dt;
       if (w.t >= w.dur || w.lv !== Z.level) { worldNotes = worldNotes.filter(x => x !== w); w.el.style.opacity = "0"; setTimeout(() => w.el.remove(), 420); continue; }
-      placeAt(w.el, w.x, w.y, -16 - w.t * 8);
+      w.kn = (w.kn || 0) + ((ui.kampfNah ? 1 : 0) - (w.kn || 0)) * Math.min(1, dt * 6); /* W11 R44: im Kampf über die Köpfe */
+      placeAt(w.el, w.x, w.y, -16 - w.t * 8 - w.kn * 52);
       w.el.style.opacity = w.t > w.dur - 0.5 ? "0" : "";
     }
   }

@@ -71,9 +71,11 @@
         let any = false;
         for (const o of Z.enemies) {
           if (o === e || o.dead || o.aware || o.def.boss) continue;
-          if (Math.abs(o.x - e.x) < 170 && Math.abs(o.y - e.y) < 90) { any = true; setTimeout(() => { if (o.dead) return; if (o.sleep) { if (Math.random() < 0.6) wake(o, false); } else { o.aware = true; o.alertT = 0.2; FX.text(o.x + o.w / 2, o.y - 10, "?!", "#e8c890"); } }, 300 + Math.random() * 400); }
+          if (Math.abs(o.x - e.x) < 170 && Math.abs(o.y - e.y) < 90) { any = true; const lv0 = Z.level; setTimeout(() => { if (o.dead || Z.level !== lv0) return; if (o.sleep) { if (Math.random() < 0.6) wake(o, false); } else if (!o.aware) { o.aware = true; o.alertT = 0.2; o.called = true; if (Z.enemyAlarmText) Z.enemyAlarmText(o, "?!", "#e8c890", 10); else FX.text(o.x + o.w / 2, o.y - 10, "?!", "#e8c890"); } }, 300 + Math.random() * 400); }
         }
-        if (any) { FX.text(e.x + e.w / 2, e.y - 14, L(["Alarm!", "Alarm!"]), "#ff8a6a"); A.play(e.def.undead ? "undead" : "monster", { vol: 0.3, x: e.x, rate: 0.85 }); }
+        /* W17 Alarm: Zeitgeber nur im selben Gebiet und nur für noch Ahnungslose; Gerufene rufen nicht weiter (called, wie gegner.js pendAl –
+           vorher rief jeder Gerufene selbst wieder: Kettenalarm); „Alarm!“/„?!“ über gegner.js Z.enemyAlarmText (einmal je Phase, nur im Bild/mit Sicht) */
+        if (any) { if (Z.enemyAlarmText) Z.enemyAlarmText(e, L(["Alarm!", "Alarm!"]), "#ff8a6a", 14); else FX.text(e.x + e.w / 2, e.y - 14, L(["Alarm!", "Alarm!"]), "#ff8a6a"); A.play(e.def.undead ? "undead" : "monster", { vol: 0.3, x: e.x, rate: 0.85 }); }
       }
     }
   };
