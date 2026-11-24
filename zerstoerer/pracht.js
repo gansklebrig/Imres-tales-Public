@@ -1485,10 +1485,122 @@
       }
     }
   }
+  /* ---------- Übergänge (Runde 9): Torbögen in den Durchgängen zwischen Räumen, Schwellen am Boden ----------
+     Wo zwei Räume seitlich verbunden sind und die Öffnung eine Decke hat, wird auf der Rückwand ein gemauerter
+     Bogen mit Pfeilern und Schlussstein gemalt, dahinter ein Hauch Tiefe; am Boden liegt eine abgetretene Schwelle.
+     Der Lichtschein aus dem Nachbarraum kommt aus dem Modul „Übergangslicht“ (Z.durchgaenge). */
+  let dwLv = null, dwList = null;
+  function doorways(lv) {
+    if (dwLv === lv && dwList) return dwList; dwLv = lv; dwList = [];
+    if (!lv || !lv.cells || lv.hub || lv.arena) return dwList;
+    const CW = Z.CW, CH = Z.CH, g = (x, y) => lv.get(x, y), air = v => v === 0 || v === 4 || v === 10 || v === 12, solid = v => v === 1 || v === 7, stand = v => v === 1 || v === 7 || v === 2 || v === 8;
+    for (const k in lv.cells) {
+      const c = lv.cells[k], nk = (c.x + 1) + "," + c.y; if (!lv.cells[nk]) continue;
+      const bx = (c.x + 1) * CW, ry = c.y * CH;
+      let y = ry;
+      while (y < ry + CH) {
+        if (!(air(g(bx - 1, y)) && air(g(bx, y)))) { y++; continue; }
+        let y1 = y; while (y1 + 1 < ry + CH && air(g(bx - 1, y1 + 1)) && air(g(bx, y1 + 1))) y1++;
+        const h = y1 - y + 1;
+        if (h >= 2 && h <= 7 && solid(g(bx, y - 1)) && solid(g(bx - 1, y - 1)) && (stand(g(bx, y1 + 1)) || stand(g(bx - 1, y1 + 1))))
+          dwList.push({ x: bx, top: y, bot: y1, a: lv.roomFns ? lv.roomFns[k] || null : null, b: lv.roomFns ? lv.roomFns[nk] || null : null });
+        y = y1 + 1;
+      }
+    }
+    return dwList;
+  }
+  Z.durchgaenge = () => doorways(Z.level);
+  function arches(H) {
+    const { c, x0, x1, y0, y1, T, PAL, lv, h3 } = H;
+    for (const d of doorways(lv)) {
+      if (d.x < x0 - 3 || d.x > x1 + 3 || d.bot < y0 - 2 || d.top > y1 + 2) continue;
+      if (!H.isWall(d.x, d.top) && !H.isWall(d.x - 1, d.top)) continue;
+      const px = d.x * T, top = d.top * T, bot = (d.bot + 1) * T, hw = 22, ar = Math.min(hw, (bot - top) * 0.45), cy = top + ar + 3;
+      H.setCR(px - hw - 8, top - 6, hw * 2 + 16, bot - top + 8);
+      /* Tiefe des Durchgangs */
+      const g = c.createLinearGradient(0, top, 0, bot); g.addColorStop(0, "rgba(0,0,0,.42)"); g.addColorStop(1, "rgba(0,0,0,.18)"); c.fillStyle = g;
+      c.beginPath(); c.moveTo(px - hw, bot); c.lineTo(px - hw, cy); c.arc(px, cy, hw, Math.PI, 0); c.lineTo(px + hw, bot); c.fill();
+      /* Pfeiler mit Sockel und Kämpfer */
+      for (const sd of [-1, 1]) {
+        const ex = px + sd * (hw + 3);
+        c.fillStyle = "rgba(0,0,0,.3)"; c.fillRect(ex - 3 + sd * 1.5, cy, 6, bot - cy);
+        c.fillStyle = PAL.stone; c.fillRect(ex - 3, cy, 6, bot - cy); c.fillStyle = sd < 0 ? PAL.stoneHi : "rgba(0,0,0,.22)"; c.fillRect(ex - 3, cy, 1, bot - cy);
+        c.fillStyle = "rgba(0,0,0,.28)"; for (let yy = cy + 7; yy < bot - 3; yy += 8) c.fillRect(ex - 3, yy, 6, 0.7);
+        c.fillStyle = H.lit(H.B.wall, 0.14); c.fillRect(ex - 4.5, cy - 2, 9, 2.4); c.fillRect(ex - 4.5, bot - 3, 9, 3);
+      }
+      /* Bogensteine mit Schlussstein */
+      const n = 9;
+      for (let k = 0; k < n; k++) {
+        const a0 = Math.PI + k / n * Math.PI, a1 = Math.PI + (k + 1) / n * Math.PI, ri = hw, ro = hw + 6 + (k === (n >> 1) ? 2.5 : 0);
+        c.fillStyle = k === (n >> 1) ? H.lit(PAL.stone, 0.08) : (k % 2 ? PAL.stone : H.lit(PAL.stone, -0.05));
+        c.beginPath(); c.arc(px, cy, ro, a0 + 0.02, a1 - 0.02); c.arc(px, cy, ri, a1 - 0.02, a0 + 0.02, true); c.closePath(); c.fill();
+      }
+      c.strokeStyle = PAL.stoneHi; c.lineWidth = 0.7; c.beginPath(); c.arc(px, cy, hw + 6, Math.PI * 1.04, Math.PI * 1.45); c.stroke();
+      c.strokeStyle = "rgba(0,0,0,.35)"; c.lineWidth = 0.6; c.beginPath(); c.arc(px, cy, hw, Math.PI, 0); c.stroke();
+      /* Zeichen über dem Durchgang, wenn der Nachbarraum eine Funktion hat */
+      const fn = d.b || d.a; if (fn && h3(d.x, d.top, 1800) < 0.5) { c.fillStyle = "rgba(255,230,190,.14)"; c.beginPath(); c.arc(px, cy - hw - 3, 1.6, 0, TAU); c.fill(); }
+    }
+  }
+  /* Schwelle am Boden des Durchgangs: abgetretene Steinplatte mit glatter Mitte */
+  function thresholds(H) {
+    const { c, x0, x1, y0, y1, T, PAL, lv } = H;
+    for (const d of doorways(lv)) {
+      const fy = d.bot + 1; if (d.x < x0 - 3 || d.x > x1 + 3 || fy < y0 - 1 || fy > y1 + 1) continue;
+      const px = d.x * T, py = fy * T; H.setCR(px - 30, py - 4, 60, 10);
+      c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(px - 24, py + 2.4, 48, 1.2);
+      c.fillStyle = H.lit(PAL.stone, 0.05); c.fillRect(px - 24, py - 1, 48, 3.6);
+      c.fillStyle = PAL.stoneHi; c.fillRect(px - 24, py - 1, 48, 0.7);
+      const g = c.createLinearGradient(px - 24, 0, px + 24, 0); g.addColorStop(0, "rgba(255,240,220,0)"); g.addColorStop(0.5, "rgba(255,240,220,.16)"); g.addColorStop(1, "rgba(255,240,220,0)"); c.fillStyle = g; c.fillRect(px - 24, py - 0.6, 48, 1.6);
+      c.fillStyle = "rgba(0,0,0,.25)"; for (const ex of [px - 12, px + 9]) c.fillRect(ex, py - 1, 0.6, 3.6);
+    }
+  }
+  /* ---------- Abnutzung, Pfützen, Wandflecken (Runde 9; alles im Chunk-Cache) ---------- */
+  const WET = { cellar: 1, dungeon: 1, lake: 1, harbour: 1, storm: 1, chasm: 0.5 };
+  const STAIN = { cellar: ["rgba(236,232,220,", "salpeter"], dungeon: ["rgba(60,80,40,", "moder"], lake: ["rgba(60,110,70,", "algen"], harbour: ["rgba(230,226,210,", "salz"], castle: ["rgba(20,16,12,", "wasser"],
+    halls: ["rgba(20,14,10,", "wasser"], belltower: ["rgba(236,230,220,", "kalk"], forge: ["rgba(10,8,6,", "russ"], embercity: ["rgba(10,8,6,", "russ"], spires: ["rgba(10,8,6,", "russ"], ramparts: ["rgba(40,50,30,", "wasser"], storm: ["rgba(40,60,30,", "moder"], chasm: ["rgba(60,40,70,", "moder"] };
+  function wearAndPuddles(H) {
+    const { c, x0, x1, y0, y1, T, B, lv, h3, sol, PAL } = H, wet = WET[B.bg] || 0;
+    for (let y = y0; y <= y1; y++) for (let x = x0; x < x1; x++) {
+      if (!H.inLv(x, y) || !sol(x, y) || sol(x, y - 1) || lv.get(x, y - 1) !== 0) continue;
+      const px = x * T, py = y * T, ck = lv.cells && lv.cells[Math.floor(x / Z.CW) + "," + Math.floor(y / Z.CH)], main = ck && ck.kind === "path";
+      /* Laufbahn: auf dem Hauptweg glatt getretene, leicht glänzende Oberkante */
+      if (main && sol(x - 1, y) && sol(x + 1, y) && !sol(x - 1, y - 1) && !sol(x + 1, y - 1)) {
+        c.fillStyle = "rgba(255,240,220,.07)"; c.fillRect(px, py + 0.2, T, 1.2); c.fillStyle = "rgba(0,0,0,.08)"; c.fillRect(px, py + 1.6, T, 1);
+        if (h3(x, y, 1810) < 0.3) { c.fillStyle = "rgba(0,0,0,.12)"; c.beginPath(); c.ellipse(px + 4 + h3(x, y, 1811) * 8, py + 0.6, 2.2, 0.5, 0, 0, TAU); c.fill(); }
+      }
+      /* Pfützen in feuchten Gebieten: flache Mulden mit dunklem Wasser, Spiegelglanz und Randlicht */
+      if (wet && h3(x, y, 1820) < 0.035 * wet && sol(x + 1, y) && sol(x + 2, y) && lv.get(x + 1, y - 1) === 0 && lv.get(x + 2, y - 1) === 0 && sol(x - 1, y)) {
+        const cx = px + 24, w2 = 14 + h3(x, y, 1821) * 8; H.setCR(cx - w2 - 2, py - 2, w2 * 2 + 4, 5);
+        c.fillStyle = B.bg === "lake" ? "rgba(14,34,26,.85)" : "rgba(20,24,20,.8)"; c.beginPath(); c.ellipse(cx, py + 0.8, w2, 1.6, 0, 0, TAU); c.fill();
+        const g = c.createLinearGradient(cx - w2, 0, cx + w2, 0); g.addColorStop(0, "rgba(220,230,210,0)"); g.addColorStop(0.4, "rgba(220,230,210,.22)"); g.addColorStop(0.6, "rgba(220,230,210,.08)"); g.addColorStop(1, "rgba(220,230,210,0)"); c.fillStyle = g; c.fillRect(cx - w2, py + 0.1, w2 * 2, 0.9);
+        c.strokeStyle = "rgba(255,240,220,.12)"; c.lineWidth = 0.4; c.beginPath(); c.ellipse(cx, py + 0.8, w2, 1.6, 0, Math.PI * 1.05, Math.PI * 1.9); c.stroke();
+        c.fillStyle = "rgba(0,0,0,.18)"; c.fillRect(cx - w2 - 1, py + 2.2, w2 * 2 + 2, 1);
+      }
+    }
+    /* Trittspuren auf Steinstufen (v 8): ausgetretene Mitte, polierte Kante */
+    for (let y = y0; y <= y1; y++) for (let x = x0; x < x1; x++) {
+      if (lv.get(x, y) !== 8) continue; const px = x * T, py = y * T;
+      c.fillStyle = "rgba(0,0,0,.14)"; c.beginPath(); c.ellipse(px + 8, py + 1.2, 5, 0.9, 0, 0, TAU); c.fill();
+      c.fillStyle = "rgba(255,240,220,.16)"; c.fillRect(px + 1, py, T - 2, 0.6);
+    }
+  }
+  function stains(H) {
+    const { c, x0, x1, y0, y1, T, B, h3, isWall, sol } = H, st = STAIN[B.bg]; if (!st) return;
+    for (let y = y0 - 1; y < y1 + 1; y++) for (let x = x0 - 1; x < x1 + 1; x++) {
+      if (!isWall(x, y) || !sol(x, y - 1) || h3(x, y, 1830) > 0.07) continue;
+      /* Fleck läuft von der Decke herab: Fahne mit ausgefranstem Rand, je Gebiet andere Farbe */
+      const px = x * T + h3(x, y, 1831) * 10, py = y * T, len = 14 + h3(x, y, 1832) * 34, wd = 4 + h3(x, y, 1833) * 8, a = st[1] === "salpeter" || st[1] === "salz" || st[1] === "kalk" ? 0.16 : 0.2;
+      H.setCR(px - wd, py, wd * 3, len + 4);
+      const g = c.createLinearGradient(0, py, 0, py + len); g.addColorStop(0, st[0] + a + ")"); g.addColorStop(1, st[0] + "0)"); c.fillStyle = g;
+      c.beginPath(); c.moveTo(px - wd * 0.6, py); c.quadraticCurveTo(px - wd, py + len * 0.5, px - wd * 0.3, py + len); c.lineTo(px + wd * 0.4, py + len * 0.8); c.quadraticCurveTo(px + wd, py + len * 0.4, px + wd * 0.7, py); c.fill();
+      if (st[1] === "salpeter" || st[1] === "salz" || st[1] === "kalk") { c.fillStyle = st[0] + ".25)"; for (let k = 0; k < 8; k++) c.fillRect(px - wd * 0.6 + h3(x, y, 1840 + k) * wd * 1.4, py + h3(x, y, 1850 + k) * len * 0.7, 1 + h3(x, y, 1860 + k), 0.7); }
+      if (st[1] === "algen" || st[1] === "moder") { c.fillStyle = st[0] + ".3)"; for (let k = 0; k < 5; k++) c.fillRect(px - 1 + (h3(x, y, 1870 + k) - 0.5) * wd, py, 0.7, 3 + h3(x, y, 1880 + k) * len * 0.6); }
+    }
+  }
   G.tileHooks.push(function (k, H) {
     if (Z.gfx.off && Z.gfx.off.steinmetz) return;
     const P = Z.gfx.stProf, t0 = P ? performance.now() : 0;
-    if (k === "wall") wall(H); else if (k === "rock") rock(H); else if (k === "fix") { floorBits(H); fix(H); }
+    if (k === "wall") { wall(H); if (!(Z.gfx.off && Z.gfx.off.textur)) { stains(H); arches(H); } } else if (k === "rock") rock(H); else if (k === "fix") { floorBits(H); fix(H); if (!(Z.gfx.off && Z.gfx.off.textur)) { wearAndPuddles(H); thresholds(H); } }
     if (P) { H.c.getImageData(0, 0, 1, 1); P[k] = (P[k] || 0) + performance.now() - t0; }
   });
 })();
@@ -2157,48 +2269,54 @@
   Z.raumlichter = () => list();
 })();
 
-/* Ezekiel – The Destroyer · Randlicht auf Figuren (Grafik-Runde 8, ab Stufe 2)
-   Ezekiel und die Gegner bekommen an der Seite, die einer starken Lichtquelle zugewandt ist, eine feine Lichtkante in
-   deren Farbe (Fackel orange, Kristall violett, Mond silbrig …). Technik: die Figur wird zusätzlich in eine kleine
-   Maske gezeichnet, eingefärbt und um ein Stück vom Licht weg verschoben wieder ausgestanzt – übrig bleibt der
-   beleuchtete Rand, der additiv aufgelegt wird. Lichter aus dem letzten Bild (G.lightQ). Höchstens 8 Figuren je
-   Bild, Bosse ausgenommen. Stufe 0/1 und Handheld unverändert. */
+/* Ezekiel – The Destroyer · Randlicht auf Figuren (Grafik-Runde 8, ab Stufe 2; Runde 9 günstiger)
+   Ezekiel und die nächsten Gegner bekommen an der Seite, die einer starken Lichtquelle zugewandt ist, eine feine
+   Lichtkante in deren Farbe (Fackel orange, Kristall violett, Mond silbrig …). Technik: die Figur wird zusätzlich in
+   eine kleine Maske (halbe Auflösung) gezeichnet, eingefärbt und um ein Stück vom Licht weg verschoben wieder
+   ausgestanzt – übrig bleibt der beleuchtete Rand, der nach dem Lichtdurchgang additiv aufgelegt wird. Lichter aus dem
+   letzten Bild (G.lightQ). Die Maske wird nur jedes zweite Bild neu gezeichnet (dazwischen mit der Figur verschoben).
+   Stufe 2: Ezekiel + 1 nächster Gegner, Stufe 3: + 3. Bosse ausgenommen. Stufe 0/1 und Handheld unverändert. */
 (function () {
   "use strict";
   const Z = window.Z, G = Z.gfx;
-  const on = () => { const q = Z.gq; if (q && q.lean) return false; if (G.off && G.off.rim) return false; return G.lq ? G.lq() >= 2 : true; };
-  const POOL = [], pend = []; let budget = 0, frame = -1, depth = 0;
+  const lvl = () => { const q = Z.gq; if (q && q.lean) return 0; if (G.off && G.off.rim) return 0; return G.lq ? G.lq() : 2; };
+  const CACHE = new WeakMap(), pend = []; let frame = -1, depth = 0, pick = null;
   function best(cx, cy) {
-    if (!G.lightQ) return null; const Q = G.lightQ(), n = G.lightQn(); let b = null, bs = 0.06;
-    for (let i = 0; i < n; i++) { const q = Q[i], dx = q.x - cx, dy = q.y - cy, d = Math.sqrt(dx * dx + dy * dy); const reach = q.r * 1.5; if (d < 18 || d > reach) continue; const s = q.a * (1 - d / reach); if (s > bs) { bs = s; b = q; b._d = d; b._dx = dx; b._dy = dy; b._s = s; } }
-    return b;
+    if (!G.lightQ) return null; const Q = G.lightQ(), n = G.lightQn(); let b = null, bs = 0.06, bd = 0, bdx = 0, bdy = 0;
+    for (let i = 0; i < n; i++) { const q = Q[i], dx = q.x - cx, dy = q.y - cy, d = Math.sqrt(dx * dx + dy * dy); const reach = q.r * 1.5; if (d < 18 || d > reach) continue; const s = q.a * (1 - d / reach); if (s > bs) { bs = s; b = q; bd = d; bdx = dx; bdy = dy; } }
+    return b ? { c: b.c, d: bd, dx: bdx, dy: bdy, s: bs } : null;
   }
-  /* Phase 1: Maske bauen (ruft die Zeichnung zuerst in die Maske – so laufen Zeitschritte von Umhang und Gesten im
-     ersten Aufruf, der sichtbare zweite Aufruf zeigt denselben Zustand); Phase 2 nach dem echten Zeichnen auflegen */
+  function newFrame() {
+    if (frame === G.frame) return; frame = G.frame; pend.length = 0;
+    /* die nächsten Gegner um Ezekiel (Stufe 2: einer, Stufe 3: drei) */
+    const P = Z.player, n = lvl() >= 3 ? 3 : 1; pick = new Set();
+    if (!P) return;
+    const arr = []; for (const e of Z.enemies || []) { if (e.dead || (e.def && e.def.boss) || e.disguise) continue; const d = Math.abs(e.x - P.x) + Math.abs(e.y - P.y); if (d < 420) arr.push([d, e]); }
+    arr.sort((a, b) => a[0] - b[0]); for (let i = 0; i < Math.min(n, arr.length); i++) pick.add(arr[i][1]);
+  }
   function rimMask(orig, c, ent, time, x0, y0, w, h) {
-    const cx = x0 + w / 2, cy = y0 + h / 2, L = best(cx, cy); if (!L) return null;
     const m = c.getTransform(); if (Math.abs(m.b) > 1e-6 || Math.abs(m.c) > 1e-6) return null;
-    /* Maske in halber Auflösung (die Kante ist weich genug, spart drei Viertel der Pixel) */
+    let E = CACHE.get(ent);
+    /* jedes zweite Bild: alte Maske mit der Figur mitschieben, nicht neu zeichnen */
+    if (E && E.ok && G.frame - E.f === 1 && Math.abs(E.s - m.a) < 1e-6) { E.sx = Math.floor(m.a * x0 + m.e); E.sy = Math.floor(m.d * y0 + m.f); return E; }
+    const L = best(x0 + w / 2, y0 + h / 2);
+    if (!E) { E = { mc: document.createElement("canvas") }; CACHE.set(ent, E); }
+    E.f = G.frame; E.ok = false; E.s = m.a; if (!L) return null;
     const RQ = 0.5, s = m.a * RQ, sx = Math.floor(m.a * x0 + m.e), sy = Math.floor(m.d * y0 + m.f), W = Math.ceil(w * s) + 2, H = Math.ceil(h * m.d * RQ) + 2;
     if (W < 4 || H < 4 || W > 600 || H > 600) return null;
-    if (frame !== G.frame) { frame = G.frame; budget = 3; pend.length = 0; }
-    if (pend.length >= POOL.length) POOL.push(document.createElement("canvas"));
-    const mc = POOL[pend.length], mx = mc.getContext("2d");
+    const mc = E.mc, mx = mc.getContext("2d");
     if (mc.width < W || mc.height < H) { mc.width = Math.max(mc.width, W); mc.height = Math.max(mc.height, H); }
-    mx.setTransform(1, 0, 0, 1, 0, 0); mx.globalCompositeOperation = "source-over"; mx.globalAlpha = 1; mx.clearRect(0, 0, W, H);
+    mx.setTransform(1, 0, 0, 1, 0, 0); mx.globalCompositeOperation = "source-over"; mx.globalAlpha = 1; mx.clearRect(0, 0, mc.width, mc.height);
     mx.save(); mx.beginPath(); mx.rect(0, 0, W, H); mx.clip(); mx.setTransform(m.a * RQ, 0, 0, m.d * RQ, (m.e - sx) * RQ, (m.f - sy) * RQ);
     try { orig.call(Z, mx, ent, time); } catch (e) { mx.restore(); return null; }
     mx.restore(); mx.setTransform(1, 0, 0, 1, 0, 0);
     const k = L.c, col = "rgb(" + Math.min(255, k[0] * 0.7 + 90 | 0) + "," + Math.min(255, k[1] * 0.7 + 80 | 0) + "," + Math.min(255, k[2] * 0.7 + 60 | 0) + ")";
     mx.globalCompositeOperation = "source-in"; mx.fillStyle = col; mx.fillRect(0, 0, W, H);
-    const off = 1.4 * s, ox = -L._dx / L._d * off, oy = -L._dy / L._d * off * 0.8;
+    const off = 1.4 * s, ox = -L.dx / L.d * off, oy = -L.dy / L.d * off * 0.8;
     mx.globalCompositeOperation = "destination-out"; mx.drawImage(mc, 0, 0, W, H, ox, oy, W, H);
     mx.globalCompositeOperation = "source-over";
-    const r = { mc, sx, sy, W, H, q: RQ, a: Math.min(0.8, 0.35 + L._s * 1.8) }; return r;
+    Object.assign(E, { ok: true, sx, sy, W, H, q: RQ, a: Math.min(0.8, 0.35 + L.s * 1.8) }); return E;
   }
-  /* aufgelegt wird erst nach dem Lichtdurchgang (sonst würde das Dunkel die Kante wieder schlucken) */
-  function rimApply(c, r) { pend.push(r); }
-
   function reg() {
     const dE = Z.drawEnemy, dP = Z.drawPlayer; if (!dE || !dP || dE._rim) return;
     const aft0 = Z.drawAfterLight;
@@ -2210,28 +2328,21 @@
       c.restore(); G._rimN = pend.length; pend.length = 0;
     };
     Z.drawEnemy = function (c, e, time) {
-      if (depth) return dE.apply(this, arguments);
+      if (depth || lvl() < 2 || !e || e.dead) return dE.apply(this, arguments);
+      newFrame(); if (!pick || !pick.has(e)) return dE.apply(this, arguments);
       let m = null; depth++;
       try {
-      if (on() && e && !e.dead && !(e.def && e.def.boss) && !e.disguise) {
-        if (frame !== G.frame) { frame = G.frame; budget = 3; pend.length = 0; }
-        const P0 = Z.player;
-        if (budget > 0 && (!P0 || Math.abs(e.x - P0.x) < 360 && Math.abs(e.y - P0.y) < 220)) { budget--; try { m = rimMask(dE, c, e, time, e.x - 14, e.y - 6, e.w + 28, e.h + 10); } catch (err) { m = null; } }
-      }
-      const r = dE.apply(this, arguments);
-      if (m) rimApply(c, m);
-      return r;
+        try { m = rimMask(dE, c, e, time, e.x - 14, e.y - 6, e.w + 28, e.h + 10); } catch (err) { m = null; }
+        const r = dE.apply(this, arguments); if (m) pend.push(m); return r;
       } finally { depth--; }
     };
     Z.drawEnemy._rim = true;
     Z.drawPlayer = function (c, P, time) {
-      if (depth) return dP.apply(this, arguments);
-      let m = null; depth++;
+      if (depth || lvl() < 2 || !P || P.dead || P.invis > 0) return dP.apply(this, arguments);
+      newFrame(); let m = null; depth++;
       try {
-      if (on() && P && !P.dead && !(P.invis > 0)) { try { m = rimMask(dP, c, P, time, P.x - 16, P.y - 10, P.w + 32, P.h + 14); } catch (err) { m = null; } }
-      const r = dP.apply(this, arguments);
-      if (m) rimApply(c, m);
-      return r;
+        try { m = rimMask(dP, c, P, time, P.x - 16, P.y - 10, P.w + 32, P.h + 14); } catch (err) { m = null; }
+        const r = dP.apply(this, arguments); if (m) pend.push(m); return r;
       } finally { depth--; }
     };
   }
@@ -2346,8 +2457,12 @@
     const w = which(); if (!w || !rich() || (G.off && (G.off.arenaFg || G.off.arena2))) return;
     const S = G.scale; c.save(); c.setTransform(S, 0, 0, S, 0, 0);
     const sx = cam.x * 1.3, h = cam.h;
+    /* nur unterhalb der Kampffläche: wo der Boden tief im Bild liegt, ist kein Platz – dann bleibt der Rand frei */
+    const IH = { labor: 46, steg: 46, hort: 40, seeherz: 90, faeden: 70 }[w] || 60, room = h - (floorY() - cam.y) - 10;
+    if (room < IH * 0.6) { c.restore(); return; }
     for (let i = Math.floor(sx / 300) - 1; i <= Math.floor((sx + cam.w * 1.3) / 300) + 1; i++) {
       const x = i * 300 - sx + hash(i) * 60, key = "a2" + w + i, a = G.fgAlpha ? G.fgAlpha(key, x - 10, h - 70, 90, 70, 0.9) : 0.9; if (a < 0.02) continue;
+      if (room < IH) { c.save(); c.translate(0, IH - room); }
       c.globalAlpha = a; c.fillStyle = "#0a0608"; c.strokeStyle = "#0a0608";
       if (w === "labor") { c.fillRect(x, h - 18, 70, 18); for (let k = 0; k < 4; k++) { const bx = x + 8 + k * 16, bh = 10 + hash(i * 4 + k) * 14; c.fillRect(bx - 2, h - 18 - bh, 4, bh); c.beginPath(); c.arc(bx, h - 18 - bh - 4, 5, 0, TAU); c.fill(); }
         c.globalCompositeOperation = "lighter"; c.fillStyle = "rgba(180,240,110,.25)"; c.beginPath(); c.arc(x + 24, h - 18 - 14, 2.5, 0, TAU); c.fill(); c.globalCompositeOperation = "source-over"; }
@@ -2355,6 +2470,7 @@
       else if (w === "hort") { c.beginPath(); c.moveTo(x - 10, h); c.quadraticCurveTo(x + 30, h - 40, x + 80, h); c.fill(); c.fillStyle = "rgba(255,200,100,.18)"; for (let k = 0; k < 6; k++) c.fillRect(x + 10 + k * 10, h - 18 + Math.abs(k - 2.5) * 5, 4, 1); }
       else if (w === "seeherz") { c.lineWidth = 3; for (let k = 0; k < 4; k++) { const bx = x + k * 14, sw = Math.sin(t * 0.9 + k + i) * 8; c.beginPath(); c.moveTo(bx, h); c.quadraticCurveTo(bx + sw, h - 40, bx + sw * 1.6, h - 70 - hash(i + k) * 20); c.stroke(); } }
       else if (w === "faeden") { c.lineWidth = 0.8; c.strokeStyle = "rgba(10,6,8,.9)"; for (let k = 0; k < 5; k++) { c.beginPath(); c.moveTo(x - 20, h - 10 - k * 12); c.quadraticCurveTo(x + 40, h + 10 - k * 14, x + 100, h - 30 - k * 10); c.stroke(); } c.fillStyle = "rgba(240,230,255,.35)"; for (let k = 0; k < 5; k++) { c.beginPath(); c.arc(x + 20 + k * 15, h - 12 - k * 6, 0.9, 0, TAU); c.fill(); } }
+      if (room < IH) c.restore();
     }
     c.restore();
   };
@@ -2406,6 +2522,19 @@
     } catch (e) { console.error(e); }
     c.restore();
   };
+  /* Platz für die Erzählrunde: weit weg von Übungspuppe, Händlern, Stationen und Bannern */
+  let sxLv = null, sxV = 0;
+  function storyX(lv) {
+    if (sxLv === lv) return sxV; sxLv = lv;
+    const busy = [];
+    for (const e of Z.enemies || []) if (e.dummy) busy.push(e.x);
+    for (const p of lv.props || []) if (p.kind === "npc" || p.kind === "station" || p.id === "Y") busy.push(p.x * T);
+    for (const d of lv.doors || []) busy.push(d.x * T);
+    for (const f of BAN) busy.push(lv.W * T * f);
+    let best = lv.W * T * 0.36, bs = -1;
+    for (let k = 0; k <= 40; k++) { const x = lv.W * T * (0.12 + k * 0.019), d = busy.reduce((m, b) => Math.min(m, Math.abs(b - x)), 1e9); if (d > bs) { bs = d; best = x; } }
+    sxV = best; return best;
+  }
   /* Banner an Stangen auf der Lagerfläche (ab Stufe 2 mit wehendem Tuch, sonst ruhig) */
   const BAN = [0.08, 0.62, 0.93];
   const mid0 = Z.drawMidLife;
@@ -2415,7 +2544,7 @@
     const lv = Z.level, fy = floorY(), mv = rich();
     c.save();
     /* Erzählrunde etwas hinter der Lagerfläche (leicht versetzt mitlaufend), am Rand der Weide */
-    try { const gx = par(cam, lv.W * T * 0.36, 0.9); if (gx > cam.x - 80 && gx < cam.x + cam.w + 80) { c.globalAlpha = 0.92; storyGroup(c, gx, fy - 1, t, Z.zeit ? Z.zeit() : null); c.globalAlpha = 1; } } catch (e) { console.error(e); }
+    try { const gx = par(cam, storyX(lv), 0.9); if (gx > cam.x - 80 && gx < cam.x + cam.w + 80) { c.globalAlpha = 0.92; storyGroup(c, gx, fy - 1, t, Z.zeit ? Z.zeit() : null); c.globalAlpha = 1; } } catch (e) { console.error(e); }
     BAN.forEach((fx, i) => {
       const x = Math.round(lv.W * fx) * T + 8; if (x < cam.x - 40 || x > cam.x + cam.w + 40) return;
       const top = fy - 70; c.fillStyle = "#3a2a1c"; c.fillRect(x - 1, top, 2, 70); c.fillStyle = "#b8923a"; c.beginPath(); c.arc(x, top - 1.5, 2, 0, TAU); c.fill();
@@ -2428,5 +2557,93 @@
       c.fillStyle = "#c8a050"; c.beginPath(); c.arc(x + 11, top + 10 + (mv ? Math.sin(t * 3 - 1.7 + i) * 1.1 : 0), 3, 0, TAU); c.fill();
     });
     c.restore();
+  };
+})();
+
+/* Ezekiel – The Destroyer · Übergangslicht (Grafik-Runde 9, ab Stufe 1)
+   Aus jedem Durchgang zwischen zwei Räumen fällt ein warmer Schein – stärker, wenn auf der anderen Seite ein bewohnter
+   Raum (mit Funktion) liegt –, damit sich die Räume wie Teile eines zusammenhängenden Schlosses anfühlen. */
+(function () {
+  "use strict";
+  const Z = window.Z, G = Z.gfx, T = Z.TILE;
+  const on = () => { const q = Z.gq; if (!q) return true; if (q.lean) return false; return (q.level === -1 ? 2 : q.level) >= 1 && !(G.off && (G.off.textur || G.off.steinmetz)); };
+  const COLS = { kueche: "#ffa860", giesserei: "#ff8a40", essenhalle: "#ff8a40", kapelle: "#ffd890", bibliothek: "#ffd8a0", taverne: "#ffb060", folterkammer: "#ff7a40", kristallhoehle: "#d090ff", pilzgrotte: "#a8e890", runenkammer: "#c890ff" };
+  if (G.lightGather) G.lightGather.push(function (add, cam, t) {
+    if (!on() || !Z.level || Z.darkness > 0 || !Z.durchgaenge) return;
+    for (const d of Z.durchgaenge()) {
+      const x = d.x * T, y = (d.bot + 1) * T - 14; if (x < cam.x - 100 || x > cam.x + cam.w + 100 || y < cam.y - 100 || y > cam.y + cam.h + 100) continue;
+      const fn = d.b || d.a, col = (fn && COLS[fn]) || "#ffd8a8", f = 0.92 + 0.08 * Math.sin(t * 2 + d.x);
+      add(x, y, fn ? 80 : 60, col, (fn ? 0.22 : 0.12) * f, 0);
+    }
+  });
+})();
+
+/* Ezekiel – The Destroyer · Tiefe Fernsicht (Grafik-Runde 9, ab Stufe 1)
+   Hinter den Öffnungen der Innenräume liegt eine weitere, ganz ferne Ebene mit langsamer Parallaxe: in den Hallen
+   ferne Gewölbe mit Kronleuchtern, im Keller Fässergänge im Dunst, im Verlies Zellengänge mit Fackeln, am See die
+   Höhlendecke mit Spiegelungen im Wasser, im Schlund Seidenfäden, im Glockenturm Gebälk mit Glocken, in der Schmiede
+   ferne Essen. Einmal je Gebiet gemalt; gezeichnet wird nur in den sichtbaren Öffnungen. Kein Blau. */
+(function () {
+  "use strict";
+  const Z = window.Z, G = Z.gfx, T = Z.TILE, TAU = Math.PI * 2;
+  const on = () => { const q = Z.gq; if (!q) return true; if (q.lean) return false; return (q.level === -1 ? 2 : q.level) >= 1 && !(G.off && G.off.fernsicht); };
+  const TW = 512, TH = 288, RS = 2, SPR = new Map();
+  const rnd = s => () => (s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+  const glowDot = (g, x, y, r, col, a) => { const q = g.createRadialGradient(x, y, 0, x, y, r); q.addColorStop(0, col.replace("A", a)); q.addColorStop(1, col.replace("A", 0)); g.fillStyle = q; g.fillRect(x - r, y - r, r * 2, r * 2); };
+  const PAINT = {
+    halls(g, R) { g.fillStyle = "#1e1410"; g.fillRect(0, 0, TW, TH);
+      for (let d = 0; d < 3; d++) { const s = 1 - d * 0.28, a = 0.9 - d * 0.25, col = ["#3a2a22", "#2e2220", "#26201e"][d], n = 4 + d * 2, w = TW / n;
+        for (let k = 0; k < n; k++) { const x = k * w + (d % 2) * w / 2, top = TH * (0.2 + d * 0.1); g.globalAlpha = a; g.fillStyle = col; g.fillRect(x, top, 6 * s, TH - top); g.beginPath(); g.moveTo(x + 6 * s, top + w * 0.45); g.quadraticCurveTo(x + w / 2, top - w * 0.1, x + w, top + w * 0.45); g.lineTo(x + w, top + w * 0.45 + 6 * s); g.quadraticCurveTo(x + w / 2, top + 6 * s - w * 0.1, x + 6 * s, top + w * 0.45 + 6 * s); g.fill();
+          g.globalAlpha = 1; glowDot(g, x + w / 2, top + w * 0.5, 14 * s, "rgba(255,200,120,A)", 0.35 * a); g.fillStyle = "rgba(255,220,150," + (0.7 * a) + ")"; for (let j = -2; j <= 2; j++) g.fillRect(x + w / 2 + j * 3 * s, top + w * 0.5, 1, 1.4); } }
+      const hz = g.createLinearGradient(0, 0, 0, TH); hz.addColorStop(0, "rgba(30,20,16,.6)"); hz.addColorStop(0.6, "rgba(60,40,30,.15)"); hz.addColorStop(1, "rgba(30,20,16,.5)"); g.fillStyle = hz; g.fillRect(0, 0, TW, TH); },
+    cellar(g, R) { g.fillStyle = "#1a120c"; g.fillRect(0, 0, TW, TH);
+      for (let d = 0; d < 4; d++) { const s = 1 - d * 0.22, cy = TH * 0.55, ar = TH * 0.42 * s, cx = TW / 2, col = ["#3a281a", "#30221a", "#281c16", "#201812"][d];
+        for (const ox of [-TW / 2, 0, TW / 2]) { g.strokeStyle = col; g.lineWidth = 6 * s; g.beginPath(); g.arc(cx + ox, cy, ar, Math.PI, 0); g.stroke();
+          for (const sd of [-1, 1]) for (let k = 0; k < 3; k++) { const bx = cx + ox + sd * ar * (0.55 + k * 0.12), by = cy + ar * 0.55 - k * ar * 0.28; g.fillStyle = col; g.beginPath(); g.arc(bx, by, 9 * s, 0, TAU); g.fill(); g.strokeStyle = "rgba(0,0,0,.4)"; g.lineWidth = 1; g.beginPath(); g.arc(bx, by, 7 * s, 0, TAU); g.stroke(); } } }
+      for (let k = 0; k < 5; k++) glowDot(g, R() * TW, TH * (0.3 + R() * 0.3), 18, "rgba(255,180,100,A)", 0.25);
+      const hz = g.createLinearGradient(0, 0, 0, TH); hz.addColorStop(0, "rgba(40,28,20,.5)"); hz.addColorStop(0.5, "rgba(90,70,50,.18)"); hz.addColorStop(1, "rgba(20,14,10,.6)"); g.fillStyle = hz; g.fillRect(0, 0, TW, TH); },
+    dungeon(g, R) { g.fillStyle = "#121410"; g.fillRect(0, 0, TW, TH);
+      for (let d = 0; d < 3; d++) { const s = 1 - d * 0.3, col = ["#262a22", "#20241c", "#1a1e18"][d], n = 5 + d * 2, w = TW / n, top = TH * (0.3 + d * 0.06), bot = TH * (0.85 - d * 0.05);
+        for (let k = 0; k < n; k++) { const x = k * w + (d % 2) * w / 2; g.fillStyle = col; g.fillRect(x, top, w * 0.12, bot - top); g.fillStyle = "rgba(0,0,0,.5)"; g.fillRect(x + w * 0.3, top + (bot - top) * 0.3, w * 0.4, (bot - top) * 0.7); g.fillStyle = col; for (let j = 0; j < 4; j++) g.fillRect(x + w * 0.3 + j * w * 0.12, top + (bot - top) * 0.3, 1.5 * s, (bot - top) * 0.7);
+          if (k % 2 === 0) glowDot(g, x + w * 0.06, top + (bot - top) * 0.25, 16 * s, "rgba(255,160,70,A)", 0.4 * s); } }
+      const hz = g.createLinearGradient(0, 0, 0, TH); hz.addColorStop(0, "rgba(10,14,10,.6)"); hz.addColorStop(0.6, "rgba(50,60,40,.15)"); hz.addColorStop(1, "rgba(10,12,8,.6)"); g.fillStyle = hz; g.fillRect(0, 0, TW, TH); },
+    lake(g, R) { const gr = g.createLinearGradient(0, 0, 0, TH); gr.addColorStop(0, "#0a1410"); gr.addColorStop(0.6, "#12241c"); gr.addColorStop(1, "#0c1a14"); g.fillStyle = gr; g.fillRect(0, 0, TW, TH);
+      g.fillStyle = "#081008"; g.beginPath(); g.moveTo(0, 0); for (let x = 0; x <= TW; x += 8) g.lineTo(x, 14 + (x % 24 === 0 ? 30 + R() * 30 : R() * 10)); g.lineTo(TW, 0); g.fill();
+      const lights = []; for (let k = 0; k < 9; k++) { const x = R() * TW, y = TH * (0.25 + R() * 0.3); lights.push([x, y]); glowDot(g, x, y, 10 + R() * 10, "rgba(150,240,180,A)", 0.3); }
+      g.fillStyle = "#0e1e18"; g.fillRect(0, TH * 0.72, TW, TH * 0.28);
+      for (const [x, y] of lights) { const ry = TH * 0.72 + (TH * 0.72 - y) * 0.25; for (let k = 0; k < 5; k++) { g.fillStyle = "rgba(170,240,190," + (0.25 - k * 0.04) + ")"; g.fillRect(x - 6 + R() * 4, ry + k * 4, 6 + R() * 8, 1); } } },
+    chasm(g, R) { g.fillStyle = "#140e18"; g.fillRect(0, 0, TW, TH);
+      g.lineWidth = 0.7; for (let k = 0; k < 26; k++) { const x0 = R() * TW, y0 = R() * TH * 0.4, x1 = x0 + (R() - 0.5) * 300, y1 = TH * (0.4 + R() * 0.6); g.strokeStyle = "rgba(220,200,240," + (0.06 + R() * 0.1).toFixed(2) + ")"; g.beginPath(); g.moveTo(x0, y0); g.quadraticCurveTo((x0 + x1) / 2 + 30, (y0 + y1) / 2 + 30, x1, y1); g.stroke(); }
+      for (let k = 0; k < 8; k++) glowDot(g, R() * TW, R() * TH, 14, "rgba(210,150,255,A)", 0.25); for (let k = 0; k < 6; k++) { g.fillStyle = "rgba(180,170,190,.25)"; g.beginPath(); g.ellipse(R() * TW, TH * (0.3 + R() * 0.5), 4, 9, 0, 0, TAU); g.fill(); } },
+    belltower(g, R) { g.fillStyle = "#1a1410"; g.fillRect(0, 0, TW, TH);
+      g.fillStyle = "#2a2018"; for (let k = 0; k < 6; k++) { const y = TH * (0.15 + k * 0.15); g.fillRect(0, y, TW, 5); for (let x = R() * 60; x < TW; x += 90 + R() * 40) { g.save(); g.translate(x, y); g.rotate(0.7); g.fillRect(0, 0, 60, 4); g.restore(); } }
+      for (let k = 0; k < 4; k++) { const x = 60 + k * 120 + R() * 30, y = TH * (0.3 + R() * 0.3), s = 0.6 + R() * 0.5; g.strokeStyle = "#2a2018"; g.lineWidth = 1; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, y); g.stroke(); g.fillStyle = "#3a2a18"; g.beginPath(); g.moveTo(x - 6 * s, y); g.quadraticCurveTo(x - 8 * s, y + 14 * s, x - 18 * s, y + 24 * s); g.lineTo(x + 18 * s, y + 24 * s); g.quadraticCurveTo(x + 8 * s, y + 14 * s, x + 6 * s, y); g.fill(); g.fillStyle = "rgba(255,210,140,.15)"; g.fillRect(x - 10 * s, y + 6 * s, 3 * s, 16 * s); }
+      const hz = g.createLinearGradient(0, 0, 0, TH); hz.addColorStop(0, "rgba(255,200,140,.08)"); hz.addColorStop(1, "rgba(20,14,10,.5)"); g.fillStyle = hz; g.fillRect(0, 0, TW, TH); },
+    forge(g, R) { g.fillStyle = "#1a0e0a"; g.fillRect(0, 0, TW, TH);
+      for (let k = 0; k < 5; k++) { const x = 40 + k * 100 + R() * 30, w = 30 + R() * 20, top = TH * (0.1 + R() * 0.2); g.fillStyle = "#2a1a14"; g.fillRect(x, top, w, TH - top); g.fillRect(x - 10, TH * 0.6, w + 20, TH * 0.4); glowDot(g, x + w / 2, TH * 0.72, 40, "rgba(255,110,40,A)", 0.45); g.fillStyle = "rgba(255,160,70,.7)"; g.fillRect(x, TH * 0.7, w, 4); }
+      const hz = g.createLinearGradient(0, 0, 0, TH); hz.addColorStop(0, "rgba(20,10,8,.6)"); hz.addColorStop(1, "rgba(80,30,10,.25)"); g.fillStyle = hz; g.fillRect(0, 0, TW, TH); }
+  };
+  PAINT.embercity = PAINT.forge; PAINT.spires = null;
+  function spr(bg) { let cv = SPR.get(bg); if (cv !== undefined) return cv; const P = PAINT[bg]; if (!P) { SPR.set(bg, null); return null; } cv = document.createElement("canvas"); cv.width = TW * RS; cv.height = TH * RS; const g = cv.getContext("2d"); g.scale(RS, RS); try { P(g, rnd(bg.length * 977 + 5)); } catch (e) { console.error(e); } SPR.set(bg, cv); return cv; }
+  /* gezeichnet vor dem übrigen Mittelgrund-Leben, nur in Gewölbe- und Höhlenöffnungen (dort malt der Chunk sonst ein
+     dunkles Inneres), halbtransparent und mit eigener, langsamer Parallaxe */
+  const mid0 = Z.drawMidLife;
+  Z.drawMidLife = function (c, cam, t) {
+    const lv = Z.level, B = Z.biome;
+    if (lv && !lv.hub && !lv.arena && !lv.out && on() && B) try {
+      const cv = spr(B.bg);
+      if (cv) {
+        const ops = G.openings || []; let any = false;
+        c.save(); c.beginPath();
+        for (const o of ops) { if (o.blind || (o.mode !== "vault" && o.mode !== "cave")) continue; const x0 = o.x0 * T + 2, y0 = o.y0 * T + 2, x1 = (o.x1 + 1) * T - 2, y1 = (o.y1 + 1) * T - 1; if (x1 < cam.x || x0 > cam.x + cam.w || y1 < cam.y || y0 > cam.y + cam.h) continue; c.rect(x0, y0, x1 - x0, y1 - y0); any = true; }
+        if (any) {
+          c.clip();
+          const sc = Math.max(1, (cam.h * 0.9) / TH), w = TW * sc, h = TH * sc, ox = cam.x - ((cam.x * 0.15) % w + w) % w, y = cam.y + (cam.h - h) * 0.5 - cam.y * 0.03 % 30;
+          c.globalAlpha = 0.55; for (let x = ox; x < cam.x + cam.w; x += w) c.drawImage(cv, x, y, w + 0.5, h);
+        }
+        c.restore();
+      }
+    } catch (e) { console.error(e); }
+    if (mid0) mid0.apply(this, arguments);
   };
 })();

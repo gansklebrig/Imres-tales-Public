@@ -3,6 +3,8 @@
 (function () {
   "use strict";
   const Z = window.Z, U = Z.U, T = Z.TILE, FX = Z.fx, A = Z.audio, W = Z.world, L = v => Z.L(v);
+  /* Klang (klang.js): eigene Stimmen der W10-Arten; true = ersetzt den Standardklang */
+  const KG = (e, ev, a) => !!(Z.klang && Z.klang.gegner && Z.klang.gegner(e, ev, a));
   Z.enemies = [];
   const HP = 30, DMG = 10;
 
@@ -285,7 +287,7 @@
     e.dmgMul = DMG * (d.dmg || 1) * Z.BAL.enemyDmg(tier) * Z.BAL.skullDmg(run.skulls || 0);
     if (o.elite) {
       e.elite = Z.R.pick(Object.keys(ELITE));
-      hp *= 3.8 /* W9: 3,4 → 3,8 (Elites fielen in 0,4–7 s) */; e.dmgMul *= 1.3; e.size *= 1.18; e.w = Math.round(e.w * 1.18); e.h = Math.round(e.h * 1.18); e.x = x - e.w / 2; e.y = y - e.h;
+      hp *= 4.2 /* W9: 3,4 → 3,8 (Elites fielen in 0,4–7 s); 3. Runde → 4,2 (K6: 1–6 s) */; e.dmgMul *= 1.3; e.size *= 1.18; e.w = Math.round(e.w * 1.18); e.h = Math.round(e.h * 1.18); e.x = x - e.w / 2; e.y = y - e.h;
       if (e.elite === "gepanzert") e.armorUp = 0;
     }
     if (d.boss) hp = HP * d.hp * Z.BAL.enemyHp(tier) * Z.BAL.skullHp(run.skulls || 0) * (Z.BAL.bossHp ? Z.BAL.bossHp(tier, id) : 1); /* W6: bossHp aus ausgleich.js */
@@ -411,13 +413,13 @@
     e.aware = true; e.sus = 0; e.lostSight = 0;
     e.alertT = how === "call" ? 0.25 + Z.R() * 0.2 : how === "noise" ? 0.35 : 0.5;
     const P = Z.player; if (P) { const s = U.sign(P.x - e.x); if (s) e.face = s; }
-    if (e.def.snd && Z.R() < 0.6) A.play(e.def.snd, { x: e.x, y: e.y, vol: 0.4 });
+    if (!KG(e, "alarm") && e.def.snd && Z.R() < 0.6) A.play(e.def.snd, { x: e.x, y: e.y, vol: 0.4 });
   }
   Z.enemyAlarm = alarm; Z.enemySuspect = suspect;
   /* Ruf: Verbündete mit Sichtlinie werden (leicht verzögert) alarmiert, gedämpft hinter Wänden nur misstrauisch */
   function shout(e) {
     const CR = e.def.callR || 230;
-    if (e.def.bell) { A.play("bell", { x: e.x, y: e.y, vol: 0.6, rate: 0.9 }); A.play("bell", { x: e.x, y: e.y, vol: 0.45, rate: 0.9, delay: 0.5, gap: 0 }); FX.ring(e.x + e.w / 2, e.y + e.h / 2, 60, "#e8c070", 0.7, 2); FX.ring(e.x + e.w / 2, e.y + e.h / 2, 110, "#c8962a", 0.9, 1.5); }
+    if (e.def.bell) { if (!KG(e, "glocke")) { A.play("bell", { x: e.x, y: e.y, vol: 0.6, rate: 0.9 }); A.play("bell", { x: e.x, y: e.y, vol: 0.45, rate: 0.9, delay: 0.5, gap: 0 }); } FX.ring(e.x + e.w / 2, e.y + e.h / 2, 60, "#e8c070", 0.7, 2); FX.ring(e.x + e.w / 2, e.y + e.h / 2, 110, "#c8962a", 0.9, 1.5); }
     if (e.def.crow) crowCall(e, 0.55);
     if (e.def.lantern) { FX.ring(e.x + e.w / 2, e.y + e.h / 2, 50, "#ffd27a", 0.5, 2); }
     const ex = e.x + e.w / 2, ey = e.y + 6, P = Z.player;
@@ -784,6 +786,7 @@
   function onActStart(e, a, P, tgt) {
     const d = e.def, cx = e.x + e.w / 2, cy = e.y + e.h * 0.4;
     if (a.sfx) A.play(a.sfx, { x: e.x, y: e.y, vol: 0.55 });
+    KG(e, "act", a);
     switch (a.k) {
       case "hit": case "combo": meleeCheck(e, a, P); e.vx = e.face * 40; break;
       case "lunge": e.vx = e.face * (a.lunge || 200); break;
@@ -1079,6 +1082,7 @@
         else A.play("unsheathe", { x: e.x, y: e.y, vol: tg === 2 ? 0.3 : 0.15, rate: tg === 2 ? 0.7 : 1.45, tag: "tg" + tg, gap: 0.08, verb: 0.2 });
       }
     }
+    KG(e, "pre", a);
   }
   /* Kriegstrommel: Verbündete ringsum werden schneller und schlagen härter zu, Schlafende wachen auf */
   function drum(e) {
@@ -1090,7 +1094,7 @@
       if (o.sleep && Z.leben && Z.leben.wake) Z.leben.wake(o, true);
     }
     Z.noise(cx, cy, 300, { alarm: true });
-    A.play("hitHeavy", { x: e.x, vol: 0.55, rate: 0.55, gap: 0 }); A.play("hitHeavy", { x: e.x, vol: 0.5, rate: 0.6, delay: 0.18, gap: 0 }); A.play("goblin", { x: e.x, vol: 0.4 });
+    if (!KG(e, "trommel")) { A.play("hitHeavy", { x: e.x, vol: 0.55, rate: 0.55, gap: 0 }); A.play("hitHeavy", { x: e.x, vol: 0.5, rate: 0.6, delay: 0.18, gap: 0 }); A.play("goblin", { x: e.x, vol: 0.4 }); }
     FX.ring(cx, cy, 40, "#ffb060", 0.5, 2.5); FX.ring(cx, cy, R * 0.6, "#ff8a3a", 0.8, 1.5); FX.addShake(2);
   }
   /* Laternenträger: „Licht hoch!“ – heller Lichtkreis, Unsichtbarkeit verpufft, alle mit Sicht zur Laterne sind alarmiert */
@@ -1111,7 +1115,7 @@
   function toll(e, a, P) {
     const cx = e.x + e.w / 2, cy = e.y + e.h / 2, R = (a.rad || 60) * (e.elite ? 1.3 : 1);
     FX.ring(cx, cy, R, "#f0d890", 0.35, 3); FX.ring(cx, cy, R * 0.6, "#c8962a", 0.25, 2); FX.addShake(3);
-    A.play("gong", { x: e.x, vol: 0.45, rate: 1.6 });
+    if (!KG(e, "toll")) A.play("gong", { x: e.x, vol: 0.45, rate: 1.6 });
     Z.noise(cx, cy, 320, { alarm: true });
     if (P && !P.dead) {
       const px = P.x + P.w / 2, py = P.y + P.h / 2;
@@ -1194,7 +1198,7 @@
     /* Zerfall in Asche und Glut statt Blut */
     FX.burst(cx, cy, 18 + Math.round(e.w), { col: [d.c || "#6a5a50", d.t || "#3a3030", "#2a2020"], sp: 90, life: 0.8, size: 2.5, kind: "smoke", g: -30, drag: 0.94 });
     FX.burst(cx, cy, 10, { col: ["#ff8a5a", "#ffd27a"], sp: 120, life: 0.5, size: 1.6, kind: "spark", add: true });
-    A.play(d.undead ? "undead" : d.snd || "die", { x: e.x, vol: 0.45 });
+    if (!KG(e, "tod")) A.play(d.undead ? "undead" : d.snd || "die", { x: e.x, vol: 0.45 });
     if (!o.self) FX.stop(0.04);
     if (d.death === "gas") Z.spawnHazard({ kind: "poisoncloud", x: cx, y: e.y + e.h, w: 40, life: 2.5, dmg: e.dmgMul * 0.15, owner: "e", eff: { poison: 1 } });
     if (d.death === "spiders") for (let i = 0; i < 3; i++) { const m = Z.spawnEnemy("spinnchen", cx + (i - 1) * 8, e.y + e.h); if (m) { m.aware = true; m.vy = -200; m.vx = (i - 1) * 80; } }

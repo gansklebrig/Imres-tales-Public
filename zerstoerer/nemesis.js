@@ -2580,7 +2580,9 @@
     /* W9: Schlüssel korrigiert (keiler/kapitaen/dorn griffen nie – Ids sind haeuptling/salzbart/dornvater; Krumschnabel fiel mit Speer +5 in 4 s).
        Grundfaktor 3,5 → 5,0 – sie fielen auch mit Standardausrüstung in 7–15 s (Bot), weil Dauer-Rückstoß sie lähmte; jetzt „Standhaft“,
        Angriffsfenster, ein Angriff mehr und Wut unter 25 % (Prüfstand w9_boss: starke Ausrüstung vorher 4–33 s) */
-    const MBHP = { ratten: 2.5, haeuptling: 2.3, kerker: 2.2, salzbart: 2.4, ilvara: 2.8, weberin: 2.0, amboss: 1, dornvater: 1.1, laeuter: 1.1 }; /* je Wächter nach Prüfstand (2. Runde): 6–9 s → 15–25 s */
+    /* W9 (3. Runde, Prüfstand kampf.py Standardausrüstung): Ratten 22 s, Keiler 24, Kerker 22, Weberin 19, Dornvater 18 s → ×1,5 (Ziel 30–60 s);
+       Kapitän 37 s, Amboss 44 s bleiben. In Läufen mit guter Ausrüstung (K6) lagen Mini-Bosse bei 6–33 s. */
+    const MBHP = { ratten: 3.75, haeuptling: 3.4, kerker: 3.3, salzbart: 2.4, ilvara: 2.8, weberin: 3.0, amboss: 1, dornvater: 1.65, laeuter: 1.4 }; /* vorher 2,5/2,3/2,2/2,4/2,8/2,0/1/1,1/1,1 */
     e.hp = e.hpMax = Math.round(e.hpMax * 5.0 * (MBHP[id] || 1));
     if (tierN() === 0) { e.hp = e.hpMax = Math.round(e.hpMax * 0.75); e.dmgMul *= 0.85; }
     if (o.aware) e.aware = true;

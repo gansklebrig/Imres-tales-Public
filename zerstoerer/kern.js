@@ -343,9 +343,11 @@
     const p = A.ctx.createStereoPanner ? A.ctx.createStereoPanner() : null;
     s.connect(g); if (p) { p.pan.value = pan; g.connect(p); p.connect(o.bus || A.sfx); } else g.connect(o.bus || A.sfx);
     if (o.verb !== 0) { const vg = A.ctx.createGain(); vg.gain.value = isFinite(o.verb) && o.verb ? o.verb : 0.6; g.connect(vg); vg.connect(A.verb); }
-    if (o.dur && isFinite(o.dur)) { g.gain.setValueAtTime(vol, now + o.dur * 0.7); g.gain.linearRampToValueAtTime(0, now + o.dur); s.stop(now + o.dur + 0.02); }
     A.live = (A.live || 0) + 1; s.onended = () => { A.live--; };
-    s.start(now + (isFinite(o.delay) ? Math.max(0, o.delay) : 0), isFinite(o.offset) ? Math.max(0, o.offset) : 0);
+    const t0 = now + (isFinite(o.delay) ? Math.max(0, o.delay) : 0);
+    s.start(t0, isFinite(o.offset) ? Math.max(0, o.offset) : 0);
+    /* Länge begrenzen (ausblenden) – erst nach start(), sonst wirft stop() einen Fehler; relativ zum Einsatz */
+    if (o.dur && isFinite(o.dur)) { g.gain.setValueAtTime(vol, t0 + o.dur * 0.7); g.gain.linearRampToValueAtTime(0, t0 + o.dur); s.stop(t0 + o.dur + 0.02); }
     return s;
   };
   /* Endlosschleifen (Geräuschkulisse der Bühne): mit Überblendung */
