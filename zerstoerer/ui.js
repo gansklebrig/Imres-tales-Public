@@ -917,7 +917,8 @@
     }
     const MR = Z.MOVE_RUNES || {}, frei = (Z.meta.runen && Z.meta.runen.frei) || {};
     const mv = Object.keys(MR).filter(k => Z.runeAll || (Z.hasMoveRune && Z.hasMoveRune(k)));
-    if (mv.length) h += "<h4>" + L(["Bewegungs-Runen", "Movement runes"]) + '</h4><ul class="ag-liste">' + mv.map(k => '<li><b style="color:' + MR[k].col + '">ᛟ ' + esc(L(MR[k].n)) + "</b>" + (frei[k] ? "" : ' <small class="hinweis">' + L(["nur dieser Lauf", "this run only"]) + "</small>") + '<br><span class="ag-how">' + (Z.runeHow ? Z.runeHow(k)[0] : esc(L(MR[k].d))) + "</span></li>").join("") + "</ul>";
+    /* W15 Runen: Bewegungs-Runen sind ab dem Fund immer aktiv (kein Gürtelplatz) – sichtbar als „aktiv“ */
+    if (mv.length) h += "<h4>" + L(["Bewegungs-Runen", "Movement runes"]) + ' <small class="hinweis">' + L(["immer aktiv, kein Gürtelplatz nötig", "always active, no belt slot needed"]) + '</small></h4><ul class="ag-liste ag-bew">' + mv.map(k => '<li class="rn-aktiv"><b style="color:' + MR[k].col + '">ᛟ ' + esc(L(MR[k].n)) + '</b> <span class="ag-aktiv">✓ ' + L(["aktiv", "active"]) + "</span>" + (frei[k] || Z.runeAll ? "" : ' <small class="hinweis">' + L(["nur dieser Lauf", "this run only"]) + "</small>") + '<br><span class="ag-how">' + (Z.runeHow ? Z.runeHow(k)[0] : esc(L(MR[k].d))) + '</span><br><small class="ag-rd">' + esc(L(MR[k].d)) + "</small></li>").join("") + "</ul>";
     return h;
   }
   /* Ezekiel selbst: Leben, Tränke, Werte, Segen & Lied, Pakte, Fluch, Paarungen */

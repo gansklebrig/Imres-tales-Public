@@ -611,14 +611,29 @@
     }
   });
   /* Klettern an Leitern (im Sturm: Ranken) */
-  const CL = { acc: 0, side: 0 };
+  const CL = { acc: 0, side: 0, offT: 9, stats: {} }; KL.leiter = CL;
+  /* R20 Leiter (W16, kampf.js – nur beobachtet: P.climbing, P.vy, P.act): Greifen (Leder + Holzklopfen), Sprossen im Takt der Strecke
+     (aufwärts heller als abwärts), Absprung (Abdruck-Knarzen + Luftzug), Fallenlassen (kurzes Rutschen), oben/unten Austreten (leiser Tritt),
+     Angriff von der Leiter (die Sprosse ächzt unter dem Schwung). Ranken (Sturm) mit Laub statt Holz. */
   function climbTick(dt) {
-    const P = Z.player; if (!P || !P.climbing) { CL.last = P && P.y; return; }
-    const dy = Math.abs(P.y - (CL.last == null ? P.y : CL.last)); CL.last = P.y; CL.acc += dy;
+    const P = Z.player; if (!P) return;
+    const ranke = Z.level && Z.level.biome === "sturm", px = P.x + P.w / 2, py = P.y + P.h / 2;
+    const holz = () => pk(ranke ? RA("n_laubschritt_", 9) : RA("n_holzschritte_", 24));
+    if (P.climbing && !CL.on) { CL.on = true; CL.stats = CL.stats || {}; CL.stats.greifen = (CL.stats.greifen || 0) + 1;
+      shot(pk(RA("g_leder_", 6)), { vol: 0.12, rate: 1.2, verb: 0.2, gap: 0.1, tag: "lgr1" }); shot(holz(), { vol: 0.12, rate: 1.5, verb: 0.3, gap: 0.1, tag: "lgr2", delay: 0.03 }); }
+    else if (!P.climbing && CL.on) { CL.on = false; CL.offT = 0;
+      if (P.vy < -60) { CL.stats.absprung = (CL.stats.absprung || 0) + 1; shot(pk(RA("g_knarren_", 5)), { vol: 0.08, rate: 1.3, verb: 0.3, gap: 0.2, tag: "lab" }); shot(holz(), { vol: 0.1, rate: 1.6, verb: 0.2, gap: 0.1, tag: "lab2" }); }
+      else if (P.onGround) { CL.stats.austreten = (CL.stats.austreten || 0) + 1; shot(holz(), { vol: 0.08, rate: 1.1, verb: 0.2, gap: 0.1, tag: "lau" }); }
+      else { CL.stats.loslassen = (CL.stats.loslassen || 0) + 1; shot(pk(RA("g_leder_", 6)), { vol: 0.08, rate: 0.9, verb: 0.2, gap: 0.1, tag: "llo" }); } }
+    CL.offT = (CL.offT || 0) + dt;
+    /* Angriff von der Leiter (oder gleich nach dem Absprung) */
+    if (P.act && P.act !== CL.act && (P.climbing || CL.offT < 0.3)) { CL.stats.angriff = (CL.stats.angriff || 0) + 1; shot(pk(RA("g_knarren_", 5)), { vol: 0.1, rate: 1.1, verb: 0.3, gap: 0.2, tag: "lat" }); }
+    CL.act = P.act;
+    if (!P.climbing) { CL.last = P.y; return; }
+    const dy = Math.abs(P.y - (CL.last == null ? P.y : CL.last)), up = P.y < (CL.last == null ? P.y : CL.last); CL.last = P.y; CL.acc += dy;
     if (CL.acc < 14) return; CL.acc = 0; CL.side = 1 - CL.side;
-    const ranke = Z.level && Z.level.biome === "sturm";
     const l = ranke ? RA("n_laubschritt_", 9) : RA("n_holzschritte_", 24);
-    shot(l[(Math.random() * l.length) | 0], { vol: ranke ? 0.12 : 0.1, rate: ranke ? 1.25 : 1.35, pan: CL.side ? 0.15 : -0.15, verb: 0.3, gap: 0.05, tag: "klettern" });
+    shot(l[(Math.random() * l.length) | 0], { vol: ranke ? 0.12 : 0.1, rate: (ranke ? 1.25 : 1.35) * (up ? 1.04 : 0.94), pan: CL.side ? 0.15 : -0.15, verb: 0.3, gap: 0.05, tag: "klettern" });
     if (!ranke && Math.random() < 0.3) shot(RA("g_knarren_", 5)[(Math.random() * 5) | 0], { vol: 0.05, rate: 1.4, verb: 0.3, gap: 0.3, tag: "kn" });
   }
 
@@ -1457,6 +1472,63 @@
     }
     FS.in = drin;
   }
+  /* R20 Runen (runen.js – nur beobachtet): Bewegungs-Rune gefunden (Z.run.moveRunes / Z.meta.runen.frei neu, dabei spielt runen.js „rune“+„holy“)
+     bzw. Runenstein in den Gürtel (P.runeBelt neu, „rune“+„gem“) → feierlicher Klang je Art statt des allgemeinen: Chor-Grund (Grundton+Quinte)
+     und Glockenkrone, dazu die Farbe der Rune – Kralle: Kratzen + Harfe aufwärts; Schatten: Schattenwisch + tiefer Moll-Chor; Schwingen:
+     Windstoß + Okarina 1-5-8-9; Erde: Grollen + Pauke; Kette: Kettenrasseln + Glocken 1-5-8; Nebel: Luft + Glas 8-5. Gürtel-Runen: Familie
+     bestimmt das Instrument (Glut Marimba, Seuche Pizzicato, Sturm Celesta, sonst Kalimba). Nebel-Rolle (Nebelrune): weicher Lufthauch mit
+     Glas-Schimmer statt „dark“; Durchgleiten eines Nebelgitters: hohles Wehen und zwei Glastöne. */
+  const RU = { mr: null, belt: null, t: -9, gitter: false, stats: { rune: 0, guertel: 0, nebelrolle: 0, gitter: 0 } }; KL.runen = RU;
+  const ruMoveSet = () => { const m = Z.meta && Z.meta.runen, r = Z.run && Z.run.moveRunes; return Object.keys(Object.assign({}, (m && m.frei) || {}, r || {})).sort().join(","); };
+  function ruFeier(farbe, extra) {
+    const now = A.ctx.currentTime; RU.t = now; const r = M.prof ? M.prof.root : 50;
+    if (M.note && !gq().mini) [0, 4].forEach((d, i) => M.note("ooh", M.ton(d, r + 12), now + 0.05 + i * 0.03, 0.04, 2.8, roomBus() || undefined));
+    extra && extra(now, r);
+    [[7, 3, 0.07, 0.65], [9, 3, 0.05, 0.8], [12, 3, 0.06, 0.95]].forEach(([d, o, v, t], i) => tuned(farbe || "glock", d, o, v, t, "ruk" + i));
+    M.duck && M.duck(0.25, 1.2);
+  }
+  const RUMOVE = {
+    kralle: () => { shot(pk(RK("fx_0_schild_metall_", [1, 2])), { vol: 0.08, rate: 1.6, gap: 0, tag: "rux" }); [0, 2, 4].forEach((d, i) => tuned("harfe", d, 2, 0.08, 0.1 + i * 0.08, "rum" + i)); },
+    schatten: () => { whoosh(0.05, 0.5); [0, 2].forEach((d, i) => tuned("ooh", d, 0, 0.06, 0.1 + i * 0.25, "rum" + i)); },
+    schwingen: () => { shot(AM("e_windstoss_1"), { vol: 0.16, rate: 1.1, gap: 0, tag: "rux", verb: 0.6 }); [0, 4, 7, 8].forEach((d, i) => tuned("oka", d, 2, 0.07, 0.15 + i * 0.12, "rum" + i)); },
+    erde: () => { dustNoise(Z.player ? Z.player.x : 0, Z.player ? Z.player.y : 0, 0.07, 1.2); tuned("timpt", 0, -1, 0.2, 0.05, "rum0"); shot(KS("taiko_36"), { vol: 0.2, rate: 0.9, gap: 0, tag: "rux", delay: 0.3 }); },
+    kette: () => { shot(pk(SRS.kette), { vol: 0.16, rate: 1.2, gap: 0, tag: "rux" }); [0, 4, 7].forEach((d, i) => tuned("glock", d, 2, 0.06, 0.15 + i * 0.1, "rum" + i)); },
+    nebel: () => { whoosh(0.04, 0.8); [7, 4].forEach((d, i) => tuned("glas", d, 3, 0.05, 0.2 + i * 0.2, "rum" + i)); }
+  };
+  const RUFAM = { feuer: "mar", gift: "pizz", sturm: "cel" };
+  function ruRune() {
+    const P = Z.player; if (!P || !A.ok) return false;
+    const ms = ruMoveSet(); if (RU.mr == null) RU.mr = ms;
+    if (ms !== RU.mr) {
+      const neu = ms.split(",").filter(k => k && !RU.mr.split(",").includes(k)); RU.mr = ms;
+      if (neu.length) { RU.stats.rune++; const k = neu[0]; ruFeier("glock", RUMOVE[k] || null); return true; }
+    }
+    const belt = (P.runeBelt || []).join(","); if (RU.belt == null) RU.belt = belt;
+    if (belt !== RU.belt) { const old = RU.belt.split(","); RU.belt = belt; const neu = (P.runeBelt || []).find(k => !old.includes(k));
+      if (neu) { RU.stats.guertel++; const fam = Z.RUNES && Z.RUNES[neu] && Z.RUNES[neu].fam, inst = RUFAM[fam] || "kal";
+        ruFeier(inst === "pizz" ? "glock" : "hglo", () => [0, 2, 4, 7].forEach((d, i) => tuned(inst, d, 2, 0.08, 0.05 + i * 0.09, "rug" + i))); return true; } }
+    return false;
+  }
+  function ruTick() {
+    const P = Z.player; if (!P) return;
+    if (RU.mr == null) RU.mr = ruMoveSet(); if (RU.belt == null) RU.belt = (P.runeBelt || []).join(",");
+    ruRune(); /* Nachholen, falls kein „rune“-Aufruf kam */
+    /* Nebelgitter durchgleiten */
+    const G = Z.runen && Z.runen.level && Z.runen.level(), T = Z.TILE || 16;
+    let drin = false;
+    if (G && G.grate && G.lv === Z.level && G.nGrate) { const tx = Math.floor((P.x + P.w / 2) / T), ty = Math.floor((P.y + P.h / 2) / T); drin = !!G.grate[ty * G.lv.W + tx]; }
+    if (drin && !RU.gitter) { RU.stats.gitter++; const c = A.ctx; if (!noiseB || noiseB.sampleRate !== c.sampleRate) mkNoise();
+      const t = c.currentTime + 0.005, s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+      s.buffer = noiseB; s.loop = true; f.type = "bandpass"; f.Q.value = 3; f.frequency.setValueAtTime(300, t); f.frequency.exponentialRampToValueAtTime(900, t + 0.5);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.1, t + 0.15); g.gain.linearRampToValueAtTime(0, t + 0.6);
+      s.connect(f); f.connect(g); g.connect(A.sfx); s.start(t); s.stop(t + 0.65); s.onended = () => { try { s.disconnect(); f.disconnect(); g.disconnect(); } catch (_) {} };
+      [4, 9].forEach((d, i) => tuned("glas", d, 3, 0.05, 0.08 + i * 0.12, "rug" + i)); }
+    RU.gitter = drin;
+  }
+  function ruNebelRolle() {
+    const P = Z.player; if (!P || !(P.rollT > 0) || !(Z.hasMoveRune && Z.hasMoveRune("nebel"))) return false;
+    RU.stats.nebelrolle++; whoosh(0.045, 0.45); tuned("glas", 4, 3, 0.035, 0.05, "run"); return true;
+  }
   /* R15 Befreiter Kundschafter (abenteuer.js, Z.helferAktiv()): beim Losgehen ein kurzer Ruf, beim Abschied ein Gruß (Formant-Laute
      wie die Lager-Figuren), Treffer als leichter Dolchstich (KL.treffer, src "helfer") statt des alten „slash“ (Hook nur direkt danach). */
   const HL = { an: false, lv: null, hitT: -9, stats: { ruf: 0, abschied: 0, treffer: 0 } }; KL.helfer = HL;
@@ -1504,6 +1576,9 @@
   if (A) A.hook = Object.assign(A.hook || {}, {
     splash: o => quSplash(),
     parry: o => fgParry(),
+    rune: o => ruRune(),
+    gem: o => !!(A.ctx && A.ctx.currentTime - RU.t < 0.02), /* R20: Gürtel-Rune – „gem“ im selben Moment ersetzt */
+    dark: o => !!(o && o.rate === 1.6 && ruNebelRolle()),
     door: o => !!(A.ctx && A.ctx.currentTime - GT.t < 0.02), /* R18: Tür-Klang des Gittertor-Hebels (gleicher Moment) */
     slash: o => !!(A.ctx && A.ctx.currentTime - HL.hitT < 0.03),
     rock: o => raeFalsch() || bkFall(),
@@ -1558,6 +1633,7 @@
   if (A) A.hook = Object.assign(A.hook || {}, {
     holy: o => {
       if (raeGeloest()) return true;
+      if (A.ctx && A.ctx.currentTime - RU.t < 0.02) return true; /* R20: „holy“ der Bewegungs-Rune im selben Moment ersetzt */
       const m = Z.meta && Z.meta.ach; if (!m || !Z.ACH) return false;
       const ids = Object.keys(m); if (ER.n < 0) { ER.n = ids.length; return false; }
       if (ids.length <= ER.n) { ER.n = ids.length; return false; }
@@ -1662,7 +1738,7 @@
     /* Raumkulisse und Gegnerstimmen */
     try { roomTick(dt); observe(dt); climbTick(dt); transitTick(dt); } catch (e) { if (!KL.err3) { KL.err3 = 1; console.error(e); } }
     try { sonderTick(dt); } catch (e) { if (!KL.err7) { KL.err7 = 1; console.error(e); } }
-    try { raeTick(); quStateTick(P); fuTick(); hlTick(); bkTick(); fgTick(); gtTick(); fsTick(); } catch (e) { if (!KL.err9) { KL.err9 = 1; console.error(e); } } /* R15: Rätsel/Quelle nach Zustand */
+    try { raeTick(); quStateTick(P); fuTick(); hlTick(); bkTick(); fgTick(); gtTick(); fsTick(); ruTick(); } catch (e) { if (!KL.err9) { KL.err9 = 1; console.error(e); } } /* R15: Rätsel/Quelle nach Zustand */
     try { rueckTick(dt); } catch (e) { if (!KL.err8) { KL.err8 = 1; console.error(e); } }
     try { tplTick(dt); } catch (e) { if (!KL.err9) { KL.err9 = 1; console.error(e); } }
     try { bewegTick(dt); } catch (e) { if (!KL.err10) { KL.err10 = 1; console.error(e); } }

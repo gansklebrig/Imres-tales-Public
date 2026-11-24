@@ -350,7 +350,7 @@
     donnersprung: { mech: true, fam: "sturm", n: ["Donnersprung", "Thunder Leap"], col: "#f0e060", ico: "⇑",
       d: ["Jeder " + RN.donnerN + ". Sprung entlädt eine Schockwelle, die betäubt.", "Every " + RN.donnerN + "rd jump releases a stunning shockwave."] },
     gewitter: { mech: true, fam: "sturm", n: ["Gewitterpfütze", "Storm Puddle"], col: "#e8d050", ico: "☔",
-      d: ["Blitztreffer hinterlassen geladene Pfützen; Kettenblitze springen über Pfützen und Wasser " + pc(RN.pfuetzeWeit) + " % weiter.", "Lightning hits leave charged puddles; chain lightning leaps " + pc(RN.pfuetzeWeit) + "% further across puddles and water."] },
+      d: ["Kettenblitz-Treffer hinterlassen geladene Pfützen; von dort springt der nächste Kettenblitz " + pc(RN.pfuetzeWeit) + " % weiter zu einem noch nicht getroffenen Gegner.", "Chain lightning hits leave charged puddles; from there the next chain leaps " + pc(RN.pfuetzeWeit) + "% further to a foe it hasn't hit yet."] },
     fadenriss: { mech: true, fam: "faden", n: ["Fadenriss", "Thread Rend"], col: "#ffd27a", ico: "⋔",
       d: ["Faden-Krits spalten sich: " + RN.rissN + " Splitterfäden treffen nahe Gegner (" + pc(RN.rissDmg) + " %) und markieren sie.", "Thread crits split: " + RN.rissN + " splinter threads hit nearby foes (" + pc(RN.rissDmg) + "%) and mark them."] },
     fallensteller: { mech: true, fam: "faden", n: ["Fallensteller", "Trapper"], col: "#e5b454", ico: "⊓",
