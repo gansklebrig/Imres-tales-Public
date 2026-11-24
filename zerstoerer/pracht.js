@@ -201,6 +201,8 @@
       const a0 = Math.max(0.35, Math.min(0.95, (mid - 0.1) / 0.5));
       /* nie vor Spieler, Gegnern, Geschossen, Gefahren oder Truhen/Türen: dann fast ganz ausblenden */
       c.globalAlpha = Z.gfx.fgAlpha ? Z.gfx.fgAlpha("p" + i, x, y, w, h, a0) : a0;
+      /* W11 R33: über Sichtnebel zurücktreten (wie der gemalte Vordergrund in ausstattung.js) */
+      if (Z.sightAt && c.globalAlpha > 0.01) { let sv = 0; for (const fy of [0.3, 0.6, 0.9]) sv = Math.max(sv, Z.sightAt(cam.x + x + w / 2, cam.y + y + h * fy)); c.globalAlpha *= 0.2 + 0.8 * Math.min(1, sv * 1.3); }
       if (c.globalAlpha < 0.01) continue;
       if (kind === "chain" || kind === "rope") { const sway = Math.sin(Z.gfx.time * 0.6 + i) * 0.03; c.save(); c.translate(x + w / 2, y); c.rotate(sway); c.drawImage(spr, -w / 2, 0, w, h); c.restore(); }
       else DS(c, spr, x, y, w, h);

@@ -74,6 +74,7 @@
     S = { lv, t: 0, found: new Set(), total: lv.secretsTotal || 0, rewards: [], keys: [], locks: [], levers: [], shrines: [], mouths: [], trial: null, exitTip: false, lockTip: 0, cellsIn: new Set() };
     const secretCells = new Set((lv.secretsList || []).filter(s => s.k === "secret").map(s => s.cell));
     S.secretCells = secretCells;
+    S.hints = geheimHinweise(lv, R); /* W13 R10: leise Hinweise auf Geheimkammern */
     /* W13 R4 Sonderräume (welt.js specials): Kranplattformen */
     S.kraene = (lv.specials || []).filter(o => o.k === "kran").map(o => ({ x: o.x, w: o.w, y0: o.yTop, y1: o.yBot, y: o.yBot, dir: -1, sp: 54, pause: 1.2, dy: 0 }));
     /* W13 R7: rollende Fässer, Kronleuchter zum Schwingen, Gezeiten */
@@ -466,6 +467,93 @@
     }
     return res;
   };
+  /* ======================= W13 R10: leise Hinweise auf Geheimkammern =======================
+     Messung (r10/geheim.py, Raum-Bot ohne Vorwissen, 13 Gebiete × 2): 29 von 47 Rissen kamen überhaupt ins Bild – der einzige Hinweis war
+     bisher das Rissbild selbst. Jetzt, alle dezent und nur solange die Kammer unentdeckt ist:
+       · Luftzug: feine Staubfäden wehen aus der Rissfläche in den Raum (nur bis ~13 Kacheln um die Figur, alle ~0,7 s ein Faden)
+       · Ratte: einmal je Riss huscht eine Ratte bis zu 12 Kacheln am Boden entlang zum Riss und verschwindet darin
+       · hohler Klang: Treffer auf feste Wand bis 2 Kacheln neben dem Riss klingen hohl (Klang-Hook Z.geheimKlang("hohl", x, y))
+       · selten (≈15 %): ein Kreidekreuz an der Rissfläche, in der Nähe ein leiser Satz
+     Grafik kann über Z.geheimRisse() (Flächen je Kammer) z. B. Steinfarbe/Spinnweben anpassen. */
+  function geheimHinweise(lv, R) {
+    const out = [], W = lv.W, air = v => v === 0 || v === 2 || v === 4 || v === 8 || v === 10;
+    for (const k in lv.cells) {
+      const c = lv.cells[k]; if (c.kind !== "secret") continue;
+      const inSec = (x, y) => x >= c.x * CW && x < c.x * CW + CW && y >= c.y * CH && y < c.y * CH + CH;
+      const seen = new Set(), q = [];
+      for (let y = c.y * CH - 1; y <= c.y * CH + CH; y++) for (let x = c.x * CW - 1; x <= c.x * CW + CW; x++) if (lv.get(x, y) === 7) { seen.add(y * W + x); q.push([x, y]); }
+      while (q.length) { const [x, y] = q.pop(); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const i = (y + dy) * W + x + dx; if (!seen.has(i) && lv.get(x + dx, y + dy) === 7) { seen.add(i); q.push([x + dx, y + dy]); } } }
+      const faces = [];
+      for (const i of seen) { const x = i % W, y = (i / W) | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, -1], [0, 1]]) if (air(lv.get(x + dx, y + dy)) && !inSec(x + dx, y + dy)) { faces.push({ x, y, dx, dy }); break; } }
+      if (!faces.length) continue;
+      const wucht = [...seen].some(i => lv.wuchtSet && lv.wuchtSet.has(i));
+      /* Rattenweg: Bodenkachel vor einer seitlichen Rissfläche, von dort 4–6 Kacheln begehbar weg vom Riss */
+      let rat = null;
+      for (const f of faces) {
+        if (!f.dx) continue; const fx = f.x + f.dx, fy = f.y;
+        if (!Z.standable(lv, fx, fy, 1)) continue;
+        let n = 0; while (n < 12 && Z.standable(lv, fx + f.dx * (n + 1), fy, 1)) n++;
+        if (n >= 3) { rat = { x0: (fx + f.dx * n) * T + 8, x1: f.x * T + 8 - f.dx * 6, y: (fy + 1) * T, dir: -f.dx }; break; }
+      }
+      out.push({ cell: k, faces, wucht, rat, ratDone: false, ratLive: null, mark: R() < 0.15 ? faces[(R() * faces.length) | 0] : null, markTip: false, t: R() * 2 });
+    }
+    return out;
+  }
+  Z.geheimRisse = () => (S && S.hints ? S.hints.filter(h => !S.found.has("secret:" + h.cell)).map(h => ({ cell: h.cell, faces: h.faces.filter(f => S.lv.get(f.x, f.y) === 7) })) : []);
+  const offen = h => S.found.has("secret:" + h.cell) || !h.faces.some(f => S.lv.get(f.x, f.y) === 7);
+  function hintTick(dt, P) {
+    const px = P.x + P.w / 2, py = P.y + P.h / 2;
+    for (const h of S.hints) {
+      if (offen(h)) { h.ratLive = null; continue; }
+      const f0 = h.faces[0], d = Math.hypot(f0.x * T + 8 - px, f0.y * T + 8 - py) / T;
+      /* Luftzug (nicht bei Wucht-Rissen – die bröckeln schon) */
+      if (!h.wucht && d < 13 && (h.t -= dt) <= 0) {
+        h.t = 0.55 + Math.random() * 0.4;
+        const f = h.faces[(Math.random() * h.faces.length) | 0], sx = f.x * T + 8 + f.dx * 8, sy = f.y * T + 8 + f.dy * 8 + (Math.random() - 0.5) * (f.dx ? 12 : 2);
+        FX.p({ x: sx + (f.dy ? (Math.random() - 0.5) * 12 : 0), y: sy, vx: f.dx * (14 + Math.random() * 10) + (Math.random() - 0.5) * 4, vy: f.dy * 12 - 3 + (Math.random() - 0.5) * 4, life: 1.6, size: 1, col: "#d8cfc0", kind: "smoke", g: -6, drag: 0.985 });
+      }
+      /* Ratte */
+      /* Ratte: startet, sobald ihr Startpunkt (bis 12 Kacheln vor dem Riss) nahe der Figur ist – sie läuft dann zum Riss und lockt hin */
+      if (h.rat && !h.ratDone && Math.abs(h.rat.x0 - px) < 12 * T && Math.abs(h.rat.y - P.y - P.h) < 4 * T) { h.ratDone = true; h.ratLive = { x: h.rat.x0, t: 0 }; }
+      if (h.ratLive) {
+        const r = h.ratLive; r.t += dt; r.x += h.rat.dir * 95 * dt;
+        if ((h.rat.dir > 0 && r.x >= h.rat.x1) || (h.rat.dir < 0 && r.x <= h.rat.x1)) {
+          h.ratLive = null; if (Z.geheimKlang) Z.geheimKlang("ratte", h.rat.x1, h.rat.y); else A.play("rat", { vol: 0.25, x: h.rat.x1 });
+          FX.burst(h.rat.x1 + h.rat.dir * 4, h.rat.y - 3, 3, { col: ["#8a7a6a"], sp: 20, life: 0.4, size: 1.5, g: 200 });
+        }
+      }
+      /* Kreidekreuz: leiser Satz in der Nähe */
+      if (h.mark && !h.markTip && Math.abs(h.mark.x * T + 8 - px) < 50 && Math.abs(h.mark.y * T + 8 - py) < 40) {
+        h.markTip = true; toast(L(["Jemand hat ein Kreuz an diese Wand gekritzelt.", "Someone scratched a cross onto this wall."]), 2600, { x: h.mark.x * T + 8, y: h.mark.y * T - 6 }, { prio: 2 });
+      }
+    }
+  }
+  function drawHints(c, t, vis) {
+    for (const h of S.hints) {
+      if (offen(h)) continue;
+      if (h.mark && vis(h.mark.x * T, h.mark.y * T)) { const x = h.mark.x * T + 8 + h.mark.dx * 6, y = h.mark.y * T + 8; c.strokeStyle = "rgba(230,222,205,.45)"; c.lineWidth = 1; c.beginPath(); c.moveTo(x - 3, y - 3); c.lineTo(x + 3, y + 3); c.moveTo(x + 3, y - 3); c.lineTo(x - 3, y + 3); c.stroke(); }
+      const r = h.ratLive; if (!r) continue;
+      const x = r.x, y = h.rat.y, s = h.rat.dir, wob = Math.sin(r.t * 40) * 0.6;
+      c.fillStyle = "#3a302a"; c.beginPath(); c.ellipse(x, y - 2.6 + wob * 0.3, 3.6, 2.2, 0, 0, 6.283); c.fill();
+      c.beginPath(); c.ellipse(x + s * 3.4, y - 3, 1.8, 1.4, 0, 0, 6.283); c.fill();
+      c.strokeStyle = "#4a3a30"; c.lineWidth = 0.7; c.beginPath(); c.moveTo(x - s * 3.4, y - 2.4); c.quadraticCurveTo(x - s * 6, y - 1 + wob, x - s * 8, y - 3); c.stroke();
+    }
+  }
+  /* hohler Klang: Treffer auf feste Wand nahe einem unentdeckten Riss */
+  let hohlT = 0;
+  const hpH0 = Z.hitProps;
+  Z.hitProps = function (r, dmg, act) {
+    const res = hpH0 ? hpH0.apply(this, arguments) : undefined;
+    try {
+      if (r && act && S && S.hints && S.hints.length && Z.level === S.lv && (S.t || 0) - hohlT > 0.4) {
+        const x0 = Math.floor(r.x / T), x1 = Math.floor((r.x + r.w) / T), y0 = Math.floor(r.y / T), y1 = Math.floor((r.y + r.h) / T);
+        let hit = null;
+        for (const h of S.hints) { if (offen(h) || hit) continue; for (const f of h.faces) { if (hit) break; for (let ty = y0; ty <= y1 && !hit; ty++) for (let tx = x0; tx <= x1; tx++) { const v = S.lv.get(tx, ty); if (v === 1 && Math.abs(tx - f.x) + Math.abs(ty - f.y) <= 2) { hit = [tx, ty]; break; } } } }
+        if (hit) { hohlT = S.t || 0; const hx = hit[0] * T + 8, hy = hit[1] * T + 8; if (Z.geheimKlang) Z.geheimKlang("hohl", hx, hy); else A.play("crate", { vol: 0.35, rate: 0.55, x: hx }); FX.burst(hx, hy, 3, { col: [Z.tileCol || "#6a5a50", "#9a8a7a"], sp: 30, life: 0.5, size: 1.6, g: 400 }); }
+      }
+    } catch (err) { console.error(err); }
+    return res;
+  };
   /* Morsche Böden (lv.morsch): brechen unter einer schweren Landung (Sturz ≥ 4 Kacheln oder Sturzangriff) */
   function morschTick(P) {
     const lv = S.lv;
@@ -535,6 +623,7 @@
     /* Geheimkammern: gefunden, sobald man drinsteht */
     const ck = Math.floor(px / T / CW) + "," + Math.floor((P.y + P.h / 2) / T / CH);
     if (S.secretCells.has(ck)) found("secret:" + ck, L(["Eine verborgene Kammer.", "A hidden chamber."]));
+    if (S.hints && S.hints.length) hintTick(bt, P);
     /* vor dem Ausgang: Bilanz der Geheimnisse */
     if (!S.exitTip && S.total > 0) for (const d of S.lv.doors) if (d.kind === "exit" && Math.abs(d.x * T + 8 - px) < 70 && Math.abs((d.y + 1) * T - py) < 40) {
       S.exitTip = true;
@@ -652,6 +741,7 @@
     for (const ro of S.rollers || []) if (vis(ro.x, ro.y) || ro.barrels.length) drawBarrels(c, ro);
     for (const s2 of S.swings || []) if (vis(s2.ax, s2.ay + s2.L)) drawSwing(c, s2, t);
     for (const o of S.tides || []) if (vis(o.td.xa * T, o.td.yw * T)) drawTide(c, o, t);
+    if (S.hints && S.hints.length) drawHints(c, t, vis);
   };
   /* Licht: Fundstücke, Schreine und Laternen leuchten durch die Dunkelheit (alle Grafikstufen) */
   const le0 = Z.lightExtra;

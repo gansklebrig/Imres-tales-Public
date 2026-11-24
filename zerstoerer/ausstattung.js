@@ -2533,7 +2533,9 @@
       const mid = Math.abs(x + w / 2 - cam.w / 2) / (cam.w * 0.5);
       const al0 = Math.max(0.28, Math.min(1, (mid - 0.15) / 0.55));
       /* nie vor Spieler, Gegnern, Geschossen, Gefahren oder Truhen/Türen: dann fast ganz ausblenden */
-      const al = Z.gfx.fgAlpha ? Z.gfx.fgAlpha("a" + i, x, y, w, h, al0) : al0;
+      let al = Z.gfx.fgAlpha ? Z.gfx.fgAlpha("a" + i, x, y, w, h, al0) : al0;
+      /* W11 R33: über unerkundetem Dunkel (Sichtnebel) tritt der Vordergrund zurück – sonst stehen helle Randkanten im Schwarz */
+      if (Z.sightAt && al > 0.01) { let sv = 0; for (const fy of [0.3, 0.6, 0.9]) sv = Math.max(sv, Z.sightAt(cam.x + x + w / 2, cam.y + y + h * fy)); al *= 0.2 + 0.8 * Math.min(1, sv * 1.3); }
       if (al < 0.01) continue;
       c.save(); c.globalAlpha = al;
       const mir = (kind === "spinnwebe" || kind === "vorhang") && x + w / 2 > cam.w / 2;

@@ -405,6 +405,25 @@
     c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = 1; c.globalCompositeOperation = "copy"; c.drawImage(hb, 0, 0); c.restore();
   }
 
+  /* W11 R33: Absicherung Handheld/lean. Mikromessung (kopie.py, CPU 8× gedrosselt, 200×): Vollbildkopie 2–15 ms,
+     halbe Auflösung 6–20 ms, Verlaufsfüllung ~10 ms, Wandfüllung 0,1–0,6 ms → auf lean/mini KEINE Vollbildkopie mehr.
+     Stattdessen auf lean (nicht mini) das Hintergrundbild einmal je Gebiet in Weltgröße backen und beim Anlegen der
+     Kachel-Chunks in deren leere Flächen malen (die Chunks werden ohnehin jedes Bild kopiert) → 0 ms Mehrkosten je Bild.
+     Auf „Handheld minimal“ (Z.gq.mini) ganz aus. */
+  const leanBack = () => !!(Z.gq && (Z.gq.lean || Z.gq.mini));
+  function lvBackFor() {
+    if (!Z.gq || !Z.gq.lean || Z.gq.mini || !lv || !B) return null;
+    const A = lv.arena && Z.ARENAS ? Z.ARENAS[lv.arena] : null;
+    const mode = lv.hub ? (G.off && G.off.lagerhimmel ? null : "hub") : A ? (A.kind === "lakeboss" || (G.off && G.off.arenahimmel) ? null : "arena") : (B.open || lv.out) && B.sky && !(G.off && G.off.fensterhimmel) ? "sky" : null;
+    if (!mode) return null;
+    const LWp = lv.W * T, LHp = lv.H * T, k = Math.min(0.5, 2400 / LWp, 900 / LHp), key = mode + "|" + lv.W + "x" + lv.H + "|" + (B.name ? B.name[0] : "") + "|" + (lv.arena || "");
+    if (G.lvBack && G.lvBack.key === key && G.lvBack.lvRef === lv) return G.lvBack;
+    const t = document.createElement("canvas"); t.width = Math.max(32, Math.ceil(LWp * k)); t.height = Math.max(24, Math.ceil(LHp * k));
+    const tc = t.getContext("2d"), cam = Z.cam;
+    try { if (mode === "hub") hubBack(tc, cam); else if (mode === "arena") arenaBack(tc, cam); else skyBack(tc, cam); } catch (e) { console.error(e); return null; }
+    G.hubBack = G.arenaBack = G.skyBack = null; /* nur die Weltfassung behalten */
+    t.key = key; t.lvRef = lv; t.k = k; G.lvBack = t; return t;
+  }
   /* W11 R32: offene Gebiete auf Stufe 0 (Fensterbögen, Lücken): statt flacher Wandfarbe der Himmelsverlauf des Gebiets
      mit ein paar Sternen, einmal gebacken (1:1-Kopie wie oben). Schalter Z.gfx.off.fensterhimmel. */
   function skyBack(c, cam) {
@@ -1474,6 +1493,9 @@
     if (!cv) { cv = document.createElement("canvas"); cv.width = cw; cv.height = chh; }
     const c = cv.getContext("2d"); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = 1; c.globalCompositeOperation = "source-over"; c.clearRect(0, 0, cw, chh); c.scale(s, s); c.translate(-cx * CH_W * T, -cy * CH_H * T);
     try { paintTiles(c, cx * CH_W, cy * CH_H, CH_W, CH_H); } catch (e) { console.error(e); }
+    /* R33: Hintergrund hinter die fertigen Kacheln backen (lean): „destination-over“ füllt nur, was frei geblieben ist
+       (Himmel, Fenster, Lücken – die Kacheln stanzen diese Stellen selbst aus) */
+    { const lb = lvBackFor(); if (lb) { const wx = cx * CH_W * T, wy = cy * CH_H * T; c.save(); c.globalCompositeOperation = "destination-over"; c.drawImage(lb, wx * lb.k, wy * lb.k, CH_W * T * lb.k, CH_H * T * lb.k, wx, wy, CH_W * T, CH_H * T); c.restore(); } }
     ch = { cv }; G.chunks.set(key, ch); return ch;
   }
   /* Chunks in Bildschirmauflösung (ab Stufe „Hoch“): Ein Chunk wird mit 3× gemalt und bisher jedes Bild auf den
@@ -2606,7 +2628,7 @@
     const pf = Z.prof, tm = pf ? () => performance.now() : null; let t0 = pf ? tm() : 0;
     const mark = k => { if (pf) { c.getImageData(0, 0, 1, 1); const n = tm(); pf[k] = (pf[k] || 0) + n - t0; t0 = n; } };
     const lay = !Z.gq || Z.gq.layers !== false;
-    if (Z.noLayers) {} else if (!lay && lv.hub && !(G.off && G.off.lagerhimmel)) { hubBack(c, cam); } else if (!lay && lv.arena && !(G.off && G.off.arenahimmel)) { arenaBack(c, cam); } else if (!lay && (B.open || lv.out) && B.sky && !(G.off && G.off.fensterhimmel)) { skyBack(c, cam); } else if (lay && (B.open || lv.out || lv.hub || lv.arena)) { drawLayers(c, cam); if (!Z.gq || Z.gq.critters !== false) { updCritters(dt, cam); drawCritters(c, cam); } } else { c.fillStyle = B.wall; c.fillRect(cam.x - 2, cam.y - 2, cam.w + 4, cam.h + 4); } mark("layers");
+    if (Z.noLayers) {} else if (!lay && !leanBack() && lv.hub && !(G.off && G.off.lagerhimmel)) { hubBack(c, cam); } else if (!lay && !leanBack() && lv.arena && !(G.off && G.off.arenahimmel)) { arenaBack(c, cam); } else if (!lay && !leanBack() && (B.open || lv.out) && B.sky && !(G.off && G.off.fensterhimmel)) { skyBack(c, cam); } else if (lay && (B.open || lv.out || lv.hub || lv.arena)) { drawLayers(c, cam); if (!Z.gq || Z.gq.critters !== false) { updCritters(dt, cam); drawCritters(c, cam); } } else { c.fillStyle = B.wall; c.fillRect(cam.x - 2, cam.y - 2, cam.w + 4, cam.h + 4); } mark("layers");
     /* Riesen im Hintergrund (Demogorgon im Herz des Sees): hinter Boden und Plattformen */
     Z.drawBehindTiles && Z.drawBehindTiles(c, cam, t);
     drawTiles(c, cam); mark("tiles");
