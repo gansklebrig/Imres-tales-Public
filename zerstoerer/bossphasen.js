@@ -1751,6 +1751,24 @@
     };
   }
   if (document.readyState === "complete") install(); else window.addEventListener("load", install);
+  /* W9 (4. Runde, Kontrollläufe): Wächterkämpfe mit frischer Meta endeten gehäuft am Chasme-Wächter (Zinnen) – ein großer Teil des
+     Schadens kam von gewöhnlichen Gegnern im Wächterraum (Armbrustbolzen, Wasserspeier). Erwacht ein Wächter, ziehen sich die
+     gewöhnlichen Gegner in seinem Raum zurück (Rauch, ohne Beute) – der Wächter bleibt der Gegner, nicht das Kreuzfeuer. */
+  const sb0 = Z.spawnBoss;
+  if (sb0) Z.spawnBoss = function () {
+    const e = sb0.apply(this, arguments);
+    try {
+      const b = e && e.box;
+      if (b && b.warden) for (const o of Z.enemies) {
+        if (o === e || o.dead || o.def.boss || o.master || o.nmMini || o.nm || o === e.partner) continue;
+        const ox = o.x + o.w / 2, oy = o.y + o.h;
+        if (ox < b.x0 - 24 || ox > b.x1 + 24 || oy < b.top - 40 || oy > b.y1 + 40) continue;
+        FX.burst(ox, o.y + o.h / 2, 12, { col: ["#3a3030", "#5a4a40"], sp: 60, life: 0.6, size: 4, kind: "smoke" });
+        o.dead = true; o.deadT = 99; o.noLoot = true;
+      }
+    } catch (err) { console.error(err); }
+    return e;
+  };
   Z.w9 = { LS, openUp, SIG, patch, breakThrough: (e, P) => breakThrough(e, P) };
 
   /* ---------- Zeichnen: Schwachpunkt und Wut ---------- */

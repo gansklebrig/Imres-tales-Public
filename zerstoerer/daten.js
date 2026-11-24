@@ -424,6 +424,6 @@
        am Laufende noch 1000–3700 übrig → 1 + 0,2t (vorher 1 + 0,6t): Aufwerten + gelegentlich Händlerin, nicht alles */
     /* W9 (Kontrollläufe K1, haupt, unsterblich): Gold ein 4000–5200, ausgegeben 1500–2800, Rest 1000–3100 – Gold war nie knapp,
        begrenzt haben nur Glut und Amboss-Schläge. Jetzt 15 % weniger Gold und teureres Schmieden (schmiede.js goldCost) */
-    goldMul: t => 0.8 * (1 + 0.2 * t) /* W9 3. Runde: 0,85 → 0,8 – mit den neuen Arten und Trupps blieben gründlich 1100–5600 Gold übrig */
+    goldMul: t => 0.82 * (1 + 0.2 * t) /* W9 3. Runde: 0,85 → 0,8 (gründlich blieben 1100–5600 Gold übrig); 4. Runde Kompromiss 0,82 (gründlich sonst nur +4) */
   };
 })();

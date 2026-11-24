@@ -557,6 +557,21 @@
     const def = RK2[RM.cur];
     if (def.fn && !q.mini && calm) { RM.fnT -= dt; if (RM.fnT <= 0) RM.fnT = roomFn(def.fn) * slow || 10; }
   }
+  /* Funkeln für Wunder (wunder.js): n leise Töne in der Tonart der Musik, im Sechzehntelraster, über die Kulisse.
+     o: inst (cel, harfe, glock …), okt (Halbtöne über dem Grundton), stufen ([Leiterstufen] zufällig oder "auf" = Arpeggio
+     aufwärts), vol, len (Achtel), abstand (Sechzehntel). Höchstens alle 0,3 s; nicht auf „minimal“. */
+  KL.funkeln = (n, o) => {
+    try {
+      o = o || {}; const q = gq();
+      if (!A.ok || !M.note || !M.raster || q.mini || Z.quiet) return;
+      const now = A.ctx.currentTime; if (now - (KL.funkT || 0) < 0.3) return; KL.funkT = now;
+      const r = M.raster(0.03), b = r.beat, inst = o.inst || "cel", up = o.stufen === "auf", st = Array.isArray(o.stufen) ? o.stufen : [0, 2, 4, 7];
+      for (let i = 0; i < (n || 1); i++) {
+        const d = up ? [0, 2, 4, 7, 9, 11, 14][i % 7] : st[(Math.random() * st.length) | 0];
+        M.note(inst, ton(d) + (o.okt != null ? o.okt : 36), r.t + i * b * 0.5 * (o.abstand || 1), (o.vol || 0.04) * (1 - i * 0.06), b * (o.len || 3), roomBus() || undefined);
+      }
+    } catch (e) { /* still */ }
+  };
   /* Prüfstand (test/w12_klang): Klangnetz für einen neuen AudioContext neu aufbauen */
   KL._reset = () => { net = null; RM.bus = null; RM.slot = null; RM.cur = RM.pend = null; RM.force = null; W.lv = null; DR.upTo = -1e9; DR.until = 0; KV.lastIdle = 0; };
   KL._alle = () => { const l = []; for (const g in GR) l.push(...GR[g]); for (const id in RK2) { const d = RK2[id]; if (d.loop) l.push(AM(d.loop[0])); for (const o of d.one || []) for (let i = 1; i <= o[1]; i++) l.push(AM(o[0] + i)); } return l; };
@@ -638,6 +653,7 @@
       W.dripT -= dt;
       if (W.dripT <= 0) { W.dripT = (0.6 + Math.random() * 1.8) / KL.R.drip; drip(); }
     }
+    if (!KL.wPre) { KL.wPre = 1; preload([1, 2, 3, 4].map(i => AM("n_fuchs_" + i)).concat([KS("fx_ka_creak2")])); }
     /* Raumkulisse und Gegnerstimmen */
     try { roomTick(dt); observe(dt); } catch (e) { if (!KL.err3) { KL.err3 = 1; console.error(e); } }
   };

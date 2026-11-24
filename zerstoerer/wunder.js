@@ -242,7 +242,7 @@
     d: ["Der Himmel regnet Sterne. Für ein paar Atemzüge ist selbst die Feste still.", "The sky rains stars. For a few breaths even the keep is quiet."],
     where: k => k.back && (k.out || k.B.open === "arch") && k.night && k.mood !== "regen" && k.mood !== "gewitter" && k.bg !== "storm",
     start(s) { s.m = []; s.life = 16; s.acc = 0; s.h = viewHole(); if (!s.h) return false; },
-    tick(s, dt) { if ((s.t * 2 | 0) !== ((s.t - dt) * 2 | 0)) s.h = viewHole() || s.h; s.acc += dt * (s.t < s.life - 2 ? 7 : 0); while (s.acc > 1) { s.acc--; s.m.push({ x: rnd(-0.1, 1), y: rnd(-0.2, 0.6), a: rnd(0.35, 0.65), l: rnd(30, 80), t: 0, life: rnd(0.7, 1.5), w: rnd(0.8, 1.6), gold: Math.random() < 0.3 }); } for (const m of s.m) m.t += dt; s.m = s.m.filter(m => m.t < m.life); return s.t < s.life || s.m.length > 0; },
+    tick(s, dt) { if ((s.t * 2 | 0) !== ((s.t - dt) * 2 | 0)) s.h = viewHole() || s.h; s.acc += dt * (s.t < s.life - 2 ? 7 : 0); while (s.acc > 1) { s.acc--; s.m.push({ x: rnd(-0.1, 1), y: rnd(-0.2, 0.6), a: rnd(0.35, 0.65), l: rnd(30, 80), t: 0, life: rnd(0.7, 1.5), w: rnd(0.8, 1.6), gold: Math.random() < 0.3 }); } for (const m of s.m) if (m.gold && !m.snd && m.t === 0) { m.snd = 1; if (Math.random() < 0.45) Z.klang && Z.klang.funkeln && Z.klang.funkeln(1, { vol: 0.03, len: 4 }); } /* Klang: goldene Schnuppen funkeln in der Tonart */ for (const m of s.m) m.t += dt; s.m = s.m.filter(m => m.t < m.life); return s.t < s.life || s.m.length > 0; },
     back(c, s, t, cam, oy, LH) {
       c.globalCompositeOperation = "lighter";
       for (const m of s.m) {
@@ -256,7 +256,7 @@
   def({ id: "regenbogen", tier: 1, n: ["Regenbogen", "Rainbow"], hint: ["wenn draußen der Regen aufhört", "when the rain stops outside"],
     d: ["Der Regen hört auf, und über der Feste spannt sich ein Bogen aus Rot, Gold, Rosa und Violett.", "The rain stops, and a bow of red, gold, rose and violet spans the keep."],
     where: k => k.back && k.out && (k.mood === "regen" || k.mood === "niesel" || k.mood === "gewitter"),
-    start(s, k) { s.life = 34; s.moon = k.night; s.x = rnd(0.25, 0.75); const B = Z.biome; if (B && B.weather) { s.wsave = B.weather.slice(); B.weather = B.weather.filter(w => w !== "rain" && w !== "drizzle"); } const W = Z.wetter && Z.wetter(); if (W) { s.msave = W.mood; W.mood = "klar"; W.ev = 99; } },
+    start(s, k) { Z.klang && Z.klang.funkeln && Z.klang.funkeln(7, { inst: "harfe", okt: 12, stufen: "auf", vol: 0.055, len: 8 }); /* Klang: Harfenbogen */ s.life = 34; s.moon = k.night; s.x = rnd(0.25, 0.75); const B = Z.biome; if (B && B.weather) { s.wsave = B.weather.slice(); B.weather = B.weather.filter(w => w !== "rain" && w !== "drizzle"); } const W = Z.wetter && Z.wetter(); if (W) { s.msave = W.mood; W.mood = "klar"; W.ev = 99; } },
     tick(s) { if (s.t >= s.life) { return false; } return true; },
     end(s) { /* das Wetter bleibt klar – der Regen ist vorbei */ },
     back(c, s, t, cam, oy, LH) {
@@ -396,7 +396,7 @@
     d: ["Eine winzige Spinne webt in aller Ruhe ein Netz, das im Licht glitzert wie Raureif. Es bleibt hängen, solange Ezekiel hier ist.", "A tiny spider calmly weaves a web that glitters like hoarfrost. It stays for as long as Ezekiel is here."],
     where: k => k.bg === "chasm" || k.bg === "cellar" || k.bg === "dungeon" || k.bg === "belltower" || k.bg === "halls" || k.bg === "lake",
     start(s) { const p = pc(); const sp = wallSpot(p.x, p.y - 20, 120, 60, (tx, ty) => Math.abs(tx * T + 8 - p.x) > 26 && wallFree(tx + 1, ty) && wallFree(tx - 1, ty) && wallFree(tx, ty - 1) && wallFree(tx, ty + 1)); if (!sp) return false; s.x = sp.x; s.y = sp.y; s.R = rnd(10, 14); s.n = 9; s.life = 20; s.pr = 0; stay.push({ kind: "web", s }); preload("wSpinne"); },
-    tick(s, dt) { s.pr = Math.min(1, s.t / 14); return s.t < s.life; },
+    tick(s, dt) { s.pr = Math.min(1, s.t / 14); if (s.pr >= 1 && !s.klang) { s.klang = 1; Z.klang && Z.klang.funkeln && Z.klang.funkeln(3, { inst: "cel", vol: 0.03, len: 4 }); } /* Klang: das fertige Netz glitzert */ return s.t < s.life; },
     at: s => ({ x: s.x, y: s.y }) });
   function drawWeb(c, s, t) {
     const pr = s.pr, x = s.x, y = s.y, R = s.R, n = s.n, sway = Math.sin(t * 0.8 + x) * 0.4;
@@ -438,10 +438,10 @@
   def({ id: "funkenvogel", tier: 1, n: ["Der Funkenvogel", "The ember bird"], hint: ["wo es glüht", "where embers glow"],
     d: ["Funken sammeln sich zu einem Vogel aus Glut, ziehen einen Kreis um Ezekiel und zerstieben zu Asche.", "Sparks gather into a bird of embers, circle Ezekiel once and scatter into ash."],
     where: k => k.bg === "embercity" || k.bg === "forge" || k.bg === "spires",
-    start(s) { const p = pc(); s.cx = p.x; s.cy = p.y - 40; s.life = 9; s.sp = []; for (let i = 0; i < 46; i++) s.sp.push({ u: Math.random(), k: (Math.random() * 4) | 0, x: p.x + rnd(-200, 200), y: p.y + rnd(-40, 120) }); },
+    start(s) { const p = pc(); preload("wFluegel"); setTimeout(() => snd("wFluegel", { vol: 0.12, rate: 1.6 }), 1800); /* Klang */ s.cx = p.x; s.cy = p.y - 40; s.life = 9; s.sp = []; for (let i = 0; i < 46; i++) s.sp.push({ u: Math.random(), k: (Math.random() * 4) | 0, x: p.x + rnd(-200, 200), y: p.y + rnd(-40, 120) }); },
     tick(s, dt) {
       const u = s.t / s.life, gather = clamp(s.t / 2, 0, 1), p = pc();
-      if (s.t > s.life - 1.2 && !s.burst) { s.burst = 1; for (const q of s.sp) FX.p({ x: q.x, y: q.y, vx: rnd(-40, 40), vy: rnd(-30, 10), g: 40, life: rnd(0.8, 1.6), size: 1.6, col: pick(["#ffb040", "#ff7a30", "#ffe080"]), kind: "glow", add: true }); }
+      if (s.t > s.life - 1.2 && !s.burst) { s.burst = 1; snd("fire", { vol: 0.16, x: p.x, rate: 1.4 }); /* Klang: Glut zerstiebt */ for (const q of s.sp) FX.p({ x: q.x, y: q.y, vx: rnd(-40, 40), vy: rnd(-30, 10), g: 40, life: rnd(0.8, 1.6), size: 1.6, col: pick(["#ffb040", "#ff7a30", "#ffe080"]), kind: "glow", add: true }); }
       const ang = (u * 1.25) * TAU, bx = p.x + Math.cos(ang) * 70, by = p.y - 34 + Math.sin(ang) * 26, dir = -Math.sin(ang) >= 0 ? 1 : -1, flap = Math.sin(s.t * 9);
       s.bx = bx; s.by = by; s.dir = dir;
       for (const q of s.sp) { const pt = birdPt(q.u, q.k, flap); const tx = bx + pt[0] * dir, ty = by + pt[1]; q.x += (tx - q.x) * Math.min(1, dt * (1 + gather * 9)); q.y += (ty - q.y) * Math.min(1, dt * (1 + gather * 9)); }
@@ -601,7 +601,7 @@
     start(s) { const p = pc(); const sp = wallSpot(p.x, p.y - 26, 140, 50, (tx, ty) => Math.abs(tx * T - p.x) > 40 && wallFree(tx + 1, ty) && wallFree(tx - 1, ty) && wallFree(tx, ty - 1) && wallFree(tx + 1, ty - 1) && wallFree(tx - 1, ty - 1)); if (!sp) return false; s.x = sp.x; s.y = sp.y - 6; s.pose = 0; s.away = 0; s.life = 70; s.changes = 0; stay.push({ kind: "painting", s }); },
     tick(s, dt) {
       const p = Z.player, looking = inCam(s.x, s.y, -10) && Math.sign(s.x - (p.x + p.w / 2)) === (p.face || 1);
-      if (!looking) { s.away += dt; if (s.away > 0.7) { s.away = -2; let np; do np = (Math.random() * POSES) | 0; while (np === s.pose); s.pose = np; s.changes++; } } else if (s.away > 0) s.away = 0; else s.away = Math.min(0, s.away + dt);
+      if (!looking) { s.away += dt; if (s.away > 0.7) { s.away = -2; let np; do np = (Math.random() * POSES) | 0; while (np === s.pose); s.pose = np; s.changes++; snd("klang/fx_ka_creak2.mp3", { vol: 0.08, x: s.x, rate: 1.3 }); /* Klang: der Rahmen knarzt */ } } else if (s.away > 0) s.away = 0; else s.away = Math.min(0, s.away + dt);
       return s.t < s.life;
     },
     at: s => ({ x: s.x, y: s.y }) });
@@ -672,7 +672,7 @@
       if (y == null) return false; side = Math.sign(x - p.x) || 1; s.side = side; s.x = x; s.y = y; s.face = -side; s.mode = "in"; s.walk = 0; s.sit = 0; s.life = 30; },
     tick(s, dt) {
       const p = Z.player, px = p.x + p.w / 2;
-      if (s.mode === "in") { const tx = px + s.side * 46; if (Math.abs(tx - s.x) < 3) { s.mode = "sit"; s.st = 0; } else { s.face = Math.sign(tx - s.x); s.x += s.face * 60 * dt; s.walk += dt * 15; } }
+      if (s.mode === "in") { const tx = px + s.side * 46; if (Math.abs(tx - s.x) < 3) { s.mode = "sit"; s.st = 0; snd("amb/n_fuchs_" + (1 + ((Math.random() * 4) | 0)) + ".mp3", { vol: 0.16, x: s.x }); /* Klang: Fuchslaut */ } else { s.face = Math.sign(tx - s.x); s.x += s.face * 60 * dt; s.walk += dt * 15; } }
       else if (s.mode === "sit") { s.face = Math.sign(px - s.x) || s.face; s.sit = Math.min(1, s.sit + dt * 2); s.st += dt; if (s.st > 6 || s.leave || Math.abs(px - s.x) < 22 || s.t > s.life) { s.mode = "out"; s.face = s.side; } }
       else { s.sit = Math.max(0, s.sit - dt * 4); s.x += s.face * 110 * dt; s.walk += dt * 26; if (!inCam(s.x, s.y, 40)) return false; }
       const gy = groundNear(s.x, s.y); if (gy != null) s.y += (gy - s.y) * Math.min(1, dt * 12);

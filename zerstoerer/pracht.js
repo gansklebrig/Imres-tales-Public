@@ -1554,6 +1554,125 @@
       c.fillStyle = "rgba(0,0,0,.25)"; for (const ex of [px - 12, px + 9]) c.fillRect(ex, py - 1, 0.6, 3.6);
     }
   }
+  /* ---------- Runde 10: senkrechte Verbindungen, Torhäuser an Gebietsausgängen, Nischen in Sackgassen ----------
+     Alles wird je Karte aus den aktuellen Level-Daten abgeleitet (nichts über den Kartenaufbau angenommen, was sich
+     ändern könnte; fehlende Felder werden übersprungen) und im Chunk-Cache gemalt. */
+  const isAir = v => v === 0 || v === 4 || v === 10 || v === 12, isSolid = v => v === 1 || v === 7, isStand = v => v === 1 || v === 7 || v === 2 || v === 8;
+  let shLv = null, shList = null;
+  function shaftsOf(lv) {
+    if (shLv === lv && shList) return shList; shLv = lv; shList = [];
+    if (!lv || !lv.cells || lv.hub || lv.arena) return shList;
+    const g = (x, y) => lv.get(x, y), CW = Z.CW, CH = Z.CH;
+    for (const k in lv.cells) {
+      const c = lv.cells[k]; if (!lv.cells[c.x + "," + (c.y + 1)]) continue;
+      const by = (c.y + 1) * CH, rx = c.x * CW;
+      for (let x = rx; x < rx + CW; x++) {
+        if (!(isAir(g(x, by - 1)) && isAir(g(x, by)))) continue;
+        let x1 = x; while (x1 + 1 < rx + CW && isAir(g(x1 + 1, by - 1)) && isAir(g(x1 + 1, by))) x1++;
+        if (x1 - x + 1 <= 10) {
+          /* Absatz: erste Reihe von unten nach oben, in der links und rechts der Öffnung fester Boden mit Luft darüber liegt */
+          let ly = -1; for (let y = by; y >= by - 6; y--) if ((isStand(g(x - 1, y)) && isAir(g(x - 1, y - 1))) || (isStand(g(x1 + 1, y)) && isAir(g(x1 + 1, y - 1)))) { ly = y; break; }
+          let lad = false; for (let xx = x; xx <= x1; xx++) if (g(xx, by) === 4 || g(xx, by - 1) === 4) lad = true;
+          shList.push({ x0: x, x1, by, ly, lad, up: lv.roomFns ? lv.roomFns[k] || null : null, dn: lv.roomFns ? lv.roomFns[c.x + "," + (c.y + 1)] || null : null });
+        }
+        x = x1;
+      }
+    }
+    return shList;
+  }
+  Z.schaechte = () => shaftsOf(Z.level);
+  /* Balustrade an den Kanten einer Schachtöffnung: Pfosten, Docken, Handlauf auf dem Absatz */
+  function balustrades(H) {
+    const { c, x0, x1, y0, y1, T, PAL, lv } = H, g = (x, y) => lv.get(x, y);
+    for (const s of shaftsOf(lv)) {
+      if (s.ly < 0 || s.x1 < x0 - 4 || s.x0 > x1 + 4 || s.ly < y0 - 2 || s.ly > y1 + 2) continue;
+      for (const [ex, dir] of [[s.x0 - 1, -1], [s.x1 + 1, 1]]) {
+        if (!(isStand(g(ex, s.ly)) && isAir(g(ex, s.ly - 1)))) continue;
+        let n = 1; while (n < 3 && isStand(g(ex + dir * n, s.ly)) && isAir(g(ex + dir * n, s.ly - 1))) n++;
+        const xa = dir < 0 ? (ex - n + 1) * T : ex * T, w = n * T, py = s.ly * T, hh = 11; H.setCR(xa - 2, py - hh - 3, w + 4, hh + 4);
+        c.fillStyle = "rgba(0,0,0,.3)"; c.fillRect(xa + 1, py - hh + 1, w, 2);
+        c.fillStyle = PAL.stone; c.fillRect(xa, py - hh, w, 2.2); c.fillStyle = PAL.stoneHi; c.fillRect(xa, py - hh, w, 0.6);
+        for (let k = 0; k <= n * 3; k++) { const bx = xa + 1 + k * (w - 2) / (n * 3); c.fillStyle = PAL.stone; c.beginPath(); c.ellipse(bx, py - hh / 2, 1.2, hh / 2 - 1.5, 0, 0, TAU); c.fill(); c.fillStyle = "rgba(0,0,0,.25)"; c.fillRect(bx + 0.4, py - hh + 2.5, 0.6, hh - 3); }
+        c.fillStyle = H.lit(PAL.stone, 0.06); const pX = dir < 0 ? xa + w - 3 : xa; c.fillRect(pX, py - hh - 2.5, 3, hh + 2.5); c.fillStyle = PAL.stoneHi; c.fillRect(pX, py - hh - 2.5, 3, 0.7);
+      }
+    }
+  }
+  /* Leitern: abgegriffene Sprossenmitten, dunkle Griffspuren an den Holmen */
+  function ladderWear(H) {
+    const { c, x0, x1, y0, y1, T, lv, h3 } = H;
+    for (let y = y0; y <= y1; y++) for (let x = x0; x < x1; x++) {
+      if (lv.get(x, y) !== 4) continue; const px = x * T, py = y * T;
+      c.fillStyle = "rgba(255,230,190,.16)"; for (let k = 3; k < T; k += 5) c.fillRect(px + 6, py + k, 4, 0.6);
+      if (h3(x, y, 1900) < 0.5) { c.fillStyle = "rgba(0,0,0,.16)"; c.fillRect(px + 2.2, py + 4 + h3(x, y, 1901) * 6, 1, 3); c.fillRect(px + 11.2, py + 2 + h3(x, y, 1902) * 8, 1, 3); }
+    }
+  }
+  /* Torhaus an Gebietsausgängen: Türme mit Zinnen, Bogensteine, hochgezogenes Fallgitter, Banner in der Farbe des
+     Zielgebiets; dazu geht die Rückwand über einige Kacheln in dessen Gestein und Ton über */
+  function targetOf(d) { const to = d.to, A = Z.ARENAS && Z.ARENAS[to]; return (Z.BIOMES && (Z.BIOMES[to] || (A && Z.BIOMES[A.base]))) || null; }
+  function gatehouses(H) {
+    const { c, x0, x1, y0, y1, T, PAL, lv, isWall } = H;
+    for (const d of lv.doors || []) {
+      if (d.kind !== "exit" || d.x < x0 - 10 || d.x > x1 + 10 || d.y < y0 - 8 || d.y > y1 + 4) continue;
+      const TB = targetOf(d), px = d.x * T + 8, py = (d.y + 1) * T;
+      if (!isWall(d.x, d.y - 1) && !isWall(d.x, d.y - 3)) continue;
+      /* Übergang des Gesteins: weicher Hof in Wandfarbe und Grundton des Zielgebiets */
+      if (TB && TB.wall) { H.setCR(px - 110, py - 110, 220, 120); const g = c.createRadialGradient(px, py - 30, 10, px, py - 30, 105); g.addColorStop(0, H.rgba(TB.wall, 0.55)); g.addColorStop(0.6, H.rgba(TB.wall, 0.25)); g.addColorStop(1, H.rgba(TB.wall, 0)); c.fillStyle = g; c.fillRect(px - 110, py - 140, 220, 150);
+        if (TB.ambCol) { const g2 = c.createRadialGradient(px, py - 20, 0, px, py - 20, 70); g2.addColorStop(0, H.rgba(TB.ambCol, 0.25)); g2.addColorStop(1, H.rgba(TB.ambCol, 0)); c.fillStyle = g2; c.fillRect(px - 70, py - 90, 140, 90); } }
+      H.setCR(px - 44, py - 92, 88, 94);
+      const hw = 20, top = py - 62, st = PAL.stone;
+      for (const sd of [-1, 1]) {
+        const tx = px + sd * (hw + 9); c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(tx - 8 + sd * 2, top - 16, 16, py - top + 16);
+        c.fillStyle = st; c.fillRect(tx - 8, top - 18, 16, py - top + 18); c.fillStyle = sd < 0 ? PAL.stoneHi : "rgba(0,0,0,.25)"; c.fillRect(tx - 8, top - 18, 1.2, py - top + 18);
+        c.fillStyle = "rgba(0,0,0,.25)"; for (let yy = top - 12; yy < py; yy += 7) c.fillRect(tx - 8, yy, 16, 0.7);
+        c.fillStyle = st; for (let k = 0; k < 3; k++) c.fillRect(tx - 8 + k * 6, top - 23, 4, 5); c.fillStyle = "#0e0a0a"; c.fillRect(tx - 1, top - 6, 2, 6);
+        if (TB) { const bc = TB.ambCol || "#8a2020"; c.fillStyle = H.mixH(bc, "#7a1a1a", 0.35); c.beginPath(); c.moveTo(tx - 5, top); c.lineTo(tx + 5, top); c.lineTo(tx + 5, top + 26); c.lineTo(tx, top + 21); c.lineTo(tx - 5, top + 26); c.fill(); c.fillStyle = "rgba(255,220,160,.35)"; c.fillRect(tx - 5, top, 10, 1.2); c.fillStyle = "#b8923a"; c.beginPath(); c.arc(tx, top + 9, 2.2, 0, TAU); c.fill(); }
+      }
+      c.fillStyle = st; c.fillRect(px - hw - 2, top - 18, hw * 2 + 4, 6);
+      const cy = top + 8;
+      for (let k = 0; k < 9; k++) { const a0 = Math.PI + k / 9 * Math.PI, a1 = Math.PI + (k + 1) / 9 * Math.PI; c.fillStyle = k === 4 ? H.lit(st, 0.1) : k % 2 ? st : H.lit(st, -0.06); c.beginPath(); c.arc(px, cy, hw + 7, a0 + 0.02, a1 - 0.02); c.arc(px, cy, hw, a1 - 0.02, a0 + 0.02, true); c.closePath(); c.fill(); }
+      c.strokeStyle = PAL.stoneHi; c.lineWidth = 0.7; c.beginPath(); c.arc(px, cy, hw + 7, Math.PI * 1.05, Math.PI * 1.45); c.stroke();
+      /* hochgezogenes Fallgitter im Bogenscheitel */
+      c.fillStyle = "#2a2422"; for (let k = -3; k <= 3; k++) { c.fillRect(px + k * 5 - 0.7, cy - hw + 2, 1.4, 10); c.beginPath(); c.moveTo(px + k * 5 - 1.4, cy - hw + 12); c.lineTo(px + k * 5, cy - hw + 15); c.lineTo(px + k * 5 + 1.4, cy - hw + 12); c.fill(); } c.fillRect(px - 17, cy - hw + 5, 34, 1.2);
+      c.fillStyle = "rgba(0,0,0,.35)"; for (let k = -2; k <= 2; k++) c.fillRect(px + k * 8 - 1.5, top - 13, 3, 3);
+    }
+  }
+  /* Nischen in Sackgassen: gemauerte Bogennische mit kleinem Schrein, Moos und einem Lichtstrahl von oben */
+  let niLv = null, niList = null;
+  function nichesOf(lv) {
+    if (niLv === lv && niList) return niList; niLv = lv; niList = [];
+    if (!lv || !lv.cells || lv.hub || lv.arena) return niList;
+    const g = (x, y) => lv.get(x, y), CW = Z.CW, CH = Z.CH, D4 = [[1, 0, "R"], [-1, 0, "L"], [0, 1, "D"], [0, -1, "U"]];
+    for (const k in lv.cells) {
+      const c = lv.cells[k]; if (c === lv.startCell || (lv.warden && lv.warden.cell === c)) continue;
+      let n = 0; for (const [dx, dy, s] of D4) { const v = c.need && c.need[s]; if (v && v !== "X" && lv.cells[(c.x + dx) + "," + (c.y + dy)]) n++; }
+      if (n !== 1 && !c.dead) continue;
+      let spot = null; for (const r of lv.rewards || []) if (r.cell === k) { spot = [r.x, r.y]; break; }
+      if (!spot) { const rx = c.x * CW, ry = c.y * CH; let bd = 1e9; for (let y = ry + 1; y < ry + CH - 1; y++) for (let x = rx + 2; x < rx + CW - 2; x++) if (isAir(g(x, y)) && isAir(g(x, y - 1)) && isAir(g(x, y - 2)) && isStand(g(x, y + 1))) { const dd = Math.abs(x - (rx + CW / 2)) + Math.abs(y - (ry + CH - 3)) * 0.5; if (dd < bd) { bd = dd; spot = [x, y]; } } }
+      if (spot) niList.push({ x: spot[0], y: spot[1], cell: k });
+    }
+    return niList;
+  }
+  Z.nischen = () => nichesOf(Z.level);
+  function niches(H) {
+    const { c, x0, x1, y0, y1, T, PAL, lv, isWall, h3 } = H;
+    for (const n of nichesOf(lv)) {
+      if (n.x < x0 - 3 || n.x > x1 + 3 || n.y < y0 - 5 || n.y > y1 + 2) continue;
+      if (!isWall(n.x, n.y - 1) || !isWall(n.x, n.y - 2)) continue;
+      const px = n.x * T + 8, bot = (n.y + 1) * T, w = 28, top = bot - 54; H.setCR(px - 40, top - 70, 80, bot - top + 72);
+      /* Lichtstrahl von oben */
+      c.save(); c.globalCompositeOperation = "lighter"; const lg = c.createLinearGradient(0, top - 60, 0, bot); lg.addColorStop(0, "rgba(255,230,170,0)"); lg.addColorStop(0.35, "rgba(255,230,170,.12)"); lg.addColorStop(1, "rgba(255,230,170,.05)"); c.fillStyle = lg; c.beginPath(); c.moveTo(px - 6, top - 60); c.lineTo(px + 6, top - 60); c.lineTo(px + 22, bot); c.lineTo(px - 14, bot); c.fill(); c.restore();
+      c.fillStyle = "rgba(0,0,0,.4)"; c.beginPath(); c.moveTo(px - w / 2, bot); c.lineTo(px - w / 2, top + w / 2); c.arc(px, top + w / 2, w / 2, Math.PI, 0); c.lineTo(px + w / 2, bot); c.fill();
+      c.strokeStyle = PAL.stone; c.lineWidth = 3; c.beginPath(); c.moveTo(px - w / 2 - 1.5, bot); c.lineTo(px - w / 2 - 1.5, top + w / 2); c.arc(px, top + w / 2, w / 2 + 1.5, Math.PI, 0); c.lineTo(px + w / 2 + 1.5, bot); c.stroke();
+      c.strokeStyle = PAL.stoneHi; c.lineWidth = 0.6; c.beginPath(); c.arc(px, top + w / 2, w / 2 + 3, Math.PI * 1.05, Math.PI * 1.5); c.stroke();
+      /* kleiner Schrein: Sockel, Figürchen, Opferschale */
+      c.fillStyle = PAL.stone; c.fillRect(px - 7, bot - 18, 14, 3); c.fillStyle = PAL.stoneHi; c.fillRect(px - 7, bot - 18, 14, 0.6);
+      c.fillStyle = H.lit(H.B.wall, 0.25); c.beginPath(); c.moveTo(px - 3, bot - 18); c.quadraticCurveTo(px - 3.5, bot - 26, px, bot - 30); c.quadraticCurveTo(px + 3.5, bot - 26, px + 3, bot - 18); c.fill(); c.beginPath(); c.arc(px, bot - 31.5, 2, 0, TAU); c.fill();
+      c.fillStyle = "rgba(240,210,140,.35)"; c.beginPath(); c.arc(px, bot - 31.5, 3.6, 0, TAU); c.fill();
+      c.fillStyle = "#6a4a2a"; c.beginPath(); c.ellipse(px, bot - 15, 5, 1.6, 0, 0, Math.PI); c.fill();
+      for (let k = 0; k < 14; k++) { const a = Math.PI + h3(n.x, k, 1910) * Math.PI, r = w / 2 + 2 + h3(k, n.y, 1911) * 3; c.fillStyle = k % 3 ? "rgba(70,100,44,.75)" : "rgba(110,140,60,.7)"; c.beginPath(); c.arc(px + Math.cos(a) * r, top + w / 2 + Math.sin(a) * r, 1 + h3(n.x, k, 1912) * 1.4, 0, TAU); c.fill(); }
+      for (let k = 0; k < 6; k++) { c.fillStyle = "rgba(70,100,44,.6)"; c.fillRect(px - w / 2 - 2 + (k % 2) * (w + 2), bot - 4 - h3(k, 9, 1913) * 20, 1.4, 3 + h3(k, 8, 1914) * 6); }
+    }
+  }
   /* ---------- Abnutzung, Pfützen, Wandflecken (Runde 9; alles im Chunk-Cache) ---------- */
   const WET = { cellar: 1, dungeon: 1, lake: 1, harbour: 1, storm: 1, chasm: 0.5 };
   const STAIN = { cellar: ["rgba(236,232,220,", "salpeter"], dungeon: ["rgba(60,80,40,", "moder"], lake: ["rgba(60,110,70,", "algen"], harbour: ["rgba(230,226,210,", "salz"], castle: ["rgba(20,16,12,", "wasser"],
@@ -1600,7 +1719,8 @@
   G.tileHooks.push(function (k, H) {
     if (Z.gfx.off && Z.gfx.off.steinmetz) return;
     const P = Z.gfx.stProf, t0 = P ? performance.now() : 0;
-    if (k === "wall") { wall(H); if (!(Z.gfx.off && Z.gfx.off.textur)) { stains(H); arches(H); } } else if (k === "rock") rock(H); else if (k === "fix") { floorBits(H); fix(H); if (!(Z.gfx.off && Z.gfx.off.textur)) { wearAndPuddles(H); thresholds(H); } }
+    const o10 = Z.gfx.off && Z.gfx.off.r10;
+    if (k === "wall") { wall(H); if (!(Z.gfx.off && Z.gfx.off.textur)) { stains(H); arches(H); } if (!o10) { gatehouses(H); niches(H); } } else if (k === "rock") rock(H); else if (k === "fix") { floorBits(H); fix(H); if (!(Z.gfx.off && Z.gfx.off.textur)) { wearAndPuddles(H); thresholds(H); } if (!o10) { balustrades(H); ladderWear(H); } }
     if (P) { H.c.getImageData(0, 0, 1, 1); P[k] = (P[k] || 0) + performance.now() - t0; }
   });
 })();
@@ -2635,15 +2755,52 @@
       if (cv) {
         const ops = G.openings || []; let any = false;
         c.save(); c.beginPath();
-        for (const o of ops) { if (o.blind || (o.mode !== "vault" && o.mode !== "cave")) continue; const x0 = o.x0 * T + 2, y0 = o.y0 * T + 2, x1 = (o.x1 + 1) * T - 2, y1 = (o.y1 + 1) * T - 1; if (x1 < cam.x || x0 > cam.x + cam.w || y1 < cam.y || y0 > cam.y + cam.h) continue; c.rect(x0, y0, x1 - x0, y1 - y0); any = true; }
+        /* große Öffnungen und Schächte zeigen die Ferne kräftiger (bis 0,85), kleine nur angedeutet */
+        let area = 0;
+        for (const o of ops) { if (o.blind || (o.mode !== "vault" && o.mode !== "cave")) continue; const x0 = o.x0 * T + 2, y0 = o.y0 * T + 2, x1 = (o.x1 + 1) * T - 2, y1 = (o.y1 + 1) * T - 1; if (x1 < cam.x || x0 > cam.x + cam.w || y1 < cam.y || y0 > cam.y + cam.h) continue; c.rect(x0, y0, x1 - x0, y1 - y0); any = true; area = Math.max(area, (o.x1 - o.x0 + 1) * (o.y1 - o.y0 + 1)); }
         if (any) {
           c.clip();
           const sc = Math.max(1, (cam.h * 0.9) / TH), w = TW * sc, h = TH * sc, ox = cam.x - ((cam.x * 0.15) % w + w) % w, y = cam.y + (cam.h - h) * 0.5 - cam.y * 0.03 % 30;
-          c.globalAlpha = 0.55; for (let x = ox; x < cam.x + cam.w; x += w) c.drawImage(cv, x, y, w + 0.5, h);
+          c.globalAlpha = Math.min(0.85, 0.55 + area / 160); for (let x = ox; x < cam.x + cam.w; x += w) c.drawImage(cv, x, y, w + 0.5, h);
         }
         c.restore();
       }
     } catch (e) { console.error(e); }
     if (mid0) mid0.apply(this, arguments);
+  };
+})();
+
+/* Ezekiel – The Destroyer · Licht der Verbindungen (Grafik-Runde 10, ab Stufe 1; Bewegung ab Stufe 2)
+   Schachtöffnungen bekommen einen Lichtschein von unten bzw. oben (warm, wenn dort ein bewohnter Raum liegt),
+   Gebietsausgänge leuchten in der Farbe des Zielgebiets, Sackgassen-Nischen haben einen sanften Lichtstrahl mit
+   tanzendem Staub und einem Kerzenlicht am Schrein. */
+(function () {
+  "use strict";
+  const Z = window.Z, G = Z.gfx, T = Z.TILE, TAU = Math.PI * 2;
+  const lvl = () => { const q = Z.gq; if (!q) return 2; if (q.lean) return 0; return q.level === -1 ? 2 : q.level; };
+  const off = () => G.off && (G.off.r10 || G.off.steinmetz);
+  const inCam = (cam, x, y, m) => x > cam.x - m && x < cam.x + cam.w + m && y > cam.y - m && y < cam.y + cam.h + m;
+  function targetOf(d) { const to = d.to, A = Z.ARENAS && Z.ARENAS[to]; return (Z.BIOMES && (Z.BIOMES[to] || (A && Z.BIOMES[A.base]))) || null; }
+  if (G.lightGather) G.lightGather.push(function (add, cam, t) {
+    const lv = Z.level; if (lvl() < 1 || !lv || Z.darkness > 0 || off()) return;
+    if (Z.schaechte) for (const s of Z.schaechte()) { const x = (s.x0 + s.x1 + 1) / 2 * T, y = s.by * T; if (!inCam(cam, x, y, 100)) continue; add(x, y + 10, 70 + (s.x1 - s.x0) * 6, s.dn || s.up ? "#ffcc90" : "#e8d8c0", s.dn || s.up ? 0.2 : 0.11, 0); }
+    for (const d of lv.doors || []) { if (d.kind !== "exit") continue; const x = d.x * T + 8, y = d.y * T; if (!inCam(cam, x, y, 120)) continue; const TB = targetOf(d); add(x, y - 10, 110, (TB && TB.ambCol) ? TB.ambCol : "#ffc890", 0.3 * (0.92 + 0.08 * Math.sin(t * 1.3 + d.x)), 0); }
+    if (Z.nischen) for (const n of Z.nischen()) { const x = n.x * T + 8, y = (n.y + 1) * T; if (!inCam(cam, x, y, 100)) continue; add(x, y - 24, 75, "#ffd890", 0.35 * (0.9 + 0.1 * Math.sin(t * 8 + n.x)), 6); }
+  });
+  const mid0 = Z.drawMidLife;
+  Z.drawMidLife = function (c, cam, t) {
+    if (mid0) mid0.apply(this, arguments);
+    const lv = Z.level; if (lvl() < 1 || !lv || off() || !Z.nischen) return;
+    c.save();
+    for (const n of Z.nischen()) {
+      const px = n.x * T + 8, bot = (n.y + 1) * T; if (!inCam(cam, px, bot, 60)) continue;
+      /* Kerze auf der Opferschale */
+      const f = 1 + 0.2 * Math.sin(t * 13 + n.x) + 0.1 * Math.sin(t * 29 + n.y);
+      c.fillStyle = "#e8dcc0"; c.fillRect(px + 3.5, bot - 21, 1.6, 4.5);
+      c.globalCompositeOperation = "lighter"; c.fillStyle = "rgba(255,150,60,.85)"; c.beginPath(); c.moveTo(px + 3.3, bot - 21); c.quadraticCurveTo(px + 3.6, bot - 24 * 1, px + 4.3, bot - 21 - 4.5 * f); c.quadraticCurveTo(px + 5, bot - 23, px + 5.3, bot - 21); c.fill();
+      if (lvl() >= 2) { /* Staub im Strahl */ for (let k = 0; k < 8; k++) { const u = (t * 0.04 * (1 + (k % 3) * 0.3) + k / 8) % 1, sx = px - 8 + ((k * 37) % 22) + u * 10 + Math.sin(t * 0.6 + k) * 2, sy = bot - 110 + u * 100; c.globalAlpha = 0.55 * Math.sin(u * Math.PI); c.fillStyle = "#ffe8c0"; c.fillRect(sx, sy, 0.8, 0.8); } c.globalAlpha = 1; }
+      c.globalCompositeOperation = "source-over";
+    }
+    c.restore();
   };
 })();

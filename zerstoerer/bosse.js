@@ -181,7 +181,7 @@
 
   /* ---------- Chasme ---------- */
   B.chasme = base({
-    n: ["Chasme", "Chasme"], title: ["Summender Dämon", "The Droning Demon"], shape: "wasp", c: "#2a2a30", t: "#ff3a2a", w: 34, h: 20, size: 1.3, hp: 30, dmg: 1.3, fly: true, noPlat: true, demon: true, idleT: 0.4,
+    n: ["Chasme", "Chasme"], title: ["Summender Dämon", "The Droning Demon"], shape: "wasp", c: "#2a2a30", t: "#ff3a2a", w: 34, h: 20, size: 1.3, hp: 30, dmg: 1.15 /* W9 4. Runde: 1,3 → 1,15 (Wand für frische Meta) */, fly: true, noPlat: true, demon: true, idleT: 0.4,
     intro: ["Ein Summen schwillt an … eine Chasme stürzt sich herab!", "A drone swells… a chasme dives down!"],
     outro: ["Die Chasme kracht auf die Zinnen. Das Summen verstummt endlich.", "The chasme crashes onto the battlements. The droning finally stops."],
     phases: [{ at: 1, moves: ["stich", "summen", "manen"] }, { at: 0.5, moves: ["stich", "summen", "manen", "doppelstich"], enter: e => { roar(e); e.rage = true; } }],
