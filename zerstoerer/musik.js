@@ -840,7 +840,10 @@
     M.lp.frequency.setTargetAtTime(cut, now, paused ? 0.15 : 0.08);
     /* Boss: jede Phase etwas lauter (+0,8 dB), Wut +0,4 dB – Steigerung, die Begrenzer und Kompressor nicht ausreizt */
     const bossUp = M.bossOn ? (1 + 0.1 * (M.bossPh || 0)) * (M.wut ? 1.05 : 1) : 1;
-    M.out.gain.setTargetAtTime(0.62 * (M.trim || 1) * bossUp * (paused ? 0.6 : 1) * (1 - 0.15 * M.low), now, 0.2);
+    /* R15 Dichte-Ausgleich (Desktop, keine Stimmengrenze): klingen mehr als 30 Musikstimmen (Boss Phase 3 + Wut + Stinger: bis 75),
+       wird der Satz weich um √(30/Stimmen) zurückgenommen (höchstens auf 0,6, ~1 s geglättet) – Handheld (≤ 30) unberührt */
+    const dz = clamp(Math.sqrt(30 / Math.max(30, M.live || 0)), 0.6, 1); M.dichteG = (M.dichteG || 1) + (dz - (M.dichteG || 1)) * Math.min(1, dt * 1.2);
+    M.out.gain.setTargetAtTime(0.62 * (M.trim || 1) * bossUp * (paused ? 0.6 : 1) * (1 - 0.15 * M.low) * M.dichteG, now, 0.2);
     /* Wut der Bossphase klingt langsam ab, bleibt aber, solange der Boss lebt */
     if (M.rage > 0 && !(Z.boss && !Z.bossDefeated)) M.rage = Math.max(0, M.rage - dt * 0.2);
 

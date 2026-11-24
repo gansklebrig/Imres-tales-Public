@@ -44,7 +44,7 @@
     fallen: { n: ["Fallengänge", "Trapped Halls"], d: ["Doppelt so viele Fallen – und bessere Beute.", "Twice as many traps – and better loot."], ico: "⚠", faktor: 4 }, /* R17: Faktor auf die Fallendichte; ergibt ca. +80 % Fallen (Raumplätze begrenzen) */
     brut: { n: ["Unruhige Brut", "Restless Brood"], d: ["Jeder siebte Gegner ist ein Elite-Gegner – und bessere Beute.", "One in seven enemies is an elite – and better loot."], ico: "☠", elite: 0.15 },
     finster: { n: ["Finstere Tiefe", "Lightless Depths"], d: ["Kaum Licht – aber die Gegner sehen dich auch schlechter. Bessere Beute.", "Barely any light – but enemies see you worse, too. Better loot."], ico: "☾", bereit: () => !!Z.dunkelSanft }, /* nur mit sanfter Abdunkelung der Grafik (Z.dunkelSanft) – der Boss-Dunkelmodus ist für ein ganzes Gebiet zu finster */
-    einsturz: { n: ["Einsturzgefahr", "Cave-in"], d: ["Immer wieder bricht die Decke – achte auf rieselnden Staub. Bessere Beute.", "The ceiling keeps caving in – watch for trickling dust. Better loot."], ico: "▼", takt: [6, 10], warn: 1.1, dmg: 0.08 },
+    einsturz: { n: ["Einsturzgefahr", "Cave-in"], d: ["Immer wieder bricht die Decke – achte auf rieselnden Staub. Bessere Beute.", "The ceiling keeps caving in – watch for trickling dust. Better loot."], ico: "▼", takt: [4, 7], warn: 1.1, dmg: 0.08, ziel: 0.5 /* W9 R14: 6–10 s → 4–7 s; Anteil direkt auf die (vorausberechnete) Figur – vorher 0–1 Treffer in 120 s */ },
     gold: { n: ["Goldader", "Gold Vein"], d: ["+60 % Gold, ein Goldgoblin treibt sich herum – aber Gegner treffen 15 % härter.", "+60% gold, a gold goblin roams about – but enemies hit 15% harder."], ico: "●", gold: 0.6, dmg: 1.15 }
   };
   const VAR = { chance: 0.18, max: 2 };
@@ -72,7 +72,7 @@
     if ((einsturzT -= dt) <= 0 && !(Z.boss && !Z.bossDefeated) && !(Z.ui && Z.ui.modalOpen)) {
       einsturzT = VARIANTEN.einsturz.takt[0] + Math.random() * (VARIANTEN.einsturz.takt[1] - VARIANTEN.einsturz.takt[0]);
       for (let versuch = 0; versuch < 10; versuch++) { /* mehrere Stellen probieren: hohe Hallen und Wände neben der Figur */
-        const px = P.x + P.w / 2 + (Math.random() < 0.5 ? -1 : 1) * (20 + Math.random() * 80) + P.vx * 0.6, tx = Math.floor(px / T), fy0 = Math.floor((P.y + P.h - 2) / T);
+        const px = P.x + P.w / 2 + (versuch === 0 && Math.random() < (VARIANTEN.einsturz.ziel || 0) ? (Math.random() - 0.5) * 12 : (Math.random() < 0.5 ? -1 : 1) * (20 + Math.random() * 80)) + P.vx * 0.6, tx = Math.floor(px / T), fy0 = Math.floor((P.y + P.h - 2) / T);
         let cy = -1; for (let y = fy0; y > fy0 - 16 && y > 0; y--) { if (solid(tx, y)) break; if (solid(tx, y - 1)) { cy = y; break; } }
         if (cy <= 0) continue;
         let fy = cy; while (fy < cy + 16 && !solid(tx, fy + 1) && lv.get(tx, fy + 1) !== 2) fy++;
@@ -809,8 +809,10 @@
          mit leisem Goldschimmer (von Weitem sichtbar: das Ende lohnt sich)
        · Ketten ab 4 Räumen → in der Mitte eine Vorratsnische (2–3 zerbrechliche Kisten/Töpfe, normale Kistenbeute)
      Keine zusätzlichen Gegner. Werte (FUND) als Vorschlag für Balance. */
-  const FUND = { gold: t => 20 + 10 * t, essen: 0.35, rolle: 0.1 };
+  const FUND = { gold: t => 20 + 10 * t, essen: 0.35, rolle: 0.1, glut: 0.4 };
   Z.FUND = FUND;
+  /* W13 R18: Joris „Funkenschlag“ (Lager-Zusatz): Überreste geben mit 40 % ein Stück Schmiedeglut, gelöste Hebelrätsel immer */
+  const joriFunken = sicher => !!(Z.lager && Z.lager.level && Z.lager.level("jori", "funken") >= 1) && (sicher || Math.random() < FUND.glut);
   function setupKetten(lv) {
     if (!lv || !lv.cells || lv.hub || lv.arena || lv.passage) return;
     const cells = Object.keys(lv.cells).map(k => lv.cells[k]), kids = new Map(), key = c => c.x + "," + c.y;
@@ -858,6 +860,7 @@
     if (Math.random() < FUND.essen && Z.FOOD) Z.spawnPickup("food", ev.x + 6, ev.y - 6, { food: Z.R.pick(Z.FOOD), drop: true });
     if (Math.random() < FUND.rolle) Z.spawnPickup("scroll", ev.x - 6, ev.y - 6, { vx: 0, vy: -140, stat: Z.R.pick(["brut", "takt", "ueber"]) });
     Z.toast(L(Z.R.pick(FUNDTXT)), 3000);
+    if (joriFunken()) { Z.spawnReward ? Z.spawnReward("glut", ev.x, ev.y - 10, { n: 1 }) : null; FX.text(ev.x, ev.y - 24, L(["Jori: „Da glimmt noch was!“", "Jori: \"Something's still glowing!\""]), "#ff9a5a"); }
     X().funde = (X().funde || 0) + 1;
   }
   function drawFund(c, ev, t) {
@@ -919,7 +922,9 @@
   /* Balance meldete: vor Stufe 4 sind die Tränke meist leer. Selten steht an einer Kreuzung des Hauptwegs (Raum mit ≥ 3 Ausgängen,
      auf dem Weg vom Eingang zum Ausgang) eine Quelle – eine Entscheidung „jetzt oder später“: trinken (Leben sofort) ODER eine Flasche
      füllen (+1 Trank, nur wenn eine Flasche leer ist). Einmal je Quelle. Werte als Vorschlag für Balance in QUELLE. */
-  const QUELLE = { heal: 0.4, chance: lv => { const t = Z.run ? Z.run.tier : 0; return t >= 1 && t <= 3 ? 0.35 : 0; } };
+  /* W13 R18: Quirins „Quellwasser“ (Lager-Zusatz) – Quellen heilen mehr */
+  const quelleHeil = () => QUELLE.heal + (Z.lager && Z.lager.level && Z.lager.level("quirin", "quellwasser") >= 1 ? QUELLE.quirin : 0);
+  const QUELLE = { heal: 0.4, quirin: 0.2, chance: lv => { const t = Z.run ? Z.run.tier : 0; return t >= 1 && t <= 3 ? 0.35 : 0; } };
   Z.QUELLE = QUELLE;
   function setupQuelle(lv) {
     const W = lv.W, D4 = { L: [-1, 0], R: [1, 0], U: [0, -1], D: [0, 1] };
@@ -941,14 +946,14 @@
     const P = () => Z.player;
     const kannFuellen = () => { const p = P(); return p && !pact("durst") && p.potMax > 0 && p.potions < p.potMax; };
     (Z.interacts = Z.interacts || []).push({ x: ev.x - 9, y: ev.y, r: 16, h: 34, ok: () => !ev.done,
-      label: () => L(["Trinken (+", "Drink (+"]) + Math.round(QUELLE.heal * 100) + L([" % Leben)", "% health)"]), use: () => quelleNimm(ev, "trinken") });
+      label: () => L(["Trinken (+", "Drink (+"]) + Math.round(quelleHeil() * 100) + L([" % Leben)", "% health)"]), use: () => quelleNimm(ev, "trinken") });
     (Z.interacts = Z.interacts || []).push({ x: ev.x + 9, y: ev.y, r: 16, h: 34, ok: () => !ev.done,
       label: () => kannFuellen() ? L(["Flasche füllen (+1 Trank)", "Fill a flask (+1 potion)"]) : L(["Flasche füllen (alle voll)", "Fill a flask (all full)"]), use: () => { if (kannFuellen()) quelleNimm(ev, "fuellen"); else Z.toast(pact("durst") ? L(["Der Pakt lässt keine Flasche zu.", "The pact allows no flask."]) : L(["Deine Flaschen sind voll – trink lieber, oder komm später wieder.", "Your flasks are full – drink instead, or come back later."]), 2400); } });
   }
   function quelleNimm(ev, art) {
     const P = Z.player; if (ev.done || !P) return; ev.done = true; finish(ev);
     A.play("splash", { vol: 0.7, x: ev.x }); FX.burst(ev.x, ev.y - 10, 16, { col: ["#9ac0a0", "#e8f0d8", "#ffd27a"], sp: 70, up: 50, life: 0.8, size: 2, kind: "glow", add: true });
-    if (art === "trinken") { Z.healPlayer(P.hpMax * QUELLE.heal); FX.text(P.x + P.w / 2, P.y - 14, L(["Erfrischt", "Refreshed"]), "#c8e0a8", true); }
+    if (art === "trinken") { Z.healPlayer(P.hpMax * quelleHeil()); FX.text(P.x + P.w / 2, P.y - 14, L(["Erfrischt", "Refreshed"]), "#c8e0a8", true); }
     else { P.potions = Math.min(P.potMax, P.potions + 1); FX.text(P.x + P.w / 2, P.y - 14, L(["+1 Trank", "+1 potion"]), "#ffd27a", true); }
     Z.toast(L(["Die Quelle versiegt.", "The spring runs dry."]), 1800);
   }
@@ -1011,6 +1016,7 @@
         Z.dropItem(ev.x, ev.y - 6, { chest: true }); const P = Z.player, g = 50 + 15 * (Z.run ? Z.run.tier : 0); P.gold += g;
         Z.toast("✦ <b>" + L(["Rätsel gelöst", "Puzzle solved"]) + "</b><small>" + L(["Hinter der Tafel klickt ein Riegel – eine Truhe und " + g + " Gold.", "A latch clicks behind the tablet – a chest and " + g + " gold."]) + "</small>", 3200);
         X().raetsel = (X().raetsel || 0) + 1; give("e_raetsel"); Z.saveMeta();
+        if (joriFunken(true)) Z.spawnReward && Z.spawnReward("glut", ev.x, ev.y - 10, { n: 1 });
       }
     } else {
       ev.fails++; ev.resetT = 0.7; A.play("rock", { vol: 0.4, rate: 0.7, x: lvr.x });
@@ -1300,6 +1306,13 @@
   }
   function late() {
     if (!Z.ui || !Z.ui.actions || !Z.TX) return setTimeout(late, 50); wire(); wireEnding(); wireAch(); Z.TX.endings.wahr = WAHR;
+    /* W13 R18: Lager-Zusatzstufen, die die neuen Lauf-Elemente stärken (Werte als Vorschlag für Balance) */
+    if (Z.lager && Z.lager.addUpgrade) {
+      Z.lager.addUpgrade("quirin", "quellwasser", { n: ["Quellwasser", "Spring Water"], max: 1, cost: [100], req: () => Z.lager.level("quirin") >= 1,
+        d: ["Quirin zeigt dir, welche Kräuter man in Heilquellen mischt: Trinken heilt 60 % statt 40 %.", "Quirin shows you which herbs to mix into healing springs: drinking heals 60% instead of 40%."] });
+      Z.lager.addUpgrade("jori", "funken", { n: ["Funkenschlag", "Spark Strike"], max: 1, cost: [120], req: () => Z.lager.level("jori") >= 1,
+        d: ["Jori lehrt dich, Glut zu erkennen: Überreste von Abenteurern geben mit 40 % Schmiedeglut, gelöste Hebelrätsel immer.", "Jori teaches you to spot embers: adventurers' remains give forge embers 40% of the time, solved lever puzzles always."] });
+    }
     /* Erfolge auch im Pause-Menü */
     const pause0 = Z.ui.pause;
     Z.ui.pause = function () { const r = pause0.apply(this, arguments); const k = document.querySelector("#modal .pausenmenue .knoepfe") || (document.querySelector("#modal .pausenmenue") ? document.querySelector("#modal .knoepfe") : null); if (k && !k.querySelector('[data-act="abAchP"]')) { const b = document.createElement("button"); b.dataset.act = "abAchP"; b.textContent = "🏆 " + L(["Erfolge", "Achievements"]); k.insertBefore(b, k.children[2] || null); } return r; };

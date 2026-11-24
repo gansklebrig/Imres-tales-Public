@@ -89,7 +89,14 @@
     if (mmC && mmC.lv === lv && mmC.n === seen.size + entered.size * 1000 + nf * 1e6 + nq * 1e9 && now - mmC.t < 300) return mmC;
     const icons = [], marks = [];
     /* W13 R11: Heilquelle (abenteuer.js) auf der Karte, sobald ihr Raum gesehen wurde und solange sie nicht versiegt ist */
-    for (const ev of Z.abEvents || []) if (ev.k === "quelle" && !ev.done && seen.has(ev.cell)) icons.push({ tx: ev.x / T, ty: ev.y / T - 1.5, ico: "✚", col: "#b8e0a0" });
+    const quellenkunde = !!(Z.lager && Z.lager.level && Z.lager.level("edda", "quellen") >= 1); /* W13 R18: Edda zeigt Quellen & Funde von Anfang an */
+    for (const ev of Z.abEvents || []) {
+      if (ev.done) continue;
+      const evSeen = quellenkunde || seen.has(ev.cell || (Math.floor(ev.x / T / CW) + "," + Math.floor((ev.y - 4) / T / CH)));
+      if (ev.k === "quelle" && evSeen) icons.push({ tx: ev.x / T, ty: ev.y / T - 1.5, ico: "✚", col: "#b8e0a0" });
+      else if (quellenkunde && ev.k === "fund") icons.push({ tx: ev.x / T, ty: ev.y / T - 1.5, ico: "✧", col: "#ffd27a" });
+      else if (quellenkunde && ev.k === "raetsel") icons.push({ tx: ev.x / T, ty: ev.y / T - 1.5, ico: "◈", col: "#e8d8a8" });
+    }
     /* W13 R11: Eddas „Spürsinn“ (Lager-Zusatzstufe vor „Geheimniszeichen“): betretener Raum mit noch unentdeckter Geheimkammer → „?“ */
     if (spuersinn()) for (const k in lv.cells) {
       const c = lv.cells[k]; if (c.kind !== "secret" || !c.parent) continue;
@@ -129,6 +136,10 @@
     n: ["Spürsinn", "Keen Sense"], max: 1, cost: [90], req: () => Z.lager.level("edda") >= 1,
     d: ["Hat ein Raum, den du betreten hast, noch eine unentdeckte Geheimkammer, steht dort ein „?“ auf der Minikarte. (Mit „Geheimniszeichen“ zeigt Edda die Kammern dann selbst.)",
       "If a room you have entered still hides an undiscovered secret chamber, a \"?\" appears there on the minimap. (With \"Secret marks\", Edda shows the chambers themselves.)"]
+  });
+  if (Z.lager && Z.lager.addUpgrade) Z.lager.addUpgrade("edda", "quellen", {
+    n: ["Quellenkunde", "Spring Lore"], max: 1, cost: [110], req: () => Z.lager.level("edda") >= 1,
+    d: ["Heilquellen, Überreste von Abenteurern und Hebelrätsel stehen vom Betreten eines Gebiets an auf der Minikarte.", "Healing springs, adventurers' remains and lever puzzles appear on the minimap as soon as you enter an area."]
   });
   Z.minimapExtra = function (g, ox, oy, scale, big, vw, vh) {
     const lv = Z.level; if (!lv || !lv.cells || lv.hub || lv.arena || lv.passage || !Z.roomFnDef) return;

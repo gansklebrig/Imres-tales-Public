@@ -339,7 +339,10 @@
     /* Handheld: höchstens 10 (minimal 7) Effekte gleichzeitig – der Audio-Thread der kleinen ARM-Kerne kommt sonst nicht nach */
     const q = Z.gq || {};
     if (q.lean && A.live >= (q.mini ? 7 : 10) && !o.must) return;
-    let vol = (o.vol == null ? 1 : o.vol) * (o.must ? 1 : dense), pan = o.pan || 0;
+    /* R15: Gedränge – klingen schon mehr als 12 Effekte (Desktop ohne Stimmengrenze, späte Läufe mit Bogen/Wurfmessern/Krits:
+       bis 32 gleichzeitig, Bugbear-Kampf -11 LUFS/0 dBFS), wird jeder neue Effekt um √(12/live) leiser; Handheld (Grenze 10/7) unberührt */
+    const crowd = A.live > 12 && !o.must ? Math.sqrt(12 / A.live) : 1;
+    let vol = (o.vol == null ? 1 : o.vol) * (o.must ? 1 : dense) * crowd, pan = o.pan || 0;
     if (o.x != null && Z.cam) {
       const dx = o.x - (Z.cam.x + Z.cam.w / 2), dy = (o.y || 0) - (Z.cam.y + Z.cam.h / 2);
       pan = U.clamp(dx / (Z.cam.w * 0.6), -0.9, 0.9);

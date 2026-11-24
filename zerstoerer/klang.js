@@ -784,7 +784,9 @@
   KL.treffer = (e, o) => {
     try {
       if (!A.ok || !e || !o || o.dot || Z.quiet) return;
+      if (o.src === "helfer") { HL.hitT = A.ctx.currentTime; HL.stats.treffer++; } /* R15: Helfer-Dolch statt „slash“ (Hook unten) */
       const [v0, pan] = posMix(e.x + e.w / 2, e.y + e.h / 2); if (v0 < 0.05) return;
+      if (o.src === "helfer") { shot(pk(RK("fx_0_fleisch_stich_", [1, 2, 3])), { vol: 0.13 * v0, rate: 1.35, pan, verb: 0.3, gap: 0.05, tag: "hlf1" }); shot(pk(RK("fx_rd_blade_0", [1, 2, 3])), { vol: 0.08 * v0, rate: 1.6, pan, verb: 0.25, gap: 0.05, tag: "hlf2" }); return; }
       const wd = o.it && Z.WEAPONS && Z.WEAPONS[o.it.id], art = wd ? WART[wd.icon] : o.src === "ranged" ? "pfeil" : null;
       /* R13: Trefferdichte – bei Dauerfeuer (Wurfmesser, Mehrfachtreffer, 8–12 Treffer/s am Boss) werden die Schichten leiser
          (Faktor ~1/√(Rate/4), mindestens 0,45), Krit-Glocken höchstens alle 0,3 s voll, die Musik duckt höchstens alle 0,5 s */
@@ -1169,7 +1171,9 @@
     Mira: { d: 4, o: 1, w: "sine", fs: 1.15, syl: 0.12, br: 0.4, k: 1.2 },
     /* die Gefährten aus der Kampagne (Lager-Figuren in ui.js) */
     Friedrich: { d: 2, o: -1, w: "sawtooth", fs: 0.9, syl: 0.1, br: 0.15, k: 1.3 }, Echo: { d: 4, o: 1, w: "square", fs: 1.25, syl: 0.07, br: 0.1, k: 0.58 },
-    Nundro: { d: 0, o: -1, w: "triangle", fs: 0.85, syl: 0.14, br: 0.3, k: 4.9 }, Rex: { bark: 1 }
+    Nundro: { d: 0, o: -1, w: "triangle", fs: 0.85, syl: 0.14, br: 0.3, k: 4.9 }, Rex: { bark: 1 },
+    /* R15: befreiter Kundschafter (abenteuer.js, Z.helferAktiv) – heller, schneller Sprecher */
+    Kundschafter: { d: 3, o: 0, w: "sawtooth", fs: 1.1, syl: 0.075, br: 0.2, k: 1 }
   };
   const VOW = [[750, 1200], [500, 1800], [300, 2300], [450, 850], [320, 750]];
   const VS = { cur: null, stats: { laute: 0, menue: 0, tor: 0 } };
@@ -1204,6 +1208,30 @@
     if (VS.hooked || !Z.ui || !Z.ui.say) return; VS.hooked = true;
     const s0 = Z.ui.say;
     Z.ui.say = function (wx, wy, who, txt, ms) { const r = s0.apply(this, arguments); try { if (who) babble(who, txt || ""); } catch (_) {} return r; };
+    /* R15 Gebietsvariante (abenteuer.js, Z.gebietVariante(): fallen/brut/gold): Ankündigung über Z.ui.notify (key „variante“) → Akzent */
+    const n0 = Z.ui.notify;
+    if (n0) Z.ui.notify = function (text, o) { const r = n0.apply(this, arguments); try { if (o && o.key === "variante") varAkzent(); } catch (_) {} return r; };
+  }
+  /* Brut: tiefes Grollen (Paukenwirbel + Taiko + Pauke auf Grundton und kleiner Sexte darunter);
+     Gold: Glocken-Glissando aufwärts in der Tonart + Münzen; Fallen: Metallklicken und Kettenrasseln, darunter Grundton + kleine Sekunde */
+  const VA = { stats: { brut: 0, gold: 0, fallen: 0 } }; KL.variante = VA;
+  function varAkzent() {
+    const v = Z.gebietVariante && Z.gebietVariante(); if (!v || !A.ok || Z.quiet) return;
+    VA.stats[v.id] = (VA.stats[v.id] || 0) + 1;
+    const r = M.prof ? M.prof.root : 50;
+    if (v.id === "brut") {
+      shot(KS("timproll"), { vol: 0.16, rate: 0.85, verb: 0.5, gap: 0, tag: "va1" });
+      shot(KS("taiko_36"), { vol: 0.3, rate: 0.85, delay: 0.55, verb: 0.5, gap: 0, tag: "va2" });
+      tuned("timpt", 0, -1, 0.2, 0.55, "va3"); tuned("timpt", 5, -2, 0.14, 0.95, "va4");
+    } else if (v.id === "gold") {
+      for (let i = 0; i < 7; i++) tuned("glock", i, 3, 0.05 + i * 0.004, i * 0.06, "vag" + i);
+      shot(pk(RA("n_muenzen_", 4)), { vol: 0.16, rate: 1.1, delay: 0.3, verb: 0.3, gap: 0, tag: "vam" });
+      tuned("glock", 7, 3, 0.07, 0.48, "vag7");
+    } else if (v.id === "fallen") {
+      [0, 0.11, 0.19].forEach((d, i) => shot(AM("e_riegel_" + (1 + i)), { vol: 0.2, rate: 1.3 + i * 0.1, delay: d, verb: 0.35, gap: 0, tag: "vaf" + i }));
+      shot(pk(RA("n_kette_", 4)), { vol: 0.16, rate: 1.2, delay: 0.3, verb: 0.4, gap: 0, tag: "vak" });
+      [0, 1].forEach((st, j) => { const pr = M.probe && M.probe("pizz", ton(0, r) + st); if (pr && A.buf[pr.path]) shot(pr.path, { vol: 0.08, rate: pr.rate, vary: 0, delay: 0.5 + j * 0.02, gap: 0, verb: 0.3, tag: "vap" + j, must: true }); });
+    }
   }
   /* Menü-Töne in der Tonart (Kalimba eine bzw. zwei Oktaven über dem Grundton) */
   let uiDeg = 0;
@@ -1212,51 +1240,71 @@
     if (!pr || !A.buf[pr.path]) { if (pr && A.buf[pr.path] === undefined) A.load(pr.path); return false; }
     shot(pr.path, { vol, rate: pr.rate, vary: 0, verb: 0.25, delay: delay || 0, gap: 0, tag: tag || "ui", must: true }); return true;
   }
-  /* R13 Hebelrätsel (abenteuer.js, Daten in Z.abEvents, ev.k "raetsel": seq, prog, levers, done) – nur beobachtet über die
-     Aufrufe, die raetselPull/raetselTick ohnehin machen: Hebel ziehen = chain 0,5/1,3 mit x, falsch = rock 0,4/0,7 mit x,
-     Zurückspringen = chain 0,35/0,8 ohne x, gelöst = holy 0,6. Richtig: Klick + Kalimba-Ton, je Fortschritt eine Stufe höher
-     (0-2-4-5-7 der Tonart); falsch: dumpfer Schlag mit kleiner Sekunde; zurück: Ratschen + fallende Töne; gelöst: Riegel klickt,
-     Arpeggio aufwärts und Glocke. */
-  const RAE = { stats: { richtig: 0, falsch: 0, zurueck: 0, geloest: 0 } }; KL.raetsel = RAE;
-  const raeEvs = () => (Z.abEvents || []).filter(e => e && e.k === "raetsel");
-  const raeLever = x => { for (const ev of raeEvs()) { const i = ev.levers.findIndex(l => l.x === x); if (i >= 0) return [ev, i]; } return null; };
+  /* R13/R15 Hebelrätsel (abenteuer.js, Z.abEvents ev.k "raetsel": seq, prog, fails, resetT, levers[].down, done) – erkannt an
+     Zustandsänderungen, nicht an Aufruf-Parametern: je Hebel/Ereignis gemerkter Stand (l._kd gesehen unten, ev._kf Fehlversuche,
+     ev._klZ Rücksprünge, ev._klDone gelöst). Die Aufrufe chain/rock/holy von raetselPull/-Tick werden nur dann still ersetzt,
+     wenn genau in diesem Moment eine passende Änderung vorliegt (Hook); ändern sich Klangnamen in abenteuer.js, holt KL.tick
+     die Änderung nach (raeTick) – dann klingt der alte Klang mit, aber nichts fehlt.
+     Richtig: Klick + Kalimba-Ton je Fortschritt eine Stufe höher (0-2-4-5-7); falsch: dumpfer Schlag mit kleiner Sekunde;
+     zurück: Ratschen + fallende Töne; gelöst: Riegel klickt, Arpeggio aufwärts und Glocke. */
+  const RAE = { stats: { richtig: 0, falsch: 0, zurueck: 0, geloest: 0, nachgeholt: 0 } }; KL.raetsel = RAE;
+  const raeEvs = () => (Z.abEvents || []).filter(e => e && e.k === "raetsel" && Array.isArray(e.levers));
   const RAE_ST = [0, 2, 4, 5, 7, 9];
   function raeClick(x, y, rate, vol, delay, tag) { wshot(AM("e_riegel_" + (1 + ((Math.random() * 4) | 0))), x, y, { vol, rate, delay: delay || 0, gap: 0, tag, verb: 0.35 }); }
-  function raePull(o) {
-    const f = raeLever(o.x); if (!f) return false;
-    const [ev, i] = f, lv = ev.levers[i], y = lv.y;
-    if (ev.done || ev.resetT > 0) return false;
-    if (ev.seq[ev.prog] === i) { /* richtig: prog wird gleich hochgezählt */
-      RAE.stats.richtig++; const k = ev.prog;
-      raeClick(lv.x, y, 1.35, 0.32, 0, "rae1");
+  /* neuer gezogener Hebel (unten, noch nicht gesehen); richtig, wenn er der nächste in seq ist – vor dem Hochzählen (Hook)
+     bzw. danach am gestiegenen prog (Nachholen) */
+  function raeNeu() { for (const ev of raeEvs()) { if (ev.done && ev._klDone) continue; const i = ev.levers.findIndex(l => l.down && !l._kd); if (i >= 0) return [ev, i]; } return null; }
+  function raePullKlang(ev, i, richtig, k) {
+    const lv = ev.levers[i]; lv._kd = true;
+    if (richtig) {
+      RAE.stats.richtig++; ev._kp = k + 1;
+      raeClick(lv.x, lv.y, 1.35, 0.32, 0, "rae1");
       tuned("kal", RAE_ST[Math.min(k, 5)], 2, 0.13, 0.04, "rae" + k); tuned("glock", RAE_ST[Math.min(k, 5)], 3, 0.04, 0.06, "raeg" + k);
-    } else raeClick(lv.x, y, 0.9, 0.3, 0, "rae1"); /* falsch: Hebel rastet, dann rock-Hook */
-    return true;
+    } else raeClick(lv.x, lv.y, 0.9, 0.3, 0, "rae1"); /* falsch: Hebel rastet, Schlag folgt */
   }
-  function raeFalsch(o) {
-    const f = raeLever(o.x); if (!f || !(f[0].resetT > 0)) return false;
-    RAE.stats.falsch++; const lv = f[0].levers[f[1]];
+  function raePull() {
+    const f = raeNeu(); if (!f) return false; const [ev, i] = f;
+    if (ev.done && ev.prog >= ev.levers.length && (ev._kp || 0) < ev.prog) { raePullKlang(ev, i, true, ev.prog - 1); return true; } /* letzter Hebel, falls done vorher gesetzt */
+    if (ev.resetT > 0 && ev.fails > (ev._kf || 0)) { raePullKlang(ev, i, false); return true; }
+    const richtig = ev.seq[ev.prog] === i || ev.prog > (ev._kp || 0);
+    raePullKlang(ev, i, richtig, ev.seq[ev.prog] === i ? ev.prog : ev.prog - 1); return true;
+  }
+  function raeFalschKlang(ev) {
+    ev._kf = ev.fails; RAE.stats.falsch++;
+    const lv = ev.levers.find(l => l.down) || ev.levers[0];
     wshot(KS("fx_im_impactmetal_heavy_000"), lv.x, lv.y, { vol: 0.22, rate: 0.55, gap: 0, tag: "raef", verb: 0.4 });
     const r0 = (M.prof ? M.prof.root : 50) - 12; /* Grundton und kleine Sekunde darüber, tief – „daneben“ */
     [0, 1].forEach((st, j) => { const pr = M.probe && M.probe("hornst", ton(0, r0) + st); if (pr && A.buf[pr.path]) shot(pr.path, { vol: 0.08, rate: pr.rate, vary: 0, delay: 0.03 + j * 0.01, gap: 0, verb: 0.3, tag: "raef" + j, must: true }); });
-    return true;
   }
-  function raeZurueck(o) {
-    if (o.x != null || o.rate !== 0.8) return false;
-    const ev = raeEvs().find(e => !e.done && e.prog === 0 && e.levers.every(l => !l.down) && e.fails > (e._klZ || 0)); if (!ev) return false;
-    ev._klZ = ev.fails; RAE.stats.zurueck++;
-    ev.levers.forEach((l, j) => raeClick(l.x, l.y, 1.1 + j * 0.08, 0.2, j * 0.06, "raez" + j));
+  function raeFalsch() { const ev = raeEvs().find(e => e.fails > (e._kf || 0)); if (!ev) return false; raeFalschKlang(ev); return true; }
+  /* Rücksprung: Hebel waren als unten gesehen, jetzt alle oben, Rätsel offen */
+  function raeZurueckKlang(ev) {
+    ev._klZ = ev.fails; RAE.stats.zurueck++; ev._kp = 0;
+    ev.levers.forEach((l, j) => { l._kd = false; raeClick(l.x, l.y, 1.1 + j * 0.08, 0.2, j * 0.06, "raez" + j); });
     [4, 2, 0].forEach((d, j) => tuned("kal", d, 1, 0.07, 0.05 + j * 0.09, "raezt" + j));
-    return true;
   }
-  function raeGeloest() {
-    const ev = raeEvs().find(e => e.done && !e._klDone); if (!ev) return false;
+  function raeZurueck() {
+    const ev = raeEvs().find(e => !e.done && e.levers.some(l => l._kd) && e.levers.every(l => !l.down)); if (!ev) return false;
+    raeZurueckKlang(ev); return true;
+  }
+  function raeGeloestKlang(ev) {
     ev._klDone = true; RAE.stats.geloest++;
-    const y = ev.y;
-    raeClick(ev.x, y, 0.8, 0.5, 0.12, "raer1"); raeClick(ev.x, y, 1.25, 0.32, 0.3, "raer2");
+    raeClick(ev.x, ev.y, 0.8, 0.5, 0.12, "raer1"); raeClick(ev.x, ev.y, 1.25, 0.32, 0.3, "raer2");
     [0, 2, 4, 7].forEach((d, j) => tuned("kal", d, 2, 0.12, 0.42 + j * 0.08, "raea" + j));
     tuned("glock", 0, 3, 0.1, 0.78, "raeb"); tuned("glock", 4, 3, 0.07, 0.84, "raec");
-    return true;
+  }
+  function raeGeloest() { const ev = raeEvs().find(e => e.done && !e._klDone); if (!ev) return false; raeGeloestKlang(ev); return true; }
+  /* Nachholen im Takt: was kein Hook abgefangen hat (z. B. andere Klangnamen in abenteuer.js) */
+  function raeTick() {
+    for (const ev of raeEvs()) {
+      if (ev._klInit !== true) { ev._klInit = true; ev._kf = ev.fails || 0; ev._kp = ev.prog || 0; ev._klZ = ev.fails || 0; ev.levers.forEach(l => { l._kd = !!l.down; }); if (ev.done) ev._klDone = true; continue; }
+      let n = 0;
+      ev.levers.forEach((l, i) => { if (l.down && !l._kd) { n++; raePullKlang(ev, i, ev.prog > (ev._kp || 0) && !(ev.fails > (ev._kf || 0)), Math.max(0, ev.prog - 1)); } });
+      if (ev.fails > (ev._kf || 0)) { n++; raeFalschKlang(ev); }
+      if (!ev.done && ev.levers.some(l => l._kd) && ev.levers.every(l => !l.down)) { n++; raeZurueckKlang(ev); }
+      if (ev.done && !ev._klDone) { n++; raeGeloestKlang(ev); }
+      if (n) RAE.stats.nachgeholt += n;
+    }
   }
   /* R14 Heilquelle (abenteuer.js HEILQUELLE, Z.abEvents ev.k "quelle", ev.done = versiegt) – nur beobachtet:
      Raumklang: Rinnsal-Schleife nahe einer aktiven Quelle (ab ~10 Kacheln, lauter je näher; im Kampf leiser).
@@ -1293,17 +1341,86 @@
     [0.0, 0.35, 0.8, 1.4].forEach((d, i) => wshot(pk(RA("n_tropfen_", 23)), x, y, { vol: 0.14 - i * 0.025, rate: 1.1 - i * 0.06, delay: 1.0 + d, verb: 0.6, gap: 0, tag: "qud" + i }));
     [4, 2, 0].forEach((d, i) => tuned("kal", d, 1, 0.05 - i * 0.008, 1.1 + i * 0.3, "quv" + i));
   }
-  function quSplash(o) {
-    if (!o || o.vol !== 0.7 || o.x == null) return false;
-    const ev = quEvs().find(e => e.done && !e._kl && e.x === o.x); if (!ev) return false;
+  /* R15 Variante „Einsturzgefahr“ (abenteuer.js varTick, Z.brockenListe(): {x, y0, yF, t, fall}) – nach Zustand:
+     neuer Brocken = 1,1-s-Vorwarnung: Knirschen in der Decke, Kies rieselt dichter werdend, Staub; Losbrechen (fall) = trockenes Brechen
+     statt „rock“; Brocken verschwindet aus der Liste = Aufschlag (Felsbruch + Steinschlag + tiefer Plattenschlag + Staubwolke) statt
+     „hitHeavy“. Hooks rock/hitHeavy greifen nur, wenn genau dann ein beobachteter Brocken losbricht bzw. aufschlägt; sonst holt der Takt nach. */
+  const BK = { live: new Set(), stats: { warn: 0, fall: 0, aufschlag: 0, nachgeholt: 0 } }; KL.einsturz = BK;
+  const bkListe = () => (Z.brockenListe ? Z.brockenListe() : null) || [];
+  function bkWarn(b) {
+    BK.stats.warn++; const x = b.x, y = b.y0 + 4;
+    wshot(pk(SRS.knirsch), x, y, { vol: 0.2, rate: 0.55, verb: 0.5, gap: 0, tag: "bkw1", far: 1.3 });
+    wshot(pk(SRS.knirsch), x, y, { vol: 0.16, rate: 0.5, delay: 0.45, verb: 0.5, gap: 0, tag: "bkw2", far: 1.3 });
+    [0.1, 0.35, 0.55, 0.72, 0.85, 0.95].forEach((d, i) => wshot(pk(SRS.kies), x, y, { vol: 0.06 + i * 0.02, rate: 1.1 + Math.random() * 0.2, delay: d, verb: 0.4, gap: 0, tag: "bkk" + i, far: 1.3 }));
+    dustNoise(x, y, 0.05, 1.1);
+  }
+  function bkFallKlang(b) { b._kf = true; BK.stats.fall++; wshot(pk(SRS.bruch), b.x, b.y0, { vol: 0.24, rate: 1.15, verb: 0.4, gap: 0, tag: "bkf", far: 1.3 }); }
+  function bkAufschlag(b) {
+    BK.live.delete(b); BK.stats.aufschlag++; const x = b.x, y = b.yF - 4;
+    wshot(pk(SRS.bruch), x, y, { vol: 0.42, rate: 0.75, verb: 0.45, gap: 0, tag: "bka1", far: 1.4 });
+    wshot(pk(SRS.steinschlag), x, y, { vol: 0.3, rate: 0.9, delay: 0.04, verb: 0.4, gap: 0, tag: "bka2", far: 1.4 });
+    wshot(KS("fx_im_impactplate_heavy_001"), x, y, { vol: 0.3, rate: 0.55, verb: 0.3, gap: 0, tag: "bka3", far: 1.4 });
+    [0.18, 0.4].forEach((d, i) => wshot(pk(SRS.kies), x, y, { vol: 0.12 - i * 0.04, rate: 1, delay: d, verb: 0.4, gap: 0, tag: "bkn" + i }));
+    dustNoise(x, y, 0.1, 1.6);
+  }
+  function bkFall() { const b = [...BK.live].find(b => b.fall && !b._kf); if (!b) return false; bkFallKlang(b); return true; }
+  const bkLanded = b => b.fall && b.y + 10 >= b.yF; /* aus der Liste genommen, weil aufgeschlagen (nicht durch Gebietswechsel/Leeren) */
+  function bkImpact() { const l = bkListe(), b = [...BK.live].find(b => !l.includes(b) && bkLanded(b)); if (!b) return false; bkAufschlag(b); return true; }
+  function bkTick() {
+    const l = bkListe();
+    if (BK.lv !== Z.level) { BK.lv = Z.level; BK.live.clear(); }
+    for (const b of l) if (!BK.live.has(b)) { BK.live.add(b); if (!b.fall && b.t < 0.4) bkWarn(b); else b._kf = b.fall; }
+    for (const b of BK.live) { if (b.fall && !b._kf) { BK.stats.nachgeholt++; bkFallKlang(b); } if (!l.includes(b)) { if (bkLanded(b)) { BK.stats.nachgeholt++; bkAufschlag(b); } else BK.live.delete(b); } }
+  }
+  /* R15 Befreiter Kundschafter (abenteuer.js, Z.helferAktiv()): beim Losgehen ein kurzer Ruf, beim Abschied ein Gruß (Formant-Laute
+     wie die Lager-Figuren), Treffer als leichter Dolchstich (KL.treffer, src "helfer") statt des alten „slash“ (Hook nur direkt danach). */
+  const HL = { an: false, lv: null, hitT: -9, stats: { ruf: 0, abschied: 0, treffer: 0 } }; KL.helfer = HL;
+  function hlTick() {
+    const an = !!(Z.helferAktiv && Z.helferAktiv()), P = Z.player;
+    if (an && !HL.an) { HL.lv = Z.level; HL.stats.ruf++; babble("Kundschafter", "Ich hab noch eine Rechnung offen!"); shot(pk([KS("fx_rp_sword_unsheathe4"), KS("fx_rp_sword_unsheathe5")]), { vol: 0.12, rate: 1.4, verb: 0.3, gap: 0.3, tag: "hlfz", delay: 0.5 }); }
+    if (!an && HL.an && P && !P.dead && Z.level === HL.lv) { HL.stats.abschied++; babble("Kundschafter", "Viel Glück, Gehörnter!"); }
+    HL.an = an;
+  }
+  /* R15 Fundstelle „Überreste eines Abenteurers“ (abenteuer.js, Z.abEvents ev.k "fund", ev.done = durchsucht) – nach Zustand:
+     Lederrascheln (Rucksack), Knochen klappern leise, verstreute Münzen, dazu ein leiser melancholischer Harfenton in der Tonart
+     (Moll-Sexte → Quinte, darunter Grundton). Hook „coin“ ersetzt den alten Münzklang nur, wenn gerade eine Fundstelle durchsucht
+     wurde; sonst holt KL.tick es nach. */
+  const FU = { stats: { fund: 0, nachgeholt: 0 } }; KL.fund = FU;
+  const fuEvs = () => (Z.abEvents || []).filter(e => e && e.k === "fund");
+  function fuKlang(ev) {
+    FU.stats.fund++; const x = ev.x, y = ev.y - 6;
+    wshot(pk(RA("g_leder_", 6)), x, y, { vol: 0.32, rate: 0.95, verb: 0.25, gap: 0, tag: "fu1" });
+    wshot(pk(RA("g_leder_", 6)), x, y, { vol: 0.22, rate: 1.1, delay: 0.22, verb: 0.25, gap: 0, tag: "fu2" });
+    wshot(AM("n_knochen_1"), x, y, { vol: 0.12, rate: 1.2, delay: 0.12, verb: 0.4, gap: 0, tag: "fu3" });
+    [0.38, 0.5, 0.66].forEach((d, i) => wshot(pk(RA("n_muenzen_", 4)), x, y, { vol: 0.2 - i * 0.04, rate: 1 + i * 0.05, delay: d, verb: 0.3, gap: 0, tag: "fum" + i }));
+    [[5, 0.55, 0.07], [4, 0.95, 0.06]].forEach(([d, t, v], i) => tuned("harfe", d, 1, v, t, "fuh" + i));
+    tuned("harfe", 0, 0, 0.05, 1.35, "fuh2");
+  }
+  function fundJetzt() { const ev = fuEvs().find(e => e.done && !e._kl && e._klInit); if (!ev) return false; ev._kl = true; fuKlang(ev); return true; }
+  function fuTick() {
+    const fe = fuEvs(); if (fe.length && FU.pre !== Z.level) { FU.pre = Z.level; preload(RA("g_leder_", 6).concat(RA("n_muenzen_", 4), [AM("n_knochen_1")])); }
+    for (const ev of fe) if (!ev._klInit) { ev._klInit = true; if (ev.done) ev._kl = true; }
+    const ev = fuEvs().find(e => e.done && !e._kl); if (ev) { ev._kl = true; FU.stats.nachgeholt++; fuKlang(ev); }
+  }
+  /* Quelle versiegt (ev.done neu): Trinken oder Füllen am Spielerzustand – Hook „splash“ (Mikrotask, nach quelleNimm) oder Nachholen im Takt */
+  function quNeu() { return quEvs().find(e => e.done && !e._kl && e._klInit); }
+  function quSplash() {
+    const ev = quNeu(); if (!ev) return false;
     ev._kl = true; const P = Z.player, pot0 = P ? P.potions : 0, hp0 = P ? P.hp : 0;
-    /* gleich danach entscheidet quelleNimm: Heilung (trinken) oder +1 Trank (füllen) */
     Promise.resolve().then(() => { try { quKlang(ev, P && P.potions > pot0 && !(P.hp > hp0) ? "fuellen" : "trinken"); } catch (_) {} });
     return true;
   }
+  function quStateTick(P) {
+    for (const ev of quEvs()) { if (!ev._klInit) { ev._klInit = true; if (ev.done) ev._kl = true; } }
+    const ev = quNeu();
+    if (ev) { ev._kl = true; QU.stats.nachgeholt = (QU.stats.nachgeholt || 0) + 1; quKlang(ev, P && QU.pot != null && P.potions > QU.pot ? "fuellen" : "trinken"); }
+    if (P) QU.pot = P.potions;
+  }
   if (A) A.hook = Object.assign(A.hook || {}, {
-    splash: o => quSplash(o),
-    rock: o => (o && o.x != null && o.rate === 0.7 && o.vol === 0.4 ? raeFalsch(o) : false),
+    splash: o => quSplash(),
+    slash: o => !!(A.ctx && A.ctx.currentTime - HL.hitT < 0.03),
+    rock: o => raeFalsch() || bkFall(),
+    hitHeavy: o => bkImpact(),
     ui: o => {
       const r = o.rate || 1; VS.stats.menue++;
       if (r <= 0.55) return false;                                                                  /* Fehler: dumpfe Klave bleibt */
@@ -1312,12 +1429,11 @@
       return tuned("kal", 0, 2, 0.1) && (tuned("kal", 4, 2, 0.09, 0.07, "ui2"), true);                 /* Öffnen/Klick: steigt */
     },
     uiOk: o => { VS.stats.menue++; return tuned("glock", 0, 3, 0.16) && (tuned("glock", 4, 3, 0.12, 0.06, "ok2"), true); },
-    coin: o => { if (Z.ui && Z.ui.modalOpen) { tuned("glock", 2, 3, 0.05, 0.08, "kauf"); } return false; },
+    coin: o => { if (fundJetzt()) return true; if (Z.ui && Z.ui.modalOpen) { tuned("glock", 2, 3, 0.05, 0.08, "kauf"); } return false; },
     anvil: o => { if (Z.ui && Z.ui.modalOpen && !o._m) { A.play("anvil", Object.assign({}, o, { vol: (o.vol || 1) * 0.7, _m: 1, noHook: true })); return true; } return false; },
     /* Rückweg-Tor erlischt (rueckweg.js spielt genau dann „chain“ 0,28/0,9 mit x): Aufschlag des Fallgitters nach 0,56 s, Rückprall nach 0,73 s – wie die Grafik */
     chain: o => {
-      if (o && o.vol === 0.5 && o.rate === 1.3 && o.x != null && raePull(o)) return true;
-      if (o && o.vol === 0.35 && raeZurueck(o)) return true;
+      if (raePull() || raeZurueck()) return true; /* R15: nach Zustand statt Parametern */
       if (o && o.vol === 0.28 && o.rate === 0.9 && o.x != null && Z.rueckweg) { VS.stats.tor++; const y = Z.player ? Z.player.y : 0;
         wshot(KS("fx_im_impactmetal_heavy_000"), o.x, y, { vol: 0.42, rate: 0.75, delay: 0.56, gap: 0, tag: "rwa", verb: 0.5 });
         wshot(KS("fx_im_impactmetal_heavy_003"), o.x, y, { vol: 0.16, rate: 1.1, delay: 0.73, gap: 0, tag: "rwr", verb: 0.4 });
@@ -1354,7 +1470,7 @@
   }
   if (A) A.hook = Object.assign(A.hook || {}, {
     holy: o => {
-      if (o && o.vol === 0.6 && raeGeloest()) return true;
+      if (raeGeloest()) return true;
       const m = Z.meta && Z.meta.ach; if (!m || !Z.ACH) return false;
       const ids = Object.keys(m); if (ER.n < 0) { ER.n = ids.length; return false; }
       if (ids.length <= ER.n) { ER.n = ids.length; return false; }
@@ -1459,6 +1575,7 @@
     /* Raumkulisse und Gegnerstimmen */
     try { roomTick(dt); observe(dt); climbTick(dt); transitTick(dt); } catch (e) { if (!KL.err3) { KL.err3 = 1; console.error(e); } }
     try { sonderTick(dt); } catch (e) { if (!KL.err7) { KL.err7 = 1; console.error(e); } }
+    try { raeTick(); quStateTick(P); fuTick(); hlTick(); bkTick(); } catch (e) { if (!KL.err9) { KL.err9 = 1; console.error(e); } } /* R15: Rätsel/Quelle nach Zustand */
     try { rueckTick(dt); } catch (e) { if (!KL.err8) { KL.err8 = 1; console.error(e); } }
     try { tplTick(dt); } catch (e) { if (!KL.err9) { KL.err9 = 1; console.error(e); } }
     try { bewegTick(dt); } catch (e) { if (!KL.err10) { KL.err10 = 1; console.error(e); } }
