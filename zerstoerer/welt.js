@@ -1493,7 +1493,7 @@
      oder es ist sichtbar eine Bodenfalle (Stachelgrube, Lavarinne, Wasserbecken), sodass Schaden einen Grund hat. */
   const ABYSS = (Z.ABYSS = { schlund: 1, zinnen: 1 });
   const PIT_TRAP = (Z.PIT_TRAP = { schmiede: 5, glut: 5, hafen: 6, see: 6 }); /* sonst Stacheln (3) */
-  const PIT_LAVA_ONLY = { glut: 1 }; /* Glutgassen: Löcher sind Lavarinnen, keine Schächte */
+  const PIT_LAVA_ONLY = {}; /* (früher Glutgassen: nur Lavarinnen – zu viel Gefahrenschaden; jetzt auch dort Schächte) */
   const PIT_DROP = 9; /* Fallschaden ab 12 Kacheln (ebenen.js): Schächte bleiben mit Luft für einen Sprung darunter, sonst ein Zwischenpodest */
   function resolvePits(lv, R, B) {
     const g = lv.get, W = lv.W, H = lv.H, id = lv.biome, cells = lv.cells;
@@ -1606,7 +1606,12 @@
         if (crumble) for (const x of xs) if (g(x, top - 1) === 10) lv.set(x, top - 1, 1);
         rec.how = "zu"; log.push(rec); continue;
       }
-      if (gentle && !R.chance(0.45)) {
+      /* Fairness: Gruben gleich hinter einem Raumdurchgang (Randspalten) und im Torhof werden harmlose Mulden;
+         Wasserbecken (Hafen, See) nur jedes zweite Mal, auf dem Hauptweg höchstens jedes dritte Mal eine Falle */
+      const rel0 = x0 - Math.floor(x0 / CW) * CW, rel1 = x1 - Math.floor(x0 / CW) * CW;
+      const atEdge = rel0 < 3 || rel1 > CW - 4;
+      const onPath = up && up.kind === "path";
+      if (gentle || atEdge || (trapTile === 6 && R.chance(0.5)) || (onPath && carvedPit) || (onPath && R.chance(0.35))) {
         /* Torhof: eine harmlose Mulde (eine Kachel tief) statt Stacheln – man steigt einfach wieder heraus */
         for (const x of xs) { const [t, b] = cols.get(x); for (let yy = t; yy <= b; yy++) lv.set(x, yy, 1); if (!crumble) lv.set(x, t, 0); else lv.set(x, t - 1, 0); }
         rec.how = "mulde"; log.push(rec); continue;
@@ -1616,7 +1621,7 @@
         for (let yy = t; yy <= b; yy++) lv.set(x, yy, 1);
         const ty = deep ? t + 1 : t;
         if (deep) lv.set(x, t, 0);
-        lv.set(x, ty, trapTile);
+        lv.set(x, ty, trapTile); (rec.trapTiles = rec.trapTiles || []).push(ty * W + x);
         if (trapTile !== 3 && deep) lv.set(x, t, trapTile === 6 ? 6 : 0); /* Becken: Wasser bis zum Rand, Lava etwas tiefer */
         if (!rockV(g(x, ty + 1))) lv.set(x, ty + 1, 1);
       }

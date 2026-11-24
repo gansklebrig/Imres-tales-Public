@@ -251,10 +251,12 @@
     for (let i = 1; i < N; i++) c.lineTo(lp(L[i * 2], R[i * 2], 0.08), lp(L[i * 2 + 1], R[i * 2 + 1], 0.08));
     for (let i = N - 1; i >= 0; i--) c.lineTo(lp(L[i * 2], R[i * 2], 0.62 - i * 0.04), lp(L[i * 2 + 1], R[i * 2 + 1], 0.62 - i * 0.04));
     c.closePath(); c.fill();
-    /* Faltenlinien */
-    c.strokeStyle = "rgba(0,0,0,.28)"; c.lineWidth = 0.6; c.beginPath();
-    for (let i = 2; i < N; i++) { const m = 0.35 + 0.25 * Math.sin(i * 1.9); c.moveTo(lp(L[i * 2 - 2], R[i * 2 - 2], m), lp(L[i * 2 - 1], R[i * 2 - 1], m)); c.lineTo(lp(L[i * 2], R[i * 2], m + 0.05), lp(L[i * 2 + 1], R[i * 2 + 1], m + 0.05)); }
-    c.stroke();
+    /* Faltenlinien (Stufe 0: weggelassen – unter einem Pixel breit) */
+    if (!(Z.gq && Z.gq.lean && !Z.sprOff)) {
+      c.strokeStyle = "rgba(0,0,0,.28)"; c.lineWidth = 0.6; c.beginPath();
+      for (let i = 2; i < N; i++) { const m = 0.35 + 0.25 * Math.sin(i * 1.9); c.moveTo(lp(L[i * 2 - 2], R[i * 2 - 2], m), lp(L[i * 2 - 1], R[i * 2 - 1], m)); c.lineTo(lp(L[i * 2], R[i * 2], m + 0.05), lp(L[i * 2 + 1], R[i * 2 + 1], m + 0.05)); }
+      c.stroke();
+    }
     /* glühende Darkin-Rune auf dem Umhang */
     if (glowK > 0.05) {
       const i = 3, mx = lp(L[i * 2], R[i * 2], 0.45), my = lp(L[i * 2 + 1], R[i * 2 + 1], 0.45);
@@ -801,33 +803,38 @@
   const toF = (x, y, o) => { o[0] = pHx + x * pC - y * pS; o[1] = pHy + x * pS + y * pC; return o; };
   const SF = [0, 0], SB = [0, 0], NK = [0, 0];
 
-  function drawLeg(c, hx, hy, ax, ay, toe, front, glowK, time) {
+  function kneeF(c, front) { poly(c, [-1.6, -1.2, 1.8, -0.8, 2.6, 0.8, 0, 1.6, -1.8, 0.6], front ? "#3a2c2e" : "#241a1c"); poly(c, [1.4, -0.4, 4, -0.6, 2.2, 0.8], front ? "#4a3a3c" : "#2a1e20"); }
+  function bootF(c, front) {
+    poly(c, [-1.7, -1.4, 1.2, -1.6, 3.6, 0.2, 3.9, 1.2, -1.8, 1.3], front ? "#120c0e" : "#0e090a");
+    limb(c, -1.2, -1.2, 1, -1.3, 0.8, front ? "#3a2c2e" : "#241a1c");
+    poly(c, [3.2, 0.2, 5, 0.6, 3.6, 1.2], front ? "#2a1e20" : "#1a1214");
+  }
+  const KNEE = [g => kneeF(g, false), g => kneeF(g, true)], BOOT = [g => bootF(g, false), g => bootF(g, true)];
+  function drawLeg(c, hx, hy, ax, ay, toe, front, glowK, time, pps) {
     const [kx, ky, ex, ey] = ik(hx, hy, ax, ay, T1, T2, 1);
     const cT = front ? EZ.leg : "#140d0f", cS = front ? EZ.leg2 : "#1a1214";
-    limb(c, hx, hy, kx, ky, front ? 4.2 : 4, cT);
-    limb(c, kx, ky, ex, ey, front ? 3.6 : 3.4, cS);
+    if (pps) { LP[0] = hx; LP[1] = hy; LP[2] = kx; LP[3] = ky; LP[4] = ex; LP[5] = ey; line(c, LP, front ? 3.9 : 3.7, cS); } /* Stufe 0: Ober- und Unterschenkel in einem Zug (Farben fast gleich) */
+    else { limb(c, hx, hy, kx, ky, front ? 4.2 : 4, cT); limb(c, kx, ky, ex, ey, front ? 3.6 : 3.4, cS); }
     /* Beinschiene */
     const sx = lp(kx, ex, 0.35), sy = lp(ky, ey, 0.35);
     limb(c, sx, sy, lp(kx, ex, 0.85), lp(ky, ey, 0.85), front ? 2.4 : 2.2, front ? "#2e2226" : "#201719");
     /* Knieschutz mit Dorn */
     const ka = Math.atan2(ey - ky, ex - kx) - PI / 2;
     c.save(); c.translate(kx, ky); c.rotate(ka);
-    poly(c, [-1.6, -1.2, 1.8, -0.8, 2.6, 0.8, 0, 1.6, -1.8, 0.6], front ? "#3a2c2e" : "#241a1c");
-    poly(c, [1.4, -0.4, 4, -0.6, 2.2, 0.8], front ? "#4a3a3c" : "#2a1e20");
+    if (!(pps && partSpr(c, "PK|" + pps + "|" + (front ? 1 : 0), 4, 6, 4, 4, pps, KNEE[front ? 1 : 0]))) kneeF(c, front);
     c.restore();
     /* glühende Ader am Oberschenkel */
     if (front && glowK > 0.05) { const a = (0.35 + 0.3 * Math.sin(time * 4 + 1.3)) * glowK; c.strokeStyle = "rgba(255,110,40," + a.toFixed(3) + ")"; c.lineWidth = 0.55; c.beginPath(); c.moveTo(lp(hx, kx, 0.15) + 0.6, lp(hy, ky, 0.15)); c.lineTo(lp(hx, kx, 0.5) + 1.1, lp(hy, ky, 0.5)); c.lineTo(lp(hx, kx, 0.8) + 0.5, lp(hy, ky, 0.8)); c.stroke(); }
     /* Stiefel */
     c.save(); c.translate(ex, ey); c.rotate(toe);
-    poly(c, [-1.7, -1.4, 1.2, -1.6, 3.6, 0.2, 3.9, 1.2, -1.8, 1.3], front ? "#120c0e" : "#0e090a");
-    limb(c, -1.2, -1.2, 1, -1.3, 0.8, front ? "#3a2c2e" : "#241a1c");
-    poly(c, [3.2, 0.2, 5, 0.6, 3.6, 1.2], front ? "#2a1e20" : "#1a1214");
+    if (!(pps && partSpr(c, "PB|" + pps + "|" + (front ? 1 : 0), 4, 7, 4, 4, pps, BOOT[front ? 1 : 0]))) bootF(c, front);
     c.restore();
   }
-  function drawArm(c, sx, sy, hx, hy, bend, front, glowK, time) {
+  const LP = [0, 0, 0, 0, 0, 0];
+  function drawArm(c, sx, sy, hx, hy, bend, front, glowK, time, pps) {
     const [ex, ey, wx, wy] = ik(sx, sy, hx, hy, L1, L2, bend);
-    limb(c, sx, sy, ex, ey, front ? 3.3 : 3.1, front ? "#1e1618" : "#150e10");
-    limb(c, ex, ey, wx, wy, front ? 3.0 : 2.8, front ? "#2a1f22" : "#1c1416");
+    if (pps) { LP[0] = sx; LP[1] = sy; LP[2] = ex; LP[3] = ey; LP[4] = wx; LP[5] = wy; line(c, LP, front ? 3.15 : 2.95, front ? "#241a1d" : "#181012"); } /* Stufe 0: Ober- und Unterarm in einem Zug */
+    else { limb(c, sx, sy, ex, ey, front ? 3.3 : 3.1, front ? "#1e1618" : "#150e10"); limb(c, ex, ey, wx, wy, front ? 3.0 : 2.8, front ? "#2a1f22" : "#1c1416"); }
     /* Armschiene */
     limb(c, lp(ex, wx, 0.25), lp(ey, wy, 0.25), lp(ex, wx, 0.8), lp(ey, wy, 0.8), front ? 3.5 : 3.2, front ? "#352829" : "#211819");
     if (front) {
@@ -839,7 +846,7 @@
     }
     return [wx, wy, ex, ey];
   }
-  function drawHand(c, x, y, front) { circ(c, x, y, front ? 1.7 : 1.6, front ? "#2c2022" : "#1e1618"); circ(c, x + 0.5, y - 0.4, 0.7, front ? "#4a3a3c" : "#2a1e20"); }
+  function drawHand(c, x, y, front, lean) { circ(c, x, y, front ? 1.7 : 1.6, front ? "#2c2022" : "#1e1618"); if (!lean) circ(c, x + 0.5, y - 0.4, 0.7, front ? "#4a3a3c" : "#2a1e20"); }
 
   function drawTorso(c, p, glowK, time, hurt, part) {
     /* lokaler Rumpf: Ursprung Hüfte, oben = −y. part: 1 = nur fester Teil (Sprite), 2 = nur glühender Kern */
@@ -887,12 +894,12 @@
     poly(c, [-0.7, 0, 0.7, 0, 0.55, 1.3, 0, 2, -0.55, 1.3], EZ.bone2);
     c.restore();
   }
-  function drawTabard(c, p, time, springA) {
+  function drawTabard(c, p, time, springA, lean) {
     /* vorderer Wappenrock: hängt vom Gürtel, federt der Bewegung hinterher */
     const sw = (springA != null ? springA : p.tab) + Math.sin(time * 2.6) * 0.05;
     const tx = 2.4 + Math.sin(sw) * 4.5, ty = 5 - Math.abs(sw) * 1.1;
     c.fillStyle = EZ.cloth2; c.beginPath(); c.moveTo(1, -0.4); c.lineTo(3.8, -0.5); c.quadraticCurveTo(3.6 + sw * 2, 2.6, tx + 1.1, ty); c.lineTo(tx, ty + 1); c.lineTo(tx - 1.1, ty); c.quadraticCurveTo(1.2 + sw * 2, 2.6, 1, -0.4); c.fill();
-    c.strokeStyle = "#8a1a1a"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(2.4, 0.2); c.quadraticCurveTo(2.4 + sw * 2.2, 2.6, tx, ty + 0.4); c.stroke();
+    if (!lean) { c.strokeStyle = "#8a1a1a"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(2.4, 0.2); c.quadraticCurveTo(2.4 + sw * 2.2, 2.6, tx, ty + 0.4); c.stroke(); }
   }
   function drawHead(c, P, glowK, time, alpha, hurt, wrath, rotW, part) {
     /* Kopf-Ursprung: Nacken; oben = −y. part: 1 = fester Teil (Sprite), 2 = nur Kapuzenzipfel, 3 = nur Leuchten */
@@ -1075,6 +1082,9 @@
   }
   let SECV = null; /* Sekundärwerte für die Teilzeichner (Kopf, Rumpf) */
 
+  /* hinterer Schulterpanzer (Rumpf-Koordinaten) */
+  function backShoulder(c) { poly(c, [-5.6, -12.4, -2.6, -14.6, 0.6, -13, -0.6, -10.4, -4.6, -10], "#140d0f"); poly(c, [-3.6, -13.8, -6, -17.4, -1.8, -14.2], "#100a0c"); }
+  const TORSO = g => { drawTorso(g, null, 1, 0, 0, 1); backShoulder(g); };
   /* vorderer Schulterpanzer (über dem Oberarm), Ursprung Schulter */
   function shoulderF(c) {
     poly(c, [-1.4, -2.6, -4.6, -5.8, -0.2, -3], "#100a0c"); poly(c, [-2.8, -1.4, -6.4, -2.8, -2.6, 0], "#100a0c");
@@ -1191,26 +1201,25 @@
     if (WI.grip2 != null && WI.icon) { hBx = hFx + Math.cos(WI.ang) * WI.grip2; hBy = hFy + Math.sin(WI.ang) * WI.grip2; }
     const ext = WI.ext;
     /* ---- hinteres Bein, hinterer Arm ---- */
-    drawLeg(c, hipB[0], hipB[1], p.fBx, p.fBy - 1.3, p.toeB, false, glowK, time);
+    drawLeg(c, hipB[0], hipB[1], p.fBx, p.fBy - 1.3, p.toeB, false, glowK, time, pps);
     /* Schild auf dem Rücken */
     if (WI.shieldBack && !P.dead) { const q = [0, 0]; toF(-4.4, -6.5, q); c.save(); c.translate(q[0], q[1]); c.rotate(p.lean + 0.2); c.scale(0.7, 0.7); weaponP(c, WI.shieldBack.icon, WI.shieldBack.col, time, 0, pps); c.restore(); }
-    const bA = drawArm(c, SB[0], SB[1], hBx, hBy, T.eB, false, glowK, time);
+    const bA = drawArm(c, SB[0], SB[1], hBx, hBy, T.eB, false, glowK, time, pps);
     /* hintere Hand: zweite Klinge, Bogensehne, Faust */
     if (WI.icon2 && !WI.punchBack) { c.save(); c.translate(bA[0], bA[1]); c.rotate(WI.ang2); weaponP(c, WI.icon2, WI.col, time, 0, pps); c.restore(); }
     else if (WI.icon2 && WI.punchBack) { c.save(); c.translate(bA[0], bA[1]); c.rotate(0); weaponP(c, WI.icon2, WI.col, time, 0, pps); c.restore(); }
     if (WI.hand2Icon) { c.save(); c.translate(bA[0], bA[1]); c.rotate(Math.atan2(bA[1] - bA[3], bA[0] - bA[2]) + 0.5); weaponP(c, WI.hand2Icon, WI.hand2Col, time, 0, pps); c.restore(); }
-    drawHand(c, bA[0], bA[1], false);
+    drawHand(c, bA[0], bA[1], false, pps > 0);
     /* ---- vorderes Bein (unter dem Wappenrock) ---- */
-    drawLeg(c, hipF[0], hipF[1], p.fFx, p.fFy - 1.3, p.toeF, true, glowK, time);
+    drawLeg(c, hipF[0], hipF[1], p.fFx, p.fFy - 1.3, p.toeF, true, glowK, time, pps);
     /* ---- Rumpf ---- */
     c.save(); c.translate(p.hx, p.hy); c.rotate(p.lean);
-    if (pps && partSpr(c, "PT|" + pps, 7, 8, 14, 7, pps, g => drawTorso(g, p, 1, 0, 0, 1))) drawTorso(c, p, glowK, time, WI.hurt, 2);
-    else drawTorso(c, p, glowK, time, WI.hurt);
-    drawTrinkets(c, S, p.lean + (T.rot || 0));
-    drawTabard(c, p, time, S.tabA);
-    /* hinterer Schulterpanzer */
-    poly(c, [-5.6, -12.4, -2.6, -14.6, 0.6, -13, -0.6, -10.4, -4.6, -10], "#140d0f");
-    poly(c, [-3.6, -13.8, -6, -17.4, -1.8, -14.2], "#100a0c");
+    /* Stufe 0: Rumpf samt hinterem Schulterpanzer als Sprite (überlappt Gürtelzeug und Wappenrock nicht); Gürtelanhänger entfallen (Pixelgröße) */
+    const torsoSpr = pps && partSpr(c, "PT|" + pps, 8, 8, 19, 7, pps, TORSO);
+    if (torsoSpr) drawTorso(c, p, glowK, time, WI.hurt, 2);
+    else { drawTorso(c, p, glowK, time, WI.hurt); drawTrinkets(c, S, p.lean + (T.rot || 0)); }
+    drawTabard(c, p, time, S.tabA, pps > 0);
+    if (!torsoSpr) backShoulder(c);
     /* Kopf */
     c.save(); c.translate(1.1, -12.4); c.rotate(headA);
     if (WI.headTurn > 0) { let hs = Math.cos(WI.headTurn * PI); if (Math.abs(hs) < 0.18) hs = hs < 0 ? -0.18 : 0.18; c.translate(0.6, 0); c.scale(hs, 1); c.translate(-0.6, 0); }
@@ -1218,8 +1227,7 @@
     if (pps) {
       const hk = "PH|" + pps + "|" + (wrath ? 1 : 0) + (WI.hurt > 0.3 ? 1 : 0) + (P.anim && P.anim.blink > 0 ? 1 : 0) + (glowK > 0.02 ? 1 : 0);
       drawHead(c, P, glowK, time, alpha, WI.hurt, wrath, rotW, 2);
-      const hb = { anim: { blink: P.anim && P.anim.blink > 0 ? 1 : 0 } }, hu = WI.hurt, gk = glowK;
-      if (!partSpr(c, hk, 11, 9, 19, 4, pps, g => drawHead(g, hb, gk, 0, 1, hu, wrath, 0, 1))) drawHead(c, P, glowK, time, alpha, WI.hurt, wrath, rotW, 1);
+      if (!partSpr(c, hk, 11, 9, 19, 4, pps, g => drawHead(g, P, glowK, 0, 1, WI.hurt, wrath, 0, 1))) drawHead(c, P, glowK, time, alpha, WI.hurt, wrath, rotW, 1);
       drawHead(c, P, glowK, time, alpha, WI.hurt, wrath, rotW, 3);
     } else drawHead(c, P, glowK, time, alpha, WI.hurt, wrath, rotW);
     /* Glut an den Hornspitzen (bei Tempo, Zorn, im Schlag) */
@@ -1234,7 +1242,7 @@
     if (S.trail && S.trail.length && (S.trFace !== P.face)) S.trail.length = 0;
     S.trFace = P.face;
     if (!low && S.trail && S.trail.length) { c.save(); c.setTransform(F0); drawTrail(c, S, time, trailCol(S.trCol || WI.col || "#ffd8b0"), alpha); c.restore(); }
-    const fA = drawArm(c, SF[0], SF[1], hFx, hFy, T.eF, true, glowK, time);
+    const fA = drawArm(c, SF[0], SF[1], hFx, hFy, T.eF, true, glowK, time, pps);
     if (WI.icon && !(WI.icon2 && WI.punchBack && FISTS[WI.icon] && false)) {
       c.save(); c.translate(fA[0], fA[1]); c.rotate(WI.ang);
       weaponP(c, WI.icon, WI.col, time, WI.icon === "bow" || WI.icon === "whip" || WI.icon === "xbow" ? ext : 0, pps);
@@ -1258,7 +1266,7 @@
     if (!swingOn && S.trail && S.trail.length && act && act.type === "melee" && act.phase === "pre") S.trail.length = 0;
     if (WI.flask > 0) { c.save(); c.translate(fA[0], fA[1]); c.rotate(-0.6 - WI.flask * 1.2); poly(c, [-1.6, 0, 1.6, 0, 2.2, -4.6, 0.8, -5.2, -0.8, -5.2, -2.2, -4.6], "#e8d8d0"); poly(c, [-1.3, -0.4, 1.3, -0.4, 1.8, -3.4, -1.8, -3.4], "#c02a2a"); limb(c, 0, -5.2, 0, -6.4, 1.3, "#8a6a40"); glow(c, 0, -2.5, 5, "rgba(255,80,80,.5)", alpha); c.restore(); }
     if (WI.glowHand) { glow(c, fA[0] + 1.5, fA[1], 7, "rgba(255,150,70,.6)", alpha); circ(c, fA[0] + 1.5, fA[1], 1.2, "#ffe0b0"); }
-    drawHand(c, fA[0], fA[1], true);
+    drawHand(c, fA[0], fA[1], true, pps > 0);
     /* vorderer Schulterpanzer (über dem Oberarm) */
     c.save(); c.translate(SF[0], SF[1]); c.rotate(p.lean * 0.5 + (Math.atan2(fA[3] - SF[1], fA[2] - SF[0]) - PI / 2) * 0.3);
     if (!(pps && partSpr(c, "PS|" + pps, 8, 5, 7, 4, pps, shoulderF))) shoulderF(c);
@@ -1459,30 +1467,36 @@
   const SPR = new Map(), SPRBIG = new WeakMap(), DID = new WeakMap();
   let sprDid = 0, sprFrame = -1, sprMade = 0, sprScratch = null, sprSg = null;
   const SPRS = { hit: 0, miss: 0, fall: 0, evict: 0, scan: 0 };
-  /* Sammelseiten (Atlas) 512×512 = 1 MB; Obergrenze 32 Seiten (minimal 20); verdrängt wird die am längsten unbenutzte Seite */
-  const PAGE = 512, PAGES = [];
-  let curPg = null;
-  const sprMaxPages = () => (Z.gq && Z.gq.mini ? 20 : 32);
+  /* Sammelseiten (Atlas) in drei Größen: 128² für gewöhnliche Gestalten, 256²/512² für große. Kleine Seiten sind deutlich
+     billiger – drawImage aus einer Leinwand und das Nachschreiben kosten in Chrome mit der Größe der Quell-Leinwand.
+     Obergrenze 32 MB (minimal 20 MB); verdrängt wird die am längsten unbenutzte Seite. */
+  const PAGES = [], CUR = {};
+  let pgBytes = 0;
+  const sprMaxBytes = () => (Z.gq && Z.gq.mini ? 20 : 32) * 1048576;
   function defId(d) { let i = DID.get(d); if (!i) { i = ++sprDid; DID.set(d, i); } return i; }
+  function pageDrop(pg) {
+    for (const k of pg.keys) SPR.delete(k);
+    pg.keys.length = 0; pg.gen++; pgBytes -= pg.S * pg.S * 4; pg.cv.width = pg.cv.height = 0; SPRS.evict++;
+    const i = PAGES.indexOf(pg); if (i >= 0) PAGES.splice(i, 1);
+    for (const k in CUR) if (CUR[k] === pg) CUR[k] = null;
+  }
   function pageAlloc(bw, bh) {
     const pw = bw + 2, ph = bh + 2; /* 1 px Rand gegen Überblenden beim Filtern */
-    if (pw > PAGE || ph > PAGE) return null;
-    if (curPg) { if (curPg.x + pw > PAGE) { curPg.x = 0; curPg.y += curPg.rh; curPg.rh = 0; } if (curPg.y + ph > PAGE) curPg = null; }
-    if (!curPg) {
-      let pg = null;
-      if (PAGES.length >= sprMaxPages()) {
-        for (const q of PAGES) if (q.used < sprFrame && (!pg || q.used < pg.used)) pg = q;
-        if (!pg) return null;
-        for (const k of pg.keys) SPR.delete(k);
-        pg.keys.length = 0; pg.gen++; pg.g.clearRect(0, 0, PAGE, PAGE); SPRS.evict++;
-      } else {
-        const cv = document.createElement("canvas"); cv.width = cv.height = PAGE;
-        pg = { cv, g: cv.getContext("2d"), keys: [], used: 0, gen: 0 }; PAGES.push(pg);
+    const S = Math.max(pw, ph) <= 128 ? 128 : Math.max(pw, ph) <= 256 ? 256 : 512;
+    if (pw > S || ph > S) return null;
+    let pg = CUR[S];
+    if (pg) { if (pg.x + pw > S) { pg.x = 0; pg.y += pg.rh; pg.rh = 0; } if (pg.y + ph > S) pg = CUR[S] = null; }
+    if (!pg) {
+      while (pgBytes + S * S * 4 > sprMaxBytes()) {
+        let lru = null; for (const q of PAGES) if (q.used < sprFrame && (!lru || q.used < lru.used)) lru = q;
+        if (!lru) return null;
+        pageDrop(lru);
       }
-      pg.x = 0; pg.y = 0; pg.rh = 0; curPg = pg;
+      const cv = document.createElement("canvas"); cv.width = cv.height = S;
+      pg = { cv, g: cv.getContext("2d"), S, keys: [], used: 0, gen: 0, x: 0, y: 0, rh: 0 }; PAGES.push(pg); pgBytes += S * S * 4; CUR[S] = pg;
     }
-    const r = curPg; const sx = r.x + 1, sy = r.y + 1; r.x += pw; if (ph > r.rh) r.rh = ph; r.used = sprFrame;
-    return { pg: r, sx, sy };
+    const sx = pg.x + 1, sy = pg.y + 1; pg.x += pw; if (ph > pg.rh) pg.rh = ph; pg.used = sprFrame;
+    return { pg, sx, sy };
   }
   /* In Zwischenleinwand zeichnen (Rahmen lokal: links L, rechts R, oben U, unten D; Maßstab ps), benutzten Bereich
      suchen und in eine Sammelseite kopieren. Rückgabe null = nicht möglich (zu groß, Fehler), {pg:null} = leer.
@@ -1560,29 +1574,46 @@
     SDEP.set(fn, r); return r;
   }
   const NOK = col => col, FLASHK = () => "#fff6ea";
-  /* Aufbau verzögert: ein fehlendes Bild wird in diesem Bild noch direkt gezeichnet und erst zu Beginn des nächsten Bildes
-     in die Sammelseite geschrieben – so wird eine Seite nie beschrieben, nachdem sie im selben Bild schon gelesen wurde
-     (das würde Chrome zu einer Kopie der ganzen Seite zwingen). */
-  const SPQ = [], PEND = { pend: true };
-  function sprFlush() {
-    const q = SPQ.splice(0);
-    for (const j of q) { let n = null; try { n = j.mk(); } catch (err) { n = null; } if (n) { if (n.pg) n.gen = n.pg.gen; SPR.set(j.key, n); } else SPR.delete(j.key); }
-  }
-  function sprTick() { const fr = Z.gfx ? Z.gfx.frame : 0; if (fr !== sprFrame) { sprFrame = fr; sprMade = 0; if (SPQ.length) sprFlush(); } }
+  /* Aufbau sofort beim ersten Bedarf (kleine Sammelseiten: Nachschreiben nach dem Lesen kostet kaum etwas) */
+  function sprTick() { const fr = Z.gfx ? Z.gfx.frame : 0; if (fr !== sprFrame) { sprFrame = fr; sprMade = 0; } }
   /* Bauteil (Spieler) aus dem Zwischenspeicher setzen; false → selbst zeichnen */
   function partSpr(c, key, L, R, U, D, ps, draw) {
-    const s = sprGet(key, () => () => sprMake(key, L, R, U, D, ps, draw));
+    const s = sprGet(key, () => sprMake(key, L, R, U, D, ps, draw));
     if (!s) return false;
     if (s.pg) c.drawImage(s.pg.cv, s.sx, s.sy, s.sw, s.sh, s.x, s.y, s.w, s.h);
     return true;
   }
+  /* Schrift (Warn-Glyphen, Elite-Namen, Zustandssymbole) als Sprite: Text zeichnen ist auf schwachen Geräten teuer.
+     (x, y) wie fillText mit textAlign center und Grundlinie alphabetic. */
+  function txtSpr(c, txt, font, size, fill, stroke, lw, x, y) {
+    if (document.fonts && document.fonts.status !== "loaded") return false; /* sonst bliebe die Ersatzschrift im Speicher */
+    const ps = Z.gfx.scale * 2, key = "T|" + ps + "|" + font + "|" + fill + "|" + (stroke || "") + "|" + txt;
+    const s = sprGet(key, () => {
+      if (!sprSg) { sprScratch = document.createElement("canvas"); sprScratch.width = sprScratch.height = 160; sprSg = sprScratch.getContext("2d", { willReadFrequently: true }); }
+      sprSg.font = font; const tw = sprSg.measureText(txt).width;
+      const w = tw + lw + 2, up = size + lw / 2 + 1, h = up + size * 0.35 + lw / 2 + 1;
+      const W = Math.ceil(w * ps), H = Math.ceil(h * ps), slot = pageAlloc(W, H); if (!slot) return null;
+      const g = slot.pg.g;
+      g.save(); g.beginPath(); g.rect(slot.sx, slot.sy, W, H); g.clip(); g.setTransform(ps, 0, 0, ps, slot.sx + (w / 2) * ps, slot.sy + up * ps);
+      g.font = font; g.textAlign = "center"; g.textBaseline = "alphabetic";
+      if (stroke) { g.strokeStyle = stroke; g.lineWidth = lw; g.lineJoin = "round"; g.strokeText(txt, 0, 0); }
+      g.fillStyle = fill; g.fillText(txt, 0, 0); g.restore();
+      slot.pg.keys.push(key);
+      return { pg: slot.pg, sx: slot.sx, sy: slot.sy, sw: W, sh: H, x: -w / 2, y: -up, w: W / ps, h: H / ps };
+    });
+    if (!s) return false;
+    if (s.pg) c.drawImage(s.pg.cv, s.sx, s.sy, s.sw, s.sh, x + s.x, y + s.y, s.w, s.h);
+    return true;
+  }
   function sprGet(key, mk) {
     const s = SPR.get(key);
-    if (s) { if (s === PEND) return null; if (s.pg && s.pg.gen !== s.gen) { SPR.delete(key); return null; } SPRS.hit++; if (s.pg) s.pg.used = sprFrame; return s; }
-    if (sprMade >= (Z.gq && Z.gq.mini ? 2 : 3)) { SPRS.fall++; return null; } /* Aufbau-Budget je Bild erschöpft */
+    if (s) { if (s.pg && s.pg.gen !== s.gen) SPR.delete(key); else { SPRS.hit++; if (s.pg) s.pg.used = sprFrame; return s; } }
+    if (sprMade >= (Z.gq && Z.gq.mini ? 2 : 3)) { SPRS.fall++; return null; } /* Aufbau-Budget je Bild erschöpft: diesmal direkt zeichnen */
     sprMade++; SPRS.miss++;
-    SPR.set(key, PEND); SPQ.push({ key, mk: mk() }); /* mk() liefert den eigentlichen Aufbau (mit eingefrorenem Zustand) */
-    return null;
+    let n = null; try { n = mk(); } catch (err) { n = null; }
+    if (!n) return null;
+    if (n.pg) n.gen = n.pg.gen;
+    SPR.set(key, n); return n;
   }
   /* Gestalt per Sprite zeichnen; false → Aufrufer zeichnet wie bisher. Q ist bereits gesetzt (setQ). */
   function sprShape(c, e, d, fn, k, flash, tA, moving, phase, ps, hLoc) {
@@ -1620,19 +1651,14 @@
     /* Treffer-Blitz: eigene Variante mit weißen Körperfarben (wie k() beim direkten Zeichnen) */
     const fkey = flash ? key + "!" : key;
     const s0 = SPR.get(fkey);
-    const s = s0 && s0 !== PEND && !(s0.pg && s0.pg.gen !== s0.gen) ? (SPRS.hit++, s0.pg && (s0.pg.used = sprFrame), s0) : sprGet(fkey, () => {
-      /* Zustand einfrieren: Aufbau läuft erst zu Beginn des nächsten Bildes */
-      const qs = Object.assign({}, Q), ec = Object.assign({}, e); if (e.st) ec.st = Object.assign({}, e.st);
-      const kk = flash ? FLASHK : NOK;
-      return () => { const q0 = Object.assign({}, Q); Object.assign(Q, qs); try { return sprBuild(fkey, cat, fn, ec, d, kk, qt, moving, qph, ak, qt, psq, hLoc); } finally { Object.assign(Q, q0); } };
-    });
+    const s = s0 && !(s0.pg && s0.pg.gen !== s0.gen) ? (SPRS.hit++, s0.pg && (s0.pg.used = sprFrame), s0) : sprGet(fkey, () => sprBuild(fkey, cat, fn, e, d, flash ? FLASHK : NOK, qt, moving, qph, ak, qt, psq, hLoc));
     Q.pre = q0; Q.act = q1; Q.post = q2; Q.hurt = q3; Q.deadT = q4; Q.dead = q5; Q.time = q6; Q.alt = q7;
     if (!s) return false;
     if (s.pg) c.drawImage(s.pg.cv, s.sx, s.sy, s.sw, s.sh, s.x, s.y, s.w, s.h);
     return true;
   }
-  Z.figSpr = { stats: () => ({ n: SPR.size, mb: PAGES.length, hit: SPRS.hit, miss: SPRS.miss, scan: SPRS.scan, fall: SPRS.fall, evict: SPRS.evict }),
-    clear: () => { SPR.clear(); SPQ.length = 0; for (const q of PAGES) { q.keys.length = 0; q.g.clearRect(0, 0, PAGE, PAGE); } curPg = null; PAGES.length = 0; }, keys: () => [...SPR.keys()] };
+  Z.figSpr = { stats: () => ({ n: SPR.size, mb: +(pgBytes / 1048576).toFixed(2), pages: PAGES.length, hit: SPRS.hit, miss: SPRS.miss, scan: SPRS.scan, fall: SPRS.fall, evict: SPRS.evict }),
+    clear: () => { SPR.clear(); while (PAGES.length) pageDrop(PAGES[0]); }, keys: () => [...SPR.keys()] };
 
   Z.drawEnemy = function (c, e, time) {
     const d = e.def;
@@ -1758,10 +1784,12 @@
     /* Glyphe über dem Kopf */
     if (pre && !d.boss && act.t > 0.05) {
       const red = act.a.glyph === "!!" || act.a.unblockable;
-      c.save(); c.font = "900 " + (red ? 13 : 11) + "px 'Alegreya Sans',sans-serif"; c.textAlign = "center";
-      c.fillStyle = red ? "#ff3a2a" : "#ffd27a"; c.strokeStyle = "rgba(0,0,0,.8)"; c.lineWidth = 2.5;
       const yy = e.y - 6 - Math.sin(act.t * 20) * 1.5;
-      c.strokeText(red ? "!!" : "!", cx, yy); c.fillText(red ? "!!" : "!", cx, yy); c.restore();
+      if (!(sprPs > 0 && txtSpr(c, red ? "!!" : "!", "900 " + (red ? 13 : 11) + "px 'Alegreya Sans',sans-serif", red ? 13 : 11, red ? "#ff3a2a" : "#ffd27a", "rgba(0,0,0,.8)", 2.5, cx, yy))) {
+        c.save(); c.font = "900 " + (red ? 13 : 11) + "px 'Alegreya Sans',sans-serif"; c.textAlign = "center";
+        c.fillStyle = red ? "#ff3a2a" : "#ffd27a"; c.strokeStyle = "rgba(0,0,0,.8)"; c.lineWidth = 2.5;
+        c.strokeText(red ? "!!" : "!", cx, yy); c.fillText(red ? "!!" : "!", cx, yy); c.restore();
+      }
       /* Ziellinie für Schützen */
       if (act.a.aimLine && act.aim) { c.save(); c.globalAlpha = 0.15 + 0.35 * (act.t / act.a.pre); c.strokeStyle = "#ff4a3a"; c.lineWidth = 0.6; c.setLineDash([3, 3]); c.beginPath(); c.moveTo(cx, e.y + e.h * 0.35); c.lineTo(act.aim.x, act.aim.y); c.stroke(); c.restore(); }
     }
@@ -1772,12 +1800,15 @@
       const w = Math.max(16, e.w + 4), x = cx - w / 2, y = e.y - (e.elite ? 10 : 5);
       c.fillStyle = "rgba(0,0,0,.6)"; c.fillRect(x - 0.5, y - 0.5, w + 1, 3);
       c.fillStyle = e.elite ? "#ff8a3a" : "#e0545a"; c.fillRect(x, y, w * Math.max(0, e.hp / e.hpMax), 2);
-      if (e.elite) { c.font = "700 6px 'Alegreya Sans',sans-serif"; c.textAlign = "center"; c.fillStyle = "#ffb070"; c.fillText(Z.L(Z.ELITE[e.elite]) + " · " + Z.L(d.n), cx, y - 2); }
+      if (e.elite) {
+        const lab = Z.L(Z.ELITE[e.elite]) + " · " + Z.L(d.n);
+        if (!(sprPs > 0 && txtSpr(c, lab, "700 6px 'Alegreya Sans',sans-serif", 6, "#ffb070", null, 0, cx, y - 2))) { c.font = "700 6px 'Alegreya Sans',sans-serif"; c.textAlign = "center"; c.fillStyle = "#ffb070"; c.fillText(lab, cx, y - 2); }
+      }
     }
     /* Statussymbole */
     const icons = [];
     /* Betäubung zeigen die kreisenden Sterne */ if (e.st.root > 0) icons.push(["⌇", "#9ad04a"]); if (e.st.weak > 0) icons.push(["♪", "#ffc24a"]); if (e.st.mark > 0) icons.push(["◎", "#c88a4a"]); if (e.st.fear > 0) icons.push(["?", "#ffc24a"]);
-    if (icons.length && !dead) { c.font = "700 7px sans-serif"; c.textAlign = "center"; icons.forEach((ic, i) => { c.fillStyle = ic[1]; c.fillText(ic[0], cx - (icons.length - 1) * 4 + i * 8 + (ic[0] === "✦" ? Math.sin(time * 8) * 2 : 0), e.y - 12); }); }
+    if (icons.length && !dead) { c.font = "700 7px sans-serif"; c.textAlign = "center"; icons.forEach((ic, i) => { const ix = cx - (icons.length - 1) * 4 + i * 8 + (ic[0] === "✦" ? Math.sin(time * 8) * 2 : 0); if (!(sprPs > 0 && txtSpr(c, ic[0], "700 7px sans-serif", 7, ic[1], null, 0, ix, e.y - 12))) { c.font = "700 7px sans-serif"; c.textAlign = "center"; c.fillStyle = ic[1]; c.fillText(ic[0], ix, e.y - 12); } }); }
   };
   /* alter Schwungwert (−1 Ausholen … +1 Schlag), stetig statt sprunghaft */
   function legacyAk() { return Q.ph === "pre" ? -eo(Q.pre) : Q.ph === "act" ? lp(-1, 1, eo(Q.act)) : Q.ph === "post" ? 1 - Q.post : 0; }

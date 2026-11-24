@@ -400,7 +400,7 @@
     moves: {
       /* Blitzbogen läuft über die Planken: springen */
       blitzlauf: { name: N("Blitzlauf", "Running Lightning"), pre: 0.55, dur: 1.0, post: 0.55, sfx: "zap",
-        act: (e, P, m) => { const dir = pcx(P) > cxOf(e) ? 1 : -1; floorSweep(e, cxOf(e), dir, 520, { warn: 0.5, gap: 0.026, col: "#ffe080", m: 0.9, eff: { stun: 0.2 }, sfx: "zap" }); if (e.phase >= 2) later(0.5, () => { if (alive(e)) floorSweep(e, cxOf(e), -dir, 520, { warn: 0.5, gap: 0.026, col: "#ffe080", m: 0.9, sfx: "zap" }); }); FX.text(pcx(P), P.y - 16, L(["Springen!", "Jump!"]), "#ffe080", true); } },
+        act: (e, P, m) => { const dir = pcx(P) > cxOf(e) ? 1 : -1; floorSweep(e, cxOf(e), dir, 520, { warn: 0.5, gap: 0.026, col: "#ffe080", m: 0.9, sfx: "zap" }); if (e.phase >= 2) later(0.5, () => { if (alive(e)) floorSweep(e, cxOf(e), -dir, 520, { warn: 0.5, gap: 0.026, col: "#ffe080", m: 0.9, sfx: "zap" }); }); FX.text(pcx(P), P.y - 16, L(["Springen!", "Jump!"]), "#ffe080", true); } },
       /* Gebet: Kanalisieren – genug Schaden unterbricht sie, sonst heilt sie und ruft Gläubige */
       gebet: { name: N("Gebet an Demogorgon", "Prayer to Demogorgon"), pre: 0.45, dur: 2.4, post: 0.6, sfx: "dark", w: 0.8,
         cond: e => e.hp < e.hpMax * 0.92,
@@ -419,14 +419,14 @@
           if (m.broke) return;
           e.hp = Math.min(e.hpMax, e.hp + e.hpMax * 0.06); FX.text(cxOf(e), e.y - 14, L(["Demogorgon antwortet …", "Demogorgon answers…"]), "#e5b454", true);
           zone(e, cxOf(e), feet(e), 160, 56, 0, 1.1, { col: "rgba(229,180,84,.9)", eff: { stun: 0.3 } }); FX.ring(cxOf(e), feet(e) - 20, 80, "#e5b454", 0.4, 4); A.play("thunder", { vol: 0.6 });
-          if (minions(e) < 3) summon(e, "kuotoa", 2, 70);
+          if (minions(e) < 2) summon(e, "kuotoa", 1, 70); /* W9: Gläubige trafen öfter als die Priesterin selbst */
         } },
       /* Fächer aus Grätenspeeren, zweimal */
       graetensalve: { name: N("Grätensalve", "Bone Volley"), pre: 0.55, dur: 0.6, post: 0.55, sfx: "throwK", range: [60, 999],
         act: (e, P, m) => { const fire = () => { if (!alive(e)) return; for (let i = -2; i <= 2; i++) { const a = Math.atan2(P.y + 12 - (e.y + 10), pcx(P) - cxOf(e)) + i * 0.13; Z.spawnProj("e_pfeil", cxOf(e), e.y + 10, 1, { dmg: dmg(e, 0.7), vx: Math.cos(a) * 300, vy: Math.sin(a) * 300 - 30 }); } A.play("throwK", { vol: 0.5 }); }; fire(); later(0.4, fire); } },
       /* Kettenblitz: springt vom Ziel nach außen weiter */
       kettenblitz: { name: N("Kettenblitz", "Chain Lightning"), pre: 0.5, dur: 1.4, post: 0.6, sfx: "zap",
-        act: (e, P, m) => { const x0 = pcx(P), dir = R() < 0.5 ? -1 : 1; for (let i = 0; i < 6; i++) later(i * 0.18, () => { if (!alive(e)) return; const x = x0 + dir * (i % 2 ? -1 : 1) * Math.ceil(i / 2) * 46; K.strikeAt(x, { y: floorAt(x, standY(P)), dmg: dmg(e, 0.9), col: "rgba(255,240,160,1)", warnCol: "#ffe080", warn: 0.75, eff: { stun: 0.25 } }); }); later(0.8, () => A.play("thunder", { vol: 0.5 })); } }
+        act: (e, P, m) => { const x0 = pcx(P), dir = R() < 0.5 ? -1 : 1; for (let i = 0; i < 6; i++) later(i * 0.18, () => { if (!alive(e)) return; const x = x0 + dir * (i % 2 ? -1 : 1) * Math.ceil(i / 2) * 46; K.strikeAt(x, { y: floorAt(x, standY(P)), dmg: dmg(e, 0.9), col: "rgba(255,240,160,1)", warnCol: "#ffe080", warn: 0.75 }); }); /* W9: ohne Betäubung – keine Betäubungsketten */ later(0.8, () => A.play("thunder", { vol: 0.5 })); } }
     },
     phases: [
       { at: 1, name: N("Die falsche Erzpriesterin", "The False Archpriestess"), moves: ["blitze", "blasen", "speere", "rufen", "blitzlauf"] },
@@ -829,10 +829,10 @@
         tick: (e, P, dt) => { e.vy = U.approach(e.vy, 0, 600 * dt); e.vx = U.approach(e.vx, 0, 300 * dt); if (R() < dt * 30) FX.p({ x: cxOf(e) + e.face * 30, y: feet(e) - 10, vx: 0, vy: 160, life: 0.4, size: 4, col: "#ff8a3a", kind: "glow", add: true }); } },
       /* Der Hort schmilzt: der ganze Boden wird zu Lava – nur Plattformen sind sicher */
       hortschmelze: { name: N("Der Hort schmilzt", "The Hoard Melts"), pre: 2.2, dur: 3.4, post: 0.6, sfx: "fireBig", w: 0.8,
-        cond: e => !e.ar || !e.ar.lastMelt || e.phaseT - e.ar.lastMelt > 12,
+        cond: e => !e.ar || !e.ar.lastMelt || e.phaseT - e.ar.lastMelt > 16, /* W9: 12 → 16 s (Bot-Tode fast nur durch Lava) */
         start: (e, P, m) => { const a = AR(); e.ar.lastMelt = e.phaseT || 0; e.grounded = false; e.vy = -260; tele({ k: "band", x0: a.x0, x1: a.x1, y: a.floor, h: 10, dur: PRE(e, 2.2), col: "#ff5a1a" }); Z.bossSay && Z.bossSay(L(["Der Hort schmilzt zu Lava – auf die Plattformen!", "The hoard melts into lava – onto the platforms!"])); FX.text(pcx(P), P.y - 22, L(["Auf die Plattformen!", "Onto the platforms!"]), "#ff8a3a", true); A.play("fireBig", { vol: 0.8 }); },
         preTick: (e, P, dt) => { const a = AR(), ty = a.floor - 190; e.vy = U.clamp((ty - e.y) * 3, -200, 200); e.vx = U.clamp(((a.x0 + a.x1) / 2 - cxOf(e)) * 2, -160, 160); if (R() < dt * 25) FX.p({ x: AR().x0 + R() * (AR().x1 - AR().x0), y: AR().floor - 2, vx: 0, vy: -40, life: 0.5, size: 2, col: "#ff8a3a", kind: "spark", add: true }); },
-        act: (e, P, m) => { const a = AR(); m.s = sheet(e, a.x0, a.x1, a.floor, { life: 3.4, rise: 0.4, m: 0.7, col: "#8a1a08", col2: "#ffb040", glow: "#ffd27a", eff: { burn: 1 } }); FX.addShake(8); A.play("fireBig", { vol: 1 }); },
+        act: (e, P, m) => { const a = AR(); m.s = sheet(e, a.x0, a.x1, a.floor, { life: 3.0, rise: 0.4, m: 0.45, col: "#8a1a08", col2: "#ffb040", glow: "#ffd27a", eff: { burn: 1 } }); FX.addShake(8); A.play("fireBig", { vol: 1 }); },
         tick: (e, P, dt, m) => { e.vx *= 0.9; e.vy *= 0.9; m.k = (m.k == null ? 0.8 : m.k) - dt; if (m.k <= 0) { m.k = 1.3; Z.aimProj("e_feuerball", cxOf(e), feet(e) - 8, pcx(P), P.y + 12, { dmg: dmg(e, 0.6), speed: 170 }); A.play("fire", { vol: 0.5 }); } },
         abort: (e, P, m) => { if (m.s) m.s.life = Math.min(m.s.life, m.s.t + 0.4); } }
     },
@@ -949,7 +949,7 @@
   });
   function N(de, en) { return [de, en]; }
   /* W9: Bausteine für den Spannungs-Teil (Abschnitt 6, Signature-Angriffe, Angriffsfenster) */
-  Z.bossPh = { tele, later, floorAt, standY, kv, zone, pillar, dropFrom, floorSweep, beam, nova, leapSlam, carpet, every, drift, web, sheet, rubble, stormBolt, PRE, alive, minions, pcx, SPEC, apply: id => apply(id), obj: () => OBJ, N };
+  Z.bossPh = { teleN: () => TELE.length, tele, later, floorAt, standY, kv, zone, pillar, dropFrom, floorSweep, beam, nova, leapSlam, carpet, every, drift, web, sheet, rubble, stormBolt, PRE, alive, minions, pcx, SPEC, apply: id => apply(id), obj: () => OBJ, N };
 
   /* Bausteine für eigene Bossdateien (demogorgon.js): Phasenmaschine, Zeitplaner, Vorwarnungen, Arena-Objekte */
   Z.bossPhase = { phased, tele, later, floorAt, standY, zone, pillar, beam, floorSweep, nova, sheet, every, drift, alive, PRE, dropFrom, minions, addObj: o => { OBJ.push(o); return o; }, syncBar: (e, f) => syncBar(e, f) };
@@ -1152,6 +1152,21 @@
     later(w, () => { if (alive(e)) { A.play("explode", { vol: 0.4 }); FX.addShake(4); } });
   }
 
+  /* ---------- Durchbruch: Bodenboss taucht neben dem Spieler auf ---------- */
+  function breakThrough(e, P) {
+    const air = e.def.fly && !e.grounded, bw = e.w, bh = e.h, W = Z.world, b = e.box || AR();
+    const fy = air ? P.y - 30 : standY(P);
+    const free = (x) => { if (air) { for (let yy = fy - bh - 2; yy < fy + 2; yy += 6) for (let xx = x - bw / 2 - 2; xx < x + bw / 2 + 2; xx += 6) if (W.solidAt(xx, yy)) return false; return W.los(x, fy - bh / 2, pcx(P), P.y + P.h / 2); } for (let yy = fy - bh + 2; yy < fy - 2; yy += 6) for (let xx = x - bw / 2 + 1; xx < x + bw / 2; xx += 6) if (W.solidAt(xx, yy)) return false; return W.solidAt(x, fy + 2) || W.isPlat(Math.floor(x / 16), Math.floor((fy + 2) / 16)); };
+    for (const d of air ? [60, -60, 90, -90, 120, -120] : [90, -90, 120, -120, 70, -70, 150, -150]) {
+      const x = pcx(P) + (cxOf(e) > pcx(P) ? d : -d); if (x < b.x0 + bw || x > b.x1 - bw || !free(x)) continue;
+      FX.burst(cxOf(e), e.y + e.h / 2, 18, { col: [Z.dustCol || "#8a7a70", "#3a3030"], sp: 100, life: 0.6, size: 4, kind: "smoke" });
+      tele({ k: "ring", x, y: fy - bh / 2, r: bw / 2 + 16, dur: 0.6, col: e.aura || "#ff6a3a" });
+      e.hidden = 0.6; e.invuln = Math.max(e.invuln || 0, 0.6); e.vx = 0; e.vy = 0; e.idle = Math.max(e.idle || 0, 1.0);
+      later(0.6, () => { if (!alive(e)) return; e.x = x - bw / 2; e.y = fy - bh - 1; Z.unstick(e); e.hidden = 0; e.face = U.sign(pcx(P) - x) || 1; FX.burst(x, fy - 4, 24, { col: [Z.dustCol || "#8a7a70", "#c8b8a0"], sp: 180, ang: -Math.PI / 2, spread: 2.4, life: 0.6, size: 3, kind: "shard", g: 600 }); FX.addShake(7); A.play("quake", { vol: 0.6 }); FX.text(x, fy - bh - 10, L(["Er bricht durch!", "It breaks through!"]), "#ffb070", true); });
+      return true;
+    }
+    return false;
+  }
   /* ---------- Wut ---------- */
   function enrage(e, P) {
     e.wut = true; e.tempoBonus = (e.tempoBonus || 1) * (easy() ? 1.08 : 1.15);
@@ -1173,7 +1188,9 @@
       up0(e, dt, P);
       if (!P || P.dead || e.dead || !alive(e) || e.intro > 0 || e.trans || e.def.noBar) { s.ref = e.mv; return; }
       /* Technik beendet → mit Glück gleich die nächste (Kombination) */
-      if (s.ref && !e.mv && !(e.openT > 0) && !(e.st.stun > 0) && R() < comboP(e) * (easy() ? 0.5 : 1)) e.idle = Math.min(e.idle, 0.12 + R() * 0.12);
+      /* Kombination nur, wenn keine Vorwarnung/verzögerte Gefahr mehr läuft – nie zwei Techniken übereinander (Bot-Tode: Kombos ohne Pause) */
+      const busyTele = H.teleN() > 0 || Z.hazards.some(h => h.owner === "e" && h.warn && h.t < h.warn);
+      if (s.ref && !e.mv && !busyTele && !(e.openT > 0) && !(e.st.stun > 0) && R() < comboP(e) * (easy() ? 0.5 : 1)) e.idle = Math.min(e.idle, 0.12 + R() * 0.12);
       s.ref = e.mv;
       const free = !e.mv || e.mv.stage === "post";
       /* an einer Stelle stehen */
@@ -1190,6 +1207,14 @@
         if (s.stuck > 0.9) { s.stuck = 0; e.vy = -460; e.onGround = false; e.vx = U.sign(pcx(P) - cxOf(e)) * 150; A.play("jump", { vol: 0.5, rate: 0.7 }); FX.burst(cxOf(e), feet(e), 10, { col: Z.dustCol || "#8a7a70", sp: 90, life: 0.4, size: 3, kind: "smoke" }); }
       } else s.stuck = 0;
       s.lx = e.x;
+      /* Unerreichbar? (zu groß für Durchgänge, Spieler auf Plattform/Gegenseite) – nach 5 s ohne Annäherung bricht der Bodenboss neben dem Spieler durch */
+      if (!e.def.fixed && !e.def.keepAway) { /* auch Flieger: der Vrock hing im Bot-Lauf 130 s über einer Decke fest */
+        const dd = Math.hypot(pcx(P) - cxOf(e), (P.y + P.h) - feet(e));
+        const blocked = !Z.world.los(cxOf(e), e.y + e.h / 2, pcx(P), P.y + P.h / 2) && !Z.world.los(cxOf(e), e.y + 4, pcx(P), P.y + 4);
+        if (blocked) s.farT += dt; /* Wand/Decke dazwischen: zählt immer */
+        else if (dd > (e.def.fly ? 190 : 150)) { if (s.best == null || dd < s.best - 20) { s.best = dd; s.farT = 0; } else s.farT += dt; } else { s.best = null; s.farT = 0; }
+        if (s.farT > (easy() ? 7 : 5) && !e.mv && (P.onGround || s.farT > 7) && !(e.st.stun > 0)) { if (breakThrough(e, P)) { s.farT = 0; s.best = null; } else s.farT -= 1; }
+      }
       /* Wut */
       if (!e.wut && e.hp < e.hpMax * 0.2 && e.hp > 0) enrage(e, P);
     };
@@ -1303,7 +1328,7 @@
           const follow = W0([1.2, 0.95, 0.8][m.k] || 0.8);
           if (m.ph === 0) { if (!m.tl) m.tl = tele({ k: "ring", x: pcx(P), y: P.y + P.h - 14, r: 22, dur: follow + 0.4, col: "#e5b454" }); m.tl.x = pcx(P); m.tl.y = standY(P) - 14; m.tl.t = Math.min(m.tl.t, m.tl.dur * 0.6); if (m.st > follow) { m.ph = 1; m.st = 0; m.lx = m.tl.x; m.ly = standY(P); A.play("rune", { vol: 0.5 }); } }
           else if (m.ph === 1 && m.st > 0.4) {
-            zone(e, m.lx, m.ly + 2, 40, 260, 0, 1.15, { col: "rgba(255,240,160,1)", eff: { stun: 0.3 }, active: 0.14 });
+            zone(e, m.lx, m.ly + 2, 40, 260, 0, 1.15, { col: "rgba(255,240,160,1)", active: 0.14 });
             FX.flashScreen("#fff8d0", 0.14); A.play("thunder", { vol: 0.6 }); FX.addShake(6); sparks(m.lx, m.ly - 4, 16, ["#fff2d0", "#ffe080", "#e5b454"], 220);
             m.k++; m.ph = 0; m.st = 0; m.tl = null; if (m.k >= m.n) m.t = 99;
           }
@@ -1674,7 +1699,7 @@
     };
   }
   if (document.readyState === "complete") install(); else window.addEventListener("load", install);
-  Z.w9 = { LS, openUp, SIG, patch };
+  Z.w9 = { LS, openUp, SIG, patch, breakThrough: (e, P) => breakThrough(e, P) };
 
   /* ---------- Zeichnen: Schwachpunkt und Wut ---------- */
   const de0 = Z.drawEnemy;

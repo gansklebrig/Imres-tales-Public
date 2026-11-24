@@ -2653,6 +2653,18 @@
       if (e.nmGuardT > 0) { e.nmGuardT -= dt; if (!(e.openT > 0)) { e.st.stun = 0; e.stagger = 0; e.kbT = 0; } if (Math.random() < dt * 12) FX.p({ x: e.x + Math.random() * e.w, y: e.y + Math.random() * e.h, vx: 0, vy: -30, life: 0.35, size: 1.6, col: "#ffb070", kind: "glow", add: true }); }
       const pa = e._mbAct;
       if (pa && pa !== e.act && pa.phase === "post" && pa.a && pa.a.open && !e.dead) mbOpen(e, pa.a.open);
+      /* W9: lange Abklingzeiten (Beschwören 8–10 s, Würfe 4–6 s) gelten nur für den Angriff selbst – e.cd ist die allgemeine Pause;
+         vorher griffen Mini-Bosse danach 4–12 s gar nicht an. Der Angriff ruht für seine Abklingzeit, die Pause wird höchstens ~1,3 s. */
+      if (pa && pa !== e.act && pa.a && (pa.a.cd || 0) > 2.5 && !e.dead) {
+        const nm = pa.a.name, sa = e.def.atks.filter(x => x === pa.a || (nm && x.name === nm));
+        e.cd = Math.min(e.cd, 0.8 + Math.random() * 0.5);
+        if (sa.length) { (e.nmRest = e.nmRest || []).push({ t: pa.a.cd * (e.wut ? 0.8 : 1), atks: sa }); e.def = Object.assign({}, e.def, { atks: e.def.atks.filter(x => !sa.includes(x)) }); }
+      }
+      if (e.nmRest && e.nmRest.length) {
+        for (const r of e.nmRest) r.t -= dt;
+        const back = e.nmRest.filter(r => r.t <= 0); e.nmRest = e.nmRest.filter(r => r.t > 0);
+        for (const r of back) { const add = r.atks.filter(x => !e.def.atks.some(y => y === x || (x.name && y.name === x.name))); if (add.length) e.def = Object.assign({}, e.def, { atks: e.def.atks.concat(add) }); }
+      }
       e._mbAct = e.act;
       if (!e.wut && e.hp > 0 && e.hp < e.hpMax * 0.25) mbWut(e);
     }

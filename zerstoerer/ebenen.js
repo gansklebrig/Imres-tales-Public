@@ -247,6 +247,29 @@
     for (const e of Z.enemies) if (alive(e) && (e.evadeCd || 0) > (before.get(e) || 0) + 1) { e.face = -e.face; const ok = groundAhead(e, 50); e.face = -e.face; if (!ok) { e.vx = 0; e.vy = Math.min(e.vy, -120); } }
   };
 
+  /* Gruben-Schutz: wer kurz nach einem Treffer aus einer Grube (Stacheln, Lava, Wasser) an derselben Stelle erneut
+     hineingerät, nimmt nur halben Schaden – kein Mehrfach-Schaden beim Wiederherausklettern. Abgründe regeln das in
+     kampf.js selbst, Boss-Flächen (ohne Grubenkachel) bleiben unberührt. */
+  const hurt0 = Z.hurtPlayer;
+  if (hurt0) Z.hurtPlayer = function (n, o) {
+    const P = Z.player;
+    if (P && o && (o.hazard || o.spike) && !o.fall && !o.trap && !o.attacker && !o.proj) {
+      const cx = Math.floor((P.x + P.w / 2) / T), fy = Math.floor((P.y + P.h - 2) / T), my = Math.floor((P.y + P.h * 0.5) / T);
+      const v = W.tile(cx, fy), v2 = W.tile(cx, my);
+      if (v === 3 || v === 5 || v === 6 || v2 === 5 || v2 === 6) {
+        /* Lavarinnen aus aufgelösten Löchern (welt.js resolvePits) brennen ohnehin nach – der Eintritt selbst etwas milder */
+        const lv = Z.level;
+        if (lv && lv.pitLog && (v === 5 || v2 === 5)) {
+          if (lv._pitSet == null) { lv._pitSet = new Set(); for (const r of lv.pitLog) for (const i of r.trapTiles || []) lv._pitSet.add(i); }
+          if (lv._pitSet.has(fy * lv.W + cx) || lv._pitSet.has(my * lv.W + cx)) n = Math.max(1, Math.round(n * 0.6));
+        }
+        const now = P.time || 0;
+        if (P._pitT != null && now - P._pitT < 8 && Math.abs((P._pitX || 0) - P.x) < 96) n = Math.max(1, Math.round(n * 0.5));
+        P._pitT = now; P._pitX = P.x;
+      }
+    }
+    return hurt0.apply(this, [n].concat(Array.prototype.slice.call(arguments, 1)));
+  };
   Z.ebenenTick = function (dt) { doorTick(dt); fallTick(dt); };
   const dp0 = Z.drawParcours;
   Z.drawParcours = function (c, t) { if (dp0) dp0(c, t); drawDoors(c, t); };

@@ -397,7 +397,7 @@
     where: k => k.bg === "chasm" || k.bg === "cellar" || k.bg === "dungeon" || k.bg === "belltower" || k.bg === "halls" || k.bg === "lake",
     start(s) { const p = pc(); const sp = wallSpot(p.x, p.y - 20, 120, 60, (tx, ty) => Math.abs(tx * T + 8 - p.x) > 26 && wallFree(tx + 1, ty) && wallFree(tx - 1, ty) && wallFree(tx, ty - 1) && wallFree(tx, ty + 1)); if (!sp) return false; s.x = sp.x; s.y = sp.y; s.R = rnd(10, 14); s.n = 9; s.life = 20; s.pr = 0; stay.push({ kind: "web", s }); preload("wSpinne"); },
     tick(s, dt) { s.pr = Math.min(1, s.t / 14); return s.t < s.life; },
-    at: s => s });
+    at: s => ({ x: s.x, y: s.y }) });
   function drawWeb(c, s, t) {
     const pr = s.pr, x = s.x, y = s.y, R = s.R, n = s.n, sway = Math.sin(t * 0.8 + x) * 0.4;
     const radial = Math.min(1, pr / 0.35), spiral = clamp((pr - 0.35) / 0.65, 0, 1);
@@ -484,10 +484,10 @@
     },
     front(c, s, t) { c.globalCompositeOperation = "lighter"; const a = s.done ? Math.max(0, 1 - (s.dt2 || 0) / 2) : Math.min(1, s.t / 1.2); for (const q of s.trail) glow(c, q.x, q.y, 3, "rgba(255,240,200,1)", (1 - q.t / 0.8) * 0.3 * a); const pul = 0.8 + 0.2 * Math.sin(t * 6); glow(c, s.x, s.y, 14 * pul, "rgba(255,226,160,1)", 0.5 * a); glow(c, s.x, s.y, 5, "rgba(255,255,240,1)", 0.9 * a); },
     light(add, s) { add(s.x, s.y, 50, "#ffe0a0", 0.45); },
-    at: s => s });
+    at: s => ({ x: s.x, y: s.y }) });
 
   /* ---- 17. Der Geist an der Orgel ---- */
-  def({ id: "geistorgel", tier: 2, n: ["Der Geist an der Orgel", "The ghost at the organ"], hint: ["in Hallen und Türmen, selten", "in halls and towers, rarely"],
+  def({ id: "geistorgel", tier: 2, n: ["Der Geist an der Orgel", "The ghost at the organ"], hint: ["in Hallen und Türmen", "in halls and towers"],
     d: ["Ein durchscheinender Organist spielt auf einem Instrument, das gestern noch nicht da war. Kommt man zu nah, verbeugt er sich – und ist fort.", "A translucent organist plays an instrument that wasn't there yesterday. Come too close and he bows – and is gone."],
     where: k => k.bg === "halls" || k.bg === "belltower" || k.bg === "cellar" || k.bg === "dungeon" || k.bg === "castle",
     start(s) {
@@ -519,7 +519,7 @@
     }, at: s => ({ x: s.x, y: s.y - 20 }) });
 
   /* ---- 18. Der schlafende Drache ---- */
-  def({ id: "drache", tier: 2, n: ["Der schlafende Drache", "The sleeping dragon"], hint: ["weit draußen, sehr selten", "far outside, very rarely"],
+  def({ id: "drache", tier: 2, n: ["Der schlafende Drache", "The sleeping dragon"], hint: ["weit draußen", "far outside"],
     d: ["Auf einem fernen Grat schläft ein Drache. Sein Atem glüht im Takt. Einmal öffnet er ein Auge – und schließt es wieder.", "On a distant ridge a dragon sleeps. Its breath glows in rhythm. Once it opens an eye – and closes it again."],
     where: k => k.back && (k.out || k.bg === "embercity"),
     start(s) { s.h = viewHole(); if (!s.h || s.h.run < 9) return false; s.life = 45; preload("wDrache"); setTimeout(() => snd("wDrache", { vol: 0.12, rate: 0.45 }), 20000); },
@@ -556,7 +556,7 @@
     }, at: () => ({ x: Z.cam.x + Z.cam.w / 2, y: Z.cam.y + Z.cam.h * 0.4 }), seenFree: true });
 
   /* ---- 19. Der Spiegel der anderen Zeit ---- */
-  def({ id: "spiegel", tier: 2, n: ["Der Spiegel der anderen Zeit", "The mirror of another time"], hint: ["in Hallen, Türmen und Kellern, sehr selten", "in halls, towers and cellars, very rarely"],
+  def({ id: "spiegel", tier: 2, n: ["Der Spiegel der anderen Zeit", "The mirror of another time"], hint: ["in Hallen, Türmen und Kellern", "in halls, towers and cellars"],
     d: ["Ein Spiegel zeigt den Raum im Sonnenlicht, mit Blumen und Fahnen – und Ezekiel mit einem Blumenkranz auf den Hörnern. Sein Spiegelbild winkt. Er nicht.", "A mirror shows the room in sunlight, with flowers and banners – and Ezekiel with a wreath of flowers on his horns. His reflection waves. He doesn't."],
     where: k => k.bg === "halls" || k.bg === "spires" || k.bg === "belltower" || k.bg === "cellar" || k.bg === "castle" || k.bg === "dungeon",
     start(s) {
@@ -595,7 +595,7 @@
 
   /* ---- 20. Das lebende Gemälde ---- */
   const POSES = 5;
-  def({ id: "gemaelde", tier: 2, n: ["Das lebende Gemälde", "The living painting"], hint: ["in den Hallen, sehr selten", "in the halls, very rarely"],
+  def({ id: "gemaelde", tier: 2, n: ["Das lebende Gemälde", "The living painting"], hint: ["in den Hallen", "in the halls"],
     d: ["Ein Gemälde, dessen Dame sich bewegt, sobald man nicht hinsieht. Mal winkt sie, mal ist sie fort, mal sitzt eine Katze auf ihrem Stuhl.", "A painting whose lady moves the moment you look away. Sometimes she waves, sometimes she's gone, sometimes a cat sits in her chair."],
     where: k => k.bg === "halls" || k.bg === "castle" || k.bg === "spires" || k.bg === "belltower",
     start(s) { const p = pc(); const sp = wallSpot(p.x, p.y - 26, 140, 50, (tx, ty) => Math.abs(tx * T - p.x) > 40 && wallFree(tx + 1, ty) && wallFree(tx - 1, ty) && wallFree(tx, ty - 1) && wallFree(tx + 1, ty - 1) && wallFree(tx - 1, ty - 1)); if (!sp) return false; s.x = sp.x; s.y = sp.y - 6; s.pose = 0; s.away = 0; s.life = 70; s.changes = 0; stay.push({ kind: "painting", s }); },
@@ -604,7 +604,7 @@
       if (!looking) { s.away += dt; if (s.away > 0.7) { s.away = -2; let np; do np = (Math.random() * POSES) | 0; while (np === s.pose); s.pose = np; s.changes++; } } else if (s.away > 0) s.away = 0; else s.away = Math.min(0, s.away + dt);
       return s.t < s.life;
     },
-    at: s => s });
+    at: s => ({ x: s.x, y: s.y }) });
   function drawPainting(c, s, t) {
     const x = s.x, y = s.y, w = 22, h = 17;
     c.fillStyle = "rgba(0,0,0,.4)"; c.fillRect(x - w / 2 - 1, y - h / 2 + 1, w + 4, h + 4);
@@ -629,7 +629,7 @@
   }
 
   /* ---- 21. Der Lichtwal ---- */
-  def({ id: "lichtwal", tier: 2, n: ["Der Lichtwal", "The light whale"], hint: ["tief am schwarzen See, sehr selten", "deep by the black lake, very rarely"],
+  def({ id: "lichtwal", tier: 2, n: ["Der Lichtwal", "The light whale"], hint: ["tief am schwarzen See", "deep by the black lake"],
     d: ["Ein Wal aus mattem Licht zieht durch die Dunkelheit über dem See und singt. Niemand weiß, wie er hierherkam.", "A whale of faint light drifts through the darkness above the lake and sings. Nobody knows how it got here."],
     where: k => k.back && k.bg === "lake",
     start(s) { s.h = viewHole(); if (!s.h) return false; s.dir = Math.random() < 0.5 ? -1 : 1; s.life = 30; preload("wWal"); setTimeout(() => snd("wWal", { vol: 0.2, rate: 0.8 }), 5000); },
@@ -644,6 +644,86 @@
       glow(c, 44, -4, 3, "rgba(255,255,230,1)", a * 0.8);
       c.restore();
     }, at: () => ({ x: Z.cam.x + Z.cam.w / 2, y: Z.cam.y + Z.cam.h * 0.4 }), seenFree: true });
+
+  /* ---- 22. Der Glückskäfer ---- */
+  def({ id: "marienkaefer", tier: 0, n: ["Der Glückskäfer", "The lucky beetle"], hint: ["wo es grünt", "where things grow green"],
+    d: ["Ein Marienkäfer landet auf Ezekiels Schulter und fährt ein Stück mit. Bei der nächsten Rolle ist er weg.", "A ladybird lands on Ezekiel's shoulder and rides along for a while. At the next roll it's gone."],
+    where: k => k.out || k.bg === "castle" || k.bg === "lake" || k.bg === "dungeon" || k.area === "passage",
+    start(s) { const p = pc(); s.x = p.x + rnd(-120, 120); s.y = p.y - rnd(60, 100); s.life = 40; s.mode = "in"; },
+    tick(s, dt) {
+      const p = Z.player, ax = p.x + p.w / 2 - (p.face || 1) * 2.5, ay = p.y + 5;
+      if (s.mode === "in") { const dx = ax - s.x, dy = ay - s.y, d = Math.hypot(dx, dy); if (d < 2) s.mode = "sit"; else { const v = Math.min(d, (40 + d) * dt); s.x += dx / d * v + Math.sin(s.t * 13) * 0.6; s.y += dy / d * v + Math.cos(s.t * 11) * 0.5; } }
+      else if (s.mode === "sit") { s.x = ax; s.y = ay; if (p.rollT > 0 || s.leave || s.t > s.life - 3) { s.mode = "out"; s.vx = rnd(-40, 40); } }
+      else { s.x += s.vx * dt + Math.sin(s.t * 13) * 0.6; s.y -= 45 * dt; return inCam(s.x, s.y, 20); }
+      return true;
+    },
+    front(c, s, t) {
+      const fly = s.mode !== "sit", x = s.x, y = s.y;
+      if (fly) { const w = Math.abs(Math.sin(t * 40)); c.globalAlpha = 0.5; c.fillStyle = "#f0e8e0"; c.beginPath(); c.ellipse(x - 1.4, y - 1, 1.6, 0.5 + w, -0.6, 0, TAU); c.ellipse(x + 1.4, y - 1, 1.6, 0.5 + w, 0.6, 0, TAU); c.fill(); c.globalAlpha = 1; }
+      c.fillStyle = "#d02a1e"; c.beginPath(); c.ellipse(x, y, 1.5, 1.2, 0, PI, TAU); c.fill(); c.fillRect(x - 1.5, y - 0.1, 3, 0.4); c.fillStyle = "#1a1010"; c.fillRect(x - 0.15, y - 1.2, 0.3, 1.2); c.fillRect(x - 0.9, y - 0.8, 0.5, 0.5); c.fillRect(x + 0.5, y - 0.7, 0.5, 0.5); c.beginPath(); c.arc(x + 1.5, y - 0.3, 0.6, 0, TAU); c.fill();
+    }, at: s => ({ x: s.x, y: s.y }) });
+
+  /* ---- 23. Der Fuchs ---- */
+  def({ id: "fuchs", tier: 0, n: ["Der Fuchs", "The fox"], hint: ["im Torhof und im Lager", "in the gate yard and in camp"],
+    d: ["Ein Fuchs trottet heran, setzt sich, mustert Ezekiel mit schiefem Kopf – und entscheidet, dass er kein Huhn ist.", "A fox trots up, sits, studies Ezekiel with its head tilted – and decides he is not a chicken."],
+    where: k => k.out && (k.bg === "castle" || k.area === "lager" || k.bg === "ramparts"),
+    start(s) { const p = Z.player, py = p.y + p.h; let side = Math.random() < 0.5 ? -1 : 1, x = 0, y = null;
+      for (let tr = 0; tr < 2 && y == null; tr++, side = -side) for (let f = 0.55; f > 0.2 && y == null; f -= 0.05) { const xx = p.x + p.w / 2 + side * Z.cam.w * f, yy = groundNear(xx, py); if (yy != null && Math.abs(yy - py) <= T) { x = xx; y = yy; } }
+      if (y == null) return false; side = Math.sign(x - p.x) || 1; s.side = side; s.x = x; s.y = y; s.face = -side; s.mode = "in"; s.walk = 0; s.sit = 0; s.life = 30; },
+    tick(s, dt) {
+      const p = Z.player, px = p.x + p.w / 2;
+      if (s.mode === "in") { const tx = px + s.side * 46; if (Math.abs(tx - s.x) < 3) { s.mode = "sit"; s.st = 0; } else { s.face = Math.sign(tx - s.x); s.x += s.face * 60 * dt; s.walk += dt * 15; } }
+      else if (s.mode === "sit") { s.face = Math.sign(px - s.x) || s.face; s.sit = Math.min(1, s.sit + dt * 2); s.st += dt; if (s.st > 6 || s.leave || Math.abs(px - s.x) < 22 || s.t > s.life) { s.mode = "out"; s.face = s.side; } }
+      else { s.sit = Math.max(0, s.sit - dt * 4); s.x += s.face * 110 * dt; s.walk += dt * 26; if (!inCam(s.x, s.y, 40)) return false; }
+      const gy = groundNear(s.x, s.y); if (gy != null) s.y += (gy - s.y) * Math.min(1, dt * 12);
+      return true;
+    },
+    mid(c, s, t) {
+      const x = s.x, y = s.y, f = s.face, st = s.sit, wk = st > 0.5 ? 0 : Math.sin(s.walk), tilt = s.mode === "sit" ? Math.sin(s.st * 1.3) * 0.25 : 0;
+      c.save(); c.translate(x, y); c.scale(f, 1);
+      c.globalAlpha = 0.3; c.fillStyle = "#000"; c.beginPath(); c.ellipse(0, 0, 9, 1.3, 0, 0, TAU); c.fill(); c.globalAlpha = 1;
+      /* buschiger Schwanz mit weißer Spitze */
+      const sw = Math.sin(t * 1.8) * 2; c.fillStyle = "#b8521e"; c.beginPath(); c.moveTo(-5, -5 + st * 2); c.quadraticCurveTo(-14, -9 + sw, -16, -2 + st * 3); c.quadraticCurveTo(-11, -2, -5, -3); c.fill(); c.fillStyle = "#f0e8dc"; c.beginPath(); c.ellipse(-15.4, -2.6 + st * 3 + sw * 0.2, 2, 1.4, 0.4, 0, TAU); c.fill();
+      c.fillStyle = "#1e1410"; if (st < 0.5) { c.fillRect(-4 + wk, -3.5, 1.2, 3.5); c.fillRect(3 - wk, -3.5, 1.2, 3.5); c.fillRect(-3 - wk, -3.5, 1.2, 3.5); c.fillRect(4 + wk, -3.5, 1.2, 3.5); } else { c.fillRect(2.4, -4, 1.2, 4); c.fillRect(3.8, -4, 1.2, 4); }
+      c.fillStyle = "#c45c22"; c.beginPath(); if (st < 0.5) c.ellipse(0, -6, 6.5, 3, 0, 0, TAU); else c.ellipse(-0.5, -6.5, 4.5, 4.5, -0.5, 0, TAU); c.fill();
+      c.fillStyle = "#f0e4d4"; c.beginPath(); c.ellipse(st < 0.5 ? 3.5 : 2.5, st < 0.5 ? -4.8 : -6, 2.4, 1.6, 0, 0, TAU); c.fill();
+      const hx = st < 0.5 ? 6 : 3.8, hy = st < 0.5 ? -8 : -12; c.save(); c.translate(hx, hy); c.rotate(tilt);
+      c.fillStyle = "#c45c22"; c.beginPath(); c.arc(0, 0, 2.6, 0, TAU); c.fill(); c.beginPath(); c.moveTo(1.5, -0.5); c.lineTo(5.2, 1); c.lineTo(1.5, 2); c.fill(); c.fillStyle = "#f0e4d4"; c.beginPath(); c.moveTo(1.4, 0.8); c.lineTo(5, 1.2); c.lineTo(1.4, 2.2); c.fill(); c.fillStyle = "#1a1010"; c.fillRect(4.8, 0.6, 0.8, 0.8);
+      c.fillStyle = "#8a3a14"; c.beginPath(); c.moveTo(-2, -1); c.lineTo(-1.4, -5); c.lineTo(0.2, -1.6); c.moveTo(0.4, -1.8); c.lineTo(1.4, -5.2); c.lineTo(2.2, -1); c.fill(); c.fillStyle = "#1a1010"; c.fillRect(0.8, -0.7, 0.8, 0.8); c.restore();
+      c.restore();
+    }, at: s => ({ x: s.x, y: s.y - 6 }) });
+
+  /* ---- 24. Das Sternbild ---- */
+  const STARFIG = [[0, -30], [-5, -38], [5, -38], [0, -22], [-9, -16], [9, -16], [-4, 0], [4, 0], [14, -26]];
+  const STARLINES = [[1, 0], [2, 0], [0, 3], [3, 4], [3, 5], [3, 6], [3, 7], [5, 8]];
+  def({ id: "sternbild", tier: 2, n: ["Das Sternbild des Zerstörers", "The Destroyer's constellation"], hint: ["in klaren Nächten unter freiem Himmel", "on clear nights under open sky"],
+    d: ["Einige Sterne leuchten heller als die anderen und verbinden sich: eine Gestalt mit Hörnern und Schwert. Irgendjemand dort oben kennt ihn.", "Some stars shine brighter than the rest and join up: a figure with horns and a sword. Someone up there knows him."],
+    where: k => k.back && k.out && k.night && k.mood !== "regen" && k.mood !== "gewitter" && k.bg !== "storm",
+    start(s) { s.h = viewHole(); if (!s.h || s.h.run < 8) return false; s.life = 22; s.x = s.h.rx; s.y = s.h.ry + 8; preload("wSchale"); setTimeout(() => snd("wSchale", { vol: 0.15 }), 1500); },
+    tick(s) { return s.t < s.life; },
+    back(c, s, t) {
+      const a = Math.min(1, (s.life - s.t) / 4), sc = 1.6; c.globalCompositeOperation = "lighter";
+      for (let i = 0; i < STARLINES.length; i++) { const u = clamp((s.t - 3 - i * 0.7) / 1.2, 0, 1); if (u <= 0) continue; const [p1, p2] = STARLINES[i], A1 = STARFIG[p1], A2 = STARFIG[p2]; c.globalAlpha = a * 0.45; c.strokeStyle = "#ffe8c8"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(s.x + A1[0] * sc, s.y + A1[1] * sc); c.lineTo(s.x + (A1[0] + (A2[0] - A1[0]) * u) * sc, s.y + (A1[1] + (A2[1] - A1[1]) * u) * sc); c.stroke(); }
+      c.globalAlpha = 1;
+      for (let i = 0; i < STARFIG.length; i++) { const u = clamp((s.t - i * 0.25) / 1.5, 0, 1), tw = 0.75 + 0.25 * Math.sin(t * 3 + i * 2); glow(c, s.x + STARFIG[i][0] * sc, s.y + STARFIG[i][1] * sc, 5, "rgba(255,240,210,1)", a * u * tw * 0.8); c.globalAlpha = a * u; c.fillStyle = "#fffaf0"; c.fillRect(s.x + STARFIG[i][0] * sc - 0.6, s.y + STARFIG[i][1] * sc - 0.6, 1.2, 1.2); c.globalAlpha = 1; }
+    }, at: () => ({ x: Z.cam.x + Z.cam.w / 2, y: Z.cam.y + 30 }), seenFree: true });
+
+  /* ---- 25. Der Pilzring ---- */
+  def({ id: "pilzring", tier: 1, n: ["Der leuchtende Pilzring", "The glowing fairy ring"], hint: ["in Höhlen und am See", "in caves and by the lake"],
+    d: ["Rund um Ezekiel leuchten Pilze auf, einer nach dem anderen, und jeder singt einen Ton. Ein Hexenring – und er steht mittendrin.", "All around Ezekiel mushrooms light up one after another, each singing a note. A fairy ring – and he is standing in the middle of it."],
+    where: k => k.bg === "lake" || k.bg === "chasm" || k.bg === "dungeon" || k.bg === "cellar",
+    start(s) {
+      const p = Z.player, py = p.y + p.h; s.m = [];
+      for (let i = 0; i < 9; i++) { const x = p.x + p.w / 2 + (i - 4) * 11 + rnd(-2, 2), y = groundNear(x, py); if (y != null && Math.abs(y - py) < 2 * T) s.m.push({ x, y, h: rnd(3, 5.5), i, col: pick(["#e080c0", "#c0e070", "#f0b060", "#b080f0"]) }); }
+      if (s.m.length < 5) return false; s.life = 14;
+      tune("w_pilzring", ["harfe", "cel"], s.m.map((m, k) => [[0, 3, 7, 12, 15, 19, 24, 19, 15][k % 9], k * 1, 3]), 0.08, 0);
+    },
+    tick(s) { return s.t < s.life; },
+    mid(c, s, t) { for (const m of s.m) { c.fillStyle = "#d8ccb8"; c.fillRect(m.x - 0.5, m.y - m.h, 1, m.h); c.fillStyle = m.col; c.beginPath(); c.ellipse(m.x, m.y - m.h, 2.4, 1.6, 0, PI, TAU); c.fill(); } },
+    front(c, s, t) { c.globalCompositeOperation = "lighter"; const out = Math.min(1, (s.life - s.t) / 3); for (const m of s.m) { const on = clamp((s.t - 0.6 - m.i * 0.45) / 0.4, 0, 1), pul = 0.7 + 0.3 * Math.sin(t * 3 + m.i); glow(c, m.x, m.y - m.h, 9, m.col.replace("#", "") && hexA(m.col), on * pul * 0.6 * out); } },
+    light(add, s) { for (const m of s.m) if (s.t > 0.6 + m.i * 0.45) add(m.x, m.y - m.h, 22, m.col, 0.25); },
+    at: s => s.m[0] });
+  function hexA(h) { const n = parseInt(h.slice(1), 16); return "rgba(" + (n >> 16) + "," + ((n >> 8) & 255) + "," + (n & 255) + ",1)"; }
 
   /* ======================= ABLAUF ======================= */
   const BYID = {}; for (const d of DEFS) BYID[d.id] = d;
@@ -689,8 +769,8 @@
     if (visit.n >= 3 || Z.level.arena && !Z.bossDefeated) return;
     next -= dt; if (next > 0) return;
     if (!calm()) { next = 6; return; }
-    next = rnd(40, 80);
-    if (Math.random() < 0.6) roll();
+    next = rnd(45, 95);
+    if (Math.random() < 0.5) roll();
   };
   /* ---------- Zeichnen ---------- */
   function draw(layer, c, args) {
@@ -722,7 +802,7 @@
       if (d.tier !== tier) continue; const got = M[d.id];
       h += '<div class="zeile' + (got ? "" : " unbekannt") + '"><div><b>' + (got ? "✧ " + esc(L(d.n)) : "???") + "</b><small>" + (got ? esc(L(d.d)) : L(["Noch nicht gesehen. Gerüchte sprechen von: ", "Not seen yet. Rumour speaks of: "]) + esc(L(d.hint))) + "</small><small>" + esc(L(TIER[d.tier])) + (got ? " · " + L(["gesehen: ", "seen: "]) + got + "×" : "") + "</small></div></div>";
     }
-    return h + '</div><div class="knoepfe"><button data-act="tbCodex" autofocus>' + L(["Zurück", "Back"]) + "</button></div>";
+    return h + '</div><div class="knoepfe"><button data-act="tbCodex">' + L(["Zurück", "Back"]) + "</button></div>";
   }
   function hookUI() {
     const U = Z.ui; if (!U || !U.codex || U._wunderHook) return; U._wunderHook = true;
@@ -736,6 +816,9 @@
       return r;
     };
     if (!U.actions.tbCodex) U.actions.tbCodex = () => { U.close(); U.codex(); };
+    /* auch auf der Seite „Die Vorgänger“ (tagebuch.js) den Reiter anbieten */
+    const grp0 = U.actions.tbGruppe;
+    if (grp0) U.actions.tbGruppe = function () { const r = grp0.apply(this, arguments); const tabs = document.querySelector("#modal .reiter"); if (tabs && !tabs.querySelector('[data-act="wunderBuch"]')) { const b = document.createElement("button"); b.dataset.act = "wunderBuch"; b.textContent = L(["Wunder", "Wonders"]); tabs.appendChild(b); } return r; };
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", hookUI); else setTimeout(hookUI, 0);
 
