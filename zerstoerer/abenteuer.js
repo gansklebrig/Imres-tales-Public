@@ -652,6 +652,8 @@
     }
     /* W13: seltene Zeitrennen-Kammer (Sanduhr-Sockel, Ringe in der Nähe einsammeln) */
     if (Math.random() < (Z.rennenChance != null ? Z.rennenChance : 0.14)) { try { const ev = setupRennen(lv); if (ev) { evs.push(ev); rennenInteract(ev); } } catch (err) { console.error(err); } }
+    /* W13 R11: Heilquelle an einer Kreuzung des Hauptwegs (Stufe 1–3): jetzt trinken oder Flasche füllen */
+    if (Math.random() < (Z.quelleChance != null ? Z.quelleChance : QUELLE.chance(lv))) { try { const ev = setupQuelle(lv); if (ev) { evs.push(ev); quelleInteract(ev); } } catch (err) { console.error(err); } }
     /* W13 R9: Hebelrätsel in einem Geheimraum (nie auf dem Hauptweg) */
     if (Math.random() < (Z.raetselChance != null ? Z.raetselChance : 0.45)) { try { const ev = setupRaetsel(lv); if (ev) { evs.push(ev); raetselInteract(ev); } } catch (err) { console.error(err); } }
     if (evs.some(e => e.k === "haendler")) setTimeout(() => { if (Z.level === lv && Z.ui && Z.ui.notify) Z.ui.notify("⚖ <b>" + L(["Fahrende Händlerin", "Wandering Trader"]) + "</b><br><small>" + L(["Irgendwo klimpert ihr Karren – folge der Laterne (Karte).", "Her cart is jingling somewhere – follow the lantern (map)."]) + "</small>", { prio: 2, art: "gold", dauer: 3400 }); }, 9000);
@@ -722,6 +724,55 @@
     }
     const limit = Math.max(8, Math.round((way * T / Z.PC.RUN * 1.15 + 2) * Z.rennenFaktor)); /* Bot (R8): braucht im Mittel 1,03 × Weg/Laufen → ~25 % Rest */
     return { k: "rennen", x: p.x * T + 8, y: (p.y + 1) * T, done: false, t: 0, on: false, tries: 0, limit, way: Math.round(way), rings: order.map(r => ({ x: r.x * T + 8, y: r.y * T + 4, got: false })) };
+  }
+  /* ======================= HEILQUELLE (W13 R11) ======================= */
+  /* Balance meldete: vor Stufe 4 sind die Tränke meist leer. Selten steht an einer Kreuzung des Hauptwegs (Raum mit ≥ 3 Ausgängen,
+     auf dem Weg vom Eingang zum Ausgang) eine Quelle – eine Entscheidung „jetzt oder später“: trinken (Leben sofort) ODER eine Flasche
+     füllen (+1 Trank, nur wenn eine Flasche leer ist). Einmal je Quelle. Werte als Vorschlag für Balance in QUELLE. */
+  const QUELLE = { heal: 0.4, chance: lv => { const t = Z.run ? Z.run.tier : 0; return t >= 1 && t <= 3 ? 0.35 : 0; } };
+  Z.QUELLE = QUELLE;
+  function setupQuelle(lv) {
+    const W = lv.W, D4 = { L: [-1, 0], R: [1, 0], U: [0, -1], D: [0, 1] };
+    const cands = Object.keys(lv.cells || {}).map(k => lv.cells[k]).filter(c => c.kind === "path" && Object.keys(D4).filter(s2 => c.need[s2]).length >= 3);
+    const startK = lv.startCell ? lv.startCell.x + "," + lv.startCell.y : null;
+    for (const c of Z.R.shuffle(cands)) {
+      if (c.x + "," + c.y === startK) continue;
+      const mx = c.x * Z.CW + Z.CW / 2, my = c.y * Z.CH + Z.CH / 2, sp = [];
+      for (let y = c.y * Z.CH + 1; y < c.y * Z.CH + Z.CH - 1; y++) for (let x = c.x * Z.CW + 2; x < c.x * Z.CW + Z.CW - 2; x++)
+        if ((!lv.reach || lv.reach[y * W + x]) && Z.standable(lv, x, y, 3) && Z.standable(lv, x - 1, y, 3) && Z.standable(lv, x + 1, y, 3) && !(lv.doors || []).some(d => Math.abs(d.x - x) < 4 && Math.abs(d.y - y) < 3) && !(lv.morsch || []).some(m => Math.abs(m.y - (y + 1)) <= 1 && x >= m.x0 - 2 && x <= m.x1 + 2) && !(lv.traps || []).some(q => Math.abs(q.x - x) < 3 && Math.abs(q.y - y) < 3)) sp.push([x, y]);
+      if (!sp.length) continue;
+      sp.sort((a, b) => Math.abs(a[0] - mx) + Math.abs(a[1] - my) - Math.abs(b[0] - mx) - Math.abs(b[1] - my));
+      const [x, y] = sp[0];
+      return { k: "quelle", x: x * T + 8, y: (y + 1) * T, done: false, t: 0, cell: c.x + "," + c.y };
+    }
+    return null;
+  }
+  function quelleInteract(ev) {
+    const P = () => Z.player;
+    const kannFuellen = () => { const p = P(); return p && !pact("durst") && p.potMax > 0 && p.potions < p.potMax; };
+    (Z.interacts = Z.interacts || []).push({ x: ev.x - 9, y: ev.y, r: 16, h: 34, ok: () => !ev.done,
+      label: () => L(["Trinken (+", "Drink (+"]) + Math.round(QUELLE.heal * 100) + L([" % Leben)", "% health)"]), use: () => quelleNimm(ev, "trinken") });
+    (Z.interacts = Z.interacts || []).push({ x: ev.x + 9, y: ev.y, r: 16, h: 34, ok: () => !ev.done,
+      label: () => kannFuellen() ? L(["Flasche füllen (+1 Trank)", "Fill a flask (+1 potion)"]) : L(["Flasche füllen (alle voll)", "Fill a flask (all full)"]), use: () => { if (kannFuellen()) quelleNimm(ev, "fuellen"); else Z.toast(pact("durst") ? L(["Der Pakt lässt keine Flasche zu.", "The pact allows no flask."]) : L(["Deine Flaschen sind voll – trink lieber, oder komm später wieder.", "Your flasks are full – drink instead, or come back later."]), 2400); } });
+  }
+  function quelleNimm(ev, art) {
+    const P = Z.player; if (ev.done || !P) return; ev.done = true; finish(ev);
+    A.play("splash", { vol: 0.7, x: ev.x }); FX.burst(ev.x, ev.y - 10, 16, { col: ["#9ac0a0", "#e8f0d8", "#ffd27a"], sp: 70, up: 50, life: 0.8, size: 2, kind: "glow", add: true });
+    if (art === "trinken") { Z.healPlayer(P.hpMax * QUELLE.heal); FX.text(P.x + P.w / 2, P.y - 14, L(["Erfrischt", "Refreshed"]), "#c8e0a8", true); }
+    else { P.potions = Math.min(P.potMax, P.potions + 1); FX.text(P.x + P.w / 2, P.y - 14, L(["+1 Trank", "+1 potion"]), "#ffd27a", true); }
+    Z.toast(L(["Die Quelle versiegt.", "The spring runs dry."]), 1800);
+  }
+  function drawQuelle(c, ev, t) {
+    if (Z.quelleGemalt && Z.quelleGemalt(c, ev, t)) return;
+    const x = ev.x, y = ev.y;
+    c.fillStyle = "#4a4448"; c.fillRect(x - 16, y - 8, 32, 8); c.fillStyle = "#5a5458"; c.fillRect(x - 18, y - 10, 36, 3);
+    c.fillStyle = "#3a3438"; c.fillRect(x - 3, y - 26, 6, 16); c.fillStyle = "#5a5458"; c.fillRect(x - 6, y - 28, 12, 3);
+    if (!ev.done) {
+      ell(c, x, y - 8, 14, 2.6, "#5a8a6a");
+      c.save(); c.globalCompositeOperation = "lighter"; glow(c, x, y - 14, 26 + Math.sin(t * 2) * 3, "rgba(170,220,150,.28)"); c.restore();
+      c.fillStyle = "rgba(200,235,190,.8)"; const k = (t * 30) % 10; c.fillRect(x - 0.8, y - 25 + k, 1.6, 3);
+      if (Math.random() < 0.08) FX.p({ x: x + (Math.random() - 0.5) * 20, y: y - 9, vx: 0, vy: -14, life: 0.9, size: 1.4, col: "#d8f0c8", kind: "glow", add: true });
+    } else ell(c, x, y - 8, 14, 2.6, "#2a2a26");
   }
   /* ======================= HEBELRÄTSEL (W13 R9) ======================= */
   /* In einem Geheimraum: eine Steintafel zeigt 3 (ab Stufe 4: 4) Zeichen in Reihenfolge, daneben gleich viele Hebel mit je einem Zeichen.
@@ -957,6 +1008,7 @@
     for (const ev of evs) {
       if (ev.k === "dieb") continue;
       if (ev.k === "raetsel") { drawRaetsel(c, ev, t); continue; }
+      if (ev.k === "quelle") { const cam = Z.cam; if (!(ev.x < cam.x - 60 || ev.x > cam.x + cam.w + 60 || ev.y < cam.y - 10 || ev.y > cam.y + cam.h + 60)) drawQuelle(c, ev, t); continue; }
       const x = ev.x, y = ev.y;
       if (x < cam.x - 60 || x > cam.x + cam.w + 60 || y < cam.y - 10 || y > cam.y + cam.h + 60) continue; /* nur im Bild */
       if (ev.k === "schrein") { c.fillStyle = "#2a2030"; c.fillRect(x - 7, y - 22, 14, 22); poly(c, [x - 9, y - 22, x + 9, y - 22, x, y - 30], "#3a2a44"); if (!ev.done) { c.save(); c.globalCompositeOperation = "lighter"; glow(c, x, y - 14, 18 + Math.sin(t * 3) * 3, "rgba(170,80,255,.5)"); c.restore(); circ(c, x, y - 14, 2.4, "#d0a0ff"); } tag(ev, L(["Opfern", "Sacrifice"])); }

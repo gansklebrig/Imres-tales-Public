@@ -84,8 +84,18 @@
   let mmC = null;
   function mmCollect(lv) {
     const now = performance.now();
-    if (mmC && mmC.lv === lv && mmC.n === seen.size + entered.size * 1000 && now - mmC.t < 300) return mmC;
+    const E0 = Z.erkundung && Z.erkundung(), nf = E0 && E0.found ? E0.found.size : 0;
+    const nq = (Z.abEvents || []).filter(e => e.k === "quelle" && e.done).length;
+    if (mmC && mmC.lv === lv && mmC.n === seen.size + entered.size * 1000 + nf * 1e6 + nq * 1e9 && now - mmC.t < 300) return mmC;
     const icons = [], marks = [];
+    /* W13 R11: Heilquelle (abenteuer.js) auf der Karte, sobald ihr Raum gesehen wurde und solange sie nicht versiegt ist */
+    for (const ev of Z.abEvents || []) if (ev.k === "quelle" && !ev.done && seen.has(ev.cell)) icons.push({ tx: ev.x / T, ty: ev.y / T - 1.5, ico: "✚", col: "#b8e0a0" });
+    /* W13 R11: Eddas „Spürsinn“ (Lager-Zusatzstufe vor „Geheimniszeichen“): betretener Raum mit noch unentdeckter Geheimkammer → „?“ */
+    if (spuersinn()) for (const k in lv.cells) {
+      const c = lv.cells[k]; if (c.kind !== "secret" || !c.parent) continue;
+      const pk = c.parent.x + "," + c.parent.y; if (!entered.has(pk) || (E0 && E0.found && E0.found.has("secret:" + k))) continue;
+      if (!icons.some(o => o.cell === pk && o.ico === "?")) icons.push({ cell: pk, tx: c.parent.x * CW + CW / 2 + (c.x - c.parent.x) * CW * 0.32, ty: c.parent.y * CH + CH / 2 + (c.y - c.parent.y) * CH * 0.32, ico: "?", col: "#e8d8a8" });
+    }
     for (const k in lv.cells) {
       const c = lv.cells[k]; if (!c.fn || !seen.has(k) || c.kind === "secret" && !entered.has(k)) continue;
       const d = Z.roomFnDef(lv.biome, c.fn); if (!d || !d.ico) continue;
@@ -110,8 +120,16 @@
         marks.push({ tx, ty, dx: D4[s2][0], dy: D4[s2][1] });
       }
     }
-    return (mmC = { lv, n: seen.size + entered.size * 1000, t: now, icons, marks });
+    return (mmC = { lv, n: seen.size + entered.size * 1000 + nf * 1e6 + nq * 1e9, t: now, icons, marks });
   }
+  /* Eddas Zusatzstufe über die Lager-Schnittstelle (keine Zeile in lager.js nötig): günstig, nach „Skizze des Eingangs“ kaufbar,
+     wirkt nur, solange „Geheimniszeichen“ (Edda Stufe 2, zeigt die Kammern selbst) noch fehlt */
+  const spuersinn = () => !!(Z.lager && Z.lager.level && Z.lager.level("edda", "spuersinn") >= 1 && Z.lager.level("edda") < 2);
+  if (Z.lager && Z.lager.addUpgrade) Z.lager.addUpgrade("edda", "spuersinn", {
+    n: ["Spürsinn", "Keen Sense"], max: 1, cost: [90], req: () => Z.lager.level("edda") >= 1,
+    d: ["Hat ein Raum, den du betreten hast, noch eine unentdeckte Geheimkammer, steht dort ein „?“ auf der Minikarte. (Mit „Geheimniszeichen“ zeigt Edda die Kammern dann selbst.)",
+      "If a room you have entered still hides an undiscovered secret chamber, a \"?\" appears there on the minimap. (With \"Secret marks\", Edda shows the chambers themselves.)"]
+  });
   Z.minimapExtra = function (g, ox, oy, scale, big, vw, vh) {
     const lv = Z.level; if (!lv || !lv.cells || lv.hub || lv.arena || lv.passage || !Z.roomFnDef) return;
     const C = mmCollect(lv), out = (x, y) => x < -10 || y < -10 || x > vw * scale + 10 || y > vh * scale + 10;
