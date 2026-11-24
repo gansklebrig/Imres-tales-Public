@@ -4133,7 +4133,7 @@ function update(dt){
  const S=STAGES[G.stage];
  if(G.firstWave&&G.stageTime>0.4){G.firstWave=0;firstWave()}
  if(G.stageKills>=G.need&&!G.room&&!(G.obj&&!G.obj.done)){if(S.boss){if(!G.boss&&!G.bossDone)spawnBoss()}else if(!G.guardE&&!G.guardDone)spawnGuard()}
- spawnTick(dt);zielTick(dt);if(!G.bot&&P.hp<P.st.maxHp*0.3){G.hbT=(G.hbT||0)-dt;if(G.hbT<=0){G.hbT=0.85;sfx('heart')}}
+ spawnTick(dt);zielTick(dt);if(!G.bot&&P.hp<P.st.maxHp*0.3){G.hbT=(G.hbT||0)-dt;if(G.hbT<=0){G.hbT=lwTakt(P.hp/P.st.maxHp);sfx('heart')}}
  if(G.mp&&(!SAVE.split||G.net))mpLeash();
  if(G.time-G.lastSave>20){G.lastSave=G.time;(window.requestIdleCallback||setTimeout)(()=>persist(),{timeout:2000})}
 }
@@ -4826,7 +4826,7 @@ function renderWorld(dt){
  drawNums();drawBubbles();
  cx.setTransform(DPR,0,0,DPR,0,0);
  if(q>2||(q>1&&(window.__hsGLWELT&&__hsGLWELT.api&&__hsGLWELT.api.EB&&__hsGLWELT.api.EB.an&&!__hsGLWELT.api.RS.u.soft)))bloom();if(q>1)vignette();if(!G.vp){drawPills();drawCombo();drawMpHud()}
- const pr=P.hp/P.st.maxHp;if(pr<0.35){const g=cx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.3,W/2,H/2,Math.max(W,H)*0.7);g.addColorStop(0,'rgba(120,0,0,0)');g.addColorStop(1,`rgba(140,0,0,${(0.35-pr)*1.4+0.1*Math.sin(t*6)})`);cx.fillStyle=g;cx.fillRect(0,0,W,H)}
+ const pr=P.hp/P.st.maxHp;if(pr<0.35&&(G.vp||!LW.an)){const g=cx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.3,W/2,H/2,Math.max(W,H)*0.7);g.addColorStop(0,'rgba(120,0,0,0)');g.addColorStop(1,`rgba(140,0,0,${(0.35-pr)*1.4+0.1*Math.sin(t*6)})`);cx.fillStyle=g;cx.fillRect(0,0,W,H)}
  if(G.sf){G.sf.a-=dt*G.sf.a0/G.sf.d;if(G.sf.a<=0)G.sf=null;else{cx.globalAlpha=G.sf.a;cx.fillStyle=G.sf.c;cx.fillRect(0,0,W,H);cx.globalAlpha=1}}
  drawBanner(dt);
  const tgt=G.boss||G.guardE||G.portal;if(tgt){const sxp=(tgt.x-camX)*ZOOM,syp=(tgt.y-camY)*ZOOM;if(sxp<0||syp<0||sxp>W||syp>H){const a=Math.atan2(syp-H/2,sxp-W/2);const m=46;const ex=clamp(W/2+Math.cos(a)*W,m,W-m),ey=clamp(H/2+Math.sin(a)*H,m+60,H-m);cx.save();cx.translate(ex,ey);cx.rotate(a);poly(cx,tgt===G.portal?'#c48cff':'#ff5a4a',14,0,-8,-9,-8,9);cx.restore()}}
@@ -7360,7 +7360,7 @@ function netGuestFrame(dt){if(!G.netGuestRun)return;const now=performance.now();
  for(const c of['zones','ezones','tele','loot'])for(const o of G[c]||[])if(typeof o.t==='number')o.t+=dt;
  if(G.bub){G.bub.t+=dt;if(G.bub.t>G.bub.dur)G.bub=null}bubsTick(dt);
  try{updProjTrails()}catch(e){}
- const me=NET.mine;if(me&&me.st&&me.hp<me.st.maxHp*0.3&&!me.down){G.hbT=(G.hbT||0)-dt;if(G.hbT<=0){G.hbT=0.85;sfx('heart')}}}
+ const me=NET.mine;if(me&&me.st&&me.hp<me.st.maxHp*0.3&&!me.down){G.hbT=(G.hbT||0)-dt;if(G.hbT<=0){G.hbT=lwTakt(me.hp/me.st.maxHp);sfx('heart')}}}
 /* Welche eigenen Eingaben hat der Gastgeber schon verarbeitet? (aus dem Stand des eigenen Helden) */
 function netAckIn(){const me=NET.mine;return me&&me._r&&me._r.netAck?me._r.netAck:Math.max(0,(NET.sentQ||0)-Math.round((NET.rtt||80)/16))}
 function netAct(k,v){NET.aSeq++;NET.aQ.push([NET.aSeq,k,v]);if(NET.aQ.length>24)NET.aQ.shift();NET.lastIn=0}
@@ -25633,6 +25633,41 @@ function ka3Rundwege(K){const n=K.n,N=n*n;K.ka3=0;if(!KA3.an||K.esc||K.flucht||!
  return K.ka3}
 {const kl3=kaLayout;kaLayout=function(S){const K=kl3.apply(this,arguments);if(!K||!K.M||!K.sec)return K;KA3.st.n++;const t0=performance.now();try{ka3Rundwege(K)}catch(er){console.error('ka3Rundwege',er)}KA3.st.ms+=performance.now()-t0;return K}}
 window.__hsKA3={KA3,ka3Rundwege};
+
+/* ---------- Paket „lebwarn“: deutliche Warnung bei wenig Leben – window.__hsLW ----------
+   Wunsch: Man soll sofort sehen, wenn es um die Lebenspunkte schlecht steht. Bisher gab es nur eine schwache Randtönung auf der
+   Spielfläche (unter 35 %, bei 30 % kaum 7 % Deckkraft) und einen Herzschlag im festen Takt.
+   Jetzt: roter Rand über dem ganzen Bild als eigene Ebene (über allen Spielebenen, unter der Anzeige), ab 40 % Leben sanft,
+   ab 30 % pulsiert er im Herzschlag – je weniger Leben, desto kräftiger und schneller, im selben Takt wie der Herzschlag-Ton.
+   Dazu blinkt der Lebensbalken, und unter 30 % leuchtet der Heiltrank-Knopf, solange noch ein Trank da ist.
+   Geteilter Bildschirm: dort bleibt die Tönung je Bildausschnitt. Wer Bewegung reduziert hat, bekommt den Rand ohne Pulsieren.
+   Schalter: __hsLW.an=0 (alte Tönung). Schwellen: LW.ab (Beginn), LW.puls (Pulsieren). */
+const LW={an:1,ab:0.4,puls:0.3,el:null,k:0};window.__hsLW=LW;
+/* Abstand zweier Herzschläge in Sekunden: 0,95 s bei 30 % Leben, 0,5 s kurz vor dem Ende */
+function lwTakt(pr){return 0.5+0.45*Math.min(1,Math.max(0,pr)/0.3)}
+(function(){try{const st=document.createElement('style');st.textContent=`
+#lebWarn{position:fixed;inset:0;z-index:9;pointer-events:none;opacity:0;transition:opacity .3s;--lwk:0;--lwd:.9s;
+ background:radial-gradient(ellipse at center,rgba(120,0,0,0) 34%,rgba(150,8,8,.4) 74%,rgba(125,0,0,.8) 100%)}
+#lebWarn.an{opacity:calc(.22 + .78*var(--lwk))}
+#lebWarn.an.puls{animation:lwPuls var(--lwd) linear infinite}
+@keyframes lwPuls{0%{opacity:calc(.3 + .7*var(--lwk))}7%{opacity:1}20%{opacity:calc(.3 + .7*var(--lwk))}27%{opacity:.9}44%{opacity:calc(.3 + .7*var(--lwk))}100%{opacity:calc(.3 + .7*var(--lwk))}}
+.bar.hp.lwNot{animation:lwBar .7s ease-in-out infinite}
+@keyframes lwBar{0%,100%{box-shadow:0 0 0 0 rgba(255,60,50,0)}50%{box-shadow:0 0 0 3px rgba(255,70,55,.85),0 0 16px rgba(255,40,30,.7)}}
+#btnPot.lwTrank{animation:lwTrank .8s ease-in-out infinite}
+@keyframes lwTrank{0%,100%{box-shadow:0 0 0 0 rgba(255,214,130,0);transform:scale(1)}50%{box-shadow:0 0 0 4px rgba(255,214,130,.9),0 0 22px rgba(255,190,90,.8);transform:scale(1.08)}}
+@media (prefers-reduced-motion:reduce){#lebWarn.an.puls,.bar.hp.lwNot,#btnPot.lwTrank{animation:none}}`;document.head.appendChild(st);
+ const el=document.createElement('div');el.id='lebWarn';el.setAttribute('aria-hidden','true');document.body.appendChild(el);LW.el=el;
+ let zuletzt='';
+ setInterval(()=>{try{let pr=1,trank=false;
+   const spiel=LW.an&&typeof G==='object'&&G&&G.state==='play'&&!G.bot&&!splitOn();
+   if(spiel){const H_=G.net&&typeof NET!=='undefined'&&NET.mine?[NET.mine]:(G.mp&&PL&&PL.length?PL:[P]);
+    for(const h of H_){if(!h||!h.st||h.down||!(h.st.maxHp>0))continue;const q=h.hp/h.st.maxHp;if(q<pr){pr=q;trank=(h.pots||0)>0}}}
+   const k=spiel&&pr<LW.ab&&pr>0?Math.min(1,(LW.ab-pr)/LW.ab*1.15):0;LW.k=k;const puls=k>0&&pr<LW.puls;
+   const key=(k>0?1:0)+'|'+(puls?1:0)+'|'+Math.round(k*20)+'|'+(puls&&trank?1:0);if(key===zuletzt)return;zuletzt=key;
+   el.style.setProperty('--lwk',k.toFixed(2));el.style.setProperty('--lwd',lwTakt(pr).toFixed(2)+'s');el.classList.toggle('an',k>0);el.classList.toggle('puls',puls);
+   const bar=document.querySelector('#hud .bar.hp');if(bar)bar.classList.toggle('lwNot',puls);
+   const pot=document.getElementById('btnPot');if(pot)pot.classList.toggle('lwTrank',puls&&trank);
+  }catch(e){LW.err=String(e)}},120)}catch(e){LW.err=String(e)}})();
 
 /* Gegnerzahl je Abschnitt nach der Fläche vor der Pflege (Leveltempo bleibt), höchstens KA2.dichte-fach dichter (1 = Gegner nach neuer Fläche, ca. 7 % weniger) */
 {const kbv0=kaBevoelkern;kaBevoelkern=function(S){const K=G.ka;if(!ka2An()||!K||!K.ka2fz0)return kbv0.apply(this,arguments);const sv=K.sec.map(s=>s.fz);

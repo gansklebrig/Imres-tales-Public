@@ -41,6 +41,10 @@ Jeder Punkt lässt sich einzeln zurücknehmen (Schalter in Klammern).
   Stufe 24 und 32 sind so nicht messbar: Den Test-Helden fehlen legendäre Ausrüstung, Sets und Lager-Ausbauten, sie sterben dort sofort.
 - Geprüft, nicht ausnutzbar: nach erfülltem Stufenziel stehen bleiben und Gegner „farmen“ (300 s: 7 Abschüsse, 3 Gold, kein Level);
   Kaufen und Wiederverkaufen beim Händler (Verkauf = 1,5 × Schrottwert, Kauf = 10–20 ×).
+- Warnung bei wenig Leben (Paket „lebwarn“): roter Rand über dem ganzen Bild ab 40 % Leben, ab 30 % pulsiert er im Herzschlag –
+  je weniger Leben, desto kräftiger und schneller, im Takt des Herzschlag-Tons (0,95 s → 0,5 s). Der Lebensbalken blinkt, der
+  Heiltrank-Knopf leuchtet, solange ein Trank da ist. Vorher: kaum sichtbare Randtönung (bei 30 % Leben 7 % Deckkraft) und fester Takt.
+  (`__hsLW.an=0` bringt die alte Tönung zurück)
 
 **Prüfung des Zweigs (24.11., nach allen Änderungen)**
 - Alle 35 Stufen mit WebGL-Welt auf „Legendär“ je 3,5 s gespielt (`sweep.js`): keine Skript-, Shader- oder Dach-Fehler.
