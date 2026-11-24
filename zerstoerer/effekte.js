@@ -451,6 +451,8 @@
       else if (k === "wucht") { W.push({ k: "druck", x: hx, y: ey, t: 0, life: 0.24, r: 16 + e.w * 0.6 }); FX.burst(hx, ey + 4, Math.round(5 * q), { col: ["#7a7268", "#948a7e", "#5a524a"], sp: 120, ang: -Math.PI / 2, spread: 2.8, life: 0.5, size: 2.2, kind: "shard", g: 600, drag: 0.95 }); FX.addShake(2); }
       else if (k === "feuer") { W.push({ k: "glutstoss", x: hx, y: ey, dir, t: 0, life: 0.3, r: 14 }); FX.burst(hx, ey, Math.round(9 * q), { col: ["#ffd27a", "#ff8a2a", "#ff5a1a"], sp: 130, ang: -Math.PI / 2 + dir * 0.4, spread: 1.8, life: 0.55, size: 1.6, kind: "glow", g: -80, add: true }); }
       else { W.push({ k: "reif", x: hx, y: ey, t: 0, life: 0.45, r: 14 + e.w * 0.4, seed: Math.random() * 9 }); FX.burst(hx, ey, Math.round(8 * q), { col: ["#ffffff", "#e8f4ee", "#d0e8dc"], sp: 140, life: 0.45, size: 1.4, kind: "shard", g: 400, drag: 0.94 }); }
+      /* Feuer- und Frosttreffer werfen kurzes Licht (Runde 12) */
+      if (Z.lightFlash) { if (k === "feuer") Z.lightFlash(hx, ey, 70, "#ff9a40", 0.65, 0.28); else if (k === "frost") Z.lightFlash(hx, ey, 60, "#e8f4ee", 0.5, 0.3); else if (o && o.crit) Z.lightFlash(hx, ey, 64, "#ffd27a", 0.55, 0.2); }
       if (o && o.crit) W.push({ k: "krit", x: hx, y: ey, t: 0, life: 0.34, r: 26 + Math.min(18, e.w * 0.5), rot: Math.random() * 0.8 });
     }
     return n;
@@ -535,6 +537,15 @@
     }
     c.restore();
   };
+  /* Dynamisches Licht (Runde 12, Stufe 2, Budget je Bild): Geschosse ohne eigenes Licht leuchten schwach in ihrer
+     Farbe, leuchtende Partikel (Zauber, Runen, Glut) werfen kleine Lichtflecken */
+  if (G && G.lightGather) G.lightGather.push(function (add, cam) {
+    if (lvl() < 2 || Z.darkness > 0) return;
+    let n = 0;
+    for (const p of Z.projs || []) { const k = p.k; if (!k || k.glow || k.fire || k.wave || k.ground || p.kind === "bombe" || p.kind === "e_bombe") continue; if (p.x < cam.x - 40 || p.x > cam.x + cam.w + 40 || p.y < cam.y - 40 || p.y > cam.y + cam.h + 40) continue; add(p.x, p.y, 30, k.col || "#ffe0b0", 0.22, 0); if (++n >= 10) break; }
+    n = 0; const PS = FX.parts;
+    for (let i = PS.length - 1; i >= 0 && n < 10; i--) { const q = PS[i]; if (!q.add || q.kind !== "glow" || q.size < 1.4 || typeof q.col !== "string" || q.col[0] !== "#") continue; if (q.x < cam.x || q.x > cam.x + cam.w || q.y < cam.y || q.y > cam.y + cam.h) continue; add(q.x, q.y, 18 + q.size * 6, q.col, 0.28 * (1 - q.t / q.life), 0); n++; i -= 3; }
+  });
   const load0 = Z.loadArea;
   Z.loadArea = function () { W.length = 0; pv.trail.length = 0; return load0.apply(this, arguments); };
 })();

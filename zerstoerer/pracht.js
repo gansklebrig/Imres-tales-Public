@@ -741,12 +741,14 @@
     /* Breschen (Runde 11): in großen Räumen mit durchgehender Rückwand gelegentlich ein hohes Fenster, ein Riss oder ein
        eingestürztes Wandstück, durch das die tiefe Fernsicht scheint – nur in Gebieten, zu denen es passt */
     const bk = BRESCHE[H.B.bg];
+    /* keine Bresche hinter Leitern, Stegen oder Geländeteilen, die lesbar bleiben müssen */
+    const clutter = (ox, oy, w, h) => { for (let y = oy - 1; y <= oy + h; y++) for (let x = ox - 1; x <= ox + w; x++) { const v = lv.get(x, y); if (v === 2 || v === 4 || v === 3 || v === 8) return true; } return false; };
     if (bk && !(G.off && G.off.bresche)) for (const k in lv.cells) {
       const [cx, cy] = k.split(",").map(Number), rx = cx * CW, ry = cy * CH; if (h3(cx, cy, 1950) > 0.5) continue;
       let wl = 0; for (let y = ry; y < ry + CH; y++) for (let x = rx; x < rx + CW; x++) if (H.isWall(x, y)) wl++;
       if (wl < CW * CH * 0.4) continue;
       const w = bk === "fenster" ? 3 : 4, h = bk === "fenster" ? 5 : 4; let hit = null;
-      for (let j = 0; j < 60 && !hit; j++) { const ox = rx + 2 + ((h3(cx, cy, 1951 + j) * (CW - w - 4)) | 0), oy = ry + 1 + ((h3(cy, cx, 1960 + j) * (CH - h - 3)) | 0); if (free(ox, oy, w, h) && fits(H, ox, oy, w, h, false, dec)) hit = [ox, oy]; }
+      for (let j = 0; j < 60 && !hit; j++) { const ox = rx + 2 + ((h3(cx, cy, 1951 + j) * (CW - w - 4)) | 0), oy = ry + 1 + ((h3(cy, cx, 1960 + j) * (CH - h - 3)) | 0); if (free(ox, oy, w, h) && fits(H, ox, oy, w, h, false, dec) && !clutter(ox, oy, w, h)) hit = [ox, oy]; }
       if (hit) { taken.push([hit[0], hit[1], w, h]); rpList.push({ kind: "bresche", x: hit[0], y: hit[1], w, h, r: h3(hit[0], hit[1], 904), fn: "bresche", art: bk }); }
     }
     G.rpMs = +(performance.now() - tRP).toFixed(2);
@@ -2807,13 +2809,15 @@
         c.save(); c.beginPath();
         /* große Öffnungen und Schächte zeigen die Ferne kräftiger (bis 0,85), kleine nur angedeutet */
         let area = 0;
-        for (const o of ops) { if (o.blind || (o.mode !== "vault" && o.mode !== "cave")) continue; const x0 = o.x0 * T + 2, y0 = o.y0 * T + 2, x1 = (o.x1 + 1) * T - 2, y1 = (o.y1 + 1) * T - 1; if (x1 < cam.x || x0 > cam.x + cam.w || y1 < cam.y || y0 > cam.y + cam.h) continue; c.rect(x0, y0, x1 - x0, y1 - y0); any = true; area = Math.max(area, (o.x1 - o.x0 + 1) * (o.y1 - o.y0 + 1)); }
+        /* Öffnungen mit Leitern oder Stegen auslassen – die müssen immer klar lesbar bleiben */
+        const busy = o => { if (o._r12 != null) return o._r12; let b = false; for (let i = 0; i < o.tiles.length && !b; i += 2) { const v = lv.get(o.tiles[i], o.tiles[i + 1]); if (v === 2 || v === 4) b = true; } return (o._r12 = b); };
+        for (const o of ops) { if (o.blind || (o.mode !== "vault" && o.mode !== "cave") || busy(o)) continue; const x0 = o.x0 * T + 2, y0 = o.y0 * T + 2, x1 = (o.x1 + 1) * T - 2, y1 = (o.y1 + 1) * T - 1; if (x1 < cam.x || x0 > cam.x + cam.w || y1 < cam.y || y0 > cam.y + cam.h) continue; c.rect(x0, y0, x1 - x0, y1 - y0); any = true; area = Math.max(area, (o.x1 - o.x0 + 1) * (o.y1 - o.y0 + 1)); }
         /* Breschen in großen Wänden zeigen die Ferne fast deckend */
         if (Z.raumStuecke && Z.breschePath) for (const p of Z.raumStuecke()) { if (p.kind !== "bresche") continue; const X = p.x * T, Y = p.y * T, W2 = p.w * T, H2 = p.h * T; if (X + W2 < cam.x || X > cam.x + cam.w || Y + H2 < cam.y || Y > cam.y + cam.h) continue; Z.breschePath(c, p.art, X + 1, Y + 1, W2 - 2, H2 - 2, p.r, true); any = true; area = Math.max(area, 90); }
         if (any) {
           c.clip();
           const sc = Math.max(1, (cam.h * 0.9) / TH), w = TW * sc, h = TH * sc, ox = cam.x - ((cam.x * 0.15) % w + w) % w, y = cam.y + (cam.h - h) * 0.5 - cam.y * 0.03 % 30;
-          c.globalAlpha = Math.min(0.85, 0.55 + area / 160); for (let x = ox; x < cam.x + cam.w; x += w) c.drawImage(cv, x, y, w + 0.5, h);
+          c.globalAlpha = Math.min(0.7, 0.5 + area / 240); for (let x = ox; x < cam.x + cam.w; x += w) c.drawImage(cv, x, y, w + 0.5, h);
         }
         c.restore();
       }
@@ -2854,5 +2858,94 @@
       c.globalCompositeOperation = "source-over";
     }
     c.restore();
+  };
+})();
+
+/* Ezekiel – The Destroyer · Vordergrund je Gebiet (Grafik-Runde 12, ab Stufe 2)
+   Sparsame, dunkle Schattenrisse ganz vorn mit kräftiger Parallaxe (1,35): Ketten und Banner in Burg und Hallen,
+   Spinnweben und Wurzeln in Keller und Verlies, Tauwerk im Hafen, Rohre und Haken in der Schmiede, Seile im Glocken-
+   turm, Tropfsteine am See, Seidenfäden im Schlund. Sie hängen nur vom oberen Bildrand herab (höchstens ein Viertel der
+   Bildhöhe) und blenden über fgAlpha aus, sobald Ezekiel, Gegner oder Geschosse dahinter sind. Kein Blau. */
+(function () {
+  "use strict";
+  const Z = window.Z, G = Z.gfx, TAU = Math.PI * 2;
+  const on = () => { const q = Z.gq; if (q && q.lean) return false; if (G.off && (G.off.vordergrund || G.off.arenaFg)) return false; return !q || (q.level === -1 ? q.layers !== false : q.level >= 2); };
+  const hash = i => { let h = Math.imul((i | 0) ^ 0x9e3779b9, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+  const SET = { castle: ["kette", "banner"], ramparts: ["banner", "kette"], halls: ["banner", "kette", "vorhang"], cellar: ["netz", "wurzel"], dungeon: ["kette", "netz", "wurzel"], harbour: ["tau", "netz"], belltower: ["seil", "kette"], forge: ["rohr", "haken"], embercity: ["rohr", "kette"], lake: ["zapfen", "wurzel"], chasm: ["faden", "netz"], storm: ["wurzel", "banner"], spires: ["kette", "banner"] };
+  function item(c, kind, x, h, t, i, H) {
+    const sw = Math.sin(t * 0.9 + i) * 3;
+    switch (kind) {
+      case "kette": { c.strokeStyle = "#0a0608"; c.lineWidth = 2.6; for (let y = -4, k = 0; y < h; y += 7, k++) { c.beginPath(); c.ellipse(x + sw * y / h, y, k % 2 ? 1.2 : 2.6, 3.6, 0, 0, TAU); c.stroke(); } c.fillStyle = "#0a0608"; c.beginPath(); c.arc(x + sw, h + 4, 5, 0, Math.PI); c.fill(); break; }
+      case "banner": { c.fillStyle = "#0a0608"; c.fillRect(x - 22, 0, 44, 3); c.beginPath(); c.moveTo(x - 16, 3); c.lineTo(x + 16, 3); c.lineTo(x + 16 + sw * 0.4, h); c.lineTo(x + sw * 0.5, h - 12); c.lineTo(x - 16 + sw * 0.4, h); c.fill(); c.fillStyle = "rgba(120,30,30,.35)"; c.fillRect(x - 12, 8, 24, h * 0.5); break; }
+      case "vorhang": { c.fillStyle = "#0a0608"; c.beginPath(); c.moveTo(x - 40, 0); c.lineTo(x + 40, 0); c.quadraticCurveTo(x + 10, h * 0.5, x + 30 + sw, h); c.quadraticCurveTo(x - 10, h * 0.6, x - 40, h * 0.3); c.fill(); break; }
+      case "netz": { c.strokeStyle = "rgba(14,10,12,.85)"; c.lineWidth = 0.8; const R = h * 0.9; for (let k = 0; k < 6; k++) { const a = k / 5 * Math.PI / 2; c.beginPath(); c.moveTo(x, 0); c.lineTo(x + Math.cos(a) * R, Math.sin(a) * R); c.stroke(); } for (let j = 1; j < 5; j++) { c.beginPath(); for (let k = 0; k < 6; k++) { const a = k / 5 * Math.PI / 2, rr = R * j / 5 + sw * 0.3; k ? c.lineTo(x + Math.cos(a) * rr, Math.sin(a) * rr) : c.moveTo(x + Math.cos(a) * rr, Math.sin(a) * rr); } c.stroke(); } break; }
+      case "wurzel": { c.strokeStyle = "#0a0608"; for (let k = 0; k < 4; k++) { c.lineWidth = 5 - k; c.beginPath(); c.moveTo(x + k * 8 - 12, 0); c.bezierCurveTo(x + k * 6 - 20, h * 0.4, x + k * 10 + sw, h * 0.6, x + k * 4 - 6 + sw, h * (0.6 + hash(i + k) * 0.4)); c.stroke(); } break; }
+      case "tau": { c.strokeStyle = "#0a0608"; c.lineWidth = 3; c.beginPath(); c.moveTo(x - 60, 0); c.quadraticCurveTo(x, h + sw, x + 70, 0); c.stroke(); c.lineWidth = 2; c.beginPath(); c.moveTo(x + 10, h * 0.55); c.lineTo(x + 12 + sw, h * 0.95); c.stroke(); break; }
+      case "seil": { c.strokeStyle = "#0a0608"; c.lineWidth = 2.4; c.beginPath(); c.moveTo(x, 0); c.quadraticCurveTo(x + sw * 2, h * 0.5, x + sw, h); c.stroke(); c.fillStyle = "#0a0608"; c.beginPath(); c.ellipse(x + sw, h + 3, 3, 5, 0, 0, TAU); c.fill(); break; }
+      case "rohr": { c.fillStyle = "#0a0608"; c.fillRect(x - 70, h * 0.3, 140, 10); c.fillRect(x - 6, 0, 12, h * 0.3 + 6); for (const ex of [x - 70, x + 64]) c.fillRect(ex, h * 0.3 - 2, 6, 14); c.fillStyle = "rgba(255,120,40,.12)"; c.fillRect(x - 70, h * 0.3 + 8, 140, 2); break; }
+      case "haken": { c.strokeStyle = "#0a0608"; c.lineWidth = 2; c.beginPath(); c.moveTo(x, 0); c.lineTo(x + sw, h - 8); c.stroke(); c.lineWidth = 3; c.beginPath(); c.arc(x + sw + 4, h - 4, 4, Math.PI, Math.PI * 2.6); c.stroke(); break; }
+      case "zapfen": { c.fillStyle = "#0a0608"; for (let k = 0; k < 5; k++) { const zx = x - 30 + k * 15, zl = h * (0.3 + hash(i * 5 + k) * 0.7); c.beginPath(); c.moveTo(zx - 6, 0); c.lineTo(zx + 6, 0); c.lineTo(zx, zl); c.fill(); } c.fillStyle = "rgba(200,240,210,.5)"; const u = (t * 0.7 + i) % 1; c.fillRect(x - 0.5, h * 0.4 + u * 40, 1, 2); break; }
+      case "faden": { c.strokeStyle = "rgba(14,10,12,.8)"; c.lineWidth = 0.8; for (let k = 0; k < 4; k++) { c.beginPath(); c.moveTo(x - 20 + k * 12, 0); c.lineTo(x - 18 + k * 12 + sw, h * (0.6 + k * 0.1)); c.stroke(); } c.fillStyle = "#0a0608"; c.beginPath(); c.ellipse(x + sw, h * 0.8, 4, 7, 0, 0, TAU); c.fill(); break; }
+    }
+  }
+  const al0 = Z.drawAfterLight;
+  Z.drawAfterLight = function (c, cam, Wd, Hd, t) {
+    if (al0) al0.apply(this, arguments);
+    const lv = Z.level, B = Z.biome; if (!lv || lv.hub || lv.arena || lv.passage || !B || !on()) return;
+    const set = SET[B.bg]; if (!set) return;
+    const S = G.scale || 2, P = 1.35, sx = cam.x * P, step = 520, maxH = cam.h * 0.24;
+    c.save(); c.setTransform(S, 0, 0, S, 0, 0);
+    for (let i = Math.floor(sx / step) - 1; i <= Math.floor((sx + cam.w * P) / step) + 1; i++) {
+      if (hash(i * 7 + (lv.seed || 0)) > 0.45) continue;
+      const kind = set[(hash(i * 3 + 1) * set.length) | 0], x = i * step - sx + hash(i) * 200, h = maxH * (0.55 + hash(i + 9) * 0.45);
+      /* nur wenn oben im Bild auch Decke/Wand ist (unter freiem Himmel hängt nichts) */
+      const wx = cam.x + x, wy = cam.y + 8; if (G.isOpen && G.isOpen(Math.floor(wx / 16), Math.floor(wy / 16)) && !(kind === "banner")) continue;
+      const a = G.fgAlpha ? G.fgAlpha("vg" + i, x - 50, -10, 100, h + 20, 0.9) : 0.9; if (a < 0.02) continue;
+      c.globalAlpha = a; try { item(c, kind, x, h, t, i, cam.h); } catch (e) { }
+    }
+    c.restore();
+  };
+})();
+
+/* Ezekiel – The Destroyer · Schwebeteilchen je Gebiet (Grafik-Runde 12, ab Stufe 1; Dichte nach Stufe)
+   Staub in Hallen und Verlies, Sporen im Keller und Schlund, Gischt und feine Tröpfchen am See und im Hafen, Asche und
+   Glut in Schmiede und Glutstadt, Federn im Glockenturm, Pollen im Torhof. Zustandslos: Lage aus Zeit und Zufallszahl,
+   kein Speicher je Teilchen. Leuchtende Teilchen nach dem Licht, die übrigen davor (sie liegen dann im Licht der Szene). */
+(function () {
+  "use strict";
+  const Z = window.Z, G = Z.gfx, TAU = Math.PI * 2;
+  const lvl = () => { const q = Z.gq; if (!q) return 2; if (q.lean) return 0; if (G.off && G.off.schweben) return 0; return q.level === -1 ? 2 : q.level; };
+  const hash = i => { let h = Math.imul((i | 0) ^ 0x9e3779b9, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+  /* [Farbe, Größe, vx, vy, Schwanken, leuchtet, Form] */
+  const MOTE = { halls: ["#f0d8a8", 0.8, 3, -2, 6, 0, "dot"], dungeon: ["#c8c0a8", 0.7, 2, 3, 4, 0, "dot"], cellar: ["#d8e8b8", 0.9, 1, -4, 6, 1, "dot"], chasm: ["#d8b0f0", 0.9, 1, -5, 7, 1, "dot"],
+    lake: ["#d8f0e0", 0.8, 2, -8, 5, 0, "drop"], harbour: ["#e8eee4", 0.8, 14, 4, 6, 0, "drop"], forge: ["#4a4040", 1.1, 4, 10, 8, 0, "flake"], embercity: ["#4a4040", 1.1, 6, 12, 8, 0, "flake"], spires: ["#5a5050", 1, 10, 14, 8, 0, "flake"],
+    belltower: ["#ece4d8", 1.6, 4, 9, 14, 0, "feather"], castle: ["#f0e0a0", 0.7, 6, -1, 8, 0, "dot"], camp: ["#f0e0a0", 0.7, 5, -1, 8, 0, "dot"], ramparts: ["#e8e0c8", 0.7, 12, 2, 6, 0, "dot"] };
+  const EMBER = { forge: 1, embercity: 1, spires: 1 };
+  function draw(c, cam, t, glow) {
+    const lv = Z.level, B = Z.biome, L = lvl(); if (!lv || !B || L < 1) return;
+    const m = MOTE[B.bg]; if (!m) return;
+    const n = L >= 3 ? 60 : L >= 2 ? 32 : 14, W = cam.w + 40, H = cam.h + 40;
+    if (glow && !m[5] && !EMBER[B.bg]) return;
+    for (let i = 0; i < n; i++) {
+      const isEmber = glow && EMBER[B.bg] && i % 4 === 0; if (glow && !m[5] && !isEmber) continue; if (!glow && (m[5] || isEmber)) continue;
+      const sp = 0.6 + hash(i + 3) * 0.8, vx = (isEmber ? 2 : m[2]) * sp, vy = (isEmber ? -14 : m[3]) * sp;
+      const px = ((hash(i) * W + t * vx + Math.sin(t * 0.7 + i) * m[4]) % W + W) % W, py = ((hash(i + 50) * H + t * vy) % H + H) % H;
+      const x = cam.x - 20 + px, y = cam.y - 20 + py, a = 0.25 + 0.35 * Math.abs(Math.sin(t * 0.8 + i * 1.7)), s = m[1] * (0.6 + hash(i + 9) * 0.8);
+      if (isEmber) { c.fillStyle = "rgba(255," + (140 + (i % 3) * 30) + ",60," + (a + 0.2).toFixed(2) + ")"; c.fillRect(x, y, 1, 1); continue; }
+      c.fillStyle = m[0]; c.globalAlpha = glow ? a * 0.9 : a;
+      if (m[6] === "feather") { c.save(); c.translate(x, y); c.rotate(Math.sin(t * 1.2 + i) * 0.8); c.beginPath(); c.ellipse(0, 0, s * 1.6, s * 0.5, 0, 0, TAU); c.fill(); c.restore(); }
+      else if (m[6] === "flake") c.fillRect(x, y, s * 1.4, s * 0.8);
+      else if (m[6] === "drop") c.fillRect(x, y, s * 0.6, s * 1.4);
+      else c.fillRect(x, y, s, s);
+    }
+    c.globalAlpha = 1;
+  }
+  const mid0 = Z.drawMidLife;
+  Z.drawMidLife = function (c, cam, t) { if (mid0) mid0.apply(this, arguments); try { c.save(); draw(c, cam, t, false); c.restore(); } catch (e) { console.error(e); } };
+  const al0 = Z.drawAfterLight;
+  Z.drawAfterLight = function (c, cam, Wd, Hd, t) {
+    if (al0) al0.apply(this, arguments);
+    const S = G.scale || 2; c.save(); c.setTransform(S, 0, 0, S, -cam.x * S, -cam.y * S); c.globalCompositeOperation = "lighter";
+    try { draw(c, cam, t, true); } catch (e) { console.error(e); } c.restore();
   };
 })();

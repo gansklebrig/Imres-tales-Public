@@ -3430,6 +3430,41 @@
   });
   Object.assign(DEATH, { drummer: "fall", schildgoblin: "fall", kobold: "fall", cube: "splat", mimic: "flip", kenku: "fall", grimlock: "fall", ghoul: "fall", bellghost: "fade", myconid: "fall", drider: "flip", rustmonster: "flip", quasit: "drop", gargoyle: "crumbleBig", grindylow: "splat", firebat: "drop", salamander: "side", slug: "splat", mephit: "fade" });
   Object.assign(LEANF, { cube: 0.1, mimic: 0.35, drider: 0.3, rustmonster: 0.3, quasit: 0.4, gargoyle: 0.5, grindylow: 0.3, firebat: 0.3, slug: 0.15, mephit: 0.3, bellghost: 0.4, myconid: 0.6 });
+  /* ---------- Pracht-Zusätze der neuen Gegner (Grafik-Runde 12, ab Stufe 2, nie bei lean) ----------
+     Mehr Volumen und Sekundärbewegung: Gallertwürfel mit Tiefe, Glanzkante und Tropfen; Glutfledermaus mit Glutspur;
+     Mephit mit Windfäden; Glockengeist mit Schleierfahnen; Myconid mit Sporen; Salamander mit Hitzeflimmern und Glut;
+     Schnecke mit Schleimglanz; Rostmonster mit Rostflocken. Telegrafie: alle neuen Arten zeigen im Anlauf einen
+     pulsierenden Warnhof am Boden (warm; „!!“-Angriffe rot). */
+  const R12 = () => !lowGfx() && !(Z.gq && Z.gq.lean) && !(Z.gfx && Z.gfx.off && Z.gfx.off.gegnerpracht) && (!Z.gfx || !Z.gfx.lq || Z.gfx.lq() >= 2);
+  const NEU12 = ["drummer", "schildgoblin", "kobold", "cube", "mimic", "kenku", "grimlock", "ghoul", "bellghost", "myconid", "drider", "rustmonster", "quasit", "gargoyle", "grindylow", "firebat", "salamander", "slug", "mephit"];
+  const EXTRA12 = {
+    cube(c, e, d, k, t) { const H = 22, W2 = 11, wob = Math.sin(t * 2.2) * 0.6;
+      const g = c.createLinearGradient(0, -H, 0, 0); g.addColorStop(0, "rgba(220,250,190,.10)"); g.addColorStop(1, "rgba(40,80,30,.28)"); c.fillStyle = g; c.fillRect(-W2 + 0.6, -H + 0.6, W2 * 2 - 1.2, H - 0.6);
+      c.fillStyle = "rgba(255,255,240,.35)"; c.fillRect(-W2 + 1 + wob * 0.6, -H + 2, 1, H - 5); c.fillRect(-W2 + 3 + wob * 0.6, -H + 1.2, 6, 0.8);
+      for (let i = 0; i < 3; i++) { const u = ((t * 0.35 + i / 3) % 1); c.fillStyle = "rgba(170,220,140," + (0.6 * (1 - u)).toFixed(2) + ")"; c.beginPath(); c.ellipse(-6 + i * 6, u * 2.5, 0.8, 0.8 + u * 1.2, 0, 0, Math.PI * 2); c.fill(); }
+      c.strokeStyle = "rgba(230,255,210,.22)"; c.lineWidth = 0.4; c.beginPath(); for (let i = 0; i < 3; i++) { const y = -H + 6 + i * 5 + Math.sin(t * 1.5 + i) * 1.2; c.moveTo(-W2 + 2, y); c.quadraticCurveTo(0, y - 1.5, W2 - 2, y + 0.5); } c.stroke(); },
+    firebat(c, e, d, k, t) { if (Math.random() < 0.35) Z.fx.p({ x: e.x + e.w / 2 - e.face * 3, y: e.y + e.h - 4, vx: -e.face * 10 + (Math.random() - 0.5) * 10, vy: 10 + Math.random() * 10, life: 0.5, size: 1, col: Math.random() < 0.5 ? "#ffb040" : "#ff6a1a", kind: "glow", add: true });
+      c.strokeStyle = "rgba(255,180,90,.35)"; c.lineWidth = 0.3; c.beginPath(); c.moveTo(0, -4); c.lineTo(-5, -8); c.moveTo(0, -4); c.lineTo(5, -8); c.stroke(); },
+    mephit(c, e, d, k, t) { c.strokeStyle = "rgba(240,245,225,.45)"; c.lineWidth = 0.5; for (let i = 0; i < 3; i++) { const a0 = t * 5 + i * 2.1; c.beginPath(); c.ellipse(0, -7, 6 + i * 1.6, 3 + i, 0.3, a0, a0 + 1.6); c.stroke(); } },
+    bellghost(c, e, d, k, t) { for (let i = 0; i < 3; i++) { const sw = Math.sin(t * 2 + i * 1.7) * 2; c.fillStyle = "rgba(230,225,215," + (0.18 - i * 0.04).toFixed(2) + ")"; c.beginPath(); c.moveTo(-5 + i * 3, -6); c.quadraticCurveTo(-6 + i * 3 + sw, 2, -4 + i * 3 + sw * 1.6, 6 + i * 2); c.lineTo(-2 + i * 3, -6); c.fill(); } },
+    myconid(c, e, d, k, t) { if (Math.random() < 0.12) Z.fx.p({ x: e.x + e.w / 2 + (Math.random() - 0.5) * 10, y: e.y + 4, vx: (Math.random() - 0.5) * 8, vy: -6 - Math.random() * 8, life: 1.6, size: 1.1, col: Math.random() < 0.5 ? "#e8c8d8" : "#d8e8b0", kind: "glow", g: -4, add: true });
+      c.fillStyle = "rgba(255,240,245,.25)"; c.beginPath(); c.ellipse(-2, -19, 4, 1.2, -0.2, 0, Math.PI * 2); c.fill(); },
+    salamander(c, e, d, k, t) { if (Math.random() < 0.25) Z.fx.p({ x: e.x + e.w / 2 + (Math.random() - 0.5) * 8, y: e.y + 2, vx: (Math.random() - 0.5) * 6, vy: -20 - Math.random() * 20, life: 0.7, size: 0.9, col: "#ffc060", kind: "glow", add: true });
+    },
+    slug(c, e, d, k, t) { c.fillStyle = "rgba(240,255,200,.35)"; c.beginPath(); c.ellipse(2, -4.6, 6, 0.8, -0.1, 0, Math.PI * 2); c.fill(); c.fillStyle = "rgba(255,255,255,.45)"; c.beginPath(); c.ellipse(-4.5, -12.5, 2.2, 1, -0.6, 0, Math.PI * 2); c.fill(); },
+    rustmonster(c, e, d, k, t, mv) { if (mv && Math.random() < 0.2) Z.fx.p({ x: e.x + e.w / 2 + (Math.random() - 0.5) * e.w, y: e.y + e.h * 0.4, vx: (Math.random() - 0.5) * 20, vy: -10, life: 0.6, size: 1, col: Math.random() < 0.5 ? "#a0501e" : "#c87a3a", kind: "shard", g: 300 }); }
+  };
+  for (const sh of NEU12) {
+    const f0 = SHAPES[sh]; if (!f0) continue;
+    SHAPES[sh] = function (c, e, d, k, t, mv, ph, ak) {
+      const on = R12() && !flashOf(k) && e && !e.dead;
+      /* Telegrafie: Warnhof am Boden während des Anlaufs */
+      if (on && Q.ph === "pre" && !d.fly) { const a = 0.25 + 0.25 * Math.sin(t * 18), red = e.act && e.act.a && (e.act.a.glyph === "!!" || e.act.a.unblockable); const w = Math.max(8, e.w * 0.9); c.fillStyle = red ? "rgba(255,70,50," + (a * (0.6 + Q.pre * 0.6)).toFixed(2) + ")" : "rgba(255,190,90," + (a * (0.5 + Q.pre * 0.5)).toFixed(2) + ")"; c.beginPath(); c.ellipse(0, -0.5, w * (0.7 + Q.pre * 0.5), 1.8, 0, 0, Math.PI * 2); c.fill(); }
+      const r = f0.apply(this, arguments);
+      if (on && EXTRA12[sh]) { c.save(); try { EXTRA12[sh](c, e, d, k, t, mv, ph); } catch (err) { } c.restore(); }
+      return r;
+    };
+  }
   /* Trainingspuppe im Lager */
   SHAPES.dummy = function (c, e, d, k, t) {
     const wob = Math.sin(t * 9) * (e.flash > 0 || e.wob > 0 ? 0.25 : 0.02);
