@@ -3467,3 +3467,47 @@
     }
   });
 })();
+
+/* W11 R45 (Grafik): Leiter-Übergänge (W16 Leiter in kampf.js) – nur Optik. Beim Loslassen der Leiter:
+   Absprung (Sprung) → Holzsplitter und Staub am Holm auf Hand-/Fußhöhe, entgegen der Sprungrichtung; Rolle als seitlicher
+   Absprung → kräftigerer Splitterstoß + Staubfahne; Angriff von der Leiter → kurzer Luftstoß unter den Füßen (Schwebe),
+   während der Schwebe (P.ladHov) ein schwacher warmer Hauch unter den Füßen. Fallenlassen/Abtreten: nur ein Stäubchen.
+   Stufe 0/lean: halbe Teilchenzahl, kein Hauch. Schalter Z.gfx.off.leiterfx. Kein Blau. */
+(function () {
+  "use strict";
+  const Z = window.Z, T = Z.TILE || 16;
+  let was = false, tx = null, lvR = null, hovT = 0;
+  const WOOD = ["#8a6a44", "#6a4a2a", "#a8865a"], DUST = () => [Z.dustCol || "#9a8a78", "#b8a890"];
+  function puff(x, y, n, o) { Z.fx.burst(x, y, n, o); }
+  const bp0 = Z.drawBeforePlayer;
+  Z.drawBeforePlayer = function (c) {
+    if (bp0) bp0.apply(this, arguments);
+    const P = Z.player, FX = Z.fx; if (!P || !FX || !Z.level) return;
+    if (Z.level !== lvR) { lvR = Z.level; was = false; }
+    if (Z.gfx && Z.gfx.off && Z.gfx.off.leiterfx) { was = !!P.climbing; return; }
+    const lo = !!(Z.gq && (Z.gq.lean || Z.gq.level === 0)), m = lo ? 0.5 : 1;
+    if (P.climbing) { was = true; tx = P.ladTx != null ? P.ladTx : Math.floor((P.x + P.w / 2) / T); return; }
+    if (was) {
+      was = false;
+      const lx = (tx != null ? tx : Math.floor((P.x + P.w / 2) / T)) * T + 8, fy = P.y + P.h, dir = P.vx > 20 ? 1 : P.vx < -20 ? -1 : 0;
+      if (P.ladHov > 0) {
+        /* Schwebe-Schlag: Luftstoß nach unten */
+        puff(P.x + P.w / 2, fy, Math.round(6 * m), { col: DUST(), sp: 50, ang: Math.PI / 2, spread: 1.6, life: 0.4, size: 2.6, kind: "smoke" });
+        FX.ring(P.x + P.w / 2, fy + 1, 12, "rgba(255,220,170,.55)", 0.25, 1);
+        hovT = 0.3;
+      } else if (P.rollT > 0) {
+        const d = P.rollDir || P.face || 1;
+        puff(lx, P.y + P.h * 0.45, Math.round(7 * m), { col: WOOD, sp: 110, ang: d > 0 ? Math.PI : 0, spread: 1.2, life: 0.55, size: 1.6, kind: "shard", g: 520 });
+        puff(lx - d * 2, fy - 4, Math.round(6 * m), { col: DUST(), sp: 40, ang: d > 0 ? Math.PI : 0, spread: 1.4, life: 0.5, size: 2.8, kind: "smoke" });
+      } else if (P.vy < -60) {
+        const d = dir || P.face || 1;
+        puff(lx, P.y + 6, Math.round(4 * m), { col: WOOD, sp: 80, ang: d > 0 ? Math.PI * 0.9 : Math.PI * 0.1 - 0.2, spread: 1, life: 0.45, size: 1.3, kind: "shard", g: 480 });
+        puff(lx, fy - 3, Math.round(4 * m), { col: DUST(), sp: 30, ang: Math.PI / 2 + (d > 0 ? 0.6 : -0.6), spread: 1.2, life: 0.45, size: 2.4, kind: "smoke" });
+      } else puff(lx, fy - 2, Math.round(2 * m) || 1, { col: DUST(), sp: 16, life: 0.4, size: 2, kind: "smoke" });
+    }
+    if (hovT > 0 && !lo) {
+      hovT -= 1 / 60;
+      if (P.ladHov > 0 && !P.onGround && Math.random() < 0.6) FX.p({ x: P.x + P.w / 2 + (Math.random() - 0.5) * 8, y: P.y + P.h + 1, vx: (Math.random() - 0.5) * 20, vy: 26, life: 0.3, size: 2.2, col: "rgba(255,226,190,.5)", kind: "smoke" });
+    }
+  };
+})();

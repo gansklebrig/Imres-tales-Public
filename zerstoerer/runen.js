@@ -643,6 +643,7 @@
     const d = MR[k];
     FX.burst(P.x + P.w / 2, P.y + 10, 34, { col: [d.col, "#fff0c0", "#ff8a3a"], sp: 150, up: 60, life: 1, size: 2.4, kind: "glow", add: true });
     FX.ring(P.x + P.w / 2, P.y + 14, 40, d.col, 0.5, 3); FX.slowmo && FX.slowmo(0.5, 0.35); A.play("rune", { vol: 0.8 }); A.play("holy", { vol: 0.4 });
+    if (Z.runenWeihe) Z.runenWeihe(P, d.col, k, true); /* W11 R45: Lichtsäule + Glyphe */
     tutorial(k, first);
   }
   /* Tutorial-Moment in der Welt: kurze Zeile mit der Steuerung über Ezekiel, dazu (falls vorhanden) ein Wegweiser
@@ -681,6 +682,7 @@
     const n = ACT.fam[r.fam] || 0;
     notify((r.ico || "ᚱ") + " <b>" + esc(L(r.n)) + "</b> <small>" + esc(L(f.n)) + (n >= 2 ? " · " + L(["Familienbonus ", "Set bonus "]) + n + ": " + esc(L(n >= 3 ? f.b3 : f.b2)) : "") + (out ? " · " + L(["ersetzt ", "replaces "]) + esc(L(Z.RUNES[out].n)) : "") + "</small>", { prio: 2, ort: "welt", x: P.x + P.w / 2, y: P.y - 30, dauer: 4200, art: "magie" });
     FX.ring(P.x + P.w / 2, P.y + 14, 30, r.col, 0.4, 3); A.play("rune", { vol: 0.6 }); A.play("gem", { vol: 0.4 });
+    if (Z.runenWeihe) Z.runenWeihe(P, r.col, "stein", false); /* W11 R45 */
   }
   function tickFinds(P, dt) {
     for (const f of finds) {
@@ -829,6 +831,18 @@
   };
   /* Spieler: Schwingen beim Gleiten, Schattengestalt, Nebel, Kette zur Öse */
   const dpl0 = Z.drawPlayer;
+  /* W11 R45: Spielerbild auf eine Zwischenleinwand (gleiche Auflösung wie das Bild), für echte Durchsichtigkeit */
+  let GCV = null;
+  function ghost(c, P, t, self, args) {
+    try {
+      const S = (Z.gfx && Z.gfx.scale) || 2, x0 = Math.floor(P.x - 40), y0 = Math.floor(P.y - 56), w = P.w + 80, h = P.h + 80;
+      if (!GCV) GCV = document.createElement("canvas");
+      const W2 = Math.ceil(w * S), H2 = Math.ceil(h * S); if (GCV.width !== W2 || GCV.height !== H2) { GCV.width = W2; GCV.height = H2; }
+      const g = GCV.getContext("2d"); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, W2, H2); g.setTransform(S, 0, 0, S, -x0 * S, -y0 * S);
+      dpl0.call(self, g, P, t);
+      return { cv: GCV, x: x0, y: y0, w, h };
+    } catch (e) { console.error(e); return null; }
+  }
   Z.drawPlayer = function (c, P, t) {
     if (!P || P !== Z.player) return dpl0.apply(this, arguments);
     const x = P.x + P.w / 2;
@@ -853,12 +867,21 @@
       const r = (P.ringHang || P.ringPull).r; c.strokeStyle = "#c8a070"; c.lineWidth = 1.4; c.setLineDash([2, 1.5]); c.beginPath(); c.moveTo(x + P.face * 3, P.y + 6); c.lineTo(r.x * T + 8, r.y * T + 8); c.stroke(); c.setLineDash([]);
     }
     /* W15: Nebelgestalt deutlicher – blasse Nebelwolke (warmes Grau-Rosé, kein Blau), Ezekiel nur schemenhaft darin */
+    if (!(P._mist && (P.rollT > 0 || overGrate(P))) && P._mistH) P._mistH = null; /* W11 R45 */
     if (P._mist && (P.rollT > 0 || overGrate(P))) {
       c.save();
       const cx = x, cy = P.y + P.h * 0.55, pulse = 1 + 0.08 * Math.sin(t * 18);
       const g = c.createRadialGradient(cx, cy, 2, cx, cy, 20 * pulse); g.addColorStop(0, "rgba(240,226,232,.55)"); g.addColorStop(0.6, "rgba(200,184,192,.28)"); g.addColorStop(1, "rgba(160,140,150,0)");
       c.fillStyle = g; c.beginPath(); c.ellipse(cx, cy, 20 * pulse, 15 * pulse, 0, 0, TAU); c.fill();
-      c.globalAlpha = 0.3; const r = dpl0.apply(this, arguments); c.restore();
+      /* W11 R45: sichtbar durchscheinend – zwei verwehende Nachbilder auf der Bahn, Gestalt leicht gestreckt, warmer Saum */
+      const MH = P._mistH || (P._mistH = []); MH.unshift([P.x, P.y]); if (MH.length > 9) MH.length = 9;
+      const lv0 = Z.gq && (Z.gq.lean || Z.gq.level === 0);
+      /* Die Figur setzt globalAlpha intern zurück – darum erst auf eine Zwischenleinwand, dann mit Deckkraft aufs Bild
+         (vorher wirkte das 0,3 aus W15 nie: Ezekiel war im Nebel voll deckend) */
+      const gh = ghost(c, P, t, this, arguments);
+      if (gh) { if (!lv0) for (const [k, al] of [[8, 0.12], [4, 0.2]]) { const h = MH[Math.min(k, MH.length - 1)]; if (!h || (h[0] === P.x && h[1] === P.y)) continue; c.globalAlpha = al; c.drawImage(gh.cv, gh.x + h[0] - P.x, gh.y + h[1] - P.y, gh.w, gh.h); } c.globalAlpha = 0.42; c.drawImage(gh.cv, gh.x, gh.y, gh.w, gh.h); }
+      const r = gh ? undefined : dpl0.apply(this, arguments); c.restore();
+      if (!lv0) { c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = 0.22; c.strokeStyle = "#f4e6ec"; c.lineWidth = 1; c.beginPath(); c.ellipse(cx, cy, 11 * pulse, 14 * pulse, 0, 0, TAU); c.stroke(); c.restore(); }
       c.save(); c.globalAlpha = 0.5; c.fillStyle = "#f0e4ea"; for (let i = 0; i < 3; i++) { const a = t * 6 + i * 2.1; c.beginPath(); c.ellipse(cx + Math.cos(a) * 9, cy + Math.sin(a) * 5, 5, 2.5, 0, 0, TAU); c.fill(); } c.restore();
       return r;
     }
@@ -973,5 +996,61 @@
       out.push(pool.splice(i, 1)[0]);
     }
     return out;
+  };
+})();
+
+/* W11 R45 (Grafik): Runen-Weihe – feierlicher Einsammel-Moment. Lichtsäule in der Runenfarbe (von den Füßen hinauf,
+   schmaler werdend, additiv), Bodenring, aufsteigende Glyphe je Bewegungsrune (Kralle: drei Krallenhiebe, Schatten:
+   Sichel, Schwingen: Flügelpaar, Erde: Berg mit Riss, Kette: zwei Glieder, Nebel: drei Wellen; Runenstein: Raute mit
+   Kerbe) und echtes Licht (Z.addLight). Gemalt hinter Ezekiel (Z.drawBeforePlayer). Dauer 1,7 s (Bewegungsrune) bzw. 1,1 s
+   (Stein). Stufe 0/lean: ohne Verlauf und Funkenregen. Kein Blau. Schalter Z.gfx.off.runenweihe. */
+(function () {
+  "use strict";
+  const Z = window.Z, TAU = Math.PI * 2;
+  const W = [];
+  const lo = () => { const q = Z.gq; return !!(q && (q.lean || q.level === 0)); };
+  Z.runenWeihe = (P, col, kind, big) => {
+    if (Z.gfx && Z.gfx.off && Z.gfx.off.runenweihe) return;
+    W.push({ P, col: col || "#ffd27a", kind, dur: big ? 1.7 : 1.1, t: 0, big, lv: Z.level, t0: performance.now() });
+    if (W.length > 4) W.shift();
+  };
+  function glyph(c, kind, s) {
+    c.beginPath();
+    switch (kind) {
+      case "kralle": for (let i = -1; i <= 1; i++) { c.moveTo(i * 4 - 2, -7); c.quadraticCurveTo(i * 4 + 2, 0, i * 4 - 1, 7); } break;
+      case "schatten": c.arc(0, 0, 7, -1.9, 1.9); c.arc(3, 0, 5.4, 1.75, -1.75, true); c.closePath(); break;
+      case "schwingen": for (const d of [-1, 1]) { c.moveTo(0, 2); c.quadraticCurveTo(d * 5, -7, d * 10, -4); c.lineTo(d * 7, 0); c.lineTo(d * 9, 1); c.lineTo(d * 4, 4); } break;
+      case "erde": c.moveTo(-9, 6); c.lineTo(-2, -6); c.lineTo(2, -1); c.lineTo(5, -4); c.lineTo(10, 6); c.closePath(); c.moveTo(-1, -3); c.lineTo(1, 1); c.lineTo(-1, 3); c.lineTo(0, 6); break;
+      case "kette": c.ellipse(-3.5, -2.5, 4, 2.6, -0.6, 0, TAU); c.moveTo(7.5, 2.5); c.ellipse(3.5, 2.5, 4, 2.6, -0.6, 0, TAU); break;
+      case "nebel": for (let i = -1; i <= 1; i++) { c.moveTo(-8, i * 4.5); c.bezierCurveTo(-4, i * 4.5 - 3, -1, i * 4.5 + 3, 3, i * 4.5); c.quadraticCurveTo(6, i * 4.5 - 2.5, 8, i * 4.5); } break;
+      default: c.moveTo(0, -8); c.lineTo(6, 0); c.lineTo(0, 8); c.lineTo(-6, 0); c.closePath(); c.moveTo(-2, -2); c.lineTo(2, 2); c.moveTo(0, -4); c.lineTo(0, 4);
+    }
+  }
+  const bp0 = Z.drawBeforePlayer;
+  Z.drawBeforePlayer = function (c) {
+    if (bp0) bp0.apply(this, arguments);
+    if (!W.length) return;
+    const now = performance.now(), L = lo();
+    for (let i = W.length - 1; i >= 0; i--) {
+      const w = W[i]; w.t = (now - w.t0) / 1000;
+      if (w.t >= w.dur || w.lv !== Z.level) { W.splice(i, 1); continue; }
+      const P = w.P, u = w.t / w.dur, env = u < 0.12 ? u / 0.12 : u > 0.6 ? Math.max(0, (1 - u) / 0.4) : 1;
+      const x = P.x + P.w / 2, fy = P.y + P.h, H = w.big ? 120 : 80, bw = (w.big ? 13 : 9) * (1 - u * 0.5);
+      c.save(); c.globalCompositeOperation = "lighter";
+      /* Lichtsäule */
+      if (!L) { const g = c.createLinearGradient(0, fy, 0, fy - H); g.addColorStop(0, w.col); g.addColorStop(0.5, w.col); g.addColorStop(1, "rgba(0,0,0,0)"); c.globalAlpha = 0.32 * env; c.fillStyle = g; c.fillRect(x - bw, fy - H, bw * 2, H); c.globalAlpha = 0.5 * env; c.fillStyle = "#fff0d8"; c.fillRect(x - bw * 0.22, fy - H * 0.85, bw * 0.44, H * 0.85); }
+      else { c.globalAlpha = 0.28 * env; c.fillStyle = w.col; c.fillRect(x - bw * 0.5, fy - H * 0.7, bw, H * 0.7); }
+      /* Bodenring */
+      c.globalAlpha = 0.7 * env; c.strokeStyle = w.col; c.lineWidth = 1.4; c.beginPath(); c.ellipse(x, fy - 1, 10 + u * 22, 2.6 + u * 4, 0, 0, TAU); c.stroke();
+      /* Glyphe steigt auf */
+      const gy = fy - 34 - (w.big ? 30 : 18) * Math.min(1, u * 1.6), sc = (w.big ? 1.25 : 0.95) * (0.6 + 0.4 * Math.min(1, u * 3));
+      c.translate(x, gy); c.scale(sc, sc); c.lineCap = "round"; c.lineJoin = "round";
+      glyph(c, w.kind, 1); c.globalAlpha = 0.35 * env; c.strokeStyle = w.col; c.lineWidth = 4; c.stroke();
+      c.globalAlpha = 0.95 * env; c.strokeStyle = "#fff4dc"; c.lineWidth = 1.2; c.stroke();
+      c.restore();
+      /* aufsteigende Funken */
+      if (!L && Math.random() < 0.5 * env && Z.fx) Z.fx.p({ x: x + (Math.random() - 0.5) * bw * 1.6, y: fy - Math.random() * 20, vx: 0, vy: -50 - Math.random() * 40, life: 0.7, size: 1.4, col: Math.random() < 0.5 ? w.col : "#fff0c0", kind: "glow", add: true });
+      if (Z.addLight) Z.addLight(x, fy - 30, w.big ? 90 : 60, w.col, 0.55 * env);
+    }
   };
 })();

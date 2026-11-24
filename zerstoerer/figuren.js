@@ -1179,6 +1179,8 @@
     }
     /* ---- Pose bestimmen und überblenden ---- */
     computePose(TG, P, time, S);
+    /* W11 R45: Schwebe-Schlag von der Leiter (P.ladHov) – Beine angezogen, Fußspitzen gestreckt, statt hängender Sprungbeine */
+    if (P.ladHov > 0 && !P.onGround && !P.climbing && !P.dead) { const k = Math.min(1, P.ladHov / 0.15); TG.fFy = Math.min(TG.fFy, -3.4 * k); TG.fBy = Math.min(TG.fBy, -2.2 * k); TG.fFx += 0.8 * k; TG.toeF = Math.max(TG.toeF || 0, 0.8 * k); TG.toeB = Math.max(TG.toeB || 0, 0.9 * k); }
     const T = TG;
     if (T.key === "wall" && T.handAbsF) {
       /* Wandhände relativ zur Schulter der Zielpose, damit sie mit überblendet werden */
