@@ -722,14 +722,20 @@
       if (!A.ok || !e || !o || o.dot || Z.quiet) return;
       const [v0, pan] = posMix(e.x + e.w / 2, e.y + e.h / 2); if (v0 < 0.05) return;
       const wd = o.it && Z.WEAPONS && Z.WEAPONS[o.it.id], art = wd ? WART[wd.icon] : o.src === "ranged" ? "pfeil" : null;
-      const pl = (l, opt) => shot(l[0][(Math.random() * l[0].length) | 0], Object.assign({ vol: l[1] * v0, rate: l[2], pan, dur: l[3], verb: 0.35, gap: 0.04 }, opt));
+      /* R13: Trefferdichte – bei Dauerfeuer (Wurfmesser, Mehrfachtreffer, 8–12 Treffer/s am Boss) werden die Schichten leiser
+         (Faktor ~1/√(Rate/4), mindestens 0,45), Krit-Glocken höchstens alle 0,3 s voll, die Musik duckt höchstens alle 0,5 s */
+      const now = A.ctx.currentTime, TD = KL.tdichte || (KL.tdichte = { r: 0, t: now, krit: -9, duck: -9 });
+      TD.r = TD.r * Math.exp(-(now - TD.t) / 0.6) + 1; TD.t = now;
+      const df = Math.max(0.45, Math.min(1, 1 / Math.sqrt(Math.max(1, TD.r * (1 / 0.6) / 4))));
+      const pl = (l, opt) => shot(l[0][(Math.random() * l[0].length) | 0], Object.assign({ vol: l[1] * v0 * df, rate: l[2], pan, dur: l[3], verb: 0.35, gap: 0.04 }, opt));
       if (art && WSND[art]) pl(WSND[art], { tag: "wa" });
       if (o.eff) for (const k in o.eff) if (o.eff[k] && ESND[k]) { pl(ESND[k], { tag: "el" + k }); break; }
       if (o.crit) {
-        const t = A.ctx.currentTime + 0.005;
-        tone(e, "glock", ton(0) + 36, t, 0.22, 1.2, 0.5); tone(e, "glock", ton(4) + 36, t + 0.05, 0.12, 1.2, 0.5);
-        shot(KS("fx_im_impactpunch_heavy_00" + [0, 1, 2][(Math.random() * 3) | 0]), { vol: 0.3 * v0, rate: 0.7, pan, verb: 0.3, gap: 0.06, tag: "krit" });
-        M.duck && M.duck(0.18, 0.25);
+        const t = now + 0.005, voll = now - TD.krit >= 0.3;
+        if (voll) { TD.krit = now; tone(e, "glock", ton(0) + 36, t, 0.22 * df, 1.2, 0.5); tone(e, "glock", ton(4) + 36, t + 0.05, 0.12 * df, 1.2, 0.5);
+          shot(KS("fx_im_impactpunch_heavy_00" + [0, 1, 2][(Math.random() * 3) | 0]), { vol: 0.3 * v0 * df, rate: 0.7, pan, verb: 0.3, gap: 0.06, tag: "krit" }); }
+        else tone(e, "glock", ton(4) + 36, t, 0.06, 0.8, 0.4);
+        if (now - TD.duck >= 0.5) { TD.duck = now; M.duck && M.duck(0.18, 0.25); }
       }
       KL.stats.treffer = (KL.stats.treffer || 0) + 1;
     } catch (err) { if (!KL.err4) { KL.err4 = 1; console.error(err); } }
@@ -764,7 +770,7 @@
     } catch (e) { /* still */ }
   };
   /* Prüfstand (test/w12_klang): Klangnetz für einen neuen AudioContext neu aufbauen */
-  KL._reset = () => { TR.wind = TR.zug = null; TR.doors = new Set(); net = null; RM.bus = null; RM.slot = null; RM.cur = RM.pend = null; RM.force = null; W.lv = null; DR.upTo = -1e9; DR.until = 0; KV.lastIdle = 0; };
+  KL._reset = () => { LATER.length = 0; TR.wind = TR.zug = null; TR.doors = new Set(); net = null; RM.bus = null; RM.slot = null; RM.cur = RM.pend = null; RM.force = null; W.lv = null; DR.upTo = -1e9; DR.until = 0; KV.lastIdle = 0; };
   KL._alle = () => { const l = []; for (const g in GR) l.push(...GR[g]); for (const id in RK2) { const d = RK2[id]; if (d.loop) l.push(AM(d.loop[0])); for (const o of d.one || []) for (let i = 1; i <= o[1]; i++) l.push(AM(o[0] + i)); } return l; };
   KL.raumJetzt = () => ({ raum: RM.cur, groesse: KL.raumGroesse || 1, hall: KL.R, loop: RM.slot && RM.slot.name });
   /* Prüfhilfe: Raum erzwingen (ohne Kachelposition) */
@@ -1141,7 +1147,54 @@
     if (!pr || !A.buf[pr.path]) { if (pr && A.buf[pr.path] === undefined) A.load(pr.path); return false; }
     shot(pr.path, { vol, rate: pr.rate, vary: 0, verb: 0.25, delay: delay || 0, gap: 0, tag: tag || "ui", must: true }); return true;
   }
+  /* R13 Hebelrätsel (abenteuer.js, Daten in Z.abEvents, ev.k "raetsel": seq, prog, levers, done) – nur beobachtet über die
+     Aufrufe, die raetselPull/raetselTick ohnehin machen: Hebel ziehen = chain 0,5/1,3 mit x, falsch = rock 0,4/0,7 mit x,
+     Zurückspringen = chain 0,35/0,8 ohne x, gelöst = holy 0,6. Richtig: Klick + Kalimba-Ton, je Fortschritt eine Stufe höher
+     (0-2-4-5-7 der Tonart); falsch: dumpfer Schlag mit kleiner Sekunde; zurück: Ratschen + fallende Töne; gelöst: Riegel klickt,
+     Arpeggio aufwärts und Glocke. */
+  const RAE = { stats: { richtig: 0, falsch: 0, zurueck: 0, geloest: 0 } }; KL.raetsel = RAE;
+  const raeEvs = () => (Z.abEvents || []).filter(e => e && e.k === "raetsel");
+  const raeLever = x => { for (const ev of raeEvs()) { const i = ev.levers.findIndex(l => l.x === x); if (i >= 0) return [ev, i]; } return null; };
+  const RAE_ST = [0, 2, 4, 5, 7, 9];
+  function raeClick(x, y, rate, vol, delay, tag) { wshot(AM("e_riegel_" + (1 + ((Math.random() * 4) | 0))), x, y, { vol, rate, delay: delay || 0, gap: 0, tag, verb: 0.35 }); }
+  function raePull(o) {
+    const f = raeLever(o.x); if (!f) return false;
+    const [ev, i] = f, lv = ev.levers[i], y = lv.y;
+    if (ev.done || ev.resetT > 0) return false;
+    if (ev.seq[ev.prog] === i) { /* richtig: prog wird gleich hochgezählt */
+      RAE.stats.richtig++; const k = ev.prog;
+      raeClick(lv.x, y, 1.35, 0.32, 0, "rae1");
+      tuned("kal", RAE_ST[Math.min(k, 5)], 2, 0.13, 0.04, "rae" + k); tuned("glock", RAE_ST[Math.min(k, 5)], 3, 0.04, 0.06, "raeg" + k);
+    } else raeClick(lv.x, y, 0.9, 0.3, 0, "rae1"); /* falsch: Hebel rastet, dann rock-Hook */
+    return true;
+  }
+  function raeFalsch(o) {
+    const f = raeLever(o.x); if (!f || !(f[0].resetT > 0)) return false;
+    RAE.stats.falsch++; const lv = f[0].levers[f[1]];
+    wshot(KS("fx_im_impactmetal_heavy_000"), lv.x, lv.y, { vol: 0.22, rate: 0.55, gap: 0, tag: "raef", verb: 0.4 });
+    const r0 = (M.prof ? M.prof.root : 50) - 12; /* Grundton und kleine Sekunde darüber, tief – „daneben“ */
+    [0, 1].forEach((st, j) => { const pr = M.probe && M.probe("hornst", ton(0, r0) + st); if (pr && A.buf[pr.path]) shot(pr.path, { vol: 0.08, rate: pr.rate, vary: 0, delay: 0.03 + j * 0.01, gap: 0, verb: 0.3, tag: "raef" + j, must: true }); });
+    return true;
+  }
+  function raeZurueck(o) {
+    if (o.x != null || o.rate !== 0.8) return false;
+    const ev = raeEvs().find(e => !e.done && e.prog === 0 && e.levers.every(l => !l.down) && e.fails > (e._klZ || 0)); if (!ev) return false;
+    ev._klZ = ev.fails; RAE.stats.zurueck++;
+    ev.levers.forEach((l, j) => raeClick(l.x, l.y, 1.1 + j * 0.08, 0.2, j * 0.06, "raez" + j));
+    [4, 2, 0].forEach((d, j) => tuned("kal", d, 1, 0.07, 0.05 + j * 0.09, "raezt" + j));
+    return true;
+  }
+  function raeGeloest() {
+    const ev = raeEvs().find(e => e.done && !e._klDone); if (!ev) return false;
+    ev._klDone = true; RAE.stats.geloest++;
+    const y = ev.y;
+    raeClick(ev.x, y, 0.8, 0.5, 0.12, "raer1"); raeClick(ev.x, y, 1.25, 0.32, 0.3, "raer2");
+    [0, 2, 4, 7].forEach((d, j) => tuned("kal", d, 2, 0.12, 0.42 + j * 0.08, "raea" + j));
+    tuned("glock", 0, 3, 0.1, 0.78, "raeb"); tuned("glock", 4, 3, 0.07, 0.84, "raec");
+    return true;
+  }
   if (A) A.hook = Object.assign(A.hook || {}, {
+    rock: o => (o && o.x != null && o.rate === 0.7 && o.vol === 0.4 ? raeFalsch(o) : false),
     ui: o => {
       const r = o.rate || 1; VS.stats.menue++;
       if (r <= 0.55) return false;                                                                  /* Fehler: dumpfe Klave bleibt */
@@ -1154,6 +1207,8 @@
     anvil: o => { if (Z.ui && Z.ui.modalOpen && !o._m) { A.play("anvil", Object.assign({}, o, { vol: (o.vol || 1) * 0.7, _m: 1, noHook: true })); return true; } return false; },
     /* Rückweg-Tor erlischt (rueckweg.js spielt genau dann „chain“ 0,28/0,9 mit x): Aufschlag des Fallgitters nach 0,56 s, Rückprall nach 0,73 s – wie die Grafik */
     chain: o => {
+      if (o && o.vol === 0.5 && o.rate === 1.3 && o.x != null && raePull(o)) return true;
+      if (o && o.vol === 0.35 && raeZurueck(o)) return true;
       if (o && o.vol === 0.28 && o.rate === 0.9 && o.x != null && Z.rueckweg) { VS.stats.tor++; const y = Z.player ? Z.player.y : 0;
         wshot(KS("fx_im_impactmetal_heavy_000"), o.x, y, { vol: 0.42, rate: 0.75, delay: 0.56, gap: 0, tag: "rwa", verb: 0.5 });
         wshot(KS("fx_im_impactmetal_heavy_003"), o.x, y, { vol: 0.16, rate: 1.1, delay: 0.73, gap: 0, tag: "rwr", verb: 0.4 });
@@ -1170,6 +1225,7 @@
   const ER = { n: -1, stats: { fanfare: 0, kat: {} } };
   KL.erfolge = ER;
   function achKat(a) {
+    if (["tempo", "technik", "nohit", "erkundung", "bosse", "sammeln", "kurios", "geschichte"].includes(a.kat)) return a.kat; /* abenteuer.js enrich(): a.kat */
     const k = a.kat || a.cat || a.k; if (k) { const m = String(k).toLowerCase(); for (const c of ["tempo", "technik", "nohit", "erkundung", "bosse"]) if (m.startsWith(c.slice(0, 4))) return c; if (/kampf|tech/.test(m)) return "technik"; if (/hit|treffer/.test(m)) return "nohit"; if (/boss/.test(m)) return "bosse"; if (/erkund|entdeck/.test(m)) return "erkundung"; }
     const txt = (a.id + " " + JSON.stringify(a.n || "") + " " + JSON.stringify(a.d || "")).toLowerCase();
     if (/ohne (schaden|treffer)|no.?hit|without (taking )?(damage|a hit)/.test(txt)) return "nohit";
@@ -1180,6 +1236,8 @@
     return "sonst";
   }
   function achGross(a) {
+    if (a.selten === true || (a.siegel && a.siegel.stufe === "blut")) return true; /* abenteuer.js: selten / Siegel-Stufe „blut“ */
+    if (a.selten === false && a.siegel) return false;
     if (a.selten || a.schwer || a.gross || a.rare || a.hard) return true;
     if (a.r && a.r.hero) return true;
     const txt = (a.id + " " + JSON.stringify(a.n || "") + " " + JSON.stringify(a.d || "")).toLowerCase();
@@ -1187,6 +1245,7 @@
   }
   if (A) A.hook = Object.assign(A.hook || {}, {
     holy: o => {
+      if (o && o.vol === 0.6 && raeGeloest()) return true;
       const m = Z.meta && Z.meta.ach; if (!m || !Z.ACH) return false;
       const ids = Object.keys(m); if (ER.n < 0) { ER.n = ids.length; return false; }
       if (ids.length <= ER.n) { ER.n = ids.length; return false; }
@@ -1194,7 +1253,9 @@
       const newest = ids.reduce((a, b) => (m[b] > m[a] ? b : a)), a = Z.ACH.find(x => x.id === newest);
       if (!a || !M.stinger || !M.out) return false;
       const kat = achKat(a), gross = achGross(a); ER.stats.fanfare++; ER.stats.kat[kat] = (ER.stats.kat[kat] || 0) + 1; ER.last = { id: a.id, kat, gross };
-      M.stinger("erfolg", { kat, gross }); return true;
+      const now = A.ctx.currentTime, kurz = !gross && ER.lastT != null && now - ER.lastT < 5 && now >= ER.lastT; /* R13: Häufung → Nachschlag */
+      ER.serie = kurz ? (ER.serie || 0) + 1 : 0; ER.lastT = now; if (kurz) ER.stats.kurz = (ER.stats.kurz || 0) + 1;
+      M.stinger("erfolg", { kat, gross, stufe: a.siegel && a.siegel.stufe, titel: !!(a.r && a.r.titel), kurz, n: ER.serie }); ER.last.stufe = a.siegel && a.siegel.stufe; ER.last.titel = !!(a.r && a.r.titel); ER.last.kurz = kurz; return true;
     }
   });
   function hookEnde() {
@@ -1217,8 +1278,13 @@
     TR.doors = new Set(); TR.near = null; TR.zugF = 0;
     RM.slot = null; RM.cur = RM.pend = null; RM.pendT = 0; RM.timers = []; RM.sizes = {}; RM.force = null; RM.cell = null; DR.upTo = -1e9; DR.until = 0;
   }
+  /* R13: Nachläufer (Trauer nach dem Tod, Rückkehr nach dem Wächtersieg) auf der Audio-Uhr statt setTimeout –
+     gleicher Abstand zum Stinger auch bei ruckelndem Bild, im Prüfstand und während Fenstern (läuft vor der Pausenprüfung) */
+  const LATER = [];
+  function later(s, fn) { LATER.push([A.ctx.currentTime + s, fn]); }
   KL.tick = (dt) => {
     if (!A.ok || !M.out) return;
+    if (LATER.length) { const now = A.ctx.currentTime; for (let i = LATER.length - 1; i >= 0; i--) if (now >= LATER[i][0]) { const f = LATER.splice(i, 1)[0][1]; try { f(); } catch (_) {} } }
     const lv = Z.level; if (!lv) return;
     if (lv !== W.lv) onLevel(lv);
     if (Z.paused) return;
@@ -1238,12 +1304,12 @@
       M.stinger("sieg");
       /* Wächter mitten im Gebiet besiegt: nach dem Schlussakkord zurück zur Musik des Gebiets */
       const l0 = lv;
-      if (!lv.arena && !lv.hub && !lv.passage) setTimeout(() => { if (Z.level === l0 && M.prof && M.prof.boss) M.set(l0.biome); }, 4500);
+      if (!lv.arena && !lv.hub && !lv.passage) later(4.5, () => { if (Z.level === l0 && M.prof && M.prof.boss) M.set(l0.biome); });
     }
     W.won = !!Z.bossDefeated;
     /* Tod */
     const dead = !!(P && P.dead);
-    if (dead && !W.dead) { M.stinger("tod"); const lv0 = lv; setTimeout(() => { if (Z.player && Z.player.dead && Z.level === lv0 && M.set) { M.set("trauer"); ER.trauer = (ER.trauer || 0) + 1; } }, 3200); }
+    if (dead && !W.dead) { M.stinger("tod"); const lv0 = lv; later(3.2, () => { if (Z.player && Z.player.dead && Z.level === lv0 && M.set) { M.set("trauer"); ER.trauer = (ER.trauer || 0) + 1; } }); }
     W.dead = dead;
     /* Killketten: Gegner, die kurz nacheinander fallen – Intensität steigt, Stinger nur auf den Stufen */
     const k = (Z.stats && Z.stats.kills) || 0;

@@ -328,13 +328,18 @@
     const key = name + (o.tag || "");
     if (A.lastPlay[key] && now - A.lastPlay[key] < (o.gap != null ? o.gap : 0.035)) return; /* nicht zu oft dasselbe */
     A.lastPlay[key] = now;
+    /* R13: Häufung desselben Geräuschs (z. B. 16 Splitter einer Nova, Glas im Sekundentakt): ab dem 4. Mal binnen 0,4 s
+       leiser, ab dem 9. still – der erste Schlag bleibt voll, die Kaskade wird zum Rieseln statt zum Dauerfeuer */
+    const hd = A.dense || (A.dense = {}), h = hd[key] && now - hd[key].t < 0.4 ? hd[key] : (hd[key] = { t: now, n: 0 });
+    h.n++; const dense = h.n <= 3 ? 1 : h.n <= 8 ? 0.55 : 0;
+    if (!dense && !o.must) return;
     const path = list[Math.floor(Math.random() * list.length)];
     const b = A.buf[path];
     if (!b) { if (b === undefined) A.load(path); return; }
     /* Handheld: höchstens 10 (minimal 7) Effekte gleichzeitig – der Audio-Thread der kleinen ARM-Kerne kommt sonst nicht nach */
     const q = Z.gq || {};
     if (q.lean && A.live >= (q.mini ? 7 : 10) && !o.must) return;
-    let vol = o.vol == null ? 1 : o.vol, pan = o.pan || 0;
+    let vol = (o.vol == null ? 1 : o.vol) * (o.must ? 1 : dense), pan = o.pan || 0;
     if (o.x != null && Z.cam) {
       const dx = o.x - (Z.cam.x + Z.cam.w / 2), dy = (o.y || 0) - (Z.cam.y + Z.cam.h / 2);
       pan = U.clamp(dx / (Z.cam.w * 0.6), -0.9, 0.9);

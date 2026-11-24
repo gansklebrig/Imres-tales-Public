@@ -374,6 +374,36 @@
     }
   }
 
+  /* W11 R30: Lager auf Stufe 0 (ohne Parallaxe-Ebenen): statt flacher Wandfarbe EIN vorgebackenes Nachtbild in halber
+     Auflösung – Himmel, Sterne, Mond, Hügel, Burgsilhouette mit Fenstern. Ersetzt die Vollbildfüllung durch eine
+     Vollbildkopie (gleiche Größenordnung), wird nur bei Größenwechsel neu gebacken. Schalter Z.gfx.off.lagerhimmel. */
+  function hubBack(c, cam) {
+    const w = Math.max(64, Math.ceil(cam.w / 2)), h = Math.max(48, Math.ceil(cam.h / 2));
+    let hb = G.hubBack;
+    if (!hb || hb.width !== w || hb.height !== h) {
+      hb = G.hubBack = document.createElement("canvas"); hb.width = w; hb.height = h; const g = hb.getContext("2d"), R = Z.Rng(7771);
+      const sk = g.createLinearGradient(0, 0, 0, h); sk.addColorStop(0, "#1c1222"); sk.addColorStop(0.55, "#3a2236"); sk.addColorStop(0.8, "#4a2a34"); sk.addColorStop(1, "#2a1a1e"); g.fillStyle = sk; g.fillRect(0, 0, w, h);
+      for (let i = 0; i < 55; i++) { const x = R() * w, y = R() * h * 0.55, a = 0.3 + R() * 0.6, sz = R() < 0.1 ? 1 : 0.55; g.fillStyle = "rgba(255,240,225," + a.toFixed(2) + ")"; g.fillRect(x, y, sz, sz); }
+      const mx = w * 0.62, my = h * 0.16, mr = Math.max(6, h * 0.05);
+      const halo = g.createRadialGradient(mx, my, mr, mx, my, mr * 5); halo.addColorStop(0, "rgba(240,220,230,.22)"); halo.addColorStop(1, "rgba(240,220,230,0)"); g.fillStyle = halo; g.fillRect(mx - mr * 5, my - mr * 5, mr * 10, mr * 10);
+      g.fillStyle = "#e8dcd8"; g.beginPath(); g.arc(mx, my, mr, 0, TAU); g.fill(); g.fillStyle = "rgba(160,140,150,.35)"; for (const [dx, dy, r] of [[-0.3, -0.2, 0.25], [0.25, 0.1, 0.18], [-0.05, 0.35, 0.14]]) { g.beginPath(); g.arc(mx + dx * mr, my + dy * mr, r * mr, 0, TAU); g.fill(); }
+      /* Hügel */
+      const hill = (yb, amp, col, seed) => { g.fillStyle = col; g.beginPath(); g.moveTo(0, h); for (let x = 0; x <= w; x += 4) g.lineTo(x, yb - Math.sin(x * 0.012 + seed) * amp - Math.sin(x * 0.031 + seed * 2) * amp * 0.4); g.lineTo(w, h); g.fill(); };
+      hill(h * 0.68, h * 0.05, "#2e1c2a", 1.3);
+      /* Burg auf dem Hügel: Türme mit Spitzdächern, warme Fenster */
+      const cx = w * 0.72, by = h * 0.66; g.fillStyle = "#1e1420";
+      g.fillRect(cx - w * 0.09, by - h * 0.12, w * 0.18, h * 0.12);
+      for (const [dx, tw, th] of [[-0.1, 0.03, 0.26], [-0.04, 0.025, 0.2], [0.03, 0.03, 0.32], [0.09, 0.025, 0.22]]) { const tx = cx + dx * w, tW = tw * w, tH = th * h; g.fillRect(tx - tW / 2, by - tH, tW, tH); g.beginPath(); g.moveTo(tx - tW * 0.7, by - tH); g.lineTo(tx, by - tH - tW * 1.6); g.lineTo(tx + tW * 0.7, by - tH); g.fill();
+        for (let k = 0; k < 2; k++) if (R() < 0.8) { g.fillStyle = "rgba(255,190,110,.75)"; g.fillRect(tx - 0.8, by - tH * (0.4 + k * 0.25), 1.6, 2.2); g.fillStyle = "#1e1420"; } }
+      for (let i = 0; i < 6; i++) if (R() < 0.7) { g.fillStyle = "rgba(255,190,110,.6)"; g.fillRect(cx - w * 0.08 + R() * w * 0.16, by - h * 0.08 + R() * h * 0.05, 1.4, 1.8); }
+      hill(h * 0.78, h * 0.04, "#22141e", 4.1);
+      /* Baumreihe als Saum */
+      g.fillStyle = "#190f16"; for (let x = 0; x < w; x += 3 + R() * 4) { const th = h * (0.04 + R() * 0.05); g.beginPath(); g.moveTo(x - th * 0.35, h * 0.84); g.lineTo(x, h * 0.84 - th); g.lineTo(x + th * 0.35, h * 0.84); g.fill(); }
+      g.fillRect(0, h * 0.84, w, h * 0.16);
+    }
+    c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.imageSmoothingEnabled = true; c.drawImage(hb, 0, 0, c.canvas.width, c.canvas.height); c.restore();
+  }
+
   /* ======================= KACHELN ======================= */
   /* Alles hier wird einmal je Chunk (24×14 Kacheln) in eine Leinwand gemalt und zwischengespeichert –
      darum darf es aufwendig sein. Muster liegen in Weltkoordinaten, damit Kacheln und Chunks nahtlos passen. */
@@ -2370,7 +2400,7 @@
        „multiply“ mit dem Farbfleck: Ergebnis = Karte × mix(weiß, Lichtfarbe, Deckkraft). So färbt eine Fackel auch
        die hell erleuchtete Umgebung des Spielers warm, eine Rune violett, ohne sie dunkel zu machen. */
     if (nT && !G.off.tint) {
-      const Tn = subCanvas("lightT", LW, LH), t2 = Tn.getContext("2d");
+      const Tn = subCanvas("lightTn", LW, LH) /* R30: eigener Schlüssel – G.lightT ist die Lichtzeit (Zahl); vorher wurde die Tönungskarte jedes Bild neu angelegt */, t2 = Tn.getContext("2d");
       t2.globalCompositeOperation = "source-over"; t2.globalAlpha = 1; t2.fillStyle = "#fff"; t2.fillRect(0, 0, AW, AH);
       t2.globalCompositeOperation = "multiply";
       for (let i = 0; i < LQn; i++) {
@@ -2522,7 +2552,7 @@
     const pf = Z.prof, tm = pf ? () => performance.now() : null; let t0 = pf ? tm() : 0;
     const mark = k => { if (pf) { c.getImageData(0, 0, 1, 1); const n = tm(); pf[k] = (pf[k] || 0) + n - t0; t0 = n; } };
     const lay = !Z.gq || Z.gq.layers !== false;
-    if (Z.noLayers) {} else if (lay && (B.open || lv.out || lv.hub || lv.arena)) { drawLayers(c, cam); if (!Z.gq || Z.gq.critters !== false) { updCritters(dt, cam); drawCritters(c, cam); } } else { c.fillStyle = B.wall; c.fillRect(cam.x - 2, cam.y - 2, cam.w + 4, cam.h + 4); } mark("layers");
+    if (Z.noLayers) {} else if (!lay && lv.hub && !(G.off && G.off.lagerhimmel)) { hubBack(c, cam); } else if (lay && (B.open || lv.out || lv.hub || lv.arena)) { drawLayers(c, cam); if (!Z.gq || Z.gq.critters !== false) { updCritters(dt, cam); drawCritters(c, cam); } } else { c.fillStyle = B.wall; c.fillRect(cam.x - 2, cam.y - 2, cam.w + 4, cam.h + 4); } mark("layers");
     /* Riesen im Hintergrund (Demogorgon im Herz des Sees): hinter Boden und Plattformen */
     Z.drawBehindTiles && Z.drawBehindTiles(c, cam, t);
     drawTiles(c, cam); mark("tiles");

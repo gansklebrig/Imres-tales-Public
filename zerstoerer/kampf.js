@@ -623,14 +623,15 @@
       else { P.vy = -330; P.y -= 2; }
     }
     if (liquid && P.y + P.h > Math.floor((P.y + P.h - 3) / T) * T + 6) {
-      if (liquid === 5) { /* W9 10. Runde: binnen 1 s nach einem Rücksetzen kein zweiter Lava-Schaden (Rücksetzen bleibt) */ if (!(P._hzRT != null && (P.time || 0) - P._hzRT >= 0 && (P.time || 0) - P._hzRT < 1)) Z.hurtPlayer(Math.round(P.hpMax * 0.18), { x: P.x, unblockable: true, hazard: true, force: true }); addStatus(P, "burn", 2, true); }
+      if (liquid === 5) { /* W9 10. Runde: binnen 1 s nach einem Rücksetzen kein zweiter Lava-Schaden (Rücksetzen bleibt) */ P._hzSkip = (P._hzRT != null && (P.time || 0) - P._hzRT >= 0 && (P.time || 0) - P._hzRT < 1); if (!P._hzSkip) Z.hurtPlayer(Math.round(P.hpMax * 0.18), { x: P.x, unblockable: true, hazard: true, force: true }); addStatus(P, "burn", 2, true); }
       else { A.play("splash", { x: P.x, y: P.y }); FX.burst(P.x + P.w / 2, P.y + P.h, 14, { col: ["#4a6a5a", "#8aa090"], sp: 90, ang: -Math.PI / 2, spread: 1.2, life: 0.5, g: 400, size: 2 }); /* W9 6. Runde (Abuse): die kostenlose Flutkammer (W13 R4) war ein Fluchtknopf – reinspringen = Teleport an die sichere Stelle + 1 s
            unverwundbar, beliebig oft, auch mitten im Kampf. Kostenlos jetzt nur ohne Kampf in der Nähe (kein wacher Gegner < 260 px, kein Boss)
            und höchstens alle 8 s; dann nur kurz unverwundbar. Sonst wie normales Wasser (8 %). */
         let frei = false;
         if (Z.flutSicher && Z.flutSicher(P)) { const now = P.time || 0, kampf = (Z.boss && !Z.bossDefeated) || Z.enemies.some(e => !e.dead && e.aware && Math.abs(e.x - P.x) < 260 && Math.abs(e.y - P.y) < 200); frei = !kampf && !(P._flutT != null && now - P._flutT < 8 && now >= P._flutT); if (frei) P._flutT = now; }
-        if (!frei && !(P._hzRT != null && (P.time || 0) - P._hzRT >= 0 && (P.time || 0) - P._hzRT < 1)) Z.hurtPlayer(Math.round(P.hpMax * 0.08), { x: P.x, unblockable: true, hazard: true, force: true }); else P._flutFrei = true; }
-      if (P.lastSafe) { P.x = P.lastSafe.x; P.y = P.lastSafe.y; P.h = C.H; P.crouch = false; P.vx = 0; P.vy = 0; P.iframe = Math.max(P.iframe, P._flutFrei ? 0.3 : 1); P._flutFrei = false; P._hzRT = P.time || 0; }
+        /* W9 11. Runde: übersprungener Schaden (< 1 s nach Rücksetzen) gibt keinen neuen Schutz und verlängert das Fenster nicht – sonst an Dauerwasser-/Lavakanten 100 % geschützt */
+        if (frei) { P._flutFrei = true; P._hzSkip = false; } else { P._hzSkip = (P._hzRT != null && (P.time || 0) - P._hzRT >= 0 && (P.time || 0) - P._hzRT < 1); if (!P._hzSkip) Z.hurtPlayer(Math.round(P.hpMax * 0.08), { x: P.x, unblockable: true, hazard: true, force: true }); } }
+      if (P.lastSafe) { P.x = P.lastSafe.x; P.y = P.lastSafe.y; P.h = C.H; P.crouch = false; P.vx = 0; P.vy = 0; if (!P._hzSkip) { P.iframe = Math.max(P.iframe, P._flutFrei ? 0.3 : liquid === 6 ? 0.6 : 1); /* Wasser kostet nur 8 %: kürzerer Schutz, sonst billiger Dauerschutz an der Kante */ P._hzRT = P.time || 0; } P._flutFrei = false; P._hzSkip = false; }
     }
   }
   function pushOutOfEnemies(P) {

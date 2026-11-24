@@ -1419,3 +1419,100 @@
     } catch (e) { console.error(e); }
   };
 })();
+
+/* Ezekiel – The Destroyer · Hebelrätsel, gemalt (W11 Runde 30; Logik abenteuer.js, Haken Z.raetselGemalt)
+   Steintafel mit Fase, Rissen und eingemeißelten Zeichen (Kerbe dunkel, Lichtkante unten rechts); gelöste Zeichen
+   glühen in ihrer Farbe, Fortschritt als Messingnieten. Hebel: Grundplatte mit Nieten und Schlitz, Holzschaft mit
+   Eisenknauf, darüber eine Messing-Plakette mit dem Zeichen; richtiger Hebel leuchtet in seiner Farbe, falscher
+   blitzt kurz rot. Gelöst: der Riegel unter der Tafel springt auf (Bolzen gleitet, Funken), warmes Leuchten.
+   Die Reihenfolge-Beschriftung bleibt wie in der schlichten Fassung. Lean: ohne Leuchten/Funken. Schalter Z.gfx.off.raetsel. */
+(function () {
+  const Z = window.Z, G = Z.gfx, TAU = Math.PI * 2; if (!G) return;
+  const lean = () => !!(Z.gq && (Z.gq.lean || Z.gq.mini));
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const ST = new WeakMap();
+  function shape(c, k, x, y, r) {
+    c.beginPath();
+    if (k === 0) { c.moveTo(x, y - r); c.lineTo(x + r * 0.8, y); c.lineTo(x, y + r); c.lineTo(x - r * 0.8, y); c.closePath(); }
+    else if (k === 1) { c.moveTo(x, y - r); c.lineTo(x + r, y + r * 0.8); c.lineTo(x - r, y + r * 0.8); c.closePath(); }
+    else if (k === 2) c.arc(x, y, r * 0.85, 0, TAU);
+    else { c.rect(x - r * 0.3, y - r, r * 0.6, r * 2); c.rect(x - r, y - r * 0.3, r * 2, r * 0.6); }
+  }
+  /* eingemeißelt: Lichtkante versetzt, dunkle Kerbe, optional leuchtende Füllung */
+  function carve(c, k, x, y, r, lit, col) {
+    c.fillStyle = "rgba(255,240,220,.22)"; shape(c, k, x + 0.7, y + 0.7, r); c.fill();
+    c.fillStyle = "#1e181c"; shape(c, k, x, y, r); c.fill();
+    if (lit) { c.fillStyle = col; shape(c, k, x, y, r * 0.78); c.fill(); if (!lean()) { c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = 0.5; c.fillStyle = col; shape(c, k, x, y, r * 1.25); c.fill(); c.restore(); } }
+  }
+  function tablet(c, ev, t, RZ, s) {
+    const n = ev.levers.length, w = 16 + n * 15, h = 32, x0 = ev.x - w / 2, y0 = ev.y - 44;
+    /* Pfosten */
+    const pg = c.createLinearGradient(ev.x - 4, 0, ev.x + 4, 0); pg.addColorStop(0, "#5a5056"); pg.addColorStop(1, "#2e282c"); c.fillStyle = pg; c.fillRect(ev.x - 4, y0 + h, 8, ev.y - (y0 + h));
+    c.fillStyle = "#2a2226"; c.fillRect(ev.x - 7, ev.y - 3, 14, 3);
+    /* Platte mit Fase */
+    c.fillStyle = "#2a2428"; c.fillRect(x0 - 1, y0 - 1, w + 2, h + 2);
+    const g = c.createLinearGradient(0, y0, 0, y0 + h); g.addColorStop(0, "#6e6468"); g.addColorStop(1, "#4a4246"); c.fillStyle = g; c.fillRect(x0, y0, w, h);
+    c.fillStyle = "#574e52"; c.fillRect(x0 + 2.5, y0 + 2.5, w - 5, h - 5);
+    c.fillStyle = "rgba(255,240,225,.16)"; c.fillRect(x0, y0, w, 1); c.fillRect(x0, y0, 1, h);
+    c.fillStyle = "rgba(0,0,0,.3)"; c.fillRect(x0, y0 + h - 1, w, 1); c.fillRect(x0 + w - 1, y0, 1, h);
+    /* Riss */
+    c.strokeStyle = "rgba(20,14,16,.6)"; c.lineWidth = 0.7; c.beginPath(); c.moveTo(x0 + w - 7, y0 + 2.5); c.lineTo(x0 + w - 10, y0 + 9); c.lineTo(x0 + w - 8, y0 + 13); c.stroke();
+    /* Zeichen in Reihenfolge, Messingnieten darunter */
+    ev.seq.forEach((li, k) => { const sk = ev.levers[li].sym, cx = x0 + 15.5 + k * 15 - 7, lit = ev.done || k < ev.prog;
+      carve(c, sk, cx, y0 + 12, 5, lit, RZ[sk].col);
+      c.fillStyle = lit ? "#ffd27a" : "#2a2024"; c.beginPath(); c.arc(cx, y0 + 24, 1.7, 0, TAU); c.fill(); if (lit) { c.fillStyle = "rgba(255,250,220,.8)"; c.fillRect(cx - 0.8, y0 + 23.2, 0.8, 0.8); } });
+    /* Riegel: Bolzen unter der Tafel, springt nach dem Lösen auf */
+    const u = ev.done ? Math.min(1, (performance.now() / 1000 - (s.doneT || 0)) / 0.45) : 0, e = u < 1 ? 1 - Math.pow(1 - u, 3) : 1;
+    const by = y0 + h + 3, bx = ev.x + 6 + e * 8;
+    c.fillStyle = "#3a3034"; c.fillRect(ev.x - 10, by - 2.5, 20, 5);
+    c.fillStyle = "#8a6430"; c.fillRect(ev.x - 8 + e * 8, by - 1.2, 12, 2.4); c.fillStyle = "#e8c070"; c.fillRect(ev.x - 8 + e * 8, by - 1.2, 12, 0.7);
+    c.fillStyle = "#b08038"; c.beginPath(); c.arc(bx, by, 2, 0, TAU); c.fill();
+    if (ev.done && !lean()) { c.save(); c.globalCompositeOperation = "lighter"; const gg = c.createRadialGradient(ev.x, y0 + h / 2, 2, ev.x, y0 + h / 2, w * 0.8); gg.addColorStop(0, "rgba(255,200,110," + (0.25 + 0.1 * Math.sin(t * 3)).toFixed(2) + ")"); gg.addColorStop(1, "rgba(255,200,110,0)"); c.fillStyle = gg; c.fillRect(ev.x - w, y0 - w * 0.4, w * 2, h + w * 0.8); c.restore(); }
+    return y0;
+  }
+  function lever(c, ev, i, t, RZ, s) {
+    const l = ev.levers[i], x = l.x, y = l.y, idx = ev.seq.indexOf(i), ok = ev.done || (idx >= 0 && idx < ev.prog && l.down), wrong = l.down && !ok && ev.resetT > 0;
+    /* Grundplatte mit Schlitz und Nieten */
+    c.fillStyle = "#2a2226"; c.fillRect(x - 8, y - 6, 16, 6); c.fillStyle = "#4a4044"; c.fillRect(x - 7, y - 5.5, 14, 4.5);
+    c.fillStyle = "#141012"; c.fillRect(x - 5, y - 4, 10, 1.4);
+    c.fillStyle = "#7a6e66"; for (const dx of [-5.5, 5.5]) { c.beginPath(); c.arc(x + dx, y - 2, 0.9, 0, TAU); c.fill(); }
+    /* Schaft mit Knauf */
+    c.save(); c.translate(x, y - 4); c.rotate(-0.75 + l.a * 1.5);
+    c.fillStyle = "#5a3a22"; c.fillRect(-1.3, -14, 2.6, 14); c.fillStyle = "#8a5e3a"; c.fillRect(-1.3, -14, 0.9, 14);
+    c.fillStyle = "#2e2a2e"; c.beginPath(); c.arc(0, -15, 2.6, 0, TAU); c.fill(); c.fillStyle = "#8a8288"; c.beginPath(); c.arc(-0.8, -15.8, 0.9, 0, TAU); c.fill();
+    c.restore();
+    /* Plakette mit Zeichen */
+    const py = y - 26, col = RZ[l.sym].col;
+    c.fillStyle = "#5a3e18"; c.fillRect(x - 6.5, py - 6.5, 13, 13);
+    const pg = c.createLinearGradient(0, py - 6, 0, py + 6); pg.addColorStop(0, "#e8c070"); pg.addColorStop(1, "#8a5e20"); c.fillStyle = pg; c.fillRect(x - 6, py - 6, 12, 12);
+    c.fillStyle = "#6a4a1a"; c.fillRect(x - 6, py + 5, 12, 1); c.fillStyle = "#fff0c0"; c.fillRect(x - 6, py - 6, 12, 0.7);
+    c.fillStyle = "#3a2410"; shape(c, l.sym, x, py, 3.6); c.fill();
+    c.fillStyle = ok || ev.done ? col : "rgba(60,36,14,.0)"; if (ok || ev.done) { shape(c, l.sym, x, py, 2.8); c.fill(); }
+    if (!lean() && (ok || wrong)) { c.save(); c.globalCompositeOperation = "lighter"; const gc = wrong ? "255,70,50" : col === "#efe6d0" ? "255,240,210" : null; const g = c.createRadialGradient(x, py, 1, x, py, 16); const rgb = gc || hexRgb(col); g.addColorStop(0, "rgba(" + rgb + "," + (wrong ? 0.6 : 0.45) + ")"); g.addColorStop(1, "rgba(" + rgb + ",0)"); c.fillStyle = g; c.fillRect(x - 16, py - 16, 32, 32); c.restore(); }
+  }
+  function hexRgb(h) { const n = parseInt(h.slice(1), 16); return ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255); }
+  Z.raetselGemalt = function (c, ev, t, RZ) {
+    if (G.off && G.off.raetsel) return false;
+    try {
+      let s = ST.get(ev); if (!s) { s = { done: ev.done, doneT: ev.done ? -9 : 0, prog: ev.prog }; ST.set(ev, s); }
+      if (ev.done && !s.done) { s.doneT = performance.now() / 1000; if (!lean() && Z.fx && Z.fx.burst) Z.fx.burst(ev.x + 8, ev.y - 9, 14, { col: ["#ffd27a", "#fff2c0"], sp: 90, life: 0.5, size: 1.6, kind: "glow", add: true }); }
+      if (ev.prog > s.prog && !lean() && Z.fx && Z.fx.burst) { const li = ev.seq[ev.prog - 1], l = ev.levers[li]; if (l) Z.fx.burst(l.x, l.y - 26, 8, { col: [RZ[l.sym].col, "#fff2c0"], sp: 50, life: 0.45, size: 1.4, kind: "glow", add: true }); }
+      s.done = ev.done; s.prog = ev.prog;
+      const cam = Z.cam, vis = (x, y) => !(x < cam.x - 60 || x > cam.x + cam.w + 60 || y < cam.y - 60 || y > cam.y + cam.h + 60);
+      if (vis(ev.x, ev.y)) {
+        const y0 = tablet(c, ev, t, RZ, s);
+        /* Reihenfolge-Beschriftung wie in der schlichten Fassung */
+        const P = Z.player, L = v => Z.L(v), nah = (x, y, dx, dy) => P && Math.abs(P.x + P.w / 2 - x) < dx && Math.abs(P.y + P.h - y) < dy;
+        if (P && !ev.done && (nah(ev.x, ev.y, 70, 50) || ev.levers.some(l => nah(l.x, l.y, 90, 60))) && Z.ui && Z.ui.worldLabel)
+          Z.ui.worldLabel("raetsel" + Math.round(ev.x), { x: ev.x, y: y0 - 10, html: esc(L(["Reihenfolge: ", "Order: "])) + ev.seq.map(li => '<b style="color:' + RZ[ev.levers[li].sym].col + '">' + RZ[ev.levers[li].sym].g + "</b>").join(" → "), jetzt: true });
+      }
+      ev.levers.forEach((l, i) => { if (vis(l.x, l.y)) lever(c, ev, i, t, RZ, s); });
+      return true;
+    } catch (e) { console.error(e); return false; }
+  };
+  if (G.lightGather) G.lightGather.push(function (add) {
+    if (G.off && G.off.raetsel) return;
+    for (const ev of Z.abEvents || []) { if (ev.k !== "raetsel") continue; if (ev.done) add(ev.x, ev.y - 30, 50, "#ffc870", 0.4, 0); else add(ev.x, ev.y - 30, 34, "#ffd8a0", 0.18, 0);
+      ev.levers.forEach((l, i) => { const k = ev.seq.indexOf(i); if (ev.done || (k >= 0 && k < ev.prog && l.down)) add(l.x, l.y - 26, 26, "#ffd27a", 0.3, 0); }); }
+  });
+})();

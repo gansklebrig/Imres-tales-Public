@@ -629,7 +629,7 @@
     M.combat = !!(prof.boss && Z.boss && !Z.bossDefeated); M.calmT = 0; M.rage = 0;
     if (!sameLevel) {
       M.C = M.combat ? 1 : 0; M.intensity = Math.min(M.intensity, 0.2); M.heat = 0; M.pushes.length = 0; M.leit = null;
-      M.tier = M.want = M.combat ? 4 : 0; M.hold = [0, 0, 0, 0];
+      M.tier = M.want = M.combat ? 4 : 0; M.hold = [0, 0, 0, 0]; M.tierName = TIER_NAME[M.tier]; /* R13: Name mitziehen (blieb sonst auf „kampf“ stehen) */
     }
     if (M.pad) M.pad.cur = null;
     if (M.pad) {
@@ -1280,8 +1280,11 @@
     erfolg: ({ p, t: t0, B, o }) => {
       const t = grid(1), r = p.root + 12, k = o.kat || "sonst", gr = !!o.gross, b = 0.11;
       const up = [0, 2, 4, 7].map(d => deg(p.scale, d, r)), top = deg(p.scale, 7, r);
-      const ins = { tempo: "trpst", technik: "hornst", nohit: "cel", erkundung: "harfe", bosse: "blech" }[k] || "trpst";
-      const stp = { tempo: 0.07, technik: 0.11, nohit: 0.1, erkundung: 0.06, bosse: 0.14 }[k] || 0.1;
+      const ins = { tempo: "trpst", technik: "hornst", nohit: "cel", erkundung: "harfe", bosse: "blech", sammeln: "mbira", kurios: "pizz", geschichte: "psab" }[k] || "trpst";
+      /* R13: Nachschlag – kommt ein weiterer (nicht seltener) Erfolg kurz nach dem vorigen, nur zwei Töne der Kategorie und ein
+         Glockenpunkt, um eine Stufe höher (o.n = wievielter in Folge): die Häufung klingt wie eine Kette statt fünfmal derselben Fanfare */
+      if (o.kurz) { const sh = Math.min(3, o.n || 1); [4, 7].forEach((d, i) => playNote(ins, deg(p.scale, d + sh, r), t + i * 0.09, 0.075, 0.5, B, 2)); playNote("glock", deg(p.scale, 7 + sh, r + 12), t + 0.2, 0.05, 1.2, B, 2); if (o.titel) playNote("glock", deg(p.scale, 4 + sh, r + 24), t + 0.38, 0.04, 1.2, B, 2); return; }
+      const stp = { tempo: 0.07, technik: 0.11, nohit: 0.1, erkundung: 0.06, bosse: 0.14, sammeln: 0.08, kurios: 0.09, geschichte: 0.13 }[k] || 0.1;
       up.forEach((m, i) => playNote(ins, m + (k === "nohit" ? 12 : 0), t + i * stp, 0.11 - i * 0.008, stp * 2.2, B, 2));
       const tEnd = t + 4 * stp;
       [0, 2, 4].forEach(d => playNote(k === "nohit" ? "glock" : k === "erkundung" ? "kal" : (p.brass || "hornst"), deg(p.scale, d, r + (k === "nohit" ? 24 : 0)), tEnd, 0.09, gr ? 2.6 : 1.3, B, 2));
@@ -1289,6 +1292,13 @@
       if (k === "technik" && p.dr) hit(p.dr[1] || p.dr[0], tEnd, 0.4, 1.05, B);
       if (k === "erkundung") for (let i = 0; i < 5; i++) playNote("kal", deg(p.scale, i * 2, r + 12), t + i * 0.05, 0.05, 1.2, B, 2);
       if (k === "bosse") { playNote("timpt", deg(p.scale, 0, p.root - 12), tEnd, 0.22, 1.6, B, 2); if (p.dr) hit(p.dr[0], tEnd, 0.6, 0.9, B); }
+      if (k === "sammeln") hit("glock_96", tEnd + 0.05, 0.05, 1, B);
+      if (k === "kurios") [9, 7].forEach((d, i) => playNote("glas", deg(p.scale, d, r + 24), tEnd + 0.12 + i * 0.1, 0.05, 0.8, B, 2));
+      if (k === "geschichte") [0, 4].forEach(d => playNote("ooh", deg(p.scale, d, r), tEnd, 0.06, 2.4, B, 2));
+      /* Stufe Gold: Oktave obendrauf und Becken (selten/„Blut“ = gross, unten) */
+      if (o.stufe === "gold" && !gr) { playNote(ins, top + 12, tEnd + 0.12, 0.07, 1.2, B, 2); hit("crash", tEnd, 0.08, 1.15, B); }
+      /* Titel-Erfolge: ein Herold-Ruf aus drei Glockentönen (Oktave, Quinte, Grundton) nach dem Akkord */
+      if (o.titel) [7, 4, 0].forEach((d, i) => playNote("glock", deg(p.scale, d, r + 24), tEnd + (gr ? 0.9 : 0.5) + i * 0.16, 0.07, 1.6, B, 2));
       if (gr) {
         hit("timproll", t - 0.05, 0.18, 1, B); hit("crash", tEnd, 0.16, 1, B); kick(tEnd, 0.5);
         [0, 2, 4].forEach(d => playNote("aah", deg(p.scale, d, r), tEnd, 0.07, 3.4, B, 2));

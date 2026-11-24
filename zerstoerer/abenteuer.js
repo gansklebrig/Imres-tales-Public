@@ -971,7 +971,7 @@
         Z.drawNPC(c, "E", x + 18, y, t, Z.player && Z.player.x > x ? 1 : -1);
         tag(ev, L(["Handeln", "Trade"]));
       }
-      if (ev.k === "rennen" && Z.rennenGemalt && !(Z.gfx && Z.gfx.off && Z.gfx.off.rennen)) { if (!ev.done && !ev.on) tag(ev, L(["Zeitrennen starten", "Start time trial"]) + " (" + ev.limit + " s)"); } /* W11 R29: gemalte Fassung in effekte.js */
+      if (ev.k === "rennen" && Z.rennenGemalt && !(Z.gfx && Z.gfx.off && Z.gfx.off.rennen)) { /* W11 R29/R30: gemalte Fassung in effekte.js; Beschriftung kommt aus Z.interacts */ }
       else if (ev.k === "rennen") {
         c.fillStyle = "#3a3236"; c.fillRect(x - 8, y - 12, 16, 12); c.fillStyle = "#4a4046"; c.fillRect(x - 10, y - 14, 20, 3);
         if (!ev.done) {
