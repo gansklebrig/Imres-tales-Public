@@ -1460,7 +1460,7 @@
         const c = cells[k]; if (c.kind === "secret") continue;
         const fn = freeNb(c); if (!fn.length) continue;
         /* lieber vom Hauptweg abzweigen, tiefe Zweige nur selten weiter verlängern */
-        anchors.push({ c, fn, w: c.kind === "path" ? 3 : 1.4 / (1 + c.depth * 0.6) });
+        anchors.push({ c, fn, w: c.kind === "path" ? 3 : 1.4 / (1 + c.depth * (Z.flacheZweige === true ? 1.6 : 0.6)) }); /* W13 R22: Z.flacheZweige (nur Versuch, aus): brachte kaum kürzere Rückwege und 2 Torhof-Karten mit Ausgang nur per Maximalsprung */
       }
       if (!anchors.length) break;
       let sum = 0; anchors.forEach(a => (sum += a.w));
@@ -1495,12 +1495,36 @@
         }
         /* W13 R21: lange Zweige (≥ 3 Räume), deren Ende NEBEN oder ÜBER einem späteren Hauptweg-Raum liegt, bekommen immer ein Gittertor
            mit Hebel auf der Zweigseite – eine Einbahn-Tür zurück auf den Hauptweg (ohne zusätzliche Zufallszüge: übrige Karte bleibt gleich) */
-        if (!made && Z.mehrTore !== false && arm.length >= 3) {
+        if (!made && Z.mehrTore !== false && (end.depth || 0) >= 3) {
+          /* W13 R22 (Nutzerwunsch: wenige Sackgassen): Vorrang 1) späterer Hauptweg daneben/darunter → Gittertor, 2) Hauptweg darüber →
+             Falltür mit Leiter, die sich vom Zweig aus öffnet, 3) früherer Hauptweg oder ein anderer Zweig → offene Schleife */
           const o = nbs.find(q => q.kind === "path" && q.idx >= root.idx && (q.y === end.y || q.y === end.y + 1));
+          const oben = !o && nbs.find(q => q.kind === "path" && q.idx >= root.idx && q.y === end.y - 1);
+          const offen = !o && !oben && (nbs.find(q => q.kind === "path") || nbs.find(q => q.kind === "side" && q.root && q.root.idx >= root.idx));
           if (o) { conn([end.x, end.y], [o.x, o.y], "G"); end.gate = true; }
+          else if (oben) { conn([end.x, end.y], [oben.x, oben.y], "G"); end.gate = true; end.gateUnten = true; }
+          else if (offen) conn([end.x, end.y], [offen.x, offen.y]);
         }
       }
       armId++;
+    }
+    /* W13 R22: zweiter Durchgang, wenn alle Zweige stehen – jetzt sind die Nachbarn bekannt (beim Wachsen fehlten sie noch in 2 von 3 Fällen).
+       Tiefe Zweigenden (≥ 3 Nebenräume) ohne zweiten Ausgang bekommen einen Rückweg nach vorn: Gittertor zum späteren Hauptweg (daneben/darunter
+       bzw. Falltür hinauf), sonst eine offene Verbindung zu einem Nachbarzweig, der näher am Hauptweg liegt. */
+    if (Z.mehrTore !== false) {
+      const offenN = c => ["L", "R", "U", "D"].filter(s2 => c.need[s2]).length;
+      const kidsOf = new Map(); for (const k in cells) { const c = cells[k]; if (c.parent) { if (!kidsOf.has(c.parent)) kidsOf.set(c.parent, []); kidsOf.get(c.parent).push(c); } }
+      for (const k in cells) {
+        const end = cells[k]; if (end.kind !== "side" || (end.depth || 0) < 3 || offenN(end) >= 2 || (kidsOf.get(end) || []).some(q => q.kind === "side")) continue;
+        const root = end.root; if (!root) continue;
+        const nbs = N4.map(([ex, ey]) => cells[key(end.x + ex, end.y + ey)]).filter(o => o && o !== end.parent && o.kind !== "secret");
+        const o = nbs.find(q => q.kind === "path" && q.idx >= root.idx && (q.y === end.y || q.y === end.y + 1));
+        const oben = !o && nbs.find(q => q.kind === "path" && q.idx >= root.idx && q.y === end.y - 1);
+        const nah = !o && !oben && nbs.filter(q => q.kind === "side" && q.root && q.root.idx >= root.idx && (q.depth || 0) < end.depth - 1).sort((a, b) => (a.depth || 0) - (b.depth || 0))[0];
+        if (o) { conn([end.x, end.y], [o.x, o.y], "G"); end.gate = true; }
+        else if (oben) { conn([end.x, end.y], [oben.x, oben.y], "G"); end.gate = true; end.gateUnten = true; }
+        else if (nah) conn([end.x, end.y], [nah.x, nah.y]);
+      }
     }
     /* Schleifen und Durchbrüche (siehe addLoops) – vor den Geheimkammern, damit diese hinter rissigen Wänden bleiben */
     addLoops(R, cells, gw, gh, lay, conn, key);
@@ -1722,7 +1746,7 @@
       if (g.flut) return; /* Flutkammer (specials): Hebel gesetzt */
       const c = cells[g.branch]; if (!c) return;
       const gx = g.vert ? g.x + 1.5 : g.side < 0 ? g.x : g.x + 1;
-      const sp = spotsOf(c, 2, false).filter(([x, y]) => g.vert ? Math.abs(x - gx) >= 3 && Math.abs(x - gx) <= 9 && y >= g.y0 - 6 && y < g.y0 : Math.abs(x - gx) <= 9 && Math.abs(x - gx) >= 2 && y >= g.y0 - 3 && y <= g.y0 + 4).sort((a, b) => Math.abs(a[0] - gx) - Math.abs(b[0] - gx));
+      const sp = spotsOf(c, 2, false).filter(([x, y]) => g.vert ? Math.abs(x - gx) >= 3 && Math.abs(x - gx) <= 9 && (g.unten ? y > g.y0 + 2 && y <= g.y0 + 10 : y >= g.y0 - 6 && y < g.y0) : Math.abs(x - gx) <= 9 && Math.abs(x - gx) >= 2 && y >= g.y0 - 3 && y <= g.y0 + 4).sort((a, b) => Math.abs(a[0] - gx) - Math.abs(b[0] - gx));
       if (!sp.length) return;
       /* offen geprüft: auch mit offenem Tor darf niemand irgendwo feststecken */
       const old = g.tiles.map(([x, y]) => lv.get(x, y)); g.tiles.forEach(([x, y, v]) => lv.set(x, y, v || 0));
@@ -2173,6 +2197,8 @@
         let y = yf + 1, ok = true; while (y < (c.y + 1) * CH + CH - 2 && (g(x, y) !== 0 || g(x + 1, y) !== 0)) { if (!((g(x, y) === 1 || g(x, y) === 0) && (g(x + 1, y) === 1 || g(x + 1, y) === 0))) { ok = false; break; } y++; }
         if (!ok || y >= (c.y + 1) * CH + CH - 2 || y - yf - 1 < 2 || y - yf - 1 > 6) continue;
         if (Math.floor(y / CH) !== c.y + 1) continue; /* Luft muss im Hauptweg-Raum liegen */
+        /* W13 R22 (Balance-Meldung): von unten nicht hochspringbar – Fallhöhe bis zum Boden darunter mindestens 7 Kacheln */
+        { let gy = y; while (gy < lv.H - 2 && g(x, gy + 1) === 0 && g(x + 1, gy + 1) === 0) gy++; if (gy - yf < 7) continue; }
         if (nahDing(x, yf, y + 6)) continue;
         const ch = []; for (let yy = yf + 1; yy < y; yy++) for (const xx of [x, x + 1]) if (g(xx, yy) !== 0) { ch.push([xx, yy, g(xx, yy)]); lv.set(xx, yy, 0); }
         if (keepOk()) { lv.abkuerzungen.push({ x, y0: yf, y1: y, cell: key(c.x, c.y), to: key(unten.x, unten.y) }); break; }
@@ -2634,7 +2660,9 @@
         /* W13: geöffnet wird die Falltür zum Treppenhaus – in Spalte 11 eine Leiter (dritter Wert = Kachel nach dem Öffnen),
            darunter hängt schon die Leiter im Hauptweg-Raum: man kommt also auch wieder hinauf (kein Einweg) */
         for (let q = 0; q < 4; q++) tiles.push([x + q, y0, q === 1 ? 4 : 0], [x + q, y0 + 1, q === 1 ? 4 : 0], [x + q, y0 + 2, q === 1 ? 4 : 0]);
-        gates.push({ x, y0, tiles, vert: true, branch: key(c.x, c.y), other: key(o.x, o.y), side: 0, open: false });
+        /* W13 R22: liegt der Zweig UNTEN (o.gateUnten), öffnet der Hebel im unteren Raum die Falltür – die Leiter führt dann hinauf */
+        if (o.gateUnten) gates.push({ x, y0, tiles, vert: true, unten: true, branch: key(o.x, o.y), other: key(c.x, c.y), side: 0, open: false });
+        else gates.push({ x, y0, tiles, vert: true, branch: key(c.x, c.y), other: key(o.x, o.y), side: 0, open: false });
       }
     }
     /* Außengebiete: oberste Raumreihe ohne Decke, damit der Himmel zu sehen ist */

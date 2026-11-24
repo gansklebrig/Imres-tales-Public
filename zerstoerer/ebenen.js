@@ -598,11 +598,23 @@
   const dl0 = Z.loadArea;
   /* erst im ersten Schritt nach dem Laden: andere Module (Trupps, Hinterhalte, Nemesis …) setzen ihre Gegner in späteren loadArea-Hüllen */
   Z.loadArea = function () { const r = dl0.apply(this, arguments); if (Z.level) Z.level._dramaPend = true; return r; };
+  function dramaJetzt() {
+    if (!(Z.level && Z.level._dramaPend)) return;
+    Z.level._dramaPend = false; const PF = Z.ladeProfil = Z.ladeProfil || {}; let t0 = performance.now(); drama(Z.level); PF.drama = (PF.drama || 0) + performance.now() - t0;
+    t0 = performance.now(); try { aufstellung(Z.level); } catch (e) { console.error(e); } PF.aufstellung = (PF.aufstellung || 0) + performance.now() - t0;
+  }
+  /* W13 R22: Umverteilung direkt am Ende von Z.loadArea (äußerste Hülle, nach allen Modulen) statt im ersten Bild – sonst sprangen Gegner
+     ein Bild nach dem Laden noch um (Rückweg-Test t_rw.py legte die Gegner am Eingang schlafen, danach rückten neue heran). Das Bild bleibt Rückfall. */
+  (function spaet() {
+    if (!Z.ui || !Z.ui.actions) return setTimeout(spaet, 50);
+    const l0 = Z.loadArea;
+    Z.loadArea = function () { const r = l0.apply(this, arguments); try { dramaJetzt(); } catch (e) { console.error(e); } return r; };
+  })();
   /* Ausblick beim ersten Betreten des Vorraums */
   let peekT = 0, peekLock = null;
   const et0 = Z.ebenenTick;
   function dramaTick(dt) {
-    if (Z.level && Z.level._dramaPend) { Z.level._dramaPend = false; const PF = Z.ladeProfil = Z.ladeProfil || {}; let t0 = performance.now(); drama(Z.level); PF.drama = (PF.drama || 0) + performance.now() - t0; t0 = performance.now(); try { aufstellung(Z.level); } catch (e) { console.error(e); } PF.aufstellung = (PF.aufstellung || 0) + performance.now() - t0; }
+    dramaJetzt();
     const lv = Z.level, P = Z.player, D = lv && lv._drama; if (!D || !P) return;
     if (peekT > 0) { peekT -= dt; if (peekT <= 0 && Z.cam.lock === peekLock) Z.cam.lock = null; }
     if (!D.V0 || D.blick || lv.wardenSpawned) return;
