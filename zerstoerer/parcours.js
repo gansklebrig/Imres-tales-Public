@@ -92,11 +92,8 @@
   Z.trapApi = { dmgFrac, hitP, hitE, circRect, ceilingAbove, floorBelow, shade: (h, k) => shade(h, k), clock: () => clock, biomeMul };
 
   /* ======================= UPDATE ======================= */
-  Z.updateParcours = function (dt) {
-    clock += dt;
-    const P = Z.player; if (!Z.level) return;
-    const near = (x, y, d) => P && Math.abs(P.x - x) < (d || 420) && Math.abs(P.y - y) < 300;
-    for (const tr of traps) {
+  /* eine Falle einen Schritt (dt) weiterrechnen */
+  function stepTrap(tr, dt, P, near, moved) {
       switch (tr.k) {
         case "pendel": {
           const a = Math.sin(clock * 6.283 / tr.per + tr.ph) * tr.amp;
@@ -163,9 +160,7 @@
           break;
         }
         case "saege": {
-          if (tr.pause > 0) tr.pause -= dt; else tr.x += tr.dir * tr.sp * dt;
-          if (tr.x > tr.x1) { tr.x = tr.x1; tr.dir = -1; } if (tr.x < tr.x0) { tr.x = tr.x0; tr.dir = 1; }
-          tr.rot += dt * 22 * tr.dir;
+          if (!moved) sawMove(tr, dt);
           if (Math.random() < dt * 25 && near(tr.x, tr.y)) FX.p({ x: tr.x - tr.dir * 8, y: tr.y + 2, vx: -tr.dir * (60 + Math.random() * 80), vy: -60 - Math.random() * 60, g: 500, life: 0.3, size: 1.2, col: "#ffd27a", kind: "spark", add: true });
           if (near(tr.x, tr.y, 200) && Math.random() < dt * 3) A.play("hitMetal", { x: tr.x, vol: 0.12, rate: 2, gap: 0.2 });
           if (P && circRect(tr.x, tr.y, 10, hbP(P)) && !(tr._pHit > clock)) { hitP(tr, 0.13, tr.x, { kb: 220, kbUp: 260 }); /* nach dem Treffer kurz anhalten und vom Spieler weg laufen */ tr.pause = 0.7; tr.dir = P.x + P.w / 2 < tr.x ? 1 : -1; }
@@ -173,12 +168,50 @@
           break;
         }
       }
+  }
+  /* Handheld (lean): Fallen und Fähren weit außerhalb des Bildes nur jedes CULL_N-te Bild rechnen; die ausgelassene Zeit wird
+     beim nächsten Schritt nachgeholt (dt aufgespart). Pendel und Flammendüsen ergeben sich ohnehin aus der Uhr, Sägen/Fähren holen
+     ihren Weg nach – alles im Bild (plus CULL_M Rand, größer als jeder Zeichenrand) und in Hörweite läuft unverändert jedes Bild.
+     Z.parcoursCull: Prüfschalter für Vorher/Nachher-Messungen (sonst nicht gesetzt → folgt Z.gq.lean). */
+  const CULL_N = 4, CULL_M = 220;
+  let frameN = 0;
+  const trapPos = tr => tr.k === "pendel" ? [tr.ax, tr.ay + tr.len / 2] : tr.k === "stein" ? [tr.x, tr.ay] : [tr.x, tr.y];
+  /* Sägeweg: läuft auch weit außerhalb des Bildes jeden Schritt (billig, bleibt exakt); ausgedünnt werden nur Treffer und Funken */
+  function sawMove(tr, dt) {
+    if (tr.pause > 0) tr.pause -= dt; else tr.x += tr.dir * tr.sp * dt;
+    if (tr.x > tr.x1) { tr.x = tr.x1; tr.dir = -1; } if (tr.x < tr.x0) { tr.x = tr.x0; tr.dir = 1; }
+    tr.rot += dt * 22 * tr.dir;
+  }
+  function moverStep(m, dt) {
+    if (m.pause > 0) m.pause -= dt;
+    else { m.x += m.dir * m.sp * dt; if (m.x + m.w > m.x1) { m.x = m.x1 - m.w; m.dir = -1; m.pause = 0.55; } if (m.x < m.x0) { m.x = m.x0; m.dir = 1; m.pause = 0.55; } }
+  }
+  Z.updateParcours = function (dt) {
+    clock += dt; frameN++;
+    const P = Z.player; if (!Z.level) return;
+    const near = (x, y, d) => P && Math.abs(P.x - x) < (d || 420) && Math.abs(P.y - y) < 300;
+    const cull = (Z.parcoursCull != null ? Z.parcoursCull : !!(Z.gq && Z.gq.lean)) && Z.cam && P;
+    const cam = Z.cam;
+    /* im Bild (mit Rand) oder in Hörweite des Spielers → jedes Bild exakt */
+    const live = (x, y) => (x > cam.x - CULL_M && x < cam.x + cam.w + CULL_M && y > cam.y - CULL_M - 140 && y < cam.y + cam.h + CULL_M) || near(x, y);
+    for (let i = 0; i < traps.length; i++) {
+      const tr = traps[i];
+      if (cull && !(tr.k === "stein" && (tr.st === "shake" || tr.st === "fall"))) {
+        const [x, y] = trapPos(tr);
+        if (!live(x, y)) {
+          const saw = tr.k === "saege"; if (saw) sawMove(tr, dt);
+          tr._acc = (tr._acc || 0) + dt;
+          if ((frameN + i) % CULL_N) continue;
+          const d = tr._acc; tr._acc = 0; stepTrap(tr, d, P, near, saw); continue;
+        }
+      }
+      /* zurück im Bild: aufgesparte Zeit nachholen (die Säge ist ihren Weg schon gefahren) */
+      if (tr._acc) { const d = tr.k === "saege" ? dt : tr._acc + dt; tr._acc = 0; stepTrap(tr, d, P, near); } else stepTrap(tr, dt, P, near);
     }
-    /* Fähren: bewegen und Spieler mitnehmen */
+    /* Fähren: bewegen und Spieler mitnehmen (immer jeden Schritt – billig und muss exakt bleiben) */
     for (const m of movers) {
       const ox = m.x;
-      if (m.pause > 0) m.pause -= dt;
-      else { m.x += m.dir * m.sp * dt; if (m.x + m.w > m.x1) { m.x = m.x1 - m.w; m.dir = -1; m.pause = 0.55; } if (m.x < m.x0) { m.x = m.x0; m.dir = 1; m.pause = 0.55; } }
+      moverStep(m, dt);
       m.dx = m.x - ox;
       if (!P || P.dead) continue;
       const over = P.x + P.w > m.x + 1 && P.x < m.x + m.w - 1;
@@ -205,9 +238,14 @@
       }
     }
     /* Gegner, die in den Abgrund stürzen */
-    for (const e of Z.enemies) if (!e.dead && !e.def.fly && W.tile(Math.floor((e.x + e.w / 2) / T), Math.floor((e.y + e.h * 0.4) / T)) === 9) { e.hp = 0; Z.killEnemy && Z.killEnemy(e, { src: "fall" }); }
+    const en = Z.enemies, odd = frameN & 1;
+    for (let i = 0; i < en.length; i++) {
+      const e = en[i]; if (e.dead || e.def.fly) continue;
+      if (cull && (i & 1) !== odd && !live(e.x, e.y)) continue; /* außerhalb des Bildes: jedes zweite Bild genügt */
+      if (W.tile(Math.floor((e.x + e.w / 2) / T), Math.floor((e.y + e.h * 0.4) / T)) === 9) { e.hp = 0; Z.killEnemy && Z.killEnemy(e, { src: "fall" }); }
+    }
     /* aufsteigender Nebel aus der Tiefe */
-    const cam = Z.cam, q = Z.gq && Z.gq.part != null ? Z.gq.part : 1;
+    const q = Z.gq && Z.gq.part != null ? Z.gq.part : 1;
     for (const [x, y] of voidTops) {
       const px = x * T, py = y * T; if (px < cam.x - 16 || px > cam.x + cam.w || py < cam.y - 16 || py > cam.y + cam.h + 16) continue;
       if (Math.random() < dt * 1.6 * q) FX.p({ x: px + Math.random() * T, y: py + 10, vx: (Math.random() - 0.5) * 6, vy: -8 - Math.random() * 10, life: 2.2, size: 7, col: "rgba(40,30,36,.35)", kind: "smoke", drag: 1, keep: false });

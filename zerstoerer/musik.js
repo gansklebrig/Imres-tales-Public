@@ -359,7 +359,7 @@
   /* ---------- Einzelnoten aus Aufnahmen ---------- */
   function playNote(inst, midi, when, vol, dur, bus, prio) {
     if (!A.ok || !M.out || !INST[inst]) return;
-    if (M.live > voiceCap(prio)) { M.stats.skipped++; if (prio === 2) M.stats.skipSt = (M.stats.skipSt || 0) + 1; return; } /* Notbremse für die Stimmenzahl (Handheld: wenige Stimmen, Audio-Thread schonen) */
+    if (M.live > voiceCap(prio) && !(prio === 2 && yieldVoice())) { M.stats.skipped++; if (prio === 2) M.stats.skipSt = (M.stats.skipSt || 0) + 1; return; } /* Notbremse für die Stimmenzahl (Handheld: wenige Stimmen, Audio-Thread schonen) */
     midi = fit(inst, midi);
     const n = nearest(inst, midi), path = K(inst + "_" + n), b = A.buf[path];
     if (!b) { if (b === undefined) A.load(path); return; }
@@ -369,18 +369,19 @@
     g.gain.setValueAtTime(0, when); g.gain.linearRampToValueAtTime(vol, when + att);
     g.gain.setValueAtTime(vol, when + dur * 0.72); g.gain.linearRampToValueAtTime(0, when + dur);
     s.connect(g); g.connect(bus || M.busMel);
-    track(s, g, bus === M.busSt); s.start(when); s.stop(when + dur + 0.05);
+    track(s, g, bus === M.busSt, when + dur); s.start(when); s.stop(when + dur + 0.05);
   }
   /* Schlagwerk / Einzelklang */
   function hit(name, when, vol, rate, bus, rev) {
     if (!A.ok || !M.out) return;
-    if (M.live > voiceCap(bus && bus === M.busSt ? 2 : false)) { M.stats.skipped++; return; }
+    const pr = bus && bus === M.busSt ? 2 : false;
+    if (M.live > voiceCap(pr) && !(pr && yieldVoice())) { M.stats.skipped++; return; }
     const path = K(name); let b = A.buf[path]; if (!b) { if (b === undefined) A.load(path); return; }
     if (rev) b = reversed(path, b);
     const c = A.ctx; when = Math.max(when, c.currentTime + 0.005);
     const s = c.createBufferSource(); s.buffer = b; s.playbackRate.value = rate || 1;
     const g = c.createGain(); g.gain.value = vol; s.connect(g); g.connect(bus || M.busDr);
-    track(s, g, bus === M.busSt); s.start(when);
+    track(s, g, bus === M.busSt, when + b.duration / (rate || 1)); s.start(when);
     return b.duration / (rate || 1);
   }
   /* Stimmen-Obergrenze: am PC 110, auf Handheld 14 (wichtige Noten 18), auf „minimal“ 10 (13) */
@@ -389,9 +390,9 @@
   function voiceCap(prio) { const q = Z.gq || {}; return (q.mini ? (prio ? 13 : 10) : q.lean ? (prio ? 18 : 14) : 110) + (prio === 2 ? 12 : 0); }
   /* Knoten nach dem Verklingen wieder lösen und mitzählen */
   const VOC = new Set();
-  function track(s, g, st) {
+  function track(s, g, st, end) {
     M.live++; M.stats.notes++;
-    const v = { s, g, st }; VOC.add(v);
+    const v = { s, g, st, end: end || 0 }; VOC.add(v);
     s.onended = () => { if (!v.freed) M.live--; VOC.delete(v); try { s.disconnect(); g.disconnect(); } catch (_) {} };
   }
   /* Stimmen des Satzes (nicht der Stinger) schnell ausblenden und beenden – für den Bosstod-Stinger */
@@ -401,6 +402,17 @@
     return k;
   }
   M.freeVoices = freeVoices;
+  /* Vorrang (Stinger prio 2: Bossauftritt, Bossphase, Kampfbeginn, Hinterhalt, Sieg): ist auch die erweiterte Grenze voll,
+     weicht statt der Stinger-Note die Satz-Stimme, die am frühesten ohnehin endet (kurz ausgeblendet) – so gehen auf
+     Handheld (Grenze 14/18 bzw. 10/13) keine Stinger-Noten verloren und die Stimmenzahl bleibt trotzdem begrenzt */
+  function yieldVoice() {
+    let best = null;
+    for (const v of VOC) if (!v.st && !v.freed && (!best || v.end < best.end)) best = v;
+    if (!best) return false;
+    const now = A.ctx.currentTime; best.freed = true; M.live--; M.stats.yielded = (M.stats.yielded || 0) + 1;
+    try { best.g.gain.cancelScheduledValues(now); best.g.gain.setTargetAtTime(0, now, 0.03); best.s.stop(now + 0.2); } catch (_) {}
+    return true;
+  }
   const revCache = {};
   function reversed(path, b) {
     if (revCache[path]) return revCache[path];
@@ -906,7 +918,7 @@
     const off = start - (at - b.duration);
     const s = c.createBufferSource(); s.buffer = b; const g = c.createGain();
     g.gain.setValueAtTime(0, start); g.gain.linearRampToValueAtTime(vol, start + 0.3); s.connect(g); g.connect(M.busSt);
-    track(s, g); s.start(start, off);
+    track(s, g, true, at); s.start(start, off);
   }
   /* Ebenen unter einem Stinger kurz zurücknehmen */
   function duck(depth, at, dur) {
@@ -945,8 +957,8 @@
       const tq = o.at || grid(2);
       if (p.dr) hit(p.dr[0], tq, 0.8, 0.94, B);
       hit("crash", tq, 0.16, 0.9, B);
-      if (p.brass) for (let i = 0; i < 3; i++) playNote(p.brass, tn(i, p.root), tq, 0.13, beat * 2.5, B, 1);
-      playNote("pizz", tn(0, p.root - 12), tq, 0.2, beat * 2, B, 1);
+      if (p.brass) for (let i = 0; i < 3; i++) playNote(p.brass, tn(i, p.root), tq, 0.13, beat * 2.5, B, 2);
+      playNote("pizz", tn(0, p.root - 12), tq, 0.2, beat * 2, B, 2);
       kick(tq, 0.6);
     },
     ruhe: ({ p, t, tn, B }) => { /* Kampf vorbei: Chor-Akkord auf der Tonika, Harfe fällt herab */
@@ -966,7 +978,7 @@
       if (p.dr) hit(p.dr[0], t, 0.9, 0.85, B);
       hit("crash", t, 0.2, 0.8, B);
       const b = p.brass || "hornst";
-      playNote(b, p.root, t, 0.13, 1.2, B, 1); playNote(b, p.root + 1, t, 0.1, 1.2, B, 1); playNote(b, p.root + 6, t, 0.1, 1.2, B, 1);
+      playNote(b, p.root, t, 0.13, 1.2, B, 2); playNote(b, p.root + 1, t, 0.1, 1.2, B, 2); playNote(b, p.root + 6, t, 0.1, 1.2, B, 2);
       M.heat = Math.max(M.heat, 0.9);
     },
     boss: ({ p, now, beat, tn, B }) => { /* Rückwärts-Becken atmet bis zum Einsatz, Paukenwirbel darunter */
@@ -976,9 +988,9 @@
       hit("timproll", Math.max(now + 0.02, at - 1.5), 0.25, 1, B);
       if (p.dr) hit(p.dr[0], at, 0.9, 0.9, B);
       hit("gong", at, 0.25, 0.8, B);
-      for (const i of [0, 1, 2]) playNote("aah", tn(i, p.root + 12, 0), at, 0.12, 3.5, B, 1);
+      for (const i of [0, 1, 2]) playNote("aah", tn(i, p.root + 12, 0), at, 0.12, 3.5, B, 2);
       kick(at, 0.7);
-      if (p.mot) M.bossMotif(false, at + beat * 2);
+      if (p.mot) M.bossMotif(false, at + beat * 2, 2);
     },
     phase: ({ p, t, tn, B }) => { /* Bossphase: Paukenwirbel → Schlag, Blech eine Stufe höher, Wut steigt */
       hit("timproll", t, 0.3, 1, B);
@@ -986,13 +998,13 @@
       if (p.dr) hit(p.dr[0], tt, 0.9, 0.88, B);
       hit("crash", tt, 0.2, 1, B);
       const b = p.brass || "blech";
-      for (let i = 0; i < 3; i++) playNote(b, tn(i, p.root + 1), tt, 0.14, 2, B, 1);
+      for (let i = 0; i < 3; i++) playNote(b, tn(i, p.root + 1), tt, 0.14, 2, B, 2);
       M.rage = Math.min(1, M.rage + 0.6);
       /* zweite Phase: Besetzung/Tempo des Bosses wechseln, Leitmotiv eine Oktave höher und lauter */
       if (p.boss && p.p2 && !M.p2) { M.p2 = true; M.prof = Object.assign({}, p, p.p2); preload(M.prof); }
       /* dritte Phase (Demogorgon: „Der Abgrund öffnet sich“): noch eine Besetzung/Tempostufe */
       else if (p.boss && p.p3 && M.p2 && !M.p3) { M.p3 = true; M.prof = Object.assign({}, p, p.p3); preload(M.prof); }
-      if (p.mot) M.bossMotif(true, tt + 0.6);
+      if (p.mot) M.bossMotif(true, tt + 0.6, 2);
       duck(0.3, tt, 1.5);
     },
     sieg: ({ p, t: t0, B, beat }) => { /* Boss besiegt: sein Leitmotiv bricht (halbes Tempo, tief, verklingend), dann der aufgehellte Schlussakkord (Pikardie-Terz) in seiner Tonart und Besetzung */
@@ -1109,15 +1121,15 @@
   };
   M.motifs = () => Object.keys(MOTIFS);
   /* Leitmotiv des Bosses: Blech (und das Melodie-Instrument) spielt es, danach zitiert die Melodie es eine Weile */
-  M.bossMotif = (wild, at) => {
+  M.bossMotif = (wild, at, pr) => {
     const p = M.prof; if (!p || !p.mot || !A.ok || !M.out) return 0;
     const beat = M.beat || 60 / p.bpm / 2, t = Math.max(at || 0, A.ctx.currentTime + 0.05), b = p.brass || "horn";
     for (const [s0, st, l] of p.mot) {
       const m = p.root + s0 + (wild ? 12 : 0);
-      playNote(b, m, t + st * beat, wild ? 0.14 : 0.12, beat * l + 0.08, M.busSt, 1);
-      playNote(p.mel, m + 12, t + st * beat, 0.07, beat * l + 0.08, M.busSt, 1);
+      playNote(b, m, t + st * beat, wild ? 0.14 : 0.12, beat * l + 0.08, M.busSt, pr || 1);
+      playNote(p.mel, m + 12, t + st * beat, 0.07, beat * l + 0.08, M.busSt, pr || 1);
     }
-    if (wild) playNote("vlntrem", p.root + 24, t, 0.05, beat * 12, M.busSt, 1);
+    if (wild) playNote("vlntrem", p.root + 24, t, 0.05, beat * 12, M.busSt, pr || 1);
     M.leit = { until: A.ctx.currentTime + 40, notes: p.mot.filter(n => n[1] < 16).map(([s0, st, l]) => ({ s: st, l, semi: s0 + (wild ? 12 : 0) })) };
     M.stats.stingers["motiv:boss"] = (M.stats.stingers["motiv:boss"] || 0) + 1;
     return t;

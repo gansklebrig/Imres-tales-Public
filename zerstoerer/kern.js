@@ -348,7 +348,13 @@
     const g = A.ctx.createGain(); g.gain.value = vol;
     const p = A.ctx.createStereoPanner ? A.ctx.createStereoPanner() : null;
     s.connect(g); if (p) { p.pan.value = pan; g.connect(p); p.connect(o.bus || A.sfx); } else g.connect(o.bus || A.sfx);
-    if (o.verb !== 0) { const vg = A.ctx.createGain(); vg.gain.value = isFinite(o.verb) && o.verb ? o.verb : 0.6; g.connect(vg); vg.connect(A.verb); }
+    if (o.verb !== 0) {
+      const vv = isFinite(o.verb) && o.verb ? o.verb : 0.6;
+      /* „Handheld minimal“: Hall über wenige gemeinsame Sende-Wege (gestuft) statt eines eigenen Gain-Knotens je Geräusch
+         (A.bundleVerb: Prüfschalter für Vorher/Nachher-Messungen, sonst nicht gesetzt) */
+      if (A.bundleVerb != null ? A.bundleVerb : q.mini) g.connect(verbSend(vv));
+      else { const vg = A.ctx.createGain(); vg.gain.value = vv; g.connect(vg); vg.connect(A.verb); }
+    }
     A.live = (A.live || 0) + 1; s.onended = () => { A.live--; };
     const t0 = now + (isFinite(o.delay) ? Math.max(0, o.delay) : 0);
     s.start(t0, isFinite(o.offset) ? Math.max(0, o.offset) : 0);
@@ -356,6 +362,14 @@
     if (o.dur && isFinite(o.dur)) { g.gain.setValueAtTime(vol, t0 + o.dur * 0.7); g.gain.linearRampToValueAtTime(0, t0 + o.dur); s.stop(t0 + o.dur + 0.02); }
     return s;
   };
+  /* gemeinsame Hall-Sende-Wege (Stufen 0,3 / 0,45 / 0,6 / 0,8 / 1): einmal angelegt, von allen Geräuschen geteilt */
+  const VSTEP = [0.3, 0.45, 0.6, 0.8, 1];
+  function verbSend(v) {
+    let k = 0; for (let i = 1; i < VSTEP.length; i++) if (Math.abs(VSTEP[i] - v) < Math.abs(VSTEP[k] - v)) k = i;
+    const S = A.vsend || (A.vsend = []);
+    if (!S[k]) { S[k] = A.ctx.createGain(); S[k].gain.value = VSTEP[k]; S[k].connect(A.verb); }
+    return S[k];
+  }
   /* Endlosschleifen (Geräuschkulisse der Bühne): mit Überblendung */
   A.loop = (id, path, vol, bus) => {
     if (!A.ok) return;
