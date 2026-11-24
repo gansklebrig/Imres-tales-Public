@@ -42638,6 +42638,30 @@ if(typeof dropItem==='function'){const di=dropItem;dropItem=function(x,y,it){try
   if(!n){B2.n.gold++;try{spGold(x,y,1+((it.rar|0)>0?1:0),0.6)}catch(e){}return}it=n}}catch(e){bErr(e)}return di.call(this,x,y,it)}}
 }catch(e){console.error('beute2',e);window.__hsBEUTE2={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/beute2» */
+/* «wurfton» */
+/* ================= Paket „wurfton“: der Würfel verrät nichts mehr vorab – window.__hsWURFTON =================
+   Bei den Ereignissen zwischen den Stufen wird das Ergebnis sofort ausgewertet, die Würfel-Animation läuft erst danach.
+   Die Folgen (Gold-Klimpern, Treffer-Schmerz, Segen, Fluch, Gegenstand …) spielten ihre Klänge und Meldungen aber schon
+   beim Auswerten – man hörte also vor dem Fallen des Würfels, ob es geklappt hat.
+   Jetzt: Während eine Wahl ausgewertet wird und solange der Würfel rollt, werden Klänge und Einblendungen zurückgehalten
+   (nur Würfeln, Klackern und Knopf-Klick laufen) und erst nach dem Lande-Klang nachgespielt. Abschaltbar: __hsWURFTON.aus=1 */
+(function(){try{if(window.__hsWURFTON)return;
+const WT=window.__hsWURFTON={v:1,aus:0,err:[],n:{gehalten:0}};const wErr=e=>{if(WT.err.length<20)WT.err.push(String(e&&e.stack||e).slice(0,300))};
+const FREI={ui:1,wuerfel:1,hit:1,fluch:1};
+let tief=0,Q=[],iv=0;
+const rollt=()=>!!(G.ev&&G.ev.res&&G.ev.res.rolling);
+const halten=()=>!WT.aus&&(tief>0||rollt());
+function abspielen(){if(halten())return;if(Q.length&&!WT.nach){WT.nach=performance.now()+260}if(performance.now()<(WT.nach||0))return;
+ const q=Q;Q=[];WT.nach=0;clearInterval(iv);iv=0;for(const [f,t,a] of q){try{f.apply(t,a)}catch(e){wErr(e)}}}
+function merk(f,t,a){Q.push([f,t,a]);WT.n.gehalten++;if(Q.length>60)Q.shift();if(!iv)iv=setInterval(abspielen,60)}
+if(typeof sfx==='function'){const s0=sfx;sfx=function(n){if(halten()&&!FREI[n]){merk(s0,this,arguments);return}return s0.apply(this,arguments)}}
+if(typeof toast==='function'){const t0=toast;toast=function(){if(halten()){merk(t0,this,arguments);return}return t0.apply(this,arguments)}}
+if(typeof banner==='function'){const b0=banner;banner=function(){if(halten()){merk(b0,this,arguments);return}return b0.apply(this,arguments)}}
+if(typeof chooseEvent==='function'){const c0=chooseEvent;chooseEvent=function(){tief++;try{return c0.apply(this,arguments)}finally{tief--;if(Q.length&&!iv)iv=setInterval(abspielen,60)}}}
+/* der Lande-Klang selbst darf durch */
+if(typeof ev2LandFx==='function'){const l0=ev2LandFx;ev2LandFx=function(){const a=WT.aus;WT.aus=1;try{return l0.apply(this,arguments)}finally{WT.aus=a;WT.nach=performance.now()+260}}}
+}catch(e){console.error('wurfton',e);window.__hsWURFTON={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/wurfton» */
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
