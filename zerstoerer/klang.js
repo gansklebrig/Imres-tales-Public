@@ -820,6 +820,9 @@
     if ((lv.wucht || []).length) l.push(...SRS.knirsch, ...SRS.bruch, ...SRS.lawine, ...SRS.steinschlag, ...SRS.kies);
     if ((lv.morsch || []).length) l.push(...SRS.holz, ...SRS.poltern, ...SRS.planke);
     l.push(AM("a_klangschale"), AM("e_windstoss_1"), KS("gong"));
+    { const ts = new Set(); for (const k in lv.cells || {}) { const t = tplBase(lv.cells[k].tpl); if (TPLK[t]) ts.add(t); } for (const t of ts) l.push(AM(TPLK[t].loop)); if (ts.size) l.push(...SRS.poltern, ...SRS.kette, ...SRS.knarz.slice(0, 8), ...SRS.ruck, ...SRS.planke, AM("e_glocke_1"), AM("e_glocke_2"), AM("e_glocke_3"));
+      if (ts.has("zisterne")) for (let i = 1; i <= 23; i++) l.push(AM("n_tropfen_" + i)); if (ts.has("uhrwerk")) l.push(KS("clave1"), KS("clave2"));
+      for (const [inst, o] of [["cel", 3], ["glock", 3], ["rgl", 1]]) for (const st of [0, 2, 4, 7]) { const pr = taktTon(inst, st, o); if (pr) l.push(pr.path); } }
     preload(l);
   }
   function hookOnce() {
@@ -857,7 +860,7 @@
     }
     /* Einsturz: Bruch, Lawine, nachpolternde Brocken, Staubrauschen – größer bei mehr Kacheln */
     if (A.ctx.currentTime - (SR.esT || 0) < 0.25) return; SR.esT = A.ctx.currentTime; SR.stats.einsturz++;
-    const k = clamp(gone.length / 6, 0.5, 1.4);
+    const k = clamp(gone.length / 6, 0.5, 1.4) * 0.75; /* R9 Mischung: Einsturz lag 4–7 dB über der Ruhe davor */
     wshot(pk(SRS.bruch), x, y, { vol: 0.55 * k, rate: 0.85, verb: 0.55, gap: 0, tag: "es" });
     wshot(pk(SRS.lawine), x, y, { vol: 0.45 * k, rate: 0.9, delay: 0.12, gap: 0, tag: "esl" });
     const nB = Math.round(2 + 3 * k); for (let i = 0; i < nB; i++) wshot(pk(SRS.steinschlag), x + (Math.random() - 0.5) * 30, y, { vol: (0.3 - i * 0.04) * k, rate: 0.8 + Math.random() * 0.4, delay: 0.25 + i * (0.12 + Math.random() * 0.12), gap: 0, tag: "esb" + i });
@@ -920,6 +923,68 @@
       dustNoise(x, y, 0.07, 1.2);
     }
   }
+  /* ======================= GEBIETSVORLAGEN (W13 R6, welt.js: lv.cells[k].tpl) =======================
+     Raumklang je Vorlage, solange Ezekiel in der Zelle steht (Schleife, weich überblendet) plus seltene Einzelgeräusche;
+     die Fähren-Plattformen („m“) dieser Räume klingen nach ihrer Rolle:
+       fasslager    – Tropfen und Kellerluft; die Plattformen rumpeln wie rollende Fässer, dumpfer Anschlag an der Wende
+       foerderband  – Mühlwerk als Grundrauschen; die Plattformen klappern im Takt (Kettenglieder), Ruck an der Wende
+       glockenstuhl – Wind im Turm, Balken knarzen, ganz selten summt eine Glocke leise mit
+       stelzensteg  – Wellen unter den Bohlen, Pfähle knarren */
+  const TPLK = {
+    fasslager: { loop: "a_tropfstein", v: 0.45, one: () => pk(SRS.poltern), ov: 0.08, orate: 0.6, every: 7, mv: "fass" },
+    foerderband: { loop: "a_muehle", v: 0.5, one: () => pk(SRS.kette), ov: 0.07, orate: 0.7, every: 5, mv: "band" },
+    glockenstuhl: { loop: "a_ruinenwind", v: 0.32, one: () => Math.random() < 0.2 ? AM("e_glocke_" + (1 + ((Math.random() * 3) | 0))) : pk(SRS.knarz), ov: 0.06, orate: 0.8, every: 6 },
+    stelzensteg: { loop: "a_wellen1", v: 0.42, one: () => pk(SRS.knarz), ov: 0.07, orate: 1.1, every: 6 },
+    /* v=72: Zisterne (Tropfen, jeder vierte als leiser Celesta-Ton in der Tonart), Uhrwerk (Ticken im Takt der Musik) */
+    zisterne: { loop: "a_tropfstein_n1", v: 0.4, one: () => AM("n_tropfen_" + (1 + ((Math.random() * 23) | 0))), ov: 0.09, orate: 1, every: 1.4, ton: "cel" },
+    uhrwerk: { loop: "a_muehle", v: 0.18, one: () => pk(SRS.kette), ov: 0.05, orate: 1.8, every: 7, takt: "uhr" }
+  };
+  /* Takt-Ereignisse je Vorlage (auf dem Achtelraster der Musik, M.raster): Uhrwerk tickt auf den Vierteln (Tick/Tack), schlägt
+     alle zwei Takte eine Glocke in der Tonart; Förderband rattert in Achteln (betont auf den Vierteln), solange eine Plattform fährt;
+     Glockenstuhl läutet ab und zu auf der Eins eine Röhrenglocke auf Grundton oder Quinte */
+  TPLK.foerderband.takt = "band"; TPLK.glockenstuhl.takt = "glocke";
+  function taktTon(inst, stufe, okt) { const p = M.prof; return M.probe && M.probe(inst, M.ton(stufe, (p ? p.root : 50) + 12 * okt)); }
+  function taktTick(d, bandOn) {
+    const r = M.raster && M.raster(0.12); if (!r) return;
+    /* nach Zeit fortschreiben (monoton, nie ein Schritt doppelt); Schrittnummer für Betonungen aus dem Raster */
+    const b = r.beat;
+    if (TV.lastT == null || r.t - TV.lastT > 4 * b || TV.lastT - r.t > 8 * b) TV.lastT = r.t - b;
+    while (TV.lastT + b * 0.5 < r.t) {
+      TV.lastT += b; const st = r.step - Math.round((r.t - TV.lastT) / b), dl = Math.max(0, TV.lastT - A.ctx.currentTime);
+      if (d.takt === "uhr" && st % 2 === 0) { shot(KS(st % 4 ? "clave2" : "clave1"), { vol: 0.075, rate: st % 4 ? 1.9 : 2.4, pan: st % 4 ? 0.25 : -0.25, delay: dl, vary: 0, verb: 0.3, gap: 0, tag: "uhr" }); TV.stats.tick = (TV.stats.tick || 0) + 1; }
+      if (d.takt === "uhr" && st % 16 === 0) { const pr = taktTon("glock", 0, 3); if (pr) shot(pr.path, { vol: 0.05, rate: pr.rate, delay: dl, vary: 0, verb: 0.7, gap: 0, tag: "uhrg" }); }
+      if (d.takt === "band" && bandOn) { shot(pk(SRS.kette), { vol: st % 2 ? 0.035 : 0.06, rate: (st % 2 ? 1.9 : 1.55) + Math.random() * 0.1, pan: rnd(-0.3, 0.3), delay: dl, vary: 0, verb: 0.25, gap: 0, tag: "band" + (st % 2) }); TV.stats.band++; }
+      if (d.takt === "glocke" && st % 8 === 0 && TV.lastT - (TV.ringT == null ? -1e9 : TV.ringT) >= 24 * b && Math.random() < 0.3) { TV.ringT = TV.lastT; const pr = taktTon("rgl", Math.random() < 0.5 ? 0 : 4, 1); if (pr) { shot(pr.path, { vol: 0.06, rate: pr.rate, delay: dl, vary: 0, verb: 0.8, pan: rnd(-0.4, 0.4), gap: 0, tag: "gst" }); TV.stats.laeuten = (TV.stats.laeuten || 0) + 1; } }
+    }
+  }
+  const tplBase = t => (t ? t.replace(/_(o|u|ou)$/, "") : t);
+  const TV = { cur: null, v: 0, t: 3, stats: { raum: {}, fass: 0, band: 0 } };
+  KL.vorlagen = TV;
+  function tplAt(x, y) { const lv = Z.level, T = Z.TILE, CW = Z.CW || 24, CH = Z.CH || 14; const c = lv && lv.cells && lv.cells[Math.floor(x / T / CW) + "," + Math.floor(y / T / CH)]; return c ? tplBase(c.tpl) : null; }
+  function tplTick(dt) {
+    const P = Z.player, lv = Z.level; if (!P || !lv || !lv.cells) return;
+    const id = tplAt(P.x + P.w / 2, P.y + P.h / 2), d = TPLK[id];
+    if (d && TV.cur !== id) { TV.cur = id; A.loop("rv_tpl", AM(d.loop), 0); TV.stats.raum[id] = (TV.stats.raum[id] || 0) + 1; }
+    const want = d ? d.v : 0;
+    if (TV.cur && (want > 0 || TV.v > 0)) { TV.v = want; A.loopVol("rv_tpl", want * (normOf(AM(TPLK[TV.cur].loop), -32) || 0.5), want ? 1.2 : 0.8); if (!want) TV.cur = null; }
+    if (d) { TV.t -= dt; if (TV.t <= 0) { TV.t = d.every * rnd(0.6, 1.5); shot(d.one(), { vol: d.ov, rate: d.orate * rnd(0.9, 1.1), pan: rnd(-0.7, 0.7), verb: 0.5, gap: d.ton ? 0 : 0.3, tag: "tpl" });
+      if (d.ton && Math.random() < 0.25) { const pr = taktTon(d.ton, [0, 2, 4, 7][(Math.random() * 4) | 0], 3); if (pr) shot(pr.path, { vol: 0.035, rate: pr.rate, vary: 0, verb: 0.85, pan: rnd(-0.6, 0.6), delay: 0.02, gap: 0, tag: "zton" }); } } }
+    let bandOn = false;
+    for (const m of Z.parcoursMovers || []) if (!(m.pause > 0) && onCam(m.x, m.y, 40) && (m._tpl === undefined ? (m._tpl = tplAt(m.x + m.w / 2, m.y - 4)) : m._tpl) === "foerderband") bandOn = true;
+    if (d && d.takt) taktTick(d, bandOn);
+    /* Plattformen */
+    for (const m of Z.parcoursMovers || []) {
+      const x = m.x + m.w / 2, y = m.y; if (!onCam(x, y, 80)) continue;
+      const k = TPLK[m._tpl === undefined ? (m._tpl = tplAt(x, y - 4)) : m._tpl]; if (!k || !k.mv) continue;
+      const s0 = m._kv || (m._kv = { t: 0, mv: !(m.pause > 0) }), mv = !(m.pause > 0);
+      if (!mv && s0.mv) wshot(k.mv === "fass" ? SRS.planke[0] : pk(SRS.ruck), x, y, { vol: k.mv === "fass" ? 0.22 : 0.16, rate: k.mv === "fass" ? 0.6 : 0.9, gap: 0, tag: "mvw" });
+      if (mv) { s0.t -= dt; if (s0.t <= 0) {
+        if (k.mv === "band") { s0.t = 1; } /* Rattern im Takt: taktTick */
+        else { s0.t = 0.38 + Math.random() * 0.2; TV.stats.fass++; wshot(pk(SRS.poltern), x, y, { vol: 0.07, rate: 0.5 + Math.random() * 0.15, gap: 0, tag: "mvf", verb: 0.3 }); } } }
+      s0.mv = mv;
+    }
+  }
+
   /* ======================= RÜCKWEG-TOR (W14, rueckweg.js) =======================
      Beobachtet Z.rueckweg.zustand(): solange das Tor offen ist, ein leiser Schimmer am Tor (Klangschale als Schleife nach Abstand,
      dazu ab und zu ein Celesta-Funke in der Tonart der Musik); erlischt die Gnade, sinken drei Glockentöne herab und ein tiefer,
@@ -1035,6 +1100,9 @@
     try { roomTick(dt); observe(dt); climbTick(dt); transitTick(dt); } catch (e) { if (!KL.err3) { KL.err3 = 1; console.error(e); } }
     try { sonderTick(dt); } catch (e) { if (!KL.err7) { KL.err7 = 1; console.error(e); } }
     try { rueckTick(dt); } catch (e) { if (!KL.err8) { KL.err8 = 1; console.error(e); } }
+    try { tplTick(dt); } catch (e) { if (!KL.err9) { KL.err9 = 1; console.error(e); } }
+    /* Effekte-Dichte reiten (kern.js A.ride): ab 4 gleichzeitigen Effekten sachte zurück, bei 10+ etwa −4 dB; schnell runter, langsam wieder hoch */
+    if (A.ride) { const n = A.live || 0, tgt = clamp(1 - 0.065 * (n - 3), 0.62, 1); KL.ride = tgt; A.ride.gain.setTargetAtTime(tgt, A.ctx.currentTime, tgt < A.ride.gain.value ? 0.12 : 1.1); }
   };
 
   /* in den Takt der Musik einhängen (läuft auch während der Pause weiter) */

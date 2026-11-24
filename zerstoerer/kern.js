@@ -203,7 +203,10 @@
     const c = (A.ctx = new AC());
     A.out = c.createDynamicsCompressor(); A.out.threshold.value = -14; A.out.ratio.value = 4; A.out.connect(c.destination);
     A.master = c.createGain(); A.master.gain.value = A.vol.master; A.master.connect(A.out);
-    A.sfx = c.createGain(); A.sfx.gain.value = A.fxAn() ? A.vol.sfx : 0; A.sfx.connect(A.master);
+    A.sfx = c.createGain(); A.sfx.gain.value = A.fxAn() ? A.vol.sfx : 0;
+    /* R9 Gesamtmischung: Effekte-Dichte ausgleichen („Fader-Reiten“, klang.js stellt es ~10× je Sekunde nach der Zahl
+       gleichzeitiger Effekte): dichte Kampfphasen bis −4 dB, damit Kampfbeginn/-ende keine Sprünge > 4 dB machen */
+    A.ride = c.createGain(); A.ride.gain.value = 1; A.sfx.connect(A.ride); A.ride.connect(A.master);
     A.mus = c.createGain(); A.mus.gain.value = A.musAn() ? A.vol.music : 0; A.mus.connect(A.master);
     A.amb = c.createGain(); A.amb.gain.value = A.fxAn() ? A.vol.amb : 0; A.amb.connect(A.master);
     /* Hall für Höhlen und Hallen: synthetische Impulsantwort */

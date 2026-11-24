@@ -184,7 +184,7 @@
   const CMBQ = { glocken: 0.82, sturm: 0.86, torhof: 0.88, verlies: 0.92, keller: 1.15, hafen: 1.15, hallen: 1.1, schmiede: 1.1, glut: 1.1 };
   /* Kulisse: aus dem Effektivwert der Teppich-Schleifen je Gebiet (welt.js amb.loops) gegen den Median (≈ −30 dB) berechnet, ~70 % ausgeglichen;
      Sturm kaum angehoben, weil Gewitter-Einzelgeräusche und Wetter ihn ohnehin tragen. Spanne der Teppiche vorher 13,5 dB */
-  const AMBTRIM = { torhof: -5, keller: -2.5, hallen: 2.5, wehrgang: -1.5, verlies: -3, schmiede: 2, zinnen: -1, see: -2, glut: 4, sturm: -1 };
+  const AMBTRIM = { torhof: -5, keller: -2.5, hallen: 2.5, wehrgang: -1.5, verlies: -3, schmiede: 2, zinnen: -1, see: -2, glut: 4, sturm: 2, glocken: 2 }; /* R9: Sturm/Glocken lagen in Ruhe 4 dB unter den anderen */
   const TIER_NAME = ["erkundung", "spannung", "kampf", "elite", "boss"];
   /* Ebenenpegel je Stufe (Erkundung, Spannung, Kampf, Elite, Boss) */
   const LAY = {
@@ -390,8 +390,8 @@
     const g = c.createGain(); g.gain.value = vol; s.connect(g); g.connect(bus || M.busDr);
     let len = b.duration / (rate || 1);
     /* Handheld: Schlagwerk-Aufnahmen klingen 2–4 s aus und belegten so lange eine der 14 Stimmen (Bosskampf: über die Hälfte
-       aller Noten verworfen). Nach 0,45 s (Schlag auf der Eins 0,75 s, Stinger 2,2 s) weich ausblenden – der hörbare Schlag bleibt, die Stimme wird frei */
-    const q = Z.gq || {}, maxL = q.lean ? (pr === 2 ? 2.2 : pr ? 0.75 : 0.45) : 0;
+       aller Noten verworfen). Nach 0,32 s (Schlag auf der Eins 0,75 s, Stinger 2,2 s) weich ausblenden – der hörbare Schlag bleibt, die Stimme wird frei */
+    const q = Z.gq || {}, maxL = q.lean ? (pr === 2 ? 2.2 : pr ? 0.75 : 0.32) : 0;
     curInst = "hit:" + name; track(s, g, bus === M.busSt, when + Math.min(len, maxL || len)); s.start(when);
     if (maxL && len > maxL && !rev) { g.gain.setValueAtTime(vol, when + maxL - 0.3); g.gain.linearRampToValueAtTime(0, when + maxL); s.stop(when + maxL + 0.02); len = maxL; }
     return len;
@@ -788,11 +788,14 @@
     M.T = M.tier === 1 ? tension : 0;
     /* Ebenen nach Stufe: hinauf schnell (der Einsatz sitzt auf der Taktgrenze, weil vorher keine Noten dieser Ebene
        geplant werden), hinab langsam ausklingend */
-    const tr = M.tier, pm = paused ? 0.35 : 1, rest = tr >= 2 ? D.rest : (M.exq || 1), cm = D.cmb * (M.cmq || 1);
+    /* Runde 9 (Gesamtmischung über einen Lauf): Ruhe→Kampf sprang die Musik um 6–10 dB – Kampfebenen −2 dB, Ruheebenen +1 dB;
+       Breakdown fiel 7–9 dB unter „voll“ – im Breakdown tritt der Teppich (Bordun/Chor) hervor */
+    const tr = M.tier, pm = paused ? 0.35 : 1, rest = tr >= 2 ? D.rest : (M.exq || 1) * 1.12, cm = D.cmb * (M.cmq || 1) * 0.8;
+    const brkMix = tr >= 2 && tr < 4 && M.kampfA === "breakdown" && (M.kampfBars || 0) < 6 ? 1.7 : 1;
     const up = now - M.tierAt < 1.5 && M.tierAt > 0, set = (node, v) => {
       const cur = node.gain.value; node.gain.setTargetAtTime(v, now, v > cur + 0.02 ? (up ? 0.05 : 0.25) : 0.8);
     };
-    set(M.busExp, LAY.exp[tr] * rest);
+    set(M.busExp, LAY.exp[tr] * rest * brkMix);
     set(M.busMel, LAY.mel[tr] * (tr >= 2 ? 1 : (M.exq || 1)));
     set(M.busCol, LAY.col[tr] * rest);
     set(M.busTen, LAY.ten[tr] * (0.4 + 0.6 * M.T) * pm);
@@ -817,7 +820,9 @@
     let cut = 20000 * Math.pow(0.08, M.low * 0.9) * (1 + pls * M.low * 0.8);
     cut = Math.min(cut, paused ? 900 : 20000);
     M.lp.frequency.setTargetAtTime(cut, now, paused ? 0.15 : 0.08);
-    M.out.gain.setTargetAtTime(0.62 * (M.trim || 1) * (paused ? 0.6 : 1) * (1 - 0.15 * M.low), now, 0.2);
+    /* Boss: jede Phase etwas lauter (+0,8 dB), Wut +0,4 dB – Steigerung, die Begrenzer und Kompressor nicht ausreizt */
+    const bossUp = M.bossOn ? (1 + 0.1 * (M.bossPh || 0)) * (M.wut ? 1.05 : 1) : 1;
+    M.out.gain.setTargetAtTime(0.62 * (M.trim || 1) * bossUp * (paused ? 0.6 : 1) * (1 - 0.15 * M.low), now, 0.2);
     /* Wut der Bossphase klingt langsam ab, bleibt aber, solange der Boss lebt */
     if (M.rage > 0 && !(Z.boss && !Z.bossDefeated)) M.rage = Math.max(0, M.rage - dt * 0.2);
 
@@ -846,7 +851,7 @@
       if (st === 4) playNote("hglo", tone(bar % 2 ? 2 : 0, p.root + 24), t, 0.07, beat * 6, M.busCol);
     },
     kriegstrommel: ({ p, t, st, I }) => {
-      const a = st === 0 || st === 3 || st === 6; if (p.dr) hit(p.dr[1], t, a ? 0.42 : 0.16 + 0.1 * I, a ? 1 : 1.12);
+      const a = st === 0 || st === 3 || st === 6; if (p.dr && (a || !(Z.gq && Z.gq.lean))) hit(p.dr[1], t, a ? 0.42 : 0.16 + 0.1 * I, a ? 1 : 1.12); /* Handheld: nur die Akzente (Geisternoten belegten Stimmen) */
     },
     geist: ({ p, t, st, bar, beat, tone }) => {
       if (st === 0 && bar % 4 === 3) swell(t + beat * 8, 0.12);
@@ -1013,36 +1018,39 @@
       if (st === 0 && M.kampfNeu) { M.kampfNeu = false; hit("crash", t, 0.16, 1); }
       /* Kernnoten auf der Eins (Ostinato, Bass, Blech-Akkord, tiefe Trommel) mit Vorrang 1: auf Handheld Grenze 18 statt 14 */
       const one = st === 0 ? 1 : undefined;
-      if (!(half && st % 2) && !(brk && !acc)) playNote(ost, tone(oi, alt ? p.root : p.root - 12), t, ((acc ? 0.22 : 0.14) + 0.04 * I) * (brk ? 0.6 : 1), beat * (half ? 1.9 : 0.95), M.busCmb, one);
+      if (!(half && st % 2) && !(brk && !acc)) playNote(ost, tone(oi, alt ? p.root : p.root - 12), t, ((acc ? 0.22 : 0.14) + 0.04 * I) * (brk ? 0.85 : 1), beat * (half ? 1.9 : 0.95), M.busCmb, one);
       if ((I > 0.7 || hi3 || drv) && acc && !brk && !half) playNote(ost, tone(oi, alt ? p.root + 12 : p.root), t, 0.1, beat * 0.9, M.busCmb, -1);
       if (st === 0 || (!brk && !half && (I > 0.65 || hi3 || drv) && (st === 3 || st === 6))) playNote(p.bass, tone(0, p.root - 24), t, st === 0 ? 0.3 : 0.2, beat * (st === 0 ? 3 : 2.2), M.busCmb, one);
-      if (chordStart && p.brass && !brk && (I > 0.55 || hi3 || drv)) for (const i of (Z.gq && Z.gq.lean ? [0, 2] : [0, 1, 2])) playNote(p.brass, tone(i, p.root), t + i * 0.008, 0.11, beat * 1.6, M.busCmb, one); /* Handheld: Grundton + Quinte */
+      if (chordStart && p.brass && !brk && (I > 0.55 || hi3 || drv)) for (const i of (Z.gq && Z.gq.mini ? [0] : Z.gq && Z.gq.lean ? [0, 2] : [0, 1, 2])) playNote(p.brass, tone(i, p.root), t + i * 0.008, 0.11, beat * 1.6, M.busCmb, one); /* Handheld: Grundton + Quinte */
       if ((hi3 || I > 0.85 || M.rage > 0) && st === 0 && !brk) for (const i of [1, 2]) playNote("vlntrem", tone(i, p.root + 24), t, 0.06 + 0.03 * M.rage, beat * 8.4, M.busCmb, -1);
       if ((tr === 4 || M.ambush || M.rage > 0) && st === 0 && bar % 2 === 0) for (const i of [0, 1, 2]) playNote("aah", tone(i, p.root + 12), t, 0.07, beat * 16, M.busCmb, -1);
       /* Boss-Phasen: jede Phase eine neue Schicht */
-      if (boss && bph >= 1 && !half) playNote(ost, tone(M.ost[(st + 2) % 8], p.root + 12), t + beat / 2, 0.065, beat * 0.45, M.busCmb);
-      if (boss && bph >= 1 && (st === 0 || st === 4)) playNote(p.bass, tone(0, p.root - 12), t, 0.15, beat * 1.8, M.busCmb);
+      /* Handheld (Grenze 14): Phasen- und Wutschichten ausgedünnt – Spiccato nur auf jeder zweiten Achtel, keine zweite Bassstimme,
+         Posaune nur auf der 3, hohe Trommel nur außerhalb der Wut (die Ticks tragen die Sechzehntel); sonst gingen in Phase 2/3 ~44 % verloren */
+      const ln = !!(Z.gq && Z.gq.lean), mn = !!(Z.gq && Z.gq.mini); /* „minimal“ (Grenze 10): noch eine Stufe schlanker */
+      if (boss && bph >= 1 && !half && !mn && (!ln || st % 2 === 0)) playNote(ost, tone(M.ost[(st + 2) % 8], p.root + 12), t + beat / 2, 0.065 * (ln ? 1.25 : 1), beat * 0.45, M.busCmb);
+      if (boss && bph >= 1 && !ln && (st === 0 || st === 4)) playNote(p.bass, tone(0, p.root - 12), t, 0.15, beat * 1.8, M.busCmb);
       if (boss && bph >= 2 && st === 0 && bar % 2 === 0) { playNote("ooh", p.root, t, 0.08, beat * 16.5, M.busCmb, -1); playNote("ooh", p.root + 7, t, 0.05, beat * 16.5, M.busCmb, -1); }
       /* Wut: eigene Farbe */
       if (wut) {
         if (st === 0) { const b = p.brass || "blech"; playNote(b, p.root + 12, t, 0.09, beat * 0.8, M.busCmb); playNote(b, p.root + 13, t + 0.01, 0.07, beat * 0.8, M.busCmb); }
-        if (st === 3 || st === 6) playNote("pos", tone(0, p.root - 12), t, 0.11, beat * 0.6, M.busCmb);
+        if (st === 3 || (st === 6 && !ln)) playNote("pos", tone(0, p.root - 12), t, 0.11, beat * 0.6, M.busCmb);
       }
       /* Trommeln (Aufnahmen) */
       const [lo, mid, hi] = p.dr || [];
       if (half) { if (lo && st === 0) hit(lo, t, 0.8, 0.94, undefined, false, true); if (mid && st === 4) hit(mid, t, 0.62, 0.9); if (st === 0) kick(t, 0.55); }
-      else if (brk) { if (lo && st === 0 && kB % 2 === 0) hit(lo, t, 0.4, 0.95); if (st === 0) kick(t, 0.35); }
+      else if (brk) { if (lo && st === 0) hit(lo, t, kB % 2 ? 0.35 : 0.5, 0.95, undefined, false, true); if (st === 0 || st === 4) kick(t, st ? 0.25 : 0.4); }
       else {
         if (lo) { if (st === 0) hit(lo, t, 0.75, 1, undefined, false, true); if ((I > 0.35 || hi3 || drv) && (alt ? st === 5 : (st === 3 || st === 6))) hit(lo, t, 0.45, 1.06); }
         if (mid) {
           if (alt) { if (st === 2 || st === 6) hit(mid, t, 0.45); }
           else if ((I > 0.5 || hi3 || drv) && st === 4) hit(mid, t, 0.5);
           const fl = (bar % 4 === 3 && (I > 0.6 || hi3)) || (build && kB === 7) || (boss && bph >= 2 && bar % 2 === 1);
-          if (fl && st >= 5) { hit(mid, t, 0.3 + (st - 5) * 0.08, 1.15); hit(mid, t + beat / 2, 0.25 + (st - 5) * 0.08, 1.2); }
+          if (fl && st >= 5) { hit(mid, t, 0.3 + (st - 5) * 0.08, 1.15); if (!ln || st === 7) hit(mid, t + beat / 2, 0.25 + (st - 5) * 0.08, 1.2); }
           if (build && kB === 7 && st < 5) hit(mid, t, 0.1 + st * 0.04, 1.2);
           if (fill) { const k = st % 4 - 2; hit(mid, t, 0.3 + k * 0.12, 1.12); hit(mid, t + beat / 2, 0.36 + k * 0.12, 1.2); }
         }
-        if (hi && (hi3 || I > 0.72 || M.rage > 0.3 || drv) && st % 2 === 1) hit(hi, hum(), hi === "amboss" ? 0.12 : 0.22, 1 + rnd(-0.03, 0.03));
+        if (hi && (hi3 || I > 0.72 || M.rage > 0.3 || drv) && st % 2 === 1 && !(ln && (wut || bph >= 1 || mn) && st % 4 === 3)) hit(hi, hum(), hi === "amboss" ? 0.12 : 0.22, 1 + rnd(-0.03, 0.03));
         if ((bar % 8 === 7 && st === 4 && (I > 0.6 || hi3)) || (build && kB === 7 && st === 0) || (wut && st === 0 && bar % 4 === 3)) hit("timproll", t, 0.22);
         /* Sub-Trommel: stützt die tiefe Trommel; im Boss und beim Treiben auf allen Vierteln */
         if (st === 0 || ((boss || drv) && st % 2 === 0) || ((I > 0.35 || hi3) && (st === 3 || st === 6))) kick(t, st === 0 ? 0.5 : drv ? 0.42 : 0.34);
@@ -1077,7 +1085,7 @@
   function cmFilter(p, t, beat, brk, build, kB, st, bar, half, alt) {
     if (!M.cmF) return;
     let f = 20000, tc = 0.25;
-    if (brk) f = 650; else if (build) { f = 650 * Math.pow(12000 / 650, ((kB - 6) * 8 + st + 1) / 16); tc = beat * 0.6; }
+    if (brk) f = 1000; else if (build) { f = 650 * Math.pow(12000 / 650, ((kB - 6) * 8 + st + 1) / 16); tc = beat * 0.6; }
     else if (half) f = 1500; else if (alt) f = 2200 + 3800 * (0.5 + 0.5 * Math.sin(bar * Math.PI / 4));
     if (Math.abs(f - (M.cmFv || 0)) > 30) { M.cmFv = f; M.cmF.frequency.setTargetAtTime(f, t, tc); }
     const d = brk ? 1100 : (p.drLP || 20000);
