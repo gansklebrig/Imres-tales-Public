@@ -193,8 +193,27 @@
           for (let k = 0; k < 2; k++) { const cx = 160 + k * 320, top = H * (0.42 + k * 0.08);
             const g2 = m.createLinearGradient(0, top, 0, H); g2.addColorStop(0, "#c8902a"); g2.addColorStop(0.5, "#8a5a1a"); g2.addColorStop(1, "#3a200a"); m.fillStyle = g2;
             m.beginPath(); m.moveTo(cx - 200, H); m.quadraticCurveTo(cx - 60, top - 10, cx, top); m.quadraticCurveTo(cx + 60, top - 10, cx + 200, H); m.fill();
+            /* W11 R35: halb vergrabene Truhen (Holz, Eisenbänder, gewölbter Deckel, überquellendes Gold), Kelche, Kronen –
+               vorher flache graue Kästchen; danach die Münzen, die sie teilweise bedecken */
+            for (let i = 0; i < 6; i++) { const x = cx + (hash(i, 40 + k) - 0.5) * 160, y = top + 30 + hash(i, 50 + k) * 40, a = (hash(i, 60 + k) - 0.5) * 0.5, kind = hash(i, 70 + k);
+              m.save(); m.translate(x, y); m.rotate(a);
+              if (kind < 0.6) {
+                m.fillStyle = "#3a1e0c"; m.fillRect(-7, -4, 14, 8); m.fillStyle = "#6a3e1c"; m.fillRect(-6.5, -3.5, 13, 7);
+                m.fillStyle = "rgba(30,14,6,.6)"; m.fillRect(-6.5, -0.5, 13, 0.6); m.fillRect(-6.5, 2, 13, 0.6);
+                m.fillStyle = "#5a3418"; m.beginPath(); m.moveTo(-7, -4); m.quadraticCurveTo(0, -9, 7, -4); m.closePath(); m.fill();
+                m.fillStyle = "#2a2018"; m.fillRect(-4.8, -7.4, 1.4, 11.4); m.fillRect(3.4, -7.4, 1.4, 11.4); m.fillStyle = "#8a7a5a"; m.fillRect(-4.8, -7.4, 0.5, 11.4); m.fillRect(3.4, -7.4, 0.5, 11.4);
+                m.fillStyle = "#c8a040"; m.fillRect(-1, -3, 2, 2.2);
+                m.fillStyle = "#ffd27a"; for (let q = 0; q < 5; q++) { m.beginPath(); m.ellipse(-5 + q * 2.5, -7.6 - hash(i + q, 80) * 1.5, 1.6, 0.9, 0, 0, 6.283); m.fill(); }
+                m.fillStyle = "rgba(255,250,220,.8)"; m.fillRect(-6, -4.2, 4, 0.6);
+              } else if (kind < 0.8) {
+                m.fillStyle = "#e5b454"; m.beginPath(); m.moveTo(-3, -9); m.quadraticCurveTo(0, -3, 3, -9); m.closePath(); m.fill(); m.fillRect(-0.6, -5, 1.2, 4); m.fillRect(-2.4, -1.2, 4.8, 1.2);
+                m.fillStyle = "#b02a2a"; m.fillRect(-0.7, -7.6, 1.4, 1.4); m.fillStyle = "rgba(255,250,220,.85)"; m.fillRect(-2.4, -8.6, 0.6, 2.4);
+              } else {
+                m.fillStyle = "#e5b454"; m.beginPath(); m.moveTo(-5, -1); m.lineTo(-5, -6); m.lineTo(-2.5, -3.5); m.lineTo(0, -7); m.lineTo(2.5, -3.5); m.lineTo(5, -6); m.lineTo(5, -1); m.closePath(); m.fill();
+                m.fillStyle = "#7a3aa0"; m.fillRect(-0.8, -3.6, 1.6, 1.6); m.fillStyle = "#3a8a4a"; m.fillRect(-3.6, -2.6, 1.2, 1.2); m.fillRect(2.4, -2.6, 1.2, 1.2);
+              }
+              m.restore(); }
             for (let i = 0; i < 160; i++) { const x = cx + (hash(i, k) - 0.5) * 300, y = top + 10 + hash(i, k + 9) * (H - top); if (Math.abs(x - cx) > (y - top) * 1.6 + 20) continue; m.fillStyle = hash(i, k + 3) < 0.5 ? "#ffd27a" : "#e5a43a"; m.beginPath(); m.ellipse(x, y, 2.2, 1.2, 0, 0, 6.283); m.fill(); }
-            for (let i = 0; i < 6; i++) { const x = cx + (hash(i, 40 + k) - 0.5) * 160, y = top + 30 + hash(i, 50 + k) * 40; m.fillStyle = "#6a4a2a"; m.fillRect(x - 6, y - 4, 12, 7); m.fillStyle = "#ffd27a"; m.fillRect(x - 6, y - 5, 12, 1.5); }
             D.glow(m, cx, top + 20, 70, "rgba(255,200,90,.25)"); }
         });
         break;
@@ -1572,6 +1591,15 @@
           const u = (t * 0.06 + hash(x, y) * 3) % 1, cx = px + ((hash(x * 3, y) * T + t * 2.5) % T);
           c.fillStyle = top ? "rgba(90,20,8,.55)" : "rgba(50,10,6,.5)"; c.beginPath(); c.ellipse(cx, py + (top ? 9 : 7) + Math.sin(t + x) * 1.2, 4 + 2 * Math.sin(u * 6.28), 1.6, 0, 0, 6.283); c.fill();
           c.fillStyle = "rgba(255,150,40," + (0.25 + 0.2 * Math.sin(t * 3 + x * 1.7 + y)).toFixed(3) + ")"; c.fillRect(px + ((hash(x, y * 5) * 12) | 0), py + (top ? 11 : 4 + ((hash(y, x) * 8) | 0)), 3, 1);
+          /* W11 R35 (Stufe 2, nicht lean): Krustenschollen mit glühenden Fugen, platzende Blasen – Lava wirkte flach */
+          if (wRich && top) {
+            const h1 = hash(x, y + 7), sx = px + 3 + ((h1 * 7 + t * 1.6) % 7), sy = py + 8 + Math.sin(t * 0.8 + x) * 0.8;
+            c.fillStyle = "rgba(60,14,6,.8)"; c.beginPath(); c.moveTo(sx, sy); c.lineTo(sx + 3.5, sy - 1.2); c.lineTo(sx + 6, sy + 0.4); c.lineTo(sx + 4.5, sy + 2.4); c.lineTo(sx + 0.8, sy + 2); c.closePath(); c.fill();
+            c.strokeStyle = "rgba(255,200,90,.7)"; c.lineWidth = 0.5; c.stroke();
+            const bu = (t * (0.35 + h1 * 0.3) + h1 * 5) % 1, bx = px + 2 + hash(x * 7, y) * 12, by = py + lw(bx) + 1.5;
+            if (bu < 0.3) { const r = 0.6 + bu * 6; c.fillStyle = "#ff9a3a"; c.beginPath(); c.arc(bx, by, r, Math.PI, 0); c.fill(); c.fillStyle = "rgba(255,240,190,.8)"; c.fillRect(bx - r * 0.5, by - r * 0.8, r * 0.5, 0.6); }
+            else if (bu < 0.4) { const k = (bu - 0.3) / 0.1; c.strokeStyle = "rgba(255,220,140," + (1 - k).toFixed(2) + ")"; c.lineWidth = 0.6; c.beginPath(); c.ellipse(bx, by, 2.4 + k * 4, 0.8 + k, 0, 0, 6.283); c.stroke(); c.fillStyle = "rgba(255,200,100," + (1 - k).toFixed(2) + ")"; c.fillRect(bx - 0.4, by - 2 - k * 6, 0.8, 0.8); c.fillRect(bx + 1.5 + k * 2, by - 1 - k * 4, 0.8, 0.8); }
+          } else if (wRich) { const h2 = hash(x + 3, y), vy = py + 3 + h2 * 9; c.strokeStyle = "rgba(255,120,30," + (0.22 + 0.15 * Math.sin(t * 1.7 + x + y)).toFixed(3) + ")"; c.lineWidth = 0.7; c.beginPath(); c.moveTo(px, vy); c.quadraticCurveTo(px + 8, vy + Math.sin(t * 0.6 + x) * 3, px + T, vy + (h2 - 0.5) * 4); c.stroke(); }
         }
         if (top) { c.fillStyle = "#ffe0a0"; c.beginPath(); c.moveTo(px, py + lw(px)); c.lineTo(px + 8, py + lw(px + 8)); c.lineTo(px + T, py + lw(px + T)); c.lineTo(px + T, py + lw(px + T) + 1); c.lineTo(px, py + lw(px) + 1); c.fill(); if (Math.random() < 0.02) FX.p({ x: px + Math.random() * T, y: py + 4, vx: 0, vy: -60 - Math.random() * 40, g: 200, life: 0.6, size: 1.6, col: "#ffb040", kind: "spark", add: true }); }
       } else if (wRich) {

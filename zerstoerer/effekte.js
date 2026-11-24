@@ -1554,3 +1554,251 @@
     } catch (e) { console.error(e); }
   };
 })();
+
+/* Ezekiel – The Destroyer · Heilquelle, gemalt (W11 Runde 35; Logik abenteuer.js Block „HEILQUELLE“, Haken Z.quelleGemalt)
+   Ab Stufe 1 (nicht lean/mini – dort bleibt die schlichte Fassung aus abenteuer.js):
+   – Becken aus behauenen, warmgrauen Quadern (Fugen, Körnung, abgeschlagene Ecke, Lichtkante), Moospolster als
+     Büschel aus vielen kleinen Blättchen an den Ecken, hängende Moosfäden;
+   – Quellstele dahinter (Rundbogen, eingemeißelter Tropfen, Bronze-Ausguss) mit Rinnsal und Ringwellen;
+   – grünlich-türkis schimmerndes Wasser mit Tiefenverlauf, wandernden Lichtreflexen und Randglanz (kein Blau);
+   – ab Stufe 2 Lichtschleier und aufsteigende Funken (deterministisch, ohne Partikelsystem);
+   – Trinken/Füllen: das Wasser sinkt in 0,9 s ab, dazu nach dem Licht ein kurzer Lichtschwall (Säule, Ring,
+     aufsteigende Streifen; grünlich beim Trinken, golden beim Füllen);
+   – versiegt (ev.done): trockener, rissiger Lehmgrund mit Kalkrand, verdorrtes Moos, Kalkspur unter dem Ausguss.
+   Licht in der Lichtkarte (G.lightGather). Schalter Z.gfx.off.quelle. */
+(function () {
+  const Z = window.Z, G = Z.gfx, TAU = Math.PI * 2; if (!G) return;
+  const lean = () => !!(Z.gq && (Z.gq.lean || Z.gq.mini));
+  const lvl = () => (Z.gq ? Z.gq.level || 0 : 0);
+  const off = () => (G.off && G.off.quelle) || lean() || lvl() < 1;
+  const hh = (a, b) => { const v = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return v - Math.floor(v); };
+  const SW = 1.1; /* Dauer des Lichtschwalls / Absinkens */
+  const ST = new WeakMap();
+  function state(ev) {
+    let s = ST.get(ev); const P = Z.player;
+    if (!s) { s = { done: ev.done, doneT: -9, fill: false, pot: P ? P.potions : 0 }; ST.set(ev, s); }
+    if (ev.done && !s.done) { s.doneT = performance.now() / 1000; s.fill = !!(P && P.potions > s.pot); }
+    s.done = ev.done; if (P) s.pot = P.potions;
+    return s;
+  }
+  /* Moosbüschel: viele kleine Blättchen, unten dunkel, oben hell; dry = verdorrt */
+  function tuft(c, cx, cy, w, n, seed, dry, hang) {
+    const cols = dry ? ["#4a4028", "#6a5a34", "#8a7444"] : ["#2a4220", "#4a7030", "#7aa848"];
+    for (let k = 0; k < 3; k++) { c.fillStyle = cols[k];
+      for (let i = 0; i < n; i++) { const u = hh(seed + i, 21 + k), v = hh(seed + i, 31 + k), dx = (u - 0.5) * w * (1 - k * 0.2), dy = -v * 1.6 - k * 0.6 + Math.abs(dx) / w * 1.2;
+        c.fillRect(cx + dx - 0.6, cy + dy - 0.5, 1.2 + (1 - k) * 0.4, 1); } }
+    if (hang) { c.strokeStyle = cols[0]; c.lineWidth = 0.7; c.beginPath(); for (let i = 0; i < hang; i++) { const hx = cx + (hh(seed, 40 + i) - 0.5) * w * 0.8; c.moveTo(hx, cy); c.lineTo(hx + 0.3, cy + 1.5 + hh(seed, 50 + i) * 3.5); } c.stroke(); }
+  }
+  function stele(c, x, y, dry) {
+    const y0 = y - 34, y1 = y - 10;
+    c.fillStyle = "#231d1e"; c.fillRect(x - 7, y0 + 5, 14, y1 - y0 - 5); c.beginPath(); c.arc(x, y0 + 6, 7, Math.PI, 0); c.fill();
+    const g = c.createLinearGradient(x - 6, 0, x + 6, 0); g.addColorStop(0, "#82766a"); g.addColorStop(0.55, "#605650"); g.addColorStop(1, "#3c3432");
+    c.fillStyle = g; c.fillRect(x - 6, y0 + 6, 12, y1 - y0 - 6); c.beginPath(); c.arc(x, y0 + 6, 6, Math.PI, 0); c.fill();
+    c.fillStyle = "rgba(255,240,220,.2)"; c.fillRect(x - 6, y0 + 6, 0.9, y1 - y0 - 6);
+    c.fillStyle = "rgba(0,0,0,.28)"; c.fillRect(x - 6, y0 + 14.5, 12, 0.8);
+    c.fillStyle = "rgba(30,22,20,.35)"; for (let i = 0; i < 9; i++) c.fillRect(x - 5 + hh(i, 61) * 10, y0 + 3 + hh(i, 62) * 20, 0.8, 0.8);
+    /* eingemeißelter Tropfen mit Lichtkante */
+    const drop = (ox, oy) => { c.beginPath(); c.moveTo(x + ox, y0 + 2.6 + oy); c.quadraticCurveTo(x + 3.4 + ox, y0 + 8 + oy, x + ox, y0 + 11 + oy); c.quadraticCurveTo(x - 3.4 + ox, y0 + 8 + oy, x + ox, y0 + 2.6 + oy); };
+    c.fillStyle = "rgba(255,240,220,.22)"; drop(0.6, 0.6); c.fill();
+    c.fillStyle = "#1e1818"; drop(0, 0); c.fill();
+    if (!dry) { c.fillStyle = "rgba(150,225,170,.55)"; c.save(); c.translate(x, y0 + 8.2); c.scale(0.55, 0.55); c.translate(-x, -(y0 + 8.2)); drop(0, 0); c.fill(); c.restore(); }
+    /* Bronze-Ausguss mit Grünspan */
+    c.fillStyle = "#4a3418"; c.fillRect(x - 2.4, y0 + 16, 4.8, 4); c.fillStyle = "#b0803e"; c.fillRect(x - 2.2, y0 + 16, 4.4, 1); c.fillStyle = "#5a8a6a"; c.fillRect(x + 0.6, y0 + 18, 1.6, 1.4); c.fillStyle = "#1a1210"; c.fillRect(x - 1, y0 + 19.2, 2, 1);
+    if (dry) { c.fillStyle = "rgba(215,205,180,.24)"; c.fillRect(x - 0.9, y0 + 20, 1.8, y1 - y0 - 20); }
+    tuft(c, x - 4, y1, 6, 10, 3, dry, 0); tuft(c, x + 4, y0 + 1.5, 4, 6, 9, dry, 1);
+  }
+  function backRim(c, x, y) {
+    c.fillStyle = "#2a2224"; c.beginPath(); c.ellipse(x, y - 10.5, 20, 4.6, 0, Math.PI, 0); c.fill();
+    c.fillStyle = "#74685e"; c.beginPath(); c.ellipse(x, y - 10.5, 20, 4.6, 0, Math.PI, 0); c.ellipse(x, y - 10.2, 17, 3.4, 0, 0, Math.PI, true); c.fill();
+    c.fillStyle = "rgba(255,240,220,.16)"; c.beginPath(); c.ellipse(x, y - 10.5, 20, 4.6, 0, Math.PI * 1.1, Math.PI * 1.6); c.ellipse(x, y - 10.5, 19, 3.9, 0, Math.PI * 1.6, Math.PI * 1.1, true); c.fill();
+  }
+  function front(c, x, y, dry) {
+    const g = c.createLinearGradient(0, y - 11, 0, y); g.addColorStop(0, "#786a60"); g.addColorStop(1, "#3c3232");
+    c.fillStyle = "#1f191a"; c.beginPath(); c.moveTo(x - 21, y - 11); c.lineTo(x + 21, y - 11); c.lineTo(x + 19.5, y); c.lineTo(x - 19.5, y); c.closePath(); c.fill();
+    c.fillStyle = g; c.beginPath(); c.moveTo(x - 20, y - 10.5); c.quadraticCurveTo(x, y - 6.2, x + 20, y - 10.5); c.lineTo(x + 18.6, y - 0.6); c.lineTo(x - 18.6, y - 0.6); c.closePath(); c.fill();
+    /* abgeschlagene Ecke rechts oben */
+    c.fillStyle = "#2a2224"; c.beginPath(); c.moveTo(x + 15, y - 9.1); c.lineTo(x + 17.5, y - 7.6); c.lineTo(x + 19.6, y - 8.4); c.lineTo(x + 20, y - 10.5); c.closePath(); c.fill();
+    c.fillStyle = "#5a4e48"; c.beginPath(); c.moveTo(x + 15.4, y - 9); c.lineTo(x + 17.5, y - 8); c.lineTo(x + 19.2, y - 8.6); c.lineTo(x + 17.6, y - 9.6); c.closePath(); c.fill();
+    /* Fugen der Quader + Körnung */
+    c.strokeStyle = "rgba(18,12,12,.55)"; c.lineWidth = 0.8; c.beginPath();
+    for (const dx of [-8, 5]) { c.moveTo(x + dx, y - 7.6); c.lineTo(x + dx + 0.4, y - 0.8); }
+    c.moveTo(x - 18.8, y - 4.6); c.lineTo(x - 8, y - 4.3); c.moveTo(x + 5, y - 4.1); c.lineTo(x + 18.8, y - 4.5); c.stroke();
+    c.fillStyle = "rgba(255,240,220,.15)"; c.fillRect(x - 7.6, y - 7.6, 0.7, 6.8); c.fillRect(x + 5.4, y - 7.4, 0.7, 6.6);
+    for (let i = 0; i < 22; i++) { const u = hh(i, 71), v = hh(i, 72); c.fillStyle = i % 3 ? "rgba(25,18,16,.35)" : "rgba(255,235,210,.14)"; c.fillRect(x - 18 + u * 36, y - 8 + v * 7, 0.8, 0.8); }
+    /* Lichtkante des Rands */
+    c.strokeStyle = dry ? "rgba(235,215,185,.36)" : "rgba(220,245,220,.42)"; c.lineWidth = 1; c.beginPath(); c.moveTo(x - 20, y - 10.6); c.quadraticCurveTo(x, y - 6.3, x + 15, y - 9.2); c.stroke();
+    c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(x - 18.6, y - 1.4, 37.2, 0.9);
+    /* Moos an Ecken und Fuß */
+    tuft(c, x - 17, y - 9.6, 7, 16, 11, dry, 3); tuft(c, x + 12, y - 8.6, 5, 10, 17, dry, 2);
+    tuft(c, x - 15, y - 0.6, 7, 14, 23, dry, 0); tuft(c, x + 16, y - 0.6, 4, 8, 29, dry, 0); tuft(c, x - 3, y - 7, 3, 5, 37, dry, 2);
+  }
+  function water(c, x, y, t, rich, k) {
+    /* k: 1 = voll, sinkt beim Versiegen auf 0 */
+    const wy = y - 10.2 + (1 - k) * 1.6, ry = 3.4 * (0.45 + 0.55 * k), rx = 17 * (0.8 + 0.2 * k);
+    c.save(); c.globalAlpha = Math.min(1, k * 1.4); c.beginPath(); c.ellipse(x, wy, rx, ry, 0, 0, TAU); c.clip();
+    const g = c.createLinearGradient(0, wy - ry, 0, wy + ry); g.addColorStop(0, "#74c8a2"); g.addColorStop(0.5, "#34856a"); g.addColorStop(1, "#1a4a3a");
+    c.fillStyle = g; c.fillRect(x - 18, wy - 4, 36, 8);
+    /* Ringwellen vom Rinnsal */
+    for (let j = 0; j < 2; j++) { const u = (t * 0.9 + j * 0.5) % 1; c.strokeStyle = "rgba(210,250,220," + (0.45 * (1 - u)).toFixed(2) + ")"; c.lineWidth = 0.6; c.beginPath(); c.ellipse(x, wy + 0.4, 2 + u * 12, 0.6 + u * 2.2, 0, 0, TAU); c.stroke(); }
+    /* wandernde Lichtreflexe */
+    c.fillStyle = "rgba(240,255,228,.8)";
+    for (let i = 0; i < (rich ? 6 : 3); i++) { const p = (t * (0.18 + hh(i, 1) * 0.12) + hh(i, 2)) % 1, rx2 = x - 15 + p * 30, ry2 = wy - 2 + hh(i, 4) * 3.6, a = Math.sin(p * Math.PI) * (0.4 + 0.6 * Math.max(0, Math.sin(t * 3 + i * 2)));
+      c.globalAlpha = a * Math.min(1, k * 1.4); c.fillRect(rx2, ry2, 2 + hh(i, 5) * 3, 0.6); }
+    c.restore();
+    c.save(); c.globalAlpha = k; c.strokeStyle = "rgba(205,248,218,.5)"; c.lineWidth = 0.6; c.beginPath(); c.ellipse(x, wy, rx, ry, 0, Math.PI * 1.1, Math.PI * 1.9); c.stroke();
+    /* Rinnsal aus dem Ausguss */
+    c.fillStyle = "rgba(195,240,212,.7)"; c.fillRect(x - 0.6, y - 14.8, 1.2, wy - (y - 14.8));
+    c.fillStyle = "rgba(240,255,240,.9)"; for (let j = 0; j < 2; j++) { const u = (t * 2.4 + j * 0.5) % 1; c.fillRect(x - 0.7, y - 14.8 + u * (wy - (y - 14.8)), 1.4, 1); }
+    c.restore();
+    if (!rich || k < 1) return;
+    /* Lichtschleier und aufsteigende Funken */
+    c.save(); c.globalCompositeOperation = "lighter";
+    const hg = c.createRadialGradient(x, wy - 4, 1, x, wy - 4, 26); hg.addColorStop(0, "rgba(150,230,170," + (0.2 + 0.05 * Math.sin(t * 1.7)).toFixed(3) + ")"); hg.addColorStop(1, "rgba(150,230,170,0)");
+    c.fillStyle = hg; c.fillRect(x - 26, wy - 30, 52, 34);
+    for (let i = 0; i < 7; i++) { const sp = 0.25 + hh(i, 11) * 0.2, u = (t * sp + hh(i, 12)) % 1, fx = x - 13 + hh(i, 13) * 26 + Math.sin(t * 1.3 + i) * 2.5 * u, fy = wy - 1 - u * 30, a = Math.sin(u * Math.PI) * 0.85;
+      const rgb = i % 3 ? "200,255,190" : "255,230,150";
+      c.fillStyle = "rgba(" + rgb + "," + (a * 0.22).toFixed(2) + ")"; c.beginPath(); c.arc(fx, fy, 1.8, 0, TAU); c.fill();
+      c.fillStyle = "rgba(" + rgb + "," + a.toFixed(2) + ")"; c.fillRect(fx - 0.5, fy - 0.5, 1, 1); }
+    c.restore();
+  }
+  function dryBed(c, x, y) {
+    const wy = y - 10.2;
+    c.fillStyle = "#4a3c2e"; c.beginPath(); c.ellipse(x, wy, 17, 3.4, 0, 0, TAU); c.fill();
+    c.fillStyle = "#7a664c"; c.beginPath(); c.ellipse(x, wy - 0.2, 15.5, 2.7, 0, 0, TAU); c.fill();
+    c.fillStyle = "#927c5c"; c.beginPath(); c.ellipse(x - 2, wy - 0.9, 10, 1.4, 0, 0, TAU); c.fill();
+    /* Trockenrisse: dunkle Spalte + helle Lehmkante */
+    const cr = [[-13, -0.6, -7, 0.4, -1, -1.4, 5, 0.2, 12, -0.8], [-7, 0.4, -9, 1.6], [-7, 0.4, -5, -2.2], [-1, -1.4, 0, -2.8], [5, 0.2, 6.5, 1.6], [5, 0.2, 9, -2.2]];
+    for (const [col, ox] of [["rgba(235,215,175,.35)", 0.5], ["rgba(18,12,8,.85)", 0]]) { c.strokeStyle = col; c.lineWidth = 0.7; c.beginPath();
+      for (const l of cr) { c.moveTo(x + l[0] + ox, wy + l[1] + ox * 0.5); for (let i = 2; i < l.length; i += 2) c.lineTo(x + l[i] + ox, wy + l[i + 1] + ox * 0.5); } c.stroke(); }
+    c.strokeStyle = "rgba(225,212,180,.4)"; c.lineWidth = 0.6; c.beginPath(); c.ellipse(x, wy, 16.4, 3, 0, Math.PI * 1.05, Math.PI * 1.95); c.stroke(); /* Kalkrand: alte Wasserlinie */
+  }
+  Z.quelleGemalt = function (c, ev, t) {
+    try {
+      const s = state(ev); if (off()) return false;
+      const now = performance.now() / 1000, x = ev.x, y = ev.y, rich = lvl() >= 2, u = (now - s.doneT) / SW;
+      c.fillStyle = "rgba(0,0,0,.3)"; c.beginPath(); c.ellipse(x, y - 0.5, 23, 2.6, 0, 0, TAU); c.fill();
+      stele(c, x, y, ev.done && u >= 1);
+      backRim(c, x, y);
+      if (ev.done) { dryBed(c, x, y); if (u < 1) water(c, x, y, now, rich, 1 - u); }
+      else water(c, x, y, now, rich, 1);
+      front(c, x, y, ev.done && u >= 1);
+      return true;
+    } catch (e) { console.error(e); return false; }
+  };
+  Z.quelleDbg = ev => ST.get(ev); /* Prüfhilfe (quelle.py): Zustand je Quelle */
+  /* Lichtschwall nach dem Licht (sonst schluckt ihn die Dunkelheit) */
+  const al0 = Z.drawAfterLight;
+  Z.drawAfterLight = function (c) {
+    if (al0) al0.apply(this, arguments);
+    if (off()) return;
+    try {
+      const now = performance.now() / 1000;
+      for (const ev of Z.abEvents || []) {
+        if (ev.k !== "quelle" || !ev.done) continue; const s = ST.get(ev); if (!s) continue;
+        const u = (now - s.doneT) / SW; if (u < 0 || u > 1) continue;
+        const x = ev.x, y = ev.y, rgb = s.fill ? "255,214,130" : "185,255,175", a = (1 - u) * (1 - u), e = 1 - Math.pow(1 - u, 3);
+        c.save(); c.globalCompositeOperation = "lighter";
+        const w = 6 + e * 9, cg = c.createLinearGradient(0, y - 76, 0, y - 8);
+        cg.addColorStop(0, "rgba(" + rgb + ",0)"); cg.addColorStop(0.55, "rgba(" + rgb + "," + (0.42 * a).toFixed(3) + ")"); cg.addColorStop(1, "rgba(" + rgb + "," + (0.7 * a).toFixed(3) + ")");
+        c.fillStyle = cg; c.beginPath(); c.moveTo(x - w * 0.5, y - 76); c.lineTo(x + w * 0.5, y - 76); c.lineTo(x + w, y - 9); c.lineTo(x - w, y - 9); c.closePath(); c.fill();
+        c.fillStyle = "rgba(255,255,240," + (0.5 * a).toFixed(3) + ")"; c.fillRect(x - 1, y - 10 - e * 60, 2, e * 52);
+        c.strokeStyle = "rgba(" + rgb + "," + (0.9 * a).toFixed(3) + ")"; c.lineWidth = 1.6 * (1 - u) + 0.5; c.beginPath(); c.ellipse(x, y - 10, 6 + e * 26, 1.6 + e * 5, 0, 0, TAU); c.stroke();
+        for (let i = 0; i < 6; i++) { const sx = x + (hh(i, 81) - 0.5) * 22, sy = y - 12 - e * (24 + hh(i, 82) * 34); c.fillStyle = "rgba(" + rgb + "," + (0.8 * a).toFixed(3) + ")"; c.fillRect(sx - 0.5, sy, 1, 4 + hh(i, 83) * 4); }
+        c.restore();
+      }
+    } catch (e) { console.error(e); }
+  };
+  if (G.lightGather) G.lightGather.push(function (add, cam) {
+    if (G.off && G.off.quelle) return;
+    const now = performance.now() / 1000;
+    for (const ev of Z.abEvents || []) {
+      if (ev.k !== "quelle") continue;
+      if (cam && (ev.x < cam.x - 120 || ev.x > cam.x + cam.w + 120 || ev.y < cam.y - 80 || ev.y > cam.y + cam.h + 120)) continue;
+      if (!ev.done) add(ev.x, ev.y - 14, 58, "#9ee0a8", 0.42 + 0.05 * Math.sin(now * 1.7), 0);
+      const s = ST.get(ev); if (s && now - s.doneT < SW) { const u = (now - s.doneT) / SW; add(ev.x, ev.y - 24, 70 + u * 30, s.fill ? "#ffd690" : "#b0f0b0", 0.7 * (1 - u), 0); }
+    }
+  });
+})();
+
+/* Ezekiel – The Destroyer · Rastfeuer vor dem Wächterraum, gemalt (W11 Runde 35; Logik ebenen.js, Haken Z.rastGemalt)
+   Ab Stufe 1 (nicht lean/mini – dort bleibt die schlichte Fassung): Steinring, gekreuzte Scheite mit Rinde und hellen
+   Schnittflächen, pulsierendes Glutbett, dreizüngige Flamme (außen orange, innen gelb, weißer Kern), warmer Bodenschein;
+   ab Stufe 2 aufsteigende Funken und Rauchfahne. Sitz-Deko nur dort, wo Boden ist: Baumstamm-Bank links, Decke mit
+   Bündel rechts. Licht in der Lichtkarte (alle Stufen, ein Eintrag). Schalter Z.gfx.off.rast. Kein Blau. */
+(function () {
+  const Z = window.Z, G = Z.gfx, TAU = Math.PI * 2, T = 16; if (!G) return;
+  const lean = () => !!(Z.gq && (Z.gq.lean || Z.gq.mini));
+  const lvl = () => (Z.gq ? Z.gq.level || 0 : 0);
+  const off = () => (G.off && G.off.rast) || lean() || lvl() < 1;
+  const hh = (a, b) => { const v = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return v - Math.floor(v); };
+  const SP = new WeakMap(); /* Plätze für Deko je Rastplatz */
+  function spots(r) {
+    let s = SP.get(r); if (s) return s;
+    const lv = Z.level, tx = Math.floor(r.x / T), ty = Math.round(r.y / T) - 1, solid = v => v === 1;
+    const ok = dx => { const x = tx + dx; return lv && lv.get(x, ty) === 0 && lv.get(x, ty - 1) === 0 && solid(lv.get(x, ty + 1)); };
+    s = { bank: ok(-2) && ok(-1), decke: ok(2) && ok(1), bund: ok(2) && ok(3) };
+    SP.set(r, s); return s;
+  }
+  function flameTongue(c, x, y, h, w, sway, col) {
+    c.fillStyle = col; c.beginPath(); c.moveTo(x - w, y);
+    c.quadraticCurveTo(x - w * 0.9 + sway * 0.3, y - h * 0.55, x + sway, y - h);
+    c.quadraticCurveTo(x + w * 0.9 + sway * 0.3, y - h * 0.5, x + w, y); c.closePath(); c.fill();
+  }
+  Z.rastGemalt = function (c, r, t) {
+    if (off()) return false;
+    try {
+      const x = r.x, y = r.y, now = performance.now() / 1000, rich = lvl() >= 2, sp = spots(r);
+      /* Bodenschein */
+      const bg = c.createRadialGradient(x, y - 1, 1, x, y - 1, 30); bg.addColorStop(0, "rgba(255,150,60,.32)"); bg.addColorStop(1, "rgba(255,150,60,0)");
+      c.fillStyle = bg; c.fillRect(x - 30, y - 8, 60, 9);
+      /* Bank: Baumstamm mit Jahresringen */
+      if (sp.bank) { const bx = x - 24; c.fillStyle = "#2a1a10"; c.fillRect(bx - 7, y - 1.2, 14, 1.2);
+        c.fillStyle = "#4a2e1a"; c.fillRect(bx - 8, y - 7, 15, 6); c.fillStyle = "#6a4426"; c.fillRect(bx - 8, y - 7, 15, 1.6);
+        c.fillStyle = "rgba(20,10,6,.5)"; for (let i = 0; i < 4; i++) c.fillRect(bx - 6 + i * 3.6, y - 5 + (i % 2), 2.2, 0.6);
+        c.fillStyle = "#b08050"; c.beginPath(); c.ellipse(bx + 7, y - 4, 1.6, 3, 0, 0, TAU); c.fill(); c.strokeStyle = "#6a4426"; c.lineWidth = 0.5; c.beginPath(); c.ellipse(bx + 7, y - 4, 0.8, 1.6, 0, 0, TAU); c.stroke();
+        c.fillStyle = "rgba(255,170,90,.35)"; c.fillRect(bx + 4, y - 7, 3, 6); }
+      /* Decke (gestreift, gefaltet) und Bündel */
+      if (sp.decke) { const dx = x + 13; c.fillStyle = "#5a1e1a"; c.beginPath(); c.moveTo(dx, y); c.lineTo(dx + 1, y - 3); c.quadraticCurveTo(dx + 6, y - 4.5, dx + 13, y - 3); c.lineTo(dx + 14, y); c.closePath(); c.fill();
+        c.fillStyle = "#c8a050"; c.fillRect(dx + 2, y - 3.2, 11, 0.7); c.fillRect(dx + 2, y - 1.4, 11, 0.6);
+        c.fillStyle = "rgba(255,180,110,.3)"; c.fillRect(dx, y - 3.4, 3, 3.4); }
+      if (sp.bund) { const ux = x + 30; c.fillStyle = "#6a5a3a"; c.beginPath(); c.ellipse(ux, y - 4, 4.5, 4, 0, 0, TAU); c.fill(); c.fillStyle = "#8a7850"; c.beginPath(); c.ellipse(ux - 1.4, y - 5.4, 2, 1.6, 0, 0, TAU); c.fill();
+        c.strokeStyle = "#3a2a18"; c.lineWidth = 0.8; c.beginPath(); c.moveTo(ux - 1, y - 8); c.lineTo(ux + 0.5, y - 7.3); c.lineTo(ux + 2, y - 9); c.stroke(); }
+      /* Steinring hinten */
+      const stone = (sx, sy, rw, rh, col) => { c.fillStyle = col; c.beginPath(); c.ellipse(sx, sy, rw, rh, 0, 0, TAU); c.fill(); c.fillStyle = "rgba(255,210,160,.25)"; c.beginPath(); c.ellipse(sx - rw * 0.2, sy - rh * 0.4, rw * 0.5, rh * 0.3, 0, 0, TAU); c.fill(); };
+      for (let i = 0; i < 4; i++) stone(x - 6 + i * 4, y - 3.2, 2.2, 1.4, "#3e3634");
+      /* Glutbett */
+      const pu = 0.75 + 0.25 * Math.sin(now * 2.3) * Math.sin(now * 3.7 + 1);
+      c.fillStyle = "#2a0e06"; c.beginPath(); c.ellipse(x, y - 1.6, 8, 2, 0, 0, TAU); c.fill();
+      c.fillStyle = "rgba(255," + Math.round(80 + 60 * pu) + ",30," + (0.75 * pu).toFixed(2) + ")"; c.beginPath(); c.ellipse(x, y - 1.8, 6.5, 1.4, 0, 0, TAU); c.fill();
+      c.fillStyle = "rgba(255,220,140,.8)"; for (let i = 0; i < 4; i++) if (Math.sin(now * (3 + i) + i * 2) > 0.2) c.fillRect(x - 5 + i * 3.2 + hh(i, 3) * 1.5, y - 2.2, 0.9, 0.7);
+      /* Scheite: gekreuzt, Rinde dunkel, Schnittflächen hell/glühend */
+      for (const [ang, ox] of [[0.42, -0.5], [-0.42, 0.5], [0.08, 0]]) { c.save(); c.translate(x + ox, y - 3); c.rotate(ang);
+        c.fillStyle = "#3a2214"; c.fillRect(-8, -1.6, 16, 3.2); c.fillStyle = "#5a3a20"; c.fillRect(-8, -1.6, 16, 0.9); c.fillStyle = "rgba(255,110,30,.6)"; c.fillRect(-2.5, 0.6, 5, 1);
+        c.fillStyle = "#a07048"; c.beginPath(); c.ellipse(-8, 0, 0.9, 1.6, 0, 0, TAU); c.ellipse(8, 0, 0.9, 1.6, 0, 0, TAU); c.fill(); c.restore(); }
+      /* Steinring vorn */
+      stone(x - 9, y - 1.2, 2.6, 1.6, "#4a4240"); stone(x - 3.5, y - 0.6, 2.4, 1.5, "#524846"); stone(x + 2.5, y - 0.6, 2.5, 1.5, "#4a4240"); stone(x + 8.5, y - 1.2, 2.5, 1.6, "#524846");
+      /* Flamme: drei Zungen */
+      const fy = y - 4, f1 = Math.sin(now * 9) * 0.12 + Math.sin(now * 13.7) * 0.08;
+      for (const [dx, hk, ph] of [[-3, 0.75, 0], [3, 0.7, 2], [0, 1, 4]]) { const fl = 1 + f1 + Math.sin(now * 11 + ph) * 0.1, sw = Math.sin(now * 5 + ph) * 1.6;
+        flameTongue(c, x + dx, fy, 15 * hk * fl, 4 * hk, sw, "#e0541c"); }
+      flameTongue(c, x, fy, 11 * (1 + f1), 3.6, Math.sin(now * 6) * 1.2, "#ff9a3a");
+      flameTongue(c, x, fy, 7 * (1 + f1), 2.4, Math.sin(now * 7) * 0.8, "#ffd27a");
+      flameTongue(c, x, fy, 3.5, 1.2, 0, "#fff4d0");
+      c.save(); c.globalCompositeOperation = "lighter";
+      const gr = c.createRadialGradient(x, y - 9, 1, x, y - 9, 34); gr.addColorStop(0, "rgba(255,170,90," + (0.3 + 0.06 * Math.sin(now * 8)).toFixed(3) + ")"); gr.addColorStop(1, "rgba(255,170,90,0)");
+      c.fillStyle = gr; c.fillRect(x - 34, y - 43, 68, 60);
+      if (rich) for (let i = 0; i < 8; i++) { const sp2 = 0.5 + hh(i, 11) * 0.5, u = (now * sp2 + hh(i, 12)) % 1, sx = x + (hh(i, 13) - 0.5) * 8 + Math.sin(now * 2 + i) * 4 * u, sy = y - 10 - u * 46, a = (1 - u) * 0.9;
+        c.fillStyle = "rgba(255," + Math.round(150 + 80 * (1 - u)) + ",70," + a.toFixed(2) + ")"; c.fillRect(sx - 0.6, sy - 0.6, 1.2, 1.2); }
+      c.restore();
+      if (rich) { for (let i = 0; i < 4; i++) { const u = (now * 0.18 + i / 4) % 1, sx = x + Math.sin(now * 0.7 + i * 1.7) * 3 + u * 8, sy = y - 20 - u * 40, rr = 3 + u * 9;
+        c.fillStyle = "rgba(60,48,44," + (0.22 * Math.sin(u * Math.PI)).toFixed(3) + ")"; c.beginPath(); c.arc(sx, sy, rr, 0, TAU); c.fill(); } }
+      return true;
+    } catch (e) { console.error(e); return false; }
+  };
+  if (G.lightGather) G.lightGather.push(function (add, cam) {
+    if (G.off && G.off.rast) return;
+    const D = Z.level && Z.level._drama, r = D && D.rast; if (!r) return;
+    if (cam && (r.x < cam.x - 140 || r.x > cam.x + cam.w + 140 || r.y < cam.y - 60 || r.y > cam.y + cam.h + 140)) return;
+    add(r.x, r.y - 10, 96, "#ffa050", 0.62, 1);
+  });
+})();

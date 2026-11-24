@@ -1782,7 +1782,7 @@
   }
   /* Tiefenunschärfe: hintere Staffeln weicher als vordere, einmal beim Bau */
   function dofPage(cv, opaque) {
-    const s = cv.width / PW, back = Z.zeitBlur(cv, 1.05 * s, true), front = Z.zeitBlur(cv, 0.38 * s, true);
+    const s = cv.width / PW, back = Z.zeitBlur(cv, 0.7 * s, true) /* W11 R35: 1,05 → 0,7 – nahe Höhlenöffnungen (Glutgassen) wirkten verschmiert */, front = Z.zeitBlur(cv, 0.38 * s, true);
     const t = document.createElement("canvas"); t.width = cv.width; t.height = cv.height; const g = t.getContext("2d");
     g.drawImage(back, 0, 0); g.globalCompositeOperation = "destination-in";
     const gr = g.createLinearGradient(0, 0, 0, cv.height); gr.addColorStop(0, "#000"); gr.addColorStop(0.56, "#000"); gr.addColorStop(0.84, "rgba(0,0,0,0)"); g.fillStyle = gr; g.fillRect(0, 0, t.width, t.height);
