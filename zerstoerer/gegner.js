@@ -692,7 +692,7 @@
       const maxDy = a.dy != null ? a.dy : a.k === "leap" ? 90 : a.k === "dive" ? 200 : ["shoot", "lob", "mark", "summon", "heal", "shield", "teleport", "grow", "invis", "beam", "volley", "web", "pull", "drum", "flare", "brace", "shell", "smoke", "spores", "thread", "toll", "gust"].includes(a.k) ? 160 : 28;
       if (Math.abs(dy) > maxDy && !(d.fly && a.k !== "hit")) continue;
       if (a.k === "summon" && countMinions(e) >= (a.max || 4)) continue;
-      if (a.k === "heal" && !Z.enemies.some(o => !o.dead && o !== e && o.hp < o.hpMax * 0.7 && U.dist(o.x, o.y, e.x, e.y) < 260)) continue;
+      if (a.k === "heal" && !Z.enemies.some(o => !o.dead && o !== e && !o.def.boss && o.hp < o.hpMax * 0.7 && U.dist(o.x, o.y, e.x, e.y) < 260)) continue;
       /* W8: kein Angriff ohne Sichtlinie (gecacht aus der Wahrnehmung) – außer Beschwören/Heilen/Schild/Wachsen/Unsichtbar */
       if (!NOLOS[a.k] && !hasLos(e, P)) continue;
       opts.push(a);
@@ -823,7 +823,7 @@
         if (P && W.los(cx, cy, P.x + P.w / 2, P.y + 10)) { e.act.pull = true; e.act.tether = true; FX.text(P.x + P.w / 2, P.y - 8, L(["Gezogen!", "Pulled!"]), "#eee8f0"); }
         break;
       }
-      case "heal": for (const o of Z.enemies) if (!o.dead && U.dist(o.x, o.y, e.x, e.y) < 260) { o.hp = Math.min(o.hpMax, o.hp + o.hpMax * ((a.amt || 0.3) + (a.amt && e.elite ? 0.1 : 0))); FX.burst(o.x + o.w / 2, o.y + o.h / 2, 8, { col: "#9ad04a", sp: 40, up: 30, life: 0.6, size: 2, kind: "glow", add: true }); } break;
+      case "heal": for (const o of Z.enemies) if (!o.dead && !o.def.boss && U.dist(o.x, o.y, e.x, e.y) < 260) { o.hp = Math.min(o.hpMax, o.hp + o.hpMax * ((a.amt || 0.3) + (a.amt && e.elite ? 0.1 : 0)) * (o.nmMini ? 0.2 : 1) /* W9: Bosse nie, Mini-Bosse nur 1/5 (Myconid heilte Mini-Bosse alle 7 s um 20 %) */); FX.burst(o.x + o.w / 2, o.y + o.h / 2, 8, { col: "#9ad04a", sp: 40, up: 30, life: 0.6, size: 2, kind: "glow", add: true }); } break;
       case "shield": for (const o of Z.enemies) if (!o.dead && U.dist(o.x, o.y, e.x, e.y) < 220) { o.armorUp = 4; FX.ring(o.x + o.w / 2, o.y + o.h / 2, 16, "#ffd27a", 0.4, 2); } break;
       case "grow": e.size *= 1.45; e.w = Math.round(e.w * 1.3); e.h = Math.round(e.h * 1.45); e.y -= e.h * 0.31; e.dmgMul *= 1.35; e.hp += e.hpMax * 0.3; e.hpMax *= 1.3; Z.unstick(e); FX.ring(cx, e.y + e.h / 2, 30, "#ff6a2a", 0.4, 3); break;
       case "drum": drum(e); break;

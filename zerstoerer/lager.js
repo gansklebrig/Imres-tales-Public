@@ -1521,7 +1521,7 @@
   }
   /* Alwin: Rekorde am Ende eines Laufs */
   function records(why) {
-    const run = Z.run, S2 = Z.stats || {}, m = LM(), k = m.rek; if (!run || run.lgRec) return; run.lgRec = 1;
+    const run = Z.run, S2 = Z.stats || {}, m = LM(), k = m.rek; if (!run || run.lgRec || run.gnade /* W9: Barmherzigkeit wertet keine Rekorde */) return; run.lgRec = 1;
     const tiers = (run.route || []).map(a => (Z.BIOMES[a] ? Z.BIOMES[a].tier : Z.ARENAS[a] ? Z.ARENAS[a].tier : 0) || 0);
     const now = { areas: (run.route || []).length, tier: Math.max(0, ...tiers), kills: S2.kills || 0, gold: S2.gold || 0, bosses: (run.bossesBeaten || []).length, time: Math.round(run.time || 0) };
     const N = { areas: ["Gebiete", "areas"], tier: ["Tiefe", "depth"], kills: ["Kills", "kills"], gold: ["Gold", "gold"], bosses: ["Bosse", "bosses"], time: ["Dauer", "duration"] };

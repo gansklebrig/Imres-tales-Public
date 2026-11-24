@@ -687,6 +687,14 @@
   /* Raumplan: je Raum mit Funktion werden einmal pro Karte bis zu drei passende Stellen für seine Schaustücke gesucht
      (ganzer Raum, notfalls kleinere Fassung des Stücks). Das Ergebnis gilt für alle Chunks gleich. */
   let rpLv = null, rpProps = null, rpList = null;
+  /* Räume ohne Funktion (Gänge, Treppenhäuser, Parcours) bekommen je Gebiet eigenen Charakter: Gangfresken, blinde
+     Bogengänge, Wendeltreppen im Hintergrund, Wimpelketten – gemischt mit den Gebietsstücken */
+  const GANG = {
+    castle: ["fresko", "bogengang", "wendeltreppe", "tapestry", "shields"], ramparts: ["wimpel", "bogengang", "wendeltreppe", "shields"], storm: ["bogengang", "statue", "fresko"],
+    halls: ["fresko", "bogengang", "wendeltreppe", "tapestry", "gallery"], spires: ["bogengang", "wendeltreppe", "tapestry"], cellar: ["bogengang", "wendeltreppe", "rack"],
+    dungeon: ["bogengang", "wendeltreppe", "cell", "fresko"], harbour: ["wimpel", "nets", "ribs"], belltower: ["wendeltreppe", "gear", "bell", "wimpel"],
+    forge: ["bogengang", "chimney", "face"], lake: ["ruin", "relief"], chasm: ["cocoon", "eier"], embercity: ["face", "chimney", "bogengang"], passage: ["tapestry", "fresko"]
+  };
   /* stehende Stücke, die notfalls auch auf Kragsteinen an der Wand hängen dürfen (Bücherbord, Waffenbrett) */
   const FLOATOK = { buecherwand: 1, waffen: 1, krugbord: 1 };
   function roomPlan(H, dec) {
@@ -696,10 +704,11 @@
     if (lv.hub || lv.arena || !lv.roomFns) return rpList;
     const CW = Z.CW, CH = Z.CH, h3 = H.h3, taken = [];
     const free = (ox, oy, w, h) => !taken.some(t => ox < t[0] + t[2] + 1 && ox + w + 1 > t[0] && oy < t[1] + t[3] + 1 && oy + h + 1 > t[1]);
-    for (const k in lv.roomFns) {
-      const rl = ROOMPIECE[lv.roomFns[k]]; if (!rl) continue;
+    const gang = GANG[H.B.bg], wk = lv.warden && lv.warden.cell ? lv.warden.cell.x + "," + lv.warden.cell.y : null;
+    for (const k in (lv.cells || lv.roomFns)) {
+      const fn = lv.roomFns[k], rl = fn ? ROOMPIECE[fn] : k !== wk ? gang : null; if (!rl) continue;
       const [cx, cy] = k.split(",").map(Number), rx = cx * CW, ry = cy * CH;
-      const want = 2 + (h3(cx, cy, 905) < 0.5 ? 1 : 0); let got = 0;
+      const want = fn ? 2 + (h3(cx, cy, 905) < 0.5 ? 1 : 0) : 1 + (h3(cx, cy, 905) < 0.6 ? 1 : 0); let got = 0;
       for (let i = 0; i < rl.length * 2 && got < want; i++) {
         const kind = rl[(i + ((h3(cx, cy, 906) * rl.length) | 0)) % rl.length], sz = SIZE[kind]; if (!sz || !PIECE[kind]) continue;
         const stand = !!sz[2], sizes = [[sz[0], sz[1]], [sz[0], sz[1] - 1], [sz[0] - 1, sz[1]], [sz[0] - 1, sz[1] - 1]].filter(s => s[0] >= 2 && s[1] >= 2);
@@ -712,7 +721,7 @@
           }
           if (hit) break;
         }
-        if (hit) { taken.push(hit); rpList.push({ kind, x: hit[0], y: hit[1], w: hit[2], h: hit[3], r: h3(hit[0], hit[1], 904), fn: lv.roomFns[k], fl: !!hit[4] }); got++; }
+        if (hit) { taken.push(hit); rpList.push({ kind, x: hit[0], y: hit[1], w: hit[2], h: hit[3], r: h3(hit[0], hit[1], 904), fn: fn || "gang", fl: !!hit[4] }); got++; }
       }
     }
     G.rpMs = +(performance.now() - tRP).toFixed(2);
@@ -729,7 +738,8 @@
     if (!list0 || !list0.length) return;
     for (let gy = Math.floor(y0 / GY) - 1; gy * GY < y1 + 1; gy++) for (let gx = Math.floor(x0 / GX) - 1; gx * GX < x1 + 1; gx++) {
       /* Räume mit eigenem Satz bekommen keine Gebietsstücke dazu */
-      const fn = useRoom ? raumTyp(lv, gx * GX + GX / 2, gy * GY + GY / 2) : null; if (fn && ROOMPIECE[fn]) continue;
+      const tcx = gx * GX + GX / 2, tcy = gy * GY + GY / 2, fn = useRoom ? raumTyp(lv, tcx, tcy) : null; if (fn && ROOMPIECE[fn]) continue;
+      if (useRoom && GANG[B.bg] && lv.cells && lv.cells[Math.floor(tcx / Z.CW) + "," + Math.floor(tcy / Z.CH)]) continue;
       if (h3(gx, gy, 900) > 0.42) continue;
       const kind = list0[(h3(gx, gy, 901) * list0.length) | 0], sz = SIZE[kind]; if (!sz || !PIECE[kind]) continue; const w = sz[0], h = sz[1], stand = !!sz[2];
       const ox = gx * GX + ((h3(gx, gy, 902) * (GX - w + 1)) | 0); let oy = -1;
@@ -1298,6 +1308,64 @@
         c.save(); c.translate(bx, by); c.rotate(a + PI / 2); const col = k % 3 === 0 ? "#b070e0" : k % 3 === 1 ? "#d0a0f0" : "#8a4ab8";
         c.fillStyle = col; c.beginPath(); c.moveTo(-wd, 0); c.lineTo(-wd, -len); c.lineTo(0, -len - wd * 1.4); c.lineTo(wd, -len); c.lineTo(wd, 0); c.fill(); c.fillStyle = "rgba(255,240,255,.35)"; c.fillRect(-wd, -len, wd * 0.6, len); c.fillStyle = "rgba(40,10,60,.3)"; c.fillRect(wd * 0.4, -len, wd * 0.6, len); c.restore(); }
       c.fillStyle = "#fff"; c.fillRect(cx - 3, cy - 14, 1, 1); c.fillRect(cx + 5, cy - 8, 0.8, 0.8);
+    }
+  });
+  /* ---------- Gangstücke (Runde 8): Fresko, blinder Bogengang, Wendeltreppe, Wimpelkette ---------- */
+  Object.assign(SIZE, { fresko: [6, 2], bogengang: [6, 3], wendeltreppe: [3, 5, 1], wimpel: [5, 2] });
+  Object.assign(PIECE, {
+    /* verblasstes Gangfresko: Jagdszene mit Reitern, Hirsch und Bäumen auf altem Putz, Bordüre, abgeplatzte Stellen */
+    fresko(c, x, y, w, h, H, r) {
+      const fx = x + 3, fy = y + 4, fw = w - 6, fh = h - 8, pl = H.mixH(H.B.wall, "#a8906a", 0.55);
+      sh(c, fx + 1, fy + 1, fw, fh, 0.35); c.fillStyle = pl; c.fillRect(fx, fy, fw, fh);
+      const g = c.createLinearGradient(0, fy, 0, fy + fh); g.addColorStop(0, "rgba(200,170,120,.25)"); g.addColorStop(1, "rgba(60,40,20,.25)"); c.fillStyle = g; c.fillRect(fx, fy, fw, fh);
+      c.fillStyle = "#6a2a1e"; c.fillRect(fx, fy, fw, 2); c.fillRect(fx, fy + fh - 2, fw, 2); c.fillStyle = "#c8a050"; for (let xx = fx + 2; xx < fx + fw - 2; xx += 5) { c.fillRect(xx, fy + 0.6, 2, 0.8); c.fillRect(xx + 2.5, fy + fh - 1.4, 2, 0.8); }
+      c.save(); c.beginPath(); c.rect(fx, fy + 2, fw, fh - 4); c.clip();
+      c.fillStyle = "rgba(70,96,50,.55)"; c.fillRect(fx, fy + fh - 7, fw, 5);
+      for (let k = 0; k < 4; k++) { const tx = fx + 6 + k * fw / 4 + H.h3(k, x | 0, 1700) * 6; c.fillStyle = "rgba(60,40,24,.6)"; c.fillRect(tx - 0.6, fy + fh - 14, 1.2, 9); c.fillStyle = "rgba(60,96,44,.6)"; c.beginPath(); c.arc(tx, fy + fh - 15, 4, 0, TAU); c.fill(); }
+      const dir = r < 0.5 ? 1 : -1;
+      for (let k = 0; k < 2; k++) { const hx = fx + fw * (0.25 + k * 0.22), hy = fy + fh - 7; c.fillStyle = k ? "rgba(90,60,40,.75)" : "rgba(220,210,190,.7)"; c.beginPath(); c.ellipse(hx, hy - 5, 5, 2.6, 0, 0, TAU); c.fill(); c.fillRect(hx - 4, hy - 4, 1, 4); c.fillRect(hx + 3, hy - 4, 1, 4); c.beginPath(); c.moveTo(hx + dir * 4, hy - 6); c.lineTo(hx + dir * 7, hy - 9); c.lineTo(hx + dir * 7.6, hy - 7.6); c.fill();
+        c.fillStyle = k ? "rgba(140,40,30,.8)" : "rgba(60,80,40,.8)"; c.fillRect(hx - 1, hy - 12, 2.4, 5); c.fillStyle = "rgba(220,190,150,.8)"; c.beginPath(); c.arc(hx + 0.2, hy - 13, 1.3, 0, TAU); c.fill(); c.strokeStyle = "rgba(60,40,24,.7)"; c.lineWidth = 0.5; c.beginPath(); c.moveTo(hx, hy - 11); c.lineTo(hx + dir * 6, hy - 14); c.stroke(); }
+      const sx = fx + fw * 0.78, sy = fy + fh - 7; c.fillStyle = "rgba(150,90,50,.75)"; c.beginPath(); c.ellipse(sx, sy - 4, 4, 2, 0, 0, TAU); c.fill(); c.fillRect(sx - 3, sy - 3, 0.8, 3); c.fillRect(sx + 2, sy - 3, 0.8, 3); c.strokeStyle = "rgba(120,80,40,.8)"; c.lineWidth = 0.5; c.beginPath(); c.moveTo(sx + dir * 3, sy - 6); c.lineTo(sx + dir * 4, sy - 10); c.lineTo(sx + dir * 2, sy - 12); c.moveTo(sx + dir * 4, sy - 10); c.lineTo(sx + dir * 6, sy - 12); c.stroke();
+      for (let k = 0; k < 4; k++) { const bx = fx + H.h3(k, y | 0, 1701) * fw, by = fy + H.h3(k, 3, 1702) * fh, R = 2 + H.h3(k, 4, 1703) * 4; c.fillStyle = H.lit(H.B.wall, -0.05); c.beginPath(); c.ellipse(bx, by, R, R * 0.7, k, 0, TAU); c.fill(); }
+      for (let k = 0; k < 30; k++) { c.fillStyle = k % 2 ? "rgba(0,0,0,.08)" : "rgba(255,240,220,.06)"; c.fillRect(fx + H.h3(k, 9, 1704) * fw, fy + H.h3(k, 8, 1705) * fh, 1.5, 0.8); }
+      c.restore();
+    },
+    /* blinder Bogengang: drei Rundbögen auf Säulchen mit Kapitellen, Nischen im Schatten */
+    bogengang(c, x, y, w, h, H, r) {
+      const P = H.PAL, n = 3, aw = (w - 6) / n, top = y + 4, bot = y + h - 2;
+      c.fillStyle = P.stone; c.fillRect(x + 1, bot - 2, w - 2, 3); c.fillStyle = P.stoneHi; c.fillRect(x + 1, bot - 2, w - 2, 0.7);
+      for (let k = 0; k < n; k++) {
+        const ax = x + 3 + k * aw, cx = ax + aw / 2, ar = aw / 2 - 2.5;
+        c.fillStyle = "rgba(0,0,0,.42)"; c.beginPath(); c.moveTo(ax + 2.5, bot - 2); c.lineTo(ax + 2.5, top + ar + 2); c.arc(cx, top + ar + 2, ar, Math.PI, 0); c.lineTo(ax + aw - 2.5, bot - 2); c.fill();
+        const g = c.createLinearGradient(0, top, 0, top + 16); g.addColorStop(0, "rgba(0,0,0,.35)"); g.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = g; c.fillRect(ax + 2.5, top, aw - 5, 16);
+        c.strokeStyle = P.stone; c.lineWidth = 2.2; c.beginPath(); c.arc(cx, top + ar + 2, ar + 1, Math.PI, 0); c.stroke(); c.strokeStyle = "rgba(0,0,0,.35)"; c.lineWidth = 0.5; for (let j = 1; j < 6; j++) { const a = Math.PI + j / 6 * Math.PI; c.beginPath(); c.moveTo(cx + Math.cos(a) * ar, top + ar + 2 + Math.sin(a) * ar); c.lineTo(cx + Math.cos(a) * (ar + 2.2), top + ar + 2 + Math.sin(a) * (ar + 2.2)); c.stroke(); }
+        c.strokeStyle = P.stoneHi; c.lineWidth = 0.5; c.beginPath(); c.arc(cx, top + ar + 2, ar + 2.1, Math.PI * 1.05, Math.PI * 1.45); c.stroke();
+      }
+      for (let k = 0; k <= n; k++) { const px = x + 3 + k * aw; c.fillStyle = "rgba(0,0,0,.3)"; c.fillRect(px - 0.5, top + 8, 3, bot - top - 10); c.fillStyle = P.stone; c.fillRect(px - 1.5, top + 8, 3, bot - top - 10); c.fillStyle = P.stoneHi; c.fillRect(px - 1.5, top + 8, 0.7, bot - top - 10); c.fillStyle = H.lit(H.B.wall, 0.12); c.fillRect(px - 2.6, top + 6.5, 5.2, 2); c.fillRect(px - 2.6, bot - 3.5, 5.2, 1.6); }
+      if (r < 0.4) { const k = (r * 7) | 0 % n, cx = x + 3 + (k % n) * aw + aw / 2; c.fillStyle = "#e8dcc0"; c.fillRect(cx - 0.7, bot - 7, 1.4, 4.5); c.fillStyle = "rgba(255,210,120,.85)"; c.beginPath(); c.ellipse(cx, bot - 8, 0.6, 1.2, 0, 0, TAU); c.fill(); }
+    },
+    /* Wendeltreppe hinter einem Mauerschlitz: gerundeter Turmschaft, Stufen schrauben sich hinauf, Licht von oben */
+    wendeltreppe(c, x, y, w, h, H, r) {
+      const P = H.PAL, cx = x + w / 2, rw = w / 2 - 3, top = y + 2, bot = y + h;
+      c.fillStyle = "rgba(0,0,0,.45)"; c.fillRect(cx - rw - 1, top, rw * 2 + 2, bot - top);
+      const g = c.createLinearGradient(cx - rw, 0, cx + rw, 0); g.addColorStop(0, "rgba(0,0,0,.5)"); g.addColorStop(0.5, "rgba(60,44,30,.25)"); g.addColorStop(1, "rgba(0,0,0,.55)"); c.fillStyle = g; c.fillRect(cx - rw, top, rw * 2, bot - top);
+      c.fillStyle = H.lit(H.B.wall, -0.15); c.fillRect(cx - 1.6, top, 3.2, bot - top);
+      const n = Math.floor((bot - top) / 5);
+      for (let k = 0; k < n; k++) { const ph = k * 0.9 + r * 6, yy = bot - 4 - k * 5, s1 = Math.sin(ph), wx = s1 * rw, front = Math.cos(ph) > 0; if (!front) continue;
+        c.fillStyle = P.stone; c.beginPath(); c.moveTo(cx, yy); c.lineTo(cx + wx, yy - 1.5); c.lineTo(cx + wx, yy + 1.4); c.lineTo(cx, yy + 2.4); c.fill(); c.fillStyle = P.stoneHi; c.beginPath(); c.moveTo(cx, yy); c.lineTo(cx + wx, yy - 1.5); c.lineTo(cx + wx, yy - 0.8); c.lineTo(cx, yy + 0.6); c.fill(); }
+      c.globalCompositeOperation = "lighter"; const lg = c.createLinearGradient(0, top, 0, top + 30); lg.addColorStop(0, "rgba(255,220,160,.16)"); lg.addColorStop(1, "rgba(255,220,160,0)"); c.fillStyle = lg; c.fillRect(cx - rw, top, rw * 2, 30); c.globalCompositeOperation = "source-over";
+      for (const sd of [-1, 1]) { const ex = cx + sd * (rw + 1); c.fillStyle = P.stone; c.fillRect(ex - 1.5, top, 3, bot - top); c.fillStyle = sd < 0 ? P.stoneHi : "rgba(0,0,0,.3)"; c.fillRect(ex - 1.5, top, 0.7, bot - top); for (let yy = top + 3; yy < bot; yy += 7) { c.fillStyle = "rgba(0,0,0,.3)"; c.fillRect(ex - 1.5, yy, 3, 0.6); } }
+      c.fillStyle = P.stone; c.fillRect(cx - rw - 2.5, top - 1, rw * 2 + 5, 3); c.fillStyle = P.stoneHi; c.fillRect(cx - rw - 2.5, top - 1, rw * 2 + 5, 0.7);
+    },
+    /* Wimpelkette quer über die Wand, dreieckige Fähnchen in Rot, Ocker, Grün und Creme */
+    wimpel(c, x, y, w, h, H, r) {
+      const y0 = y + 4, sag = 8 + r * 6, n = 9, cols = ["#8a2020", "#c8902a", "#3a5a2a", "#e0d4b8", "#6a2a5a"];
+      const yAt = u => y0 + Math.sin(u * Math.PI) * sag;
+      c.strokeStyle = "#3a2a1c"; c.lineWidth = 0.6; c.beginPath(); for (let k = 0; k <= 20; k++) { const u = k / 20, xx = x + 2 + u * (w - 4); k ? c.lineTo(xx, yAt(u)) : c.moveTo(xx, yAt(u)); } c.stroke();
+      for (let k = 0; k < n; k++) { const u0 = (k + 0.15) / n, u1 = (k + 0.85) / n, x0 = x + 2 + u0 * (w - 4), x1 = x + 2 + u1 * (w - 4), y0b = yAt(u0), y1b = yAt(u1);
+        c.fillStyle = "rgba(0,0,0,.3)"; c.beginPath(); c.moveTo(x0 + 0.8, y0b + 0.8); c.lineTo(x1 + 0.8, y1b + 0.8); c.lineTo((x0 + x1) / 2 + 0.8, (y0b + y1b) / 2 + 8.8); c.fill();
+        c.fillStyle = cols[(k + ((r * 10) | 0)) % cols.length]; c.beginPath(); c.moveTo(x0, y0b); c.lineTo(x1, y1b); c.lineTo((x0 + x1) / 2, (y0b + y1b) / 2 + 8); c.fill(); c.fillStyle = "rgba(255,240,220,.15)"; c.beginPath(); c.moveTo(x0, y0b); c.lineTo((x0 + x1) / 2, (y0b + y1b) / 2); c.lineTo((x0 + x1) / 2, (y0b + y1b) / 2 + 8); c.fill(); }
+      for (const ex of [x + 2, x + w - 2]) { c.fillStyle = "#2a2420"; c.fillRect(ex - 1, y0 - 1.5, 2, 3); }
     }
   });
   /* ---------- Fels: Patina, Kanten, Einschlüsse, Laufflächen ---------- */
@@ -2110,22 +2178,23 @@
   function rimMask(orig, c, ent, time, x0, y0, w, h) {
     const cx = x0 + w / 2, cy = y0 + h / 2, L = best(cx, cy); if (!L) return null;
     const m = c.getTransform(); if (Math.abs(m.b) > 1e-6 || Math.abs(m.c) > 1e-6) return null;
-    const s = m.a, sx = Math.floor(m.a * x0 + m.e), sy = Math.floor(m.d * y0 + m.f), W = Math.ceil(w * s) + 2, H = Math.ceil(h * m.d) + 2;
-    if (W < 4 || H < 4 || W > 900 || H > 900) return null;
-    if (frame !== G.frame) { frame = G.frame; budget = 9; pend.length = 0; }
+    /* Maske in halber Auflösung (die Kante ist weich genug, spart drei Viertel der Pixel) */
+    const RQ = 0.5, s = m.a * RQ, sx = Math.floor(m.a * x0 + m.e), sy = Math.floor(m.d * y0 + m.f), W = Math.ceil(w * s) + 2, H = Math.ceil(h * m.d * RQ) + 2;
+    if (W < 4 || H < 4 || W > 600 || H > 600) return null;
+    if (frame !== G.frame) { frame = G.frame; budget = 3; pend.length = 0; }
     if (pend.length >= POOL.length) POOL.push(document.createElement("canvas"));
     const mc = POOL[pend.length], mx = mc.getContext("2d");
     if (mc.width < W || mc.height < H) { mc.width = Math.max(mc.width, W); mc.height = Math.max(mc.height, H); }
     mx.setTransform(1, 0, 0, 1, 0, 0); mx.globalCompositeOperation = "source-over"; mx.globalAlpha = 1; mx.clearRect(0, 0, W, H);
-    mx.save(); mx.beginPath(); mx.rect(0, 0, W, H); mx.clip(); mx.setTransform(m.a, 0, 0, m.d, m.e - sx, m.f - sy);
+    mx.save(); mx.beginPath(); mx.rect(0, 0, W, H); mx.clip(); mx.setTransform(m.a * RQ, 0, 0, m.d * RQ, (m.e - sx) * RQ, (m.f - sy) * RQ);
     try { orig.call(Z, mx, ent, time); } catch (e) { mx.restore(); return null; }
     mx.restore(); mx.setTransform(1, 0, 0, 1, 0, 0);
     const k = L.c, col = "rgb(" + Math.min(255, k[0] * 0.7 + 90 | 0) + "," + Math.min(255, k[1] * 0.7 + 80 | 0) + "," + Math.min(255, k[2] * 0.7 + 60 | 0) + ")";
     mx.globalCompositeOperation = "source-in"; mx.fillStyle = col; mx.fillRect(0, 0, W, H);
-    const off = 1.3 * s, ox = -L._dx / L._d * off, oy = -L._dy / L._d * off * 0.8;
+    const off = 1.4 * s, ox = -L._dx / L._d * off, oy = -L._dy / L._d * off * 0.8;
     mx.globalCompositeOperation = "destination-out"; mx.drawImage(mc, 0, 0, W, H, ox, oy, W, H);
     mx.globalCompositeOperation = "source-over";
-    const r = { mc, sx, sy, W, H, a: Math.min(0.8, 0.35 + L._s * 1.8) }; return r;
+    const r = { mc, sx, sy, W, H, q: RQ, a: Math.min(0.8, 0.35 + L._s * 1.8) }; return r;
   }
   /* aufgelegt wird erst nach dem Lichtdurchgang (sonst würde das Dunkel die Kante wieder schlucken) */
   function rimApply(c, r) { pend.push(r); }
@@ -2137,7 +2206,7 @@
       if (aft0) aft0.apply(this, arguments);
       if (!pend.length || frame !== G.frame) return;
       c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = "lighter";
-      for (const r of pend) { c.globalAlpha = r.a; c.drawImage(r.mc, 0, 0, r.W, r.H, r.sx, r.sy, r.W, r.H); }
+      for (const r of pend) { c.globalAlpha = r.a; c.drawImage(r.mc, 0, 0, r.W, r.H, r.sx, r.sy, r.W / r.q, r.H / r.q); }
       c.restore(); G._rimN = pend.length; pend.length = 0;
     };
     Z.drawEnemy = function (c, e, time) {
@@ -2145,8 +2214,9 @@
       let m = null; depth++;
       try {
       if (on() && e && !e.dead && !(e.def && e.def.boss) && !e.disguise) {
-        if (frame !== G.frame) { frame = G.frame; budget = 9; pend.length = 0; }
-        if (budget > 0) { budget--; try { m = rimMask(dE, c, e, time, e.x - 14, e.y - 6, e.w + 28, e.h + 10); } catch (err) { m = null; } }
+        if (frame !== G.frame) { frame = G.frame; budget = 3; pend.length = 0; }
+        const P0 = Z.player;
+        if (budget > 0 && (!P0 || Math.abs(e.x - P0.x) < 360 && Math.abs(e.y - P0.y) < 220)) { budget--; try { m = rimMask(dE, c, e, time, e.x - 14, e.y - 6, e.w + 28, e.h + 10); } catch (err) { m = null; } }
       }
       const r = dE.apply(this, arguments);
       if (m) rimApply(c, m);
@@ -2166,4 +2236,197 @@
     };
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", reg); else setTimeout(reg, 0);
+})();
+
+/* Ezekiel – The Destroyer · Arena-Kulissen II (Grafik-Runde 8): Labor, Tempelsteg, Hort, Herz des Sees, Herz der Fäden
+   Wie Wachturm/Turmspitze: Leben im Hintergrund (ab Stufe 1), Requisiten mit Licht auf der Kampffläche, Vordergrund-
+   Schattenrisse an den Rändern ab Stufe 2 (blenden über fgAlpha aus, wenn Kampf oder Ezekiel dahinter ist).
+   Labor: brodelnde Destillierkolben, schwebende Glasscherben, Runenkreis. Tempelsteg: Laternen auf Pollern, Gischt an
+   den Pfählen, Möwen. Hort: Goldglitzern über dem Schatzberg, rieselnde Münzen. Herz des Sees: grüne Lichtbahnen von
+   oben, Schwebeteilchen, wiegender Tang. Herz der Fäden: leuchtende Seidenfäden, Tauperlen, eingesponnene Kokons. Kein Blau. */
+(function () {
+  "use strict";
+  const Z = window.Z, G = Z.gfx, T = Z.TILE, TAU = Math.PI * 2, PI = Math.PI;
+  const on = () => { const q = Z.gq; if (!q) return true; if (q.lean) return false; return q.level === -1 ? true : q.level >= 1; };
+  const rich = () => { const q = Z.gq; if (q && q.lean) return false; return !q || (q.level === -1 ? q.layers !== false : q.level >= 2); };
+  const hash = i => { let h = Math.imul((i | 0) ^ 0x9e3779b9, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+  const which = () => { const lv = Z.level; if (!lv || !lv.arena) return null; if (lv.arena === "herz") return "faeden"; const A = Z.ARENAS && Z.ARENAS[lv.arena]; const k = A && A.kind; return k === "lab" ? "labor" : k === "pier" ? "steg" : k === "hoard" ? "hort" : k === "lakeboss" ? "seeherz" : null; };
+  function floorY() { const lv = Z.level, x = Math.floor(lv.W / 2); for (let y = 3; y < lv.H; y++) if (lv.get(x, y) === 1) return y * T; return (lv.H - 2) * T; }
+  const par = (cam, wx, p) => cam.x * (1 - p) + wx * p;
+  function glowAt(c, x, y, r, col, a) { const g = c.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, col.replace("A", a.toFixed(3))); g.addColorStop(1, col.replace("A", "0")); c.fillStyle = g; c.fillRect(x - r, y - r, r * 2, r * 2); }
+  /* Requisiten auf der Kampffläche (Anteile der Breite) */
+  const PROPS = { labor: [[0.18, "kolben"], [0.82, "kolben"]], steg: [[0.15, "poller"], [0.5, "poller"], [0.85, "poller"]], hort: [[0.22, "kelch"], [0.78, "kelch"]], seeherz: [[0.2, "muschel"], [0.8, "muschel"]], faeden: [[0.2, "kokon"], [0.8, "kokon"]] };
+  const LCOL = { kolben: "#b8f060", poller: "#ffc070", kelch: "#ffd27a", muschel: "#c8f0b0", kokon: "#e8d8f0" };
+  const propPos = (fx) => { const lv = Z.level; return { x: Math.round(lv.W * fx) * T + 8, y: floorY() }; };
+  /* ---------- Hintergrund ---------- */
+  function back(c, cam, t, w) {
+    const lv = Z.level, W = lv.W * T, fy = floorY();
+    c.save(); c.globalCompositeOperation = "lighter";
+    if (w === "labor" || w === "faeden") {
+      /* schwebende Glasscherben bzw. Tauperlen, die im Licht blitzen */
+      for (let i = 0; i < 18; i++) { const x = par(cam, W * hash(i), 0.6), y = cam.y + cam.h * (0.1 + hash(i + 50) * 0.6) + Math.sin(t * 0.6 + i) * 6, a = 0.3 + 0.3 * Math.max(0, Math.sin(t * 1.7 + i * 2.3));
+        if (w === "labor") { c.save(); c.translate(x, y); c.rotate(t * 0.3 + i); c.fillStyle = "rgba(200,240,190," + (a * 0.5).toFixed(2) + ")"; c.beginPath(); c.moveTo(0, -3); c.lineTo(2, 1); c.lineTo(-1.5, 2); c.fill(); c.restore(); }
+        else { c.fillStyle = "rgba(240,230,255," + a.toFixed(2) + ")"; c.beginPath(); c.arc(x, y, 1, 0, TAU); c.fill(); } }
+      if (w === "faeden") { /* Seidenfäden quer durch die Höhle, an denen Licht entlangläuft */
+        c.lineWidth = 0.6; for (let i = 0; i < 7; i++) { const x0 = par(cam, W * hash(i + 9) - 200, 0.7), y0 = fy - 260 + hash(i + 3) * 200, x1 = x0 + 400 + hash(i) * 300, y1 = y0 + (hash(i + 7) - 0.5) * 160, sag = 30 + hash(i + 11) * 40;
+          c.strokeStyle = "rgba(220,200,240,.16)"; c.beginPath(); c.moveTo(x0, y0); c.quadraticCurveTo((x0 + x1) / 2, (y0 + y1) / 2 + sag, x1, y1); c.stroke();
+          const u = (t * 0.12 + hash(i + 20)) % 1, px = (1 - u) * (1 - u) * x0 + 2 * u * (1 - u) * (x0 + x1) / 2 + u * u * x1, py = (1 - u) * (1 - u) * y0 + 2 * u * (1 - u) * ((y0 + y1) / 2 + sag) + u * u * y1; glowAt(c, px, py, 10, "rgba(230,200,255,A)", 0.5); } }
+      else { /* Runenkreis am Boden hinter der Kampffläche */
+        const rx = par(cam, W / 2, 0.85), ry = fy - 4, R = 120, a = 0.12 + 0.06 * Math.sin(t * 1.2); c.strokeStyle = "rgba(190,240,110," + a.toFixed(2) + ")"; c.lineWidth = 1.2; c.beginPath(); c.ellipse(rx, ry, R, R * 0.18, 0, 0, TAU); c.stroke(); c.beginPath(); c.ellipse(rx, ry, R * 0.8, R * 0.14, 0, 0, TAU); c.stroke();
+        for (let k = 0; k < 12; k++) { const an = k / 12 * TAU + t * 0.1; c.fillStyle = "rgba(200,240,120," + (a * 1.6).toFixed(2) + ")"; c.fillRect(rx + Math.cos(an) * R * 0.9 - 1, ry + Math.sin(an) * R * 0.16 - 1.5, 2, 3); } }
+    } else if (w === "hort") {
+      /* Goldglitzern auf dem Schatzberg und rieselnde Münzen */
+      for (let i = 0; i < 40; i++) { const x = par(cam, W * hash(i), 0.5), y = fy - 20 - hash(i + 100) * 160, a = Math.max(0, Math.sin(t * (1.5 + hash(i + 7) * 2) + i * 3)); if (a < 0.6) continue; const s = (a - 0.6) * 9;
+        c.strokeStyle = "rgba(255,240,180," + ((a - 0.6) * 2).toFixed(2) + ")"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(x - s, y); c.lineTo(x + s, y); c.moveTo(x, y - s); c.lineTo(x, y + s); c.stroke(); }
+      for (let i = 0; i < 8; i++) { const u = (t * 0.25 + hash(i + 40)) % 1, x = par(cam, W * hash(i + 60), 0.5) + Math.sin(u * 8 + i) * 3, y = fy - 200 + u * 190; c.fillStyle = "rgba(255,214,110," + (0.8 * (1 - u)).toFixed(2) + ")"; c.fillRect(x, y, 1.6, 1 + Math.abs(Math.sin(t * 9 + i)) * 1.2); }
+    } else if (w === "seeherz") {
+      /* grüne Lichtbahnen von oben und Schwebeteilchen */
+      for (let i = 0; i < 5; i++) { const x = par(cam, W * (0.1 + i * 0.2), 0.4) + Math.sin(t * 0.2 + i) * 30, a = 0.05 + 0.03 * Math.sin(t * 0.5 + i * 1.7); const g = c.createLinearGradient(0, cam.y, 0, fy); g.addColorStop(0, "rgba(170,240,190," + a.toFixed(3) + ")"); g.addColorStop(1, "rgba(170,240,190,0)"); c.fillStyle = g; c.beginPath(); c.moveTo(x - 14, cam.y); c.lineTo(x + 14, cam.y); c.lineTo(x + 60, fy); c.lineTo(x + 10, fy); c.fill(); }
+      for (let i = 0; i < 24; i++) { const u = (t * 0.03 * (1 + hash(i)) + hash(i + 5)) % 1, x = cam.x + cam.w * hash(i + 30) + Math.sin(t * 0.4 + i) * 10, y = cam.y + cam.h * (1 - u); c.fillStyle = "rgba(200,240,210," + (0.35 * Math.sin(u * PI)).toFixed(2) + ")"; c.fillRect(x, y, 1, 1); }
+    } else if (w === "steg") {
+      /* Gischt an den Pfählen des Stegs */
+      for (let i = 0; i < 7; i++) { const x = par(cam, W * (0.07 + i * 0.145), 1), y = fy + 22; for (let k = 0; k < 4; k++) { const u = (t * 0.7 + k / 4 + hash(i)) % 1; c.fillStyle = "rgba(220,236,220," + (0.5 * (1 - u)).toFixed(2) + ")"; c.beginPath(); c.arc(x + (k - 1.5) * 4 * (1 + u), y - u * 14 + u * u * 12, 1 + u, 0, TAU); c.fill(); } }
+    }
+    c.restore();
+  }
+  const back0 = Z.drawBackLife;
+  Z.drawBackLife = function (c, cam, t, B, oy, LH) {
+    if (back0) back0.apply(this, arguments);
+    const w = which(); if (!w || !on() || (G.off && G.off.arena2)) return;
+    c.save(); try { back(c, cam, t, w); } catch (e) { console.error(e); } c.restore();
+  };
+  /* ---------- Requisiten mit Licht ---------- */
+  function prop(c, k, x, y, t, i) {
+    switch (k) {
+      case "kolben": {
+        c.fillStyle = "#3a2a1c"; c.fillRect(x - 10, y - 10, 20, 2); c.fillRect(x - 9, y - 8, 2, 8); c.fillRect(x + 7, y - 8, 2, 8);
+        const fl = ["#a8e040", "#c060c0"][i % 2]; c.fillStyle = "rgba(220,240,220,.35)"; c.beginPath(); c.arc(x - 3, y - 15, 5, 0, TAU); c.fill(); c.fillRect(x - 4, y - 24, 2, 6);
+        c.fillStyle = fl; c.globalAlpha = 0.8; c.beginPath(); c.arc(x - 3, y - 15, 4, 0.2, PI - 0.2); c.fill(); c.globalAlpha = 1;
+        c.strokeStyle = "rgba(220,240,220,.5)"; c.lineWidth = 0.8; c.beginPath(); c.moveTo(x - 2, y - 23); c.quadraticCurveTo(x + 6, y - 28, x + 7, y - 16); c.stroke();
+        c.fillStyle = "rgba(220,240,220,.35)"; c.fillRect(x + 5, y - 16, 4, 6); c.fillStyle = fl; c.fillRect(x + 5.5, y - 13, 3, 2.6);
+        for (let b = 0; b < 3; b++) { const u = (t * 1.4 + b / 3 + i) % 1; c.fillStyle = "rgba(240,255,220," + (0.8 * (1 - u)).toFixed(2) + ")"; c.beginPath(); c.arc(x - 4 + b * 1.5, y - 14 - u * 5, 0.6 + u * 0.4, 0, TAU); c.fill(); }
+        c.globalCompositeOperation = "lighter"; c.fillStyle = "rgba(255,150,60,.8)"; c.beginPath(); c.ellipse(x - 3, y - 9.5, 2, 1, 0, 0, TAU); c.fill(); c.globalCompositeOperation = "source-over"; break;
+      }
+      case "poller": {
+        c.fillStyle = "#3a2a1c"; c.fillRect(x - 3, y - 12, 6, 12); c.fillStyle = "#5a4028"; c.fillRect(x - 3.6, y - 13, 7.2, 1.6); c.strokeStyle = "#8a7048"; c.lineWidth = 1; c.beginPath(); c.moveTo(x - 3, y - 8); c.lineTo(x + 3, y - 6); c.moveTo(x - 3, y - 6); c.lineTo(x + 3, y - 8); c.stroke();
+        c.fillStyle = "#2a2420"; c.fillRect(x - 0.6, y - 24, 1.2, 11); c.fillStyle = "#3a3028"; c.fillRect(x - 3, y - 30, 6, 1.2); c.fillRect(x - 3, y - 22.5, 6, 1); const f = 0.85 + 0.15 * Math.sin(t * 9 + i);
+        c.fillStyle = "#ffcf7a"; c.globalAlpha = 0.9; c.fillRect(x - 2.4, y - 29, 4.8, 6.5); c.globalAlpha = 1; c.fillStyle = "#fff0c0"; c.fillRect(x - 0.6, y - 27 + (1 - f), 1.2, 2.4 * f); break;
+      }
+      case "kelch": {
+        for (let k = 0; k < 9; k++) { c.fillStyle = k % 2 ? "#e0b040" : "#b88a20"; c.beginPath(); c.ellipse(x - 8 + hash(k + i * 9) * 16, y - 1 - hash(k + 30) * 2, 2, 1, 0, 0, TAU); c.fill(); }
+        c.fillStyle = "#c89a30"; c.beginPath(); c.moveTo(x - 4, y - 14); c.lineTo(x + 4, y - 14); c.quadraticCurveTo(x + 3.5, y - 8, x, y - 7); c.quadraticCurveTo(x - 3.5, y - 8, x - 4, y - 14); c.fill(); c.fillRect(x - 0.6, y - 7, 1.2, 5); c.fillRect(x - 3, y - 2.4, 6, 1.4);
+        c.fillStyle = "#a01a2a"; c.beginPath(); c.arc(x, y - 11, 1.1, 0, TAU); c.fill(); c.fillStyle = "rgba(255,250,220,.7)"; c.fillRect(x - 3, y - 13.4, 1, 4);
+        const a = Math.max(0, Math.sin(t * 2 + i * 3)); if (a > 0.7) { c.globalCompositeOperation = "lighter"; c.strokeStyle = "rgba(255,240,200," + ((a - 0.7) * 3).toFixed(2) + ")"; c.lineWidth = 0.5; c.beginPath(); c.moveTo(x - 6, y - 13); c.lineTo(x + 0, y - 13); c.moveTo(x - 3, y - 16); c.lineTo(x - 3, y - 10); c.stroke(); c.globalCompositeOperation = "source-over"; } break;
+      }
+      case "muschel": {
+        c.fillStyle = "#c8b0a0"; c.beginPath(); c.moveTo(x - 9, y); c.quadraticCurveTo(x - 9, y - 12, x, y - 13); c.quadraticCurveTo(x + 9, y - 12, x + 9, y); c.fill(); c.strokeStyle = "rgba(90,60,50,.45)"; c.lineWidth = 0.5; c.beginPath(); for (let k = -3; k <= 3; k++) { c.moveTo(x, y); c.lineTo(x + k * 2.8, y - 12 + Math.abs(k) * 0.8); } c.stroke();
+        const a = 0.6 + 0.3 * Math.sin(t * 1.3 + i); c.globalCompositeOperation = "lighter"; c.fillStyle = "rgba(220,255,220," + a.toFixed(2) + ")"; c.beginPath(); c.arc(x, y - 3, 2.6, 0, TAU); c.fill(); c.globalCompositeOperation = "source-over"; break;
+      }
+      case "kokon": {
+        c.strokeStyle = "rgba(230,220,240,.4)"; c.lineWidth = 0.4; c.beginPath(); c.moveTo(x, y - 60); c.lineTo(x, y - 30); c.stroke();
+        const sw = Math.sin(t * 0.8 + i) * 0.08; c.save(); c.translate(x, y - 30); c.rotate(sw); c.fillStyle = "#c8c0cc"; c.beginPath(); c.ellipse(0, 10, 6, 11, 0, 0, TAU); c.fill(); c.strokeStyle = "rgba(90,70,100,.45)"; c.lineWidth = 0.5; c.beginPath(); for (let j = 0; j < 7; j++) { c.moveTo(-5.5, 2 + j * 2.6); c.quadraticCurveTo(0, 4 + j * 2.6, 5.5, 1 + j * 2.6); } c.stroke();
+        c.globalCompositeOperation = "lighter"; c.fillStyle = "rgba(230,200,255," + (0.25 + 0.15 * Math.sin(t * 2 + i)).toFixed(2) + ")"; c.beginPath(); c.ellipse(0, 10, 3, 6, 0, 0, TAU); c.fill(); c.restore(); break;
+      }
+    }
+  }
+  const mid0 = Z.drawMidLife;
+  Z.drawMidLife = function (c, cam, t) {
+    if (mid0) mid0.apply(this, arguments);
+    const w = which(); if (!w || !on() || (G.off && G.off.arena2)) return;
+    c.save(); PROPS[w].forEach(([fx, k], i) => { const p = propPos(fx); if (p.x > cam.x - 40 && p.x < cam.x + cam.w + 40) prop(c, k, p.x, p.y, t, i); }); c.restore();
+  };
+  if (G.lightGather) G.lightGather.push(function (add, cam, t) {
+    const w = which(); if (!w || !on() || (G.off && G.off.arena2)) return;
+    PROPS[w].forEach(([fx, k], i) => { const p = propPos(fx); add(p.x, p.y - (k === "poller" ? 26 : k === "kokon" ? 20 : 12), k === "poller" ? 120 : 95, LCOL[k], (k === "poller" ? 0.55 : 0.4) * (0.9 + 0.1 * Math.sin(t * 7 + i)), k === "poller" ? 10 : 4); });
+  });
+  /* ---------- Vordergrund-Schattenrisse an den unteren Rändern ---------- */
+  const al0 = Z.drawAfterLight;
+  Z.drawAfterLight = function (c, cam, Wd, Hd, t) {
+    if (al0) al0.apply(this, arguments);
+    const w = which(); if (!w || !rich() || (G.off && (G.off.arenaFg || G.off.arena2))) return;
+    const S = G.scale; c.save(); c.setTransform(S, 0, 0, S, 0, 0);
+    const sx = cam.x * 1.3, h = cam.h;
+    for (let i = Math.floor(sx / 300) - 1; i <= Math.floor((sx + cam.w * 1.3) / 300) + 1; i++) {
+      const x = i * 300 - sx + hash(i) * 60, key = "a2" + w + i, a = G.fgAlpha ? G.fgAlpha(key, x - 10, h - 70, 90, 70, 0.9) : 0.9; if (a < 0.02) continue;
+      c.globalAlpha = a; c.fillStyle = "#0a0608"; c.strokeStyle = "#0a0608";
+      if (w === "labor") { c.fillRect(x, h - 18, 70, 18); for (let k = 0; k < 4; k++) { const bx = x + 8 + k * 16, bh = 10 + hash(i * 4 + k) * 14; c.fillRect(bx - 2, h - 18 - bh, 4, bh); c.beginPath(); c.arc(bx, h - 18 - bh - 4, 5, 0, TAU); c.fill(); }
+        c.globalCompositeOperation = "lighter"; c.fillStyle = "rgba(180,240,110,.25)"; c.beginPath(); c.arc(x + 24, h - 18 - 14, 2.5, 0, TAU); c.fill(); c.globalCompositeOperation = "source-over"; }
+      else if (w === "steg") { c.fillRect(x, h - 14, 80, 14); c.fillRect(x + 6, h - 44, 7, 30); c.lineWidth = 2; c.beginPath(); c.moveTo(x + 10, h - 38); c.quadraticCurveTo(x + 40, h - 20 + Math.sin(t) * 2, x + 74, h - 34); c.stroke(); }
+      else if (w === "hort") { c.beginPath(); c.moveTo(x - 10, h); c.quadraticCurveTo(x + 30, h - 40, x + 80, h); c.fill(); c.fillStyle = "rgba(255,200,100,.18)"; for (let k = 0; k < 6; k++) c.fillRect(x + 10 + k * 10, h - 18 + Math.abs(k - 2.5) * 5, 4, 1); }
+      else if (w === "seeherz") { c.lineWidth = 3; for (let k = 0; k < 4; k++) { const bx = x + k * 14, sw = Math.sin(t * 0.9 + k + i) * 8; c.beginPath(); c.moveTo(bx, h); c.quadraticCurveTo(bx + sw, h - 40, bx + sw * 1.6, h - 70 - hash(i + k) * 20); c.stroke(); } }
+      else if (w === "faeden") { c.lineWidth = 0.8; c.strokeStyle = "rgba(10,6,8,.9)"; for (let k = 0; k < 5; k++) { c.beginPath(); c.moveTo(x - 20, h - 10 - k * 12); c.quadraticCurveTo(x + 40, h + 10 - k * 14, x + 100, h - 30 - k * 10); c.stroke(); } c.fillStyle = "rgba(240,230,255,.35)"; for (let k = 0; k < 5; k++) { c.beginPath(); c.arc(x + 20 + k * 15, h - 12 - k * 6, 0.9, 0, TAU); c.fill(); } }
+    }
+    c.restore();
+  };
+})();
+
+/* Ezekiel – The Destroyer · Lagerleben (Grafik-Runde 8, ab Stufe 1)
+   Im Lager vor der Burg: hinter dem Lager sitzt eine Runde um ein fernes Feuer und erzählt (eine Gestalt gestikuliert,
+   eine hebt den Becher, Funken steigen), Rauchsäulen ferner Feuer ziehen in den Himmel und neigen sich im Wind,
+   Banner an Stangen wehen. Am Abend warmes Gegenlicht, nachts rötliche Glut. Stufe 0 / Handheld unverändert. Kein Blau. */
+(function () {
+  "use strict";
+  const Z = window.Z, G = Z.gfx, T = Z.TILE, TAU = Math.PI * 2;
+  const on = () => { const q = Z.gq; if (!q) return true; if (q.lean) return false; return q.level === -1 ? true : q.level >= 1; };
+  const rich = () => { const q = Z.gq; if (q && q.lean) return false; return !q || (q.level === -1 ? q.layers !== false : q.level >= 2); };
+  const hash = i => { let h = Math.imul((i | 0) ^ 0x9e3779b9, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+  const isCamp = () => { const lv = Z.level; return lv && lv.hub && !(G.off && G.off.lagerleben); };
+  let fyC = null, fyLv = null;
+  function floorY() { const lv = Z.level; if (fyLv === lv) return fyC; fyLv = lv; const x = lv.start ? lv.start.x : Math.floor(lv.W / 2); fyC = (lv.H - 2) * T; for (let y = (lv.start ? lv.start.y : 3); y < lv.H; y++) if (lv.get(x, y) === 1) { fyC = y * T; break; } return fyC; }
+  const par = (cam, wx, p) => cam.x * (1 - p) + wx * p;
+  function smoke(c, x, y, t, k, scale) {
+    for (let i = 0; i < 14; i++) { const u = ((t * 0.05 + i / 14 + hash(k) ) % 1), r = (4 + u * 26) * scale, dx = Math.sin(u * 3 + t * 0.2 + k) * 6 * scale + u * u * 70 * scale, a = 0.16 * Math.sin(u * Math.PI);
+      c.fillStyle = "rgba(70,56,60," + a.toFixed(3) + ")"; c.beginPath(); c.arc(x + dx, y - u * 220 * scale, r, 0, TAU); c.fill(); }
+  }
+  function storyGroup(c, x, y, t, zt) {
+    const night = !zt || zt.k === "nacht" || zt.k === "blut", f = 0.85 + 0.1 * Math.sin(t * 8) + 0.05 * Math.sin(t * 19);
+    c.save(); c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(x, y - 6, 0, x, y - 6, 70); g.addColorStop(0, "rgba(255,150,60," + (0.35 * f).toFixed(3) + ")"); g.addColorStop(1, "rgba(255,150,60,0)"); c.fillStyle = g; c.fillRect(x - 70, y - 76, 140, 140); c.restore();
+    c.fillStyle = "rgba(255,150,60,.9)"; c.beginPath(); c.moveTo(x - 4, y); c.quadraticCurveTo(x - 3, y - 9 * f, x, y - 13 * f); c.quadraticCurveTo(x + 3, y - 8 * f, x + 4, y); c.fill(); c.fillStyle = "rgba(255,230,150,.9)"; c.beginPath(); c.ellipse(x, y - 4, 1.6, 3.4 * f, 0, 0, TAU); c.fill();
+    const sil = night ? "#140c10" : "#22141a";
+    /* fünf Gestalten im Kreis; eine erzählt mit großen Gesten, eine hebt den Becher */
+    const P = [[-26, 0, 0], [-15, 2, 1], [14, 2, 2], [26, 0, 3], [36, -1, 4]];
+    for (const [dx, dy, k] of P) {
+      const px = x + dx, py = y + dy, face = dx < 0 ? 1 : -1;
+      c.fillStyle = sil; c.beginPath(); c.moveTo(px - 4, py); c.quadraticCurveTo(px - 4.5, py - 9, px, py - 11); c.quadraticCurveTo(px + 4.5, py - 9, px + 4, py); c.fill(); c.beginPath(); c.arc(px + face * 0.5, py - 13.5, 2.6, 0, TAU); c.fill();
+      if (k === 2) { const a = -0.8 + Math.sin(t * 2.3) * 0.7, b = -1.6 + Math.sin(t * 1.7 + 1) * 0.5; c.strokeStyle = sil; c.lineWidth = 1.6; c.beginPath(); c.moveTo(px, py - 9); c.lineTo(px + face * Math.cos(a) * 7, py - 9 + Math.sin(a) * 7); c.moveTo(px, py - 9); c.lineTo(px + face * Math.cos(b) * 6, py - 9 + Math.sin(b) * 6); c.stroke(); }
+      if (k === 0) { const up = Math.max(0, Math.sin(t * 0.4)) ; c.strokeStyle = sil; c.lineWidth = 1.5; c.beginPath(); c.moveTo(px, py - 9); c.lineTo(px + 5, py - 9 - up * 7); c.stroke(); c.fillStyle = sil; c.fillRect(px + 4, py - 12 - up * 7, 2.4, 3); }
+      if (k === 4) { c.fillStyle = sil; c.beginPath(); c.ellipse(px - 2, py - 3, 7, 4, 0, Math.PI, 0); c.fill(); }
+      c.fillStyle = "rgba(255,170,90,.45)"; c.fillRect(px - face * 3.6, py - 9, 0.8, 8);
+    }
+    c.fillStyle = "rgba(255,200,110,.9)"; for (let k = 0; k < 6; k++) { const u = (t * 0.5 + k / 6) % 1; c.globalAlpha = 1 - u; c.fillRect(x + Math.sin(t * 2 + k * 3) * 4 + u * 6, y - 12 - u * 40, 1, 1); } c.globalAlpha = 1;
+  }
+  const back0 = Z.drawBackLife;
+  Z.drawBackLife = function (c, cam, t, B, oy, LH) {
+    if (back0) back0.apply(this, arguments);
+    if (!isCamp() || !on()) return;
+    const lv = Z.level, W = lv.W * T, fy = floorY();
+    c.save();
+    try {
+      for (let k = 0; k < 3; k++) smoke(c, par(cam, W * (0.15 + k * 0.33), 0.25), fy - 50 - k * 6, t, k, 0.6 + k * 0.1);
+    } catch (e) { console.error(e); }
+    c.restore();
+  };
+  /* Banner an Stangen auf der Lagerfläche (ab Stufe 2 mit wehendem Tuch, sonst ruhig) */
+  const BAN = [0.08, 0.62, 0.93];
+  const mid0 = Z.drawMidLife;
+  Z.drawMidLife = function (c, cam, t) {
+    if (mid0) mid0.apply(this, arguments);
+    if (!isCamp() || !on()) return;
+    const lv = Z.level, fy = floorY(), mv = rich();
+    c.save();
+    /* Erzählrunde etwas hinter der Lagerfläche (leicht versetzt mitlaufend), am Rand der Weide */
+    try { const gx = par(cam, lv.W * T * 0.36, 0.9); if (gx > cam.x - 80 && gx < cam.x + cam.w + 80) { c.globalAlpha = 0.92; storyGroup(c, gx, fy - 1, t, Z.zeit ? Z.zeit() : null); c.globalAlpha = 1; } } catch (e) { console.error(e); }
+    BAN.forEach((fx, i) => {
+      const x = Math.round(lv.W * fx) * T + 8; if (x < cam.x - 40 || x > cam.x + cam.w + 40) return;
+      const top = fy - 70; c.fillStyle = "#3a2a1c"; c.fillRect(x - 1, top, 2, 70); c.fillStyle = "#b8923a"; c.beginPath(); c.arc(x, top - 1.5, 2, 0, TAU); c.fill();
+      const col = ["#8a1a1a", "#3a5a2a", "#6a2a5a"][i % 3], N = 8, L = 26, H = 16;
+      c.fillStyle = col; c.beginPath(); c.moveTo(x + 1, top + 2);
+      for (let k = 0; k <= N; k++) { const u = k / N, wv = mv ? Math.sin(t * 3 - u * 4 + i) * 2.5 * u : 0; c.lineTo(x + 1 + u * L, top + 2 + wv); }
+      for (let k = N; k >= 0; k--) { const u = k / N, wv = mv ? Math.sin(t * 3 - u * 4 + i + 0.4) * 2.5 * u : 0; c.lineTo(x + 1 + u * L - (k === N ? 4 : 0), top + 2 + H + wv + (k === N ? -H / 2 : 0)); }
+      c.closePath(); c.fill();
+      c.fillStyle = "rgba(255,230,190,.12)"; c.fillRect(x + 1, top + 2, L * 0.4, 2);
+      c.fillStyle = "#c8a050"; c.beginPath(); c.arc(x + 11, top + 10 + (mv ? Math.sin(t * 3 - 1.7 + i) * 1.1 : 0), 3, 0, TAU); c.fill();
+    });
+    c.restore();
+  };
 })();

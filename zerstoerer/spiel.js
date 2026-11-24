@@ -318,7 +318,7 @@
     const run = Z.run;
     if (run) {
       run.time = (performance.now() - run.t0) / 1000;
-      Z.meta.best.kills = Math.max(Z.meta.best.kills, Z.stats.kills || 0);
+      if (!run.gnade) Z.meta.best.kills = Math.max(Z.meta.best.kills, Z.stats.kills || 0); /* W9: Barmherzigkeit wertet keine Rekorde */
     }
     Z.saveMeta();
     setTimeout(() => { A.muffle(20000); Z.ui.deathScreen(o); }, 1600);

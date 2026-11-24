@@ -514,6 +514,17 @@
   }
   M.stop = () => { M.id = null; M.prof = null; if (M.pad && A.ctx) M.pad.g.gain.setTargetAtTime(0, A.ctx.currentTime, 0.8); };
   M.key = () => { const p = M.prof || PROF.torhof; return { root: p.root, scale: p.scale, bpm: p.bpm, name: NN[p.root % 12] + " " + SC_NAME[p.scale], boss: p.bossId ? BOSS_NAME[p.bossId] : null }; };
+  /* Helfer für klang.js (Gegnerstimmen, Raumkulissen): Leiterton der laufenden Tonart (Stufe 0 = Grundton, 4 = Quinte),
+     passende Aufnahme eines Instruments samt Abspielrate, nächster Achtel-Rasterpunkt samt Achtel-Nummer (für Muster im Takt) */
+  M.ton = (stufe, basis) => { const p = M.prof || PROF.torhof; return deg(p.scale, stufe, basis != null ? basis : p.root); };
+  M.probe = (inst, midi) => { if (!INST[inst]) return null; midi = fit(inst, midi); const n = nearest(inst, midi); return { path: K(inst + "_" + n), rate: Math.pow(2, (midi - n) / 12), midi }; };
+  M.raster = (ahead) => {
+    if (!A.ctx) return null;
+    const now = A.ctx.currentTime + (ahead == null ? 0.03 : ahead), p = M.prof || PROF.torhof;
+    if (!M.prof || !M.beat || M.next < now - 1) { const b = 60 / p.bpm / 2, s = Math.ceil(now / b); return { t: s * b, step: s, beat: b }; }
+    const b = M.beat, j = Math.ceil((now - M.next) / b - 1e-6);
+    return { t: M.next + j * b, step: M.step + j, beat: b };
+  };
 
   /* ---------- Schübe anderer Module ---------- */
   let pushId = 0;

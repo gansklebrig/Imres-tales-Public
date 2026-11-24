@@ -1021,7 +1021,7 @@
     if (!was && on()) {
       inkT = 0; plate = null; pan = null;
       const k = (Z.stats && Z.stats.kills) || 0;
-      if (old > 0 && k > old) setTimeout(() => Z.toast("✦ " + L(["Neuer Rekord: ", "New record: "]) + k + L([" erschlagen", " slain"]) + " ✦", 3000), 650);
+      if (old > 0 && k > old && !(Z.run && Z.run.gnade)) setTimeout(() => Z.toast("✦ " + L(["Neuer Rekord: ", "New record: "]) + k + L([" erschlagen", " slain"]) + " ✦", 3000), 650);
     }
     return r;
   };
