@@ -72,6 +72,8 @@
   const SC = { moll: [0, 2, 3, 5, 7, 8, 10], dorisch: [0, 2, 3, 5, 7, 9, 10], phryg: [0, 1, 3, 5, 7, 8, 10], harm: [0, 2, 3, 5, 7, 8, 11], hpan: [0, 2, 3, 5, 7, 8, 10] };
   const SC_NAME = { moll: "Moll (äolisch)", dorisch: "dorisch", phryg: "phrygisch", harm: "harmonisch Moll", hpan: "Moll (Handpan)" };
   const NN = ["C", "Cis", "D", "Es", "E", "F", "Fis", "G", "As", "A", "B", "H"];
+  /* R16 Registerlage: Basstöne nicht unter die Grenze (sonst 20–40 Hz – auf den meisten Lautsprechern nur Brei/Druck, kein Ton) */
+  const lift = (m, floor) => { while (m < floor) m += 12; return m; };
   const deg = (scale, i, root) => { const s = SC[scale], n = s.length; const o = Math.floor(i / n); return root + s[((i % n) + n) % n] + 12 * o; };
 
   /* Profile je Gebiet: Grundton (MIDI), Tempo, Leiter und Besetzung der Ebenen.
@@ -223,7 +225,9 @@
     if (!A.ok || M.out) return;
     const c = A.ctx;
     M.lp = c.createBiquadFilter(); M.lp.type = "lowpass"; M.lp.frequency.value = 20000; M.lp.Q.value = 0.5; M.lp.connect(A.mus);
-    M.out = c.createGain(); M.out.gain.value = 0.62; M.out.connect(M.lp);
+    /* R16: Hochpass 32 Hz (Subsonik aus Pauke/Kick/Bass-Aufnahmen tiefer gestimmt), dann Tiefpass wie gehabt */
+    M.hp = c.createBiquadFilter(); M.hp.type = "highpass"; M.hp.frequency.value = 38; M.hp.Q.value = 0.6; M.hp.connect(M.lp);
+    M.out = c.createGain(); M.out.gain.value = 0.62; M.out.connect(M.hp);
     M.xf = c.createGain(); M.xf.gain.value = 1; M.xf.connect(M.out);
     M.lay = c.createGain(); M.lay.gain.value = 1; M.lay.connect(M.xf);
     const verbIn = c.createGain(); verbIn.gain.value = 1; verbIn.connect(A.verb); M.verbIn = verbIn;
@@ -242,7 +246,10 @@
     M.busTen = bus(0, 0, 0.3);       /* Spannung */
     M.cmF = c.createBiquadFilter(); M.cmF.type = "lowpass"; M.cmF.frequency.value = 20000; M.cmF.Q.value = 2.2; M.cmF.connect(M.lay); /* Filterfahrten im Kampf */
     M.busCmb = bus(0, 0.08, 0.25, M.cmF);   /* Ostinato, Bass, Blech */
-    M.busDr = bus(0, 0, 0, M.drF);   /* Trommeln */
+    /* R16: Trommel-Aufnahmen (Taiko/Riese/Pauke) tragen den meisten Anteil unter 60 Hz – Absenkung −6 dB unter ~70 Hz,
+       der Schlag (80–200 Hz) bleibt */
+    M.drSh = c.createBiquadFilter(); M.drSh.type = "lowshelf"; M.drSh.frequency.value = 70; M.drSh.gain.value = -6; M.drSh.connect(M.drF);
+    M.busDr = bus(0, 0, 0, M.drSh);   /* Trommeln */
     M.busPuls = bus(0, 0, 0.08);     /* prozeduraler Pulsbass */
     M.busPerc = bus(0, 0, 0.12);     /* prozedurale Sub-Trommel und Ticks */
     M.busSt = bus(1, 0, 0.55, M.out); /* Stinger */
@@ -320,7 +327,7 @@
   /* ein Ton des Pulsbasses: Pegel und Filter springen weich auf und fallen ab */
   function pulse(midi, t, v, len, bright) {
     const S = M.syn; if (!S) return;
-    const f = hz(midi);
+    const f = hz(lift(midi, 40)); /* R16: Unteroktave (o2) nicht unter ~41 Hz */
     S.o1.frequency.setValueAtTime(f, t); S.o2.frequency.setValueAtTime(f / 2, t);
     S.pg.gain.setTargetAtTime(v, t, 0.003); S.pg.gain.setTargetAtTime(0, t + 0.02, len * 0.32);
     const base = 140 + f * 0.8, peak = base + 500 + 1300 * bright;
@@ -329,7 +336,7 @@
   /* Sub-Trommel */
   function kick(t, v) {
     const S = M.syn; if (!S) return;
-    S.ko.frequency.setValueAtTime(120, t); S.ko.frequency.exponentialRampToValueAtTime(44, t + 0.13);
+    S.ko.frequency.setValueAtTime(130, t); S.ko.frequency.exponentialRampToValueAtTime(56, t + 0.12); /* R16: Ausklang 56 statt 44 Hz – Druck statt Grummeln */
     S.kg.gain.setTargetAtTime(v, t, 0.002); S.kg.gain.setTargetAtTime(0, t + 0.025, 0.085);
   }
   /* Rasseltick */
@@ -348,6 +355,37 @@
   }
 
   /* Akkord auf dem Teppich setzen: Stimmen gleiten zur nächstgelegenen Lage */
+  /* R16 Drehpunkt für Tonartwechsel: Dreiklang der alten Leiter, dessen Töne alle in der neuen Leiter liegen; bevorzugt nach Funktion in
+     der neuen Tonart (V > IV > ii > vi > iii > I), sonst die Dominante der neuen Tonart. Gleiche Tonart: null (kein Drehpunkt nötig). */
+  function pivotChord(oldP, newP, from) {
+    const pc = m => ((m % 12) + 12) % 12;
+    const pcs = P => { const n = (SC[P.scale] || []).length || 7; return [...Array(n).keys()].map(d => pc(deg(P.scale, d, P.root))); };
+    const nP = pcs(newP), oP = pcs(oldP); if (pc(oldP.root) === pc(newP.root) && oldP.scale === newP.scale) return null;
+    const nN = nP.length, fnScore = { 4: 6, 3: 5, 1: 4, 5: 3, 2: 2, 0: 1 };
+    let best = null, bs = -1;
+    for (let d = 0; d < oP.length; d++) {
+      const tri = [0, 2, 4].map(k => deg(oldP.scale, d + k, oldP.root)); if (!tri.every(m => nP.includes(pc(m)))) continue;
+      const nd = nP.indexOf(pc(tri[0])); const sc = (nN === 7 ? fnScore[nd] : 2) || 1;
+      if (sc > bs && nd !== 0) { bs = sc; best = tri; }
+    }
+    if (!best) best = [0, 2, 4].map(k => deg(newP.scale, 4 + k, newP.root));
+    /* Lage: jeden Ton so oktavieren, dass er dem entsprechenden Ton des Ausgangsakkords am nächsten liegt */
+    return best.map(pc).map((q, i) => { const f = from[i] != null ? from[i] : from[0]; let m = f - pc(f) + q; if (m - f > 6) m -= 12; if (f - m > 6) m += 12; return m; }).sort((a, b) => a - b);
+  }
+  /* R16 Stimmführung: aus den Kandidaten den Ton nehmen, der der vorigen Lage dieser Stimme am nächsten liegt; gegen die Bezugsstimme
+     (ref) keine parallele reine Quinte/Oktave (gleiches Intervall bei Bewegung beider Stimmen), wenn eine Alternative ≤ 4 Halbtöne weiter liegt */
+  const VL = {};
+  function vlNext(key, cand, ref) {
+    if (!cand.length) return VL[key] || 0;
+    const prev = VL[key], pref = VL[key + "_r"];
+    const pc = m => ((m % 12) + 12) % 12, perf = (a, b) => b != null && (pc(a - b) === 7 || pc(a - b) === 0);
+    const sorted = cand.slice().sort((x, y) => (prev == null ? x - y : Math.abs(x - prev) - Math.abs(y - prev)));
+    let pick = sorted[0];
+    if (prev != null && ref != null && pref != null && ref !== pref && pick !== prev && perf(pick, ref) && perf(prev, pref) && pc(pick - ref) === pc(prev - pref)) {
+      const alt = sorted.find(m => !perf(m, ref) && Math.abs(m - prev) <= Math.abs(pick - prev) + 4); if (alt != null) { pick = alt; M.stats.vlFix = (M.stats.vlFix || 0) + 1; }
+    }
+    VL[key] = pick; VL[key + "_r"] = ref; return pick;
+  }
   function padChord(chord, when, glide) {
     const P = M.pad, p = M.prof; if (!P) return;
     const tones = [deg(p.scale, chord, p.root), deg(p.scale, chord + 2, p.root), deg(p.scale, chord + 4, p.root)];
@@ -360,7 +398,7 @@
     }
     best = best || tones; P.cur = best;
     best.forEach((m, i) => P.v[i].o.forEach(o => o.frequency.setTargetAtTime(hz(m), when, glide)));
-    P.sub.frequency.setTargetAtTime(hz(deg(p.scale, chord, p.root) - 12), when, glide * 0.6);
+    P.sub.frequency.setTargetAtTime(hz(lift(deg(p.scale, chord, p.root) - 12, 36)), when, glide * 0.6);
   }
 
   /* ---------- Einzelnoten aus Aufnahmen ---------- */
@@ -380,7 +418,7 @@
     g.gain.setValueAtTime(0, when); g.gain.linearRampToValueAtTime(vol, when + att);
     g.gain.setValueAtTime(vol, when + dur * 0.72); g.gain.linearRampToValueAtTime(0, when + dur);
     s.connect(g); g.connect(bus || M.busMel);
-    curInst = inst; track(s, g, bus === M.busSt, when + dur, fig); s.start(when); s.stop(when + dur + 0.05);
+    curInst = inst; track(s, g, bus === M.busSt, when + dur, fig, when); s.start(when); s.stop(when + dur + 0.05);
   }
   /* Schlagwerk / Einzelklang */
   function hit(name, when, vol, rate, bus, rev, imp) {
@@ -409,15 +447,25 @@
   let curInst = "";
   /* Testhilfe: belegte Stimmen nach Instrument (k = Kern, f = Schmuck, s = Stinger) */
   M._voc = () => { const o = {}; for (const v of VOC) if (!v.freed) { const k = (v.st ? "s:" : v.fig ? "f:" : "k:") + v.i; o[k] = (o[k] || 0) + 1; } return o; };
-  function track(s, g, st, end, fig) {
+  function track(s, g, st, end, fig, when) {
     M.live++; M.stats.notes++;
-    const v = { s, g, st, end: end || 0, fig: !!fig, i: curInst, t0: A.ctx.currentTime }; VOC.add(v);
+    const v = { s, g, st, end: end || 0, fig: !!fig, i: curInst, t0: A.ctx.currentTime, w: when || 0 }; VOC.add(v);
     s.onended = () => { if (!v.freed) M.live--; VOC.delete(v); try { s.disconnect(); g.disconnect(); } catch (_) {} };
   }
   /* Stimmen des Satzes (nicht der Stinger) schnell ausblenden und beenden – für den Bosstod-Stinger */
+  /* R16: Stimme ausblenden ohne Lautstärkesprung. cancelScheduledValues allein setzt eine Note, deren Hüllkurve noch in der Zukunft
+     liegt (vorausgeplant bis ~0,16 s), auf den Grundwert 1 zurück – sie setzte dann ohne Einschwingen mit vielfacher Lautstärke ein
+     (Spitze bis +12 dB beim Gebietswechsel). Noch nicht begonnene Noten werden gar nicht erst gestartet, klingende gehalten und geblendet. */
+  function fadeVoice(v, now, delay, tau, stopIn) {
+    const g = v.g.gain;
+    if (v.w && v.w > now + 0.002) { try { v.s.stop(now); } catch (_) {} return; }
+    if (g.cancelAndHoldAtTime) g.cancelAndHoldAtTime(now); else { const cur = g.value; g.cancelScheduledValues(now); g.setValueAtTime(cur, now); }
+    g.setTargetAtTime(0, now + (delay || 0), tau);
+    if (stopIn != null) v.s.stop(now + stopIn);
+  }
   function freeVoices(n, alle) { /* alle: auch Stinger-Stimmen (Prüfstand beim Wechsel des Audio-Kontexts) */
     const c = A.ctx, now = c.currentTime; let k = 0;
-    for (const v of VOC) { if ((v.st && !alle) || v.freed) continue; v.freed = true; M.live--; try { v.g.gain.cancelScheduledValues(now); v.g.gain.setTargetAtTime(0, now, 0.05); v.s.stop(now + 0.3); } catch (_) {} if (++k >= n) break; }
+    for (const v of VOC) { if ((v.st && !alle) || v.freed) continue; v.freed = true; M.live--; try { fadeVoice(v, now, 0, 0.05, 0.3); } catch (_) {} if (++k >= n) break; }
     return k;
   }
   M.freeVoices = freeVoices;
@@ -431,7 +479,7 @@
     if (!best && alteSt) { const now = A.ctx.currentTime; for (const v of VOC) if (v.st && !v.freed && now - (v.t0 || 0) >= 1 && (!best || v.end < best.end)) best = v; if (best) M.stats.yieldSt = (M.stats.yieldSt || 0) + 1; }
     if (!best) return false;
     const now = A.ctx.currentTime; best.freed = true; M.live--; M.stats.yielded = (M.stats.yielded || 0) + 1;
-    try { best.g.gain.cancelScheduledValues(now); best.g.gain.setTargetAtTime(0, now, 0.03); best.s.stop(now + 0.2); } catch (_) {}
+    try { fadeVoice(best, now, 0, 0.03, 0.2); } catch (_) {}
     return true;
   }
   const revCache = {};
@@ -615,10 +663,15 @@
       start = clamp(endBar, now + 0.9, now + 2.0);
       M.xf.gain.cancelScheduledValues(now); M.xf.gain.setTargetAtTime(1, now, 0.2);
       const tau = Math.max(0.2, (start - now) / 3);
-      for (const v of VOC) if (!v.st && !v.freed) { try { v.g.gain.cancelScheduledValues(now); v.g.gain.setTargetAtTime(0, now + 0.15, tau); } catch (_) {} }
+      for (const v of VOC) if (!v.st && !v.freed) { try { fadeVoice(v, now, 0.15, tau); } catch (_) {} }
       if (oldP && !oldP.boss) {
         const r = oldP.root, ch = [deg(oldP.scale, 0, r + 12), deg(oldP.scale, 2, r + 12), deg(oldP.scale, 4, r + 12)];
-        ch.forEach((m, i) => playNote(oldP.pad || "ooh", m, now + 0.02 + i * 0.03, 0.05, (start - now) + 1.4, M.busSt, 1));
+        /* R16 Drehpunkt-Akkord: erst der Grundakkord der alten Tonart, dann (zweite Hälfte der Brücke) ein Akkord, der in beiden Tonarten
+           vorkommt und in der neuen möglichst Dominante/Subdominante ist – oder, wenn es keinen gibt, die Dominante der neuen Tonart;
+           jeder Ton auf kürzestem Weg (Stimmführung), die neue Tonika setzt dann auf der Eins ein */
+        const pv = pivotChord(oldP, prof, ch), mid = now + Math.max(0.45, (start - now) * 0.5);
+        ch.forEach((m, i) => playNote(oldP.pad || "ooh", m, now + 0.02 + i * 0.03, 0.05, (pv ? mid - now + 0.25 : (start - now) + 1.4), M.busSt, 1));
+        if (pv) { pv.forEach((m, i) => playNote(oldP.pad || "ooh", m, mid + i * 0.02, 0.05, (start - mid) + 1.2, M.busSt, 1)); M.stats.pivot = (M.stats.pivot || 0) + 1; M.lastPivot = pv.slice(); }
       }
       swell(start, 0.09);
       M.stats.bruecke = (M.stats.bruecke || 0) + 1; M.bridge = { from: oldP && (oldP.bossId || oldP.root), start: +start.toFixed(2), now: +now.toFixed(2) };
@@ -634,6 +687,7 @@
       M.tier = M.want = M.combat ? 4 : 0; M.hold = [0, 0, 0, 0]; M.tierName = TIER_NAME[M.tier]; M.bossBarN = 0; /* R13: Name mitziehen (blieb sonst auf „kampf“ stehen) */
     }
     if (M.pad) M.pad.cur = null;
+    for (const k in VL) delete VL[k]; /* R16: neue Tonart – Stimmführung neu beginnen */
     if (M.pad) {
       M.pad.g.gain.setTargetAtTime(prof.calm ? 0.45 : 0.36, start, 1.5);
       /* im Lager weicher (Dreieck), sonst Streicher-Säge */
@@ -906,8 +960,16 @@
     const p = M.prof, st = M.step % 8, bar = Math.floor(M.step / 8), ph = M.step % 16;
     /* Stufenwechsel nur auf Grenzen: Kampf auf jede Viertel, Elite/Boss auf halbe Takte, abwärts auf die Eins */
     if (M.want !== M.tier) {
-      const w = M.want, ok = w > M.tier ? (w <= 2 ? st % 2 === 0 : st % 4 === 0) : st === 0;
+      /* R16: zurück in die Ruhe nur auf den Beginn einer Zwei-Takt-Phrase (vorher: jede Eins) */
+      const w = M.want, ok = w > M.tier ? (w <= 2 ? st % 2 === 0 : st % 4 === 0) : (st === 0 && (w >= 2 || M.tier < 2 || bar % 2 === 0));
+      const vorher = M.tier;
       if (ok) commitTier(w, t);
+      /* R16 harmonischer Anschluss: beim Einstieg in den Kampf die Kampf-Akkordfolge so drehen, dass sie mit dem gerade klingenden
+         Akkord weitergeht (statt mitten im Takt auf einen fremden Akkord zu springen); ebenso zurück in die Ruhe */
+      if (ok && (vorher < 2) !== (w < 2) && M.chord != null) {
+        const pr = w >= 2 ? M.progC : M.progE, k = pr ? pr.indexOf(M.chord) : -1;
+        if (k >= 0) { const at = w >= 2 ? bar % 4 : Math.floor(bar / 2) % 4, sh = (k - at + 4) % 4, rot = pr.map((_, i) => pr[(i + sh) % 4]); if (w >= 2) M.progC = rot; else M.progE = rot; M.stats.anschluss = (M.stats.anschluss || 0) + 1; }
+      }
     }
     const tr = M.tier, combat = tr >= 2;
     /* Harmonie: Erkundung zwei Takte je Akkord, Kampf einer */
@@ -951,12 +1013,22 @@
       const len = beat * 8 * 1.45, re = chordStart ? 1 : 0.75;
       if (p.drone === "didge") playNote("didge", p.root - 12, t, 0.32 * re, len, M.busExp); /* Didgeridoo bleibt als Orgelpunkt auf dem Grundton */
       else if (RA === "orgel") { playNote(p.drone, p.root - 12, t, 0.27, len, M.busExp); playNote(p.drone, deg(p.scale, 4, p.root - 12), t, 0.12, len, M.busExp); } /* Orgelpunkt: Grundton und Quinte bleiben liegen */
-      else { playNote(p.drone, tone(0, p.root - 12), t, 0.25 * re, len, M.busExp); if (I > 0.25 || p.calm) playNote(p.drone, tone(2, p.root - 12), t, 0.12 * re, len, M.busExp, -1); }
+      else {
+        /* R16: tiefe Tonarten (Bordun unter C2 ≈ 65 Hz: Keller, Verlies, Schlund, See …) – Bordun −3 dB, sonst überdeckt er 60–120 Hz */
+        const bs = tone(0, p.root - 12), dk = bs < 36 ? 0.7 : 1; playNote(p.drone, bs, t, 0.25 * re * dk, len, M.busExp);
+        /* R16 Stimmführung: zweite Bordunstimme nicht stur auf der Quinte (Quintparallelen bei jedem Akkordwechsel), sondern
+           der nächstgelegene Akkordton (Terz oder Quinte) zur vorigen Lage; liegende Töne bleiben liegen */
+        if (I > 0.25 || p.calm) { const d2 = vlNext("dr2", [tone(1, p.root - 12), tone(2, p.root - 12)].filter(m => m > bs), bs); playNote(p.drone, d2, t, 0.12 * re * dk, len, M.busExp, -1); }
+        else VL.dr2 = null;
+      }
     }
     if (p.pad && st === 0) {
       const len = beat * 8 * 1.35;
-      playNote(p.pad, tone(1, p.root + 12), t, 0.09 + I * 0.04, len, M.busExp, -1);
-      playNote(p.pad, tone(2, p.root + 12), t, 0.07 + I * 0.04, len, M.busExp, -1);
+      /* R16: zwei Flächenstimmen mit Stimmführung (nächster Akkordton, Gegenbewegung bevorzugt) statt Terz+Quinte parallel */
+      const cand = [0, 1, 2].flatMap(i => [tone(i, p.root + 12), tone(i, p.root)]).filter(m => m >= p.root + 5 && m <= p.root + 24);
+      const a1 = vlNext("pd1", cand, null), a2 = vlNext("pd2", cand.filter(m => Math.abs(m - a1) >= 3), a1);
+      playNote(p.pad, Math.max(a1, a2), t, 0.09 + I * 0.04, len, M.busExp, -1);
+      playNote(p.pad, Math.min(a1, a2), t, 0.07 + I * 0.04, len, M.busExp, -1);
     }
     /* Farbe: gebrochener Akkord bei Akkordwechseln, sonst seltene Einzeltöne in den Atempausen */
     if (p.col && tr <= 1 && RA === "phasen") {
@@ -1053,7 +1125,7 @@
       const one = st === 0 ? 1 : undefined;
       if (!(half && st % 2) && !(brk && !acc)) playNote(ost, tone(oi, alt ? p.root : p.root - 12), t, ((acc ? 0.22 : 0.14) + 0.04 * I) * (brk ? 0.85 : 1), beat * (half ? 1.9 : 0.95), M.busCmb, one);
       if ((I > 0.7 || hi3 || drv) && acc && !brk && !half) playNote(ost, tone(oi, alt ? p.root + 12 : p.root), t, 0.1, beat * 0.9, M.busCmb, -1);
-      if (st === 0 || (!brk && !half && (I > 0.65 || hi3 || drv) && (st === 3 || st === 6))) playNote(p.bass, tone(0, p.root - 24), t, st === 0 ? 0.3 : 0.2, beat * (st === 0 ? 3 : 2.2), M.busCmb, one);
+      if (st === 0 || (!brk && !half && (I > 0.65 || hi3 || drv) && (st === 3 || st === 6))) playNote(p.bass, lift(tone(0, p.root - 24), 30), t, st === 0 ? 0.3 : 0.2, beat * (st === 0 ? 3 : 2.2), M.busCmb, one);
       if (chordStart && p.brass && !brk && (I > 0.55 || hi3 || drv)) for (const i of (Z.gq && Z.gq.mini ? [0] : Z.gq && Z.gq.lean ? [0, 2] : [0, 1, 2])) playNote(p.brass, tone(i, p.root), t + i * 0.008, 0.11, beat * 1.6, M.busCmb, one); /* Handheld: Grundton + Quinte */
       if ((hi3 || I > 0.85 || M.rage > 0) && st === 0 && !brk) for (const i of [1, 2]) playNote("vlntrem", tone(i, p.root + 24), t, 0.06 + 0.03 * M.rage, beat * 8.4, M.busCmb, -1);
       if ((tr === 4 || M.ambush || M.rage > 0) && st === 0 && bar % 2 === 0) for (const i of [0, 1, 2]) playNote("aah", tone(i, p.root + 12), t, 0.07, beat * 16, M.busCmb, -1);
