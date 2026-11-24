@@ -1,0 +1,130 @@
+# Baut Heldensturm als Programm für Windows und Linux (offline, alle Dateien im Programm) und stellt es als Release bereit:
+# github.com/gansklebrig/Imres-tales-Public/releases → Heldensturm-Setup.exe (Windows) und Heldensturm.AppImage (Linux).
+# Die Release-Marke heißt heldensturm-pc-1.N – getrennt von der Android-App (heldensturm-1.N), die weiter „Latest“ bleibt.
+name: Heldensturm-Programm bauen (Windows, Linux)
+
+on:
+  push:
+    branches: [main, "claude/heldensturm-pc"]
+    paths:
+      - heldensturm.html
+      - heldensturm-erzaehler.js
+      - heldensturm-sw.js
+      - heldensturm-ton.js
+      - tonregler.js
+      - "audio/heldensturm/**"
+      - "klang/**"
+      - "heldensturm-clips/**"
+      - "tools/vertonung/heldensturm-de.json"
+      - "desktop/**"
+      - "tools/android/sammeln.py"
+      - ".github/workflows/heldensturm-pc.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: heldensturm-pc-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bauen:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            ziel: --win
+            datei: Heldensturm-Setup.exe
+          - os: ubuntu-latest
+            ziel: --linux
+            datei: Heldensturm.AppImage
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /desktop/
+            /tools/android/
+            /tools/vertonung/heldensturm-de.json
+            /heldensturm*
+            /tonregler.js
+            /klang/
+            /amb/
+            /audio/heldensturm/
+            /heldensturm-clips/
+            /schriften/
+            /vendor/
+            /kuerzel.js
+            /inhalt.js
+            /*-frei.webp
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Spieldateien einpacken
+        run: python tools/android/sammeln.py desktop/spiel
+
+      - name: Abhängigkeiten holen
+        working-directory: desktop
+        run: npm ci --no-audit --no-fund
+
+      - name: Programm bauen
+        working-directory: desktop
+        shell: bash
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: npx electron-builder ${{ matrix.ziel }} --publish never -c.extraMetadata.version=1.${{ github.run_number }}.0
+
+      - name: Datei sichern
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.datei }}
+          path: desktop/dist/${{ matrix.datei }}
+          retention-days: 5
+          if-no-files-found: error
+
+  veroeffentlichen:
+    needs: bauen
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: fertig
+          merge-multiple: true
+
+      - name: Als Release veröffentlichen
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: heldensturm-pc-1.${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          name: Heldensturm für PC 1.${{ github.run_number }}
+          prerelease: ${{ github.ref != 'refs/heads/main' }}
+          make_latest: false
+          body: |
+            ${{ github.event.head_commit.message }}
+
+            **Windows:** `Heldensturm-Setup.exe` herunterladen und ausführen. Windows warnt beim ersten Mal („Der Computer wurde geschützt“), weil das Programm nicht signiert ist: „Weitere Informationen“ → „Trotzdem ausführen“.
+            **Linux:** `Heldensturm.AppImage` herunterladen, ausführbar machen (`chmod +x Heldensturm.AppImage`) und starten.
+
+            Läuft offline, mit Controller. F11 = Vollbild. Spielstände bleiben bei Updates erhalten.
+          files: |
+            fertig/Heldensturm-Setup.exe
+            fertig/Heldensturm.AppImage
+
+      - name: Alte Programm-Versionen aufräumen (die letzten 3 bleiben)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release list --repo "$GITHUB_REPOSITORY" --limit 100 --json tagName,createdAt \
+            --jq '[.[] | select(.tagName | startswith("heldensturm-pc-1."))] | sort_by(.createdAt) | reverse | .[3:] | .[].tagName' |
+          while read -r t; do gh release delete "$t" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || true; done

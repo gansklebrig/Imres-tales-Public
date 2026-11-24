@@ -2475,10 +2475,12 @@ const $=id=>document.getElementById(id);
 const cv=$('cv');let cx=cv.getContext('2d',{alpha:false});
 let scr=$('scr');const hud=$('hud'),skillsEl=$('skills'),toastEl=$('toast');
 let W=0,H=0,DPR=1,ZOOM=1;
-/* Grafikstufen: 0 Minimal · 1 Niedrig · 2 Mittel · 3 Hoch · 4 Episch. „Auto“ passt sich der Bildrate an. */
+/* Grafikstufen: 0 Minimal · 1 Niedrig · 2 Mittel · 3 Hoch · 4 Episch · 5 Legendär. „Auto“ passt sich der Bildrate an.
+   Legendär (Kennzeichen „leg“) ist für starke Grafikkarten: volle Bildschirmauflösung ohne Obergrenze, Licht und Lichtschatten in voller Auflösung,
+   feinerer Leuchtschein, deutlich mehr Funken, Schwebeteilchen und Kampfspuren. Die Automatik wählt sie nur im PC-Programm (window.__hsPC). */
 /* Die Auflösung bleibt immer scharf – gespart wird bei Licht, Partikeln, Spuren und Leichen. */
-const HS_VERSION='05.11.2026 · Optik';
-const GFX=[{n:'Minimal',px:1.6e6,dpr:1.5,q:1,lr:0.25,parts:120,corpse:0,lite:1,nodec:1,noamb:1},{n:'Niedrig',px:2.2e6,dpr:1.75,q:1,lr:0.3,parts:260,corpse:6,nodec:1},{n:'Mittel',px:3.2e6,dpr:2,q:2,lr:0.4,parts:600,corpse:18},{n:'Hoch',px:5e6,dpr:2,q:2,lr:0.5,parts:900,corpse:35},{n:'Episch',px:8e6,dpr:2.5,q:3,lr:0.6,parts:1500,corpse:60}];
+const HS_VERSION='24.11.2026 · Legendär';
+const GFX=[{n:'Minimal',px:1.6e6,dpr:1.5,q:1,lr:0.25,parts:120,corpse:0,lite:1,nodec:1,noamb:1},{n:'Niedrig',px:2.2e6,dpr:1.75,q:1,lr:0.3,parts:260,corpse:6,nodec:1},{n:'Mittel',px:3.2e6,dpr:2,q:2,lr:0.4,parts:600,corpse:18},{n:'Hoch',px:5e6,dpr:2,q:2,lr:0.5,parts:900,corpse:35},{n:'Episch',px:8e6,dpr:2.5,q:3,lr:0.6,parts:1500,corpse:60},{n:'Legendär',px:3.4e7,dpr:3,q:3,lr:1,parts:4000,corpse:150,leg:1}];
 let GAUTO=3,GCEIL=3,FPSNOW=60,RSC=1,RSLOW=0,RSOK=0;
 /* feste Render-Auflösung (Anteil der Bildschirmauflösung) oder null = automatisch */
 const RES_STUFEN=[1,0.85,0.7,0.5];const resFest=()=>{const v=SAVE&&(SAVE.res!=null?SAVE.res:SAVE.fullres?1:null);return RES_STUFEN.includes(v)?v:null};
@@ -2487,7 +2489,7 @@ const SWR=(()=>{try{const g=document.createElement('canvas').getContext('webgl')
 if(SWR){RSC=0.7;GAUTO=1}
 try{const f=resFest();if(f)RSC=f}catch(e){}
 function gfxMigrate(){if(SAVE.gfx===undefined){SAVE.gfx=SAVE.fx==='low'?1:SAVE.fx==='hi'?4:'auto'}}
-const gfxL=()=>{const g=SAVE&&SAVE.gfx;return g===undefined||g==='auto'||!isFinite(+g)?GAUTO:clamp(Math.round(+g),0,4)};
+const gfxL=()=>{const g=SAVE&&SAVE.gfx;return g===undefined||g==='auto'||!isFinite(+g)?GAUTO:clamp(Math.round(+g),0,GFX.length-1)};
 const GF=()=>GFX[gfxL()];
 /* Pixelscharf: auf Handys mit hoher Pixeldichte (z. B. 2,6×) wird nicht krumm hochskaliert (das macht weich),
    sondern genau ½ oder ⅓ der Bildschirmauflösung gerechnet und Pixel für Pixel verdoppelt – scharf und sogar sparsamer. */
@@ -4242,9 +4244,9 @@ function fpsWatch(dt,raw,js){FW.iv.push(raw);FW.js.push(js||0);FW.t+=raw;if(FW.t
 function drawPerf(){if(!SAVE.perf||!PERF)return;const c=cx;c.save();c.setTransform(DPR,0,0,DPR,0,0);c.font='700 11px ui-monospace,monospace';c.textAlign='left';c.textBaseline='top';
  const L=[`${PERF.fps} FPS · Bildschirm ${PERF.hz} Hz`,`verpasste Bilder ${PERF.miss}%`,`Rechenzeit ⌀${PERF.js.toFixed(1)} / max ${PERF.jsM.toFixed(1)} ms`,`Grafik: ${GFX[PERF.lv].n} · ${cv.width}×${cv.height}${RSC<1?' · '+Math.round(RSC*100)+'%':''}`].concat(SWR?['⚠ Grafikbeschleunigung des Browsers aus']:[]);
  const y0=(typeof PILLTOP!=='undefined'?PILLTOP:120)+30;c.fillStyle='rgba(0,0,0,.65)';c.fillRect(8,y0,236,L.length*15+8);c.fillStyle=PERF.miss>10?'#ff8a7a':'#bfffc8';L.forEach((s,i)=>c.fillText(s,13,y0+4+i*15));c.restore()}
-const gfxInner=()=>{const L=gfxL(),auto=SAVE.gfx==='auto'||SAVE.gfx===undefined;return`<div style="min-width:0"><div class="t">Grafikqualität<small><span id="gfxName">${window.__hsULTRA&&__hsULTRA.on?'Ultra leicht':GFX[L].n}${auto?' (Auto)':''}</span> · <span id="gfxFps">${FPSNOW} FPS</span></small></div><div class="d">Das Bild bleibt auf jeder Stufe scharf. Ruckelt es am Handy, weiter nach links schieben – dann gibt es weniger Licht, Funken und Spuren. Am PC sieht „Episch“ am besten aus: mehr Licht, Leuchtschein, Funken und fliegende Gegner.</div>
+const gfxInner=()=>{const L=gfxL(),auto=SAVE.gfx==='auto'||SAVE.gfx===undefined;return`<div style="min-width:0"><div class="t">Grafikqualität<small><span id="gfxName">${window.__hsULTRA&&__hsULTRA.on?'Ultra leicht':GFX[L].n}${auto?' (Auto)':''}</span> · <span id="gfxFps">${FPSNOW} FPS</span></small></div><div class="d">Das Bild bleibt auf jeder Stufe scharf. Ruckelt es am Handy, weiter nach links schieben – dann gibt es weniger Licht, Funken und Spuren. Am PC sieht „Episch“ sehr gut aus: mehr Licht, Leuchtschein, Funken und fliegende Gegner. „Legendär“ ist für starke Grafikkarten – volle Auflösung, schärfere Lichtschatten, feinerer Leuchtschein und viel mehr Funken, Schwebeteilchen und Kampfspuren${window.__hsPC?'':' (am flüssigsten im PC-Programm oder in Chrome/Edge)'}.</div>
  <div class="row" style="margin:6px 0 2px;align-items:center;flex-wrap:wrap"><span class="muted" style="font-size:13px">Auflösung:</span>${[null].concat(RES_STUFEN).map(v=>`<button class="btn small ${resFest()===v?'gold':''}" data-act="res" data-v="${v==null?'auto':v}" title="${v==null?'Senkt die Auflösung nur, wenn es ruckelt':v===1?'Immer volle Schärfe':'Feste, kleinere Auflösung – mehr Bilder pro Sekunde, etwas weicher'}">${v==null?'Auto':Math.round(v*100)+' %'}</button>`).join('')}<span class="muted" style="font-size:12px">${cv.width}×${cv.height}</span></div>
- <input type="range" min="0" max="4" step="1" value="${L}" data-gfx aria-label="Grafikqualität"><div class="gfxlbl">${GFX.map((g,i)=>`<span class="${i===L?'on':''}">${g.n}</span>`).join('')}</div>
+ <input type="range" min="0" max="${GFX.length-1}" step="1" value="${L}" data-gfx aria-label="Grafikqualität"><div class="gfxlbl">${GFX.map((g,i)=>`<span class="${i===L?'on':''}">${g.n}</span>`).join('')}</div>
  <div class="row" style="margin-top:6px"><button class="btn small ${auto?'gold':''}" data-act="gfx-auto">${auto?'Automatisch: an':'Automatisch anpassen'}</button>${ulKnopf()}<button class="btn small ${SAVE.perf?'gold':''}" data-act="perf">${SAVE.perf?'Leistungsanzeige: an':'Leistungsanzeige'}</button><button class="btn small ${SAVE.fov!==false?'gold':''}" data-act="fov" title="Hinter Mauern, Felsen und Hauswänden liegt Schatten – du siehst nur, was dein Held sieht">${SAVE.fov!==false?'Sichtschatten: an':'Sichtschatten: aus'}</button>${(window.devicePixelRatio||1)>=1.5?`<button class="btn small ${sharpOn()?'gold':''}" data-act="sharp" title="Bildschirmpixel genau verdoppeln statt weich hochrechnen">${sharpOn()?'Bild: pixelscharf':'Bild: weich'}</button>`:''}</div></div>`};
 const fsOk=()=>!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);const fsOn=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
 function fsToggle(){try{if(fsOn())(document.exitFullscreen||document.webkitExitFullscreen).call(document);else{const e=document.documentElement;const r=(e.requestFullscreen||e.webkitRequestFullscreen).call(e,{navigationUI:'hide'});if(r&&r.catch)r.catch(()=>toast('Vollbild wird hier nicht unterstützt.','#ff8a7a'))}}catch(e){toast('Vollbild wird hier nicht unterstützt.','#ff8a7a')}}
@@ -4302,7 +4304,7 @@ function light(x,y,r,c,life,a){if(!G.lights)G.lights=[];if(G.lights.length>40)G.
 
 /* Partikel: Funken (leuchtend), Glut, Geister, Brocken (mit Schwerkraft), Rauch */
 function part(o){const cap=GF().parts;if(G.parts.length>=cap)return;o.t=0;G.parts.push(o)}
-function burst(x,y,c,n,spd){const q=fxQ();if(G.parts.length>(q>1?650:220))n=Math.min(n,3);else if(q<2)n=Math.ceil(n*0.55);const lc=lite(c);
+function burst(x,y,c,n,spd){const q=fxQ();if(G.parts.length>(GF().leg?2200:q>1?650:220))n=Math.min(n,3);else if(q<2)n=Math.ceil(n*0.55);const lc=lite(c);
  for(let i=0;i<n;i++){const a=rnd(TAU),s=rnd(0.3,1)*spd;
   if(i%3!==2)part({k:'spark',x,y,vx:Math.cos(a)*s*1.5,vy:Math.sin(a)*s*1.5,life:rnd(0.16,0.42),c:lc,s:rnd(1.2,2.4),drag:0.88});
   else part({k:'chunk',x,y,vx:Math.cos(a)*s*0.6,vy:Math.sin(a)*s*0.45,z:rnd(2,10),vz:rnd(80,240),life:rnd(0.5,0.9),c,s:rnd(2,4.2),rot:rnd(TAU),vr:rnd(-14,14),drag:0.95})}}
@@ -6216,7 +6218,7 @@ function updCorpses(dt){const A=G.corpses;if(!A||!A.length)return;
    if(c.z<=0){c.z=0;if(c.vz<-160&&!c.bounced){c.vz=-c.vz*0.28;c.bounced=1}else{c.vz=0;c.land=1;c.rot=((c.rot%TAU)+TAU)%TAU;if(fxQ()>1)puffs(c.x,c.y+c.r*0.5,'#5a5048',3,40,10)}c.vx*=0.5;c.vy*=0.5;c.vr*=0.4}}
   else{const k=Math.max(0,1-7*dt);c.vx*=k;c.vy*=k;c.x+=c.vx*dt;c.y+=c.vy*dt;const tg=c.lie>0?Math.PI/2:Math.PI*1.5;c.rot+=(tg-c.rot)*Math.min(1,dt*10)}
   c.x=clamp(c.x,10,WORLD-10);c.y=clamp(c.y,10,WORLD-10)}}
-function drawCorpses(inView,t){const A=G.corpses;if(!A||!A.length)return;const life=fxQ()>2?5:1.8;
+function drawCorpses(inView,t){const A=G.corpses;if(!A||!A.length)return;const life=GF().leg?12:fxQ()>2?5:1.8;
  for(const c of A){if(!inView(c.x,c.y,80))continue;const al=1-Math.max(0,(c.t-(life-0.7))/0.7);if(al<=0)continue;cx.save();cx.globalAlpha=al*(c.land?(fxQ()>2?0.9:0.7):1);
   cx.translate(c.x,c.y-c.z);cx.rotate(c.rot);cx.translate(-c.x,-c.y);drawEnemy(c,0);cx.restore()}
  cx.globalAlpha=1;G.corpses=A.filter(c=>c.t<life)}
@@ -20033,7 +20035,7 @@ PETART.ev_kueken={draw(a,t,c,fade){const fl=Math.sin(t*14+a.v*9)*0.5+0.5,y=a.y-1
 window.__hsEv={EV2,EV2L,ev2Start,ev2Chance,ev2Pick,fin:()=>finishEvent(),go:()=>{hideScreen();hud.hidden=false;G.state="play";G.paused=false}};
 
 /* ---------- Offline spielen: App installieren (Service Worker speichert alles) oder ZIP für den PC ---------- */
-const OFF={ok:false,reg:null,bip:null,st:null,fort:null,zip:null,datei:location.protocol==='file:'||location.hostname==='appassets.androidplatform.net',app:location.hostname==='appassets.androidplatform.net',inst:false};window.__hsAPP=OFF.app;
+const OFF={ok:false,reg:null,bip:null,st:null,fort:null,zip:null,datei:location.protocol==='file:'||location.hostname==='appassets.androidplatform.net'||!!window.__hsPC,app:location.hostname==='appassets.androidplatform.net',pc:!!window.__hsPC,inst:false};window.__hsAPP=OFF.app;
 function offMB(b){return(b/1e6).toLocaleString('de-DE',{maximumFractionDigits:1,minimumFractionDigits:1})+' MB'}
 function offSend(m){try{const c=navigator.serviceWorker&&navigator.serviceWorker.controller;const w=c||(OFF.reg&&(OFF.reg.active||OFF.reg.waiting||OFF.reg.installing));if(w)w.postMessage({hsOff:m})}catch(e){}}
 function offUpd(){try{if(G.state==='title'&&SPL.view==='offline'&&scr.querySelector('.offpg')){const f=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.act;slRender(true);if(f){const b=scr.querySelector(`[data-act="${f}"]`);if(b)b.focus()}}else if(G.state==='title'&&SPL.view==='main'&&scr.querySelector('.slnav')&&!scr.querySelector('[data-v="offline"]'))slRender(true)}catch(e){}}
@@ -20095,7 +20097,7 @@ function offHtml(){const st=OFF.st,f=OFF.fort,z=OFF.zip;
  const bereit=st&&st.n>=st.total;
  const bar=(p,t)=>`<div class="offbar"><i style="width:${Math.max(2,Math.min(100,p))}%"></i></div><div class="offst">${t}</div>`;
  let app;
- if(OFF.app)app=`<p>Du spielst die <b>App-Fassung</b> – alles ist schon auf dem Gerät. Neue Versionen kommen als App-Update.</p>`;else if(OFF.datei)app=`<p>Du spielst gerade die <b>heruntergeladene Fassung</b> von deinem Rechner. Neue Versionen gibt es auf imrestales.de.</p>`;
+ if(OFF.app)app=`<p>Du spielst die <b>App-Fassung</b> – alles ist schon auf dem Gerät. Neue Versionen kommen als App-Update.</p>`;else if(OFF.pc)app=`<p>Du spielst das <b>Programm für den PC</b> – alles ist schon auf dem Rechner, es läuft ohne Internet. Neue Fassungen meldet das Programm beim Start; im Hauptmenü gibt es dafür auch „Nach Updates suchen“.</p><p class="offh">F11 oder Alt+Enter schaltet das Vollbild um.</p>`;else if(OFF.datei)app=`<p>Du spielst gerade die <b>heruntergeladene Fassung</b> von deinem Rechner. Neue Versionen gibt es auf imrestales.de.</p>`;
  else if(!OFF.ok)app=`<p>Hier kann das Spiel nicht gespeichert werden. Öffne <b>imrestales.de/heldensturm.html</b> direkt im Browser (Chrome, Firefox, Edge, Safari – nicht in einer Vorschau oder App-Ansicht). Dort steht an dieser Stelle der Knopf <b>„Für offline speichern“</b>.</p>${OFF.err?`<p class="offbad">Der Browser meldet: ${esc(OFF.err)}</p>`:''}`;
  else{const knopf=f?'':bereit?`<button class="slbtn" data-act="off-laden">Erneut prüfen</button>`:`<button class="slbtn gold" data-act="off-laden" data-sl-def="1">Für offline speichern${ges?` (${offMB(ges)})`:''}</button>`;
   const inst=OFF.inst?`<p class="offok">✓ Läuft als installierte App.</p>`:OFF.bip?`<button class="slbtn gold" data-act="off-inst" ${bereit?'data-sl-def="1"':''}>App installieren</button>`:
@@ -20112,8 +20114,12 @@ function offHtml(){const st=OFF.st,f=OFF.fort,z=OFF.zip;
    <p>Die <b>komplette App</b> mit allem drin (≈ 140 MB): startet wie ein eigenes Spiel, ohne Browser, mit Controller und eigenem Update-Knopf. Spielstände liegen getrennt von der Website.</p>
    <div class="offrow"><button class="slbtn" onclick="location.href='${APK}'">APK herunterladen</button></div>
    <p class="offh">Danach die Datei öffnen und „Aus dieser Quelle installieren“ erlauben.</p></div>`;
+ const pcp=OFF.datei||MOBIL?'':`<div class="offk"><div class="eyebrow">Windows · Linux</div><h3>Als Programm installieren</h3>
+   <p>Heldensturm als <b>eigenes Programm</b> (≈ 260 MB): nutzt die Grafikkarte voll aus – auch wenn dein Browser das Spiel bremst –, läuft offline, im echten Vollbild und mit der Grafikstufe „Legendär“. Spielstände liegen getrennt von der Website.</p>
+   <div class="offrow"><button class="slbtn gold" data-act="off-pc" data-v="Heldensturm-Setup.exe">Für Windows</button><button class="slbtn" data-act="off-pc" data-v="Heldensturm.AppImage">Für Linux</button></div>
+   <p class="offh">Windows warnt beim ersten Start („Der Computer wurde geschützt“): „Weitere Informationen“ → „Trotzdem ausführen“. Linux: Datei ausführbar machen und starten.</p></div>`;
  return`<div class="slm offpg"><div class="slp">${slHead('Ohne Internet','Offline spielen','Online-Mehrspieler, Bestenliste und Cloud-Spielstand brauchen weiterhin Internet – alles andere läuft offline, auch Mehrspieler an einem Gerät.')}
-  <div class="offgrid${apk?' off3':''}"><div class="offk"><div class="eyebrow">Handy · Handheld · PC</div><h3>${OFF.datei?'Als App speichern':'Nur den Inhalt laden'}</h3>${app}</div>${apk}${zip}</div>
+  <div class="offgrid${apk?' off3':''}"><div class="offk"><div class="eyebrow">Handy · Handheld · PC</div><h3>${OFF.pc?'Programm für den PC':OFF.datei?'Als App speichern':'Nur den Inhalt laden'}</h3>${app}</div>${pcp}${apk}${zip}</div>
   <div style="flex:1 1 auto"></div><div class="slbar"><button class="slbtn" data-act="sl-back" ${(!OFF.ok||bereit)&&!OFF.bip?'data-sl-def="1"':''}>‹ Zurück</button></div></div>${slFoot()}</div>`}
 (function(){const st=document.createElement('style');st.textContent=`
 .offpg .offgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,19em),1fr));gap:1em;margin-top:.6em}
@@ -20125,7 +20131,10 @@ function offHtml(){const st=OFF.st,f=OFF.fort,z=OFF.zip;
 .offpg .slbtn.klein{font-size:.78em;align-self:flex-start;opacity:.8}`;document.head.appendChild(st)})();
 /* Hauptmenü: Knopf „Offline spielen“ (nur wenn es hier etwas zu tun gibt) */
 slIco.offline='⇩';
-{const f=slMainHtml;slMainHtml=function(){let h=f.apply(this,arguments);if(OFF.app){if(!window.__hsBereit){window.__hsBereit=1;setTimeout(()=>{try{window.HeldensturmApp&&HeldensturmApp.bereit&&HeldensturmApp.bereit()}catch(e){}},120)}let v='';try{v=window.HeldensturmApp?HeldensturmApp.version():''}catch(e){}
+{const f=slMainHtml;slMainHtml=function(){let h=f.apply(this,arguments);if(OFF.pc){const v=String(window.__hsPC.version||'').replace(/\.0$/,'');
+  const ab=`<button class="slb" onclick="try{__hsPC.updates()}catch(e){}"><span class="ic">⟳</span><span class="tx">Nach Updates suchen<small>Programm-Version ${esc(v||'?')}</small></span></button>`,en=`<button class="slb" onclick="try{__hsPC.beenden()}catch(e){}"><span class="ic">⏻</span><span class="tx">Beenden<small>Zurück zum Desktop</small></span></button>`,a0='<button class="slb" data-act="sl-go" data-v="credits">';
+  if(h.includes(a0))h=h.replace(a0,ab+a0);const i=h.lastIndexOf('<button class="slb"');if(i>=0){const j=h.indexOf('</button>',i);if(j>=0)h=h.slice(0,j+9)+en+h.slice(j+9)}return h}
+ if(OFF.app){if(!window.__hsBereit){window.__hsBereit=1;setTimeout(()=>{try{window.HeldensturmApp&&HeldensturmApp.bereit&&HeldensturmApp.bereit()}catch(e){}},120)}let v='';try{v=window.HeldensturmApp?HeldensturmApp.version():''}catch(e){}
   const ab=`<button class="slb" onclick="try{window.HeldensturmApp&&HeldensturmApp.suche()}catch(e){}"><span class="ic">⟳</span><span class="tx">Nach Updates suchen<small>App-Version ${esc(v||'?')}</small></span></button>`,a0='<button class="slb" data-act="sl-go" data-v="credits">';return h.includes(a0)?h.replace(a0,ab+a0):h}
  const st=OFF.st,sub=OFF.datei?'Heruntergeladene Fassung':!OFF.ok?'So geht’s: Spiel auf imrestales.de speichern':OFF.fort?'Wird gespeichert …':st&&st.n>=st.total?'✓ Offline bereit':'App installieren oder ZIP für den PC';
  const b=`<button class="slb" data-act="sl-go" data-v="offline"><span class="ic">${slIco.offline}</span><span class="tx">Offline spielen<small>${sub}</small></span></button>`;
@@ -20137,7 +20146,13 @@ document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.
  if(a==='off-laden'){OFF.fort={b:0,ges:(OFF.st&&OFF.st.ges)||1};offSend('laden');offUpd()}
  else if(a==='off-inst'&&OFF.bip){const p=OFF.bip;OFF.bip=null;p.prompt();(p.userChoice||Promise.resolve({})).then(c=>{if(c&&c.outcome==='accepted'){OFF.inst=true;offSend('laden')}offUpd()})}
  else if(a==='off-weg'){offSend('loeschen')}
- else if(a==='off-zip')offZip()});
+ else if(a==='off-zip')offZip()
+ else if(a==='off-pc')offPcLaden(b.dataset.v)});
+/* Programm für Windows/Linux: neueste Fassung in den Releases suchen (Marke heldensturm-pc-1.N) und herunterladen */
+function offPcLaden(datei){const seite='https://github.com/gansklebrig/Imres-tales-Public/releases';try{toast('Suche die neueste Fassung …','#e5b454')}catch(e){}
+ fetch('https://api.github.com/repos/gansklebrig/Imres-tales-Public/releases?per_page=40',{headers:{Accept:'application/vnd.github+json'}}).then(r=>r.ok?r.json():Promise.reject(r.status)).then(L=>{let best=null;
+  for(const r of L){const m=/^heldensturm-pc-1\.(\d+)$/.exec(r.tag_name||'');if(!m||r.draft)continue;const d=(r.assets||[]).find(x=>x.name===datei);if(d&&(!best||+m[1]>best.n))best={n:+m[1],u:d.browser_download_url}}
+  location.href=best?best.u:seite}).catch(()=>{location.href=seite})}
 if(/(^|[#&])offline($|&)/.test(location.hash||''))setTimeout(()=>{try{if(G.state==='title'&&SPL.view==='main'){SPL.view='offline';showTitle()}}catch(e){}},600);
 window.__hsOFF={OFF,offZip,zipBau,crc32};
 
@@ -27623,7 +27638,7 @@ function oaGradZeichne(t){const c=cx,s=OA.s,C=OA.cfg;if(!C)return;if(!OA.gA||OA.
  c.globalCompositeOperation='source-over';c.globalAlpha=1;c.imageSmoothingEnabled=sm}
 
 /* ---------- 2) Schwebende Teilchen ---------- */
-const OA_PMAX=120;for(let i=0;i<OA_PMAX;i++)OA.P.push({on:0,k:'',x:0,y:0,z:1,vx:0,vy:0,t:0,life:1,s:1,ph:0,rot:0,vr:0,ci:0});
+const OA_PMAX=280;for(let i=0;i<OA_PMAX;i++)OA.P.push({on:0,k:'',x:0,y:0,z:1,vx:0,vy:0,t:0,life:1,s:1,ph:0,rot:0,vr:0,ci:0});
 for(let i=0;i<16;i++)OA.LS.push({x:0,y:0,r:0,a:0});for(let i=0;i<10;i++)OA.EM.push({x:0,y:0,k:''});
 const OA_LEAF={leaf:['#8aa63a','#b5b84a','#d9a441','#c97a2c','#6f8f2f','#a8b040'],leafd:['#6a5a3a','#7a6a42','#5a4a30','#84704a']};
 const OA_SPR={};
@@ -27648,8 +27663,8 @@ function oaSpawn(p,k,init){const M=40,z=0.45+Math.random()*1.05;p.on=1;p.k=k;p.z
  else if(k==='mote'){p.life=6+Math.random()*8;p.s=0.5+Math.random()*0.8}
  if(init)p.t=Math.random()*Math.min(p.life,4)}
 function oaTeilchenPlan(){const C=OA.cfg;if(!C)return;const s=OA.s,ul=OA.ul;let want=0;const plan=OA.plan||(OA.plan=[]);plan.length=0;
- for(const q of C.P){let n=q[1];if(!n)continue;n=s>=2&&!ul?n:Math.ceil(n*(ul?0.18:0.35));plan.push(q[0],n);want+=n}
- const max=ul?12:s>=2?OA_PMAX:48;OA.pWant=Math.min(max,want)}
+ for(const q of C.P){let n=q[1];if(!n)continue;n=s>=2&&!ul?(GF().leg?Math.ceil(n*2.2):n):Math.ceil(n*(ul?0.18:0.35));plan.push(q[0],n);want+=n}
+ const max=ul?12:s>=2?(GF().leg?OA_PMAX:120):48;OA.pWant=Math.min(max,want)}
 function oaTeilchen(dt,t,dX,dY){const P=OA.P,c=cx,plan=OA.plan;if(!plan)return;const ul=OA.ul;
  /* Belegung: je Art so viele wie geplant */
  let idx=0;for(let j=0;j<plan.length;j+=2){const k=plan[j];let n=plan[j+1];while(n-->0&&idx<OA.pWant){const p=P[idx++];if(!p.on||p.k!==k)oaSpawn(p,k,true)}}
@@ -28395,7 +28410,7 @@ const _obDrawEnemyRoh=(e,t)=>drawEnemy(e,t);
 {const _dfx=deathFx;deathFx=function(e){const r=_dfx.apply(this,arguments);try{if(e&&!G.netGuestRun){const C=G.corpses,lc=C&&C[C.length-1];const leiche=!!(lc&&lc.def===e.def&&Math.abs(lc.x-e.x)<2&&lc.t<0.05);obTod(e,leiche)}}catch(er){}return r}}
 {const _dc=drawCorpses;drawCorpses=function(inView,t){const r=_dc.apply(this,arguments);const t0=obT0();try{if(OB.ul&&OB.s>0){/* Ultra: Bodenspuren hier (der Hintergrund ist vorgerendert) */obDDraw(cx)}if(OB.s>0&&!OB.aus.zerf)obZDraw(t)}catch(e){}obT1(t0);return r}}
 /* Leichen zerfallen beim Ausblenden zu Staub */
-function obLeichenTick(){const A=G.corpses;if(!A||!A.length)return;const life=fxQ()>2?5:1.8;for(const c of A){if(c._obZ||c.t<life-0.65)continue;c._obZ=1;if(!obSicht(c.x,c.y,60))continue;const g=obTodTyp(c),C=OB_GCOL[g]||OB_GCOL.flesh,r=c.r||12;
+function obLeichenTick(){const A=G.corpses;if(!A||!A.length)return;const life=GF().leg?12:fxQ()>2?5:1.8;for(const c of A){if(c._obZ||c.t<life-0.65)continue;c._obZ=1;if(!obSicht(c.x,c.y,60))continue;const g=obTodTyp(c),C=OB_GCOL[g]||OB_GCOL.flesh,r=c.r||12;
   const n=OB.s>=2?7:3;for(let i=0;i<n;i++){const j=obP(1,c.x+obRn(-r,r),c.y+obRn(-r*0.4,r*0.4),obRn(-12,12),obRn(-26,-8),obRn(0.6,1),obRn(3.5,6),obC(i&1?C[0]:C[1]));if(j>=0)OBP.d[j]=0.94}
   if(OB.s>=2)for(let i=0;i<3;i++){const j=obP(11,c.x+obRn(-r,r),c.y,obRn(-8,8),obRn(-34,-16),obRn(0.6,0.9),1.2,obC('#e8d8b8'));if(j>=0)OBP.d[j]=0.96}}}
 
@@ -37050,7 +37065,10 @@ const swAuto=()=>SAVE.gfx==='auto'||SAVE.gfx===undefined;
 function swPc(){if(SW.pcTest!=null)return !!SW.pcTest;try{const ul=window.__hsULTRA&&window.__hsULTRA.on,weak=typeof RG2!=='undefined'&&RG2.weak;return !MOBIL&&!SWR&&!ul&&!weak}catch(e){return false}}
 const SW_L=[[4,1],[4,0.85],[4,0.75],[3,0.75],[2,0.75],[2,0.6],[2,0.5],[1,0.5],[0,0.5]];
 /* Leiter je nach fester Auflösung: ohne Auflösungsschritte */
-function swLeiter(){const f=resFest();if(!f)return SW_L;return [[4,f],[3,f],[2,f],[1,f],[0,f]]}
+/* Im PC-Programm (eigenes Chromium, Grafikkarte sicher an) beginnt die Leiter eine Stufe höher bei „Legendär“ */
+const swLeg=()=>{try{return !!window.__hsPC&&GFX.length>5}catch(e){return false}};
+const SW_L5=[[5,1],[5,0.85]].concat(SW_L);
+function swLeiter(){const f=resFest(),g=swLeg();if(!f)return g?SW_L5:SW_L;return (g?[[5,f]]:[]).concat([[4,f],[3,f],[2,f],[1,f],[0,f]])}
 function swAnwenden(){const L=swLeiter();SW.step=Math.max(0,Math.min(L.length-1,SW.step));SW.ce=Math.max(0,Math.min(SW.step,SW.ce));const s=L[SW.step];
  GAUTO=s[0];GCEIL=s[0];const r=resFest()||s[1];if(RSC!==r||true){RSC=r}RSLOW=RSOK=0;try{resize()}catch(e){}}
 SW.anwenden=swAnwenden;SW.leiter=swLeiter;
@@ -39749,7 +39767,7 @@ window.__hsGLWELT={v:7};
   if(RS.uf){try{rZiel(RS.u,null);GW.haken.uPost(hCtx());flush(RS.u)}catch(e){gErr('uPost',e);/* Notfall: Puffer 1:1 */try{const RU=RS.u,gu=RU.gl;rZiel(RU,null);zustand(RU,RU.P.tex,RS.uf.t,'copy',0,gu.NEAREST);quad(RU,0,0,EB.w,0,EB.w,EB.h,0,EB.h,0,1,1,0,1,1,1,1);flush(RU)}catch(e2){}}}GW.st.mix+=X.st.mix;GW.st.text+=X.st.text;GW.st.unbek+=X.st.unbek;
   for(let i=EB.slN;i<2;i++){if(EB.slVis[i]){EB.slVis[i]=false;EB.sl[i].style.display='none'}}
   const w=EB.w,h=EB.h;let bl=0;
-  if(FR.bloom){const bw=Math.max(2,Math.round(W/7)),bh=Math.max(2,Math.round(H/7));if(!RS.bf||RS.bf.w!==bw||RS.bf.h!==bh){if(RS.bf)fbWeg(RO,RS.bf);RS.bf=fbNeu(RO,bw,bh,false)}
+  if(FR.bloom){const bq=GF().leg?4.5:7,bw=Math.max(2,Math.round(W/bq)),bh=Math.max(2,Math.round(H/bq));if(!RS.bf||RS.bf.w!==bw||RS.bf.h!==bh){if(RS.bf)fbWeg(RO,RS.bf);RS.bf=fbNeu(RO,bw,bh,false)}
    if(RS.bf){let mitS=0;const bs=GW.k.bloomS1<0?!firefox:!!GW.k.bloomS1;
     if(bs){if(!RS.bs1c){RS.bs1c=document.createElement('canvas')}const c=RS.bs1c;if(c.width!==bw||c.height!==bh){c.width=bw;c.height=bh}const q=c.getContext('2d');q.globalCompositeOperation='copy';q.imageSmoothingEnabled=true;q.drawImage(EB.s1,0,0,bw,bh);
      const e=texVon(RO,c);if(e){g.activeTexture(g.TEXTURE1);g.bindTexture(g.TEXTURE_2D,e.t);g.activeTexture(g.TEXTURE0);mitS=1}}
@@ -39829,7 +39847,7 @@ window.__hsGLWELT={v:7};
      spiegel  – nasse Spiegelungen der Lichter bei Regen
      bloom2   – weicherer Bloom (zwei Weichzeichner-Durchgänge)
    Stufen: Minimal: farbe · Niedrig: + ao · Mittel: + relief, sonne, nass, wind, spuren, glanz · Hoch: + schatten (4 Lichter), nebel, lava, spiegel ·
-   Episch: + schatten (8 Lichter), figuren, staub, bloom2. Schalter: __hsGLFX.aus, __hsGLFX.k.<name> = 1/0 (−1 = nach Grafikstufe), SAVE.glfx 'aus'|'voll'.
+   Episch: + schatten (8 Lichter), figuren, staub, bloom2 · Legendär: Lichtschatten in voller statt halber Auflösung, feinerer Bloom (3 Durchgänge). Schalter: __hsGLFX.aus, __hsGLFX.k.<name> = 1/0 (−1 = nach Grafikstufe), SAVE.glfx 'aus'|'voll'.
    Farben: nur warme/neutrale/grüne/violette Töne. Keine Zeitlupe, kein Standbild. ES2017 (Chromium 77). */
 window.__hsGLFX={v:1};
 (function(){try{
@@ -39993,7 +40011,7 @@ setInterval(()=>{try{GW.haken.uPost=uAktiv()?uPost:null}catch(e){}},500);GW.hake
 /* ---------- Haken: obere Ebene, Lichtschatten ---------- */
 const SB={F:null,R:null,gen:-1};
 GW.haken.licht.push(function(c){if(!an('schatten'))return;const R=c.RO,g=R.gl;if(!(c.dunkel>0.3)||!c.m)return;const max=lvl()>=4||modus()==='voll'?8:4;const L=lichter(c,max);FX.st.lichter=L.length;if(!L.length)return;
- const occ=occTex(R);if(!occ)return;const p=prog(R,'s');if(!p)return;const hw=Math.max(2,Math.ceil(c.w/2)),hh=Math.max(2,Math.ceil(c.h/2));
+ const occ=occTex(R);if(!occ)return;const p=prog(R,'s');if(!p)return;const sq=lvl()>=5?1:2,hw=Math.max(2,Math.ceil(c.w/sq)),hh=Math.max(2,Math.ceil(c.h/sq));
  if(!SB.F||SB.R!==R||SB.gen!==R.gen||SB.F.w!==hw||SB.F.h!==hh){if(SB.F&&SB.R===R&&SB.gen===R.gen)A.fbWeg(R,SB.F);SB.F=A.fbNeu(R,hw,hh,false);SB.R=R;SB.gen=R.gen;if(!SB.F)return}
  A.rZiel(R,SB.F);g.clearColor(0,0,0,0);g.clear(g.COLOR_BUFFER_BIT);A.useProg(R,p);g.uniform2f(p.u.uR,hw,hh);p.zw=hw;p.zh=hh;g.uniform1f(p.u.uK,c.w/hw);
  g.uniform1i(p.u.uOcc,0);bindT(R,0,occ.t);g.uniform3f(p.u.uCam,c.m[4],c.m[5],c.m[0]);g.uniform1f(p.u.uN8,occ.n8);g.uniform1f(p.u.uD,Math.min(0.95,c.dunkel));g.uniform1f(p.u.uDbg,FX.dbg||0);
@@ -40026,7 +40044,7 @@ GW.haken.ende.push(function(c){const R=c.RO,g=R.gl;if(!c.m)return;const x=WXo();
 const BB={F:null,R:null,gen:-1};
 GW.haken.bloom=GW.haken.bloom||[];GW.haken.bloom.push(function(c){if(!an('bloom2')||!c.bf)return;const R=c.RO,g=R.gl,p=prog(R,'b');if(!p)return;const w=c.bf.w,h=c.bf.h;
  if(!BB.F||BB.R!==R||BB.gen!==R.gen||BB.F.w!==w||BB.F.h!==h){if(BB.F&&BB.R===R&&BB.gen===R.gen)A.fbWeg(R,BB.F);BB.F=A.fbNeu(R,w,h,false);BB.R=R;BB.gen=R.gen;if(!BB.F)return}
- blend(R,'copy');for(let k=0;k<2;k++){A.rZiel(R,BB.F);A.useProg(R,p);g.uniform1i(p.u.uT,0);bindT(R,0,c.bf.t);g.uniform2f(p.u.uD,(1+k)/w,0);vollbild(R,p,w,h,true);
+ blend(R,'copy');for(let k=0,kn=lvl()>=5?3:2;k<kn;k++){A.rZiel(R,BB.F);A.useProg(R,p);g.uniform1i(p.u.uT,0);bindT(R,0,c.bf.t);g.uniform2f(p.u.uD,(1+k)/w,0);vollbild(R,p,w,h,true);
   A.rZiel(R,c.bf);A.useProg(R,p);bindT(R,0,BB.F.t);g.uniform2f(p.u.uD,0,(1+k)/h);vollbild(R,p,w,h,true)}});
 
 /* ---------- Schalter in der Grafik-Box ---------- */
