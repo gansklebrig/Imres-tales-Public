@@ -24,7 +24,7 @@
     }
   }
   const load0 = Z.loadArea;
-  Z.loadArea = function () { if (amb && amb.state === "fight") unseal(true); const r = load0.apply(this, arguments); try { setup(Z.level); } catch (e) { console.error(e); } return r; };
+  Z.loadArea = function () { if (amb && amb.state === "fight") unseal(true); const r = load0.apply(this, arguments); try { if (Z.formSquads) Z.formSquads(Z.level); /* W10: Trupps mit Rollen */ } catch (e) { console.error(e); } try { setup(Z.level); } catch (e) { console.error(e); } return r; };
 
   const solid = v => v === 1 || v === 7 || v === 12;
   function seal() {

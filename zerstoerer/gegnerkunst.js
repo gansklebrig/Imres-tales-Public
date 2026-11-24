@@ -130,8 +130,11 @@
         c.globalAlpha = 1;
       }
       /* W8: misstrauisch – kleines „?“ über dem Kopf (hat etwas gehört/gesehen, sucht) */
-      if (e.sus > 0 && !e.aware && !e.sleep && !(e.hidden > 0)) qBubble(c, cx + (e.face || 1) * e.w * 0.3, e.y - 3, e.qPop || 0, e.sus);
-      if (!e.elite) continue;
+      if (e.sus > 0 && !e.aware && !e.sleep && !e.disguise && !(e.hidden > 0)) qBubble(c, cx + (e.face || 1) * e.w * 0.3, e.y - 3, e.qPop || 0, e.sus);
+      /* W10: Kriegstakt (Trommler) – kleine Glutnoten steigen auf; Laternenlicht */
+      if (e.rageT > 0 && !e.disguise) { const ph = (t * 1.4 + e.anim * 0.3) % 1; c.globalAlpha = Math.min(1, e.rageT) * (1 - ph) * 0.8; c.fillStyle = "#ffb060"; c.font = "700 7px 'Alegreya Sans',sans-serif"; c.textAlign = "center"; c.fillText("♪", cx + Math.sin(ph * 6 + e.anim) * e.w * 0.5, e.y - 2 - ph * 12); c.globalAlpha = 1; }
+      if (e.def.lantern && !(e.hidden > 0)) lanternPool(c, e, t);
+      if (!e.elite || e.disguise) continue;
       c.save(); c.globalCompositeOperation = "lighter";
       switch (e.elite) {
         case "schnell": for (let k = 0; k < 3; k++) { c.globalAlpha = 0.25; c.strokeStyle = "#e8f0e0"; c.lineWidth = 0.8; const yy = e.y + e.h * (0.25 + k * 0.25) + Math.sin(t * 9 + k) * 1.5, len = 8 + Math.abs(e.vx) * 0.06; c.beginPath(); c.moveTo(cx - Math.sign(e.vx || e.face) * (e.w * 0.6), yy); c.lineTo(cx - Math.sign(e.vx || e.face) * (e.w * 0.6 + len), yy); c.stroke(); } break;
@@ -145,10 +148,27 @@
       }
       c.restore();
     }
+    /* W10: Fadennetze der Drider */
+    if (Z.webStrips) for (const st of Z.webStrips) {
+      const a = Math.min(1, st.t / 0.15) * Math.min(1, (st.life - st.t) / 0.6), x0 = st.x - st.w / 2;
+      c.globalAlpha = 0.75 * a; c.strokeStyle = "#eee8f0"; c.lineWidth = 0.6; c.beginPath();
+      for (let i = 0; i < 7; i++) { const y = st.y - 1 - (i % 3) * 3; c.moveTo(x0 + i * 2, y); c.quadraticCurveTo(st.x + Math.sin(st.seed + i) * 8, y - 3 - (i % 2) * 2, x0 + st.w - i * 2, y + (i % 2 ? -1 : 0)); }
+      for (let i = 0; i <= 6; i++) { const x = x0 + i * st.w / 6; c.moveTo(x, st.y); c.lineTo(x + Math.sin(st.seed * 3 + i) * 3, st.y - 8); }
+      c.stroke(); c.globalAlpha = 1;
+    }
+    /* W10: Rost an Ezekiels Waffe */
+    { const P = Z.player; if (P && P.rustT > 0 && !P.dead) { c.globalAlpha = Math.min(1, P.rustT) * 0.85; c.fillStyle = "#c86a2a"; c.font = "700 6px 'Alegreya Sans',sans-serif"; c.textAlign = "center"; c.fillText(L(["Rost", "Rust"]), P.x + P.w / 2, P.y - 6); c.globalAlpha = 1; } }
     /* Zündende Explosiv-Leichen */
     for (const b of bombs) { const u = Math.min(1, b.t / 0.9); c.save(); c.globalCompositeOperation = "lighter"; c.strokeStyle = "rgba(255,120,40," + (0.4 + 0.6 * Math.abs(Math.sin(u * 20))) + ")"; c.lineWidth = 1.5; c.beginPath(); c.arc(b.x, b.y, 52 * u, 0, TAU); c.stroke(); c.fillStyle = "rgba(255,140,60," + 0.15 * u + ")"; c.beginPath(); c.arc(b.x, b.y, 52, 0, TAU); c.fill(); c.restore(); }
     c.restore();
   };
   const load0 = Z.loadArea;
-  Z.loadArea = function () { bombs = []; return load0.apply(this, arguments); };
+  Z.loadArea = function () { bombs = []; if (Z.webStrips) Z.webStrips.length = 0; if (Z.player) Z.player.rustT = 0; return load0.apply(this, arguments); };
+  /* Lichtkreis einer Laterne (Handheld: ein vorgefertigter Lichtfleck statt Verlauf je Bild) */
+  let poolSpr = null;
+  function lanternPool(c, e, t) {
+    if (!poolSpr) { poolSpr = document.createElement("canvas"); poolSpr.width = poolSpr.height = 64; const g = poolSpr.getContext("2d"), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, "rgba(255,205,120,.32)"); gr.addColorStop(0.6, "rgba(255,180,90,.12)"); gr.addColorStop(1, "rgba(255,170,80,0)"); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); }
+    const r = (e.flareT > 0 ? 110 : 60) * (0.96 + 0.04 * Math.sin(t * 9 + e.anim)), x = e.x + e.w / 2 + e.face * 8, y = e.y + e.h * 0.35;
+    c.save(); c.globalCompositeOperation = "lighter"; c.drawImage(poolSpr, x - r, y - r, r * 2, r * 2); c.restore();
+  }
 })();

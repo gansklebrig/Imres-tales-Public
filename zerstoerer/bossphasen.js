@@ -1685,10 +1685,18 @@
     Z.hitEnemy = function (e, v, o) {
       if (!e || !e.def || e.dead) return h0.apply(this, arguments);
       if ((e.def.boss || e.nmMini) && e.openT > 0 && !(o && o.dot) && v > 0) { v *= 1.5; if (R() < 0.5) FX.burst(cxOf(e), e.y + e.h * 0.4, 6, { col: ["#ffe08a", "#fff2d0"], sp: 120, life: 0.3, size: 2, kind: "spark", add: true }); }
-      const fight = !!(e.nmMini || (bossFight() && !(o && o.dot)));
+      /* W9 (Abuse-Bot): auch Diener von Mini-Bossen/Bossen zählen – vorher gab es an Mini-Boss-Beschwörungen vollen Lebensraub */
+      const fight = !!(e.nmMini || (e.master && !e.master.dead && (e.master.nmMini || (e.master.def && e.master.def.boss))) || (bossFight() && !(o && o.dot)));
       if (!fight) return h0.call(this, e, v, o);
       LS.depth++; const c0 = LS.ctx; LS.ctx = true;
       try { return h0.call(this, e, v, o); } finally { LS.depth--; LS.ctx = c0; LS.frame = FRAME; if (e.nmMini && e.nmGuardT > 0 && !(e.openT > 0)) { e.kbT = 0; e.stagger = 0; } }
+    };
+    /* W9: Kill-Heilungen (Blutdurst, Blut-Familie, Darkin-Ladung …) durch Gift-/Brand-Tode während eines Bosskampfs liefen am Deckel vorbei */
+    const k0 = Z.killEnemy;
+    Z.killEnemy = function (e, o) {
+      if (!e || e.dead || !(bossFight() || (e.master && (e.master.nmMini || (e.master.def && e.master.def.boss))))) return k0.apply(this, arguments);
+      LS.depth++; const c0 = LS.ctx; LS.ctx = true;
+      try { return k0.apply(this, arguments); } finally { LS.depth--; LS.ctx = c0; }
     };
     const hp0 = Z.healPlayer;
     Z.healPlayer = function (n) {

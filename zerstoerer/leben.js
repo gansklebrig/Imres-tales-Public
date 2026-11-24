@@ -13,7 +13,7 @@
     const R = Z.Rng(((lv.seed || 5) * 7 + 911) >>> 0);
     const P = Z.player;
     for (const e of Z.enemies) {
-      if (e.dead || !e.def || e.def.boss || e.def.fly || e.thief || e.ambush || ["turret", "exploder", "swarm", "phase"].includes(e.def.ai)) continue;
+      if (e.dead || !e.def || e.def.boss || e.def.fly || e.def.noSleep || e.thief || e.ambush || ["turret", "exploder", "swarm", "phase"].includes(e.def.ai)) continue;
       if (P && Math.abs(e.x - P.x) < 200 && Math.abs(e.y - P.y) < 100) continue;
       const r = R();
       if (r < 0.22) { e.sleep = true; e.sleepPh = R() * 6; }

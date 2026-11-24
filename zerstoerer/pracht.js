@@ -1050,8 +1050,9 @@
   const WET = { cellar: 1, dungeon: 1, lake: 1, harbour: 1 }, DUSTY = { embercity: 1, forge: 1, spires: 1, belltower: 1, halls: 1, castle: 1 };
   const bend = new Map(); let bLv = null;
   let stepAcc = 0, wasAir = false, vyMax = 0;
-  const tick0 = Z.ebenenTick;
-  Z.ebenenTick = function (dt) {
+  /* über Z.prachtTick (ebenen.js setzt Z.ebenenTick neu, ohne Kette) */
+  const tick0 = Z.prachtTick;
+  Z.prachtTick = function (dt) {
     if (tick0) tick0(dt);
     const P = Z.player, lv = Z.level, B = Z.biome; if (!on() || !P || P.dead || !lv || !B) return;
     const q = (Z.gq && Z.gq.part) || 1, onG = !!P.onGround, fx = P.x + P.w / 2, fy = P.y + P.h;
@@ -1081,6 +1082,7 @@
     }
     for (const [k, v] of bend) { const nv = v * Math.pow(0.02, dt); if (Math.abs(nv) < 0.01) bend.delete(k); else bend.set(k, nv); }
   };
+  Z.laufspuren = () => bend.size;
   const mid0 = Z.drawMidLife;
   Z.drawMidLife = function (c, cam, t) {
     if (mid0) mid0.apply(this, arguments);
@@ -1094,6 +1096,119 @@
       c.strokeStyle = k % 2 ? col : Z.shade(col, 0.15);
       c.beginPath(); c.moveTo(x, y); c.quadraticCurveTo(x + (v + sw) * h * 0.3, y - h * 0.6, x + (v + sw) * h * 0.95, y - h * (1 - Math.abs(v) * 0.45)); c.stroke();
     }
+    c.restore();
+  };
+})();
+
+/* Ezekiel – The Destroyer · Arena-Kulissen: Wachturm und Turmspitze (ab Stufe 1; Vordergrund ab Stufe 2)
+   Wachturm: hinter der Plattform ein gewaltiges Glockengerüst mit gesprungener Glocke, ferne Wachtürme mit
+   Signalfeuern auf den Hügeln, eine Wehrmauer, die in die Tiefe läuft, wehende Fahnen; zwei Feuerkörbe auf der Plattform.
+   Turmspitze: der abgebrochene Turmhelm ragt in den Sturm, Wasserspeier, ziehende Giftnebelbänder, umherwirbelnde
+   Trümmer; grüngoldene Hexenfeuer. Vordergrund: Zinnen- und Kettenschattenrisse an den Rändern (blenden vor Spielgeschehen aus). */
+(function () {
+  "use strict";
+  const Z = window.Z, G = Z.gfx, T = Z.TILE, TAU = Math.PI * 2, PI = Math.PI;
+  const on = () => { const q = Z.gq; if (!q) return true; if (q.lean) return false; return q.level === -1 ? true : q.level >= 1; };
+  const rich = () => { const q = Z.gq; return !q || (q.level === -1 ? q.layers !== false : q.level >= 2); };
+  const which = () => { const lv = Z.level; return lv && (lv.arena === "wachturm" || lv.arena === "venomfang") ? lv.arena : null; };
+  function floorY() { const lv = Z.level, x = Math.floor(lv.W / 2); for (let y = 3; y < lv.H; y++) if (lv.get(x, y) === 1) return y * T; return (lv.H - 2) * T; }
+  const par = (cam, wx, p) => cam.x * (1 - p) + wx * p;
+  const zt = () => (Z.zeit ? Z.zeit() : null);
+  const rimCol = () => { const z = zt(); return z && Z.gfx.lightRGB ? "rgba(" + Z.gfx.lightRGB(z.light).join(",") + ",.35)" : "rgba(255,220,200,.3)"; };
+  /* ---------- Wachturm ---------- */
+  function backTurm(c, cam, t) {
+    const lv = Z.level, W = lv.W * T, fy = floorY(), rim = rimCol();
+    /* ferne Hügel mit Wachtürmen und Signalfeuern */
+    for (let i = 0; i < 5; i++) {
+      const wx = par(cam, W * (0.1 + i * 0.2), 0.3), hy = fy - 30 - (i % 2) * 14;
+      c.fillStyle = "rgba(22,14,24,.9)"; c.beginPath(); c.moveTo(wx - 90, fy + 20); c.quadraticCurveTo(wx - 30, hy - 10, wx, hy); c.quadraticCurveTo(wx + 40, hy + 4, wx + 100, fy + 20); c.fill();
+      c.fillRect(wx - 5, hy - 34, 10, 34); c.fillRect(wx - 7, hy - 38, 14, 4); for (let k = 0; k < 3; k++) c.fillRect(wx - 7 + k * 5, hy - 41, 3, 3);
+      const f = 0.7 + 0.3 * Math.sin(t * 6 + i * 2) + 0.1 * Math.sin(t * 17 + i);
+      c.save(); c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(wx, hy - 44, 0, wx, hy - 44, 14); g.addColorStop(0, "rgba(255,170,80," + (0.7 * f) + ")"); g.addColorStop(1, "rgba(255,120,40,0)"); c.fillStyle = g; c.fillRect(wx - 14, hy - 58, 28, 28); c.fillStyle = "rgba(255,220,150," + f + ")"; c.fillRect(wx - 1, hy - 46, 2, 2.5); c.restore();
+    }
+    /* Wehrmauer, die in die Tiefe läuft */
+    const mw0 = par(cam, -40, 0.55), mw1 = par(cam, W + 40, 0.55), my = fy - 52;
+    c.fillStyle = "#1e1620"; c.fillRect(mw0, my, mw1 - mw0, 80); for (let x = mw0; x < mw1; x += 14) c.fillRect(x, my - 7, 8, 7);
+    c.fillStyle = rim; c.fillRect(mw0, my, mw1 - mw0, 1); for (let x = mw0; x < mw1; x += 14) c.fillRect(x, my - 7, 8, 0.8);
+    c.fillStyle = "rgba(0,0,0,.25)"; for (let x = mw0 + 40; x < mw1; x += 90) c.fillRect(x, my + 8, 4, 10);
+    /* Glockengerüst mit gesprungener Glocke */
+    /* die Riesenglocke hängt an einem Seil aus dem Himmel über den Bergen – gesprungen, schwingt kaum */
+    const bx = par(cam, W * 0.55, 0.6), top = cam.y - 4, sway = Math.sin(t * 0.7) * 0.05, rim2 = rimCol();
+    c.save(); c.globalAlpha = 0.9; c.translate(bx, top); c.rotate(sway);
+    c.strokeStyle = "#1e1612"; c.lineWidth = 2; c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 18); c.stroke();
+    c.fillStyle = "#24180e"; c.fillRect(-5, 16, 10, 5);
+    c.fillStyle = "#2c2016"; c.beginPath(); c.moveTo(-8, 21); c.quadraticCurveTo(-9, 40, -24, 62); c.lineTo(24, 62); c.quadraticCurveTo(9, 40, 8, 21); c.closePath(); c.fill();
+    c.fillStyle = rim2; c.beginPath(); c.moveTo(-7, 22); c.quadraticCurveTo(-8, 40, -21, 61); c.lineTo(-18, 61); c.quadraticCurveTo(-5, 40, -4, 22); c.fill();
+    c.fillStyle = "#1a120a"; c.fillRect(-25, 61, 50, 3); c.strokeStyle = "#0e0806"; c.lineWidth = 1.2; c.beginPath(); c.moveTo(5, 30); c.lineTo(9, 42); c.lineTo(5, 50); c.lineTo(11, 62); c.stroke();
+    c.restore();
+    /* Fahnen an Stangen */
+    for (const [fx0, k] of [[W * 0.2, 0], [W * 0.8, 1]]) { const fx = par(cam, fx0, 0.8), py = fy - 120; c.fillStyle = "#24181a"; c.fillRect(fx - 1, py, 2, 120); c.fillStyle = "#7a1a1a"; c.beginPath(); c.moveTo(fx + 1, py + 2); for (let i = 0; i <= 6; i++) { const u = i / 6; c.lineTo(fx + 1 + u * 30, py + 2 + Math.sin(t * 3 + u * 5 + k) * 3 * u); } for (let i = 6; i >= 0; i--) { const u = i / 6; c.lineTo(fx + 1 + u * 30, py + 16 + Math.sin(t * 3 + u * 5 + k + 0.5) * 3 * u); } c.fill(); c.fillStyle = "rgba(232,180,80,.6)"; c.beginPath(); c.arc(fx + 12, py + 9 + Math.sin(t * 3 + 2 + k) * 1.4, 3, 0, TAU); c.fill(); }
+  }
+  /* ---------- Turmspitze ---------- */
+  function backSpitze(c, cam, t) {
+    const lv = Z.level, W = lv.W * T, fy = floorY(), rim = rimCol();
+    /* abgebrochener Turmhelm */
+    const sx = par(cam, W * 0.62, 0.7), base = fy + 10;
+    c.fillStyle = "#1a1418"; c.beginPath(); c.moveTo(sx - 70, base); c.lineTo(sx - 52, base - 210); c.lineTo(sx - 30, base - 236); c.lineTo(sx - 14, base - 214); c.lineTo(sx + 6, base - 250); c.lineTo(sx + 22, base - 222); c.lineTo(sx + 52, base - 200); c.lineTo(sx + 70, base); c.closePath(); c.fill();
+    c.strokeStyle = rim; c.lineWidth = 1; c.beginPath(); c.moveTo(sx - 70, base); c.lineTo(sx - 52, base - 210); c.lineTo(sx - 30, base - 236); c.lineTo(sx - 14, base - 214); c.lineTo(sx + 6, base - 250); c.stroke();
+    /* Spitzbogenfenster mit grünem Glimmen */
+    for (let k = 0; k < 3; k++) { const wy = base - 60 - k * 52, ww = 12 - k * 2; c.fillStyle = "#0a0608"; c.beginPath(); c.moveTo(sx - ww / 2, wy); c.lineTo(sx - ww / 2, wy - 18); c.quadraticCurveTo(sx, wy - 30, sx + ww / 2, wy - 18); c.lineTo(sx + ww / 2, wy); c.fill(); c.save(); c.globalCompositeOperation = "lighter"; c.fillStyle = "rgba(140,220,90," + (0.18 + 0.1 * Math.sin(t * 2 + k)) + ")"; c.fillRect(sx - ww / 2 + 2, wy - 16, ww - 4, 14); c.restore(); }
+    /* Wasserspeier an den Kanten */
+    for (const [gx, d] of [[sx - 62, -1], [sx + 60, 1]]) { const gy = base - 120; c.fillStyle = "#1a1418"; c.beginPath(); c.moveTo(gx, gy); c.lineTo(gx + d * 22, gy - 4); c.lineTo(gx + d * 30, gy - 10); c.lineTo(gx + d * 26, gy - 2); c.lineTo(gx + d * 30, gy + 4); c.lineTo(gx + d * 14, gy + 8); c.lineTo(gx, gy + 12); c.fill(); c.beginPath(); c.moveTo(gx + d * 12, gy - 2); c.lineTo(gx + d * 8, gy - 16); c.lineTo(gx + d * 18, gy - 4); c.fill(); }
+    /* Giftnebelbänder (grün, kein Blau) */
+    c.save(); c.globalCompositeOperation = "lighter";
+    for (let i = 0; i < 4; i++) { const y = fy - 40 - i * 46, x = cam.x + ((t * (8 + i * 5) + i * 300) % (cam.w + 400)) - 200, g = c.createLinearGradient(0, y - 12, 0, y + 12); g.addColorStop(0, "rgba(110,190,80,0)"); g.addColorStop(0.5, "rgba(110,190,80,.08)"); g.addColorStop(1, "rgba(110,190,80,0)"); c.fillStyle = g; c.fillRect(x - 200, y - 12, 400, 24); }
+    c.restore();
+    /* wirbelnde Trümmer und Blätter */
+    c.fillStyle = "#2a2024"; for (let i = 0; i < 10; i++) { const u = ((t * (0.05 + (i % 3) * 0.02)) + i * 0.13) % 1, x = cam.x - 20 + u * (cam.w + 40), y = cam.y + cam.h * (0.15 + (i * 0.37) % 0.6) + Math.sin(t * 2 + i) * 10; c.save(); c.translate(x, y); c.rotate(t * (1 + i % 3) + i); c.fillRect(-2, -1, 4, 2); c.restore(); }
+  }
+  const back0 = Z.drawBackLife;
+  Z.drawBackLife = function (c, cam, t, B, oy, LH) {
+    if (back0) back0.apply(this, arguments);
+    const w = which(); if (!w || !on()) return;
+    c.save(); try { if (w === "wachturm") backTurm(c, cam, t); else backSpitze(c, cam, t); } catch (e) { console.error(e); } c.restore();
+  };
+  /* Feuerkörbe auf der Plattform (Wachturm: Glut; Turmspitze: grüngoldenes Hexenfeuer) */
+  const BRZ = [0.2, 0.8];
+  function brazierPos(k) { const lv = Z.level; return { x: Math.round(lv.W * BRZ[k]) * T + 8, y: floorY() }; }
+  const mid0 = Z.drawMidLife;
+  Z.drawMidLife = function (c, cam, t) {
+    if (mid0) mid0.apply(this, arguments);
+    const w = which(); if (!w || !on()) return;
+    c.save();
+    for (let k = 0; k < 2; k++) {
+      const p = brazierPos(k), x = p.x, y = p.y, f = 0.85 + 0.15 * Math.sin(t * 9 + k * 3);
+      c.fillStyle = "#2a2422"; c.fillRect(x - 1, y - 12, 2, 12); c.fillRect(x - 5, y - 1.5, 10, 1.5); c.beginPath(); c.moveTo(x - 7, y - 16); c.lineTo(x + 7, y - 16); c.lineTo(x + 4.5, y - 11); c.lineTo(x - 4.5, y - 11); c.fill();
+      const fc = w === "wachturm" ? ["#ff8a30", "#ffe0a0"] : ["#a0e040", "#f0f0a0"];
+      c.fillStyle = fc[0]; c.beginPath(); c.moveTo(x - 5, y - 16); c.quadraticCurveTo(x - 4, y - 24 * f, x, y - 28 * f); c.quadraticCurveTo(x + 4, y - 22 * f, x + 5, y - 16); c.fill();
+      c.fillStyle = fc[1]; c.beginPath(); c.ellipse(x, y - 19, 1.8, 3.4 * f, 0, 0, TAU); c.fill();
+      if (Math.random() < 0.08) Z.fx.p({ x: x + (Math.random() - 0.5) * 6, y: y - 24, vx: (Math.random() - 0.5) * 10, vy: -30 - Math.random() * 20, life: 1, size: 1.2, col: fc[0], kind: "glow", add: true });
+    }
+    c.restore();
+  };
+  if (G.lightGather) G.lightGather.push(function (add, cam, t) {
+    const w = which(); if (!w || !on()) return;
+    for (let k = 0; k < 2; k++) { const p = brazierPos(k); add(p.x, p.y - 20, 130, w === "wachturm" ? "#ff9a40" : "#b0e050", 0.55 * (0.9 + 0.1 * Math.sin(t * 9 + k * 3)), 14); }
+  });
+  /* Vordergrund: Zinnen bzw. Wasserspeier-Trümmer an den unteren Ecken, Kette oben (blendet vor Spielgeschehen aus) */
+  const al0 = Z.drawAfterLight;
+  Z.drawAfterLight = function (c, cam, W, H, t) {
+    if (al0) al0.apply(this, arguments);
+    const w = which(); if (!w || !rich() || (G.off && G.off.arenaFg)) return;
+    const S = G.scale; c.save(); c.setTransform(S, 0, 0, S, 0, 0);
+    const sx = cam.x * 1.3, items = [];
+    for (let i = Math.floor(sx / 260) - 1; i <= Math.floor((sx + cam.w * 1.3) / 260) + 1; i++) items.push(i);
+    for (const i of items) {
+      const x = i * 260 - sx, h = cam.h, key = "ar" + i, isL = (i & 1) === 0;
+      const bx = x, by = h - 26, bw = 70, bh = 40;
+      const a = G.fgAlpha ? G.fgAlpha(key, bx, by - 30, bw, bh + 30, 0.92) : 0.92; if (a < 0.02) continue;
+      c.globalAlpha = a; c.fillStyle = "#0b0709";
+      if (w === "wachturm" || isL) { c.fillRect(bx, by + 6, bw, bh); for (let k = 0; k < 4; k++) c.fillRect(bx + 2 + k * 18, by - 6, 12, 14); c.fillStyle = "rgba(255,196,150,.12)"; for (let k = 0; k < 4; k++) c.fillRect(bx + 2 + k * 18, by - 6, 12, 1); }
+      else { c.beginPath(); c.moveTo(bx, h); c.lineTo(bx + 10, by - 4); c.lineTo(bx + 26, by - 14); c.lineTo(bx + 40, by - 8); c.lineTo(bx + 34, by + 2); c.lineTo(bx + 60, by + 6); c.lineTo(bx + 70, h); c.fill(); c.beginPath(); c.moveTo(bx + 26, by - 14); c.lineTo(bx + 22, by - 26); c.lineTo(bx + 32, by - 12); c.fill(); }
+    }
+    /* Kette oben links */
+    const cx = 30 - (cam.x * 1.3) % 400 + 400, ca = G.fgAlpha ? G.fgAlpha("arc", cx - 10, 0, 20, 90, 0.9) : 0.9;
+    if (ca > 0.02 && w === "wachturm") { c.globalAlpha = ca; c.strokeStyle = "#0b0709"; c.lineWidth = 3; const sw = Math.sin(t * 0.8) * 4; for (let y = -6, k = 0; y < 80; y += 9, k++) { const xx = cx + sw * y / 80; if (k % 2) { c.fillStyle = "#0b0709"; c.fillRect(xx - 1.5, y, 3, 10); } else { c.beginPath(); c.ellipse(xx, y + 5, 4, 6, 0, 0, TAU); c.stroke(); } } }
     c.restore();
   };
 })();

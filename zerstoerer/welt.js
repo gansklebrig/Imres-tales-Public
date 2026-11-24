@@ -20,7 +20,8 @@
       tile: { base: "#4a4044", light: "#7a6a62", dark: "#231c20", det: "#5e5250", top: "moss", topCol: "#4f6b34" }, plat: "#6b4a30",
       dark: 0.42, ambCol: "#3a2a4a", bg: "castle", weather: ["dust", "leaves", "fireflies"], hazard: "spikes",
       props: { torch: 3, banner: 2, barrel: 2, crate: 2, cart: 1, hay: 1, statue: 1, window: 2, chain: 1, weapons: 1 },
-      foes: { goblin: 5, goblinBogen: 3, goblinSchlaeger: 1, robe: 3, ratte: 2, wolf: 2 }, density: 0.85,
+      foes: { goblin: 4, goblinBogen: 3, goblinSchlaeger: 1, robe: 3, ratte: 2, wolf: 2, goblinTrommler: 1, goblinSchild: 1 }, density: 0.85,
+      squads: [["goblinSchild", "goblinBogen", "goblinBogen"], ["goblinTrommler", "goblin", "goblin", "goblinSchlaeger"], ["wolf", "wolf", "goblinBogen"]], /* W10 */
       exits: ["keller", "hallen", "wehrgang"], amb: { loops: [["amb/a_nacht.mp3", 0.5], ["amb/a_hof.mp3", 0.25], ["amb/a_wind1.mp3", 0.18]], one: [["e_eule_", 4, 9], ["e_kraehe_", 16, 14], ["n_kette_", 4, 20]] },
       music: "torhof", story: ["Die Zugbrücke ist unten. Niemand hält Wache. Natürlich nicht.", "The drawbridge is down. No one keeps watch. Of course not."]
     },
@@ -30,7 +31,8 @@
       tile: { base: "#4e4238", light: "#76644e", dark: "#201a16", det: "#5c4e40", top: "drip", topCol: "#3d4a30" }, plat: "#5e4028",
       dark: 0.62, ambCol: "#3a2a1a", bg: "cellar", weather: ["dust", "drip"], hazard: "spikes",
       props: { barrel: 4, crate: 3, torch: 2, shelf: 2, web: 2, pot: 3, sack: 2, bones: 1, candle: 2 },
-      foes: { ratte: 4, robe: 3, robeArmbrust: 2, phiole: 2, kerkerwache: 1, skelett: 2, goblinBombe: 1 }, density: 1,
+      foes: { ratte: 4, robe: 3, robeArmbrust: 2, phiole: 2, kerkerwache: 1, skelett: 2, goblinBombe: 1, laternentraeger: 2, gallertwuerfel: 1 }, density: 1,
+      squads: [["laternentraeger", "robe", "robeArmbrust"], ["gallertwuerfel", "robeArmbrust"], ["robe", "robe", "phiole"], ["laternentraeger", "skelett", "skelett"]], /* W10 */
       exits: ["verlies", "hafen"], amb: { loops: [["amb/a_tropfstein.mp3", 0.5], ["amb/a_grabesdroehnen.mp3", 0.15]], one: [["n_ratte_", 6, 8], ["e_kette_", 4, 22], ["n_tropfen_", 1, 6]] },
       music: "keller", story: ["Unter der Feste lagert mehr als Wein.", "Beneath the keep there is more than wine."]
     },
@@ -40,7 +42,8 @@
       tile: { base: "#5a443e", light: "#8a6c58", dark: "#24161a", det: "#6e5448", top: "carpet", topCol: "#8a1f24" }, plat: "#6e4a2c",
       dark: 0.38, ambCol: "#5a2a1a", bg: "halls", weather: ["dust", "embers"], hazard: "spikes",
       props: { candelabra: 3, banner: 4, painting: 3, torch: 2, statue: 2, column: 2, armor: 2, table: 2, window: 2, chandelier: 2 },
-      foes: { robe: 4, robeTrunk: 2, adept: 2, ruestung: 2, robeSchlaeger: 1, drowWache: 1 }, density: 1,
+      foes: { robe: 4, robeTrunk: 2, adept: 2, ruestung: 2, robeSchlaeger: 1, drowWache: 1, mimik: 1, goblinTrommler: 1 }, density: 1,
+      squads: [["robeSchlaeger", "adept", "robe"], ["ruestung", "ruestung", "adept"], ["robeTrunk", "robeTrunk", "robe"], ["goblinTrommler", "robe", "robe", "robeArmbrust"]], /* W10 */
       exits: ["verlies", "hafen", "glocken"], amb: { loops: [["amb/a_halle.mp3", 0.45], ["amb/a_feuer1.mp3", 0.2]], one: [["e_raunen_", 3, 16], ["n_stuhl_", 2, 22], ["e_glocke_", 3, 40]] },
       music: "hallen", story: ["Jemand hat für Gäste gedeckt. Für viele Gäste.", "Someone has set the table for guests. Many guests."]
     },
@@ -50,7 +53,8 @@
       tile: { base: "#56504e", light: "#8a807a", dark: "#25202a", det: "#6a6260", top: "moss", topCol: "#4a5a3a" }, plat: "#6a4a30",
       dark: 0.35, ambCol: "#3a2a4a", bg: "ramparts", weather: ["wind", "leaves", "dust"], hazard: "spikes",
       props: { banner: 4, torch: 2, crate: 1, weapons: 2, brazier: 2, rope: 2, crenel: 3 },
-      foes: { goblinBogen: 3, stirge: 3, soeldner: 3, drowSchuetze: 2, goblin: 2, wolfsreiter: 1 }, density: 0.95,
+      foes: { goblinBogen: 3, stirge: 3, soeldner: 3, drowSchuetze: 2, goblin: 2, wolfsreiter: 1, kenku: 2, goblinSchild: 1 }, density: 0.95,
+      squads: [["goblinSchild", "goblinBogen", "drowSchuetze"], ["kenku", "kenku", "soeldner"], ["wolfsreiter", "goblin", "goblin"]], /* W10 */
       exits: ["hafen", "glocken"], amb: { loops: [["amb/a_heulwind.mp3", 0.45], ["amb/a_wind1.mp3", 0.3]], one: [["e_kraehe_", 16, 9], ["n_windstoss_", 1, 12], ["e_fernglocken_", 2, 30]] },
       music: "wehrgang", story: ["Oben pfeift der Wind. Und manchmal ein Pfeil.", "Up top the wind whistles. Sometimes an arrow does."]
     },
@@ -60,7 +64,8 @@
       tile: { base: "#3e4238", light: "#646a56", dark: "#171a14", det: "#4c5244", top: "slime", topCol: "#4f6a2a" }, plat: "#4e3a28",
       dark: 0.7, ambCol: "#2a3a1a", bg: "dungeon", weather: ["drip", "dust", "fog"], hazard: "spikes",
       props: { chain: 4, cage: 3, torch: 2, bones: 3, skull: 2, web: 2, bars: 3, rack: 1 },
-      foes: { skelett: 3, skelBogen: 2, kerkerwache: 2, ratte: 2, zombie: 2, phiole: 1, folterknecht: 1 }, density: 1.05,
+      foes: { skelett: 3, skelBogen: 2, kerkerwache: 2, ratte: 2, zombie: 2, phiole: 1, folterknecht: 1, grimlock: 2, ghul: 2, laternentraeger: 1 }, density: 1.05,
+      squads: [["grimlock", "grimlock", "ghul"], ["kerkerwache", "skelBogen", "skelBogen"], ["folterknecht", "zombie", "zombie"], ["laternentraeger", "kerkerwache", "skelett"]], /* W10 */
       exits: ["labor"], amb: { loops: [["amb/a_tropfstein.mp3", 0.4], ["amb/a_grabesdroehnen.mp3", 0.3], ["amb/a_fluestern.mp3", 0.12]], one: [["n_kette_", 4, 7], ["n_stoehnen_", 8, 14], ["e_stoehnen_", 4, 20]] },
       music: "verlies", story: ["Hinter jeder Tür ein Stöhnen. Hinter manchen ein Lachen.", "Behind every door a groan. Behind some, a laugh."]
     },
@@ -70,7 +75,8 @@
       tile: { base: "#4a4038", light: "#7a6a56", dark: "#201a16", det: "#5a4e40", top: "wood", topCol: "#6a4e30" }, plat: "#7a5634",
       dark: 0.4, ambCol: "#2a2a3a", bg: "harbour", weather: ["drizzle", "fog", "gulls"], hazard: "water",
       props: { barrel: 3, crate: 3, rope: 3, net: 2, anchor: 1, lantern: 3, mast: 1, sack: 2 },
-      foes: { kuotoa: 4, kuotoaSpeer: 2, soeldner: 2, goblinBombe: 2, ratte: 1, robeArmbrust: 1 }, density: 1, pits: 0.45, /* weniger Löcher: der Hafen war schwerer als sein Boss */
+      foes: { kuotoa: 4, kuotoaSpeer: 2, soeldner: 2, goblinBombe: 2, ratte: 1, robeArmbrust: 1, schmuggler: 2, grindylow: 1 }, density: 1, pits: 0.45,
+      squads: [["schmuggler", "schmuggler", "kuotoaSpeer"], ["kuotoa", "kuotoa", "grindylow"], ["soeldner", "robeArmbrust", "goblinBombe"]], /* W10 */ /* weniger Löcher: der Hafen war schwerer als sein Boss */
       exits: ["erzpriesterin"], amb: { loops: [["amb/a_hafen.mp3", 0.4], ["amb/a_wellen1.mp3", 0.4]], one: [["e_moewe_", 10, 9], ["n_knarren_", 8, 7], ["e_platsch_", 4, 12]] },
       music: "hafen", story: ["Der Hafen der Feste. Die Stege sind nass. Nicht nur vom Regen.", "The keep's harbour. The piers are wet. Not only from rain."]
     },
@@ -80,7 +86,8 @@
       tile: { base: "#544640", light: "#86705e", dark: "#231a18", det: "#665448", top: "none", topCol: "#000" }, plat: "#7a5432",
       dark: 0.5, ambCol: "#3a2a2a", bg: "belltower", weather: ["dust", "feathers"], hazard: "spikes",
       props: { gear: 4, rope: 3, bell: 2, torch: 2, window: 3, crate: 1, beam: 3 },
-      foes: { stirge: 3, goblinBogen: 2, soeldner: 2, drowSchuetze: 2, drowWache: 2, wolf: 1 }, density: 1,
+      foes: { stirge: 3, goblinBogen: 2, soeldner: 2, drowSchuetze: 2, drowWache: 2, wolf: 1, glockengeist: 1, kenku: 1 }, density: 1,
+      squads: [["drowWache", "drowSchuetze", "drowSchuetze"], ["kenku", "kenku", "goblinBogen"], ["soeldner", "soeldner", "drowSchuetze"]], /* W10 */
       exits: ["wachturm"], amb: { loops: [["amb/a_uhr.mp3", 0.35], ["amb/a_ruinenwind.mp3", 0.3]], one: [["e_glocke_", 3, 28], ["n_knarren_", 8, 9], ["n_fledermaus_", 8, 12]] },
       music: "glocken", story: ["Ganz oben schlägt die Glocke. Nur hat sie keinen Klöppel mehr.", "At the very top the bell tolls. Only it has no clapper anymore."]
     },
@@ -90,7 +97,8 @@
       tile: { base: "#3e3446", light: "#6a5a72", dark: "#160f1a", det: "#4e4258", top: "web", topCol: "#c8c0d0" }, plat: "#d8d0dc",
       dark: 0.72, ambCol: "#3a1a4a", bg: "chasm", weather: ["spores", "dust"], hazard: "spikes", webPlat: true,
       props: { web: 5, mushroom: 5, cocoon: 3, bones: 2, crystal: 1, skull: 1 },
-      foes: { riesenspinne: 3, netzspinne: 3, ettercap: 2, spinnchen: 3, schatten: 1, brutsack: 1 }, density: 1.05,
+      foes: { riesenspinne: 3, netzspinne: 3, ettercap: 2, spinnchen: 3, schatten: 1, brutsack: 1, myconid: 2, drider: 1 }, density: 1.05,
+      squads: [["drider", "netzspinne"], ["myconid", "riesenspinne", "ettercap"], ["ettercap", "netzspinne", "riesenspinne"]], /* W10 */
       warden: "wraith", exits: ["see", "glut"],
       amb: { loops: [["amb/a_tropfstein.mp3", 0.3], ["amb/a_fluestern.mp3", 0.2], ["amb/a_geisterhauch.mp3", 0.15]], one: [["e_spinne_", 4, 6], ["e_insekt_", 6, 10], ["n_zischen_", 4, 14]] },
       music: "schlund", story: ["Unter der Feste reißt der Fels auf. Und die Fäden führen nach unten.", "Beneath the keep the rock splits open. And the threads lead down."]
@@ -101,7 +109,8 @@
       tile: { base: "#4a4040", light: "#7a6a60", dark: "#1e1818", det: "#c88a2a", top: "rune", topCol: "#e5a43a" }, plat: "#5a4a3a",
       dark: 0.55, ambCol: "#5a3010", bg: "forge", weather: ["embers", "sparks"], hazard: "lava",
       props: { anvil: 3, forge: 2, rune: 4, chain: 2, armor: 2, weapons: 2, pipe: 2, brazier: 2 },
-      foes: { ruestung: 3, runenfunke: 3, runenwaechter: 1, duergar: 2, duergarArmbrust: 2, schmiedegeist: 1 }, density: 1,
+      foes: { ruestung: 3, runenfunke: 3, runenwaechter: 1, duergar: 2, duergarArmbrust: 2, schmiedegeist: 1, rostmonster: 2 }, density: 1,
+      squads: [["ruestung", "duergarArmbrust", "duergarArmbrust"], ["rostmonster", "rostmonster", "duergar"], ["runenwaechter", "duergarArmbrust"]], /* W10 */
       warden: "schmiedewaechter", exits: ["see", "glut", "sturm"],
       amb: { loops: [["amb/a_esse.mp3", 0.35], ["amb/a_feuer1.mp3", 0.25], ["amb/a_grabesdroehnen.mp3", 0.15]], one: [["n_hammer_", 7, 3], ["e_blasebalg_", 2, 9], ["e_erz_", 6, 12]] },
       music: "schmiede", story: ["Die Schmiede singt noch. Leise. In einer Sprache aus Funken.", "The forge still sings. Quietly. In a language of sparks."]
@@ -112,7 +121,8 @@
       tile: { base: "#5e4c48", light: "#9a7a6a", dark: "#2a1c1c", det: "#6e5a52", top: "ash", topCol: "#8a7a70" }, plat: "#6a4a32",
       dark: 0.3, ambCol: "#6a2a1a", bg: "spires", weather: ["ash", "wind", "embers"], hazard: "spikes",
       props: { banner: 3, gargoyle: 3, brazier: 2, chain: 2, crenel: 3, bones: 1 },
-      foes: { mane: 3, stirge: 3, harpyie: 2, nadelBlight: 2, zweigBlight: 2, drowSchuetze: 1 }, density: 1,
+      foes: { mane: 3, stirge: 3, harpyie: 2, nadelBlight: 2, zweigBlight: 2, drowSchuetze: 1, quasit: 2, gargoyle: 1 }, density: 1,
+      squads: [["nadelBlight", "zweigBlight", "zweigBlight"], ["drowSchuetze", "mane", "mane"]], /* W10 */
       warden: "chasme", exits: ["glut", "sturm"],
       amb: { loops: [["amb/a_heulwind.mp3", 0.5], ["amb/a_feuer1.mp3", 0.12]], one: [["e_kraehe_", 16, 7], ["n_fledermaus_", 8, 10], ["e_fernschrei_", 1, 25]] },
       music: "zinnen", story: ["Der Himmel brennt. Jemand hat ihn angezündet.", "The sky is burning. Someone set it alight."]
@@ -123,7 +133,8 @@
       tile: { base: "#34463c", light: "#5c7a62", dark: "#0e1a14", det: "#c87a8a", top: "algae", topCol: "#3a6a3a" }, plat: "#5a4a34",
       dark: 0.7, ambCol: "#1a3a2a", bg: "lake", weather: ["bubbles", "drip", "fog"], hazard: "water",
       props: { coral: 3, shell: 3, net: 2, bones: 2, statueKuo: 1, mushroom: 2, lantern: 2 },
-      foes: { kuotoa: 3, kuotoaSpeer: 2, peitscher: 2, rochen: 3, ertrunkener: 2, krabbe: 2 }, density: 1.05,
+      foes: { kuotoa: 3, kuotoaSpeer: 2, peitscher: 2, rochen: 3, ertrunkener: 2, krabbe: 2, grindylow: 2, myconid: 1 }, density: 1.05,
+      squads: [["peitscher", "kuotoa", "kuotoa"], ["grindylow", "ertrunkener", "krabbe"], ["myconid", "kuotoaSpeer", "kuotoa"]], /* W10 */
       warden: "ilvaraW", exits: ["demogorgon"],
       amb: { loops: [["amb/a_unterwasser.mp3", 0.25], ["amb/a_wellen1.mp3", 0.3], ["amb/a_tropfstein.mp3", 0.25]], one: [["e_blubb_", 4, 6], ["e_platsch_", 4, 10], ["e_seeungeheuer_", 2, 30]] },
       music: "see", story: ["Das Wasser ist still. Zu still für einen See, der atmet.", "The water is still. Too still for a lake that breathes."]
@@ -134,7 +145,8 @@
       tile: { base: "#4a3a34", light: "#7a5a46", dark: "#1a100c", det: "#ff7a2a", top: "soot", topCol: "#2a2220" }, plat: "#4a3a2e",
       dark: 0.5, ambCol: "#6a2a0a", bg: "embercity", weather: ["embers", "ash", "smoke"], hazard: "lava",
       props: { brazier: 3, forge: 2, chain: 2, greenfire: 3, crate: 2, pipe: 2, statueDuergar: 1, lantern: 2 },
-      foes: { duergar: 3, duergarArmbrust: 2, feuerschlucker: 2, glutling: 3, bewahrer: 2, magmaHund: 1 }, density: 1.05,
+      foes: { duergar: 3, duergarArmbrust: 2, feuerschlucker: 2, glutling: 3, bewahrer: 2, magmaHund: 1, salamander: 2 }, density: 1.05,
+      squads: [["bewahrer", "duergar", "duergar"], ["salamander", "feuerschlucker", "glutling"], ["duergarArmbrust", "duergarArmbrust", "magmaHund"], ["feuerschlucker", "glutfledermaus", "glutfledermaus", "glutfledermaus"], ["duergar", "glutfledermaus", "glutfledermaus", "glutfledermaus"]], /* W10: Glutfledermäuse nur als Schwarm im Trupp (die Gassen haben keine Flieger-Plätze für sie allein) */
       warden: "riese", exits: ["themberchaud"],
       amb: { loops: [["amb/a_esse.mp3", 0.35], ["amb/a_markt.mp3", 0.12], ["amb/a_feuer1.mp3", 0.3]], one: [["n_hammer_", 7, 4], ["e_zischen_", 2, 8], ["e_grollen_", 2, 14]] },
       music: "glut", story: ["Hier hämmert es Tag und Nacht. Wenn es hier Tage gäbe.", "Hammering day and night. If there were days down here."]
@@ -145,7 +157,8 @@
       tile: { base: "#4a4a3e", light: "#7a7a62", dark: "#1a1a12", det: "#5a5a48", top: "moss", topCol: "#4a6a2a" }, plat: "#5a4a2e",
       dark: 0.45, ambCol: "#2a4a1a", bg: "storm", weather: ["rain", "lightning", "fog"], hazard: "spikes",
       props: { vine: 4, bones: 2, banner: 2, crenel: 2, torch: 1, gargoyle: 2, rope: 1 },
-      foes: { zombie: 3, zombieBlaeh: 2, zweigBlight: 3, nadelBlight: 2, rankenBlight: 1, stirge: 2 }, density: 1.05,
+      foes: { zombie: 3, zombieBlaeh: 2, zweigBlight: 3, nadelBlight: 2, rankenBlight: 1, stirge: 2, saeureschnecke: 2, sturmMephit: 2 }, density: 1.05,
+      squads: [["saeureschnecke", "nadelBlight", "nadelBlight"], ["rankenBlight", "zweigBlight", "zweigBlight"], ["zombieBlaeh", "zombie", "zombie"]], /* W10 */
       warden: "vrock", exits: ["venomfang"],
       amb: { loops: [["amb/a_gewitter1.mp3", 0.45], ["amb/a_regen1.mp3", 0.3]], one: [["n_donner_", 8, 11], ["e_kraehe_", 16, 12], ["n_stoehnen_", 8, 18]] },
       music: "sturm", story: ["Der Regen schmeckt nach Gift. Ganz oben schläft etwas Grünes.", "The rain tastes of poison. At the very top, something green sleeps."]
@@ -861,18 +874,113 @@
     }
   }
 
+  /* ======================= RÄUME MIT FUNKTION =======================
+     Das Schloss soll wie ein bewohntes Gebäude wirken: Räume bekommen eine erkennbare Funktion (Wachstube, Weinkeller,
+     Bankettsaal, Bibliothek, Kapelle, Zellenblock …), logisch angeordnet (Wachstube am Eingang, Küche neben dem
+     Speisesaal, Kapelle und Gemächer oben, Lager und Ställe unten). Die Ausstattung richtet sich danach (ausstattung.js),
+     beim ersten Betreten erscheint dezent der Raumname, die Karte zeigt ein Zeichen (ebenen.js).
+     Felder: n Name [de,en] · m höchstens so viele · lage: start (nah am Eingang), oben, unten, weit (großer Boden),
+     ende (Sackgasse), neben: [Typ…] (direkt verbunden) · col Kartenfarbe (kein Blau) · ico Zeichen auf der großen Karte.
+     Hindernis-Parcoursräume bekommen keine Funktion (dort hängt man nicht den Braten auf). */
+  const RF = (n, en, m, lage, col, ico, neben) => ({ n: [n, en], m, lage: lage || "", col, ico, neben: neben || [] });
+  const ROOMFN = (Z.ROOMFN = {
+    torhof: { wachstube: RF("Wachstube", "Guardroom", 1, "start", "#c8a060", "W"), stall: RF("Stall", "Stable", 2, "unten weit", "#a08050", "S"),
+      unterstand: RF("Schmiede-Unterstand", "Smithy shed", 1, "", "#d0804a", "A", ["stall"]), uebungsplatz: RF("Übungsplatz", "Training yard", 1, "weit", "#b0a070", "Ü"),
+      schuppen: RF("Vorratsschuppen", "Storage shed", 1, "ende", "#9a8060", "V") },
+    keller: { kueche: RF("Küche", "Kitchen", 1, "oben weit", "#d08a4a", "K"), weinkeller: RF("Weinkeller", "Wine cellar", 2, "unten", "#a0404a", "W"),
+      vorratskammer: RF("Vorratskammer", "Pantry", 2, "", "#b09060", "V", ["kueche"]), gesindestube: RF("Gesindestube", "Servants' hall", 1, "", "#b07a50", "G", ["kueche"]),
+      brunnenkammer: RF("Brunnenkammer", "Well chamber", 1, "ende", "#8a8a70", "B") },
+    hallen: { bankettsaal: RF("Bankettsaal", "Banquet hall", 2, "weit", "#d0a040", "B"), anrichte: RF("Anrichte", "Serving room", 1, "", "#c08a4a", "A", ["bankettsaal"]),
+      bibliothek: RF("Bibliothek", "Library", 2, "", "#a07a50", "L"), kapelle: RF("Kapelle", "Chapel", 1, "oben", "#e0c070", "K"),
+      ahnengalerie: RF("Ahnengalerie", "Ancestral gallery", 1, "weit", "#c09070", "G"), schlafgemach: RF("Schlafgemach", "Bedchamber", 2, "oben ende", "#b06070", "S"),
+      ruestkammer: RF("Rüstkammer", "Armoury", 1, "start", "#a09890", "R") },
+    wehrgang: { wachstube: RF("Wachstube", "Guardroom", 2, "start", "#c8a060", "W"), ruestkammer: RF("Rüstkammer", "Armoury", 1, "", "#a09890", "R", ["wachstube"]),
+      geschuetzstand: RF("Geschützstand", "Gun platform", 2, "oben", "#a08070", "G"), kaserne: RF("Kaserne", "Barracks", 1, "weit", "#b08a60", "K"),
+      schuetzenstand: RF("Schützenstand", "Archers' post", 1, "oben", "#b09a60", "S") },
+    verlies: { waerterstube: RF("Wärterstube", "Warden's room", 2, "start", "#c8a060", "W"), zellenblock: RF("Zellenblock", "Cell block", 3, "", "#8a7a60", "Z", ["waerterstube"]),
+      folterkammer: RF("Folterkammer", "Torture chamber", 2, "unten", "#b04040", "F"), gebeinhaus: RF("Gebeinhaus", "Ossuary", 1, "unten ende", "#c8c0a8", "G") },
+    hafen: { lagerhaus: RF("Lagerhaus", "Warehouse", 2, "weit", "#b09060", "L"), bootsschuppen: RF("Bootsschuppen", "Boathouse", 1, "unten weit", "#8a7050", "B"),
+      taverne: RF("Taverne", "Tavern", 1, "", "#d08a4a", "T"), fischerkate: RF("Fischerkate", "Fisher's hut", 2, "", "#a0a070", "F", ["bootsschuppen"]),
+      zollstube: RF("Zollstube", "Customs office", 1, "start", "#c8a060", "Z") },
+    glocken: { glockenstube: RF("Glockenstube", "Bell chamber", 2, "oben", "#d0a040", "G"), uhrwerk: RF("Uhrwerk", "Clockwork", 2, "", "#b09060", "U", ["glockenstube"]),
+      uhrmacher: RF("Uhrmacherwerkstatt", "Clockmaker's workshop", 1, "", "#c08a50", "W"), taubenschlag: RF("Taubenschlag", "Dovecote", 1, "oben ende", "#c8c0a8", "T"),
+      seilkammer: RF("Seilkammer", "Rope room", 1, "unten", "#a08060", "S") },
+    schlund: { brutkammer: RF("Brutkammer", "Brood chamber", 2, "unten", "#c8b8c8", "B"), beutelager: RF("Beutelager", "Larder of prey", 2, "ende", "#a89080", "L"),
+      pilzgrotte: RF("Pilzgrotte", "Mushroom grotto", 2, "", "#c890a0", "P"), kristallhoehle: RF("Kristallhöhle", "Crystal cave", 1, "", "#c8a0e0", "K") },
+    schmiede: { essenhalle: RF("Essenhalle", "Forge hall", 1, "weit", "#e08040", "E"), giesserei: RF("Gießerei", "Foundry", 1, "", "#d06030", "G", ["essenhalle"]),
+      erzlager: RF("Erzlager", "Ore store", 2, "unten", "#a08070", "L", ["giesserei"]), waffenkammer: RF("Waffenkammer", "Weapon store", 1, "ende", "#b0a090", "W"),
+      runenkammer: RF("Runenkammer", "Rune chamber", 1, "oben", "#c890ff", "R") },
+    zinnen: { geschuetzstand: RF("Geschützstand", "Gun platform", 2, "oben", "#a08070", "G"), wehrturm: RF("Wehrturm", "Defence tower", 2, "", "#b09a70", "T"),
+      speiergalerie: RF("Speiergalerie", "Gargoyle gallery", 1, "weit", "#c0a890", "S") },
+    see: { tempel: RF("Versunkener Tempel", "Sunken temple", 1, "unten weit", "#c87a8a", "T"), opferstaette: RF("Opferstätte", "Offering place", 1, "ende", "#d08a6a", "O", ["tempel"]),
+      wrackhalde: RF("Wrackhalde", "Wreck heap", 2, "", "#a08a60", "W"), korallengarten: RF("Korallengarten", "Coral garden", 2, "", "#e08a8a", "K") },
+    glut: { giesserei: RF("Gießerei", "Foundry", 2, "weit", "#d06030", "G"), erzlager: RF("Erzlager", "Ore store", 2, "", "#a08070", "L", ["giesserei"]),
+      schrein: RF("Duergar-Schrein", "Duergar shrine", 1, "ende", "#a8e060", "S"), schlackehalde: RF("Schlackehalde", "Slag heap", 1, "unten", "#7a5a4a", "H") },
+    sturm: { kapelle: RF("Verfallene Kapelle", "Ruined chapel", 1, "oben", "#c8c090", "K"), giftgarten: RF("Giftgarten", "Poison garden", 2, "", "#a0c050", "G"),
+      wachstube: RF("Verlassene Wachstube", "Abandoned guardroom", 1, "start", "#c8a060", "W"), truemmerhalle: RF("Trümmerhalle", "Rubble hall", 2, "weit", "#a09080", "T") }
+  });
+  /* Sonderräume aus plan()/Geheimnissen tragen ihren eigenen Namen */
+  const ROOMSPEC = (Z.ROOMSPEC = { geheim: RF("Geheimkammer", "Secret chamber", 0, "", "#c890ff", "?"), schatz: RF("Schatzkammer", "Treasury", 0, "", "#ffd27a", "$"),
+    grube: RF("Grubenkeller", "Pit cellar", 0, "", "#a08a70", "▾") });
+  function assignRooms(lv) {
+    if (!lv || !lv.cells) return;
+    const defs = ROOMFN[lv.biome]; lv.roomFns = {};
+    const R = Z.Rng(((lv.seed || 1) ^ 0x7ac3) >>> 0), cells = lv.cells, key = (x, y) => x + "," + y, gh = lv.gh || 1;
+    const pk = new Set(TPL.filter(t => t.pk).map(t => t.n));
+    const lock = new Set((lv.feats || []).filter(f => f.t === "lock").map(f => f.cell));
+    const D4 = { L: [-1, 0], R: [1, 0], U: [0, -1], D: [0, 1] };
+    const nbs = c => { const o = []; for (const s2 in D4) { const v = c.need[s2]; if (!v || v === "X") continue; const n = cells[key(c.x + D4[s2][0], c.y + D4[s2][1])]; if (n) o.push(n); } return o; };
+    const free = [];
+    for (const k in cells) {
+      const c = cells[k]; delete c.fn;
+      if (c.kind === "secret") { c.fn = "geheim"; continue; }
+      if (lock.has(k)) { c.fn = "schatz"; continue; }
+      if (c.pit) { c.fn = "grube"; continue; }
+      if (pk.has(c.tpl) || c === lv.endCell && lv.warden) continue;
+      c._sp = spotsIn(lv, c, 3, false).length; free.push(c);
+    }
+    if (!defs) return;
+    const used = new Map();
+    const score = (c, id) => {
+      const d = defs[id], L = d.lage; let s = R() * 0.6;
+      if (L.includes("start")) s += Math.max(0, 3 - (c.dist != null ? c.dist : 3)) * 1.6 - (c === lv.startCell ? 0.5 : 0);
+      if (L.includes("oben")) s += (1 - c.y / Math.max(1, gh - 1)) * 3;
+      if (L.includes("unten")) s += (c.y / Math.max(1, gh - 1)) * 3;
+      if (L.includes("weit")) s += Math.min(3, (c._sp || 0) / 14);
+      if (L.includes("ende")) s += nbs(c).length <= 1 ? 2 : -0.5;
+      for (const o of nbs(c)) if (o.fn && d.neben.includes(o.fn)) s += 2.5;
+      if ((c._sp || 0) < 6) s -= 3; /* zu wenig Boden für Möbel */
+      return s;
+    };
+    /* jede Raumart einmal, dann zweite Runde für die Mehrfach-Arten; Nachbar-Regeln greifen, weil Partner früher stehen */
+    const ids = Object.keys(defs), maxAssign = Math.ceil(free.length * 0.7);
+    let n = 0;
+    for (let round = 0; round < 3 && n < maxAssign; round++) {
+      for (const id of ids) {
+        if ((used.get(id) || 0) >= defs[id].m || (round > 0 && (used.get(id) || 0) > round) || n >= maxAssign) continue;
+        let best = null, bs = -1e9;
+        for (const c of free) { if (c.fn) continue; const v = score(c, id); if (v > bs) { bs = v; best = c; } }
+        if (!best || bs < -1) continue;
+        best.fn = id; used.set(id, (used.get(id) || 0) + 1); n++;
+      }
+    }
+    for (const k in cells) { const c = cells[k]; delete c._sp; if (c.fn) lv.roomFns[k] = c.fn; }
+  }
+  Z.assignRooms = assignRooms;
+  Z.roomFnDef = (biome, id) => (ROOMFN[biome] && ROOMFN[biome][id]) || ROOMSPEC[id] || null;
+
   /* Baut eine Karte für ein Gebiet. Gibt {w,h,tiles,spawns,...} in Kacheln zurück. */
   Z.genLevel = function (biomeId, seed, opts) {
     opts = opts || {};
     let best = null, bs = 1e9;
     for (let attempt = 0; attempt < 40; attempt++) {
       const lv = tryGen(biomeId, (seed + attempt * 7919) >>> 0, opts);
-      if (lv && validate(lv)) { lv.attempts = attempt + 1; settle(lv); plan(lv); if (!Z.noRuneGates) runeGates(lv); return lv; }
+      if (lv && validate(lv)) { lv.attempts = attempt + 1; settle(lv); plan(lv); if (!Z.noRuneGates) runeGates(lv); assignRooms(lv); return lv; }
       /* Notfall: die beste Karte merken (alle Ausgänge erreichbar, möglichst wenige Festsitz-Stellen) */
       const sc = lv && lv.stuck ? lv.stuck.length : 1e8;
       if (lv && sc < bs) { bs = sc; best = lv; }
     }
-    if (best) { settle(best); plan(best); return best; }
+    if (best) { settle(best); plan(best); assignRooms(best); return best; }
     return tryGen(biomeId, seed, opts);
   };
 

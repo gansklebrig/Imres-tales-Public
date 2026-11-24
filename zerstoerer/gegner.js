@@ -174,31 +174,31 @@
   Object.assign(E, {
     /* Torhof */
     goblinTrommler: { n: NM("Goblin-Trommler", "Goblin Drummer"), shape: "drummer", c: "#6a9a3a", t: "#8a3a22", w: 12, h: 17, hp: 1.3, dmg: 0.85, spd: 70, ai: "support", keep: [60, 150], sight: 190, gold: 8, snd: "goblin", callR: 320, role: "support", kkDone: true, chain: 0.2,
-      atks: [{ k: "drum", r: [0, 400], pre: 0.55, act: 0.6, post: 0.3, cd: 5.5, sfx: "hitHeavy", name: NM("Kriegstrommel", "War Drum"), w: 1.6 },
+      atks: [{ k: "drum", r: [0, 400], pre: 0.55, act: 0.6, post: 0.3, cd: 0.8, own: 6, sfx: "hitHeavy", name: NM("Kriegstrommel", "War Drum"), w: 1.6 },
              { k: "slam", r: [0, 34], pre: 0.6, act: 0.1, post: 0.5, cd: 1.8, box: [-4, -16, 34, 16], wave: true, sfx: "swingHeavy", hitSfx: "hitHeavy", name: NM("Paukenschlag", "Drum Slam") },
              { k: "hit", r: [0, 24], pre: 0.35, act: 0.08, post: 0.35, cd: 0.8, box: [0, -14, 18, 12], sfx: "punch", w: 0.6 }] },
     goblinSchild: { n: NM("Goblin-Schildträger", "Goblin Shieldbearer"), shape: "schildgoblin", c: "#5e8a30", t: "#4a3a22", w: 12, h: 17, hp: 1.6, dmg: 0.9, spd: 78, ai: "guard", front: true, poise: 0.35, sight: 180, gold: 8, snd: "goblin", role: "tank", kkDone: true, chain: 0.25,
       atks: [{ k: "lunge", r: [0, 40], pre: 0.45, act: 0.15, post: 0.45, cd: 1.4, box: [0, -16, 22, 16], lunge: 200, kb: 260, sfx: "block", hitSfx: "hitHeavy", name: NM("Schildstoß", "Shield Bash") },
              { k: "hit", r: [0, 26], pre: 0.35, act: 0.08, post: 0.4, cd: 0.9, box: [0, -9, 24, 9], sfx: "stab" },
-             { k: "brace", r: [0, 120], pre: 0.3, act: 1.4, post: 0.3, cd: 6, sfx: "block", name: NM("Schildwall", "Shield Wall"), w: 0.5 }] },
+             { k: "brace", r: [0, 120], pre: 0.3, act: 1.4, post: 0.3, cd: 0.6, own: 6, sfx: "block", name: NM("Schildwall", "Shield Wall"), w: 0.5 }] },
     /* Keller */
     laternentraeger: { n: NM("Kobold-Laternenträger", "Kobold Lanternbearer"), shape: "kobold", c: "#8a4a2a", t: "#e5b454", w: 10, h: 15, hp: 0.95, dmg: 0.8, spd: 88, ai: "ranged", keep: [60, 140], sight: 230, gold: 6, lantern: true, callR: 340, role: "alarm", kkDone: true, chain: 0.2,
       atks: [{ k: "hit", r: [0, 26], pre: 0.38, act: 0.1, post: 0.4, cd: 1, box: [0, -16, 22, 14], eff: { burn: 1 }, sfx: "swing" },
-             { k: "lob", proj: "e_glut", r: [40, 170], pre: 0.6, act: 0.05, post: 0.5, cd: 2.6, sfx: "glass", name: NM("Lampenöl", "Lamp Oil") },
-             { k: "flare", r: [0, 400], pre: 0.45, act: 0.05, post: 0.3, cd: 10, sfx: "fire", name: NM("Licht hoch!", "Lights up!"), w: 0.8 }] },
+             { k: "lob", proj: "e_glut", r: [40, 170], pre: 0.6, act: 0.05, post: 0.5, cd: 1.4, own: 2.6, sfx: "glass", name: NM("Lampenöl", "Lamp Oil") },
+             { k: "flare", r: [0, 400], pre: 0.45, act: 0.05, post: 0.3, cd: 0.8, own: 12, sfx: "fire", name: NM("Licht hoch!", "Lights up!"), w: 0.8 }] },
     gallertwuerfel: { n: NM("Gallertwürfel", "Gelatinous Cube"), shape: "cube", c: "#8ac07a", t: "#c8e8a0", w: 22, h: 22, hp: 3.2, dmg: 1.2, spd: 32, ai: "walker", heavy: true, poise: 0.5, blind: true, ears: 1.2, sight: 90, gold: 16, immune: ["poison", "bleed"], noBlock: true, role: "tank", kkDone: true, chain: 0, blood: "#c8e8a0",
-      atks: [{ k: "grab", r: [0, 24], pre: 0.75, act: 0.15, post: 0.7, cd: 3, box: [-4, -22, 30, 22], unblockable: true, glyph: "!!", sfx: "slime", name: NM("Verschlingen", "Engulf") },
+      atks: [{ k: "grab", r: [0, 24], pre: 0.75, act: 0.15, post: 0.7, cd: 1.2, own: 3.5, box: [-4, -22, 30, 22], unblockable: true, glyph: "!!", sfx: "slime", name: NM("Verschlingen", "Engulf") },
              { k: "hit", r: [0, 34], pre: 0.55, act: 0.12, post: 0.5, cd: 1.2, box: [0, -18, 36, 14], sfx: "slime", eff: { poison: 1 }, name: NM("Scheinfuß", "Pseudopod") }] },
     /* Hallen */
     mimik: { n: NM("Mimik", "Mimic"), shape: "mimic", c: "#7a5030", t: "#c8a040", w: 18, h: 14, hp: 2.2, dmg: 1.25, spd: 95, ai: "walker", heavy: true, poise: 0.35, disguise: true, noSleep: true, sight: 150, gold: 26, role: "hinterhalt", kkDone: true, chain: 0.3,
-      atks: [{ k: "grab", r: [0, 26], pre: 0.5, act: 0.15, post: 0.6, cd: 2.5, box: [0, -14, 26, 14], unblockable: true, glyph: "!!", sfx: "bite", name: NM("Zuschnappen", "Snap Shut") },
-             { k: "pull", r: [40, 150], pre: 0.55, act: 0.35, post: 0.5, cd: 3.5, sfx: "slime", glyph: "!!", tongue: true, name: NM("Klebzunge", "Sticky Tongue") },
+      atks: [{ k: "grab", r: [0, 26], pre: 0.5, act: 0.15, post: 0.6, cd: 1, own: 3, box: [0, -14, 26, 14], unblockable: true, glyph: "!!", sfx: "bite", name: NM("Zuschnappen", "Snap Shut") },
+             { k: "pull", r: [40, 150], pre: 0.55, act: 0.35, post: 0.5, cd: 1, own: 4, sfx: "slime", glyph: "!!", tongue: true, name: NM("Klebzunge", "Sticky Tongue") },
              { k: "leap", r: [40, 120], pre: 0.4, act: 0.5, post: 0.4, cd: 1.6, box: [0, -14, 24, 14], jump: [240, -280], sfx: "bite" }] },
     /* Wehrgang */
     kenku: { n: NM("Kenku", "Kenku"), shape: "kenku", c: "#2a2228", t: "#c8a040", w: 11, h: 20, hp: 1.05, dmg: 1, spd: 118, ai: "skirmish", sight: 230, gold: 8, crow: true, callR: 300, role: "plänkler", kkDone: true, chain: 0.35,
       atks: [{ k: "shoot", proj: "e_nadel", n: 2, gap: 0.12, r: [50, 200], pre: 0.5, act: 0.05, post: 0.4, cd: 1.8, sfx: "throwK", aimLine: true, name: NM("Wurfpfeile", "Darts") },
              { k: "combo", r: [0, 28], pre: 0.35, act: 0.08, post: 0.4, cd: 1, box: [0, -18, 24, 16], n: 2, gap: 0.16, sfx: "slash" },
-             { k: "evade", r: [0, 40], pre: 0.12, act: 0.35, post: 0.15, cd: 3.5, w: 0.8 }] },
+             { k: "evade", r: [0, 40], pre: 0.12, act: 0.35, post: 0.15, cd: 0.4, own: 3.5, w: 0.8 }] },
     /* Verlies */
     grimlock: { n: NM("Grimlock", "Grimlock"), shape: "grimlock", c: "#8a8a80", t: "#5a5048", w: 12, h: 21, hp: 1.5, dmg: 1.2, spd: 95, ai: "walker", blind: true, ears: 1.6, sight: 70, gold: 7, role: "jäger", kkDone: true, chain: 0.35,
       atks: [{ k: "combo", r: [0, 30], pre: 0.42, act: 0.1, post: 0.45, cd: 1, box: [0, -20, 28, 20], n: 2, gap: 0.24, sfx: "swingHeavy", hitSfx: "hitHeavy" },
@@ -208,21 +208,21 @@
       atks: [{ k: "combo", r: [0, 26], pre: 0.32, act: 0.08, post: 0.35, cd: 0.9, box: [0, -16, 22, 14], n: 3, gap: 0.15, sfx: "claw", eff: { slow: 0.8 } },
              { k: "leap", r: [40, 140], pre: 0.5, act: 0.5, post: 0.5, cd: 3, box: [0, -16, 24, 16], jump: [300, -230], sfx: "undead", eff: { stun: 0.45 }, glyph: "!!", name: NM("Lähmender Sprung", "Paralysing Pounce") }] },
     /* Hafen */
-    schmuggler: { n: NM("Hafenschmuggler", "Harbour Smuggler"), shape: "human", c: "#5a3a2a", t: "#2a2420", skin: "#c89a76", tricorn: 1, scim: 1, netBag: 1, w: 11, h: 22, hp: 1.2, dmg: 1.05, spd: 98, ai: "skirmish", sight: 200, gold: 12, role: "kontrolle", kkDone: true, chain: 0.35,
-      atks: [{ k: "web", proj: "e_netz", r: [40, 180], pre: 0.55, act: 0.05, post: 0.4, cd: 3.2, sfx: "swing", name: NM("Fangnetz", "Catch Net") },
-             { k: "combo", r: [0, 30], pre: 0.38, act: 0.1, post: 0.4, cd: 0.9, box: [0, -22, 28, 20], n: 2, gap: 0.2, sfx: "slash" },
-             { k: "smoke", r: [0, 50], pre: 0.25, act: 0.05, post: 0.2, cd: 6, sfx: "poison", name: NM("Rauchtopf", "Smoke Pot"), w: 0.7 }] },
+    schmuggler: { n: NM("Hafenschmuggler", "Harbour Smuggler"), shape: "human", c: "#5a3a2a", t: "#2a2420", skin: "#c89a76", tricorn: 1, scim: 1, netBag: 1, w: 11, h: 22, hp: 1.2, dmg: 1.05, spd: 98, ai: "duelist", sight: 200, gold: 12, role: "kontrolle", kkDone: true, chain: 0.35,
+      atks: [{ k: "web", proj: "e_netz", r: [40, 180], pre: 0.55, act: 0.05, post: 0.4, cd: 0.9, own: 4, sfx: "swing", name: NM("Fangnetz", "Catch Net") },
+             { k: "lunge", r: [16, 72], pre: 0.4, act: 0.16, post: 0.45, cd: 0.9, box: [-4, -22, 30, 20], lunge: 300, sfx: "slash", name: NM("Enterhieb", "Boarding Slash") },
+             { k: "smoke", r: [0, 50], pre: 0.25, act: 0.05, post: 0.2, cd: 0.6, own: 7, sfx: "poison", name: NM("Rauchtopf", "Smoke Pot"), w: 0.7 }] },
     /* Glockenturm */
     glockengeist: { n: NM("Glockengeist", "Bell Wraith"), shape: "bellghost", c: "#d8d0c0", t: "#c8962a", w: 14, h: 18, fly: true, ghost: true, ai: "flyer", keep: [90, 170], hp: 1.05, dmg: 0.9, spd: 80, sight: 260, gold: 9, undead: true, immune: ["poison", "bleed"], callR: 440, callWall: true, bell: true, role: "alarm", kkDone: true, chain: 0.2,
-      atks: [{ k: "toll", r: [0, 70], pre: 0.8, act: 0.1, post: 0.6, cd: 3.2, rad: 62, kb: 300, sfx: "bell", name: NM("Glockenschlag", "Bell Toll") },
+      atks: [{ k: "toll", r: [0, 70], pre: 0.8, act: 0.1, post: 0.6, cd: 1, own: 3.2, rad: 62, kb: 300, sfx: "bell", name: NM("Glockenschlag", "Bell Toll") },
              { k: "shoot", proj: "e_schall", r: [60, 240], pre: 0.6, act: 0.05, post: 0.5, cd: 2.6, sfx: "undead", eff: { stun: 0.3 }, name: NM("Klageton", "Wail") }] },
     /* Spinnenschlund */
     myconid: { n: NM("Myconid-Sporenträger", "Myconid Sporebearer"), shape: "myconid", c: "#c8b8a0", t: "#a0506a", w: 13, h: 22, hp: 1.6, dmg: 0.9, spd: 55, ai: "support", keep: [60, 150], sight: 170, gold: 7, immune: ["poison"], death: "gas", role: "heiler", kkDone: true, chain: 0.2,
-      atks: [{ k: "spores", r: [0, 100], pre: 0.6, act: 0.05, post: 0.5, cd: 3.5, sfx: "poison", name: NM("Sporenwolke", "Spore Cloud") },
-             { k: "heal", r: [0, 300], pre: 0.7, act: 0.05, post: 0.5, cd: 6, amt: 0.2, sfx: "magic", name: NM("Verbundsporen", "Rapport Spores") },
+      atks: [{ k: "spores", r: [0, 100], pre: 0.6, act: 0.05, post: 0.5, cd: 1, own: 3.5, sfx: "poison", name: NM("Sporenwolke", "Spore Cloud") },
+             { k: "heal", r: [0, 300], pre: 0.7, act: 0.05, post: 0.5, cd: 0.8, own: 7, amt: 0.2, sfx: "magic", name: NM("Verbundsporen", "Rapport Spores") },
              { k: "hit", r: [0, 28], pre: 0.5, act: 0.1, post: 0.5, cd: 1.2, box: [0, -20, 28, 20], sfx: "punch" }] },
     drider: { n: NM("Drider", "Drider"), shape: "drider", c: "#2a2236", t: "#4a3a5a", skin: "#4a3e5e", hair: "#eeeeff", w: 24, h: 26, hp: 3, dmg: 1.2, spd: 90, ai: "ranged", keep: [80, 180], sight: 240, gold: 18, heavy: true, poise: 0.35, snd: "insect", role: "kontrolle", kkDone: true, chain: 0.3,
-      atks: [{ k: "thread", r: [30, 220], pre: 0.6, act: 0.05, post: 0.4, cd: 4, sfx: "web", name: NM("Fadennetz", "Thread Snare") },
+      atks: [{ k: "thread", r: [30, 220], pre: 0.6, act: 0.05, post: 0.4, cd: 1, own: 4.5, sfx: "web", name: NM("Fadennetz", "Thread Snare") },
              { k: "shoot", proj: "e_bolzen", n: 3, spread: 0.18, r: [50, 240], pre: 0.65, act: 0.05, post: 0.5, cd: 2.2, sfx: "xbow", eff: { poison: 1 } },
              { k: "combo", r: [0, 34], pre: 0.45, act: 0.1, post: 0.45, cd: 1.1, box: [-6, -14, 40, 14], n: 2, gap: 0.2, sfx: "stab", eff: { poison: 1 } }] },
     /* Runenschmiede */
@@ -231,29 +231,29 @@
              { k: "charge", r: [60, 200], pre: 0.55, act: 0.7, post: 0.5, cd: 3, box: [0, -14, 22, 14], spd: 300, sfx: "insect" }] },
     /* Zinnen */
     quasit: { n: NM("Quasit", "Quasit"), shape: "quasit", c: "#4a6a2a", t: "#ff8a3a", w: 10, h: 12, fly: true, ai: "flyer", keep: [50, 110], hp: 0.8, dmg: 0.95, spd: 125, demon: true, sight: 220, gold: 6, role: "flieger", kkDone: true, chain: 0.3,
-      atks: [{ k: "invis", r: [60, 240], pre: 0.3, act: 0.05, post: 0.1, cd: 5, sfx: "shadow", w: 0.6 },
+      atks: [{ k: "invis", r: [60, 240], pre: 0.3, act: 0.05, post: 0.1, cd: 0.6, own: 5, sfx: "shadow", w: 0.6 },
              { k: "dive", r: [0, 140], pre: 0.5, act: 0.55, post: 0.45, cd: 1.5, box: [-2, -12, 16, 12], spd: 300, sfx: "claw", eff: { poison: 1 }, name: NM("Giftstachel", "Venom Sting") }] },
     gargoyle: { n: NM("Wasserspeier", "Gargoyle"), shape: "gargoyle", c: "#7a7068", t: "#ff8a3a", w: 16, h: 20, ai: "flyer", keep: [40, 90], hp: 2, armor: 0.3, dmg: 1.2, spd: 105, disguise: true, noSleep: true, heavy: true, sight: 160, gold: 12, immune: ["bleed", "poison"], metal: false, role: "hinterhalt", kkDone: true, chain: 0.3,
       atks: [{ k: "dive", r: [0, 150], pre: 0.55, act: 0.6, post: 0.5, cd: 1.6, box: [-2, -18, 20, 18], spd: 300, sfx: "rock", name: NM("Steinsturz", "Stone Plunge") },
              { k: "hit", r: [0, 28], pre: 0.45, act: 0.1, post: 0.45, cd: 1, box: [0, -18, 24, 16], sfx: "claw" }] },
     /* Schwarzer See */
     grindylow: { n: NM("Grindylow", "Grindylow"), shape: "grindylow", c: "#3a6a4a", t: "#c8d070", w: 14, h: 16, hp: 1.15, dmg: 1, spd: 85, ai: "walker", sight: 190, gold: 6, role: "kontrolle", kkDone: true, chain: 0.3,
-      atks: [{ k: "pull", r: [40, 140], pre: 0.55, act: 0.4, post: 0.45, cd: 3, sfx: "splash", glyph: "!!", tentacle: true, name: NM("Tentakelzug", "Tentacle Drag") },
-             { k: "grab", r: [0, 22], pre: 0.55, act: 0.15, post: 0.6, cd: 3.2, box: [0, -14, 22, 14], unblockable: true, glyph: "!!", sfx: "slime", name: NM("Umschlingen", "Entangle") },
+      atks: [{ k: "pull", r: [40, 140], pre: 0.55, act: 0.4, post: 0.45, cd: 1, own: 3.5, sfx: "splash", glyph: "!!", tentacle: true, name: NM("Tentakelzug", "Tentacle Drag") },
+             { k: "grab", r: [0, 22], pre: 0.55, act: 0.15, post: 0.6, cd: 1.2, own: 3.5, box: [0, -14, 22, 14], unblockable: true, glyph: "!!", sfx: "slime", name: NM("Umschlingen", "Entangle") },
              { k: "combo", r: [0, 24], pre: 0.35, act: 0.08, post: 0.4, cd: 1, box: [0, -14, 20, 12], n: 2, gap: 0.16, sfx: "bite" }] },
     /* Glutgassen */
-    glutfledermaus: { n: NM("Glutfledermaus", "Ember Bat"), shape: "firebat", c: "#3a1a14", t: "#ff8a2a", w: 9, h: 7, fly: true, ai: "flyer", keep: [30, 70], hp: 0.4, dmg: 0.7, spd: 140, group: [3, 4], immune: ["burn"], glow: true, sight: 210, gold: 1, snd: "bat", role: "schwarm", kkDone: true, chain: 0.1,
-      atks: [{ k: "dive", r: [0, 140], pre: 0.45, act: 0.55, post: 0.4, cd: 1.4, box: [-2, -8, 12, 8], spd: 290, sfx: "bat", eff: { burn: 1 }, swarmDive: true }] },
+    glutfledermaus: { n: NM("Glutfledermaus", "Ember Bat"), shape: "firebat", c: "#3a1a14", t: "#ff8a2a", w: 9, h: 7, fly: true, ai: "flyer", keep: [30, 70], hp: 0.4, dmg: 0.55, spd: 140, group: [3, 4], immune: ["burn"], glow: true, sight: 210, gold: 1, snd: "bat", role: "schwarm", kkDone: true, chain: 0.1,
+      atks: [{ k: "dive", r: [0, 140], pre: 0.45, act: 0.55, post: 0.4, cd: 2.2, box: [-2, -8, 12, 8], spd: 290, sfx: "bat", swarmDive: true }] },
     salamander: { n: NM("Salamander", "Salamander"), shape: "salamander", c: "#a83a1a", t: "#ffb040", w: 14, h: 22, hp: 1.6, dmg: 1.15, spd: 85, ai: "walker", immune: ["burn"], glow: true, sight: 200, gold: 11, fireTrail: true, role: "nahkampf", kkDone: true, chain: 0.35,
-      atks: [{ k: "lunge", r: [10, 56], pre: 0.45, act: 0.15, post: 0.45, cd: 1, box: [0, -18, 40, 10], lunge: 180, sfx: "spear", eff: { burn: 1 } },
+      atks: [{ k: "lunge", r: [10, 56], pre: 0.45, act: 0.15, post: 0.45, cd: 1.3, box: [0, -18, 40, 10], lunge: 180, sfx: "spear" },
              { k: "hit", r: [0, 30], pre: 0.5, act: 0.12, post: 0.45, cd: 1.6, box: [-30, -8, 60, 10], sfx: "whip", name: NM("Schwanzfeger", "Tail Sweep") }] },
     /* Sturmspitze */
     saeureschnecke: { n: NM("Säureschnecke", "Acid Slug"), shape: "slug", c: "#8aa040", t: "#7a5a3a", w: 22, h: 16, hp: 2.8, dmg: 1.1, spd: 28, ai: "walker", heavy: true, poise: 0.5, armor: 0.15, immune: ["poison"], sight: 150, gold: 10, acidTrail: true, role: "tank", kkDone: true, chain: 0, blood: "#b8d060",
-      atks: [{ k: "lob", proj: "e_gift", r: [40, 170], pre: 0.6, act: 0.05, post: 0.5, cd: 2.2, sfx: "slime", name: NM("Säurespucke", "Acid Spit") },
-             { k: "shell", r: [0, 60], pre: 0.25, act: 1.6, post: 0.3, cd: 6, sfx: "rock", w: 0.7, name: NM("Ins Haus", "Withdraw") },
+      atks: [{ k: "lob", proj: "e_gift", r: [40, 170], pre: 0.6, act: 0.05, post: 0.5, cd: 1.2, own: 2.4, sfx: "slime", name: NM("Säurespucke", "Acid Spit") },
+             { k: "shell", r: [0, 60], pre: 0.25, act: 1.6, post: 0.3, cd: 0.6, own: 7, sfx: "rock", w: 0.7, name: NM("Ins Haus", "Withdraw") },
              { k: "hit", r: [0, 30], pre: 0.5, act: 0.12, post: 0.5, cd: 1.2, box: [0, -14, 30, 14], sfx: "slime", eff: { poison: 1 } }] },
     sturmMephit: { n: NM("Sturm-Mephit", "Storm Mephit"), shape: "mephit", c: "#6a7a62", t: "#f0f0b0", w: 11, h: 13, fly: true, ai: "flyer", keep: [70, 140], hp: 0.8, dmg: 0.9, spd: 110, sight: 230, gold: 6, role: "flieger", kkDone: true, chain: 0.2,
-      atks: [{ k: "gust", r: [0, 110], pre: 0.6, act: 0.1, post: 0.5, cd: 3.2, sfx: "swing", name: NM("Sturmböe", "Gale") },
+      atks: [{ k: "gust", r: [0, 110], pre: 0.6, act: 0.1, post: 0.5, cd: 1, own: 3.2, sfx: "swing", name: NM("Sturmböe", "Gale") },
              { k: "mark", hz: "strike", r: [40, 240], pre: 0.5, act: 0.05, post: 0.5, cd: 2.8, warn: 0.8, hw: 20, sfx: "zap", col: "rgba(255,245,180,1)", name: NM("Blitz", "Lightning") }] }
   });
   /* Wasserspeier: nach dem Erwachen fliegt er (eigene Def., nicht im Bestiarium) */
@@ -567,6 +567,7 @@
     senses(e, dt, P);
     if (e.alertT > 0) e.alertT -= dt;
     e.cd -= dt;
+    if (e.ocd) for (const k in e.ocd) e.ocd[k] -= dt; /* W10: eigene Abklingzeiten einzelner Fähigkeiten */
     const tgt = e.decoy && !e.decoy.dead ? { x: e.decoy.x, y: e.decoy.y, w: e.decoy.w, h: e.decoy.h } : P;
     const dx = tgt.x + tgt.w / 2 - (e.x + e.w / 2), dy = (tgt.y + tgt.h) - (e.y + e.h), adx = Math.abs(dx);
     /* laufender Angriff */
@@ -598,7 +599,7 @@
       case "duelist": { if (adx > 90) dir = U.sign(dx); else if (adx < 40) dir = -U.sign(dx); else dir = (Math.sin(e.anim * 2) > 0 ? 1 : -1); spd = 0.9; break; }
       case "drunk": { dir = Math.sin(e.anim * 1.7) > -0.3 ? U.sign(dx) : -U.sign(dx); spd = 0.7 + Math.sin(e.anim * 3.1) * 0.4; break; }
       case "exploder": dir = U.sign(dx); spd = 1.15; break;
-      case "jumper": dir = 0; if (e.onGround) { e.hopT = (e.hopT || 0) - dt; if (e.hopT <= 0) { e.hopT = 0.6 + Z.R() * 0.5; e.vy = -220; e.vx = U.sign(dx) * d.spd; } } break;
+      case "jumper": dir = !e.onGround && Math.abs(e.vx) > 20 ? U.sign(e.vx) : 0; if (e.onGround) { e.hopT = (e.hopT || 0) - dt; if (e.hopT <= 0) { e.hopT = 0.6 + Z.R() * 0.5; e.vy = -220; e.vx = U.sign(dx) * d.spd; } } break;
       case "turret": dir = 0; break;
       case "support": { const r = supportMove(e, dx, adx); dir = r[0]; spd = r[1]; break; }
       case "guard": dir = guardMove(e, dx, adx, P); spd = 1; break;
@@ -685,6 +686,7 @@
     const opts = [];
     for (const a of d.atks || []) {
       if (a.once && e.uses[a.k]) continue;
+      if (a.own && e.ocd && e.ocd[a.k] > 0) continue;
       if (rooted && ["lunge", "leap", "charge", "dive", "teleport"].includes(a.k)) continue;
       if (adx < a.r[0] || adx > a.r[1]) continue;
       const maxDy = a.dy != null ? a.dy : a.k === "leap" ? 90 : a.k === "dive" ? 200 : ["shoot", "lob", "mark", "summon", "heal", "shield", "teleport", "grow", "invis", "beam", "volley", "web", "pull", "drum", "flare", "brace", "shell", "smoke", "spores", "thread", "toll", "gust"].includes(a.k) ? 160 : 28;
@@ -761,7 +763,7 @@
       if (ac.t >= a.act + (a.n && a.gap && !["shoot"].includes(a.k) ? (a.n - 1) * a.gap : 0) + (a.k === "shoot" && a.gap ? (a.n - 1) * a.gap : 0)) { ac.phase = "post"; ac.t = 0; onActEnd(e, a, P); }
     } else {
       if (!d.fly) e.vx = U.approach(e.vx, 0, 900 * dt); else { e.vx *= 0.92; e.vy *= 0.92; }
-      if (ac.t >= a.post) { e.act = null; e.cd = (a.once ? Math.min(a.cd || 0.6, 1.2) /* W9: Einmal-Fähigkeiten (Wachsen, Wolfsgeheul …) legten den Gegner sonst 7–100 s still */ : (a.cd || 0.6)) * (0.75 + Z.R() * 0.5) * (e.elite === "wuetend" ? 0.6 : 1) * (e.rageT > 0 ? 0.75 : 1); }
+      if (ac.t >= a.post) { if (a.own) (e.ocd || (e.ocd = {}))[a.k] = a.own * (0.85 + Z.R() * 0.3); e.act = null; e.cd = (a.once ? Math.min(a.cd || 0.6, 1.2) /* W9: Einmal-Fähigkeiten (Wachsen, Wolfsgeheul …) legten den Gegner sonst 7–100 s still */ : (a.cd || 0.6)) * (0.75 + Z.R() * 0.5) * (e.elite === "wuetend" ? 0.6 : 1) * (e.rageT > 0 ? 0.75 : 1); }
     }
     e.noPlat = !!d.fly;
     if (d.ai === "phase") { const g = e.ghost; e.ghost = true; Z.moveBody(e, dt); e.ghost = g; } else Z.moveBody(e, dt);
@@ -832,7 +834,7 @@
       case "smoke": FX.burst(cx, cy, 22, { col: ["#8a8a80", "#6a6a62", "#a8a49a"], sp: 70, life: 1.1, size: 6, kind: "smoke", g: -15, drag: 0.92 }); e.vx = -e.face * 260; e.vy = -230; e.onGround = false; e.invuln = 0.3; e.hidden = 1.1; Z.noise(cx, cy, 120); break;
       case "toll": toll(e, a, P); break;
       case "spores": { const x = cx + e.face * 34; Z.spawnHazard({ kind: "poisoncloud", x, y: Z.groundY(x, e.y + e.h - 4), w: 56, life: 3, dmg: dmgP(e, 0.15), owner: "e", eff: { poison: 1 } }); FX.burst(cx + e.face * 8, e.y + 6, 16, { col: ["#c8a0b0", "#e0d0c0", "#a0506a"], sp: 70, ang: e.face > 0 ? -0.4 : Math.PI + 0.4, spread: 1.4, life: 0.9, size: 3, kind: "smoke", g: -10 }); break; }
-      case "thread": addStrip(e.act.aim.x, e.act.aim.y, e); break;
+      case "thread": { const am = e.act.aim || { x: P.x + P.w / 2, y: Z.groundY(P.x + P.w / 2, P.y + P.h) }; addStrip(am.x, am.y, e); break; }
       case "gust": gust(e, a, P); break;
       case "invis": e.hidden = 2.2; FX.burst(cx, cy, 10, { col: "#4a4246", sp: 60, life: 0.5, size: 4, kind: "smoke" }); break;
     }
@@ -904,6 +906,274 @@
       return;
     }
   }
+
+  /* ======================= W10: ZUSAMMENSPIEL, VORWARNUNG, NEUE FÄHIGKEITEN ======================= */
+  let LIT = false; /* steht Ezekiel im Licht einer Laterne? (je Bild) */
+  const STRIPS = (Z.webStrips = []); /* Fadennetze der Drider am Boden */
+  /* je Bild: Laternenlicht, Kriegstakt, Spuren (Feuer/Säure), Fäden, Rost */
+  function w10Frame(dt, P) {
+    LIT = false;
+    const px = P.x + P.w / 2, py = P.y + P.h / 2;
+    for (const e of Z.enemies) {
+      if (e.dead) continue;
+      if (e.rageT > 0) e.rageT -= dt;
+      if (e.flareT > 0) e.flareT -= dt;
+      const d = e.def;
+      if (d.lantern && !e._rest && !LIT) { const lx = e.x + e.w / 2, ly = e.y + e.h * 0.4, R = e.flareT > 0 ? 220 : 120; if (Math.abs(lx - px) < R && Math.abs(ly - py) < R * 0.8 && Math.hypot(lx - px, ly - py) < R && W.los(lx, ly, px, py)) LIT = true; }
+      if ((d.fireTrail || d.acidTrail) && e.aware && e.onGround && !e._rest && Math.abs(e.vx) > 14) {
+        e.trailW = (e.trailW || 0) - dt;
+        if (e.trailW <= 0) {
+          e.trailW = d.fireTrail ? 0.7 : 0.9;
+          if (d.fireTrail) Z.spawnHazard({ kind: "fire", x: e.x + e.w / 2 - e.face * 6, y: e.y + e.h, w: 16, life: 1.3, dmg: dmgP(e, 0.07), owner: "e" });
+          else Z.spawnHazard({ kind: "poisonpool", x: e.x + e.w / 2 - e.face * 8, y: e.y + e.h, w: 22, life: 3.5, dmg: dmgP(e, 0.05), owner: "e", eff: { poison: 1 } });
+        }
+      }
+    }
+    if (P.rustT > 0) { P.rustT -= dt; if (Math.random() < dt * 6) FX.p({ x: px + P.face * 8, y: P.y + 10, vx: 0, vy: 30, life: 0.5, size: 1.4, col: Math.random() < 0.5 ? "#a85a2a" : "#7a3a1a", kind: "shard", g: 200 }); }
+    /* Fäden: bremsen, wer hineintritt; ein Hieb (Spieler-Nahkampf) zerschneidet sie */
+    for (let i = STRIPS.length - 1; i >= 0; i--) {
+      const s = STRIPS[i]; s.t += dt;
+      if (s.t > s.life) { STRIPS.splice(i, 1); continue; }
+      if (P.dead) continue;
+      const on = P.x + P.w > s.x - s.w / 2 && P.x < s.x + s.w / 2 && P.y + P.h > s.y - 10 && P.y + P.h < s.y + 6;
+      if (on && s.t > 0.15) { Z.addStatus(P, "slow", 0.3, true); if (!s.told) { s.told = true; FX.text(px, P.y - 8, L(["Klebrige Fäden!", "Sticky threads!"]), "#eee8f0"); A.play("web", { x: s.x, vol: 0.4 }); } }
+      if (P.act && P.act.type === "melee" && P.act.phase === "act" && Math.abs(px + P.face * 14 - s.x) < s.w / 2 + 10 && Math.abs(P.y + P.h - s.y) < 26) {
+        STRIPS.splice(i, 1); FX.burst(s.x, s.y - 3, 10, { col: ["#eee8f0", "#c8c0d0"], sp: 80, life: 0.4, size: 1.4, kind: "shard", g: 200 }); A.play("web", { x: s.x, vol: 0.4, rate: 1.4 });
+      }
+    }
+  }
+  function addStrip(x, y, e) {
+    if (!isFinite(x) || !isFinite(y)) return;
+    if (STRIPS.length >= 4) STRIPS.shift();
+    STRIPS.push({ x, y, w: 64, t: 0, life: 6.5, seed: Math.random() * 10 });
+    FX.burst(x, y - 4, 12, { col: ["#eee8f0", "#d8d0dc"], sp: 70, life: 0.5, size: 1.3, kind: "shard", g: 100 });
+    if (e) { const cx = e.x + e.w / 2; FX.burst(cx, e.y + e.h * 0.5, 6, { col: "#eee8f0", sp: 50, life: 0.3, size: 1.2, kind: "spark" }); }
+  }
+  /* Rost: Nahkampfwaffe richtet einige Sekunden 30 % weniger Schaden an */
+  function rustPlayer(P, t) {
+    if (!(P.rustT > 0)) FX.text(P.x + P.w / 2, P.y - 12, L(["Rost! Waffe stumpf", "Rust! Blade dulled"]), "#d88a4a", true);
+    P.rustT = Math.max(P.rustT || 0, t); A.play("hitMetal", { vol: 0.35, rate: 0.6 });
+  }
+  { const hit0 = Z.hitEnemy;
+    Z.hitEnemy = function (e, dmg, o) {
+      const P = Z.player;
+      if (P && P.rustT > 0 && o && o.src === "melee" && !o.dot) dmg *= 0.7;
+      if (e && e.latchT > 0 && !(o && o.dot)) { e.latchT = 0; e.cd = Math.max(e.cd || 0, 1.2); e.vy = -140; e.vx = (P && e.x > P.x ? 1 : -1) * 120; }
+      return hit0.apply(this, [e, dmg, o].concat([].slice.call(arguments, 3)));
+    }; }
+  function crowCall(e, vol) { A.play("amb/e_kraehe_" + (1 + ((Z.R() * 16) | 0)) + ".mp3", { x: e.x, y: e.y, vol, rate: 1.1, gap: 0.3 }); }
+  /* Getarnt (Mimik als Truhe, Wasserspeier als Statue): regungslos, bis man zu nah kommt, sie trifft oder sie gerufen werden */
+  function disguiseTick(e, dt, P) {
+    const d = e.def, ex = e.x + e.w / 2, px = P.x + P.w / 2, garg = e.id === "gargoyle";
+    const near = !P.dead && Math.abs(px - ex) < (garg ? 64 : 30) && Math.abs((P.y + P.h) - (e.y + e.h)) < (garg ? 90 : 34) && W.los(ex, e.y + 4, px, P.y + 6);
+    if (e.hp < e.hpMax || e.aware || near) { reveal(e, P); return; }
+    e.sus = 0; e.vx = 0;
+    if (!e.ceil) { e.vy += (Z.ENEMY_GRAV || 1400) * dt; Z.moveBody(e, dt); }
+  }
+  function reveal(e, P) {
+    e.disguise = false; e.revealed = true;
+    const cx = e.x + e.w / 2, cy = e.y + e.h / 2;
+    if (e.id === "gargoyle") { e.def = GARG_FLY; e.baseY = e.y; e.vy = -200; e.onGround = false; FX.burst(cx, cy, 16, { col: ["#7a7068", "#9a9088", "#5a524c"], sp: 110, life: 0.6, size: 2.4, kind: "shard", g: 500 }); A.play("rock", { x: e.x, vol: 0.6 }); A.play("roar", { x: e.x, vol: 0.4, rate: 1.4 }); }
+    else { FX.burst(cx, cy, 12, { col: ["#c8a040", "#7a5030", "#e8d8b0"], sp: 100, life: 0.5, size: 2, kind: "shard", g: 400 }); A.play("bite", { x: e.x, vol: 0.7, rate: 0.8 }); A.play("monster", { x: e.x, vol: 0.4, rate: 0.7 }); }
+    FX.text(cx, e.y - 12, L(e.id === "gargoyle" ? ["Die Statue lebt!", "The statue lives!"] : ["Eine Mimik!", "A mimic!"]), "#ffb070", true);
+    e.aware = true; e.sus = 0; e.lostSight = 0; e.alertT = 0.2; e.cd = 0.25; e.called = false; e._wasAware = false;
+    if (P) { const s = U.sign(P.x - e.x); if (s) e.face = s; }
+  }
+  /* Stirge saugt sich fest */
+  function startLatch(e, P) {
+    if (P.dead || !e.def.fly) return;
+    e.latchT = 1.6; e.latchTick = 0.45; if (e.act) { e.act = null; e.cd = 1.2; }
+    FX.text(P.x + P.w / 2, P.y - 10, L(["Blutsauger! Abrollen!", "Bloodsucker! Roll!"]), "#ff8a7a");
+  }
+  function latchTick(e, dt, P) {
+    if (P.dead || P.rollT > 0 || e.kbT > 0 || (e.st.stun > 0) || e.frozenT > 0) { e.latchT = 0; e.vy = -140; e.vx = -(P.face || 1) * 120; e.cd = Math.max(e.cd, 1.2); return false; }
+    e.latchT -= dt; e.x = P.x + P.w / 2 - e.w / 2 - (P.face || 1) * 5; e.y = P.y + 1; e.vx = 0; e.vy = 0; e.face = P.face || 1;
+    e.latchTick -= dt;
+    if (e.latchTick <= 0) { e.latchTick = 0.5; P.iframe = 0; const h0 = P.hp; Z.hurtPlayer(dmgP(e, 0.3), { x: e.x + e.w / 2, kb: 0, unblockable: true, force: true }); P.hurtT = 0; if (P.hp < h0) e.hp = Math.min(e.hpMax, e.hp + (h0 - P.hp) * 0.6); }
+    if (e.latchT <= 0) { e.vy = -140; e.vx = -(P.face || 1) * 100; e.cd = Math.max(e.cd, 1.2); }
+    return true;
+  }
+  /* Ratte holt Hilfe: läuft zum nächsten ahnungslosen Kameraden und quiekt ihn wach */
+  function fetchHelp(e, dt, P) {
+    if (e.fetchDone || e.master || e.ambush || e.trial) return false;
+    if (!e.fetchO) {
+      e.fetchDone = true;
+      if (Z.R() > 0.6) return false;
+      let best = null, bd = 320;
+      for (const o of Z.enemies) { if (o.dead || o.aware || o.def.fetch || o.def.boss || o.disguise || o._rest || Math.abs(o.y - e.y) > 50) continue; const dd = Math.abs(o.x - e.x); if (dd > 50 && dd < bd && W.los(e.x + e.w / 2, e.y + 2, o.x + o.w / 2, o.y + o.h - 4)) { bd = dd; best = o; } }
+      if (!best) return false;
+      for (const r of Z.enemies) if (r !== e && r.def.fetch && Math.abs(r.x - e.x) < 90) r.fetchDone = true;
+      e.fetchDone = false; e.fetchO = best; e.fetchT = 4;
+      FX.text(e.x + e.w / 2, e.y - 8, L(["Quiek!", "Squeak!"]), "#e8d8c0"); A.play("rat", { x: e.x, vol: 0.6, rate: 1.3 });
+    }
+    const o = e.fetchO; e.fetchT -= dt;
+    if (!o || o.dead || o.aware || e.fetchT <= 0) { e.fetchDone = true; e.fetchO = null; return false; }
+    const ddx = o.x + o.w / 2 - (e.x + e.w / 2);
+    if (Math.abs(ddx) < 26) {
+      alarm(o, "call"); o.lkx = P.x + P.w / 2; o.lky = P.y + P.h; FX.text(o.x + o.w / 2, o.y - 10, "?!", "#e8c890"); A.play("rat", { x: e.x, vol: 0.6, rate: 1.5 });
+      e.fetchDone = true; e.fetchO = null; return false;
+    }
+    moveToward(e, dt, U.sign(ddx), 1.3); e.face = U.sign(ddx) || e.face;
+    return true;
+  }
+  /* Unterstützer (Trommler, Myconid): hält sich hinter dem nächsten kämpfenden Verbündeten, sonst auf Abstand */
+  function supportMove(e, dx, adx) {
+    const ex = e.x + e.w / 2, P = Z.player;
+    let buddy = null, bd = 260;
+    for (const o of Z.enemies) { if (o === e || o.dead || !o.aware || o.def.boss || o.def.role === "support" || o.def.role === "heiler" || o.def.fly || Math.abs(o.y - e.y) > 40) continue; const dd = Math.abs(o.x + o.w / 2 - ex); if (dd < bd) { bd = dd; buddy = o; } }
+    if (buddy && P) {
+      const bx = buddy.x + buddy.w / 2, side = U.sign(bx - (P.x + P.w / 2)) || 1, want = bx + side * 42, ddx = want - ex;
+      if (Math.abs(ddx) > 10) return [U.sign(ddx), Math.abs(ddx) > 60 ? 1 : 0.6];
+      return [0, 0];
+    }
+    /* allein: auf Nahkampf-/Sporenreichweite heran */
+    return adx > (e.def.role === "heiler" ? 64 : 22) ? [U.sign(dx), 0.85] : [0, 0];
+  }
+  /* Schildträger: stellt sich zwischen Ezekiel und den nächsten Schützen/Zauberer; Schild immer nach vorn */
+  function guardMove(e, dx, adx, P) {
+    const ex = e.x + e.w / 2, px = P.x + P.w / 2;
+    let ward = null, bd = 200;
+    for (const o of Z.enemies) { if (o === e || o.dead || !o.aware || o.def.fly || (o.def.ai !== "ranged" && o.def.ai !== "caster" && o.def.role !== "support" && o.def.role !== "heiler") || Math.abs(o.y - e.y) > 40) continue; const dd = Math.abs(o.x + o.w / 2 - ex); if (dd < bd) { bd = dd; ward = o; } }
+    if (ward) {
+      const wx = ward.x + ward.w / 2, side = U.sign(px - wx) || 1;
+      const want = Math.abs(px - wx) > 70 ? wx + side * 34 : px - side * 22, ddx = want - ex;
+      e.face = U.sign(dx) || e.face;
+      return Math.abs(ddx) > 8 ? U.sign(ddx) : 0;
+    }
+    return adx > 22 ? U.sign(dx) : 0;
+  }
+  /* ---------- Einheitliche Vorwarnsprache ----------
+     Klasse 1 (leicht, parierbar): gelbes „!“, warmes Glühen, heller Klingen-Ton.
+     Klasse 2 (schwer: Panzerung/Wucht/Ansturm/Stampfer): oranges „!!“, dunkler Klingen-Ton.
+     Klasse 3 (nicht blockbar: Packen, Ziehen, Verschlingen): rotes „!!“, hoher Glockenton.
+     Mindest-Ausholzeit (wirkt auch nach Tiefen-Beschleunigung und wütenden Eliten): 0,30 / 0,50 / 0,55 s,
+     Fernangriffe/Flächen 0,40 s, Kleinstgetier im Schwarm 0,22 s. */
+  const TG0 = { teleport: 1, summon: 1, heal: 1, shield: 1, grow: 1, invis: 1, drum: 1, flare: 1, brace: 1, evade: 1, smoke: 1, shell: 1 };
+  const AREA = { shoot: 1, lob: 1, volley: 1, web: 1, mark: 1, beam: 1, spray: 1, thread: 1, spores: 1, gust: 1 };
+  const MINPRE = [0, 0.3, 0.5, 0.55];
+  function tgOf(a) {
+    if (!a) return 0;
+    if (a._tg != null) return a._tg;
+    let tg;
+    if (TG0[a.k]) tg = 0;
+    else if (a.unblockable || a.k === "grab" || a.k === "pull") tg = 3;
+    else if (a.armor || a.glyph === "!!" || a.k === "slam" || a.k === "charge" || a.k === "toll" || (a.dmg || 1) >= 1.3) tg = 2;
+    else tg = 1;
+    try { a._tg = tg; } catch (err) { /* eingefrorene Def */ }
+    return tg;
+  }
+  Z.enemyTg = tgOf;
+  function teleInit(e, ac, a) {
+    const d = e.def, tg = tgOf(a);
+    let min = tg === 0 || d.boss ? 0 : AREA[a.k] ? 0.4 : MINPRE[tg];
+    if (a.counter) min = 0.36;
+    if (tg === 1 && d.group && (d.hp || 1) < 0.6) min = 0.22;
+    ac.fast = ac.fast || 1;
+    ac.pf = a.pre > 0 ? Math.max(ac.fast, min / a.pre) : ac.fast;
+    if (tg && !d.boss && !(e.hidden > 0) && Z.cam) {
+      const cm = Z.cam;
+      if (e.x > cm.x - 30 && e.x < cm.x + cm.w + 30 && e.y > cm.y - 30 && e.y < cm.y + cm.h + 30) {
+        if (tg === 3) A.play("bell", { x: e.x, y: e.y, vol: 0.2, rate: 2.2, tag: "tg3", gap: 0.12, verb: 0.2 });
+        else A.play("unsheathe", { x: e.x, y: e.y, vol: tg === 2 ? 0.3 : 0.15, rate: tg === 2 ? 0.7 : 1.45, tag: "tg" + tg, gap: 0.08, verb: 0.2 });
+      }
+    }
+  }
+  /* Kriegstrommel: Verbündete ringsum werden schneller und schlagen härter zu, Schlafende wachen auf */
+  function drum(e) {
+    const R = e.elite ? 300 : 220, cx = e.x + e.w / 2, cy = e.y + e.h / 2;
+    for (const o of Z.enemies) {
+      if (o.dead || o.def.boss || o.disguise) continue;
+      const dd = Math.hypot(o.x + o.w / 2 - cx, (o.y + o.h / 2 - cy) * 1.3); if (dd > R) continue;
+      o.rageT = e.elite ? 7 : 5;
+      if (o.sleep && Z.leben && Z.leben.wake) Z.leben.wake(o, true);
+    }
+    Z.noise(cx, cy, 300, { alarm: true });
+    A.play("hitHeavy", { x: e.x, vol: 0.55, rate: 0.55, gap: 0 }); A.play("hitHeavy", { x: e.x, vol: 0.5, rate: 0.6, delay: 0.18, gap: 0 }); A.play("goblin", { x: e.x, vol: 0.4 });
+    FX.ring(cx, cy, 40, "#ffb060", 0.5, 2.5); FX.ring(cx, cy, R * 0.6, "#ff8a3a", 0.8, 1.5); FX.addShake(2);
+  }
+  /* Laternenträger: „Licht hoch!“ – heller Lichtkreis, Unsichtbarkeit verpufft, alle mit Sicht zur Laterne sind alarmiert */
+  function flare(e, P) {
+    const cx = e.x + e.w / 2, cy = e.y + e.h * 0.4;
+    e.flareT = 4;
+    FX.ring(cx, cy, 70, "#ffd27a", 0.6, 3); FX.ring(cx, cy, 140, "#ffb050", 0.9, 1.5);
+    FX.burst(cx, cy, 16, { col: ["#ffe8a0", "#ffd27a"], sp: 110, life: 0.6, size: 2, kind: "glow", add: true });
+    if (P && P.invis > 0 && Math.hypot(P.x - cx, P.y - cy) < 180) { P.invis = 0; FX.text(P.x + P.w / 2, P.y - 12, L(["Entdeckt!", "Spotted!"]), "#ffd27a", true); }
+    for (const o of Z.enemies) {
+      if (o === e || o.dead || o.aware || o.def.boss || o.disguise) continue;
+      const dd = Math.hypot(o.x + o.w / 2 - cx, o.y + o.h / 2 - cy);
+      if (dd < 300 && W.los(cx, cy, o.x + o.w / 2, o.y + 4)) { o.pendAl = 0.2 + Z.R() * 0.3; o.called = true; }
+      else if (dd < 400) suspect(o, P ? P.x + P.w / 2 : cx, P ? P.y + P.h : cy, SUS_T);
+    }
+  }
+  /* Glockenschlag: Schallring um den Geist – wer drinsteht, wird weggeschleudert und kurz betäubt; der Klang alarmiert den Raum */
+  function toll(e, a, P) {
+    const cx = e.x + e.w / 2, cy = e.y + e.h / 2, R = a.rad || 60;
+    FX.ring(cx, cy, R, "#f0d890", 0.35, 3); FX.ring(cx, cy, R * 0.6, "#c8962a", 0.25, 2); FX.addShake(3);
+    A.play("gong", { x: e.x, vol: 0.45, rate: 1.6 });
+    Z.noise(cx, cy, 320, { alarm: true });
+    if (P && !P.dead) {
+      const px = P.x + P.w / 2, py = P.y + P.h / 2;
+      if (Math.hypot(px - cx, py - cy) < R + 6 && W.los(cx, cy, px, py)) Z.hurtPlayer(dmgP(e, 1), { x: cx, kb: a.kb || 280, kbUp: 220, attacker: e, parryable: false, eff: { stun: 0.25 } });
+    }
+  }
+  /* Sturmböe: stößt Ezekiel weg – über Abgründen nur schwach (keine unfairen Stürze) */
+  function gust(e, a, P) {
+    const cx = e.x + e.w / 2, cy = e.y + e.h / 2;
+    for (let i = 0; i < 12; i++) FX.p({ x: cx + e.face * (6 + Math.random() * 20), y: cy + (Math.random() - 0.5) * 24, vx: e.face * (220 + Math.random() * 120), vy: (Math.random() - 0.5) * 30, life: 0.45, size: 1.4, col: "#e8f0d8", kind: "spark" });
+    A.play("swing", { x: e.x, vol: 0.6, rate: 0.55 });
+    if (!P || P.dead) return;
+    const px = P.x + P.w / 2, ddx = px - cx;
+    if (U.sign(ddx) !== e.face && Math.abs(ddx) > 10) return;
+    if (Math.abs(ddx) > (a.r ? a.r[1] : 110) + 12 || Math.abs(P.y + P.h / 2 - cy) > 70 || !W.los(cx, cy, px, P.y + P.h / 2)) return;
+    const dir = e.face;
+    const safe = W.groundBelow(px + dir * 56, P.y + P.h - 4, 140) != null && W.groundBelow(px + dir * 28, P.y + P.h - 4, 140) != null;
+    Z.hurtPlayer(dmgP(e, 0.35), { x: cx, kb: safe ? 320 : 130, kbUp: safe ? 170 : 90, attacker: e, parryable: false });
+  }
+  /* ---------- Trupps: Gruppen mit Rollen statt Zufall ----------
+     welt.js BIOMES[id].squads: Listen von Arten (erste = Anführer). Je Ebene 2–4 Trupps; ein Trupp ersetzt einen
+     Einzelgegner und nimmt (Größe−2) andere Einzelgegner weg (Gesamtzahl steigt nur um 1 je Trupp).
+     Ab Tiefe 2 ist der Anführer manchmal ein Elite. Aufruf aus hinterhalt.js nach dem Laden (vor Schlaf/Wachen). */
+  Z.formSquads = function (lv) {
+    if (!lv || lv.hub || lv.arena || lv.passage || !Z.run) return;
+    const B = Z.BIOMES && Z.BIOMES[lv.biome]; if (!B || !B.squads || !B.squads.length) return;
+    const R = Z.Rng(((lv.seed || 7) * 92821 + 4049) >>> 0), tier = Z.run.tier || 0, P = Z.player;
+    const singles = Z.enemies.filter(e => !e.dead && !e.def.boss && !e.def.fly && !e.def.group && !e.elite && !e.master && !e.thief && !e.nm && !e.trial && !e.ambush && e.def.ai !== "turret" && !e.disguise && Z.ENEMIES[e.id] && e.onGround !== undefined && (!P || Math.abs(e.x - P.x) > 220));
+    if (singles.length < 6) return;
+    R.shuffle(singles);
+    let want = Math.min(2 + Math.floor(tier / 2), Math.floor(singles.length / 5)), made = 0;
+    const used = new Set(), kill = new Set();
+    for (const s of singles) {
+      if (made >= want) break;
+      if (used.has(s) || s.dead) continue;
+      const list = B.squads[Math.floor(R() * B.squads.length)].filter(id => Z.ENEMIES[id]);
+      if (list.length < 2) continue;
+      const x0 = s.x + s.w / 2, y0 = s.y + s.h;
+      /* Plätze auf demselben Boden links/rechts suchen */
+      const spots = [];
+      for (const off of [0, 22, -22, 44, -44, 66, -66, 88, -88]) {
+        if (spots.length >= list.length) break;
+        const x = x0 + off, gy = W.groundBelow(x, y0 - 10, 24);
+        if (gy == null || Math.abs(gy - y0) > 8) continue;
+        const tx = Math.floor(x / T), ty = Math.floor((gy - 4) / T);
+        if (W.solidT(W.tile(tx, ty)) || W.solidT(W.tile(tx, ty - 1)) || [3, 5, 6, 9].includes(W.tile(tx, ty + 1)) || [3, 5, 6, 9].includes(W.tile(tx, ty))) continue;
+        spots.push([x, gy]);
+      }
+      if (spots.length < list.length) continue;
+      used.add(s); kill.add(s);
+      /* Ausgleich: andere Einzelgegner fallen weg */
+      let drop = list.length - 2;
+      for (const o of singles) { if (drop <= 0) break; if (used.has(o) || o.dead || Math.abs(o.x - s.x) < 200) continue; used.add(o); kill.add(o); drop--; }
+      const lead = tier >= 2 && R() < 0.3;
+      list.forEach((id, i) => {
+        const [x, y] = spots[i], d = Z.ENEMIES[id];
+        const e = Z.spawnEnemy(id, x, y - (d.fly ? 20 : 0), { elite: lead && i === 0 && !d.group });
+        if (!e) return; e.spawnT = 0; e.squad = made + 1; e.face = i % 2 ? -1 : 1; Z.unstick && Z.unstick(e);
+      });
+      made++;
+    }
+    for (let i = Z.enemies.length - 1; i >= 0; i--) if (kill.has(Z.enemies[i])) Z.enemies.splice(i, 1);
+    lv.squadsMade = made;
+  };
 
   /* ======================= TOD & BEUTE ======================= */
   Z.killEnemy = function (e, o) {

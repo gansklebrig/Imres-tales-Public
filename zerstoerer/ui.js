@@ -133,7 +133,7 @@
         /* Magazin-Zustand einer früheren Fernwaffe, aber jetzt liegt etwas anderes im Platz (z. B. außerhalb von place belegt) */
         const wd = Z.WEAPONS[it.id];
         if (!wd || !wd.shoot) delete P.mag[s];
-        else { P.mag[s].t -= dt; k = P.mag[s].t / (wd.shoot.reload || 1); if (P.mag[s].t <= 0) P.mag[s].n = wd.shoot.mag + (Z.metaLvl(it.id) >= 3 ? 2 : 0); }
+        else { if (!Z.magTick) { P.mag[s].t -= dt; if (P.mag[s].t <= 0) P.mag[s].n = wd.shoot.mag + (Z.metaLvl(it.id) >= 3 ? 2 : 0); } k = P.mag[s].t / (wd.shoot.reload || 1); } /* W9: Nachladen läuft in Spielzeit (kampfkunst.js Z.magTick) */
       }
       sty(se.cd, "height", Math.max(0, Math.min(1, k)) * 100 + "%");
       se.el.classList.toggle("aktiv", !!(P.act && P.act.slot === s));

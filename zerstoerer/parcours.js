@@ -75,7 +75,7 @@
   function hitP(tr, frac, x, o) {
     const P = Z.player; if (!P || P.dead) return;
     /* eine Falle trifft den Spieler höchstens alle 1,2 s – man kommt heraus, ohne mehrfach erwischt zu werden */
-    if (tr) { if (tr._pHit > clock) return false; tr._pHit = clock + 1.2; }
+    if (tr) { if (tr._pHit > clock) return false; tr._pHit = clock + (tr.k === "pendel" ? Math.max(1.2, tr.per || 2.4) : 1.2); } /* Pendel: eine volle Schwingung Zeit zum Durchkommen */
     return Z.hurtPlayer(dmgFrac(frac), Object.assign({ x, kb: 200, kbUp: 220, parryable: false, trap: true }, o || {}));
   }
   function hitE(tr, e, dmg, o) {

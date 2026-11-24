@@ -377,5 +377,10 @@
     stuckT -= dt; if (stuckT > 0) return; stuckT = 0.2;
     for (const e of Z.enemies) if (alive(e) && !e.ghost && !e.def.ghost && e.def.ai !== "phase" && !e.def.boss && !e.ceil && !(e.kbT > 0 && e.def.fly)) Z.unstick(e);
   }
-  Z.kampfTick = function (dt) { diveTick(Z.player, dt); synTick(dt); synEffects(dt); enemyTick(dt); unstickTick(dt); };
+  /* W9: Magazin-Nachladen in Spielzeit statt im HUD (Echtzeit) – lief vorher in Zeitlupe/Trefferstopp und bei Auswahl-Zeitlupe weiter */
+  Z.magTick = function (P, dt) {
+    if (!P || !P.mag) return;
+    for (const s of ["a1", "a2"]) { const m = P.mag[s], it = P.slots[s]; if (!m || !(m.t > 0)) continue; const wd = it && Z.WEAPONS[it.id]; if (!wd || !wd.shoot) { delete P.mag[s]; continue; } m.t -= dt; if (m.t <= 0) { m.t = 0; m.n = wd.shoot.mag + (Z.metaLvl(it.id) >= 3 ? 2 : 0); } }
+  };
+  Z.kampfTick = function (dt) { Z.magTick(Z.player, dt); diveTick(Z.player, dt); synTick(dt); synEffects(dt); enemyTick(dt); unstickTick(dt); };
 })();
