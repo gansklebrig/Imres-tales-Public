@@ -74,6 +74,9 @@
     S = { lv, t: 0, found: new Set(), total: lv.secretsTotal || 0, rewards: [], keys: [], locks: [], levers: [], shrines: [], mouths: [], trial: null, exitTip: false, lockTip: 0, cellsIn: new Set() };
     const secretCells = new Set((lv.secretsList || []).filter(s => s.k === "secret").map(s => s.cell));
     S.secretCells = secretCells;
+    /* W13 R4 Sonderräume (welt.js specials): Kranplattformen */
+    S.kraene = (lv.specials || []).filter(o => o.k === "kran").map(o => ({ x: o.x, w: o.w, y0: o.yTop, y1: o.yBot, y: o.yBot, dir: -1, sp: 54, pause: 1.2, dy: 0 }));
+    S.specials = lv.specials || [];
     /* Fundstücke */
     for (const r of lv.rewards || []) S.rewards.push({ kind: r.kind, x: r.x * T + 8, y: (r.y + 1) * T, q: r.tier || 0, cell: r.cell, vault: !!r.vault, open: false, t: R() * 9, secret: !!r.secret });
     for (const f of lv.feats) {
@@ -153,6 +156,8 @@
     g.open = true; Z.dirtyTiles && Z.dirtyTiles(g.tiles[0][0], g.tiles[0][1]);
     A.play("chain", { vol: 0.8, rate: 0.8 }); A.play("door", { vol: 0.6, rate: 0.7 }); FX.addShake(4);
     for (const [x, y] of g.tiles) FX.burst(x * T + 8, y * T + 8, 3, { col: [Z.dustCol || "#8a7a70"], sp: 50, life: 0.6, size: 3, kind: "smoke" });
+    if (g.flut) { for (let i = 0; i < g.tiles.length; i += 3) { const [x, y] = g.tiles[i]; FX.burst(x * T + 8, y * T + 4, 2, { col: ["#4a7a6a", "#9ac0b0"], sp: 60, ang: Math.PI / 2, spread: 1, life: 0.7, size: 2 }); } A.play("splash", { vol: 0.8 }); }
+    if (g.flut) { found("gate" + o.f.gate, L(["Gurgelnd läuft das Wasser ab – der Durchgang ist frei.", "With a gurgle the water drains away – the passage is clear."])); return; }
     found("gate" + o.f.gate, g.vert ? L(["Eine Falltür führt zurück zum Hauptweg.", "A trapdoor leads back to the main path."]) : L(["Das Gittertor ist offen – eine Abkürzung.", "The portcullis is open – a shortcut."]));
   }
   function useShrine(o) {
@@ -252,6 +257,55 @@
     if (Z.stats) Z.stats.pruefungen = (Z.stats.pruefungen || 0) + 1;
   }
 
+  /* ======================= W13 R4: Sonderräume ======================= */
+  /* Kranplattform: fährt zwischen zwei Etagen auf und ab (wie die Fähre, nur senkrecht) und nimmt den Spieler mit */
+  Z._kraene = () => (S && S.kraene) || []; /* Tests */
+  function kranTick(dt, P) {
+    for (const m of S.kraene) {
+      const oy = m.y;
+      if (m.pause > 0) m.pause -= dt;
+      else { m.y += m.dir * m.sp * dt; if (m.y <= m.y0) { m.y = m.y0; m.dir = 1; m.pause = 1.4; } if (m.y >= m.y1) { m.y = m.y1; m.dir = -1; m.pause = 1.4; } }
+      m.dy = m.y - oy;
+      const over = P.x + P.w > m.x + 1 && P.x < m.x + m.w - 1;
+      if (P._kran === m) {
+        if (over && P.vy >= Math.min(0, m.dy / dt) - 5 && P.y + P.h > oy - 3 && P.y + P.h < oy + 10 && !P.grapple && !P.climbing) { P.y = m.y - P.h; P.vy = Math.min(0, m.dy / dt); P.onGround = true; } /* aufwärts: vy mitgeben, sonst zieht die Bodenhaftung (stickDown) zurück auf den Boden darunter */
+        else P._kran = null;
+      } else if (over && P.vy >= 0 && P.y + P.h >= m.y - 1 && P.y + P.h - P.vy * dt - Math.max(0, m.dy) <= m.y + 4 && !P.dropT && !P.grapple && !P.climbing) {
+        if (P.vy > 120) A.play("stepWood", { vol: 0.5 });
+        P.y = m.y - P.h; P.vy = 0; P.onGround = true; P._kran = m; P.cut = false;
+      }
+    }
+  }
+  /* Flutkammer: ins Wasser fallen kostet nichts – man steht wieder an der letzten sicheren Stelle (kampf.js fragt hier nach) */
+  let flutTip = 0;
+  Z.flutSicher = function (P) {
+    const lv = Z.level; if (!lv || !lv.flood) return false;
+    const tx = Math.floor((P.x + P.w / 2) / T), ty = Math.floor((P.y + P.h - 3) / T);
+    let hit = false; for (const yy of [ty, Math.floor((P.y + P.h * 0.5) / T)]) if (lv.flood.has(yy * lv.W + tx) && lv.get(tx, yy) === 6) hit = true;
+    if (hit && (Z.time0 ? Z.time0() : performance.now() / 1000) - flutTip > 20) { flutTip = Z.time0 ? Z.time0() : performance.now() / 1000; toast(L(["Zu tief zum Durchwaten. Irgendwo muss sich das Wasser ablassen lassen.", "Too deep to wade. There must be a way to drain it."]), 2600, { x: P.x + P.w / 2, y: P.y - 12 }, { prio: 1 }); }
+    return hit;
+  };
+  function drawKran(c, m, t) {
+    const x = m.x, w = m.w, top = m.y0 - 3 * T;
+    /* Ausleger oben und Seil */
+    c.fillStyle = "#3a2a20"; c.fillRect(x - 6, top - 3, w + 12, 4); c.fillRect(x + w / 2 - 2, top - 3, 4, 10);
+    c.strokeStyle = "rgba(200,180,140,.8)"; c.lineWidth = 1; c.beginPath(); c.moveTo(x + 4, top + 1); c.lineTo(x + 4, m.y - 2); c.moveTo(x + w - 4, top + 1); c.lineTo(x + w - 4, m.y - 2); c.stroke();
+    /* Plattform */
+    c.fillStyle = "#6a4a2c"; c.fillRect(x, m.y, w, 5); c.fillStyle = "#9a7a52"; c.fillRect(x, m.y, w, 1.5);
+    c.fillStyle = "#4a4448"; c.fillRect(x - 1, m.y - 1, 3, 7); c.fillRect(x + w - 2, m.y - 1, 3, 7);
+    /* Gegengewicht/Zahnrad am Ausleger: dreht sich mit der Fahrt */
+    const a = (m.y / 9) % (Math.PI * 2); c.save(); c.translate(x + w / 2, top - 1); c.rotate(a); c.fillStyle = "#5a5058"; c.fillRect(-4, -1, 8, 2); c.fillRect(-1, -4, 2, 8); c.restore();
+  }
+  function drawTruemmer(c, o, t) {
+    /* eingestürzter Übergang: Geröllhaufen vor der zugeschütteten Öffnung, abgebrochene Bohlen auf beiden Seiten */
+    const x = o.x * T, y = (o.y0 + 3) * T;
+    const R = n => { const v = Math.sin(n * 12.9898 + o.x * 78.233) * 43758.5453; return v - Math.floor(v); };
+    for (let i = 0; i < 9; i++) { const rx = x - 18 + R(i) * 52, rr = 3 + R(i + 9) * 5; c.fillStyle = i % 3 ? "#5a524c" : "#7a6e64"; c.beginPath(); c.ellipse(rx, y - rr * 0.6, rr, rr * 0.7, R(i + 3) * 3, 0, Math.PI * 2); c.fill(); }
+    c.fillStyle = "#6a4a2c"; c.save(); c.translate(x - 22, y - 3); c.rotate(-0.35); c.fillRect(0, 0, 18, 3); c.restore();
+    c.save(); c.translate(x + 40, y - 9); c.rotate(0.5); c.fillRect(0, 0, 16, 3); c.restore();
+    c.fillStyle = "rgba(40,30,26,.55)"; for (let i = 0; i < 5; i++) c.fillRect(x + R(i + 20) * 30, o.y0 * T + R(i + 30) * 40, 3, 2); /* Risse im Schutt */
+  }
+
   /* ======================= Ablauf ======================= */
   const tick0 = Z.ebenenTick;
   /* W13 R3 Handheld: Anzeige- und Buchhaltungsteile (Ziel-Hinweis, Zeitzähler der Zeichnungen, Hebel-Schwung, Geheimkammer-
@@ -271,6 +325,7 @@
       }
     }
     if (S.trial) trialTick(S.trial, dt);
+    if (S.kraene.length) kranTick(dt, P);
     const bt = erTakt(dt); if (!(bt > 0)) return;
     S.t += bt;
     zielTick(bt, px, py);
@@ -329,7 +384,7 @@
     c.fillStyle = "#2a1a10"; c.fillRect(x + 7, y + h / 2 - 1, 2, 4);
   }
   function drawGate(c, g, t) {
-    if (g.open) return;
+    if (g.open || g.flut) return;
     if (g.vert) {
       const x = g.x * T, y = (g.y0 + 2) * T;
       c.fillStyle = "#2e2622"; c.fillRect(x, y - 2, 4 * T, 4);
@@ -392,6 +447,8 @@
     if (S.trial && vis(S.trial.x, S.trial.y)) drawTrial(c, S.trial, t);
     for (const r of S.rewards) if (vis(r.x, r.y)) drawReward(c, r, t);
     for (const k of S.keys) if (vis(k.x, k.y)) drawKey(c, k, t);
+    for (const m of S.kraene || []) if (m.x > vx0 - 40 && m.x < vx1 && m.y1 > vy0 && m.y0 - 60 < vy1) drawKran(c, m, t);
+    for (const o of S.specials || []) if (o.k === "bruecke" && vis(o.x * T, o.y0 * T)) drawTruemmer(c, o, t);
   };
   /* Licht: Fundstücke, Schreine und Laternen leuchten durch die Dunkelheit (alle Grafikstufen) */
   const le0 = Z.lightExtra;

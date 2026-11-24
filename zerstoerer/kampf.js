@@ -622,7 +622,7 @@
     }
     if (liquid && P.y + P.h > Math.floor((P.y + P.h - 3) / T) * T + 6) {
       if (liquid === 5) { if (P.iframe <= 0 || true) Z.hurtPlayer(Math.round(P.hpMax * 0.18), { x: P.x, unblockable: true, hazard: true, force: true }); addStatus(P, "burn", 2, true); }
-      else { A.play("splash", { x: P.x, y: P.y }); FX.burst(P.x + P.w / 2, P.y + P.h, 14, { col: ["#4a6a5a", "#8aa090"], sp: 90, ang: -Math.PI / 2, spread: 1.2, life: 0.5, g: 400, size: 2 }); Z.hurtPlayer(Math.round(P.hpMax * 0.08), { x: P.x, unblockable: true, hazard: true, force: true }); }
+      else { A.play("splash", { x: P.x, y: P.y }); FX.burst(P.x + P.w / 2, P.y + P.h, 14, { col: ["#4a6a5a", "#8aa090"], sp: 90, ang: -Math.PI / 2, spread: 1.2, life: 0.5, g: 400, size: 2 }); if (!(Z.flutSicher && Z.flutSicher(P))) Z.hurtPlayer(Math.round(P.hpMax * 0.08), { x: P.x, unblockable: true, hazard: true, force: true }); } /* W13 R4: Flutkammer ohne Schaden */
       if (P.lastSafe) { P.x = P.lastSafe.x; P.y = P.lastSafe.y; P.h = C.H; P.crouch = false; P.vx = 0; P.vy = 0; P.iframe = Math.max(P.iframe, 1); }
     }
   }

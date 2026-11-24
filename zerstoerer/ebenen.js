@@ -281,7 +281,7 @@
   function fallTick(dt) {
     const P = Z.player;
     if (P && !P.dead) {
-      if (P.onGround || P.climbing || P.ledge || P.grapple) { if (P._wasAir && P.peakY != null && !P.climbing) landed(P); P.peakY = P.y; P._peak0 = null; P._wasAir = false; }
+      if (P.onGround || P.climbing || P.ledge || P.grapple || P._kran) { if (P._wasAir && P.peakY != null && !P.climbing) landed(P); P.peakY = P.y; P._peak0 = null; P._wasAir = false; }
       else {
         /* Abfangen: ein Schwung nach oben mitten im Fall (Doppelsprung, Sprungfeder, Schwingen, Ösen-Abstoß …) setzt die
            Fallhöhe neu an – wer kurz vor dem Aufprall noch springt, fällt danach nur noch die Resthöhe */

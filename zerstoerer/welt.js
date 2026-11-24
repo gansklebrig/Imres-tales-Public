@@ -1035,7 +1035,7 @@
     let best = null, bs = 1e9;
     for (let attempt = 0; attempt < 40; attempt++) {
       const lv = tryGen(biomeId, (seed + attempt * 7919) >>> 0, opts);
-      if (lv && validate(lv)) { lv.attempts = attempt + 1; if (!Z.noEase) ease(lv); settle(lv); plan(lv); if (!Z.noRuneGates) runeGates(lv); unwall(lv); assignRooms(lv); return lv; }
+      if (lv && validate(lv)) { lv.attempts = attempt + 1; if (!Z.noEase) ease(lv); settle(lv); plan(lv); specials(lv); if (!Z.noRuneGates) runeGates(lv); unwall(lv); assignRooms(lv); return lv; }
       /* Notfall: die beste Karte merken (alle Ausgänge erreichbar, möglichst wenige Festsitz-Stellen) */
       const sc = lv && lv.stuck ? lv.stuck.length : 1e8;
       if (lv && sc < bs) { bs = sc; best = lv; }
@@ -1111,6 +1111,7 @@
     const role = new Map();
     /* --- Abkürzungen: Hebel auf der Zweigseite der Gittertore --- */
     (lv.gates || []).forEach((g, i) => {
+      if (g.flut) return; /* Flutkammer (specials): Hebel gesetzt */
       const c = cells[g.branch]; if (!c) return;
       const gx = g.vert ? g.x + 1.5 : g.side < 0 ? g.x : g.x + 1;
       const sp = spotsOf(c, 2, false).filter(([x, y]) => g.vert ? Math.abs(x - gx) >= 3 && Math.abs(x - gx) <= 9 && y >= g.y0 - 6 && y < g.y0 : Math.abs(x - gx) <= 9 && Math.abs(x - gx) >= 2 && y >= g.y0 - 3 && y <= g.y0 + 4).sort((a, b) => Math.abs(a[0] - gx) - Math.abs(b[0] - gx));
@@ -1498,7 +1499,7 @@
      läge – Beute, Lohn, Schlüssel, Hebel, Gegner, Fallen – rückt auf den nächsten freien Stehplatz im selben Raum
      (Gegner und Fallen fallen notfalls weg). Laufzeit-Schutz zusätzlich: Z.freeSpot (platz.js). */
   function unwall(lv) {
-    const g = lv.get, W = lv.W, solid = (x, y) => { const v = g(x, y); return v === 1 || v === 7; };
+    const g = lv.get, W = lv.W, solid = (x, y) => { const v = g(x, y); return v === 1 || v === 7 || (v === 6 && lv.flood && lv.flood.has(y * W + x)); };
     const near = (x, y, avoid) => {
       const cx = Math.floor(x / CW), cy = Math.floor(y / CH);
       let best = null, bd = 1e9;
@@ -1522,6 +1523,102 @@
     if (lv.traps) lv.traps = lv.traps.filter(t => !solid(t.x, t.y));
   }
   Z._unwall = unwall;
+  /* ======================= W13 R4: SONDERRÄUME (nur auf Schleifen-Kanten) =======================
+     Selten (≈ 40 % der Karten passender Gebiete) wird eine Verbindung zwischen zwei Räumen, die auf einem Rundweg liegt,
+     zu etwas Besonderem – der Rundweg ist dann der (kurze) Umweg, es entsteht keine Sackgasse:
+       bruecke (Wehrgang, Zinnen, Sturm): eingestürzter Übergang – Trümmer versperren den Durchgang
+       flut (Hafen, See): überflutete Kammer – der Durchgang steht unter Wasser; ein Hebel daneben lässt es ablaufen
+                          (Gittertor-Mechanik: lv.gates mit flut:true, Kacheln 6 → 0). Ins Wasser zu fallen kostet nichts,
+                          man steht wieder an der letzten sicheren Stelle (Z.flutSicher, erkundung.js).
+       kran (Schmiede, Glut): Kranplattform neben einer Leiter, fährt zwischen zwei Etagen auf und ab (erkundung.js).
+     Beide Räume behalten mindestens zwei andere Ausgänge, kein Raum geht verloren, die bequeme Erreichbarkeit bleibt.
+     Prüfschalter: Z.specialForce = true (immer, wenn möglich) / false (nie). Ergebnis: lv.specials, lv.flood. */
+  const SPECIAL = (Z.SPECIAL = { wehrgang: "bruecke", zinnen: "bruecke", sturm: "bruecke", hafen: "flut", see: "flut", schmiede: "kran", glut: "kran" });
+  function specials(lv) {
+    lv.specials = []; const kind = SPECIAL[lv.biome]; if (!kind || !lv.cells) return;
+    const R = Z.Rng(((lv.seed || 1) ^ 0x5bec1) >>> 0);
+    if (Z.specialForce === false || (Z.specialForce !== true && R() > 0.4)) return;
+    const W = lv.W, H = lv.H, g = lv.get, cells = lv.cells, key = (x, y) => x + "," + y;
+    const D4 = { L: [-1, 0], R: [1, 0], U: [0, -1], D: [0, 1] }, OPP = { L: "R", R: "L", U: "D", D: "U" };
+    const open = v => v === true || v === "P";
+    const deg = c => ["L", "R", "U", "D"].filter(s2 => open(c.need[s2])).length;
+    const fixed = new Set(lv.doors.map(d => key(Math.floor(d.x / CW), Math.floor(d.y / CH))));
+    if (lv.warden && lv.warden.cell) fixed.add(key(lv.warden.cell.x, lv.warden.cell.y));
+    for (const rg of lv.runeGates || []) fixed.add(rg.cell);
+    for (const f of lv.feats || []) if (f.t === "lock" || f.t === "trial") fixed.add(f.cell);
+    const roomsOf = rc => { const s2 = new Set(); for (let i = 0; i < rc.length; i++) if (rc[i]) s2.add(Math.floor((i % W) / CW) + "," + Math.floor(((i / W) | 0) / CH)); return s2; };
+    const comfyRooms = () => { const c = { W, H, get: g, start: lv.start, doors: lv.doors, cells }; validate(c, null, true); return roomsOf(c.reach); };
+    const full0 = roomsOf(lv.reach), comfy0 = comfyRooms();
+    /* Umweg im Raumgraphen ohne die Kante a–b */
+    const detour = (a, b) => { const d = new Map([[a, 0]]), q = [a]; for (let h = 0; h < q.length; h++) { const c = q[h]; for (const s2 in D4) { if (!open(c.need[s2])) continue; const o = cells[key(c.x + D4[s2][0], c.y + D4[s2][1])]; if (!o || d.has(o) || (c === a && o === b)) continue; d.set(o, d.get(c) + 1); q.push(o); } } return d.get(b); };
+    const cand = [];
+    for (const k in cells) {
+      const a = cells[k]; if (a.kind === "secret" || fixed.has(k)) continue;
+      const s2 = kind === "kran" ? "D" : "R", b = cells[key(a.x + D4[s2][0], a.y + D4[s2][1])];
+      if (!b || b.kind === "secret" || fixed.has(key(b.x, b.y)) || a.need[s2] !== true) continue;
+      if (kind !== "kran") { if (deg(a) < 3 || deg(b) < 3) continue; const dt = detour(a, b); if (dt == null || dt > 6) continue; }
+      cand.push({ a, b, s2 });
+    }
+    R.shuffle(cand);
+    const keepOk = () => { if (!validate(lv)) return false; const f1 = roomsOf(lv.reach); for (const k of full0) if (!f1.has(k)) return false; const c1 = comfyRooms(); for (const k of comfy0) if (!c1.has(k)) return false; return true; };
+    for (const { a, b, s2 } of cand.slice(0, 10)) {
+      const ch = []; const setT = (x, y, v) => { ch.push([x, y, g(x, y)]); lv.set(x, y, v); };
+      const undo = () => { for (let i = ch.length - 1; i >= 0; i--) lv.set(ch[i][0], ch[i][1], ch[i][2]); };
+      if (kind === "bruecke") {
+        const x = (a.x + 1) * CW - 1, y0 = a.y * CH + 8; let ok = true;
+        for (let y = y0; y <= y0 + 2; y++) if (g(x, y) !== 0 || g(x + 1, y) !== 0) ok = false;
+        if (!ok) continue;
+        for (let y = y0; y <= y0 + 2; y++) { setT(x, y, 1); setT(x + 1, y, 1); }
+        const na = a.need.R, nb = b.need.L; delete a.need.R; delete b.need.L;
+        if (!keepOk()) { undo(); a.need.R = na; b.need.L = nb; validate(lv); continue; }
+        lv.specials.push({ k: "bruecke", x, y0, a: key(a.x, a.y), b: key(b.x, b.y) });
+        break;
+      }
+      if (kind === "flut") {
+        const bx = (a.x + 1) * CW, top = a.y * CH + 7, bot = a.y * CH + CH - 1, x0 = bx - 5, x1 = bx + 4;
+        let ok = true; const wt = [];
+        for (let x = x0; x <= x1 && ok; x++) {
+          let y = bot; while (y >= top && g(x, y) !== 0) { const v = g(x, y); if (v !== 1 && v !== 7) { ok = false; break; } y--; }
+          if (!ok) break;
+          /* Wasser von unten bis zur Oberfläche: jede Spalte braucht festen Grund innerhalb der Kammer */
+          if (y === bot && g(x, bot + 1) !== 1) { ok = false; break; }
+          for (let yy = y; yy >= top; yy--) { const v = g(x, yy); if (v === 0) wt.push([x, yy]); else if (v !== 1 && v !== 7) { ok = false; break; } }
+        }
+        if (!ok || !wt.length) continue;
+        for (const [x, y] of wt) setT(x, y, 6);
+        if (g(bx, a.y * CH + 9) !== 6 || g(bx - 1, a.y * CH + 9) !== 6) { undo(); continue; }
+        lv.flood = new Set(wt.map(([x, y]) => y * W + x));
+        if (!keepOk()) { undo(); lv.flood = null; validate(lv); continue; }
+        /* Hebel: erreichbarer Stehplatz in einem der beiden Räume, nicht im Wasser, 3+ Kacheln vom Becken */
+        const sp = [a, b].flatMap(c => spotsIn(lv, c, 2, false)).filter(([x, y]) => lv.reach[y * W + x] && (x < x0 - 2 || x > x1 + 2) && !lv.doors.some(d => Math.abs(d.x - x) < 3 && Math.abs(d.y - y) < 3) && !(lv.feats || []).some(f => f.x != null && Math.abs(f.x - x) < 3 && Math.abs(f.y - y) < 2));
+        sp.sort((p, q) => Math.abs(p[0] - bx) - Math.abs(q[0] - bx));
+        /* abgelassen geprüft: auch ohne Wasser sitzt niemand fest */
+        for (const [x, y] of wt) lv.set(x, y, 0); const fineOpen = validate(lv); for (const [x, y] of wt) lv.set(x, y, 6); validate(lv);
+        if (!sp.length || !fineOpen) { undo(); lv.flood = null; validate(lv); continue; }
+        const gi = (lv.gates = lv.gates || []).length;
+        lv.gates.push({ flut: true, x: bx - 1, y0: a.y * CH + 8, tiles: wt.map(([x, y]) => [x, y, 0]), branch: key(a.x, a.y), other: key(b.x, b.y), side: 0, open: false, lever: true });
+        (lv.feats = lv.feats || []).push({ t: "lever", x: sp[0][0], y: sp[0][1], gate: gi, flut: true });
+        /* was jetzt im Wasser stünde: Gegner und Fallen weg, Beute rückt (unwall) */
+        lv.spawns = lv.spawns.filter(o => !lv.flood.has(Math.floor(o.y) * W + Math.floor(o.x)));
+        if (lv.traps) lv.traps = lv.traps.filter(o => !lv.flood.has(o.y * W + o.x));
+        lv.specials.push({ k: "flut", x0, x1, top, bot, gate: gi, a: key(a.x, a.y), b: key(b.x, b.y) });
+        (lv.secretsList = lv.secretsList || []).push({ k: "gate", i: gi }); lv.secretsTotal = lv.secretsList.length; /* der Hebel zählt wie die Abkürzungs-Hebel */
+        break;
+      }
+      if (kind === "kran") {
+        /* Plattform in den Spalten 12–13 neben der Leiter (Spalte 11) – fährt von Boden des oberen Raums bis zum Boden darunter */
+        const xs = a.x * CW + 12, fr = (a.y + 1) * CH - 2;
+        if (g(a.x * CW + 9, fr) !== 1 || g(a.x * CW + 14, fr) !== 1) continue;
+        let r = fr, ok = true; while (r < H - 1 && g(xs, r) === 0 && g(xs + 1, r) === 0) r++;
+        if (!(g(xs, r) === 1 && g(xs + 1, r) === 1) || r - fr < 6) ok = false;
+        for (let y = fr - 3; y < fr && ok; y++) if (g(xs, y) !== 0 || g(xs + 1, y) !== 0) ok = false; /* Kopfraum oben */
+        if (!ok) continue;
+        lv.specials.push({ k: "kran", x: xs * T, w: 2 * T, yTop: fr * T, yBot: r * T, a: key(a.x, a.y), b: key(b.x, b.y) });
+        break;
+      }
+    }
+  }
+  Z._specials = specials;
   /* W13 Runde 2: BEQUEME WEGE. Der Prüfer rechnet mit Maximalsprüngen (6 hoch, 7 weit); für echte Spieler (und Handheld)
      ist das grenzwertig. Jede Stelle, die nur mit einem solchen Sprung erreichbar ist, bekommt einen Zwischensteg
      (3 Kacheln Brett, von unten durchspringbar) etwa in der Mitte des Sprungs – solange danach weiterhin niemand
