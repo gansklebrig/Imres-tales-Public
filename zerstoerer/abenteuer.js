@@ -649,7 +649,7 @@
       else evs.push({ k, x, y, done: false, t: 0 });
     }
     /* W13: seltene Zeitrennen-Kammer (Sanduhr-Sockel, Ringe in der Nähe einsammeln) */
-    if (Math.random() < (Z.rennenChance != null ? Z.rennenChance : 0.14)) { try { const ev = setupRennen(lv); if (ev) evs.push(ev); } catch (err) { console.error(err); } }
+    if (Math.random() < (Z.rennenChance != null ? Z.rennenChance : 0.14)) { try { const ev = setupRennen(lv); if (ev) { evs.push(ev); rennenInteract(ev); } } catch (err) { console.error(err); } }
     if (evs.some(e => e.k === "haendler")) setTimeout(() => { if (Z.level === lv && Z.ui && Z.ui.notify) Z.ui.notify("⚖ <b>" + L(["Fahrende Händlerin", "Wandering Trader"]) + "</b><br><small>" + L(["Irgendwo klimpert ihr Karren – folge der Laterne (Karte).", "Her cart is jingling somewhere – follow the lantern (map)."]) + "</small>", { prio: 2, art: "gold", dauer: 3400 }); }, 9000);
     /* Runen-Fragmente in Geheimräumen */
     const RUNE = { verlies: "tiefe", schmiede: "glut", zinnen: "himmel" };
@@ -669,34 +669,68 @@
   function finish(ev) { ev.done = true; M().events = (M().events || 0) + 1; if (Z.run) Z.run.events++; Z.saveMeta(); }
   /* ======================= ZEITRENNEN ======================= */
   /* Sockel mit Sanduhr; Benutzen startet die Uhr, 5 goldene Ringe liegen in Reichweite (gleiche oder Nachbarzellen, keine Geheimräume).
-     Zeit = geschätzter Weg (waagrecht + 1,6 × senkrecht) / Laufgeschwindigkeit × 1,8 + 5 s. Scheitern kostet nichts – bis zu 3 Versuche. */
+     Zeit = Kachelweg (Dijkstra über die Prüferkanten) / Laufgeschwindigkeit × 1,15 + 2 s (per Bot geeicht: ~25 % Restzeit). Scheitern kostet nichts – bis zu 3 Versuche. */
+  /* Wegkosten über die echten Kachelkanten des Erreichbarkeitsprüfers (welt.js validate): Dijkstra je Teilstück.
+     Kosten in „Laufkacheln“: waagrecht 1, hinauf 1,7 je Kachel (Sprung/Leiter), hinab 0,5 je Kachel. */
+  function rennenGraph(lv, p) {
+    const f = { W: lv.W, H: lv.H, get: lv.get, start: { x: p.x, y: p.y }, doors: [], cells: lv.cells, _wantEdges: true };
+    Z.validateLevel(f); const [ea, eb] = f._edges || [[], []], N = lv.W * lv.H, W = lv.W;
+    const head = new Int32Array(N).fill(-1), nxt = new Int32Array(ea.length), cost = new Float64Array(ea.length);
+    for (let k = 0; k < ea.length; k++) { nxt[k] = head[ea[k]]; head[ea[k]] = k; const dx = Math.abs((ea[k] % W) - (eb[k] % W)), dy = ((eb[k] / W) | 0) - ((ea[k] / W) | 0); cost[k] = Math.max(dx, 0.3) + (dy < 0 ? -dy * 1.7 : dy * 0.5); }
+    const dist = src => {
+      const d = new Float64Array(N).fill(1e9), hc = [], hv = []; d[src] = 0;
+      const up = (c, v) => { let i = hc.length; hc.push(c); hv.push(v); while (i > 0) { const q = (i - 1) >> 1; if (hc[q] <= hc[i]) break; [hc[q], hc[i]] = [hc[i], hc[q]]; [hv[q], hv[i]] = [hv[i], hv[q]]; i = q; } };
+      const down = () => { const c = hc[0], v = hv[0], lc = hc.pop(), lv2 = hv.pop(); if (hc.length) { hc[0] = lc; hv[0] = lv2; let i = 0; for (;;) { const l = 2 * i + 1, r = l + 1; let m = i; if (l < hc.length && hc[l] < hc[m]) m = l; if (r < hc.length && hc[r] < hc[m]) m = r; if (m === i) break; [hc[m], hc[i]] = [hc[i], hc[m]]; [hv[m], hv[i]] = [hv[i], hv[m]]; i = m; } } return [c, v]; };
+      up(0, src);
+      while (hc.length) {
+        const [c, u] = down(); if (c > d[u]) continue; if (c > 200) break;
+        for (let e = head[u]; e >= 0; e = nxt[e]) { const v = eb[e], nc = c + cost[e]; if (nc < d[v]) { d[v] = nc; up(nc, v); } }
+      }
+      return d;
+    };
+    return { reach: f.reach, dist };
+  }
+  Z.rennenFaktor = 1;
   function setupRennen(lv) {
     const p = spotFar(lv, lv.start, 24); if (!p) return null;
     const cellOf = (x, y) => lv.cells && lv.cells[Math.floor(x / Z.CW) + "," + Math.floor(y / Z.CH)];
     const c0 = cellOf(p.x, p.y); if (!c0 || c0.kind === "secret" || (lv.reach && !lv.reach[p.y * lv.W + p.x])) return null;
+    const G = rennenGraph(lv, p), W = lv.W;
+    const d0 = G.dist(p.y * W + p.x);
     const cand = [];
     for (let i = 0; i < 900 && cand.length < 60; i++) {
       const x = p.x - 22 + ((Math.random() * 45) | 0), y = p.y - 9 + ((Math.random() * 16) | 0);
       if (x < 2 || y < 2 || x >= lv.W - 2 || y >= lv.H - 2) continue;
       const c = cellOf(x, y); if (!c || c.kind === "secret") continue;
-      if (Math.abs(x - p.x) + Math.abs(y - p.y) < 6 || !Z.standable(lv, x, y, 2) || (lv.reach && !lv.reach[y * lv.W + x])) continue;
+      if (Math.abs(x - p.x) + Math.abs(y - p.y) < 6 || !Z.standable(lv, x, y, 2) || d0[y * W + x] > 60) continue; /* vom Sockel erreichbar, nicht zu weit */
       if ((lv.doors || []).some(d => Math.abs(d.x - x) < 3 && Math.abs(d.y - y) < 3)) continue;
       cand.push({ x, y });
     }
     const rings = [];
     for (const q of cand) { if (rings.length >= 5) break; if (rings.every(r => Math.abs(r.x - q.x) + Math.abs(r.y - q.y) >= 6)) rings.push(q); }
     if (rings.length < 4) return null;
-    /* Weg schätzen: nächster Nachbar ab dem Sockel */
-    let cur = p, left = rings.slice(), way = 0; const order = [];
-    while (left.length) { let bi = 0, bd = 1e9; left.forEach((r, i) => { const d = Math.abs(r.x - cur.x) + 1.6 * Math.abs(r.y - cur.y); if (d < bd) { bd = d; bi = i; } }); way += bd; cur = left.splice(bi, 1)[0]; order.push(cur); }
-    const limit = Math.round(way * T / Z.PC.RUN * 1.8 + 5);
-    return { k: "rennen", x: p.x * T + 8, y: (p.y + 1) * T, done: false, t: 0, on: false, tries: 0, limit, rings: order.map(r => ({ x: r.x * T + 8, y: r.y * T + 4, got: false })) };
+    /* echte Reihenfolge: jeweils der nächste Ring auf dem Kachelweg */
+    let cur = p, dc = d0, left = rings.slice(), way = 0; const order = [];
+    while (left.length) {
+      let bi = -1, bd = 1e9; left.forEach((r, i) => { const v = dc[r.y * W + r.x]; if (v < bd) { bd = v; bi = i; } });
+      if (bi < 0 || bd >= 1e8) return null; /* ein Ring wäre von hier nicht erreichbar */
+      way += bd; cur = left.splice(bi, 1)[0]; order.push(cur); if (left.length) dc = G.dist(cur.y * W + cur.x);
+    }
+    const limit = Math.max(8, Math.round((way * T / Z.PC.RUN * 1.15 + 2) * Z.rennenFaktor)); /* Bot (R8): braucht im Mittel 1,03 × Weg/Laufen → ~25 % Rest */
+    return { k: "rennen", x: p.x * T + 8, y: (p.y + 1) * T, done: false, t: 0, on: false, tries: 0, limit, way: Math.round(way), rings: order.map(r => ({ x: r.x * T + 8, y: r.y * T + 4, got: false })) };
+  }
+  /* Sockel über das gemeinsame Benutzen-System (Z.interacts): Vorrang/Beschriftung wie Hebel, kein Konflikt mit Schildern & Co. */
+  function rennenInteract(ev) {
+    (Z.interacts = Z.interacts || []).push({ x: ev.x, y: ev.y, r: 26, h: 34, ok: () => !ev.done && !ev.on, label: () => L(["Zeitrennen starten", "Start time trial"]) + " (" + ev.limit + " s)", use: () => rennenStart(ev) });
+  }
+  function rennenStart(ev) {
+    if (ev.done || ev.on) return; ev._start = true;
   }
   function rennenTick(ev, dt, use) {
     const P = Z.player;
     if (!ev.on) {
-      if (near(ev, 26) && use) {
-        inp.consume("use"); ev.on = true; ev.left = ev.limit; ev.tries++; for (const r of ev.rings) r.got = false;
+      if (ev._start) {
+        ev._start = false; ev.on = true; ev.left = ev.limit; ev.tries++; for (const r of ev.rings) r.got = false;
         A.play("gong", { vol: 0.5, rate: 1.4 }); FX.ring(ev.x, ev.y - 14, 40, "#ffd27a", 0.5, 2);
         Z.toast("⏳ <b>" + L(["Zeitrennen", "Time trial"]) + "</b><small>" + L(["Sammle alle " + ev.rings.length + " Ringe in " + ev.limit + " Sekunden.", "Collect all " + ev.rings.length + " rings in " + ev.limit + " seconds."]) + "</small>", 3000);
       }
@@ -842,14 +876,14 @@
         Z.drawNPC(c, "E", x + 18, y, t, Z.player && Z.player.x > x ? 1 : -1);
         tag(ev, L(["Handeln", "Trade"]));
       }
-      if (ev.k === "rennen") {
+      if (ev.k === "rennen" && Z.rennenGemalt && !(Z.gfx && Z.gfx.off && Z.gfx.off.rennen)) { if (!ev.done && !ev.on) tag(ev, L(["Zeitrennen starten", "Start time trial"]) + " (" + ev.limit + " s)"); } /* W11 R29: gemalte Fassung in effekte.js */
+      else if (ev.k === "rennen") {
         c.fillStyle = "#3a3236"; c.fillRect(x - 8, y - 12, 16, 12); c.fillStyle = "#4a4046"; c.fillRect(x - 10, y - 14, 20, 3);
         if (!ev.done) {
           const sy = y - 30; c.fillStyle = "#8a6a3a"; c.fillRect(x - 7, sy - 1, 14, 2); c.fillRect(x - 7, sy + 15, 14, 2);
           poly(c, [x - 5, sy + 1, x + 5, sy + 1, x + 0.8, sy + 8, x + 5, sy + 15, x - 5, sy + 15, x - 0.8, sy + 8], "rgba(255,230,180,.35)");
           const f = ev.on ? Math.max(0, ev.left / ev.limit) : 1; poly(c, [x - 4 * f, sy + 7 - 5 * f, x + 4 * f, sy + 7 - 5 * f, x, sy + 8], "#e5b454"); poly(c, [x - 4, sy + 14, x + 4, sy + 14, x, sy + 14 - 5 * (1 - f)], "#e5b454");
           c.save(); c.globalCompositeOperation = "lighter"; glow(c, x, sy + 8, 14 + Math.sin(t * 3) * 2, "rgba(255,200,100,.35)"); c.restore();
-          if (!ev.on) tag(ev, L(["Zeitrennen starten", "Start time trial"]) + " (" + ev.limit + " s)");
         }
         if (ev.on) for (const r of ev.rings) if (!r.got) { const b = Math.sin(t * 4 + r.x) * 2; c.save(); c.globalCompositeOperation = "lighter"; glow(c, r.x, r.y + b, 13, "rgba(255,210,120,.45)"); c.restore(); c.strokeStyle = "#ffd27a"; c.lineWidth = 2; c.beginPath(); c.ellipse(r.x, r.y + b, 5 + Math.sin(t * 5) * 1.5, 7, 0, 0, 6.283); c.stroke(); }
       }

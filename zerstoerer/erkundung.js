@@ -404,7 +404,13 @@
         let b = null, bd = 1e9; for (const [x, y] of td.safe) { const d = Math.abs(x - tx) + Math.abs(y - ty) * 2; if (d < bd) { bd = d; b = [x, y]; } }
         if (!b) continue;
         A.play("splash", { vol: 0.6 }); FX.burst(mx, feet, 12, { col: ["#4a6a5a", "#8aa090"], sp: 90, ang: -Math.PI / 2, spread: 1.2, life: 0.5, g: 400, size: 2 });
-        P.x = b[0] * T + 8 - P.w / 2; P.y = (b[1] + 1) * T - P.h; P.vx = P.vy = 0; P.iframe = Math.max(P.iframe || 0, 0.8); P._swing = null; Z.achEv && Z.achEv("flutNass");
+        /* Balance (Exploit): Rücksetzen mit Unverwundbarkeit nur ohne Kampf in der Nähe (kein wacher Gegner < 260 px, kein Boss) und höchstens
+           alle 8 s – gleiche Regel und gleicher Zeitgeber wie die Flutkammer (kampf.js, P._flutT). Sonst wie normales Wasser: 8 % Schaden, kein Extra-Schutz. */
+        const pt = P.time || 0, kampf = (Z.boss && !Z.bossDefeated) || Z.enemies.some(e => !e.dead && e.aware && Math.abs(e.x - P.x) < 260 && Math.abs(e.y - P.y) < 200);
+        const frei = !kampf && !(P._flutT != null && pt - P._flutT < 8 && pt >= P._flutT);
+        P.x = b[0] * T + 8 - P.w / 2; P.y = (b[1] + 1) * T - P.h; P.vx = P.vy = 0; P._swing = null; Z.achEv && Z.achEv("flutNass");
+        if (frei) { P._flutT = pt; P.iframe = Math.max(P.iframe || 0, 0.3); }
+        else if (!(P._hzRT != null && pt - P._hzRT >= 0 && pt - P._hzRT < 1)) { P._hzRT = pt; const if0 = P.iframe || 0; Z.hurtPlayer(Math.round(P.hpMax * 0.08), { x: P.x, unblockable: true, hazard: true, force: true }); P.iframe = if0; /* kein Treffer-Schutz geschenkt */ }
         const now = S.t; if (!o.tip || now - o.tip > 20) { o.tip = now; toast(L(["Die Flut steigt – warte auf die Ebbe.", "The tide is rising – wait for low water."]), 2400, { x: P.x + P.w / 2, y: P.y - 10 }, { prio: 1 }); }
       }
     }

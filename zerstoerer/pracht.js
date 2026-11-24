@@ -3316,3 +3316,51 @@
   });
   /* Förderband auch auf lean: Kachel 11 hat sonst nur die Bohlen aus bild.js – reicht dort */
 })();
+
+/* Ezekiel – The Destroyer · Erdreich unter dem Lager (W11 Runde 29)
+   Im Lager (lv.hub, unter freiem Himmel) lag unter der Graskante gemauerter Burgstein in gleichförmigen Reihen –
+   wie eine Kellerwand. Jetzt: Erdreich mit Schichtung (oben warm-braun, nach unten dunkler), Kiesel, Wurzeln unter
+   der Grasnarbe, vereinzelt vergrabene Dinge (Knochen, Münze, Scherbe, Hufeisen). Läuft im Kachel-Haken (je Chunk
+   einmal), nur Grafikstufe ≥ 2 wie alle Kachel-Haken. Schalter Z.gfx.off.lagererde. Kein Blau. */
+(function () {
+  const Z = window.Z, G = Z.gfx; if (!G || !G.tileHooks) return;
+  G.tileHooks.push(function (k, H) {
+    if (k !== "fix" || (G.off && G.off.lagererde)) return;
+    const { c, x0, x1, y0, y1, T, lv, h3 } = H; if (!lv || !lv.hub) return;
+    const solid = v => v === 1 || v === 7 || v === 12;
+    const rnd = (x, y, s) => h3 ? h3(x, y, s) : ((Math.sin(x * 127.1 + y * 311.7 + s * 74.7) * 43758.5453) % 1 + 1) % 1;
+    for (let y = y0; y <= y1; y++) for (let x = x0; x < x1; x++) {
+      if (!solid(lv.get(x, y))) continue;
+      let top = y; while (top > 0 && solid(lv.get(x, top - 1)) && y - top < 40) top--;
+      if (solid(lv.get(x, top - 1))) continue; /* kein Boden unter freiem Himmel (z. B. Mauern) */
+      const d = y - top, px = x * T, py = y * T;
+      if (d === 0) {
+        /* Grasnarbe bleibt; darunter (untere Hälfte) schon Erde */
+        const g = c.createLinearGradient(0, py + 3, 0, py + T); g.addColorStop(0, "#4a3422"); g.addColorStop(1, "#3a2a1e"); c.fillStyle = g; c.fillRect(px, py + 3, T, T - 3);
+        c.fillStyle = "rgba(20,14,8,.35)"; c.fillRect(px, py + 3, T, 1.2); /* Schatten unter der Grasnarbe */
+        for (let i = 0; i < 2; i++) { const qx = px + 2 + rnd(x, y, 50 + i) * (T - 4), qy = py + 7 + rnd(x, y, 60 + i) * (T - 9); c.fillStyle = "#6a5e54"; c.beginPath(); c.ellipse(qx, qy, 1.4, 1, 0, 0, Math.PI * 2); c.fill(); }
+        if (rnd(x, y, 70) < 0.7) { c.strokeStyle = "rgba(120,86,56,.6)"; c.lineWidth = 0.8; c.beginPath(); let wx = px + rnd(x, y, 71) * T, wy = py + 3; c.moveTo(wx, wy); for (let s2 = 0; s2 < 3; s2++) { wx += (rnd(x, y, 72 + s2) - 0.5) * 5; wy += 3 + rnd(x, y, 76 + s2) * 2; c.lineTo(wx, wy); } c.stroke(); }
+        continue;
+      }
+      /* Erdschicht je Tiefe */
+      const k2 = Math.min(1, d / 6), r = Math.round(58 - 30 * k2), gg = Math.round(40 - 20 * k2), b = Math.round(28 - 12 * k2);
+      c.fillStyle = "rgb(" + r + "," + gg + "," + b + ")"; c.fillRect(px, py, T, T);
+      /* leichte Schichtlinien */
+      c.fillStyle = "rgba(0,0,0,.14)"; c.fillRect(px, py + ((rnd(x, y, 1) * 10) | 0) + 3, T, 1);
+      c.fillStyle = "rgba(255,220,180,.05)"; c.fillRect(px, py + ((rnd(x, y, 2) * 10) | 0) + 2, T, 1);
+      /* Kiesel */
+      const n = 1 + ((rnd(x, y, 3) * 3) | 0);
+      for (let i = 0; i < n; i++) { const qx = px + 2 + rnd(x, y, 10 + i) * (T - 4), qy = py + 2 + rnd(x, y, 20 + i) * (T - 4), rr = 0.8 + rnd(x, y, 30 + i) * 1.6, lt = 70 + ((rnd(x, y, 40 + i) * 40) | 0) - d * 4;
+        c.fillStyle = "rgb(" + lt + "," + (lt - 6) + "," + (lt - 12) + ")"; c.beginPath(); c.ellipse(qx, qy, rr * 1.3, rr, 0, 0, Math.PI * 2); c.fill(); c.fillStyle = "rgba(255,235,210,.18)"; c.fillRect(qx - rr * 0.6, qy - rr * 0.7, rr * 0.8, 0.6); }
+      /* Wurzeln unter der Grasnarbe */
+      if (d <= 2 && rnd(x, y, 5) < 0.6) { c.strokeStyle = "rgba(120,86,56,.65)"; c.lineWidth = 0.8; c.beginPath(); let wx = px + rnd(x, y, 6) * T, wy = py; c.moveTo(wx, wy); for (let s = 0; s < 4; s++) { wx += (rnd(x, y, 7 + s) - 0.5) * 6; wy += 3 + rnd(x, y, 12 + s) * 2; c.lineTo(wx, wy); } c.stroke(); }
+      /* vergraben */
+      const f = rnd(x, y, 9);
+      if (d >= 2 && f < 0.045) { const cx = px + T / 2, cy = py + T / 2, kind = (rnd(x, y, 15) * 4) | 0;
+        if (kind === 0) { c.fillStyle = "#c8bca4"; c.fillRect(cx - 5, cy - 0.8, 10, 1.6); c.beginPath(); c.arc(cx - 5, cy - 1, 1.4, 0, 7); c.arc(cx - 5, cy + 1, 1.4, 0, 7); c.arc(cx + 5, cy - 1, 1.4, 0, 7); c.arc(cx + 5, cy + 1, 1.4, 0, 7); c.fill(); }
+        else if (kind === 1) { c.fillStyle = "#b08a3a"; c.beginPath(); c.ellipse(cx, cy, 2.4, 1.2, 0.3, 0, 7); c.fill(); c.fillStyle = "#e5c46a"; c.fillRect(cx - 1, cy - 0.8, 1.4, 0.6); }
+        else if (kind === 2) { c.fillStyle = "#8a4a2a"; c.beginPath(); c.moveTo(cx - 3, cy + 2); c.lineTo(cx + 1, cy - 3); c.lineTo(cx + 4, cy + 1); c.closePath(); c.fill(); c.fillStyle = "rgba(255,210,170,.25)"; c.fillRect(cx - 1, cy - 1, 2, 0.6); }
+        else { c.strokeStyle = "#5a5050"; c.lineWidth = 1.2; c.beginPath(); c.arc(cx, cy, 3, Math.PI * 0.15, Math.PI * 0.85, true); c.stroke(); } }
+    }
+  });
+})();

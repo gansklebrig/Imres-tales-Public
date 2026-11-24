@@ -1303,3 +1303,119 @@
     return r;
   };
 })();
+
+/* Ezekiel – The Destroyer · Zeitrennen-Kammer, gemalt (W11 Runde 29; Daten/Logik abenteuer.js, gelesen über Z.abEvents)
+   Über die schlichte Fassung: Steinsockel mit Kapitell, Messing-Sanduhr mit Glas, rinnendem Sand und Glanz;
+   goldene Ringe, die sich drehen (Ellipse wechselt die Breite) und funkeln; Einsammeln: Funkenring und Lichtblitz;
+   Countdown als Medaillon über Ezekiel (Bogen läuft ab, letzte 5 s rot pulsierend); Erfolg: goldener Funkenregen;
+   dritter Fehlversuch: die Sanduhr zerspringt (Glasscherben, Sandschwall), danach bleibt der leere, gebrochene Rahmen.
+   Kein Blau. Lean: ohne Glanz-/Funkenextras. Schalter Z.gfx.off.rennen. */
+(function () {
+  const Z = window.Z, G = Z.gfx, FX = Z.fx, TAU = Math.PI * 2;
+  if (!G) return;
+  const lean = () => !!(Z.gq && (Z.gq.lean || Z.gq.mini));
+  const off = () => G.off && G.off.rennen;
+  const ST = new WeakMap();
+  const st = ev => { let s = ST.get(ev); if (!s) { s = { on: false, got: ev.rings.map(r => r.got), done: ev.done, win: false, broke: false, pulse: [], flash: 0 }; ST.set(ev, s); } return s; };
+  function sparks(x, y, n, cols, sp) { if (!FX || !FX.burst) return; FX.burst(x, y, n, { col: cols, sp: sp || 90, life: 0.55, size: 1.8, kind: "glow", add: true }); }
+  function track(ev) {
+    const s = st(ev), now = performance.now() / 1000;
+    if (ev.on && !s.on) { s.flash = now; s.broke = false; }
+    ev.rings.forEach((r, i) => { if (r.got && !s.got[i]) { s.pulse.push({ x: r.x, y: r.y, t0: now }); if (!lean()) sparks(r.x, r.y, 14, ["#fff2c0", "#ffd27a", "#ffb040"], 110); } s.got[i] = r.got; });
+    if (!ev.on && s.on && ev.done && ev.rings.every(r => r.got)) { s.win = true; if (!lean()) sparks(ev.x, ev.y - 30, 30, ["#fff2c0", "#ffd27a"], 160); }
+    if (ev.done && !s.done && !s.win && ev.tries >= 3) { s.broke = true; s.brokeT = now; if (FX && FX.burst) { FX.burst(ev.x, ev.y - 22, lean() ? 8 : 18, { col: ["#f0f4e8", "#d8e0d0", "#fff"], sp: 130, life: 0.8, size: 1.6, kind: "shard", g: 600 }); FX.burst(ev.x, ev.y - 22, lean() ? 6 : 16, { col: ["#e5b454", "#c8963a"], sp: 70, life: 0.9, size: 1.4, g: 500, drag: 0.95 }); } }
+    s.on = ev.on; s.done = ev.done; s.pulse = s.pulse.filter(p => now - p.t0 < 0.6);
+    return s;
+  }
+  function pedestal(c, x, y, t) {
+    /* Sockel: Fuß, Schaft mit Fugen, Kapitell – überdeckt die schlichte Fassung */
+    const sg = c.createLinearGradient(x - 12, 0, x + 12, 0); sg.addColorStop(0, "#6a5e5a"); sg.addColorStop(0.5, "#4a4044"); sg.addColorStop(1, "#2a2428");
+    c.fillStyle = "#2a2226"; c.fillRect(x - 13, y - 4, 26, 4); c.fillStyle = "#5a4e4c"; c.fillRect(x - 13, y - 4, 26, 1);
+    c.fillStyle = sg; c.fillRect(x - 9, y - 15, 18, 11);
+    c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(x - 9, y - 10, 18, 0.8); c.fillRect(x - 1, y - 15, 0.8, 5); c.fillRect(x + 3, y - 10, 0.8, 6);
+    c.fillStyle = "#5e5250"; c.fillRect(x - 12, y - 18, 24, 3); c.fillStyle = "#7a6e68"; c.fillRect(x - 12, y - 18, 24, 1);
+    /* eingeritzte Sanduhr-Rune vorn */
+    c.strokeStyle = "rgba(229,180,84,.55)"; c.lineWidth = 0.8; c.beginPath(); c.moveTo(x - 3, y - 13); c.lineTo(x + 3, y - 13); c.lineTo(x - 3, y - 7); c.lineTo(x + 3, y - 7); c.closePath(); c.stroke();
+  }
+  function hourglass(c, x, y, f, t, run, broke, bt) {
+    const sy = y - 38, h = 20, w = 8;
+    if (!broke) {
+      /* Glas */
+      c.fillStyle = "rgba(240,236,220,.16)"; c.beginPath(); c.moveTo(x - w, sy + 2); c.quadraticCurveTo(x - w, sy + h * 0.42, x - 1, sy + h / 2); c.quadraticCurveTo(x - w, sy + h * 0.58, x - w, sy + h - 2); c.lineTo(x + w, sy + h - 2); c.quadraticCurveTo(x + w, sy + h * 0.58, x + 1, sy + h / 2); c.quadraticCurveTo(x + w, sy + h * 0.42, x + w, sy + 2); c.closePath(); c.fill();
+      c.strokeStyle = "rgba(255,245,220,.32)"; c.lineWidth = 0.8; c.stroke(); /* Glaskontur */
+      /* Sand oben (nimmt ab), unten (Kegel wächst), Rinnsal */
+      const top = Math.max(0, f), bot = 1 - top;
+      if (top > 0.01) { const ty = sy + 2 + (h / 2 - 3) * (1 - top); c.fillStyle = "#e5b454"; c.beginPath(); c.moveTo(x - w * 0.85 * Math.sqrt(top), ty); c.lineTo(x + w * 0.85 * Math.sqrt(top), ty); c.lineTo(x + 1, sy + h / 2 - 0.5); c.lineTo(x - 1, sy + h / 2 - 0.5); c.closePath(); c.fill(); }
+      c.fillStyle = "#d8a040"; c.beginPath(); c.moveTo(x - w + 0.5, sy + h - 2); c.lineTo(x + w - 0.5, sy + h - 2); c.lineTo(x + w * 0.3, sy + h - 2 - (h / 2 - 3) * (0.25 + bot * 0.75)); c.lineTo(x - w * 0.3, sy + h - 2 - (h / 2 - 3) * (0.25 + bot * 0.75)); c.closePath(); c.fill();
+      if (run && top > 0.01) { c.fillStyle = "#ffd27a"; c.fillRect(x - 0.5, sy + h / 2, 1, h / 2 - 3); for (let k = 0; k < 3; k++) { const u = (t * 3 + k / 3) % 1; c.fillRect(x - 0.6, sy + h / 2 + u * (h / 2 - 3), 1.2, 1.2); } }
+      /* Glanz */
+      c.strokeStyle = "rgba(255,250,235,.55)"; c.lineWidth = 0.9; c.beginPath(); c.moveTo(x - w + 2, sy + 4); c.quadraticCurveTo(x - w + 1.5, sy + 7, x - 3, sy + h / 2 - 2); c.stroke();
+      c.strokeStyle = "rgba(255,250,235,.25)"; c.beginPath(); c.moveTo(x - w + 2, sy + h - 4); c.lineTo(x - 3, sy + h / 2 + 3); c.stroke();
+    } else {
+      /* gebrochen: Glassplitter am Rahmen, Sandhaufen auf dem Kapitell */
+      c.fillStyle = "rgba(240,236,220,.22)"; for (const [a, b, cc, d] of [[-w, 2, -w + 3, 7], [w, 3, w - 2, 9], [-w, h - 2, -w + 4, h - 6], [w, h - 2, w - 3, h - 7]]) { c.beginPath(); c.moveTo(x + a, sy + b); c.lineTo(x + cc, sy + d); c.lineTo(x + a, sy + d + 2); c.closePath(); c.fill(); }
+      c.fillStyle = "#c8963a"; c.beginPath(); c.ellipse(x, y - 18, 11, 2.4, 0, Math.PI, 0); c.fill();
+    }
+    /* Messingrahmen: Deckel, Boden, drei Stäbe */
+    const bg = c.createLinearGradient(0, sy - 2, 0, sy + 2); bg.addColorStop(0, "#f0c870"); bg.addColorStop(1, "#8a5a1a");
+    c.fillStyle = bg; c.fillRect(x - w - 2, sy - 1, w * 2 + 4, 3); c.fillRect(x - w - 2, sy + h - 2, w * 2 + 4, 3);
+    c.fillStyle = "#a8742a"; for (const dx of [-w - 1, w]) c.fillRect(x + dx, sy + 1, 1.4, h - 3);
+    c.fillStyle = "#ffe0a0"; c.fillRect(x - w - 2, sy - 1, w * 2 + 4, 0.8);
+    if (broke) { c.strokeStyle = "#6a4a1a"; c.lineWidth = 1; c.beginPath(); c.moveTo(x + w, sy + 3); c.lineTo(x + w + 3, sy + 8); c.stroke(); }
+  }
+  function ring(c, r, t, k) {
+    const b = Math.sin(t * 4 + r.x) * 2, ry = r.y + b, spin = Math.cos(t * 2.6 + r.x * 0.05), rx = 6.5 * Math.max(0.18, Math.abs(spin)), lo = lean();
+    if (!lo) { const g = c.createRadialGradient(r.x, ry, 0, r.x, ry, 16); g.addColorStop(0, "rgba(255,220,140,.35)"); g.addColorStop(1, "rgba(255,200,100,0)"); c.fillStyle = g; c.fillRect(r.x - 16, ry - 16, 32, 32); }
+    /* dunkle Unterkante, Gold, Glanzkante */
+    c.lineWidth = 3.2; c.strokeStyle = "#7a4a10"; c.beginPath(); c.ellipse(r.x + 0.4, ry + 0.6, rx, 7, 0, 0, TAU); c.stroke();
+    c.lineWidth = 2.4; c.strokeStyle = spin > 0 ? "#f0c050" : "#d09030"; c.beginPath(); c.ellipse(r.x, ry, rx, 7, 0, 0, TAU); c.stroke();
+    c.lineWidth = 0.9; c.strokeStyle = "#fff4c8"; c.beginPath(); c.ellipse(r.x, ry, rx, 7, 0, Math.PI * 1.05, Math.PI * 1.55); c.stroke();
+    /* Funkeln */
+    if (!lo) { const tw = (Math.sin(t * 6 + k * 1.7) + 1) / 2; if (tw > 0.75) { const a = (tw - 0.75) * 4, sx = r.x - rx * 0.7, sy2 = ry - 5; c.fillStyle = "rgba(255,255,235," + a.toFixed(2) + ")"; c.beginPath(); c.moveTo(sx, sy2 - 4); c.lineTo(sx + 0.9, sy2); c.lineTo(sx, sy2 + 4); c.lineTo(sx - 0.9, sy2); c.closePath(); c.fill(); c.fillRect(sx - 3.5, sy2 - 0.45, 7, 0.9); } }
+  }
+  Z.rennenGemalt = true; /* abenteuer.js zeichnet dann nur noch die Beschriftung */
+  const dp0 = Z.drawParcours;
+  Z.drawParcours = function (c, t) {
+    if (dp0) dp0.apply(this, arguments);
+    if (off()) return;
+    try {
+      const tt = performance.now() / 1000, cam = Z.cam;
+      for (const ev of Z.abEvents || []) {
+        if (ev.k !== "rennen" || !ev.rings) continue;
+        if (cam && (ev.x < cam.x - 400 || ev.x > cam.x + cam.w + 400)) { track(ev); continue; }
+        const s = track(ev), f = ev.on ? Math.max(0, ev.left / ev.limit) : s.win ? 0 : 1;
+        pedestal(c, ev.x, ev.y, tt);
+        if (!ev.done || s.win || s.broke || ev.tries >= 3) hourglass(c, ev.x, ev.y, f, tt, ev.on, s.broke || (ev.done && !s.win && ev.tries >= 3), s.brokeT);
+        if (ev.on) ev.rings.forEach((r, k) => { if (!r.got) ring(c, r, tt, k); });
+        /* Einsammel-Funkenring */
+        for (const p of s.pulse) { const u = (tt - p.t0) / 0.6; c.save(); c.globalCompositeOperation = "lighter"; c.strokeStyle = "rgba(255,220,140," + (1 - u).toFixed(2) + ")"; c.lineWidth = 2 * (1 - u) + 0.5; c.beginPath(); c.arc(p.x, p.y, 6 + u * 22, 0, TAU); c.stroke();
+          if (!lean()) for (let i = 0; i < 10; i++) { const a = i / 10 * TAU + u * 0.8, rr = 8 + u * 26; c.fillStyle = "rgba(255,240,190," + (1 - u).toFixed(2) + ")"; c.fillRect(p.x + Math.cos(a) * rr - 0.8, p.y + Math.sin(a) * rr - 0.8, 1.6, 1.6); } c.restore(); }
+      }
+    } catch (e) { console.error(e); }
+  };
+  /* Licht: Ringe und Sanduhr leuchten */
+  if (G.lightGather) G.lightGather.push(function (add) { if (off()) return; for (const ev of Z.abEvents || []) { if (ev.k !== "rennen" || !ev.rings) continue; if (!ev.done) add(ev.x, ev.y - 28, 46, "#ffc870", 0.4, 0); if (ev.on) for (const r of ev.rings) if (!r.got) add(r.x, r.y, 30, "#ffd27a", 0.45, 0); } });
+  /* Countdown: Medaillon über Ezekiel, nach dem Licht (immer lesbar) */
+  const al0 = Z.drawAfterLight;
+  Z.drawAfterLight = function (c) {
+    if (al0) al0.apply(this, arguments);
+    if (off()) return;
+    try {
+      const P = Z.player; if (!P) return;
+      const ev = (Z.abEvents || []).find(e => e.k === "rennen" && e.on); if (!ev) return;
+      const tt = performance.now() / 1000, left = Math.max(0, ev.left), f = left / ev.limit, crit = left <= 5;
+      const pu = crit ? 1 + 0.12 * Math.max(0, Math.sin((left % 1) * Math.PI)) : 1;
+      const x = P.x + P.w / 2, y = P.y - 22, R = 9 * pu;
+      c.save();
+      c.fillStyle = "rgba(20,12,10,.78)"; c.beginPath(); c.arc(x, y, R + 2.5, 0, TAU); c.fill();
+      c.strokeStyle = "rgba(90,70,60,.9)"; c.lineWidth = 1; c.beginPath(); c.arc(x, y, R + 2.5, 0, TAU); c.stroke();
+      c.strokeStyle = crit ? "#ff6a4a" : "#e5b454"; c.lineWidth = 2.4; c.lineCap = "round"; c.beginPath(); c.arc(x, y, R, -Math.PI / 2, -Math.PI / 2 + TAU * f); c.stroke();
+      c.fillStyle = crit ? "#ffd0c0" : "#ffe8b0"; c.font = "bold " + Math.round(9 * pu) + "px " + (getComputedStyle(document.documentElement).getPropertyValue("--fb") || "sans-serif"); c.textAlign = "center"; c.textBaseline = "middle";
+      c.fillText(left >= 10 ? String(Math.ceil(left)) : left.toFixed(1), x, y + 0.5);
+      /* Ringe gesammelt: kleine Punkte darunter */
+      const n = ev.rings.length, g = ev.rings.filter(r => r.got).length;
+      for (let i = 0; i < n; i++) { c.fillStyle = i < g ? "#ffd27a" : "rgba(120,100,80,.8)"; c.beginPath(); c.arc(x + (i - (n - 1) / 2) * 5, y + R + 6, 1.6, 0, TAU); c.fill(); }
+      c.restore();
+    } catch (e) { console.error(e); }
+  };
+})();
