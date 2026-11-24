@@ -16,8 +16,13 @@ const START = SCHEMA + '://spiel/heldensturm.html';
 const NETZ = 'https://imrestales.de/';
 const RELEASES = 'https://api.github.com/repos/gansklebrig/Imres-tales-Public/releases?per_page=40';
 const TAG = /^heldensturm-pc-1\.(\d+)$/;
+const QUELLE = 'https://github.com/gansklebrig/Imres-tales-Public/releases';
 const SPIEL = app.isPackaged ? path.join(process.resourcesPath, 'spiel') : path.join(__dirname, 'spiel');
 const ARG = n => process.argv.some(a => a === '--' + n);
+const ENTW = !app.isPackaged || ARG('entwickler');   // Entwicklerwerkzeuge nur beim Entwickeln oder mit --entwickler
+
+/* ---------- Sicherheit: im fertigen Programm lässt sich Chromium nicht von außen fernsteuern ---------- */
+if (app.isPackaged) for (const s of ['remote-debugging-port', 'remote-debugging-pipe', 'remote-debugging-address', 'remote-allow-origins', 'inspect', 'inspect-brk', 'js-flags', 'load-extension', 'disable-web-security', 'allow-running-insecure-content']) app.commandLine.removeSwitch(s);
 
 /* ---------- Grafikkarte ausreizen (muss vor „ready“ stehen) ---------- */
 if (ARG('ohne-gpu')) app.disableHardwareAcceleration();
@@ -45,18 +50,25 @@ function cfgSichern() { try { fs.writeFileSync(CFG_DATEI(), JSON.stringify(CFG))
 /* ---------- Spieldateien ausliefern (mit Teilabrufen für Ton und Video) ---------- */
 const MIME = { html: 'text/html; charset=utf-8', js: 'text/javascript; charset=utf-8', css: 'text/css; charset=utf-8', json: 'application/json; charset=utf-8', webmanifest: 'application/manifest+json', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp', svg: 'image/svg+xml', gif: 'image/gif', ico: 'image/x-icon', mp3: 'audio/mpeg', ogg: 'audio/ogg', opus: 'audio/ogg', wav: 'audio/wav', m4a: 'audio/mp4', webm: 'video/webm', mp4: 'video/mp4', woff2: 'font/woff2', woff: 'font/woff', ttf: 'font/ttf', txt: 'text/plain; charset=utf-8', wasm: 'application/wasm' };
 function pfadZu(url) {
-  let p; try { p = decodeURIComponent(new URL(url).pathname); } catch (e) { return null; }
+  let p; try { const u = new URL(url); if (u.hostname !== 'spiel') return null; p = decodeURIComponent(u.pathname); } catch (e) { return null; }
+  if (p.includes('\0')) return null;
   if (p === '/' || p === '') p = '/heldensturm.html';
   const ziel = path.normalize(path.join(SPIEL, p));
   if (ziel !== SPIEL && !ziel.startsWith(SPIEL + path.sep)) return null;   // nichts außerhalb des Spielordners
   return ziel;
 }
+/* Inhaltsrichtlinie: Programmcode nur aus dem Programmordner (kein Nachladen von Skripten aus dem Netz), keine Rahmen, keine Plugins.
+   'unsafe-inline'/'unsafe-eval' braucht das Spiel für seine eigenen Skripte im Dokument; Netz nur verschlüsselt (Bestenliste, Online-Mehrspieler, Updates). */
+const CSP = ["default-src 'self' heldensturm: data: blob:", "script-src 'self' heldensturm: 'unsafe-inline' 'unsafe-eval' blob:", "style-src 'self' heldensturm: 'unsafe-inline'",
+  "img-src 'self' heldensturm: data: blob:", "media-src 'self' heldensturm: data: blob:", "font-src 'self' heldensturm: data:", "connect-src 'self' heldensturm: https: wss: data: blob:",
+  "worker-src 'self' heldensturm: blob:", "frame-src 'none'", "object-src 'none'", "base-uri 'self'", "form-action 'none'"].join('; ');
 async function liefern(req) {
   const datei = pfadZu(req.url);
   if (!datei) return new Response('', { status: 403 });
   let st; try { st = await fs.promises.stat(datei); } catch (e) { st = null; }
   if (!st || !st.isFile()) return new Response('', { status: 404 });
-  const kopf = { 'Content-Type': MIME[path.extname(datei).slice(1).toLowerCase()] || 'application/octet-stream', 'Accept-Ranges': 'bytes', 'Cache-Control': 'no-cache' };
+  const kopf = { 'Content-Type': MIME[path.extname(datei).slice(1).toLowerCase()] || 'application/octet-stream', 'Accept-Ranges': 'bytes', 'Cache-Control': 'no-cache', 'X-Content-Type-Options': 'nosniff' };
+  if (/\.html?$/i.test(datei)) kopf['Content-Security-Policy'] = CSP;
   if (req.method === 'HEAD') return new Response(null, { status: 200, headers: Object.assign(kopf, { 'Content-Length': String(st.size) }) });
   const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.get('range') || '');
   if (m && (m[1] || m[2]) && st.size > 0) {
@@ -87,7 +99,7 @@ function fenster() {
     width: CFG.b, height: CFG.h, minWidth: 640, minHeight: 400, show: false, fullscreen: !!CFG.vollbild && !ARG('fenster'),
     backgroundColor: '#100c12', title: 'Heldensturm', autoHideMenuBar: true,
     icon: path.join(__dirname, 'build', 'icon.png'),
-    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false, spellcheck: false, devTools: true }
+    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false, spellcheck: false, devTools: ENTW, webSecurity: true, allowRunningInsecureContent: false, webviewTag: false }
   });
   if (CFG.max && !win.isFullScreen()) win.maximize();
   win.once('ready-to-show', () => win.show());
@@ -105,7 +117,7 @@ function fenster() {
     const strg = k.control || k.meta;
     if (k.key === 'F11' || (k.alt && k.key === 'Enter')) { e.preventDefault(); vollbild(); }
     else if (strg && !k.shift && k.key.toLowerCase() === 'r') { e.preventDefault(); wc.reloadIgnoringCache(); }
-    else if (strg && k.shift && k.key.toLowerCase() === 'i') { e.preventDefault(); wc.toggleDevTools(); }
+    else if (strg && k.shift && k.key.toLowerCase() === 'i') { e.preventDefault(); if (ENTW) wc.toggleDevTools(); }
     else if (strg && k.key.toLowerCase() === 'q') { e.preventDefault(); app.quit(); }
   });
   wc.on('render-process-gone', (e, d) => { if (d && d.reason !== 'clean-exit' && win) setTimeout(() => { try { win.loadURL(START); } catch (x) { } }, 400); });
@@ -137,18 +149,21 @@ async function updateSuchen(laut) {
   if (!laut && CFG.spaeter === neu.n) return { ok: true, neu: true, version: neu.n };
   if (win) {
     const a = await dialog.showMessageBox(win, { type: 'info', buttons: ['Herunterladen', 'Später'], defaultId: 0, cancelId: 1, message: `Neue Fassung von Heldensturm: 1.${neu.n}`, detail: (neu.text ? neu.text + '\n\n' : '') + `Du hast 1.${ich}. Der Download öffnet sich im Browser – danach die Datei einfach ausführen. Spielstände bleiben erhalten.` });
-    if (a.response === 0) shell.openExternal(neu.datei || neu.seite); else { CFG.spaeter = neu.n; cfgSichern(); }
+    const ziel = [neu.datei, neu.seite].find(u => typeof u === 'string' && u.startsWith(QUELLE)) || QUELLE;   // nur das eigene GitHub-Projekt
+    if (a.response === 0) shell.openExternal(ziel); else { CFG.spaeter = neu.n; cfgSichern(); }
   }
   return { ok: true, neu: true, version: neu.n };
 }
 
 /* ---------- Brücke zum Spiel (preload.js → window.__hsPC) ---------- */
-ipcMain.handle('hs:vollbild', (e, an) => vollbild(an));
-ipcMain.handle('hs:istVollbild', () => !!(win && win.isFullScreen()));
-ipcMain.handle('hs:beenden', () => { app.quit(); });
-ipcMain.handle('hs:updates', () => updateSuchen(true));
-ipcMain.handle('hs:gpu', async () => { try { const i = await app.getGPUInfo('basic'); const s = app.getGPUFeatureStatus(); return { karten: (i.gpuDevice || []).map(d => ({ aktiv: !!d.active, hersteller: d.vendorId, geraet: d.deviceId })), stand: s }; } catch (e) { return null; } });
-ipcMain.on('hs:info', e => { e.returnValue = { version: app.getVersion(), plattform: process.platform, chrom: process.versions.chrome, electron: process.versions.electron }; });
+const vomSpiel = e => { try { return !!(win && e.sender === win.webContents && e.senderFrame && e.senderFrame === win.webContents.mainFrame && imSpiel(e.senderFrame.url)); } catch (x) { return false; } };
+const nur = f => (e, ...a) => (vomSpiel(e) ? f(e, ...a) : undefined);
+ipcMain.handle('hs:vollbild', nur((e, an) => vollbild(an === undefined ? undefined : !!an)));
+ipcMain.handle('hs:istVollbild', nur(() => !!(win && win.isFullScreen())));
+ipcMain.handle('hs:beenden', nur(() => { app.quit(); }));
+ipcMain.handle('hs:updates', nur(() => updateSuchen(true)));
+ipcMain.handle('hs:gpu', nur(async () => { try { const i = await app.getGPUInfo('basic'); const s = app.getGPUFeatureStatus(); return { karten: (i.gpuDevice || []).map(d => ({ aktiv: !!d.active, hersteller: d.vendorId, geraet: d.deviceId })), stand: s }; } catch (e) { return null; } }));
+ipcMain.on('hs:info', e => { if (!vomSpiel(e)) { e.returnValue = {}; return; } e.returnValue = { version: app.getVersion(), plattform: process.platform, chrom: process.versions.chrome, electron: process.versions.electron }; });
 
 /* ---------- Start ---------- */
 if (!app.requestSingleInstanceLock()) app.quit();
@@ -159,10 +174,23 @@ else {
     Menu.setApplicationMenu(null);
     protocol.handle(SCHEMA, liefern);
     /* Mikrofon, Standort usw. braucht das Spiel nicht; Vollbild und Zeigersperre schon */
-    session.defaultSession.setPermissionRequestHandler((wc, recht, cb) => cb(['fullscreen', 'pointerLock', 'clipboard-sanitized-write', 'keyboardLock'].includes(recht)));
+    const RECHTE = ['fullscreen', 'pointerLock', 'clipboard-sanitized-write', 'keyboardLock'];
+    const ses = session.defaultSession;
+    ses.setPermissionRequestHandler((wc, recht, cb) => cb(RECHTE.includes(recht)));
+    ses.setPermissionCheckHandler((wc, recht) => RECHTE.includes(recht));
+    if (ses.setDevicePermissionHandler) ses.setDevicePermissionHandler(() => false);
+    /* Netz: nur verschlüsselt (https/wss) und die eigenen Spieldateien – kein http, kein Zugriff auf Dateien des Rechners */
+    ses.webRequest.onBeforeRequest((d, cb) => { let pr = ''; try { pr = new URL(d.url).protocol; } catch (e) { } cb({ cancel: !['heldensturm:', 'https:', 'wss:', 'data:', 'blob:', 'devtools:'].includes(pr) }); });
+    ses.on('will-download', e => e.preventDefault());   // das Programm lädt nichts auf den Rechner – Downloads laufen über den Browser
     if (!fs.existsSync(path.join(SPIEL, 'heldensturm.html'))) { dialog.showErrorBox('Heldensturm', 'Die Spieldateien fehlen (' + SPIEL + ').\nBitte das Programm neu installieren.'); app.quit(); return; }
     fenster();
     if (app.isPackaged && !ARG('ohne-update')) setTimeout(() => updateSuchen(false), 8000);
+  });
+  /* keine weiteren Fenster, Rahmen oder eingebetteten Seiten – alles außerhalb des Spiels geht an den Browser */
+  app.on('web-contents-created', (ev, wc) => {
+    wc.on('will-attach-webview', e => e.preventDefault());
+    wc.setWindowOpenHandler(({ url }) => { nachAussen(url); return { action: 'deny' }; });
+    wc.on('will-frame-navigate', e => { if (!e.isMainFrame && !imSpiel(e.url)) e.preventDefault(); });
   });
   app.on('window-all-closed', () => app.quit());
 }

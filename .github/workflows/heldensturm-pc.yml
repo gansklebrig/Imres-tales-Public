@@ -22,7 +22,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: heldensturm-pc-${{ github.ref }}
@@ -96,30 +96,39 @@ jobs:
     needs: bauen
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: write
     steps:
       - uses: actions/download-artifact@v4
         with:
           path: fertig
           merge-multiple: true
 
+      # Ohne fremde Bausteine: das Release legt GitHubs eigenes Werkzeug an. Die Prüfsummen stehen im Release-Text.
       - name: Als Release veröffentlichen
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: heldensturm-pc-1.${{ github.run_number }}
-          target_commitish: ${{ github.sha }}
-          name: Heldensturm für PC 1.${{ github.run_number }}
-          prerelease: ${{ github.ref != 'refs/heads/main' }}
-          make_latest: false
-          body: |
-            ${{ github.event.head_commit.message }}
-
-            **Windows:** `Heldensturm-Setup.exe` herunterladen und ausführen. Windows warnt beim ersten Mal („Der Computer wurde geschützt“), weil das Programm nicht signiert ist: „Weitere Informationen“ → „Trotzdem ausführen“.
-            **Linux:** `Heldensturm.AppImage` herunterladen, ausführbar machen (`chmod +x Heldensturm.AppImage`) und starten.
-
-            Läuft offline, mit Controller. F11 = Vollbild. Spielstände bleiben bei Updates erhalten.
-          files: |
-            fertig/Heldensturm-Setup.exe
-            fertig/Heldensturm.AppImage
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MARKE: heldensturm-pc-1.${{ github.run_number }}
+          TITEL: Heldensturm für PC 1.${{ github.run_number }}
+          NACHRICHT: ${{ github.event.head_commit.message }}
+          VORAB: ${{ github.ref != 'refs/heads/main' }}
+        run: |
+          cd fertig
+          sha256sum Heldensturm-Setup.exe Heldensturm.AppImage > SHA256SUMS.txt
+          {
+            printf '%s\n\n' "$NACHRICHT"
+            echo '**Windows:** `Heldensturm-Setup.exe` herunterladen und ausführen. Windows warnt beim ersten Mal („Der Computer wurde geschützt“), weil das Programm nicht signiert ist: „Weitere Informationen“ → „Trotzdem ausführen“.'
+            echo '**Linux:** `Heldensturm.AppImage` herunterladen, ausführbar machen (`chmod +x Heldensturm.AppImage`) und starten.'
+            echo
+            echo 'Läuft offline, mit Controller. F11 = Vollbild. Spielstände bleiben bei Updates erhalten.'
+            echo
+            echo 'Prüfsummen (SHA-256):'
+            echo '```'
+            cat SHA256SUMS.txt
+            echo '```'
+          } > ../text.md
+          vorab=""; [ "$VORAB" = "true" ] && vorab="--prerelease"
+          gh release create "$MARKE" Heldensturm-Setup.exe Heldensturm.AppImage SHA256SUMS.txt --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "$TITEL" --notes-file ../text.md --latest=false $vorab
 
       - name: Alte Programm-Versionen aufräumen (die letzten 3 bleiben)
         env:
