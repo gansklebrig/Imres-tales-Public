@@ -2590,7 +2590,7 @@
     /* W9 (3. Runde, Prüfstand kampf.py Standardausrüstung): Ratten 22 s, Keiler 24, Kerker 22, Weberin 19, Dornvater 18 s → ×1,5 (Ziel 30–60 s);
        Kapitän 37 s, Amboss 44 s bleiben. In Läufen mit guter Ausrüstung (K6) lagen Mini-Bosse bei 6–33 s. */
     const MBHP = { ratten: 4.3 /* 6. Runde: 21–50 s */, haeuptling: 3.4, kerker: 3.3, salzbart: 2.4, ilvara: 2.3, weberin: 3.0, amboss: 1, dornvater: 1.4, laeuter: 1.2 }; /* vorher 2,5/2,3/2,2/2,4/2,8/2,0/1/1,1/1,1; 6. Runde Fernkampf-Prüfstand: Läuter 154 s, Dornvater 78–90 s, Ilvara 334 s → etwas weniger */
-    e.hp = e.hpMax = Math.round(e.hpMax * 5.0 * (MBHP[id] || 1));
+    e.hp = e.hpMax = Math.round(e.hpMax * 5.75 /* W9 8. Runde: 24 Prüfstand-Kämpfe Median 36 s, 12 unter 30 s → +15 % */ * (MBHP[id] || 1));
     if (tierN() === 0) { e.hp = e.hpMax = Math.round(e.hpMax * 0.75); e.dmgMul *= 0.85; }
     if (o.aware) e.aware = true;
     mbLive.push(e);

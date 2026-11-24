@@ -1253,6 +1253,10 @@
            „durchschaut“ ihn der Wächter: Säulen unter dem Sims treiben ihn herunter (lesbare Vorwarnung wie beim Stillstehen) */
         if (!far && feet(e) - (P.y + P.h) > 60 && s.pat > 12 && P.onGround) { s.pat = 0; punish(e, P); }
         /* 7. Runde (K12: Schmiedewächter 530 s): umgekehrt – der Wächter steht auf einem Sims ÜBER dem Spieler und kommt nicht herunter */
+        /* 8. Runde (K13: Chasme 515 s über einem Nahkampf-Bot): Flieger, die 12 s nur über dem Spieler schweben, stoßen herab */
+        else if (!far && (P.y + P.h) - feet(e) > 40 && s.pat > 12 && e.def.fly) {
+          s.pat = 0; const dv = Object.keys(e.def.moves).find(k => /stich|sturz|dive|blutsauger/.test(k)); if (dv) { e.nextMv = dv; e.idle = Math.min(e.idle || 0, 0.05); }
+        }
         else if (!far && (P.y + P.h) - feet(e) > 60 && s.pat > 12 && P.onGround && !e.def.fly) {
           s.pat = 0;
           if (!breakThrough(e, P)) { const side = pcx(P) < cxOf(e) ? 1 : -1; e.x = pcx(P) + side * 70 - e.w / 2; e.y = standY(P) - e.h - 1; e.vx = 0; e.vy = 0; Z.unstick(e); FX.burst(cxOf(e), feet(e) - 6, 20, { col: [Z.dustCol || "#8a7a70", "#c8b8a0"], sp: 160, ang: -Math.PI / 2, spread: 2.4, life: 0.5, size: 3, kind: "smoke" }); A.play("quake", { vol: 0.5 }); }

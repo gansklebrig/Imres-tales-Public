@@ -287,7 +287,7 @@
     e.dmgMul = DMG * (d.dmg || 1) * Z.BAL.enemyDmg(tier) * Z.BAL.skullDmg(run.skulls || 0);
     if (o.elite) {
       e.elite = Z.R.pick(Object.keys(ELITE));
-      hp *= 5.2 /* 5. Runde 4,6 → 5,2 (Ziel 3–10 s) */ /* W9: 3,4 → 3,8 (Elites fielen in 0,4–7 s); 3. Runde → 4,2 (K6: 1–6 s); 4. Runde → 4,6 (K7: 0,6–6,6 s) */; e.dmgMul *= 1.3; e.size *= 1.18; e.w = Math.round(e.w * 1.18); e.h = Math.round(e.h * 1.18); e.x = x - e.w / 2; e.y = y - e.h;
+      hp *= 6.0 /* 8. Runde 5,2 → 6,0 (K12 Median 1,4–5,1 s) */ /* 5. Runde 4,6 → 5,2 (Ziel 3–10 s) */ /* W9: 3,4 → 3,8 (Elites fielen in 0,4–7 s); 3. Runde → 4,2 (K6: 1–6 s); 4. Runde → 4,6 (K7: 0,6–6,6 s) */; e.dmgMul *= 1.3; e.size *= 1.18; e.w = Math.round(e.w * 1.18); e.h = Math.round(e.h * 1.18); e.x = x - e.w / 2; e.y = y - e.h;
       if (e.elite === "gepanzert") e.armorUp = 0;
     }
     if (d.boss) hp = HP * d.hp * Z.BAL.enemyHp(tier) * Z.BAL.skullHp(run.skulls || 0) * (Z.BAL.bossHp ? Z.BAL.bossHp(tier, id) : 1); /* W6: bossHp aus ausgleich.js */
