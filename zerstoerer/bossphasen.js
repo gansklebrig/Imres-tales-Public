@@ -1252,6 +1252,11 @@
         /* 5. Runde: Spieler auf einem Sims knapp über dem Wächter (Ilvara: 112 px darüber, Durchbruch ohne Platz) – nach 12 s ohne Treffer
            „durchschaut“ ihn der Wächter: Säulen unter dem Sims treiben ihn herunter (lesbare Vorwarnung wie beim Stillstehen) */
         if (!far && feet(e) - (P.y + P.h) > 60 && s.pat > 12 && P.onGround) { s.pat = 0; punish(e, P); }
+        /* 7. Runde (K12: Schmiedewächter 530 s): umgekehrt – der Wächter steht auf einem Sims ÜBER dem Spieler und kommt nicht herunter */
+        else if (!far && (P.y + P.h) - feet(e) > 60 && s.pat > 12 && P.onGround && !e.def.fly) {
+          s.pat = 0;
+          if (!breakThrough(e, P)) { const side = pcx(P) < cxOf(e) ? 1 : -1; e.x = pcx(P) + side * 70 - e.w / 2; e.y = standY(P) - e.h - 1; e.vx = 0; e.vy = 0; Z.unstick(e); FX.burst(cxOf(e), feet(e) - 6, 20, { col: [Z.dustCol || "#8a7a70", "#c8b8a0"], sp: 160, ang: -Math.PI / 2, spread: 2.4, life: 0.5, size: 3, kind: "smoke" }); A.play("quake", { vol: 0.5 }); }
+        }
         if (!far) s.pat = Math.min(s.pat, 12.5);
         if (s.pat > 15 && (P.onGround || s.pat > 25)) {
           s.pat = 0; const b = e.box, out = pcx(P) < b.x0 - 8 || pcx(P) > b.x1 + 8 || P.y + P.h > b.y1 + 260 || P.y < b.top - 80;

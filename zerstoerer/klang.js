@@ -819,6 +819,7 @@
     if ((lv.specials || []).length) l.push(...SRS.kette, ...SRS.knarz.slice(0, 8), ...SRS.ruck, ...SRS.obenH, ...SRS.untenH, ...SRS.blubb, ...SRS.platsch.slice(0, 6), ...SRS.kies, ...SRS.steinschlag, AM("a_bach_n1"), AM("a_wildwasser"), AM("a_ruinenwind"), AM("a_heulwind"));
     if ((lv.wucht || []).length) l.push(...SRS.knirsch, ...SRS.bruch, ...SRS.lawine, ...SRS.steinschlag, ...SRS.kies);
     if ((lv.morsch || []).length) l.push(...SRS.holz, ...SRS.poltern, ...SRS.planke);
+    l.push(AM("a_klangschale"), AM("e_windstoss_1"), KS("gong"));
     preload(l);
   }
   function hookOnce() {
@@ -919,6 +920,42 @@
       dustNoise(x, y, 0.07, 1.2);
     }
   }
+  /* ======================= RÜCKWEG-TOR (W14, rueckweg.js) =======================
+     Beobachtet Z.rueckweg.zustand(): solange das Tor offen ist, ein leiser Schimmer am Tor (Klangschale als Schleife nach Abstand,
+     dazu ab und zu ein Celesta-Funke in der Tonart der Musik); erlischt die Gnade, sinken drei Glockentöne herab und ein tiefer,
+     weicher Gong verklingt; beim Durchgang zurück eine kurze Blende (Musik geduckt, alles kurz gedämpft, ein Windhauch). */
+  const RW = { st: null, t: 0, v: 0, on: false, stats: { schimmer: 0, schliessen: 0, blende: 0 } };
+  KL.rueckweg = RW;
+  function rwTone(stufe, okt) { const pr = M.probe && M.probe(okt === 2 ? "glock" : "cel", M.ton(stufe, (M.prof ? M.prof.root : 50) + 12 * (okt || 2))); return pr; }
+  function rueckTick(dt) {
+    const R0 = Z.rueckweg && Z.rueckweg.zustand ? Z.rueckweg.zustand() : null, b = R0 && R0.back;
+    const st = b ? b.st : null, gate = (Z.interacts || []).find(o => o && o.rueck);
+    const gx = gate ? gate.x : null, gy = gate ? gate.y - 20 : null;
+    const open = st === "open" || st === "opening";
+    /* Schimmer */
+    let want = 0;
+    if (open && gate) { const [v] = posMix(gx, gy, 0.9); want = v * (st === "opening" ? 0.5 : 1); }
+    if (want > 0.01 || RW.v > 0.01) {
+      const path = AM("a_klangschale"); if (!RW.on) { RW.on = true; A.loop("rw_schimmer", path, 0); RW.stats.schimmer++; }
+      RW.v = want; A.loopVol("rw_schimmer", want * 0.5 * (normOf(path, -32) || 0.5), want > 0.01 ? 0.8 : 0.35);
+    } else if (RW.on && !open) { RW.on = false; A.stopLoop("rw_schimmer", 0.6); }
+    if (open && gate && want > 0.05) { RW.t -= dt; if (RW.t <= 0) { RW.t = 1.3 + Math.random() * 1.6; const pr = rwTone([0, 2, 4, 7, 9][(Math.random() * 5) | 0], 3); if (pr) wshot(pr.path, gx + (Math.random() - 0.5) * 20, gy, { vol: 0.06, rate: pr.rate, vary: 0, verb: 0.85, gap: 0, tag: "rws" }); } }
+    /* Gnade erlischt */
+    if (st === "closing" && RW.st !== "closing" && gate) {
+      RW.stats.schliessen++;
+      [7, 4, 0].forEach((d, i) => { const pr = rwTone(d, 2); if (pr) wshot(pr.path, gx, gy, { vol: 0.09 - i * 0.015, rate: pr.rate, vary: 0, verb: 0.8, delay: 0.1 + i * 0.22, gap: 0, tag: "rwc" + i }); });
+      wshot(KS("gong"), gx, gy, { vol: 0.12, rate: 0.62, verb: 0.7, delay: 0.55, gap: 0, tag: "rwg" });
+    }
+    /* Durchgang zurück: kurze Blende */
+    if (st === "going" && RW.st !== "going") {
+      RW.stats.blende++;
+      M.duck && M.duck(0.6, 0.9);
+      A.muffle && A.muffle(700);
+      setTimeout(() => { if (!(Z.ui && Z.ui.modalOpen) && !(Z.player && Z.player.dead)) A.muffle && A.muffle(20000); }, 560);
+      shot(AM("e_windstoss_1"), { vol: 0.22, rate: 1.15, verb: 0.6, gap: 0, tag: "rwb" });
+    }
+    RW.st = st;
+  }
   const W = { lv: null, pages: 0, kills: 0, chain: 0, chainT: 0, boss: null, phase: 0, won: false, dead: false, seenChest: new WeakSet(), seenElite: new WeakSet(), seenLoot: new WeakSet(), chall: 0, trials: 0, dripT: 2 };
   /* liegt ein Punkt im Bild (mit etwas Rand)? */
   const onCam = (x, y, m) => { const c = Z.cam; if (!c) return true; m = m || 0; return x > c.x - m && x < c.x + c.w + m && y > c.y - m && y < c.y + c.h + m; };
@@ -997,6 +1034,7 @@
     /* Raumkulisse und Gegnerstimmen */
     try { roomTick(dt); observe(dt); climbTick(dt); transitTick(dt); } catch (e) { if (!KL.err3) { KL.err3 = 1; console.error(e); } }
     try { sonderTick(dt); } catch (e) { if (!KL.err7) { KL.err7 = 1; console.error(e); } }
+    try { rueckTick(dt); } catch (e) { if (!KL.err8) { KL.err8 = 1; console.error(e); } }
   };
 
   /* in den Takt der Musik einhängen (läuft auch während der Pause weiter) */
