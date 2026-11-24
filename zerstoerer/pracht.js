@@ -244,7 +244,8 @@
   /* Grundton der Lichtkarte: senkrechter Verlauf der Umgebungstönung, an den Rändern ein Hauch dunkler */
   Z.gfx.colorBase = function () {
     const B = Z.biome || {}, lv = Z.level, zt = Z.zeit ? Z.zeit() : null, outside = !!(lv && (lv.out || lv.hub)) || B.open === "arch";
-    const key = (B.bg || "") + (outside ? "o" : "") + (zt ? zt.k + (zt.moonBright * 4 | 0) : "");
+    const gv = Z.gebietVariante ? Z.gebietVariante() : null; /* W11 R38: Farbstimmung je Gebietsvariante */
+    const key = (B.bg || "") + (outside ? "o" : "") + (zt ? zt.k + (zt.moonBright * 4 | 0) : "") + (gv ? gv.id : "");
     if (cbase && cbaseKey === key) return cbase;
     cbaseKey = key; cbase = cbase || document.createElement("canvas"); cbase.width = 32; cbase.height = 18;
     let P = GRADE[B.bg] || [[250, 238, 228], [238, 232, 232], [222, 212, 228]];
@@ -255,6 +256,9 @@
       const tint = (v, f) => v.map((c, i) => Math.min(255, (c * (1 - f) + c * (a[i] / 255) * f) * dim) | 0);
       P = [tint(P[0], f0), tint(P[1], f0 * 0.8), tint(P[2], f0 * (zt.k === "blut" ? 0.9 : 0.55))];
     }
+    /* Gebietsvariante: Goldader wärmer/goldener, Brut rötlicher, Fallengänge kühler-grünlich (Blau wird gesenkt, nie gehoben) */
+    const VT = { gold: [1, 0.95, 0.8], brut: [1, 0.86, 0.84], fallen: [0.92, 1, 0.9] }[gv && gv.id];
+    if (VT) P = P.map(v => v.map((c, i) => Math.min(255, c * VT[i]) | 0));
     const g = cbase.getContext("2d"), s = v => "rgb(" + v.join(",") + ")";
     const lg = g.createLinearGradient(0, 0, 0, 18); lg.addColorStop(0, s(P[0])); lg.addColorStop(0.5, s(P[1])); lg.addColorStop(1, s(P[2])); g.fillStyle = lg; g.fillRect(0, 0, 32, 18);
     const rg = g.createRadialGradient(16, 9, 4, 16, 9, 19); rg.addColorStop(0, "rgba(255,255,255,.06)"); rg.addColorStop(1, "rgba(0,0,0,.08)"); g.fillStyle = rg; g.fillRect(0, 0, 32, 18);

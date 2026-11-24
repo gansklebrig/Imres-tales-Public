@@ -147,8 +147,10 @@
       hudT = 0.25;
       /* Segen und Werte stehen jetzt im Pausenmenü; der Gebietsname zeigt sich nur nach dem Betreten (und auf der großen Karte) */
       const run = Z.run, an = areaShow > 0 || bigMap;
-      setHTML("area", esc(areaTitle()) + (run && an ? '<small>' + fmtTime(run.time) + (run.skulls ? " · " + "☠".repeat(run.skulls) : "") + (run.gnade ? ' · <span class="gnade-hud" title="' + esc(L(["Hilfsmodus Barmherzigkeit", "Assist mode Mercy"])) + '">✚</span>' : "") + "</small>" : ""));
-      $("#area").classList.toggle("still", !an);
+      /* W11 R38 (Grafik): Gebietsvariante dauerhaft am Ortsnamen („Das Verlies · ☠ Unruhige Brut“), Farbe je Variante */
+      const gv = Z.gebietVariante && Z.gebietVariante(), gvC = gv ? ({ gold: "#f0c860", brut: "#e87060", fallen: "#a8c890" })[gv.id] || "#e8d8b0" : "";
+      setHTML("area", esc(areaTitle()) + (gv ? '<span class="var-hud" style="color:' + gvC + '"> · <span class="var-ico">' + esc(gv.ico) + "</span> " + esc(L(gv.n)) + "</span>" : "") + (run && an ? '<small>' + fmtTime(run.time) + (run.skulls ? " · " + "☠".repeat(run.skulls) : "") + (run.gnade ? ' · <span class="gnade-hud" title="' + esc(L(["Hilfsmodus Barmherzigkeit", "Assist mode Mercy"])) + '">✚</span>' : "") + "</small>" : ""));
+      $("#area").classList.toggle("still", !an && !gv); $("#area").classList.toggle("varonly", !an && !!gv);
       $("#fps").textContent = Z.settings.fps ? (Z.fps || 0) + " fps" : "";
     }
     if (areaShow > 0) areaShow -= dt;

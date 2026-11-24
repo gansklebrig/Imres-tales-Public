@@ -58,10 +58,46 @@
       run._var = { id: k, area: id }; run._varN = (run._varN || 0) + 1; run._varLaden = true;
     }
   }
-  function varAnsage() {
+  /* Finstere Tiefe: Dunkel-Modus der Beleuchtung (bild.js: Z.darkness > 0, kleiner Lichtkreis; gegner.js: Gegner sehen schlechter).
+     Einsturzgefahr: in der Nähe der Figur bricht alle 6–10 s ein Brocken aus der Decke – 1,1 s vorher rieselt Staub, am Boden ein Schatten. */
+  let brocken = [], einsturzT = 5;
+  function varTick(dt) {
+    const v = Z.gebietVariante(), P = Z.player; if (!v || !P || !Z.level) { brocken.length = 0; return; }
+    if (v.id === "finster") Z.darkness = Math.max(Z.darkness || 0, 0.1);
+    if (v.id !== "einsturz" || P.dead) return;
+    const lv = Z.level, solid = (x, y) => { const g = lv.get(x, y); return g === 1 || g === 7; };
+    if ((einsturzT -= dt) <= 0 && !(Z.boss && !Z.bossDefeated) && !(Z.ui && Z.ui.modalOpen)) {
+      einsturzT = VARIANTEN.einsturz.takt[0] + Math.random() * (VARIANTEN.einsturz.takt[1] - VARIANTEN.einsturz.takt[0]);
+      const px = P.x + P.w / 2 + (Math.random() < 0.5 ? -1 : 1) * (30 + Math.random() * 110), tx = Math.floor(px / T), fy0 = Math.floor((P.y + P.h - 2) / T);
+      let cy = -1; for (let y = fy0; y > fy0 - 12 && y > 0; y--) if (solid(tx, y - 1) && !solid(tx, y)) { cy = y; break; }
+      if (cy > 0 && !solid(tx, cy)) { let fy = cy; while (fy < cy + 14 && !solid(tx, fy + 1) && lv.get(tx, fy + 1) !== 2) fy++;
+        if (fy - cy >= 3 && solid(tx, fy + 1)) brocken.push({ x: tx * T + 8, y0: cy * T, yF: (fy + 1) * T, y: cy * T, t: 0, vy: 0, fall: false }); }
+    }
+    for (let i = brocken.length - 1; i >= 0; i--) {
+      const b = brocken[i]; b.t += dt;
+      if (!b.fall) { if (Math.random() < dt * 18) FX.p({ x: b.x + (Math.random() - 0.5) * 12, y: b.y0 + 2, vx: 0, vy: 40 + Math.random() * 40, life: 0.8, size: 1.3, col: "#9a8a7a", kind: "smoke", g: 200 }); if (b.t >= VARIANTEN.einsturz.warn) { b.fall = true; A.play("rock", { vol: 0.5, rate: 0.8, x: b.x }); } continue; }
+      b.vy = Math.min(700, b.vy + 1600 * dt); b.y += b.vy * dt;
+      if (b.y + 10 >= b.yF) {
+        brocken.splice(i, 1); FX.addShake && FX.addShake(3); A.play("hitHeavy", { vol: 0.45, x: b.x });
+        FX.burst(b.x, b.yF - 4, 14, { col: [Z.tileCol || "#6a5a50", "#3a3030"], sp: 140, life: 0.6, size: 3, kind: "shard", g: 700 });
+        const r = { x: b.x - 14, y: b.yF - 30, w: 28, h: 30 };
+        if (!P.dead && U.overlap(r, P) && !(P.iframe > 0)) Z.hurtPlayer(Math.round(P.hpMax * VARIANTEN.einsturz.dmg), { x: b.x, kb: 120, hazard: true });
+        for (const e of Z.enemies) if (!e.dead && !e.def.boss && U.overlap(r, e)) Z.hitEnemy(e, Math.round(e.hpMax * 0.35), { src: "trap", kb: 100, kbUp: 120 });
+      }
+    }
+  }
+  Z.einsturzTest = () => { einsturzT = 0; };
+  function drawBrocken(c) {
+    for (const b of brocken) {
+      if (!b.fall) { const a = Math.min(1, b.t / VARIANTEN.einsturz.warn); c.fillStyle = "rgba(0,0,0," + (0.15 + 0.35 * a).toFixed(2) + ")"; c.beginPath(); c.ellipse(b.x, b.yF - 1, 6 + 8 * a, 2.2, 0, 0, 6.283); c.fill(); continue; }
+      c.fillStyle = "#5a4e48"; c.beginPath(); c.moveTo(b.x - 8, b.y); c.lineTo(b.x - 3, b.y - 9); c.lineTo(b.x + 7, b.y - 6); c.lineTo(b.x + 8, b.y + 4); c.lineTo(b.x - 2, b.y + 8); c.closePath(); c.fill();
+      c.fillStyle = "#7a6e66"; c.fillRect(b.x - 3, b.y - 5, 5, 3);
+    }
+  }
+  function varAnsage() { brocken.length = 0; einsturzT = 5;
     const run = Z.run; if (!run) return; run._varLaden = false;
     const v = Z.gebietVariante(); if (!v) return;
-    setTimeout(() => { if (Z.gebietVariante() && Z.ui && Z.ui.notify) Z.ui.notify(v.ico + " <b>" + esc(L(v.n)) + "</b><br><small>" + esc(L(v.d)) + "</small>", { prio: 1, art: "gefahr", dauer: 5200, key: "variante" }); }, 3400);
+    setTimeout(() => { if (Z.gebietVariante() && Z.ui && Z.ui.notify) Z.ui.notify('<span class="var-ico-m var-' + v.id + '">' + v.ico + "</span> <b>" + esc(L(v.n)) + "</b><br><small>" + esc(L(v.d)) + "</small>", { prio: 1, art: "gefahr", dauer: 5200, key: "variante" }); }, 3400);
   }
 
   /* ======================= HELDEN & UMHÄNGE ======================= */
