@@ -1,0 +1,3 @@
+(()=>{const R=__R.filter(a=>!a.err);const m=k=>(R.reduce((s,a)=>s+a[k],0)/R.length).toFixed(2);const by={};for(const a of R){const b=by[a.lay]||(by[a.lay]={n:0,dead:0,sum:0,loop:0,sumMain:0,ka3:0});b.n++;b.dead+=a.dead;b.sum+=a.sumDead;b.loop+=a.loop;b.sumMain+=a.sumMain;b.ka3+=a.ka3}
+for(const k in by){const b=by[k];for(const f of ['dead','sum','loop','sumMain','ka3'])b[f]=+(b[f]/b.n).toFixed(1)}
+return JSON.stringify({n:R.length,err:__R.length-R.length,dead:m('dead'),deadSeite:m('deadSeite'),leer:m('deadEmpty'),loop:m('loop'),sumDead:m('sumDead'),sumMain:m('sumMain'),maxDead:m('maxDead'),unreach:m('unreach'),schl:m('schl'),ka3:m('ka3'),L:m('L'),by})})()

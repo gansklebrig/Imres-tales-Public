@@ -25425,7 +25425,7 @@ P2.stat=p2Stat;
      Hauptweg mit Richtungspfeilen auf der Minikarte (unter dem Erkundungsnebel)
    Nur Laufzeit-Hüllen um die Generator-Funktionen aus „karte“; Zeichnung/HUD bleiben unberührt. Präfix ka2. */
 window.__hsKARTE2=1;
-const KA2={aus:0,pfad:1,form:1,start:0,pflege:1,inhalt:1,leit:1,weg:1,licht:1,mini:1,schleife:0.55,dichte:1.2,
+const KA2={aus:0,pfad:1,form:1,start:0,pflege:1,inhalt:1,leit:1,weg:1,licht:1,mini:1,schleife:0.85,dichte:1.2,
  st:{n:0,fuell:0,nische:0,zurueck:0,inh:0}};
 const ka2An=()=>!KA2.aus&&!window.__ka2Aus;
 
@@ -25551,6 +25551,39 @@ function ka2Pflege(K){const n=K.n,N=n*n,prot=new Uint8Array(N);K.kaNi=[];K.ka2fz
 {const kl0=kaLayout;kaLayout=function(S){const K=kl0.apply(this,arguments);if(!ka2An()||!K)return K;KA2.st.n++;
  try{const t0=K.tore.find(t=>t.main&&t.a===0);if(KA2.start||t0&&(t0.los==='schluessel'||t0.los==='lager'))ka2Start(K)}catch(er){console.error('ka2Start',er)}
  const t0=performance.now();try{if(KA2.pflege)ka2Pflege(K)}catch(er){console.error('ka2Pflege',er)}KA2.st.msP=(KA2.st.msP||0)+performance.now()-t0;return K}}
+
+/* ---------- 3b. Rundwege (Paket „rundweg“): tiefe Sackgassen bekommen einen Durchbruch – window.__hsKA3 ----------
+   Wunsch: durch die Welt streifen, ohne ständig umkehren zu müssen. Nach der Sackgassen-Pflege sucht ka3Rundwege dünne Massestreifen
+   (Wand, Fels, Dickicht; höchstens KA3.dick Zellen – auch ein kurzer Stollen/Hohlweg), auf deren beiden Seiten Boden desselben Abschnitts liegt (oder Seitenraum ↔ sein
+   Elternabschnitt), der zu Fuß aber weit auseinander ist (Wegunterschied vom Start ≥ KA3.min Zellen). Dort wird ein 3 Zellen breiter
+   Durchgang geöffnet: aus der Sackgasse wird ein Rundweg. Je Stufe höchstens KA3.max, mit Abstand zueinander.
+   Der Hauptweg Start → Ziel darf dadurch höchstens KA3.kurz Zellen kürzer werden (keine Abkürzung an den Kämpfen vorbei).
+   Nie über Abschnittsgrenzen hinweg (Tore, Schlüssel, Barrikaden bleiben Pflicht), nie an Toren, am Kampfplatz, in Arenen, am Wasser/Abgrund,
+   nicht bei Flucht-/Eskortestufen. Schalter: __hsKA3.KA3.an=0. Zähler: G.ka.ka3 (Durchbrüche dieser Stufe). */
+const KA3={an:1,max:4,dick:16,min:22,abstand:13,kurz:8,st:{n:0,auf:0,ms:0}};
+function ka3Rundwege(K){const n=K.n,N=n*n;K.ka3=0;if(!KA3.an||K.esc||K.flucht||!K.start)return 0;const prot=new Uint8Array(N);
+ const mark=(ci,cj,r)=>{for(let j=Math.floor(cj-r);j<=Math.ceil(cj+r);j++)for(let i=Math.floor(ci-r);i<=Math.ceil(ci+r);i++){if(i<0||j<0||i>=n||j>=n)continue;if((i-ci)**2+(j-cj)**2<=r*r)prot[j*n+i]=1}};
+ for(const t of K.tore){mark(t.pa.i,t.pa.j,5);mark(t.pb.i,t.pb.j,5)}if(K.kampf)mark(K.kampf.i,K.kampf.j,8);mark(K.start.i,K.start.j,4);
+ const okS=s=>{const S=K.sec[s];return !!S&&S.art!=='arena'};
+ const paar=(a,b)=>{const sa=K.sid[a],sb=K.sid[b];if(sa===255||sb===255||!okS(sa)||!okS(sb))return false;if(sa===sb)return true;const A=K.sec[sa],B=K.sec[sb];return !!((A.seite&&A.parent===sb)||(B.seite&&B.parent===sa))};
+ const orte=[];
+ /* Ziel des Hauptwegs: Kampfplatz, sonst die Mitte des letzten Hauptabschnitts */
+ let ziel=-1;if(K.kampf)ziel=K.kampf.j*n+K.kampf.i;if(ziel<0||K.M[ziel]){let ls=-1;K.sec.forEach((S,k)=>{if(S&&S.main)ls=k});let bd=1e9;if(ls>=0){const B=K.sec[ls].B,mi=(B[0]+B[2])/2,mj=(B[1]+B[3])/2;for(let c=0;c<N;c++){if(K.M[c]||K.lo[c]||K.sid[c]!==ls)continue;const q=Math.hypot(c%n-mi,((c/n)|0)-mj);if(q<bd){bd=q;ziel=c}}}}
+ for(let runde=0;runde<KA3.max;runde++){const d=kaFlut(K,[K.start.j*n+K.start.i],K.lo),dz=ziel>=0?kaFlut(K,[ziel],K.lo):null,Lh=dz?d[ziel]:-1;let best=null;
+  for(let j=4;j<n-4;j++)for(let i=4;i<n-4;i++){const a=j*n+i;if(K.M[a]||K.lo[a]||d[a]<0||prot[a])continue;
+   for(let ri_=0;ri_<2;ri_++){const st=ri_?n:1,qu=ri_?1:n;if(!K.M[a+st])continue;let L=0,c=a,ok=true;
+    for(;;){c+=st;const ci=c%n,cj=(c/n)|0;if(ci<4||cj<4||ci>=n-4||cj>=n-4||K.lo[c]||prot[c]){ok=false;break}if(!K.M[c])break;
+     /* echte Wand: auch die Nachbarn quer dazu sind Masse oder werden gleich mit geöffnet – kein Wasser/Abgrund daneben */if(K.lo[c+qu]||K.lo[c-qu]){ok=false;break}if(++L>KA3.dick){ok=false;break}}
+    if(!ok||L<1||d[c]<0)continue;const b=c;if(!paar(a,b))continue;const gew=Math.abs(d[a]-d[b])-L;if(gew<KA3.min)continue;
+    if(dz&&Lh>0&&dz[a]>=0&&dz[b]>=0&&Math.min(d[a]+L+dz[b],d[b]+L+dz[a])<Lh-KA3.kurz)continue;
+    if(orte.some(o=>Math.hypot(o[0]-i,o[1]-j)<KA3.abstand))continue;
+    /* beide Enden brauchen etwas Platz (keine Öffnung in eine 1 Zelle breite Ritze) */let fa=0,fb=0;for(let v=-1;v<=1;v++)for(let u=-1;u<=1;u++){if(!K.M[a+u+v*n]&&!K.lo[a+u+v*n])fa++;if(!K.M[b+u+v*n]&&!K.lo[b+u+v*n])fb++}if(fa<4||fb<4)continue;
+    const wert=gew-L*1.5+Math.random()*5;if(!best||wert>best.wert)best={a,b,st,qu,L,wert,i,j}}}
+  if(!best)break;const s=K.sid[best.a];for(let k=1;k<=best.L;k++){const c=best.a+k*best.st;for(let w=-1;w<=1;w++){const e=c+w*best.qu;if(K.lo[e]||prot[e])continue;if(K.M[e]){K.M[e]=0;K.sid[e]=s}}}
+  orte.push([best.i,best.j]);K.ka3++;KA3.st.auf++}
+ return K.ka3}
+{const kl3=kaLayout;kaLayout=function(S){const K=kl3.apply(this,arguments);if(!K||!K.M||!K.sec)return K;KA3.st.n++;const t0=performance.now();try{ka3Rundwege(K)}catch(er){console.error('ka3Rundwege',er)}KA3.st.ms+=performance.now()-t0;return K}}
+window.__hsKA3={KA3,ka3Rundwege};
 
 /* Gegnerzahl je Abschnitt nach der Fläche vor der Pflege (Leveltempo bleibt), höchstens KA2.dichte-fach dichter (1 = Gegner nach neuer Fläche, ca. 7 % weniger) */
 {const kbv0=kaBevoelkern;kaBevoelkern=function(S){const K=G.ka;if(!ka2An()||!K||!K.ka2fz0)return kbv0.apply(this,arguments);const sv=K.sec.map(s=>s.fz);
