@@ -414,6 +414,7 @@
   };
   const load0 = Z.loadArea;
   Z.loadArea = function () { fx = []; ghosts = []; souls = []; chain = { n: 0, t: 0 }; banner = null; lines = null; return load0.apply(this, arguments); };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "effekte", load: () => { fx = []; ghosts = []; souls = []; chain = { n: 0, t: 0 }; banner = null; lines = null; } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
 })();
 
 /* Ezekiel – The Destroyer · Kampf-Optik II (Grafik-Runde 11)
@@ -548,6 +549,7 @@
   });
   const load0 = Z.loadArea;
   Z.loadArea = function () { W.length = 0; pv.trail.length = 0; return load0.apply(this, arguments); };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "effekte2", load: () => { W.length = 0; pv.trail.length = 0; } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
 })();
 
 /* W11 R15: Auflage für Gittertore, Falltüren und Hebel (Code in tageszeit.js) – hier eingehängt, weil effekte.js nach
@@ -1056,4 +1058,94 @@
       }
     } catch (e) { console.error(e); }
   };
+})();
+
+/* Ezekiel – The Destroyer · Zerstörbare Wände und morsche Böden (W11 Runde 19)
+   Daten: welt.js lv.wuchtSet/lv.wucht (Wucht-Risse, Kachel 7) und lv.morsch [{x0,x1,y,broken}] (erkundung.js).
+   – Wucht-Wände: Aussehen im Kachelbild (bild.js wuchtWall: Putz, Rissnetz, Ausbruch, Bröckel); hier: in der Nähe
+     rieselt ab und zu Staub; bricht die Wand, fallen Brocken (drehen, springen, bleiben ~3 s liegen), Putzplatten und
+     eine Staubwolke.
+   – Morsche Böden: einzelne Bohlen mit Maserung, Nägeln, Rissen und herabhängenden Splittern; unter Ezekiel biegen sie
+     sich leicht durch. Brechen sie, fliegen die Bohlenstücke (drehend) in die Tiefe, an den Rändern bleiben gesplitterte
+     Stümpfe stehen.
+   Lean: nur die Bruchstücke (wenige), kein Rieseln/Durchbiegen. Schalter Z.gfx.off.bruch. */
+(function () {
+  const Z = window.Z, FX = Z.fx, G = Z.gfx, T = 16, TAU = Math.PI * 2;
+  const lean = () => !!(Z.gq && (Z.gq.lean || Z.gq.mini || Z.gq.level === 0));
+  const off = () => !!(G.off && G.off.bruch);
+  const solid = (x, y) => Z.world && Z.world.solidAt(x, y);
+  let lvRef = null, wt = [], mState = new Map(), D = [], lastT = 0;
+  const hash = (a, b) => { const v = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return v - Math.floor(v); };
+  function reset(lv) { lvRef = lv; D = []; mState = new Map(); wt = lv && lv.wuchtSet ? Array.from(lv.wuchtSet).filter(i => lv.get(i % lv.W, (i / lv.W) | 0) === 7) : []; }
+  function chunks(px, py, col, n) {
+    for (let i = 0; i < n; i++) D.push({ k: "brocken", x: px + Math.random() * T, y: py + Math.random() * T, vx: (Math.random() - 0.5) * 160, vy: -60 - Math.random() * 120, r: Math.random() * 6, vr: (Math.random() - 0.5) * 16, s: 2 + Math.random() * 3, col, t: 0, life: 3 + Math.random() });
+  }
+  function collapse(x, y) {
+    const px = x * T, py = y * T, lo = lean(), col = (Z.biome && Z.biome.wall) || "#4a4240";
+    chunks(px, py, col, lo ? 3 : 7);
+    if (!lo) {
+      FX.burst(px + 8, py + 8, 10, { col: [Z.dustCol || "#8a7a70", "#a89a8a"], sp: 70, life: 1.1, size: 5, kind: "smoke", g: -10, drag: 0.95 });
+      for (let i = 0; i < 4; i++) D.push({ k: "putz", x: px + Math.random() * T, y: py + Math.random() * 8, vx: (Math.random() - 0.5) * 60, vy: -20, r: 0, vr: (Math.random() - 0.5) * 10, s: 3 + Math.random() * 2, col: "#c8b8a0", t: 0, life: 2.5 });
+    }
+    if (D.length > 90) D.splice(0, D.length - 90);
+  }
+  function breakPlanks(m) {
+    const lo = lean();
+    for (let x = m.x0; x <= m.x1; x++) for (let k = 0; k < (lo ? 1 : 3); k++) D.push({ k: "bohle", x: x * T + 3 + k * 5, y: m.y * T + 3, vx: (Math.random() - 0.5) * 120, vy: -40 - Math.random() * 100, r: (Math.random() - 0.5) * 0.4, vr: (Math.random() - 0.5) * 14, s: 5 + Math.random() * 3, col: "#6a4a2c", t: 0, life: 3 });
+  }
+  function tick() {
+    const now = performance.now() / 1000, dt = Math.min(0.05, lastT ? now - lastT : 0.016); lastT = now;
+    const lv = Z.level; if (lv !== lvRef) reset(lv); if (!lv || Z.paused) return;
+    /* gebrochene Wucht-Kacheln */
+    for (let i = wt.length - 1; i >= 0; i--) { const idx = wt[i], x = idx % lv.W, y = (idx / lv.W) | 0; if (lv.get(x, y) !== 7) { wt.splice(i, 1); collapse(x, y); } }
+    /* gebrochene Bohlen */
+    for (const m of lv.morsch || []) { let s = mState.get(m); if (!s) { s = { broken: !!m.broken, seen: !!m.broken }; mState.set(m, s); } if (m.broken && !s.broken) { s.broken = true; breakPlanks(m); } }
+    for (let i = D.length - 1; i >= 0; i--) {
+      const o = D[i]; o.t += dt; if (o.t > o.life) { D.splice(i, 1); continue; }
+      if (o.rest) continue;
+      o.vy += (o.k === "putz" ? 260 : 640) * dt; if (o.k === "putz") o.vx *= 0.98; o.x += o.vx * dt; o.y += o.vy * dt; o.r += o.vr * dt;
+      if (solid(o.x, o.y + 1)) { o.y = Math.floor((o.y + 1) / T) * T - 1; if (o.vy > 120) { o.vy *= -0.3; o.vx *= 0.6; o.vr *= 0.5; } else { o.rest = 1; o.vx = o.vy = o.vr = 0; } }
+    }
+    /* Rieseln an Wucht-Wänden in Spielernähe */
+    if (!lean() && wt.length && Math.random() < 0.05) { const P = Z.player; if (P) { const idx = wt[(Math.random() * wt.length) | 0], x = idx % lv.W, y = (idx / lv.W) | 0; if (Math.abs(x * T - P.x) < 200 && Math.abs(y * T - P.y) < 150) FX.p({ x: x * T + Math.random() * T, y: y * T + Math.random() * 6, vx: 0, vy: 10, g: 140, life: 1, size: 0.9, col: Z.dustCol || "#8a7a70", kind: "dot" }); } }
+  }
+  function drawPlanks(c, m, t) {
+    const x = m.x0 * T, y = m.y * T, w = (m.x1 - m.x0 + 1) * T, P = Z.player, lo = lean();
+    if (m.broken) { /* gesplitterte Stümpfe an den Rändern */
+      for (const [sx, d] of [[x - 1, 1], [x + w + 1, -1]]) { c.fillStyle = "#5a3e26"; c.beginPath(); c.moveTo(sx, y); c.lineTo(sx + d * 6, y); c.lineTo(sx + d * 4, y + 3); c.lineTo(sx + d * 7, y + 5); c.lineTo(sx, y + 6); c.fill(); }
+      return;
+    }
+    const on = P && P.onGround && P.x + P.w > x && P.x < x + w && Math.abs(P.y + P.h - y) < 3;
+    const sag = !lo && on ? 1.6 + Math.sin(t * 9) * 0.3 : 0, px0 = P ? Math.max(x, Math.min(x + w, P.x + P.w / 2)) : x + w / 2;
+    const n = m.x1 - m.x0 + 1, bw = w / (n * 2);
+    for (let i = 0; i < n * 2; i++) {
+      const bx = x + i * bw, mid = bx + bw / 2, dd = 1 - Math.min(1, Math.abs(mid - px0) / (w * 0.6)), sy = y + sag * dd;
+      c.fillStyle = i % 2 ? "#5e4028" : "#664630"; c.fillRect(bx, sy, bw - 0.6, 6.5);
+      c.fillStyle = "#86603e"; c.fillRect(bx, sy, bw - 0.6, 1.2);
+      c.strokeStyle = "rgba(40,24,12,.55)"; c.lineWidth = 0.5; c.beginPath(); c.moveTo(bx + 1, sy + 3 + hash(i, m.x0) * 2); c.quadraticCurveTo(mid, sy + 2 + hash(m.y, i) * 3, bx + bw - 1.5, sy + 3.4); c.stroke();
+      c.fillStyle = "#3a3438"; c.fillRect(bx + 1, sy + 1.6, 0.9, 0.9); c.fillRect(bx + bw - 2.4, sy + 1.6, 0.9, 0.9);
+      if (hash(i * 3, m.y) < 0.4) { c.strokeStyle = "rgba(20,10,4,.9)"; c.lineWidth = 0.8; c.beginPath(); c.moveTo(mid - 1, sy); c.lineTo(mid + 1, sy + 3); c.lineTo(mid - 0.5, sy + 6.5); c.stroke(); }
+      if (!lo && hash(i, m.x1) < 0.35) { c.fillStyle = "#4a3220"; c.beginPath(); c.moveTo(mid - 1, sy + 6.5); c.lineTo(mid + 0.6, sy + 6.5); c.lineTo(mid - 0.2 + Math.sin(t * 2 + i) * 0.4, sy + 10 + hash(i, 7) * 3); c.fill(); }
+    }
+    c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(x, y + 6.5 + sag, w, 1);
+  }
+  function draw(c, t) {
+    const cam = Z.cam;
+    for (const m of Z.level.morsch || []) { const x = m.x0 * T, y = m.y * T; if (x > cam.x - 60 && x < cam.x + cam.w + 20 && y > cam.y - 30 && y < cam.y + cam.h + 30) drawPlanks(c, m, t); }
+    for (const o of D) {
+      if (o.x < cam.x - 30 || o.x > cam.x + cam.w + 30 || o.y < cam.y - 30 || o.y > cam.y + cam.h + 30) continue;
+      const a = Math.min(1, (o.life - o.t) / 0.8); c.save(); c.globalAlpha = a; c.translate(o.x, o.y); c.rotate(o.r);
+      if (o.k === "brocken") { c.fillStyle = o.col; c.beginPath(); c.moveTo(-o.s, o.s * 0.5); c.lineTo(-o.s * 0.4, -o.s); c.lineTo(o.s, -o.s * 0.3); c.lineTo(o.s * 0.6, o.s * 0.8); c.closePath(); c.fill(); c.fillStyle = "rgba(255,235,200,.18)"; c.fillRect(-o.s * 0.4, -o.s * 0.9, o.s, 0.7); }
+      else if (o.k === "putz") { c.fillStyle = o.col; c.fillRect(-o.s / 2, -o.s / 3, o.s, o.s * 0.6); }
+      else { c.fillStyle = o.col; c.fillRect(-o.s / 2, -1.5, o.s, 3); c.fillStyle = "#86603e"; c.fillRect(-o.s / 2, -1.5, o.s, 0.7); c.fillStyle = "#3a2416"; c.beginPath(); c.moveTo(o.s / 2, -1.5); c.lineTo(o.s / 2 + 2, 0); c.lineTo(o.s / 2, 1.5); c.fill(); }
+      c.restore();
+    }
+  }
+  const dp0 = Z.drawParcours;
+  Z.drawParcours = function (c, t) {
+    if (dp0) dp0.apply(this, arguments);
+    if (off()) return;
+    try { tick(); if (Z.level && ((Z.level.morsch && Z.level.morsch.length) || D.length)) draw(c, performance.now() / 1000); } catch (e) { console.error(e); }
+  };
+  Z.bruchDbg = () => ({ wucht: wt.length, teile: D.length, morsch: (Z.level && Z.level.morsch || []).length });
 })();

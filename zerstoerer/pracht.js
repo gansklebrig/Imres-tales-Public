@@ -157,6 +157,11 @@
       const x0 = 45, x1 = 95, top = 70 + R(1) * 60, broken = v < 0.5;
       g.fillRect(x0 - 16, H - 34, x1 - x0 + 32, 34); g.fillRect(x0 - 10, H - 46, x1 - x0 + 20, 13);
       g.fillRect(x0, top, x1 - x0, H - top - 40);
+      /* R19: Mauerwerk statt flacher Fläche – Lagen, Fugen, Verlauf (oben etwas heller, unten im Dunst) */
+      { const gr = g.createLinearGradient(0, top, 0, H); gr.addColorStop(0, "rgba(52,40,40,.3)"); gr.addColorStop(0.6, "rgba(30,22,24,.2)"); gr.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = gr; g.fillRect(x0, top, x1 - x0, H - top - 40);
+        for (let yy = top + 4, r = 0; yy < H - 46; yy += 16, r++) { g.fillStyle = "rgba(0,0,0,.55)"; g.fillRect(x0, yy, x1 - x0, 1.6); const off = r % 2 ? 12 : 26; g.fillRect(x0 + off, yy, 1.4, 16); g.fillRect(x0 + off + 25, yy, 1.4, 16);
+          g.fillStyle = "rgba(255,210,170,.05)"; g.fillRect(x0 + 2, yy + 2, x1 - x0 - 4, 1); }
+        g.fillStyle = "rgba(0,0,0,.35)"; g.fillRect(x1 - 12, top, 12, H - top - 40); g.fillStyle = col; }
       if (broken) { g.beginPath(); g.moveTo(x0, top + 2); for (let k = 0; k <= 6; k++) g.lineTo(x0 + (x1 - x0) * k / 6, top - 4 - R(k + 3) * 16); g.lineTo(x1, top + 2); g.fill(); }
       else { g.fillRect(x0 - 12, top - 18, x1 - x0 + 24, 12); g.fillRect(x0 - 6, top - 7, x1 - x0 + 12, 8); g.fillRect(x0 - 16, top - 24, x1 - x0 + 32, 7); }
       g.fillStyle = rim; g.fillRect(x0, top, 2.5, H - top - 46); g.fillRect(x0 - 16, H - 34, 2.5, 34); g.fillRect(x0 - 10, H - 46, x1 - x0 + 20, 1.5);
@@ -2878,7 +2883,15 @@
     const sw = Math.sin(t * 0.9 + i) * 3;
     switch (kind) {
       case "kette": { c.strokeStyle = "#0a0608"; c.lineWidth = 2.6; for (let y = -4, k = 0; y < h; y += 7, k++) { c.beginPath(); c.ellipse(x + sw * y / h, y, k % 2 ? 1.2 : 2.6, 3.6, 0, 0, TAU); c.stroke(); } c.fillStyle = "#0a0608"; c.beginPath(); c.arc(x + sw, h + 4, 5, 0, Math.PI); c.fill(); break; }
-      case "banner": { c.fillStyle = "#0a0608"; c.fillRect(x - 22, 0, 44, 3); c.beginPath(); c.moveTo(x - 16, 3); c.lineTo(x + 16, 3); c.lineTo(x + 16 + sw * 0.4, h); c.lineTo(x + sw * 0.5, h - 12); c.lineTo(x - 16 + sw * 0.4, h); c.fill(); c.fillStyle = "rgba(120,30,30,.35)"; c.fillRect(x - 12, 8, 24, h * 0.5); break; }
+      case "banner": { /* R19: Stoffbahn mit Falten, Borte und gesticktem Zeichen statt flacher roter Fläche */
+        c.fillStyle = "#0a0608"; c.fillRect(x - 22, 0, 44, 3); c.beginPath(); c.arc(x - 22, 1.5, 2.5, 0, TAU); c.arc(x + 22, 1.5, 2.5, 0, TAU); c.fill();
+        c.save(); c.beginPath(); c.moveTo(x - 16, 3); c.lineTo(x + 16, 3); c.lineTo(x + 16 + sw * 0.4, h); c.lineTo(x + sw * 0.5, h - 12); c.lineTo(x - 16 + sw * 0.4, h); c.closePath();
+        c.fillStyle = "#1c0a0c"; c.fill(); c.clip();
+        for (let k = 0; k < 4; k++) { const fx = x - 16 + k * 8 + sw * 0.2; c.fillStyle = k % 2 ? "rgba(70,18,22,.55)" : "rgba(8,4,6,.55)"; c.fillRect(fx, 3, 4, h); }
+        c.strokeStyle = "rgba(150,110,50,.45)"; c.lineWidth = 1.2; c.strokeRect(x - 13 + sw * 0.15, 6, 26, h - 22);
+        const ey = 6 + (h - 22) * 0.42; c.strokeStyle = "rgba(170,130,60,.5)"; c.lineWidth = 1.4; c.beginPath(); c.arc(x + sw * 0.25, ey, 6, 0, TAU); c.stroke();
+        for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; c.beginPath(); c.moveTo(x + sw * 0.25 + Math.cos(a) * 7.5, ey + Math.sin(a) * 7.5); c.lineTo(x + sw * 0.25 + Math.cos(a) * 10, ey + Math.sin(a) * 10); c.stroke(); }
+        c.restore(); break; }
       case "vorhang": { c.fillStyle = "#0a0608"; c.beginPath(); c.moveTo(x - 40, 0); c.lineTo(x + 40, 0); c.quadraticCurveTo(x + 10, h * 0.5, x + 30 + sw, h); c.quadraticCurveTo(x - 10, h * 0.6, x - 40, h * 0.3); c.fill(); break; }
       case "netz": { c.strokeStyle = "rgba(14,10,12,.85)"; c.lineWidth = 0.8; const R = h * 0.9; for (let k = 0; k < 6; k++) { const a = k / 5 * Math.PI / 2; c.beginPath(); c.moveTo(x, 0); c.lineTo(x + Math.cos(a) * R, Math.sin(a) * R); c.stroke(); } for (let j = 1; j < 5; j++) { c.beginPath(); for (let k = 0; k < 6; k++) { const a = k / 5 * Math.PI / 2, rr = R * j / 5 + sw * 0.3; k ? c.lineTo(x + Math.cos(a) * rr, Math.sin(a) * rr) : c.moveTo(x + Math.cos(a) * rr, Math.sin(a) * rr); } c.stroke(); } break; }
       case "wurzel": { c.strokeStyle = "#0a0608"; for (let k = 0; k < 4; k++) { c.lineWidth = 5 - k; c.beginPath(); c.moveTo(x + k * 8 - 12, 0); c.bezierCurveTo(x + k * 6 - 20, h * 0.4, x + k * 10 + sw, h * 0.6, x + k * 4 - 6 + sw, h * (0.6 + hash(i + k) * 0.4)); c.stroke(); } break; }
@@ -2901,7 +2914,7 @@
       if (hash(i * 7 + (lv.seed || 0)) > 0.45) continue;
       const kind = set[(hash(i * 3 + 1) * set.length) | 0], x = i * step - sx + hash(i) * 200, h = maxH * (0.55 + hash(i + 9) * 0.45);
       /* nur wenn oben im Bild auch Decke/Wand ist (unter freiem Himmel hängt nichts) */
-      const wx = cam.x + x, wy = cam.y + 8; if (G.isOpen && G.isOpen(Math.floor(wx / 16), Math.floor(wy / 16)) && !(kind === "banner")) continue;
+      const wx = cam.x + x, wy = cam.y + 8; if (G.isOpen && G.isOpen(Math.floor(wx / 16), Math.floor(wy / 16))) continue; /* R19: auch Banner nicht frei im Himmel */
       const a = G.fgAlpha ? G.fgAlpha("vg" + i, x - 50, -10, 100, h + 20, 0.9) : 0.9; if (a < 0.02) continue;
       c.globalAlpha = a; try { item(c, kind, x, h, t, i, cam.h); } catch (e) { }
     }

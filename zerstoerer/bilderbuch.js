@@ -1526,6 +1526,16 @@
       const { c, R, pal } = o; const rock = pal.rock, st = pal.stone;
       body(o, 0, 0, PW, H, o.hz(rock, 0.55), 0.1); rockTex(o, 0, 0, PW, H, o.hz(rock, 0.55), 900);
       const glowBand = c.createLinearGradient(0, 120, 0, H); glowBand.addColorStop(0, "rgba(255,90,20,0)"); glowBand.addColorStop(1, "rgba(255,90,20,.25)"); c.fillStyle = glowBand; c.fillRect(0, 120, PW, H - 120);
+      /* R19: obere Höhle nicht mehr flach – Gesteinsbänke mit Glutkanten, Magmaadern, große Tropfsteine, Hängestege */
+      for (let b = 0; b < 4; b++) { const by = 18 + b * 26 + R() * 8; c.fillStyle = o.hz(rock, 0.42 - b * 0.03); c.beginPath(); c.moveTo(0, by);
+        for (let x = 0; x <= PW; x += 24) c.lineTo(x, by + Math.sin(x * 0.013 + b) * 5 + (R() - 0.5) * 4); c.lineTo(PW, by + 9); for (let x = PW; x >= 0; x -= 24) c.lineTo(x, by + 9 + Math.sin(x * 0.02 + b * 2) * 3); c.closePath(); c.fill();
+        c.strokeStyle = "rgba(255,140,60,.18)"; c.lineWidth = 0.8; c.beginPath(); c.moveTo(0, by); for (let x = 0; x <= PW; x += 24) c.lineTo(x, by + Math.sin(x * 0.013 + b) * 5); c.stroke(); }
+      for (let v = 0; v < 9; v++) { let x = R() * PW, y = 4 + R() * 40; c.strokeStyle = "rgba(255,110,30,.35)"; c.lineWidth = 1.1; c.beginPath(); c.moveTo(x, y);
+        for (let k = 0; k < 7; k++) { x += (R() - 0.5) * 22; y += 6 + R() * 10; c.lineTo(x, y); } c.stroke(); c.strokeStyle = "rgba(255,200,120,.25)"; c.lineWidth = 0.4; c.stroke(); }
+      for (let i = 0; i < 14; i++) { const x = R() * PW, w = 10 + R() * 18, h = 30 + R() * 70; c.fillStyle = o.hz(rock, 0.3); c.beginPath(); c.moveTo(x - w / 2, 0); c.quadraticCurveTo(x - w * 0.2, h * 0.6, x, h); c.quadraticCurveTo(x + w * 0.2, h * 0.6, x + w / 2, 0); c.fill(); c.fillStyle = "rgba(255,120,50,.14)"; c.fillRect(x - 0.6, h * 0.3, 1.2, h * 0.6); }
+      for (let i = 0; i < 4; i++) { const x0 = R() * PW, x1 = x0 + 120 + R() * 160, y = 60 + R() * 40; c.strokeStyle = o.hz(st, 0.35); c.lineWidth = 2; c.beginPath(); c.moveTo(x0, y); c.quadraticCurveTo((x0 + x1) / 2, y + 16, x1, y); c.stroke();
+        c.lineWidth = 0.8; c.beginPath(); for (let k = 0; k <= 8; k++) { const u = k / 8, xx = x0 + (x1 - x0) * u, yy = y + 4 * 16 * u * (1 - u); c.moveTo(xx, yy); c.lineTo(xx, yy - 6); } c.stroke();
+        if (R() < 0.6) { c.fillStyle = "rgba(255,170,80,.6)"; c.fillRect((x0 + x1) / 2 - 1, y + 10, 2, 2); } }
       /* ferne Stadtterrassen an der Höhlenwand */
       for (let t = 0; t < 4; t++) { const base = 150 + t * 36, f = 0.62 - t * 0.06; for (let x = R() * 10; x < PW; x += 8 + R() * 6) { const w = 6 + R() * 6, h = 6 + R() * 12, col = o.hz(st, f); c.fillStyle = col; c.fillRect(x, base - h, w, h + 36); if (R() < 0.5) { c.fillStyle = "#ffa040"; c.globalAlpha = 0.7; c.fillRect(x + w / 2 - 0.6, base - h + 2, 1.2, 1.4); c.globalAlpha = 1; } } }
       mist(o, 120, 140, "#5a2a10", 0.4);
