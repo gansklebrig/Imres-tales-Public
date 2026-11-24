@@ -1524,7 +1524,7 @@
    Dezent, aber erkennbar – nur solange die Kammer unentdeckt ist:
    – abweichende Steinfarbe: die Rissfläche ist eine Spur heller/fahler (neuer vermauert), Fugen dunkler und ungleichmäßig;
    – offene Fuge: dort, wo die Fläche an Luft grenzt, eine dunkle Schattenfuge, die sacht „atmet“ (Luftzug);
-   – ein kleines Spinnennetz in einer Ecke der Fläche (nicht bei jeder, ≈ jede zweite).
+   – (R34: Spinnennetz entfernt – an der Rissfläche zieht Luft.)
    Kein Blau; auch lean (gehört zum Spiel), dort ohne Netz. Schalter Z.gfx.off.geheimhinweis. */
 (function () {
   const Z = window.Z, G = Z.gfx, T = 16; if (!G) return;
@@ -1541,7 +1541,7 @@
         for (const f of r.faces) {
           const px = f.x * T, py = f.y * T; if (px < cam.x - T || px > cam.x + cam.w + T || py < cam.y - T || py > cam.y + cam.h + T) continue;
           /* fahlerer Stein, ungleichmäßige Fugen */
-          c.fillStyle = "rgba(232,218,196,.075)"; c.fillRect(px, py, T, T);
+          c.fillStyle = "rgba(238,206,160,.085)"; c.fillRect(px, py, T, T); /* R34: wärmer/trockener (Karten-Agent) */
           c.fillStyle = "rgba(20,14,12,.28)"; const my = py + 6 + ((hh(f.x, f.y, 1) * 4) | 0); c.fillRect(px, my, T, 1); c.fillRect(px + 4 + ((hh(f.x, f.y, 2) * 8) | 0), py, 1, my - py); c.fillRect(px + 2 + ((hh(f.x, f.y, 3) * 10) | 0), my + 1, 1, py + T - my - 1);
           /* atmende Schattenfuge zur Luftseite */
           const a = 0.32 + 0.14 * Math.sin(tt * 1.7 + f.x * 0.9 + f.y * 0.7);
@@ -1549,16 +1549,7 @@
           if (f.dx > 0) c.fillRect(px + T - 1.5, py + 1, 1.5, T - 2); else if (f.dx < 0) c.fillRect(px, py + 1, 1.5, T - 2);
           else if (f.dy > 0) c.fillRect(px + 1, py + T - 1.5, T - 2, 1.5); else if (f.dy < 0) c.fillRect(px + 1, py, T - 2, 1.5);
         }
-        /* Spinnennetz an einer Ecke (eine Fläche je Kammer) */
-        if (!lo && r.faces.length && hh(r.faces[0].x, r.faces[0].y, 9) < 0.55) {
-          const f = r.faces[0], ox = f.dx < 0 ? f.x * T : f.x * T + T, oy = f.y * T, sx = f.dx < 0 ? 1 : -1;
-          if (!(ox < cam.x - 20 || ox > cam.x + cam.w + 20)) {
-            c.strokeStyle = "rgba(225,215,200,.28)"; c.lineWidth = 0.5; c.beginPath();
-            for (let k = 0; k <= 4; k++) { const ang = k / 4 * Math.PI / 2; c.moveTo(ox, oy); c.lineTo(ox + sx * Math.cos(ang) * 9, oy + Math.sin(ang) * 9); }
-            for (const rr of [3.5, 6.5]) { c.moveTo(ox + sx * rr, oy); for (let k = 1; k <= 4; k++) { const ang = k / 4 * Math.PI / 2; c.lineTo(ox + sx * Math.cos(ang) * rr, oy + Math.sin(ang) * rr); } }
-            c.stroke();
-          }
-        }
+        /* R34: kein Spinnennetz an der Rissfläche – dort zieht Luft (Wunsch Karten-Agent) */
       }
     } catch (e) { console.error(e); }
   };

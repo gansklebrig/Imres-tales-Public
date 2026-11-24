@@ -416,14 +416,15 @@
     const A = lv.arena && Z.ARENAS ? Z.ARENAS[lv.arena] : null;
     const mode = lv.hub ? (G.off && G.off.lagerhimmel ? null : "hub") : A ? (A.kind === "lakeboss" || (G.off && G.off.arenahimmel) ? null : "arena") : (B.open || lv.out) && B.sky && !(G.off && G.off.fensterhimmel) ? "sky" : null;
     if (!mode) return null;
-    const LWp = lv.W * T, LHp = lv.H * T, k = Math.min(0.5, 2400 / LWp, 900 / LHp), key = mode + "|" + lv.W + "x" + lv.H + "|" + (B.name ? B.name[0] : "") + "|" + (lv.arena || "");
+    const LWp = lv.W * T, LHp = lv.H * T, k = mode === "sky" ? Math.min(0.25, 1200 / LWp, 450 / LHp) : Math.min(0.5, 2400 / LWp, 900 / LHp), /* R34: Himmelsverlauf ist weich – Viertelauflösung reicht (Backzeit/Speicher großer offener Gebiete) */ key = mode + "|" + lv.W + "x" + lv.H + "|" + (B.name ? B.name[0] : "") + "|" + (lv.arena || "");
     if (G.lvBack && G.lvBack.key === key && G.lvBack.lvRef === lv) return G.lvBack;
     const t = document.createElement("canvas"); t.width = Math.max(32, Math.ceil(LWp * k)); t.height = Math.max(24, Math.ceil(LHp * k));
     const tc = t.getContext("2d"), cam = Z.cam;
-    try { if (mode === "hub") hubBack(tc, cam); else if (mode === "arena") arenaBack(tc, cam); else skyBack(tc, cam); } catch (e) { console.error(e); return null; }
+    G._bakeLv = true; try { if (mode === "hub") hubBack(tc, cam); else if (mode === "arena") arenaBack(tc, cam); else skyBack(tc, cam); } catch (e) { console.error(e); G._bakeLv = false; return null; } G._bakeLv = false;
     G.hubBack = G.arenaBack = G.skyBack = null; /* nur die Weltfassung behalten */
     t.key = key; t.lvRef = lv; t.k = k; G.lvBack = t; return t;
   }
+  G._lvBackFor = lvBackFor; /* Prüfhilfe (weltbild.py) */
   /* W11 R32: offene Gebiete auf Stufe 0 (Fensterbögen, Lücken): statt flacher Wandfarbe der Himmelsverlauf des Gebiets
      mit ein paar Sternen, einmal gebacken (1:1-Kopie wie oben). Schalter Z.gfx.off.fensterhimmel. */
   function skyBack(c, cam) {
@@ -432,7 +433,7 @@
     if (!hb || hb.key !== key) {
       hb = G.skyBack = document.createElement("canvas"); hb.width = w; hb.height = h; hb.key = key; const g = hb.getContext("2d"), R = Z.Rng(4242);
       const sk = g.createLinearGradient(0, 0, 0, h); sk.addColorStop(0, B.sky[0]); sk.addColorStop(0.6, B.sky[1]); sk.addColorStop(1, B.sky[2]); g.fillStyle = sk; g.fillRect(0, 0, w, h);
-      for (let i = 0; i < 40; i++) { g.fillStyle = "rgba(255,240,225," + (0.15 + R() * 0.35).toFixed(2) + ")"; g.fillRect(R() * w, R() * h * 0.6, 1, 1); }
+      if (!G._bakeLv) for (let i = 0; i < 40; i++) { g.fillStyle = "rgba(255,240,225," + (0.15 + R() * 0.35).toFixed(2) + ")"; g.fillRect(R() * w, R() * h * 0.6, 1, 1); } /* im Weltbild (Viertelauflösung) keine Sterne – sie würden zu groß */
     }
     c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = 1; c.globalCompositeOperation = "copy"; c.drawImage(hb, 0, 0); c.restore();
   }

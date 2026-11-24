@@ -529,14 +529,42 @@
     }
   }
   function drawHints(c, t, vis) {
+    /* Zeichnung W11 R34 (Grafik-Agent): Kreidekreuz als zwei raue Kreidestriche mit Abrieb, Ratte mit Fell-Verlauf,
+       Ohr, Auge, Schnurrhaaren, trippelnden Beinen und geschwungenem Schwanz. Logik unverändert. */
     for (const h of S.hints) {
       if (offen(h)) continue;
-      if (h.mark && vis(h.mark.x * T, h.mark.y * T)) { const x = h.mark.x * T + 8 + h.mark.dx * 6, y = h.mark.y * T + 8; c.strokeStyle = "rgba(230,222,205,.45)"; c.lineWidth = 1; c.beginPath(); c.moveTo(x - 3, y - 3); c.lineTo(x + 3, y + 3); c.moveTo(x + 3, y - 3); c.lineTo(x - 3, y + 3); c.stroke(); }
+      if (h.mark && vis(h.mark.x * T, h.mark.y * T)) {
+        const x = h.mark.x * T + 8 + h.mark.dx * 6, y = h.mark.y * T + 8, sd = (h.mark.x * 7 + h.mark.y * 13) % 5;
+        c.save(); c.lineCap = "round";
+        /* Abrieb: weicher, heller Schleier */
+        c.fillStyle = "rgba(235,228,212,.08)"; c.beginPath(); c.ellipse(x, y, 5, 4.4, 0.3, 0, 6.283); c.fill();
+        for (const [ax, ay, bx, by] of [[-3.4, -3.6, 3.2, 3.4], [3.4, -3.2, -3.0, 3.6]]) {
+          c.strokeStyle = "rgba(238,232,218,.55)"; c.lineWidth = 1.1; c.beginPath(); c.moveTo(x + ax, y + ay); c.quadraticCurveTo(x + (ax + bx) / 2 + 0.4, y + (ay + by) / 2 - 0.3, x + bx, y + by); c.stroke();
+          /* raue Kreidekörner entlang des Strichs */
+          c.fillStyle = "rgba(245,240,228,.5)"; for (let k = 0; k < 5; k++) { const u = (k + 0.5) / 5, jx = ((k * 37 + sd * 11) % 7 - 3) * 0.15, jy = ((k * 53 + sd * 5) % 7 - 3) * 0.15; c.fillRect(x + ax + (bx - ax) * u + jx - 0.35, y + ay + (by - ay) * u + jy - 0.35, 0.7, 0.7); }
+        }
+        c.restore();
+      }
       const r = h.ratLive; if (!r) continue;
-      const x = r.x, y = h.rat.y, s = h.rat.dir, wob = Math.sin(r.t * 40) * 0.6;
-      c.fillStyle = "#3a302a"; c.beginPath(); c.ellipse(x, y - 2.6 + wob * 0.3, 3.6, 2.2, 0, 0, 6.283); c.fill();
-      c.beginPath(); c.ellipse(x + s * 3.4, y - 3, 1.8, 1.4, 0, 0, 6.283); c.fill();
-      c.strokeStyle = "#4a3a30"; c.lineWidth = 0.7; c.beginPath(); c.moveTo(x - s * 3.4, y - 2.4); c.quadraticCurveTo(x - s * 6, y - 1 + wob, x - s * 8, y - 3); c.stroke();
+      const x = r.x, y = h.rat.y, s = h.rat.dir, run = r.t * 38, wob = Math.sin(run) * 0.5;
+      c.save();
+      /* Schatten */
+      c.fillStyle = "rgba(0,0,0,.25)"; c.beginPath(); c.ellipse(x, y - 0.2, 4.2, 0.9, 0, 0, 6.283); c.fill();
+      /* Schwanz */
+      c.strokeStyle = "#7a5a50"; c.lineWidth = 0.8; c.lineCap = "round"; c.beginPath(); c.moveTo(x - s * 3.4, y - 2.2); c.bezierCurveTo(x - s * 6, y - 0.6 + wob, x - s * 7.5, y - 3.5 - wob, x - s * 10, y - 2.4); c.stroke();
+      /* Beine (trippeln) */
+      c.strokeStyle = "#2a201c"; c.lineWidth = 0.7; for (const [bx, ph] of [[-2, 0], [2, Math.PI]]) { const k = Math.sin(run + ph) * 1.1; c.beginPath(); c.moveTo(x + s * bx, y - 1.4); c.lineTo(x + s * (bx + k), y); c.stroke(); }
+      /* Körper mit Fell-Verlauf */
+      const g = c.createLinearGradient(0, y - 5, 0, y - 0.5); g.addColorStop(0, "#7a6658"); g.addColorStop(1, "#3a2e28"); c.fillStyle = g;
+      c.beginPath(); c.ellipse(x, y - 2.6 + wob * 0.3, 3.8, 2.3, s * -0.08, 0, 6.283); c.fill();
+      /* Kopf, spitze Schnauze */
+      c.beginPath(); c.moveTo(x + s * 2.4, y - 4.2); c.quadraticCurveTo(x + s * 5.2, y - 3.6, x + s * 6.2, y - 2.2); c.quadraticCurveTo(x + s * 4.2, y - 1.2, x + s * 2.4, y - 1.4); c.closePath(); c.fill();
+      c.fillStyle = "#c08a80"; c.beginPath(); c.arc(x + s * 6.1, y - 2.3, 0.45, 0, 6.283); c.fill(); /* Nase */
+      c.fillStyle = "#6a5048"; c.beginPath(); c.ellipse(x + s * 3.2, y - 4.4, 1, 1.2, 0, 0, 6.283); c.fill(); c.fillStyle = "#a07868"; c.beginPath(); c.ellipse(x + s * 3.2, y - 4.4, 0.5, 0.7, 0, 0, 6.283); c.fill(); /* Ohr */
+      c.fillStyle = "#e8d0a0"; c.fillRect(x + s * 4.4 - 0.4, y - 3.4, 0.8, 0.8); /* Auge mit Glanz */
+      c.strokeStyle = "rgba(220,210,190,.45)"; c.lineWidth = 0.3; c.beginPath(); c.moveTo(x + s * 5.6, y - 2.4); c.lineTo(x + s * 7.4, y - 3.1); c.moveTo(x + s * 5.6, y - 2.2); c.lineTo(x + s * 7.4, y - 1.9); c.stroke(); /* Schnurrhaare */
+      c.strokeStyle = "rgba(255,236,210,.35)"; c.lineWidth = 0.6; c.beginPath(); c.ellipse(x, y - 2.6 + wob * 0.3, 3.8, 2.3, s * -0.08, Math.PI * 1.15, Math.PI * 1.85); c.stroke(); /* Randlicht oben, damit sie vor dunklen Wänden lesbar bleibt */
+      c.restore();
     }
   }
   /* hohler Klang: Treffer auf feste Wand nahe einem unentdeckten Riss */
