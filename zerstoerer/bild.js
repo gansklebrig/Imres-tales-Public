@@ -405,6 +405,59 @@
     c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = 1; c.globalCompositeOperation = "copy"; c.drawImage(hb, 0, 0); c.restore();
   }
 
+  /* W11 R32: offene Gebiete auf Stufe 0 (Fensterbögen, Lücken): statt flacher Wandfarbe der Himmelsverlauf des Gebiets
+     mit ein paar Sternen, einmal gebacken (1:1-Kopie wie oben). Schalter Z.gfx.off.fensterhimmel. */
+  function skyBack(c, cam) {
+    const w = c.canvas.width, h = c.canvas.height, key = (B.name ? B.name[0] : "") + w + "x" + h;
+    let hb = G.skyBack;
+    if (!hb || hb.key !== key) {
+      hb = G.skyBack = document.createElement("canvas"); hb.width = w; hb.height = h; hb.key = key; const g = hb.getContext("2d"), R = Z.Rng(4242);
+      const sk = g.createLinearGradient(0, 0, 0, h); sk.addColorStop(0, B.sky[0]); sk.addColorStop(0.6, B.sky[1]); sk.addColorStop(1, B.sky[2]); g.fillStyle = sk; g.fillRect(0, 0, w, h);
+      for (let i = 0; i < 40; i++) { g.fillStyle = "rgba(255,240,225," + (0.15 + R() * 0.35).toFixed(2) + ")"; g.fillRect(R() * w, R() * h * 0.6, 1, 1); }
+    }
+    c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = 1; c.globalCompositeOperation = "copy"; c.drawImage(hb, 0, 0); c.restore();
+  }
+  /* W11 R32: Boss-Arenen auf Stufe 0 (ohne Parallaxe) – wie das Lager ein einmal gebackenes Bild in Leinwandgröße,
+     je Arena-Art: Turm (Abendhimmel, Berge, ferne Türme), Steg (Dämmerung, grünes Meer, Leuchtturm, Masten),
+     Hort (Höhle, Tropfsteine, glimmende Goldberge), sonst Höhle mit fernem Glimmen. 1:1-Kopie statt Wandfüllung.
+     Schalter Z.gfx.off.arenahimmel. Kein Blau. */
+  function arenaBack(c, cam) {
+    const w = c.canvas.width, h = c.canvas.height, A = Z.ARENAS && Z.ARENAS[lv.arena], kind = A ? A.kind : "", key = kind + w + "x" + h;
+    let hb = G.arenaBack;
+    if (!hb || hb.key !== key) {
+      hb = G.arenaBack = document.createElement("canvas"); hb.width = w; hb.height = h; hb.key = key; const g = hb.getContext("2d"), R = Z.Rng(9311 + kind.length * 31);
+      const grad = (cols) => { const sk = g.createLinearGradient(0, 0, 0, h); cols.forEach((cc, i) => sk.addColorStop(i / (cols.length - 1), cc)); g.fillStyle = sk; g.fillRect(0, 0, w, h); };
+      const ridge = (yb, amp, col, f, seed) => { g.fillStyle = col; g.beginPath(); g.moveTo(0, h); for (let x = 0; x <= w; x += 4) g.lineTo(x, yb - Math.abs(Math.sin(x * f + seed)) * amp - Math.sin(x * f * 2.7 + seed) * amp * 0.25); g.lineTo(w, h); g.fill(); };
+      const glowAt = (x, y, r, col) => { const gg = g.createRadialGradient(x, y, 0, x, y, r); gg.addColorStop(0, col); gg.addColorStop(1, col.replace(/[\d.]+\)$/, "0)")); g.fillStyle = gg; g.fillRect(x - r, y - r, r * 2, r * 2); };
+      if (kind === "tower" || kind === "towertop") {
+        grad(["#24142a", "#4a2236", "#7a3a3e", "#3a1e24"]);
+        for (let i = 0; i < 30; i++) { g.fillStyle = "rgba(255,235,220," + (0.2 + R() * 0.5).toFixed(2) + ")"; g.fillRect(R() * w, R() * h * 0.35, 1, 1); }
+        g.fillStyle = "#e8d8d0"; g.beginPath(); g.arc(w * 0.3, h * 0.16, h * 0.04, 0, TAU); g.fill(); g.fillStyle = "#4a2236"; g.beginPath(); g.arc(w * 0.3 + h * 0.018, h * 0.15, h * 0.036, 0, TAU); g.fill();
+        ridge(h * 0.62, h * 0.18, "#3a1c2a", 0.006, 1.2); ridge(h * 0.7, h * 0.1, "#2a1420", 0.011, 2.9);
+        g.fillStyle = "#1e1018"; for (const [fx, th] of [[0.12, 0.2], [0.55, 0.28], [0.82, 0.22]]) { const x = w * fx, tw = w * 0.02; g.fillRect(x - tw / 2, h * 0.72 - h * th, tw, h * th); g.fillRect(x - tw * 0.8, h * 0.72 - h * th - 4, tw * 1.6, 4); for (let k = -1; k <= 1; k++) g.fillRect(x + k * tw * 0.55 - 1.5, h * 0.72 - h * th - 8, 3, 4); g.fillStyle = "rgba(255,180,100,.6)"; g.fillRect(x - 1, h * 0.72 - h * th * 0.7, 2, 3); g.fillStyle = "#1e1018"; }
+      } else if (kind === "pier") {
+        grad(["#2a1630", "#5a2a40", "#8a4a48", "#4a2a30"]);
+        g.fillStyle = "#1e3a34"; g.fillRect(0, h * 0.66, w, h * 0.34);
+        const sg = g.createLinearGradient(0, h * 0.66, 0, h); sg.addColorStop(0, "rgba(140,90,80,.35)"); sg.addColorStop(0.4, "rgba(30,58,52,0)"); g.fillStyle = sg; g.fillRect(0, h * 0.66, w, h * 0.34);
+        g.fillStyle = "rgba(220,190,170,.18)"; for (let i = 0; i < 40; i++) g.fillRect(R() * w, h * 0.68 + R() * h * 0.28, 4 + R() * 10, 1);
+        const lx = w * 0.78; g.fillStyle = "#1e1218"; g.beginPath(); g.moveTo(lx - w * 0.018, h * 0.66); g.lineTo(lx - w * 0.01, h * 0.38); g.lineTo(lx + w * 0.01, h * 0.38); g.lineTo(lx + w * 0.018, h * 0.66); g.fill(); g.fillRect(lx - w * 0.014, h * 0.35, w * 0.028, h * 0.03);
+        glowAt(lx, h * 0.365, h * 0.1, "rgba(255,210,140,.45)"); g.fillStyle = "#ffe0a0"; g.fillRect(lx - 2, h * 0.355, 4, 3);
+        g.strokeStyle = "#1e1218"; g.lineWidth = 2; for (const mx of [0.2, 0.26, 0.45]) { g.beginPath(); g.moveTo(w * mx, h * 0.66); g.lineTo(w * mx, h * 0.42); g.stroke(); g.lineWidth = 1; g.beginPath(); g.moveTo(w * mx - 10, h * 0.48); g.lineTo(w * mx + 10, h * 0.48); g.stroke(); g.lineWidth = 2; }
+      } else if (kind === "hoard") {
+        grad(["#140c0a", "#2a1810", "#3a2214", "#1e120c"]);
+        g.fillStyle = "#0e0806"; for (let x = 0; x < w; x += 10 + R() * 18) { const l = h * (0.05 + R() * 0.16); g.beginPath(); g.moveTo(x - 6, 0); g.lineTo(x, l); g.lineTo(x + 6, 0); g.fill(); }
+        for (const [fx, fw, fh] of [[0.25, 0.3, 0.22], [0.7, 0.36, 0.28], [0.5, 0.22, 0.14]]) { const cx = w * fx, by = h * 0.74; glowAt(cx, by - h * fh * 0.4, w * fw * 0.6, "rgba(255,170,60,.1)"); const gg = g.createLinearGradient(0, by - h * fh, 0, by); gg.addColorStop(0, "#8a6424"); gg.addColorStop(1, "#3a2610"); /* gedämpft: Hintergrund darf nicht mit Gold-Beute verwechselt werden */ g.fillStyle = gg; g.beginPath(); g.moveTo(cx - w * fw / 2, by); g.quadraticCurveTo(cx, by - h * fh * 2, cx + w * fw / 2, by); g.fill();
+          for (let i = 0; i < 14; i++) { g.fillStyle = "rgba(255,230,170," + (0.2 + R() * 0.3).toFixed(2) + ")"; g.fillRect(cx + (R() - 0.5) * w * fw * 0.7, by - R() * h * fh * 0.9, 1.5, 1.5); } }
+        g.fillStyle = "#1a100a"; g.fillRect(0, h * 0.74, w, h * 0.26);
+      } else {
+        grad(["#120c10", "#22161a", "#2e1e1e", "#160e10"]);
+        for (let i = 0; i < 6; i++) glowAt(R() * w, h * (0.3 + R() * 0.4), h * (0.08 + R() * 0.1), "rgba(200,110,80,.12)");
+        g.fillStyle = "#0c080a"; for (let x = 0; x < w; x += 14 + R() * 20) { const l = h * (0.04 + R() * 0.12); g.beginPath(); g.moveTo(x - 7, 0); g.lineTo(x, l); g.lineTo(x + 7, 0); g.fill(); }
+      }
+    }
+    c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = 1; c.globalCompositeOperation = "copy"; c.drawImage(hb, 0, 0); c.restore();
+  }
+
   /* ======================= KACHELN ======================= */
   /* Alles hier wird einmal je Chunk (24×14 Kacheln) in eine Leinwand gemalt und zwischengespeichert –
      darum darf es aufwendig sein. Muster liegen in Weltkoordinaten, damit Kacheln und Chunks nahtlos passen. */
@@ -2553,7 +2606,7 @@
     const pf = Z.prof, tm = pf ? () => performance.now() : null; let t0 = pf ? tm() : 0;
     const mark = k => { if (pf) { c.getImageData(0, 0, 1, 1); const n = tm(); pf[k] = (pf[k] || 0) + n - t0; t0 = n; } };
     const lay = !Z.gq || Z.gq.layers !== false;
-    if (Z.noLayers) {} else if (!lay && lv.hub && !(G.off && G.off.lagerhimmel)) { hubBack(c, cam); } else if (lay && (B.open || lv.out || lv.hub || lv.arena)) { drawLayers(c, cam); if (!Z.gq || Z.gq.critters !== false) { updCritters(dt, cam); drawCritters(c, cam); } } else { c.fillStyle = B.wall; c.fillRect(cam.x - 2, cam.y - 2, cam.w + 4, cam.h + 4); } mark("layers");
+    if (Z.noLayers) {} else if (!lay && lv.hub && !(G.off && G.off.lagerhimmel)) { hubBack(c, cam); } else if (!lay && lv.arena && !(G.off && G.off.arenahimmel)) { arenaBack(c, cam); } else if (!lay && (B.open || lv.out) && B.sky && !(G.off && G.off.fensterhimmel)) { skyBack(c, cam); } else if (lay && (B.open || lv.out || lv.hub || lv.arena)) { drawLayers(c, cam); if (!Z.gq || Z.gq.critters !== false) { updCritters(dt, cam); drawCritters(c, cam); } } else { c.fillStyle = B.wall; c.fillRect(cam.x - 2, cam.y - 2, cam.w + 4, cam.h + 4); } mark("layers");
     /* Riesen im Hintergrund (Demogorgon im Herz des Sees): hinter Boden und Plattformen */
     Z.drawBehindTiles && Z.drawBehindTiles(c, cam, t);
     drawTiles(c, cam); mark("tiles");
