@@ -182,6 +182,7 @@
   let vis = null, mem = null, tvis = null, visLv = null, visT = 0, ofs = null, ofc = null, ofImg = null, seenRef = null, seenN = null;
   const blocks = v => v === 1 || v === 7 || v === 12;
   Z._fogDbg = () => ({ vis, mem, tvis, ofs }); /* Tests: Sichtnebel ansehen */
+  Z._computeVis = (lv, cam) => computeVis(lv, cam); /* Tests (W13 R6) */
   function sightRange(lv) {
     const B = Z.biome || {};
     let r = lv.out ? 30 : B.open === "cave" ? 15 : 21;
@@ -189,7 +190,46 @@
     if (Z.darkness > 0) r = Math.min(r, 10);
     return r;
   }
+  /* W13 R6 Handheld: Sichtstrahlen statt Prüfung jeder Kachel. Vorher lief für jede Kachel im Sichtkreis eine eigene
+     Linie bis zum Auge (≈ πR² Kacheln × R Schritte); jetzt ≈ 2πR·1,6 Strahlen vom Auge nach außen, die an der ersten
+     blockierenden Kachel enden (sie selbst ist sichtbar). Gleiche Abklingkurven (f, fm), gleiche Gedächtnis-/Raumlogik.
+     Prüfschalter: Z.visRays = false → alte Kachel-Prüfung (computeVisTiles). */
   function computeVis(lv, cam) {
+    if (Z.visRays === false) return computeVisTiles(lv, cam);
+    const P = Z.player; if (!P) return;
+    const n = lv.W * lv.H;
+    if (visLv !== lv) { visLv = lv; vis = new Float32Array(n); mem = new Uint8Array(n); tvis = new Float32Array(n); }
+    if (seenRef !== seen) { seenRef = seen; seenN = new Set(); }
+    tvis.fill(0);
+    const ex = (P.x + P.w / 2) / T, ey = (P.y + 7) / T, R = sightRange(lv), W = lv.W;
+    const x0 = Math.max(0, Math.floor(cam.x / T) - 2), x1 = Math.min(W - 1, Math.ceil((cam.x + cam.w) / T) + 2);
+    const y0 = Math.max(0, Math.floor(cam.y / T) - 2), y1 = Math.min(lv.H - 1, Math.ceil((cam.y + cam.h) / T) + 2);
+    const mark = (tx, ty) => {
+      const i = ty * W + tx; if (tvis[i] > 0 || tx < x0 || tx > x1 || ty < y0 || ty > y1) return;
+      const dx = tx + 0.5 - ex, dy = ty + 0.5 - ey, d = Math.sqrt(dx * dx + dy * dy); if (d > R) return;
+      const u = d < R * 0.55 ? 0 : Math.min(1, (d - R * 0.55) / (R * 0.45)), f = 1 - u * u * (3 - 2 * u);
+      const fm = d < R * 0.7 ? 1 : Math.max(0, 1 - (d - R * 0.7) / (R * 0.3));
+      tvis[i] = Math.max(f, 1e-4);
+      if (fm > 0.25) { mem[i] = 1; const kn = Math.floor(tx / CW) * 4096 + Math.floor(ty / CH); if (!seenN.has(kn)) { seenN.add(kn); seen.add(Math.floor(tx / CW) + "," + Math.floor(ty / CH)); } }
+    };
+    mark(Math.floor(ex), Math.floor(ey));
+    const N = Math.ceil(2 * Math.PI * R * 1.6), st = 0.45;
+    for (let k = 0; k < N; k++) {
+      const a = (k / N) * 2 * Math.PI, cx = Math.cos(a) * st, cy = Math.sin(a) * st;
+      let x = ex, y = ey, px = -1, py = -1, ox = Math.floor(ex), oy = Math.floor(ey);
+      for (let s = st; s <= R + 0.71; s += st) {
+        x += cx; y += cy; const tx = Math.floor(x), ty = Math.floor(y);
+        if (tx === px && ty === py) continue; px = tx; py = ty;
+        if (tx < 0 || ty < 0 || tx >= W || ty >= lv.H) break;
+        /* diagonal über eine Ecke: sind beide Nachbarn fest, kommt der Blick nicht durch (keine Lecks an Mauerecken) */
+        if (ox >= 0 && tx !== ox && ty !== oy && blocks(lv.get(tx, oy)) && blocks(lv.get(ox, ty))) break;
+        ox = tx; oy = ty;
+        mark(tx, ty);
+        if (blocks(lv.get(tx, ty))) break;
+      }
+    }
+  }
+  function computeVisTiles(lv, cam) {
     const P = Z.player; if (!P) return;
     const n = lv.W * lv.H;
     if (visLv !== lv) { visLv = lv; vis = new Float32Array(n); mem = new Uint8Array(n); tvis = new Float32Array(n); }
