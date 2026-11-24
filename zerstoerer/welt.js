@@ -1668,7 +1668,7 @@
     let best = null, bs = 1e9;
     for (let attempt = 0; attempt < 40; attempt++) {
       const lv = tryGen(biomeId, (seed + attempt * 7919) >>> 0, opts);
-      if (lv && validate(lv)) { lv.attempts = attempt + 1; if (Z.run) { const u = (Z.run._tplUse = Z.run._tplUse || {}); for (const k in lv.cells) { const t = lv.cells[k].tpl; if (t) u[t] = (u[t] || 0) + 1; } } if (!Z.noEase) ease(lv); settle(lv); plan(lv); specials(lv); if (!Z.noRuneGates) runeGates(lv); cracks(lv); tides(lv); if (!Z.noAbkuerzung) abkuerzungen(lv); unwall(lv); assignRooms(lv); if (attempt < 30 && !Z.noEase && !comfyAusgaenge(lv)) continue; /* W13 R23: Ausgang nur per Maximalsprung → nächster Versuch */ return lv; }
+      if (lv && validate(lv)) { lv.attempts = attempt + 1; if (Z.run) { const u = (Z.run._tplUse = Z.run._tplUse || {}); for (const k in lv.cells) { const t = lv.cells[k].tpl; if (t) u[t] = (u[t] || 0) + 1; } } if (!Z.noEase) ease(lv); settle(lv); plan(lv); specials(lv); if (!Z.noRuneGates) runeGates(lv); cracks(lv); tides(lv); faehrLeitern(lv); if (!Z.noAbkuerzung) abkuerzungen(lv); unwall(lv); assignRooms(lv); if (attempt < 30 && !Z.noEase && !comfyAusgaenge(lv)) continue; /* W13 R23: Ausgang nur per Maximalsprung → nächster Versuch */ return lv; }
       /* Notfall: die beste Karte merken (alle Ausgänge erreichbar, möglichst wenige Festsitz-Stellen) */
       const sc = lv && lv.stuck ? lv.stuck.length : 1e8;
       if (lv && sc < bs) { bs = sc; best = lv; }
@@ -2171,6 +2171,18 @@
      Hauptweg-Raum, 20 davon liegen direkt DARÜBER. Dort wird ein Fallschacht (2 breit) vom Kettenende in den Hauptweg-Raum gegraben: Der Rückweg
      schrumpft auf einen Sprung hinab. Geprüft wie die Sonderräume: alle Räume bleiben (bequem) erreichbar, kein Festsitzen, keine Türen/Fallen/Funde
      im Schacht. Der Schacht ist höher als ein bequemer Sprung – also eine Einbahn-Abkürzung nach unten. */
+  /* W13 R24 (Leiter-Agent, Torhof-Seed 448840687): Leiter endet direkt unter einer Fährstrecke (Kachel 11 – für die Physik Luft, nur die Fähre
+     trägt). Von der Leiterspitze kommt man nicht auf die Fähre (Kopf steckt im Wagen) → Grube ohne Ausweg. Der Prüfer hält 11 für einen Steg und
+     merkt das nicht. Lösung: über jeder solchen Leiterspitze ein fester Absatz (3 Kacheln Steg 2) in der Fährstrecke – von dort steigt man auf die
+     vorbeikommende Fähre wie von jedem Steg. */
+  function faehrLeitern(lv) {
+    const W = lv.W, H = lv.H, g = lv.get; lv.faehrAbsatz = [];
+    for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+      if (g(x, y) !== 11 || g(x, y + 1) !== 4) continue;
+      for (const xx of [x - 1, x, x + 1]) if (g(xx, y) === 11 || g(xx, y) === 0) lv.set(xx, y, 2);
+      lv.faehrAbsatz.push([x, y]);
+    }
+  }
   function abkuerzungen(lv) {
     if (!lv.cells || lv.hub || lv.arena || lv.passage) return;
     const W = lv.W, g = lv.get, cells = Object.keys(lv.cells).map(k => lv.cells[k]), key = (x, y) => x + "," + y;
