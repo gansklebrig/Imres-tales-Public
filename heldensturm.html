@@ -9889,7 +9889,14 @@ function kgSprite(key,sc,fl,box,draw,ol,rot){rot=rot||0;const K=key+'|'+sc+'|'+f
 function kgPut(K,s){KG.m.set(K,s);KG.bytes=(KG.bytes||0)+(s.b||s.cv.width*s.cv.height*4);const lim=typeof MOBIL!=='undefined'&&MOBIL?24e6:64e6;
  if(KG.bytes>lim||KG.m.size>KG.max){const it=KG.m.keys();while((KG.bytes>lim*0.8||KG.m.size>KG.max*0.85)&&KG.m.size>8){const k=it.next().value,v=KG.m.get(k);KG.m.delete(k);if(v)v.lu=-1;KG.bytes-=(v&&(v.b||v.cv.width*v.cv.height*4))||0}}}
 /* Sprites, die lange nicht gebraucht wurden (z. B. alte Zoomstufe), wieder freigeben */
-function kgSweep(){const lim=KG.fc-900;for(const[k,v]of KG.m)if((v.lu||0)<lim&&!k.startsWith('bit:')){KG.m.delete(k);v.lu=-1;KG.bytes-=v.b||v.cv.width*v.cv.height*4}}
+function kgSweep(){const lim=KG.fc-(KG.alt||900);for(const[k,v]of KG.m)if((v.lu||0)<lim&&!k.startsWith('bit:')){KG.m.delete(k);v.lu=-1;KG.bytes-=v.b||v.cv.width*v.cv.height*4}}
+/* Sprite-Zwischenspeicher ruhiger (Diagnose 24.11.: 10–15 Neubauten/s, Ruckler bis 155 ms bei 110 Hz):
+   · Aufräumen nach Zeit statt nach Bildern – vorher flog ein Sprite schon nach 900 Bildern (bei 110 Hz ≈ 8 s außer Sicht) hinaus
+     und musste beim Wiederauftauchen neu gemalt werden; jetzt erst nach ≈ 40 s (das Speicher-Budget von 64 MB bleibt die Grenze)
+   · neuer Maßstab erst, wenn er 1,5 s am Stück gebraucht wird (Kamera-Stöße bei Treffern/Krits sind kürzer) – solange wird
+     der Nachbar-Maßstab weich skaliert gezeichnet */
+KG.warte=1500;KG.alt=900;KG.tz=0;KG.tf=0;
+function kgTakt(){const n=performance.now();if(KG.tz){const fps=(KG.fc-KG.tf)/Math.max(0.001,(n-KG.tz)/1000);if(fps>0&&isFinite(fps))KG.alt=Math.max(900,Math.min(9000,Math.round(fps*40)))}KG.tz=n;KG.tf=KG.fc}
 /* Abwandlungen eines Sprites: W = weißer Trefferblitz, D = abgedunkelte Leiche */
 function kgVar(s,m){const K=s.K+'|'+m;let v=s['v'+m];if(v&&v.lu!==-1){v.lu=KG.fc;return v}v=KG.m.get(K);if(v){s['v'+m]=v;v.lu=KG.fc;return v}const w=s.cv.width,h=s.cv.height,C=kgCv(w,h),g=C.getContext('2d');g.drawImage(s.cv,0,0);
  if(m==='W'){g.globalCompositeOperation='source-atop';g.fillStyle='rgba(255,255,255,.92)';g.fillRect(0,0,w,h)}else{g.globalCompositeOperation='source-atop';g.fillStyle='rgba(28,16,22,.42)';g.fillRect(0,0,w,h)}
@@ -10235,10 +10242,10 @@ const KGDK=new WeakMap();function kgKeyM(d,v){let a=KGDK.get(d);if(!a)KGDK.set(d
 function kgGet(d,v,want,fl,rot){const sc=kgScale(want),key=kgKeyM(d,v),K=kgK(key,sc,fl,rot);let s=KG.m.get(K);KG.gx=1;if(s){s.lu=KG.fc;return s}
  /* Nachbar-Stufe, die noch in die 1:1-Toleranz passt, gilt als genau (verhindert Flackern an Stufengrenzen) */
  for(let i=-1;i<=1;i+=2){const s2=kgScale(sc*Math.pow(2,i/12));if(Math.abs(want/s2-1)<0.034){const q=KG.m.get(kgK(key,s2,fl,rot));if(q)return q}}
- let nb=null;for(const i of[1,-1,2,-2,0]){const k2=kgK(key,kgScale(sc*Math.pow(2,i/12)),fl,0);if(k2===K)continue;const q=KG.m.get(k2);if(q){nb=q;break}}
+ let nb=null;for(const i of[1,-1,2,-2,3,-3,4,-4,0]){const k2=kgK(key,kgScale(sc*Math.pow(2,i/12)),fl,0);if(k2===K)continue;const q=KG.m.get(k2);if(q){nb=q;break}}
  /* erst anlegen, wenn dieser Maßstab ununterbrochen gebraucht wird (Zoom-Stöße beim Treffen sind nur kurz) */
  const now=performance.now();let r=KG.req.get(K);if(!r||now-r[1]>120){if(!r){if(KG.req.size>600)KG.req.clear();KG.req.set(K,r=[now,now])}else r[0]=now}r[1]=now;
- KG.gx=0;if(nb&&now-r[0]<400)return nb;
+ KG.gx=0;if(nb&&now-r[0]<KG.warte)return nb;
  if(KG.bud>0){KG.bud--;KG.req.delete(K);KG.lim=0;s=kgBodyFor(null,d,v,sc,fl,rot);KG.lim=1;if(s){KG.gx=1;return s}}
  return nb}
 function kgBodyFor(c,d,v,sc,fl,rot){const S=KGS[d.shape];const key=kgKey(d,v);
@@ -10260,7 +10267,7 @@ function kgDraw(c,e,t,d,lg,wob,W_,sq,fl){if(!KG.on||e.boss||d.gx)return false;co
  else if(e.land&&Math.abs(a1)<0.006*sx)rot=b1>0?1.5708:-1.5708;/* liegende Leiche: auf der Seite, als eigenes gedrehtes Sprite */
  if(rot!==null){const sn=b1/sx;fast=(rot>1||rot<-1?Math.abs(m.d)<0.006*sy:m.d>0)&&Math.abs(m.c+sy*sn)<sy*0.01&&Math.abs(sx/sc-1)<0.07&&Math.abs(sy/sc-1)<0.07}
  /* höchstens wenige neue Sprites je Bild vorrendern – sonst kurz das ungeneigte Sprite bzw. die einfache Zeichnung */
- if(t!==KG.lt){KG.lt=t;KG.bud=3;if(++KG.fc%240===0)kgSweep()}
+ if(t!==KG.lt){KG.lt=t;KG.bud=3;if(++KG.fc%240===0){kgTakt();kgSweep()}}
  if(KG.wst!==G.stage&&!e.corpse&&!sq){KG.wst=G.stage;kgWarm(sx/(e.r/12))}const want=fast?sx:sc,rq=fast?rot:0,bk=kgScale(want);
  /* Merkzettel je Gegner: gleiches Sprite wie im letzten Bild → ohne Schlüssel-Zeichenkette wiederverwenden */
  let M=KGME.get(e),s=null,ex=1;if(M&&M.d===d&&M.v===v&&M.bk===bk&&M.fl===fl&&M.rq===rq&&M.s.lu!==-1&&Math.abs(want/M.s.sc-1)<0.034){s=M.s;s.lu=KG.fc}
