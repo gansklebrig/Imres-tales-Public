@@ -1241,6 +1241,26 @@
         if (pcx(P) > bx.x0 - 200 && pcx(P) < bx.x1 + 200 && py > bx.y1 && py < bx.y1 + 480) bx.y1 = py + 24;
         if (py > bx.top && py < bx.y1 + 24) { if (pcx(P) < bx.x0 && pcx(P) > bx.x0 - 200) bx.x0 = pcx(P) - 40; if (pcx(P) > bx.x1 && pcx(P) < bx.x1 + 200) bx.x1 = pcx(P) + 40; }
       }
+      /* W9 4. Runde (Boss-Spur K8): Pattsituation – Wächter 15 s ohne Treffer, Spieler weit weg (z. B. durch ein Bodenloch aus dem Raum
+         gefallen, Chasme 250–1100 px über ihm). Erst Kampfbereich bis zum Spieler erweitern und durchbrechen; klappt das nicht, schläft
+         der Wächter wieder ein (verschwindet, erwacht neu, wenn Ezekiel den Raum wieder betritt) – kein Festsitzen bei geschlossenen Türen. */
+      if (e.warden && e.box && !e.trans) {
+        if (s.hpRef == null || e.hp < s.hpRef - 1) { s.hpRef = e.hp; s.pat = 0; } else s.pat = (s.pat || 0) + dt;
+        const far = Math.hypot(pcx(P) - cxOf(e), (P.y + P.h) - feet(e)) > 170;
+        if (!far) s.pat = Math.min(s.pat, 6);
+        if (s.pat > 15 && !e.mv && P.onGround) {
+          s.pat = 0; const b = e.box, out = pcx(P) < b.x0 - 8 || pcx(P) > b.x1 + 8 || P.y + P.h > b.y1 + 260 || P.y < b.top - 80;
+          let ok = false;
+          if (!out) { b.top = Math.min(b.top, P.y - 60); b.y1 = Math.max(b.y1, P.y + P.h + 24); ok = breakThrough(e, P); }
+          if (!ok) {
+            const lv = Z.level; FX.burst(cxOf(e), e.y + e.h / 2, 30, { col: ["#3a3030", "#5a4a40"], sp: 90, life: 0.8, size: 5, kind: "smoke" });
+            e.dead = true; e.deadT = 99; Z.boss = null; Z.cam.lock = null; if (lv) lv.wardenSpawned = false; if (Z.music) Z.music.target = 0;
+            for (const o of Z.enemies) if (o.master === e && !o.dead) { o.dead = true; o.deadT = 99; }
+            Z.toast && Z.toast(L(["Der Wächter zieht sich in seinen Raum zurück …", "The warden withdraws into its chamber…"]), 2600);
+            return;
+          }
+        }
+      }
       /* Unerreichbar? (zu groß für Durchgänge, Spieler auf Plattform/Gegenseite) – nach 5 s ohne Annäherung bricht der Bodenboss neben dem Spieler durch */
       if (!e.def.fixed && !e.def.keepAway) { /* auch Flieger: der Vrock hing im Bot-Lauf 130 s über einer Decke fest */
         const dd = Math.hypot(pcx(P) - cxOf(e), (P.y + P.h) - feet(e));

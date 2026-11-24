@@ -149,7 +149,7 @@
   function pullLever(o) {
     if (o.pulled) return;
     o.pulled = true; const lv = Z.level, g = o.g;
-    for (const [x, y] of g.tiles) lv.set(x, y, 0);
+    for (const [x, y, v] of g.tiles) lv.set(x, y, v || 0); /* W13 (Karte): Falltüren öffnen zur Leiter */
     g.open = true; Z.dirtyTiles && Z.dirtyTiles(g.tiles[0][0], g.tiles[0][1]);
     A.play("chain", { vol: 0.8, rate: 0.8 }); A.play("door", { vol: 0.6, rate: 0.7 }); FX.addShake(4);
     for (const [x, y] of g.tiles) FX.burst(x * T + 8, y * T + 8, 3, { col: [Z.dustCol || "#8a7a70"], sp: 50, life: 0.6, size: 3, kind: "smoke" });

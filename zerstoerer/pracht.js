@@ -2966,7 +2966,9 @@
     const S = G.scale || 2, x0 = Math.max(0, Math.floor(cam.x / T)), x1 = Math.min(lv.W - 1, Math.ceil((cam.x + cam.w) / T)), y0 = Math.max(1, Math.floor(cam.y / T)), y1 = Math.min(lv.H - 1, Math.ceil((cam.y + cam.h) / T));
     const sol = v => v === 1 || v === 7, see = Z.sightAt;
     c.save(); c.setTransform(S, 0, 0, S, -cam.x * S, -cam.y * S);
-    const pPl = new Path2D(), pFl = new Path2D(), pLd = new Path2D(), pSh = new Path2D();
+    const pPl = new Path2D(), pFl = new Path2D(), pLd = new Path2D(), pSh = new Path2D(), pLdS = new Path2D(), pSp = new Path2D(), pSpB = new Path2D(); let nSp = 0;
+    /* helle Gebiete (Glut, Schmiede, Turmspitze) brauchen kräftigere Kanten */
+    const B = Z.biome || {}, hot = B.bg === "embercity" || B.bg === "forge" || B.bg === "spires", kp = hot ? 0.6 : 0.38, kl = hot ? 0.45 : 0.32;
     let nPl = 0, nFl = 0, nLd = 0;
     for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
       const v = lv.get(x, y); if (v === 0) continue;
@@ -2976,17 +2978,19 @@
       const up = lv.get(x, y - 1);
       if (v === 2 && up !== 2) { pPl.rect(px, py, T, 0.9); pSh.rect(px, py + 3.4, T, 0.8); nPl++; }
       else if (sol(v) && (up === 0 || up === 4)) { pFl.rect(px, py, T, 0.7); nFl++; }
-      else if (v === 4) { pLd.rect(px + 2.4, py, 0.6, T); pLd.rect(px + 11.4, py, 0.6, T); nLd++; }
+      else if (v === 3) { for (let k = 0; k < 4; k++) pSp.rect(px + k * 4 + 1.6, py + 13 - 10, 0.8, 6); pSpB.rect(px, py + 12.4, T, 0.8); nSp++; }
+      else if (v === 4) { pLd.rect(px + 2.4, py, 0.7, T); pLd.rect(px + 11.4, py, 0.7, T); for (let k = 3; k < T; k += 5) pLd.rect(px + 3.5, py + k, 9, 0.5); pLdS.rect(px + 1.4, py, 0.8, T); pLdS.rect(px + 12.3, py, 0.8, T); nLd++; }
     }
     if (nFl) { c.fillStyle = "rgba(255,236,206,.10)"; c.fill(pFl); }
-    if (nPl) { c.fillStyle = "rgba(0,0,0,.3)"; c.fill(pSh); c.fillStyle = "rgba(255,232,196,.38)"; c.fill(pPl); }
-    if (nLd) { c.fillStyle = "rgba(255,232,196,.16)"; c.fill(pLd); }
+    if (nPl) { c.fillStyle = "rgba(0,0,0,.3)"; c.fill(pSh); c.fillStyle = "rgba(255,236,206," + kp + ")"; c.fill(pPl); }
+    if (nSp) { c.fillStyle = "rgba(200,40,30,.45)"; c.fill(pSpB); c.fillStyle = "rgba(255,244,228,.5)"; c.fill(pSp); }
+    if (nLd) { c.fillStyle = "rgba(0,0,0,.32)"; c.fill(pLdS); c.fillStyle = "rgba(255,236,206," + kl + ")"; c.fill(pLd); }
     /* Gegner-Geschosse: dunkler Rand, heller Kern */
     for (const q of Z.projs || []) {
       if (q.owner !== "e" || q.x < cam.x - 10 || q.x > cam.x + cam.w + 10 || q.y < cam.y - 10 || q.y > cam.y + cam.h + 10) continue;
       const r = Math.max(2.2, (q.r || 2) + 1.2);
-      c.strokeStyle = "rgba(10,6,8,.55)"; c.lineWidth = 1.2; c.beginPath(); c.arc(q.x, q.y, r + 0.8, 0, TAU); c.stroke();
-      c.fillStyle = "rgba(255,248,230,.55)"; c.beginPath(); c.arc(q.x, q.y, Math.max(0.8, r * 0.35), 0, TAU); c.fill();
+      c.strokeStyle = "rgba(10,6,8,.7)"; c.lineWidth = 1.6; c.beginPath(); c.arc(q.x, q.y, r + 0.9, 0, TAU); c.stroke();
+      c.fillStyle = "rgba(255,250,236,.9)"; c.beginPath(); c.arc(q.x, q.y, Math.max(1, r * 0.45), 0, TAU); c.fill();
     }
     c.restore();
   };

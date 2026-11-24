@@ -389,7 +389,7 @@
       "#..E..............T....#",
       "#..H.......F.......H...#",
       "#..H...............H...#",
-      "####################H###",
+      "###H###############H####", /* W13: beide Leitern gehen durch den Zwischenboden (vorher versetzt: rechte Leiter brach ab) */
       "#..H...............H...#",
       "#..H...............H...#",
       "...H..........E....H....",
@@ -722,39 +722,79 @@
     const isLeaf = c => c.kind !== "path" && nbs(c).length === 1;
     /* Länge der Sackgasse, an deren Ende c liegt */
     const armLen = c => { let n = 1, prev = c, cur = nbs(c)[0]; while (cur && cur.kind !== "path" && nbs(cur).length === 2 && n < 30) { const nx = nbs(cur).find(o => o !== prev); prev = cur; cur = nx; n++; } return n; };
+    /* W13: Räume auf einem Rundweg zählen (Brücken im Raumgraphen, Tarjan) – Schleifen werden nach Gewinn gewählt:
+       wie viele Räume danach auf einem Rundweg liegen. So wird aus einem langen Zweig eine Runde, und am Ende bleibt
+       höchstens eine kurze Belohnungs-Nische (ein Raum) statt eines langen Sackgassen-Schlauchs. */
+    const onCycle = () => {
+      const cs = live(), disc = new Map(), low = new Map(), br = new Set(); let tm = 0;
+      const ek = (u, v) => (u.x * 97 + u.y < v.x * 97 + v.y ? key(u.x, u.y) + "|" + key(v.x, v.y) : key(v.x, v.y) + "|" + key(u.x, u.y));
+      const dfs = (u, pe) => {
+        disc.set(u, tm); low.set(u, tm); tm++;
+        for (const v of nbs(u)) {
+          if (!disc.has(v)) { dfs(v, u); low.set(u, Math.min(low.get(u), low.get(v))); if (low.get(v) > disc.get(u)) br.add(ek(u, v)); }
+          else if (v !== pe) low.set(u, Math.min(low.get(u), disc.get(v)));
+        }
+      };
+      for (const c of cs) if (!disc.has(c)) dfs(c, null);
+      let n = 0; for (const c of cs) if (nbs(c).some(v => !br.has(ek(c, v)))) n++;
+      return n;
+    };
+    /* Länge des Hauptwegs über offene Durchgänge (Gittertore zählen nicht – die öffnet man erst von der Zweigseite) */
+    const pathCs = Object.keys(cells).map(k => cells[k]).filter(c => c.kind === "path").sort((p, q) => p.idx - q.idx);
+    const st0 = pathCs[0], en0 = pathCs[pathCs.length - 1];
+    const openDist = () => { const d = new Map([[st0, 0]]), q = [st0]; for (let h = 0; h < q.length; h++) { const c = q[h]; for (const s2 in D4) { if (c.need[s2] !== true) continue; const o = cells[key(c.x + D4[s2][0], c.y + D4[s2][1])]; if (o && !d.has(o)) { d.set(o, d.get(c) + 1); q.push(o); } } } return d.get(en0); };
+    const len0 = openDist();
     const all0 = live(), leaves0 = all0.filter(isLeaf).length;
-    const keepLeaves = Math.max(3, Math.ceil(leaves0 * (lay.gentle ? 0.75 : 0.72)));
-    const want = Math.max(1, Math.round(all0.length * (lay.gentle ? 0.05 : 0.1)));
+    /* lohnende Sackgassen behalten (dort liegen Truhen, Schrein, Prüfung, Schatzkammer) – aber keine langen Schläuche */
+    const keepLeaves = Math.max(3, Math.ceil(leaves0 * (lay.gentle ? 0.75 : 0.62)));
+    const want = Math.max(1, Math.round(all0.length * (lay.gentle ? 0.12 : 0.25)));
     let made = 0;
     for (let round = 0; round < want * 3 && made < want; round++) {
-      const cs = live(), leaves = cs.filter(isLeaf).length, cand = [];
+      const cs = live(), leaves = cs.filter(isLeaf).length, cand = [], base = onCycle();
       for (const a of cs) {
         const da = bfs(a);
         for (const s2 of ["R", "D"]) {
           const b = cells[key(a.x + D4[s2][0], a.y + D4[s2][1])];
           if (!b || b.kind === "secret" || a.need[s2]) continue;
-          if (a.kind === "path" && b.kind === "path") continue;
+          /* zwei Hauptweg-Räume, die im Weg weit auseinander liegen: Gittertor als Abkürzung zurück (Hebel im späteren
+             Raum; senkrecht nur, wenn der spätere oben liegt – dann eine Falltür in seinem Boden) */
+          let gate = false;
+          if (a.kind === "path" && b.kind === "path") {
+            const hi = a.idx > b.idx ? a : b, lo = hi === a ? b : a;
+            if (hi.idx - lo.idx < 3 || lo.gate || hi.gate || (s2 === "D" && hi !== a)) continue;
+            gate = "pp";
+          }
           const d = da.get(b); if (d != null && d < 3) continue; /* schon nah verbunden: kein Gewinn */
           const la = isLeaf(a), lb = isLeaf(b);
           if ((la || lb) && leaves <= keepLeaves && !(la && lb)) continue; /* genug lohnende Sackgassen behalten */
           if ((la && armLen(a) < 2) || (lb && armLen(b) < 2)) continue; /* kurze Sackgassen (ein Raum) bleiben: dort liegt der Lohn */
           /* Hauptweg-Anschluss: nach vorn nur waagrecht als Gittertor (Zweigseite öffnet), nach hinten offen */
-          const side = a.kind === "path" ? b : b.kind === "path" ? a : null, pc = side ? (side === a ? b : a) : null;
-          let gate = false;
+          const side = gate ? null : a.kind === "path" ? b : b.kind === "path" ? a : null, pc = side ? (side === a ? b : a) : null;
           if (side) {
             const ri = side.root ? side.root.idx : 0;
-            if (pc.idx > ri + 1) { if (s2 !== "R") continue; gate = true; }
+            /* nach vorn: waagrecht ein Gittertor, senkrecht eine Falltür im Boden des Zweigraums darüber */
+            if (pc.idx > ri + 1) { if ((s2 === "D" && a !== side) || pc.gate) continue; gate = true; }
           }
-          let w = 1 + (d == null ? 6 : Math.min(8, d)) * 0.6;
-          if (la) w += 2 + armLen(a); if (lb) w += 2 + armLen(b);
-          if (s2 === "D") w *= 0.75; /* Treppenhäuser etwas seltener als Türen */
+          /* Gewinn: Räume, die danach auf einem Rundweg liegen; offene Schleifen dürfen den Hauptweg nicht abkürzen */
+          const o2 = { R: "L", D: "U" }[s2], va = a.need[s2], vb = b.need[o2];
+          a.need[s2] = gate ? "G" : true; b.need[o2] = gate ? "G" : true;
+          const gain = onCycle() - base, len1 = gate ? len0 : openDist();
+          if (va === undefined) delete a.need[s2]; else a.need[s2] = va;
+          if (vb === undefined) delete b.need[o2]; else b.need[o2] = vb;
+          if (len0 != null && len1 != null && len1 < len0 - 1) continue;
+          let w = 0.6 + Math.max(0, gain) * 1.1 + (d == null ? 6 : Math.min(8, d)) * 0.25;
+          if (la) w += 1 + armLen(a) * 0.5; if (lb) w += 1 + armLen(b) * 0.5;
+          if ((la || lb) && gain < 3) w *= 0.5; /* lieber den vorletzten Raum anschließen: die Nische mit Lohn bleibt */
+          if (s2 === "D") w *= 0.6; /* Treppenhäuser etwas seltener als Türen */
+          /* Räume mit nur waagrechten Durchgängen (links + rechts) bleiben möglichst so: dort passen die Parcours-Räume (Fähre, Sägewerk …) */
+          if (s2 === "D" && [a, b].some(c => c.need.L && c.need.R && !c.need.U && !c.need.D)) w *= 0.3;
           if (gate) w *= 0.5;
-          cand.push({ a, b, s2, gate, w });
+          cand.push({ a, b, s2, gate, w: w * w });
         }
       }
       if (!cand.length) break;
       let sum = 0; cand.forEach(c => (sum += c.w)); let pk = R() * sum, ch = cand[0]; for (const c of cand) { pk -= c.w; if (pk <= 0) { ch = c; break; } }
-      if (ch.gate) { const br = ch.a.kind === "path" ? ch.b : ch.a; conn([ch.a.x, ch.a.y], [ch.b.x, ch.b.y], "G"); br.gate = true; }
+      if (ch.gate) { const br = ch.gate === "pp" ? (ch.a.idx > ch.b.idx ? ch.a : ch.b) : ch.a.kind === "path" ? ch.b : ch.a; conn([ch.a.x, ch.a.y], [ch.b.x, ch.b.y], "G"); br.gate = true; }
       else conn([ch.a.x, ch.a.y], [ch.b.x, ch.b.y]);
       ch.a.loop = ch.b.loop = true; made++;
     }
@@ -995,12 +1035,12 @@
     let best = null, bs = 1e9;
     for (let attempt = 0; attempt < 40; attempt++) {
       const lv = tryGen(biomeId, (seed + attempt * 7919) >>> 0, opts);
-      if (lv && validate(lv)) { lv.attempts = attempt + 1; settle(lv); plan(lv); if (!Z.noRuneGates) runeGates(lv); assignRooms(lv); return lv; }
+      if (lv && validate(lv)) { lv.attempts = attempt + 1; settle(lv); plan(lv); if (!Z.noRuneGates) runeGates(lv); unwall(lv); assignRooms(lv); return lv; }
       /* Notfall: die beste Karte merken (alle Ausgänge erreichbar, möglichst wenige Festsitz-Stellen) */
       const sc = lv && lv.stuck ? lv.stuck.length : 1e8;
       if (lv && sc < bs) { bs = sc; best = lv; }
     }
-    if (best) { settle(best); plan(best); assignRooms(best); return best; }
+    if (best) { settle(best); plan(best); unwall(best); assignRooms(best); return best; }
     return tryGen(biomeId, seed, opts);
   };
 
@@ -1076,7 +1116,7 @@
       const sp = spotsOf(c, 2, false).filter(([x, y]) => g.vert ? Math.abs(x - gx) >= 3 && Math.abs(x - gx) <= 9 && y >= g.y0 - 6 && y < g.y0 : Math.abs(x - gx) <= 9 && Math.abs(x - gx) >= 2 && y >= g.y0 - 3 && y <= g.y0 + 4).sort((a, b) => Math.abs(a[0] - gx) - Math.abs(b[0] - gx));
       if (!sp.length) return;
       /* offen geprüft: auch mit offenem Tor darf niemand irgendwo feststecken */
-      const old = g.tiles.map(([x, y]) => lv.get(x, y)); g.tiles.forEach(([x, y]) => lv.set(x, y, 0));
+      const old = g.tiles.map(([x, y]) => lv.get(x, y)); g.tiles.forEach(([x, y, v]) => lv.set(x, y, v || 0));
       const fine = validate(lv);
       g.tiles.forEach(([x, y], j) => lv.set(x, y, old[j])); lv.reach = r0; lv.back = b0; lv.stuck = s0;
       if (!fine) return;
@@ -1299,7 +1339,9 @@
       spots = [];
       for (let r = 0; r < CH; r++) for (let q = 0; q < CW; q++) { const ch = rows[r][q]; setT(ox + q, oy + r, ch === "#" ? 1 : 0); if (ch === "$") spots.push([ox + q, oy + r]); }
       const col = ox + 11; let lb = oy + CH - 1;
-      for (let y = oy + CH; y < H - 1 && lv.get(col, y) === 4; y++) { setT(col, y, 0); free.add(y * W + col); lb = y; }
+      /* W13: nur bis zum Boden des Elternraums – dessen Leiter nach unten (in den Raum darunter) bleibt, sonst wäre
+         der Elternraum selbst nur noch mit der Rune erreichbar */
+      for (let y = oy + CH; y < H - 1 && y < oy + 2 * CH - 2 && lv.get(col, y) === 4; y++) { setT(col, y, 0); free.add(y * W + col); lb = y; }
       if (lb - oy - CH > (kind === "kralle" ? 15 : 30)) return back("lang"); /* Schacht höchstens einen Raum tief hinab – sonst wird das Klettern zäh */
       if (kind === "kette") {
         for (let ry = oy + 2, i = 0; ry <= lb - 3; ry += 4, i++) {
@@ -1372,6 +1414,12 @@
     /* Verlust außerhalb der Kammer: nur unwichtige Simse (keine Türen, Beute, Stationen) und nur wenige Plätze */
     let lost = 0; for (let i = 0; i < W * H; i++) if (r0[i] && !lv.reach[i] && !free.has(i)) lost++;
     if (lost > 60) return back("ohne:verlust");
+    /* W13: kein anderer Raum darf ganz verloren gehen (Raumgraph: sonst unerreichbarer Raum ohne Rune) */
+    if (lost) {
+      const had = new Set(), has = new Set();
+      for (let i = 0; i < W * H; i++) { if (!r0[i] && !lv.reach[i]) continue; const k2 = Math.floor((i % W) / CW) + "," + Math.floor(((i / W) | 0) / CH); if (k2 === ck) continue; if (r0[i]) had.add(k2); if (lv.reach[i]) has.add(k2); }
+      for (const k2 of had) if (!has.has(k2) && lv.cells[k2] && lv.cells[k2].kind !== "secret") return back("ohne:raum");
+    }
     if (lost) {
       const keyPts = [];
       for (const d of lv.doors) keyPts.push([d.x, d.y, "door"]);
@@ -1446,6 +1494,34 @@
     }
     lv.spawns = lv.spawns.filter(s2 => s2.fly || near(s2.x, s2.y) || secret(s2.x, s2.y));
   }
+  /* W13: Nach plan()/runeGates() können Kacheln zugehen (Tür der Schatzkammer, Runentore). Was dann in festem Fels
+     läge – Beute, Lohn, Schlüssel, Hebel, Gegner, Fallen – rückt auf den nächsten freien Stehplatz im selben Raum
+     (Gegner und Fallen fallen notfalls weg). Laufzeit-Schutz zusätzlich: Z.freeSpot (platz.js). */
+  function unwall(lv) {
+    const g = lv.get, W = lv.W, solid = (x, y) => { const v = g(x, y); return v === 1 || v === 7; };
+    const near = (x, y, avoid) => {
+      const cx = Math.floor(x / CW), cy = Math.floor(y / CH);
+      let best = null, bd = 1e9;
+      for (let yy = cy * CH + 1; yy < cy * CH + CH - 1; yy++) for (let xx = cx * CW + 1; xx < cx * CW + CW - 1; xx++) {
+        const d = Math.abs(xx - x) + Math.abs(yy - y) * 1.5; if (d >= bd || !standable(lv, xx, yy, 2)) continue;
+        if (avoid && avoid(xx, yy)) continue;
+        best = [xx, yy]; bd = d;
+      }
+      return best;
+    };
+    const busy = (self, list) => (xx, yy) => list.some(o => o !== self && Math.abs(o.x - xx) < 2 && o.y === yy);
+    const moveAll = list => list.filter(o => {
+      if (o.x == null || !solid(Math.floor(o.x), Math.floor(o.y))) return true;
+      const p = near(o.x, o.y, busy(o, list)); if (!p) return false;
+      o.x = p[0]; o.y = p[1]; o.moved = 1; return true;
+    });
+    lv.loot = moveAll(lv.loot || []);
+    lv.rewards = moveAll(lv.rewards || []);
+    if (lv.feats) lv.feats = lv.feats.filter(f => f.t === "lock" || f.t === "mouth" || f.x == null || !solid(f.x, f.y) || (() => { const p = near(f.x, f.y); if (!p) return f.t !== "key" && f.t !== "lever"; f.x = p[0]; f.y = p[1]; return true; })());
+    lv.spawns = (lv.spawns || []).filter(s2 => !solid(Math.floor(s2.x), Math.floor(s2.y)));
+    if (lv.traps) lv.traps = lv.traps.filter(t => !solid(t.x, t.y));
+  }
+  Z._unwall = unwall;
   Z._tryGen = (b, s, o) => tryGen(b, s, o || {}); /* für Tests */
   function tryGen(biomeId, seed, opts) {
     const B = BIOMES[biomeId], R = Z.Rng(seed);
@@ -1547,7 +1623,9 @@
       if (c.need.D === "G") {
         const o = cells[key(c.x, c.y + 1)]; if (!o) continue;
         const x = c.x * CW + 10, y0 = (c.y + 1) * CH - 2, tiles = [];
-        for (let q = 0; q < 4; q++) tiles.push([x + q, y0], [x + q, y0 + 1], [x + q, y0 + 2]);
+        /* W13: geöffnet wird die Falltür zum Treppenhaus – in Spalte 11 eine Leiter (dritter Wert = Kachel nach dem Öffnen),
+           darunter hängt schon die Leiter im Hauptweg-Raum: man kommt also auch wieder hinauf (kein Einweg) */
+        for (let q = 0; q < 4; q++) tiles.push([x + q, y0, q === 1 ? 4 : 0], [x + q, y0 + 1, q === 1 ? 4 : 0], [x + q, y0 + 2, q === 1 ? 4 : 0]);
         gates.push({ x, y0, tiles, vert: true, branch: key(c.x, c.y), other: key(o.x, o.y), side: 0, open: false });
       }
     }
@@ -1566,6 +1644,13 @@
         set(col, c.y * CH - 1, 4); set(col, c.y * CH - 2, 4);
         for (let r = c.y * CH; r < c.y * CH + CH; r++) { const v = get(col, r); if (v === 0 || v === 2) set(col, r, 4); else break; }
       }
+    }
+    /* W13: unter einer Falltür (Gittertor senkrecht) hängt die Leiter schon im unteren Raum bis zum Boden */
+    for (const k in cells) {
+      const c = cells[k];
+      if (c.need.U !== "G") continue;
+      const col = c.x * CW + 11;
+      for (let r = c.y * CH + 1; r < c.y * CH + CH; r++) { const v = get(col, r); if (v === 0 || v === 2) set(col, r, 4); else break; }
     }
     /* senkrechte Geheimgänge: rissige Wand im Boden darf nicht über Leere hängen */
     /* Treppen und Leitern in Seitenräumen bleiben wie sie sind. Schwebende Einzelkacheln entfernen. */
@@ -1927,6 +2012,23 @@
     const used = [], chosen = [];
     const Ls = lv.path ? lv.path.length - 1 : 4, exW = (LAYOUT[lv.biome] || {}).ex || [0.8, 1], exLo = exW[0], exHi = exW[1];
     const order = exits.map((to, i) => ({ to, i, v: VDIR[to] != null ? VDIR[to] : 0 })).sort((a, b) => Math.abs(b.v) - Math.abs(a.v));
+    /* W13: Gebietsübergänge logisch an der Kante – nach oben in einem Raum, über dem nichts mehr liegt (oberste Zelle
+       seiner Spalte), nach unten in der untersten Zelle der Spalte, waagrecht am linken/rechten Ende einer Raumreihe
+       (bei Durchgangsgebieten am Ende, weg vom Eingang). Notfalls an einer Außenwand in der passenden Kartenhälfte. */
+    const colMin = {}, colMax = {}, rowMin = {}, rowMax = {};
+    for (const c of cellsAll) {
+      colMin[c.x] = Math.min(colMin[c.x] != null ? colMin[c.x] : 99, c.y); colMax[c.x] = Math.max(colMax[c.x] != null ? colMax[c.x] : -1, c.y);
+      rowMin[c.y] = Math.min(rowMin[c.y] != null ? rowMin[c.y] : 99, c.x); rowMax[c.y] = Math.max(rowMax[c.y] != null ? rowMax[c.y] : -1, c.x);
+    }
+    const edgeOf = (c, v) => {
+      const ry = gh > 1 ? c.y / (gh - 1) : 0.5, sideL = c.x === rowMin[c.y], sideR = c.x === rowMax[c.y];
+      /* Seite: bei Durchgangsgebieten nur die dem Eingang abgewandte */
+      const far = B.flow === "through" ? (sc.x <= lv.gw / 2 ? sideR : sideL) : sideL || sideR;
+      if (v < -0.4) return c.y === colMin[c.x] ? { s: 2, w: 0 } : far && ry <= 0.5 ? { s: 1, w: sideL ? -1 : 1 } : { s: 0 };
+      if (v > 0.4) return c.y === colMax[c.x] ? { s: 2, w: 0 } : far && ry >= 0.5 ? { s: 1, w: sideL ? -1 : 1 } : { s: 0 };
+      /* waagrecht in einem Durchgangsgebiet: die Tür zumindest an die Wand in Laufrichtung (weg vom Eingang) */
+      return far ? { s: 2, w: sideL ? -1 : 1 } : { s: 0, w: B.flow === "through" ? (sc.x <= lv.gw / 2 ? 1 : -1) : 0 };
+    };
     for (const ex of order) {
       let best = null, bs = -1e9;
       for (const c of cellsAll) {
@@ -1944,16 +2046,23 @@
         if (used.includes(c)) sc2 -= 50;
         if (c === lv.endCell) sc2 += 2.5;
         if (c.kind === "path") sc2 += 1.2;
+        /* Kante zählt voll nur bei passender Weglänge – sonst rückte der Ausgang zu nah an den Eingang (Balance) */
+        const ed = edgeOf(c, ex.v); sc2 += ed.s * (dd >= Ls * exLo - 0.5 && dd <= Ls * exHi + 1 ? 1.4 : 0.3);
         sc2 += R() * 0.5;
         let spots = spotsIn(lv, c, 3, true); if (!spots.length) spots = spotsIn(lv, c, 3, false);
         spots = spots.filter(p => !chosen.some(q => Math.abs(q[0] - p[0]) < 4 && Math.abs(q[1] - p[1]) < 3) && Math.abs(p[0] - st[0]) + Math.abs(p[1] - st[1]) > 14);
         if (!spots.length) continue;
-        if (sc2 > bs) { bs = sc2; best = { c, spots }; }
+        if (sc2 > bs) { bs = sc2; best = { c, spots, ed }; }
       }
       let p;
       if (best) {
-        const sp2 = best.spots.slice().sort((a, b) => ex.v > 0 ? b[1] - a[1] : ex.v < 0 ? a[1] - b[1] : Math.abs(a[0] - (best.c.x * CW + 12)) - Math.abs(b[0] - (best.c.x * CW + 12)));
-        p = sp2[Math.min(sp2.length - 1, R.int(0, Math.min(2, sp2.length - 1)))]; used.push(best.c);
+        /* Platz im Raum: nach oben möglichst hoch, nach unten möglichst tief, an der Außenwand möglichst nah an ihr
+           (aber nicht in den Durchgang zum Nachbarraum: Randspalten bleiben frei) */
+        const ox = best.c.x * CW, wx = best.ed.w > 0 ? ox + CW - 4 : best.ed.w < 0 ? ox + 3 : ox + 12;
+        const yk = a => (ex.v > 0.4 ? -a[1] : ex.v < -0.4 ? a[1] : 0) * 3;
+        const sp2 = best.spots.filter(a => a[0] > ox + 2 && a[0] < ox + CW - 3);
+        const sp3 = (sp2.length ? sp2 : best.spots).slice().sort((a, b) => yk(a) + Math.abs(a[0] - wx) - (yk(b) + Math.abs(b[0] - wx)));
+        p = sp3[Math.min(sp3.length - 1, R.int(0, Math.min(2, sp3.length - 1)))]; used.push(best.c);
       } else {
         const oy = lv.endCell.y * CH, ox = lv.endCell.x * CW;
         for (let x = ox + 2; x < ox + CW - 2; x++) { for (let y = oy + 8; y <= oy + 11; y++) lv.set(x, y, 0); lv.set(x, oy + 12, 1); }
@@ -2124,6 +2233,7 @@
     }
     from = -1;
     lv.reach = seen;
+    if (lv._wantEdges) lv._edges = [ea, eb]; /* Kartengraph-Analyse (Tests): Kachelkanten mitgeben */
     const exits = lv.doors.filter(d => d.kind === "exit");
     for (const d of exits) if (!seen[d.y * W + d.x]) return false;
     /* Rückweg: rückwärts von den Ausgängen über dieselben Kanten */
