@@ -4244,7 +4244,7 @@ function fpsWatch(dt,raw,js){FW.iv.push(raw);FW.js.push(js||0);FW.t+=raw;if(FW.t
 function drawPerf(){if(!SAVE.perf||!PERF)return;const c=cx;c.save();c.setTransform(DPR,0,0,DPR,0,0);c.font='700 11px ui-monospace,monospace';c.textAlign='left';c.textBaseline='top';
  const L=[`${PERF.fps} FPS · Bildschirm ${PERF.hz} Hz`,`verpasste Bilder ${PERF.miss}%`,`Rechenzeit ⌀${PERF.js.toFixed(1)} / max ${PERF.jsM.toFixed(1)} ms`,`Grafik: ${GFX[PERF.lv].n} · ${cv.width}×${cv.height}${RSC<1?' · '+Math.round(RSC*100)+'%':''}`].concat(SWR?['⚠ Grafikbeschleunigung des Browsers aus']:[]);
  const y0=(typeof PILLTOP!=='undefined'?PILLTOP:120)+30;c.fillStyle='rgba(0,0,0,.65)';c.fillRect(8,y0,236,L.length*15+8);c.fillStyle=PERF.miss>10?'#ff8a7a':'#bfffc8';L.forEach((s,i)=>c.fillText(s,13,y0+4+i*15));c.restore()}
-const gfxInner=()=>{const L=gfxL(),auto=SAVE.gfx==='auto'||SAVE.gfx===undefined;return`<div style="min-width:0"><div class="t">Grafikqualität<small><span id="gfxName">${window.__hsULTRA&&__hsULTRA.on?'Ultra leicht':GFX[L].n}${auto?' (Auto)':''}</span> · <span id="gfxFps">${FPSNOW} FPS</span></small></div><div class="d">Das Bild bleibt auf jeder Stufe scharf. Ruckelt es am Handy, weiter nach links schieben – dann gibt es weniger Licht, Funken und Spuren. Am PC sieht „Episch“ sehr gut aus: mehr Licht, Leuchtschein, Funken und fliegende Gegner. „Legendär“ ist für starke Grafikkarten – volle Auflösung, schärfere Lichtschatten, feinerer Leuchtschein und viel mehr Funken, Schwebeteilchen und Kampfspuren${window.__hsPC?'':' (am flüssigsten im PC-Programm oder in Chrome/Edge)'}.</div>
+const gfxInner=()=>{const L=gfxL(),auto=SAVE.gfx==='auto'||SAVE.gfx===undefined;return`<div style="min-width:0"><div class="t">Grafikqualität<small><span id="gfxName">${window.__hsULTRA&&__hsULTRA.on?'Ultra leicht':GFX[L].n}${auto?' (Auto)':''}</span> · <span id="gfxFps">${FPSNOW} FPS</span></small></div><div class="d">Das Bild bleibt auf jeder Stufe scharf. Ruckelt es am Handy, weiter nach links schieben – dann gibt es weniger Licht, Funken und Spuren. Am PC sieht „Episch“ sehr gut aus: mehr Licht, Leuchtschein, Funken und fliegende Gegner. „Legendär“ ist für starke Grafikkarten – volle Auflösung, schärfere Lichtschatten, feinerer Leuchtschein, Sonnenstrahlen, Lichtspiel auf Teichen und viel mehr Funken, Schwebeteilchen und Kampfspuren${window.__hsPC?'':' (am flüssigsten im PC-Programm oder in Chrome/Edge)'}.</div>
  <div class="row" style="margin:6px 0 2px;align-items:center;flex-wrap:wrap"><span class="muted" style="font-size:13px">Auflösung:</span>${[null].concat(RES_STUFEN).map(v=>`<button class="btn small ${resFest()===v?'gold':''}" data-act="res" data-v="${v==null?'auto':v}" title="${v==null?'Senkt die Auflösung nur, wenn es ruckelt':v===1?'Immer volle Schärfe':'Feste, kleinere Auflösung – mehr Bilder pro Sekunde, etwas weicher'}">${v==null?'Auto':Math.round(v*100)+' %'}</button>`).join('')}<span class="muted" style="font-size:12px">${cv.width}×${cv.height}</span></div>
  <input type="range" min="0" max="${GFX.length-1}" step="1" value="${L}" data-gfx aria-label="Grafikqualität"><div class="gfxlbl">${GFX.map((g,i)=>`<span class="${i===L?'on':''}">${g.n}</span>`).join('')}</div>
  <div class="row" style="margin-top:6px"><button class="btn small ${auto?'gold':''}" data-act="gfx-auto">${auto?'Automatisch: an':'Automatisch anpassen'}</button>${ulKnopf()}<button class="btn small ${SAVE.perf?'gold':''}" data-act="perf">${SAVE.perf?'Leistungsanzeige: an':'Leistungsanzeige'}</button><button class="btn small ${SAVE.fov!==false?'gold':''}" data-act="fov" title="Hinter Mauern, Felsen und Hauswänden liegt Schatten – du siehst nur, was dein Held sieht">${SAVE.fov!==false?'Sichtschatten: an':'Sichtschatten: aus'}</button>${(window.devicePixelRatio||1)>=1.5?`<button class="btn small ${sharpOn()?'gold':''}" data-act="sharp" title="Bildschirmpixel genau verdoppeln statt weich hochrechnen">${sharpOn()?'Bild: pixelscharf':'Bild: weich'}</button>`:''}</div></div>`};
@@ -39847,15 +39847,15 @@ window.__hsGLWELT={v:7};
      spiegel  – nasse Spiegelungen der Lichter bei Regen
      bloom2   – weicherer Bloom (zwei Weichzeichner-Durchgänge)
    Stufen: Minimal: farbe · Niedrig: + ao · Mittel: + relief, sonne, nass, wind, spuren, glanz · Hoch: + schatten (4 Lichter), nebel, lava, spiegel ·
-   Episch: + schatten (8 Lichter), figuren, staub, bloom2 · Legendär: Lichtschatten in voller statt halber Auflösung, feinerer Bloom (3 Durchgänge). Schalter: __hsGLFX.aus, __hsGLFX.k.<name> = 1/0 (−1 = nach Grafikstufe), SAVE.glfx 'aus'|'voll'.
+   Episch: + schatten (8 Lichter), figuren, staub, bloom2 · Legendär: + strahlen (Sonnenstrahlen draußen), kaustik (Lichtnetz auf Teichen), schatten (12 Lichter, volle statt halbe Auflösung), feinerer Bloom (3 Durchgänge). Schalter: __hsGLFX.aus, __hsGLFX.k.<name> = 1/0 (−1 = nach Grafikstufe), SAVE.glfx 'aus'|'voll'.
    Farben: nur warme/neutrale/grüne/violette Töne. Keine Zeitlupe, kein Standbild. ES2017 (Chromium 77). */
 window.__hsGLFX={v:1};
 (function(){try{
 const FX=window.__hsGLFX,GW=window.__hsGLWELT;if(!GW||!GW.api||!GW.haken)throw new Error('glwelt fehlt');
 const A=GW.api;FX.aus=false;
-const NAMEN=['relief','ao','sonne','nass','wind','farbe','spuren','schatten','figuren','nebel','glanz','lava','staub','spiegel','bloom2'];
+const NAMEN=['relief','ao','sonne','nass','wind','farbe','spuren','schatten','figuren','nebel','glanz','lava','staub','spiegel','bloom2','strahlen','kaustik'];
 FX.k={};for(const n of NAMEN)FX.k[n]=-1;
-const STUFE={farbe:0,ao:1,relief:2,sonne:2,nass:2,wind:2,spuren:2,glanz:2,schatten:3,nebel:3,lava:3,spiegel:3,figuren:4,staub:4,bloom2:4};
+const STUFE={farbe:0,ao:1,relief:2,sonne:2,nass:2,wind:2,spuren:2,glanz:2,schatten:3,nebel:3,lava:3,spiegel:3,figuren:4,staub:4,bloom2:4,strahlen:5,kaustik:5};
 FX.st={u:0,o:0,sch:0,lichter:0,stempel:0,fehler:0};FX.err=[];
 const fErr=(k,e)=>{FX.st.fehler++;if(FX.err.length<12)FX.err.push(k+': '+String(e&&e.message||e))};
 function modus(){try{const v=SAVE&&SAVE.glfx;return v==='aus'||v==='voll'?v:'auto'}catch(e){return'auto'}}
@@ -39890,20 +39890,20 @@ const FS_U=A.PH+'uniform sampler2D uT;uniform sampler2D uOcc;uniform sampler2D u
  'if(uFarb.w>0.0){float l=lum(col);vec3 g=mix(vec3(l),col,uFarb.x);g=(g-0.5)*uFarb.y+0.5;g*=uTint;col=mix(col,max(g,0.0),uFarb.w);}'+
  'gl_FragColor=vec4(col,1.0);}';
 /* obere Ebene: Lichtschatten (halbe Auflösung) – ergibt zusätzliche Dunkelheit dort, wo ein Licht verdeckt ist */
-const FS_S=A.PH+'uniform float uDbg;uniform sampler2D uOcc;uniform vec2 uR;uniform float uK;uniform vec3 uCam;uniform float uN8;uniform vec4 uL[8];uniform float uNL;uniform vec4 uX[8];uniform float uNX;uniform vec4 uF[24];uniform float uNF;uniform float uD;'+NOISE+
+const FS_S=A.PH+'uniform float uDbg;uniform sampler2D uOcc;uniform vec2 uR;uniform float uK;uniform vec3 uCam;uniform float uN8;uniform vec4 uL[16];uniform float uNL;uniform vec4 uX[8];uniform float uNX;uniform vec4 uF[24];uniform float uNF;uniform float uD;'+NOISE+
  'float oO(vec2 w){return texture2D(uOcc,w/uN8).a;}'+
  'float sicht(vec2 w,vec2 lw){vec2 d=lw-w;float L=length(d);if(L<2.0)return 1.0;vec2 nn=vec2(-d.y,d.x)/L;float T=1.0;float j=h21(w*0.37);for(int i=1;i<=24;i++){float t=(float(i)-j)/24.0;if(t*L<6.0)continue;'+
  ' float sp=2.0+(1.0-t)*L*0.045;float o=0.5*(oO(w+d*t+nn*sp)+oO(w+d*t-nn*sp));T*=1.0-o*0.55;if(T<0.03)break;}'+
  ' for(int k=0;k<24;k++){if(float(k)>=uNF)break;vec4 f=uF[k];vec2 c=f.xy-w;float tt=clamp(dot(c,d)/(L*L),0.0,1.0);if(tt<0.02||tt>0.98)continue;float dd=length(w+d*tt-f.xy);float wl=length(f.xy-w);'+
  '  float s=smoothstep(f.z,f.z*0.45,dd)*smoothstep(f.z*5.0,f.z*1.2,wl);T*=1.0-0.72*s;}return T;}'+
  'void main(){vec2 dev=vec2(gl_FragCoord.x,uR.y-gl_FragCoord.y)*uK;vec2 w=(dev-uCam.xy)/uCam.z;if(uDbg>1.5){gl_FragColor=vec4(oO(w),texture2D(uOcc,w/uN8).r*0.5,0.0,0.6);return;}if(texture2D(uOcc,w/uN8).r>0.5){gl_FragColor=vec4(0.0);return;}float p0=1.0,p1=1.0;'+
- ' for(int i=0;i<8;i++){if(float(i)>=uNL)break;vec4 l=uL[i];float d=length(dev-l.xy);if(d>=l.z)continue;float h=l.w*clamp((l.z-d)/(0.85*l.z),0.0,1.0);if(h<0.01)continue;vec2 lw=(l.xy-uCam.xy)/uCam.z;float v=sicht(w,lw);p0*=1.0-h;p1*=1.0-h*v;}'+
+ ' for(int i=0;i<16;i++){if(float(i)>=uNL)break;vec4 l=uL[i];float d=length(dev-l.xy);if(d>=l.z)continue;float h=l.w*clamp((l.z-d)/(0.85*l.z),0.0,1.0);if(h<0.01)continue;vec2 lw=(l.xy-uCam.xy)/uCam.z;float v=sicht(w,lw);p0*=1.0-h;p1*=1.0-h*v;}'+
  ' for(int i=0;i<8;i++){if(float(i)>=uNX)break;vec4 l=uX[i];float d=length(dev-l.xy);if(d>=l.z)continue;float h=l.w*clamp((l.z-d)/(0.85*l.z),0.0,1.0);p0*=1.0-h;p1*=1.0-h;}'+
  ' float a0=uD*p0,a1=uD*p1;float ad=clamp((a1-a0)/max(1.0-a0,0.02),0.0,0.82);gl_FragColor=uDbg>0.5?vec4(ad,0.0,0.0,ad):vec4(vec3(6.0,4.0,10.0)/255.0*ad,ad);}';
 /* obere Ebene: Nebel, Glanz, Lava, Staub, Spiegelungen (ein Vollbild-Durchgang, additiv bzw. deckend) */
 const FS_E=A.PH+'uniform vec2 uR;uniform vec3 uCam;uniform float uZeit;uniform vec4 uL[8];uniform float uNL;'+
  'uniform float uNeb;uniform vec3 uNebC;uniform vec2 uWindD;uniform vec4 uHeld[4];uniform float uNH;'+
- 'uniform vec4 uWa[12];uniform float uNW;uniform float uGl;uniform vec4 uLa[12];uniform float uNLa;uniform float uLav;uniform float uStb;uniform float uSpg;'+NOISE+
+ 'uniform vec4 uWa[12];uniform float uNW;uniform float uGl;uniform vec4 uLa[12];uniform float uNLa;uniform float uLav;uniform float uStb;uniform float uSpg;uniform vec4 uStr;uniform vec3 uStrC;uniform float uKau;'+NOISE+
  'void main(){vec2 dev=vec2(gl_FragCoord.x,uR.y-gl_FragCoord.y);vec2 w=(dev-uCam.xy)/uCam.z;vec3 add=vec3(0.0);float fa=0.0;vec3 fc=vec3(0.0);'+
  ' float lit=0.0;vec3 lcol=vec3(1.0,0.78,0.5);for(int i=0;i<8;i++){if(float(i)>=uNL)break;vec4 l=uL[i];float d=length(dev-l.xy);lit+=l.w*max(0.0,1.0-d/l.z);}'+
  ' if(uNeb>0.0){vec2 q=w*0.0021+uWindD*uZeit*0.018;float n=fbm(q)*0.65+fbm(q*2.3-uWindD*uZeit*0.03+5.0)*0.35;float tief=0.65+0.35*(dev.y/uR.y);float dens=smoothstep(0.32,0.85,n)*tief;'+
@@ -39916,6 +39916,12 @@ const FS_E=A.PH+'uniform vec2 uR;uniform vec3 uCam;uniform float uZeit;uniform v
  '  float d=length(w-pos);float tw=0.45+0.55*sin(uZeit*(0.8+r1*1.7)+r1*40.0);add+=vec3(1.0,0.86,0.62)*smoothstep(1.5,0.2,d)*max(tw,0.0)*min(lit,1.0)*uStb;}}'+
  ' if(uSpg>0.0){for(int i=0;i<8;i++){if(float(i)>=uNL)break;vec4 l=uL[i];vec2 o=dev-l.xy;if(o.y<0.0||o.y>l.z*1.4)continue;float sx=l.z*0.09*(1.0+o.y/l.z);float s=exp(-o.x*o.x/(sx*sx))*(1.0-o.y/(l.z*1.4));'+
  '   float rp=0.6+0.4*sin(o.y*0.18-uZeit*5.0+vn(dev*0.05)*4.0);add+=vec3(1.0,0.8,0.55)*s*rp*l.w*uSpg*0.22;}}'+
+ /* Legendär: Sonnenstrahlen – breite, langsam wandernde Lichtbahnen entlang der Sonnenrichtung (Weltkoordinaten, nichts „schwimmt“) */
+ ' if(uStr.z>0.0){vec2 sd=uStr.xy;float s=dot(w,vec2(-sd.y,sd.x));float a=dot(w,sd);float st=vn(vec2(s*0.012+uZeit*0.01,3.7))*0.6+vn(vec2(s*0.035-uZeit*0.016,9.1))*0.4;st=smoothstep(0.5,0.88,st);'+
+ '  float br=0.5+0.5*vn(vec2(a*0.004+uZeit*0.02,s*0.006));add+=uStrC*st*br*uStr.z;}'+
+ /* Legendär: Kaustik – wanderndes Lichtnetz auf Teichen */
+ ' if(uKau>0.0){for(int k=0;k<12;k++){if(float(k)>=uNW)break;vec4 c=uWa[k];float d=length(w-c.xy);if(d<c.z){vec2 q=w*0.045;float r1=abs(vn(q+vec2(uZeit*0.22,uZeit*0.15))-0.5),r2=abs(vn(q*1.8-vec2(uZeit*0.18,-uZeit*0.2)+7.3)-0.5);'+
+ '   float ka=pow(clamp(1.0-(r1+r2)*2.4,0.0,1.0),5.0);add+=vec3(0.9,0.97,0.86)*ka*uKau*smoothstep(c.z,c.z*0.75,d)*(0.3+0.7*min(1.0,lit+0.35));break;}}}'+
  ' gl_FragColor=vec4(fc+add,fa);}';
 /* Bloom weichzeichnen (getrennt waagrecht/senkrecht) */
 const FS_B=A.PH+'uniform sampler2D uT;uniform vec2 uD;varying vec2 vT;void main(){vec4 c=texture2D(uT,vT)*0.227;c+=(texture2D(uT,vT+uD*1.385)+texture2D(uT,vT-uD*1.385))*0.316;c+=(texture2D(uT,vT+uD*3.23)+texture2D(uT,vT-uD*3.23))*0.07;gl_FragColor=c;}';
@@ -40010,12 +40016,12 @@ setInterval(()=>{try{GW.haken.uPost=uAktiv()?uPost:null}catch(e){}},500);GW.hake
 
 /* ---------- Haken: obere Ebene, Lichtschatten ---------- */
 const SB={F:null,R:null,gen:-1};
-GW.haken.licht.push(function(c){if(!an('schatten'))return;const R=c.RO,g=R.gl;if(!(c.dunkel>0.3)||!c.m)return;const max=lvl()>=4||modus()==='voll'?8:4;const L=lichter(c,max);FX.st.lichter=L.length;if(!L.length)return;
+GW.haken.licht.push(function(c){if(!an('schatten'))return;const R=c.RO,g=R.gl;if(!(c.dunkel>0.3)||!c.m)return;const max=lvl()>=5?12:lvl()>=4||modus()==='voll'?8:4;const L=lichter(c,max);FX.st.lichter=L.length;if(!L.length)return;
  const occ=occTex(R);if(!occ)return;const p=prog(R,'s');if(!p)return;const sq=lvl()>=5?1:2,hw=Math.max(2,Math.ceil(c.w/sq)),hh=Math.max(2,Math.ceil(c.h/sq));
  if(!SB.F||SB.R!==R||SB.gen!==R.gen||SB.F.w!==hw||SB.F.h!==hh){if(SB.F&&SB.R===R&&SB.gen===R.gen)A.fbWeg(R,SB.F);SB.F=A.fbNeu(R,hw,hh,false);SB.R=R;SB.gen=R.gen;if(!SB.F)return}
  A.rZiel(R,SB.F);g.clearColor(0,0,0,0);g.clear(g.COLOR_BUFFER_BIT);A.useProg(R,p);g.uniform2f(p.u.uR,hw,hh);p.zw=hw;p.zh=hh;g.uniform1f(p.u.uK,c.w/hw);
  g.uniform1i(p.u.uOcc,0);bindT(R,0,occ.t);g.uniform3f(p.u.uCam,c.m[4],c.m[5],c.m[0]);g.uniform1f(p.u.uN8,occ.n8);g.uniform1f(p.u.uD,Math.min(0.95,c.dunkel));g.uniform1f(p.u.uDbg,FX.dbg||0);
- const LV=new Float32Array(32);L.forEach((l,i)=>{LV[i*4]=l.x;LV[i*4+1]=l.y;LV[i*4+2]=l.r;LV[i*4+3]=Math.min(1,l.a)});g.uniform4fv(p.u.uL,LV);g.uniform1f(p.u.uNL,L.length);
+ const LV=new Float32Array(64);L.forEach((l,i)=>{LV[i*4]=l.x;LV[i*4+1]=l.y;LV[i*4+2]=l.r;LV[i*4+3]=Math.min(1,l.a)});g.uniform4fv(p.u.uL,LV);g.uniform1f(p.u.uNL,L.length);
  const X=rest(c,L),XV=new Float32Array(32);X.forEach((l,i)=>{XV[i*4]=l.x;XV[i*4+1]=l.y;XV[i*4+2]=l.r;XV[i*4+3]=Math.min(1,l.a)});g.uniform4fv(p.u.uX,XV);g.uniform1f(p.u.uNX,X.length);
  const Fg=an('figuren')?figuren(c,24):[];const FV=new Float32Array(96);Fg.forEach((f,i)=>{FV[i*4]=f[0];FV[i*4+1]=f[1];FV[i*4+2]=f[2]});g.uniform4fv(p.u.uF,FV);g.uniform1f(p.u.uNF,Fg.length);
  blend(R,'copy');vollbild(R,p,hw,hh,false);
@@ -40025,11 +40031,15 @@ GW.haken.licht.push(function(c){if(!an('schatten'))return;const R=c.RO,g=R.gl;if
 /* ---------- Haken: obere Ebene, Nebel/Glanz/Lava/Staub/Spiegelungen ---------- */
 GW.haken.ende.push(function(c){const R=c.RO,g=R.gl;if(!c.m)return;const x=WXo();let C=null;try{C=OA.cfg}catch(e){}
  const neb=an('nebel')&&((x&&(x.w==='nebel'||x.w==='sporen'))||(C&&C.fog))?1:0;
- const wa=[],la=[];if(an('glanz')||an('lava')){try{const V=wlSicht(),Wd=G.wl;if(Wd&&Wd.an&&Wd.lo)for(const o of Wd.lo){if(o.t!=='c')continue;if(o.x+o.r<V.x0||o.x-o.r>V.x1||o.y+o.r<V.y0||o.y-o.r>V.y1)continue;if(o.k==='wasser'&&wa.length<12)wa.push([o.x,o.y,o.r]);else if(o.k==='lava'&&la.length<12)la.push([o.x,o.y,o.r])}}catch(e){}
+ const wa=[],la=[];if(an('glanz')||an('lava')||an('kaustik')){try{const V=wlSicht(),Wd=G.wl;if(Wd&&Wd.an&&Wd.lo)for(const o of Wd.lo){if(o.t!=='c')continue;if(o.x+o.r<V.x0||o.x-o.r>V.x1||o.y+o.r<V.y0||o.y-o.r>V.y1)continue;if(o.k==='wasser'&&wa.length<12)wa.push([o.x,o.y,o.r]);else if(o.k==='lava'&&la.length<12)la.push([o.x,o.y,o.r])}}catch(e){}
   try{for(const z of G.ezones||[])if(z&&z.kind==='lava'&&la.length<12)la.push([z.x,z.y,z.r||40])}catch(e){}try{const vw=W/ZOOM,vh=H/ZOOM,cx0=G.cam.x-vw/2,cy0=G.cam.y-vh/2;for(const d of G.deco){if(la.length>=12)break;if(d.k==='lava'&&d.x>cx0-100&&d.x<cx0+vw+100&&d.y>cy0-100&&d.y<cy0+vh+100)la.push([d.x,d.y,30*(d.s||1)])}}catch(e){}}
  const gl_=an('glanz')&&wa.length?1:0,lav=an('lava')&&la.length?1:0;let th='';try{th=G.themeKey||''}catch(e){}
  const stb=an('staub')&&(!OUT()||G.room)?1:0,spg=an('spiegel')&&OUT()&&x&&(x.w==='regen'||x.w==='gewitter')?1:0;
- if(!neb&&!gl_&&!lav&&!stb&&!spg)return;const p=prog(R,'e');if(!p)return;A.rZiel(R,c.of);A.useProg(R,p);g.uniform2f(p.u.uR,c.w,c.h);p.zw=c.w;p.zh=c.h;
+ /* Legendär: Sonnenstrahlen (draußen, bei Tag und Dämmerung; im Nebel kräftiger, bei Regen aus) und Kaustik auf Teichen */
+ let str=0,sdx=0,sdy=0,sc=[1,0.9,0.66];if(an('strahlen')){const so=sonne();if(so){const sl=Math.hypot(so.dx,so.dy)||1;sdx=so.dx/sl;sdy=so.dy/sl;str=0.095;const z=x&&x.z,wt=x&&x.w;if(z==='daemmer'){str=0.13;sc=[1,0.72,0.44]}
+   if(wt==='regen'||wt==='gewitter')str=0;else if(wt==='nebel')str*=1.5;else if(wt==='schnee')str*=0.6}}
+ const kau=an('kaustik')&&wa.length?(x&&x.z==='nacht'?0.1:0.22):0;
+ if(!neb&&!gl_&&!lav&&!stb&&!spg&&!str&&!kau)return;const p=prog(R,'e');if(!p)return;A.rZiel(R,c.of);A.useProg(R,p);g.uniform2f(p.u.uR,c.w,c.h);p.zw=c.w;p.zh=c.h;
  g.uniform3f(p.u.uCam,c.m[4],c.m[5],c.m[0]);g.uniform1f(p.u.uZeit,((G.time||0)%1000));
  const L=lichter(c,8),LV=new Float32Array(32);L.forEach((l,i)=>{LV[i*4]=l.x;LV[i*4+1]=l.y;LV[i*4+2]=l.r;LV[i*4+3]=Math.min(1,l.a)});g.uniform4fv(p.u.uL,LV);g.uniform1f(p.u.uNL,L.length);
  let nc=[0.78,0.76,0.73],na=0.16;try{if(x&&x.w==='sporen'){nc=[0.55,0.62,0.4];na=0.12}else if(C&&C.fog){const f=C.fog[0];/* warm-neutral statt kühl */const gr=(f[0]+f[1]+f[2])/765*0.5+0.4;nc=[gr*1.02+0.02,gr,gr*0.95];na=Math.min(0.16,(C.fog[1]||0.12)*0.75)}}catch(e){}
@@ -40037,7 +40047,7 @@ GW.haken.ende.push(function(c){const R=c.RO,g=R.gl;if(!c.m)return;const x=WXo();
  const HV=new Float32Array(16);let nh=0;try{for(const q of (G.mp?PL:[P])){if(!q||nh>=4)break;HV[nh*4]=q.x;HV[nh*4+1]=q.y;nh++}}catch(e){}g.uniform4fv(p.u.uHeld,HV);g.uniform1f(p.u.uNH,nh);
  const WV=new Float32Array(48);wa.forEach((q,i)=>{WV[i*4]=q[0];WV[i*4+1]=q[1];WV[i*4+2]=q[2]});g.uniform4fv(p.u.uWa,WV);g.uniform1f(p.u.uNW,wa.length);g.uniform1f(p.u.uGl,gl_?0.35:0);
  const LA=new Float32Array(48);la.forEach((q,i)=>{LA[i*4]=q[0];LA[i*4+1]=q[1];LA[i*4+2]=q[2]});g.uniform4fv(p.u.uLa,LA);g.uniform1f(p.u.uNLa,la.length);g.uniform1f(p.u.uLav,lav?1:0);
- g.uniform1f(p.u.uStb,stb?0.5:0);g.uniform1f(p.u.uSpg,spg?1:0);
+ g.uniform1f(p.u.uStb,stb?0.5:0);g.uniform1f(p.u.uSpg,spg?1:0);g.uniform4f(p.u.uStr,sdx,sdy,str,0);g.uniform3f(p.u.uStrC,sc[0],sc[1],sc[2]);g.uniform1f(p.u.uKau,kau);
  /* Nebel deckt (über), Licht/Glanz addiert: vormultipliziert über = rgb + dst·(1−a) */blend(R,'over');vollbild(R,p,c.w,c.h,false);FX.st.o++});
 
 /* ---------- Bloom weicher: zwei Weichzeichner-Durchgänge auf dem kleinen Bloom-Bild ---------- */
