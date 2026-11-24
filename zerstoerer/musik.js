@@ -361,7 +361,9 @@
   /* ---------- Einzelnoten aus Aufnahmen ---------- */
   function playNote(inst, midi, when, vol, dur, bus, prio) {
     if (!A.ok || !M.out || !INST[inst]) return;
-    if (M.live > voiceCap(prio) && !(prio === 2 && yieldVoice())) { M.stats.skipped++; if (prio === 2) M.stats.skipSt = (M.stats.skipSt || 0) + 1; return; } /* Notbremse für die Stimmenzahl (Handheld: wenige Stimmen, Audio-Thread schonen) */
+    /* prio -1: Stimme einer Lagerfigur bzw. Schmuckschicht des Lagers – zählt wie Satz (0), weicht aber, wenn der Satz bei voller Grenze eine Stimme braucht */
+    const fig = prio === -1; if (fig) prio = 0;
+    if (M.live > voiceCap(prio) && !(prio === 2 && yieldVoice()) && !(!fig && yieldVoice(true))) { if (fig) { M.stats.skipFig = (M.stats.skipFig || 0) + 1; return; } M.stats.skipped++; if (prio === 2) M.stats.skipSt = (M.stats.skipSt || 0) + 1; return; } /* Notbremse für die Stimmenzahl (Handheld: wenige Stimmen, Audio-Thread schonen) */
     midi = fit(inst, midi);
     const n = nearest(inst, midi), path = K(inst + "_" + n), b = A.buf[path];
     if (!b) { if (b === undefined) A.load(path); return; }
@@ -371,13 +373,13 @@
     g.gain.setValueAtTime(0, when); g.gain.linearRampToValueAtTime(vol, when + att);
     g.gain.setValueAtTime(vol, when + dur * 0.72); g.gain.linearRampToValueAtTime(0, when + dur);
     s.connect(g); g.connect(bus || M.busMel);
-    track(s, g, bus === M.busSt, when + dur); s.start(when); s.stop(when + dur + 0.05);
+    track(s, g, bus === M.busSt, when + dur, fig); s.start(when); s.stop(when + dur + 0.05);
   }
   /* Schlagwerk / Einzelklang */
   function hit(name, when, vol, rate, bus, rev) {
     if (!A.ok || !M.out) return;
     const pr = bus && bus === M.busSt ? 2 : false;
-    if (M.live > voiceCap(pr) && !(pr && yieldVoice())) { M.stats.skipped++; return; }
+    if (M.live > voiceCap(pr) && !(pr && yieldVoice()) && !yieldVoice(true)) { M.stats.skipped++; return; }
     const path = K(name); let b = A.buf[path]; if (!b) { if (b === undefined) A.load(path); return; }
     if (rev) b = reversed(path, b);
     const c = A.ctx; when = Math.max(when, c.currentTime + 0.005);
@@ -392,9 +394,9 @@
   function voiceCap(prio) { const q = Z.gq || {}; return (q.mini ? (prio ? 13 : 10) : q.lean ? (prio ? 18 : 14) : 110) + (prio === 2 ? 12 : 0); }
   /* Knoten nach dem Verklingen wieder lösen und mitzählen */
   const VOC = new Set();
-  function track(s, g, st, end) {
+  function track(s, g, st, end, fig) {
     M.live++; M.stats.notes++;
-    const v = { s, g, st, end: end || 0 }; VOC.add(v);
+    const v = { s, g, st, end: end || 0, fig: !!fig }; VOC.add(v);
     s.onended = () => { if (!v.freed) M.live--; VOC.delete(v); try { s.disconnect(); g.disconnect(); } catch (_) {} };
   }
   /* Stimmen des Satzes (nicht der Stinger) schnell ausblenden und beenden – für den Bosstod-Stinger */
@@ -407,9 +409,9 @@
   /* Vorrang (Stinger prio 2: Bossauftritt, Bossphase, Kampfbeginn, Hinterhalt, Sieg): ist auch die erweiterte Grenze voll,
      weicht statt der Stinger-Note die Satz-Stimme, die am frühesten ohnehin endet (kurz ausgeblendet) – so gehen auf
      Handheld (Grenze 14/18 bzw. 10/13) keine Stinger-Noten verloren und die Stimmenzahl bleibt trotzdem begrenzt */
-  function yieldVoice() {
+  function yieldVoice(figOnly) {
     let best = null;
-    for (const v of VOC) if (!v.st && !v.freed && (!best || v.end < best.end)) best = v;
+    for (const v of VOC) if (!v.st && !v.freed && (!figOnly || v.fig) && (!best || v.end < best.end)) best = v;
     if (!best) return false;
     const now = A.ctx.currentTime; best.freed = true; M.live--; M.stats.yielded = (M.stats.yielded || 0) + 1;
     try { best.g.gain.cancelScheduledValues(now); best.g.gain.setTargetAtTime(0, now, 0.03); best.s.stop(now + 0.2); } catch (_) {}
@@ -544,20 +546,26 @@
   function lagerStep(p, t, st, bar, ph, beat, chord, tone, chordStart, hum) {
     if (st === 0 && bar % 8 === 0) { const I = lagerInfo(); p.lst = I.stage; p.lres = I.res; } /* im Lager gekauft/eingezogen: beim nächsten 8-Takt-Abschnitt hörbar */
     const S = p.lst;
-    if (S >= 2 && st === 0) playNote("kb", tone(0, p.root - 12), t, 0.12, beat * 3, M.busExp);                       /* Hütten: warmer Bass auf der Eins */
+    if (S >= 2 && st === 0) playNote("kb", tone(0, p.root - 12), t, 0.12, beat * 3, M.busExp, -1);                       /* Hütten: warmer Bass auf der Eins */
     if (S >= 3) { if (st === 0) hit("rahm_1", t, 0.16, 0.9, M.busCol); else if (st === 5) hit("rahm_2", t, 0.09, 1, M.busCol); } /* Palisade: Rahmentrommel, Herzschlag */
-    if (S >= 4 && st === 0 && bar % 4 === 0) { playNote("psab", tone(2, p.root + 24), t, 0.04, beat * 24, M.busCol); playNote("psab", tone(0, p.root + 24), t + beat * 2, 0.035, beat * 22, M.busCol); } /* Banner: Psalter schimmert */
-    if (S >= 5 && chordStart && bar % 4 === 0) for (const i of [0, 1, 2]) playNote("aah", tone(i, p.root + 12), t, 0.04, beat * 30, M.busExp); /* Feste: Chor öffnet sich */
+    const ln = !!(Z.gq && Z.gq.lean); /* Handheld: lange Flächen kürzer und eine Stimme weniger (Stimmengrenze 14) */
+    if (S >= 4 && st === 0 && bar % 4 === 0) { playNote("psab", tone(2, p.root + 24), t, 0.04, beat * (ln ? 14 : 24), M.busCol, -1); if (!ln) playNote("psab", tone(0, p.root + 24), t + beat * 2, 0.035, beat * 22, M.busCol, -1); } /* Banner: Psalter schimmert */
+    if (S >= 5 && chordStart && bar % 4 === 0) for (const i of ln ? [0, 2] : [0, 1, 2]) playNote("aah", tone(i, p.root + 12), t, 0.04, beat * (ln ? 18 : 30), M.busExp, -1); /* Feste: Chor öffnet sich */
     /* Bewohner: zu Beginn jeder Phrase ist einer dran (der Reihe nach); in Atempausen der Handpan voll, sonst manchmal leise dazu */
     if (ph === 0 && p.lres.length) {
-      const id = p.lres[p.rk++ % p.lres.length], r = RESV[id], solo = !M.phrase;
-      if (!solo && Math.random() > 0.35) return;
+      const id = p.lres[p.rk % p.lres.length], r = RESV[id], solo = !M.phrase;
+      if (!solo && Math.random() > 0.35) { p.rk++; return; }
+      /* Handheld: reicht die Stimmengrenze nicht für das ganze Motiv (plus 2 Stimmen Luft für den Satz), wird die Figur
+         auf die nächste Phrase zurückgestellt – sie kommt dann als Nächste dran, statt dass Satz- oder Motivnoten verloren gehen */
+      const need = r.hit ? 0 : r.n.length * (r.chord ? 3 : 1);
+      if (need && M.live + need > voiceCap(0)) { M.stats.lagerZurueck = (M.stats.lagerZurueck || 0) + 1; return; }
+      p.rk++;
       const vk = solo ? 1 : 0.55; M.stats.lagerStimme = M.stats.lagerStimme || {}; M.stats.lagerStimme[id] = (M.stats.lagerStimme[id] || 0) + 1;
       if (r.hit) { for (const s0 of r.pat) hit(r.hit, t + s0 * beat + rnd(-0.004, 0.006), r.v * vk * (s0 % 8 === 0 ? 1.3 : 1), 1.02 + rnd(-0.02, 0.02), M.busCol); return; }
       for (const [d, s0, l] of r.n) {
         const at = t + s0 * beat + rnd(-0.004, 0.008);
-        if (r.chord) { for (const i of [0, 1, 2]) playNote(r.i, tone(i, p.root + r.o), at, r.v * vk, beat * l * 0.9, M.busCol); }
-        else playNote(r.i, deg(p.scale, chord + d, p.root + r.o), at, r.v * vk, beat * l * 1.3 + 0.1, M.busCol);
+        if (r.chord) { for (const i of [0, 1, 2]) playNote(r.i, tone(i, p.root + r.o), at, r.v * vk, beat * l * 0.9, M.busCol, -1); }
+        else playNote(r.i, deg(p.scale, chord + d, p.root + r.o), at, r.v * vk, beat * l * 1.3 + 0.1, M.busCol, -1);
       }
     }
   }

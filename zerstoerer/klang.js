@@ -771,6 +771,154 @@
   KL.raumTest = (id) => { setRoom(id, null); RM.pend = id; RM.pendT = 0; RM.force = id; };
 
   /* ---------- Beobachter ---------- */
+
+  /* ======================= SONDERRÄUME UND ZERSTÖRUNG (W13) =======================
+     Beobachtet die Daten aus welt.js/erkundung.js (lv.specials, Z._kraene(), lv.gates, lv.wuchtSet, lv.morsch) – keine Aufrufe in fremden Dateien nötig:
+       Kran       – Kette rasselt und Holz knarzt während der Fahrt, Ruck beim Anfahren, Anschlag oben (hell, Holz) und unten (dumpf, schwer)
+       Flutkammer – Wasser rauscht, solange die Kammer voll ist; Hebel → Ablaufen: Gurgeln, Strudel schwillt an und versiegt;
+                    wer hineinfällt („Zu tief“), platscht laut (Z.flutSicher wird dazu umhüllt)
+       Brücke     – Wind pfeift im Spalt (Schleife nach Abstand), gelegentlich bröckelt es
+       Wucht-Riss – leichter Treffer: Knirschen im Stein; Wuchtschlag/Explosion: Einsturz mit Steinlawine, Splittern und Staubrauschen
+                    (Z.hitProps wird beim ersten Takt als äußerste Hülle umwickelt)
+       Morscher Boden – Bersten: splitterndes Holz, Poltern der Bohlen, Staub */
+  const SR = { lv: null, kr: [], flut: [], br: [], wT: 4, splT: 0, hooked: false, morsch: null, stats: { kran: 0, anschlag: 0, flutAb: 0, platsch: 0, broeckeln: 0, knirschen: 0, einsturz: 0, bersten: 0 } };
+  KL.sonder = SR;
+  function wshot(path, x, y, o) {
+    const [v, pan] = posMix(x, y, o && o.far); if (v < 0.03) return null;
+    return shot(path, Object.assign({}, o, { vol: (o && o.vol != null ? o.vol : 0.3) * v, pan }));
+  }
+  const pk = l => l[(Math.random() * l.length) | 0];
+  const SRS = {
+    kette: RA("n_kette_", 4).concat(RA("g_kette_", 3)), knarz: RA("n_knarren_", 22), ruck: [KS("fx_ka_creak2")].concat(RA("e_riemen_", 2)),
+    obenH: [KS("fx_im_impactplank_medium_002"), KS("fx_fo_wooden_02")], untenH: [KS("fx_im_impactplate_heavy_001"), KS("fx_im_impactmetal_heavy_000")],
+    blubb: RA("e_blubb_", 4).concat(RA("n_blubb_", 3)), platsch: RA("n_platsch_", 10).concat(RA("e_platsch_", 4)),
+    kies: RA("n_kies_", 8), steinschlag: RA("g_steinschlag_", 4).concat(RA("n_steinschlag_", 5)), knirsch: RK("fx_0_stein_treffer_", [1, 2, 3, 4]),
+    bruch: [KS("fx_br_bfh1_rock_breaking_01"), KS("fx_br_bfh1_rock_breaking_02")], lawine: [KS("fx_br_bfh1_rock_falling_04")],
+    holz: RA("g_holzbruch_", 7).concat(RA("n_holzbruch_", 3)), poltern: RA("e_holzpoltern_", 7), planke: [KS("fx_im_impactplank_medium_002")]
+  };
+  /* Staubwolke: gefiltertes Rauschen, das aufbraust und mit sinkendem Tiefpass verweht (ein Puffer, je Einsatz zwei Knoten + Filter) */
+  let noiseB = null;
+  function dustNoise(x, y, vol, len) {
+    const [v, pan] = posMix(x, y, 1.2); if (v < 0.03 || !A.ok) return;
+    const c = A.ctx; if (!noiseB || noiseB.sampleRate !== c.sampleRate) { noiseB = c.createBuffer(1, c.sampleRate * 2, c.sampleRate); const d = noiseB.getChannelData(0); let b = 0; for (let i = 0; i < d.length; i++) { b = b * 0.97 + (Math.random() * 2 - 1) * 0.03; d[i] = b * 6; } }
+    const t = c.currentTime + 0.02, L = len || 1.6, s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain(), pn = c.createStereoPanner ? c.createStereoPanner() : null;
+    s.buffer = noiseB; s.loop = true; f.type = "lowpass"; f.frequency.setValueAtTime(2600, t); f.frequency.exponentialRampToValueAtTime(260, t + L);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol * v, t + 0.08); g.gain.setTargetAtTime(0, t + 0.25, L / 3.5);
+    s.connect(f); f.connect(g); if (pn) { pn.pan.value = pan; g.connect(pn); pn.connect(A.sfx); } else g.connect(A.sfx);
+    s.start(t); s.stop(t + L + 0.6); s.onended = () => { try { s.disconnect(); f.disconnect(); g.disconnect(); pn && pn.disconnect(); } catch (_) {} };
+  }
+  function sonderLevel(lv) {
+    SR.lv = lv; SR.kr = []; SR.flut = []; SR.br = []; SR.morsch = (lv.morsch || []).map(m => !!m.broken);
+    A.stopLoop && A.stopLoop("sr_flut", 0.5); A.stopLoop && A.stopLoop("sr_wind", 0.5); SR.flutV = SR.windV = 0; SR.flutCur = null; SR.windOn = false;
+    const T = Z.TILE;
+    for (const o of lv.specials || []) {
+      if (o.k === "flut") { const g = (lv.gates || [])[o.gate]; SR.flut.push({ o, g, x: (o.x0 + o.x1 + 1) / 2 * T, y: (o.top + 2) * T, open: !!(g && g.open), drainT: 0 }); }
+      if (o.k === "bruecke") SR.br.push({ x: o.x * T + T, y: o.y0 * T + 1.5 * T, t: 4 + Math.random() * 8 });
+    }
+    const l = [];
+    if ((lv.specials || []).length) l.push(...SRS.kette, ...SRS.knarz.slice(0, 8), ...SRS.ruck, ...SRS.obenH, ...SRS.untenH, ...SRS.blubb, ...SRS.platsch.slice(0, 6), ...SRS.kies, ...SRS.steinschlag, AM("a_bach_n1"), AM("a_wildwasser"), AM("a_ruinenwind"), AM("a_heulwind"));
+    if ((lv.wucht || []).length) l.push(...SRS.knirsch, ...SRS.bruch, ...SRS.lawine, ...SRS.steinschlag, ...SRS.kies);
+    if ((lv.morsch || []).length) l.push(...SRS.holz, ...SRS.poltern, ...SRS.planke);
+    preload(l);
+  }
+  function hookOnce() {
+    if (SR.hooked) return; SR.hooked = true;
+    /* „Zu tief“: wer in die volle Flutkammer fällt */
+    const fs0 = Z.flutSicher;
+    if (fs0) Z.flutSicher = function (P) {
+      const r = fs0.apply(this, arguments);
+      try { if (r && A.ok && A.ctx.currentTime - SR.splT > 0.8) { SR.splT = A.ctx.currentTime; SR.stats.platsch++; const x = P.x + P.w / 2, y = P.y + P.h;
+        wshot(pk(SRS.platsch), x, y, { vol: 0.55, rate: 0.75, verb: 0.5, gap: 0 }); wshot(pk(SRS.platsch), x, y, { vol: 0.35, rate: 1.1, delay: 0.09, gap: 0, tag: "p2" });
+        for (let i = 0; i < 3; i++) wshot(pk(SRS.blubb), x, y, { vol: 0.16, rate: 0.8 + Math.random() * 0.4, delay: 0.3 + i * 0.22, gap: 0, tag: "pb" + i }); } } catch (_) {}
+      return r;
+    };
+    /* Wucht-Risse: Knirschen bei leichtem Treffer, Einsturz beim Brechen */
+    const hp0 = Z.hitProps;
+    Z.hitProps = function (r, dmg, act) {
+      const lv = Z.level, T = Z.TILE; let before = null;
+      if (r && lv && lv.wuchtSet && lv.wuchtSet.size) {
+        before = [];
+        for (let ty = Math.floor(r.y / T); ty <= Math.floor((r.y + r.h) / T); ty++) for (let tx = Math.floor(r.x / T); tx <= Math.floor((r.x + r.w) / T); tx++) if (lv.wuchtSet.has(ty * lv.W + tx) && lv.get(tx, ty) === 7) before.push([tx, ty]);
+      }
+      const res = hp0 ? hp0.apply(this, arguments) : undefined;
+      if (before && before.length) try { crackSound(lv, before); } catch (_) {}
+      return res;
+    };
+  }
+  function crackSound(lv, tiles) {
+    const T = Z.TILE, gone = tiles.filter(([x, y]) => lv.get(x, y) !== 7 || !lv.wuchtSet.has(y * lv.W + x));
+    let sx = 0, sy = 0; for (const [x, y] of (gone.length ? gone : tiles)) { sx += x; sy += y; } const n = gone.length || tiles.length, x = (sx / n + 0.5) * T, y = (sy / n + 0.5) * T;
+    if (!gone.length) { /* Riss-Knirschen: Stein knirscht, ein paar Krümel rieseln */
+      if (A.ctx.currentTime - (SR.knT || 0) < 0.12) return; SR.knT = A.ctx.currentTime; SR.stats.knirschen++;
+      wshot(pk(SRS.knirsch), x, y, { vol: 0.32, rate: 0.62 + Math.random() * 0.12, gap: 0, tag: "kn" });
+      wshot(pk(SRS.kies), x, y, { vol: 0.12, rate: 1.2, delay: 0.08, gap: 0, tag: "knk" });
+      return;
+    }
+    /* Einsturz: Bruch, Lawine, nachpolternde Brocken, Staubrauschen – größer bei mehr Kacheln */
+    if (A.ctx.currentTime - (SR.esT || 0) < 0.25) return; SR.esT = A.ctx.currentTime; SR.stats.einsturz++;
+    const k = clamp(gone.length / 6, 0.5, 1.4);
+    wshot(pk(SRS.bruch), x, y, { vol: 0.55 * k, rate: 0.85, verb: 0.55, gap: 0, tag: "es" });
+    wshot(pk(SRS.lawine), x, y, { vol: 0.45 * k, rate: 0.9, delay: 0.12, gap: 0, tag: "esl" });
+    const nB = Math.round(2 + 3 * k); for (let i = 0; i < nB; i++) wshot(pk(SRS.steinschlag), x + (Math.random() - 0.5) * 30, y, { vol: (0.3 - i * 0.04) * k, rate: 0.8 + Math.random() * 0.4, delay: 0.25 + i * (0.12 + Math.random() * 0.12), gap: 0, tag: "esb" + i });
+    for (let i = 0; i < 3; i++) wshot(pk(SRS.kies), x, y, { vol: 0.14, rate: 1 + Math.random() * 0.3, delay: 0.7 + i * 0.35, gap: 0, tag: "esk" + i });
+    dustNoise(x, y, 0.14 * k, 1.8);
+  }
+  function sonderTick(dt) {
+    const lv = Z.level; if (!lv) return;
+    if (lv !== SR.lv) sonderLevel(lv);
+    hookOnce();
+    const cam = Z.cam; if (!cam) return;
+    const cx = cam.x + cam.w / 2, cy = cam.y + cam.h / 2;
+    /* --- Kräne --- */
+    for (const m of (Z._kraene ? Z._kraene() : [])) {
+      const st = m._kl || (m._kl = { mv: !(m.pause > 0), t: 0 }), mv = !(m.pause > 0), x = m.x + m.w / 2, y = m.y;
+      if (Math.abs(x - cx) > cam.w * 1.3 || Math.abs(y - cy) > cam.h * 1.5) { st.mv = mv; continue; }
+      if (mv && !st.mv) { SR.stats.kran++; wshot(pk(SRS.ruck), x, y - 30, { vol: 0.28, rate: 0.8, gap: 0, tag: "kr" }); wshot(pk(SRS.kette), x, y - 40, { vol: 0.3, rate: 0.85, gap: 0, tag: "krk" }); }
+      if (!mv && st.mv) { SR.stats.anschlag++; const oben = Math.abs(m.y - m.y0) < Math.abs(m.y - m.y1);
+        wshot(pk(oben ? SRS.obenH : SRS.untenH), x, y, { vol: oben ? 0.34 : 0.5, rate: oben ? 1.05 : 0.7, verb: 0.45, gap: 0, tag: "ka" });
+        wshot(pk(SRS.kette), x, y - 40, { vol: 0.22, rate: 1.1, delay: 0.06, gap: 0, tag: "kak" }); if (!oben) dustNoise(x, y, 0.05, 0.9); }
+      if (mv) { st.t -= dt; if (st.t <= 0) { st.t = 0.3 + Math.random() * 0.18; wshot(pk(SRS.kette), x, y - 40, { vol: 0.1 + Math.random() * 0.05, rate: (m.dir < 0 ? 1.05 : 0.9) + Math.random() * 0.1, gap: 0, tag: "km", verb: 0.3 });
+        if (Math.random() < 0.22) wshot(pk(SRS.knarz), x, y - 20, { vol: 0.11, rate: 0.8 + Math.random() * 0.3, gap: 0, tag: "kz" }); } }
+      st.mv = mv;
+    }
+    /* --- Flutkammern --- */
+    let fV = 0, fX = 0, fY = 0;
+    for (const f of SR.flut) {
+      const open = !!(f.g && f.g.open);
+      if (open && !f.open) { /* Hebel gezogen: Gurgeln, Strudel schwillt an und versiegt */
+        SR.stats.flutAb++; f.drainT = 4.5;
+        for (let i = 0; i < 7; i++) wshot(pk(SRS.blubb), f.x + (Math.random() - 0.5) * 50, f.y + 20, { vol: 0.26 - i * 0.02, rate: 0.55 + Math.random() * 0.35, delay: 0.2 + i * 0.45 + Math.random() * 0.2, gap: 0, tag: "fb" + i, far: 1.4 });
+      }
+      f.open = open;
+      if (f.drainT > 0) { f.drainT -= dt; }
+      const [v] = posMix(f.x, f.y, 1.3);
+      const want = f.drainT > 0 ? 0.5 * Math.min(1, (4.5 - f.drainT) / 0.8) * Math.min(1, f.drainT / 2.2) : open ? 0 : 0.2;
+      if (want * v > fV) { fV = want * v; fX = f.x; fY = f.y; SR.flutPath = f.drainT > 0 ? AM("a_wildwasser") : AM("a_bach_n1"); }
+    }
+    if (A.loop && (fV > 0.01 || SR.flutV > 0.01)) {
+      if (fV > 0.01 && SR.flutCur !== SR.flutPath) { SR.flutCur = SR.flutPath; A.loop("sr_flut", SR.flutPath, 0); }
+      SR.flutV = fV; A.loopVol("sr_flut", fV * (normOf(SR.flutPath, -32) || 0.5), 0.4);
+    }
+    /* --- Brücken: Wind im Spalt (nächste Brücke), gelegentliches Bröckeln --- */
+    let wV = 0;
+    for (const b of SR.br) {
+      const [v] = posMix(b.x, b.y, 1.1); wV = Math.max(wV, v);
+      b.t -= dt; if (b.t <= 0) { b.t = 6 + Math.random() * 9; if (v > 0.15) { SR.stats.broeckeln++; wshot(pk(SRS.steinschlag), b.x, b.y, { vol: 0.13, rate: 1.1 + Math.random() * 0.3, gap: 0, tag: "bb" }); for (let i = 0; i < 2; i++) wshot(pk(SRS.kies), b.x, b.y + 10, { vol: 0.08, rate: 1.2, delay: 0.15 + i * 0.3, gap: 0, tag: "bk" + i }); } }
+    }
+    if (A.loop && (wV > 0.01 || SR.windV > 0.01)) {
+      const path = AM("a_ruinenwind"); if (wV > 0.01 && !SR.windOn) { SR.windOn = true; A.loop("sr_wind", path, 0); }
+      SR.windV = wV; A.loopVol("sr_wind", wV * 0.6 * (normOf(path, -32) || 0.5), 0.6);
+    }
+    /* --- morsche Böden: Bersten --- */
+    const ms = lv.morsch || [];
+    if (SR.morsch) for (let i = 0; i < ms.length; i++) if (ms[i].broken && !SR.morsch[i]) {
+      SR.morsch[i] = true; SR.stats.bersten++; const T = Z.TILE, m = ms[i], x = (m.x0 + m.x1 + 1) / 2 * T, y = m.y * T;
+      wshot(pk(SRS.holz), x, y, { vol: 0.55, rate: 0.85, gap: 0, tag: "mb" }); wshot(pk(SRS.holz), x + 10, y, { vol: 0.4, rate: 1.1, delay: 0.07, gap: 0, tag: "mb2" });
+      wshot(pk(SRS.planke), x, y, { vol: 0.4, rate: 0.7, delay: 0.03, gap: 0, tag: "mp" });
+      for (let k = 0; k < 4; k++) wshot(pk(SRS.poltern), x + (Math.random() - 0.5) * 40, y + 30, { vol: 0.25 - k * 0.04, rate: 0.85 + Math.random() * 0.3, delay: 0.3 + k * 0.18 + Math.random() * 0.1, gap: 0, tag: "mpo" + k });
+      dustNoise(x, y, 0.07, 1.2);
+    }
+  }
   const W = { lv: null, pages: 0, kills: 0, chain: 0, chainT: 0, boss: null, phase: 0, won: false, dead: false, seenChest: new WeakSet(), seenElite: new WeakSet(), seenLoot: new WeakSet(), chall: 0, trials: 0, dripT: 2 };
   /* liegt ein Punkt im Bild (mit etwas Rand)? */
   const onCam = (x, y, m) => { const c = Z.cam; if (!c) return true; m = m || 0; return x > c.x - m && x < c.x + c.w + m && y > c.y - m && y < c.y + c.h + m; };
@@ -848,6 +996,7 @@
     if (!KL.wPre) { KL.wPre = 1; preload([1, 2, 3, 4].map(i => AM("n_fuchs_" + i)).concat([KS("fx_ka_creak2")])); }
     /* Raumkulisse und Gegnerstimmen */
     try { roomTick(dt); observe(dt); climbTick(dt); transitTick(dt); } catch (e) { if (!KL.err3) { KL.err3 = 1; console.error(e); } }
+    try { sonderTick(dt); } catch (e) { if (!KL.err7) { KL.err7 = 1; console.error(e); } }
   };
 
   /* in den Takt der Musik einhängen (läuft auch während der Pause weiter) */
