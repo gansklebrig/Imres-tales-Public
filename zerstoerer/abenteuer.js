@@ -94,6 +94,7 @@
   }
   Z.einsturzTest = () => { einsturzT = 0; }; Z.brockenN = () => brocken.length; Z.brockenListe = () => brocken;
   function drawBrocken(c) {
+    if (brocken.length && Z.brockenGemalt && Z.brockenGemalt(c, brocken, VARIANTEN.einsturz)) return; /* W11 R39 (Grafik): gemalte Fassung in effekte.js */
     for (const b of brocken) {
       if (!b.fall) { const a = Math.min(1, b.t / VARIANTEN.einsturz.warn); c.fillStyle = "rgba(0,0,0," + (0.15 + 0.35 * a).toFixed(2) + ")"; c.beginPath(); c.ellipse(b.x, b.yF - 1, 6 + 8 * a, 2.2, 0, 0, 6.283); c.fill(); continue; }
       c.fillStyle = "#5a4e48"; c.beginPath(); c.moveTo(b.x - 8, b.y); c.lineTo(b.x - 3, b.y - 9); c.lineTo(b.x + 7, b.y - 6); c.lineTo(b.x + 8, b.y + 4); c.lineTo(b.x - 2, b.y + 8); c.closePath(); c.fill();

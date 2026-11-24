@@ -2368,7 +2368,7 @@
   function cutHoles(hole0, cone0, holeC0, t, ck) {
     const P = Z.player;
     if (P) {
-      let r = Z.darkness > 0 ? 70 : 150;
+      let r = Z.darkness > 0 ? 70 : 150 + 70 * sanftV; /* R39: größerer Lichtkreis bei sanfter Abdunkelung */
       if ((P.slots.a1 && P.slots.a1.id === "dawnbringer") || (P.slots.a2 && P.slots.a2.id === "dawnbringer")) r += 70;
       hole0(P.x + P.w / 2, P.y + 10, r, 0.95);
     }
@@ -2397,9 +2397,17 @@
       kg.addColorStop(0, "rgba(" + col + ",.9)"); kg.addColorStop(0.5, "rgba(" + col + ",.4)"); kg.addColorStop(1, "rgba(" + col + ",0)"); k.fillStyle = kg; k.beginPath(); k.moveTo(26, 0); k.lineTo(38, 0); k.lineTo(64, 96); k.lineTo(0, 96); k.closePath(); k.fill(); return s; };
     G.holeSpr = mkHole("0,0,0"); G.coneSpr = mkCone("0,0,0"); G.holeW = mkHole("255,255,255"); G.coneW = mkCone("255,255,255");
   }
+  /* W11 R39: sanfte gebietsweite Abdunkelung (Variante „Finstere Tiefe“ des Karten-Agenten ruft Z.dunkelSanft(0.6, dt)
+     jedes Bild). Geglättet (~0,6 s), klingt von selbst ab, wenn nicht mehr gerufen. Lichter leuchten weiter (anders als
+     Z.darkness), der Lichtkreis um Ezekiel wächst mit. Kostet nichts extra (nur Zahlen in lightPass/cutHoles). */
+  let sanftZiel = 0, sanftV = 0, sanftT = -9;
+  Z.dunkelSanft = function (s, dt) { sanftZiel = Math.max(0, Math.min(1, +s || 0)); sanftT = G.time || 0; };
+  Z.dunkelSanftWert = () => sanftV;
+  function sanftTick(dt) { const ziel = (G.time || 0) - sanftT > 0.4 ? 0 : sanftZiel; sanftV += (ziel - sanftV) * Math.min(1, dt * 1.7); if (sanftV < 0.002) sanftV = 0; return Z.darkness > 0 ? 0 : sanftV; }
   function lightPass(c, cam, W, H, camX, camY) {
-    const dark = Z.darkness > 0 ? 0.93 : B.dark * 0.82 + (Z.run && Z.run.skulls ? Z.run.skulls * 0.02 : 0);
+    let dark = Z.darkness > 0 ? 0.93 : B.dark * 0.82 + (Z.run && Z.run.skulls ? Z.run.skulls * 0.02 : 0);
     const lvl = lq(), t = G.time, dt = Math.min(0.1, Math.max(0, t - (G.lightT == null ? t : G.lightT))); G.lightT = t;
+    const sv = sanftTick(dt); if (sv > 0) dark += (0.92 - dark) * sv * 0.8;
     /* gleiche Kameralage wie die Welt (inkl. Wackeln), damit Lichtkreise und Sichtnebel nicht verrutschen */
     if (camX != null) cam = { x: camX, y: camY, w: cam.w, h: cam.h };
     /* R22: Stufe 1 hat weniger Lichtquellen-Pracht als Stufe 2 – Grunddunkel um ein Viertel gesenkt (wie Stufe 0), damit sie nicht dunkler wirkt als Stufe 0 */
@@ -2407,7 +2415,7 @@
     LQn = 0; EXT.length = 0; for (let i = FLASH.length - 1; i >= 0; i--) { FLASH[i].t += dt; if (FLASH[i].t >= FLASH[i].life) FLASH.splice(i, 1); }
     /* R20: Stufe 0 – dunkle Burg, aber Spielrelevantes erkennbar: Grunddunkel um gut ein Viertel gesenkt (Dunkelheits-
        Ereignisse bleiben voll) */
-    return darkPass(c, cam, W, H, Z.darkness > 0 ? dark : Math.min(0.42, dark * 0.74));
+    return darkPass(c, cam, W, H, Z.darkness > 0 ? dark : Math.min(0.42 + 0.33 * sv, dark * 0.74));
   }
   function lightCanvas(W, H) {
     const LD = (Z.gq && Z.gq.light) || 4; if (!G.light || G.light.width !== Math.ceil(W / LD) || G.light.height !== Math.ceil(H / LD)) { G.light = document.createElement("canvas"); G.light.width = Math.ceil(W / LD); G.light.height = Math.ceil(H / LD); G.lc = G.light.getContext("2d"); }

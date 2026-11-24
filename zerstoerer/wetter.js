@@ -178,7 +178,8 @@
     if (!W || !W.fogs.length || (Z.gq && Z.gq.level === 0)) return; /* Handheld: keine Nebelbänke */
     const W2 = c.canvas.width, H2 = c.canvas.height;
     c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
-    for (const f of W.fogs) { const x = f.x * W2 * 1.4 - W2 * 0.2, y = f.y * H2, w = W2 * 0.7 * f.s, h = H2 * 0.22 * f.s; c.drawImage(fogBlob(), x - w * 0.5, y - h * 0.5, w, h); }
+    c.globalAlpha = 0.7; /* R39: im Himmel (Hafen) wirkten die Bänke als helle Flecken – flacher und schwächer */
+    for (const f of W.fogs) { const x = f.x * W2 * 1.4 - W2 * 0.2, y = f.y * H2, w = W2 * 0.85 * f.s, h = H2 * 0.15 * f.s; c.drawImage(fogBlob(), x - w * 0.5, y - h * 0.5, w, h); }
     c.restore();
   };
   function fogBlob() {
