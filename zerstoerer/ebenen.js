@@ -159,9 +159,12 @@
         if (blocks(lv.get(sx, sy))) { ok = false; break; }
       }
       if (!ok) continue;
-      const f = d < R * 0.7 ? 1 : Math.max(0, 1 - (d - R * 0.7) / (R * 0.3));
+      /* Optik (Grafik-Runde 6): weicher, länger auslaufender Rand (~45 % der Sichtweite, Smoothstep);
+         Gedächtnis/Erkundung bleibt bei der alten Schwelle (fm), damit sich am Spiel nichts ändert */
+      const u = d < R * 0.55 ? 0 : Math.min(1, (d - R * 0.55) / (R * 0.45)), f = 1 - u * u * (3 - 2 * u);
+      const fm = d < R * 0.7 ? 1 : Math.max(0, 1 - (d - R * 0.7) / (R * 0.3));
       const i = ty * lv.W + tx; tvis[i] = f;
-      if (f > 0.25) { mem[i] = 1; const kn = Math.floor(tx / CW) * 4096 + Math.floor(ty / CH); if (!seenN.has(kn)) { seenN.add(kn); seen.add(Math.floor(tx / CW) + "," + Math.floor(ty / CH)); } }
+      if (fm > 0.25) { mem[i] = 1; const kn = Math.floor(tx / CW) * 4096 + Math.floor(ty / CH); if (!seenN.has(kn)) { seenN.add(kn); seen.add(Math.floor(tx / CW) + "," + Math.floor(ty / CH)); } }
     }
   }
   /* Sichtnebel als kleines Bild (eine Kachel = ein Pixel) aktualisieren; liefert die Lage in Kacheln */
@@ -181,7 +184,7 @@
       let o = (ty - y0) * w * 4, i = ty * lv.W + x0;
       for (let tx = x0; tx <= x1; tx++, i++, o += 4) {
         const v = vis[i] += (tvis[i] - vis[i]) * 0.18;
-        D[o] = 7; D[o + 1] = 5; D[o + 2] = 10; D[o + 3] = ((mem[i] ? memA : unA) * (1 - v) * 255 + 0.5) | 0;
+        D[o] = 22; D[o + 1] = 14; D[o + 2] = 10; /* warmes Sepia-Dunkel statt Kaltschwarz */ D[o + 3] = ((mem[i] ? memA : unA) * (1 - v) * 255 + 0.5) | 0;
       }
     }
     ofc.putImageData(ofImg, 0, 0);

@@ -262,11 +262,16 @@
     riesenspinne: "spinne", netzspinne: "spinne", ettercap: "spinne",
     zweigBlight: "blight", nadelBlight: "blight", rankenBlight: "blight",
     mane: "daemon", stirge: "daemon", harpyie: "daemon",
-    glutling: "glut", schmiedegeist: "glut"
+    glutling: "glut", schmiedegeist: "glut",
+    /* W10: neue Arten */
+    goblinTrommler: "goblin", goblinSchild: "goblin", laternentraeger: "kobold", gallertwuerfel: "schleim", saeureschnecke: "schleim", mimik: "mimik",
+    kenku: "kenku", grimlock: "grimlock", ghul: "untot", glockengeist: "untot", schmuggler: "mensch", myconid: "pilz", drider: "drow",
+    rostmonster: "bestie", quasit: "daemon", sturmMephit: "daemon", gargoyle: "stein", grindylow: "fisch", glutfledermaus: "glut", salamander: "glut"
   };
   /* wer kommt als Verstärkung, wenn ein Nemesis ruft */
   const MINION = { goblin: ["goblin", "goblinBogen"], bestie: ["wolf", "ratte"], robe: ["robe", "robeArmbrust"], mensch: ["kerkerwache", "soeldner"], drow: ["drowWache"], untot: ["skelett", "zombie"],
-    konstrukt: ["runenfunke"], duergar: ["duergar"], fisch: ["kuotoa"], spinne: ["spinnchen", "riesenspinne"], blight: ["zweigBlight"], daemon: ["mane", "stirge"], glut: ["glutlingKlein", "glutling"] };
+    konstrukt: ["runenfunke"], duergar: ["duergar"], fisch: ["kuotoa"], spinne: ["spinnchen", "riesenspinne"], blight: ["zweigBlight"], daemon: ["mane", "stirge"], glut: ["glutlingKlein", "glutling"],
+    kobold: ["laternentraeger", "ratte"], schleim: ["phiole"], mimik: ["ratte", "ratte"], kenku: ["kenku"], grimlock: ["grimlock"], pilz: ["myconid", "spinnchen"], stein: ["mane"] };
   const SYL = {
     goblin: [["Gri", "Snag", "Rat", "Muz", "Gob", "Skar", "Nar", "Ugl", "Krik", "Zog", "Bol", "Gna", "Rik", "Mog"], ["shak", "nik", "gut", "zak", "rot", "grub", "mosh", "lik", "dak", "brak", "gash", "nob"]],
     untot: [["Mor", "Kra", "Vel", "Sab", "Gru", "Os", "Thr", "Nek", "Ul", "Dra"], ["thul", "gath", "rim", "ox", "ul", "ias", "nor", "mund", "geist"]],
@@ -274,12 +279,19 @@
     duergar: [["Grim", "Dur", "Thor", "Brak", "Hol", "Mor", "Skal", "Bal", "Ruk", "Gor"], ["bold", "gan", "grim", "ka", "dra", "nar", "rik", "dun", "mir"]],
     fisch: [["Glu", "Blo", "Ssk", "Kla", "Ur", "Mlo", "Gor", "Bub", "Ssa"], ["gl", "ubb", "ssa", "rrk", "oth", "mak", "lup", "gurr"]],
     spinne: [["Ix", "Sel", "Ach", "Thir", "Vess", "Ky", "Lol", "Sza", "Ny"], ["ith", "ara", "neth", "ix", "ys", "assa", "thra", "ira"]],
-    daemon: [["Zza", "Kel", "Vrog", "Ash", "Mal", "Baz", "Gre", "Yth", "Nar"], ["goth", "zul", "mon", "rax", "eth", "gor", "zek", "ul"]]
+    daemon: [["Zza", "Kel", "Vrog", "Ash", "Mal", "Baz", "Gre", "Yth", "Nar"], ["goth", "zul", "mon", "rax", "eth", "gor", "zek", "ul"]],
+    kobold: [["Kur", "Snik", "Mee", "Tak", "Yip", "Dek", "Rok", "Zik", "Pip"], ["tik", "pok", "snak", "rik", "mek", "yap", "zaz", "lik"]]
   };
   const NAMES = {
     bestie: [["Graufang", "Greyfang"], ["Aschepelz", "Ashpelt"], ["Schlitzohr", "Slit-Ear"], ["Rostbiss", "Rustbite"], ["Krummbein", "Crookleg"], ["Narbenmaul", "Scarmaw"], ["Rotzahn", "Redtooth"], ["Halbohr", "Half-Ear"], ["Schattenpfote", "Shadowpaw"]],
     konstrukt: [["Rostherz", "Rustheart"], ["Eisenwitwe", "Iron Widow"], ["Bolzenkopf", "Boltbrain"], ["Wacht VII", "Ward VII"], ["Kaltschmied", "Coldsmith"], ["Nietenfaust", "Rivetfist"], ["Der Hohle", "The Hollow"]],
     blight: [["Dornwurz", "Thornroot"], ["Moderzweig", "Rotbranch"], ["Krummast", "Crookbough"], ["Distelherz", "Thistleheart"], ["Wurzelgram", "Rootgrudge"], ["Splitterborke", "Splinterbark"]],
+    schleim: [["Schleimkönig", "Slime King"], ["Ätzbauch", "Acidgut"], ["Der Klebrige", "The Sticky One"], ["Moderwabbel", "Mouldwobble"], ["Glibber", "Goo"], ["Säuresuppe", "Acid Soup"]],
+    mimik: [["Kistenkiefer", "Chestjaw"], ["Schatzmaul", "Treasuremaw"], ["Der Deckel", "The Lid"], ["Falscher Freund", "False Friend"], ["Goldzunge", "Goldtongue"]],
+    kenku: [["Klirrklang", "Clinkclang"], ["Türknarr", "Doorcreak"], ["Pfeifwind", "Whistlewind"], ["Schlurfschritt", "Shufflestep"], ["Hustenhall", "Coughecho"], ["Ezekiels Stimme", "Ezekiel's Voice"]],
+    grimlock: [["Blindzahn", "Blindtooth"], ["Steinohr", "Stone-Ear"], ["Graukeule", "Greyclub"], ["Lauscher", "Listener"], ["Narbengesicht", "Scarface"]],
+    pilz: [["Sporenvater", "Sporefather"], ["Moderhut", "Mouldcap"], ["Schimmelfürst", "Mildew Prince"], ["Stillspore", "Stillspore"], ["Lamellus", "Lamellus"]],
+    stein: [["Grauflügel", "Greywing"], ["Moosrücken", "Mossback"], ["Regenspeier", "Rainspout"], ["Steingrimm", "Stonegrim"], ["Der Wächter der Rinne", "Warden of the Gutter"]],
     glut: [["Funkenzahn", "Sparktooth"], ["Rußherz", "Sootheart"], ["Schwelbrand", "Smoulder"], ["Kohlenkind", "Coalchild"], ["Zunder", "Tinder"], ["Aschwind", "Ashwind"]]
   };
   /* Titel passend zum Geschlecht des Vornamens */
@@ -478,7 +490,11 @@
     robe: [["Die Roben vergessen nicht.", "The Robes do not forget."]], mensch: [["Im Namen der Feste: steh still.", "In the keep's name: stand still."]], drow: [["Oberflächenwurm. Diesmal tanzt du für mich.", "Surface worm. This time you dance for me."]],
     duergar: [["Ich hab dein Grab schon geschmiedet.", "I've already forged your grave."]], spinne: [["Ssso viel Fleisch, ssso wenig Verstand.", "Ssso much meat, ssso little sense."]], fisch: [["Blubb. Die Tiefe ruft dich.", "Blub. The deep is calling you."]],
     bestie: [["*Ein tiefes, wiedererkennendes Knurren.*", "*A low, knowing growl.*"]], konstrukt: [["ZIEL ERKANNT. ZIEL WIEDERHOLT.", "TARGET RECOGNISED. TARGET REPEATED."]], blight: [["Die Wurzeln erinnern sich an dein Blut.", "The roots remember your blood."]],
-    daemon: [["Dein Darkin-Blut schmeckt nach mehr.", "Your Darkin blood tastes like more."]], glut: [["Ich brenne heller seit deinem Tod.", "I burn brighter since your death."]]
+    daemon: [["Dein Darkin-Blut schmeckt nach mehr.", "Your Darkin blood tastes like more."]],
+    kobold: [["Ich hab Licht! Du hast Angst! Hihi!", "I've got light! You've got fear! Heehee!"]], schleim: [["*Blubbernd:* Du klebst noch an mir.", "*Bubbling:* You still stick to me."]],
+    mimik: [["*Der Deckel klappert erwartungsvoll.*", "*The lid rattles expectantly.*"]], kenku: [["„Steh still“, sagst du. „Steh still“, sage ich.", "\"Stand still,\" you say. \"Stand still,\" I say."]],
+    grimlock: [["*Schnüffelt.* Ich höre dein Herz. Es rennt.", "*Sniffs.* I hear your heart. It's running."]], pilz: [["Alle Sporen erinnern sich. Alle.", "All spores remember. All of them."]],
+    stein: [["Ich habe von oben zugesehen. Jahrhundertelang.", "I've watched from above. For centuries."]], glut: [["Ich brenne heller seit deinem Tod.", "I burn brighter since your death."]]
   };
   function memoryLine(rec) {
     const R = Z.R, last = lastHist(rec, ["meet"]) || {}, o = { area: areaIn(last.area || rec.home), weapon: rec.trophy ? L(rec.trophy.n) : "", n: rec.kills, rival: last.rival ? L(last.rival) : "" };
@@ -839,7 +855,10 @@
   const ANCH = { human: [0.12, 0.13, -0.3, 0.32], goblin: [0.2, 0.18, -0.3, 0.38], skel: [0.12, 0.12, -0.3, 0.32], zombie: [0.2, 0.15, -0.28, 0.35], armor: [0.1, 0.1, -0.3, 0.3], golem: [0.05, 0.12, -0.32, 0.3],
     duergar: [0.12, 0.14, -0.3, 0.34], kuotoa: [0.15, 0.13, -0.28, 0.34], ettercap: [0.15, 0.12, -0.28, 0.32], mane: [0.15, 0.2, -0.3, 0.4], blight: [0.1, 0.12, -0.28, 0.32], wraith: [0.1, 0.12, -0.25, 0.3],
     wolf: [0.42, 0.25, -0.2, 0.2], rat: [0.42, 0.3, -0.2, 0.25], spider: [0.38, 0.3, -0.15, 0.2], crab: [0.3, 0.3, -0.2, 0.2], ray: [0.35, 0.4, -0.2, 0.3], stirge: [0.3, 0.3, -0.2, 0.3], harpy: [0.15, 0.15, -0.3, 0.35],
-    wolfrider: [0.1, 0.05, -0.3, 0.25], blob: [0.15, 0.3, -0.2, 0.3], wisp: [0.1, 0.3, -0.2, 0.3] };
+    wolfrider: [0.1, 0.05, -0.3, 0.25], blob: [0.15, 0.3, -0.2, 0.3], wisp: [0.1, 0.3, -0.2, 0.3],
+    drummer: [0.2, 0.18, -0.3, 0.38], schildgoblin: [0.15, 0.18, -0.3, 0.38], kobold: [0.2, 0.18, -0.3, 0.38], cube: [0.1, 0.2, -0.3, 0.3], mimic: [0.3, 0.3, -0.3, 0.3], kenku: [0.12, 0.12, -0.3, 0.32],
+    grimlock: [0.2, 0.12, -0.3, 0.32], ghoul: [0.2, 0.2, -0.3, 0.35], bellghost: [0.1, 0.12, -0.25, 0.3], myconid: [0.1, 0.1, -0.3, 0.4], drider: [0.15, 0.08, -0.35, 0.4], rustmonster: [0.4, 0.3, -0.2, 0.25],
+    quasit: [0.2, 0.2, -0.2, 0.35], gargoyle: [0.15, 0.18, -0.3, 0.35], grindylow: [0.15, 0.2, -0.3, 0.4], firebat: [0.2, 0.3, -0.2, 0.3], salamander: [0.15, 0.12, -0.3, 0.35], slug: [0.4, 0.45, -0.15, 0.3], mephit: [0.15, 0.2, -0.2, 0.35] };
   const RANKCOL = [null, "#8a6a4a", "#a8401a", "#8a1414", "#5a0e2a", "#2a0a10"];
   function drawDeco(c, e, t) {
     const rec = e.nm; if (!rec || e.dead) return;

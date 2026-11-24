@@ -30,6 +30,8 @@
   /* Handheld (Stufe 0): ganz aus – dort zählt nur die Spielmechanik */
   const on = () => !(Z.settings && Z.settings.cineOff) && !(Z.gq && Z.gq.level === 0);
   const rich = () => on() && !low();
+  /* Komfort „Schnellstart“: Kapitelseiten (Betreten, Lagerrückkehr) und die Kamerafahrt zum Ausgang immer überspringen */
+  const quick = () => !!(Z.settings && Z.settings.schnellstart);
   const mk = (w, h) => { const c = document.createElement("canvas"); c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h)); return c; };
   const hashS = s => { let h = 2166136261; s = String(s); for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0) / 4294967296; };
   const roman = n => { n = Math.max(1, Math.min(3999, n | 0)); let o = ""; for (const [v, r] of [[1000, "M"], [900, "CM"], [500, "D"], [400, "CD"], [100, "C"], [90, "XC"], [50, "L"], [40, "XL"], [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]]) while (n >= v) { o += r; n -= v; } return o; };
@@ -684,11 +686,11 @@
     c.restore();
   }
   function drawClimaxScreen(c, W, H) {
-    const k = climax; if (!k || k.t > 0.4 || (Z.settings && Z.settings.flashes === false)) return;
+    const k = climax, fk = Z.flashK ? Z.flashK() : 1; if (!k || k.t > 0.4 || fk <= 0) return;
     const u = k.t / 0.4, S = Z.gfx.scale || 1, cam = Z.cam;
     const sx = (k.x - cam.x) * S, sy = (k.y - cam.y) * S;
     c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = "lighter";
-    const g = c.createRadialGradient(sx, sy, 0, sx, sy, Math.max(W, H) * (0.3 + 0.7 * u)); g.addColorStop(0, rgba(k.col, 0.55 * (1 - u))); g.addColorStop(1, rgba(k.col, 0));
+    const g = c.createRadialGradient(sx, sy, 0, sx, sy, Math.max(W, H) * (0.3 + 0.7 * u)); g.addColorStop(0, rgba(k.col, 0.55 * (1 - u) * fk)); g.addColorStop(1, rgba(k.col, 0));
     c.fillStyle = g; c.fillRect(0, 0, W, H);
     c.restore();
   }
@@ -935,7 +937,7 @@
     if (suck && suck.done) suck = null;
     Z.interactTarget = null;
     let info = null;
-    if (on()) {
+    if (on() && !quick()) {
       try {
         info = pageInfo(id, B, lv); info.id = id; info.B = B; info.lv = lv; info.low = low();
         if (!info.low) info.page = grabPage();
@@ -961,7 +963,7 @@
   const back0 = Z.backToCamp;
   Z.backToCamp = function () {
     if (book && book.closing) return;
-    if (!rich() || !Z.level) return back0.apply(this, arguments);
+    if (!rich() || !Z.level || quick()) return back0.apply(this, arguments);
     try {
       const P = Z.player, run = Z.run, lv = Z.level, AR = lv.arena && Z.ARENAS[lv.arena];
       const kind = P && P.dead ? "fall" : AR && AR.final && Z.bossDefeated ? "win" : "abort";

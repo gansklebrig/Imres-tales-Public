@@ -968,7 +968,7 @@
   function disguiseTick(e, dt, P) {
     const d = e.def, ex = e.x + e.w / 2, px = P.x + P.w / 2, garg = e.id === "gargoyle";
     const near = !P.dead && Math.abs(px - ex) < (garg ? 64 : 30) && Math.abs((P.y + P.h) - (e.y + e.h)) < (garg ? 90 : 34) && W.los(ex, e.y + 4, px, P.y + 6);
-    if (e.hp < e.hpMax || e.aware || near) { reveal(e, P); return; }
+    if (e.hp < e.hpMax || e.aware || near || e.nm || e.nmHunter || e.nmEvent || e.master) { reveal(e, P); return; } /* Nemesis/Diener tarnen sich nicht */
     e.sus = 0; e.vx = 0;
     if (!e.ceil) { e.vy += (Z.ENEMY_GRAV || 1400) * dt; Z.moveBody(e, dt); }
   }
@@ -1142,12 +1142,13 @@
     const singles = Z.enemies.filter(e => !e.dead && !e.def.boss && !e.def.fly && !e.def.group && !e.elite && !e.master && !e.thief && !e.nm && !e.trial && !e.ambush && e.def.ai !== "turret" && !e.disguise && Z.ENEMIES[e.id] && e.onGround !== undefined && (!P || Math.abs(e.x - P.x) > 220));
     if (singles.length < 6) return;
     R.shuffle(singles);
-    let want = Math.min(2 + Math.floor(tier / 2), Math.floor(singles.length / 5)), made = 0;
+    let want = Math.min(2 + Math.floor(tier / 2) - (Z.gq && Z.gq.mini ? 1 : 0), Math.floor(singles.length / 5)), made = 0;
     const used = new Set(), kill = new Set();
     for (const s of singles) {
       if (made >= want) break;
       if (used.has(s) || s.dead) continue;
       const list = B.squads[Math.floor(R() * B.squads.length)].filter(id => Z.ENEMIES[id]);
+      if (Z.gq && Z.gq.lean && list.length > 3) list.length = 3; /* Handheld: Trupps höchstens zu dritt */
       if (list.length < 2) continue;
       const x0 = s.x + s.w / 2, y0 = s.y + s.h;
       /* Plätze auf demselben Boden links/rechts suchen */

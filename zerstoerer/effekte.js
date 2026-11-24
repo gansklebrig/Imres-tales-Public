@@ -366,10 +366,11 @@
     c.restore();
   }
   function drawScreen(c, W, H) {
-    if (hurtT > 0 && Z.settings.flashes !== false) {
-      c.save(); c.globalAlpha = Math.min(1, hurtT / 0.45) * 0.55; c.drawImage(vigSprite(), 0, 0, W, H); c.restore();
+    const fk = Z.flashK ? Z.flashK() : 1; /* Komfort: Treffer-Aufleuchten und Paraden-Linien gedämpft/aus */
+    if (hurtT > 0 && fk > 0) {
+      c.save(); c.globalAlpha = Math.min(1, hurtT / 0.45) * 0.55 * Math.max(fk, 0.5); c.drawImage(vigSprite(), 0, 0, W, H); c.restore();
     }
-    if (lines && Z.settings.flashes !== false) drawLines(c, W, H);
+    if (lines && fk > 0) { c.save(); c.globalAlpha = fk; drawLines(c, W, H); c.restore(); }
     if (banner) {
       const u = banner.t / 1.3, a = u < 0.12 ? u / 0.12 : u > 0.75 ? (1 - u) / 0.25 : 1, s = 1 + (u < 0.12 ? (1 - u / 0.12) * 0.6 : 0);
       const fs = Math.max(14, Math.min(W, H) * 0.045) * s * (1 + Math.min(0.5, (banner.n - 2) * 0.1));

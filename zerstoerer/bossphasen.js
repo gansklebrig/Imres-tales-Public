@@ -1158,8 +1158,16 @@
     const fy = air ? P.y - 30 : standY(P);
     if (b.y1 != null && (fy > b.y1 + 8 || fy - bh < b.top - 40)) return false; /* Spieler hat den Wächterraum verlassen */
     const free = (x) => { if (air) { for (let yy = fy - bh - 2; yy < fy + 2; yy += 6) for (let xx = x - bw / 2 - 2; xx < x + bw / 2 + 2; xx += 6) if (W.solidAt(xx, yy)) return false; return W.los(x, fy - bh / 2, pcx(P), P.y + P.h / 2); } for (let yy = fy - bh + 2; yy < fy - 2; yy += 6) for (let xx = x - bw / 2 + 1; xx < x + bw / 2; xx += 6) if (W.solidAt(xx, yy)) return false; return W.solidAt(x, fy + 2) || W.isPlat(Math.floor(x / 16), Math.floor((fy + 2) / 16)); };
-    for (const d of air ? [60, -60, 90, -90, 120, -120] : [90, -90, 120, -120, 70, -70, 150, -150]) {
-      const x = pcx(P) + (cxOf(e) > pcx(P) ? d : -d); if (x < b.x0 + bw || x > b.x1 - bw || !free(x)) continue;
+    /* W9-Nacharbeit 3: Landeplatz in Nahkampfreichweite, gleiche Ebene, freie Sicht und freier Laufweg zum Spieler –
+       vorher 90–150 px daneben, oft hinter Stufe/Kiste → Durchbruch-Schleife (Riese 10×/min, 0 Schaden) */
+    const reach = bw / 2 + 26;
+    const path = (x) => { if (air) return true; const a = Math.min(x, pcx(P)), z = Math.max(x, pcx(P));
+      for (let xx = a; xx <= z; xx += 5) { if (W.solidAt(xx, fy - 8) || W.solidAt(xx, fy - Math.min(bh - 4, 40)) || !(W.solidAt(xx, fy + 2) || W.isPlat(Math.floor(xx / 16), Math.floor((fy + 2) / 16)))) return false; }
+      return W.los(x, fy - bh / 2, pcx(P), P.y + P.h / 2); };
+    const near = side => [reach, reach + 14, reach + 30, reach + 50].map(v => side * v);
+    const first = cxOf(e) > pcx(P) ? 1 : -1;
+    for (const d of air ? [60, -60, 90, -90, 120, -120] : near(first).concat(near(-first))) {
+      const x = pcx(P) + (air ? (cxOf(e) > pcx(P) ? d : -d) : d); if (x < b.x0 + bw / 2 || x > b.x1 - bw / 2 || !free(x) || !path(x)) continue;
       FX.burst(cxOf(e), e.y + e.h / 2, 18, { col: [Z.dustCol || "#8a7a70", "#3a3030"], sp: 100, life: 0.6, size: 4, kind: "smoke" });
       tele({ k: "ring", x, y: fy - bh / 2, r: bw / 2 + 16, dur: 0.6, col: e.aura || "#ff6a3a" });
       e.hidden = 0.6; e.invuln = Math.max(e.invuln || 0, 0.6); e.vx = 0; e.vy = 0; e.idle = Math.max(e.idle || 0, 1.0);
@@ -1214,9 +1222,13 @@
       if (!e.def.fixed && !e.def.keepAway) { /* auch Flieger: der Vrock hing im Bot-Lauf 130 s über einer Decke fest */
         const dd = Math.hypot(pcx(P) - cxOf(e), (P.y + P.h) - feet(e));
         const blocked = !Z.world.los(cxOf(e), e.y + e.h / 2, pcx(P), P.y + P.h / 2) && !Z.world.los(cxOf(e), e.y + 4, pcx(P), P.y + 4);
-        if (blocked) s.farT += dt; /* Wand/Decke dazwischen: zählt immer */
+        /* Nahkampf-Bodenbosse: lange kein Kontakt (Riese auf Sims/hinter Stufe, Spieler bleibt stehen) zählt ebenfalls */
+        const touch = Math.abs(pcx(P) - cxOf(e)) < e.w / 2 + 44 && e.y < P.y + P.h && feet(e) > P.y - 10;
+        s.noTouch = touch ? 0 : (s.noTouch || 0) + dt;
+        if (blocked || (!e.def.fly && s.noTouch > 8)) s.farT += dt; /* Wand/Decke dazwischen: zählt immer */
         else if (dd > (e.def.fly ? 190 : 150)) { if (s.best == null || dd < s.best - 20) { s.best = dd; s.farT = 0; } else s.farT += dt; } else { s.best = null; s.farT = 0; }
-        if (s.farT > (easy() ? 7 : 5) && !e.mv && (P.onGround || s.farT > 7) && !(e.st.stun > 0)) { if (breakThrough(e, P)) { s.farT = 0; s.best = null; } else s.farT -= 1; }
+        s.btCd = Math.max(0, (s.btCd || 0) - dt);
+        if (s.farT > (easy() ? 7 : 5) && !s.btCd && !e.mv && (P.onGround || s.farT > 7) && !(e.st.stun > 0)) { if (breakThrough(e, P)) { s.farT = 0; s.best = null; s.btCd = 10; s.btN = (s.btN || 0) + 1; } else s.farT -= 1; }
       }
       /* Wut */
       if (!e.wut && e.hp < e.hpMax * 0.2 && e.hp > 0) enrage(e, P);
@@ -1647,6 +1659,8 @@
     sig: ["kokonsturz", "fadenkaefig"]
   };
 
+  /* Bosse, die absichtlich Abstand halten (kein Durchbruch) */
+  const KEEP = { glasstab: 1, erzpriesterin: 1, ilvaraW: 1, wraith: 1, nezna: 1 };
   /* ---------- Einbau je Boss (beim ersten Auftritt) ---------- */
   function patch(id) {
     const d = B[id]; if (!d || d.w9) return; d.w9 = true;
@@ -1657,6 +1671,9 @@
     for (const [k, ...ids] of s.add || []) { const ph = d.phases && d.phases[k]; if (ph) ph.moves = ph.moves.concat(ids.filter(i => d.moves[i] && !ph.moves.includes(i))); }
     for (const k in s.open || {}) { const v = s.open[k]; if (Array.isArray(v)) wrapOpen(d, k, v[0], v[1]); else wrapOpen(d, k, v, (s.openTxt || {})[k]); }
     d.sig = (s.sig || []).filter(i => d.moves[i]);
+    if (KEEP[id]) d.keepAway = true;
+    /* Chasme stieg beim Summen (3 s) und nach dem Stachelregen bis 250 px hoch und war außer Reichweite: beim Summen auf Kopfhöhe nachführen */
+    if (id === "chasme" && d.moves.summen && !d.moves.summen.w9h) { const t0 = d.moves.summen.tick; d.moves.summen = Object.assign({}, d.moves.summen, { w9h: true, tick: (e, P, dt, m) => { if (t0) t0(e, P, dt, m); const ty = P.y - 26, tx = pcx(P) - e.face * 44; e.vy = U.approach(e.vy, U.clamp((ty - e.y) * 2, -120, 120), 400 * dt); e.vx = U.approach(e.vx, U.clamp((tx - cxOf(e)) * 2, -90, 90), 300 * dt); } }); }
     if (!EXCL[id]) wrapUpdate(d);
   }
   const se0 = Z.spawnEnemy;

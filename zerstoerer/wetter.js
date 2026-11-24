@@ -137,7 +137,7 @@
         for (const pts of [b.pts, b.branch]) { c.beginPath(); pts.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y))); c.stroke(); }
       }
       /* der ganze Himmel leuchtet kurz auf */
-      c.globalAlpha = a * 0.22; c.fillStyle = "#d8d0ff"; c.fillRect(b.px, b.py, cam.w, cam.h);
+      c.globalAlpha = a * 0.22 * (Z.flashK ? Z.flashK() : 1); c.fillStyle = "#d8d0ff"; c.fillRect(b.px, b.py, cam.w, cam.h);
       c.restore();
     }
     if (W.mood === "gewitter" && Math.random() < 0.004) { W.bolts.push({ pts: [[cam.x + Math.random() * cam.w, cam.y + cam.h * 0.3], [cam.x + Math.random() * cam.w, cam.y + cam.h * 0.33]], branch: [], t: 0, life: 0.2, px: cam.x, py: cam.y }); }

@@ -147,7 +147,7 @@
       hudT = 0.25;
       /* Segen und Werte stehen jetzt im Pausenmenü; der Gebietsname zeigt sich nur nach dem Betreten (und auf der großen Karte) */
       const run = Z.run, an = areaShow > 0 || bigMap;
-      setHTML("area", esc(areaTitle()) + (run && an ? '<small>' + fmtTime(run.time) + (run.skulls ? " · " + "☠".repeat(run.skulls) : "") + "</small>" : ""));
+      setHTML("area", esc(areaTitle()) + (run && an ? '<small>' + fmtTime(run.time) + (run.skulls ? " · " + "☠".repeat(run.skulls) : "") + (run.gnade ? ' · <span class="gnade-hud" title="' + esc(L(["Hilfsmodus Barmherzigkeit", "Assist mode Mercy"])) + '">✚</span>' : "") + "</small>" : ""));
       $("#area").classList.toggle("still", !an);
       $("#fps").textContent = Z.settings.fps ? (Z.fps || 0) + " fps" : "";
     }
@@ -886,7 +886,7 @@
     const k = gearKeyHTML(false);
     return '<div class="reiter p-reiter"><button data-act="pTab" data-arg="0" class="' + (i === 0 ? "an" : "") + '">' + esc(t("pause")) + '</button><button data-act="pTab" data-arg="1" class="' + (i === 1 ? "an" : "") + '">' + L(["Ausrüstung", "Gear"]) + (k && i === 0 ? ' <span class="rt">' + k + "</span>" : "") + "</button></div>";
   }
-  const ortHTML = () => { const run = Z.run; return esc(areaTitle()) + (run ? " · " + fmtTime(run.time) + (run.skulls ? " · " + "☠".repeat(run.skulls) : "") : ""); };
+  const ortHTML = () => { const run = Z.run; return esc(areaTitle()) + (run ? " · " + fmtTime(run.time) + (run.skulls ? " · " + "☠".repeat(run.skulls) : "") + (run.gnade ? " · ✚ " + L(["Barmherzigkeit", "Mercy"]) : "") : ""); };
   /* Vollansicht „Ausrüstung“ */
   ui.gear = () => {
     const P = Z.player; if (!P || !Z.level) return;
@@ -961,7 +961,7 @@
     const tip = L(Z.R.pick(TX.tips));
     /* rechts: Lage – Herausforderungen (bilanz.js setzt sie hinter den Tipp) und eine kurze Ausrüstungs-Übersicht;
        Werte, Segen, Runen und Fluch stehen vollständig im Reiter „Ausrüstung“ */
-    const ort = esc(areaTitle()) + (run ? " · " + fmtTime(run.time) + (run.skulls ? " · " + "☠".repeat(run.skulls) : "") : "");
+    const ort = esc(areaTitle()) + (run ? " · " + fmtTime(run.time) + (run.skulls ? " · " + "☠".repeat(run.skulls) : "") + (run.gnade ? " · ✚ " + L(["Barmherzigkeit", "Mercy"]) : "") : "");
     const hin = { alle: L(["alle", "all"]), wenige: L(["wenige", "few"]), keine: L(["keine", "none"]) }[Z.settings.hinweise || "alle"];
     openModal('<h2 class="p-kopf">' + esc(t("pause")) + '<span class="p-ort">' + ort + '</span></h2>' + pauseTabs(0) + '<div class="p-spalten"><div class="knoepfe senk"><button data-act="close" autofocus>' + esc(t("resume")) + '</button><button data-act="ctrl">' + esc(t("tut")) + '</button><button data-act="settings">' + esc(t("settings")) + '</button><button data-act="hinweise">' + L(["Hinweise: ", "Hints: "]) + hin + "</button>" + (fs.ok ? '<button data-act="fullscreen">' + esc(fs.label()) + "</button>" : "") +
       (inRun ? '<button data-act="abort" class="gefahr">' + esc(t("abort")) + "</button>" : "") + '<a class="btn" href="./#taverne">' + esc(t("tavern")) + '</a></div><div class="p-info"><p class="tipp">' + esc(tip) + "</p>" +
@@ -995,12 +995,12 @@
     const ck = (id, lab, val) => '<label class="schalter"><input type="checkbox" data-set="' + id + '"' + (val ? " checked" : "") + "> " + esc(lab) + "</label>";
     openModal("<h2>" + esc(t("settings")) + '</h2><div class="einst">' +
       sl("master", L(["Gesamtlautstärke", "Master volume"]), v.master) + sl("music", L(["Musik", "Music"]), v.music) + sl("sfx", L(["Effekte", "Effects"]), v.sfx) + sl("amb", L(["Geräuschkulisse", "Ambience"]), v.amb) +
-      '<label class="regler">' + L(["Bildschirmwackeln", "Screen shake"]) + '<input type="range" min="0" max="100" value="' + Math.round(s.shake * 100) + '" data-shake="1"></label>' +
+      '<button class="steuerknopf komfortknopf" data-act="komfort">' + L(["Komfort & Barrierefreiheit", "Comfort & accessibility"]) + " <small>· " + esc(komfortSumme()) + "</small></button>" +
       '<label class="regler">' + L(["Größe der Touch-Knöpfe", "Touch button size"]) + '<input type="range" min="70" max="140" value="' + Math.round(s.touchSize * 100) + '" data-touch="1"></label>' +
       '<label class="schalter">' + L(["Textgröße", "Text size"]) + ' <select data-textsize="1">' + [["klein", L(["klein", "small"])], ["normal", L(["normal", "normal"])], ["gross", L(["groß", "large"])], ["riesig", L(["sehr groß", "very large"])]].map(([v, n]) => '<option value="' + v + '"' + ((s.textSize || "normal") === v ? " selected" : "") + ">" + esc(n) + "</option>").join("") + "</select></label>" +
       '<label class="schalter">' + L(["Hinweise im Spiel", "In-game hints"]) + ' <select data-hint="1">' + [["alle", L(["alle", "all"])], ["wenige", L(["wenige (nur Wichtiges)", "few (important only)"])], ["keine", L(["keine", "none"])]].map(([v, n]) => '<option value="' + v + '"' + ((s.hinweise || "alle") === v ? " selected" : "") + ">" + esc(n) + "</option>").join("") + "</select></label>" +
       ck("cinePan", L(["Kamerafahrt zum Ausgang beim Betreten", "Camera pan to the exit on arrival"]), !!s.cinePan) + ck("presentOff", L(["Fundvorführung aus", "Turn off item showcase"]), !!s.presentOff) +
-      ck("showDmg", L(["Schadenszahlen", "Damage numbers"]), s.showDmg) + ck("flashes", L(["Bildschirmblitze", "Screen flashes"]), s.flashes) + ck("vib", L(["Vibration", "Vibration"]), s.vib !== false) +
+      ck("showDmg", L(["Schadenszahlen", "Damage numbers"]), s.showDmg) + ck("vib", L(["Vibration", "Vibration"]), s.vib !== false) +
       '<label class="regler">' + L(["Stick-Totzone (Controller)", "Stick dead zone (controller)"]) + '<input type="range" min="15" max="60" value="' + Math.round((s.dead || 0.35) * 100) + '" data-dead="1"></label>' +
       '<button class="steuerknopf" data-act="controls">' + L(["Steuerung: Tastatur & Controller belegen", "Controls: remap keyboard & controller"]) + "</button>" +
       (fs.ok ? '<button class="steuerknopf" data-act="fullscreen">' + esc(fs.label()) + " <small>· F · Alt+Enter</small></button>" + ck("autoFs", L(["Am Handy beim Spielstart automatisch Vollbild", "Automatic fullscreen on phones when starting"]), Z.settings.autoFs !== false) : "") +
@@ -1009,7 +1009,6 @@
       '<label class="schalter">' + L(["Sprache", "Language"]) + ' <select data-lang="1"><option value="de"' + (s.lang === "de" ? " selected" : "") + '>Deutsch</option><option value="en"' + (s.lang === "en" ? " selected" : "") + ">English</option></select></label>" +
       '</div><div class="knoepfe"><button data-act="close">' + esc(t("close")) + "</button></div>", { cls: "schmal", onClose: () => { Z.saveSettings(); A.saveVol(); if (!Z.level) showTitle(); } });
     modal.querySelectorAll("[data-vol]").forEach(r => r.oninput = () => { A.vol[r.dataset.vol] = r.value / 100; A.applyVol(); if (r.dataset.vol === "sfx") A.play("hitFlesh", { vol: 0.6, gap: 0.15 }); });
-    modal.querySelector("[data-shake]").oninput = e => { Z.settings.shake = e.target.value / 100; };
     modal.querySelector("[data-dead]").oninput = e => { Z.settings.dead = e.target.value / 100; };
     modal.querySelector("[data-touch]").oninput = e => { Z.settings.touchSize = e.target.value / 100; touchSync(); };
     modal.querySelectorAll("[data-set]").forEach(c => c.onchange = () => { Z.settings[c.dataset.set] = c.checked; if (c.dataset.set === "vib") inp.vib = c.checked; });
@@ -1017,6 +1016,194 @@
     modal.querySelector("[data-hint]").onchange = e => { Z.settings.hinweise = e.target.value; Z.saveSettings(); };
     modal.querySelector("[data-lang]").onchange = e => { Z.settings.lang = e.target.value; Z.saveSettings(); closeModal(); for (const k in slotEls) slotEls[k].uid = -9; ui.settings(); };
   };
+
+
+  /* ---------- Komfort & Barrierefreiheit ----------
+     Eigene Unterseite der Einstellungen. Alles liegt in Z.settings und wirkt über die zentralen Faktoren in kern.js
+     (Z.shakeK, Z.flashK, Z.slowK, Z.dangerHi, Z.mercy). Bedienung: ↑↓ Zeile, ←→ Wahl/Regler, A/Enter wählt, B/Esc zurück. */
+  const KOPT = {
+    blitze: { opts: [["voll", ["voll", "full"]], ["sanft", ["gedämpft", "reduced"]], ["aus", ["aus", "off"]]] },
+    zeitlupe: { opts: [["voll", ["voll", "full"]], ["sanft", ["sanft", "subtle"]], ["aus", ["aus", "off"]]] },
+    kontrast: { bool: true }, schnellstart: { bool: true }, gnade: { bool: true }
+  };
+  const onOff = [[true, ["an", "on"]], [false, ["aus", "off"]]];
+  function komfortSumme() {
+    const s = Z.settings, out = [L(["Wackeln ", "Shake "]) + Math.round(Z.shakeK() * 100) + " %"];
+    if (s.blitze !== "voll") out.push(L(["Blitze ", "Flashes "]) + L(KOPT.blitze.opts.find(o => o[0] === s.blitze)[1]));
+    if (s.zeitlupe !== "voll") out.push(L(["Zeitlupe ", "Slow-mo "]) + L(KOPT.zeitlupe.opts.find(o => o[0] === s.zeitlupe)[1]));
+    if (s.kontrast) out.push(L(["Kontrast", "Contrast"]));
+    if (s.schnellstart) out.push(L(["Schnellstart", "Quick start"]));
+    if (s.gnade) out.push("✚ " + L(["Barmherzigkeit", "Mercy"]));
+    return out.join(" · ");
+  }
+  ui.komfortSumme = komfortSumme;
+  /* Tastenzeile oben: zeigt die echten Knöpfe des gerade benutzten Geräts */
+  function komfortTasten() {
+    const pad = inp.device === "pad", n = k => (pad ? inp.padButtonName(inp.pad[k]) : inp.label(k));
+    if (ui.touchOn && !pad) return '<p class="k-tasten">' + L(["Antippen zum Wählen · Regler ziehen", "Tap to choose · drag the slider"]) + "</p>";
+    return '<p class="k-tasten">' + (pad ? ui.kbd(L(["Stick", "Stick"])) + ui.kbd("✚") : ui.kbd("↑") + ui.kbd("↓")) + L([" Zeile", " row"]) + " · " + (pad ? ui.kbd("◀") + ui.kbd("▶") : ui.kbd("←") + ui.kbd("→")) + L([" Wahl / Regler", " choice / slider"]) +
+      " · " + ui.kbd(pad ? n("jump") : "Enter") + L([" übernehmen", " apply"]) + " · " + ui.kbd(pad ? n("roll") : "Esc") + L([" zurück", " back"]) + "</p>";
+  }
+  ui.komfort = focusKey => {
+    const s = Z.settings;
+    const seg = (key, opts, cur) => '<div class="k-wahl" role="radiogroup">' + opts.map(([v, n]) => '<button class="k-seg' + (v === cur ? " an" : "") + '" role="radio" aria-checked="' + (v === cur) + '" data-act="kset" data-arg="' + key + "|" + v + '">' + esc(L(n)) + "</button>").join("") + "</div>";
+    const row = (key, lab, hint, ctl, cls) => '<div class="k-zeile' + (cls ? " " + cls : "") + '" data-k="' + key + '"><div class="k-text"><b>' + lab + "</b>" + (hint ? "<small>" + hint + "</small>" : "") + "</div>" + ctl + "</div>";
+    const b = key => seg(key, onOff.map(([v, n]) => [String(v), n]), String(!!s[key]));
+    const sh = Math.round(Z.shakeK() * 100);
+    openModal("<h2>" + L(["Komfort & Barrierefreiheit", "Comfort & accessibility"]) + " <small>" + L(["wird sofort gespeichert", "saved instantly"]) + "</small></h2>" + komfortTasten() + '<div class="einst komfort">' +
+      "<h3>" + L(["Bewegung & Licht", "Motion & light"]) + "</h3>" +
+      row("shake", L(["Bildschirmwackeln", "Screen shake"]) + ' <em data-out="shake">' + sh + " %</em>", L(["Alle Erschütterungen von Treffern, Bossen, Beben und Fallen.", "Every shake from hits, bosses, quakes and traps."]),
+        '<div class="k-regler"><input type="range" min="0" max="100" step="5" value="' + sh + '" data-kshake="1" autofocus aria-label="' + esc(L(["Bildschirmwackeln", "Screen shake"])) + '"></div>') +
+      row("blitze", L(["Blitze & Aufleuchten", "Flashes & glare"]), L(["Vollbild-Blitze, Treffer-Aufleuchten, Gewitter- und Explosionslicht. „aus“ ist epilepsiefreundlich.", "Full-screen flashes, hit glare, lightning and explosion light. 'off' is epilepsy-friendly."]), seg("blitze", KOPT.blitze.opts, s.blitze)) +
+      row("zeitlupe", L(["Zeitlupe & Trefferstopp", "Slow-motion & hit-stop"]), L(["Kurzes Einfrieren bei Treffern, Zeitlupe bei Paraden, Ausweichen und Siegen.", "Brief freezes on hits, slow-motion on parries, dodges and victories."]), seg("zeitlupe", KOPT.zeitlupe.opts, s.zeitlupe)) +
+      "<h3>" + L(["Lesbarkeit", "Readability"]) + "</h3>" +
+      row("kontrast", L(["Gefahren-Kontrast", "Hazard contrast"]), L(["Ausholende Gegner, Fallen-Vorwarnungen, Bodenwarnungen und feindliche Geschosse bekommen kräftige Umrisse und Warnschraffur – erkennbar auch ohne Farbe.", "Winding-up enemies, trap warnings, floor warnings and enemy projectiles get bold outlines and warning stripes – readable without colour."]), b("kontrast")) +
+      "<h3>" + L(["Ablauf", "Flow"]) + "</h3>" +
+      row("schnellstart", L(["Schnellstart", "Quick start"]), L(["Kapitelseiten beim Betreten und bei der Lagerrückkehr sowie die Kamerafahrt zum Ausgang immer überspringen.", "Always skip chapter pages on arrival and on returning to camp, and the camera pan to the exit."]), b("schnellstart")) +
+      "<h3>" + L(["Hilfsmodus", "Assist mode"]) + "</h3>" +
+      row("gnade", "✚ " + L(["Barmherzigkeit", "Mercy"]) + ' <span class="k-marke">' + L(["Hilfsmodus", "Assist"]) + "</span>", L(["−25 % erlittener Schaden, längere Unverwundbarkeit nach Treffern. Läufe damit werden mit ✚ gekennzeichnet; Bestzeit und neuer Schädel-Grad zählen dann nicht.", "−25 % damage taken, longer invulnerability after hits. Runs with it are marked ✚; best time and new skull tiers don't count."]), b("gnade"), "gnade") +
+      '<div class="k-schnell"><button class="steuerknopf" data-act="kpreset" data-arg="ruhig">' + L(["Alles schonend: kein Wackeln, keine Blitze, keine Zeitlupe", "Gentle preset: no shake, no flashes, no slow-motion"]) + '</button><button class="steuerknopf" data-act="kpreset" data-arg="std">' + L(["Standard wiederherstellen", "Restore defaults"]) + "</button></div>" +
+      '</div><div class="knoepfe"><button data-act="komfortBack">' + esc(t("back")) + "</button></div>", { cls: "komfortfenster", onClose: () => { Z.saveSettings(); setTimeout(() => { if (!ui.modalOpen) actions.komfortBack(); }, 0); } }); /* Esc/B: zurück zu den Einstellungen */
+    const r = modal.querySelector("[data-kshake]");
+    r.oninput = () => { Z.settings.shake = r.value / 100; modal.querySelector('[data-out="shake"]').textContent = r.value + " %"; if (Z.level && +r.value > 0) Z.fx.shake = Math.max(Z.fx.shake, 6); };
+    r.onchange = () => { Z.saveSettings(); };
+    if (focusKey) setTimeout(() => { const el = modal.querySelector('[data-k="' + focusKey + '"] .an, [data-k="' + focusKey + '"] input, [data-act="kpreset"][data-arg="' + focusKey + '"]'); if (el) el.focus({ preventScroll: true }); }, 45);
+  };
+  actions.komfort = () => { Z.saveSettings(); A.saveVol(); ui.onClose = null; closeModal(); ui.komfort(); };
+  actions.komfortBack = () => { Z.saveSettings(); ui.onClose = null; if (ui.modalOpen) closeModal(); ui.settings(); setTimeout(() => { const b = modal.querySelector('[data-act="komfort"]'); if (b) b.focus({ preventScroll: true }); }, 45); };
+  actions.kset = (arg, btn) => {
+    const [key, v] = String(arg).split("|"), o = KOPT[key]; if (!o) return;
+    Z.settings[key] = o.bool ? v === "true" : v; Z.saveSettings();
+    const wrap = btn && btn.closest(".k-wahl");
+    if (wrap) wrap.querySelectorAll(".k-seg").forEach(x => { const on = x === btn; x.classList.toggle("an", on); x.setAttribute("aria-checked", on); });
+    if (key === "gnade" && Z.settings.gnade && Z.run) { Z.run.gnade = true; ui.toast("✚ " + L(["Barmherzigkeit aktiv – dieser Lauf wird gekennzeichnet.", "Mercy active – this run will be marked."]), 2600); }
+    if (key === "blitze" && v !== "aus" && Z.level) Z.fx.flashScreen("#fff3c0", 0.3); /* Vorschau in der gewählten Stärke */
+  };
+  actions.kpreset = arg => {
+    const S = Z.settings;
+    if (arg === "ruhig") Object.assign(S, { shake: 0, blitze: "aus", zeitlupe: "aus" });
+    else Object.assign(S, { shake: 1, blitze: "voll", zeitlupe: "voll", kontrast: false, schnellstart: false, gnade: false });
+    Z.saveSettings(); ui.onClose = null; closeModal(); ui.komfort(arg);
+    ui.toast(arg === "ruhig" ? L(["Schonende Einstellungen übernommen.", "Gentle settings applied."]) : L(["Standard wiederhergestellt.", "Defaults restored."]), 2000);
+  };
+  /* Barmherzigkeit: −25 % erlittener Schaden, 40 % längere Unverwundbarkeit; der Lauf wird gekennzeichnet */
+  {
+    const hurt0 = Z.hurtPlayer;
+    Z.hurtPlayer = function (dmg, o, ...rest) {
+      if (!Z.mercy()) return hurt0.call(this, dmg, o, ...rest);
+      const P = Z.player, hp0 = P ? P.hp : 0;
+      if (Z.run) Z.run.gnade = true;
+      if (typeof dmg === "number" && isFinite(dmg)) dmg *= 0.75;
+      const r = hurt0.call(this, dmg, o, ...rest);
+      if (P && P.hp < hp0 && P.iframe > 0) P.iframe *= 1.4;
+      return r;
+    };
+  }
+  const gnadeNote = () => (Z.run && Z.run.gnade ? '<p class="gnade-note">✚ ' + L(["Barmherzigkeit war in diesem Lauf aktiv – Bestzeit und neuer Schädel-Grad werden nicht gewertet.", "Mercy was active in this run – best time and new skull tiers are not counted."]) + "</p>" : "");
+
+  /* Gefahren-Kontrast: kräftige Umrisse (schwarz + hell) und Warnschraffur über allem, was gleich wehtut.
+     Liegt über dem Licht (auch in dunklen Gebieten lesbar), zeichnet nichts, wenn die Option aus ist. Kein Blau. */
+  const DK = { ink: "#120a06", warn: "#ffd84a", hell: "#fff6e0", safe: "#8fe07a" };
+  let hatchPat = null, hatchCtx = null;
+  function hatch(c) {
+    if (hatchPat && hatchCtx === c) return hatchPat;
+    const cv = document.createElement("canvas"); cv.width = cv.height = 8; const g = cv.getContext("2d");
+    g.fillStyle = DK.ink; g.fillRect(0, 0, 8, 8); g.strokeStyle = DK.warn; g.lineWidth = 2.6;
+    for (const o of [-8, 0, 8]) { g.beginPath(); g.moveTo(o, 8); g.lineTo(o + 8, 0); g.stroke(); }
+    hatchPat = c.createPattern(cv, "repeat"); hatchCtx = c; return hatchPat;
+  }
+  function outlineRect(c, x, y, w, h, lw, dash) {
+    c.setLineDash([]); c.strokeStyle = DK.ink; c.lineWidth = lw * 2; c.strokeRect(x, y, w, h);
+    c.strokeStyle = DK.warn; c.lineWidth = lw; if (dash) { c.setLineDash(dash); c.lineDashOffset = -dash.t || 0; } c.strokeRect(x, y, w, h); c.setLineDash([]);
+  }
+  function warnSign(c, x, y, s, a) {
+    c.globalAlpha = a; c.beginPath(); c.moveTo(x, y - s); c.lineTo(x + s * 0.95, y + s * 0.65); c.lineTo(x - s * 0.95, y + s * 0.65); c.closePath();
+    c.lineJoin = "round"; c.strokeStyle = DK.ink; c.lineWidth = s * 0.45; c.stroke(); c.fillStyle = DK.warn; c.fill();
+    c.fillStyle = DK.ink; c.fillRect(x - s * 0.11, y - s * 0.5, s * 0.22, s * 0.68); c.fillRect(x - s * 0.11, y + s * 0.3, s * 0.22, s * 0.2);
+  }
+  function hatchArea(c, x, y, w, h, a, lw) {
+    if (!(w > 0 && h > 0)) return;
+    c.globalAlpha = a * 0.42; c.fillStyle = hatch(c); c.fillRect(x, y, w, h);
+    c.globalAlpha = 1; outlineRect(c, x, y, w, h, lw);
+  }
+  const TRAP_WARN = new Set(["warn", "zittert", "knarr", "pocht", "zeichen", "reisst"]);
+  ui.dangerOverlay = function (c, cam, t) {
+    if (!Z.dangerHi() || !Z.level || !cam) return 0;
+    const FX = Z.fx, S = Z.gfx.scale || 1, ox = Math.round((-cam.x + FX.shakeX) * S) / S, oy = Math.round((-cam.y + FX.shakeY) * S) / S;
+    const lw = Math.max(0.9, 2.6 / S), pulse = 0.75 + 0.25 * Math.sin(t * 14), x0 = cam.x - 40, x1 = cam.x + cam.w + 40, y0 = cam.y - 60, y1 = cam.y + cam.h + 60;
+    const inView = (x, y) => x > x0 && x < x1 && y > y0 && y < y1;
+    let n = 0;
+    c.save(); c.setTransform(S, 0, 0, S, ox * S, oy * S); c.globalCompositeOperation = "source-over"; c.lineCap = "butt";
+    /* 1) Bodenwarnungen (Vorwarnphase von Gefahrenzonen, Säulen, Einschlägen) */
+    for (const h of Z.hazards || []) {
+      if (!h.warn || h.t >= h.warn || h.owner === "p" || !inView(h.x, h.y)) continue;
+      const tall = h.kind === "strike" || h.kind === "column", hh = tall ? Math.min(h.hgt || 400, 400) : Math.max(8, h.hgt || 24);
+      hatchArea(c, h.x - h.w / 2, h.y - hh, h.w, hh, pulse, lw); warnSign(c, h.x, h.y - hh - 9, 5, 1); c.globalAlpha = 1; n++;
+    }
+    /* 2) Boss-Telegraphen (bossphasen.js) */
+    for (const tl of Z.bossTeleList || []) {
+      const k = Math.min(1, tl.t / (tl.dur || 1));
+      if (tl.k === "floor") { if (!inView(tl.x, tl.y)) continue; hatchArea(c, tl.x - tl.w / 2, tl.y - 16, tl.w, 16, pulse, lw); warnSign(c, tl.x, tl.y - 27, 5, 1); }
+      else if (tl.k === "band") { hatchArea(c, tl.x0, tl.y - tl.h, tl.x1 - tl.x0, tl.h, pulse * (0.6 + 0.4 * k), lw); }
+      else if (tl.k === "ring") { c.globalAlpha = 1; c.setLineDash([]); c.strokeStyle = DK.ink; c.lineWidth = lw * 2; c.beginPath(); c.arc(tl.x, tl.y, tl.r, 0, 6.283); c.stroke(); c.strokeStyle = DK.warn; c.lineWidth = lw; c.setLineDash([lw * 3, lw * 2]); c.lineDashOffset = -t * 20; c.stroke(); c.setLineDash([]); warnSign(c, tl.x, tl.y - tl.r - 8, 5, 1); }
+      else if (tl.k === "safe") { c.globalAlpha = 1; c.setLineDash([lw * 1.5, lw * 1.5]); c.strokeStyle = DK.ink; c.lineWidth = lw * 2; c.strokeRect(tl.x - tl.w / 2, tl.y - 30, tl.w, 30); c.strokeStyle = DK.safe; c.lineWidth = lw; c.strokeRect(tl.x - tl.w / 2, tl.y - 30, tl.w, 30); c.setLineDash([]); }
+      c.globalAlpha = 1; n++;
+    }
+    /* 3) Gegner, die gerade ausholen: Eckwinkel um den Körper + Warnzeichen über dem Kopf */
+    for (const e of Z.enemies || []) {
+      if (e.dead || e.hidden) continue;
+      const pre = (e.act && e.act.phase === "pre") || e.tele > 0 || (e.mv && e.mv.stage === "pre");
+      if (!pre || !inView(e.x + e.w / 2, e.y)) continue;
+      const pad = 2, x = e.x - pad, y = e.y - pad, w = e.w + pad * 2, h = e.h + pad * 2, q = Math.min(7, w * 0.35, h * 0.35);
+      c.globalAlpha = 1; c.lineJoin = "miter";
+      for (const [col, wd] of [[DK.ink, lw * 2.2], [DK.warn, lw]]) {
+        c.strokeStyle = col; c.lineWidth = wd; c.beginPath();
+        c.moveTo(x, y + q); c.lineTo(x, y); c.lineTo(x + q, y); c.moveTo(x + w - q, y); c.lineTo(x + w, y); c.lineTo(x + w, y + q);
+        c.moveTo(x + w, y + h - q); c.lineTo(x + w, y + h); c.lineTo(x + w - q, y + h); c.moveTo(x + q, y + h); c.lineTo(x, y + h); c.lineTo(x, y + h - q); c.stroke();
+      }
+      warnSign(c, e.x + e.w / 2, e.y - 10 - 2 * pulse, 5.5, 1); n++;
+    }
+    /* 4) feindliche Geschosse: schwarzer Ring mit hellem, laufendem Strichmuster */
+    for (const p of Z.projs || []) {
+      if (p.owner !== "e" || p.dead || !inView(p.x, p.y)) continue;
+      const r = ((p.k && p.k.r) || 3) + 3.5;
+      c.globalAlpha = 1; c.setLineDash([]); c.strokeStyle = DK.ink; c.lineWidth = lw * 2.2; c.beginPath(); c.arc(p.x, p.y, r, 0, 6.283); c.stroke();
+      c.strokeStyle = DK.hell; c.lineWidth = lw; c.setLineDash([lw * 2.2, lw * 1.6]); c.lineDashOffset = -t * 30; c.stroke(); c.setLineDash([]); n++;
+    }
+    /* 5) Fallen in der Vorwarnung (fallen.js): Warnzeichen über der Falle */
+    for (const tr of Z.fallen || []) {
+      const x = tr.wx != null ? tr.wx : tr.x != null ? tr.x : tr.tx, y = tr.y != null ? tr.y : tr.fy;
+      if (x == null || y == null || !(tr.w === true || TRAP_WARN.has(tr.st)) || !inView(x, y)) continue;
+      warnSign(c, x, y - 16 - 2 * pulse, 6, 1); n++;
+    }
+    c.restore();
+    return n;
+  };
+  {
+    const al0 = Z.drawAfterLight;
+    Z.drawAfterLight = function (c, cam, W, H, t) { if (al0) al0.apply(this, arguments); try { ui.dangerOverlay(c, cam, t || 0); } catch (e) { console.error(e); } };
+  }
+  /* Aussehen der Unterseite (Pergament & Schmiedeeisen, kein Blau) */
+  {
+    const st = document.createElement("style");
+    st.textContent = ".mbox.komfortfenster{width:min(860px,calc(96vw / var(--ui,1)))!important}.komfortfenster h2 small{margin-left:auto}.komfort{gap:6px}" +
+      ".k-tasten{margin:0 0 6px;font-size:var(--fs-s);color:var(--mute)}" +
+      ".komfort h3{margin:4px 0 0;font-size:var(--fs-m,16px);border-bottom:1px solid rgba(229,180,84,.18);padding-bottom:2px}" +
+      ".k-zeile{display:flex;align-items:center;gap:14px;padding:5px 10px;border-radius:6px;background:linear-gradient(90deg,rgba(240,214,160,.07),rgba(240,214,160,.02));border-left:3px solid #6e5530}" +
+      ".k-zeile:focus-within{border-left-color:var(--gold);background:linear-gradient(90deg,rgba(240,214,160,.14),rgba(240,214,160,.04))}" +
+      ".k-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.k-text b{color:var(--text,#f0e0c0);font-size:var(--fs-m,15px)}.k-text b em{font-style:normal;color:var(--gold);margin-left:6px}.k-text small{color:var(--mute);font-size:var(--fs-xs,12px);line-height:1.3}" +
+      ".k-wahl{display:flex;flex:none;border:1px solid #160f0c;border-radius:7px;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,230,190,.08)}" +
+      ".k-seg{background:linear-gradient(#3a2a24,#241915);color:var(--mute);border:0;border-left:1px solid #160f0c;padding:6px 11px;font-weight:700;font-size:var(--fs-s);cursor:pointer;min-width:3.2em}.k-seg:first-child{border-left:0}" +
+      ".k-seg.an{background:linear-gradient(#f6e9c8,#cdb07a);color:#2a1810;text-shadow:none}.k-seg:focus{outline:2px solid var(--gold);outline-offset:-2px}.k-seg.an:focus{outline-color:#8a1f14}" +
+      ".k-regler{flex:none;width:min(220px,40%)}.k-regler input{width:100%;accent-color:var(--gold)}" +
+      ".k-zeile.gnade{border-left-color:#8a1f14;background:repeating-linear-gradient(135deg,rgba(138,31,20,.14) 0 10px,rgba(138,31,20,.05) 10px 20px)}" +
+      ".k-marke{display:inline-block;margin-left:6px;padding:0 6px;border-radius:4px;background:#8a1f14;color:#ffe6c8;font-size:var(--fs-xs,11px);font-weight:800;letter-spacing:.04em;vertical-align:middle}" +
+      ".k-schnell{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}.k-schnell .steuerknopf{flex:1;min-width:200px}" +
+      ".gnade-hud{color:#ff8a6a;font-weight:800}.gnade-note{margin:8px 0;padding:6px 10px;border-left:3px solid #8a1f14;background:rgba(138,31,20,.16);color:#f0d0b0;font-size:var(--fs-s)}" +
+      ".klein .k-zeile,.handheld .k-zeile{flex-wrap:wrap;padding:5px 8px}.klein .k-regler,.handheld .k-regler{width:100%}.klein .k-text small,.handheld .k-text small{display:none}" +
+      ".klein .k-zeile:focus-within .k-text small,.handheld .k-zeile:focus-within .k-text small{display:block}";
+    document.head.appendChild(st);
+  }
 
   /* ---------- Vollbild ---------- */
   const fs = (Z.fs = {
@@ -1426,15 +1613,17 @@
       '<p class="hinweis">' + esc(t("reached")) + ": " + (run.route || []).map(r => esc(Z.areaName(r))).join(" → ") + "</p>";
   }
   ui.deathScreen = o => {
-    openModal("<h2>" + esc(o && o.abort ? L(["Umgekehrt", "Turned back"]) : t("died")) + '</h2><p class="unter">' + esc(o && o.abort ? L(["Ezekiel kehrt um. Ohne ein Wort.", "Ezekiel turns back. Without a word."]) : t("diedSub")) + "</p>" + statsHTML() + '<p class="tipp">' + esc(L(Z.R.pick(TX.tips))) + '</p><div class="knoepfe"><button data-act="toCamp" autofocus>' + esc(t("camp")) + "</button></div>", { cls: "breit todfenster", noEsc: true });
+    openModal("<h2>" + esc(o && o.abort ? L(["Umgekehrt", "Turned back"]) : t("died")) + '</h2><p class="unter">' + esc(o && o.abort ? L(["Ezekiel kehrt um. Ohne ein Wort.", "Ezekiel turns back. Without a word."]) : t("diedSub")) + "</p>" + statsHTML() + gnadeNote() + '<p class="tipp">' + esc(L(Z.R.pick(TX.tips))) + '</p><div class="knoepfe"><button data-act="toCamp" autofocus>' + esc(t("camp")) + "</button></div>", { cls: "breit todfenster", noEsc: true });
   };
   actions.toCamp = () => { modalQueue.length = 0; closeModal(); Z.backToCamp(); }; /* nach Tod/Ende nichts Altes nachholen */
   ui.ending = key => {
     const M = Z.meta, run = Z.run;
     const first = !M.endings[key];
     M.endings[key] = (M.endings[key] || 0) + 1; M.wins++;
-    if (!M.best.time || run.time < M.best.time) M.best.time = run.time;
-    const newSkull = run.skulls >= (M.skulls || 0) && (M.skulls || 0) < 5;
+    /* Barmherzigkeit: Sieg zählt, aber keine Bestzeit und kein neuer Schädel-Grad (fair gegenüber Läufen ohne Hilfe) */
+    const mercy = !!run.gnade;
+    if (!mercy && (!M.best.time || run.time < M.best.time)) M.best.time = run.time;
+    const newSkull = !mercy && run.skulls >= (M.skulls || 0) && (M.skulls || 0) < 5;
     if (newSkull) M.skulls = (M.skulls || 0) + 1;
     /* Splitter aus dem letzten Abschnitt sichern */
     M.shards += Z.player.shards; run.shardsBank += Z.player.shards; Z.player.shards = 0;
@@ -1443,7 +1632,7 @@
     if (showAll) M.endings.alle = 1;
     Z.saveMeta();
     const e = TX.endings[key];
-    openModal('<h2 class="ende">' + esc(L(e[0])) + '</h2><p class="erz">' + L(e[1]) + "</p>" + (showAll ? '<h2 class="ende">' + esc(L(TX.endings.alle[0])) + '</h2><p class="erz">' + L(TX.endings.alle[1]) + "</p>" : "") + statsHTML() + (newSkull ? '<p class="schaedel">☠ ' + esc(t("winSkull")) + "</p>" : "") + '<div class="knoepfe"><button data-act="toCamp" autofocus>' + esc(t("camp")) + "</button></div>", { cls: "breit endfenster", noEsc: true });
+    openModal('<h2 class="ende">' + esc(L(e[0])) + '</h2><p class="erz">' + L(e[1]) + "</p>" + (showAll ? '<h2 class="ende">' + esc(L(TX.endings.alle[0])) + '</h2><p class="erz">' + L(TX.endings.alle[1]) + "</p>" : "") + statsHTML() + gnadeNote() + (newSkull ? '<p class="schaedel">☠ ' + esc(t("winSkull")) + "</p>" : "") + '<div class="knoepfe"><button data-act="toCamp" autofocus>' + esc(t("camp")) + "</button></div>", { cls: "breit endfenster", noEsc: true });
     A.play("holy", { vol: 0.6 });
   };
 
@@ -1498,6 +1687,7 @@
     const now = performance.now(), rdt = Math.min(0.1, (now - lastFrame) / 1000); lastFrame = now;
     try { noteTick(rdt); if (Z.level) labelTick(); } catch (e) { console.error(e); }
     syncPadHint();
+    if (Z.run && !Z.run.gnade && Z.mercy()) Z.run.gnade = true; /* Hilfsmodus kennzeichnet den laufenden Durchgang */
     if (!title.hidden && !ui.modalOpen) { if (inp.pressed.jump || inp.pressed.use || inp.pressed.a1) { const b = title.querySelector("button:focus, a:focus") || title.querySelector("button"); if (b) b.click(); } if (inp.pressed.down || inp.pressed.up) { const bs = [...title.querySelectorAll("button, a")]; const i = bs.indexOf(document.activeElement); (bs[(i + (inp.pressed.down ? 1 : -1) + bs.length) % bs.length] || bs[0]).focus(); } inp.endFrame(); return; }
     if (inp.pressed.pause && !ui.choiceActive) { inp.consume("pause"); if (ui.modalOpen) { if (!ui.noEsc) closeModal(); } else ui.pause(); }
     /* Controller „Ansicht“: antippen = Karte (beim Loslassen), halten = Ausrüstung. Die Tastatur hat eigene Tasten

@@ -348,7 +348,7 @@
         /* Gewitter: ferne Blitze erhellen die Wolken */
         if (kind === "storm" || kind === "spires") {
           const n = Math.floor(t / 4.3), k = t % 4.3;
-          if (hash(n, 21) > 0.45 && k < 0.25) { c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = (0.25 - k) * (kind === "storm" ? 1.6 : 0.8); c.fillStyle = kind === "storm" ? "#e8f0d8" : "#ffb070"; c.fillRect(cam.x, oy, cam.w, LH * 0.6); c.restore();
+          if (hash(n, 21) > 0.45 && k < 0.25) { c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = (0.25 - k) * (kind === "storm" ? 1.6 : 0.8) * (Z.flashK ? Z.flashK("licht") : 1); c.fillStyle = kind === "storm" ? "#e8f0d8" : "#ffb070"; c.fillRect(cam.x, oy, cam.w, LH * 0.6); c.restore();
             if (kind === "storm" && k < 0.12) { const lx = cam.x + cam.w * hash(n, 9); c.save(); c.strokeStyle = "rgba(255,255,240,.85)"; c.lineWidth = 1.2; c.beginPath(); let x = lx, y = oy + LH * 0.1; c.moveTo(x, y); for (let i = 0; i < 6; i++) { x += (hash(n, i) - 0.5) * 24; y += LH * 0.07; c.lineTo(x, y); } c.stroke(); c.restore(); } }
         }
         /* Dunst am Horizont, langsam ziehend */
@@ -647,24 +647,95 @@
   };
   const SIZE = { tapestry: [2, 4], statue: [2, 4, 1], stairs: [6, 4, 1], shields: [3, 2], gallery: [4, 2], rack: [3, 3, 1], cell: [3, 3], ribs: [5, 3, 1], nets: [3, 3], bell: [3, 3], gear: [3, 3], cocoon: [2, 4], ruin: [3, 4, 1], face: [3, 3], chimney: [3, 5, 1] };
   let decSet = null, decLv = null;
-  function decorSet(lv) { if (decLv === lv && decSet) return decSet; decLv = lv; decSet = new Set(); for (const d of lv.decor || []) for (let dy = -2; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) decSet.add((d.y + dy) * lv.W + d.x + dx); return decSet; }
+  let decProps = null;
+  function decorSet(lv) {
+    /* Wandschmuck aus ausstattung.js (Pfannen, Regale …) ebenfalls freihalten – die Liste kann nach dem ersten Chunk kommen */
+    const pr = Z.ausstattung ? Z.ausstattung() : null;
+    if (decLv === lv && decSet && decProps === pr) return decSet; decLv = lv; decProps = pr; decSet = new Set();
+    for (const d of lv.decor || []) for (let dy = -2; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) decSet.add((d.y + dy) * lv.W + d.x + dx);
+    if (pr) for (const p of pr) if (p.wall) { const hw = Math.ceil((p.w || 1) / 2); for (let dy = -2; dy <= 1; dy++) for (let dx = -hw; dx <= hw; dx++) decSet.add((Math.round(p.y) + dy) * lv.W + Math.round(p.x) + dx); }
+    return decSet;
+  }
+  /* Raumfunktion (welt.js assignRooms → lv.roomFns) an einer Kachel; Z.raumTyp(tx, ty) gibt z. B. "kueche" zurück */
+  const raumTyp = (lv, tx, ty) => { const f = lv && lv.roomFns; return f ? f[Math.floor(tx / Z.CW) + "," + Math.floor(ty / Z.CH)] || null : null; };
+  Z.raumTyp = (tx, ty) => raumTyp(Z.level, tx, ty);
+  /* Liste der platzierten Raumstücke (Kacheln) für die Belebung in Runde 7; entsteht beim ersten Chunk */
+  Z.raumStuecke = () => (rpLv === Z.level && rpList) || [];
+  /* Schaustücke nach Raumfunktion: hier hängt, was in diesen Raum gehört (Bücherwände in der Bibliothek, Glasfenster in
+     der Kapelle, Kupfertöpfe am Küchenkamin …). Räume ohne Eintrag nehmen die Gebietsliste. */
+  const ROOMPIECE = {
+    wachstube: ["waffen", "schluessel", "shields"], stall: ["hufeisen", "hufeisen", "seile"], unterstand: ["waffen", "hufeisen"], uebungsplatz: ["zielscheibe", "waffen", "zielscheibe"],
+    schuppen: ["faesser", "seile"], kueche: ["kamin", "kupfer", "kamin", "kupfer"], weinkeller: ["faesser", "rack", "faesser"], vorratskammer: ["faesser", "teller"],
+    gesindestube: ["teller", "kamin"], brunnenkammer: ["seile", "relief"], bankettsaal: ["kamin", "glasfenster", "tapestry", "gallery"], anrichte: ["teller", "kupfer"],
+    bibliothek: ["buecherwand", "buecherwand", "buecherwand", "spiegel"], kapelle: ["glasfenster", "altarbild", "glasfenster", "statue"], ahnengalerie: ["gallery", "spiegel", "gallery"],
+    schlafgemach: ["spiegel", "tapestry", "kamin"], ruestkammer: ["waffen", "shields", "waffen"], geschuetzstand: ["kugeln", "shields"], kaserne: ["waffen", "shields", "schluessel"],
+    schuetzenstand: ["waffen", "zielscheibe"], waerterstube: ["schluessel", "waffen"], zellenblock: ["kerker", "cell", "kerker"], folterkammer: ["folter", "kerker", "folter"],
+    gebeinhaus: ["schaedel", "schaedel"], lagerhaus: ["faesser", "seile", "faesser"], bootsschuppen: ["ribs", "nets", "seile"], taverne: ["wirtsschild", "krugbord", "faesser", "krugbord"],
+    fischerkate: ["nets", "seile"], zollstube: ["waage", "schluessel"], glockenstube: ["bell", "uhr"], uhrwerk: ["uhr", "gear", "uhr"], uhrmacher: ["uhr", "gear"],
+    taubenschlag: ["tauben", "tauben"], seilkammer: ["seile", "seile"], brutkammer: ["eier", "eier", "cocoon"], beutelager: ["cocoon", "eier"], pilzgrotte: ["riesenpilze", "riesenpilze"],
+    kristallhoehle: ["kristall", "kristall"], essenhalle: ["chimney", "gussform"], giesserei: ["gussform", "chimney", "gussform"], erzlager: ["erz", "erz"], waffenkammer: ["waffen", "shields", "waffen"],
+    runenkammer: ["runenstein", "runenstein"], wehrturm: ["shields", "waffen"], speiergalerie: ["statue", "statue"], tempel: ["relief", "relief", "ruin"], opferstaette: ["relief", "altarbild"],
+    wrackhalde: ["ribs", "ribs"], korallengarten: ["korallen", "korallen"], schrein: ["face", "runenstein"], schlackehalde: ["chimney", "erz"], giftgarten: ["ranken", "ranken"],
+    truemmerhalle: ["ruin", "statue"], geheim: ["spiegel", "runenstein"], schatz: ["shields", "gallery", "spiegel"]
+  };
   function fits(H, ox, oy, w, h, stand, dec) {
     const W = H.lv.W;
     for (let y = oy; y < oy + h; y++) for (let x = ox; x < ox + w; x++) if (!H.isWall(x, y) || dec.has(y * W + x)) return false;
     if (stand) for (let x = ox; x < ox + w; x++) { const v = H.lv.get(x, oy + h); if (!(H.solidV(v) || H.isPlatV(v))) return false; }
     return true;
   }
+  /* Raumplan: je Raum mit Funktion werden einmal pro Karte bis zu drei passende Stellen für seine Schaustücke gesucht
+     (ganzer Raum, notfalls kleinere Fassung des Stücks). Das Ergebnis gilt für alle Chunks gleich. */
+  let rpLv = null, rpProps = null, rpList = null;
+  /* stehende Stücke, die notfalls auch auf Kragsteinen an der Wand hängen dürfen (Bücherbord, Waffenbrett) */
+  const FLOATOK = { buecherwand: 1, waffen: 1, krugbord: 1 };
+  function roomPlan(H, dec) {
+    const lv = H.lv;
+    if (rpLv === lv && rpProps === decProps && rpList) return rpList;
+    rpLv = lv; rpProps = decProps; rpList = [];
+    if (lv.hub || lv.arena || !lv.roomFns) return rpList;
+    const CW = Z.CW, CH = Z.CH, h3 = H.h3, taken = [];
+    const free = (ox, oy, w, h) => !taken.some(t => ox < t[0] + t[2] + 1 && ox + w + 1 > t[0] && oy < t[1] + t[3] + 1 && oy + h + 1 > t[1]);
+    for (const k in lv.roomFns) {
+      const rl = ROOMPIECE[lv.roomFns[k]]; if (!rl) continue;
+      const [cx, cy] = k.split(",").map(Number), rx = cx * CW, ry = cy * CH;
+      const want = 2 + (h3(cx, cy, 905) < 0.5 ? 1 : 0); let got = 0;
+      for (let i = 0; i < rl.length * 2 && got < want; i++) {
+        const kind = rl[(i + ((h3(cx, cy, 906) * rl.length) | 0)) % rl.length], sz = SIZE[kind]; if (!sz || !PIECE[kind]) continue;
+        const stand = !!sz[2], sizes = [[sz[0], sz[1]], [sz[0], sz[1] - 1], [sz[0] - 1, sz[1]], [sz[0] - 1, sz[1] - 1]].filter(s => s[0] >= 2 && s[1] >= 2);
+        let hit = null;
+        for (const [w, h, fl] of FLOATOK[kind] ? sizes.concat(sizes.map(s => [s[0], s[1], 1]), [[sz[0], 2, 1], [sz[0] - 1, 2, 1]]) : sizes) {
+          const nx = CW - w - 1, ny = CH - h + 1, sx = (h3(cx, cy, 907 + i) * nx) | 0;
+          for (let j = 0; j < nx * ny && !hit; j++) {
+            const ox = rx + 1 + (sx + (j % nx)) % nx, oy = ry + ((j / nx) | 0);
+            if (free(ox, oy, w, h) && fits(H, ox, oy, w, h, stand && !fl, dec)) hit = [ox, oy, w, h, fl];
+          }
+          if (hit) break;
+        }
+        if (hit) { taken.push(hit); rpList.push({ kind, x: hit[0], y: hit[1], w: hit[2], h: hit[3], r: h3(hit[0], hit[1], 904), fn: lv.roomFns[k], fl: !!hit[4] }); got++; }
+      }
+    }
+    return rpList;
+  }
   function setPieces(H) {
-    const { x0, y0, x1, y1, B, h3, lv, T } = H, list = PIECES[B.bg]; if (!list || !list.length) return;
-    const dec = decorSet(lv);
+    const { x0, y0, x1, y1, B, h3, lv, T } = H, list0 = PIECES[B.bg];
+    const dec = decorSet(lv), useRoom = !lv.hub && !lv.arena;
+    const draw = (kind, ox, oy, w, h, r, fn) => { if (Z.gfx.pieceLog) Z.gfx.pieceLog.push([kind, fn, ox, oy]); H.c.save(); try { PIECE[kind](H.c, ox * T, oy * T, w * T, h * T, H, r); } catch (e) { console.error(e); } H.c.restore(); };
+    if (useRoom) for (const p of roomPlan(H, dec)) if (!(p.x + p.w < x0 - 1 || p.x > x1 + 1 || p.y + p.h < y0 - 1 || p.y > y1 + 1)) {
+      draw(p.kind, p.x, p.y, p.w, p.h, p.r, p.fn);
+      if (p.fl) { const c = H.c, by = (p.y + p.h) * T, P = H.PAL; for (const bx of [p.x * T + 5, (p.x + p.w) * T - 11]) { c.fillStyle = "rgba(0,0,0,.35)"; c.beginPath(); c.moveTo(bx + 1, by); c.lineTo(bx + 7, by); c.lineTo(bx + 4, by + 8); c.fill(); c.fillStyle = P.stone; c.beginPath(); c.moveTo(bx, by - 1); c.lineTo(bx + 6, by - 1); c.lineTo(bx + 6, by + 1); c.quadraticCurveTo(bx + 2, by + 2, bx + 1, by + 7); c.lineTo(bx, by + 7); c.fill(); c.fillStyle = P.stoneHi; c.fillRect(bx, by - 1, 6, 0.6); } }
+    }
+    if (!list0 || !list0.length) return;
     for (let gy = Math.floor(y0 / GY) - 1; gy * GY < y1 + 1; gy++) for (let gx = Math.floor(x0 / GX) - 1; gx * GX < x1 + 1; gx++) {
+      /* Räume mit eigenem Satz bekommen keine Gebietsstücke dazu */
+      const fn = useRoom ? raumTyp(lv, gx * GX + GX / 2, gy * GY + GY / 2) : null; if (fn && ROOMPIECE[fn]) continue;
       if (h3(gx, gy, 900) > 0.42) continue;
-      const kind = list[(h3(gx, gy, 901) * list.length) | 0], sz = SIZE[kind], w = sz[0], h = sz[1], stand = !!sz[2];
+      const kind = list0[(h3(gx, gy, 901) * list0.length) | 0], sz = SIZE[kind]; if (!sz || !PIECE[kind]) continue; const w = sz[0], h = sz[1], stand = !!sz[2];
       const ox = gx * GX + ((h3(gx, gy, 902) * (GX - w + 1)) | 0); let oy = -1;
       if (stand) { for (let dy = 0; dy <= GY - h; dy++) if (fits(H, ox, gy * GY + dy, w, h, true, dec)) { oy = gy * GY + dy; break; } }
       else { const c0 = gy * GY + ((h3(gx, gy, 903) * (GY - h + 1)) | 0); if (fits(H, ox, c0, w, h, false, dec)) oy = c0; }
       if (oy < 0 || ox + w < x0 - 1 || ox > x1 + 1 || oy + h < y0 - 1 || oy > y1 + 1) continue;
-      H.c.save(); try { PIECE[kind](H.c, ox * T, oy * T, w * T, h * T, H, h3(gx, gy, 904)); } catch (e) { console.error(e); } H.c.restore();
+      draw(kind, ox, oy, w, h, h3(gx, gy, 904), null);
     }
   }
   const sh = (c, x, y, w, h, a) => { c.fillStyle = "rgba(0,0,0," + a + ")"; c.fillRect(x, y, w, h); };
@@ -813,6 +884,421 @@
       const s2 = c.createLinearGradient(0, y, 0, y + 30); s2.addColorStop(0, "rgba(8,5,4,.5)"); s2.addColorStop(1, "rgba(8,5,4,0)"); c.fillStyle = s2; c.fillRect(cx - 8, y, 16, 30);
     }
   };
+  /* ---------- Schaustücke nach Raumfunktion (Runde 6) ----------
+     Werden über ROOMPIECE gewählt; alle gedämpft genug, um Rückwand zu bleiben, aber erkennbar: Bücherwand, Glasfenster,
+     Altarbild, Küchenkamin, Kupfertöpfe, Waffenrechen, Fassreihe, Folterwand, Wirtshausschild, Krugbord, Kerkerzelle,
+     Uhrwerk, Gussformen, Tempelrelief, Eiersäcke, Schädelnischen, Schlüsselbrett, Taubenschlag, Seile, Hufeisen,
+     Zielscheibe, Kugelpyramide, Erzhaufen, Runenstein, Korallen, Giftranken, Tellerbord, Waage, Spiegel, Riesenpilze,
+     Kristalle. Kein Blau. */
+  Object.assign(SIZE, { buecherwand: [4, 4, 1], glasfenster: [3, 5], altarbild: [4, 3], kamin: [4, 4, 1], kupfer: [4, 2], waffen: [3, 3, 1], faesser: [5, 3, 1], folter: [4, 3],
+    wirtsschild: [3, 2], krugbord: [4, 2], kerker: [4, 3, 1], uhr: [4, 4], gussform: [4, 3, 1], relief: [4, 3], eier: [3, 3], schaedel: [4, 3], schluessel: [2, 2], tauben: [4, 3],
+    seile: [3, 3], hufeisen: [3, 2], zielscheibe: [2, 2], kugeln: [3, 2, 1], erz: [3, 2, 1], runenstein: [3, 4, 1], korallen: [3, 3], ranken: [3, 4], teller: [4, 2], waage: [3, 2],
+    spiegel: [2, 3], riesenpilze: [3, 4, 1], kristall: [3, 3] });
+  const BOOK = ["#6a1e1e", "#3a4a22", "#5a3a18", "#4a2440", "#7a4a1a", "#2e3a24", "#5a2a2a", "#6a5a30", "#3a2a1c", "#7a2a3a"];
+  const GLAS = ["#9a2020", "#c8902a", "#3a6a2a", "#6a2a6a", "#c86a2a", "#8a1a3a", "#a8a040"];
+  const CU = { m: "#a85a28", hi: "#e8a060", lo: "#5a2a12" }, IRON = { m: "#4a4440", hi: "#8a8480", lo: "#1e1a18" };
+  const lancet = (c, x, yT, w, yB) => { c.beginPath(); c.moveTo(x, yB); c.lineTo(x, yT + w * 0.62); c.quadraticCurveTo(x, yT + w * 0.12, x + w / 2, yT); c.quadraticCurveTo(x + w, yT + w * 0.12, x + w, yT + w * 0.62); c.lineTo(x + w, yB); c.closePath(); };
+  const glow = (c, x, y, R, col, a) => { c.save(); c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(x, y, 0, x, y, R); g.addColorStop(0, H2rgba(col, a)); g.addColorStop(1, H2rgba(col, 0)); c.fillStyle = g; c.fillRect(x - R, y - R, R * 2, R * 2); c.restore(); };
+  const H2rgba = (hex, a) => { const n = parseInt(hex.slice(1), 16); return "rgba(" + (n >> 16) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")"; };
+  const peg = (c, x, y) => { c.fillStyle = "#2a1c12"; c.fillRect(x - 1, y - 1, 2, 2); c.fillStyle = "rgba(255,220,170,.25)"; c.fillRect(x - 1, y - 1, 2, 0.5); };
+  const skull = (c, x, y, s, col) => { c.fillStyle = col || "#cfc4a8"; c.beginPath(); c.arc(x, y, 3.2 * s, PI, 0); c.lineTo(x + 2.4 * s, y + 2.6 * s); c.lineTo(x - 2.4 * s, y + 2.6 * s); c.closePath(); c.fill(); c.fillStyle = "rgba(20,12,8,.85)"; c.beginPath(); c.arc(x - 1.2 * s, y + 0.4 * s, 0.9 * s, 0, TAU); c.arc(x + 1.2 * s, y + 0.4 * s, 0.9 * s, 0, TAU); c.fill(); c.fillRect(x - 0.3 * s, y + 1.4 * s, 0.6 * s, 0.8 * s); c.fillStyle = "rgba(255,250,230,.25)"; c.fillRect(x - 2 * s, y - 2.4 * s, 2 * s, 0.6 * s); };
+  Object.assign(PIECE, {
+    /* Bücherwand: Regal mit Gesims, Bücher in vielen Höhen und Farben, liegende Stapel, gekippte Bände, Leiter */
+    buecherwand(c, x, y, w, h, H, r) {
+      const wd = "#3a2618", wl = "#6a4a2e", bot = y + h, n = Math.max(1, Math.round((h - 6) / 14.5)), sH = (h - 6) / n;
+      sh(c, x + 3, y + 3, w - 3, h - 3, 0.45); c.fillStyle = wd; c.fillRect(x + 1, y + 2, w - 2, h - 2);
+      for (let s = 0; s < n; s++) {
+        const sy = y + 4 + s * sH, by = sy + sH - 2; c.fillStyle = "#170e08"; c.fillRect(x + 3, sy, w - 6, sH - 2);
+        let bx = x + 4, i = 0;
+        while (bx < x + w - 5 && i < 40) {
+          const hv = k => H.h3((bx * 7) | 0, s * 31 + y, k + i), v = hv(1300); i++;
+          if (v < 0.06) { bx += 3 + hv(1301) * 3; continue; }
+          const bw = Math.min(x + w - 4 - bx, 1.7 + hv(1310) * 2.6), bh = (sH - 4) * (0.6 + hv(1320) * 0.38), col = BOOK[(hv(1330) * BOOK.length) | 0];
+          if (v > 0.92 && bx < x + w - 15) { for (let k = 0; k < 3; k++) { c.fillStyle = BOOK[(k * 3 + i) % BOOK.length]; c.fillRect(bx + k * 0.6, by - 2.3 * (k + 1), 10 - k * 1.2, 2.1); c.fillStyle = "rgba(255,225,160,.3)"; c.fillRect(bx + k * 0.6, by - 2.3 * (k + 1), 10 - k * 1.2, 0.5); } bx += 11; continue; }
+          if (v > 0.85 && v <= 0.92 && bx < x + w - 10) { c.save(); c.translate(bx + 0.5, by); c.rotate(0.38); c.fillStyle = col; c.fillRect(0, -bh, bw + 0.6, bh); c.fillStyle = "rgba(255,225,160,.3)"; c.fillRect(0, -bh + 2, bw + 0.6, 0.6); c.restore(); bx += bw + bh * 0.36 + 0.5; continue; }
+          c.fillStyle = col; c.fillRect(bx, by - bh, bw, bh);
+          c.fillStyle = "rgba(255,225,160,.32)"; c.fillRect(bx, by - bh + 1.6, bw, 0.6); c.fillRect(bx, by - 3.2, bw, 0.6);
+          if (hv(1340) < 0.3) { c.fillStyle = "rgba(255,225,160,.25)"; c.fillRect(bx + bw / 2 - 0.3, by - bh * 0.6, 0.6, 1.4); }
+          c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(bx + bw - 0.5, by - bh, 0.5, bh); bx += bw + 0.25;
+        }
+        c.fillStyle = wl; c.fillRect(x + 2, by, w - 4, 2); c.fillStyle = "rgba(255,220,170,.22)"; c.fillRect(x + 2, by, w - 4, 0.5); c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(x + 3, by + 2, w - 6, 1);
+      }
+      c.fillStyle = wl; c.fillRect(x + 1, y + 2, 2.2, h - 2); c.fillRect(x + w - 3.2, y + 2, 2.2, h - 2);
+      c.fillStyle = "#5a3e26"; c.fillRect(x - 1, y, w + 2, 4); c.fillStyle = "rgba(255,220,170,.28)"; c.fillRect(x - 1, y, w + 2, 0.7); c.fillStyle = "rgba(0,0,0,.3)"; c.fillRect(x - 1, y + 3.3, w + 2, 0.7);
+      /* Leiter an der Bücherwand */
+      if (r > 0.55) { const lx = x + w * (0.55 + (r - 0.55) * 0.6); c.strokeStyle = "#7a5634"; c.lineWidth = 1.2; c.beginPath(); c.moveTo(lx, y + 2); c.lineTo(lx + 9, bot); c.moveTo(lx + 6, y + 2); c.lineTo(lx + 15, bot); c.stroke(); c.lineWidth = 0.9; c.beginPath(); for (let k = 1; k < 9; k++) { const u = k / 9; c.moveTo(lx + 9 * u, y + 2 + u * (h - 2)); c.lineTo(lx + 6 + 9 * u, y + 2 + u * (h - 2)); } c.stroke(); }
+      else { /* Schädel oder Kerzenstumpf obenauf */ if (r < 0.25) skull(c, x + w * 0.75, y - 3, 0.8); else { c.fillStyle = "#e8dcc0"; c.fillRect(x + w * 0.2, y - 5, 2, 5); c.fillStyle = "rgba(240,230,210,.6)"; c.fillRect(x + w * 0.2 - 1, y - 0.6, 4, 0.6); } }
+    },
+    /* Glasfenster: Spitzbogen mit Maßwerk, bunte Scheiben in Bleiruten, Rosette, Heiligenfigur, schräger Lichtschein */
+    glasfenster(c, x, y, w, h, H, r) {
+      const P = H.PAL, fx = x + 8, fw = w - 16, top = y + 5, bot = y + h - 9, broken = H.B.bg === "storm";
+      c.fillStyle = "rgba(0,0,0,.45)"; lancet(c, fx - 4, top - 4, fw + 8, bot + 6); c.fill();
+      c.fillStyle = P.stone; lancet(c, fx - 3, top - 3, fw + 6, bot + 3); c.fill(); c.strokeStyle = P.stoneHi; c.lineWidth = 0.7; lancet(c, fx - 3, top - 3, fw + 6, bot + 3); c.stroke();
+      c.save(); lancet(c, fx, top, fw, bot); c.clip();
+      c.fillStyle = "#1a0e0c"; c.fillRect(fx, top, fw, bot - top);
+      for (let yy = top; yy < bot; yy += 5) for (let xx = fx + (((yy - top) / 5) & 1) * 2.5 - 2.5; xx < fx + fw; xx += 5) {
+        const v = H.h3((xx * 3) | 0, (yy * 5) | 0, 1400 + ((r * 50) | 0)); if (broken && v > 0.8) continue;
+        c.fillStyle = GLAS[(v * GLAS.length) | 0]; c.globalAlpha = 0.55 + H.h3((xx | 0), (yy | 0), 1401) * 0.3; c.fillRect(xx + 0.5, yy + 0.5, 4, 4);
+      }
+      c.globalAlpha = 1;
+      /* Heiligenfigur: Mantel, Gesicht, Heiligenschein */
+      const cx = fx + fw / 2, fy = bot - 4; c.fillStyle = r < 0.5 ? "#7a1a1a" : "#2e5a24"; c.beginPath(); c.moveTo(cx - 8, fy); c.quadraticCurveTo(cx - 6, fy - 18, cx, fy - 26); c.quadraticCurveTo(cx + 6, fy - 18, cx + 8, fy); c.fill();
+      c.fillStyle = "#c8a030"; c.beginPath(); c.arc(cx, fy - 30, 5.5, 0, TAU); c.fill(); c.fillStyle = "#e8c8a0"; c.beginPath(); c.arc(cx, fy - 30, 3, 0, TAU); c.fill();
+      c.fillStyle = "#d8b878"; c.fillRect(cx - 0.6, fy - 22, 1.2, 14); c.fillRect(cx - 3, fy - 18, 6, 1.2);
+      /* Rosette */
+      const ry = top + fw * 0.42; c.fillStyle = "#c8902a"; c.beginPath(); c.arc(cx, ry, 6, 0, TAU); c.fill();
+      for (let k = 0; k < 6; k++) { const a = k / 6 * TAU; c.fillStyle = k % 2 ? "#9a2020" : "#6a2a6a"; c.beginPath(); c.arc(cx + Math.cos(a) * 4, ry + Math.sin(a) * 4, 2.4, 0, TAU); c.fill(); }
+      /* Bleiruten */
+      c.strokeStyle = "rgba(20,14,10,.85)"; c.lineWidth = 0.6; c.beginPath(); for (let yy = top + 5; yy < bot; yy += 5) { c.moveTo(fx, yy); c.lineTo(fx + fw, yy); } c.stroke();
+      c.lineWidth = 1.6; c.strokeStyle = "#2a201a"; c.beginPath(); c.moveTo(cx, ry + 7); c.lineTo(cx, bot); c.moveTo(fx, top + fw * 0.95); c.lineTo(fx + fw, top + fw * 0.95); c.stroke();
+      c.beginPath(); c.arc(cx, ry, 6.5, 0, TAU); c.stroke();
+      /* Glanz von außen */
+      c.globalCompositeOperation = "lighter"; const g = c.createLinearGradient(fx, top, fx + fw, bot); g.addColorStop(0, "rgba(255,220,150,.22)"); g.addColorStop(0.5, "rgba(255,200,120,.06)"); g.addColorStop(1, "rgba(255,180,100,.12)"); c.fillStyle = g; c.fillRect(fx, top, fw, bot - top);
+      c.restore();
+      /* Fensterbank und schräger Lichtschein */
+      c.fillStyle = P.stone; c.fillRect(fx - 5, bot + 2, fw + 10, 3); c.fillStyle = P.stoneHi; c.fillRect(fx - 5, bot + 2, fw + 10, 0.7);
+      if (!broken) { c.save(); c.globalCompositeOperation = "lighter"; const lg = c.createLinearGradient(0, bot, 0, y + h + 40); lg.addColorStop(0, "rgba(255,200,120,.10)"); lg.addColorStop(1, "rgba(255,200,120,0)"); c.fillStyle = lg; c.beginPath(); c.moveTo(fx, bot + 5); c.lineTo(fx + fw, bot + 5); c.lineTo(fx + fw + 18, y + h + 40); c.lineTo(fx + 10, y + h + 40); c.fill(); c.restore(); }
+      if (broken) { c.strokeStyle = "#3e5a28"; c.lineWidth = 0.7; c.beginPath(); c.moveTo(fx - 3, bot + 3); c.quadraticCurveTo(fx - 8, (top + bot) / 2, fx + 2, top + 6); c.stroke(); for (let k = 0; k < 6; k++) { c.fillStyle = "#4a6a2a"; c.beginPath(); c.ellipse(fx - 5 + Math.sin(k) * 3, bot - k * 7, 2, 1.2, k, 0, TAU); c.fill(); } }
+    },
+    /* Altarbild: Flügelaltar mit Goldgrund, Mittelfigur mit Heiligenschein, kniende Stifter, Kerzen */
+    altarbild(c, x, y, w, h, H, r) {
+      const cx = x + w / 2, top = y + 4, bot = y + h - 4, cw = 26, ww = 13, gold = "#b8903a";
+      sh(c, x + 6, top + 2, w - 10, bot - top, 0.45);
+      const panel = (px, pw, py, pointed) => { c.fillStyle = "#6a4a1a"; if (pointed) lancet(c, px - 1.5, py - 1.5, pw + 3, bot + 1.5); else c.rect(px - 1.5, py - 1.5, pw + 3, bot - py + 3); c.fill(); c.save(); c.beginPath(); if (pointed) lancet(c, px, py, pw, bot); else c.rect(px, py, pw, bot - py); c.clip(); const g = c.createLinearGradient(0, py, 0, bot); g.addColorStop(0, "#c8a048"); g.addColorStop(1, "#7a5a22"); c.fillStyle = g; c.fillRect(px, py, pw, bot - py); c.fillStyle = "rgba(255,240,200,.12)"; for (let k = 0; k < 12; k++) c.fillRect(px + H.h3(k, px | 0, 1450) * pw, py + H.h3(k, py | 0, 1451) * (bot - py), 1, 1); return () => c.restore(); };
+      let done = panel(cx - cw / 2, cw, top, true);
+      c.fillStyle = "#f0d890"; c.globalAlpha = 0.6; c.beginPath(); c.arc(cx, top + 15, 6.5, 0, TAU); c.fill(); c.globalAlpha = 1;
+      c.fillStyle = "#e8c8a0"; c.beginPath(); c.arc(cx, top + 15, 3, 0, TAU); c.fill();
+      c.fillStyle = "#7a1a1a"; c.beginPath(); c.moveTo(cx - 9, bot); c.quadraticCurveTo(cx - 7, top + 22, cx, top + 18); c.quadraticCurveTo(cx + 7, top + 22, cx + 9, bot); c.fill();
+      c.fillStyle = "#2e5028"; c.beginPath(); c.moveTo(cx - 10, bot); c.quadraticCurveTo(cx - 9, top + 22, cx - 1, top + 17); c.lineTo(cx - 4, bot); c.fill(); c.beginPath(); c.moveTo(cx + 10, bot); c.quadraticCurveTo(cx + 9, top + 22, cx + 1, top + 17); c.lineTo(cx + 4, bot); c.fill();
+      c.fillStyle = "#e8c8a0"; c.beginPath(); c.arc(cx, top + 26, 1.6, 0, TAU); c.fill(); done();
+      for (const d of [-1, 1]) {
+        const px = d < 0 ? cx - cw / 2 - ww - 3 : cx + cw / 2 + 3; done = panel(px, ww, top + 8, false);
+        const fx = px + ww / 2; c.fillStyle = d < 0 ? "#4a2440" : "#5a3a18"; c.beginPath(); c.moveTo(fx - 4, bot); c.lineTo(fx - 3, bot - 10); c.quadraticCurveTo(fx, bot - 16, fx + 3, bot - 10); c.lineTo(fx + 4, bot); c.fill(); c.fillStyle = "#e8c8a0"; c.beginPath(); c.arc(fx + d * -1, bot - 15, 2, 0, TAU); c.fill(); c.fillStyle = "rgba(240,216,144,.5)"; c.beginPath(); c.arc(fx + d * -1, bot - 15, 3.4, 0, TAU); c.fill(); done();
+      }
+      c.fillStyle = "#5a3e16"; c.fillRect(x + 4, bot + 1.5, w - 8, 3); c.fillStyle = gold; c.fillRect(x + 4, bot + 1.5, w - 8, 0.7);
+      for (const kx of [x + 6, x + w - 8]) { c.fillStyle = "#e8dcc0"; c.fillRect(kx, bot - 6, 2, 7.5); glow(c, kx + 1, bot - 8, 7, "#ffd890", 0.35); c.fillStyle = "#fff0c0"; c.fillRect(kx + 0.5, bot - 8.5, 1, 2); }
+    },
+    /* Küchenkamin: Kaminbrust, Sims mit Töpfen, Feuerbogen, Glut, Kessel an der Kette, Rußfahne */
+    kamin(c, x, y, w, h, H, r) {
+      const P = H.PAL, st = H.lit(H.B.wall, 0.1), bot = y + h, cx = x + w / 2, ow = w - 20, oh = 24, oy = bot - oh;
+      sh(c, x + 10, y, w - 18, h, 0.35); c.fillStyle = st; c.fillRect(x + 12, y, w - 24, h - oh - 8);
+      c.fillStyle = "rgba(0,0,0,.2)"; for (let yy = y + 4; yy < bot - oh - 8; yy += 6) c.fillRect(x + 12, yy, w - 24, 0.7);
+      const sg = c.createLinearGradient(0, y, 0, bot - oh); sg.addColorStop(0, "rgba(10,6,4,.0)"); sg.addColorStop(1, "rgba(10,6,4,.45)"); c.fillStyle = sg; c.fillRect(cx - 9, y, 18, h - oh);
+      /* Haube und Sims */
+      c.fillStyle = P.stone; c.beginPath(); c.moveTo(x + 12, bot - oh - 8); c.lineTo(x + w - 12, bot - oh - 8); c.lineTo(x + w - 2, bot - oh - 1); c.lineTo(x + 2, bot - oh - 1); c.closePath(); c.fill();
+      c.fillStyle = "#4a3020"; c.fillRect(x, bot - oh - 2, w, 3.5); c.fillStyle = "rgba(255,220,170,.25)"; c.fillRect(x, bot - oh - 2, w, 0.6);
+      /* Töpfe auf dem Sims */
+      for (let k = 0; k < 4; k++) { const px = x + 6 + k * (w - 12) / 3.2, ps = 2.6 + H.h3(k, x, 1460) * 2; c.fillStyle = k % 2 ? CU.m : "#6a5040"; c.beginPath(); c.ellipse(px, bot - oh - 2 - ps, ps, ps, 0, PI, 0); c.lineTo(px + ps, bot - oh - 2); c.lineTo(px - ps, bot - oh - 2); c.fill(); c.fillStyle = k % 2 ? CU.hi : "#8a7060"; c.fillRect(px - ps * 0.6, bot - oh - 2 - ps * 1.4, 1, ps); }
+      /* Feuerbogen */
+      c.fillStyle = P.stone; c.fillRect(cx - ow / 2 - 4, oy - 2, ow + 8, oh + 2);
+      c.fillStyle = "#140a06"; c.beginPath(); c.moveTo(cx - ow / 2, bot); c.lineTo(cx - ow / 2, oy + 6); c.quadraticCurveTo(cx, oy - 3, cx + ow / 2, oy + 6); c.lineTo(cx + ow / 2, bot); c.fill();
+      c.strokeStyle = P.stoneHi; c.lineWidth = 0.7; c.beginPath(); c.moveTo(cx - ow / 2 - 4, oy - 2); c.lineTo(cx + ow / 2 + 4, oy - 2); c.stroke();
+      c.save(); c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(cx, bot - 2, 0, cx, bot - 2, 18); g.addColorStop(0, "rgba(255,150,60,.75)"); g.addColorStop(0.5, "rgba(220,80,20,.3)"); g.addColorStop(1, "rgba(200,60,10,0)"); c.fillStyle = g; c.fillRect(cx - ow / 2, oy, ow, oh); c.restore();
+      c.fillStyle = "#3a2214"; c.save(); c.translate(cx, bot - 2.5); c.rotate(0.15); c.fillRect(-9, -1.6, 18, 3.2); c.rotate(-0.4); c.fillRect(-8, -1.4, 16, 2.8); c.restore();
+      c.fillStyle = "rgba(255,200,100,.9)"; for (let k = 0; k < 7; k++) c.fillRect(cx - 8 + k * 2.6, bot - 1.5 - H.h3(k, y, 1461) * 2.5, 1.2, 1);
+      c.fillStyle = "rgba(255,180,80,.75)"; c.beginPath(); c.moveTo(cx - 5, bot - 3); c.quadraticCurveTo(cx - 3, bot - 11, cx - 1, bot - 3); c.moveTo(cx + 1, bot - 3); c.quadraticCurveTo(cx + 3, bot - 13, cx + 5, bot - 3); c.fill();
+      /* Kessel an der Kette */
+      c.strokeStyle = "#2a2420"; c.lineWidth = 0.8; c.beginPath(); c.moveTo(cx, oy + 2); c.lineTo(cx, bot - 14); c.stroke();
+      c.fillStyle = "#1e1a18"; c.beginPath(); c.ellipse(cx, bot - 10, 6, 4.5, 0, 0, TAU); c.fill(); c.fillStyle = "rgba(255,160,70,.35)"; c.fillRect(cx - 5, bot - 8, 10, 0.8); c.strokeStyle = "#1e1a18"; c.beginPath(); c.arc(cx, bot - 13, 5, PI, 0); c.stroke();
+    },
+    /* Kupfertöpfe an der Hängestange: Pfannen, Töpfe, Kelle, Sieb */
+    kupfer(c, x, y, w, h, H, r) {
+      const ry = y + 5; c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(x + 3, ry + 1, w - 4, 2); c.fillStyle = IRON.m; c.fillRect(x + 2, ry, w - 4, 1.6); c.fillStyle = IRON.hi; c.fillRect(x + 2, ry, w - 4, 0.5);
+      for (const bx of [x + 3, x + w - 4]) { c.fillStyle = IRON.lo; c.fillRect(bx, ry - 3, 1.4, 5); }
+      const n = 5;
+      for (let k = 0; k < n; k++) {
+        const hx = x + 8 + k * (w - 16) / (n - 1), t = ((H.h3(k, x | 0, 1470) * 4) | 0), hy = ry + 2;
+        c.strokeStyle = IRON.m; c.lineWidth = 0.6; c.beginPath(); c.moveTo(hx, hy - 1); c.quadraticCurveTo(hx + 1.5, hy + 1, hx, hy + 3); c.stroke();
+        if (t === 0) { /* Pfanne */ c.fillStyle = CU.lo; c.fillRect(hx - 0.8, hy + 3, 1.6, 9); c.fillStyle = CU.m; c.beginPath(); c.arc(hx, hy + 18, 6.5, 0, TAU); c.fill(); c.fillStyle = CU.lo; c.beginPath(); c.arc(hx, hy + 18, 4.8, 0, TAU); c.fill(); c.fillStyle = CU.m; c.beginPath(); c.arc(hx, hy + 18, 4.2, 0, TAU); c.fill(); c.strokeStyle = CU.hi; c.lineWidth = 0.7; c.beginPath(); c.arc(hx, hy + 18, 5.8, PI * 1.1, PI * 1.6); c.stroke(); }
+        else if (t === 1) { /* Topf */ c.fillStyle = CU.m; c.beginPath(); c.moveTo(hx - 5, hy + 6); c.lineTo(hx + 5, hy + 6); c.lineTo(hx + 4.5, hy + 15); c.quadraticCurveTo(hx, hy + 17, hx - 4.5, hy + 15); c.fill(); c.fillStyle = CU.lo; c.fillRect(hx - 5.5, hy + 5.5, 11, 1.4); c.fillStyle = CU.hi; c.fillRect(hx - 3.5, hy + 7.5, 1.1, 7); c.strokeStyle = CU.lo; c.lineWidth = 0.7; c.beginPath(); c.arc(hx, hy + 6, 4, PI, 0); c.stroke(); }
+        else if (t === 2) { /* Kelle */ c.fillStyle = "#6a6058"; c.fillRect(hx - 0.5, hy + 3, 1, 14); c.fillStyle = CU.m; c.beginPath(); c.arc(hx, hy + 18, 3, 0, PI); c.fill(); c.fillStyle = CU.hi; c.fillRect(hx - 2, hy + 18, 1, 1); }
+        else { /* Sieb */ c.fillStyle = CU.m; c.beginPath(); c.arc(hx, hy + 10, 5, 0, PI); c.fill(); c.fillStyle = CU.lo; c.fillRect(hx - 5.5, hy + 9.4, 11, 1.2); c.fillStyle = "rgba(20,10,6,.7)"; for (let j = 0; j < 7; j++) c.fillRect(hx - 3 + (j % 4) * 2, hy + 11.5 + (j > 3 ? 1.6 : 0), 0.7, 0.7); c.strokeStyle = CU.lo; c.lineWidth = 0.7; c.beginPath(); c.arc(hx, hy + 9, 3.6, PI, 0); c.stroke(); }
+      }
+    },
+    /* Waffenrechen: Speere und Hellebarden, Schwerter mit Parierstange oder Bögen mit Köcher */
+    waffen(c, x, y, w, h, H, r) {
+      const wd = "#4a3020", wl = "#6a4a2e", bot = y + h;
+      sh(c, x + 3, y + 6, w - 4, h - 6, 0.3);
+      c.fillStyle = wd; c.fillRect(x + 3, y + 8, 2.5, h - 8); c.fillRect(x + w - 5.5, y + 8, 2.5, h - 8); c.fillRect(x + 2, y + 12, w - 4, 2.4); c.fillRect(x + 2, bot - 8, w - 4, 2.4); c.fillStyle = wl; c.fillRect(x + 2, y + 12, w - 4, 0.6); c.fillRect(x + 2, bot - 8, w - 4, 0.6);
+      if (r < 0.5) {
+        for (let k = 0; k < 5; k++) { const sx = x + 9 + k * (w - 18) / 4, lean = (H.h3(k, x | 0, 1480) - 0.5) * 3, top = y + 1 + H.h3(k, y | 0, 1481) * 5;
+          c.strokeStyle = "#5a3a22"; c.lineWidth = 1.2; c.beginPath(); c.moveTo(sx, bot - 1); c.lineTo(sx + lean, top + 5); c.stroke();
+          c.fillStyle = IRON.hi; c.beginPath(); if (k % 2) { c.moveTo(sx + lean, top - 2); c.lineTo(sx + lean + 1.8, top + 5); c.lineTo(sx + lean - 1.8, top + 5); } else { c.moveTo(sx + lean, top - 1); c.lineTo(sx + lean + 1, top + 4); c.lineTo(sx + lean + 4.5, top + 3); c.lineTo(sx + lean + 4.5, top + 8); c.lineTo(sx + lean, top + 7); c.lineTo(sx + lean - 1, top + 4); } c.fill(); c.fillStyle = IRON.lo; c.fillRect(sx + lean - 0.8, top + 5, 1.6, 1); }
+      } else if (r < 0.8) {
+        for (let k = 0; k < 4; k++) { const sx = x + 10 + k * (w - 20) / 3, top = y + 11;
+          c.fillStyle = "#3a2a1e"; c.fillRect(sx - 0.8, top - 6, 1.6, 6); c.fillStyle = "#b08a3a"; c.beginPath(); c.arc(sx, top - 6.5, 1.3, 0, TAU); c.fill(); c.fillRect(sx - 4, top - 0.6, 8, 1.4);
+          c.fillStyle = IRON.m; c.beginPath(); c.moveTo(sx - 1.6, top + 1); c.lineTo(sx + 1.6, top + 1); c.lineTo(sx + 1.2, bot - 12); c.lineTo(sx, bot - 9); c.lineTo(sx - 1.2, bot - 12); c.fill(); c.fillStyle = IRON.hi; c.fillRect(sx - 0.2, top + 1, 0.5, bot - top - 13); }
+      } else {
+        for (let k = 0; k < 2; k++) { const bx = x + 12 + k * 14; c.strokeStyle = "#7a4a22"; c.lineWidth = 1.4; c.beginPath(); c.moveTo(bx, y + 4); c.quadraticCurveTo(bx + 8, y + h / 2, bx, bot - 4); c.stroke(); c.strokeStyle = "rgba(230,220,200,.5)"; c.lineWidth = 0.4; c.beginPath(); c.moveTo(bx, y + 4); c.lineTo(bx, bot - 4); c.stroke(); }
+        const qx = x + w - 12; c.fillStyle = "#5a3018"; c.beginPath(); c.moveTo(qx - 3, y + 14); c.lineTo(qx + 3, y + 14); c.lineTo(qx + 2.4, bot - 6); c.lineTo(qx - 2.4, bot - 6); c.fill(); for (let k = 0; k < 4; k++) { c.strokeStyle = "#8a6a40"; c.lineWidth = 0.5; c.beginPath(); c.moveTo(qx - 2 + k * 1.3, y + 14); c.lineTo(qx - 2.5 + k * 1.6, y + 6); c.stroke(); c.fillStyle = k % 2 ? "#c8c0b0" : "#9a2a2a"; c.fillRect(qx - 3.2 + k * 1.6, y + 5, 1.4, 3); }
+      }
+    },
+    /* Fassreihe: zwei große Stückfässer auf dem Lager, ein kleines obenauf, Zapfhahn, Kreidezeichen */
+    faesser(c, x, y, w, h, H, r) {
+      const bot = y + h, cradle = "#3a2618";
+      const barrel = (bx, by, R, tap) => {
+        c.fillStyle = "rgba(0,0,0,.4)"; c.beginPath(); c.arc(bx + 1.5, by + 1.5, R, 0, TAU); c.fill();
+        c.fillStyle = "#5a3a22"; c.beginPath(); c.arc(bx, by, R, 0, TAU); c.fill();
+        c.save(); c.beginPath(); c.arc(bx, by, R - 2, 0, TAU); c.clip(); const n = Math.round(R / 2.2);
+        for (let k = 0; k < n; k++) { c.fillStyle = k % 2 ? "#6a4628" : "#5e3e22"; c.fillRect(bx - R + k * (2 * R / n), by - R, 2 * R / n, 2 * R); c.fillStyle = "rgba(0,0,0,.25)"; c.fillRect(bx - R + k * (2 * R / n), by - R, 0.5, 2 * R); }
+        const g = c.createRadialGradient(bx - R * 0.3, by - R * 0.3, 1, bx, by, R); g.addColorStop(0, "rgba(255,220,170,.12)"); g.addColorStop(1, "rgba(0,0,0,.3)"); c.fillStyle = g; c.fillRect(bx - R, by - R, 2 * R, 2 * R); c.restore();
+        c.strokeStyle = IRON.m; c.lineWidth = 1.8; c.beginPath(); c.arc(bx, by, R - 1, 0, TAU); c.stroke(); c.strokeStyle = "rgba(200,190,180,.3)"; c.lineWidth = 0.5; c.beginPath(); c.arc(bx, by, R - 0.6, PI * 1.05, PI * 1.6); c.stroke();
+        if (tap) { c.fillStyle = "#8a6a3a"; c.fillRect(bx - 1, by + R * 0.45, 2, 4); c.fillRect(bx - 2.5, by + R * 0.45 + 3, 5, 1.4); c.fillStyle = "#c8a050"; c.fillRect(bx - 0.5, by + R * 0.45 + 4.4, 1, 1.4); }
+        if (H.h3(bx | 0, by | 0, 1490) < 0.6) { c.strokeStyle = "rgba(240,236,224,.3)"; c.lineWidth = 0.5; c.beginPath(); const k = (H.h3(bx | 0, 1, 1491) * 3) | 0; if (k === 0) { c.moveTo(bx - 3, by - 4); c.lineTo(bx - 1, by - 7); c.lineTo(bx + 1, by - 4); c.moveTo(bx + 3, by - 7); c.lineTo(bx + 3, by - 4); } else if (k === 1) { c.arc(bx, by - 5, 2, 0, TAU); } else { for (let i = 0; i < 4; i++) { c.moveTo(bx - 3 + i * 1.6, by - 7); c.lineTo(bx - 3 + i * 1.6, by - 3); } c.moveTo(bx - 4, by - 4); c.lineTo(bx + 3.5, by - 6.5); } c.stroke(); }
+      };
+      c.fillStyle = cradle; c.fillRect(x + 2, bot - 4, w - 4, 4); c.fillStyle = "rgba(255,220,170,.18)"; c.fillRect(x + 2, bot - 4, w - 4, 0.6);
+      for (const bx of [x + 4, x + w / 2 - 2, x + w - 8]) { c.fillStyle = cradle; c.beginPath(); c.moveTo(bx, bot - 4); c.lineTo(bx + 6, bot - 4); c.lineTo(bx + 3, bot - 10); c.fill(); }
+      const R = Math.min(16, (w - 10) / 4.4); barrel(x + 4 + R, bot - 4 - R, R, true); barrel(x + w - 4 - R, bot - 4 - R, R, r < 0.6);
+      if (h > 2 * R + 14) barrel(x + w / 2, bot - 4 - 2 * R - R * 0.38, R * 0.55, false);
+    },
+    /* Folterwand: Zangen, Säge, Brandeisen, Fesseln an der Kette, Peitsche, dunkle Flecken */
+    folter(c, x, y, w, h, H, r) {
+      const by = y + 6; c.fillStyle = "#3a2618"; c.fillRect(x + 2, by - 2, w - 4, 3); c.fillStyle = "rgba(255,220,170,.15)"; c.fillRect(x + 2, by - 2, w - 4, 0.6);
+      for (let k = 0; k < 6; k++) peg(c, x + 7 + k * (w - 14) / 5, by + 2);
+      const X = k => x + 7 + k * (w - 14) / 5, Y = by + 3;
+      /* Zange */ c.strokeStyle = IRON.m; c.lineWidth = 1.2; c.beginPath(); c.moveTo(X(0) - 2, Y + 18); c.lineTo(X(0) + 1.5, Y + 3); c.moveTo(X(0) + 2, Y + 18); c.lineTo(X(0) - 1.5, Y + 3); c.stroke(); c.fillStyle = IRON.lo; c.beginPath(); c.arc(X(0), Y + 7, 1, 0, TAU); c.fill();
+      /* Säge */ c.fillStyle = "#5a3a22"; c.fillRect(X(1) - 1.4, Y, 2.8, 5); c.fillStyle = IRON.m; c.beginPath(); c.moveTo(X(1) - 2, Y + 5); c.lineTo(X(1) + 2, Y + 5); c.lineTo(X(1) + 1.2, Y + 22); c.lineTo(X(1) - 2, Y + 22); c.closePath(); c.fill(); c.fillStyle = IRON.lo; for (let k = 0; k < 8; k++) { c.beginPath(); c.moveTo(X(1) - 2, Y + 6 + k * 2); c.lineTo(X(1) - 3.2, Y + 7 + k * 2); c.lineTo(X(1) - 2, Y + 8 + k * 2); c.fill(); }
+      /* Fesseln an der Kette */ c.strokeStyle = IRON.m; c.lineWidth = 0.9; c.beginPath(); for (let k = 0; k < 7; k++) { c.ellipse(X(2) + 2 + Math.sin(k * 0.6) * 2, Y + 2 + k * 2.4, 1, 1.4, 0, 0, TAU); } c.stroke(); c.lineWidth = 1.3; c.beginPath(); c.arc(X(2) - 1, Y + 21, 3, 0, TAU); c.moveTo(X(2) + 8, Y + 21); c.arc(X(2) + 5, Y + 21, 3, 0, TAU); c.stroke(); c.lineWidth = 0.8; c.beginPath(); c.moveTo(X(2) + 2, Y + 18); c.lineTo(X(2) - 1, Y + 18); c.moveTo(X(2) + 2, Y + 18); c.lineTo(X(2) + 5, Y + 18); c.stroke();
+      /* Brandeisen */ c.fillStyle = "#5a3a22"; c.fillRect(X(3) - 1, Y, 2, 7); c.fillStyle = IRON.m; c.fillRect(X(3) - 0.6, Y + 7, 1.2, 12); c.strokeStyle = IRON.m; c.lineWidth = 1.1; c.beginPath(); c.arc(X(3), Y + 22, 2.6, 0, TAU); c.moveTo(X(3) - 2.6, Y + 22); c.lineTo(X(3) + 2.6, Y + 22); c.stroke();
+      /* Peitsche */ c.fillStyle = "#4a2a18"; c.fillRect(X(4) - 1, Y, 2, 6); c.strokeStyle = "#3a2214"; c.lineWidth = 0.8; c.beginPath(); c.moveTo(X(4), Y + 6); c.bezierCurveTo(X(4) + 5, Y + 12, X(4) - 6, Y + 16, X(4) + 1, Y + 22); c.moveTo(X(4), Y + 6); c.bezierCurveTo(X(4) - 3, Y + 14, X(4) + 4, Y + 18, X(4) - 2, Y + 24); c.stroke();
+      /* Daumenschraube */ c.fillStyle = IRON.m; c.fillRect(X(5) - 3, Y + 4, 6, 2); c.fillRect(X(5) - 3, Y + 10, 6, 2); c.fillRect(X(5) - 0.6, Y + 1, 1.2, 12); c.fillRect(X(5) - 2.5, Y + 1, 5, 1.2);
+      /* dunkle Flecken an der Wand darunter */
+      for (let k = 0; k < 4; k++) { const fx = x + 8 + H.h3(k, x | 0, 1500) * (w - 16), fy = y + h - 12 + H.h3(k, y | 0, 1501) * 6; c.fillStyle = "rgba(60,14,10,.28)"; c.beginPath(); c.ellipse(fx, fy, 3 + H.h3(k, 2, 1502) * 4, 1.6, 0, 0, TAU); c.fill(); c.fillRect(fx - 0.4, fy, 0.8, 3 + H.h3(k, 3, 1503) * 5); }
+    },
+    /* Wirtshausschild am geschmiedeten Ausleger: Krug mit Schaum, roter Rand */
+    wirtsschild(c, x, y, w, h, H, r) {
+      const ay = y + 5; c.fillStyle = IRON.lo; c.fillRect(x + 1, ay - 3, 3, 8); c.fillStyle = IRON.m; c.fillRect(x + 2, ay, w - 6, 1.6);
+      c.strokeStyle = IRON.m; c.lineWidth = 1; c.beginPath(); c.moveTo(x + 3, ay + 6); c.quadraticCurveTo(x + 14, ay + 6, x + 20, ay + 1.5); c.stroke(); c.beginPath(); c.arc(x + 10, ay + 3.2, 2.2, 0, TAU); c.stroke();
+      const bx = x + 14, bw = w - 18, bt = ay + 7, bh = h - 14;
+      c.strokeStyle = "#2a2420"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(bx + 2, ay + 1.6); c.lineTo(bx + 2, bt); c.moveTo(bx + bw - 2, ay + 1.6); c.lineTo(bx + bw - 2, bt); c.stroke();
+      sh(c, bx + 1.5, bt + 1.5, bw, bh, 0.4); c.fillStyle = "#5a3a22"; c.fillRect(bx, bt, bw, bh); c.fillStyle = "#8a2a22"; c.fillRect(bx + 1, bt + 1, bw - 2, bh - 2); c.fillStyle = "#3a2214"; c.fillRect(bx + 2.2, bt + 2.2, bw - 4.4, bh - 4.4);
+      const mx = bx + bw / 2 - 2, my = bt + bh / 2 + 1, ic = r < 0.5;
+      if (ic) { c.fillStyle = "#c8902a"; c.fillRect(mx - 4, my - 4, 8, 8); c.fillStyle = "#e8b850"; c.fillRect(mx - 4, my - 4, 2, 8); c.strokeStyle = "#c8902a"; c.lineWidth = 1.2; c.beginPath(); c.arc(mx + 4.5, my, 2.6, -PI / 2, PI / 2); c.stroke(); c.fillStyle = "#f0e8d8"; c.beginPath(); c.arc(mx - 2.5, my - 4.5, 2, 0, TAU); c.arc(mx, my - 5, 2.3, 0, TAU); c.arc(mx + 2.6, my - 4.4, 1.9, 0, TAU); c.fill(); }
+      else { /* Fisch und Anker – Hafentaverne */ c.fillStyle = "#c8902a"; c.beginPath(); c.ellipse(mx, my, 6, 3, 0, 0, TAU); c.fill(); c.beginPath(); c.moveTo(mx + 5, my); c.lineTo(mx + 9, my - 3); c.lineTo(mx + 9, my + 3); c.fill(); c.fillStyle = "#3a2214"; c.beginPath(); c.arc(mx - 3.5, my - 0.6, 0.8, 0, TAU); c.fill(); }
+    },
+    /* Krugbord: zwei Bretter mit Zinnkrügen, Tonbechern, Kanne und angelehnten Tellern; Krüge am Haken */
+    krugbord(c, x, y, w, h, H, r) {
+      for (let s = 0; s < 2; s++) {
+        const sy = y + 12 + s * 14; c.fillStyle = "#4a3020"; c.fillRect(x + 2, sy, w - 4, 2); c.fillStyle = "rgba(255,220,170,.22)"; c.fillRect(x + 2, sy, w - 4, 0.5); c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(x + 3, sy + 2, w - 6, 1.2);
+        c.fillStyle = "#3a2618"; c.beginPath(); c.moveTo(x + 4, sy + 2); c.lineTo(x + 7, sy + 2); c.lineTo(x + 4, sy + 6); c.fill(); c.beginPath(); c.moveTo(x + w - 4, sy + 2); c.lineTo(x + w - 7, sy + 2); c.lineTo(x + w - 4, sy + 6); c.fill();
+        let bx = x + 5;
+        for (let k = 0; k < 7 && bx < x + w - 8; k++) {
+          const t = ((H.h3(k + s * 9, x | 0, 1510) * 4) | 0);
+          if (t === 0) { c.fillStyle = "#8a8478"; c.fillRect(bx, sy - 7, 5, 7); c.fillStyle = "#b0aaa0"; c.fillRect(bx, sy - 7, 1.2, 7); c.fillStyle = "#6a645a"; c.fillRect(bx - 0.4, sy - 7.6, 5.8, 1.2); c.strokeStyle = "#6a645a"; c.lineWidth = 0.9; c.beginPath(); c.arc(bx + 5.6, sy - 3.6, 1.8, -PI / 2, PI / 2); c.stroke(); bx += 9; }
+          else if (t === 1) { c.fillStyle = "#9a5a30"; c.beginPath(); c.moveTo(bx, sy); c.lineTo(bx + 0.6, sy - 5); c.lineTo(bx + 3.4, sy - 5); c.lineTo(bx + 4, sy); c.fill(); c.fillStyle = "rgba(255,220,170,.3)"; c.fillRect(bx + 0.8, sy - 4.6, 0.8, 4); bx += 6; }
+          else if (t === 2) { c.fillStyle = "#c8b898"; c.beginPath(); c.ellipse(bx + 4, sy - 5, 4, 5, 0, 0, TAU); c.fill(); c.strokeStyle = "#8a2a22"; c.lineWidth = 0.7; c.beginPath(); c.ellipse(bx + 4, sy - 5, 2.6, 3.4, 0, 0, TAU); c.stroke(); c.fillStyle = "rgba(0,0,0,.3)"; c.fillRect(bx + 7, sy - 9, 1, 9); bx += 9; }
+          else { c.fillStyle = "#7a4a28"; c.beginPath(); c.moveTo(bx + 1, sy); c.quadraticCurveTo(bx - 1, sy - 6, bx + 2, sy - 9); c.lineTo(bx + 4, sy - 9); c.quadraticCurveTo(bx + 7, sy - 6, bx + 5, sy); c.fill(); c.fillStyle = "#7a4a28"; c.beginPath(); c.moveTo(bx + 2, sy - 9); c.lineTo(bx + 0.4, sy - 10.5); c.lineTo(bx + 3, sy - 9.6); c.fill(); c.fillStyle = "rgba(255,220,170,.3)"; c.fillRect(bx + 1.4, sy - 7, 0.8, 5); bx += 9; }
+        }
+      }
+    },
+    /* Kerkerzelle hinter Gittern: Stroh, Kette, Gerippe oder Eimer */
+    kerker(c, x, y, w, h, H, r) {
+      const P = H.PAL, bot = y + h, ix = x + 4, iw = w - 8, it = y + 6;
+      c.fillStyle = P.stone; c.fillRect(ix - 3, it - 3, iw + 6, bot - it + 3); c.fillStyle = P.stoneHi; c.fillRect(ix - 3, it - 3, iw + 6, 0.8);
+      c.fillStyle = "#0c0908"; c.fillRect(ix, it, iw, bot - it); const g = c.createLinearGradient(0, it, 0, bot); g.addColorStop(0, "rgba(0,0,0,.5)"); g.addColorStop(1, "rgba(60,40,24,.25)"); c.fillStyle = g; c.fillRect(ix, it, iw, bot - it);
+      c.strokeStyle = "rgba(200,170,90,.45)"; c.lineWidth = 0.5; c.beginPath(); for (let k = 0; k < 22; k++) { const sx = ix + H.h3(k, x | 0, 1520) * iw, a = (H.h3(k, 1, 1521) - 0.5) * 1.2; c.moveTo(sx, bot - 0.5); c.lineTo(sx + Math.sin(a) * 5, bot - 1 - Math.cos(a) * 2); } c.stroke();
+      if (r < 0.55) { const sx = ix + iw * 0.62, sy = bot - 7; c.strokeStyle = IRON.m; c.lineWidth = 0.6; c.beginPath(); c.moveTo(sx - 5, it + 3); c.lineTo(sx - 4, sy - 8); c.moveTo(sx + 5, it + 3); c.lineTo(sx + 4, sy - 8); c.stroke(); c.strokeStyle = "#bdb39a"; c.lineWidth = 1; c.beginPath(); c.moveTo(sx, sy - 6); c.lineTo(sx, sy + 2); c.moveTo(sx - 4, sy - 8); c.lineTo(sx, sy - 4); c.lineTo(sx + 4, sy - 8); c.moveTo(sx, sy + 2); c.lineTo(sx - 5, sy + 6); c.moveTo(sx, sy + 2); c.lineTo(sx + 6, sy + 6.5); c.stroke(); c.lineWidth = 0.5; c.beginPath(); for (let k = 0; k < 3; k++) { c.moveTo(sx - 2.4, sy - 4 + k * 1.8); c.lineTo(sx + 2.4, sy - 4 + k * 1.8); } c.stroke(); skull(c, sx + 0.6, sy - 9.5, 0.75, "#bdb39a"); }
+      else { const ex = ix + iw * 0.3; c.fillStyle = "#4a3422"; c.beginPath(); c.moveTo(ex - 4, bot - 8); c.lineTo(ex + 4, bot - 8); c.lineTo(ex + 3.4, bot); c.lineTo(ex - 3.4, bot); c.fill(); c.fillStyle = IRON.m; c.fillRect(ex - 4, bot - 6, 8, 0.8); c.fillRect(ex - 3.6, bot - 2.4, 7.2, 0.8); if (r > 0.8) { c.fillStyle = "rgba(255,200,90,.7)"; c.fillRect(ix + iw * 0.7, it + 12, 1.2, 0.8); c.fillRect(ix + iw * 0.7 + 3.4, it + 12, 1.2, 0.8); } }
+      c.fillStyle = IRON.m; for (let k = 0; k <= 7; k++) { const bx = ix + k * iw / 7; c.fillRect(bx - 0.9, it - 1, 1.8, bot - it + 1); } c.fillStyle = "rgba(200,190,180,.25)"; for (let k = 0; k <= 7; k++) c.fillRect(ix + k * iw / 7 - 0.9, it - 1, 0.5, bot - it + 1);
+      c.fillStyle = IRON.m; c.fillRect(ix - 1, it + 4, iw + 2, 1.8); c.fillRect(ix - 1, bot - 9, iw + 2, 1.8); c.fillStyle = "rgba(120,52,20,.45)"; c.fillRect(ix - 1, it + 5.8, iw + 2, 1.2);
+      c.fillStyle = IRON.lo; c.fillRect(ix + iw * 0.5 - 2, it + 14, 4, 5); c.fillStyle = "#000"; c.fillRect(ix + iw * 0.5 - 0.5, it + 15.5, 1, 2);
+    },
+    /* Uhrwerk: großes Zifferblatt mit Stundenmarken, Zeigern und offenem Räderwerk dahinter */
+    uhr(c, x, y, w, h, H, r) {
+      const cx = x + w / 2, cy = y + h / 2, R = Math.min(w, h) / 2 - 3, brass = "#b08a3a", brassL = "#e0c070", brassD = "#5a4418";
+      c.fillStyle = "rgba(0,0,0,.45)"; c.beginPath(); c.arc(cx + 2, cy + 2, R + 1, 0, TAU); c.fill();
+      c.fillStyle = H.PAL.stone; c.beginPath(); c.arc(cx, cy, R + 1, 0, TAU); c.fill(); c.fillStyle = "#2a1e14"; c.beginPath(); c.arc(cx, cy, R - 3, 0, TAU); c.fill();
+      /* Räderwerk hinter dem Blatt */
+      c.save(); c.beginPath(); c.arc(cx, cy, R - 3, 0, TAU); c.clip();
+      const wheel = (gx, gy, gr, n, rot) => { c.fillStyle = brassD; c.beginPath(); for (let k = 0; k < n * 2; k++) { const a = rot + k / (n * 2) * TAU, rr = k % 2 ? gr : gr - 1.6; c.lineTo(gx + Math.cos(a) * rr, gy + Math.sin(a) * rr); } c.closePath(); c.fill(); c.fillStyle = "#2a1e14"; c.beginPath(); c.arc(gx, gy, gr - 3, 0, TAU); c.fill(); c.fillStyle = brassD; for (let k = 0; k < 3; k++) { c.save(); c.translate(gx, gy); c.rotate(rot + k * PI / 3); c.fillRect(-gr + 3, -0.7, (gr - 3) * 2, 1.4); c.restore(); } };
+      wheel(cx - R * 0.35, cy + R * 0.4, R * 0.42, 14, r); wheel(cx + R * 0.38, cy + R * 0.3, R * 0.3, 10, r * 3); wheel(cx + R * 0.1, cy - R * 0.45, R * 0.28, 9, r * 2);
+      c.restore();
+      c.strokeStyle = brass; c.lineWidth = 2.2; c.beginPath(); c.arc(cx, cy, R - 2, 0, TAU); c.stroke(); c.strokeStyle = brassL; c.lineWidth = 0.6; c.beginPath(); c.arc(cx, cy, R - 1.2, PI * 1.05, PI * 1.6); c.stroke();
+      c.lineWidth = 3.2; c.strokeStyle = "rgba(200,180,140,.55)"; c.beginPath(); c.arc(cx, cy, R - 6.5, 0, TAU); c.stroke();
+      for (let k = 0; k < 12; k++) { const a = k / 12 * TAU - PI / 2, big = k % 3 === 0; c.fillStyle = big ? brassL : brass; c.save(); c.translate(cx + Math.cos(a) * (R - 6.5), cy + Math.sin(a) * (R - 6.5)); c.rotate(a + PI / 2); c.fillRect(-0.6, -2, 1.2, 4); if (big) c.fillRect(-1.8, -2, 1, 4), c.fillRect(0.8, -2, 1, 4); c.restore(); }
+      const ah = -PI / 2 + r * TAU, am = -PI / 2 + ((r * 12) % 1) * TAU;
+      c.strokeStyle = "#1a120a"; c.lineWidth = 2; c.beginPath(); c.moveTo(cx, cy); c.lineTo(cx + Math.cos(ah) * R * 0.45, cy + Math.sin(ah) * R * 0.45); c.stroke(); c.lineWidth = 1.2; c.beginPath(); c.moveTo(cx, cy); c.lineTo(cx + Math.cos(am) * R * 0.7, cy + Math.sin(am) * R * 0.7); c.stroke();
+      c.fillStyle = brassL; c.beginPath(); c.arc(cx + Math.cos(am) * R * 0.7, cy + Math.sin(am) * R * 0.7, 1.3, 0, TAU); c.fill(); c.fillStyle = brass; c.beginPath(); c.arc(cx, cy, 2.4, 0, TAU); c.fill(); c.fillStyle = brassL; c.fillRect(cx - 1, cy - 1.4, 1, 1);
+    },
+    /* Gießerei: Werkbank mit Glocken- und Barrenformen, frisch gegossener Barren glüht, Kellen an der Wand */
+    gussform(c, x, y, w, h, H, r) {
+      const bot = y + h, tb = bot - 14;
+      for (let k = 0; k < 3; k++) { const lx = x + 10 + k * 16; peg(c, lx, y + 4); c.fillStyle = IRON.m; c.fillRect(lx - 0.6, y + 5, 1.2, 14); c.fillStyle = IRON.lo; c.beginPath(); c.arc(lx, y + 21, 3.4 - k * 0.4, 0, PI); c.fill(); c.fillStyle = "rgba(255,120,40,.25)"; c.fillRect(lx - 2.6, y + 21, 5.2, 0.8); }
+      c.fillStyle = "#3a2618"; c.fillRect(x + 2, tb, w - 4, 3); c.fillRect(x + 4, tb + 3, 2.4, bot - tb - 3); c.fillRect(x + w - 6.4, tb + 3, 2.4, bot - tb - 3); c.fillStyle = "rgba(255,220,170,.2)"; c.fillRect(x + 2, tb, w - 4, 0.6);
+      /* Glockenform aus Lehm */
+      const gx = x + 16; c.fillStyle = "#8a6a4a"; c.beginPath(); c.moveTo(gx - 9, tb); c.quadraticCurveTo(gx - 8, tb - 10, gx - 4, tb - 16); c.quadraticCurveTo(gx, tb - 19, gx + 4, tb - 16); c.quadraticCurveTo(gx + 8, tb - 10, gx + 9, tb); c.fill(); c.fillStyle = "rgba(255,230,190,.2)"; c.fillRect(gx - 6, tb - 12, 1.2, 10); c.strokeStyle = "rgba(0,0,0,.35)"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(gx - 8, tb - 5); c.lineTo(gx + 8, tb - 5); c.moveTo(gx - 6, tb - 11); c.lineTo(gx + 6, tb - 11); c.stroke();
+      /* Barrenform mit Glut */
+      const mx = x + w - 22; c.fillStyle = IRON.lo; c.fillRect(mx - 9, tb - 4, 18, 4); c.fillStyle = "#2a1408"; for (let k = 0; k < 3; k++) c.fillRect(mx - 8 + k * 6, tb - 3.4, 4.6, 2.6);
+      c.save(); c.globalCompositeOperation = "lighter"; for (let k = 0; k < (r < 0.6 ? 2 : 1); k++) { c.fillStyle = "rgba(255,150,60,.9)"; c.fillRect(mx - 8 + k * 6, tb - 3.4, 4.6, 2.6); c.fillStyle = "rgba(255,230,150,.8)"; c.fillRect(mx - 7 + k * 6, tb - 3, 2.4, 0.8); } c.restore(); glow(c, mx - 4, tb - 3, 12, "#ff8a40", 0.3);
+      /* Tiegel */ c.fillStyle = "#5a4a3a"; c.beginPath(); c.moveTo(x + w - 10, tb); c.lineTo(x + w - 9, tb - 7); c.lineTo(x + w - 3, tb - 7); c.lineTo(x + w - 4, tb); c.fill();
+      for (let k = 0; k < 3; k++) { c.fillStyle = "#8a7a6a"; c.fillRect(x + 8 + k * 7, bot - 4, 6, 4); c.fillStyle = "rgba(255,240,220,.2)"; c.fillRect(x + 8 + k * 7, bot - 4, 6, 0.6); }
+    },
+    /* Tempelrelief: Fries mit fischköpfigen Gestalten, die einer Sonnenscheibe huldigen; Wellenband, Algen */
+    relief(c, x, y, w, h, H, r) {
+      const st = H.lit(H.B.wall, 0.14), hi = H.lit(st, 0.25), lo = H.lit(st, -0.3), cx = x + w / 2, cy = y + h / 2;
+      sh(c, x + 3, y + 3, w - 4, h - 4, 0.4); c.fillStyle = st; c.fillRect(x + 2, y + 2, w - 4, h - 4); c.fillStyle = lo; c.fillRect(x + 4, y + 7, w - 8, h - 16);
+      c.fillStyle = hi; c.fillRect(x + 2, y + 2, w - 4, 0.8);
+      c.strokeStyle = hi; c.lineWidth = 0.8; c.beginPath(); for (let xx = x + 4; xx < x + w - 4; xx += 6) { c.moveTo(xx, y + h - 6); c.quadraticCurveTo(xx + 1.5, y + h - 9.5, xx + 3, y + h - 7); c.quadraticCurveTo(xx + 4.5, y + h - 4.5, xx + 6, y + h - 6); } c.stroke();
+      c.fillStyle = st; c.beginPath(); c.arc(cx, cy - 2, 6, 0, TAU); c.fill(); c.strokeStyle = hi; c.lineWidth = 0.6; for (let k = 0; k < 10; k++) { const a = k / 10 * TAU; c.beginPath(); c.moveTo(cx + Math.cos(a) * 7, cy - 2 + Math.sin(a) * 7); c.lineTo(cx + Math.cos(a) * 9.5, cy - 2 + Math.sin(a) * 9.5); c.stroke(); } c.fillStyle = lo; c.beginPath(); c.arc(cx, cy - 2, 2, 0, TAU); c.fill();
+      for (const d of [-1, 1]) for (let k = 0; k < 2; k++) {
+        const fx = cx + d * (15 + k * 11), fb = y + h - 10; c.fillStyle = st;
+        c.beginPath(); c.moveTo(fx - 3, fb); c.lineTo(fx - 2, fb - 12); c.lineTo(fx + 2, fb - 12); c.lineTo(fx + 3, fb); c.fill();
+        c.beginPath(); c.ellipse(fx - d * 0.5, fb - 15, 3.4, 2.6, d * 0.3, 0, TAU); c.fill(); c.beginPath(); c.moveTo(fx + d * 2, fb - 16); c.lineTo(fx + d * 5, fb - 18); c.lineTo(fx + d * 5, fb - 13); c.fill();
+        c.fillStyle = lo; c.fillRect(fx - d * 1.6 - 0.5, fb - 16, 1, 1); c.strokeStyle = st; c.lineWidth = 1.1; c.beginPath(); c.moveTo(fx - d * 1, fb - 10); c.lineTo(fx - d * 5, fb - 15); c.stroke();
+        c.fillStyle = hi; c.fillRect(fx - 2, fb - 12, 0.6, 12);
+      }
+      for (let k = 0; k < 10; k++) { const ax = x + 3 + H.h3(k, x | 0, 1530) * (w - 6), ay = y + 2 + H.h3(k, y | 0, 1531) * h * 0.4; c.fillStyle = "rgba(70,110,50,.35)"; c.beginPath(); c.ellipse(ax, ay, 2 + H.h3(k, 1, 1532) * 3, 1.2, 0, 0, TAU); c.fill(); c.fillRect(ax - 0.3, ay, 0.6, 2 + H.h3(k, 2, 1533) * 6); }
+      if (r < 0.4) { c.strokeStyle = "rgba(0,0,0,.5)"; c.lineWidth = 0.7; c.beginPath(); c.moveTo(x + w * 0.7, y + 2); c.lineTo(x + w * 0.66, y + h * 0.4); c.lineTo(x + w * 0.74, y + h * 0.7); c.stroke(); }
+    },
+    /* Eiersäcke: durchscheinende Trauben mit Schatten von Gelegen darin, nasser Glanz, Seidenfäden */
+    eier(c, x, y, w, h, H, r) {
+      c.strokeStyle = "rgba(236,228,244,.3)"; c.lineWidth = 0.4; c.beginPath(); for (let k = 0; k < 7; k++) { const sx = x + 4 + k * (w - 8) / 6; c.moveTo(sx, y); c.lineTo(sx + (H.h3(k, x | 0, 1540) - 0.5) * 10, y + h * 0.5); } c.stroke();
+      const n = 9;
+      for (let k = 0; k < n; k++) {
+        const ex = x + 8 + H.h3(k, x | 0, 1541) * (w - 16), ey = y + h * 0.35 + H.h3(k, y | 0, 1542) * h * 0.52, rx = 3.4 + H.h3(k, 3, 1543) * 3, ry = rx * 1.25;
+        c.fillStyle = "rgba(0,0,0,.3)"; c.beginPath(); c.ellipse(ex + 1, ey + 1.2, rx, ry, 0, 0, TAU); c.fill();
+        c.fillStyle = k % 3 ? "rgba(210,196,210,.78)" : "rgba(226,214,186,.78)"; c.beginPath(); c.ellipse(ex, ey, rx, ry, 0, 0, TAU); c.fill();
+        c.fillStyle = "rgba(60,30,50,.45)"; c.beginPath(); c.arc(ex + 0.4, ey + 0.6, rx * 0.45, 0.4, TAU - 0.6); c.fill();
+        c.fillStyle = "rgba(255,250,255,.55)"; c.beginPath(); c.ellipse(ex - rx * 0.4, ey - ry * 0.45, rx * 0.22, ry * 0.3, -0.4, 0, TAU); c.fill();
+      }
+      const g = c.createLinearGradient(0, y + h - 8, 0, y + h); g.addColorStop(0, "rgba(200,220,170,0)"); g.addColorStop(1, "rgba(200,220,170,.15)"); c.fillStyle = g; c.fillRect(x + 6, y + h - 8, w - 12, 8);
+    },
+    /* Schädelnischen eines Beinhauses: gewölbte Fächer mit Schädeln, gekreuzte Knochen dazwischen */
+    schaedel(c, x, y, w, h, H, r) {
+      const P = H.PAL, cols = 4, rows = 2, cw = (w - 6) / cols, ch = (h - 8) / rows;
+      sh(c, x + 3, y + 3, w - 4, h - 4, 0.35); c.fillStyle = P.stone; c.fillRect(x + 2, y + 2, w - 4, h - 4); c.fillStyle = P.stoneHi; c.fillRect(x + 2, y + 2, w - 4, 0.8);
+      for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+        const nx = x + 4 + i * cw, ny = y + 5 + j * ch, nw = cw - 3, nh = ch - 4; c.fillStyle = "#120c0a"; c.beginPath(); c.moveTo(nx, ny + nh); c.lineTo(nx, ny + nw / 2); c.arc(nx + nw / 2, ny + nw / 2, nw / 2, PI, 0); c.lineTo(nx + nw, ny + nh); c.fill();
+        if (H.h3(i, j + (y | 0), 1550) < 0.85) skull(c, nx + nw / 2, ny + nh - 3.6, 1, H.h3(i, j, 1551) < 0.5 ? "#c8bca0" : "#b0a488");
+        if (H.h3(i, j + (x | 0), 1552) < 0.4) { c.strokeStyle = "#a89c80"; c.lineWidth = 1; c.beginPath(); c.moveTo(nx + 1, ny + nh - 0.6); c.lineTo(nx + nw - 1, ny + nh - 1.4); c.stroke(); }
+      }
+      c.strokeStyle = "#b0a488"; c.lineWidth = 1.2; for (let i = 0; i < cols - 1; i++) { const bx = x + 4 + (i + 1) * cw - 1.5, by = y + h - 5; c.beginPath(); c.moveTo(bx - 3, by - 3); c.lineTo(bx + 3, by + 2); c.moveTo(bx + 3, by - 3); c.lineTo(bx - 3, by + 2); c.stroke(); }
+    },
+    /* Schlüsselbrett mit Ring und Schlüsseln */
+    schluessel(c, x, y, w, h, H, r) {
+      const bx = x + 4, by = y + 6, bw = w - 8, bh = 6; sh(c, bx + 1, by + 1, bw, bh, 0.4); c.fillStyle = "#5a3a22"; c.fillRect(bx, by, bw, bh); c.fillStyle = "rgba(255,220,170,.25)"; c.fillRect(bx, by, bw, 0.6);
+      for (let k = 0; k < 4; k++) { const kx = bx + 3 + k * (bw - 6) / 3; peg(c, kx, by + 4); if (H.h3(k, x | 0, 1560) < 0.25) continue; const len = 8 + H.h3(k, y | 0, 1561) * 5; c.strokeStyle = "#8a7a50"; c.lineWidth = 0.9; c.beginPath(); c.arc(kx, by + 7.5, 1.8, 0, TAU); c.stroke(); c.fillStyle = "#8a7a50"; c.fillRect(kx - 0.5, by + 9, 1, len); c.fillRect(kx, by + 7 + len, 2.4, 1.2); c.fillRect(kx, by + 5 + len, 1.8, 1); }
+      c.strokeStyle = IRON.m; c.lineWidth = 1; c.beginPath(); c.arc(bx + bw - 3, by + bh + 5, 3.4, 0, TAU); c.stroke();
+    },
+    /* Taubenschlag: Nistlöcher mit Stroh, ein paar Tauben, weiße Spuren */
+    tauben(c, x, y, w, h, H, r) {
+      const P = H.PAL, cols = 4, rows = 3, cw = (w - 4) / cols, ch = (h - 4) / rows;
+      for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+        const nx = x + 3 + i * cw, ny = y + 3 + j * ch, nw = cw - 4, nh = ch - 4;
+        c.fillStyle = P.stone; c.fillRect(nx - 1, ny + nh, nw + 2, 2); c.fillStyle = "#140e0a"; c.beginPath(); c.moveTo(nx, ny + nh); c.lineTo(nx, ny + nw / 2); c.arc(nx + nw / 2, ny + nw / 2, nw / 2, PI, 0); c.lineTo(nx + nw, ny + nh); c.fill();
+        c.strokeStyle = "rgba(200,170,90,.5)"; c.lineWidth = 0.5; c.beginPath(); c.moveTo(nx + 1, ny + nh - 0.5); c.lineTo(nx + nw - 1, ny + nh - 1.2); c.stroke();
+        const v = H.h3(i, j + (y | 0), 1570);
+        if (v < 0.35) { const px = nx + nw / 2, py = ny + nh - 2.5; c.fillStyle = v < 0.15 ? "#c8c0b4" : "#8a847c"; c.beginPath(); c.ellipse(px, py, 3.4, 2.2, 0, 0, TAU); c.fill(); c.beginPath(); c.arc(px + 2.6, py - 2, 1.4, 0, TAU); c.fill(); c.fillStyle = "#c86a3a"; c.fillRect(px + 3.8, py - 2, 1, 0.6); c.fillStyle = "#1a1410"; c.fillRect(px + 2.8, py - 2.4, 0.5, 0.5); c.fillStyle = "rgba(160,120,140,.6)"; c.fillRect(px + 1.4, py - 1, 1.6, 1); }
+        if (v > 0.6) { c.fillStyle = "rgba(236,230,220,.35)"; c.fillRect(nx + nw * H.h3(i, j, 1571), ny + nh + 2, 1, 2 + v * 4); }
+      }
+    },
+    /* Seile: aufgeschossene Taurollen an Pflöcken, eine Talje */
+    seile(c, x, y, w, h, H, r) {
+      for (let k = 0; k < 2; k++) { const px = x + 10 + k * (w - 20), py = y + 6; peg(c, px, py); const R = 6 + H.h3(k, x | 0, 1580) * 3;
+        c.strokeStyle = "#7a6038"; c.lineWidth = 1.6; for (let j = 0; j < 4; j++) { c.beginPath(); c.ellipse(px, py + R + 1 + j * 0.8, R - j * 0.7, R + 1, 0, 0, TAU); c.stroke(); }
+        c.strokeStyle = "rgba(255,230,180,.25)"; c.lineWidth = 0.5; c.beginPath(); c.ellipse(px, py + R + 1, R, R + 1, 0, PI * 1.1, PI * 1.7); c.stroke(); c.strokeStyle = "#7a6038"; c.lineWidth = 1.4; c.beginPath(); c.moveTo(px + R * 0.2, py + 2 * R); c.quadraticCurveTo(px + 2, py + 2 * R + 8, px - 1, y + h - 2); c.stroke(); }
+      const tx = x + w / 2, ty = y + 10; c.fillStyle = "#5a3a22"; c.beginPath(); c.ellipse(tx, ty + 6, 3.4, 5, 0, 0, TAU); c.fill(); c.fillStyle = IRON.m; c.beginPath(); c.arc(tx, ty + 6, 1.4, 0, TAU); c.fill(); c.strokeStyle = IRON.m; c.lineWidth = 0.8; c.beginPath(); c.arc(tx, ty, 1.8, 0, TAU); c.stroke(); c.strokeStyle = "#7a6038"; c.lineWidth = 0.9; c.beginPath(); c.moveTo(tx - 3, ty + 7); c.lineTo(tx - 3, y + h - 6); c.moveTo(tx + 3, ty + 7); c.lineTo(tx + 3, y + h - 12); c.stroke();
+    },
+    /* Stallwand: Hufeisen auf Nägeln, Zaumzeug, Striegel */
+    hufeisen(c, x, y, w, h, H, r) {
+      for (let k = 0; k < 3; k++) { const hx = x + 9 + k * 12, hy = y + 8 + (k % 2) * 2; c.strokeStyle = IRON.m; c.lineWidth = 2; c.beginPath(); c.arc(hx, hy + 2, 3.6, PI * 0.1, PI * 0.9, true); c.stroke(); c.strokeStyle = IRON.hi; c.lineWidth = 0.5; c.beginPath(); c.arc(hx, hy + 2, 4.4, PI * 1.15, PI * 1.5); c.stroke(); c.fillStyle = IRON.lo; c.fillRect(hx - 0.5, hy - 2.5, 1, 1); }
+      const bx = x + w - 10, by = y + 4; peg(c, bx, by); c.strokeStyle = "#5a3018"; c.lineWidth = 1; c.beginPath(); c.moveTo(bx, by + 1); c.quadraticCurveTo(bx - 6, by + 10, bx - 2, by + 20); c.moveTo(bx, by + 1); c.quadraticCurveTo(bx + 5, by + 12, bx + 1, by + 22); c.stroke(); c.strokeStyle = IRON.hi; c.lineWidth = 0.8; c.beginPath(); c.arc(bx - 0.5, by + 21, 2, 0, TAU); c.stroke();
+      c.fillStyle = "#6a4a2a"; c.fillRect(x + 6, y + h - 9, 10, 3); c.fillStyle = "#3a2618"; for (let k = 0; k < 6; k++) c.fillRect(x + 6.5 + k * 1.6, y + h - 6, 0.7, 2);
+    },
+    /* Zielscheibe aus Stroh mit Pfeilen */
+    zielscheibe(c, x, y, w, h, H, r) {
+      const cx = x + w / 2, cy = y + h / 2, R = Math.min(w, h) / 2 - 2;
+      sh(c, cx - R + 1.5, cy - R + 1.5, R * 2, R * 2, 0); c.fillStyle = "rgba(0,0,0,.35)"; c.beginPath(); c.arc(cx + 1.5, cy + 1.5, R, 0, TAU); c.fill();
+      const ring = ["#b8984a", "#e8dcc0", "#9a2a22", "#e8dcc0", "#9a2a22"]; for (let k = 0; k < 5; k++) { c.fillStyle = ring[k]; c.beginPath(); c.arc(cx, cy, R * (1 - k * 0.19), 0, TAU); c.fill(); }
+      c.strokeStyle = "rgba(90,60,20,.35)"; c.lineWidth = 0.5; c.beginPath(); for (let k = 0; k < 16; k++) { const a = k / 16 * TAU; c.moveTo(cx + Math.cos(a) * R * 0.85, cy + Math.sin(a) * R * 0.85); c.lineTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R); } c.stroke();
+      for (let k = 0; k < 3; k++) { const a = H.h3(k, x | 0, 1590) * TAU, d = H.h3(k, y | 0, 1591) * R * 0.7, ax = cx + Math.cos(a) * d, ay = cy + Math.sin(a) * d; c.strokeStyle = "#5a3a22"; c.lineWidth = 0.8; c.beginPath(); c.moveTo(ax, ay); c.lineTo(ax + 5, ay - 4); c.stroke(); c.fillStyle = k % 2 ? "#e8dcc0" : "#9a2a22"; c.beginPath(); c.moveTo(ax + 4, ay - 3); c.lineTo(ax + 7, ay - 6.5); c.lineTo(ax + 5.4, ay - 2.4); c.fill(); }
+    },
+    /* Kugelpyramide neben dem Geschütz, dazu ein Ladestock */
+    kugeln(c, x, y, w, h, H, r) {
+      const bot = y + h, R = 4.6; c.strokeStyle = "#5a3a22"; c.lineWidth = 1.2; c.beginPath(); c.moveTo(x + w - 5, bot); c.lineTo(x + w - 9, y + 1); c.stroke(); c.fillStyle = "#3a2a1e"; c.beginPath(); c.ellipse(x + w - 9, y + 1.5, 2, 2.6, -0.2, 0, TAU); c.fill();
+      for (let row = 0; row < 4; row++) for (let k = 0; k < 4 - row; k++) { const bx = x + 6 + R + k * R * 2.05 + row * R, by = bot - R - row * R * 1.75; c.fillStyle = "rgba(0,0,0,.35)"; c.beginPath(); c.arc(bx + 0.8, by + 0.8, R, 0, TAU); c.fill(); c.fillStyle = "#2a2624"; c.beginPath(); c.arc(bx, by, R, 0, TAU); c.fill(); c.fillStyle = "rgba(220,210,200,.3)"; c.beginPath(); c.arc(bx - 1.4, by - 1.6, 1.4, 0, TAU); c.fill(); }
+    },
+    /* Erzhaufen mit Glanz von Kupfer und Gold, Spitzhacke angelehnt */
+    erz(c, x, y, w, h, H, r) {
+      const bot = y + h; c.strokeStyle = "#5a3a22"; c.lineWidth = 1.3; c.beginPath(); c.moveTo(x + w - 6, bot); c.lineTo(x + w - 12, y + 6); c.stroke(); c.strokeStyle = IRON.m; c.lineWidth = 1.6; c.beginPath(); c.moveTo(x + w - 19, y + 9); c.quadraticCurveTo(x + w - 12, y + 3, x + w - 4, y + 6); c.stroke();
+      for (let k = 0; k < 14; k++) { const t = k / 14, bx = x + 5 + H.h3(k, x | 0, 1600) * (w - 16), s = 2.5 + H.h3(k, 1, 1601) * 3.5, by = bot - s * 0.6 - (1 - Math.abs((bx - x - w * 0.4) / (w * 0.5))) * 10 * (1 - t * 0.3);
+        c.fillStyle = ["#3a302a", "#4a3a30", "#2e2822"][k % 3]; c.beginPath(); c.moveTo(bx - s, by + s * 0.6); c.lineTo(bx - s * 0.6, by - s * 0.6); c.lineTo(bx + s * 0.5, by - s * 0.7); c.lineTo(bx + s, by + s * 0.6); c.fill();
+        if (H.h3(k, 2, 1602) < 0.45) { c.fillStyle = H.h3(k, 3, 1603) < 0.5 ? "#c87a3a" : "#e0c060"; c.fillRect(bx - 0.6, by - 0.4, 1.2, 1); } }
+    },
+    /* Runenstein: aufrechte Stele mit eingemeißelten, violett glimmenden Runen */
+    runenstein(c, x, y, w, h, H, r) {
+      const bot = y + h, cx = x + w / 2, sw = w - 16, st = H.lit(H.B.wall, 0.15);
+      c.fillStyle = "rgba(0,0,0,.4)"; c.beginPath(); c.moveTo(cx - sw / 2 + 2, bot); c.lineTo(cx - sw / 2 + 2, y + 10); c.quadraticCurveTo(cx + 2, y + 2, cx + sw / 2 + 2, y + 10); c.lineTo(cx + sw / 2 + 2, bot); c.fill();
+      c.fillStyle = st; c.beginPath(); c.moveTo(cx - sw / 2, bot); c.lineTo(cx - sw / 2 + 1, y + 9); c.quadraticCurveTo(cx, y + 1, cx + sw / 2 - 1, y + 9); c.lineTo(cx + sw / 2, bot); c.fill();
+      c.fillStyle = H.lit(st, 0.2); c.fillRect(cx - sw / 2 + 1, y + 9, 1.4, h - 9); c.fillStyle = "rgba(0,0,0,.25)"; c.fillRect(cx + sw / 2 - 2.4, y + 9, 1.4, h - 9);
+      c.save(); c.globalCompositeOperation = "lighter"; c.strokeStyle = "rgba(200,140,255,.75)"; c.lineWidth = 0.9; c.beginPath();
+      for (let k = 0; k < 5; k++) { const ry = y + 14 + k * 9, rx = cx - 3, v = H.h3(k * 13 + 3, ((x + r * 99) | 0) + k * 7, 1610 + k); c.moveTo(rx + 3, ry - 3); c.lineTo(rx + 3, ry + 4); if (v < 0.33) { c.moveTo(rx + 3, ry - 1); c.lineTo(rx + 6, ry - 3); c.moveTo(rx + 3, ry + 1); c.lineTo(rx + 6, ry - 1); } else if (v < 0.66) { c.moveTo(rx, ry - 2); c.lineTo(rx + 6, ry + 2); } else { c.moveTo(rx + 3, ry); c.lineTo(rx, ry - 3); c.moveTo(rx + 3, ry); c.lineTo(rx + 6, ry + 3); } }
+      c.stroke(); c.restore(); glow(c, cx, y + h * 0.45, 18, "#c890ff", 0.18);
+      c.fillStyle = "rgba(90,120,50,.4)"; for (let k = 0; k < 8; k++) c.fillRect(cx - sw / 2 + H.h3(k, 1, 1611) * sw, bot - 2 - H.h3(k, 2, 1612) * 8, 2, 1.2);
+    },
+    /* Korallengarten: Fächer- und Geweihkorallen in Rosa, Koralle und Ocker, Muscheln */
+    korallen(c, x, y, w, h, H, r) {
+      const bot = y + h, cols = ["#e08a8a", "#e0a060", "#c86a7a", "#d8b070"];
+      const branch = (bx, by, len, a, d, col) => { if (d <= 0 || len < 1.5) return; const ex = bx + Math.cos(a) * len, ey = by + Math.sin(a) * len; c.strokeStyle = col; c.lineWidth = d * 0.6; c.beginPath(); c.moveTo(bx, by); c.lineTo(ex, ey); c.stroke(); branch(ex, ey, len * 0.72, a - 0.45, d - 1, col); branch(ex, ey, len * 0.72, a + 0.4, d - 1, col); };
+      for (let k = 0; k < 3; k++) branch(x + 10 + k * (w - 20) / 2, bot - 2, 8 + H.h3(k, x | 0, 1620) * 4, -PI / 2 + (H.h3(k, 1, 1621) - 0.5) * 0.5, 4, cols[k % cols.length]);
+      const fx = x + w * 0.5, fy = y + h * 0.42; c.fillStyle = H2rgba("#c86a7a", 0.55); c.beginPath(); c.moveTo(fx, fy + 12); c.quadraticCurveTo(fx - 14, fy - 2, fx - 6, fy - 12); c.quadraticCurveTo(fx, fy - 15, fx + 6, fy - 12); c.quadraticCurveTo(fx + 14, fy - 2, fx, fy + 12); c.fill(); c.strokeStyle = "rgba(90,30,40,.4)"; c.lineWidth = 0.4; c.beginPath(); for (let k = 0; k < 7; k++) { c.moveTo(fx, fy + 12); c.lineTo(fx - 9 + k * 3, fy - 10 + Math.abs(k - 3)); } c.stroke();
+      for (let k = 0; k < 3; k++) { const sx = x + 6 + H.h3(k, 3, 1622) * (w - 12); c.fillStyle = "#e8d8c0"; c.beginPath(); c.arc(sx, bot - 1.5, 2.2, PI, 0); c.fill(); c.strokeStyle = "rgba(120,90,60,.5)"; c.lineWidth = 0.3; c.beginPath(); for (let j = -1; j <= 1; j++) { c.moveTo(sx, bot - 1.5); c.lineTo(sx + j * 1.6, bot - 3.4); } c.stroke(); }
+    },
+    /* Giftranken am Spalier: dunkle Ranken, Blätter, violette und gelbe Giftblüten, Beeren */
+    ranken(c, x, y, w, h, H, r) {
+      c.strokeStyle = "#4a3420"; c.lineWidth = 1; c.beginPath(); for (let k = 0; k <= 4; k++) { const xx = x + 4 + k * (w - 8) / 4; c.moveTo(xx, y + 2); c.lineTo(xx, y + h - 2); } for (let k = 0; k <= 5; k++) { const yy = y + 4 + k * (h - 8) / 5; c.moveTo(x + 3, yy); c.lineTo(x + w - 3, yy); } c.stroke();
+      for (let v = 0; v < 3; v++) { let px = x + 8 + v * (w - 16) / 2, py = y + h; c.strokeStyle = "#2e4a20"; c.lineWidth = 1.2; c.beginPath(); c.moveTo(px, py);
+        for (let k = 0; k < 7; k++) { const nx = px + (H.h3(v, k, 1630) - 0.5) * 12, ny = py - h / 7; c.quadraticCurveTo(px + (k % 2 ? 6 : -6), py - h / 14, nx, ny); px = nx; py = ny; } c.stroke();
+        px = x + 8 + v * (w - 16) / 2; py = y + h;
+        for (let k = 0; k < 9; k++) { const lx = px + (H.h3(v, k, 1631) - 0.5) * 14, ly = y + h - k * h / 9 - 3; c.fillStyle = k % 2 ? "#3e5a28" : "#4e6a2e"; c.beginPath(); c.ellipse(lx, ly, 2.6, 1.3, H.h3(v, k, 1632) * 3, 0, TAU); c.fill();
+          const fv = H.h3(v, k, 1633); if (fv < 0.28) { c.fillStyle = fv < 0.14 ? "#8a3aa0" : "#d8c040"; for (let j = 0; j < 5; j++) { const a = j / 5 * TAU; c.beginPath(); c.arc(lx + Math.cos(a) * 1.6, ly - 2 + Math.sin(a) * 1.6, 1, 0, TAU); c.fill(); } c.fillStyle = "#2a1a10"; c.fillRect(lx - 0.4, ly - 2.4, 0.8, 0.8); } else if (fv > 0.86) { c.fillStyle = "#6a1a3a"; for (let j = 0; j < 3; j++) { c.beginPath(); c.arc(lx + j * 1.6 - 1.6, ly + 2 + (j % 2), 0.9, 0, TAU); c.fill(); } } }
+      }
+    },
+    /* Tellerbord: aufgestellte Teller in der Leiste, darunter Becher an Haken */
+    teller(c, x, y, w, h, H, r) {
+      const sy = y + 16; c.fillStyle = "#4a3020"; c.fillRect(x + 2, sy, w - 4, 2.4); c.fillRect(x + 2, sy - 6, w - 4, 1.2); c.fillStyle = "rgba(255,220,170,.22)"; c.fillRect(x + 2, sy, w - 4, 0.5);
+      for (let k = 0; k < 6; k++) { const px = x + 8 + k * (w - 16) / 5, R = 4.6 + H.h3(k, x | 0, 1640) * 1.4, col = ["#c8b898", "#a86a3a", "#8a8478", "#d8c8a8"][(H.h3(k, 1, 1641) * 4) | 0]; c.fillStyle = "rgba(0,0,0,.3)"; c.beginPath(); c.ellipse(px + 1, sy - R + 1, R * 0.9, R, 0, 0, TAU); c.fill(); c.fillStyle = col; c.beginPath(); c.ellipse(px, sy - R, R * 0.9, R, 0, 0, TAU); c.fill(); c.strokeStyle = "rgba(0,0,0,.2)"; c.lineWidth = 0.5; c.beginPath(); c.ellipse(px, sy - R, R * 0.6, R * 0.7, 0, 0, TAU); c.stroke(); if (k % 2 === 0) { c.strokeStyle = "rgba(138,42,34,.6)"; c.beginPath(); c.ellipse(px, sy - R, R * 0.78, R * 0.88, 0, 0, TAU); c.stroke(); } }
+      c.fillStyle = "#4a3020"; c.fillRect(x + 2, sy - 6, w - 4, 1.2);
+      for (let k = 0; k < 4; k++) { const hx = x + 10 + k * (w - 20) / 3; c.strokeStyle = IRON.m; c.lineWidth = 0.5; c.beginPath(); c.moveTo(hx, sy + 2.4); c.lineTo(hx, sy + 4.4); c.stroke(); c.fillStyle = k % 2 ? "#9a5a30" : "#8a8478"; c.fillRect(hx - 2, sy + 4.4, 4, 5); c.fillStyle = "rgba(255,230,190,.25)"; c.fillRect(hx - 2, sy + 4.4, 1, 5); }
+    },
+    /* Zollstube: Balkenwaage, Gewichte, Kassenbücher, Münzstapel */
+    waage(c, x, y, w, h, H, r) {
+      const sy = y + h - 6; c.fillStyle = "#4a3020"; c.fillRect(x + 2, sy, w - 4, 2.4); c.fillStyle = "rgba(255,220,170,.22)"; c.fillRect(x + 2, sy, w - 4, 0.5);
+      const cx = x + 14, brass = "#b08a3a"; c.fillStyle = brass; c.fillRect(cx - 0.7, sy - 16, 1.4, 16); c.fillRect(cx - 3, sy - 1.4, 6, 1.4); c.fillRect(cx - 9, sy - 16, 18, 1); c.strokeStyle = brass; c.lineWidth = 0.4; c.beginPath(); for (const d of [-1, 1]) { c.moveTo(cx + d * 9, sy - 15); c.lineTo(cx + d * 9 - 2.5, sy - 8); c.moveTo(cx + d * 9, sy - 15); c.lineTo(cx + d * 9 + 2.5, sy - 8); } c.stroke(); c.fillStyle = brass; for (const d of [-1, 1]) { c.beginPath(); c.ellipse(cx + d * 9, sy - 7.6, 3.2, 1, 0, 0, PI); c.fill(); }
+      for (let k = 0; k < 3; k++) { c.fillStyle = BOOK[(k * 3 + 1) % BOOK.length]; c.fillRect(x + 28 + k * 3.2, sy - 10 - k, 3, 10 + k); c.fillStyle = "rgba(255,225,160,.3)"; c.fillRect(x + 28 + k * 3.2, sy - 8 - k, 3, 0.5); }
+      for (let k = 0; k < 2; k++) for (let j = 0; j < 3 + k; j++) { c.fillStyle = j % 2 ? "#c8a040" : "#e0c060"; c.fillRect(x + w - 10 + k * 4, sy - 1 - j * 1.2, 3.4, 1.1); }
+    },
+    /* Spiegel mit vergoldetem Rahmen, warmem Spiegelschein, manchmal gesprungen */
+    spiegel(c, x, y, w, h, H, r) {
+      const cx = x + w / 2, cy = y + h / 2, rx = w / 2 - 6, ry = h / 2 - 7;
+      c.fillStyle = "rgba(0,0,0,.45)"; c.beginPath(); c.ellipse(cx + 1.5, cy + 1.5, rx + 3, ry + 3, 0, 0, TAU); c.fill();
+      c.fillStyle = "#7a5a1e"; c.beginPath(); c.ellipse(cx, cy, rx + 3, ry + 3, 0, 0, TAU); c.fill(); c.strokeStyle = "#d8b050"; c.lineWidth = 0.8; c.beginPath(); c.ellipse(cx, cy, rx + 2.2, ry + 2.2, 0, PI * 1.0, PI * 1.7); c.stroke();
+      for (let k = 0; k < 10; k++) { const a = k / 10 * TAU; c.fillStyle = "#c89a40"; c.beginPath(); c.arc(cx + Math.cos(a) * (rx + 2.6), cy + Math.sin(a) * (ry + 2.6), 1, 0, TAU); c.fill(); }
+      c.fillStyle = "#c89a40"; c.beginPath(); c.moveTo(cx - 5, y + 2); c.quadraticCurveTo(cx, y - 3, cx + 5, y + 2); c.lineTo(cx, y + 5); c.fill();
+      const g = c.createLinearGradient(cx - rx, cy - ry, cx + rx, cy + ry); g.addColorStop(0, "#8a8070"); g.addColorStop(0.45, "#3a342c"); g.addColorStop(1, "#5a5044"); c.fillStyle = g; c.beginPath(); c.ellipse(cx, cy, rx, ry, 0, 0, TAU); c.fill();
+      c.save(); c.clip(); c.fillStyle = "rgba(255,245,225,.22)"; c.beginPath(); c.moveTo(cx - rx, cy - ry * 0.2); c.lineTo(cx - rx * 0.2, cy - ry); c.lineTo(cx + rx * 0.1, cy - ry); c.lineTo(cx - rx, cy + ry * 0.2); c.fill(); c.fillStyle = "rgba(255,245,225,.12)"; c.fillRect(cx + rx * 0.1, cy - ry, 2, ry * 2);
+      if (r > 0.6) { c.strokeStyle = "rgba(255,250,240,.4)"; c.lineWidth = 0.5; c.beginPath(); c.moveTo(cx + 1, cy - 2); c.lineTo(cx - 4, cy - ry); c.moveTo(cx + 1, cy - 2); c.lineTo(cx + rx, cy + 3); c.moveTo(cx + 1, cy - 2); c.lineTo(cx - 2, cy + ry); c.moveTo(cx + 1, cy - 2); c.lineTo(cx - rx, cy + 4); c.stroke(); }
+      c.restore();
+    },
+    /* Riesenpilze an der Grottenwand: Stiele, gefleckte Hüte, leuchtende Lamellen */
+    riesenpilze(c, x, y, w, h, H, r) {
+      const bot = y + h;
+      for (let k = 0; k < 3; k++) { const px = x + 10 + k * (w - 20) / 2 + (H.h3(k, x | 0, 1650) - 0.5) * 6, ph = h * (0.45 + H.h3(k, 1, 1651) * 0.45) - 6, top = bot - ph, R = 6 + H.h3(k, 2, 1652) * 6, glowC = k % 2 ? "#e890b8" : "#a8e890";
+        c.fillStyle = "#c8bca8"; c.beginPath(); c.moveTo(px - 2.4, bot); c.quadraticCurveTo(px - 1, (top + bot) / 2, px - 1.6, top); c.lineTo(px + 1.6, top); c.quadraticCurveTo(px + 1, (top + bot) / 2, px + 2.4, bot); c.fill(); c.fillStyle = "rgba(0,0,0,.2)"; c.fillRect(px + 0.8, top, 1, ph);
+        c.fillStyle = k % 2 ? "#8a3a5a" : "#7a4a2a"; c.beginPath(); c.ellipse(px, top, R, R * 0.55, 0, PI, 0); c.fill();
+        c.save(); c.globalCompositeOperation = "lighter"; c.fillStyle = H2rgba(glowC, 0.55); c.fillRect(px - R * 0.9, top - 0.5, R * 1.8, 1.4); c.restore(); glow(c, px, top + 2, R * 1.6, glowC, 0.22);
+        c.fillStyle = "rgba(240,230,210,.7)"; for (let j = 0; j < 4; j++) { c.beginPath(); c.arc(px - R * 0.6 + j * R * 0.4, top - R * 0.25 - (j % 2) * R * 0.15, 0.8 + (j % 2) * 0.5, 0, TAU); c.fill(); } }
+    },
+    /* Kristallader: Amethystprismen aus dem Fels, innerer Schein */
+    kristall(c, x, y, w, h, H, r) {
+      const cx = x + w / 2, cy = y + h * 0.6; c.fillStyle = "rgba(0,0,0,.45)"; c.beginPath(); c.ellipse(cx, cy + 4, w / 2 - 6, 8, 0, 0, TAU); c.fill();
+      glow(c, cx, cy - 4, w * 0.5, "#c890ff", 0.25);
+      for (let k = 0; k < 7; k++) { const a = -PI / 2 + (k - 3) * 0.32 + (H.h3(k, x | 0, 1660) - 0.5) * 0.2, len = 10 + H.h3(k, 1, 1661) * 14 - Math.abs(k - 3) * 2, wd = 2.4 + H.h3(k, 2, 1662) * 1.6, bx = cx + (k - 3) * 2.6, by = cy + 2;
+        c.save(); c.translate(bx, by); c.rotate(a + PI / 2); const col = k % 3 === 0 ? "#b070e0" : k % 3 === 1 ? "#d0a0f0" : "#8a4ab8";
+        c.fillStyle = col; c.beginPath(); c.moveTo(-wd, 0); c.lineTo(-wd, -len); c.lineTo(0, -len - wd * 1.4); c.lineTo(wd, -len); c.lineTo(wd, 0); c.fill(); c.fillStyle = "rgba(255,240,255,.35)"; c.fillRect(-wd, -len, wd * 0.6, len); c.fillStyle = "rgba(40,10,60,.3)"; c.fillRect(wd * 0.4, -len, wd * 0.6, len); c.restore(); }
+      c.fillStyle = "#fff"; c.fillRect(cx - 3, cy - 14, 1, 1); c.fillRect(cx + 5, cy - 8, 0.8, 0.8);
+    }
+  });
   /* ---------- Fels: Patina, Kanten, Einschlüsse, Laufflächen ---------- */
   const DEBRIS = { castle: "leaf", ramparts: "leaf", storm: "leaf", camp: "leaf", cellar: "straw", harbour: "shell", dungeon: "bone", chasm: "bone", lake: "shroom", forge: "ash", embercity: "ash", spires: "ash", halls: "petal", belltower: "feather" };
   /* ---------- Gesteinsarten je Gebiet (auf den oberen drei Felsreihen, darunter verschluckt die Tiefe alles) ---------- */
@@ -1411,6 +1897,76 @@
     c.save(); c.globalCompositeOperation = "lighter";
     const gy = (lv.H - 3) * T;
     for (let i = 0; i < 9; i++) { const x = cam.x + ((hash(i, 3) * cam.w * 1.5 + t * (4 + i)) % (cam.w + 40)) - 20, y = Math.min(gy - 6, cam.y + cam.h * (0.55 + hash(i, 5) * 0.35)) + Math.sin(t * 1.3 + i) * 6, b = Math.max(0, Math.sin(t * 2 + i * 1.7)); c.globalAlpha = 0.5 * b; c.drawImage(Z.glowSprite("rgba(214,255,110,1)"), x - 5, y - 5, 10, 10); c.globalAlpha = b; c.fillStyle = "#f4ffc0"; c.fillRect(x - 0.4, y - 0.4, 0.8, 0.8); }
+    c.restore();
+  };
+})();
+
+/* Ezekiel – The Destroyer · Belebte Raumstücke (Grafik-Runde 7)
+   Die Schaustücke der Räume (pracht.js, Steinmetz-Abschnitt) bekommen Leben: Küchen- und Kaminfeuer flackern mit
+   Funken und werfen warmes Licht, Glasfenster legen farbige Lichtflecken in den Raum und Staub tanzt im Strahl,
+   Altarkerzen brennen, frisch gegossene Barren glühen nach, Runensteine, Kristalle und Riesenpilze atmen Licht,
+   Kupfertöpfe blitzen auf. Licht ab Stufe 1, Bewegung ab Stufe 2; Stufe 0 / Handheld unverändert. Kein Blau. */
+(function () {
+  "use strict";
+  const Z = window.Z, G = Z.gfx, T = Z.TILE, TAU = Math.PI * 2;
+  const lvl = () => { const q = Z.gq; if (!q) return 2; if (q.lean) return 0; return q.level === -1 ? 2 : q.level; };
+  const off = () => G.off && (G.off.steinmetz || G.off.belebt);
+  const hash = (x, y) => { let h = (x * 374761393 + y * 668265263) ^ 0x5bd1e995; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+  const LIVE = { kamin: 1, glasfenster: 1, altarbild: 1, gussform: 1, runenstein: 1, kristall: 1, riesenpilze: 1, kupfer: 1, chimney: 1 };
+  const vis = (p, cam, m) => { const x = p.x * T, y = p.y * T; return x + p.w * T > cam.x - m && x < cam.x + cam.w + m && y + p.h * T > cam.y - m && y < cam.y + cam.h + m; };
+  const fl = (t, ph) => 0.82 + 0.12 * Math.sin(t * 8.3 + ph) + 0.06 * Math.sin(t * 21 + ph * 3);
+  if (G.lightGather) G.lightGather.push(function (add, cam, t) {
+    if (lvl() < 1 || !Z.level || Z.darkness > 0 || off()) return;
+    for (const p of Z.raumStuecke()) {
+      if (!LIVE[p.kind] || !vis(p, cam, 140)) continue;
+      const x = p.x * T, y = p.y * T, w = p.w * T, h = p.h * T, ph = hash(p.x, p.y) * 9;
+      switch (p.kind) {
+        case "kamin": add(x + w / 2, y + h - 6, 150, "#ff9a48", 0.62 * fl(t, ph), 12); break;
+        case "glasfenster": { const b = y + h - 9; add(x + w / 2, y + h * 0.45, 70, "#ffc070", 0.32, 0); add(x + w / 2 + 10, b + 34, 54, "#ff7050", 0.22, 0); add(x + w / 2 + 24, b + 44, 50, "#e0b040", 0.2, 0); add(x + w / 2 + 16, b + 54, 42, "#c070d0", 0.16, 0); break; }
+        case "altarbild": add(x + w / 2, y + h - 10, 80, "#ffd890", 0.4 * fl(t, ph), 6); break;
+        case "gussform": add(x + w - 26, y + h - 17, 70, "#ff8a40", 0.4 + 0.08 * Math.sin(t * 1.3 + ph), 4); break;
+        case "chimney": add(x + w / 2, y + h - 5, 90, "#ff7a30", 0.45 * fl(t, ph), 8); break;
+        case "runenstein": add(x + w / 2, y + h * 0.45, 80, "#c890ff", 0.28 + 0.12 * Math.sin(t * 1.1 + ph), 0); break;
+        case "kristall": add(x + w / 2, y + h * 0.5, 80, "#d090ff", 0.3 + 0.08 * Math.sin(t * 0.8 + ph), 0); break;
+        case "riesenpilze": add(x + w / 2, y + h * 0.45, 80, ((p.x + p.y) & 1) ? "#e890b8" : "#a8e890", 0.28 + 0.1 * Math.sin(t * 0.9 + ph), 0); break;
+      }
+    }
+  });
+  function flame(c, x, y, s, t, ph) {
+    const k = 1 + 0.18 * Math.sin(t * 13 + ph) + 0.1 * Math.sin(t * 29 + ph * 2), hh = 7 * s * k, sw = Math.sin(t * 6 + ph) * s;
+    c.fillStyle = "rgba(255,120,40,.85)"; c.beginPath(); c.moveTo(x - 2.6 * s, y); c.quadraticCurveTo(x - 2.8 * s, y - hh * 0.5, x + sw, y - hh); c.quadraticCurveTo(x + 2.8 * s, y - hh * 0.5, x + 2.6 * s, y); c.fill();
+    c.fillStyle = "rgba(255,214,120,.9)"; c.beginPath(); c.moveTo(x - 1.3 * s, y); c.quadraticCurveTo(x - 1.4 * s, y - hh * 0.35, x + sw * 0.6, y - hh * 0.62); c.quadraticCurveTo(x + 1.4 * s, y - hh * 0.35, x + 1.3 * s, y); c.fill();
+  }
+  const mid0 = Z.drawMidLife;
+  Z.drawMidLife = function (c, cam, t) {
+    if (mid0) mid0.apply(this, arguments);
+    if (lvl() < 2 || !Z.level || off()) return;
+    const list = Z.raumStuecke(); if (!list.length) return;
+    c.save();
+    for (const p of list) {
+      if (!LIVE[p.kind] || !vis(p, cam, 30)) continue;
+      const x = p.x * T, y = p.y * T, w = p.w * T, h = p.h * T, ph = hash(p.x, p.y) * 9, bot = y + h;
+      switch (p.kind) {
+        case "kamin": case "chimney": {
+          const cx = x + w / 2; c.globalCompositeOperation = "lighter";
+          for (let k = 0; k < 4; k++) flame(c, cx - 6 + k * 4, bot - 2.5, p.kind === "kamin" ? 0.9 + (k % 2) * 0.35 : 0.7, t, ph + k * 1.9);
+          /* Funken steigen in den Abzug */
+          c.fillStyle = "rgba(255,190,100,.9)";
+          for (let k = 0; k < 5; k++) { const u = (t * (0.5 + hash(k, p.x) * 0.4) + hash(p.y, k)) % 1, sx = cx + (hash(k, p.y) - 0.5) * 12 + Math.sin(t * 3 + k) * 2, sy = bot - 6 - u * (p.kind === "kamin" ? 34 : 26); c.globalAlpha = (1 - u) * 0.9; c.fillRect(sx, sy, 0.9, 0.9); }
+          c.globalAlpha = 1; c.globalCompositeOperation = "source-over"; break;
+        }
+        case "glasfenster": {
+          /* Staub tanzt im farbigen Lichtstrahl */
+          const fx = x + 8, fw = w - 16, b = y + h - 9; c.globalCompositeOperation = "lighter";
+          for (let k = 0; k < 9; k++) { const u = (t * 0.03 * (1 + hash(k, 3)) + hash(k, p.x)) % 1, v = hash(p.y, k), sx = fx + v * fw + u * 18 + Math.sin(t * 0.7 + k) * 2, sy = b + 6 + u * 34; c.globalAlpha = 0.5 * Math.sin(u * Math.PI); c.fillStyle = k % 3 ? "#ffe0b0" : "#ffb090"; c.fillRect(sx, sy, 0.8, 0.8); }
+          c.globalAlpha = 1; c.globalCompositeOperation = "source-over"; break;
+        }
+        case "altarbild": { c.globalCompositeOperation = "lighter"; for (const kx of [x + 7, x + w - 7]) flame(c, kx, bot - 10.5, 0.35, t, ph + kx); c.globalCompositeOperation = "source-over"; break; }
+        case "runenstein": { /* ein Runenzeichen leuchtet auf, wandert langsam nach unten */ const k = Math.floor(t * 0.5 + ph) % 5, a = Math.sin(((t * 0.5 + ph) % 1) * Math.PI); c.globalCompositeOperation = "lighter"; c.globalAlpha = 0.5 * a; c.fillStyle = "#e8c8ff"; c.fillRect(x + w / 2 - 4, y + 14 + k * 9 - 4, 8, 9); c.globalAlpha = 1; c.globalCompositeOperation = "source-over"; break; }
+        case "kupfer": { /* ab und zu blitzt ein Topf im Licht */ const u = (t * 0.25 + ph) % 1; if (u < 0.08) { const k = Math.floor(t * 0.25 + ph) % 5, sx = x + 8 + k * (w - 16) / 4 - 2, sy = y + 18 + (k % 2) * 3, a = Math.sin(u / 0.08 * Math.PI); c.globalCompositeOperation = "lighter"; c.strokeStyle = "rgba(255,230,180," + (0.9 * a).toFixed(2) + ")"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(sx - 3 * a, sy); c.lineTo(sx + 3 * a, sy); c.moveTo(sx, sy - 3 * a); c.lineTo(sx, sy + 3 * a); c.stroke(); c.globalCompositeOperation = "source-over"; } break; }
+        case "gussform": { /* Hitzeflimmern über dem Barren */ const mx = x + w - 26, tb = bot - 14; c.strokeStyle = "rgba(255,200,150,.12)"; c.lineWidth = 0.6; for (let k = 0; k < 3; k++) { c.beginPath(); for (let j = 0; j <= 6; j++) { const yy = tb - 4 - j * 3, xx = mx - 4 + k * 4 + Math.sin(t * 4 + j + k) * 1.2; j ? c.lineTo(xx, yy) : c.moveTo(xx, yy); } c.stroke(); } break; }
+      }
+    }
     c.restore();
   };
 })();

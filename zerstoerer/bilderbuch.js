@@ -1896,6 +1896,18 @@
       const off = (t * 70) % f.P; for (let y = f.y - f.P + off; y < f.y + f.h; y += f.P) { if (y + f.P < Y0 || y > Y1) continue; c.drawImage(f.tex, f.x, y, f.w, f.P); }
       c.restore();
       if (rich) for (let k = 0; k < 6; k++) { const u = frac(t * 0.6 + k / 6), px = f.x + f.w / 2 + (hsh(k) - 0.5) * f.w * 2 * u; glow(c, px, f.y + f.h - u * 8, 4 + u * 10, f.lava ? "#ffb050" : "#e0f0e0", 0.35 * (1 - u), true); }
+      if (rich && !f.lava) {
+        /* Gischt (Runde 6): Sprühtropfen in Bögen, Schaumkranz, Nebelschleier und Ringwellen am Fuß des Falls */
+        const bx = f.x + f.w / 2, by = f.y + f.h, gco = c.globalCompositeOperation;
+        c.globalCompositeOperation = "source-over";
+        for (let k = 0; k < 3; k++) { const u = frac(t * 0.35 + k / 3); c.globalAlpha = 0.35 * (1 - u); c.strokeStyle = "#d8ecd8"; c.lineWidth = 0.6; c.beginPath(); c.ellipse(bx, by + 1, f.w * (0.6 + u * 1.8), 1 + u * 2.2, 0, 0, TAU); c.stroke(); }
+        c.globalAlpha = 0.5; c.fillStyle = "#e8f4e4"; for (let k = 0; k < 9; k++) { const h0 = hsh(k * 13 + 7), w2 = f.w * (0.3 + h0 * 0.5); c.beginPath(); c.ellipse(bx + (h0 - 0.5) * f.w * 1.2 + Math.sin(t * 3 + k) * 1.2, by - 1 - hsh(k) * 2, w2 * 0.5, 1.4 + hsh(k + 3) * 1.2, 0, 0, TAU); c.fill(); }
+        for (let k = 0; k < 14; k++) { const h0 = hsh(k * 31 + 3), u = frac(t * (0.9 + h0 * 0.6) + h0), dir = h0 < 0.5 ? -1 : 1, vx = dir * (8 + hsh(k + 50) * 18), vy = 20 + hsh(k + 70) * 18;
+          const px = bx + dir * f.w * 0.3 + vx * u, py = by - 2 - vy * u + 40 * u * u; c.globalAlpha = 0.7 * (1 - u); c.fillRect(px, py, 1, 1); }
+        c.globalAlpha = 1; c.globalCompositeOperation = "lighter";
+        for (let k = 0; k < 3; k++) { const u = frac(t * 0.12 + k / 3); glow(c, bx + Math.sin(t * 0.3 + k * 2) * f.w, by - 6 - u * 26, f.w * (1.2 + u * 1.5), "#d8ecd8", 0.16 * Math.sin(u * PI), true); }
+        c.globalCompositeOperation = gco;
+      }
       c.globalAlpha = 1;
     }
     c.globalCompositeOperation = "lighter";

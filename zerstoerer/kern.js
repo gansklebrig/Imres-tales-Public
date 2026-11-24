@@ -397,10 +397,16 @@
   };
   FX.ring = (x, y, r, col, life, w) => FX.rings.push({ x, y, r0: 2, r, col, t: 0, life: life || 0.35, w: w || 2 });
   FX.smear = o => { o.t = 0; FX.smears.push(o); }; /* Sichelförmige Schlagspur */
+  /* Bildschirmwackeln: Rohwert sammeln, die Stärke-Einstellung (Z.shakeK) wirkt zentral in FX.update */
   FX.addShake = (v, cap) => { FX.shake = Math.min(Math.max(FX.shake, v), cap || 10); };
-  FX.stop = (t) => { FX.hitstop = Math.max(FX.hitstop, t); };
-  FX.flashScreen = (col, a) => { FX.flashCol = col; FX.flash = Math.max(FX.flash, a); };
-  FX.slowmo = (f, t) => { FX.slow = f; FX.slowT = t; };
+  /* Trefferstopp, Bildschirmblitz und Zeitlupe laufen durch die Komfort-Faktoren (Einstellungen → Komfort & Barrierefreiheit) */
+  FX.stop = (t) => { t = (+t || 0) * Z.slowK(); if (t > 0.004) FX.hitstop = Math.max(FX.hitstop, t); };
+  FX.flashScreen = (col, a) => { a = (+a || 0) * Z.flashK(); if (a < 0.01) return; FX.flashCol = col; FX.flash = Math.max(FX.flash, a); };
+  FX.slowmo = (f, t) => {
+    const k = Z.slowK(); if (k <= 0) return;
+    if (k < 1) { f = 1 - (1 - f) * k; t = t * (0.5 + 0.5 * k); }
+    FX.slow = f; FX.slowT = t;
+  };
   FX.update = dt => {
     for (let i = FX.parts.length - 1; i >= 0; i--) {
       const p = FX.parts[i]; p.t += dt;
@@ -413,7 +419,7 @@
     for (let i = FX.rings.length - 1; i >= 0; i--) { const r = FX.rings[i]; r.t += dt; if (r.t > r.life) FX.rings.splice(i, 1); }
     for (let i = FX.smears.length - 1; i >= 0; i--) { const s = FX.smears[i]; s.t += dt; if (s.t > s.life) FX.smears.splice(i, 1); }
     FX.shake = Math.max(0, FX.shake - dt * 38);
-    const sh = FX.shake * (Z.settings ? Z.settings.shake : 1);
+    const sh = FX.shake * Z.shakeK();
     FX.shakeX = (Math.random() - 0.5) * sh; FX.shakeY = (Math.random() - 0.5) * sh;
     FX.flash = Math.max(0, FX.flash - dt * 3);
     if (FX.slowT > 0) { FX.slowT -= dt; if (FX.slowT <= 0) FX.slow = 0; }
@@ -498,7 +504,9 @@
   };
 
   /* ---------------- Einstellungen ---------------- */
-  Z.settings = { shake: 1, lang: "de", touchSize: 1, showDmg: true, flashes: true, autoAim: true, fps: false };
+  Z.settings = { shake: 1, lang: "de", touchSize: 1, showDmg: true, flashes: true, autoAim: true, fps: false,
+    blitze: "voll", zeitlupe: "voll", kontrast: false, gnade: false, schnellstart: false };
+  const hadStore = (() => { try { const v = JSON.parse(localStorage.getItem("imres-zerstoerer-einst") || "{}"); return v && typeof v === "object" ? v : {}; } catch (_) { return {}; } })();
   try { const v = JSON.parse(localStorage.getItem("imres-zerstoerer-einst") || "{}"); if (v && typeof v === "object" && !Array.isArray(v)) Object.assign(Z.settings, v); } catch (_) {}
   /* Werte prüfen: kaputter oder alter Speicher darf das Spiel nicht lahmlegen */
   {
@@ -507,8 +515,36 @@
     if (S.lang !== "de" && S.lang !== "en") S.lang = "de";
     for (const k of ["showDmg", "flashes", "autoAim"]) if (typeof S[k] !== "boolean") S[k] = true;
     if (typeof S.fps !== "boolean") S.fps = false;
+    /* Komfort & Barrierefreiheit: alte Speicherstände (nur „flashes“ an/aus) übernehmen */
+    if (hadStore.blitze === undefined && hadStore.flashes === false) S.blitze = "aus";
+    if (!["voll", "sanft", "aus"].includes(S.blitze)) S.blitze = "voll";
+    if (!["voll", "sanft", "aus"].includes(S.zeitlupe)) S.zeitlupe = "voll";
+    for (const k of ["kontrast", "gnade", "schnellstart"]) if (typeof S[k] !== "boolean") S[k] = false;
+    S.flashes = S.blitze !== "aus";
   }
   try { const s = localStorage.getItem("imres-lang"); if (!localStorage.getItem("imres-zerstoerer-einst") && (s === "de" || s === "en")) Z.settings.lang = s; } catch (_) {}
-  Z.saveSettings = () => { try { localStorage.setItem("imres-zerstoerer-einst", JSON.stringify(Z.settings)); } catch (_) {} };
+  Z.saveSettings = () => { try { Z.settings.flashes = Z.settings.blitze !== "aus"; localStorage.setItem("imres-zerstoerer-einst", JSON.stringify(Z.settings)); } catch (_) {} };
+
+  /* ---------------- Komfort & Barrierefreiheit: zentrale Faktoren ----------------
+     Jede Stelle, die wackelt, blitzt oder die Zeit anhält, fragt hier nach – nie die Einstellung direkt.
+     Z.shakeK()        Bildschirmwackeln 0…1 (Regler 0–100 %)
+     Z.flashK()        Vollbild-/Trefferblitze: voll 1 · gedämpft 0,3 · aus 0
+     Z.flashK("licht") örtliche Lichtblitze (Treffer, Gewitter, Explosionen): voll 1 · gedämpft 0,5 · aus 0,2 (Licht bleibt lesbar, blitzt nicht)
+     Z.slowK()         Zeitlupe & Trefferstopp: voll 1 · sanft 0,5 · aus 0
+     Z.dangerHi()      Kontrastmodus für Gefahren (kräftige Umrisse + Warnschraffur)
+     Z.mercy()         Hilfsmodus „Barmherzigkeit“ aktiv */
+  Z.shakeK = () => { const v = Z.settings && Z.settings.shake; return typeof v === "number" && isFinite(v) ? Math.max(0, Math.min(1, v)) : 1; };
+  Z.flashK = kind => { const m = Z.settings ? Z.settings.blitze || (Z.settings.flashes === false ? "aus" : "voll") : "voll"; if (kind === "licht") return m === "aus" ? 0.2 : m === "sanft" ? 0.5 : 1; return m === "aus" ? 0 : m === "sanft" ? 0.3 : 1; };
+  Z.slowK = () => { const m = Z.settings && Z.settings.zeitlupe; return m === "aus" ? 0 : m === "sanft" ? 0.5 : 1; };
+  Z.dangerHi = () => !!(Z.settings && Z.settings.kontrast);
+  Z.mercy = () => !!(Z.settings && Z.settings.gnade);
+  /* Lichtblitze (bild.js setzt Z.flashLight beim Gewitter, Z.lightFlash für Treffer-/Explosionslicht) werden beim Setzen gedämpft –
+     so braucht keine Zeichenstelle eigene Abfragen. Abklingen (kleinere Werte) geht unverändert durch. */
+  {
+    let fl = 0, lf = null, lfRaw = null;
+    Object.defineProperty(Z, "flashLight", { configurable: true, enumerable: true, get: () => fl, set: v => { v = +v || 0; fl = v > fl ? fl + (v - fl) * Z.flashK("licht") : v; } });
+    Object.defineProperty(Z, "lightFlash", { configurable: true, enumerable: true, get: () => lf,
+      set: fn => { lfRaw = fn; lf = typeof fn === "function" ? function (x, y, r, col, a, life) { return lfRaw.call(this, x, y, r, col, (a == null ? 0.7 : a) * Z.flashK("licht"), life); } : fn; } });
+  }
   inp.vib = Z.settings.vib !== false;
 })();

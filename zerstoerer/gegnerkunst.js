@@ -132,7 +132,7 @@
       /* W8: misstrauisch – kleines „?“ über dem Kopf (hat etwas gehört/gesehen, sucht) */
       if (e.sus > 0 && !e.aware && !e.sleep && !e.disguise && !(e.hidden > 0)) qBubble(c, cx + (e.face || 1) * e.w * 0.3, e.y - 3, e.qPop || 0, e.sus);
       /* W10: Kriegstakt (Trommler) – kleine Glutnoten steigen auf; Laternenlicht */
-      if (e.rageT > 0 && !e.disguise) { const ph = (t * 1.4 + e.anim * 0.3) % 1; c.globalAlpha = Math.min(1, e.rageT) * (1 - ph) * 0.8; c.fillStyle = "#ffb060"; c.font = "700 7px 'Alegreya Sans',sans-serif"; c.textAlign = "center"; c.fillText("♪", cx + Math.sin(ph * 6 + e.anim) * e.w * 0.5, e.y - 2 - ph * 12); c.globalAlpha = 1; }
+      if (e.rageT > 0 && !e.disguise) { const ph = (t * 1.4 + e.anim * 0.3) % 1; c.globalAlpha = Math.min(1, e.rageT) * (1 - ph) * 0.8; c.drawImage(noteSpr(), cx + Math.sin(ph * 6 + e.anim) * e.w * 0.5 - 3, e.y - 9 - ph * 12, 6, 8); c.globalAlpha = 1; } /* Handheld: Note als fertiges Bildchen statt Schrift je Gegner und Bild */
       if (e.def.lantern && !(e.hidden > 0)) lanternPool(c, e, t);
       if (!e.elite || e.disguise) continue;
       c.save(); c.globalCompositeOperation = "lighter";
@@ -164,12 +164,20 @@
   };
   const load0 = Z.loadArea;
   Z.loadArea = function () { bombs = []; if (Z.webStrips) Z.webStrips.length = 0; if (Z.player) Z.player.rustT = 0; return load0.apply(this, arguments); };
+  let noteCv = null;
+  function noteSpr() {
+    if (noteCv) return noteCv;
+    noteCv = document.createElement("canvas"); noteCv.width = 24; noteCv.height = 32; const g = noteCv.getContext("2d");
+    g.fillStyle = "#ffb060"; g.beginPath(); g.ellipse(8, 25, 6, 4.5, -0.4, 0, Math.PI * 2); g.fill(); g.fillRect(12, 4, 3, 21); g.beginPath(); g.moveTo(12, 4); g.quadraticCurveTo(22, 8, 20, 16); g.quadraticCurveTo(19, 10, 14, 10); g.fill();
+    return noteCv;
+  }
   /* Lichtkreis einer Laterne (Handheld: ein vorgefertigter Lichtfleck statt Verlauf je Bild) */
   let poolSpr = null;
   function lanternPool(c, e, t) {
     if (!poolSpr) { poolSpr = document.createElement("canvas"); poolSpr.width = poolSpr.height = 64; const g = poolSpr.getContext("2d"), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, "rgba(255,205,120,.32)"); gr.addColorStop(0.6, "rgba(255,180,90,.12)"); gr.addColorStop(1, "rgba(255,170,80,0)"); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); }
     const r = (e.flareT > 0 ? 110 : 60) * (0.96 + 0.04 * Math.sin(t * 9 + e.anim)), x = e.x + e.w / 2 + e.face * 8, y = e.y + e.h * 0.35;
     if (Z.addLight) Z.addLight(x, y, r * 1.4, "#ffd8a0", e.flareT > 0 ? 0.6 : 0.42); /* echtes Licht gegen die Dunkelheit */
+    if (Z.addLight && Z.gq && Z.gq.lean) return; /* Stufe 0: das Licht reicht, kein zusätzlicher Lichtfleck */
     c.save(); c.globalCompositeOperation = "lighter"; c.drawImage(poolSpr, x - r, y - r, r * 2, r * 2); c.restore();
   }
 })();

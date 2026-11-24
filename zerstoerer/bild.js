@@ -1397,6 +1397,7 @@
     const x0 = Math.max(0, Math.floor(cam.x / T) - 3), x1 = Math.min(lv.W - 1, Math.ceil((cam.x + cam.w) / T) + 3);
     const y0 = Math.max(0, Math.floor(cam.y / T) - 3), y1 = Math.min(lv.H - 1, Math.ceil((cam.y + cam.h) / T) + 3);
     const LA = G.lava; let ln = 0, run = -1;
+    const wRich = lq() >= 2 && !(Z.gq && Z.gq.lean) && !(G.off && G.off.wasser);
     for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
       const v = lv.get(x, y); if (v !== 5 && v !== 6) { run = -1; continue; }
       const px = x * T, py = y * T, top = lv.get(x, y - 1) !== v;
@@ -1408,8 +1409,31 @@
         /* Verlauf einmal anlegen und verschieben statt je Kachel und Bild neu */
         c.save(); c.translate(0, py); c.fillStyle = G.lavaG; c.fillRect(px, top ? 4 + Math.sin(t * 3 + x) * 1.2 : 0, T, T); c.restore();
         if (top) { c.fillStyle = "#ffe0a0"; c.fillRect(px, py + 4 + Math.sin(t * 3 + x) * 1.2, T, 1); if (Math.random() < 0.02) FX.p({ x: px + Math.random() * T, y: py + 4, vx: 0, vy: -60 - Math.random() * 40, g: 200, life: 0.6, size: 1.6, col: "#ffb040", kind: "spark", add: true }); }
+      } else if (wRich) {
+        /* Wasser (ab Stufe 2): durchgehende sanfte Wellen über Kachelgrenzen, Tiefe dunkelt ab, Lichtflirren und
+           Spiegelungen auf der Oberfläche, Lichtbänder darunter. Farbe grün-türkis, nie Blau. */
+        const lake = B.bg === "lake";
+        if (top) {
+          const wy = xw => py + 5 + Math.sin(t * 1.9 + xw * 0.045) * 1.1 + Math.sin(t * 1.3 - xw * 0.11) * 0.55;
+          const y0w = wy(px), y1w = wy(px + 4), y2w = wy(px + 8), y3w = wy(px + 12), y4w = wy(px + T);
+          c.fillStyle = lake ? "rgba(18,48,38,.86)" : "rgba(26,44,40,.82)";
+          c.beginPath(); c.moveTo(px, y0w); c.lineTo(px + 4, y1w); c.lineTo(px + 8, y2w); c.lineTo(px + 12, y3w); c.lineTo(px + T, y4w); c.lineTo(px + T, py + T); c.lineTo(px, py + T); c.closePath(); c.fill();
+          /* Lichtband knapp unter der Oberfläche */
+          c.fillStyle = lake ? "rgba(150,220,180,.08)" : "rgba(220,220,180,.07)"; c.fillRect(px, y2w + 3 + Math.sin(t * 1.1 + x) * 1.2, T, 2.2);
+          /* Schaumkante */
+          c.strokeStyle = lake ? "rgba(200,236,214,.42)" : "rgba(226,232,214,.4)"; c.lineWidth = 0.9; c.beginPath(); c.moveTo(px, y0w); c.lineTo(px + 4, y1w); c.lineTo(px + 8, y2w); c.lineTo(px + 12, y3w); c.lineTo(px + T, y4w); c.stroke();
+          /* Glitzer: kurze helle Striche, die auf den Wellen kommen und gehen */
+          for (let k = 0; k < 2; k++) { const h0 = hash(x * 3 + k, y), a = Math.sin(t * (2.2 + h0) + h0 * 40); if (a < 0.35) continue; const gx = px + ((h0 * 13 + t * (k ? 3 : -2)) % 14 + 14) % 14, gyy = wy(gx) + 1.5 + k * 2.2; c.fillStyle = lake ? "rgba(214,250,226," + ((a - 0.35) * 0.9).toFixed(2) + ")" : "rgba(255,238,200," + ((a - 0.35) * 0.9).toFixed(2) + ")"; c.fillRect(gx, gyy, 2 + h0 * 3, 0.7); }
+          if (Math.random() < 0.01) FX.p({ x: px + Math.random() * T, y: y2w, vx: 0, vy: -10, life: 0.8, size: 1.5, col: "#c0e0d0", kind: "bubble" });
+        } else {
+          let d = 1; while (d < 4 && lv.get(x, y - d) === v) d++;
+          c.fillStyle = lake ? "rgba(18,48,38,.86)" : "rgba(26,44,40,.82)"; c.fillRect(px, py, T, T);
+          c.fillStyle = "rgba(0,0,0," + (0.08 * d).toFixed(2) + ")"; c.fillRect(px, py, T, T);
+          /* schwache Lichtbänder (Kaustik) in der Tiefe */
+          if (d < 3) { const cy = py + 6 + Math.sin(t * 0.9 + x * 0.6 + y) * 4; c.fillStyle = lake ? "rgba(150,220,180,.05)" : "rgba(220,220,180,.045)"; c.fillRect(px, cy, T, 1.4); }
+        }
       } else {
-        c.fillStyle = B.hazard === "water" && B.bg === "lake" ? "rgba(20,50,40,.85)" : "rgba(30,40,50,.8)"; const ty = top ? 5 + Math.sin(t * 2 + x * 0.7) * 1.2 : 0;
+        c.fillStyle = B.hazard === "water" && B.bg === "lake" ? "rgba(20,50,40,.85)" : "rgba(26,44,40,.8)"; const ty = top ? 5 + Math.sin(t * 2 + x * 0.7) * 1.2 : 0;
         c.fillRect(px, py + ty, T, T - ty);
         if (top) { c.fillStyle = "rgba(200,230,210,.35)"; c.fillRect(px, py + ty, T, 1); if (Math.random() < 0.01) FX.p({ x: px + Math.random() * T, y: py + ty, vx: 0, vy: -10, life: 0.8, size: 1.5, col: "#c0e0d0", kind: "bubble" }); }
       }
@@ -1556,6 +1580,7 @@
         case "painting": if (G.isOpen(d.x, d.y)) break; c.fillStyle = "#6a4a1a"; c.fillRect(px - 9, py - 30, 18, 14); c.fillStyle = shade(B.wall, -0.4); c.fillRect(px - 7.5, py - 28.5, 15, 11); D.circ(c, px, py - 24, 3, "#3a2a2a"); c.fillStyle = "#7a1a1a"; c.fillRect(px - 3, py - 21, 6, 3); break;
         case "window": { /* kleines Spitzbogenfenster mit Steinrahmen, Sprossen und Fensterbank */
           if (G.isOpen(d.x, d.y)) break;
+          if (vistaOn()) { drawVistaWindow(c, d, px, py, t); break; }
           const y = py - 30, st0 = PAL ? PAL.stone : shade(B.wall, 0.1), sth = PAL ? PAL.stoneHi : shade(B.wall, 0.3);
           c.fillStyle = st0; c.beginPath(); c.moveTo(px - 7.5, y + 19); c.lineTo(px - 7.5, y + 4); c.quadraticCurveTo(px, y - 5.5, px + 7.5, y + 4); c.lineTo(px + 7.5, y + 19); c.fill();
           c.fillStyle = shade(B.wall, -0.55); c.beginPath(); c.moveTo(px - 5.5, y + 18); c.lineTo(px - 5.5, y + 4.5); c.quadraticCurveTo(px, y - 2.5, px + 5.5, y + 4.5); c.lineTo(px + 5.5, y + 18); c.fill();
@@ -1597,6 +1622,85 @@
         case "tent": { const s = d.s || 1; c.fillStyle = "#5a4a3a"; c.beginPath(); c.moveTo(px - 28 * s, py); c.lineTo(px, py - 30 * s); c.lineTo(px + 28 * s, py); c.fill(); c.fillStyle = "#3a2e24"; c.beginPath(); c.moveTo(px - 6 * s, py); c.lineTo(px, py - 20 * s); c.lineTo(px + 6 * s, py); c.fill(); c.strokeStyle = "#7a6a5a"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(px, py - 30 * s); c.lineTo(px, py - 36 * s); c.stroke(); break; }
       }
     }
+  }
+  /* ---------- Fensterausblick (Grafik-Runde 6, ab Stufe 2) ----------
+     Die kleinen Wandfenster werden größer und zeigen einen echten Ausblick: Himmel in den Farben der Stunde, ferne
+     Burgteile mit erleuchteten Fenstern, Hügel im Dunst, Mond oder Sterne, unter Tage eine Höhle mit fernen Lichtern.
+     Davor ziehen Wolkenfetzen, ab und zu kreuzt ein Vogel. Das Bild ist je Gebiet/Stunde/Variante zwischengespeichert,
+     je Bild kommt nur Wolke/Vogel dazu. Kein Blau. */
+  const vistaOn = () => { const q = Z.gq; if (q && q.lean) return false; if (G.off && G.off.ausblick) return false; return lq() >= 2; };
+  const VISTA = new Map(), VW = 18, VH = 27, VS = 4;
+  const UNDER = { chasm: "#d090ff", lake: "#8af0b0", embercity: "#ff8a40" };
+  const hx3 = h => { const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
+  const mixC = (a, b, k) => { const A = hx3(a), Bc = hx3(b); return "rgb(" + Math.round(A[0] + (Bc[0] - A[0]) * k) + "," + Math.round(A[1] + (Bc[1] - A[1]) * k) + "," + Math.round(A[2] + (Bc[2] - A[2]) * k) + ")"; };
+  function vistaSprite(bg, zt, v) {
+    const key = bg + "|" + (zt ? zt.k : "-") + "|" + v; let cv = VISTA.get(key); if (cv) return cv;
+    cv = document.createElement("canvas"); cv.width = VW * VS; cv.height = VH * VS; const g = cv.getContext("2d"), W = cv.width, H = cv.height;
+    let s = (v * 7919 + bg.length * 131) | 0; const R = () => { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; };
+    const under = UNDER[bg];
+    const sky = under ? ["#0a0608", "#1a1014", "#2c1c1c"] : zt ? zt.H.sky : ["#1c1226", "#3e2c44", "#8a5a5a"];
+    const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, sky[0]); gr.addColorStop(0.55, sky[1]); gr.addColorStop(1, sky[2]); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    if (under) {
+      /* Höhle: ferne Felsbögen, Leuchtpunkte, beim See ein heller Wasserfall */
+      for (let k = 0; k < 3; k++) { g.fillStyle = mixC("#2c1c1c", "#000000", 0.3 + k * 0.22); g.beginPath(); const yb = H * (0.45 + k * 0.18); g.moveTo(0, H); g.lineTo(0, yb); for (let x = 0; x <= W; x += W / 6) g.lineTo(x, yb - R() * H * 0.12); g.lineTo(W, H); g.fill(); }
+      g.globalCompositeOperation = "lighter"; for (let k = 0; k < 7; k++) { const x = R() * W, y = H * (0.4 + R() * 0.5), r = 2 + R() * 5; const rg = g.createRadialGradient(x, y, 0, x, y, r * 3); rg.addColorStop(0, under); rg.addColorStop(1, "rgba(0,0,0,0)"); g.globalAlpha = 0.5; g.fillStyle = rg; g.fillRect(x - r * 3, y - r * 3, r * 6, r * 6); } g.globalAlpha = 1;
+      if (bg === "lake") { g.fillStyle = "rgba(200,236,214,.35)"; g.fillRect(W * (0.3 + v * 0.15), 0, W * 0.07, H * 0.8); }
+      g.globalCompositeOperation = "source-over"; return VISTA.set(key, cv), cv;
+    }
+    /* Sterne */
+    const night = !zt || zt.k === "nacht" || zt.k === "blut"; if (night) { g.fillStyle = "rgba(255,246,236,.8)"; for (let k = 0; k < 22; k++) { const r = R() < 0.15 ? 1.6 : 0.9; g.fillRect(R() * W, R() * H * 0.55, r, r); } }
+    /* Mond bzw. tiefe Sonne */
+    if (v === 0 || v === 2) { const mx = W * (0.25 + R() * 0.5), my = H * (0.12 + R() * 0.15), mr = W * 0.11, mc = zt ? zt.light : "#e8e0ec"; const rg = g.createRadialGradient(mx, my, 0, mx, my, mr * 4); rg.addColorStop(0, mc); rg.addColorStop(0.25, "rgba(255,240,220,.25)"); rg.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = rg; g.fillRect(0, 0, W, H); g.fillStyle = mc; g.beginPath(); g.arc(mx, my, mr, 0, Math.PI * 2); g.fill(); }
+    /* Hügel und ferne Burg, nach hinten heller (Luftperspektive) */
+    const far = mixC(sky[2], sky[0], 0.45), mid = mixC(sky[1], "#000000", 0.55), near = mixC(sky[0], "#000000", 0.5), win = zt ? zt.win : "#ffb468";
+    g.fillStyle = far; g.beginPath(); g.moveTo(0, H); g.lineTo(0, H * 0.62); for (let x = 0; x <= W; x += W / 5) g.lineTo(x, H * (0.56 + R() * 0.1)); g.lineTo(W, H); g.fill();
+    if (bg === "harbour") { /* Meer mit Lichtpfad und einem Segel */ g.fillStyle = mixC("#1a2a24", sky[0], 0.4); g.fillRect(0, H * 0.7, W, H * 0.3); g.fillStyle = "rgba(255,230,190,.35)"; for (let k = 0; k < 8; k++) g.fillRect(W * 0.4 + (R() - 0.5) * W * 0.3, H * (0.72 + k * 0.035), 2 + R() * 6, 1); g.fillStyle = mid; g.beginPath(); g.moveTo(W * 0.15, H * 0.7); g.lineTo(W * 0.3, H * 0.52); g.lineTo(W * 0.32, H * 0.7); g.fill(); return VISTA.set(key, cv), cv; }
+    g.fillStyle = mid;
+    const bx = W * (0.15 + R() * 0.3);
+    for (let k = 0; k < 4; k++) { const tw = W * (0.1 + R() * 0.1), tx = bx + k * W * 0.17 + (R() - 0.5) * 4, th = H * (0.18 + R() * 0.2), ty = H * 0.64 - th; g.fillRect(tx, ty, tw, th + H * 0.1); g.beginPath(); if (R() < 0.6) { g.moveTo(tx - 1, ty); g.lineTo(tx + tw / 2, ty - tw * 1.2); g.lineTo(tx + tw + 1, ty); } else { for (let j = 0; j < 3; j++) g.rect(tx + j * tw / 2.5, ty - 2.5, tw / 5, 2.5); } g.fill();
+      g.fillStyle = win; for (let j = 0; j < 3; j++) if (R() < (zt ? zt.lit + 0.2 : 0.5)) g.fillRect(tx + tw * (0.3 + R() * 0.3), ty + th * (0.2 + j * 0.25), 1.6, 2.4); g.fillStyle = mid; }
+    g.fillRect(bx - 4, H * 0.62, W * 0.7, H * 0.06);
+    const hz = g.createLinearGradient(0, H * 0.5, 0, H * 0.8); hz.addColorStop(0, "rgba(0,0,0,0)"); hz.addColorStop(1, sky[2]); g.globalAlpha = 0.35; g.fillStyle = hz; g.fillRect(0, H * 0.5, W, H * 0.3); g.globalAlpha = 1;
+    g.fillStyle = near; g.beginPath(); g.moveTo(0, H); g.lineTo(0, H * 0.8); for (let x = 0; x <= W; x += W / 4) g.lineTo(x, H * (0.76 + R() * 0.08)); g.lineTo(W, H); g.fill();
+    if (bg === "castle" || bg === "ramparts" || bg === "camp" || bg === "storm") { g.fillStyle = mixC(sky[0], "#0a140a", 0.6); for (let k = 0; k < 5; k++) { const x = R() * W, y = H * (0.8 + R() * 0.05), r = W * (0.06 + R() * 0.05); g.beginPath(); g.arc(x, y, r, Math.PI, 0); g.fill(); } }
+    VISTA.set(key, cv); return cv;
+  }
+  const archPath = (c, x0, x1, yTop, yArc, yB) => { c.beginPath(); c.moveTo(x0, yB); c.lineTo(x0, yArc); c.quadraticCurveTo((x0 + x1) / 2, yTop, x1, yArc); c.lineTo(x1, yB); c.closePath(); };
+  function drawVistaWindow(c, d, px, py, t) {
+    const y = py - 30, st0 = PAL ? PAL.stone : shade(B.wall, 0.1), sth = PAL ? PAL.stoneHi : shade(B.wall, 0.3), zt = Z.zeit ? Z.zeit() : null, v = (hash(d.x, d.y) * 3) | 0;
+    /* Laibung (Schatten), Rahmen */
+    c.fillStyle = "rgba(0,0,0,.35)"; archPath(c, px - 10.5, px + 12.5, y - 13, y + 1.5, y + 21); c.fill();
+    c.fillStyle = st0; archPath(c, px - 11, px + 11, y - 14, y + 1, y + 19); c.fill();
+    /* Ausblick */
+    const gx0 = px - 8.6, gx1 = px + 8.6, gT = y - 8.5, gB = y + 17.6;
+    c.save(); archPath(c, gx0, gx1, gT - 2.6, y + 2.2, gB); c.clip();
+    c.drawImage(vistaSprite(B.bg, zt, v), gx0, gT - 1.4, gx1 - gx0, gB - gT + 1.4);
+    const under = UNDER[B.bg], hv = hash(d.y, d.x);
+    if (!under) {
+      /* Wolkenfetzen ziehen vorbei */
+      const cc = zt ? zt.H.sky[2] : "#c8a8a0";
+      for (let k = 0; k < 2; k++) { const u = ((t * (1.1 + k * 0.6) + hv * 40 + k * 13) % 34) - 8; c.globalAlpha = 0.22; c.fillStyle = cc; c.beginPath(); c.ellipse(gx0 + u, gT + 4 + k * 5 + hv * 3, 4 + k * 2, 1.1, 0, 0, Math.PI * 2); c.ellipse(gx0 + u + 3, gT + 3.4 + k * 5 + hv * 3, 2.6, 1, 0, 0, Math.PI * 2); c.fill(); }
+      c.globalAlpha = 1;
+      /* ab und zu ein Vogel */
+      const per = 9 + hv * 8, u = ((t + hv * 50) % per) / per;
+      if (u < 0.3) { const bx = gx0 - 2 + (u / 0.3) * 22, by = gT + 7 + Math.sin(u * 30) * 0.8 + hv * 4, fl = Math.sin(t * 14) * 0.9; c.strokeStyle = "rgba(20,12,10,.8)"; c.lineWidth = 0.5; c.beginPath(); c.moveTo(bx - 1.6, by - fl); c.lineTo(bx, by); c.lineTo(bx + 1.6, by - fl); c.stroke(); }
+    } else { /* unter Tage: ein ferner Funke steigt */ const u = ((t * 0.2 + hv) % 1); c.fillStyle = under; c.globalAlpha = 0.6 * Math.sin(u * Math.PI); c.fillRect(gx0 + 4 + hv * 9, gB - u * (gB - gT), 0.8, 0.8); c.globalAlpha = 1; }
+    /* Rautenblei im Bogenfeld */
+    c.strokeStyle = shade(B.wall, -0.6); c.lineWidth = 0.4; c.beginPath(); for (let k = -3; k <= 3; k++) { c.moveTo(px + k * 3.4, gT - 3); c.lineTo(px + k * 3.4 + 5, y + 2); c.moveTo(px + k * 3.4, gT - 3); c.lineTo(px + k * 3.4 - 5, y + 2); } c.stroke();
+    /* Glas: leichter Schimmer und Spiegelung */
+    c.fillStyle = "rgba(255,240,220,.07)"; c.fillRect(gx0, gT - 3, 3, gB - gT + 3);
+    c.restore();
+    /* Sprossen: Mittelpfosten, Querriegel, Rautenblei im Bogen */
+    const mull = shade(B.wall, -0.6);
+    c.fillStyle = mull; c.fillRect(px - 0.6, gT - 2, 1.2, gB - gT + 2); c.fillRect(gx0, y + 7, gx1 - gx0, 1.1);
+    c.fillStyle = sth; c.fillRect(px - 11, y + 1, 0.8, 18);
+    /* Bogensteine */
+    c.strokeStyle = "rgba(0,0,0,.3)"; c.lineWidth = 0.5; c.beginPath(); for (let k = 1; k < 6; k++) { const a = Math.PI + k / 6 * Math.PI, rx = 11, ry = 15; c.moveTo(px + Math.cos(a) * rx * 0.78, y + 1 + Math.sin(a) * ry * 0.62); c.lineTo(px + Math.cos(a) * rx, y + 1 + Math.sin(a) * ry * 0.95); } c.stroke();
+    /* Fensterbank */
+    c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(px - 13, y + 21, 26, 2); c.fillStyle = st0; c.fillRect(px - 13, y + 18.5, 26, 2.8); c.fillStyle = sth; c.fillRect(px - 13, y + 18.5, 26, 0.7);
+    if (hv < 0.3 && !UNDER[B.bg]) { /* Blumentopf oder Kerze auf der Bank */ if (hv < 0.15) { c.fillStyle = "#8a4a2a"; c.fillRect(px + 6, y + 15, 4, 3.5); c.fillStyle = "#4a6a2a"; c.beginPath(); c.arc(px + 8, y + 14, 2.4, 0, Math.PI * 2); c.fill(); c.fillStyle = "#d8607a"; c.fillRect(px + 7, y + 12.5, 1.2, 1.2); } else { c.fillStyle = "#e8dcc0"; c.fillRect(px - 9, y + 13.5, 1.6, 5); } }
+    /* Lichtbahn in den Raum, in der Farbe der Stunde */
+    c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = 0.07; c.fillStyle = zt && !UNDER[B.bg] ? zt.win : "#f0dcc8"; c.beginPath(); c.moveTo(px - 8, y); c.lineTo(px + 8, y); c.lineTo(px + 40, y + 70); c.lineTo(px + 16, y + 70); c.fill(); c.restore();
   }
   /* Flamme: Hof, äußere Zunge, Kern und weißer Docht – alles additiv */
   /* frei sichtbarer Hintergrund (Himmel, Fenster, Arena): dort gibt es keine Wand für Wandschmuck */
