@@ -287,7 +287,7 @@
     e.dmgMul = DMG * (d.dmg || 1) * Z.BAL.enemyDmg(tier) * Z.BAL.skullDmg(run.skulls || 0);
     if (o.elite) {
       e.elite = Z.R.pick(Object.keys(ELITE));
-      hp *= 4.6 /* W9: 3,4 → 3,8 (Elites fielen in 0,4–7 s); 3. Runde → 4,2 (K6: 1–6 s); 4. Runde → 4,6 (K7: 0,6–6,6 s) */; e.dmgMul *= 1.3; e.size *= 1.18; e.w = Math.round(e.w * 1.18); e.h = Math.round(e.h * 1.18); e.x = x - e.w / 2; e.y = y - e.h;
+      hp *= 5.2 /* 5. Runde 4,6 → 5,2 (Ziel 3–10 s) */ /* W9: 3,4 → 3,8 (Elites fielen in 0,4–7 s); 3. Runde → 4,2 (K6: 1–6 s); 4. Runde → 4,6 (K7: 0,6–6,6 s) */; e.dmgMul *= 1.3; e.size *= 1.18; e.w = Math.round(e.w * 1.18); e.h = Math.round(e.h * 1.18); e.x = x - e.w / 2; e.y = y - e.h;
       if (e.elite === "gepanzert") e.armorUp = 0;
     }
     if (d.boss) hp = HP * d.hp * Z.BAL.enemyHp(tier) * Z.BAL.skullHp(run.skulls || 0) * (Z.BAL.bossHp ? Z.BAL.bossHp(tier, id) : 1); /* W6: bossHp aus ausgleich.js */
@@ -327,15 +327,28 @@
       /* Handheld: auch wache Gegner ruhen, wenn sie weit außerhalb des Bildes sind (über 1,5 Bildbreiten) – wie in Dead Cells */
       e._rest = far && !e.def.boss && (!e.aware || (lean && (Math.abs(e.x - P.x) > 760 || Math.abs(e.y - P.y) > 480)));
       if (e._rest) continue;
-      e.anim += dt; e.flash = Math.max(0, e.flash - dt); e.spawnT = Math.max(0, e.spawnT - dt);
-      if (e.invuln > 0) e.invuln -= dt;
-      if (e.broken > 0) { e.broken -= dt; if (e.broken <= 0) e.guard = 0; }
-      if (e.armorUp > 0) e.armorUp -= dt;
-      if (e.hidden > 0) e.hidden -= dt; if (e.pile > 0) e.pile -= dt;
-      Z.statusTick(e, dt, false);
+      /* W9 5. Runde (Handheld-Messung: updateEnemies bis 11 ms bei Gruppen): auf lean werden Gegner außerhalb des Bildes (mit Rand),
+         die nicht kämpfen, nur jedes dritte Bild mit der gesammelten Zeit gerechnet. Im Bild und im Kampf (wach, Angriff, Rückstoß,
+         Status) läuft alles wie bisher jedes Bild. */
+      let edt = dt;
+      if (lean && !e.def.boss && !e.aware && !e.act && !(e.kbT > 0) && !(e.sus > 0) && !e.nmMini) {
+        const cam = Z.cam, ox = e.x + e.w / 2, oy = e.y + e.h / 2;
+        if (cam && (ox < cam.x - 48 || ox > cam.x + cam.w + 48 || oy < cam.y - 48 || oy > cam.y + cam.h + 48)) {
+          e._skipAcc = (e._skipAcc || 0) + dt;
+          if (((e._skipN = (e._skipN || 0) + 1) % 3) !== 0) continue;
+          edt = e._skipAcc; e._skipAcc = 0;
+          if (edt > 0.05) edt = 0.05;
+        } else if (e._skipAcc) { edt += e._skipAcc; e._skipAcc = 0; if (edt > 0.05) edt = 0.05; }
+      }
+      e.anim += edt; e.flash = Math.max(0, e.flash - edt); e.spawnT = Math.max(0, e.spawnT - edt);
+      if (e.invuln > 0) e.invuln -= edt;
+      if (e.broken > 0) { e.broken -= edt; if (e.broken <= 0) e.guard = 0; }
+      if (e.armorUp > 0) e.armorUp -= edt;
+      if (e.hidden > 0) e.hidden -= edt; if (e.pile > 0) e.pile -= edt;
+      Z.statusTick(e, edt, false);
       if (e.dead) continue;
-      if (e.def.boss && e.def.update) { e.def.update(e, dt, P); continue; }
-      think(e, dt, P);
+      if (e.def.boss && e.def.update) { e.def.update(e, edt, P); continue; }
+      think(e, edt, P);
     }
     /* Trennung, damit sich Gegner nicht stapeln */
     for (let i = 0; i < Z.enemies.length; i++) {

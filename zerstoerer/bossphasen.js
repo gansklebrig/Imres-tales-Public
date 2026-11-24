@@ -1247,8 +1247,11 @@
       if (e.warden && e.box && !e.trans) {
         if (s.hpRef == null || e.hp < s.hpRef - 1) { s.hpRef = e.hp; s.pat = 0; } else s.pat = (s.pat || 0) + dt;
         const far = Math.hypot(pcx(P) - cxOf(e), (P.y + P.h) - feet(e)) > 170;
-        if (!far) s.pat = Math.min(s.pat, 6);
-        if (s.pat > 15 && !e.mv && P.onGround) {
+        /* 5. Runde: Spieler auf einem Sims knapp über dem Wächter (Ilvara: 112 px darüber, Durchbruch ohne Platz) – nach 12 s ohne Treffer
+           „durchschaut“ ihn der Wächter: Säulen unter dem Sims treiben ihn herunter (lesbare Vorwarnung wie beim Stillstehen) */
+        if (!far && feet(e) - (P.y + P.h) > 60 && s.pat > 12 && P.onGround) { s.pat = 0; punish(e, P); }
+        if (!far) s.pat = Math.min(s.pat, 12.5);
+        if (s.pat > 15 && (P.onGround || s.pat > 25)) {
           s.pat = 0; const b = e.box, out = pcx(P) < b.x0 - 8 || pcx(P) > b.x1 + 8 || P.y + P.h > b.y1 + 260 || P.y < b.top - 80;
           let ok = false;
           if (!out) { b.top = Math.min(b.top, P.y - 60); b.y1 = Math.max(b.y1, P.y + P.h + 24); ok = breakThrough(e, P); }
