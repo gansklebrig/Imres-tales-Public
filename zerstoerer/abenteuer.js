@@ -100,9 +100,9 @@
   ];
   Z.ACH = ACH;
   const BONUS = { trank: ["+1 Trank zu Beginn jedes Durchgangs", "+1 potion at the start of every run"], riss: ["Ein Riss im Netz öffnet sich nach jedem Endboss", "A rift in the web opens after every final boss"], startwaffe: ["Nundro gibt dir eine zufällige gefundene Waffe mit", "Nundro gives you a random found weapon to start"], leben: ["+10 Leben", "+10 health"], glueck: ["Mehr Raum-Ereignisse", "More room events"] };
-  function rewardText(r) { if (r.cape) return L(["Umhang: ", "Cape: "]) + L(CAPES[r.cape].n); if (r.hero) return L(["Neuer Held: ", "New hero: "]) + L(HEROES[r.hero].n); if (r.bonus) return L(BONUS[r.bonus]); return ""; }
+  function rewardText(r) { if (r.cape) return L(["Umhang: ", "Cape: "]) + L(CAPES[r.cape].n); if (r.hero) return L(["Neuer Held: ", "New hero: "]) + L(HEROES[r.hero].n); if (r.bonus) return L(BONUS[r.bonus]); if (r.titel) return L(["Titel: ", "Title: "]) + "„" + L(r.titel) + "“"; return ""; }
   function grant(a) {
-    const m = M(); if (m.ach[a.id]) return; m.ach[a.id] = Date.now();
+    const m = M(); if (!a || m.ach[a.id]) return; m.ach[a.id] = Date.now();
     if (a.r.cape) m.capes[a.r.cape] = 1; if (a.r.hero) m.heroes[a.r.hero] = 1; if (a.r.bonus) m.bonus[a.r.bonus] = 1;
     Z.saveMeta(); A.play("holy", { vol: 0.6 });
     if (Z.ui && Z.ui.notify) Z.ui.notify("🏆 <b>" + L(["Erfolg: ", "Achievement: "]) + esc(L(a.n)) + "</b><br><small>" + esc(rewardText(a.r)) + "</small>", { prio: 1, art: "sieg", dauer: 3600 }); else Z.toast && Z.toast("🏆 <b>" + esc(L(a.n)) + "</b>", 4200);
@@ -110,6 +110,254 @@
   let achT = 0;
   function achTick(dt) { achT -= dt; if (achT > 0) return; achT = 1; for (const a of ACH) if (!M().ach[a.id]) { let ok = false; try { ok = a.ok(); } catch (_) {} if (ok) { grant(a); break; } } }
   Z.grantAch = id => { const a = ACH.find(x => x.id === id); if (a) grant(a); };
+
+  /* ======================= ERFOLGE II (W13, Nutzerwunsch): Kategorien, Fortschritt, Titel ======================= */
+  /* Kategorien (Reiter in der Erfolge-Ansicht). Alte Erfolge behalten ihre ids und werden nur einsortiert. */
+  const KAT = [
+    { id: "geschichte", i: "📜", n: ["Geschichte", "Story"] }, { id: "tempo", i: "⏱", n: ["Tempo", "Speed"] },
+    { id: "kampf", i: "⚔", n: ["Kampftechnik", "Technique"] }, { id: "makellos", i: "🛡", n: ["Makellos", "Flawless"] },
+    { id: "erkunden", i: "🗺", n: ["Erkundung", "Exploration"] }, { id: "bosse", i: "☠", n: ["Bosse", "Bosses"] },
+    { id: "sammeln", i: "🏕", n: ["Sammeln & Lager", "Collecting & Camp"] }, { id: "spass", i: "🎭", n: ["Kurioses", "Curiosities"] }
+  ];
+  const OLDC = { erstesblut: "kampf", hundert: "kampf", parade: "kampf", ausweichen: "kampf", serie: "kampf", sturz: "kampf", fallen: "kampf", zorn: "kampf", boss: "bosse",
+    gold: "sammeln", sammler: "sammeln", paarung: "sammeln", ohnetrank: "makellos", federleicht: "makellos", runen: "erkunden", tagebuch: "erkunden", spuren: "erkunden",
+    befreier: "erkunden", ereignis: "erkunden", hinterhalt: "erkunden", schleicher: "kampf", wette: "spass" };
+  const n0 = o => Object.keys(o || {}).length;
+  const OLDP = { hundert: () => [S().kills || 0, 100], parade: () => [S().parries || 0, 10], ausweichen: () => [S().dodges || 0, 20], serie: () => [S().bestStreak || 0, 8],
+    sturz: () => [S().dives || 0, 25], fallen: () => [(S().trapKills || 0) + (S().fallKills || 0), 10], gold: () => [S().gold || 0, 1000], sammler: () => [n0(M().found), 20],
+    paarung: () => [n0(M().syn), 5], runen: () => [n0(M().runes), 3], tagebuch: () => [n0(M().tagebuch), 13], spuren: () => [M().spuren || 0, 10], befreier: () => [M().befreit || 0, 3],
+    ereignis: () => [M().events || 0, 5], hinterhalt: () => [S().ambushes || 0, 3], schleicher: () => [M().ueberrascht || 0, 5], zaeh: () => [M().deaths || 0, 10], alle: () => [["tiefe", "glut", "himmel"].filter(k => (M().endings || {})[k]).length, 3] };
+  for (const a of ACH) { a.c = OLDC[a.id] || "geschichte"; if (OLDP[a.id]) a.p = OLDP[a.id]; }
+  /* neue Umhänge (kein Blau) */
+  Object.assign(CAPES, {
+    blitz: { n: ["Eilbote", "Courier"], c: ["#e8c040", "#5a4010"] }, eisen: { n: ["Eisen", "Iron"], c: ["#6a6866", "#262422"] },
+    rubin: { n: ["Rubin", "Ruby"], c: ["#a0102a", "#3a0410"] }, kupfer: { n: ["Kupfer", "Copper"], c: ["#b8683a", "#4a2410"] },
+    nebel: { n: ["Nebel", "Mist"], c: ["#b0aaa0", "#5a5650"] }, asche: { n: ["Asche", "Ash"], c: ["#8a8580", "#3a3634"] },
+    elfenbein: { n: ["Elfenbein", "Ivory"], c: ["#efe6d0", "#a89a80"] }, koenig: { n: ["Königsmantel", "Royal Mantle"], c: ["#7a1020", "#e5b454"] },
+    lava: { n: ["Lava", "Lava"], c: ["#c83a10", "#2a0804"] }, smaragd: { n: ["Smaragd", "Emerald"], c: ["#2a7a4a", "#0e2a1a"] },
+    bernstein: { n: ["Bernstein", "Amber"], c: ["#d8901a", "#5a3008"] }, dorn: { n: ["Dornen", "Thorns"], c: ["#4a6a2a", "#1a2a0e"] },
+    tang: { n: ["Seetang", "Kelp"], c: ["#3a5a3a", "#142014"] }, violett: { n: ["Waffenmeister", "Weaponmaster"], c: ["#6a2a7a", "#24082a"] }
+  });
+  /* dauerhafte Zähler (alte Spielstände: fehlt achZ, wird leer angelegt) */
+  function X() { const m = M(); const x = m.achZ || (m.achZ = {}); x.wk = x.wk || {}; x.mini = x.mini || {}; x.nhB = x.nhB || {}; x.bio = x.bio || {}; return x; }
+  /* Laufzähler: hängen am Lauf-Objekt (neuer Lauf = frischer Zähler) */
+  function RA() {
+    const run = Z.run; if (!run) return null;
+    return run._a || (run._a = { ar: {}, lv: null, dmg: null, dmgRun: 0, par: null, parC: 0, parB: 0, dod: null, dodC: 0, dodB: 0, plT: -9, swRel: -9, swCur: null, swLast: null, swGround: true, swChain: 0,
+      fassC: 0, kran: false, wu: null, mo: null, fight: null, nhAreas: 0, up: 0, dive: 0, bash: 0, konter: 0, surp: 0, gnade: false, end: false });
+  }
+  const gnade = () => !!(Z.run && (Z.run.gnade || (Z.run._a && Z.run._a.gnade)));
+  Z.achRun = RA;
+  const TT = (de, en) => ({ titel: [de, en] });
+  const mk = (c, id, n, d, ok, r, p) => ({ id, c, n, d, ok: ok || (() => false), r: r || {}, p });
+  const runP = (k, max) => () => [(RA() || {})[k] || 0, max];
+  /* Tempo-Grenzen je Gebiet in Sekunden (aus den Bot-Läufen W9: ca. schnellstes Viertel × 1,1 – schwer, aber machbar) */
+  const TEMPO = { torhof: 35, keller: 50, hallen: 50, wehrgang: 40, verlies: 70, hafen: 70, glocken: 80, schlund: 140, schmiede: 140, zinnen: 140, see: 130, glut: 160, sturm: 160 };
+  const WKL = { klinge: ["Klingen", "blades"], stich: ["Stichwaffen", "thrusting weapons"], faust: ["Faustwaffen", "fist weapons"], wucht: ["Wuchtwaffen", "heavy weapons"], sense: ["Sensen", "scythes"],
+    stoss: ["Stoßwaffen", "polearms"], peitsche: ["Peitschen", "whips"], schild: ["Schilde", "shields"], schuss: ["Fernwaffen", "ranged weapons"] };
+  const WKT = { klinge: ["Klingentänzer", "Bladedancer"], stich: ["Nadelstich", "the Needle"], faust: ["Eisenfaust", "Ironfist"], wucht: ["Steinbrecher", "Stonebreaker"], sense: ["Schnitter", "the Reaper"],
+    stoss: ["Pfeiler", "the Pillar"], peitsche: ["Peitschenknall", "Whipcrack"], schild: ["Bollwerk", "the Bulwark"], schuss: ["Adlerauge", "Eagle Eye"] };
+  const WKN = 50;
+  const NEU = [
+    /* Tempo (Gebiete kommen in late() dazu, weil die Namen aus welt.js stammen) */
+    mk("tempo", "t_lauf20", ["Eilbote", "Courier"], ["Ein Ende in unter 20 Minuten erreichen.", "Reach an ending in under 20 minutes."], null, { cape: "blitz" }),
+    mk("tempo", "t_lauf12", ["Darkin-Sturm", "Darkin Storm"], ["Ein Ende in unter 12 Minuten erreichen.", "Reach an ending in under 12 minutes."], null, TT("der Rasende", "the Swift")),
+    mk("tempo", "t_boss", ["Kurzer Prozess", "Short Work"], ["Einen Arena-Boss in unter 45 Sekunden ab Kampfbeginn besiegen.", "Defeat an arena boss within 45 seconds of the fight starting."], null, TT("Kurzer Prozess", "Short Work")),
+    mk("tempo", "t_waechter", ["Wachwechsel", "Changing of the Guard"], ["Einen Wächter in unter 30 Sekunden besiegen.", "Defeat a warden in under 30 seconds."], null, { cape: "eisen" }),
+    /* Kampftechnik */
+    mk("kampf", "k_parkette", ["Stahlwand", "Wall of Steel"], ["5 Paraden in Folge, ohne dazwischen getroffen zu werden.", "5 parries in a row without being hit in between."], () => (RA() || {}).parB >= 5, { cape: "kupfer" }, () => [(RA() || {}).parB || 0, 5]),
+    mk("kampf", "k_rollkette", ["Windhauch", "Breath of Wind"], ["10 perfekte Ausweichrollen in Folge, ohne getroffen zu werden.", "10 perfect dodges in a row without being hit."], () => (RA() || {}).dodB >= 10, { cape: "nebel" }, () => [(RA() || {}).dodB || 0, 10]),
+    mk("kampf", "k_auf", ["Himmelsstürmer", "Skystormer"], ["15 Gegner in einem Durchgang mit Aufwärtsangriffen erledigen.", "Finish 15 enemies with upward attacks in one run."], () => (RA() || {}).up >= 15, TT("Himmelsstürmer", "Skystormer"), runP("up", 15)),
+    mk("kampf", "k_sturz", ["Hammer von oben", "Hammer from Above"], ["15 Gegner in einem Durchgang mit Sturzangriffen erledigen.", "Finish 15 enemies with dive attacks in one run."], () => (RA() || {}).dive >= 15, TT("Meteor", "the Meteor"), runP("dive", 15)),
+    mk("kampf", "k_schild", ["Schildbrecher", "Shieldbreaker"], ["10 Gegner in einem Durchgang mit Schildstößen erledigen.", "Finish 10 enemies with shield bashes in one run."], () => (RA() || {}).bash >= 10, TT("Rammbock", "the Ram"), runP("bash", 10)),
+    mk("kampf", "k_konter", ["Gegenschlag", "Riposte"], ["5 Gegner in einem Durchgang durch Paraden-Konter erledigen.", "Finish 5 enemies with parry counters in one run."], () => (RA() || {}).konter >= 5, TT("Konterkünstler", "Riposte Artist"), runP("konter", 5)),
+    mk("kampf", "k_umg", ["Hausrecht", "Home Advantage"], ["25 Gegner durch Fallen, Abgründe oder Wände erledigen (insgesamt).", "Finish 25 enemies with traps, chasms or walls (total)."], () => (X().umg || 0) >= 25, { cape: "asche" }, () => [X().umg || 0, 25]),
+    mk("kampf", "k_leuchter", ["Aus dem Leuchter", "Chandelier Drop"], ["Einen Gegner erledigen, kurz nachdem du vom Kronleuchter gesprungen bist – noch in der Luft.", "Finish an enemy right after leaping off a chandelier – still airborne."], null, TT("Lüsterflieger", "Chandelier Flyer")),
+    mk("kampf", "k_serie15", ["Blutrausch", "Bloodrush"], ["Eine Kill-Serie von 15.", "A kill streak of 15."], () => (S().bestStreak || 0) >= 15, { cape: "rubin" }, () => [S().bestStreak || 0, 15]),
+    mk("kampf", "k_ueber", ["Aus dem Schatten", "From the Shadows"], ["15 Gegner in einem Durchgang überrumpeln.", "Catch 15 enemies off guard in one run."], () => (RA() || {}).surp >= 15, TT("Schatten", "the Shadow"), runP("surp", 15)),
+    mk("kampf", "k_elite", ["Elitejäger", "Elite Hunter"], ["10 Elite-Gegner in einem Durchgang besiegen.", "Defeat 10 elite enemies in one run."], () => (S().elites || 0) >= 10, TT("Elitejäger", "Elite Hunter"), () => [S().elites || 0, 10]),
+    ...Object.keys(WKL).map(k => mk("kampf", "k_w_" + k, [WKT[k][0], WKT[k][1]], [WKN + " Gegner mit " + WKL[k][0] + " erledigen (insgesamt).", "Finish " + WKN + " enemies with " + WKL[k][1] + " (total)."], () => (X().wk[k] || 0) >= WKN, TT(WKT[k][0], WKT[k][1]), () => [X().wk[k] || 0, WKN])),
+    mk("kampf", "k_meister", ["Waffenmeister", "Weaponmaster"], ["Mit jeder der neun Waffengattungen " + WKN + " Gegner erledigen.", "Finish " + WKN + " enemies with each of the nine weapon types."], () => Object.keys(WKL).every(k => (X().wk[k] || 0) >= WKN), { cape: "violett" }, () => [Object.keys(WKL).filter(k => (X().wk[k] || 0) >= WKN).length, 9]),
+    /* Makellos (ohne Treffer; unter Barmherzigkeit gesperrt) */
+    mk("makellos", "nh_gebiet", ["Kein Kratzer", "Not a Scratch"], ["Ein Gebiet ohne einen Treffer abschließen.", "Clear an area without taking a hit."], null, TT("der Unversehrte", "the Unscathed")),
+    mk("makellos", "nh_gebiet3", ["Eisern", "Ironclad"], ["Drei Gebiete in einem Durchgang ohne Treffer abschließen.", "Clear three areas without a hit in one run."], () => (RA() || {}).nhAreas >= 3, TT("der Eiserne", "the Ironclad"), runP("nhAreas", 3)),
+    mk("makellos", "nh_lauf", ["Makellos", "Flawless"], ["Ein Ende erreichen, ohne ein einziges Mal getroffen zu werden.", "Reach an ending without being hit even once."], null, { cape: "elfenbein" }),
+    mk("makellos", "nh_heil", ["Ohne Heilung", "No Mending"], ["Ein Ende erreichen, ohne einen Trank zu trinken.", "Reach an ending without drinking a potion."], null, TT("der Durstige", "the Parched")),
+    mk("makellos", "nh_voll", ["Volles Leben", "Full Health"], ["Ein Gebiet mit vollem Leben verlassen.", "Leave an area at full health."], null, TT("der Heile", "the Whole")),
+    /* Erkundung */
+    mk("erkunden", "e_geheim", ["Spürnase", "Keen Nose"], ["Alle Geheimnisse eines Gebiets finden.", "Find every secret of an area."], null, TT("Spürnase", "Keen Nose")),
+    mk("erkunden", "e_geheim5", ["Schatzsucher", "Treasure Seeker"], ["In 5 Gebieten alle Geheimnisse finden (insgesamt).", "Find every secret in 5 areas (total)."], () => (X().gA || 0) >= 5, TT("Schatzsucher", "Treasure Seeker"), () => [X().gA || 0, 5]),
+    mk("erkunden", "e_geheim25", ["Verborgene Pfade", "Hidden Paths"], ["25 Geheimnisse finden (insgesamt).", "Find 25 secrets (total)."], () => (M().geheimnisse || 0) >= 25, TT("Pfadfinder", "Pathfinder"), () => [M().geheimnisse || 0, 25]),
+    mk("erkunden", "e_karte", ["Kartograf", "Cartographer"], ["Jeden Raum eines Gebiets betreten (Geheimräume zählen nicht).", "Enter every room of an area (secret rooms don't count)."], null, TT("Kartograf", "Cartographer")),
+    mk("erkunden", "e_gebiete", ["Weltenbummler", "Globetrotter"], ["Alle 13 Gebiete der Feste betreten.", "Enter all 13 areas of the keep."], () => Object.keys(TEMPO).every(k => X().bio[k]), { cape: "smaragd" }, () => [Object.keys(TEMPO).filter(k => X().bio[k]).length, 13]),
+    mk("erkunden", "e_wucht", ["Mauerbrecher", "Wallbreaker"], ["10 Wucht-Risse zerschlagen (insgesamt).", "Smash 10 cracked walls (total)."], () => (X().wu || 0) >= 10, TT("Mauerbrecher", "Wallbreaker"), () => [X().wu || 0, 10]),
+    mk("erkunden", "e_morsch", ["Durchgebrochen", "Fell Through"], ["5 morsche Böden durchbrechen (insgesamt).", "Break through 5 rotten floors (total)."], () => (X().mo || 0) >= 5, TT("Schwergewicht", "Heavyweight"), () => [X().mo || 0, 5]),
+    mk("erkunden", "e_flut", ["Schleusenwärter", "Lockkeeper"], ["Eine Flutkammer ablassen.", "Drain a flood chamber."], null, { cape: "tang" }),
+    mk("erkunden", "e_kran", ["Kranführer", "Crane Operator"], ["Mit einem Lastenkran fahren.", "Ride a cargo crane."], () => (X().kran || 0) >= 1, TT("Kranführer", "Crane Operator")),
+    mk("erkunden", "e_rueck", ["Kein Weg zu weit", "No Road Too Far"], ["Den Rückweg in ein früheres Gebiet nutzen.", "Use the way back into an earlier area."], null, TT("Heimkehrer", "Homecomer")),
+    mk("erkunden", "e_wunder", ["Staunender", "Wonderstruck"], ["3 verschiedene Wunder sehen.", "See 3 different wonders."], () => Z.wunder && Z.wunder.seen() >= 3, TT("Staunender", "the Wonderstruck"), () => [Z.wunder ? Z.wunder.seen() : 0, 3]),
+    /* Sammeln & Lager */
+    mk("sammeln", "s_palisade", ["Palisade", "Palisade"], ["Das Lager wächst zur Palisade.", "The camp grows to a palisade."], () => Z.lager && Z.lager.stage() >= 3, TT("Lagerhauptmann", "Camp Captain"), () => [Z.lager ? Z.lager.stage() : 0, 3]),
+    mk("sammeln", "s_banner", ["Banner im Wind", "Banners in the Wind"], ["Das Lager hisst seine Banner.", "The camp raises its banners."], () => Z.lager && Z.lager.stage() >= 4, TT("Bannerträger", "Bannerman"), () => [Z.lager ? Z.lager.stage() : 0, 4]),
+    mk("sammeln", "s_feste", ["Die Feste vor der Feste", "The Keep before the Keep"], ["Das Lager auf die höchste Stufe bringen.", "Raise the camp to its highest stage."], () => Z.lager && Z.lager.stage() >= 5, TT("Burgherr", "Lord of the Keep"), () => [Z.lager ? Z.lager.stage() : 0, 5]),
+    mk("sammeln", "s_bewohner", ["Volles Haus", "Full House"], ["Alle Bewohner ins Lager holen.", "Bring every resident to the camp."], () => { const R2 = Z.lager && Z.lager.RES; return !!R2 && Object.keys(R2).every(k => Z.lager.residents().includes(k)); }, TT("Gastgeber", "the Host"), () => { const R2 = Z.lager && Z.lager.RES; return R2 ? [Object.keys(R2).filter(k => Z.lager.residents().includes(k)).length, Object.keys(R2).length] : [0, 1]; }),
+    mk("sammeln", "s_plus5", ["Meisterstück", "Masterpiece"], ["Eine Waffe auf +5 bringen.", "Raise a weapon to +5."], () => { const P = Z.player; return !!(P && P.slots && Object.values(P.slots).some(it => it && (it.plus || 0) >= 5)); }, TT("Meisterschmied", "Mastersmith")),
+    mk("sammeln", "s_segen3", ["Gesegnet", "Blessed"], ["Drei Segen gleichzeitig tragen.", "Carry three blessings at once."], () => !!(Z.run && Z.player && (Z.player.bless || []).length >= 3), TT("der Gesegnete", "the Blessed"), () => [Z.run && Z.player ? (Z.player.bless || []).length : 0, 3]),
+    mk("sammeln", "s_gold", ["Schatzmeister", "Treasurer"], ["5.000 Gold sammeln (insgesamt).", "Collect 5,000 gold (total)."], () => (M().totalGold || 0) >= 5000, { cape: "bernstein" }, () => [M().totalGold || 0, 5000]),
+    mk("sammeln", "s_waffen", ["Waffenkammer", "Armoury"], ["40 verschiedene Waffen oder Fähigkeiten finden.", "Find 40 different weapons or skills."], () => n0(M().found) >= 40, TT("Sammler", "the Collector"), () => [n0(M().found), 40]),
+    mk("sammeln", "s_umhang", ["Garderobe", "Wardrobe"], ["15 Umhänge besitzen.", "Own 15 capes."], () => n0(M().capes) >= 15, TT("Modegeck", "the Dandy"), () => [n0(M().capes), 15]),
+    /* Kurioses */
+    mk("spass", "f_fass", ["Fass-Surfer", "Barrel Surfer"], ["Dreimal hintereinander auf rollende Fässer springen, ohne den Boden zu berühren.", "Bounce on rolling barrels three times in a row without touching the ground."], null, TT("Fass-Surfer", "Barrel Surfer")),
+    mk("spass", "f_tarzan", ["Tarzan", "Tarzan"], ["Von einem Kronleuchter direkt zum nächsten schwingen.", "Swing from one chandelier straight to the next."], null, TT("Tarzan", "Tarzan")),
+    mk("spass", "f_pazifist", ["Pazifist", "Pacifist"], ["Ein Gebiet verlassen, ohne einen einzigen Gegner zu erledigen.", "Leave an area without finishing a single enemy."], null, TT("der Sanfte", "the Gentle")),
+    mk("spass", "f_nass", ["Nasse Füße", "Wet Feet"], ["Dreimal von der steigenden Flut erwischt werden.", "Get caught by the rising tide three times."], () => (X().nass || 0) >= 3, TT("Wasserratte", "Water Rat"), () => [X().nass || 0, 3]),
+    mk("spass", "f_goblin", ["Goldgräber", "Gold Digger"], ["Drei Goldgoblins erwischen (insgesamt).", "Catch three gold goblins (total)."], () => (X().dieb || 0) >= 3, TT("Goblinschreck", "Goblin's Bane"), () => [X().dieb || 0, 3]),
+    mk("spass", "f_faust", ["Mit bloßen Fäusten", "Bare-Knuckle"], ["10 Gegner in einem Durchgang mit bloßen Fäusten erledigen.", "Finish 10 enemies bare-handed in one run."], () => ((S().killsBy || {}).faeuste || 0) >= 10, TT("Faustkämpfer", "the Brawler"), () => [(S().killsBy || {}).faeuste || 0, 10])
+  ];
+  for (const a of NEU) ACH.push(a);
+  /* Gebiete, Bosse, Mini-Bosse: Namen/Ids erst bekannt, wenn alle Dateien geladen sind (demogorgon.js lädt später) */
+  const bossIds = () => Object.keys(Z.BOSSDEF || {}).filter(id => id !== "nezna" && !Z.BOSSDEF[id].minion && !Z.BOSSDEF[id].noAch);
+  const miniIds = () => Object.keys(Z.ENEMIES || {}).filter(id => /^mb_/.test(id));
+  const enThe = s => String(s).replace(/^The /, "the ");
+  const bossN = id => (Z.BOSSDEF[id] && Z.BOSSDEF[id].n) || [id, id];
+  let dynDone = false;
+  function buildDyn() {
+    if (dynDone || !Z.BIOMES || !Z.BOSSDEF) return; dynDone = true;
+    const at = id => ACH.findIndex(a => a.id === id);
+    const ins = (afterId, list) => { const i = at(afterId); ACH.splice(i < 0 ? ACH.length : i + 1, 0, ...list); };
+    ins("t_waechter", Object.keys(TEMPO).filter(k => Z.BIOMES[k]).map(k => { const nm = Z.BIOMES[k].name || [k, k]; return mk("tempo", "t_" + k, ["Eile: " + nm[0], "Haste: " + nm[1]], [nm[0] + " in unter " + TEMPO[k] + " Sekunden durchqueren.", "Cross " + nm[1] + " in under " + TEMPO[k] + " seconds."], null, TT("Läufer", "the Runner")); }));
+    const BT = { glasstab: TT("Glasbrecher", "Glassbreaker"), erzpriesterin: TT("Ketzer", "the Heretic"), bugbear: TT("Bärentöter", "Bearslayer"), wraith: TT("Geisterbanner", "Ghostbinder"), schmiedewaechter: TT("Ambossbrecher", "Anvilbreaker"),
+      chasme: TT("Fliegenklatsche", "the Flyswatter"), ilvaraW: TT("Netzreißer", "Webtearer"), riese: TT("Riesentöter", "Giantslayer"), vrock: TT("Geierschreck", "Vulture's Bane"), demogorgon: TT("Dämonenfürst-Bezwinger", "Demon Prince's Bane"),
+      themberchaud: TT("Drachenbändiger", "Dragontamer"), venomfang: TT("Giftzahnzieher", "Fangpuller"), weberin: TT("Fadenlos", "the Unthreaded") };
+    const ids = bossIds();
+    const bossW = ids.map(id => { const nm = bossN(id); return mk("bosse", "b_" + id, ["Sieg: " + nm[0], "Victory: " + nm[1]], [nm[0] + " besiegen.", "Defeat " + enThe(nm[1]) + "."], () => !!((M().bosses || {})[id] && M().bosses[id].won > 0), BT[id] || TT("Bezwinger", "the Conqueror")); });
+    const mins = miniIds();
+    bossW.push(mk("bosse", "b_mini", ["Kopfgeldjäger", "Bounty Hunter"], ["Alle " + mins.length + " Mini-Bosse besiegen (insgesamt).", "Defeat all " + mins.length + " mini-bosses (total)."], () => mins.every(k => X().mini[k]), { cape: "dorn" }, () => [mins.filter(k => X().mini[k]).length, mins.length]));
+    bossW.push(mk("bosse", "b_schaedel3", ["Schädelträger", "Skullbearer"], ["Ein Ende mit mindestens 3 Schädeln erreichen.", "Reach an ending with at least 3 skulls."], null, TT("Schädelträger", "Skullbearer")));
+    bossW.push(mk("bosse", "b_schaedel5", ["Schädelkönig", "Skull King"], ["Ein Ende mit 5 Schädeln erreichen.", "Reach an ending with 5 skulls."], null, { cape: "lava" }));
+    bossW.push(mk("bosse", "b_alle", ["Trophäenwand", "Trophy Wall"], ["Jeden Boss und Wächter mindestens einmal besiegen.", "Defeat every boss and warden at least once."], () => ids.every(id => (M().bosses || {})[id] && M().bosses[id].won > 0), { cape: "koenig" }, () => [ids.filter(id => (M().bosses || {})[id] && M().bosses[id].won > 0).length, ids.length]));
+    ins("boss", bossW);
+    ins("nh_voll", ids.map(id => { const nm = bossN(id); return mk("makellos", "nh_" + id, ["Unberührt: " + nm[0], "Untouched: " + nm[1]], [nm[0] + " besiegen, ohne getroffen zu werden.", "Defeat " + enThe(nm[1]) + " without being hit."], () => !!X().nhB[id], TT("Tänzer", "the Dancer")); }));
+  }
+  Z.achBuild = buildDyn;
+  /* Testhaken: Liste, alle erfüllten sofort prüfen, erzwingen, zurücksetzen */
+  Z.achTest = {
+    list: () => ACH.map(a => ({ id: a.id, c: a.c, done: !!M().ach[a.id], p: a.p ? (() => { try { return a.p(); } catch (_) { return null; } })() : null })),
+    check: () => { const out = []; for (const a of ACH) if (!M().ach[a.id]) { let ok = false; try { ok = a.ok(); } catch (_) {} if (ok) { grant(a); out.push(a.id); } } return out; },
+    force: id => { const a = ACH.find(x => x.id === id); if (a) grant(a); return !!a; },
+    reset: id => { const m = M(); if (id) delete m.ach[id]; else { m.ach = {}; m.achZ = {}; } Z.saveMeta(); },
+    run: () => RA(), meta: () => X(), tick: dt => trackTick(dt || 1 / 60)
+  };
+  const getA = id => ACH.find(a => a.id === id);
+  const give = id => { if (!M().ach[id]) grant(getA(id)); };
+  /* Ereignisse aus anderen Dateien (Minimal-Hooks): Z.achEv("fass" | "flut" | "flutNass") */
+  Z.achEv = function (k) {
+    try {
+      const A2 = RA(), P = Z.player; if (!A2 || !P) return;
+      if (k === "fass") { A2.fassC = (A2.fassC || 0) + 1; if (A2.fassC >= 3) give("f_fass"); }
+      else if (k === "flut") give("e_flut");
+      else if (k === "flutNass") { X().nass = (X().nass || 0) + 1; }
+    } catch (err) { console.error(err); }
+  };
+  /* Gebiet verlassen (nur über Z.loadArea – der Rückweg setzt Gebiete ohne loadArea ein und löst hier nichts aus) */
+  function areaDone(to) {
+    const A2 = RA(), lv = Z.level, P = Z.player; if (!A2 || !lv || !P || P.dead || !to || to === "lager") return;
+    const id = lv.id; if (!id || lv.hub || lv.arena || lv.passage || !TEMPO[id]) return;
+    const a = A2.ar[id]; if (!a || a.done) return; a.done = true;
+    const fair = !gnade();
+    if (fair && a.t > 0 && a.t <= TEMPO[id]) give("t_" + id);
+    if (fair && a.dmg <= 0 && a.t > 15) { give("nh_gebiet"); A2.nhAreas++; }
+    if (fair && P.hp >= P.hpMax - 0.5) give("nh_voll");
+    if (!a.kills) give("f_pazifist");
+    const S2 = Z.erkundung && Z.erkundung();
+    if (S2 && S2.lv === lv && S2.total > 0 && S2.found.size >= S2.total) { give("e_geheim"); X().gA = (X().gA || 0) + 1; }
+    const need = Object.keys(lv.cells || {}).filter(k => lv.cells[k].kind !== "secret");
+    if (need.length && need.every(k => a.cells[k])) give("e_karte");
+    Z.saveMeta();
+  }
+  function areaRec(A2, id) { return A2.ar[id] || (A2.ar[id] = { t: 0, dmg: 0, kills: 0, done: false, cells: {} }); }
+  /* Kill-Einordnung (äußerster Wrapper, siehe late) */
+  function onKill(e, o) {
+    const A2 = RA(), P = Z.player; if (!A2 || !P || o.self) return;
+    const run = Z.run, now = run.time || 0;
+    if (Z.level && Z.level.id) areaRec(A2, Z.level.id).kills++;
+    const act = P.act;
+    const mel = o.src === "melee";
+    if (act && act.up && (mel || o.src === "ranged")) A2.up++;
+    if (mel && (P.plunge || now - A2.plT < 0.3)) A2.dive++;
+    if (act && act.bash && (mel || !o.src)) A2.bash++;
+    if (o.src === "parry") A2.konter++;
+    if (o.src === "trap" || o.src === "fall" || o.src === "wall") X().umg = (X().umg || 0) + 1;
+    if (!P.onGround && now - A2.swRel < 1.6 && !P._swing) give("k_leuchter");
+    if (o.it && Z.WEAPONS[o.it.id] && Z.WEAPONS[o.it.id].kind && Z.upClass) { const k = Z.upClass(Z.WEAPONS[o.it.id]); if (WKL[k]) X().wk[k] = (X().wk[k] || 0) + 1; }
+    if (e.id && /^mb_/.test(e.id)) { X().mini[e.id] = 1; Z.saveMeta(); }
+    if (e.thief) X().dieb = (X().dieb || 0) + 1;
+  }
+  /* Bosskampf beendet */
+  function bossWin(f) {
+    const run = Z.run; if (!run) return;
+    const fair = !gnade(), dt = (run.time || 0) - f.t0;
+    if (fair && f.dmg <= 0 && f.id) { X().nhB[f.id] = 1; Z.saveMeta(); }
+    if (fair && f.warden && dt < 30) give("t_waechter");
+    if (fair && !f.warden && Z.level && Z.level.arena && dt < 45) give("t_boss");
+  }
+  /* Ende erreicht */
+  function endCheck() {
+    const A2 = RA(), run = Z.run; if (!A2 || A2.end) return; A2.end = true;
+    if (gnade()) return;
+    const t = run.time || 0;
+    if (t < 1200) give("t_lauf20"); if (t < 720) give("t_lauf12");
+    if (A2.dmgRun <= 0) give("nh_lauf");
+    if (!(S().potions > 0)) give("nh_heil");
+    if ((run.skulls || 0) >= 3) give("b_schaedel3"); if ((run.skulls || 0) >= 5) give("b_schaedel5");
+  }
+  let lvLoaded = null;
+  /* Beobachtung pro Bild: Zeit/Treffer je Gebiet, Paraden-/Rollen-Ketten, Kran, Kronleuchter, Fässer, Bosskampf */
+  function trackTick(dt) {
+    const run = Z.run, P = Z.player, lv = Z.level; if (!run || !P || !lv || lv.hub) return;
+    const A2 = RA();
+    if (run.gnade) A2.gnade = true;
+    /* Gebietswechsel ohne Z.loadArea = Rückweg (rueckweg.js setzt den Zustand direkt ein) */
+    if (lv !== A2.lv) { if (A2.lv && lv !== lvLoaded && !A2.lv.hub) give("e_rueck"); A2.lv = lv; }
+    const s = S();
+    /* Treffer über erlittenen Schaden (zählt alles, auch Fallen und Stürze) */
+    const dm = P.dmgTaken || 0;
+    if (A2.dmg == null || dm < A2.dmg) A2.dmg = dm;
+    const dd = dm - A2.dmg; A2.dmg = dm;
+    const id = lv.id, rec = id && !lv.passage ? areaRec(A2, id) : null;
+    if (dd > 0) { A2.dmgRun += dd; if (rec) rec.dmg += dd; if (A2.fight && !A2.fight.done) A2.fight.dmg += dd; A2.parC = 0; A2.dodC = 0; }
+    if (rec && !P.dead) {
+      rec.t += dt;
+      const ck = Math.floor((P.x + P.w / 2) / T / Z.CW) + "," + Math.floor((P.y + P.h / 2) / T / Z.CH);
+      if (lv.cells && lv.cells[ck]) rec.cells[ck] = 1;
+    }
+    /* Ketten */
+    const pa = s.parries || 0, dg = s.dodges || 0;
+    if (A2.par == null || pa < A2.par) A2.par = pa; if (A2.dod == null || dg < A2.dod) A2.dod = dg;
+    if (pa > A2.par) { A2.parC += pa - A2.par; A2.parB = Math.max(A2.parB, A2.parC); } A2.par = pa;
+    if (dg > A2.dod) { A2.dodC += dg - A2.dod; A2.dodB = Math.max(A2.dodB, A2.dodC); } A2.dod = dg;
+    /* Wucht-Risse, morsche Böden (Laufzähler aus erkundung.js) → dauerhaft */
+    const wu = s.wucht || 0, mo = s.morsch || 0;
+    if (A2.wu == null || wu < A2.wu) A2.wu = wu; if (A2.mo == null || mo < A2.mo) A2.mo = mo;
+    if (wu > A2.wu) { X().wu = (X().wu || 0) + wu - A2.wu; A2.wu = wu; }
+    if (mo > A2.mo) { X().mo = (X().mo || 0) + mo - A2.mo; A2.mo = mo; }
+    /* Sturzangriff */
+    if (P.plunge) A2.plT = run.time || 0;
+    /* Kran */
+    if (P._kran && !A2.kran) X().kran = (X().kran || 0) + 1; A2.kran = !!P._kran;
+    /* Kronleuchter: Griff, Loslassen, Kette ohne Bodenkontakt */
+    if (P._swing !== A2.swCur) {
+      if (P._swing) { if (!A2.swGround && A2.swLast && A2.swLast !== P._swing && (run.time || 0) - A2.swRel < 3) { A2.swChain++; if (A2.swChain >= 1) give("f_tarzan"); } else A2.swChain = 0; A2.swLast = P._swing; A2.swGround = false; }
+      else A2.swRel = run.time || 0;
+      A2.swCur = P._swing;
+    }
+    if (P.onGround) { A2.swGround = true; A2.fassC = 0; }
+    /* Bosskampf */
+    const b = Z.boss;
+    if (b && (!A2.fight || A2.fight.e !== b)) A2.fight = { e: b, id: b.id, warden: !!b.warden, t0: run.time || 0, dmg: 0, done: false };
+    if (A2.fight && !A2.fight.done && Z.bossDefeated && Z.boss === A2.fight.e) { A2.fight.done = true; bossWin(A2.fight); }
+    if (A2.fight && !b) A2.fight = null;
+  }
 
   /* ======================= LAUFSTART: Held, Umhang, Pakte ======================= */
   const ui = () => Z.ui;
@@ -134,7 +382,7 @@
     const n = sel.pacts.length;
     const sk = Z.meta.skullSel || 0;
     ui().open("<h2>" + L(["Die Feste betreten", "Enter the keep"]) + "</h2>" +
-      "<h3>" + L(["Held", "Hero"]) + '</h3><div class="wahlen">' + heroes + "</div>" +
+      "<h3>" + L(["Held", "Hero"]) + (Z.achTitel && Z.achTitel() ? ' <small class="hinweis">„' + esc(Z.achTitel()) + "“</small>" : "") + '</h3><div class="wahlen">' + heroes + "</div>" +
       "<h3>" + L(["Ausrüstung", "Gear"]) + ' <small class="hinweis">' + L(["Was du in den Händen hältst, nimmst du mit – alles Bessere findest du unterwegs", "What you hold, you take along – anything better you find on the way"]) + "</small></h3>" + gearHTML +
       "<h3>" + L(["Umhang", "Cape"]) + ' <small class="hinweis">' + Object.keys(m.capes).length + "/" + Object.keys(CAPES).length + '</small></h3><div class="umhaenge">' + capes + "</div>" +
       "<h3>" + L(["Pakte", "Pacts"]) + ' <small class="hinweis">' + L(["Jeder Pakt: +30 % Seelensplitter, bessere Beute", "Each pact: +30% soul shards, better loot"]) + (n ? " · " + L(["aktiv: ", "active: "]) + n + " (×" + (1 + 0.3 * n).toFixed(1) + ")" : "") + '</small></h3><div class="wahlen pakte">' + pacts + "</div>" +
@@ -163,15 +411,50 @@
     act.abShrine = b => shrineTake(b);
     act.abTrade = a => trade(a);
     act.abAchBack = arg => { ui().close(); if (arg === "start") startModal(); };
+    act.abAchTab = k => { ui().close(); achModal(null, k); setTimeout(() => { const el = document.querySelector('#modal .ach-reiter [data-arg="' + k + '"]'); if (el) el.focus({ preventScroll: true }); }, 40); };
+    act.abTitel = id => { const m = M(); if (!m.ach[id]) return; m.titel = m.titel === id ? null : id; Z.saveMeta(); const sc = document.querySelector("#modal .ach2l"), top = sc ? sc.scrollTop : 0; ui().close(); achModal(null); setTimeout(() => { const s2 = document.querySelector("#modal .ach2l"); if (s2) s2.scrollTop = top; const el = document.querySelector('#modal [data-act="abTitel"][data-arg="' + id + '"]'); if (el) el.focus({ preventScroll: true }); }, 40); };
+    act.abNix = () => {};
     ui().startRunConfirm = () => { sel = null; startModal(); };
   }
-  function achModal(fromStart) {
+  /* Erfolge-Ansicht: Reiter je Kategorie (LB/RB bzw. Bild↑/↓ wechseln – .reiter aus ui.js), Zeilen als Knöpfe (Pad-Raster),
+     Fortschrittsbalken bei zählbaren, freigeschaltete Titel per Klick anlegen. */
+  let achTab = "geschichte", achFrom = false;
+  const titelOf = id => { const a = getA(id); return a && a.r.titel && M().ach[id] ? L(a.r.titel) : ""; };
+  Z.achTitel = () => titelOf(M().titel);
+  function achModal(fromStart, tab) {
+    buildDyn(); achCss();
+    if (fromStart != null) achFrom = !!fromStart; if (tab && KAT.some(k => k.id === tab)) achTab = tab;
     const m = M(), done = ACH.filter(a => m.ach[a.id]).length;
-    const rows = ACH.map(a => '<div class="erfolg' + (m.ach[a.id] ? " ja" : "") + '"><b>' + (m.ach[a.id] ? "🏆 " : "· ") + esc(L(a.n)) + "</b><span>" + esc(L(a.d)) + "</span><small>" + esc(rewardText(a.r)) + "</small></div>").join("");
+    const tabs = '<div class="reiter ach-reiter">' + KAT.map(k => { const l = ACH.filter(a => a.c === k.id), d = l.filter(a => m.ach[a.id]).length;
+      return '<button data-act="abAchTab" data-arg="' + k.id + '" class="' + (k.id === achTab ? "an" : "") + '">' + k.i + " " + esc(L(k.n)) + " <small>" + d + "/" + l.length + "</small></button>"; }).join("") + "</div>";
+    const rows = ACH.filter(a => a.c === achTab).map(a => {
+      const ok = !!m.ach[a.id]; let bar = "";
+      if (a.p && !ok) { let p = null; try { p = a.p(); } catch (_) {} if (p && p[1] > 0) { const v = Math.max(0, Math.min(p[0], p[1])); bar = '<i class="ach-balken"><i style="width:' + Math.round(v / p[1] * 100) + '%"></i></i><em class="ach-zahl">' + U.fmt(Math.floor(v)) + " / " + U.fmt(p[1]) + "</em>"; } }
+      const tit = ok && a.r.titel, an = tit && m.titel === a.id;
+      return '<button class="erfolg ach2' + (ok ? " ja" : "") + (an ? " titel-an" : "") + '"' + (tit ? ' data-act="abTitel" data-arg="' + a.id + '"' : ' data-act="abNix"') + "><b>" + (ok ? "🏆 " : "· ") + esc(L(a.n)) + "</b><span>" + esc(L(a.d)) + "</span>" + bar + "<small>" + esc(rewardText(a.r)) + (tit ? (an ? L([" · getragen", " · worn"]) : L([" · anlegen", " · wear"])) : "") + "</small></button>";
+    }).join("");
     const runes = ["tiefe", "glut", "himmel"].map(k => (m.runes[k] ? "◆" : "◇")).join(" ");
-    ui().open("<h2>" + L(["Erfolge", "Achievements"]) + " <small>" + done + "/" + ACH.length + '</small></h2><p class="hinweis">' + L(["Runen-Fragmente: ", "Rune fragments: "]) + runes + " · " + L(["versteckt in Geheimräumen der Verliese, der Schmiede und der Zinnen", "hidden in secret rooms of the dungeons, the forge and the spires"]) + '</p><div class="erfolge">' + rows + '</div><div class="knoepfe"><button data-act="abAchBack" data-arg="' + (fromStart ? "start" : "") + '" autofocus>' + L(["Zurück", "Back"]) + "</button></div>", { cls: "breit" });
+    const tt = titelOf(m.titel);
+    ui().open("<h2>" + L(["Erfolge", "Achievements"]) + " <small>" + done + "/" + ACH.length + (tt ? " · „" + esc(tt) + "“" : "") + "</small></h2>" + tabs +
+      (achTab === "erkunden" ? '<p class="hinweis">' + L(["Runen-Fragmente: ", "Rune fragments: "]) + runes + " · " + L(["versteckt in Geheimräumen der Verliese, der Schmiede und der Zinnen", "hidden in secret rooms of the dungeons, the forge and the spires"]) + "</p>" : "") +
+      (achTab === "tempo" || achTab === "makellos" ? '<p class="hinweis">' + L(["Unter Barmherzigkeit zählen Tempo- und Makellos-Erfolge nicht.", "Speed and flawless achievements don't count under Mercy."]) + "</p>" : "") +
+      '<div class="erfolge ach2l">' + rows + '</div><div class="knoepfe"><button data-act="abAchBack" data-arg="' + (achFrom ? "start" : "") + '">' + L(["Zurück", "Back"]) + "</button></div>", { cls: "breit" });
   }
   Z.achModal = achModal;
+  function achCss() {
+    if (document.getElementById("ach2css")) return;
+    const st = document.createElement("style"); st.id = "ach2css";
+    st.textContent = ".erfolge.ach2l{grid-template-columns:repeat(auto-fill,minmax(250px,1fr));max-height:min(62vh,900px);overflow:auto;padding:2px}" +
+      "button.erfolg.ach2{font:inherit;color:var(--text);text-align:left;background:linear-gradient(#2a1e1a,#1c1412);cursor:pointer;align-items:stretch}" +
+      "button.erfolg.ach2:focus,button.erfolg.ach2:hover{outline:none;border-color:var(--gold);opacity:1;filter:none;box-shadow:0 0 12px rgba(229,180,84,.25)}" +
+      "button.erfolg.titel-an{box-shadow:inset 0 0 0 1px var(--gold);background:linear-gradient(#3a2618,#22160e)}" +
+      ".ach-balken{display:block;height:6px;margin:4px 0 1px;background:#140e0c;border:1px solid #3a2a24;border-radius:4px;overflow:hidden}" +
+      ".ach-balken i{display:block;height:100%;background:linear-gradient(90deg,#8a1414,#e5b454)}" +
+      ".ach-zahl{font-style:normal;font-size:var(--fs-xs,11px);color:#c8b090}" +
+      ".ach-reiter button small{opacity:.75;font-weight:400}" +
+      "@media (min-width:2200px){.erfolge.ach2l{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}.erfolg.ach2 span{font-size:14px}}";
+    document.head.appendChild(st);
+  }
 
   /* Lauf beginnt: Held, Pakte, Boni anwenden */
   const start0 = Z.startRun;
@@ -464,6 +747,7 @@
         Z.level.riftKey = key; Z.level.riftT = 25; return;
       }
       if (pact && npacts() >= 3) Z.grantAch("pakt");
+      try { endCheck(); } catch (err) { console.error(err); }
       return end0.apply(this, arguments);
     };
   }
@@ -476,9 +760,33 @@
   }
 
   /* ======================= Schritt & Verkabelung ======================= */
-  Z.abenteuerTick = function (dt) { heroTick(dt); evTick(dt); riftTick(dt); achTick(dt); };
+  Z.abenteuerTick = function (dt) { heroTick(dt); evTick(dt); riftTick(dt); try { trackTick(dt); } catch (err) { console.error(err); } achTick(dt); };
+  /* Erfolge II: äußerste Wrapper (erst nach allen Dateien), damit sie das Endergebnis sehen */
+  function wireAch() {
+    buildDyn();
+    const k0 = Z.killEnemy;
+    Z.killEnemy = function (e, o) {
+      const was = !!(e && e.dead); const r = k0.apply(this, arguments);
+      try { if (e && e.dead && !was && !e._achK && !e.dummy) { e._achK = 1; onKill(e, o || {}); } } catch (err) { console.error(err); }
+      return r;
+    };
+    const h0 = Z.hitEnemy;
+    Z.hitEnemy = function (e, dmg, o) {
+      const s0 = e ? e.surpN || 0 : 0; const r = h0.apply(this, arguments);
+      try { if (e && (e.surpN || 0) > s0) { const A2 = RA(); if (A2) A2.surp++; } } catch (_) {}
+      return r;
+    };
+    const l0 = Z.loadArea;
+    Z.loadArea = function (id) {
+      try { areaDone(id); } catch (err) { console.error(err); }
+      const r = l0.apply(this, arguments);
+      lvLoaded = Z.level;
+      try { const lv = Z.level; if (Z.run && lv && TEMPO[lv.id] && !lv.arena && !lv.passage) { const x = X(); if (!x.bio[lv.id]) { x.bio[lv.id] = 1; Z.saveMeta(); } } } catch (_) {}
+      return r;
+    };
+  }
   function late() {
-    if (!Z.ui || !Z.ui.actions || !Z.TX) return setTimeout(late, 50); wire(); wireEnding(); Z.TX.endings.wahr = WAHR;
+    if (!Z.ui || !Z.ui.actions || !Z.TX) return setTimeout(late, 50); wire(); wireEnding(); wireAch(); Z.TX.endings.wahr = WAHR;
     /* Erfolge auch im Pause-Menü */
     const pause0 = Z.ui.pause;
     Z.ui.pause = function () { const r = pause0.apply(this, arguments); const k = document.querySelector("#modal .pausenmenue .knoepfe") || (document.querySelector("#modal .pausenmenue") ? document.querySelector("#modal .knoepfe") : null); if (k && !k.querySelector('[data-act="abAchP"]')) { const b = document.createElement("button"); b.dataset.act = "abAchP"; b.textContent = "🏆 " + L(["Erfolge", "Achievements"]); k.insertBefore(b, k.children[2] || null); } return r; };

@@ -4057,6 +4057,8 @@
     c.restore();
     cache.set(key, out); return out;
   };
+  /* Leinwand statt URL (sofort zeichenbar, z. B. im Boss-Titelband von uebergang.js) */
+  Z.bossPortraetBild = function (d) { if (!d || !Z.bossPortraet(d)) return null; return cache.get("boss:" + (d.id || d.n[0]) + ":cv") || null; };
   Z.bossPortraet = function (d) {
     if (!d) return null; const key = "boss:" + (d.id || d.n[0]); let u = cache.get(key); if (u) return u;
     try {
@@ -4080,7 +4082,89 @@
       c.strokeStyle = "#2a2024"; c.lineWidth = 5; c.beginPath(); c.arc(48, 48, 44, 0, TAU); c.stroke();
       c.strokeStyle = "rgba(255,120,60,.55)"; c.lineWidth = 1.2; c.beginPath(); c.arc(48, 48, 41.4, Math.PI * 0.15, Math.PI * 0.85); c.stroke();
       c.strokeStyle = "rgba(200,170,160,.35)"; c.lineWidth = 1; c.beginPath(); c.arc(48, 48, 46.4, Math.PI * 1.1, Math.PI * 1.6); c.stroke();
-      u = cv.toDataURL(); cache.set(key, u); return u;
+      u = cv.toDataURL(); cache.set(key, u); cache.set(key + ":cv", cv); return u;
     } catch (e) { console.error(e); return null; }
   };
+})();
+
+/* Ezekiel – The Destroyer · Gemalte Siegel und Abzeichen (W11 Runde 27)
+   Z.siegel(motiv, o) → Canvas 96×96 (Z.siegelURL → Bild-URL): Medaille im Stil der Porträts – geprägter Metallrand
+   (o.stufe: bronze, silber, gold, blut), Grund mit Glanz, Motiv als Prägung; o.gesperrt → stumpfer Schattenriss mit
+   Kette. o.band → Bandschleife unten. Motive: tod, sieg, schwert, schild, krone, schaedel, stern, karte, truhe, flamme,
+   auge, feder, rune, glocke, zahnrad, pfote, faden, muenze, trank, blitz, herz, sanduhr, pfeil, tor; sonst Z.drawIcon.
+   Für Laufbilanz (Tod/Sieg) und Erfolge. Kein Blau. */
+(function () {
+  const Z = window.Z; if (!Z) return;
+  const TAU = Math.PI * 2, cache = new Map();
+  const MET = { bronze: ["#f0b884", "#a8643a", "#5a2e16"], silber: ["#f4ecdc", "#a8a096", "#4e4842"], gold: ["#fff0b0", "#d8a038", "#6a4410"], blut: ["#ffb0a0", "#b0302a", "#4a0c0a"] };
+  const GRUND = { bronze: ["#7a4a2a", "#3a2014"], silber: ["#5a5450", "#262220"], gold: ["#8a5a1a", "#3a2408"], blut: ["#6a1410", "#240606"] };
+  function glyph(c, m, ink) {
+    c.fillStyle = ink; c.strokeStyle = ink; c.lineCap = "round"; c.lineJoin = "round";
+    const P = pts => { c.beginPath(); c.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) c.lineTo(pts[i], pts[i + 1]); c.closePath(); c.fill(); };
+    const L = (w, pts) => { c.lineWidth = w; c.beginPath(); c.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) c.lineTo(pts[i], pts[i + 1]); c.stroke(); };
+    const O = (x, y, r) => { c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill(); };
+    switch (m) {
+      case "tod": case "schaedel":
+        c.beginPath(); c.arc(0, -3, 13, Math.PI * 0.85, Math.PI * 0.15); c.lineTo(8, 12); c.lineTo(-8, 12); c.closePath(); c.fill();
+        c.save(); c.globalCompositeOperation = "destination-out"; O(-5, -2, 3.8); O(5, -2, 3.8); P([0, 3, -2, 7, 2, 7]); for (const x of [-4, 0, 4]) c.fillRect(x - 0.8, 9, 1.6, 4); c.restore();
+        if (m === "tod") { c.save(); c.globalCompositeOperation = "destination-out"; L(1.6, [3, -16, 0, -8, 4, -4, 1, 2]); c.restore(); }
+        break;
+      case "sieg":
+        O(0, -2, 7); for (let i = 0; i < 12; i++) { const a = i / 12 * TAU; P([Math.cos(a - 0.12) * 9, -2 + Math.sin(a - 0.12) * 9, Math.cos(a) * 14, -2 + Math.sin(a) * 14, Math.cos(a + 0.12) * 9, -2 + Math.sin(a + 0.12) * 9]); }
+        for (const sd of [-1, 1]) for (let k = 0; k < 5; k++) { const a = Math.PI / 2 + sd * (0.5 + k * 0.32); c.save(); c.translate(Math.cos(a) * 17, Math.sin(a) * 17); c.rotate(a + sd * 1.2); c.beginPath(); c.ellipse(0, 0, 2.2, 4.4, 0, 0, TAU); c.fill(); c.restore(); }
+        break;
+      case "schwert": P([-2, 10, -2, -14, 0, -18, 2, -14, 2, 10]); c.fillRect(-8, 8, 16, 3); c.fillRect(-1.6, 11, 3.2, 6); O(0, 18, 2.4); break;
+      case "schild": c.beginPath(); c.moveTo(-12, -12); c.lineTo(12, -12); c.lineTo(11, 2); c.quadraticCurveTo(8, 12, 0, 16); c.quadraticCurveTo(-8, 12, -11, 2); c.closePath(); c.fill(); c.save(); c.globalCompositeOperation = "destination-out"; L(2, [0, -9, 0, 12]); L(2, [-9, -2, 9, -2]); c.restore(); break;
+      case "krone": P([-14, 8, -14, -6, -7, 1, 0, -12, 7, 1, 14, -6, 14, 8]); c.fillRect(-14, 9, 28, 4); break;
+      case "stern": c.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 6.5 : 15; c.lineTo(Math.cos(a) * r, Math.sin(a) * r); } c.closePath(); c.fill(); break;
+      case "karte": P([-14, -10, -5, -13, 5, -10, 14, -13, 14, 11, 5, 14, -5, 11, -14, 14]); c.save(); c.globalCompositeOperation = "destination-out"; c.setLineDash([2.5, 2.5]); L(1.4, [-9, 6, -2, -2, 4, 2, 9, -6]); c.setLineDash([]); L(1.6, [7, -9, 11, -5]); L(1.6, [11, -9, 7, -5]); c.restore(); break;
+      case "truhe": c.fillRect(-14, -2, 28, 14); c.beginPath(); c.moveTo(-14, -2); c.quadraticCurveTo(0, -16, 14, -2); c.fill(); c.save(); c.globalCompositeOperation = "destination-out"; c.fillRect(-14, -3, 28, 1.6); c.fillRect(-2.5, -4, 5, 6); c.restore(); break;
+      case "flamme": c.beginPath(); c.moveTo(0, -17); c.quadraticCurveTo(13, -2, 9, 8); c.quadraticCurveTo(5, 15, 0, 15); c.quadraticCurveTo(-6, 15, -9, 8); c.quadraticCurveTo(-12, -2, -3, -6); c.quadraticCurveTo(-3, 0, 1, 1); c.quadraticCurveTo(4, -8, 0, -17); c.fill(); break;
+      case "auge": c.beginPath(); c.moveTo(-16, 0); c.quadraticCurveTo(0, -14, 16, 0); c.quadraticCurveTo(0, 14, -16, 0); c.fill(); c.save(); c.globalCompositeOperation = "destination-out"; O(0, 0, 6); c.restore(); O(0, 0, 3.4); break;
+      case "feder": c.beginPath(); c.moveTo(-12, 15); c.quadraticCurveTo(-4, -6, 12, -16); c.quadraticCurveTo(10, 2, -9, 12); c.fill(); L(1.4, [-14, 17, -6, 8]); break;
+      case "rune": L(3, [0, -15, 0, 15]); L(3, [0, -11, 9, -4, 0, 3]); L(3, [0, 3, -8, 11]); break;
+      case "glocke": c.beginPath(); c.moveTo(-12, 10); c.quadraticCurveTo(-10, -12, 0, -13); c.quadraticCurveTo(10, -12, 12, 10); c.closePath(); c.fill(); c.fillRect(-14, 9, 28, 3); O(0, 15, 3); O(0, -15, 2.4); break;
+      case "zahnrad": O(0, 0, 10); for (let i = 0; i < 8; i++) { c.save(); c.rotate(i / 8 * TAU); c.fillRect(-3, -15, 6, 6); c.restore(); } c.save(); c.globalCompositeOperation = "destination-out"; O(0, 0, 4); c.restore(); break;
+      case "pfote": c.beginPath(); c.ellipse(0, 6, 8, 7, 0, 0, TAU); c.fill(); for (const [x, y] of [[-10, -4], [-4, -10], [4, -10], [10, -4]]) { c.beginPath(); c.ellipse(x, y, 3.2, 4.2, x * 0.04, 0, TAU); c.fill(); } break;
+      case "faden": c.lineWidth = 2.4; c.beginPath(); for (let i = 0; i <= 40; i++) { const u = i / 40, a = u * TAU * 2.2; c.lineTo(Math.cos(a) * (4 + u * 10), Math.sin(a) * (4 + u * 10)); } c.stroke(); break;
+      case "muenze": O(0, 0, 13); c.save(); c.globalCompositeOperation = "destination-out"; c.lineWidth = 1.6; c.beginPath(); c.arc(0, 0, 10, 0, TAU); c.stroke(); c.font = "bold 14px serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("Z", 0, 1); c.restore(); break;
+      case "trank": c.beginPath(); c.arc(0, 5, 11, 0, TAU); c.fill(); c.fillRect(-4, -14, 8, 10); c.fillRect(-6, -16, 12, 3); c.save(); c.globalCompositeOperation = "destination-out"; c.fillRect(-11, 2, 22, 1.6); c.restore(); break;
+      case "blitz": P([3, -17, -10, 2, -1, 2, -4, 17, 10, -3, 1, -3]); break;
+      case "herz": c.beginPath(); c.moveTo(0, 14); c.bezierCurveTo(-18, 2, -12, -16, 0, -6); c.bezierCurveTo(12, -16, 18, 2, 0, 14); c.fill(); break;
+      case "sanduhr": P([-10, -15, 10, -15, 1, 0, 10, 15, -10, 15, -1, 0]); c.fillRect(-12, -17, 24, 3); c.fillRect(-12, 14, 24, 3); break;
+      case "pfeil": L(2.6, [-13, 13, 11, -11]); P([13, -13, 3, -11, 11, -3]); P([-13, 13, -14, 6, -9, 9]); P([-13, 13, -6, 14, -9, 9]); break;
+      case "tor": c.beginPath(); c.moveTo(-13, 15); c.lineTo(-13, -2); c.quadraticCurveTo(-13, -15, 0, -15); c.quadraticCurveTo(13, -15, 13, -2); c.lineTo(13, 15); c.closePath(); c.fill(); c.save(); c.globalCompositeOperation = "destination-out"; for (const x of [-6, 0, 6]) c.fillRect(x - 1, -10, 2, 25); c.restore(); break;
+      default: if (Z.drawIcon) { c.save(); Z.drawIcon(c, m, 0, 0, 30, ink); c.restore(); } else O(0, 0, 8);
+    }
+  }
+  Z.siegel = function (motiv, o) {
+    o = o || {}; const st = MET[o.stufe] ? o.stufe : "gold", lock = !!o.gesperrt, key = motiv + "|" + st + "|" + (lock ? 1 : 0) + "|" + (o.band ? 1 : 0);
+    let cv = cache.get(key); if (cv) return cv;
+    cv = document.createElement("canvas"); cv.width = cv.height = 96; const c = cv.getContext("2d");
+    const M = lock ? ["#6a5e58", "#3a322e", "#1a1614"] : MET[st], G = lock ? ["#2a2220", "#120e0c"] : GRUND[st];
+    if (o.band) { for (const sd of [-1, 1]) { c.fillStyle = lock ? "#2a2020" : st === "blut" ? "#5a0e0a" : "#7a1a12"; c.beginPath(); c.moveTo(48 + sd * 6, 66); c.lineTo(48 + sd * 22, 95); c.lineTo(48 + sd * 15, 88); c.lineTo(48 + sd * 10, 95); c.lineTo(48 + sd * 2, 70); c.fill(); } }
+    /* geprägter Rand mit Zacken */
+    c.save(); c.translate(48, 46);
+    c.fillStyle = M[2]; c.beginPath(); for (let i = 0; i < 48; i++) { const a = i / 48 * TAU, r = i % 2 ? 37 : 39.5; c.lineTo(Math.cos(a) * r, Math.sin(a) * r); } c.closePath(); c.fill();
+    const rg = c.createLinearGradient(-36, -36, 36, 36); rg.addColorStop(0, M[0]); rg.addColorStop(0.45, M[1]); rg.addColorStop(1, M[2]);
+    c.fillStyle = rg; c.beginPath(); c.arc(0, 0, 35.5, 0, TAU); c.fill();
+    const gg = c.createRadialGradient(-8, -10, 4, 0, 0, 30); gg.addColorStop(0, G[0]); gg.addColorStop(1, G[1]);
+    c.fillStyle = gg; c.beginPath(); c.arc(0, 0, 29, 0, TAU); c.fill();
+    c.strokeStyle = lock ? "rgba(0,0,0,.4)" : "rgba(0,0,0,.45)"; c.lineWidth = 1.2; c.beginPath(); c.arc(0, 0, 29, 0, TAU); c.stroke();
+    c.strokeStyle = lock ? "rgba(140,120,110,.25)" : "rgba(255,240,210,.35)"; c.setLineDash([1.2, 2.6]); c.beginPath(); c.arc(0, 0, 32.5, 0, TAU); c.stroke(); c.setLineDash([]);
+    /* Motiv: dunkle Prägekante, dann Metall */
+    const g2 = document.createElement("canvas"); g2.width = g2.height = 96; const gc = g2.getContext("2d"); gc.translate(48, 46); gc.scale(1.15, 1.15); glyph(gc, motiv, "#fff");
+    const tint = (col) => { const t = document.createElement("canvas"); t.width = t.height = 96; const tc = t.getContext("2d"); tc.drawImage(g2, 0, 0); tc.globalCompositeOperation = "source-in"; if (typeof col === "string") tc.fillStyle = col; else { const lg = tc.createLinearGradient(0, 20, 0, 76); lg.addColorStop(0, col[0]); lg.addColorStop(1, col[1]); tc.fillStyle = lg; } tc.fillRect(0, 0, 96, 96); return t; };
+    c.restore();
+    c.drawImage(tint("rgba(0,0,0,.6)"), 1.2, 1.8);
+    c.drawImage(tint(lock ? ["#5a504a", "#322a26"] : [M[0], M[1]]), 0, 0);
+    if (!lock) { c.globalAlpha = 0.5; c.drawImage(tint("rgba(255,250,230,.8)"), -0.8, -0.8); c.globalAlpha = 1; c.drawImage(tint([M[0], M[1]]), 0, 0); }
+    /* Glanz oben links */
+    if (!lock) { c.save(); c.translate(48, 46); c.globalCompositeOperation = "lighter"; const hl = c.createRadialGradient(-14, -18, 1, -14, -18, 22); hl.addColorStop(0, "rgba(255,240,210,.32)"); hl.addColorStop(1, "rgba(255,240,210,0)"); c.fillStyle = hl; c.beginPath(); c.arc(0, 0, 35, 0, TAU); c.fill(); c.restore(); }
+    /* gesperrt: Kette quer */
+    if (lock) { c.save(); c.translate(48, 46); c.rotate(-0.5); c.strokeStyle = "#4a423e"; c.lineWidth = 2.2; for (let x = -40; x <= 40; x += 9) { c.beginPath(); c.ellipse(x, 0, 5, x / 9 % 2 ? 1.6 : 3.2, 0, 0, TAU); c.stroke(); } c.fillStyle = "#3a322e"; c.fillRect(-6, -3, 12, 11); c.beginPath(); c.arc(0, -3, 4.5, Math.PI, 0); c.lineWidth = 2; c.stroke(); c.restore(); }
+    cache.set(key, cv); return cv;
+  };
+  const urls = new Map();
+  Z.siegelURL = function (motiv, o) { const cv = Z.siegel(motiv, o), k = cv; let u = urls.get(k); if (!u) { u = cv.toDataURL(); urls.set(k, u); } return u; };
 })();

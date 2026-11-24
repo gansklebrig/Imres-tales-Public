@@ -162,7 +162,7 @@
     A.play("chain", { vol: 0.8, rate: 0.8 }); A.play("door", { vol: 0.6, rate: 0.7 }); FX.addShake(4);
     for (const [x, y] of g.tiles) FX.burst(x * T + 8, y * T + 8, 3, { col: [Z.dustCol || "#8a7a70"], sp: 50, life: 0.6, size: 3, kind: "smoke" });
     if (g.flut) { for (let i = 0; i < g.tiles.length; i += 3) { const [x, y] = g.tiles[i]; FX.burst(x * T + 8, y * T + 4, 2, { col: ["#4a7a6a", "#9ac0b0"], sp: 60, ang: Math.PI / 2, spread: 1, life: 0.7, size: 2 }); } A.play("splash", { vol: 0.8 }); }
-    if (g.flut) { found("gate" + o.f.gate, L(["Gurgelnd läuft das Wasser ab – der Durchgang ist frei.", "With a gurgle the water drains away – the passage is clear."])); return; }
+    if (g.flut) { Z.achEv && Z.achEv("flut"); found("gate" + o.f.gate, L(["Gurgelnd läuft das Wasser ab – der Durchgang ist frei.", "With a gurgle the water drains away – the passage is clear."])); return; }
     found("gate" + o.f.gate, g.vert ? L(["Eine Falltür führt zurück zum Hauptweg.", "A trapdoor leads back to the main path."]) : L(["Das Gittertor ist offen – eine Abkürzung.", "The portcullis is open – a shortcut."]));
   }
   function useShrine(o) {
@@ -340,7 +340,7 @@
         const v = Z.level.get(Math.floor(b.x / T), Math.floor(b.y / T));
         if (v === 3 || v === 5 || v === 6 || v === 9 || b.life <= 0 || Math.floor(b.x / T / CW) !== ro.cx || Math.floor(b.y / T / CH) !== ro.cy) gone = true;
         if (!gone && !P.dead && Math.abs(P.x + P.w / 2 - b.x) < P.w / 2 + b.r - 2 && P.y + P.h > b.y - b.r && P.y < b.y + b.r) {
-          if (P.vy > 40 && P.y + P.h - (b.y - b.r) < 10) { P.vy = -330; P.onGround = false; A.play("crate", { vol: 0.4, rate: 1.3, x: b.x }); }
+          if (P.vy > 40 && P.y + P.h - (b.y - b.r) < 10) { P.vy = -330; P.onGround = false; A.play("crate", { vol: 0.4, rate: 1.3, x: b.x }); Z.achEv && Z.achEv("fass"); }
           else if (!(P.iframe > 0)) { Z.hurtPlayer(Math.round(P.hpMax * 0.07), { x: b.x, kb: 180 }); gone = true; }
         }
         if (gone) { ro.barrels.splice(i, 1); if (near) { A.play("break", { vol: 0.4, x: b.x }); FX.burst(b.x, b.y, 10, { col: ["#7a5432", "#5a3a20", "#9a7448"], sp: 120, life: 0.6, size: 2.5, kind: "shard", g: 700 }); } }
@@ -404,7 +404,7 @@
         let b = null, bd = 1e9; for (const [x, y] of td.safe) { const d = Math.abs(x - tx) + Math.abs(y - ty) * 2; if (d < bd) { bd = d; b = [x, y]; } }
         if (!b) continue;
         A.play("splash", { vol: 0.6 }); FX.burst(mx, feet, 12, { col: ["#4a6a5a", "#8aa090"], sp: 90, ang: -Math.PI / 2, spread: 1.2, life: 0.5, g: 400, size: 2 });
-        P.x = b[0] * T + 8 - P.w / 2; P.y = (b[1] + 1) * T - P.h; P.vx = P.vy = 0; P.iframe = Math.max(P.iframe || 0, 0.8); P._swing = null;
+        P.x = b[0] * T + 8 - P.w / 2; P.y = (b[1] + 1) * T - P.h; P.vx = P.vy = 0; P.iframe = Math.max(P.iframe || 0, 0.8); P._swing = null; Z.achEv && Z.achEv("flutNass");
         const now = S.t; if (!o.tip || now - o.tip > 20) { o.tip = now; toast(L(["Die Flut steigt – warte auf die Ebbe.", "The tide is rising – wait for low water."]), 2400, { x: P.x + P.w / 2, y: P.y - 10 }, { prio: 1 }); }
       }
     }

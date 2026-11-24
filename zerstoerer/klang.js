@@ -1161,6 +1161,47 @@
       return false;
     }
   });
+  /* ======================= R12: ERFOLGE, TRAUER, ABSPANN =======================
+     Erfolg: abenteuer.js grant() trägt den Erfolg in Z.meta.ach ein und spielt gleich danach „holy“ – an genau dieser Stelle
+     (A.hook.holy, neuer Eintrag in Z.meta.ach) erklingt stattdessen die Fanfare in der Tonart (musik.js Stinger „erfolg“).
+     Kategorie: Feld kat/cat/k der Erfolgs-Daten, sonst aus Kennung und Text geraten; „gross“ bei Feld selten/schwer/gross,
+     Belohnung Held, oder Text mit Boss/Ende/ohne Treffer. Trauer: nach dem Todes-Stinger (3,2 s) Musik „trauer“ (Tonart des
+     Lagers); Abspann: Z.ui.ending wird umhüllt → Musik „abspann“. */
+  const ER = { n: -1, stats: { fanfare: 0, kat: {} } };
+  KL.erfolge = ER;
+  function achKat(a) {
+    const k = a.kat || a.cat || a.k; if (k) { const m = String(k).toLowerCase(); for (const c of ["tempo", "technik", "nohit", "erkundung", "bosse"]) if (m.startsWith(c.slice(0, 4))) return c; if (/kampf|tech/.test(m)) return "technik"; if (/hit|treffer/.test(m)) return "nohit"; if (/boss/.test(m)) return "bosse"; if (/erkund|entdeck/.test(m)) return "erkundung"; }
+    const txt = (a.id + " " + JSON.stringify(a.n || "") + " " + JSON.stringify(a.d || "")).toLowerCase();
+    if (/ohne (schaden|treffer)|no.?hit|without (taking )?(damage|a hit)/.test(txt)) return "nohit";
+    if (/boss|w[aä]chter|warden|demogorgon|endboss|final/.test(txt)) return "bosse";
+    if (/sekunden|minuten|schnell|zeit|tempo|speed|fast|seconds|minutes/.test(txt)) return "tempo";
+    if (/parade|parry|ausweich|dodge|kombo|combo|krit|crit|sturz|technik/.test(txt)) return "technik";
+    if (/geheim|secret|karte|map|spur|trace|befrei|free|erkund|explor|seite|page|kammer|chamber/.test(txt)) return "erkundung";
+    return "sonst";
+  }
+  function achGross(a) {
+    if (a.selten || a.schwer || a.gross || a.rare || a.hard) return true;
+    if (a.r && a.r.hero) return true;
+    const txt = (a.id + " " + JSON.stringify(a.n || "") + " " + JSON.stringify(a.d || "")).toLowerCase();
+    return /alle enden|all endings|endboss|demogorgon|ohne (schaden|treffer)|without taking damage|5 sch[aä]del|five skulls/.test(txt);
+  }
+  if (A) A.hook = Object.assign(A.hook || {}, {
+    holy: o => {
+      const m = Z.meta && Z.meta.ach; if (!m || !Z.ACH) return false;
+      const ids = Object.keys(m); if (ER.n < 0) { ER.n = ids.length; return false; }
+      if (ids.length <= ER.n) { ER.n = ids.length; return false; }
+      ER.n = ids.length;
+      const newest = ids.reduce((a, b) => (m[b] > m[a] ? b : a)), a = Z.ACH.find(x => x.id === newest);
+      if (!a || !M.stinger || !M.out) return false;
+      const kat = achKat(a), gross = achGross(a); ER.stats.fanfare++; ER.stats.kat[kat] = (ER.stats.kat[kat] || 0) + 1; ER.last = { id: a.id, kat, gross };
+      M.stinger("erfolg", { kat, gross }); return true;
+    }
+  });
+  function hookEnde() {
+    if (ER.endHooked || !Z.ui || !Z.ui.ending) return; ER.endHooked = true;
+    const e0 = Z.ui.ending;
+    Z.ui.ending = function () { const r = e0.apply(this, arguments); try { if (M.set) { M.set("abspann"); ER.abspann = (ER.abspann || 0) + 1; } } catch (_) {} return r; };
+  }
   const W = { lv: null, pages: 0, kills: 0, chain: 0, chainT: 0, boss: null, phase: 0, won: false, dead: false, seenChest: new WeakSet(), seenElite: new WeakSet(), seenLoot: new WeakSet(), chall: 0, trials: 0, dripT: 2 };
   /* liegt ein Punkt im Bild (mit etwas Rand)? */
   const onCam = (x, y, m) => { const c = Z.cam; if (!c) return true; m = m || 0; return x > c.x - m && x < c.x + c.w + m && y > c.y - m && y < c.y + c.h + m; };
@@ -1202,7 +1243,7 @@
     W.won = !!Z.bossDefeated;
     /* Tod */
     const dead = !!(P && P.dead);
-    if (dead && !W.dead) M.stinger("tod");
+    if (dead && !W.dead) { M.stinger("tod"); const lv0 = lv; setTimeout(() => { if (Z.player && Z.player.dead && Z.level === lv0 && M.set) { M.set("trauer"); ER.trauer = (ER.trauer || 0) + 1; } }, 3200); }
     W.dead = dead;
     /* Killketten: Gegner, die kurz nacheinander fallen – Intensität steigt, Stinger nur auf den Stufen */
     const k = (Z.stats && Z.stats.kills) || 0;
@@ -1242,6 +1283,7 @@
     try { rueckTick(dt); } catch (e) { if (!KL.err8) { KL.err8 = 1; console.error(e); } }
     try { tplTick(dt); } catch (e) { if (!KL.err9) { KL.err9 = 1; console.error(e); } }
     try { bewegTick(dt); } catch (e) { if (!KL.err10) { KL.err10 = 1; console.error(e); } }
+    try { hookEnde(); if (ER.n < 0 && Z.meta && Z.meta.ach) ER.n = Object.keys(Z.meta.ach).length; } catch (e) { if (!KL.err12) { KL.err12 = 1; console.error(e); } }
     try { hookStimmen(); if (!VS.pre && M.prof) { VS.pre = M.prof.root; for (const [i, o] of [["kal", 2], ["glock", 3]]) for (let d = 0; d < 7; d++) { const pr = M.probe(i, M.ton(d, M.prof.root + 12 * o)); if (pr) A.load(pr.path); } } else if (M.prof && VS.pre !== M.prof.root) VS.pre = null; } catch (e) { if (!KL.err11) { KL.err11 = 1; console.error(e); } }
     /* Effekte-Dichte reiten (kern.js A.ride): ab 4 gleichzeitigen Effekten sachte zurück, bei 10+ etwa −4 dB; schnell runter, langsam wieder hoch */
     if (A.ride) { const n = A.live || 0, tgt = clamp(1 - 0.065 * (n - 3), 0.62, 1); KL.ride = tgt; A.ride.gain.setTargetAtTime(tgt, A.ctx.currentTime, tgt < A.ride.gain.value ? 0.12 : 1.1); }

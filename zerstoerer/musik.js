@@ -80,6 +80,10 @@
   const PROF = {
     lager:    { root: 50, bpm: 66, scale: "hpan", drone: "didge", pad: null, mel: "hpan", col: "kal", calm: true, wave: "triangle" },
     /* Titelmenü: dieselbe Tonart wie das Lager (D, Handpan-Moll), noch langsamer; gestrichener Psalter singt, Handpan tropft als Farbe */
+    /* R12: Trauer nach dem Tod (in der Tonart des Lagers, damit der Weg ins Lager ohne Bruch weiterklingt) und Abspann nach dem
+       Endboss (D dorisch, Choral aus Chor, Horn und Pauke – getragen statt laut) */
+    trauer:   { root: 50, bpm: 50, scale: "hpan", drone: "vc", pad: "ooh", mel: "stimme", col: "hglo", calm: true, wave: "triangle", still: true },
+    abspann:  { root: 50, bpm: 68, scale: "dorisch", drone: "vc", pad: "aah", mel: "horn", col: "harfe", calm: true, wave: "triangle", still: true, hymne: true },
     titel:    { root: 50, bpm: 56, scale: "hpan", drone: "vc", pad: "ooh", mel: "psab", col: "hpan", calm: true, wave: "triangle", titel: true },
     passage:  { root: 50, bpm: 60, scale: "hpan", drone: "vc", pad: "ooh", mel: "hpan", col: "glas", calm: true },
     torhof:   { root: 50, bpm: 92, scale: "dorisch", drone: "vc", pad: "ooh", mel: "eh", col: "harfe", ost: "spic", bass: "kb", brass: "hornst", dr: ["taiko_36", "timp1", "marsch1"], tick: 7000 },
@@ -510,6 +514,7 @@
     else { M.restRun = (M.restRun || 0) + 1; M.playRun = 0; M.phrase = null; }
   }
 
+  const i0 = bar => [2, 4, 3, 1][Math.floor(bar / 2) % 4]; /* Horn im Abspann: Terz, Quinte, Quarte, Sekunde über dem Akkordgrundton */
   /* ---------- Gebiet setzen ---------- */
   const ambushFight = () => !!(Z.ambush && Z.ambush() && Z.ambush().state === "fight");
   const trialFight = () => { const S = Z.erkundung && Z.erkundung(); return !!(S && S.trial && S.trial.state === "fight"); };
@@ -603,7 +608,7 @@
     /* Gebietswechsel als musikalische Brücke statt Schnitt (R10): die schon gespielten Noten des alten Gebiets klingen bis zum
        Ende des laufenden Takts aus (höchstens ~2 s, mindestens 0,9 s), darüber hält ein leiser Chor den Grundakkord der alten
        Tonart; ein Rückwärts-Becken atmet auf die Eins, auf der das neue Gebiet einsetzt. Kein Abbruch, keine Pause. */
-    if (!sameLevel && hadProf && M.xf) {
+    if ((!sameLevel || prof.still) && hadProf && M.xf) {
       const toBar = (8 - (oldStep % 8)) % 8, endBar = Math.max(now, oldNext) + toBar * oldBeat;
       start = clamp(endBar, now + 0.9, now + 2.0);
       M.xf.gain.cancelScheduledValues(now); M.xf.gain.setTargetAtTime(1, now, 0.2);
@@ -772,7 +777,7 @@
     hookSettings();
     const p = M.prof, c = A.ctx, now = c.currentTime, D = DYN[dynMode()];
     dt = Math.min(dt || 0, 0.1);
-    const paused = !!(Z.paused && Z.ui && Z.ui.modalOpen);
+    const paused = !!(Z.paused && Z.ui && Z.ui.modalOpen) && !(M.prof && M.prof.still); /* Trauer/Abspann laufen unter ihrem Fenster ungedämpft weiter */
     if (!paused) M.raw = gameIntensity(dt);
     /* Tod: keine Abtreppung über Kampf/Spannung – Intensität sofort weg, der Tod-Stinger trägt den Übergang */
     const dead = !!(Z.player && Z.player.dead);
@@ -960,6 +965,12 @@
       else if (!M.phrase && (st === 2 || st === 5) && Math.random() < 0.18) playNote(p.col, deg(p.scale, pick([0, 2, 4, 7, 9]) + chord, p.root + 19), hum(), 0.08, beat * 5, M.busCol);
     }
     if (p.lager && tr <= 1) lagerStep(p, t, st, bar, ph, beat, chord, tone, chordStart, hum);
+    /* Abspann: Choral – Chor hält den Akkord, Horn singt eine Quint-Linie, Pauke auf jeder zweiten Eins, ab Takt 9 Glocken */
+    if (p.hymne) {
+      if (chordStart) { for (const i of [0, 1, 2]) playNote("aah", tone(i, p.root + 12), t, 0.07, beat * 15, M.busExp, -1); playNote("horn", deg(p.scale, chord + i0(bar), p.root), t, 0.1, beat * 7, M.busMel, 1); }
+      if (st === 0 && bar % 2 === 0) playNote("timpt", tone(0, p.root - 12), t, 0.16, beat * 4, M.busExp);
+      if (st === 0 && bar >= 8 && bar % 4 === 0) [0, 4, 7].forEach((d, k) => playNote("glock", deg(p.scale, chord + d, p.root + 36), t + k * beat, 0.05, beat * 6, M.busCol, -1));
+    }
     /* Melodie (Leitmotiv-Noten tragen „semi“: Halbtöne über dem Grundton, auch chromatisch) */
     if (M.phrase) {
       for (const n of M.phrase) if (n.s === ph) {
@@ -1157,6 +1168,7 @@
     const p = M.prof || PROF.torhof, now = A.ctx.currentTime, beat = M.beat || 60 / p.bpm / 2;
     const t = o && o.at > now ? o.at : Math.max(q16(), now + 0.03);
     M.lastSting = M.lastSting || {};
+    if (kind === "erfolg") M.lastSting.erfolg = 0; /* jede Freischaltung bekommt ihre Fanfare */
     const gap = { kampf: 6, ruhe: 8, kette: 0.2, truhe: 1, seite: 2, elite: 10, beute: 1.5, geschafft: 3 }[kind] || 1.5;
     if (M.lastSting[kind] && now - M.lastSting[kind] < gap) return;
     M.lastSting[kind] = now; M.stats.stingers[kind] = (M.stats.stingers[kind] || 0) + 1;
@@ -1262,6 +1274,28 @@
       maj.forEach(m => playNote("aah", m + 12, t + 0.6, 0.08 * kk, 4, B, 2));
       for (let i = 0; i < 6; i++) playNote("harfe", maj[i % 4] + 12 * (1 + Math.floor(i / 4)), t + 0.6 + i * 0.09, 0.1 * kk, 2.5, B, 2);
       duck(0.5, t, 3.5);
+    },
+    /* Erfolg freigeschaltet (R12): kurze Fanfare in der Tonart, je Kategorie gefärbt; o.gross = seltener/schwerer Erfolg → prächtiger
+       (Chor, Paukenwirbel, Oktavverdopplung, Becken, länger). Kategorien: tempo, technik, nohit, erkundung, bosse, sonst */
+    erfolg: ({ p, t: t0, B, o }) => {
+      const t = grid(1), r = p.root + 12, k = o.kat || "sonst", gr = !!o.gross, b = 0.11;
+      const up = [0, 2, 4, 7].map(d => deg(p.scale, d, r)), top = deg(p.scale, 7, r);
+      const ins = { tempo: "trpst", technik: "hornst", nohit: "cel", erkundung: "harfe", bosse: "blech" }[k] || "trpst";
+      const stp = { tempo: 0.07, technik: 0.11, nohit: 0.1, erkundung: 0.06, bosse: 0.14 }[k] || 0.1;
+      up.forEach((m, i) => playNote(ins, m + (k === "nohit" ? 12 : 0), t + i * stp, 0.11 - i * 0.008, stp * 2.2, B, 2));
+      const tEnd = t + 4 * stp;
+      [0, 2, 4].forEach(d => playNote(k === "nohit" ? "glock" : k === "erkundung" ? "kal" : (p.brass || "hornst"), deg(p.scale, d, r + (k === "nohit" ? 24 : 0)), tEnd, 0.09, gr ? 2.6 : 1.3, B, 2));
+      if (k === "tempo") for (let i = 0; i < 6; i++) tick(t + i * 0.035, 0.05, 0.015);
+      if (k === "technik" && p.dr) hit(p.dr[1] || p.dr[0], tEnd, 0.4, 1.05, B);
+      if (k === "erkundung") for (let i = 0; i < 5; i++) playNote("kal", deg(p.scale, i * 2, r + 12), t + i * 0.05, 0.05, 1.2, B, 2);
+      if (k === "bosse") { playNote("timpt", deg(p.scale, 0, p.root - 12), tEnd, 0.22, 1.6, B, 2); if (p.dr) hit(p.dr[0], tEnd, 0.6, 0.9, B); }
+      if (gr) {
+        hit("timproll", t - 0.05, 0.18, 1, B); hit("crash", tEnd, 0.16, 1, B); kick(tEnd, 0.5);
+        [0, 2, 4].forEach(d => playNote("aah", deg(p.scale, d, r), tEnd, 0.07, 3.4, B, 2));
+        playNote(ins, top + 12, tEnd + 0.2, 0.08, 1.8, B, 2);
+      }
+      duck(gr ? 0.45 : 0.3, t, gr ? 2.8 : 1.5);
+      void b; void t0;
     },
     tod: ({ p, t, B }) => { /* tiefer Chor sinkt herab */
       [0, -2, -4].forEach((d, i) => playNote("ooh", deg(p.scale, d, p.root + 12), t + i * 0.9, 0.12, 2.4, B, 1));

@@ -144,7 +144,7 @@
     lastEnd = why || "";
     b.why = why || ""; b.st = "closing"; b.closeT = 0; b.snap = null; /* Zustand des alten Gebiets freigeben */
     try { Z.ui.worldLabel("rueckweg", null); } catch (_) {}
-    if (b.lv === Z.level) { A.play("chain", { vol: 0.28, rate: 0.9, x: b.gx }); A.play("door", { vol: 0.25, rate: 0.7, delay: 0.25, x: b.gx }); }
+    if (b.lv === Z.level) { A.play("chain", { vol: 0.28, rate: 0.9, x: b.gx }); } /* Aufschlag/Rückprall des Gitters (0,56/0,73 s) spielt klang.js über diesen Kettenklang */
   }
 
   /* ======================= ZURÜCK / WIEDER VOR ======================= */

@@ -360,7 +360,11 @@
   function noteShow(n) {
     const el = document.createElement("div");
     el.className = "meldung eisen p" + n.prio + (n.art ? " " + n.art : "");
-    el.innerHTML = (n.icon ? '<span class="mi">' + n.icon + "</span>" : "") + '<span class="mt">' + n.html + "</span>";
+    /* W11 R27 (nur Optik): freigeschalteter Erfolg → kurzes gemaltes Siegel mit Glanz statt Pokal-Zeichen (figuren.js Z.siegelURL;
+       Motiv/Stufe kann abenteuer.js über Z.erfolgSiegel(html) → { motiv, stufe } liefern) */
+    let ico = n.icon;
+    if (n.icon === "🏆" && Z.siegelURL) { try { const w = (Z.erfolgSiegel && Z.erfolgSiegel(n.html)) || {}; ico = '<img class="siegel" alt="" src="' + Z.siegelURL(w.motiv || "stern", { stufe: w.stufe || "gold" }) + '">'; el.classList.add("erfolg-siegel"); } catch (_) { ico = n.icon; } }
+    el.innerHTML = (ico ? '<span class="mi">' + ico + "</span>" : "") + '<span class="mt">' + n.html + "</span>";
     if (n.prio >= 2) notesEl.prepend(el); else notesEl.appendChild(el);
     void el.offsetWidth; el.classList.add("an");
     n.el = el; n.t = 0; notes.push(n); ui.lastNote = el;
@@ -496,6 +500,8 @@
     { let im = bossbar.querySelector("img.boss-portraet"); const u = Z.bossPortraet ? Z.bossPortraet(e.def) : null;
       if (u) { if (!im) { im = document.createElement("img"); im.className = "boss-portraet"; im.alt = ""; bossbar.prepend(im); } im.src = u; } else if (im) im.remove(); }
     ui.banner(L(e.def.n), e.def.intro ? L(e.def.intro) : L(e.def.title || ["", ""]), 4200);
+    /* W11 R27 (nur Optik): einfache Grafik zeigt statt des gemalten Bands das Textbanner – auch dort das Boss-Porträt */
+    { const bb = banner.querySelector("b"), u = Z.bossPortraet ? Z.bossPortraet(e.def) : null; if (u && bb && bb.textContent === L(e.def.n)) { const im = document.createElement("img"); im.className = "boss-portraet"; im.alt = ""; im.src = u; banner.prepend(im); } }
     /* W11 R25 (nur Lage): solange das Boss-Titelband steht, rücken Meldungen darunter (CSS body.bossplatte) */
     document.body.classList.add("bossplatte"); ui._bpLeft = 4.6; /* zählt in noteTick mit der Spielzeit herunter, wie das Band selbst */
   };
@@ -1626,6 +1632,17 @@
     return '<div class="stats"><div><b>' + (Z.stats.kills || 0) + "</b>" + esc(t("kills")) + "</div><div><b>" + fmtTime(run.time) + "</b>" + esc(t("time")) + "</div><div><b>" + U.fmt(Z.stats.gold || 0) + "</b>" + esc(t("gold")) + "</div><div><b>" + (Z.stats.parries || 0) + "</b>" + esc(t("parries")) + "</div><div><b>" + run.shardsBank + "</b>" + esc(t("shardsKept")) + "</div>" + (P && P.shards ? "<div><b>" + P.shards + "</b>" + esc(t("shardsLost")) + "</div>" : "") + "</div>" +
       '<p class="hinweis">' + esc(t("reached")) + ": " + (run.route || []).map(r => esc(Z.areaName(r))).join(" → ") + "</p>";
   }
+  /* W11 R27 (nur Optik): Laufbilanz (Tod, Umkehr, Sieg) schmücken – gemaltes Siegel über dem Titel (figuren.js Z.siegelURL),
+     roter bzw. goldener Schein, Kacheln erscheinen nacheinander, leere Werte treten zurück. Greift, sobald die Bilanz im
+     Fenster steht (auch aus der Warteschlange oder von anderen Modulen umhüllt). */
+  new MutationObserver(() => { try {
+    const bx = modal.querySelector(".mbox"), bl = bx && bx.querySelector(".bilanz"); if (!bl || bx.classList.contains("geschmueckt")) return;
+    bx.classList.add("geschmueckt"); const sieg = !!bx.querySelector("h2.ende"), h2 = bx.querySelector("h2"), um = !sieg && h2 && h2.textContent === L(["Umgekehrt", "Turned back"]);
+    bx.classList.add(sieg ? "bilanz-sieg" : "bilanz-tod");
+    const sch = document.createElement("div"); sch.className = "bilanz-schein"; bx.prepend(sch);
+    if (Z.siegelURL && h2) { const im = document.createElement("img"); im.className = "bilanz-siegel"; im.alt = ""; im.src = sieg ? Z.siegelURL("sieg", { stufe: "gold", band: true }) : um ? Z.siegelURL("tor", { stufe: "silber" }) : Z.siegelURL("tod", { stufe: "blut", band: true }); h2.before(im); }
+    bl.querySelectorAll(".bk").forEach((k, i) => { k.style.setProperty("--i", i); const v = (k.querySelector("b") || {}).textContent || ""; if (/^(0|0 m|0:00)$/.test(v.trim())) k.classList.add("leer"); });
+  } catch (e) { console.error(e); } }).observe(modal, { childList: true });
   ui.deathScreen = o => {
     openModal("<h2>" + esc(o && o.abort ? L(["Umgekehrt", "Turned back"]) : t("died")) + '</h2><p class="unter">' + esc(o && o.abort ? L(["Ezekiel kehrt um. Ohne ein Wort.", "Ezekiel turns back. Without a word."]) : t("diedSub")) + "</p>" + statsHTML() + gnadeNote() + '<p class="tipp">' + esc(L(Z.R.pick(TX.tips))) + '</p><div class="knoepfe"><button data-act="toCamp" autofocus>' + esc(t("camp")) + "</button></div>", { cls: "breit todfenster", noEsc: true });
   };
