@@ -1682,17 +1682,20 @@
     const ceilAt = (x, y) => { for (let yy = y; yy > y - 10 && yy > 0; yy--) if (g(x, yy) === 0 && solid(g(x, yy - 1))) return yy; return -1; };
     const dropOf = (x, y, max) => { let d = 0; while (d < max && g(x, y + d + 1) === 0) d++; return d; };
     const noVoid = (x0, x1, y) => { for (let x = x0 - 3; x <= x1 + 3; x++) for (let yy = y; yy <= y + 3; yy++) { const v = g(x, yy); if (v === 9 || v === 5 || v === 6) return false; } return true; };
+    /* keine Kombi-Fallen: Bodenfallen nicht direkt neben Gruben, Schachtöffnungen, Stacheln oder Flüssigkeit */
+    const pitNear = (x0, x1, fy) => { for (let x = x0 - 2; x <= x1 + 2; x++) { const v = g(x, fy + 1), w = g(x, fy); if (v === 0 || v === 3 || v === 5 || v === 6 || v === 9 || w === 3 || w === 5 || w === 6) return true; } return false; };
     const runOf = (x, y, max) => { let x1 = x; while (x1 - x < max && standable(lv, x1 + 1, y, 3) && g(x1 + 1, y + 1) === 1) x1++; return x1; };
     function tryPlace(kind, x, y) {
       const pl = TRAPPLACE[kind] || "boden";
       if (pl === "boden") {
         const fy = floorAt(x, y); if (fy < 0 || !free(x, fy)) return false;
         if (!(standable(lv, x, fy, 3) && standable(lv, x - 1, fy, 3) && standable(lv, x + 1, fy, 3) && g(x, fy + 1) === 1 && g(x - 1, fy + 1) !== 9 && g(x + 1, fy + 1) !== 9)) return false;
+        if (pitNear(x, x, fy)) return false;
         add(kind, x, fy); return true;
       }
       if (pl === "tor") {
         const fy = floorAt(x, y); if (fy < 0 || !free(x, fy)) return false;
-        if (!(standable(lv, x - 1, fy, 3) && standable(lv, x + 1, fy, 3) && g(x, fy + 1) === 1)) return false;
+        if (!(standable(lv, x - 1, fy, 3) && standable(lv, x + 1, fy, 3) && g(x, fy + 1) === 1) || pitNear(x, x, fy)) return false;
         let h = 0; while (h < 10 && g(x, fy - h - 1) === 0) h++;
         if (h < 2 || h > 9 || !solid(g(x, fy - h - 1))) return false; /* auch unter höheren Bögen (Torhof hat hohe Räume) */
         add(kind, x, fy, { h: h + 1 }); return true;
@@ -1722,7 +1725,7 @@
         const fy = floorAt(x, y); if (fy < 0 || !free(x, fy)) return false;
         while (standable(lv, x - 1, fy, 3) && g(x - 1, fy + 1) === 1 && x > Math.floor(x / CW) * CW + 1 && pl === "luft") x--;
         const x1 = runOf(x, fy, pl === "luft" ? 9 : 7), need = pl === "luft" ? 5 : 4;
-        if (x1 - x < need) return false;
+        if (x1 - x < need || pitNear(x, x1, fy)) return false;
         if (pl === "luft") { for (let q = x; q <= x1; q++) for (let h = 1; h <= 3; h++) if (g(q, fy - h) !== 0 && g(q, fy - h) !== 4) return false; if (kind === "boee" && !noVoid(x, x1, fy)) return false; }
         if (kind === "z") { for (let q = x; q <= x1; q++) lv.traps.push({ t: "z", x: q, y: fy }); taken.push([x, fy]); return true; }
         add(kind, x, fy, { x1 }); return true;

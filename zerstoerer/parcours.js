@@ -74,7 +74,9 @@
   /* ======================= TREFFER ======================= */
   function hitP(tr, frac, x, o) {
     const P = Z.player; if (!P || P.dead) return;
-    Z.hurtPlayer(dmgFrac(frac), Object.assign({ x, kb: 200, kbUp: 220, parryable: false, trap: true }, o || {}));
+    /* eine Falle trifft den Spieler höchstens alle 1,2 s – man kommt heraus, ohne mehrfach erwischt zu werden */
+    if (tr) { if (tr._pHit > clock) return false; tr._pHit = clock + 1.2; }
+    return Z.hurtPlayer(dmgFrac(frac), Object.assign({ x, kb: 200, kbUp: 220, parryable: false, trap: true }, o || {}));
   }
   function hitE(tr, e, dmg, o) {
     if (tr.cd.get(e) > Z.time0()) return;
@@ -112,7 +114,7 @@
             if (!tr.on) { tr.on = true; if (near(tr.x, tr.y)) A.play("fireBig", { x: tr.x, vol: 0.35, rate: 1.2 }); }
             const r = { x: tr.x - 7, y: tr.y - 58, w: 14, h: 58 };
             const pz = skin.burn === "poison";
-            if (P && U.overlap(r, hbP(P))) { hitP(tr, 0.12, tr.x, { kb: 120 }); Z.addStatus(P, pz ? "poison" : "burn", pz ? 2 : 1.5, true); }
+            if (P && U.overlap(r, hbP(P)) && hitP(tr, 0.12, tr.x, { kb: 120 }) !== false) Z.addStatus(P, pz ? "poison" : "burn", pz ? 2 : 1.5, true);
             for (const e of Z.enemies) if (!e.dead && U.overlap(r, e)) { hitE(tr, e, 30); Z.addStatus(e, pz ? "poison" : "burn", 2); }
             if (Math.random() < dt * 70) FX.p({ x: tr.x + (Math.random() - 0.5) * 8, y: tr.y - 4, vx: (Math.random() - 0.5) * 30, vy: -170 - Math.random() * 80, life: 0.35, size: 3, col: Math.random() < 0.5 ? skin.fl[1] : skin.fl[0], kind: "glow", add: true });
           } else tr.on = false;
@@ -161,11 +163,12 @@
           break;
         }
         case "saege": {
-          tr.x += tr.dir * tr.sp * dt; if (tr.x > tr.x1) { tr.x = tr.x1; tr.dir = -1; } if (tr.x < tr.x0) { tr.x = tr.x0; tr.dir = 1; }
+          if (tr.pause > 0) tr.pause -= dt; else tr.x += tr.dir * tr.sp * dt;
+          if (tr.x > tr.x1) { tr.x = tr.x1; tr.dir = -1; } if (tr.x < tr.x0) { tr.x = tr.x0; tr.dir = 1; }
           tr.rot += dt * 22 * tr.dir;
           if (Math.random() < dt * 25 && near(tr.x, tr.y)) FX.p({ x: tr.x - tr.dir * 8, y: tr.y + 2, vx: -tr.dir * (60 + Math.random() * 80), vy: -60 - Math.random() * 60, g: 500, life: 0.3, size: 1.2, col: "#ffd27a", kind: "spark", add: true });
           if (near(tr.x, tr.y, 200) && Math.random() < dt * 3) A.play("hitMetal", { x: tr.x, vol: 0.12, rate: 2, gap: 0.2 });
-          if (P && circRect(tr.x, tr.y, 10, hbP(P))) hitP(tr, 0.13, tr.x, { kb: 220, kbUp: 260 });
+          if (P && circRect(tr.x, tr.y, 10, hbP(P)) && !(tr._pHit > clock)) { hitP(tr, 0.13, tr.x, { kb: 220, kbUp: 260 }); /* nach dem Treffer kurz anhalten und vom Spieler weg laufen */ tr.pause = 0.7; tr.dir = P.x + P.w / 2 < tr.x ? 1 : -1; }
           for (const e of Z.enemies) if (!e.dead && !e.def.fly && circRect(tr.x, tr.y, 10, e)) { hitE(tr, e, 35, { eff: { bleed: 2 } }); }
           break;
         }
