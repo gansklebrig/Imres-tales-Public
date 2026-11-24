@@ -111,6 +111,7 @@
   }
   const load0 = Z.loadArea;
   Z.loadArea = function () { if (S && S.trial && S.trial.state === "fight") unsealTrial(S.trial, true); const r = load0.apply(this, arguments); try { setup(Z.level); } catch (e) { console.error(e); } return r; };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "erkundung", save: () => S, load: s => { S = s; } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
 
   function spawnGuard(lv, f, R) {
     const B = Z.BIOMES[lv.biome]; if (!B || !Z.spawnEnemy) return;
@@ -286,6 +287,7 @@
     return hit;
   };
   function drawKran(c, m, t) {
+    if (Z.sonderPracht && Z.sonderPracht()) return; /* effekte.js zeichnet die schöne Fassung (alle Stufen) */
     const x = m.x, w = m.w, top = m.y0 - 3 * T;
     /* Ausleger oben und Seil */
     c.fillStyle = "#3a2a20"; c.fillRect(x - 6, top - 3, w + 12, 4); c.fillRect(x + w / 2 - 2, top - 3, 4, 10);
@@ -297,6 +299,7 @@
     const a = (m.y / 9) % (Math.PI * 2); c.save(); c.translate(x + w / 2, top - 1); c.rotate(a); c.fillStyle = "#5a5058"; c.fillRect(-4, -1, 8, 2); c.fillRect(-1, -4, 2, 8); c.restore();
   }
   function drawTruemmer(c, o, t) {
+    if (Z.sonderPracht && Z.sonderPracht()) return; /* effekte.js zeichnet die schöne Fassung (alle Stufen) */
     /* eingestürzter Übergang: Geröllhaufen vor der zugeschütteten Öffnung, abgebrochene Bohlen auf beiden Seiten */
     const x = o.x * T, y = (o.y0 + 3) * T;
     const R = n => { const v = Math.sin(n * 12.9898 + o.x * 78.233) * 43758.5453; return v - Math.floor(v); };
@@ -304,6 +307,59 @@
     c.fillStyle = "#6a4a2c"; c.save(); c.translate(x - 22, y - 3); c.rotate(-0.35); c.fillRect(0, 0, 18, 3); c.restore();
     c.save(); c.translate(x + 40, y - 9); c.rotate(0.5); c.fillRect(0, 0, 16, 3); c.restore();
     c.fillStyle = "rgba(40,30,26,.55)"; for (let i = 0; i < 5; i++) c.fillRect(x + R(i + 20) * 30, o.y0 * T + R(i + 30) * 40, 3, 2); /* Risse im Schutt */
+  }
+
+  /* ======================= W13 R5: zerstörbare Umgebung ======================= */
+  /* Wucht-Risse (welt.js cracks, lv.wuchtSet): leichte Treffer prallen ab (Kachel für diesen Treffer kurz fest),
+     Wucht-Schläge (heavy/spin), Schildstoß, Sturzangriff und Explosionen (ohne Angriffsobjekt) brechen sie. */
+  let wuchtTip = 0, morschTip = null;
+  const hpW0 = Z.hitProps;
+  Z.hitProps = function (r, dmg, act) {
+    const lv = Z.level;
+    if (!r || !lv || !lv.wuchtSet || !lv.wuchtSet.size) return hpW0 ? hpW0.apply(this, arguments) : undefined;
+    const heavy = !act || !!(act.def && (act.def.heavy || act.def.spin)) || !!act.bash;
+    const tmp = [];
+    for (let ty = Math.floor(r.y / T); ty <= Math.floor((r.y + r.h) / T); ty++) for (let tx = Math.floor(r.x / T); tx <= Math.floor((r.x + r.w) / T); tx++) {
+      const i = ty * lv.W + tx; if (!lv.wuchtSet.has(i) || lv.get(tx, ty) !== 7) continue;
+      if (heavy) { lv.wuchtSet.delete(i); Z.stats && (Z.stats.wucht = (Z.stats.wucht || 0) + 1); }
+      else { lv.set(tx, ty, 1); tmp.push([tx, ty]); }
+    }
+    const res = hpW0 ? hpW0.apply(this, arguments) : undefined;
+    for (const [x, y] of tmp) lv.set(x, y, 7);
+    if (tmp.length) {
+      const [x, y] = tmp[0]; A.play("rock", { vol: 0.35, rate: 1.6 }); FX.burst(x * T + 8, y * T + 8, 4, { col: [Z.tileCol || "#6a5a50", "#9a8a7a"], sp: 50, life: 0.5, size: 2, g: 500 });
+      const now = S ? S.t : 0;
+      if (now - wuchtTip > 25) { wuchtTip = now; toast(L(["Es bröckelt nur – ein Wuchtschlag, Schildstoß oder Sturzangriff könnte es brechen.", "It only crumbles – a heavy blow, shield bash or dive attack could break it."]), 2800, { x: x * T + 8, y: y * T - 6 }, { prio: 1 }); }
+    }
+    return res;
+  };
+  /* Morsche Böden (lv.morsch): brechen unter einer schweren Landung (Sturz ≥ 4 Kacheln oder Sturzangriff) */
+  function morschTick(P) {
+    const lv = S.lv;
+    if (!P.onGround || P._kran) { P._mPeak = P._mPeak == null ? P.y : Math.min(P._mPeak, P.y); P._mAir = true; return; }
+    const fall = P._mPeak != null ? P.y - P._mPeak : 0, wasAir = P._mAir; P._mPeak = null; P._mAir = false;
+    const fy = Math.floor((P.y + P.h + 1) / T);
+    for (const m of lv.morsch) {
+      if (m.broken || fy !== m.y || P.x + P.w <= m.x0 * T || P.x >= (m.x1 + 1) * T) continue;
+      if (wasAir && (fall >= 4 * T || (P.diveRec || 0) > 0.2)) { breakMorsch(m, P); return; }
+      if (morschTip !== lv) { morschTip = lv; A.play("stepWood", { vol: 0.5, rate: 0.6 }); toast(L(["Die Bohlen knarren bedrohlich …", "The planks creak ominously…"]), 2200, { x: P.x + P.w / 2, y: P.y - 8 }, { prio: 0 }); }
+    }
+  }
+  function breakMorsch(m, P) {
+    const lv = S.lv; m.broken = true;
+    for (let x = m.x0; x <= m.x1; x++) lv.set(x, m.y, 0);
+    Z.dirtyTiles && Z.dirtyTiles(m.x0, m.y);
+    A.play("break", { vol: 0.8 }); A.play("crate", { vol: 0.5, rate: 0.7 }); FX.addShake(4);
+    FX.burst((m.x0 + 1.5) * T, m.y * T + 8, 22, { col: ["#7a5432", "#5a3a20", "#9a7448"], sp: 150, life: 0.9, size: 3, kind: "shard", g: 700, drag: 0.98 });
+    if (P) { P.onGround = false; P.vy = Math.max(P.vy, 120); }
+    Z.stats && (Z.stats.morsch = (Z.stats.morsch || 0) + 1);
+  }
+  function drawMorsch(c, m) {
+    const x = m.x0 * T, y = m.y * T, w = (m.x1 - m.x0 + 1) * T;
+    c.fillStyle = "#5a3e26"; c.fillRect(x - 1, y, w + 2, 7); c.fillStyle = "#7a5634"; c.fillRect(x - 1, y, w + 2, 2);
+    c.fillStyle = "#3a2616"; for (let i = 1; i < 6; i++) c.fillRect(x + (w / 6) * i, y, 1, 7); /* Fugen */
+    c.strokeStyle = "rgba(25,15,8,.9)"; c.lineWidth = 1; c.beginPath(); c.moveTo(x + w * 0.3, y + 1); c.lineTo(x + w * 0.42, y + 4); c.lineTo(x + w * 0.38, y + 7); c.moveTo(x + w * 0.66, y); c.lineTo(x + w * 0.6, y + 5); c.stroke(); /* Risse */
+    c.fillStyle = "rgba(10,6,4,.55)"; c.fillRect(x, y + 7, w, 9); /* Hohlraum unter den Bohlen */
   }
 
   /* ======================= Ablauf ======================= */
@@ -326,6 +382,7 @@
     }
     if (S.trial) trialTick(S.trial, dt);
     if (S.kraene.length) kranTick(dt, P);
+    if (S.lv.morsch && S.lv.morsch.length) morschTick(P);
     const bt = erTakt(dt); if (!(bt > 0)) return;
     S.t += bt;
     zielTick(bt, px, py);
@@ -333,6 +390,12 @@
     for (const k of S.keys) k.t += bt;
     for (const o of S.levers) if (o.pulled && o.a < 1) o.a = Math.min(1, o.a + bt * 4);
     for (const s of S.shrines) s.t += bt;
+    /* W13 R5: bröckelnder Putz an Wucht-Rissen im Bild – kleine Staubkrümel als Hinweis */
+    if (S.lv.wucht && S.lv.wucht.length && (S.putzT = (S.putzT || 0) - bt) <= 0) {
+      S.putzT = 0.45; const cam = Z.cam;
+      for (const o of S.lv.wucht) { const tl = o.tiles.filter(([x, y]) => S.lv.get(x, y) === 7); if (!tl.length) continue; const [x, y] = tl[(Math.random() * tl.length) | 0];
+        if (cam && x * T > cam.x - 16 && x * T < cam.x + cam.w + 16 && y * T > cam.y - 16 && y * T < cam.y + cam.h + 16) FX.burst(x * T + 2 + Math.random() * 12, y * T + 14, 1, { col: ["#8a7a6a", "#6a5a50"], sp: 10, ang: Math.PI / 2, spread: 0.5, life: 0.8, size: 1.5, g: 300 }); }
+    }
     /* Geheimkammern: gefunden, sobald man drinsteht */
     const ck = Math.floor(px / T / CW) + "," + Math.floor((P.y + P.h / 2) / T / CH);
     if (S.secretCells.has(ck)) found("secret:" + ck, L(["Eine verborgene Kammer.", "A hidden chamber."]));
@@ -449,6 +512,7 @@
     for (const k of S.keys) if (vis(k.x, k.y)) drawKey(c, k, t);
     for (const m of S.kraene || []) if (m.x > vx0 - 40 && m.x < vx1 && m.y1 > vy0 && m.y0 - 60 < vy1) drawKran(c, m, t);
     for (const o of S.specials || []) if (o.k === "bruecke" && vis(o.x * T, o.y0 * T)) drawTruemmer(c, o, t);
+    for (const m of S.lv.morsch || []) if (!m.broken && vis(m.x0 * T, m.y * T)) drawMorsch(c, m);
   };
   /* Licht: Fundstücke, Schreine und Laternen leuchten durch die Dunkelheit (alle Grafikstufen) */
   const le0 = Z.lightExtra;

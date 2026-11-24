@@ -1035,7 +1035,7 @@
     let best = null, bs = 1e9;
     for (let attempt = 0; attempt < 40; attempt++) {
       const lv = tryGen(biomeId, (seed + attempt * 7919) >>> 0, opts);
-      if (lv && validate(lv)) { lv.attempts = attempt + 1; if (!Z.noEase) ease(lv); settle(lv); plan(lv); specials(lv); if (!Z.noRuneGates) runeGates(lv); unwall(lv); assignRooms(lv); return lv; }
+      if (lv && validate(lv)) { lv.attempts = attempt + 1; if (!Z.noEase) ease(lv); settle(lv); plan(lv); specials(lv); if (!Z.noRuneGates) runeGates(lv); cracks(lv); unwall(lv); assignRooms(lv); return lv; }
       /* Notfall: die beste Karte merken (alle Ausgänge erreichbar, möglichst wenige Festsitz-Stellen) */
       const sc = lv && lv.stuck ? lv.stuck.length : 1e8;
       if (lv && sc < bs) { bs = sc; best = lv; }
@@ -1619,6 +1619,171 @@
     }
   }
   Z._specials = specials;
+  /* ======================= W13 R5: ZERSTÖRBARE UMGEBUNG („The Destroyer“) =======================
+     Wucht-Risse: rissiges Mauerwerk (Kachel 7), das nur starke Treffer zerschlagen – Wucht-Schläge der Kombos (heavy/spin),
+     Schildstoß, Sturzangriff/Stampfer, Explosionen (erkundung.js filtert leichte Treffer heraus):
+       wand    – Abkürzung zwischen zwei benachbarten Räumen, die im Raumgraph weit auseinander liegen (≥ 4 Räume Umweg)
+       versteck– kleine Kammer in dickem Fels hinter einer rissigen Wand (seitlich) oder unter einem rissigen Boden, mit Lohn
+     Morsche Böden: dünne Steinsimse (eine Kachel dick, Luft darunter), die als Holzbohlen gezeichnet werden und unter einer
+     schweren Landung (Sturz ≥ 4 Kacheln oder Sturzangriff) wegbrechen – Abkürzung nach unten, unten ist schon erreichbar.
+     Jedes Stück wird geprüft: geschlossen ändert sich nichts (7 und 1 sind fest), geöffnet – einzeln und alle zusammen –
+     sitzt niemand fest und alle Ausgänge bleiben erreichbar. Nie auf dem Hauptweg nötig (geschlossen = alter Zustand).
+     Ergebnis: lv.wucht [{k, tiles:[[x,y]], cell, ...}], lv.wuchtSet (Kachel-Indizes), lv.morsch [{x0, x1, y, cell}].
+     Prüfschalter: Z.noCracks = true (keine), Z.crackForce = true (so viele wie möglich, für Tests). */
+  function cracks(lv) {
+    lv.wucht = []; lv.morsch = []; lv.wuchtSet = new Set();
+    if (Z.noCracks || !lv.cells || !lv.reach) return;
+    const R = Z.Rng(((lv.seed || 1) ^ 0xc7ac4) >>> 0), force = !!Z.crackForce;
+    const W = lv.W, H = lv.H, g = lv.get, cells = lv.cells, key = (x, y) => x + "," + y;
+    const cellAt = (x, y) => cells[key(Math.floor(x / CW), Math.floor(y / CH))];
+    const fixed = new Set();
+    for (const rg of lv.runeGates || []) fixed.add(rg.cell);
+    for (const f of lv.feats || []) if (f.t === "lock" || f.t === "trial") fixed.add(f.cell);
+    if (lv.warden && lv.warden.cell) fixed.add(key(lv.warden.cell.x, lv.warden.cell.y));
+    const okCell = c => c && c.kind !== "secret" && !fixed.has(key(c.x, c.y)) && !c.pit;
+    const busy = (x, y) => lv.doors.some(d => Math.abs(d.x - x) < 4 && Math.abs(d.y - y) < 4) || (lv.feats || []).some(f => f.x != null && Math.abs(f.x - x) < 3 && Math.abs(f.y - y) < 3) ||
+      (lv.rewards || []).some(o => Math.abs(o.x - x) < 2 && Math.abs(o.y - y) < 2) || (lv.flood && lv.flood.has(y * W + x));
+    /* alle bisher geöffneten zusammen + das neue: kein Festsitz, Ausgänge erreichbar */
+    const opened = []; /* [x, y, Wert geöffnet, Wert geschlossen] */
+    const testOpen = extra => {
+      const all = opened.concat(extra);
+      for (const [x, y, vo] of all) lv.set(x, y, vo);
+      const okAll = validate(lv);
+      for (const [x, y, , vc] of all) lv.set(x, y, vc);
+      if (!okAll) { validate(lv); return false; }
+      for (const [x, y, vo] of extra) lv.set(x, y, vo);
+      const okOne = validate(lv);
+      for (const [x, y, , vc] of extra) lv.set(x, y, vc);
+      validate(lv); return okOne;
+    };
+    const nWand = force ? 3 : R() < 0.55 ? 1 : R() < 0.5 ? 2 : 0, nVers = force ? 2 : R() < 0.6 ? 1 : 0, nMorsch = force ? 2 : R() < 0.55 ? 1 : 0;
+    /* --- Abkürzungswände --- */
+    if (nWand) {
+      const open = v => v === true || v === "P";
+      const dist = (a, b) => { const D4 = [["L", -1, 0], ["R", 1, 0], ["U", 0, -1], ["D", 0, 1]], d = new Map([[a, 0]]), q = [a]; for (let h = 0; h < q.length; h++) { const c = q[h]; if (c === b) return d.get(c); for (const [s2, dx, dy] of D4) { if (!open(c.need[s2])) continue; const o = cells[key(c.x + dx, c.y + dy)]; if (o && !d.has(o)) { d.set(o, d.get(c) + 1); q.push(o); } } } return 99; };
+      const cand = [];
+      for (const k in cells) {
+        const a = cells[k], b = cells[key(a.x + 1, a.y)];
+        if (!okCell(a) || !okCell(b) || a.need.R) continue;
+        const dd = dist(a, b); if (dd < 4) continue;
+        /* Tunnelhöhe 3 auf irgendeiner Bodenhöhe, auf der beide Räume einen Boden an der Trennwand haben – die kürzeste */
+        const bx = (a.x + 1) * CW; let best = null;
+        for (let y0 = a.y * CH + 2; y0 <= a.y * CH + CH - 5; y0++) {
+          const solidCol = x => g(x, y0) === 1 && g(x, y0 + 1) === 1 && g(x, y0 + 2) === 1;
+          const airCol = x => [0, 1, 2].every(i => g(x, y0 + i) === 0);
+          let lx = bx - 1; while (lx > bx - 9 && solidCol(lx)) lx--;
+          let rx = bx; while (rx < bx + 8 && solidCol(rx)) rx++;
+          if (lx === bx - 1 && rx === bx) continue;
+          if (!airCol(lx) || !airCol(rx) || rx - lx - 1 > 10) continue;
+          let ok = g(lx, y0 + 3) === 1 && g(rx, y0 + 3) === 1 && lv.reach[(y0 + 2) * W + lx] && lv.reach[(y0 + 2) * W + rx];
+          for (let x = lx + 1; x < rx && ok; x++) if (g(x, y0 + 3) !== 1 || g(x, y0 - 1) !== 1) ok = false;
+          if (!ok || busy(lx, y0 + 2) || busy(rx, y0 + 2)) continue;
+          if (!best || rx - lx < best.rx - best.lx) best = { lx, rx, y0 };
+        }
+        if (!best) continue;
+        const { lx, rx, y0 } = best;
+        cand.push({ a, b, lx, rx, y0, w: dd + R() * 2 });
+      }
+      /* dazu: bestehende Türen auf Rundwegen, die zugemauert werden (Umweg 3–8 Räume, beide Räume behalten ≥ 2 Ausgänge) –
+         zerschlagen öffnet die Abkürzung wieder; ohne Zerschlagen bleibt alles erreichbar (geprüft) */
+      const deg = c => ["L", "R", "U", "D"].filter(s2 => open(c.need[s2])).length;
+      for (const k in cells) {
+        const a = cells[k], b = cells[key(a.x + 1, a.y)];
+        if (!okCell(a) || !okCell(b) || a.need.R !== true || deg(a) < 3 || deg(b) < 3) continue;
+        const bx = (a.x + 1) * CW, y0 = a.y * CH + 8;
+        if (![0, 1, 2].every(i => g(bx - 1, y0 + i) === 0 && g(bx, y0 + i) === 0) || g(bx - 1, y0 + 3) !== 1 || g(bx, y0 + 3) !== 1) continue;
+        a.need.R = undefined; const dd = dist(a, b); a.need.R = true;
+        if (dd < 3 || dd > 8) continue;
+        cand.push({ a, b, lx: bx - 2, rx: bx + 1, y0, w: dd + R() * 2, tuer: true });
+      }
+      const rooms = () => { const s2 = new Set(); for (let i = 0; i < lv.reach.length; i++) if (lv.reach[i]) s2.add(Math.floor((i % W) / CW) + "," + Math.floor(((i / W) | 0) / CH)); return s2; };
+      const comfyR = () => { const c = { W, H, get: g, start: lv.start, doors: lv.doors, cells }; validate(c, null, true); const s2 = new Set(); for (let i = 0; i < c.reach.length; i++) if (c.reach[i]) s2.add(Math.floor((i % W) / CW) + "," + Math.floor(((i / W) | 0) / CH)); return s2; };
+      const rooms0 = rooms(), comfy0 = comfyR();
+      cand.sort((p, q) => q.w - p.w);
+      for (const c of cand) {
+        if (lv.wucht.filter(o => o.k === "wand").length >= nWand) break;
+        if (lv.wucht.some(o => o.k === "wand" && (o.a === key(c.a.x, c.a.y) || o.b === key(c.b.x, c.b.y)))) continue;
+        const tiles = []; for (let x = c.lx + 1; x < c.rx; x++) for (let y = c.y0; y <= c.y0 + 2; y++) tiles.push([x, y, 0, 7]);
+        if (c.tuer) {
+          /* zumauern und prüfen: kein Raum verloren, bequem erreichbar wie zuvor */
+          for (const [x, y] of tiles) lv.set(x, y, 7);
+          let ok = validate(lv); if (ok) { const r1 = rooms(); for (const k of rooms0) if (!r1.has(k)) ok = false; }
+          if (ok) { const c1 = comfyR(); for (const k of comfy0) if (!c1.has(k)) ok = false; }
+          if (!ok) { for (const [x, y] of tiles) lv.set(x, y, 0); validate(lv); continue; }
+          delete c.a.need.R; delete c.b.need.L;
+        }
+        if (!testOpen(tiles)) { if (c.tuer) { for (const [x, y] of tiles) lv.set(x, y, 0); c.a.need.R = true; c.b.need.L = true; validate(lv); } continue; }
+        for (const [x, y] of tiles) { lv.set(x, y, 7); lv.wuchtSet.add(y * W + x); } opened.push(...tiles);
+        lv.wucht.push({ k: "wand", tuer: !!c.tuer, tiles: tiles.map(([x, y]) => [x, y]), a: key(c.a.x, c.a.y), b: key(c.b.x, c.b.y), cell: key(c.a.x, c.a.y) });
+      }
+    }
+    /* --- Verstecke: seitlich in dicken Fels (3 hoch) oder unter dem Boden (2 tief) --- */
+    if (nVers) {
+      const cand = [];
+      for (let y = 2; y < H - 3; y++) for (let x = 2; x < W - 2; x++) {
+        if (!lv.reach[y * W + x] || !standable(lv, x, y, 3) || g(x, y + 1) !== 1) continue;
+        const c = cellAt(x, y); if (!okCell(c) || c === lv.startCell || busy(x, y)) continue;
+        const inC = (xx, yy) => xx > 0 && xx < W - 1 && yy > 0 && yy < H - 1 && !(cellAt(xx, yy) && cellAt(xx, yy).kind === "secret");
+        for (const d of [-1, 1]) {
+          /* seitlich: Riss bei x+d, Kammer x+2d..x+3d, Spalten x+d..x+4d in den Zeilen y-3..y+1 fest (Kammer rundum Fels) */
+          let ok = true;
+          for (let i = 1; i <= 4 && ok; i++) { const xx = x + d * i; if (!inC(xx, y - 3) || !inC(xx, y + 1)) ok = false; for (let yy = y - 3; yy <= y + 1 && ok; yy++) if (g(xx, yy) !== 1) ok = false; }
+          if (ok) cand.push({ k: "seite", x, y, d });
+        }
+        /* unten: Boden x-1..x+1 in Zeile y+1 rissig, Kammer y+2..y+3, ringsum fest */
+        let ok = true;
+        for (let xx = x - 2; xx <= x + 2 && ok; xx++) for (let yy = y + 1; yy <= y + 4 && ok; yy++) if (g(xx, yy) !== 1 || !inC(xx, yy)) ok = false;
+        for (let xx = x - 1; xx <= x + 1 && ok; xx++) if (!standable(lv, xx, y, 3)) ok = false;
+        if (ok) cand.push({ k: "boden", x, y });
+      }
+      R.shuffle(cand);
+      for (const c of cand) {
+        if (lv.wucht.filter(o => o.k === "versteck").length >= nVers) break;
+        if (lv.wucht.some(o => Math.abs((o.x || 0) - c.x) < 30 && Math.abs((o.y || 0) - c.y) < 14)) continue;
+        const crack = [], pocket = []; let spot;
+        if (c.k === "seite") {
+          for (let yy = c.y - 2; yy <= c.y; yy++) crack.push([c.x + c.d, yy, 0, 1]);
+          for (let i = 2; i <= 3; i++) for (let yy = c.y - 2; yy <= c.y; yy++) pocket.push([c.x + c.d * i, yy]);
+          spot = [c.x + c.d * 2, c.y];
+        } else {
+          for (let xx = c.x - 1; xx <= c.x + 1; xx++) crack.push([xx, c.y + 1, 0, 1]);
+          for (let xx = c.x - 1; xx <= c.x + 1; xx++) for (let yy = c.y + 2; yy <= c.y + 3; yy++) pocket.push([xx, yy]);
+          spot = [c.x, c.y + 3];
+        }
+        for (const [x, y] of pocket) lv.set(x, y, 0);
+        if (!testOpen(crack)) { for (const [x, y] of pocket) lv.set(x, y, 1); validate(lv); continue; }
+        for (const [x, y] of crack) { lv.set(x, y, 7); lv.wuchtSet.add(y * W + x); } opened.push(...crack);
+        const cell = cellAt(c.x, c.y), r = R();
+        lv.rewards.push({ kind: r < 0.55 ? "gold" : r < 0.82 ? "glut" : "heil", x: spot[0], y: spot[1], tier: 1, cell: key(cell.x, cell.y), versteck: true });
+        lv.wucht.push({ k: "versteck", art: c.k, tiles: crack.map(([x, y]) => [x, y]), x: c.x, y: c.y, cell: key(cell.x, cell.y) });
+      }
+    }
+    /* --- morsche Böden: dünne Simse über erreichbarem Raum, mit 4 Kacheln Luft darüber (Sprung + Sturzangriff geht immer) --- */
+    if (nMorsch) {
+      const cand = [];
+      for (let y = 3; y < H - 4; y++) for (let x = 2; x < W - 4; x++) {
+        let ok = true;
+        for (let xx = x; xx < x + 3 && ok; xx++) if (g(xx, y) !== 1 || g(xx, y - 1) !== 0 || g(xx, y - 2) !== 0 || g(xx, y - 3) !== 0 || g(xx, y - 4) !== 0 || g(xx, y + 1) !== 0 || !lv.reach[(y - 1) * W + xx] || lv.wuchtSet.has(y * W + xx)) ok = false;
+        if (!ok) continue;
+        const c = cellAt(x, y); if (!okCell(c) || cellAt(x + 2, y) !== c || busy(x + 1, y - 1)) continue;
+        /* darunter: in höchstens 9 Kacheln fester Boden, und dort ist man schon */
+        for (let xx = x; xx < x + 3 && ok; xx++) { let yy = y + 1; while (yy < H - 1 && yy - y < 10 && (g(xx, yy) === 0)) yy++; const v = g(xx, yy); if (!(v === 1 || v === 2) || yy - y >= 10 || !lv.reach[(yy - 1) * W + xx]) ok = false; }
+        if (ok) cand.push({ x, y });
+      }
+      R.shuffle(cand);
+      for (const c of cand) {
+        if (lv.morsch.length >= nMorsch) break;
+        if (lv.morsch.some(o => Math.abs(o.x0 - c.x) < 24 && Math.abs(o.y - c.y) < 14)) continue;
+        const tiles = [[c.x, c.y, 0, 1], [c.x + 1, c.y, 0, 1], [c.x + 2, c.y, 0, 1]];
+        if (!testOpen(tiles)) continue;
+        opened.push(...tiles);
+        const cl = cellAt(c.x, c.y);
+        lv.morsch.push({ x0: c.x, x1: c.x + 2, y: c.y, cell: key(cl.x, cl.y) });
+      }
+    }
+    validate(lv);
+  }
+  Z._cracks = cracks;
   /* W13 Runde 2: BEQUEME WEGE. Der Prüfer rechnet mit Maximalsprüngen (6 hoch, 7 weit); für echte Spieler (und Handheld)
      ist das grenzwertig. Jede Stelle, die nur mit einem solchen Sprung erreichbar ist, bekommt einen Zwischensteg
      (3 Kacheln Brett, von unten durchspringbar) etwa in der Mitte des Sprungs – solange danach weiterhin niemand
