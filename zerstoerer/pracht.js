@@ -656,9 +656,9 @@
     if (pr) for (const p of pr) if (p.wall) { const hw = Math.ceil((p.w || 1) / 2); for (let dy = -2; dy <= 1; dy++) for (let dx = -hw; dx <= hw; dx++) decSet.add((Math.round(p.y) + dy) * lv.W + Math.round(p.x) + dx); }
     return decSet;
   }
-  /* Raumfunktion (welt.js assignRooms → lv.roomFns) an einer Kachel; Z.raumTyp(tx, ty) gibt z. B. "kueche" zurück */
+  /* Raumfunktion (welt.js assignRooms → lv.roomFns) an einer Kachel – nur intern; öffentlich gelten
+     Z.raumTyp(cx, cy) (Zellen) und Z.raumTypAt(tx, ty) (Kacheln) aus welt.js */
   const raumTyp = (lv, tx, ty) => { const f = lv && lv.roomFns; return f ? f[Math.floor(tx / Z.CW) + "," + Math.floor(ty / Z.CH)] || null : null; };
-  Z.raumTyp = (tx, ty) => raumTyp(Z.level, tx, ty);
   /* Liste der platzierten Raumstücke (Kacheln) für die Belebung in Runde 7; entsteht beim ersten Chunk */
   Z.raumStuecke = () => (rpLv === Z.level && rpList) || [];
   /* Schaustücke nach Raumfunktion: hier hängt, was in diesen Raum gehört (Bücherwände in der Bibliothek, Glasfenster in
@@ -1970,4 +1970,200 @@
     }
     c.restore();
   };
+})();
+
+/* Ezekiel – The Destroyer · Raumlicht (Grafik-Runde 8, ab Stufe 1)
+   Dunkle Räume bekommen Licht, das zu ihnen passt und eine sichtbare Quelle hat: Wandfackeln im Zellenblock und in
+   der Wärterstube, ein Kohlebecken mit glühenden Eisen in der Folterkammer, Kerzengruppen im Gebeinhaus, Laternen in
+   Kellern und Lagern, Leuchtpilze in Brut- und Beutekammern, Glutrisse auf Schlackehalden. Dazu ein sanfter Schein
+   an den Schlüsselstücken der Räume (ausstattung.js, Feld key), damit Kessel, Regal oder Käfig im Dunkel lesbar bleiben.
+   Stufe 0 / Handheld unverändert. Kein Blau. */
+(function () {
+  "use strict";
+  const Z = window.Z, G = Z.gfx, T = Z.TILE, TAU = Math.PI * 2;
+  const lvl = () => { const q = Z.gq; if (!q) return 2; if (q.lean) return 0; return q.level === -1 ? 2 : q.level; };
+  const off = () => G.off && (G.off.raumlicht || G.off.inseln);
+  const hash = (x, y) => { let h = (x * 374761393 + y * 668265263) ^ 0x5bd1e995; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+  const RL = {
+    zellenblock: ["fackel", "fackel"], folterkammer: ["kohlebecken", "fackel"], waerterstube: ["fackel"], gebeinhaus: ["kerzen", "kerzen"],
+    weinkeller: ["laterne"], vorratskammer: ["laterne"], brunnenkammer: ["kerzen"], lagerhaus: ["laterne"], bootsschuppen: ["laterne"], seilkammer: ["laterne"],
+    erzlager: ["laterne"], brutkammer: ["pilz", "pilz"], beutelager: ["pilz"], schlackehalde: ["glut"], kaserne: ["fackel"], geheim: ["kerzen"], grube: ["fackel"]
+  };
+  const COL = { fackel: "#ffa850", kohlebecken: "#ff7a30", kerzen: "#ffd890", laterne: "#ffc070", pilz: "#a8e890", glut: "#ff7a30" };
+  const KEYCOL = { kessel: "#ff9a48", esse: "#ff8a40", schmelztiegel: "#ff8a40", kristall: "#d090ff", pilzring: "#a8e890", runensteine: "#c890ff", eiersack: "#e0d0c0", goetze: "#c8e0a0", opferschale: "#ffb060", greenfire: "#a8e060" };
+  let L = null, Llv = null, Lp = null;
+  function list() {
+    const lv = Z.level; if (!lv || !lv.roomFns || lv.hub || lv.arena) return [];
+    const pr = Z.ausstattung ? Z.ausstattung() : null;
+    if (L && Llv === lv && Lp === pr) return L; Llv = lv; Lp = pr; L = [];
+    const solid = v => v === 1 || v === 7, stand = v => v === 1 || v === 7 || v === 2 || v === 8, sky = G.sky;
+    const src = (lv.lights || []).map(d => [d.x, d.y]).concat((Z.lichtinseln ? Z.lichtinseln() : []).map(l => [l.x, l.y]));
+    const near = (x, y, r) => src.some(([a, b]) => Math.abs(a - x) <= r && Math.abs(b - y) <= r * 0.8);
+    const free = (x, y) => lv.get(x, y) === 0 && !(sky && sky[y * lv.W + x]) && !(G.isOpen && G.isOpen(x, y));
+    const busy = (x, y) => (pr || []).some(p => Math.abs(p.x - x) < 1.6 && Math.abs(p.y - y) < 2.5) || (lv.doors || []).some(d => Math.abs(d.x - x) < 3 && Math.abs(d.y - y) < 3);
+    for (const k in lv.roomFns) {
+      const kinds = RL[lv.roomFns[k]]; if (!kinds) continue;
+      const [cx, cy] = k.split(",").map(Number), rx = cx * Z.CW, ry = cy * Z.CH;
+      kinds.forEach((kind, i) => {
+        const tx = rx + Math.round(Z.CW * (i + 1) / (kinds.length + 1));
+        for (let d = 0; d < Z.CW / 2; d++) for (const sx of [tx + d, tx - d]) {
+          if (sx <= rx || sx >= rx + Z.CW - 1) continue;
+          for (let y = ry + Z.CH - 1; y > ry + 1; y--) {
+            if (!stand(lv.get(sx, y + 1)) || !free(sx, y) || !free(sx, y - 1)) continue;
+            const wall = kind === "fackel" || kind === "laterne", ly = wall ? y - 1 : y;
+            if (near(sx, ly, 5) || busy(sx, y)) continue;
+            L.push({ x: sx, y: ly, k: kind, wall, ph: hash(sx, y) * 9 }); src.push([sx, ly]); return;
+          }
+        }
+      });
+    }
+    return L;
+  }
+  const pos = l => ({ x: l.x * T + 8, y: l.wall ? l.y * T + 4 : (l.y + 1) * T });
+  if (G.lightGather) G.lightGather.push(function (add, cam, t) {
+    if (lvl() < 1 || !Z.level || Z.darkness > 0 || off()) return;
+    for (const l of list()) { const p = pos(l); if (p.x < cam.x - 140 || p.x > cam.x + cam.w + 140 || p.y < cam.y - 120 || p.y > cam.y + cam.h + 120) continue;
+      const f = l.k === "pilz" ? 0.9 + 0.1 * Math.sin(t * 0.9 + l.ph) : 0.86 + 0.1 * Math.sin(t * 8 + l.ph) + 0.04 * Math.sin(t * 21 + l.ph);
+      add(p.x, p.y - (l.wall ? 4 : 8), l.k === "kohlebecken" ? 150 : l.k === "kerzen" ? 95 : l.k === "pilz" ? 90 : 125, COL[l.k], (l.k === "kerzen" ? 0.5 : l.k === "pilz" ? 0.45 : 0.62) * f, l.k === "pilz" ? 4 : 10); }
+    /* Schein an den Schlüsselstücken */
+    for (const p of (Z.ausstattung ? Z.ausstattung() : [])) {
+      if (!p.key || p.broken || p.gone) continue; const X = p.x * T + 8, Y = (p.y + 1) * T - 14;
+      if (X < cam.x - 80 || X > cam.x + cam.w + 80 || Y < cam.y - 80 || Y > cam.y + cam.h + 80) continue;
+      add(X, Y, 70, KEYCOL[p.kind] || "#ffe0b8", KEYCOL[p.kind] ? 0.34 : 0.2, 0);
+    }
+  });
+  function flame(c, x, y, s, t, ph) {
+    const k = 1 + 0.2 * Math.sin(t * 13 + ph) + 0.1 * Math.sin(t * 29 + ph * 2), hh = 7 * s * k, sw = Math.sin(t * 6 + ph) * s;
+    c.fillStyle = "rgba(255,120,40,.9)"; c.beginPath(); c.moveTo(x - 2.4 * s, y); c.quadraticCurveTo(x - 2.6 * s, y - hh * 0.5, x + sw, y - hh); c.quadraticCurveTo(x + 2.6 * s, y - hh * 0.5, x + 2.4 * s, y); c.fill();
+    c.fillStyle = "rgba(255,220,130,.95)"; c.beginPath(); c.moveTo(x - 1.2 * s, y); c.quadraticCurveTo(x - 1.3 * s, y - hh * 0.35, x + sw * 0.6, y - hh * 0.6); c.quadraticCurveTo(x + 1.3 * s, y - hh * 0.35, x + 1.2 * s, y); c.fill();
+  }
+  function draw(c, l, t) {
+    const p = pos(l), x = p.x, y = p.y;
+    switch (l.k) {
+      case "fackel": {
+        c.fillStyle = "#2a2420"; c.fillRect(x - 2.5, y - 1, 5, 3); c.fillRect(x - 0.7, y - 4, 1.4, 4); c.fillStyle = "#4a4440"; c.fillRect(x - 2.5, y - 1, 5, 0.7);
+        c.fillStyle = "#4a2e1a"; c.save(); c.translate(x, y - 3); c.rotate(-0.15); c.fillRect(-1, -9, 2, 10); c.fillStyle = "#2a1a10"; c.fillRect(-1.6, -11, 3.2, 3); c.restore();
+        c.globalCompositeOperation = "lighter"; flame(c, x - 1.4, y - 13.5, 1, t, l.ph); c.globalCompositeOperation = "source-over";
+        if (lvl() >= 2) { c.fillStyle = "rgba(255,190,100,.85)"; for (let k = 0; k < 3; k++) { const u = (t * 0.8 + k / 3 + l.ph) % 1; c.globalAlpha = 1 - u; c.fillRect(x - 1.4 + Math.sin(t * 4 + k) * 2, y - 16 - u * 14, 0.8, 0.8); } c.globalAlpha = 1; }
+        break;
+      }
+      case "kohlebecken": {
+        c.fillStyle = "rgba(0,0,0,.35)"; c.beginPath(); c.ellipse(x, y, 8, 1.3, 0, 0, TAU); c.fill();
+        c.strokeStyle = "#2a2422"; c.lineWidth = 1.1; c.beginPath(); c.moveTo(x - 6, y); c.lineTo(x - 3, y - 8); c.moveTo(x + 6, y); c.lineTo(x + 3, y - 8); c.moveTo(x, y); c.lineTo(x, y - 8); c.stroke();
+        c.fillStyle = "#3a3230"; c.beginPath(); c.moveTo(x - 7, y - 11); c.lineTo(x + 7, y - 11); c.lineTo(x + 4.5, y - 7); c.lineTo(x - 4.5, y - 7); c.fill(); c.fillStyle = "#5a524a"; c.fillRect(x - 7, y - 11.4, 14, 0.8);
+        c.globalCompositeOperation = "lighter"; const g = 0.75 + 0.25 * Math.sin(t * 3 + l.ph); c.fillStyle = "rgba(255," + (90 + g * 70 | 0) + ",30,.95)"; for (let k = 0; k < 6; k++) { c.beginPath(); c.arc(x - 5 + k * 2, y - 11.6 + (k % 2) * 0.5, 1.3, 0, TAU); c.fill(); }
+        flame(c, x - 2, y - 11.5, 0.6, t, l.ph); flame(c, x + 2.5, y - 11.5, 0.5, t, l.ph + 2); c.globalCompositeOperation = "source-over";
+        /* Brandeisen stecken in der Glut, die Spitzen glühen */
+        for (const [dx, a] of [[-3, -0.5], [3, 0.45]]) { c.strokeStyle = "#2a2422"; c.lineWidth = 0.8; c.beginPath(); c.moveTo(x + dx, y - 11); c.lineTo(x + dx + Math.sin(a) * 12, y - 11 - Math.cos(a) * 12); c.stroke(); c.fillStyle = "rgba(255,140,60," + (0.6 + 0.3 * g).toFixed(2) + ")"; c.fillRect(x + dx - 0.6, y - 12, 1.2, 1.6); }
+        if (lvl() >= 2) { c.fillStyle = "rgba(255,200,110,.9)"; for (let k = 0; k < 5; k++) { const u = (t * 0.6 + k / 5 + l.ph) % 1; c.globalAlpha = 1 - u; c.fillRect(x - 4 + hash(k, l.x) * 8 + Math.sin(t * 3 + k) * 2, y - 13 - u * 22, 0.9, 0.9); } c.globalAlpha = 1; }
+        break;
+      }
+      case "kerzen": {
+        c.fillStyle = "rgba(240,230,210,.75)"; c.beginPath(); c.ellipse(x, y - 0.5, 6, 1.2, 0, 0, TAU); c.fill();
+        const hs = [6, 9, 4.5, 7]; for (let k = 0; k < 4; k++) { const kx = x - 4.5 + k * 3, h = hs[(k + (l.ph | 0)) % 4]; c.fillStyle = "#e8dcc0"; c.fillRect(kx - 0.8, y - h, 1.6, h); c.fillStyle = "rgba(255,250,240,.5)"; c.fillRect(kx - 0.8, y - h, 0.5, h); c.globalCompositeOperation = "lighter"; flame(c, kx, y - h - 0.2, 0.32, t, l.ph + k); c.globalCompositeOperation = "source-over"; }
+        break;
+      }
+      case "laterne": {
+        c.fillStyle = "#2a2420"; c.fillRect(x - 0.6, y - 8, 1.2, 3); c.fillRect(x - 0.6, y - 8, 6, 1.1);
+        const lx = x + 5; c.fillStyle = "#3a3028"; c.fillRect(lx - 2.6, y - 5.6, 5.2, 1.2); c.fillRect(lx - 2.6, y + 2.6, 5.2, 1.2);
+        c.fillStyle = "#ffcf7a"; c.globalAlpha = 0.9; c.fillRect(lx - 2, y - 4.4, 4, 7); c.globalAlpha = 1; const f = 0.85 + 0.15 * Math.sin(t * 9 + l.ph);
+        c.fillStyle = "#fff0c0"; c.fillRect(lx - 0.6, y - 2 + (1 - f), 1.2, 2.4 * f); c.fillStyle = "#2a2420"; c.fillRect(lx - 2.6, y - 4.4, 0.7, 7); c.fillRect(lx + 1.9, y - 4.4, 0.7, 7); break;
+      }
+      case "pilz": {
+        for (let k = 0; k < 3; k++) { const mx = x - 4 + k * 4, h = 4 + ((k * 7 + l.x) % 4), r = 2 + (k % 2); c.fillStyle = "#c8c0a8"; c.fillRect(mx - 0.5, y - h, 1, h); c.fillStyle = "#4a7a3a"; c.beginPath(); c.ellipse(mx, y - h, r, r * 0.6, 0, Math.PI, 0); c.fill(); c.globalCompositeOperation = "lighter"; c.fillStyle = "rgba(168,232,144," + (0.5 + 0.2 * Math.sin(t * 0.9 + l.ph + k)).toFixed(2) + ")"; c.fillRect(mx - r * 0.8, y - h - 0.2, r * 1.6, 0.8); c.globalCompositeOperation = "source-over"; }
+        break;
+      }
+      case "glut": {
+        c.globalCompositeOperation = "lighter"; const g = 0.6 + 0.4 * Math.sin(t * 1.5 + l.ph); c.strokeStyle = "rgba(255,120,40," + g.toFixed(2) + ")"; c.lineWidth = 1; c.beginPath(); c.moveTo(x - 8, y - 0.5); c.lineTo(x - 3, y - 1.4); c.lineTo(x + 1, y - 0.6); c.lineTo(x + 6, y - 1.6); c.stroke(); c.globalCompositeOperation = "source-over"; break;
+      }
+    }
+  }
+  const mid0 = Z.drawMidLife;
+  Z.drawMidLife = function (c, cam, t) {
+    if (mid0) mid0.apply(this, arguments);
+    if (lvl() < 1 || !Z.level || off()) return;
+    c.save();
+    for (const l of list()) { const p = pos(l); if (p.x < cam.x - 30 || p.x > cam.x + cam.w + 30 || p.y < cam.y - 40 || p.y > cam.y + cam.h + 40) continue; draw(c, l, t); }
+    c.restore();
+  };
+  Z.raumlichter = () => list();
+})();
+
+/* Ezekiel – The Destroyer · Randlicht auf Figuren (Grafik-Runde 8, ab Stufe 2)
+   Ezekiel und die Gegner bekommen an der Seite, die einer starken Lichtquelle zugewandt ist, eine feine Lichtkante in
+   deren Farbe (Fackel orange, Kristall violett, Mond silbrig …). Technik: die Figur wird zusätzlich in eine kleine
+   Maske gezeichnet, eingefärbt und um ein Stück vom Licht weg verschoben wieder ausgestanzt – übrig bleibt der
+   beleuchtete Rand, der additiv aufgelegt wird. Lichter aus dem letzten Bild (G.lightQ). Höchstens 8 Figuren je
+   Bild, Bosse ausgenommen. Stufe 0/1 und Handheld unverändert. */
+(function () {
+  "use strict";
+  const Z = window.Z, G = Z.gfx;
+  const on = () => { const q = Z.gq; if (q && q.lean) return false; if (G.off && G.off.rim) return false; return G.lq ? G.lq() >= 2 : true; };
+  const POOL = [], pend = []; let budget = 0, frame = -1, depth = 0;
+  function best(cx, cy) {
+    if (!G.lightQ) return null; const Q = G.lightQ(), n = G.lightQn(); let b = null, bs = 0.06;
+    for (let i = 0; i < n; i++) { const q = Q[i], dx = q.x - cx, dy = q.y - cy, d = Math.sqrt(dx * dx + dy * dy); const reach = q.r * 1.5; if (d < 18 || d > reach) continue; const s = q.a * (1 - d / reach); if (s > bs) { bs = s; b = q; b._d = d; b._dx = dx; b._dy = dy; b._s = s; } }
+    return b;
+  }
+  /* Phase 1: Maske bauen (ruft die Zeichnung zuerst in die Maske – so laufen Zeitschritte von Umhang und Gesten im
+     ersten Aufruf, der sichtbare zweite Aufruf zeigt denselben Zustand); Phase 2 nach dem echten Zeichnen auflegen */
+  function rimMask(orig, c, ent, time, x0, y0, w, h) {
+    const cx = x0 + w / 2, cy = y0 + h / 2, L = best(cx, cy); if (!L) return null;
+    const m = c.getTransform(); if (Math.abs(m.b) > 1e-6 || Math.abs(m.c) > 1e-6) return null;
+    const s = m.a, sx = Math.floor(m.a * x0 + m.e), sy = Math.floor(m.d * y0 + m.f), W = Math.ceil(w * s) + 2, H = Math.ceil(h * m.d) + 2;
+    if (W < 4 || H < 4 || W > 900 || H > 900) return null;
+    if (frame !== G.frame) { frame = G.frame; budget = 9; pend.length = 0; }
+    if (pend.length >= POOL.length) POOL.push(document.createElement("canvas"));
+    const mc = POOL[pend.length], mx = mc.getContext("2d");
+    if (mc.width < W || mc.height < H) { mc.width = Math.max(mc.width, W); mc.height = Math.max(mc.height, H); }
+    mx.setTransform(1, 0, 0, 1, 0, 0); mx.globalCompositeOperation = "source-over"; mx.globalAlpha = 1; mx.clearRect(0, 0, W, H);
+    mx.save(); mx.beginPath(); mx.rect(0, 0, W, H); mx.clip(); mx.setTransform(m.a, 0, 0, m.d, m.e - sx, m.f - sy);
+    try { orig.call(Z, mx, ent, time); } catch (e) { mx.restore(); return null; }
+    mx.restore(); mx.setTransform(1, 0, 0, 1, 0, 0);
+    const k = L.c, col = "rgb(" + Math.min(255, k[0] * 0.7 + 90 | 0) + "," + Math.min(255, k[1] * 0.7 + 80 | 0) + "," + Math.min(255, k[2] * 0.7 + 60 | 0) + ")";
+    mx.globalCompositeOperation = "source-in"; mx.fillStyle = col; mx.fillRect(0, 0, W, H);
+    const off = 1.3 * s, ox = -L._dx / L._d * off, oy = -L._dy / L._d * off * 0.8;
+    mx.globalCompositeOperation = "destination-out"; mx.drawImage(mc, 0, 0, W, H, ox, oy, W, H);
+    mx.globalCompositeOperation = "source-over";
+    const r = { mc, sx, sy, W, H, a: Math.min(0.8, 0.35 + L._s * 1.8) }; return r;
+  }
+  /* aufgelegt wird erst nach dem Lichtdurchgang (sonst würde das Dunkel die Kante wieder schlucken) */
+  function rimApply(c, r) { pend.push(r); }
+
+  function reg() {
+    const dE = Z.drawEnemy, dP = Z.drawPlayer; if (!dE || !dP || dE._rim) return;
+    const aft0 = Z.drawAfterLight;
+    Z.drawAfterLight = function (c, cam, W, H, t) {
+      if (aft0) aft0.apply(this, arguments);
+      if (!pend.length || frame !== G.frame) return;
+      c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = "lighter";
+      for (const r of pend) { c.globalAlpha = r.a; c.drawImage(r.mc, 0, 0, r.W, r.H, r.sx, r.sy, r.W, r.H); }
+      c.restore(); G._rimN = pend.length; pend.length = 0;
+    };
+    Z.drawEnemy = function (c, e, time) {
+      if (depth) return dE.apply(this, arguments);
+      let m = null; depth++;
+      try {
+      if (on() && e && !e.dead && !(e.def && e.def.boss) && !e.disguise) {
+        if (frame !== G.frame) { frame = G.frame; budget = 9; pend.length = 0; }
+        if (budget > 0) { budget--; try { m = rimMask(dE, c, e, time, e.x - 14, e.y - 6, e.w + 28, e.h + 10); } catch (err) { m = null; } }
+      }
+      const r = dE.apply(this, arguments);
+      if (m) rimApply(c, m);
+      return r;
+      } finally { depth--; }
+    };
+    Z.drawEnemy._rim = true;
+    Z.drawPlayer = function (c, P, time) {
+      if (depth) return dP.apply(this, arguments);
+      let m = null; depth++;
+      try {
+      if (on() && P && !P.dead && !(P.invis > 0)) { try { m = rimMask(dP, c, P, time, P.x - 16, P.y - 10, P.w + 32, P.h + 14); } catch (err) { m = null; } }
+      const r = dP.apply(this, arguments);
+      if (m) rimApply(c, m);
+      return r;
+      } finally { depth--; }
+    };
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", reg); else setTimeout(reg, 0);
 })();

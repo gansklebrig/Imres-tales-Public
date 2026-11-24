@@ -982,12 +982,12 @@
      Rückgabe: { id, name: [de, en], col, ico, lage, neben, cell }  (id z. B. "kueche", "bibliothek", "zellenblock",
      Sonderräume "geheim", "schatz", "grube"). Das Feld liegt auch direkt an der Zelle: Z.level.cells["cx,cy"].fn;
      lv.roomFns = { "cx,cy": id }. Schlüsselstücke der Ausstattung tragen in Z.ausstattung() das Feld key: true. */
-  Z.raumTyp = (cx, cy) => {
+  Z.raumTyp = Z.raumZelle = (cx, cy) => {
     const lv = Z.level, c = lv && lv.cells && lv.cells[cx + "," + cy]; if (!c || !c.fn) return null;
     const d = Z.roomFnDef(lv.biome, c.fn); if (!d) return null;
     return { id: c.fn, name: d.n, col: d.col, ico: d.ico, lage: d.lage, neben: d.neben, cell: c };
   };
-  Z.raumTypAt = (tx, ty) => Z.raumTyp(Math.floor(tx / CW), Math.floor(ty / CH));
+  Z.raumTypAt = (tx, ty) => Z.raumZelle(Math.floor(tx / CW), Math.floor(ty / CH));
 
   /* Baut eine Karte für ein Gebiet. Gibt {w,h,tiles,spawns,...} in Kacheln zurück. */
   Z.genLevel = function (biomeId, seed, opts) {

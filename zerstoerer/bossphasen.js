@@ -1166,6 +1166,23 @@
       return W.los(x, fy - bh / 2, pcx(P), P.y + P.h / 2); };
     const near = side => [reach, reach + 14, reach + 30, reach + 50].map(v => side * v);
     const first = cxOf(e) > pcx(P) ? 1 : -1;
+    /* Notlösung (Spieler im Schacht/auf Leiter): nächste freie Bodenstelle im Kampfbereich mit Sicht zum Spieler */
+    if (loose === 2 && !air) {
+      let best = null, bd = 1e9;
+      for (let x = b.x0 + bw / 2 + 4; x < b.x1 - bw / 2 - 4; x += 8) {
+        const g = W.groundBelow(x, P.y - 48, 200); if (g == null || Math.abs(g - fy) > 96) continue;
+        let ok = true; for (let yy = g - bh + 2; yy < g - 2 && ok; yy += 6) for (let xx = x - bw / 2 + 1; xx < x + bw / 2; xx += 6) if (W.solidAt(xx, yy)) { ok = false; break; }
+        if (!ok || !W.los(x, g - bh / 2, pcx(P), P.y + P.h / 2)) continue;
+        const dd = Math.abs(x - pcx(P)) + Math.abs(g - fy); if (dd < bd && Math.abs(x - pcx(P)) > bw / 2) { bd = dd; best = [x, g]; }
+      }
+      if (!best) return false;
+      const [x, g] = best;
+      FX.burst(cxOf(e), e.y + e.h / 2, 18, { col: [Z.dustCol || "#8a7a70", "#3a3030"], sp: 100, life: 0.6, size: 4, kind: "smoke" });
+      tele({ k: "ring", x, y: g - bh / 2, r: bw / 2 + 16, dur: 0.6, col: e.aura || "#ff6a3a" });
+      e.hidden = 0.6; e.invuln = Math.max(e.invuln || 0, 0.6); e.vx = 0; e.vy = 0; e.idle = Math.max(e.idle || 0, 1.0);
+      later(0.6, () => { if (!alive(e)) return; e.x = x - bw / 2; e.y = g - bh - 1; Z.unstick(e); e.hidden = 0; e.face = U.sign(pcx(P) - x) || 1; FX.addShake(7); A.play("quake", { vol: 0.6 }); FX.text(x, g - bh - 10, L(["Er bricht durch!", "It breaks through!"]), "#ffb070", true); });
+      return true;
+    }
     for (const d of air ? [60, -60, 90, -90, 120, -120] : near(first).concat(near(-first))) {
       const x = pcx(P) + (air ? (cxOf(e) > pcx(P) ? d : -d) : d); if (x < b.x0 + bw / 2 || x > b.x1 - bw / 2 || !free(x) || (!loose && !path(x)) || (loose && !W.los(x, fy - bh / 2, pcx(P), P.y + P.h / 2))) continue;
       FX.burst(cxOf(e), e.y + e.h / 2, 18, { col: [Z.dustCol || "#8a7a70", "#3a3030"], sp: 100, life: 0.6, size: 4, kind: "smoke" });
@@ -1216,6 +1233,8 @@
         if (s.stuck > 0.9) { s.stuck = 0; e.vy = -460; e.onGround = false; e.vx = U.sign(pcx(P) - cxOf(e)) * 150; A.play("jump", { vol: 0.5, rate: 0.7 }); FX.burst(cxOf(e), feet(e), 10, { col: Z.dustCol || "#8a7a70", sp: 90, life: 0.4, size: 3, kind: "smoke" }); }
       } else s.stuck = 0;
       s.lx = e.x;
+      /* Flieger (Vrock, Chasme) steigen in manchen Techniken davon (Wirbel, Summen) – nie weiter als ~110 px über den Spieler */
+      if (LOW[e.id] && !e.grounded && e.y + e.h < P.y - 110 && !(e.mv && e.mv.stage === "act" && e.mv.vy != null)) e.vy = Math.max(e.vy, 110);
       /* Wächterraum nach unten offen (Bot fiel durch Löcher im Boden): der Kampfbereich wächst mit, statt dass der Wächter zurückspringt */
       if (e.box && e.box.warden && !e.def.fixed) {
         const bx = e.box, py = P.y + P.h;
@@ -1232,7 +1251,7 @@
         if (blocked || (!e.def.fly && s.noTouch > 8)) s.farT += dt; /* Wand/Decke dazwischen: zählt immer */
         else if (dd > (e.def.fly ? 190 : 150)) { if (s.best == null || dd < s.best - 20) { s.best = dd; s.farT = 0; } else s.farT += dt; } else { s.best = null; s.farT = 0; }
         s.btCd = Math.max(0, (s.btCd || 0) - dt);
-        if (s.farT > (easy() ? 7 : 5) && !s.btCd && !e.mv && (P.onGround || s.farT > 7) && !(e.st.stun > 0)) { if (breakThrough(e, P, (s.btFail || 0) >= 2)) { s.farT = 0; s.best = null; s.btCd = 10; s.btN = (s.btN || 0) + 1; s.btFail = 0; } else { s.farT -= 1; s.btFail = (s.btFail || 0) + 1; } }
+        if (s.farT > (easy() ? 7 : 5) && !s.btCd && !e.mv && (P.onGround || s.farT > 7) && !(e.st.stun > 0)) { if (breakThrough(e, P, (s.btFail || 0) >= 4 ? 2 : (s.btFail || 0) >= 2 ? 1 : 0)) { s.farT = 0; s.best = null; s.btCd = 10; s.btN = (s.btN || 0) + 1; s.btFail = 0; } else { s.farT -= 1; s.btFail = (s.btFail || 0) + 1; } }
       }
       /* Wut */
       if (!e.wut && e.hp < e.hpMax * 0.2 && e.hp > 0) enrage(e, P);
@@ -1663,6 +1682,7 @@
     sig: ["kokonsturz", "fadenkaefig"]
   };
 
+  const LOW = { vrock: 1, chasme: 1 };
   /* Bosse, die absichtlich Abstand halten (kein Durchbruch) */
   const KEEP = { glasstab: 1, erzpriesterin: 1, ilvaraW: 1, wraith: 1, nezna: 1 };
   /* ---------- Einbau je Boss (beim ersten Auftritt) ---------- */

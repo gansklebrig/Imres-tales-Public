@@ -1447,6 +1447,7 @@
       const px = d.x * T + 8, py = d.y * T + 16;
       if (px < cam.x - 60 || px > cam.x + cam.w + 60 || py < cam.y - 60 || py > cam.y + cam.h + 80) continue;
       const fl = Math.sin(t * 9 + d.x) * 0.5 + Math.sin(t * 13 + d.y) * 0.5;
+      if (FANCY[d.kind] && fancyOn()) { drawFancy(c, d, px, py, t); continue; }
       switch (d.kind) {
         case "torch": {
           /* Wandfackel: genietete Halterung, geschwungener Arm, umwickelter Schaft, Pechkopf */
@@ -1631,8 +1632,8 @@
   const vistaOn = () => { const q = Z.gq; if (q && q.lean) return false; if (G.off && G.off.ausblick) return false; return lq() >= 2; };
   const VISTA = new Map(), VW = 18, VH = 27, VS = 4;
   const UNDER = { chasm: "#d090ff", lake: "#8af0b0", embercity: "#ff8a40" };
-  const hx3 = h => { const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
-  const mixC = (a, b, k) => { const A = hx3(a), Bc = hx3(b); return "rgb(" + Math.round(A[0] + (Bc[0] - A[0]) * k) + "," + Math.round(A[1] + (Bc[1] - A[1]) * k) + "," + Math.round(A[2] + (Bc[2] - A[2]) * k) + ")"; };
+  const hx3 = h => { if (h.length === 4) h = "#" + h[1] + h[1] + h[2] + h[2] + h[3] + h[3]; const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
+  const mixC = (a, b, k) => { const A = hx3(a), Bc = hx3(b), h2 = i => ("0" + Math.round(A[i] + (Bc[i] - A[i]) * k).toString(16)).slice(-2); return "#" + h2(0) + h2(1) + h2(2); };
   function vistaSprite(bg, zt, v) {
     const key = bg + "|" + (zt ? zt.k : "-") + "|" + v; let cv = VISTA.get(key); if (cv) return cv;
     cv = document.createElement("canvas"); cv.width = VW * VS; cv.height = VH * VS; const g = cv.getContext("2d"), W = cv.width, H = cv.height;
@@ -1701,6 +1702,137 @@
     if (hv < 0.3 && !UNDER[B.bg]) { /* Blumentopf oder Kerze auf der Bank */ if (hv < 0.15) { c.fillStyle = "#8a4a2a"; c.fillRect(px + 6, y + 15, 4, 3.5); c.fillStyle = "#4a6a2a"; c.beginPath(); c.arc(px + 8, y + 14, 2.4, 0, Math.PI * 2); c.fill(); c.fillStyle = "#d8607a"; c.fillRect(px + 7, y + 12.5, 1.2, 1.2); } else { c.fillStyle = "#e8dcc0"; c.fillRect(px - 9, y + 13.5, 1.6, 5); } }
     /* Lichtbahn in den Raum, in der Farbe der Stunde */
     c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = 0.07; c.fillStyle = zt && !UNDER[B.bg] ? zt.win : "#f0dcc8"; c.beginPath(); c.moveTo(px - 8, y); c.lineTo(px + 8, y); c.lineTo(px + 40, y + 70); c.lineTo(px + 16, y + 70); c.fill(); c.restore();
+  }
+  /* ---------- Requisiten-Pracht (Grafik-Runde 8, ab Stufe 1) ----------
+     Die alten Platzhalter-Requisiten (flache Rüstung, Statuen als Rechtecke, Tisch, Amboss, Waffenständer) werden als
+     ausführlich gemalte Sprites (4-fach aufgelöst, einmal je Art/Variante/Gebiet) gezeichnet. Stufe 0 bleibt beim alten,
+     billigen Bild. Kein Blau. */
+  const fancyOn = () => { const q = Z.gq; if (q && q.lean) return false; if (G.off && G.off.requisiten) return false; return lq() >= 1; };
+  const FSPR = new Map(), FS = 4;
+  const lgr = (g, x0, y0, x1, y1, cols) => { const q = g.createLinearGradient(x0, y0, x1, y1); cols.forEach((cc, i) => q.addColorStop(i / (cols.length - 1), cc)); return q; };
+  const poly2 = (g, col, pts) => { g.fillStyle = col; g.beginPath(); g.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) g.lineTo(pts[i], pts[i + 1]); g.closePath(); g.fill(); };
+  const ell2 = (g, x, y, rx, ry, col) => { g.fillStyle = col; g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); g.fill(); };
+  const ln2 = (g, col, w, pts) => { g.strokeStyle = col; g.lineWidth = w; g.beginPath(); g.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) g.lineTo(pts[i], pts[i + 1]); g.stroke(); };
+  const STEEL = ["#c8c4bc", "#8e8a84", "#5a5650", "#2e2a28"];
+  const FANCY = {
+    /* Ritterrüstung auf dem Ständer: Schuhe, Beinschienen mit Kniebuckeln, Bauchreifen, gewölbter Brustpanzer mit Grat,
+       geschobene Schulterstücke, hängende Arme mit Panzerhandschuhen, Helm mit Visier und Federbusch, Hellebarde */
+    armor: { w: 30, h: 46, draw(g, v, B) {
+      ln2(g, "#3a2a1a", 1.4, [0, -3, 0, -38]);
+      g.fillStyle = "rgba(0,0,0,.35)"; g.beginPath(); g.ellipse(0, 0, 9, 1.4, 0, 0, Math.PI * 2); g.fill();
+      poly2(g, "#4a3020", [-8, 0, 8, 0, 7, -3, -7, -3]); g.fillStyle = "#6a4a30"; g.fillRect(-7, -3, 14, 0.7);
+      /* Hellebarde */
+      const hx = 10.5; ln2(g, "#5a3a22", 1.1, [hx, -1, hx, -44]); poly2(g, lgr(g, hx, -42, hx + 6, -34, STEEL.slice(0, 3)), [hx + 0.4, -40.5, hx + 5.5, -42.5, hx + 6, -35.5, hx + 0.4, -35.5]); poly2(g, STEEL[1], [hx, -46, hx - 0.8, -40, hx + 0.8, -40]); poly2(g, STEEL[2], [hx - 0.4, -40, hx - 3.5, -38.5, hx - 0.4, -37.4]);
+      for (const sd of [-1, 1]) {
+        const lx = sd * 2.6;
+        poly2(g, STEEL[2], [lx - 2.2, -0.5, lx + 2.4 + sd * 1.2, -0.5, lx + 1.6, -2.4, lx - 1.6, -2.6]);
+        poly2(g, lgr(g, lx - 1.8, 0, lx + 1.8, 0, [STEEL[0], STEEL[1], STEEL[3]]), [lx - 1.7, -2.4, lx + 1.7, -2.4, lx + 1.9, -11.5, lx - 1.9, -11.5]);
+        ell2(g, lx, -12.6, 2.2, 1.8, STEEL[1]); ell2(g, lx - 0.6, -13.1, 0.9, 0.6, "rgba(255,250,240,.6)");
+        poly2(g, lgr(g, lx - 2, 0, lx + 2, 0, [STEEL[0], STEEL[1], STEEL[3]]), [lx - 2, -14, lx + 2, -14, lx + 2.2, -19, lx - 2.2, -19]);
+      }
+      for (let k = 0; k < 3; k++) poly2(g, k % 2 ? STEEL[2] : STEEL[1], [-6 + k * 0.3, -18.5 - k * 1.5, 6 - k * 0.3, -18.5 - k * 1.5, 5.6 - k * 0.3, -20.4 - k * 1.5, -5.6 + k * 0.3, -20.4 - k * 1.5]);
+      g.fillStyle = v === 1 ? "#3a5a2a" : "#8a1f24"; g.fillRect(-6, -23.6, 12, 1.4);
+      poly2(g, lgr(g, -6.5, 0, 6.5, 0, [STEEL[0], STEEL[1], STEEL[2], STEEL[3]]), [-6, -23.8, 6, -23.8, 6.8, -30, 4, -32, -4, -32, -6.8, -30]);
+      ln2(g, "rgba(255,250,240,.55)", 0.5, [-0.4, -24, -0.4, -31.5]); ln2(g, "rgba(0,0,0,.35)", 0.4, [0.5, -24, 0.5, -31.5]); ln2(g, "rgba(255,250,240,.35)", 0.6, [-4.6, -25, -5.4, -30]);
+      for (const sd of [-1, 1]) {
+        for (let k = 0; k < 3; k++) { g.fillStyle = k === 0 ? STEEL[1] : k === 1 ? STEEL[2] : STEEL[1]; g.beginPath(); g.ellipse(sd * (7 - k * 0.3), -30.6 + k * 1.8, 3.6 - k * 0.5, 2.2, sd * 0.2, Math.PI, 0); g.fill(); }
+        ell2(g, sd * 6.4 - 0.8, -31.6, 1.2, 0.5, "rgba(255,250,240,.6)");
+        poly2(g, lgr(g, sd * 7.6 - 1.3, 0, sd * 7.6 + 1.3, 0, [STEEL[0], STEEL[2]]), [sd * 7.4 - 1.3, -27.8, sd * 7.4 + 1.3, -27.8, sd * 7.8 + 1.2, -19, sd * 7.8 - 1.2, -19]);
+        ell2(g, sd * 7.8, -23.4, 1.6, 1.2, STEEL[1]); poly2(g, STEEL[2], [sd * 7.8 - 1.6, -19, sd * 7.8 + 1.6, -19, sd * 7.8 + 1.4, -16, sd * 7.8 - 1.2, -15.6]);
+      }
+      /* Helm */
+      poly2(g, STEEL[2], [-3.6, -32, 3.6, -32, 3.2, -33.2, -3.2, -33.2]);
+      g.fillStyle = lgr(g, -4, 0, 4, 0, [STEEL[0], STEEL[1], STEEL[3]]); g.beginPath(); g.moveTo(-3.8, -33); g.lineTo(-3.8, -38); g.quadraticCurveTo(-3.6, -42, 0, -42.4); g.quadraticCurveTo(3.6, -42, 3.8, -38); g.lineTo(3.8, -33); g.closePath(); g.fill();
+      g.fillStyle = "#120c0c"; g.fillRect(-3.4, -38.4, 6.8, 0.9); for (let k = -2; k <= 2; k++) g.fillRect(k * 1.2 - 0.2, -36.2, 0.45, 1.4);
+      ln2(g, "rgba(0,0,0,.4)", 0.4, [0, -42.2, 0, -33.2]); ln2(g, "rgba(255,250,240,.5)", 0.45, [-2.6, -41, -3, -35]);
+      const pl = v === 1 ? "#d8c8a0" : v === 2 ? "#5a2a50" : "#8a1a20";
+      g.fillStyle = pl; g.beginPath(); g.moveTo(0, -42.2); g.bezierCurveTo(2, -46.5, 6, -46.5, 8.5, -42.5); g.bezierCurveTo(6, -44, 3, -43.6, 0.8, -41.4); g.fill(); g.fillStyle = "rgba(255,255,255,.18)"; g.beginPath(); g.moveTo(1, -42.6); g.bezierCurveTo(3, -45.4, 5.4, -45.6, 7, -43.6); g.lineTo(1.6, -42.2); g.fill();
+      g.fillStyle = "#b8923a"; g.fillRect(-0.5, -43.2, 1, 1.2);
+    } },
+    /* Steinstatue auf gestuftem Sockel: Ritter mit Schwert, Heilige mit Buch oder Engel mit Flügeln */
+    statue: { w: 30, h: 48, draw(g, v, B) {
+      const m = mixC(B.tile.base || "#6a6460", "#8a8478", 0.5), hi = mixC(m, "#ffffff", 0.28), lo = mixC(m, "#000000", 0.45), lo2 = mixC(m, "#000000", 0.25);
+      g.fillStyle = "rgba(0,0,0,.35)"; g.beginPath(); g.ellipse(0, 0, 10, 1.5, 0, 0, Math.PI * 2); g.fill();
+      poly2(g, lo2, [-9, 0, 9, 0, 9, -3, -9, -3]); poly2(g, m, [-8, -3, 8, -3, 7, -7, -7, -7]); poly2(g, hi, [-8.6, -7, 8.6, -7, 8.6, -8.2, -8.6, -8.2]); g.fillStyle = lo; g.fillRect(-8, -3.6, 16, 0.6);
+      g.strokeStyle = lo; g.lineWidth = 0.4; g.strokeRect(-4, -6.4, 8, 2.6);
+      if (v === 2) { for (const sd of [-1, 1]) { g.fillStyle = lgr(g, 0, -40, sd * 12, -20, [hi, m, lo2]); g.beginPath(); g.moveTo(sd * 2, -32); g.bezierCurveTo(sd * 10, -44, sd * 14, -36, sd * 12, -22); g.bezierCurveTo(sd * 9, -26, sd * 6, -22, sd * 3, -24); g.fill(); g.strokeStyle = lo; g.lineWidth = 0.3; for (let k = 0; k < 4; k++) { g.beginPath(); g.moveTo(sd * (4 + k * 2), -30 + k); g.lineTo(sd * (6 + k * 1.8), -23 - k * 0.5); g.stroke(); } } }
+      /* Gewand */
+      g.fillStyle = lgr(g, -6, 0, 6, 0, [hi, m, lo]); g.beginPath(); g.moveTo(-6, -8.2); g.quadraticCurveTo(-5.4, -20, -4.4, -30); g.lineTo(4.4, -30); g.quadraticCurveTo(5.4, -20, 6, -8.2); g.fill();
+      g.strokeStyle = "rgba(0,0,0,.22)"; g.lineWidth = 0.4; for (let k = 0; k < 5; k++) { g.beginPath(); g.moveTo(-3.6 + k * 1.8, -28); g.quadraticCurveTo(-3.8 + k * 2 + (k % 2 ? 0.8 : -0.8), -18, -4.4 + k * 2.2, -8.4); g.stroke(); }
+      for (const sd of [-1, 1]) ell2(g, sd * 4.6, -29, 2.2, 1.6, sd < 0 ? hi : lo2);
+      /* Kopf */
+      ell2(g, 0, -33.2, 2.9, 3.3, m); ell2(g, -0.9, -34, 1, 1.3, "rgba(255,255,255,.18)"); ell2(g, 0.8, -32.6, 1.6, 2.2, "rgba(0,0,0,.15)");
+      if (v === 0) { /* Ritter: Helmkamm, Schwert vor sich, Hände auf dem Knauf */ poly2(g, lo2, [-3, -35.4, 3, -35.4, 2.4, -37, -2.4, -37]); g.fillStyle = lo; g.fillRect(-2, -33.6, 4, 0.6);
+        g.fillStyle = lgr(g, -0.8, 0, 0.8, 0, [hi, lo]); g.fillRect(-0.8, -24, 1.6, 15); g.fillStyle = m; g.fillRect(-3.6, -24.6, 7.2, 1.4); ell2(g, 0, -26.2, 1.2, 1.2, hi); ell2(g, -1.6, -24.8, 1.8, 1.4, m); ell2(g, 1.6, -24.8, 1.8, 1.4, lo2); }
+      else if (v === 1) { /* Heilige mit offenem Buch und Kapuze */ g.fillStyle = lo2; g.beginPath(); g.arc(0, -33.4, 3.6, Math.PI, 0); g.lineTo(3.8, -30); g.lineTo(-3.8, -30); g.fill(); ell2(g, 0, -32.6, 2, 2.4, m);
+        poly2(g, hi, [-4, -22, 0, -21, 0, -17, -4.4, -18]); poly2(g, m, [4, -22, 0, -21, 0, -17, 4.4, -18]); ln2(g, lo, 0.3, [-3, -20.4, -0.8, -20, -3, -19.2, -0.8, -18.8]); }
+      else { /* Engel: gefaltete Hände, Haar */ ell2(g, 0, -35.6, 3.2, 1.6, lo2); ell2(g, 0, -22, 1.6, 2.4, hi); }
+      /* Alter: Moos, Riss, Flechten */
+      const R = Z.Rng(77 + v); for (let k = 0; k < 10; k++) ell2(g, -6 + R() * 12, -2 - R() * 26, 0.8 + R() * 0.8, 0.5, k % 3 ? "rgba(70,96,44,.6)" : "rgba(200,170,80,.45)");
+      ln2(g, "rgba(20,16,18,.55)", 0.35, [1.4, -29, 2.4, -22, 1.2, -16, 2, -12]);
+    } },
+    /* Fischgötze des Sees: schuppiger Leib, Glotzaugen, Flossenkamm, Dreizack; grünlicher Stein mit Algen */
+    statueKuo: { w: 28, h: 48, draw(g, v, B) {
+      const m = "#3e5246", hi = "#6a8270", lo = "#1e2a24";
+      poly2(g, lo, [-8, 0, 8, 0, 7, -4, -7, -4]); poly2(g, m, [-7.6, -4, 7.6, -4, 7.6, -5, -7.6, -5]);
+      g.fillStyle = lgr(g, -6, 0, 6, 0, [hi, m, lo]); g.beginPath(); g.moveTo(-5, -5); g.quadraticCurveTo(-7, -16, -4, -26); g.quadraticCurveTo(0, -30, 4, -26); g.quadraticCurveTo(7, -16, 5, -5); g.fill();
+      g.strokeStyle = "rgba(0,0,0,.25)"; g.lineWidth = 0.4; for (let r = 0; r < 6; r++) for (let k = 0; k < 4; k++) { g.beginPath(); g.arc(-3.6 + k * 2.4 + (r % 2) * 1.2, -8 - r * 3, 1.2, 0, Math.PI); g.stroke(); }
+      g.fillStyle = lgr(g, -5, 0, 5, 0, [hi, m, lo]); g.beginPath(); g.ellipse(0.6, -30, 5, 4.2, 0.1, 0, Math.PI * 2); g.fill();
+      poly2(g, m, [-2, -33, 0, -38, 2, -34, 3, -37, 4, -33]); ell2(g, -1.6, -31, 1.4, 1.4, "#c8d0a0"); ell2(g, 2.6, -31, 1.4, 1.4, "#c8d0a0"); ell2(g, -1.4, -31, 0.6, 0.6, "#1a1a10"); ell2(g, 2.8, -31, 0.6, 0.6, "#1a1a10");
+      ln2(g, lo, 0.6, [-2, -27.6, 0.6, -26.4, 3.4, -27.6]);
+      ln2(g, "#5a4a30", 1, [7, -2, 7, -42]); for (const dx of [-2.4, 0, 2.4]) ln2(g, "#8a7a50", 0.8, [7 + dx, -40, 7 + dx, -45]); ln2(g, "#8a7a50", 0.8, [4.6, -40, 9.4, -40]);
+      for (let k = 0; k < 6; k++) ln2(g, "rgba(90,140,60,.55)", 0.6, [-5 + k * 2, -5 - k % 3, -5.6 + k * 2, -12 - (k % 2) * 4]);
+    } },
+    /* Duergar-Ahnenstatue: breiter Zwerg mit geflochtenem Bart, Kriegsaxt, glimmende Augen */
+    statueDuergar: { w: 28, h: 40, draw(g, v, B) {
+      const m = "#4a4448", hi = "#76707a", lo = "#221e22";
+      poly2(g, lo, [-9, 0, 9, 0, 8, -4, -8, -4]); poly2(g, hi, [-8.6, -4, 8.6, -4, 8.6, -5, -8.6, -5]);
+      g.fillStyle = lgr(g, -7, 0, 7, 0, [hi, m, lo]); g.beginPath(); g.moveTo(-7, -5); g.lineTo(-7.4, -18); g.quadraticCurveTo(-7, -23, 0, -23.4); g.quadraticCurveTo(7, -23, 7.4, -18); g.lineTo(7, -5); g.fill();
+      g.fillStyle = lo; g.fillRect(-7, -12, 14, 1.4); g.fillStyle = "#8a6a2a"; g.fillRect(-1.2, -12.2, 2.4, 1.8);
+      g.fillStyle = lgr(g, -4, 0, 4, 0, [hi, m]); g.beginPath(); g.ellipse(0, -26, 4, 4.4, 0, 0, Math.PI * 2); g.fill();
+      poly2(g, lo, [-4.4, -27.4, 4.4, -27.4, 3.6, -31, -3.6, -31]); poly2(g, hi, [-4.6, -27.4, 4.6, -27.4, 4.6, -26.6, -4.6, -26.6]);
+      g.fillStyle = mixC(m, "#000000", 0.1); g.beginPath(); g.moveTo(-3.8, -25); g.quadraticCurveTo(-4.4, -16, 0, -11); g.quadraticCurveTo(4.4, -16, 3.8, -25); g.fill();
+      g.strokeStyle = "rgba(0,0,0,.35)"; g.lineWidth = 0.35; for (let k = 0; k < 6; k++) { g.beginPath(); g.moveTo(-2.5 + k, -24); g.quadraticCurveTo(-2 + k * 0.8, -18, -0.6 + k * 0.3, -13); g.stroke(); }
+      g.fillStyle = "rgba(255,140,60,.9)"; g.fillRect(-2.4, -26.4, 1.3, 0.7); g.fillRect(1.1, -26.4, 1.3, 0.7);
+      ln2(g, "#3a2a1a", 1.2, [-9.5, -2, -9.5, -30]); g.fillStyle = lgr(g, -14, -30, -9, -24, ["#9a9690", "#4a4642"]); g.beginPath(); g.moveTo(-9.5, -31); g.quadraticCurveTo(-15, -30, -14.4, -24); g.quadraticCurveTo(-12, -26, -9.5, -25); g.fill();
+    } },
+    /* Tisch: Platte mit Maserung und Kante, gedrechselte Beine, Querstrebe; darauf Krug, Brot und Kerze */
+    table: { w: 26, h: 18, draw(g, v, B) {
+      g.fillStyle = "rgba(0,0,0,.3)"; g.beginPath(); g.ellipse(0, 0, 11, 1.2, 0, 0, Math.PI * 2); g.fill();
+      for (const sd of [-1, 1]) { g.fillStyle = "#4a2e1a"; g.fillRect(sd * 8.5 - 1, -7, 2, 7); ell2(g, sd * 8.5, -4, 1.3, 0.8, "#5a3a22"); }
+      g.fillStyle = "#3a2414"; g.fillRect(-8, -3.4, 16, 1);
+      g.fillStyle = lgr(g, 0, -9.6, 0, -7, ["#7a5434", "#4a2e1a"]); g.fillRect(-11, -9.6, 22, 2.6); g.fillStyle = "rgba(255,220,170,.3)"; g.fillRect(-11, -9.6, 22, 0.5);
+      g.strokeStyle = "rgba(0,0,0,.25)"; g.lineWidth = 0.25; g.beginPath(); g.moveTo(-10, -8.4); g.quadraticCurveTo(0, -8, 10, -8.6); g.stroke();
+      if (v !== 1) { g.fillStyle = "#8a8478"; g.fillRect(-7, -13, 3, 3.4); g.fillStyle = "#b0aaa0"; g.fillRect(-7, -13, 0.8, 3.4); g.strokeStyle = "#6a645a"; g.lineWidth = 0.5; g.beginPath(); g.arc(-3.6, -11.4, 1, -Math.PI / 2, Math.PI / 2); g.stroke(); }
+      ell2(g, 2, -10.2, 3.4, 0.9, "#c8c0b0"); g.fillStyle = "#b07a3a"; g.beginPath(); g.ellipse(2, -11, 2.4, 1.3, 0, Math.PI, 0); g.fill();
+      if (v !== 2) { g.fillStyle = "#e8dcc0"; g.fillRect(7, -14, 1.2, 4.4); g.fillStyle = "rgba(255,210,120,.9)"; g.beginPath(); g.ellipse(7.6, -15, 0.6, 1.1, 0, 0, Math.PI * 2); g.fill(); }
+    } },
+    /* Amboss auf dem Holzklotz: Horn, Bahn, Hardyloch, Hammer daneben */
+    anvil: { w: 30, h: 16, draw(g, v, B) {
+      g.fillStyle = "rgba(0,0,0,.35)"; g.beginPath(); g.ellipse(0, 0, 10, 1.3, 0, 0, Math.PI * 2); g.fill();
+      g.fillStyle = lgr(g, -4, 0, 4, 0, ["#6a4a2a", "#3a2414"]); g.fillRect(-4.4, -6, 8.8, 6); g.strokeStyle = "rgba(0,0,0,.3)"; g.lineWidth = 0.3; for (let k = 0; k < 3; k++) { g.beginPath(); g.moveTo(-4 + k * 3, -6); g.lineTo(-4.2 + k * 3, 0); g.stroke(); }
+      poly2(g, "#2a2628", [-3, -6, 3, -6, 2.2, -8.4, -2.2, -8.4]);
+      g.fillStyle = lgr(g, 0, -12, 0, -8, ["#7a7678", "#2e2a2c"]); g.beginPath(); g.moveTo(-7, -12); g.lineTo(6, -12); g.quadraticCurveTo(12, -12, 14, -10.6); g.quadraticCurveTo(10, -9.4, 5, -9.2); g.lineTo(3, -8.4); g.lineTo(-3, -8.4); g.lineTo(-5, -9.6); g.lineTo(-7, -9.6); g.closePath(); g.fill();
+      g.fillStyle = "rgba(255,250,240,.45)"; g.fillRect(-7, -12, 12, 0.5); g.fillStyle = "#141012"; g.fillRect(-5, -11.6, 0.9, 0.9);
+      ln2(g, "#5a3a22", 1, [-12, -0.4, -8, -6]); poly2(g, "#4a4648", [-9.6, -6.6, -6.4, -5, -7.2, -3.8, -10.4, -5.4]);
+    } },
+    /* Waffenständer: Gestell mit Speeren, Axt und Schwert, Rundschild an der Seite */
+    rack: { w: 26, h: 26, draw(g, v, B) {
+      g.fillStyle = "rgba(0,0,0,.3)"; g.beginPath(); g.ellipse(0, 0, 11, 1.2, 0, 0, Math.PI * 2); g.fill();
+      for (const sd of [-1, 1]) { g.fillStyle = "#4a3020"; g.fillRect(sd * 9 - 1, -20, 2, 20); g.fillRect(sd * 9 - 2, -1.4, 4, 1.4); }
+      g.fillStyle = "#5a3a24"; g.fillRect(-10, -20, 20, 1.8); g.fillRect(-10, -6, 20, 1.6); g.fillStyle = "rgba(255,220,170,.25)"; g.fillRect(-10, -20, 20, 0.5);
+      for (let k = 0; k < 4; k++) { const sx = -6 + k * 4; ln2(g, "#5a3a22", 0.8, [sx, -5, sx + (k - 1.5) * 0.4, -23]); if (k === 2) { poly2(g, STEEL[1], [sx + 0.6, -21, sx + 4, -22.5, sx + 4, -17.5, sx + 0.6, -18.5]); } else poly2(g, lgr(g, sx - 1, 0, sx + 1, 0, [STEEL[0], STEEL[2]]), [sx + (k - 1.5) * 0.4, -26.5, sx + 1.1 + (k - 1.5) * 0.4, -22.5, sx - 1.1 + (k - 1.5) * 0.4, -22.5]); }
+      ell2(g, 9.6, -11, 4, 5, "#6a2a1a"); ell2(g, 9.6, -11, 3, 4, "#8a3a22"); ell2(g, 9.6, -11, 1.1, 1.1, "#b8923a"); g.strokeStyle = "#b8923a"; g.lineWidth = 0.4; g.beginPath(); g.ellipse(9.6, -11, 4, 5, 0, 0, Math.PI * 2); g.stroke();
+    } }
+  };
+  function drawFancy(c, d, px, py, t) {
+    const F = FANCY[d.kind], v = (hash(d.x * 7, d.y * 3) * 3) | 0, key = d.kind + "|" + v + "|" + (B.bg || "") + "|" + (B.tile && B.tile.base);
+    let cv = FSPR.get(key);
+    if (!cv) { cv = document.createElement("canvas"); cv.width = F.w * FS; cv.height = F.h * FS; const g = cv.getContext("2d"); g.setTransform(FS, 0, 0, FS, F.w * FS / 2, F.h * FS); try { F.draw(g, v, B); } catch (e) { console.error(e); } FSPR.set(key, cv); }
+    const flip = hash(d.y, d.x * 5) < 0.5 && d.kind !== "armor" && d.kind !== "statueDuergar";
+    if (flip) { c.save(); c.translate(px, 0); c.scale(-1, 1); c.drawImage(cv, -F.w / 2, py - F.h, F.w, F.h); c.restore(); }
+    else c.drawImage(cv, px - F.w / 2, py - F.h, F.w, F.h);
+    if (d.kind === "table" && v !== 2) { c.save(); c.globalCompositeOperation = "lighter"; const f = 0.8 + 0.2 * Math.sin(t * 9 + d.x); c.globalAlpha = 0.5 * f; c.fillStyle = "#ffc070"; c.beginPath(); c.arc(px + (flip ? -7.6 : 7.6), py - 15, 2.4, 0, Math.PI * 2); c.fill(); c.restore(); }
   }
   /* Flamme: Hof, äußere Zunge, Kern und weißer Docht – alles additiv */
   /* frei sichtbarer Hintergrund (Himmel, Fenster, Arena): dort gibt es keine Wand für Wandschmuck */
@@ -1835,6 +1967,8 @@
     q.x = x; q.y = y; q.r = r; q.c = rgb; q.a = a; q.b = bloom || 0;
   }
   const addC = (x, y, r, col, a, bloom) => pushL(x, y, r, colRGB(col), a == null ? 0.5 : a, bloom);
+  /* Lichter des letzten Bildes (für Randlicht auf Figuren, pracht.js) – nur lesen */
+  G.lightQ = () => LQ; G.lightQn = () => LQn;
   const EXT = [];
   G.addLight = Z.addLight = (x, y, r, col, a) => { if (EXT.length < 400) EXT.push(x, y, r, colRGB(col), a == null ? 0.5 : a); };
   const FLASH = [];
