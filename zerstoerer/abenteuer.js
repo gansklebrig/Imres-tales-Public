@@ -195,6 +195,8 @@
     mk("erkunden", "e_flut", ["Schleusenwärter", "Lockkeeper"], ["Eine Flutkammer ablassen.", "Drain a flood chamber."], null, { cape: "tang" }),
     mk("erkunden", "e_kran", ["Kranführer", "Crane Operator"], ["Mit einem Lastenkran fahren.", "Ride a cargo crane."], () => (X().kran || 0) >= 1, TT("Kranführer", "Crane Operator")),
     mk("erkunden", "e_rueck", ["Kein Weg zu weit", "No Road Too Far"], ["Den Rückweg in ein früheres Gebiet nutzen.", "Use the way back into an earlier area."], null, TT("Heimkehrer", "Homecomer")),
+    mk("erkunden", "e_raetsel", ["Rätselmeister", "Puzzle Master"], ["Ein Hebelrätsel in einem Geheimraum lösen.", "Solve a lever puzzle in a secret room."], () => (X().raetsel || 0) >= 1, TT("Rätselmeister", "Puzzle Master")),
+    mk("erkunden", "e_raetsel5", ["Schlossknacker", "Lockbreaker"], ["5 Hebelrätsel lösen (insgesamt).", "Solve 5 lever puzzles (total)."], () => (X().raetsel || 0) >= 5, TT("Schlossknacker", "Lockbreaker"), () => [X().raetsel || 0, 5]),
     mk("erkunden", "e_wunder", ["Staunender", "Wonderstruck"], ["3 verschiedene Wunder sehen.", "See 3 different wonders."], () => Z.wunder && Z.wunder.seen() >= 3, TT("Staunender", "the Wonderstruck"), () => [Z.wunder ? Z.wunder.seen() : 0, 3]),
     /* Sammeln & Lager */
     mk("sammeln", "s_palisade", ["Palisade", "Palisade"], ["Das Lager wächst zur Palisade.", "The camp grows to a palisade."], () => Z.lager && Z.lager.stage() >= 3, TT("Lagerhauptmann", "Camp Captain"), () => [Z.lager ? Z.lager.stage() : 0, 3]),
@@ -245,7 +247,7 @@
   /* Klang/Grafik-Schnittstelle: kat (Kategorie), selten (Fanfare), siegel {motiv, stufe} je Erfolg */
   const KATN = { tempo: "tempo", kampf: "technik", makellos: "nohit", erkunden: "erkundung", bosse: "bosse", sammeln: "sammeln", spass: "kurios", geschichte: "geschichte" };
   const SELTEN = ["nh_lauf", "t_lauf12", "b_schaedel5", "b_alle", "k_meister", "wahr", "alle", "nh_gebiet3", "b_mini", "s_feste", "e_gebiete", "k_rollkette", "nh_weberin", "nh_demogorgon"];
-  const GOLD = ["t_lauf20", "t_boss", "t_waechter", "k_parkette", "k_serie15", "k_ueber", "k_elite", "b_schaedel3", "nh_heil", "e_geheim5", "s_bewohner", "s_plus5", "s_banner", "f_fass", "f_tarzan", "f_rennen", "zorn", "runen", "tagebuch", "pakt", "b_weberin", "b_demogorgon", "s_gold", "s_waffen"];
+  const GOLD = ["t_lauf20", "t_boss", "t_waechter", "k_parkette", "k_serie15", "k_ueber", "k_elite", "b_schaedel3", "nh_heil", "e_geheim5", "s_bewohner", "s_plus5", "s_banner", "f_fass", "f_tarzan", "f_rennen", "e_raetsel5", "zorn", "runen", "tagebuch", "pakt", "b_weberin", "b_demogorgon", "s_gold", "s_waffen"];
   const BRONZE = ["erstesblut", "ende", "boss", "e_kran", "e_flut", "e_rueck", "nh_voll", "f_pazifist", "f_nass", "e_morsch", "zaeh", "gold", "hundert", "ereignis", "befreier", "spuren", "s_umhang"];
   const MOTIV_K = { tempo: "sanduhr", kampf: "schwert", makellos: "schild", erkunden: "karte", bosse: "krone", sammeln: "truhe", spass: "stern", geschichte: "faden" };
   const MOTIV = { erstesblut: "schwert", hundert: "tod", parade: "schild", ausweichen: "feder", boss: "krone", gold: "muenze", ohnetrank: "trank", federleicht: "feder", fallen: "zahnrad",
@@ -255,7 +257,7 @@
     k_umg: "zahnrad", k_leuchter: "glocke", k_serie15: "flamme", k_ueber: "auge", k_elite: "tod", k_meister: "sieg", nh_gebiet: "schild", nh_gebiet3: "schild", nh_lauf: "herz", nh_heil: "trank", nh_voll: "herz",
     e_geheim: "auge", e_geheim5: "truhe", e_geheim25: "auge", e_karte: "karte", e_gebiete: "karte", e_wucht: "zahnrad", e_morsch: "zahnrad", e_flut: "tor", e_kran: "zahnrad", e_rueck: "tor", e_wunder: "stern",
     s_palisade: "tor", s_banner: "krone", s_feste: "krone", s_bewohner: "herz", s_plus5: "flamme", s_segen3: "stern", s_gold: "muenze", s_waffen: "schwert", s_umhang: "faden",
-    f_fass: "zahnrad", f_tarzan: "glocke", f_pazifist: "herz", f_nass: "trank", f_goblin: "muenze", f_faust: "schwert", f_rennen: "sanduhr", b_mini: "tod", b_schaedel3: "schaedel", b_schaedel5: "schaedel", b_alle: "sieg" };
+    f_fass: "zahnrad", f_tarzan: "glocke", f_pazifist: "herz", f_nass: "trank", f_goblin: "muenze", f_faust: "schwert", f_rennen: "sanduhr", e_raetsel: "zahnrad", e_raetsel5: "rune", b_mini: "tod", b_schaedel3: "schaedel", b_schaedel5: "schaedel", b_alle: "sieg" };
   function enrich() {
     for (const a of ACH) {
       a.kat = KATN[a.c] || "geschichte";
@@ -650,6 +652,8 @@
     }
     /* W13: seltene Zeitrennen-Kammer (Sanduhr-Sockel, Ringe in der Nähe einsammeln) */
     if (Math.random() < (Z.rennenChance != null ? Z.rennenChance : 0.14)) { try { const ev = setupRennen(lv); if (ev) { evs.push(ev); rennenInteract(ev); } } catch (err) { console.error(err); } }
+    /* W13 R9: Hebelrätsel in einem Geheimraum (nie auf dem Hauptweg) */
+    if (Math.random() < (Z.raetselChance != null ? Z.raetselChance : 0.45)) { try { const ev = setupRaetsel(lv); if (ev) { evs.push(ev); raetselInteract(ev); } } catch (err) { console.error(err); } }
     if (evs.some(e => e.k === "haendler")) setTimeout(() => { if (Z.level === lv && Z.ui && Z.ui.notify) Z.ui.notify("⚖ <b>" + L(["Fahrende Händlerin", "Wandering Trader"]) + "</b><br><small>" + L(["Irgendwo klimpert ihr Karren – folge der Laterne (Karte).", "Her cart is jingling somewhere – follow the lantern (map)."]) + "</small>", { prio: 2, art: "gold", dauer: 3400 }); }, 9000);
     /* Runen-Fragmente in Geheimräumen */
     const RUNE = { verlies: "tiefe", schmiede: "glut", zinnen: "himmel" };
@@ -719,6 +723,95 @@
     const limit = Math.max(8, Math.round((way * T / Z.PC.RUN * 1.15 + 2) * Z.rennenFaktor)); /* Bot (R8): braucht im Mittel 1,03 × Weg/Laufen → ~25 % Rest */
     return { k: "rennen", x: p.x * T + 8, y: (p.y + 1) * T, done: false, t: 0, on: false, tries: 0, limit, way: Math.round(way), rings: order.map(r => ({ x: r.x * T + 8, y: r.y * T + 4, got: false })) };
   }
+  /* ======================= HEBELRÄTSEL (W13 R9) ======================= */
+  /* In einem Geheimraum: eine Steintafel zeigt 3 (ab Stufe 4: 4) Zeichen in Reihenfolge, daneben gleich viele Hebel mit je einem Zeichen.
+     Richtige Reihenfolge ziehen → Truhe + Gold. Falscher Hebel → alle springen zurück (kein Schaden, beliebig oft).
+     Erreichbarkeit: Prüferkanten mit zerschlagenen Rissen (Kachel 7 offen) ab dem Gebietsstart. Geheimräume liegen nie auf dem Hauptweg. */
+  const RZ = [{ id: "raute", g: "◆", col: "#e5b454" }, { id: "dreieck", g: "▲", col: "#d0503a" }, { id: "kreis", g: "●", col: "#efe6d0" }, { id: "kreuz", g: "✚", col: "#6aa04a" }];
+  function setupRaetsel(lv) {
+    const secrets = Object.keys(lv.cells || {}).filter(k => lv.cells[k].kind === "secret"); if (!secrets.length) return null;
+    const f = { W: lv.W, H: lv.H, get: (x, y) => { const v = lv.get(x, y); return v === 7 ? 0 : v; }, start: lv.start, doors: [], cells: lv.cells };
+    Z.validateLevel(f, null, true); const reach = f.reach, W = lv.W; /* bequeme Reichweite (4 hoch / 5 weit) */
+    const n = (Z.run && Z.run.tier >= 4) ? 4 : 3;
+    for (const key of Z.R.shuffle(secrets.slice())) {
+      const c = lv.cells[key], sp = [];
+      /* nicht auf Truhen, Schlüsseln, Schreinen o. Ä. (sonst greift Benutzen das falsche Ding) */
+      const busy = [].concat((lv.rewards || []).map(r => [r.x, r.y]), (lv.feats || []).map(q => [q.x, q.y != null ? q.y : q.y0]), (lv.loot || []).map(q => [q.x, q.y]));
+      for (let y = c.y * Z.CH + 1; y < c.y * Z.CH + Z.CH - 1; y++) for (let x = c.x * Z.CW + 1; x < c.x * Z.CW + Z.CW - 1; x++)
+        if (reach[y * W + x] && Z.standable(lv, x, y, 2) && !busy.some(([bx, by]) => Math.abs(bx - x) <= 2 && Math.abs(by - y) <= 2)) sp.push({ x, y });
+      if (sp.length < n + 1) continue;
+      /* Tafel zuerst; Hebel nur, was von der Tafel aus OHNE weitere Risse erreichbar ist (alles in einem Zug lösbar) */
+      let tab = null, levers = null;
+      for (const t0 of Z.R.shuffle(sp.slice()).slice(0, 4)) {
+        const g2 = { W: lv.W, H: lv.H, get: lv.get, start: t0, doors: [], cells: lv.cells }; Z.validateLevel(g2, null, true);
+        const pick = [];
+        for (const q of Z.R.shuffle(sp.filter(q => q !== t0 && g2.reach[q.y * W + q.x]))) { if (pick.length >= n) break; if ([t0].concat(pick).every(r => Math.abs(r.x - q.x) >= 3 || Math.abs(r.y - q.y) >= 3)) { const g3 = { W: lv.W, H: lv.H, get: lv.get, start: q, doors: [], cells: lv.cells }; Z.validateLevel(g3, null, true); if (g3.reach[t0.y * W + t0.x]) pick.push(q); /* auch zurück zur Tafel – keine Einbahn-Falle */ } }
+        if (pick.length >= n) { tab = t0; levers = pick.sort((a, b) => a.x - b.x || a.y - b.y); break; }
+      }
+      if (!tab) continue;
+      const sym = Z.R.shuffle(RZ.slice(0, n).map((_, i) => i)); /* Zeichen je Hebel */
+      const seq = Z.R.shuffle(levers.map((_, i) => i)); /* richtige Reihenfolge der Hebel */
+      return { k: "raetsel", cell: key, x: tab.x * T + 8, y: (tab.y + 1) * T, done: false, t: 0, prog: 0, resetT: 0, fails: 0, seq,
+        levers: levers.map((q, i) => ({ x: q.x * T + 8, y: (q.y + 1) * T, sym: sym[i], down: false, a: 0 })) };
+    }
+    return null;
+  }
+  function raetselInteract(ev) {
+    ev.levers.forEach((lvr, i) => (Z.interacts = Z.interacts || []).push({ x: lvr.x, y: lvr.y, r: 22, h: 34, ok: () => !ev.done && !lvr.down && ev.resetT <= 0,
+      label: () => L(["Hebel ", "Lever "]) + RZ[lvr.sym].g + L([" ziehen", ""]), use: () => raetselPull(ev, i) }));
+  }
+  function raetselPull(ev, i) {
+    const lvr = ev.levers[i]; if (ev.done || lvr.down || ev.resetT > 0) return;
+    lvr.down = true; A.play("chain", { vol: 0.5, rate: 1.3, x: lvr.x });
+    if (ev.seq[ev.prog] === i) {
+      ev.prog++; FX.text(lvr.x, lvr.y - 22, RZ[lvr.sym].g, RZ[lvr.sym].col, true);
+      if (ev.prog >= ev.levers.length) {
+        ev.done = true; finish(ev); A.play("holy", { vol: 0.6 }); FX.flashScreen("#ffd27a", 0.2);
+        Z.dropItem(ev.x, ev.y - 6, { chest: true }); const P = Z.player, g = 50 + 15 * (Z.run ? Z.run.tier : 0); P.gold += g;
+        Z.toast("✦ <b>" + L(["Rätsel gelöst", "Puzzle solved"]) + "</b><small>" + L(["Hinter der Tafel klickt ein Riegel – eine Truhe und " + g + " Gold.", "A latch clicks behind the tablet – a chest and " + g + " gold."]) + "</small>", 3200);
+        X().raetsel = (X().raetsel || 0) + 1; give("e_raetsel"); Z.saveMeta();
+      }
+    } else {
+      ev.fails++; ev.resetT = 0.7; A.play("rock", { vol: 0.4, rate: 0.7, x: lvr.x });
+      FX.text(lvr.x, lvr.y - 22, L(["Falsch – die Hebel springen zurück", "Wrong – the levers snap back"]), "#d0503a");
+    }
+  }
+  function raetselTick(ev, dt) {
+    for (const lvr of ev.levers) lvr.a += ((lvr.down ? 1 : 0) - lvr.a) * Math.min(1, dt * 12);
+    if (ev.resetT > 0) { ev.resetT -= dt; if (ev.resetT <= 0) { ev.prog = 0; for (const lvr of ev.levers) lvr.down = false; A.play("chain", { vol: 0.35, rate: 0.8 }); } }
+  }
+  /* Zeichen als Formen (lesbar ohne Schrift; Grafik-Agent kann übermalen: Z.raetselGemalt) */
+  function rzShape(c, k, x, y, r, col) {
+    c.fillStyle = col; c.beginPath();
+    if (k === 0) { c.moveTo(x, y - r); c.lineTo(x + r * 0.8, y); c.lineTo(x, y + r); c.lineTo(x - r * 0.8, y); }
+    else if (k === 1) { c.moveTo(x, y - r); c.lineTo(x + r, y + r * 0.8); c.lineTo(x - r, y + r * 0.8); }
+    else if (k === 2) { c.arc(x, y, r * 0.85, 0, 6.283); }
+    else { c.rect(x - r * 0.3, y - r, r * 0.6, r * 2); c.rect(x - r, y - r * 0.3, r * 2, r * 0.6); }
+    c.fill();
+  }
+  function drawRaetsel(c, ev, t) {
+    if (Z.raetselGemalt && Z.raetselGemalt(c, ev, t, RZ)) return;
+    const cam = Z.cam, vis = (x, y) => !(x < cam.x - 60 || x > cam.x + cam.w + 60 || y < cam.y - 60 || y > cam.y + cam.h + 60);
+    const n = ev.levers.length;
+    if (vis(ev.x, ev.y)) {
+      /* Steintafel: Zeichen in Reihenfolge, darunter Punkte für den Fortschritt */
+      const w = 10 + n * 14, x0 = ev.x - w / 2, y0 = ev.y - 40;
+      c.fillStyle = "#3a3236"; c.fillRect(ev.x - 3, ev.y - 12, 6, 12); c.fillStyle = "#5a5056"; c.fillRect(x0, y0, w, 28); c.fillStyle = "#463e44"; c.fillRect(x0 + 2, y0 + 2, w - 4, 24);
+      ev.seq.forEach((li, k) => { const sk = ev.levers[li].sym, cx = x0 + 12 + k * 14; rzShape(c, sk, cx, y0 + 11, 4.5, ev.done || k < ev.prog ? RZ[sk].col : "#c8b8a0"); c.fillStyle = k < ev.prog || ev.done ? "#ffd27a" : "#2a2226"; c.fillRect(cx - 1.5, y0 + 20, 3, 3); });
+      if (!ev.done) { c.save(); c.globalCompositeOperation = "lighter"; glow(c, ev.x, y0 + 12, 22 + Math.sin(t * 2) * 2, "rgba(255,200,120,.18)"); c.restore(); }
+      const P = Z.player;
+      const nah = (x, y, dx, dy) => P && Math.abs(P.x + P.w / 2 - x) < dx && Math.abs(P.y + P.h - y) < dy;
+      if (P && !ev.done && (nah(ev.x, ev.y, 70, 50) || ev.levers.some(l => nah(l.x, l.y, 90, 60))) && Z.ui && Z.ui.worldLabel)
+        Z.ui.worldLabel("raetsel" + Math.round(ev.x), { x: ev.x, y: y0 - 10, html: esc(L(["Reihenfolge: ", "Order: "])) + ev.seq.map(li => '<b style="color:' + RZ[ev.levers[li].sym].col + '">' + RZ[ev.levers[li].sym].g + "</b>").join(" → "), jetzt: true });
+    }
+    for (const lvr of ev.levers) {
+      if (!vis(lvr.x, lvr.y)) continue;
+      const x = lvr.x, y = lvr.y;
+      c.fillStyle = "#3a3030"; c.fillRect(x - 6, y - 4, 12, 4);
+      c.save(); c.translate(x, y - 3); c.rotate(-0.7 + lvr.a * 1.4); c.fillStyle = "#6a4a30"; c.fillRect(-1, -13, 2.4, 13); c.restore();
+      rzShape(c, lvr.sym, x, y - 22, 4, ev.done ? "#ffd27a" : RZ[lvr.sym].col);
+    }
+  }
   /* Sockel über das gemeinsame Benutzen-System (Z.interacts): Vorrang/Beschriftung wie Hebel, kein Konflikt mit Schildern & Co. */
   function rennenInteract(ev) {
     (Z.interacts = Z.interacts || []).push({ x: ev.x, y: ev.y, r: 26, h: 34, ok: () => !ev.done && !ev.on, label: () => L(["Zeitrennen starten", "Start time trial"]) + " (" + ev.limit + " s)", use: () => rennenStart(ev) });
@@ -782,6 +875,7 @@
           }
           break;
         case "rennen": rennenTick(ev, dt, use); break;
+        case "raetsel": raetselTick(ev, dt); break;
         case "rune": if (near(ev, 18)) { ev.done = true; M().runes[ev.rk] = 1; Z.saveMeta(); FX.flashScreen("#d8d0e8", 0.5); A.play("holy", { vol: 0.8 }); FX.burst(ev.x, ev.y - 10, 30, { col: ["#d8d0e8", "#c03a5a", "#fff"], sp: 120, up: 40, life: 1, size: 2.4, kind: "glow", add: true }); const n = Object.keys(M().runes).length; Z.toast("◆ <b>" + L(["Runen-Fragment gefunden", "Rune fragment found"]) + " (" + n + "/3)</b><br><small>" + L(n >= 3 ? ["Alle drei! Nach dem nächsten Endboss öffnet sich ein Riss im Netz …", "All three! After the next final boss, a rift in the web will open…"] : ["Irgendwo im Netz zuckt etwas.", "Somewhere in the web, something twitches."]) + "</small>", 4600); } break;
       }
     }
@@ -862,6 +956,7 @@
     const cam = Z.cam;
     for (const ev of evs) {
       if (ev.k === "dieb") continue;
+      if (ev.k === "raetsel") { drawRaetsel(c, ev, t); continue; }
       const x = ev.x, y = ev.y;
       if (x < cam.x - 60 || x > cam.x + cam.w + 60 || y < cam.y - 10 || y > cam.y + cam.h + 60) continue; /* nur im Bild */
       if (ev.k === "schrein") { c.fillStyle = "#2a2030"; c.fillRect(x - 7, y - 22, 14, 22); poly(c, [x - 9, y - 22, x + 9, y - 22, x, y - 30], "#3a2a44"); if (!ev.done) { c.save(); c.globalCompositeOperation = "lighter"; glow(c, x, y - 14, 18 + Math.sin(t * 3) * 3, "rgba(170,80,255,.5)"); c.restore(); circ(c, x, y - 14, 2.4, "#d0a0ff"); } tag(ev, L(["Opfern", "Sacrifice"])); }
