@@ -514,6 +514,74 @@
     /* Rastfeuer im Vorraum: Bodenplatz nahe der Raummitte */
     if (V0) { const c = lv.cells[V0], mx = c.x * CW + CW / 2; let best = null; for (let y = c.y * CH + 1; y < c.y * CH + CH - 1; y++) for (let x = c.x * CW + 3; x < c.x * CW + CW - 3; x++) if (Z.standable(lv, x, y, 2) && Z.standable(lv, x - 1, y, 2) && Z.standable(lv, x + 1, y, 2) && lv.get(x, y + 1) === 1 && (!lv.reach || lv.reach[y * lv.W + x]) && !(lv.doors || []).some(d => Math.abs(d.x - x) < 3 && Math.abs(d.y - y) < 3)) { const d2 = Math.abs(x - mx); if (!best || d2 < best.d) best = { x, y, d: d2 }; } if (best) lv._drama.rast = { x: best.x * T + 8, y: (best.y + 1) * T }; }
   }
+  /* ======================= W13 R14: Aufstellungen =======================
+     Messung (r14/aufstellung.py, 13 Gebiete × 4, 924 Räume mit ≥ 2 Gegnern): 32 % „flach“ (alle am Boden in einer Höhe), obwohl 85 % dieser
+     Räume Simse haben; nur 29 % der Fernkämpfer stehen erhöht. Innerhalb desselben Raums (Anzahl gleich):
+       · Fernkämpfer/Zauberer → auf einen erreichbaren Sims 3–7 Kacheln über dem Raumboden, an der Kante (Sicht nach unten),
+         ≥ 6 Kacheln vom Eingang, nicht über Türen
+       · flache Räume: eine Bodengruppe auf einen Sims (springt gestaffelt herab)
+       · in Räumen mit Bodenfalle: eine Nahkampfgruppe 2–5 Kacheln HINTER die Falle (vom Eingang aus gesehen) – die Falle wird Teil des Kampfs
+     Fair: nur erreichbare Plätze, Abstand zum Eingang, höchstens 2 Umstellungen je Raum. */
+  const AU = { an: true, fernAnteil: 0.6 };
+  Z.aufstellung = AU;
+  function aufstellung(lv) {
+    if (!AU.an || !lv || lv.hub || lv.arena || lv.passage || !lv.cells) return;
+    const D4 = [[1, 0], [-1, 0], [0, 1], [0, -1]], W = lv.W, key = (x, y) => x + "," + y;
+    const ruhe = new Set(lv._drama ? [lv._drama.V0, lv._drama.W0].filter(Boolean) : []);
+    const startK = lv.startCell ? key(lv.startCell.x, lv.startCell.y) : null;
+    const by = {};
+    for (const e of Z.enemies) { if (e.dead || e.def.boss || e.nmMini || e.thief || !e.home) continue; const k = Math.floor(e.home.x / T / CW) + "," + Math.floor(e.home.y / T / CH); (by[k] = by[k] || []).push(e); }
+    let fern = 0, falle = 0, stufe = 0;
+    for (const k in by) {
+      const c = lv.cells[k]; if (!c || k === startK || ruhe.has(k) || c.kind === "secret") continue;
+      /* Eingang: Mitte der Kante zum Elternraum bzw. zum Hauptweg-Vorgänger */
+      let ent = null;
+      const pc = c.kind === "path" ? Object.keys(lv.cells).map(q => lv.cells[q]).find(o => o.kind === "path" && Math.abs(o.x - c.x) + Math.abs(o.y - c.y) === 1 && (o.dist || 0) === (c.dist || 0) - 1) : c.parent;
+      if (pc) ent = { x: c.x * CW + CW / 2 + (pc.x - c.x) * CW / 2, y: c.y * CH + CH / 2 + (pc.y - c.y) * CH / 2 };
+      if (!ent) continue;
+      let floor = -1; for (let y = c.y * CH + 1; y < c.y * CH + CH - 1; y++) for (let x = c.x * CW + 1; x < c.x * CW + CW - 1; x++) if ((!lv.reach || lv.reach[y * W + x]) && Z.standable(lv, x, y, 2)) floor = Math.max(floor, y);
+      if (floor < 0) continue;
+      const es = by[k], groups = [];
+      for (const e of es) { let g = groups.find(g2 => Math.abs(g2.hx - e.home.x) < 40 && Math.abs(g2.hy - e.home.y) < 24); if (!g) groups.push(g = { hx: e.home.x, hy: e.home.y, es: [] }); g.es.push(e); }
+      const besetzt = (x, y) => Z.enemies.some(e => !e.dead && e.home && Math.abs(e.home.x - (x * T + 8)) < 48 && Math.abs(e.home.y - (y + 1) * T) < 32);
+      const setze = (g, x, y) => { g.es.forEach((e, i) => { const px = x * T + 8 + (i - (g.es.length - 1) / 2) * 12, py = (y + 1) * T; e.x = px - e.w / 2; e.y = py - e.h; e.home = { x: px, y: py }; e.vx = e.vy = 0; }); };
+      const frei = (x, y) => (!lv.reach || lv.reach[y * W + x]) && Z.standable(lv, x, y, 2) && !(lv.doors || []).some(d => Math.abs(d.x - x) < 4 && Math.abs(d.y - y) < 4) && Math.abs(x - ent.x) + Math.abs(y - ent.y) >= 6 && !besetzt(x, y);
+      let n = 0;
+      /* Fernkämpfer auf Simse */
+      for (const g of groups) {
+        if (n >= 2) break; const d = g.es[0].def; if (!(d.ai === "ranged" || d.ai === "caster") || d.fly) continue;
+        const fy = Math.floor((g.hy - 2) / T); if (floor - fy >= 3) continue;
+        if (Math.random() > AU.fernAnteil) continue;
+        const sp = [];
+        for (let y = Math.max(c.y * CH + 1, floor - 7); y <= floor - 3; y++) for (let x = c.x * CW + 2; x < c.x * CW + CW - 2; x++) {
+          if (!frei(x, y)) continue;
+          const kante = [-2, -1, 1, 2].some(dx => !Z.standable(lv, x + dx, y, 1) && lv.get(x + dx, y) === 0 && lv.get(x + dx, y + 1) !== 1); /* Simskante: daneben Luft, kein Boden */
+          if (kante) sp.push([x, y]);
+        }
+        if (!sp.length) continue;
+        const [x, y] = sp[(Math.random() * sp.length) | 0]; setze(g, x, y); n++; fern++;
+      }
+      /* flache Räume (alle Gruppen in einer Höhe): eine Bodengruppe auf einen Sims – sie springt dann gestaffelt herab */
+      if (n < 2 && groups.length >= 2) {
+        const rows = groups.map(g2 => Math.floor((g2.hy - 2) / T));
+        if (Math.max(...rows) - Math.min(...rows) <= 1 && !groups.some(g2 => g2.es[0].def.fly)) {
+          const g = groups.find(g2 => ["walker", "pack", "skirmish", "jumper", "swarm"].includes(g2.es[0].def.ai));
+          if (g) { const sp = []; for (let y = Math.max(c.y * CH + 1, floor - 6); y <= floor - 3; y++) for (let x = c.x * CW + 2; x < c.x * CW + CW - 2; x++) if (frei(x, y)) sp.push([x, y]);
+            if (sp.length) { const [x, y] = sp[(Math.random() * sp.length) | 0]; setze(g, x, y); n++; stufe++; } }
+        }
+      }
+      /* Nahkämpfer hinter eine Bodenfalle */
+      if (n < 2) {
+        const tr = (lv.traps || []).filter(t => Math.floor(t.x / CW) === c.x && Math.floor(t.y / CH) === c.y && lv.get(t.x, t.y) === 0 && lv.get(t.x, t.y + 1) === 1);
+        const g = groups.find(g2 => !g2.es[0].def.fly && ["walker", "pack", "skirmish", "charger", "duelist", "shielder", "guard"].includes(g2.es[0].def.ai));
+        if (tr.length && g) {
+          const t = tr[(Math.random() * tr.length) | 0], dir = Math.sign(t.x - ent.x) || 1;
+          for (let dx = 2; dx <= 5; dx++) { const x = t.x + dir * dx, y = t.y; if (frei(x, y) && Z.standable(lv, x - dir, y, 1)) { setze(g, x, y); g.es.forEach(e => (e._hinterFalle = true)); n++; falle++; break; } }
+        }
+      }
+    }
+    lv._aufstellung = { fern, falle, stufe };
+  }
   const dl0 = Z.loadArea;
   /* erst im ersten Schritt nach dem Laden: andere Module (Trupps, Hinterhalte, Nemesis …) setzen ihre Gegner in späteren loadArea-Hüllen */
   Z.loadArea = function () { const r = dl0.apply(this, arguments); if (Z.level) Z.level._dramaPend = true; return r; };
@@ -521,7 +589,7 @@
   let peekT = 0, peekLock = null;
   const et0 = Z.ebenenTick;
   function dramaTick(dt) {
-    if (Z.level && Z.level._dramaPend) { Z.level._dramaPend = false; drama(Z.level); }
+    if (Z.level && Z.level._dramaPend) { Z.level._dramaPend = false; drama(Z.level); try { aufstellung(Z.level); } catch (e) { console.error(e); } }
     const lv = Z.level, P = Z.player, D = lv && lv._drama; if (!D || !P) return;
     if (peekT > 0) { peekT -= dt; if (peekT <= 0 && Z.cam.lock === peekLock) Z.cam.lock = null; }
     if (!D.V0 || D.blick || lv.wardenSpawned) return;

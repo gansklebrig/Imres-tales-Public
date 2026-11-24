@@ -1802,3 +1802,95 @@
     add(r.x, r.y - 10, 96, "#ffa050", 0.62, 1);
   });
 })();
+
+/* Ezekiel – The Destroyer · Überreste eines Abenteurers, gemalt (W11 Runde 36; Logik abenteuer.js „fund“, Haken Z.fundGemalt)
+   Ab Stufe 1 (nicht lean/mini – dort die schlichte Fassung): zusammengesunkenes Skelett (Schädel mit Augenhöhlen,
+   Rippenbögen, Arm- und Beinknochen), Lederrucksack mit Deckelklappe, Riemen, Schnalle und aufgeschnallter Deckenrolle,
+   umgekippte, erloschene Messinglaterne mit gesprungenem Glas, kalte Feuerstelle (Steine, verkohlte Stöcke, Asche) –
+   Laterne/Feuerstelle nur, wo daneben Boden ist. Undurchsucht: Münzen lugen aus dem Rucksack, Goldschimmer und
+   Funkeln (Funkeln ab Stufe 2), schwaches Licht. Durchsucht: Klappe offen, Rucksack eingesunken, leer.
+   Schalter Z.gfx.off.fund. Kein Blau. */
+(function () {
+  const Z = window.Z, G = Z.gfx, TAU = Math.PI * 2, T = 16; if (!G) return;
+  const lean = () => !!(Z.gq && (Z.gq.lean || Z.gq.mini));
+  const lvl = () => (Z.gq ? Z.gq.level || 0 : 0);
+  const off = () => (G.off && G.off.fund) || lean() || lvl() < 1;
+  const SP = new WeakMap();
+  function spots(ev) {
+    let s = SP.get(ev); if (s) return s;
+    const lv = Z.level, tx = Math.floor(ev.x / T), ty = Math.round(ev.y / T) - 1;
+    const ok = dx => { const x = tx + dx; return !!lv && lv.get(x, ty) === 0 && lv.get(x, ty + 1) === lv.get(tx, ty + 1); };
+    s = { l: ok(-1), r: ok(1) }; SP.set(ev, s); return s;
+  }
+  const bone = (c, x1, y1, x2, y2, w) => { c.strokeStyle = "#d8ccb0"; c.lineWidth = w; c.lineCap = "round"; c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
+    c.fillStyle = "#e8dec8"; c.beginPath(); c.arc(x1, y1, w * 0.75, 0, TAU); c.arc(x2, y2, w * 0.75, 0, TAU); c.fill(); };
+  function skeleton(c, x, y) {
+    /* sitzt an der Wand gelehnt, nach links gesunken */
+    c.fillStyle = "rgba(0,0,0,.28)"; c.beginPath(); c.ellipse(x, y - 0.4, 9, 1.4, 0, 0, TAU); c.fill();
+    bone(c, x - 1, y - 1, x + 7, y - 1.4, 1.3); bone(c, x + 7, y - 1.4, x + 9, y - 0.6, 1); /* Bein */
+    bone(c, x - 2, y - 1.6, x + 5, y - 3.6, 1.2); bone(c, x + 5, y - 3.6, x + 8, y - 1.2, 1); /* angewinkeltes Bein */
+    bone(c, x - 3, y - 3, x - 2.4, y - 9, 1.2); /* Wirbelsäule */
+    c.strokeStyle = "#cfc2a4"; c.lineWidth = 0.8; for (let i = 0; i < 3; i++) { c.beginPath(); c.ellipse(x - 2.6, y - 5 - i * 1.4, 2.6 - i * 0.3, 0.9, 0, 0, Math.PI); c.stroke(); }
+    bone(c, x - 4.6, y - 8, x - 6.2, y - 3, 0.9); bone(c, x - 6.2, y - 3, x - 4, y - 0.8, 0.8); /* Arm */
+    /* Schädel, geneigt */
+    c.save(); c.translate(x - 3.4, y - 11.2); c.rotate(-0.35);
+    c.fillStyle = "#e6dcc4"; c.beginPath(); c.ellipse(0, 0, 2.6, 2.4, 0, 0, TAU); c.fill(); c.fillRect(-1.6, 1.2, 3, 1.6);
+    c.fillStyle = "#2a1e16"; c.beginPath(); c.arc(-0.9, 0.2, 0.7, 0, TAU); c.arc(1, 0.2, 0.7, 0, TAU); c.fill(); c.fillRect(-0.2, 1.1, 0.5, 0.7);
+    c.fillStyle = "rgba(255,250,235,.5)"; c.fillRect(-1.8, -1.8, 1.4, 0.6); c.restore();
+  }
+  function pack(c, x, y, done, now, rich) {
+    const h = done ? 7 : 9, top = y - h;
+    c.fillStyle = "rgba(0,0,0,.3)"; c.beginPath(); c.ellipse(x + 4, y - 0.4, 6, 1.2, 0, 0, TAU); c.fill();
+    const g = c.createLinearGradient(x - 1, 0, x + 9, 0); g.addColorStop(0, "#7a5030"); g.addColorStop(1, "#4a2e1a");
+    c.fillStyle = g; c.beginPath(); c.moveTo(x - 1, y); c.lineTo(x - 0.5, top + 1); c.quadraticCurveTo(x + 4, top - 1, x + 8.5, top + 1); c.lineTo(x + 9, y); c.closePath(); c.fill();
+    c.fillStyle = "#3a2414"; c.fillRect(x + 1.4, top + 1, 1, h - 1); c.fillRect(x + 6, top + 1, 1, h - 1); /* Riemen */
+    c.fillStyle = "rgba(255,220,170,.18)"; c.fillRect(x - 0.6, top + 2, 0.8, h - 3);
+    if (!done) {
+      /* Deckenrolle oben */
+      c.fillStyle = "#6a2a22"; c.beginPath(); c.ellipse(x + 4, top - 1.4, 5.4, 1.7, 0, 0, TAU); c.fill(); c.fillStyle = "#c8a050"; c.fillRect(x + 1, top - 2.4, 0.6, 2); c.fillRect(x + 6.6, top - 2.4, 0.6, 2);
+      c.fillStyle = "#a05040"; c.beginPath(); c.ellipse(x + 9.2, top - 1.4, 0.8, 1.6, 0, 0, TAU); c.fill();
+      /* Klappe mit Schnalle, Münzen lugen hervor */
+      c.fillStyle = "#e5b454"; for (let i = 0; i < 3; i++) { c.beginPath(); c.ellipse(x + 2.4 + i * 1.8, top + 1.6 - (i % 2) * 0.5, 1.1, 0.6, 0, 0, TAU); c.fill(); }
+      c.fillStyle = "#5a3820"; c.beginPath(); c.moveTo(x - 0.6, top + 1.6); c.quadraticCurveTo(x + 4, top + 0.4, x + 8.6, top + 1.6); c.lineTo(x + 7.6, top + 5); c.lineTo(x + 0.4, top + 5); c.closePath(); c.fill();
+      c.fillStyle = "#c8a050"; c.fillRect(x + 3.3, top + 4, 1.6, 1.4); c.fillStyle = "#3a2414"; c.fillRect(x + 3.8, top + 4.4, 0.6, 0.6);
+      if (rich) { const tw = (Math.sin(now * 3.1) + 1) / 2; if (tw > 0.7) { const a = (tw - 0.7) * 3.3, sx = x + 5, sy = top + 1; c.fillStyle = "rgba(255,250,220," + a.toFixed(2) + ")"; c.fillRect(sx - 0.4, sy - 3, 0.8, 6); c.fillRect(sx - 3, sy - 0.4, 6, 0.8); } }
+    } else {
+      /* offen: Klappe nach hinten, dunkles Inneres, Decke aufgerollt daneben */
+      c.fillStyle = "#1e120a"; c.beginPath(); c.ellipse(x + 4, top + 1.2, 4.2, 1.3, 0, 0, TAU); c.fill();
+      c.fillStyle = "#5a3820"; c.beginPath(); c.moveTo(x - 0.4, top + 0.6); c.lineTo(x + 8.4, top + 0.6); c.lineTo(x + 7.4, top - 3.2); c.lineTo(x + 0.6, top - 3.2); c.closePath(); c.fill();
+      c.fillStyle = "#c8a050"; c.fillRect(x + 3.3, top - 3, 1.6, 1.2);
+      c.fillStyle = "#6a2a22"; c.beginPath(); c.moveTo(x + 9, y); c.quadraticCurveTo(x + 11, y - 2.6, x + 14, y - 1.2); c.lineTo(x + 14, y); c.closePath(); c.fill();
+    }
+  }
+  function lantern(c, x, y) {
+    c.save(); c.translate(x, y - 2.4); c.rotate(-1.35);
+    c.fillStyle = "#6a5030"; c.fillRect(-2.6, -3.4, 5.2, 0.9); c.fillRect(-2.6, 2.5, 5.2, 0.9);
+    c.fillStyle = "rgba(200,190,160,.25)"; c.fillRect(-2.2, -2.5, 4.4, 5);
+    c.strokeStyle = "#8a6a3a"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(-2.4, -2.5); c.lineTo(-2.4, 2.5); c.moveTo(2.4, -2.5); c.lineTo(2.4, 2.5); c.moveTo(-1.5, -4.2); c.quadraticCurveTo(0, -6, 1.5, -4.2); c.stroke();
+    c.strokeStyle = "rgba(240,235,220,.45)"; c.lineWidth = 0.4; c.beginPath(); c.moveTo(-1.6, -1.8); c.lineTo(0.2, 0.4); c.lineTo(-0.6, 1.8); c.stroke(); /* Sprung */
+    c.fillStyle = "#2a2018"; c.fillRect(-0.4, -0.6, 0.8, 1.6); c.restore();
+  }
+  function coldFire(c, x, y) {
+    c.fillStyle = "#5a5450"; c.beginPath(); c.ellipse(x, y - 0.8, 5, 1.2, 0, 0, TAU); c.fill(); /* Asche */
+    c.fillStyle = "#7a7470"; c.beginPath(); c.ellipse(x - 0.6, y - 1.2, 3, 0.7, 0, 0, TAU); c.fill();
+    c.strokeStyle = "#1e1612"; c.lineWidth = 1.1; c.lineCap = "round"; c.beginPath(); c.moveTo(x - 3.6, y - 1); c.lineTo(x + 1.6, y - 3.2); c.moveTo(x + 3.4, y - 1); c.lineTo(x - 1, y - 2.8); c.stroke();
+    for (const [dx, r] of [[-5.4, 1.4], [5.4, 1.3], [-2, 1.1], [2.6, 1.2]]) { c.fillStyle = "#4a4442"; c.beginPath(); c.ellipse(x + dx, y - 0.9, r * 1.3, r, 0, 0, TAU); c.fill(); c.fillStyle = "rgba(255,240,220,.18)"; c.fillRect(x + dx - r * 0.6, y - 0.9 - r * 0.7, r, 0.5); }
+  }
+  Z.fundGemalt = function (c, ev, t) {
+    if (off()) return false;
+    try {
+      const x = ev.x, y = ev.y, now = performance.now() / 1000, rich = lvl() >= 2, sp = spots(ev);
+      if (!ev.done) { c.save(); c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(x + 4, y - 7, 1, x + 4, y - 7, 15); g.addColorStop(0, "rgba(255,200,110," + (0.22 + 0.06 * Math.sin(now * 2 + ev.t)).toFixed(3) + ")"); g.addColorStop(1, "rgba(255,200,110,0)"); c.fillStyle = g; c.fillRect(x - 11, y - 22, 30, 24); c.restore(); }
+      if (sp.r) coldFire(c, x + 19, y);
+      skeleton(c, x - 7, y);
+      if (sp.l) lantern(c, x - 16, y);
+      pack(c, x, y, ev.done, now, rich);
+      if (!ev.done && rich && Math.random() < 0.03 && Z.fx && Z.fx.p) Z.fx.p({ x: x + 4 + (Math.random() - 0.5) * 6, y: y - 11, vx: 0, vy: -12, life: 0.7, size: 1.1, col: "#ffd27a", kind: "spark", add: true });
+      return true;
+    } catch (e) { console.error(e); return false; }
+  };
+  if (G.lightGather) G.lightGather.push(function (add, cam) {
+    if (G.off && G.off.fund) return;
+    for (const ev of Z.abEvents || []) { if (ev.k !== "fund" || ev.done) continue; if (cam && (ev.x < cam.x - 60 || ev.x > cam.x + cam.w + 60 || ev.y < cam.y - 40 || ev.y > cam.y + cam.h + 60)) continue; add(ev.x + 4, ev.y - 8, 30, "#ffc870", 0.3, 0); }
+  });
+})();

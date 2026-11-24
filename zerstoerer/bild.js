@@ -1573,6 +1573,7 @@
     const y0 = Math.max(0, Math.floor(cam.y / T) - 3), y1 = Math.min(lv.H - 1, Math.ceil((cam.y + cam.h) / T) + 3);
     const LA = G.lava; let ln = 0, run = -1;
     const wRich = lq() >= 2 && !(Z.gq && Z.gq.lean) && !(G.off && G.off.wasser);
+    const lRich = lq() >= 1 && !(Z.gq && (Z.gq.lean || Z.gq.mini)) && !(G.off && G.off.wasser); /* W11 R36: Lava-Schollen schon ab Stufe 1 */
     for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
       const v = lv.get(x, y); if (v !== 5 && v !== 6) { run = -1; continue; }
       const px = x * T, py = y * T, top = lv.get(x, y - 1) !== v;
@@ -1592,12 +1593,13 @@
           c.fillStyle = top ? "rgba(90,20,8,.55)" : "rgba(50,10,6,.5)"; c.beginPath(); c.ellipse(cx, py + (top ? 9 : 7) + Math.sin(t + x) * 1.2, 4 + 2 * Math.sin(u * 6.28), 1.6, 0, 0, 6.283); c.fill();
           c.fillStyle = "rgba(255,150,40," + (0.25 + 0.2 * Math.sin(t * 3 + x * 1.7 + y)).toFixed(3) + ")"; c.fillRect(px + ((hash(x, y * 5) * 12) | 0), py + (top ? 11 : 4 + ((hash(y, x) * 8) | 0)), 3, 1);
           /* W11 R35 (Stufe 2, nicht lean): Krustenschollen mit glühenden Fugen, platzende Blasen – Lava wirkte flach */
-          if (wRich && top) {
+          if ((wRich || lRich) && top) {
             const h1 = hash(x, y + 7), sx = px + 3 + ((h1 * 7 + t * 1.6) % 7), sy = py + 8 + Math.sin(t * 0.8 + x) * 0.8;
             c.fillStyle = "rgba(60,14,6,.8)"; c.beginPath(); c.moveTo(sx, sy); c.lineTo(sx + 3.5, sy - 1.2); c.lineTo(sx + 6, sy + 0.4); c.lineTo(sx + 4.5, sy + 2.4); c.lineTo(sx + 0.8, sy + 2); c.closePath(); c.fill();
             c.strokeStyle = "rgba(255,200,90,.7)"; c.lineWidth = 0.5; c.stroke();
             const bu = (t * (0.35 + h1 * 0.3) + h1 * 5) % 1, bx = px + 2 + hash(x * 7, y) * 12, by = py + lw(bx) + 1.5;
-            if (bu < 0.3) { const r = 0.6 + bu * 6; c.fillStyle = "#ff9a3a"; c.beginPath(); c.arc(bx, by, r, Math.PI, 0); c.fill(); c.fillStyle = "rgba(255,240,190,.8)"; c.fillRect(bx - r * 0.5, by - r * 0.8, r * 0.5, 0.6); }
+            if (!wRich) { /* Stufe 1: nur Schollen (R36) */ }
+            else if (bu < 0.3) { const r = 0.6 + bu * 6; c.fillStyle = "#ff9a3a"; c.beginPath(); c.arc(bx, by, r, Math.PI, 0); c.fill(); c.fillStyle = "rgba(255,240,190,.8)"; c.fillRect(bx - r * 0.5, by - r * 0.8, r * 0.5, 0.6); }
             else if (bu < 0.4) { const k = (bu - 0.3) / 0.1; c.strokeStyle = "rgba(255,220,140," + (1 - k).toFixed(2) + ")"; c.lineWidth = 0.6; c.beginPath(); c.ellipse(bx, by, 2.4 + k * 4, 0.8 + k, 0, 0, 6.283); c.stroke(); c.fillStyle = "rgba(255,200,100," + (1 - k).toFixed(2) + ")"; c.fillRect(bx - 0.4, by - 2 - k * 6, 0.8, 0.8); c.fillRect(bx + 1.5 + k * 2, by - 1 - k * 4, 0.8, 0.8); }
           } else if (wRich) { const h2 = hash(x + 3, y), vy = py + 3 + h2 * 9; c.strokeStyle = "rgba(255,120,30," + (0.22 + 0.15 * Math.sin(t * 1.7 + x + y)).toFixed(3) + ")"; c.lineWidth = 0.7; c.beginPath(); c.moveTo(px, vy); c.quadraticCurveTo(px + 8, vy + Math.sin(t * 0.6 + x) * 3, px + T, vy + (h2 - 0.5) * 4); c.stroke(); }
         }
@@ -2604,10 +2606,15 @@
   };
   function fog(c, cam) {
     if (!(B.weather || []).includes("fog") || (Z.gq && Z.gq.fog === false)) return;
-    if (!G.fogStrip) { const f = G.fogStrip = document.createElement("canvas"); f.width = 4; f.height = 40; const g = f.getContext("2d"), gr = g.createLinearGradient(0, 0, 0, 40); gr.addColorStop(0, "rgba(180,190,180,0)"); gr.addColorStop(0.5, "rgba(180,190,180,.7)"); gr.addColorStop(1, "rgba(180,190,180,0)"); g.fillStyle = gr; g.fillRect(0, 0, 4, 40); }
+    /* W11 R36: Nebelbahnen waren bildschirmfest, grau (180,190,180) und lagen als graue Platten über dunklen
+       Wand-/Leerraumflächen (Sturm, Verlies, Hafen, See). Jetzt: in der Welt verankert (alle ~9 Kacheln eine Bahn,
+       langsam treibend, wandert mit der Kamera), Farbe aus dem Gebiet (helle Kachelfarbe, abgedunkelt), schwächer. */
+    const col = shade(B.tile.light, -0.35);
+    if (!G.fogStrip || G.fogStrip._col !== col) { const f = G.fogStrip = document.createElement("canvas"); f._col = col; f.width = 4; f.height = 40; const g = f.getContext("2d"), rgb = col.slice(4, -1), gr = g.createLinearGradient(0, 0, 0, 40); gr.addColorStop(0, "rgba(" + rgb + ",0)"); gr.addColorStop(0.5, "rgba(" + rgb + ",.7)"); gr.addColorStop(1, "rgba(" + rgb + ",0)"); g.fillStyle = gr; g.fillRect(0, 0, 4, 40); }
     /* die Bahnen sind waagerecht gleichförmig: nur der sichtbare Teil, ohne Verlauf je Bild */
-    c.save(); c.globalAlpha = 0.18;
-    for (let i = 0; i < 4; i++) { const y = cam.y + cam.h * (0.55 + i * 0.12); c.drawImage(G.fogStrip, cam.x - 2, y - 20, cam.w + 4, 40); }
+    c.save(); c.globalAlpha = 0.13;
+    const step = 148, k0 = Math.floor((cam.y - 40) / step), k1 = Math.ceil((cam.y + cam.h + 40) / step);
+    for (let k = k0; k <= k1; k++) { const y = k * step + 70 + Math.sin(G.time * 0.13 + k * 1.7) * 14; if (y < cam.y - 30 || y > cam.y + cam.h + 30) continue; c.drawImage(G.fogStrip, cam.x - 2, y - 26, cam.w + 4, 52); }
     c.restore();
   }
 

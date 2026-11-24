@@ -149,12 +149,8 @@
     if (al0) al0.apply(this, arguments);
     if (!W) return;
     c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
-    /* Nebelbänke: ein vorgefertigter weicher Fleck statt Verlauf je Bild */
-    const nf = Z.gq && Z.gq.level === 0 ? 0 : W.fogs.length; /* Handheld: keine Nebelbänke */
-    for (let i = 0; i < nf; i++) {
-      const f = W.fogs[i], x = f.x * W2 * 1.4 - W2 * 0.2, y = f.y * H2, w = W2 * 0.7 * f.s, h = H2 * 0.22 * f.s;
-      c.drawImage(fogBlob(), x - w * 0.5, y - h * 0.5, w, h);
-    }
+    /* W11 R36: Nebelbänke jetzt VOR dem Licht (Z.drawParcours unten) – nach dem Licht lagen sie als hellgraue Platten
+       über dunklen Wand- und Leerraumflächen (Zinnen, Hafen, Torhof) */
     for (const s of W.shafts) {
       const u = s.t / s.life, a = Math.sin(u * Math.PI) * 0.16;
       c.globalCompositeOperation = "lighter";
@@ -176,6 +172,15 @@
     if (!W || !(W.mood === "regen" || W.mood === "gewitter")) return;
     l.fillStyle = RAIN_TINT; l.fillRect(0, 0, LW, LH); rainFrame = Z.gfx.frame;
   });
+  const dpF = Z.drawParcours;
+  Z.drawParcours = function (c, t) {
+    if (dpF) dpF.apply(this, arguments);
+    if (!W || !W.fogs.length || (Z.gq && Z.gq.level === 0)) return; /* Handheld: keine Nebelbänke */
+    const W2 = c.canvas.width, H2 = c.canvas.height;
+    c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
+    for (const f of W.fogs) { const x = f.x * W2 * 1.4 - W2 * 0.2, y = f.y * H2, w = W2 * 0.7 * f.s, h = H2 * 0.22 * f.s; c.drawImage(fogBlob(), x - w * 0.5, y - h * 0.5, w, h); }
+    c.restore();
+  };
   function fogBlob() {
     if (blob) return blob;
     blob = document.createElement("canvas"); blob.width = blob.height = 64; const g = blob.getContext("2d");
