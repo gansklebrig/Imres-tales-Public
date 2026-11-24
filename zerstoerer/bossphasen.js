@@ -1804,6 +1804,13 @@
         FX.burst(ox, o.y + o.h / 2, 12, { col: ["#3a3030", "#5a4a40"], sp: 60, life: 0.6, size: 4, kind: "smoke" });
         o.dead = true; o.deadT = 99; o.noLoot = true;
       }
+      /* W9 13. Runde (Trank-Ökonomie): Stufe-4/5-Gebiete sind lang; die Tränke gehen dort vor dem Wächter an Fallen und Fernkämpfer
+         (K17/K18: Vorschaden 1–5 × LP). Wer ohne Trank vor dem Wächter steht, findet am Eingang einen – einmal je Gebiet, nur bei 0 Tränken. */
+      const lv = Z.level, P = Z.player;
+      if (b && b.warden && lv && !lv._w9Trank && P && !P.dead && (P.potions || 0) < 1 && (P.potMax || 0) > 0) {
+        lv._w9Trank = true; P.potions = 1; A.play("coin", { vol: 0.5, rate: 0.8 });
+        FX.text(pcx(P), P.y - 18, L(["Ein vergessener Heiltrank am Eingang (+1)", "A forgotten potion by the entrance (+1)"]), "#8ae08a", true);
+      }
     } catch (err) { console.error(err); }
     return e;
   };

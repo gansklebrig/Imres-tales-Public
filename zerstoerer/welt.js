@@ -2847,11 +2847,13 @@
   Z.trapDens = trapDens;
   function sprinkleTraps(lv, R, B, avoid) {
     const list = (TRAPKINDS[lv.biome] || "").split(" ").filter(Boolean); if (!list.length) return; lv.traps = lv.traps || [];
-    const g = lv.get, solid = v => v === 1 || v === 7, taken = [], dens = trapDens(B), tier = B.tier || 0;
+    /* W13 R17: Gebietsvariante „Fallengänge“ (abenteuer.js Z.fallenFaktor): eigener Faktor, engere Abstände und mehr Versuche je Raum */
+    const vf = (Z.fallenFaktor && Z.fallenFaktor()) || 1;
+    const g = lv.get, solid = v => v === 1 || v === 7, taken = [], dens = Math.min(vf > 1 ? 3.2 : 1.8, trapDens(B) * vf), tier = B.tier || 0, gap = vf > 1 ? 4 : 5;
     const st = lv.start || { x: -99, y: -99 };
     /* im ersten Gebiet: die ersten Schritte bleiben frei, Fallen erst ein gutes Stück hinter dem Eingang */
     const farFromStart = (x, y) => tier > 0 || Math.abs(x - st.x) + Math.abs(y - st.y) > 26;
-    const free = (x, y) => !avoid(x, y) && farFromStart(x, y) && !taken.some(([a, b]) => Math.abs(a - x) < 5 && Math.abs(b - y) < 3) && !(lv.traps || []).some(t => Math.abs(t.x - x) < 4 && Math.abs(t.y - y) < 3);
+    const free = (x, y) => !avoid(x, y) && farFromStart(x, y) && !taken.some(([a, b]) => Math.abs(a - x) < gap && Math.abs(b - y) < 3) && !(lv.traps || []).some(t => Math.abs(t.x - x) < gap - 1 && Math.abs(t.y - y) < 3);
     const add = (t, x, y, o) => { lv.traps.push(Object.assign({ t, x, y }, o || {})); taken.push([x, y]); };
     const floorAt = (x, y) => { for (let yy = y; yy < y + 10 && yy < lv.H - 1; yy++) if (standable(lv, x, yy, 3)) return yy; return -1; };
     const ceilAt = (x, y) => { for (let yy = y; yy > y - 10 && yy > 0; yy--) if (g(x, yy) === 0 && solid(g(x, yy - 1))) return yy; return -1; };
@@ -2915,7 +2917,7 @@
       let want = 0; for (let q = p; q > 0; q -= 1) if (R.chance(Math.min(1, q))) want++;
       if (want && tier > 0 && R.chance(0.3)) want++;
       const ox = c.x * CW, oy = c.y * CH;
-      for (let n = 0, tries = 0; n < want && tries < 40; tries++) {
+      for (let n = 0, tries = 0; n < want && tries < 40 * vf; tries++) {
         const kind = list[R.int(0, list.length - 1)], x = ox + R.int(2, CW - 3), y = oy + R.int(1, CH - 3);
         if (tryPlace(kind, x, y)) n++;
       }

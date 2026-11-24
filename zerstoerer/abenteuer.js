@@ -34,14 +34,17 @@
   Z.PACTS = PACTS;
   const pact = id => !!(Z.run && Z.run.pacts && Z.run.pacts.includes(id));
   /* W13 R16: Gebietsvariante „Fallengänge“ nutzt die Fallen-Regel des Pakts (welt.js trapDens) – nur für dieses Gebiet */
-  Z.hasPact = id => pact(id) || (id === "fallen" && varAktiv("fallen"));
+  Z.hasPact = pact;
+  Z.fallenFaktor = () => (varAktiv("fallen") ? VARIANTEN.fallen.faktor : 1); /* welt.js sprinkleTraps */
   const npacts = () => (Z.run && Z.run.pacts ? Z.run.pacts.length : 0);
   /* ======================= GEBIETSVARIANTEN (W13 R16) =======================
      Selten (Vorschlag 18 % je Gebiet ab Stufe 1, höchstens 2 je Lauf, nie Torhof/Arena) bekommt ein Gebiet eine Variante mit eigener Regel,
      Gefahr und besserer Beute (Beute wie ein Pakt mehr). Angekündigt beim Betreten. Werte als Vorschlag für Balance. */
   const VARIANTEN = {
-    fallen: { n: ["Fallengänge", "Trapped Halls"], d: ["Doppelt so viele Fallen – und bessere Beute.", "Twice as many traps – and better loot."], ico: "⚠" },
+    fallen: { n: ["Fallengänge", "Trapped Halls"], d: ["Doppelt so viele Fallen – und bessere Beute.", "Twice as many traps – and better loot."], ico: "⚠", faktor: 4 }, /* R17: Faktor auf die Fallendichte; ergibt ca. +80 % Fallen (Raumplätze begrenzen) */
     brut: { n: ["Unruhige Brut", "Restless Brood"], d: ["Jeder siebte Gegner ist ein Elite-Gegner – und bessere Beute.", "One in seven enemies is an elite – and better loot."], ico: "☠", elite: 0.15 },
+    finster: { n: ["Finstere Tiefe", "Lightless Depths"], d: ["Kaum Licht – aber die Gegner sehen dich auch schlechter. Bessere Beute.", "Barely any light – but enemies see you worse, too. Better loot."], ico: "☾", bereit: () => !!Z.dunkelSanft }, /* nur mit sanfter Abdunkelung der Grafik (Z.dunkelSanft) – der Boss-Dunkelmodus ist für ein ganzes Gebiet zu finster */
+    einsturz: { n: ["Einsturzgefahr", "Cave-in"], d: ["Immer wieder bricht die Decke – achte auf rieselnden Staub. Bessere Beute.", "The ceiling keeps caving in – watch for trickling dust. Better loot."], ico: "▼", takt: [6, 10], warn: 1.1, dmg: 0.08 },
     gold: { n: ["Goldader", "Gold Vein"], d: ["+60 % Gold, ein Goldgoblin treibt sich herum – aber Gegner treffen 15 % härter.", "+60% gold, a gold goblin roams about – but enemies hit 15% harder."], ico: "●", gold: 0.6, dmg: 1.15 }
   };
   const VAR = { chance: 0.18, max: 2 };
@@ -54,7 +57,7 @@
     run._var = null; run._varLaden = false;
     const erzwungen = Z.varianteErzwingen;
     if (erzwungen || ((run._varN || 0) < VAR.max && Math.random() < VAR.chance)) {
-      const k = erzwungen && VARIANTEN[erzwungen] ? erzwungen : Z.R.pick(Object.keys(VARIANTEN));
+      const k = erzwungen && VARIANTEN[erzwungen] ? erzwungen : Z.R.pick(Object.keys(VARIANTEN).filter(q => !VARIANTEN[q].bereit || VARIANTEN[q].bereit()));
       run._var = { id: k, area: id }; run._varN = (run._varN || 0) + 1; run._varLaden = true;
     }
   }
@@ -63,15 +66,18 @@
   let brocken = [], einsturzT = 5;
   function varTick(dt) {
     const v = Z.gebietVariante(), P = Z.player; if (!v || !P || !Z.level) { brocken.length = 0; return; }
-    if (v.id === "finster") Z.darkness = Math.max(Z.darkness || 0, 0.1);
+    if (v.id === "finster") { if (Z.dunkelSanft) Z.dunkelSanft(0.6, dt); else Z.darkness = Math.max(Z.darkness || 0, 0.1); }
     if (v.id !== "einsturz" || P.dead) return;
     const lv = Z.level, solid = (x, y) => { const g = lv.get(x, y); return g === 1 || g === 7; };
     if ((einsturzT -= dt) <= 0 && !(Z.boss && !Z.bossDefeated) && !(Z.ui && Z.ui.modalOpen)) {
       einsturzT = VARIANTEN.einsturz.takt[0] + Math.random() * (VARIANTEN.einsturz.takt[1] - VARIANTEN.einsturz.takt[0]);
-      const px = P.x + P.w / 2 + (Math.random() < 0.5 ? -1 : 1) * (30 + Math.random() * 110), tx = Math.floor(px / T), fy0 = Math.floor((P.y + P.h - 2) / T);
-      let cy = -1; for (let y = fy0; y > fy0 - 12 && y > 0; y--) if (solid(tx, y - 1) && !solid(tx, y)) { cy = y; break; }
-      if (cy > 0 && !solid(tx, cy)) { let fy = cy; while (fy < cy + 14 && !solid(tx, fy + 1) && lv.get(tx, fy + 1) !== 2) fy++;
-        if (fy - cy >= 3 && solid(tx, fy + 1)) brocken.push({ x: tx * T + 8, y0: cy * T, yF: (fy + 1) * T, y: cy * T, t: 0, vy: 0, fall: false }); }
+      for (let versuch = 0; versuch < 10; versuch++) { /* mehrere Stellen probieren: hohe Hallen und Wände neben der Figur */
+        const px = P.x + P.w / 2 + (Math.random() < 0.5 ? -1 : 1) * (20 + Math.random() * 80) + P.vx * 0.6, tx = Math.floor(px / T), fy0 = Math.floor((P.y + P.h - 2) / T);
+        let cy = -1; for (let y = fy0; y > fy0 - 16 && y > 0; y--) { if (solid(tx, y)) break; if (solid(tx, y - 1)) { cy = y; break; } }
+        if (cy <= 0) continue;
+        let fy = cy; while (fy < cy + 16 && !solid(tx, fy + 1) && lv.get(tx, fy + 1) !== 2) fy++;
+        if (fy - cy >= 3 && (solid(tx, fy + 1) || lv.get(tx, fy + 1) === 2)) { brocken.push({ x: tx * T + 8, y0: cy * T, yF: (fy + 1) * T, y: cy * T, t: 0, vy: 0, fall: false }); break; }
+      }
     }
     for (let i = brocken.length - 1; i >= 0; i--) {
       const b = brocken[i]; b.t += dt;
@@ -86,7 +92,7 @@
       }
     }
   }
-  Z.einsturzTest = () => { einsturzT = 0; };
+  Z.einsturzTest = () => { einsturzT = 0; }; Z.brockenN = () => brocken.length; Z.brockenListe = () => brocken;
   function drawBrocken(c) {
     for (const b of brocken) {
       if (!b.fall) { const a = Math.min(1, b.t / VARIANTEN.einsturz.warn); c.fillStyle = "rgba(0,0,0," + (0.15 + 0.35 * a).toFixed(2) + ")"; c.beginPath(); c.ellipse(b.x, b.yF - 1, 6 + 8 * a, 2.2, 0, 0, 6.283); c.fill(); continue; }
@@ -261,7 +267,7 @@
     mk("erkunden", "e_rueck", ["Kein Weg zu weit", "No Road Too Far"], ["Den Rückweg in ein früheres Gebiet nutzen.", "Use the way back into an earlier area."], null, TT("Heimkehrer", "Homecomer")),
     mk("erkunden", "e_raetsel", ["Rätselmeister", "Puzzle Master"], ["Ein Hebelrätsel in einem Geheimraum lösen.", "Solve a lever puzzle in a secret room."], () => (X().raetsel || 0) >= 1, TT("Rätselmeister", "Puzzle Master")),
     mk("erkunden", "e_raetsel5", ["Schlossknacker", "Lockbreaker"], ["5 Hebelrätsel lösen (insgesamt).", "Solve 5 lever puzzles (total)."], () => (X().raetsel || 0) >= 5, TT("Schlossknacker", "Lockbreaker"), () => [X().raetsel || 0, 5]),
-    mk("erkunden", "e_variante", ["Wechselhafte Feste", "Shifting Keep"], ["Ein Gebiet mit besonderer Variante (Fallengänge, Unruhige Brut, Goldader) abschließen.", "Clear an area with a special variant (Trapped Halls, Restless Brood, Gold Vein)."], null, TT("Wetterfest", "Weatherproof")),
+    mk("erkunden", "e_variante", ["Wechselhafte Feste", "Shifting Keep"], ["Ein Gebiet mit besonderer Variante (z. B. Fallengänge, Goldader, Einsturzgefahr) abschließen.", "Clear an area with a special variant (e.g. Trapped Halls, Gold Vein, Cave-in)."], null, TT("Wetterfest", "Weatherproof")),
     mk("erkunden", "e_wunder", ["Staunender", "Wonderstruck"], ["3 verschiedene Wunder sehen.", "See 3 different wonders."], () => Z.wunder && Z.wunder.seen() >= 3, TT("Staunender", "the Wonderstruck"), () => [Z.wunder ? Z.wunder.seen() : 0, 3]),
     /* Sammeln & Lager */
     mk("sammeln", "s_palisade", ["Palisade", "Palisade"], ["Das Lager wächst zur Palisade.", "The camp grows to a palisade."], () => Z.lager && Z.lager.stage() >= 3, TT("Lagerhauptmann", "Camp Captain"), () => [Z.lager ? Z.lager.stage() : 0, 3]),
@@ -1227,7 +1233,7 @@
       c.save(); c.globalCompositeOperation = "lighter"; glow(c, r.x, r.y - 20, 34 + Math.sin(t * 4) * 4, "rgba(200,60,110,.5)"); c.restore(); c.strokeStyle = "rgba(230,220,240,.8)"; c.lineWidth = 0.7; for (let i = 0; i < 8; i++) { const a = i / 8 * 6.283 + t * 0.3; c.beginPath(); c.moveTo(r.x, r.y - 20); c.lineTo(r.x + Math.cos(a) * 22, r.y - 20 + Math.sin(a) * 26); c.stroke(); } ell(c, r.x, r.y - 20, 6, 16, "#120810"); }
   }
   const hz0 = Z.drawParcours;
-  Z.drawParcours = function (c, t) { if (hz0) hz0(c, t); drawEvents(c, t); try { drawHelfer(c, t); } catch (err) { console.error(err); } };
+  Z.drawParcours = function (c, t) { if (hz0) hz0(c, t); drawEvents(c, t); try { drawHelfer(c, t); drawBrocken(c); } catch (err) { console.error(err); } };
 
   /* ======================= DAS WAHRE ENDE ======================= */
   Z.ARENAS.herz = { tier: 7, boss: "weberin", final: "wahr", name: ["Das Herz der Fäden", "The Heart of Threads"], base: "schlund", exits: [], music: "final", w: 56, h: 20, kind: "lab" };
@@ -1267,7 +1273,7 @@
   }
 
   /* ======================= Schritt & Verkabelung ======================= */
-  Z.abenteuerTick = function (dt) { heroTick(dt); evTick(dt); riftTick(dt); try { trackTick(dt); helferTick(dt); } catch (err) { console.error(err); } achTick(dt); };
+  Z.abenteuerTick = function (dt) { heroTick(dt); evTick(dt); riftTick(dt); try { trackTick(dt); helferTick(dt); varTick(dt); } catch (err) { console.error(err); } achTick(dt); };
   /* Erfolge II: äußerste Wrapper (erst nach allen Dateien), damit sie das Endergebnis sehen */
   function wireAch() {
     buildDyn();
