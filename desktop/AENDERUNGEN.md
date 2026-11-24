@@ -45,6 +45,15 @@ Jeder Punkt lässt sich einzeln zurücknehmen (Schalter in Klammern).
   je weniger Leben, desto kräftiger und schneller, im Takt des Herzschlag-Tons (0,95 s → 0,5 s). Der Lebensbalken blinkt, der
   Heiltrank-Knopf leuchtet, solange ein Trank da ist. Vorher: kaum sichtbare Randtönung (bei 30 % Leben 7 % Deckkraft) und fester Takt.
   (`__hsLW.an=0` bringt die alte Tönung zurück)
+- Einstieg auf „Schwer“ entschärft (`HART_EIN`, `hartEin()`, `hartMix()`): Die ersten drei Stufen der Kampagne führen an die volle
+  Härte heran (25 % / 55 % / 80 %, ab Stufe 4 wie bisher). Betrifft Gegner-Leben (+8 % statt +35 % in Stufe 1), Gegner-Schaden,
+  Nachschub und Obergrenze der Gegner, Mindestleben („zähere Gegner“), die Goblin-Sonderangriffe (längere Vorwarnung, weniger Wucht –
+  galt bisher nur auf Normal), die Zusatz-Eigenschaft seltener Rudel (erst ab Stufe 3) und das Zusatzrudel (erst ab Stufe 3).
+  In der ersten Ebene nimmt der Held 10 % weniger Schaden.
+  Bot-Messung, 40 Läufe über die ersten zwei Stufen auf Schwer: vorher 19 Tode (21 schaffen beide Stufen), nachher 4 Tode (36 schaffen beide).
+  Nur Leben/Schaden/Nachschub zu senken half nicht (18 Tode) – tödlich waren die Sonderangriffe und die Elite-Rudel.
+- Wasserfall/Lavafall („Wegerlebnis“) nur noch unter der Erde und seltener (Gewicht 0,8 → 0,3); nicht mehr auf Straße, im Wald, am Teich.
+- Diagnose-Bericht nennt jetzt, welche Gegner-Sprites neu gebaut werden (Art, Maßstäbe, Drehwinkel, Größe des Zwischenspeichers).
 
 **Prüfung des Zweigs (24.11., nach allen Änderungen)**
 - Alle 35 Stufen mit WebGL-Welt auf „Legendär“ je 3,5 s gespielt (`sweep.js`): keine Skript-, Shader- oder Dach-Fehler.

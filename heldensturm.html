@@ -467,6 +467,11 @@ const diffMult=d=>({hp:Math.pow(3,d),dmg:Math.pow(2,d),il:d*12,gold:1+d*0.75,xp:
 const NORM=()=>G.diff===0&&!G.hard;const HARD=()=>!!(G&&G.hard&&G.diff===0);
 function dMult(){const m=diffMult(G.diff);if(HARD()){m.gold*=1.35;m.xp*=1.15;m.il+=2}return m}
 const diffNm=()=>HARD()?'Schwer':diffName(G.diff);
+/* Einstieg auf „Schwer“: die ersten drei Stufen der Kampagne führen an die volle Härte heran (0 = wie am Anfang, 1 = volle Härte ab Stufe 4).
+   Ein frischer Held ohne Ausrüstung starb sonst schon in der ersten Ebene mehrfach. hartMix(a,b) mischt den Einstiegswert a zum vollen Wert b. */
+const HART_EIN=[0.25,0.55,0.8];
+const hartEin=()=>{try{if(G.mode!=='kampagne')return 1;const s=G.stage|0;return s<HART_EIN.length?HART_EIN[s]:1}catch(e){return 1}};
+const hartMix=(a,b)=>{const e=hartEin();return a+(b-a)*e};
 
 /* ================= Audio =================
    Echte Aufnahmen aus klang/ (VSCO 2 Community Edition, CC0) – Harfe, Glockenspiel, Pauken, Gong,
@@ -2378,7 +2383,7 @@ function rollAffixes(n){const a=AFFIX_IDS.slice(),o={};while(n-->0&&a.length){co
 function makeElite(e,affix,rare){e.elite=true;e.champ=!rare;e.rare=!!rare;e.affix=affix;const k=rare?5:3;e.hp*=k;e.maxHp=e.hp;e.dmg*=rare?1.5:1.3;e.r*=rare?1.35:1.15;
  for(const a in affix)if(AFFIX[a].apply)AFFIX[a].apply(e);e.affixNames=Object.keys(affix).map(a=>AFFIX[a].n).join(' · ')}
 function spawnPack(f,x,y){const rare=Math.random()<0.3+Math.min(0.2,SL()*0.01);packFx(x,y,rare);
- if(rare){const nA=2+(SL()>12||G.diff>0||HARD()?1:0)+(G.diff>1?1:0);const L=spawnEnemy(f,x,y,{});L.elite=false;makeElite(L,rollAffixes(nA),true);
+ if(rare){const nA=2+(SL()>12||G.diff>0||(HARD()&&hartEin()>=0.8)?1:0)+(G.diff>1?1:0);const L=spawnEnemy(f,x,y,{});L.elite=false;makeElite(L,rollAffixes(nA),true);
   for(let i=0;i<4;i++)spawnEnemy(f,x+rnd(-60,60),y+rnd(-60,60),{});return L}
  const af=rollAffixes(1);const n=ri(3,4);for(let i=0;i<n;i++){const e=spawnEnemy(f,x+rnd(-50,50),y+rnd(-50,50),{});e.elite=false;makeElite(e,af,false)}}
 function affixTick(e,dt){if(!e.affix)return;for(const a in e.affix){const A=AFFIX[a];if(A.tick)A.tick(e,dt)}}
@@ -3696,7 +3701,7 @@ const effStage=()=>SL()+diffStages(G.diff);
 const EB=()=>G&&G.diff===0?Math.max(0,1-SL()/14):0;
 /* Ab sehr hohen Stufen wachsen Gegner langsamer, damit Hölle und darüber schwer, aber schaffbar bleiben */
 const softE=(E,k)=>E<=30?E:30+(E-30)*k;
-function scale(){const E=effStage(),prog=Math.min(1,(G.need?G.stageKills/G.need:1)),eb=EB(),an=1+0.15*(1-anlauf().lv);return{hp:an*28*Math.pow(1.14,softE(E,0.55))*(1+0.35*prog)*(1+0.8*eb)*mpHp()*(HARD()?1.35:1),dmg:an*9.2*Math.pow(1.122,softE(E,0.42))*(1+0.3*prog)*(1+0.75*eb)*(NORM()&&G.mode==='kampagne'?0.8:1)*(HARD()?(G.stage===0&&G.mode==='kampagne'?1.05:1.2):1),il:Math.max(1,Math.round(1+1.1*E+prog*2))+(HARD()?2:0)}}
+function scale(){const E=effStage(),prog=Math.min(1,(G.need?G.stageKills/G.need:1)),eb=EB(),an=1+0.15*(1-anlauf().lv);return{hp:an*28*Math.pow(1.14,softE(E,0.55))*(1+0.35*prog)*(1+0.8*eb)*mpHp()*(HARD()?hartMix(1.08,1.35):1),dmg:an*9.2*Math.pow(1.122,softE(E,0.42))*(1+0.3*prog)*(1+0.75*eb)*(NORM()&&G.mode==='kampagne'?0.8:1)*(HARD()?hartMix(0.8,1.2):1),il:Math.max(1,Math.round(1+1.1*E+prog*2))+(HARD()?2:0)}}
 function spawnEnemy(def,x,y,o){o=o||{};const sc=scale();const big=o.boss||o.guard||o.add;const elite=false;
  const sz=(big?(def.size||2):(def.size||1)*(elite?1.35:1))*(dmod('riesen')&&!big?1.3:1);
  const hp=sc.hp*(def.hp||1)*(dmod('riesen')?1.5:1)*(dmod('goldrausch')?1.25:1)*wxUndead(def)*(elite?4.5:1)*(o.boss?(40+SL()*1.5):o.guard?(8+Math.min(6,SL()*0.5)):o.add?10:1);
@@ -3718,8 +3723,8 @@ function firstWave(){zielStart();if(!G.bot&&G.stage===0&&NET.role!=='guest'){con
 function spawnTick(dt){
  if(G.room)return;G.spawnT-=dt;if(G.spawnT>0)return;const prog=Math.min(1,(G.need?G.stageKills/G.need:1));const bossy=G.boss||G.guardE;
  G.spawnT=Math.max(0.38,1.45-prog*0.6-Math.min(SL(),24)*0.035-G.diff*0.08)*(1-0.3*EB())/mpSpawn()*(bossy?2.4:1)*(G.portal&&!G.boss?99:1);
- const surv0=G.boss&&G.boss.survive>0&&NORM()&&G.mode==='kampagne';if(HARD())G.spawnT*=0.85;if(surv0)G.spawnT*=1.6;const AN=anlauf();G.spawnT*=(1.4-0.4*AN.st)*(1.15-0.15*AN.lv)*(SL()>=8?0.9:1);
- const cap=Math.round((50+Math.min(SL(),24)*2+G.diff*8+(HARD()?10:0)+20*(mpN()-1))*(surv0?0.6:1)*(0.6+0.4*AN.lv)*(0.8+0.2*AN.st)*(SL()>=8?1.12:1));if(G.enemies.length>=cap)return;
+ const surv0=G.boss&&G.boss.survive>0&&NORM()&&G.mode==='kampagne';if(HARD())G.spawnT*=hartMix(1,0.85);if(surv0)G.spawnT*=1.6;const AN=anlauf();G.spawnT*=(1.4-0.4*AN.st)*(1.15-0.15*AN.lv)*(SL()>=8?0.9:1);
+ const cap=Math.round((50+Math.min(SL(),24)*2+G.diff*8+(HARD()?Math.round(hartMix(0,10)):0)+20*(mpN()-1))*(surv0?0.6:1)*(0.6+0.4*AN.lv)*(0.8+0.2*AN.st)*(SL()>=8?1.12:1));if(G.enemies.length>=cap)return;
  const f=pickFoe(prog),pt=viewEdgePoint(50);
  const packC=(SL()<2?0.03:0.06)+0.03*EB()+0.005*Math.min(SL(),27)+0.03*G.diff;
  if(!bossy&&f.k!=='still'&&Math.random()<packC*(dmod('elitenflut')?3:1)*(G.gefahr?2.2:1)*wxPack()*b2PackF()){spawnPack(f,pt.x,pt.y);return}
@@ -3959,7 +3964,7 @@ function dropItem(x,y,it){it=ancRoll(it);if(G.portal&&d2({x,y},G.portal)<100*100
 /* ================= Spieler ================= */
 const keys={};let joy=null;
 function absorb(a){if(P.shieldHp>0){const t=Math.min(P.shieldHp,a);P.shieldHp-=t;a-=t;if(P.shieldHp<=0)burst(P.x,P.y,'#ecdcb2',12,140)}return a}
-function hurt(raw){G.kampfT=G.time;if(P.inv>0||P.down||G.state!=='play')return;if(P.id==='friedrich'&&Math.random()<0.125){if(!P.dgT||G.time-P.dgT>0.6){P.dgT=G.time;word(P.x,P.y-34,'ausgewichen','#cfe8b0')}return}let a=raw*hookMul('hurtMul',raw)*(P.buffs.roarG>0?0.85:1)*mpGuard()*setHurtMul()*curseHurtMul()*(1-armorRed(P.st.armor))*(LP('demohaut')?0.85:1)*(shrineOn('schutz')?0.5:1)*(1+modSum('edmg'))*(G.stage===0&&NORM()?0.8:1);a=absorb(a);a=Math.min(a,P.st.maxHp*(G.mode==='abstieg'?0.7:0.75));/* kein Ein-Treffer-Tod aus vollem Leben */if(LP('demohaut')&&Math.random()<0.2){aoe(P.x,P.y,110*P.st.area,sk(2),{knock:200});G.fxs.push({k:'tentacle',x:P.x,y:P.y-60,x2:P.x+rnd(-60,60),y2:P.y+rnd(-30,30),t:0,life:0.35})}if(a<=0)return;P.hp-=a;rumble(P,Math.min(1,0.15+a/P.st.maxHp*2.5),Math.min(300,90+a/P.st.maxHp*600));P.hurtT=0.18;P.hurtA=G.time;hurtFx(a);try{hurtFb(a)}catch(e){}G.shake=Math.min(G.shake+2.5,12);num(P.x,P.y-26,a,false,true);sfx('hurt');skHurt();if(P.hp<=0)die()}
+function hurt(raw){G.kampfT=G.time;if(P.inv>0||P.down||G.state!=='play')return;if(P.id==='friedrich'&&Math.random()<0.125){if(!P.dgT||G.time-P.dgT>0.6){P.dgT=G.time;word(P.x,P.y-34,'ausgewichen','#cfe8b0')}return}let a=raw*hookMul('hurtMul',raw)*(P.buffs.roarG>0?0.85:1)*mpGuard()*setHurtMul()*curseHurtMul()*(1-armorRed(P.st.armor))*(LP('demohaut')?0.85:1)*(shrineOn('schutz')?0.5:1)*(1+modSum('edmg'))*(G.stage===0&&NORM()?0.8:1)*(G.stage===0&&HARD()&&G.mode==='kampagne'?0.9:1);a=absorb(a);a=Math.min(a,P.st.maxHp*(G.mode==='abstieg'?0.7:0.75));/* kein Ein-Treffer-Tod aus vollem Leben */if(LP('demohaut')&&Math.random()<0.2){aoe(P.x,P.y,110*P.st.area,sk(2),{knock:200});G.fxs.push({k:'tentacle',x:P.x,y:P.y-60,x2:P.x+rnd(-60,60),y2:P.y+rnd(-30,30),t:0,life:0.35})}if(a<=0)return;P.hp-=a;rumble(P,Math.min(1,0.15+a/P.st.maxHp*2.5),Math.min(300,90+a/P.st.maxHp*600));P.hurtT=0.18;P.hurtA=G.time;hurtFx(a);try{hurtFb(a)}catch(e){}G.shake=Math.min(G.shake+2.5,12);num(P.x,P.y-26,a,false,true);sfx('hurt');skHurt();if(P.hp<=0)die()}
 function hurtDot(a){if(P.inv>0||P.down||G.state!=='play')return;a=a*setHurtMul()*curseHurtMul()*(1-armorRed(P.st.armor))*(LP('demohaut')?0.85:1)*(shrineOn('schutz')?0.5:1)*(1+modSum('edmg'));a=absorb(a);if(a<=0)return;P.hp-=a;P.dotAcc=(P.dotAcc||0)+a;if(P.dotAcc>P.st.maxHp*0.03){num(P.x+rnd(-8,8),P.y-26,P.dotAcc,false,true);P.dotAcc=0}if(P.hp<=0)die()}
 function die(){if(pactSave())return;if(LP('fledermaus')&&!P.batUsed){P.batUsed=1;P.hp=1;P.inv=2;P.batT=2;smoke(P.x,P.y);toast('Neznas Flucht! Du wirst zur Fledermaus.','#c48cff');later(2,()=>{heal(P.st.maxHp*0.3);smoke(P.x,P.y)});sfx('blink');return}
  if(P.revives>0){P.revives--;P.hp=P.st.maxHp*0.6;P.inv=2.5;aoe(P.x,P.y,280,sk(2),{knock:600,stun:1.5});ring(P.x,P.y,280,'#e5b454',0.8,8);toast('Zweite Chance! Du erhebst dich erneut.','#e5b454');sfx('level');return}
@@ -4631,13 +4636,13 @@ function gWind(e,dur,snd){e.gw={t0:G.time,dur};if(snd!==false&&fxQ()>=1)sfxAt(GV
 function gEnr(e){if(e.genr||e.hp>=e.maxHp*0.4)return;e.genr=1;word(e.x,e.y-e.r-18,'In Rage!','#ff5a3a');ring(e.x,e.y,e.r+40,'#ff4a3a',0.6,6);G.shake+=3;sfxAt('g_enrage',e.x,e.y);sfxAt(GVOICE[e.def.gx]||'gv_hum',e.x,e.y)}
 const GBM={
  /* Kriegshorn: Schockwelle, Verstärkung, die Goblins in der Nähe werden flinker */
- g_horn(e,enr){const ea=NORM()&&G.stage<3;gWind(e,0.55);later(0.55,()=>{if(e.dead)return;sfxAt('g_horn',e.x,e.y);tele({k:'wave',x:e.x,y:e.y,r:e.r,spd:380,max:320,dmg:e.dmg*0.6,c:'#c9b38a',push:320});tele({k:'circle',x:e.x,y:e.y,r:300,delay:0.5,gs:'horn',c:'#ffd04a'});
+ g_horn(e,enr){const ea=(NORM()&&G.stage<3)||(HARD()&&hartEin()<0.6);gWind(e,0.55);later(0.55,()=>{if(e.dead)return;sfxAt('g_horn',e.x,e.y);tele({k:'wave',x:e.x,y:e.y,r:e.r,spd:380,max:320,dmg:e.dmg*0.6,c:'#c9b38a',push:320});tele({k:'circle',x:e.x,y:e.y,r:300,delay:0.5,gs:'horn',c:'#ffd04a'});
   if(G.enemies.length<110)for(let i=0;i<(ea?1:2)+(enr?1:0);i++){const a=rnd(TAU);spawnEnemy(FOES.goblin,e.x+Math.cos(a)*(e.r+50),e.y+Math.sin(a)*(e.r+50),{summon:1})}
   for(const o of G.enemies)if(!o.dead&&!o.hornB&&o!==e&&o.def.shape==='goblin'&&d2(o,e)<420*420){o.hornB=1;o.sp*=ea?1.08:1.2}word(e.x,e.y-e.r-14,'Zum Angriff!','#ffd04a')})},
  /* Rudelsprung: kauert, springt auf das Ziel, landet mit Wucht */
- g_pounce(e,enr){const tx=P.x,ty=P.y;gWind(e,0.5);tele({k:'circle',x:tx,y:ty,r:95,delay:NORM()&&G.stage<3?0.95:0.75,dmg:e.dmg*(NORM()&&G.stage<3?1.15:1.6),c:'#ffd04a'});later(0.5,()=>{if(e.dead)return;const d=Math.max(1,Math.sqrt(d2(e,{x:tx,y:ty}))),sp=Math.min(1700,d/0.25);e.charging=0.25;e.cvx=(tx-e.x)/d*sp;e.cvy=(ty-e.y)/d*sp;sfxAt('gv_wolf',e.x,e.y)});e.moveT+=0.5},
+ g_pounce(e,enr){const tx=P.x,ty=P.y;gWind(e,0.5);tele({k:'circle',x:tx,y:ty,r:95,delay:NORM()&&G.stage<3?0.95:HARD()?hartMix(0.95,0.75):0.75,dmg:e.dmg*(NORM()&&G.stage<3?1.15:HARD()?hartMix(1.15,1.6):1.6),c:'#ffd04a'});later(0.5,()=>{if(e.dead)return;const d=Math.max(1,Math.sqrt(d2(e,{x:tx,y:ty}))),sp=Math.min(1700,d/0.25);e.charging=0.25;e.cvx=(tx-e.x)/d*sp;e.cvy=(ty-e.y)/d*sp;sfxAt('gv_wolf',e.x,e.y)});e.moveT+=0.5},
  /* Felswurf der Höhlenwache */
- g_boulder(e,enr){gWind(e,0.6);later(0.35,()=>{if(e.dead)return;for(let i=0;i<2+(enr?1:0);i++){const x=P.x+(i?rnd(-150,150):0),y=P.y+(i?rnd(-150,150):0);tele({k:'circle',x,y,r:95,delay:1.15,dmg:e.dmg*(NORM()&&G.stage<3?1.4:2),c:'#c8a070',rock:{x:e.x,y:e.y}})}sfxAt('g_rock',e.x,e.y)})},
+ g_boulder(e,enr){gWind(e,0.6);later(0.35,()=>{if(e.dead)return;for(let i=0;i<2+(enr?1:0);i++){const x=P.x+(i?rnd(-150,150):0),y=P.y+(i?rnd(-150,150):0);tele({k:'circle',x,y,r:95,delay:1.15,dmg:e.dmg*(NORM()&&G.stage<3?1.4:HARD()?hartMix(1.4,2):2),c:'#c8a070',rock:{x:e.x,y:e.y}})}sfxAt('g_rock',e.x,e.y)})},
  /* Zahltag! Ein Fächer aus goldenen Münzen, drei Salven */
  g_coins(e,enr){gWind(e,0.4,false);word(e.x,e.y-e.r-14,'Zahltag!','#ffd04a');for(let w=0;w<3;w++)later(0.4+w*0.22,()=>{if(e.dead)return;const a0=ang(e,P),n=6+(enr?2:0);for(let i=0;i<n;i++)eShot(e.x,e.y-4,a0-0.7+1.4*i/(n-1)+rnd(-0.04,0.04),250+w*20,e.dmg*0.5,{kind:'eball',c:'#ffd04a',r:5});e.atkA=G.time;sfxAt('g_coins',e.x,e.y)})},
  /* Kettenhaken: zieht das Opfer heran und hält es kurz fest */
@@ -26046,7 +26051,8 @@ const WG_ART={
  schild:{n:'Schild mit falscher Richtung',art:'lach',ort:'weg',th:null,w:1,nv:5},
  skelett:{n:'Riesenskelett',art:'wow',ort:'weg',th:[...WG_HOEH,...WG_UNTER,'glutgang','hort','wald','nacht','grab','ruine'],w:0.8,nv:3,nische:1},
  kristall:{n:'Kristalle, die aufleuchten',art:'wow',ort:'weg',th:[...WG_HOEH,...WG_UNTER,'glutgang','hort'],w:0.9,nv:3,nische:1},
- fall:{n:'Wasserfall/Lavafall',art:'wow',ort:'weg',th:[...WG_WALD,...WG_HOEH,...WG_UNTER,'glutgang','hort','gracklstugh','schmiede'],w:0.8,nv:3,nische:1},
+ /* nur unter der Erde und selten: ein Wasserfall mitten auf der Wiese (Straße, Wald, Teich) ergab keinen Sinn */
+ fall:{n:'Wasserfall/Lavafall',art:'wow',ort:'weg',th:[...WG_HOEH,...WG_UNTER,'glutgang','hort','gracklstugh','schmiede'],w:0.3,nv:3,nische:1},
  pilzring:{n:'Pilzring',art:'ding',ort:'weg',th:['wald','nacht','teich','pilze','spinnweben','see','wurzeldorf','hoehle'],w:0.8,nv:3,nische:1},
  statue:{n:'Statue, die sich dreht',art:'wow',ort:'weg',th:[...WG_BURG,...WG_STADT,'hoehle','mine','spinnweben','see','glutgang','hort'],w:0.9,nv:4,nische:1},
  bruecke:{n:'Geheimer Steg',art:'wow',ort:'nische',th:null,w:1,nv:2,nische:1},
@@ -37293,10 +37299,11 @@ function huelle(B,vor){const [name,lab,get,set]=B;let o;try{o=get()}catch(e){ret
   try{return o.apply(this,arguments)}finally{const t=now()-a,k=M.stk.pop();const e=M.cur[lab]||(M.cur[lab]=[0,0]);e[0]+=t-k;e[1]++;if(M.stk.length)M.stk[M.stk.length-1]+=t}};
  w.__dgW=1;try{set(w);if(get()===w)M.hooks.push([B,w,o])}catch(e){dErr('hülle '+name,e)}}
 function protoHuelle(obj,name,mk){const o=obj[name];if(typeof o!=='function')return;const w=mk(o);try{obj[name]=w;M.proto.push([obj,name,w,o])}catch(e){dErr('proto '+name,e)}}
-function anlegen(){M.hooks.length=0;M.proto.length=0;
+function anlegen(){M.hooks.length=0;M.proto.length=0;window.__hsDIAGkg={art:new Map(),sc:new Set(),rot:new Set(),n:0,gr:null};
  /* Gesamt: Spiel / Bild / Oberfläche (Bild = render ohne die Bereiche darunter → „übriges Bild“) */
  /* Sprite-Neubau zählen: der Zeichen-Rückruf (5. Argument) von kgSprite läuft nur bei einem Zwischenspeicher-Fehlgriff */
- const kgVor=A=>{const d0=A[4];if(typeof d0==='function')A[4]=function(){M.cnt.kg++;return d0.apply(this,arguments)}};
+ /* dazu merken, WAS neu gebaut wird (Art, Maßstab, Drehung) – zeigt, ob der Zwischenspeicher an Zoomstufen, Drehwinkeln oder Verdrängung scheitert */
+ const kgVor=A=>{const d0=A[4];if(typeof d0==='function'){const a0=A[0],a1=A[1],a6=A[6];A[4]=function(){M.cnt.kg++;try{const Q=window.__hsDIAGkg;if(Q){const s=String(a0),art=s.split(':')[0]+(s.split(':')[2]?' '+s.split(':')[2]:'');Q.art.set(art,(Q.art.get(art)||0)+1);Q.sc.add((+a1).toFixed(3));if(a6)Q.rot.add((+a6).toFixed(3));Q.n++;try{Q.gr=window.__kg?[window.__kg.m.size,Math.round((window.__kg.bytes||0)/1e6)]:null}catch(e){}}}catch(e){}return d0.apply(this,arguments)}}};
  for(const B of BEREICHE)huelle(B,B[0]==='kgSprite'?kgVor:null);
  protoHuelle(CanvasRenderingContext2D.prototype,'getImageData',o=>function(){if(DG.on)M.cnt.gid++;return o.apply(this,arguments)});
  protoHuelle(Document.prototype,'createElement',o=>function(t){if(DG.on&&typeof t==='string'&&t.toLowerCase()==='canvas')M.cnt.cv++;return o.apply(this,arguments)});
@@ -37414,6 +37421,7 @@ function text(d){const L=[];
  const top=d.ber.filter(b=>b[1]>=0.05).slice(0,7).map(b=>`${b[0]} ${f1(b[1])}`);
  L.push(`Bild teuerste (ms): ${top.length?top.join(' · '):'–'} · übriges ${f1(d.uebrig)}`);
  L.push(`Je s: neue Leinwände ${Math.round(d.cnt.cv)} · getImageData ${Math.round(d.cnt.gid)} · Sprite-Neubau ${Math.round(d.cnt.kg)} · lange Aufgaben ${d.lang.obs?d.lang.n+(d.lang.n?' (max '+Math.round(d.lang.max)+' ms)':''):'n/v'}`);
+ try{const Q=window.__hsDIAGkg;if(Q&&Q.n){const top=[...Q.art.entries()].sort((a,b)=>b[1]-a[1]).slice(0,6).map(e=>e[0]+' '+e[1]).join(' · ');L.push(`Sprite-Neubau gesamt ${Q.n}: ${top} · Maßstäbe ${Q.sc.size} (${[...Q.sc].slice(0,8).join(', ')}) · Drehwinkel ${Q.rot.size}${Q.rot.size?' ('+[...Q.rot].slice(0,8).join(', ')+')':''} · Zwischenspeicher ${Q.gr?Q.gr[0]+' Bilder, '+Q.gr[1]+' MB':'?'}`)}}catch(e){}
  L.push(`Szene: ${d.modus} · ${d.ort?d.ort+' / ':''}${d.stufe} (Nr. ${d.stNr}) · ${d.wetter||'kein Wetter'} · ${d.diff} · ${d.held} St. ${d.lvl}${d.online?' · online '+d.online+', '+d.spieler+' Spieler':d.spieler>1?' · '+d.spieler+' Spieler':''}`);
  const o=d.obj||{};L.push(`Objekte: Gegner ${o.gegner} (im Bild ${o.sicht}) · Deko ${o.deko} · Dinge ${o.props} · Partikel ${o.parts} · Geschosse ${o.proj} · Effekte ${o.fx} · Leichen ${o.leichen}`);
  L.push(`Speicher: ${d.mem?'JS '+d.mem.u+' MB von '+d.mem.l+' MB':'n/v'}`);
@@ -40389,7 +40397,7 @@ window.__hsKURVE={v:1,n:0,aus:0};
  const erst=()=>!(G.mp&&PL[0]&&P!==PL[0]);
  const ok=()=>erst()&&!KV.aus&&HARD()&&G.mode==='kampagne'&&G.state==='play'&&!G.room;
  function rudel(){try{if(!ok())return;const pt=edgePoint(420);spawnPack(pickFoe(0.6),pt.x,pt.y);KV.n++}catch(e){}}
- hook('stage',i=>{try{if(!erst()||KV.aus||!HARD()||G.mode!=='kampagne')return;const s=G.stage;if(s<1||s>8)return;KV.halb=s>=3?1:0;later(8,rudel)}catch(e){}});
+ hook('stage',i=>{try{if(!erst()||KV.aus||!HARD()||G.mode!=='kampagne')return;const s=G.stage;if(s<2||s>8)return;KV.halb=s>=3?1:0;later(8,rudel)}catch(e){}});
  hook('tick',()=>{try{if(!KV.halb||!ok()||!G.need)return;if(G.stageKills>=G.need*0.5){KV.halb=0;rudel()}}catch(e){}});
  /* Champion-Rudel auf Schwer ab Stufe 2: eine Eigenschaft mehr */
  const sp=spawnPack;spawnPack=function(){let ra=null;try{if(!KV.aus&&HARD()&&G.stage>=2){ra=rollAffixes;rollAffixes=function(n){return ra(n===1?2:n)}}}catch(e){}
@@ -41081,7 +41089,7 @@ window.__hsZAEH={v:1,aus:0,T:4,st:{n:0,mul:0}};
 const ZH=window.__hsZAEH;
 function boden(){let s=0;for(const q of mpL()){if(!q||!q.st||q.netGone)continue;const d=dpsOf(q.st);s=Math.max(s,Math.max(d.m,d.r)*(GUARD_HK[q.id]||1.5))}return s}
 const sp=spawnEnemy;spawnEnemy=function(def,x,y,o){const e=sp.apply(this,arguments);try{o=o||{};if(!e||ZH.aus||o.boss||o.guard||o.add||o.summon||e.boss||G.room&&G.room.type==='training')return e;
-  const ref=boden();if(!(ref>0))return e;const hf=def&&def.hp||1;const ziel=ref*ZH.T*Math.max(0.45,hf)*(HARD()?1.35:1)*(G.stage<2?0.7:1);
+  const ref=boden();if(!(ref>0))return e;const hf=def&&def.hp||1;const ziel=ref*ZH.T*Math.max(0.45,hf)*(HARD()?hartMix(1.05,1.35):1)*(G.stage<2?0.7:1);
   if(e.maxHp<ziel){const m=Math.min(14,ziel/e.maxHp);e.hp*=m;e.maxHp*=m;e.zhM=m;ZH.st.n++;ZH.st.mul+=m}
   if((SL()||0)>=4)e.dmg*=HARD()?1.18:1.12}catch(er){if(!ZH.err)ZH.err=String(er&&er.stack||er)}return e};
 /* zähere Gegner → Kill-Ziel der Stufe 15 % kleiner, damit Stufen nicht zäh werden */

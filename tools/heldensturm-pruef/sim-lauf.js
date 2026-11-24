@@ -2,7 +2,8 @@
 window.__simLauf=async function(held,ast,stufen,diff,bot){const o={tode:0,st:[]};try{
  try{__hsGLWELT.modus='aus'}catch(e){}
  window.__bb=null;window.__bpick=[];window.__stb='ast:'+ast;
- __hs.start(held,diff||0);__hs.bot(true);const fn=__hs.fn();o.ast=__hs.P.hero.branches[ast];
+ /* schwierigkeit −1 = „Schwer“ (Normal-Kampagne ohne Schonung) */
+ try{__hs.SAVE().hard=diff<0}catch(e){}__hs.start(held,Math.max(0,diff||0));__hs.bot(true);const fn=__hs.fn();o.ast=__hs.P.hero.branches[ast];o.hart=!!__hs.G.hard;
  let last=0,tS=0,echt=performance.now(),maxS=stufen*900,hpMin=1,dmgIn=0,hp0=__hs.P.hp;
  for(;;){__hs.step(150,1/30);const G=__hs.G,P=__hs.P;
   if(bot&&bot!=='std'&&window.__simBot)try{window.__simBot(bot,G,P)}catch(e){o.botF=String(e)}
