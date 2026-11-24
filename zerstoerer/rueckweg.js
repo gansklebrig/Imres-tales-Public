@@ -17,7 +17,7 @@
 
    Gnade erlischt (Tor schließt sich), sobald im neuen Gebiet etwas passiert: Leben ändert sich (Heilung/Schaden),
    Treffer ausgeteilt, Gold/Splitter/Tränke/Ausrüstung/Segen/Werte geändert, etwas aufgehoben oder benutzt
-   (Truhe, Hebel, Händler, Altar, NSC …), Kiste zerschlagen, ein naher Gegner holt zum Angriff aus (oder ist > 4 s wach in der Nähe), Bosskampf/Wächter,
+   (Truhe, Hebel, Händler, Altar, NSC …), Kiste zerschlagen, Bosskampf/Wächter (bloßes Bemerkt- oder Angegriffenwerden ohne Schaden zählt nicht),
    Türen verriegelt, nach 25 s oder mehr als zwei Räume vom Eingang entfernt, Tod.
    Darstellung: warmes Schimmern im Eingangstor (sonst ein schlichter Torbogen am Startpunkt) + Weltschild
    „Zurück nach …“ (Z.ui.worldLabel); beim Erlöschen fällt ein Fallgitter herunter und das Licht verlischt.
@@ -219,13 +219,9 @@
     else if (Z.propsLive.filter(p => p.dead || p.hp <= 0).length !== B0.props) why = "zerschlagen";
     else if (Z.boss || Z.cam.lock || (Z.run && Z.run.doorsOpen !== B0.doors)) why = "boss";
     else {
-      /* alarmiert: ein wacher Gegner in der Nähe holt zum Angriff aus – oder bleibt länger als 4 s wach in der Nähe
-         (bloßes Bemerktwerden am Eingang allein schließt das Tor nicht, sonst wäre es in vielen Gebieten sofort zu) */
-      let near = false;
-      for (const e of Z.enemies) if (!e.dead && !e.dummy && e.aware && Math.abs(e.x - P.x) < ALARM_R && Math.abs(e.y - P.y) < ALARM_R * 0.7) { near = true; if (e.act) { why = "alarm"; break; } }
-      b.alarmT = near ? (b.alarmT || 0) + dt : Math.max(0, (b.alarmT || 0) - dt);
-      if (!why && b.alarmT > 4) why = "alarm";
-      if (!why && b.lv.cells) { const c = cellOf(P.x + P.w / 2, P.y + P.h / 2); if (Math.max(Math.abs(c[0] - b.cell[0]), Math.abs(c[1] - b.cell[1])) > ROOMS) why = "weg"; }
+      /* Bemerktwerden und Ausholen schließen das Tor NICHT (Nutzerwunsch): nur Handlungen, die einen Vorteil
+         brächten (Treffer, Heilung, Beute, Benutzen …) – oder erlittener Schaden (Leben ändert sich, s. o.) */
+      if (b.lv.cells) { const c = cellOf(P.x + P.w / 2, P.y + P.h / 2); if (Math.max(Math.abs(c[0] - b.cell[0]), Math.abs(c[1] - b.cell[1])) > ROOMS) why = "weg"; }
       else if (!why && Math.abs(P.x + P.w / 2 - b.gx) > ROOMS * Z.CW * T) why = "weg";
     }
     if (why) endGrace(why);
