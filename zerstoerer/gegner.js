@@ -823,18 +823,20 @@
         if (P && W.los(cx, cy, P.x + P.w / 2, P.y + 10)) { e.act.pull = true; e.act.tether = true; FX.text(P.x + P.w / 2, P.y - 8, L(["Gezogen!", "Pulled!"]), "#eee8f0"); }
         break;
       }
-      case "heal": for (const o of Z.enemies) if (!o.dead && U.dist(o.x, o.y, e.x, e.y) < 260) { o.hp = Math.min(o.hpMax, o.hp + o.hpMax * (a.amt || 0.3)); FX.burst(o.x + o.w / 2, o.y + o.h / 2, 8, { col: "#9ad04a", sp: 40, up: 30, life: 0.6, size: 2, kind: "glow", add: true }); } break;
+      case "heal": for (const o of Z.enemies) if (!o.dead && U.dist(o.x, o.y, e.x, e.y) < 260) { o.hp = Math.min(o.hpMax, o.hp + o.hpMax * ((a.amt || 0.3) + (a.amt && e.elite ? 0.1 : 0))); FX.burst(o.x + o.w / 2, o.y + o.h / 2, 8, { col: "#9ad04a", sp: 40, up: 30, life: 0.6, size: 2, kind: "glow", add: true }); } break;
       case "shield": for (const o of Z.enemies) if (!o.dead && U.dist(o.x, o.y, e.x, e.y) < 220) { o.armorUp = 4; FX.ring(o.x + o.w / 2, o.y + o.h / 2, 16, "#ffd27a", 0.4, 2); } break;
       case "grow": e.size *= 1.45; e.w = Math.round(e.w * 1.3); e.h = Math.round(e.h * 1.45); e.y -= e.h * 0.31; e.dmgMul *= 1.35; e.hp += e.hpMax * 0.3; e.hpMax *= 1.3; Z.unstick(e); FX.ring(cx, e.y + e.h / 2, 30, "#ff6a2a", 0.4, 3); break;
       case "drum": drum(e); break;
       case "flare": flare(e, P); break;
-      case "brace": e.armorUp = Math.max(e.armorUp || 0, a.act + 0.15); FX.ring(cx, cy, 16, "#e8d8b0", 0.35, 2); break;
+      case "brace": e.armorUp = Math.max(e.armorUp || 0, a.act + 0.15); FX.ring(cx, cy, 16, "#e8d8b0", 0.35, 2);
+        if (e.elite) for (const o of Z.enemies) if (o !== e && !o.dead && !o.def.boss && Math.abs(o.x - e.x) < 56 && Math.abs(o.y - e.y) < 30) { o.armorUp = Math.max(o.armorUp || 0, a.act); FX.ring(o.x + o.w / 2, o.y + o.h / 2, 12, "#e8d8b0", 0.35, 1.5); } /* Elite-Schildträger: Schildwall deckt die Nachbarn */
+        break;
       case "shell": e.armorUp = Math.max(e.armorUp || 0, a.act + 0.1); FX.burst(cx, e.y + e.h - 4, 8, { col: [d.blood || "#b8d060", "#7a5a3a"], sp: 60, life: 0.4, size: 2, kind: "shard", g: 300 }); break;
       case "evade": e.vx = -e.face * 230; e.vy = -260; e.onGround = false; e.invuln = 0.25; FX.burst(cx, e.y + e.h, 6, { col: Z.dustCol || "#8a7a70", sp: 60, life: 0.3, size: 2, kind: "smoke" }); if (d.crow) FX.burst(cx, cy, 6, { col: ["#1a1418", "#3a3038"], sp: 70, life: 0.6, size: 2, kind: "shard", g: 80 }); break;
       case "smoke": FX.burst(cx, cy, 22, { col: ["#8a8a80", "#6a6a62", "#a8a49a"], sp: 70, life: 1.1, size: 6, kind: "smoke", g: -15, drag: 0.92 }); e.vx = -e.face * 260; e.vy = -230; e.onGround = false; e.invuln = 0.3; e.hidden = 1.1; Z.noise(cx, cy, 120); break;
       case "toll": toll(e, a, P); break;
       case "spores": { const x = cx + e.face * 34; Z.spawnHazard({ kind: "poisoncloud", x, y: Z.groundY(x, e.y + e.h - 4), w: 56, life: 3, dmg: dmgP(e, 0.15), owner: "e", eff: { poison: 1 } }); FX.burst(cx + e.face * 8, e.y + 6, 16, { col: ["#c8a0b0", "#e0d0c0", "#a0506a"], sp: 70, ang: e.face > 0 ? -0.4 : Math.PI + 0.4, spread: 1.4, life: 0.9, size: 3, kind: "smoke", g: -10 }); break; }
-      case "thread": { const am = e.act.aim || { x: P.x + P.w / 2, y: Z.groundY(P.x + P.w / 2, P.y + P.h) }; addStrip(am.x, am.y, e); break; }
+      case "thread": { const am = e.act.aim || { x: P.x + P.w / 2, y: Z.groundY(P.x + P.w / 2, P.y + P.h) }; addStrip(am.x, am.y, e); if (e.elite) { const x2 = am.x + (am.x > cx ? 72 : -72), g2 = Z.groundY(x2, am.y - 4); if (Math.abs(g2 - am.y) < 20) addStrip(x2, g2, null); } break; } /* Elite-Drider: zwei Fadennetze */
       case "gust": gust(e, a, P); break;
       case "invis": e.hidden = 2.2; FX.burst(cx, cy, 10, { col: "#4a4246", sp: 60, life: 0.5, size: 4, kind: "smoke" }); break;
     }
@@ -1094,7 +1096,7 @@
   /* Laternenträger: „Licht hoch!“ – heller Lichtkreis, Unsichtbarkeit verpufft, alle mit Sicht zur Laterne sind alarmiert */
   function flare(e, P) {
     const cx = e.x + e.w / 2, cy = e.y + e.h * 0.4;
-    e.flareT = 4;
+    e.flareT = e.elite ? 7 : 4;
     FX.ring(cx, cy, 70, "#ffd27a", 0.6, 3); FX.ring(cx, cy, 140, "#ffb050", 0.9, 1.5);
     FX.burst(cx, cy, 16, { col: ["#ffe8a0", "#ffd27a"], sp: 110, life: 0.6, size: 2, kind: "glow", add: true });
     if (P && P.invis > 0 && Math.hypot(P.x - cx, P.y - cy) < 180) { P.invis = 0; FX.text(P.x + P.w / 2, P.y - 12, L(["Entdeckt!", "Spotted!"]), "#ffd27a", true); }
@@ -1107,7 +1109,7 @@
   }
   /* Glockenschlag: Schallring um den Geist – wer drinsteht, wird weggeschleudert und kurz betäubt; der Klang alarmiert den Raum */
   function toll(e, a, P) {
-    const cx = e.x + e.w / 2, cy = e.y + e.h / 2, R = a.rad || 60;
+    const cx = e.x + e.w / 2, cy = e.y + e.h / 2, R = (a.rad || 60) * (e.elite ? 1.3 : 1);
     FX.ring(cx, cy, R, "#f0d890", 0.35, 3); FX.ring(cx, cy, R * 0.6, "#c8962a", 0.25, 2); FX.addShake(3);
     A.play("gong", { x: e.x, vol: 0.45, rate: 1.6 });
     Z.noise(cx, cy, 320, { alarm: true });

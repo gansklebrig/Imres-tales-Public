@@ -1212,3 +1212,205 @@
     c.restore();
   };
 })();
+
+/* Ezekiel – The Destroyer · Bewegte Luft (ab Stufe 2)
+   Bodennebel in feuchten Gebieten (und überall im Morgengrauen) liegt in Schwaden über dem Boden und teilt sich, wenn
+   Ezekiel oder ein Gegner hindurchläuft – danach fließt er langsam zurück. Über Kerzen und Leuchtern kräuselt sich ein
+   dünner Rauchfaden. */
+(function () {
+  "use strict";
+  const Z = window.Z, G = Z.gfx, T = Z.TILE, TAU = Math.PI * 2;
+  const rich = () => { const q = Z.gq; if (!q) return true; if (q.lean) return false; return q.level === -1 ? q.layers !== false : q.level >= 2; };
+  const MISTY = { lake: 1, dungeon: 1, harbour: 1, cellar: 1, chasm: 1 };
+  const hash = (x, y) => { let h = (x * 374761393 + y * 668265263) ^ 0x5bd1e995; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+  let blob = null;
+  function mistSpr() { if (blob) return blob; blob = document.createElement("canvas"); blob.width = 64; blob.height = 32; const g = blob.getContext("2d"), gr = g.createRadialGradient(32, 16, 0, 32, 16, 32); gr.addColorStop(0, "rgba(232,224,224,.5)"); gr.addColorStop(0.6, "rgba(232,224,224,.18)"); gr.addColorStop(1, "rgba(232,224,224,0)"); g.save(); g.scale(1, 0.5); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); g.restore(); return blob; }
+  const off = new Map(); let offLv = null, lastT = 0;
+  function mistOn() { const B = Z.biome || {}, z = Z.zeit ? Z.zeit() : null, lv = Z.level; return lv && !lv.hub && !lv.passage && !lv.arena && (MISTY[B.bg] || (z && z.k === "morgen")); }
+  const mid0 = Z.drawMidLife;
+  Z.drawMidLife = function (c, cam, t) {
+    if (mid0) mid0.apply(this, arguments);
+    const lv = Z.level; if (!lv || !rich() || (G.off && G.off.luft)) return;
+    const dt = Math.min(0.05, Math.max(0, t - lastT)); lastT = t;
+    if (offLv !== lv) { offLv = lv; off.clear(); }
+    c.save();
+    /* Rauchfäden über Kerzen */
+    c.lineWidth = 0.5; c.lineCap = "round";
+    for (const d of lv.lights || []) {
+      const oy = d.kind === "candle" ? 3 : d.kind === "candelabra" ? -15 : d.kind === "chandelier" ? 14 : null; if (oy == null) continue;
+      const x = d.x * T + 8, y = d.y * T + oy; if (x < cam.x - 10 || x > cam.x + cam.w + 10 || y < cam.y - 30 || y > cam.y + cam.h) continue;
+      const wind = (Z.windX || 0) * 0.08; c.strokeStyle = "rgba(200,190,200,.16)"; c.beginPath(); c.moveTo(x, y);
+      for (let k = 1; k <= 8; k++) { const u = k / 8; c.lineTo(x + Math.sin(t * 1.6 + d.x + u * 5) * 2.4 * u + wind * u * 10, y - u * 18); }
+      c.stroke();
+    }
+    /* Bodennebel, der sich teilt */
+    if (mistOn()) {
+      const P = Z.player, movers = []; if (P && !P.dead) movers.push(P); for (const e of Z.enemies) if (!e.dead && Math.abs(e.x - cam.x - cam.w / 2) < cam.w) movers.push(e);
+      const spr = mistSpr(), x0 = Math.max(1, Math.floor(cam.x / T) - 2), x1 = Math.min(lv.W - 2, Math.ceil((cam.x + cam.w) / T) + 2), y0 = Math.max(1, Math.floor(cam.y / T)), y1 = Math.min(lv.H - 2, Math.ceil((cam.y + cam.h) / T));
+      for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) {
+        if (hash(tx, ty * 3 + 1) > 0.42) continue; const v = lv.get(tx, ty + 1); if (lv.get(tx, ty) !== 0 || !(v === 1 || v === 7)) continue;
+        const key = ty * lv.W + tx, bx = tx * T + 8 + Math.sin(t * 0.3 + tx) * 6, by = (ty + 1) * T - 4;
+        let o = off.get(key); if (!o) { o = { x: 0, y: 0 }; off.set(key, o); }
+        let tx2 = 0, ty2 = 0;
+        for (const m of movers) { const mx = m.x + m.w / 2, my = m.y + m.h - 6, dx = bx - mx, dy = by - my, d = Math.hypot(dx, dy); if (d < 34) { const f = (34 - d) / 34 * (0.6 + Math.min(1, Math.abs(m.vx || 0) / 160)); tx2 += (dx / (d || 1)) * f * 26; ty2 += -f * 6; } }
+        o.x += (tx2 - o.x) * Math.min(1, dt * (tx2 ? 6 : 0.8)); o.y += (ty2 - o.y) * Math.min(1, dt * (ty2 ? 6 : 0.8));
+        const sp = Math.hypot(o.x, o.y), w = 46 + hash(tx, ty) * 20 - sp * 0.4, h = 14;
+        c.globalAlpha = 0.3 * (1 - Math.min(0.6, sp / 40)); c.drawImage(spr, bx + o.x - w / 2, by + o.y - h / 2, w, h);
+      }
+    }
+    c.restore();
+  };
+})();
+
+/* Ezekiel – The Destroyer · Gemalter Sichtrand (ab Stufe 2)
+   Der Sichtnebel (ebenen.js) bekommt am Rand eine Tusche-Kante: unregelmäßige, weich auslaufende Tintenkleckse in
+   warmem Sepia statt einer glatten Schwärze, und die verborgenen Bereiche einen Hauch Pergamentbraun – wie eine
+   Buchillustration, deren Ränder noch nicht ausgemalt sind. Läuft als letzte Überlagerung in der Lichtkarte. */
+(function () {
+  "use strict";
+  const Z = window.Z, G = Z.gfx, T = Z.TILE, TAU = Math.PI * 2;
+  const rich = () => { const q = Z.gq; if (!q) return true; if (q.lean) return false; return q.level === -1 ? q.layers !== false : q.level >= 2; };
+  const hash = (x, y) => { let h = (x * 374761393 + y * 668265263) ^ 0x5bd1e995; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+  const BL = [];
+  function blots() {
+    if (BL.length) return BL;
+    for (let v = 0; v < 4; v++) {
+      const cv = document.createElement("canvas"); cv.width = cv.height = 32; const g = cv.getContext("2d");
+      for (let k = 0; k < 7; k++) { const x = 16 + (hash(v, k) - 0.5) * 14, y = 16 + (hash(k, v + 9) - 0.5) * 14, r = 5 + hash(v * 3, k * 5) * 7, gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, "rgba(30,18,16,.75)"); gr.addColorStop(0.7, "rgba(30,18,16,.45)"); gr.addColorStop(1, "rgba(30,18,16,0)"); g.fillStyle = gr; g.fillRect(0, 0, 32, 32); }
+      g.fillStyle = "rgba(30,18,16,.6)"; for (let k = 0; k < 6; k++) { g.beginPath(); g.arc(4 + hash(v + 20, k) * 24, 4 + hash(k + 30, v) * 24, 0.6 + hash(k, v + 40), 0, TAU); g.fill(); }
+      BL.push(cv);
+    }
+    /* helle Pergament-Kleckse (Papier scheint durch): gleiche Form, warmes Sepia */
+    for (let v = 0; v < 4; v++) { const cv = document.createElement("canvas"); cv.width = cv.height = 32; const g = cv.getContext("2d"); g.drawImage(BL[v], 0, 0); g.globalCompositeOperation = "source-in"; g.fillStyle = "rgb(150,104,66)"; g.fillRect(0, 0, 32, 32); BL.push(cv); }
+    return BL;
+  }
+  const fogOn = lv => lv && !lv.hub && !lv.arena && !lv.passage && lv.cells;
+  function edge(l, X0, Y0, sx, sy, LW, LH) {
+    const lv = Z.level; if (!rich() || !fogOn(lv) || !Z.sightAt || Z.darkness > 0 || (G.off && G.off.tusche)) return;
+    const cam = Z.cam, B = blots(), x0 = Math.max(0, Math.floor(X0 / T) - 1), x1 = Math.min(lv.W - 1, Math.ceil((X0 + cam.w) / T) + 1), y0 = Math.max(0, Math.floor(Y0 / T) - 1), y1 = Math.min(lv.H - 1, Math.ceil((Y0 + cam.h) / T) + 1);
+    const t = G.time || 0; l.save(); l.globalCompositeOperation = "source-over"; G._tuscheN = (G._tuscheN || 0) + 1;
+    for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) {
+      const s = Z.sightAt(tx * T + 8, ty * T + 8); if (s >= 0.8) continue;
+      const X = (tx * T + 8 - X0) * sx, Y = (ty * T + 8 - Y0) * sy;
+      /* Pergamentbraun über verborgenen Stellen */
+      if (s < 0.5) { l.globalAlpha = (0.5 - s) * 0.22; l.fillStyle = "#3c2418"; l.fillRect(X - T * sx / 2, Y - T * sy / 2, T * sx + 0.5, T * sy + 0.5); }
+      /* Tuschkante am Übergang */
+      if (s > 0.03 && s < 0.85) {
+        const k = 1 - Math.abs(s - 0.42) / 0.45, r = (15 + hash(tx, ty) * 10) * sx * (1 + 0.04 * Math.sin(t * 0.7 + tx));
+        const pick = (hash(ty, tx) * 4) | 0;
+        if (s < 0.45) { l.globalAlpha = Math.min(1, Math.max(0, 1 - Math.abs(s - 0.2) / 0.2)) * 0.32; l.drawImage(B[4 + pick], X - r * 0.8, Y - r * 0.8, r * 1.6, r * 1.6); }
+        else { l.globalAlpha = Math.min(1, Math.max(0, k) * 0.6); l.drawImage(B[pick], X - r, Y - r, r * 2, r * 2); }
+      }
+    }
+    l.restore();
+  }
+  /* erst nach allen Modulen eintragen, damit die Kante über dem Sichtnebel liegt */
+  const reg = () => { if (G.lightOver && !G.lightOver.includes(edge)) G.lightOver.push(edge); };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", reg); else setTimeout(reg, 0);
+})();
+
+/* Ezekiel – The Destroyer · Lager und Durchgänge (ab Stufe 1)
+   Durchgang: Zwischen Händler und Altar hängt ein großes Wandbild, das das nächste Gebiet zeigt – Himmel in dessen
+   Farben, Türme, Gewölbe, Schiffe, Lava oder Spinnennetze, mit Namensschild; ein paar Lichter darin flackern.
+   Dazu tanzender Goldstaub im Fackelschein. Lager: Himmelslaternen steigen langsam in den Nachthimmel, und über dem
+   Gras schweben ein paar Glühwürmchen. */
+(function () {
+  "use strict";
+  const Z = window.Z, G = Z.gfx, T = Z.TILE, TAU = Math.PI * 2, PI = Math.PI;
+  const on = () => { const q = Z.gq; if (!q) return true; if (q.lean) return false; return q.level === -1 ? true : q.level >= 1; };
+  const hash = (x, y) => { let h = (x * 374761393 + y * 668265263) ^ 0x5bd1e995; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+  let mural = null, mLv = null;
+  function targetBiome(lv) { const to = lv.to, A = Z.ARENAS && Z.ARENAS[to]; return { id: to, B: (Z.BIOMES && (Z.BIOMES[to] || (A && Z.BIOMES[A.base]))) || null, arena: !!A }; }
+  function buildMural(lv) {
+    const tg = targetBiome(lv), B = tg.B; if (!B) return null;
+    const W = 96, H = 64, S = 3, cv = document.createElement("canvas"); cv.width = W * S; cv.height = H * S; const c = cv.getContext("2d"); c.scale(S, S);
+    const sky = B.sky || ["#120c1c", "#3a2234", "#5e3442"], g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, sky[0]); g.addColorStop(0.6, sky[1]); g.addColorStop(1, sky[2]); c.fillStyle = g; c.fillRect(0, 0, W, H);
+    const dk = "#120a10", bg = B.bg, R = k => hash(k, 77);
+    /* Sterne */
+    c.fillStyle = "rgba(255,245,230,.7)"; for (let k = 0; k < 16; k++) c.fillRect(R(k) * W, R(k + 40) * H * 0.5, 0.6, 0.6);
+    c.fillStyle = dk;
+    if (bg === "castle" || bg === "ramparts" || bg === "spires" || bg === "storm") {
+      c.fillStyle = "#2a1c26"; c.beginPath(); c.moveTo(0, H); c.quadraticCurveTo(30, 40, 60, 46); c.quadraticCurveTo(80, 50, W, 38); c.lineTo(W, H); c.fill(); c.fillStyle = dk;
+      for (const [x, w, h] of [[14, 8, 30], [34, 10, 40], [58, 7, 24], [74, 9, 34]]) { c.fillRect(x, H - h, w, h); for (let k = 0; k < 3; k++) c.fillRect(x - 1 + k * (w / 2.5), H - h - 3, 2, 3); if (bg === "spires") { c.beginPath(); c.moveTo(x - 1, H - h); c.lineTo(x + w / 2, H - h - 14); c.lineTo(x + w + 1, H - h); c.fill(); } }
+      c.fillRect(0, H - 10, W, 10);
+    } else if (bg === "cellar" || bg === "dungeon" || bg === "passage") {
+      c.fillStyle = "#1c1214"; c.fillRect(0, 0, W, H); for (let k = 0; k < 4; k++) { c.fillStyle = "#2c1e1a"; c.beginPath(); c.moveTo(k * 26, H); c.lineTo(k * 26, 26); c.arc(k * 26 + 12, 26, 12, PI, 0); c.lineTo(k * 26 + 24, H); c.fill(); }
+      c.fillStyle = dk; if (bg === "dungeon") for (let x = 8; x < W; x += 6) c.fillRect(x, 20, 1.2, 36); else for (let k = 0; k < 5; k++) { c.beginPath(); c.ellipse(10 + k * 18, H - 8, 6, 7, 0, 0, TAU); c.fill(); }
+    } else if (bg === "halls") {
+      c.fillStyle = "#24141a"; c.fillRect(0, 0, W, H); c.fillStyle = "#3a2024"; for (let x = 6; x < W; x += 22) c.fillRect(x, 10, 6, H - 10); c.fillStyle = "#c89a40"; c.fillRect(40, 8, 16, 1); for (let k = 0; k < 4; k++) c.fillRect(41 + k * 4.5, 5, 1, 3);
+    } else if (bg === "harbour") {
+      c.fillStyle = "#1a1418"; c.fillRect(0, H - 14, W, 14); c.fillStyle = dk; c.beginPath(); c.moveTo(20, H - 16); c.lineTo(50, H - 16); c.lineTo(46, H - 10); c.lineTo(24, H - 10); c.fill(); c.fillRect(34, H - 40, 1.5, 24); c.beginPath(); c.moveTo(35.5, H - 40); c.lineTo(48, H - 22); c.lineTo(35.5, H - 22); c.fill(); c.fillRect(74, H - 44, 8, 30);
+    } else if (bg === "belltower") {
+      c.fillStyle = dk; c.fillRect(38, 14, 20, H - 14); c.beginPath(); c.moveTo(34, 14); c.lineTo(48, 0); c.lineTo(62, 14); c.fill(); c.fillStyle = "#8a6a30"; c.beginPath(); c.moveTo(45, 20); c.quadraticCurveTo(44, 28, 40, 32); c.lineTo(56, 32); c.quadraticCurveTo(52, 28, 51, 20); c.fill();
+    } else if (bg === "chasm") {
+      c.fillStyle = "#140c1a"; c.fillRect(0, 0, W, H); c.fillStyle = dk; for (let k = 0; k < 9; k++) { c.beginPath(); c.moveTo(k * 11, 0); c.lineTo(k * 11 + 5, 10 + R(k) * 16); c.lineTo(k * 11 + 10, 0); c.fill(); }
+      c.strokeStyle = "rgba(230,220,240,.4)"; c.lineWidth = 0.4; for (let k = 0; k <= 6; k++) { c.beginPath(); c.moveTo(48, 34); c.lineTo(48 + Math.cos(k / 6 * PI) * 30, 34 - Math.sin(k / 6 * PI) * 22); c.stroke(); }
+    } else if (bg === "lake") {
+      c.fillStyle = "#0e1a16"; c.fillRect(0, H - 22, W, 22); c.fillStyle = dk; for (const x of [20, 30, 70]) c.fillRect(x, H - 40, 5, 20); c.fillStyle = "rgba(220,240,220,.6)"; c.beginPath(); c.arc(64, 16, 5, 0, TAU); c.fill(); c.fillStyle = "rgba(220,240,220,.25)"; for (let k = 0; k < 5; k++) c.fillRect(60 + R(k) * 6, H - 20 + k * 3, 8 - k, 0.6);
+    } else {
+      c.fillStyle = "#2a0c06"; c.fillRect(0, H - 18, W, 18); c.fillStyle = dk; for (const [x, h] of [[10, 34], [26, 24], [50, 40], [70, 28], [84, 36]]) c.fillRect(x, H - 18 - h, 8, h); const lg = c.createLinearGradient(0, H - 18, 0, H); lg.addColorStop(0, "rgba(255,110,30,.6)"); lg.addColorStop(1, "rgba(255,60,20,.2)"); c.fillStyle = lg; c.fillRect(0, H - 18, W, 18);
+    }
+    /* Innenräume: warmer Lichtschein in der Bildmitte (Fackel, Kerzen) */
+    if (bg === "cellar" || bg === "dungeon" || bg === "halls" || bg === "chasm" || bg === "passage") { const wg = c.createRadialGradient(W * 0.5, H * 0.55, 2, W * 0.5, H * 0.55, W * 0.5); wg.addColorStop(0, bg === "chasm" ? "rgba(200,140,255,.35)" : "rgba(255,190,110,.4)"); wg.addColorStop(1, "rgba(255,190,110,0)"); c.fillStyle = wg; c.fillRect(0, 0, W, H); c.fillStyle = "#ffd080"; c.fillRect(W * 0.5 - 0.8, H * 0.45, 1.6, 3); }
+    /* gemalter Firnis: leichte Vignette und Craquelé */
+    const vg = c.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, W * 0.65); vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(30,16,8,.55)"); c.fillStyle = vg; c.fillRect(0, 0, W, H);
+    c.strokeStyle = "rgba(255,230,190,.06)"; c.lineWidth = 0.3; for (let k = 0; k < 14; k++) { c.beginPath(); c.moveTo(R(k + 90) * W, R(k + 120) * H); c.lineTo(R(k + 90) * W + (R(k) - 0.5) * 10, R(k + 120) * H + (R(k + 5) - 0.5) * 8); c.stroke(); }
+    const lights = []; for (let k = 0; k < 6; k++) lights.push([6 + R(k + 200) * (W - 12), H * (0.45 + R(k + 220) * 0.45)]);
+    return { cv, W, H, name: Z.areaName ? Z.areaName(tg.id) : tg.id, lights, warm: bg === "embercity" || bg === "forge" };
+  }
+  const mid0 = Z.drawMidLife;
+  Z.drawMidLife = function (c, cam, t) {
+    if (mid0) mid0.apply(this, arguments);
+    const lv = Z.level; if (!lv || !on()) return;
+    if (lv.passage) {
+      if (mLv !== lv) { mLv = lv; mural = null; try { mural = buildMural(lv); } catch (e) { console.error(e); } }
+      if (mural) {
+        const m = mural, x = 21.6 * T, y = 3 * T + 2, w = m.W, h = m.H;
+        if (x + w > cam.x - 20 && x < cam.x + cam.w + 20) {
+          c.save();
+          c.fillStyle = "rgba(0,0,0,.45)"; c.fillRect(x + 3, y + 3, w + 6, h + 6);
+          c.fillStyle = "#6a4a1a"; c.fillRect(x - 4, y - 4, w + 8, h + 8); c.fillStyle = "#c8963c"; c.fillRect(x - 4, y - 4, w + 8, 1); c.fillRect(x - 4, y - 4, 1, h + 8); c.fillStyle = "#3a2410"; c.fillRect(x - 4, y + h + 3, w + 8, 1); c.fillRect(x + w + 3, y - 4, 1, h + 8);
+          c.fillStyle = "#e0b050"; for (const [cx, cy] of [[x - 2, y - 2], [x + w + 2, y - 2], [x - 2, y + h + 2], [x + w + 2, y + h + 2]]) { c.beginPath(); c.arc(cx, cy, 2.2, 0, TAU); c.fill(); }
+          c.drawImage(m.cv, x, y, w, h);
+          c.globalCompositeOperation = "lighter";
+          for (let k = 0; k < m.lights.length; k++) { const [lx, ly] = m.lights[k], f = 0.5 + 0.5 * Math.sin(t * (2 + k) + k * 3); c.globalAlpha = 0.5 * f; c.fillStyle = m.warm ? "#ff9a40" : "#ffd890"; c.fillRect(x + lx - 0.6, y + ly - 0.6, 1.2, 1.2); }
+          c.globalCompositeOperation = "source-over"; c.globalAlpha = 1;
+          /* Namensschild */
+          const px = x + w / 2, py = y + h + 10; c.fillStyle = "#4a3418"; c.fillRect(px - 26, py - 5, 52, 10); c.fillStyle = "#c8963c"; c.fillRect(px - 26, py - 5, 52, 0.8);
+          c.font = "600 6px 'Alegreya Sans',serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillStyle = "#f0dca8"; c.fillText(m.name, px, py + 0.5);
+          c.restore();
+        }
+      }
+      /* Goldstaub im Fackelschein */
+      if (Math.random() < 0.25 * ((Z.gq && Z.gq.part) || 1)) Z.fx.p({ x: cam.x + Math.random() * cam.w, y: cam.y + cam.h * (0.3 + Math.random() * 0.5), vx: (Math.random() - 0.5) * 4, vy: -2 - Math.random() * 3, g: 0, life: 4, size: 1.1, col: "#ffd890", kind: "glow", add: true, a: 0.5 });
+    }
+  };
+  /* Lager: Himmelslaternen und Glühwürmchen */
+  const lan = []; let lanT = 0, lanLv = null;
+  const back0 = Z.drawBackLife;
+  Z.drawBackLife = function (c, cam, t, B, oy, LH) {
+    if (back0) back0.apply(this, arguments);
+    const lv = Z.level; if (!lv || !lv.hub || !on()) return;
+    if (lanLv !== lv) { lanLv = lv; lan.length = 0; lanT = 0; }
+    const dt = Math.min(0.05, Math.max(0, t - lanT)); lanT = t;
+    if (lan.length < 7 && Math.random() < dt * 0.35) lan.push({ x: cam.x + Math.random() * cam.w, y: cam.y + cam.h * 0.9, ph: Math.random() * 9, s: 0.7 + Math.random() * 0.6, v: 4 + Math.random() * 4 });
+    c.save();
+    for (let i = lan.length - 1; i >= 0; i--) {
+      const l = lan[i]; l.y -= l.v * dt; l.x += Math.sin(t * 0.4 + l.ph) * 2 * dt + (Z.windX || 0) * 0.02 * dt;
+      const a = Math.min(1, (cam.y + cam.h * 0.9 - l.y) / 30) * Math.min(1, (l.y - cam.y + 20) / 60); if (a <= 0 && l.y < cam.y) { lan.splice(i, 1); continue; }
+      const f = 0.8 + 0.2 * Math.sin(t * 5 + l.ph), w = 3 * l.s, h = 4 * l.s;
+      c.globalCompositeOperation = "lighter"; c.globalAlpha = a * 0.5 * f; c.drawImage(Z.glowSprite("rgba(255,170,80,1)"), l.x - 9 * l.s, l.y - 9 * l.s, 18 * l.s, 18 * l.s);
+      c.globalCompositeOperation = "source-over"; c.globalAlpha = a; c.fillStyle = "#e8904a"; c.beginPath(); c.moveTo(l.x - w / 2, l.y - h / 2); c.lineTo(l.x + w / 2, l.y - h / 2); c.lineTo(l.x + w * 0.4, l.y + h / 2); c.lineTo(l.x - w * 0.4, l.y + h / 2); c.fill(); c.fillStyle = "#ffe0a0"; c.fillRect(l.x - w * 0.2, l.y, w * 0.4, h * 0.4);
+    }
+    c.restore();
+  };
+  const al0 = Z.drawAfterLight;
+  Z.drawAfterLight = function (c, cam, W, H, t) {
+    if (al0) al0.apply(this, arguments);
+    const lv = Z.level; if (!lv || !lv.hub || !on()) return;
+    c.save(); c.globalCompositeOperation = "lighter";
+    const gy = (lv.H - 3) * T;
+    for (let i = 0; i < 9; i++) { const x = cam.x + ((hash(i, 3) * cam.w * 1.5 + t * (4 + i)) % (cam.w + 40)) - 20, y = Math.min(gy - 6, cam.y + cam.h * (0.55 + hash(i, 5) * 0.35)) + Math.sin(t * 1.3 + i) * 6, b = Math.max(0, Math.sin(t * 2 + i * 1.7)); c.globalAlpha = 0.5 * b; c.drawImage(Z.glowSprite("rgba(214,255,110,1)"), x - 5, y - 5, 10, 10); c.globalAlpha = b; c.fillStyle = "#f4ffc0"; c.fillRect(x - 0.4, y - 0.4, 0.8, 0.8); }
+    c.restore();
+  };
+})();

@@ -109,8 +109,8 @@
       tile: { base: "#4a4040", light: "#7a6a60", dark: "#1e1818", det: "#c88a2a", top: "rune", topCol: "#e5a43a" }, plat: "#5a4a3a",
       dark: 0.55, ambCol: "#5a3010", bg: "forge", weather: ["embers", "sparks"], hazard: "lava",
       props: { anvil: 3, forge: 2, rune: 4, chain: 2, armor: 2, weapons: 2, pipe: 2, brazier: 2 },
-      foes: { ruestung: 3, runenfunke: 3, runenwaechter: 1, duergar: 2, duergarArmbrust: 2, schmiedegeist: 1, rostmonster: 2 }, density: 1,
-      squads: [["ruestung", "duergarArmbrust", "duergarArmbrust"], ["rostmonster", "rostmonster", "duergar"], ["runenwaechter", "duergarArmbrust"]], /* W10 */
+      foes: { ruestung: 3, runenfunke: 3, runenwaechter: 1, duergar: 2, duergarArmbrust: 2, schmiedegeist: 1, rostmonster: 1 }, density: 1,
+      squads: [["ruestung", "duergarArmbrust", "duergarArmbrust"], ["rostmonster", "duergar", "duergarArmbrust"], ["runenwaechter", "duergarArmbrust"]], /* W10 */
       warden: "schmiedewaechter", exits: ["see", "glut", "sturm"],
       amb: { loops: [["amb/a_esse.mp3", 0.35], ["amb/a_feuer1.mp3", 0.25], ["amb/a_grabesdroehnen.mp3", 0.15]], one: [["n_hammer_", 7, 3], ["e_blasebalg_", 2, 9], ["e_erz_", 6, 12]] },
       music: "schmiede", story: ["Die Schmiede singt noch. Leise. In einer Sprache aus Funken.", "The forge still sings. Quietly. In a language of sparks."]
@@ -953,11 +953,13 @@
       return s;
     };
     /* jede Raumart einmal, dann zweite Runde für die Mehrfach-Arten; Nachbar-Regeln greifen, weil Partner früher stehen */
-    const ids = Object.keys(defs), maxAssign = Math.ceil(free.length * 0.7);
+    /* große Karten: von jeder Mehrfach-Art entsprechend mehr (wie ein größeres Gebäude) */
+    const ids = Object.keys(defs), maxAssign = Math.ceil(free.length * 0.75), mul = Math.max(1, free.length / 12);
+    const cap = id => defs[id].m > 1 ? Math.round(defs[id].m * mul) : 1;
     let n = 0;
-    for (let round = 0; round < 3 && n < maxAssign; round++) {
+    for (let round = 0; round < 6 && n < maxAssign; round++) {
       for (const id of ids) {
-        if ((used.get(id) || 0) >= defs[id].m || (round > 0 && (used.get(id) || 0) > round) || n >= maxAssign) continue;
+        if ((used.get(id) || 0) >= cap(id) || (round > 0 && (used.get(id) || 0) > round) || n >= maxAssign) continue;
         let best = null, bs = -1e9;
         for (const c of free) { if (c.fn) continue; const v = score(c, id); if (v > bs) { bs = v; best = c; } }
         if (!best || bs < -1) continue;

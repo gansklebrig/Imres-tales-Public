@@ -46,6 +46,25 @@
     wood: { col: ["#8a6a42", "#b08a5a", "#5a4228"], kind: "shard", n: 5, sp: 110, g: 560, size: 1.5, life: 0.5 },
     ember: { col: ["#ffd27a", "#ff8a2a", "#ff5a1a"], kind: "glow", n: 6, sp: 110, g: 200, size: 1.8, life: 0.45, add: true }
   };
+  const MATL = { metal: "#ffe0a0", bone: "#f0e4d0", flesh: "#ff9a5a", stone: "#d8c8b0", glass: "#e8fff0", spirit: "#e8d8f0", shell: "#ffd0a8", wood: "#ffcc90", ember: "#ff8a30" };
+  const rich2 = () => !Z.gq || Z.gq.level >= 2 || (Z.gq.level === -1 && Z.gq.layers !== false);
+  /* Staubwolke mit Volumen: vorgerenderter Bausch (oben hell angestrahlt, unten dunkel), in Bildschirmauflösung skaliert */
+  const puffCache = {};
+  function puffSpr(col) {
+    if (puffCache[col]) return puffCache[col];
+    const cv = document.createElement("canvas"); cv.width = cv.height = 48; const g = cv.getContext("2d"), n = parseInt(col.slice(1), 16), r = n >> 16, gg = (n >> 8) & 255, b = n & 255;
+    const gr = g.createRadialGradient(24, 26, 2, 24, 24, 23); gr.addColorStop(0, "rgba(" + r + "," + gg + "," + b + ",.9)"); gr.addColorStop(0.65, "rgba(" + r + "," + gg + "," + b + ",.55)"); gr.addColorStop(1, "rgba(" + r + "," + gg + "," + b + ",0)");
+    g.fillStyle = gr; g.fillRect(0, 0, 48, 48);
+    g.globalCompositeOperation = "source-atop"; const lg = g.createLinearGradient(0, 4, 0, 44); lg.addColorStop(0, "rgba(255,244,230,.35)"); lg.addColorStop(0.45, "rgba(255,244,230,0)"); lg.addColorStop(0.7, "rgba(0,0,0,0)"); lg.addColorStop(1, "rgba(0,0,0,.35)"); g.fillStyle = lg; g.fillRect(0, 0, 48, 48);
+    return (puffCache[col] = cv);
+  }
+  function cloud(x, y, w, col, life) {
+    if (!rich2()) return;
+    const n = Math.max(4, Math.min(10, Math.round(w / 6))), P = [];
+    for (let i = 0; i < n; i++) { const u = (i + 0.5) / n - 0.5; P.push({ x: x + u * w * 0.8, y: y - 2 - Math.random() * 3, vx: u * (40 + Math.random() * 30), vy: -6 - Math.random() * 14, r: 3 + Math.random() * 3 + (1 - Math.abs(u) * 2) * 3 }); }
+    fx.push({ k: "cloud", t: 0, life: life || 0.9, p: P, col: col || "#8a7a70" });
+  }
+  function hexOf(c) { if (!c) return "#8a7a70"; if (c[0] === "#" && c.length === 7) return c; const m = /(\d+)\D+(\d+)\D+(\d+)/.exec(c); return m ? "#" + [m[1], m[2], m[3]].map(v => (+v).toString(16).padStart(2, "0")).join("") : "#8a7a70"; }
   function matBurst(e, x, y, dir, heavy, scale) {
     const m = MAT[matOf(e)] || MAT.flesh, k = (heavy ? 1.5 : 1) * (scale || 1) * (low() ? 0.5 : 1);
     const n = Math.max(1, Math.round(m.n * k));
@@ -69,6 +88,8 @@
       fx.push({ k: "flare", x: hx, y: ey, t: 0, life: heavy ? 0.14 : 0.09, r: heavy ? 16 : 10, col: fcol, rot: Math.random() });
       fx.push({ k: "streak", x: hx, y: ey, dir, t: 0, life: 0.16, n: heavy ? 5 : 3, seed: Math.random() * 9, col: mat === "metal" ? "#ffe8b0" : (e.def && e.def.blood) || "#ffcf9a" });
       matBurst(e, hx, ey, dir, heavy);
+      /* der Treffer leuchtet kurz in die Umgebung (Farblicht ab Stufe 1) */
+      if (rich() && Z.lightFlash) Z.lightFlash(hx, ey, heavy ? 72 : 46, MATL[mat] || "#ffd8a0", heavy ? 0.7 : 0.42, heavy ? 0.24 : 0.16);
       if (o && o.crit) {
         /* Standbild-Ring: hält während des Trefferstopps still, dann platzt er auf */
         const hold = Math.max(0.06, Math.min(0.14, FX.hitstop || 0));
@@ -96,6 +117,8 @@
       fx.push({ k: "pop", x: cx, y: cy, t: 0, life: 0.35, r: 10 + e.w * 0.8 });
       /* Zerbrechen passend zum Material */
       deathBurst(e, cx, cy);
+      { const m = matOf(e); if (m !== "spirit" && m !== "ember") cloud(cx, e.y + e.h, Math.max(14, e.w * 1.6), m === "stone" ? "#8a8278" : m === "bone" ? "#b8ae98" : hexOf(Z.dustCol), e.def && e.def.boss ? 1.6 : 0.9); }
+      if (rich() && Z.lightFlash) Z.lightFlash(cx, cy, 60 + e.w, e.elite ? "#ffd27a" : "#ff9a6a", 0.5, 0.3);
       if (!(o && o.self) && P) {
         chain.n = chain.t > 0 ? chain.n + 1 : 1; chain.t = 2.2;
         const names = [null, null, ["Doppelt!", "Double!"], ["Dreifach!", "Triple!"], ["Vierfach!", "Quadra!"], ["Gemetzel!", "Carnage!"], ["Zerstörer!", "Destroyer!"]];
@@ -150,7 +173,7 @@
       const s = Math.min(1, (prev.vy - 200) / 400);
       fx.push({ k: "dust", x: fx0, y: fy, t: 0, life: 0.45, w: 18 + s * 30 });
       FX.burst(fx0, fy - 1, 4 + Math.round(s * 8), { col: [Z.dustCol || "#8a7a70"], sp: 70 + s * 90, ang: -Math.PI / 2, spread: 2.8, life: 0.4, size: 2.4, kind: "smoke" });
-      if (s > 0.5) fx.push({ k: "ring2", x: fx0, y: fy - 1, t: 0, life: 0.28, wide: true });
+      if (s > 0.5) { fx.push({ k: "ring2", x: fx0, y: fy - 1, t: 0, life: 0.28, wide: true }); cloud(fx0, fy, 20 + s * 30, hexOf(Z.dustCol), 0.7); }
     }
     if (!P.onGround && prev.ground && P.vy < -200) fx.push({ k: "puff", x: fx0, y: fy, t: 0, life: 0.3 });
     if (!P.onGround && P.airJumps < prev.air && P.vy < -150) fx.push({ k: "ring2", x: fx0, y: fy - 2, t: 0, life: 0.3 });
@@ -183,7 +206,7 @@
 
   /* ---------- Fortschreiben ---------- */
   function step(dt) {
-    for (const f of fx) { f.t += dt; if (f.k === "slip") f.x += f.vx * dt; }
+    for (const f of fx) { f.t += dt; f.dt = dt; if (f.k === "slip") f.x += f.vx * dt; }
     fx = fx.filter(f => f.t < f.life);
     for (const g of ghosts) g.t += dt; ghosts = ghosts.filter(g => g.t < g.life);
     const P = Z.player;
@@ -276,6 +299,11 @@
         c.save(); c.globalAlpha = (1 - u) * 0.45; c.fillStyle = Z.dustCol || "#8a7a70"; for (const s of [-1, 1]) { c.beginPath(); c.ellipse(f.x + s * (4 + u * 8), f.y - 1, 3 + u * 3, 1.6 + u, 0, 0, TAU); c.fill(); } c.restore();
       } else if (f.k === "ring2") {
         c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = (1 - u) * (f.wide ? 0.45 : 0.8); c.strokeStyle = f.wide ? "#e8d8c8" : "#ffd8a8"; c.lineWidth = f.wide ? 1 : 1.4; c.beginPath(); c.ellipse(f.x, f.y, (f.wide ? 8 : 4) + u * (f.wide ? 26 : 16), 1.5 + u * (f.wide ? 2 : 4), 0, 0, TAU); c.stroke(); c.restore();
+      } else if (f.k === "cloud") {
+        /* Bausch für Bausch: wächst, steigt, verliert an Dichte */
+        const spc = puffSpr(f.col), dts = Math.min(0.05, f.dt || 0.016); c.save();
+        for (const q of f.p) { const r = q.r * (1 + u * 1.6), a = (1 - u) * (1 - u) * 0.55; q.x += q.vx * dts; q.y += q.vy * dts; q.vx *= 0.94; q.vy *= 0.97; c.globalAlpha = a; c.drawImage(spc, q.x - r, q.y - r * 0.9, r * 2, r * 1.8); }
+        c.restore();
       } else if (f.k === "slip") {
         c.save(); c.globalAlpha = (1 - u) * 0.35; c.strokeStyle = "#ffe8d0"; c.lineWidth = 1; c.beginPath(); c.moveTo(f.x, f.y); c.lineTo(f.x - (Z.player ? Math.sign(Z.player.vx) : 1) * 10, f.y); c.stroke(); c.restore();
       }
@@ -366,6 +394,22 @@
   Z.drawAfterLight = function (c, cam, W, H, t) {
     if (al0) al0.apply(this, arguments);
     c.save(); c.setTransform(1, 0, 0, 1, 0, 0); drawScreen(c, W, H); c.restore();
+  };
+  /* Seelenfunken leuchten in ihre Umgebung (Farblicht ab Stufe 1) */
+  if (Z.gfx && Z.gfx.lightGather) Z.gfx.lightGather.push(function (add) { if (!rich()) return; let n = 0; for (const s of souls) { if (s.t < s.delay || n++ > 10) continue; add(s.x, s.y, 34, s.col, 0.4, 0); } });
+  /* Explosionen (große, kurze, warme Ringe): Glutfunken, die aufsteigen und verglimmen, und eine Rauchwolke mit Volumen */
+  const ring0 = FX.ring;
+  FX.ring = function (x, y, r, col, life, w) {
+    const res = ring0.apply(this, arguments);
+    if (rich2() && r >= 34 && (life || 0.35) <= 0.6 && typeof col === "string") {
+      const m = /(\d+)\D+(\d+)\D+(\d+)/.exec(col), hot = col[0] === "#" ? (() => { const n = parseInt(col.slice(1, 7), 16); return (n >> 16) > 200 && ((n >> 8) & 255) < 210 && (n & 255) < 140; })() : m && +m[1] > 200 && +m[2] < 210 && +m[3] < 140;
+      if (hot) {
+        const k = Math.min(1.6, r / 50), q = (Z.gq && Z.gq.part) || 1;
+        for (let i = 0; i < Math.round(10 * k * q); i++) { const a = Math.random() * TAU, sp = 40 + Math.random() * 90 * k; FX.p({ x: x + Math.cos(a) * 4, y: y + Math.sin(a) * 4, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 40, g: -30, drag: 0.94, life: 0.8 + Math.random() * 0.9, size: 1.2 + Math.random() * 1.4, col: ["#ffd27a", "#ff9a3a", "#ff6a1a"][i % 3], kind: "glow", add: true }); }
+        cloud(x, y + r * 0.2, r * 1.2, "#4a3a34", 1.4);
+      }
+    }
+    return res;
   };
   const load0 = Z.loadArea;
   Z.loadArea = function () { fx = []; ghosts = []; souls = []; chain = { n: 0, t: 0 }; banner = null; lines = null; return load0.apply(this, arguments); };

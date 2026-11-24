@@ -1910,6 +1910,70 @@
       { f: [["dornen", -1], ["giftpilze", 0.7], ["knochen", 1.5]] }
     ]
   });
+  /* ======================= Ausstattung nach Raumfunktion (welt.js assignRooms → cell.fn) =======================
+     Räume mit Funktion holen Szenen und Einzelstücke aus ihrem eigenen Satz (Küche: Kessel, Pfannen, Würste …),
+     gleiche Stückzahl wie sonst (Leistung). Schlüssel: "<gebiet>:<funktion>" vor "<funktion>". */
+  const S3 = (a, b) => ({ f: [["hocker", -1.9, 1], [a, 0], ["hocker", 1.9, -1]], w: b ? [[b, 0, -1]] : undefined });
+  const ROOMSET = (Z.ROOMSET = {
+    wachstube: { scn: [{ f: [["hocker", -1.9, 1], ["wachtisch", 0], ["hocker", 1.9, -1]], w: [["steckbrief", -1, -1], ["schluesselbrett", 2, -1]] }], floor: ["waffenstaender", "faesser", "bank", "kohlebecken"], wall: ["schild", "schluesselbrett", "steckbrief", "wandlaterne"], ceil: ["laterne_h"], crit: ["katze", "ratte"] },
+    stall: { scn: [{ f: [["heu", -1.8], ["trog", 0.4], ["eimer", 2]], w: [["hufeisen", 0, -1]] }, { f: [["huhn", -1.6], ["heu", 0], ["huhn", 1.6]] }], floor: ["heu", "trog", "eimer", "karren", "holzstapel"], wall: ["hufeisen", "werkzeugbrett"], ceil: ["kraeuter", "laterne_h"], crit: ["huhn", "huhn", "katze", "ratte"] },
+    unterstand: { scn: [{ f: [["amboss", -1], ["kohlebecken", 1.2], ["wassertrog", 2.6]], w: [["zangen", 0, -1], ["werkzeugbrett", 2, -1]] }, { f: [["hackklotz", -1], ["holzstapel", 1]] }], floor: ["amboss", "holzstapel", "hackklotz", "kohlebecken"], wall: ["zangen", "werkzeugbrett", "hufeisen"], ceil: ["laterne_h"] },
+    uebungsplatz: { scn: [{ f: [["zielscheibe", -1], ["koecherfass", 1]] }, { f: [["waffenstaender", -1.5], ["hocker", 0, -1], ["faesser", 1.5]], w: [["steckbrief", 0, -1]] }], floor: ["zielscheibe", "waffenstaender", "koecherfass", "heu"], wall: ["schild", "steckbrief"], crit: ["kraehe"] },
+    schuppen: { scn: [{ f: [["kisten", -1.8], ["faesser", 0], ["saecke", 1.8]] }], floor: ["kisten", "faesser", "saecke", "holzstapel", "apfelkorb", "karren"], wall: ["werkzeugbrett"], ceil: ["kraeuter"], crit: ["ratte"] },
+    kueche: { scn: [{ f: [["kessel", -2], ["kuechentisch", 0.8]], w: [["pfannen", 1, -1]] }, { f: [["hocker", -1.9, 1], ["kuechentisch", 0], ["hocker", 1.9, -1]], w: [["wuerste", 0, -1]] }], floor: ["kessel", "kuechentisch", "faesser", "saecke", "apfelkorb", "besen"], wall: ["pfannen", "wuerste", "zwiebelzopf", "wandregal"], ceil: ["kraeuter"], crit: ["katze", "ratte"] },
+    weinkeller: { scn: [{ f: [["weinfass", -1.2], ["krugreihe", 1]], w: [["flaschenregal", 0, -1]] }], floor: ["weinfass", "fassregal", "faesser", "krugreihe"], wall: ["flaschenregal", "wandkerze", "spinnweben"], ceil: ["spinne", "tropfen"], crit: ["ratte"] },
+    vorratskammer: { scn: [{ f: [["vorratsregal", -1.5], ["saecke", 0.6], ["kartoffelkiste", 2]], w: [["zwiebelzopf", 1, -1]] }], floor: ["vorratsregal", "saecke", "kaese", "kartoffelkiste", "kisten", "apfelkorb"], wall: ["wuerste", "zwiebelzopf", "wandregal"], ceil: ["kraeuter"], crit: ["ratte", "katze"] },
+    gesindestube: { scn: [S3("kuechentisch", "wandkerze")], floor: ["bank", "hocker", "besen", "eimer"], wall: ["wandkerze", "wandregal"], crit: ["katze"] },
+    brunnenkammer: { scn: [{ f: [["brunnen", 0], ["eimer", 1.8]] }], floor: ["eimer", "trog"], wall: ["spinnweben", "wandkerze"], ceil: ["tropfen"], crit: ["ratte"] },
+    bankettsaal: { scn: [{ f: [["stuhl", -3.1, 1], ["stuhl", -2.2, 1], ["esstisch", 0], ["stuhl", 2.2, -1], ["stuhl", 3.1, -1]], w: [["wandleuchter", -2, -1], ["wandleuchter", 2, -1]] }, { f: [["stuhl", -2.3, 1], ["esstisch", 0], ["stuhl", 2.3, -1]], w: [["portraet", 0, -1]] }], floor: ["kerzenstaender", "teppich", "harfe"], wall: ["portraet", "wandteppich", "wandleuchter", "wappen", "geweih"], ceil: ["kronleuchter_k"], crit: ["katze"] },
+    anrichte: { scn: [{ f: [["kuechentisch", -0.5], ["faesser", 1.8]], w: [["pfannen", 0, -1]] }, { f: [["krugreihe", -1], ["weinfass", 1.2]] }], floor: ["kuechentisch", "krugreihe", "faesser"], wall: ["wandregal", "flaschenregal", "pfannen"], crit: ["katze"] },
+    bibliothek: { scn: [{ f: [["buecherregal", -1.2], ["lesepult", 1], ["kerzenstaender", 2]] }, { f: [["globus", -2], ["buecherregal", 0], ["sessel", 2.1]] }], floor: ["buecherregal", "lesepult", "globus", "sessel", "kerzenstaender"], wall: ["landschaft", "wandleuchter", "portraet"], ceil: ["kronleuchter_k", "spinne"] },
+    kapelle: { scn: [{ f: [["kerzenstaender", -2], ["statue", 0], ["kerzenstaender", 2]], w: [["wandteppich", 0, -1]] }, { f: [["bank", -1.6], ["bank", 1.6]], w: [["wandkerze", 0, -1]] }], floor: ["kerzenstaender", "bank", "statue", "buestensaeule", "teppich"], wall: ["wandkerze", "wandteppich", "wappen"], ceil: ["kronleuchter_k"] },
+    ahnengalerie: { scn: [{ f: [["ruestung", -2.2], ["teppich", 0], ["ruestung", 2.2]], w: [["wappen", 0, -1]] }, { f: [["buestensaeule", -1.5], ["buestensaeule", 1.5]], w: [["portraet", 0, -1]] }], floor: ["buestensaeule", "ruestung", "teppich"], wall: ["portraet", "portraet", "landschaft", "spiegel"], ceil: ["kronleuchter_k"] },
+    schlafgemach: { scn: [{ f: [["sessel", -2.4, 1], ["kamin", 0.6]], w: [["landschaft", -2.4, -1]] }, { f: [["truhe", -1.2], ["teppich", 0.6], ["standuhr", 2.2]], w: [["spiegel", 0, -1]] }], floor: ["truhe", "sessel", "standuhr", "harfe", "teppich"], wall: ["spiegel", "portraet", "wandteppich"], crit: ["katze"] },
+    ruestkammer: { scn: [{ f: [["waffenstaender", -1.5], ["ruestung", 0], ["waffenstaender", 1.5]], w: [["schild", 0, -1]] }, { f: [["ruestungsstaender", -1], ["koecherfass", 1]] }], floor: ["waffenstaender", "ruestung", "ruestungsstaender", "koecherfass", "kisten"], wall: ["schild", "schwertwand", "wappen"] },
+    geschuetzstand: { scn: [{ f: [["kanonenkugeln", -2.4], ["kanone", 0], ["pulverfass", 2.4]] }, { f: [["kanonenkugeln", -1.2], ["kohlebecken", 0], ["pulverfass", 1.2]] }], floor: ["kanonenkugeln", "pulverfass", "kanone", "faesser"], wall: ["wandlaterne", "banner_zerrissen"], crit: ["kraehe", "taube"] },
+    kaserne: { scn: [{ f: [["bank", -0.8], ["kohlebecken", 1.2]], w: [["wandlaterne", -1, -1]] }, S3("wachtisch", "steckbrief")], floor: ["stroh", "bank", "kisten", "faesser", "heu"], wall: ["schild", "steckbrief", "wandlaterne"] },
+    schuetzenstand: { scn: [{ f: [["zielscheibe", -1], ["koecherfass", 1]] }], floor: ["koecherfass", "zielscheibe", "kisten"], wall: ["schild", "banner_zerrissen"], crit: ["kraehe"] },
+    waerterstube: { scn: [S3("wachtisch", "schluesselbrett")], floor: ["wachtisch", "hocker", "kohlebecken", "faesser"], wall: ["schluesselbrett", "steckbrief", "wandlaterne"], crit: ["ratte"] },
+    zellenblock: { scn: [{ f: [["stroh", -1], ["eimer", 0.8], ["napf", 1.6]], w: [["strichliste", -1, -1], ["kerkerfenster", 2, -1]] }], floor: ["stroh", "napf", "eimer", "bodenkaefig", "knochen"], wall: ["fesseln", "strichliste", "kritzelei", "kerkerfenster"], ceil: ["ketten_h", "tropfen", "haengekaefig"], crit: ["ratte"] },
+    folterkammer: { scn: [{ f: [["streckbank", -0.6], ["kohlebecken", 1.6]], w: [["peitschen", 0, -1]] }, { f: [["folterstuhl", -1.3], ["jungfrau", 0.3], ["knochen", 1.6]] }], floor: ["streckbank", "folterstuhl", "jungfrau", "kohlebecken"], wall: ["peitschen", "fesseln"], ceil: ["haengekaefig", "ketten_h"] },
+    gebeinhaus: { scn: [{ f: [["knochenhaufen", -1.5], ["knochen", 0.5], ["knochenhaufen", 1.8]] }], floor: ["knochen", "knochenhaufen"], wall: ["kritzelei", "spinnweben"], ceil: ["tropfen", "spinne"], crit: ["ratte"] },
+    lagerhaus: { scn: [{ f: [["kisten", -1.8], ["faesser", 0], ["saecke", 1.8]] }, { f: [["seekiste", -1], ["kisten", 1]] }], floor: ["kisten", "faesser", "saecke", "seekiste", "tauwerk"], wall: ["wandlaterne", "netzwand"], ceil: ["netz_h", "laterne_h"], crit: ["ratte", "katze"] },
+    bootsschuppen: { scn: [{ f: [["boot", 0], ["ruderbuendel", 2.4]], w: [["steuerrad", 0, -1]] }, { f: [["poller", -1.2], ["tauwerk", 0], ["anker", 1.3]], w: [["rettungsring", 0, -1]] }], floor: ["anker", "ruderbuendel", "tauwerk", "netze"], wall: ["ruder_x", "rettungsring", "steuerrad"], ceil: ["netz_h"], crit: ["moewe"] },
+    taverne: { scn: [{ f: [["stuhl", -2.3, 1], ["esstisch", 0], ["stuhl", 2.3, -1]], w: [["schiffsglocke", 0, -1]] }, { f: [["weinfass", -1.2], ["krugreihe", 1]] }], floor: ["faesser", "weinfass", "hocker", "bank"], wall: ["wandlaterne", "rettungsring", "schiffsglocke"], ceil: ["laterne_h", "trockenfisch"], crit: ["katze"] },
+    fischerkate: { scn: [{ f: [["hocker", -1.2, 1], ["fischkorb", 0], ["netze", 1.6]], w: [["reuse", 0, -1]] }], floor: ["fischkorb", "hummerkorb", "netze", "eimer"], wall: ["reuse", "netzwand"], ceil: ["trockenfisch", "netz_h"], crit: ["moewe", "katze"] },
+    zollstube: { scn: [S3("wachtisch", "schluesselbrett")], floor: ["kisten", "seekiste", "saecke"], wall: ["steckbrief", "wandlaterne"] },
+    glockenstube: { scn: [{ f: [["grosseglocke", -0.6], ["kleineglocke", 1.8]] }], floor: ["kleineglocke", "grosseglocke", "winde"], wall: ["seilrolle", "wandlaterne"], ceil: ["glockenseil", "glockenseil"], crit: ["taube"] },
+    uhrwerk: { scn: [{ f: [["winde", -1], ["zahnradkiste", 1]], w: [["zahnrad", -1, -1], ["zahnrad", 2, -1]] }], floor: ["zahnradkiste", "winde"], wall: ["zahnrad", "uhrblatt"], ceil: ["flaschenzug"] },
+    uhrmacher: { scn: [{ f: [["hocker", -1.9, 1], ["uhrtisch", 0], ["standuhr", 2.1]], w: [["uhrblatt", 0, -1]] }], floor: ["uhrtisch", "standuhr", "zahnradkiste"], wall: ["werkzeugbrett_fein", "uhrblatt"] },
+    taubenschlag: { scn: [{ f: [["taube", -1.5], ["kisten", 0], ["taube", 1.5]] }], floor: ["kisten", "heu"], wall: ["wandlaterne"], crit: ["taube", "taube"] },
+    seilkammer: { scn: [{ f: [["winde", -1], ["kisten", 1]], w: [["seilrolle", -1, -1]] }], floor: ["winde", "tauwerk", "kisten"], wall: ["seilrolle"], ceil: ["flaschenzug", "glockenseil"] },
+    brutkammer: { scn: [{ f: [["eiersack", -1.6], ["kokon_boden", 0], ["eiersack", 1.5]], w: [["eier_wand", 0, -1]] }], floor: ["eiersack", "kokon_boden"], wall: ["eier_wand", "gespinst"], ceil: ["kokon_h", "spinne"] },
+    beutelager: { scn: [{ f: [["knochen", -1.4], ["knochenhaufen", 0], ["kokon_boden", 1.6]] }], floor: ["knochenhaufen", "knochen", "kokon_boden"], wall: ["gespinst", "spinnweben"], ceil: ["kokon_h"] },
+    pilzgrotte: { scn: [{ f: [["pilze", -1.6], ["pilzring", 0], ["pilze", 1.6]] }], floor: ["pilze", "pilzring", "kaefer"], wall: ["wandpilze"], ceil: ["tropfen"] },
+    kristallhoehle: { scn: [{ f: [["kristall", -1.4], ["kristall", 1.4]] }], floor: ["kristall", "pilze"], wall: ["wandpilze"], ceil: ["tropfen"] },
+    essenhalle: { scn: [{ f: [["esse", -1.4], ["amboss", 1], ["wassertrog", 2.6]], w: [["werkzeugwand", 1, -1]] }], floor: ["esse", "amboss", "wassertrog", "kohlebecken", "schleifstein"], wall: ["zangen", "werkzeugwand"], ceil: ["ketten_h", "flaschenzug"] },
+    giesserei: { scn: [{ f: [["schmelztiegel", -1.4], ["gussform", 0.8], ["barren", 2.2]] }], floor: ["schmelztiegel", "gussform", "barren", "kohlebecken"], wall: ["zangen", "ketten"], ceil: ["kranhaken"] },
+    "glut:giesserei": { scn: [{ f: [["schmelztiegel", -1.4], ["erzhaufen", 0.8], ["schlacke", 2.2]] }], floor: ["schmelztiegel", "kohlebecken", "schlacke"], wall: ["rohre", "zangen"], ceil: ["kranhaken", "ketten_h"] },
+    erzlager: { scn: [{ f: [["kohlenkarren", 0], ["erzhaufen", 2.6]] }], floor: ["erzhaufen", "kohlenkarren", "kisten", "schlacke"], wall: ["ketten", "wandlaterne"], ceil: ["kranhaken"] },
+    waffenkammer: { scn: [{ f: [["waffenstaender", -1.5], ["ruestungsstaender", 0], ["barren", 1.3]], w: [["schwertwand", 0, -1]] }], floor: ["waffenstaender", "ruestungsstaender", "barren"], wall: ["schwertwand", "werkzeugwand"] },
+    runenkammer: { scn: [{ f: [["runensteine", -1.2], ["kohlebecken", 1.2]], w: [["runentafel", 0, -1]] }], floor: ["runensteine"], wall: ["runentafel"], ceil: ["ketten_h"] },
+    wehrturm: { scn: [{ f: [["ballista", 0], ["fahnenmast", 2.4]] }], floor: ["ballista", "fahnenmast", "kanonenkugeln", "faesser"], wall: ["schild", "banner_zerrissen"], crit: ["kraehe"] },
+    speiergalerie: { scn: [{ f: [["wasserspeier", -2], ["statue", 0], ["wasserspeier", 2]] }], floor: ["wasserspeier", "statue", "kohlebecken"], crit: ["kraehe"] },
+    tempel: { scn: [{ f: [["opferschale", -1.3], ["goetze", 0], ["muscheln", 1.3]], w: [["kuo_glyphen", 0, -1]] }, { f: [["saeulenstumpf", -1.6], ["goetze", 0], ["saeulenstumpf", 1.6]] }], floor: ["goetze", "saeulenstumpf", "opferschale", "amphore"], wall: ["kuo_glyphen", "muschelwand"], ceil: ["algen_h"] },
+    opferstaette: { scn: [{ f: [["opferschale", -1.3], ["goetze", 0], ["fischgraeten", 1.3]], w: [["kuo_glyphen", 0, -1]] }], floor: ["opferschale", "fischgraeten"], wall: ["kuo_glyphen"] },
+    wrackhalde: { scn: [{ f: [["wrackkiste", -1], ["amphore", 0.6], ["fischgraeten", 1.6]] }], floor: ["wrackkiste", "amphore", "fischgraeten", "anker"], wall: ["netzwand"], crit: ["krabbe"] },
+    korallengarten: { scn: [{ f: [["korallen", -1.2], ["saeulenstumpf", 0], ["korallen", 1.2]] }], floor: ["korallen", "muscheln", "schilf"], wall: ["algen"], ceil: ["algen_h"], crit: ["krabbe"] },
+    schrein: { scn: [{ f: [["gruenfeuer", -1.5], ["duergarstatue", 0], ["gruenfeuer", 1.5]] }], floor: ["gruenfeuer", "duergarstatue"], wall: ["rohre"] },
+    schlackehalde: { scn: [{ f: [["schlacke", -1.2], ["kohlenkarren", 0.6], ["schlacke", 2]] }], floor: ["schlacke", "erzhaufen", "kohlenkarren"], wall: ["rohre"] },
+    "sturm:kapelle": { scn: [{ f: [["truemmer", -1.6], ["statue", 0], ["kandelaber_um", 1.7]] }], floor: ["statue", "kandelaber_um", "truemmer"], wall: ["ranken_w"] },
+    giftgarten: { scn: [{ f: [["dornen", -1], ["giftpilze", 0.7], ["knochen", 1.5]] }], floor: ["giftpilze", "dornen"], wall: ["ranken_w"], ceil: ["ranken_h"] },
+    "sturm:wachstube": { scn: [{ f: [["truemmer", -1.4], ["kanonenkugeln", 1.2]] }], floor: ["truemmer", "kanonenkugeln", "knochen"], wall: ["schild", "banner_zerrissen"] },
+    truemmerhalle: { scn: [{ f: [["truemmer", -1.6], ["statue", 0], ["truemmer", 1.6]] }], floor: ["truemmer", "statue", "knochen"], wall: ["ranken_w"] },
+    schatz: { scn: [{ f: [["truhe", -1.2], ["kisten", 1.2]] }], floor: ["truhe", "kisten"], wall: ["wappen", "wandleuchter"] }
+  });
+  const roomSet = (lv, cell) => cell && cell.fn ? ROOMSET[lv.biome + ":" + cell.fn] || ROOMSET[cell.fn] || null : null;
   let props = [], lvRef = null;
   const LAYER = { w: 0, c: 2, f: 1 };
   const FLOORDECO = new Set(["barrel", "crate", "bones", "skull", "pot", "sack", "statue", "armor", "table", "anvil", "forge", "mushroom", "coral", "shell", "hay", "cart", "brazier", "candelabra", "anchor", "statueKuo", "statueDuergar", "greenfire", "weapons", "rack", "crystal", "gargoyle", "mast", "candle", "tent"]);
@@ -1935,13 +1999,16 @@
     for (const k in lv.cells) {
       const cell = lv.cells[k], ox = cell.x * CW, oy = cell.y * CH;
       const rx = () => ox + 2 + R.int(0, CW - 5);
+      /* Raumfunktion: eigene Szenen und Stücke (sonst die des Gebiets) */
+      const RS = roomSet(lv, cell), scnL = (RS && RS.scn) || SCN[lv.biome];
+      const fl = (RS && RS.floor) || set.floor, wl0 = (RS && RS.wall) || set.wall, cl = (RS && RS.ceil) || set.ceil, crl = (RS && RS.crit) || set.crit;
       /* alle Bodenplätze dieser Zelle (3 Kacheln Kopffreiheit, kein Steg) */
       const spots = []; for (let y = oy + 1; y < oy + CH - 1; y++) for (let x = ox + 1; x < ox + CW - 1; x++) if (floorOK(x, y, 1)) spots.push([x, y]);
       let scene = false;
       /* Szene: mehrere Stücke als Gruppe */
-      if (SCN[lv.biome] && spots.length > 6 && R() < 0.75) {
+      if (scnL && spots.length > 6 && R() < (RS ? 0.95 : 0.75)) {
         for (let tries = 0; tries < 40 && !scene; tries++) {
-          const sc = R.pick(SCN[lv.biome]), [x, y] = R.pick(spots);
+          const sc = R.pick(scnL), [x, y] = R.pick(spots);
           let ok = true;
           for (const [kind, dx] of sc.f) { const w = K[kind].w || 1, xx = Math.round(x + dx); if (xx - w / 2 < ox || xx + w / 2 > ox + CW || !floorOK(xx, y, w, head(kind)) || blocked(x + dx, y, w, false, true)) { ok = false; break; } }
           if (!ok) continue;
@@ -1958,14 +2025,14 @@
       /* Einzelstücke am Boden */
       let n = (scene ? 0 : 1) + (R() < 0.6 ? 1 : 0) + (R() < 0.3 ? 1 : 0);
       for (let tries = 0; tries < 40 && n > 0 && spots.length; tries++) {
-        const kind = R.pick(set.floor), w = K[kind].w || 1, [x, y] = R.pick(spots);
+        const kind = R.pick(fl), w = K[kind].w || 1, [x, y] = R.pick(spots);
         if (!floorOK(x, y, w, head(kind)) || blocked(x, y, w)) continue;
         mk(kind, x, y); n--;
       }
       /* Wand */
       let m = 1 + (R() < 0.5 ? 1 : 0);
       for (let tries = 0; tries < 60 && m > 0; tries++) {
-        const kind = R.pick(set.wall), x = rx(), y = oy + 2 + R.int(0, CH - 5);
+        const kind = R.pick(wl0), x = rx(), y = oy + 2 + R.int(0, CH - 5);
         let ok;
         if (kind === "spinnweben") ok = g(x, y) === 0 && g(x, y - 1) === 1 && (g(x - 1, y) === 1 || g(x + 1, y) === 1) && !sky(x, y);
         else ok = wallOK(x, y, 1, 3);
@@ -1973,18 +2040,18 @@
         mk(kind, x, y, kind === "spinnweben" ? { f: g(x - 1, y) === 1 ? 1 : -1 } : null); m--;
       }
       /* Decke: Hängendes */
-      if (set.ceil && R() < 0.65) {
+      if (cl && R() < 0.65) {
         for (let tries = 0; tries < 40; tries++) {
-          const kind = R.pick(set.ceil), d = K[kind], x = rx(), y = oy + 1 + R.int(0, CH - 6);
+          const kind = R.pick(cl), d = K[kind], x = rx(), y = oy + 1 + R.int(0, CH - 6);
           if (!ceilOK(x, y, d.len || 4) || props.some(p => p.L === 2 && Math.abs(p.x - x) < 4 && Math.abs(p.y - y) < 4) || (lv.decor || []).some(dd => Math.abs(dd.x - x) < 2 && Math.abs(dd.y - y) < 3)) continue;
           let fall = 0; while (fall < 30 && g(x, y + fall) === 0) fall++;
           mk(kind, x, y, { fall: fall * T }); break;
         }
       }
       /* Tiere */
-      if (set.crit && R() < 0.4) {
+      if (crl && R() < 0.4) {
         for (let tries = 0; tries < 30; tries++) {
-          const kind = R.pick(set.crit), d = K[kind]; let x = rx(), y = oy + 1 + R.int(0, CH - 3);
+          const kind = R.pick(crl), d = K[kind]; let x = rx(), y = oy + 1 + R.int(0, CH - 3);
           if (d.at !== "c") { if (!spots.length) break; [x, y] = R.pick(spots); }
           if (d.at === "c") { if (!ceilOK(x, y, d.len || 3)) continue; let fall = 0; while (fall < 30 && g(x, y + fall) === 0) fall++; mk(kind, x, y, { fall: fall * T }); break; }
           if (!floorOK(x, y, 1) || blocked(x, y, 1)) continue;

@@ -169,6 +169,7 @@
   function lanternPool(c, e, t) {
     if (!poolSpr) { poolSpr = document.createElement("canvas"); poolSpr.width = poolSpr.height = 64; const g = poolSpr.getContext("2d"), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, "rgba(255,205,120,.32)"); gr.addColorStop(0.6, "rgba(255,180,90,.12)"); gr.addColorStop(1, "rgba(255,170,80,0)"); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); }
     const r = (e.flareT > 0 ? 110 : 60) * (0.96 + 0.04 * Math.sin(t * 9 + e.anim)), x = e.x + e.w / 2 + e.face * 8, y = e.y + e.h * 0.35;
+    if (Z.addLight) Z.addLight(x, y, r * 1.4, "#ffd8a0", e.flareT > 0 ? 0.6 : 0.42); /* echtes Licht gegen die Dunkelheit */
     c.save(); c.globalCompositeOperation = "lighter"; c.drawImage(poolSpr, x - r, y - r, r * 2, r * 2); c.restore();
   }
 })();

@@ -335,6 +335,7 @@
     /* Händlerin, Schrein, Glutamboss: kleine Symbole, sobald man die Stelle gesehen hat (Händlerin immer – man hört sie) */
     for (const ev of Z.abEvents || []) if (!ev.done && (ev.k === "haendler" || (ev.k === "schrein" && Z.explored[Math.floor(ev.y / T - 1) * lv.W + Math.floor(ev.x / T)]))) { const x = (ev.x / T - ox) * scale, y = (ev.y / T - 1 - oy) * scale; mmc.fillStyle = ev.k === "haendler" ? "#ffb060" : "#c890ff"; mmc.beginPath(); mmc.moveTo(x, y - 3); mmc.lineTo(x + 3, y); mmc.lineTo(x, y + 3); mmc.lineTo(x - 3, y); mmc.closePath(); mmc.fill(); }
     for (const a of Z.anvils || []) if (a.used < a.charges) { mmc.fillStyle = "#ff8a2a"; mmc.fillRect((a.x / T - ox) * scale - 2, (a.y / T - 1 - oy) * scale - 1, 4, 2); }
+    if (Z.minimapExtra) try { Z.minimapExtra(mmc, ox, oy, scale, big, vw, vh); } catch (e) { console.error(e); } /* Raumzeichen (ebenen.js) */
     mmc.fillStyle = "#ff5a3a"; mmc.fillRect(((P.x + P.w / 2) / T - ox) * scale - 2, ((P.y + P.h / 2) / T - oy) * scale - 2, 4, 4);
   }
 

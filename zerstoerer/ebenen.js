@@ -14,7 +14,7 @@
 
   /* ======================= Aufbau je Gebiet ======================= */
   function setup(lv) {
-    doors = []; seen = new Set(); lvRef = lv; Z.lvDoors = doors;
+    doors = []; seen = new Set(); lvRef = lv; Z.lvDoors = doors; lastRoom = null;
     if (!lv || lv.hub || lv.arena || lv.passage || !lv.cells) return;
     /* Außengebiete: keine unsichtbare Decke – über der Karte ist offener Himmel */
     if (lv.out && !lv._skyOpen) {
@@ -65,7 +65,33 @@
   const load0 = Z.loadArea;
   Z.loadArea = function () { const r = load0.apply(this, arguments); try { setup(Z.level); } catch (e) { console.error(e); } return r; };
   const cellOf = (x, y) => Math.floor(x / T / CW) + "," + Math.floor(y / T / CH);
-  function reveal(P) { const k = cellOf(P.x + P.w / 2, P.y + P.h / 2); if (!seen.has(k)) { seen.add(k); fogT = 0; } }
+  function reveal(P) { const k = cellOf(P.x + P.w / 2, P.y + P.h / 2); if (!seen.has(k)) { seen.add(k); fogT = 0; } if (k !== lastRoom) { lastRoom = k; enterRoom(k, P); } }
+  /* ======================= Räume mit Funktion (welt.js assignRooms) =======================
+     Beim ersten Betreten erscheint dezent der Raumname über Ezekiel (Stimmung, Priorität 0 – bei „Hinweise: wenige“ still);
+     die Karte zeigt für gesehene Räume ein kleines Zeichen in der Raumfarbe. */
+  let entered = new Set(), lastRoom = null, enterLv = null;
+  function enterRoom(k, P) {
+    const lv = Z.level; if (!lv || !lv.cells || lv.hub || lv.arena || lv.passage) return;
+    if (enterLv !== lv) { enterLv = lv; entered = new Set(); entered.add(lv.startCell ? lv.startCell.x + "," + lv.startCell.y : ""); }
+    if (entered.has(k)) return; entered.add(k);
+    const c = lv.cells[k]; if (!c || !c.fn || !Z.roomFnDef) return;
+    const d = Z.roomFnDef(lv.biome, c.fn); if (!d || !Z.ui || !Z.ui.notify) return;
+    Z.ui.notify(U.esc ? U.esc(L(d.n)) : L(d.n), { prio: 0, ort: "welt", x: P.x + P.w / 2, y: P.y - 4, art: "pergament", dauer: 2200, key: "raum" + k });
+  }
+  Z.minimapExtra = function (g, ox, oy, scale, big, vw, vh) {
+    const lv = Z.level; if (!lv || !lv.cells || lv.hub || lv.arena || lv.passage || !Z.roomFnDef) return;
+    const fs = big ? Math.max(9, Math.min(14, scale * 5)) : 8;
+    g.save(); g.font = "bold " + fs + "px serif"; g.textAlign = "center"; g.textBaseline = "middle";
+    for (const k in lv.cells) {
+      const c = lv.cells[k]; if (!c.fn || !seen.has(k) || c.kind === "secret" && !entered.has(k)) continue;
+      const d = Z.roomFnDef(lv.biome, c.fn); if (!d || !d.ico) continue;
+      const x = (c.x * CW + CW / 2 - ox) * scale, y = (c.y * CH + 3 - oy) * scale;
+      if (x < -10 || y < -10 || x > vw * scale + 10 || y > vh * scale + 10) continue;
+      g.fillStyle = "rgba(12,8,12,.7)"; g.beginPath(); g.arc(x, y, fs * 0.62, 0, 6.283); g.fill();
+      g.fillStyle = d.col || "#d8c8a0"; g.fillText(d.ico, x, y + 0.5);
+    }
+    g.restore();
+  };
 
   /* ======================= Türen ======================= */
   function doorTick(dt) {
@@ -270,7 +296,9 @@
     }
     return hurt0.apply(this, [n].concat(Array.prototype.slice.call(arguments, 1)));
   };
-  Z.ebenenTick = function (dt) { doorTick(dt); fallTick(dt); };
+  /* verkettet: Module, die sich vor ebenen.js einhängen, laufen weiter (zuerst) */
+  const ebTick0 = Z.ebenenTick;
+  Z.ebenenTick = function (dt) { if (ebTick0) ebTick0(dt); doorTick(dt); fallTick(dt); };
   const dp0 = Z.drawParcours;
   Z.drawParcours = function (c, t) { if (dp0) dp0(c, t); drawDoors(c, t); };
   const al0 = Z.drawAfterLight;

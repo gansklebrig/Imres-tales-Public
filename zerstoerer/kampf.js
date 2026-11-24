@@ -1136,7 +1136,7 @@
     /* W8: Überraschungsangriff – der erste Treffer auf einen ahnungslosen (nicht alarmierten) Gegner trifft kritisch, +50 %.
        Gleiche Bedingung wie die Herausforderung „Meuchler“ (bilanz.js: Nah-/Fernkampftreffer gegen !e.aware). */
     let surprise = false;
-    if (P && !o.dot && !o.crit && !e.aware && !e.def.boss && !e.dummy && !e.surprised && (o.src === "melee" || o.src === "ranged")) {
+    if (P && !o.dot && !o.crit && !e.aware && !e.def.boss && !e.nmMini /* W9: Mini-Bosse wie Bosse nie überrumpelt (Dolch-Krit ×3 × 1,5 als Eröffnung) */ && !e.dummy && !e.surprised && (o.src === "melee" || o.src === "ranged")) {
       surprise = true; e.surprised = true; o = Object.assign({}, o, { crit: true });
       FX.text(e.x + e.w / 2, e.y - 14, L(["Überrumpelt!", "Caught off guard!"]), "#ffd27a");
     }

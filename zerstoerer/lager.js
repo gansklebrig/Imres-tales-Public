@@ -751,16 +751,19 @@
   const load0 = Z.loadArea;
   Z.loadArea = function (id) {
     const r = load0.apply(this, arguments);
-    try { const lv = Z.level; if (lv && lv.hub) setupCamp(lv); else { camp = null; areaFresh = true; } } catch (err) { console.error(err); }
+    try { const lv = Z.level; if (lv && lv.hub) setupCamp(lv); else { camp = null; areaFresh = true; if (id === "passage") LM().lgFar = true; } } catch (err) { console.error(err); }
     return r;
   };
   let areaFresh = false;
   function setupCamp(lv) {
     const m = LM(), st = lv.lstage != null ? lv.lstage : stage(), T2 = T / 2;
     m.visits = (m.visits | 0) + 1;
+    /* W9 (Abuse-Bot): Angebote (Lotte, Sigrun-Runen, Barradins Lieder) wurden mit jedem Lagerbesuch neu gewürfelt – Lauf sofort
+       aufgeben = beliebig oft neu würfeln. Neue Saat jetzt nur, wenn der letzte Lauf mindestens einen Durchgang erreicht hat. */
+    if (m.lgFar || m.offerN == null) { m.offerN = (m.offerN | 0) + 1; m.lgFar = false; }
     resetSprites();
     try { autoWanted(); } catch (_) {}
-    camp = { lv, st, t: 0, res: [], hens: [], folk: [], chatT: 6, trickT: 8, gravLeft: lvl("sigrun") >= 3 ? 2 : lvl("sigrun") >= 1 ? 1 : 0, seed: (m.visits * 7919) >>> 0, offers: null, songOffer: null, said: {} };
+    camp = { lv, st, t: 0, res: [], hens: [], folk: [], chatT: 6, trickT: 8, gravLeft: lvl("sigrun") >= 3 ? 2 : lvl("sigrun") >= 1 ? 1 : 0, seed: ((m.offerN | 0) * 7919) >>> 0, offers: null, songOffer: null, said: {} };
     const add = o => { (Z.interacts = Z.interacts || []).push(o); return o; };
     /* Bewohner auf ihren Plätzen */
     for (const p of lv.plots) {
@@ -1186,6 +1189,7 @@
       const R = Z.Rng(camp.seed + 911), M = Z.meta, n = lvl("lotte") >= 3 ? 2 : 1;
       const pool = Object.keys(M.found || {}).filter(id => { const d = (Z.WEAPONS[id] || Z.SKILLS[id]); return d && d.find && !d.legendaryOnly; });
       camp.offers = R.shuffle(pool).slice(0, n).map(id => { const rar = R() < 0.35 ? 2 : 1, it = Z.makeItem(id, 0, rar, R); return { it, price: rar === 2 ? 55 : 30, sold: false }; });
+      const lm = LM(); if (lm.lgSoldN === lm.offerN) for (const i of lm.lgSold || []) if (camp.offers[i]) camp.offers[i].sold = true; /* W9: gekauft bleibt gekauft, bis zur nächsten Saat */
     }
     return camp.offers;
   }
@@ -1314,7 +1318,7 @@
   }
   function lotteBuy(i) {
     const offers = lotteOffers(), o = offers[+i], M = Z.meta; if (!o || o.sold || M.shards < o.price) return;
-    M.shards -= o.price; o.sold = true; save(); A.play("coin", { vol: 0.6 });
+    M.shards -= o.price; o.sold = true; { const lm = LM(); if (lm.lgSoldN !== lm.offerN) { lm.lgSoldN = lm.offerN; lm.lgSold = []; } lm.lgSold.push(+i); } save(); A.play("coin", { vol: 0.6 });
     const at = resAt("lotte"); Z.spawnPickup("item", at.x - 14, at.y, { it: o.it, vx: 0, vy: -140, float: true });
     ui().close(); ui().say(at.x, at.y - 32, "Lotte", L(Z.R.pick(RES.lotte.buy)), 2800);
   }
