@@ -3209,19 +3209,31 @@
         if (h(tx, k) < 0.35) { c.fillStyle = "rgba(255,190,90,.85)"; c.fillRect(x + 8, y + 8, 1.4, 1.4); c.fillRect(x + 12, y + 8, 1.4, 1.4); }
         c.fillStyle = "#5a5458"; for (let b = 1; b < 5; b++) c.fillRect(x + b * w / 5 - 0.8, y, 1.6, hh); c.fillRect(x, y + hh / 2 - 0.8, w, 1.6);
         c.fillStyle = "rgba(0,0,0,.4)"; c.fillRect(x - 3, y + hh + 3, w + 6, 2); } },
-    glockenstuhl(H, ox, oy) { const { c, T } = H;
+    glockenstuhl(H, ox, oy) { const { c, T, lv } = H;
       const x0 = (ox + 3) * T, x1 = (ox + CW() - 3) * T, y0 = (oy + 1) * T, y1 = (oy + 10) * T;
-      c.strokeStyle = "rgba(60,40,26,.85)"; c.lineWidth = 4;
+      /* R22: vor Rückwand und Fenstern (Stufe „fix“), aber nur auf freien Kacheln – nicht über Fels, Stegen, Leitern */
+      c.save(); c.beginPath(); for (let y = oy; y < oy + CH(); y++) for (let x = ox; x < ox + CW(); x++) { const v = lv.get(x, y); if (v === 0) c.rect(x * T, y * T, T, T); } c.clip();
+      c.strokeStyle = "rgba(70,48,30,.92)"; c.lineWidth = 4;
       for (let x = x0; x <= x1; x += (x1 - x0) / 3) { c.beginPath(); c.moveTo(x, y0); c.lineTo(x, y1); c.stroke(); }
       c.lineWidth = 3; for (let i = 0; i < 3; i++) { const a = x0 + i * (x1 - x0) / 3, b = a + (x1 - x0) / 3; c.beginPath(); c.moveTo(a, y0 + 4); c.lineTo(b, y1 - 4); c.moveTo(b, y0 + 4); c.lineTo(a, y1 - 4); c.stroke(); }
       c.lineWidth = 5; c.beginPath(); c.moveTo(x0 - 6, y0 + 2); c.lineTo(x1 + 6, y0 + 2); c.stroke();
-      c.strokeStyle = "rgba(255,220,170,.12)"; c.lineWidth = 1; c.beginPath(); c.moveTo(x0 - 6, y0); c.lineTo(x1 + 6, y0); c.stroke(); },
-    schiessscharten(H, ox, oy) { const { c, T } = H;
-      for (const [tx, ty] of spots(H, ox, oy, 1, 3, 5, 1, 8)) {
-        const x = tx * T + 6, y = ty * T + 4, hh = 36;
-        c.fillStyle = "rgba(0,0,0,.45)"; c.fillRect(x - 3, y - 2, 10, hh + 4);
-        const g = c.createLinearGradient(0, y, 0, y + hh); g.addColorStop(0, "rgba(220,150,120,.55)"); g.addColorStop(1, "rgba(120,60,70,.45)"); c.fillStyle = g; c.fillRect(x, y, 3.5, hh);
-        c.fillRect(x - 3, y + hh / 2 - 1, 9.5, 2.5); c.fillStyle = "rgba(255,230,200,.18)"; c.fillRect(x - 3, y - 2, 1, hh + 4); } },
+      c.strokeStyle = "rgba(255,220,170,.12)"; c.lineWidth = 1; c.beginPath(); c.moveTo(x0 - 6, y0); c.lineTo(x1 + 6, y0); c.stroke();
+      c.fillStyle = "#3a2a1c"; for (let x = x0; x <= x1 + 1; x += (x1 - x0) / 3) for (const yy of [y0 + 2, y1 - 4]) c.fillRect(x - 3, yy - 3, 6, 6); /* Knotenbleche */
+      c.restore(); },
+    schiessscharten(H, ox, oy) { const { c, T, lv } = H;
+      /* R22: Scharten in die Mauerkacheln (Stufe „fix“): senkrechter Schlitz mit Querschlitz, innen Himmelsschimmer,
+         dazu helle Laibung; auf Mauern mit Luft auf mindestens einer Seite, jede dritte Reihe, versetzt */
+      let n = 0;
+      for (let y = oy + 2; y < oy + CH() - 2 && n < 8; y++) for (let x = ox; x < ox + CW() && n < 8; x++) {
+        if (lv.get(x, y) !== 1 || lv.get(x, y - 1) !== 1 || lv.get(x, y + 1) !== 1) continue;
+        if (!(lv.get(x - 1, y) === 0 || lv.get(x + 1, y) === 0)) continue;
+        if ((y - oy + (x % 2)) % 3) continue;
+        const px = x * T + 6, py = y * T - 6, hh = 26; n++;
+        c.fillStyle = "rgba(0,0,0,.6)"; c.fillRect(px - 2.5, py - 1, 8.5, hh + 2);
+        const g = c.createLinearGradient(0, py, 0, py + hh); g.addColorStop(0, "rgba(232,170,140,.85)"); g.addColorStop(1, "rgba(130,64,74,.8)");
+        c.fillStyle = g; c.fillRect(px, py, 3.5, hh); c.fillRect(px - 2.5, py + hh / 2 - 1.2, 8.5, 2.6);
+        c.fillStyle = "rgba(255,236,210,.3)"; c.fillRect(px - 2.5, py - 1, 1, hh + 2); c.fillRect(px - 2.5, py - 1, 8.5, 0.8);
+      } },
     stelzensteg(H, ox, oy) { const { c, T, lv } = H;
       for (let y = oy; y < oy + CH(); y++) for (let x = ox; x < ox + CW(); x++) {
         if (lv.get(x, y) !== 2) continue; const L = lv.get(x - 1, y) !== 2, R2 = lv.get(x + 1, y) !== 2; if (!L && !R2 && (x - ox) % 4) continue;
@@ -3237,8 +3249,56 @@
         for (const rx of [4, 12]) { c.fillStyle = "#3a3438"; c.beginPath(); c.arc(px + rx, py + 7.5, 2.6, 0, 6.283); c.fill(); c.fillStyle = "#8a8088"; c.fillRect(px + rx - 0.6, py + 6.9, 1.2, 1.2); } } },
     schlackerinne(H, ox, oy) { const { c, T, lv } = H;
       for (let y = oy; y < oy + CH(); y++) for (let x = ox; x < ox + CW(); x++) { const v = lv.get(x, y); if (v !== 5) continue; if (lv.get(x, y - 1) === 5) continue;
-        for (const sd of [-1, 1]) if (lv.get(x + sd, y) === 1) { const px = sd < 0 ? x * T - 3 : x * T + T; c.fillStyle = "rgba(255,120,40,.35)"; c.fillRect(px, y * T - 2, 3, 6); } } }
+        for (const sd of [-1, 1]) if (lv.get(x + sd, y) === 1) { const px = sd < 0 ? x * T - 4 : x * T + T; c.fillStyle = "rgba(255,130,50,.6)"; c.fillRect(px, y * T - 3, 4, 8); c.fillStyle = "#2a1a14"; c.fillRect(px + (sd < 0 ? 0 : 1), y * T - 6, 3, 3); }
+        /* R22: Glutschein über der Rinne und Schlackenkrusten am Rand */
+        const g = c.createLinearGradient(0, y * T - 14, 0, y * T + 4); g.addColorStop(0, "rgba(255,110,30,0)"); g.addColorStop(1, "rgba(255,120,40,.3)"); c.fillStyle = g; c.fillRect(x * T, y * T - 14, T, 18);
+        if ((x * 7) % 3 === 0) { c.fillStyle = "#3a2018"; c.fillRect(x * T + 3, y * T + 3, 6, 2); c.fillStyle = "rgba(255,170,80,.6)"; c.fillRect(x * T + 4, y * T + 3, 4, 0.6); } } }
   };
+  /* R22 Wunschliste: Fassstapel, Zellengitter, Kai (Poller+Netze), Thron, Korallen, Tempel-Steinmetzarbeit */
+  const floorSpots = (H, ox, oy, n, minGap) => { const { lv } = H, out = []; for (let y = oy + 1; y < oy + CH() && out.length < n; y++) for (let x = ox + 1; x < ox + CW() - 2 && out.length < n; x++) {
+    const sol = v => v === 1 || v === 7; if (lv.get(x, y) || lv.get(x + 1, y) || lv.get(x, y - 1) || lv.get(x + 1, y - 1) || !sol(lv.get(x, y + 1)) || !sol(lv.get(x + 1, y + 1))) continue;
+    if (out.some(q => Math.abs(q[0] - x) < minGap && q[1] === y)) continue; out.push([x, y]); } return out; };
+  const surf = (H, ox, oy, test) => { const { lv } = H, out = []; for (let y = oy; y < oy + CH(); y++) for (let x = ox; x < ox + CW(); x++) if (test(lv, x, y)) out.push([x, y]); return out; };
+  const fass0 = P.fasslager;
+  P.fasslager = function (H, ox, oy) { const { c, T } = H; fass0(H, ox, oy);
+    for (const [tx, ty] of floorSpots(H, ox, oy, 2, 8)) { const bx = tx * T + 16, by = (ty + 1) * T;
+      const bar = (x, y) => { c.fillStyle = "#5e3e24"; c.beginPath(); c.ellipse(x, y - 6, 6.5, 6, 0, 0, 6.283); c.fill(); c.strokeStyle = "#2e2a2a"; c.lineWidth = 1; c.beginPath(); c.ellipse(x, y - 6, 6.5, 6, 0, 0, 6.283); c.stroke(); c.beginPath(); c.ellipse(x, y - 6, 3.4, 3.2, 0, 0, 6.283); c.stroke(); c.fillStyle = "rgba(255,220,170,.14)"; c.fillRect(x - 4, y - 10, 3, 2); };
+      bar(bx - 7, by); bar(bx + 7, by); bar(bx, by - 11); } };
+  const zg0 = P.zellengang;
+  P.zellengang = function (H, ox, oy) { const { c, T, lv } = H; zg0(H, ox, oy);
+    /* Gitter vor den Zellennischen: Luftkacheln zwischen zwei Mauerpfeilern in den oberen Reihen */
+    for (let y = oy + 1; y < oy + 5; y++) for (let x = ox + 1; x < ox + CW() - 1; x++) {
+      if (lv.get(x, y) !== 0) continue; let l = x; while (l > ox && lv.get(l - 1, y) === 0) l--; let r = x; while (r < ox + CW() - 1 && lv.get(r + 1, y) === 0) r++;
+      if (x !== l || r - l > 2 || lv.get(l - 1, y) !== 1 || lv.get(r + 1, y) !== 1) continue;
+      const px = l * T, w = (r - l + 1) * T, py = y * T; c.fillStyle = "#4a4448"; for (let k = 2; k < w; k += 5) c.fillRect(px + k, py, 1.6, T); c.fillRect(px, py + 2, w, 1.4); c.fillRect(px, py + T - 3, w, 1.4);
+      c.fillStyle = "#8a8288"; for (let k = 2; k < w; k += 5) c.fillRect(px + k, py, 0.5, T); }
+  };
+  P.kai = function (H, ox, oy) { const { c, T, lv } = H;
+    for (const [x, y] of surf(H, ox, oy, (lv, x, y) => (lv.get(x, y) === 0) && (lv.get(x, y + 1) === 1) && (lv.get(x + 1, y + 1) === 11 || lv.get(x - 1, y + 1) === 11 || lv.get(x + 1, y + 1) === 6 || lv.get(x - 1, y + 1) === 6))) {
+      const px = x * T + 8, py = (y + 1) * T; c.fillStyle = "#3a3236"; c.fillRect(px - 3.5, py - 9, 7, 9); c.beginPath(); c.ellipse(px, py - 9, 5, 2, 0, 0, 6.283); c.fill(); c.fillStyle = "#6a6266"; c.fillRect(px - 3.5, py - 9, 1, 9);
+      c.strokeStyle = "#b09a70"; c.lineWidth = 0.8; c.beginPath(); c.moveTo(px - 3.5, py - 6); c.quadraticCurveTo(px + 6, py - 2, px + 14, py - 1); c.stroke(); }
+    for (const [tx, ty] of spots(H, ox, oy, 2, 2, 2, 1, 7)) { const x = tx * T, y = ty * T; c.strokeStyle = "rgba(170,150,110,.75)"; c.lineWidth = 0.6; c.beginPath();
+      for (let k = 0; k <= 6; k++) { c.moveTo(x + k * 5, y); c.quadraticCurveTo(x + k * 5 + 2, y + 16, x + k * 4 + 3, y + 26); } for (let r = 1; r < 6; r++) { c.moveTo(x, y + r * 4.5); c.quadraticCurveTo(x + 15, y + r * 4.5 + 3, x + 30, y + r * 4.2); } c.stroke();
+      c.fillStyle = "#c8a060"; c.beginPath(); c.arc(x + 8, y + 12, 1.6, 0, 6.283); c.arc(x + 22, y + 18, 1.6, 0, 6.283); c.fill(); } };
+  P.thronsaal = function (H, ox, oy) { const { c, T, lv } = H;
+    let best = null; for (let y = oy + 2; y < oy + 6; y++) for (let x = ox + 8; x < ox + 16; x++) if (lv.get(x, y) === 0 && lv.get(x, y + 1) === 1 && lv.get(x - 1, y + 1) === 1 && lv.get(x + 1, y + 1) === 1) { best = [x, y]; break; }
+    if (!best) return; const px = best[0] * T + 8, py = (best[1] + 1) * T;
+    c.fillStyle = "#6a1a1a"; c.fillRect(px - 22, py - 1, 44, 1.5);
+    c.fillStyle = "#3a2618"; c.fillRect(px - 8, py - 30, 16, 30); c.beginPath(); c.moveTo(px - 8, py - 30); c.lineTo(px, py - 38); c.lineTo(px + 8, py - 30); c.fill();
+    c.fillStyle = "#8a1a22"; c.fillRect(px - 6, py - 27, 12, 18); c.fillStyle = "#c8a050"; c.fillRect(px - 8, py - 30, 16, 1.5); c.fillRect(px - 10, py - 12, 20, 3); c.fillRect(px - 10, py - 12, 3, 12); c.fillRect(px + 7, py - 12, 3, 12);
+    c.beginPath(); c.arc(px, py - 33, 2, 0, 6.283); c.fill(); c.fillStyle = "rgba(255,230,170,.2)"; c.fillRect(px - 6, py - 27, 2, 18); };
+  P.korallengrotte = function (H, ox, oy) { const { c, T, lv } = H; const cols = ["#d0503a", "#e08a5a", "#c8406a", "#e0b070"];
+    let n = 0; for (const [x, y] of surf(H, ox, oy, (lv, x, y) => lv.get(x, y) === 0 && lv.get(x, y + 1) === 1)) { if ((x * 7 + y * 3) % 4 || n > 10) continue; n++;
+      const px = x * T + 8, py = (y + 1) * T, col = cols[(x + y) % 4]; c.strokeStyle = col; c.lineCap = "round";
+      const br = (x0, y0, a, l, d) => { if (d > 3) return; const x1 = x0 + Math.cos(a) * l, y1 = y0 + Math.sin(a) * l; c.lineWidth = 2.4 - d * 0.5; c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke(); br(x1, y1, a - 0.5, l * 0.7, d + 1); br(x1, y1, a + 0.45, l * 0.7, d + 1); };
+      br(px, py, -Math.PI / 2 + ((x % 3) - 1) * 0.2, 6 + (y % 3), 0); c.fillStyle = "rgba(255,240,220,.4)"; c.fillRect(px - 0.5, py - 9, 1, 1); } };
+  P.tempelstufen = function (H, ox, oy) { const { c, T, lv } = H;
+    for (const [x, y] of surf(H, ox, oy, (lv, x, y) => lv.get(x, y) === 1 && lv.get(x, y - 1) === 0 && y < oy + CH() - 4)) {
+      const px = x * T, py = y * T; c.fillStyle = "rgba(255,230,190,.16)"; c.fillRect(px, py, T, 1.4); c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(px, py + 5, T, 0.8); c.fillRect(px, py + 13, T, 0.8);
+      c.strokeStyle = "rgba(255,220,170,.22)"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(px + 2, py + 9); c.lineTo(px + 5, py + 7); c.lineTo(px + 8, py + 9); c.lineTo(px + 11, py + 7); c.lineTo(px + 14, py + 9); c.stroke();
+      if ((x % 4) === 0) { c.fillStyle = "rgba(0,0,0,.3)"; c.fillRect(px, py + 5, 0.8, 8); } } };
+  P.kai_o = P.kai_u = P.kai; P.korallengrotte_o = P.korallengrotte_u = P.korallengrotte; P.tempelstufen_u = P.tempelstufen_o = P.tempelstufen; P.thronsaal_o = P.thronsaal_u = P.thronsaal;
+  P.fasslager_o = P.fasslager_u = P.fasslager; P.galerie_o = P.galerie_u = P.galerie;
   P.zweigalerie = P.zweigalerie_u = P.galerie; P.zellengang_u = P.zellengang; P.glockenstuhl_u = P.glockenstuhl; P.schiessscharten_o = P.schiessscharten;
   P.stelzensteg_o = P.stelzensteg; P.schlackerinne_o = P.schlackerinne;
   G.tileHooks.push(function (k, H) {
@@ -3247,8 +3307,9 @@
     const cx0 = Math.floor(H.x0 / CW()), cx1 = Math.floor((H.x1 - 1) / CW()), cy0 = Math.floor(H.y0 / CH()), cy1 = Math.floor((H.y1 - 1) / CH());
     for (let cy = cy0; cy <= cy1; cy++) for (let cx = cx0; cx <= cx1; cx++) {
       const cell = lv.cells[cx + "," + cy]; if (!cell || !cell.tpl) continue;
-      const f = P[cell.tpl]; if (!f) continue;
-      const stage = cell.tpl.startsWith("stelzen") || cell.tpl.startsWith("foerder") || cell.tpl.startsWith("schlacke") ? "fix" : "wall";
+      const f = P[cell.tpl] || P[cell.tpl.replace(/_(o|u|ou)$/, "")]; if (!f) continue;
+      const base = cell.tpl.replace(/_(o|u|ou)$/, ""), f2 = P[cell.tpl] || P[base];
+      const stage = /^(stelzen|foerder|schlacke|glocken|schiess|fasslager|zellengang|kai|thronsaal|korallen|tempel)/.test(base) ? "fix" : "wall";
       if (stage !== k) continue;
       try { f(H, cx * CW(), cy * CH()); } catch (e) { console.error(e); }
     }

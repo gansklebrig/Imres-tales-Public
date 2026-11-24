@@ -230,6 +230,23 @@
           for (let i = 0; i < 40; i++) { const x = R() * LW, y = R() * H * 0.6; repeatDraw(m, () => D.glow(m, x, y, 5, "rgba(130,230,170,.4)")); }
         }
         if (kind === "embercity") {
+          /* R22: Mittelebene mit Tiefe/Kontrast – dunkle Tropfsteinzapfen von oben, Hängestege an Ketten mit Glutfenstern,
+             ein Bogen-Aquädukt; Glutkanten. So zeigt jede Höhlenöffnung Staffelung statt einer Dunstfläche. */
+          repeatDraw(m, () => {
+            const dk = "#170a06", rimE = "rgba(255,130,50,.35)";
+            for (let i = 0; i < 6; i++) { const x = 40 + i * 105 + hash(i, 61) * 40, w = 18 + hash(i, 62) * 26, h = H * (0.12 + hash(i, 63) * 0.22);
+              m.fillStyle = dk; m.beginPath(); m.moveTo(x - w, 0); m.quadraticCurveTo(x - w * 0.3, h * 0.6, x, h); m.quadraticCurveTo(x + w * 0.3, h * 0.6, x + w, 0); m.fill();
+              m.strokeStyle = rimE; m.lineWidth = 1; m.beginPath(); m.moveTo(x + w * 0.9, 2); m.quadraticCurveTo(x + w * 0.3, h * 0.6, x, h); m.stroke(); }
+            for (let i = 0; i < 4; i++) { const x = 70 + i * 160 + hash(i, 64) * 50, y = H * (0.22 + hash(i, 65) * 0.3), w = 46 + hash(i, 66) * 30;
+              m.strokeStyle = "#241410"; m.lineWidth = 1.4; m.beginPath(); m.moveTo(x - w / 2 + 4, 0); m.lineTo(x - w / 2 + 4, y); m.moveTo(x + w / 2 - 4, 0); m.lineTo(x + w / 2 - 4, y); m.stroke();
+              m.fillStyle = dk; m.fillRect(x - w / 2, y, w, 5); m.fillRect(x - w / 2 + 6, y - 14, w - 12, 14); m.beginPath(); m.moveTo(x - w / 2 + 3, y - 14); m.lineTo(x, y - 24); m.lineTo(x + w / 2 - 3, y - 14); m.fill();
+              m.fillStyle = "rgba(255,160,70,.85)"; for (let k = 0; k < 3; k++) m.fillRect(x - w / 2 + 11 + k * (w - 22) / 2, y - 10, 3, 4);
+              m.fillStyle = rimE; m.fillRect(x - w / 2, y + 4, w, 1); }
+            const ay = H * 0.62; m.fillStyle = "#1c0e08"; m.fillRect(0, ay, LW, 7);
+            for (let x = 0; x < LW; x += 64) { m.beginPath(); m.moveTo(x, ay + 6); m.lineTo(x + 64, ay + 6); m.lineTo(x + 64, ay + 34); m.arc(x + 32, ay + 34, 24, 0, Math.PI, true); m.closePath(); m.fill(); m.fillRect(x, ay + 34, 8, H - ay - 34); m.fillRect(x + 56, ay + 34, 8, H - ay - 34);
+              m.strokeStyle = rimE; m.lineWidth = 0.8; m.beginPath(); m.arc(x + 32, ay + 34, 24, Math.PI, 0); m.stroke(); }
+            m.fillStyle = rimE; m.fillRect(0, ay, LW, 1);
+          });
           /* Felswand mit hunderten Feuern, manche grün (Gracklstugh) */
           repeatDraw(f, () => { for (let i = 0; i < 120; i++) { const x = hash(i, 11) * LW, y = H * 0.15 + hash(i, 12) * H * 0.6; const green = hash(i, 13) < 0.22; D.glow(f, x, y, 5, green ? "rgba(120,255,140,.55)" : "rgba(255,150,60,.55)"); f.fillStyle = green ? "#b0ffb0" : "#ffd090"; f.fillRect(x - 0.5, y - 0.5, 1, 1.2); } });
           repeatDraw(m, () => { for (let i = 0; i < 4; i++) { const x = 30 + i * 160; m.fillStyle = "#1a0c08"; m.fillRect(x, H * 0.4, 50, H * 0.6); for (let k = 0; k < 50; k += 10) m.fillRect(x + k, H * 0.4 - 6, 6, 6); m.fillStyle = "rgba(255,140,50,.7)"; m.fillRect(x + 12, H * 0.5, 5, 7); m.fillRect(x + 32, H * 0.6, 5, 7); D.glow(m, x + 25, H * 0.9, 50, "rgba(255,90,20,.25)"); } });
@@ -1569,6 +1586,7 @@
           c.fillStyle = "rgba(255,230,180,.35)"; c.fillRect(lx - 3.4, ly + 0.4, 6.8, 0.4);
           D.glow(c, lx, ly + 3.5, 18, "rgba(255,180,90,.4)"); break; }
         case "banner": { /* Wappenbanner: Stange mit Knäufen, Borte, Stickerei, Schwalbenschwanz und Quasten */
+          if (lv.out && G.sky && G.sky[Math.max(0, d.y - 2) * lv.W + d.x] && G.sky[Math.max(0, d.y - 3) * lv.W + d.x] && !(lv.get(d.x - 1, d.y - 2) === 1 || lv.get(d.x + 1, d.y - 2) === 1)) break; /* R22: nicht frei im Himmel */
           /* d.swing (optional, Bogenmaß, etwa −0,6 … 0,6): Auslenkung durch einen Stoß – siehe Kopfkommentar „Schwingen“ */
           const w = 11, h = 24, y = py - 31, wind = (Z.windX || 0) / 20 + 1, a = +d.swing || 0;
           const col = B.bg === "spires" ? "#4a1a1a" : B.bg === "storm" ? "#2e3a24" : B.bg === "halls" ? "#8a1a22" : "#7a1a20";
@@ -2247,7 +2265,8 @@
     const lvl = lq(), t = G.time, dt = Math.min(0.1, Math.max(0, t - (G.lightT == null ? t : G.lightT))); G.lightT = t;
     /* gleiche Kameralage wie die Welt (inkl. Wackeln), damit Lichtkreise und Sichtnebel nicht verrutschen */
     if (camX != null) cam = { x: camX, y: camY, w: cam.w, h: cam.h };
-    if (lvl >= 1 && !G.off.color) { gather(cam, t, lvl, dt); return mulPass(c, cam, W, H, dark, lvl); }
+    /* R22: Stufe 1 hat weniger Lichtquellen-Pracht als Stufe 2 – Grunddunkel um ein Viertel gesenkt (wie Stufe 0), damit sie nicht dunkler wirkt als Stufe 0 */
+    if (lvl >= 1 && !G.off.color) { gather(cam, t, lvl, dt); return mulPass(c, cam, W, H, lvl === 1 && !(Z.darkness > 0) && !G.off.s1dunkel ? dark * 0.74 : dark, lvl); }
     LQn = 0; EXT.length = 0; for (let i = FLASH.length - 1; i >= 0; i--) { FLASH[i].t += dt; if (FLASH[i].t >= FLASH[i].life) FLASH.splice(i, 1); }
     /* R20: Stufe 0 – dunkle Burg, aber Spielrelevantes erkennbar: Grunddunkel um gut ein Viertel gesenkt (Dunkelheits-
        Ereignisse bleiben voll) */

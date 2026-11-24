@@ -1149,3 +1149,39 @@
   };
   Z.bruchDbg = () => ({ wucht: wt.length, teile: D.length, morsch: (Z.level && Z.level.morsch || []).length });
 })();
+
+/* Ezekiel – The Destroyer · Bewegte Teile der Raumvorlagen (W11 Runde 22)
+   Fähren (parcours.js, Z.parcoursMovers) in Förderband-, Fasslager-, Uhrwerk- und Kai-Räumen werden als Band-Wagen mit
+   Rollen und laufendem Gurt gezeichnet (über der Fährplatte); die Säge (Z.traps k "saege") im Uhrwerk als drehendes
+   Zahnrad mit Nabe. Trefferzonen unverändert. Schalter Z.gfx.off.vorlagen. */
+(function () {
+  const Z = window.Z, G = Z.gfx, T = 16, TAU = Math.PI * 2;
+  const tplAt = (x, y) => { const lv = Z.level, c = lv && lv.cells && lv.cells[Math.floor(x / T / Z.CW) + "," + Math.floor(y / T / Z.CH)]; return c && c.tpl ? c.tpl.replace(/_(o|u|ou)$/, "") : ""; };
+  const BAND = { foerderband: 1, fasslager: 1, uhrwerk: 1, kai: 1 };
+  function belt(c, m, t) {
+    const x = Math.round(m.x * 4) / 4, y = m.y, w = m.w;
+    c.fillStyle = "#2a2426"; c.fillRect(x - 2, y - 0.5, w + 4, 9);
+    c.fillStyle = "#3e3638"; c.fillRect(x, y, w, 4); c.fillStyle = "#5a5256"; c.fillRect(x, y, w, 1);
+    const off = (t * 30 * (m.dir || 1)) % 6; c.fillStyle = "rgba(0,0,0,.45)"; for (let k = -6; k < w + 6; k += 6) { const xx = x + ((k + off) % (w + 6) + w + 6) % (w + 6); if (xx < x + w - 1) c.fillRect(xx, y + 1, 1.2, 3); }
+    for (const rx of [x + 4, x + w / 2, x + w - 4]) { c.fillStyle = "#4a4448"; c.beginPath(); c.arc(rx, y + 6, 3, 0, TAU); c.fill(); c.strokeStyle = "#8a8288"; c.lineWidth = 0.6; const a = t * 6 * (m.dir || 1); c.beginPath(); c.moveTo(rx + Math.cos(a) * 2.4, y + 6 + Math.sin(a) * 2.4); c.lineTo(rx - Math.cos(a) * 2.4, y + 6 - Math.sin(a) * 2.4); c.stroke(); }
+  }
+  function gear(c, tr, t) {
+    const x = tr.x, y = tr.y, r = 11, n = 10, a0 = (tr.rot || t * 6);
+    c.save(); c.translate(x, y); c.rotate(a0);
+    c.fillStyle = "#6a5a40"; c.beginPath(); for (let i = 0; i < n * 2; i++) { const a = i / (n * 2) * TAU, rr = i % 2 ? r : r + 3; c.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } c.closePath(); c.fill();
+    c.fillStyle = "#8a7650"; c.beginPath(); c.arc(0, 0, r - 2, 0, TAU); c.fill();
+    c.fillStyle = "#3a3024"; for (let k = 0; k < 4; k++) { c.save(); c.rotate(k * Math.PI / 2); c.fillRect(-1.2, 2.5, 2.4, r - 5); c.restore(); }
+    c.beginPath(); c.arc(0, 0, 2.6, 0, TAU); c.fill(); c.fillStyle = "#c8a860"; c.fillRect(-0.7, -0.7, 1.4, 1.4);
+    c.restore();
+  }
+  const dp0 = Z.drawParcours;
+  Z.drawParcours = function (c, t) {
+    if (dp0) dp0.apply(this, arguments);
+    if (G.off && G.off.vorlagen) return;
+    try {
+      const cam = Z.cam, tt = performance.now() / 1000, vis = (x, y) => x > cam.x - 60 && x < cam.x + cam.w + 60 && y > cam.y - 60 && y < cam.y + cam.h + 60;
+      for (const m of Z.parcoursMovers || []) if (vis(m.x, m.y) && BAND[tplAt(m.x + m.w / 2, m.y)]) belt(c, m, tt);
+      for (const tr of Z.traps || []) if (tr.k === "saege" && vis(tr.x, tr.y) && tplAt(tr.x, tr.y) === "uhrwerk") gear(c, tr, tt);
+    } catch (e) { console.error(e); }
+  };
+})();
