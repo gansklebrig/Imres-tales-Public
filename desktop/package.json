@@ -50,9 +50,10 @@
     "nsis": {
       "oneClick": true,
       "perMachine": false,
-      "createDesktopShortcut": true,
+      "createDesktopShortcut": false,
       "shortcutName": "Heldensturm",
-      "deleteAppDataOnUninstall": false
+      "deleteAppDataOnUninstall": false,
+      "include": "build/installer.nsh"
     },
     "linux": {
       "target": [

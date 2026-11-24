@@ -6,6 +6,9 @@ Jeder Punkt lässt sich einzeln zurücknehmen (Schalter in Klammern).
 **Programm**
 - Heldensturm als Programm für Windows und Linux (desktop/), Release `heldensturm-pc-1.N`
 - Sicherheitsprüfung und Härtung, siehe SICHERHEIT.md
+- Neues Update-System: Spiel-Updates laden nur geänderte Dateien (SHA-256-geprüft) in den eigenen Datenordner, aktiv beim nächsten
+  Start; Programm-Updates still am selben Ort (Windows beim Beenden, Linux AppImage unter gleichem Namen); Desktop-Verknüpfung
+  nur bei der allerersten Installation (`--ohne-update` schaltet alles ab)
 
 **Grafik**
 - Neue Stufe „Legendär“ über „Episch“: volle Auflösung ohne Obergrenze, Licht und Lichtschatten in voller Auflösung, feinerer Bloom,

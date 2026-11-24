@@ -43,6 +43,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 40
     steps:
+      # Zeilenenden genau wie im Repo lassen: die Prüfsummen im Spiel-Manifest müssen zu den Dateien auf GitHub passen
+      - name: Zeilenenden nicht umwandeln
+        shell: bash
+        run: git config --global core.autocrlf false
+
       - uses: actions/checkout@v4
         with:
           sparse-checkout-cone-mode: false
@@ -73,6 +78,10 @@ jobs:
       - name: Spieldateien einpacken
         run: python tools/android/sammeln.py desktop/spiel
 
+      # Liste aller Spieldateien mit Prüfsummen: damit holt das installierte Programm später nur geänderte Dateien
+      - name: Spiel-Manifest schreiben
+        run: python desktop/manifest.py desktop/spiel ${{ github.run_number }} ${{ github.sha }}
+
       - name: Abhängigkeiten holen
         working-directory: desktop
         run: npm ci --no-audit --no-fund
@@ -89,6 +98,15 @@ jobs:
         with:
           name: ${{ matrix.datei }}
           path: desktop/dist/${{ matrix.datei }}
+          retention-days: 5
+          if-no-files-found: error
+
+      - name: Manifest sichern
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: spiel-manifest.json
+          path: desktop/spiel/spiel-manifest.json
           retention-days: 5
           if-no-files-found: error
 
@@ -114,13 +132,13 @@ jobs:
           VORAB: ${{ github.ref != 'refs/heads/main' }}
         run: |
           cd fertig
-          sha256sum Heldensturm-Setup.exe Heldensturm.AppImage > SHA256SUMS.txt
+          sha256sum Heldensturm-Setup.exe Heldensturm.AppImage spiel-manifest.json > SHA256SUMS.txt
           {
             printf '%s\n\n' "$NACHRICHT"
             echo '**Windows:** `Heldensturm-Setup.exe` herunterladen und ausführen. Windows warnt beim ersten Mal („Der Computer wurde geschützt“), weil das Programm nicht signiert ist: „Weitere Informationen“ → „Trotzdem ausführen“.'
             echo '**Linux:** `Heldensturm.AppImage` herunterladen, ausführbar machen (`chmod +x Heldensturm.AppImage`) und starten.'
             echo
-            echo 'Läuft offline, mit Controller. F11 = Vollbild. Spielstände bleiben bei Updates erhalten.'
+            echo 'Läuft offline, mit Controller. F11 = Vollbild. Spielstände bleiben bei Updates erhalten. Ab dieser Fassung aktualisiert sich das Programm selbst: geänderte Spieldateien kommen einzeln im Hintergrund, Programm-Updates werden am selben Ort eingespielt.'
             echo
             echo 'Prüfsummen (SHA-256):'
             echo '```'
@@ -128,7 +146,7 @@ jobs:
             echo '```'
           } > ../text.md
           vorab=""; [ "$VORAB" = "true" ] && vorab="--prerelease"
-          gh release create "$MARKE" Heldensturm-Setup.exe Heldensturm.AppImage SHA256SUMS.txt --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "$TITEL" --notes-file ../text.md --latest=false $vorab
+          gh release create "$MARKE" Heldensturm-Setup.exe Heldensturm.AppImage spiel-manifest.json SHA256SUMS.txt --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "$TITEL" --notes-file ../text.md --latest=false $vorab
 
       - name: Alte Programm-Versionen aufräumen (die letzten 3 bleiben)
         env:
