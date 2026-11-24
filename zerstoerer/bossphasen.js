@@ -1369,8 +1369,8 @@
           if (m.next <= 0 && m.k < n) {
             m.next = 0.78; m.k++;
             const a = AR(), side = m.k % 2 ? 1 : -1, x = U.clamp(pcx(P) + side * (30 + R() * 30), a.x0 + 30, a.x1 - 30), fy = standY(P), last = m.k >= n;
-            tele({ k: "ring", x, y: fy - 16, r: 40, dur: W0(0.55), col: "#ff3a2a" });
-            later(W0(0.55), () => {
+            tele({ k: "ring", x, y: fy - 16, r: 40, dur: W0(0.7), col: "#ff3a2a" }); /* W9 R16: 0,55 → 0,7 s (Labor häufiger früher Tod: drei Einschläge in 1,5 s, 44 % LP) */
+            later(W0(0.7), () => {
               if (!alive(e)) return;
               FX.burst(cxOf(e), e.y + 14, 14, { col: ["#ff3a2a", "#8a1a2a"], sp: 90, life: 0.4, size: 3, kind: "smoke" });
               e.x = x - e.w / 2; e.y = fy - e.h - 1; Z.unstick(e); e.vy = 0;

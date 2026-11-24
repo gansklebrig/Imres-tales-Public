@@ -127,7 +127,7 @@
       atks: [{ k: "summon", r: [0, 260], pre: 0.8, act: 0.05, post: 0.5, cd: 4, spawn: ["spinnchen", "spinnchen"], max: 5, sfx: "slime" }], death: "spiders" },
     /* ---------------- Runenschmiede ---------------- */
     runenfunke: { n: ["Runenfunke", "Rune Spark"], shape: "wisp", c: "#ffb040", t: "#fff0c0", w: 10, h: 10, hp: 0.6, dmg: 0.9, spd: 70, ai: "flyer", fly: true, keep: [80, 160], sight: 240, gold: 4, metal: false,
-      atks: [{ k: "shoot", proj: "e_funke", n: 3, gap: 0.18, r: [30, 240], pre: 0.6, act: 0.4, post: 0.5, cd: 1.8, sfx: "rune" }] },
+      atks: [{ k: "shoot", proj: "e_funke", n: 3, gap: 0.18, r: [30, 240], pre: 0.6, act: 0.4, post: 0.5, cd: 2.3 /* W9 R16: 1,8 → 2,3 (Schmiede: Nicht-Boss-Schaden 1,85 LP/min statt ~1,2 wie übrige Stufen) */, sfx: "rune" }] },
     runenwaechter: { n: ["Runenwächter", "Rune Warden"], shape: "golem", c: "#5a6070", t: "#ffb040", size: 1.5, w: 20, h: 32, hp: 4, dmg: 1.6, spd: 50, ai: "walker", armor: 0.3, metal: true, heavy: true, poise: 0.4, sight: 200, gold: 18, immune: ["bleed", "poison"],
       atks: [{ k: "slam", r: [0, 44], pre: 0.8, act: 0.12, post: 0.7, cd: 1, box: [-10, -36, 54, 36], armor: true, wave: true, sfx: "quake", hitSfx: "hitHeavy", glyph: "!!" },
              { k: "beam", r: [40, 260], pre: 0.9, act: 0.4, post: 0.6, cd: 3.5, sfx: "rune", col: "rgba(255,170,60,.85)", w: 0.7 }] },
@@ -136,7 +136,7 @@
              { k: "hit", r: [0, 32], pre: 0.45, act: 0.1, post: 0.45, cd: 0.7, box: [-2, -20, 32, 20], sfx: "axe", hitSfx: "hitMetal" },
              { k: "invis", r: [60, 220], pre: 0.4, act: 0.05, post: 0.1, cd: 6, sfx: "shadow", w: 0.4 }] },
     duergarArmbrust: { n: ["Duergar-Armbrustschütze", "Duergar Crossbowman"], shape: "duergar", c: "#4a4248", t: "#c8501a", skin: "#7a7a82", xbow: 1, w: 12, h: 19, hp: 1.1, dmg: 1.1, spd: 70, ai: "ranged", keep: [100, 220], sight: 260, gold: 10, metal: true,
-      atks: [{ k: "shoot", proj: "e_bolzen", r: [50, 280], pre: 0.7, act: 0.05, post: 0.4, cd: 1.4, sfx: "xbow", aimLine: true, eff: { burn: 1 } }] },
+      atks: [{ k: "shoot", proj: "e_bolzen", r: [50, 280], pre: 0.7, act: 0.05, post: 0.4, cd: 1.8 /* W9 R16: 1,4 → 1,8 (größter Einzelposten in der Schmiede) */, sfx: "xbow", aimLine: true, eff: { burn: 1 } }] },
     schmiedegeist: { n: ["Schmiedegeist", "Forge Spirit"], shape: "wraith", c: "#4a2a1a", t: "#ff8a2a", w: 13, h: 22, hp: 1.4, dmg: 1.2, spd: 80, ai: "phase", fly: true, ghost: true, sight: 230, gold: 8, immune: ["burn", "poison", "bleed"],
       atks: [{ k: "spray", r: [0, 70], pre: 0.6, act: 0.6, post: 0.5, cd: 2.2, len: 70, sfx: "fireBig", col: "rgba(255,150,50,.6)", eff: { burn: 1 } },
              { k: "teleport", r: [0, 200], pre: 0.3, act: 0.05, post: 0.2, cd: 3, sfx: "fire", w: 0.6 }] },
