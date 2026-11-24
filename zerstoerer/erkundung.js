@@ -76,6 +76,10 @@
     S.secretCells = secretCells;
     /* W13 R4 Sonderräume (welt.js specials): Kranplattformen */
     S.kraene = (lv.specials || []).filter(o => o.k === "kran").map(o => ({ x: o.x, w: o.w, y0: o.yTop, y1: o.yBot, y: o.yBot, dir: -1, sp: 54, pause: 1.2, dy: 0 }));
+    /* W13 R7: rollende Fässer, Kronleuchter zum Schwingen, Gezeiten */
+    S.rollers = (lv.rollers || []).map(r => ({ x: (r.x + 0.5) * T, y: (r.y + 1) * T, dir: r.dir, cx: +r.cell.split(",")[0], cy: +r.cell.split(",")[1], t: 1.5 + R() * 1.5, warn: false, barrels: [] }));
+    S.swings = (lv.swings || []).map(o => { let ay = o.y; while (ay > 0 && lv.get(o.x, ay - 1) !== 1) ay--; const L0 = U.clamp((o.y - ay) * T + 3 * T, 48, 96); return { ax: (o.x + 0.5) * T, ay: ay * T, L: L0, th: 0, om: 0, cool: 0, t: R() * 9 }; });
+    S.tides = (lv.tides || []).map(td => ({ td, ph: R() * 15, lvl: 0 }));
     S.specials = lv.specials || [];
     /* Fundstücke */
     for (const r of lv.rewards || []) S.rewards.push({ kind: r.kind, x: r.x * T + 8, y: (r.y + 1) * T, q: r.tier || 0, cell: r.cell, vault: !!r.vault, open: false, t: R() * 9, secret: !!r.secret });
@@ -283,6 +287,9 @@
     const lv = Z.level; if (!lv || !lv.flood) return false;
     const tx = Math.floor((P.x + P.w / 2) / T), ty = Math.floor((P.y + P.h - 3) / T);
     let hit = false; for (const yy of [ty, Math.floor((P.y + P.h * 0.5) / T)]) if (lv.flood.has(yy * lv.W + tx) && lv.get(tx, yy) === 6) hit = true;
+    /* Gezeiten (W13 R7): zurück auf den nächsten trockenen Platz des Raums (nicht auf den letzten Platz, der jetzt unter Wasser steht) */
+    if (hit && S && S.tides) { const k = Math.floor(tx / CW) + "," + Math.floor(ty / CH), td = S.tides.find(o => o.td.cell === k);
+      if (td) { let b = null, bd = 1e9; for (const [x, y] of td.td.safe) { const d = Math.abs(x - tx) + Math.abs(y - ty) * 2; if (d < bd && lv.get(x, y) !== 6 && lv.get(x, y + 1) !== 6) { bd = d; b = [x, y]; } } if (b) P.lastSafe = { x: b[0] * T + 8 - P.w / 2, y: (b[1] + 1) * T - P.h }; } }
     if (hit && (Z.time0 ? Z.time0() : performance.now() / 1000) - flutTip > 20) { flutTip = Z.time0 ? Z.time0() : performance.now() / 1000; toast(L(["Zu tief zum Durchwaten. Irgendwo muss sich das Wasser ablassen lassen.", "Too deep to wade. There must be a way to drain it."]), 2600, { x: P.x + P.w / 2, y: P.y - 12 }, { prio: 1 }); }
     return hit;
   };
@@ -307,6 +314,126 @@
     c.fillStyle = "#6a4a2c"; c.save(); c.translate(x - 22, y - 3); c.rotate(-0.35); c.fillRect(0, 0, 18, 3); c.restore();
     c.save(); c.translate(x + 40, y - 9); c.rotate(0.5); c.fillRect(0, 0, 16, 3); c.restore();
     c.fillStyle = "rgba(40,30,26,.55)"; for (let i = 0; i < 5; i++) c.fillRect(x + R(i + 20) * 30, o.y0 * T + R(i + 30) * 40, 3, 2); /* Risse im Schutt */
+  }
+
+  /* ======================= W13 R7: Raum-Mechaniken ======================= */
+  /* Rollende Fässer (Fasslager, Marke „o“): alle 3,6 s rollt ein Fass aus der Rutsche, 0,9 s vorher rumpelt es und staubt.
+     Draufspringen federt ab (wie ein Stampfer), seitlich getroffen kostet 7 % und das Fass zerbricht. Nur in Spielernähe. */
+  const solidAt = (x, y) => { const v = Z.level.get(Math.floor(x / T), Math.floor(y / T)); return v === 1 || v === 7 || v === 12; };
+  const floorAt = (x, y) => { const v = Z.level.get(Math.floor(x / T), Math.floor(y / T)); return v === 1 || v === 7 || v === 12 || v === 2 || v === 10; };
+  function rollTick(dt, P) {
+    for (const ro of S.rollers) {
+      const near = Math.abs(ro.x - P.x) < 700 && Math.abs(ro.y - P.y) < 420;
+      if (near) {
+        ro.t -= dt;
+        if (ro.t < 0.9 && !ro.warn) { ro.warn = true; A.play("rock", { vol: 0.35, rate: 0.55, x: ro.x }); FX.burst(ro.x, ro.y - 8, 6, { col: ["#8a7a6a", "#6a5a50"], sp: 40, life: 0.6, size: 2, g: 300 }); }
+        if (ro.t <= 0) { ro.t = 3.6; ro.warn = false; ro.barrels.push({ x: ro.x, y: ro.y - 7, vx: ro.dir * 95, vy: 0, r: 7, rot: 0, life: 14 }); }
+      }
+      for (let i = ro.barrels.length - 1; i >= 0; i--) {
+        const b = ro.barrels[i]; let gone = false;
+        b.life -= dt; b.vy = Math.min(520, b.vy + 1400 * dt);
+        const ny = b.y + b.vy * dt;
+        if (b.vy >= 0 && floorAt(b.x, ny + b.r)) { b.y = Math.floor((ny + b.r) / T) * T - b.r; b.vy = 0; } else b.y = ny;
+        const nx = b.x + b.vx * dt;
+        if (solidAt(nx + Math.sign(b.vx) * b.r, b.y)) gone = true; else b.x = nx;
+        b.rot += b.vx * dt / b.r;
+        const v = Z.level.get(Math.floor(b.x / T), Math.floor(b.y / T));
+        if (v === 3 || v === 5 || v === 6 || v === 9 || b.life <= 0 || Math.floor(b.x / T / CW) !== ro.cx || Math.floor(b.y / T / CH) !== ro.cy) gone = true;
+        if (!gone && !P.dead && Math.abs(P.x + P.w / 2 - b.x) < P.w / 2 + b.r - 2 && P.y + P.h > b.y - b.r && P.y < b.y + b.r) {
+          if (P.vy > 40 && P.y + P.h - (b.y - b.r) < 10) { P.vy = -330; P.onGround = false; A.play("crate", { vol: 0.4, rate: 1.3, x: b.x }); }
+          else if (!(P.iframe > 0)) { Z.hurtPlayer(Math.round(P.hpMax * 0.07), { x: b.x, kb: 180 }); gone = true; }
+        }
+        if (gone) { ro.barrels.splice(i, 1); if (near) { A.play("break", { vol: 0.4, x: b.x }); FX.burst(b.x, b.y, 10, { col: ["#7a5432", "#5a3a20", "#9a7448"], sp: 120, life: 0.6, size: 2.5, kind: "shard", g: 700 }); } }
+      }
+    }
+  }
+  /* Kronleuchter (Galerie/Bankett, Marke „L“): im Sprung anspringen → man hängt daran und schwingt; links/rechts gibt Schwung,
+     Springen lässt mit dem Schwung los (dazu ein kleiner Satz nach oben), runter lässt einfach los. Danach 0,5 s nicht greifbar. */
+  let swingTip = false;
+  function swingTick(dt, P) {
+    for (const s2 of S.swings) {
+      s2.t += dt; if (s2.cool > 0) s2.cool -= dt;
+      const hx = s2.ax + Math.sin(s2.th) * s2.L, hy = s2.ay + Math.cos(s2.th) * s2.L;
+      if (P._swing === s2) {
+        const inp = Z.input;
+        if (P.dead || P.climbing || P.hurtT > 0.2 || inp.pressed.jump || inp.held.down) {
+          P._swing = null; s2.cool = 0.5;
+          if (!P.dead && inp.pressed.jump) { P.vx = U.clamp(s2.L * s2.om * Math.cos(s2.th), -340, 340); P.vy = Math.min(-230, -s2.L * s2.om * Math.sin(s2.th) - 230); A.play("jump", { vol: 0.5 }); }
+          continue;
+        }
+        let acc = -(1420 / s2.L) * Math.sin(s2.th);
+        /* Schwung holen: Drücken in Bewegungsrichtung pumpt (wie auf einer Schaukel), dagegen bremst nicht */
+        const dirI = (inp.held.right ? 1 : 0) - (inp.held.left ? 1 : 0); if (dirI && dirI * s2.om >= -0.05) acc += 7.5 * dirI;
+        s2.om = (s2.om + acc * dt) * (1 - 0.12 * dt);
+        let th = s2.th + s2.om * dt; if (Math.abs(th) > 1.25) { th = Math.sign(th) * 1.25; s2.om *= -0.4; }
+        const nx = s2.ax + Math.sin(th) * s2.L, ny = s2.ay + Math.cos(th) * s2.L;
+        /* Körper (unter den Händen) prallt an Wänden ab */
+        if (solidAt(nx - P.w / 2 + 1, ny + 2) || solidAt(nx + P.w / 2 - 1, ny + 2) || solidAt(nx, ny + P.h - 2)) { s2.om *= -0.4; }
+        else s2.th = th;
+        const qx = s2.ax + Math.sin(s2.th) * s2.L, qy = s2.ay + Math.cos(s2.th) * s2.L;
+        P.x = qx - P.w / 2; P.y = qy - 2; P.vx = 0; P.vy = 0; P.onGround = false; P.face = s2.om >= 0 ? 1 : -1;
+        if (P.airJumps != null && P.airJumps < 1) P.airJumps = 1;
+        continue;
+      }
+      /* ruhig hängend: leichtes Pendeln */
+      if (Math.abs(s2.om) > 0.01 || Math.abs(s2.th) > 0.01) { s2.om = (s2.om - (1420 / s2.L) * Math.sin(s2.th) * dt) * (1 - 0.8 * dt); s2.th += s2.om * dt; }
+      if (s2.cool <= 0 && !P._swing && !P.onGround && !P.climbing && !P.dead && Math.abs(P.x + P.w / 2 - hx) < 14 && Math.abs(P.y + 6 - hy) < 16) {
+        P._swing = s2; s2.th = U.clamp(Math.atan2(P.x + P.w / 2 - s2.ax, Math.max(8, P.y - s2.ay)), -1.1, 1.1); s2.om = U.clamp(P.vx / s2.L, -3, 3);
+        A.play("chain", { vol: 0.5, rate: 1.2 });
+        if (!swingTip) { swingTip = true; toast(L(["Am Kronleuchter: ← → für Schwung, Springen lässt mit Schwung los.", "On the chandelier: ← → to swing, jump to let go with momentum."]), 3200, { x: hx, y: hy - 20 }, { prio: 1 }); }
+      }
+    }
+  }
+  /* Gezeiten (Zisterne/Stelzensteg): 15-s-Zyklus – Ebbe 6 s, steigen, Flut 5 s, fallen; 1,5 s vor dem Steigen gurgelt es
+     und Blasen steigen auf. Wasser ist sicher (Z.flutSicher: zurück auf einen trockenen Platz, kein Schaden). */
+  function tideTick(dt, P) {
+    for (const o of S.tides) {
+      o.ph = (o.ph + dt) % 15;
+      /* Wasserhöhe über der Ebbe-Linie in Pixeln: Ebbe 0–6 s, steigen 6–8 s, Flut 8–13 s, fallen 13–15 s */
+      const ph = o.ph, h = ph < 6 ? 0 : ph < 8 ? (ph - 6) / 2 * 2 * T : ph < 13 ? 2 * T : (15 - ph) / 2 * 2 * T;
+      o.h = h;
+      const td = o.td, [cx, cy] = td.cell.split(",").map(Number), near = Math.abs(cx * CW * T + CW * T / 2 - P.x) < 700 && Math.abs(cy * CH * T + CH * T / 2 - P.y) < 400;
+      if (!near) continue;
+      if (ph > 4.5 && ph - dt <= 4.5) { A.play("splash", { vol: 0.35, rate: 0.5 }); for (const [x, y, s2] of td.rows) if (s2 === 1 && Math.random() < 0.5) FX.burst(x * T + 8, (y + 1) * T, 1, { col: ["#9ac0b0", "#c8e0d0"], sp: 20, ang: -Math.PI / 2, spread: 0.4, life: 0.8, size: 1.5, g: -40 }); }
+      if (h < 3 || P.dead) continue;
+      /* wer im gestiegenen Wasser steht: sicher zurück auf den nächsten trockenen Platz (wie die Flutkammer, kein Schaden) */
+      const feet = P.y + P.h - 3, mx = P.x + P.w / 2;
+      if (mx >= td.xa * T && mx < (td.xb + 1) * T && feet > td.yw * T - h + 4 && feet < td.yw * T + 2) {
+        const tx = Math.floor(mx / T), ty = Math.floor(feet / T);
+        if (!td.rows.some(([x, y]) => x === tx && y === ty)) continue; /* auf einem herausragenden Steg/Stein ist es trocken */
+        let b = null, bd = 1e9; for (const [x, y] of td.safe) { const d = Math.abs(x - tx) + Math.abs(y - ty) * 2; if (d < bd) { bd = d; b = [x, y]; } }
+        if (!b) continue;
+        A.play("splash", { vol: 0.6 }); FX.burst(mx, feet, 12, { col: ["#4a6a5a", "#8aa090"], sp: 90, ang: -Math.PI / 2, spread: 1.2, life: 0.5, g: 400, size: 2 });
+        P.x = b[0] * T + 8 - P.w / 2; P.y = (b[1] + 1) * T - P.h; P.vx = P.vy = 0; P.iframe = Math.max(P.iframe || 0, 0.8); P._swing = null;
+        const now = S.t; if (!o.tip || now - o.tip > 20) { o.tip = now; toast(L(["Die Flut steigt – warte auf die Ebbe.", "The tide is rising – wait for low water."]), 2400, { x: P.x + P.w / 2, y: P.y - 10 }, { prio: 1 }); }
+      }
+    }
+  }
+  function drawTide(c, o, t) {
+    const h = o.h || 0; if (h < 0.5) return;
+    const td = o.td, top = td.yw * T - h;
+    c.fillStyle = "rgba(48,96,82,.62)";
+    for (const [x, y] of td.rows) { const y0 = Math.max(y * T, top), y1 = (y + 1) * T; if (y1 > y0) c.fillRect(x * T, y0, T, y1 - y0); }
+    c.fillStyle = "rgba(170,215,190,.55)";
+    for (let x = td.xa * T; x < (td.xb + 1) * T; x += 3) if (td.rows.some(([tx, ty]) => tx === Math.floor(x / T) && ty === Math.floor((top + 1) / T))) c.fillRect(x, top + Math.sin(x * 0.4 + t * 6) * 0.8, 2, 1);
+  }
+  function drawBarrels(c, ro) {
+    /* Rutsche: dunkler Bogen an der Wand */
+    c.fillStyle = "rgba(20,12,8,.7)"; c.beginPath(); c.arc(ro.x - ro.dir * 6, ro.y - 9, 9, Math.PI, 0); c.fill(); c.fillRect(ro.x - ro.dir * 6 - 9, ro.y - 9, 18, 9);
+    if (ro.warn) { c.fillStyle = "rgba(255,190,90,.8)"; c.font = "bold 10px serif"; c.textAlign = "center"; c.fillText("!", ro.x - ro.dir * 6, ro.y - 20); }
+    for (const b of ro.barrels) {
+      c.save(); c.translate(b.x, b.y); c.rotate(b.rot);
+      c.fillStyle = "#6a4426"; c.beginPath(); c.arc(0, 0, b.r, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = "#3a2414"; c.lineWidth = 1.2; c.beginPath(); c.arc(0, 0, b.r - 1.5, 0, Math.PI * 2); c.stroke();
+      c.fillStyle = "#8a8a8a"; c.fillRect(-b.r, -1, b.r * 2, 2); c.fillRect(-1, -b.r, 2, b.r * 2);
+      c.restore();
+    }
+  }
+  function drawSwing(c, s2, t) {
+    const hx = s2.ax + Math.sin(s2.th) * s2.L, hy = s2.ay + Math.cos(s2.th) * s2.L;
+    c.strokeStyle = "#5a5058"; c.lineWidth = 1.5; c.beginPath(); c.moveTo(s2.ax, s2.ay); c.lineTo(hx, hy); c.stroke();
+    c.fillStyle = "#c8a050"; c.fillRect(hx - 12, hy, 24, 3); c.fillRect(hx - 1.5, hy - 4, 3, 5);
+    for (const dx of [-11, -4, 4, 11]) { c.fillStyle = "#f0e6c8"; c.fillRect(hx + dx - 1, hy - 5, 2, 5); const f = 0.7 + 0.3 * Math.sin(t * 9 + dx); c.fillStyle = "rgba(255,200,110," + f.toFixed(2) + ")"; c.fillRect(hx + dx - 1, hy - 8, 2, 3); }
   }
 
   /* ======================= W13 R5: zerstörbare Umgebung ======================= */
@@ -382,6 +509,9 @@
     }
     if (S.trial) trialTick(S.trial, dt);
     if (S.kraene.length) kranTick(dt, P);
+    if (S.rollers.length) rollTick(dt, P);
+    if (S.swings.length) swingTick(dt, P);
+    if (S.tides.length) tideTick(dt, P);
     if (S.lv.morsch && S.lv.morsch.length) morschTick(P);
     const bt = erTakt(dt); if (!(bt > 0)) return;
     S.t += bt;
@@ -513,6 +643,9 @@
     for (const m of S.kraene || []) if (m.x > vx0 - 40 && m.x < vx1 && m.y1 > vy0 && m.y0 - 60 < vy1) drawKran(c, m, t);
     for (const o of S.specials || []) if (o.k === "bruecke" && vis(o.x * T, o.y0 * T)) drawTruemmer(c, o, t);
     for (const m of S.lv.morsch || []) if (!m.broken && vis(m.x0 * T, m.y * T)) drawMorsch(c, m);
+    for (const ro of S.rollers || []) if (vis(ro.x, ro.y) || ro.barrels.length) drawBarrels(c, ro);
+    for (const s2 of S.swings || []) if (vis(s2.ax, s2.ay + s2.L)) drawSwing(c, s2, t);
+    for (const o of S.tides || []) if (vis(o.td.xa * T, o.td.yw * T)) drawTide(c, o, t);
   };
   /* Licht: Fundstücke, Schreine und Laternen leuchten durch die Dunkelheit (alle Grafikstufen) */
   const le0 = Z.lightExtra;

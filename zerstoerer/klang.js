@@ -1070,7 +1070,7 @@
     if (st === "closing" && RW.st !== "closing" && gate) {
       RW.stats.schliessen++;
       [7, 4, 0].forEach((d, i) => { const pr = rwTone(d, 2); if (pr) wshot(pr.path, gx, gy, { vol: 0.09 - i * 0.015, rate: pr.rate, vary: 0, verb: 0.8, delay: 0.1 + i * 0.22, gap: 0, tag: "rwc" + i }); });
-      wshot(KS("gong"), gx, gy, { vol: 0.12, rate: 0.62, verb: 0.7, delay: 0.55, gap: 0, tag: "rwg" });
+      /* Aufschlag und Rückprall des Fallgitters: siehe A.hook.chain (genau auf den Zeitpunkt der Grafik) */
     }
     /* Durchgang zurück: kurze Blende */
     if (st === "going" && RW.st !== "going") {
@@ -1082,6 +1082,85 @@
     }
     RW.st = st;
   }
+  /* ======================= R11: STIMMEN, MENÜ-KLÄNGE, TOR-AUFSCHLAG =======================
+     Lager-Figuren „sprechen“ beim Erscheinen ihrer Sprechblase (Z.ui.say wird beim ersten Takt umhüllt): kurze Silbenfolge aus
+     einem Oszillator durch zwei Formantfilter (Vokale a e i o u), Tonhöhe auf Tönen der laufenden Tonart, Satzmelodie fallend
+     (Frage: steigend). Je Figur eigene Lage, Klangfarbe, Silbentempo. Leise (Effekte-Bus), höchstens ~1,3 s, eine Stimme zugleich.
+     Menü: „ui“ (Klave) und „uiOk“ werden über A.hook zu leisen Kalimba-/Glockentönen in der Tonart der Musik – Wählen geht die
+     Tonleiter auf und ab, Öffnen steigt (Grund→Quinte), Zurück fällt, Bestätigen klingt Grundton+Quinte; Fehler bleibt die
+     dumpfe Klave. Kauf: Münzen + leiser Glockenton; Ambossschlag im Menü etwas leiser. Fehlt ein Ton noch im Speicher, erklingt
+     das Original. */
+  const VOICE = {
+    Edda: { d: 4, o: 1, w: "sawtooth", fs: 1.18, syl: 0.085, br: 0.25, k: 0.8 }, Quirin: { d: 2, o: 1, w: "square", fs: 1.3, syl: 0.075, br: 0, k: 0.5 },
+    Sigrun: { d: 2, o: 1, w: "triangle", fs: 1.12, syl: 0.11, br: 0.5, k: 0.86 }, Wendel: { d: 0, o: -1, w: "sawtooth", fs: 0.82, syl: 0.12, br: 0.1, det: 9, k: 0.94 },
+    Jori: { d: 4, o: 0, w: "sawtooth", fs: 1.05, syl: 0.07, br: 0, k: 1.12 }, Barradin: { d: 0, o: 0, w: "sawtooth", fs: 0.92, syl: 0.1, br: 0, sing: 1, k: 0.87 },
+    Alwin: { d: 2, o: -1, w: "triangle", fs: 0.95, syl: 0.13, br: 0.2, k: 6.1 }, Lotte: { d: 7, o: 0, w: "square", fs: 1.22, syl: 0.065, br: 0, k: 1.03 },
+    Mira: { d: 4, o: 1, w: "sine", fs: 1.15, syl: 0.12, br: 0.4, k: 1.2 },
+    /* die Gefährten aus der Kampagne (Lager-Figuren in ui.js) */
+    Friedrich: { d: 2, o: -1, w: "sawtooth", fs: 0.9, syl: 0.1, br: 0.15, k: 1.3 }, Echo: { d: 4, o: 1, w: "square", fs: 1.25, syl: 0.07, br: 0.1, k: 0.58 },
+    Nundro: { d: 0, o: -1, w: "triangle", fs: 0.85, syl: 0.14, br: 0.3, k: 4.9 }, Rex: { bark: 1 }
+  };
+  const VOW = [[750, 1200], [500, 1800], [300, 2300], [450, 850], [320, 750]];
+  const VS = { cur: null, stats: { laute: 0, menue: 0, tor: 0 } };
+  KL.stimmen = VS;
+  const hzM = m => 440 * Math.pow(2, (m - 69) / 12);
+  function babble(who, txt) {
+    if (!A.ok || Z.quiet) return;
+    const v = VOICE[who]; if (!v) return; /* nur bekannte Sprecher (Notizen, Gerüchte, Schilder bleiben stumm) */
+    if (v.bark) { A.play("bark", { vol: 0.3, gap: 0.5 }); VS.stats.laute++; return; }
+    const c = A.ctx, t0 = c.currentTime + 0.03, root = (M.prof ? M.prof.root : 50) + 12 * v.o;
+    if (VS.cur) { try { VS.cur.g.gain.cancelScheduledValues(t0); VS.cur.g.gain.setTargetAtTime(0, t0, 0.02); VS.cur.o.stop(t0 + 0.1); } catch (_) {} }
+    const n = clamp(Math.round(String(txt).length / 8), 3, gq().lean ? 7 : 10), q = /\?\s*$/.test(txt);
+    const o = c.createOscillator(), f1 = c.createBiquadFilter(), f2 = c.createBiquadFilter(), g = c.createGain(), out = c.createGain();
+    o.type = v.w; if (v.det) o.detune.value = v.det;
+    f1.type = f2.type = "bandpass"; f1.Q.value = 5; f2.Q.value = 7; o.connect(f1); o.connect(f2); f1.connect(g); f2.connect(g); g.gain.value = 0;
+    const pan = c.createStereoPanner ? c.createStereoPanner() : null; out.gain.value = ({ sawtooth: 8, square: 6, triangle: 5, sine: 2.6 }[v.w] || 4) * (v.k || 1); /* Formantfilter (schmale Bandpässe) schlucken ~18 dB: Ausgleich je Wellenform, k je Figur gemessen → alle um −31 dB RMS */ g.connect(out); if (pan) { pan.pan.value = rnd(-0.25, 0.25); out.connect(pan); pan.connect(A.sfx); } else out.connect(A.sfx);
+    let t = t0, deg0 = v.d;
+    for (let i = 0; i < n; i++) {
+      const last = i === n - 1, d = v.sing ? deg0 + [0, 2, 4, 2, 1, 0, -1, 0][i % 8] : deg0 + (last ? (q ? 2 : -2) : ((Math.random() * 3) | 0) - 1);
+      const f = hzM(M.ton ? M.ton(d, root) : root + d), L = v.syl * rnd(0.8, 1.3) * (last ? 1.6 : 1), [a, b] = VOW[(Math.random() * VOW.length) | 0];
+      o.frequency.setValueAtTime(f, t); if (last) o.frequency.linearRampToValueAtTime(f * (q ? 1.12 : 0.9), t + L);
+      f1.frequency.setValueAtTime(a * v.fs, t); f2.frequency.setValueAtTime(b * v.fs, t);
+      const vol = 0.09 * (1 - v.br * 0.4) * rnd(0.8, 1.1);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + 0.015); g.gain.setValueAtTime(vol * 0.85, t + L * 0.7); g.gain.linearRampToValueAtTime(0, t + L);
+      t += L + rnd(0.02, 0.06) + (Math.random() < 0.15 ? 0.12 : 0);
+    }
+    o.start(t0); o.stop(t + 0.05); VS.cur = { o, g };
+    o.onended = () => { try { o.disconnect(); f1.disconnect(); f2.disconnect(); g.disconnect(); out.disconnect(); pan && pan.disconnect(); } catch (_) {} if (VS.cur && VS.cur.o === o) VS.cur = null; };
+    VS.stats.laute++;
+  }
+  function hookStimmen() {
+    if (VS.hooked || !Z.ui || !Z.ui.say) return; VS.hooked = true;
+    const s0 = Z.ui.say;
+    Z.ui.say = function (wx, wy, who, txt, ms) { const r = s0.apply(this, arguments); try { if (who) babble(who, txt || ""); } catch (_) {} return r; };
+  }
+  /* Menü-Töne in der Tonart (Kalimba eine bzw. zwei Oktaven über dem Grundton) */
+  let uiDeg = 0;
+  function tuned(inst, d, okt, vol, delay, tag) {
+    const r = (M.prof ? M.prof.root : 50) + 12 * okt, pr = M.probe && M.ton ? M.probe(inst, M.ton(d, r)) : null;
+    if (!pr || !A.buf[pr.path]) { if (pr && A.buf[pr.path] === undefined) A.load(pr.path); return false; }
+    shot(pr.path, { vol, rate: pr.rate, vary: 0, verb: 0.25, delay: delay || 0, gap: 0, tag: tag || "ui", must: true }); return true;
+  }
+  if (A) A.hook = Object.assign(A.hook || {}, {
+    ui: o => {
+      const r = o.rate || 1; VS.stats.menue++;
+      if (r <= 0.55) return false;                                                                  /* Fehler: dumpfe Klave bleibt */
+      if (r >= 1.4) { uiDeg = (uiDeg + (Math.random() < 0.7 ? 1 : -1) + 7) % 7; return tuned("kal", uiDeg, 2, 0.07); } /* Wählen */
+      if (r < 0.75) return tuned("kal", 4, 2, 0.1) && (tuned("kal", 0, 2, 0.09, 0.07, "ui2"), true);   /* Zurück: fällt */
+      return tuned("kal", 0, 2, 0.1) && (tuned("kal", 4, 2, 0.09, 0.07, "ui2"), true);                 /* Öffnen/Klick: steigt */
+    },
+    uiOk: o => { VS.stats.menue++; return tuned("glock", 0, 3, 0.16) && (tuned("glock", 4, 3, 0.12, 0.06, "ok2"), true); },
+    coin: o => { if (Z.ui && Z.ui.modalOpen) { tuned("glock", 2, 3, 0.05, 0.08, "kauf"); } return false; },
+    anvil: o => { if (Z.ui && Z.ui.modalOpen && !o._m) { A.play("anvil", Object.assign({}, o, { vol: (o.vol || 1) * 0.7, _m: 1, noHook: true })); return true; } return false; },
+    /* Rückweg-Tor erlischt (rueckweg.js spielt genau dann „chain“ 0,28/0,9 mit x): Aufschlag des Fallgitters nach 0,56 s, Rückprall nach 0,73 s – wie die Grafik */
+    chain: o => {
+      if (o && o.vol === 0.28 && o.rate === 0.9 && o.x != null && Z.rueckweg) { VS.stats.tor++; const y = Z.player ? Z.player.y : 0;
+        wshot(KS("fx_im_impactmetal_heavy_000"), o.x, y, { vol: 0.42, rate: 0.75, delay: 0.56, gap: 0, tag: "rwa", verb: 0.5 });
+        wshot(KS("fx_im_impactmetal_heavy_003"), o.x, y, { vol: 0.16, rate: 1.1, delay: 0.73, gap: 0, tag: "rwr", verb: 0.4 });
+        setTimeout(() => dustNoise(o.x, y, 0.06, 0.8), 560); }
+      return false;
+    }
+  });
   const W = { lv: null, pages: 0, kills: 0, chain: 0, chainT: 0, boss: null, phase: 0, won: false, dead: false, seenChest: new WeakSet(), seenElite: new WeakSet(), seenLoot: new WeakSet(), chall: 0, trials: 0, dripT: 2 };
   /* liegt ein Punkt im Bild (mit etwas Rand)? */
   const onCam = (x, y, m) => { const c = Z.cam; if (!c) return true; m = m || 0; return x > c.x - m && x < c.x + c.w + m && y > c.y - m && y < c.y + c.h + m; };
@@ -1163,6 +1242,7 @@
     try { rueckTick(dt); } catch (e) { if (!KL.err8) { KL.err8 = 1; console.error(e); } }
     try { tplTick(dt); } catch (e) { if (!KL.err9) { KL.err9 = 1; console.error(e); } }
     try { bewegTick(dt); } catch (e) { if (!KL.err10) { KL.err10 = 1; console.error(e); } }
+    try { hookStimmen(); if (!VS.pre && M.prof) { VS.pre = M.prof.root; for (const [i, o] of [["kal", 2], ["glock", 3]]) for (let d = 0; d < 7; d++) { const pr = M.probe(i, M.ton(d, M.prof.root + 12 * o)); if (pr) A.load(pr.path); } } else if (M.prof && VS.pre !== M.prof.root) VS.pre = null; } catch (e) { if (!KL.err11) { KL.err11 = 1; console.error(e); } }
     /* Effekte-Dichte reiten (kern.js A.ride): ab 4 gleichzeitigen Effekten sachte zurück, bei 10+ etwa −4 dB; schnell runter, langsam wieder hoch */
     if (A.ride) { const n = A.live || 0, tgt = clamp(1 - 0.065 * (n - 3), 0.62, 1); KL.ride = tgt; A.ride.gain.setTargetAtTime(tgt, A.ctx.currentTime, tgt < A.ride.gain.value ? 0.12 : 1.1); }
   };

@@ -673,22 +673,22 @@
     { n: "fasslager", bio: ["keller", "hafen"], pk: true, r: [
       "########################",
       "#......................#",
-      "#..bb.....w.......bb...#",
-      "#..##.............##...#",
+      "#o.bb.....w.......bb...#",
+      "####..............##...#",
       "#......----..----......#",
       "#..........F...........#",
       "#.b..................b.#",
       "#.##..--........--..##.#",
       "........................",
       "........................",
-      "..E....bb......bb....E..",
-      "####mmmmmmmmmmmmmmmm####",
-      "####~~~~~~~~~~~~~~~~####",
+      "..E...................E.",
+      "########################",
+      "########################",
       "########################"] },
     { n: "weinregal", bio: ["keller"], r: [
       "##########....##########",
       "#......................#",
-      "#.b.b.b...........b.b..#",
+      "#ob.b.b...........b.b..#",
       "#-----........H...-----#",
       "#.............H........#",
       "#.....b.b.....H..b.....#",
@@ -712,13 +712,13 @@
       "........................",
       "........................",
       "..E..................E..",
-      "####~~~#~~~#~~~#~~~~####",
-      "####~~~#~~~#~~~#~~~~####",
+      "####qqq#qqq#qqq#qqqq####",
+      "####qqq#qqq#qqq#qqqq####",
       "########################"] },
     { n: "zweigalerie", bio: ["hallen"], r: [
       "##########....##########",
       "#......................#",
-      "#..w......p.......w....#",
+      "#..w......L.......w....#",
       "#......................#",
       "#.E..................E.#",
       "#------...--..--...----#",
@@ -748,7 +748,7 @@
     { n: "bankett", bio: ["hallen", "keller"], r: [
       "########################",
       "#......................#",
-      "#....w.....p.....w.....#",
+      "#....w.....L.....w.....#",
       "#......................#",
       "#......................#",
       "#.....F................#",
@@ -923,7 +923,7 @@
       "........................",
       "..E.................E...",
       "####--.--.--.--.--.-####",
-      "####~~~~~~~~~~~~~~~~####",
+      "####qqqqqqqqqqqqqqqq####",
       "########################"] },
     { n: "korallengrotte", bio: ["see", "schlund"], r: [
       "########################",
@@ -1015,7 +1015,7 @@
       "#####.#######.##.#######",
       "########################",
       "########################"] },
-    { n: "foerderband", bio: ["schmiede", "glut"], pk: true, r: [
+    { n: "foerderband", bio: ["schmiede"], pk: true, r: [
       "########################",
       "#......................#",
       "#....r........r........#",
@@ -1042,8 +1042,8 @@
       "........................",
       "........................",
       "..E..##..........##..E..",
-      "#######~~~~##~~~~#######",
-      "#######~~~~##~~~~#######",
+      "########~~~##~~~########",
+      "########~~~##~~~########",
       "########################"] },
     { n: "ambosshalle", bio: ["schmiede"], r: [
       "########################",
@@ -1072,24 +1072,9 @@
       "........................",
       "........................",
       "..E..................E..",
-      "###..mmmmm....mmmmm..###",
-      "###~~~~~~~~##~~~~~~~~###",
+      "####~~~###~~~###~~~#####",
+      "####~~~###~~~###~~~#####",
       "########################"] },
-    { n: "weinregal_u", bio: ["keller"], r: [
-      "##########....##########",
-      "#......................#",
-      "#.b.b.b...........b.b..#",
-      "#-----........H...-----#",
-      "#.............H........#",
-      "#.....b.b.....H..b.....#",
-      "#....-----....H.-----..#",
-      "#.............H........#",
-      "..............H.........",
-      "..............H.........",
-      "..E...b.b.....H....E....",
-      "##########....##########",
-      "##########....##########",
-      "##########....##########"] },
     { n: "zisterne_o", bio: ["keller", "verlies"], pk: true, r: [
       "##########....##########",
       "#......................#",
@@ -1102,13 +1087,13 @@
       "........................",
       "........................",
       "..E..................E..",
-      "####~~~#~~~#~~~#~~~~####",
-      "####~~~#~~~#~~~#~~~~####",
+      "####qqq#qqq#qqq#qqqq####",
+      "####qqq#qqq#qqq#qqqq####",
       "########################"] },
     { n: "zweigalerie_u", bio: ["hallen"], r: [
       "##########....##########",
       "#......................#",
-      "#..w......p.......w....#",
+      "#..w......L.......w....#",
       "#......................#",
       "#.E..................E.#",
       "#------...--..--...----#",
@@ -1193,7 +1178,7 @@
       "........................",
       "..E.................E...",
       "####--.--.--.--.--.-####",
-      "####~~~~~~~~~~~~~~~~####",
+      "####qqqqqqqqqqqqqqqq####",
       "########################"] },
     { n: "korallengrotte_o", bio: ["see", "schlund"], r: [
       "##########....##########",
@@ -1267,8 +1252,8 @@
       "........................",
       "........................",
       "..E..##..........##..E..",
-      "#######~~~~##~~~~#######",
-      "#######~~~~##~~~~#######",
+      "########~~~##~~~########",
+      "########~~~##~~~########",
       "########################"] },
     { n: "ambosshalle_u", bio: ["schmiede"], r: [
       "########################",
@@ -1285,21 +1270,6 @@
       "##########....##########",
       "##########....##########",
       "##########....##########"] },
-    { n: "lavafluss_o", bio: ["glut"], pk: true, r: [
-      "##########....##########",
-      "#......................#",
-      "#......................#",
-      "#..........F...........#",
-      "#......................#",
-      "#......................#",
-      "#......................#",
-      "#......................#",
-      "........................",
-      "........................",
-      "..E..................E..",
-      "###..mmmmm....mmmmm..###",
-      "###~~~~~~~~##~~~~~~~~###",
-      "########################"] },
   ];
   /* Prüfen und Öffnungen bestimmen */
   TPL.forEach(t => {
@@ -1666,7 +1636,7 @@
     let best = null, bs = 1e9;
     for (let attempt = 0; attempt < 40; attempt++) {
       const lv = tryGen(biomeId, (seed + attempt * 7919) >>> 0, opts);
-      if (lv && validate(lv)) { lv.attempts = attempt + 1; if (Z.run) { const u = (Z.run._tplUse = Z.run._tplUse || {}); for (const k in lv.cells) { const t = lv.cells[k].tpl; if (t) u[t] = (u[t] || 0) + 1; } } if (!Z.noEase) ease(lv); settle(lv); plan(lv); specials(lv); if (!Z.noRuneGates) runeGates(lv); cracks(lv); unwall(lv); assignRooms(lv); return lv; }
+      if (lv && validate(lv)) { lv.attempts = attempt + 1; if (Z.run) { const u = (Z.run._tplUse = Z.run._tplUse || {}); for (const k in lv.cells) { const t = lv.cells[k].tpl; if (t) u[t] = (u[t] || 0) + 1; } } if (!Z.noEase) ease(lv); settle(lv); plan(lv); specials(lv); if (!Z.noRuneGates) runeGates(lv); cracks(lv); tides(lv); unwall(lv); assignRooms(lv); return lv; }
       /* Notfall: die beste Karte merken (alle Ausgänge erreichbar, möglichst wenige Festsitz-Stellen) */
       const sc = lv && lv.stuck ? lv.stuck.length : 1e8;
       if (lv && sc < bs) { bs = sc; best = lv; }
@@ -2415,14 +2385,47 @@
     validate(lv);
   }
   Z._cracks = cracks;
+  /* ======================= W13 R7: GEZEITEN (Zisterne, Stelzensteg) =======================
+     Das Vorlagen-Wasser (q) ist „sicher“ wie die Flutkammer (lv.flood: kein Schaden, zurück an einen trockenen Platz).
+     Darüber steigt das Wasser in einem langsamen Zyklus um bis zu 2 Reihen (erkundung.js: Ebbe 6 s, steigen 2 s, Flut 5 s,
+     fallen 2 s; Vorwarnung: Gurgeln + Blasen). Die Flut ändert keine Kacheln (das kostete je Wechsel eine Neuberechnung der
+     Grafik): erkundung.js zeichnet das Wasser darüber und setzt wer hineingerät sicher zurück. Der Prüfer kennt nur die Ebbe –
+     die Flut ist reines Weg-Timing.
+     lv.tides: [{cell, rows: [[x, y, stufe]], safe: [[x, y]]}] (stufe 1 = erste Reihe über dem Wasser, 2 = zweite). */
+  function tides(lv) {
+    lv.tides = [];
+    const q = lv.qTiles || []; if (!q.length) return;
+    const W = lv.W, g = lv.get;
+    lv.flood = lv.flood || new Set(); for (const i of q) lv.flood.add(i);
+    const byCell = new Map();
+    for (const i of q) { const x = i % W, y = (i / W) | 0, k = Math.floor(x / CW) + "," + Math.floor(y / CH); if (!byCell.has(k)) byCell.set(k, []); byCell.get(k).push([x, y]); }
+    for (const [k, ts] of byCell) {
+      const c = lv.cells[k]; if (!c || !/^(zisterne|stelzensteg)/.test(c.tpl || "")) continue;
+      /* über die ganze Beckenbreite: 1–2 Reihen über der Wasseroberfläche (Stege/Steine ragen heraus, das Wasser steht drumherum) */
+      const yw = Math.min(...ts.map(t => t[1])), xa = Math.min(...ts.map(t => t[0])), xb = Math.max(...ts.map(t => t[0]));
+      const rows = [];
+      for (let s2 = 1; s2 <= 2; s2++) for (let x = xa; x <= xb; x++) if (g(x, yw - s2) === 0) rows.push([x, yw - s2, s2]);
+      if (!rows.length) continue;
+      const tideSet = new Set(rows.map(([x, y]) => y * W + x));
+      /* trockene Plätze im Raum (für das Zurücksetzen bei Flut): erreichbar, nicht unter/neben steigendem Wasser */
+      const safe = spotsIn(lv, c, 2, false).filter(([x, y]) => lv.reach && lv.reach[y * W + x] && !tideSet.has(y * W + x) && !tideSet.has((y + 1) * W + x) && !tideSet.has((y - 1) * W + x));
+      if (!safe.length) continue;
+      /* was bei Flut unter Wasser stünde: Bodengegner weg, Beute/Lohn auf einen trockenen Platz */
+      const wet = (x, y) => tideSet.has(Math.floor(y) * W + Math.floor(x)) || tideSet.has((Math.floor(y) + 1) * W + Math.floor(x));
+      lv.spawns = lv.spawns.filter(o => o.fly || !wet(o.x, o.y));
+      let si = 0; for (const o of (lv.loot || []).concat(lv.rewards || [])) if (wet(o.x, o.y)) { const p2 = safe[si++ % safe.length]; o.x = p2[0]; o.y = p2[1]; }
+      if (lv.tides.length < 2) lv.tides.push({ cell: k, rows, safe, xa, xb, yw }); /* höchstens 2 je Karte (das Wasser ohne Gezeiten bleibt) */
+    }
+  }
+  Z._tides = tides;
   /* W13 Runde 2: BEQUEME WEGE. Der Prüfer rechnet mit Maximalsprüngen (6 hoch, 7 weit); für echte Spieler (und Handheld)
      ist das grenzwertig. Jede Stelle, die nur mit einem solchen Sprung erreichbar ist, bekommt einen Zwischensteg
      (3 Kacheln Brett, von unten durchspringbar) etwa in der Mitte des Sprungs – solange danach weiterhin niemand
      feststecken kann. Messung danach: validate(lv, null, true) = höchstens 4 hoch / 5 weit. */
   function ease(lv) {
     const W = lv.W, H = lv.H, g = lv.get, tried = new Set();
-    const busy = (x, y) => lv.doors.some(d => Math.abs(d.x - x) < 3 && Math.abs(d.y - y) < 3) || (lv.loot || []).some(o => Math.abs(o.x - x) < 2 && Math.abs(o.y - y) < 2) ||
-      (lv.traps || []).some(o => Math.abs(o.x - x) < 2 && Math.abs(o.y - y) < 2) || (lv.spawns || []).some(o => Math.abs(o.x - x) < 1 && Math.abs(o.y - y) < 2);
+    const busy = (x, y) => lv.doors.some(d => Math.abs(d.x - x) < 2 && Math.abs(d.y - y) < 2) || /* W13 R7: Stege dürfen nah an Türen (Zugang zur Tür) */ (lv.loot || []).some(o => Math.abs(o.x - x) < 2 && Math.abs(o.y - y) < 2) ||
+      (!forceT && (lv.traps || []).some(o => Math.abs(o.x - x) < 2 && Math.abs(o.y - y) < 2)) || (lv.spawns || []).some(o => Math.abs(o.x - x) < 1 && Math.abs(o.y - y) < 2);
     const secretAt = (x, y) => { const c = lv.cells[Math.floor(x / CW) + "," + Math.floor(y / CH)]; return !c || c.kind === "secret"; };
     const okPlank = (x0, x1, row) => {
       if (row < 2 || row >= H - 1) return false;
@@ -2432,12 +2435,22 @@
       }
       return true;
     };
-    lv.eased = [];
-    for (let it = 0; it < 16 && lv.eased.length < 10; it++) {
+    lv.eased = []; let forceT = false; /* W13 R7: für Ausgänge dürfen Fallen dem Steg weichen */
+    /* W13 R7: Ausgänge zuerst – solange eine Tür nur per Maximalsprung erreichbar ist, die Kante wählen, die ihr am nächsten führt
+       (vorher konnte das Steg-Budget an anderer Stelle aufgebraucht sein: 1 von 390 Karten); dafür etwas mehr Budget */
+    const exitsP = lv.doors.filter(d => d.kind === "exit");
+    for (let it = 0; it < 24 && lv.eased.length < 13; it++) {
       const c = { W, H, get: g, start: lv.start, doors: lv.doors, cells: lv.cells }; validate(c, null, true); const rc = c.reach;
       const f = { W, H, get: g, start: lv.start, doors: lv.doors, cells: lv.cells, _wantEdges: true }; validate(f); const [ea, eb] = f._edges;
-      let pick = -1;
-      for (let k = 0; k < ea.length; k++) { if (!rc[ea[k]] || rc[eb[k]] || tried.has(ea[k] + ">" + eb[k])) continue; pick = k; break; }
+      const openEx = exitsP.filter(d => !rc[d.y * W + d.x]);
+      if (!openEx.length && (lv.eased.length >= 10 || it >= 16)) break; /* wie bisher; nur für Türen mehr Budget */
+      let pick = -1, bd = 1e9; forceT = openEx.length > 0;
+      for (let k = 0; k < ea.length; k++) {
+        if (!rc[ea[k]] || rc[eb[k]] || tried.has(ea[k] + ">" + eb[k])) continue;
+        if (!openEx.length) { pick = k; break; }
+        const bx2 = eb[k] % W, by2 = (eb[k] / W) | 0; let d = 1e9; for (const e of openEx) d = Math.min(d, Math.abs(e.x - bx2) + Math.abs(e.y - by2) * 1.5);
+        if (d < bd) { bd = d; pick = k; }
+      }
       if (pick < 0) break;
       const A = ea[pick], Bt = eb[pick]; tried.add(A + ">" + Bt);
       const ax = A % W, ay = (A / W) | 0, bx = Bt % W, by = (Bt / W) | 0, dy = ay - by, dx = bx - ax;
@@ -2449,7 +2462,7 @@
           if (!okPlank(mx - 1, mx + 1, row)) continue;
           for (let x = mx - 1; x <= mx + 1; x++) lv.set(x, row, 2);
           const c2 = { W, H, get: g, start: lv.start, doors: lv.doors, cells: lv.cells }; validate(c2, null, true);
-          if (c2.reach[Bt] && validate(lv)) { lv.eased.push([mx - 1, mx + 1, row]); done = true; break; }
+          if (c2.reach[Bt] && validate(lv)) { lv.eased.push([mx - 1, mx + 1, row]); done = true; if (forceT && lv.traps) lv.traps = lv.traps.filter(o => !(o.x >= mx - 2 && o.x <= mx + 2 && Math.abs(o.y - (row - 1)) < 2)); break; }
           for (let x = mx - 1; x <= mx + 1; x++) lv.set(x, row, 0);
         }
         if (done) break;
@@ -2494,6 +2507,7 @@
     const get = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? 1 : tiles[y * W + x]);
     const startCell = cells[key(path[0][0], path[0][1])], endCell = cells[key(path[path.length - 1][0], path[path.length - 1][1])];
     const tplUse = {}; /* W13 R6: Zählung je Karte (Wiederholungsdämpfung) */
+    const qTiles = []; /* W13 R7: Wasser aus Vorlagen (q) */
     const runUse = Z.run && Z.run._tplUse ? Z.run._tplUse : null;
     for (const k in cells) {
       const c = cells[k], n = c.need;
@@ -2539,9 +2553,9 @@
           let v = 0;
           if (ch === "#") v = 1; else if (ch === "-") v = 2; else if (ch === "^") v = 3; else if (ch === "H") v = 4; else if (ch === "~") v = B.hazard === "water" ? 6 : B.hazard === "lava" ? 5 : 3;
           else if (ch === "X") v = 7; else if (ch === "?") v = R.chance(0.5) ? 1 : 0;
-          else if (ch === "A") v = 9; else if (ch === "c") v = 10; else if (ch === "m") v = 11;
+          else if (ch === "A") v = 9; else if (ch === "c") v = 10; else if (ch === "m") v = 11; else if (ch === "q") { v = 6; qTiles.push((oy + r) * W + ox + q); } /* W13 R7: echtes Wasser (Gezeiten, sicher) */
           set(ox + q, oy + r, v);
-          if ("ETSFbwpfkrjz<>m".includes(ch)) marks.push({ t: ch === "<" || ch === ">" ? (chosen.mir ? (ch === "<" ? ">" : "<") : ch) : ch, x: ox + q, y: oy + r, cell: c });
+          if ("ETSFbwpfkrjz<>moL".includes(ch)) marks.push({ t: ch === "<" || ch === ">" ? (chosen.mir ? (ch === "<" ? ">" : "<") : ch) : ch, x: ox + q, y: oy + r, cell: c });
         }
       /* nicht benötigte Öffnungen verschließen, geheime Öffnungen mit rissiger Wand */
       const seal = (side, val) => {
@@ -2613,7 +2627,7 @@
     const pitLog = resolvePits({ get, set, cells, W, H, gw, gh, carved, biome: biomeId, startCell }, R, B);
     /* Stacheln brauchen Boden */
     for (let y = 0; y < H - 1; y++) for (let x = 0; x < W; x++) if (get(x, y) === 3 && get(x, y + 1) !== 1) set(x, y + 1, 1);
-    const lv = { biome: biomeId, seed, W, H, tiles, marks, cells, path, gw, gh, startCell, endCell, flow: B.flow, out: !!B.out, gates, pitLog };
+    const lv = { biome: biomeId, seed, W, H, tiles, marks, cells, path, gw, gh, startCell, endCell, flow: B.flow, out: !!B.out, gates, pitLog, qTiles };
     lv.get = get; lv.set = set;
     placeSpecial(lv, R, B, opts);
     return lv;
@@ -2623,7 +2637,7 @@
     const g = lv.get, chance = B.pits != null ? B.pits : 0.9;
     for (const k in lv.cells) {
       const c = lv.cells[k];
-      if (c === lv.startCell || c === lv.endCell || c.kind === "secret" || !R.chance(c.kind === "path" ? chance : chance * 0.4)) continue;
+      if (c === lv.startCell || c === lv.endCell || c.kind === "secret" || /^(fasslager|weinregal|zisterne|stelzensteg)/.test(c.tpl || "") || !R.chance(c.kind === "path" ? chance : chance * 0.4)) continue; /* W13 R7: Fassrinne und Gezeitenbecken ohne Gruben */
       const ox = c.x * CW, oy = c.y * CH, runs = [];
       for (let r = oy + 4; r <= oy + CH - 2; r++) {
         let x0 = -1;
@@ -3035,6 +3049,9 @@
       if (m.t === "S" && scrolls < 3 && R.chance(0.65)) { lv.loot.push({ kind: "scroll", x: m.x, y: m.y }); scrolls++; }
       if (m.t === "b" && !nearDoor(m.x, m.y)) lv.props.push({ kind: "breakable", x: m.x, y: m.y });
       if (m.t === "w") lv.decor.push({ kind: "window", x: m.x, y: m.y });
+      /* W13 R7: Fassrutsche (rollende Fässer) und Kronleuchter zum Schwingen (erkundung.js) */
+      if (m.t === "o" && (lv.rollers || []).length < 2) (lv.rollers = lv.rollers || []).push({ x: m.x, y: m.y, cell: m.cell.x + "," + m.cell.y, dir: m.x - m.cell.x * CW < CW / 2 ? 1 : -1 });
+      if (m.t === "L" && (lv.swings || []).length < 2) (lv.swings = lv.swings || []).push({ x: m.x, y: m.y, cell: m.cell.x + "," + m.cell.y });
       if ("pfkrjz<>m".includes(m.t)) {
         /* keine Falle direkt am Eingang (Federn und Fähren bleiben – sie gehören zum Weg) */
         if ("fkrz<>".includes(m.t) && Math.abs(m.x - startPx) < 9 && Math.abs(m.y - startPy) < 6) continue;

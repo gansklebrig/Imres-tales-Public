@@ -4013,3 +4013,74 @@
     catch (e) { console.error(e); return null; }
   };
 })();
+
+/* Ezekiel – The Destroyer · Gegner- und Bossbilder aus den echten Figuren (W11 Runde 26)
+   Z.gegnerBild(def, o) → Canvas: die Figur wird mit Z.drawEnemy in Ruhehaltung auf eine Leinwand gemalt, auf ihren
+   Umriss zugeschnitten und eingepasst (Fundbuch: Gegner/Bosse). o.dunkel → nur Schattenriss (noch nicht begegnet).
+   Z.bossPortraet(def) → Bild-URL: Kopf und Schultern des Bosses im Medaillon-Stil der NSC-Porträts, aber bedrohlich
+   (Glutgrund, rote Vignette, dunkler Eisenring mit Dornen). Kein Blau. Ergebnisse werden zwischengespeichert. */
+(function () {
+  const Z = window.Z; if (!Z || !Z.drawEnemy) return;
+  const raw = new Map(), cache = new Map();
+  function render(d) {
+    let r = raw.get(d); if (r) return r;
+    const s = d.size || 1, w = d.w || 16, h = d.h || 20, SC = 4, pad = 80;
+    const cv = document.createElement("canvas"); cv.width = Math.ceil((w * 4 + pad) * SC); cv.height = Math.ceil((h * 2.2 + pad) * SC);
+    const c = cv.getContext("2d");
+    const e = { def: d, x: 0, y: 0, w, h, face: 1, anim: 0.3, vx: 0, vy: 0, onGround: true, st: {}, size: s, hp: d.hp || 1, hpMax: d.hp || 1, aware: true, id: "bild" + Math.random(), kind: d.id, flash: 0, act: null, tele: 0, intro: 0 };
+    c.save(); c.scale(SC, SC); c.translate(cv.width / SC / 2 - w / 2, cv.height / SC - pad / 2 - h);
+    const gq = Z.gq; try { if (gq) Z.gq = Object.assign({}, gq, { lean: false }); Z.drawEnemy(c, e, 1.0); } catch (err) { console.error(err); } finally { Z.gq = gq; }
+    c.restore();
+    /* Umriss suchen */
+    const id = c.getImageData(0, 0, cv.width, cv.height).data; let x0 = cv.width, y0 = cv.height, x1 = -1, y1 = -1;
+    for (let y = 0; y < cv.height; y += 2) for (let x = 0; x < cv.width; x += 2) if (id[(y * cv.width + x) * 4 + 3] > 110) { /* Schein (Glühen) zählt nicht zum Umriss */ if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    /* Körpersäule (ohne seitlich ragende Waffen/Stäbe): oberster Punkt = Scheitel, für das Bossporträt */
+    const cxp = cv.width / 2, hw = w * SC * 0.22; let bt = cv.height;
+    for (let y = 0; y < cv.height && bt === cv.height; y += 2) for (let x = Math.floor(cxp - hw); x < cxp + hw; x += 2) if (id[(y * cv.width + x) * 4 + 3] > 110) { bt = y; break; }
+    r = x1 < 0 ? null : { cv, x0, y0, x1: x1 + 2, y1: y1 + 2, cx: cxp, bt, bw: w * SC, bh: h * SC };
+    raw.set(d, r); return r;
+  }
+  Z.gegnerBild = function (d, o) {
+    o = o || {}; const W = o.w || 64, H = o.h || 64, key = (o.key || d.id || d.n && d.n[0]) + W + "x" + H + (o.dunkel ? "d" : "");
+    let out = cache.get(key); if (out) return out;
+    out = document.createElement("canvas"); out.width = W; out.height = H; const c = out.getContext("2d");
+    const r = render(d);
+    if (r) {
+      const bw = r.x1 - r.x0, bh = r.y1 - r.y0, k = Math.min((W - 6) / bw, (H - 6) / bh), dw = bw * k, dh = bh * k;
+      c.imageSmoothingQuality = "high";
+      if (o.dunkel) { const t = document.createElement("canvas"); t.width = W; t.height = H; const tc = t.getContext("2d"); tc.drawImage(r.cv, r.x0, r.y0, bw, bh, (W - dw) / 2, H - 3 - dh, dw, dh); tc.globalCompositeOperation = "source-in"; tc.fillStyle = "rgba(96,74,70,.7)"; /* Schattenriss, auf dunklem Fenstergrund noch erkennbar */ tc.fillRect(0, 0, W, H); c.drawImage(t, 0, 0); }
+      else { c.save(); c.globalAlpha = 0.3; c.fillStyle = "#000"; c.beginPath(); c.ellipse(W / 2, H - 3, dw * 0.4, 2.2, 0, 0, Math.PI * 2); c.fill(); c.restore(); c.drawImage(r.cv, r.x0, r.y0, bw, bh, (W - dw) / 2, H - 3 - dh, dw, dh); }
+    }
+    /* Schein, der über den Umriss hinausreicht, weich auslaufen lassen statt an der Bildkante abzuschneiden */
+    c.save(); c.globalCompositeOperation = "destination-out";
+    for (const [x0, y0, x1, y1, rx, ry, rw, rh] of [[0, 0, 7, 0, 0, 0, 7, H], [W, 0, W - 7, 0, W - 7, 0, 7, H], [0, 0, 0, 7, 0, 0, W, 7]]) { const g = c.createLinearGradient(x0, y0, x1, y1); g.addColorStop(0, "rgba(0,0,0,1)"); g.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = g; c.fillRect(rx, ry, rw, rh); }
+    c.restore();
+    cache.set(key, out); return out;
+  };
+  Z.bossPortraet = function (d) {
+    if (!d) return null; const key = "boss:" + (d.id || d.n[0]); let u = cache.get(key); if (u) return u;
+    try {
+      const r = render(d); if (!r) return null;
+      const S = 96, cv = document.createElement("canvas"); cv.width = cv.height = S; const c = cv.getContext("2d"), TAU = Math.PI * 2;
+      c.save(); c.beginPath(); c.arc(48, 48, 44, 0, TAU); c.clip();
+      const bg = c.createRadialGradient(48, 60, 4, 48, 52, 54); bg.addColorStop(0, "#8a2a14"); bg.addColorStop(0.45, "#4a120c"); bg.addColorStop(1, "#120608"); c.fillStyle = bg; c.fillRect(0, 0, S, S);
+      /* Glutfunken im Grund */
+      for (let i = 0; i < 14; i++) { const a = i * 2.39, rr = 16 + (i * 37 % 26); c.fillStyle = "rgba(255," + (120 + (i * 29 % 80)) + ",60," + (0.25 + (i % 3) * 0.12) + ")"; c.fillRect(48 + Math.cos(a) * rr, 50 + Math.sin(a) * rr * 0.8, 1.6, 1.6); }
+      /* Kopf und Schultern: oberer Teil des Umrisses (bei breiten Gestalten etwas mehr) */
+      /* Ausschnitt um Kopf und Schultern: Mitte der Körpersäule, oben am Scheitel */
+      const HEAD = { dragon: [0.3, 0.6, 1.05], spider: [0.22, 0.55, 1.15] }, hd = HEAD[d.shape]; /* breite Gestalten: Kopf liegt vorn (Blickrichtung) */
+      const side = hd ? r.bw * hd[1] * 1.2 : Math.max(r.bw * 1.5, r.bh * 0.6), sx = r.cx + (hd ? r.bw * hd[0] : 0) - side / 2, sy = hd ? Math.max(0, r.y1 - r.bh * hd[2]) : Math.max(0, r.bt - side * 0.1);
+      c.drawImage(r.cv, sx, sy, side, side, 4, 8, 88, 88);
+      /* Randlicht von unten (Glut) und Vignette */
+      const vg = c.createRadialGradient(48, 44, 22, 48, 48, 50); vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(20,0,0,.75)"); c.fillStyle = vg; c.fillRect(0, 0, S, S);
+      const lo = c.createLinearGradient(0, 60, 0, 96); lo.addColorStop(0, "rgba(255,90,30,0)"); lo.addColorStop(1, "rgba(255,90,30,.28)"); c.globalCompositeOperation = "lighter"; c.fillStyle = lo; c.fillRect(0, 0, S, S); c.globalCompositeOperation = "source-over";
+      c.restore();
+      /* Eisenring mit Dornen */
+      c.fillStyle = "#1c1416"; for (let i = 0; i < 12; i++) { const a = i / 12 * TAU - Math.PI / 2; c.beginPath(); c.moveTo(48 + Math.cos(a - 0.09) * 44, 48 + Math.sin(a - 0.09) * 44); c.lineTo(48 + Math.cos(a) * 47.5, 48 + Math.sin(a) * 47.5); c.lineTo(48 + Math.cos(a + 0.09) * 44, 48 + Math.sin(a + 0.09) * 44); c.fill(); }
+      c.strokeStyle = "#2a2024"; c.lineWidth = 5; c.beginPath(); c.arc(48, 48, 44, 0, TAU); c.stroke();
+      c.strokeStyle = "rgba(255,120,60,.55)"; c.lineWidth = 1.2; c.beginPath(); c.arc(48, 48, 41.4, Math.PI * 0.15, Math.PI * 0.85); c.stroke();
+      c.strokeStyle = "rgba(200,170,160,.35)"; c.lineWidth = 1; c.beginPath(); c.arc(48, 48, 46.4, Math.PI * 1.1, Math.PI * 1.6); c.stroke();
+      u = cv.toDataURL(); cache.set(key, u); return u;
+    } catch (e) { console.error(e); return null; }
+  };
+})();

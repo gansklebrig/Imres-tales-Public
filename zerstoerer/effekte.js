@@ -1251,6 +1251,10 @@
         const top = td.yw * T - h, solid = v => v === 1 || v === 7 || v === 12, inRows = new Set(td.rows.map(r => r[0] + "," + r[1]));
         c.fillStyle = "rgba(48,96,82,.62)";
         for (let x = td.xa; x <= td.xb; x++) for (let s2 = 1; s2 <= 2; s2++) { const y = td.yw - s2; if (inRows.has(x + "," + y) || solid(lv.get(x, y))) continue; const y0 = Math.max(y * T, top), y1 = (y + 1) * T; if (y1 > y0) c.fillRect(x * T, y0, T, y1 - y0); }
+        /* R26: zweite, deckendere Wasserschicht mit Tiefenverlauf über allen gefluteten Kacheln – so scheinen helle
+           Himmels- und dunkle Mauerspalten kaum noch unterschiedlich durch (vorher 62 % Deckung, jetzt rund 80 %) */
+        { const dg = c.createLinearGradient(0, top, 0, td.yw * T); dg.addColorStop(0, "rgba(44,92,76,.34)"); dg.addColorStop(1, "rgba(22,52,44,.5)"); c.fillStyle = dg;
+          for (let x = td.xa; x <= td.xb; x++) for (let s2 = 1; s2 <= 2; s2++) { const y = td.yw - s2; if (!inRows.has(x + "," + y) && solid(lv.get(x, y))) continue; const y0 = Math.max(y * T, top), y1 = (y + 1) * T; if (y1 > y0) c.fillRect(x * T, y0, T, y1 - y0); } }
         const ty = Math.floor((top + 1) / T), wy = x => top + Math.sin(x * 0.11 + t * 2.4) * 0.9 + Math.sin(x * 0.037 - t * 1.3) * 0.6;
         /* Spiegelband (heller Saum unter der Linie) und Linie als ein Pfad je zusammenhängendem Stück */
         let run = null; const segs = [];

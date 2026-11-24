@@ -492,6 +492,9 @@
   };
   ui.bossIntro = e => {
     $("#bossname").innerHTML = esc(L(e.def.n)) + (e.def.title ? "<small>" + esc(L(e.def.title)) + "</small>" : "");
+    /* W11 R26 (nur Optik): gemaltes Boss-Porträt (figuren.js, Z.bossPortraet) als Wappen am linken Ende der Boss-Leiste */
+    { let im = bossbar.querySelector("img.boss-portraet"); const u = Z.bossPortraet ? Z.bossPortraet(e.def) : null;
+      if (u) { if (!im) { im = document.createElement("img"); im.className = "boss-portraet"; im.alt = ""; bossbar.prepend(im); } im.src = u; } else if (im) im.remove(); }
     ui.banner(L(e.def.n), e.def.intro ? L(e.def.intro) : L(e.def.title || ["", ""]), 4200);
     /* W11 R25 (nur Lage): solange das Boss-Titelband steht, rücken Meldungen darunter (CSS body.bossplatte) */
     document.body.classList.add("bossplatte"); ui._bpLeft = 4.6; /* zählt in noteTick mit der Spielzeit herunter, wie das Band selbst */
@@ -1467,7 +1470,11 @@
     openModal("<h2>" + esc(t("forge")) + ' <span class="bank">' + U.fmt(M.shards) + " ◆ " + esc(t("shards")) + "</span></h2>" + '<p class="hinweis">' + L(["Jede Waffe, die du einmal getragen hast, kann hier geschärft werden. Fundglück macht sie in der Feste häufiger. Finden musst du sie trotzdem.", "Any weapon you have carried once can be sharpened here. Find luck makes it more common in the keep. You still have to find it."]) + "</p>" + body + '<div class="knoepfe"><button data-act="close">' + esc(t("close")) + "</button></div>", { cls: "breit" });
     drawIcons();
   };
-  function drawIcons() { modal.querySelectorAll(".ico[data-icon]").forEach(el => { const cv = document.createElement("canvas"); cv.width = 64; cv.height = 64; const c = cv.getContext("2d"); c.scale(2, 2); Z.drawIcon(c, el.dataset.icon, 16, 17, 22, el.dataset.col); el.appendChild(cv); }); }
+  /* W11 R26 (nur Optik): Fundbuch-Gegner und -Bosse mit gemalten Bildern der echten Figuren (figuren.js) – unbekannte als Schattenriss */
+  function drawBeasts() { if (!Z.gegnerBild) return; modal.querySelectorAll(".ico.vieh").forEach(el => { try { const bo = el.dataset.boss, d = bo ? Z.BOSSDEF[bo] : Z.ENEMIES[el.dataset.gegner]; if (!d) return;
+    const kn = el.dataset.k === "1", bp = bo && kn && Z.bossPortraet ? Z.bossPortraet(d) : null, im = document.createElement("img"); im.alt = "";
+    im.src = bp || Z.gegnerBild(d, { w: 96, h: 96, dunkel: !kn, key: bo || el.dataset.gegner }).toDataURL(); el.appendChild(im); } catch (e) { console.error(e); } }); }
+  function drawIcons() { drawBeasts(); modal.querySelectorAll(".ico[data-icon]").forEach(el => { const cv = document.createElement("canvas"); cv.width = 64; cv.height = 64; const c = cv.getContext("2d"); c.scale(2, 2); Z.drawIcon(c, el.dataset.icon, 16, 17, 22, el.dataset.col); el.appendChild(cv); }); }
   actions.forgeTab = i => ui.forge(i);
   actions.wlvl = id => { const M = Z.meta, d = Z.WEAPONS[id] || Z.SKILLS[id], l = M.wlvl[id] || 0, c = lvlCost(d, l); if (M.shards < c || l >= 5) return; M.shards -= c; M.wlvl[id] = l + 1; Z.saveMeta(); A.play("anvil", { vol: 0.7 }); ui.forge(); };
   actions.luck = id => { const M = Z.meta, l = M.luck[id] || 0, c = luckCost(l); if (M.shards < c || l >= 3) return; M.shards -= c; M.luck[id] = l + 1; Z.saveMeta(); A.play("gem", { vol: 0.6 }); ui.forge(); };
@@ -1493,9 +1500,9 @@
         body += '<div class="zeile' + (found ? "" : " unbekannt") + '"><span class="ico" data-icon="' + d.icon + '" data-col="' + (found ? d.col : "#3a3236") + '"></span><div><b>' + (found ? esc(L(d.n)) : "???") + "</b><small>" + (found ? esc(L(d.d)) : esc(t("unknown"))) + '</small><small class="fund">' + esc(L(Z.FIND[d.find].n)) + " · " + esc(t("findChance")) + " ≈ " + ch + (d.only ? " · " + L(["Orte: ", "Places: "]) + d.only.map(o => Z.BOSSDEF[o] && !Z.BIOMES[o] && !Z.ARENAS[o] ? L(Z.BOSSDEF[o].n) : Z.areaName(o)).join(", ") : "") + (d.tags ? " · " + d.tags.join(", ") : "") + "</small></div></div>";
       }
     } else if (codexTab === 2) {
-      for (const id in Z.ENEMIES) { if (id === "puppe" || id === "glutlingKlein") continue; const d = Z.ENEMIES[id], n = M.seen[id] || 0; body += '<div class="zeile' + (n ? "" : " unbekannt") + '"><div><b>' + (n ? esc(L(d.n)) : "???") + "</b><small>" + (n ? L(["Erschlagen: ", "Slain: "]) + n + " · " + d.atks.length + L([" Angriffe", " attacks"]) + (d.undead ? L([" · untot", " · undead"]) : "") + (d.demon ? L([" · Dämon", " · demon"]) : "") + (d.front ? L([" · Schild vorn – von hinten angreifen", " · shield in front – attack from behind"]) : "") : "") + "</small></div></div>"; }
+      for (const id in Z.ENEMIES) { if (id === "puppe" || id === "glutlingKlein") continue; const d = Z.ENEMIES[id], n = M.seen[id] || 0; body += '<div class="zeile' + (n ? "" : " unbekannt") + '"><span class="ico vieh" data-gegner="' + id + '" data-k="' + (n ? 1 : 0) + '"></span><div><b>'  + (n ? esc(L(d.n)) : "???") + "</b><small>" + (n ? L(["Erschlagen: ", "Slain: "]) + n + " · " + d.atks.length + L([" Angriffe", " attacks"]) + (d.undead ? L([" · untot", " · undead"]) : "") + (d.demon ? L([" · Dämon", " · demon"]) : "") + (d.front ? L([" · Schild vorn – von hinten angreifen", " · shield in front – attack from behind"]) : "") : "") + "</small></div></div>"; }
     } else if (codexTab === 3) {
-      for (const id in Z.BOSSDEF) { if (id === "nezna") continue; const d = Z.BOSSDEF[id], b = M.bosses[id]; body += '<div class="zeile' + (b ? "" : " unbekannt") + '"><div><b>' + (b ? esc(L(d.n)) : "???") + "</b><small>" + (b ? esc(L(d.title || ["", ""])) + " · " + L(["Begegnet ", "Met "]) + b.seen + "× · " + L(["Besiegt ", "Defeated "]) + b.won + "×" : "") + "</small></div></div>"; }
+      for (const id in Z.BOSSDEF) { if (id === "nezna") continue; const d = Z.BOSSDEF[id], b = M.bosses[id]; body += '<div class="zeile' + (b ? "" : " unbekannt") + '"><span class="ico vieh boss" data-boss="' + id + '" data-k="' + (b ? 1 : 0) + '"></span><div><b>'  + (b ? esc(L(d.n)) : "???") + "</b><small>" + (b ? esc(L(d.title || ["", ""])) + " · " + L(["Begegnet ", "Met "]) + b.seen + "× · " + L(["Besiegt ", "Defeated "]) + b.won + "×" : "") + "</small></div></div>"; }
     } else if (codexTab === 4) {
       for (const k of ["tiefe", "glut", "himmel", "alle"]) { const got = M.endings[k]; body += '<div class="zeile' + (got ? "" : " unbekannt") + '"><div><b>' + (got ? esc(L(TX.endings[k][0])) : "???") + "</b><small>" + (got ? L(TX.endings[k][1]).slice(0, 160).replace(/<br>/g, " ") + " …" : k === "alle" ? L(["Erreiche alle drei Enden.", "Reach all three endings."]) : L(["Ein Ende der Feste. Welcher Weg führt dorthin?", "An ending of the keep. Which path leads there?"])) + "</small></div></div>"; }
     } else {
