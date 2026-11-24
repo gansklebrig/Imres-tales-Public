@@ -20112,8 +20112,13 @@ function offHtml(){const st=OFF.st,f=OFF.fort,z=OFF.zip;
    <p>Die <b>komplette App</b> mit allem drin (≈ 140 MB): startet wie ein eigenes Spiel, ohne Browser, mit Controller und eigenem Update-Knopf. Spielstände liegen getrennt von der Website.</p>
    <div class="offrow"><button class="slbtn" onclick="location.href='${APK}'">APK herunterladen</button></div>
    <p class="offh">Danach die Datei öffnen und „Aus dieser Quelle installieren“ erlauben.</p></div>`;
+ /* Programm für Windows/Linux (eigene Chromium-Hülle, Release heldensturm-pc-1.N) – nur am PC und nur in der Browser-Fassung angeboten */
+ const pcp=OFF.datei||MOBIL||window.__hsPC?'':`<div class="offk"><div class="eyebrow">Windows · Linux</div><h3>Als Programm installieren</h3>
+   <p>Heldensturm als <b>eigenes Programm</b> (≈ 260 MB): nutzt die Grafikkarte voll aus – auch wenn dein Browser das Spiel bremst –, läuft offline und im echten Vollbild. Spielstände liegen getrennt von der Website; mit dem Cloud-Spielstand (Optionen) nimmst du deinen Fortschritt mit.</p>
+   <div class="offrow"><button class="slbtn gold" data-act="off-pc" data-v="Heldensturm-Setup.exe">Für Windows</button><button class="slbtn" data-act="off-pc" data-v="Heldensturm.AppImage">Für Linux</button></div>
+   <p class="offh">Windows warnt beim ersten Start („Der Computer wurde geschützt“): „Weitere Informationen“ → „Trotzdem ausführen“. Linux: Datei ausführbar machen und starten.</p></div>`;
  return`<div class="slm offpg"><div class="slp">${slHead('Ohne Internet','Offline spielen','Online-Mehrspieler, Bestenliste und Cloud-Spielstand brauchen weiterhin Internet – alles andere läuft offline, auch Mehrspieler an einem Gerät.')}
-  <div class="offgrid${apk?' off3':''}"><div class="offk"><div class="eyebrow">Handy · Handheld · PC</div><h3>${OFF.datei?'Als App speichern':'Nur den Inhalt laden'}</h3>${app}</div>${apk}${zip}</div>
+  <div class="offgrid${apk?' off3':''}"><div class="offk"><div class="eyebrow">Handy · Handheld · PC</div><h3>${OFF.datei?'Als App speichern':'Nur den Inhalt laden'}</h3>${app}</div>${pcp}${apk}${zip}</div>
   <div style="flex:1 1 auto"></div><div class="slbar"><button class="slbtn" data-act="sl-back" ${(!OFF.ok||bereit)&&!OFF.bip?'data-sl-def="1"':''}>‹ Zurück</button></div></div>${slFoot()}</div>`}
 (function(){const st=document.createElement('style');st.textContent=`
 .offpg .offgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,19em),1fr));gap:1em;margin-top:.6em}
@@ -20137,7 +20142,13 @@ document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.
  if(a==='off-laden'){OFF.fort={b:0,ges:(OFF.st&&OFF.st.ges)||1};offSend('laden');offUpd()}
  else if(a==='off-inst'&&OFF.bip){const p=OFF.bip;OFF.bip=null;p.prompt();(p.userChoice||Promise.resolve({})).then(c=>{if(c&&c.outcome==='accepted'){OFF.inst=true;offSend('laden')}offUpd()})}
  else if(a==='off-weg'){offSend('loeschen')}
- else if(a==='off-zip')offZip()});
+ else if(a==='off-zip')offZip()
+ else if(a==='off-pc')offPcLaden(b.dataset.v)});
+/* Programm für Windows/Linux: neueste Fassung in den Releases suchen (Marke heldensturm-pc-1.N) und herunterladen */
+function offPcLaden(datei){const seite='https://github.com/gansklebrig/Imres-tales-Public/releases';try{toast('Suche die neueste Fassung …','#e5b454')}catch(e){}
+ fetch('https://api.github.com/repos/gansklebrig/Imres-tales-Public/releases?per_page=40',{headers:{Accept:'application/vnd.github+json'}}).then(r=>r.ok?r.json():Promise.reject(r.status)).then(L=>{let best=null;
+  for(const r of L){const m=/^heldensturm-pc-1\.(\d+)$/.exec(r.tag_name||'');if(!m||r.draft)continue;const d=(r.assets||[]).find(x=>x.name===datei);if(d&&(!best||+m[1]>best.n))best={n:+m[1],u:d.browser_download_url}}
+  location.href=best?best.u:seite}).catch(()=>{location.href=seite})}
 if(/(^|[#&])offline($|&)/.test(location.hash||''))setTimeout(()=>{try{if(G.state==='title'&&SPL.view==='main'){SPL.view='offline';showTitle()}}catch(e){}},600);
 window.__hsOFF={OFF,offZip,zipBau,crc32};
 
