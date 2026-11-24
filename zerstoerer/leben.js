@@ -63,8 +63,11 @@
       }
       if (e.watch && !e.aware) { e.pDir = 0; e.patrol = 9; e.vx = 0; if (Math.random() < dt * 0.15) e.face = -e.face; }
       /* Ruf: wer entdeckt, alarmiert die Nachbarn */
-      if (e.aware && !e.called && !e.def.boss) {
-        e.called = true; if (e.watch) e.watch = false;
+      /* R19: gegner.js setzt „called“ beim Beruhigen zurück – flackert die Wachheit, rief dieselbe Figur bis zu 60× je Sekunde „Alarm“
+         (Klang „monster“, im Botlauf bis 3600×/min). Je Figur höchstens alle 8 s ein Alarmruf. */
+      if (e.alarmCd > 0) e.alarmCd -= dt;
+      if (e.aware && !e.called && !e.def.boss && !(e.alarmCd > 0)) {
+        e.called = true; e.alarmCd = 8; if (e.watch) e.watch = false;
         let any = false;
         for (const o of Z.enemies) {
           if (o === e || o.dead || o.aware || o.def.boss) continue;

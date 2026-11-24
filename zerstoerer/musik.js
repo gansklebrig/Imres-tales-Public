@@ -232,7 +232,7 @@
     M.out = c.createGain(); M.out.gain.value = 0.62; M.out.connect(M.eqK);
     M.xf = c.createGain(); M.xf.gain.value = 1; M.xf.connect(M.out);
     M.lay = c.createGain(); M.lay.gain.value = 1; M.lay.connect(M.xf);
-    const verbIn = c.createGain(); verbIn.gain.value = 1; verbIn.connect(A.verb); M.verbIn = verbIn;
+    const verbIn = c.createGain(); verbIn.gain.value = 1; verbIn.connect(A.verbM || A.verb); M.verbIn = verbIn; /* R19: Musik-Hall hinter dem Musikregler */
     const bus = (g, pan, verb, to) => {
       const b = c.createGain(); b.gain.value = g; let o = b;
       if (pan && c.createStereoPanner) { const p = c.createStereoPanner(); p.pan.value = pan; b.connect(p); o = p; }
@@ -620,9 +620,12 @@
     if (S >= 4 && st === 0 && bar % 4 === 0) { playNote("psab", tone(2, p.root + 24), t, 0.04, beat * (ln ? 14 : 24), M.busCol, -1); if (!ln) playNote("psab", tone(0, p.root + 24), t + beat * 2, 0.035, beat * 22, M.busCol, -1); } /* Banner: Psalter schimmert */
     if (S >= 5 && chordStart && bar % 4 === 0) for (const i of ln ? [0, 2] : [0, 1, 2]) playNote("aah", tone(i, p.root + 12), t, 0.04, beat * (ln ? 18 : 30), M.busExp, -1); /* Feste: Chor öffnet sich */
     /* Bewohner: zu Beginn jeder Phrase ist einer dran (der Reihe nach); in Atempausen der Handpan voll, sonst manchmal leise dazu */
-    if (ph === 0 && p.lres.length) {
+    /* R19: volles Lager (ab 4 Bewohnern, Stufe ≥ 3) – auch in der Mitte der Phrase antwortet ein zweiter Bewohner (Ruf und Antwort),
+       und beim Mitspielen über der Melodie öfter (50 % statt 35 %); sonst käme jeder nur alle paar Minuten dran */
+    const voll = p.lres.length >= 4 && S >= 3;
+    if ((ph === 0 || (voll && ph === 8)) && p.lres.length) {
       const id = p.lres[p.rk % p.lres.length], r = RESV[id], solo = !M.phrase;
-      if (!solo && Math.random() > 0.35) { p.rk++; return; }
+      if (!solo && Math.random() > (voll ? 0.5 : 0.35)) { p.rk++; return; }
       /* Handheld: reicht die Stimmengrenze nicht für das ganze Motiv (plus 2 Stimmen Luft für den Satz), wird die Figur
          auf die nächste Phrase zurückgestellt – sie kommt dann als Nächste dran, statt dass Satz- oder Motivnoten verloren gehen */
       const need = r.hit ? 0 : r.n.length * (r.chord ? 3 : 1);

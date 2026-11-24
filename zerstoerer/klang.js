@@ -210,13 +210,13 @@
   KL.VOX = VOX;
   const KV = (KL.vox = { lastIdle: 0, n: {} });
   /* eine Liste von Geräuschen an der Stelle des Gegners */
-  function emit(e, list, far) {
+  function emit(e, list, far, warn) {
     if (!list || !list.length || !e) return;
     const [v0, pan] = posMix(e.x + e.w / 2, e.y + e.h / 2, far); if (v0 < 0.03) return;
     const big = Math.pow(e.size || 1, -0.3) * (e.elite ? 0.94 : 1);
     for (const it of list) {
       const l = GR[it[0]]; if (!l) continue;
-      shot(l[(Math.random() * l.length) | 0], { vol: it[1] * v0 * (e.elite ? 1.15 : 1), rate: (it[2] || 1) * big, pan, delay: it[3] || 0, dur: it[4], verb: 0.5, tag: "kv" + it[0] });
+      shot(l[(Math.random() * l.length) | 0], { vol: it[1] * v0 * (e.elite ? 1.15 : 1), rate: (it[2] || 1) * big, pan, delay: it[3] || 0, dur: it[4], verb: 0.5, tag: "kv" + it[0], must: !!warn });
     }
   }
   /* gestimmter Ton aus einer Instrument-Aufnahme in der Tonart der Musik, am Ort des Gegners (absolute Zeit t) */
@@ -314,7 +314,7 @@
       KV.n[ev] = (KV.n[ev] || 0) + 1;
       switch (ev) {
         case "alarm": emit(e, V.alarm); if (V.alarmFn) V.alarmFn(e); return !!(V.alarm || V.alarmFn);
-        case "pre": if (V.pre && a) emit(e, V.pre[a.k]); return false;
+        case "pre": if (V.pre && a) emit(e, V.pre[a.k], undefined, true); return false; /* R19: Ausholen = Warnklang, immer durch */
         case "act": if (V.act && a) emit(e, V.act[a.k]); if (V.actFn && a) V.actFn(e, a); return false;
         case "tod": emit(e, V.tod); if (V.todFn) V.todFn(e); return !!V.tod;
         case "trommel": return drumPhrase(e);
@@ -1360,8 +1360,8 @@
   const bkListe = () => (Z.brockenListe ? Z.brockenListe() : null) || [];
   function bkWarn(b) {
     BK.stats.warn++; const x = b.x, y = b.y0 + 4;
-    wshot(pk(SRS.knirsch), x, y, { vol: 0.2, rate: 0.55, verb: 0.5, gap: 0, tag: "bkw1", far: 1.3 });
-    wshot(pk(SRS.knirsch), x, y, { vol: 0.16, rate: 0.5, delay: 0.45, verb: 0.5, gap: 0, tag: "bkw2", far: 1.3 });
+    wshot(pk(SRS.knirsch), x, y, { vol: 0.2, rate: 0.55, verb: 0.5, gap: 0, tag: "bkw1", far: 1.3, must: true });
+    wshot(pk(SRS.knirsch), x, y, { vol: 0.16, rate: 0.5, delay: 0.45, verb: 0.5, gap: 0, tag: "bkw2", far: 1.3, must: true });
     [0.1, 0.35, 0.55, 0.72, 0.85, 0.95].forEach((d, i) => wshot(pk(SRS.kies), x, y, { vol: 0.06 + i * 0.02, rate: 1.1 + Math.random() * 0.2, delay: d, verb: 0.4, gap: 0, tag: "bkk" + i, far: 1.3 }));
     dustNoise(x, y, 0.05, 1.1);
   }
