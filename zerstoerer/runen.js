@@ -918,6 +918,7 @@
     return h + '</div><div class="knoepfe"><button data-act="close">' + L(["Zurück", "Back"]) + "</button></div>";
   }
   function openStele() { if (Z.ui && Z.ui.open) Z.ui.open(steleHTML(), { cls: "lager schmal" }); }
+  if (Z.runen) Z.runen._stele = openStele; /* W11 R46: Prüfhilfe für Bildtests */
   function wireUI() {
     if (!Z.ui || !Z.ui.actions) return setTimeout(wireUI, 60);
     Z.ui.actions.rnFrei = k => {
@@ -975,8 +976,10 @@
     ".rn-zeile.frei{background:rgba(229,180,84,.07)}.rn-txt{flex:1;min-width:0}.rn-txt b{color:var(--c)}.rn-txt small{display:block;color:var(--mute,#ab9c8c);font-size:12.5px;line-height:1.3}",
     ".rn-ok{color:var(--gold,#e5b454);font-weight:800;font-size:18px;padding:0 12px}.rn-zeile button{min-width:80px}",
     /* W15: Bewegungs-Runen im Ausrüstungsfenster als „aktiv“ */
-    ".ag-aktiv{display:inline-block;margin-left:4px;padding:0 6px;border:1px solid #8ac040;border-radius:9px;color:#b8e070;font-size:11.5px;font-weight:800;line-height:16px;background:rgba(138,192,64,.12)}",
-    ".ag-bew .ag-rd{color:var(--mute,#ab9c8c);font-size:11.5px;line-height:1.3}"
+    ".ag-aktiv{display:inline-block;margin-left:4px;padding:0 6px;border:1px solid #c89a3e;border-radius:9px;color:#ffd27a;font-size:11.5px;font-weight:800;line-height:16px;background:rgba(229,180,84,.12);white-space:nowrap}", /* W11 R46: Gold statt Grün (Grün nur für Gift) */
+    ".ag-bew .ag-rd{color:var(--mute,#ab9c8c);font-size:11.5px;line-height:1.3}",
+    /* W11 R46: Handheld (640×480) – Runenstele kompakter, damit Titel und alle sechs Zeilen ohne Scrollen passen */
+    ".handheld .rn-liste{gap:3px;margin:3px 0}.handheld .rn-zeile{padding:3px 8px;gap:8px}.handheld .rn-txt small{font-size:11px;line-height:1.2}.handheld .rn-ok{font-size:15px;padding:0 6px}.handheld .rn-zeile button{min-width:64px;padding:2px 6px}"
   ].join("\n");
   document.head.appendChild(css);
   if (document.readyState === "complete") setTimeout(wireUI, 0); else window.addEventListener("load", () => setTimeout(wireUI, 0));
