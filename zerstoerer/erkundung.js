@@ -254,24 +254,30 @@
 
   /* ======================= Ablauf ======================= */
   const tick0 = Z.ebenenTick;
+  /* W13 R3 Handheld: Anzeige- und Buchhaltungsteile (Ziel-Hinweis, Zeitzähler der Zeichnungen, Hebel-Schwung, Geheimkammer-
+     und Ausgangs-Hinweis) einmal pro Bild mit gesammelter Zeit; Aufheben von Fundstücken/Schlüsseln und die Prüfung bleiben
+     je Teilschritt (sonst könnte man bei schnellem Fall an einem Fundstück vorbeirutschen). */
+  const erTakt0 = Z.bildTakt ? Z.bildTakt() : null, erTakt = dt => (!erTakt0 || Z.ebenenCull === false ? dt : erTakt0(dt)); /* Prüfschalter Z.ebenenCull=false: wie vorher */
   Z.ebenenTick = function (dt) {
     if (tick0) tick0(dt);
     const P = Z.player; if (!S || !P || P.dead || Z.level !== S.lv) return;
-    S.t += dt;
     const px = P.x + P.w / 2, py = P.y + P.h;
-    zielTick(dt, px, py);
-    for (const r of S.rewards) { r.t += dt; if (!r.open && Math.abs(r.x - px) < 15 && Math.abs(r.y - py) < 22) openReward(r); }
+    for (const r of S.rewards) if (!r.open && Math.abs(r.x - px) < 15 && Math.abs(r.y - py) < 22) openReward(r);
     for (const k of S.keys) {
-      k.t += dt;
       if (!k.got && Math.abs(k.x - px) < 16 && Math.abs(k.y - 8 - py) < 26) {
         k.got = true; give("schluessel", k.x, k.y - 4, 0);
         A.play("chain", { vol: 0.6, rate: 1.5 }); FX.burst(k.x, k.y - 14, 18, { col: ["#ffd27a", "#fff0c0"], sp: 90, life: 0.6, size: 2, kind: "spark", add: true });
         toast("⚷ <b>" + L(["Schlüssel", "Key"]) + "</b><small>" + L(["Irgendwo wartet eine verschlossene Kammer.", "A locked chamber waits somewhere."]) + "</small>", 3200, { x: k.x, y: k.y - 18 }, { prio: 1, art: "gold" });
       }
     }
-    for (const o of S.levers) if (o.pulled && o.a < 1) o.a = Math.min(1, o.a + dt * 4);
-    for (const s of S.shrines) s.t += dt;
     if (S.trial) trialTick(S.trial, dt);
+    const bt = erTakt(dt); if (!(bt > 0)) return;
+    S.t += bt;
+    zielTick(bt, px, py);
+    for (const r of S.rewards) r.t += bt;
+    for (const k of S.keys) k.t += bt;
+    for (const o of S.levers) if (o.pulled && o.a < 1) o.a = Math.min(1, o.a + bt * 4);
+    for (const s of S.shrines) s.t += bt;
     /* Geheimkammern: gefunden, sobald man drinsteht */
     const ck = Math.floor(px / T / CW) + "," + Math.floor((P.y + P.h / 2) / T / CH);
     if (S.secretCells.has(ck)) found("secret:" + ck, L(["Eine verborgene Kammer.", "A hidden chamber."]));

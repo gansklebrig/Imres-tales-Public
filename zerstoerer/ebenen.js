@@ -78,23 +78,22 @@
     const d = Z.roomFnDef(lv.biome, c.fn); if (!d || !Z.ui || !Z.ui.notify) return;
     Z.ui.notify(U.esc ? U.esc(L(d.n)) : L(d.n), { prio: 0, ort: "welt", x: P.x + P.w / 2, y: P.y - 4, art: "pergament", dauer: 2200, key: "raum" + k });
   }
-  Z.minimapExtra = function (g, ox, oy, scale, big, vw, vh) {
-    const lv = Z.level; if (!lv || !lv.cells || lv.hub || lv.arena || lv.passage || !Z.roomFnDef) return;
-    const fs = big ? Math.max(9, Math.min(14, scale * 5)) : 8;
-    g.save(); g.font = "bold " + fs + "px serif"; g.textAlign = "center"; g.textBaseline = "middle";
+  /* Kartenzeichen werden gesammelt, wenn sich Gesehenes ändert (spätestens alle 0,3 s für Kartennebel und Tore),
+     und nur noch gezeichnet (W13 R3: vorher je Kartenbild über alle Zellen) */
+  let mmC = null;
+  function mmCollect(lv) {
+    const now = performance.now();
+    if (mmC && mmC.lv === lv && mmC.n === seen.size + entered.size * 1000 && now - mmC.t < 300) return mmC;
+    const icons = [], marks = [];
     for (const k in lv.cells) {
       const c = lv.cells[k]; if (!c.fn || !seen.has(k) || c.kind === "secret" && !entered.has(k)) continue;
       const d = Z.roomFnDef(lv.biome, c.fn); if (!d || !d.ico) continue;
-      const x = (c.x * CW + CW / 2 - ox) * scale, y = (c.y * CH + 3 - oy) * scale;
-      if (x < -10 || y < -10 || x > vw * scale + 10 || y > vh * scale + 10) continue;
-      g.fillStyle = "rgba(12,8,12,.7)"; g.beginPath(); g.arc(x, y, fs * 0.62, 0, 6.283); g.fill();
-      g.fillStyle = d.col || "#d8c8a0"; g.fillText(d.ico, x, y + 0.5);
+      icons.push({ tx: c.x * CW + CW / 2, ty: c.y * CH + 3, ico: d.ico, col: d.col || "#d8c8a0" });
     }
     /* W13: offene, noch nicht betretene Durchgänge – kleines goldenes Dreieck am Rand eines gesehenen Raums, das in den
        unbekannten Nachbarraum zeigt. So sieht man auf der Karte, wo es noch weitergeht (und wo sich Rundwege schließen). */
-    const D4 = { L: [-1, 0], R: [1, 0], U: [0, -1], D: [0, 1] }, ms = big ? Math.max(3.5, Math.min(7, scale * 2.2)) : 2.6;
+    const D4 = { L: [-1, 0], R: [1, 0], U: [0, -1], D: [0, 1] };
     const gateOpen = (a, b) => (lv.gates || []).some(gt => gt.open && ((gt.branch === a && gt.other === b) || (gt.branch === b && gt.other === a)));
-    const pulse = 0.75 + 0.25 * Math.sin((Z.time || performance.now() / 1000) * 3);
     for (const k in lv.cells) {
       if (!seen.has(k)) continue;
       const c = lv.cells[k];
@@ -107,10 +106,28 @@
         const ty = s2 === "U" ? c.y * CH + 0.5 : s2 === "D" ? (c.y + 1) * CH - 0.5 : c.y * CH + 9.5;
         /* nur, wenn man die Öffnung selbst schon gesehen hat (Kartennebel) */
         if (Z.explored) { const ix = Math.floor(tx) - D4[s2][0], iy = Math.floor(ty) - D4[s2][1]; let ex = false; for (let q = -1; q <= 1 && !ex; q++) { const jx = ix + (D4[s2][1] ? q : 0), jy = iy + (D4[s2][0] ? q : 0); if (Z.explored[jy * lv.W + jx]) ex = true; } if (!ex) continue; }
-        const x = (tx - ox) * scale, y = (ty - oy) * scale, [dx, dy] = D4[s2];
-        if (x < -10 || y < -10 || x > vw * scale + 10 || y > vh * scale + 10) continue;
+        marks.push({ tx, ty, dx: D4[s2][0], dy: D4[s2][1] });
+      }
+    }
+    return (mmC = { lv, n: seen.size + entered.size * 1000, t: now, icons, marks });
+  }
+  Z.minimapExtra = function (g, ox, oy, scale, big, vw, vh) {
+    const lv = Z.level; if (!lv || !lv.cells || lv.hub || lv.arena || lv.passage || !Z.roomFnDef) return;
+    const C = mmCollect(lv), out = (x, y) => x < -10 || y < -10 || x > vw * scale + 10 || y > vh * scale + 10;
+    const fs = big ? Math.max(9, Math.min(14, scale * 5)) : 8;
+    g.save(); g.font = "bold " + fs + "px serif"; g.textAlign = "center"; g.textBaseline = "middle";
+    for (const o of C.icons) {
+      const x = (o.tx - ox) * scale, y = (o.ty - oy) * scale; if (out(x, y)) continue;
+      g.fillStyle = "rgba(12,8,12,.7)"; g.beginPath(); g.arc(x, y, fs * 0.62, 0, 6.283); g.fill();
+      g.fillStyle = o.col; g.fillText(o.ico, x, y + 0.5);
+    }
+    if (C.marks.length) {
+      const ms = big ? Math.max(3.5, Math.min(7, scale * 2.2)) : 2.6, pulse = 0.75 + 0.25 * Math.sin((Z.time || performance.now() / 1000) * 3);
+      g.fillStyle = "rgba(255,210,122," + pulse.toFixed(2) + ")"; g.strokeStyle = "rgba(20,12,10,.85)"; g.lineWidth = 1;
+      for (const m of C.marks) {
+        const x = (m.tx - ox) * scale, y = (m.ty - oy) * scale, dx = m.dx, dy = m.dy; if (out(x, y)) continue;
         g.beginPath(); g.moveTo(x + dx * ms * 1.3, y + dy * ms * 1.3); g.lineTo(x - dy * ms - dx * ms * 0.4, y + dx * ms - dy * ms * 0.4); g.lineTo(x + dy * ms - dx * ms * 0.4, y - dx * ms - dy * ms * 0.4); g.closePath();
-        g.fillStyle = "rgba(255,210,122," + pulse.toFixed(2) + ")"; g.strokeStyle = "rgba(20,12,10,.85)"; g.lineWidth = 1; g.fill(); g.stroke();
+        g.fill(); g.stroke();
       }
     }
     g.restore();
@@ -123,10 +140,10 @@
   };
 
   /* ======================= Türen ======================= */
-  function doorTick(dt) {
+  function doorTick(dt, anim) { /* Aufstoßen je Teilschritt (Kollision), Aufschwingen (anim) einmal pro Bild */
     const P = Z.player; if (!P) return;
     for (const d of doors) {
-      if (d.opening) { d.open = Math.min(1, d.open + dt * 4); continue; }
+      if (d.opening) { if (anim > 0) d.open = Math.min(1, d.open + anim * 4); continue; }
       const dx = d.x * T, r = { x: dx - 3, y: d.y0 * T, w: T + 6, h: 3 * T };
       const push = (U.overlap(r, P) && ((P.vx > 10 && P.x < dx) || (P.vx < -10 && P.x > dx) || Z.input.held.right || Z.input.held.left)) || (Z.input.pressed.use && Math.abs(P.x + P.w / 2 - (dx + 8)) < 26 && Math.abs(P.y + P.h - (d.y0 + 3) * T) < 20);
       let hitByE = false;
@@ -142,8 +159,10 @@
   }
   function drawDoors(c, t) {
     const B = Z.biome || {}, wood = B.plat || "#6a4a2a";
+    const cam = Z.cam;
     for (const d of doors) {
       const x = d.x * T, y = d.y0 * T, h = 3 * T;
+      if (cam && (x < cam.x - 24 || x > cam.x + cam.w + 24 || y > cam.y + cam.h + 8 || y + h < cam.y - 8)) continue; /* W13 R3: nur sichtbare Türen */
       /* Rahmen */
       c.fillStyle = "#1a1214"; c.fillRect(x - 2, y - 4, 2, h + 4); c.fillRect(x + T, y - 4, 2, h + 4); c.fillRect(x - 2, y - 5, T + 4, 3);
       if (d.open >= 1) { /* offen: Türblatt flach an der Wand */ c.fillStyle = Z.shade ? Z.shade(wood, -0.4) : wood; c.fillRect(d.dir > 0 ? x + T - 3 : x, y, 3, h); continue; }
@@ -161,6 +180,7 @@
      Unbekanntes liegt im Dunkel. Die Sichtweite hängt vom Gebiet ab. */
   let vis = null, mem = null, tvis = null, visLv = null, visT = 0, ofs = null, ofc = null, ofImg = null, seenRef = null, seenN = null;
   const blocks = v => v === 1 || v === 7 || v === 12;
+  Z._fogDbg = () => ({ vis, mem, tvis, ofs }); /* Tests: Sichtnebel ansehen */
   function sightRange(lv) {
     const B = Z.biome || {};
     let r = lv.out ? 30 : B.open === "cave" ? 15 : 21;
@@ -197,28 +217,39 @@
     }
   }
   /* Sichtnebel als kleines Bild (eine Kachel = ein Pixel) aktualisieren; liefert die Lage in Kacheln */
+  let fA = null, fB = null;
   function fogImage(lv, cam) {
     const now = performance.now();
-    if (now - visT > 70 || visLv !== lv) { visT = now; computeVis(lv, cam); }
+    if (now - visT > (Z.gq && Z.gq.lean ? 110 : 70) || visLv !== lv) { visT = now; computeVis(lv, cam); } /* W13 R3: Handheld seltener (Nebel gleitet weiter je Bild) */
     const x0 = Math.max(0, Math.floor(cam.x / T) - 1), x1 = Math.min(lv.W - 1, Math.ceil((cam.x + cam.w) / T) + 1);
-    const y0 = Math.max(0, Math.floor(cam.y / T) - 1), y1 = Math.min(lv.H - 1, Math.ceil((cam.y + cam.h) / T) + 1);
+    /* Außengebiete: über dem Kartenrand (Himmel) läuft der Nebel über 4 Kacheln aus statt an der obersten Reihe abzubrechen */
+    const top = lv.out ? -5 : 0;
+    const y0 = Math.max(top, Math.floor(cam.y / T) - 1), y1 = Math.min(lv.H - 1, Math.ceil((cam.y + cam.h) / T) + 1);
     const w = x1 - x0 + 1, h = y1 - y0 + 1;
     if (!(w > 0 && h > 0) || !isFinite(w + h)) return null; /* ungültige Kamera (NaN) nicht weiterreichen */
     if (!ofs) { ofs = document.createElement("canvas"); ofc = ofs.getContext("2d"); }
     if (ofs.width !== w || ofs.height !== h) { ofs.width = w; ofs.height = h; ofImg = null; }
-    if (!ofImg) ofImg = ofc.createImageData(w, h);
+    if (!ofImg) { ofImg = ofc.createImageData(w, h); fA = new Float32Array(w * h); fB = new Float32Array(w * h); }
     const D = ofImg.data;
     const memA = lv.out ? 0.38 : 0.52, unA = lv.out ? 0.7 : 0.88;
-    for (let ty = y0; ty <= y1; ty++) {
-      let o = (ty - y0) * w * 4, i = ty * lv.W + x0;
-      for (let tx = x0; tx <= x1; tx++, i++, o += 4) {
+    for (let ty = y1; ty >= y0; ty--) { /* von unten nach oben: Himmelsreihen nehmen die oberste Kartenreihe */
+      let o = (ty - y0) * w, i = Math.max(0, ty) * lv.W + x0;
+      const fade = ty < 0 ? Math.max(0, 1 + ty / 4) : 1, o0 = (0 - y0) * w;
+      for (let tx = x0; tx <= x1; tx++, i++, o++) {
+        if (ty < 0) { fA[o] = y1 >= 0 ? fA[o0 + tx - x0] * fade : 0; continue; }
         const v = vis[i] += (tvis[i] - vis[i]) * 0.18;
-        D[o] = 22; D[o + 1] = 14; D[o + 2] = 10; /* warmes Sepia-Dunkel statt Kaltschwarz */ D[o + 3] = ((mem[i] ? memA : unA) * (1 - v) * 255 + 0.5) | 0;
+        fA[o] = (mem[i] ? memA : unA) * (1 - v);
       }
     }
+    /* W13 R3: weiche Kanten – Sichtschatten hinter Wänden und Grenzen „erkundet/unerkundet“ waren kachelscharf (eine Kachel
+       Verlauf durch die Bildglättung); jetzt 5-Kachel-Weichzeichnung (1-2-3-2-1) quer und längs */
+    const K = [1, 2, 3, 2, 1];
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { let s2 = 0, n = 0; for (let k = -2; k <= 2; k++) { const xx = x + k; if (xx < 0 || xx >= w) continue; s2 += fA[y * w + xx] * K[k + 2]; n += K[k + 2]; } fB[y * w + x] = s2 / n; }
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { let s2 = 0, n = 0; for (let k = -2; k <= 2; k++) { const yy = y + k; if (yy < 0 || yy >= h) continue; s2 += fB[yy * w + x] * K[k + 2]; n += K[k + 2]; } const o = (y * w + x) * 4; D[o] = 22; D[o + 1] = 14; D[o + 2] = 10; /* warmes Sepia-Dunkel statt Kaltschwarz */ D[o + 3] = (s2 / n * 255 + 0.5) | 0; }
     ofc.putImageData(ofImg, 0, 0);
     return { x0, y0, w, h };
   }
+
   const fogOn = lv => lv && !lv.hub && !lv.arena && !lv.passage && lv.cells;
   /* bevorzugt: direkt in die Lichtkarte (spart einen Vollbild-Durchgang) */
   let fogFrame = -1;
@@ -262,7 +293,6 @@
       }
       P._vyPrev = P.vy;
       if (Z.input.pressed.roll) P._rollPress = P.time;
-      reveal(P);
     }
     for (const e of Z.enemies) {
       if (!alive(e) || e.def.fly || e.def.boss) continue;
@@ -300,9 +330,10 @@
   /* Ausweichsprung der Gegner nur, wenn hinter ihnen Boden ist (kampfkunst setzt e.vx nach hinten) */
   const ek0 = Z.kampfTick;
   Z.kampfTick = function (dt) {
-    const before = new Map(); for (const e of Z.enemies) before.set(e, e.evadeCd || 0);
+    /* (W13 R3: Vorher-Wert direkt am Gegner statt einer neuen Map je Teilschritt – gleiche Logik, keine Speicherlast) */
+    for (const e of Z.enemies) e._evB = e.evadeCd || 0;
     ek0(dt);
-    for (const e of Z.enemies) if (alive(e) && (e.evadeCd || 0) > (before.get(e) || 0) + 1) { e.face = -e.face; const ok = groundAhead(e, 50); e.face = -e.face; if (!ok) { e.vx = 0; e.vy = Math.min(e.vy, -120); } }
+    for (const e of Z.enemies) if (alive(e) && (e.evadeCd || 0) > (e._evB || 0) + 1) { e.face = -e.face; const ok = groundAhead(e, 50); e.face = -e.face; if (!ok) { e.vx = 0; e.vy = Math.min(e.vy, -120); } }
   };
 
   /* Gruben-Schutz: wer kurz nach einem Treffer aus einer Grube (Stacheln, Lava, Wasser) an derselben Stelle erneut
@@ -330,7 +361,17 @@
   };
   /* verkettet: Module, die sich vor ebenen.js einhängen, laufen weiter (zuerst) */
   const ebTick0 = Z.ebenenTick;
-  Z.ebenenTick = function (dt) { if (ebTick0) ebTick0(dt); doorTick(dt); fallTick(dt); };
+  /* W13 R3 Handheld: Tür-Animation und Raum-Erkennung (Nebel, Raumname) einmal pro Bild mit gesammelter Zeit (Z.bildTakt aus fallen.js;
+     auf lean bis zu 6 Teilschritte je Bild); die Sturzhöhe (fallTick) bleibt je Teilschritt, sonst stimmten Fallschaden und
+     Abfangen nicht. Ohne lean feuert der Takt jeden Teilschritt – Verhalten wie vorher. */
+  const ebTakt0 = Z.bildTakt ? Z.bildTakt() : null, ebTakt = dt => (!ebTakt0 || Z.ebenenCull === false ? dt : ebTakt0(dt)); /* Prüfschalter Z.ebenenCull=false: wie vorher */
+  Z.ebenenTick = function (dt) {
+    if (ebTick0) ebTick0(dt);
+    const bt = ebTakt(dt);
+    doorTick(dt, bt);
+    if (bt > 0) { const P = Z.player; if (P && !P.dead) reveal(P); }
+    fallTick(dt);
+  };
   const dp0 = Z.drawParcours;
   Z.drawParcours = function (c, t) { if (dp0) dp0(c, t); drawDoors(c, t); };
   const al0 = Z.drawAfterLight;
