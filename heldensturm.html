@@ -467,6 +467,11 @@ const diffMult=d=>({hp:Math.pow(3,d),dmg:Math.pow(2,d),il:d*12,gold:1+d*0.75,xp:
 const NORM=()=>G.diff===0&&!G.hard;const HARD=()=>!!(G&&G.hard&&G.diff===0);
 function dMult(){const m=diffMult(G.diff);if(HARD()){m.gold*=1.35;m.xp*=1.15;m.il+=2}return m}
 const diffNm=()=>HARD()?'Schwer':diffName(G.diff);
+/* Einstieg auf „Schwer“: die ersten drei Stufen der Kampagne führen an die volle Härte heran (0 = wie am Anfang, 1 = volle Härte ab Stufe 4).
+   Ein frischer Held ohne Ausrüstung starb sonst schon in der ersten Ebene mehrfach. hartMix(a,b) mischt den Einstiegswert a zum vollen Wert b. */
+const HART_EIN=[0.25,0.55,0.8];
+const hartEin=()=>{try{if(G.mode!=='kampagne')return 1;const s=G.stage|0;return s<HART_EIN.length?HART_EIN[s]:1}catch(e){return 1}};
+const hartMix=(a,b)=>{const e=hartEin();return a+(b-a)*e};
 
 /* ================= Audio =================
    Echte Aufnahmen aus klang/ (VSCO 2 Community Edition, CC0) – Harfe, Glockenspiel, Pauken, Gong,
@@ -2378,7 +2383,7 @@ function rollAffixes(n){const a=AFFIX_IDS.slice(),o={};while(n-->0&&a.length){co
 function makeElite(e,affix,rare){e.elite=true;e.champ=!rare;e.rare=!!rare;e.affix=affix;const k=rare?5:3;e.hp*=k;e.maxHp=e.hp;e.dmg*=rare?1.5:1.3;e.r*=rare?1.35:1.15;
  for(const a in affix)if(AFFIX[a].apply)AFFIX[a].apply(e);e.affixNames=Object.keys(affix).map(a=>AFFIX[a].n).join(' · ')}
 function spawnPack(f,x,y){const rare=Math.random()<0.3+Math.min(0.2,SL()*0.01);packFx(x,y,rare);
- if(rare){const nA=2+(SL()>12||G.diff>0||HARD()?1:0)+(G.diff>1?1:0);const L=spawnEnemy(f,x,y,{});L.elite=false;makeElite(L,rollAffixes(nA),true);
+ if(rare){const nA=2+(SL()>12||G.diff>0||(HARD()&&hartEin()>=0.8)?1:0)+(G.diff>1?1:0);const L=spawnEnemy(f,x,y,{});L.elite=false;makeElite(L,rollAffixes(nA),true);
   for(let i=0;i<4;i++)spawnEnemy(f,x+rnd(-60,60),y+rnd(-60,60),{});return L}
  const af=rollAffixes(1);const n=ri(3,4);for(let i=0;i<n;i++){const e=spawnEnemy(f,x+rnd(-50,50),y+rnd(-50,50),{});e.elite=false;makeElite(e,af,false)}}
 function affixTick(e,dt){if(!e.affix)return;for(const a in e.affix){const A=AFFIX[a];if(A.tick)A.tick(e,dt)}}
@@ -2475,10 +2480,12 @@ const $=id=>document.getElementById(id);
 const cv=$('cv');let cx=cv.getContext('2d',{alpha:false});
 let scr=$('scr');const hud=$('hud'),skillsEl=$('skills'),toastEl=$('toast');
 let W=0,H=0,DPR=1,ZOOM=1;
-/* Grafikstufen: 0 Minimal · 1 Niedrig · 2 Mittel · 3 Hoch · 4 Episch. „Auto“ passt sich der Bildrate an. */
+/* Grafikstufen: 0 Minimal · 1 Niedrig · 2 Mittel · 3 Hoch · 4 Episch · 5 Legendär. „Auto“ passt sich der Bildrate an.
+   Legendär (Kennzeichen „leg“) ist für starke Grafikkarten: volle Bildschirmauflösung ohne Obergrenze, Licht und Lichtschatten in voller Auflösung,
+   feinerer Leuchtschein, deutlich mehr Funken, Schwebeteilchen und Kampfspuren. Die Automatik wählt sie nur im PC-Programm (window.__hsPC). */
 /* Die Auflösung bleibt immer scharf – gespart wird bei Licht, Partikeln, Spuren und Leichen. */
-const HS_VERSION='05.11.2026 · Optik';
-const GFX=[{n:'Minimal',px:1.6e6,dpr:1.5,q:1,lr:0.25,parts:120,corpse:0,lite:1,nodec:1,noamb:1},{n:'Niedrig',px:2.2e6,dpr:1.75,q:1,lr:0.3,parts:260,corpse:6,nodec:1},{n:'Mittel',px:3.2e6,dpr:2,q:2,lr:0.4,parts:600,corpse:18},{n:'Hoch',px:5e6,dpr:2,q:2,lr:0.5,parts:900,corpse:35},{n:'Episch',px:8e6,dpr:2.5,q:3,lr:0.6,parts:1500,corpse:60}];
+const HS_VERSION='24.11.2026 · Legendär';
+const GFX=[{n:'Minimal',px:1.6e6,dpr:1.5,q:1,lr:0.25,parts:120,corpse:0,lite:1,nodec:1,noamb:1},{n:'Niedrig',px:2.2e6,dpr:1.75,q:1,lr:0.3,parts:260,corpse:6,nodec:1},{n:'Mittel',px:3.2e6,dpr:2,q:2,lr:0.4,parts:600,corpse:18},{n:'Hoch',px:5e6,dpr:2,q:2,lr:0.5,parts:900,corpse:35},{n:'Episch',px:8e6,dpr:2.5,q:3,lr:0.6,parts:1500,corpse:60},{n:'Legendär',px:3.4e7,dpr:3,q:3,lr:1,parts:4000,corpse:150,leg:1}];
 let GAUTO=3,GCEIL=3,FPSNOW=60,RSC=1,RSLOW=0,RSOK=0;
 /* feste Render-Auflösung (Anteil der Bildschirmauflösung) oder null = automatisch */
 const RES_STUFEN=[1,0.85,0.7,0.5];const resFest=()=>{const v=SAVE&&(SAVE.res!=null?SAVE.res:SAVE.fullres?1:null);return RES_STUFEN.includes(v)?v:null};
@@ -2487,7 +2494,7 @@ const SWR=(()=>{try{const g=document.createElement('canvas').getContext('webgl')
 if(SWR){RSC=0.7;GAUTO=1}
 try{const f=resFest();if(f)RSC=f}catch(e){}
 function gfxMigrate(){if(SAVE.gfx===undefined){SAVE.gfx=SAVE.fx==='low'?1:SAVE.fx==='hi'?4:'auto'}}
-const gfxL=()=>{const g=SAVE&&SAVE.gfx;return g===undefined||g==='auto'||!isFinite(+g)?GAUTO:clamp(Math.round(+g),0,4)};
+const gfxL=()=>{const g=SAVE&&SAVE.gfx;return g===undefined||g==='auto'||!isFinite(+g)?GAUTO:clamp(Math.round(+g),0,GFX.length-1)};
 const GF=()=>GFX[gfxL()];
 /* Pixelscharf: auf Handys mit hoher Pixeldichte (z. B. 2,6×) wird nicht krumm hochskaliert (das macht weich),
    sondern genau ½ oder ⅓ der Bildschirmauflösung gerechnet und Pixel für Pixel verdoppelt – scharf und sogar sparsamer. */
@@ -3694,7 +3701,7 @@ const effStage=()=>SL()+diffStages(G.diff);
 const EB=()=>G&&G.diff===0?Math.max(0,1-SL()/14):0;
 /* Ab sehr hohen Stufen wachsen Gegner langsamer, damit Hölle und darüber schwer, aber schaffbar bleiben */
 const softE=(E,k)=>E<=30?E:30+(E-30)*k;
-function scale(){const E=effStage(),prog=Math.min(1,(G.need?G.stageKills/G.need:1)),eb=EB(),an=1+0.15*(1-anlauf().lv);return{hp:an*28*Math.pow(1.14,softE(E,0.55))*(1+0.35*prog)*(1+0.8*eb)*mpHp()*(HARD()?1.35:1),dmg:an*9.2*Math.pow(1.122,softE(E,0.42))*(1+0.3*prog)*(1+0.75*eb)*(NORM()&&G.mode==='kampagne'?0.8:1)*(HARD()?(G.stage===0&&G.mode==='kampagne'?1.05:1.2):1),il:Math.max(1,Math.round(1+1.1*E+prog*2))+(HARD()?2:0)}}
+function scale(){const E=effStage(),prog=Math.min(1,(G.need?G.stageKills/G.need:1)),eb=EB(),an=1+0.15*(1-anlauf().lv);return{hp:an*28*Math.pow(1.14,softE(E,0.55))*(1+0.35*prog)*(1+0.8*eb)*mpHp()*(HARD()?hartMix(1.08,1.35):1),dmg:an*9.2*Math.pow(1.122,softE(E,0.42))*(1+0.3*prog)*(1+0.75*eb)*(NORM()&&G.mode==='kampagne'?0.8:1)*(HARD()?hartMix(0.8,1.2):1),il:Math.max(1,Math.round(1+1.1*E+prog*2))+(HARD()?2:0)}}
 function spawnEnemy(def,x,y,o){o=o||{};const sc=scale();const big=o.boss||o.guard||o.add;const elite=false;
  const sz=(big?(def.size||2):(def.size||1)*(elite?1.35:1))*(dmod('riesen')&&!big?1.3:1);
  const hp=sc.hp*(def.hp||1)*(dmod('riesen')?1.5:1)*(dmod('goldrausch')?1.25:1)*wxUndead(def)*(elite?4.5:1)*(o.boss?(40+SL()*1.5):o.guard?(8+Math.min(6,SL()*0.5)):o.add?10:1);
@@ -3716,8 +3723,8 @@ function firstWave(){zielStart();if(!G.bot&&G.stage===0&&NET.role!=='guest'){con
 function spawnTick(dt){
  if(G.room)return;G.spawnT-=dt;if(G.spawnT>0)return;const prog=Math.min(1,(G.need?G.stageKills/G.need:1));const bossy=G.boss||G.guardE;
  G.spawnT=Math.max(0.38,1.45-prog*0.6-Math.min(SL(),24)*0.035-G.diff*0.08)*(1-0.3*EB())/mpSpawn()*(bossy?2.4:1)*(G.portal&&!G.boss?99:1);
- const surv0=G.boss&&G.boss.survive>0&&NORM()&&G.mode==='kampagne';if(HARD())G.spawnT*=0.85;if(surv0)G.spawnT*=1.6;const AN=anlauf();G.spawnT*=(1.4-0.4*AN.st)*(1.15-0.15*AN.lv)*(SL()>=8?0.9:1);
- const cap=Math.round((50+Math.min(SL(),24)*2+G.diff*8+(HARD()?10:0)+20*(mpN()-1))*(surv0?0.6:1)*(0.6+0.4*AN.lv)*(0.8+0.2*AN.st)*(SL()>=8?1.12:1));if(G.enemies.length>=cap)return;
+ const surv0=G.boss&&G.boss.survive>0&&NORM()&&G.mode==='kampagne';if(HARD())G.spawnT*=hartMix(1,0.85);if(surv0)G.spawnT*=1.6;const AN=anlauf();G.spawnT*=(1.4-0.4*AN.st)*(1.15-0.15*AN.lv)*(SL()>=8?0.9:1);
+ const cap=Math.round((50+Math.min(SL(),24)*2+G.diff*8+(HARD()?Math.round(hartMix(0,10)):0)+20*(mpN()-1))*(surv0?0.6:1)*(0.6+0.4*AN.lv)*(0.8+0.2*AN.st)*(SL()>=8?1.12:1));if(G.enemies.length>=cap)return;
  const f=pickFoe(prog),pt=viewEdgePoint(50);
  const packC=(SL()<2?0.03:0.06)+0.03*EB()+0.005*Math.min(SL(),27)+0.03*G.diff;
  if(!bossy&&f.k!=='still'&&Math.random()<packC*(dmod('elitenflut')?3:1)*(G.gefahr?2.2:1)*wxPack()*b2PackF()){spawnPack(f,pt.x,pt.y);return}
@@ -3957,7 +3964,7 @@ function dropItem(x,y,it){it=ancRoll(it);if(G.portal&&d2({x,y},G.portal)<100*100
 /* ================= Spieler ================= */
 const keys={};let joy=null;
 function absorb(a){if(P.shieldHp>0){const t=Math.min(P.shieldHp,a);P.shieldHp-=t;a-=t;if(P.shieldHp<=0)burst(P.x,P.y,'#ecdcb2',12,140)}return a}
-function hurt(raw){G.kampfT=G.time;if(P.inv>0||P.down||G.state!=='play')return;if(P.id==='friedrich'&&Math.random()<0.125){if(!P.dgT||G.time-P.dgT>0.6){P.dgT=G.time;word(P.x,P.y-34,'ausgewichen','#cfe8b0')}return}let a=raw*hookMul('hurtMul',raw)*(P.buffs.roarG>0?0.85:1)*mpGuard()*setHurtMul()*curseHurtMul()*(1-armorRed(P.st.armor))*(LP('demohaut')?0.85:1)*(shrineOn('schutz')?0.5:1)*(1+modSum('edmg'))*(G.stage===0&&NORM()?0.8:1);a=absorb(a);a=Math.min(a,P.st.maxHp*(G.mode==='abstieg'?0.7:0.75));/* kein Ein-Treffer-Tod aus vollem Leben */if(LP('demohaut')&&Math.random()<0.2){aoe(P.x,P.y,110*P.st.area,sk(2),{knock:200});G.fxs.push({k:'tentacle',x:P.x,y:P.y-60,x2:P.x+rnd(-60,60),y2:P.y+rnd(-30,30),t:0,life:0.35})}if(a<=0)return;P.hp-=a;rumble(P,Math.min(1,0.15+a/P.st.maxHp*2.5),Math.min(300,90+a/P.st.maxHp*600));P.hurtT=0.18;P.hurtA=G.time;hurtFx(a);try{hurtFb(a)}catch(e){}G.shake=Math.min(G.shake+2.5,12);num(P.x,P.y-26,a,false,true);sfx('hurt');skHurt();if(P.hp<=0)die()}
+function hurt(raw){G.kampfT=G.time;if(P.inv>0||P.down||G.state!=='play')return;if(P.id==='friedrich'&&Math.random()<0.125){if(!P.dgT||G.time-P.dgT>0.6){P.dgT=G.time;word(P.x,P.y-34,'ausgewichen','#cfe8b0')}return}let a=raw*hookMul('hurtMul',raw)*(P.buffs.roarG>0?0.85:1)*mpGuard()*setHurtMul()*curseHurtMul()*(1-armorRed(P.st.armor))*(LP('demohaut')?0.85:1)*(shrineOn('schutz')?0.5:1)*(1+modSum('edmg'))*(G.stage===0&&NORM()?0.8:1)*(G.stage===0&&HARD()&&G.mode==='kampagne'?0.9:1);a=absorb(a);a=Math.min(a,P.st.maxHp*(G.mode==='abstieg'?0.7:0.75));/* kein Ein-Treffer-Tod aus vollem Leben */if(LP('demohaut')&&Math.random()<0.2){aoe(P.x,P.y,110*P.st.area,sk(2),{knock:200});G.fxs.push({k:'tentacle',x:P.x,y:P.y-60,x2:P.x+rnd(-60,60),y2:P.y+rnd(-30,30),t:0,life:0.35})}if(a<=0)return;P.hp-=a;rumble(P,Math.min(1,0.15+a/P.st.maxHp*2.5),Math.min(300,90+a/P.st.maxHp*600));P.hurtT=0.18;P.hurtA=G.time;hurtFx(a);try{hurtFb(a)}catch(e){}G.shake=Math.min(G.shake+2.5,12);num(P.x,P.y-26,a,false,true);sfx('hurt');skHurt();if(P.hp<=0)die()}
 function hurtDot(a){if(P.inv>0||P.down||G.state!=='play')return;a=a*setHurtMul()*curseHurtMul()*(1-armorRed(P.st.armor))*(LP('demohaut')?0.85:1)*(shrineOn('schutz')?0.5:1)*(1+modSum('edmg'));a=absorb(a);if(a<=0)return;P.hp-=a;P.dotAcc=(P.dotAcc||0)+a;if(P.dotAcc>P.st.maxHp*0.03){num(P.x+rnd(-8,8),P.y-26,P.dotAcc,false,true);P.dotAcc=0}if(P.hp<=0)die()}
 function die(){if(pactSave())return;if(LP('fledermaus')&&!P.batUsed){P.batUsed=1;P.hp=1;P.inv=2;P.batT=2;smoke(P.x,P.y);toast('Neznas Flucht! Du wirst zur Fledermaus.','#c48cff');later(2,()=>{heal(P.st.maxHp*0.3);smoke(P.x,P.y)});sfx('blink');return}
  if(P.revives>0){P.revives--;P.hp=P.st.maxHp*0.6;P.inv=2.5;aoe(P.x,P.y,280,sk(2),{knock:600,stun:1.5});ring(P.x,P.y,280,'#e5b454',0.8,8);toast('Zweite Chance! Du erhebst dich erneut.','#e5b454');sfx('level');return}
@@ -4131,7 +4138,7 @@ function update(dt){
  const S=STAGES[G.stage];
  if(G.firstWave&&G.stageTime>0.4){G.firstWave=0;firstWave()}
  if(G.stageKills>=G.need&&!G.room&&!(G.obj&&!G.obj.done)){if(S.boss){if(!G.boss&&!G.bossDone)spawnBoss()}else if(!G.guardE&&!G.guardDone)spawnGuard()}
- spawnTick(dt);zielTick(dt);if(!G.bot&&P.hp<P.st.maxHp*0.3){G.hbT=(G.hbT||0)-dt;if(G.hbT<=0){G.hbT=0.85;sfx('heart')}}
+ spawnTick(dt);zielTick(dt);if(!G.bot&&P.hp<P.st.maxHp*0.3){G.hbT=(G.hbT||0)-dt;if(G.hbT<=0){G.hbT=lwTakt(P.hp/P.st.maxHp);sfx('heart')}}
  if(G.mp&&(!SAVE.split||G.net))mpLeash();
  if(G.time-G.lastSave>20){G.lastSave=G.time;(window.requestIdleCallback||setTimeout)(()=>persist(),{timeout:2000})}
 }
@@ -4242,9 +4249,9 @@ function fpsWatch(dt,raw,js){FW.iv.push(raw);FW.js.push(js||0);FW.t+=raw;if(FW.t
 function drawPerf(){if(!SAVE.perf||!PERF)return;const c=cx;c.save();c.setTransform(DPR,0,0,DPR,0,0);c.font='700 11px ui-monospace,monospace';c.textAlign='left';c.textBaseline='top';
  const L=[`${PERF.fps} FPS · Bildschirm ${PERF.hz} Hz`,`verpasste Bilder ${PERF.miss}%`,`Rechenzeit ⌀${PERF.js.toFixed(1)} / max ${PERF.jsM.toFixed(1)} ms`,`Grafik: ${GFX[PERF.lv].n} · ${cv.width}×${cv.height}${RSC<1?' · '+Math.round(RSC*100)+'%':''}`].concat(SWR?['⚠ Grafikbeschleunigung des Browsers aus']:[]);
  const y0=(typeof PILLTOP!=='undefined'?PILLTOP:120)+30;c.fillStyle='rgba(0,0,0,.65)';c.fillRect(8,y0,236,L.length*15+8);c.fillStyle=PERF.miss>10?'#ff8a7a':'#bfffc8';L.forEach((s,i)=>c.fillText(s,13,y0+4+i*15));c.restore()}
-const gfxInner=()=>{const L=gfxL(),auto=SAVE.gfx==='auto'||SAVE.gfx===undefined;return`<div style="min-width:0"><div class="t">Grafikqualität<small><span id="gfxName">${window.__hsULTRA&&__hsULTRA.on?'Ultra leicht':GFX[L].n}${auto?' (Auto)':''}</span> · <span id="gfxFps">${FPSNOW} FPS</span></small></div><div class="d">Das Bild bleibt auf jeder Stufe scharf. Ruckelt es am Handy, weiter nach links schieben – dann gibt es weniger Licht, Funken und Spuren. Am PC sieht „Episch“ am besten aus: mehr Licht, Leuchtschein, Funken und fliegende Gegner.</div>
+const gfxInner=()=>{const L=gfxL(),auto=SAVE.gfx==='auto'||SAVE.gfx===undefined;return`<div style="min-width:0"><div class="t">Grafikqualität<small><span id="gfxName">${window.__hsULTRA&&__hsULTRA.on?'Ultra leicht':GFX[L].n}${auto?' (Auto)':''}</span> · <span id="gfxFps">${FPSNOW} FPS</span></small></div><div class="d">Das Bild bleibt auf jeder Stufe scharf. Ruckelt es am Handy, weiter nach links schieben – dann gibt es weniger Licht, Funken und Spuren. Am PC sieht „Episch“ sehr gut aus: mehr Licht, Leuchtschein, Funken und fliegende Gegner. „Legendär“ ist für starke Grafikkarten – volle Auflösung, schärfere Lichtschatten, feinerer Leuchtschein, Sonnenstrahlen, Lichtspiel auf Teichen und viel mehr Funken, Schwebeteilchen und Kampfspuren${window.__hsPC?'':' (am flüssigsten im PC-Programm oder in Chrome/Edge)'}.</div>
  <div class="row" style="margin:6px 0 2px;align-items:center;flex-wrap:wrap"><span class="muted" style="font-size:13px">Auflösung:</span>${[null].concat(RES_STUFEN).map(v=>`<button class="btn small ${resFest()===v?'gold':''}" data-act="res" data-v="${v==null?'auto':v}" title="${v==null?'Senkt die Auflösung nur, wenn es ruckelt':v===1?'Immer volle Schärfe':'Feste, kleinere Auflösung – mehr Bilder pro Sekunde, etwas weicher'}">${v==null?'Auto':Math.round(v*100)+' %'}</button>`).join('')}<span class="muted" style="font-size:12px">${cv.width}×${cv.height}</span></div>
- <input type="range" min="0" max="4" step="1" value="${L}" data-gfx aria-label="Grafikqualität"><div class="gfxlbl">${GFX.map((g,i)=>`<span class="${i===L?'on':''}">${g.n}</span>`).join('')}</div>
+ <input type="range" min="0" max="${GFX.length-1}" step="1" value="${L}" data-gfx aria-label="Grafikqualität"><div class="gfxlbl">${GFX.map((g,i)=>`<span class="${i===L?'on':''}">${g.n}</span>`).join('')}</div>
  <div class="row" style="margin-top:6px"><button class="btn small ${auto?'gold':''}" data-act="gfx-auto">${auto?'Automatisch: an':'Automatisch anpassen'}</button>${ulKnopf()}<button class="btn small ${SAVE.perf?'gold':''}" data-act="perf">${SAVE.perf?'Leistungsanzeige: an':'Leistungsanzeige'}</button><button class="btn small ${SAVE.fov!==false?'gold':''}" data-act="fov" title="Hinter Mauern, Felsen und Hauswänden liegt Schatten – du siehst nur, was dein Held sieht">${SAVE.fov!==false?'Sichtschatten: an':'Sichtschatten: aus'}</button>${(window.devicePixelRatio||1)>=1.5?`<button class="btn small ${sharpOn()?'gold':''}" data-act="sharp" title="Bildschirmpixel genau verdoppeln statt weich hochrechnen">${sharpOn()?'Bild: pixelscharf':'Bild: weich'}</button>`:''}</div></div>`};
 const fsOk=()=>!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);const fsOn=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
 function fsToggle(){try{if(fsOn())(document.exitFullscreen||document.webkitExitFullscreen).call(document);else{const e=document.documentElement;const r=(e.requestFullscreen||e.webkitRequestFullscreen).call(e,{navigationUI:'hide'});if(r&&r.catch)r.catch(()=>toast('Vollbild wird hier nicht unterstützt.','#ff8a7a'))}}catch(e){toast('Vollbild wird hier nicht unterstützt.','#ff8a7a')}}
@@ -4302,7 +4309,7 @@ function light(x,y,r,c,life,a){if(!G.lights)G.lights=[];if(G.lights.length>40)G.
 
 /* Partikel: Funken (leuchtend), Glut, Geister, Brocken (mit Schwerkraft), Rauch */
 function part(o){const cap=GF().parts;if(G.parts.length>=cap)return;o.t=0;G.parts.push(o)}
-function burst(x,y,c,n,spd){const q=fxQ();if(G.parts.length>(q>1?650:220))n=Math.min(n,3);else if(q<2)n=Math.ceil(n*0.55);const lc=lite(c);
+function burst(x,y,c,n,spd){const q=fxQ();if(G.parts.length>(GF().leg?2200:q>1?650:220))n=Math.min(n,3);else if(q<2)n=Math.ceil(n*0.55);const lc=lite(c);
  for(let i=0;i<n;i++){const a=rnd(TAU),s=rnd(0.3,1)*spd;
   if(i%3!==2)part({k:'spark',x,y,vx:Math.cos(a)*s*1.5,vy:Math.sin(a)*s*1.5,life:rnd(0.16,0.42),c:lc,s:rnd(1.2,2.4),drag:0.88});
   else part({k:'chunk',x,y,vx:Math.cos(a)*s*0.6,vy:Math.sin(a)*s*0.45,z:rnd(2,10),vz:rnd(80,240),life:rnd(0.5,0.9),c,s:rnd(2,4.2),rot:rnd(TAU),vr:rnd(-14,14),drag:0.95})}}
@@ -4629,13 +4636,13 @@ function gWind(e,dur,snd){e.gw={t0:G.time,dur};if(snd!==false&&fxQ()>=1)sfxAt(GV
 function gEnr(e){if(e.genr||e.hp>=e.maxHp*0.4)return;e.genr=1;word(e.x,e.y-e.r-18,'In Rage!','#ff5a3a');ring(e.x,e.y,e.r+40,'#ff4a3a',0.6,6);G.shake+=3;sfxAt('g_enrage',e.x,e.y);sfxAt(GVOICE[e.def.gx]||'gv_hum',e.x,e.y)}
 const GBM={
  /* Kriegshorn: Schockwelle, Verstärkung, die Goblins in der Nähe werden flinker */
- g_horn(e,enr){const ea=NORM()&&G.stage<3;gWind(e,0.55);later(0.55,()=>{if(e.dead)return;sfxAt('g_horn',e.x,e.y);tele({k:'wave',x:e.x,y:e.y,r:e.r,spd:380,max:320,dmg:e.dmg*0.6,c:'#c9b38a',push:320});tele({k:'circle',x:e.x,y:e.y,r:300,delay:0.5,gs:'horn',c:'#ffd04a'});
+ g_horn(e,enr){const ea=(NORM()&&G.stage<3)||(HARD()&&hartEin()<0.6);gWind(e,0.55);later(0.55,()=>{if(e.dead)return;sfxAt('g_horn',e.x,e.y);tele({k:'wave',x:e.x,y:e.y,r:e.r,spd:380,max:320,dmg:e.dmg*0.6,c:'#c9b38a',push:320});tele({k:'circle',x:e.x,y:e.y,r:300,delay:0.5,gs:'horn',c:'#ffd04a'});
   if(G.enemies.length<110)for(let i=0;i<(ea?1:2)+(enr?1:0);i++){const a=rnd(TAU);spawnEnemy(FOES.goblin,e.x+Math.cos(a)*(e.r+50),e.y+Math.sin(a)*(e.r+50),{summon:1})}
   for(const o of G.enemies)if(!o.dead&&!o.hornB&&o!==e&&o.def.shape==='goblin'&&d2(o,e)<420*420){o.hornB=1;o.sp*=ea?1.08:1.2}word(e.x,e.y-e.r-14,'Zum Angriff!','#ffd04a')})},
  /* Rudelsprung: kauert, springt auf das Ziel, landet mit Wucht */
- g_pounce(e,enr){const tx=P.x,ty=P.y;gWind(e,0.5);tele({k:'circle',x:tx,y:ty,r:95,delay:NORM()&&G.stage<3?0.95:0.75,dmg:e.dmg*(NORM()&&G.stage<3?1.15:1.6),c:'#ffd04a'});later(0.5,()=>{if(e.dead)return;const d=Math.max(1,Math.sqrt(d2(e,{x:tx,y:ty}))),sp=Math.min(1700,d/0.25);e.charging=0.25;e.cvx=(tx-e.x)/d*sp;e.cvy=(ty-e.y)/d*sp;sfxAt('gv_wolf',e.x,e.y)});e.moveT+=0.5},
+ g_pounce(e,enr){const tx=P.x,ty=P.y;gWind(e,0.5);tele({k:'circle',x:tx,y:ty,r:95,delay:NORM()&&G.stage<3?0.95:HARD()?hartMix(0.95,0.75):0.75,dmg:e.dmg*(NORM()&&G.stage<3?1.15:HARD()?hartMix(1.15,1.6):1.6),c:'#ffd04a'});later(0.5,()=>{if(e.dead)return;const d=Math.max(1,Math.sqrt(d2(e,{x:tx,y:ty}))),sp=Math.min(1700,d/0.25);e.charging=0.25;e.cvx=(tx-e.x)/d*sp;e.cvy=(ty-e.y)/d*sp;sfxAt('gv_wolf',e.x,e.y)});e.moveT+=0.5},
  /* Felswurf der Höhlenwache */
- g_boulder(e,enr){gWind(e,0.6);later(0.35,()=>{if(e.dead)return;for(let i=0;i<2+(enr?1:0);i++){const x=P.x+(i?rnd(-150,150):0),y=P.y+(i?rnd(-150,150):0);tele({k:'circle',x,y,r:95,delay:1.15,dmg:e.dmg*(NORM()&&G.stage<3?1.4:2),c:'#c8a070',rock:{x:e.x,y:e.y}})}sfxAt('g_rock',e.x,e.y)})},
+ g_boulder(e,enr){gWind(e,0.6);later(0.35,()=>{if(e.dead)return;for(let i=0;i<2+(enr?1:0);i++){const x=P.x+(i?rnd(-150,150):0),y=P.y+(i?rnd(-150,150):0);tele({k:'circle',x,y,r:95,delay:1.15,dmg:e.dmg*(NORM()&&G.stage<3?1.4:HARD()?hartMix(1.4,2):2),c:'#c8a070',rock:{x:e.x,y:e.y}})}sfxAt('g_rock',e.x,e.y)})},
  /* Zahltag! Ein Fächer aus goldenen Münzen, drei Salven */
  g_coins(e,enr){gWind(e,0.4,false);word(e.x,e.y-e.r-14,'Zahltag!','#ffd04a');for(let w=0;w<3;w++)later(0.4+w*0.22,()=>{if(e.dead)return;const a0=ang(e,P),n=6+(enr?2:0);for(let i=0;i<n;i++)eShot(e.x,e.y-4,a0-0.7+1.4*i/(n-1)+rnd(-0.04,0.04),250+w*20,e.dmg*0.5,{kind:'eball',c:'#ffd04a',r:5});e.atkA=G.time;sfxAt('g_coins',e.x,e.y)})},
  /* Kettenhaken: zieht das Opfer heran und hält es kurz fest */
@@ -4824,7 +4831,7 @@ function renderWorld(dt){
  drawNums();drawBubbles();
  cx.setTransform(DPR,0,0,DPR,0,0);
  if(q>2||(q>1&&(window.__hsGLWELT&&__hsGLWELT.api&&__hsGLWELT.api.EB&&__hsGLWELT.api.EB.an&&!__hsGLWELT.api.RS.u.soft)))bloom();if(q>1)vignette();if(!G.vp){drawPills();drawCombo();drawMpHud()}
- const pr=P.hp/P.st.maxHp;if(pr<0.35){const g=cx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.3,W/2,H/2,Math.max(W,H)*0.7);g.addColorStop(0,'rgba(120,0,0,0)');g.addColorStop(1,`rgba(140,0,0,${(0.35-pr)*1.4+0.1*Math.sin(t*6)})`);cx.fillStyle=g;cx.fillRect(0,0,W,H)}
+ const pr=P.hp/P.st.maxHp;if(pr<0.35&&(G.vp||!LW.an)){const g=cx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.3,W/2,H/2,Math.max(W,H)*0.7);g.addColorStop(0,'rgba(120,0,0,0)');g.addColorStop(1,`rgba(140,0,0,${(0.35-pr)*1.4+0.1*Math.sin(t*6)})`);cx.fillStyle=g;cx.fillRect(0,0,W,H)}
  if(G.sf){G.sf.a-=dt*G.sf.a0/G.sf.d;if(G.sf.a<=0)G.sf=null;else{cx.globalAlpha=G.sf.a;cx.fillStyle=G.sf.c;cx.fillRect(0,0,W,H);cx.globalAlpha=1}}
  drawBanner(dt);
  const tgt=G.boss||G.guardE||G.portal;if(tgt){const sxp=(tgt.x-camX)*ZOOM,syp=(tgt.y-camY)*ZOOM;if(sxp<0||syp<0||sxp>W||syp>H){const a=Math.atan2(syp-H/2,sxp-W/2);const m=46;const ex=clamp(W/2+Math.cos(a)*W,m,W-m),ey=clamp(H/2+Math.sin(a)*H,m+60,H-m);cx.save();cx.translate(ex,ey);cx.rotate(a);poly(cx,tgt===G.portal?'#c48cff':'#ff5a4a',14,0,-8,-9,-8,9);cx.restore()}}
@@ -6216,7 +6223,7 @@ function updCorpses(dt){const A=G.corpses;if(!A||!A.length)return;
    if(c.z<=0){c.z=0;if(c.vz<-160&&!c.bounced){c.vz=-c.vz*0.28;c.bounced=1}else{c.vz=0;c.land=1;c.rot=((c.rot%TAU)+TAU)%TAU;if(fxQ()>1)puffs(c.x,c.y+c.r*0.5,'#5a5048',3,40,10)}c.vx*=0.5;c.vy*=0.5;c.vr*=0.4}}
   else{const k=Math.max(0,1-7*dt);c.vx*=k;c.vy*=k;c.x+=c.vx*dt;c.y+=c.vy*dt;const tg=c.lie>0?Math.PI/2:Math.PI*1.5;c.rot+=(tg-c.rot)*Math.min(1,dt*10)}
   c.x=clamp(c.x,10,WORLD-10);c.y=clamp(c.y,10,WORLD-10)}}
-function drawCorpses(inView,t){const A=G.corpses;if(!A||!A.length)return;const life=fxQ()>2?5:1.8;
+function drawCorpses(inView,t){const A=G.corpses;if(!A||!A.length)return;const life=GF().leg?12:fxQ()>2?5:1.8;
  for(const c of A){if(!inView(c.x,c.y,80))continue;const al=1-Math.max(0,(c.t-(life-0.7))/0.7);if(al<=0)continue;cx.save();cx.globalAlpha=al*(c.land?(fxQ()>2?0.9:0.7):1);
   cx.translate(c.x,c.y-c.z);cx.rotate(c.rot);cx.translate(-c.x,-c.y);drawEnemy(c,0);cx.restore()}
  cx.globalAlpha=1;G.corpses=A.filter(c=>c.t<life)}
@@ -7358,7 +7365,7 @@ function netGuestFrame(dt){if(!G.netGuestRun)return;const now=performance.now();
  for(const c of['zones','ezones','tele','loot'])for(const o of G[c]||[])if(typeof o.t==='number')o.t+=dt;
  if(G.bub){G.bub.t+=dt;if(G.bub.t>G.bub.dur)G.bub=null}bubsTick(dt);
  try{updProjTrails()}catch(e){}
- const me=NET.mine;if(me&&me.st&&me.hp<me.st.maxHp*0.3&&!me.down){G.hbT=(G.hbT||0)-dt;if(G.hbT<=0){G.hbT=0.85;sfx('heart')}}}
+ const me=NET.mine;if(me&&me.st&&me.hp<me.st.maxHp*0.3&&!me.down){G.hbT=(G.hbT||0)-dt;if(G.hbT<=0){G.hbT=lwTakt(me.hp/me.st.maxHp);sfx('heart')}}}
 /* Welche eigenen Eingaben hat der Gastgeber schon verarbeitet? (aus dem Stand des eigenen Helden) */
 function netAckIn(){const me=NET.mine;return me&&me._r&&me._r.netAck?me._r.netAck:Math.max(0,(NET.sentQ||0)-Math.round((NET.rtt||80)/16))}
 function netAct(k,v){NET.aSeq++;NET.aQ.push([NET.aSeq,k,v]);if(NET.aQ.length>24)NET.aQ.shift();NET.lastIn=0}
@@ -20040,7 +20047,7 @@ PETART.ev_kueken={draw(a,t,c,fade){const fl=Math.sin(t*14+a.v*9)*0.5+0.5,y=a.y-1
 window.__hsEv={EV2,EV2L,ev2Start,ev2Chance,ev2Pick,fin:()=>finishEvent(),go:()=>{hideScreen();hud.hidden=false;G.state="play";G.paused=false}};
 
 /* ---------- Offline spielen: App installieren (Service Worker speichert alles) oder ZIP für den PC ---------- */
-const OFF={ok:false,reg:null,bip:null,st:null,fort:null,zip:null,datei:location.protocol==='file:'||location.hostname==='appassets.androidplatform.net',app:location.hostname==='appassets.androidplatform.net',inst:false};window.__hsAPP=OFF.app;
+const OFF={ok:false,reg:null,bip:null,st:null,fort:null,zip:null,datei:location.protocol==='file:'||location.hostname==='appassets.androidplatform.net'||!!window.__hsPC,app:location.hostname==='appassets.androidplatform.net',pc:!!window.__hsPC,inst:false};window.__hsAPP=OFF.app;
 function offMB(b){return(b/1e6).toLocaleString('de-DE',{maximumFractionDigits:1,minimumFractionDigits:1})+' MB'}
 function offSend(m){try{const c=navigator.serviceWorker&&navigator.serviceWorker.controller;const w=c||(OFF.reg&&(OFF.reg.active||OFF.reg.waiting||OFF.reg.installing));if(w)w.postMessage({hsOff:m})}catch(e){}}
 function offUpd(){try{if(G.state==='title'&&SPL.view==='offline'&&scr.querySelector('.offpg')){const f=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.act;slRender(true);if(f){const b=scr.querySelector(`[data-act="${f}"]`);if(b)b.focus()}}else if(G.state==='title'&&SPL.view==='main'&&scr.querySelector('.slnav')&&!scr.querySelector('[data-v="offline"]'))slRender(true)}catch(e){}}
@@ -20102,7 +20109,7 @@ function offHtml(){const st=OFF.st,f=OFF.fort,z=OFF.zip;
  const bereit=st&&st.n>=st.total;
  const bar=(p,t)=>`<div class="offbar"><i style="width:${Math.max(2,Math.min(100,p))}%"></i></div><div class="offst">${t}</div>`;
  let app;
- if(OFF.app)app=`<p>Du spielst die <b>App-Fassung</b> – alles ist schon auf dem Gerät. Neue Versionen kommen als App-Update.</p>`;else if(OFF.datei)app=`<p>Du spielst gerade die <b>heruntergeladene Fassung</b> von deinem Rechner. Neue Versionen gibt es auf imrestales.de.</p>`;
+ if(OFF.app)app=`<p>Du spielst die <b>App-Fassung</b> – alles ist schon auf dem Gerät. Neue Versionen kommen als App-Update.</p>`;else if(OFF.pc)app=`<p>Du spielst das <b>Programm für den PC</b> – alles ist schon auf dem Rechner, es läuft ohne Internet. Neue Fassungen meldet das Programm beim Start; im Hauptmenü gibt es dafür auch „Nach Updates suchen“.</p><p class="offh">F11 oder Alt+Enter schaltet das Vollbild um.</p>`;else if(OFF.datei)app=`<p>Du spielst gerade die <b>heruntergeladene Fassung</b> von deinem Rechner. Neue Versionen gibt es auf imrestales.de.</p>`;
  else if(!OFF.ok)app=`<p>Hier kann das Spiel nicht gespeichert werden. Öffne <b>imrestales.de/heldensturm.html</b> direkt im Browser (Chrome, Firefox, Edge, Safari – nicht in einer Vorschau oder App-Ansicht). Dort steht an dieser Stelle der Knopf <b>„Für offline speichern“</b>.</p>${OFF.err?`<p class="offbad">Der Browser meldet: ${esc(OFF.err)}</p>`:''}`;
  else{const knopf=f?'':bereit?`<button class="slbtn" data-act="off-laden">Erneut prüfen</button>`:`<button class="slbtn gold" data-act="off-laden" data-sl-def="1">Für offline speichern${ges?` (${offMB(ges)})`:''}</button>`;
   const inst=OFF.inst?`<p class="offok">✓ Läuft als installierte App.</p>`:OFF.bip?`<button class="slbtn gold" data-act="off-inst" ${bereit?'data-sl-def="1"':''}>App installieren</button>`:
@@ -20119,13 +20126,12 @@ function offHtml(){const st=OFF.st,f=OFF.fort,z=OFF.zip;
    <p>Die <b>komplette App</b> mit allem drin (≈ 140 MB): startet wie ein eigenes Spiel, ohne Browser, mit Controller und eigenem Update-Knopf. Spielstände liegen getrennt von der Website.</p>
    <div class="offrow"><button class="slbtn" onclick="location.href='${APK}'">APK herunterladen</button></div>
    <p class="offh">Danach die Datei öffnen und „Aus dieser Quelle installieren“ erlauben.</p></div>`;
- /* Programm für Windows/Linux (eigene Chromium-Hülle, Release heldensturm-pc-1.N) – nur am PC und nur in der Browser-Fassung angeboten */
  const pcp=OFF.datei||MOBIL||window.__hsPC?'':`<div class="offk"><div class="eyebrow">Windows · Linux</div><h3>Als Programm installieren</h3>
-   <p>Heldensturm als <b>eigenes Programm</b> (≈ 260 MB): nutzt die Grafikkarte voll aus – auch wenn dein Browser das Spiel bremst –, läuft offline und im echten Vollbild. Spielstände liegen getrennt von der Website; mit dem Cloud-Spielstand (Optionen) nimmst du deinen Fortschritt mit.</p>
+   <p>Heldensturm als <b>eigenes Programm</b> (≈ 260 MB): nutzt die Grafikkarte voll aus – auch wenn dein Browser das Spiel bremst –, läuft offline, im echten Vollbild und mit der Grafikstufe „Legendär“. Spielstände liegen getrennt von der Website.</p>
    <div class="offrow"><button class="slbtn gold" data-act="off-pc" data-v="Heldensturm-Setup.exe">Für Windows</button><button class="slbtn" data-act="off-pc" data-v="Heldensturm.AppImage">Für Linux</button></div>
    <p class="offh">Windows warnt beim ersten Start („Der Computer wurde geschützt“): „Weitere Informationen“ → „Trotzdem ausführen“. Linux: Datei ausführbar machen und starten.</p></div>`;
  return`<div class="slm offpg"><div class="slp">${slHead('Ohne Internet','Offline spielen','Online-Mehrspieler, Bestenliste und Cloud-Spielstand brauchen weiterhin Internet – alles andere läuft offline, auch Mehrspieler an einem Gerät.')}
-  <div class="offgrid${apk?' off3':''}"><div class="offk"><div class="eyebrow">Handy · Handheld · PC</div><h3>${OFF.datei?'Als App speichern':'Nur den Inhalt laden'}</h3>${app}</div>${pcp}${apk}${zip}</div>
+  <div class="offgrid${apk?' off3':''}"><div class="offk"><div class="eyebrow">Handy · Handheld · PC</div><h3>${OFF.pc?'Programm für den PC':OFF.datei?'Als App speichern':'Nur den Inhalt laden'}</h3>${app}</div>${pcp}${apk}${zip}</div>
   <div style="flex:1 1 auto"></div><div class="slbar"><button class="slbtn" data-act="sl-back" ${(!OFF.ok||bereit)&&!OFF.bip?'data-sl-def="1"':''}>‹ Zurück</button></div></div>${slFoot()}</div>`}
 (function(){const st=document.createElement('style');st.textContent=`
 .offpg .offgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,19em),1fr));gap:1em;margin-top:.6em}
@@ -20137,7 +20143,10 @@ function offHtml(){const st=OFF.st,f=OFF.fort,z=OFF.zip;
 .offpg .slbtn.klein{font-size:.78em;align-self:flex-start;opacity:.8}`;document.head.appendChild(st)})();
 /* Hauptmenü: Knopf „Offline spielen“ (nur wenn es hier etwas zu tun gibt) */
 slIco.offline='⇩';
-{const f=slMainHtml;slMainHtml=function(){let h=f.apply(this,arguments);if(OFF.app){if(!window.__hsBereit){window.__hsBereit=1;setTimeout(()=>{try{window.HeldensturmApp&&HeldensturmApp.bereit&&HeldensturmApp.bereit()}catch(e){}},120)}let v='';try{v=window.HeldensturmApp?HeldensturmApp.version():''}catch(e){}
+{const f=slMainHtml;slMainHtml=function(){let h=f.apply(this,arguments);if(OFF.pc){const v=String(window.__hsPC.version||'').replace(/\.0$/,'');
+  const ab=`<button class="slb" onclick="try{__hsPC.updates()}catch(e){}"><span class="ic">⟳</span><span class="tx">Nach Updates suchen<small>Programm-Version ${esc(v||'?')}</small></span></button>`,en=`<button class="slb" onclick="try{__hsPC.beenden()}catch(e){}"><span class="ic">⏻</span><span class="tx">Beenden<small>Zurück zum Desktop</small></span></button>`,a0='<button class="slb" data-act="sl-go" data-v="credits">';
+  if(h.includes(a0))h=h.replace(a0,ab+a0);const i=h.lastIndexOf('<button class="slb"');if(i>=0){const j=h.indexOf('</button>',i);if(j>=0)h=h.slice(0,j+9)+en+h.slice(j+9)}return h}
+ if(OFF.app){if(!window.__hsBereit){window.__hsBereit=1;setTimeout(()=>{try{window.HeldensturmApp&&HeldensturmApp.bereit&&HeldensturmApp.bereit()}catch(e){}},120)}let v='';try{v=window.HeldensturmApp?HeldensturmApp.version():''}catch(e){}
   const ab=`<button class="slb" onclick="try{window.HeldensturmApp&&HeldensturmApp.suche()}catch(e){}"><span class="ic">⟳</span><span class="tx">Nach Updates suchen<small>App-Version ${esc(v||'?')}</small></span></button>`,a0='<button class="slb" data-act="sl-go" data-v="credits">';return h.includes(a0)?h.replace(a0,ab+a0):h}
  const st=OFF.st,sub=OFF.datei?'Heruntergeladene Fassung':!OFF.ok?'So geht’s: Spiel auf imrestales.de speichern':OFF.fort?'Wird gespeichert …':st&&st.n>=st.total?'✓ Offline bereit':'App installieren oder ZIP für den PC';
  const b=`<button class="slb" data-act="sl-go" data-v="offline"><span class="ic">${slIco.offline}</span><span class="tx">Offline spielen<small>${sub}</small></span></button>`;
@@ -20849,14 +20858,58 @@ function kaHaeuser(g,K,C,i0,j0,i1,j1,at,tx,ty){const Z=K.Z,n=K.n,D=K.md,th=G.the
    for(let xx=x+12;xx<x+w-16;xx+=34){const lit=dunkel&&kaH(xx|0,y|0,1)<0.55&&!ruin;g.fillStyle=lit?'#ffcf70':'#2a2220';g.fillRect(xx,fy+6,10,9);if(lit){g.fillStyle='rgba(255,200,100,.18)';g.fillRect(xx-6,fy+fh,22,10)}g.strokeStyle='#3a2a1a';g.lineWidth=1.2;g.strokeRect(xx,fy+6,10,9)}
    if(L.tuer){g.fillStyle='#3a2414';g.fillRect(x+w/2-7,fy+4,14,fh-4);g.fillStyle='#5a3a20';g.fillRect(x+w/2-7,fy+4,14,3)}}
   const ry=y,rh=L.front?h-22:h;g.fillStyle='rgba(0,0,0,.35)';g.fillRect(x+5,ry+6,w-4,rh);
+  if(KAD.an&&!GF().lite&&w>=30&&rh>=24){try{kaDachFein(g,L,Cd,typ,hor,x,ry,w,rh,dunkel,ruin)}catch(e){KAD.err=String(e)}}else{
   if(hor){g.fillStyle=Cd[2];g.fillRect(x,ry,w-2,rh/2);g.fillStyle=Cd[1];g.fillRect(x,ry+rh/2,w-2,rh/2)}else{g.fillStyle=Cd[2];g.fillRect(x,ry,w/2,rh-2);g.fillStyle=Cd[1];g.fillRect(x+w/2,ry,w/2-2,rh-2)}
   g.strokeStyle='rgba(0,0,0,.25)';g.lineWidth=1;g.beginPath();
   if(typ==='ziegel'){for(let yy=ry+6;yy<ry+rh;yy+=7){g.moveTo(x,yy);g.lineTo(x+w-2,yy)}}else if(typ==='schiefer'){for(let yy=ry+8;yy<ry+rh;yy+=9)for(let xx=x+((yy/9|0)%2?8:0);xx<x+w-2;xx+=16){g.rect(xx,yy-8,16,9)}}else{for(let q=0;q<w*rh/80;q++){const px=x+kaH(q,L.x|0,2)*(w-6)+2,py=ry+kaH(q,L.y|0,3)*(rh-6)+2;g.moveTo(px,py);if(hor)g.lineTo(px,py+(py<ry+rh/2?5:-5));else g.lineTo(px+(px<x+w/2?5:-5),py)}}
   g.stroke();g.strokeStyle='rgba(0,0,0,.6)';g.lineWidth=3;g.beginPath();if(hor){g.moveTo(x+3,ry+rh/2);g.lineTo(x+w-5,ry+rh/2)}else{g.moveTo(x+w/2,ry+3);g.lineTo(x+w/2,ry+rh-5)}g.stroke();
+  }
   g.strokeStyle='rgba(10,6,4,.9)';g.lineWidth=2;g.strokeRect(x+1,ry+1,w-4,rh-3);
   if(L.far){g.fillStyle='rgba(8,6,10,.45)';g.fillRect(x,ry,w,rh)}
   if(ruin&&kaH(L.x|0,L.y|0,5)<0.45){g.fillStyle='#1a1410';g.beginPath();g.ellipse(x+w*0.3+kaH(L.x|0,1,6)*w*0.4,ry+rh*0.4,w*0.16,rh*0.18,0.4,0,TAU);g.fill();g.strokeStyle='#4a3a28';g.lineWidth=2;for(let q=0;q<3;q++){g.beginPath();g.moveTo(x+w*0.25+q*8,ry+rh*0.3);g.lineTo(x+w*0.3+q*8,ry+rh*0.55);g.stroke()}}
   else if(typ!=='stroh'&&kaH(L.x|0,L.y|0,7)<0.6){g.fillStyle='#3a3230';const cx0=hor?x+w*0.72:x+w*0.25,cy0=hor?ry+rh*0.25:ry+rh*0.7;g.fillRect(cx0,cy0-12,11,16);g.fillStyle='#2a2422';g.fillRect(cx0-1,cy0-14,13,4)}}}
+/* ---------- Dächer fein (Paket „dach“): jede Dachfläche mit Verlauf, einzelnen Ziegeln/Schieferplatten/Strohlagen, First, Ortgang,
+   Moos und Ruß, Gauben mit Licht – einmal in die Kartenkachel gemalt, kostet im Spiel nichts. Schalter: KAD.an=0 (alte Dächer). ---------- */
+const KAD={an:1,err:''};window.__hsDACH=KAD;
+function kaDachFein(g,L,Cd,typ,hor,x,ry,w,rh,dunkel,ruin){const sx=L.x|0,sy=L.y|0,H=(a,b)=>kaH(sx+a*31,sy+b*17,(a*7+b*3)&63);
+ /* in ein gedrehtes Hilfssystem: u läuft am First entlang (0..U), v quer dazu (0..V); First bei v=V/2 */
+ const U=hor?w-2:rh-2,V=hor?rh:w-2,R=(u0,v0,du,dv)=>{if(hor)g.rect(x+u0,ry+v0,du,dv);else g.rect(x+v0,ry+u0,dv,du)},
+  P=(u,v)=>hor?[x+u,ry+v]:[x+v,ry+u],lin=(u0,v0,u1,v1)=>{const a=P(u0,v0),b=P(u1,v1);g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1])},
+  gr=(v0,v1,c0,c1)=>{const a=P(0,v0),b=P(0,v1),G_=g.createLinearGradient(a[0],a[1],b[0],b[1]);G_.addColorStop(0,c0);G_.addColorStop(1,c1);return G_};
+ const hV=V/2;
+ /* 1) Flächen: Sonnenseite (oben/links) hell, zur Traufe etwas dunkler; Schattenseite dunkel, zur Traufe noch dunkler */
+ g.fillStyle=gr(0,hV,bT(Cd[2],-0.16),bT(Cd[2],0.08));g.beginPath();R(0,0,U,hV);g.fill();
+ g.fillStyle=gr(hV,V,bT(Cd[1],0.04),bT(Cd[1],-0.3));g.beginPath();R(0,hV,U,V-hV);g.fill();
+ /* 2) Deckung */
+ if(typ==='stroh'){/* Strohlagen: Bänder mit ausgefranster Unterkante, darüber Halme */
+  const nb=Math.max(2,Math.round(hV/11));for(let s=0;s<2;s++)for(let b=0;b<nb;b++){const v0=s?hV+b*(V-hV)/nb:hV-(b+1)*hV/nb,dv=hV/nb,dir=s?1:-1,ve=s?v0+dv:v0;
+    g.fillStyle='rgba(0,0,0,'+(0.1+0.05*(b%2))+')';g.beginPath();for(let u=0;u<U;u+=5){const z=2+H(u,b+s*9)*4;if(dir>0)R(u,ve-z,5,z);else R(u,ve,5,z)}g.fill();
+    g.strokeStyle='rgba(255,230,160,.13)';g.lineWidth=1;g.beginPath();for(let u=2;u<U-1;u+=4){const o=H(u+3,b+s*5)*dv*0.6;lin(u,v0+o,u+(H(u,b)-0.5)*2,v0+o+dv*0.45)}g.stroke()}}
+ else{const zw=typ==='schiefer'?13:9,zh=typ==='schiefer'?9:7;
+  /* einzelne Platten: versetzte Reihen, jede dritte etwas heller oder dunkler; Unterkante jeder Reihe mit Schattenfuge */
+  for(const pass of [0,1]){g.fillStyle=pass?'rgba(0,0,0,.16)':(typ==='schiefer'?'rgba(225,215,235,.10)':'rgba(255,205,160,.13)');g.beginPath();
+   for(let s=0;s<2;s++){let row=0;for(let d=0;d<hV;d+=zh,row++){const v0=s?hV+d:hV-d-zh,dv=Math.min(zh,s?V-v0:zh);if(v0<0)continue;const off=(row%2)*zw/2;
+     for(let u=-off,k=0;u<U;u+=zw,k++){const r=H(k+row*13,row+s*40);if(pass?r<0.2:r>0.74){const u0=Math.max(0,u),du=Math.min(zw-1,U-u0);if(du>1)R(u0,v0,du,dv-1)}}}}g.fill()}
+  g.strokeStyle='rgba(0,0,0,.3)';g.lineWidth=1;g.beginPath();
+  for(let s=0;s<2;s++){let row=0;for(let d=zh;d<hV;d+=zh,row++){const v=s?hV+d:hV-d;lin(0,v,U,v);const off=((row+1)%2)*zw/2;for(let u=zw-off;u<U;u+=zw)lin(u,v,u,v+(s?-zh:zh)*0.55)}}g.stroke();
+  /* Glanzkante je Reihe auf der Sonnenseite */
+  g.strokeStyle=typ==='schiefer'?'rgba(230,225,240,.10)':'rgba(255,190,150,.12)';g.beginPath();for(let d=zh;d<hV;d+=zh)lin(0,hV-d+1,U,hV-d+1);g.stroke()}
+ /* 3) Moos an der Traufe der Schattenseite, Ruß und Flecken */
+ if(!ruin||true){const nm=Math.round(U/70+H(1,2)*2);for(let q=0;q<nm;q++){const u=H(q,50)*U,v=typ==='stroh'?H(q,51)*V:V-3-H(q,52)*hV*0.5,ru=6+H(q,53)*12,rv=3+H(q,54)*6,p=P(u,v);
+   g.fillStyle=H(q,55)<0.6?'rgba(86,120,52,.24)':'rgba(20,14,10,.2)';g.beginPath();g.ellipse(p[0],p[1],hor?ru:rv,hor?rv:ru,0,0,TAU);g.fill()}}
+ /* 4) Gauben auf der Schattenseite (zur Straße): kleines Giebeldach mit Fenster; im Dunkeln brennt in manchen Licht */
+ if(typ!=='stroh'&&V-hV>=34&&U>=90&&!ruin){for(let u=34+H(3,4)*26;u<U-34;u+=64+H(u|0,6)*30){if(H(u|0,7)<0.35)continue;const v=hV+(V-hV)*0.42,p=P(u,v),bw=18,bh=15;
+   g.fillStyle='rgba(0,0,0,.3)';g.fillRect(p[0]-bw/2+3,p[1]-bh/2+3,bw,bh);g.fillStyle=bT(Cd[0],-0.05);g.fillRect(p[0]-bw/2,p[1]-bh/2,bw,bh);
+   g.fillStyle=bT(Cd[2],0.05);g.beginPath();if(hor){g.moveTo(p[0]-bw/2-2,p[1]-bh/2+5);g.lineTo(p[0],p[1]-bh/2-4);g.lineTo(p[0]+bw/2+2,p[1]-bh/2+5)}else{g.moveTo(p[0]-bw/2+5,p[1]-bh/2-2);g.lineTo(p[0]-bw/2-4,p[1]);g.lineTo(p[0]-bw/2+5,p[1]+bh/2+2)}g.closePath();g.fill();
+   const lit=dunkel&&H(u|0,8)<0.5;g.fillStyle=lit?'#ffcf70':'#221c1a';g.fillRect(p[0]-4,p[1]-2,8,7);g.strokeStyle='#2a1c12';g.lineWidth=1;g.strokeRect(p[0]-4,p[1]-2,8,7);g.beginPath();g.moveTo(p[0],p[1]-2);g.lineTo(p[0],p[1]+5);g.stroke();
+   if(lit){g.fillStyle='rgba(255,200,100,.14)';g.beginPath();g.ellipse(p[0],p[1]+2,14,11,0,0,TAU);g.fill()}}}
+ /* 5) First: dunkle Fuge, Firstziegel, Lichtkante */
+ g.strokeStyle='rgba(0,0,0,.62)';g.lineWidth=4;g.beginPath();lin(2,hV,U-3,hV);g.stroke();
+ g.strokeStyle=bT(Cd[2],0.22);g.lineWidth=1.4;g.beginPath();lin(2,hV-1.6,U-3,hV-1.6);g.stroke();
+ if(typ!=='stroh'){g.strokeStyle='rgba(0,0,0,.45)';g.lineWidth=1;g.beginPath();for(let u=8;u<U-4;u+=10)lin(u,hV-2.5,u,hV+2.5);g.stroke()}
+ /* 6) Ortgang (Giebelbretter) an beiden Enden */
+ g.strokeStyle=bT(Cd[0],0.3);g.lineWidth=2;g.beginPath();lin(1.5,1,1.5,V-1);lin(U-1.5,1,U-1.5,V-1);g.stroke();
+ g.strokeStyle='rgba(0,0,0,.35)';g.lineWidth=1;g.beginPath();lin(3.5,1,3.5,V-1);lin(U-3.5,1,U-3.5,V-1);g.stroke()}
 /* Häuserblöcke in Grundstücke teilen */
 function kaHausLots(K){const L=[],Z=K.Z,n=K.n,pool=KA_DACHF[G.themeKey]||['ziegel','stroh'];
  for(const r of K.rects){const i0=r.x/Z,j0=r.y/Z,iw=r.w/Z,jh=r.h/Z;if(iw>8&&jh>8){/* großer Block: nur Rand bebauen */}
@@ -25428,7 +25481,7 @@ P2.stat=p2Stat;
      Hauptweg mit Richtungspfeilen auf der Minikarte (unter dem Erkundungsnebel)
    Nur Laufzeit-Hüllen um die Generator-Funktionen aus „karte“; Zeichnung/HUD bleiben unberührt. Präfix ka2. */
 window.__hsKARTE2=1;
-const KA2={aus:0,pfad:1,form:1,start:0,pflege:1,inhalt:1,leit:1,weg:1,licht:1,mini:1,schleife:0.55,dichte:1.2,
+const KA2={aus:0,pfad:1,form:1,start:0,pflege:1,inhalt:1,leit:1,weg:1,licht:1,mini:1,schleife:0.85,dichte:1.2,
  st:{n:0,fuell:0,nische:0,zurueck:0,inh:0}};
 const ka2An=()=>!KA2.aus&&!window.__ka2Aus;
 
@@ -25488,9 +25541,14 @@ function ka2HallenKammern(K,s,B,ports){const ax=ka2Achse(K,s,B);if(!ax)return nu
 /* Seitenraum mit zweitem Durchgang in denselben Abschnitt: kleiner Rundweg statt Sackgasse */
 function ka2Schleife(K,s){const sec=K.sec[s];if(!sec||!sec.seite||sec.ka2S)return;sec.ka2S=1;if(Math.random()>KA2.schleife)return;const par=K.sec[sec.parent];if(!par)return;const C=K.C;
  const t1=K.tore.find(t=>t.typ==='seite'&&t.b===s);if(!t1)return;const o1=t1.P.t-t1.P.base;const opts=[];for(let off=10;off<=C-11;off++)if(Math.abs(off-o1)>=12)opts.push(off);if(!opts.length)return;
- const P_=kaPort(K,par.cell,sec.cell,C,{w:3,m:3,off:pick(opts)});
- /* Anschluss an den (schon ausgeformten) Elternabschnitt: nächste Bodenzelle suchen */
- const n=K.n;let best=-1,bd=1e9;for(let c=0;c<n*n;c++){if(K.M[c]||K.sid[c]!==par.k)continue;const d=Math.hypot(c%n-P_.pa.i,((c/n)|0)-P_.pa.j);if(d<bd){bd=d;best=c}}if(best<0||bd>16)return;
+ /* Echter Rundweg: der zweite Durchgang mündet dort in den Elternabschnitt, wo der Fußweg vom ersten Durchgang am weitesten ist
+    (vorher: zufällige Stelle – beide Gänge trafen oft denselben Flur, man kam genau dort wieder heraus, wo man hineinging). */
+ const n=K.n;const parZ=[];for(let c=0;c<n*n;c++)if(!K.M[c]&&K.sid[c]===par.k)parZ.push(c);if(!parZ.length)return;
+ const nahe=(pi,pj)=>{let bc=-1,bd=1e9;for(const c of parZ){const d=Math.hypot(c%n-pi,((c/n)|0)-pj);if(d<bd){bd=d;bc=c}}return[bc,bd]};
+ let dW=null;try{const q0=nahe(t1.pa.i,t1.pa.j);if(q0[0]>=0)dW=kaFlut(K,[q0[0]],K.lo)}catch(e){dW=null}
+ let P_=null,best=-1,bd=1e9,bw=-1e9;for(const off of opts){const Q=kaPort(K,par.cell,sec.cell,C,{w:3,m:3,off});const q=nahe(Q.pa.i,Q.pa.j);if(q[0]<0||q[1]>20)continue;
+  const w=(dW&&dW[q[0]]>=0?dW[q[0]]:0)-q[1]*1.5+Math.abs(off-o1)*0.3+Math.random()*3;if(w>bw){bw=w;P_=Q;best=q[0];bd=q[1]}}
+ if(!P_||best<0)return;
  kaDurchgang(K,P_,par.k,s);kaLinie(K,P_.pa.i,P_.pa.j,best%n,(best/n)|0,3,par.k,null,0.06);
  const tor={g:K.tore.length,a:par.k,b:s,P:P_,typ:'seite',los:'offen',main:0,fl:null,pa:P_.pa,pb:P_.pb,ka2:1};K.tore.push(tor);par.ports.push(P_.pa);sec.ports.push(P_.pb);KA2.st.schleife=(KA2.st.schleife||0)+1}
 {const fo0=kaFormOrganisch;kaFormOrganisch=function(K,s,B,ports,o){if(!ka2An()||!KA2.form||!K||!K.sec)return fo0.apply(this,arguments);try{if(K.sec[s]&&K.sec[s].seite)ka2Schleife(K,s);const r=ka2Organisch(K,s,B,ports,o||{});if(r)return r}catch(er){console.error('ka2Organisch',er)}return fo0.apply(this,arguments)}}
@@ -25554,6 +25612,74 @@ function ka2Pflege(K){const n=K.n,N=n*n,prot=new Uint8Array(N);K.kaNi=[];K.ka2fz
 {const kl0=kaLayout;kaLayout=function(S){const K=kl0.apply(this,arguments);if(!ka2An()||!K)return K;KA2.st.n++;
  try{const t0=K.tore.find(t=>t.main&&t.a===0);if(KA2.start||t0&&(t0.los==='schluessel'||t0.los==='lager'))ka2Start(K)}catch(er){console.error('ka2Start',er)}
  const t0=performance.now();try{if(KA2.pflege)ka2Pflege(K)}catch(er){console.error('ka2Pflege',er)}KA2.st.msP=(KA2.st.msP||0)+performance.now()-t0;return K}}
+
+/* ---------- 3b. Rundwege (Paket „rundweg“): tiefe Sackgassen bekommen einen Durchbruch – window.__hsKA3 ----------
+   Wunsch: durch die Welt streifen, ohne ständig umkehren zu müssen. Nach der Sackgassen-Pflege sucht ka3Rundwege dünne Massestreifen
+   (Wand, Fels, Dickicht; höchstens KA3.dick Zellen – auch ein kurzer Stollen/Hohlweg), auf deren beiden Seiten Boden desselben Abschnitts liegt (oder Seitenraum ↔ sein
+   Elternabschnitt), der zu Fuß aber weit auseinander ist (Wegunterschied vom Start ≥ KA3.min Zellen). Dort wird ein 3 Zellen breiter
+   Durchgang geöffnet: aus der Sackgasse wird ein Rundweg. Je Stufe höchstens KA3.max, mit Abstand zueinander.
+   Der Hauptweg Start → Ziel darf dadurch höchstens KA3.kurz Zellen kürzer werden (keine Abkürzung an den Kämpfen vorbei).
+   Nie über Abschnittsgrenzen hinweg (Tore, Schlüssel, Barrikaden bleiben Pflicht), nie an Toren, am Kampfplatz, in Arenen, am Wasser/Abgrund,
+   nicht bei Flucht-/Eskortestufen. Schalter: __hsKA3.KA3.an=0. Zähler: G.ka.ka3 (Durchbrüche dieser Stufe). */
+const KA3={an:1,max:4,dick:16,min:22,abstand:13,kurz:8,st:{n:0,auf:0,ms:0}};
+function ka3Rundwege(K){const n=K.n,N=n*n;K.ka3=0;if(!KA3.an||K.esc||K.flucht||!K.start)return 0;const prot=new Uint8Array(N);
+ const mark=(ci,cj,r)=>{for(let j=Math.floor(cj-r);j<=Math.ceil(cj+r);j++)for(let i=Math.floor(ci-r);i<=Math.ceil(ci+r);i++){if(i<0||j<0||i>=n||j>=n)continue;if((i-ci)**2+(j-cj)**2<=r*r)prot[j*n+i]=1}};
+ for(const t of K.tore){mark(t.pa.i,t.pa.j,5);mark(t.pb.i,t.pb.j,5)}if(K.kampf)mark(K.kampf.i,K.kampf.j,8);mark(K.start.i,K.start.j,4);
+ const okS=s=>{const S=K.sec[s];return !!S&&S.art!=='arena'};
+ const paar=(a,b)=>{const sa=K.sid[a],sb=K.sid[b];if(sa===255||sb===255||!okS(sa)||!okS(sb))return false;if(sa===sb)return true;const A=K.sec[sa],B=K.sec[sb];return !!((A.seite&&A.parent===sb)||(B.seite&&B.parent===sa))};
+ const orte=[];
+ /* Ziel des Hauptwegs: Kampfplatz, sonst die Mitte des letzten Hauptabschnitts */
+ let ziel=-1;if(K.kampf)ziel=K.kampf.j*n+K.kampf.i;if(ziel<0||K.M[ziel]){let ls=-1;K.sec.forEach((S,k)=>{if(S&&S.main)ls=k});let bd=1e9;if(ls>=0){const B=K.sec[ls].B,mi=(B[0]+B[2])/2,mj=(B[1]+B[3])/2;for(let c=0;c<N;c++){if(K.M[c]||K.lo[c]||K.sid[c]!==ls)continue;const q=Math.hypot(c%n-mi,((c/n)|0)-mj);if(q<bd){bd=q;ziel=c}}}}
+ for(let runde=0;runde<KA3.max;runde++){const d=kaFlut(K,[K.start.j*n+K.start.i],K.lo),dz=ziel>=0?kaFlut(K,[ziel],K.lo):null,Lh=dz?d[ziel]:-1;let best=null;
+  for(let j=4;j<n-4;j++)for(let i=4;i<n-4;i++){const a=j*n+i;if(K.M[a]||K.lo[a]||d[a]<0||prot[a])continue;
+   for(let ri_=0;ri_<2;ri_++){const st=ri_?n:1,qu=ri_?1:n;if(!K.M[a+st])continue;let L=0,c=a,ok=true;
+    for(;;){c+=st;const ci=c%n,cj=(c/n)|0;if(ci<4||cj<4||ci>=n-4||cj>=n-4||K.lo[c]||prot[c]){ok=false;break}if(!K.M[c])break;
+     /* echte Wand: auch die Nachbarn quer dazu sind Masse oder werden gleich mit geöffnet – kein Wasser/Abgrund daneben */if(K.lo[c+qu]||K.lo[c-qu]){ok=false;break}if(++L>KA3.dick){ok=false;break}}
+    if(!ok||L<1||d[c]<0)continue;const b=c;if(!paar(a,b))continue;const gew=Math.abs(d[a]-d[b])-L;if(gew<KA3.min)continue;
+    if(dz&&Lh>0&&dz[a]>=0&&dz[b]>=0&&Math.min(d[a]+L+dz[b],d[b]+L+dz[a])<Lh-KA3.kurz)continue;
+    if(orte.some(o=>Math.hypot(o[0]-i,o[1]-j)<KA3.abstand))continue;
+    /* beide Enden brauchen etwas Platz (keine Öffnung in eine 1 Zelle breite Ritze) */let fa=0,fb=0;for(let v=-1;v<=1;v++)for(let u=-1;u<=1;u++){if(!K.M[a+u+v*n]&&!K.lo[a+u+v*n])fa++;if(!K.M[b+u+v*n]&&!K.lo[b+u+v*n])fb++}if(fa<4||fb<4)continue;
+    const wert=gew-L*1.5+Math.random()*5;if(!best||wert>best.wert)best={a,b,st,qu,L,wert,i,j}}}
+  if(!best)break;const s=K.sid[best.a];for(let k=1;k<=best.L;k++){const c=best.a+k*best.st;for(let w=-1;w<=1;w++){const e=c+w*best.qu;if(K.lo[e]||prot[e])continue;if(K.M[e]){K.M[e]=0;K.sid[e]=s}}}
+  orte.push([best.i,best.j]);K.ka3++;KA3.st.auf++}
+ return K.ka3}
+{const kl3=kaLayout;kaLayout=function(S){const K=kl3.apply(this,arguments);if(!K||!K.M||!K.sec)return K;KA3.st.n++;const t0=performance.now();try{ka3Rundwege(K)}catch(er){console.error('ka3Rundwege',er)}KA3.st.ms+=performance.now()-t0;return K}}
+window.__hsKA3={KA3,ka3Rundwege};
+
+/* ---------- Paket „lebwarn“: deutliche Warnung bei wenig Leben – window.__hsLW ----------
+   Wunsch: Man soll sofort sehen, wenn es um die Lebenspunkte schlecht steht. Bisher gab es nur eine schwache Randtönung auf der
+   Spielfläche (unter 35 %, bei 30 % kaum 7 % Deckkraft) und einen Herzschlag im festen Takt.
+   Jetzt: roter Rand über dem ganzen Bild als eigene Ebene (über allen Spielebenen, unter der Anzeige), ab 40 % Leben sanft,
+   ab 30 % pulsiert er im Herzschlag – je weniger Leben, desto kräftiger und schneller, im selben Takt wie der Herzschlag-Ton.
+   Dazu blinkt der Lebensbalken, und unter 30 % leuchtet der Heiltrank-Knopf, solange noch ein Trank da ist.
+   Geteilter Bildschirm: dort bleibt die Tönung je Bildausschnitt. Wer Bewegung reduziert hat, bekommt den Rand ohne Pulsieren.
+   Schalter: __hsLW.an=0 (alte Tönung). Schwellen: LW.ab (Beginn), LW.puls (Pulsieren). */
+const LW={an:1,ab:0.4,puls:0.3,el:null,k:0};window.__hsLW=LW;
+/* Abstand zweier Herzschläge in Sekunden: 0,95 s bei 30 % Leben, 0,5 s kurz vor dem Ende */
+function lwTakt(pr){return 0.5+0.45*Math.min(1,Math.max(0,pr)/0.3)}
+(function(){try{const st=document.createElement('style');st.textContent=`
+#lebWarn{position:fixed;inset:0;z-index:9;pointer-events:none;opacity:0;transition:opacity .3s;--lwk:0;--lwd:.9s;
+ background:radial-gradient(ellipse at center,rgba(120,0,0,0) 34%,rgba(150,8,8,.4) 74%,rgba(125,0,0,.8) 100%)}
+#lebWarn.an{opacity:calc(.22 + .78*var(--lwk))}
+#lebWarn.an.puls{animation:lwPuls var(--lwd) linear infinite}
+@keyframes lwPuls{0%{opacity:calc(.3 + .7*var(--lwk))}7%{opacity:1}20%{opacity:calc(.3 + .7*var(--lwk))}27%{opacity:.9}44%{opacity:calc(.3 + .7*var(--lwk))}100%{opacity:calc(.3 + .7*var(--lwk))}}
+.bar.hp.lwNot{animation:lwBar .7s ease-in-out infinite}
+@keyframes lwBar{0%,100%{box-shadow:0 0 0 0 rgba(255,60,50,0)}50%{box-shadow:0 0 0 3px rgba(255,70,55,.85),0 0 16px rgba(255,40,30,.7)}}
+#btnPot.lwTrank{animation:lwTrank .8s ease-in-out infinite}
+@keyframes lwTrank{0%,100%{box-shadow:0 0 0 0 rgba(255,214,130,0);transform:scale(1)}50%{box-shadow:0 0 0 4px rgba(255,214,130,.9),0 0 22px rgba(255,190,90,.8);transform:scale(1.08)}}
+@media (prefers-reduced-motion:reduce){#lebWarn.an.puls,.bar.hp.lwNot,#btnPot.lwTrank{animation:none}}`;document.head.appendChild(st);
+ const el=document.createElement('div');el.id='lebWarn';el.setAttribute('aria-hidden','true');document.body.appendChild(el);LW.el=el;
+ let zuletzt='';
+ setInterval(()=>{try{let pr=1,trank=false;
+   const spiel=LW.an&&typeof G==='object'&&G&&G.state==='play'&&!G.bot&&!splitOn();
+   if(spiel){const H_=G.net&&typeof NET!=='undefined'&&NET.mine?[NET.mine]:(G.mp&&PL&&PL.length?PL:[P]);
+    for(const h of H_){if(!h||!h.st||h.down||!(h.st.maxHp>0))continue;const q=h.hp/h.st.maxHp;if(q<pr){pr=q;trank=(h.pots||0)>0}}}
+   const k=spiel&&pr<LW.ab&&pr>0?Math.min(1,(LW.ab-pr)/LW.ab*1.15):0;LW.k=k;const puls=k>0&&pr<LW.puls;
+   const key=(k>0?1:0)+'|'+(puls?1:0)+'|'+Math.round(k*20)+'|'+(puls&&trank?1:0);if(key===zuletzt)return;zuletzt=key;
+   el.style.setProperty('--lwk',k.toFixed(2));el.style.setProperty('--lwd',lwTakt(pr).toFixed(2)+'s');el.classList.toggle('an',k>0);el.classList.toggle('puls',puls);
+   const bar=document.querySelector('#hud .bar.hp');if(bar)bar.classList.toggle('lwNot',puls);
+   const pot=document.getElementById('btnPot');if(pot)pot.classList.toggle('lwTrank',puls&&trank);
+  }catch(e){LW.err=String(e)}},120)}catch(e){LW.err=String(e)}})();
 
 /* Gegnerzahl je Abschnitt nach der Fläche vor der Pflege (Leveltempo bleibt), höchstens KA2.dichte-fach dichter (1 = Gegner nach neuer Fläche, ca. 7 % weniger) */
 {const kbv0=kaBevoelkern;kaBevoelkern=function(S){const K=G.ka;if(!ka2An()||!K||!K.ka2fz0)return kbv0.apply(this,arguments);const sv=K.sec.map(s=>s.fz);
@@ -25932,7 +26058,8 @@ const WG_ART={
  schild:{n:'Schild mit falscher Richtung',art:'lach',ort:'weg',th:null,w:1,nv:5},
  skelett:{n:'Riesenskelett',art:'wow',ort:'weg',th:[...WG_HOEH,...WG_UNTER,'glutgang','hort','wald','nacht','grab','ruine'],w:0.8,nv:3,nische:1},
  kristall:{n:'Kristalle, die aufleuchten',art:'wow',ort:'weg',th:[...WG_HOEH,...WG_UNTER,'glutgang','hort'],w:0.9,nv:3,nische:1},
- fall:{n:'Wasserfall/Lavafall',art:'wow',ort:'weg',th:[...WG_WALD,...WG_HOEH,...WG_UNTER,'glutgang','hort','gracklstugh','schmiede'],w:0.8,nv:3,nische:1},
+ /* nur unter der Erde und selten: ein Wasserfall mitten auf der Wiese (Straße, Wald, Teich) ergab keinen Sinn */
+ fall:{n:'Wasserfall/Lavafall',art:'wow',ort:'weg',th:[...WG_HOEH,...WG_UNTER,'glutgang','hort','gracklstugh','schmiede'],w:0.3,nv:3,nische:1},
  pilzring:{n:'Pilzring',art:'ding',ort:'weg',th:['wald','nacht','teich','pilze','spinnweben','see','wurzeldorf','hoehle'],w:0.8,nv:3,nische:1},
  statue:{n:'Statue, die sich dreht',art:'wow',ort:'weg',th:[...WG_BURG,...WG_STADT,'hoehle','mine','spinnweben','see','glutgang','hort'],w:0.9,nv:4,nische:1},
  bruecke:{n:'Geheimer Steg',art:'wow',ort:'nische',th:null,w:1,nv:2,nische:1},
@@ -27641,7 +27768,7 @@ function oaGradZeichne(t){const c=cx,s=OA.s,C=OA.cfg;if(!C)return;if(!OA.gA||OA.
  c.globalCompositeOperation='source-over';c.globalAlpha=1;c.imageSmoothingEnabled=sm}
 
 /* ---------- 2) Schwebende Teilchen ---------- */
-const OA_PMAX=120;for(let i=0;i<OA_PMAX;i++)OA.P.push({on:0,k:'',x:0,y:0,z:1,vx:0,vy:0,t:0,life:1,s:1,ph:0,rot:0,vr:0,ci:0});
+const OA_PMAX=280;for(let i=0;i<OA_PMAX;i++)OA.P.push({on:0,k:'',x:0,y:0,z:1,vx:0,vy:0,t:0,life:1,s:1,ph:0,rot:0,vr:0,ci:0});
 for(let i=0;i<16;i++)OA.LS.push({x:0,y:0,r:0,a:0});for(let i=0;i<10;i++)OA.EM.push({x:0,y:0,k:''});
 const OA_LEAF={leaf:['#8aa63a','#b5b84a','#d9a441','#c97a2c','#6f8f2f','#a8b040'],leafd:['#6a5a3a','#7a6a42','#5a4a30','#84704a']};
 const OA_SPR={};
@@ -27666,8 +27793,8 @@ function oaSpawn(p,k,init){const M=40,z=0.45+Math.random()*1.05;p.on=1;p.k=k;p.z
  else if(k==='mote'){p.life=6+Math.random()*8;p.s=0.5+Math.random()*0.8}
  if(init)p.t=Math.random()*Math.min(p.life,4)}
 function oaTeilchenPlan(){const C=OA.cfg;if(!C)return;const s=OA.s,ul=OA.ul;let want=0;const plan=OA.plan||(OA.plan=[]);plan.length=0;
- for(const q of C.P){let n=q[1];if(!n)continue;n=s>=2&&!ul?n:Math.ceil(n*(ul?0.18:0.35));plan.push(q[0],n);want+=n}
- const max=ul?12:s>=2?OA_PMAX:48;OA.pWant=Math.min(max,want)}
+ for(const q of C.P){let n=q[1];if(!n)continue;n=s>=2&&!ul?(GF().leg?Math.ceil(n*2.2):n):Math.ceil(n*(ul?0.18:0.35));plan.push(q[0],n);want+=n}
+ const max=ul?12:s>=2?(GF().leg?OA_PMAX:120):48;OA.pWant=Math.min(max,want)}
 function oaTeilchen(dt,t,dX,dY){const P=OA.P,c=cx,plan=OA.plan;if(!plan)return;const ul=OA.ul;
  /* Belegung: je Art so viele wie geplant */
  let idx=0;for(let j=0;j<plan.length;j+=2){const k=plan[j];let n=plan[j+1];while(n-->0&&idx<OA.pWant){const p=P[idx++];if(!p.on||p.k!==k)oaSpawn(p,k,true)}}
@@ -28413,7 +28540,7 @@ const _obDrawEnemyRoh=(e,t)=>drawEnemy(e,t);
 {const _dfx=deathFx;deathFx=function(e){const r=_dfx.apply(this,arguments);try{if(e&&!G.netGuestRun){const C=G.corpses,lc=C&&C[C.length-1];const leiche=!!(lc&&lc.def===e.def&&Math.abs(lc.x-e.x)<2&&lc.t<0.05);obTod(e,leiche)}}catch(er){}return r}}
 {const _dc=drawCorpses;drawCorpses=function(inView,t){const r=_dc.apply(this,arguments);const t0=obT0();try{if(OB.ul&&OB.s>0){/* Ultra: Bodenspuren hier (der Hintergrund ist vorgerendert) */obDDraw(cx)}if(OB.s>0&&!OB.aus.zerf)obZDraw(t)}catch(e){}obT1(t0);return r}}
 /* Leichen zerfallen beim Ausblenden zu Staub */
-function obLeichenTick(){const A=G.corpses;if(!A||!A.length)return;const life=fxQ()>2?5:1.8;for(const c of A){if(c._obZ||c.t<life-0.65)continue;c._obZ=1;if(!obSicht(c.x,c.y,60))continue;const g=obTodTyp(c),C=OB_GCOL[g]||OB_GCOL.flesh,r=c.r||12;
+function obLeichenTick(){const A=G.corpses;if(!A||!A.length)return;const life=GF().leg?12:fxQ()>2?5:1.8;for(const c of A){if(c._obZ||c.t<life-0.65)continue;c._obZ=1;if(!obSicht(c.x,c.y,60))continue;const g=obTodTyp(c),C=OB_GCOL[g]||OB_GCOL.flesh,r=c.r||12;
   const n=OB.s>=2?7:3;for(let i=0;i<n;i++){const j=obP(1,c.x+obRn(-r,r),c.y+obRn(-r*0.4,r*0.4),obRn(-12,12),obRn(-26,-8),obRn(0.6,1),obRn(3.5,6),obC(i&1?C[0]:C[1]));if(j>=0)OBP.d[j]=0.94}
   if(OB.s>=2)for(let i=0;i<3;i++){const j=obP(11,c.x+obRn(-r,r),c.y,obRn(-8,8),obRn(-34,-16),obRn(0.6,0.9),1.2,obC('#e8d8b8'));if(j>=0)OBP.d[j]=0.96}}}
 
@@ -37076,7 +37203,10 @@ const swAuto=()=>SAVE.gfx==='auto'||SAVE.gfx===undefined;
 function swPc(){if(SW.pcTest!=null)return !!SW.pcTest;try{const ul=window.__hsULTRA&&window.__hsULTRA.on,weak=typeof RG2!=='undefined'&&RG2.weak;return !MOBIL&&!SWR&&!ul&&!weak}catch(e){return false}}
 const SW_L=[[4,1],[4,0.85],[4,0.75],[3,0.75],[2,0.75],[2,0.6],[2,0.5],[1,0.5],[0,0.5]];
 /* Leiter je nach fester Auflösung: ohne Auflösungsschritte */
-function swLeiter(){const f=resFest();if(!f)return SW_L;return [[4,f],[3,f],[2,f],[1,f],[0,f]]}
+/* Im PC-Programm (eigenes Chromium, Grafikkarte sicher an) beginnt die Leiter eine Stufe höher bei „Legendär“ */
+const swLeg=()=>{try{return !!window.__hsPC&&GFX.length>5}catch(e){return false}};
+const SW_L5=[[5,1],[5,0.85]].concat(SW_L);
+function swLeiter(){const f=resFest(),g=swLeg();if(!f)return g?SW_L5:SW_L;return (g?[[5,f]]:[]).concat([[4,f],[3,f],[2,f],[1,f],[0,f]])}
 function swAnwenden(){const L=swLeiter();SW.step=Math.max(0,Math.min(L.length-1,SW.step));SW.ce=Math.max(0,Math.min(SW.step,SW.ce));const s=L[SW.step];
  GAUTO=s[0];GCEIL=s[0];const r=resFest()||s[1];if(RSC!==r||true){RSC=r}RSLOW=RSOK=0;try{resize()}catch(e){}}
 SW.anwenden=swAnwenden;SW.leiter=swLeiter;
@@ -37184,10 +37314,11 @@ function huelle(B,vor){const [name,lab,get,set]=B;let o;try{o=get()}catch(e){ret
   try{return o.apply(this,arguments)}finally{const t=now()-a,k=M.stk.pop();const e=M.cur[lab]||(M.cur[lab]=[0,0]);e[0]+=t-k;e[1]++;if(M.stk.length)M.stk[M.stk.length-1]+=t}};
  w.__dgW=1;try{set(w);if(get()===w)M.hooks.push([B,w,o])}catch(e){dErr('hülle '+name,e)}}
 function protoHuelle(obj,name,mk){const o=obj[name];if(typeof o!=='function')return;const w=mk(o);try{obj[name]=w;M.proto.push([obj,name,w,o])}catch(e){dErr('proto '+name,e)}}
-function anlegen(){M.hooks.length=0;M.proto.length=0;
+function anlegen(){M.hooks.length=0;M.proto.length=0;window.__hsDIAGkg={art:new Map(),sc:new Set(),rot:new Set(),n:0,gr:null};
  /* Gesamt: Spiel / Bild / Oberfläche (Bild = render ohne die Bereiche darunter → „übriges Bild“) */
  /* Sprite-Neubau zählen: der Zeichen-Rückruf (5. Argument) von kgSprite läuft nur bei einem Zwischenspeicher-Fehlgriff */
- const kgVor=A=>{const d0=A[4];if(typeof d0==='function')A[4]=function(){M.cnt.kg++;return d0.apply(this,arguments)}};
+ /* dazu merken, WAS neu gebaut wird (Art, Maßstab, Drehung) – zeigt, ob der Zwischenspeicher an Zoomstufen, Drehwinkeln oder Verdrängung scheitert */
+ const kgVor=A=>{const d0=A[4];if(typeof d0==='function'){const a0=A[0],a1=A[1],a6=A[6];A[4]=function(){M.cnt.kg++;try{const Q=window.__hsDIAGkg;if(Q){const s=String(a0),art=s.split(':')[0]+(s.split(':')[2]?' '+s.split(':')[2]:'');Q.art.set(art,(Q.art.get(art)||0)+1);Q.sc.add((+a1).toFixed(3));if(a6)Q.rot.add((+a6).toFixed(3));Q.n++;try{Q.gr=window.__kg?[window.__kg.m.size,Math.round((window.__kg.bytes||0)/1e6)]:null}catch(e){}}}catch(e){}return d0.apply(this,arguments)}}};
  for(const B of BEREICHE)huelle(B,B[0]==='kgSprite'?kgVor:null);
  protoHuelle(CanvasRenderingContext2D.prototype,'getImageData',o=>function(){if(DG.on)M.cnt.gid++;return o.apply(this,arguments)});
  protoHuelle(Document.prototype,'createElement',o=>function(t){if(DG.on&&typeof t==='string'&&t.toLowerCase()==='canvas')M.cnt.cv++;return o.apply(this,arguments)});
@@ -37305,6 +37436,7 @@ function text(d){const L=[];
  const top=d.ber.filter(b=>b[1]>=0.05).slice(0,7).map(b=>`${b[0]} ${f1(b[1])}`);
  L.push(`Bild teuerste (ms): ${top.length?top.join(' · '):'–'} · übriges ${f1(d.uebrig)}`);
  L.push(`Je s: neue Leinwände ${Math.round(d.cnt.cv)} · getImageData ${Math.round(d.cnt.gid)} · Sprite-Neubau ${Math.round(d.cnt.kg)} · lange Aufgaben ${d.lang.obs?d.lang.n+(d.lang.n?' (max '+Math.round(d.lang.max)+' ms)':''):'n/v'}`);
+ try{const Q=window.__hsDIAGkg;if(Q&&Q.n){const top=[...Q.art.entries()].sort((a,b)=>b[1]-a[1]).slice(0,6).map(e=>e[0]+' '+e[1]).join(' · ');L.push(`Sprite-Neubau gesamt ${Q.n}: ${top} · Maßstäbe ${Q.sc.size} (${[...Q.sc].slice(0,8).join(', ')}) · Drehwinkel ${Q.rot.size}${Q.rot.size?' ('+[...Q.rot].slice(0,8).join(', ')+')':''} · Zwischenspeicher ${Q.gr?Q.gr[0]+' Bilder, '+Q.gr[1]+' MB':'?'}`)}}catch(e){}
  L.push(`Szene: ${d.modus} · ${d.ort?d.ort+' / ':''}${d.stufe} (Nr. ${d.stNr}) · ${d.wetter||'kein Wetter'} · ${d.diff} · ${d.held} St. ${d.lvl}${d.online?' · online '+d.online+', '+d.spieler+' Spieler':d.spieler>1?' · '+d.spieler+' Spieler':''}`);
  const o=d.obj||{};L.push(`Objekte: Gegner ${o.gegner} (im Bild ${o.sicht}) · Deko ${o.deko} · Dinge ${o.props} · Partikel ${o.parts} · Geschosse ${o.proj} · Effekte ${o.fx} · Leichen ${o.leichen}`);
  L.push(`Speicher: ${d.mem?'JS '+d.mem.u+' MB von '+d.mem.l+' MB':'n/v'}`);
@@ -39775,7 +39907,7 @@ window.__hsGLWELT={v:7};
   if(RS.uf){try{rZiel(RS.u,null);GW.haken.uPost(hCtx());flush(RS.u)}catch(e){gErr('uPost',e);/* Notfall: Puffer 1:1 */try{const RU=RS.u,gu=RU.gl;rZiel(RU,null);zustand(RU,RU.P.tex,RS.uf.t,'copy',0,gu.NEAREST);quad(RU,0,0,EB.w,0,EB.w,EB.h,0,EB.h,0,1,1,0,1,1,1,1);flush(RU)}catch(e2){}}}GW.st.mix+=X.st.mix;GW.st.text+=X.st.text;GW.st.unbek+=X.st.unbek;
   for(let i=EB.slN;i<2;i++){if(EB.slVis[i]){EB.slVis[i]=false;EB.sl[i].style.display='none'}}
   const w=EB.w,h=EB.h;let bl=0;
-  if(FR.bloom){const bw=Math.max(2,Math.round(W/7)),bh=Math.max(2,Math.round(H/7));if(!RS.bf||RS.bf.w!==bw||RS.bf.h!==bh){if(RS.bf)fbWeg(RO,RS.bf);RS.bf=fbNeu(RO,bw,bh,false)}
+  if(FR.bloom){const bq=GF().leg?4.5:7,bw=Math.max(2,Math.round(W/bq)),bh=Math.max(2,Math.round(H/bq));if(!RS.bf||RS.bf.w!==bw||RS.bf.h!==bh){if(RS.bf)fbWeg(RO,RS.bf);RS.bf=fbNeu(RO,bw,bh,false)}
    if(RS.bf){let mitS=0;const bs=GW.k.bloomS1<0?!firefox:!!GW.k.bloomS1;
     if(bs){if(!RS.bs1c){RS.bs1c=document.createElement('canvas')}const c=RS.bs1c;if(c.width!==bw||c.height!==bh){c.width=bw;c.height=bh}const q=c.getContext('2d');q.globalCompositeOperation='copy';q.imageSmoothingEnabled=true;q.drawImage(EB.s1,0,0,bw,bh);
      const e=texVon(RO,c);if(e){g.activeTexture(g.TEXTURE1);g.bindTexture(g.TEXTURE_2D,e.t);g.activeTexture(g.TEXTURE0);mitS=1}}
@@ -39855,15 +39987,15 @@ window.__hsGLWELT={v:7};
      spiegel  – nasse Spiegelungen der Lichter bei Regen
      bloom2   – weicherer Bloom (zwei Weichzeichner-Durchgänge)
    Stufen: Minimal: farbe · Niedrig: + ao · Mittel: + relief, sonne, nass, wind, spuren, glanz · Hoch: + schatten (4 Lichter), nebel, lava, spiegel ·
-   Episch: + schatten (8 Lichter), figuren, staub, bloom2. Schalter: __hsGLFX.aus, __hsGLFX.k.<name> = 1/0 (−1 = nach Grafikstufe), SAVE.glfx 'aus'|'voll'.
+   Episch: + schatten (8 Lichter), figuren, staub, bloom2 · Legendär: + strahlen (Sonnenstrahlen draußen), kaustik (Lichtnetz auf Teichen), schatten (12 Lichter, volle statt halbe Auflösung), feinerer Bloom (3 Durchgänge). Schalter: __hsGLFX.aus, __hsGLFX.k.<name> = 1/0 (−1 = nach Grafikstufe), SAVE.glfx 'aus'|'voll'.
    Farben: nur warme/neutrale/grüne/violette Töne. Keine Zeitlupe, kein Standbild. ES2017 (Chromium 77). */
 window.__hsGLFX={v:1};
 (function(){try{
 const FX=window.__hsGLFX,GW=window.__hsGLWELT;if(!GW||!GW.api||!GW.haken)throw new Error('glwelt fehlt');
 const A=GW.api;FX.aus=false;
-const NAMEN=['relief','ao','sonne','nass','wind','farbe','spuren','schatten','figuren','nebel','glanz','lava','staub','spiegel','bloom2'];
+const NAMEN=['relief','ao','sonne','nass','wind','farbe','spuren','schatten','figuren','nebel','glanz','lava','staub','spiegel','bloom2','strahlen','kaustik'];
 FX.k={};for(const n of NAMEN)FX.k[n]=-1;
-const STUFE={farbe:0,ao:1,relief:2,sonne:2,nass:2,wind:2,spuren:2,glanz:2,schatten:3,nebel:3,lava:3,spiegel:3,figuren:4,staub:4,bloom2:4};
+const STUFE={farbe:0,ao:1,relief:2,sonne:2,nass:2,wind:2,spuren:2,glanz:2,schatten:3,nebel:3,lava:3,spiegel:3,figuren:4,staub:4,bloom2:4,strahlen:5,kaustik:5};
 FX.st={u:0,o:0,sch:0,lichter:0,stempel:0,fehler:0};FX.err=[];
 const fErr=(k,e)=>{FX.st.fehler++;if(FX.err.length<12)FX.err.push(k+': '+String(e&&e.message||e))};
 function modus(){try{const v=SAVE&&SAVE.glfx;return v==='aus'||v==='voll'?v:'auto'}catch(e){return'auto'}}
@@ -39898,20 +40030,20 @@ const FS_U=A.PH+'uniform sampler2D uT;uniform sampler2D uOcc;uniform sampler2D u
  'if(uFarb.w>0.0){float l=lum(col);vec3 g=mix(vec3(l),col,uFarb.x);g=(g-0.5)*uFarb.y+0.5;g*=uTint;col=mix(col,max(g,0.0),uFarb.w);}'+
  'gl_FragColor=vec4(col,1.0);}';
 /* obere Ebene: Lichtschatten (halbe Auflösung) – ergibt zusätzliche Dunkelheit dort, wo ein Licht verdeckt ist */
-const FS_S=A.PH+'uniform float uDbg;uniform sampler2D uOcc;uniform vec2 uR;uniform float uK;uniform vec3 uCam;uniform float uN8;uniform vec4 uL[8];uniform float uNL;uniform vec4 uX[8];uniform float uNX;uniform vec4 uF[24];uniform float uNF;uniform float uD;'+NOISE+
+const FS_S=A.PH+'uniform float uDbg;uniform sampler2D uOcc;uniform vec2 uR;uniform float uK;uniform vec3 uCam;uniform float uN8;uniform vec4 uL[16];uniform float uNL;uniform vec4 uX[8];uniform float uNX;uniform vec4 uF[24];uniform float uNF;uniform float uD;'+NOISE+
  'float oO(vec2 w){return texture2D(uOcc,w/uN8).a;}'+
  'float sicht(vec2 w,vec2 lw){vec2 d=lw-w;float L=length(d);if(L<2.0)return 1.0;vec2 nn=vec2(-d.y,d.x)/L;float T=1.0;float j=h21(w*0.37);for(int i=1;i<=24;i++){float t=(float(i)-j)/24.0;if(t*L<6.0)continue;'+
  ' float sp=2.0+(1.0-t)*L*0.045;float o=0.5*(oO(w+d*t+nn*sp)+oO(w+d*t-nn*sp));T*=1.0-o*0.55;if(T<0.03)break;}'+
  ' for(int k=0;k<24;k++){if(float(k)>=uNF)break;vec4 f=uF[k];vec2 c=f.xy-w;float tt=clamp(dot(c,d)/(L*L),0.0,1.0);if(tt<0.02||tt>0.98)continue;float dd=length(w+d*tt-f.xy);float wl=length(f.xy-w);'+
  '  float s=smoothstep(f.z,f.z*0.45,dd)*smoothstep(f.z*5.0,f.z*1.2,wl);T*=1.0-0.72*s;}return T;}'+
  'void main(){vec2 dev=vec2(gl_FragCoord.x,uR.y-gl_FragCoord.y)*uK;vec2 w=(dev-uCam.xy)/uCam.z;if(uDbg>1.5){gl_FragColor=vec4(oO(w),texture2D(uOcc,w/uN8).r*0.5,0.0,0.6);return;}if(texture2D(uOcc,w/uN8).r>0.5){gl_FragColor=vec4(0.0);return;}float p0=1.0,p1=1.0;'+
- ' for(int i=0;i<8;i++){if(float(i)>=uNL)break;vec4 l=uL[i];float d=length(dev-l.xy);if(d>=l.z)continue;float h=l.w*clamp((l.z-d)/(0.85*l.z),0.0,1.0);if(h<0.01)continue;vec2 lw=(l.xy-uCam.xy)/uCam.z;float v=sicht(w,lw);p0*=1.0-h;p1*=1.0-h*v;}'+
+ ' for(int i=0;i<16;i++){if(float(i)>=uNL)break;vec4 l=uL[i];float d=length(dev-l.xy);if(d>=l.z)continue;float h=l.w*clamp((l.z-d)/(0.85*l.z),0.0,1.0);if(h<0.01)continue;vec2 lw=(l.xy-uCam.xy)/uCam.z;float v=sicht(w,lw);p0*=1.0-h;p1*=1.0-h*v;}'+
  ' for(int i=0;i<8;i++){if(float(i)>=uNX)break;vec4 l=uX[i];float d=length(dev-l.xy);if(d>=l.z)continue;float h=l.w*clamp((l.z-d)/(0.85*l.z),0.0,1.0);p0*=1.0-h;p1*=1.0-h;}'+
  ' float a0=uD*p0,a1=uD*p1;float ad=clamp((a1-a0)/max(1.0-a0,0.02),0.0,0.82);gl_FragColor=uDbg>0.5?vec4(ad,0.0,0.0,ad):vec4(vec3(6.0,4.0,10.0)/255.0*ad,ad);}';
 /* obere Ebene: Nebel, Glanz, Lava, Staub, Spiegelungen (ein Vollbild-Durchgang, additiv bzw. deckend) */
 const FS_E=A.PH+'uniform vec2 uR;uniform vec3 uCam;uniform float uZeit;uniform vec4 uL[8];uniform float uNL;'+
  'uniform float uNeb;uniform vec3 uNebC;uniform vec2 uWindD;uniform vec4 uHeld[4];uniform float uNH;'+
- 'uniform vec4 uWa[12];uniform float uNW;uniform float uGl;uniform vec4 uLa[12];uniform float uNLa;uniform float uLav;uniform float uStb;uniform float uSpg;'+NOISE+
+ 'uniform vec4 uWa[12];uniform float uNW;uniform float uGl;uniform vec4 uLa[12];uniform float uNLa;uniform float uLav;uniform float uStb;uniform float uSpg;uniform vec4 uStr;uniform vec3 uStrC;uniform float uKau;'+NOISE+
  'void main(){vec2 dev=vec2(gl_FragCoord.x,uR.y-gl_FragCoord.y);vec2 w=(dev-uCam.xy)/uCam.z;vec3 add=vec3(0.0);float fa=0.0;vec3 fc=vec3(0.0);'+
  ' float lit=0.0;vec3 lcol=vec3(1.0,0.78,0.5);for(int i=0;i<8;i++){if(float(i)>=uNL)break;vec4 l=uL[i];float d=length(dev-l.xy);lit+=l.w*max(0.0,1.0-d/l.z);}'+
  ' if(uNeb>0.0){vec2 q=w*0.0021+uWindD*uZeit*0.018;float n=fbm(q)*0.65+fbm(q*2.3-uWindD*uZeit*0.03+5.0)*0.35;float tief=0.65+0.35*(dev.y/uR.y);float dens=smoothstep(0.32,0.85,n)*tief;'+
@@ -39924,6 +40056,12 @@ const FS_E=A.PH+'uniform vec2 uR;uniform vec3 uCam;uniform float uZeit;uniform v
  '  float d=length(w-pos);float tw=0.45+0.55*sin(uZeit*(0.8+r1*1.7)+r1*40.0);add+=vec3(1.0,0.86,0.62)*smoothstep(1.5,0.2,d)*max(tw,0.0)*min(lit,1.0)*uStb;}}'+
  ' if(uSpg>0.0){for(int i=0;i<8;i++){if(float(i)>=uNL)break;vec4 l=uL[i];vec2 o=dev-l.xy;if(o.y<0.0||o.y>l.z*1.4)continue;float sx=l.z*0.09*(1.0+o.y/l.z);float s=exp(-o.x*o.x/(sx*sx))*(1.0-o.y/(l.z*1.4));'+
  '   float rp=0.6+0.4*sin(o.y*0.18-uZeit*5.0+vn(dev*0.05)*4.0);add+=vec3(1.0,0.8,0.55)*s*rp*l.w*uSpg*0.22;}}'+
+ /* Legendär: Sonnenstrahlen – breite, langsam wandernde Lichtbahnen entlang der Sonnenrichtung (Weltkoordinaten, nichts „schwimmt“) */
+ ' if(uStr.z>0.0){vec2 sd=uStr.xy;float s=dot(w,vec2(-sd.y,sd.x));float a=dot(w,sd);float st=vn(vec2(s*0.012+uZeit*0.01,3.7))*0.6+vn(vec2(s*0.035-uZeit*0.016,9.1))*0.4;st=smoothstep(0.5,0.88,st);'+
+ '  float br=0.5+0.5*vn(vec2(a*0.004+uZeit*0.02,s*0.006));add+=uStrC*st*br*uStr.z;}'+
+ /* Legendär: Kaustik – wanderndes Lichtnetz auf Teichen */
+ ' if(uKau>0.0){for(int k=0;k<12;k++){if(float(k)>=uNW)break;vec4 c=uWa[k];float d=length(w-c.xy);if(d<c.z){vec2 q=w*0.045;float r1=abs(vn(q+vec2(uZeit*0.22,uZeit*0.15))-0.5),r2=abs(vn(q*1.8-vec2(uZeit*0.18,-uZeit*0.2)+7.3)-0.5);'+
+ '   float ka=pow(clamp(1.0-(r1+r2)*2.4,0.0,1.0),5.0);add+=vec3(0.9,0.97,0.86)*ka*uKau*smoothstep(c.z,c.z*0.75,d)*(0.3+0.7*min(1.0,lit+0.35));break;}}}'+
  ' gl_FragColor=vec4(fc+add,fa);}';
 /* Bloom weichzeichnen (getrennt waagrecht/senkrecht) */
 const FS_B=A.PH+'uniform sampler2D uT;uniform vec2 uD;varying vec2 vT;void main(){vec4 c=texture2D(uT,vT)*0.227;c+=(texture2D(uT,vT+uD*1.385)+texture2D(uT,vT-uD*1.385))*0.316;c+=(texture2D(uT,vT+uD*3.23)+texture2D(uT,vT-uD*3.23))*0.07;gl_FragColor=c;}';
@@ -40018,12 +40156,12 @@ setInterval(()=>{try{GW.haken.uPost=uAktiv()?uPost:null}catch(e){}},500);GW.hake
 
 /* ---------- Haken: obere Ebene, Lichtschatten ---------- */
 const SB={F:null,R:null,gen:-1};
-GW.haken.licht.push(function(c){if(!an('schatten'))return;const R=c.RO,g=R.gl;if(!(c.dunkel>0.3)||!c.m)return;const max=lvl()>=4||modus()==='voll'?8:4;const L=lichter(c,max);FX.st.lichter=L.length;if(!L.length)return;
- const occ=occTex(R);if(!occ)return;const p=prog(R,'s');if(!p)return;const hw=Math.max(2,Math.ceil(c.w/2)),hh=Math.max(2,Math.ceil(c.h/2));
+GW.haken.licht.push(function(c){if(!an('schatten'))return;const R=c.RO,g=R.gl;if(!(c.dunkel>0.3)||!c.m)return;const max=lvl()>=5?12:lvl()>=4||modus()==='voll'?8:4;const L=lichter(c,max);FX.st.lichter=L.length;if(!L.length)return;
+ const occ=occTex(R);if(!occ)return;const p=prog(R,'s');if(!p)return;const sq=lvl()>=5?1:2,hw=Math.max(2,Math.ceil(c.w/sq)),hh=Math.max(2,Math.ceil(c.h/sq));
  if(!SB.F||SB.R!==R||SB.gen!==R.gen||SB.F.w!==hw||SB.F.h!==hh){if(SB.F&&SB.R===R&&SB.gen===R.gen)A.fbWeg(R,SB.F);SB.F=A.fbNeu(R,hw,hh,false);SB.R=R;SB.gen=R.gen;if(!SB.F)return}
  A.rZiel(R,SB.F);g.clearColor(0,0,0,0);g.clear(g.COLOR_BUFFER_BIT);A.useProg(R,p);g.uniform2f(p.u.uR,hw,hh);p.zw=hw;p.zh=hh;g.uniform1f(p.u.uK,c.w/hw);
  g.uniform1i(p.u.uOcc,0);bindT(R,0,occ.t);g.uniform3f(p.u.uCam,c.m[4],c.m[5],c.m[0]);g.uniform1f(p.u.uN8,occ.n8);g.uniform1f(p.u.uD,Math.min(0.95,c.dunkel));g.uniform1f(p.u.uDbg,FX.dbg||0);
- const LV=new Float32Array(32);L.forEach((l,i)=>{LV[i*4]=l.x;LV[i*4+1]=l.y;LV[i*4+2]=l.r;LV[i*4+3]=Math.min(1,l.a)});g.uniform4fv(p.u.uL,LV);g.uniform1f(p.u.uNL,L.length);
+ const LV=new Float32Array(64);L.forEach((l,i)=>{LV[i*4]=l.x;LV[i*4+1]=l.y;LV[i*4+2]=l.r;LV[i*4+3]=Math.min(1,l.a)});g.uniform4fv(p.u.uL,LV);g.uniform1f(p.u.uNL,L.length);
  const X=rest(c,L),XV=new Float32Array(32);X.forEach((l,i)=>{XV[i*4]=l.x;XV[i*4+1]=l.y;XV[i*4+2]=l.r;XV[i*4+3]=Math.min(1,l.a)});g.uniform4fv(p.u.uX,XV);g.uniform1f(p.u.uNX,X.length);
  const Fg=an('figuren')?figuren(c,24):[];const FV=new Float32Array(96);Fg.forEach((f,i)=>{FV[i*4]=f[0];FV[i*4+1]=f[1];FV[i*4+2]=f[2]});g.uniform4fv(p.u.uF,FV);g.uniform1f(p.u.uNF,Fg.length);
  blend(R,'copy');vollbild(R,p,hw,hh,false);
@@ -40033,11 +40171,17 @@ GW.haken.licht.push(function(c){if(!an('schatten'))return;const R=c.RO,g=R.gl;if
 /* ---------- Haken: obere Ebene, Nebel/Glanz/Lava/Staub/Spiegelungen ---------- */
 GW.haken.ende.push(function(c){const R=c.RO,g=R.gl;if(!c.m)return;const x=WXo();let C=null;try{C=OA.cfg}catch(e){}
  const neb=an('nebel')&&((x&&(x.w==='nebel'||x.w==='sporen'))||(C&&C.fog))?1:0;
- const wa=[],la=[];if(an('glanz')||an('lava')){try{const V=wlSicht(),Wd=G.wl;if(Wd&&Wd.an&&Wd.lo)for(const o of Wd.lo){if(o.t!=='c')continue;if(o.x+o.r<V.x0||o.x-o.r>V.x1||o.y+o.r<V.y0||o.y-o.r>V.y1)continue;if(o.k==='wasser'&&wa.length<12)wa.push([o.x,o.y,o.r]);else if(o.k==='lava'&&la.length<12)la.push([o.x,o.y,o.r])}}catch(e){}
+ const wa=[],la=[];if(an('glanz')||an('lava')||an('kaustik')){try{const V=wlSicht(),Wd=G.wl;if(Wd&&Wd.an&&Wd.lo)for(const o of Wd.lo){if(o.t!=='c')continue;if(o.x+o.r<V.x0||o.x-o.r>V.x1||o.y+o.r<V.y0||o.y-o.r>V.y1)continue;if(o.k==='wasser'&&wa.length<12)wa.push([o.x,o.y,o.r]);else if(o.k==='lava'&&la.length<12)la.push([o.x,o.y,o.r])}}catch(e){}
   try{for(const z of G.ezones||[])if(z&&z.kind==='lava'&&la.length<12)la.push([z.x,z.y,z.r||40])}catch(e){}try{const vw=W/ZOOM,vh=H/ZOOM,cx0=G.cam.x-vw/2,cy0=G.cam.y-vh/2;for(const d of G.deco){if(la.length>=12)break;if(d.k==='lava'&&d.x>cx0-100&&d.x<cx0+vw+100&&d.y>cy0-100&&d.y<cy0+vh+100)la.push([d.x,d.y,30*(d.s||1)])}}catch(e){}}
  const gl_=an('glanz')&&wa.length?1:0,lav=an('lava')&&la.length?1:0;let th='';try{th=G.themeKey||''}catch(e){}
  const stb=an('staub')&&(!OUT()||G.room)?1:0,spg=an('spiegel')&&OUT()&&x&&(x.w==='regen'||x.w==='gewitter')?1:0;
- if(!neb&&!gl_&&!lav&&!stb&&!spg)return;const p=prog(R,'e');if(!p)return;A.rZiel(R,c.of);A.useProg(R,p);g.uniform2f(p.u.uR,c.w,c.h);p.zw=c.w;p.zh=c.h;
+ /* Legendär: Sonnenstrahlen (draußen, bei Tag und Dämmerung; im Nebel kräftiger, bei Regen aus) und Kaustik auf Teichen */
+ let str=0,sdx=0,sdy=0,sc=[1,0.9,0.66];if(an('strahlen')){const so=sonne();if(so){const sl=Math.hypot(so.dx,so.dy)||1;sdx=so.dx/sl;sdy=so.dy/sl;str=0.095;const z=x&&x.z,wt=x&&x.w;if(z==='daemmer'){str=0.13;sc=[1,0.72,0.44]}
+   if(wt==='regen'||wt==='gewitter')str=0;else if(wt==='nebel')str*=1.5;else if(wt==='schnee')str*=0.6;
+   /* nur wo es wirklich hell ist: in düsteren Gebieten (Schloss, Dorf bei Nacht) lagen die Bahnen sonst als Schleier über dem dunklen Boden */
+   let dk=0;try{dk=+(G.theme&&G.theme.dark)||0}catch(e){}str*=Math.max(0,1-dk*2.2);if(str<0.012)str=0}}
+ const kau=an('kaustik')&&wa.length?(x&&x.z==='nacht'?0.1:0.22):0;
+ if(!neb&&!gl_&&!lav&&!stb&&!spg&&!str&&!kau)return;const p=prog(R,'e');if(!p)return;A.rZiel(R,c.of);A.useProg(R,p);g.uniform2f(p.u.uR,c.w,c.h);p.zw=c.w;p.zh=c.h;
  g.uniform3f(p.u.uCam,c.m[4],c.m[5],c.m[0]);g.uniform1f(p.u.uZeit,((G.time||0)%1000));
  const L=lichter(c,8),LV=new Float32Array(32);L.forEach((l,i)=>{LV[i*4]=l.x;LV[i*4+1]=l.y;LV[i*4+2]=l.r;LV[i*4+3]=Math.min(1,l.a)});g.uniform4fv(p.u.uL,LV);g.uniform1f(p.u.uNL,L.length);
  let nc=[0.78,0.76,0.73],na=0.16;try{if(x&&x.w==='sporen'){nc=[0.55,0.62,0.4];na=0.12}else if(C&&C.fog){const f=C.fog[0];/* warm-neutral statt kühl */const gr=(f[0]+f[1]+f[2])/765*0.5+0.4;nc=[gr*1.02+0.02,gr,gr*0.95];na=Math.min(0.16,(C.fog[1]||0.12)*0.75)}}catch(e){}
@@ -40045,14 +40189,14 @@ GW.haken.ende.push(function(c){const R=c.RO,g=R.gl;if(!c.m)return;const x=WXo();
  const HV=new Float32Array(16);let nh=0;try{for(const q of (G.mp?PL:[P])){if(!q||nh>=4)break;HV[nh*4]=q.x;HV[nh*4+1]=q.y;nh++}}catch(e){}g.uniform4fv(p.u.uHeld,HV);g.uniform1f(p.u.uNH,nh);
  const WV=new Float32Array(48);wa.forEach((q,i)=>{WV[i*4]=q[0];WV[i*4+1]=q[1];WV[i*4+2]=q[2]});g.uniform4fv(p.u.uWa,WV);g.uniform1f(p.u.uNW,wa.length);g.uniform1f(p.u.uGl,gl_?0.35:0);
  const LA=new Float32Array(48);la.forEach((q,i)=>{LA[i*4]=q[0];LA[i*4+1]=q[1];LA[i*4+2]=q[2]});g.uniform4fv(p.u.uLa,LA);g.uniform1f(p.u.uNLa,la.length);g.uniform1f(p.u.uLav,lav?1:0);
- g.uniform1f(p.u.uStb,stb?0.5:0);g.uniform1f(p.u.uSpg,spg?1:0);
+ g.uniform1f(p.u.uStb,stb?0.5:0);g.uniform1f(p.u.uSpg,spg?1:0);g.uniform4f(p.u.uStr,sdx,sdy,str,0);g.uniform3f(p.u.uStrC,sc[0],sc[1],sc[2]);g.uniform1f(p.u.uKau,kau);
  /* Nebel deckt (über), Licht/Glanz addiert: vormultipliziert über = rgb + dst·(1−a) */blend(R,'over');vollbild(R,p,c.w,c.h,false);FX.st.o++});
 
 /* ---------- Bloom weicher: zwei Weichzeichner-Durchgänge auf dem kleinen Bloom-Bild ---------- */
 const BB={F:null,R:null,gen:-1};
 GW.haken.bloom=GW.haken.bloom||[];GW.haken.bloom.push(function(c){if(!an('bloom2')||!c.bf)return;const R=c.RO,g=R.gl,p=prog(R,'b');if(!p)return;const w=c.bf.w,h=c.bf.h;
  if(!BB.F||BB.R!==R||BB.gen!==R.gen||BB.F.w!==w||BB.F.h!==h){if(BB.F&&BB.R===R&&BB.gen===R.gen)A.fbWeg(R,BB.F);BB.F=A.fbNeu(R,w,h,false);BB.R=R;BB.gen=R.gen;if(!BB.F)return}
- blend(R,'copy');for(let k=0;k<2;k++){A.rZiel(R,BB.F);A.useProg(R,p);g.uniform1i(p.u.uT,0);bindT(R,0,c.bf.t);g.uniform2f(p.u.uD,(1+k)/w,0);vollbild(R,p,w,h,true);
+ blend(R,'copy');for(let k=0,kn=lvl()>=5?3:2;k<kn;k++){A.rZiel(R,BB.F);A.useProg(R,p);g.uniform1i(p.u.uT,0);bindT(R,0,c.bf.t);g.uniform2f(p.u.uD,(1+k)/w,0);vollbild(R,p,w,h,true);
   A.rZiel(R,c.bf);A.useProg(R,p);bindT(R,0,BB.F.t);g.uniform2f(p.u.uD,0,(1+k)/h);vollbild(R,p,w,h,true)}});
 
 /* ---------- Schalter in der Grafik-Box ---------- */
@@ -40268,7 +40412,7 @@ window.__hsKURVE={v:1,n:0,aus:0};
  const erst=()=>!(G.mp&&PL[0]&&P!==PL[0]);
  const ok=()=>erst()&&!KV.aus&&HARD()&&G.mode==='kampagne'&&G.state==='play'&&!G.room;
  function rudel(){try{if(!ok())return;const pt=edgePoint(420);spawnPack(pickFoe(0.6),pt.x,pt.y);KV.n++}catch(e){}}
- hook('stage',i=>{try{if(!erst()||KV.aus||!HARD()||G.mode!=='kampagne')return;const s=G.stage;if(s<1||s>8)return;KV.halb=s>=3?1:0;later(8,rudel)}catch(e){}});
+ hook('stage',i=>{try{if(!erst()||KV.aus||!HARD()||G.mode!=='kampagne')return;const s=G.stage;if(s<2||s>8)return;KV.halb=s>=3?1:0;later(8,rudel)}catch(e){}});
  hook('tick',()=>{try{if(!KV.halb||!ok()||!G.need)return;if(G.stageKills>=G.need*0.5){KV.halb=0;rudel()}}catch(e){}});
  /* Champion-Rudel auf Schwer ab Stufe 2: eine Eigenschaft mehr */
  const sp=spawnPack;spawnPack=function(){let ra=null;try{if(!KV.aus&&HARD()&&G.stage>=2){ra=rollAffixes;rollAffixes=function(n){return ra(n===1?2:n)}}}catch(e){}
@@ -40304,7 +40448,7 @@ window.__hsPRAEG={v:1,n:0};
 /* ================= Paket „gold2“: Hehler und Wette am Lagerfeuer – window.__hsGOLD2 =================
    Hehler: verhüllte Ware (Waffe/Rüstung/Schmuck) in drei Güten, Chancen stehen offen dran, Preis steigt mit Stufe und
    jedem Kauf im Lauf. Wette auf dich selbst: nächste Stufe ohne Heiltrank / nie unter 30 % Leben / beides – Einsatz
-   10 % oder 25 % des Goldes, Gewinn doppelt (beides dreifach). Kein Automat, keine Endlos-Würfe. */
+   10 % oder 25 % des Goldes (nach Level gedeckelt), Gewinn doppelt (beides dreifach). Kein Automat, keine Endlos-Würfe. */
 window.__hsGOLD2={v:1,kauf:0,wette:0,gew:0};
 (function(){try{
  const GD=window.__hsGOLD2;const ORANGE='#e5b454';
@@ -40318,7 +40462,10 @@ window.__hsGOLD2={v:1,kauf:0,wette:0,gew:0};
   try{persist()}catch(e){}return txt}
  /* ---- Wette ---- */
  const WETTEN=[{k:'trank',n:'Ohne Heiltrank',d:'Die nächste Stufe ohne einen einzigen Heiltrank.',x:2},{k:'heil',n:'Nie unter 30 % Leben',d:'Dein Leben fällt in der nächsten Stufe nie unter 30 %.',x:2},{k:'beides',n:'Beides',d:'Ohne Heiltrank und nie unter 30 % Leben.',x:3}];
- const einsatz=f=>Math.max(50,Math.round(SAVE.gold*f/10)*10);
+ /* Einsatz gedeckelt (wächst mit dem Level, nicht mit dem Goldbestand): sonst ließ sich das Gold Stufe für Stufe um 25–50 % vermehren –
+    über einen Lauf das Tausendfache. Kleiner Einsatz höchstens 100 + 40 je Level, großer das 2,5-Fache. */
+ const deckel=f=>Math.round((100+40*((P&&P.level)||1))*(f>=0.25?2.5:1)/10)*10;
+ const einsatz=f=>Math.max(50,Math.min(deckel(f),Math.round(SAVE.gold*f/10)*10));
  function wetteSetzen(w,f){const e=einsatz(f);if(SAVE.gold<e)return false;SAVE.gold-=e;G.wette={k:w.k,x:w.x,e,st:G.stage+1,trank:0,min:1,tod:0};GD.wette++;sfx('coin');try{persist()}catch(x){}return true}
  {const up=usePotion;usePotion=function(){const p0=P&&P.pots;const r=up.apply(this,arguments);try{const W=G.wette;if(W&&G.stage===W.st&&P.pots<p0)W.trank=1}catch(e){}return r}}
  hook('tick',()=>{const W=G.wette;if(!W||G.stage!==W.st||G.state!=='play'||!P||(G.mp&&PL[0]&&P!==PL[0]))return;W.min=Math.min(W.min,P.hp/P.st.maxHp);if(P.down)W.tod=1});
@@ -40345,7 +40492,7 @@ window.__hsGOLD2={v:1,kauf:0,wette:0,gew:0};
   <div class="g2grid">${L.map(x=>`<span class="g2klein">mind. selten ${x.c.sel} % · legendär ${String(x.c.leg).replace('.',',')} %</span>`).join('')}</div>
   ${msg?`<p>${msg}</p>`:''}<div class="g2row"><button class="btn" data-g2="zu">Zurück zum Feuer</button></div>`)}
  function wette(msg){const W=G.wette;
-  ov(`<h3>Wette auf dich selbst</h3>${W?`<p>Läuft schon: <b>${WETTEN.find(x=>x.k===W.k).n}</b> um ${fmt(W.e)} Gold – Gewinn ${fmt(W.e*W.x)}.</p>`:`<p>Für die nächste Stufe. Gewinnst du, bekommst du den Einsatz doppelt (bei „Beides“ dreifach) zurück. Dein Gold: <b>${fmt(SAVE.gold)}</b></p>
+  ov(`<h3>Wette auf dich selbst</h3>${W?`<p>Läuft schon: <b>${WETTEN.find(x=>x.k===W.k).n}</b> um ${fmt(W.e)} Gold – Gewinn ${fmt(W.e*W.x)}.</p>`:`<p>Für die nächste Stufe. Gewinnst du, bekommst du den Einsatz doppelt (bei „Beides“ dreifach) zurück. Der Einsatz ist nach deinem Level begrenzt. Dein Gold: <b>${fmt(SAVE.gold)}</b></p>
   ${WETTEN.map((w,i)=>`<div class="g2grid" style="grid-template-columns:1fr auto auto;align-items:center"><span><b>${w.n}</b><br><span class="g2klein">${w.d}</span></span><button class="btn" data-g2="wette" data-i="${i}" data-f="0.1" ${SAVE.gold<einsatz(0.1)?'disabled':''}>${fmt(einsatz(0.1))}</button><button class="btn" data-g2="wette" data-i="${i}" data-f="0.25" ${SAVE.gold<einsatz(0.25)?'disabled':''}>${fmt(einsatz(0.25))}</button></div>`).join('')}`}
   ${msg?`<p>${msg}</p>`:''}<div class="g2row"><button class="btn" data-g2="zu">Zurück zum Feuer</button></div>`)}
  GD.hehler=()=>hehler();GD.wetteUI=()=>wette();
@@ -40957,7 +41104,7 @@ window.__hsZAEH={v:1,aus:0,T:4,st:{n:0,mul:0}};
 const ZH=window.__hsZAEH;
 function boden(){let s=0;for(const q of mpL()){if(!q||!q.st||q.netGone)continue;const d=dpsOf(q.st);s=Math.max(s,Math.max(d.m,d.r)*(GUARD_HK[q.id]||1.5))}return s}
 const sp=spawnEnemy;spawnEnemy=function(def,x,y,o){const e=sp.apply(this,arguments);try{o=o||{};if(!e||ZH.aus||o.boss||o.guard||o.add||o.summon||e.boss||G.room&&G.room.type==='training')return e;
-  const ref=boden();if(!(ref>0))return e;const hf=def&&def.hp||1;const ziel=ref*ZH.T*Math.max(0.45,hf)*(HARD()?1.35:1)*(G.stage<2?0.7:1);
+  const ref=boden();if(!(ref>0))return e;const hf=def&&def.hp||1;const ziel=ref*ZH.T*Math.max(0.45,hf)*(HARD()?hartMix(1.05,1.35):1)*(G.stage<2?0.7:1);
   if(e.maxHp<ziel){const m=Math.min(14,ziel/e.maxHp);e.hp*=m;e.maxHp*=m;e.zhM=m;ZH.st.n++;ZH.st.mul+=m}
   if((SL()||0)>=4)e.dmg*=HARD()?1.18:1.12}catch(er){if(!ZH.err)ZH.err=String(er&&er.stack||er)}return e};
 /* zähere Gegner → Kill-Ziel der Stufe 15 % kleiner, damit Stufen nicht zäh werden */
@@ -42416,7 +42563,7 @@ document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.
 const A=window.__hsATTR={v:1,aus:0,err:[]};const aErr=e=>{if(A.err.length<30)A.err.push(String(e&&e.stack||e).slice(0,300))};
 const K=['st','ge','ko','in','we','ch'];
 const AN={st:{n:'Stärke',k:'STÄ',c:'#e8785a',w:'Stärke-Waffen und -Fähigkeiten +4 % Schaden'},ge:{n:'Geschick',k:'GES',c:'#a8d46a',w:'Geschick-Waffen und -Fähigkeiten +4 % Schaden, +0,5 % Krit'},
- ko:{n:'Konstitution',k:'KON',c:'#e0a860',w:'+5 % Leben'},in:{n:'Intelligenz',k:'INT',c:'#c4a0f0',w:'Intelligenz-Fähigkeiten +4 % Schaden, −1 % Abklingzeit'},
+ ko:{n:'Konstitution',k:'KON',c:'#e0a860',w:'+6 % Leben, −1 % erlittener Schaden'},in:{n:'Intelligenz',k:'INT',c:'#c4a0f0',w:'Intelligenz-Fähigkeiten +4 % Schaden, −1 % Abklingzeit'},
  we:{n:'Weisheit',k:'WEI',c:'#e8dca0',w:'Weisheits-Fähigkeiten und Begleiter +4 % Schaden'},ch:{n:'Charisma',k:'CHA',c:'#ff9ccc',w:'Charisma-Fähigkeiten +4 % Schaden, +2 % Kontrolldauer, +2 % Gold'}};
 A.K=K;A.AN=AN;
 const BASIS={barradin:{st:8,ge:14,ko:12,in:13,we:10,ch:15},echo:{st:10,ge:13,ko:14,in:12,we:15,ch:8},friedrich:{st:12,ge:15,ko:13,in:10,we:14,ch:8},ezekiel:{st:14,ge:15,ko:13,in:12,we:10,ch:8}};
@@ -42483,7 +42630,8 @@ function waffeAttr(q,melee){const it=q.eq&&q.eq[melee?'weapon':'ranged'];const r
 const SKC={};
 function quelleAttr(q,o){if(o.pet)return BEGL[q.id];if(o.basic)return waffeAttr(q,!!o.melee);let k='';try{k=dmSrc(o)}catch(e){}if(!k)return null;if(k==='pet:rex'||k.indexOf('pet:')===0)return BEGL[q.id];
  const c=q.id+'|'+k;if(c in SKC)return SKC[c];const r=astAttr(q,k);SKC[c]=r;return r}
-hook('stats',s=>{if(!an()||!P||!P.id)return;sync(P);const v=verteilt(P);if(v.ge)s.crit+=0.005*v.ge;if(v.ko)s.hpP+=0.05*v.ko;if(v.in)s.cdr+=0.01*v.in;if(v.ch){s.ctrlP+=0.02*v.ch;s.gold+=0.02*v.ch}});
+hook('stats',s=>{if(!an()||!P||!P.id)return;sync(P);const v=verteilt(P);if(v.ge)s.crit+=0.005*v.ge;if(v.ko)s.hpP+=0.06*v.ko;if(v.in)s.cdr+=0.01*v.in;if(v.ch){s.ctrlP+=0.02*v.ch;s.gold+=0.02*v.ch}});
+hook('hurtMul',()=>{if(!an()||!P||!P.id)return 1;const v=verteilt(P);return v.ko?1-Math.min(0.2,0.01*v.ko):1});
 hook('dmgMul',(e,o)=>{if(!an()||!P||!P.id||!o)return 1;const v=verteilt(P);let n=0;for(const k in v)n+=v[k];if(!n)return 1;const a=quelleAttr(P,o);return a&&v[a]?1+0.04*v[a]:1});
 /* ---------- Würfelproben ---------- */
 if(typeof ev2Start==='function'){const es=ev2Start;ev2Start=function(ev){const r=es.apply(this,arguments);try{if(an()&&G.ev&&G.ev.ev&&G.ev.ev.opts){for(const o of G.ev.ev.opts){if(!o||!o.skill||!PROBE[o.skill])continue;if(!o.atB0)o.atB0=Object.assign({},o.bonus||{});const b=Object.assign({},o.atB0);

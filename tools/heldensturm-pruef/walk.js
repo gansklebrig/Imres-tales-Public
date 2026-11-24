@@ -1,0 +1,3 @@
+(()=>{const D=__hs.draw,H=['barradin','friedrich','echo','ezekiel'],N=8,cw=190,ch=210;const cv=document.createElement('canvas');cv.width=N*cw;cv.height=H.length*ch;const g=cv.getContext('2d');g.fillStyle='#4a4a40';g.fillRect(0,0,cv.width,cv.height);
+H.forEach((h,r)=>{for(let k=0;k<N;k++){const x=k*cw+cw/2,y=r*ch+ch*0.66;g.strokeStyle='rgba(255,255,255,.15)';g.beginPath();g.moveTo(k*cw,y+38);g.lineTo(k*cw+cw,y+38);g.stroke();g.save();try{D.drawHero(g,h,x,y,4,{t:k/N*(Math.PI*2/12),moving:true})}catch(e){}g.restore();g.setTransform(1,0,0,1,0,0)}});
+window.__sheet=cv.toDataURL('image/jpeg',0.88);return 1})()

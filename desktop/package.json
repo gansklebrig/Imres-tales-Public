@@ -1,0 +1,88 @@
+{
+  "name": "heldensturm",
+  "productName": "Heldensturm",
+  "version": "1.0.0",
+  "description": "Heldensturm – das Roguelike zu Imres Tales, als Programm für Windows und Linux",
+  "author": "Imres Tales",
+  "homepage": "https://imrestales.de/heldensturm.html",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "bauen": "electron-builder --publish never"
+  },
+  "devDependencies": {
+    "electron": "^45.4.1",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "de.imrestales.heldensturm",
+    "productName": "Heldensturm",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "build/icon.png",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "spiel",
+        "to": "spiel"
+      }
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "Heldensturm-Setup.exe"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": false,
+      "shortcutName": "Heldensturm",
+      "deleteAppDataOnUninstall": false,
+      "include": "build/installer.nsh"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "Heldensturm.AppImage",
+      "category": "Game",
+      "executableName": "heldensturm",
+      "syncDesktopName": true
+    },
+    "publish": null,
+    "electronFuses": {
+      "runAsNode": false,
+      "enableCookieEncryption": true,
+      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeCliInspectArguments": false,
+      "enableEmbeddedAsarIntegrityValidation": true,
+      "onlyLoadAppFromAsar": true,
+      "grantFileProtocolExtraPrivileges": false
+    }
+  },
+  "desktopName": "heldensturm.desktop",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gansklebrig/Imres-tales-Public.git"
+  }
+}

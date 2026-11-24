@@ -1,0 +1,157 @@
+# Baut Heldensturm als Programm für Windows und Linux (offline, alle Dateien im Programm) und stellt es als Release bereit:
+# github.com/gansklebrig/Imres-tales-Public/releases → Heldensturm-Setup.exe (Windows) und Heldensturm.AppImage (Linux).
+# Die Release-Marke heißt heldensturm-pc-1.N – getrennt von der Android-App (heldensturm-1.N), die weiter „Latest“ bleibt.
+name: Heldensturm-Programm bauen (Windows, Linux)
+
+on:
+  push:
+    branches: [main, "claude/heldensturm-pc"]
+    paths:
+      - heldensturm.html
+      - heldensturm-erzaehler.js
+      - heldensturm-sw.js
+      - heldensturm-ton.js
+      - tonregler.js
+      - "audio/heldensturm/**"
+      - "klang/**"
+      - "heldensturm-clips/**"
+      - "tools/vertonung/heldensturm-de.json"
+      - "desktop/**"
+      - "tools/android/sammeln.py"
+      - ".github/workflows/heldensturm-pc.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: heldensturm-pc-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bauen:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            ziel: --win
+            datei: Heldensturm-Setup.exe
+          - os: ubuntu-latest
+            ziel: --linux
+            datei: Heldensturm.AppImage
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    steps:
+      # Zeilenenden genau wie im Repo lassen: die Prüfsummen im Spiel-Manifest müssen zu den Dateien auf GitHub passen
+      - name: Zeilenenden nicht umwandeln
+        shell: bash
+        run: git config --global core.autocrlf false
+
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /desktop/
+            /tools/android/
+            /tools/vertonung/heldensturm-de.json
+            /heldensturm*
+            /tonregler.js
+            /klang/
+            /amb/
+            /audio/heldensturm/
+            /heldensturm-clips/
+            /schriften/
+            /vendor/
+            /kuerzel.js
+            /inhalt.js
+            /*-frei.webp
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Spieldateien einpacken
+        run: python tools/android/sammeln.py desktop/spiel
+
+      # Liste aller Spieldateien mit Prüfsummen: damit holt das installierte Programm später nur geänderte Dateien
+      - name: Spiel-Manifest schreiben
+        run: python desktop/manifest.py desktop/spiel ${{ github.run_number }} ${{ github.sha }}
+
+      - name: Abhängigkeiten holen
+        working-directory: desktop
+        run: npm ci --no-audit --no-fund
+
+      - name: Programm bauen
+        working-directory: desktop
+        shell: bash
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: npx electron-builder ${{ matrix.ziel }} --publish never -c.extraMetadata.version=1.${{ github.run_number }}.0
+
+      - name: Datei sichern
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.datei }}
+          path: desktop/dist/${{ matrix.datei }}
+          retention-days: 5
+          if-no-files-found: error
+
+      - name: Manifest sichern
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: spiel-manifest.json
+          path: desktop/spiel/spiel-manifest.json
+          retention-days: 5
+          if-no-files-found: error
+
+  veroeffentlichen:
+    needs: bauen
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: fertig
+          merge-multiple: true
+
+      # Ohne fremde Bausteine: das Release legt GitHubs eigenes Werkzeug an. Die Prüfsummen stehen im Release-Text.
+      - name: Als Release veröffentlichen
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MARKE: heldensturm-pc-1.${{ github.run_number }}
+          TITEL: Heldensturm für PC 1.${{ github.run_number }}
+          NACHRICHT: ${{ github.event.head_commit.message }}
+          VORAB: ${{ github.ref != 'refs/heads/main' }}
+        run: |
+          cd fertig
+          sha256sum Heldensturm-Setup.exe Heldensturm.AppImage spiel-manifest.json > SHA256SUMS.txt
+          {
+            printf '%s\n\n' "$NACHRICHT"
+            echo '**Windows:** `Heldensturm-Setup.exe` herunterladen und ausführen. Windows warnt beim ersten Mal („Der Computer wurde geschützt“), weil das Programm nicht signiert ist: „Weitere Informationen“ → „Trotzdem ausführen“.'
+            echo '**Linux:** `Heldensturm.AppImage` herunterladen, ausführbar machen (`chmod +x Heldensturm.AppImage`) und starten.'
+            echo
+            echo 'Läuft offline, mit Controller. F11 = Vollbild. Spielstände bleiben bei Updates erhalten. Ab dieser Fassung aktualisiert sich das Programm selbst: geänderte Spieldateien kommen einzeln im Hintergrund, Programm-Updates werden am selben Ort eingespielt.'
+            echo
+            echo 'Prüfsummen (SHA-256):'
+            echo '```'
+            cat SHA256SUMS.txt
+            echo '```'
+          } > ../text.md
+          vorab=""; [ "$VORAB" = "true" ] && vorab="--prerelease"
+          gh release create "$MARKE" Heldensturm-Setup.exe Heldensturm.AppImage spiel-manifest.json SHA256SUMS.txt --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "$TITEL" --notes-file ../text.md --latest=false $vorab
+
+      - name: Alte Programm-Versionen aufräumen (die letzten 3 bleiben)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release list --repo "$GITHUB_REPOSITORY" --limit 100 --json tagName,createdAt \
+            --jq '[.[] | select(.tagName | startswith("heldensturm-pc-1."))] | sort_by(.createdAt) | reverse | .[3:] | .[].tagName' |
+          while read -r t; do gh release delete "$t" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || true; done
