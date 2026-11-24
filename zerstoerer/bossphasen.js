@@ -403,21 +403,22 @@
         act: (e, P, m) => { const dir = pcx(P) > cxOf(e) ? 1 : -1; floorSweep(e, cxOf(e), dir, 520, { warn: 0.5, gap: 0.026, col: "#ffe080", m: 0.9, sfx: "zap" }); if (e.phase >= 2) later(0.5, () => { if (alive(e)) floorSweep(e, cxOf(e), -dir, 520, { warn: 0.5, gap: 0.026, col: "#ffe080", m: 0.9, sfx: "zap" }); }); FX.text(pcx(P), P.y - 16, L(["Springen!", "Jump!"]), "#ffe080", true); } },
       /* Gebet: Kanalisieren – genug Schaden unterbricht sie, sonst heilt sie und ruft Gläubige */
       gebet: { name: N("Gebet an Demogorgon", "Prayer to Demogorgon"), pre: 0.45, dur: 2.4, post: 0.6, sfx: "dark", w: 0.8,
-        cond: e => e.hp < e.hpMax * 0.92,
+        cond: e => e.hp < e.hpMax * 0.92 && (e._gebetN || 0) < 3, /* W9 6. Runde: höchstens 3 Gebete je Kampf (Bot-Lauf: 600 s Patt, sie heilte schneller als der Nahkampf-Bot schlug) */
         start: (e, P, m) => { m.chan = 0; },
         act: (e, P, m) => { m.chan = 0; FX.text(cxOf(e), e.y - 18, L(["Unterbrich sie!", "Interrupt her!"]), "#ffd27a", true); A.play("dark", { vol: 0.7 }); },
         tick: (e, P, dt, m) => {
           e.vx = 0;
           if (R() < dt * 30) { const a = R() * TAU; FX.p({ x: cxOf(e) + Math.cos(a) * 40, y: e.y + 14 + Math.sin(a) * 30, vx: -Math.cos(a) * 80, vy: -Math.sin(a) * 60, life: 0.5, size: 2, col: "#e5b454", kind: "glow", add: true }); }
           if (m.t > 1.6 && !m.warned) { m.warned = true; tele({ k: "ring", x: cxOf(e), y: feet(e) - 20, r: 80, dur: 0.8, col: "#ff3a2a" }); }
-          if (m.chan >= e.hpMax * 0.07 && !m.broke) {
+          if (m.chan >= e.hpMax * 0.05 && !m.broke) { /* W9: Unterbrechen ab 5 % statt 7 % */
             m.broke = true; m.t = 99; e.st.stun = 2.2;
             FX.text(cxOf(e), e.y - 14, L(["Unterbrochen!", "Interrupted!"]), "#ffe08a", true); A.play("parry", { vol: 0.7 }); FX.ring(cxOf(e), e.y + 14, 40, "#ffe08a", 0.4, 3); FX.addShake(4);
           }
         },
         end: (e, P, m) => {
+          e._gebetN = (e._gebetN || 0) + 1;
           if (m.broke) return;
-          e.hp = Math.min(e.hpMax, e.hp + e.hpMax * 0.06); FX.text(cxOf(e), e.y - 14, L(["Demogorgon antwortet …", "Demogorgon answers…"]), "#e5b454", true);
+          e.hp = Math.min(e.hpMax, e.hp + e.hpMax * 0.05); FX.text(cxOf(e), e.y - 14, L(["Demogorgon antwortet …", "Demogorgon answers…"]), "#e5b454", true);
           zone(e, cxOf(e), feet(e), 160, 56, 0, 1.1, { col: "rgba(229,180,84,.9)", eff: { stun: 0.3 } }); FX.ring(cxOf(e), feet(e) - 20, 80, "#e5b454", 0.4, 4); A.play("thunder", { vol: 0.6 });
           if (minions(e) < 2) summon(e, "kuotoa", 1, 70); /* W9: Gläubige trafen öfter als die Priesterin selbst */
         } },
@@ -974,6 +975,7 @@
   /* Beim Gebietswechsel alles abräumen */
   const la0 = Z.loadArea;
   Z.loadArea = function () { Q = []; TELE.length = 0; OBJ = []; return la0.apply(this, arguments); };
+  (Z.rueckHooks = Z.rueckHooks || []).push({ id: "bossphasen", load: () => { Q = []; TELE.length = 0; OBJ = []; } }); /* W14 Rückweg-Gnade (rueckweg.js): Gebietszustand merken/einsetzen */
 
   /* Lebensbalken: Phasenmarken und Phasenfarbe */
   let barFor = null;

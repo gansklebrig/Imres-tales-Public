@@ -471,7 +471,7 @@
     n = Math.round(n); let coins = Math.min(12, Math.max(1, Math.round(n / 6)));
     for (let i = 0; i < coins; i++) Z.spawnPickup("gold", x, y, { n: Math.ceil(n / coins) });
   };
-  Z.dropShards = (x, y, n) => { if (Z.has("splitterjaeger")) n *= 1.6; if (["a1", "a2", "s1", "s2"].some(s => Z.hasAff(Z.player.slots[s], "splitternd"))) n *= 1.3; n = Math.round(n); for (let i = 0; i < Math.min(8, n); i++) Z.spawnPickup("shard", x, y, { n: Math.ceil(n / Math.min(8, n)), vy: -80 - Math.random() * 100 }); };
+  Z.dropShards = (x, y, n) => { n *= Z.BAL && Z.BAL.shardMul ? Z.BAL.shardMul : 1; if (Z.has("splitterjaeger")) n *= 1.6; if (["a1", "a2", "s1", "s2"].some(s => Z.hasAff(Z.player.slots[s], "splitternd"))) n *= 1.3; n = Math.round(n); for (let i = 0; i < Math.min(8, n); i++) Z.spawnPickup("shard", x, y, { n: Math.ceil(n / Math.min(8, n)), vy: -80 - Math.random() * 100 }); };
   Z.updatePickups = function (dt) {
     const P = Z.player;
     if (Z.unstickTick) Z.unstickTick(dt); /* platz.js: festsitzende Beute einmal pro Sekunde freiploppen */
