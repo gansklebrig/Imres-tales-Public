@@ -763,7 +763,7 @@
      Kosten in „Laufkacheln“: waagrecht 1, hinauf 1,7 je Kachel (Sprung/Leiter), hinab 0,5 je Kachel. */
   function rennenGraph(lv, p) {
     /* R19: nur ein Ausschnitt um den Sockel (Ringe liegen ±22/±9 Kacheln) – spart die Prüfung der ganzen Karte */
-    const bx0 = p.x - 32, bx1 = p.x + 32, by0 = p.y - 16, by1 = p.y + 16, boxGet = (x, y) => (x < bx0 || x > bx1 || y < by0 || y > by1 ? 1 : lv.get(x, y));
+    const bx0 = p.x - 32, bx1 = p.x + 32, by0 = p.y - 16, by1 = p.y + 16, boxGet = Z.rennenVoll ? lv.get : (x, y) => (x < bx0 || x > bx1 || y < by0 || y > by1 ? 1 : lv.get(x, y)); /* Z.rennenVoll: Vergleichsmodus ganze Karte (Test) */
     const f = { W: lv.W, H: lv.H, get: boxGet, start: { x: p.x, y: p.y }, doors: [], cells: lv.cells, _wantEdges: true };
     Z.validateLevel(f); const [ea, eb] = f._edges || [[], []], N = lv.W * lv.H, W = lv.W;
     const head = new Int32Array(N).fill(-1), nxt = new Int32Array(ea.length), cost = new Float64Array(ea.length);
@@ -782,6 +782,17 @@
     return { reach: f.reach, dist };
   }
   Z.rennenFaktor = 1;
+  /* Test (R20): Weg und Limit für die Ringe des aktuellen Zeitrennens neu berechnen – voll (ganze Karte) oder Ausschnitt */
+  Z.rennenMessen = voll => {
+    const lv = Z.level, ev = (Z.abEvents || []).find(e => e.k === "rennen"); if (!ev) return null;
+    const v0 = Z.rennenVoll; Z.rennenVoll = !!voll;
+    try {
+      const p = { x: Math.floor(ev.x / T), y: Math.floor(ev.y / T) - 1 }, G = rennenGraph(lv, p), W = lv.W;
+      let dc = G.dist(p.y * W + p.x), left = ev.rings.map(r => ({ x: Math.floor(r.x / T), y: Math.floor(r.y / T) })), way = 0;
+      while (left.length) { let bi = -1, bd = 1e9; left.forEach((r, i) => { const v = dc[r.y * W + r.x]; if (v < bd) { bd = v; bi = i; } }); if (bi < 0 || bd >= 1e8) return { unerreichbar: true }; way += bd; const cur = left.splice(bi, 1)[0]; if (left.length) dc = G.dist(cur.y * W + cur.x); }
+      return { way: Math.round(way), limit: Math.max(8, Math.round((way * T / Z.PC.RUN * 1.15 + 2) * Z.rennenFaktor)) };
+    } finally { Z.rennenVoll = v0; }
+  };
   function setupRennen(lv) {
     const p = spotFar(lv, lv.start, 24); if (!p) return null;
     const cellOf = (x, y) => lv.cells && lv.cells[Math.floor(x / Z.CW) + "," + Math.floor(y / Z.CH)];

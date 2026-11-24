@@ -1636,7 +1636,7 @@
     let best = null, bs = 1e9;
     for (let attempt = 0; attempt < 40; attempt++) {
       const lv = tryGen(biomeId, (seed + attempt * 7919) >>> 0, opts);
-      if (lv && validate(lv)) { lv.attempts = attempt + 1; if (Z.run) { const u = (Z.run._tplUse = Z.run._tplUse || {}); for (const k in lv.cells) { const t = lv.cells[k].tpl; if (t) u[t] = (u[t] || 0) + 1; } } if (!Z.noEase) ease(lv); settle(lv); plan(lv); specials(lv); if (!Z.noRuneGates) runeGates(lv); cracks(lv); tides(lv); unwall(lv); assignRooms(lv); return lv; }
+      if (lv && validate(lv)) { lv.attempts = attempt + 1; if (Z.run) { const u = (Z.run._tplUse = Z.run._tplUse || {}); for (const k in lv.cells) { const t = lv.cells[k].tpl; if (t) u[t] = (u[t] || 0) + 1; } } if (!Z.noEase) ease(lv); settle(lv); plan(lv); specials(lv); if (!Z.noRuneGates) runeGates(lv); cracks(lv); tides(lv); if (!Z.noAbkuerzung) abkuerzungen(lv); unwall(lv); assignRooms(lv); return lv; }
       /* Notfall: die beste Karte merken (alle Ausgänge erreichbar, möglichst wenige Festsitz-Stellen) */
       const sc = lv && lv.stuck ? lv.stuck.length : 1e8;
       if (lv && sc < bs) { bs = sc; best = lv; }
@@ -2135,6 +2135,45 @@
      Beide Räume behalten mindestens zwei andere Ausgänge, kein Raum geht verloren, die bequeme Erreichbarkeit bleibt.
      Prüfschalter: Z.specialForce = true (immer, wenn möglich) / false (nie). Ergebnis: lv.specials, lv.flood. */
   const SPECIAL = (Z.SPECIAL = { wehrgang: "bruecke", zinnen: "bruecke", sturm: "bruecke", hafen: "flut", see: "flut", schmiede: "kran", glut: "kran" });
+  /* W13 R20: Abkürzungen am Ende langer Nebenketten. Messung (r20): 200 Kettenenden mit ≥ 3 Nebenräumen auf 52 Karten; 52 grenzen an einen
+     Hauptweg-Raum, 20 davon liegen direkt DARÜBER. Dort wird ein Fallschacht (2 breit) vom Kettenende in den Hauptweg-Raum gegraben: Der Rückweg
+     schrumpft auf einen Sprung hinab. Geprüft wie die Sonderräume: alle Räume bleiben (bequem) erreichbar, kein Festsitzen, keine Türen/Fallen/Funde
+     im Schacht. Der Schacht ist höher als ein bequemer Sprung – also eine Einbahn-Abkürzung nach unten. */
+  function abkuerzungen(lv) {
+    if (!lv.cells || lv.hub || lv.arena || lv.passage) return;
+    const W = lv.W, g = lv.get, cells = Object.keys(lv.cells).map(k => lv.cells[k]), key = (x, y) => x + "," + y;
+    const kids = new Map(); for (const c of cells) if (c.parent) { if (!kids.has(c.parent)) kids.set(c.parent, []); kids.get(c.parent).push(c); }
+    const tiefe = c => { let d = 0, x = c; while (x && x.kind === "side") { d++; x = x.parent; } return d; };
+    const roomsOf = rc => { const s2 = new Set(); for (let i = 0; i < rc.length; i++) if (rc[i]) s2.add(Math.floor((i % W) / CW) + "," + Math.floor(((i / W) | 0) / CH)); return s2; };
+    const comfyRooms = () => { const c = { W, H: lv.H, get: g, start: lv.start, doors: lv.doors, cells: lv.cells }; validate(c, null, true); return roomsOf(c.reach); };
+    if (!validate(lv)) return;
+    const full0 = roomsOf(lv.reach), comfy0 = comfyRooms();
+    const keepOk = () => { if (!validate(lv)) return false; const f1 = roomsOf(lv.reach); for (const k of full0) if (!f1.has(k)) return false; const c1 = comfyRooms(); for (const k of comfy0) if (!c1.has(k)) return false; return true; };
+    const nahDing = (x, y0, y1) => (lv.doors || []).some(d => Math.abs(d.x - x) < 4 && d.y >= y0 - 3 && d.y <= y1 + 3) || (lv.traps || []).some(t => Math.abs(t.x - x) < 3 && t.y >= y0 - 2 && t.y <= y1 + 2) ||
+      (lv.rewards || []).some(r => Math.abs(r.x - x) < 3 && r.y >= y0 - 2 && r.y <= y1 + 2) || (lv.feats || []).some(f => Math.abs(f.x - x) < 3 && (f.y != null ? f.y : f.y0) >= y0 - 2 && (f.y != null ? f.y : f.y0) <= y1 + 2);
+    lv.abkuerzungen = [];
+    for (const c of cells) {
+      if (c.kind !== "side" || (kids.get(c) || []).some(k => k.kind === "side") || tiefe(c) < 3) continue;
+      const unten = lv.cells[key(c.x, c.y + 1)]; if (!unten || unten.kind !== "path") continue;
+      if (c.need.D || unten.need.U) continue; /* schon verbunden (Leiter/Rundweg) – keine Abkürzung nötig */
+      let wurzel = c; while (wurzel && wurzel.kind === "side") wurzel = wurzel.parent;
+      if (!wurzel || (unten.dist || 0) < (wurzel.dist || 0)) continue; /* nur wenn man damit VORAN kommt (nicht hinter die Abzweigung zurück) */
+      const fr = (c.y + 1) * CH - 1; /* untere Randreihe des Kettenendes */
+      for (let x = c.x * CW + 3; x < c.x * CW + CW - 4; x++) {
+        /* oben: Stehplatz auf dem Boden des Kettenendes; darunter nur Fels (1) bis zur Luft im Hauptweg-Raum */
+        let yf = -1; for (let y = fr - 1; y > c.y * CH; y--) if (g(x, y) === 0 && g(x + 1, y) === 0 && g(x, y + 1) === 1 && g(x + 1, y + 1) === 1) { yf = y; break; }
+        if (yf < 0) continue;
+        let y = yf + 1, ok = true; while (y < (c.y + 1) * CH + CH - 2 && (g(x, y) !== 0 || g(x + 1, y) !== 0)) { if (!((g(x, y) === 1 || g(x, y) === 0) && (g(x + 1, y) === 1 || g(x + 1, y) === 0))) { ok = false; break; } y++; }
+        if (!ok || y >= (c.y + 1) * CH + CH - 2 || y - yf - 1 < 2 || y - yf - 1 > 6) continue;
+        if (Math.floor(y / CH) !== c.y + 1) continue; /* Luft muss im Hauptweg-Raum liegen */
+        if (nahDing(x, yf, y + 6)) continue;
+        const ch = []; for (let yy = yf + 1; yy < y; yy++) for (const xx of [x, x + 1]) if (g(xx, yy) !== 0) { ch.push([xx, yy, g(xx, yy)]); lv.set(xx, yy, 0); }
+        if (keepOk()) { lv.abkuerzungen.push({ x, y0: yf, y1: y, cell: key(c.x, c.y), to: key(unten.x, unten.y) }); break; }
+        for (let i = ch.length - 1; i >= 0; i--) lv.set(ch[i][0], ch[i][1], ch[i][2]); validate(lv);
+      }
+    }
+    validate(lv);
+  }
   function specials(lv) {
     lv.specials = []; const kind = SPECIAL[lv.biome]; if (!kind || !lv.cells) return;
     const R = Z.Rng(((lv.seed || 1) ^ 0x5bec1) >>> 0);
