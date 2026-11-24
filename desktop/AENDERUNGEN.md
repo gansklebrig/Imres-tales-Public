@@ -41,3 +41,8 @@ Jeder Punkt lässt sich einzeln zurücknehmen (Schalter in Klammern).
   Stufe 24 und 32 sind so nicht messbar: Den Test-Helden fehlen legendäre Ausrüstung, Sets und Lager-Ausbauten, sie sterben dort sofort.
 - Geprüft, nicht ausnutzbar: nach erfülltem Stufenziel stehen bleiben und Gegner „farmen“ (300 s: 7 Abschüsse, 3 Gold, kein Level);
   Kaufen und Wiederverkaufen beim Händler (Verkauf = 1,5 × Schrottwert, Kauf = 10–20 ×).
+
+**Prüfung des Zweigs (24.11., nach allen Änderungen)**
+- Alle 35 Stufen mit WebGL-Welt auf „Legendär“ je 3,5 s gespielt (`sweep.js`): keine Skript-, Shader- oder Dach-Fehler.
+- Helden und Bosse als Übersichtsbild (`sheet.js`, `walk.js`) angesehen: bewusst nichts geändert – Figuren und Laufzyklen sind stimmig,
+  Änderungen daran brauchen ein Auge am echten Bild.
