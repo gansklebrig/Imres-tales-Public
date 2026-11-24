@@ -438,4 +438,115 @@
   const al0 = Z.drawAfterLight;
   Z.drawAfterLight = function (c, cam, W2, H2, t) { if (al0) al0(c, cam, W2, H2, t); c.save(); drawFog(c, cam, t); c.restore(); };
   Z.fogSeen = () => seen;
+
+  /* ======================= W13 R12: Laufdramaturgie =======================
+     Messung (r12/statik.py, 13 Gebiete × 6): Gegner je Hauptweg-Raum nach Wegviertel z. B. Keller 2,0/2,9/1,9/2,2, Schmiede 1,3/1,8/1,1/2,7 –
+     die Dichte steigt nicht, sie springt. Wächter-Gebiete: im Wächterraum (= Ausgangsraum) stehen zusätzlich 1,7–3,5 normale Gegner,
+     der Kampf beginnt ohne Vorwarnung mitten im Gewühl.
+     1) Steigerung: Gegnergruppen auf dem Hauptweg werden umverteilt (gleiche Anzahl!) – Ziel ∝ 0,6 + 0,8 × Wegfortschritt.
+        Nebenräume bleiben unberührt. Nur auf freie, erreichbare Bodenplätze des Zielraums (Abstand zu Gegnern, Türen, Start).
+     2) Atempause vor dem Wächter: Wächterraum und sein Vorraum werden von normalen Gegnern geräumt (die Gruppen wandern in die
+        späten Hauptweg-Räume davor). Im Vorraum brennt ein Rastfeuer.
+     3) Ausblick: beim ersten Betreten des Vorraums ein tiefes Grollen, der Wächterraum erscheint auf der Karte, die Kamera blickt
+        kurz hinüber. */
+  const DR = { an: true, ramp: [0.6, 0.8] };
+  Z.dramaturgie = DR;
+  function drama(lv) {
+    if (!DR.an || !lv || lv.hub || lv.arena || lv.passage || !lv.cells || !lv.spawns) return;
+    const key = (x, y) => x + "," + y, cellK = (px, py) => key(Math.floor(px / T / CW), Math.floor(py / T / CH));
+    const path = Object.keys(lv.cells).map(k => lv.cells[k]).filter(c => c.kind === "path");
+    if (path.length < 4) return;
+    const maxd = Math.max(1, ...path.map(c => c.dist || 0));
+    const W0 = lv.warden && lv.warden.cell ? key(lv.warden.cell.x, lv.warden.cell.y) : null;
+    let V0 = null;
+    if (W0) { const wc = lv.warden.cell; const nb = path.filter(c => Math.abs(c.x - wc.x) + Math.abs(c.y - wc.y) === 1 && (c.dist || 0) < (wc.dist || 0)).sort((a, b) => (b.dist || 0) - (a.dist || 0))[0]; if (nb) V0 = key(nb.x, nb.y); }
+    const ruhe = new Set([W0, V0].filter(Boolean));
+    const startK = lv.startCell ? key(lv.startCell.x, lv.startCell.y) : null;
+    /* Gruppen (gleicher Spawnplatz) bilden */
+    const groups = [];
+    for (const e of Z.enemies) {
+      if (e.dead || e.def.boss || e.nmMini || e.thief || !e.home) continue;
+      const k = cellK(e.home.x, e.home.y), c = lv.cells[k]; if (!c || c.kind !== "path") continue;
+      let g = groups.find(g2 => g2.k === k && Math.abs(g2.hx - e.home.x) < 40 && Math.abs(g2.hy - e.home.y) < 24);
+      if (!g) groups.push(g = { k, hx: e.home.x, hy: e.home.y, es: [] }); g.es.push(e);
+    }
+    const tot = groups.reduce((a, g) => a + g.es.length, 0); if (!tot) return;
+    const ziel = path.filter(c => !ruhe.has(key(c.x, c.y)) && key(c.x, c.y) !== startK);
+    const wsum = ziel.reduce((a, c) => a + DR.ramp[0] + DR.ramp[1] * (c.dist || 0) / maxd, 0);
+    const want = {}, have = {};
+    for (const c of ziel) want[key(c.x, c.y)] = tot * (DR.ramp[0] + DR.ramp[1] * (c.dist || 0) / maxd) / wsum;
+    for (const g of groups) have[g.k] = (have[g.k] || 0) + g.es.length;
+    /* freie Spawnplätze je Zielraum (kein Gegner näher als 3 Kacheln, weit genug vom Start) */
+    const free = {}, taken = [];
+    const frei = (x, y) => { const px = x * T + 8, py = y * T + 16; return !Z.enemies.some(e => !e.dead && e.home && Math.abs(e.home.x - px) < 56 && Math.abs(e.home.y - py) < 32) && !taken.some(([tx, ty]) => Math.abs(tx - x) < 4 && Math.abs(ty - y) < 2); };
+    for (const k in want) {
+      const c = lv.cells[k], arr = [];
+      for (let y = c.y * CH + 1; y < c.y * CH + CH - 1; y++) for (let x = c.x * CW + 2; x < c.x * CW + CW - 2; x++) {
+        if (!Z.standable(lv, x, y, 2) || (lv.reach && !lv.reach[y * lv.W + x])) continue;
+        if ((lv.doors || []).some(d => Math.abs(d.x - x) < 4 && Math.abs(d.y - y) < 3)) continue;
+        if (lv.start && Math.abs(x - lv.start.x) + Math.abs(y - lv.start.y) < 12) continue;
+        arr.push({ x, y });
+      }
+      free[k] = Z.R.shuffle(arr);
+    }
+    const move = (g, k) => {
+      const list = free[k] || []; const i = list.findIndex(q => frei(q.x, q.y)); if (i < 0) return false;
+      const sp = list.splice(i, 1)[0]; taken.push([sp.x, sp.y]);
+      g.es.forEach((e, i) => { const x = sp.x * T + 8 + (i - (g.es.length - 1) / 2) * 12, y = sp.y * T + 16 - (e.def.fly ? 20 : 0); e.x = x - e.w / 2; e.y = y - e.h; e.home = { x, y }; e.vx = e.vy = 0; });
+      have[g.k] -= g.es.length; have[k] = (have[k] || 0) + g.es.length; g.k = k; return true;
+    };
+    let moved = 0;
+    /* 1. Ruheräume räumen: Gruppen in den spätesten Hauptweg-Raum mit Bedarf */
+    const spaet = ziel.slice().sort((a, b) => (b.dist || 0) - (a.dist || 0)).map(c => key(c.x, c.y));
+    const halb = spaet.slice(0, Math.max(2, Math.ceil(spaet.length / 2)));
+    for (const g of groups.filter(g2 => ruhe.has(g2.k))) { const ks = halb.slice().sort((a, b) => (want[b] - (have[b] || 0)) - (want[a] - (have[a] || 0))); for (const k of ks) if (move(g, k)) { moved += g.es.length; break; } }
+    /* 2. Rampe: Überschuss vorn → Mangel hinten (höchstens die Hälfte aller Gruppen bewegen) */
+    const vorn = ziel.slice().sort((a, b) => (a.dist || 0) - (b.dist || 0)).map(c => key(c.x, c.y));
+    let budget = Math.ceil(groups.length / 2);
+    for (const k of vorn) {
+      while (budget > 0 && (have[k] || 0) - want[k] > 1) {
+        const g = groups.find(g2 => g2.k === k); if (!g) break;
+        const ziel2 = spaet.find(k2 => k2 !== k && (want[k2] - (have[k2] || 0)) >= g.es.length * 0.5 && (free[k2] || []).length);
+        if (!ziel2 || !move(g, ziel2)) break; moved += g.es.length; budget--;
+      }
+    }
+    lv._drama = { moved, tot, V0, W0, rast: null, blick: false };
+    /* Rastfeuer im Vorraum: Bodenplatz nahe der Raummitte */
+    if (V0) { const c = lv.cells[V0], mx = c.x * CW + CW / 2; let best = null; for (let y = c.y * CH + 1; y < c.y * CH + CH - 1; y++) for (let x = c.x * CW + 3; x < c.x * CW + CW - 3; x++) if (Z.standable(lv, x, y, 2) && Z.standable(lv, x - 1, y, 2) && Z.standable(lv, x + 1, y, 2) && lv.get(x, y + 1) === 1 && (!lv.reach || lv.reach[y * lv.W + x]) && !(lv.doors || []).some(d => Math.abs(d.x - x) < 3 && Math.abs(d.y - y) < 3)) { const d2 = Math.abs(x - mx); if (!best || d2 < best.d) best = { x, y, d: d2 }; } if (best) lv._drama.rast = { x: best.x * T + 8, y: (best.y + 1) * T }; }
+  }
+  const dl0 = Z.loadArea;
+  /* erst im ersten Schritt nach dem Laden: andere Module (Trupps, Hinterhalte, Nemesis …) setzen ihre Gegner in späteren loadArea-Hüllen */
+  Z.loadArea = function () { const r = dl0.apply(this, arguments); if (Z.level) Z.level._dramaPend = true; return r; };
+  /* Ausblick beim ersten Betreten des Vorraums */
+  let peekT = 0, peekLock = null;
+  const et0 = Z.ebenenTick;
+  function dramaTick(dt) {
+    if (Z.level && Z.level._dramaPend) { Z.level._dramaPend = false; drama(Z.level); }
+    const lv = Z.level, P = Z.player, D = lv && lv._drama; if (!D || !P) return;
+    if (peekT > 0) { peekT -= dt; if (peekT <= 0 && Z.cam.lock === peekLock) Z.cam.lock = null; }
+    if (!D.V0 || D.blick || lv.wardenSpawned) return;
+    if (cellOf(P.x + P.w / 2, P.y + P.h / 2) !== D.V0) return;
+    D.blick = true;
+    const wc = lv.warden.cell;
+    if (Z.explored) for (let y = wc.y * CH; y < wc.y * CH + CH; y++) for (let x = wc.x * CW; x < wc.x * CW + CW; x++) if (x >= 0 && y >= 0 && x < lv.W && y < lv.H) Z.explored[y * lv.W + x] = 1;
+    seen.add(wc.x + "," + wc.y);
+    A.play("roar", { vol: 0.22, rate: 0.55, delay: 0.3 }); FX.addShake && FX.addShake(2);
+    if (Z.ui && Z.ui.notify) Z.ui.notify(L(["Ein Rastplatz. Hinter der nächsten Tür regt sich etwas Großes …", "A resting place. Beyond the next door, something large stirs…"]), { prio: 1, art: "gefahr", dauer: 3200 });
+    if (!Z.cam.lock) { const tx = wc.x * CW * T + CW * T / 2, ty = wc.y * CH * T + CH * T / 2; peekLock = { x: (P.x + tx * 2) / 3, y: (P.y + ty * 2) / 3, k: 0.12 }; Z.cam.lock = peekLock; peekT = 1.6; }
+  }
+  Z.ebenenTick = function (dt) { const r = et0 ? et0.apply(this, arguments) : undefined; try { dramaTick(dt); } catch (e) { console.error(e); } return r; };
+  /* Rastfeuer zeichnen (Grafik kann übermalen: Z.rastGemalt(c, r, t)) */
+  const dp1 = Z.drawParcours;
+  Z.drawParcours = function (c, t) {
+    if (dp1) dp1(c, t);
+    const D = Z.level && Z.level._drama, r = D && D.rast; if (!r) return;
+    const cam = Z.cam; if (r.x < cam.x - 60 || r.x > cam.x + cam.w + 60 || r.y < cam.y - 40 || r.y > cam.y + cam.h + 60) return;
+    if (Z.rastGemalt && Z.rastGemalt(c, r, t)) return;
+    c.fillStyle = "#3a2a20"; c.fillRect(r.x - 8, r.y - 3, 16, 3); c.save(); c.translate(r.x, r.y - 2); c.rotate(0.4); c.fillStyle = "#5a3a22"; c.fillRect(-7, -1.5, 14, 3); c.rotate(-0.8); c.fillRect(-7, -1.5, 14, 3); c.restore();
+    const f = 1 + Math.sin(t * 9) * 0.12 + Math.sin(t * 13.7) * 0.08;
+    c.fillStyle = "#ff8a3a"; c.beginPath(); c.moveTo(r.x - 5, r.y - 3); c.quadraticCurveTo(r.x - 3, r.y - 12 * f, r.x, r.y - 15 * f); c.quadraticCurveTo(r.x + 3, r.y - 11 * f, r.x + 5, r.y - 3); c.fill();
+    c.fillStyle = "#ffd27a"; c.beginPath(); c.moveTo(r.x - 2.5, r.y - 3); c.quadraticCurveTo(r.x, r.y - 9 * f, r.x + 2.5, r.y - 3); c.fill();
+    c.save(); c.globalCompositeOperation = "lighter"; const gr = c.createRadialGradient(r.x, r.y - 8, 1, r.x, r.y - 8, 40); gr.addColorStop(0, "rgba(255,170,90,.35)"); gr.addColorStop(1, "rgba(255,170,90,0)"); c.fillStyle = gr; c.fillRect(r.x - 40, r.y - 48, 80, 80); c.restore();
+    if (Math.random() < 0.15) FX.p && FX.p({ x: r.x + (Math.random() - 0.5) * 6, y: r.y - 12, vx: (Math.random() - 0.5) * 10, vy: -30, life: 0.8, size: 1.2, col: "#ffb060", kind: "spark", add: true });
+  };
 })();

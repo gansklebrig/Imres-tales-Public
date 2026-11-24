@@ -382,10 +382,10 @@
     /* Kran */
     if (P._kran && !A2.kran) X().kran = (X().kran || 0) + 1; A2.kran = !!P._kran;
     /* Kronleuchter: Griff, Loslassen, Kette ohne Bodenkontakt */
-    if (P._swing !== A2.swCur) {
+    if ((P._swing || null) !== A2.swCur) { /* undefined ≠ null zählte sonst beim ersten Bild als „losgelassen“ (Fehlvergabe Aus dem Leuchter) */
       if (P._swing) { if (!A2.swGround && A2.swLast && A2.swLast !== P._swing && (run.time || 0) - A2.swRel < 3) { A2.swChain++; if (A2.swChain >= 1) give("f_tarzan"); } else A2.swChain = 0; A2.swLast = P._swing; A2.swGround = false; }
       else A2.swRel = run.time || 0;
-      A2.swCur = P._swing;
+      A2.swCur = P._swing || null;
     }
     if (P.onGround) { A2.swGround = true; A2.fassC = 0; }
     /* Bosskampf */
