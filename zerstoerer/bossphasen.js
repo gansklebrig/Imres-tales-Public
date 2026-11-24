@@ -1265,6 +1265,10 @@
           s.pat = 0;
           if (!breakThrough(e, P)) { const side = pcx(P) < cxOf(e) ? 1 : -1; e.x = pcx(P) + side * 70 - e.w / 2; e.y = standY(P) - e.h - 1; e.vx = 0; e.vy = 0; Z.unstick(e); FX.burst(cxOf(e), feet(e) - 6, 20, { col: [Z.dustCol || "#8a7a70", "#c8b8a0"], sp: 160, ang: -Math.PI / 2, spread: 2.4, life: 0.5, size: 3, kind: "smoke" }); A.play("quake", { vol: 0.5 }); }
         }
+        /* W9 14. Runde (Chasme 300/600 s, 2 von ~45 Prüfstand-Kämpfen: Flieger nah am Spieler, aber 35 s ohne jeden Treffer): Flieger setzt sich
+           sichtbar auf Spielerhöhe neben ihn und stößt zu – nur bei echtem Stillstand, sonst greift nichts davon */
+        if (s.hp2 == null || e.hp < s.hp2 - 1) { s.hp2 = e.hp; s.pat2 = 0; } else s.pat2 = (s.pat2 || 0) + dt;
+        if (e.def.fly && !far && s.pat2 > 35) { s.pat2 = 0; const side = pcx(P) < cxOf(e) ? 1 : -1; FX.burst(cxOf(e), e.y + e.h / 2, 14, { col: ["#3a3030", "#5a4a40"], sp: 80, life: 0.5, size: 3, kind: "smoke" }); e.x = pcx(P) + side * 60 - e.w / 2; e.y = P.y + P.h - e.h - 6; e.vx = 0; e.vy = 0; Z.unstick(e); const dv = Object.keys(e.def.moves).find(k => /stich|sturz|dive|blutsauger/.test(k)); if (dv) { e.nextMv = dv; e.idle = Math.min(e.idle || 0, 0.3); } }
         if (!far) s.pat = Math.min(s.pat, 12.5);
         if (s.pat > 15 && (P.onGround || s.pat > 25)) {
           s.pat = 0; const b = e.box, out = pcx(P) < b.x0 - 8 || pcx(P) > b.x1 + 8 || P.y + P.h > b.y1 + 260 || P.y < b.top - 80;

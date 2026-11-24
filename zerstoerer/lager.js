@@ -40,7 +40,7 @@
       idle: [["Wenn du schon stirbst, dann bitte an einer Stelle, die ich noch nicht kenne.", "If you must die, do it somewhere I haven't mapped yet."], ["Barradin will eine Karte mit „Hier war Barradin“ an jeder Ecke. Ich hab abgelehnt.", "Barradin wants a map with 'Barradin was here' on every corner. I declined."], ["Rex hat auf meine Karte gesabbert. Jetzt ist der Keller nass. Auf der Karte.", "Rex drooled on my map. Now the cellar is wet. On the map."], ["Geheimgänge riechen anders. Nach kaltem Stein und schlechten Ideen.", "Secret passages smell different. Of cold stone and bad ideas."]],
       buy: [["Ein Strich mehr – und du verläufst dich einmal weniger.", "One more line – and you get lost one time less."]],
       ups: [
-        { n: ["Skizze des Eingangs", "Sketch of the entrance"], d: ["Beim Betreten eines Gebiets sind die Kammern rund um den Eingang aufgedeckt.", "When you enter an area, the chambers around the entrance are revealed."] },
+        { n: ["Skizze des Eingangs", "Sketch of the entrance"], d: ["Beim Betreten eines Gebiets sind die Kammern rund um den Eingang und der Ausgangsraum aufgedeckt.", "When you enter an area, the chambers around the entrance and the exit room are revealed."] },
         { n: ["Geheimniszeichen", "Secret marks"], d: ["Geheimkammern, Schatzkammern, Schlüssel und Prüfungen sind auf der Minikarte markiert.", "Secret rooms, treasure chambers, keys and trials are marked on the minimap."] },
         { n: ["Miras Linien", "Mira's lines"], d: ["Auch Tagebuchseiten, Runenfragmente und Verirrte stehen auf der Karte – und der aufgedeckte Eingangsbereich ist doppelt so groß.", "Diary pages, rune fragments and lost souls appear on the map too – and the revealed entrance area is twice as large."] }
       ]
@@ -118,7 +118,7 @@
       idle: [["Ich habe ein Kapitel „Rex frisst einen Stiefel“. Es ist mein bestes.", "I have a chapter 'Rex eats a boot'. It's my best."], ["Barradin will, dass ich seine Lieder abschreibe. Ich will, dass er sie nicht singt.", "Barradin wants me to copy out his songs. I want him not to sing them."], ["Echo hat mein Tintenfass gegen Gold getauscht. Ich habe kein Gold bekommen.", "Echo traded my inkwell for gold. I got no gold."], ["Jeder Tod ist eine Fußnote. Du hast viele Fußnoten.", "Every death is a footnote. You have many footnotes."]],
       buy: [["Notiert. Mit Unterstreichung.", "Noted. Underlined."]],
       ups: [
-        { n: ["Die Chronik", "The chronicle"], d: ["Am Gedenkstein stehen deine Rekorde. Und: +6 % Schaden gegen Gegnerarten, die du schon 30-mal erschlagen hast.", "Your records appear on the memorial stone. And: +6% damage against enemy types you've slain 30 times."] },
+        { n: ["Die Chronik", "The chronicle"], d: ["Am Gedenkstein stehen deine Rekorde. Und: +8 % Schaden gegen Gegnerarten, die du schon 15-mal erschlagen hast.", "Your records appear on the memorial stone. And: +8% damage against enemy types you've slain 15 times."] },
         { n: ["Bestiarium", "Bestiary"], d: ["+10 % gegen Arten mit 30 Kills, +15 % ab 100 – und +8 % gegen Bosse, die du schon besiegt hast.", "+10% vs types with 30 kills, +15% from 100 – and +8% vs bosses you've already defeated."] },
         { n: ["Heldenepos", "Heroic epic"], d: ["Jeder neue Rekord bringt am Ende des Laufs 30 Seelensplitter.", "Every new record grants 30 soul shards at the end of the run."] }
       ]
@@ -131,7 +131,7 @@
       idle: [["Echo bietet mir ständig „Steine von unschätzbarem Wert“ an.", "Echo keeps offering me 'stones of inestimable value'."], ["Rabatt? Für den Zerstörer? Ich bin doch nicht lebensmüde.", "A discount? For the Destroyer? I'm not tired of living."], ["Frisch aus einer Truhe, die niemandem gehört hat!", "Fresh from a chest that belonged to nobody!"], ["Barradin zahlt in Liedern. Ich nehme keine mehr an.", "Barradin pays in songs. I don't accept them any more."]],
       buy: [["Gutes Geschäft. Für mich. Für dich auch, irgendwie.", "Good deal. For me. For you too, somehow."]],
       ups: [
-        { n: ["Reisekasse", "Travel purse"], d: ["Jeder Lauf beginnt mit 50 Gold.", "Every run starts with 50 gold."] },
+        { n: ["Reisekasse", "Travel purse"], d: ["Jeder Lauf beginnt mit 70 Gold.", "Every run starts with 70 gold."] },
         { n: ["Lottes Ware", "Lotte's wares"], d: ["Bei jedem Lagerbesuch bietet sie eine Waffe oder Fähigkeit aus deinem Fundbuch an – gegen Splitter.", "On every camp visit she offers a weapon or skill from your ledger – for shards."] },
         { n: ["Stammkundschaft", "Regular customer"], d: ["120 Gold Reisekasse und zwei Waren zur Auswahl.", "120 gold travel purse and two wares to choose from."] }
       ]
@@ -1493,6 +1493,8 @@
     const L0 = lvl("edda"); if (!L0 || !Z.explored || !lv.start) return;
     const rx = L0 >= 3 ? 44 : 26, ry = L0 >= 3 ? 20 : 12, s = lv.start;
     for (let y = Math.max(0, s.y - ry); y <= Math.min(lv.H - 1, s.y + ry); y++) for (let x = Math.max(0, s.x - rx); x <= Math.min(lv.W - 1, s.x + rx); x++) Z.explored[y * lv.W + x] = 1;
+    /* W9 R14 (Vorschlag Karten-Agent): zusätzlich die Ausgangsräume aufdecken */
+    for (const d of lv.doors || []) if (d.kind === "exit") { for (let y = Math.max(0, d.y - 6); y <= Math.min(lv.H - 1, d.y + 4); y++) for (let x = Math.max(0, d.x - 10); x <= Math.min(lv.W - 1, d.x + 10); x++) Z.explored[y * lv.W + x] = 1; if (Z.fogSeen) Z.fogSeen().add(Math.floor(d.x / Z.CW) + "," + Math.floor(d.y / Z.CH)); }
     if (Z.fogSeen && lv.cells) { const sc = lv.startCell; if (sc) for (const key in lv.cells) { const c2 = lv.cells[key]; if (Math.abs(c2.x - sc.x) + Math.abs(c2.y - sc.y) <= (L0 >= 3 ? 2 : 1)) Z.fogSeen().add(key); } }
   }
   /* Wendel: Rex gräbt am Eingang etwas aus */
@@ -1514,7 +1516,7 @@
   /* Laufstart: Lottes Reisekasse, Quirins Extra-Trank, Barradins Lied */
   function onNewRun() {
     const P = Z.player, run = Z.run, m = LM(); if (!P || !run) return;
-    const lo2 = lvl("lotte"); if (lo2) P.gold = (P.gold || 0) + (lo2 >= 3 ? 120 : 50);
+    const lo2 = lvl("lotte"); if (lo2) P.gold = (P.gold || 0) + (lo2 >= 3 ? 120 : 70); /* W9 R14: 50 → 70 (80 wäre gleich der erste Amboss-Schlag) */
     if (lvl("quirin") >= 3) { P.potMax = (P.potMax || 2) + 1; P.potions = P.potMax; }
     if (m.song && Z.BLESS[m.song] && lvl("lied") >= 1) { if (!P.bless.includes(m.song)) P.bless.push(m.song); run.lgSong = m.song; m.song = null; Z.recalcPlayer && Z.recalcPlayer(); save(); }
     run.lgMira = 0;
@@ -1583,7 +1585,7 @@
       if (L0 && e && !e.dummy && Z.run && typeof dmg === "number") {
         const n = (Z.meta.seen || {})[e.id] || 0; let f = 1;
         if (e.def && e.def.boss) { const b = (Z.meta.bosses || {})[e.id]; if (L0 >= 2 && b && b.won > 0) f = 1.08; }
-        else if (L0 >= 2) f = n >= 100 ? 1.15 : n >= 30 ? 1.1 : 1; else f = n >= 30 ? 1.06 : 1;
+        else if (L0 >= 2) f = n >= 100 ? 1.15 : n >= 30 ? 1.1 : 1; else f = n >= 15 ? 1.08 : 1; /* W9 R14: Stufe 1 war kaum spürbar (+6 % ab 30) */
         dmg *= f;
       }
       return hit0.call(this, e, dmg, o);
