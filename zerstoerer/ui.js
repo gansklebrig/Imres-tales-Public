@@ -401,6 +401,7 @@
   };
   function noteTick(dt) {
     if (ui.verdeckt) dt = 0; /* Kapitelseite liegt darüber: Meldungen warten */
+    if (ui._bpLeft > 0) { ui._bpLeft -= dt; if (ui._bpLeft <= 0) document.body.classList.remove("bossplatte"); } /* W11 R25: Boss-Titelband (nur Lage) */
     /* großer Gebietsname (Banner) sichtbar: Stimmungs-/Info-Meldungen warten unsichtbar, Antworten (prio 3) bleiben */
     const ban = !banner.hidden && banner.classList.contains("an");
     document.body.classList.toggle("banner-an", ban);
@@ -492,6 +493,8 @@
   ui.bossIntro = e => {
     $("#bossname").innerHTML = esc(L(e.def.n)) + (e.def.title ? "<small>" + esc(L(e.def.title)) + "</small>" : "");
     ui.banner(L(e.def.n), e.def.intro ? L(e.def.intro) : L(e.def.title || ["", ""]), 4200);
+    /* W11 R25 (nur Lage): solange das Boss-Titelband steht, rücken Meldungen darunter (CSS body.bossplatte) */
+    document.body.classList.add("bossplatte"); ui._bpLeft = 4.6; /* zählt in noteTick mit der Spielzeit herunter, wie das Band selbst */
   };
   ui.bossDown = b => { setTimeout(() => ui.banner(L(["Besiegt", "Defeated"]) + ": " + L(b.def.n), b.def.outro ? L(b.def.outro) : "", 6000), 700); };
 
@@ -1400,7 +1403,10 @@
   /* ---------- Lager: Figuren ---------- */
   /* Sprechblase über einer Figur im Lager */
   const bubble = $("#bubble"); let bubbleT = 0, bubbleAt = null;
-  ui.say = (wx, wy, who, txt, ms) => { bubble.innerHTML = (who ? "<b>" + esc(who) + "</b>" : "") + esc(txt); bubble.hidden = false; bubbleAt = [wx, wy]; bubbleT = (ms || 4200) / 1000; };
+  ui.say = (wx, wy, who, txt, ms) => { bubble.innerHTML = (who ? "<b>" + esc(who) + "</b>" : "") + esc(txt); bubble.hidden = false; bubbleAt = [wx, wy]; bubbleT = (ms || 4200) / 1000;
+    /* W11 R25 (nur Optik): gemaltes Porträt des Sprechers (figuren.js, Z.portraet), Ausdruck passend zum Satz */
+    const pu = who && Z.portraet ? Z.portraet(who, txt) : null; bubble.classList.toggle("mit-bild", !!pu);
+    if (pu) { const im = document.createElement("img"); im.className = "portraet"; im.alt = ""; im.src = pu; bubble.prepend(im); } };
   /* steht unter zoom (--hud): Bildschirmkoordinaten durch den Zoom teilen und die Blase im sichtbaren Bereich halten */
   function bubbleTick(dt) {
     if (bubble.hidden) return; bubbleT -= dt; if (bubbleT <= 0 || ui.modalOpen) { bubble.hidden = true; return; }

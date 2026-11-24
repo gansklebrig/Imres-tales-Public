@@ -3885,3 +3885,131 @@
     }
   }
 })();
+
+/* Ezekiel – The Destroyer · Gemalte Porträts für Sprechblasen (W11 Runde 25)
+   Z.portraet(name, text) → Bild-URL (oder null): kleines Brustbild im Pergament-Medaillon für die NSC des Lagers
+   (Edda, Quirin, Sigrun, Wendel, Jori, Barradin, Alwin, Lotte, Mira), die fahrende Händlerin und den Verfluchten.
+   Aussehen nach den Figuren in lager.js/figuren.js; der Gesichtsausdruck wird aus dem Satz geschätzt
+   (froh, ernst, traurig, aufgeregt, fragend). Einmal gemalt, danach aus dem Zwischenspeicher. Kein Blau. */
+(function () {
+  const Z = window.Z; if (!Z) return;
+  const LOOK = {
+    edda: { skin: "#e8c09a", hair: "#8a4a22", hs: "kurz", hat: "feder", cloth: "#6a4628", cloth2: "#c8902a", scarf: 1 },
+    quirin: { skin: "#e0b48e", hair: null, hs: "glatze", beard: "#ece4d4", cloth: "#5e6e26", cloth2: "#3e4a18", goggles: 1, age: 1 },
+    sigrun: { skin: "#e4c0a4", hair: "#b8b4b0", hs: "zoepfe", hood: "#7a2234", cloth: "#5a1a28", rune: 1, age: 1 },
+    wendel: { skin: "#d8a47e", hair: "#a8401c", hs: "kurz", beard: "#b04a20", cloth: "#7a5a36", cloth2: "#5a3e22", fur: 1, whistle: 1, broad: 1 },
+    jori: { skin: "#ecc29c", hair: "#5a3a22", hs: "kurz", hat: "muetze", cloth: "#7a4e2c", cloth2: "#4a3222", soot: 1, young: 1 },
+    barradin: { skin: "#ecccaa", hair: "#e8d090", hs: "lang", hat: "barde", cloth: "#6a2a6a", cloth2: "#8a3a2a", ears: 1 },
+    alwin: { skin: "#dcb898", hair: "#c8c4bc", hs: "duenn", cloth: "#2a2430", cloth2: "#4a3e30", glasses: 1, age: 2 },
+    lotte: { skin: "#ecc29e", hair: "#6a3a1e", hs: "kurz", scarfHead: "#c8402a", cloth: "#b03a24", cloth2: "#efe2c4", apron: 1 },
+    mira: { skin: "#e6be98", hair: "#2a1a16", hs: "lang", cloth: "#a87a32", cloth2: "#c03a5a", threads: 1 },
+    haendlerin: { skin: "#d8aa82", hair: "#3a2418", hs: "lang", hood: "#4a4226", cloth: "#5a3a22", cloth2: "#c8902a", earring: 1 },
+    verfluchter: { skin: "#9a8a90", hair: null, hs: "glatze", hood: "#241a24", cloth: "#1e161e", cloth2: "#3a2a3a", cursed: 1 }
+  };
+  const ALIAS = [["edda", "edda"], ["quirin", "quirin"], ["sigrun", "sigrun"], ["wendel", "wendel"], ["jori", "jori"], ["barradin", "barradin"], ["alwin", "alwin"], ["lotte", "lotte"], ["mira", "mira"], ["händlerin", "haendlerin"], ["trader", "haendlerin"], ["verfluch", "verfluchter"], ["cursed", "verfluchter"]];
+  function who(name) { const n = String(name || "").toLowerCase(); for (const [k, v] of ALIAS) if (n.includes(k)) return v; return null; }
+  function mood(txt) {
+    const s = String(txt || "");
+    if (/(tot|verloren|leider|allein|vermiss|tränen|grab|nie wieder|dead|lost|alone|miss|sorry|tears|…$|\.\.\.$)/i.test(s)) return "traurig";
+    if (/(hinter dir|vorsicht|achtung|lauf|weg hier|wächter|behind you|watch out|run)/i.test(s) || (s.match(/!/g) || []).length >= 2) return "aufgeregt";
+    if (/\?\s*["“”«»]?\s*$/.test(s) || /\?$/.test(s.trim())) return "fragend";
+    if (/(danke|gern|gut|schön|freu|ha!|haha|wunderbar|perfekt|thank|good|great|glad|lovely|well done)/i.test(s) || /!/.test(s)) return "froh";
+    return "ernst";
+  }
+  const cache = new Map();
+  function paint(L, md) {
+    const S = 96, cv = document.createElement("canvas"); cv.width = cv.height = S; const c = cv.getContext("2d"), TAU = Math.PI * 2;
+    const E = (x, y, rx, ry, col, r0) => { c.fillStyle = col; c.beginPath(); c.ellipse(x, y, rx, ry, r0 || 0, 0, TAU); c.fill(); };
+    const P = (col, pts) => { c.fillStyle = col; c.beginPath(); c.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) c.lineTo(pts[i], pts[i + 1]); c.closePath(); c.fill(); };
+    const Ln = (col, w, pts) => { c.strokeStyle = col; c.lineWidth = w; c.lineCap = "round"; c.beginPath(); c.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) c.lineTo(pts[i], pts[i + 1]); c.stroke(); };
+    /* Medaillon: Pergamentgrund mit warmer Vignette, Holzrand */
+    c.save(); c.beginPath(); c.arc(48, 48, 44, 0, TAU); c.clip();
+    const bg = c.createRadialGradient(44, 38, 6, 48, 48, 50); bg.addColorStop(0, L.cursed ? "#5a4458" : "#f4e4c0"); bg.addColorStop(0.7, L.cursed ? "#2a1e2a" : "#d8bc88"); bg.addColorStop(1, L.cursed ? "#140c14" : "#9a7a4a");
+    c.fillStyle = bg; c.fillRect(0, 0, S, S);
+    if (L.rune) { c.globalAlpha = 0.35; Ln("#a04a8a", 2, [74, 20, 74, 34]); Ln("#a04a8a", 2, [74, 22, 80, 27, 74, 31]); Ln("#a04a8a", 2, [18, 30, 24, 22, 24, 36]); c.globalAlpha = 1; }
+    const sk = L.skin, dk = "rgba(60,30,20,.22)", hx = 48, hy = L.broad ? 46 : 44, hr = L.young ? 15.5 : 16.5;
+    /* Haar hinten / Kapuze hinten */
+    if (L.hood) P(L.hood, [hx - 26, 98, hx - 25, hy - 6, hx - 14, hy - 26, hx, hy - 30, hx + 14, hy - 26, hx + 25, hy - 6, hx + 26, 98]);
+    if (L.hs === "lang") P(L.hair, [hx - 18, hy - 6, hx - 21, hy + 26, hx - 10, hy + 30, hx + 10, hy + 30, hx + 21, hy + 26, hx + 18, hy - 6]);
+    /* Schultern und Kleidung */
+    const sw = L.broad ? 40 : 34;
+    E(hx, 100, sw, 30, L.cloth);
+    c.fillStyle = "rgba(0,0,0,.18)"; c.beginPath(); c.ellipse(hx + 10, 102, sw * 0.7, 26, 0, 0, TAU); c.fill();
+    if (L.fur) for (let k = 0; k < 14; k++) { const a = Math.PI + k / 13 * Math.PI; E(hx + Math.cos(a) * (sw - 4), 80 + Math.abs(Math.sin(a)) * 2 + (k % 2) * 2, 5, 4, k % 2 ? "#a88a62" : "#8a6c48"); }
+    if (L.apron) P(L.cloth2, [hx - 12, 76, hx + 12, 76, hx + 16, 98, hx - 16, 98]);
+    if (L.cloth2 && !L.apron && !L.fur) P(L.cloth2, [hx - 7, 70, hx + 7, 70, hx + 4, 98, hx - 4, 98]);
+    /* Hals */
+    E(hx, hy + 20, 7, 8, sk); E(hx, hy + 22, 7, 5, dk);
+    if (L.scarf) { E(hx, hy + 25, 15, 6, L.cloth2); E(hx + 6, hy + 33, 5, 9, L.cloth2, 0.3); Ln("rgba(90,50,10,.5)", 1, [hx - 12, hy + 25, hx + 12, hy + 26]); }
+    if (L.whistle) { Ln("#3a2a1a", 1, [hx - 9, hy + 22, hx, hy + 36, hx + 9, hy + 22]); E(hx, hy + 38, 2.6, 4, "#c8a060"); }
+    if (L.threads) { Ln("#c03a5a", 1.6, [hx - 22, 92, hx - 14, 90]); Ln("#c03a5a", 1.2, [hx - 22, 95, hx - 14, 93]); }
+    /* Ohren */
+    if (L.ears) { P(sk, [hx - 15, hy - 1, hx - 27, hy - 12, hx - 16, hy + 6]); P(sk, [hx + 15, hy - 1, hx + 27, hy - 12, hx + 16, hy + 6]); }
+    else { E(hx - 16, hy + 2, 3, 5, sk); E(hx + 16, hy + 2, 3, 5, sk); }
+    if (L.earring) E(hx + 16, hy + 9, 1.6, 1.6, "#e8c060");
+    /* Kopf mit Licht von oben links */
+    E(hx, hy, hr, hr * 1.17, sk);
+    const sh = c.createLinearGradient(hx - hr, 0, hx + hr, 0); sh.addColorStop(0.55, "rgba(0,0,0,0)"); sh.addColorStop(1, "rgba(70,30,20,.28)"); c.fillStyle = sh; c.beginPath(); c.ellipse(hx, hy, hr, hr * 1.17, 0, 0, TAU); c.fill();
+    E(hx - 9, hy + 7, 4, 2.6, "rgba(220,110,90,.22)"); E(hx + 9, hy + 7, 4, 2.6, "rgba(220,110,90,.22)");
+    if (L.soot) { E(hx + 8, hy + 8, 4, 2.4, "rgba(40,30,30,.35)"); E(hx - 5, hy - 10, 3, 1.6, "rgba(40,30,30,.25)"); }
+    if (L.cursed) { const g = c.createLinearGradient(0, hy - 20, 0, hy + 10); g.addColorStop(0, "rgba(10,4,12,.85)"); g.addColorStop(1, "rgba(10,4,12,.15)"); c.fillStyle = g; c.beginPath(); c.ellipse(hx, hy, hr, hr * 1.17, 0, 0, TAU); c.fill(); }
+    /* Haar vorn */
+    const H = L.hair;
+    if (L.hs === "kurz") { P(H, [hx - hr - 1, hy + 2, hx - hr, hy - 10, hx - 8, hy - hr - 4, hx + 8, hy - hr - 4, hx + hr, hy - 10, hx + hr + 1, hy + 2, hx + 12, hy - 8, hx + 2, hy - 12, hx - 10, hy - 7]); }
+    if (L.hs === "lang") { P(H, [hx - hr - 2, hy + 14, hx - hr - 1, hy - 10, hx - 6, hy - hr - 5, hx + 10, hy - hr - 3, hx + hr + 1, hy - 8, hx + hr + 2, hy + 14, hx + 13, hy - 4, hx + 4, hy - 13, hx - 8, hy - 11, hx - 13, hy - 2]); }
+    if (L.hs === "zoepfe") { P(H, [hx - hr, hy - 2, hx - 8, hy - hr - 3, hx + 8, hy - hr - 3, hx + hr, hy - 2, hx + 6, hy - 12, hx - 6, hy - 12]); for (const sd of [-1, 1]) for (let k = 0; k < 5; k++) E(hx + sd * (hr + 1), hy + 6 + k * 6, 3.6, 3.4, k % 2 ? "#a8a4a0" : H); }
+    if (L.hs === "duenn") { P(H, [hx - hr - 1, hy + 4, hx - hr, hy - 8, hx - 11, hy - 11, hx - 12, hy + 2]); P(H, [hx + hr + 1, hy + 4, hx + hr, hy - 8, hx + 11, hy - 11, hx + 12, hy + 2]); Ln("rgba(200,196,188,.7)", 1, [hx - 6, hy - hr - 1, hx + 2, hy - hr + 1]); }
+    if (L.hs === "glatze" && !L.hood) { E(hx - 5, hy - 13, 5, 2.5, "rgba(255,240,220,.35)"); }
+    /* Elfenohren ragen durchs Haar */
+    if (L.ears) { P(L.skin, [hx - hr + 1, hy + 1, hx - 28, hy - 13, hx - hr + 1, hy + 7]); P(L.skin, [hx + hr - 1, hy + 1, hx + 28, hy - 13, hx + hr - 1, hy + 7]); Ln("rgba(120,60,40,.35)", 1, [hx - hr - 1, hy + 2, hx - 24, hy - 9]); Ln("rgba(120,60,40,.35)", 1, [hx + hr + 1, hy + 2, hx + 24, hy - 9]); }
+    /* Kopfbedeckung */
+    if (L.hood) { c.fillStyle = L.hood; c.beginPath(); c.moveTo(hx - hr - 6, hy + 18); c.quadraticCurveTo(hx - hr - 6, hy - hr - 12, hx, hy - hr - 12); c.quadraticCurveTo(hx + hr + 6, hy - hr - 12, hx + hr + 6, hy + 18); c.lineTo(hx + hr - 1, hy + 10); c.quadraticCurveTo(hx + hr, hy - hr + 2, hx, hy - hr + 1); c.quadraticCurveTo(hx - hr, hy - hr + 2, hx - hr + 1, hy + 10); c.closePath(); c.fill();
+      Ln("rgba(255,220,190,.18)", 1.2, [hx - hr - 4, hy + 10, hx - hr - 3, hy - 8, hx - 8, hy - hr - 9]); }
+    if (L.hat === "feder") { P("#5a3a22", [hx - hr - 3, hy - 10, hx - 10, hy - hr - 10, hx + 12, hy - hr - 9, hx + hr + 3, hy - 9]); Ln("#3a2414", 2, [hx - hr - 3, hy - 9, hx + hr + 3, hy - 8]); c.strokeStyle = "#c83a2a"; c.lineWidth = 3; c.beginPath(); c.moveTo(hx + 8, hy - hr - 8); c.quadraticCurveTo(hx + 22, hy - hr - 18, hx + 30, hy - hr - 10); c.stroke(); }
+    if (L.hat === "muetze") { E(hx, hy - hr + 1, hr + 2, 9, "#4a3a2e"); Ln("#2e241c", 2.4, [hx - hr - 2, hy - hr + 6, hx + hr + 2, hy - hr + 6]); }
+    if (L.hat === "barde") { P("#4a2a5a", [hx - hr - 6, hy - 9, hx - 10, hy - hr - 12, hx + 10, hy - hr - 14, hx + hr + 5, hy - 9]); Ln("#3a1a4a", 2.6, [hx - hr - 6, hy - 9, hx + hr + 6, hy - 9]); c.strokeStyle = "#e04a4a"; c.lineWidth = 2.4; c.beginPath(); c.moveTo(hx - 6, hy - hr - 10); c.quadraticCurveTo(hx - 20, hy - hr - 26, hx - 34, hy - hr - 20); c.stroke(); }
+    if (L.scarfHead) { c.fillStyle = L.scarfHead; c.beginPath(); c.moveTo(hx - hr - 2, hy + 2); c.quadraticCurveTo(hx - hr - 2, hy - hr - 8, hx, hy - hr - 8); c.quadraticCurveTo(hx + hr + 2, hy - hr - 8, hx + hr + 2, hy + 2); c.quadraticCurveTo(hx + 2, hy - 16, hx - hr - 2, hy + 2); c.fill(); E(hx + hr, hy + 4, 4, 5, L.scarfHead); for (let k = 0; k < 4; k++) E(hx - 10 + k * 7, hy - hr - 1, 1.2, 1.2, "#efe2c4"); }
+    /* Bart */
+    if (L.beard) { c.fillStyle = L.beard; c.beginPath(); c.moveTo(hx - hr + 1, hy + 2); c.quadraticCurveTo(hx - hr + 2, hy + (L.broad ? 34 : 28), hx, hy + (L.broad ? 38 : 32)); c.quadraticCurveTo(hx + hr - 2, hy + (L.broad ? 34 : 28), hx + hr - 1, hy + 2); c.quadraticCurveTo(hx + 8, hy + 10, hx, hy + 10); c.quadraticCurveTo(hx - 8, hy + 10, hx - hr + 1, hy + 2); c.fill();
+      Ln("rgba(0,0,0,.18)", 1, [hx - 6, hy + 18, hx - 4, hy + 28]); Ln("rgba(0,0,0,.18)", 1, [hx + 5, hy + 18, hx + 4, hy + 28]); }
+    /* Gesicht je Stimmung */
+    const ey = hy - 1, ex = 6.5;
+    if (L.cursed) { for (const sd of [-1, 1]) { const g = c.createRadialGradient(hx + sd * ex, ey, 0, hx + sd * ex, ey, 6); g.addColorStop(0, "rgba(230,170,255,1)"); g.addColorStop(0.35, "rgba(180,80,220,.7)"); g.addColorStop(1, "rgba(120,40,160,0)"); c.fillStyle = g; c.fillRect(hx + sd * ex - 6, ey - 6, 12, 12); } }
+    else if (md === "froh") { for (const sd of [-1, 1]) Ln("#2a1a14", 1.8, [hx + sd * ex - 2.6, ey + 0.6, hx + sd * ex, ey - 1.4, hx + sd * ex + 2.6, ey + 0.6]); }
+    else for (const sd of [-1, 1]) { E(hx + sd * ex, ey, 2.2, md === "aufgeregt" ? 2.8 : 2.4, "#fff8ee"); E(hx + sd * ex + 0.3, ey + 0.3, 1.5, 1.7, "#2a1a14"); E(hx + sd * ex - 0.3, ey - 0.5, 0.5, 0.5, "#fff"); }
+    if (L.age) { Ln("rgba(80,40,30,.3)", 0.8, [hx - ex - 4, ey + 3, hx - ex - 2, ey + 4]); Ln("rgba(80,40,30,.3)", 0.8, [hx + ex + 4, ey + 3, hx + ex + 2, ey + 4]); if (L.age > 1) Ln("rgba(80,40,30,.25)", 0.8, [hx - 6, hy - 12, hx + 6, hy - 12]); }
+    /* Brauen */
+    const bc = L.cursed ? "rgba(0,0,0,0)" : L.beard ? L.beard : L.hair || "#6a4a3a", by = ey - 5;
+    const brow = (sd, inner, outer) => Ln(bc, 2, [hx + sd * 3, by + inner, hx + sd * 10, by + outer]);
+    if (md === "froh") { brow(-1, -1.5, -1.5); brow(1, -1.5, -1.5); }
+    else if (md === "traurig") { brow(-1, -2, 1); brow(1, -2, 1); }
+    else if (md === "aufgeregt") { brow(-1, 1.2, -2.2); brow(1, 1.2, -2.2); }
+    else if (md === "fragend") { brow(-1, 0, 0); brow(1, -2.5, -3.5); }
+    else { brow(-1, 0, -0.5); brow(1, 0, -0.5); }
+    /* Nase */
+    Ln("rgba(90,40,30,.45)", 1.3, [hx + 0.5, ey + 2, hx + 2, ey + 8, hx - 1, ey + 9]);
+    /* Mund */
+    const my = hy + 13;
+    if (L.beard) E(hx, my, 6, 2.2, L.beard);
+    if (L.cursed) Ln("rgba(20,8,20,.8)", 1.4, [hx - 4, my, hx + 4, my + 0.5]);
+    else if (md === "froh") { c.fillStyle = "#7a2a22"; c.beginPath(); c.moveTo(hx - 6, my - 1); c.quadraticCurveTo(hx, my + 6, hx + 6, my - 1); c.quadraticCurveTo(hx, my + 2, hx - 6, my - 1); c.fill(); }
+    else if (md === "traurig") { c.strokeStyle = "#6a2a22"; c.lineWidth = 1.5; c.beginPath(); c.moveTo(hx - 5, my + 2); c.quadraticCurveTo(hx, my - 2, hx + 5, my + 2); c.stroke(); }
+    else if (md === "aufgeregt") { E(hx, my + 1, 3.6, 3.2, "#4a1a16"); E(hx, my + 2.6, 2, 1, "#a04a3a"); }
+    else if (md === "fragend") { E(hx + 1.5, my, 2, 1.8, "#5a2420"); }
+    else Ln("#6a2a22", 1.5, [hx - 4.5, my, hx + 4.5, my]);
+    /* Brille / Schutzbrille */
+    if (L.glasses) { c.strokeStyle = "#3a2a1a"; c.lineWidth = 1.2; for (const sd of [-1, 1]) { c.beginPath(); c.arc(hx + sd * ex, ey, 4.2, 0, TAU); c.stroke(); } Ln("#3a2a1a", 1.2, [hx - 2.2, ey, hx + 2.2, ey]); c.fillStyle = "rgba(255,240,210,.18)"; c.fillRect(hx - ex - 3, ey - 3, 2, 2); }
+    if (L.goggles) { Ln("#4a2e1a", 3, [hx - hr, hy - 9, hx + hr, hy - 9]); for (const sd of [-1, 1]) { E(hx + sd * 6, hy - 10, 5, 4.2, "#b06a2a"); E(hx + sd * 6, hy - 10, 3.2, 2.6, "#e8c890"); E(hx + sd * 6 - 1, hy - 11, 1, 0.8, "#fff"); } }
+    c.restore();
+    /* Rahmen: gemalter Holz-/Messingring */
+    c.strokeStyle = "#5a3a1e"; c.lineWidth = 4; c.beginPath(); c.arc(48, 48, 44, 0, TAU); c.stroke();
+    c.strokeStyle = "rgba(232,200,130,.7)"; c.lineWidth = 1.2; c.beginPath(); c.arc(48, 48, 41.6, Math.PI * 1.05, Math.PI * 1.75); c.stroke();
+    c.strokeStyle = "rgba(30,16,8,.6)"; c.lineWidth = 1; c.beginPath(); c.arc(48, 48, 46, 0, TAU); c.stroke();
+    return cv.toDataURL();
+  }
+  Z.portraetStimmung = mood;
+  Z.portraet = function (name, txt) {
+    try { const id = who(name); if (!id) return null; const md = mood(txt), k = id + ":" + md; let u = cache.get(k); if (!u) { u = paint(LOOK[id], md); cache.set(k, u); } return u; }
+    catch (e) { console.error(e); return null; }
+  };
+})();

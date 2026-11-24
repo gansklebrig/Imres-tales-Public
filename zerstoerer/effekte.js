@@ -377,7 +377,11 @@
       const fd = getComputedStyle(document.documentElement).getPropertyValue("--fd") || "serif";
       c.save(); c.globalAlpha = a; c.textAlign = "right"; c.textBaseline = "middle"; c.font = Math.round(fs) + "px " + fd;
       /* R24: in der 16:9-Spalte des HUD bleiben (UWQHD) und unter den Musik-/Ton-Knöpfen rechts (Handheld) */
-      const colW = Math.min(W, H * 16 / 9), x = W / 2 + colW / 2 - colW * 0.04, y = H * 0.35;
+      const colW = Math.min(W, H * 16 / 9), x = W / 2 + colW / 2 - colW * 0.04;
+      /* R25: unter der rechten HUD-Spalte (Gebietsname, Minikarte, Herausforderungen, Musik-Knöpfe) bleiben */
+      let y = H * 0.35;
+      try { const hr = document.querySelector("#hud .hr"), cvm = c.canvas; if (hr && hr.offsetParent !== null) { const a = hr.getBoundingClientRect(), b = cvm.getBoundingClientRect(); if (b.height > 0) y = Math.max(y, (a.bottom - b.top) * H / b.height + fs * 0.75); } } catch (_) {}
+      y = Math.min(y, H * 0.6);
       c.shadowColor = banner.n >= 5 ? "#ff3a2a" : "#ff9a3a"; c.shadowBlur = fs * 0.5; c.fillStyle = banner.n >= 5 ? "#ffb0a0" : "#ffd8a0";
       c.fillText(banner.txt, x + (Math.random() - 0.5) * (banner.n >= 5 ? 3 : 0), y);
       c.shadowBlur = 0; c.font = "700 " + Math.round(fs * 0.45) + "px " + (getComputedStyle(document.documentElement).getPropertyValue("--fb") || "sans-serif"); c.fillStyle = "#e8d8c8"; c.fillText("× " + banner.n, x, y + fs * 0.72);
@@ -1239,6 +1243,26 @@
     for (const [x, y, s2] of o.td.rows) { if (s2 === 2) maxRow = Math.min(maxRow, y); if (lv.get(x, y) === 6) { const v = cols.get(x); if (v == null || y < v) cols.set(x, y); } }
     /* Wasserstandsmarke bei Flut: nasser, dunkler Streifen auf den Wänden neben dem Becken */
     if (maxRow < 1e9) for (const [x, y] of o.td.rows) if (y === maxRow) for (const sd of [-1, 1]) { const v = lv.get(x + sd, y); if (v === 1) { c.fillStyle = "rgba(20,40,32,.35)"; c.fillRect((x + (sd > 0 ? 1 : 0)) * T - (sd > 0 ? 0 : 3), y * T, 3, T); c.fillStyle = "rgba(200,220,190,.25)"; c.fillRect((x + (sd > 0 ? 1 : 0)) * T - (sd > 0 ? 0 : 3), y * T, 3, 1); } }
+    /* R25: steigende Flut ohne kantige Spaltenstufen. erkundung.js füllt nur Luftkacheln; Leiter-/Stegspalten
+       blieben trocken und der Spiegel zerfiel in Stücke. Hier (nur Bild) dieselbe Wasserfarbe in diesen Spalten und
+       ein durchgehender, über die Spalten interpolierter Wasserspiegel; nur massive Kacheln unterbrechen ihn. */
+    { const h = o.h || 0, td = o.td;
+      if (h >= 0.5) {
+        const top = td.yw * T - h, solid = v => v === 1 || v === 7 || v === 12, inRows = new Set(td.rows.map(r => r[0] + "," + r[1]));
+        c.fillStyle = "rgba(48,96,82,.62)";
+        for (let x = td.xa; x <= td.xb; x++) for (let s2 = 1; s2 <= 2; s2++) { const y = td.yw - s2; if (inRows.has(x + "," + y) || solid(lv.get(x, y))) continue; const y0 = Math.max(y * T, top), y1 = (y + 1) * T; if (y1 > y0) c.fillRect(x * T, y0, T, y1 - y0); }
+        const ty = Math.floor((top + 1) / T), wy = x => top + Math.sin(x * 0.11 + t * 2.4) * 0.9 + Math.sin(x * 0.037 - t * 1.3) * 0.6;
+        /* Spiegelband (heller Saum unter der Linie) und Linie als ein Pfad je zusammenhängendem Stück */
+        let run = null; const segs = [];
+        for (let x = td.xa; x <= td.xb + 1; x++) { const ok = x <= td.xb && !solid(lv.get(x, ty)); if (ok && !run) run = [x, x]; else if (ok) run[1] = x; else if (run) { segs.push(run); run = null; } }
+        for (const [a0, a1] of segs) {
+          const x0 = a0 * T, x1 = (a1 + 1) * T;
+          const gr = c.createLinearGradient(0, top - 1, 0, top + 7); gr.addColorStop(0, "rgba(150,205,175,.28)"); gr.addColorStop(1, "rgba(150,205,175,0)");
+          c.fillStyle = gr; c.beginPath(); c.moveTo(x0, wy(x0)); for (let x = x0 + 3; x < x1; x += 3) c.lineTo(x, wy(x)); c.lineTo(x1, wy(x1)); c.lineTo(x1, top + 7); c.lineTo(x0, top + 7); c.closePath(); c.fill();
+          c.strokeStyle = "rgba(210,236,214,.75)"; c.lineWidth = 1.2; c.beginPath(); c.moveTo(x0, wy(x0)); for (let x = x0 + 3; x < x1; x += 3) c.lineTo(x, wy(x)); c.lineTo(x1, wy(x1)); c.stroke();
+        }
+      }
+    }
     /* Schaumlinie */
     c.strokeStyle = "rgba(220,236,220,.7)"; c.lineWidth = 1;
     for (const [x, y] of cols) { const px = x * T, py = y * T + 5; c.beginPath(); for (let k = 0; k <= T; k += 2) { const yy = py + Math.sin(t * 3 + (px + k) * 0.25) * 0.9; k ? c.lineTo(px + k, yy) : c.moveTo(px + k, yy); } c.stroke();
