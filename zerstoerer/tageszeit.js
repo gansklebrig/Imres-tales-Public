@@ -438,7 +438,11 @@
     const cv = document.createElement("canvas"); cv.width = 4; cv.height = 96; const c = cv.getContext("2d");
     const g = c.createLinearGradient(0, 96, 0, 0);
     g.addColorStop(0, rgba(cols[0], 0)); g.addColorStop(0.06, rgba(shade(cols[0], 0.35), 0.95)); g.addColorStop(0.16, rgba(cols[0], 0.6)); g.addColorStop(0.45, rgba(cols[1], 0.28)); g.addColorStop(0.8, rgba(cols[2], 0.12)); g.addColorStop(1, rgba(cols[2], 0));
-    c.fillStyle = g; c.fillRect(0, 0, 4, 96); AUR.set(key, cv); return cv;
+    c.fillStyle = g; c.fillRect(0, 0, 4, 96);
+    /* R16: seitlich weich auslaufend, damit sich die Streifen nahtlos überlagern (vorher harte senkrechte Kanten) */
+    const g2 = c.createLinearGradient(0, 0, 4, 0); g2.addColorStop(0, "rgba(0,0,0,0)"); g2.addColorStop(0.5, "rgba(0,0,0,1)"); g2.addColorStop(1, "rgba(0,0,0,0)");
+    c.globalCompositeOperation = "destination-in"; c.fillStyle = g2; c.fillRect(0, 0, 4, 96); c.globalCompositeOperation = "source-over";
+    AUR.set(key, cv); return cv;
   }
   const AURORA = { nacht: [["#7ae07a", "#d8d070", "#b066d8"], ["#e8c860", "#c87ad0", "#8a4ab0"]], blut: [["#ff4a3a", "#c02040", "#6a1050"], ["#ff8a3a", "#a01a2a", "#4a0820"]], abend: [["#ffd070", "#ff9a6a", "#a050a0"], ["#e8e070", "#ff8a8a", "#8a4090"]] };
   /* Band-Sprite für ziehende Wolken */
@@ -459,9 +463,10 @@
   function drawAurora(c, cam, t, oy, z) {
     const sets = AURORA[z.k] || AURORA.nacht, H = sky.H, ox = cam.x * (1 - PFX);
     /* Höhenbereich der Schleier (Ebenenkoordinaten), auf den sichtbaren Ausschnitt begrenzt */
-    const y0w = Math.max(Math.min(H * 0.2 + 18 - 14, H * 0.28 + 18 - 22.4) - 82, cam.y - oy - 2), y1w = Math.min(H * 0.28 + 18 + 22.4 + 10, cam.y + cam.h - oy + 2);
+    const yTop = H * 0.2 + 18 - 16 * 1.4 - 96, yBot = H * 0.28 + 18 + 22.4 + 10; /* W11 R16: ganze Schleierhöhe (vorher oben abgeschnitten → harte Kante) */
+    const y0w = Math.max(yTop, cam.y - oy - 2), y1w = Math.min(H * 0.28 + 18 + 22.4 + 10, cam.y + cam.h - oy + 2);
     if (y1w <= y0w) return;
-    const R = Math.min(1.5, G.scale || 1.5), AW = Math.ceil(cam.w * R) + 2, AH = Math.ceil((y1w - y0w) * R) + 2;
+    const R = Math.min(1.2, G.scale || 1.2), AW = Math.ceil(cam.w * R) + 2, AH = Math.ceil((y1w - y0w) * R) + 2;
     if (!AU || AU.width !== AW || AU.height !== AH) { AU = document.createElement("canvas"); AU.width = AW; AU.height = AH; }
     const a = AU.getContext("2d");
     a.setTransform(1, 0, 0, 1, 0, 0); a.globalAlpha = 1; a.globalCompositeOperation = "source-over"; a.clearRect(0, 0, AW, AH);
@@ -479,15 +484,19 @@
           const u = x / LW * TAU;
           const y = yb + Math.sin(u * 2 + t * 0.07 + k) * amp + Math.sin(u * 5 - t * 0.11 + k * 2) * amp * 0.4;
           const h = 34 + 30 * (0.5 + 0.5 * Math.sin(u * 3 + t * 0.13 + k * 3)) + 16 * Math.sin(u * 11 + t * 0.21);
-          const ray = 0.7 + 0.3 * Math.sin(u * 41 + t * 0.6 + k * 5) * Math.sin(u * 17 - t * 0.4);
+          const ray = 0.86 + 0.14 * Math.sin(u * 13 + t * 0.5 + k * 5) * Math.sin(u * 7 - t * 0.3); /* R16: sanfte Strahlen statt harter Streifen */
           const al = (0.1 + 0.15 * Math.pow(0.5 + 0.5 * Math.sin(u * 4 - t * 0.35 + k * 1.7), 2)) * (0.55 + 0.45 * Math.sin(u * 1 + t * 0.05 + k)) * ray * (z.k === "abend" ? 0.5 : 1);
           if (al < 0.015) continue;
-          a.globalAlpha = al; a.drawImage(spr, x - step * 0.5, y - h * ray, step * 2.2, h * ray + 8);
+          a.globalAlpha = Math.min(1, al * 1.5); a.drawImage(spr, x - step, y - h * ray, step * 3, h * ray + 8);
         }
       }
       a.restore();
     }
     a.restore();
+    /* R16: oben und unten weich ausblenden (in Ebenenkoordinaten, auch wenn der Ausschnitt beschnitten ist) */
+    { const fy0 = oy + yTop, fy1 = oy + yBot, gm = a.createLinearGradient(0, fy0, 0, fy1);
+      gm.addColorStop(0, "rgba(0,0,0,0)"); gm.addColorStop(0.35, "rgba(0,0,0,1)"); gm.addColorStop(0.86, "rgba(0,0,0,1)"); gm.addColorStop(1, "rgba(0,0,0,0)");
+      a.globalCompositeOperation = "destination-in"; a.globalAlpha = 1; a.fillStyle = gm; a.fillRect(cam.x - 4, oy + y0w - 4, cam.w + 8, y1w - y0w + 8); a.globalCompositeOperation = "source-over"; }
     c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = 1; c.imageSmoothingEnabled = true;
     c.drawImage(AU, 0, 0, AW, AH, cam.x, oy + y0w, AW / R, AH / R); c.restore();
   }

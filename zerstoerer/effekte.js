@@ -556,3 +556,222 @@
   const Z = window.Z, d0 = Z.drawParcours;
   Z.drawParcours = function (c, t) { if (d0) d0.apply(this, arguments); if (Z.toreAuf) Z.toreAuf(c, t); };
 })();
+
+/* Ezekiel – The Destroyer · Lebendige Welt und Bossauftritte (W11 Runde 16)
+   1) Umgebung reagiert auf Kampf: Treffer schütteln Staub von der Decke (Kachel über dem Getroffenen), Explosionen und
+      schwere Erschütterungen lassen hängende Laternen, Radleuchter, Ketten, Käfige und Banner (lv.decor, Auslenkung
+      d.swing – gezeichnet in bild.js) schaukeln; im Zellenblock/Folterkammer/Gebeinhaus klirren alle Ketten des Raums.
+   2) Kleine Szenen in Räumen mit Funktion (nur im Raum des Spielers, ab Stufe 1, nicht lean): Ratten huschen über
+      Tische (Küche, Vorrats-/Gesindestube, Weinkeller, Wärterstube, Bankettsaal, Anrichte), Bücher fallen aus Regalen
+      (Bibliothek), Zugluft aus Schächten drückt Kerzenflammen flach (d.gust → bild.js flame), Ketten im Zellenblock
+      knarren von selbst.
+   3) Bossauftritt (während e.intro, also nicht länger als bisher): Kamerafahrt zum Boss, Licht flackert, Staub fällt,
+      Lampen schaukeln, je Bossgestalt eine Eigenheit (Chasme: Fliegenschwarm/Summen, Vrock: Federn, Riese: Stampfen,
+      Wächter: Runenfunken, Wraith: Kältenebel und fast erlöschendes Licht, Druidin: Sporen, Drachen: Glut und
+      Goldglanz, Bugbear: Brüllwelle, Kuo-toa: Tropfen, Glasstab: Glassplitter). Jede neue Taste beendet die
+      Kamerafahrt. Namensbanner bleibt das bestehende (ui.js/uebergang.js). Lean: nur etwas Staub, keine Kamera/Flackern.
+   Schalter: Z.gfx.off.umwelt, Z.gfx.off.szenen, Z.gfx.off.auftritt. */
+(function () {
+  const Z = window.Z, G = Z.gfx, FX = Z.fx, T = 16, TAU = Math.PI * 2;
+  if (!G || !FX) return;
+  const off = k => !!(G.off && G.off[k]);
+  const qL = () => (Z.gq && Number.isFinite(Z.gq.level) && Z.gq.level >= 0 ? Z.gq.level : 2);
+  const lean = () => !!(Z.gq && (Z.gq.lean || Z.gq.mini));
+  const rnd = Math.random;
+  const solidT = (x, y) => { const v = Z.level.get(x, y); return v === 1 || v === 7; };
+  const standT = (x, y) => { const v = Z.level.get(x, y); return v === 1 || v === 7 || v === 2 || v === 8; };
+
+  /* ---------- Staub von der Decke ---------- */
+  function ceilAt(x, y) { let tx = Math.floor(x / T), ty = Math.floor(y / T); for (let i = 0; i < 14; i++, ty--) { if (ty < 1) return null; if (solidT(tx, ty)) return (ty + 1) * T; } return null; }
+  function dust(x, y, n, spread) {
+    if (!Z.level || off("umwelt")) return; if (lean()) n = Math.min(n, 2);
+    const col = Z.dustCol || "#8a7a70";
+    for (let i = 0; i < n; i++) {
+      const xx = x + (rnd() - 0.5) * (spread || 30), cy = ceilAt(xx, y); if (cy == null) continue;
+      FX.p({ x: xx, y: cy + 1, vx: (rnd() - 0.5) * 8, vy: 8 + rnd() * 26, g: 150, drag: 0.97, life: 0.9 + rnd() * 0.8, size: 0.8 + rnd() * 0.9, col, kind: "dot" });
+      if (i === 0 && !lean()) FX.p({ x: xx, y: cy + 3, vx: 0, vy: 10, life: 1.1, size: 4 + rnd() * 3, col, kind: "smoke", a: 0.45 });
+    }
+  }
+  Z.deckenStaub = dust;
+
+  /* ---------- Schaukeln hängender Dinge ---------- */
+  const SWK = { chain: 1, banner: 0.55, lantern: 1, chandelier: 0.7, cage: 0.8 };
+  const act = new Set(); let lvRef = null;
+  function impulse(x, y, R, s) {
+    const lv = Z.level; if (!lv || !lv.decor || off("umwelt")) return;
+    for (const d of lv.decor) {
+      const k = SWK[d.kind]; if (!k) continue;
+      const dx = d.x * T + 8 - x, dy = d.y * T + 8 - y; if (Math.abs(dx) > R || Math.abs(dy) > R) continue; const r = Math.hypot(dx, dy); if (r > R) continue;
+      d._va = (d._va || 0) + (dx >= 0 ? 1 : -1) * s * k * (1 - r / R) * (0.75 + rnd() * 0.5); d._a = d._a || 0; act.add(d);
+    }
+  }
+  Z.umweltStoss = impulse;
+  function swingTick(dt) {
+    for (const d of act) {
+      d._va += (-d._a * 28 - d._va * 1.5) * dt; d._a = Math.max(-0.9, Math.min(0.9, d._a + d._va * dt)); d.swing = d._a;
+      if (Math.abs(d._a) < 0.003 && Math.abs(d._va) < 0.01) { d.swing = 0; d._a = d._va = 0; act.delete(d); }
+    }
+  }
+
+  /* ---------- Kampf → Umgebung ---------- */
+  let hcd = 0, scd = 0;
+  const CELLS = /zellen|folter|gebein|waerter/;
+  const h0 = Z.hitEnemy;
+  if (h0) Z.hitEnemy = function (e, dmg, o) {
+    const r = h0.apply(this, arguments);
+    try {
+      if (e && Z.level && !off("umwelt") && hcd <= 0) {
+        hcd = 0.14; const x = e.x + e.w / 2, y = e.y + 2, big = !!(o && (o.crit || o.heavy)) || dmg >= 30;
+        dust(x, y, big ? 5 : 2, 40);
+        const rt = Z.raumTypAt && Z.raumTypAt(Math.floor(x / T), Math.floor(y / T)), cells = !!(rt && CELLS.test(rt.id));
+        impulse(x, y, cells ? 300 : 90, big ? 0.9 : 0.45);
+        if (cells && Z.ausstattungImpuls) Z.ausstattungImpuls(x, y, big ? 0.7 : 0.4, 0);
+      }
+    } catch (err) { console.error(err); }
+    return r;
+  };
+  const ex0 = Z.explode;
+  if (ex0) Z.explode = function (x, y, r) {
+    const res = ex0.apply(this, arguments);
+    try { if (Z.level && !off("umwelt")) { const R = r || 40; dust(x, y, 9, R * 2.2); impulse(x, y, R * 3 + 90, 2.0); } } catch (err) { console.error(err); }
+    return res;
+  };
+
+  /* ---------- Szenen in Räumen mit Funktion ---------- */
+  const TABLE = { kuechentisch: [-14, 22], wachtisch: [-18, 24], esstisch: [-20, 32], tisch: [-14, 22] };
+  const RATROOM = /kueche|vorrat|gesinde|weinkeller|waerter|bankett|anrichte/;
+  const SC = new Map(); /* Zelle -> { next, gust, gt, draft } */
+  let rats = [], books = [], gustOn = null;
+  function cellInfo(key, cx, cy) {
+    let s = SC.get(key); if (s) return s;
+    const lv = Z.level, CW = Z.CW, CH = Z.CH; let draft = false;
+    /* Zugluft: offene Kacheln durch Decke oder Boden der Zelle (Schacht, Leiterloch, Falltür) */
+    for (const yy of [cy * CH, cy * CH + CH - 1]) { let n = 0; for (let x = cx * CW; x < cx * CW + CW; x++) { const a = lv.get(x, yy), b = lv.get(x, yy === cy * CH ? yy - 1 : yy + 1); if ((a === 0 || a === 4) && (b === 0 || b === 4)) n++; } if (n >= 1 && n < CW - 2) draft = true; }
+    s = { next: G.time + 2 + rnd() * 4, bnext: G.time + 3 + rnd() * 5, gnext: G.time + 2 + rnd() * 5, cnext: G.time + 4 + rnd() * 6, draft }; SC.set(key, s); return s;
+  }
+  function scenes(dt) {
+    const P = Z.player, lv = Z.level; if (!P || !lv) return;
+    const cx = Math.floor((P.x + P.w / 2) / T / Z.CW), cy = Math.floor((P.y + P.h / 2) / T / Z.CH), key = cx + "," + cy;
+    const rt = Z.raumTyp && Z.raumTyp(cx, cy), s = cellInfo(key, cx, cy), now = G.time, props = Z.ausstattung ? Z.ausstattung() : [];
+    const inCell = p => Math.floor(p.x / Z.CW) === cx && Math.floor(p.y / Z.CH) === cy && !p.broken && !p.gone;
+    /* Ratten über Tische */
+    if (rt && RATROOM.test(rt.id) && now > s.next) {
+      s.next = now + 7 + rnd() * 8;
+      const tb = props.filter(p => TABLE[p.kind] && inCell(p));
+      if (tb.length && rats.length < 2) { const p = tb[(rnd() * tb.length) | 0], g = TABLE[p.kind], x = p.x * T + 8, y = (p.y + 1) * T + g[0], dir = rnd() < 0.5 ? 1 : -1;
+        rats.push({ x0: x - dir * (g[1] + 6), x1: x + dir * (g[1] + 6), y, t: 0, dur: 0.9 + rnd() * 0.5, dir, hop: rnd() < 0.5 }); }
+    }
+    /* Bücher fallen aus Regalen */
+    if (rt && /bibliothek|archiv|schreib|studier/.test(rt.id) && now > s.bnext) {
+      s.bnext = now + 8 + rnd() * 7;
+      /* Quellen: Bücherregale (Fächer), Lesepulte (Pultkante), Wandborde (lv.decor shelf) */
+      const sh = props.filter(p => /buecherregal|wandregal|lesepult/.test(p.kind) && inCell(p)).map(p => p.kind === "lesepult" ? [p.x * T + 8, (p.y + 1) * T - 24, 6] : p.kind === "wandregal" ? [p.x * T + 8, p.y * T + 6, 12] : [p.x * T + 8, (p.y + 1) * T - 14 - rnd() * 30, 28])
+        .concat((lv.decor || []).filter(d => d.kind === "shelf" && Math.floor(d.x / Z.CW) === cx && Math.floor(d.y / Z.CH) === cy).map(d => [d.x * T + 8, d.y * T + 6, 10]));
+      if (sh.length && books.length < 4) { const q = sh[(rnd() * sh.length) | 0], x = q[0] + (rnd() - 0.5) * q[2], y = q[1];
+        books.push({ x, y, vx: (rnd() < 0.5 ? -1 : 1) * (18 + rnd() * 20), vy: -20, rot: 0, vr: (rnd() - 0.5) * 14, st: 0, t: 0, col: ["#6a2a22", "#3a4a2a", "#5a3a1a", "#7a5a2a", "#4a2a3a"][(rnd() * 5) | 0] }); }
+    }
+    /* Zugluft: Kerzen in Zellen mit Schacht */
+    if (s.draft && now > s.gnext && !gustOn) { s.gnext = now + 6 + rnd() * 7; gustOn = { key, t: 0, dur: 1.6 + rnd() * 0.8, cx, cy, list: (lv.decor || []).filter(d => (d.kind === "candle" || d.kind === "candelabra" || d.kind === "chandelier") && Math.floor(d.x / Z.CW) === cx && Math.floor(d.y / Z.CH) === cy) }; }
+    /* Ketten im Zellenblock knarren */
+    if (rt && CELLS.test(rt.id) && now > s.cnext) { s.cnext = now + 8 + rnd() * 8; impulse(cx * Z.CW * T + rnd() * Z.CW * T, cy * Z.CH * T + 40, 140, 0.22); }
+  }
+  function sceneTick(dt) {
+    for (let i = rats.length - 1; i >= 0; i--) { const r = rats[i]; r.t += dt; if (r.t > r.dur) rats.splice(i, 1); }
+    for (let i = books.length - 1; i >= 0; i--) {
+      const b = books[i]; b.t += dt;
+      if (b.st === 0) { b.vy += 520 * dt; b.x += b.vx * dt; b.y += b.vy * dt; b.rot += b.vr * dt;
+        if (b.vy > 0 && standT(Math.floor(b.x / T), Math.floor((b.y + 2) / T))) { b.y = Math.floor((b.y + 2) / T) * T - 1.5; b.st = 1; b.t = 0; b.rot = Math.round(b.rot / Math.PI) * Math.PI;
+          FX.burst(b.x, b.y, 4, { col: [Z.dustCol || "#8a7a70"], sp: 30, life: 0.5, size: 2.5, kind: "smoke", ang: -Math.PI / 2, spread: 2.4 });
+          FX.p({ x: b.x, y: b.y - 2, vx: (rnd() - 0.5) * 30, vy: -30, g: 60, drag: 0.94, life: 1.2, size: 2, col: "#e8dcc0", kind: "leaf" }); }
+        if (b.t > 3) books.splice(i, 1); }
+      else if (b.t > 7) books.splice(i, 1);
+    }
+    if (gustOn) { const g = gustOn; g.t += dt; const u = g.t / g.dur, k = u >= 1 ? 0 : Math.sin(Math.PI * u) * (0.75 + 0.25 * Math.sin(g.t * 17));
+      for (const d of g.list) d.gust = k;
+      if (u > 0.3 && u < 0.7 && rnd() < dt * 6) { const d = g.list[(rnd() * g.list.length) | 0]; if (d) FX.p({ x: d.x * T + 8, y: d.y * T + 2, vx: 14, vy: -12, life: 1, size: 2.5, col: "#9a8e84", kind: "smoke", a: 0.4 }); }
+      if (u >= 1) { for (const d of g.list) d.gust = 0; gustOn = null; } }
+  }
+  function drawScenes(c) {
+    const cam = Z.cam;
+    for (const r of rats) {
+      const u = r.t / r.dur, x = r.x0 + (r.x1 - r.x0) * u, y = r.y - (r.hop ? Math.abs(Math.sin(u * Math.PI * 3)) * 2 : 0), d = r.dir, f = Math.sin(r.t * 40);
+      if (x < cam.x - 20 || x > cam.x + cam.w + 20) continue;
+      c.fillStyle = "#5e4a40"; c.beginPath(); c.ellipse(x, y - 2.6, 4.6, 2.4, 0, 0, TAU); c.fill(); c.beginPath(); c.ellipse(x + d * 4.6, y - 2.8, 2.4, 1.7, d * 0.2, 0, TAU); c.fill();
+      c.fillStyle = "#8a7262"; c.beginPath(); c.ellipse(x, y - 3.8, 3.4, 0.9, 0, 0, TAU); c.fill();
+      c.fillStyle = "#b08a80"; c.beginPath(); c.arc(x + d * 3, y - 4.6, 1, 0, TAU); c.fill();
+      c.fillStyle = "#1a1010"; c.fillRect(x + d * 5.2 - 0.4, y - 3.4, 0.8, 0.8);
+      c.strokeStyle = "#b08078"; c.lineWidth = 0.7; c.beginPath(); c.moveTo(x - d * 4.2, y - 2); c.quadraticCurveTo(x - d * 8, y - 0.5 + f, x - d * 11, y - 3); c.stroke();
+      c.strokeStyle = "#3a2a24"; c.beginPath(); c.moveTo(x - 2, y - 1); c.lineTo(x - 2 + f * 1.4, y); c.moveTo(x + 2, y - 1); c.lineTo(x + 2 - f * 1.4, y); c.stroke();
+    }
+    for (const b of books) {
+      const a = b.st ? Math.max(0, Math.min(1, (7 - b.t) / 1.2)) : 1; if (a <= 0) continue;
+      c.save(); c.globalAlpha = a; c.translate(b.x, b.y); c.rotate(b.rot);
+      c.fillStyle = b.col; c.fillRect(-4, -1.5, 8, 3); c.fillStyle = "#e8dcc0"; c.fillRect(-3.4, -1, 6.6, 0.8); c.fillStyle = "#c8a050"; c.fillRect(-4, -1.5, 0.8, 3);
+      c.restore();
+    }
+  }
+
+  /* ---------- Bossauftritt ---------- */
+  const seenB = new WeakSet(); let BI = null;
+  function startIntro(e) {
+    const lo = lean(), cx = e.x + e.w / 2, cy = e.y + e.h / 2;
+    BI = { e, t: 0, dur: Math.min(1.8, e.intro || 1.8), lock0: Z.cam.lock, cam: false, h0: Object.assign({}, Z.input && Z.input.held), shape: (e.def && e.def.shape) || "", id: e.id || (e.def && e.def.id) || "", lo, steps: 0 };
+    if (!lo && !off("auftritt")) { const P = Z.player, mx = P ? (cx * 0.7 + (P.x + P.w / 2) * 0.3) : cx, my = P ? (cy * 0.7 + (P.y + P.h / 2) * 0.3) : cy; Z.cam.lock = { x: mx, y: my - 10, k: 0.75 }; BI.cam = true; }
+    const cam = Z.cam;
+    for (let i = 0; i < (lo ? 2 : 7); i++) dust(cam.x + rnd() * cam.w, cy, lo ? 1 : 3, 20);
+    impulse(cx, cy, 420, 0.7); if (Z.ausstattungImpuls) Z.ausstattungImpuls(cx, cy, 0.5, 0);
+  }
+  function endCam() { if (BI && BI.cam) { if (Z.cam.lock && BI.lock0 !== Z.cam.lock) Z.cam.lock = BI.lock0; BI.cam = false; } }
+  function quirk(B, dt) {
+    const e = B.e, x = e.x + e.w / 2, y = e.y + e.h / 2, cam = Z.cam, t = B.t, sh = B.shape, p = r => rnd() < dt * r;
+    if (sh === "wasp") { if (t < 1.4) FX.addShake(1.2); if (p(30)) { const a = rnd() * TAU, r = 18 + rnd() * 26; FX.p({ x: x + Math.cos(a) * r, y: y + Math.sin(a) * r * 0.6, vx: -Math.sin(a) * 90, vy: Math.cos(a) * 50, life: 0.6, size: 1.3, col: "#1a1418", kind: "dot", drag: 0.96 }); } }
+    else if (sh === "vulture") { if (p(10)) FX.p({ x: cam.x + rnd() * cam.w, y: cam.y - 4, vx: 10 + rnd() * 10, vy: 20 + rnd() * 20, g: 8, drag: 0.99, life: 2.4, size: 3, col: rnd() < 0.5 ? "#3a3036" : "#5a4a4a", kind: "leaf" }); }
+    else if (sh === "giant") { const n = Math.floor(t / 0.4); if (n > B.steps && n <= 3) { B.steps = n; FX.addShake(6); for (let i = 0; i < 4; i++) dust(cam.x + rnd() * cam.w, y, 2, 20); impulse(x, y, 400, 0.6); } }
+    else if (sh === "golem") { if (p(26)) FX.p({ x: x + (rnd() - 0.5) * 80, y: e.y + e.h, vx: 0, vy: -40 - rnd() * 40, life: 0.9, size: 1.6, col: rnd() < 0.5 ? "#ffb060" : "#ffd890", kind: "spark", add: true }); }
+    else if (sh === "wraith") { if (p(14)) FX.p({ x: x + (rnd() - 0.5) * 90, y: e.y + e.h - 4, vx: (rnd() - 0.5) * 20, vy: -6, life: 1.6, size: 8 + rnd() * 6, col: "#a89ab0", kind: "smoke", a: 0.35 }); }
+    else if (sh === "druidin") { if (p(18)) FX.p({ x: x + (rnd() - 0.5) * 70, y: e.y + e.h, vx: (rnd() - 0.5) * 14, vy: -20 - rnd() * 20, life: 1.6, size: 1.5, col: "#9ad870", kind: "glow", add: true }); }
+    else if (sh === "dragon") { if (p(22)) FX.p({ x: cam.x + rnd() * cam.w, y: cam.y + rnd() * 20, vx: (rnd() - 0.5) * 20, vy: 30 + rnd() * 30, life: 1.6, size: 1.4, col: rnd() < 0.5 ? "#ff8a3a" : "#ffc060", kind: "ember", add: true });
+      if (p(8)) FX.p({ x: x + (rnd() - 0.5) * 120, y: e.y + e.h - 2, vx: 0, vy: -4, life: 0.5, size: 2, col: "#ffe08a", kind: "spark", add: true }); }
+    else if (sh === "bugbear") { if (!B.roar && t > 0.45) { B.roar = 1; FX.ring && FX.ring(x, y - 6, 70, "#e8d0a0", 0.5, 3); FX.addShake(4); impulse(x, y, 300, 1.0); for (let i = 0; i < 4; i++) dust(cam.x + rnd() * cam.w, y, 2, 20); } }
+    else if (sh === "kuotoa") { if (p(12)) { const xx = cam.x + rnd() * cam.w, cy = ceilAt(xx, y); if (cy != null) FX.p({ x: xx, y: cy + 1, vx: 0, vy: 30, g: 400, drag: 1, life: 1.5, size: 1.4, col: "#7a9a80", kind: "drop", collide: true }); } }
+    else if (sh === "human") { if (p(10)) FX.p({ x: x + (rnd() - 0.5) * 50, y: y + (rnd() - 0.5) * 40, vx: (rnd() - 0.5) * 30, vy: -10, g: 60, life: 0.8, size: 1.6, col: "#f0e8d8", kind: "shard", add: true }); }
+  }
+  function bossTick(dt) {
+    const b = Z.boss;
+    if (b && !seenB.has(b) && b.intro > 0 && !b.dg && !off("auftritt")) { seenB.add(b); startIntro(b); }
+    if (!BI) return;
+    const B = BI; B.t += dt;
+    if (B.cam) { const h = Z.input && Z.input.held; if (h) for (const k in h) if (h[k] && !B.h0[k]) { endCam(); break; } }
+    if (B.cam && B.t > B.dur * 0.8) endCam();
+    if (!B.lo && B.t < B.dur) quirk(B, dt);
+    if (B.t > B.dur + 0.3 || B.e.dead || Z.boss !== B.e) { endCam(); BI = null; }
+  }
+  /* Licht flackert: dunkle Schleier in unregelmäßigem Takt, nach dem Licht (Stufe 1+) */
+  function flickOver(c, cam) {
+    const B = BI; if (!B || B.lo || B.t > 1.3 || qL() < 1) return;
+    const t = B.t, cold = B.shape === "wraith", n = Math.sin(t * 31) * Math.sin(t * 17 + 1) + (Math.sin(t * 53) > 0.6 ? 0.8 : 0);
+    const a = Math.max(0, n) * (cold ? 0.42 : 0.24) * (1 - t / 1.3); if (a < 0.01) return;
+    c.fillStyle = cold ? "rgba(16,12,24," + a.toFixed(3) + ")" : "rgba(10,6,4," + a.toFixed(3) + ")"; c.fillRect(cam.x - 4, cam.y - 4, cam.w + 8, cam.h + 8);
+  }
+
+  /* ---------- Einhängen ---------- */
+  let last = 0;
+  function tick() {
+    const now = performance.now(), dt = Math.min(0.05, last ? (now - last) / 1000 : 0.016); last = now;
+    if (Z.level !== lvRef) { lvRef = Z.level; act.clear(); SC.clear(); rats = []; books = []; gustOn = null; if (BI) { endCam(); BI = null; } }
+    if (Z.paused) return;
+    hcd -= dt; scd -= dt;
+    if (!off("umwelt") && FX.shake > 5 && scd <= 0 && Z.player) { scd = 0.7; const cam = Z.cam; for (let i = 0; i < 3; i++) dust(cam.x + rnd() * cam.w, Z.player.y, 2, 16); }
+    swingTick(dt);
+    bossTick(dt);
+    if (!off("szenen") && qL() >= 1 && !lean()) { scenes(dt); }
+    sceneTick(dt);
+  }
+  const dml0 = Z.drawMidLife;
+  Z.drawMidLife = function () { if (dml0) dml0.apply(this, arguments); try { tick(); } catch (e) { console.error(e); } };
+  const dp0 = Z.drawParcours;
+  Z.drawParcours = function (c, t) { if (dp0) dp0.apply(this, arguments); try { if (rats.length || books.length) drawScenes(c); } catch (e) { console.error(e); } };
+  const dal0 = Z.drawAfterLight;
+  Z.drawAfterLight = function (c, cam) { if (dal0) dal0.apply(this, arguments); try { flickOver(c, cam); } catch (e) { console.error(e); } };
+  Z.umweltDbg = () => ({ act: act.size, rats: rats.length, ratList: rats.map(r => [r.x0, r.x1, r.y, r.t, r.dur]), books: books.length, gust: !!gustOn, boss: BI && { t: BI.t, cam: BI.cam, shape: BI.shape } });
+})();

@@ -1494,29 +1494,31 @@
         case "brazier": c.fillStyle = "#3a3434"; c.beginPath(); c.moveTo(px - 7, py - 10); c.lineTo(px + 7, py - 10); c.lineTo(px + 4, py - 4); c.lineTo(px - 4, py - 4); c.fill(); c.fillRect(px - 1, py - 4, 2, 4); c.fillRect(px - 4, py - 1, 8, 1); flame(c, px, py - 10, 1.4 + fl * 0.2, "#ff8a2a"); flame(c, px - 3, py - 10, 0.9, "#ff6a1a"); break;
         case "greenfire": c.fillStyle = "#2a2a2a"; c.fillRect(px - 5, py - 6, 10, 6); flame(c, px, py - 6, 1.3 + fl * 0.2, "#6aff7a"); break;
         case "candle": { /* Kerze im Messingschälchen mit Wachstropfen */
+          FG = +d.gust || 0;
           D.ell(c, px, py - 0.8, 3.4, 1.1, "#6a4a1e"); c.fillStyle = "#a07a34"; c.fillRect(px - 3.4, py - 1.6, 6.8, 0.7);
           const hh = 6 + (d.s || 0.5) * 3; c.fillStyle = "#e8dcc0"; c.fillRect(px - 1.2, py - 1 - hh, 2.4, hh); c.fillStyle = "#fff4dc"; c.fillRect(px - 1.2, py - 1 - hh, 0.7, hh);
           c.fillStyle = "#d8ccb0"; c.fillRect(px + 0.6, py - hh + 0.5, 0.8, 2.5); c.fillRect(px - 1.6, py - 1 - hh * 0.4, 0.8, 1.6);
           c.fillStyle = "#2a1a10"; c.fillRect(px - 0.2, py - 2 - hh, 0.5, 1.2);
-          flame(c, px, py - 1.8 - hh, 0.55, "#ffc060"); break; }
+          flame(c, px, py - 1.8 - hh, 0.55, "#ffc060"); FG = 0; break; }
         case "candelabra": { /* dreiarmiger Leuchter mit Füßen, Knauf und Tropfschalen */
+          FG = +d.gust || 0;
           const g1 = "#8a6a2a", g2 = "#c8a050";
           c.fillStyle = g1; c.beginPath(); c.moveTo(px - 5, py); c.lineTo(px + 5, py); c.lineTo(px + 1.2, py - 3); c.lineTo(px - 1.2, py - 3); c.fill();
           c.fillRect(px - 0.8, py - 18, 1.6, 16); D.ell(c, px, py - 8, 1.8, 1.2, g1); D.ell(c, px, py - 13, 1.4, 1, g1);
           c.strokeStyle = g1; c.lineWidth = 1.2; c.beginPath(); c.moveTo(px - 6, py - 22); c.quadraticCurveTo(px - 6, py - 16, px, py - 17); c.quadraticCurveTo(px + 6, py - 16, px + 6, py - 22); c.stroke();
           c.fillStyle = g2; c.fillRect(px - 0.8, py - 18, 0.5, 15);
           for (const o of [-6, 0, 6]) { const top = o ? py - 22 : py - 24; c.fillStyle = g1; c.fillRect(px + o - 2, top, 4, 1.2); c.fillStyle = "#e8dcc0"; c.fillRect(px + o - 0.9, top - 4, 1.8, 4); c.fillStyle = "#fff4dc"; c.fillRect(px + o - 0.9, top - 4, 0.5, 4); flame(c, px + o, top - 4, 0.45, "#ffc060"); }
-          break; }
+          FG = 0; break; }
         case "chandelier": { /* eiserner Radleuchter an drei Ketten */
-          const sw = Math.sin(t * 0.8 + d.x) * 1.5, cy = py + 8;
+          const sw = Math.sin(t * 0.8 + d.x) * 1.5 + Math.sin(+d.swing || 0) * 12, cy = py + 8 - Math.abs(+d.swing || 0) * 3; FG = +d.gust || 0;
           c.strokeStyle = "#2a2218"; c.lineWidth = 0.6; c.setLineDash([1.4, 0.8]); c.beginPath(); c.moveTo(px, py - 16); c.lineTo(px + sw, cy - 8); c.moveTo(px + sw, cy - 8); c.lineTo(px + sw - 10, cy); c.moveTo(px + sw, cy - 8); c.lineTo(px + sw + 10, cy); c.moveTo(px + sw, cy - 8); c.lineTo(px + sw, cy); c.stroke(); c.setLineDash(DASH_NONE);
           D.circ(c, px + sw, cy - 8, 1.2, "#5a4a2a");
           c.fillStyle = "#3a2a14"; c.beginPath(); c.ellipse(px + sw, cy + 1, 11, 2.2, 0, 0, 6.283); c.fill(); c.fillStyle = "#6a5020"; c.beginPath(); c.ellipse(px + sw, cy, 11, 1.8, 0, 0, 6.283); c.fill(); c.fillStyle = "#2a1c0e"; c.beginPath(); c.ellipse(px + sw, cy, 8.5, 1, 0, 0, 6.283); c.fill();
           c.fillStyle = "#6a5020"; for (const k of [-1, 1]) { c.beginPath(); c.moveTo(px + sw + k * 9, cy + 1.5); c.quadraticCurveTo(px + sw + k * 10, cy + 5, px + sw + k * 7, cy + 5.5); c.lineTo(px + sw + k * 7.5, cy + 4.5); c.quadraticCurveTo(px + sw + k * 9, cy + 4, px + sw + k * 8, cy + 1.5); c.fill(); }
           for (let k = -2; k <= 2; k++) { const kx = px + k * 4.5 + sw; c.fillStyle = "#e8dcc0"; c.fillRect(kx - 0.7, cy - 4, 1.4, 4); flame(c, kx, cy - 4, 0.42, "#ffc060"); }
-          break; }
+          FG = 0; break; }
         case "lantern": { /* Laterne mit Dach, Gitterstäben und glimmendem Docht */
-          const sw = Math.sin(t * 1.4 + d.x) * 2, lx = px + sw, ly = py - 2, fl2 = 0.85 + 0.15 * Math.sin(t * 11 + d.x);
+          const sw = Math.sin(t * 1.4 + d.x) * 2 + Math.sin(+d.swing || 0) * 14, lx = px + sw, ly = py - 2 - Math.abs(+d.swing || 0) * 3, fl2 = 0.85 + 0.15 * Math.sin(t * 11 + d.x);
           c.strokeStyle = "#2a2420"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(px, py - 16); c.lineTo(lx, ly - 2.5); c.stroke();
           c.strokeStyle = "#3a302a"; c.lineWidth = 0.8; c.beginPath(); c.arc(lx, ly - 3.2, 1.2, 0, 6.283); c.stroke();
           c.fillStyle = "rgba(255,190,100," + (0.85 * fl2).toFixed(2) + ")"; c.fillRect(lx - 2.6, ly + 0.5, 5.2, 6);
@@ -1571,7 +1573,7 @@
           else if (d.s > 0.3) { c.strokeStyle = "#4a4440"; c.lineWidth = 1.3; c.beginPath(); c.moveTo(hx, hy); c.lineTo(hx, hy + 3); c.arc(hx - 2, hy + 3, 2, 0, Math.PI); c.stroke(); }
           if (a) c.restore();
           break; }
-        case "cage": { const sw = Math.sin(t * 0.9 + d.x) * 0.08; c.save(); c.translate(px, py - 16); c.rotate(sw); c.strokeStyle = "#3a3430"; c.lineWidth = 0.8; c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 14); c.stroke(); c.lineWidth = 1; for (let k = -6; k <= 6; k += 3) { c.beginPath(); c.moveTo(k, 14); c.lineTo(k, 32); c.stroke(); } c.beginPath(); c.ellipse(0, 14, 7, 2, 0, 0, 6.283); c.stroke(); c.fillStyle = "#2a2420"; c.fillRect(-7, 31, 14, 2); if (d.s > 0.5) { D.circ(c, -1, 27, 2.4, "#c8c0b0"); c.fillStyle = "#c8c0b0"; c.fillRect(-1, 28, 1, 4); } c.restore(); break; }
+        case "cage": { const sw = Math.sin(t * 0.9 + d.x) * 0.08 + (+d.swing || 0); c.save(); c.translate(px, py - 16); c.rotate(sw); c.strokeStyle = "#3a3430"; c.lineWidth = 0.8; c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 14); c.stroke(); c.lineWidth = 1; for (let k = -6; k <= 6; k += 3) { c.beginPath(); c.moveTo(k, 14); c.lineTo(k, 32); c.stroke(); } c.beginPath(); c.ellipse(0, 14, 7, 2, 0, 0, 6.283); c.stroke(); c.fillStyle = "#2a2420"; c.fillRect(-7, 31, 14, 2); if (d.s > 0.5) { D.circ(c, -1, 27, 2.4, "#c8c0b0"); c.fillStyle = "#c8c0b0"; c.fillRect(-1, 28, 1, 4); } c.restore(); break; }
         case "web": { c.strokeStyle = "rgba(230,224,240,.35)"; c.lineWidth = 0.5; const r = 14 + d.s * 10; const ox = px + (d.s < 0.5 ? -8 : 8), oy = py - 16; for (let k = 0; k < 5; k++) { const a = (d.s < 0.5 ? 0 : Math.PI / 2) + k / 4 * Math.PI / 2; c.beginPath(); c.moveTo(ox, oy); c.lineTo(ox + Math.cos(a) * r, oy + Math.sin(a) * r); c.stroke(); } for (let rr = 4; rr < r; rr += 4) { c.beginPath(); for (let k = 0; k <= 4; k++) { const a = (d.s < 0.5 ? 0 : Math.PI / 2) + k / 4 * Math.PI / 2; k ? c.lineTo(ox + Math.cos(a) * rr, oy + Math.sin(a) * rr) : c.moveTo(ox + Math.cos(a) * rr, oy + Math.sin(a) * rr); } c.stroke(); } break; }
         case "cocoon": { const sw = Math.sin(t * 0.7 + d.x) * 0.1; c.save(); c.translate(px, py - 16); c.rotate(sw); c.strokeStyle = "rgba(230,224,240,.6)"; c.lineWidth = 0.6; c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 8); c.stroke(); D.ell(c, 0, 18, 5, 10, "#d8d0dc"); c.strokeStyle = "rgba(160,150,170,.6)"; for (let k = 0; k < 4; k++) { c.beginPath(); c.moveTo(-5, 12 + k * 4); c.lineTo(5, 14 + k * 4); c.stroke(); } c.restore(); break; }
         case "mushroom": { const g = 0.6 + 0.4 * Math.sin(t * 2 + d.x); const col = d.s < 0.5 ? "190,110,255" : "236,120,220"; /* lila und rosalila Leuchtpilze */ c.fillStyle = "#3a3040"; c.fillRect(px - 1, py - 6, 2, 6); D.ell(c, px, py - 7, 5, 3, "rgb(" + col + ")"); D.glow(c, px, py - 7, 14, "rgba(" + col + "," + 0.45 * g + ")"); if (d.s > 0.3) { c.fillStyle = "#3a3040"; c.fillRect(px + 5, py - 4, 1.4, 4); D.ell(c, px + 5.5, py - 4.5, 3, 2, "rgb(" + col + ")"); } break; }
@@ -1845,6 +1847,7 @@
   /* Flamme: Hof, äußere Zunge, Kern und weißer Docht – alles additiv */
   /* frei sichtbarer Hintergrund (Himmel, Fenster, Arena): dort gibt es keine Wand für Wandschmuck */
   G.isOpen = (x, y) => { if (!lv || x < 0 || y < 0 || x >= lv.W || y >= lv.H) return false; const i = y * lv.W + x; return !!((G.sky && G.sky[i]) || (PR && (PR.win[i] || PR.clear[i]))); };
+  let FG = 0; /* Zugluft der gerade gezeichneten Kerze */
   function flame(c, x, y, s, col) {
     if (Z.gq && Z.gq.level === 0) { /* Handheld: eine einfache Flamme ohne Schein */
       const h = (7 + Math.sin(G.time * 17 + x) * 1.6) * s, w = 2.6 * s;
@@ -1852,7 +1855,8 @@
       c.fillStyle = "#ffd890"; c.fillRect(x - w * 0.35, y - h * 0.4, w * 0.7, h * 0.4); return;
     }
     c.save(); c.globalCompositeOperation = "lighter";
-    const tm = G.time, h = (7 + Math.sin(tm * 17 + x) * 1.6 + Math.sin(tm * 29 + x * 3) * 0.7) * s, w = 3 * s, lean = Math.sin(tm * 11 + y) * w * 0.45 + (Z.windX || 0) * 0.02 * s;
+    /* W11 R16: Zugluft (FG 0…1, gesetzt vom Kerzen-Fall in drawDecor): Flamme legt sich flach und wird kleiner */
+    const tm = G.time, h = (7 + Math.sin(tm * 17 + x) * 1.6 + Math.sin(tm * 29 + x * 3) * 0.7) * s * (1 - FG * 0.5), w = 3 * s, lean = Math.sin(tm * 11 + y) * w * 0.45 + (Z.windX || 0) * 0.02 * s + FG * w * (1.4 + 0.5 * Math.sin(tm * 23 + x));
     D.glow(c, x, y - h * 0.4, 14 * s + 5, "rgba(255,150,60,.32)");
     c.fillStyle = col; c.globalAlpha = 0.85; c.beginPath(); c.moveTo(x - w, y); c.quadraticCurveTo(x - w * 0.8, y - h * 0.6, x + lean, y - h); c.quadraticCurveTo(x + w * 0.8, y - h * 0.5, x + w, y); c.quadraticCurveTo(x, y + w * 0.5, x - w, y); c.fill();
     if (s > 0.6) { c.globalAlpha = 0.6; c.beginPath(); c.moveTo(x + w * 0.2, y - h * 0.3); c.quadraticCurveTo(x + w * 0.9, y - h * 0.7, x + lean * 1.6 + w * 0.6, y - h * 0.95 - Math.sin(tm * 23 + x) * s); c.quadraticCurveTo(x + w * 0.5, y - h * 0.45, x + w * 0.2, y - h * 0.3); c.fill(); }
