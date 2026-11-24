@@ -1185,3 +1185,76 @@
     } catch (e) { console.error(e); }
   };
 })();
+
+/* Ezekiel – The Destroyer · Rollende Fässer, Kronleuchter-Schwung, Gezeiten (W11 Runde 23; Daten/Logik erkundung.js)
+   Über der schlichten Fassung aus erkundung.js:
+   – Fässer: Stirnansicht mit Dauben (abwechselnd hell/dunkel), zwei Eisenreifen, Spundloch, Staubspur am Boden;
+     Rutsche als Holzschacht mit Rahmen, beim Vorwarnen rumpelt sie (Wackeln).
+   – Kronleuchter: Gliederkette, eiserner Radleuchter mit Tropfschalen, sechs Kerzen mit Flammen, die sich gegen die
+     Bewegung legen; bei Schwung eine leuchtende Bogen-Spur.
+   – Gezeiten: Schaumlinie auf dem Wasserspiegel, Wasserstandsmarke (nasser Streifen) an den Wänden bis zur Flut,
+     aufsteigende Blasen kurz vor dem Steigen. Grün/Türkis, kein Blau.
+   Lean: schlichter (keine Spur, weniger Kerzen). Schalter Z.gfx.off.r7. */
+(function () {
+  const Z = window.Z, G = Z.gfx, T = 16, TAU = Math.PI * 2;
+  const lean = () => !!(Z.gq && (Z.gq.lean || Z.gq.mini));
+  const trail = new WeakMap();
+  function barrels(c, ro, t) {
+    const lo = lean(), sh = ro.warn ? Math.sin(t * 60) * 0.8 : 0, cx = ro.x - ro.dir * 6 + sh, cy = ro.y - 9;
+    c.fillStyle = "#3a2616"; c.fillRect(cx - 11, cy - 10, 22, 19); c.fillStyle = "#14100c"; c.beginPath(); c.arc(cx, cy, 8, Math.PI, 0); c.fill(); c.fillRect(cx - 8, cy, 16, 9);
+    c.fillStyle = "#6a4a2c"; c.fillRect(cx - 11, cy - 11, 22, 2); c.fillRect(cx - 11, cy - 10, 2, 19); c.fillRect(cx + 9, cy - 10, 2, 19);
+    for (const b of ro.barrels) {
+      if (!lo && Math.random() < 0.3) Z.fx.p({ x: b.x - Math.sign(b.vx) * b.r, y: b.y + b.r - 1, vx: -b.vx * 0.1, vy: -8, life: 0.5, size: 2.5, col: Z.dustCol || "#8a7a70", kind: "smoke", a: 0.4 });
+      c.save(); c.translate(b.x, b.y); c.rotate(b.rot); const r = b.r;
+      for (let k = 0; k < 8; k++) { c.fillStyle = k % 2 ? "#6e4828" : "#7e5634"; c.beginPath(); c.moveTo(0, 0); c.arc(0, 0, r, k * TAU / 8, (k + 1) * TAU / 8); c.closePath(); c.fill(); }
+      c.strokeStyle = "#3a2a24"; c.lineWidth = 1.4; c.beginPath(); c.arc(0, 0, r - 0.7, 0, TAU); c.stroke();
+      c.strokeStyle = "#6a6266"; c.lineWidth = 1; c.beginPath(); c.arc(0, 0, r * 0.62, 0, TAU); c.stroke();
+      c.fillStyle = "#2a1a10"; c.beginPath(); c.arc(r * 0.35, 0, 1.3, 0, TAU); c.fill();
+      c.restore();
+      c.fillStyle = "rgba(255,230,190,.18)"; c.beginPath(); c.arc(b.x - 2, b.y - 2, b.r * 0.6, Math.PI * 1.1, Math.PI * 1.6); c.lineTo(b.x, b.y); c.fill();
+    }
+  }
+  function swing(c, s2, t) {
+    const lo = lean(), hx = s2.ax + Math.sin(s2.th) * s2.L, hy = s2.ay + Math.cos(s2.th) * s2.L;
+    /* Spur */
+    if (!lo) { let tr = trail.get(s2); if (!tr) { tr = []; trail.set(s2, tr); } tr.push([hx, hy]); if (tr.length > 10) tr.shift();
+      if (Math.abs(s2.om) > 1.2 && tr.length > 2) { c.save(); c.globalCompositeOperation = "lighter"; c.lineCap = "round"; for (let i = 1; i < tr.length; i++) { c.strokeStyle = "rgba(255,190,100," + (0.05 * i).toFixed(3) + ")"; c.lineWidth = 2 + i * 0.6; c.beginPath(); c.moveTo(tr[i - 1][0], tr[i - 1][1] - 6); c.lineTo(tr[i][0], tr[i][1] - 6); c.stroke(); } c.restore(); } }
+    /* Kette aus Gliedern */
+    const n = Math.max(3, Math.floor(s2.L / 5)); c.strokeStyle = "#5a5058"; c.lineWidth = 0.9;
+    for (let i = 0; i < n; i++) { const u = (i + 0.5) / n, x = s2.ax + (hx - s2.ax) * u, y = s2.ay + (hy - s2.ay) * u; c.beginPath(); c.ellipse(x, y, i % 2 ? 0.8 : 1.6, 2.2, -s2.th, 0, TAU); c.stroke(); }
+    /* Radleuchter */
+    c.save(); c.translate(hx, hy); c.rotate(-s2.th * 0.3);
+    c.strokeStyle = "#3a3236"; c.lineWidth = 1; c.beginPath(); c.moveTo(0, 0); c.lineTo(-12, 6); c.moveTo(0, 0); c.lineTo(12, 6); c.moveTo(0, 0); c.lineTo(0, 6); c.stroke();
+    c.fillStyle = "#3a2a18"; c.beginPath(); c.ellipse(0, 7, 14, 3, 0, 0, TAU); c.fill(); c.fillStyle = "#8a6a28"; c.beginPath(); c.ellipse(0, 6.4, 14, 2.4, 0, 0, TAU); c.fill(); c.fillStyle = "#2a1c0e"; c.beginPath(); c.ellipse(0, 6.4, 10.5, 1.3, 0, 0, TAU); c.fill();
+    const lean2 = -s2.om * 1.6;
+    for (const dx of lo ? [-9, 0, 9] : [-12, -7, -2.5, 2.5, 7, 12]) {
+      c.fillStyle = "#6a5020"; c.fillRect(dx - 1.6, 4.6, 3.2, 1); c.fillStyle = "#efe4c8"; c.fillRect(dx - 0.9, 0, 1.8, 5);
+      const f = 0.75 + 0.25 * Math.sin(t * 11 + dx); c.fillStyle = "rgba(255,190,90," + f.toFixed(2) + ")"; c.beginPath(); c.moveTo(dx - 1.3, 0); c.quadraticCurveTo(dx + lean2 * 0.5, -3, dx + lean2, -4.6 * f); c.quadraticCurveTo(dx + lean2 * 0.3 + 0.8, -2, dx + 1.3, 0); c.fill();
+    }
+    c.restore();
+  }
+  function tides(c, o, t) {
+    const lv = Z.level, cols = new Map(); let maxRow = 1e9;
+    for (const [x, y, s2] of o.td.rows) { if (s2 === 2) maxRow = Math.min(maxRow, y); if (lv.get(x, y) === 6) { const v = cols.get(x); if (v == null || y < v) cols.set(x, y); } }
+    /* Wasserstandsmarke bei Flut: nasser, dunkler Streifen auf den Wänden neben dem Becken */
+    if (maxRow < 1e9) for (const [x, y] of o.td.rows) if (y === maxRow) for (const sd of [-1, 1]) { const v = lv.get(x + sd, y); if (v === 1) { c.fillStyle = "rgba(20,40,32,.35)"; c.fillRect((x + (sd > 0 ? 1 : 0)) * T - (sd > 0 ? 0 : 3), y * T, 3, T); c.fillStyle = "rgba(200,220,190,.25)"; c.fillRect((x + (sd > 0 ? 1 : 0)) * T - (sd > 0 ? 0 : 3), y * T, 3, 1); } }
+    /* Schaumlinie */
+    c.strokeStyle = "rgba(220,236,220,.7)"; c.lineWidth = 1;
+    for (const [x, y] of cols) { const px = x * T, py = y * T + 5; c.beginPath(); for (let k = 0; k <= T; k += 2) { const yy = py + Math.sin(t * 3 + (px + k) * 0.25) * 0.9; k ? c.lineTo(px + k, yy) : c.moveTo(px + k, yy); } c.stroke();
+      if (Math.random() < 0.04) Z.fx.p({ x: px + Math.random() * T, y: py, vx: 0, vy: -6, life: 0.6, size: 1.2, col: "#e0f0e0", kind: "dot" }); }
+    /* Gurgeln vor dem Steigen */
+    if (o.ph > 4.5 && o.ph < 6 && !lean()) for (const [x, y, s2] of o.td.rows) if (s2 === 1 && Math.random() < 0.05) Z.fx.p({ x: x * T + Math.random() * T, y: (y + 1) * T, vx: 0, vy: -30, life: 0.8, size: 1.4, col: "#b8e0c8", kind: "bubble" });
+  }
+  const dp0 = Z.drawParcours;
+  Z.drawParcours = function (c, t) {
+    if (dp0) dp0.apply(this, arguments);
+    if (G.off && G.off.r7) return;
+    try {
+      const S = Z.erkundung && Z.erkundung(); if (!S || S.lv !== Z.level) return;
+      const cam = Z.cam, tt = performance.now() / 1000, vis = (x, y, m) => x > cam.x - (m || 80) && x < cam.x + cam.w + (m || 80) && y > cam.y - 120 && y < cam.y + cam.h + 120;
+      for (const ro of S.rollers || []) if (vis(ro.x, ro.y) || ro.barrels.length) barrels(c, ro, tt);
+      for (const s2 of S.swings || []) if (vis(s2.ax, s2.ay + s2.L)) swing(c, s2, tt);
+      for (const o of S.tides || []) { const [cx, cy] = o.td.cell.split(",").map(Number); if (vis(cx * Z.CW * T + Z.CW * 8, cy * Z.CH * T + Z.CH * 8, 300)) tides(c, o, tt); }
+    } catch (e) { console.error(e); }
+  };
+})();

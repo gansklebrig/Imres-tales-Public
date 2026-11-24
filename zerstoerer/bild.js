@@ -2266,7 +2266,7 @@
     /* gleiche Kameralage wie die Welt (inkl. Wackeln), damit Lichtkreise und Sichtnebel nicht verrutschen */
     if (camX != null) cam = { x: camX, y: camY, w: cam.w, h: cam.h };
     /* R22: Stufe 1 hat weniger Lichtquellen-Pracht als Stufe 2 – Grunddunkel um ein Viertel gesenkt (wie Stufe 0), damit sie nicht dunkler wirkt als Stufe 0 */
-    if (lvl >= 1 && !G.off.color) { gather(cam, t, lvl, dt); return mulPass(c, cam, W, H, lvl === 1 && !(Z.darkness > 0) && !G.off.s1dunkel ? dark * 0.74 : dark, lvl); }
+    if (lvl >= 1 && !G.off.color) { gather(cam, t, lvl, dt); return mulPass(c, cam, W, H, lvl === 1 && !(Z.darkness > 0) && !G.off.s1dunkel ? dark * 0.6 : dark, lvl); }
     LQn = 0; EXT.length = 0; for (let i = FLASH.length - 1; i >= 0; i--) { FLASH[i].t += dt; if (FLASH[i].t >= FLASH[i].life) FLASH.splice(i, 1); }
     /* R20: Stufe 0 – dunkle Burg, aber Spielrelevantes erkennbar: Grunddunkel um gut ein Viertel gesenkt (Dunkelheits-
        Ereignisse bleiben voll) */

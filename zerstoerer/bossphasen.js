@@ -1024,14 +1024,18 @@
         case "floor": {
           const w = t.w;
           c.globalAlpha = 0.35 + 0.45 * k; c.fillStyle = t.col; c.fillRect(t.x - w / 2, t.y - 3, w, 3);
-          c.globalAlpha = (0.15 + 0.25 * pulse) * (0.4 + k); c.fillRect(t.x - w / 2, t.y - 3 - 14 * k, w, 14 * k);
+          { /* W11 R23 (Grafik): weicher Verlauf statt Rechteck */ const hh = 6 + 18 * k, g = c.createLinearGradient(0, t.y - 3 - hh, 0, t.y - 3); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, t.col);
+            c.globalAlpha = (0.2 + 0.3 * pulse) * (0.4 + k); c.fillStyle = g; c.fillRect(t.x - w / 2, t.y - 3 - hh, w, hh); c.fillStyle = t.col; }
           c.globalAlpha = 0.5 + 0.5 * pulse; c.beginPath(); c.moveTo(t.x - 3, t.y - 20 - 4 * pulse); c.lineTo(t.x + 3, t.y - 20 - 4 * pulse); c.lineTo(t.x, t.y - 15 - 4 * pulse); c.fill();
           if (late) { c.globalAlpha = 0.6 * pulse; c.fillStyle = "#fff2d0"; c.fillRect(t.x - w / 2, t.y - 1.5, w, 1.5); }
           break;
         }
         case "band": {
           const w = t.x1 - t.x0;
-          c.globalAlpha = (0.12 + 0.22 * pulse) * (0.5 + k); c.fillStyle = t.col; c.fillRect(t.x0, t.y - t.h, w, t.h);
+          { /* W11 R23 (Grafik): Band mit Verlauf und laufender Schraffur */ const g = c.createLinearGradient(0, t.y - t.h, 0, t.y); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, t.col);
+            c.globalAlpha = (0.2 + 0.25 * pulse) * (0.5 + k); c.fillStyle = g; c.fillRect(t.x0, t.y - t.h, w, t.h);
+            if (!(Z.gq && Z.gq.lean)) { c.save(); c.beginPath(); c.rect(t.x0, t.y - t.h, w, t.h); c.clip(); c.strokeStyle = t.col; c.lineWidth = 1; c.globalAlpha = 0.18 + 0.2 * k; const off = (t.t * 30) % 8; c.beginPath(); for (let xx = t.x0 - t.h + off; xx < t.x0 + w; xx += 8) { c.moveTo(xx, t.y); c.lineTo(xx + t.h, t.y - t.h); } c.stroke(); c.restore(); }
+            c.fillStyle = t.col; }
           c.globalAlpha = 0.55 + 0.35 * k; c.fillRect(t.x0, t.y - t.h, w, 1); c.fillRect(t.x0, t.y - 1, w, 1);
           if (t.arrow) { c.globalAlpha = 0.6 * pulse; const n = Math.max(1, Math.floor(w / 60)); for (let i = 0; i < n; i++) { const ax = t.x0 + (i + 0.5) * w / n + t.arrow * ((t.t * 60) % 20), ay = t.y - t.h / 2; c.beginPath(); c.moveTo(ax - t.arrow * 4, ay - 4); c.lineTo(ax + t.arrow * 3, ay); c.lineTo(ax - t.arrow * 4, ay + 4); c.fill(); } }
           if (late) { c.globalAlpha = 0.5 * pulse; c.fillStyle = "#fff2d0"; c.fillRect(t.x0, t.y - t.h, w, 1.2); }

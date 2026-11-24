@@ -341,11 +341,21 @@
       c.save();
       if (warn) {
         /* Vorwarnung: pulsierende Bodenmarkierung */
-        const k = h.t / h.warn, pulse = 0.4 + 0.4 * Math.sin(h.t * 30);
-        c.globalAlpha = 0.25 + 0.35 * k;
-        c.fillStyle = h.warnCol || "#ff3a2a";
-        if (h.kind === "strike" || h.kind === "column") { c.fillRect(h.x - h.w / 2, h.y - (h.hgt || 400), h.w, h.hgt || 400); c.globalAlpha = pulse; c.fillRect(h.x - h.w / 2, h.y - 3, h.w, 3); }
-        else { c.fillRect(h.x - h.w / 2, h.y - 4, h.w, 4); c.globalAlpha = pulse * 0.5; c.fillRect(h.x - h.w / 2, h.y - (h.hgt || 24) * k, h.w, (h.hgt || 24) * k); }
+        /* W11 R23 (Grafik): weiche, lesbare Telegrafie statt flacher Rechtecke – Verlauf zum Boden, schräge
+           Schraffur, die nach unten läuft, helle Seitenkanten, pulsierende Bodenmarke; je näher der Einschlag, desto
+           dichter und heller (nur Zeichnung, Trefferlogik unverändert) */
+        const k = h.t / h.warn, pulse = 0.5 + 0.5 * Math.sin(h.t * (14 + k * 16)), col = h.warnCol || "#ff3a2a";
+        const lo = !!(Z.gq && (Z.gq.lean || Z.gq.mini)), x0 = h.x - h.w / 2, w = h.w;
+        const col2 = (a) => { const n = parseInt(String(col).slice(1), 16); return isNaN(n) ? "rgba(255,58,42," + a + ")" : "rgba(" + (n >> 16) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")"; };
+        const tall = h.kind === "strike" || h.kind === "column", hh = tall ? (h.hgt || 400) : (h.hgt || 24) * (0.4 + 0.6 * k), top = h.y - hh;
+        const g = c.createLinearGradient(0, top, 0, h.y); g.addColorStop(0, col2(0)); g.addColorStop(0.7, col2((0.1 + 0.18 * k).toFixed(3))); g.addColorStop(1, col2((0.28 + 0.3 * k).toFixed(3)));
+        c.fillStyle = g; c.fillRect(x0, top, w, hh);
+        if (!lo) { c.save(); c.beginPath(); c.rect(x0, top, w, hh); c.clip(); c.strokeStyle = col2((0.1 + 0.16 * k).toFixed(3)); c.lineWidth = 1.2;
+          const off = (h.t * 40) % 10; c.beginPath(); for (let yy = top - w + off; yy < h.y; yy += 10) { c.moveTo(x0, yy); c.lineTo(x0 + w, yy + w * 0.6); } c.stroke(); c.restore(); }
+        const eg = c.createLinearGradient(0, top, 0, h.y); eg.addColorStop(0, col2(0)); eg.addColorStop(1, col2((0.45 + 0.4 * pulse * k).toFixed(3)));
+        c.fillStyle = eg; c.fillRect(x0, top, 1.2, hh); c.fillRect(x0 + w - 1.2, top, 1.2, hh);
+        c.globalAlpha = 0.35 + 0.5 * pulse; c.fillStyle = col2(0.85); c.beginPath(); c.ellipse(h.x, h.y - 1, w / 2 + 2, 2.2, 0, 0, Math.PI * 2); c.fill();
+        c.globalAlpha = 1; c.fillStyle = "rgba(255,240,220," + (0.25 + 0.4 * pulse * k).toFixed(3) + ")"; c.fillRect(x0 + 1, h.y - 1.2, w - 2, 0.8);
         c.restore(); continue;
       }
       c.globalAlpha = fade;
