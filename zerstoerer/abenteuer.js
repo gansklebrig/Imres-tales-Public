@@ -1193,6 +1193,12 @@
         cardHTML: '<div class="ic-kopf" style="--rar:#e5b454"><b>' + L(["Glücksbeutel", "Lucky bag"]) + "</b><small>" + L(["Ein Griff pro Begegnung. Kein Umtausch.", "One grab per encounter. No refunds."]) + "</small></div><p>" + L(["40 %: 2 Schmiedeglut · 25 %: seltene Waffe · 15 %: Schriftrolle · 20 %: ein Stein.", "40%: 2 forge embers · 25%: rare weapon · 15%: scroll · 20%: a rock."]) + "</p>",
         kannt: () => Z.player.gold >= bag || (ui().notify(L(["Zu wenig Gold.", "Not enough gold."]), { prio: 3 }), false),
         nimm: () => { tradeEv = ev; trade("bag"); } });
+      /* W9 R17 (Goldsenke): ab Stufe 2 füllt sie eine leere Flasche – einmal je Begegnung, teuer genug, dass frühes Gold knapp bleibt */
+      const trankPreis = 120 + 60 * tier;
+      if (tier >= 2 && !ev.trank) items.push({ art: "ware", icon: "trank", col: "#c8402a", name: L(["Heiltrank", "Healing potion"]), preis: trankPreis, verb: L(["Flasche füllen", "fill a flask"]),
+        cardHTML: '<div class="ic-kopf" style="--rar:#c8402a"><b>' + L(["Heiltrank", "Healing potion"]) + "</b><small>" + L(["Füllt eine leere Flasche. Einmal je Begegnung.", "Fills an empty flask. Once per encounter."]) + "</small></div>",
+        kannt: () => (Z.player.potions < Z.player.potMax || (ui().notify(L(["Deine Flaschen sind voll.", "Your flasks are full."]), { prio: 3 }), false)) && (Z.player.gold >= trankPreis || (ui().notify(L(["Zu wenig Gold.", "Not enough gold."]), { prio: 3 }), false)),
+        nimm: () => { const P2 = Z.player; if (ev.trank || P2.potions >= P2.potMax || P2.gold < trankPreis) return false; P2.gold -= trankPreis; P2.potions++; ev.trank = true; A.play("coin", { vol: 0.6 }); FX.text(P2.x + P2.w / 2, P2.y - 14, L(["+1 Trank", "+1 potion"]), "#8ae08a", true); return true; } });
       ui().auslage({ key: "haendlerin" + Math.round(ev.x), x: ev.x - 3, y: ev.y, abstand: 22, hoch: 30, items, aktiv: () => !ev.done });
       return;
     }
