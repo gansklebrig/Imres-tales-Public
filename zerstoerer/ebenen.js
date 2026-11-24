@@ -314,11 +314,12 @@
         fA[o] = (mem[i] ? memA : unA) * (1 - v);
       }
     }
+    const NF = Z.sichtNebelForm ? Z.sichtNebelForm(fA, w, h, x0, y0, lv, mem, leanFog) : null; /* Grafik R41: Haken (effekte.js) formt fA, liefert ggf. Farbe [r,g,b] */
     /* W13 R3: weiche Kanten – Sichtschatten hinter Wänden und Grenzen „erkundet/unerkundet“ waren kachelscharf (eine Kachel
        Verlauf durch die Bildglättung); jetzt 5-Kachel-Weichzeichnung (1-2-3-2-1) quer und längs */
     const K = [1, 2, 3, 2, 1];
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { let s2 = 0, n = 0; for (let k = -2; k <= 2; k++) { const xx = x + k; if (xx < 0 || xx >= w) continue; s2 += fA[y * w + xx] * K[k + 2]; n += K[k + 2]; } fB[y * w + x] = s2 / n; }
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { let s2 = 0, n = 0; for (let k = -2; k <= 2; k++) { const yy = y + k; if (yy < 0 || yy >= h) continue; s2 += fB[yy * w + x] * K[k + 2]; n += K[k + 2]; } const o = (y * w + x) * 4; D[o] = 22; D[o + 1] = 14; D[o + 2] = 10; /* warmes Sepia-Dunkel statt Kaltschwarz */ D[o + 3] = (s2 / n * 255 + 0.5) | 0; }
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { let s2 = 0, n = 0; for (let k = -2; k <= 2; k++) { const yy = y + k; if (yy < 0 || yy >= h) continue; s2 += fB[yy * w + x] * K[k + 2]; n += K[k + 2]; } const o = (y * w + x) * 4; D[o] = NF ? NF[0] : 22; D[o + 1] = NF ? NF[1] : 14; D[o + 2] = NF ? NF[2] : 10; /* warmes Sepia-Dunkel statt Kaltschwarz (R41: Farbe aus dem Haken) */ D[o + 3] = (s2 / n * 255 + 0.5) | 0; }
     ofc.putImageData(ofImg, 0, 0);
     return { x0, y0, w, h };
   }

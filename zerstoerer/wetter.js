@@ -116,7 +116,7 @@
           const v = lv.get(tx, ty + 1);
           if (lv.get(tx, ty) === 0 && (v === 1 || v === 2 || v === 7) && Z.gfx.sky[ty * lv.W + tx]) {
             const gy = (ty + 1) * T;
-            for (let k = 0; k < 3; k++) FX.p({ x, y: gy - 1, vx: (Math.random() - 0.5) * 50, vy: -40 - Math.random() * 50, g: 500, life: 0.3, size: 0.9, col: "rgba(200,210,220,.7)", kind: "dot" });
+            for (let k = 0; k < 3; k++) FX.p({ x, y: gy - 1, vx: (Math.random() - 0.5) * 50, vy: -40 - Math.random() * 50, g: 500, life: 0.3, size: 0.9, col: "rgba(222,214,206,.7)", kind: "dot" }); /* R41: warmgrau statt kühl */
             break;
           }
         }
@@ -182,6 +182,30 @@
     for (const f of W.fogs) { const x = f.x * W2 * 1.4 - W2 * 0.2, y = f.y * H2, w = W2 * 0.85 * f.s, h = H2 * 0.15 * f.s; c.drawImage(fogBlob(), x - w * 0.5, y - h * 0.5, w, h); }
     c.restore();
   };
+  /* R41 Sturm: Gischt – vom Wind über die Oberkanten freistehender Felsblöcke gerissene Sprühfahnen (Stufe ≥ 1, nicht lean).
+     Ecken einmal je Gebiet gesammelt; je Bild nur die sichtbaren, deterministisch nach Zeit. Schalter Z.gfx.off.gischt. */
+  let gCache = null;
+  const dpG = Z.drawParcours;
+  Z.drawParcours = function (c, t) {
+    if (dpG) dpG.apply(this, arguments);
+    const lv = Z.level; if (!lv || lv.biome !== "sturm" || (Z.gfx.off && Z.gfx.off.gischt) || !Z.gq || Z.gq.level < 1 || Z.gq.lean || Z.gq.mini || !Z.gfx.sky) return;
+    if (!gCache || gCache.lv !== lv) { const out = [], sol = (x, y) => { const v = lv.get(x, y); return v === 1 || v === 7; }, sk = Z.gfx.sky;
+      for (let y = 2; y < lv.H; y++) for (let x = 1; x < lv.W - 1; x++) { if (!sol(x, y) || sol(x, y - 1) || !sk[(y - 1) * lv.W + x]) continue; const l = !sol(x - 1, y), r = !sol(x + 1, y); if (l) out.push(x * T, y * T, -1); if (r) out.push(x * T + T, y * T, 1); }
+      gCache = { lv, p: out }; }
+    const cam = Z.cam, P = gCache.p, wind = (Z.windX || 0) / 40, tt = Z.time || performance.now() / 1000; let n = 0;
+    c.save();
+    for (let i = 0; i < P.length && n < 40; i += 3) {
+      const x = P[i], y = P[i + 1], sd = P[i + 2]; if (x < cam.x - 40 || x > cam.x + cam.w + 40 || y < cam.y - 30 || y > cam.y + cam.h + 30) continue; n++;
+      const h0 = Math.abs(Math.sin(x * 0.131 + y * 0.071)) % 1, dir = sd * 0.6 + wind + 0.4;
+      for (let k = 0; k < 4; k++) { const u = ((tt * (0.45 + h0 * 0.2) + k / 4 + h0) % 1 + 1) % 1, a = Math.sin(u * Math.PI) * 0.32, rw = 4 + u * 12, rh = 1.6 + u * 3.5;
+        c.globalAlpha = a; c.drawImage(sprayBlob(), x + dir * u * 30 + Math.sin(tt * 2 + k) * 1.5 - rw, y - 2 - u * 9 - Math.sin(u * 3 + h0) * 2 - rh, rw * 2, rh * 2); }
+      c.globalAlpha = 1;
+      if (((tt * 3 + h0 * 7) % 1) < 0.25) { c.fillStyle = "rgba(240,234,244,.35)"; c.fillRect(x + dir * 6 * h0, y - 3 - h0 * 4, 1, 1); }
+    }
+    c.restore();
+  };
+  let sprayC = null;
+  function sprayBlob() { if (sprayC) return sprayC; sprayC = document.createElement("canvas"); sprayC.width = sprayC.height = 32; const g = sprayC.getContext("2d"), gr = g.createRadialGradient(16, 16, 0, 16, 16, 16); gr.addColorStop(0, "rgba(232,226,240,.9)"); gr.addColorStop(0.5, "rgba(232,226,240,.35)"); gr.addColorStop(1, "rgba(232,226,240,0)"); g.fillStyle = gr; g.fillRect(0, 0, 32, 32); return sprayC; }
   function fogBlob() {
     if (blob) return blob;
     blob = document.createElement("canvas"); blob.width = blob.height = 64; const g = blob.getContext("2d");

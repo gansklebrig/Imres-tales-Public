@@ -2266,3 +2266,37 @@
   };
   Z.mmZeichenDbg = (z, fs) => sprite(z, Math.round(fs * 0.62) + 1);
 })();
+
+/* Ezekiel – The Destroyer · Sichtnebel sanfter (W11 Runde 41; Haken Z.sichtNebelForm in ebenen.js fogImage)
+   Der Sichtnebel ließ das untere Bilddrittel der Innengebiete fast schwarz (Boden/Plattformen unter Ezekiel kaum lesbar).
+   – Gedächtnis (schon gesehen) etwas heller; Unerkundetes nahe Ezekiel (v. a. darunter) etwas weniger dunkel;
+   – ab Stufe 1 (nicht lean): Sicht „sickert“ 2 Kacheln in angrenzende Wand-/Bodenmassen (Kanten und Tiefe lesbar),
+     dahinter bleibt Unerkundetes dunkel (Erkundungs-Spannung);
+   – Farbe wärmer (Braun statt Sepia-Schwarz). Stufe 0/lean: nur die billigen Faktoren. Schalter Z.gfx.off.nebelsanft. */
+(function () {
+  const Z = window.Z, G = Z.gfx, T = 16; if (!G) return;
+  let tmp = null;
+  Z.sichtNebelForm = function (fA, w, h, x0, y0, lv, mem, leanFog) {
+    if (G.off && G.off.nebelsanft) return null;
+    const lean = !!(Z.gq && (Z.gq.lean || Z.gq.mini)), lvl = Z.gq ? Z.gq.level : 2, rich = !lean && lvl >= 1;
+    const P = Z.player, ex = P ? (P.x + P.w / 2) / T : -1e4, ey = P ? (P.y + P.h) / T : -1e4;
+    const kMem = rich ? 0.8 : 0.9, nahK = rich ? 0.26 : 0.16, R0 = 4, R1 = 15, W = lv.W;
+    for (let y = 0; y < h; y++) {
+      const ty = y0 + y; if (ty < 0) continue;
+      const dy = ty + 0.5 - ey, wy = dy > 0 ? 1 : 0.55;
+      for (let x = 0, o = y * w, i = ty * W + x0; x < w; x++, o++, i++) {
+        let a = fA[o]; if (a < 0.002) continue;
+        if (mem[i]) a *= kMem;
+        const dx = x0 + x + 0.5 - ex, d = Math.sqrt(dx * dx + dy * dy * 1.4);
+        if (d < R1) { const u = d <= R0 ? 1 : 1 - (d - R0) / (R1 - R0), s = u * u * (3 - 2 * u); a *= 1 - nahK * s * wy; }
+        fA[o] = a;
+      }
+    }
+    if (rich) { /* Sicht sickert in die Nachbarschaft: a' = min(a, a[±k] + 0.2·k), quer und längs */
+      const n = w * h; if (!tmp || tmp.length < n) tmp = new Float32Array(n);
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const o = y * w + x; let m = fA[o]; for (let k = 1; k <= 2; k++) { const p = k * 0.2; if (x - k >= 0 && fA[o - k] + p < m) m = fA[o - k] + p; if (x + k < w && fA[o + k] + p < m) m = fA[o + k] + p; } tmp[o] = m; }
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const o = y * w + x; let m = tmp[o]; for (let k = 1; k <= 2; k++) { const p = k * 0.2; if (y - k >= 0 && tmp[o - k * w] + p < m) m = tmp[o - k * w] + p; if (y + k < h && tmp[o + k * w] + p < m) m = tmp[o + k * w] + p; } fA[o] = m; }
+    }
+    return rich ? [30, 19, 12] : [26, 16, 11];
+  };
+})();

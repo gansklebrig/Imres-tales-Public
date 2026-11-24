@@ -89,7 +89,11 @@
         /* Dunst über dem Tal */
         const hz = f.createLinearGradient(0, H * 0.5, 0, H * 0.72); hz.addColorStop(0, "rgba(255,220,210,0)"); hz.addColorStop(0.6, rgbaS(sky[2], 0.22)); hz.addColorStop(1, "rgba(255,220,210,0)"); f.fillStyle = hz; f.fillRect(0, H * 0.5, LW, H * 0.22);
         const towerCol = lit(sky[1], -0.5);
-        for (let i = 0; i < 6; i++) { const x = i * 110 + R() * 40, w = 14 + R() * 14, h = 50 + R() * 80; repeatDraw(f, () => bgTower(f, x, H * 0.66, w, h, towerCol, R, kind === "spires" ? null : "rgba(255,190,110,.75)", kind === "storm" ? null : "rgba(255,230,210,.12)")); }
+        /* R41 (Nutzerwunsch: keine schwebenden Türme): jeder ferne Turm steht auf einer Kuppe aus dem Gestein der vorderen Kette,
+           die bis zum unteren Rand reicht – auch wo die Kette tiefer liegt als der Turmfuß */
+        const kn = lit(sky[1], -0.35), kg = f.createLinearGradient(0, H * 0.63 - 40, 0, H); kg.addColorStop(0, kn); kg.addColorStop(1, shade(kn.slice(0, 7), -0.4));
+        const knoll = (x, w, b) => { f.fillStyle = kg; f.beginPath(); f.moveTo(x - w * 1.6, H); f.lineTo(x - w * 1.6, b + 10); f.quadraticCurveTo(x - w * 0.6, b - 3, x + w * 0.5, b - 3); f.quadraticCurveTo(x + w * 1.6, b - 3, x + w * 2.6, b + 10); f.lineTo(x + w * 2.6, H); f.closePath(); f.fill(); };
+        for (let i = 0; i < 6; i++) { const x = i * 110 + R() * 40, w = 14 + R() * 14, h = 50 + R() * 80; repeatDraw(f, () => { if (!(G.off && G.off.bauwerkfuss)) knoll(x, w, H * 0.66); bgTower(f, x, H * 0.66, w, h, towerCol, R, kind === "spires" ? null : "rgba(255,190,110,.75)", kind === "storm" ? null : "rgba(255,230,210,.12)"); }); }
         if (kind === "harbour") {
           /* Wasser mit Mondspiegelung */
           const wy = H * 0.7; f.fillStyle = shade(sky[0], -0.2); f.fillRect(0, wy, LW, H - wy);
@@ -97,7 +101,7 @@
           /* Schiffe */
           for (let i = 0; i < 3; i++) { const x = 60 + i * 210 + R() * 40; repeatDraw(m, () => { m.fillStyle = "#1a1418"; m.beginPath(); m.moveTo(x - 30, H * 0.72); m.lineTo(x + 34, H * 0.72); m.lineTo(x + 24, H * 0.8); m.lineTo(x - 22, H * 0.8); m.fill(); m.fillRect(x - 1, H * 0.72 - 70, 2, 70); m.fillRect(x + 14, H * 0.72 - 50, 1.5, 50); m.fillStyle = "rgba(60,40,40,.9)"; m.beginPath(); m.moveTo(x + 1, H * 0.72 - 64); m.lineTo(x + 22, H * 0.72 - 30); m.lineTo(x + 1, H * 0.72 - 22); m.fill(); m.strokeStyle = "rgba(20,14,18,.9)"; m.lineWidth = 0.6; m.beginPath(); m.moveTo(x, H * 0.72 - 70); m.lineTo(x - 30, H * 0.72); m.moveTo(x, H * 0.72 - 70); m.lineTo(x + 34, H * 0.72); m.stroke(); m.fillStyle = "rgba(255,200,120,.8)"; m.fillRect(x - 10, H * 0.74, 2, 2); }); }
           /* Leuchtturm */
-          repeatDraw(f, () => { f.fillStyle = towerCol; f.fillRect(560, H * 0.38, 12, H * 0.3); f.fillStyle = "rgba(255,210,120,.9)"; f.fillRect(560, H * 0.38 - 6, 12, 6); D.glow(f, 566, H * 0.38 - 3, 40, "rgba(255,200,120,.35)"); });
+          repeatDraw(f, () => { f.fillStyle = towerCol; f.beginPath(); f.moveTo(546, H * 0.72); f.lineTo(550, H * 0.675); f.lineTo(558, H * 0.66); f.lineTo(576, H * 0.665); f.lineTo(584, H * 0.69); f.lineTo(588, H * 0.72); f.fill(); /* R41: Felsen unter dem Leuchtturm */ f.fillRect(560, H * 0.38, 12, H * 0.3); f.fillStyle = "rgba(255,210,120,.9)"; f.fillRect(560, H * 0.38 - 6, 12, 6); D.glow(f, 566, H * 0.38 - 3, 40, "rgba(255,200,120,.35)"); });
         }
         /* mittlere Ebene: Mauern mit Zinnen */
         if (kind !== "harbour") {
@@ -129,7 +133,7 @@
         }
         if (kind === "camp") {
           /* Die Feste der Fäden auf dem Hügel, mit Netzfäden */
-          repeatDraw(m, () => { m.fillStyle = "#1a1018"; m.beginPath(); m.moveTo(200, H * 0.75); m.quadraticCurveTo(320, H * 0.5, 460, H * 0.75); m.fill(); for (const [x, h, w] of [[290, 90, 16], [318, 120, 20], [350, 80, 14], [372, 60, 12]]) { m.fillRect(x, H * 0.58 - h, w, h); m.beginPath(); m.moveTo(x - 2, H * 0.58 - h); m.lineTo(x + w / 2, H * 0.58 - h - w * 1.4); m.lineTo(x + w + 2, H * 0.58 - h); m.fill(); }
+          repeatDraw(m, () => { m.fillStyle = "#1a1018"; m.beginPath(); m.moveTo(200, H * 0.75); m.quadraticCurveTo(320, H * 0.5, 460, H * 0.75); m.fill(); for (const [x, h, w] of [[290, 90, 16], [318, 120, 20], [350, 80, 14], [372, 60, 12]]) { m.fillRect(x, H * 0.58 - h, w, h + (G.off && G.off.bauwerkfuss ? 0 : H * 0.1)); /* R41: Türme reichen bis in den Hügel */ m.beginPath(); m.moveTo(x - 2, H * 0.58 - h); m.lineTo(x + w / 2, H * 0.58 - h - w * 1.4); m.lineTo(x + w + 2, H * 0.58 - h); m.fill(); }
             /* R19: Spinnfäden statt Drahtgitter – leicht durchhängende Speichen, Fangfäden als Bögen zwischen den Speichen,
                nach außen dünner; vereinzelt Tautropfen */
             const ax = 328, ay = H * 0.58 - 140, sp = [];
@@ -378,7 +382,8 @@
     if (!cover) { c.fillStyle = B.sky[2]; c.fillRect(cam.x - 2, cam.y - 2, cam.w + 4, cam.h + 4); }
     const lvH = lv.H * T;
     for (const [layer, px, py] of [[L.far, 0.12, 0.08], [L.mid, 0.32, 0.2]]) {
-      const ox = cam.x * (1 - px), oy = cam.y - (cam.y - (lvH - cam.h) * 0.5) * py - 40;
+      /* R41: Versatz begrenzen – die Ebene deckt immer den ganzen Ausschnitt (keine freigelegte Unterkante, kein „schwebendes“ Mauerband in hohen Gebieten) */
+      const ox = cam.x * (1 - px), oy = Math.max(cam.y + cam.h + 2 - L.H, Math.min(cam.y - 2, cam.y - (cam.y - (lvH - cam.h) * 0.5) * py - 40));
       if (cover && layer === L.far) { if (Z.drawBackLife) Z.drawBackLife(c, cam, G.time, B, oy, L.H); continue; }
       let x = Math.floor((cam.x - ox) / LW) * LW + ox;
       const y0 = Math.max(oy, cam.y - 2), y1 = Math.min(oy + L.H, cam.y + cam.h + 2);
@@ -1567,16 +1572,20 @@
   }
   /* Flüssigkeiten leben: jedes Bild neu */
   /* sichtbare Lava-Oberflächen als waagerechte Läufe [x0, x1, y] (für das farbige Licht dieses Bildes) */
-  G.lava = []; G.lavaN = 0;
+  G.lava = []; G.lavaN = 0; G.see = []; G.seeN = 0;
   function drawLiquids(c, cam, t) {
     const x0 = Math.max(0, Math.floor(cam.x / T) - 3), x1 = Math.min(lv.W - 1, Math.ceil((cam.x + cam.w) / T) + 3);
     const y0 = Math.max(0, Math.floor(cam.y / T) - 3), y1 = Math.min(lv.H - 1, Math.ceil((cam.y + cam.h) / T) + 3);
     const LA = G.lava; let ln = 0, run = -1;
     const wRich = lq() >= 2 && !(Z.gq && Z.gq.lean) && !(G.off && G.off.wasser);
     const lRich = lq() >= 1 && !(Z.gq && (Z.gq.lean || Z.gq.mini)) && !(G.off && G.off.wasser); /* W11 R36: Lava-Schollen schon ab Stufe 1 */
+    /* R41 See: Tiefe grünlich-türkis statt fast schwarz, Lichtschleier im Wasser, Schein der Oberfläche (Stufe ≥ 1, nicht lean) */
+    const seeT = B.bg === "lake" && lq() >= 1 && !(Z.gq && (Z.gq.lean || Z.gq.mini)) && !(G.off && (G.off.wasser || G.off.seetiefe));
+    const SA = G.see; let sn = 0, srun = -1;
     for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
-      const v = lv.get(x, y); if (v !== 5 && v !== 6) { run = -1; continue; }
+      const v = lv.get(x, y); if (v !== 5 && v !== 6) { run = -1; srun = -1; continue; }
       const px = x * T, py = y * T, top = lv.get(x, y - 1) !== v;
+      if (seeT && v === 6 && top) { if (srun >= 0 && SA[srun + 1] === x - 1 && SA[srun + 2] === y) SA[srun + 1] = x; else { srun = sn; SA[sn++] = x; SA[sn++] = x; SA[sn++] = y; } } else srun = -1;
       if (v === 5 && top) { if (run >= 0 && LA[run + 1] === x - 1 && LA[run + 2] === y) LA[run + 1] = x; else { run = ln; LA[ln++] = x; LA[ln++] = x; LA[ln++] = y; } } else run = -1;
       /* Rand (außerhalb des Bildes) nur fürs Licht zählen, nicht zeichnen */
       if (px + T < cam.x || px > cam.x + cam.w || py + T < cam.y || py > cam.y + cam.h) continue;
@@ -1611,7 +1620,7 @@
         if (top) {
           const wy = xw => py + 5 + Math.sin(t * 1.9 + xw * 0.045) * 1.1 + Math.sin(t * 1.3 - xw * 0.11) * 0.55;
           const y0w = wy(px), y1w = wy(px + 4), y2w = wy(px + 8), y3w = wy(px + 12), y4w = wy(px + T);
-          c.fillStyle = lake ? "rgba(18,48,38,.86)" : "rgba(26,44,40,.82)";
+          c.fillStyle = lake ? (seeT ? "rgba(34,98,80,.86)" : "rgba(18,48,38,.86)") : "rgba(26,44,40,.82)";
           c.beginPath(); c.moveTo(px, y0w); c.lineTo(px + 4, y1w); c.lineTo(px + 8, y2w); c.lineTo(px + 12, y3w); c.lineTo(px + T, y4w); c.lineTo(px + T, py + T); c.lineTo(px, py + T); c.closePath(); c.fill();
           /* Lichtband knapp unter der Oberfläche */
           c.fillStyle = lake ? "rgba(150,220,180,.08)" : "rgba(220,220,180,.07)"; c.fillRect(px, y2w + 3 + Math.sin(t * 1.1 + x) * 1.2, T, 2.2);
@@ -1622,18 +1631,32 @@
           if (Math.random() < 0.01) FX.p({ x: px + Math.random() * T, y: y2w, vx: 0, vy: -10, life: 0.8, size: 1.5, col: "#c0e0d0", kind: "bubble" });
         } else {
           let d = 1; while (d < 4 && lv.get(x, y - d) === v) d++;
-          c.fillStyle = lake ? "rgba(18,48,38,.86)" : "rgba(26,44,40,.82)"; c.fillRect(px, py, T, T);
-          c.fillStyle = "rgba(0,0,0," + (0.08 * d).toFixed(2) + ")"; c.fillRect(px, py, T, T);
+          c.fillStyle = lake ? (seeT ? "rgba(26,82,68,.88)" : "rgba(18,48,38,.86)") : "rgba(26,44,40,.82)"; c.fillRect(px, py, T, T);
+          c.fillStyle = seeT ? "rgba(6,22,18," + (0.07 * d).toFixed(2) + ")" : "rgba(0,0,0," + (0.08 * d).toFixed(2) + ")"; c.fillRect(px, py, T, T);
           /* schwache Lichtbänder (Kaustik) in der Tiefe */
           if (d < 3) { const cy = py + 6 + Math.sin(t * 0.9 + x * 0.6 + y) * 4; c.fillStyle = lake ? "rgba(150,220,180,.05)" : "rgba(220,220,180,.045)"; c.fillRect(px, cy, T, 1.4); }
         }
       } else {
-        c.fillStyle = B.hazard === "water" && B.bg === "lake" ? "rgba(20,50,40,.85)" : "rgba(26,44,40,.8)"; const ty = top ? 5 + Math.sin(t * 2 + x * 0.7) * 1.2 : 0;
+        c.fillStyle = seeT ? "rgba(28,88,72,.86)" : B.hazard === "water" && B.bg === "lake" ? "rgba(20,50,40,.85)" : "rgba(26,44,40,.8)"; const ty = top ? 5 + Math.sin(t * 2 + x * 0.7) * 1.2 : 0;
         c.fillRect(px, py + ty, T, T - ty);
         if (top) { c.fillStyle = "rgba(200,230,210,.35)"; c.fillRect(px, py + ty, T, 1); if (Math.random() < 0.01) FX.p({ x: px + Math.random() * T, y: py + ty, vx: 0, vy: -10, life: 0.8, size: 1.5, col: "#c0e0d0", kind: "bubble" }); }
       }
     }
-    G.lavaN = ln;
+    G.lavaN = ln; G.seeN = sn;
+    if (seeT && wRich && sn) { /* Lichtschleier: schräge, langsam wandernde Lichtbahnen von der Oberfläche in die Tiefe */
+      c.save(); c.globalCompositeOperation = "lighter";
+      for (let i = 0; i < sn; i += 3) {
+        const a0 = SA[i], a1 = SA[i + 1], y = SA[i + 2], sy = y * T + 5;
+        let dep = 1; while (dep < 7 && lv.get(Math.round((a0 + a1) / 2), y + dep) === 6) dep++;
+        const L = dep * T, g = c.createLinearGradient(0, sy, 0, sy + L); g.addColorStop(0, "rgba(150,230,180,.13)"); g.addColorStop(1, "rgba(150,230,180,0)"); c.fillStyle = g;
+        for (let x = a0 * T - 8; x < (a1 + 1) * T; x += 22) {
+          const h0 = hash(Math.floor(x / 22), y), w = 5 + h0 * 7, dx = Math.sin(t * 0.35 + h0 * 9) * 6, sk = L * 0.35, al = 0.55 + 0.45 * Math.sin(t * 0.6 + h0 * 20);
+          if (al < 0.15) continue; c.globalAlpha = al;
+          c.beginPath(); c.moveTo(x + dx, sy); c.lineTo(x + dx + w, sy); c.lineTo(x + dx + w + sk, sy + L); c.lineTo(x + dx + sk - w * 0.3, sy + L); c.closePath(); c.fill();
+        }
+      }
+      c.restore();
+    }
   }
 
   /* ======================= REQUISITEN ======================= */
@@ -2273,7 +2296,7 @@
     return v;
   }
   const DOORC = { down: colRGB("#b080ff"), up: colRGB("#ffd27a"), boss: colRGB("#ff5a4e"), side: colRGB("#e8a070") };
-  const C_DARKIN = [255, 78, 36], C_WRATH = [255, 40, 30], C_LAVA = [255, 92, 30], C_GOLD = [255, 210, 120], C_FIRE = [255, 128, 44], C_STRIKE = [255, 228, 170];
+  const C_SEE = [90, 210, 160], C_DARKIN = [255, 78, 36], C_WRATH = [255, 40, 30], C_LAVA = [255, 92, 30], C_GOLD = [255, 210, 120], C_FIRE = [255, 128, 44], C_STRIKE = [255, 228, 170];
   /* alle Lichter dieses Bildes einsammeln (Weltkoordinaten) */
   function gather(cam, t, lvl, dt) {
     LQn = 0;
@@ -2291,6 +2314,8 @@
       const a0 = G.lava[i], a1 = G.lava[i + 1], y = G.lava[i + 2] * T + 2;
       for (let x = a0; x <= a1; x += 2) { const wx = x * T + (a1 - a0 >= 1 ? T : T / 2); pushL(wx, y, 78, C_LAVA, 0.5 * flick(5, t, x), 0); }
     }
+    /* R41 See: weicher grün-türkiser Schein über der Wasseroberfläche (alle drei Kacheln) */
+    if (!dark && G.seeN) for (let i = 0; i < G.seeN; i += 3) { const a0 = G.see[i], a1 = G.see[i + 1], y = G.see[i + 2] * T + 10; for (let x = a0; x <= a1; x += 3) pushL(x * T + 8, y, 56, C_SEE, 0.3, 0); }
     if (!dark && lv.doors) for (const d of lv.doors) {
       if (d.kind === "entry") continue; const x = d.x * T + 8, y = d.y * T - 4; if (!vis(x, y)) continue;
       if (d.kind === "gate") { pushL(x, y - 10, 96, C_WRATH, 0.32 * flick(4, t, d.x), 0); continue; }

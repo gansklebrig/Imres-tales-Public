@@ -3163,6 +3163,8 @@
       if (v0 === 8 && (lv.out || lv.arena)) { const vb = lv.get(x, y + 1); if (vb === 6 || vb === 0 || vb === 5) { const g = c.createLinearGradient(0, py + 3, 0, py + T); g.addColorStop(0, "rgba(16,10,12,.85)"); g.addColorStop(1, "rgba(16,10,12,.55)"); c.fillStyle = g; c.fillRect(px, py + 3, T, T - 3); c.fillStyle = "rgba(90,62,40,.6)"; c.fillRect(px + 2 + ((x * 5) % 7), py + 3, 1.4, T - 5); } continue; }
       if (v0 !== 0 || !G.isOpen(x, y)) continue;
       /* unter einem Steg / einer Decke */
+      /* R41: unter frei im Himmel hängenden Bohlen-Stegen kein Schatten (lag als „schwebender Block“ im Himmel) */
+      if (solidT(x, y - 1) && !(G.off && G.off.bauwerkfuss) && (lv.get(x, y - 1) === 2 || lv.get(x, y - 1) === 8) && lv.get(x, y - 2) === 0) continue;
       if (solidT(x, y - 1)) { const g = c.createLinearGradient(0, py, 0, py + T * 1.4); g.addColorStop(0, "rgba(14,8,10,.62)"); g.addColorStop(1, "rgba(14,8,10,0)"); c.fillStyle = g; c.fillRect(px, py, T, T); continue; }
       /* schmaler Schacht: Wände links und rechts in 1–2 Kacheln, darüber mindestens 3 offene Kacheln */
       const wl = solidT(x - 1, y) || solidT(x - 2, y), wr = solidT(x + 1, y) || solidT(x + 2, y);
@@ -3367,6 +3369,101 @@
         else if (kind === 1) { c.fillStyle = "#b08a3a"; c.beginPath(); c.ellipse(cx, cy, 2.4, 1.2, 0.3, 0, 7); c.fill(); c.fillStyle = "#e5c46a"; c.fillRect(cx - 1, cy - 0.8, 1.4, 0.6); }
         else if (kind === 2) { c.fillStyle = "#8a4a2a"; c.beginPath(); c.moveTo(cx - 3, cy + 2); c.lineTo(cx + 1, cy - 3); c.lineTo(cx + 4, cy + 1); c.closePath(); c.fill(); c.fillStyle = "rgba(255,210,170,.25)"; c.fillRect(cx - 1, cy - 1, 2, 0.6); }
         else { c.strokeStyle = "#5a5050"; c.lineWidth = 1.2; c.beginPath(); c.arc(cx, cy, 3, Math.PI * 0.15, Math.PI * 0.85, true); c.stroke(); } }
+    }
+  });
+})();
+
+/* Ezekiel – The Destroyer · Sturm: verwitterte Felsblöcke vor dem Himmel (W11 Runde 41, Kachel-Haken, Stufe 2+, einmal je Chunk)
+   Die gemauerten Plattformblöcke der Sturmspitze standen als glatte Kästen vor dem Himmel. Jetzt an allen Flächen, die an
+   offenen Himmel grenzen: ausgebrochene Kanten und Ecken (Silhouette, per destination-out), dunkle Regenspuren und nasse
+   Lichtkante an den Seiten, Moospolster über die Oberkante mit herabhängenden Fäden, Tropfspuren an Unterseiten.
+   Gischt (bewegt) zeichnet wetter.js. Schalter Z.gfx.off.sturmfels. Kein Blau. */
+(function () {
+  "use strict";
+  const Z = window.Z, G = Z.gfx; if (!G || !G.tileHooks) return;
+  const hh = (a, b, s) => { const v = Math.sin(a * 127.1 + b * 311.7 + s * 74.7) * 43758.5453; return v - Math.floor(v); };
+  G.tileHooks.push(function (k, H) {
+    if (k !== "fix" || (G.off && G.off.sturmfels)) return;
+    const { c, x0, x1, y0, y1, T, lv, PR } = H; if (!lv || lv.biome !== "sturm" || !PR) return;
+    const solid = (x, y) => { const v = lv.get(x, y); return v === 1 || v === 7; };
+    const sky = (x, y) => x >= 0 && y >= 0 && x < PR.W && y < PR.H && !solid(x, y) && lv.get(x, y) !== 2 && lv.get(x, y) !== 8 && PR.clear[y * PR.W + x];
+    const MOOS = ["#2a3a1c", "#3e5426", "#56702e", "#6e8a38"];
+    for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+      if (!solid(x, y)) continue;
+      const L = sky(x - 1, y), R = sky(x + 1, y), U = sky(x, y - 1), D = sky(x, y + 1); if (!(L || R || U || D)) continue;
+      const px = x * T, py = y * T, r1 = hh(x, y, 1), r2 = hh(x, y, 2), r3 = hh(x, y, 3);
+      /* Tiefe unter der Oberkante (für Moos/Regenspuren) */
+      let dTop = 0; while (dTop < 6 && solid(x, y - dTop - 1)) dTop++;
+      /* 1) Regenspuren und nasse Lichtkante an Seitenflächen */
+      for (const [side, on] of [[-1, L], [1, R]]) { if (!on) continue;
+        const ex = side < 0 ? px : px + T;
+        c.fillStyle = "rgba(226,214,232,.13)"; c.fillRect(side < 0 ? ex : ex - 1, py, 1, T);
+        for (let s = 0; s < 3; s++) { const sx = ex - side * (1.5 + hh(x, y, 10 + s) * 6), len = T * (0.4 + hh(x, y, 20 + s) * 0.9) * (dTop < 3 ? 1 : 0.6); c.fillStyle = "rgba(14,10,18," + (0.3 + 0.18 * hh(x, y, 30 + s)).toFixed(2) + ")"; c.fillRect(sx, py + hh(x, y, 40 + s) * 4, 1 + hh(x, y, 50 + s) * 1.2, len); }
+        /* Moos-Flecken in den oberen Reihen */
+        if (dTop <= 2 && r2 < 0.55) for (let m = 0; m < 6; m++) { c.fillStyle = MOOS[(m + (r1 * 4 | 0)) % 4]; const mx = ex - side * (0.5 + hh(x, y, 60 + m) * 4), my = py + hh(x, y, 70 + m) * (T - 2); c.beginPath(); c.arc(mx, my, 0.6 + hh(x, y, 80 + m) * 0.9, 0, 6.283); c.fill(); }
+      }
+      /* 2) Moos über die Oberkante an Ecken zum Himmel, mit Fäden */
+      if (U && (L || R)) for (const [side, on] of [[-1, L], [1, R]]) { if (!on) continue;
+        const ex = side < 0 ? px : px + T;
+        for (let m = 0; m < 9; m++) { c.fillStyle = MOOS[m % 4]; const mx = ex - side * (hh(x, y, 90 + m) * 7) + side * 1.2, my = py + 2 + hh(x, y, 100 + m) * 4; c.beginPath(); c.ellipse(mx, my, 0.8 + hh(x, y, 110 + m) * 1.3, 0.6 + hh(x, y, 115 + m) * 0.8, 0, 0, 6.283); c.fill(); }
+        c.strokeStyle = "rgba(62,84,38,.85)"; c.lineWidth = 0.7; c.beginPath();
+        for (let f = 0; f < 3; f++) { const fx = ex + side * (0.6 + f * 0.7), fl = 4 + hh(x, y, 120 + f) * 9; c.moveTo(fx, py + 3); c.quadraticCurveTo(fx + side * 1.2, py + 3 + fl * 0.5, fx + side * 0.4, py + 3 + fl); }
+        c.stroke();
+      }
+      /* 3) Tropfspuren und Moosfäden an Unterseiten */
+      if (D) { c.fillStyle = "rgba(14,10,16,.3)"; c.fillRect(px, py + T - 2, T, 2); if (r3 < 0.5) { c.strokeStyle = "rgba(62,84,38,.7)"; c.lineWidth = 0.6; c.beginPath(); const fx = px + 3 + r1 * 10, fl = 3 + r2 * 6; c.moveTo(fx, py + T); c.lineTo(fx + 0.5, py + T + fl); c.stroke(); } }
+      /* 4) Silhouette: ausgebrochene Kanten/Ecken (gibt den Himmel frei) */
+      c.save(); c.globalCompositeOperation = "destination-out"; c.fillStyle = "#000";
+      if (U && L && r1 < 0.85) { const w = 4 + r2 * 5, h = 3 + r3 * 5; c.beginPath(); c.moveTo(px - 0.5, py - 0.5); c.lineTo(px + w, py - 0.5); c.lineTo(px + w * 0.5, py + h * 0.5); c.lineTo(px - 0.5, py + h); c.closePath(); c.fill(); }
+      if (U && R && r2 < 0.85) { const w = 4 + r3 * 5, h = 3 + r1 * 5; c.beginPath(); c.moveTo(px + T + 0.5, py - 0.5); c.lineTo(px + T - w, py - 0.5); c.lineTo(px + T - w * 0.5, py + h * 0.5); c.lineTo(px + T + 0.5, py + h); c.closePath(); c.fill(); }
+      for (const [side, on] of [[-1, L], [1, R]]) { if (!on || hh(x, y, 130 + side) > 0.6) continue;
+        const ex = side < 0 ? px - 0.5 : px + T + 0.5, d = 2 + hh(x, y, 140 + side) * 3.5, yy = py + 2 + hh(x, y, 150 + side) * (T - 9), hgt = 4 + hh(x, y, 160 + side) * 6;
+        c.beginPath(); c.moveTo(ex, yy); c.lineTo(ex - side * d, yy + hgt * 0.35); c.lineTo(ex - side * d * 0.6, yy + hgt); c.lineTo(ex, yy + hgt + 0.5); c.closePath(); c.fill(); }
+      if (D && r3 > 0.55) { const bx = px + 2 + r1 * 9, w = 2 + r2 * 3; c.beginPath(); c.moveTo(bx, py + T + 0.5); c.lineTo(bx + w * 0.5, py + T - 1.5 - r3 * 1.5); c.lineTo(bx + w, py + T + 0.5); c.closePath(); c.fill(); }
+      c.restore();
+    }
+  });
+})();
+
+/* Ezekiel – The Destroyer · Fallschacht-Abkürzungen markieren (W11 Runde 41, Kachel-Haken, Stufe 2+, einmal je Chunk)
+   lv.abkuerzungen (welt.js, v=108): [{x, y0, y1}] – 2 Kacheln breiter Schacht von y0+1 bis y1-1. Dezent: abgebrochene Bodenplatten
+   an der Schachtkante (Bruchkante mit Lichtkante, Risse im Boden daneben, Bröckchen), an einer Seite ein ausgefranster Seilrest
+   an einem Eisenhaken. Schalter Z.gfx.off.abkuerzung. Kein Blau. */
+(function () {
+  "use strict";
+  const Z = window.Z, G = Z.gfx; if (!G || !G.tileHooks) return;
+  const hh = (a, b, s) => { const v = Math.sin(a * 127.1 + b * 311.7 + s * 74.7) * 43758.5453; return v - Math.floor(v); };
+  G.tileHooks.push(function (k, H) {
+    if (k !== "fix" || (G.off && G.off.abkuerzung)) return;
+    const { c, x0, x1, y0, y1, T, lv, B } = H; if (!lv || !lv.abkuerzungen || !lv.abkuerzungen.length) return;
+    const tile = (B && B.tile) || { base: "#5a5058", light: "#7a6a62", dark: "#231c20" };
+    for (const a of lv.abkuerzungen) {
+      const ty = a.y0 + 1; if (a.x + 3 < x0 || a.x - 2 > x1 || ty < y0 - 1 || ty > y1 + 1) continue;
+      const py = ty * T, lx = a.x * T, rx = (a.x + 2) * T;
+      /* abgebrochene Platten: ragen unregelmäßig in die Öffnung */
+      const fest = tx => { const v = lv.get(tx, ty); return v === 1 || v === 7; };
+      for (const [ex, sd] of [[lx, 1], [rx, -1]]) {
+        if (!fest(sd > 0 ? a.x - 1 : a.x + 2)) continue; /* nur an echten Bodenkanten */
+        const d1 = 3 + hh(a.x, sd, 1) * 5, d2 = 1.5 + hh(a.x, sd, 2) * 3;
+        c.fillStyle = tile.base; c.beginPath(); c.moveTo(ex, py - 0.5); c.lineTo(ex + sd * d1, py - 0.5); c.lineTo(ex + sd * d1 * 0.6, py + 2.5); c.lineTo(ex + sd * d2, py + 3.5); c.lineTo(ex + sd * d2 * 0.4, py + 6); c.lineTo(ex, py + 7); c.closePath(); c.fill();
+        c.fillStyle = tile.light; c.fillRect(Math.min(ex, ex + sd * d1), py - 0.5, d1, 1);
+        c.strokeStyle = tile.dark; c.lineWidth = 0.7; c.beginPath(); c.moveTo(ex + sd * d1, py - 0.5); c.lineTo(ex + sd * d1 * 0.6, py + 2.5); c.lineTo(ex + sd * d2, py + 3.5); c.lineTo(ex + sd * d2 * 0.4, py + 6); c.stroke();
+        /* Risse im Boden neben der Kante */
+        c.strokeStyle = "rgba(14,10,10,.55)"; c.lineWidth = 0.6; c.beginPath();
+        for (let r = 0; r < 2; r++) { const sx = ex - sd * 0.5; let x = sx, y = py + 0.5; c.moveTo(x, y); for (let s = 0; s < 3; s++) { x -= sd * (2 + hh(a.x, r * 7 + s, 3 + sd) * 4); y += hh(a.x, r * 5 + s, 4) * 2.5; c.lineTo(x, y); } }
+        c.stroke();
+        /* Bröckchen auf dem Boden */
+        c.fillStyle = tile.light; for (let b = 0; b < 3; b++) { const bx = ex - sd * (3 + hh(a.x, b, 5 + sd) * 10), s2 = 0.8 + hh(a.x, b, 6) * 1.2; c.fillRect(bx, py - s2, s2 * 1.4, s2); }
+      }
+      /* Seilrest an einem Haken (Seite nach Zufall) */
+      let sd = hh(a.x, a.y0, 7) < 0.5 ? 1 : -1; if (!fest(sd > 0 ? a.x - 1 : a.x + 2)) sd = -sd; if (!fest(sd > 0 ? a.x - 1 : a.x + 2)) continue;
+      const hx = sd > 0 ? lx - 3 : rx + 3, hy = py + 1;
+      c.fillStyle = "#2e2826"; c.fillRect(hx - 1, hy - 1.5, 2.2, 2.2); c.strokeStyle = "#5a5250"; c.lineWidth = 0.7; c.beginPath(); c.arc(hx + sd * 1.6, hy + 1, 1.4, 0, 6.283); c.stroke();
+      const len = 10 + hh(a.x, a.y0, 8) * 14, rx2 = hx + sd * 3.2;
+      c.strokeStyle = "#3a2a1a"; c.lineWidth = 2; c.beginPath(); c.moveTo(hx + sd * 1.6, hy + 2); c.quadraticCurveTo(rx2 + sd * 1.5, hy + len * 0.5, rx2, hy + len); c.stroke();
+      c.strokeStyle = "#9a7a4a"; c.lineWidth = 1.1; c.stroke();
+      c.strokeStyle = "rgba(40,28,16,.8)"; c.lineWidth = 0.4; c.beginPath(); for (let y = hy + 4; y < hy + len - 1; y += 2.2) { const u = (y - hy) / len, xx = (1 - u) * (1 - u) * (hx + sd * 1.6) + 2 * (1 - u) * u * (rx2 + sd * 1.5) + u * u * rx2; c.moveTo(xx - 0.6, y); c.lineTo(xx + 0.6, y + 1); } c.stroke();
+      c.strokeStyle = "#b8945a"; c.lineWidth = 0.4; c.beginPath(); for (let f = -1; f <= 1; f++) { c.moveTo(rx2, hy + len); c.lineTo(rx2 + f * 1.4, hy + len + 2 + Math.abs(f)); } c.stroke();
     }
   });
 })();
