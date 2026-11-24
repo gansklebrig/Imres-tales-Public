@@ -31,7 +31,44 @@
     Z.hitEnemy(e, sc(dmg), Object.assign({ src: "trap", kb: 150, kbUp: 150 }, o || {}));
     if (st) for (const k in st) Z.addStatus(e, k, st[k]);
   }
-  function foes(test, fn) { for (const e of Z.enemies) if (!e.dead && !(e.def && e.def.boss) && test(e)) fn(e); }
+  /* Handheld (lean): Vorauswahl über einen großzügigen Wirkkasten der gerade gerechneten Falle (foesBox) – wer weit
+     außerhalb liegt, kann ohnehin nicht getroffen werden; die eigentliche Prüfung (test) bleibt unverändert → gleiches Ergebnis,
+     aber ohne Prüf-Aufruf (und dessen Kasten-Anlage) für jeden der 50–90 Gegner je Falle und Teilschritt */
+  let foesBox = null;
+  function foes(test, fn) {
+    const b = foesBox;
+    for (const e of Z.enemies) {
+      if (e.dead || (e.def && e.def.boss)) continue;
+      if (b && (e.x + e.w < b[0] || e.x > b[1] || e.y + e.h < b[2] || e.y > b[3])) { if (Z.fallenPruef) { Z.fallenPruef.aus++; if (test(e)) Z.fallenPruef.fehl++; } continue; } /* Z.fallenPruef: Selbstprüfung für Tests */
+      if (test(e)) fn(e);
+    }
+  }
+  /* Wirkkasten einer Falle aus ihren Lagefeldern (jeden Schritt neu: manche Fallen bewegen sich), Rand = Reichweite + 160 px waagrecht, 320 px senkrecht */
+  const XK = ["x", "x0", "x1", "wx", "tx", "bx", "hx", "cx", "sx"], YK = ["y", "fy", "ay", "top", "ly", "hy", "gy", "by", "sy", "wy"];
+  const BOX = [0, 0, 0, 0];
+  function trapBox(tr, B) {
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    for (const k of XK) { const v = tr[k]; if (typeof v === "number" && v === v) { if (v < x0) x0 = v; if (v > x1) x1 = v; } }
+    for (const k of YK) { const v = tr[k]; if (typeof v === "number" && v === v) { if (v < y0) y0 = v; if (v > y1) y1 = v; } }
+    if (x0 === Infinity || y0 === Infinity) return null;
+    const r = (+tr.range || 0) + (+tr.len || 0) + (+tr.R || 0) + (+tr.reach || 0);
+    B[0] = x0 - r - 160; B[1] = x1 + r + 160; B[2] = y0 - r - 320; B[3] = y1 + r + 320; return B;
+  }
+  const kasten = (B, x, y, rx, ry) => { B[0] = x - rx; B[1] = x + rx; B[2] = y - ry; B[3] = y + ry; return B; };
+  /* Bildtakt (Handheld): Arbeit, die einmal pro Bild genügt (Hinweise, Anzeige, Buchhaltung), statt je Teilschritt (lean: bis zu 6 je Bild).
+     Z.bildNr zählt die Bilder (eigene rAF-Schleife). Z.bildTakt() gibt einen Taktgeber t(dt) zurück: aufgesparte Zeit, wenn fällig, sonst 0
+     (spätestens alle 0,1 s, damit Testläufe ohne Bilder nicht stehen bleiben). Prüfschalter Z.bildTaktCull, sonst folgt er Z.gq.lean. */
+  if (!Z.bildNr) { Z.bildNr = 1; const f = () => { Z.bildNr++; requestAnimationFrame(f); }; requestAnimationFrame(f); }
+  Z.bildTakt = function () {
+    let b = 0, acc = 0;
+    return dt => {
+      const on = Z.bildTaktCull != null ? Z.bildTaktCull : !!(Z.gq && Z.gq.lean);
+      acc += dt;
+      if (on && b === Z.bildNr && acc < 0.1) return 0;
+      b = Z.bildNr; const a = acc; acc = 0; return a;
+    };
+  };
+  const fcTakt = Z.bildTakt();
   const box = (x, y, w, h) => ({ x, y, w, h });
   const ov = U.overlap;
   const circRect = api.circRect;
@@ -1504,13 +1541,17 @@
     clock += dt; toastCd = Math.max(0, toastCd - dt);
     if (!Z.level) return;
     const P = P0();
-    for (const tr of list) { const d = D[tr.k]; if (!d) continue; try { d.upd(tr, dt, P); } catch (e) { console.error(tr.k, e); tr.k = "_x"; } }
+    const cull = Z.fallenCull != null ? Z.fallenCull : !!(Z.gq && Z.gq.lean);
+    /* Wirkkasten je Falle zwischenspeichern, alle 8 Schritte neu (Fallen bewegen sich in 8 Schritten weit weniger als den Rand) */
+    for (const tr of list) { const d = D[tr.k]; if (!d) continue; if (cull) { if (!(tr._bxN-- > 0)) { tr._bxN = 7; tr._bx = trapBox(tr, tr._bx || [0, 0, 0, 0]); } foesBox = tr._bx; } else foesBox = null; try { d.upd(tr, dt, P); } catch (e) { console.error(tr.k, e); tr.k = "_x"; } }
+    foesBox = null;
     for (let i = list.length - 1; i >= 0; i--) if (!D[list[i].k]) list.splice(i, 1);
     /* Geschosse: Ballistenbolzen, Lava- und Schlackebrocken */
     for (let i = shots.length - 1; i >= 0; i--) {
       const s = shots[i]; s.life -= dt; s.vy += s.g * dt; s.x += s.vx * dt; s.y += s.vy * dt;
       const b = box(s.x - 3, s.y - 3, 6, 6);
       if (P && !s.hitP && ov(b, HB(P))) { s.hitP = true; hp(s.frac, s.x - Math.sign(s.vx || 1) * 10, { kb: s.k === "bolzen" ? 280 : 120, kbUp: 160, eff: s.k === "bolzen" ? null : { burn: 1 } }); if (!s.pierce) s.life = 0; }
+      foesBox = cull ? kasten(BOX, s.x, s.y, 80, 80) : null;
       foes(e => ov(b, e), e => { he(s.src, e, s.edmg, { kb: s.k === "bolzen" ? 260 : 80 }, s.k === "bolzen" ? { bleed: 1 } : { burn: 2 }); if (!s.pierce) s.life = 0; });
       if (s.k !== "bolzen" && Math.random() < dt * 30) FX.p({ x: s.x, y: s.y, vx: 0, vy: 0, life: 0.3, size: 2, col: "#ff8a3a", kind: "glow", add: true });
       if (W.solidAt(s.x + Math.sign(s.vx) * 4, s.y) || W.solidAt(s.x, s.y + 3)) {
@@ -1533,6 +1574,7 @@
         m.x += m.vx * dt; m.y += m.vy * dt;
         if (W.solidAt(m.x, m.y + 1) || W.isPlat(Math.floor(m.x / T), Math.floor((m.y + 1) / T))) { FX.burst(m.x, m.y, 2, { col: "#f0ece4", sp: 50, ang: -Math.PI / 2, spread: 2, life: 0.4, size: 1.2, kind: "dot", g: 500 }); m.t = 99; }
         if (m.dmg && P && ov(box(m.x - 1.5, m.y - 1.5, 3, 3), HB(P))) { hp(0.035, m.x, { kb: 30, kbUp: 30, eff: { slow: 0.8 } }); m.t = 99; }
+        foesBox = cull ? kasten(BOX, m.x, m.y, 80, 80) : null;
         if (m.dmg) foes(e => ov(box(m.x - 1.5, m.y - 1.5, 3, 3), e), e => { he(m.src, e, 8, { kb: 0 }); m.t = 99; });
       }
       if (m.t > m.life) minis.splice(i, 1);
@@ -1543,6 +1585,7 @@
       if (q.k === "bolzen") continue;
       const r = box(q.x - q.w / 2, q.y - 4, q.w, 4);
       if (P && P.onGround && ov(r, P)) { if (!q.ember) Z.addStatus(P, "slow", 0.4, true); if (q.hot && q.t < q.life * 0.6 && !(P.st.burn > 0)) Z.addStatus(P, "burn", 1, true); }
+      foesBox = cull ? kasten(BOX, q.x, q.y, q.w + 80, 80) : null;
       foes(e => ov(r, e), e => { Z.addStatus(e, "slow", 1); });
       if (q.hot && Math.random() < dt * 3) FX.p({ x: q.x + (Math.random() - 0.5) * q.w, y: q.y - 1, vx: 0, vy: -20, life: 0.6, size: 1.2, col: "#ff8a3a", kind: "ember", add: true });
     }
@@ -1550,10 +1593,13 @@
     for (let i = waves.length - 1; i >= 0; i--) {
       const w = waves[i]; w.t += dt; w.r = 4 + (w.max - 4) * (w.t / w.life);
       if (P && !w.hitP) { const dd = Math.hypot(pcx(P) - w.x, P.y + P.h / 2 - w.y); if (Math.abs(dd - w.r) < 10) { w.hitP = true; if (hp(0.05, w.x, { kb: 260, kbUp: 160 })) Z.addStatus(P, "slow", 1.2, true); } }
+      foesBox = cull ? kasten(BOX, w.x, w.y, w.r + 120, w.r + 120) : null;
       foes(e => Math.abs(Math.hypot(e.x + e.w / 2 - w.x, e.y + e.h / 2 - w.y) - w.r) < 10, e => he(w.src, e, 15, { kb: 200 }, { stun: 1 }));
       if (w.t > w.life) waves.splice(i, 1);
     }
-    firstContact();
+    foesBox = null;
+    /* Erstkontakt-Hinweis: einmal pro Bild genügt (lean) */
+    if (fcTakt(dt)) firstContact();
   };
 
   /* ======================= LICHT ======================= */

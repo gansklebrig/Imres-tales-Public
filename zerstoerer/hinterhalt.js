@@ -66,8 +66,11 @@
     amb.wave++;
   }
   const tick0 = Z.ebenenTick;
+  const takt = Z.bildTakt ? Z.bildTakt() : (d => d);
   Z.ebenenTick = function (dt) {
     if (tick0) tick0(dt);
+    /* Buchhaltung des Hinterhalts (Auslösen, Wellen, Siegel): auf Handheld einmal pro Bild mit aufgesparter Zeit */
+    dt = takt(dt); if (!dt) return;
     const P = Z.player; if (!amb || !P || P.dead) return;
     const { ox, oy } = amb;
     const inside = P.x > (ox + 3) * T && P.x < (ox + CW - 3) * T && P.y > (oy + 1) * T && P.y < (oy + CH - 1) * T;

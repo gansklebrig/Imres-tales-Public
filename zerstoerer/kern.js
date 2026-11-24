@@ -366,7 +366,8 @@
   const VSTEP = [0.3, 0.45, 0.6, 0.8, 1];
   function verbSend(v) {
     let k = 0; for (let i = 1; i < VSTEP.length; i++) if (Math.abs(VSTEP[i] - v) < Math.abs(VSTEP[k] - v)) k = i;
-    const S = A.vsend || (A.vsend = []);
+    if (A.vsendCtx !== A.ctx) { A.vsend = []; A.vsendCtx = A.ctx; } /* neuer Kontext (z. B. Prüfstand mit OfflineAudioContext): Sende-Wege neu anlegen */
+    const S = A.vsend;
     if (!S[k]) { S[k] = A.ctx.createGain(); S[k].gain.value = VSTEP[k]; S[k].connect(A.verb); }
     return S[k];
   }

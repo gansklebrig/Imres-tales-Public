@@ -453,6 +453,30 @@
     for (const k in w) { x -= w[k]; if (x <= 0) { M.lastVar2 = M.lastVar; M.lastVar = k; return k; } }
     return "orig";
   }
+  /* ---------- Ruhe-Abschnitte (Erkundung/Spannung) ----------
+     Lange Läufe sollen nicht monoton werden: alle 8–16 Takte wechselt die Erkundungsmusik den Abschnitt – gleiche Tonart,
+     gleiche Besetzung, aber andere Anordnung (Prinzip aus Ambient/Techno: Elemente kommen und gehen, statt neuer Themen).
+       grund   – wie bisher
+       atem    – Melodie schweigt, nur Bordun und Teppich; ferne Einzeltöne der Farbe (Luft holen)
+       phasen  – zwei Schleifen ungleicher Länge (5 und 7 Achtel) laufen über die Akkordtöne und verschieben sich gegeneinander
+       kanon   – die Farbe antwortet der Melodie einen Takt später eine Quinte höher
+       orgel   – Orgelpunkt: der Bordun bleibt auf dem Grundton, die Akkorde wandern darüber
+       hoch    – Melodie eine Oktave höher und leiser, schwebend
+       puls    – leiser Herzpuls: weiche Sub-Trommel auf 1 und 3, gedämpfter Pulsbass auf den Offbeats, feine Ticks (nicht im Lager)
+     Nach jedem Kampf beginnt die Ruhe wieder mit „grund“. Z.music.ruhe(name) erzwingt einen Abschnitt (Tests/Hörproben). */
+  const RUHE = { grund: 3, atem: 1.4, phasen: 1.6, kanon: 1.4, orgel: 1.2, hoch: 1, puls: 1.5 };
+  function pickRuhe(force) {
+    const p = M.prof || {}, w = Object.assign({}, RUHE);
+    if (p.calm) w.puls = 0;
+    if (M.ruheA !== "grund") w.grund *= 2; /* zwischen zwei Abwandlungen meist zurück zum Grund */
+    if (M.ruheA) w[M.ruheA] = 0; if (M.ruheB) w[M.ruheB] *= 0.3;
+    let k = force;
+    if (!k) { let sum = 0; for (const n in w) sum += w[n]; let x = Math.random() * sum; for (const n in w) { x -= w[n]; if (x <= 0) { k = n; break; } } k = k || "grund"; }
+    M.ruheB = M.ruheA; M.ruheA = k; M.ruheBars = 0; M.ruheLen = k === "grund" ? (Math.random() < 0.5 ? 8 : 16) : 16;
+    M.stats.ruhe = M.stats.ruhe || {}; M.stats.ruhe[k] = (M.stats.ruhe[k] || 0) + 1;
+    M.phA = 0; M.phB = 0;
+  }
+  M.ruhe = name => { if (name && !RUHE[name]) return M.ruheA; if (name) { pickRuhe(name); M.ruheFix = true; } else M.ruheFix = false; return M.ruheA; };
   /* Phrasenplan: spielen oder atmen (in der Erkundung bewusst mit Pausen). Ein Leitmotiv (Z.music.motif mit leit)
      ersetzt die Melodie, solange es gilt – jede zweite Phrase, damit es nicht penetrant wird. */
   function planPhrase() {
@@ -465,6 +489,8 @@
     else if (M.restRun >= 2) play = true;
     else if (M.playRun >= 2) play = false;
     else play = Math.random() < (M.prof.calm ? 0.55 : 0.5);
+    /* Ruhe-Abschnitte: „atem“ schweigt (höchstens jede vierte Phrase ein Nachklang), „phasen“ lässt den Schleifen mehr Raum */
+    if (calm && !M.bossOn) { if (M.ruheA === "atem") play = M.restRun >= 3; else if (M.ruheA === "phasen" && M.playRun >= 1) play = false; }
     if (play) { M.playRun = (M.playRun || 0) + 1; M.restRun = 0; M.phrase = VAR[nextVariant()](M.mel); }
     else { M.restRun = (M.restRun || 0) + 1; M.playRun = 0; M.phrase = null; }
   }
@@ -529,6 +555,7 @@
     if (M.colF) M.colF.frequency.setTargetAtTime(prof.colLP || 20000, now, 0.3);
     if (M.wav) { M.wav.amp.gain.setTargetAtTime(prof.water ? 0.15 * prof.water : 0, now, 1); M.wav.flt.gain.setTargetAtTime(prof.water ? 380 * prof.water : 0, now, 1); }
     M.whaleT = 2;
+    if (!sameLevel && !M.ruheFix) { M.ruheA = null; M.ruheB = null; pickRuhe("grund"); }
     preload(prof);
     if (prof.boss && sameLevel && !prevBoss) M.stinger("boss");
   };
@@ -637,6 +664,7 @@
   function commitTier(w, t) {
     const old = M.tier; if (w === old) return;
     M.tier = w; M.tierName = TIER_NAME[w]; M.tierAt = t; M.combat = w >= 2;
+    if (w >= 2 && old < 2 && !M.ruheFix && M.ruheA !== "grund") pickRuhe("grund"); /* nach dem Kampf beginnt die Ruhe wieder beim Grund */
     M.stats.tiers[M.tierName] = (M.stats.tiers[M.tierName] || 0) + 1;
     (M.log = M.log || []).push({ t: +t.toFixed(3), st: M.step % 8, von: TIER_NAME[old], zu: TIER_NAME[w] }); if (M.log.length > 24) M.log.shift();
     if (w >= 2 && old < 2 && w !== 4) M.stinger("kampf", { at: t });
@@ -687,8 +715,10 @@
     set(M.busTen, LAY.ten[tr] * (0.4 + 0.6 * M.T) * pm);
     set(M.busCmb, LAY.cmb[tr] * (0.85 + 0.2 * I) * pm * cm);
     set(M.busDr, LAY.dr[tr] * (0.7 + 0.35 * I) * pm * cm);
-    set(M.busPuls, LAY.puls[tr] * pm * cm);
-    set(M.busPerc, LAY.perc[tr] * pm * cm);
+    /* Ruhe-Abschnitt „puls“ braucht Pulsbass- und Schlag-Bus auch in der Erkundung (weich ein- und ausgeblendet) */
+    const rP = tr <= 1 && M.ruheA === "puls" ? 1 : 0; M.rP = (M.rP || 0) + (rP - (M.rP || 0)) * Math.min(1, dt * 0.8);
+    set(M.busPuls, LAY.puls[tr] * pm * cm + 0.55 * M.rP * pm * (M.exq || 1));
+    set(M.busPerc, LAY.perc[tr] * pm * cm + 0.5 * M.rP * pm * (M.exq || 1));
     /* Teppich: im Kampf heller und lauter, bei wenig Leben dunkel */
     const P = Z.player, lowHp = P && !P.dead && Z.level && !Z.level.hub && P.hpMax ? clamp((0.32 - P.hp / P.hpMax) / 0.22, 0, 1) : 0;
     M.low += (lowHp - M.low) * Math.min(1, dt * 1.5);
@@ -777,12 +807,14 @@
       const pool = combat ? (p.progC || PROG_CMB) : (p.progE || PROG_EXP); let np; do { np = pick(pool); } while (np === prog && pool.length > 1);
       if (combat) M.progC = np; else M.progE = np;
       if (Math.random() < 0.5) M.ost = pick(OSTP);
+      if (!combat && !M.ruheFix) { M.ruheBars = (M.ruheBars || 0) + 8; if (!M.ruheA || M.ruheBars >= M.ruheLen) pickRuhe(); }
     }
     M.chord = chord;
     const tone = (i, base) => deg(p.scale, chord + [0, 2, 4, 7][i], base);
     if (chordStart) padChord(chord, t, slow ? 0.6 : 0.18);
     if (ph === 0) planPhrase();
     const hum = () => t + rnd(-0.006, 0.01);
+    const RA = !combat ? (M.ruheA || "grund") : "grund", lean = !!(Z.gq && Z.gq.lean);
 
     /* --- Herzschlag bei wenig Leben: im Takt, langsame Musik auf Vierteln, schnelle auf Halben --- */
     if (M.low > 0.08 && !(Z.player && Z.player.dead)) {
@@ -795,6 +827,7 @@
     if (st === 0) {
       const len = beat * 8 * 1.45, re = chordStart ? 1 : 0.75;
       if (p.drone === "didge") playNote("didge", p.root - 12, t, 0.32 * re, len, M.busExp); /* Didgeridoo bleibt als Orgelpunkt auf dem Grundton */
+      else if (RA === "orgel") { playNote(p.drone, p.root - 12, t, 0.27, len, M.busExp); playNote(p.drone, deg(p.scale, 4, p.root - 12), t, 0.12, len, M.busExp); } /* Orgelpunkt: Grundton und Quinte bleiben liegen */
       else { playNote(p.drone, tone(0, p.root - 12), t, 0.25 * re, len, M.busExp); if (I > 0.25 || p.calm) playNote(p.drone, tone(2, p.root - 12), t, 0.12 * re, len, M.busExp); }
     }
     if (p.pad && st === 0) {
@@ -803,7 +836,13 @@
       playNote(p.pad, tone(2, p.root + 12), t, 0.07 + I * 0.04, len, M.busExp);
     }
     /* Farbe: gebrochener Akkord bei Akkordwechseln, sonst seltene Einzeltöne in den Atempausen */
-    if (p.col && tr <= 1) {
+    if (p.col && tr <= 1 && RA === "phasen") {
+      /* zwei Schleifen: 5 Achtel (Akkordtöne aufwärts) und 7 Achtel (eine Oktave höher, abwärts) – sie treffen sich erst nach 35 Achteln wieder */
+      if (M.step % 5 === 0) { playNote(p.col, tone(M.phA % 4, p.root + 12), hum(), 0.085, beat * 5, M.busCol); M.phA++; }
+      if (!lean && M.step % 7 === 3) { playNote(p.col, tone(3 - (M.phB % 3), p.root + 24), hum(), 0.05, beat * 6, M.busCol); M.phB++; }
+    } else if (p.col && tr <= 1 && RA === "atem") {
+      if (st === 0 && bar % 2 === 1 && Math.random() < 0.7) playNote(p.col, tone(pick([2, 3]), p.root + 24), hum(), 0.06, beat * 10, M.busCol);
+    } else if (p.col && tr <= 1) {
       if (chordStart && Math.random() < 0.35) { const upw = Math.random() < 0.6; for (let i = 0; i < 4; i++) playNote(p.col, tone(upw ? i : 3 - i, p.root + 12), t + i * beat * 0.5, 0.11 - i * 0.012, beat * 4, M.busCol); }
       else if (!M.phrase && (st === 2 || st === 5) && Math.random() < 0.18) playNote(p.col, deg(p.scale, pick([0, 2, 4, 7, 9]) + chord, p.root + 19), hum(), 0.08, beat * 5, M.busCol);
     }
@@ -823,12 +862,24 @@
           }
           midi = deg(p.scale, d, p.root + 12);
         }
-        playNote(p.mel, midi, hum(), vol, beat * n.l * (calm ? 1.6 : 1.1) + 0.1, M.busMel);
+        if (RA === "hoch" && calm) { midi += 12; }
+        playNote(p.mel, midi, hum(), vol * (RA === "hoch" && calm ? 0.72 : 1), beat * n.l * (calm ? 1.6 : 1.1) + 0.1, M.busMel);
+        /* Kanon: die Farbe antwortet einen Takt später eine Quinte höher (nicht auf weichen Echo-Noten) */
+        if (RA === "kanon" && calm && p.col && !n.soft) {
+          const m2 = n.semi != null ? midi + 7 : deg(p.scale, n.d + 4, p.root + 12);
+          playNote(p.col, m2, t + beat * 8, vol * 0.42, beat * n.l * 1.4 + 0.1, M.busCol);
+        }
         /* höchste Stufen: Blech verdoppelt die Melodie eine Oktave tiefer */
         if (combat && (tr >= 3 || I > 0.8 || M.rage > 0.3) && n.s % 2 === 0 && p.brass) playNote(p.brass, midi - 12, t, 0.1, beat * n.l, M.busCmb);
       }
     }
 
+    /* --- Ruhe-Abschnitt „puls“: weicher Herzpuls (Sub-Trommel 1 und 3, Pulsbass auf den Offbeats, feine Ticks) --- */
+    if (RA === "puls" && tr <= 1 && !p.calm) {
+      if (st === 0 || st === 4) kick(t, st === 0 ? 0.42 : 0.3);
+      if (st % 2 === 1) pulse(tone(0, p.root - 24) + (st === 7 && bar % 2 ? 7 : 0), t, 0.09, beat * 0.9, 0.12 + 0.1 * Math.sin(M.step * 0.07));
+      if (!lean && st % 2 === 1) tick(t + beat / 2, 0.022, 0.03);
+    }
     /* --- Spannung (Gegner wach, aber noch kein Kampf) --- */
     if (tr === 1) {
       if (st === 0 || st === 4) playNote("timpt", tone(st === 0 ? 0 : 2, p.root - 12), t, 0.2 + 0.1 * M.T, beat * 3, M.busTen);
@@ -1191,7 +1242,7 @@
   }
   window.addEventListener("load", hookSettings);
 
-  M.debug = () => ({ id: M.id, key: M.key().name, bpm: M.prof && M.prof.bpm, tier: M.tierName, want: TIER_NAME[M.want], intensity: +M.intensity.toFixed(3), raw: +(M.raw || 0).toFixed(3), parts: Object.assign({}, M.parts), live: M.live, dyn: dynMode(), pushes: M.pushes.length });
+  M.debug = () => ({ ruhe: M.ruheA, id: M.id, key: M.key().name, bpm: M.prof && M.prof.bpm, tier: M.tierName, want: TIER_NAME[M.want], intensity: +M.intensity.toFixed(3), raw: +(M.raw || 0).toFixed(3), parts: Object.assign({}, M.parts), live: M.live, dyn: dynMode(), pushes: M.pushes.length });
 
   /* ---------- Kulisse der Bühne ---------- */
   const AMB = (Z.ambience = { biome: null, timers: [] });

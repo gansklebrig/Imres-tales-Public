@@ -856,7 +856,7 @@
   function frame(dt) {
     sigT -= dt;
     if (sigT <= 0) {
-      sigT = 0.4;
+      sigT = lo() ? 1 : 0.4; /* Handheld: Tasten-/Schrift-Kennung seltener prüfen (Schriftwechsel melden sich ohnehin über document.fonts) */
       const S0 = (Z.gfx && Z.gfx.scale) || 2, k = clamp(Math.ceil(S0 * 2) / 2, 1.5, 4);
       kScale = k; gsig = globalSig();
     }
@@ -906,7 +906,9 @@
   };
   /* Lernen im Spielablauf */
   const tick0 = Z.ebenenTick;
-  Z.ebenenTick = function (dt) { if (tick0) tick0(dt); try { watch(Z.player, dt); } catch (e) { console.error(e); } };
+  /* Lernen beobachten: auf Handheld einmal pro Bild (Eingaben ändern sich ohnehin nur je Bild) */
+  const wTakt = Z.bildTakt ? Z.bildTakt() : (d => d);
+  Z.ebenenTick = function (dt) { if (tick0) tick0(dt); const d = wTakt(dt); if (!d) return; try { watch(Z.player, d); } catch (e) { console.error(e); } };
   /* Gebietswechsel: neu aufbauen (nach allen anderen Modulen) */
   const load0 = Z.loadArea;
   /* Plätze erst beim ersten Bild suchen: dann haben alle Module (auch die später geladenen) ihr Gebiet aufgebaut */

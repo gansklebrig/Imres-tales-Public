@@ -40,21 +40,24 @@
   };
 
   const tick0 = Z.ebenenTick;
+  const zzTakt = Z.bildTakt ? Z.bildTakt() : (dt => dt);
   Z.ebenenTick = function (dt) {
     if (tick0) tick0(dt);
     const P = Z.player; if (!P || P.dead || Z.level !== lvRef) return;
+    const zdt = zzTakt(dt); /* Zzz (reine Anzeige): auf Handheld einmal pro Bild mit aufgesparter Zeit */
     const px = P.x + P.w / 2, py = P.y + P.h / 2;
     const loud = (P.act && P.act.phase === "act") || P.rollT > 0 || (Math.abs(P.vx) > 120 && !P.crouch) || (P.justLanded && (P.anim && P.anim.land > 0.5));
     for (const e of Z.enemies) {
       if (e.dead) continue;
-      const ex = e.x + e.w / 2, ey = e.y + e.h / 2, d = Math.hypot(ex - px, (ey - py) * 1.6);
+      const ex = e.x + e.w / 2, ey = e.y + e.h / 2;
       if (e.sleep) {
         e.aware = false; e.pDir = 0; e.patrol = 9; e.vx = 0;
         const hear = P.crouch ? 26 : loud ? 110 : 52;
-        if (d < hear) wake(e, false);
+        /* weit weg (> Hörweite schon waagrecht): ohne Wurzel – gleiches Ergebnis */
+        if (Math.abs(ex - px) < hear && Math.hypot(ex - px, (ey - py) * 1.6) < hear) wake(e, false);
         /* Zzz nur für Schläfer im Bild anlegen (reine Anzeige) */
         const cm = Z.cam;
-        if (Math.random() < dt * 0.8 && ex > cm.x - 40 && ex < cm.x + cm.w + 40 && ey > cm.y - 60 && ey < cm.y + cm.h + 40) { const zz = e.zz || (e.zz = []); zz.push({ t: 0, x: ex + e.face * 3, y: e.y - 2 }); if (zz.length > 3) zz.shift(); }
+        if (zdt && Math.random() < zdt * 0.8 && ex > cm.x - 40 && ex < cm.x + cm.w + 40 && ey > cm.y - 60 && ey < cm.y + cm.h + 40) { const zz = e.zz || (e.zz = []); zz.push({ t: 0, x: ex + e.face * 3, y: e.y - 2 }); if (zz.length > 3) zz.shift(); }
         continue;
       }
       if (e.watch && !e.aware) { e.pDir = 0; e.patrol = 9; e.vx = 0; if (Math.random() < dt * 0.15) e.face = -e.face; }
@@ -81,9 +84,13 @@
     for (const e of Z.enemies) {
       if (e.dead || e.x < cam.x - 40 || e.x > cam.x + cam.w + 40 || e.y < cam.y - 60 || e.y > cam.y + cam.h + 40) continue;
       if (e.sleep && e.zz) {
-        c.font = "700 7px 'Alegreya Sans',sans-serif"; c.textAlign = "center";
-        /* Handheld: eine feste Schriftgröße (jedes neue c.font wird geparst – teuer auf schwachen Kernen) */
-        for (const z of e.zz) { z.t += 1 / 60; const u = Math.min(1, z.t / 2.4); c.globalAlpha = 1 - u; c.fillStyle = "#e8e0ff"; if (!lean) c.font = "700 " + (5 + u * 5) + "px 'Alegreya Sans',sans-serif"; c.fillText("z", z.x + Math.sin(z.t * 3) * 3 + u * 6, z.y - u * 18); }
+        if (!lean) { c.font = "700 7px 'Alegreya Sans',sans-serif"; c.textAlign = "center"; }
+        /* Handheld: „z“ als fertiges Bildchen (kein Schrift-Setzen und fillText je Zeichen und Bild – teuer auf schwachen Kernen) */
+        for (const z of e.zz) {
+          z.t += 1 / 60; const u = Math.min(1, z.t / 2.4), zx = z.x + Math.sin(z.t * 3) * 3 + u * 6, zy = z.y - u * 18; c.globalAlpha = 1 - u;
+          if (lean) { const s = (5 + u * 5) / 7; c.drawImage(zSpr(), zx - 3 * s, zy - 7 * s, 6 * s, 8 * s); continue; }
+          c.fillStyle = "#e8e0ff"; c.font = "700 " + (5 + u * 5) + "px 'Alegreya Sans',sans-serif"; c.fillText("z", zx, zy);
+        }
         e.zz = e.zz.filter(z => z.t < 2.4); c.globalAlpha = 1;
       }
       if (e.watch && !e.aware) {
@@ -99,6 +106,13 @@
     }
     c.restore();
   };
+  let zCv = null;
+  function zSpr() {
+    if (zCv) return zCv;
+    zCv = document.createElement("canvas"); zCv.width = 18; zCv.height = 24; const g = zCv.getContext("2d");
+    g.fillStyle = "#e8e0ff"; g.font = "700 21px 'Alegreya Sans',sans-serif"; g.textAlign = "center"; g.textBaseline = "alphabetic"; g.fillText("z", 9, 21);
+    return zCv;
+  }
   /* Wachen sehen nach vorn weiter, aber nicht nach hinten */
   Z.leben = { wake };
 })();

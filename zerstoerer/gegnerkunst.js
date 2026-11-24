@@ -94,9 +94,13 @@
   let bombs = [];
   /* giftige Eliten hinterlassen Pfützen */
   const tick0 = Z.ebenenTick;
+  /* Eliten-Liste: neu nur bei neuem Bild oder geänderter Gegnerzahl (statt 50–90 Gegner je Teilschritt durchzusehen) */
+  let elit = [], eKey = "";
   Z.ebenenTick = function (dt) {
     if (tick0) tick0(dt);
-    for (const e of Z.enemies) {
+    const key = Z.bildNr + ":" + Z.enemies.length;
+    if (key !== eKey || !(Z.gq && Z.gq.lean) || Z.bildTaktCull === false) { eKey = key; elit = Z.enemies.filter(e => e.elite); }
+    for (const e of elit) {
       if (e.dead || !e.elite) continue;
       if (e.elite === "giftig" && e.onGround && Math.abs(e.vx) > 30) { e.trailT = (e.trailT || 0) - dt; if (e.trailT <= 0) { e.trailT = 0.7; Z.spawnHazard({ kind: "poisonpool", x: e.x + e.w / 2, y: e.y + e.h, w: 18, life: 3, dmg: e.dmgMul * 0.08, owner: "e", eff: { poison: 1 } }); } }
     }
