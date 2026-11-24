@@ -167,10 +167,10 @@
     hellebarde: { n: ["Hellebarde der Torwache", "Gate Guard's Halberd"], kind: "melee", stat: "ueber", find: "selten", tier: 0, icon: "hellebarde", col: "#c0b8b0",
       d: ["Zwei weite Stiche und ein Schwung, der Gegner auf Abstand hält. Treffer mit der Spitze sind kritisch.", "Two long thrusts and a sweep that keeps foes at bay. Hits with the tip crit."],
       combo: [
-        { pre: 0.08, act: 0.08, post: 0.12, dmg: 14, box: [8, -26, 50, 12], lunge: 50, kb: 120, sw: "stab", smear: { r: 50, a0: -0.04, a1: 0.04, th: 4, stab: true } },
-        { pre: 0.08, act: 0.08, post: 0.12, dmg: 14, box: [8, -20, 50, 12], lunge: 50, kb: 120, sw: "stab", smear: { r: 50, a0: 0.1, a1: 0.14, th: 4, stab: true } },
-        { pre: 0.16, act: 0.14, post: 0.3, dmg: 24, box: [-4, -40, 56, 40], lunge: 40, kb: 280, kbUp: 120, sw: "swingHeavy", heavy: true, smear: { r: 48, a0: -2.0, a1: 1.2, th: 10 } }
-      ], crit: "tip", tags: ["Reichweite", "Abstand"], master: ["Meisterschaft: Der Schwung reißt auch Gegner hinter dir mit.", "Mastery: the sweep also catches foes behind you."] },
+        { pre: 0.08, act: 0.08, post: 0.12, dmg: 16, box: [8, -26, 50, 12], lunge: 50, kb: 120, sw: "stab", smear: { r: 50, a0: -0.04, a1: 0.04, th: 4, stab: true } },
+        { pre: 0.08, act: 0.08, post: 0.12, dmg: 16, box: [8, -20, 50, 12], lunge: 50, kb: 120, sw: "stab", smear: { r: 50, a0: 0.1, a1: 0.14, th: 4, stab: true } },
+        { pre: 0.16, act: 0.14, post: 0.3, dmg: 26, box: [-4, -40, 56, 40], lunge: 40, kb: 280, kbUp: 120, sw: "swingHeavy", heavy: true, smear: { r: 48, a0: -2.0, a1: 1.2, th: 10 } }
+      ], crit: "tip" /* W9 R15: Stiche 14 → 16, Schwung 24 → 26 (gegen Bosse ohne Rückstoß selten Spitzentreffer: Erzpriesterin 48–78 s statt 24 s) */, tags: ["Reichweite", "Abstand"], master: ["Meisterschaft: Der Schwung reißt auch Gegner hinter dir mit.", "Mastery: the sweep also catches foes behind you."] },
     schleuder: { n: ["Kobold-Schleuder", "Kobold Sling"], kind: "ranged", stat: "takt", find: "haeufig", tier: 0, icon: "schleuder", col: "#9a8a7a",
       d: ["Steine, die zweimal von Wänden abprallen und kurz betäuben. Perfekt für Banden-Schüsse um die Ecke.", "Stones that ricochet off walls twice and briefly stun. Perfect for trick shots."],
       shoot: { pre: 0.08, post: 0.2, proj: "stein", dmg: 9, sw: "swing" }, tags: ["Kontrolle", "Abpraller"], master: ["Meisterschaft: Steine prallen viermal ab.", "Mastery: stones ricochet four times."] },

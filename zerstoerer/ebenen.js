@@ -93,15 +93,15 @@
     for (const ev of Z.abEvents || []) {
       if (ev.done) continue;
       const evSeen = quellenkunde || seen.has(ev.cell || (Math.floor(ev.x / T / CW) + "," + Math.floor((ev.y - 4) / T / CH)));
-      if (ev.k === "quelle" && evSeen) icons.push({ tx: ev.x / T, ty: ev.y / T - 1.5, ico: "✚", col: "#b8e0a0" });
-      else if (quellenkunde && ev.k === "fund") icons.push({ tx: ev.x / T, ty: ev.y / T - 1.5, ico: "✧", col: "#ffd27a" });
-      else if (quellenkunde && ev.k === "raetsel") icons.push({ tx: ev.x / T, ty: ev.y / T - 1.5, ico: "◈", col: "#e8d8a8" });
+      if (ev.k === "quelle" && evSeen) icons.push({ tx: ev.x / T, ty: ev.y / T - 1.5, ico: "✚", col: "#b8e0a0", z: "quelle" });
+      else if (quellenkunde && ev.k === "fund") icons.push({ tx: ev.x / T, ty: ev.y / T - 1.5, ico: "✧", col: "#ffd27a", z: "fund" });
+      else if (quellenkunde && ev.k === "raetsel") icons.push({ tx: ev.x / T, ty: ev.y / T - 1.5, ico: "◈", col: "#e8d8a8", z: "raetsel" });
     }
     /* W13 R11: Eddas „Spürsinn“ (Lager-Zusatzstufe vor „Geheimniszeichen“): betretener Raum mit noch unentdeckter Geheimkammer → „?“ */
     if (spuersinn()) for (const k in lv.cells) {
       const c = lv.cells[k]; if (c.kind !== "secret" || !c.parent) continue;
       const pk = c.parent.x + "," + c.parent.y; if (!entered.has(pk) || (E0 && E0.found && E0.found.has("secret:" + k))) continue;
-      if (!icons.some(o => o.cell === pk && o.ico === "?")) icons.push({ cell: pk, tx: c.parent.x * CW + CW / 2 + (c.x - c.parent.x) * CW * 0.32, ty: c.parent.y * CH + CH / 2 + (c.y - c.parent.y) * CH * 0.32, ico: "?", col: "#e8d8a8" });
+      if (!icons.some(o => o.cell === pk && o.ico === "?")) icons.push({ cell: pk, tx: c.parent.x * CW + CW / 2 + (c.x - c.parent.x) * CW * 0.32, ty: c.parent.y * CH + CH / 2 + (c.y - c.parent.y) * CH * 0.32, ico: "?", col: "#e8d8a8", z: "spur" });
     }
     for (const k in lv.cells) {
       const c = lv.cells[k]; if (!c.fn || !seen.has(k) || c.kind === "secret" && !entered.has(k)) continue;
@@ -148,6 +148,7 @@
     g.save(); g.font = "bold " + fs + "px serif"; g.textAlign = "center"; g.textBaseline = "middle";
     for (const o of C.icons) {
       const x = (o.tx - ox) * scale, y = (o.ty - oy) * scale; if (out(x, y)) continue;
+      if (o.z && Z.mmZeichen && Z.mmZeichen(g, o.z, x, y, fs)) continue; /* R40 Grafik: gemalte Zeichen (effekte.js) */
       g.fillStyle = "rgba(12,8,12,.7)"; g.beginPath(); g.arc(x, y, fs * 0.62, 0, 6.283); g.fill();
       g.fillStyle = o.col; g.fillText(o.ico, x, y + 0.5);
     }

@@ -1441,28 +1441,28 @@
   /* eingemeißelt: Lichtkante versetzt, dunkle Kerbe, optional leuchtende Füllung */
   function carve(c, k, x, y, r, lit, col) {
     c.fillStyle = "rgba(255,240,220,.22)"; shape(c, k, x + 0.7, y + 0.7, r); c.fill();
-    c.fillStyle = "#1e181c"; shape(c, k, x, y, r); c.fill();
+    c.fillStyle = "#2a1a12"; shape(c, k, x, y, r); c.fill();
     if (lit) { c.fillStyle = col; shape(c, k, x, y, r * 0.78); c.fill(); c.strokeStyle = "rgba(30,20,24,.6)"; c.lineWidth = 0.6; c.stroke(); if (!lean()) { c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = 0.5; c.fillStyle = col; shape(c, k, x, y, r * 1.25); c.fill(); c.restore(); } }
   }
   function tablet(c, ev, t, RZ, s) {
     const n = ev.levers.length, w = 16 + n * 15, h = 32, x0 = ev.x - w / 2, y0 = ev.y - 44;
     /* Pfosten */
-    const pg = c.createLinearGradient(ev.x - 4, 0, ev.x + 4, 0); pg.addColorStop(0, "#5a5056"); pg.addColorStop(1, "#2e282c"); c.fillStyle = pg; c.fillRect(ev.x - 4, y0 + h, 8, ev.y - (y0 + h));
-    c.fillStyle = "#2a2226"; c.fillRect(ev.x - 7, ev.y - 3, 14, 3);
+    const pg = c.createLinearGradient(ev.x - 4, 0, ev.x + 4, 0); pg.addColorStop(0, "#7a5e44"); pg.addColorStop(1, "#3a2a20"); c.fillStyle = pg; c.fillRect(ev.x - 4, y0 + h, 8, ev.y - (y0 + h));
+    c.fillStyle = "#2e2018"; c.fillRect(ev.x - 7, ev.y - 3, 14, 3);
     /* Platte mit Fase */
-    c.fillStyle = "#2a2428"; c.fillRect(x0 - 1, y0 - 1, w + 2, h + 2);
-    const g = c.createLinearGradient(0, y0, 0, y0 + h); g.addColorStop(0, "#6e6468"); g.addColorStop(1, "#4a4246"); c.fillStyle = g; c.fillRect(x0, y0, w, h);
-    c.fillStyle = "#574e52"; c.fillRect(x0 + 2.5, y0 + 2.5, w - 5, h - 5);
+    c.fillStyle = "#2e2018"; c.fillRect(x0 - 1, y0 - 1, w + 2, h + 2); /* R40: warmer Sandstein statt Grau */
+    const g = c.createLinearGradient(0, y0, 0, y0 + h); g.addColorStop(0, "#a08060"); g.addColorStop(1, "#6a4e38"); c.fillStyle = g; c.fillRect(x0, y0, w, h);
+    c.fillStyle = "#86684c"; c.fillRect(x0 + 2.5, y0 + 2.5, w - 5, h - 5);
     c.fillStyle = "rgba(255,240,225,.16)"; c.fillRect(x0, y0, w, 1); c.fillRect(x0, y0, 1, h);
     c.fillStyle = "rgba(0,0,0,.3)"; c.fillRect(x0, y0 + h - 1, w, 1); c.fillRect(x0 + w - 1, y0, 1, h);
     /* Riss */
     c.strokeStyle = "rgba(20,14,16,.6)"; c.lineWidth = 0.7; c.beginPath(); c.moveTo(x0 + w - 7, y0 + 2.5); c.lineTo(x0 + w - 10, y0 + 9); c.lineTo(x0 + w - 8, y0 + 13); c.stroke();
     /* R39: Tafel wirkte flach grau – wärmerer Stein, eingemeißelte Randrille, Körnung, abgeschlagene Ecke, Moos oben, Fleckenschatten */
-    c.fillStyle = "rgba(150,110,70,.26)"; c.fillRect(x0 + 2.5, y0 + 2.5, w - 5, h - 5);
+    const ig = c.createLinearGradient(0, y0 + 2.5, 0, y0 + h - 2.5); ig.addColorStop(0, "rgba(196,150,96,.30)"); ig.addColorStop(1, "rgba(120,70,40,.22)"); c.fillStyle = ig; c.fillRect(x0 + 2.5, y0 + 2.5, w - 5, h - 5);
     c.strokeStyle = "rgba(25,18,16,.55)"; c.lineWidth = 0.7; c.strokeRect(x0 + 4.5, y0 + 4.5, w - 9, h - 9);
     c.strokeStyle = "rgba(255,240,220,.14)"; c.beginPath(); c.moveTo(x0 + 5.2, y0 + h - 4); c.lineTo(x0 + w - 4, y0 + h - 4); c.lineTo(x0 + w - 4, y0 + 5.2); c.stroke();
     for (let i = 0; i < 26; i++) { const u = Math.abs(Math.sin(i * 12.9898 + w) * 43758.5) % 1, v = Math.abs(Math.sin(i * 78.233 + h) * 12345.6) % 1; c.fillStyle = i % 3 ? "rgba(30,22,20,.3)" : "rgba(255,235,210,.12)"; c.fillRect(x0 + 1 + u * (w - 2), y0 + 1 + v * (h - 2), 0.8, 0.8); }
-    c.fillStyle = "#2a2226"; c.beginPath(); c.moveTo(x0 - 1, y0 - 1); c.lineTo(x0 + 4, y0 - 1); c.lineTo(x0 - 1, y0 + 3.5); c.closePath(); c.fill();
+    c.fillStyle = "#2e2018"; c.beginPath(); c.moveTo(x0 - 1, y0 - 1); c.lineTo(x0 + 4, y0 - 1); c.lineTo(x0 - 1, y0 + 3.5); c.closePath(); c.fill();
     const mg = ["#2e4420", "#4a6a2c", "#6e9a3e"]; for (let k = 0; k < 3; k++) { c.fillStyle = mg[k]; for (let i = 0; i < 9; i++) { const u = Math.abs(Math.sin((i + k * 9) * 3.7 + w) * 999) % 1; c.fillRect(x0 + w * 0.55 + u * w * 0.4, y0 - 1.2 - k * 0.5 + (u * 3 % 1), 1.2, 1); } }
     c.fillStyle = "rgba(0,0,0,.18)"; c.fillRect(x0 + w * 0.6, y0 + 1, w * 0.35, 3);
     /* Zeichen in Reihenfolge, Messingnieten darunter */
@@ -1472,7 +1472,7 @@
     /* Riegel: Bolzen unter der Tafel, springt nach dem Lösen auf */
     const u = ev.done ? Math.min(1, (performance.now() / 1000 - (s.doneT || 0)) / 0.45) : 0, e = u < 1 ? 1 - Math.pow(1 - u, 3) : 1;
     const by = y0 + h + 3, bx = ev.x + 6 + e * 8;
-    c.fillStyle = "#3a3034"; c.fillRect(ev.x - 10, by - 2.5, 20, 5);
+    c.fillStyle = "#3e2e24"; c.fillRect(ev.x - 10, by - 2.5, 20, 5);
     c.fillStyle = "#8a6430"; c.fillRect(ev.x - 8 + e * 8, by - 1.2, 12, 2.4); c.fillStyle = "#e8c070"; c.fillRect(ev.x - 8 + e * 8, by - 1.2, 12, 0.7);
     c.fillStyle = "#b08038"; c.beginPath(); c.arc(bx, by, 2, 0, TAU); c.fill();
     if (ev.done && !lean()) { c.save(); c.globalCompositeOperation = "lighter"; const gg = c.createRadialGradient(ev.x, y0 + h / 2, 2, ev.x, y0 + h / 2, w * 0.8); gg.addColorStop(0, "rgba(255,200,110," + (0.25 + 0.1 * Math.sin(t * 3)).toFixed(2) + ")"); gg.addColorStop(1, "rgba(255,200,110,0)"); c.fillStyle = gg; c.fillRect(ev.x - w, y0 - w * 0.4, w * 2, h + w * 0.8); c.restore(); }
@@ -1492,7 +1492,7 @@
     if (ok || ev.done) { c.fillStyle = col; shape(c, l.sym, x, py, 2.8); c.fill(); c.strokeStyle = "#3a2410"; c.lineWidth = 0.7; c.stroke(); }
     if (!lean() && (ok || wrong)) { c.save(); c.globalCompositeOperation = "lighter"; const rgb = wrong ? "255,70,50" : col === "#efe6d0" ? "255,236,200" : hexRgb(col); const g = c.createRadialGradient(x, py, 1, x, py, 16); g.addColorStop(0, "rgba(" + rgb + "," + (wrong ? 0.6 : 0.45) + ")"); g.addColorStop(1, "rgba(" + rgb + ",0)"); c.fillStyle = g; c.fillRect(x - 16, py - 16, 32, 32); c.restore(); }
     /* Grundplatte mit Schlitz und Nieten */
-    c.fillStyle = "#2a2226"; c.fillRect(x - 8, y - 6, 16, 6); c.fillStyle = "#4a4044"; c.fillRect(x - 7, y - 5.5, 14, 4.5);
+    c.fillStyle = "#2e2220"; c.fillRect(x - 8, y - 6, 16, 6); c.fillStyle = "#544238"; c.fillRect(x - 7, y - 5.5, 14, 4.5);
     c.fillStyle = "#141012"; c.fillRect(x - 5, y - 4, 10, 1.4);
     c.fillStyle = "#7a6e66"; for (const dx of [-5.5, 5.5]) { c.beginPath(); c.arc(x + dx, y - 2, 0.9, 0, TAU); c.fill(); }
     /* Schaft mit Knauf, vor dem Pfosten */
@@ -2190,4 +2190,79 @@
       return true;
     } catch (e) { console.error(e); return false; }
   };
+})();
+
+/* Ezekiel – The Destroyer · Minikarten-Zeichen, gemalt (W11 Runde 40; Sammeln/Logik ebenen.js mmCollect, Zeichnung Z.minimapExtra)
+   Statt der Schriftzeichen ✚ ✧ ◈ ? kleine gemalte Marken, je Art und Pixelgröße einmal als Sprite gebacken (kein Mehraufwand je Bild):
+   – quelle: grünlich-türkiser Tropfen mit Glanzpunkt in Steinschale (Heilquelle);
+   – fund:   beinfarbener Schädel mit dunklen Augenhöhlen und Goldrand (Überreste);
+   – raetsel: Hebel auf Grundplatte, Holzschaft, roter Knauf, Messingrand (Hebelrätsel);
+   – spur:   Schlüsselloch in fahlem Gold, leicht pulsierender Schein (unentdecktes Geheimnis, Eddas Spürsinn).
+   Dunkle Scheibe + farbiger Ring wie bisher, ganzzahlige Lage (Karte wird mit image-rendering:pixelated skaliert).
+   Kein Blau. Schalter Z.gfx.off.mmzeichen (zurück zu Schriftzeichen). */
+(function () {
+  const Z = window.Z, G = Z.gfx, TAU = Math.PI * 2; if (!G) return;
+  const CACHE = new Map();
+  const RING = { quelle: "#8ad8a8", fund: "#ffd27a", raetsel: "#e8b860", spur: "#e8d8a8" };
+  function paint(g, z, s) { /* s = Halbmesser in Pixeln, Mitte (0,0) */
+    const u = s / 6; /* Einheit: Entwurf für s = 6 */
+    g.lineJoin = "round"; g.lineCap = "round";
+    if (z === "quelle") {
+      /* Schale */
+      g.fillStyle = "#5a4a3a"; g.beginPath(); g.ellipse(0, 3.2 * u, 3.6 * u, 1.5 * u, 0, 0, TAU); g.fill();
+      g.fillStyle = "#3e8a6a"; g.beginPath(); g.ellipse(0, 2.9 * u, 2.6 * u, 0.8 * u, 0, 0, TAU); g.fill();
+      /* Tropfen */
+      g.beginPath(); g.moveTo(0, -4.4 * u); g.bezierCurveTo(1.2 * u, -2.4 * u, 2.7 * u, -0.6 * u, 2.7 * u, 0.7 * u); g.arc(0, 0.7 * u, 2.7 * u, 0, Math.PI); g.bezierCurveTo(-2.7 * u, -0.6 * u, -1.2 * u, -2.4 * u, 0, -4.4 * u); g.closePath();
+      const dg = g.createLinearGradient(0, -4.4 * u, 0, 3.4 * u); dg.addColorStop(0, "#c8f0c8"); dg.addColorStop(0.5, "#6ad0a0"); dg.addColorStop(1, "#2e8a68"); g.fillStyle = dg; g.fill();
+      g.strokeStyle = "#0e2a20"; g.lineWidth = Math.max(0.8, 0.7 * u); g.stroke();
+      g.fillStyle = "#f4fff0"; g.beginPath(); g.ellipse(-1 * u, 0.2 * u, 0.7 * u, 1.1 * u, -0.4, 0, TAU); g.fill();
+    } else if (z === "fund") {
+      /* Schädel */
+      g.fillStyle = "#e8dcc0"; g.beginPath(); g.arc(0, -0.8 * u, 3.4 * u, Math.PI * 0.92, Math.PI * 2.08); g.lineTo(2.2 * u, 2.6 * u); g.lineTo(-2.2 * u, 2.6 * u); g.closePath(); g.fill();
+      g.strokeStyle = "#2a1c12"; g.lineWidth = Math.max(0.8, 0.6 * u); g.stroke();
+      g.fillStyle = "#a89070"; g.fillRect(-2.2 * u, 1.6 * u, 4.4 * u, 1 * u); /* Schatten unter den Wangen */
+      g.fillStyle = "#1a100c"; g.beginPath(); g.arc(-1.3 * u, -0.4 * u, 1.05 * u, 0, TAU); g.arc(1.3 * u, -0.4 * u, 1.05 * u, 0, TAU); g.fill();
+      g.beginPath(); g.moveTo(0, 0.7 * u); g.lineTo(0.55 * u, 1.6 * u); g.lineTo(-0.55 * u, 1.6 * u); g.closePath(); g.fill();
+      if (s >= 7) { g.fillStyle = "#1a100c"; for (let i = -1; i <= 1; i++) g.fillRect(i * 1.1 * u - 0.25 * u, 2.1 * u, 0.5 * u, 0.6 * u); }
+      g.fillStyle = "rgba(255,255,240,.8)"; g.fillRect(-2.2 * u, -3.2 * u, 1.2 * u, 0.8 * u);
+    } else if (z === "raetsel") {
+      /* Grundplatte */
+      g.fillStyle = "#2a1c14"; g.fillRect(-3.6 * u, 1.6 * u, 7.2 * u, 2.4 * u);
+      g.fillStyle = "#8a6a48"; g.fillRect(-3.1 * u, 2 * u, 6.2 * u, 1.5 * u);
+      /* Schaft */
+      g.strokeStyle = "#2a1c14"; g.lineWidth = Math.max(2.4, 2.2 * u); g.beginPath(); g.moveTo(-0.4 * u, 2.2 * u); g.lineTo(2 * u, -2.8 * u); g.stroke();
+      g.strokeStyle = "#d8aa6a"; g.lineWidth = Math.max(1.2, 1.1 * u); g.beginPath(); g.moveTo(-0.4 * u, 2.2 * u); g.lineTo(2 * u, -2.8 * u); g.stroke();
+      /* Knauf */
+      g.fillStyle = "#2a1c14"; g.beginPath(); g.arc(2.2 * u, -3.2 * u, 1.9 * u, 0, TAU); g.fill();
+      g.fillStyle = "#e0503a"; g.beginPath(); g.arc(2.2 * u, -3.2 * u, 1.3 * u, 0, TAU); g.fill();
+      g.fillStyle = "#ffd0a0"; g.fillRect(1.6 * u, -3.9 * u, 0.7 * u, 0.7 * u);
+      /* Gegenstellung angedeutet */
+      g.fillStyle = "rgba(232,184,96,.55)"; g.beginPath(); g.arc(-2.6 * u, -1.8 * u, 0.8 * u, 0, TAU); g.fill();
+    } else if (z === "spur") {
+      /* Schlüsselschild in fahlem Gold mit dunklem Schlüsselloch */
+      g.fillStyle = "#d8b870"; g.beginPath(); g.ellipse(0, 0, 3.6 * u, 4.6 * u, 0, 0, TAU); g.fill();
+      g.strokeStyle = "#4a3418"; g.lineWidth = Math.max(0.8, 0.6 * u); g.stroke();
+      g.fillStyle = "#fff0c0"; g.beginPath(); g.ellipse(-1.4 * u, -2.6 * u, 0.9 * u, 0.6 * u, -0.5, 0, TAU); g.fill();
+      g.fillStyle = "#140c06"; g.beginPath(); g.arc(0, -1.1 * u, 1.45 * u, 0, TAU); g.fill();
+      g.beginPath(); g.moveTo(-0.7 * u, -0.6 * u); g.lineTo(0.7 * u, -0.6 * u); g.lineTo(1.3 * u, 3.2 * u); g.lineTo(-1.3 * u, 3.2 * u); g.closePath(); g.fill();
+    }
+  }
+  function sprite(z, s) {
+    const key = z + s; let cv = CACHE.get(key); if (cv) return cv;
+    const R = s + 1, d = R * 2 + 2; cv = document.createElement("canvas"); cv.width = cv.height = d;
+    const g = cv.getContext("2d"); g.translate(d / 2, d / 2);
+    /* Scheibe mit Ring (wie die Schrift-Marken, aber mit Farbkante) */
+    g.fillStyle = "rgba(12,8,12,.82)"; g.beginPath(); g.arc(0, 0, R, 0, TAU); g.fill();
+    g.strokeStyle = RING[z]; g.globalAlpha = 0.85; g.lineWidth = s >= 8 ? 1.3 : 1; g.beginPath(); g.arc(0, 0, R - 0.5, 0, TAU); g.stroke(); g.globalAlpha = 1;
+    g.save(); g.beginPath(); g.arc(0, 0, R - 0.9, 0, TAU); g.clip(); paint(g, z, s * 1.06); g.restore();
+    CACHE.set(key, cv); return cv;
+  }
+  /* g: Kartenkontext, z: Art, x/y: Mitte, fs: bisherige Schriftgröße (8 klein, 9–14 groß) → true = gezeichnet */
+  Z.mmZeichen = function (g, z, x, y, fs) {
+    if ((G.off && G.off.mmzeichen) || !RING[z]) return false;
+    const s = Math.round(fs * 0.62) + 1, cv = sprite(z, s), h = cv.width / 2, px = Math.round(x - h), py = Math.round(y - h);
+    if (z === "spur") { const a = 0.18 + 0.14 * Math.sin((Z.time || performance.now() / 1000) * 2.4); g.fillStyle = "rgba(255,220,140," + a.toFixed(2) + ")"; g.beginPath(); g.arc(Math.round(x), Math.round(y), h + 1.5, 0, TAU); g.fill(); }
+    g.drawImage(cv, px, py); return true;
+  };
+  Z.mmZeichenDbg = (z, fs) => sprite(z, Math.round(fs * 0.62) + 1);
 })();

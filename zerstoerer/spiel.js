@@ -290,13 +290,17 @@
     if (o.type === "npc") return Z.ui.npc(o.s.id);
     if (o.type === "station") return Z.ui.station(o.s.id);
   }
+  let doorBusy = 0; /* keine zweite Tür-Eingabe während der Überblendung (sonst doppeltes Laden, Rückweg-Gnade weg) */
   function goThrough(to, d) {
+    if (doorBusy && performance.now() - doorBusy < 3000) return; /* Sicherung: nach 3 s wieder frei */
     const lv = Z.level, P = Z.player, RW = Z.rueckweg;
     /* W14 Rückweg-Gnade: nach dem Zurückgehen führt dieselbe Tür wieder in das gemerkte Folgegebiet (gleicher Zustand, kein neues Laden) */
     if (RW && d && RW.vor(d)) return;
     const pos = P ? { x: P.x, y: P.y, face: P.face } : null;
     A.play("door", { vol: 0.7 });
+    doorBusy = performance.now();
     Z.ui.fade(() => {
+      doorBusy = 0;
       let snap = null; try { snap = RW && d && Z.level === lv ? RW.capture(d, pos) : null; } catch (e) { console.error(e); }
       if (lv.passage) { Z.run.route.push(to); Z.loadArea(to); }
       else { Z.loadArea("passage", { from: lv.id, to }); }
