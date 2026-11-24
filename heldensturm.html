@@ -40119,7 +40119,9 @@ GW.haken.ende.push(function(c){const R=c.RO,g=R.gl;if(!c.m)return;const x=WXo();
  const stb=an('staub')&&(!OUT()||G.room)?1:0,spg=an('spiegel')&&OUT()&&x&&(x.w==='regen'||x.w==='gewitter')?1:0;
  /* Legendär: Sonnenstrahlen (draußen, bei Tag und Dämmerung; im Nebel kräftiger, bei Regen aus) und Kaustik auf Teichen */
  let str=0,sdx=0,sdy=0,sc=[1,0.9,0.66];if(an('strahlen')){const so=sonne();if(so){const sl=Math.hypot(so.dx,so.dy)||1;sdx=so.dx/sl;sdy=so.dy/sl;str=0.095;const z=x&&x.z,wt=x&&x.w;if(z==='daemmer'){str=0.13;sc=[1,0.72,0.44]}
-   if(wt==='regen'||wt==='gewitter')str=0;else if(wt==='nebel')str*=1.5;else if(wt==='schnee')str*=0.6}}
+   if(wt==='regen'||wt==='gewitter')str=0;else if(wt==='nebel')str*=1.5;else if(wt==='schnee')str*=0.6;
+   /* nur wo es wirklich hell ist: in düsteren Gebieten (Schloss, Dorf bei Nacht) lagen die Bahnen sonst als Schleier über dem dunklen Boden */
+   let dk=0;try{dk=+(G.theme&&G.theme.dark)||0}catch(e){}str*=Math.max(0,1-dk*2.2);if(str<0.012)str=0}}
  const kau=an('kaustik')&&wa.length?(x&&x.z==='nacht'?0.1:0.22):0;
  if(!neb&&!gl_&&!lav&&!stb&&!spg&&!str&&!kau)return;const p=prog(R,'e');if(!p)return;A.rZiel(R,c.of);A.useProg(R,p);g.uniform2f(p.u.uR,c.w,c.h);p.zw=c.w;p.zh=c.h;
  g.uniform3f(p.u.uCam,c.m[4],c.m[5],c.m[0]);g.uniform1f(p.u.uZeit,((G.time||0)%1000));

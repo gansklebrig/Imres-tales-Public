@@ -16,6 +16,8 @@ Jeder Punkt lässt sich einzeln zurücknehmen (Schalter in Klammern).
 - Dächer in Dörfern und Städten neu gemalt (Paket „dach“, alle Stufen außer Minimal): Verlauf je Dachfläche, einzelne Ziegel und
   Schieferplatten, Strohlagen, First mit Firstziegeln, Giebelbretter, Moos und Ruß, Gauben mit Licht bei Nacht. Wird einmal in die
   Kartenkachel gemalt und kostet im Spiel nichts. (`__hsDACH.an=0` bringt die alten Dächer zurück)
+- Sonnenstrahlen nur noch in hellen Gebieten (Straße voll, Wald abgeschwächt, ab mittlerer Düsternis aus): Im Schloss und im Dorf bei
+  Nacht lagen sie als heller Schleier über dem dunklen Boden.
 
 **Karten**
 - Seitenräume bekommen häufiger einen zweiten Durchgang (`KA2.schleife` 0,55 → 0,85)
