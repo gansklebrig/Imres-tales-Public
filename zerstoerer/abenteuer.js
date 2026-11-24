@@ -794,6 +794,51 @@
     c.fillStyle = ev.done ? "#4a3a2a" : "#6a4a2a"; c.fillRect(x - 1, y - 9, 9, 9); c.fillStyle = "#3a2a1a"; c.fillRect(x - 1, y - 9, 9, 2); c.fillRect(x + 6, y - 7, 2, 5);
     if (!ev.done && Math.random() < 0.04) FX.p({ x: x + 3 + (Math.random() - 0.5) * 6, y: y - 10, vx: 0, vy: -12, life: 0.7, size: 1.2, col: "#ffd27a", kind: "spark", add: true });
   }
+  /* ======================= BEFREITE KUNDSCHAFTER KÄMPFEN MIT (W13 R15) ======================= */
+  /* Der Käfig-Gefangene dankt nicht nur: er zieht seinen Dolch und kämpft eine Weile an Ezekiels Seite (folgt, greift den nächsten
+     Gegner an, kann nicht sterben), bis die Zeit um ist oder das Gebiet wechselt. Werte als Vorschlag für Balance in HELFER. */
+  const HELFER = { dauer: 35, dmg: t => 7 + 4 * t, takt: 0.8, reichweite: 220, splitter: 25 };
+  Z.HELFER = HELFER; Z.helferTest = ev => { helferStart(ev); return helfer; }; Z.helferAktiv = () => !!helfer;
+  let helfer = null;
+  const HELFERSPRUCH = [["„Ich hab noch eine Rechnung offen. Lass mich mitkommen!“", "\"I've got a score to settle. Let me come along!\""], ["„Zwei Klingen sind besser als eine. Na ja – eine Klinge und ein Dolch.“", "\"Two blades beat one. Well – one blade and a dagger.\""], ["„Ich decke dir den Rücken, Gehörnter.“", "\"I've got your back, horned one.\""]];
+  function helferStart(ev) {
+    const P = Z.player; if (!P) return;
+    helfer = { lv: Z.level, x: ev.x - 6, y: ev.y - 22, w: 12, h: 22, vx: 0, vy: 0, face: 1, t: 0, hit: 0, onGround: false, swing: 0 };
+    Z.toast(L(Z.R.pick(HELFERSPRUCH)) + "<small>" + L(["Kämpft " + HELFER.dauer + " s an deiner Seite.", "Fights at your side for " + HELFER.dauer + " s."]) + "</small>", 3200);
+  }
+  function helferTick(dt) {
+    const a = helfer; if (!a) return;
+    const P = Z.player;
+    if (!P || P.dead || Z.level !== a.lv || (a.t += dt) > HELFER.dauer) {
+      if (P && Z.level === a.lv) { FX.burst(a.x + a.w / 2, a.y + a.h / 2, 10, { col: ["#a99a8b"], sp: 50, life: 0.5, size: 3, kind: "smoke" }); FX.text(a.x + a.w / 2, a.y - 8, L(["Viel Glück, Gehörnter!", "Good luck, horned one!"]), "#e8d8b0"); }
+      helfer = null; return;
+    }
+    let tgt = null, bd = HELFER.reichweite;
+    for (const e of Z.enemies) { if (e.dead || e.hidden || e.def.boss && !e.nmMini || e.intro > 0) continue; const d = Math.hypot(e.x - a.x, e.y - a.y); if (d < bd && Math.abs(e.y - a.y) < 80) { bd = d; tgt = e; } }
+    const tx = tgt ? tgt.x + tgt.w / 2 : P.x + P.w / 2 - P.face * 22, dx = tx - (a.x + a.w / 2);
+    a.face = Math.sign(dx) || a.face;
+    const sp = tgt ? 170 : Math.abs(dx) > 26 ? 160 : 0;
+    a.vx += ((Math.sign(dx) * sp) - a.vx) * Math.min(1, dt * 10);
+    a.vy = Math.min(500, a.vy + 1400 * dt);
+    if (a.onGround && (a.hitWall || (tgt ? tgt.y + tgt.h < a.y - 10 : P.y + P.h < a.y - 20) && Math.abs(dx) < 70)) a.vy = -380;
+    Z.moveBody(a, dt);
+    /* weit abgehängt (Leiter, Abgrund): kurzer Rauch, neben Ezekiel wieder da */
+    if (Math.hypot(P.x - a.x, P.y - a.y) > 320) { FX.burst(a.x + a.w / 2, a.y + a.h / 2, 6, { col: ["#a99a8b"], sp: 40, life: 0.4, size: 2.5, kind: "smoke" }); a.x = P.x - P.face * 20; a.y = P.y + P.h - a.h; a.vx = a.vy = 0; }
+    a.hit -= dt; a.swing = Math.max(0, a.swing - dt * 4);
+    if (tgt && a.hit <= 0 && Math.abs(dx) < 22 && Math.abs((tgt.y + tgt.h) - (a.y + a.h)) < 30) {
+      a.hit = HELFER.takt; a.swing = 1; Z.hitEnemy(tgt, HELFER.dmg(Z.run ? Z.run.tier : 0), { kb: 60, src: "helfer", dir: a.face });
+      A.play("slash", { x: a.x, vol: 0.35, rate: 1.2 });
+    }
+  }
+  function drawHelfer(c, t) {
+    const a = helfer; if (!a || Z.level !== a.lv) return;
+    const cx = a.x + a.w / 2, fy = a.y + a.h, left = HELFER.dauer - a.t;
+    c.save(); if (left < 4 && Math.floor(t * 8) % 2) c.globalAlpha = 0.55;
+    Z.drawNPC(c, "A", cx, fy, t * (Math.abs(a.vx) > 20 ? 3 : 1), a.face);
+    /* Dolch */
+    c.translate(cx + a.face * 5, fy - 12); c.rotate(a.face * (a.swing > 0 ? 1.2 - a.swing * 2 : 0.5)); c.fillStyle = "#c8c0b0"; c.fillRect(-1, -9, 2, 9); c.fillStyle = "#5a3a22"; c.fillRect(-1.5, 0, 3, 3);
+    c.restore();
+  }
   /* ======================= HEILQUELLE (W13 R11) ======================= */
   /* Balance meldete: vor Stufe 4 sind die Tränke meist leer. Selten steht an einer Kreuzung des Hauptwegs (Raum mit ≥ 3 Ausgängen,
      auf dem Weg vom Eingang zum Ausgang) eine Quelle – eine Entscheidung „jetzt oder später“: trinken (Leben sofort) ODER eine Flasche
@@ -984,7 +1029,7 @@
         case "schrein": if (!ev.welt && near(ev, 110)) shrineChoice(ev); else if (!ev.welt && near(ev) && use) { inp.consume("use"); shrineChoice(ev); } break;
         case "haendler": if (!ev.welt && near(ev, 120)) traderEvent(ev); else if (!ev.welt && near(ev, 26) && use) { inp.consume("use"); traderEvent(ev); } break;
         case "brunnen": if (near(ev) && use) { inp.consume("use"); if (P.gold >= 60) { P.gold -= 60; const r = Math.random(); A.play("splash", { vol: 0.6 }); FX.burst(ev.x, ev.y - 10, 16, { col: ["#ffd27a", "#c0e0d0"], sp: 80, up: 60, life: 0.7, size: 2, kind: "glow", add: true }); if (r < 0.35) { Z.healPlayer(P.hpMax); Z.toast(L(["Das Wasser heilt dich vollständig.", "The water heals you completely."]), 2600); } else if (r < 0.7) { Z.dropItem(ev.x, ev.y - 10, { chest: true }); Z.toast(L(["Etwas glänzt im Wasser …", "Something glitters in the water…"]), 2600); } else if (r < 0.9) { P.potions = Math.min(P.potMax + 1, P.potions + 1); P.potMax = Math.max(P.potMax, P.potions); Z.toast(L(["Ein voller Trank treibt nach oben.", "A full potion floats up."]), 2600); } else { Z.toast(L(["Nichts. Echo kichert irgendwo.", "Nothing. Somewhere, Echo giggles."]), 2600); } finish(ev); } else { Z.toast(L(["Der Brunnen will 60 Gold.", "The well wants 60 gold."]), 2000); } } break;
-        case "kaefig": if (near(ev, 26) && use) { inp.consume("use"); finish(ev); A.play("chain", { vol: 0.8 }); FX.burst(ev.x, ev.y - 10, 18, { col: ["#9a8a7a", "#5a4a40"], sp: 120, life: 0.5, size: 2.4, kind: "shard", g: 500 }); Z.dropShards(ev.x, ev.y - 8, 25); Z.toast(L(["„Danke, Gehörnter! Nimm das – Nundro wird staunen.“", "\"Thanks, horned one! Take this – Nundro will be amazed.\""]), 3000); } break;
+        case "kaefig": if (near(ev, 26) && use) { inp.consume("use"); finish(ev); A.play("chain", { vol: 0.8 }); FX.burst(ev.x, ev.y - 10, 18, { col: ["#9a8a7a", "#5a4a40"], sp: 120, life: 0.5, size: 2.4, kind: "shard", g: 500 }); Z.dropShards(ev.x, ev.y - 8, HELFER.splitter); helferStart(ev); } break;
         case "wette":
           if (!ev.on && near(ev, 26) && use) { inp.consume("use"); ev.on = true; ev.left = 30; ev.hp0 = P.dmgTaken; ev.k0 = Z.stats.kills || 0; Z.toast(L(["Barradin: „30 Sekunden, drei Kills, kein Kratzer. Ich wette meine Laute dagegen.“", "Barradin: \"30 seconds, three kills, not a scratch. I bet my lute you can't.\""]), 3600); }
           else if (ev.on) {
@@ -1112,7 +1157,7 @@
       c.save(); c.globalCompositeOperation = "lighter"; glow(c, r.x, r.y - 20, 34 + Math.sin(t * 4) * 4, "rgba(200,60,110,.5)"); c.restore(); c.strokeStyle = "rgba(230,220,240,.8)"; c.lineWidth = 0.7; for (let i = 0; i < 8; i++) { const a = i / 8 * 6.283 + t * 0.3; c.beginPath(); c.moveTo(r.x, r.y - 20); c.lineTo(r.x + Math.cos(a) * 22, r.y - 20 + Math.sin(a) * 26); c.stroke(); } ell(c, r.x, r.y - 20, 6, 16, "#120810"); }
   }
   const hz0 = Z.drawParcours;
-  Z.drawParcours = function (c, t) { if (hz0) hz0(c, t); drawEvents(c, t); };
+  Z.drawParcours = function (c, t) { if (hz0) hz0(c, t); drawEvents(c, t); try { drawHelfer(c, t); } catch (err) { console.error(err); } };
 
   /* ======================= DAS WAHRE ENDE ======================= */
   Z.ARENAS.herz = { tier: 7, boss: "weberin", final: "wahr", name: ["Das Herz der Fäden", "The Heart of Threads"], base: "schlund", exits: [], music: "final", w: 56, h: 20, kind: "lab" };
@@ -1152,7 +1197,7 @@
   }
 
   /* ======================= Schritt & Verkabelung ======================= */
-  Z.abenteuerTick = function (dt) { heroTick(dt); evTick(dt); riftTick(dt); try { trackTick(dt); } catch (err) { console.error(err); } achTick(dt); };
+  Z.abenteuerTick = function (dt) { heroTick(dt); evTick(dt); riftTick(dt); try { trackTick(dt); helferTick(dt); } catch (err) { console.error(err); } achTick(dt); };
   /* Erfolge II: äußerste Wrapper (erst nach allen Dateien), damit sie das Endergebnis sehen */
   function wireAch() {
     buildDyn();
