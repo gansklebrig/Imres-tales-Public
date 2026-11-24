@@ -695,6 +695,20 @@
     dungeon: ["bogengang", "wendeltreppe", "cell", "fresko"], harbour: ["wimpel", "nets", "ribs"], belltower: ["wendeltreppe", "gear", "bell", "wimpel"],
     forge: ["bogengang", "chimney", "face"], lake: ["ruin", "relief"], chasm: ["cocoon", "eier"], embercity: ["face", "chimney", "bogengang"], passage: ["tapestry", "fresko"]
   };
+  const BRESCHE = { halls: "fenster", belltower: "fenster", cellar: "riss", dungeon: "riss", lake: "riss", chasm: "riss", forge: "einsturz", embercity: "einsturz" };
+  /* Umriss der Bresche (für Chunk und Fernsicht-Ausschnitt gleich) */
+  function breschePath(c, art, x, y, w, h, r, cont) {
+    if (!cont) c.beginPath();
+    if (art === "fenster") { const fx = x + 6, fw = w - 12, top = y + 4, bot = y + h - 6; c.moveTo(fx, bot); c.lineTo(fx, top + fw * 0.6); c.quadraticCurveTo(fx, top + fw * 0.1, fx + fw / 2, top); c.quadraticCurveTo(fx + fw, top + fw * 0.1, fx + fw, top + fw * 0.6); c.lineTo(fx + fw, bot); c.closePath(); return; }
+    if (art === "riss") { /* schmaler, gezackter Spalt, in der Mitte am weitesten */
+      const N = 9, L = [], Rr = []; for (let i = 0; i <= N; i++) { const t = i / N, yy = y + 2 + t * (h - 4), mid = x + w / 2 + Math.sin(t * 6 + r * 7) * w * 0.12, hw = w * 0.3 * Math.pow(Math.sin(Math.PI * t), 0.9) * (0.65 + 0.35 * Math.abs(Math.sin(i * 2.1 + r * 11))); L.push([mid - hw - (i % 2) * 1.5, yy]); Rr.push([mid + hw + ((i + 1) % 2) * 1.5, yy]); }
+      c.moveTo(L[0][0], L[0][1]); for (const q of L) c.lineTo(q[0], q[1]); for (let i = Rr.length - 1; i >= 0; i--) c.lineTo(Rr[i][0], Rr[i][1]); c.closePath(); return;
+    }
+    const cx = x + w / 2, cy = y + h / 2, n = art === "riss" ? 14 : 11, R0 = art === "riss" ? [w * 0.18, h * 0.46] : [w * 0.4, h * 0.38];
+    for (let k = 0; k < n; k++) { const a = k / n * Math.PI * 2, s = 0.55 + 0.45 * Math.abs(Math.sin(k * 2.3 + r * 9)), px = cx + Math.cos(a) * R0[0] * (art === "riss" ? (k % 2 ? 0.4 : 1) * s * 1.6 : s), py = cy + Math.sin(a) * R0[1] * (art === "riss" ? 1 : s) + (art === "einsturz" && Math.sin(a) > 0 ? h * 0.12 : 0); k ? c.lineTo(px, py) : c.moveTo(px, py); }
+    c.closePath();
+  }
+  Z.breschePath = breschePath;
   /* stehende Stücke, die notfalls auch auf Kragsteinen an der Wand hängen dürfen (Bücherbord, Waffenbrett) */
   const FLOATOK = { buecherwand: 1, waffen: 1, krugbord: 1 };
   function roomPlan(H, dec) {
@@ -724,6 +738,17 @@
         if (hit) { taken.push(hit); rpList.push({ kind, x: hit[0], y: hit[1], w: hit[2], h: hit[3], r: h3(hit[0], hit[1], 904), fn: fn || "gang", fl: !!hit[4] }); got++; }
       }
     }
+    /* Breschen (Runde 11): in großen Räumen mit durchgehender Rückwand gelegentlich ein hohes Fenster, ein Riss oder ein
+       eingestürztes Wandstück, durch das die tiefe Fernsicht scheint – nur in Gebieten, zu denen es passt */
+    const bk = BRESCHE[H.B.bg];
+    if (bk && !(G.off && G.off.bresche)) for (const k in lv.cells) {
+      const [cx, cy] = k.split(",").map(Number), rx = cx * CW, ry = cy * CH; if (h3(cx, cy, 1950) > 0.5) continue;
+      let wl = 0; for (let y = ry; y < ry + CH; y++) for (let x = rx; x < rx + CW; x++) if (H.isWall(x, y)) wl++;
+      if (wl < CW * CH * 0.4) continue;
+      const w = bk === "fenster" ? 3 : 4, h = bk === "fenster" ? 5 : 4; let hit = null;
+      for (let j = 0; j < 60 && !hit; j++) { const ox = rx + 2 + ((h3(cx, cy, 1951 + j) * (CW - w - 4)) | 0), oy = ry + 1 + ((h3(cy, cx, 1960 + j) * (CH - h - 3)) | 0); if (free(ox, oy, w, h) && fits(H, ox, oy, w, h, false, dec)) hit = [ox, oy]; }
+      if (hit) { taken.push([hit[0], hit[1], w, h]); rpList.push({ kind: "bresche", x: hit[0], y: hit[1], w, h, r: h3(hit[0], hit[1], 904), fn: "bresche", art: bk }); }
+    }
     G.rpMs = +(performance.now() - tRP).toFixed(2);
     return rpList;
   }
@@ -732,7 +757,7 @@
     const dec = decorSet(lv), useRoom = !lv.hub && !lv.arena;
     const draw = (kind, ox, oy, w, h, r, fn) => { if (Z.gfx.pieceLog) Z.gfx.pieceLog.push([kind, fn, ox, oy]); H.c.save(); try { PIECE[kind](H.c, ox * T, oy * T, w * T, h * T, H, r); } catch (e) { console.error(e); } H.c.restore(); };
     if (useRoom) for (const p of roomPlan(H, dec)) if (!(p.x + p.w < x0 - 1 || p.x > x1 + 1 || p.y + p.h < y0 - 1 || p.y > y1 + 1)) {
-      draw(p.kind, p.x, p.y, p.w, p.h, p.r, p.fn);
+      H.rpCur = p; draw(p.kind, p.x, p.y, p.w, p.h, p.r, p.fn); H.rpCur = null;
       if (p.fl) { const c = H.c, by = (p.y + p.h) * T, P = H.PAL; for (const bx of [p.x * T + 5, (p.x + p.w) * T - 11]) { c.fillStyle = "rgba(0,0,0,.35)"; c.beginPath(); c.moveTo(bx + 1, by); c.lineTo(bx + 7, by); c.lineTo(bx + 4, by + 8); c.fill(); c.fillStyle = P.stone; c.beginPath(); c.moveTo(bx, by - 1); c.lineTo(bx + 6, by - 1); c.lineTo(bx + 6, by + 1); c.quadraticCurveTo(bx + 2, by + 2, bx + 1, by + 7); c.lineTo(bx, by + 7); c.fill(); c.fillStyle = P.stoneHi; c.fillRect(bx, by - 1, 6, 0.6); } }
     }
     if (!list0 || !list0.length) return;
@@ -1368,6 +1393,25 @@
       for (const ex of [x + 2, x + w - 2]) { c.fillStyle = "#2a2420"; c.fillRect(ex - 1, y0 - 1.5, 2, 3); }
     }
   });
+  SIZE.bresche = [4, 4];
+  PIECE.bresche = function (c, x, y, w, h, H, r) {
+    const p = H.rpCur || {}, art = p.art || "riss", P = H.PAL;
+    c.save(); breschePath(c, art, x, y, w, h, r); c.clip();
+    const g = c.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, "#0c0808"); g.addColorStop(1, "#1a1210"); c.fillStyle = g; c.fillRect(x - 4, y - 4, w + 8, h + 8);
+    c.restore();
+    if (art === "fenster") {
+      c.save(); c.lineWidth = 4; c.strokeStyle = "rgba(0,0,0,.4)"; c.translate(1.5, 1.5); breschePath(c, art, x, y, w, h, r); c.stroke(); c.restore();
+      c.lineWidth = 3; c.strokeStyle = P.stone; breschePath(c, art, x, y, w, h, r); c.stroke(); c.lineWidth = 0.6; c.strokeStyle = P.stoneHi; breschePath(c, art, x - 1, y - 1, w, h, r); c.stroke();
+      const fx = x + 6, fw = w - 12, bot = y + h - 6; c.fillStyle = "#2a2220"; c.fillRect(fx + fw / 2 - 0.8, y + 6, 1.6, bot - y - 6); c.fillRect(fx, y + h * 0.5, fw, 1.4);
+      c.fillStyle = P.stone; c.fillRect(fx - 4, bot, fw + 8, 3); c.fillStyle = P.stoneHi; c.fillRect(fx - 4, bot, fw + 8, 0.7);
+    } else {
+      /* gebrochene Kanten: hervorstehende Steinbrocken und Mörtel am Rand, unten Schutt */
+      c.save(); c.lineWidth = 2.2; c.strokeStyle = "rgba(0,0,0,.45)"; breschePath(c, art, x, y, w, h, r); c.stroke(); c.restore();
+      c.lineWidth = 0.8; c.strokeStyle = H.rgba(H.lit(H.B.wall, 0.3), 0.55); c.save(); c.translate(-0.8, -0.8); breschePath(c, art, x, y, w, h, r); c.stroke(); c.restore();
+      for (let k = 0; k < 9; k++) { const a = H.h3(k, x | 0, 1970) * Math.PI * 2, rr = art === "riss" ? [w * 0.2, h * 0.46] : [w * 0.4, h * 0.38], bx = x + w / 2 + Math.cos(a) * rr[0], by = y + h / 2 + Math.sin(a) * rr[1], s = 2 + H.h3(k, 2, 1971) * 3; c.fillStyle = P.wallCols ? P.wallCols[k % P.wallCols.length] : P.stone; c.fillRect(bx - s / 2, by - s / 2, s, s * 0.7); c.fillStyle = "rgba(0,0,0,.3)"; c.fillRect(bx - s / 2, by + s * 0.2, s, 0.6); }
+      if (art === "einsturz") for (let k = 0; k < 7; k++) { const bx = x + w * 0.2 + H.h3(k, 5, 1972) * w * 0.6, s = 2 + H.h3(k, 6, 1973) * 3; c.fillStyle = P.stone; c.beginPath(); c.moveTo(bx - s, y + h); c.lineTo(bx - s * 0.3, y + h - s); c.lineTo(bx + s, y + h); c.fill(); }
+    }
+  };
   /* ---------- Fels: Patina, Kanten, Einschlüsse, Laufflächen ---------- */
   const DEBRIS = { castle: "leaf", ramparts: "leaf", storm: "leaf", camp: "leaf", cellar: "straw", harbour: "shell", dungeon: "bone", chasm: "bone", lake: "shroom", forge: "ash", embercity: "ash", spires: "ash", halls: "petal", belltower: "feather" };
   /* ---------- Gesteinsarten je Gebiet (auf den oberen drei Felsreihen, darunter verschluckt die Tiefe alles) ---------- */
@@ -1637,9 +1681,12 @@
     }
   }
   /* Nischen in Sackgassen: gemauerte Bogennische mit kleinem Schrein, Moos und einem Lichtstrahl von oben */
-  let niLv = null, niList = null;
+  let niLv = null, niList = null, niPr = null;
   function nichesOf(lv) {
-    if (niLv === lv && niList) return niList; niLv = lv; niList = [];
+    const pr = Z.ausstattung ? Z.ausstattung() : null;
+    if (niLv === lv && niList && niPr === pr) return niList; niLv = lv; niPr = pr; niList = [];
+    /* Möbel, Wandschmuck und Deko freihalten (Runde 11): die Nische weicht auf den nächsten freien Bodenplatz aus */
+    const busy = (x, y) => (pr || []).some(p => Math.abs(p.x - x) < 2.6 + (p.w || 1) / 2 && p.y > y - 5 && p.y < y + 2) || (lv.decor || []).some(d => Math.abs(d.x - x) < 2.5 && d.y > y - 5 && d.y <= y + 1) || (lv.doors || []).some(d => Math.abs(d.x - x) < 4 && Math.abs(d.y - y) < 4);
     if (!lv || !lv.cells || lv.hub || lv.arena) return niList;
     const g = (x, y) => lv.get(x, y), CW = Z.CW, CH = Z.CH, D4 = [[1, 0, "R"], [-1, 0, "L"], [0, 1, "D"], [0, -1, "U"]];
     for (const k in lv.cells) {
@@ -1647,7 +1694,8 @@
       let n = 0; for (const [dx, dy, s] of D4) { const v = c.need && c.need[s]; if (v && v !== "X" && lv.cells[(c.x + dx) + "," + (c.y + dy)]) n++; }
       if (n !== 1 && !c.dead) continue;
       let spot = null; for (const r of lv.rewards || []) if (r.cell === k) { spot = [r.x, r.y]; break; }
-      if (!spot) { const rx = c.x * CW, ry = c.y * CH; let bd = 1e9; for (let y = ry + 1; y < ry + CH - 1; y++) for (let x = rx + 2; x < rx + CW - 2; x++) if (isAir(g(x, y)) && isAir(g(x, y - 1)) && isAir(g(x, y - 2)) && isStand(g(x, y + 1))) { const dd = Math.abs(x - (rx + CW / 2)) + Math.abs(y - (ry + CH - 3)) * 0.5; if (dd < bd) { bd = dd; spot = [x, y]; } } }
+      const want = spot || [c.x * CW + CW / 2, c.y * CH + CH - 3];
+      if (!spot || busy(spot[0], spot[1])) { spot = null; const rx = c.x * CW, ry = c.y * CH; let bd = 1e9; for (let y = ry + 1; y < ry + CH - 1; y++) for (let x = rx + 2; x < rx + CW - 2; x++) if (isAir(g(x, y)) && isAir(g(x, y - 1)) && isAir(g(x, y - 2)) && isStand(g(x, y + 1)) && !busy(x, y)) { const dd = Math.abs(x - want[0]) + Math.abs(y - want[1]) * 0.7; if (dd < bd) { bd = dd; spot = [x, y]; } } }
       if (spot) niList.push({ x: spot[0], y: spot[1], cell: k });
     }
     return niList;
@@ -1690,6 +1738,8 @@
       /* Pfützen in feuchten Gebieten: flache Mulden mit dunklem Wasser, Spiegelglanz und Randlicht */
       if (wet && h3(x, y, 1820) < 0.035 * wet && sol(x + 1, y) && sol(x + 2, y) && lv.get(x + 1, y - 1) === 0 && lv.get(x + 2, y - 1) === 0 && sol(x - 1, y)) {
         const cx = px + 24, w2 = 14 + h3(x, y, 1821) * 8; H.setCR(cx - w2 - 2, py - 2, w2 * 2 + 4, 5);
+        /* Lage merken: Ezekiel spritzt beim Landen in der Pfütze (effekte.js) */
+        if (G.pfLv !== lv) { G.pfLv = lv; G.pfuetzen = new Set(); } for (let k = -1; k <= 3; k++) G.pfuetzen.add((x + k) + "," + y);
         c.fillStyle = B.bg === "lake" ? "rgba(14,34,26,.85)" : "rgba(20,24,20,.8)"; c.beginPath(); c.ellipse(cx, py + 0.8, w2, 1.6, 0, 0, TAU); c.fill();
         const g = c.createLinearGradient(cx - w2, 0, cx + w2, 0); g.addColorStop(0, "rgba(220,230,210,0)"); g.addColorStop(0.4, "rgba(220,230,210,.22)"); g.addColorStop(0.6, "rgba(220,230,210,.08)"); g.addColorStop(1, "rgba(220,230,210,0)"); c.fillStyle = g; c.fillRect(cx - w2, py + 0.1, w2 * 2, 0.9);
         c.strokeStyle = "rgba(255,240,220,.12)"; c.lineWidth = 0.4; c.beginPath(); c.ellipse(cx, py + 0.8, w2, 1.6, 0, Math.PI * 1.05, Math.PI * 1.9); c.stroke();
@@ -2758,6 +2808,8 @@
         /* große Öffnungen und Schächte zeigen die Ferne kräftiger (bis 0,85), kleine nur angedeutet */
         let area = 0;
         for (const o of ops) { if (o.blind || (o.mode !== "vault" && o.mode !== "cave")) continue; const x0 = o.x0 * T + 2, y0 = o.y0 * T + 2, x1 = (o.x1 + 1) * T - 2, y1 = (o.y1 + 1) * T - 1; if (x1 < cam.x || x0 > cam.x + cam.w || y1 < cam.y || y0 > cam.y + cam.h) continue; c.rect(x0, y0, x1 - x0, y1 - y0); any = true; area = Math.max(area, (o.x1 - o.x0 + 1) * (o.y1 - o.y0 + 1)); }
+        /* Breschen in großen Wänden zeigen die Ferne fast deckend */
+        if (Z.raumStuecke && Z.breschePath) for (const p of Z.raumStuecke()) { if (p.kind !== "bresche") continue; const X = p.x * T, Y = p.y * T, W2 = p.w * T, H2 = p.h * T; if (X + W2 < cam.x || X > cam.x + cam.w || Y + H2 < cam.y || Y > cam.y + cam.h) continue; Z.breschePath(c, p.art, X + 1, Y + 1, W2 - 2, H2 - 2, p.r, true); any = true; area = Math.max(area, 90); }
         if (any) {
           c.clip();
           const sc = Math.max(1, (cam.h * 0.9) / TH), w = TW * sc, h = TH * sc, ox = cam.x - ((cam.x * 0.15) % w + w) % w, y = cam.y + (cam.h - h) * 0.5 - cam.y * 0.03 % 30;

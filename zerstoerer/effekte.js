@@ -415,3 +415,126 @@
   const load0 = Z.loadArea;
   Z.loadArea = function () { fx = []; ghosts = []; souls = []; chain = { n: 0, t: 0 }; banner = null; lines = null; return load0.apply(this, arguments); };
 })();
+
+/* Ezekiel – The Destroyer · Kampf-Optik II (Grafik-Runde 11)
+   – Treffer-Charakter je Waffenart (ab Stufe 1): Klinge = feiner Schnittbogen mit langen Funken, Wucht = Druckring mit
+     Brocken und Staub, Feuer = Glutstoß mit Flammenzunge, Frost = Eissplitter mit Reifnebel (weiß/grünlich, kein Blau).
+   – Krit (ab Stufe 1): goldener Vierstrahl-Stern mit Gegenzacken und Lichtbruch – deutlich anders als normale Treffer.
+   – Boss-Tod (ab Stufe 1, Strahlen ab Stufe 2): Lichtbruch mit rotierenden Strahlen und Druckwelle, danach zerfällt der
+     Boss je nach Heimat in Asche, Glut oder Wasser (Zeitlupe kommt schon aus spiel.js).
+   – Ezekiel (ab Stufe 1): Landen wirbelt je Untergrund anderes auf (Gras, Laub, Asche, Sand, Knochenstaub) und spritzt
+     in Pfützen; Wandkontakt im Fall schabt Staub und Mörtel ab; Rolle (ab Stufe 2) zieht eine Bewegungsspur.
+   Alles bei Handheld (lean) und Stufe 0 aus. Schalter Z.gfx.off.kampf2. */
+(function () {
+  "use strict";
+  const Z = window.Z, FX = Z.fx, G = Z.gfx, T = Z.TILE, TAU = Math.PI * 2;
+  const lvl = () => { const q = Z.gq; if (q && q.lean) return 0; if (G && G.off && G.off.kampf2) return 0; if (!q || !Number.isFinite(q.level)) return 2; return q.level === -1 ? 2 : q.level; };
+  const W = [];   /* eigene Weltzeichnungen: {k,x,y,t,life,...} */
+  const BLUNT = { hammer: 1, club: 1, fist: 1, stonefist: 1, anchor: 1, staff: 1, goldshield: 1, shield: 1, thornshield: 1 };
+  function kindOf(e, o) {
+    if (o && o.eff && o.eff.burn) return "feuer";
+    if (e && e.frozenT > 0) return "frost";
+    const it = o && o.it, id = it && (it.id || it), wd = id && Z.WEAPONS && Z.WEAPONS[id];
+    if (wd && /eis|frost/i.test(String(id))) return "frost";
+    if (wd && /feuer|glut|brand|flamm/i.test(String(id))) return "feuer";
+    if ((wd && BLUNT[wd.icon]) || (o && o.heavy && !wd)) return "wucht";
+    return "klinge";
+  }
+  const hit0 = Z.hitEnemy;
+  Z.hitEnemy = function (e, dmg, o) {
+    const n = hit0.apply(this, arguments);
+    const L = lvl();
+    if (L >= 1 && n > 0 && e && !(o && (o.dot || o.fx))) {
+      const P = Z.player, ex = e.x + e.w / 2, ey = e.y + e.h * 0.45, dir = (o && o.dir) || (P ? (ex > P.x + P.w / 2 ? 1 : -1) : 1), hx = ex - dir * e.w * 0.3;
+      const k = kindOf(e, o), q = L >= 2 ? 1 : 0.6;
+      if (k === "klinge") { W.push({ k: "schnitt", x: hx, y: ey, dir, t: 0, life: 0.16, r: 12 + e.h * 0.25, a0: Math.random() * 0.6 - 0.3 }); FX.burst(hx, ey, Math.round(5 * q), { col: ["#fffbe8", "#ffe0a0"], sp: 260, ang: dir > 0 ? -0.15 : Math.PI + 0.15, spread: 0.9, life: 0.18, size: 1.1, kind: "spark", add: true, drag: 0.9 }); }
+      else if (k === "wucht") { W.push({ k: "druck", x: hx, y: ey, t: 0, life: 0.24, r: 16 + e.w * 0.6 }); FX.burst(hx, ey + 4, Math.round(5 * q), { col: ["#7a7268", "#948a7e", "#5a524a"], sp: 120, ang: -Math.PI / 2, spread: 2.8, life: 0.5, size: 2.2, kind: "shard", g: 600, drag: 0.95 }); FX.addShake(2); }
+      else if (k === "feuer") { W.push({ k: "glutstoss", x: hx, y: ey, dir, t: 0, life: 0.3, r: 14 }); FX.burst(hx, ey, Math.round(9 * q), { col: ["#ffd27a", "#ff8a2a", "#ff5a1a"], sp: 130, ang: -Math.PI / 2 + dir * 0.4, spread: 1.8, life: 0.55, size: 1.6, kind: "glow", g: -80, add: true }); }
+      else { W.push({ k: "reif", x: hx, y: ey, t: 0, life: 0.45, r: 14 + e.w * 0.4, seed: Math.random() * 9 }); FX.burst(hx, ey, Math.round(8 * q), { col: ["#ffffff", "#e8f4ee", "#d0e8dc"], sp: 140, life: 0.45, size: 1.4, kind: "shard", g: 400, drag: 0.94 }); }
+      if (o && o.crit) W.push({ k: "krit", x: hx, y: ey, t: 0, life: 0.34, r: 26 + Math.min(18, e.w * 0.5), rot: Math.random() * 0.8 });
+    }
+    return n;
+  };
+  /* ---------- Boss-Tod ---------- */
+  const seen = new WeakSet();
+  function bossWatch() {
+    if (lvl() < 1) return;
+    for (const b of Z.enemies || []) {
+      if (!b.def || !b.def.boss || seen.has(b) || !(b.dead || b.hp <= 0)) continue; seen.add(b);
+      const bg = (Z.biome && Z.biome.bg) || "", art = bg === "lake" || bg === "harbour" ? "wasser" : (bg === "forge" || bg === "embercity" || bg === "spires") ? "glut" : "asche";
+      W.push({ k: "bosstod", x: b.x + b.w / 2, y: b.y + b.h / 2, w: b.w, h: b.h, bx: b.x, by: b.y, t: 0, life: 2.6, art, rot: Math.random() * TAU, em: 0 });
+      if (Z.lightFlash) Z.lightFlash(b.x + b.w / 2, b.y + b.h / 2, 260, art === "wasser" ? "#c8f0d8" : "#ffe0a0", 1, 0.9);
+    }
+  }
+  function bossEmit(f, dt) {
+    f.em += dt * (f.t < 1.8 ? 60 : 10); const n = Math.floor(f.em); f.em -= n;
+    for (let i = 0; i < n; i++) {
+      const x = f.bx + Math.random() * f.w, y = f.by + Math.random() * f.h;
+      if (f.art === "asche") FX.p({ x, y, vx: (Math.random() - 0.3) * 30, vy: -20 - Math.random() * 40, life: 1.4, size: 1.6 + Math.random() * 1.6, col: Math.random() < 0.3 ? "#ffb060" : "#6a6058", kind: Math.random() < 0.3 ? "glow" : "smoke", g: -10, add: false });
+      else if (f.art === "glut") FX.p({ x, y, vx: (Math.random() - 0.5) * 40, vy: -40 - Math.random() * 60, life: 1.1, size: 1.4 + Math.random(), col: ["#ffd27a", "#ff8a2a", "#ff5a1a"][(Math.random() * 3) | 0], kind: "glow", g: -30, add: true });
+      else FX.p({ x, y, vx: (Math.random() - 0.5) * 30, vy: -10 - Math.random() * 30, life: 0.9, size: 1.4, col: Math.random() < 0.5 ? "#c8f0d8" : "#8ac0a0", kind: "drop", g: 420, collide: true });
+    }
+  }
+  /* ---------- Ezekiel: Landen, Wand, Rolle ---------- */
+  const DUST = { castle: ["#5a7a3a", "#8a6a3a", "leaf"], ramparts: ["#6a6a5a", "#8a7a5a", "dust"], camp: ["#5a7a3a", "#a08a50", "leaf"], storm: ["#4a6a3a", "#6a5a40", "leaf"], cellar: ["#a08a60", "#7a6a50", "dust"], halls: ["#8a6a5a", "#b8908a", "dust"], dungeon: ["#c8c0a8", "#6a6a50", "bone"], harbour: ["#c8b890", "#8a8070", "dust"], belltower: ["#e8e0d0", "#8a7a6a", "feather"], chasm: ["#8a7a90", "#c8b8d0", "dust"], lake: ["#5a7a5a", "#8aa080", "dust"], forge: ["#4a4040", "#ff8a3a", "ash"], embercity: ["#3a3030", "#ff7a2a", "ash"], spires: ["#4a4040", "#8a7a6a", "ash"] };
+  const pv = { ground: true, vy: 0, wallT: 0, trail: [] };
+  function playerFx(dt) {
+    const P = Z.player, L = lvl(); if (!P || P.dead || L < 1) { pv.trail.length = 0; return; }
+    const fx0 = P.x + P.w / 2, fy = P.y + P.h, lv = Z.level, bg = (Z.biome && Z.biome.bg) || "";
+    if (P.onGround && !pv.ground && pv.vy > 230 && lv) {
+      const s = Math.min(1, (pv.vy - 200) / 450), tx = Math.floor(fx0 / T), ty = Math.floor((fy + 2) / T);
+      if (G.pfuetzen && G.pfLv === lv && G.pfuetzen.has(tx + "," + ty)) {
+        FX.burst(fx0, fy - 1, 8 + Math.round(s * 10), { col: ["#c8e0d0", "#a0c0b0", "#e8f4ee"], sp: 110 + s * 80, ang: -Math.PI / 2, spread: 1.9, life: 0.55, size: 1.3, kind: "drop", g: 520, drag: 0.97 });
+        W.push({ k: "welle", x: fx0, y: fy, t: 0, life: 0.6, r: 14 + s * 10 });
+      } else {
+        const d = DUST[bg] || ["#8a7a70", "#6a5a50", "dust"], n = 3 + Math.round(s * 6);
+        if (d[2] === "leaf") FX.burst(fx0, fy - 1, n, { col: [d[0], d[1]], sp: 70 + s * 60, ang: -Math.PI / 2, spread: 2.2, life: 0.9, size: 1.6, kind: "leaf", g: 120, drag: 0.94 });
+        else if (d[2] === "ash") FX.burst(fx0, fy - 1, n, { col: [d[0], d[1]], sp: 60 + s * 50, ang: -Math.PI / 2, spread: 2.6, life: 0.8, size: 1.3, kind: Math.random() < 0.5 ? "glow" : "dot", g: -20, add: false });
+        else if (d[2] === "feather") FX.burst(fx0, fy - 1, Math.max(2, n >> 1), { col: [d[0]], sp: 50, ang: -Math.PI / 2, spread: 2, life: 1.4, size: 1.6, kind: "leaf", g: 40, drag: 0.92 });
+        else FX.burst(fx0, fy - 1, n, { col: [d[0], d[1]], sp: 60 + s * 70, ang: -Math.PI / 2, spread: 2.8, life: 0.5, size: 1.1, kind: d[2] === "bone" ? "shard" : "dot", g: 500, drag: 0.95 });
+      }
+    }
+    /* Wandkontakt in der Luft: an der Wand entlang schaben */
+    if (!P.onGround && !P.ledge && lv && Z.world && Math.abs(P.vy) > 60) {
+      const side = P.face || 1, wx = side > 0 ? P.x + P.w + 1.5 : P.x - 1.5, my = P.y + P.h * 0.55;
+      if (Z.world.solidAt(wx, my) && Z.world.solidAt(wx, P.y + P.h * 0.2)) { pv.wallT -= dt; if (pv.wallT <= 0) { pv.wallT = 0.07; FX.p({ x: wx - side * 1, y: my + (Math.random() - 0.5) * 8, vx: -side * (20 + Math.random() * 30), vy: -P.vy * 0.15, life: 0.4, size: 1.2, col: Z.dustCol || "#8a7a70", kind: "dot", g: 300 }); if (P.vy > 200 && Math.random() < 0.4) FX.p({ x: wx, y: my, vx: -side * 40, vy: -20, life: 0.18, size: 0.9, col: "#ffd8a0", kind: "spark", add: true }); } }
+    }
+    /* Rollspur */
+    if (L >= 2 && P.rollT > 0) { pv.trail.push({ x: fx0, y: P.y + P.h - 8, t: 0 }); if (pv.trail.length > 7) pv.trail.shift(); }
+    for (const q of pv.trail) q.t += dt; while (pv.trail.length && pv.trail[0].t > 0.22) pv.trail.shift();
+    pv.ground = P.onGround; pv.vy = P.vy;
+  }
+  /* ---------- Zeichnen ---------- */
+  let lastT = 0;
+  const al0 = Z.drawAfterLight;
+  Z.drawAfterLight = function (c, cam, Wd, Hd, t) {
+    if (al0) al0.apply(this, arguments);
+    const dt = Math.min(0.05, Math.max(0, t - lastT)); lastT = t;
+    try { bossWatch(); playerFx(dt); } catch (e) { console.error(e); }
+    if (!W.length && !pv.trail.length) return;
+    const S = G.scale || 2, L = lvl(); c.save(); c.setTransform(S, 0, 0, S, -cam.x * S, -cam.y * S);
+    /* Rollspur hinter Ezekiel (ab Stufe 2) */
+    if (pv.trail.length > 1) { const cc = (Z.capeCol && Z.capeCol[0]) || "#8a1414"; c.globalCompositeOperation = "source-over"; for (let i = 0; i < pv.trail.length - 1; i++) { const q = pv.trail[i], a = (1 - q.t / 0.22) * 0.35 * (i / pv.trail.length); c.globalAlpha = a; c.fillStyle = cc; c.beginPath(); c.arc(q.x, q.y, 7 * (0.6 + 0.4 * i / pv.trail.length), 0, TAU); c.fill(); } c.globalAlpha = 1; }
+    for (let i = W.length - 1; i >= 0; i--) {
+      const f = W[i]; f.t += dt; if (f.t >= f.life) { W.splice(i, 1); continue; }
+      const u = f.t / f.life, a = 1 - u;
+      if (f.k === "schnitt") { c.globalCompositeOperation = "lighter"; c.strokeStyle = "rgba(255,250,230," + (0.9 * a).toFixed(2) + ")"; c.lineWidth = 2.2 * a + 0.4; c.beginPath(); c.arc(f.x - f.dir * f.r * 0.4, f.y, f.r * (0.8 + u * 0.4), f.a0 - 0.9 + (f.dir < 0 ? Math.PI : 0), f.a0 + 0.9 + (f.dir < 0 ? Math.PI : 0)); c.stroke(); }
+      else if (f.k === "druck") { c.globalCompositeOperation = "lighter"; c.strokeStyle = "rgba(255,236,200," + (0.6 * a).toFixed(2) + ")"; c.lineWidth = 3 * a + 0.5; c.beginPath(); c.ellipse(f.x, f.y, f.r * (0.3 + u), f.r * (0.2 + u * 0.6), 0, 0, TAU); c.stroke(); }
+      else if (f.k === "glutstoss") { c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.r * (1 + u)); g.addColorStop(0, "rgba(255,200,100," + (0.7 * a).toFixed(2) + ")"); g.addColorStop(1, "rgba(255,90,20,0)"); c.fillStyle = g; c.fillRect(f.x - f.r * 2, f.y - f.r * 2, f.r * 4, f.r * 4); c.fillStyle = "rgba(255,150,60," + (0.8 * a).toFixed(2) + ")"; c.beginPath(); c.moveTo(f.x - 3, f.y); c.quadraticCurveTo(f.x + f.dir * 4, f.y - 8 - u * 10, f.x + f.dir * 2, f.y - 14 - u * 12); c.quadraticCurveTo(f.x + 3, f.y - 6, f.x + 3, f.y); c.fill(); }
+      else if (f.k === "reif") { c.globalCompositeOperation = "source-over"; c.fillStyle = "rgba(236,246,240," + (0.35 * a).toFixed(2) + ")"; c.beginPath(); c.arc(f.x, f.y, f.r * (0.5 + u * 0.8), 0, TAU); c.fill(); c.strokeStyle = "rgba(255,255,255," + (0.8 * a).toFixed(2) + ")"; c.lineWidth = 0.8; c.beginPath(); for (let k = 0; k < 6; k++) { const an = k / 6 * TAU + f.seed; c.moveTo(f.x, f.y); c.lineTo(f.x + Math.cos(an) * f.r * 0.9, f.y + Math.sin(an) * f.r * 0.9); c.moveTo(f.x + Math.cos(an) * f.r * 0.5, f.y + Math.sin(an) * f.r * 0.5); c.lineTo(f.x + Math.cos(an + 0.5) * f.r * 0.65, f.y + Math.sin(an + 0.5) * f.r * 0.65); } c.stroke(); }
+      else if (f.k === "krit") { c.globalCompositeOperation = "lighter"; const R = f.r * (0.6 + u * 0.7), rot = f.rot + u * 0.6; c.fillStyle = "rgba(255,214,110," + (0.95 * a).toFixed(2) + ")"; c.beginPath(); for (let k = 0; k < 8; k++) { const an = rot + k / 8 * TAU, rr = k % 2 ? R * 0.18 : R; c.lineTo(f.x + Math.cos(an) * rr, f.y + Math.sin(an) * rr); } c.closePath(); c.fill(); c.fillStyle = "rgba(255,255,240," + a.toFixed(2) + ")"; c.beginPath(); for (let k = 0; k < 8; k++) { const an = rot + Math.PI / 8 + k / 8 * TAU, rr = k % 2 ? R * 0.1 : R * 0.5; c.lineTo(f.x + Math.cos(an) * rr, f.y + Math.sin(an) * rr); } c.closePath(); c.fill(); c.strokeStyle = "rgba(255,230,160," + (0.6 * a).toFixed(2) + ")"; c.lineWidth = 1.2; c.beginPath(); c.arc(f.x, f.y, R * 1.1, 0, TAU); c.stroke(); }
+      else if (f.k === "welle") { c.globalCompositeOperation = "source-over"; c.strokeStyle = "rgba(220,240,228," + (0.6 * a).toFixed(2) + ")"; c.lineWidth = 0.8; c.beginPath(); c.ellipse(f.x, f.y, f.r * (0.3 + u), 1.6 * (0.5 + u), 0, 0, TAU); c.stroke(); }
+      else if (f.k === "bosstod") {
+        bossEmit(f, dt);
+        c.globalCompositeOperation = "lighter";
+        const ph = Math.min(1, f.t / 0.5), fade = f.t < 1.6 ? 1 : 1 - (f.t - 1.6) / 1;
+        if (L >= 2) { /* Lichtbruch: rotierende Strahlen */ const col = f.art === "wasser" ? "200,240,216" : "255,226,160"; for (let k = 0; k < 12; k++) { const an = f.rot + f.t * 0.4 + k / 12 * TAU, len = (120 + (k % 3) * 60) * ph, wd = 0.06 + (k % 2) * 0.04; c.fillStyle = "rgba(" + col + "," + (0.15 * fade).toFixed(3) + ")"; c.beginPath(); c.moveTo(f.x, f.y); c.lineTo(f.x + Math.cos(an - wd) * len, f.y + Math.sin(an - wd) * len); c.lineTo(f.x + Math.cos(an + wd) * len, f.y + Math.sin(an + wd) * len); c.fill(); } }
+        const g = c.createRadialGradient(f.x, f.y, 0, f.x, f.y, 60 + f.w); g.addColorStop(0, "rgba(255,240,210," + (0.5 * fade).toFixed(3) + ")"); g.addColorStop(1, "rgba(255,240,210,0)"); c.fillStyle = g; c.fillRect(f.x - 80 - f.w, f.y - 80 - f.w, 160 + f.w * 2, 160 + f.w * 2);
+        if (f.t < 0.8) { c.strokeStyle = "rgba(255,240,210," + (0.7 * (1 - f.t / 0.8)).toFixed(3) + ")"; c.lineWidth = 3; c.beginPath(); c.arc(f.x, f.y, 20 + f.t * 260, 0, TAU); c.stroke(); }
+      }
+    }
+    c.restore();
+  };
+  const load0 = Z.loadArea;
+  Z.loadArea = function () { W.length = 0; pv.trail.length = 0; return load0.apply(this, arguments); };
+})();
