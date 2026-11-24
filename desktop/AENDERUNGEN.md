@@ -33,3 +33,9 @@ Jeder Punkt lässt sich einzeln zurücknehmen (Schalter in Klammern).
   wer jede Stufe „ohne Heiltrank“ wettete, vermehrte sein Gold um 25 % je Stufe (über einen Lauf mehr als das Tausendfache), mit „Beides“ um 50 %.
 - Bot-Läufe (tools/heldensturm-pruef/sim.js): alle 20 Äste, je 3 Läufe über die ersten 3 Stufen auf Normal.
   Zeit je Stufe 230–355 s, kein Ast fällt klar ab oder dominiert → am Frühspiel nichts geändert. Spätere Stufen stehen noch aus.
+- Schnellstart-Läufe (`node sim.js aus.json 8,16 0 2`): Held mit passendem Level und 12 Beutestücken direkt in eine Stufe.
+  Stufe 8 und 16: 18 von 20 Ästen schaffen die Stufe im ersten Versuch; die drei auffälligen Äste (Schatten, Phantom, Natur & Gier)
+  bestehen bei je 4 Wiederholungen in Stufe 6 und 10 genauso oft wie die Kontrolle → kein Ast fällt ab, nichts geändert.
+  Stufe 24 und 32 sind so nicht messbar: Den Test-Helden fehlen legendäre Ausrüstung, Sets und Lager-Ausbauten, sie sterben dort sofort.
+- Geprüft, nicht ausnutzbar: nach erfülltem Stufenziel stehen bleiben und Gegner „farmen“ (300 s: 7 Abschüsse, 3 Gold, kein Level);
+  Kaufen und Wiederverkaufen beim Händler (Verkauf = 1,5 × Schrottwert, Kauf = 10–20 ×).
