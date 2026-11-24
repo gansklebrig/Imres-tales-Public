@@ -314,6 +314,8 @@
   A.play = (name, o) => {
     if (!A.ok || Z.quiet) return;
     o = o || {};
+    /* Umleitung für Untergrund-Schritte u. a. (klang.js setzt A.hook[name]; true = dort erklungen) */
+    if (A.hook && A.hook[name] && !o.noHook) { try { if (A.hook[name](o)) return; } catch (_) {} }
     const list = A.SFX[name] || [name];
     const now = A.ctx.currentTime;
     const key = name + (o.tag || "");

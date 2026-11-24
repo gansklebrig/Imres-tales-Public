@@ -557,6 +557,196 @@
     const def = RK2[RM.cur];
     if (def.fn && !q.mini && calm) { RM.fnT -= dt; if (RM.fnT <= 0) RM.fnT = roomFn(def.fn) * slow || 10; }
   }
+  /* ======================= RUNDE 2: UNTERGRUND, ÜBERGÄNGE, TREFFER =======================
+     Schritte und Landungen: kern.js leitet "step", "stepWood" und "land" an A.hook weiter; hier wird der Untergrund unter
+     Ezekiels Füßen bestimmt (Kachel unter den Füßen, Wasser an den Füßen, Raumfunktion, Gebiet, Regen) und passend
+     geklungen: stein, holz, nass, metall (Gitterstege in Schmiede/Glut), gras (Moos im Freien), kies (Asche/Ruß),
+     teppich (Hallen, Durchgang), knochen (Gebeinhaus, Beutelager, Brutkammer). Landen: je Untergrund, mit Fallhöhe lauter
+     und dumpfer, ab mittlerer Höhe ein Aufprall. Klettern: Sprossen-Knarzen alle ~14 px (im Sturm Ranken-Rascheln). */
+  const STEPS = {
+    stein: RA("n_steinschritte_", 8).concat(RA("g_stein_", 5)), holz: RA("n_holzschritte_", 24).concat(RA("g_holz_", 5)), nass: RA("g_nass_", 3),
+    gras: RA("g_gras_", 5).concat(RA("n_laubschritt_", 9)), kies: RA("n_kies_", 8).concat(RA("e_kies_", 2)), teppich: RA("n_erdschritte_", 17),
+    metall: RA("n_steinschritte_", 8), knochen: RA("n_steinschritte_", 8)
+  };
+  /* Zusatzschicht je Untergrund: [Liste, Lautstärke, Rate, Dauer, Wahrscheinlichkeit] */
+  const STEPL = { metall: [RA("g_metallhieb_", 7), 0.09, 2.4, 0.12, 1], knochen: [RA("g_untot_", 6).concat([AM("n_knochen_1")]), 0.12, 1.5, 0.25, 0.5], nass: [RA("n_platsch_", 10), 0.1, 1.5, 0.3, 0.55] };
+  const STEPV = { stein: 1, holz: 1, nass: 1.15, gras: 1.05, kies: 0.85, teppich: 0.75, metall: 1, knochen: 1 };
+  const OUT_BIOME = { torhof: 1, wehrgang: 1, sturm: 1, zinnen: 1 };
+  KL.untergrund = () => {
+    const P = Z.player, lv = Z.level; if (!P || !lv || !lv.get) return "stein";
+    const T = Z.TILE || 16, tx = Math.floor((P.x + P.w / 2) / T), tyIn = Math.floor((P.y + P.h - 3) / T), tyB = Math.floor((P.y + P.h + 2) / T);
+    const vin = lv.get(tx, tyIn), vb = lv.get(tx, tyB), bi = lv.biome, top = (Z.biome && Z.biome.tile && Z.biome.tile.top) || "";
+    if (vin === 6 || vb === 6) return "nass";
+    if (vb === 2 || vb === 8 || vb === 4) return bi === "schmiede" || bi === "glut" ? "metall" : "holz";
+    if (lv.hub) return "gras";
+    if (lv.passage) return "teppich";
+    const r = Z.raumTypAt && Z.raumTypAt(tx, tyIn), fn = r && r.id;
+    if (fn === "gebeinhaus" || fn === "beutelager" || fn === "brutkammer") return "knochen";
+    if (fn === "taverne" || fn === "bootsschuppen" || fn === "stall" || fn === "schuppen" || fn === "kaserne" || fn === "taubenschlag") return "holz";
+    if (top === "carpet" || fn === "bibliothek" || fn === "schlafgemach") return "teppich";
+    if (top === "wood") return "holz";
+    if (top === "ash" || top === "soot") return "kies";
+    if (top === "moss" && OUT_BIOME[bi]) { const wt = Z.wetter && Z.wetter(); return wt && (wt.mood === "regen" || wt.mood === "gewitter") && Math.random() < 0.35 ? "nass" : "gras"; }
+    if ((top === "drip" || top === "slime" || top === "algae") && Math.random() < 0.18) return "nass";
+    return "stein";
+  };
+  function stepSound(kind, vol, rate, land) {
+    const l = STEPS[kind] || STEPS.stein, path = l[(Math.random() * l.length) | 0];
+    shot(path, { vol: vol * (STEPV[kind] || 1), rate, verb: 0.35, gap: 0.06, tag: "sch" });
+    const L2 = STEPL[kind];
+    if (L2 && Math.random() < (land ? 1 : L2[4])) shot(L2[0][(Math.random() * L2[0].length) | 0], { vol: L2[1] * (land ? 2 : 1) * Math.min(1.5, vol / 0.22), rate: L2[2] * rate, dur: L2[3] * (land ? 1.6 : 1), verb: 0.4, gap: 0.05, tag: "schL" });
+  }
+  KL.stats.schritte = {};
+  if (A) A.hook = Object.assign(A.hook || {}, {
+    step: o => { const k = KL.untergrund(); KL.stats.schritte[k] = (KL.stats.schritte[k] || 0) + 1; stepSound(k, o.vol != null ? o.vol : 0.22, o.rate || 1); return true; },
+    stepWood: o => { const k = KL.untergrund(), k2 = k === "metall" ? "metall" : k === "nass" ? "nass" : "holz"; KL.stats.schritte[k2] = (KL.stats.schritte[k2] || 0) + 1; stepSound(k2, o.vol != null ? o.vol : 0.22, o.rate || 1); return true; },
+    land: o => {
+      const k = KL.untergrund(), h = clamp(o.vol != null ? o.vol : 0.5, 0.2, 1);
+      KL.stats.schritte["land_" + k] = (KL.stats.schritte["land_" + k] || 0) + 1;
+      stepSound(k, 0.3 + 0.45 * h, (o.rate || 1) * (1.02 - 0.22 * h), true);
+      if (h > 0.45) shot(KS("fx_im_impactsoft_heavy_00" + [0, 1, 3][(Math.random() * 3) | 0]), { vol: 0.12 + 0.35 * (h - 0.45), rate: 0.8, verb: 0.3, gap: 0.08, tag: "aufprall" });
+      if (k === "nass") shot(RA("n_platsch_", 10)[(Math.random() * 10) | 0], { vol: 0.15 + 0.3 * h, rate: 1.05 - 0.2 * h, verb: 0.4, gap: 0.08 });
+      return true;
+    }
+  });
+  /* Klettern an Leitern (im Sturm: Ranken) */
+  const CL = { acc: 0, side: 0 };
+  function climbTick(dt) {
+    const P = Z.player; if (!P || !P.climbing) { CL.last = P && P.y; return; }
+    const dy = Math.abs(P.y - (CL.last == null ? P.y : CL.last)); CL.last = P.y; CL.acc += dy;
+    if (CL.acc < 14) return; CL.acc = 0; CL.side = 1 - CL.side;
+    const ranke = Z.level && Z.level.biome === "sturm";
+    const l = ranke ? RA("n_laubschritt_", 9) : RA("n_holzschritte_", 24);
+    shot(l[(Math.random() * l.length) | 0], { vol: ranke ? 0.12 : 0.1, rate: ranke ? 1.25 : 1.35, pan: CL.side ? 0.15 : -0.15, verb: 0.3, gap: 0.05, tag: "klettern" });
+    if (!ranke && Math.random() < 0.3) shot(RA("g_knarren_", 5)[(Math.random() * 5) | 0], { vol: 0.05, rate: 1.4, verb: 0.3, gap: 0.3, tag: "kn" });
+  }
+
+  /* ---------- Übergänge: Torhaus, Schacht, Belohnungsnische ----------
+     Torhaus (Gebietsausgang, lv.doors kind "exit"): Wind zieht durch das Tor (lauter, je näher), beim ersten Herantreten
+     rasselt die Fallgitter-Kette und das Gitter knarrt. Schacht: offene, enge Säule unter Ezekiel (≥ 6 Kacheln tief,
+     Wände links und rechts) oder Raum-Vorlage „…schacht“ → Luftzug von unten (dumpfer Wind, mit der Tiefe lauter).
+     Belohnungsnische (Z.erkundung().rewards, ungeöffnet, nicht geheim): beim Näherkommen ein leiser Schrein-Klang aus
+     Handglocken und Chor in der Tonart, alle 7–11 s wieder, solange man nah ist. Handheld: Wind ja (eine Schleife je Art),
+     „minimal“: kein Wind, nur das Fallgitter. */
+  const TR = { wind: null, zug: null, doors: new Set(), nT: 0, near: null, t: 0, zugF: 0, torF: 0, scanT: 0, stats: { tor: 0, schacht: 0, nische: 0 } };
+  KL.uebergang = TR; KL.schacht = () => shaftDepth(); KL._schritt = (k, v, r, land) => stepSound(k, v, r || 1, land); /* Prüfhilfen */
+  function windSlot(file, lp, hp) {
+    const c = A.ctx, s = { g: c.createGain(), src: null, f: null, file };
+    s.g.gain.value = 0;
+    let last = s.g;
+    if (lp) { s.f = c.createBiquadFilter(); s.f.type = "lowpass"; s.f.frequency.value = lp; s.f.Q.value = 0.7; s.f.connect(s.g); }
+    s.g.connect(roomBus() || A.amb);
+    A.load(AM(file)).then(b => { if (!b || s.dead) return; const src = c.createBufferSource(); src.buffer = b; src.loop = true; src.playbackRate.value = hp || 1; src.connect(s.f || s.g); src.start(0, Math.random() * Math.max(0, b.duration - 1)); s.src = src; s.norm = normOf(AM(file), -32); });
+    return s;
+  }
+  function windLevel(slotKey, file, lp, rate, level) {
+    let s = TR[slotKey];
+    if (level > 0.01 && !s) s = TR[slotKey] = windSlot(file, lp, rate);
+    if (!s) return;
+    const now = A.ctx.currentTime; s.g.gain.setTargetAtTime(level * (s.norm || 1), now, level > 0.01 ? 0.6 : 1.2);
+    if (level <= 0.01) { s.idle = (s.idle || 0) + 1; if (s.idle > 40) { s.dead = true; TR[slotKey] = null; setTimeout(() => { try { s.src && s.src.stop(); s.g.disconnect(); } catch (_) {} }, 4000); } }
+    else s.idle = 0;
+  }
+  function shaftDepth() {
+    const P = Z.player, lv = Z.level, T = Z.TILE || 16; if (!P || !lv || !lv.get) return 0;
+    const tx = Math.floor((P.x + P.w / 2) / T), ty0 = Math.floor((P.y + P.h + 1) / T);
+    const free = v => v === 0 || v === 4 || v === 10 || v === 12, solid = v => v === 1 || v === 7;
+    let d = 0, narrow = 0;
+    for (let k = 0; k < 22; k++) {
+      const v = lv.get(tx, ty0 + k); if (!free(v)) break; d++;
+      let l = 0, r = 0; for (let j = 1; j <= 4; j++) { if (!l && solid(lv.get(tx - j, ty0 + k))) l = 1; if (!r && solid(lv.get(tx + j, ty0 + k))) r = 1; }
+      if (l && r) narrow++;
+    }
+    let f = d >= 6 && narrow >= d * 0.6 ? clamp((d - 5) / 10, 0.15, 1) : 0;
+    const CW = Z.CW || 24, CH = Z.CH || 14, c = lv.cells && lv.cells[Math.floor(tx / CW) + "," + Math.floor(Math.floor((P.y + P.h / 2) / T) / CH)];
+    if (c && c.tpl && /schacht/.test(c.tpl)) f = Math.max(f, d >= 3 ? 0.55 : 0.3);
+    return f;
+  }
+  function shrine(r) {
+    if (!M.note || !M.raster) return;
+    const rs = M.raster(0.04), b = rs.beat, bus = roomBus();
+    const notes = [0, 2, 4].concat(r.q >= 2 ? [7] : []);
+    notes.forEach((d, i) => M.note("hglo", ton(d) + 36, rs.t + i * b, 0.04 - i * 0.004, b * 6, bus));
+    M.note("ooh", ton(0) + 12, rs.t, 0.025, b * 10, bus); M.note("ooh", ton(4) + 12, rs.t + b * 0.5, 0.018, b * 10, bus);
+    TR.stats.nische++;
+  }
+  function transitTick(dt) {
+    const P = Z.player, lv = Z.level; if (!P || !lv || !net) return;
+    const q = gq(), now = A.ctx.currentTime;
+    /* Torhaus */
+    let best = 1e9, bd = null;
+    for (const d of lv.doors || []) {
+      if (d.kind !== "exit") continue;
+      const dx = d.x * 16 + 8 - (P.x + P.w / 2), dy = (d.y + 1) * 16 - (P.y + P.h), dist = Math.hypot(dx, dy * 1.4);
+      if (dist < best) { best = dist; bd = d; }
+    }
+    const torF = bd && !lv.hub ? clamp(1 - best / 150, 0, 1) : 0;
+    TR.torF = torF;
+    if (bd && best < 110 && !TR.doors.has(bd)) {
+      TR.doors.add(bd); TR.stats.tor++;
+      const pan = clamp((bd.x * 16 + 8 - (P.x + P.w / 2)) / 200, -0.8, 0.8);
+      shot(RA("n_kette_", 4)[(Math.random() * 4) | 0], { vol: 0.2, rate: 0.72, pan, verb: 0.6, gap: 0.5 });
+      shot(RA("n_knarren_", 22)[(Math.random() * 22) | 0], { vol: 0.16, rate: 0.6, pan, delay: 0.35, verb: 0.6, gap: 0.5 });
+      shot(RA("e_tor_", 4)[(Math.random() * 4) | 0], { vol: 0.08, rate: 0.8, pan, delay: 0.7, verb: 0.7, gap: 0.5, dur: 1.6 });
+    }
+    if (!q.mini) {
+      windLevel("wind", "a_wind_n1", 2600, 1, torF * 0.7);
+      TR.scanT -= dt; if (TR.scanT <= 0) { TR.scanT = q.lean ? 0.5 : 0.25; TR.zugF = lv.hub || lv.arena ? 0 : shaftDepth(); if (TR.zugF > 0.1) TR.stats.schacht++; }
+      windLevel("zug", "a_heulwind", 700, 0.8, TR.zugF * 0.8);
+    }
+    /* Belohnungsnischen */
+    const S = Z.erkundung && Z.erkundung(); if (!S || !S.rewards || S.lv !== lv || q.mini || (M.tier || 0) >= 2) return;
+    let near = null, nd = 1e9;
+    for (const r of S.rewards) { if (r.open || r.secret) continue; const d = Math.hypot(r.x - (P.x + P.w / 2), (r.y - (P.y + P.h)) * 1.3); if (d < nd) { nd = d; near = r; } }
+    if (near && nd < 110) {
+      if (TR.near !== near) { TR.near = near; TR.nT = 0.2; }
+      TR.nT -= dt; if (TR.nT <= 0) { TR.nT = rnd(7, 11); shrine(near); }
+    } else TR.near = null;
+  }
+
+  /* Treffer: Schicht je Waffenart (aus dem Symbol der Waffe) und Element (Status-Wirkung), Krit mit hellem Ton in der
+     Tonart, dumpfem Schlag und kurzem Zurücknehmen der Musik. Aufruf aus kampf.js (Z.hitEnemy). */
+  const WART = { dagger: "klinge", rapier: "klinge", scimitar: "klinge", sickles: "klinge", scythe: "klinge", knives: "klinge", claw: "klinge",
+    hammer: "wucht", club: "wucht", anchor: "wucht", stonefist: "wucht", fist: "wucht", axe: "axt", spear: "stich", staff: "wucht", whip: "peitsche",
+    bow: "pfeil", arrows: "pfeil", xbow: "pfeil", bolt: "pfeil", shield: "schild", goldshield: "schild", thornshield: "schild" };
+  const WSND = {
+    klinge: [RK("fx_rd_blade_0", [1, 2, 3]), 0.16, 1.15, 0.25], wucht: [RK("fx_im_impactpunch_heavy_00", [0, 1, 2, 3]), 0.26, 0.75, 0.4],
+    axt: [RK("fx_wn_", ["axt", "beil"]), 0.2, 1, 0.4], stich: [RK("fx_0_speer_", [1, 2, 3, 4]), 0.18, 1.05, 0.3], peitsche: [[AM("n_peitsche_1")], 0.16, 1.2, 0.3],
+    pfeil: [RK("fx_0_pfeil_holz_", [1, 2, 3, 4]), 0.16, 1, 0.3], schild: [RK("fx_0_schild_metall_", [1, 2, 3]), 0.14, 0.9, 0.3]
+  };
+  const ESND = { burn: [GR.zisch, 0.14, 1.4, 0.35], poison: [GR.schleim, 0.14, 1.2, 0.3], stun: [GR.zap, 0.1, 1.6, 0.25], bleed: [RK("fx_0_fleisch_stich_", [1, 2, 3]), 0.12, 1.2, 0.3],
+    root: [RK("fx_wn_", ["ranken", "dornen_1"]), 0.12, 1.2, 0.4], slow: [RA("n_eis_", 9), 0.12, 1.3, 0.3], frost: [RA("n_eis_", 9), 0.14, 1.2, 0.35] };
+  KL.treffer = (e, o) => {
+    try {
+      if (!A.ok || !e || !o || o.dot || Z.quiet) return;
+      const [v0, pan] = posMix(e.x + e.w / 2, e.y + e.h / 2); if (v0 < 0.05) return;
+      const wd = o.it && Z.WEAPONS && Z.WEAPONS[o.it.id], art = wd ? WART[wd.icon] : o.src === "ranged" ? "pfeil" : null;
+      const pl = (l, opt) => shot(l[0][(Math.random() * l[0].length) | 0], Object.assign({ vol: l[1] * v0, rate: l[2], pan, dur: l[3], verb: 0.35, gap: 0.04 }, opt));
+      if (art && WSND[art]) pl(WSND[art], { tag: "wa" });
+      if (o.eff) for (const k in o.eff) if (o.eff[k] && ESND[k]) { pl(ESND[k], { tag: "el" + k }); break; }
+      if (o.crit) {
+        const t = A.ctx.currentTime + 0.005;
+        tone(e, "glock", ton(0) + 36, t, 0.22, 1.2, 0.5); tone(e, "glock", ton(4) + 36, t + 0.05, 0.12, 1.2, 0.5);
+        shot(KS("fx_im_impactpunch_heavy_00" + [0, 1, 2][(Math.random() * 3) | 0]), { vol: 0.3 * v0, rate: 0.7, pan, verb: 0.3, gap: 0.06, tag: "krit" });
+        M.duck && M.duck(0.18, 0.25);
+      }
+      KL.stats.treffer = (KL.stats.treffer || 0) + 1;
+    } catch (err) { if (!KL.err4) { KL.err4 = 1; console.error(err); } }
+  };
+  /* Gestimmter Geisterchor (Geistorgel in wunder.js): Akkordfolge i–VI–iv–i in der Tonart, Chorstimmen überlappend
+     neu angeschlagen, solange das Wunder dauert (sec), über die Kulisse */
+  KL.chor = (sec, vol) => {
+    try {
+      if (!A.ok || !M.note || !M.raster || gq().mini) return;
+      const r = M.raster(0.05), b = r.beat, bus = roomBus(), v = vol || 0.04, prog = [0, 5, 3, 0], len = b * 8;
+      const n = Math.max(1, Math.min(16, Math.round((sec || 16) / len)));
+      for (let i = 0; i < n; i++) {
+        const st = prog[Math.floor(i / 2) % 4], t = r.t + i * len, k = Math.min(1, (i + 1) / 2) * Math.min(1, (n - i) / 2);
+        M.note("ooh", ton(st) + 12, t, v * k, len * 1.35, bus); M.note("aah", ton(st + 2) + 12, t + 0.03, v * 0.8 * k, len * 1.35, bus); M.note("ooh", ton(st + 4) + 12, t + 0.06, v * 0.7 * k, len * 1.35, bus);
+      }
+    } catch (_) {}
+  };
+
   /* Funkeln für Wunder (wunder.js): n leise Töne in der Tonart der Musik, im Sechzehntelraster, über die Kulisse.
      o: inst (cel, harfe, glock …), okt (Halbtöne über dem Grundton), stufen ([Leiterstufen] zufällig oder "auf" = Arpeggio
      aufwärts), vol, len (Achtel), abstand (Sechzehntel). Höchstens alle 0,3 s; nicht auf „minimal“. */
@@ -573,7 +763,7 @@
     } catch (e) { /* still */ }
   };
   /* Prüfstand (test/w12_klang): Klangnetz für einen neuen AudioContext neu aufbauen */
-  KL._reset = () => { net = null; RM.bus = null; RM.slot = null; RM.cur = RM.pend = null; RM.force = null; W.lv = null; DR.upTo = -1e9; DR.until = 0; KV.lastIdle = 0; };
+  KL._reset = () => { TR.wind = TR.zug = null; TR.doors = new Set(); net = null; RM.bus = null; RM.slot = null; RM.cur = RM.pend = null; RM.force = null; W.lv = null; DR.upTo = -1e9; DR.until = 0; KV.lastIdle = 0; };
   KL._alle = () => { const l = []; for (const g in GR) l.push(...GR[g]); for (const id in RK2) { const d = RK2[id]; if (d.loop) l.push(AM(d.loop[0])); for (const o of d.one || []) for (let i = 1; i <= o[1]; i++) l.push(AM(o[0] + i)); } return l; };
   KL.raumJetzt = () => ({ raum: RM.cur, groesse: KL.raumGroesse || 1, hall: KL.R, loop: RM.slot && RM.slot.name });
   /* Prüfhilfe: Raum erzwingen (ohne Kachelposition) */
@@ -592,6 +782,7 @@
     KL.setRaum(raumFor(lv));
     /* Raumkulisse zurücksetzen (neue Karte) */
     if (RM.slot) fadeSlot(RM.slot, 0.8);
+    TR.doors = new Set(); TR.near = null; TR.zugF = 0;
     RM.slot = null; RM.cur = RM.pend = null; RM.pendT = 0; RM.timers = []; RM.sizes = {}; RM.force = null; RM.cell = null; DR.upTo = -1e9; DR.until = 0;
   }
   KL.tick = (dt) => {
@@ -655,7 +846,7 @@
     }
     if (!KL.wPre) { KL.wPre = 1; preload([1, 2, 3, 4].map(i => AM("n_fuchs_" + i)).concat([KS("fx_ka_creak2")])); }
     /* Raumkulisse und Gegnerstimmen */
-    try { roomTick(dt); observe(dt); } catch (e) { if (!KL.err3) { KL.err3 = 1; console.error(e); } }
+    try { roomTick(dt); observe(dt); climbTick(dt); transitTick(dt); } catch (e) { if (!KL.err3) { KL.err3 = 1; console.error(e); } }
   };
 
   /* in den Takt der Musik einhängen (läuft auch während der Pause weiter) */

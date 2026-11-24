@@ -1137,7 +1137,9 @@
        Gleiche Bedingung wie die Herausforderung „Meuchler“ (bilanz.js: Nah-/Fernkampftreffer gegen !e.aware). */
     let surprise = false;
     if (P && !o.dot && !o.crit && !e.aware && !e.def.boss && !e.nmMini /* W9: Mini-Bosse wie Bosse nie überrumpelt (Dolch-Krit ×3 × 1,5 als Eröffnung) */ && !e.dummy && !e.surprised && (o.src === "melee" || o.src === "ranged")) {
-      surprise = true; e.surprised = true; o = Object.assign({}, o, { crit: true });
+      /* W9 4. Runde (Rundwege): wer im Kreis läuft, bis Gegner die Spur verlieren, und dann erneut überrumpelt, bekam jedes Mal Krit ×1,5 –
+         ab dem zweiten Überrumpeln desselben Gegners nur noch +25 %, ohne Krit */
+      e.surpN = (e.surpN || 0) + 1; surprise = e.surpN === 1 ? true : "halb"; e.surprised = true; if (surprise === true) o = Object.assign({}, o, { crit: true });
       FX.text(e.x + e.w / 2, e.y - 14, L(["Überrumpelt!", "Caught off guard!"]), "#ffd27a");
     }
     /* Schild von vorn */
@@ -1149,7 +1151,7 @@
         e.vx = -e.face * 60; return 0;
       }
     }
-    let m = surprise ? 1.5 : 1;
+    let m = surprise === true ? 1.5 : surprise ? 1.25 : 1;
     if (e.st.mark > 0) m *= 1.25;
     if (e.st.weak > 0) m *= 1.3;
     if ((e.st.stun > 0 || e.st.root > 0) && Z.has("fesselnd")) m *= 1.6;
@@ -1178,6 +1180,7 @@
       FX.burst(e.x + e.w / 2, e.y + e.h * 0.45, heavy ? 14 : 8, { col: [col, "#fff0d0"], sp: heavy ? 190 : 130, ang, spread: 1.6, life: 0.3, size: 1.8, kind: "spark", add: true });
       if (o.crit) { FX.ring(e.x + e.w / 2, e.y + e.h * 0.45, 22, "#ffb040", 0.25, 2); A.play("crit", { vol: 0.6, x: e.x }); }
       A.play(o.sfx || (e.def.undead ? "hitBone" : e.def.metal ? "hitMetal" : "hitFlesh"), { vol: 0.6, x: e.x, y: e.y });
+      Z.klang && Z.klang.treffer && Z.klang.treffer(e, o); /* Klang: Waffenart, Element, Krit (klang.js) */
       Z.input.rumble(heavy ? 0.4 : 0.15, 50);
       /* Rückstoß und Taumeln */
       const kbRes = e.def.boss ? 0.1 : e.def.heavy ? 0.35 : 1;

@@ -912,6 +912,17 @@
     const ch = M.chord || 0, tn = (i, base, c2) => deg(p.scale, (c2 == null ? ch : c2) + [0, 2, 4, 7][i], base), B = M.busSt;
     const fn = STINGERS[kind]; if (fn) fn({ p, t, now, beat, ch, tn, B, o: o || {} });
   };
+  /* Farbe im Schlussakkord je Boss-Akzent (siehe ACC) */
+  const BOSS_END = {
+    glas: (p, t) => [0, 4, 7, 12].forEach((d, i) => playNote("glas", p.root + 36 + d, t + 0.6 + i * 0.12, 0.05, 2.5, M.busSt, 1)),
+    ritual: (p, t) => [0, 7, 12].forEach((d, i) => playNote("hglo", p.root + 24 + d, t + 0.6 + i * 0.3, 0.06, 3, M.busSt, 1)),
+    kriegstrommel: (p, t, B, beat) => { if (p.dr) [0, 1, 2].forEach(i => hit(p.dr[1] || p.dr[0], t - beat * (3 - i) * 0.5, 0.3 + i * 0.12, 1, B)); },
+    geist: (p, t) => [0, 4, 7].forEach(d => playNote("ooh", p.root + 12 + d, t + 0.6, 0.06, 4.5, M.busSt, 1)),
+    amboss: (p, t) => [0, 0.5, 1].forEach((d, i) => hit("amboss", t + 0.6 + d, 0.18 - i * 0.05, 1, M.busSt)),
+    feuer: (p, t) => hit("gong", t + 0.6, 0.16, 0.9, M.busSt),
+    riese: (p, t) => { hit("riese1", t, 0.5, 0.85, M.busSt); kick(t, 0.8); },
+    netz: (p, t) => [0, 4, 7, 12, 16].forEach((d, i) => playNote(p.col || "cel", p.root + 24 + d, t + 0.6 + i * 0.1, 0.05, 1.5, M.busSt, 1))
+  };
   const STINGERS = {
     kampf: ({ p, t, o, beat, tn, B }) => { /* Einsatz: tiefer Schlag, Becken, Blechstoß – auf die Taktgrenze */
       const tq = o.at || grid(2);
@@ -967,15 +978,35 @@
       if (p.mot) M.bossMotif(true, tt + 0.6);
       duck(0.3, tt, 1.5);
     },
-    sieg: ({ p, t, B }) => { /* Boss besiegt: aufgehellter Schlussakkord (Pikardie-Terz) */
+    sieg: ({ p, t: t0, B, beat }) => { /* Boss besiegt: sein Leitmotiv bricht (halbes Tempo, tief, verklingend), dann der aufgehellte Schlussakkord (Pikardie-Terz) in seiner Tonart und Besetzung */
+      let t = t0;
+      /* Boss-Profile sind leiser getrimmt (dichter Satz); der Schluss-Stinger soll trotzdem tragen */
+      const tc = clamp(1.3 / (M.trim || 1), 1.15, 1.8);
+      if (p.mot && p.mot.length) {
+        const mot = p.mot.slice(0, 5), b0 = Math.min(beat, 0.3) * 1.5, end = Math.min(9, Math.max(...mot.map(n => n[1] + n[2])));
+        hit("crash", t0, 0.14, 0.8, B); if (p.dr) hit(p.dr[0], t0, 0.75, 0.9, B); kick(t0, 0.6);
+        mot.forEach(([s0, st, l], i) => {
+          if (st >= end) return;
+          const m = p.root + s0, k = 1 - i / (mot.length + 2);
+          playNote(p.brass || "horn", m, t0 + st * b0, 0.22 * k * tc, b0 * l + 0.1, B, 1);
+          playNote(p.mel || "vc", m + 12, t0 + st * b0, 0.1 * k * tc, b0 * l + 0.1, B, 1);
+          playNote("timpt", p.root - 12, t0 + st * b0, 0.2 * k * tc, b0 * 1.5, B, 1);
+        });
+        playNote("vctrem", p.root - 12, t0, 0.1, end * b0, B, 1);
+        if (p.dr) hit(p.dr[1] || p.dr[0], t0 + end * b0 - b0, 0.45, 0.85, B);
+        t = t0 + end * b0 + b0 * 0.5;
+        BOSS_END[p.acc] && BOSS_END[p.acc](p, t, B, beat);
+        duck(0.55, t0, (t - t0) + 3.5);
+      }
       hit("crash", t, 0.2, 1, B);
       if (p.dr) hit(p.dr[0], t, 0.8, 1, B);
       const r = p.root, maj = [r, r + 4, r + 7, r + 12];
       const b = p.brass || "blech";
-      [0, 0.18, 0.36].forEach((d, i) => playNote(b, maj[i], t + d, 0.13, 0.5, B, 1));
-      maj.forEach(m => playNote(b, m, t + 0.6, 0.12, 3.2, B, 1));
-      maj.forEach(m => playNote("aah", m + 12, t + 0.6, 0.08, 4, B, 1));
-      for (let i = 0; i < 6; i++) playNote("harfe", maj[i % 4] + 12 * (1 + Math.floor(i / 4)), t + 0.6 + i * 0.09, 0.1, 2.5, B, 1);
+      const kk = (p.mot ? 1.35 : 1) * tc; /* nach dem gebrochenen Leitmotiv trägt der Schlussakkord mehr */
+      [0, 0.18, 0.36].forEach((d, i) => playNote(b, maj[i], t + d, 0.13 * kk, 0.5, B, 1));
+      maj.forEach(m => playNote(b, m, t + 0.6, 0.12 * kk, 3.2, B, 1));
+      maj.forEach(m => playNote("aah", m + 12, t + 0.6, 0.08 * kk, 4, B, 1));
+      for (let i = 0; i < 6; i++) playNote("harfe", maj[i % 4] + 12 * (1 + Math.floor(i / 4)), t + 0.6 + i * 0.09, 0.1 * kk, 2.5, B, 1);
       duck(0.5, t, 3.5);
     },
     tod: ({ p, t, B }) => { /* tiefer Chor sinkt herab */

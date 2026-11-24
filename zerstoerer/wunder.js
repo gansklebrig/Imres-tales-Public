@@ -493,7 +493,7 @@
     start(s) {
       const p = Z.player, lv = Z.level; let spot = null;
       for (let i = 0; i < 200 && !spot; i++) { const x = p.x + rnd(60, 170) * (Math.random() < 0.5 ? -1 : 1), y = floorY(x, p.y - 10, 4); if (y == null) continue; const tx = Math.floor(x / T), ty = y / T - 1; let ok = true; for (let dx = -1; dx <= 1 && ok; dx++) for (let dy = 0; dy < 3 && ok; dy++) if (!airFree(tx + dx, ty - dy)) ok = false; if (ok && floorY(x - 14, y - 8, 2) === y && floorY(x + 14, y - 8, 2) === y && inCam(x, y, -30)) spot = { x, y }; }
-      if (!spot) return false; s.x = spot.x; s.y = spot.y; s.life = 26; s.a = 0; s.keys = []; preload("wChor");
+      if (!spot) return false; s.x = spot.x; s.y = spot.y; s.life = 26; s.a = 0; s.keys = []; Z.klang && Z.klang.chor && Z.klang.chor(s.life - 6, 0.035); /* Klang: gestimmter Geisterchor (statt der ungestimmten Aufnahme) */
       tune("w_orgel", ["orgel", "ooh"], [[0, 0, 4], [3, 4, 4], [7, 8, 4], [12, 12, 6], [10, 18, 2], [7, 20, 4], [3, 24, 4], [5, 28, 4], [7, 32, 8]], 0.09, -12);
     },
     tick(s, dt) { const p = pc(); if (Math.abs(p.x - s.x) < 28 && Math.abs(p.y - s.y) < 40 && !s.bye) { s.bye = 1; s.life = Math.min(s.life, s.t + 2.2); } s.a = Math.min(1, s.t / 2.5) * Math.min(1, (s.life - s.t) / 2); if (Math.random() < dt * 3) s.keys.push({ x: s.x + rnd(-6, 6), y: s.y - 30, t: 0, k: (Math.random() * 2) | 0 }); for (const q of s.keys) q.t += dt; s.keys = s.keys.filter(q => q.t < 2.5); return s.t < s.life; },
