@@ -154,6 +154,7 @@
     if (areaShow > 0) areaShow -= dt;
     /* Boss */
     const b = Z.boss;
+    { const on = !!(b && !Z.bossDefeated && !b.def.noBar); if (ui._bkOn !== on) { ui._bkOn = on; document.body.classList.toggle("bosskampf", on); } }
     if (b && !Z.bossDefeated && !b.def.noBar) { bossbar.hidden = false; sty($("#bossfill"), "width", Math.max(0, b.hp / b.hpMax * 100) + "%"); }
     else bossbar.hidden = true;
     /* Interaktions-Hinweis */

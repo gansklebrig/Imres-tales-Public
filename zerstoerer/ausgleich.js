@@ -20,7 +20,10 @@
   /* W9 (Spielermeldung „zäh, aber zu leicht“): Grundfaktor 2,0 → 1,75. Dafür mehr Gefahr statt mehr Leben: Angriffsfenster
      (1,5-facher Schaden), Kombos, Wut unter 20 %, Anti-Cheese, Lebensraub-Deckel und Signatur-Techniken (bossphasen.js, Abschnitt 6).
      Prüfstand /home/claude/test/w9_boss (kampf.py, Stil „stark“ = Speer +5): vorher Stufe-3-Bosse 22–48 s, Wächter 13–90 s. */
-  Z.BAL.bossHp = (t, id) => 1.75 * (BOSS_F[id] || 1);
+  /* Totenköpfe machen Bosse nicht mehr voll zum Schwamm: nur die Wurzel des Totenkopf-Lebensfaktors (3 Köpfe ×1,32 statt ×1,75) –
+     die Härte kommt über Schaden und Tempo (Demogorgon mit 3 Köpfen: Bot 443 s / 11 Tode → Ziel unter ~200 s) */
+  const skullComp = () => { const s = (Z.run && Z.run.skulls) || 0, f = s > 0 && Z.BAL.skullHp ? Z.BAL.skullHp(s) : 1; return f > 1 ? 1 / Math.sqrt(f) : 1; };
+  Z.BAL.bossHp = (t, id) => 1.75 * (BOSS_F[id] || 1) * skullComp();
   const MUL = { melee: 1.4, dive: 1.4, parry: 1.2, ranged: 0.92, skill: 1.1 };
   const hit0 = Z.hitEnemy;
   Z.hitEnemy = function (e, dmg, o) {

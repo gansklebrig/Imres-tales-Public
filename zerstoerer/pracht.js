@@ -495,9 +495,9 @@
       }
       /* Putzreste auf Ziegeln und Fachwerk: helle Fläche mit abgeplatzter Kante */
       if ((wl === "brick" || wl === "timber") && r > 0.986) {
-        const cx = px + 8, cy = py + 6, rx = 10 + r2 * 14, ry = 7 + r3 * 8, seed = x * 17 + y * 3, pc = mixH(lit(B.wall, -0.05), "#a89478", wl === "brick" ? 0.2 : 0.14);
+        const cx = px + 8, cy = py + 6, rx = 7 + r2 * 9, ry = 5 + r3 * 6, seed = x * 17 + y * 3, pc = mixH(lit(B.wall, -0.05), "#a89478", wl === "brick" ? 0.2 : 0.14);
         c.fillStyle = "rgba(0,0,0,.25)"; blob(c, cx + 0.8, cy + 1, rx, ry, seed, H, 11); c.fill();
-        c.fillStyle = pc; blob(c, cx, cy, rx, ry, seed, H, 11); c.fill();
+        c.globalAlpha = 0.7; c.fillStyle = pc; blob(c, cx, cy, rx, ry, seed, H, 11); c.fill(); c.globalAlpha = 1;
         c.save(); c.clip();
         for (let k = 0; k < 26; k++) { c.fillStyle = k % 2 ? "rgba(0,0,0,.08)" : "rgba(255,250,240,.07)"; c.fillRect(cx - rx + h3(x, y, 300 + k) * rx * 2, cy - ry + h3(x, y, 330 + k) * ry * 2, 1 + h3(x, y, 360 + k) * 3, 1); }
         const g = c.createLinearGradient(0, cy - ry, 0, cy + ry); g.addColorStop(0, "rgba(255,250,240,.10)"); g.addColorStop(1, "rgba(0,0,0,.16)"); c.fillStyle = g; c.fillRect(cx - rx * 1.3, cy - ry * 1.3, rx * 2.6, ry * 2.6);
@@ -528,7 +528,7 @@
         else if (r2 < 0.15) { c.beginPath(); c.arc(gx + 6, gy + 11, 2.4, 0, TAU); for (let k = 0; k < 8; k++) { const a = k / 8 * TAU; c.moveTo(gx + 6 + Math.cos(a) * 3.4, gy + 11 + Math.sin(a) * 3.4); c.lineTo(gx + 6 + Math.cos(a) * 5, gy + 11 + Math.sin(a) * 5); } c.stroke(); }
       }
       if (bg === "dungeon" && r3 > 0.97) { /* Fesseln an der Wand */ iron(c, px + 5, py + 4, 0); iron(c, px + 12, py + 4, 0); c.strokeStyle = "#2a2422"; c.lineWidth = 0.8; c.beginPath(); c.moveTo(px + 5, py + 9.5); c.quadraticCurveTo(px + 8.5, py + 15, px + 12, py + 9.5); c.stroke(); }
-      if (bg === "cellar" && r3 < 0.045) {
+      if (bg === "cellar" && r3 < 0.016) {
         /* Kreidezeichen der Kellermeister: Zählstriche, Jahreszahl-Kringel, Kreuz */
         c.strokeStyle = "rgba(240,236,224,.17)"; c.lineWidth = 0.5; c.beginPath(); const gx = px + 3, gy = py + 5, k = (r2 * 4) | 0;
         if (k === 0) { for (let i = 0; i < 5; i++) { c.moveTo(gx + i * 1.6, gy); c.lineTo(gx + i * 1.6, gy + 5); } c.moveTo(gx - 1, gy + 3); c.lineTo(gx + 8, gy + 1.5); }

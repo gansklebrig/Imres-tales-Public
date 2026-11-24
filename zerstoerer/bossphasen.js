@@ -1052,6 +1052,18 @@
     c.restore();
   };
 
+  /* W9: Ansagen (Technik-Namen) nie unter dem HTML-Bossbalken (Name, Untertitel, Balken): Weltkoordinate knapp unter seiner Unterkante */
+  let lblC = { t: -1, y: 0 };
+  Z.bossLabelY = function () {
+    const cam = Z.cam, now = performance.now();
+    if (now - lblC.t < 250) return cam.y + lblC.y;
+    lblC.t = now; lblC.y = 40;
+    try {
+      const bb = document.getElementById("bossbar"), cv = document.getElementById("cv");
+      if (bb && cv && !bb.hidden) { const r = bb.getBoundingClientRect(), rc = cv.getBoundingClientRect(); if (rc.height > 0 && r.bottom > rc.top) lblC.y = Math.max(40, (r.bottom - rc.top) * cam.h / rc.height + 22); }
+    } catch (_) {}
+    return cam.y + lblC.y;
+  };
   /* Namen der Techniken über dem Boss, Zielinien, Augen im Nebel, Marionettenfäden */
   const dp0 = Z.drawProjs;
   Z.drawProjs = function (c) {
@@ -1072,7 +1084,7 @@
       if (mv && mv.name && m.stage !== "post" && !(e.hidden > 0) && !e.trans) {
         const u = m.stage === "pre" ? Math.min(1, m.t / 0.12) : 1;
         c.save(); c.globalAlpha = u; c.font = "italic 800 8px 'Alegreya Sans',sans-serif"; c.textAlign = "center";
-        const s = L(mv.name), w = c.measureText(s).width + 10, y = Math.max(Z.cam.y + 40, e.y - 10);
+        const s = L(mv.name), w = c.measureText(s).width + 10, y = Math.max(Z.bossLabelY(), e.y - 10);
         c.fillStyle = "rgba(20,8,10,.82)"; c.fillRect(cx - w / 2, y - 8, w, 11);
         c.fillStyle = e.aura || "#ffb040"; c.fillRect(cx - w / 2, y + 2, w, 1);
         c.fillStyle = mv.danger ? "#ff7a6a" : "#ffd8a0"; c.fillText(s, cx, y);

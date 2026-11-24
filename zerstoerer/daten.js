@@ -422,6 +422,8 @@
     skullDmg: s => 1 + 0.22 * s,
     /* W6-Balancing: Gold je Lauf lag bei ~5500 (haupt), Aufwerten einer Waffe auf +5 kostet ~1500. Mit 1 + 0,3t blieben
        am Laufende noch 1000–3700 übrig → 1 + 0,2t (vorher 1 + 0,6t): Aufwerten + gelegentlich Händlerin, nicht alles */
-    goldMul: t => 1 + 0.2 * t
+    /* W9 (Kontrollläufe K1, haupt, unsterblich): Gold ein 4000–5200, ausgegeben 1500–2800, Rest 1000–3100 – Gold war nie knapp,
+       begrenzt haben nur Glut und Amboss-Schläge. Jetzt 15 % weniger Gold und teureres Schmieden (schmiede.js goldCost) */
+    goldMul: t => 0.85 * (1 + 0.2 * t)
   };
 })();

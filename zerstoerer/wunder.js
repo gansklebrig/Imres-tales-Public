@@ -43,13 +43,23 @@
   }
   const skyAt = (tx, ty) => { const lv = Z.level, s = Z.gfx.sky; return !!(s && s[ty * lv.W + tx]); };
   const wallFree = (tx, ty) => { const lv = Z.level; return tx > 0 && ty > 0 && tx < lv.W - 1 && ty < lv.H - 1 && lv.get(tx, ty) === 0 && !skyAt(tx, ty) && !(Z.gfx.isOpen && Z.gfx.isOpen(tx, ty)); };
+  const airFree = (tx, ty) => { const lv = Z.level; return tx > 0 && ty > 0 && tx < lv.W - 1 && ty < lv.H - 1 && lv.get(tx, ty) === 0 && !skyAt(tx, ty); };
   /* freie Wandstelle im Bild nahe (cx, cy); f(tx, ty) zusätzliche Bedingung */
   function wallSpot(cx, cy, rx, ry, f, tries) {
     for (let i = 0; i < (tries || 160); i++) {
       const tx = Math.floor((cx + rnd(-rx, rx)) / T), ty = Math.floor((cy + rnd(-ry, ry)) / T);
-      if (wallFree(tx, ty) && (!f || f(tx, ty))) return { tx, ty, x: tx * T + T / 2, y: ty * T + T / 2 };
+      if (wallFree(tx, ty) && inCam(tx * T + 8, ty * T + 8, -12) && (!f || f(tx, ty))) return { tx, ty, x: tx * T + T / 2, y: ty * T + T / 2 };
     }
     return null;
+  }
+  /* sichtbare Öffnungen (Fenster, Höhlenlöcher, freier Himmel) im Bild: Mittelpunkt und Ausdehnung in Weltkoordinaten */
+  function viewHole() {
+    const lv = Z.level, cam = Z.cam; if (!lv) return null;
+    const tx0 = Math.max(0, Math.floor(cam.x / T)), tx1 = Math.min(lv.W - 1, Math.floor((cam.x + cam.w) / T)), ty0 = Math.max(0, Math.floor(cam.y / T)), ty1 = Math.min(lv.H - 1, Math.floor((cam.y + cam.h) / T));
+    let n = 0, sx = 0, sy = 0, x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) { if (lv.get(tx, ty) !== 0) continue; if (!(skyAt(tx, ty) || (Z.gfx.isOpen && Z.gfx.isOpen(tx, ty)))) continue; n++; const x = tx * T + 8, y = ty * T + 8; sx += x; sy += y; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (n < 6) return null;
+    return { n, x: sx / n, y: sy / n, x0, x1, y0, y1 };
   }
   const P = () => Z.player, pc = () => { const p = Z.player; return { x: p.x + p.w / 2, y: p.y + p.h / 2 }; };
   const inCam = (x, y, m) => { const c = Z.cam; m = m || 0; return x > c.x - m && x < c.x + c.w + m && y > c.y - m && y < c.y + c.h + m; };
@@ -89,15 +99,17 @@
   def({ id: "motten", tier: 0, n: ["Motten im Fackelschein", "Moths in the torchlight"], hint: ["wo Fackeln brennen", "where torches burn"],
     d: ["Blasse Motten tanzen um eine Flamme und werfen riesige Schatten an die Wand.", "Pale moths dance around a flame and cast giant shadows on the wall."],
     where: k => !k.out && !!(k.lv.lights || []).length,
-    start(s) { const p = pc(); let best = null, bd = 1e9; for (const d of Z.level.lights || []) { if (!(d.kind === "torch" || d.kind === "candle" || d.kind === "candelabra" || d.kind === "brazier" || d.kind === "lantern")) continue; const x = d.x * T + 8, y = d.y * T + (d.kind === "torch" ? -6 : 0), dd = Math.hypot(x - p.x, y - p.y); if (dd < bd && inCam(x, y, -20)) { bd = dd; best = { x, y }; } } if (!best) return false; s.c = best; s.m = []; for (let i = 0; i < 5; i++) s.m.push({ a: rnd(0, TAU), r: rnd(6, 16), sp: rnd(2, 4), ph: rnd(0, TAU), e: rnd(0.5, 0.9) }); s.life = 22; },
+    start(s) { const p = pc(); let best = null, bd = 1e9; for (const d of Z.level.lights || []) { if (!(d.kind === "torch" || d.kind === "candle" || d.kind === "candelabra" || d.kind === "brazier" || d.kind === "lantern")) continue; const x = d.x * T + 8, y = d.y * T + (d.kind === "torch" ? -6 : 0), dd = Math.hypot(x - p.x, y - p.y); if (dd < bd && inCam(x, y, -20)) { bd = dd; best = { x, y }; } } if (!best) return false; s.c = best; s.m = []; for (let i = 0; i < 7; i++) s.m.push({ a: rnd(0, TAU), r: rnd(5, 15), sp: rnd(2.5, 5) * (Math.random() < 0.5 ? -1 : 1), ph: rnd(0, TAU), e: rnd(0.5, 0.9) }); s.life = 22; },
     tick(s) { return s.t < s.life; },
     mid(c, s, t) {
       const fade = Math.min(1, s.t / 2) * Math.min(1, (s.life - s.t) / 2);
       for (const m of s.m) {
         const a = m.a + t * m.sp + Math.sin(t * 3 + m.ph) * 0.8, x = s.c.x + Math.cos(a) * m.r * (1 + 0.3 * Math.sin(t * 1.7 + m.ph)), y = s.c.y - 6 + Math.sin(a) * m.r * m.e + Math.sin(t * 5 + m.ph) * 2;
         /* riesiger Schatten an der Wand hinter der Flamme */
-        const dx = x - s.c.x, dy = y - s.c.y; c.globalAlpha = 0.16 * fade; c.fillStyle = "#000"; c.beginPath(); c.ellipse(s.c.x + dx * 3.2, s.c.y + dy * 3.2, 6, 3.2 * Math.abs(Math.sin(t * 22 + m.ph)) + 1, 0, 0, TAU); c.fill();
-        const w = Math.abs(Math.sin(t * 24 + m.ph)); c.globalAlpha = 0.9 * fade; c.fillStyle = "#e8dcc8"; c.beginPath(); c.ellipse(x - 1.4, y, 1.6, 1 + w * 0.8, -0.4, 0, TAU); c.ellipse(x + 1.4, y, 1.6, 1 + w * 0.8, 0.4, 0, TAU); c.fill(); c.fillStyle = "#6a5a48"; c.fillRect(x - 0.4, y - 1, 0.8, 2);
+        const dx = x - s.c.x, dy = y - s.c.y, w = Math.abs(Math.sin(t * 26 + m.ph)), sx = s.c.x + dx * 3.4, sy = s.c.y + dy * 3.4;
+        /* Schatten an der Wand: groß, weich, flatternd */
+        c.globalAlpha = 0.2 * fade; c.fillStyle = "#000"; c.beginPath(); c.moveTo(sx, sy); c.lineTo(sx - 8, sy - 6 * w - 1); c.lineTo(sx - 5, sy + 2); c.lineTo(sx, sy + 1); c.lineTo(sx + 5, sy + 2); c.lineTo(sx + 8, sy - 6 * w - 1); c.closePath(); c.fill();
+        c.globalAlpha = 0.85 * fade; c.fillStyle = "#c8b8a0"; c.beginPath(); c.moveTo(x, y); c.lineTo(x - 2, y - 1.6 * w - 0.3); c.lineTo(x - 1.3, y + 0.6); c.closePath(); c.moveTo(x, y); c.lineTo(x + 2, y - 1.6 * w - 0.3); c.lineTo(x + 1.3, y + 0.6); c.closePath(); c.fill(); c.fillStyle = "#5a4a3a"; c.fillRect(x - 0.3, y - 0.6, 0.6, 1.6);
       }
       c.globalAlpha = 1;
     }, at: s => s.c });
@@ -221,12 +233,12 @@
   def({ id: "sternschnuppen", tier: 1, n: ["Sternschnuppenregen", "Meteor shower"], hint: ["nachts, durch Fenster und unter freiem Himmel", "at night, through windows and under open sky"],
     d: ["Der Himmel regnet Sterne. Für ein paar Atemzüge ist selbst die Feste still.", "The sky rains stars. For a few breaths even the keep is quiet."],
     where: k => k.back && (k.out || k.B.open === "arch") && k.night && k.mood !== "regen" && k.mood !== "gewitter" && k.bg !== "storm",
-    start(s) { s.m = []; s.life = 14; s.acc = 0; },
-    tick(s, dt) { s.acc += dt * (s.t < s.life - 2 ? 4.5 : 0); while (s.acc > 1) { s.acc--; s.m.push({ x: rnd(0, 1), y: rnd(0.02, 0.35), a: rnd(0.35, 0.65), l: rnd(26, 70), t: 0, life: rnd(0.5, 1.1), w: rnd(0.6, 1.4), gold: Math.random() < 0.3 }); } for (const m of s.m) m.t += dt; s.m = s.m.filter(m => m.t < m.life); return s.t < s.life || s.m.length > 0; },
+    start(s) { s.m = []; s.life = 16; s.acc = 0; s.h = viewHole(); if (!s.h) return false; },
+    tick(s, dt) { if ((s.t * 2 | 0) !== ((s.t - dt) * 2 | 0)) s.h = viewHole() || s.h; s.acc += dt * (s.t < s.life - 2 ? 7 : 0); while (s.acc > 1) { s.acc--; s.m.push({ x: rnd(-0.1, 1), y: rnd(-0.2, 0.6), a: rnd(0.35, 0.65), l: rnd(30, 80), t: 0, life: rnd(0.7, 1.5), w: rnd(0.8, 1.6), gold: Math.random() < 0.3 }); } for (const m of s.m) m.t += dt; s.m = s.m.filter(m => m.t < m.life); return s.t < s.life || s.m.length > 0; },
     back(c, s, t, cam, oy, LH) {
       c.globalCompositeOperation = "lighter";
       for (const m of s.m) {
-        const u = m.t / m.life, x = cam.x + m.x * cam.w + u * 90, y = oy + m.y * LH + u * 90 * m.a, a = Math.sin(u * PI);
+        const h = s.h, u = m.t / m.life, x = cam.x + m.x * cam.w + u * 90, y = h.y0 - 20 + m.y * (h.y1 - h.y0 + 40) + u * 90 * m.a, a = Math.sin(u * PI);
         const g = c.createLinearGradient(x, y, x - m.l, y - m.l * m.a); g.addColorStop(0, m.gold ? "rgba(255,230,170," + a + ")" : "rgba(255,250,240," + a + ")"); g.addColorStop(1, "rgba(255,220,200,0)");
         c.strokeStyle = g; c.lineWidth = m.w; c.beginPath(); c.moveTo(x, y); c.lineTo(x - m.l, y - m.l * m.a); c.stroke(); glow(c, x, y, 4, "rgba(255,240,210,1)", a * 0.6);
       }
@@ -255,7 +267,7 @@
   def({ id: "vogelnest", tier: 1, n: ["Das Nest im Gewölbe", "The nest in the vault"], hint: ["unter Decken und Balken", "under ceilings and beams"],
     d: ["Unter der Decke hat eine Schwalbe genistet. Drei Schnäbel, ein Wurm, großes Geschrei.", "A swallow has nested under the ceiling. Three beaks, one worm, a great racket."],
     where: k => k.bg !== "embercity" && k.bg !== "forge" && k.area !== "arena",
-    start(s) { const p = pc(), lv = Z.level; const sp = wallSpot(p.x, p.y - 30, 150, 90, (tx, ty) => solidV(lv.get(tx, ty - 1)) && lv.get(tx, ty + 1) === 0 && Math.abs(tx * T - p.x) > 30); if (!sp) return false; s.n = { x: sp.x, y: sp.ty * T + 1 }; s.feeds = 0; s.bird = null; s.next = 1.5; s.life = 40; s.open = 0; preload("wVogel"); stay.push({ kind: "nest", x: s.n.x, y: s.n.y, s }); },
+    start(s) { const p = pc(), lv = Z.level; const sp = wallSpot(p.x, p.y - 50, 170, 110, (tx, ty) => (solidV(lv.get(tx, ty - 1)) || lv.get(tx, ty - 1) === 2) && airFree(tx, ty + 1) && Math.abs(tx * T - p.x) > 30, 400) || wallSpot(p.x, p.y - 50, 170, 110, (tx, ty) => (solidV(lv.get(tx, ty - 1)) || lv.get(tx, ty - 1) === 2) && airFree(tx, ty + 1), 400); if (!sp) return false; s.n = { x: sp.x, y: sp.ty * T + 1 }; s.feeds = 0; s.bird = null; s.next = 1.5; s.life = 40; s.open = 0; preload("wVogel"); stay.push({ kind: "nest", x: s.n.x, y: s.n.y, s }); },
     tick(s, dt) {
       const n = s.n; s.open = Math.max(0, s.open - dt);
       if (!s.bird && !s.leave && s.feeds < 3) { s.next -= dt; if (s.next <= 0) { const side = Math.random() < 0.5 ? -1 : 1; s.bird = { x: n.x + side * 240, y: n.y + rnd(20, 60), ph: "in", t: 0, f: -side }; } }
@@ -290,8 +302,9 @@
     d: ["Eine Reihe winziger Pilzwesen zieht mit Laterne vorbei. Als sie Ezekiel passieren, verneigen sie sich höflich.", "A line of tiny mushroom folk files past with a lantern. Passing Ezekiel, they bow politely."],
     where: k => k.bg === "cellar" || k.bg === "dungeon" || k.bg === "chasm" || k.bg === "lake" || k.area === "lager" || k.area === "passage" || k.bg === "castle",
     start(s) {
-      const p = Z.player, py = p.y + p.h, side = Math.random() < 0.5 ? -1 : 1, x0 = p.x + p.w / 2 + side * (Z.cam.w * 0.5 + 10), y = floorY(x0, py - 20, 6);
-      if (y == null || Math.abs(y - py) > 2 * T) return false;
+      const p = Z.player, py = p.y + p.h; let side = Math.random() < 0.5 ? -1 : 1, x0 = 0, y = null;
+      for (let tr = 0; tr < 2 && y == null; tr++, side = -side) for (let f = 0.52; f > 0.12 && y == null; f -= 0.04) { const xx = p.x + p.w / 2 + side * Z.cam.w * f, yy = floorY(xx, py - 3 * T, 7); if (yy != null && Math.abs(yy - py) <= 3 * T) { x0 = xx; y = yy; } }
+      if (y == null) return false; side = Math.sign(x0 - p.x) || 1;
       s.dir = -side; s.y = y; s.m = []; const n = 5 + ((Math.random() * 4) | 0);
       for (let i = 0; i < n; i++) s.m.push({ x: x0 - s.dir * i * 9, y, cap: pick(CAPS), h: rnd(5, 7.5), ph: rnd(0, TAU), bow: 0, done: 0, role: i === 0 ? "lantern" : i === n - 1 ? "banner" : (Math.random() < 0.3 ? "drum" : "") });
       s.life = 40; preload("wSchellen"); setTimeout(() => snd("wSchellen", { vol: 0.16, x: x0 }), 800);
@@ -310,8 +323,8 @@
     mid(c, s, t) {
       for (const m of s.m) {
         const bow = m.bow > 0 ? Math.sin(Math.min(1, m.bow / 1.1) * PI) : 0, step = m.bow ? 0 : Math.sin(m.ph), x = m.x, y = m.y - Math.abs(step) * 0.6, h = m.h;
-        c.save(); c.translate(x, y); c.scale(s.dir, 1);
-        c.fillStyle = "rgba(0,0,0,.3)"; c.beginPath(); c.ellipse(0, m.y - y, 3, 0.7, 0, 0, TAU); c.fill();
+        c.save(); c.translate(x, y); c.scale(s.dir * 1.3, 1.3);
+        c.fillStyle = "rgba(0,0,0,.3)"; c.beginPath(); c.ellipse(0, (m.y - y) / 1.3, 3, 0.7, 0, 0, TAU); c.fill();
         c.fillStyle = "#d8ccb8"; c.fillRect(-1.6 + step * 0.6, -1.4, 1, 1.4); c.fillRect(0.6 - step * 0.6, -1.4, 1, 1.4);
         c.fillStyle = m.cap[1]; c.beginPath(); c.moveTo(-1.8, -1.2); c.lineTo(1.8, -1.2); c.lineTo(1.3, -h + 2); c.lineTo(-1.3, -h + 2); c.fill();
         c.fillStyle = "#2a1a14"; c.fillRect(0.4, -h + 3.2, 0.6, 0.6); c.fillRect(-0.8, -h + 3.2, 0.6, 0.6);
@@ -322,7 +335,7 @@
         c.restore();
       }
     },
-    front(c, s, t) { c.globalCompositeOperation = "lighter"; for (const m of s.m) if (m.role === "lantern") glow(c, m.x + s.dir * 4.7, m.y - m.h + 0.4, 9, "rgba(255,200,110,1)", 0.45 + 0.1 * Math.sin(t * 7)); },
+    front(c, s, t) { c.globalCompositeOperation = "lighter"; for (const m of s.m) if (m.role === "lantern") glow(c, m.x + s.dir * 6.1, m.y - m.h * 1.3 + 0.5, 9, "rgba(255,200,110,1)", 0.45 + 0.1 * Math.sin(t * 7)); },
     light(add, s) { for (const m of s.m) if (m.role === "lantern") add(m.x + s.dir * 4.7, m.y - m.h, 26, "#ffc070", 0.35); },
     at: s => s.m[0] });
 
@@ -358,10 +371,10 @@
   def({ id: "schatten", tier: 1, n: ["Schatten hinter den Fenstern", "Shadows behind the windows"], hint: ["wo Fenster nach draußen gehen", "where windows look outside"],
     d: ["Etwas Riesiges zieht draußen vorbei. Man sieht nur seinen Schatten, Fenster für Fenster.", "Something enormous passes outside. You only see its shadow, window by window."],
     where: k => k.back && (k.out || k.B.open === "arch" || k.B.open === "vault") && k.bg !== "lake",
-    start(s) { s.kind = pick(["drache", "drache", "riese", "wurm"]); s.dir = Math.random() < 0.5 ? -1 : 1; s.life = 13; s.y = rnd(0.25, 0.45); preload("wFluegel"); if (s.kind === "drache") setTimeout(() => snd("wFluegel", { vol: 0.25, rate: 0.5 }), 3000); },
+    start(s) { s.h = viewHole(); if (!s.h) return false; s.kind = pick(["drache", "drache", "riese", "wurm"]); s.dir = Math.random() < 0.5 ? -1 : 1; s.life = 13; s.y = rnd(-0.15, 0.15); preload("wFluegel"); if (s.kind === "drache") setTimeout(() => snd("wFluegel", { vol: 0.25, rate: 0.5 }), 3000); },
     tick(s) { return s.t < s.life; },
     back(c, s, t, cam, oy, LH) {
-      const u = s.t / s.life, x = s.dir > 0 ? cam.x - 160 + u * (cam.w + 320) : cam.x + cam.w + 160 - u * (cam.w + 320), y = oy + LH * s.y;
+      const u = s.t / s.life, x = s.dir > 0 ? cam.x - 160 + u * (cam.w + 320) : cam.x + cam.w + 160 - u * (cam.w + 320), y = s.h.y + (s.h.y1 - s.h.y0 + 30) * s.y + (s.kind === "riese" ? 40 : 0);
       c.save(); c.translate(x, y); c.scale(s.dir, 1); c.fillStyle = "rgba(12,6,14,.82)";
       if (s.kind === "drache") { const w = Math.sin(t * 2.6); c.beginPath(); c.ellipse(0, 0, 34, 9, 0, 0, TAU); c.fill(); c.beginPath(); c.moveTo(30, -3); c.quadraticCurveTo(48, -10, 58, -6); c.lineTo(62, -2); c.lineTo(54, 0); c.quadraticCurveTo(44, 2, 30, 4); c.fill(); c.beginPath(); c.moveTo(-30, 0); c.quadraticCurveTo(-60, 6, -90, -6); c.lineTo(-86, 0); c.quadraticCurveTo(-60, 12, -30, 5); c.fill();
         c.beginPath(); c.moveTo(-10, -4); c.lineTo(-30, -50 * w - 10); c.lineTo(-10, -42 * w - 20); c.lineTo(6, -46 * w - 6); c.lineTo(16, -4); c.fill(); c.beginPath(); c.moveTo(-6, -3); c.lineTo(-20, -30 * w - 4); c.lineTo(10, -3); c.fill(); }
@@ -397,10 +410,10 @@
   def({ id: "geisterboot", tier: 1, n: ["Das Laternenboot", "The lantern boat"], hint: ["am Hafen und am schwarzen See", "at the harbour and the black lake"],
     d: ["Ein Boot ohne Ruderer gleitet durch den Nebel, eine einzelne Laterne am Bug. Es läutet leise, dann ist es fort.", "A boat without an oarsman glides through the fog, a single lantern at its bow. It rings softly, then it is gone."],
     where: k => k.back && (k.bg === "harbour" || k.bg === "lake"),
-    start(s) { s.dir = Math.random() < 0.5 ? -1 : 1; s.life = 26; s.y = rnd(0.62, 0.72); preload("wGlocklein"); setTimeout(() => snd("wGlocklein", { vol: 0.18, rate: 0.7 }), 6000); },
+    start(s) { s.h = viewHole(); if (!s.h) return false; s.dir = Math.random() < 0.5 ? -1 : 1; s.life = 26; preload("wGlocklein"); setTimeout(() => snd("wGlocklein", { vol: 0.18, rate: 0.7 }), 6000); },
     tick(s) { return s.t < s.life; },
     back(c, s, t, cam, oy, LH) {
-      const u = s.t / s.life, a = Math.min(1, s.t / 4) * Math.min(1, (s.life - s.t) / 4), x = s.dir > 0 ? cam.x - 80 + u * (cam.w + 160) : cam.x + cam.w + 80 - u * (cam.w + 160), y = oy + LH * s.y + Math.sin(t * 0.9) * 1.2;
+      const u = s.t / s.life, a = Math.min(1, s.t / 4) * Math.min(1, (s.life - s.t) / 4), x = s.dir > 0 ? cam.x - 80 + u * (cam.w + 160) : cam.x + cam.w + 80 - u * (cam.w + 160), y = s.h.y1 - 6 + Math.sin(t * 0.9) * 1.2;
       c.save(); c.globalAlpha = a * 0.7; c.translate(x, y); c.scale(s.dir, 1); c.rotate(Math.sin(t * 0.8) * 0.03);
       c.fillStyle = "#1a1220"; c.beginPath(); c.moveTo(-22, -3); c.lineTo(22, -3); c.quadraticCurveTo(18, 4, 10, 5); c.lineTo(-14, 5); c.quadraticCurveTo(-20, 3, -22, -3); c.fill();
       c.fillRect(-2, -26, 1.4, 23); c.fillStyle = "rgba(40,30,46,.8)"; c.beginPath(); c.moveTo(-1, -25); c.quadraticCurveTo(10, -16, -1, -5); c.fill();
@@ -470,7 +483,7 @@
     where: k => k.bg === "halls" || k.bg === "belltower" || k.bg === "cellar" || k.bg === "dungeon" || k.bg === "castle",
     start(s) {
       const p = Z.player, lv = Z.level; let spot = null;
-      for (let i = 0; i < 200 && !spot; i++) { const x = p.x + rnd(60, 170) * (Math.random() < 0.5 ? -1 : 1), y = floorY(x, p.y - 10, 4); if (y == null) continue; const tx = Math.floor(x / T), ty = y / T - 1; let ok = true; for (let dx = -1; dx <= 1 && ok; dx++) for (let dy = 0; dy < 3 && ok; dy++) if (!wallFree(tx + dx, ty - dy)) ok = false; if (ok && floorY(x - 14, y - 8, 1) === y && floorY(x + 14, y - 8, 1) === y && inCam(x, y, -30)) spot = { x, y }; }
+      for (let i = 0; i < 200 && !spot; i++) { const x = p.x + rnd(60, 170) * (Math.random() < 0.5 ? -1 : 1), y = floorY(x, p.y - 10, 4); if (y == null) continue; const tx = Math.floor(x / T), ty = y / T - 1; let ok = true; for (let dx = -1; dx <= 1 && ok; dx++) for (let dy = 0; dy < 3 && ok; dy++) if (!airFree(tx + dx, ty - dy)) ok = false; if (ok && floorY(x - 14, y - 8, 2) === y && floorY(x + 14, y - 8, 2) === y && inCam(x, y, -30)) spot = { x, y }; }
       if (!spot) return false; s.x = spot.x; s.y = spot.y; s.life = 26; s.a = 0; s.keys = []; preload("wChor");
       tune("w_orgel", ["orgel", "ooh"], [[0, 0, 4], [3, 4, 4], [7, 8, 4], [12, 12, 6], [10, 18, 2], [7, 20, 4], [3, 24, 4], [5, 28, 4], [7, 32, 8]], 0.09, -12);
     },
@@ -500,11 +513,11 @@
   def({ id: "drache", tier: 2, n: ["Der schlafende Drache", "The sleeping dragon"], hint: ["weit draußen, sehr selten", "far outside, very rarely"],
     d: ["Auf einem fernen Grat schläft ein Drache. Sein Atem glüht im Takt. Einmal öffnet er ein Auge – und schließt es wieder.", "On a distant ridge a dragon sleeps. Its breath glows in rhythm. Once it opens an eye – and closes it again."],
     where: k => k.back && (k.out || k.bg === "embercity"),
-    start(s) { s.life = 45; s.x = rnd(0.2, 0.8); preload("wDrache"); setTimeout(() => snd("wDrache", { vol: 0.12, rate: 0.45 }), 20000); },
+    start(s) { s.h = viewHole(); if (!s.h) return false; s.life = 45; preload("wDrache"); setTimeout(() => snd("wDrache", { vol: 0.12, rate: 0.45 }), 20000); },
     tick(s) { return s.t < s.life; },
     back(c, s, t, cam, oy, LH) {
-      const a = Math.min(1, s.t / 6) * Math.min(1, (s.life - s.t) / 6), y = oy + LH * 0.58;
-      const X = cam.x + cam.w * s.x, br = 0.5 + 0.5 * Math.sin(t * 0.9);
+      const a = Math.min(1, s.t / 6) * Math.min(1, (s.life - s.t) / 6), y = s.h.y1 + 4;
+      const X = s.h.x - 20, br = 0.5 + 0.5 * Math.sin(t * 0.9);
       c.save(); c.globalAlpha = a; c.translate(X, y);
       const col = "#160c14";
       c.fillStyle = col; c.beginPath(); c.moveTo(-90, 30); c.quadraticCurveTo(-60, -6, -20, -10); c.quadraticCurveTo(20, -14, 60, -4); c.quadraticCurveTo(80, 4, 100, 30); c.fill();
@@ -532,7 +545,7 @@
     where: k => k.bg === "halls" || k.bg === "spires" || k.bg === "belltower" || k.bg === "cellar" || k.bg === "castle" || k.bg === "dungeon",
     start(s) {
       const p = Z.player; let spot = null;
-      for (let i = 0; i < 200 && !spot; i++) { const x = p.x + p.w / 2 + rnd(50, 140) * (Math.random() < 0.5 ? -1 : 1), y = floorY(x, p.y - 10, 4); if (y == null || Math.abs(y - (p.y + p.h)) > 8) continue; const tx = Math.floor(x / T), ty = y / T - 1; if (wallFree(tx, ty) && wallFree(tx, ty - 1) && wallFree(tx, ty - 2) && floorY(x - 10, y - 8, 1) === y && floorY(x + 10, y - 8, 1) === y) spot = { x, y }; }
+      for (let i = 0; i < 200 && !spot; i++) { const x = p.x + p.w / 2 + rnd(50, 140) * (Math.random() < 0.5 ? -1 : 1), y = floorY(x, p.y - 10, 4); if (y == null || Math.abs(y - (p.y + p.h)) > 8) continue; const tx = Math.floor(x / T), ty = y / T - 1; if (airFree(tx, ty) && airFree(tx, ty - 1) && airFree(tx, ty - 2) && floorY(x - 10, y - 8, 2) === y && floorY(x + 10, y - 8, 2) === y) spot = { x, y }; }
       if (!spot) return false; s.x = spot.x; s.y = spot.y; s.life = 40; s.hist = []; s.wave = 0; preload("wSchale"); setTimeout(() => snd("wSchale", { vol: 0.2, x: s.x }), 500);
     },
     tick(s, dt) { const p = Z.player; s.hist.push({ x: p.x + p.w / 2, y: p.y + p.h, f: p.face || 1, t: s.t }); while (s.hist.length && s.hist[0].t < s.t - 0.45) s.hist.shift(); const near = Math.abs(p.x + p.w / 2 - s.x) < 40; s.near = (s.near || 0) + ((near ? 1 : 0) - (s.near || 0)) * Math.min(1, dt * 2); if (near) s.wave += dt; return s.t < s.life; },
@@ -603,10 +616,10 @@
   def({ id: "lichtwal", tier: 2, n: ["Der Lichtwal", "The light whale"], hint: ["tief am schwarzen See, sehr selten", "deep by the black lake, very rarely"],
     d: ["Ein Wal aus mattem Licht zieht durch die Dunkelheit über dem See und singt. Niemand weiß, wie er hierherkam.", "A whale of faint light drifts through the darkness above the lake and sings. Nobody knows how it got here."],
     where: k => k.back && k.bg === "lake",
-    start(s) { s.dir = Math.random() < 0.5 ? -1 : 1; s.life = 30; s.y = rnd(0.3, 0.45); preload("wWal"); setTimeout(() => snd("wWal", { vol: 0.2, rate: 0.8 }), 5000); },
+    start(s) { s.h = viewHole(); if (!s.h) return false; s.dir = Math.random() < 0.5 ? -1 : 1; s.life = 30; preload("wWal"); setTimeout(() => snd("wWal", { vol: 0.2, rate: 0.8 }), 5000); },
     tick(s) { return s.t < s.life; },
     back(c, s, t, cam, oy, LH) {
-      const u = s.t / s.life, a = Math.min(1, s.t / 5) * Math.min(1, (s.life - s.t) / 5), x = s.dir > 0 ? cam.x - 140 + u * (cam.w + 280) : cam.x + cam.w + 140 - u * (cam.w + 280), y = oy + LH * s.y + Math.sin(t * 0.5) * 6;
+      const u = s.t / s.life, a = Math.min(1, s.t / 5) * Math.min(1, (s.life - s.t) / 5), x = s.dir > 0 ? cam.x - 140 + u * (cam.w + 280) : cam.x + cam.w + 140 - u * (cam.w + 280), y = s.h.y + Math.sin(t * 0.5) * 6;
       c.save(); c.translate(x, y); c.scale(s.dir, 1); c.globalCompositeOperation = "lighter";
       c.globalAlpha = a * 0.22; c.fillStyle = "#7ae0b0"; c.beginPath(); c.moveTo(60, 0); c.quadraticCurveTo(50, -20, 10, -18); c.quadraticCurveTo(-40, -16, -70, -2); c.quadraticCurveTo(-40, 10, 10, 14); c.quadraticCurveTo(50, 14, 60, 0); c.fill();
       const fl = Math.sin(t * 1.2) * 8; c.beginPath(); c.moveTo(-68, -2); c.quadraticCurveTo(-84, -14 + fl, -96, -18 + fl); c.quadraticCurveTo(-86, -2, -96, 12 + fl); c.quadraticCurveTo(-84, 8 + fl, -68, 2); c.fill();

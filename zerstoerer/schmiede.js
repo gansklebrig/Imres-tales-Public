@@ -24,7 +24,8 @@
   const PLUS_DMG = 0.15;                     /* +15 % Schaden je Stufe (additiv): +5 = ×1,75 */
   const GLUT_COST = [1, 1, 2, 2, 3];        /* Glut für +1 … +5 (zusammen 9) */
   const RUNE_AT = [2, 4];                   /* Gravur-Wahl bei diesen Stufen */
-  const goldCost = (p, tier) => Math.round((45 + 30 * p) * (1 + 0.5 * tier) * (1 - 0.15 * (F().rabatt || 0)) / 5) * 5;
+  /* W9: (45 + 30p) → (60 + 40p): Gold soll beim Schmieden die Wahl erzwingen (vorher 1000–3000 Gold übrig am Laufende) */
+  const goldCost = (p, tier) => Math.round((60 + 40 * p) * (1 + 0.5 * tier) * (1 - 0.15 * (F().rabatt || 0)) / 5) * 5;
   const glutMul = () => 1 + 0.25 * (F().glut || 0);
   const chainMul = n => (n >= 12 ? 2 : n >= 8 ? 1.75 : n >= 5 ? 1.5 : n >= 3 ? 1.25 : 1);
   const PLUS_COL = ["#c4bcae", "#efe0a8", "#ffd27a", "#ffa040", "#ff6a3a", "#ff4ab0"];

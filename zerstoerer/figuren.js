@@ -1218,7 +1218,8 @@
     if (pps) {
       const hk = "PH|" + pps + "|" + (wrath ? 1 : 0) + (WI.hurt > 0.3 ? 1 : 0) + (P.anim && P.anim.blink > 0 ? 1 : 0) + (glowK > 0.02 ? 1 : 0);
       drawHead(c, P, glowK, time, alpha, WI.hurt, wrath, rotW, 2);
-      if (!partSpr(c, hk, 11, 9, 19, 4, pps, g => drawHead(g, P, glowK, 0, 1, WI.hurt, wrath, rotW, 1))) drawHead(c, P, glowK, time, alpha, WI.hurt, wrath, rotW, 1);
+      const hb = { anim: { blink: P.anim && P.anim.blink > 0 ? 1 : 0 } }, hu = WI.hurt, gk = glowK;
+      if (!partSpr(c, hk, 11, 9, 19, 4, pps, g => drawHead(g, hb, gk, 0, 1, hu, wrath, 0, 1))) drawHead(c, P, glowK, time, alpha, WI.hurt, wrath, rotW, 1);
       drawHead(c, P, glowK, time, alpha, WI.hurt, wrath, rotW, 3);
     } else drawHead(c, P, glowK, time, alpha, WI.hurt, wrath, rotW);
     /* Glut an den Hornspitzen (bei Tempo, Zorn, im Schlag) */
@@ -1457,7 +1458,7 @@
      Bilder je Zyklus: Ruhe 16 (2 s, 8 B/s), Lauf 8 je Schritt-Zyklus, Ausholen 6 (letztes = voll ausgeholt), Schlag 6, Nachlauf 4, Tod 9. */
   const SPR = new Map(), SPRBIG = new WeakMap(), DID = new WeakMap();
   let sprDid = 0, sprFrame = -1, sprMade = 0, sprScratch = null, sprSg = null;
-  const SPRS = { hit: 0, miss: 0, fall: 0, evict: 0 };
+  const SPRS = { hit: 0, miss: 0, fall: 0, evict: 0, scan: 0 };
   /* Sammelseiten (Atlas) 512×512 = 1 MB; Obergrenze 32 Seiten (minimal 20); verdrängt wird die am längsten unbenutzte Seite */
   const PAGE = 512, PAGES = [];
   let curPg = null;
@@ -1473,10 +1474,10 @@
         for (const q of PAGES) if (q.used < sprFrame && (!pg || q.used < pg.used)) pg = q;
         if (!pg) return null;
         for (const k of pg.keys) SPR.delete(k);
-        pg.keys.length = 0; pg.g.clearRect(0, 0, PAGE, PAGE); SPRS.evict++;
+        pg.keys.length = 0; pg.gen++; pg.g.clearRect(0, 0, PAGE, PAGE); SPRS.evict++;
       } else {
         const cv = document.createElement("canvas"); cv.width = cv.height = PAGE;
-        pg = { cv, g: cv.getContext("2d"), keys: [], used: 0 }; PAGES.push(pg);
+        pg = { cv, g: cv.getContext("2d"), keys: [], used: 0, gen: 0 }; PAGES.push(pg);
       }
       pg.x = 0; pg.y = 0; pg.rh = 0; curPg = pg;
     }
@@ -1515,75 +1516,129 @@
   }
   const EDGE = { hit: false };
   /* Gegner-Gestalt: Rahmen aus Körpergröße; stößt sie an, wird der Rahmen für diese Art vergrößert (nächster Aufbau) */
-  function sprBuild(key, fn, e, d, k, t, mv, ph, ak, time, ps, hLoc) {
-    const big = SPRBIG.get(d) || 1, s = e.size || 1;
-    const R = (Math.max(hLoc * 1.6, e.w / s * 1.3, 24) + 10) * big, up = (hLoc * 1.9 + 16) * big, dn = (hLoc * 0.6 + 10) * big;
-    EDGE.hit = false;
-    const r = sprMake(key, R, R, up, dn, ps, g => fn(g, e, d, k, t, mv, ph, ak, time), EDGE);
-    if (EDGE.hit && big < 2.2) SPRBIG.set(d, big * 1.4);
-    return r;
+  /* Umrisse je Art × Maßstab × Zustandsgruppe: die ersten Bilder werden vermessen (Scan), danach wird direkt in die
+     Sammelseite gezeichnet (Rahmen = vermessener Umriss + Rand, abgeschnitten) – kein Zurücklesen mehr.
+     Schlag- und Todesbilder (Klinge/Knochen fliegen weit) werden immer vermessen. */
+  const SBOX = new Map();
+  function sprBuild(key, cat, fn, e, d, k, t, mv, ph, ak, time, ps, hLoc) {
+    const draw = g => fn(g, e, d, k, t, mv, ph, ak, time);
+    const bk = defId(d) + "|" + ps + "|" + cat; let b = SBOX.get(bk);
+    if (!b || b.n < 3 || cat === "a" || cat === "D") {
+      SPRS.scan++;
+      const big = SPRBIG.get(d) || 1, s = e.size || 1;
+      const R = (Math.max(hLoc * 1.6, e.w / s * 1.3, 24) + 10) * big, up = (hLoc * 1.9 + 16) * big, dn = (hLoc * 0.6 + 10) * big;
+      EDGE.hit = false;
+      const r = sprMake(key, R, R, up, dn, ps, draw, EDGE);
+      if (EDGE.hit && big < 2.2) SPRBIG.set(d, big * 1.4);
+      if (r && r.pg && !EDGE.hit) {
+        if (!b) { b = { n: 0, x0: r.x, y0: r.y, x1: r.x + r.w, y1: r.y + r.h }; if (SBOX.size > 3000) SBOX.clear(); SBOX.set(bk, b); }
+        b.n++; b.x0 = Math.min(b.x0, r.x); b.y0 = Math.min(b.y0, r.y); b.x1 = Math.max(b.x1, r.x + r.w); b.y1 = Math.max(b.y1, r.y + r.h);
+      }
+      return r;
+    }
+    const pad = 2 + 0.12 * Math.max(b.x1 - b.x0, b.y1 - b.y0);
+    const L = pad - b.x0, U = pad - b.y0, W = Math.ceil((b.x1 + pad + L) * ps), H = Math.ceil((b.y1 + pad + U) * ps);
+    const slot = pageAlloc(W, H); if (!slot) return null;
+    const g = slot.pg.g;
+    g.save(); g.beginPath(); g.rect(slot.sx, slot.sy, W, H); g.clip(); g.setTransform(ps, 0, 0, ps, slot.sx + L * ps, slot.sy + U * ps);
+    try { draw(g); } catch (err) { g.restore(); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(slot.sx, slot.sy, W, H); return null; }
+    g.restore(); g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = "source-over";
+    slot.pg.keys.push(key);
+    return { pg: slot.pg, sx: slot.sx, sy: slot.sy, sw: W, sh: H, x: -L, y: -U, w: W / ps, h: H / ps };
+  }
+  /* Welche Zustände eine Gestalt überhaupt unterscheidet (aus ihrem Quelltext und aufgerufenen Gestalten);
+     fremde Gestalten (Nemesis) zählen vorsichtshalber alles */
+  const SDEP = new WeakMap();
+  function shapeDeps(fn, shape) {
+    let r = SDEP.get(fn); if (r) return r;
+    let src = ""; const seen = new Set();
+    const add = f => { if (typeof f !== "function" || seen.has(f)) return; seen.add(f); const t = String(f); src += t; t.replace(/SHAPES\.(\w+)/g, (m, n) => { add(SHAPES[n]); return m; }); };
+    add(fn);
+    const all = /^nm_/.test(shape || "") || !src;
+    const has = re => all || re.test(src);
+    r = { vy: has(/e\.vy|e\.onGround/), aware: has(/e\.aware/), hurt: has(/Q\.hurt/), stun: has(/e\.st\b|broken/), sleep: has(/e\.sleep/), rev: has(/e\.revealed/), gr: has(/e\.grounded/), wob: has(/e\.wob/), alt: has(/Q\.alt/) };
+    SDEP.set(fn, r); return r;
   }
   /* Treffer-Blitz aus dem normalen Bild ableiten (billig, ohne Gestalt neu zu zeichnen) */
   function sprFlash(key, s) {
     if (!s.pg) return s;
-    const slot = pageAlloc(s.sw, s.sh); if (!slot || !s.pg.keys.length) return null;
+    const slot = pageAlloc(s.sw, s.sh); if (!slot || s.pg.gen !== s.gen) return null; /* Quelle inzwischen verdrängt */
     const g = slot.pg.g;
     g.drawImage(s.pg.cv, s.sx, s.sy, s.sw, s.sh, slot.sx, slot.sy, s.sw, s.sh);
     g.globalCompositeOperation = "source-atop"; g.globalAlpha = 0.88; g.fillStyle = "#fff6ea"; g.fillRect(slot.sx, slot.sy, s.sw, s.sh);
     g.globalCompositeOperation = "source-over"; g.globalAlpha = 1; slot.pg.keys.push(key);
     return { pg: slot.pg, sx: slot.sx, sy: slot.sy, sw: s.sw, sh: s.sh, x: s.x, y: s.y, w: s.w, h: s.h };
   }
-  function sprTick() { const fr = Z.gfx ? Z.gfx.frame : 0; if (fr !== sprFrame) { sprFrame = fr; sprMade = 0; } }
+  /* Aufbau verzögert: ein fehlendes Bild wird in diesem Bild noch direkt gezeichnet und erst zu Beginn des nächsten Bildes
+     in die Sammelseite geschrieben – so wird eine Seite nie beschrieben, nachdem sie im selben Bild schon gelesen wurde
+     (das würde Chrome zu einer Kopie der ganzen Seite zwingen). */
+  const SPQ = [], PEND = { pend: true };
+  function sprFlush() {
+    const q = SPQ.splice(0);
+    for (const j of q) { let n = null; try { n = j.mk(); } catch (err) { n = null; } if (n) { if (n.pg) n.gen = n.pg.gen; SPR.set(j.key, n); } else SPR.delete(j.key); }
+  }
+  function sprTick() { const fr = Z.gfx ? Z.gfx.frame : 0; if (fr !== sprFrame) { sprFrame = fr; sprMade = 0; if (SPQ.length) sprFlush(); } }
   /* Bauteil (Spieler) aus dem Zwischenspeicher setzen; false → selbst zeichnen */
   function partSpr(c, key, L, R, U, D, ps, draw) {
-    const s = sprGet(key, () => sprMake(key, L, R, U, D, ps, draw));
+    const s = sprGet(key, () => () => sprMake(key, L, R, U, D, ps, draw));
     if (!s) return false;
     if (s.pg) c.drawImage(s.pg.cv, s.sx, s.sy, s.sw, s.sh, s.x, s.y, s.w, s.h);
     return true;
   }
   function sprGet(key, mk) {
     const s = SPR.get(key);
-    if (s) { SPRS.hit++; if (s.pg) s.pg.used = sprFrame; return s; }
-    if (sprMade >= (Z.gq && Z.gq.mini ? 2 : 3)) { SPRS.fall++; return null; } /* Aufbau-Budget je Bild erschöpft: diesmal direkt zeichnen */
+    if (s) { if (s === PEND) return null; if (s.pg && s.pg.gen !== s.gen) { SPR.delete(key); return null; } SPRS.hit++; if (s.pg) s.pg.used = sprFrame; return s; }
+    if (sprMade >= (Z.gq && Z.gq.mini ? 2 : 3)) { SPRS.fall++; return null; } /* Aufbau-Budget je Bild erschöpft */
     sprMade++; SPRS.miss++;
-    const n = mk(); if (!n) return null;
-    SPR.set(key, n);
-    return n;
+    SPR.set(key, PEND); SPQ.push({ key, mk: mk() }); /* mk() liefert den eigentlichen Aufbau (mit eingefrorenem Zustand) */
+    return null;
   }
   /* Gestalt per Sprite zeichnen; false → Aufrufer zeichnet wie bisher. Q ist bereits gesetzt (setQ). */
   function sprShape(c, e, d, fn, k, flash, tA, moving, phase, ps, hLoc) {
-    let fk, qt, qph = 0;
-    const q0 = Q.pre, q1 = Q.act, q2 = Q.post, q3 = Q.hurt, q4 = Q.deadT, q5 = Q.dead, q6 = Q.time;
+    let fk, qt, qph = 0, cat;
+    const q0 = Q.pre, q1 = Q.act, q2 = Q.post, q3 = Q.hurt, q4 = Q.deadT, q5 = Q.dead, q6 = Q.time, q7 = Q.alt;
+    const dp = shapeDeps(fn, d.shape);
     sprTick();
-    if (e.dead) { const b = Math.min(8, (Q.deadT / 0.07) | 0); fk = "D" + b; Q.deadT = (b + 0.5) * 0.07; Q.dead = cl(Q.deadT / 0.3, 0, 1); qt = 0; }
+    if (e.dead) { const b = Math.min(5, (Q.deadT / 0.1) | 0); fk = "D" + b; cat = "D"; Q.deadT = (b + 0.5) * 0.1; Q.dead = cl(Q.deadT / 0.3, 0, 1); qt = 0; flash = false; }
     else {
       let wb = -1;
-      if (moving) { wb = ((((phase % TAU) + TAU) % TAU) / TAU * 8) | 0; qph = (wb + 0.5) * TAU / 8; }
-      if (Q.ph === "pre") { const b = Math.min(5, (Q.pre * 6) | 0); Q.pre = (b + 1) / 6; fk = "p" + b; qt = 0.5; }
-      else if (Q.ph === "act") { const b = Math.min(5, (Q.act * 6) | 0); Q.act = (b + 0.5) / 6; fk = "a" + b + Q.alt; qt = 0.5; }
-      else if (Q.ph === "post") { const b = Math.min(3, (Q.post * 4) | 0); Q.post = (b + 0.5) / 4; fk = "o" + b; qt = 0.5; }
-      else if (wb >= 0) { fk = "w"; qt = wb * 0.25; }
-      else { const b = ((tA * 8) | 0) % 16; fk = "i" + b; qt = b / 8; }
+      if (moving) { wb = ((((phase % TAU) + TAU) % TAU) / TAU * 8) | 0; if (Q.ph) wb &= 6; /* im Angriff 4 Schrittbilder */ qph = (wb + 0.5) * TAU / 8; }
+      if (Q.ph === "pre") { const b = Math.min(5, (Q.pre * 6) | 0); Q.pre = (b + 1) / 6; fk = "p" + b; qt = 0.5; cat = "p" + Q.kind; }
+      else if (Q.ph === "act") { const b = Math.min(5, (Q.act * 6) | 0); Q.act = (b + 0.5) / 6; if (!dp.alt) Q.alt = 0; fk = "a" + b + Q.alt; qt = 0.5; cat = "a"; }
+      else if (Q.ph === "post") { const b = Math.min(3, (Q.post * 4) | 0); Q.post = (b + 0.5) / 4; fk = "o" + b; qt = 0.5; cat = "p" + Q.kind; }
+      else if (wb >= 0) { fk = "w"; qt = wb * 0.25; cat = "i"; }
+      else { const b = Q.air || Q.hurt > 0.4 ? 0 : ((tA * 8) | 0) % 16; fk = "i" + b; qt = b / 8; cat = "i"; } /* in der Luft/getroffen: Ruhe-Atmen egal */
+      if (wb >= 0 && !Q.ph && (Q.air || Q.hurt > 0.4)) { wb &= 6; qph = (wb + 0.5) * TAU / 8; }
       if (wb >= 0) fk += "m" + wb;
       if (Q.ph) fk += Q.kind;
-      /* Rückstoß zeigt die Ganzkörper-Feder; in der Gestalt nur „getroffen ja/nein“ */
-      if (Q.hurt > 0.4) { Q.hurt = 0.8; fk += "h"; } else Q.hurt = 0;
+      /* Rückstoß zeigt die Ganzkörper-Feder; in der Gestalt nur „getroffen ja/nein“ (und nur, wenn die Gestalt es zeigt) */
+      if (Q.hurt > 0.4 && dp.hurt) { Q.hurt = 0.8; fk += "h"; } else Q.hurt = 0;
     }
     Q.time = qt;
     const st = e.st;
-    const key = defId(d) + "|" + ((ps * 4 + 0.5) | 0) + "|" + fk + (!d.fly && !e.onGround ? (e.vy < 0 ? "u" : "f") : "") +
-      (e.aware && !Q.ph && !e.dead ? "w" : "") + ((st && st.stun > 0) || e.broken > 0 ? "s" : "") + (e.sleep ? "z" : "") + (e.revealed ? "r" : "") + (e.grounded ? "g" : "") + (e.wob > 0 ? "b" : "");
+    if (Q.air && !e.dead) { fk += dp.vy ? (e.vy < 0 ? "u" : "f") : "A"; cat += "A"; }
+    if (dp.aware && e.aware && !Q.ph && !e.dead) fk += "w";
+    if (dp.stun && ((st && st.stun > 0) || e.broken > 0)) fk += "s";
+    if (dp.sleep && e.sleep) fk += "z";
+    if (dp.rev && e.revealed) fk += "r";
+    if (dp.gr && e.grounded) fk += "g";
+    if (dp.wob && e.wob > 0) fk += "b";
     const psq = Math.max(0.5, Math.round(ps * 4) / 4);
+    const key = defId(d) + "|" + psq + "|" + fk;
     const ak = legacyAk();
-    let s = sprGet(key, () => sprBuild(key, fn, e, d, col => col, qt, moving, qph, ak, qt, psq, hLoc));
-    if (s && flash) { const s0 = s; s = sprGet(key + "!", () => sprFlash(key + "!", s0)); }
-    Q.pre = q0; Q.act = q1; Q.post = q2; Q.hurt = q3; Q.deadT = q4; Q.dead = q5; Q.time = q6;
+    let s = sprGet(key, () => {
+      /* Zustand einfrieren: Aufbau läuft erst zu Beginn des nächsten Bildes */
+      const qs = Object.assign({}, Q), ec = Object.assign({}, e); if (e.st) ec.st = Object.assign({}, e.st);
+      return () => { const q0 = Object.assign({}, Q); Object.assign(Q, qs); try { return sprBuild(key, cat, fn, ec, d, col => col, qt, moving, qph, ak, qt, psq, hLoc); } finally { Object.assign(Q, q0); } };
+    });
+    if (s && flash) { const s0 = s; s = sprGet(key + "!", () => () => sprFlash(key + "!", s0)); }
+    Q.pre = q0; Q.act = q1; Q.post = q2; Q.hurt = q3; Q.deadT = q4; Q.dead = q5; Q.time = q6; Q.alt = q7;
     if (!s) return false;
     if (s.pg) c.drawImage(s.pg.cv, s.sx, s.sy, s.sw, s.sh, s.x, s.y, s.w, s.h);
     return true;
   }
-  Z.figSpr = { stats: () => ({ n: SPR.size, mb: PAGES.length, hit: SPRS.hit, miss: SPRS.miss, fall: SPRS.fall, evict: SPRS.evict }),
-    clear: () => { SPR.clear(); for (const q of PAGES) { q.keys.length = 0; q.g.clearRect(0, 0, PAGE, PAGE); } curPg = null; PAGES.length = 0; }, keys: () => [...SPR.keys()] };
+  Z.figSpr = { stats: () => ({ n: SPR.size, mb: PAGES.length, hit: SPRS.hit, miss: SPRS.miss, scan: SPRS.scan, fall: SPRS.fall, evict: SPRS.evict }),
+    clear: () => { SPR.clear(); SPQ.length = 0; for (const q of PAGES) { q.keys.length = 0; q.g.clearRect(0, 0, PAGE, PAGE); } curPg = null; PAGES.length = 0; }, keys: () => [...SPR.keys()] };
 
   Z.drawEnemy = function (c, e, time) {
     const d = e.def;
@@ -1621,7 +1676,8 @@
     const shape = d.shape;
     /* Stufe 0: Gestalt aus dem Sprite-Zwischenspeicher (Pixelmaßstab vor der Ganzkörper-Bewegung bestimmen) */
     let sprPs = 0;
-    if (Z.gq && Z.gq.lean && !Z.sprOff && !d.boss && shape !== "dummy") { const m = c.getTransform(); sprPs = Math.hypot(m.a, m.b); }
+    if (Z.gq && Z.gq.lean && !Z.sprOff) { if (!d.boss && shape !== "dummy") { const m = c.getTransform(); sprPs = Math.sqrt(Math.abs(m.a * m.d - m.b * m.c)); } }
+    else if (PAGES.length && !(Z.gq && Z.gq.lean)) Z.figSpr.clear(); /* Stufe gewechselt: Speicher freigeben */
     const hLoc = e.h / s; /* Körperhöhe in lokalen Einheiten */
     /* ---- Ganzkörper-Bewegung: Anspannen, Zuschlagen, Rückstoß ---- */
     const lf = LEANF[shape] != null ? LEANF[shape] : 1;

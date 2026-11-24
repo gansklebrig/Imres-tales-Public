@@ -1016,7 +1016,7 @@
     if (!mv || !mv.nm || m.stage === "post" || e.trans) return;
     const u = m.stage === "pre" ? Math.min(1, m.t / 0.12) : 1, d = e.dg;
     c.save(); c.globalAlpha = u; c.font = "italic 800 8px 'Alegreya Sans',sans-serif"; c.textAlign = "center";
-    const s = L(mv.nm), w = c.measureText(s).width + 12, x = U.clamp(d.bx, cam.x + w / 2 + 6, cam.x + cam.w - w / 2 - 6), y = cam.y + 66;
+    const s = L(mv.nm), w = c.measureText(s).width + 12, x = U.clamp(d.bx, cam.x + w / 2 + 6, cam.x + cam.w - w / 2 - 6), y = Math.max(cam.y + 66, Z.bossLabelY ? Z.bossLabelY() : 0); /* W9: unter dem Bossbalken */
     c.fillStyle = "rgba(14,8,16,.84)"; c.fillRect(x - w / 2, y - 8, w, 11);
     c.fillStyle = e.aura || "#c86aff"; c.fillRect(x - w / 2, y + 2, w, 1);
     c.fillStyle = mv.danger ? "#ff7a6a" : "#ffd8a0"; c.fillText(s, x, y);

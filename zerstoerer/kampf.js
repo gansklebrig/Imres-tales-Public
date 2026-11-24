@@ -1185,7 +1185,10 @@
       if (o.kb) { e.vx = dir * o.kb * kbRes; if (!e.def.fly) e.vy = Math.min(e.vy, -(o.kbUp || 30) * kbRes); else e.vy -= (o.kbUp || 20) * kbRes; e.kbT = 0.18; }
       if (o.wallSlam) e.wallSlam = 0.35;
       e.poise = (e.poise || 0) + dmg;
-      if (!e.def.boss && (o.heavy || e.poise > e.hpMax * (e.def.poise || 0.12)) && !(e.act && e.act.armor)) { e.poise = 0; Z.staggerEnemy && Z.staggerEnemy(e, o.heavy ? 0.35 : 0.22); }
+      /* W9: Elites sind standfester – schwere Treffer werfen sie erst ab halber Taumel-Schwelle aus dem Angriff, sonst 1,6-fache Schwelle,
+         und sie fangen sich schneller (vorher ließ sich ein Elite mit Hammer/Krallen dauerhaft im Taumeln halten) */
+      const pz = e.hpMax * (e.def.poise || 0.12) * (e.elite ? 1.6 : 1);
+      if (!e.def.boss && ((o.heavy && (!e.elite || e.poise > pz * 0.5)) || e.poise > pz) && !(e.act && e.act.armor)) { e.poise = 0; Z.staggerEnemy && Z.staggerEnemy(e, (o.heavy ? 0.35 : 0.22) * (e.elite ? 0.7 : 1)); }
       e.aware = true; e.lostT = 0;
     }
     if (e.hp <= 0) Z.killEnemy && Z.killEnemy(e, o);
