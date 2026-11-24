@@ -42563,7 +42563,7 @@ document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.
 const A=window.__hsATTR={v:1,aus:0,err:[]};const aErr=e=>{if(A.err.length<30)A.err.push(String(e&&e.stack||e).slice(0,300))};
 const K=['st','ge','ko','in','we','ch'];
 const AN={st:{n:'Stärke',k:'STÄ',c:'#e8785a',w:'Stärke-Waffen und -Fähigkeiten +4 % Schaden'},ge:{n:'Geschick',k:'GES',c:'#a8d46a',w:'Geschick-Waffen und -Fähigkeiten +4 % Schaden, +0,5 % Krit'},
- ko:{n:'Konstitution',k:'KON',c:'#e0a860',w:'+5 % Leben'},in:{n:'Intelligenz',k:'INT',c:'#c4a0f0',w:'Intelligenz-Fähigkeiten +4 % Schaden, −1 % Abklingzeit'},
+ ko:{n:'Konstitution',k:'KON',c:'#e0a860',w:'+6 % Leben, −1 % erlittener Schaden'},in:{n:'Intelligenz',k:'INT',c:'#c4a0f0',w:'Intelligenz-Fähigkeiten +4 % Schaden, −1 % Abklingzeit'},
  we:{n:'Weisheit',k:'WEI',c:'#e8dca0',w:'Weisheits-Fähigkeiten und Begleiter +4 % Schaden'},ch:{n:'Charisma',k:'CHA',c:'#ff9ccc',w:'Charisma-Fähigkeiten +4 % Schaden, +2 % Kontrolldauer, +2 % Gold'}};
 A.K=K;A.AN=AN;
 const BASIS={barradin:{st:8,ge:14,ko:12,in:13,we:10,ch:15},echo:{st:10,ge:13,ko:14,in:12,we:15,ch:8},friedrich:{st:12,ge:15,ko:13,in:10,we:14,ch:8},ezekiel:{st:14,ge:15,ko:13,in:12,we:10,ch:8}};
@@ -42630,7 +42630,8 @@ function waffeAttr(q,melee){const it=q.eq&&q.eq[melee?'weapon':'ranged'];const r
 const SKC={};
 function quelleAttr(q,o){if(o.pet)return BEGL[q.id];if(o.basic)return waffeAttr(q,!!o.melee);let k='';try{k=dmSrc(o)}catch(e){}if(!k)return null;if(k==='pet:rex'||k.indexOf('pet:')===0)return BEGL[q.id];
  const c=q.id+'|'+k;if(c in SKC)return SKC[c];const r=astAttr(q,k);SKC[c]=r;return r}
-hook('stats',s=>{if(!an()||!P||!P.id)return;sync(P);const v=verteilt(P);if(v.ge)s.crit+=0.005*v.ge;if(v.ko)s.hpP+=0.05*v.ko;if(v.in)s.cdr+=0.01*v.in;if(v.ch){s.ctrlP+=0.02*v.ch;s.gold+=0.02*v.ch}});
+hook('stats',s=>{if(!an()||!P||!P.id)return;sync(P);const v=verteilt(P);if(v.ge)s.crit+=0.005*v.ge;if(v.ko)s.hpP+=0.06*v.ko;if(v.in)s.cdr+=0.01*v.in;if(v.ch){s.ctrlP+=0.02*v.ch;s.gold+=0.02*v.ch}});
+hook('hurtMul',()=>{if(!an()||!P||!P.id)return 1;const v=verteilt(P);return v.ko?1-Math.min(0.2,0.01*v.ko):1});
 hook('dmgMul',(e,o)=>{if(!an()||!P||!P.id||!o)return 1;const v=verteilt(P);let n=0;for(const k in v)n+=v[k];if(!n)return 1;const a=quelleAttr(P,o);return a&&v[a]?1+0.04*v[a]:1});
 /* ---------- Würfelproben ---------- */
 if(typeof ev2Start==='function'){const es=ev2Start;ev2Start=function(ev){const r=es.apply(this,arguments);try{if(an()&&G.ev&&G.ev.ev&&G.ev.ev.opts){for(const o of G.ev.ev.opts){if(!o||!o.skill||!PROBE[o.skill])continue;if(!o.atB0)o.atB0=Object.assign({},o.bonus||{});const b=Object.assign({},o.atB0);
