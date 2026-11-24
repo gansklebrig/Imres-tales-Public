@@ -38,7 +38,7 @@
     if (G.layers && G.dropLayer) { G.dropLayer(G.layers.far.cv); G.dropLayer(G.layers.mid.cv); }
     const H = Math.ceil((Z.cam.h + 120));
     const mk = s => { const cv = document.createElement("canvas"); cv.width = Math.ceil(LW * s); cv.height = Math.ceil(H * s); const c = cv.getContext("2d"); const sx = cv.width / LW, sy = cv.height / H; c.scale(sx, sy); return { cv, c, s, sx, sy, H }; };
-    const far = mk(Math.min(G.scale, 1.15)), mid = mk(Math.min(G.scale, 1.7));
+    const far = mk(Math.min(G.scale, 1.15)), mid = mk(Math.min(G.scale, 1.7)); G.bgBauten = []; G._farC = far.c;
     /* Himmel direkt in die ferne Ebene backen (spart eine Vollbildfüllung pro Bild) */
     const g = far.c.createLinearGradient(0, 40, 0, H - 80); g.addColorStop(0, B.sky[0]); g.addColorStop(0.6, B.sky[1]); g.addColorStop(1, B.sky[2]); far.c.fillStyle = g; far.c.fillRect(0, 0, LW, H);
     const R = Z.Rng((B.name[0].length * 9973 + 17) >>> 0);
@@ -61,6 +61,7 @@
   }
   /* Turm mit Zinnen oder Kegeldach, erleuchteten Fenstern und Mondkante */
   function bgTower(c, x, base, w, h, col, R, winCol, rim) {
+    if (G.bgBauten && c === (G._farC || null)) G.bgBauten.push([c.getTransform().e / (c.getTransform().a || 1) + x, base, w, h]); /* R42: Prüfhilfe */
     c.fillStyle = col; c.fillRect(x, base - h, w, h);
     bgCourses(c, x, base - h, w, h, 0.18, 5);
     if (rim) { c.fillStyle = rim; c.fillRect(x + w - 1.2, base - h, 1.2, h); }
@@ -77,8 +78,10 @@
         /* Sterne, Mond, Wolken */
         if (kind !== "spires" && kind !== "storm") for (let i = 0; i < 90; i++) { f.fillStyle = "rgba(255,240,230," + (0.2 + R() * 0.6) + ")"; const sz = R() < 0.1 ? 1.4 : 0.8; f.fillRect(R() * LW, R() * H * 0.6, sz, sz); }
         if (kind === "castle" || kind === "harbour" || kind === "camp" || kind === "ramparts") { const mx = 380, my = 50; D.glow(f, mx, my, 60, "rgba(255,230,200,.25)"); D.circ(f, mx, my, 14, "#f0e6d4"); D.circ(f, mx - 4, my - 3, 3, "#d8ccb8"); D.circ(f, mx + 5, my + 4, 2, "#d8ccb8"); }
-        if (kind === "spires") { for (let i = 0; i < 14; i++) { const x = R() * LW, y = 30 + R() * 120; repeatDraw(f, () => D.ell(f, x, y, 40 + R() * 60, 6 + R() * 8, "rgba(255,120,60," + (0.08 + R() * 0.1) + ")")); } }
-        if (kind === "storm") { for (let i = 0; i < 10; i++) { const x = R() * LW, y = 20 + R() * 100; repeatDraw(f, () => D.ell(f, x, y, 60 + R() * 70, 12 + R() * 14, "rgba(30,44,30," + (0.4 + R() * 0.3) + ")")); } }
+        /* R42: Wolkenschleier weich (elliptischer Verlauf) statt harter Ovale; Schalter off.wolkenweich */
+        const ell = (x, y, rx, ry, rgb, a) => { if (G.off && G.off.wolkenweich) { D.ell(f, x, y, rx, ry, "rgba(" + rgb + "," + a + ")"); return; } f.save(); f.translate(x, y); f.scale(rx, ry); const g = f.createRadialGradient(0, 0, 0, 0, 0, 1); g.addColorStop(0, "rgba(" + rgb + "," + a + ")"); g.addColorStop(0.6, "rgba(" + rgb + "," + (a * 0.55) + ")"); g.addColorStop(1, "rgba(" + rgb + ",0)"); f.fillStyle = g; f.fillRect(-1, -1, 2, 2); f.restore(); };
+        if (kind === "spires") { for (let i = 0; i < 14; i++) { const x = R() * LW, y = 30 + R() * 120, rx = 40 + R() * 60, ry = 6 + R() * 8, a = 0.08 + R() * 0.1; repeatDraw(f, () => ell(x, y, rx * 1.2, ry * 1.4, "255,120,60", a * 1.3)); } }
+        if (kind === "storm") { for (let i = 0; i < 10; i++) { const x = R() * LW, y = 20 + R() * 100, rx = 60 + R() * 70, ry = 12 + R() * 14, a = 0.4 + R() * 0.3; repeatDraw(f, () => ell(x, y, rx * 1.2, ry * 1.3, "34,40,30", a)); } }
         /* zwei Bergketten: die hintere im Dunst, die vordere mit Mondkante (nahtlos über LW) */
         const ridge = (yb, a1, a2, p1, p2, col, rim) => { const yf = x => yb - Math.sin(x * Math.PI * 2 / LW * p1) * a1 - Math.sin(x * Math.PI * 2 / LW * p2 + 2) * a2;
           const g = f.createLinearGradient(0, yb - a1 - a2, 0, H); g.addColorStop(0, col); g.addColorStop(1, shade(col.slice(0, 7), -0.4)); f.fillStyle = g;

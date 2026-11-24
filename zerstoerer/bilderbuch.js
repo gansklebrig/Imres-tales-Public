@@ -270,6 +270,7 @@
   /* op: head (cone|spire|cren|broken|dome|onion|none), far (0 nah … 1 fern), roof, garg, bart, oriel, ivy, wk, lit, wander, round, door, drapes */
   function tower(o, x, base, w, h, col, op) {
     op = op || {}; const { c, R, pal } = o; const far = op.far || 0;
+    if (o.bauten) o.bauten.push([x, base, w, h]); /* R42: Prüfhilfe Z.bbBauten (Bauwerk-Fuß) */
     const top = base - h, roof = op.roof || o.hz(R.pick(pal.roofs), far * 0.8);
     const ch = w > 26 ? 4.4 : w > 14 ? 3.6 : 3;
     const pl = h > 40 && op.plinth !== false ? Math.min(h * 0.08, 8) : 0;
@@ -1728,7 +1729,7 @@
     const c = cv.getContext("2d"); c.scale(sx, sy);
     const R = Rng(((B.name[0].length * 7919) ^ ((lv.seed || 7) * 31)) >>> 0);
     const pal = palette(B, kind);
-    const o = P(c, R, pal, H, s);
+    const o = P(c, R, pal, H, s); o.bauten = [];
     try { fn(o, H); } catch (err) { console.error("bilderbuch", kind, err); }
     const tF = performance.now();
     o.zt = pal.zt;
@@ -1831,6 +1832,7 @@
   /* deckt die Bilderbuchseite gerade das ganze Bild? Dann braucht es weder Himmel noch ferne Ebene darunter */
   Z.bilderbuchCovers = () => !!(page && !page.none && page.opaque && page.lvRef === Z.level && page.q === curQ() && Math.abs(page.H - Math.ceil(Z.cam.h + 120)) <= 2);
   Z.bilderbuchPage = () => page;
+  Z.bbBauten = () => (page && page.o && page.o.bauten) || [];
   Z.bilderbuchBuild = () => { build(); return page && page.ms; };
   /* Prüfhilfe: ganze Seite samt Leben in ein Bild malen */
   Z.bilderbuchDump = function (t, sc) {
