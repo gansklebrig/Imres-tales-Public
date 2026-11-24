@@ -821,6 +821,7 @@
     if ((lv.morsch || []).length) l.push(...SRS.holz, ...SRS.poltern, ...SRS.planke);
     l.push(AM("a_klangschale"), AM("e_windstoss_1"), KS("gong"));
     { const ts = new Set(); for (const k in lv.cells || {}) { const t = tplBase(lv.cells[k].tpl); if (TPLK[t]) ts.add(t); } for (const t of ts) l.push(AM(TPLK[t].loop)); if (ts.size) l.push(...SRS.poltern, ...SRS.kette, ...SRS.knarz.slice(0, 8), ...SRS.ruck, ...SRS.planke, AM("e_glocke_1"), AM("e_glocke_2"), AM("e_glocke_3"));
+      if ((lv.rollers || []).length || (lv.swings || []).length || (lv.tides || []).length) l.push(...BWS.swing, ...BWS.kerze.slice(0, 8), AM("a_wellen2"), ...SRS.blubb, ...SRS.holz);
       if (ts.has("zisterne")) for (let i = 1; i <= 23; i++) l.push(AM("n_tropfen_" + i)); if (ts.has("uhrwerk")) l.push(KS("clave1"), KS("clave2"));
       for (const [inst, o] of [["cel", 3], ["glock", 3], ["rgl", 1]]) for (const st of [0, 2, 4, 7]) { const pr = taktTon(inst, st, o); if (pr) l.push(pr.path); } }
     preload(l);
@@ -985,6 +986,66 @@
     }
   }
 
+  /* ======================= BEWEGLICHES (W13 R7, erkundung.js: S.rollers, S.swings, S.tides) =======================
+     Fass-Rutsche: 0,9 s Vorwarnung (Balken knarzt, Rumpeln schwillt in drei Stößen an), Fass fällt heraus (dumpfer Holzschlag),
+       rollt mit Dopplertönung (heller, wenn es auf die Bildmitte zurollt, dunkler, wenn es sich entfernt) und zerbricht am Ende.
+     Kronleuchter: Kette klirrt an den Umkehrpunkten, Luftzug („Whoosh“) beim Durchschwingen nach Geschwindigkeit, Kerzen knistern
+       leise und flackern hörbar stärker, je schneller er schwingt.
+     Gezeiten: Wasser als Schleife, deren Pegel dem Wasserstand folgt (anschwellend beim Steigen, abklingend beim Fallen),
+       Blasen vor dem Steigen, Gurgeln beim Ablaufen. */
+  const BW = { stats: { warn: 0, fass: 0, roll: 0, prall: 0, kette: 0, whoosh: 0, kerze: 0, gezeit: 0 }, tideV: 0, tideOn: false };
+  KL.beweglich = BW;
+  const BWS = { swing: [KS("fx_rp_swing"), KS("fx_rp_swing2")], kerze: RA("n_feuerknistern_", 18) };
+  function bewegTick(dt) {
+    const S = Z.erkundung && Z.erkundung(); if (!S || S.lv !== Z.level) return;
+    const cam = Z.cam, cx = cam ? cam.x + cam.w / 2 : 0;
+    /* --- Fässer --- */
+    for (const ro of S.rollers || []) {
+      const k = ro._kl || (ro._kl = { warn: false, seen: new Map(), t: 0 });
+      if (ro.warn && !k.warn) { BW.stats.warn++; wshot(pk(SRS.knarz), ro.x, ro.y - 10, { vol: 0.16, rate: 0.75, gap: 0, tag: "rw" });
+        for (let i = 0; i < 3; i++) wshot(pk(SRS.poltern), ro.x, ro.y - 10, { vol: 0.08 + i * 0.05, rate: 0.5 + i * 0.05, delay: 0.1 + i * 0.25, gap: 0, tag: "rwp" + i }); }
+      k.warn = ro.warn;
+      const now = new Set(ro.barrels);
+      for (const b of ro.barrels) if (!k.seen.has(b)) { BW.stats.fass++; wshot(SRS.planke[0], b.x, b.y, { vol: 0.3, rate: 0.6, gap: 0, tag: "rf" }); k.seen.set(b, { t: 0.15, x: b.x, y: b.y }); }
+      for (const [b, st] of k.seen) {
+        if (!now.has(b)) { k.seen.delete(b); if (onCam(st.x, st.y, 60)) { BW.stats.prall++; wshot(pk(SRS.holz), st.x, st.y, { vol: 0.32, rate: 0.75, gap: 0, tag: "rp" }); wshot(pk(SRS.poltern), st.x, st.y, { vol: 0.2, rate: 0.6, delay: 0.08, gap: 0, tag: "rp2" }); } continue; }
+        st.x = b.x; st.y = b.y; st.t -= dt;
+        if (st.t <= 0 && onCam(b.x, b.y, 80) && b.vy === 0) {
+          st.t = 0.2 + Math.random() * 0.06; BW.stats.roll++;
+          const toward = Math.sign(cx - b.x) === Math.sign(b.vx), dop = toward ? 1.14 : 0.88; /* Dopplertönung */
+          wshot(pk(SRS.poltern), b.x, b.y, { vol: 0.1, rate: 0.55 * dop + Math.random() * 0.05, gap: 0, tag: "rr", verb: 0.25 });
+        }
+      }
+    }
+    /* --- Kronleuchter --- */
+    for (const s2 of S.swings || []) {
+      const hx = s2.ax + Math.sin(s2.th) * s2.L, hy = s2.ay + Math.cos(s2.th) * s2.L; if (!onCam(hx, hy, 60)) { s2._kl = null; continue; }
+      const k = s2._kl || (s2._kl = { om: s2.om, th: s2.th, kt: 1 }), sp = Math.abs(s2.om);
+      if (Math.sign(s2.om) !== Math.sign(k.om) && Math.abs(k.om) > 0.25) { BW.stats.kette++; wshot(pk(SRS.kette), s2.ax, s2.ay + 10, { vol: 0.08 + Math.min(0.1, Math.abs(s2.th) * 0.1), rate: 1.25 + Math.random() * 0.15, gap: 0, tag: "kk" }); }
+      if (Math.sign(s2.th) !== Math.sign(k.th) && sp > 1.2) { BW.stats.whoosh++; wshot(pk(BWS.swing), hx, hy, { vol: Math.min(0.32, 0.08 + sp * 0.06), rate: 0.7 + Math.min(0.4, sp * 0.08), gap: 0, tag: "kw", verb: 0.4 }); }
+      k.kt -= dt * (1 + sp * 0.8);
+      if (k.kt <= 0) { k.kt = 1.2 + Math.random() * 1.6; BW.stats.kerze++; wshot(pk(BWS.kerze), hx, hy, { vol: 0.05 + Math.min(0.08, sp * 0.03), rate: 1.2 + sp * 0.1, gap: 0, tag: "kz2", verb: 0.3 }); }
+      k.om = s2.om; k.th = s2.th;
+    }
+    /* --- Gezeiten (nächste Kammer im Bild) --- */
+    let tv = 0, tx = 0, ty = 0;
+    const T = Z.TILE, CW = Z.CW || 24, CH = Z.CH || 14;
+    for (const o of S.tides || []) {
+      const [ccx, ccy] = o.td.cell.split(",").map(Number), x = (ccx + 0.5) * CW * T, y = (ccy + 0.7) * CH * T;
+      const [v] = posMix(x, y, 1.1); if (v < 0.03) continue;
+      const ph = o.ph, lvl = ph < 4.5 ? 0.25 : ph < 6 ? 0.25 + (ph - 4.5) / 1.5 * 0.35 : ph < 7.5 ? 0.6 + (ph - 6) / 1.5 * 0.4 : ph < 13 ? 1 - (ph - 7.5) / 5.5 * 0.25 : ph < 14.5 ? 0.75 - (ph - 13) / 1.5 * 0.5 : 0.25;
+      if (v * lvl > tv) { tv = v * lvl; tx = x; ty = y; }
+      const k = o._kl || (o._kl = { ph }), cross = (a) => k.ph < a && ph >= a;
+      if (cross(4.6) || cross(5.2) || cross(5.7)) { BW.stats.gezeit++; wshot(pk(SRS.blubb), x, y, { vol: 0.14, rate: 0.6 + Math.random() * 0.3, gap: 0, tag: "gb", far: 1.2 }); }
+      if (cross(13.1) || cross(13.6) || cross(14.1)) { BW.stats.gezeit++; wshot(pk(SRS.blubb), x, y, { vol: 0.18, rate: 0.45 + Math.random() * 0.2, gap: 0, tag: "gg", far: 1.2 }); }
+      k.ph = ph;
+    }
+    if (tv > 0.01 || BW.tideV > 0.01) {
+      const path = AM("a_wellen2"); if (!BW.tideOn) { BW.tideOn = true; A.loop("bw_tide", path, 0); }
+      BW.tideV = tv; A.loopVol("bw_tide", tv * 0.55 * (normOf(path, -32) || 0.5), 0.5);
+    }
+  }
+
   /* ======================= RÜCKWEG-TOR (W14, rueckweg.js) =======================
      Beobachtet Z.rueckweg.zustand(): solange das Tor offen ist, ein leiser Schimmer am Tor (Klangschale als Schleife nach Abstand,
      dazu ab und zu ein Celesta-Funke in der Tonart der Musik); erlischt die Gnade, sinken drei Glockentöne herab und ein tiefer,
@@ -1101,6 +1162,7 @@
     try { sonderTick(dt); } catch (e) { if (!KL.err7) { KL.err7 = 1; console.error(e); } }
     try { rueckTick(dt); } catch (e) { if (!KL.err8) { KL.err8 = 1; console.error(e); } }
     try { tplTick(dt); } catch (e) { if (!KL.err9) { KL.err9 = 1; console.error(e); } }
+    try { bewegTick(dt); } catch (e) { if (!KL.err10) { KL.err10 = 1; console.error(e); } }
     /* Effekte-Dichte reiten (kern.js A.ride): ab 4 gleichzeitigen Effekten sachte zurück, bei 10+ etwa −4 dB; schnell runter, langsam wieder hoch */
     if (A.ride) { const n = A.live || 0, tgt = clamp(1 - 0.065 * (n - 3), 0.62, 1); KL.ride = tgt; A.ride.gain.setTargetAtTime(tgt, A.ctx.currentTime, tgt < A.ride.gain.value ? 0.12 : 1.1); }
   };

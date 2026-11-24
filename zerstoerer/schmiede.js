@@ -176,7 +176,7 @@
   Z.anvils = [];
   Z.placeAnvil = function (x, y, o) {
     o = o || {};
-    const a = { x, y, charges: 2 + (F().amboss ? 1 : 0), used: 0, t: Math.random() * 9 };
+    const a = { x, y, charges: 2 + (F().amboss ? 1 : 0) + (Z.level && !Z.level.passage && !Z.level.arena ? 1 : 0) /* W9 9. Runde: Ambosse in Gebieten (abseits des Durchgangs) 3 Schläge – gründliche Läufe erreichten nur 0–1× +5 */, used: 0, t: Math.random() * 9 };
     Z.anvils.push(a);
     (Z.interacts = Z.interacts || []).push({ x, y, r: 30, h: 38, anvil: a,
       label: () => L(["Glutamboss", "Ember anvil"]) + (a.used >= a.charges ? L([" · erloschen", " · cold"]) : " · " + (a.charges - a.used) + L([" Schläge", " strikes"])),
@@ -495,7 +495,7 @@
     if ([3, 5, 8, 12].includes(n)) { const P = Z.player; if (P) { FX.text(P.x + P.w / 2, P.y - 26, L(["Kette ", "Chain "]) + n + " · " + L(["Gold ×", "Gold ×"]) + chainMul(n).toFixed(2).replace(/0$/, "").replace(/\.$/, ""), "#ffd27a", true); A.play("coin", { vol: 0.5, rate: 0.8 + n * 0.03 }); } }
     const cx = e.x + e.w / 2, cy = e.y + e.h / 2;
     if (e.elite) {
-      if (Z.R() < 0.35 * glutMul()) Z.spawnReward("glut", cx, cy, { n: tierNow() >= 4 && Z.R() < 0.25 ? 2 : 1 });
+      if (Z.R() < 0.48 /* W9 9. Runde: 0,35 → 0,48 (belohnt gründliches Aufräumen) */ * glutMul()) Z.spawnReward("glut", cx, cy, { n: tierNow() >= 4 && Z.R() < 0.25 ? 2 : 1 });
       if (Z.R() < 0.1) Z.spawnReward("rolle", cx, e.y + e.h, { drop: true });
     } else if (Z.R() < 0.006 * glutMul()) Z.spawnReward("glut", cx, cy, { n: 1 });
     return r;
@@ -504,7 +504,7 @@
   Z.onChestOpen = function (p, cursed) {
     if (Z.chChest) Z.chChest();
     if (cursed) Z.spawnReward("glut", p.x, p.y - 8, { n: 1 });
-    else if (Z.R() < 0.12 * glutMul()) Z.spawnReward("glut", p.x, p.y - 8, { n: 1 });
+    else if (Z.R() < 0.18 /* W9 9. Runde: 0,12 → 0,18 */ * glutMul()) Z.spawnReward("glut", p.x, p.y - 8, { n: 1 });
   };
   Z.onBossDown = function (b) {
     later(() => Z.spawnReward("glut", b.x + b.w / 2, b.y + b.h / 2, { n: b.warden ? 1 : 2 }), 600);
