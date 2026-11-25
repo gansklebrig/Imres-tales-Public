@@ -152,7 +152,7 @@
     if (!RS) return;
     if (RS.i >= RS.stages.length) return ergebnis("sieg");
     const next = RS.stages[RS.i], from = Z.level ? Z.level.id : "";
-    const go = () => { if (RS) Z.loadArea("passage", { from, to: next.area }); };
+    const go = () => { if (RS && !(Z.player && Z.player.dead)) Z.loadArea("passage", { from, to: next.area }); }; /* W26 Erstspieler: in der Überblendung gestorben → nicht mit 0 LP weiter */
     if (Z.ui && Z.ui.fade) Z.ui.fade(go); else go();
   }
   /* Ruhe-Kammer */

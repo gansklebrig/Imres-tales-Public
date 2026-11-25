@@ -9,7 +9,15 @@
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const M = () => Z.meta;
   const inp = Z.input;
-  function metaInit() { const m = M(); m.ach = m.ach || {}; m.runes = m.runes || {}; m.heroes = m.heroes || { Z: 1 }; m.capes = m.capes || { rot: 1 }; m.cape = m.cape || "rot"; m.hero = m.hero || "Z"; m.pactSel = m.pactSel || []; m.deaths = m.deaths || 0; m.bonus = m.bonus || {}; m.totalKills = m.totalKills || 0; m.totalGold = m.totalGold || 0; }
+  function metaInit() { const m = M(); m.ach = m.ach || {}; m.runes = m.runes || {}; m.heroes = m.heroes || { Z: 1 }; m.capes = m.capes || { rot: 1 }; m.cape = m.cape || "rot"; m.hero = m.hero || "Z"; m.pactSel = m.pactSel || []; m.deaths = m.deaths || 0; m.bonus = m.bonus || {}; m.totalKills = m.totalKills || 0; m.totalGold = m.totalGold || 0;
+    /* W26 Erstspieler: kaputte Spielstände (falsche Typen) dürfen den Laufstart nicht verhindern */
+    const obj = v => v && typeof v === "object" && !Array.isArray(v), num = v => (Number.isFinite(v) ? v : 0);
+    for (const k of ["ach", "runes", "bonus"]) if (!obj(m[k])) m[k] = {};
+    if (!obj(m.heroes)) m.heroes = { Z: 1 }; if (!obj(m.capes)) m.capes = { rot: 1 };
+    if (typeof m.cape !== "string") m.cape = "rot"; if (typeof m.hero !== "string") m.hero = "Z";
+    if (!Array.isArray(m.pactSel)) m.pactSel = []; else m.pactSel = m.pactSel.filter(x => typeof x === "string");
+    m.deaths = num(m.deaths); m.totalKills = num(m.totalKills); m.totalGold = num(m.totalGold);
+  }
   metaInit();
 
   /* ======================= PAKTE ======================= */
@@ -1305,7 +1313,7 @@
     const lv = Z.level; if (!lv || !lv.rift) return;
     const P = Z.player, r = lv.rift;
     lv.riftT -= dt;
-    if (P && Math.abs(P.x + P.w / 2 - r.x) < 22 && Math.abs(P.y + P.h - r.y) < 30 && inp.pressed.use) { inp.consume("use"); lv.rift = null; Z.ui.fade(() => { Z.run.route.push("herz"); Z.loadArea("herz"); }); return; }
+    if (P && Math.abs(P.x + P.w / 2 - r.x) < 22 && Math.abs(P.y + P.h - r.y) < 30 && inp.pressed.use) { inp.consume("use"); lv.rift = null; Z.ui.fade(() => { if (!Z.run || !Z.player || Z.player.dead || Z.level !== lv) return; /* W26 Erstspieler: kein Gebietswechsel für Tote */ Z.run.route.push("herz"); Z.loadArea("herz"); }); return; }
     if (lv.riftT <= 0) { const k = lv.riftKey; lv.rift = null; Z.ui.ending(k); }
   }
 

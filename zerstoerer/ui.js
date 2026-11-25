@@ -180,13 +180,20 @@
     if (o.type === "station") return { K: t("fountain"), M: t("shop"), S: t("altar") }[o.s.id] || t("use");
     return t("use");
   }
+  /* W26 Erstspieler: Schlagwörter der Waffen/Fähigkeiten (daten.js „tags“, nur deutsch) im EN-Modus übersetzen */
+  const TAGS_EN = { Abpraller: "Ricochet", Abstand: "Distance", Ausweichen: "Evasion", Begleiter: "Companion", Beweglich: "Mobile", Bewegung: "Movement", Blitz: "Lightning", Blutung: "Bleed", blutung: "bleed", Brand: "Burn", Dornen: "Thorns",
+    Durchschlag: "Pierce", Einzelziel: "Single target", Erholung: "Recovery", Explosion: "Explosion", Faden: "Thread", Falle: "Trap", Fechter: "Fencer", Fernkampf: "Ranged", "Fernkampf-Schutz": "Ranged defence", Festhalten: "Hold",
+    Feuer: "Fire", "Fläche": "Area", Frost: "Frost", Gift: "Poison", Glaskanone: "Glass cannon", Gruppe: "Crowd", Gruppen: "Crowds", Heilung: "Healing", Heranziehen: "Pull", Kettenblitz: "Chain lightning", Kontrolle: "Control",
+    "Köder": "Decoy", Lebensraub: "Lifesteal", Panzer: "Armour", Parade: "Parry", "Präzision": "Precision", Reichweite: "Reach", "Rückstoß": "Knockback", "Rückwurf": "Reflect", Schutz: "Protection", "Schwächen": "Weaken",
+    Wucht: "Impact", "gegen Untote": "vs. undead", kritisch: "critical", licht: "light", meuchler: "assassin", schnell: "fast", schwer: "heavy", start: "starter" };
+  const tagTxt = x => (Z.settings && Z.settings.lang === "en" && TAGS_EN[x]) || x;
   function itemCardHTML(it, cmp) {
     const d = Z.itemDef(it), r = Z.RARITY[it.rar], st = Z.STATS[d.stat];
     const kind = it.type === "skill" ? L(["Fähigkeit", "Skill"]) : d.kind === "ranged" ? L(["Fernkampf", "Ranged"]) : d.kind === "shield" ? L(["Schild", "Shield"]) : L(["Nahkampf", "Melee"]);
     const lvl = Z.metaLvl(it.id);
     return (Z.curseCardHTML ? Z.curseCardHTML(it) : "") + '<div class="ic-kopf" style="--rar:' + (it.cursed ? "#c040ff" : r.col) + '"><b>' + esc(L(d.n)) + (it.plus ? ' <span class="plus" style="color:' + (Z.plusCol ? Z.plusCol(it.plus) : "#ffd27a") + '">+' + it.plus + "</span>" : "") + "</b>" + (lvl ? ' <span class="lv" title="' + esc(L(["Nundros Schärfe (dauerhaft)", "Nundro's sharpening (permanent)"])) + '">◆' + lvl + "</span>" : "") + '<small>' + esc(L(r.n)) + " · " + kind + ' · <span style="color:' + st.col + '">' + esc(L(st.n)) + "</span> · " + L(["Stufe", "Tier"]) + " " + (it.tier + 1) + "</small></div>" +
       '<p>' + esc(L(d.d)) + "</p>" + (it.aff.length ? '<ul class="aff">' + it.aff.map(a => "<li>" + esc(L(Z.AFFIX[a].n)) + ": " + esc(L(Z.AFFIX[a].d)) + "</li>").join("") + "</ul>" : "") +
-      (d.tags ? '<p class="tags">' + d.tags.map(x => "<span>" + esc(x) + "</span>").join("") + "</p>" : "") +
+      (d.tags ? '<p class="tags">' + d.tags.map(x => "<span>" + esc(tagTxt(x)) + "</span>").join("") + "</p>" : "") +
       (lvl >= 3 && d.master ? '<p class="meister">' + esc(L(d.master)) + "</p>" : "") +
       (Z.cardExtraHTML ? Z.cardExtraHTML(it, cmp) : "") +
       (cmp ? '<p class="mul">' + L(["Kraft", "Power"]) + ": ×" + Z.itemMul(it).toFixed(2) + "</p>" : "");
@@ -693,7 +700,9 @@
   function slotName(n) { return L(["Spielstand ", "Save "]) + n; }
   function fmtWhen(ts) {
     if (!ts) return "";
-    const d = new Date(ts), now = new Date(), p = x => String(x).padStart(2, "0"), hm = p(d.getHours()) + ":" + p(d.getMinutes());
+    const d = new Date(ts), now = new Date();
+    if (!Number.isFinite(d.getTime())) return ""; /* W26 Erstspieler: kaputtes „zuletzt“ → kein „NaN.NaN.NaN“ im Titel */
+    const p = x => String(x).padStart(2, "0"), hm = p(d.getHours()) + ":" + p(d.getMinutes());
     const day = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime(), diff = Math.round((day(now) - day(d)) / 864e5);
     if (diff === 0) return L(["heute ", "today "]) + hm;
     if (diff === 1) return L(["gestern ", "yesterday "]) + hm;
@@ -1022,7 +1031,7 @@
     h += '</div><div class="ag-r">';
     if (!skill) h += "<h4>" + L(["Skalierung", "Scaling"]) + "</h4>" + scaleHTML(it);
     const bf = buffsHTML(it, d); if (bf) h += "<h4>" + L(["Wirkt gerade mit", "Currently boosted by"]) + '</h4><ul class="ag-liste ag-buffs">' + bf + "</ul>";
-    if (d.tags && d.tags.length) h += '<p class="tags">' + d.tags.map(x => "<span>" + esc(x) + "</span>").join("") + "</p>";
+    if (d.tags && d.tags.length) h += '<p class="tags">' + d.tags.map(x => "<span>" + esc(tagTxt(x)) + "</span>").join("") + "</p>";
     return h + "</div></div></button>";
   }
   /* kompakte Karte (Schnellansicht über der Schnellleiste) */
@@ -1715,7 +1724,7 @@
         return '<button data-act="stat" data-arg="' + s + '" data-key="' + (i + 1) + '" style="--c:' + Z.STATS[s].col + '"' + (i === 0 ? " autofocus" : "") + "><b>" + kb(i) + esc(L(Z.STATS[s].n)) + " " + n + " → " + (n + 1) + "</b><small>" + esc(L(Z.STATS[s].d)) + '</small><small class="nutzen">' + L(["Jetzt: ", "Now: "]) + ben + " · +" + hp + L([" Leben", " health"]) + "</small></button>"; }).join("") +
       "</div>", { cls: "schmal rollenwahl", noEsc: true });
   };
-  actions.stat = s => { const P = Z.player; P.stats[s]++; const before = P.hpMax; Z.recalcPlayer(); P.hp += P.hpMax - before; closeModal(); A.play("holy", { vol: 0.5 }); Z.fx.text(P.x + P.w / 2, P.y - 14, L(Z.STATS[s].n) + " +1", Z.STATS[s].col, true); Z.fx.burst(P.x + P.w / 2, P.y + 10, 20, { col: Z.STATS[s].col, sp: 60, up: 60, life: 0.8, size: 2.5, kind: "glow", add: true }); };
+  actions.stat = s => { const P = Z.player; P.stats[s]++; const before = P.hpMax, hp0 = P.hp; Z.recalcPlayer(); P.hp = Math.min(P.hpMax, hp0 + Math.max(0, P.hpMax - before)); /* W26 Erstspieler: recalcPlayer skaliert schon mit – vorher 128/114 */ closeModal(); A.play("holy", { vol: 0.5 }); Z.fx.text(P.x + P.w / 2, P.y - 14, L(Z.STATS[s].n) + " +1", Z.STATS[s].col, true); Z.fx.burst(P.x + P.w / 2, P.y + 10, 20, { col: Z.STATS[s].col, sp: 60, up: 60, life: 0.8, size: 2.5, kind: "glow", add: true }); };
 
   /* ---------- Lager: Figuren ---------- */
   /* Sprechblase über einer Figur im Lager */
@@ -1738,7 +1747,9 @@
     const s = Z.level.props.find(p => p.id === id);
     if (lines && s) ui.say(s.x * Z.TILE + 8, s.y * Z.TILE - 22, { B: "Barradin", G: "Friedrich", E: "Echo", A: "Nundro", R: "Rex", C: "" }[id] || "", L(Z.R.pick(lines)), id === "A" || id === "B" || id === "C" ? 2600 : 4600);
     /* Fenster erst nach der Sprechblase – aber nur, wenn inzwischen nichts anderes offen ist und man noch im Lager steht */
-    const later = (fn, ms) => { const lv = Z.level; setTimeout(() => { if (!ui.modalOpen && Z.level === lv && lv.hub && Z.player && !Z.player.dead) fn(); }, ms); };
+    /* W26 Erstspieler: … und man noch bei der Figur steht (sonst ging z. B. Barradins Fundbuch auf, während man schon bei Friedrich war) */
+    const near = () => !s || Math.abs(Z.player.x + Z.player.w / 2 - (s.x * Z.TILE + 8)) < 64;
+    const later = (fn, ms) => { const lv = Z.level; setTimeout(() => { if (!ui.modalOpen && Z.level === lv && lv.hub && Z.player && !Z.player.dead && near()) fn(); }, ms); };
     if (id === "A") later(() => ui.forge(), 900);
     if (id === "B") later(() => ui.codex(), 900);
     if (id === "C") later(() => ui.skulls(), 700);
@@ -1811,7 +1822,7 @@
         const d = pool[id]; if (!d.find) continue;
         const found = M.found[id];
         const ch = d.legendaryOnly ? L(["nur vom Wraith", "only from the Wraith"]) : findChance(id, d, 3).toFixed(1) + " %";
-        body += '<div class="zeile' + (found ? "" : " unbekannt") + '"><span class="ico" data-icon="' + d.icon + '" data-col="' + (found ? d.col : "#3a3236") + '"></span><div><b>' + (found ? esc(L(d.n)) : "???") + "</b><small>" + (found ? esc(L(d.d)) : esc(t("unknown"))) + '</small><small class="fund">' + esc(L(Z.FIND[d.find].n)) + " · " + esc(t("findChance")) + " ≈ " + ch + (d.only ? " · " + L(["Orte: ", "Places: "]) + d.only.map(o => Z.BOSSDEF[o] && !Z.BIOMES[o] && !Z.ARENAS[o] ? L(Z.BOSSDEF[o].n) : Z.areaName(o)).join(", ") : "") + (d.tags ? " · " + d.tags.join(", ") : "") + "</small></div></div>";
+        body += '<div class="zeile' + (found ? "" : " unbekannt") + '"><span class="ico" data-icon="' + d.icon + '" data-col="' + (found ? d.col : "#3a3236") + '"></span><div><b>' + (found ? esc(L(d.n)) : "???") + "</b><small>" + (found ? esc(L(d.d)) : esc(t("unknown"))) + '</small><small class="fund">' + esc(L(Z.FIND[d.find].n)) + " · " + esc(t("findChance")) + " ≈ " + ch + (d.only ? " · " + L(["Orte: ", "Places: "]) + d.only.map(o => Z.BOSSDEF[o] && !Z.BIOMES[o] && !Z.ARENAS[o] ? L(Z.BOSSDEF[o].n) : Z.areaName(o)).join(", ") : "") + (d.tags ? " · " + d.tags.map(tagTxt).join(", ") : "") + "</small></div></div>";
       }
     } else if (codexTab === 2) {
       for (const id in Z.ENEMIES) { if (id === "puppe" || id === "glutlingKlein") continue; const d = Z.ENEMIES[id], n = M.seen[id] || 0; body += '<div class="zeile' + (n ? "" : " unbekannt") + '"><span class="ico vieh" data-gegner="' + id + '" data-k="' + (n ? 1 : 0) + '"></span><div><b>'  + (n ? esc(L(d.n)) : "???") + "</b><small>" + (n ? L(["Erschlagen: ", "Slain: "]) + n + " · " + d.atks.length + L([" Angriffe", " attacks"]) + (d.undead ? L([" · untot", " · undead"]) : "") + (d.demon ? L([" · Dämon", " · demon"]) : "") + (d.front ? L([" · Schild vorn – von hinten angreifen", " · shield in front – attack from behind"]) : "") : "") + "</small></div></div>"; }

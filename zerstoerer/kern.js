@@ -17,7 +17,7 @@
     easeOut: t => 1 - (1 - t) * (1 - t),
     overlap: (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y,
     angDiff: (a, b) => { let d = b - a; while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2; return d; },
-    fmt: n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+    fmt: n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, Z.settings && Z.settings.lang === "en" ? "," : "."), /* W26 Erstspieler: im EN-Modus 1,000 statt 1.000 */
     esc: s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c])
   });
   /* Saatbasierter Zufall (mulberry32), damit Welten reproduzierbar sind */

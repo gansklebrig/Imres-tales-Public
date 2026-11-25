@@ -359,7 +359,7 @@
   const S0 = () => {
     const m = M(); let s = m.nemesis;
     if (!s || typeof s !== "object" || Array.isArray(s)) s = m.nemesis = {};
-    if (!Array.isArray(s.list)) s.list = []; if (!Array.isArray(s.fallen)) s.fallen = []; if (!Array.isArray(s.news)) s.news = [];
+    if (!Array.isArray(s.list)) s.list = []; if (!Array.isArray(s.fallen)) s.fallen = []; { const okR = r => r && typeof r === "object" && Array.isArray(r.name) && Array.isArray(r.ep); if (!s.fallen.every(okR)) s.fallen = s.fallen.filter(okR); if (!s.list.every(okR)) s.list = s.list.filter(okR); } /* W26 Erstspieler: kaputte Einträge aus alten/kaputten Ständen */ if (!Array.isArray(s.news)) s.news = [];
     if (!Number.isFinite(s.seq)) s.seq = 1; if (!Number.isFinite(s.slain)) s.slain = 0;
     if (!s.hunter || typeof s.hunter !== "object") s.hunter = { lvl: 0, beaten: 0, kills: 0, scars: 0 };
     /* kaputte Einträge aussortieren (alte/fremde Speicherstände dürfen nichts zerstören) */

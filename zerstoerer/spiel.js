@@ -33,6 +33,8 @@
       else if (typeof d === "boolean") m[k] = !!v;
       else if (v !== null && v !== undefined) m[k] = v;
     }
+    /* W26 Erstspieler: Lager-Ausbauten sind kleine Stufen – kaputte Werte (Text, -1, riesig) gaben NaN-Leben bzw. „Invalid array length“ */
+    for (const k of ["trank", "zaeh", "klingen", "haendler"]) { const n = +m.up[k]; m.up[k] = Number.isFinite(n) ? Math.max(0, Math.min(k === "trank" ? 2 : k === "haendler" ? 3 : 5, Math.floor(n))) : 0; }
     return m;
   }
   /* Migration (einmalig): alter Einzel-Stand → Spielstand 1; erst wenn die Kopie nachweislich geschrieben ist, gilt sie als erledigt */
@@ -413,6 +415,9 @@
     doorBusy = performance.now();
     Z.ui.fade(() => {
       doorBusy = 0;
+      /* W26 Erstspieler: während der Überblendung gestorben (oder Gebiet schon gewechselt, z. B. Titelbild) → nicht mehr
+         weitergehen; sonst belebte loadArea den Toten mit 0 LP im Durchgang wieder und der Lauf hing dort fest */
+      if (!Z.player || Z.player.dead || Z.level !== lv || !Z.run) return;
       let snap = null; try { snap = RW && d && Z.level === lv ? RW.capture(d, pos) : null; } catch (e) { console.error(e); }
       if (lv.passage) { Z.run.route.push(to); Z.loadArea(to); }
       else { Z.loadArea("passage", { from: lv.id, to }); }

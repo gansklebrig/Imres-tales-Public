@@ -20,15 +20,17 @@
   /* ======================= 1. ZEITPLANER & VORWARNUNGEN ======================= */
   /* Spielzeit-Zeitplaner: ersetzt setTimeout in den Bossmustern (läuft mit Pause, Zeitlupe und Einzelschritten) */
   let Q = [];
-  Z.bossLater = (fn, ms) => { Q.push({ t: (ms || 0) / 1000, fn }); };
-  const later = (sec, fn) => Q.push({ t: sec, fn });
+  /* W26 Erstspieler: jeder Eintrag merkt sich seinen Lauf – endet der Lauf (Tod → Lager, Titelbild, Bossrausch-Ende), verfallen
+     offene Einträge, statt ohne Z.run weiterzulaufen („Bossplan: Cannot read properties of null (reading 'tier')“ über Z.rollItem) */
+  Z.bossLater = (fn, ms) => { Q.push({ t: (ms || 0) / 1000, fn, run: Z.run }); };
+  const later = (sec, fn) => Q.push({ t: sec, fn, run: Z.run });
   function tickQ(dt) {
     if (!Q.length) return;
     let due = null;
     for (const q of Q) { q.t -= dt; if (q.t <= 0) (due || (due = [])).push(q); }
     if (!due) return;
-    Q = Q.filter(q => q.t > 0);
-    for (const q of due) { try { q.fn(); } catch (err) { console.error("Bossplan:", err); } }
+    Q = Q.filter(q => q.t > 0 && q.run === Z.run);
+    for (const q of due) { if (q.run !== Z.run) continue; try { q.fn(); } catch (err) { console.error("Bossplan:", err); } }
   }
 
   /* Vorwarnungen ohne Schaden (Bodenmarken, Säulen, Bänder, Ringe, Ziellinien, sichere Felder) */

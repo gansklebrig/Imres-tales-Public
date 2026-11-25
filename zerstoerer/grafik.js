@@ -43,7 +43,10 @@
   /* W18 PC: im PC-Programm (window.__zsPC) startet die Automatik bei der höchsten Stufe (schaltet bei Ruckeln wie gewohnt herunter) */
   if (window.__zsPC && !tinyDev) autoLvl = 3;
   const presetOf = l => (l < 0 ? PRESETS[MINI] : PRESETS[l]);
-  try { const raw = sessionStorage.getItem("imres-zerstoerer-autolvl"), a = +raw; if (raw != null && a >= -1 && a <= 3) autoLvl = Math.min(autoLvl, a); } catch (_) {}
+  /* W25 Leistung: autoNat = über Stufe Ultra hinaus in voller Bildschirmauflösung (UWQHD/4K), nur durch Hochstufen erreicht */
+  let autoNat = false;
+  try { const raw = sessionStorage.getItem("imres-zerstoerer-autolvl"), a = +raw, up = sessionStorage.getItem("imres-zerstoerer-autoup"); if (raw != null && a >= -1 && a <= 3) autoLvl = up ? a : Math.min(autoLvl, a); if (up === "nat" && autoLvl === 3) autoNat = true; } catch (_) {}
+  const NAT_PIX = 3840 * 2160;
   Z.gq = {};
   Z.applyGfx = function (noResize) {
     const g = S.gfx;
@@ -51,6 +54,7 @@
     const q = {};
     for (const k of KEYS) q[k] = g.preset === "custom" && g.c && g.c[k] != null ? g.c[k] : base[k];
     q.fpsCap = g.fpsCap || 0;
+    if (g.preset === "auto" && autoLvl === 3 && autoNat) { q.maxPix = NAT_PIX; q.nativ = true; } /* W25 Leistung: Ultra nativ */
     q.level = g.preset === "auto" ? Math.max(0, autoLvl) : g.preset === "custom" ? -1 : +g.preset === MINI ? 0 : +g.preset;
     /* schlanker Handheld-Weg (Stufe 0 bzw. „Handheld minimal“): weniger Teilschritte, gedrosselte Nebenrechnungen, sparsamer Ton */
     q.lean = base === PRESETS[0] || base === PRESETS[MINI];
@@ -60,7 +64,7 @@
   };
   Z.gfxName = function () {
     const g = S.gfx;
-    if (g.preset === "auto") return L(["Automatisch", "Automatic"]) + " (" + L(presetOf(autoLvl).n) + ")";
+    if (g.preset === "auto") return L(["Automatisch", "Automatic"]) + " (" + L(presetOf(autoLvl).n) + (autoLvl === 3 && autoNat ? L([", volle Auflösung", ", full resolution"]) : "") + ")";
     if (g.preset === "custom") return L(["Eigene", "Custom"]);
     return L((PRESETS[+g.preset] || PRESETS[2]).n);
   };
@@ -82,14 +86,26 @@
      Gleichtakt (30 fps) ohne Pendeln: scheitert das Aufheben (wieder < 50 fps, z. B. weil die Grafikkarte bremst und die
      Rechenzeit klein aussieht), wartet der nächste Versuch doppelt so lange (5, 10, 20, 40 s). */
   let autoLv = null, capLifted = false, capBack = 0, capWait = 0;
+  /* W25 Leistung: Hochstufen bei klarer, anhaltender Reserve (PC mit starker Grafikkarte soll ohne Handarbeit scharf werden):
+     4 Prüffenster (10 s) hintereinander mit vollem Takt und Rechenzeit < 35 % des Bildes → eine Stufe höher (2 → 3 → Ultra in
+     voller Bildschirmauflösung). Nie im Bosskampf, nie in der Schonfrist nach Gebietswechsel. Nach jeder Abstufung 60 s Sperre;
+     wird eine Hochstufung binnen 30 s wieder zurückgenommen (Grafikkarte schafft es doch nicht), bleibt diese Stufe die Obergrenze.
+     30-Hz-Takt (Stromsparmodus, Akku-Drosselung): stabile ~33-ms-Bilder bei kleiner Rechenzeit gelten nicht als „zu langsam“
+     (und es wird dann auch nicht hochgestuft – das Gerät will Strom sparen). */
+  let dtSq = 0, upRun = 0, downAt = -1e9, upAt = -1e9, upCeil = 9, hz30 = false;
+  const nowS = () => performance.now() / 1000;
+  const natNeeded = () => { try { const d = Math.min(window.devicePixelRatio || 1, 3); return innerWidth * innerHeight * d * d > PRESETS[3].maxPix * 1.02; } catch (_) { return false; } };
   Z.gfxAutoTick = function (dt, playing) {
-    if (!playing || document.hidden || Z.diag.busy) { autoAcc = 0; autoN = 0; autoT = 0; return; }
-    if (Z.level !== autoLv) { autoLv = Z.level; autoGrace = Math.max(autoGrace, 2); autoAcc = 0; autoN = 0; autoT = 0; Z._work = 0; Z._workN = 0; }
-    if (autoGrace > 0) { autoGrace -= dt; return; }
-    autoAcc += dt; autoN++; autoT += dt;
+    if (!playing || document.hidden || Z.diag.busy) { autoAcc = 0; autoN = 0; autoT = 0; dtSq = 0; return; }
+    if (Z.level !== autoLv) { autoLv = Z.level; autoGrace = Math.max(autoGrace, 2); autoAcc = 0; autoN = 0; autoT = 0; dtSq = 0; upRun = 0; Z._work = 0; Z._workN = 0; }
+    if (autoGrace > 0) { autoGrace -= dt; Z._work = 0; Z._workN = 0; return; } /* W25: Rechenzeit der Schonfrist (Ladespitzen) nicht mitzählen */
+    autoAcc += dt; autoN++; autoT += dt; dtSq += dt * dt;
     if (autoT < 2.5) return;
-    const fps = autoN / autoAcc; autoAcc = 0; autoN = 0; autoT = 0;
-    const cap = Z.gq.fpsCap || 60;
+    const fps = autoN / autoAcc, mDt = autoAcc / autoN, sdDt = Math.sqrt(Math.max(0, dtSq / autoN - mDt * mDt)); autoAcc = 0; autoN = 0; autoT = 0; dtSq = 0;
+    const work0 = Z._workN ? Z._work / Z._workN : 0;
+    /* 30-Hz-Takt: Bilder gleichmäßig 31–36 ms (Streuung < 2,5 ms) bei weniger als 9 ms Rechenzeit */
+    hz30 = !Z.gq.fpsCap && !Z.gq.autoCap && mDt > 0.031 && mDt < 0.036 && sdDt < 0.0025 && work0 > 0 && work0 < 9;
+    const cap = Z.gq.fpsCap || (hz30 ? 30 : 60);
     /* Handheld-Gleichtakt: schafft das Gerät keine ~50 fps, gleichmäßig 30 fps statt springender 33/50/66-ms-Bilder
        (fühlt sich ruhiger an). Nur ohne eigene Bildratengrenze; braucht ein Bild wieder deutlich weniger als 11 ms
        Rechenzeit, wird die Grenze aufgehoben. Z._work: Rechenzeit je Bild (spiel.js). */
@@ -100,11 +116,21 @@
       else if (work > 0 && work < 11) { if (capWait > 0) capWait -= 2.5; else { Z.gq.autoCap = 0; capLifted = true; } }
     } else Z.gq.autoCap = 0;
     if (S.gfx.preset !== "auto") return;
-    let to = autoLvl;
-    if (fps < Math.min(48, cap * 0.8) && autoLvl > 0) to = fps < 30 ? 0 : autoLvl - 1;
+    let to = autoLvl, nat = autoNat;
+    const tNow = nowS(), boss = !!(Z.boss && !Z.bossDefeated);
+    /* W25: zuerst die volle Auflösung zurücknehmen, dann wie bisher Stufen */
+    if (autoNat && fps < Math.min(48, cap * 0.8)) { nat = false; upRun = 0; }
+    else if (fps < Math.min(48, cap * 0.8) && autoLvl > 0) to = fps < 30 ? 0 : autoLvl - 1;
     else if (autoLvl === 0 && fps < Math.min(24, cap * 0.6)) to = -1;
-    if (to !== autoLvl) {
-      autoLvl = to; try { sessionStorage.setItem("imres-zerstoerer-autolvl", autoLvl); } catch (_) {}
+    else if (!boss && !hz30 && autoLvl >= 0 && fps >= Math.min(55, cap * 0.92) && work > 0 && work < (1000 / cap) * 0.35 && tNow - downAt > 60) {
+      /* W25: Hochstufen mit Hysterese (4 Fenster in Folge) */
+      if (++upRun >= 4) { upRun = 0; if (autoLvl < 3 && autoLvl + 1 <= upCeil) to = autoLvl + 1; else if (autoLvl === 3 && !autoNat && upCeil > 3 && natNeeded()) nat = true; }
+    } else upRun = 0;
+    if (to !== autoLvl || nat !== autoNat) {
+      const up = to > autoLvl || (nat && !autoNat);
+      if (!up) { downAt = tNow; upRun = 0; if (tNow - upAt < 30) upCeil = autoNat && !nat ? 3 : to; } else upAt = tNow;
+      autoLvl = to; autoNat = nat && autoLvl === 3;
+      try { sessionStorage.setItem("imres-zerstoerer-autolvl", autoLvl); if (up) sessionStorage.setItem("imres-zerstoerer-autoup", autoNat ? "nat" : "1"); else sessionStorage.removeItem("imres-zerstoerer-autoup"); } catch (_) {}
       Z.applyGfx(); autoGrace = 3;
       Z.toast && Z.toast(L(["Grafik automatisch angepasst: ", "Graphics adjusted automatically: "]) + "<b>" + L(presetOf(autoLvl).n) + "</b>", 2600);
       Z.diag.note("Auto-Grafik → " + presetOf(autoLvl).n[0] + " (" + fps.toFixed(0) + " fps)");
