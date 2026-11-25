@@ -37433,6 +37433,7 @@ function text(d){const L=[];
  L.push(`2D-Leinwand: ${d.swr?'⚠ wahrscheinlich Software (ohne Grafikbeschleunigung)':d.swr===false?'wahrscheinlich Grafikkarte':'unbekannt'}`);
  L.push(`Anzeige: Fenster ${d.fenster} · DPR ${+d.dpr.toFixed(2)} · Schirm ${d.schirm} · Leinwand ${d.lw} (${Math.round((d.rsc||1)*100)} %)${d.vollbild?' · Vollbild':''}`);
  L.push(`Grafik: ${d.gfx} · Auflösung ${d.res} · Effekte ${d.fx||'?'} · Bloom ${d.bloom} · Sichtschatten ${d.sicht?'an':'aus'}${d.ultra?' · Ultra leicht':''}`);
+ try{const T3=window.__hsTAKT3,RH=window.__hsRHYTHM;L.push(`Bildrate-Einstellung: ${(SAVE.bildrate||'max')}${T3&&T3.hz?' · gemessener Bildschirmtakt '+T3.hz()+' Hz':''}${RH&&RH.letzte?' · Weg-Rhythmus: '+RH.letzte.plaetze+' Plätze, '+(RH.schwellen||0)+' Schwellen':''}`)}catch(e){}
  L.push(`Messung: ${f1(d.sek)} s · ${d.n} Bilder · ${f1(d.fps)} FPS ⌀ · 1%-Tief ${f1(d.low)} FPS · längstes ${Math.round(d.ivMax)} ms · Bildschirm ${d.hz} Hz${d.hzSitzung?' (Sitzung '+d.hzSitzung+')':''} · verpasst ${Math.round(d.miss)} %`);
  L.push(`Rechenzeit je Bild (ms): Spiel ${f1(d.spiel)} · Bild ${f1(d.bild)} · Oberfläche ${f1(d.ober)} · ${d.hz&&d.fps>=d.hz*0.9?'Rest (Leerlauf bis zum nächsten Bild)':'Rest (Browser/Grafikkarte)'} ${f1(d.rest)}`);
  const top=d.ber.filter(b=>b[1]>=0.05).slice(0,7).map(b=>`${b[0]} ${f1(b[1])}`);
