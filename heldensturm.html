@@ -43291,6 +43291,7 @@ const el=()=>typeof toastEl!=='undefined'&&toastEl?toastEl:document.getElementBy
 let basis=null,zuletzt=-1;
 function frei(){/* unterste belegte Bildschirmzeile (CSS-Pixel) durch Abschnittsname oder Banner */
  let y=0;
+ try{if(typeof KANAME!=='undefined'&&KANAME.t>0&&KANAME.unten>0)return KANAME.unten+4}catch(e){}
  try{if(typeof KANAME!=='undefined'&&KANAME.t>0){let top=70;const h=document.querySelector('#hud .top');if(h){const r=h.getBoundingClientRect();if(r.height>0)top=r.bottom+(W<700?58:14)}const fs=W<700?15:19;y=Math.max(y,top+fs+(KANAME.sub?36:16))}}catch(e){}
  return y}
 function lage(){const t=el();if(!t)return;if(basis===null){basis=parseFloat(getComputedStyle(t).top)||150;t.style.transition='top .25s ease, opacity .18s ease'}
@@ -43304,7 +43305,7 @@ function spur(){const erz=document.querySelector('.erzSub'),ln=document.getEleme
  if(ziel!==laneZ){laneZ=ziel;if(ziel){DE.style.setProperty('--qa2lb',ziel+'px');DE.style.setProperty('--qa2tb',ziel+'px')}else{DE.style.removeProperty('--qa2lb');DE.style.removeProperty('--qa2tb')}}}
 (function schleife(){try{lage()}catch(e){}try{spur()}catch(e){}requestAnimationFrame(schleife)})();
 /* Banner nicht über den Abschnittsnamen legen: Banner rückt unter ihn */
-function kaUnten(){try{if(typeof KANAME!=='undefined'&&KANAME.t>0){let top=70;const h=document.querySelector('#hud .top');if(h){const r=h.getBoundingClientRect();if(r.height>0)top=r.bottom+(W<700?58:14)}const fs=W<700?15:19;return top+fs+(KANAME.sub?40:22)}}catch(e){}return 0}
+function kaUnten(){try{if(typeof KANAME!=='undefined'&&KANAME.t>0&&KANAME.unten>0)return KANAME.unten+12}catch(e){}try{if(typeof KANAME!=='undefined'&&KANAME.t>0){let top=70;const h=document.querySelector('#hud .top');if(h){const r=h.getBoundingClientRect();if(r.height>0)top=r.bottom+(W<700?58:14)}const fs=W<700?15:19;return top+fs+(KANAME.sub?40:22)}}catch(e){}return 0}
 if(typeof drawBanner==='function'){const db=drawBanner;drawBanner=function(){const b=G&&G.banner;try{if(!ME.aus&&b){const k=kaUnten();if(k){const fs=Math.min(b.size||56,W*0.105),by=b.y||H*(b.bars?0.32:0.26);if(by-fs*0.8<k)b.y=k+fs*0.8}}}catch(e){}
  return db.apply(this,arguments)}}  /* einmal verschoben, bleibt das Banner dort – kein Springen */
 /* doppelte Hinweise und Weltwörter */
@@ -43384,15 +43385,79 @@ function rhythm(K){if(RH.aus||!K||!K.M||!K.sec||!K.start||K.start.i==null)return
    cut+=z;nOk++;done.push([Math.round(mi),Math.round(mj),Math.round(R)])}}
  K.rhP=done;RH.st.n++;RH.st.cut+=cut;RH.letzte={stufe:G.stage,lay,laeufe:laeufe.length,plaetze:nOk,zellen:cut,why}}
 /* Platzlicht: jeder neue Platz bekommt ein, zwei Lichter am Rand – man sieht ihn schon von Weitem */
-if(typeof kaDeko==='function'){const kd=kaDeko;kaDeko=function(S){const r=kd.apply(this,arguments);try{const K=G.ka;if(!RH.aus&&K&&K.rhP&&K.rhP.length&&G.deco){const T=K.T||{},k=T.lay==='gassen'?'lantern':T.glut?'brazier':T.lay==='hallen'?'brazier':'torch';let m=0;
+if(typeof kaDeko==='function'){const kd=kaDeko;kaDeko=function(S){const r=kd.apply(this,arguments);try{const K=G.ka;if(!RH.aus&&K&&K.rhP&&G.deco){const T=K.T||{},k=T.lay==='gassen'?'lantern':T.glut?'brazier':T.lay==='hallen'?'brazier':'torch';let m=0;
  const frei=(x,y)=>!(typeof blkPunkt==='function'&&blkPunkt(x,y,16))&&!(typeof wlLoPunkt==='function'&&wlLoPunkt(x,y,22));
  for(const p of K.rhP){const cx=(p[0]+0.5)*K.Z,cy=(p[1]+0.5)*K.Z,R=Math.max(80,p[2]*K.Z-34);let n=0;const a0=Math.random()*6.283;
   for(let q=0;q<10&&n<2;q++){const a=a0+q*2.4,x=cx+Math.cos(a)*R,y=cy+Math.sin(a)*R;if(!frei(x,y))continue;if(K.tore&&K.tore.some(t=>Math.hypot(t.x-x,t.y-y)<160))continue;
    G.deco.push({x,y,k,s:1,v:Math.random(),wl:1,rh:1});n++;m++}}
- RH.lichter=m}}catch(e){console.error('rhythm-licht',e)}return r}}
+ RH.lichter=m;
+ /* Schwellen: Wo der Hauptweg aus einer Engstelle in einen großen Raum tritt, rahmen zwei Lichter den Eingang – der Raum öffnet sich wie eine Bühne */
+ try{const W=K.ka2W;if(W&&W.length>3&&T.mas!=='wald'){const D=abst(K),n=K.n,Z=K.Z,dAt=(x,y)=>{const i=(x/Z)|0,j=(y/Z)|0;return i<0||j<0||i>=n||j>=n?0:D[j*n+i]};
+   const S=[];for(let q=1;q<W.length;q++){const a=W[q-1],b=W[q],l=Math.hypot(b[0]-a[0],b[1]-a[1]),st=Math.max(1,Math.round(l/20));for(let u=0;u<st;u++)S.push([a[0]+(b[0]-a[0])*u/st,a[1]+(b[1]-a[1])*u/st])}
+   const kk=T.lay==='gassen'?'lantern':T.mas==='fels'&&!T.glut?'torch':'brazier';let nS=0,letzt=-1e9;const done=[];
+   for(let q=6;q<S.length-5&&nS<8;q++){let eng=true;for(let z=q-6;z<q;z++)if(dAt(S[z][0],S[z][1])>3){eng=false;break}if(!eng)continue;
+    const d0=dAt(S[q][0],S[q][1]);if(d0<4)continue;let weit=0;for(let z=q;z<Math.min(S.length,q+5);z++)if(dAt(S[z][0],S[z][1])>=5)weit++;if(weit<3)continue;
+    const m=S[q];if(done.some(o=>Math.hypot(o[0]-m[0],o[1]-m[1])<700))continue;if(K.tore&&K.tore.some(t=>Math.hypot(t.x-m[0],t.y-m[1])<320))continue;if(K.start&&Math.hypot(K.start.x-m[0],K.start.y-m[1])<400)continue;
+    const a=S[q-4],ux0=m[0]-a[0],uy0=m[1]-a[1],ul=Math.hypot(ux0,uy0)||1,ux=ux0/ul,uy=uy0/ul,px=-uy,py=ux;
+    /* halbe Breite der Engstelle: von der Mündung quer bis zur Wand tasten */
+    const breit=sg=>{for(let r=20;r<260;r+=10){const x=a[0]+px*sg*r,y=a[1]+py*sg*r;if(dAt(x,y)===0)return r}return 140};
+    const put=[];for(const sg of [-1,1]){const r=breit(sg)+26;const x=m[0]+ux*30+px*sg*r,y=m[1]+uy*30+py*sg*r;if(dAt(x,y)<1||frei(x,y)===false)break;put.push([x,y])}
+    if(put.length<2)continue;for(const [x,y] of put)G.deco.push({x,y,k:kk,s:1.1,v:Math.random(),wl:1,rh:2});done.push(m);nS++;q+=10}
+   RH.schwellen=nS}}catch(e){console.error('rhythm-schwelle',e)}
+ /* Gassen: auf etwa jedem zweiten Platz ein Brunnen in der Mitte – Wiedererkennung und etwas zum Umkreisen im Kampf */
+ if(T.lay==='gassen'&&G.blk){let b=0;for(const p of K.rhP){if(p[2]<4||Math.random()>0.55)continue;const x=(p[0]+0.5)*K.Z,y=(p[1]+0.5)*K.Z;if(typeof blkPunkt==='function'&&blkPunkt(x,y,70))continue;{let zu=false;for(let b=-3;b<=3&&!zu;b++)for(let a=-3;a<=3;a++){const i=p[0]+a,j=p[1]+b;if(a*a+b*b>10)continue;if(i<0||j<0||i>=K.n||j>=K.n||K.M[j*K.n+i]){zu=true;break}}if(zu)continue}if(K.tore&&K.tore.some(t=>Math.hypot(t.x-x,t.y-y)<220))continue;
+   G.blk.push({t:'c',x,y,r:20,k:'brunnen',v:Math.random(),wl:1,ai:0,rh:1});b++}
+  if(b&&typeof blkRaster==='function')blkRaster();RH.brunnen=b}}}catch(e){console.error('rhythm-licht',e)}return r}}
+/* Gassen-Karten: Die Häuser SIND die Wandmassen. Zusätzlich lagen bisher ≈ 240 kleine Deko-Häuschen mitten auf Straßen und Plätzen
+   (man lief durch sie hindurch) und ≈ 75 auf den Dächern. Auf Straßen werden daraus Kisten/Fässer (etwa jedes dritte), der Rest entfällt. */
+RH.haus={n:0,weg:0};
+function hausAufraeumen(){const K=G.ka;if(RH.aus||!K||!K.M||K._rhHaus||!K.T||K.T.mas!=='haus'||!G.deco)return;K._rhHaus=1;const n=K.n,Z=K.Z,D=G.deco;
+ for(let i=D.length-1;i>=0;i--){const d=D[i];if(!d||d.k!=='house'||d.edge)continue;const ci=(d.x/Z)|0,cj=(d.y/Z)|0;const masse=ci<0||cj<0||ci>=n||cj>=n||K.M[cj*n+ci];
+  if(!masse&&d.v<0.34){d.k=d.v<0.17?'crate':'barrel';d.s=Math.min(d.s||1,1.1);RH.haus.n++}else{D.splice(i,1);RH.haus.weg++}}}
+if(typeof render==='function'){const r0=render;render=function(){try{if(G&&G.state==='play'&&G.ka&&!G.ka._rhHaus)hausAufraeumen()}catch(e){}return r0.apply(this,arguments)}}
 if(typeof kaLayout==='function'){const kl=kaLayout;kaLayout=function(S){const K=kl.apply(this,arguments);try{const t0=performance.now();rhythm(K);RH.st.ms+=performance.now()-t0}catch(e){console.error('rhythm',e)}return K}}
 }catch(e){console.error('rhythm',e);window.__hsRHYTHM={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/rhythm» */
+/* «kname» */
+/* ================= Paket „kname“: Abschnittsname scharf, groß genug und gleich lang sichtbar – window.__hsKNAME =================
+   Befund: Die Tafel mit dem Abschnittsnamen („Am Rand der Schlucht · Abschnitt 1 von 8 · Ohne die Netze …“)
+     · wurde NACH dem Bild gezeichnet und landete damit auf der Spielleinwand mit verringerter Auflösung → verwaschen,
+       während alle anderen Texte auf der scharfen Textebene liegen;
+     · wuchs auf großen Bildschirmen nicht mit (HUD, Hinweise, Banner wachsen mit txtHz, die Tafel nicht) – 11,5-px-Zeilen auf UWQHD;
+     · zählte ihre Anzeigedauer in Bildern (1/60 je Bild): bei 144 Hz stand sie nur ≈ 1,4 s statt 3,4 s.
+   Jetzt: Zeitmessung in echter Zeit, Tafel mit txtHz skaliert, Zeilen etwas größer, und – wenn die Spielwelt mit geringerer
+   Auflösung läuft – Text auf der scharfen Textebene. Logik (welcher Abschnitt, welche Zeilen) bleibt beim Original; nur das Zeichnen
+   wird ersetzt. KANAME.unten = Unterkante der Tafel (CSS-px) für die Meldungsführung. Abschaltbar: __hsKNAME.aus=1 */
+(function(){try{if(window.__hsKNAME||typeof kaNameZeigen!=='function'||typeof KANAME==='undefined')return;
+const KN=window.__hsKNAME={v:1,aus:0,n:0};
+const DUM=(()=>{const c=document.createElement('canvas');c.width=c.height=1;return c.getContext('2d')})();
+let last=0;
+function zeile(){try{const K=G.ka;if(!K||KANAME.s<0)return '';const S_=K.sec[KANAME.s];if(!S_||S_.art==='seite'||S_.art==='arena')return '';return(typeof SP_ZEILE!=='undefined'&&SP_ZEILE[S_.name])||''}catch(e){return ''}}
+function hudTop(){let top=70;try{const el=document.querySelector('#hud .top');if(el){const r=el.getBoundingClientRect();if(r.height>0)top=r.bottom+(W<700?58:14)}}catch(e){}return top}
+function zeichne(){const a=Math.min(1,KANAME.t/0.6,(3.4-KANAME.t)/0.4);if(!(a>0)||!KANAME.txt){KANAME.unten=0;return}
+ const k=typeof txtHz==='function'?Math.min(1.6,txtHz()):1;const klein=W<700;
+ let g=cx,pr=DPR,ov=false;try{if(typeof TXO!=='undefined'&&TXO.on&&TXO.cv&&TXO.g){g=TXO.g;pr=TXO.cv.width/Math.max(1,innerWidth);ov=true}}catch(e){}
+ const top=hudTop(),fs=(klein?15:19)*k,sub=KANAME.sub,z=zeile();
+ g.save();g.setTransform(pr,0,0,pr,0,0);g.globalAlpha=a;g.textAlign='center';g.textBaseline='alphabetic';g.shadowBlur=0;g.globalCompositeOperation='source-over';
+ g.font=`700 ${fs}px "Alegreya SC","Alegreya Sans",Georgia,serif`;const tw=g.measureText(KANAME.txt).width;
+ const hS=sub?(klein?11:13)*k:0,hT=fs+(sub?hS+8*k:12*k);
+ const gr=g.createLinearGradient(W/2-tw/2-60*k,0,W/2+tw/2+60*k,0);gr.addColorStop(0,'rgba(12,9,8,0)');gr.addColorStop(0.2,'rgba(12,9,8,.62)');gr.addColorStop(0.8,'rgba(12,9,8,.62)');gr.addColorStop(1,'rgba(12,9,8,0)');
+ g.fillStyle=gr;g.fillRect(W/2-tw/2-60*k,top,tw+120*k,hT);
+ g.lineWidth=3*k;g.lineJoin='round';g.strokeStyle='rgba(0,0,0,.8)';g.strokeText(KANAME.txt,W/2,top+fs+2*k);g.fillStyle='#ecd9b0';g.fillText(KANAME.txt,W/2,top+fs+2*k);
+ let unten=top+hT;
+ if(sub){g.font=`600 ${hS}px "Alegreya Sans",sans-serif`;g.fillStyle='#c8b490';g.fillText(sub,W/2,top+fs+2*k+hS+3*k)}
+ if(z){const zs=(klein?11:13.5)*k,y=unten+zs+4*k;g.globalAlpha=a*0.95;g.font=`italic 500 ${zs}px "Alegreya","Alegreya Sans",Georgia,serif`;const zw=Math.min(W-20,g.measureText(z).width);
+  g.fillStyle='rgba(12,9,8,.5)';g.fillRect(W/2-zw/2-14*k,y-zs-1*k,zw+28*k,zs+7*k);g.fillStyle='#d8c4a0';g.fillText(z,W/2,y,W-24);unten=y+6*k}
+ g.restore();KANAME.unten=unten;KN.n++;
+ if(ov){try{TXO.n++;if(TXO.cv.hidden)TXO.cv.hidden=false}catch(e){}}}
+const kn0=kaNameZeigen;kaNameZeigen=function(){if(KN.aus)return kn0.apply(this,arguments);
+ const now=performance.now(),dt=last?Math.min(0.1,Math.max(0,(now-last)/1000)):1/60;last=now;
+ if(KANAME.t>0)KANAME.t+=1/60-dt;   /* das Original zieht je Bild 1/60 ab – hier gilt echte Zeit */
+ const c0=cx;let r;cx=DUM;try{r=kn0.apply(this,arguments)}finally{cx=c0}
+ try{if(KANAME.t>0&&G.state==='play'&&!G.room)zeichne();else KANAME.unten=0}catch(e){KANAME.unten=0}
+ return r};
+}catch(e){console.error('kname',e);window.__hsKNAME={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/kname» */
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
