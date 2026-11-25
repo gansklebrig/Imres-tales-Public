@@ -9689,8 +9689,8 @@
 "sha256":"3ab7b7816ddadc9aa1ef272db3236698570d927a2f28af60f6ead1f3ac0a9320"
 },
 "zerstoerer.html":{
-"groesse":64404,
-"sha256":"47cca60db4702741b1de6a3961a476e8357b96eb2b872cac270d5763c7fd9884"
+"groesse":64607,
+"sha256":"fa6cbcf8bfe606383e4f978ddcdaa8420bc8fd85ab492c9438f0edcf9935e80a"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":143716,
@@ -9723,6 +9723,10 @@
 "zerstoerer/bossphasen.js":{
 "groesse":158392,
 "sha256":"c95258734c83436621d589d116965628352a1e7c87f82cf366c5ac377b51bcdb"
+},
+"zerstoerer/bossrausch.js":{
+"groesse":28910,
+"sha256":"e9c80fecdce514b30a3f649e1ff5ecfbc56513655fee34753cd3ed7ec3ecea53"
 },
 "zerstoerer/daten.js":{
 "groesse":52012,
@@ -9836,6 +9840,10 @@
 "groesse":28390,
 "sha256":"8fe4b66c329ed341b86ba6a983d4bc7f391657dfa11b9c62acef05518cf8a7cd"
 },
+"zerstoerer/rueckblick.js":{
+"groesse":20601,
+"sha256":"611757c488e3812f108150777ac96facd98ad8cabc98cec29f1a167b5f027db1"
+},
 "zerstoerer/rueckweg.js":{
 "groesse":23678,
 "sha256":"7d9380ada815344ebc6caae261be2be9512429a3103d1c12fad0baa826e3940f"
@@ -9884,6 +9892,10 @@
 "groesse":239147,
 "sha256":"23235f62dad9aad0177bef50a3ae9b310db5501feb3f50bc6d22b6bfd224d367"
 },
+"zerstoerer/weltkarte.js":{
+"groesse":42121,
+"sha256":"d83c61b1d09be8ebc5eb0f732fe039d231131ff14b6ca0cc1885a6f046d4b160"
+},
 "zerstoerer/weltspuren.js":{
 "groesse":79528,
 "sha256":"672243c7cf1ea92837a64269a8304ddcb8129de27c001cfe9bbc2d4d9abbea71"
@@ -9901,5 +9913,5 @@
 "sha256":"bd666dd2ac70650c8a7b947c709a2c71251f4de5328a9f37e1b70d932514c922"
 }
 },
-"stand":130
+"stand":131
 }
