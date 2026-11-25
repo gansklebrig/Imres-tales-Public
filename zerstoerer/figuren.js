@@ -1509,6 +1509,7 @@
      Bilder je Zyklus: Ruhe 12 (2 s, 6 B/s), Lauf 8 je Schritt-Zyklus, Ausholen 6 (letztes = voll ausgeholt), Schlag 6, Nachlauf 4, Tod 6. */
   const SPR = new Map(), SPRBIG = new WeakMap(), DID = new WeakMap();
   let sprDid = 0, sprFrame = -1, sprMade = 0, sprScratch = null, sprSg = null;
+  let rbEmpty = 0, rbFull = 0; /* W22 Geist */
   const SPRS = { hit: 0, miss: 0, fall: 0, evict: 0, scan: 0 };
   /* Sammelseiten (Atlas) in drei Größen: 128² für gewöhnliche Gestalten, 256²/512² für große. Kleine Seiten sind deutlich
      billiger – drawImage aus einer Leinwand und das Nachschreiben kosten in Chrome mit der Größe der Quell-Leinwand.
@@ -1523,6 +1524,11 @@
     const i = PAGES.indexOf(pg); if (i >= 0) PAGES.splice(i, 1);
     for (const k in CUR) if (CUR[k] === pg) CUR[k] = null;
   }
+  /* W22 Geist: alle Sprite-Seiten verwerfen (Kontextverlust, verfälschtes Rücklesen, Wächter) – Neuaufbau beim nächsten Bedarf */
+  (Z._cachesNeu = Z._cachesNeu || []).push(() => {
+    for (const pg of PAGES.slice()) pageDrop(pg);
+    SPR.clear(); SBOX.clear(); pgBytes = 0; for (const k in CUR) CUR[k] = null; sprScratch = null; sprSg = null; rbEmpty = 0;
+  });
   function pageAlloc(bw, bh) {
     const pw = bw + 2, ph = bh + 2; /* 1 px Rand gegen Überblenden beim Filtern */
     const S = Math.max(pw, ph) <= 128 ? 128 : Math.max(pw, ph) <= 256 ? 256 : 512;
@@ -1536,6 +1542,7 @@
         pageDrop(lru);
       }
       const cv = document.createElement("canvas"); cv.width = cv.height = S;
+      cv.addEventListener("contextrestored", () => { Z.cachesNeu && Z.cachesNeu("sprite-kontext"); }); /* W22 Geist: Seite nach Kontextverlust leer */
       pg = { cv, g: cv.getContext("2d"), S, keys: [], used: 0, gen: 0, x: 0, y: 0, rh: 0 }; PAGES.push(pg); pgBytes += S * S * 4; CUR[S] = pg;
     }
     const sx = pg.x + 1, sy = pg.y + 1; pg.x += pw; if (ph > pg.rh) pg.rh = ph; pg.used = sprFrame;
@@ -1555,16 +1562,22 @@
     try { draw(g); } catch (err) { g.restore(); return null; }
     g.restore(); g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = "source-over";
     /* benutzten Bereich suchen (Deckkraft > 2/255) */
-    const px = new Uint32Array(g.getImageData(0, 0, W, H).data.buffer);
     let x0 = W, x1 = -1, y0 = H, y1 = -1;
-    for (let y = 0; y < H; y++) {
-      const o = y * W; let a = -1, b = -1;
-      for (let x = 0; x < W; x++) if ((px[o + x] >>> 24) > 2) { a = x; break; }
-      if (a < 0) continue;
-      for (let x = W - 1; x >= a; x--) if ((px[o + x] >>> 24) > 2) { b = x; break; }
-      if (y < y0) y0 = y; y1 = y; if (a < x0) x0 = a; if (b > x1) x1 = b;
+    /* W22 Geist: verfälschtes Rücklesen (Brave-Shields & Co.) → ganzer Rahmen statt Umriss-Suche (sonst „leer“ = unsichtbar) */
+    if (Z.canvasLesbar && !Z.canvasLesbar()) { x0 = 0; y0 = 0; x1 = W - 1; y1 = H - 1; }
+    else {
+      const px = new Uint32Array(g.getImageData(0, 0, W, H).data.buffer);
+      for (let y = 0; y < H; y++) {
+        const o = y * W; let a = -1, b = -1;
+        for (let x = 0; x < W; x++) if ((px[o + x] >>> 24) > 2) { a = x; break; }
+        if (a < 0) continue;
+        for (let x = W - 1; x >= a; x--) if ((px[o + x] >>> 24) > 2) { b = x; break; }
+        if (y < y0) y0 = y; y1 = y; if (a < x0) x0 = a; if (b > x1) x1 = b;
+      }
+      /* W22 Geist: nur leere Ergebnisse, nie ein gefülltes → Rücklesen liefert offenbar Nullen (Lesetest umgangen) */
+      if (x1 < 0) { if (++rbEmpty >= 30 && !rbFull && Z.canvasUnlesbar) Z.canvasUnlesbar("nur leere Sprites"); return { pg: null }; }
+      rbFull++;
     }
-    if (x1 < 0) return { pg: null };
     if (edge && (x0 === 0 || y0 === 0 || x1 === W - 1 || y1 === H - 1)) edge.hit = true;
     const bw = x1 - x0 + 1, bh = y1 - y0 + 1, slot = pageAlloc(bw, bh);
     if (!slot) return null;

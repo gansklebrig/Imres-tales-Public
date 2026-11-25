@@ -850,9 +850,10 @@
     const dev = devNow();
     const labs = dev === "touch" ? "" : ["left", "right", "up", "down", "jump", "roll", "a1", "a2", "s1", "s2", "use", "potion", "map", "gear"].map(a => keyName(a, dev).s).join(",");
     const fontsOK = document.fonts && document.fonts.check ? (document.fonts.check(F_TXT) && document.fonts.check(F_TTL) ? 1 : 0) : 1;
-    return (Z.settings && Z.settings.lang) + "|" + dev + "|" + labs + "|" + fontsOK + "|" + kScale + "|" + (lo() ? 0 : 1);
+    return (Z.settings && Z.settings.lang) + "|" + dev + "|" + labs + "|" + fontsOK + "|" + kScale + "|" + (lo() ? 0 : 1) + "|" + neuGen;
   }
-  let sigT = 0;
+  let sigT = 0, neuGen = 0;
+  (Z._cachesNeu = Z._cachesNeu || []).push(() => { neuGen++; sigT = 0; }); /* W22 Geist: Schilder nach Kontextverlust neu malen */
   function frame(dt) {
     sigT -= dt;
     if (sigT <= 0) {

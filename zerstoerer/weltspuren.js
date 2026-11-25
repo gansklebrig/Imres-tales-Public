@@ -46,6 +46,7 @@
 
   /* Sprites: einmal in eine Leinwand gemalt, danach nur noch kopiert */
   const SPR = new Map();
+  (Z._cachesNeu = Z._cachesNeu || []).push(() => SPR.clear()); /* W22 Geist */
   function spr(key, w, h, ox, oy, paint) {
     let s = SPR.get(key); if (s) return s;
     const cv = document.createElement("canvas"); cv.width = Math.ceil(w * SS); cv.height = Math.ceil(h * SS);

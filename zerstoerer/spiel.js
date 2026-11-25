@@ -460,6 +460,27 @@
   }
   addEventListener("resize", resize); Z.resize = resize; resize();
 
+  /* W22 Geist: abgefangene Fehler der Hauptschleife (je Ort einmal in Z.diag) */
+  function caught(ort, e) { try { if (Z.diag && Z.diag.caught) Z.diag.caught(ort, e); else console.error(e); } catch (_) {} }
+  /* W22 Geist: Kontextverlust der Haupt-Leinwand (Android bei Speicherdruck, App-Wechsel, Vollbild). KEIN preventDefault:
+     bei 2D-Leinwänden verhindert das laut Spezifikation die Wiederherstellung. Nach „contextrestored“ ist die Leinwand
+     leer und alle Zwischenleinwände sind verdächtig → Zwischenspeicher neu, Größe neu setzen. */
+  cv.addEventListener("contextlost", () => { Z.ctxLost = true; try { Z.diag && Z.diag.note("Leinwand-Kontext verloren"); } catch (_) {} });
+  cv.addEventListener("contextrestored", () => {
+    Z.ctxLost = false; Z.cachesNeu && Z.cachesNeu("kontext"); try { resize(); } catch (e) { caught("resize", e); }
+    /* im Lager (kein Lauf) zusätzlich das Gebiet neu aufbauen – fängt auch Zwischenspeicher, die sich nicht angemeldet haben */
+    try { const lv = Z.level, P = Z.player; if (lv && lv.hub && !Z.run && P && !P.dead) { const px = P.x, py = P.y, f = P.face; Z.loadArea(lv.id); if (Z.player === P) { P.x = px; P.y = py; P.face = f; Z.cam.update && Z.cam.update(1, P); } } } catch (e) { caught("lager-neu", e); }
+  });
+  /* Rückkehr aus dem Hintergrund / Vollbildwechsel: Kontext prüfen (isContextLost, wo vorhanden) und nach langer
+     Abwesenheit die Zwischenspeicher vorsorglich erneuern (Android verwirft GPU-Speicher im Hintergrund) */
+  let hiddenAt = 0;
+  const ctxCheck = grund => { try { if (ctx.isContextLost && ctx.isContextLost()) { Z.ctxLost = true; return; } } catch (_) {} if (Z.ctxLost) { Z.ctxLost = false; Z.cachesNeu && Z.cachesNeu(grund); } };
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { hiddenAt = performance.now(); return; }
+    const away = hiddenAt ? performance.now() - hiddenAt : 0; hiddenAt = 0;
+    ctxCheck("sichtbar"); if (away > 20000 && Z.cachesNeu) Z.cachesNeu("hintergrund");
+  });
+  for (const ev of ["fullscreenchange", "webkitfullscreenchange"]) document.addEventListener(ev, () => setTimeout(() => ctxCheck("vollbild"), 300));
   let last = performance.now(), acc = 0, fpsT = 0, fpsN = 0;
   const STEP = 1 / 120;
   Z.paused = false;
@@ -484,13 +505,18 @@
         for (let i = 0; i < n; i++) { tick(h, first); first = false; }
         inp.endFrame();
       }
-      FX.update(dt);
-      Z.cam.update(dt, Z.player);
-      Z.gfx.weather(dt);
-      Z.music.update(dt); Z.ambience.update(dt);
-    } else { inp.endFrame(); if (Z.music) Z.music.update(dt); }
+      /* W22 Geist: was nach der Spiellogik kommt, darf das Bild nicht verhindern – früher brach eine Ausnahme hier
+         (Ton, Kamera, Wetter) das ganze Bild ab, die Logik lief weiter: Spieler als „unsichtbarer Geist“ */
+      try { FX.update(dt); } catch (e) { caught("fx", e); }
+      try { Z.cam.update(dt, Z.player); } catch (e) { caught("kamera", e); }
+      try { Z.gfx.weather(dt); } catch (e) { caught("wetter", e); }
+      try { Z.music.update(dt); Z.ambience.update(dt); } catch (e) { caught("musik", e); }
+    } else { inp.endFrame(); if (Z.music) try { Z.music.update(dt); } catch (e) { caught("musik", e); } }
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    if (Z.level) Z.gfx.render(ctx, VW, VH, Z.paused ? 0 : dt);
+    if (Z.level) {
+      try { Z.gfx.render(ctx, VW, VH, Z.paused ? 0 : dt); }
+      catch (e) { caught("bild", e); if (Z.gfx.ctxReset) Z.gfx.ctxReset(ctx); }
+    }
     else { ctx.fillStyle = "#0c080c"; ctx.fillRect(0, 0, VW, VH); }
     Z._work = (Z._work || 0) + performance.now() - now; Z._workN = (Z._workN || 0) + 1; /* Rechenzeit je Bild für die Grafik-Automatik */
   }

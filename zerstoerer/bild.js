@@ -2313,6 +2313,7 @@
   G.lightRGB = colRGB;
   /* Lichtfleck je Farbe (auf 8er-Stufen gerundet, zwischengespeichert): heller Kern, weicher, fast quadratischer Abfall */
   const LSPR = new Map();
+  (Z._cachesNeu = Z._cachesNeu || []).push(() => { LSPR.clear(); FSPR.clear(); }); /* W22 Geist */
   function lightSpr(rgb) {
     const r = rgb[0] & 0xf8, g = rgb[1] & 0xf8, b = rgb[2] & 0xf8, key = (r << 16) | (g << 8) | b;
     let s = LSPR.get(key); if (s) return s;
@@ -2759,46 +2760,95 @@
   };
 
   /* ======================= GESAMTBILD ======================= */
+  /* W22 Geist: Zeichenpfad abgeschottet. Wirft eine Phase oder ein Zeichen-Haken (z. B. ein Modul auf einer anderen
+     Browser-Engine), werden Fehler einmal je Ort gemeldet (Z.diag.caught), der Leinwand-Zustand (save-Stapel, Deckkraft,
+     Mischmodus, Filter, Schatten, Strichmuster, Transform) zurückgesetzt – und Welt wie Spieler trotzdem gezeichnet.
+     Früher brach das ganze Bild ab, während die Spiellogik weiterlief („unsichtbarer Geist“). try/catch nur je Phase,
+     je Figur und je Haken – nicht in inneren Schleifen. */
+  function ctxReset(c) {
+    for (let i = 0; i < 48; i++) c.restore(); /* leerer Stapel: wirkungslos; render() selbst liegt in keinem save() */
+    c.globalAlpha = 1; c.globalCompositeOperation = "source-over";
+    if (c.filter !== undefined && c.filter !== "none") c.filter = "none";
+    c.shadowBlur = 0; c.shadowColor = "rgba(0,0,0,0)"; if (c.setLineDash) c.setLineDash([]); c.lineWidth = 1;
+  }
+  G.ctxReset = ctxReset;
+  function rFail(c, ort, err) {
+    try { if (Z.diag && Z.diag.caught) Z.diag.caught(ort, err); else console.warn(ort, err); } catch (_) {}
+    G.rErr = (G.rErr || 0) + 1; G.rErrOrt = ort;
+    ctxReset(c);
+  }
+  /* Notbild des Spielers, falls seine Zeichnung selbst scheitert: schlichte Gestalt (Rumpf, Maske, Hörner, Umhang) */
+  function notSpieler(c, P) {
+    const x = P.x + P.w / 2, y = P.y + P.h, f = P.face || 1;
+    c.save(); c.globalAlpha = P.invis > 0 ? 0.3 : 1;
+    c.fillStyle = "#7a1414"; c.fillRect(x - f * 7 - 2.5, y - 20, 5, 17);
+    c.fillStyle = "#2a2024"; c.fillRect(x - 4, y - 21, 8, 21);
+    c.fillStyle = "#d8c8a8"; c.fillRect(x - 3 + f, y - 27, 6, 6);
+    c.fillStyle = "#3a2e2a"; c.fillRect(x - 3, y - 31, 1.6, 4); c.fillRect(x + 1.4, y - 31, 1.6, 4);
+    c.fillStyle = "#ff8a2a"; c.fillRect(x + f * 2 - 0.6, y - 25, 1.3, 1.3);
+    c.restore();
+  }
+  /* Wächter: scheitert die Spielerzeichnung Bild um Bild, Zwischenspeicher neu; hält es an, im Lager das Gebiet neu laden */
+  let pFail = 0;
+  function pHeal() {
+    pFail++;
+    if (pFail === 30) { try { Z.cachesNeu && Z.cachesNeu("spieler-zeichnung"); } catch (_) {} }
+    else if (pFail === 240) {
+      try { if (Z.diag && Z.diag.note) Z.diag.note("Wächter: Spielerzeichnung scheitert weiter → Gebiet neu"); } catch (_) {}
+      try { const lvh = Z.level; if (lvh && lvh.hub && !Z.run && Z.loadArea) { const P = Z.player, px = P && P.x, py = P && P.y; Z.loadArea(lvh.id); if (P && Z.player === P && px != null) { P.x = px; P.y = py; } } } catch (e) { console.warn(e); }
+      pFail = 0;
+    }
+  }
   G.render = function (c, W, H, dt) {
     G.time += dt; G.frame++;
     const cam = Z.cam, t = G.time;
     if (!lv || !B) return;
     const S = G.scale;
     const ox = Math.round((-cam.x + FX.shakeX) * S) / S, oy = Math.round((-cam.y + FX.shakeY) * S) / S;
-    c.setTransform(S, 0, 0, S, ox * S, oy * S);
+    const WT = () => c.setTransform(S, 0, 0, S, ox * S, oy * S);
+    WT();
     const pf = Z.prof, tm = pf ? () => performance.now() : null; let t0 = pf ? tm() : 0;
     const mark = k => { if (pf) { c.getImageData(0, 0, 1, 1); const n = tm(); pf[k] = (pf[k] || 0) + n - t0; t0 = n; } };
     const lay = !Z.gq || Z.gq.layers !== false;
-    if (Z.noLayers) {} else if (!lay && !leanBack() && lv.hub && !(G.off && G.off.lagerhimmel)) { hubBack(c, cam); } else if (!lay && !leanBack() && lv.arena && !(G.off && G.off.arenahimmel)) { arenaBack(c, cam); } else if (!lay && !leanBack() && (B.open || lv.out) && B.sky && !(G.off && G.off.fensterhimmel)) { skyBack(c, cam); } else if (lay && (B.open || lv.out || lv.hub || lv.arena)) { drawLayers(c, cam); if (!Z.gq || Z.gq.critters !== false) { updCritters(dt, cam); drawCritters(c, cam); } } else { c.fillStyle = B.wall; c.fillRect(cam.x - 2, cam.y - 2, cam.w + 4, cam.h + 4); } mark("layers");
+    try { if (Z.noLayers) {} else if (!lay && !leanBack() && lv.hub && !(G.off && G.off.lagerhimmel)) { hubBack(c, cam); } else if (!lay && !leanBack() && lv.arena && !(G.off && G.off.arenahimmel)) { arenaBack(c, cam); } else if (!lay && !leanBack() && (B.open || lv.out) && B.sky && !(G.off && G.off.fensterhimmel)) { skyBack(c, cam); } else if (lay && (B.open || lv.out || lv.hub || lv.arena)) { drawLayers(c, cam); if (!Z.gq || Z.gq.critters !== false) { updCritters(dt, cam); drawCritters(c, cam); } } else { c.fillStyle = B.wall; c.fillRect(cam.x - 2, cam.y - 2, cam.w + 4, cam.h + 4); } }
+    catch (err) { rFail(c, "hintergrund", err); WT(); c.fillStyle = B.wall || "#0c080c"; c.fillRect(cam.x - 2, cam.y - 2, cam.w + 4, cam.h + 4); }
+    mark("layers");
     /* Riesen im Hintergrund (Demogorgon im Herz des Sees): hinter Boden und Plattformen */
-    Z.drawBehindTiles && Z.drawBehindTiles(c, cam, t);
-    drawTiles(c, cam); mark("tiles");
-    drawLiquids(c, cam, t);
-    drawDecor(c, cam, t);
-    Z.drawMidLife && Z.drawMidLife(c, cam, t); mark("decor");
-    drawDoors(c, t);
-    Z.drawWorldProps && Z.drawWorldProps(c, t);
-    pickupBack(c, t); Z.drawPickups(c, t); pickupFront(c, t);
-    Z.drawHazards(c, t);
-    Z.drawParcours && Z.drawParcours(c, t); mark("misc");
-    for (const e of Z.enemies) if (e.def.boss && e.def.shape === "demogorgon") Z.drawEnemy(c, e, t);
-    FX.draw(c, false);
-    for (const a of Z.allies) Z.drawAlly(c, a, t);
-    for (const e of Z.enemies) if (!(e.def.boss && e.def.shape === "demogorgon")) { if (e.x > cam.x - 80 && e.x < cam.x + cam.w + 80 && e.y > cam.y - 120 && e.y < cam.y + cam.h + 80) Z.drawEnemy(c, e, t); }
+    try { Z.drawBehindTiles && Z.drawBehindTiles(c, cam, t); } catch (err) { rFail(c, "dahinter", err); WT(); }
+    try { drawTiles(c, cam); } catch (err) { rFail(c, "kacheln", err); WT(); G.chunks.clear(); }
+    mark("tiles");
+    try { drawLiquids(c, cam, t); } catch (err) { rFail(c, "fluessig", err); WT(); }
+    try { drawDecor(c, cam, t); } catch (err) { rFail(c, "deko", err); WT(); }
+    try { Z.drawMidLife && Z.drawMidLife(c, cam, t); } catch (err) { rFail(c, "mittelleben", err); WT(); }
+    mark("decor");
+    try { drawDoors(c, t); } catch (err) { rFail(c, "tueren", err); WT(); }
+    try { Z.drawWorldProps && Z.drawWorldProps(c, t); } catch (err) { rFail(c, "requisiten", err); WT(); }
+    try { pickupBack(c, t); Z.drawPickups(c, t); pickupFront(c, t); } catch (err) { rFail(c, "beute", err); WT(); }
+    try { Z.drawHazards(c, t); } catch (err) { rFail(c, "gefahren", err); WT(); }
+    try { Z.drawParcours && Z.drawParcours(c, t); } catch (err) { rFail(c, "parcours", err); WT(); }
+    mark("misc");
+    for (const e of Z.enemies) if (e.def.boss && e.def.shape === "demogorgon") { try { Z.drawEnemy(c, e, t); } catch (err) { rFail(c, "gegner:" + e.def.shape, err); WT(); } }
+    try { FX.draw(c, false); } catch (err) { rFail(c, "fx-hinten", err); WT(); }
+    for (const a of Z.allies) { try { Z.drawAlly(c, a, t); } catch (err) { rFail(c, "verbuendete", err); WT(); } }
+    for (const e of Z.enemies) if (!(e.def.boss && e.def.shape === "demogorgon")) { if (e.x > cam.x - 80 && e.x < cam.x + cam.w + 80 && e.y > cam.y - 120 && e.y < cam.y + cam.h + 80) { try { Z.drawEnemy(c, e, t); } catch (err) { rFail(c, "gegner:" + (e.def.shape || e.def.id), err); WT(); } } }
     mark("enemies");
-    Z.drawBeforePlayer && Z.drawBeforePlayer(c);
-    if (Z.player) Z.drawPlayer(c, Z.player, t);
-    Z.drawProjs(c);
-    Z.drawGadgets && Z.drawGadgets(c, t);
-    FX.drawSmears(c);
-    FX.draw(c, true); mark("fx");
-    fog(c, cam);
-    const merged = lightPass(c, cam, W, H, -ox, -oy); mark("light");
-    Z.drawAfterLight && Z.drawAfterLight(c, cam, W, H, t);
-    if (pkFly.length) pkFlyDraw(c); else pkT = G.time;
+    try { Z.drawBeforePlayer && Z.drawBeforePlayer(c); } catch (err) { rFail(c, "vor-spieler", err); WT(); }
+    if (Z.player) {
+      try { Z.drawPlayer(c, Z.player, t); if (pFail) pFail = 0; G.pDrawn = G.frame; }
+      catch (err) { rFail(c, "spieler", err); WT(); try { notSpieler(c, Z.player); } catch (_) { ctxReset(c); } WT(); pHeal(); }
+    }
+    try { Z.drawProjs(c); } catch (err) { rFail(c, "geschosse", err); WT(); }
+    try { Z.drawGadgets && Z.drawGadgets(c, t); } catch (err) { rFail(c, "werkzeuge", err); WT(); }
+    try { FX.drawSmears(c); FX.draw(c, true); } catch (err) { rFail(c, "fx-vorne", err); WT(); }
+    mark("fx");
+    try { fog(c, cam); } catch (err) { rFail(c, "nebel", err); WT(); }
+    let merged = false;
+    try { merged = lightPass(c, cam, W, H, -ox, -oy); } catch (err) { rFail(c, "licht", err); WT(); }
+    mark("light");
+    try { Z.drawAfterLight && Z.drawAfterLight(c, cam, W, H, t); } catch (err) { rFail(c, "nach-licht", err); WT(); }
+    try { if (pkFly.length) pkFlyDraw(c); else pkT = G.time; } catch (err) { rFail(c, "beuteflug", err); pkFly.length = 0; }
     /* Bildschirmblitz und Vignette */
     c.setTransform(1, 0, 0, 1, 0, 0);
-    if (FX.flash > 0 && Z.settings.flashes) { c.globalAlpha = FX.flash * 0.6; c.fillStyle = FX.flashCol; c.fillRect(0, 0, W, H); c.globalAlpha = 1; }
     const P = Z.player;
     if (P && P.hp < P.hpMax * 0.3 && !P.dead) { if (!G.vigR) { G.vigR = document.createElement("canvas"); G.vigR.width = 160; G.vigR.height = 90; const v = G.vigR.getContext("2d"); const g = v.createRadialGradient(80, 45, 26, 80, 45, 84); g.addColorStop(0, "rgba(140,0,0,0)"); g.addColorStop(1, "rgba(140,0,0,1)"); v.fillStyle = g; v.fillRect(0, 0, 160, 90); } c.globalAlpha = (0.3 - P.hp / P.hpMax) / 0.3 * (0.6 + 0.2 * Math.sin(t * 5)); c.drawImage(G.vigR, 0, 0, W, H); c.globalAlpha = 1; }
     if (!merged && (!Z.gq || Z.gq.vignette !== false)) c.drawImage(vigSprite(), 0, 0, W, H);

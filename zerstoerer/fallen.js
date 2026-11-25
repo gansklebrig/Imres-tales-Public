@@ -96,6 +96,7 @@
   }
   /* Schatten-/Sprite-Zwischenspeicher für Statisches (keine Verläufe pro Bild) */
   const SPR = new Map();
+  (Z._cachesNeu = Z._cachesNeu || []).push(() => SPR.clear()); /* W22 Geist */
   function spr(key, w, h, fn) {
     let cv = SPR.get(key); if (cv) return cv;
     cv = document.createElement("canvas"); cv.width = w * 3; cv.height = h * 3; const g = cv.getContext("2d"); g.scale(3, 3); fn(g, w, h);

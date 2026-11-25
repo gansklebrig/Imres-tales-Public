@@ -425,6 +425,7 @@
   /* Statisches (Zelte, Hütten, Stände, Palisade, Balken, Brett, Stein) wird einmal pro Besuch/Änderung gemalt und dann
      nur noch mit drawImage gesetzt. Auflösung folgt der Bildschirmskalierung (Handheld-Stufe: gröber). */
   const SPR = new Map();
+  (Z._cachesNeu = Z._cachesNeu || []).push(() => SPR.clear()); /* W22 Geist */
   const sprK = () => { const s = (Z.gfx && Z.gfx.scale) || 2; const k = lo() ? Math.min(1.5, s * 0.6) : Math.min(3, s); return Math.max(1, Math.round(k * 2) / 2); };
   function sprite(key, w, h, draw) {
     const k = sprK(), id = key + "@" + k;
@@ -939,6 +940,7 @@
   /* Zahlen auf dem Gedenkstein (lebendig, damit nichts neu gemalt werden muss) */
   /* Text und Stufenrauten als kleines Bild zwischenspeichern (5 px je Welteinheit) – Schrift je Bild ist auf Handhelds teuer */
   let stoneTx = null;
+  (Z._cachesNeu = Z._cachesNeu || []).push(() => { stoneTx = null; }); /* W22 Geist */
   function stoneText(c, x, gy, t, st) {
     const M = Z.meta, key = (M.runs || 0) + "|" + (M.deaths || 0) + "|" + st + "|" + L(["Läufe", "runs"]) + "|" + (document.fonts ? document.fonts.status : "");
     if (!stoneTx || stoneTx.key !== key) {

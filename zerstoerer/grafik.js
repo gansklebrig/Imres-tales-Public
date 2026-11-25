@@ -4,7 +4,13 @@
 (function () {
   "use strict";
   const Z = window.Z, L = v => Z.L(v);
-  const VERSION = "zerstoerer v16 · 2026-11-23";
+  /* W22: Versionsnummer aus dem ?v= der eingebundenen Skripte (zerstoerer.html) – Fehlerberichte zeigen so den echten Stand */
+  const VERSION = (() => {
+    let v = "";
+    try { const src = (document.currentScript && document.currentScript.src) || ""; const m = /[?&]v=([\w.-]+)/.exec(src); if (m) v = m[1]; } catch (_) {}
+    if (!v) try { for (const s of document.scripts) { const m = /zerstoerer\/\w+\.js\?v=([\w.-]+)/.exec(s.src || ""); if (m) { v = m[1]; break; } } } catch (_) {}
+    return "zerstoerer v=" + (v || "?") + (window.__zsPC ? " · PC" : "");
+  })();
   Z.VERSION = VERSION;
 
   /* ======================= QUALITÄTSSTUFEN ======================= */
@@ -116,6 +122,12 @@
   addEventListener("error", ev => { if (ev && ev.message) addErr(ev.message, ev.filename, ev.lineno, ev.colno, ev.error && ev.error.stack); else if (ev && ev.target && ev.target.src) addErr("Laden fehlgeschlagen: " + short(ev.target.src), "", 0); }, true);
   addEventListener("unhandledrejection", ev => { const r = ev && ev.reason; addErr("Promise: " + (r && r.message || r), r && r.fileName, r && r.lineNumber, 0, r && r.stack); });
   const ce = console.error; console.error = function () { try { addErr("console.error: " + [...arguments].map(a => a && a.message || String(a)).join(" "), "", 0); } catch (_) {} return ce.apply(console, arguments); };
+  /* W22 Geist: abgefangene Fehler im Zeichenpfad – je Ort nur einmal melden (sonst 60 Einträge je Sekunde) */
+  const caughtAt = new Set();
+  D.caught = (ort, err) => {
+    if (caughtAt.has(ort)) return; caughtAt.add(ort);
+    addErr("[" + ort + "] " + (err && err.message || err), err && err.fileName, err && err.lineNumber, 0, err && err.stack);
+  };
   D.note = s => { D.notes.push(new Date().toTimeString().slice(0, 8) + " " + s); if (D.notes.length > 20) D.notes.shift(); };
   D.clearOld = () => { D.old = []; D.errors.length = 0; try { localStorage.removeItem(ERRKEY); } catch (_) {} };
 
@@ -248,6 +260,8 @@
     out.push(VERSION + " · " + new Date().toLocaleString("de-DE"));
     out.push("Gerät: " + browser() + " · " + (navigator.hardwareConcurrency || "?") + " Kerne" + (navigator.deviceMemory ? " · " + navigator.deviceMemory + " GB" : "") + " · " + gpu());
     out.push("Bildschirm: " + innerWidth + "×" + innerHeight + " @" + (devicePixelRatio || 1).toFixed(2) + " · Zeichenfläche " + (cv ? cv.width + "×" + cv.height : "?") + (document.fullscreenElement ? " · Vollbild" : ""));
+    /* W22 Geist: Leinwand-Rücklesen (Brave-Shields & Co.), Kontextverlust, abgefangene Zeichenfehler */
+    try { out.push("Leinwand: Rücklesen " + (Z.canvasLesbar ? (Z.canvasLesbar() ? "ok" : "verfälscht (Datenschutz-Schutz) – Sprites ohne Rücklesen") : "?") + (Z.ctxLost ? " · Kontext VERLOREN" : "") + (Z.gfx && Z.gfx.rErr ? " · Zeichenfehler abgefangen: " + Z.gfx.rErr + " (zuletzt " + Z.gfx.rErrOrt + ")" : "") + (Z.gfx && Z.player ? " · Spieler zuletzt gezeichnet vor " + Math.max(0, (Z.gfx.frame || 0) - (Z.gfx.pDrawn || 0)) + " Bildern" : "")); } catch (_) {}
     const pad = Z.input.lastPad ? Z.input.padName || "Controller" : "";
     out.push("Eingabe: " + (Z.input.device === "pad" ? "Controller" : Z.input.device === "touch" ? "Touch" : "Tastatur/Maus") + (pad ? " · " + pad.replace(/\s*\(.*?\)/g, "").slice(0, 50) : ""));
     out.push("Grafik: " + Z.gfxName() + " · Auflösung " + f0(q.res * 100) + " % · Partikel " + f0(q.part * 100) + " % · Licht 1/" + q.light + " · Wetter " + onoff(q.weather) + " · Nebel " + onoff(q.fog) + " · Ebenen " + onoff(q.layers) + " · Tiere " + onoff(q.critters) + " · Vignette " + onoff(q.vignette) + " · FPS-Grenze " + (q.fpsCap || "aus"));

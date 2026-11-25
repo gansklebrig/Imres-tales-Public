@@ -2773,6 +2773,7 @@
   const Z = window.Z, G = Z.gfx, T = Z.TILE, TAU = Math.PI * 2;
   const on = () => { const q = Z.gq; if (!q) return true; if (q.lean) return false; return (q.level === -1 ? 2 : q.level) >= 1 && !(G.off && G.off.fernsicht); };
   const TW = 512, TH = 288, RS = 2, SPR = new Map();
+  (Z._cachesNeu = Z._cachesNeu || []).push(() => SPR.clear()); /* W22 Geist */
   const rnd = s => () => (s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
   const glowDot = (g, x, y, r, col, a) => { const q = g.createRadialGradient(x, y, 0, x, y, r); q.addColorStop(0, col.replace("A", a)); q.addColorStop(1, col.replace("A", 0)); g.fillStyle = q; g.fillRect(x - r, y - r, r * 2, r * 2); };
   const PAINT = {

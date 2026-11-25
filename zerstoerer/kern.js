@@ -728,4 +728,41 @@
   { const S = Z.settings; if (!(typeof S.vibK === "number" && isFinite(S.vibK))) S.vibK = S.vib === false ? 0 : 0.8; S.vibK = Math.max(0, Math.min(1, S.vibK)); S.vib = S.vibK > 0; }
   inp.vib = Z.settings.vibK > 0;
   Z.setVibK = v => { Z.settings.vibK = Math.max(0, Math.min(1, +v || 0)); Z.settings.vib = Z.settings.vibK > 0; inp.vib = Z.settings.vib; };
+
+  /* ---------- W22 Geist: Leinwand-Lesetest und zentrale Cache-Erneuerung ----------
+     Brave (Shields „Fingerprinting blockieren“), Firefox resistFingerprinting, Tor u. a. verfälschen getImageData
+     (leere, verrauschte oder weiße Daten). Die Sprite-Zwischenspeicher (Stufe 0: Ezekiel, Figuren, Gegner) suchen den
+     benutzten Bereich per Rücklesen – liefert das Nullen, gelten die Teile als „leer“ und werden nie gezeichnet
+     (unsichtbarer Spieler, unsichtbare Lagerfiguren). Z.canvasLesbar() prüft einmal mit einem bekannten Muster. */
+  let lesbar = null;
+  Z.canvasLesbar = function (neu) {
+    if (lesbar !== null && !neu) return lesbar;
+    try {
+      const cv = document.createElement("canvas"); cv.width = 8; cv.height = 8;
+      const g = cv.getContext("2d", { willReadFrequently: true });
+      g.clearRect(0, 0, 8, 8); g.fillStyle = "#c81e32"; g.fillRect(2, 2, 3, 3);
+      const d = g.getImageData(0, 0, 8, 8).data;
+      let ok = true;
+      for (let y = 0; y < 8 && ok; y++) for (let x = 0; x < 8; x++) {
+        const i = (y * 8 + x) * 4, inn = x >= 2 && x < 5 && y >= 2 && y < 5;
+        if (inn ? d[i + 3] < 250 || Math.abs(d[i] - 200) > 6 || d[i + 1] > 40 || Math.abs(d[i + 2] - 50) > 6 : d[i + 3] > 2) { ok = false; break; }
+      }
+      lesbar = ok;
+    } catch (e) { lesbar = false; }
+    if (!lesbar) try { Z.diag && Z.diag.note && Z.diag.note("Leinwand-Rücklesen verfälscht (Datenschutz-Schutz?) → Sprites ohne Rücklesen"); } catch (_) {}
+    return lesbar;
+  };
+  Z.canvasUnlesbar = grund => { if (lesbar === false) return; lesbar = false; try { Z.diag && Z.diag.note && Z.diag.note("Rücklesen unzuverlässig (" + grund + ")"); } catch (_) {} if (Z.cachesNeu) Z.cachesNeu("lesen"); };
+  /* Module melden hier ihre Zwischenspeicher an (Leeren = beim nächsten Bedarf neu malen). Z.cachesNeu(grund) leert alle,
+     dazu Kachel-Blöcke und Ebenen (bild.js). Aufrufer: Kontextverlust, Wächter im Zeichenpfad, Lesetest. */
+  const cacheFns = (Z._cachesNeu = Z._cachesNeu || []);
+  let cnLast = 0;
+  Z.cachesNeu = function (grund) {
+    const now = performance.now(); if (now - cnLast < 250) return false; cnLast = now;
+    for (const fn of cacheFns) { try { fn(grund); } catch (e) { console.warn("cachesNeu", e); } }
+    const G = Z.gfx;
+    try { if (G) { if (G.chunks) G.chunks.clear(); if (G.dropCaches) G.dropCaches(); if (Z.level && G.buildLayers) G.buildLayers(); } } catch (e) { console.warn("cachesNeu gfx", e); }
+    try { Z.diag && Z.diag.note && Z.diag.note("Zwischenspeicher neu (" + (grund || "?") + ")"); } catch (_) {}
+    return true;
+  };
 })();

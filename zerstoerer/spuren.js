@@ -549,6 +549,7 @@
     }
   }
   const SPR = new Map();
+  (Z._cachesNeu = Z._cachesNeu || []).push(() => SPR.clear()); /* W22 Geist */
   function sprite(s) {
     const res = Math.max(2, Math.min(4, Math.ceil((Z.gfx && Z.gfx.scale) || 2)));
     let o = SPR.get(s); if (o && o.res === res) return o;
