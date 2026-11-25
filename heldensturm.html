@@ -43288,7 +43288,7 @@ hook('tick',()=>{try{if(frei()&&laeuft()&&P.padAim!=null)P.padAim=null}catch(e){
 const ME=window.__hsMELDE={v:1,aus:0,n:{toast:0,wort:0}};
 const bannerAn=()=>{try{const b=G&&G.banner;return!!(b&&b.t<b.dur&&G.state==='play')}catch(e){return false}};
 const el=()=>typeof toastEl!=='undefined'&&toastEl?toastEl:document.getElementById('toast');
-let basis=null,zuletzt=-1;
+let basis=null,zuletzt=-1,lageT=0,spurT=0;
 function frei(){/* unterste belegte Bildschirmzeile (CSS-Pixel) durch Abschnittsname oder Banner */
  let y=0;
  try{if(typeof KANAME!=='undefined'&&KANAME.t>0&&KANAME.unten>0)return KANAME.unten+4}catch(e){}
@@ -43297,11 +43297,13 @@ function frei(){/* unterste belegte Bildschirmzeile (CSS-Pixel) durch Abschnitts
 function lage(){const t=el();if(!t)return;if(basis===null){basis=parseFloat(getComputedStyle(t).top)||150;t.style.transition='top .25s ease, opacity .18s ease'}
  const ban=!ME.aus&&bannerAn();if(ban!==(t.style.opacity==='0'))t.style.opacity=ban?'0':'';
  if(ME.aus||!G||G.state!=='play'){if(zuletzt!==-1){t.style.top='';zuletzt=-1}return}
+ const nw=performance.now();if(nw-lageT<120)return;lageT=nw;
  const y=frei(),ziel=y>basis-8?Math.round(y+8):-1;if(ziel!==zuletzt){zuletzt=ziel;t.style.top=ziel<0?'':ziel+'px'}}
+/* (beide Prüfungen gedrosselt: Lage ≤ 8×/s, Spur ≤ 7×/s – Layout-Abfragen kosten in jedem Bild Zeit) */
 /* Hinweisspur unten (lange Hinweise) nicht unter die Erzähler-/Heldenzeile legen: Spur rückt darüber */
 let laneZ=-1;const DE=document.documentElement;
-function spur(){const erz=document.querySelector('.erzSub'),ln=document.getElementById('qa2lane');if(!ln)return;let ziel=0;
- if(!ME.aus&&erz&&erz.isConnected&&erz.classList.contains('an')&&!erz.classList.contains('oben')&&!erz.classList.contains('pz')){const cs=getComputedStyle(erz);if(cs.display!=='none'&&cs.visibility!=='hidden'&&+cs.opacity>0.05){const r=erz.getBoundingClientRect();if(r.height>8&&r.top<innerHeight){const hz=parseFloat(getComputedStyle(DE).getPropertyValue('--hz'))||1;ziel=Math.round((innerHeight-r.top+8)/hz)}}}
+function spur(){const nw=performance.now();if(nw-spurT<150)return;spurT=nw;const ln=document.getElementById('qa2lane');if(!ln||!ln.firstElementChild&&laneZ<=0)return;const erz=document.querySelector('.erzSub');let ziel=0;
+ if(!ME.aus&&erz&&erz.isConnected&&erz.classList.contains('an')&&!erz.classList.contains('oben')&&!erz.classList.contains('pz')){const r=erz.getBoundingClientRect();if(r.height>8&&r.top<innerHeight){const hz=parseFloat(DE.style.getPropertyValue('--hz'))||1;ziel=Math.round((innerHeight-r.top+8)/hz)}}
  if(ziel!==laneZ){laneZ=ziel;if(ziel){DE.style.setProperty('--qa2lb',ziel+'px');DE.style.setProperty('--qa2tb',ziel+'px')}else{DE.style.removeProperty('--qa2lb');DE.style.removeProperty('--qa2tb')}}}
 (function schleife(){try{lage()}catch(e){}try{spur()}catch(e){}requestAnimationFrame(schleife)})();
 /* Banner nicht über den Abschnittsnamen legen: Banner rückt unter ihn */
@@ -43418,6 +43420,14 @@ if(typeof kaDeko==='function'){const kd=kaDeko;kaDeko=function(S){const r=kd.app
    let nL=0;const gew=[];for(const c of C){if(nL>=2)break;if(gew.some(g=>Math.hypot(g[0]-c[0],g[1]-c[1])<1800))continue;if(typeof blkPunkt==='function'&&blkPunkt(c[0],c[1],60))continue;
     G.deco.push({x:c[0],y:c[1],k:'rh_schacht',s:1,v:Math.random(),wl:1,rh:3});gew.push(c);nL++}
    RH.schaechte=nL}}catch(e){console.error('rhythm-schacht',e)}
+ /* Feenring: im Wald liegt an einer offenen Stelle nahe dem Weg ein Ring aus Pilzen – wer hineintritt, findet ein paar Münzen */
+ try{const W=K.ka2W;if(W&&W.length>3&&T.mas==='wald'&&K.fl&&Math.random()<0.8){const D=abst(K),n=K.n,Z=K.Z;let ok=null;
+   for(let t=0;t<400&&!ok;t++){const c=K.fl[Math.floor(Math.random()*K.fl.length)];if(D[c]<5)continue;const x=(c%n+0.5)*Z,y=(((c/n)|0)+0.5)*Z;
+    let nah=false;for(let q=0;q<W.length;q+=2){const p=W[q];const d2=(p[0]-x)*(p[0]-x)+(p[1]-y)*(p[1]-y);if(d2<400*400&&d2>190*190){nah=true;break}}if(!nah)continue;
+    if(K.tore&&K.tore.some(o=>Math.hypot(o.x-x,o.y-y)<400))continue;if(K.start&&Math.hypot(K.start.x-x,K.start.y-y)<500)continue;if(typeof blkPunkt==='function'&&blkPunkt(x,y,95))continue;ok=[x,y]}
+   if(ok){const m=11,R=66;for(let i=0;i<m;i++){const a=i/m*6.2832+Math.random()*0.2;G.deco.push({x:ok[0]+Math.cos(a)*R,y:ok[1]+Math.sin(a)*R*0.7,k:'mush',s:0.75+Math.random()*0.3,v:Math.random(),wl:1,rh:4})}
+    for(let i=0;i<4;i++)G.deco.push({x:ok[0]+(Math.random()-0.5)*50,y:ok[1]+(Math.random()-0.5)*30,k:'grass',s:0.8,v:Math.random(),wl:1,rh:4});
+    K.rhRing={x:ok[0],y:ok[1],used:0};RH.ring=1}}}catch(e){console.error('rhythm-ring',e)}
  /* Gassen: auf etwa jedem zweiten Platz ein Brunnen in der Mitte – Wiedererkennung und etwas zum Umkreisen im Kampf */
  if(T.lay==='gassen'&&G.blk){let b=0;for(const p of K.rhP){if(p[2]<4||Math.random()>0.55)continue;const x=(p[0]+0.5)*K.Z,y=(p[1]+0.5)*K.Z;if(typeof blkPunkt==='function'&&blkPunkt(x,y,70))continue;{let zu=false;for(let b=-3;b<=3&&!zu;b++)for(let a=-3;a<=3;a++){const i=p[0]+a,j=p[1]+b;if(a*a+b*b>10)continue;if(i<0||j<0||i>=K.n||j>=K.n||K.M[j*K.n+i]){zu=true;break}}if(zu)continue}if(K.tore&&K.tore.some(t=>Math.hypot(t.x-x,t.y-y)<220))continue;
    G.blk.push({t:'c',x,y,r:20,k:'brunnen',v:Math.random(),wl:1,ai:0,rh:1});b++}
@@ -43439,6 +43449,8 @@ hook('tick',()=>{try{if(RH.aus||!G.deco||!G.ka||!P)return;if(!G.lights)G.lights=
   for(let i=L.length-1;i>=0;i--){const o=L[i];if(o._rh&&(Math.abs(o._rh.x-P.x)>1900||Math.abs(o._rh.y-P.y)>1300||G.deco.indexOf(o._rh)<0))L.splice(i,1)}
   if((G.time*4|0)%2)return;for(const d of G.deco){if(d.k!=='rh_schacht'||Math.abs(d.x-P.x)>1700||Math.abs(d.y-P.y)>1100)continue;if(L.some(o=>o._rh===d))continue;
    L.push({x:d.x,y:d.y-10,r:250,c:'#ffe6b8',t:0,life:1e9,a:0.8,_rh:d})}}catch(e){}});
+hook('tick',()=>{try{const R=G.ka&&G.ka.rhRing;if(!R||R.used||RH.aus||!P||P.dead||(typeof NET!=='undefined'&&NET.role==='guest'))return;
+  if(Math.abs(P.x-R.x)<48&&Math.abs(P.y-R.y)<36){R.used=1;try{word(R.x,R.y-50,'Ein Feenring!','#f6d77c')}catch(e){}try{sparks(R.x,R.y,'#f6d77c',18,1,true)}catch(e){}try{if(typeof spGold==='function')spGold(R.x,R.y,4)}catch(e){}}}catch(e){}});
 hook('draw',(t,c)=>{try{if(RH.aus||!G.deco||!G.ka||typeof spLeicht==='function'&&spLeicht())return;c=c||cx;const cxW=P.x,cyW=P.y;
   for(const d of G.deco){if(d.k!=='rh_schacht')continue;if(Math.abs(d.x-cxW)>1500||Math.abs(d.y-cyW)>1000)continue;const T_=G.time||0;
    c.save();c.translate(d.x,d.y);
@@ -43466,7 +43478,7 @@ const KN=window.__hsKNAME={v:1,aus:0,n:0};
 const DUM=(()=>{const c=document.createElement('canvas');c.width=c.height=1;return c.getContext('2d')})();
 let last=0;
 function zeile(){try{const K=G.ka;if(!K||KANAME.s<0)return '';const S_=K.sec[KANAME.s];if(!S_||S_.art==='seite'||S_.art==='arena')return '';return(typeof SP_ZEILE!=='undefined'&&SP_ZEILE[S_.name])||''}catch(e){return ''}}
-function hudTop(){let top=70;try{const el=document.querySelector('#hud .top');if(el){const r=el.getBoundingClientRect();if(r.height>0)top=r.bottom+(W<700?58:14)}}catch(e){}return top}
+let htT=0,htV=70;function hudTop(){const nw=performance.now();if(nw-htT<250)return htV;htT=nw;let top=70;try{const el=document.querySelector('#hud .top');if(el){const r=el.getBoundingClientRect();if(r.height>0)top=r.bottom+(W<700?58:14)}}catch(e){}htV=top;return top}
 function zeichne(){const a=Math.min(1,KANAME.t/0.6,(3.4-KANAME.t)/0.4);if(!(a>0)||!KANAME.txt){KANAME.unten=0;return}
  const k=typeof txtHz==='function'?Math.min(1.6,txtHz()):1;const klein=W<700;
  let g=cx,pr=DPR,ov=false;try{if(typeof TXO!=='undefined'&&TXO.on&&TXO.cv&&TXO.g){g=TXO.g;pr=TXO.cv.width/Math.max(1,innerWidth);ov=true}}catch(e){}
