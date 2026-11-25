@@ -43490,12 +43490,12 @@ hook('draw',(t,c)=>{try{if(RH.aus||!G.deco||!G.ka||typeof spLeicht==='function'&
    /* Staub im Licht */for(let i=0;i<14;i++){const ph=(T_*0.07+i*0.137+d.v)%1,yy=-ph*300,xx=-ph*80+Math.sin(T_*0.9+i*1.7)*(18+ph*30)+((i*53)%70-35)*(1-ph*0.5);
     const al=Math.sin(ph*Math.PI)*0.55;if(al<0.04)continue;c.globalAlpha=al;c.fillStyle='#fff3d6';c.fillRect(xx,yy,2,2)}
    c.restore()}}catch(e){}});
-/* Spannung: Je näher man dem Kampfplatz bzw. der Arena kommt, desto mehr zieht sich das Licht zusammen (bis +0,12 Dunkelheit),
-   weich überblendet; nach dem Sieg über Wächter/Boss wieder hell. */
+/* Spannung: Auf dem Weg zum Kampfplatz bzw. zur Arena zieht sich das Licht zusammen (bis +0,12 Dunkelheit), weich überblendet;
+   im Kampfbereich selbst wieder heller (Warnzeichen lesbar), nach dem Sieg über Wächter/Boss ganz hell. */
 RH.vd=0;
 function kampfZiel(){const K=G.ka;if(!K||!K.sec)return null;if(K._rhZ!==undefined)return K._rhZ;let z=K.kampfP||null;if(!z){const ar=K.sec.find(o=>o.art==='arena');if(ar)z={x:ar.cx,y:ar.cy}}K._rhZ=z;return z}
 hook('kill',e=>{try{if(e&&(e.guard||e.boss)&&G.ka)G.ka._rhSieg=1}catch(x){}});
-hook('tick',dt=>{try{if(G.mp&&typeof PL!=='undefined'&&PL[0]&&P!==PL[0])return;let ziel=0;const K=G.ka;if(!RH.aus&&K&&P&&!K._rhSieg&&G.state==='play'){const z=kampfZiel();if(z){const d=Math.hypot(P.x-z.x,P.y-z.y);const f=Math.max(0,Math.min(1,(1100-d)/700));ziel=f*0.12}}
+hook('tick',dt=>{try{if(G.mp&&typeof PL!=='undefined'&&PL[0]&&P!==PL[0])return;let ziel=0;const K=G.ka;if(!RH.aus&&K&&P&&!K._rhSieg&&G.state==='play'){const z=kampfZiel();if(z){const d=Math.hypot(P.x-z.x,P.y-z.y);/* am dunkelsten auf dem Weg dorthin; im Kampf selbst wieder heller (Warnzeichen gut lesbar) */const f=Math.max(0,Math.min(1,(1100-d)/500))*(d<450?0.35+0.65*Math.max(0,(d-200)/250):1);let ff=f;try{const si=kaSecAt(P.x,P.y);if(si!==255&&K.sec[si]&&K.sec[si].art==='arena')ff=Math.min(ff,0.35)}catch(e){}ziel=ff*0.12}}
   const k=Math.min(1,(dt||0.016)*1.2);RH.vd+=(ziel-RH.vd)*k;if(RH.vd<0.002&&ziel===0)RH.vd=0}catch(e){}});
 if(typeof wxDark==='function'){const wd=wxDark;wxDark=function(){const r=wd.apply(this,arguments);return RH.vd?r+RH.vd:r}}
 if(typeof kaLayout==='function'){const kl=kaLayout;kaLayout=function(S){const K=kl.apply(this,arguments);try{const t0=performance.now();rhythm(K);RH.st.ms+=performance.now()-t0}catch(e){console.error('rhythm',e)}return K}}
