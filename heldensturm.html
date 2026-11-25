@@ -42817,6 +42817,186 @@ if(typeof chooseEvent==='function'){const c0=chooseEvent;chooseEvent=function(){
 if(typeof ev2LandFx==='function'){const l0=ev2LandFx;ev2LandFx=function(){const a=WT.aus;WT.aus=1;try{return l0.apply(this,arguments)}finally{WT.aus=a;WT.nach=performance.now()+260}}}
 }catch(e){console.error('wurfton',e);window.__hsWURFTON={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/wurfton» */
+/* «beute3» */
+/* ================= Paket „beute3“: Beute-Kaskade, Fundorte, Garantien, Beutebuch – window.__hsBEUTE3 =================
+   Idee (kaskadierende Seltenheits-Würfe): Jeder Fund würfelt von oben nach unten –
+     erst Legendär (z. B. 0,45 %), sonst Episch (7,6 %), sonst Selten (32 %), sonst Magisch (72 %), sonst Gewöhnlich.
+   Jede Stufe hat ihre eigene, feste Chance. Was es innerhalb der Stufe wird, entscheidet danach eine eigene Tabelle
+   (Stufen-Tabelle). Neue Gegenstände oder Sets verändern so nie die Chance einer anderen Stufe – das Spiel bleibt stabil,
+   egal was wir später hinzufügen.
+
+   Bausteine
+   1. Kaskade (ersetzt rollRarity): Grundchancen KASK, Glückswert L hebt Selten/Episch/Legendär mit weicher Obergrenze
+      (f = 1 + a·L/(1+L/c)) – Glück wirkt immer spürbar, kann das Spiel aber nie sprengen.
+      L = Glück des Helden + Quellen-Bonus (Boss, Truhe …) + Schwierigkeit + Gefährlicher Weg + Entdeckerglück.
+   2. Stufen-Tabellen (verschachtelt): Legendär-Stufe → 88 % Legendär, 12 % Set-Teil (Heimat-Set bevorzugt).
+   3. Fundorte: Jede Region der Kampagne hat ein Heimat-Set. Set-Teile, die dort fallen, gehören zu 55 % zu diesem Set.
+      Fehlende Teile eines angefangenen Sets werden bevorzugt (70 %), damit Sammeln nicht im Doppelten erstickt.
+   4. Garantien (sichere Stellen):
+        · Erstsieg über jeden Kampagnen-Boss (je Held): sicher ein Set-Teil des Heimat-Sets
+        · Set-Pech-Schutz: spätestens der 5. Boss in Folge ohne Set-Teil lässt eins fallen
+        · Episch-Pech-Schutz: spätestens nach 40 Funden ohne Episch+ ist der nächste episch
+        · Legendär-Pech-Schutz, weich und über Läufe hinweg: ab 80 Funden ohne Legendär steigt die Chance stetig
+          (bei 120 doppelt, bei 160 dreifach); der harte Schutz pro Lauf bleibt zusätzlich bestehen
+   5. Wann sich die Tabellen ändern:
+        · Schwierigkeit (Schwer, Albtraum …): mehr Glückswert, nur für Selten/Episch bzw. über die Qualitätsstufen
+        · Gefährlicher Weg: mehr Glückswert für Selten/Episch
+        · Entdeckerglück: auf einer Kampagnen-Stufe, die dieser Held noch nie abgeschlossen hat, +0,3 Glückswert
+        · Farmen derselben Stufe dämpft weiterhin Menge und Legendäre (bestehende Bremse)
+   6. Glück: Glückswert in jeder Stufe der Kaskade, +10 % Fundchance je Glückspunkt bei normalen Gegnern (höchstens +30 %),
+      Pech-Schutz zählt mit Glück schneller, mehr magische Funde bleiben liegen.
+   7. Beutebuch (im Beutel und als Karte im Lager): zeigt Chancen je Quelle, Glückswert, Pech-Schutz-Stände, Fundorte und
+      gesammelte Set-Teile.
+   Verträgt sich mit den bestehenden Bremsen: Fortschritts-Rampe für Legendäres und Set-Obergrenze je Lauf (Paket „beute“),
+   Set-Filter je Quelle (bal2), Dämpfung beim Farmen. Garantierte Set-Teile zählen in die Obergrenze, werden aber nie verschluckt.
+   Abschaltbar: __hsBEUTE3.aus=1 (zurück zur alten Gewichtung). */
+(function(){try{if(window.__hsBEUTE3)return;
+const B3=window.__hsBEUTE3={v:1,aus:0,err:[]};const bErr=e=>{if(B3.err.length<30)B3.err.push(String(e&&e.stack||e).slice(0,300))};
+const B2P=(typeof B2!=='undefined'&&B2)?B2:{gefL:0.35,hardL:0.15};
+/* ---------- 1. Kaskade ---------- */
+const KASK=B3.KASK={l:0.0045,e:0.076,s:0.318,m:0.723};          /* Grundchancen (je Stufe, von oben nach unten) */
+const KURVE=B3.KURVE={l:{a:0.5,c:3},e:{a:0.71,c:2.7},s:{a:0.71,c:2.7},m:{a:0,c:1}};
+const PITY=B3.PITY={epi:40,legWeich:80,legSpanne:40,setBoss:5,legHart:220};
+const weich=(L,k)=>{const K=KURVE[k];L=Math.max(0,L);return 1+K.a*L/(1+L/K.c)};
+const hart=()=>{try{return typeof b2Hard==='function'&&b2Hard()}catch(e){return false}};
+const luckP=()=>Math.max(0,(typeof P!=='undefined'&&P&&P.st&&P.st.luck)||0);
+function hs(){if(!SAVE.b3||SAVE.b3.v!==1)SAVE.b3={v:1,h:{}};const id=(P&&P.id)||'_';const H=SAVE.b3.h;if(!H[id])H[id]={leg:0,epi:0,setB:0,fund:{},erst:{},done:-1};return H[id]}
+B3.hs=hs;
+function erst(){try{if(G.mode!=='kampagne'||G.bot)return false;const h=hs();if(h.done<0){const b=SAVE.heroes&&SAVE.heroes[P.id];h.done=Math.max(0,b&&b.best>0?b.best:0)}return G.stage>=h.done}catch(e){return false}}
+B3.erst=erst;
+/* Bestandteile des Glückswerts – auch für die Anzeige */
+function glueck(bonus){const lk=luckP(),q=0.25*(typeof qualN==='function'?qualN():0);
+ const ext=(G.gefahr?B2P.gefL:0)+(hart()?B2P.hardL:0)+(erst()?0.3:0);
+ return{lk,bonus:bonus||0,q,ext,Lleg:Math.max(0,lk+(bonus||0)+q),L:Math.max(0,lk+(bonus||0)+q+ext)}}
+B3.glueck=glueck;
+/* Fortschritts-Rampe des Pakets „beute“ (BT) bleibt gültig: früh nichts Legendäres, ab Stufe 4 langsam mehr */
+const btDa=()=>typeof BT!=='undefined'&&typeof btRamp==='function'&&typeof btAus==='function';
+const rampe=()=>{try{if(btDa()&&!btAus())return BT.legW*btRamp()/0.42;return (typeof B2!=='undefined'&&B2.legW?B2.legW:0.42)/0.42}catch(e){return 1}};
+const frueh=()=>{try{return btDa()&&!btAus()&&btFrueh()}catch(e){return false}};
+const setPlatz=()=>{try{if(!btDa()||btAus())return true;const np=Math.max(1,(typeof PL!=='undefined'&&PL&&PL.length)|0);return (G.btSetN|0)<BT.setMax(btProg())*np}catch(e){return true}};
+function legMul(){let m=rampe();try{m*=(typeof RLDROP==='function'?RLDROP():1)*(typeof legDaempf==='function'?legDaempf():1)}catch(e){}
+ if(!G.bot){const c=hs().leg;if(c>PITY.legWeich)m*=1+(c-PITY.legWeich)/PITY.legSpanne}return m}
+B3.chancen=function(bonus){const g=glueck(bonus);const pl=Math.min(0.2,KASK.l*weich(g.Lleg,'l')*legMul()),pe=Math.min(0.6,KASK.e*weich(g.L,'e')),ps=Math.min(0.9,KASK.s*weich(g.L,'s')),pm=KASK.m;
+ const L=pl,E=(1-L)*pe,S=(1-L-E)*ps,M=(1-L-E-S)*pm;return{l:L,e:E,s:S,m:M,g:1-L-E-S-M,glueck:g}};
+if(typeof rollRarity==='function'){const alt=rollRarity;B3.altRoll=alt;
+ rollRarity=function(bonus){if(B3.aus)return alt.apply(this,arguments);try{const c=B3.chancen(bonus);const r=Math.random();
+  if(r<c.l)return 4;if(r<c.l+c.e)return 3;if(r<c.l+c.e+c.s)return 2;if(r<c.l+c.e+c.s+c.m)return 1;return 0}catch(e){bErr(e);return alt.apply(this,arguments)}}}
+/* ---------- 3. Fundorte (Heimat-Sets) ---------- */
+const HS1={barradin:'barradin',echo:'echo',friedrich:'friedrich',ezekiel:'ezekiel'},HS2={barradin:'b_verz',echo:'e_bar',friedrich:'f_schuetz',ezekiel:'z_klingen'},HS3={barradin:'b_ranke',echo:'e_hort',friedrich:'f_jaeger',ezekiel:'z_schatten'};
+const HEIMAT=B3.HEIMAT=['g_rudel','HS1','g_bund','g_vampir','g_weit','g_bollwerk','g_blitz','HS2','g_tanz','HS3','g_magier','g_glueck','HSX','g_feuer','HSX'];
+const okSet=id=>!!(SETS[id]&&(!SETS[id].hero||SETS[id].hero===P.id));
+function heimatSets(ort,hid){const k=HEIMAT[ort];hid=hid||(P&&P.id);if(!k)return[];if(k==='HS1')return[HS1[hid]];if(k==='HS2')return[HS2[hid]];if(k==='HS3')return[HS3[hid]];if(k==='HSX')return[HS1[hid],HS2[hid],HS3[hid]];return[k]}
+B3.heimatSets=heimatSets;
+function ortJetzt(){try{if(G.mode!=='kampagne'||!STAGES[G.stage])return -1;return STAGES[G.stage].ort}catch(e){return -1}}
+const fehlt=(id)=>{const f=hs().fund[id]|0;return Object.keys(SETS[id].pieces).filter((s,i)=>!(f&(1<<SLOTS_I(s))))};
+function SLOTS_I(s){const L=['weapon','ranged','helm','armor','gloves','ring'];const i=L.indexOf(s);return i<0?7:i}
+function setWahl(){/* Set (und ggf. Teil) nach Fundort und Sammelstand wählen; null = altes Verfahren */
+ const o=ortJetzt();const H=o>=0?heimatSets(o).filter(okSet):[];
+ if(H.length&&Math.random()<0.55){H.sort((a,b)=>fehlt(b).length-fehlt(a).length);const id=Math.random()<0.7?H[0]:H[(Math.random()*H.length)|0];return id}
+ /* angefangene Sets vervollständigen */
+ const an=Object.keys(hs().fund).filter(id=>okSet(id)&&fehlt(id).length>0);if(an.length&&Math.random()<0.35)return an[(Math.random()*an.length)|0];
+ return null}
+if(typeof makeSetItem==='function'){const ms=makeSetItem;makeSetItem=function(il,slot,id){if(B3.aus||G.bot)return ms.apply(this,arguments);try{
+  if(!id){const w=setWahl();if(w)id=w}
+  if(id&&SETS[id]&&!slot){const f=fehlt(id);if(f.length&&Math.random()<0.7)slot=f[(Math.random()*f.length)|0]}
+ }catch(e){bErr(e)}return ms.call(this,il,slot,id)}}
+/* Fund vermerken (für Sammelstand & Vervollständigen) */
+function vermerk(it){try{if(!it||!it.set||G.bot||!SETS[it.set])return;const h=hs();h.fund[it.set]=(h.fund[it.set]|0)|(1<<SLOTS_I(it.slot))}catch(e){bErr(e)}}
+/* ---------- 2./4. Stufen-Tabelle + Pech-Schutz (bei jedem Zufallsgegenstand) ---------- */
+if(typeof randomItem==='function'){const ri=randomItem;randomItem=function(il,bonus,minR){let it=ri.apply(this,arguments);if(B3.aus||!it||G.bot||(G&&G.netGuestRun))return it;try{
+  const h=hs(),inc=1+0.15*Math.min(4,luckP());
+  /* Legendär-Stufe: zum Teil ein Set-Teil statt eines Legendären */
+  if(it.rar===4&&!it.anc&&!(minR>=4)&&Math.random()<0.12&&setPlatz()){const s=makeSetItem(il,null,null);if(s){s.b2ok=1;s.b3q='leg';G.btSetN=(G.btSetN|0)+1;it=s}}
+  if(it.rar>=4){h.leg=0}else{h.leg+=inc;if(h.leg>=PITY.legHart&&!(minR>=4)&&!frueh()){it=makeItem(it.slot,il,4,P.id);it.b3p=1;h.leg=0}}
+  if(it.rar>=3){h.epi=0}else{h.epi+=inc;if(h.epi>=PITY.epi){it=makeItem(it.slot,il,3,P.id);it.b3p=1;h.epi=0}}
+ }catch(e){bErr(e)}return it}}
+/* ---------- 6. Glück: Fundchance normaler Gegner ---------- */
+if(typeof beuteF==='function'){const bf=beuteF;beuteF=function(){const v=bf.apply(this,arguments);if(B3.aus)return v;return v*(1+0.1*Math.min(3,luckP()))}}
+if(window.__hsBEUTE2&&__hsBEUTE2.BLEIB){const B2b=__hsBEUTE2;const w0=B2b.wandeln;B2b.wandeln=function(it){const alt=B2b.BLEIB[1];if(!B3.aus)B2b.BLEIB[1]=Math.min(0.6,0.45+0.05*Math.min(3,luckP()));try{return w0.apply(this,arguments)}finally{B2b.BLEIB[1]=alt}}}
+/* ---------- 4. Garantien bei Bossen ---------- */
+let imKill=0,setsImKill=0;
+if(typeof dropItem==='function'){const di=dropItem;dropItem=function(x,y,it){const n0=G.loot?G.loot.length:0;const r=di.apply(this,arguments);try{if(it&&it.set&&G.loot&&G.loot.length>n0){vermerk(it);if(imKill)setsImKill++;if(!G.bot)hs().setB=0}}catch(e){bErr(e)}return r}}
+function setGarantie(e,warum){const a=Math.random()*Math.PI*2;const it=makeSetItem((e.il|0)+3,null,null);if(!it)return;it.b2ok=1;it.b3g=warum;G.btSetN=(G.btSetN|0)+1;
+ dropItem(e.x+Math.cos(a)*90,e.y-170,it);if(!G.bot){try{word(e.x,e.y-220,warum==='erst'?'Erstsieg: Set-Teil!':'Glücksfund: Set-Teil!','#3fdc6a')}catch(x){}}}
+if(typeof killEnemy==='function'){const ke=killEnemy;killEnemy=function(e,o){if(B3.aus||!e||e.dead||!e.boss||e.roomBoss||G.bot||(G&&G.netGuestRun))return ke.apply(this,arguments);
+ imKill=1;setsImKill=0;let r;try{r=ke.apply(this,arguments)}finally{imKill=0}
+ try{if(e.dead&&!setsImKill){const h=hs();const key=e.def&&e.def.id;
+   if(G.mode==='kampagne'&&key&&!h.erst[key]){h.erst[key]=1;setGarantie(e,'erst');h.setB=0}
+   else if(!frueh()){h.setB=(h.setB|0)+1;if(h.setB>=PITY.setBoss){setGarantie(e,'pech');h.setB=0}}}
+  else if(e.dead&&G.mode==='kampagne'&&e.def&&e.def.id)hs().erst[e.def.id]=1;persist()}catch(x){bErr(x)}return r}}
+/* Entdeckerglück: Abschluss einer Stufe merken */
+let lastSt=null,lastRun=null;
+hook('tick',()=>{try{if(G.bot||G.mode!=='kampagne'||G.state!=='play')return;const run=G.runId||G.seed||1;if(lastRun!==run){lastRun=run;lastSt=G.stage;return}
+ if(lastSt!==null&&G.stage===lastSt+1){const h=hs();if(h.done<G.stage)h.done=G.stage}lastSt=G.stage}catch(e){bErr(e)}});
+/* ---------- 7. Beutebuch ---------- */
+const QUELLEN=B3.QUELLEN=[
+ {k:'normal',n:'Gewöhnliche Gegner',b:()=>0.02*SLx()+0.07,min:0,menge:K=>`${pz(0.011*fundF()*K)} je Gegner`},
+ {k:'elite',n:'Elite-Gegner',b:()=>0.6+0.02*SLx(),min:1,menge:K=>`${pz(0.3*K)} je Elite`},
+ {k:'guard',n:'Wächter',b:()=>0.8+0.02*SLx(),min:1,menge:()=>'2 Funde, einer mind. selten'},
+ {k:'truhe',n:'Truhen',b:()=>0.5+0.02*SLx(),min:1,menge:()=>'2–3 Funde, einer oft selten'},
+ {k:'boss',n:'Bosse',b:()=>1.5+0.03*SLx(),min:2,menge:()=>'4–8 Funde, einer mind. episch'}];
+function SLx(){try{return typeof SL==='function'?SL():0}catch(e){return 0}}
+function fundF(){return 1+0.1*Math.min(3,luckP())}
+const pz=v=>v>=0.1?Math.round(v*100)+' %':v>=0.01?(Math.round(v*1000)/10).toString().replace('.',',')+' %':(Math.round(v*10000)/100).toString().replace('.',',')+' %';
+/* was tatsächlich liegen bleibt: Kaskade, dann das Aussortieren aus „beute2“ (Kleinkram → Gold, manches eine Stufe besser) */
+function effektiv(q){const c=B3.chancen(q.b());let l=c.l,e=c.e,s=c.s,m=c.m,g=c.g;if(q.min>=1){m+=g;g=0}if(q.min>=2){s+=m;m=0}
+ const W=window.__hsBEUTE2;if(W&&!W.aus&&W.BLEIB){const k0=W.BLEIB[0],k1=Math.min(0.6,0.45+0.05*Math.min(3,luckP())),u1=(W.AUF&&W.AUF[1])||0,u2=(W.AUF&&W.AUF[2])||0;
+  g*=k0;m*=k1;const mu=m*u1;m-=mu;s+=mu;const su=s*u2;s-=su;e+=su}
+ const K=l+e+s+m+g;return{K,z:[[4,l/K],[3,e/K],[2,s/K],[1,m/K],[0,g/K]].filter(x=>x[1]>0.00005)}}
+function zeile(q){const f=effektiv(q),z=f.z;
+ return`<div class="b3Q"><div class="b3Qn"><b>${esc(q.n)}</b><small>${q.menge(f.K)}</small></div><div class="b3Bar">${z.map(([r,v])=>`<span style="--c:${RARCOL[r]};flex:${Math.max(v,0.012)}" title="${RARN[r]} ${pz(v)}"></span>`).join('')}</div>
+  <div class="b3Qz">${z.map(([r,v])=>`<i style="color:${RARCOL[r]}">${RARN[r]} ${pz(v)}</i>`).join('')}</div></div>`}
+function setFortschritt(id){const S=SETS[id];if(!S)return'';const f=hs().fund[id]|0;const sl=Object.keys(S.pieces);const n=sl.filter(s=>f&(1<<SLOTS_I(s))).length;return`${n}/${sl.length}`}
+function seiteHtml(){const g=glueck(0),h=hs();const o=ortJetzt();
+ const mod=[];if(g.lk>0)mod.push(`Glück des Helden <b>+${(Math.round(g.lk*100)/100).toString().replace('.',',')}</b>`);if(g.q>0)mod.push(`Qualitätsstufe <b>+${g.q}</b>`);if(G.gefahr)mod.push(`Gefährlicher Weg <b>+${B2P.gefL}</b>`);if(hart())mod.push(`Schwer <b>+${B2P.hardL}</b>`);if(erst())mod.push('Entdeckerglück <b>+0,3</b> (Stufe zum ersten Mal)');
+ const hm=o>=0?heimatSets(o).filter(okSet):[];
+ const legP=Math.min(1,h.leg/PITY.legHart),epiP=Math.min(1,h.epi/PITY.epi),setP=Math.min(1,(h.setB|0)/PITY.setBoss);
+ const balken=(n,p,c,t)=>`<div class="b3P"><span>${n}</span><div class="b3Pb"><i style="width:${Math.round(p*100)}%;background:${c}"></i></div><small>${t}</small></div>`;
+ return`<div class="wrap narrow b3Wrap"><div class="inv-head"><div><div class="eyebrow">${esc(P.hero.name)} · Beutebuch</div><h2 style="margin:0">Was fällt wo?</h2></div>
+  <div class="row" style="gap:6px"><button class="btn small" data-act="b3-zu">‹ Beutel</button></div></div>
+  <p class="muted b3Info">Jeder Fund würfelt von oben nach unten: erst Legendär, sonst Episch, sonst Selten … Glück hebt die oberen Stufen – mit weicher Obergrenze. Angezeigt ist, was liegen bleibt (Kleinkram wird zu Gold).${mod.length?' Gerade: '+mod.join(' · '):''}</p>
+  <div class="b3Grid"><div class="b3L">${QUELLEN.map(zeile).join('')}</div>
+  <div class="b3R"><div class="eyebrow">Pech-Schutz</div>
+   ${balken('Episch',epiP,RARCOL[3],`spätestens in ${Math.max(0,Math.ceil(PITY.epi-h.epi))} Funden`)}
+   ${balken('Legendär',legP,RARCOL[4],h.leg>PITY.legWeich?`Chance steigt: ×${(Math.round((1+(h.leg-PITY.legWeich)/PITY.legSpanne)*10)/10).toString().replace('.',',')}`:`steigt ab ${PITY.legWeich} Funden ohne Legendär`)}
+   ${balken('Set (Bosse)',setP,RARCOL[5],`spätestens beim ${PITY.setBoss-(h.setB|0)}. Boss`)}
+   <div class="eyebrow" style="margin-top:8px">Fundort ${o>=0?esc(ORTE[o].name):'–'}</div>
+   ${hm.length?hm.map(id=>`<div class="b3S"><b style="color:${RARCOL[5]}">${esc(SETS[id].n)}</b> <small>${setFortschritt(id)} gefunden</small></div>`).join(''):'<div class="b3S muted">Kein Heimat-Set in diesem Modus – Set-Teile ergänzen bevorzugt angefangene Sets.</div>'}
+   <p class="muted b3Klein">Erster Sieg über jeden Kampagnen-Boss: sicher ein Set-Teil des Heimat-Sets.</p></div></div></div>`}
+function zeig(){css();showScreen(seiteHtml(),'overlay',true);PADNAV.dirty=true}
+B3.oeffnen=function(){if(G.state!=='play')return;if(G.overlay!=='inv')openOverlay('inv');G.b3Ans=1;zeig()};
+if(typeof renderInv==='function'){const ri=renderInv;renderInv=function(){if(G.b3Ans&&G.overlay==='inv'&&P&&P.id&&!B3.aus){try{zeig();return}catch(e){bErr(e)}}const r=ri.apply(this,arguments);try{if(!B3.aus&&P&&P.id)knopf()}catch(e){bErr(e)}return r}}
+{const oo=openOverlay;openOverlay=function(k){if(k==='inv')G.b3Ans=0;return oo.apply(this,arguments)}}
+{const co=closeOverlay;closeOverlay=function(){G.b3Ans=0;return co.apply(this,arguments)}}
+{const ao=window.__hsATTR&&__hsATTR.oeffnen;if(ao)__hsATTR.oeffnen=function(){G.b3Ans=0;return ao.apply(this,arguments)}}
+function knopf(){const h=scr.querySelector('.inv-head');if(!h||h.querySelector('.b3Btn'))return;css();const b=document.createElement('button');b.className='btn small b3Btn';b.dataset.act='b3-open';b.innerHTML='❖ Beutebuch';
+ const z=h.querySelector('.atBtn');if(z)z.insertAdjacentElement('afterend',b);else{const r=h.querySelector('.row')||h;r.insertBefore(b,r.firstChild)}}
+document.addEventListener('click',ev=>{const t=ev.target&&ev.target.closest&&ev.target.closest('[data-act]');if(!t)return;const a=t.dataset.act;
+ if(a==='b3-open'){ev.stopPropagation();sfx('ui');B3.oeffnen()}else if(a==='b3-zu'){ev.stopPropagation();sfx('ui');G.b3Ans=0;renderInv()}},true);
+/* Lager: kurze Karte mit Pech-Schutz und den Fundorten */
+function lagerHtml(id){const H=(SAVE.b3&&SAVE.b3.h&&SAVE.b3.h[id])||{leg:0,epi:0,setB:0,fund:{}};
+ /* nur Orte, die dieser Held schon erreicht hat – keine Vorschau auf spätere Kapitel */
+ let bis=0;try{const b=SAVE.heroes&&SAVE.heroes[id]&&SAVE.heroes[id].best|0;const st=Math.max(0,Math.min(STAGES.length-1,Math.max(b,H.done|0)));bis=STAGES[st].ort}catch(e){}
+ const reg=[];for(let o=0;o<=bis&&o<ORTE.length;o++){const s=heimatSets(o,id).filter(k=>SETS[k]&&(!SETS[k].hero||SETS[k].hero===id));if(s.length)reg.push([o,s])}
+ const sf=k=>{const S=SETS[k],f=(H.fund||{})[k]|0;const sl=Object.keys(S.pieces);return sl.filter(s=>f&(1<<SLOTS_I(s))).length+'/'+sl.length};
+ const gesehen=new Set();const L=reg.filter(([o,s])=>{const k=s.join();if(gesehen.has(k))return false;gesehen.add(k);return true}).slice(0,15);
+ return`<div class="card b3Lg"><div class="eyebrow">Beutebuch · Fundorte der Sets</div><div class="b3LgW">${L.map(([o,s])=>`<span><small>${esc(ORTE[o].name)}</small> ${s.map(k=>`<b>${esc(SETS[k].n)}</b> ${sf(k)}`).join(', ')}</span>`).join('')}</div>
+  ${bis<ORTE.length-1?'<div class="muted b3Klein">Weitere Fundorte zeigen sich, wenn ihr weiterzieht.</div>':''}<div class="muted b3Klein">Pech-Schutz: Episch in ≤${Math.max(0,Math.ceil(PITY.epi-(H.epi||0)))} Funden · Set spätestens beim ${PITY.setBoss-(H.setB|0)}. Boss · Legendär-Zähler ${Math.round(H.leg||0)}</div></div>`}
+B3.lagerHtml=lagerHtml;
+if(typeof showLager==='function'){const sl=showLager;showLager=function(){const r=sl.apply(this,arguments);try{if(!B3.aus){css();const w=scr.querySelector('.lager-wrap');const id=G.sel;if(w&&id&&HEROES[id]&&!w.querySelector('.b3Lg')){const z=w.querySelector('.atLg')||w.querySelector('.stKreis')||w.querySelector('.lager-chips');const h=lagerHtml(id);if(z)z.insertAdjacentHTML('afterend',h);else w.insertAdjacentHTML('beforeend',h)}}}catch(e){bErr(e)}return r}}
+function css(){if(document.getElementById('b3Css'))return;const s=document.createElement('style');s.id='b3Css';s.textContent=`
+.b3Wrap .inv-head{padding-right:112px;gap:8px}.b3Info{font-size:13px;margin:4px 0 8px;max-width:none}
+.b3Grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:14px}.b3Q{margin:0 0 9px}.b3Qn{display:flex;justify-content:space-between;gap:8px;font-size:14px}.b3Qn small{opacity:.7}
+.b3Bar{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:3px 0 2px;background:#2a2118}.b3Bar span{background:var(--c);min-width:2px}
+.b3Qz{display:flex;flex-wrap:wrap;gap:2px 10px;font-size:12px}.b3Qz i{font-style:normal}
+.b3P{display:grid;grid-template-columns:78px 1fr;align-items:center;gap:2px 8px;font-size:13px;margin:4px 0}.b3P small{grid-column:2;opacity:.75;font-size:11.5px}
+.b3Pb{height:8px;border-radius:4px;background:#2a2118;overflow:hidden}.b3Pb i{display:block;height:100%}
+.b3S{font-size:13px;margin:3px 0}.b3Klein{font-size:12px;margin:6px 0 0}
+.b3Lg{margin-top:10px;padding:9px 12px}.b3LgW{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;margin:4px 0}.b3LgW small{opacity:.65;margin-right:3px}.b3LgW b{color:${RARCOL[5]};font-weight:600}
+@media (max-height:520px){.b3Grid{gap:10px}.b3Q{margin-bottom:5px}.b3Info{font-size:12px;margin:2px 0 4px}.b3Qn{font-size:13px}}
+@media (max-width:560px){.b3Grid{grid-template-columns:1fr}}`;document.head.appendChild(s)}
+}catch(e){console.error('beute3',e);window.__hsBEUTE3={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/beute3» */
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
