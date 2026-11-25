@@ -443,11 +443,14 @@
       if (!run.gnade) Z.meta.best.kills = Math.max(Z.meta.best.kills, Z.stats.kills || 0); /* W9: Barmherzigkeit wertet keine Rekorde */
     }
     Z.saveMeta();
-    setTimeout(() => { A.muffle(20000); Z.ui.deathScreen(o); }, 1600);
+    setTimeout(() => { if (Z.player !== P || !Z.level) return; /* W26 Erstspieler: inzwischen zum Titelbild gewechselt – kein Todesfenster über dem Titel */ A.muffle(20000); Z.ui.deathScreen(o); }, 1600);
   };
 
   /* ======================= HAUPTSCHLEIFE ======================= */
-  const cv = document.getElementById("cv"), ctx = cv.getContext("2d", { alpha: false, desynchronized: true }) || cv.getContext("2d");
+  /* W25 Leistung: ohne „desynchronized“ – der Hinweis ist für Stift-Zeichen-Apps gedacht (Puffer an der Bildsynchronisation
+     vorbei); über der Leinwand liegen HUD und Buchseite, ein Spiel mit rAF-Takt gewinnt dadurch nichts, riskiert aber Reißen/Flackern
+     (Frontpuffer auf ChromeOS/Android). alpha:false bleibt (deckende Leinwand, billigeres Zusammensetzen). */
+  const cv = document.getElementById("cv"), ctx = cv.getContext("2d", { alpha: false }) || cv.getContext("2d");
   let VW = 0, VH = 0, dpr = 1;
   function resize() {
     const q = Z.gq || {};
@@ -459,7 +462,12 @@
     VW = cv.width = Math.round(cw * dpr); VH = cv.height = Math.round(ch * dpr);
     cv.style.width = cw + "px"; cv.style.height = ch + "px";
     /* sichtbarer Weltausschnitt: ~250 Einheiten hoch im Querformat */
-    const S = Math.min(VW / 400, VH / 250);
+    let S = Math.min(VW / 400, VH / 250);
+    /* W24 Auflösung: faire Sichtweite – über 2,4:1 (breiter als UWQHD 3440×1440, z. B. 32:9) nicht beliebig weit sehen,
+       sondern etwas heranzoomen (Ausschnitt höchstens ~600 breit, mindestens 210 hoch); hochkant (Handy, schmales Fenster)
+       höchstens 320 breit, damit die Figuren nicht winzig werden. 16:9 bis 21:9 bleiben unverändert. */
+    if (VW > VH * 2.4) S = Math.max(S, Math.min(VW / 600, VH / 210));
+    else if (VH > VW) S = Math.min(VW / 320, Math.max(S, VH / 520));
     Z.gfx.scale = S; Z.gfx.bs = Math.min(S, 3);
     Z.cam.w = VW / S; Z.cam.h = VH / S;
     if (Z.level) { Z.gfx.chunks.clear(); Z.gfx.buildLayers(); Z.cam.clamp(); }
@@ -490,12 +498,20 @@
   let last = performance.now(), acc = 0, fpsT = 0, fpsN = 0;
   const STEP = 1 / 120;
   Z.paused = false;
+  /* W25 Leistung: typische Bilddauer (gleitend). Nach einem einzelnen Hänger (lange Aufgabe, Laden, Tab zurück) läuft das
+     Spiel mit EINEM normalen Schritt weiter statt 50 ms auf einmal zu springen – sichtbarer „Ruck“ entfällt. Auf durchweg
+     langsamen Geräten (typisch ≥ 1/10 s) greift das nicht, dort gilt wie bisher die 50-ms-Grenze. */
+  let typDt = 1 / 60;
   function frame(now) {
     requestAnimationFrame(frame);
     if (Z.frameGate && !Z.frameGate(now)) return;
-    let dt = Math.min(0.05, (now - last) / 1000); last = now;
-    Z.gfxAutoTick && Z.gfxAutoTick(dt, !!(Z.level && !Z.paused));
-    fpsT += dt; fpsN++; if (fpsT > 1) { Z.fps = fpsN; fpsN = 0; fpsT = 0; }
+    const raw = (now - last) / 1000; last = now;
+    let dt;
+    if (raw > 0.1 && raw > typDt * 4) dt = Math.min(0.05, typDt);
+    else { dt = Math.min(0.05, Math.max(0, raw)); if (raw > 0) typDt += (Math.min(raw, 0.25) - typDt) * 0.1; }
+    const mdt = Math.min(0.05, Math.max(0, raw)); /* Messung (Automatik, fps-Anzeige) sieht weiter die echte Bilddauer */
+    Z.gfxAutoTick && Z.gfxAutoTick(mdt, !!(Z.level && !Z.paused));
+    fpsT += mdt; fpsN++; if (fpsT > 1) { Z.fps = fpsN; fpsN = 0; fpsT = 0; }
     inp.pollPad();
     if (Z.ui) Z.ui.frame(dt);
     if (Z.level && !Z.paused) {

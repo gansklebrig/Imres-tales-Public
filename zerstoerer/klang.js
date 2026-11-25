@@ -117,7 +117,8 @@
      bzw. −32 dB (Raumschleife) gebracht – so passen die Lautstärken der Tabellen unabhängig von der Quelle zusammen */
   const NORM = {};
   function normOf(path, target) {
-    const key = path + "|" + target; if (NORM[key] != null) return NORM[key];
+    /* W25 Leistung: zweistufig nachschlagen statt je Aufruf einen Schlüssel-String zu bauen (Raumschleifen fragen jedes Bild) */
+    const NT = NORM[target] || (NORM[target] = {}); if (NT[path] != null) return NT[path];
     const b = A.buf[path]; if (!b) return null;
     const d = b.getChannelData(0), n = d.length, st = Math.max(1, Math.floor(n / 30000)); let s = 0, k = 0, pk = 1e-4;
     for (let i = 0; i < n; i += st) { s += d[i] * d[i]; k++; }
@@ -125,7 +126,7 @@
     for (let i = 0; i < n; i += ps) { const v = d[i] < 0 ? -d[i] : d[i]; if (v > pk) pk = v; }
     const db = 10 * Math.log10(s / Math.max(1, k) + 1e-10);
     /* nie mehr anheben, als die Spitze verträgt (lang ausklingende Glocken haben wenig Effektivwert, aber einen harten Anschlag) */
-    return (NORM[key] = clamp(Math.min(Math.pow(10, (target - db) / 20), 0.7 / pk), 0.25, 4));
+    return (NT[path] = clamp(Math.min(Math.pow(10, (target - db) / 20), 0.7 / pk), 0.25, 4));
   }
   /* Einzelgeräusch ohne Weltposition (löst keinen Lärm für die Gegner aus): vol, rate, pan, delay (s), verb, bus, dur, vary */
   function shot(path, o) {

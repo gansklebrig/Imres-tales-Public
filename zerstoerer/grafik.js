@@ -77,8 +77,14 @@
   /* Automatik: läuft das Spiel zu langsam, herunterschalten (nur nach unten, kein Hin und Her).
      Prüffenster 2,5 s; bei deutlichem Ruckeln (< 30 fps) sofort auf Handheld (schlank), darunter (< 24 fps) auf minimal. */
   let autoAcc = 0, autoN = 0, autoT = 0, autoGrace = 4;
+  /* W25 Leistung: Gebietswechsel = Ladespitze + Aufbau der Zwischenspeicher – das darf nicht als „Gerät zu langsam“ zählen
+     (die Herabstufung gilt für die ganze Sitzung). Nach jedem Wechsel 2 s Schonfrist, Messfenster neu.
+     Gleichtakt (30 fps) ohne Pendeln: scheitert das Aufheben (wieder < 50 fps, z. B. weil die Grafikkarte bremst und die
+     Rechenzeit klein aussieht), wartet der nächste Versuch doppelt so lange (5, 10, 20, 40 s). */
+  let autoLv = null, capLifted = false, capBack = 0, capWait = 0;
   Z.gfxAutoTick = function (dt, playing) {
     if (!playing || document.hidden || Z.diag.busy) { autoAcc = 0; autoN = 0; autoT = 0; return; }
+    if (Z.level !== autoLv) { autoLv = Z.level; autoGrace = Math.max(autoGrace, 2); autoAcc = 0; autoN = 0; autoT = 0; Z._work = 0; Z._workN = 0; }
     if (autoGrace > 0) { autoGrace -= dt; return; }
     autoAcc += dt; autoN++; autoT += dt;
     if (autoT < 2.5) return;
@@ -89,8 +95,9 @@
        Rechenzeit, wird die Grenze aufgehoben. Z._work: Rechenzeit je Bild (spiel.js). */
     const work = Z._workN ? Z._work / Z._workN : 0; Z._work = 0; Z._workN = 0;
     if (Z.gq.lean && !Z.gq.fpsCap) {
-      if (!Z.gq.autoCap && fps < 50) Z.gq.autoCap = 30;
-      else if (Z.gq.autoCap && work > 0 && work < 11) Z.gq.autoCap = 0;
+      if (!Z.gq.autoCap && fps < 50) { Z.gq.autoCap = 30; if (capLifted) { capBack = Math.min(4, capBack + 1); capWait = 2.5 * (1 << capBack); } capLifted = false; }
+      else if (!Z.gq.autoCap) { if (capLifted) { capLifted = false; capBack = 0; } }
+      else if (work > 0 && work < 11) { if (capWait > 0) capWait -= 2.5; else { Z.gq.autoCap = 0; capLifted = true; } }
     } else Z.gq.autoCap = 0;
     if (S.gfx.preset !== "auto") return;
     let to = autoLvl;

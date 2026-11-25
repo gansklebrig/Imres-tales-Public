@@ -88,14 +88,20 @@
       const a = b.a * (0.82 + 0.18 * Math.sin(t * 0.7 + b.ph)) * sv;
       c.save();
       const sh = clipShadows(c, b);
-      const g = c.createLinearGradient(b.x, b.y, ex, ey); g.addColorStop(0, "rgba(" + rgb + "," + a.toFixed(3) + ")"); g.addColorStop(0.7, "rgba(" + rgb + "," + (a * 0.45).toFixed(3) + ")"); g.addColorStop(1, "rgba(" + rgb + "," + (b.hit ? a * 0.25 : 0).toFixed(3) + ")");
-      c.fillStyle = g; beamPath(c, b); c.fill();
+      /* W25 Leistung: Verlauf je Strahl EINMAL (Deckkraft 1) anlegen und die flackernde Deckkraft über globalAlpha geben –
+         gleiche Farben (nur der Alphawert ändert sich entlang des Verlaufs), statt 2 neuer Verläufe je Strahl und Bild */
+      const ga0 = c.globalAlpha;
+      if (!b._g || b._gRgb !== rgb || b._gEx !== ex || b._gEy !== ey || b._gHit !== !!b.hit) {
+        const g = c.createLinearGradient(b.x, b.y, ex, ey); g.addColorStop(0, "rgba(" + rgb + ",1)"); g.addColorStop(0.7, "rgba(" + rgb + ",0.45)"); g.addColorStop(1, "rgba(" + rgb + "," + (b.hit ? 0.25 : 0) + ")");
+        b._g = g; b._gRgb = rgb; b._gEx = ex; b._gEy = ey; b._gHit = !!b.hit; b._gp = null;
+      }
+      c.globalAlpha = ga0 * a; c.fillStyle = b._g; beamPath(c, b); c.fill();
       /* feine Lichtbahnen im Strahl, die langsam wandern (Gottesstrahlen) */
       if (lvl >= 3) {
         for (let i = 0; i < 3; i++) {
           const u = 0.5 + 0.38 * Math.sin(t * (0.13 + i * 0.05) + b.ph + i * 2.1), ww = 0.12 + 0.08 * Math.sin(t * 0.21 + i + b.ph);
           const x0 = b.x - b.w0 / 2 + b.w0 * u, x1 = ex - b.w1 / 2 + b.w1 * u, h0 = b.w0 * ww / 2, h1 = b.w1 * ww / 2;
-          c.globalAlpha = 0.55; c.beginPath(); c.moveTo(x0 - h0, b.y); c.lineTo(x0 + h0, b.y); c.lineTo(x1 + h1, ey); c.lineTo(x1 - h1, ey); c.closePath(); c.fill();
+          c.globalAlpha = 0.55 * a; c.beginPath(); c.moveTo(x0 - h0, b.y); c.lineTo(x0 + h0, b.y); c.lineTo(x1 + h1, ey); c.lineTo(x1 - h1, ey); c.closePath(); c.fill();
         }
         c.globalAlpha = 1;
       }
@@ -103,8 +109,8 @@
       /* Lichtfleck auf dem Boden (fällt mit dem Schatten zusammen nicht weg – der liegt im Strahl) */
       if (b.hit) {
         const pw = b.w1 * 1.15, ph = 5 + b.w1 * 0.12, pa = Math.min(1, a * 3.2);
-        const gp = c.createRadialGradient(ex, ey, 0, ex, ey, pw / 2); gp.addColorStop(0, "rgba(" + rgb + "," + pa.toFixed(3) + ")"); gp.addColorStop(1, "rgba(" + rgb + ",0)");
-        c.save(); c.translate(ex, ey - 1); c.scale(1, ph / pw * 2); c.translate(-ex, -ey); c.fillStyle = gp; c.fillRect(ex - pw / 2, ey - pw / 2, pw, pw); c.restore();
+        if (!b._gp) { const gp = c.createRadialGradient(ex, ey, 0, ex, ey, pw / 2); gp.addColorStop(0, "rgba(" + rgb + ",1)"); gp.addColorStop(1, "rgba(" + rgb + ",0)"); b._gp = gp; } /* W25: wie oben, Deckkraft über globalAlpha */
+        c.save(); c.globalAlpha *= pa; c.translate(ex, ey - 1); c.scale(1, ph / pw * 2); c.translate(-ex, -ey); c.fillStyle = b._gp; c.fillRect(ex - pw / 2, ey - pw / 2, pw, pw); c.restore();
       }
       /* tanzender Staub: steigt und sinkt langsam, funkelt, fehlt im Schatten */
       const n = Math.round(b.dust * (lvl >= 3 ? 1.6 : 1));
@@ -323,6 +329,7 @@
     return (sprites[k] = cv);
   }
   const rgba = (hex, f) => { const n = parseInt(hex.slice(1), 16); const r = Math.min(255, (n >> 16) * f + 20) | 0, g = Math.min(255, ((n >> 8) & 255) * f + 16) | 0, b = Math.min(255, (n & 255) * f + 14) | 0; return "rgba(" + r + "," + g + "," + b + ",A)"; };
+  let hazeG = null, hazeY = NaN, hazeC = ""; /* W25 Leistung: Dunst-Verlauf zwischengespeichert */
   Z.drawBackLife = function (c, cam, t, B, oy, LH) {
     if (!B || !Z.gq || Z.gq.level === 0) return;
     const lvl = Z.level, kind = B.bg, out = OUT[kind] || (lvl && (lvl.hub || (lvl.arena && lvl.out)));
@@ -364,7 +371,9 @@
         }
         /* Dunst am Horizont, langsam ziehend */
         const hy = oy + LH * 0.6, zt = Z.zeit ? Z.zeit() : null, hz = hazeRGB(zt, B); c.save(); c.globalAlpha = zt && (zt.k === "nacht" || zt.k === "blut") ? 0.14 : 0.22;
-        for (let i = 0; i < 3; i++) { const x = cam.x - ((t * (4 + i * 2) + i * 140) % 300), g = c.createLinearGradient(0, hy - 14, 0, hy + 14); g.addColorStop(0, "rgba(" + hz + ",0)"); g.addColorStop(0.5, "rgba(" + hz + ",.6)"); g.addColorStop(1, "rgba(" + hz + ",0)"); c.fillStyle = g; c.fillRect(x, hy - 14 + i * 9, cam.w + 320, 28); }
+        /* W25 Leistung: der Verlauf hängt nur von hy und der Farbe ab – einmal anlegen statt dreimal je Bild */
+        if (!hazeG || hazeY !== hy || hazeC !== hz) { hazeG = c.createLinearGradient(0, hy - 14, 0, hy + 14); hazeG.addColorStop(0, "rgba(" + hz + ",0)"); hazeG.addColorStop(0.5, "rgba(" + hz + ",.6)"); hazeG.addColorStop(1, "rgba(" + hz + ",0)"); hazeY = hy; hazeC = hz; }
+        for (let i = 0; i < 3; i++) { const x = cam.x - ((t * (4 + i * 2) + i * 140) % 300); c.fillStyle = hazeG; c.fillRect(x, hy - 14 + i * 9, cam.w + 320, 28); }
         c.restore();
       }
     } else if (full) {

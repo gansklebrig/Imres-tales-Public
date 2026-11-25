@@ -321,7 +321,7 @@
     const lv = Z.level; if (!lv || !Z.explored) return;
     const big = bigMap;
     mm.classList.toggle("gross", big);
-    const P = Z.player, scale = big ? Math.min(innerWidth * 0.8 / lv.W, innerHeight * 0.7 / lv.H) : 2;
+    const P = Z.player, rawS = big ? Math.min(innerWidth * 0.8 / lv.W, innerHeight * 0.7 / lv.H) : 2, scale = rawS >= 2 ? Math.floor(rawS) : rawS; /* W24 Auflösung: ganzzahlige Kachelgröße – keine Nähte/kein Moiré */
     const vw = big ? lv.W : 70, vh = big ? lv.H : 40;
     mm.width = Math.ceil(vw * scale); mm.height = Math.ceil(vh * scale);
     const ox = big ? 0 : U.clamp(Math.floor((P.x + P.w / 2) / T) - vw / 2, 0, Math.max(0, lv.W - vw)), oy = big ? 0 : U.clamp(Math.floor((P.y + P.h / 2) / T) - vh / 2, 0, Math.max(0, lv.H - vh));

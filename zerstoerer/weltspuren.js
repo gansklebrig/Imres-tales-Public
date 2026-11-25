@@ -177,12 +177,14 @@
   let decRef = null, decLen = -1, decKinds = "";
   const DST = new WeakMap();
   function dstate(d, mk) { let o = DST.get(d); if (!o) { o = mk(); DST.set(d, o); } return o; }
+  /* W25 Leistung: Stichprobe der Deko-Arten als Zahl statt als String (lief je Teilschritt – 120×/s – und baute jedes Mal einen neuen String) */
+  function kindsKey(D) { let h = 0; for (let i = 0; i < D.length; i += 7) h = (h * 31 + (D[i].kind.charCodeAt(0) || 0)) | 0; return h; }
   function decorSync(lv, force) {
     const D = lv.decor || [];
-    let kinds = ""; if (!force) { for (let i = 0; i < D.length; i += 7) kinds += D[i].kind[0]; }
+    const kinds = force ? 0 : kindsKey(D);
     if (!force && D === decRef && D.length === decLen && kinds === decKinds) return;
     for (const w of swings) if (w.hid && !D.includes(w.d)) { w.d.kind = w.kind; w.hid = false; }
-    decRef = D; decLen = D.length; decKinds = kinds || ""; if (force) { kinds = ""; for (let i = 0; i < D.length; i += 7) kinds += D[i].kind[0]; decKinds = kinds; }
+    decRef = D; decLen = D.length; decKinds = force ? kindsKey(D) : kinds;
     flames = []; swings = []; vines = []; pipes = []; bells = [];
     const fl = (d, i, k) => { const o = dstate(d, () => ({ f: [] })); let f = o.f[i]; if (!f) f = o.f[i] = { l: 0, v: 0, dd: d, i, k }; placeFlame(f); flames.push(f); };
     for (const d of D) {
@@ -511,6 +513,9 @@
 
   /* ======================= Takt ======================= */
   const BOD = [];
+  /* W25 Leistung: Hilfen ohne neue Arrays/Closures je Teilschritt */
+  function pruneLife(a) { let j = 0; for (let i = 0; i < a.length; i++) { const x = a[i]; if (x.t < x.life) a[j++] = x; } a.length = j; }
+  function dropDone(s, b, m) { if (s.done) m.delete(b); }
   function bodies() {
     BOD.length = 0; const P = Z.player, cam = Z.cam;
     if (P && !P.dead) BOD.push(P);
@@ -643,15 +648,16 @@
       const mx = s.x - Math.cos(s.rot) * s.len * 0.6, my = s.y - Math.sin(s.rot) * s.len * 0.6;
       for (const b of bs) if ((Math.abs(b.vx) > 70 || (b === P && P.rollT > 0)) && mx > b.x - 1 && mx < b.x + b.w + 1 && my > b.y && my < b.y + b.h) { knock(s, b.vx * 0.4); break; }
     }
-    stuck = stuck.filter(s => s.t < s.life);
+    /* W25 Leistung: abgelaufene Einträge an Ort und Stelle entfernen (vorher je Teilschritt fünf neue Arrays + Map-Iterator) */
+    pruneLife(stuck);
     for (const o of loose) looseTick(o, dt, bs);
-    loose = loose.filter(o => o.t < o.life);
+    pruneLife(loose);
     for (const d of decals) d.t += dt;
-    decals = decals.filter(d => d.t < d.life);
+    pruneLife(decals);
     for (const p of prints) p.t += dt;
-    prints = prints.filter(p => p.t < p.life);
-    for (const [b, s] of scuffs) { if (s.done) scuffs.delete(b); }
-    if (scuffList.length) { for (const s of scuffList) s.t += dt; scuffList = scuffList.filter(s => s.t < s.life); }
+    pruneLife(prints);
+    if (scuffs.size) scuffs.forEach(dropDone);
+    if (scuffList.length) { for (const s of scuffList) s.t += dt; pruneLife(scuffList); }
     /* --- Luftteilchen verwirbeln, Glühwürmchen weichen aus --- */
     stir(dt, P);
   }

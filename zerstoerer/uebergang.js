@@ -378,7 +378,7 @@
   function hudHide(v) {
     if (!hudEl || hudHidden === !!v) return; hudHidden = !!v; ui.verdeckt = !!v;
     /* HUD, Meldungen und Weltschilder warten, solange die Seite über dem Bild liegt */
-    for (const el of [hudEl, document.getElementById("meldungen"), document.getElementById("welt")]) if (el) { el.style.transition = "opacity .3s"; el.style.opacity = v ? "0" : ""; }
+    for (const el of [hudEl, document.getElementById("meldungen"), document.getElementById("welt"), promptEl, cardEl]) if (el) /* W24 Auflösung: Fundkarte/Hinweis lagen über der Kapitelseite (kleine Schirme: halbe Seite verdeckt) */ { el.style.transition = "opacity .3s"; el.style.opacity = v ? "0" : ""; }
   }
   function pageInfo(id, B, lv) {
     const run = Z.run;
@@ -567,7 +567,7 @@
     /* W11 R27 (Grafik): gemaltes Boss-Porträt (figuren.js) als Wappen am linken Bandende; das Band wird dafür breiter */
     let por = null; try { por = Z.bossPortraetBild ? Z.bossPortraetBild(e.def) : null; } catch (_) { por = null; }
     const bh0 = title ? s * 14.5 : s * 10.5, md = por ? bh0 * 1.32 : 0;
-    const bw = clamp(tw + s * 26 + md * 1.3, W * 0.34, W * 0.86), bh = bh0, tail = s * 11, pad = s * 3;
+    const tail = s * 11, pad = s * 3, bw = clamp(tw + s * 26 + md * 1.3, W * 0.34, Math.min(W * 0.86, W - 2 * (tail + pad))), bh = bh0; /* W24 Auflösung: hochkant/schmal ragte das Band samt Enden aus dem Bild */
     const cv = mk(bw + tail * 2 + pad * 2, bh + s * 10), c = cv.getContext("2d"), x0 = pad + tail, y0 = s * 3.5;
     /* Bandenden (hinten, gefaltet): ragen nach außen, gegabelt */
     for (const k of [-1, 1]) {
@@ -608,7 +608,9 @@
     if (bar > 0.5) { c.fillStyle = "#0a0605"; c.fillRect(0, 0, W, bar); c.fillRect(0, H - bar, W, bar); c.fillStyle = rgba(GOLD, 0.35); c.fillRect(0, bar - 1, W, 1); c.fillRect(0, H - bar, W, 1); }
     /* Band rollt sich auf */
     const open = easeOut(span(t, 0.15, 0.75)) * (1 - easeIn(span(t, dur - 0.6, dur - 0.1)));
-    const pw = p.pl.cv.width, ph = p.pl.cv.height, px = W / 2 - pw / 2, py = H * 0.2;
+    const pw = p.pl.cv.width, ph = p.pl.cv.height, px = W / 2 - pw / 2;
+    /* W24 Auflösung: Band unter die Boss-Lebensleiste (HTML, wächst mit --hud) – auf kleinen Schirmen lag sie über dem Band */
+    let py = H * 0.2; try { const bb = document.getElementById("bossbar"); if (bb && bb.offsetParent) { const r = bb.getBoundingClientRect(), k = W / (innerWidth || W); if (r.height > 0) py = Math.min(Math.max(py, (r.bottom + 4) * k), H * 0.32); } } catch (_) {}
     if (open > 0.01) {
       const vis = pw * open;
       c.save(); c.beginPath(); c.rect(W / 2 - vis / 2, 0, vis, H); c.clip(); c.drawImage(p.pl.cv, px, py); c.restore();
@@ -621,7 +623,7 @@
       /* Einleitungssatz */
       const ia = span(t, 0.7, 1.1) * (1 - span(t, dur - 0.6, dur - 0.2));
       if (ia > 0 && p.intro) {
-        c.font = "italic " + (s * 3.3).toFixed(1) + "px " + FI; const lines = wrap(c, p.intro, W * 0.62, 2);
+        c.font = "italic " + (s * 3.3).toFixed(1) + "px " + FI; const lines = wrap(c, p.intro, W * (W < H ? 0.86 : 0.62), W < H ? 4 : 2); /* W24 Auflösung: hochkant breiter/mehr Zeilen statt abgeschnitten */
         const ly = py + ph + s * 2.5;
         const gb = c.createLinearGradient(0, ly - s * 3, 0, ly + lines.length * s * 4.4 + s * 2); gb.addColorStop(0, "rgba(10,5,3,0)"); gb.addColorStop(0.3, "rgba(10,5,3,.55)"); gb.addColorStop(1, "rgba(10,5,3,0)");
         c.globalAlpha = ia; c.fillStyle = gb; c.fillRect(W * 0.12, ly - s * 3, W * 0.76, lines.length * s * 4.4 + s * 5);

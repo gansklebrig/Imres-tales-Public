@@ -257,7 +257,9 @@
     ".handheld .rb21-oben{grid-template-columns:minmax(0,.9fr) minmax(0,1fr);gap:6px}.handheld .rb21-kacheln{gap:3px}.handheld .rb21-k{padding:2px 6px}.handheld .rb21-k b{font-size:14px}.handheld .rb21-k span{font-size:10px}",
     ".handheld .rb21-mitte{gap:4px;margin-top:5px}.handheld .rb21-feld{padding:3px 5px;gap:5px}.handheld .rb21-bild{width:34px;height:34px;font-size:18px}.handheld .rb21-feld b{font-size:12px}.handheld .rb21-feld span,.handheld .rb21-feld small{font-size:10px}",
     ".handheld .rb21-neu{margin-top:5px;gap:3px}.handheld .rb21-neu i{font-size:10px;padding:0 6px}.handheld .rb21-rek{margin-top:5px;font-size:11px}.handheld .rb21-rek td,.handheld .rb21-rek th{padding:1px 4px}.handheld .mbox.rb21box{padding:10px 12px}",
-    "@media (max-aspect-ratio:1/1){.rb21-oben,.rb21-mitte{grid-template-columns:1fr}}"
+    "@media (max-aspect-ratio:1/1){.rb21-oben,.rb21-mitte{grid-template-columns:1fr}}",
+    /* W24 Auflösung: Kleinschrift lag auf Handheld/Handy bei 7–9 px (10 px × --ui 0,8–0,88) – auf ≥ 9,7 px angehoben */
+    ".handheld .rb21-k span,.handheld .rb21-feld span,.handheld .rb21-feld small,.handheld .rb21-neu i,.handheld .rb21-neu>span,.handheld .rb21-rek{font-size:11px}.handheld .rb21-k b small{font-size:.75em}"
   ].join("\n");
   document.head.appendChild(css);
 
