@@ -1787,7 +1787,7 @@
   /* W11 R26 (nur Optik): Fundbuch-Gegner und -Bosse mit gemalten Bildern der echten Figuren (figuren.js) – unbekannte als Schattenriss */
   function drawBeasts() { if (!Z.gegnerBild) return; modal.querySelectorAll(".ico.vieh").forEach(el => { try { const bo = el.dataset.boss, d = bo ? Z.BOSSDEF[bo] : Z.ENEMIES[el.dataset.gegner]; if (!d) return;
     const kn = el.dataset.k === "1", bp = bo && kn && Z.bossPortraet ? Z.bossPortraet(d) : null, im = document.createElement("img"); im.alt = "";
-    im.src = bp || Z.gegnerBild(d, { w: 96, h: 96, dunkel: !kn, key: bo || el.dataset.gegner }).toDataURL(); el.appendChild(im); } catch (e) { console.error(e); } }); }
+    im.src = bp || (gb => Z.leinwandURL ? Z.leinwandURL(gb) : gb.toDataURL())(Z.gegnerBild(d, { w: 96, h: 96, dunkel: !kn, key: bo || el.dataset.gegner })); /* W23 Browser */ el.appendChild(im); } catch (e) { console.error(e); } }); }
   function drawIcons() { drawBeasts(); modal.querySelectorAll(".ico[data-icon]").forEach(el => { const cv = document.createElement("canvas"); cv.width = 64; cv.height = 64; const c = cv.getContext("2d"); c.scale(2, 2); Z.drawIcon(c, el.dataset.icon, 16, 17, 22, el.dataset.col); el.appendChild(cv); }); }
   actions.forgeTab = i => ui.forge(i);
   actions.wlvl = id => { const M = Z.meta, d = Z.WEAPONS[id] || Z.SKILLS[id], l = M.wlvl[id] || 0, c = lvlCost(d, l); if (M.shards < c || l >= 5) return; M.shards -= c; M.wlvl[id] = l + 1; Z.saveMeta(); A.play("anvil", { vol: 0.7 }); ui.forge(); };

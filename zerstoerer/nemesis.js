@@ -2775,7 +2775,7 @@
     }
     return p;
   }
-  const portURL = rec => { const p = portraitOf(rec); if (!p.url && p.cv) { try { p.url = p.cv.toDataURL(); } catch (_) { p.url = ""; } } return p.url; };
+  const portURL = rec => { const p = portraitOf(rec); if (!p.url && p.cv) { try { p.url = Z.leinwandURL ? Z.leinwandURL(p.cv) : p.cv.toDataURL(); /* W23 Browser */ } catch (_) { p.url = ""; } } return p.url; };
   function wantedList() {
     const s = S0(), out = [];
     for (const r of active().sort((a, b) => b.rank - a.rank || b.kills - a.kills)) out.push({

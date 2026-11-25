@@ -753,6 +753,56 @@
     return lesbar;
   };
   Z.canvasUnlesbar = grund => { if (lesbar === false) return; lesbar = false; try { Z.diag && Z.diag.note && Z.diag.note("Rücklesen unzuverlässig (" + grund + ")"); } catch (_) {} if (Z.cachesNeu) Z.cachesNeu("lesen"); };
+  /* W23 Browser: Bild-URLs aus Leinwänden (NSC-/Boss-Porträts, Siegel, Bestiarium, Nemesis). Ist das Rücklesen verfälscht
+     (Firefox resistFingerprinting: LibreWolf, Mullvad, Tor; Brave „streng“), liefert toDataURL Rauschen → Streifenbild statt
+     Porträt. Dann: Platzhalter-URL (durchsichtiges 1×1-GIF mit Kennung); jedes <img> mit ihr bekommt eine Leinwand-Kopie als
+     Zwilling dahinter (Leinwand→Leinwand ist nicht verfälscht). Das <img> bleibt versteckt im Dokument (Code sucht/ändert es),
+     CSS-Regeln mit „img“ gelten per Kopie auch für die Zwillinge (canvas.w23img). Feature-Erkennung über Z.canvasLesbar(). */
+  const W23 = { map: new Map(), n: 0, twin: new WeakMap(), obs: null, css: null, nSheets: -1 };
+  const W23GIF = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7#w23-";
+  const W23IMG = /(^|[\s>+~(,])img(?=$|[\s.#:[>+~),])/g;
+  function w23Css() {
+    if (document.styleSheets.length === W23.nSheets) return;
+    let t = "";
+    const rule = r => { if (!r.selectorText || !r.style) return ""; const p = r.selectorText.split(",").filter(s => s.replace(W23IMG, "") !== s); return p.length ? p.map(s => s.replace(W23IMG, "$1canvas.w23img")).join(",") + "{" + r.style.cssText + "}" : ""; };
+    for (const sh of Array.from(document.styleSheets)) {
+      if (W23.css && sh.ownerNode === W23.css) continue;
+      let rs; try { rs = sh.cssRules; } catch (_) { continue; }
+      for (const r of Array.from(rs || [])) {
+        if (r.selectorText) t += rule(r);
+        else if (r.cssRules && r.conditionText != null && r.media) { const inner = Array.from(r.cssRules).map(rule).join(""); if (inner) t += "@media " + r.conditionText + "{" + inner + "}"; }
+      }
+    }
+    if (!W23.css) { W23.css = document.createElement("style"); W23.css.id = "w23-img-css"; document.head.appendChild(W23.css); }
+    W23.css.textContent = t; W23.nSheets = document.styleSheets.length;
+  }
+  function w23Zwilling(im) {
+    const cv = W23.map.get(im.getAttribute("src") || ""); let tw = W23.twin.get(im);
+    if (!cv) { if (tw) { tw.remove(); W23.twin.delete(im); im.style.removeProperty("display"); } return; }
+    if (!tw) { tw = document.createElement("canvas"); W23.twin.set(im, tw); }
+    for (const a of Array.from(im.attributes)) if (!/^(src|alt|width|height|hidden)$/.test(a.name)) tw.setAttribute(a.name, a.value);
+    tw.style.removeProperty("display"); tw.classList.add("w23img"); tw.setAttribute("role", "img");
+    for (const k of ["width", "height"]) { const v = im.getAttribute(k); if (v && !tw.style[k]) tw.style[k] = v + "px"; }
+    tw.width = cv.width; tw.height = cv.height; const g = tw.getContext("2d"); g.clearRect(0, 0, tw.width, tw.height); g.drawImage(cv, 0, 0);
+    im.style.setProperty("display", "none", "important");
+    if (im.nextSibling !== tw) im.after(tw);
+  }
+  const w23Scan = n => { if (n.nodeType !== 1) return; if (n.tagName === "IMG") w23Zwilling(n); else if (n.querySelectorAll) for (const im of Array.from(n.querySelectorAll('img[src^="data:image/gif;base64,R0lGODlhAQAB"]'))) w23Zwilling(im); };
+  Z.leinwandURL = function (cv, typ, q) {
+    if (Z.canvasLesbar()) return cv.toDataURL(typ, q);
+    try {
+      w23Css();
+      if (!W23.obs && window.MutationObserver) {
+        W23.obs = new MutationObserver(ms => { for (const m of ms) {
+          if (m.type === "attributes") { if (m.target.tagName === "IMG") w23Zwilling(m.target); continue; }
+          m.addedNodes.forEach(w23Scan);
+          m.removedNodes.forEach(n => { if (n.tagName === "IMG" && !n.isConnected) { const tw = W23.twin.get(n); if (tw && tw.parentNode) tw.remove(); } });
+        } });
+        W23.obs.observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ["src"] });
+      }
+      const u = W23GIF + (++W23.n); W23.map.set(u, cv); return u;
+    } catch (_) { return cv.toDataURL(typ, q); }
+  };
   /* Module melden hier ihre Zwischenspeicher an (Leeren = beim nächsten Bedarf neu malen). Z.cachesNeu(grund) leert alle,
      dazu Kachel-Blöcke und Ebenen (bild.js). Aufrufer: Kontextverlust, Wächter im Zeichenpfad, Lesetest. */
   const cacheFns = (Z._cachesNeu = Z._cachesNeu || []);

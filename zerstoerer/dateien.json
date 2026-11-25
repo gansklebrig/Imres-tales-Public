@@ -9690,7 +9690,7 @@
 },
 "zerstoerer.html":{
 "groesse":64607,
-"sha256":"7892807b99b411eb0ec9d1a60d76318bf87a6206ae962df3e84095589d14809c"
+"sha256":"0cab2bf2d5f5038d637d94fdafd7514349a573e200a9ab0bf9f32a3e8b561115"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":143716,
@@ -9753,8 +9753,8 @@
 "sha256":"2e761f3b67fc6ed08a2b3f1ecb4297c2e947eb041ecdc373515efdc3ae3dcc37"
 },
 "zerstoerer/figuren.js":{
-"groesse":336792,
-"sha256":"4c3c38e7c3ee0ede76a398127d3a9702eba4e2fa9cd99fb437a0f1e5c2358c24"
+"groesse":337421,
+"sha256":"f1f5366e371e09c78730a105325b114b7eb694ae605728a09cc12ff030c9ff9f"
 },
 "zerstoerer/fluch.js":{
 "groesse":5071,
@@ -9801,8 +9801,8 @@
 "sha256":"5ebb1a5185cebd64abd9330e59c92f0f573ebd859fd5e6eba7eb7c3e4c4d4f30"
 },
 "zerstoerer/kern.js":{
-"groesse":61659,
-"sha256":"70d66f94c40126b04fbde6fd9775c80bb21b220a4708a11edb3e495504aed150"
+"groesse":65575,
+"sha256":"1c13d4798e7771638c0cb7fa52d442189ef35182580492bd33b824d91fe40444"
 },
 "zerstoerer/klang.js":{
 "groesse":146438,
@@ -9821,8 +9821,8 @@
 "sha256":"63b6d85f416eb3663021193f0730b976e6ea141bf4394decdabd210b639274d9"
 },
 "zerstoerer/nemesis.js":{
-"groesse":244478,
-"sha256":"09c74923e3257cbaa078aed529c3ddeb4ed4859fa46d54ca8719444aed223340"
+"groesse":244534,
+"sha256":"161d0adf02c981024e4e0b32db4ac479c0eab16051a05e0b7971709c6b112261"
 },
 "zerstoerer/parcours.js":{
 "groesse":39202,
@@ -9841,8 +9841,8 @@
 "sha256":"8fe4b66c329ed341b86ba6a983d4bc7f391657dfa11b9c62acef05518cf8a7cd"
 },
 "zerstoerer/rueckblick.js":{
-"groesse":20601,
-"sha256":"611757c488e3812f108150777ac96facd98ad8cabc98cec29f1a167b5f027db1"
+"groesse":20648,
+"sha256":"1b6d450393bc3edbcafa2b2a1848c7ceae678f143dfcef313144fa70a2cf8739"
 },
 "zerstoerer/rueckweg.js":{
 "groesse":23678,
@@ -9861,8 +9861,8 @@
 "sha256":"b4b86902ba969ef7e7a3fd4e6567df4ff744e94ff9c87ed26b8d4b0145a2a5dd"
 },
 "zerstoerer/spiel.js":{
-"groesse":44426,
-"sha256":"b511a106d86538d68def067c0c7d387f8e719b3bc7e63ae5ed2ea47a0aa41386"
+"groesse":45362,
+"sha256":"873db12dafff9b6a96c8598e69fa7b5b180b88e61edc9a1d3be68cc8fbf56ef0"
 },
 "zerstoerer/spuren.js":{
 "groesse":70897,
@@ -9885,8 +9885,8 @@
 "sha256":"d9bff6570056058cff1feac86e5247a8a9ca3548ed6d457998fdaa7595512f93"
 },
 "zerstoerer/ui.js":{
-"groesse":209980,
-"sha256":"b37909c2c6a572f4fdbfb27090c7b2e1ea2799fd24742096530d01538b056215"
+"groesse":210046,
+"sha256":"ee3bb5b3e02d64c016a418135ad591373f09bdaee618c3f698c3d692ba9bfd77"
 },
 "zerstoerer/welt.js":{
 "groesse":239147,
@@ -9913,5 +9913,5 @@
 "sha256":"bd666dd2ac70650c8a7b947c709a2c71251f4de5328a9f37e1b70d932514c922"
 }
 },
-"stand":132
+"stand":133
 }

@@ -143,7 +143,7 @@
           const d = t === "b" ? Z.BOSSDEF && Z.BOSSDEF[id] : Z.ENEMIES[id]; if (!d) return;
           const url = t === "b" && Z.bossPortraet ? Z.bossPortraet(d) : null;
           const im = document.createElement("img"); im.alt = "";
-          im.src = url || (Z.gegnerBild ? Z.gegnerBild(d, { w: 96, h: 96, key: id }).toDataURL() : "");
+          im.src = url || (Z.gegnerBild ? (Z.leinwandURL || (c => c.toDataURL()))(Z.gegnerBild(d, { w: 96, h: 96, key: id })) : ""); /* W23 Browser */
           if (im.src) el.appendChild(im);
         } else if (t === "w") {
           const d = Z.WEAPONS[id] || Z.SKILLS[id]; if (!d || !Z.drawIcon) { el.textContent = "⚔"; return; }

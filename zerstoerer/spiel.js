@@ -52,7 +52,13 @@
     if (!Z.meta) return;
     Z.meta.zuletzt = Date.now();
     const s = JSON.stringify(Z.meta);
-    ls.set(SKEY(slot), s); ls.set(KEY, s);
+    /* W23 Browser: Speicher voll (≈5 MB je Website, geteilt mit den anderen Spielen auf imrestales.de) oder gesperrt
+       (Cookies/Website-Daten blockiert, alter privater Safari-Modus): erst den Spiegel (KEY) opfern, dann einmal je Sitzung
+       sagen, dass nichts gespeichert wird – sonst ist der Fortschritt nach dem Schließen ohne jede Warnung weg. */
+    let ok = ls.set(SKEY(slot), s);
+    if (!ok) { ls.del(KEY); ok = ls.set(SKEY(slot), s); } else ls.set(KEY, s);
+    if (!ok && !Z._w23SpeichernWarnung && Z.toast) { Z._w23SpeichernWarnung = 1; try { Z.toast(L(["⚠ Spielstand kann nicht gespeichert werden – der Browser blockiert den Speicher (privates Fenster, Cookies/Website-Daten gesperrt oder Speicher voll). Fortschritt geht beim Schließen verloren.", "⚠ Progress cannot be saved – the browser blocks storage (private window, cookies/site data blocked or storage full). Progress will be lost when closing."]), 4200); } catch (_) {} }
+    return ok;
   };
   /* Fortschritt ja/nein, Kurzübersicht je Platz (Titelbild, Spielstand-Auswahl) */
   const hasProgress = m => !!(m && ((m.runs | 0) > 0 || m.intro || (m.shards | 0) > 0 || (m.wins | 0) > 0));

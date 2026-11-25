@@ -4020,7 +4020,7 @@
     c.strokeStyle = "#5a3a1e"; c.lineWidth = 4; c.beginPath(); c.arc(48, 48, 44, 0, TAU); c.stroke();
     c.strokeStyle = "rgba(232,200,130,.7)"; c.lineWidth = 1.2; c.beginPath(); c.arc(48, 48, 41.6, Math.PI * 1.05, Math.PI * 1.75); c.stroke();
     c.strokeStyle = "rgba(30,16,8,.6)"; c.lineWidth = 1; c.beginPath(); c.arc(48, 48, 46, 0, TAU); c.stroke();
-    return cv.toDataURL();
+    return Z.leinwandURL ? Z.leinwandURL(cv) : cv.toDataURL(); /* W23 Browser */
   }
   Z.portraetStimmung = mood;
   Z.portraet = function (name, txt) {
@@ -4052,6 +4052,8 @@
     /* Körpersäule (ohne seitlich ragende Waffen/Stäbe): oberster Punkt = Scheitel, für das Bossporträt */
     const cxp = cv.width / 2, hw = w * SC * 0.22; let bt = cv.height;
     for (let y = 0; y < cv.height && bt === cv.height; y += 2) for (let x = Math.floor(cxp - hw); x < cxp + hw; x += 2) if (id[(y * cv.width + x) * 4 + 3] > 110) { bt = y; break; }
+    /* W23 Browser: Rücklesen verfälscht (Rauschen/Weiß/Nullen) → Umriss aus der Figurgröße schätzen statt aus den Pixeln */
+    if (Z.canvasLesbar && !Z.canvasLesbar()) { const fy = cv.height - pad / 2 * SC; x0 = Math.max(0, Math.floor(cxp - w * SC * 1.3)); x1 = Math.min(cv.width - 2, Math.ceil(cxp + w * SC * 1.3)); y0 = Math.max(0, Math.floor(fy - h * SC * 1.25)); y1 = Math.min(cv.height - 2, Math.ceil(fy)); bt = Math.max(0, Math.floor(fy - h * SC)); }
     r = x1 < 0 ? null : { cv, x0, y0, x1: x1 + 2, y1: y1 + 2, cx: cxp, bt, bw: w * SC, bh: h * SC };
     raw.set(d, r); return r;
   }
@@ -4097,7 +4099,7 @@
       c.strokeStyle = "#2a2024"; c.lineWidth = 5; c.beginPath(); c.arc(48, 48, 44, 0, TAU); c.stroke();
       c.strokeStyle = "rgba(255,120,60,.55)"; c.lineWidth = 1.2; c.beginPath(); c.arc(48, 48, 41.4, Math.PI * 0.15, Math.PI * 0.85); c.stroke();
       c.strokeStyle = "rgba(200,170,160,.35)"; c.lineWidth = 1; c.beginPath(); c.arc(48, 48, 46.4, Math.PI * 1.1, Math.PI * 1.6); c.stroke();
-      u = cv.toDataURL(); cache.set(key, u); cache.set(key + ":cv", cv); return u;
+      u = Z.leinwandURL ? Z.leinwandURL(cv) : cv.toDataURL(); /* W23 Browser */ cache.set(key, u); cache.set(key + ":cv", cv); return u;
     } catch (e) { console.error(e); return null; }
   };
 })();
@@ -4181,5 +4183,5 @@
     cache.set(key, cv); return cv;
   };
   const urls = new Map();
-  Z.siegelURL = function (motiv, o) { const cv = Z.siegel(motiv, o), k = cv; let u = urls.get(k); if (!u) { u = cv.toDataURL(); urls.set(k, u); } return u; };
+  Z.siegelURL = function (motiv, o) { const cv = Z.siegel(motiv, o), k = cv; let u = urls.get(k); if (!u) { u = Z.leinwandURL ? Z.leinwandURL(cv) : cv.toDataURL(); /* W23 Browser */ urls.set(k, u); } return u; };
 })();
