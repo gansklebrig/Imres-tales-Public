@@ -43458,6 +43458,12 @@ if(typeof kaDeko==='function'){const kd=kaDeko;kaDeko=function(S){const r=kd.app
     const mx=(x0+x1)/2,my=(y0+y1)/2;if(L.some(o=>Math.hypot(o.mx-mx,o.my-my)<520))continue;if(K.tore&&K.tore.some(o=>Math.hypot(o.x-mx,o.y-my)<260))continue;
     L.push({x0,y0,x1,y1,mx,my,hor,v:Math.random()})}
    K.rhLeinen=L;RH.leinen=L.length}}catch(e){console.error('rhythm-leine',e)}
+ /* Teppichläufer: In Schloss, Hof und Wachhaus führt durch große Hallen ein roter Läufer entlang des Hauptwegs */
+ try{const W=K.ka2W,th=G.themeKey;if(W&&W.length>3&&(th==='schloss'||th==='hof'||th==='wachhaus')){const D=abst(K),n=K.n,Z=K.Z,dAt=(x,y)=>{const i=(x/Z)|0,j=(y/Z)|0;return i<0||j<0||i>=n||j>=n?0:D[j*n+i]};
+   const S=[];for(let q=1;q<W.length;q++){const a=W[q-1],b=W[q],l=Math.hypot(b[0]-a[0],b[1]-a[1]),st=Math.max(1,Math.round(l/40));for(let u=0;u<st;u++)S.push([a[0]+(b[0]-a[0])*u/st,a[1]+(b[1]-a[1])*u/st])}
+   let nT=0;for(let q=1;q<S.length-1;q+=2){const p=S[q];if(dAt(p[0],p[1])<4)continue;if(K.tore&&K.tore.some(o=>Math.hypot(o.x-p[0],o.y-p[1])<200))continue;if(K.start&&Math.hypot(K.start.x-p[0],K.start.y-p[1])<160)continue;
+    const a=S[q-1],b=S[q+1];const ang=Math.atan2(b[1]-a[1],b[0]-a[0]);G.deco.push({x:p[0],y:p[1],k:'rh_teppich',a:ang,s:1,v:0,wl:1,rh:7});nT++}
+   RH.teppich=nT}}catch(e){console.error('rhythm-teppich',e)}
  /* Gassen: auf etwa jedem zweiten Platz ein Brunnen in der Mitte – Wiedererkennung und etwas zum Umkreisen im Kampf */
  if(T.lay==='gassen'&&G.blk){let b=0;for(const p of K.rhP){if(p[2]<4||Math.random()>0.55)continue;const x=(p[0]+0.5)*K.Z,y=(p[1]+0.5)*K.Z;if(typeof blkPunkt==='function'&&blkPunkt(x,y,70))continue;{let zu=false;for(let b=-3;b<=3&&!zu;b++)for(let a=-3;a<=3;a++){const i=p[0]+a,j=p[1]+b;if(a*a+b*b>10)continue;if(i<0||j<0||i>=K.n||j>=K.n||K.M[j*K.n+i]){zu=true;break}}if(zu)continue}if(K.tore&&K.tore.some(t=>Math.hypot(t.x-x,t.y-y)<220))continue;
    G.blk.push({t:'c',x,y,r:20,k:'brunnen',v:Math.random(),wl:1,ai:0,rh:1});b++}
@@ -43473,6 +43479,9 @@ if(typeof render==='function'){const r0=render;render=function(){try{if(G&&G.sta
 if(typeof drawDeco==='function'){const dd=drawDeco;drawDeco=function(d,t){if(d&&d.k==='rh_schacht'){const c=cx;try{c.save();c.translate(d.x,d.y);
   const g=c.createRadialGradient(0,0,6,0,0,120);g.addColorStop(0,'rgba(255,240,205,.30)');g.addColorStop(0.55,'rgba(255,232,190,.14)');g.addColorStop(1,'rgba(255,228,180,0)');c.fillStyle=g;c.scale(1,0.62);c.beginPath();c.arc(0,0,120,0,6.2832);c.fill();c.scale(1,1/0.62);
   /* Moos und Halme, wo das Licht hinfällt */for(let i=0;i<9;i++){const a=(i*2.39+d.v*6)%6.2832,r=26+((i*37+d.v*97)%58);const x=Math.cos(a)*r,y=Math.sin(a)*r*0.6;c.fillStyle=i%3?'rgba(110,140,70,.55)':'rgba(150,170,90,.5)';c.beginPath();c.ellipse(x,y,5+(i%3)*2,2.6,a,0,6.2832);c.fill()}
+  }finally{c.restore()}return}
+ if(d&&d.k==='rh_teppich'){const c=cx;try{c.save();c.translate(d.x,d.y);c.rotate(d.a||0);c.fillStyle='#6a1e1c';c.fillRect(-44,-26,88,52);c.fillStyle='#8a2a24';c.fillRect(-44,-21,88,42);
+  c.fillStyle='#b8903a';c.fillRect(-44,-23,88,2);c.fillRect(-44,21,88,2);c.fillStyle='rgba(184,144,58,.55)';for(let k=-1;k<=1;k++){c.save();c.translate(k*30,0);c.rotate(Math.PI/4);c.fillRect(-4,-4,8,8);c.restore()}
   }finally{c.restore()}return}
  if(d&&d.k==='rh_fenster'){const c=cx;try{c.save();c.translate(d.x,d.y);
   /* drei hohe Fensterbahnen, schräg nach Süden auf den Boden geworfen */
