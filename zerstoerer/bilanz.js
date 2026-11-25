@@ -276,7 +276,7 @@
     if (Z.ui && Z.ui.notify) Z.ui.notify("<b>" + L(["Geschafft: ", "Done: "]) + esc(L(x.h.n)) + "</b><br><small>" + esc(rwTxt(x.rw)) + "</small>", { prio: 2, art: "sieg", icon: x.h.ico || "✦", dauer: 3200 });
     Z.audio.play("holy", { vol: 0.5 }); Z.audio.play("coin", { vol: 0.4, rate: 0.8, delay: 0.15 });
     const P = Z.player; if (P && Z.fx) { Z.fx.burst(P.x + P.w / 2, P.y + 6, 30, { col: ["#ffd27a", "#ffb060", "#fff2c0"], sp: 130, up: 60, life: 0.9, size: 2.2, kind: "glow", add: true }); Z.fx.ring(P.x + P.w / 2, P.y + 14, 30, "#ffd27a", 0.4, 2); }
-    Z.input.rumble && Z.input.rumble(0.3, 140);
+    Z.vib && Z.vib("reward"); /* W20 Steuerung */
   }
   function fail(x) {
     if (x.state !== "laeuft") return; x.state = "weg";

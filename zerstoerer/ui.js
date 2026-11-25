@@ -140,7 +140,7 @@
       se.el.classList.toggle("stumm", s[0] === "s" && P.st.silence > 0);
       const lab = inp.label(s); if (se.lab !== lab) { se.lab = lab; se.k.textContent = lab; se.k.hidden = !lab; }
     }
-    { const lab = touchy() ? "" : inp.device === "pad" ? inp.padButtonName(inp.pad.gear != null ? inp.pad.gear : inp.pad.map) : inp.label("gear"), k = lab + "|" + Z.settings.lang;
+    { const lab = touchy() ? "" : inp.device === "pad" ? inp.padButtonName(inp.padOf("gear") != null ? inp.padOf("gear") : inp.padOf("map")) /* W20 Steuerung */ : inp.label("gear"), k = lab + "|" + Z.settings.lang;
       if (hbAusr._k !== k) { hbAusr._k = k; hbAusr.hidden = !lab || lab === "–"; hbAusr.innerHTML = "<kbd>" + esc(lab) + "</kbd><span>" + esc(L(["Ausrüstung", "Gear"])) + "</span>"; hbAusr.title = L(["Halten: Ausrüstung ansehen", "Hold: view gear"]); } }
     hudT -= dt;
     if (hudT <= 0) {
@@ -881,7 +881,7 @@
   /* Taste(n) der Ausrüstung für das aktuelle Gerät, z. B. „[Tab]“ oder „[RS] / [View] halten“ */
   function gearKeyHTML(hold) {
     if (touchy()) return "";
-    if (inp.device === "pad") return (inp.pad.gear != null ? ui.kbd(inp.padButtonName(inp.pad.gear)) + " / " : "") + ui.kbd(inp.padButtonName(inp.pad.map)) + (hold ? " " + L(["halten", "hold"]) : "");
+    if (inp.device === "pad") return (inp.padOf("gear") != null ? ui.kbd(inp.padButtonName(inp.padOf("gear"))) + " / " : "") + ui.kbd(inp.padButtonName(inp.padOf("map"))) + /* W20 Steuerung */ (hold ? " " + L(["halten", "hold"]) : "");
     const k = inp.keys.gear && (inp.keys.gear[0] || inp.keys.gear[1]);
     return k ? ui.kbd(inp.keyName(k)) + (hold ? " " + L(["halten", "hold"]) : "") : "";
   }
@@ -1198,7 +1198,7 @@
       '<label class="schalter">' + L(["Textgröße", "Text size"]) + ' <select data-textsize="1">' + [["klein", L(["klein", "small"])], ["normal", L(["normal", "normal"])], ["gross", L(["groß", "large"])], ["riesig", L(["sehr groß", "very large"])]].map(([v, n]) => '<option value="' + v + '"' + ((s.textSize || "normal") === v ? " selected" : "") + ">" + esc(n) + "</option>").join("") + "</select></label>" +
       '<label class="schalter">' + L(["Hinweise im Spiel", "In-game hints"]) + ' <select data-hint="1">' + [["alle", L(["alle", "all"])], ["wenige", L(["wenige (nur Wichtiges)", "few (important only)"])], ["keine", L(["keine", "none"])]].map(([v, n]) => '<option value="' + v + '"' + ((s.hinweise || "alle") === v ? " selected" : "") + ">" + esc(n) + "</option>").join("") + "</select></label>" +
       ck("cinePan", L(["Kamerafahrt zum Ausgang beim Betreten", "Camera pan to the exit on arrival"]), !!s.cinePan) + ck("presentOff", L(["Fundvorführung aus", "Turn off item showcase"]), !!s.presentOff) +
-      ck("showDmg", L(["Schadenszahlen", "Damage numbers"]), s.showDmg) + ck("vib", L(["Vibration", "Vibration"]), s.vib !== false) +
+      ck("showDmg", L(["Schadenszahlen", "Damage numbers"]), s.showDmg) + /* W20 Steuerung */ vibBlock("set") +
       '<label class="regler">' + L(["Stick-Totzone (Controller)", "Stick dead zone (controller)"]) + '<input type="range" min="15" max="60" value="' + Math.round((s.dead || 0.35) * 100) + '" data-dead="1"></label>' +
       '<button class="steuerknopf" data-act="controls">' + L(["Steuerung: Tastatur & Controller belegen", "Controls: remap keyboard & controller"]) + "</button>" +
       (fs.ok ? '<button class="steuerknopf" data-act="fullscreen">' + esc(fs.label()) + " <small>· F · Alt+Enter</small></button>" + ck("autoFs", L(["Am Handy beim Spielstart automatisch Vollbild", "Automatic fullscreen on phones when starting"]), Z.settings.autoFs !== false) : "") +
@@ -1208,6 +1208,7 @@
       '</div><div class="knoepfe"><button data-act="close">' + esc(t("close")) + "</button></div>", { cls: "schmal", onClose: () => { Z.saveSettings(); A.saveVol(); if (!Z.level) showTitle(); } });
     modal.querySelectorAll("[data-vol]").forEach(r => r.oninput = () => { A.vol[r.dataset.vol] = r.value / 100; A.applyVol(); if (r.dataset.vol === "sfx") A.play("hitFlesh", { vol: 0.6, gap: 0.15 }); });
     modal.querySelector("[data-dead]").oninput = e => { Z.settings.dead = e.target.value / 100; };
+    wireVib(); /* W20 Steuerung */
     modal.querySelector("[data-touch]").oninput = e => { Z.settings.touchSize = e.target.value / 100; touchSync(); };
     modal.querySelectorAll("[data-set]").forEach(c => c.onchange = () => { Z.settings[c.dataset.set] = c.checked; if (c.dataset.set === "vib") inp.vib = c.checked; });
     modal.querySelector("[data-textsize]").onchange = e => { Z.settings.textSize = e.target.value; Z.saveSettings(); fitText(); const sel = modal.querySelector("[data-textsize]"); if (sel) sel.focus({ preventScroll: true }); };
@@ -1237,7 +1238,7 @@
   ui.komfortSumme = komfortSumme;
   /* Tastenzeile oben: zeigt die echten Knöpfe des gerade benutzten Geräts */
   function komfortTasten() {
-    const pad = inp.device === "pad", n = k => (pad ? inp.padButtonName(inp.pad[k]) : inp.label(k));
+    const pad = inp.device === "pad", n = k => (pad ? { jump: "A", roll: "B" }[k] || inp.padButtonName(inp.pad[k]) : inp.label(k)); /* W20 Steuerung: Menüknöpfe fest */
     if (ui.touchOn && !pad) return '<p class="k-tasten">' + L(["Antippen zum Wählen · Regler ziehen", "Tap to choose · drag the slider"]) + "</p>";
     return '<p class="k-tasten">' + (pad ? ui.kbd(L(["Stick", "Stick"])) + ui.kbd("✚") : ui.kbd("↑") + ui.kbd("↓")) + L([" Zeile", " row"]) + " · " + (pad ? ui.kbd("◀") + ui.kbd("▶") : ui.kbd("←") + ui.kbd("→")) + L([" Wahl / Regler", " choice / slider"]) +
       " · " + ui.kbd(pad ? n("jump") : "Enter") + L([" übernehmen", " apply"]) + " · " + ui.kbd(pad ? n("roll") : "Esc") + L([" zurück", " back"]) + "</p>";
@@ -1552,34 +1553,102 @@
   Z.diag.onError = () => { if (errHinted) return; errHinted = true; setTimeout(() => ui.toast(L(["Es ist ein Fehler aufgetreten. Bericht: Einstellungen → Grafik, Leistung & Fehlerbericht.", "An error occurred. Report: Settings → Graphics, performance & error report."]), 4200), 200); };
 
   /* ---------- Steuerung belegen ---------- */
+  /* W20 Steuerung: freie Belegung – je Aktion zwei Tasten und zwei Controller-Knöpfe, Vorlagen, Konfliktwarnung mit
+     Tauschen, Erfassung mit Abbruch (Esc · Menü/Start lange · 10 s nichts), Leeren (Entf · Controller X), Vibration mit
+     Stärke und Testknopf. Alles global (eigene Speicherschlüssel bzw. Z.settings), nicht je Spielstand. */
   const ACT_NAMES = { left: ["Links", "Left"], right: ["Rechts", "Right"], up: ["Hoch / Leiter", "Up / ladder"], down: ["Runter / Ducken", "Down / crouch"], jump: ["Springen", "Jump"], roll: ["Rolle", "Roll"],
     a1: ["Waffe 1", "Weapon 1"], a2: ["Waffe 2", "Weapon 2"], s1: ["Fähigkeit 1", "Skill 1"], s2: ["Fähigkeit 2", "Skill 2"], use: ["Benutzen / Aufheben", "Use / pick up"], potion: ["Heiltrank", "Healing potion"], map: ["Karte", "Map"], gear: ["Ausrüstung ansehen (halten)", "View gear (hold)"], pause: ["Pause", "Pause"] };
+  ui.ACT_NAMES = ACT_NAMES;
   function bindingSummary() {
     const pad = inp.device === "pad";
     const row = a => ui.kbd(pad ? inp.label(a) : inp.keyName(inp.keys[a][0] || inp.keys[a][1])) + " " + esc(L(ACT_NAMES[a]));
-    return (pad ? L(["Linker Stick / Steuerkreuz laufen · ", "Left stick / D-pad move · "]) : ui.kbd(inp.keyName(inp.keys.left[0])) + ui.kbd(inp.keyName(inp.keys.right[0])) + " " + L(["laufen · ", "move · "])) +
-      ["jump", "roll", "a1", "a2", "s1", "s2", "potion", "use", "map", "gear", "pause"].filter(a => !pad || inp.pad[a] != null).map(row).join(" · ") + (pad ? " · " + ui.kbd(inp.padButtonName(inp.pad.map)) + " " + L(["halten: Ausrüstung", "hold: gear"]) : "") + L([" · Oben + Angriff: Aufwärtsangriff (in der Luft: Aufwärts-Schwung)", " · Up + attack: upward attack (in the air: rising swing)"]) + (pad ? "" : L([" · Linksklick/Rechtsklick: Waffe 1/2 · Runter + Sprung: durch Stege fallen · Runter + Angriff in der Luft: Sturzangriff", " · Left/right click: weapon 1/2 · Down + jump: drop through ledges · Down + attack in the air: plunge"]));
+    return (pad ? L(["Linker Stick / Steuerkreuz laufen · ", "Left stick / D-pad move · "]) : ui.kbd(inp.keyName(inp.keys.left[0] || inp.keys.left[1])) + ui.kbd(inp.keyName(inp.keys.right[0] || inp.keys.right[1])) + " " + L(["laufen · ", "move · "])) +
+      ["jump", "roll", "a1", "a2", "s1", "s2", "potion", "use", "map", "gear", "pause"].filter(a => !pad || inp.padOf(a) != null).map(row).join(" · ") + (pad && inp.padOf("map") != null ? " · " + ui.kbd(inp.padButtonName(inp.padOf("map"))) + " " + L(["halten: Ausrüstung", "hold: gear"]) : "") + L([" · Oben + Angriff: Aufwärtsangriff (in der Luft: Aufwärts-Schwung)", " · Up + attack: upward attack (in the air: rising swing)"]) + (pad ? "" : L([" · Linksklick/Rechtsklick: Waffe 1/2 · Runter + Sprung: durch Stege fallen · Runter + Angriff in der Luft: Sturzangriff", " · Left/right click: weapon 1/2 · Down + jump: drop through ledges · Down + attack in the air: plunge"]));
   }
-  ui.controls = () => {
-    const padOn = !!inp.lastPad;
-    const cell = (a, kind, slot) => { const lab = kind === "pad" ? inp.padButtonName(inp.pad[a]) : inp.keyName(inp.keys[a][slot]); return '<button class="belegung" data-act="bind" data-arg="' + a + "|" + kind + "|" + slot + '">' + esc(lab) + "</button>"; };
-    let rows = "";
-    for (const a in ACT_NAMES) rows += "<tr><th>" + esc(L(ACT_NAMES[a])) + "</th><td>" + cell(a, "key", 0) + "</td><td>" + cell(a, "key", 1) + "</td><td>" + (inp.pad[a] !== undefined ? cell(a, "pad", 0) : '<span class="fix">' + (a === "left" || a === "right" || a === "up" || a === "down" ? L(["Stick + Kreuz", "Stick + D-pad"]) : "–") + "</span>") + "</td></tr>";
-    openModal("<h2>" + L(["Steuerung", "Controls"]) + "</h2>" +
-      '<p class="hinweis">' + (padOn ? "🎮 " + esc(inp.padName.replace(/\(.*?\)/g, "").trim() || L(["Controller verbunden", "Controller connected"])) : L(["Kein Controller erkannt – einmal einen Knopf drücken, dann erscheint er hier.", "No controller detected – press any button and it will appear here."])) + "</p>" +
-      '<table class="belegtab"><thead><tr><th></th><th>' + L(["Taste", "Key"]) + "</th><th>" + L(["Zweite Taste", "Second key"]) + "</th><th>Controller</th></tr></thead><tbody>" + rows + "</tbody></table>" +
-      '<p class="hinweis" id="bindhint">' + L(["Feld wählen, dann die neue Taste oder den Controller-Knopf drücken. Esc bricht ab. Maus: links Waffe 1, rechts Waffe 2.", "Pick a field, then press the new key or controller button. Esc cancels. Mouse: left weapon 1, right weapon 2."]) + "</p>" +
-      '<div class="knoepfe"><button data-act="bindReset">' + L(["Standard wiederherstellen", "Restore defaults"]) + '</button><button data-act="controlsBack" autofocus>' + esc(t("back")) + "</button></div>", { cls: "breit" });
+  const DIRS = ["left", "right", "up", "down"];
+  const slotLab = (kind, v) => (kind === "pad" ? inp.padButtonName(v) : inp.keyName(v));
+  let ctrlState = null; /* { conflict: {kind, action, slot, v, other}, msg } */
+  function vibBlock(id) {
+    const k = Math.round((Z.settings.vibK != null ? Z.settings.vibK : 0.8) * 100);
+    return '<div class="st-vib"><label class="regler">' + L(["Vibration (Controller)", "Vibration (controller)"]) + ' <em data-vibout="1">' + (k ? k + " %" : L(["aus", "off"])) + '</em><input type="range" min="0" max="100" step="5" value="' + k + '" data-vibk="' + id + '" aria-label="' + esc(L(["Vibrationsstärke", "Vibration strength"])) + '"></label>' +
+      '<button class="steuerknopf st-test" data-act="vibTest">' + L(["Vibration testen", "Test vibration"]) + "</button></div>";
+  }
+  function wireVib() {
+    modal.querySelectorAll("[data-vibk]").forEach(r => {
+      r.oninput = () => { Z.setVibK(r.value / 100); const o = modal.querySelector("[data-vibout]"); if (o) o.textContent = +r.value ? r.value + " %" : L(["aus", "off"]); };
+      r.onchange = () => { Z.saveSettings(); if (+r.value) Z.vib("hit"); };
+    });
+  }
+  ui.wireVib = wireVib; ui.vibBlock = vibBlock;
+  actions.vibTest = () => {
+    const ok = Z.vib("test"), b = modal.querySelector('[data-act="vibTest"]');
+    if (!b) return;
+    b.textContent = !(Z.settings.vibK > 0) ? L(["Vibration ist aus (0 %)", "Vibration is off (0%)"]) : ok ? L(["Brrr … gespürt?", "Brrr… feel it?"]) : !inp.lastPad && inp.device !== "touch" ? L(["Kein Controller verbunden", "No controller connected"]) : L(["Kurz warten …", "Wait a moment…"]);
+    clearTimeout(b._t); b._t = setTimeout(() => { if (b.isConnected) b.textContent = L(["Vibration testen", "Test vibration"]); }, 1800);
   };
-  actions.controls = () => { Z.saveSettings(); closeModal(); ui.controls(); };
-  actions.controlsBack = () => { closeModal(); ui.settings(); };
-  actions.bindReset = () => { inp.reset(); for (const k in slotEls) slotEls[k].lab = null; ui.controls(); };
+  ui.controls = focusArg => {
+    const padOn = !!inp.lastPad, st = ctrlState || {}, cf = st.conflict;
+    const box0 = modal.querySelector(".mbox.steuerung"), scroll = box0 ? box0.scrollTop : 0;
+    const cell = (a, kind, slot) => {
+      const v = inp.getSlot(kind, a, slot), wait = cf && cf.action === a && cf.kind === kind && cf.slot === slot;
+      return '<button class="belegung' + (v == null ? " leer" : "") + (wait ? " wartet" : "") + '" data-act="bind" data-arg="' + a + "|" + kind + "|" + slot + '" aria-label="' + esc(L(ACT_NAMES[a]) + " · " + (kind === "pad" ? "Controller " : L(["Taste ", "Key "])) + (slot + 1)) + '">' + esc(v == null ? "–" : slotLab(kind, v)) + "</button>";
+    };
+    let rows = "";
+    for (const a in ACT_NAMES) {
+      const noKey = !inp.keys[a][0] && !inp.keys[a][1], noPad = !DIRS.includes(a) && inp.padOf(a) == null;
+      rows += "<tr" + (noKey || noPad ? ' class="ohne"' : "") + "><th>" + esc(L(ACT_NAMES[a])) + (noKey || noPad ? ' <small class="warn">' + (noKey ? L(["ohne Taste", "no key"]) : L(["ohne Knopf", "no button"])) + "</small>" : "") + "</th><td>" + cell(a, "key", 0) + "</td><td>" + cell(a, "key", 1) + "</td><td>" +
+        (DIRS.includes(a) ? '<span class="fix">' + L(["Stick + Kreuz", "Stick + D-pad"]) + "</span>" : cell(a, "pad", 0)) + "</td><td>" + cell(a, "pad", 1) + "</td></tr>";
+    }
+    const pk = inp.presetOf("keys"), pp = inp.presetOf("pad");
+    const pre = '<div class="st-vorlagen"><span>' + L(["Vorlage:", "Preset:"]) + "</span>" + Object.keys(inp.PRESETS).map((id, i) => '<button class="k-seg' + (pk === id && pp === id ? " an" : pk === id || pp === id ? " halb" : "") + '" data-act="bindPreset" data-arg="' + id + '"' + (!i && !cf && focusArg == null ? " autofocus" : "") + ">" + esc(L(inp.PRESETS[id].n)) + "</button>").join("") + "</div>";
+    const conf = cf ? '<div class="st-konflikt" role="alertdialog"><p>⚠ ' + L(["„", "“"])[0] + "<b>" + esc(slotLab(cf.kind, cf.v)) + "</b>" + L(["“ liegt schon auf ", "” is already used by "]) + "<b>" + esc(L(ACT_NAMES[cf.other.action])) + "</b>.</p>" +
+      '<div class="knoepfe"><button data-act="bindSwap" autofocus>' + L(["Tauschen", "Swap"]) + (inp.getSlot(cf.kind, cf.action, cf.slot) != null ? " <small>(" + esc(L(ACT_NAMES[cf.other.action])) + " → " + esc(slotLab(cf.kind, inp.getSlot(cf.kind, cf.action, cf.slot))) + ")</small>" : "") + '</button><button data-act="bindSteal">' + L(["Dort entfernen", "Remove there"]) + '</button><button data-act="bindNo">' + esc(t("cancel")) + "</button></div></div>" : "";
+    const pad = inp.device === "pad";
+    const hint = st.msg ? '<span class="st-msg">' + st.msg + "</span> " : "";
+    openModal("<h2>" + L(["Steuerung", "Controls"]) + " <small>" + L(["wird sofort gespeichert · gilt für alle Spielstände", "saved instantly · applies to all save slots"]) + "</small></h2>" +
+      '<p class="hinweis">' + (padOn ? "🎮 " + esc(inp.padName.replace(/\(.*?\)/g, "").trim() || L(["Controller verbunden", "Controller connected"])) : L(["Kein Controller erkannt – einmal einen Knopf drücken, dann erscheint er hier.", "No controller detected – press any button and it will appear here."])) + "</p>" +
+      pre + conf +
+      '<table class="belegtab"><thead><tr><th></th><th>' + L(["Taste", "Key"]) + "</th><th>" + L(["Zweite Taste", "Second key"]) + "</th><th>Controller</th><th>" + L(["Zweiter Knopf", "Second button"]) + "</th></tr></thead><tbody>" + rows + "</tbody></table>" +
+      vibBlock("ctl") +
+      '<p class="hinweis" id="bindhint">' + hint + (pad ? L(["Feld wählen (A), dann den neuen Knopf drücken und loslassen. Menü/Start lange halten bricht ab · X leert das Feld. In Menüs gilt immer A = Auswählen, B = Zurück.", "Pick a field (A), then press and release the new button. Hold Menu/Start to cancel · X clears the field. In menus A = select, B = back always."])
+        : L(["Feld wählen, dann die neue Taste oder den Controller-Knopf drücken. Esc bricht ab · Entf leert das Feld. Maus: links Waffe 1, rechts Waffe 2.", "Pick a field, then press the new key or controller button. Esc cancels · Delete clears the field. Mouse: left weapon 1, right weapon 2."])) + "</p>" +
+      '<div class="knoepfe"><button data-act="bindReset">' + L(["Standard wiederherstellen", "Restore defaults"]) + '</button><button data-act="controlsBack">' + esc(t("back")) + "</button></div>", { cls: "breit steuerung", onClose: () => { ctrlState = null; Z.saveSettings(); } });
+    wireVib();
+    const bx = modal.querySelector(".mbox.steuerung"); if (bx) bx.scrollTop = scroll;
+    if (focusArg && !cf) setTimeout(() => { const b = modal.querySelector('[data-arg="' + focusArg + '"]'); if (b) { b.focus({ preventScroll: true }); b.scrollIntoView && b.scrollIntoView({ block: "nearest" }); } }, 40);
+  };
+  const refreshLabels = () => { for (const k in slotEls) slotEls[k].lab = null; padHintKey = ""; };
+  const ctrlRedraw = (focusArg, msg) => { ctrlState = msg ? { msg } : null; refreshLabels(); ui.onClose = null; ui.controls(focusArg); };
+  actions.controls = () => { Z.saveSettings(); closeModal(); ctrlState = null; ui.controls(); };
+  actions.controlsBack = () => { ui.onClose = null; ctrlState = null; closeModal(); ui.settings(); };
+  actions.bindReset = () => { inp.reset(); ctrlRedraw(null, L(["Standard wiederhergestellt.", "Defaults restored."])); };
+  actions.bindPreset = id => { inp.applyPreset(id); A.play("uiOk", { vol: 0.4 }); ctrlRedraw("", L(["Vorlage „", "Preset “"]) + esc(L(inp.PRESETS[id].n)) + L(["“ übernommen.", "” applied."])); setTimeout(() => { const b = modal.querySelector('[data-act="bindPreset"][data-arg="' + id + '"]'); if (b) b.focus({ preventScroll: true }); }, 45); };
+  actions.bindSwap = () => { const c = ctrlState && ctrlState.conflict; if (!c) return; inp.assign(c.kind, c.action, c.slot, c.v, "swap"); A.play("uiOk", { vol: 0.4 }); ctrlRedraw(c.action + "|" + c.kind + "|" + c.slot, L(["Getauscht mit ", "Swapped with "]) + esc(L(ACT_NAMES[c.other.action])) + "."); };
+  actions.bindSteal = () => { const c = ctrlState && ctrlState.conflict; if (!c) return; inp.assign(c.kind, c.action, c.slot, c.v, "steal"); A.play("uiOk", { vol: 0.4 }); ctrlRedraw(c.action + "|" + c.kind + "|" + c.slot, esc(L(ACT_NAMES[c.other.action])) + L([" hat diesen Platz jetzt frei.", " no longer uses it."])); };
+  actions.bindNo = () => { const c = ctrlState && ctrlState.conflict; ctrlRedraw(c ? c.action + "|" + c.kind + "|" + c.slot : null, L(["Nichts geändert.", "Nothing changed."])); };
+  actions.bindClear = arg => {
+    const [a, kind, slot] = (arg || "").split("|"); if (!ACT_NAMES[a]) return;
+    if (kind === "pad" && +slot === 0 && DIRS.includes(a)) return;
+    inp.clearSlot(kind, a, +slot); A.play("ui", { vol: 0.3, rate: 0.8 }); ctrlRedraw(arg, L(["Feld geleert.", "Field cleared."]));
+  };
+  ui.ctrlCapturing = () => !!(inp.capture && inp.capture.w20);
   actions.bind = (arg, btn) => {
-    const [a, kind, slot] = arg.split("|");
+    const [a, kind, slot] = arg.split("|"), sl = +slot;
     btn.textContent = kind === "pad" ? L(["Knopf drücken …", "Press button…"]) : L(["Taste drücken …", "Press key…"]);
     btn.classList.add("wartet");
-    const done = () => { for (const k in slotEls) slotEls[k].lab = null; A.play("uiOk", { vol: 0.4 }); const f = arg; ui.controls(); setTimeout(() => { const b = modal.querySelector('[data-arg="' + f + '"]'); if (b) b.focus(); }, 40); };
-    inp.capture = { kind, action: a, slot: +slot, done };
+    const hintEl = modal.querySelector("#bindhint"); if (hintEl) hintEl.innerHTML = kind === "pad" ? L(["Neuen Knopf drücken und loslassen · <b>Menü/Start lange halten</b> = Abbrechen · Taste auf der Tastatur = Abbrechen", "Press and release the new button · <b>hold Menu/Start</b> = cancel · any keyboard key = cancel"]) : L(["Neue Taste drücken · <b>Esc</b> = Abbrechen · <b>Entf</b> = Feld leeren · Controller-Knopf = Abbrechen", "Press the new key · <b>Esc</b> = cancel · <b>Delete</b> = clear field · controller button = cancel"]);
+    inp.capture = { kind, action: a, slot: sl, w20: true, onValue: v => {
+      if (v === "Delete") return actions.bindClear(arg);
+      if (v == null) return ctrlRedraw(arg, L(["Abgebrochen.", "Cancelled."]));
+      if (kind === "pad" && sl === 0 && DIRS.includes(a)) return ctrlRedraw(arg);
+      if (inp.getSlot(kind, a, sl) === v) return ctrlRedraw(arg, L(["Unverändert.", "Unchanged."]));
+      const other = inp.findBinding(kind, v, a, sl);
+      /* derselbe Wert im anderen Platz derselben Aktion: einfach verschieben */
+      if (other && other.action !== a) { ctrlState = { conflict: { kind, action: a, slot: sl, v, other } }; A.play("ui", { vol: 0.4, rate: 0.7 }); Z.vib && Z.vib("tick"); refreshLabels(); ui.onClose = null; ui.controls(); return; }
+      inp.assign(kind, a, sl, v, "steal"); A.play("uiOk", { vol: 0.4 }); ctrlRedraw(arg);
+    } };
+    /* Halte-Fortschritt für „Start lange = Abbrechen“ sichtbar machen */
+    if (kind === "pad") { const tick = () => { if (!inp.capture || inp.capture.action !== a || !btn.isConnected) return; btn.style.setProperty("--halt", String(inp.capture.holdK || 0)); requestAnimationFrame(tick); }; requestAnimationFrame(tick); }
   };
 
   /* ---------- Gegenstand aufheben / tauschen ---------- */
@@ -1945,7 +2014,7 @@
   function syncPadHint() {
     /* Controller und Tastatur bekommen eine Hinweisleiste (Touch braucht keine: dort wird getippt) */
     const pad = inp.device === "pad", show = ui.modalOpen && (pad || (inp.device === "keys" && !ui.touchOn));
-    const n = k => (pad ? inp.padButtonName(inp.pad[k]) : inp.label(k));
+    const n = k => (pad ? { jump: "A", roll: "B", s1: "LB", s2: "RB" }[k] || inp.padButtonName(inp.pad[k]) : inp.label(k)); /* W20 Steuerung: Menüknöpfe sind fest */
     const tabs = show && modal.querySelector(".reiter button");
     const key = show ? [pad, n("jump"), n("roll"), ui.noEsc, !!tabs, n("s1"), n("s2"), Z.settings.lang].join("|") : "";
     if (key === padHintKey) return; padHintKey = key;
@@ -1962,6 +2031,13 @@
     try { noteTick(rdt); if (Z.level) labelTick(); } catch (e) { console.error(e); }
     syncPadHint();
     if (Z.run && !Z.run.gnade && Z.mercy()) Z.run.gnade = true; /* Hilfsmodus kennzeichnet den laufenden Durchgang */
+    /* W20 Steuerung: in Menüs und auf dem Titelbild gelten am Controller feste Knöpfe (A wählt, B zurück, Menü/Start, LB/RB
+       Reiter, RS Ausrüstung) – egal wie die Spielsteuerung belegt ist. X leert im Steuerungsmenü das gewählte Feld. */
+    if (inp.device === "pad" && inp.menu && !inp.capture && (ui.modalOpen || !title.hidden)) {
+      const m = inp.menu; for (const a of ["jump", "roll", "a1", "a2", "use", "s1", "s2", "pause", "gear", "potion", "map"]) inp.pressed[a] = false;
+      inp.pressed.jump = m.ok; inp.pressed.roll = m.back; inp.pressed.pause = m.start; inp.pressed.s1 = m.lb; inp.pressed.s2 = m.rb; inp.pressed.gear = m.rs;
+      if (m.x && ui.modalOpen) { const f = document.activeElement; if (f && f.classList && f.classList.contains("belegung") && modal.contains(f)) actions.bindClear(f.dataset.arg); }
+    }
     if (!title.hidden && !ui.modalOpen) { if (inp.pressed.jump || inp.pressed.use || inp.pressed.a1) { const b = title.querySelector("button:focus, a:focus") || title.querySelector("button"); if (b) b.click(); } if (inp.pressed.down || inp.pressed.up) { const bs = [...title.querySelectorAll("button, a")]; const i = bs.indexOf(document.activeElement); (bs[(i + (inp.pressed.down ? 1 : -1) + bs.length) % bs.length] || bs[0]).focus(); } inp.endFrame(); return; }
     if (inp.pressed.pause && !ui.choiceActive) { inp.consume("pause"); if (ui.modalOpen) { if (!ui.noEsc) closeModal(); } else ui.pause(); }
     /* Controller „Ansicht“: antippen = Karte (beim Loslassen), halten = Ausrüstung. Die Tastatur hat eigene Tasten

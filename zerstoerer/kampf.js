@@ -205,10 +205,14 @@
   /* Aktionen puffern, damit Eingaben während einer Animation nicht verloren gehen */
   function buffer(P, dt) {
     for (const a of ["a1", "a2", "s1", "s2", "roll", "potion"]) {
-      if (inp.pressed[a]) P.buf[a] = a === "roll" ? 0.14 : 0.22;
+      /* W20 Steuerung: Angriff/Fähigkeit während der Rolle gedrückt → wartet bis kurz nach dem Rollenende (sonst verfiel ein früher Druck) */
+      if (inp.pressed[a]) P.buf[a] = a === "roll" ? 0.14 : a !== "potion" && P.rollT > 0 ? Math.max(0.22, P.rollT + 0.12) : 0.22;
       else if (P.buf[a] > 0) P.buf[a] -= dt;
     }
     if (inp.pressed.jump) P.jumpBuf = C.JBUF; else P.jumpBuf -= dt;
+    /* W20 Steuerung: wie lange wurde der (letzte) Sprungdruck gehalten? Ein gepufferter Sprung, dessen Knopf schon wieder
+       los ist, wird so hoch wie derselbe Tipp am Boden (statt nur als Mindesthüpfer) */
+    if (inp.pressed.jump) P.jTap = 0; else if (inp.held.jump) P.jTap = (P.jTap || 0) + dt;
   }
   const take = (P, a) => { if (P.buf[a] > 0) { P.buf[a] = 0; return true; } return false; };
 
@@ -450,8 +454,9 @@
        Der Schnitt wird zeitgenau ausgeglichen, damit die Hüpferhöhe nicht von der Bildrate abhängt. */
     if (!inp.held.jump && P.jumpHeld) P.jumpRel = true;
     const jt0 = P.jumpT || 0; P.jumpT = jt0 + dt;
-    if (P.jumpRel && P.jumpT >= C.MINJ && P.vy < 0 && !P.cut) {
-      const early = Math.max(0, C.MINJ - jt0);
+    const minJ = Math.max(C.MINJ, P.jMin || 0); /* W20 Steuerung: gepufferter Tipp (siehe doJump) */
+    if (P.jumpRel && P.jumpT >= minJ && P.vy < 0 && !P.cut) {
+      const early = Math.max(0, minJ - jt0);
       P.y += P.vy * (1 - C.CUT) * early; P.vy *= C.CUT; P.cut = true;
     }
     if (!inp.held.jump && P.jumpT >= C.MINJ) P.jumpHeld = false;
@@ -526,6 +531,7 @@
   Z.PJ = { doJump: (P, v, dbl) => doJump(P, v, dbl), startRoll: (P, d) => startRoll(P, d), bodyFree: (x, y, w, h) => bodyFree(x, y, w, h) };
   function doJump(P, v, dbl) {
     P.vy = -v; P.jumpBuf = 0; P.jumpHeld = true; P.jumpRel = false; P.jumpT = 0; P.cut = false; P.onGround = false;
+    P.jMin = inp.held.jump ? 0 : Math.min(0.2, P.jTap || 0); /* W20 Steuerung: Knopf schon los (gepuffert) → Tippdauer als Mindesthöhe */
     if (dbl) {
       FX.ring(P.x + P.w / 2, P.y + P.h, 12, "#ff5a3a", 0.3, 2);
       FX.burst(P.x + P.w / 2, P.y + P.h, 10, { col: ["#ff5a3a", "#ffb040", "#8a1a1a"], sp: 70, ang: Math.PI / 2, spread: 2.4, life: 0.4, size: 2, kind: "spark", add: true });
@@ -1077,7 +1083,7 @@
       if (P.dodgeT > 0 && !P.dodged && !o.hazard) {
         P.dodged = true; P.counterT = 1.2; P.st.adrenalin = 3; Z.stats.dodges = (Z.stats.dodges || 0) + 1; Z.onPerfectDodge && Z.onPerfectDodge(P);
         FX.stop(0.04); FX.slowmo(0.3, 0.16); FX.text(P.x + P.w / 2, P.y - 10, L(["Ausgewichen!", "Dodged!"]), "#ffe08a", true);
-        FX.ring(P.x + P.w / 2, P.y + 12, 18, "#ffe08a", 0.25, 2); A.play("parry", { vol: 0.35, rate: 1.6 }); Z.input.rumble(0.25, 60);
+        FX.ring(P.x + P.w / 2, P.y + 12, 18, "#ffe08a", 0.25, 2); A.play("parry", { vol: 0.35, rate: 1.6 }); Z.vib("dodge"); /* W20 Steuerung: perfektes Ausweichen */
       }
       return false;
     }
@@ -1094,12 +1100,12 @@
         if (o.proj) { o.proj.owner = "p"; o.proj.vx *= -1.3; o.proj.vy *= -0.5; o.proj.dmg = dmgOf(P, P.act.it, 12) * (sh.reflectMul || 1.5); o.proj.hits = new Set(); o.proj.reflected = true; }
         if (P.act.it && Z.metaLvl(P.act.it.id) >= 3) { if (P.act.it.id === "turmschild") Z.healPlayer(P.hpMax * 0.04); if (P.act.it.id === "goldschild") P.iframe = 2; }
         if (Z.has("bollwerk")) Z.healPlayer(P.hpMax * 0.03);
-        Z.stats.parries = (Z.stats.parries || 0) + 1; P.act.parried = true;
+        Z.stats.parries = (Z.stats.parries || 0) + 1; P.act.parried = true; Z.vib("parry"); /* W20 Steuerung */
         if (Z.shieldHook) Z.shieldHook("parry", P, o);
         return false;
       }
       const through = dmg * Math.min(1, 1 - sh.block + (Z.blockLeak ? Z.blockLeak() : 0));
-      A.play("block", { vol: 0.7 }); FX.burst(P.x + P.w / 2 + P.face * 8, P.y + 12, 8, { col: "#ffe0a0", sp: 110, life: 0.25, size: 1.6, kind: "spark", add: true });
+      Z.vib("block"); /* W20 Steuerung */ A.play("block", { vol: 0.7 }); FX.burst(P.x + P.w / 2 + P.face * 8, P.y + 12, 8, { col: "#ffe0a0", sp: 110, life: 0.25, size: 1.6, kind: "spark", add: true });
       P.vx = -P.face * 120; FX.addShake(2); FX.stop(0.04);
       if (sh.thorns && o.attacker && !o.attacker.dead) Z.hitEnemy(o.attacker, dmg * sh.thorns, { kb: 60, src: "thorns", eff: Z.metaLvl("dornenschild") >= 3 ? { bleed: 1 } : null });
       if (Z.has("bollwerk")) Z.healPlayer(P.hpMax * 0.03);
@@ -1125,7 +1131,7 @@
     FX.text(P.x + P.w / 2, P.y - 6, "-" + dmg, "#ff6b5e", dmg > P.hpMax * 0.15);
     FX.addShake(Math.min(9, 3 + dmg / P.hpMax * 30)); FX.stop(0.07); FX.flashScreen("#ff2020", 0.22);
     FX.burst(P.x + P.w / 2, P.y + 12, 12, { col: ["#ff4a3a", "#8a1414", "#ffb070"], sp: 120, life: 0.4, size: 2, kind: "spark", add: true });
-    A.play("hurt", { vol: 0.7 }); Z.input.rumble(0.6, 120);
+    A.play("hurt", { vol: 0.7 }); Z.vib("hurt"); /* W20 Steuerung */
     if (Z.has("dornen") && o.attacker && !o.attacker.dead && o.melee) Z.hitEnemy(o.attacker, dmg * 0.6, { kb: 40, src: "thorns" });
     if (o.eff) for (const k in o.eff) addStatus(P, k, o.eff[k], true);
     if (P.hp <= P.hpMax * 0.3 && Z.has("rexTreue") && !P.rexUsed) { P.rexUsed = true; Z.spawnAlly("rex", P.x, P.y + P.h - 14, { dmg: 10, life: 10 }); A.play("bark"); }
@@ -1234,7 +1240,7 @@
       if (o.crit) { FX.ring(e.x + e.w / 2, e.y + e.h * 0.45, 22, "#ffb040", 0.25, 2); A.play("crit", { vol: 0.6, x: e.x }); }
       A.play(o.sfx || (e.def.undead ? "hitBone" : e.def.metal ? "hitMetal" : "hitFlesh"), { vol: 0.6, x: e.x, y: e.y });
       Z.klang && Z.klang.treffer && Z.klang.treffer(e, o); /* Klang: Waffenart, Element, Krit (klang.js) */
-      Z.input.rumble(heavy ? 0.4 : 0.15, 50);
+      if (!o.dot) Z.vib(heavy || o.crit ? "hitHeavy" : "hit"); /* W20 Steuerung: nur eigene direkte Treffer, kein Brummen bei Gift/Brand */
       /* Rückstoß und Taumeln */
       const kbRes = e.def.boss ? 0.1 : e.def.heavy ? 0.35 : 1;
       const dir = o.dir || (P ? (e.x + e.w / 2 > P.x + P.w / 2 ? 1 : -1) : 1);

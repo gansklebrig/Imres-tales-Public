@@ -49,7 +49,7 @@
   function keyName(a, dev) {
     if (dev === "touch") return { kind: "touch", s: L(TOUCH[a] || [a, a]) };
     if (dev === "pad") {
-      const i = inp.pad ? (a === "gear" && inp.pad.gear == null ? inp.pad.map : inp.pad[a]) : null;
+      const pf = x => (inp.padOf ? inp.padOf(x) : inp.pad[x]), i = inp.pad ? (a === "gear" && pf("gear") == null ? pf("map") : pf(a)) : null; /* W20 Steuerung: auch zweiter Knopf */
       if (i != null) return { kind: "pad", s: inp.padButtonName ? inp.padButtonName(i) : PADK[i] || "?" };
       return { kind: "stick", s: a === "up" ? "▲" : a === "down" ? "▼" : "◐" };
     }

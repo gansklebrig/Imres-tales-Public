@@ -8,12 +8,23 @@
   const Z = window.Z, FX = Z.fx, inp = Z.input, C = Z.PC;
   const dust = () => Z.dustCol || "#8a7a70";
   /* Vibration nur am Controller und gedrosselt, damit sie nicht zu einem Dauerbrummen wird */
-  let lastRumble = -1;
+  /* W20 Steuerung: über Z.vib (kern.js) – Stärkeregler, Vorrang und Drossel gelten auch hier */
   const buzz = (P, s, ms) => {
-    if (!inp.vib || inp.device !== "pad" || !inp.rumble) return;
-    if (P.time - lastRumble < 0.09) return;
-    lastRumble = P.time; inp.rumble(s, ms);
+    if (!inp.vib || inp.device !== "pad" || !Z.vib) return;
+    Z.vib({ s, w: s * 0.7, ms, p: 0, gap: 0.09 });
   };
+  /* W20 Steuerung: Boss-Großangriffe (starkes Beben außerhalb der Spieler-Aktion, solange ein Boss lebt), Phasenwechsel, Tod */
+  let inPlayer = false, lastDead = null;
+  const bossAlive = () => { const P = Z.player; if (!P || !Z.enemies) return false; for (const e of Z.enemies) if (e && !e.dead && e.def && e.def.boss && Math.abs(e.x - P.x) < 520) return true; return false; };
+  {
+    const sh0 = FX.addShake;
+    FX.addShake = function (v, cap) { try { if (!inPlayer && +v >= 6 && Z.level && !Z.paused && bossAlive()) Z.vib && Z.vib("boss"); } catch (_) {} return sh0.apply(this, arguments); };
+  }
+  const phSeen = new WeakMap();
+  function bossWatch() {
+    if (!Z.enemies) return;
+    for (const e of Z.enemies) { if (!e || !e.def || !e.def.boss) continue; const ph = e.phase || 0, was = phSeen.get(e); phSeen.set(e, ph); if (was != null && ph > was && !e.dead) Z.vib && Z.vib("phase"); }
+  }
   let skidT = 0;
   /* W9 Treppen: Figur um P.stepOff versetzt zeichnen (Stufe hinauf/hinab weich nachgezogen, siehe stepUp/stickDown in kampf.js).
      figuren.js lädt erst nach dieser Datei → Umhüllung beim ersten Spieler-Update. */
@@ -31,7 +42,8 @@
   Z.updatePlayer = function (P, dt) {
     wrapDraw();
     const wasGround = P.onGround, vy0 = P.vy, vx0 = P.vx, aj0 = P.airJumps, ledge0 = !!P.ledge;
-    const r = up0.apply(this, arguments);
+    let r; inPlayer = true; try { r = up0.apply(this, arguments); } finally { inPlayer = false; }
+    try { if (P && P === Z.player) { if (P.dead && lastDead !== P) Z.vib && Z.vib("death"); lastDead = P.dead ? P : null; bossWatch(); } } catch (e) { console.error(e); } /* W20 Steuerung */
     if (!P || P.dead) return r;
     try {
       skidT = Math.max(0, skidT - dt);

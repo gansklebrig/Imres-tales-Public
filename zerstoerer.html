@@ -266,6 +266,20 @@ button:disabled{opacity:.45;cursor:default}
 .belegung{width:100%;min-width:74px;background:#2a1c20;border:1px solid #4a3236;border-radius:6px;padding:5px 8px;font-weight:800;color:var(--gold)}
 .belegung:hover,.belegung:focus{border-color:var(--gold)}
 .belegung.wartet{background:#5a2a1a;color:#fff;animation:puls .7s infinite alternate}
+/* W20 Steuerung: Vorlagen, Konfliktwarnung, leere Felder, Halte-Fortschritt (Start lange = Abbrechen), Vibration – Eisen/Gold/Blut, kein Blau */
+.steuerung h2 small{font-family:var(--fb,inherit);font-size:var(--fs-s);color:var(--mute);margin-left:8px}
+.st-vorlagen{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0 6px}.st-vorlagen>span{color:var(--mute);font-weight:700;font-size:var(--fs-s);margin-right:2px}
+.st-vorlagen .k-seg{background:#2a1c20;border:1px solid #4a3236;border-radius:6px;padding:5px 10px;color:var(--text);font-weight:700}
+.st-vorlagen .k-seg.an{border-color:var(--gold);color:var(--gold2);background:#3a2618}.st-vorlagen .k-seg.halb{border-color:var(--gold3);border-style:dashed}
+.st-konflikt{border:1px solid var(--blut);border-left:4px solid var(--blut);background:rgba(90,20,22,.35);border-radius:6px;padding:6px 10px;margin:6px 0}
+.st-konflikt p{margin:0 0 4px}.st-konflikt .knoepfe{justify-content:flex-start;margin:0}
+.belegung.leer{color:var(--mute2);border-style:dashed}
+.belegtab tr.ohne th .warn{color:#ff9a8a;font-weight:700}
+.belegung.wartet{background-image:linear-gradient(90deg,rgba(194,59,63,.75) calc(var(--halt,0)*100%),transparent 0)}
+.st-msg{color:var(--gold2);font-weight:700}
+.st-vib{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:8px 0 2px}.st-vib .regler{flex:1 1 260px}.st-vib em{font-style:normal;color:var(--gold2);margin-left:6px}
+.st-vib .st-test{flex:0 0 auto}
+.handheld .steuerung .belegtab th,.handheld .steuerung .belegtab td{padding:2px 3px}.handheld .steuerung .belegung{min-width:54px;padding:3px 5px}
 @keyframes puls{from{opacity:1}to{opacity:.55}}
 .fix{color:var(--mute);font-size:12px}
 .einst h3{margin:10px 0 0}
@@ -552,57 +566,57 @@ button:disabled{opacity:.45;cursor:default}
 <div id="modal" hidden></div>
 <div id="title"></div>
 <div id="fade"></div>
-<script src="tonregler.js?v=128"></script>
-<script src="zerstoerer/kern.js?v=128"></script>
-<script src="zerstoerer/platz.js?v=128"></script>
-<script src="zerstoerer/welt.js?v=128"></script>
-<script src="zerstoerer/daten.js?v=128"></script>
-<script src="zerstoerer/kampf.js?v=128"></script>
-<script src="zerstoerer/steuerung.js?v=128"></script>
-<script src="zerstoerer/geschosse.js?v=128"></script>
-<script src="zerstoerer/gegner.js?v=128"></script>
-<script src="zerstoerer/bosse.js?v=128"></script>
-<script src="zerstoerer/bossphasen.js?v=128"></script>
-<script src="zerstoerer/figuren.js?v=128"></script>
-<script src="zerstoerer/werkzeuge.js?v=128"></script>
-<script src="zerstoerer/bild.js?v=128"></script>
-<script src="zerstoerer/pracht.js?v=128"></script>
-<script src="zerstoerer/grafik.js?v=128"></script>
-<script src="zerstoerer/musik.js?v=128"></script>
-<script src="zerstoerer/klang.js?v=128"></script>
-<script src="zerstoerer/spiel.js?v=128"></script>
-<script src="zerstoerer/lager.js?v=128"></script>
-<script src="zerstoerer/parcours.js?v=128"></script>
-<script src="zerstoerer/fallen.js?v=128"></script>
-<script src="zerstoerer/bilanz.js?v=128"></script>
-<script src="zerstoerer/kampfkunst.js?v=128"></script>
-<script src="zerstoerer/hintergrund.js?v=128"></script>
-<script src="zerstoerer/bilderbuch.js?v=128"></script>
-<script src="zerstoerer/tageszeit.js?v=128"></script>
-<script src="zerstoerer/abenteuer.js?v=128"></script>
-<script src="zerstoerer/fluch.js?v=128"></script>
-<script src="zerstoerer/fluchkraft.js?v=128"></script>
-<script src="zerstoerer/ebenen.js?v=128"></script>
-<script src="zerstoerer/erkundung.js?v=128"></script>
-<script src="zerstoerer/spuren.js?v=128"></script>
-<script src="zerstoerer/effekte.js?v=128"></script>
-<script src="zerstoerer/hinterhalt.js?v=128"></script>
-<script src="zerstoerer/leben.js?v=128"></script>
-<script src="zerstoerer/gegnerkunst.js?v=128"></script>
-<script src="zerstoerer/demogorgon.js?v=128"></script>
-<script src="zerstoerer/nemesis.js?v=128"></script>
-<script src="zerstoerer/wetter.js?v=128"></script>
-<script src="zerstoerer/wunder.js?v=128"></script>
-<script src="zerstoerer/ausstattung.js?v=128"></script>
-<script src="zerstoerer/ausgleich.js?v=128"></script>
-<script src="zerstoerer/ui.js?v=128"></script>
-<script src="zerstoerer/praesentation.js?v=128"></script>
-<script src="zerstoerer/schmiede.js?v=128"></script>
-<script src="zerstoerer/runen.js?v=128"></script>
-<script src="zerstoerer/tagebuch.js?v=128"></script>
-<script src="zerstoerer/schilder.js?v=128"></script>
-<script src="zerstoerer/weltspuren.js?v=128"></script>
-<script src="zerstoerer/uebergang.js?v=128"></script>
-<script src="zerstoerer/rueckweg.js?v=128"></script>
+<script src="tonregler.js?v=129"></script>
+<script src="zerstoerer/kern.js?v=129"></script>
+<script src="zerstoerer/platz.js?v=129"></script>
+<script src="zerstoerer/welt.js?v=129"></script>
+<script src="zerstoerer/daten.js?v=129"></script>
+<script src="zerstoerer/kampf.js?v=129"></script>
+<script src="zerstoerer/steuerung.js?v=129"></script>
+<script src="zerstoerer/geschosse.js?v=129"></script>
+<script src="zerstoerer/gegner.js?v=129"></script>
+<script src="zerstoerer/bosse.js?v=129"></script>
+<script src="zerstoerer/bossphasen.js?v=129"></script>
+<script src="zerstoerer/figuren.js?v=129"></script>
+<script src="zerstoerer/werkzeuge.js?v=129"></script>
+<script src="zerstoerer/bild.js?v=129"></script>
+<script src="zerstoerer/pracht.js?v=129"></script>
+<script src="zerstoerer/grafik.js?v=129"></script>
+<script src="zerstoerer/musik.js?v=129"></script>
+<script src="zerstoerer/klang.js?v=129"></script>
+<script src="zerstoerer/spiel.js?v=129"></script>
+<script src="zerstoerer/lager.js?v=129"></script>
+<script src="zerstoerer/parcours.js?v=129"></script>
+<script src="zerstoerer/fallen.js?v=129"></script>
+<script src="zerstoerer/bilanz.js?v=129"></script>
+<script src="zerstoerer/kampfkunst.js?v=129"></script>
+<script src="zerstoerer/hintergrund.js?v=129"></script>
+<script src="zerstoerer/bilderbuch.js?v=129"></script>
+<script src="zerstoerer/tageszeit.js?v=129"></script>
+<script src="zerstoerer/abenteuer.js?v=129"></script>
+<script src="zerstoerer/fluch.js?v=129"></script>
+<script src="zerstoerer/fluchkraft.js?v=129"></script>
+<script src="zerstoerer/ebenen.js?v=129"></script>
+<script src="zerstoerer/erkundung.js?v=129"></script>
+<script src="zerstoerer/spuren.js?v=129"></script>
+<script src="zerstoerer/effekte.js?v=129"></script>
+<script src="zerstoerer/hinterhalt.js?v=129"></script>
+<script src="zerstoerer/leben.js?v=129"></script>
+<script src="zerstoerer/gegnerkunst.js?v=129"></script>
+<script src="zerstoerer/demogorgon.js?v=129"></script>
+<script src="zerstoerer/nemesis.js?v=129"></script>
+<script src="zerstoerer/wetter.js?v=129"></script>
+<script src="zerstoerer/wunder.js?v=129"></script>
+<script src="zerstoerer/ausstattung.js?v=129"></script>
+<script src="zerstoerer/ausgleich.js?v=129"></script>
+<script src="zerstoerer/ui.js?v=129"></script>
+<script src="zerstoerer/praesentation.js?v=129"></script>
+<script src="zerstoerer/schmiede.js?v=129"></script>
+<script src="zerstoerer/runen.js?v=129"></script>
+<script src="zerstoerer/tagebuch.js?v=129"></script>
+<script src="zerstoerer/schilder.js?v=129"></script>
+<script src="zerstoerer/weltspuren.js?v=129"></script>
+<script src="zerstoerer/uebergang.js?v=129"></script>
+<script src="zerstoerer/rueckweg.js?v=129"></script>
 </body>
 </html>

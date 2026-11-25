@@ -131,7 +131,7 @@
 
   /* ======================= Aktionen ======================= */
   function openReward(r) {
-    r.open = true; r.t = 0;
+    r.open = true; r.t = 0; Z.vib && Z.vib("chest"); /* W20 Steuerung */
     const sfx = r.kind === "gold" ? "coin" : r.kind === "waffe" ? "chest" : r.kind === "rolle" ? "scroll" : r.kind === "glut" ? "chest" : "holy";
     A.play(sfx, { vol: 0.7 }); A.play("chain", { vol: 0.15, rate: 1.6 });
     FX.burst(r.x, r.y - 10, 18 + r.q * 6, { col: COL[r.kind] ? [COL[r.kind][0], "#fff0c0"] : ["#ffd27a"], sp: 110, up: 60, life: 0.7, size: 2, kind: "spark", add: true });

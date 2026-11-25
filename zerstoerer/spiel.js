@@ -374,10 +374,10 @@
       if (p.kind === "item") return Z.ui.offerItem(p);
       if (p.kind === "scroll") { Z.pickups.splice(Z.pickups.indexOf(p), 1); A.play("scroll"); return Z.ui.scrollChoice(); }
       if (p.kind === "food") { Z.pickups.splice(Z.pickups.indexOf(p), 1); const f = p.food || Z.FOOD[0]; Z.healPlayer(P.hpMax * f.heal); A.play("potion", { vol: 0.5 }); FX.text(P.x + P.w / 2, P.y - 14, L(f.n), "#e8c890"); return; }
-      if (p.kind === "chest") { p.open = true; A.play("chest"); FX.burst(p.x, p.y - 8, 20, { col: ["#ffd27a", "#fff0c0"], sp: 120, up: 60, life: 0.6, size: 2, kind: "spark", add: true }); Z.dropGold(p.x, p.y - 10, 25 * Z.BAL.goldMul(Z.run.tier)); Z.dropItem(p.x, p.y - 10, { chest: true }); Z.onChestOpen && Z.onChestOpen(p, false); if (Z.R() < 0.3) Z.spawnPickup("food", p.x, p.y - 10, { food: Z.R.pick(Z.FOOD), drop: true }); return; }
+      if (p.kind === "chest") { p.open = true; A.play("chest"); Z.vib && Z.vib("chest"); /* W20 Steuerung */ FX.burst(p.x, p.y - 8, 20, { col: ["#ffd27a", "#fff0c0"], sp: 120, up: 60, life: 0.6, size: 2, kind: "spark", add: true }); Z.dropGold(p.x, p.y - 10, 25 * Z.BAL.goldMul(Z.run.tier)); Z.dropItem(p.x, p.y - 10, { chest: true }); Z.onChestOpen && Z.onChestOpen(p, false); if (Z.R() < 0.3) Z.spawnPickup("food", p.x, p.y - 10, { food: Z.R.pick(Z.FOOD), drop: true }); return; }
       if (p.kind === "cursed") {
         const open = it => {
-          p.open = true; A.play("chest"); FX.burst(p.x, p.y - 8, 24, { col: ["#c040ff", "#ff9af0"], sp: 120, up: 60, life: 0.7, size: 2, kind: "spark", add: true });
+          p.open = true; A.play("chest"); Z.vib && Z.vib("chest"); /* W20 Steuerung */ FX.burst(p.x, p.y - 8, 24, { col: ["#c040ff", "#ff9af0"], sp: 120, up: 60, life: 0.7, size: 2, kind: "spark", add: true });
           Z.dropGold(p.x, p.y - 10, 80 * Z.BAL.goldMul(Z.run.tier)); Z.dropItem(p.x, p.y - 10, { elite: true }); Z.dropShards(p.x, p.y, 10); Z.onChestOpen && Z.onChestOpen(p, true);
           return it ? Z.spawnPickup("item", p.x + 10, p.y - 10, { it, drop: true, vy: -200, vx: 30 }) : null;
         };

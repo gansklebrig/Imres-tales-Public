@@ -642,7 +642,7 @@
     const P = Z.player; if (!P || silent) return;
     const d = MR[k];
     FX.burst(P.x + P.w / 2, P.y + 10, 34, { col: [d.col, "#fff0c0", "#ff8a3a"], sp: 150, up: 60, life: 1, size: 2.4, kind: "glow", add: true });
-    FX.ring(P.x + P.w / 2, P.y + 14, 40, d.col, 0.5, 3); FX.slowmo && FX.slowmo(0.5, 0.35); A.play("rune", { vol: 0.8 }); A.play("holy", { vol: 0.4 });
+    FX.ring(P.x + P.w / 2, P.y + 14, 40, d.col, 0.5, 3); FX.slowmo && FX.slowmo(0.5, 0.35); A.play("rune", { vol: 0.8 }); Z.vib && Z.vib("rune"); /* W20 Steuerung */ A.play("holy", { vol: 0.4 });
     if (Z.runenWeihe) Z.runenWeihe(P, d.col, k, true); /* W11 R45: Lichtsäule + Glyphe */
     tutorial(k, first);
   }
@@ -681,7 +681,7 @@
     const r = Z.RUNES[k], f = FAM[r.fam];
     const n = ACT.fam[r.fam] || 0;
     notify((r.ico || "ᚱ") + " <b>" + esc(L(r.n)) + "</b> <small>" + esc(L(f.n)) + (n >= 2 ? " · " + L(["Familienbonus ", "Set bonus "]) + n + ": " + esc(L(n >= 3 ? f.b3 : f.b2)) : "") + (out ? " · " + L(["ersetzt ", "replaces "]) + esc(L(Z.RUNES[out].n)) : "") + "</small>", { prio: 2, ort: "welt", x: P.x + P.w / 2, y: P.y - 30, dauer: 4200, art: "magie" });
-    FX.ring(P.x + P.w / 2, P.y + 14, 30, r.col, 0.4, 3); A.play("rune", { vol: 0.6 }); A.play("gem", { vol: 0.4 });
+    FX.ring(P.x + P.w / 2, P.y + 14, 30, r.col, 0.4, 3); A.play("rune", { vol: 0.6 }); Z.vib && Z.vib("rune"); /* W20 Steuerung */ A.play("gem", { vol: 0.4 });
     if (Z.runenWeihe) Z.runenWeihe(P, r.col, "stein", false); /* W11 R45 */
   }
   function tickFinds(P, dt) {

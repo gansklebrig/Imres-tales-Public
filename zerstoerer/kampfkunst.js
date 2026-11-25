@@ -91,7 +91,7 @@
         if (Z.pogoOn && Z.pogoOn(P)) { P.plunge = false; P.diveStyle = null; P.vy = -470; P.vx *= 0.4; P.airJumps = 1; P.cut = true; P.diveShots = 0; P.diveLock = false; FX.ring(P.x + P.w / 2, P.y + P.h, 26, "#ff6ae0", 0.3, 3); }
         else { P.plunge = false; P.diveStyle = null; P.vy = -120; P.vx = -P.face * 60; P.airJumps = 0; P.cut = true; P.diveShots = 0; P.diveLock = true; P.diveRecPend = true; }
         FX.stop(0.06); FX.ring(P.x + P.w / 2, P.y + P.h, 18, "#ffd27a", 0.25, 3);
-        A.play(st === "schild" ? "block" : "hitHeavy", { vol: 0.6 }); Z.input.rumble(0.35, 60);
+        A.play(st === "schild" ? "block" : "hitHeavy", { vol: 0.6 }); Z.vib("hitHeavy"); /* W20 Steuerung */
         return;
       }
     }

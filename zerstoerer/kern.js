@@ -47,6 +47,20 @@
   /* Ausrüstung: rechter Stick drücken (halten); zusätzlich „Ansicht“ halten statt antippen (ui.js) */
   const PAD0 = { jump: 0, roll: 1, a1: 2, a2: 3, s1: 4, s2: 5, potion: 6, use: 7, map: 8, pause: 9, gear: 11 };
   const PADNAMES = ["A", "B", "X", "Y", "LB", "RB", "LT", "RT", "View", "Menu", "LS", "RS", "↑", "↓", "←", "→", "Xbox"];
+  /* W20 Steuerung: zweiter Controller-Knopf je Aktion (inp.pad2) und Vorlagen. Richtungen bleiben Stick + Steuerkreuz;
+     ein Kreuz-Knopf, der einer Aktion gegeben wird, lenkt im Spiel nicht mehr (in Menüs schon). */
+  const PAD2_0 = {};
+  const PRESETS = {
+    standard: { n: ["Standard", "Default"], keys: KEYS0, pad: PAD0, pad2: PAD2_0 },
+    deadcells: { n: ["Dead Cells", "Dead Cells"],
+      keys: { left: ["KeyA", "ArrowLeft"], right: ["KeyD", "ArrowRight"], up: ["KeyW", "ArrowUp"], down: ["KeyS", "ArrowDown"], jump: ["Space", null], roll: ["ShiftLeft", "ControlLeft"],
+        a1: ["KeyJ", null], a2: ["KeyK", null], s1: ["KeyQ", null], s2: ["KeyE", null], use: ["KeyR", "Enter"], potion: ["KeyF", null], pause: ["Escape", "KeyP"], map: ["Tab", null], gear: ["KeyC", null] },
+      pad: { jump: 0, roll: 1, a1: 2, a2: 3, potion: 4, use: 5, s1: 6, s2: 7, map: 8, pause: 9, gear: 11 }, pad2: {} },
+    links: { n: ["Linkshänder (IJKL/Ziffernblock)", "Left-handed (IJKL/numpad)"],
+      keys: { left: ["KeyJ", "Numpad4"], right: ["KeyL", "Numpad6"], up: ["KeyI", "Numpad8"], down: ["KeyK", "Numpad5"], jump: ["Space", "Numpad0"], roll: ["ShiftRight", "NumpadDecimal"],
+        a1: ["KeyU", "Numpad7"], a2: ["KeyO", "Numpad9"], s1: ["KeyY", "Numpad1"], s2: ["KeyP", "Numpad3"], use: ["KeyH", "NumpadEnter"], potion: ["KeyN", "NumpadAdd"], pause: ["Escape", "Backspace"], map: ["KeyM", "NumpadSubtract"], gear: ["KeyB", "NumpadMultiply"] },
+      pad: PAD0, pad2: PAD2_0 }
+  };
   const inp = (Z.input = { held: {}, pressed: {}, released: {}, mouse: false, device: "keys", touch: false, vib: true, lastPad: null, axis: 0, padName: "", capture: null });
   ACTIONS.forEach(a => { inp.held[a] = false; inp.pressed[a] = false; inp.released[a] = false; });
   const src = { key: {}, pad: {}, touch: {}, mouse: {} };
@@ -58,21 +72,26 @@
       inp.held[a] = h;
     }
   }
-  inp.endFrame = () => { for (const a of ACTIONS) { inp.pressed[a] = false; inp.released[a] = false; } };
+  inp.endFrame = () => { for (const a of ACTIONS) { inp.pressed[a] = false; inp.released[a] = false; } if (inp.menu) for (const m in inp.menu) inp.menu[m] = false; /* W20 Steuerung */ };
   inp.consume = a => { inp.pressed[a] = false; };
   /* gespeicherte Belegung */
   const clone = o => JSON.parse(JSON.stringify(o));
-  inp.keys = clone(KEYS0); inp.pad = clone(PAD0);
+  inp.keys = clone(KEYS0); inp.pad = clone(PAD0); inp.pad2 = {}; /* W20 Steuerung */
   /* gespeicherte Belegung nur übernehmen, wenn sie gültig ist (kaputter Speicher darf nichts zerstören) */
   const okCode = c => (typeof c === "string" && /^[A-Za-z][A-Za-z0-9]{1,30}$/.test(c) ? c : null);
   try { const k = JSON.parse(localStorage.getItem("imres-zerstoerer-tasten2") || "null"); if (k && typeof k === "object") for (const a of ACTIONS) if (Array.isArray(k[a])) { const v = [okCode(k[a][0]), okCode(k[a][1])]; if (v[0] || v[1]) inp.keys[a] = v; } } catch (_) {}
   /* F ist jetzt Vollbild: alte Belegung von F auf „Benutzen“ entfernen */
   try { if (!localStorage.getItem("imres-zerstoerer-fmig")) { inp.keys.use = inp.keys.use.map(c => (c === "KeyF" ? "Enter" : c)); localStorage.setItem("imres-zerstoerer-fmig", "1"); } } catch (_) {}
-  try { const p = JSON.parse(localStorage.getItem("imres-zerstoerer-pad") || "null"); if (p && typeof p === "object") { for (const a in PAD0) if (Number.isInteger(p[a]) && p[a] >= 0 && p[a] < 12) inp.pad[a] = p[a];
+  /* W20 Steuerung: Knöpfe 0–15 (auch Steuerkreuz), null = frei */
+  const okBtn = v => Number.isInteger(v) && v >= 0 && v < 16;
+  try { const p = JSON.parse(localStorage.getItem("imres-zerstoerer-pad") || "null"); if (p && typeof p === "object") { for (const a in PAD0) if (okBtn(p[a]) || p[a] === null) inp.pad[a] = p[a];
     /* ältere Belegung ohne „Ausrüstung“: liegt der rechte Stick schon auf etwas anderem, bleibt Ausrüstung frei (Ansicht halten geht immer) */
     if (!("gear" in p) && Object.keys(inp.pad).some(a => a !== "gear" && inp.pad[a] === PAD0.gear)) inp.pad.gear = null; } } catch (_) {}
+  try { const p = JSON.parse(localStorage.getItem("imres-zerstoerer-pad2") || "null"); if (p && typeof p === "object") for (const a of ACTIONS) if (okBtn(p[a])) inp.pad2[a] = p[a]; } catch (_) {} /* W20 Steuerung */
   /* doppelte Knöpfe aus altem/kaputtem Speicher: dann lieber Standard */
-  { const v = Object.values(inp.pad); if (new Set(v).size !== v.length) inp.pad = clone(PAD0); }
+  { const v = [...Object.values(inp.pad), ...Object.values(inp.pad2)].filter(x => x != null); if (new Set(v).size !== v.length) { inp.pad = clone(PAD0); inp.pad2 = {}; } }
+  /* Pause muss am Controller erreichbar bleiben */
+  if (inp.pad.pause == null && inp.pad2.pause == null) inp.pad.pause = Object.keys(inp.pad).some(a => inp.pad[a] === 9) || Object.values(inp.pad2).includes(9) ? null : 9;
   /* jede Aktion braucht mindestens eine Taste */
   for (const a of ACTIONS) { if (!Array.isArray(inp.keys[a]) || inp.keys[a].length < 2) inp.keys[a] = [(inp.keys[a] || [])[0] || null, (inp.keys[a] || [])[1] || null]; if (!inp.keys[a][0] && !inp.keys[a][1]) inp.keys[a] = KEYS0[a].slice(); }
   /* Tab gehörte früher zur Karte und ist jetzt „Ausrüstung halten“: alte Speicherstände umstellen; Standardtasten der
@@ -82,11 +101,43 @@
   let codeMap = {};
   inp.rebuild = () => { codeMap = {}; for (const a of ACTIONS) for (const c of inp.keys[a] || []) if (c) codeMap[c] = a; if (!codeMap.Escape) codeMap.Escape = "pause"; if (!codeMap.ShiftRight && inp.keys.roll.includes("ShiftLeft")) codeMap.ShiftRight = "roll"; };
   inp.rebuild();
-  inp.save = () => { try { localStorage.setItem("imres-zerstoerer-tasten2", JSON.stringify(inp.keys)); localStorage.setItem("imres-zerstoerer-pad", JSON.stringify(inp.pad)); } catch (_) {} inp.rebuild(); };
-  inp.reset = () => { inp.keys = clone(KEYS0); inp.pad = clone(PAD0); inp.save(); };
-  /* eine Taste/Knopf neu belegen; doppelte Belegungen werden entfernt */
-  inp.setKey = (action, slot, code) => { for (const a of ACTIONS) inp.keys[a] = inp.keys[a].map(c => (c === code ? null : c)); inp.keys[action][slot] = code; inp.save(); };
-  inp.setPad = (action, btn) => { for (const a in inp.pad) if (inp.pad[a] === btn) inp.pad[a] = inp.pad[action]; inp.pad[action] = btn; inp.save(); };
+  inp.save = () => { try { localStorage.setItem("imres-zerstoerer-tasten2", JSON.stringify(inp.keys)); localStorage.setItem("imres-zerstoerer-pad", JSON.stringify(inp.pad)); localStorage.setItem("imres-zerstoerer-pad2", JSON.stringify(inp.pad2)); } catch (_) {} inp.rebuild(); padBound = null; };
+  inp.reset = () => inp.applyPreset("standard");
+  /* W20 Steuerung: Vorlagen, Konflikte, Tauschen.
+     Plätze: Tastatur slot 0/1 (inp.keys[a][slot]), Controller slot 0 (inp.pad[a]) und 1 (inp.pad2[a]). */
+  inp.ACTIONS = ACTIONS; inp.PRESETS = PRESETS;
+  inp.applyPreset = (id, part) => { const p = PRESETS[id]; if (!p) return false;
+    if (part !== "pad") { inp.keys = clone(p.keys); for (const a of ACTIONS) if (!Array.isArray(inp.keys[a])) inp.keys[a] = KEYS0[a].slice(); }
+    if (part !== "keys") { inp.pad = clone(PAD0); for (const a in PAD0) inp.pad[a] = a in p.pad ? p.pad[a] : null; inp.pad2 = clone(p.pad2 || {}); }
+    inp.save(); return true; };
+  /* welche Vorlage entspricht der aktuellen Belegung? (für die Anzeige) */
+  inp.presetOf = part => { for (const id in PRESETS) { const p = PRESETS[id];
+      const kOk = ACTIONS.every(a => JSON.stringify(inp.keys[a]) === JSON.stringify(p.keys[a]));
+      const pOk = Object.keys(PAD0).every(a => (inp.pad[a] ?? null) === (a in p.pad ? p.pad[a] : null)) && ACTIONS.every(a => (inp.pad2[a] ?? null) === ((p.pad2 || {})[a] ?? null));
+      if (part === "keys" ? kOk : part === "pad" ? pOk : kOk && pOk) return id; } return null; };
+  const getSlot = (kind, a, slot) => (kind === "key" ? (inp.keys[a] || [])[slot] || null : (slot ? inp.pad2[a] : inp.pad[a]) ?? null);
+  const putSlot = (kind, a, slot, v) => { if (kind === "key") inp.keys[a][slot] = v; else if (slot) { if (v == null) delete inp.pad2[a]; else inp.pad2[a] = v; } else inp.pad[a] = v; };
+  inp.getSlot = getSlot;
+  /* wo liegt dieser Wert schon? → { action, slot } (außer am Platz selbst) */
+  inp.findBinding = (kind, v, exA, exS) => { if (v == null) return null;
+    for (const a of ACTIONS) for (const s of [0, 1]) { if (a === exA && s === exS) continue; if (kind === "pad" && !s && !(a in PAD0)) continue; if (getSlot(kind, a, s) === v) return { action: a, slot: s }; }
+    return null; };
+  /* belegen: mode "swap" = der andere Platz bekommt die alte Belegung dieses Platzes, sonst wird er frei */
+  inp.assign = (kind, action, slot, v, mode) => {
+    const old = getSlot(kind, action, slot), c = inp.findBinding(kind, v, action, slot);
+    if (c) putSlot(kind, c.action, c.slot, mode === "swap" ? old : null);
+    putSlot(kind, action, slot, v);
+    /* doppelt in derselben Aktion (Platz 1 = Platz 2) vermeiden */
+    if (getSlot(kind, action, 1 - slot) === v && (kind === "key" || action in PAD0)) putSlot(kind, action, 1 - slot, null);
+    inp.save(); return c;
+  };
+  inp.clearSlot = (kind, action, slot) => { putSlot(kind, action, slot, null); inp.save(); };
+  /* alte Schnittstelle (andere Module/Tests) */
+  inp.setKey = (action, slot, code) => inp.assign("key", action, slot, code, "steal");
+  inp.setPad = (action, btn) => inp.assign("pad", action, 0, btn, "swap");
+  /* erster belegter Controller-Knopf einer Aktion */
+  inp.padOf = a => (inp.pad[a] != null ? inp.pad[a] : inp.pad2[a] != null ? inp.pad2[a] : null);
+  let padBound = null; /* Menge der Knöpfe, die Aktionen tragen (Steuerkreuz-Ausnahme) */
   inp.keyName = code => {
     if (!code) return "–";
     const sp = { Space: Z.settings && Z.settings.lang === "en" ? "Space" : "Leertaste", ShiftLeft: "Shift", ShiftRight: "Shift ⇧", ControlLeft: "Strg", ControlRight: "Strg ⇧", AltLeft: "Alt", Escape: "Esc", Enter: "Enter", Tab: "Tab", Backspace: "⌫", ArrowLeft: "←", ArrowRight: "→", ArrowUp: "↑", ArrowDown: "↓", CapsLock: "Caps" };
@@ -99,7 +150,7 @@
   inp.padButtonName = i => (i == null ? "–" : PADNAMES[i] || "#" + i);
   /* Beschriftung einer Aktion für das aktuelle Gerät */
   inp.label = a => {
-    if (inp.device === "pad") return inp.pad[a] != null ? inp.padButtonName(inp.pad[a]) : a === "left" || a === "right" ? "◐" : "";
+    if (inp.device === "pad") return inp.padOf(a) != null ? inp.padButtonName(inp.padOf(a)) : a === "left" || a === "right" ? "◐" : ""; /* W20 Steuerung: auch zweiter Knopf */
     if (inp.device === "touch") return "";
     const k = inp.keys[a] && (inp.keys[a][0] || inp.keys[a][1]);
     return inp.keyName(k);
@@ -111,13 +162,17 @@
       /* System- und Browsertasten nicht belegen (Windows-Taste, F5, F11 …) */
       if (/^(Meta|OS|ContextMenu|F5|F11|F12|PrintScreen)/.test(e.code) || !e.code) return;
       const c = inp.capture; inp.capture = null;
-      if (e.code !== "Escape" || c.action === "pause") inp.setKey(c.action, c.slot, e.code);
+      /* W20 Steuerung: Esc bricht ab (außer beim Belegen von Pause); c.onValue entscheidet über Konflikte, sonst direkt belegen */
+      const val = e.code !== "Escape" || c.action === "pause" ? e.code : null;
+      if (c.onValue) { c.onValue(val); return; }
+      if (val) inp.setKey(c.action, c.slot, val);
       c.done && c.done(); return;
     }
     /* Controller-Knopf wird erwartet, aber eine Taste gedrückt: Belegen abbrechen statt Menü zu schließen */
     if (inp.capture && inp.capture.kind === "pad") {
       e.preventDefault(); if (e.repeat) return;
       const c = inp.capture; inp.capture = null; captureArmed = false;
+      if (c.onValue) { c.onValue(null); return; } /* W20 Steuerung */
       c.done && c.done(); return;
     }
     if (Z.ui && Z.ui.onKey && Z.ui.onKey(e)) { e.preventDefault(); return; }
@@ -140,6 +195,11 @@
 
   /* Gamepad abfragen. Richtungen: linker Stick und Steuerkreuz. Trigger zählen ab halbem Druck. */
   let padPrev = [], captureArmed = false;
+  const swallow = new Set(); /* W20 Steuerung */
+  /* W20 Steuerung: feste Menüknöpfe (A bestätigt, B zurück, Menü/Start, LB/RB Reiter, RS Ausrüstung) – unabhängig von der
+     Spielbelegung, damit ein umbelegter Controller in Menüs nie „verloren“ geht. inp.menu.* = in diesem Bild gedrückt. */
+  inp.menu = { ok: false, back: false, start: false, lb: false, rb: false, rs: false, x: false };
+  const MENU_BTN = { ok: 0, back: 1, start: 9, lb: 4, rb: 5, rs: 11, x: 2 };
   const padV = { up: false, down: false }; /* Hysterese-Zustand der Stick-Senkrechten */
   inp.pollPad = () => {
     const pads = navigator.getGamepads ? navigator.getGamepads() : [];
@@ -149,14 +209,25 @@
       const down = i => { const bt = p.buttons[i]; return !!bt && (bt.pressed || bt.value > 0.45); };
       const now = p.buttons.map((_, i) => down(i));
       /* Belegung einfangen: erst wenn alle Knöpfe losgelassen wurden, dann der nächste Druck */
+      /* W20 Steuerung: Knopf wird beim LOSLASSEN übernommen; Menü/Start lange halten (0,8 s) bricht ab, ebenso 10 s nichts.
+         Knöpfe, die eine Erfassung beendet haben, zählen bis zum Loslassen nicht (kein „Durchrutschen“ ins Menü). */
+      for (const k of [...swallow]) if (!now[k]) swallow.delete(k);
+      const tNow = performance.now();
       if (inp.capture && inp.capture.kind === "pad") {
+        const c = inp.capture; c.t0 = c.t0 || tNow;
+        const finish = v => { inp.capture = null; captureArmed = false; now.forEach((d, k) => d && swallow.add(k)); if (c.onValue) c.onValue(v); else { if (v != null) inp.setPad(c.action, v); c.done && c.done(); } };
         if (!now.some(Boolean)) captureArmed = true;
-        else if (captureArmed) { const i = now.findIndex((v, k) => v && !padPrev[k]); if (i >= 0) { const c = inp.capture; inp.capture = null; captureArmed = false; if (i < 12) inp.setPad(c.action, i); c.done && c.done(); } }
+        if (c.btn == null) { if (captureArmed) { const i = now.findIndex((v, k) => v && !padPrev[k] && k < 16); if (i >= 0) { c.btn = i; c.tb = tNow; } } }
+        else if (!now[c.btn]) { const v = c.btn; c.btn = null; finish(v); }
+        else if (c.btn === 9 && tNow - c.tb > 800) { c.btn = null; finish(null); }
+        if (inp.capture === c && c.btn == null && tNow - c.t0 > 10000) finish(null);
+        c.holdK = c.btn === 9 ? Math.min(1, (tNow - c.tb) / 800) : 0;
         padPrev = now; inp.lastPad = p; recompute(); return;
       }
       if (inp.capture && inp.capture.kind === "key") {
-        if (now.some((v, k) => v && !padPrev[k])) { const c = inp.capture; inp.capture = null; for (const a of ACTIONS) src.pad[a] = false; padPrev = now; inp.lastPad = p; recompute(); inp.endFrame(); c.done && c.done(); return; }
+        if (now.some((v, k) => v && !padPrev[k])) { const c = inp.capture; inp.capture = null; now.forEach((d, k) => d && swallow.add(k)); for (const a of ACTIONS) src.pad[a] = false; padPrev = now; inp.lastPad = p; recompute(); inp.endFrame(); if (c.onValue) c.onValue(null); else c.done && c.done(); return; }
       }
+      for (const k of swallow) now[k] = false;
       captureArmed = false;
       const dz = (Z.settings && Z.settings.dead) || 0.35;
       let ax = p.axes[0] || 0, ay = p.axes[1] || 0;
@@ -164,26 +235,84 @@
       if (Math.hypot(ax, ay) < dz * 0.8) { ax = 0; ay = 0; }
       /* waagrecht: ab Totzone, außer der Stick zeigt fast senkrecht (Leiter klettern ohne seitliches Abrutschen) */
       const horiz = Math.abs(ax) > dz && Math.abs(ax) > Math.abs(ay) * 0.36;
-      src.pad.left = (horiz && ax < 0) || now[14]; src.pad.right = (horiz && ax > 0) || now[15];
+      /* W20 Steuerung: Kreuz-Knopf mit eigener Aktion lenkt nur noch in Menüs */
+      if (!padBound) { padBound = new Set(); for (const a in inp.pad) if (inp.pad[a] != null) padBound.add(inp.pad[a]); for (const a in inp.pad2) if (inp.pad2[a] != null && !["left", "right", "up", "down"].includes(a)) padBound.add(inp.pad2[a]); }
+      const inMenu = !!(Z.ui && Z.ui.modalOpen), dp = i => now[i] && (inMenu || !padBound.has(i));
+      for (const m in MENU_BTN) inp.menu[m] = !!now[MENU_BTN[m]] && !padPrev[MENU_BTN[m]];
+      src.pad.left = (horiz && ax < 0) || dp(14); src.pad.right = (horiz && ax > 0) || dp(15);
       /* hoch/runter: Kegel um die Senkrechte (±50°) mit Hysterese – ein leicht nach unten geneigter Laufstick
          löst kein Ducken/Kriechen, Durchfallen oder Schnellfallen mehr aus */
       const vOn = Math.max(0.5, dz), vk = padV;
       const dn = vk.down ? ay > 0.4 && ay > Math.abs(ax) * 0.6 : ay > vOn && ay > Math.abs(ax) * 0.84;
       const upv = vk.up ? ay < -0.4 && -ay > Math.abs(ax) * 0.6 : ay < -vOn && -ay > Math.abs(ax) * 0.84;
       vk.down = dn; vk.up = upv; inp.axis = horiz ? ax : 0;
-      src.pad.up = upv || now[12]; src.pad.down = dn || now[13];
+      src.pad.up = upv || dp(12); src.pad.down = dn || dp(13);
       for (const a in inp.pad) if (now[inp.pad[a]]) src.pad[a] = true;
+      for (const a in inp.pad2) if (now[inp.pad2[a]]) src.pad[a] = true; /* W20 Steuerung */
+      if (now[9] && inp.padOf("pause") == null) src.pad.pause = true; /* W20 Steuerung: Pause bleibt am Controller immer erreichbar */
       if (now.some(Boolean) || Math.abs(ax) > dz || Math.abs(ay) > 0.5) inp.device = "pad";
       if (!inp.padName) inp.padName = p.id || "";
       inp.lastPad = p; padPrev = now;
     }
     recompute();
   };
-  inp.rumble = (s, ms) => {
-    if (!inp.vib) return;
-    try { const p = inp.lastPad; if (p && p.vibrationActuator) p.vibrationActuator.playEffect("dual-rumble", { duration: ms || 80, strongMagnitude: s, weakMagnitude: s * 0.6 }); } catch (_) {}
-    try { if (inp.device === "touch" && navigator.vibrate) navigator.vibrate(Math.min(60, ms || 30)); } catch (_) {}
+  /* ---------- W20 Steuerung: Vibration ----------
+     Muster je Ereignis (stark/schwach = die zwei Motoren, ms, Vorrang, Mindestabstand). Alles läuft über Z.vib(art);
+     die Stärke kommt aus Z.settings.vibK (0–1, Regler „Vibration“, 0 = aus → kein einziger Aufruf).
+     Drossel: je Art ein Mindestabstand, ein laufendes stärkeres Muster wird nicht von schwächeren überschrieben,
+     und höchstens ~0,7 s Vibration je Sekunde (kein Dauerbrummen). Gamepad.vibrationActuator (Chrome/Electron),
+     sonst hapticActuators[0].pulse (Firefox); Handy-Vibration (navigator.vibrate) wie bisher nur bei Touch. */
+  const VIB = {
+    tick: { s: 0.05, w: 0.12, ms: 30, p: 0, gap: 0.5 },      /* Fluch, Kleinkram */
+    land: { s: 0.1, w: 0.2, ms: 40, p: 0, gap: 0.09 },
+    hit: { s: 0.05, w: 0.28, ms: 40, p: 1, gap: 0.07 },      /* Treffer austeilen: leicht */
+    hitHeavy: { s: 0.22, w: 0.4, ms: 60, p: 1, gap: 0.08 },
+    block: { s: 0.3, w: 0.35, ms: 60, p: 2, gap: 0.1 },
+    hurt: { s: 0.5, w: 0.55, ms: 130, p: 3, gap: 0.18 },     /* Treffer einstecken: mittel */
+    parry: { s: 0.85, w: 0.25, ms: 45, p: 3, gap: 0.12 },    /* perfekte Parade: kurz, knackig */
+    dodge: { s: 0.55, w: 0.15, ms: 35, p: 3, gap: 0.2 },     /* perfektes Ausweichen */
+    chest: { seq: [[0.05, 0.3, 70], 60, [0.1, 0.4, 90]], p: 2, gap: 0.4 },  /* Truhe: sanft */
+    rune: { seq: [[0.08, 0.3, 90], 50, [0.15, 0.45, 140], 60, [0.08, 0.3, 90]], p: 2, gap: 0.6 },
+    reward: { s: 0.15, w: 0.35, ms: 140, p: 2, gap: 0.4 },
+    boss: { s: 1, w: 0.7, ms: 240, p: 4, gap: 0.35 },        /* Boss-Großangriff-Einschlag: stark */
+    phase: { seq: [[0.9, 1, 260], 90, [0.6, 0.8, 320]], p: 5, gap: 1 },
+    death: { seq: [[1, 0.9, 200], 110, [0.55, 0.6, 380]], p: 6, gap: 1.5 },
+    test: { seq: [[0.15, 0.4, 90], 140, [0.5, 0.5, 110], 160, [0.95, 0.8, 200]], p: 7, gap: 0.3 }
   };
+  inp.VIB = VIB;
+  const vibK = () => { const v = Z.settings && Z.settings.vibK; return typeof v === "number" && isFinite(v) ? Math.max(0, Math.min(1, v)) : 0.8; };
+  const vs = { last: {}, busyT: 0, busyP: -1, win: [] };
+  const freshPad = () => { const p = inp.lastPad; if (!p) return null; try { const g = navigator.getGamepads && navigator.getGamepads()[p.index]; return g && g.connected ? g : p; } catch (_) { return p; } };
+  function motor(s, w, ms) {
+    const k = vibK(); if (k <= 0) return false;
+    const st = Math.min(1, s * k), wk = Math.min(1, w * k); ms = Math.round(ms);
+    let ok = false;
+    if (inp.device === "pad" || inp.lastPad) {
+      const p = freshPad();
+      try { const va = p && p.vibrationActuator; if (va && va.playEffect) { const r = va.playEffect("dual-rumble", { startDelay: 0, duration: ms, strongMagnitude: st, weakMagnitude: wk }); if (r && r.catch) r.catch(() => {}); ok = true; } } catch (_) {}
+      if (!ok) try { const ha = p && p.hapticActuators && p.hapticActuators[0]; if (ha && ha.pulse) { const r = ha.pulse(Math.max(st, wk), ms); if (r && r.catch) r.catch(() => {}); ok = true; } } catch (_) {}
+    }
+    if (inp.device === "touch" && navigator.vibrate) try { const d = Math.round(Math.min(80, ms) * (0.4 + 0.6 * k) * Math.max(0.35, Math.max(s, w))); if (d >= 8) { navigator.vibrate(d); ok = true; } } catch (_) {}
+    return ok;
+  }
+  Z.vib = (kind, o) => {
+    const d = typeof kind === "string" ? VIB[kind] : kind; if (!d || vibK() <= 0 || (!inp.lastPad && inp.device !== "touch")) return false;
+    const t = performance.now() / 1000, id = typeof kind === "string" ? kind : "raw";
+    if (vs.last[id] != null && t - vs.last[id] < (d.gap || 0.06)) return false;
+    const pr = d.p || 0;
+    if (t < vs.busyT && pr < vs.busyP) return false;              /* stärkeres Muster läuft noch */
+    const total = d.seq ? d.seq.reduce((n, x) => n + (Array.isArray(x) ? x[2] : x), 0) : d.ms;
+    vs.win = vs.win.filter(x => t - x[0] < 1);
+    const used = vs.win.reduce((n, x) => n + x[1], 0);
+    if (pr < 4 && used + total > 700) return false;                /* Budget je Sekunde (Großes geht immer) */
+    vs.last[id] = t; vs.busyT = t + total / 1000; vs.busyP = pr; vs.win.push([t, total]);
+    const sc = (o && o.k) || 1;
+    if (!d.seq) return motor(d.s * sc, d.w * sc, d.ms);
+    let at = 0; for (const x of d.seq) { if (!Array.isArray(x)) { at += x; continue; } const [s, w, ms] = x; if (at === 0) motor(s * sc, w * sc, ms); else setTimeout(() => motor(s * sc, w * sc, ms), at); at += ms; }
+    return true;
+  };
+  /* alte Schnittstelle: rohe Stärke/Dauer, läuft jetzt auch über Regler und Drossel */
+  inp.rumble = (s, ms) => Z.vib({ s, w: s * 0.6, ms: ms || 80, p: 1, gap: 0.06 });
 
   /* Touch: linke Hälfte = schwebender Stick, rechts Knöpfe (werden in spiel.js als DOM gebaut) */
   inp.setTouch = (a, v) => { src.touch[a] = v; inp.device = "touch"; recompute(); };
@@ -595,5 +724,8 @@
     Object.defineProperty(Z, "lightFlash", { configurable: true, enumerable: true, get: () => lf,
       set: fn => { lfRaw = fn; lf = typeof fn === "function" ? function (x, y, r, col, a, life) { return lfRaw.call(this, x, y, r, col, (a == null ? 0.7 : a) * Z.flashK("licht"), life); } : fn; } });
   }
-  inp.vib = Z.settings.vib !== false;
+  /* W20 Steuerung: Vibrationsstärke 0–1 (alter Schalter „vib: false“ → 0); inp.vib bleibt als „an?“ für ältere Stellen */
+  { const S = Z.settings; if (!(typeof S.vibK === "number" && isFinite(S.vibK))) S.vibK = S.vib === false ? 0 : 0.8; S.vibK = Math.max(0, Math.min(1, S.vibK)); S.vib = S.vibK > 0; }
+  inp.vib = Z.settings.vibK > 0;
+  Z.setVibK = v => { Z.settings.vibK = Math.max(0, Math.min(1, +v || 0)); Z.settings.vib = Z.settings.vibK > 0; inp.vib = Z.settings.vib; };
 })();
