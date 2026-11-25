@@ -169,7 +169,7 @@
     { id: "schleicher", n: ["Leise Sohlen", "Soft Soles"], d: ["5 schlafende Gegner überraschen.", "Ambush 5 sleeping enemies."], ok: () => (M().ueberrascht || 0) >= 5, r: { cape: "nacht" } },
     { id: "wette", n: ["Wettkönig", "Bet King"], d: ["Barradins Wette gewinnen.", "Win Barradin's bet."], ok: () => !!M().betWon, r: { cape: "gold" } }
   ];
-  Z.ACH = ACH;
+  Z.ACH = ACH; Z.CAPES = CAPES; /* W9 Härte: haerte.js ergänzt Umhänge und Erfolge je Härtegrad */
   const BONUS = { trank: ["+1 Trank zu Beginn jedes Durchgangs", "+1 potion at the start of every run"], riss: ["Ein Riss im Netz öffnet sich nach jedem Endboss", "A rift in the web opens after every final boss"], startwaffe: ["Nundro gibt dir eine zufällige gefundene Waffe mit", "Nundro gives you a random found weapon to start"], leben: ["+10 Leben", "+10 health"], glueck: ["Mehr Raum-Ereignisse", "More room events"] };
   function rewardText(r) { if (r.cape) return L(["Umhang: ", "Cape: "]) + L(CAPES[r.cape].n); if (r.hero) return L(["Neuer Held: ", "New hero: "]) + L(HEROES[r.hero].n); if (r.bonus) return L(BONUS[r.bonus]); if (r.titel) return L(["Titel: ", "Title: "]) + "„" + L(r.titel) + "“"; return ""; }
   function grant(a) {
