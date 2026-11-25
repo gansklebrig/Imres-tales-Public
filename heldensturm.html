@@ -43317,6 +43317,12 @@ if(typeof toast==='function'){const t0=toast;toast=function(m){
  try{if(!ME.aus){const k=String(m).replace(/<[^>]+>/g,'').trim();const n=zeit(),v=TQ.get(k);if(v&&n-v<2500){ME.n.toast++;return}TQ.set(k,n);if(TQ.size>60){for(const [a,b] of TQ)if(n-b>5000)TQ.delete(a)}}}catch(e){}return t0.apply(this,arguments)}}
 const WQ=[];
 if(typeof word==='function'){const w0=word;word=function(x,y,txt){try{if(!ME.aus){const n=zeit();for(let i=WQ.length-1;i>=0;i--){const q=WQ[i];if(n-q.t>600){WQ.splice(i,1);continue}if(q.s===txt&&Math.abs(q.x-x)<140&&Math.abs(q.y-y)<90){ME.n.wort++;return}}WQ.push({s:txt,x,y,t:n});if(WQ.length>40)WQ.shift()}}catch(e){}return w0.apply(this,arguments)}}
+/* Weltwörter am selben Ort stapeln statt übereinander zu liegen („Jagdbeute!“ · „Beute erlegt!“ · „Ein Schlüssel!“) */
+if(typeof drawFx==='function'){const df=drawFx;drawFx=function(f){try{if(f&&f.k==='word'&&!f._st&&!ME.aus){f._st=1;const L=G.fxs;if(L&&f.txt&&String(f.txt).length>2){
+  const breit=Math.max(60,String(f.txt).length*4.2);let dy=0;
+  for(let r=0;r<4;r++){let hit=false;const fy=f.y+dy;for(let i=0;i<L.length;i++){const o=L[i];if(o===f||o.k!=='word'||!o._st||!(o.t>=0)||o.t>=(o.life||1.1))continue;const oy=o.y-(o.t/(o.life||1.1))*30;
+    if(Math.abs(o.x-f.x)<breit+String(o.txt||'').length*4.2&&Math.abs(oy-fy)<19){hit=true;break}}if(!hit)break;dy-=20}
+  if(dy){f.y+=dy;ME.n.stapel=(ME.n.stapel||0)+1}}}}catch(e){}return df.apply(this,arguments)}}
 }catch(e){console.error('melde',e);window.__hsMELDE={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/melde» */
 /* «rhythm» */
@@ -43404,6 +43410,14 @@ if(typeof kaDeko==='function'){const kd=kaDeko;kaDeko=function(S){const r=kd.app
     const put=[];for(const sg of [-1,1]){const r=breit(sg)+26;const x=m[0]+ux*30+px*sg*r,y=m[1]+uy*30+py*sg*r;if(dAt(x,y)<1||frei(x,y)===false)break;put.push([x,y])}
     if(put.length<2)continue;for(const [x,y] of put)G.deco.push({x,y,k:kk,s:1.1,v:Math.random(),wl:1,rh:2});done.push(m);nS++;q+=10}
    RH.schwellen=nS}}catch(e){console.error('rhythm-schwelle',e)}
+ /* Lichtschacht: In dunklen Höhlen fällt an ein, zwei weiten Stellen nahe dem Hauptweg Tageslicht von oben herein –
+    heller Fleck am Boden, Lichtsäule mit tanzendem Staub. Ein Ort zum Durchatmen, schon von Weitem zu sehen. */
+ try{const W=K.ka2W;if(W&&W.length>3&&T.mas==='fels'&&!T.glut&&(G.theme.dark||0)>=0.4&&K.fl){const D=abst(K),n=K.n,Z=K.Z;const nahW=(x,y)=>{for(let q=0;q<W.length;q+=2){const p=W[q];if((p[0]-x)*(p[0]-x)+(p[1]-y)*(p[1]-y)<330*330)return true}return false};
+   const C=[];for(let t=0;t<500&&C.length<40;t++){const c=K.fl[Math.floor(Math.random()*K.fl.length)];if(D[c]<6)continue;const x=(c%n+0.5)*Z,y=(((c/n)|0)+0.5)*Z;if(!nahW(x,y))continue;
+    if(K.tore&&K.tore.some(o=>Math.hypot(o.x-x,o.y-y)<420))continue;if(K.start&&Math.hypot(K.start.x-x,K.start.y-y)<500)continue;if(K.kampfP&&Math.hypot(K.kampfP.x-x,K.kampfP.y-y)<520)continue;C.push([x,y])}
+   let nL=0;const gew=[];for(const c of C){if(nL>=2)break;if(gew.some(g=>Math.hypot(g[0]-c[0],g[1]-c[1])<1800))continue;if(typeof blkPunkt==='function'&&blkPunkt(c[0],c[1],60))continue;
+    G.deco.push({x:c[0],y:c[1],k:'rh_schacht',s:1,v:Math.random(),wl:1,rh:3});gew.push(c);nL++}
+   RH.schaechte=nL}}catch(e){console.error('rhythm-schacht',e)}
  /* Gassen: auf etwa jedem zweiten Platz ein Brunnen in der Mitte – Wiedererkennung und etwas zum Umkreisen im Kampf */
  if(T.lay==='gassen'&&G.blk){let b=0;for(const p of K.rhP){if(p[2]<4||Math.random()>0.55)continue;const x=(p[0]+0.5)*K.Z,y=(p[1]+0.5)*K.Z;if(typeof blkPunkt==='function'&&blkPunkt(x,y,70))continue;{let zu=false;for(let b=-3;b<=3&&!zu;b++)for(let a=-3;a<=3;a++){const i=p[0]+a,j=p[1]+b;if(a*a+b*b>10)continue;if(i<0||j<0||i>=K.n||j>=K.n||K.M[j*K.n+i]){zu=true;break}}if(zu)continue}if(K.tore&&K.tore.some(t=>Math.hypot(t.x-x,t.y-y)<220))continue;
    G.blk.push({t:'c',x,y,r:20,k:'brunnen',v:Math.random(),wl:1,ai:0,rh:1});b++}
@@ -43415,6 +43429,25 @@ function hausAufraeumen(){const K=G.ka;if(RH.aus||!K||!K.M||K._rhHaus||!K.T||K.T
  for(let i=D.length-1;i>=0;i--){const d=D[i];if(!d||d.k!=='house'||d.edge)continue;const ci=(d.x/Z)|0,cj=(d.y/Z)|0;const masse=ci<0||cj<0||ci>=n||cj>=n||K.M[cj*n+ci];
   if(!masse&&d.v<0.34){d.k=d.v<0.17?'crate':'barrel';d.s=Math.min(d.s||1,1.1);RH.haus.n++}else{D.splice(i,1);RH.haus.weg++}}}
 if(typeof render==='function'){const r0=render;render=function(){try{if(G&&G.state==='play'&&G.ka&&!G.ka._rhHaus)hausAufraeumen()}catch(e){}return r0.apply(this,arguments)}}
+/* Lichtschacht: Licht (Loch in der Dunkelheit), Bodenfleck (ruhend, wird mit den Kacheln vorgezeichnet), Säule + Staub (bewegt) */
+if(typeof drawDeco==='function'){const dd=drawDeco;drawDeco=function(d,t){if(d&&d.k==='rh_schacht'){const c=cx;try{c.save();c.translate(d.x,d.y);
+  const g=c.createRadialGradient(0,0,6,0,0,120);g.addColorStop(0,'rgba(255,240,205,.30)');g.addColorStop(0.55,'rgba(255,232,190,.14)');g.addColorStop(1,'rgba(255,228,180,0)');c.fillStyle=g;c.scale(1,0.62);c.beginPath();c.arc(0,0,120,0,6.2832);c.fill();c.scale(1,1/0.62);
+  /* Moos und Halme, wo das Licht hinfällt */for(let i=0;i<9;i++){const a=(i*2.39+d.v*6)%6.2832,r=26+((i*37+d.v*97)%58);const x=Math.cos(a)*r,y=Math.sin(a)*r*0.6;c.fillStyle=i%3?'rgba(110,140,70,.55)':'rgba(150,170,90,.5)';c.beginPath();c.ellipse(x,y,5+(i%3)*2,2.6,a,0,6.2832);c.fill()}
+  }finally{c.restore()}return}return dd.apply(this,arguments)}}
+/* Licht des Schachts als dauerhafte Lichtquelle (die Deko-Lichter sind je Bild auf 16 begrenzt – Fackeln kämen sonst zuerst) */
+hook('tick',()=>{try{if(RH.aus||!G.deco||!G.ka||!P)return;if(!G.lights)G.lights=[];const L=G.lights;
+  for(let i=L.length-1;i>=0;i--){const o=L[i];if(o._rh&&(Math.abs(o._rh.x-P.x)>1900||Math.abs(o._rh.y-P.y)>1300||G.deco.indexOf(o._rh)<0))L.splice(i,1)}
+  if((G.time*4|0)%2)return;for(const d of G.deco){if(d.k!=='rh_schacht'||Math.abs(d.x-P.x)>1700||Math.abs(d.y-P.y)>1100)continue;if(L.some(o=>o._rh===d))continue;
+   L.push({x:d.x,y:d.y-10,r:250,c:'#ffe6b8',t:0,life:1e9,a:0.8,_rh:d})}}catch(e){}});
+hook('draw',(t,c)=>{try{if(RH.aus||!G.deco||!G.ka||typeof spLeicht==='function'&&spLeicht())return;c=c||cx;const cxW=P.x,cyW=P.y;
+  for(const d of G.deco){if(d.k!=='rh_schacht')continue;if(Math.abs(d.x-cxW)>1500||Math.abs(d.y-cyW)>1000)continue;const T_=G.time||0;
+   c.save();c.translate(d.x,d.y);
+   /* Lichtsäule: schräg von oben, zum Boden hin breiter und heller */
+   const g=c.createLinearGradient(-70,-330,0,0);g.addColorStop(0,'rgba(255,240,210,0)');g.addColorStop(0.6,'rgba(255,238,205,.07)');g.addColorStop(1,'rgba(255,236,200,.13)');
+   c.fillStyle=g;c.beginPath();c.moveTo(-118,-330);c.lineTo(-38,-330);c.lineTo(78,0);c.lineTo(-78,0);c.closePath();c.fill();
+   /* Staub im Licht */for(let i=0;i<14;i++){const ph=(T_*0.07+i*0.137+d.v)%1,yy=-ph*300,xx=-ph*80+Math.sin(T_*0.9+i*1.7)*(18+ph*30)+((i*53)%70-35)*(1-ph*0.5);
+    const al=Math.sin(ph*Math.PI)*0.55;if(al<0.04)continue;c.globalAlpha=al;c.fillStyle='#fff3d6';c.fillRect(xx,yy,2,2)}
+   c.restore()}}catch(e){}});
 if(typeof kaLayout==='function'){const kl=kaLayout;kaLayout=function(S){const K=kl.apply(this,arguments);try{const t0=performance.now();rhythm(K);RH.st.ms+=performance.now()-t0}catch(e){console.error('rhythm',e)}return K}}
 }catch(e){console.error('rhythm',e);window.__hsRHYTHM={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/rhythm» */
