@@ -43399,6 +43399,7 @@ if(typeof kaDeko==='function'){const kd=kaDeko;kaDeko=function(S){const r=kd.app
   for(let q=0;q<10&&n<2;q++){const a=a0+q*2.4,x=cx+Math.cos(a)*R,y=cy+Math.sin(a)*R;if(!frei(x,y))continue;if(K.tore&&K.tore.some(t=>Math.hypot(t.x-x,t.y-y)<160))continue;
    G.deco.push({x,y,k,s:1,v:Math.random(),wl:1,rh:1});n++;m++}}
  RH.lichter=m;
+ try{if(T.mas==='haus'){hausAufraeumen();RH.haus.imBau=RH.haus.weg}}catch(e){}
  /* Schwellen: Wo der Hauptweg aus einer Engstelle in einen großen Raum tritt, rahmen zwei Lichter den Eingang – der Raum öffnet sich wie eine Bühne */
  try{const W=K.ka2W;if(W&&W.length>3&&T.mas!=='wald'){const D=abst(K),n=K.n,Z=K.Z,dAt=(x,y)=>{const i=(x/Z)|0,j=(y/Z)|0;return i<0||j<0||i>=n||j>=n?0:D[j*n+i]};
    const S=[];for(let q=1;q<W.length;q++){const a=W[q-1],b=W[q],l=Math.hypot(b[0]-a[0],b[1]-a[1]),st=Math.max(1,Math.round(l/20));for(let u=0;u<st;u++)S.push([a[0]+(b[0]-a[0])*u/st,a[1]+(b[1]-a[1])*u/st])}
@@ -43428,6 +43429,16 @@ if(typeof kaDeko==='function'){const kd=kaDeko;kaDeko=function(S){const r=kd.app
     if(K.tore&&K.tore.some(o=>Math.hypot(o.x-x,o.y-y)<320))continue;if(K.start&&Math.hypot(K.start.x-x,K.start.y-y)<420)continue;C.push([x,y])}
    let nF=0;const gew=[];for(const c of C){if(nF>=3)break;if(gew.some(g=>Math.hypot(g[0]-c[0],g[1]-c[1])<1400))continue;G.deco.push({x:c[0],y:c[1]+22,k:'rh_fenster',s:1,v:Math.random(),wl:1,rh:5});gew.push(c);nF++}
    RH.fenster=nF}}catch(e){console.error('rhythm-fenster',e)}
+ /* Vorahnung: Auf den letzten Schritten vor dem Kampfplatz bzw. der Arena werden Knochen und Spuren dichter – man ahnt, was wartet */
+ try{const W=K.ka2W;if(W&&W.length>4){const n=K.n,Z=K.Z;let ziel=K.kampfP;if(!ziel){const ar=K.sec.find(o=>o.art==='arena');if(ar)ziel={x:ar.cx,y:ar.cy}}
+   if(ziel){const S=[];for(let q=1;q<W.length;q++){const a=W[q-1],b=W[q],l=Math.hypot(b[0]-a[0],b[1]-a[1]),st=Math.max(1,Math.round(l/30));for(let u=0;u<st;u++)S.push([a[0]+(b[0]-a[0])*u/st,a[1]+(b[1]-a[1])*u/st])}
+    /* Stück des Wegs, das auf das Ziel zuläuft: letzte 1000 px vor dem Punkt, der dem Ziel am nächsten ist */
+    let bi=0,bd=1e18;for(let q=0;q<S.length;q++){const d=(S[q][0]-ziel.x)**2+(S[q][1]-ziel.y)**2;if(d<bd){bd=d;bi=q}}
+    const k0=Math.max(0,bi-34),kk=T.glut?['bones','ash','bones']:['bones','bones','rubble'];let nV=0;
+    for(let q=k0;q<bi-4;q++){const f=(q-k0)/Math.max(1,bi-4-k0);if(Math.random()>0.18+0.5*f)continue;const p=S[q],a=Math.random()*6.2832,r=30+Math.random()*90;const x=p[0]+Math.cos(a)*r,y=p[1]+Math.sin(a)*r;
+     const i=(x/Z)|0,j=(y/Z)|0;if(i<0||j<0||i>=n||j>=n||K.M[j*n+i])continue;if(!frei(x,y))continue;if(Math.hypot(x-ziel.x,y-ziel.y)<260)continue;
+     G.deco.push({x,y,k:kk[nV%kk.length],s:0.7+f*0.5,v:Math.random(),wl:1,rh:6});nV++}
+    RH.vorahnung=nV}}}catch(e){console.error('rhythm-vorahnung',e)}
  /* Feenring: im Wald liegt an einer offenen Stelle nahe dem Weg ein Ring aus Pilzen – wer hineintritt, findet ein paar Münzen */
  try{const W=K.ka2W;if(W&&W.length>3&&T.mas==='wald'&&K.fl&&Math.random()<0.8){const D=abst(K),n=K.n,Z=K.Z;let ok=null;
    for(let t=0;t<400&&!ok;t++){const c=K.fl[Math.floor(Math.random()*K.fl.length)];if(D[c]<5)continue;const x=(c%n+0.5)*Z,y=(((c/n)|0)+0.5)*Z;
@@ -43443,10 +43454,10 @@ if(typeof kaDeko==='function'){const kd=kaDeko;kaDeko=function(S){const r=kd.app
 /* Gassen-Karten: Die Häuser SIND die Wandmassen. Zusätzlich lagen bisher ≈ 240 kleine Deko-Häuschen mitten auf Straßen und Plätzen
    (man lief durch sie hindurch) und ≈ 75 auf den Dächern. Auf Straßen werden daraus Kisten/Fässer (etwa jedes dritte), der Rest entfällt. */
 RH.haus={n:0,weg:0};
-function hausAufraeumen(){const K=G.ka;if(RH.aus||!K||!K.M||K._rhHaus||!K.T||K.T.mas!=='haus'||!G.deco)return;K._rhHaus=1;const n=K.n,Z=K.Z,D=G.deco;
+function hausAufraeumen(nach){const K=G.ka;if(RH.aus||!K||!K.M||(K._rhHaus&&!nach)||K._rhHaus>1||!K.T||K.T.mas!=='haus'||!G.deco)return;K._rhHaus=1;const n=K.n,Z=K.Z,D=G.deco;
  for(let i=D.length-1;i>=0;i--){const d=D[i];if(!d||d.k!=='house'||d.edge)continue;const ci=(d.x/Z)|0,cj=(d.y/Z)|0;const masse=ci<0||cj<0||ci>=n||cj>=n||K.M[cj*n+ci];
   if(!masse&&d.v<0.34){d.k=d.v<0.17?'crate':'barrel';d.s=Math.min(d.s||1,1.1);RH.haus.n++}else{D.splice(i,1);RH.haus.weg++}}}
-if(typeof render==='function'){const r0=render;render=function(){try{if(G&&G.state==='play'&&G.ka&&!G.ka._rhHaus)hausAufraeumen()}catch(e){}return r0.apply(this,arguments)}}
+if(typeof render==='function'){const r0=render;render=function(){try{if(G&&G.state==='play'&&G.ka&&(G.ka._rhHaus||0)<2){hausAufraeumen(1);G.ka._rhHaus=2}}catch(e){}return r0.apply(this,arguments)}}
 /* Lichtschacht: Licht (Loch in der Dunkelheit), Bodenfleck (ruhend, wird mit den Kacheln vorgezeichnet), Säule + Staub (bewegt) */
 if(typeof drawDeco==='function'){const dd=drawDeco;drawDeco=function(d,t){if(d&&d.k==='rh_schacht'){const c=cx;try{c.save();c.translate(d.x,d.y);
   const g=c.createRadialGradient(0,0,6,0,0,120);g.addColorStop(0,'rgba(255,240,205,.30)');g.addColorStop(0.55,'rgba(255,232,190,.14)');g.addColorStop(1,'rgba(255,228,180,0)');c.fillStyle=g;c.scale(1,0.62);c.beginPath();c.arc(0,0,120,0,6.2832);c.fill();c.scale(1,1/0.62);
