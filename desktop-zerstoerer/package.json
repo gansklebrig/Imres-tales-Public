@@ -1,0 +1,102 @@
+{
+  "name": "zerstoerer",
+  "productName": "Ezekiel – The Destroyer",
+  "version": "1.0.0",
+  "description": "Ezekiel – The Destroyer – das Spiel zu Imres Tales, als Programm für Windows und Linux",
+  "author": "Imres Tales",
+  "homepage": "https://imrestales.de/zerstoerer.html",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/inhalt.test.js",
+    "bauen": "electron-builder --publish never"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.3"
+  },
+  "devDependencies": {
+    "electron": "^45.4.1",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "de.imrestales.zerstoerer",
+    "productName": "Ezekiel – The Destroyer",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "inhalt.js",
+      "build/icon.png",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "spiel",
+        "to": "spiel"
+      }
+    ],
+    "asar": true,
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://github.com/gansklebrig/Imres-tales-Public/releases/download/zerstoerer-pc/",
+        "useMultipleRangeRequest": false
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "executableName": "Zerstoerer",
+      "artifactName": "Zerstoerer-Setup.exe"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Ezekiel – The Destroyer",
+      "deleteAppDataOnUninstall": false,
+      "differentialPackage": false,
+      "runAfterFinish": true
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "Zerstoerer.AppImage",
+      "category": "Game",
+      "executableName": "zerstoerer",
+      "syncDesktopName": true
+    },
+    "electronFuses": {
+      "runAsNode": false,
+      "enableCookieEncryption": true,
+      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeCliInspectArguments": false,
+      "enableEmbeddedAsarIntegrityValidation": true,
+      "onlyLoadAppFromAsar": true,
+      "grantFileProtocolExtraPrivileges": false
+    }
+  },
+  "desktopName": "zerstoerer.desktop",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gansklebrig/Imres-tales-Public.git"
+  }
+}

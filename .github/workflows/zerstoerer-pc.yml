@@ -1,0 +1,161 @@
+# Baut „Ezekiel – The Destroyer“ als Programm für Windows (Zerstoerer-Setup.exe) und Linux (Zerstoerer.AppImage).
+# Läuft nur, wenn sich die Programm-Hülle ändert (desktop-zerstoerer/**, tools/zerstoerer/**) oder per Hand –
+# Spieländerungen kommen ohne Neubau als Spiel-Update ins Programm (zerstoerer/dateien.json, siehe zerstoerer-manifest.yml).
+#
+# Veröffentlicht zweimal:
+#  - Release „zerstoerer-pc“ (fester Tag, Dateien werden ersetzt): Quelle für die Programm-Updates (electron-updater liest
+#    latest.yml / latest-linux.yml von …/releases/download/zerstoerer-pc/) und fester Download-Link für die Seite.
+#  - Release „zerstoerer-pc-1.N“ (versioniert, die letzten 3 bleiben).
+# Keines wird „Latest“ – das bleibt die Heldensturm-Android-App.
+name: Zerstörer-Programm bauen (Windows, Linux)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "desktop-zerstoerer/**"
+      - "tools/zerstoerer/**"
+      - ".github/workflows/zerstoerer-pc.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: zerstoerer-pc
+  cancel-in-progress: false
+
+jobs:
+  bauen:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            ziel: --win
+            name: windows
+            dateien: |
+              desktop-zerstoerer/dist/Zerstoerer-Setup.exe
+              desktop-zerstoerer/dist/latest.yml
+          - os: ubuntu-latest
+            ziel: --linux
+            name: linux
+            dateien: |
+              desktop-zerstoerer/dist/Zerstoerer.AppImage
+              desktop-zerstoerer/dist/latest-linux.yml
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    steps:
+      # Dateien byte-gleich wie im Repo (kein CRLF auf Windows) – sonst passen die Prüfsummen nicht zur Dateiliste auf der Seite
+      - name: Zeilenenden unverändert lassen
+        run: git config --global core.autocrlf false
+
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /desktop-zerstoerer/
+            /tools/zerstoerer/
+            /zerstoerer.html
+            /zerstoerer/
+            /tonregler.js
+            /favicon.svg
+            /schriften/
+            /klang/
+            /amb/
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Spieldateien einpacken (mit Dateiliste)
+        run: python tools/zerstoerer/sammeln.py desktop-zerstoerer/spiel
+
+      - name: Abhängigkeiten holen
+        working-directory: desktop-zerstoerer
+        run: npm ci --no-audit --no-fund
+
+      - name: Update-Logik prüfen
+        if: runner.os == 'Linux'
+        working-directory: desktop-zerstoerer
+        run: npm test
+
+      - name: Programm bauen
+        working-directory: desktop-zerstoerer
+        shell: bash
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: npx electron-builder ${{ matrix.ziel }} --publish never -c.extraMetadata.version=1.${{ github.run_number }}.0
+
+      - name: Dateien sichern
+        uses: actions/upload-artifact@v4
+        with:
+          name: zerstoerer-${{ matrix.name }}
+          path: ${{ matrix.dateien }}
+          retention-days: 5
+          if-no-files-found: error
+
+  veroeffentlichen:
+    needs: bauen
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: fertig
+          merge-multiple: true
+
+      # Ohne fremde Bausteine: GitHubs eigenes Werkzeug (gh). Prüfsummen in SHA256SUMS.txt und im Release-Text.
+      - name: Als Release veröffentlichen
+        env:
+          GH_TOKEN: ${{ github.token }}
+          N: ${{ github.run_number }}
+          NACHRICHT: ${{ github.event.head_commit.message }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd fertig
+          ls -la
+          sha256sum Zerstoerer-Setup.exe Zerstoerer.AppImage > SHA256SUMS.txt
+          {
+            [ -n "${NACHRICHT:-}" ] && printf '%s\n\n' "$NACHRICHT"
+            echo "**Ezekiel – The Destroyer** als Programm, Fassung 1.$N."
+            echo
+            echo '**Windows:** `Zerstoerer-Setup.exe` herunterladen und ausführen. Windows warnt beim ersten Mal („Der Computer wurde geschützt“), weil das Programm nicht signiert ist: „Weitere Informationen“ → „Trotzdem ausführen“.'
+            echo '**Linux:** `Zerstoerer.AppImage` herunterladen, ausführbar machen (`chmod +x Zerstoerer.AppImage`) und starten.'
+            echo
+            echo 'Läuft offline, mit Controller. F11 = Vollbild. Spiel-Updates kommen automatisch ohne Neuinstallation; Spielstände und Verknüpfungen bleiben erhalten.'
+            echo
+            echo 'Prüfsummen (SHA-256):'
+            echo '```'
+            cat SHA256SUMS.txt
+            echo '```'
+          } > ../text.md
+          R="$GITHUB_REPOSITORY"
+
+          # 1) versioniertes Release
+          gh release create "zerstoerer-pc-1.$N" Zerstoerer-Setup.exe Zerstoerer.AppImage latest.yml latest-linux.yml SHA256SUMS.txt \
+            --repo "$R" --target "$GITHUB_SHA" --title "Ezekiel – The Destroyer für PC 1.$N" --notes-file ../text.md --latest=false
+
+          # 2) festes Release „zerstoerer-pc“: erst die Programme, zuletzt latest*.yml (so zeigt die Update-Info nie auf eine fehlende Datei)
+          if ! gh release view zerstoerer-pc --repo "$R" >/dev/null 2>&1; then
+            gh release create zerstoerer-pc --repo "$R" --target "$GITHUB_SHA" --title "Ezekiel – The Destroyer für PC (aktuell)" --notes-file ../text.md --latest=false
+          fi
+          gh release upload zerstoerer-pc Zerstoerer-Setup.exe Zerstoerer.AppImage SHA256SUMS.txt --repo "$R" --clobber
+          gh release upload zerstoerer-pc latest.yml latest-linux.yml --repo "$R" --clobber
+          gh release edit zerstoerer-pc --repo "$R" --title "Ezekiel – The Destroyer für PC (aktuell: 1.$N)" --notes-file ../text.md --latest=false
+
+      - name: Alte versionierte Programm-Releases aufräumen (die letzten 3 bleiben)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release list --repo "$GITHUB_REPOSITORY" --limit 100 --json tagName,createdAt \
+            --jq '[.[] | select(.tagName | startswith("zerstoerer-pc-1."))] | sort_by(.createdAt) | reverse | .[3:] | .[].tagName' |
+          while read -r t; do gh release delete "$t" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || true; done
