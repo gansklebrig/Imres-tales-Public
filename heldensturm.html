@@ -43579,6 +43579,20 @@ document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest?ev.t
  const fo=document.activeElement===b;einsetzen();if(fo){const n=document.querySelector(`[data-act="t3"][data-v="${SAVE.bildrate}"]`);if(n)try{n.focus({preventScroll:true});n.classList.add('padf')}catch(e){}}},true);
 }catch(e){console.error('takt3',e);window.__hsTAKT3={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/takt3» */
+/* «klar» */
+/* ================= Paket „klar“: klarere Luft bei klarem Wetter – window.__hsKLAR =================
+   Befund (Bilder in WebGL, Legendär): Die Stimmungs-Nebelschwaden der Optik-Schicht liegen in jeder Stufe, auch bei klarem
+   Wetter in Hallen und Höhlen – das Bild wirkt grau verhangen, Kontraste und Farben gehen verloren. Bei Wetter „Nebel“ oder
+   „Sporennebel“ ist das gewollt (Kaum Sicht), sonst nicht.
+   Jetzt: Ohne Nebelwetter sind die Schwaden auf 55 % ihrer Deckkraft gesenkt; mit Nebelwetter unverändert.
+   Nebenbei weniger Zeichenarbeit. Abschaltbar: __hsKLAR.aus=1 · Stärke: __hsKLAR.k */
+(function(){try{if(window.__hsKLAR||typeof oaNebel!=='function')return;
+const KL=window.__hsKLAR={v:1,aus:0,k:0.55};
+const nb=oaNebel;oaNebel=function(){let C=null,a0;try{C=typeof OA!=='undefined'&&OA.cfg;const nebelWetter=typeof wxIs==='function'&&(wxIs('nebel')||wxIs('sporen'));
+  if(KL.aus||nebelWetter||!C||!C.fog)C=null;else{a0=C.fog[1];C.fog[1]=a0*KL.k}}catch(e){C=null}
+ try{return nb.apply(this,arguments)}finally{if(C)C.fog[1]=a0}};
+}catch(e){console.error('klar',e);window.__hsKLAR={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/klar» */
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
