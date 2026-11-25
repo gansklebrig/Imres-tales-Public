@@ -10276,7 +10276,7 @@ function kgDraw(c,e,t,d,lg,wob,W_,sq,fl){if(!KG.on||e.boss||d.gx)return false;co
  else if(e.land&&Math.abs(a1)<0.006*sx)rot=b1>0?1.5708:-1.5708;/* liegende Leiche: auf der Seite, als eigenes gedrehtes Sprite */
  if(rot!==null){const sn=b1/sx;fast=(rot>1||rot<-1?Math.abs(m.d)<0.006*sy:m.d>0)&&Math.abs(m.c+sy*sn)<sy*0.01&&Math.abs(sx/sc-1)<0.07&&Math.abs(sy/sc-1)<0.07}
  /* höchstens wenige neue Sprites je Bild vorrendern – sonst kurz das ungeneigte Sprite bzw. die einfache Zeichnung */
- if(t!==KG.lt){KG.lt=t;KG.bud=3;if(++KG.fc%240===0){kgTakt();kgSweep()}}
+ if(t!==KG.lt){KG.lt=t;KG.bud=1;/* höchstens ein neues Sprite je Bild (≈ 14 ms) – drei auf einmal ergaben 40–120-ms-Ruckler */if(++KG.fc%240===0){kgTakt();kgSweep()}}
  if(KG.wst!==G.stage&&!e.corpse&&!sq){KG.wst=G.stage;kgWarm(sx/(e.r/12))}const want=fast?sx:sc,rq=fast?rot:0,bk=kgScale(want);
  /* Merkzettel je Gegner: gleiches Sprite wie im letzten Bild → ohne Schlüssel-Zeichenkette wiederverwenden */
  let M=KGME.get(e),s=null,ex=1;if(M&&M.d===d&&M.v===v&&M.bk===bk&&M.fl===fl&&M.rq===rq&&M.s.lu!==-1&&Math.abs(want/M.s.sc-1)<0.034){s=M.s;s.lu=KG.fc}
