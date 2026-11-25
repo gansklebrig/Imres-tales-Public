@@ -689,11 +689,18 @@
     title.hidden = false; hud.hidden = true;
     title.innerHTML = '<div class="tbox"><div class="ttl">' + esc(t("title")) + '</div><div class="tsub">' + esc(t("sub")) + '</div><span class="tzier"></span>' +
       '<div class="tbtn"><button id="t-play" autofocus>' + esc(t("play")) + '</button><button id="t-set">' + esc(t("settings")) + '</button>' + (fs.ok ? '<button id="t-fs">' + esc(fs.label()) + "</button>" : "") + '<a href="./#taverne">' + esc(t("tavern")) + "</a></div>" +
-      '<p class="tfoot">' + L(["Ein Spiel zu Imres Tales · Kopfhörer empfohlen", "A game for Imre's Tales · headphones recommended"]) + "</p></div>";
+      '<p class="tfoot">' + L(["Ein Spiel zu Imres Tales · Kopfhörer empfohlen", "A game for Imre's Tales · headphones recommended"]) + "</p>" + pcAngebot() + "</div>";
     $("#t-play").onclick = () => { A.init(); if (Z.settings.autoFs !== false && fs.ok && fs.touch && !fs.on()) fs.enter(); preload(); title.hidden = true; Z.player = Z.newPlayer(); Z.loadArea("lager"); if (!Z.meta.intro) { Z.meta.intro = true; Z.saveMeta(); ui.story(); } };
     $("#t-set").onclick = () => { A.init(); ui.settings(); };
     if ($("#t-fs")) $("#t-fs").onclick = () => { A.init(); fs.toggle(); };
     setTimeout(() => $("#t-play").focus(), 50);
+  }
+  /* W18 PC: im Browser am PC (Windows/Linux x64, keine Touch-Geräte, nicht im Programm) dezenter Verweis auf das Programm */
+  function pcAngebot() {
+    const pl = navigator.platform || "", ua = navigator.userAgent || "";
+    if (window.__zsPC || matchMedia("(pointer: coarse)").matches || /Android|CrOS/i.test(ua) || !(/^Win/i.test(pl) || /Linux x86_64/i.test(pl))) return "";
+    return '<p class="tfoot pc-angebot"><a href="https://github.com/gansklebrig/Imres-tales-Public/releases/tag/zerstoerer-pc" target="_blank" rel="noopener" style="color:#c9a86a;opacity:.75;font-size:.9em;text-decoration:none;border-bottom:1px dotted #8a6a3a">' +
+      L(["⤓ Als Programm für Windows/Linux", "⤓ As a program for Windows/Linux"]) + "</a></p>";
   }
   function preload() { A.loadAll(A.allSfxPaths()); }
   ui.story = () => openModal('<h2>' + esc(t("title")) + " · " + L(["Die Feste der Fäden", "The Keep of Threads"]) + '</h2><p class="erz">' + t("intro") + '</p><div class="knoepfe"><button data-act="close" autofocus>' + esc(t("cont")) + "</button></div>", { cls: "schmal" });
@@ -1018,7 +1025,7 @@
        Werte, Segen, Runen und Fluch stehen vollständig im Reiter „Ausrüstung“ */
     const ort = esc(areaTitle()) + (run ? " · " + fmtTime(run.time) + (run.skulls ? " · " + "☠".repeat(run.skulls) : "") + (run.gnade ? " · ✚ " + L(["Barmherzigkeit", "Mercy"]) : "") : "");
     const hin = { alle: L(["alle", "all"]), wenige: L(["wenige", "few"]), keine: L(["keine", "none"]) }[Z.settings.hinweise || "alle"];
-    openModal('<h2 class="p-kopf">' + esc(t("pause")) + '<span class="p-ort">' + ort + '</span></h2>' + pauseTabs(0) + '<div class="p-spalten"><div class="knoepfe senk"><button data-act="close" autofocus>' + esc(t("resume")) + '</button><button data-act="ctrl">' + esc(t("tut")) + '</button><button data-act="settings">' + esc(t("settings")) + '</button><button data-act="hinweise">' + L(["Hinweise: ", "Hints: "]) + hin + "</button>" + (fs.ok ? '<button data-act="fullscreen">' + esc(fs.label()) + "</button>" : "") +
+    openModal('<h2 class="p-kopf">' + esc(t("pause")) + '<span class="p-ort">' + ort + '</span></h2>' + pauseTabs(0) + '<div class="p-spalten"><div class="knoepfe senk"><button data-act="close" autofocus>' + esc(t("resume")) + '</button><button data-act="ctrl">' + esc(t("tut")) + '</button><button data-act="settings">' + esc(t("settings")) + '</button><button data-act="hinweise">' + L(["Hinweise: ", "Hints: "]) + hin + "</button>" + (fs.ok ? '<button data-act="fullscreen">' + esc(fs.label()) + "</button>" : "") + /* W18 PC */ pcKnoepfe() +
       (inRun ? '<button data-act="abort" class="gefahr">' + esc(t("abort")) + "</button>" : "") + '<a class="btn" href="./#taverne">' + esc(t("tavern")) + '</a></div><div class="p-info"><p class="tipp">' + esc(tip) + "</p>" +
       pauseGearTeaser() + "</div></div>", { cls: "schmal pausenmenue" });
   };
@@ -1279,6 +1286,60 @@
     exit() { const x = document.exitFullscreen || document.webkitExitFullscreen; try { if (x) { const p = x.call(document); if (p && p.catch) p.catch(() => {}); } } catch (_) {} },
     toggle() { fs.on() ? fs.exit() : fs.enter(); }
   });
+  /* W18 PC: im PC-Programm (window.__zsPC, desktop-zerstoerer/preload.js) schaltet das Programm das Fenster-Vollbild (wie F11);
+     dazu Menüpunkte „Nach Updates suchen“/„Beenden“ und der Hinweis auf geladene Updates. Im Browser ändert sich nichts. */
+  const PC = window.__zsPC || null;
+  if (PC) {
+    let pcVoll = false;
+    PC.istVollbild().then(v => { pcVoll = !!v; fsSync(); }).catch(() => {});
+    fs.ok = true; fs.on = () => pcVoll;
+    fs.enter = () => PC.vollbild(true).then(v => { pcVoll = !!v; fsSync(); });
+    fs.exit = () => PC.vollbild(false).then(v => { pcVoll = !!v; fsSync(); });
+    PC.bei(n => {
+      if (!n) return;
+      if (n.art === "vollbild") { pcVoll = !!n.an; fsSync(); return; }
+      if (n.art === "inhalt" || n.art === "programm") pcHinweis(n);
+    });
+  }
+  let pcWartet = null;
+  function pcHinweis(n) {
+    pcWartet = n;
+    let el = document.getElementById("pc-update");
+    if (!el) {
+      el = document.createElement("div"); el.id = "pc-update";
+      el.style.cssText = "position:fixed;right:14px;bottom:14px;z-index:80;max-width:340px;padding:10px 12px;background:rgba(20,14,16,.94);border:1px solid #8a6a3a;border-radius:6px;color:#ece4d2;font:14px/1.35 var(--fb,serif);box-shadow:0 4px 18px rgba(0,0,0,.5);display:flex;gap:10px;align-items:center";
+      document.body.appendChild(el);
+    }
+    const prog = n.art === "programm";
+    el.innerHTML = "<span>" + (prog ? L(["Programm-Update geladen – wird beim Beenden installiert", "Program update downloaded – installs when you quit"]) : L(["Update geladen – beim nächsten Start aktiv", "Update downloaded – active on next start"])) +
+      (Z.run ? "<br><small style='opacity:.7'>" + L(["Spielstand bleibt; der laufende Lauf endet.", "Progress is kept; the current run ends."]) + "</small>" : "") + "</span>" +
+      '<button type="button" data-pc="neu" style="white-space:nowrap;background:#3a2a1c;color:#f0d89a;border:1px solid #8a6a3a;border-radius:4px;padding:5px 9px;cursor:pointer">' + (prog ? L(["Jetzt neu starten", "Restart now"]) : L(["Jetzt neu laden", "Reload now"])) + "</button>" +
+      '<button type="button" data-pc="zu" aria-label="' + L(["Schließen", "Close"]) + '" style="background:none;border:0;color:#a0968a;cursor:pointer;font-size:16px">×</button>';
+    el.querySelector('[data-pc="neu"]').onclick = () => { try { Z.saveMeta && Z.saveMeta(); Z.saveSettings && Z.saveSettings(); } catch (_) {} PC.neuLaden(); };
+    el.querySelector('[data-pc="zu"]').onclick = () => el.remove();
+    clearTimeout(pcHinweis.t); pcHinweis.t = setTimeout(() => { if (el.isConnected) el.remove(); }, 20000);
+  }
+  function pcKnoepfe() {
+    if (!PC) return "";
+    return (pcWartet ? '<button data-act="pcNeu">' + (pcWartet.art === "programm" ? L(["Update: jetzt neu starten", "Update: restart now"]) : L(["Update: jetzt neu laden", "Update: reload now"])) + "</button>" : "") +
+      '<button data-act="pcUpdates">' + L(["Nach Updates suchen", "Check for updates"]) + '</button><button data-act="pcQuit">' + L(["Beenden", "Quit"]) + "</button>";
+  }
+  actions.pcNeu = () => { try { Z.saveMeta && Z.saveMeta(); Z.saveSettings && Z.saveSettings(); } catch (_) {} if (PC) PC.neuLaden(); };
+  actions.pcQuit = () => { try { Z.saveMeta && Z.saveMeta(); Z.saveSettings && Z.saveSettings(); } catch (_) {} if (PC) PC.beenden(); };
+  actions.pcUpdates = (_, b) => {
+    if (!PC) return;
+    if (b) { b.disabled = true; b.textContent = L(["Suche …", "Checking …"]); }
+    PC.updates().then(r => {
+      const i = (r && r.inhalt) || {}, p = (r && r.programm) || {};
+      let msg;
+      if (p.bereit || (p.ok && p.neu)) msg = L(["Neue Programm-Fassung ", "New program version "]) + (p.version || "") + L([" wird geladen – sie wird beim Beenden installiert.", " is downloading – it installs when you quit."]);
+      else if (i.ok && i.neu) msg = L(["Update geladen – beim nächsten Start aktiv.", "Update downloaded – active on next start."]);
+      else if (i.ok) msg = L(["Das Spiel ist aktuell", "The game is up to date"]) + " (" + L(["Stand ", "build "]) + (i.stand || "?") + ").";
+      else msg = L(["Keine Verbindung – es geht mit dem bisherigen Stand weiter.", "No connection – playing on with the current version."]);
+      if (b) { b.disabled = false; b.textContent = L(["Nach Updates suchen", "Check for updates"]); }
+      ui.notify(msg, { prio: 3, dauer: 4200 });
+    }).catch(() => { if (b) b.disabled = false; });
+  };
   { const tp = document.getElementById("tonplatz"); if (tp && window.TonRegler) tp.replaceWith(TonRegler.knoepfe("zerstoerer")); }
   const fsBtn = document.getElementById("fsbtn");
   const fsSync = () => {

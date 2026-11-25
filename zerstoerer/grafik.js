@@ -34,6 +34,8 @@
   const weakDev = cores <= 2 || (mem && mem <= 2) || armLinux;
   const tinyDev = mem && mem <= 1;
   let autoLvl = tinyDev ? -1 : smallScr || weakDev ? 0 : touchDev || cores <= 4 ? 1 : 2;
+  /* W18 PC: im PC-Programm (window.__zsPC) startet die Automatik bei der höchsten Stufe (schaltet bei Ruckeln wie gewohnt herunter) */
+  if (window.__zsPC && !tinyDev) autoLvl = 3;
   const presetOf = l => (l < 0 ? PRESETS[MINI] : PRESETS[l]);
   try { const raw = sessionStorage.getItem("imres-zerstoerer-autolvl"), a = +raw; if (raw != null && a >= -1 && a <= 3) autoLvl = Math.min(autoLvl, a); } catch (_) {}
   Z.gq = {};
