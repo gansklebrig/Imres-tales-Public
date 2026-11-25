@@ -43555,6 +43555,12 @@ if(typeof drawLootIcons==='function'){const dl=drawLootIcons;drawLootIcons=funct
      c.fillStyle='rgba(0,0,0,.18)';c.fillRect(-w/2+3,4,w,h);c.fillStyle=bT(col,-dk*0.9);c.fillRect(-w/2,0,w,h);c.fillStyle='rgba(0,0,0,.12)';c.fillRect(-w/2,h-3,w,3);
      c.fillStyle=bT('#2a2018',-dk*0.4);c.fillRect(-w/2+2,-2,2,4);c.fillRect(w/2-4,-2,2,4);c.restore()}
     c.restore()}}}catch(e){}return dl.apply(this,arguments)}}
+/* Glutfontänen: Lavabecken und -rinnen nahe dem Helden spucken ab und zu einen Funkenregen (nur Darstellung) */
+hook('tick',dt=>{try{if(RH.aus||!G.wl||!G.wl.lo||!P||G.state!=='play'||(typeof spLeicht==='function'&&spLeicht()))return;if(G.mp&&typeof PL!=='undefined'&&PL[0]&&P!==PL[0])return;
+  RH.glT=(RH.glT||0)-(dt||0.016);if(RH.glT>0)return;RH.glT=0.6;const L=G.wl.lo;let best=null,n=0;
+  for(const o of L){if(o.k!=='lava'&&o.k!=='ka_lava')continue;const x=o.t==='c'?o.x:o.x+Math.random()*o.w,y=o.t==='c'?o.y:o.y+Math.random()*o.h;const d=Math.hypot(x-P.x,y-P.y);if(d>700||d<90)continue;n++;if(Math.random()<1/n)best=[x,y,o]}
+  if(!best||Math.random()>0.35)return;const [x,y]=best;try{sparks(x,y,'#ffa040',14,1.2,true)}catch(e){}try{sparks(x,y,'#ffe08a',6,0.8,true)}catch(e){}
+  try{if(G.lights&&G.lights.length<60)G.lights.push({x,y,r:140,c:'#ff8a30',t:0,life:0.7,a:0.7})}catch(e){}}catch(e){}});
 if(typeof kaLayout==='function'){const kl=kaLayout;kaLayout=function(S){const K=kl.apply(this,arguments);try{const t0=performance.now();rhythm(K);RH.st.ms+=performance.now()-t0}catch(e){console.error('rhythm',e)}return K}}
 }catch(e){console.error('rhythm',e);window.__hsRHYTHM={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/rhythm» */
