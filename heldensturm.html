@@ -43448,6 +43448,16 @@ if(typeof kaDeko==='function'){const kd=kaDeko;kaDeko=function(S){const r=kd.app
    if(ok){const m=11,R=66;for(let i=0;i<m;i++){const a=i/m*6.2832+Math.random()*0.2;G.deco.push({x:ok[0]+Math.cos(a)*R,y:ok[1]+Math.sin(a)*R*0.7,k:'mush',s:0.75+Math.random()*0.3,v:Math.random(),wl:1,rh:4})}
     for(let i=0;i<4;i++)G.deco.push({x:ok[0]+(Math.random()-0.5)*50,y:ok[1]+(Math.random()-0.5)*30,k:'grass',s:0.8,v:Math.random(),wl:1,rh:4});
     K.rhRing={x:ok[0],y:ok[1],used:0};RH.ring=1}}}catch(e){console.error('rhythm-ring',e)}
+ /* Wäscheleinen: quer über schmale Gassen gespannte Leinen mit Wäsche – über den Köpfen, wiegt im Wind */
+ try{if(T.lay==='gassen'&&T.mas==='haus'&&K.fl&&!T.ruin){const n=K.n,Z=K.Z,M=K.M,L=[];
+   for(let t=0;t<1500&&L.length<9;t++){const c=K.fl[Math.floor(Math.random()*K.fl.length)],i=c%n,j=(c/n)|0;
+    /* senkrechte Gasse: links und rechts in ≤ 3 Feldern Wand, Gasse 2–5 Felder breit, oben/unten frei */
+    let a=0;while(a<5&&!M[j*n+i-a-1])a++;let b=0;while(b<5&&!M[j*n+i+b+1])b++;const w=a+b+1;let hor=true,x0,x1,y0,y1;
+    if(w>=2&&w<=5&&M[j*n+i-a-1]&&M[j*n+i+b+1]&&!M[(j-1)*n+i]&&!M[(j+1)*n+i]){x0=(i-a)*Z;x1=(i+b+1)*Z;y0=y1=(j+0.5)*Z}
+    else{let u=0;while(u<5&&!M[(j-u-1)*n+i])u++;let d=0;while(d<5&&!M[(j+d+1)*n+i])d++;const h=u+d+1;if(!(h>=2&&h<=5&&M[(j-u-1)*n+i]&&M[(j+d+1)*n+i]&&!M[j*n+i-1]&&!M[j*n+i+1]))continue;hor=false;x0=x1=(i+0.5)*Z;y0=(j-u)*Z;y1=(j+d+1)*Z}
+    const mx=(x0+x1)/2,my=(y0+y1)/2;if(L.some(o=>Math.hypot(o.mx-mx,o.my-my)<520))continue;if(K.tore&&K.tore.some(o=>Math.hypot(o.x-mx,o.y-my)<260))continue;
+    L.push({x0,y0,x1,y1,mx,my,hor,v:Math.random()})}
+   K.rhLeinen=L;RH.leinen=L.length}}catch(e){console.error('rhythm-leine',e)}
  /* Gassen: auf etwa jedem zweiten Platz ein Brunnen in der Mitte – Wiedererkennung und etwas zum Umkreisen im Kampf */
  if(T.lay==='gassen'&&G.blk){let b=0;for(const p of K.rhP){if(p[2]<4||Math.random()>0.55)continue;const x=(p[0]+0.5)*K.Z,y=(p[1]+0.5)*K.Z;if(typeof blkPunkt==='function'&&blkPunkt(x,y,70))continue;{let zu=false;for(let b=-3;b<=3&&!zu;b++)for(let a=-3;a<=3;a++){const i=p[0]+a,j=p[1]+b;if(a*a+b*b>10)continue;if(i<0||j<0||i>=K.n||j>=K.n||K.M[j*K.n+i]){zu=true;break}}if(zu)continue}if(K.tore&&K.tore.some(t=>Math.hypot(t.x-x,t.y-y)<220))continue;
    G.blk.push({t:'c',x,y,r:20,k:'brunnen',v:Math.random(),wl:1,ai:0,rh:1});b++}
@@ -43499,6 +43509,19 @@ hook('kill',e=>{try{if(e&&(e.guard||e.boss)&&G.ka)G.ka._rhSieg=1}catch(x){}});
 hook('tick',dt=>{try{if(G.mp&&typeof PL!=='undefined'&&PL[0]&&P!==PL[0])return;let ziel=0;const K=G.ka;if(!RH.aus&&K&&P&&!K._rhSieg&&G.state==='play'){const z=kampfZiel();if(z){const d=Math.hypot(P.x-z.x,P.y-z.y);/* am dunkelsten auf dem Weg dorthin; im Kampf selbst wieder heller (Warnzeichen gut lesbar) */const f=Math.max(0,Math.min(1,(1100-d)/500))*(d<450?0.35+0.65*Math.max(0,(d-200)/250):1);let ff=f;try{const si=kaSecAt(P.x,P.y);if(si!==255&&K.sec[si]&&K.sec[si].art==='arena')ff=Math.min(ff,0.35)}catch(e){}ziel=ff*0.12}}
   const k=Math.min(1,(dt||0.016)*1.2);RH.vd+=(ziel-RH.vd)*k;if(RH.vd<0.002&&ziel===0)RH.vd=0}catch(e){}});
 if(typeof wxDark==='function'){const wd=wxDark;wxDark=function(){const r=wd.apply(this,arguments);return RH.vd?r+RH.vd:r}}
+/* Wäscheleinen zeichnen: nach dem Licht, über den Figuren (sie hängen über den Köpfen); Helligkeit nach Dunkelheit des Orts */
+const WCOL=['#c8b8a0','#e8dcc4','#a85a48','#c89a4a','#7a8a5a','#b07a8a','#d8c8a8'];
+if(typeof drawLootIcons==='function'){const dl=drawLootIcons;drawLootIcons=function(inView,t){try{const K=G.ka,L=K&&K.rhLeinen;if(!RH.aus&&L&&L.length&&!(typeof spLeicht==='function'&&spLeicht())){const c=cx;
+   let dk=0;try{dk=Math.min(0.75,((G.theme&&G.theme.dark)||0)+(typeof wxDark==='function'?wxDark():0))}catch(e){}const T_=G.time||0;
+   for(const o of L){if(!inView(o.mx,o.my,160))continue;c.save();c.globalCompositeOperation='source-over';c.globalAlpha=1;
+    const len=Math.hypot(o.x1-o.x0,o.y1-o.y0),ux=(o.x1-o.x0)/len,uy=(o.y1-o.y0)/len,sag=o.hor?10:4,wind=Math.sin(T_*1.3+o.v*9)*2.5;
+    const P_=f=>[o.x0+(o.x1-o.x0)*f+(o.hor?0:Math.sin(f*Math.PI)*sag*0.5),o.y0+(o.y1-o.y0)*f+(o.hor?Math.sin(f*Math.PI)*(sag+wind):0)];
+    c.strokeStyle=bT('#3a2e24',-dk*0.5);c.lineWidth=1.4;c.beginPath();for(let k=0;k<=8;k++){const p=P_(k/8);k?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1])}c.stroke();
+    const m=Math.max(2,Math.min(6,Math.round(len/34)));for(let k=0;k<m;k++){const f=(k+0.6)/(m+0.2),p=P_(f),col=WCOL[(k*3+Math.floor(o.v*7))%WCOL.length],w=o.hor?12+((k*7+o.v*13)%8):13+((k*5)%6),h=o.hor?14+((k*5)%7):15+((k*7+o.v*11)%8);
+     const sw=Math.sin(T_*2.1+k*1.7+o.v*5)*0.12;c.save();c.translate(p[0],p[1]);c.rotate(o.hor?sw:-Math.PI/2+sw);
+     c.fillStyle='rgba(0,0,0,.18)';c.fillRect(-w/2+3,4,w,h);c.fillStyle=bT(col,-dk*0.9);c.fillRect(-w/2,0,w,h);c.fillStyle='rgba(0,0,0,.12)';c.fillRect(-w/2,h-3,w,3);
+     c.fillStyle=bT('#2a2018',-dk*0.4);c.fillRect(-w/2+2,-2,2,4);c.fillRect(w/2-4,-2,2,4);c.restore()}
+    c.restore()}}}catch(e){}return dl.apply(this,arguments)}}
 if(typeof kaLayout==='function'){const kl=kaLayout;kaLayout=function(S){const K=kl.apply(this,arguments);try{const t0=performance.now();rhythm(K);RH.st.ms+=performance.now()-t0}catch(e){console.error('rhythm',e)}return K}}
 }catch(e){console.error('rhythm',e);window.__hsRHYTHM={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/rhythm» */
