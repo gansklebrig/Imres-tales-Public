@@ -43470,15 +43470,17 @@ if(typeof drawDeco==='function'){const dd=drawDeco;drawDeco=function(d,t){if(d&&
    c.fillStyle='rgba(30,24,20,.25)';c.fillRect(x0+11,0,2,8)}
   }finally{c.restore()}return}
  return dd.apply(this,arguments)}}
+/* Schächte/Fenster der Stufe zwischengespeichert (statt jedes Bild alle Deko-Teile zu durchsuchen) */
+let spA=[],spD=null,spN=-1;function spez(){if(G.deco!==spD||G.deco.length!==spN){spD=G.deco;spN=G.deco.length;spA=G.deco.filter(d=>d&&(d.k==='rh_schacht'||d.k==='rh_fenster'))}return spA}
 /* Licht des Schachts als dauerhafte Lichtquelle (die Deko-Lichter sind je Bild auf 16 begrenzt – Fackeln kämen sonst zuerst) */
 hook('tick',()=>{try{if(RH.aus||!G.deco||!G.ka||!P)return;if(!G.lights)G.lights=[];const L=G.lights;
-  for(let i=L.length-1;i>=0;i--){const o=L[i];if(o._rh&&(Math.abs(o._rh.x-P.x)>1900||Math.abs(o._rh.y-P.y)>1300||G.deco.indexOf(o._rh)<0))L.splice(i,1)}
-  if((G.time*4|0)%2)return;for(const d of G.deco){if((d.k!=='rh_schacht'&&d.k!=='rh_fenster')||Math.abs(d.x-P.x)>1700||Math.abs(d.y-P.y)>1100)continue;if(L.some(o=>o._rh===d))continue;
+  for(let i=L.length-1;i>=0;i--){const o=L[i];if(o._rh&&(Math.abs(o._rh.x-P.x)>1900||Math.abs(o._rh.y-P.y)>1300||spez().indexOf(o._rh)<0))L.splice(i,1)}
+  if((G.time*4|0)%2)return;for(const d of spez()){if((d.k!=='rh_schacht'&&d.k!=='rh_fenster')||Math.abs(d.x-P.x)>1700||Math.abs(d.y-P.y)>1100)continue;if(L.some(o=>o._rh===d))continue;
    L.push(d.k==='rh_fenster'?{x:d.x+28,y:d.y+90,r:200,c:'#ffe6c0',t:0,life:1e9,a:0.7,_rh:d}:{x:d.x,y:d.y-10,r:250,c:'#ffe6b8',t:0,life:1e9,a:0.8,_rh:d})}}catch(e){}});
 hook('tick',()=>{try{const R=G.ka&&G.ka.rhRing;if(!R||R.used||RH.aus||!P||P.dead||(typeof NET!=='undefined'&&NET.role==='guest'))return;
   if(Math.abs(P.x-R.x)<48&&Math.abs(P.y-R.y)<36){R.used=1;try{word(R.x,R.y-50,'Ein Feenring!','#f6d77c')}catch(e){}try{sparks(R.x,R.y,'#f6d77c',18,1,true)}catch(e){}try{if(typeof spGold==='function')spGold(R.x,R.y,4)}catch(e){}}}catch(e){}});
 hook('draw',(t,c)=>{try{if(RH.aus||!G.deco||!G.ka||typeof spLeicht==='function'&&spLeicht())return;c=c||cx;const cxW=P.x,cyW=P.y;
-  for(const d of G.deco){if(d.k==='rh_fenster'&&Math.abs(d.x-cxW)<1500&&Math.abs(d.y-cyW)<1000){const T_=G.time||0;c.save();c.translate(d.x,d.y);
+  for(const d of spez()){if(d.k==='rh_fenster'&&Math.abs(d.x-cxW)<1500&&Math.abs(d.y-cyW)<1000){const T_=G.time||0;c.save();c.translate(d.x,d.y);
     for(let i=0;i<10;i++){const ph=(T_*0.05+i*0.173+d.v)%1,yy=ph*180,xx=(i%3-1)*46+ph*46+Math.sin(T_*0.8+i*2.1)*8;const al=Math.sin(ph*Math.PI)*0.5;if(al<0.04)continue;c.globalAlpha=al;c.fillStyle='#fff3d6';c.fillRect(xx,yy,2,2)}c.restore();continue}
    if(d.k!=='rh_schacht')continue;if(Math.abs(d.x-cxW)>1500||Math.abs(d.y-cyW)>1000)continue;const T_=G.time||0;
    c.save();c.translate(d.x,d.y);
@@ -43531,6 +43533,43 @@ const kn0=kaNameZeigen;kaNameZeigen=function(){if(KN.aus)return kn0.apply(this,a
  return r};
 }catch(e){console.error('kname',e);window.__hsKNAME={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/kname» */
+/* «takt3» */
+/* ================= Paket „takt3“: Bildrate gleichmäßig – wahlweise halbe Bildschirmrate – window.__hsTAKT3 =================
+   Befund (Diagnose UWQHD, 144 Hz): Rechenzeit ≈ 6,6–7,2 ms je Bild, das Bildfenster bei 144 Hz ist 6,94 ms. Ein Teil der Bilder schafft
+   es, ein Teil nicht → Bildabstände springen zwischen 6,9 und 13,9 ms (21–32 % „verpasst“, ⌀ 80–88 FPS). Das wirkt unruhiger, als
+   die Zahl vermuten lässt. „Browser/Grafikkarte“ in der Anzeige ist dabei größtenteils Warten auf den nächsten Bildschirmtakt.
+   Neu in den Grafik-Einstellungen: „Bildrate: Höchste · Gleichmäßig · 60“.
+     · Höchste    – wie bisher (jedes Bild, so schnell es geht)
+     · Gleichmäßig – bei Bildschirmen ab 100 Hz jedes zweite Bild (144 Hz → 72, 165 → 82, 240 → 120) mit immer gleichem Abstand;
+                     darunter wie „Höchste“
+     · 60          – höchstens 60 Bilder je Sekunde (spart Strom/Wärme, z. B. am Laptop)
+   Spiellogik rechnet mit der echten Zeit weiter (dt), nichts läuft langsamer. Die Grafik-Automatik sieht die gewählte Rate als Takt.
+   Gilt im Spiel und in Menüs. Abschaltbar: __hsTAKT3.aus=1 */
+(function(){try{if(window.__hsTAKT3||typeof frame!=='function')return;
+const T3=window.__hsTAKT3={v:1,aus:0,n:{skip:0,lauf:0},hz:()=>Math.round(1000/hzMs)};
+let hzMs=1000/60,lastV=0,lastDone=0;
+/* Bildschirmtakt selbst messen (Median der letzten rAF-Abstände), unabhängig vom Spiel */
+const IV=[];
+function modus(){try{return SAVE.bildrate||'max'}catch(e){return 'max'}}
+function ziel(){const m=modus();if(T3.aus||m==='max')return 0;const hz=1000/hzMs;if(m==='60')return hz>65?1000/60:0;if(m==='glatt')return hz>=100?2*hzMs:0;return 0}
+const f0=frame;frame=function(now){
+ if(lastV){const d=now-lastV;if(d>2&&d<60){IV.push(d);if(IV.length>90)IV.shift();if(IV.length>=30&&(IV.length%15)===0){const s=IV.slice().sort((a,b)=>a-b);hzMs=s[Math.floor(s.length*0.35)]}}}
+ lastV=now;
+ const zi=ziel();
+ if(zi&&lastDone&&now-lastDone<zi-hzMs*0.5){T3.n.skip++;requestAnimationFrame(frame);return}
+ lastDone=now;T3.n.lauf++;return f0.apply(this,arguments)};
+/* Einstellung: eigene Zeile unter „Leistungsanzeige“ in der Grafik-Box */
+const STU=[['max','Höchste','Jedes Bild, so schnell es geht'],['glatt','Gleichmäßig','Bei Bildschirmen ab 100 Hz jedes zweite Bild mit immer gleichem Abstand (144 Hz → 72) – ruhiger, wenn die Höchste nicht ganz erreicht wird'],['60','60','Höchstens 60 Bilder je Sekunde – spart Strom und Wärme']];
+const zeile=()=>{const v=modus();return`<div class="row" data-t3-row style="margin-top:6px;align-items:center"><span class="muted" style="margin-right:4px">Bildrate:</span>${STU.map(s=>`<button class="btn small ${v===s[0]?'gold':''}" data-act="t3" data-v="${s[0]}" title="${s[2]}">${s[1]}</button>`).join('')}</div>`};
+let plan=false;
+function einsetzen(){plan=false;try{if(typeof MOBIL!=='undefined'&&MOBIL)return;for(const box of document.querySelectorAll('#gfxBox')){const alt=box.querySelector('[data-t3-row]');if(alt){alt.outerHTML=zeile();continue}
+  const anker=box.querySelector('[data-kgr-row]')||(box.querySelector('[data-act="perf"]')||{closest:()=>null}).closest('.row');if(anker)anker.insertAdjacentHTML('afterend',zeile())}}catch(e){}}
+if(typeof ulKnopf==='function'){const _uk=ulKnopf;ulKnopf=function(){const r=_uk.apply(this,arguments);try{if(!plan){plan=true;Promise.resolve().then(()=>Promise.resolve().then(einsetzen))}}catch(e){}return r}}
+document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest?ev.target.closest('[data-act="t3"]'):null;if(!b)return;ev.stopPropagation();ev.preventDefault();
+ try{sfx('ui')}catch(e){}SAVE.bildrate=b.dataset.v;try{persist()}catch(e){}lastDone=0;
+ const fo=document.activeElement===b;einsetzen();if(fo){const n=document.querySelector(`[data-act="t3"][data-v="${SAVE.bildrate}"]`);if(n)try{n.focus({preventScroll:true});n.classList.add('padf')}catch(e){}}},true);
+}catch(e){console.error('takt3',e);window.__hsTAKT3={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/takt3» */
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
