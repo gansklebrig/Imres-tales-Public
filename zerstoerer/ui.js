@@ -588,6 +588,8 @@
     inp.capture = null; /* angefangene Tastenbelegung endet mit dem Fenster */
     modal.hidden = true; modal.innerHTML = ""; ui.modalOpen = false; ui.noEsc = false; Z.paused = false; A.muffle(20000); ui.klang("zurueck");
     const cb = ui.onClose; ui.onClose = null; if (cb) cb();
+    /* W19 Slots: zurück auf dem Titelbild → Fokus wieder auf den Hauptknopf (Tastatur/Controller gehen nie ins Leere) */
+    if (!ui.modalOpen && !Z.level && !title.hidden) setTimeout(() => { if (!ui.modalOpen && !title.hidden && !title.contains(document.activeElement)) { const b = title.querySelector("#t-play"); if (b) b.focus(); } }, 40);
     /* wartende Fenster nachholen (nur wenn nicht gerade ein neues aufging und der Spieler lebt) */
     if (modalQueue.length && !ui.modalOpen) { const q = modalQueue.shift(); if (Z.level && Z.player && !Z.player.dead) setTimeout(() => { if (!ui.modalOpen) openModal(q[0], q[1]); else modalQueue.unshift(q); }, 60); else modalQueue.length = 0; }
   }
@@ -606,7 +608,7 @@
   /* Tastatur in Menüs */
   ui.onKey = e => {
     if (inp.capture) return false;
-    if (!title.hidden && !ui.modalOpen && (e.code === "Enter" || e.code === "Space")) { const b = title.querySelector("button:focus") || title.querySelector("button"); if (b) { b.click(); return true; } }
+    if (!title.hidden && !ui.modalOpen && (e.code === "Enter" || e.code === "Space")) { const b = title.querySelector("button:focus, a:focus") || title.querySelector("button"); if (b) { if (!e.repeat) b.click(); return true; } } /* W19 Slots: auch Links (Download, Taverne) per Enter; gehaltene Taste löst nicht mehrfach aus */
     if (!ui.modalOpen) {
       /* Karte sofort umschalten (Tab gehört jetzt der Ausrüstung: halten = Schnellansicht) */
       if (inp.keys.map.includes(e.code) && Z.level) { if (!e.repeat) toggleMap(); return true; }
@@ -685,22 +687,156 @@
   }
 
   /* ---------- Titel ---------- */
+  /* W19 Slots: Titelbild mit „Weiterspielen“ (zuletzt benutzter Spielstand, Unterzeile sagt, wohin es geht) bzw. „Neues Spiel“,
+     dazu „Spielstände“ (drei Plätze: spielen, neu beginnen, kopieren, löschen). Die Kennung #t-play bleibt der Hauptknopf. */
+  const SL = () => Z.slots;
+  function slotName(n) { return L(["Spielstand ", "Save "]) + n; }
+  function fmtWhen(ts) {
+    if (!ts) return "";
+    const d = new Date(ts), now = new Date(), p = x => String(x).padStart(2, "0"), hm = p(d.getHours()) + ":" + p(d.getMinutes());
+    const day = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime(), diff = Math.round((day(now) - day(d)) / 864e5);
+    if (diff === 0) return L(["heute ", "today "]) + hm;
+    if (diff === 1) return L(["gestern ", "yesterday "]) + hm;
+    return Z.settings.lang === "en" ? d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : p(d.getDate()) + "." + p(d.getMonth() + 1) + "." + d.getFullYear();
+  }
+  function fmtPlay(s) {
+    s = Math.round(s || 0); if (s < 60) return L(["unter 1 Min.", "under 1 min"]);
+    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+    return h ? h + " h " + m + L([" Min.", " min"]) : m + L([" Min.", " min"]);
+  }
+  const nRuns = n => n + " " + (n === 1 ? L(["Lauf", "run"]) : L(["Läufe", "runs"]));
+  const nWins = n => n + " " + (n === 1 ? L(["Sieg", "win"]) : L(["Siege", "wins"]));
+  function slotLine(i) {
+    const bits = [slotName(i.n), L(["zurück ins Lager", "back to the camp"])];
+    bits.push(i.runs ? nRuns(i.runs) : L(["noch kein Lauf", "no run yet"]));
+    if (i.wins) bits.push(nWins(i.wins));
+    if (i.zuletzt) bits.push(L(["zuletzt ", "last "]) + fmtWhen(i.zuletzt));
+    return bits.join(" · ");
+  }
+  function startGame() {
+    A.init(); if (Z.settings.autoFs !== false && fs.ok && fs.touch && !fs.on()) fs.enter(); preload();
+    if (ui.modalOpen) { ui.onClose = null; closeModal(); }
+    title.hidden = true; Z.player = Z.newPlayer(); Z.loadArea("lager");
+    if (!Z.meta.intro) { Z.meta.intro = true; Z.saveMeta(); ui.story(); }
+  }
+  ui.startGame = startGame;
   function showTitle() {
     title.hidden = false; hud.hidden = true;
+    const S = SL();
+    /* zuletzt benutzter Platz mit Fortschritt wird der aktive (so zeigen Erfolge & Co. denselben Stand wie „Weiterspielen“) */
+    if (S && !Z.level) { const ls0 = S.last(); if (ls0 && ls0 !== S.active()) S.use(ls0); }
+    const info = S ? S.info(S.active()) : null, cont = !!(info && !info.leer);
+    const main = cont
+      ? '<button id="t-play" class="t-haupt" autofocus>' + esc(L(["Weiterspielen", "Continue"])) + '<small class="t-unter">' + esc(slotLine(info)) + "</small></button>"
+      : '<button id="t-play" class="t-haupt" autofocus>' + esc(L(["Neues Spiel", "New game"])) + '<small class="t-unter">' + esc(slotName(S ? S.active() : 1) + " · " + L(["Beginn im Lager vor der Feste", "starts in the camp before the keep"])) + "</small></button>";
     title.innerHTML = '<div class="tbox"><div class="ttl">' + esc(t("title")) + '</div><div class="tsub">' + esc(t("sub")) + '</div><span class="tzier"></span>' +
-      '<div class="tbtn"><button id="t-play" autofocus>' + esc(t("play")) + '</button><button id="t-set">' + esc(t("settings")) + '</button>' + (fs.ok ? '<button id="t-fs">' + esc(fs.label()) + "</button>" : "") + '<a href="./#taverne">' + esc(t("tavern")) + "</a></div>" +
+      '<div class="tbtn">' + main + (S ? '<button id="t-slots">' + esc(L(["Spielstände", "Saves"])) + "</button>" : "") +
+      (cont && Z.achModal ? '<button id="t-ach">' + esc(L(["Erfolge", "Achievements"])) + "</button>" : "") +
+      '<button id="t-set">' + esc(t("settings")) + '</button>' + (fs.ok ? '<button id="t-fs">' + esc(fs.label()) + "</button>" : "") +
+      (PC ? '<button id="t-quit">' + esc(L(["Beenden", "Quit"])) + "</button>" : "") + '<a href="./#taverne">' + esc(t("tavern")) + "</a></div>" +
       '<p class="tfoot">' + L(["Ein Spiel zu Imres Tales · Kopfhörer empfohlen", "A game for Imre's Tales · headphones recommended"]) + "</p>" + pcAngebot() + "</div>";
-    $("#t-play").onclick = () => { A.init(); if (Z.settings.autoFs !== false && fs.ok && fs.touch && !fs.on()) fs.enter(); preload(); title.hidden = true; Z.player = Z.newPlayer(); Z.loadArea("lager"); if (!Z.meta.intro) { Z.meta.intro = true; Z.saveMeta(); ui.story(); } };
+    $("#t-play").onclick = () => { if (S && !cont) S.use(S.active(), !S.raw(S.active())); startGame(); };
+    if ($("#t-slots")) $("#t-slots").onclick = () => { A.init(); ui.slots(); };
+    if ($("#t-ach")) $("#t-ach").onclick = () => { A.init(); Z.achModal(false); ui.onClose = () => { if (!Z.level) showTitle(); }; };
     $("#t-set").onclick = () => { A.init(); ui.settings(); };
     if ($("#t-fs")) $("#t-fs").onclick = () => { A.init(); fs.toggle(); };
-    setTimeout(() => $("#t-play").focus(), 50);
+    if ($("#t-quit")) $("#t-quit").onclick = () => { try { Z.saveSettings && Z.saveSettings(); } catch (_) {} PC.beenden(); };
+    setTimeout(() => { if (!ui.modalOpen && !title.hidden) { const b = $("#t-play"); if (b) b.focus(); } }, 50);
   }
-  /* W18 PC: im Browser am PC (Windows/Linux x64, keine Touch-Geräte, nicht im Programm) dezenter Verweis auf das Programm */
-  function pcAngebot() {
+  ui.showTitle = showTitle;
+  /* W19 Slots: Auswahl der drei Spielstände (Fenster über dem Titelbild; Zurück/B/Esc führt zum Titelbild) */
+  const backToTitle = () => { if (!Z.level) showTitle(); };
+  function slotCard(i, foc) {
+    const g = i.gebiet ? L(i.gebiet.name) : "–";
+    const body = i.leer
+      ? '<p class="sl-leer">' + esc(L(["Leer – hier beginnt ein neues Spiel.", "Empty – a new game starts here."])) + "</p>"
+      : '<p class="sl-werte"><b>' + esc(nRuns(i.runs)) + "</b> · <b>" + esc(nWins(i.wins)) + "</b>" + (i.enden ? " · ⚔ " + i.enden + "/3 " + esc(L(["Enden", "endings"])) : "") + "</p>" +
+        '<p class="sl-mehr">' + esc(L(["Höchstes Gebiet: ", "Furthest area: "]) + g) + "<br>" + esc(L(["Spielzeit ", "Play time "]) + fmtPlay(i.zeit)) + (i.zuletzt ? " · " + esc(L(["zuletzt ", "last "]) + fmtWhen(i.zuletzt)) : "") + "</p>";
+    const b = (act, lab, cls, af) => '<button data-act="' + act + '" data-arg="' + i.n + '"' + (cls ? ' class="' + cls + '"' : "") + (af ? " autofocus" : "") + ">" + esc(lab) + "</button>";
+    const knoepfe = i.leer
+      ? b("slotNeu", L(["Neues Spiel", "New game"]), "sl-los", foc)
+      : b("slotSpielen", L(["Spielen", "Play"]), "sl-los", foc) + b("slotNeu", L(["Neues Spiel", "New game"])) + b("slotKopie", L(["Kopieren nach …", "Copy to …"])) + b("slotWeg", L(["Löschen", "Delete"]), "gefahr");
+    return '<div class="sl-karte' + (i.leer ? " leer" : "") + (i.aktiv && !i.leer ? " aktiv" : "") + '"><div class="sl-kopf"><b>' + esc(slotName(i.n)) + "</b>" + (i.aktiv && !i.leer ? '<small>' + esc(L(["zuletzt gespielt", "last played"])) + "</small>" : "") + "</div>" +
+      body + '<div class="sl-knoepfe">' + knoepfe + "</div></div>";
+  }
+  ui.slots = focusN => {
+    const S = SL(); if (!S) return;
+    const act = S.active(); focusN = focusN || act;
+    let html = "<h2>" + esc(L(["Spielstände", "Saves"])) + '</h2><p class="hinweis">' + esc(L(["Jeder Spielstand hat eigenen Fortschritt (Splitter, Schmiede, Lager, Erfolge, Runen …). Einstellungen gelten für alle.", "Each save keeps its own progress (shards, forge, camp, achievements, runes …). Settings are shared."])) + '</p><div class="sl-liste">';
+    for (let n = 1; n <= S.N; n++) html += slotCard(S.info(n), n === focusN);
+    html += '</div><div class="knoepfe"><button data-act="close">' + esc(t("back")) + "</button></div>";
+    openModal(html, { cls: "spielstaende", onClose: backToTitle });
+  };
+  const slotSummary = n => { const i = SL().info(n); return i.leer ? L(["leer", "empty"]) : nRuns(i.runs) + " · " + nWins(i.wins) + (i.gebiet ? " · " + L(i.gebiet.name) : ""); };
+  /* Rückfrage im selben Fenster: Abbrechen kehrt zur Spielstand-Liste zurück, Fokus liegt sicher auf „Abbrechen“ */
+  function slotAsk(head, txt, okLab, fn, n, gefahr) {
+    ui._slotFn = fn;
+    openModal("<h2>" + esc(head) + "</h2><p>" + esc(txt) + '</p><div class="knoepfe"><button data-act="slotJa"' + (gefahr ? ' class="gefahr"' : "") + ">" + esc(okLab) + '</button><button data-act="slotZurueck" data-arg="' + n + '" autofocus>' + esc(t("cancel")) + "</button></div>",
+      { cls: "schmal", onClose: () => { if (!Z.level) ui.slots(n); } });
+  }
+  actions.slotJa = () => { const fn = ui._slotFn; ui._slotFn = null; ui.onClose = null; if (fn) fn(); };
+  actions.slotZurueck = n => { ui.onClose = null; ui.slots(+n); };
+  actions.slotSpielen = n => { n = +n; const S = SL(); if (S.active() !== n) S.use(n); startGame(); };
+  actions.slotNeu = n => {
+    n = +n; const S = SL(), i = S.info(n);
+    const go = () => { S.neu(n); startGame(); };
+    if (i.leer) return go();
+    slotAsk(slotName(n) + L([" überschreiben?", ": overwrite?"]), L(["Ein neues Spiel ersetzt den bisherigen Fortschritt (", "A new game replaces the current progress ("]) + slotSummary(n) + L([").", ")."]), L(["Überschreiben und neu beginnen", "Overwrite and start anew"]), go, n, true);
+  };
+  actions.slotWeg = n => {
+    n = +n;
+    slotAsk(slotName(n) + L([" löschen?", ": delete?"]), slotSummary(n), L(["Löschen …", "Delete …"]), () => {
+      slotAsk(L(["Wirklich endgültig löschen?", "Really delete for good?"]), slotName(n) + " (" + slotSummary(n) + L([") wird gelöscht. Das lässt sich nicht rückgängig machen.", ") will be deleted. This cannot be undone."]),
+        L(["Endgültig löschen", "Delete for good"]), () => { SL().loeschen(n); ui.slots(n); ui.toast(slotName(n) + L([" gelöscht.", " deleted."])); }, n, true);
+    }, n, true);
+  };
+  actions.slotKopie = n => {
+    n = +n; const S = SL();
+    let html = "<h2>" + esc(slotName(n) + L([" kopieren nach …", ": copy to …"])) + '</h2><div class="knoepfe senk">';
+    for (let k = 1; k <= S.N; k++) if (k !== n) html += '<button data-act="slotKopieZiel" data-arg="' + n + ":" + k + '"' + (html.includes("autofocus") ? "" : " autofocus") + ">" + esc(slotName(k)) + " <small>· " + esc(slotSummary(k)) + "</small></button>";
+    html += '<button data-act="slotZurueck" data-arg="' + n + '">' + esc(t("cancel")) + "</button></div>";
+    openModal(html, { cls: "schmal", onClose: () => { if (!Z.level) ui.slots(n); } });
+  };
+  actions.slotKopieZiel = arg => {
+    const [a, b] = String(arg).split(":").map(Number), S = SL();
+    const go = () => { const ok = S.kopieren(a, b); ui.slots(b); ui.toast(ok ? slotName(a) + L([" nach ", " copied to "]) + slotName(b) + L([" kopiert.", "."]) : L(["Kopieren fehlgeschlagen (Speicher voll?).", "Copy failed (storage full?)."])); };
+    if (S.info(b).leer) return go();
+    slotAsk(slotName(b) + L([" überschreiben?", ": overwrite?"]), slotName(b) + " (" + slotSummary(b) + L([") wird durch eine Kopie von ", ") will be replaced by a copy of "]) + slotName(a) + L([" ersetzt.", "."]), L(["Überschreiben", "Overwrite"]), go, a, true);
+  };
+  /* W19 Slots: zurück zum Titelbild (aus Lager oder Lauf) – Gebiet abbauen, Stand sichern; danach lässt sich der Spielstand wechseln */
+  ui.toTitle = () => {
+    if (ui.modalOpen) { ui.onClose = null; closeModal(); }
+    ui.fade(() => {
+      try { Z.saveMeta(); } catch (e) { console.error(e); }
+      for (const k of ["enemies", "projs", "hazards", "allies", "pickups", "propsLive", "stuck", "bolts", "gadgets"]) if (Array.isArray(Z[k])) Z[k].length = 0;
+      Z.run = null; Z.boss = null; Z.bossDefeated = false; Z.interacts = []; Z.player = null; Z.level = null;
+      try { Z.ambience && Z.ambience.set(null); } catch (_) {}
+      ui.clearQueue(); ui.choiceActive = null;
+      for (const el of [bossbar, prompt, banner, choice, card, $("#bubble"), $("#touch")]) if (el) el.hidden = true;
+      Z.paused = false;
+      showTitle();
+    });
+  };
+  actions.toTitle = () => {
+    if (!Z.run) return ui.toTitle();
+    ui.confirm(L(["Zum Titelbildschirm?", "Back to the title screen?"]), L(["Der laufende Durchgang endet. Nicht abgelieferte Seelensplitter gehen verloren.", "The current run ends. Undelivered soul shards will be lost."]), L(["Zum Titelbildschirm", "To the title screen"]), () => ui.toTitle());
+  };
+  /* W19 Slots (ersetzt den W18-Textverweis): im Browser am PC ein nachrangiger Download-Knopf – Windows → Setup, Linux x86_64 → AppImage;
+     nicht im Programm (window.__zsPC), nicht auf Touch/Handy, Mac/andere: nichts */
+  const DL_BASE = "https://github.com/gansklebrig/Imres-tales-Public/releases";
+  ui.pcDownload = () => {
     const pl = navigator.platform || "", ua = navigator.userAgent || "";
-    if (window.__zsPC || matchMedia("(pointer: coarse)").matches || /Android|CrOS/i.test(ua) || !(/^Win/i.test(pl) || /Linux x86_64/i.test(pl))) return "";
-    return '<p class="tfoot pc-angebot"><a href="https://github.com/gansklebrig/Imres-tales-Public/releases/tag/zerstoerer-pc" target="_blank" rel="noopener" style="color:#c9a86a;opacity:.75;font-size:.9em;text-decoration:none;border-bottom:1px dotted #8a6a3a">' +
-      L(["⤓ Als Programm für Windows/Linux", "⤓ As a program for Windows/Linux"]) + "</a></p>";
+    if (window.__zsPC || matchMedia("(pointer: coarse)").matches || /Android|CrOS|iPhone|iPad/i.test(ua)) return null;
+    if (/^Win/i.test(pl) || (!pl && /Windows NT/i.test(ua))) return { os: "win", url: DL_BASE + "/download/zerstoerer-pc/Zerstoerer-Setup.exe", lab: L(["⤓ Für Windows herunterladen", "⤓ Download for Windows"]) };
+    if (/Linux x86_64/i.test(pl)) return { os: "linux", url: DL_BASE + "/download/zerstoerer-pc/Zerstoerer.AppImage", lab: L(["⤓ Für Linux herunterladen", "⤓ Download for Linux"]) };
+    return null;
+  };
+  function pcAngebot() {
+    const d = ui.pcDownload(); if (!d) return "";
+    return '<div class="t-dl"><a class="t-dl-knopf" href="' + d.url + '" download>' + esc(d.lab) + "</a>" +
+      '<small>' + esc(L(["ca. 180 MB · Spiel-Updates kommen danach automatisch, ohne Neuinstallation", "approx. 180 MB · game updates then arrive automatically, no reinstall"])) +
+      (d.os === "win" ? "<br>" + esc(L(["Windows fragt beim ersten Start: „Weitere Informationen“ → „Trotzdem ausführen“", "On first start Windows asks: “More info” → “Run anyway”"])) : "") +
+      ' · <a class="t-dl-alle" href="' + DL_BASE + '/tag/zerstoerer-pc" target="_blank" rel="noopener">' + esc(L(["Alle Downloads", "All downloads"])) + "</a></small></div>";
   }
   function preload() { A.loadAll(A.allSfxPaths()); }
   ui.story = () => openModal('<h2>' + esc(t("title")) + " · " + L(["Die Feste der Fäden", "The Keep of Threads"]) + '</h2><p class="erz">' + t("intro") + '</p><div class="knoepfe"><button data-act="close" autofocus>' + esc(t("cont")) + "</button></div>", { cls: "schmal" });
@@ -1026,7 +1162,7 @@
     const ort = esc(areaTitle()) + (run ? " · " + fmtTime(run.time) + (run.skulls ? " · " + "☠".repeat(run.skulls) : "") + (run.gnade ? " · ✚ " + L(["Barmherzigkeit", "Mercy"]) : "") : "");
     const hin = { alle: L(["alle", "all"]), wenige: L(["wenige", "few"]), keine: L(["keine", "none"]) }[Z.settings.hinweise || "alle"];
     openModal('<h2 class="p-kopf">' + esc(t("pause")) + '<span class="p-ort">' + ort + '</span></h2>' + pauseTabs(0) + '<div class="p-spalten"><div class="knoepfe senk"><button data-act="close" autofocus>' + esc(t("resume")) + '</button><button data-act="ctrl">' + esc(t("tut")) + '</button><button data-act="settings">' + esc(t("settings")) + '</button><button data-act="hinweise">' + L(["Hinweise: ", "Hints: "]) + hin + "</button>" + (fs.ok ? '<button data-act="fullscreen">' + esc(fs.label()) + "</button>" : "") + /* W18 PC */ pcKnoepfe() +
-      (inRun ? '<button data-act="abort" class="gefahr">' + esc(t("abort")) + "</button>" : "") + '<a class="btn" href="./#taverne">' + esc(t("tavern")) + '</a></div><div class="p-info"><p class="tipp">' + esc(tip) + "</p>" +
+      (inRun ? '<button data-act="abort" class="gefahr">' + esc(t("abort")) + "</button>" : "") + /* W19 Slots */ '<button data-act="toTitle">' + esc(L(["Zum Titelbildschirm", "To the title screen"])) + "</button>" + '<a class="btn" href="./#taverne">' + esc(t("tavern")) + '</a></div><div class="p-info"><p class="tipp">' + esc(tip) + "</p>" +
       pauseGearTeaser() + "</div></div>", { cls: "schmal pausenmenue" });
   };
   /* Hinweise schnell umschalten: alle → wenige → keine */

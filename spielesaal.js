@@ -367,6 +367,19 @@
     if (a && nav) nav.scrollLeft = Math.max(0, a.offsetLeft - (nav.clientWidth - a.offsetWidth) / 2);
   }
 
+  /* W19 Slots: Download-Knopf für das PC-Programm „Ezekiel – The Destroyer“ – gleiche Regeln wie im Titelbild (zerstoerer/ui.js):
+     nur im Browser am PC, Windows → Setup, Linux x86_64 → AppImage; Touch/Handy, Mac und andere: nichts */
+  function pcDownloadHTML() {
+    const pl = navigator.platform || "", ua = navigator.userAgent || "", en = sprache() === "en", base = "https://github.com/gansklebrig/Imres-tales-Public/releases";
+    if (window.__zsPC || (window.matchMedia && matchMedia("(pointer: coarse)").matches) || /Android|CrOS|iPhone|iPad/i.test(ua)) return "";
+    let url, lab;
+    if (/^Win/i.test(pl) || (!pl && /Windows NT/i.test(ua))) { url = base + "/download/zerstoerer-pc/Zerstoerer-Setup.exe"; lab = en ? "⤓ Download for Windows" : "⤓ Für Windows herunterladen"; }
+    else if (/Linux x86_64/i.test(pl)) { url = base + "/download/zerstoerer-pc/Zerstoerer.AppImage"; lab = en ? "⤓ Download for Linux" : "⤓ Für Linux herunterladen"; }
+    else return "";
+    return '<p class="sd-dl"><a class="sd-dl-knopf" href="' + url + '" download>' + esc(lab) + "</a> <small>" +
+      esc(en ? "approx. 180 MB · updates arrive automatically" : "ca. 180 MB · Updates kommen automatisch") + ' · <a href="' + base + '/tag/zerstoerer-pc" target="_blank" rel="noopener">' + esc(en ? "All downloads" : "Alle Downloads") + "</a></small></p>";
+  }
+
   /* ---------- Vorschau-Fenster ---------- */
   let offenKey = null;
   function vorschau(key) {
@@ -395,6 +408,7 @@
             ? '<a class="sd-los" href="' + sp.extern + '" data-gesehen="' + key + '">' + esc(T.spielen) + ' <small>↗</small></a>'
             : '<button type="button" class="sd-los" data-los="' + key + '">' + esc(f.weiter ? M.weiter : T.spielen) + "</button>") +
           '<button type="button" class="sd-leise" data-zu>' + esc(T.schliessen) + "</button></div>" +
+          (key === "zerstoerer" ? pcDownloadHTML() : "") + /* W19 Slots: Zerstörer als PC-Programm (nur PC-Browser) */
         "</div>" +
       "</div>";
     if (!dialog.open) { if (dialog.showModal) dialog.showModal(); else dialog.setAttribute("open", ""); }
@@ -837,6 +851,11 @@ html.saal-dialog-offen { overflow: hidden; }
 .sd-los:hover, .sd-los:focus-visible { filter: brightness(1.12); outline: none; box-shadow: 0 0 26px color-mix(in srgb, var(--farbe) 50%, transparent); }
 .sd-leise { border: 0; background: none; color: var(--ash); font: inherit; font-size: .9rem; text-decoration: underline; cursor: pointer; padding: .5rem; }
 .sd-leise:hover { color: var(--vellum); }
+/* W19 Slots: nachrangiger Download-Knopf (Zerstörer) */
+.sd-dl { margin: .5rem 0 0; font-size: .82rem; color: var(--ash); flex: none; }
+.sd-dl-knopf { display: inline-block; padding: .35rem .9rem; border: 1px solid color-mix(in srgb, var(--farbe) 55%, transparent); color: var(--vellum); text-decoration: none; font-weight: 700; }
+.sd-dl-knopf:hover, .sd-dl-knopf:focus-visible { border-color: var(--farbe); outline: none; box-shadow: 0 0 14px color-mix(in srgb, var(--farbe) 35%, transparent); }
+.sd-dl small a { color: var(--ash); }
 
 /* Handy: Fenster über den ganzen Bildschirm, Bilder oben zum Wischen, Spielen-Knopf immer sichtbar */
 @media (max-width: 760px) {

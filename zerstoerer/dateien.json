@@ -9689,12 +9689,12 @@
 "sha256":"3ab7b7816ddadc9aa1ef272db3236698570d927a2f28af60f6ead1f3ac0a9320"
 },
 "zerstoerer.html":{
-"groesse":58760,
-"sha256":"464e1cf0991fcd53bad67af964fcb08667e0875b45b55adebe80ae5327b8dac9"
+"groesse":62732,
+"sha256":"487be0aefdf5a95018f3cf30d92e3075cb822bb589bd29c4ae586a1cb94d3b28"
 },
 "zerstoerer/abenteuer.js":{
-"groesse":143416,
-"sha256":"48ffa345f2428593239827e038913be7d670b1613e50235ad4393b99a32907a0"
+"groesse":143628,
+"sha256":"0e26fff8127939aa8ad796b9ca92c68083c34d6ac0484ee21f9be96801b86bcb"
 },
 "zerstoerer/ausgleich.js":{
 "groesse":6230,
@@ -9797,8 +9797,8 @@
 "sha256":"bc1c7d16bdfe180cf75fe83a0b5289ab427cbe8c11e4151e0a77b923e0daf051"
 },
 "zerstoerer/klang.js":{
-"groesse":146282,
-"sha256":"349bf65809d3943ac0bce24432836b6f4916d1f5a54a78d694d87a04d295296e"
+"groesse":146438,
+"sha256":"dd7d697900c1679e89e8fb19e8450ff91f2be2438fd72f0724f363a975c90428"
 },
 "zerstoerer/lager.js":{
 "groesse":159152,
@@ -9849,8 +9849,8 @@
 "sha256":"b4b86902ba969ef7e7a3fd4e6567df4ff744e94ff9c87ed26b8d4b0145a2a5dd"
 },
 "zerstoerer/spiel.js":{
-"groesse":35403,
-"sha256":"e8781471e80487256809093aabb588a161a122fbfeb2b681f503dd8282fe6bda"
+"groesse":41620,
+"sha256":"21201173229f8e4086a11e8d9e2ade69f0d6bb2b1c0cee7e8230890b19baf27e"
 },
 "zerstoerer/spuren.js":{
 "groesse":70818,
@@ -9873,8 +9873,8 @@
 "sha256":"d9bff6570056058cff1feac86e5247a8a9ca3548ed6d457998fdaa7595512f93"
 },
 "zerstoerer/ui.js":{
-"groesse":188437,
-"sha256":"3615a11e01a58954506fd8aa2378c3aa2102589e2d92f7a088d0b6d5bb2948aa"
+"groesse":200375,
+"sha256":"aab9612832bb138fab21da878a79614542bfc70ab66319a778fa224f631dff78"
 },
 "zerstoerer/welt.js":{
 "groesse":239147,
@@ -9897,5 +9897,5 @@
 "sha256":"bd666dd2ac70650c8a7b947c709a2c71251f4de5328a9f37e1b70d932514c922"
 }
 },
-"stand":127
+"stand":128
 }

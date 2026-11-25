@@ -1611,6 +1611,7 @@
      Lagers); Abspann: Z.ui.ending wird umhüllt → Musik „abspann“. */
   const ER = { n: -1, stats: { fanfare: 0, kat: {} } };
   KL.erfolge = ER;
+  (Z._slotSwap = Z._slotSwap || []).push(() => { ER.n = -1; }); /* W19 Slots: Erfolgszähler des neuen Spielstands neu aufnehmen (keine falsche Fanfare) */
   function achKat(a) {
     if (["tempo", "technik", "nohit", "erkundung", "bosse", "sammeln", "kurios", "geschichte"].includes(a.kat)) return a.kat; /* abenteuer.js enrich(): a.kat */
     const k = a.kat || a.cat || a.k; if (k) { const m = String(k).toLowerCase(); for (const c of ["tempo", "technik", "nohit", "erkundung", "bosse"]) if (m.startsWith(c.slice(0, 4))) return c; if (/kampf|tech/.test(m)) return "technik"; if (/hit|treffer/.test(m)) return "nohit"; if (/boss/.test(m)) return "bosse"; if (/erkund|entdeck/.test(m)) return "erkundung"; }

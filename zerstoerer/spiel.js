@@ -6,12 +6,26 @@
   const Z = window.Z, U = Z.U, T = Z.TILE, FX = Z.fx, A = Z.audio, W = Z.world, L = v => Z.L(v), inp = Z.input;
 
   /* ======================= META-SPEICHER ======================= */
+  /* W19 Slots: zentrale Speicher-Schicht mit drei Spielständen.
+     Spielfortschritt (alles in Z.meta: Splitter, Schmiede, Fundbuch, Erfolge, Runen, Lager-Stufen, Bestzeiten, Nemesis, Tagebuch …)
+     liegt je Spielstand unter „imres-zerstoerer-s<n>-v1“. Einstellungen (Grafik, Ton, Tasten, Sprache) bleiben global (kern.js).
+     „imres-zerstoerer-v1“ (altes Einzel-Format) bleibt ein Spiegel des aktiven Spielstands – der Spielesaal (spielesaal.js) und
+     ältere Programmstände lesen ihn weiter. Migration: der alte Stand wird beim ersten Start Spielstand 1 (plus Sicherungskopie). */
   const KEY = "imres-zerstoerer-v1";
+  const SKEY = n => "imres-zerstoerer-s" + n + "-v1", AKT = "imres-zerstoerer-slot", MIG = "imres-zerstoerer-slotmig", BAK = "imres-zerstoerer-v1-vorW19";
+  const WEG = n => "imres-zerstoerer-s" + n + "-weg"; /* letzter gelöschter/überschriebener Stand je Platz (Rettungsanker) */
+  const NSLOT = 3;
+  const ls = {
+    get: k => { try { return localStorage.getItem(k); } catch (_) { return null; } },
+    set: (k, v) => { try { localStorage.setItem(k, v); return localStorage.getItem(k) === v; } catch (_) { return false; } },
+    del: k => { try { localStorage.removeItem(k); } catch (_) {} }
+  };
   const META0 = () => ({ v: 1, shards: 0, wlvl: {}, luck: {}, found: {}, up: { trank: 0, zaeh: 0, klingen: 0, haendler: 0 }, skulls: 0, skullSel: 0, endings: {}, runs: 0, wins: 0, best: { time: 0, kills: 0 }, seen: {}, bosses: {}, intro: false, tut: false, forge: {} });
-  Z.meta = META0();
-  try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); if (s && s.v === 1) {
-    /* gegen kaputte Speicherstände absichern: Objektfelder nur als Objekt, Zahlen nur endlich */
+  /* gegen kaputte Speicherstände absichern: Objektfelder nur als Objekt, Zahlen nur endlich */
+  function parseMeta(raw) {
+    let s = null; try { s = JSON.parse(raw || "null"); } catch (_) { s = null; }
     const m = META0();
+    if (!s || s.v !== 1) return m;
     for (const k in s) {
       const v = s[k], d = m[k];
       if (d && typeof d === "object") { if (v && typeof v === "object" && !Array.isArray(v)) m[k] = Object.assign(d, v); }
@@ -19,9 +33,99 @@
       else if (typeof d === "boolean") m[k] = !!v;
       else if (v !== null && v !== undefined) m[k] = v;
     }
-    Z.meta = m;
-  } } catch (_) {}
-  Z.saveMeta = () => { try { localStorage.setItem(KEY, JSON.stringify(Z.meta)); } catch (_) {} };
+    return m;
+  }
+  /* Migration (einmalig): alter Einzel-Stand → Spielstand 1; erst wenn die Kopie nachweislich geschrieben ist, gilt sie als erledigt */
+  if (!ls.get(MIG)) {
+    const old = ls.get(KEY);
+    let ok = true;
+    if (old) {
+      if (!ls.get(BAK)) ls.set(BAK, old);
+      if (!ls.get(SKEY(1))) ok = ls.set(SKEY(1), old);
+    }
+    if (ok) { ls.set(MIG, "1"); if (!ls.get(AKT)) ls.set(AKT, "1"); }
+  }
+  let slot = Math.max(1, Math.min(NSLOT, parseInt(ls.get(AKT), 10) || 1));
+  { const raw = ls.get(SKEY(slot)); if (raw && !/^\s*\{/.test(raw)) ls.set(SKEY(slot) + "-kaputt", raw); }
+  Z.meta = parseMeta(ls.get(SKEY(slot)) || (ls.get(MIG) ? null : ls.get(KEY)));
+  Z.saveMeta = () => {
+    if (!Z.meta) return;
+    Z.meta.zuletzt = Date.now();
+    const s = JSON.stringify(Z.meta);
+    ls.set(SKEY(slot), s); ls.set(KEY, s);
+  };
+  /* Fortschritt ja/nein, Kurzübersicht je Platz (Titelbild, Spielstand-Auswahl) */
+  const hasProgress = m => !!(m && ((m.runs | 0) > 0 || m.intro || (m.shards | 0) > 0 || (m.wins | 0) > 0));
+  function areaOf(m) {
+    /* höchstes erreichtes Gebiet: mitgeschrieben (meta.gebiet) – ältere Stände: aus den getroffenen Wächtern/Bossen abgeleitet */
+    let best = null;
+    const take = (id, tier) => { if (id && Number.isFinite(tier) && (!best || tier > best.tier)) best = { id, tier }; };
+    if (m.gebiet && typeof m.gebiet === "object") take(m.gebiet.id, m.gebiet.tier);
+    const B = Z.BIOMES || {}, AR = Z.ARENAS || {};
+    for (const b in m.bosses || {}) {
+      for (const id in B) if (B[id].warden === b) take(id, B[id].tier);
+      for (const id in AR) if (AR[id].boss === b) take(id, AR[id].tier);
+    }
+    if (!best && (m.runs | 0) > 0) take("torhof", 0);
+    if (!best) return null;
+    const d = B[best.id] || AR[best.id];
+    return { id: best.id, tier: best.tier, name: d && d.name ? d.name : [best.id, best.id] };
+  }
+  const swapHooks = (Z._slotSwap = Z._slotSwap || []); /* früher geladene Module (klang.js) melden sich hier an */
+  Z.slots = {
+    N: NSLOT,
+    active: () => slot,
+    key: SKEY,
+    raw: n => ls.get(SKEY(n)),
+    meta: n => (n === slot ? Z.meta : parseMeta(ls.get(SKEY(n)))),
+    has: n => hasProgress(Z.slots.meta(n)),
+    info(n) {
+      const m = Z.slots.meta(n), on = hasProgress(m);
+      return { n, leer: !on, runs: m.runs | 0, wins: m.wins | 0, enden: Object.keys(m.endings || {}).filter(k => m.endings[k]).length, gebiet: on ? areaOf(m) : null, zeit: Math.max(0, +m.spielzeit || 0), zuletzt: +m.zuletzt || 0, aktiv: n === slot };
+    },
+    /* zuletzt benutzter Platz mit Fortschritt (für „Weiterspielen“) – bevorzugt der aktive */
+    last() {
+      if (Z.slots.has(slot)) return slot;
+      let b = 0, bt = -1;
+      for (let n = 1; n <= NSLOT; n++) { const i = Z.slots.info(n); if (!i.leer && i.zuletzt > bt) { bt = i.zuletzt; b = n; } }
+      return b || 0;
+    },
+    onSwap: fn => { if (typeof fn === "function") swapHooks.push(fn); },
+    /* Platz wechseln (nur vom Titelbild aus): Z.meta tauschen und Module ihre Meta-Felder neu anlegen lassen */
+    use(n, frisch) {
+      n = Math.max(1, Math.min(NSLOT, n | 0));
+      if (n !== slot && Z.level && hasProgress(Z.meta)) Z.saveMeta();
+      slot = n; ls.set(AKT, String(n));
+      Z.meta = frisch ? META0() : parseMeta(ls.get(SKEY(n)));
+      const raw = ls.get(SKEY(n)); if (raw && !frisch) ls.set(KEY, raw); else ls.del(KEY);
+      for (const fn of swapHooks) { try { fn(n); } catch (e) { console.error(e); } }
+      return Z.meta;
+    },
+    /* Neues Spiel auf Platz n (überschreibt – vorher Sicherung unter -weg) */
+    neu(n) {
+      const raw = ls.get(SKEY(n)); if (raw && hasProgress(parseMeta(raw))) ls.set(WEG(n), raw);
+      ls.del(SKEY(n));
+      return Z.slots.use(n, true);
+    },
+    loeschen(n) {
+      const raw = ls.get(SKEY(n)); if (raw && hasProgress(parseMeta(raw))) ls.set(WEG(n), raw);
+      ls.del(SKEY(n));
+      if (n === slot) { Z.meta = META0(); ls.del(KEY); for (const fn of swapHooks) { try { fn(n); } catch (e) { console.error(e); } } }
+    },
+    kopieren(a, b) {
+      if (a === b) return false;
+      if (a === slot && Z.level && Z.meta) Z.saveMeta(); /* auf dem Titelbild ist der Speicher schon aktuell */
+      const src = ls.get(SKEY(a)); if (!src) return false;
+      const raw = ls.get(SKEY(b)); if (raw && hasProgress(parseMeta(raw))) ls.set(WEG(b), raw);
+      if (!ls.set(SKEY(b), src)) return false;
+      if (b === slot) Z.slots.use(b);
+      return true;
+    },
+    areaOf, parse: parseMeta, fresh: META0
+  };
+  /* Spielzeit je Spielstand (nur solange ein Gebiet läuft, sichtbar und nicht pausiert) */
+  setInterval(() => { if (Z.level && !Z.paused && !document.hidden && Z.meta) Z.meta.spielzeit = (+Z.meta.spielzeit || 0) + 5; }, 5000);
+  addEventListener("pagehide", () => { if (Z.level && Z.meta) Z.saveMeta(); });
 
   /* Sondergebiete für die Darstellung */
   const HUB_B = { flow: "flat", out: true, name: ["Das Lager vor der Feste", "The Camp before the Keep"], sky: ["#1a1020", "#4a2434", "#8a4a3a"], wall: "#2a2224", brick: "#1a1416", tile: { base: "#3e3a30", light: "#6a5e44", dark: "#1e1a14", det: "#4a4a30", top: "moss", topCol: "#4a5a2a" }, plat: "#6a4a30", dark: 0.32, ambCol: "#4a2a2a", bg: "camp", weather: ["fireflies", "leaves"], props: {}, amb: { loops: [["amb/a_lagerfeuer.mp3", 0.5], ["amb/a_nacht.mp3", 0.35]], one: [["e_eule_", 4, 14]] } };
@@ -96,6 +200,8 @@
     lv.id = id;
     W.lv = lv; Z.level = lv; Z.biome = B;
     if (Z.run) { Z.run.area = id; if (Z.BIOMES[id]) Z.run.tier = Z.BIOMES[id].tier; if (Z.ARENAS[id]) Z.run.tier = Z.ARENAS[id].tier; }
+    /* W19 Slots: höchstes erreichtes Gebiet für die Spielstand-Übersicht */
+    { const d = Z.BIOMES[id] || Z.ARENAS[id], g = Z.meta.gebiet; if (d && Number.isFinite(d.tier) && (!g || typeof g !== "object" || !(g.tier >= d.tier))) Z.meta.gebiet = { id, tier: d.tier }; }
     Z.gfx.setLevel(lv, B);
     /* Spieler */
     const P = Z.player || (Z.player = Z.newPlayer());

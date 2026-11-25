@@ -471,6 +471,8 @@
   /* ======================= LAUFSTART: Held, Umhang, Pakte ======================= */
   const ui = () => Z.ui;
   let sel = null;
+  /* W19 Slots: Spielstand gewechselt → Meta-Felder dieses Moduls neu anlegen, Umhang und Laufstart-Auswahl aus dem neuen Stand */
+  if (Z.slots) Z.slots.onSwap(() => { metaInit(); applyCape(); sel = null; });
   function startModal() {
     const m = M(); sel = sel || { hero: m.heroes[m.hero] ? m.hero : "Z", cape: m.capes[m.cape] ? m.cape : "rot", pacts: (m.pactSel || []).slice(), kit: KITS[m.kit] ? m.kit : "sb" };
     const b = (act, arg, on, lab, dis, sub) => '<button class="wahl' + (on ? " an" : "") + '" data-act="' + act + '" data-arg="' + arg + '"' + (dis ? " disabled" : "") + "><b>" + esc(lab) + "</b>" + (sub ? "<small>" + esc(sub) + "</small>" : "") + "</button>";
