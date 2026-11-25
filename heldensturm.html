@@ -43134,11 +43134,13 @@ function kanal(e,dauer,fertig,o){/* angekündigter Kanal: steht still, leuchtend
 function kanalTick(e,dt){const k=e.kan;if(!k)return;k.t+=dt;if(e.hp<k.hp-e.maxHp*k.brich){e.kan=null;e.stun=0;e.kanCd=G.time+5;word(e.x,e.y-e.r-18,'Unterbrochen!','#ffd27a');burst(e.x,e.y,'#ffd27a',8,120);return}
  if(k.t>=k.d){e.kan=null;try{k.fertig(e)}catch(x){rErr(x)}}}
 function erstesTreffen(e){try{if(G.bot||!e.def||!NEU[e.def.id])return;const id=e.def.id;SAVE.rgSeen=SAVE.rgSeen||{};if(SAVE.rgSeen[id])return;if(!sicht(e))return;SAVE.rgSeen[id]=1;
-  const d=NEU[id];if(d.tip){toast(`<b>Neuer Gegner: ${esc(d.n)}</b> – ${esc(d.tip)}`,'#e8c890');}try{bestErlebt('rg_'+id)}catch(x){}persist()}catch(x){rErr(x)}}
+  const d=NEU[id];if(d.tip){toast(`<b>Neuer Gegner: ${esc(d.n)}</b> – ${esc(d.tip)}`,'#e8c890');}try{SAVE.bw=SAVE.bw||{};SAVE.bw['rg_'+id]=1}catch(x){}  /* Eintrag still freischalten – der Hinweis oben sagt schon alles */persist()}catch(x){rErr(x)}}
 /* ---------- Mechaniken ---------- */
 const M={};
 M.falle=(e,dt)=>{e.atkCd=9;e.m1=(e.m1===undefined?rnd(1.5,3):e.m1)-dt;if(e.m1>0||!nah(e,460)||!sicht(e))return;e.m1=rnd(4.5,6);
- const x=P.x+rnd(-50,50)+(P.vx||0)*0.5,y=P.y+rnd(-40,40)+(P.vy||0)*0.5;zone({k:'falle',x,y,r:e.def.dornen?34:24,life:14,scharf:0.7,dmg:e.dmg*0.9,dornen:e.def.dornen});
+ /* höchstens drei eigene Fallen gleichzeitig – sonst wurde der Boden um den Helden unlesbar */
+ if(Z.filter(z=>z.own===e).length>=3)return;
+ const x=P.x+rnd(-50,50)+(P.vx||0)*0.5,y=P.y+rnd(-40,40)+(P.vy||0)*0.5;zone({k:'falle',x,y,r:e.def.dornen?34:24,life:11,scharf:0.7,dmg:e.dmg*0.9,dornen:e.def.dornen,own:e,weg:()=>e.dead&&Math.random()<0.02});
  eShot(e.x,e.y-4,Math.atan2(y-e.y,x-e.x),0,0,{kind:'eball',life:0.01});burst(x,y,'#c8b080',5,60)};
 M.trommel=(e,dt)=>{e.atkCd=9;e.m1=(e.m1||0)-dt;if(e.m1>0)return;e.m1=0.5;let n=0;query(e.x,e.y,240,o=>{if(o!==e&&!o.dead&&!o.boss){o.drumT=G.time+0.7;n++}});if(n&&((e.m2=(e.m2||0)+1)%2===0))ring(e.x,e.y,240,'#e8a050',0.5,2)};
 M.ruf=(e,dt)=>{if(e.kan){kanalTick(e,dt);return}if(e.rufFertig||(e.kanCd||0)>G.time||!nah(e,520)||!sicht(e))return;
@@ -43253,6 +43255,60 @@ const E2=window.__hsECHO2={v:1,aus:0,DMG0:0.4,BIS:15,HP:0.12};
 hook('stats',s=>{try{if(E2.aus||!P||P.id!=='echo')return;const lv=Math.max(1,P.level|0);const f=Math.max(0,1-(lv-1)/(E2.BIS-1));s.dmgP=(s.dmgP||0)+E2.DMG0*f;s.hpP=(s.hpP||0)+E2.HP}catch(e){}});
 }catch(e){console.error('echo2',e);window.__hsECHO2={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/echo2» */
+/* «padziel» */
+/* ================= Paket „padziel“: Controller – Fähigkeiten in Laufrichtung – window.__hsPADZIEL =================
+   Rückmeldung: Am Controller lassen sich Zielhebel und Fähigkeitstaste kaum gleichzeitig drücken. Fähigkeiten gingen deshalb
+   meist dorthin, wohin man vor bis zu drei Sekunden noch mit dem rechten Stick gezielt hatte (PAD_STICKY), oder aufs nächste Ziel.
+   Jetzt (ohne Maus, solange der rechte Stick NICHT gehalten wird):
+     · Läuft der Held, wirkt jede Fähigkeit in Laufrichtung – mit leichter Zielhilfe: Steht ein Gegner in einem schmalen Kegel
+       (±25°) vor ihm, wird er anvisiert, sonst geht es genau geradeaus.
+     · Steht der Held still, gilt wie bisher die letzte Zielrichtung bzw. das nächste Ziel.
+     · Wer den rechten Stick hält, zielt weiter damit; Maus und Touch-Zielen bleiben unverändert.
+   Abschaltbar: __hsPADZIEL.aus=1 */
+(function(){try{if(window.__hsPADZIEL)return;
+const PZ=window.__hsPADZIEL={v:1,aus:0,n:0,KEGEL:0.45};
+const laeuft=()=>P&&Math.hypot(P.lix||0,P.liy||0)>0.3&&P.mvA!=null&&isFinite(P.mvA);
+const frei=()=>!PZ.aus&&P&&!G.auCast&&!P.padHeld&&!(P.touchAim!=null&&P.touchAim>=0)&&!(typeof mouseAim==='function'&&mouseAim())&&!(P.netIn&&P.padAim!=null);
+if(typeof aimAng==='function'){const a0=aimAng;aimAng=function(R){try{if(frei()&&laeuft()){PZ.n++;const a=P.mvA,r=R||500;let t=null;
+  try{t=(typeof prioInCone==='function'&&prioInCone(a,r,PZ.KEGEL))||(typeof coneTarget==='function'&&coneTarget(a,r,PZ.KEGEL))}catch(e){}
+  return t?ang(P,t):a}}catch(e){}return a0.apply(this,arguments)}}
+/* alte, „klebende“ Zielrichtung verwerfen, sobald man ohne Zielhebel losläuft – sonst lesen manche Fähigkeiten sie direkt */
+hook('tick',()=>{try{if(frei()&&laeuft()&&P.padAim!=null)P.padAim=null}catch(e){}});
+}catch(e){console.error('padziel',e);window.__hsPADZIEL={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/padziel» */
+/* «melde» */
+/* ================= Paket „melde“: Meldungen überlappen sich nicht mehr – window.__hsMELDE =================
+   Befund (Bilder aus dem Spiel): Hinweise (Toasts) lagen über dem Abschnittsnamen und über großen Bannern („Der Beutelschneider“),
+   gleiche Meldungen erschienen doppelt untereinander, gleiche Weltwörter („Der Tropfstein bricht!“) zweimal versetzt übereinander.
+   Jetzt:
+     · Die Hinweisliste rutscht weich unter den Abschnittsnamen bzw. unter ein gerade sichtbares Banner und danach zurück.
+     · Gleicher Hinweis binnen 2,5 s nur einmal; gleiches Weltwort am selben Ort binnen 0,6 s nur einmal.
+   Rein darstellend. Abschaltbar: __hsMELDE.aus=1 */
+(function(){try{if(window.__hsMELDE)return;
+const ME=window.__hsMELDE={v:1,aus:0,n:{toast:0,wort:0}};
+const el=()=>typeof toastEl!=='undefined'&&toastEl?toastEl:document.getElementById('toast');
+let basis=null,zuletzt=-1;
+function frei(){/* unterste belegte Bildschirmzeile (CSS-Pixel) durch Abschnittsname oder Banner */
+ let y=0;
+ try{if(typeof KANAME!=='undefined'&&KANAME.t>0){let top=70;const h=document.querySelector('#hud .top');if(h){const r=h.getBoundingClientRect();if(r.height>0)top=r.bottom+(W<700?58:14)}const fs=W<700?15:19;y=Math.max(y,top+fs+(KANAME.sub?24:14))}}catch(e){}
+ try{const b=G&&G.banner;if(b&&b.t<b.dur){const fs=Math.min(b.size||56,W*0.105),by=b.y||H*(b.bars?0.32:0.26);y=Math.max(y,by+fs*(b.small?1.45:0.9))}}catch(e){}
+ return y}
+function lage(){const t=el();if(!t)return;if(basis===null){basis=parseFloat(getComputedStyle(t).top)||150;t.style.transition='top .25s ease'}
+ if(ME.aus||!G||G.state!=='play'){if(zuletzt!==-1){t.style.top='';zuletzt=-1}return}
+ const y=frei(),ziel=y>basis-8?Math.round(y+8):-1;if(ziel!==zuletzt){zuletzt=ziel;t.style.top=ziel<0?'':ziel+'px'}}
+(function schleife(){try{lage()}catch(e){}requestAnimationFrame(schleife)})();
+/* Banner nicht über den Abschnittsnamen legen: Banner rückt unter ihn */
+function kaUnten(){try{if(typeof KANAME!=='undefined'&&KANAME.t>0){let top=70;const h=document.querySelector('#hud .top');if(h){const r=h.getBoundingClientRect();if(r.height>0)top=r.bottom+(W<700?58:14)}const fs=W<700?15:19;return top+fs+(KANAME.sub?40:22)}}catch(e){}return 0}
+if(typeof drawBanner==='function'){const db=drawBanner;drawBanner=function(){const b=G&&G.banner;try{if(!ME.aus&&b){const k=kaUnten();if(k){const fs=Math.min(b.size||56,W*0.105),by=b.y||H*(b.bars?0.32:0.26);if(by-fs*0.8<k)b.y=k+fs*0.8}}}catch(e){}
+ return db.apply(this,arguments)}}  /* einmal verschoben, bleibt das Banner dort – kein Springen */
+/* doppelte Hinweise und Weltwörter */
+const zeit=()=>performance.now();
+const TQ=new Map();
+if(typeof toast==='function'){const t0=toast;toast=function(m){try{if(!ME.aus){const k=String(m).replace(/<[^>]+>/g,'').trim();const n=zeit(),v=TQ.get(k);if(v&&n-v<2500){ME.n.toast++;return}TQ.set(k,n);if(TQ.size>60){for(const [a,b] of TQ)if(n-b>5000)TQ.delete(a)}}}catch(e){}return t0.apply(this,arguments)}}
+const WQ=[];
+if(typeof word==='function'){const w0=word;word=function(x,y,txt){try{if(!ME.aus){const n=zeit();for(let i=WQ.length-1;i>=0;i--){const q=WQ[i];if(n-q.t>600){WQ.splice(i,1);continue}if(q.s===txt&&Math.abs(q.x-x)<140&&Math.abs(q.y-y)<90){ME.n.wort++;return}}WQ.push({s:txt,x,y,t:n});if(WQ.length>40)WQ.shift()}}catch(e){}return w0.apply(this,arguments)}}
+}catch(e){console.error('melde',e);window.__hsMELDE={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/melde» */
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
