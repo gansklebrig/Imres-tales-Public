@@ -43461,7 +43461,7 @@ if(typeof kaDeko==='function'){const kd=kaDeko;kaDeko=function(S){const r=kd.app
  /* Teppichläufer: In Schloss, Hof und Wachhaus führt durch große Hallen ein roter Läufer entlang des Hauptwegs */
  try{const W=K.ka2W,th=G.themeKey;if(W&&W.length>3&&(th==='schloss'||th==='hof'||th==='wachhaus')){const D=abst(K),n=K.n,Z=K.Z,dAt=(x,y)=>{const i=(x/Z)|0,j=(y/Z)|0;return i<0||j<0||i>=n||j>=n?0:D[j*n+i]};
    const S=[];for(let q=1;q<W.length;q++){const a=W[q-1],b=W[q],l=Math.hypot(b[0]-a[0],b[1]-a[1]),st=Math.max(1,Math.round(l/40));for(let u=0;u<st;u++)S.push([a[0]+(b[0]-a[0])*u/st,a[1]+(b[1]-a[1])*u/st])}
-   let nT=0;for(let q=1;q<S.length-1;q+=2){const p=S[q];if(dAt(p[0],p[1])<4)continue;if(K.tore&&K.tore.some(o=>Math.hypot(o.x-p[0],o.y-p[1])<200))continue;if(K.start&&Math.hypot(K.start.x-p[0],K.start.y-p[1])<160)continue;
+   let nT=0;for(let q=1;q<S.length-1;q+=2){const p=S[q];if(dAt(p[0],p[1])<4)continue;{const i=(p[0]/Z)|0,j=(p[1]/Z)|0;if(K.lo&&K.lo[j*n+i])continue}if(typeof wlLoPunkt==='function'&&wlLoPunkt(p[0],p[1],50))continue;if(K.tore&&K.tore.some(o=>Math.hypot(o.x-p[0],o.y-p[1])<200))continue;if(K.start&&Math.hypot(K.start.x-p[0],K.start.y-p[1])<160)continue;
     const a=S[q-1],b=S[q+1];const ang=Math.atan2(b[1]-a[1],b[0]-a[0]);G.deco.push({x:p[0],y:p[1],k:'rh_teppich',a:ang,s:1,v:0,wl:1,rh:7});nT++}
    RH.teppich=nT}}catch(e){console.error('rhythm-teppich',e)}
  /* Kerzenecken (Gruft, Kerker, Ruine, Turm) und verschüttete Tränke (Labor): kleine Orte nahe dem Weg, an Wänden */
