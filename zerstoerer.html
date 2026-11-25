@@ -92,10 +92,12 @@ kbd:empty{display:none}
 #padhint[hidden]{display:none}
 body:has(#padhint:not([hidden])) #modal{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 52px)}
 body:has(#padhint:not([hidden])) .mbox{max-height:calc((100vh - 70px) / var(--ui,1))!important}
+html:not(.handheld) body:has(#padhint:not([hidden])) #modal{padding-top:30px}html:not(.handheld) body:has(#padhint:not([hidden])) .mbox{max-height:calc((100vh - 90px) / var(--ui,1))!important} /* W24 Auflösung: hohe Fenster (z. B. „Die Feste betreten“ bei 720p) klebten 16 px an der Oberkante, unten 52 px für die Tastenleiste – oben etwas Luft, Handheld unverändert */
 .mbox :focus-visible,.mbox button:focus{outline:2px solid var(--gold);outline-offset:2px}
 #minimap.gross{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);max-width:none;z-index:30;box-shadow:0 0 0 2px var(--eisen3),0 0 0 4px #000,0 10px 50px #000}
 /* W24 Auflösung: große Karte steht in .hr (zoom --hud) – Zoom aufheben, sonst ist sie auf großen Schirmen breiter als das Bild und nach links verrutscht */
 html #minimap.gross{zoom:calc(1 / var(--hud,1));max-width:96vw;max-height:90vh} /* html: schlägt .klein #minimap{max-width:96px} – auf kleinen Schirmen war die große Karte nur 96 px breit */
+body:has(#minimap.gross) #card,body:has(#minimap.gross) #prompt{visibility:hidden} /* W24 Auflösung: Fundkarte lag (eigene Ebene z 15) über der großen Karte */
 #fps{font-size:10px;color:var(--mute)}
 .hb{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);left:50%;transform:translateX(-50%);display:flex;gap:10px;align-items:flex-end}
 .slot{position:relative;width:52px;height:52px;border-radius:7px;background:radial-gradient(circle at 50% 40%,rgba(40,26,30,.92),rgba(14,9,11,.92));border:2px solid var(--rar,#3b2e28);box-shadow:0 0 0 1px #000,inset 0 0 12px rgba(0,0,0,.65)}
@@ -589,61 +591,61 @@ button:disabled{opacity:.45;cursor:default}
 <div id="modal" hidden></div>
 <div id="title"></div>
 <div id="fade"></div>
-<script src="tonregler.js?v=137"></script>
-<script src="zerstoerer/kern.js?v=137"></script>
-<script src="zerstoerer/platz.js?v=137"></script>
-<script src="zerstoerer/welt.js?v=137"></script>
-<script src="zerstoerer/daten.js?v=137"></script>
-<script src="zerstoerer/kampf.js?v=137"></script>
-<script src="zerstoerer/steuerung.js?v=137"></script>
-<script src="zerstoerer/geschosse.js?v=137"></script>
-<script src="zerstoerer/gegner.js?v=137"></script>
-<script src="zerstoerer/bosse.js?v=137"></script>
-<script src="zerstoerer/bossphasen.js?v=137"></script>
-<script src="zerstoerer/figuren.js?v=137"></script>
-<script src="zerstoerer/werkzeuge.js?v=137"></script>
-<script src="zerstoerer/bild.js?v=137"></script>
-<script src="zerstoerer/pracht.js?v=137"></script>
-<script src="zerstoerer/grafik.js?v=137"></script>
-<script src="zerstoerer/musik.js?v=137"></script>
-<script src="zerstoerer/klang.js?v=137"></script>
-<script src="zerstoerer/spiel.js?v=137"></script>
-<script src="zerstoerer/lager.js?v=137"></script>
-<script src="zerstoerer/parcours.js?v=137"></script>
-<script src="zerstoerer/fallen.js?v=137"></script>
-<script src="zerstoerer/bilanz.js?v=137"></script>
-<script src="zerstoerer/kampfkunst.js?v=137"></script>
-<script src="zerstoerer/hintergrund.js?v=137"></script>
-<script src="zerstoerer/bilderbuch.js?v=137"></script>
-<script src="zerstoerer/tageszeit.js?v=137"></script>
-<script src="zerstoerer/abenteuer.js?v=137"></script>
-<script src="zerstoerer/fluch.js?v=137"></script>
-<script src="zerstoerer/fluchkraft.js?v=137"></script>
-<script src="zerstoerer/ebenen.js?v=137"></script>
-<script src="zerstoerer/erkundung.js?v=137"></script>
-<script src="zerstoerer/spuren.js?v=137"></script>
-<script src="zerstoerer/effekte.js?v=137"></script>
-<script src="zerstoerer/hinterhalt.js?v=137"></script>
-<script src="zerstoerer/leben.js?v=137"></script>
-<script src="zerstoerer/gegnerkunst.js?v=137"></script>
-<script src="zerstoerer/demogorgon.js?v=137"></script>
-<script src="zerstoerer/nemesis.js?v=137"></script>
-<script src="zerstoerer/wetter.js?v=137"></script>
-<script src="zerstoerer/wunder.js?v=137"></script>
-<script src="zerstoerer/ausstattung.js?v=137"></script>
-<script src="zerstoerer/ausgleich.js?v=137"></script>
-<script src="zerstoerer/ui.js?v=137"></script>
-<script src="zerstoerer/praesentation.js?v=137"></script>
-<script src="zerstoerer/schmiede.js?v=137"></script>
-<script src="zerstoerer/runen.js?v=137"></script>
-<script src="zerstoerer/tagebuch.js?v=137"></script>
-<script src="zerstoerer/schilder.js?v=137"></script>
-<script src="zerstoerer/weltspuren.js?v=137"></script>
-<script src="zerstoerer/uebergang.js?v=137"></script>
-<script src="zerstoerer/rueckweg.js?v=137"></script>
-<script src="zerstoerer/haerte.js?v=137"></script> <!-- W9 Härte -->
-<script src="zerstoerer/weltkarte.js?v=137"></script> <!-- W21 -->
-<script src="zerstoerer/rueckblick.js?v=137"></script> <!-- W21 -->
-<script src="zerstoerer/bossrausch.js?v=137"></script> <!-- W21 -->
+<script src="tonregler.js?v=138"></script>
+<script src="zerstoerer/kern.js?v=138"></script>
+<script src="zerstoerer/platz.js?v=138"></script>
+<script src="zerstoerer/welt.js?v=138"></script>
+<script src="zerstoerer/daten.js?v=138"></script>
+<script src="zerstoerer/kampf.js?v=138"></script>
+<script src="zerstoerer/steuerung.js?v=138"></script>
+<script src="zerstoerer/geschosse.js?v=138"></script>
+<script src="zerstoerer/gegner.js?v=138"></script>
+<script src="zerstoerer/bosse.js?v=138"></script>
+<script src="zerstoerer/bossphasen.js?v=138"></script>
+<script src="zerstoerer/figuren.js?v=138"></script>
+<script src="zerstoerer/werkzeuge.js?v=138"></script>
+<script src="zerstoerer/bild.js?v=138"></script>
+<script src="zerstoerer/pracht.js?v=138"></script>
+<script src="zerstoerer/grafik.js?v=138"></script>
+<script src="zerstoerer/musik.js?v=138"></script>
+<script src="zerstoerer/klang.js?v=138"></script>
+<script src="zerstoerer/spiel.js?v=138"></script>
+<script src="zerstoerer/lager.js?v=138"></script>
+<script src="zerstoerer/parcours.js?v=138"></script>
+<script src="zerstoerer/fallen.js?v=138"></script>
+<script src="zerstoerer/bilanz.js?v=138"></script>
+<script src="zerstoerer/kampfkunst.js?v=138"></script>
+<script src="zerstoerer/hintergrund.js?v=138"></script>
+<script src="zerstoerer/bilderbuch.js?v=138"></script>
+<script src="zerstoerer/tageszeit.js?v=138"></script>
+<script src="zerstoerer/abenteuer.js?v=138"></script>
+<script src="zerstoerer/fluch.js?v=138"></script>
+<script src="zerstoerer/fluchkraft.js?v=138"></script>
+<script src="zerstoerer/ebenen.js?v=138"></script>
+<script src="zerstoerer/erkundung.js?v=138"></script>
+<script src="zerstoerer/spuren.js?v=138"></script>
+<script src="zerstoerer/effekte.js?v=138"></script>
+<script src="zerstoerer/hinterhalt.js?v=138"></script>
+<script src="zerstoerer/leben.js?v=138"></script>
+<script src="zerstoerer/gegnerkunst.js?v=138"></script>
+<script src="zerstoerer/demogorgon.js?v=138"></script>
+<script src="zerstoerer/nemesis.js?v=138"></script>
+<script src="zerstoerer/wetter.js?v=138"></script>
+<script src="zerstoerer/wunder.js?v=138"></script>
+<script src="zerstoerer/ausstattung.js?v=138"></script>
+<script src="zerstoerer/ausgleich.js?v=138"></script>
+<script src="zerstoerer/ui.js?v=138"></script>
+<script src="zerstoerer/praesentation.js?v=138"></script>
+<script src="zerstoerer/schmiede.js?v=138"></script>
+<script src="zerstoerer/runen.js?v=138"></script>
+<script src="zerstoerer/tagebuch.js?v=138"></script>
+<script src="zerstoerer/schilder.js?v=138"></script>
+<script src="zerstoerer/weltspuren.js?v=138"></script>
+<script src="zerstoerer/uebergang.js?v=138"></script>
+<script src="zerstoerer/rueckweg.js?v=138"></script>
+<script src="zerstoerer/haerte.js?v=138"></script> <!-- W9 Härte -->
+<script src="zerstoerer/weltkarte.js?v=138"></script> <!-- W21 -->
+<script src="zerstoerer/rueckblick.js?v=138"></script> <!-- W21 -->
+<script src="zerstoerer/bossrausch.js?v=138"></script> <!-- W21 -->
 </body>
 </html>
