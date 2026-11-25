@@ -9689,8 +9689,8 @@
 "sha256":"3ab7b7816ddadc9aa1ef272db3236698570d927a2f28af60f6ead1f3ac0a9320"
 },
 "zerstoerer.html":{
-"groesse":66226,
-"sha256":"1cb6f4c1287800d756eea1ffadd9f76b6f811b2c357a2476c17b3ade4bf35a7c"
+"groesse":68449,
+"sha256":"a39f58004f88722eb581ca664c9d99da81e71d9cd252108cdd98330208c805df"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":143716,
@@ -9913,5 +9913,5 @@
 "sha256":"bd666dd2ac70650c8a7b947c709a2c71251f4de5328a9f37e1b70d932514c922"
 }
 },
-"stand":134
+"stand":135
 }

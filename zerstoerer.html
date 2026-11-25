@@ -530,8 +530,24 @@ button:disabled{opacity:.45;cursor:default}
 .eisen,#prompt,#card,#choice,.meldung:not(.pergament),.wl,#hfzeile,.hfkarte{background-image:var(--eisenkorn),linear-gradient(rgba(36,22,26,.94),rgba(20,12,15,.94))}
 #title{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 300' preserveAspectRatio='none'%3E%3Cpath d='M0 300V230h60v-30h20v30h80v-60h14l6-30 6 30h14v60h120v-20h30v-50h10v-14h10v14h10v50h30v20h200v-90h16v-26l10-18 10 18v26h16v90h160v-40h40v40h220v-70h12v-40h10l8-24 8 24h10v40h12v70h260v-30h20v-20h12v20h20v30H1600V300z' fill='%23180a0c' opacity='.85'/%3E%3C/svg%3E"),radial-gradient(ellipse at 50% 72%,rgba(140,30,20,.38),rgba(0,0,0,0) 60%),linear-gradient(#0c080a,#1a0c10 70%,#2a0e10);background-repeat:no-repeat,no-repeat,no-repeat;background-position:bottom center,center,center;background-size:100% 26%,auto,auto}
 </style>
+<script>/* W23 Browser: Ladefortschritt (im <head>, damit kein Skripttext in body.textContent landet) (Skripte laden nacheinander; N = Zahl der <script src> unten, wächst notfalls mit) */
+(function () {
+  var N = 56, n = 0, fehl = 0, el = function (i) { return document.getElementById(i); };
+  function zeig() { var p = Math.min(99, Math.round(n / N * 100)); if (!el("w23laden-b")) return; el("w23laden-b").style.width = Math.max(2, p) + "%"; el("w23laden-p").textContent = p + " %"; }
+  document.addEventListener("load", function (e) { if (e.target && e.target.tagName === "SCRIPT") { n++; if (n > N) N = n + 1; zeig(); } }, true);
+  document.addEventListener("error", function (e) { if (e.target && e.target.tagName === "SCRIPT" && el("w23laden-t")) { fehl++; el("w23laden-t").innerHTML = "Eine Spieldatei konnte nicht geladen werden (Verbindung?).<br><button onclick=\"location.reload()\" style=\"margin-top:10px;font:inherit;padding:6px 16px;background:#2a1a1e;color:#e5b454;border:1px solid #e5b454;border-radius:6px;cursor:pointer\">Neu laden</button>"; } }, true);
+  document.addEventListener("DOMContentLoaded", function () { if (fehl) return; var l = el("w23laden"); if (l) l.remove(); });
+})();
+</script>
 </head>
 <body>
+<!-- W23 Browser: Ladebildschirm – bei langsamem Netz (5 MB Skripte) erscheint sofort etwas statt minutenlang nichts; Fortschritt = geladene Skripte -->
+<div id="w23laden" style="position:fixed;inset:0;z-index:2147483000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(ellipse at 50% 70%,#3a1210,#0c080a 70%);color:#e5b454;font:600 15px/1.4 Georgia,serif;text-align:center;padding:20px">
+  <div style="font-size:clamp(28px,7vw,54px);letter-spacing:.08em;color:#ff6a4a;text-shadow:0 2px 14px rgba(140,20,10,.7)">EZEKIEL</div>
+  <div id="w23laden-t" style="color:#d3b986">Die Feste wird geladen …</div>
+  <div style="width:min(320px,70vw);height:8px;border:1px solid #6e5a48;border-radius:5px;background:#1d1015;overflow:hidden"><div id="w23laden-b" style="height:100%;width:2%;background:linear-gradient(90deg,#8a1a14,#e5b454);transition:width .2s"></div></div>
+  <div id="w23laden-p" style="color:#ab9c8c;font-size:13px">0 %</div>
+</div>
 <canvas id="cv" aria-label="Spielfeld"></canvas>
 <div id="hud" hidden>
   <div class="hl">
@@ -573,61 +589,61 @@ button:disabled{opacity:.45;cursor:default}
 <div id="modal" hidden></div>
 <div id="title"></div>
 <div id="fade"></div>
-<script src="tonregler.js?v=134"></script>
-<script src="zerstoerer/kern.js?v=134"></script>
-<script src="zerstoerer/platz.js?v=134"></script>
-<script src="zerstoerer/welt.js?v=134"></script>
-<script src="zerstoerer/daten.js?v=134"></script>
-<script src="zerstoerer/kampf.js?v=134"></script>
-<script src="zerstoerer/steuerung.js?v=134"></script>
-<script src="zerstoerer/geschosse.js?v=134"></script>
-<script src="zerstoerer/gegner.js?v=134"></script>
-<script src="zerstoerer/bosse.js?v=134"></script>
-<script src="zerstoerer/bossphasen.js?v=134"></script>
-<script src="zerstoerer/figuren.js?v=134"></script>
-<script src="zerstoerer/werkzeuge.js?v=134"></script>
-<script src="zerstoerer/bild.js?v=134"></script>
-<script src="zerstoerer/pracht.js?v=134"></script>
-<script src="zerstoerer/grafik.js?v=134"></script>
-<script src="zerstoerer/musik.js?v=134"></script>
-<script src="zerstoerer/klang.js?v=134"></script>
-<script src="zerstoerer/spiel.js?v=134"></script>
-<script src="zerstoerer/lager.js?v=134"></script>
-<script src="zerstoerer/parcours.js?v=134"></script>
-<script src="zerstoerer/fallen.js?v=134"></script>
-<script src="zerstoerer/bilanz.js?v=134"></script>
-<script src="zerstoerer/kampfkunst.js?v=134"></script>
-<script src="zerstoerer/hintergrund.js?v=134"></script>
-<script src="zerstoerer/bilderbuch.js?v=134"></script>
-<script src="zerstoerer/tageszeit.js?v=134"></script>
-<script src="zerstoerer/abenteuer.js?v=134"></script>
-<script src="zerstoerer/fluch.js?v=134"></script>
-<script src="zerstoerer/fluchkraft.js?v=134"></script>
-<script src="zerstoerer/ebenen.js?v=134"></script>
-<script src="zerstoerer/erkundung.js?v=134"></script>
-<script src="zerstoerer/spuren.js?v=134"></script>
-<script src="zerstoerer/effekte.js?v=134"></script>
-<script src="zerstoerer/hinterhalt.js?v=134"></script>
-<script src="zerstoerer/leben.js?v=134"></script>
-<script src="zerstoerer/gegnerkunst.js?v=134"></script>
-<script src="zerstoerer/demogorgon.js?v=134"></script>
-<script src="zerstoerer/nemesis.js?v=134"></script>
-<script src="zerstoerer/wetter.js?v=134"></script>
-<script src="zerstoerer/wunder.js?v=134"></script>
-<script src="zerstoerer/ausstattung.js?v=134"></script>
-<script src="zerstoerer/ausgleich.js?v=134"></script>
-<script src="zerstoerer/ui.js?v=134"></script>
-<script src="zerstoerer/praesentation.js?v=134"></script>
-<script src="zerstoerer/schmiede.js?v=134"></script>
-<script src="zerstoerer/runen.js?v=134"></script>
-<script src="zerstoerer/tagebuch.js?v=134"></script>
-<script src="zerstoerer/schilder.js?v=134"></script>
-<script src="zerstoerer/weltspuren.js?v=134"></script>
-<script src="zerstoerer/uebergang.js?v=134"></script>
-<script src="zerstoerer/rueckweg.js?v=134"></script>
-<script src="zerstoerer/haerte.js?v=134"></script> <!-- W9 Härte -->
-<script src="zerstoerer/weltkarte.js?v=134"></script> <!-- W21 -->
-<script src="zerstoerer/rueckblick.js?v=134"></script> <!-- W21 -->
-<script src="zerstoerer/bossrausch.js?v=134"></script> <!-- W21 -->
+<script src="tonregler.js?v=135"></script>
+<script src="zerstoerer/kern.js?v=135"></script>
+<script src="zerstoerer/platz.js?v=135"></script>
+<script src="zerstoerer/welt.js?v=135"></script>
+<script src="zerstoerer/daten.js?v=135"></script>
+<script src="zerstoerer/kampf.js?v=135"></script>
+<script src="zerstoerer/steuerung.js?v=135"></script>
+<script src="zerstoerer/geschosse.js?v=135"></script>
+<script src="zerstoerer/gegner.js?v=135"></script>
+<script src="zerstoerer/bosse.js?v=135"></script>
+<script src="zerstoerer/bossphasen.js?v=135"></script>
+<script src="zerstoerer/figuren.js?v=135"></script>
+<script src="zerstoerer/werkzeuge.js?v=135"></script>
+<script src="zerstoerer/bild.js?v=135"></script>
+<script src="zerstoerer/pracht.js?v=135"></script>
+<script src="zerstoerer/grafik.js?v=135"></script>
+<script src="zerstoerer/musik.js?v=135"></script>
+<script src="zerstoerer/klang.js?v=135"></script>
+<script src="zerstoerer/spiel.js?v=135"></script>
+<script src="zerstoerer/lager.js?v=135"></script>
+<script src="zerstoerer/parcours.js?v=135"></script>
+<script src="zerstoerer/fallen.js?v=135"></script>
+<script src="zerstoerer/bilanz.js?v=135"></script>
+<script src="zerstoerer/kampfkunst.js?v=135"></script>
+<script src="zerstoerer/hintergrund.js?v=135"></script>
+<script src="zerstoerer/bilderbuch.js?v=135"></script>
+<script src="zerstoerer/tageszeit.js?v=135"></script>
+<script src="zerstoerer/abenteuer.js?v=135"></script>
+<script src="zerstoerer/fluch.js?v=135"></script>
+<script src="zerstoerer/fluchkraft.js?v=135"></script>
+<script src="zerstoerer/ebenen.js?v=135"></script>
+<script src="zerstoerer/erkundung.js?v=135"></script>
+<script src="zerstoerer/spuren.js?v=135"></script>
+<script src="zerstoerer/effekte.js?v=135"></script>
+<script src="zerstoerer/hinterhalt.js?v=135"></script>
+<script src="zerstoerer/leben.js?v=135"></script>
+<script src="zerstoerer/gegnerkunst.js?v=135"></script>
+<script src="zerstoerer/demogorgon.js?v=135"></script>
+<script src="zerstoerer/nemesis.js?v=135"></script>
+<script src="zerstoerer/wetter.js?v=135"></script>
+<script src="zerstoerer/wunder.js?v=135"></script>
+<script src="zerstoerer/ausstattung.js?v=135"></script>
+<script src="zerstoerer/ausgleich.js?v=135"></script>
+<script src="zerstoerer/ui.js?v=135"></script>
+<script src="zerstoerer/praesentation.js?v=135"></script>
+<script src="zerstoerer/schmiede.js?v=135"></script>
+<script src="zerstoerer/runen.js?v=135"></script>
+<script src="zerstoerer/tagebuch.js?v=135"></script>
+<script src="zerstoerer/schilder.js?v=135"></script>
+<script src="zerstoerer/weltspuren.js?v=135"></script>
+<script src="zerstoerer/uebergang.js?v=135"></script>
+<script src="zerstoerer/rueckweg.js?v=135"></script>
+<script src="zerstoerer/haerte.js?v=135"></script> <!-- W9 Härte -->
+<script src="zerstoerer/weltkarte.js?v=135"></script> <!-- W21 -->
+<script src="zerstoerer/rueckblick.js?v=135"></script> <!-- W21 -->
+<script src="zerstoerer/bossrausch.js?v=135"></script> <!-- W21 -->
 </body>
 </html>
