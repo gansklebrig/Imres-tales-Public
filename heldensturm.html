@@ -43281,22 +43281,28 @@ hook('tick',()=>{try{if(frei()&&laeuft()&&P.padAim!=null)P.padAim=null}catch(e){
    Befund (Bilder aus dem Spiel): Hinweise (Toasts) lagen über dem Abschnittsnamen und über großen Bannern („Der Beutelschneider“),
    gleiche Meldungen erschienen doppelt untereinander, gleiche Weltwörter („Der Tropfstein bricht!“) zweimal versetzt übereinander.
    Jetzt:
-     · Die Hinweisliste rutscht weich unter den Abschnittsnamen bzw. unter ein gerade sichtbares Banner und danach zurück.
+     · Die Hinweisliste rutscht weich unter den Abschnittsnamen; solange ein großes Banner steht, blendet sie aus und neue Hinweise warten (≤ 5 s).
      · Gleicher Hinweis binnen 2,5 s nur einmal; gleiches Weltwort am selben Ort binnen 0,6 s nur einmal.
    Rein darstellend. Abschaltbar: __hsMELDE.aus=1 */
 (function(){try{if(window.__hsMELDE)return;
 const ME=window.__hsMELDE={v:1,aus:0,n:{toast:0,wort:0}};
+const bannerAn=()=>{try{const b=G&&G.banner;return!!(b&&b.t<b.dur&&G.state==='play')}catch(e){return false}};
 const el=()=>typeof toastEl!=='undefined'&&toastEl?toastEl:document.getElementById('toast');
 let basis=null,zuletzt=-1;
 function frei(){/* unterste belegte Bildschirmzeile (CSS-Pixel) durch Abschnittsname oder Banner */
  let y=0;
- try{if(typeof KANAME!=='undefined'&&KANAME.t>0){let top=70;const h=document.querySelector('#hud .top');if(h){const r=h.getBoundingClientRect();if(r.height>0)top=r.bottom+(W<700?58:14)}const fs=W<700?15:19;y=Math.max(y,top+fs+(KANAME.sub?24:14))}}catch(e){}
- try{const b=G&&G.banner;if(b&&b.t<b.dur){const fs=Math.min(b.size||56,W*0.105),by=b.y||H*(b.bars?0.32:0.26);y=Math.max(y,by+fs*(b.small?1.45:0.9))}}catch(e){}
+ try{if(typeof KANAME!=='undefined'&&KANAME.t>0){let top=70;const h=document.querySelector('#hud .top');if(h){const r=h.getBoundingClientRect();if(r.height>0)top=r.bottom+(W<700?58:14)}const fs=W<700?15:19;y=Math.max(y,top+fs+(KANAME.sub?36:16))}}catch(e){}
  return y}
-function lage(){const t=el();if(!t)return;if(basis===null){basis=parseFloat(getComputedStyle(t).top)||150;t.style.transition='top .25s ease'}
+function lage(){const t=el();if(!t)return;if(basis===null){basis=parseFloat(getComputedStyle(t).top)||150;t.style.transition='top .25s ease, opacity .18s ease'}
+ const ban=!ME.aus&&bannerAn();if(ban!==(t.style.opacity==='0'))t.style.opacity=ban?'0':'';
  if(ME.aus||!G||G.state!=='play'){if(zuletzt!==-1){t.style.top='';zuletzt=-1}return}
  const y=frei(),ziel=y>basis-8?Math.round(y+8):-1;if(ziel!==zuletzt){zuletzt=ziel;t.style.top=ziel<0?'':ziel+'px'}}
-(function schleife(){try{lage()}catch(e){}requestAnimationFrame(schleife)})();
+/* Hinweisspur unten (lange Hinweise) nicht unter die Erzähler-/Heldenzeile legen: Spur rückt darüber */
+let laneZ=-1;const DE=document.documentElement;
+function spur(){const erz=document.querySelector('.erzSub'),ln=document.getElementById('qa2lane');if(!ln)return;let ziel=0;
+ if(!ME.aus&&erz&&erz.isConnected&&erz.classList.contains('an')&&!erz.classList.contains('oben')&&!erz.classList.contains('pz')){const cs=getComputedStyle(erz);if(cs.display!=='none'&&cs.visibility!=='hidden'&&+cs.opacity>0.05){const r=erz.getBoundingClientRect();if(r.height>8&&r.top<innerHeight){const hz=parseFloat(getComputedStyle(DE).getPropertyValue('--hz'))||1;ziel=Math.round((innerHeight-r.top+8)/hz)}}}
+ if(ziel!==laneZ){laneZ=ziel;if(ziel){DE.style.setProperty('--qa2lb',ziel+'px');DE.style.setProperty('--qa2tb',ziel+'px')}else{DE.style.removeProperty('--qa2lb');DE.style.removeProperty('--qa2tb')}}}
+(function schleife(){try{lage()}catch(e){}try{spur()}catch(e){}requestAnimationFrame(schleife)})();
 /* Banner nicht über den Abschnittsnamen legen: Banner rückt unter ihn */
 function kaUnten(){try{if(typeof KANAME!=='undefined'&&KANAME.t>0){let top=70;const h=document.querySelector('#hud .top');if(h){const r=h.getBoundingClientRect();if(r.height>0)top=r.bottom+(W<700?58:14)}const fs=W<700?15:19;return top+fs+(KANAME.sub?40:22)}}catch(e){}return 0}
 if(typeof drawBanner==='function'){const db=drawBanner;drawBanner=function(){const b=G&&G.banner;try{if(!ME.aus&&b){const k=kaUnten();if(k){const fs=Math.min(b.size||56,W*0.105),by=b.y||H*(b.bars?0.32:0.26);if(by-fs*0.8<k)b.y=k+fs*0.8}}}catch(e){}
@@ -43304,11 +43310,89 @@ if(typeof drawBanner==='function'){const db=drawBanner;drawBanner=function(){con
 /* doppelte Hinweise und Weltwörter */
 const zeit=()=>performance.now();
 const TQ=new Map();
-if(typeof toast==='function'){const t0=toast;toast=function(m){try{if(!ME.aus){const k=String(m).replace(/<[^>]+>/g,'').trim();const n=zeit(),v=TQ.get(k);if(v&&n-v<2500){ME.n.toast++;return}TQ.set(k,n);if(TQ.size>60){for(const [a,b] of TQ)if(n-b>5000)TQ.delete(a)}}}catch(e){}return t0.apply(this,arguments)}}
+if(typeof toast==='function'){const t0=toast;toast=function(m){
+ /* während ein großes Banner steht, warten Hinweise kurz (höchstens 5 s) und erscheinen danach – nichts liegt mehr auf dem Helden oder unter dem Banner */
+ try{if(!ME.aus&&bannerAn()){const a=arguments,self=this,t1=performance.now();ME.n.warte=(ME.n.warte||0)+1;(function w(){if(bannerAn()&&performance.now()-t1<5000){setTimeout(w,200);return}toast.apply(self,a)})();return}}catch(e){}
+ try{if(!ME.aus){const k=String(m).replace(/<[^>]+>/g,'').trim();const n=zeit(),v=TQ.get(k);if(v&&n-v<2500){ME.n.toast++;return}TQ.set(k,n);if(TQ.size>60){for(const [a,b] of TQ)if(n-b>5000)TQ.delete(a)}}}catch(e){}return t0.apply(this,arguments)}}
 const WQ=[];
 if(typeof word==='function'){const w0=word;word=function(x,y,txt){try{if(!ME.aus){const n=zeit();for(let i=WQ.length-1;i>=0;i--){const q=WQ[i];if(n-q.t>600){WQ.splice(i,1);continue}if(q.s===txt&&Math.abs(q.x-x)<140&&Math.abs(q.y-y)<90){ME.n.wort++;return}}WQ.push({s:txt,x,y,t:n});if(WQ.length>40)WQ.shift()}}catch(e){}return w0.apply(this,arguments)}}
 }catch(e){console.error('melde',e);window.__hsMELDE={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/melde» */
+/* «rhythm» */
+/* ================= Paket „rhythm“: Weg-Rhythmus – lange Engstellen öffnen sich zu Plätzen und Buchten – window.__hsRHYTHM =================
+   Messung (Hauptweg, Halbbreite je 20 px): In Gassen-Stufen sind 45–56 % des Hauptwegs enge Gassen (≤ 100 px Halbbreite) und nur
+   2–4 % weit; einzelne Engstrecken laufen 500–720 px am Stück. In Hallen-Stufen 37 %. Das liest sich eintönig: Gang, Gang, Gang.
+   Jetzt bekommt jede lange Engstrecke im Hauptweg (≥ 11 Felder = 440 px) alle ≈ 12 Felder eine Öffnung, je nach Grundriss:
+     · Gassen: kleiner Platz, leicht zur Seite versetzt (Hauseck weicht zurück)   · Hallen: Nische/Vorraum als Rechteck
+     · Höhle/Wald: runde Ausbuchtung mit weichem Rand
+   Spielwert: Atempause und Ausweichraum mitten in engen Stücken, Kämpfe wechseln zwischen Engpass und Platz, die Welt
+   (Gruppen, Deko, Weg-Momente) findet dort von selbst Platz.
+   Sicherheit: nur im eigenen Abschnitt, ≥ 3 Felder Abstand zu Abschnittsgrenzen, Toren, Fluss-/Schluchtbetten, Start und
+   Kampfplatz; es wird nur Boden freigelegt, nie Wand gesetzt (Wege bleiben verbunden). Läuft beim Bau des Grundrisses,
+   also vor Wänden, Licht, Kacheln und Online-Stufenpaket. Abschaltbar: __hsRHYTHM.aus=1 */
+(function(){try{if(window.__hsRHYTHM)return;
+const RH=window.__hsRHYTHM={v:1,aus:0,LAUF:10,TAKT:12,MAX:8,ENG:3,st:{n:0,cut:0,ms:0},letzte:null};
+function weg(K,s,z){/* kürzester Weg über freie Zellen (4er-Nachbarn) */const n=K.n,T=n*n,pr=new Int32Array(T).fill(-1),q=new Int32Array(T);let h=0,t=0;
+ const S=s.j*n+s.i,Zc=z.j*n+z.i;pr[S]=S;q[t++]=S;
+ while(h<t){const c=q[h++];if(c===Zc)break;const x=c%n,y=(c/n)|0;
+  for(let d=0;d<4;d++){const X=x+(d===0?1:d===1?-1:0),Y=y+(d===2?1:d===3?-1:0);if(X<1||Y<1||X>=n-1||Y>=n-1)continue;const k=Y*n+X;if(pr[k]>=0||K.M[k]||K.lo&&K.lo[k])continue;pr[k]=c;q[t++]=k}}
+ if(pr[Zc]<0)return null;const L=[];for(let c=Zc;;c=pr[c]){L.push(c);if(c===S)break}return L.reverse()}
+function abst(K){const n=K.n,T=n*n,D=new Int16Array(T).fill(999),q=new Int32Array(T);let h=0,t=0;
+ for(let c=0;c<T;c++)if(K.M[c]){D[c]=0;q[t++]=c}
+ while(h<t){const c=q[h++],x=c%n,y=(c/n)|0;for(let d=0;d<4;d++){const X=x+(d===0?1:d===1?-1:0),Y=y+(d===2?1:d===3?-1:0);if(X<0||Y<0||X>=n||Y>=n)continue;const k=Y*n+X;if(D[k]>D[c]+1){D[k]=D[c]+1;q[t++]=k}}}
+ return D}
+function rhythm(K){if(RH.aus||!K||!K.M||!K.sec||!K.start||K.start.i==null)return;const lay=K.T&&K.T.lay;if(lay==='offen')return;
+ const n=K.n,vh=K.sec[K.nMain-1];if(!vh)return;
+ /* Ziel: Kampfplatz bzw. Mitte des letzten Hauptabschnitts */
+ const ziel=K.kampf&&K.kampf.i!=null?K.kampf:{i:Math.round((vh.B[0]+vh.B[2])/2),j:Math.round((vh.B[1]+vh.B[3])/2)};
+ /* Weg über alle Haupttore in Reihenfolge – so folgt er dem tatsächlichen Hauptweg */
+ const stops=[K.start];for(const t of K.tore)if(t.main&&t.pa&&t.pb)stops.push(t.pa,t.pb);stops.push(ziel);
+ let P=[];for(let i=0;i<stops.length-1;i++){const a=stops[i],b=stops[i+1];if(K.M[a.j*n+a.i]||K.M[b.j*n+b.i])continue;const w=weg(K,a,b);if(w)P=P.concat(w)}
+ if(P.length<20)return;
+ const D=abst(K);
+ /* Sperrpunkte: Tore (beide Seiten + Grenze), Start, Kampfplatz */
+ const sperr=[[K.start.i,K.start.j,7],[ziel.i,ziel.j,9]];for(const t of K.tore){if(t.pa)sperr.push([t.pa.i,t.pa.j,4]);if(t.pb)sperr.push([t.pb.i,t.pb.j,4])}
+ const gesperrt=(i,j)=>{for(const s of sperr)if(Math.abs(i-s[0])<=s[2]&&Math.abs(j-s[1])<=s[2])return true;return false};
+ /* enge Läufe finden */
+ /* „eng“ = auch in 3 Feldern Umkreis keine Stelle mit mehr als 2 Feldern Wandabstand (sonst ist es nur der Rand eines Raums) */
+ const engAt=c=>{const x=c%n,y=(c/n)|0;if(D[c]>RH.ENG)return false;for(let b=-3;b<=3;b++)for(let a2=-3;a2<=3;a2++){const X=x+a2,Y=y+b;if(X<0||Y<0||X>=n||Y>=n)continue;if(D[Y*n+X]>RH.ENG&&D[Y*n+X]<999)return false}return true};
+ const laeufe=[];let a=-1;for(let k=0;k<=P.length;k++){const eng=k<P.length&&engAt(P[k]);if(eng&&a<0)a=k;if(!eng&&a>=0){if(k-a>=RH.LAUF)laeufe.push([a,k-1]);a=-1}}
+ let cut=0,nOk=0;const done=[],why={sperr:0,nah:0,sec:0,klein:0};
+ for(const [s0,s1] of laeufe){const len=s1-s0+1,m=Math.max(1,Math.round(len/RH.TAKT));
+  for(let q=0;q<m&&nOk<RH.MAX;q++){const k0=s0+Math.round((q+0.5)*len/m);let k=-1;
+   /* gesperrt (Tor, Start, Kampfplatz)? entlang des Laufs nach einer freien Stelle suchen */
+   for(const o of [0,2,-2,4,-4,6,-6,8,-8,10,-10]){const kk=k0+o;if(kk<s0-2||kk>s1+2||kk<0||kk>=P.length)continue;const cc=P[kk];if(!gesperrt(cc%n,(cc/n)|0)){k=kk;break}}
+   if(k<0){why.sperr++;continue}const c=P[k],ci=c%n,cj=(c/n)|0;
+   if(done.some(d=>Math.abs(d[0]-ci)+Math.abs(d[1]-cj)<9)){why.nah++;continue}
+   const sid=K.sid[c];if(sid===255){why.sec++;continue}const S=K.sec[sid];if(!S||S.art==='arena'||S.seite){why.sec++;continue}
+   /* Laufrichtung → Versatz quer dazu */
+   const c0=P[Math.max(0,k-3)],c1=P[Math.min(P.length-1,k+3)];let dx=(c1%n)-(c0%n),dy=((c1/n)|0)-((c0/n)|0);const dl=Math.hypot(dx,dy)||1;dx/=dl;dy/=dl;
+   const sg=Math.random()<0.5?-1:1,off=lay==='gassen'?2:lay==='hallen'?1.5:1.2;const mi=ci+(-dy)*sg*off,mj=cj+dx*sg*off;
+   const B=S.B,R=lay==='hallen'?3+Math.floor(Math.random()*2):lay==='gassen'?4+Math.floor(Math.random()*2):3.2+Math.random()*1.5,R2=lay==='gassen'?R-0.5:R*(0.8+Math.random()*0.3);
+   const rund=lay!=='hallen'&&lay!=='gassen';let z=0;const zellen=[];
+   for(let j=Math.floor(mj-R-1);j<=Math.ceil(mj+R+1);j++)for(let i=Math.floor(mi-R-1);i<=Math.ceil(mi+R+1);i++){
+    if(i<B[0]+2||j<B[1]+2||i>B[2]-2||j>B[3]-2)continue;
+    const u=(i-mi)/R,v=(j-mj)/R2;if(rund?u*u+v*v>1:(Math.abs(u)>1||Math.abs(v)>1))continue;
+    const kk=j*n+i;if(K.sid[kk]!==sid&&K.sid[kk]!==255)continue;if(K.lo&&K.lo[kk])continue;if(gesperrt(i,j))continue;
+    /* Fluss-/Schluchtnähe: Nachbarn mit lo meiden */
+    let nahLo=false;if(K.lo)for(let b=-2;b<=2&&!nahLo;b++)for(let a2=-2;a2<=2;a2++){const k2=(j+b)*n+i+a2;if(K.lo[k2]){nahLo=true;break}}if(nahLo)continue;
+    zellen.push(kk);if(K.M[kk])z++}
+   if(z<6){why.klein++;continue}
+   for(const kk of zellen){K.M[kk]=0;K.sid[kk]=sid}
+   /* weiche Kante (Höhle/Wald): einzelne Wandzacken neben der Bucht glätten */
+   if(rund){for(let j=Math.floor(mj-R-2);j<=Math.ceil(mj+R+2);j++)for(let i=Math.floor(mi-R-2);i<=Math.ceil(mi+R+2);i++){if(i<B[0]+3||j<B[1]+3||i>B[2]-3||j>B[3]-3)continue;const kk=j*n+i;if(!K.M[kk])continue;let f=0;for(let b=-1;b<=1;b++)for(let a2=-1;a2<=1;a2++)if(!K.M[kk+b*n+a2])f++;if(f>=6&&!(K.lo&&K.lo[kk])&&!gesperrt(i,j)){K.M[kk]=0;K.sid[kk]=sid;z++}}}
+   cut+=z;nOk++;done.push([Math.round(mi),Math.round(mj),Math.round(R)])}}
+ K.rhP=done;RH.st.n++;RH.st.cut+=cut;RH.letzte={stufe:G.stage,lay,laeufe:laeufe.length,plaetze:nOk,zellen:cut,why}}
+/* Platzlicht: jeder neue Platz bekommt ein, zwei Lichter am Rand – man sieht ihn schon von Weitem */
+if(typeof kaDeko==='function'){const kd=kaDeko;kaDeko=function(S){const r=kd.apply(this,arguments);try{const K=G.ka;if(!RH.aus&&K&&K.rhP&&K.rhP.length&&G.deco){const T=K.T||{},k=T.lay==='gassen'?'lantern':T.glut?'brazier':T.lay==='hallen'?'brazier':'torch';let m=0;
+ const frei=(x,y)=>!(typeof blkPunkt==='function'&&blkPunkt(x,y,16))&&!(typeof wlLoPunkt==='function'&&wlLoPunkt(x,y,22));
+ for(const p of K.rhP){const cx=(p[0]+0.5)*K.Z,cy=(p[1]+0.5)*K.Z,R=Math.max(80,p[2]*K.Z-34);let n=0;const a0=Math.random()*6.283;
+  for(let q=0;q<10&&n<2;q++){const a=a0+q*2.4,x=cx+Math.cos(a)*R,y=cy+Math.sin(a)*R;if(!frei(x,y))continue;if(K.tore&&K.tore.some(t=>Math.hypot(t.x-x,t.y-y)<160))continue;
+   G.deco.push({x,y,k,s:1,v:Math.random(),wl:1,rh:1});n++;m++}}
+ RH.lichter=m}}catch(e){console.error('rhythm-licht',e)}return r}}
+if(typeof kaLayout==='function'){const kl=kaLayout;kaLayout=function(S){const K=kl.apply(this,arguments);try{const t0=performance.now();rhythm(K);RH.st.ms+=performance.now()-t0}catch(e){console.error('rhythm',e)}return K}}
+}catch(e){console.error('rhythm',e);window.__hsRHYTHM={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/rhythm» */
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
