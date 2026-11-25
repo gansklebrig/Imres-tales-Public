@@ -2624,18 +2624,33 @@ registerProcessor("imres-raum", ImresRaum);
   });
   const ambBasis = (() => { const sk = document.querySelector('script[src*="lautenwerk"]'); return sk ? sk.src.replace(/lautenwerk\.js.*$/, "amb/") : "amb/"; })();
   const ambBuf = new Map(), ambLaedt = new Map();
+  /* Ausgepackte Geräusche sind groß (2 min Stereo bei 48 kHz ≈ 45 MB). Ohne Obergrenze wuchs der Speicher mit jeder Kulisse
+     um 50–100 MB – nach einer Viertelstunde über 1 GB; auf dem Zynthian lagert das System dann aus und die Bedienung steht
+     sekundenlang. Darum: zuletzt Benutztes behalten, Ältestes vergessen. Laufende Schichten halten ihren Puffer selbst fest. */
+  const AMB_GRENZE = (zynGeraet ? 260 : spar || mobil ? 200 : 700) * 1048576, ambZuletzt = new Map(); let ambGroesse = 0;
+  const ambBytes = b => b ? b.length * b.numberOfChannels * 4 : 0;
+  function ambMerken(name, b) {
+    ambBuf.set(name, b); ambZuletzt.set(name, performance.now()); ambGroesse += ambBytes(b);
+    if (ambGroesse <= AMB_GRENZE) return;
+    const alt = [...ambZuletzt.entries()].sort((x, y) => x[1] - y[1]);
+    for (const [n, t] of alt) {
+      if (ambGroesse <= AMB_GRENZE * .85) break;
+      if (n === name || performance.now() - t < 20000) continue; /* gerade Gebrauchtes bleibt */
+      ambGroesse -= ambBytes(ambBuf.get(n)); ambBuf.delete(n); ambLaedt.delete(n); ambZuletzt.delete(n);
+    }
+  }
   function ambLaden(name) {
     if (name === "amboss" || name.startsWith("fx_") || name.startsWith("stimme_")) return sampleLaden(name);
-    if (ambBuf.has(name)) return Promise.resolve(ambBuf.get(name));
+    if (ambBuf.has(name)) { ambZuletzt.set(name, performance.now()); return Promise.resolve(ambBuf.get(name)); }
     if (ambLaedt.has(name)) return ambLaedt.get(name);
     if (!ctx) return Promise.resolve(null);
     const c = ctx;
     const pr = fetch(ambBasis + encodeURIComponent(name) + ".mp3").then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status))
       .then(ab => new Promise((res, rej) => { const x = c.decodeAudioData(ab, res, rej); if (x && x.catch) x.catch(rej); }))
-      .then(b => { ambBuf.set(name, b); return b; }).catch(() => { ambLaedt.delete(name); return null; });
+      .then(b => { ambMerken(name, b); return b; }).catch(() => { ambLaedt.delete(name); return null; });
     ambLaedt.set(name, pr); return pr;
   }
-  const ambPuffer = n => n === "amboss" || n.startsWith("fx_") || n.startsWith("stimme_") ? sampleBuf.get(n) : ambBuf.get(n);
+  const ambPuffer = n => { if (n === "amboss" || n.startsWith("fx_") || n.startsWith("stimme_")) return sampleBuf.get(n); const b = ambBuf.get(n); if (b) ambZuletzt.set(n, performance.now()); return b; };
   const LIN_EIN = new Float32Array(64), LIN_AUS = new Float32Array(64);
   for (let i = 0; i < 64; i++) { LIN_EIN[i] = i / 63; LIN_AUS[i] = 1 - i / 63; }
   const KUL_EIN = new Float32Array(64), KUL_AUS = new Float32Array(64);
