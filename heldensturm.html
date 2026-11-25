@@ -10262,7 +10262,9 @@ const KGL={lg:0,wob:0,W:null},KGME=new WeakMap();
 /* Vorwärmen: zu Beginn einer Stufe die Körper ihrer Gegnerarten in Leerlauf-Häppchen (je ≤4 ms) vorrendern */
 function kgWarm(Z){let S=null;try{S=STAGES[G.stage]}catch(er){}if(!S||!S.foes)return;const q=[];
  for(const id in S.foes){const d=FOES[id];if(!d||!KGS[d.shape]||d.gx)continue;const sc=kgScale(Z*(d.size||1));for(let v=0;v<3;v++)for(const fl of[1,-1])for(const r of[0,0.06*fl])q.push([d,v,sc,fl,r])}
- KG.wq=q;setTimeout(kgWarmTick,0)}
+ /* Vorwärmen auch für die Nachbar-Maßstäbe (Kampf-Zoom, Kamera-Stöße) und Elite-Größe – bauen, bevor gekämpft wird */
+ const extra=[];for(const [d,v,sc,fl,r] of q){if(r)continue;for(const k of[-1,1,2])extra.push([d,v,kgScale(sc*Math.pow(2,k/12)),fl,0])}
+ KG.wq=q.filter(x=>!x[4]).concat(extra);setTimeout(kgWarmTick,0)}
 function kgWarmTick(){const q=KG.wq;if(!q||!q.length)return;const t0=performance.now();while(q.length&&performance.now()-t0<4){const[d,v,sc,fl,r]=q.shift();try{kgBodyFor(null,d,v,sc,fl,r)}catch(er){}}if(q.length)setTimeout(kgWarmTick,30)}
 function kgDraw(c,e,t,d,lg,wob,W_,sq,fl){if(!KG.on||e.boss||d.gx)return false;const S=KGS[d.shape];if(!S)return false;
  const m0=c.getTransform(),sc=kgScale(Math.sqrt(m0.a*m0.a+m0.b*m0.b)/(1+(sq||0))),v=kgVarOf(e),L=KGL;L.lg=lg;L.wob=wob;L.W=W_;
@@ -10270,7 +10272,7 @@ function kgDraw(c,e,t,d,lg,wob,W_,sq,fl){if(!KG.on||e.boss||d.gx)return false;co
  /* Ist die Lage nur verschoben (bzw. um die Lauf-Neigung gedreht) und passt der Maßstab auf ±3,5 %, wird das Sprite
     pixelgenau 1:1 in Geräte-Koordinaten kopiert – das ist ein Vielfaches schneller als skaliert zu zeichnen. */
  const m=S.pre?c.getTransform():m0,a1=m.a*fl,b1=m.b*fl,sx=Math.sqrt(a1*a1+b1*b1),sy=Math.sqrt(m.c*m.c+m.d*m.d);
- let rot=null,fast=false;if(Math.abs(b1)<0.004*sx)rot=0;else if(!e.corpse){if(Math.abs(b1/sx-0.06*fl)<0.004)rot=0.06*fl}
+ let rot=null,fast=false;if(Math.abs(b1)<0.004*sx)rot=0;/* Lauf-Neigung (±0,06): kein eigenes Sprite mehr, das ungeneigte wird gedreht gezeichnet – spart zwei Drittel der Neubauten */
  else if(e.land&&Math.abs(a1)<0.006*sx)rot=b1>0?1.5708:-1.5708;/* liegende Leiche: auf der Seite, als eigenes gedrehtes Sprite */
  if(rot!==null){const sn=b1/sx;fast=(rot>1||rot<-1?Math.abs(m.d)<0.006*sy:m.d>0)&&Math.abs(m.c+sy*sn)<sy*0.01&&Math.abs(sx/sc-1)<0.07&&Math.abs(sy/sc-1)<0.07}
  /* höchstens wenige neue Sprites je Bild vorrendern – sonst kurz das ungeneigte Sprite bzw. die einfache Zeichnung */
