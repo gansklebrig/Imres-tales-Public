@@ -42997,6 +42997,260 @@ function css(){if(document.getElementById('b3Css'))return;const s=document.creat
 @media (max-width:560px){.b3Grid{grid-template-columns:1fr}}`;document.head.appendChild(s)}
 }catch(e){console.error('beute3',e);window.__hsBEUTE3={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/beute3» */
+/* «regio» */
+/* ================= Paket „regio“: eigene Gegner-Mechaniken je Region – window.__hsREGIO =================
+   Jede Region der Kampagne bekommt ein bis zwei neue Gegnerarten mit einer Mechanik, die man lernen muss.
+   Alle Angriffe sind angekündigt (Kreis, Linie, Leuchten) – man kann ausweichen, flankieren oder unterbrechen.
+     0 Hinterhalt      Goblin-Fallensteller   Falle: legt Fallen auf deinen Weg – hineintreten hält dich fest
+     1 Goblinhöhle     Goblin-Trommler        Trommel: Goblins in der Nähe werden schneller und stärker – zuerst ausschalten
+                       Goblin-Fackelträger    Brand: hinterlässt beim Tod brennendes Öl
+     2 Phandalin       Schildträger der Roben Frontschild: von vorn fast unverwundbar – umrunden oder Flächen/Gift
+                       Späher der Roben       Ruf: pfeift Verstärkung herbei, wenn man ihn nicht rechtzeitig trifft
+     3 Crackmore       Alchemist der Roben    Pfütze: wirft Kolben, die klebrige Lachen hinterlassen (verlangsamt)
+                       Schleicher der Roben   Tarnung: kaum sichtbar, bis er nah ist – dann ein angekündigter Hieb
+     4 Wachturm        Goblin-Hornbläser      Ruf: bläst Wölfe herbei
+                       Goblin-Steinschleuderer Geschütz: bleibt stehen, schleudert Steine (Kreise)
+     5 Mine            Runenschmied           Schilden: gibt Nachbarn Runenschilde – zuerst ihn
+                       Wühlratte              Untergrund: gräbt sich ein, taucht unter dir auf (Kreis)
+     6 Donnerbaum Turm Gewitterzweig          Entladung: lädt sich auf und entlädt sich rundum
+                       Stirgen-Nest           Brut: brütet Stirgen aus, bis es zerstört ist
+     7 Verlassenes Dorf Wurzelgreifer         Untergrund
+                       Dornenstreuer          Falle (Dornen)
+     8 Ilvaras Festung Drow-Klingentänzerin   Parade: leuchtet auf und pariert – dann nicht zuschlagen
+                       Schattenweberin        Dunkelheit: Gegner im Schattenkreis nehmen halben Schaden
+     9 Spinnweben      Eiersack               Brut (Jungspinnen)
+                       Phasenspinne           Blinzeln: taucht angekündigt hinter dir auf
+    10 Grab            Bannstein der Magierin Bann: Untote in seiner Nähe sind unverwundbar
+                       Spiegelschemen         Spaltung: zerfällt in zwei Splitter
+    11 See             Kuo-Toa-Fänger         Ziehen: Harpunenlinie zieht dich heran
+                       Laichbecken            Brut (Kuo-Toa)
+    12 Gracklstugh     Duergar-Vergrößerer    Wachsen: wächst zum Riesen, wenn man ihn nicht unterbricht
+                       Unsichtbarer Duergar   Tarnung
+    13 Glut            Glutläufer             Spur: hinterlässt eine Feuerspur
+                       Glühende Esse          Geschütz (Feuer)
+    14 Meister d. Fl.  Flammenrufer           Ruf: ruft Magmine
+                       Ascheschild-Duergar    Frontschild
+   Erstes Treffen: kurzer Hinweis + Eintrag im Bestiarium. Gäste online sehen die Gegner, die Mechanik rechnet der Gastgeber.
+   Abschaltbar: __hsREGIO.aus=1 (keine neuen Gegner mehr). */
+(function(){try{if(window.__hsREGIO)return;
+const RG=window.__hsREGIO={v:1,aus:0,err:[],Z:[]};const rErr=e=>{if(RG.err.length<30)RG.err.push(String(e&&e.stack||e).slice(0,300))};
+/* ---------- Gegner ---------- */
+const NEU={
+ rg_fallen:{n:'Goblin-Fallensteller',k:'ranged',shape:'goblin',c:'#6a6a32',t:'#7a5a32',hp:0.8,sp:84,dmg:0.8,xp:1.5,mech:'falle',ort:[[0,1,1.2]],
+  lore:'Er kennt die Straße besser als jeder Händler – und jede Stelle, an der ein Fuß im Gras verschwindet.',tip:'Weich den gezackten Kreisen aus – wer hineintritt, steckt fest.'},
+ rg_trommler:{n:'Goblin-Trommler',k:'ranged',shape:'goblin',c:'#7a4a2a',t:'#c8a060',hp:0.9,sp:70,dmg:0.6,xp:1.6,mech:'trommel',ort:[[1,1,1]],
+  lore:'Sein Takt treibt die anderen nach vorn. Ohne ihn verliert die Bande schnell den Mut.',tip:'Goblins im Trommelkreis sind schneller und stärker – den Trommler zuerst.'},
+ rg_fackel:{n:'Goblin-Fackelträger',k:'melee',shape:'goblin',c:'#6a5a2a',t:'#ff9a3a',hp:1,sp:92,dmg:1,xp:1.3,mech:'brand',ort:[[1,0,1],[1,1,0.8]],
+  lore:'Die Fackel ist für die Höhle gedacht. Das Öl im Gürtel eigentlich auch.',tip:'Stirbt er, brennt der Boden – lieber aus der Ferne erledigen.'},
+ rg_schild:{n:'Schildträger der Roben',k:'melee',shape:'human',c:'#7a1c1c',t:'#4a3a2a',skin:'#c99c76',helm:1,hp:1.7,sp:68,dmg:1.15,xp:2,mech:'schild',ort:[[2,0,1.1]],
+  lore:'Ein Turmschild, zwei Hände, keine Eile. Die Roten Roben schicken ihn, wenn der Weg frei bleiben soll.',tip:'Von vorn hält der Schild fast alles ab – umrunden, Flächen oder Gift.'},
+ rg_pfeife:{n:'Späher der Roben',k:'ranged',shape:'human',c:'#8a2a20',t:'#3a2a20',skin:'#c99c76',hp:0.8,sp:86,dmg:0.7,xp:1.6,mech:'ruf',ruf:'robe',rufN:3,ort:[[2,0,0.9]],
+  lore:'Ein Pfiff, und aus jeder Gasse kommt ein Roter.',tip:'Leuchtet der Ring um ihn, pfeift er gleich – genug Schaden unterbricht ihn.'},
+ rg_alchem:{n:'Alchemist der Roben',k:'caster',shape:'human',c:'#6a2a3a',t:'#c8a040',skin:'#d9b08c',hat:1,hp:0.9,sp:70,dmg:1,xp:1.8,mech:'pfuetze',pc:'#a8c040',ort:[[3,2,1.2]],
+  lore:'Was in seinen Kolben gärt, hat Crackmore schon zwei Kellergewölbe gekostet.',tip:'Kolben hinterlassen klebrige Lachen – außen herum laufen.'},
+ rg_schleicher:{n:'Schleicher der Roben',k:'melee',shape:'human',c:'#2a1a1a',t:'#5a2a2a',skin:'#b08a6a',hp:0.9,sp:105,dmg:1.25,xp:1.8,mech:'tarnung',ort:[[3,1,1]],
+  lore:'Man sieht ihn erst, wenn er es will.',tip:'Kaum sichtbar, bis er nah ist – sein erster Hieb ist angekündigt.'},
+ rg_horn:{n:'Goblin-Hornbläser',k:'ranged',shape:'goblin',c:'#5a6a2a',t:'#d8b060',hp:1,sp:76,dmg:0.7,xp:1.8,mech:'ruf',ruf:'wolf',rufN:3,size:1.15,ort:[[4,0,0.9],[4,1,0.9]],
+  lore:'Ein Ton, und vom Waldrand antworten die Wölfe.',tip:'Hornbläser unterbrechen, bevor das Horn ertönt.'},
+ rg_schleuder:{n:'Goblin-Steinschleuderer',k:'still',shape:'goblin',c:'#6a5a3a',t:'#8a7a5a',hp:2.2,sp:0,dmg:1.2,xp:2,mech:'geschuetz',size:1.1,ort:[[4,1,0.6]],
+  lore:'Er steht auf seinem Stein und wirft andere Steine. Viel mehr will er vom Leben nicht.',tip:'Bleibt stehen und schleudert Steine in Kreise – in Bewegung bleiben.'},
+ rg_runen:{n:'Runenschmied',k:'ranged',shape:'duergar',c:'#4a3a30',t:'#f4ca75',hp:1.1,sp:72,dmg:0.7,xp:2,mech:'schilden',ort:[[5,1,1],[5,2,1]],
+  lore:'Er hämmert Runen in alles, was stillhält – und in manches, was zurückschlägt.',tip:'Gibt Nachbarn Runenschilde – zuerst ihn ausschalten.'},
+ rg_wuehl:{n:'Wühlratte',k:'melee',shape:'rat',c:'#5a4a3a',t:'#8a6a5a',hp:0.9,sp:120,dmg:1,xp:1.6,mech:'grab',size:1.3,ort:[[5,0,1]],
+  lore:'Sie gräbt schneller, als ein Zwerg fluchen kann.',tip:'Taucht unter dir auf – sobald der Kreis erscheint, raus da.'},
+ rg_gewitter:{n:'Gewitterzweig',k:'melee',shape:'blight',c:'#4a4a2a',t:'#f4e07a',hp:1.2,sp:80,dmg:1.1,xp:1.8,mech:'entladung',ort:[[6,0,1],[6,1,1]],
+  lore:'Der Blitz traf den Baum. Der Baum hat es nicht vergessen.',tip:'Lädt sich auf und entlädt sich rundum – Abstand halten, solange er knistert.'},
+ rg_nest:{n:'Stirgen-Nest',k:'still',shape:'blob',c:'#5a3030',t:'#c86a5a',hp:2.4,sp:0,dmg:0,xp:2.2,mech:'brut',brut:'stirge',brutN:2,ort:[[6,1,0.5]],
+  lore:'Was darin summt, will Blut.',tip:'Brütet Stirgen aus, bis es zerstört ist.'},
+ rg_wurzel:{n:'Wurzelgreifer',k:'melee',shape:'blight',c:'#4a3a22',t:'#8a6a3a',hp:1.2,sp:75,dmg:1.15,xp:1.8,mech:'grab',ort:[[7,0,1],[7,1,1]],
+  lore:'Unter dem Dorf ist der Boden lebendig geworden.',tip:'Gräbt sich ein und greift von unten – raus aus dem Kreis.'},
+ rg_dornen:{n:'Dornenstreuer',k:'ranged',shape:'blight',c:'#3a4a22',t:'#a88a4a',hp:0.9,sp:72,dmg:0.85,xp:1.6,mech:'falle',dornen:1,ort:[[7,1,0.9]],
+  lore:'Er sät Dornen, wo andere Wege gehen.',tip:'Dornenfelder halten fest – ausweichen.'},
+ rg_tanz:{n:'Drow-Klingentänzerin',k:'melee',shape:'human',c:'#2a1a2e',t:'#c8c0d8',skin:'#5a4a6a',hair:'#e8e0f0',hp:1.3,sp:110,dmg:1.25,xp:2.2,mech:'parade',ort:[[8,0,1],[8,1,1]],
+  lore:'Ihr Tanz ist ein Versprechen: Wer zu früh zuschlägt, trifft nur Stahl.',tip:'Leuchtet sie auf, pariert sie – kurz nicht zuschlagen.'},
+ rg_weberin:{n:'Schattenweberin',k:'caster',shape:'human',c:'#1e1424',t:'#9a6ac8',skin:'#5a4a6a',hair:'#e8e0f0',hat:1,hp:1,sp:74,dmg:1,xp:2,mech:'dunkel',pc:'#9a6ac8',ort:[[8,1,0.9]],
+  lore:'Sie webt Dunkelheit wie andere Stoff.',tip:'Gegner im Schattenkreis nehmen halben Schaden – herauslocken.'},
+ rg_eier:{n:'Eiersack',k:'still',shape:'blob',c:'#d8d0b8',t:'#8a6a5a',hp:2.2,sp:0,dmg:0,xp:2,mech:'brut',brut:'spinnchen',brutN:3,ort:[[9,0,0.6],[9,1,0.6]],
+  lore:'Er zuckt. Das ist kein gutes Zeichen.',tip:'Bringt Jungspinnen hervor, bis er zerstört ist.'},
+ rg_phase:{n:'Phasenspinne',k:'fast',shape:'spider',c:'#3a2a3a',t:'#c88aff',hp:1.1,sp:135,dmg:1.15,xp:2,mech:'blinzeln',ort:[[9,0,1],[9,1,1]],
+  lore:'Halb hier, halb anderswo – und immer hinter dir.',tip:'Wo der kleine Kreis hinter dir erscheint, taucht sie gleich auf.'},
+ rg_bann:{n:'Bannstein der Magierin',k:'still',shape:'pylon',c:'#3a3036',t:'#c890ff',hp:2.6,sp:0,dmg:0,xp:2.4,mech:'bann',ort:[[10,1,0.7]],
+  lore:'Ihre letzte Arbeit: ein Stein, der die Toten schützt.',tip:'Untote in seiner Nähe sind unverwundbar – erst den Stein.'},
+ rg_spiegel:{n:'Spiegelschemen',k:'ranged',shape:'wraith',c:'#c8c0b0',t:'#f4ecd8',hp:1.2,sp:88,dmg:1,xp:2,split:'rg_splitter',mech:'spalt',ort:[[10,0,1],[10,1,0.8]],
+  lore:'Schlägt man ihn, zerspringt er – in mehr von sich.',tip:'Zerfällt beim Tod in zwei Splitter.'},
+ rg_splitter:{n:'Schemen-Splitter',k:'fast',shape:'wraith',c:'#a8a090',t:'#f4ecd8',hp:0.35,sp:140,dmg:0.6,xp:0.4,size:0.7,
+  lore:'Ein Bruchstück eines Spiegelschemens. Allein harmlos.'},
+ rg_faenger:{n:'Kuo-Toa-Fänger',k:'ranged',shape:'kuotoa',c:'#4a5a3a',t:'#c8b080',hp:1,sp:78,dmg:0.9,xp:1.9,mech:'ziehen',ort:[[11,0,1],[11,1,1],[11,2,0.8]],
+  lore:'Sein Haken hat schon größere Fische gefangen.',tip:'Die Harpunenlinie zieht dich heran – zur Seite ausweichen.'},
+ rg_laich:{n:'Laichbecken',k:'still',shape:'blob',c:'#4a5a3a',t:'#a8b060',hp:2.4,sp:0,dmg:0,xp:2,mech:'brut',brut:'kuotoa',brutN:1,ort:[[11,1,0.5]],
+  lore:'Im Schlick bewegt sich etwas.',tip:'Bringt Kuo-Toa hervor, bis es zerstört ist.'},
+ rg_gross:{n:'Duergar-Vergrößerer',k:'melee',shape:'duergar',c:'#4a4038',t:'#a88a5a',hp:1.3,sp:82,dmg:1.2,xp:2.2,mech:'wachsen',ort:[[12,0,1],[12,1,1]],
+  lore:'Duergar können wachsen. Dieser übt gern.',tip:'Leuchtet der Ring, wächst er gleich zum Riesen – genug Schaden unterbricht.'},
+ rg_unsicht:{n:'Unsichtbarer Duergar',k:'melee',shape:'duergar',c:'#3a3430',t:'#6a5a4a',hp:1.1,sp:96,dmg:1.3,xp:2,mech:'tarnung',ort:[[12,0,0.8],[12,1,0.8]],
+  lore:'Gracklstugh hat mehr Schatten als Laternen.',tip:'Kaum sichtbar, bis er nah ist – sein erster Hieb ist angekündigt.'},
+ rg_glut:{n:'Glutläufer',k:'fast',shape:'salamander',c:'#8a3a1a',t:'#ffb040',hp:1,sp:140,dmg:1,xp:1.8,mech:'spur',ort:[[13,0,1],[13,1,1]],
+  lore:'Er rennt, und hinter ihm brennt die Welt ein bisschen.',tip:'Hinterlässt eine Feuerspur – nicht hinterherlaufen.'},
+ rg_esse:{n:'Glühende Esse',k:'still',shape:'pylon',c:'#4a2a1a',t:'#ff8a3a',hp:2.6,sp:0,dmg:1.3,xp:2.4,mech:'geschuetz',feuer:1,ort:[[13,1,0.6]],
+  lore:'Die Esse wirft, was sie nicht schmelzen konnte.',tip:'Schleudert Glut in Kreise, dort brennt es kurz – in Bewegung bleiben.'},
+ rg_rufer:{n:'Flammenrufer',k:'caster',shape:'human',c:'#6a2a14',t:'#ffb040',skin:'#b08060',hat:1,hp:1.1,sp:72,dmg:1,xp:2.2,mech:'ruf',ruf:'magmin',rufN:3,pc:'#ff8a3a',ort:[[14,0,0.9],[14,3,0.9]],
+  lore:'Er singt, und das Feuer antwortet.',tip:'Leuchtet der Ring, ruft er Magmine – unterbrechen.'},
+ rg_asche:{n:'Ascheschild-Duergar',k:'melee',shape:'duergar',c:'#3a302a',t:'#c86a3a',hp:1.8,sp:66,dmg:1.25,xp:2.2,mech:'schild',ort:[[14,1,1],[14,2,1]],
+  lore:'Sein Schild wurde in der Glut geschmiedet und ist seither nicht mehr kalt geworden.',tip:'Von vorn hält der Schild fast alles ab – umrunden, Flächen oder Gift.'}};
+const MECHN={falle:'Fallen',trommel:'Kriegstrommel',brand:'Brennendes Öl',schild:'Frontschild',ruf:'Verstärkung rufen',pfuetze:'Klebrige Lachen',tarnung:'Tarnung',geschuetz:'Geschütz',schilden:'Runenschilde',grab:'Untergrund',entladung:'Entladung',brut:'Brut',parade:'Parade',dunkel:'Dunkelheit',blinzeln:'Blinzeln',bann:'Bann der Toten',spalt:'Spaltung',ziehen:'Harpune',wachsen:'Wachsen',spur:'Feuerspur'};
+RG.NEU=NEU;
+function eintragen(){for(const id in NEU){const d=NEU[id];if(!FOES[id]){const f=Object.assign({},d);delete f.ort;delete f.lore;delete f.tip;f.id=id;FOES[id]=f}
+  try{if(typeof LORE==='object'&&!LORE[id])LORE[id]=d.lore}catch(e){}
+  try{if(d.mech&&typeof bestWissen==='function')bestWissen('rg_'+id,{n:MECHN[d.mech]||d.mech,d:d.tip,tip:d.tip,foe:id,grp:'Gegner'})}catch(e){}
+  for(const [o,s,w] of (d.ort||[])){try{const st=ORTE[o]&&ORTE[o].stufen[s];if(st&&st.foes&&st.foes[id]===undefined)st.foes[id]=w}catch(e){}}}
+ /* STAGES zeigt auf dieselben Objekte; falls kopiert wurde, dort ebenfalls eintragen */
+ try{for(const S of STAGES){if(S&&S.ort!==undefined&&S.foes){const o=ORTE[S.ort];if(!o)continue;for(const st of o.stufen)if(st.name===S.name&&st.foes!==S.foes)for(const id in NEU)if(st.foes[id]!==undefined&&S.foes[id]===undefined)S.foes[id]=st.foes[id]}}}catch(e){rErr(e)}}
+eintragen();
+RG.ausschalten=function(){RG.aus=1;for(const S of STAGES)if(S&&S.foes)for(const id in NEU)delete S.foes[id];for(const o of ORTE)for(const st of o.stufen)if(st.foes)for(const id in NEU)delete st.foes[id]};
+/* ---------- Bodenzonen (Fallen, Lachen, Feuer, Dunkelheit) ---------- */
+const Z=RG.Z;
+function zone(o){o.t=0;Z.push(o);if(Z.length>60)Z.shift();return o}
+const imKreis=(o,x,y,r)=>(x-o.x)*(x-o.x)+(y-o.y)*(y-o.y)<r*r;
+function zonenTick(dt){for(let i=Z.length-1;i>=0;i--){const z=Z[i];z.t+=dt;if(z.t>=z.life||(z.weg&&z.weg())){Z.splice(i,1);continue}
+  if(z.scharf!==undefined&&z.t<z.scharf)continue;
+  if(P&&!P.down&&!P.dead&&imKreis(z,P.x,P.y,z.r+(P.r||14)*0.5)){
+   if(z.k==='falle'){P.rootT=Math.max(P.rootT||0,z.dornen?0.8:1.0);hurt(z.dmg);burst(z.x,z.y,z.dornen?'#a8c060':'#c8b080',10,140);sfx('hit');Z.splice(i,1);continue}
+   if(z.k==='pfuetze'){P.slowT=Math.max(P.slowT||0,0.4);P.slowA=Math.max(P.slowA||0,0.5)}
+   if(z.k==='feuer'){z.tk=(z.tk||0)-dt;if(z.tk<=0){z.tk=0.5;hurt(z.dmg*0.5)}}}}}
+function zonenMalen(c,t){for(const z of Z){const a=Math.min(1,z.t/0.25)*Math.min(1,(z.life-z.t)/0.4);c.save();
+  if(z.k==='falle'){const sch=z.scharf===undefined||z.t>=z.scharf;c.globalAlpha=0.85*a;c.strokeStyle=z.dornen?'#8aa04a':'#c8b080';c.lineWidth=2.2;c.beginPath();
+   for(let i=0;i<14;i++){const w=i/14*TAU,q=i%2?z.r*0.62:z.r;c.lineTo(z.x+Math.cos(w)*q,z.y+Math.sin(w)*q*0.6)}c.closePath();c.stroke();if(!sch){c.globalAlpha=0.3*a;c.fillStyle='#c8b080';c.fill()}}
+  else if(z.k==='pfuetze'){c.globalAlpha=0.42*a;c.fillStyle='#8a9a30';c.beginPath();c.ellipse(z.x,z.y,z.r,z.r*0.62,0,0,TAU);c.fill();c.globalAlpha=0.6*a;c.strokeStyle='#c8d060';c.lineWidth=1.5;c.stroke()}
+  else if(z.k==='feuer'){const f=0.75+0.25*Math.sin(t*9+z.x);c.globalAlpha=0.38*a*f;c.fillStyle='#ff7a2a';c.beginPath();c.ellipse(z.x,z.y,z.r,z.r*0.62,0,0,TAU);c.fill();c.globalAlpha=0.55*a;c.strokeStyle='#ffc060';c.lineWidth=1.5;c.stroke()}
+  else if(z.k==='dunkel'){c.globalAlpha=0.45*a;c.fillStyle='#160c1c';c.beginPath();c.ellipse(z.x,z.y,z.r,z.r*0.7,0,0,TAU);c.fill();c.globalAlpha=0.5*a;c.strokeStyle='#9a6ac8';c.setLineDash([8,8]);c.lineWidth=1.6;c.stroke();c.setLineDash([])}
+  c.restore()}}
+RG.zone=zone;
+/* ---------- Hilfen ---------- */
+const nah=(e,r)=>P&&!P.down&&d2(e,P)<r*r;
+const sicht=e=>{try{return onScr(e)}catch(x){return true}};
+function kanal(e,dauer,fertig,o){/* angekündigter Kanal: steht still, leuchtender Ring; genug Schaden (Anteil o.brich vom Max-Leben) unterbricht */
+ e.kan={t:0,d:dauer,hp:e.hp,brich:(o&&o.brich)||0.2,fertig,c:(o&&o.c)||'#ffd27a'};e.stun=Math.max(e.stun||0,dauer)}
+function kanalTick(e,dt){const k=e.kan;if(!k)return;k.t+=dt;if(e.hp<k.hp-e.maxHp*k.brich){e.kan=null;e.stun=0;e.kanCd=G.time+5;word(e.x,e.y-e.r-18,'Unterbrochen!','#ffd27a');burst(e.x,e.y,'#ffd27a',8,120);return}
+ if(k.t>=k.d){e.kan=null;try{k.fertig(e)}catch(x){rErr(x)}}}
+function erstesTreffen(e){try{if(G.bot||!e.def||!NEU[e.def.id])return;const id=e.def.id;SAVE.rgSeen=SAVE.rgSeen||{};if(SAVE.rgSeen[id])return;if(!sicht(e))return;SAVE.rgSeen[id]=1;
+  const d=NEU[id];if(d.tip){toast(`<b>Neuer Gegner: ${esc(d.n)}</b> – ${esc(d.tip)}`,'#e8c890');}try{bestErlebt('rg_'+id)}catch(x){}persist()}catch(x){rErr(x)}}
+/* ---------- Mechaniken ---------- */
+const M={};
+M.falle=(e,dt)=>{e.atkCd=9;e.m1=(e.m1===undefined?rnd(1.5,3):e.m1)-dt;if(e.m1>0||!nah(e,460)||!sicht(e))return;e.m1=rnd(4.5,6);
+ const x=P.x+rnd(-50,50)+(P.vx||0)*0.5,y=P.y+rnd(-40,40)+(P.vy||0)*0.5;zone({k:'falle',x,y,r:e.def.dornen?34:24,life:14,scharf:0.7,dmg:e.dmg*0.9,dornen:e.def.dornen});
+ eShot(e.x,e.y-4,Math.atan2(y-e.y,x-e.x),0,0,{kind:'eball',life:0.01});burst(x,y,'#c8b080',5,60)};
+M.trommel=(e,dt)=>{e.atkCd=9;e.m1=(e.m1||0)-dt;if(e.m1>0)return;e.m1=0.5;let n=0;query(e.x,e.y,240,o=>{if(o!==e&&!o.dead&&!o.boss){o.drumT=G.time+0.7;n++}});if(n&&((e.m2=(e.m2||0)+1)%2===0))ring(e.x,e.y,240,'#e8a050',0.5,2)};
+M.ruf=(e,dt)=>{if(e.kan){kanalTick(e,dt);return}if(e.rufFertig||(e.kanCd||0)>G.time||!nah(e,520)||!sicht(e))return;
+ e.m1=(e.m1===undefined?rnd(1,2.5):e.m1)-dt;if(e.m1>0)return;
+ kanal(e,2.4,e=>{e.rufFertig=1;const id=e.def.ruf,n=e.def.rufN||3;word(e.x,e.y-e.r-18,'Verstärkung!','#ff9a5a');sfx('horn');for(let i=0;i<n;i++){const a=i/n*TAU;try{const s=spawnEnemy(FOES[id],e.x+Math.cos(a)*70,e.y+Math.sin(a)*70,{summon:1});if(s)s.noLoot=true}catch(x){}}},{c:'#ff9a5a'})};
+M.pfuetze=(e,dt)=>{e.atkCd=9;e.m1=(e.m1===undefined?rnd(1.5,3):e.m1)-dt;if(e.m1>0||!nah(e,430)||!sicht(e))return;e.m1=rnd(3.4,4.4);const x=P.x+rnd(-20,20),y=P.y+rnd(-20,20),dmg=e.dmg*0.7;
+ tele({k:'circle',x,y,r:62,delay:0.9,dmg,c:'#a8c040',after:()=>{zone({k:'pfuetze',x,y,r:66,life:5})}})};
+M.tarnung=(e,dt)=>{if(e.enttarnt)return;if(nah(e,150)||e.hp<e.maxHp){e.enttarnt=1;burst(e.x,e.y,'#8a7a6a',8,90);if(nah(e,170)){const x=P.x,y=P.y;e.stun=Math.max(e.stun||0,0.45);tele({k:'circle',x,y,r:44,delay:0.5,dmg:e.dmg*1.6,c:'#ff6a4a'})}}};
+M.geschuetz=(e,dt)=>{e.m1=(e.m1===undefined?rnd(1,2.5):e.m1)-dt;if(e.m1>0||!nah(e,640)||!sicht(e))return;e.m1=rnd(2.8,3.4);const x=P.x+(P.vx||0)*0.6,y=P.y+(P.vy||0)*0.6,f=e.def.feuer;
+ tele({k:'circle',x,y,r:70,delay:1.15,dmg:e.dmg*1.3,c:f?'#ff8a3a':'#c8b080',after:f?()=>zone({k:'feuer',x,y,r:58,life:2.5,dmg:e.dmg*0.5}):null})};
+M.schilden=(e,dt)=>{e.atkCd=9;e.m1=(e.m1===undefined?2:e.m1)-dt;if(e.m1>0)return;e.m1=4;const L=[];query(e.x,e.y,270,o=>{if(o!==e&&!o.dead&&!o.boss&&!o.guard&&(o.shield|0)<2&&!(o.def&&o.def.mech==='schilden'))L.push(o)});
+ L.sort((a,b)=>d2(a,e)-d2(b,e));for(const o of L.slice(0,2)){o.shield=Math.min(3,(o.shield|0)+2);o.rgRune=G.time+4;G.fxs.push({k:'ring',x:o.x,y:o.y,r:o.r+10,c:'#f4ca75',t:0,life:0.5});e.strahl={x:o.x,y:o.y,t:G.time+0.35}}};
+M.grab=(e,dt)=>{e.m1=(e.m1===undefined?rnd(1,2):e.m1)-dt;
+ if(e.unter){e.flying=true;e.flyHigh=1;if(P){const a=ang(e,P);e.x+=Math.cos(a)*e.sp*1.5*dt;e.y+=Math.sin(a)*e.sp*1.5*dt}if(Math.random()<0.25)burst(e.x,e.y+6,'#6a5a4a',1,30);
+  if(e.m1<=0&&!e.auf&&P){e.auf=1;const x=P.x,y=P.y;tele({k:'circle',x,y,r:52,delay:0.9,dmg:e.dmg*1.3,c:'#a88a5a',after:()=>{if(e.dead)return;e.x=x;e.y=y;e.unter=0;e.auf=0;e.flying=false;e.flyHigh=0;e.m1=rnd(3,4.2);burst(x,y,'#8a6a4a',14,160);G.shake=(G.shake||0)+3;if(P&&d2({x,y},P)<56*56)P.rootT=Math.max(P.rootT||0,0.7)}})}
+  return 'stop'}
+ if(e.m1<=0&&nah(e,520)&&!e.kan){e.unter=1;e.m1=rnd(1.8,2.6);burst(e.x,e.y,'#6a5a4a',10,100)}};
+M.entladung=(e,dt)=>{e.m1=(e.m1===undefined?rnd(2,4):e.m1)-dt;if(e.m1>0||!nah(e,190))return;e.m1=rnd(4.5,5.5);e.stun=Math.max(e.stun||0,1.05);e.lade=G.time+1.05;
+ tele({k:'circle',x:e.x,y:e.y,r:120,delay:1.05,dmg:e.dmg*1.45,c:'#f4e07a',after:()=>{if(!e.dead){burst(e.x,e.y,'#f4e07a',16,240);sfx('thunder')}}})};
+M.brut=(e,dt)=>{e.m1=(e.m1===undefined?rnd(2,4):e.m1)-dt;if(e.m1>0||!nah(e,700))return;e.m1=rnd(5.5,6.5);if(G.enemies.length>110)return;const id=e.def.brut,n=e.def.brutN||2;
+ burst(e.x,e.y,e.def.t,8,110);for(let i=0;i<n;i++){try{const s=spawnEnemy(FOES[id],e.x+rnd(-24,24),e.y+rnd(-24,24),{summon:1});if(s)s.noLoot=true}catch(x){}}};
+M.parade=(e,dt)=>{e.m1=(e.m1===undefined?rnd(2,3.5):e.m1)-dt;if(e.parT>G.time)return;if(e.parN){e.parN=0;if(P&&nah(e,420)){const a=ang(e,P);e.dashT=0.3;e.cvx=Math.cos(a)*560;e.cvy=Math.sin(a)*560;word(e.x,e.y-e.r-18,'Gegenschlag!','#e8e0f0')}}
+ if(e.m1<=0&&nah(e,300)){e.m1=rnd(4,5);e.parT=G.time+1.3;e.stun=Math.max(e.stun||0,1.3);ring(e.x,e.y,e.r+16,'#e8e0f0',0.4,2)}};
+M.dunkel=(e,dt)=>{e.atkCd=9;e.m1=(e.m1===undefined?rnd(1,2):e.m1)-dt;if(e.m1>0||!nah(e,520)||!sicht(e))return;e.m1=rnd(6.5,7.5);zone({k:'dunkel',x:e.x,y:e.y,r:150,life:6})};
+M.blinzeln=(e,dt)=>{e.m1=(e.m1===undefined?rnd(2,3.5):e.m1)-dt;if(e.m1>0||!nah(e,420)||e.blink)return;e.m1=rnd(3.8,4.8);e.blink=1;
+ const a=(P.aimA!==undefined?P.aimA:Math.atan2(P.vy||0,P.vx||1))+Math.PI,x=clamp(P.x+Math.cos(a)*70,20,WORLD-20),y=clamp(P.y+Math.sin(a)*70,20,WORLD-20);
+ tele({k:'circle',x,y,r:30,delay:0.45,dmg:0,c:'#c88aff',after:()=>{e.blink=0;if(e.dead)return;smoke(e.x,e.y);e.x=x;e.y=y;smoke(x,y);e.hitCd=Math.min(e.hitCd,0.25)}})};
+M.bann=(e,dt)=>{e.m1=(e.m1||0)-dt;if(e.m1>0)return;e.m1=0.5;e.bannL=[];query(e.x,e.y,230,o=>{if(o!==e&&!o.dead&&!o.boss&&!o.guard&&o.def&&typeof HOLY!=='undefined'&&HOLY.has(o.def.shape)){o.bannT=G.time+0.7;e.bannL.push(o)}})};
+M.ziehen=(e,dt)=>{e.atkCd=Math.max(e.atkCd,1);e.m1=(e.m1===undefined?rnd(2,3.5):e.m1)-dt;if(e.m1>0||!P)return;const dd=Math.sqrt(d2(e,P));if(dd<150||dd>430||!sicht(e))return;e.m1=rnd(4.6,5.6);
+ const a=ang(e,P),len=dd+40;e.stun=Math.max(e.stun||0,0.8);tele({k:'line',x:e.x,y:e.y,a,len,w:26,delay:0.8,c:'#c8b080',after:()=>{if(e.dead||!P)return;
+  const px=P.x-e.x,py=P.y-e.y,u=px*Math.cos(a)+py*Math.sin(a),v=Math.abs(-px*Math.sin(a)+py*Math.cos(a));if(u>0&&u<len&&v<30&&!(P.inv>0)){const s=Math.min(160,u-40);P.x-=Math.cos(a)*s;P.y-=Math.sin(a)*s;P.slowT=Math.max(P.slowT||0,1.2);P.slowA=Math.max(P.slowA||0,0.4);hurt(e.dmg*0.7);burst(P.x,P.y,'#c8b080',8,120)}}})};
+M.wachsen=(e,dt)=>{if(e.kan){kanalTick(e,dt);return}if(e.gross||(e.kanCd||0)>G.time||!nah(e,420)||!sicht(e))return;e.m1=(e.m1===undefined?rnd(0.8,2):e.m1)-dt;if(e.m1>0)return;
+ kanal(e,2.0,e=>{e.gross=1;e.r*=1.4;e.maxHp*=1.8;e.hp=Math.min(e.maxHp,e.hp*1.8);e.dmg*=1.55;e.sp*=0.85;word(e.x,e.y-e.r-18,'Vergrößert!','#ff9a5a');G.shake=(G.shake||0)+4;burst(e.x,e.y,'#a88a5a',18,200)},{brich:0.22})};
+M.spur=(e,dt)=>{e.m1=(e.m1||0)-dt;if(e.m1>0||!e.mv)return;e.m1=0.32;zone({k:'feuer',x:e.x,y:e.y+4,r:24,life:2.4,dmg:e.dmg*0.45})};
+RG.M=M;
+/* ---------- Einhängen ---------- */
+if(typeof updEnemy==='function'){const ue=updEnemy;updEnemy=function(e,dt){const m=!RG.aus&&e&&e.def&&e.def.mech&&M[e.def.mech];
+  if(m&&!e.dead&&!e.boss&&!e.guard&&!(G&&G.netGuestRun)){try{erstesTreffen(e);if(e.stun>0&&!e.kan&&e.def.mech!=='grab'){}else if(m(e,dt)==='stop')return}catch(x){rErr(x)}}
+  return ue.apply(this,arguments)}}
+if(typeof dealDmg==='function'){const dd=dealDmg;dealDmg=function(e,base,o){try{if(!RG.aus&&e&&!e.dead){
+  if(e.unter)return 0;
+  if(e.bannT>G.time){if(!e.bannW||e.bannW<G.time){e.bannW=G.time+0.8;word(e.x,e.y-e.r-14,'Gebannt','#c890ff')}return 0}
+  const m=e.def&&e.def.mech;o=o||{};
+  if(m==='parade'&&e.parT>G.time&&!o.dot&&!o.pet){e.parN=(e.parN|0)+1;if(!e.parW||e.parW<G.time){e.parW=G.time+0.4;word(e.x,e.y-e.r-14,'Pariert','#e8e0f0');try{sfxAt('e_wucht',e.x,e.y)}catch(x){}}return 0}
+  if(m==='schild'&&!o.dot&&!o.pet&&P){const fa=e.sa||0,a=Math.atan2(P.y-e.y,P.x-e.x);let w=Math.abs(((a-fa+Math.PI*3)%(Math.PI*2))-Math.PI);if(w<1.05){base*=0.2;if(!e.schW||e.schW<G.time){e.schW=G.time+0.6;burst(e.x+Math.cos(fa)*e.r,e.y+Math.sin(fa)*e.r,'#e8d8b0',4,80)}}}
+  for(const z of Z)if(z.k==='dunkel'&&imKreis(z,e.x,e.y,z.r)){base*=0.5;break}}}catch(x){rErr(x)}
+ return dd.call(this,e,base,o)}}
+/* Schildträger drehen sich nur langsam – wer umrundet, kommt an den Schild vorbei */
+hook('tick',dt=>{try{if(RG.aus)return;if(!(G&&G.state==='play'))return;zonenTick(dt);
+ for(const e of G.enemies){if(e.dead||!e.def||e.def.mech!=='schild'||!P)continue;const ta=Math.atan2(P.y-e.y,P.x-e.x);if(e.sa===undefined)e.sa=ta;let d=((ta-e.sa+Math.PI*3)%(Math.PI*2))-Math.PI;const st=1.25*dt;e.sa+=Math.max(-st,Math.min(st,d))}}catch(x){rErr(x)}});
+if(typeof startRun==='function'){const sr=startRun;startRun=function(){Z.length=0;return sr.apply(this,arguments)}}
+hook('stage',()=>{Z.length=0});
+if(typeof drawEnemy==='function'){const de=drawEnemy;drawEnemy=function(e,t){if(e&&e.unter)return;if(e&&e.def&&e.def.mech==='tarnung'&&!e.enttarnt&&!RG.aus){const c=cx,a=c.globalAlpha;c.globalAlpha=a*0.14;try{return de.apply(this,arguments)}finally{c.globalAlpha=a}}return de.apply(this,arguments)}}
+hook('draw',(t,c)=>{try{if(RG.aus||!G||G.state!=='play')return;zonenMalen(c,t);
+ for(const e of G.enemies){if(e.dead||!e.def||!e.def.mech)continue;const m=e.def.mech;c.save();
+  if(e.unter){c.globalAlpha=0.7;c.fillStyle='#4a3a2a';c.beginPath();c.ellipse(e.x,e.y+6,18,7,0,0,TAU);c.fill();c.globalAlpha=0.5;c.fillStyle='#7a6a5a';for(let i=0;i<3;i++){c.beginPath();c.arc(e.x+Math.sin(t*6+i*2)*10,e.y+4,2.5,0,TAU);c.fill()}}
+  else if(m==='schild'&&e.sa!==undefined){c.globalAlpha=0.85;c.strokeStyle='#d8c8a0';c.lineWidth=4;c.beginPath();c.arc(e.x,e.y-4,e.r+7,e.sa-0.9,e.sa+0.9);c.stroke();c.globalAlpha=0.35;c.strokeStyle='#fff4d8';c.lineWidth=8;c.beginPath();c.arc(e.x,e.y-4,e.r+7,e.sa-0.5,e.sa+0.5);c.stroke()}
+  else if(m==='trommel'){c.globalAlpha=0.16+0.08*Math.sin(t*8);c.strokeStyle='#e8a050';c.lineWidth=2;c.setLineDash([6,10]);c.beginPath();c.arc(e.x,e.y,240,t*0.6,t*0.6+TAU);c.stroke();c.setLineDash([])}
+  else if(m==='parade'&&e.parT>G.time){c.globalAlpha=0.55+0.3*Math.sin(t*20);c.strokeStyle='#f4ecff';c.lineWidth=3;c.beginPath();c.arc(e.x,e.y-6,e.r+9,0,TAU);c.stroke()}
+  else if(m==='entladung'&&e.lade>G.time){c.globalAlpha=0.7;c.strokeStyle='#f4e07a';c.lineWidth=2;for(let i=0;i<3;i++){const a=t*7+i*2.1;c.beginPath();c.moveTo(e.x,e.y-8);c.lineTo(e.x+Math.cos(a)*(e.r+14),e.y-8+Math.sin(a)*(e.r+10));c.stroke()}}
+  else if(m==='schilden'&&e.strahl&&e.strahl.t>G.time){c.globalAlpha=0.7;c.strokeStyle='#f4ca75';c.lineWidth=2.5;c.beginPath();c.moveTo(e.x,e.y-10);c.lineTo(e.strahl.x,e.strahl.y-10);c.stroke()}
+  else if(m==='bann'&&e.bannL){c.globalAlpha=0.35+0.15*Math.sin(t*5);c.strokeStyle='#c890ff';c.lineWidth=1.6;c.setLineDash([4,6]);for(const o of e.bannL){if(o.dead)continue;c.beginPath();c.moveTo(e.x,e.y-20);c.lineTo(o.x,o.y-8);c.stroke()}c.setLineDash([])}
+  if(e.kan){const k=e.kan,p=Math.min(1,k.t/k.d);c.globalAlpha=0.85;c.strokeStyle=k.c;c.lineWidth=3;c.beginPath();c.arc(e.x,e.y-4,e.r+12,-Math.PI/2,-Math.PI/2+p*TAU);c.stroke();c.globalAlpha=0.25;c.beginPath();c.arc(e.x,e.y-4,e.r+12,0,TAU);c.stroke()}
+  if(e.rgRune>G.time&&e.shield>0){c.globalAlpha=0.5;c.strokeStyle='#f4ca75';c.lineWidth=1.5;c.beginPath();c.arc(e.x,e.y-4,e.r+6,0,TAU);c.stroke()}
+  c.restore()}}catch(x){rErr(x)}});
+}catch(e){console.error('regio',e);window.__hsREGIO={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/regio» */
+/* «skal» */
+/* ================= Paket „skal“: Gegner wachsen mit den Helden – window.__hsSKAL =================
+   Messung (Bot, Normal, alle Helden): Der Heldenschaden wächst je Stufe um ≈ 25 %, das Gegnerleben nur um ≈ 12 %.
+   Folge: Ein normaler Gegner hielt früh ≈ 1 s, ab Stufe 10 nur noch ≈ 0,2 s, am Ende ≈ 0,1 s – alles verdampft,
+   Ausrüstung und Attribute spielen kaum noch eine Rolle, und lange Wege ohne Kampf fühlen sich leer an.
+   Jetzt (auf scale(), also für alle Gegner, Wächter und Bosse):
+     · Leben: ab Stufe 5 ansteigender Zuschlag (Stufe 10: ×2, danach +3 % je Stufe) – die Zeit pro Gegner fällt nicht mehr ins Bodenlose
+     · Schaden: kein pauschaler Zuschlag (längere Kämpfe erhöhen den erlittenen Schaden von selbst), dafür Ausreißer-Stufen geglättet
+     · Leerlauf: ab Stufe 8 kommen Gegnerwellen 15 % schneller nach, ab Stufe 16 30 % (Leerlauf stieg bis auf 50–60 %)
+     · Rückstand-Schutz: Liegt die Heldenstufe unter der für die Stufe üblichen (Messung), wird der Zuschlag je fehlender
+       Stufe gemildert – wer weniger farmt oder Pech mit Beute hat, rennt nicht gegen Schwämme.
+   Prüfung: bal2.mjs + zeig2.py (Time-to-Kill, erlittener Schaden je Kampfminute, Tiefstwert Leben, Leerlauf) vorher/nachher.
+   Abschaltbar: __hsSKAL.aus=1 */
+(function(){try{if(window.__hsSKAL)return;
+const SK=window.__hsSKAL={v:1,aus:0,err:[],DMG_A:1,AB:2,DMG_MAX:2.4,LUECKE:0.94,TOL:2,HP_K:1.0,HP_L:0.03,LEER:0.85};
+/* Leben-Zuschlag je Kampagnenstufe s: ab Stufe 5 ansteigend, ab Stufe 10 nur noch sanft (gemessene Time-to-Kill fällt bis ≈ Stufe 9 stark, danach flach) */
+SK.kurveHp=s=>1+SK.HP_K*Math.min(1,Math.max(0,(s-4)/6))+SK.HP_L*Math.max(0,s-10);
+SK.erwLv=s=>8+1.1*s;                         /* übliche Heldenstufe auf Kampagnenstufe s (Bot-Messung) */
+/* Spitzen glätten: Schaden je Kampagnenstufe (Index), gemessen als Ausreißer beim erlittenen Schaden */
+SK.ST={1:{dmg:0.85},11:{hdmg:0.85},16:{dmg:0.9},18:{dmg:0.85},19:{dmg:0.9},20:{dmg:0.85},21:{dmg:0.85},22:{dmg:0.85}};  /* 2: Wölfe · 12: Spinnweben (Schwer) · 17–23: späte Spitzen */
+/* Spuren im Wald (Stufe 2): weniger Wölfe/Reiter im Gemisch – das Rudel kam zu oft auf einmal */
+try{const S=STAGES[1];if(S&&S.foes&&S.foes.wolf>=3){S.foes.wolf=2;if(S.foes.wolfsreiter)S.foes.wolfsreiter=0.7}}catch(e){}
+function lv(){try{if(typeof PL!=='undefined'&&PL&&PL.length>1){let a=0,n=0;for(const q of PL)if(q&&q.level){a+=q.level;n++}return n?a/n:P.level}return P&&P.level||1}catch(e){return 1}}
+SK.f=function(){if(SK.aus||!G||G.netGuestRun)return{hp:1,dmg:1};let s=0;try{s=Math.max(0,(typeof SL==='function'?SL():G.stage)-SK.AB)}catch(e){}
+ if(G.mode!=='kampagne'&&G.mode!=='taeglich')return{hp:1,dmg:1};   /* Abstieg und Boss-Rausch haben ihre eigene Tiefen-Skalierung */
+ let hp=SK.kurveHp(s+SK.AB),dmg=Math.min(SK.DMG_MAX,Math.pow(SK.DMG_A,s));
+ const fehl=Math.max(0,SK.erwLv(s+SK.AB)-lv()-SK.TOL);if(fehl>0){const m=Math.pow(SK.LUECKE,fehl);hp=Math.max(1,1+(hp-1)*m);dmg=Math.max(1,1+(dmg-1)*m)}
+ const st=SK.ST[G.stage];if(st&&G.mode==='kampagne'){if(st.dmg)dmg*=st.dmg;if(st.hp)hp*=st.hp;if(HARDx()&&st.hdmg)dmg*=st.hdmg}
+ return{hp,dmg}};
+function HARDx(){try{return typeof HARD==='function'&&HARD()}catch(e){return false}}
+if(typeof spawnTick==='function'){const st=spawnTick;spawnTick=function(dt){const v=G.spawnT;const r=st.apply(this,arguments);try{const s=(typeof SL==='function'?SL():G.stage);if(!SK.aus&&G.spawnT>v&&(G.mode==='kampagne'||G.mode==='taeglich')&&s>=8)G.spawnT*=SK.LEER-0.15*Math.min(1,(s-8)/8)}catch(e){}return r}}
+if(typeof scale==='function'){const sc=scale;scale=function(){const r=sc.apply(this,arguments);try{if(r&&!SK.aus){const f=SK.f();r.hp*=f.hp;r.dmg*=f.dmg}}catch(e){if(SK.err.length<20)SK.err.push(String(e))}return r}}
+}catch(e){console.error('skal',e);window.__hsSKAL={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/skal» */
+/* «echo2» */
+/* ================= Paket „echo2“: Echo in den ersten Stufen stärker – window.__hsECHO2 =================
+   Messung (Bot, Normal): Echo machte auf den ersten beiden Stufen nur halb so viel Schaden wie Barradin (56 / 215 gegen 113 / 418
+   Schaden je Sekunde) und fiel auf Stufe 2 bis auf 34 % Leben – mit dem wenigsten Leben aller Helden (100).
+   Ab Stufe ≈ 10 holt Echo über die Sturm-Zauber auf und liegt am Ende vorn. Deshalb kein pauschaler Zuschlag, sondern:
+     · +40 % Schaden auf Heldenstufe 1, gleitend weniger bis Stufe 15 (dann +0 %)
+     · +12 % Leben dauerhaft (Echo ist sonst der zerbrechlichste Held)
+   Abschaltbar: __hsECHO2.aus=1 */
+(function(){try{if(window.__hsECHO2)return;
+const E2=window.__hsECHO2={v:1,aus:0,DMG0:0.4,BIS:15,HP:0.12};
+hook('stats',s=>{try{if(E2.aus||!P||P.id!=='echo')return;const lv=Math.max(1,P.level|0);const f=Math.max(0,1-(lv-1)/(E2.BIS-1));s.dmgP=(s.dmgP||0)+E2.DMG0*f;s.hpP=(s.hpP||0)+E2.HP}catch(e){}});
+}catch(e){console.error('echo2',e);window.__hsECHO2={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/echo2» */
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
