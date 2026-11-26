@@ -4258,7 +4258,7 @@ function fsToggle(){try{if(fsOn())(document.exitFullscreen||document.webkitExitF
 document.addEventListener('fullscreenchange',()=>{setTimeout(resize,60);const b=$('fsBtn');if(b)b.textContent=fsOn()?'Vollbild beenden':'Vollbild'});document.addEventListener('webkitfullscreenchange',()=>setTimeout(resize,60));
 const fsRow=()=>fsOk()?`<div class="up fsrow"><div><div class="t">Vollbild</div><div class="d">Das Spiel füllt den ganzen Bildschirm. Am PC auch mit der Taste F.</div></div><button class="btn" id="fsBtn" data-act="fs">${fsOn()?'Vollbild beenden':'Vollbild'}</button></div>`:'';
 const gfxRow=()=>`${fsRow()}<div class="up vol" id="gfxBox">${gfxInner()}</div><div class="up chrow" id="camBox">${camInner()}</div>`;
-const camInner=()=>{const L=camL();return`<div><div class="t">Wackeln &amp; Zeitlupe<small>${CAMN[L]}</small></div><div class="d">${CAMD[L]}</div></div><div class="chips">${CAMN.map((n,i)=>`<button class="chip ${i===L?'on':''}" data-act="camfx" data-v="${i}">${n}</button>`).join('')}</div>`};
+const camInner=()=>{const L=camL();return`<div><div class="t">Wackeln<small>${CAMN[L]}</small></div><div class="d">${CAMD[L]}</div></div><div class="chips">${CAMN.map((n,i)=>`<button class="chip ${i===L?'on':''}" data-act="camfx" data-v="${i}">${n}</button>`).join('')}</div>`};
 /* Farben */
 const RGBC={},LITE={};
 function rgbOf(c){let r=RGBC[c];if(r)return r;let h=String(c||'#fff').replace('#','');if(h.length===3)h=h.split('').map(x=>x+x).join('');const n=parseInt(h.slice(0,6),16);r=(h.length<6||isNaN(n))?[255,255,255]:[n>>16&255,n>>8&255,n&255];return RGBC[c]=r}
@@ -4284,10 +4284,10 @@ function vignette(){if(!VIG||VW!==W||VH!==H){VW=W;VH=H;VIG=document.createElemen
  cx.globalAlpha=1;cx.drawImage(VIG,0,0,W,H)}
 
 /* Zeit, Kamera, Bildschirm */
-const CAMN=['Aus','Sanft','Voll'],CAMD=['Kein Wackeln, keine Zeitlupe, gedämpfte Blitze.','Leichtes Wackeln und weiche Zeitlupe bei Bossen – ohne Ruckler.','Volle Wucht: starkes Wackeln, Trefferstopps und lange Zeitlupe.'];
+const CAMN=['Aus','Sanft','Voll'],CAMD=['Kein Wackeln, gedämpfte Blitze.','Leichtes Wackeln bei großen Treffern und Bossen.','Volle Wucht: starkes Wackeln und kräftige Blitze.'];
 const camL=()=>REDUCED?0:(SAVE.camfx===undefined?1:SAVE.camfx);
 function hitstop(s){return;/* Bild-Einfrieren auf Wunsch aus */if(G.bot||camL()<2||(G.hsCd||0)>performance.now())return;G.hsCd=performance.now()+500;G.hsT=Math.max(G.hsT||0,Math.min(s,0.05))}
-function slowmo(s,v){if(G.bot)return;const L=camL();if(!L)return;if(L===1){s=Math.min(s*0.6,0.9);v=Math.max(v,0.5)}G.smT=Math.max(G.smT||0,s);G.smD=G.smT;G.smV=v}
+function slowmo(s,v){return;/* Zeitlupe auf Wunsch ganz aus (wie Bild-Einfrieren) */if(G.bot)return;const L=camL();if(!L)return;if(L===1){s=Math.min(s*0.6,0.9);v=Math.max(v,0.5)}G.smT=Math.max(G.smT||0,s);G.smD=G.smT;G.smV=v}
 function zpunch(v){if(G.bot)return;const L=camL();if(!L)return;G.zp=Math.max(G.zp||0,v*(L===1?0.5:1))}
 function sflash(c,a,d){if(G.bot)return;a*=[0.3,0.6,1][camL()];G.sf={c,a,a0:a,d:d||0.3}}
 function timeScale(dt){if(G.hsT>0){G.hsT-=dt;return 0.25}if(G.smT>0){G.smT-=dt;const k=1-Math.max(0,G.smT)/(G.smD||1),v=G.smV||0.4;let e=k<0.12?k/0.12:k>0.55?1-(k-0.55)/0.45:1;e=e*e*(3-2*e);return 1+(v-1)*e}return 1}
