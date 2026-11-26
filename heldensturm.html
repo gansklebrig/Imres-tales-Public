@@ -21452,7 +21452,7 @@ Object.assign(HFX,{dtRuf(f,k,c,t){let x=f.x,y=f.y;const e=dtFind(f.eid);if(e&&!e
 /* Seltene Eliten: Name und Titel aus der Kampagne (Hash statt Zufall) */
 {const m0=makeElite;makeElite=function(e,affix,rare){const r=m0.apply(this,arguments);try{if(rare&&e&&!e.boss&&!e.guard)e.dtN=dtName(e)}catch(er){}return r}}
 {const d0=drawEnemy;drawEnemy=function(e,t){const r=d0.apply(this,arguments);try{if(e&&e.dtN&&!e.dead&&!e.corpse&&!(FOV.on&&fovVersteckt(e))){const c=cx,ty=e.y-e.r-(e.affix?27:15);
- c.font='italic 800 11px "Alegreya",Georgia,serif';c.textAlign='center';c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.85)';c.strokeText(e.dtN,e.x,ty);c.fillStyle='#ffe7a0';c.fillText(e.dtN,e.x,ty)}}catch(er){}return r}}
+ c.font='italic 800 11px "Alegreya",Georgia,serif';c.textAlign='center';c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.85)';c.strokeText(e.dtN,e.x,ty);c.fillStyle='#ffe7a0';c.fillText(e.dtN,e.x,ty);try{const w=c.measureText(e.dtN).width/2+3;SWLF.L.push({k:'dt',x:e.x,y:ty,x0:e.x-w,x1:e.x+w,y0:ty-12,y1:ty})}catch(er){}}}catch(er){}return r}}
 /* Treffer: erster Treffer ruft, wenig Leben jammert */
 hook('hit',(e,o)=>{if(G.bot||!e||e.dead||e.boss||e.guard)return;if(!e._dtA){e._dtA=1;if(dtR()<(e.rare?0.9:0.1))dtRuf(e,'a',e.rare)}else if(!e._dtN&&e.hp<e.maxHp*0.3){e._dtN=1;if(dtR()<0.3)dtRuf(e,'n')}});
 /* Tod: letzter Satz (selten), Reste je Gegnerart, Rudel-Moral */
@@ -24514,13 +24514,17 @@ function swEliteDraw(e,t,c){if(!e.affix||e.dead)return;const L=swLbl(e,c);const 
  /* Bodenring: je Eigenschaft ein Bogen in ihrer Farbe */
  if(ids.length){const R=e.r+7,ry=R*0.4,y0=e.y+e.r*0.85,n=ids.length,rot=t*0.6+(e.seed||0);c.save();c.lineWidth=swLeicht()?2:2.6;c.lineCap='round';c.globalAlpha=0.85;
   for(let i=0;i<n;i++){const a0=rot+i*TAU/n+0.12,a1=rot+(i+1)*TAU/n-0.12;c.strokeStyle=AFFIX[ids[i]].c;c.beginPath();c.ellipse(e.x,y0,R,ry,0,a0,a1);c.stroke()}c.restore()}
- /* Name */
- const ty=e.y-e.r-(e.boss?24:14);c.save();c.font='800 11px "Alegreya Sans",sans-serif';c.textAlign='left';c.textBaseline='alphabetic';c.lineJoin='round';
+ /* Name – im Gedränge nicht übereinander: gleiche Eigenschaften im Rudel nur einmal, überlappende Schilder weglassen (Boss/Wächter immer) */
+ const ty=e.y-e.r-(e.boss?24:14);
+ if(!e.boss&&!e.guard){const r0={x0:e.x-L.w/2-3,x1:e.x+L.w/2+3,y0:ty-12,y1:ty+4};for(const q of SWLF.L){if(q.k===L.k&&Math.abs(q.x-e.x)<320&&Math.abs(q.y-ty)<240)return;if(r0.x0<q.x1&&r0.x1>q.x0&&r0.y0<q.y1&&r0.y1>q.y0)return}
+  r0.k=L.k;r0.x=e.x;r0.y=ty;SWLF.L.push(r0)}
+ c.save();c.font='800 11px "Alegreya Sans",sans-serif';c.textAlign='left';c.textBaseline='alphabetic';c.lineJoin='round';
  let x=e.x-L.w/2;const nc=e.rare||e.boss||e.guard?'#f6dc78':'#f0e4c8';
  for(let i=0;i<L.seg.length;i++){const s=L.seg[i];c.lineWidth=3.2;c.strokeStyle='rgba(0,0,0,.85)';if(i){if(!(L.kurz&&s.k)){c.strokeText(' · ',x,ty);c.fillStyle='#a89878';c.fillText(' · ',x,ty)}x+=L.gap}
   if(s.ic){c.strokeText(s.ic,x,ty);c.fillStyle=s.c;c.fillText(s.ic,x,ty);x+=s.wi}
   if(!s.k){c.strokeText(s.n,x,ty);c.fillStyle=nc;c.fillText(s.n,x,ty);x+=s.wn}}
  c.restore()}
+const SWLF={L:[]};{const rn=render;render=function(){SWLF.L.length=0;return rn.apply(this,arguments)}}
 {const up=ulEPost;ulEPost=function(e,t,c){if(e&&e.affix&&e.affixNames){const n=e.affixNames;e.affixNames='';let r;try{r=up.apply(this,arguments)}finally{e.affixNames=n}try{swEliteDraw(e,t,c)}catch(x){}return r}return up.apply(this,arguments)}}
 /* Ankündigungs-Effekt (Teleport-Ziel / Beschwörung) */
 HFX.sw_tp=function(f,k,c,t){const R=f.r*(f.in?1.2-0.4*k:0.6+0.4*k),a=0.35+0.5*k;c.save();c.globalAlpha=a;c.strokeStyle=f.c;c.lineWidth=2.5;c.setLineDash([6,5]);c.lineDashOffset=-t*30;
@@ -43514,11 +43518,12 @@ if(typeof kaDeko==='function'){const kd=kaDeko;kaDeko=function(S){const r=kd.app
    G.blk.push({t:'c',x,y,r:20,k:'brunnen',v:Math.random(),wl:1,ai:0,rh:1});b++}
   if(b&&typeof blkRaster==='function')blkRaster();RH.brunnen=b}}}catch(e){console.error('rhythm-licht',e)}return r}}
 /* Gassen-Karten: Die Häuser SIND die Wandmassen. Zusätzlich lagen bisher ≈ 240 kleine Deko-Häuschen mitten auf Straßen und Plätzen
-   (man lief durch sie hindurch) und ≈ 75 auf den Dächern. Auf Straßen werden daraus Kisten/Fässer (etwa jedes dritte), der Rest entfällt. */
+   (man lief durch sie hindurch) und ≈ 75 auf den Dächern. Auf Straßen werden daraus Kisten/Fässer (etwa jedes dritte), der Rest entfällt.
+   Ebenso im Geisterdorf die kleinen Ruinen-Häuschen (100–240 auf Gassen, 100 auf Dächern): auf Gassen Schutt/Knochen, der Rest entfällt. */
 RH.haus={n:0,weg:0};
 function hausAufraeumen(nach){const K=G.ka;if(RH.aus||!K||!K.M||(K._rhHaus&&!nach)||K._rhHaus>1||!K.T||K.T.mas!=='haus'||!G.deco)return;K._rhHaus=1;const n=K.n,Z=K.Z,D=G.deco;
- for(let i=D.length-1;i>=0;i--){const d=D[i];if(!d||d.k!=='house'||d.edge)continue;const ci=(d.x/Z)|0,cj=(d.y/Z)|0;const masse=ci<0||cj<0||ci>=n||cj>=n||K.M[cj*n+ci];
-  if(!masse&&d.v<0.34){d.k=d.v<0.17?'crate':'barrel';d.s=Math.min(d.s||1,1.1);RH.haus.n++}else{D.splice(i,1);RH.haus.weg++}}}
+ for(let i=D.length-1;i>=0;i--){const d=D[i];if(!d||(d.k!=='house'&&d.k!=='ruinhouse')||d.edge)continue;const ru=d.k==='ruinhouse';const ci=(d.x/Z)|0,cj=(d.y/Z)|0;const masse=ci<0||cj<0||ci>=n||cj>=n||K.M[cj*n+ci];
+  if(!masse&&d.v<(ru?0.3:0.34)){d.k=ru?(d.v<0.18?'rubble':'bones'):d.v<0.17?'crate':'barrel';d.s=Math.min(d.s||1,1.1);RH.haus.n++}else{D.splice(i,1);RH.haus.weg++}}}
 if(typeof render==='function'){const r0=render;render=function(){try{if(G&&G.state==='play'&&G.ka&&(G.ka._rhHaus||0)<2){hausAufraeumen(1);G.ka._rhHaus=2}}catch(e){}return r0.apply(this,arguments)}}
 /* Lichtschacht: Licht (Loch in der Dunkelheit), Bodenfleck (ruhend, wird mit den Kacheln vorgezeichnet), Säule + Staub (bewegt) */
 if(typeof drawDeco==='function'){const dd=drawDeco;drawDeco=function(d,t){if(d&&d.k==='rh_schacht'){const c=cx;try{c.save();c.translate(d.x,d.y);
