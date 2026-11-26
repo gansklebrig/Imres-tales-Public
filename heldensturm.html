@@ -4312,7 +4312,7 @@ function drawBanner(dt){try{heroScreen(dt);taktHud();tutTick(dt)}catch(e){}const
  const inA=Math.min(1,b.t/0.35),a=Math.min(inA,Math.min(1,(b.dur-b.t)/0.5));
  if(b.bars){const bh=Math.min(H*0.11,90)*Math.min(1,b.t/0.3,(b.dur-b.t)/0.4);cx.globalAlpha=1;cx.fillStyle='#000';cx.fillRect(0,0,W,bh);cx.fillRect(0,H-bh,W,bh)}
  const y=b.y||H*(b.bars?0.32:0.26),fs=Math.min(b.size||56,W*0.105),sc=1+0.3*(1-inA)*(1-inA);
- cx.save();cx.translate(W/2,y);cx.scale(sc,sc);cx.textAlign='center';{cx.font=`${Math.round(fs)}px 'IM Fell English SC','Palatino Linotype',Georgia,serif`;const mw=cx.measureText(b.big).width;if(mw>W*0.92){const k=W*0.92/mw;cx.scale(k,k)}}cx.textBaseline='middle';
+ cx.save();cx.translate(W/2,y);cx.scale(sc,sc);cx.textAlign='center';{cx.font=`${Math.round(fs)}px 'IM Fell English SC','Palatino Linotype',Georgia,serif`;let mw=cx.measureText(b.big).width;if(b.small){cx.font=`800 ${Math.max(12,Math.round(fs*0.3))}px "Alegreya Sans",sans-serif`;mw=Math.max(mw,cx.measureText(String(b.small).toUpperCase()).width)}if(mw>W*0.92){const k=W*0.92/mw;cx.scale(k,k)}}cx.textBaseline='middle';
  const gr=cx.createLinearGradient(-W/2,0,W/2,0);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(0.5,'rgba(0,0,0,.6)');gr.addColorStop(1,'rgba(0,0,0,0)');cx.globalAlpha=a;cx.fillStyle=gr;cx.fillRect(-W/2,-fs*0.8,W,fs*(b.small?2.15:1.6));
  cx.globalCompositeOperation='lighter';glow(0,0,fs*2.4,b.col,0.32*a,true);cx.globalCompositeOperation='source-over';
  cx.globalAlpha=a;cx.font=`${Math.round(fs)}px 'IM Fell English SC','Palatino Linotype',Georgia,serif`;cx.lineWidth=5;cx.strokeStyle='rgba(0,0,0,.85)';cx.strokeText(b.big,0,0);cx.fillStyle=b.col;cx.fillText(b.big,0,0);
@@ -18662,6 +18662,8 @@ const IVD={cfg:{},bp:{},bs:{}};
 .wrap.ivg .stilbox .stilrow>span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wrap.ivg.ivtiny .stilbox>div:last-child{display:none}.wrap.ivg.ivtiny.ivm-N .stilbox .stilrow{display:none}.wrap.ivg.ivtiny .stilbox .stilrow{display:none}.wrap.ivg.ivtiny.ivhinw .iv-body p.muted{display:none}.wrap.ivg.ivtiny .stilbox{padding:4px 10px}.wrap.ivg.ivtiny .stilbox>div:first-child .muted{display:none}.wrap.ivg.ivtiny.ivm-N .stilbox{padding:4px 10px}
 .wrap.ivg.ivtiny .eyebrow{font-size:11px}
+/* winzige Fenster mit Hinweiskasten: Spielstil-Kasten weglassen, sonst schieben sich Raster und Kasten übereinander */
+.wrap.ivg.ivtiny.ivhinw.ivk-inv .stilbox,.wrap.ivg.ivtiny.ivhinw.ivk-inv details.stats{display:none}
 `;document.head.appendChild(st)}catch(e){}})();
 
 function ivKind(w){if(!w||!w.classList.contains('inv')||!w.querySelector('.bag'))return'';if(w.classList.contains('smith'))return w.querySelector('.smdet')?'smith':'';return w.querySelector('.equip')?'inv':'truhe'}
@@ -43340,7 +43342,9 @@ function spur(){const nw=performance.now();if(nw-spurT<150)return;spurT=nw;const
 (function schleife(){try{lage()}catch(e){}try{spur()}catch(e){}requestAnimationFrame(schleife)})();
 /* Banner nicht über den Abschnittsnamen legen: Banner rückt unter ihn */
 function kaUnten(){try{if(typeof KANAME!=='undefined'&&KANAME.t>0&&KANAME.unten>0)return KANAME.unten+12}catch(e){}try{if(typeof KANAME!=='undefined'&&KANAME.t>0){let top=70;const h=document.querySelector('#hud .top');if(h){const r=h.getBoundingClientRect();if(r.height>0)top=r.bottom+(W<700?58:14)}const fs=W<700?15:19;return top+fs+(KANAME.sub?40:22)}}catch(e){}return 0}
-if(typeof drawBanner==='function'){const db=drawBanner;drawBanner=function(){const b=G&&G.banner;try{if(!ME.aus&&b){const k=kaUnten();if(k){const fs=Math.min(b.size||56,W*0.105),by=b.y||H*(b.bars?0.32:0.26);if(by-fs*0.8<k)b.y=k+fs*0.8}}}catch(e){}
+/* Banner nie über HUD-Leiste/Karte: Unterkante der oberen HUD-Zeile (gemessen, gedrosselt) – wichtig auf kleinen Fenstern */
+let huT=0,huV=0;function hudUnten(){const nw=performance.now();if(nw-huT<300)return huV;huT=nw;huV=0;try{const el=document.querySelector('#hud .top');if(el&&!hud.hidden){const r=el.getBoundingClientRect();if(r.height>0)huV=r.bottom+6}}catch(e){}return huV}
+if(typeof drawBanner==='function'){const db=drawBanner;drawBanner=function(){const b=G&&G.banner;try{if(!ME.aus&&b){const k=Math.max(kaUnten(),hudUnten());if(k){const fs=Math.min(b.size||56,W*0.105),by=b.y||H*(b.bars?0.32:0.26);if(by-fs*0.8<k)b.y=k+fs*0.8}}}catch(e){}
  return db.apply(this,arguments)}}  /* einmal verschoben, bleibt das Banner dort – kein Springen */
 /* doppelte Hinweise und Weltwörter */
 const zeit=()=>performance.now();
