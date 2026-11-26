@@ -43703,6 +43703,28 @@ const ue=updEnemy;updEnemy=function(e,dt){
  return r};
 }catch(e){console.error('rudel',e);window.__hsRUDEL={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/rudel» */
+/* «erzlage» */
+/* ================= Paket „erzlage“: Erzähler-/Heldenzeile in Menüs und Zwischenbildschirmen klein unten rechts – window.__hsERZLAGE =================
+   Befund (Bilder): In Zwischenbildschirmen (Ereignis „Die alte Druidin“) lag die Zeile „Barradin meint …“ oben mittig über der
+   Bildschirm-Überschrift („Unterwegs · Barradin“), im Beutel unten mittig über der Spielstil-Tafel.
+   Jetzt: Solange ein Menü (Beutel, Talente, Pause …) oder ein Zwischenbildschirm offen ist, sitzt die Zeile kompakt unten rechts
+   (Bild 26 px, Schrift 12,5 px, höchstens 300 px breit; kleine Fenster 240 px). Im Spiel unverändert. Abschaltbar: __hsERZLAGE.aus=1 */
+(function(){try{if(window.__hsERZLAGE)return;
+const EL=window.__hsERZLAGE={v:1,aus:0};
+const css=document.createElement('style');css.textContent=`
+body.erzEck:not(.chrAuf) .erzSub,body.erzEck:not(.chrAuf) .erzSub.oben{left:auto!important;right:8px!important;top:auto!important;bottom:8px!important;transform:none!important;width:auto!important;min-width:0!important;max-width:300px!important;padding:4px 10px 4px 4px!important;border-radius:10px!important;box-sizing:border-box}
+body.erzEck:not(.chrAuf) .erzSub .erzBild{width:26px!important;height:26px!important}
+body.erzEck:not(.chrAuf) .erzSub .erzZeile{font-size:12.5px!important;line-height:1.18!important}
+body.erzEck:not(.chrAuf) .erzSub .erzWer{display:none!important}
+@media (max-width:760px),(max-height:480px){body.erzEck:not(.chrAuf) .erzSub,body.erzEck:not(.chrAuf) .erzSub.oben{max-width:240px!important;right:4px!important;bottom:4px!important}}`;
+document.head.appendChild(css);
+let zu=null,tA=0;
+(function lauf(){try{const nw=performance.now();if(nw-tA>200){tA=nw;let an=false;
+  if(!EL.aus&&typeof G!=='undefined'&&G){const scr=document.getElementById('scr');const scrAuf=!!(scr&&!scr.hidden&&scr.childElementCount&&getComputedStyle(scr).display!=='none');
+   an=(G.state==='between'||G.state==='camp'||G.state==='end')&&scrAuf||!!G.overlay}
+  if(an!==zu){zu=an;document.body.classList.toggle('erzEck',an)}}}catch(e){}requestAnimationFrame(lauf)})();
+}catch(e){console.error('erzlage',e);window.__hsERZLAGE={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/erzlage» */
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
