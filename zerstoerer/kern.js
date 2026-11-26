@@ -203,7 +203,7 @@
   const padV = { up: false, down: false }; /* Hysterese-Zustand der Stick-Senkrechten */
   inp.pollPad = () => {
     const pads = navigator.getGamepads ? navigator.getGamepads() : [];
-    let p = null; for (const g of pads) if (g && g.connected) { p = g; break; }
+    let p = null; for (const g of pads) if (g && g.connected && !(Z.koopSkipPad && Z.koopSkipPad(g))) { p = g; break; } /* W27 Koop: Controller von Spieler 2 überspringen */
     for (const a of ACTIONS) src.pad[a] = false;
     if (p) {
       const down = i => { const bt = p.buttons[i]; return !!bt && (bt.pressed || bt.value > 0.45); };

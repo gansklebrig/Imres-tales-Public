@@ -361,6 +361,7 @@
       }
     }
   };
+  Z._ueKern = Z.updateEnemies; /* W27 Koop: reiner Gegner-Kern (ohne spätere Hüllen) für die Spieler-2-Gruppe (koop.js) */
 
   /* ======================= WAHRNEHMUNG (W8) =======================
      Zustände: schlafend (leben.js) → ruhig/patrouillierend → misstrauisch („?“: hat etwas gehört oder kurz gesehen, sucht

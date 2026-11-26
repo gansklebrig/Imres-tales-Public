@@ -404,6 +404,7 @@
     if (o.type === "npc") return Z.ui.npc(o.s.id);
     if (o.type === "station") return Z.ui.station(o.s.id);
   }
+  Z._koopFind = findInteract; Z._koopInteract = interact; /* W27 Koop: Spieler 2 benutzt Türen, Truhen, Tore (koop.js) */
   let doorBusy = 0; /* keine zweite Tür-Eingabe während der Überblendung (sonst doppeltes Laden, Rückweg-Gnade weg) */
   function goThrough(to, d) {
     if (doorBusy && performance.now() - doorBusy < 3000) return; /* Sicherung: nach 3 s wieder frei */
