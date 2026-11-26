@@ -43749,6 +43749,27 @@ function backen(){plan=false;try{if(VB.aus)return;const K=G.ka;if(!K||!K.an||G.r
 hook('stage',()=>{if(plan||VB.aus)return;plan=true;Promise.resolve().then(backen)});
 }catch(e){console.error('vorbau',e);window.__hsVORBAU={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/vorbau» */
+/* «beistand» */
+/* ================= Paket „beistand“: nach wiederholtem Scheitern an derselben Stufe etwas Rückenwind – window.__hsBEISTAND =================
+   Wer an einer Stufe immer wieder fällt, verliert oft die Lust – egal ob Pech, eine harte Gegnermischung oder ein
+   schwächerer Held. Nur im Normalmodus der Kampagne (Schwer bleibt unverändert):
+     · ab dem 2. Tod auf derselben Stufe (über Läufe hinweg gezählt): Gegner treffen 8 % schwächer, je weiterem Tod nochmals 8 % (höchstens −24 %)
+     · offen angezeigt („Imre steht dir bei …“), nichts versteckt
+     · zurückgesetzt, sobald die Stufe geschafft ist
+   Abschaltbar: __hsBEISTAND.aus=1 */
+(function(){try{if(window.__hsBEISTAND||typeof die!=='function')return;
+const BS=window.__hsBEISTAND={v:1,aus:0,STUFE:0.08,MAX:3};
+function st(){try{if(!SAVE._bst||typeof SAVE._bst.s==='number')SAVE._bst={};return SAVE._bst}catch(e){return{}}}
+function aktiv(){try{return !BS.aus&&G&&G.mode==='kampagne'&&typeof NORM==='function'&&NORM()&&!G.netGuestRun}catch(e){return false}}
+BS.stufe=()=>{if(!aktiv())return 0;const n=st()[G.stage]||0;return Math.min(BS.MAX,Math.max(0,n-1))};
+const d0=die;die=function(){const hp0=P&&P.hp;const r=d0.apply(this,arguments);
+ try{if(aktiv()&&G.state==='end'){const b=st();b[G.stage]=(b[G.stage]||0)+1;try{persist()}catch(e){}}}catch(e){}return r};
+hook('hurtMul',()=>{const k=BS.stufe();return k?1-BS.STUFE*k:1});
+let gesagt=-1;
+hook('stage',i=>{try{const b=st();const k=BS.stufe();if(k&&gesagt!==G.stage*10+k&&!G.bot){gesagt=G.stage*10+k;setTimeout(()=>{try{toast(`<b>Imre steht dir bei</b> – nach ${b[G.stage]} gescheiterten Versuchen treffen die Gegner hier ${Math.round(BS.STUFE*k*100)} % schwächer.`,'#e8c070')}catch(e){}},2600)}}catch(e){}});
+if(typeof enterPortal==='function'){const ep=enterPortal;enterPortal=function(){try{const b=st();if(b[G.stage])delete b[G.stage]}catch(e){}return ep.apply(this,arguments)}}
+}catch(e){console.error('beistand',e);window.__hsBEISTAND={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/beistand» */
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
