@@ -43769,11 +43769,24 @@ body.erzEck:not(.chrAuf) .erzSub .erzZeile{font-size:12.5px!important;line-heigh
 body.erzEck:not(.chrAuf) .erzSub .erzWer{display:none!important}
 @media (max-width:760px),(max-height:480px){body.erzEck:not(.chrAuf) .erzSub,body.erzEck:not(.chrAuf) .erzSub.oben{max-width:240px!important;right:4px!important;bottom:4px!important}}`;
 document.head.appendChild(css);
+/* Im Spiel: Untertitel-Kasten unten mittig nie über Trank-/Sprint-Knopf (#util) – sobald Fähigkeiten gelernt sind, rücken diese
+   Knöpfe links neben die Fähigkeiten und lagen bei 1280 px Breite halb unter dem Kasten. Dann wird der Kasten links davon eingepasst. */
+const css2=document.createElement('style');css2.textContent=`body.erzRaum:not(.erzEck) .erzSub{left:var(--erzL)!important;transform:none!important;width:var(--erzW)!important;min-width:0!important;max-width:var(--erzW)!important}`;document.head.appendChild(css2);
+let nat=null,natK='',raum=false;
+function raumPruef(){const b=document.body;const s=document.querySelector('.erzSub'),u=document.getElementById('util');
+ const aus=()=>{if(raum){raum=false;b.classList.remove('erzRaum')}};
+ if(EL.aus||!s||!u||b.classList.contains('erzEck')||typeof G==='undefined'||!G||G.state!=='play'){aus();return}
+ const ur=u.getBoundingClientRect();if(!(ur.width>0)||getComputedStyle(u).display==='none'){aus();return}
+ const k=innerWidth+'x'+innerHeight;if(!raum&&(natK!==k||!nat)){const r=s.getBoundingClientRect();if(r.width>0){nat={l:r.left,r:r.right,t:r.top,b:r.bottom,w:r.width};natK=k}}
+ if(!nat||natK!==k){aus();return}
+ const stoss=nat.r>ur.left-10&&nat.b>ur.top&&nat.t<ur.bottom;if(!stoss){aus();return}
+ const avail=ur.left-24,w=Math.max(220,Math.min(nat.w,avail)),l=Math.max(12,12+(avail-w)/2);
+ b.style.setProperty('--erzW',Math.round(w)+'px');b.style.setProperty('--erzL',Math.round(l)+'px');if(!raum){raum=true;b.classList.add('erzRaum')}}
 let zu=null,tA=0;
 (function lauf(){try{const nw=performance.now();if(nw-tA>200){tA=nw;let an=false;
   if(!EL.aus&&typeof G!=='undefined'&&G){const scr=document.getElementById('scr');const scrAuf=!!(scr&&!scr.hidden&&scr.childElementCount&&getComputedStyle(scr).display!=='none');
    an=(G.state==='between'||G.state==='camp'||G.state==='end')&&scrAuf||!!G.overlay}
-  if(an!==zu){zu=an;document.body.classList.toggle('erzEck',an)}}}catch(e){}requestAnimationFrame(lauf)})();
+  if(an!==zu){zu=an;document.body.classList.toggle('erzEck',an)}try{raumPruef()}catch(e){}}}catch(e){}requestAnimationFrame(lauf)})();
 }catch(e){console.error('erzlage',e);window.__hsERZLAGE={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/erzlage» */
 /* «vorbau» */
