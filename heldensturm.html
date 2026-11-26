@@ -43215,7 +43215,7 @@ hook('draw',(t,c)=>{try{if(RG.aus||!G||G.state!=='play')return;zonenMalen(c,t);
    Folge: Ein normaler Gegner hielt früh ≈ 1 s, ab Stufe 10 nur noch ≈ 0,2 s, am Ende ≈ 0,1 s – alles verdampft,
    Ausrüstung und Attribute spielen kaum noch eine Rolle, und lange Wege ohne Kampf fühlen sich leer an.
    Jetzt (auf scale(), also für alle Gegner, Wächter und Bosse):
-     · Leben: ab Stufe 5 ansteigender Zuschlag (Stufe 10: ×2, danach +3 % je Stufe) – die Zeit pro Gegner fällt nicht mehr ins Bodenlose
+     · Leben: ab Stufe 5 ansteigender Zuschlag (Stufe 10: ×2, danach +6 % je Stufe – spät verdampften Gegner sonst wieder in 0,2 s) – die Zeit pro Gegner fällt nicht mehr ins Bodenlose
      · Schaden: kein pauschaler Zuschlag (längere Kämpfe erhöhen den erlittenen Schaden von selbst), dafür Ausreißer-Stufen geglättet
      · Leerlauf: ab Stufe 8 kommen Gegnerwellen 15 % schneller nach, ab Stufe 16 30 % (Leerlauf stieg bis auf 50–60 %)
      · Rückstand-Schutz: Liegt die Heldenstufe unter der für die Stufe üblichen (Messung), wird der Zuschlag je fehlender
@@ -43223,7 +43223,7 @@ hook('draw',(t,c)=>{try{if(RG.aus||!G||G.state!=='play')return;zonenMalen(c,t);
    Prüfung: bal2.mjs + zeig2.py (Time-to-Kill, erlittener Schaden je Kampfminute, Tiefstwert Leben, Leerlauf) vorher/nachher.
    Abschaltbar: __hsSKAL.aus=1 */
 (function(){try{if(window.__hsSKAL)return;
-const SK=window.__hsSKAL={v:1,aus:0,err:[],DMG_A:1,AB:2,DMG_MAX:2.4,LUECKE:0.94,TOL:2,HP_K:1.0,HP_L:0.03,LEER:0.85};
+const SK=window.__hsSKAL={v:1,aus:0,err:[],DMG_A:1,AB:2,DMG_MAX:2.4,LUECKE:0.94,TOL:2,HP_K:1.0,HP_L:0.06,LEER:0.85};
 /* Leben-Zuschlag je Kampagnenstufe s: ab Stufe 5 ansteigend, ab Stufe 10 nur noch sanft (gemessene Time-to-Kill fällt bis ≈ Stufe 9 stark, danach flach) */
 SK.kurveHp=s=>1+SK.HP_K*Math.min(1,Math.max(0,(s-4)/6))+SK.HP_L*Math.max(0,s-10);
 SK.erwLv=s=>8+1.1*s;                         /* übliche Heldenstufe auf Kampagnenstufe s (Bot-Messung) */
