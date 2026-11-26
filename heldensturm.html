@@ -2680,7 +2680,8 @@ function drawDeco(d,t){const c=cx,s=d.s;c.save();c.translate(d.x,d.y);c.scale(s,
   case'cart':c.rotate(0.4);c.fillStyle='#3a2a1a';c.fillRect(-26,-14,52,28);c.fillStyle='#1a1410';c.fillRect(-26,-14,30,28);ln(c,'#5a4028',3,26,0,44,0);circ(c,-14,16,8,'#2a2018');circ(c,14,16,8,'#2a2018');circ(c,14,16,3,'#5a4028');c.globalAlpha=0.5;circ(c,-12,-6,10,'#2a2a2a');c.globalAlpha=1;break;
   case'stalag':poly(c,'#4a4440',-10,8,-3,-22,4,8);poly(c,'#5a5450',2,8,8,-12,12,8);break;
   case'bones':ln(c,'#d8d2c0',2.5,-8,2,8,-2);ln(c,'#d8d2c0',2.5,-6,-4,6,4);circ(c,-9,3,2,'#d8d2c0');circ(c,9,-3,2,'#d8d2c0');break;
-  case'torch':ln(c,'#4a3424',3,0,8,0,-8);{const f=Math.sin(t*14+d.v*9)*1.5;poly(c,'#ff9a30',-4,-8,0,-18-f,4,-8);poly(c,'#ffe08a',-2,-8,0,-13-f*0.6,2,-8)}break;
+  case'torch':ln(c,'#4a3424',3,0,8,0,-8);{const f=Math.sin(t*14+d.v*9)*1.5;poly(c,'#ff9a30',-4,-8,0,-18-f,4,-8);poly(c,'#ffe08a',-2,-8,0,-13-f*0.6,2,-8);
+   /* Flammenschein: kleiner warmer Hof um die Flamme, flackert mit */if(!(typeof spLeicht==='function'&&spLeicht())){const go=c.globalCompositeOperation,ga=c.globalAlpha;c.globalCompositeOperation='lighter';c.globalAlpha=ga*(0.85+0.15*Math.sin(t*11+d.v*5));const R=24+f;c.drawImage(decoLightSpr('255,170,80'),-R,-13-R,R*2,R*2);c.drawImage(decoLightSpr('255,170,80'),-R*0.5,-13-R*0.5,R,R);c.globalCompositeOperation=go;c.globalAlpha=ga}}break;
   case'lantern':ln(c,'#2a2a2e',2.4,0,10,0,-16);ln(c,'#2a2a2e',2,0,-16,7,-16);c.fillStyle='#ffd27a';c.fillRect(4,-15,6,8);break;
   case'house':c.fillStyle='#4a3a2e';c.fillRect(-28,-20,56,34);poly(c,'#5a2a22',-34,-18,0,-42,34,-18);c.fillStyle=d.v>0.4?'#ffcf7a':'#1a1612';c.fillRect(-16,-8,9,9);c.fillRect(7,-8,9,9);c.fillStyle='#2a1e16';c.fillRect(-5,0,10,14);break;
   case'ruinhouse':c.fillStyle='#3a3a36';c.fillRect(-28,-16,56,30);c.fillStyle='#2a2a26';c.fillRect(-28,-16,20,14);poly(c,'#2a2420',-32,-14,-6,-34,10,-24,8,-14);c.fillStyle='#141412';c.fillRect(-4,0,10,14);ln(c,'#3a5a2a',2,20,14,24,-8,18,-14);break;
@@ -21160,7 +21161,7 @@ function kaDeko(S){const K=G.ka,T=K.T,th=G.themeKey,n=K.n,dec=G.theme.deco||['ro
 /* ================= Minimap: eigene Grundkarte, Zwischenziel-Markierung ================= */
 {const mb0=wlMiniBau;wlMiniBau=function(){const K=G.ka;if(!K||!K.md||G.room)return mb0.apply(this,arguments);const S=260,k=S/WORLD,cv=document.createElement('canvas');cv.width=cv.height=S;const g=cv.getContext('2d'),base=(G.theme&&G.theme.base)||'#333',n=K.n,z=K.Z*k;
  g.fillStyle='#0a0808';g.fillRect(0,0,S,S);
- for(let c=0;c<n*n;c++){if(K.M[c])continue;const i=c%n,j=(c/n)|0,s=K.sid[c];g.fillStyle=K.lo[c]?'#2e5a50':s!==255&&K.sec[s]&&K.sec[s].art==='arena'?bT(base,0.3):bT(base,0.18);g.fillRect(i*z,j*z,z+0.3,z+0.3)}
+ for(let c=0;c<n*n;c++){if(K.M[c])continue;const i=c%n,j=(c/n)|0,s=K.sid[c];g.fillStyle=K.lo[c]?'#2e5a50':s!==255&&K.sec[s]&&K.sec[s].art==='arena'?bT(base,0.44):bT(base,0.3);g.fillRect(i*z,j*z,z+0.3,z+0.3)}
  for(const t of K.tore)if(t.loL)for(const o of t.loL){g.fillStyle=t.fl.k==='lava'?'#d8602a':t.fl.k==='schlucht'?'#050408':'#2e5a50';g.fillRect(o.x*k,o.y*k,o.w*k,o.h*k)}
  for(const H of (G.wl&&G.wl.haus)||[]){g.fillStyle=bT(base,0.35);g.fillRect(H.x*k,H.y*k,H.w*k,H.h*k)}
  for(const b of G.blk){if(b.kaM)continue;g.fillStyle=b.k==='baum'||b.k==='hecke'?'#2a5a2a':'#6a6050';if(b.t==='c'){g.beginPath();g.arc(b.x*k,b.y*k,Math.max(0.8,b.r*k),0,TAU);g.fill()}else g.fillRect(b.x*k,b.y*k,Math.max(1,b.w*k),Math.max(1,b.h*k))}
