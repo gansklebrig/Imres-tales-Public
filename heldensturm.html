@@ -43264,7 +43264,7 @@ hook('stats',s=>{try{if(E2.aus||!P||P.id!=='echo')return;const lv=Math.max(1,P.l
    Rückmeldung: Am Controller lassen sich Zielhebel und Fähigkeitstaste kaum gleichzeitig drücken. Fähigkeiten gingen deshalb
    meist dorthin, wohin man vor bis zu drei Sekunden noch mit dem rechten Stick gezielt hatte (PAD_STICKY), oder aufs nächste Ziel.
    Jetzt (ohne Maus, solange der rechte Stick NICHT gehalten wird):
-     · Läuft der Held, wirkt jede Fähigkeit in Laufrichtung – mit leichter Zielhilfe: Steht ein Gegner in einem schmalen Kegel
+     · Läuft der Held, wirkt jede Fähigkeit in Laufrichtung (auch Flächenzauber: Ziel im Kegel bzw. Punkt voraus) – mit leichter Zielhilfe: Steht ein Gegner in einem schmalen Kegel
        (±25°) vor ihm, wird er anvisiert, sonst geht es genau geradeaus.
      · Steht der Held still, gilt wie bisher die letzte Zielrichtung bzw. das nächste Ziel.
      · Wer den rechten Stick hält, zielt weiter damit; Maus und Touch-Zielen bleiben unverändert.
@@ -43276,6 +43276,11 @@ const frei=()=>!PZ.aus&&P&&!G.auCast&&!P.padHeld&&!(P.touchAim!=null&&P.touchAim
 if(typeof aimAng==='function'){const a0=aimAng;aimAng=function(R){try{if(frei()&&laeuft()){PZ.n++;const a=P.mvA,r=R||500;let t=null;
   try{t=(typeof prioInCone==='function'&&prioInCone(a,r,PZ.KEGEL))||(typeof coneTarget==='function'&&coneTarget(a,r,PZ.KEGEL))}catch(e){}
   return t?ang(P,t):a}}catch(e){}return a0.apply(this,arguments)}}
+/* Flächen-Fähigkeiten (aimPoint): ebenso in Laufrichtung – Elite/Boss im Kegel zuerst, sonst die dichteste Gruppe im Kegel, sonst ein Punkt voraus */
+if(typeof aimPoint==='function'){const ap=aimPoint;aimPoint=function(range){try{if(frei()&&laeuft()){PZ.np=(PZ.np||0)+1;const a=P.mvA,r=range||400;
+  let t=null;try{t=typeof prioInCone==='function'&&prioInCone(a,r,0.6)}catch(e){}if(t)return{x:t.x,y:t.y};
+  try{if(typeof clusterIn==='function'){const c=clusterIn(r,e=>{const da=Math.atan2(e.y-P.y,e.x-P.x)-a;return Math.abs(Math.atan2(Math.sin(da),Math.cos(da)))<0.6});if(c)return c}}catch(e){}
+  return{x:P.x+Math.cos(a)*r*0.6,y:P.y+Math.sin(a)*r*0.6}}}catch(e){}return ap.apply(this,arguments)}}
 /* alte, „klebende“ Zielrichtung verwerfen, sobald man ohne Zielhebel losläuft – sonst lesen manche Fähigkeiten sie direkt */
 hook('tick',()=>{try{if(frei()&&laeuft()&&P.padAim!=null)P.padAim=null}catch(e){}});
 }catch(e){console.error('padziel',e);window.__hsPADZIEL={v:1,err:[String(e&&e.stack||e)]}}})();
