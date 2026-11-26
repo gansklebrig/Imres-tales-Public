@@ -1676,6 +1676,7 @@
     wanted(list, opts) { wantedList = Array.isArray(list) ? list.slice(0, 6) : []; wantedOpts = Object.assign({}, opts || wantedOpts, { manual: true }); resetSprites(); return wantedList.length; },
     on(evt, fn) { (listeners[evt] = listeners[evt] || []).push(fn); },
     open: id => (has(id) ? openMenu(id) : null),
+    portrait: (cv, id) => portrait(cv, id), /* W28 Lager: Bildnis für das Auftragsfenster (auftraege.js) */
     chronicle: () => chronicle(),
     /* Tests */
     _caps: () => caps, _camp: () => camp,
