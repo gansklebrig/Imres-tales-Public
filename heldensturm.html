@@ -43659,6 +43659,48 @@ const nb=oaNebel;oaNebel=function(){let C=null,a0;try{C=typeof OA!=='undefined'&
  try{return nb.apply(this,arguments)}finally{if(C)C.fog[1]=a0}};
 }catch(e){console.error('klar',e);window.__hsKLAR={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/klar» */
+/* «atem» */
+/* ================= Paket „atem“: kein Tod in zwei Sekunden aus vollem Leben – window.__hsATEM =================
+   Messung (Bot, Echo, Schwer, Goblinnest): 237 → 0 Leben in 2,0 s – 14 Treffer à 12–46 von einem Rudel, das sich um den Helden
+   schließt. Ein einzelner Treffer ist schon auf 75 % des Lebens gedeckelt, eine Trefferkette nicht. Solche Tode fühlen sich
+   unfair an: keine Zeit für Ausweichen, Trank oder Fähigkeit.
+   Jetzt (rollendes Fenster von 1,2 s je Held): Was über 35 % des Höchstlebens (Schwer: 45 %) in diesem Fenster hinausgeht,
+   wird halbiert; über 60 % (Schwer: 70 %) nur noch zu einem Drittel durchgelassen. Durchschnittlicher Schaden ändert sich kaum
+   (nur bei Bündelungen), aber es bleibt Zeit zu reagieren. Gilt nicht für Dauerschaden (Gift/Brand). Abschaltbar: __hsATEM.aus=1 */
+(function(){try{if(window.__hsATEM||typeof hurt!=='function')return;
+const AT=window.__hsATEM={v:1,aus:0,FEN:1.2,n:0,gespart:0};
+const h0=hurt;hurt=function(raw){if(AT.aus||!P||!P.st||!(raw>0))return h0.apply(this,arguments);
+ let f=1;try{const hard=typeof HARD==='function'&&HARD(),A=hard?0.45:0.35,B=hard?0.70:0.60,mx=P.st.maxHp||1,t=G.time;
+  const L=P._atW||(P._atW=[]);while(L.length&&t-L[0][0]>AT.FEN)L.shift();let s=0;for(const q of L)s+=q[1];const q=s/mx;
+  if(q>B)f=0.33;else if(q>A)f=0.5}catch(e){f=1}
+ const hp0=P.hp;const r=h0.call(this,raw*f);
+ try{const d=hp0-P.hp;if(d>0){(P._atW||(P._atW=[])).push([G.time,d]);if(f<1){AT.n++;AT.gespart+=d*(1/f-1)}}}catch(e){}
+ return r};
+}catch(e){console.error('atem',e);window.__hsATEM={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/atem» */
+/* «rudel» */
+/* ================= Paket „rudel“: nicht alle auf einmal – höchstens ein paar Nahkampftreffer gleichzeitig – window.__hsRUDEL =================
+   Messung (Bot, Schwer): Friedrich 705 → 0 Leben in 0,9 s – 17 Nahkampftreffer à 28–54 von Gegnern, die sich auf ihn
+   gedrängt hatten (Abstand 1–8 px). Jeder Gegner in Berührung schlägt zu, sobald seine eigene Abklingzeit um ist; bei 15
+   Gegnern im Ring sind das ≈ 18 Treffer je Sekunde – kein Ausweichen, kein Trank hilft.
+   Jetzt (übliche „Angriffsplätze“ der Action-RPGs): Je Held landen höchstens 5 Nahkampftreffer (Schwer: 6) in 0,85 s.
+   Wer keinen Platz bekommt, holt kurz Luft (0,15–0,5 s) und versucht es erneut – das Rudel drängt weiter, schlägt aber
+   gestaffelt. Bosse/Wächter und Fernkampf unberührt. Zusammen mit „atem“ (Schadensbündelung) bleibt Zeit zu reagieren.
+   Abschaltbar: __hsRUDEL.aus=1 */
+(function(){try{if(window.__hsRUDEL||typeof updEnemy!=='function')return;
+const RU=window.__hsRUDEL={v:1,aus:0,FEN:0.85,n:{verschoben:0,treffer:0}};
+function ziel(e){let best=null,bd=1e9;try{const L=typeof mpL==='function'?mpL():[P];for(const q of L){if(!q||q.down||q.netGone)continue;const d=Math.hypot(q.x-e.x,q.y-e.y)-(e.r||12)-(q.r||14);if(d<bd){bd=d;best=q}}}catch(x){}return bd<6?best:null}
+const ue=updEnemy;updEnemy=function(e,dt){
+ if(RU.aus||!e||e.dead||e.boss||e.guard||!(e.hitCd<=(dt||0)))return ue.apply(this,arguments);
+ const q=ziel(e);if(!q)return ue.apply(this,arguments);
+ const W=q._ruW||(q._ruW=[]),t=G.time;while(W.length&&t-W[0]>RU.FEN)W.shift();
+ const N=(typeof HARD==='function'&&HARD())?6:5;
+ if(W.length>=N){e.hitCd=0.15+Math.random()*0.35;RU.n.verschoben++;return ue.apply(this,arguments)}
+ const a0=e.atkA;const r=ue.apply(this,arguments);
+ if(e.atkA===G.time&&a0!==G.time){W.push(G.time);RU.n.treffer++}
+ return r};
+}catch(e){console.error('rudel',e);window.__hsRUDEL={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/rudel» */
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
