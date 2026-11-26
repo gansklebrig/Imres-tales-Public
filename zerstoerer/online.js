@@ -152,6 +152,8 @@
   function joinRoom(code) {
     code = normCode(code); if (code.length !== CODE_N) return fail("code", L(["Der Code hat 6 Zeichen.", "The code has 6 characters."]));
     S.code = code; S.kind = "peer";
+    /* W34 Online: nach Neuladen der Gast-Seite (gleicher Tab, gleicher Raum) die Kennung wiederverwenden – sonst „Raum voll“ bis zum Abbruch beim Gastgeber */
+    try { const t = JSON.parse(sessionStorage.getItem("imres-zs-tok") || "null"); S.tok = t && t.c === code && typeof t.t === "string" ? txt(t.t, 24) : ""; } catch (e) { S.tok = ""; }
     setSt("connecting", L(["Verbinde mit Raum ", "Connecting to room "]) + code + " …");
     loadLib().then(() => {
       const pr = S.peer && !S.peer.destroyed ? S.peer : new window.Peer(cfg().peer); S.peer = pr;
@@ -174,9 +176,9 @@
     for (;;) { const { done, value } = await rd.read(); if (done) break; n += value.length; if (n > max) { try { rd.cancel(); } catch (e) { } throw new Error("gross"); } parts.push(value); }
     const out = new Uint8Array(n); let o = 0; for (const p of parts) { out.set(p, o); o += p.length; } return out;
   }
-  async function pack(obj) {
+  async function pack(obj, plain) {
     const raw = new TextEncoder().encode(JSON.stringify(obj));
-    if (typeof CompressionStream === "function") try { return "ZS1z" + b64u(await pipe(raw, CompressionStream, "deflate-raw", 200000)); } catch (e) { }
+    if (typeof CompressionStream === "function" && !plain) try { /* W33 Online: plain = Antwort ungepackt, wenn das Angebot ungepackt kam (alter Browser beim Gastgeber) */ return "ZS1z" + b64u(await pipe(raw, CompressionStream, "deflate-raw", 200000)); } catch (e) { }
     return "ZS1r" + b64u(raw);
   }
   async function unpack(s) {
@@ -184,7 +186,7 @@
     s = s.replace(/\s+/g, "");
     if (s.length > 40000 || !/^ZS1[zr][A-Za-z0-9_\-]+$/.test(s)) throw new Error("fmt");
     let u = unb64u(s.slice(4));
-    if (s[3] === "z") { if (typeof DecompressionStream !== "function") throw new Error("fmt"); u = await pipe(u, DecompressionStream, "deflate-raw", 60000); }
+    if (s[3] === "z") { if (typeof DecompressionStream !== "function") throw new Error("alt"); try { u = await pipe(u, DecompressionStream, "deflate-raw", 60000); } catch (e) { throw new Error(e && e.message === "gross" ? "fmt" : "alt"); } } /* W33 Online: alter Browser kann gepackte Texte nicht lesen → eigene Meldung */
     const o = JSON.parse(new TextDecoder().decode(u));
     if (!isObj(o) || (o.t !== "o" && o.t !== "a") || typeof o.s !== "string" || o.s.length > 50000 || !/^v=0\r?\n/.test(o.s)) throw new Error("fmt");
     return o;
@@ -219,7 +221,7 @@
     const { pc } = manualPc(); S.manual = { pc };
     await pc.setRemoteDescription({ type: "offer", sdp: o.s });
     await pc.setLocalDescription(await pc.createAnswer()); await iceDone(pc, 5000);
-    S.manual.answer = await pack({ t: "a", s: pc.localDescription.sdp });
+    S.manual.answer = await pack({ t: "a", s: pc.localDescription.sdp }, /^\s*ZS1r/.test(String(offer || ""))); /* W33 Online */
     setSt("manswer", "");
     setTimeout(() => { if (S.st === "manswer" || S.st === "connecting") fail(pc.iceConnectionState === "failed" ? "nat" : "timeout"); }, 120000);
   }
@@ -230,7 +232,8 @@
     const M = {
       nat: L(["Keine direkte Verbindung möglich. Wahrscheinlich blockiert ein strenges NAT oder eine Firewall (Mobilfunk, Firmen-, Uni- oder Hotel-WLAN). Tipps: beide ins selbe WLAN, ein anderes Netz oder einen Handy-Hotspot versuchen. Einen Weiterleitungsserver (TURN) nutzt das Spiel aus Datenschutzgründen nicht.", "No direct connection possible. A strict NAT or firewall is probably in the way (mobile data, company/campus/hotel Wi-Fi). Tips: join the same Wi-Fi, try another network or a phone hotspot. The game uses no relay server (TURN) for privacy reasons."]),
       timeout: L(["Zeitüberschreitung – keine Antwort vom anderen Gerät.", "Timed out – no answer from the other device."]),
-      lib: L(["Der Online-Baustein konnte nicht geladen werden.", "The online module could not be loaded."]),
+      lib: L(["Der Online-Baustein konnte nicht geladen werden (offline oder sehr alter Browser?). „Ohne Vermittler (Text kopieren)“ geht trotzdem.", "The online module could not be loaded (offline or a very old browser?). “Without a broker (copy text)” still works."]), /* W33 Online: Ausweg nennen */
+      alt: L(["Dieser Browser kann den gepackten Text nicht lesen (zu alt). Ausweg: Browser aktualisieren – oder tauscht die Rollen, dann erstellt dieses Gerät das Angebot.", "This browser can't read the packed text (too old). Fix: update the browser – or swap roles so this device creates the offer."]), /* W33 Online */
       broker: L(["Vermittlungsdienst nicht erreichbar. Internet prüfen – oder „Ohne Vermittler“ nutzen.", "Matchmaking service unreachable. Check your internet – or use “Without a broker”."]),
       fmt: L(["Der eingefügte Text ist kein gültiges Angebot/keine gültige Antwort.", "The pasted text is not a valid offer/answer."])
     };
@@ -256,6 +259,10 @@
   }
   function lost() {
     if (S.st === "lost" || !S.role) return;
+    /* W33 Online: Gast war länger weg, als der Gastgeber wartet (Gerät/Tab eingefroren) → die Sitzung ist drüben sicher beendet: sofort sauberes Ende statt 45 s „getrennt“ */
+    if (S.role === "guest" && S.lastRx && now() - S.lastRx > T_LOST + T_GIVEUP) return endSession(L(["Zu lange keine Verbindung – der Gastgeber hat das Spiel inzwischen beendet.", "No connection for too long – the host has ended the game by now."]));
+    S.unav = 0;
+    S.held = {}; S.tap = 0; /* W34 Online: gehaltene Gast-Tasten nicht „kleben“ lassen, solange die Leitung weg ist */
     S.lostAt = now(); setSt("lost", "");
     Z.toast && Z.toast(L(["Verbindung unterbrochen – versuche wieder zu verbinden …", "Connection lost – trying to reconnect …"]));
     if (S.role === "guest" && S.kind === "peer") retry(0);
@@ -266,6 +273,8 @@
     try {
       if (!S.peer || S.peer.destroyed) S.peer = new window.Peer(cfg().peer);
       const pr = S.peer;
+      /* W33 Online: Raum gibt es nicht mehr (zweimal hintereinander „peer-unavailable“) → Gastgeber hat beendet: sofort sauberes Ende */
+      if (!pr._zsU) { pr._zsU = 1; pr.on("error", e => { if (e && e.type === "peer-unavailable" && S.st === "lost" && S.role === "guest" && ++S.unav >= 2) endSession(L(["Der Raum besteht nicht mehr – der Gastgeber hat das Spiel beendet.", "The room is gone – the host has ended the game."])); }); }
       const go = () => { const c = pr.connect(PFX + S.code, { reliable: true, serialization: "raw", label: "zs" }); c.on("open", () => { if (S.st === "lost") attach(peerLink(c)); else c.close(); }); };
       if (pr.disconnected && !pr.destroyed) { try { pr.reconnect(); } catch (e) { } }
       if (pr.open) go(); else pr.once("open", go);
@@ -287,11 +296,12 @@
     }, 1000);
   }
   function onPing(m) { if (S.link) S.link.sendR({ t: "pong", c: num(m.c, 0, 1e12, 0) }); }
-  function onPong(m) { const c = num(m.c, 0, 1e12, -1); if (c < 0) return; const r = now() - c; if (r >= 0 && r < 30000) S.rtt = S.rtt ? S.rtt * 0.7 + r * 0.3 : r; }
+  function onPong(m) { const c = num(m.c, 0, 1e12, -1); if (c < 0) return; const r = now() - c; if (r >= 0 && r < 30000) { if (S.rtt && r > S.rtt * 3 + 400 && (S.rttOut = (S.rttOut | 0) + 1) <= 3) return; S.rttOut = 0; S.rtt = S.rtt ? S.rtt * 0.7 + r * 0.3 : r; } } /* W34 Online: einzelne Ausreißer (Gebiet lädt, Seite hängt kurz) nicht als Ping anzeigen – erst ab dem 4. Mal in Folge */
 
   function endSession(why, quiet) {
     const was = S.role, playing = S.playing;
     try { if (S.link && !S.link.closed) { S.link.sendR({ t: "bye", why: "" }); const l = S.link; setTimeout(() => l.close(), 250); } } catch (e) { }
+    if (S.link) S.link.onmsg = null; /* W33 Online: das „bye“ der Gegenseite darf die eigene Endmeldung nicht überschreiben (Gast verlässt → sah „Der Gastgeber hat das Spiel beendet“) */
     S.link = null;
     try { S.peer && setTimeout(((p) => () => { try { p.destroy(); } catch (e) { } })(S.peer), 300); } catch (e) { }
     S.peer = null; S.manual = null; clearInterval(pingI);
@@ -319,6 +329,7 @@
   }
   const NOPE = {};
   let refOf = null; /* Objekt → "@E12" (Gastgeber, je Schnappschuss) */
+  const isPic = v => !!v && typeof v === "object" && ((typeof HTMLCanvasElement !== "undefined" && v instanceof HTMLCanvasElement) || (typeof OffscreenCanvas !== "undefined" && v instanceof OffscreenCanvas) || (typeof ImageBitmap !== "undefined" && v instanceof ImageBitmap) || (typeof HTMLImageElement !== "undefined" && v instanceof HTMLImageElement)); /* W33 Online */
   function enc(v, d) {
     const t = typeof v;
     if (t === "number") return isFinite(v) ? Math.round(v * 100) / 100 : 0;
@@ -328,11 +339,11 @@
     const r = refOf && refOf(v); if (r) return r;
     const tok = reg().m.get(v); if (tok) return "$" + tok;
     if (d > 3 || v instanceof Set || v instanceof Map || v instanceof WeakSet || ArrayBuffer.isView(v) || (typeof Element !== "undefined" && v instanceof Element) || (typeof CanvasGradient !== "undefined" && v instanceof CanvasGradient) || (typeof CanvasPattern !== "undefined" && v instanceof CanvasPattern) || (typeof HTMLCanvasElement !== "undefined" && v instanceof HTMLCanvasElement)) return NOPE;
-    if (Array.isArray(v)) { const a = []; for (let i = 0; i < v.length && i < 64; i++) { const x = enc(v[i], d + 1); a.push(x === NOPE ? null : x); } return a; }
+    if (Array.isArray(v)) { const a = []; for (let i = 0; i < v.length && i < 64; i++) { if (isPic(v[i])) return NOPE; const x = enc(v[i], d + 1); a.push(x === NOPE ? null : x); } return a; }
     const o = {}; const pro = Object.getPrototypeOf(v);
     if (pro && pro !== Object.prototype) { const pt = reg().m.get(pro); if (pt) o.$p = pt; else if (pro.constructor !== Object) return NOPE; }
     let n = 0;
-    for (const k in v) { if (!Object.prototype.hasOwnProperty.call(v, k) || !KEYRX.test(k) || k === "$p") continue; const x = enc(v[k], d + 1); if (x !== NOPE && x !== undefined) { o[k] = x; if (++n > 48) break; } }
+    for (const k in v) { if (!Object.prototype.hasOwnProperty.call(v, k) || !KEYRX.test(k) || k === "$p") continue; if (isPic(v[k])) return NOPE; /* W33 Online: Objekt mit Bild (z. B. Requisiten-Stumpf/-Geist {cv,l,t,w,h}) ganz weglassen – ohne cv rief der Gast drawImage(undefined) → TypeError */ const x = enc(v[k], d + 1); if (x !== NOPE && x !== undefined) { o[k] = x; if (++n > 48) break; } }
     return o;
   }
   function encEnt(o, isP) {
@@ -352,7 +363,10 @@
     if (hooksH) return; hooksH = true;
     /* Klang & Effekte mitschreiben (der Gast spielt sie selbst ab) */
     const A = Z.audio, FX = Z.fx;
-    const rec = (k, args) => { if (S.role !== "host" || !S.playing || S.ev.length > 120) return; const a = []; for (const x of args) { const e = enc(x, 2); a.push(e === NOPE ? null : e); } S.ev.push([++S.evId, k].concat(a)); };
+    /* W33 Online: Schwebetexte in der Sprache des GASTS – der Gastgeber merkt sich zu jedem übersetzten Text das Sprachpaar (Z.L-Hülle) */
+    const LX = new Map(), L0 = Z.L;
+    if (typeof L0 === "function") Z.L = function (v) { const r = L0.apply(this, arguments); if (S.role === "host" && S.playing && Array.isArray(v) && typeof r === "string" && r.length < 80 && typeof v[0] === "string" && typeof v[1] === "string" && !LX.has(r)) { LX.set(r, [v[0].slice(0, 80), v[1].slice(0, 80)]); if (LX.size > 300) LX.delete(LX.keys().next().value); } return r; };
+    const rec = (k, args) => { if (S.role !== "host" || !S.playing || S.ev.length > 120) return; const a = []; for (const x of args) { const e = enc(x, 2); a.push(e === NOPE ? null : e); } if (k === "t") { a.length = Math.min(a.length, 5); const p = typeof args[2] === "string" && LX.get(args[2]); if (p) { while (a.length < 5) a.push(null); const ep = enc(p, 2); if (ep !== NOPE) a.push(ep); } } /* W33 Online */ S.ev.push([++S.evId, k].concat(a)); };
     const wrap = (obj, name, k) => { const f = obj[name]; if (typeof f !== "function") return; obj[name] = function () { rec(k, arguments); return f.apply(this, arguments); }; obj[name]._zs = f; };
     wrap(A, "play", "a"); wrap(FX, "burst", "b"); wrap(FX, "text", "t"); wrap(FX, "ring", "r"); wrap(FX, "flashScreen", "f"); wrap(FX, "addShake", "k");
     /* Gebietswechsel melden */
@@ -389,7 +403,7 @@
     S.credit = { t0: now(), sh0: Z.meta ? Z.meta.shards | 0 : 0, bosses: [], kills0: 0, kills: 0 };
     const go = () => {
       const k = K();
-      if (k && k.joinRemote) { k.joinRemote(S.gHero); k.setInputSource(() => S.held); }
+      if (k && k.joinRemote) { k.joinRemote(S.gHero); k.setInputSource(() => (now() - (S.inAt || 0) > 900 ? {} : S.held)); } /* W34 Online: > 0,9 s keine Eingabe (Funkloch, Hänger) → nichts gehalten */
       sendArea();
       setSt("play", "");
     };
@@ -419,8 +433,9 @@
     switch (m.t) {
       case "hello": {
         if (m.v !== PROTO) { S.link.sendR({ t: "bye", why: "ver" }); return; }
-        S.gHero = heroOk(m.hero); S.gName = txt(m.name, 16) || "Gast";
+        S.gHero = heroOk(m.hero); S.gName = txt(m.name, 16); /* W33 Online: kein fest deutsches „Gast“ – die Lobby setzt L(["Gast","Guest"]) ein */
         if (!S.gTok || m.tok !== S.gTok) S.gTok = newCode() + newCode();
+        S.lastIn = -1; S.held = {}; S.tap = 0; /* W34 Online: neu geladene Gast-Seite zählt ihre Eingaben wieder ab 1 */
         S.link.sendR({ t: "welcome", v: PROTO, hero: S.gHero, playing: S.playing ? 1 : 0, tok: S.gTok });
         if (S.playing) { sendArea(); setSt("play", ""); } else { setSt("lobby", ""); lobbyCast(); }
         return;
@@ -460,7 +475,7 @@
     let best = null;
     for (const e of m.k) { if (!Array.isArray(e) || e.length !== 2) continue; const q = int(e[0], 0, 1e9, -1), b = int(e[1], 0, 0xfff, -1); if (q <= S.lastIn || b < 0) continue; if (!best || q > best[0]) best = [q, b]; if (q > S.lastIn) { /* kurze Tipps zwischen zwei Paketen nicht verlieren */ for (let i = 0; i < ACT.length; i++) if (b & (1 << i)) S.tap = (S.tap | 0) | (1 << i); } }
     if (!best) return;
-    S.lastIn = best[0];
+    S.lastIn = best[0]; S.inAt = now(); /* W34 Online */
     const h = {}; for (let i = 0; i < ACT.length; i++) h[ACT[i]] = !!(best[1] & (1 << i)) || !!((S.tap | 0) & (1 << i));
     S.tap = 0; S.held = h;
   }
@@ -501,7 +516,7 @@
     if (bs) for (const key of bs.keys()) if (!cur.has(key)) e[key] = 0;
     S.hist.set(seq, str); for (const q of S.hist.keys()) if (q < seq - HIST) S.hist.delete(q);
     const ev = S.ev.splice(0, S.ev.length); S.evLast = (S.evLast || []).concat(ev).slice(-40);
-    const msg = { t: "s", q: seq, b: base, n: S.area, tm: Math.round(t), e, ev: S.evLast.slice(-Math.min(40, ev.length + 12)), ia: S.lastIn, hp: S.gPaused ? 1 : 0, hm: Z.ui && Z.ui.modalOpen ? 1 : 0 };
+    const msg = { t: "s", q: seq, b: base, n: S.area, tm: Math.round(t), e, ev: S.evLast.slice(-Math.min(40, ev.length + 12)), ia: S.lastIn, hp: S.gPaused ? 1 : 0, hm: Z.ui && Z.ui.modalOpen ? 1 : 0, hv: document.hidden ? 1 : 0 /* W33 Online: Gastgeber-Tab im Hintergrund → Welt steht, Gast bekommt Hinweis */ };
     S.link.sendU(msg);
     /* Kachel-Änderungen (Tore, zerstörbare Wände …) */
     if (lv.tiles && S.tShadow && S.tShadow.length === lv.tiles.length && t - S.tT > 250) {
@@ -542,7 +557,7 @@
       /* der eigene Spielstand bleibt unberührt: gespielt wird mit einer Kopie */
       S.metaReal = Z.meta; try { Z.meta = JSON.parse(JSON.stringify(Z.meta)); } catch (e) { Z.meta = Object.assign({}, Z.meta); }
     }
-    S.playing = true; S.states.clear(); S.buf.length = 0; S.applied = -1; S.live.clear(); S.evSeen.clear(); S.t0 = now(); S.off = null; S.gotCredit = 0;
+    S.playing = true; S.states.clear(); S.buf.length = 0; S.applied = -1; S.live.clear(); S.evSeen.clear(); S.t0 = now(); S.off = null; S.gotCredit = 0; S.creditShown = 0; S.szene = null; /* W34 Online: zweite Sitzung ohne Neuladen – Gutschrift-Hinweis wieder ab 0 */
     const t = document.getElementById("title"); if (t) t.hidden = true;
     document.body.classList.add("zso-gast"); /* Ezekiels Fähigkeitenleiste/Hinweise gehören dem Gastgeber – beim Gast ausblenden */
     if (Z.ui.modalOpen) Z.ui.close();
@@ -566,7 +581,7 @@
   }
   function guestMsg(m) {
     switch (m.t) {
-      case "welcome": if (m.v !== PROTO) return endSession(L(["Unterschiedliche Spielversion – bitte beide die Seite neu laden.", "Different game versions – please both reload."])); S.gHero = heroOk(m.hero); S.tok = txt(m.tok, 24); if (!m.playing) setSt("lobby", ""); return;
+      case "welcome": if (m.v !== PROTO) return endSession(L(["Unterschiedliche Spielversion – bitte beide die Seite neu laden.", "Different game versions – please both reload."])); S.gHero = heroOk(m.hero); S.tok = txt(m.tok, 24); try { sessionStorage.setItem("imres-zs-tok", JSON.stringify({ c: S.code, t: S.tok })); } catch (e) { } /* W34 Online */ if (!m.playing) setSt("lobby", ""); return;
       case "lobby": S.gHero = heroOk(m.gh); S.hReady = !!m.hr; S.gReady = !!m.gr; redraw(); return;
       case "area": return guestArea(m);
       case "s": return guestSnap(m);
@@ -680,6 +695,8 @@
     if (S.off == null || off < S.off) S.off = off; else S.off += 0.05; /* langsam nachziehen, falls Uhren driften oder die Leitung langsamer wird */
     S.buf.push({ q, tm, full, n: S.areaN }); S.buf.sort((x, y) => x.tm - y.tm); while (S.buf.length > 40) S.buf.shift();
     S.hostPaused = !!m.hm && !!m.hp;
+    /* W33 Online: Gastgeber hat das Spiel im Hintergrund (Tab/App gewechselt) – dort steht die Welt; Hinweis statt stummem Stillstand */
+    { const aw = !!m.hv; if (aw && !S.hostAway) { Z.toast && Z.toast(L(["Der Gastgeber hat das Spiel gerade im Hintergrund – es geht weiter, sobald er zurück ist.", "The host has the game in the background – it continues once they're back."])); } if (aw !== !!S.hostAway) { S.hostAway = aw; chip(); } }
     S.stats.snaps++; S.lastSnapAt = now();
     if (Array.isArray(m.ev)) for (const ev of m.ev.slice(0, 60)) playEv(ev);
     if (Number.isInteger(m.ia)) S.iAck = m.ia;
@@ -694,7 +711,7 @@
       switch (ev[1]) {
         case "a": if (typeof a[0] === "string" && a[0].length < 40) orig(A.play).call(A, a[0], isObj(a[1]) ? a[1] : undefined); break;
         case "b": if (typeof a[0] === "number" && typeof a[1] === "number") orig(FX.burst).call(FX, a[0], a[1], Math.min(60, num(a[2], 0, 60, 8)), isObj(a[3]) ? a[3] : {}); break;
-        case "t": if (typeof a[0] === "number" && typeof a[1] === "number") orig(FX.text).call(FX, a[0], a[1], txt(String(a[2] == null ? "" : a[2]), 60), typeof a[3] === "string" ? a[3].slice(0, 30) : "#fff", !!a[4]); break;
+        case "t": if (typeof a[0] === "number" && typeof a[1] === "number") orig(FX.text).call(FX, a[0], a[1], txt(String(Array.isArray(a[5]) && a[5].length === 2 && typeof a[5][0] === "string" && typeof a[5][1] === "string" ? L(a[5]) : a[2] == null ? "" : a[2]), 60) /* W33 Online: Sprachpaar */, typeof a[3] === "string" ? a[3].slice(0, 30) : "#fff", !!a[4]); break;
         case "r": if (typeof a[0] === "number" && typeof a[1] === "number") orig(FX.ring).apply(FX, a.slice(0, 6).map(x => (typeof x === "number" || typeof x === "string" ? x : 0))); break;
         case "f": orig(FX.flashScreen).call(FX, typeof a[0] === "string" ? a[0].slice(0, 30) : "#fff", num(a[1], 0, 1, 0.3)); break;
         case "k": orig(FX.addShake).call(FX, num(a[0], 0, 30, 1)); break;
@@ -765,6 +782,18 @@
     for (const c in LISTS) { const arr = Z[LISTS[c]]; if (!Array.isArray(arr)) continue; arr.length = 0; }
     for (const [key, o] of want) { const arr = Z[LISTS[key[0]]]; if (Array.isArray(arr)) arr.push(o); }
     for (const o of Z.enemies) { if (!o.st || typeof o.st !== "object") o.st = {}; if (!o.def || typeof o.def !== "object") o.def = (own(Z.ENEMIES, o.id) && Z.ENEMIES[o.id]) || (own(Z.BOSSDEF, o.id) && Z.BOSSDEF[o.id]) || {}; }
+    /* W34 Online: Demogorgon-Arme rechnen mit Float32Array-Ketten (p/v/o), die nicht übertragen werden (enc lässt Typed Arrays aus) →
+       beim Gast „Demogorgon-Bild“-Fehler, Arme fehlten. Je Boss und Arm eine eigene Kette anlegen und über die Schnappschüsse behalten. */
+    if (!S.armC || S.armC.size > 40) S.armC = new Map();
+    for (const [key, o] of want) {
+      const arms = key[0] === "E" && o.dg && typeof o.dg === "object" && Array.isArray(o.dg.arms) ? o.dg.arms : null; if (!arms) continue;
+      let ca = S.armC.get(key); if (!ca) S.armC.set(key, (ca = []));
+      arms.forEach((a, i) => {
+        if (!a || typeof a !== "object" || a.p instanceof Float32Array) return; const n = int(a.n, 2, 64, 0); if (!n) return;
+        let c = ca[i]; if (!c || c.p.length !== n * 2) c = ca[i] = { p: new Float32Array(n * 2), v: new Float32Array(n * 2), o: new Float32Array(n * 2), seen: false };
+        a.p = c.p; a.v = c.v; a.o = c.o; a.init = c.seen; c.seen = true;
+      });
+    }
     /* 2) Spieler 1 (Ezekiel des Gastgebers) */
     const P = Z.player, fP = B.get("P1");
     if (P && fP) setF(P, fP, A.get("P1"), "P1");
@@ -802,7 +831,7 @@
 
   /* ======================= OBERFLÄCHE ======================= */
   let ui = { scr: "menu", entry: "", manualIn: "" };
-  O.open = keep => { if (!Z.ui || !Z.ui.open) return; if (window.RTCPeerConnection == null) { Z.ui.confirm(L(["Online spielen", "Play online"]), L(["Dieser Browser kann keine direkten Verbindungen (WebRTC).", "This browser can't do direct connections (WebRTC)."]), "OK", () => { }); return; } if (!S.role && keep !== true) ui.scr = "menu"; draw(true); };
+  O.open = keep => { if (!Z.ui || !Z.ui.open) return; if (window.RTCPeerConnection == null) { Z.ui.confirm(L(["Online spielen", "Play online"]), L(["Dieser Browser kann keine direkten Verbindungen (WebRTC). Online-Koop geht mit einem aktuellen Firefox, Chrome, Edge oder Safari – allein spielen geht hier weiter.", "This browser can't do direct connections (WebRTC). Online co-op works in a current Firefox, Chrome, Edge or Safari – solo play still works here."]), "OK", () => { }); return; } /* W33 Online: Ausweg nennen */ if (!S.role && keep !== true) ui.scr = "menu"; draw(true); };
   function heroCard(id, sel, who) {
     const ch = Z.koop && Z.koop.CH && Z.koop.CH[id];
     const n = id === "Z" ? "Ezekiel" : ch ? ch.n : id === "E" ? "Echo" : "Friedrich";
@@ -910,8 +939,8 @@
     else if (a === "copyl") { const u = link(); if (navigator.share && /Android|iPhone|iPad/i.test(navigator.userAgent)) navigator.share({ title: "Ezekiel – The Destroyer", url: u }).catch(() => copy(u)); else copy(u); }
     else if (a === "mcopy") { const t = document.getElementById("zso-mout"); if (t) copy(t.value); }
     else if (a === "mhost") { S.role = "host"; S.hReady = true; manualHost().catch(() => fail("fmt")); }
-    else if (a === "mguest") { const t = document.getElementById("zso-min"); S.role = "guest"; S.gHero = S.hero; manualGuest(t ? t.value : "").catch(() => { S.role = null; fail("fmt"); }); }
-    else if (a === "mans") { const t = document.getElementById("zso-mans"); manualAccept(t ? t.value : "").catch(() => fail("fmt")); }
+    else if (a === "mguest") { const t = document.getElementById("zso-min"); S.role = "guest"; S.gHero = S.hero; manualGuest(t ? t.value : "").catch(e => { S.role = null; fail(e && e.message === "alt" ? "alt" : "fmt"); }); } /* W33 Online: alt */
+    else if (a === "mans") { const t = document.getElementById("zso-mans"); manualAccept(t ? t.value : "").catch(e => fail(e && e.message === "alt" ? "alt" : "fmt")); } /* W33 Online: alt */
     else if (a === "leave") { endSession(L(["Online-Spiel beendet.", "Online game ended."])); draw(true); }
     else if (a === "close") { Z.ui.close(); }
     else if (a === "mutnimm" && S.mutW) { const id = b.dataset.h; if (S.mutW.ang.indexOf(id) < 0) return; if (S.mutW.voll) { S.mutW.neu = id; mutZeichne(); } else mutSende(id, null); }
@@ -925,14 +954,39 @@
   function chip() {
     if (!S.role || !S.playing) { if (chipEl) chipEl.hidden = true; return; }
     if (!chipEl) { chipEl = document.createElement("div"); chipEl.id = "zso-chip"; chipEl.setAttribute("role", "status"); document.body.appendChild(chipEl); }
-    const p2 = Z.koop && Z.koop.p2;
+    let p2 = Z.koop && Z.koop.p2;
+    { const kh = document.getElementById("koop-hl"); if (kh && kh.offsetParent !== null && kh.getBoundingClientRect().width > 0) p2 = null; } /* W34 Online: Leben steht schon in der P2-Leiste – Streifen kurz halten */
     const ping = S.rtt ? Math.round(S.rtt) + " ms" : "…";
     const lostT = S.st === "lost" ? Math.max(0, Math.ceil((T_GIVEUP - (now() - S.lostAt)) / 1000)) : 0;
     chipEl.className = S.st === "lost" ? "weg" : S.rtt > 160 ? "lahm" : "";
-    chipEl.innerHTML = "<b>" + esc(L(["Online", "Online"])) + "</b> " + esc(S.role === "host" ? L(["Gastgeber", "Host"]) : L(["Gast", "Guest"])) + " · " + esc(ping) +
+    chipEl.innerHTML = "<b>" + esc(L(["Online", "Online"])) + "</b> " + (innerWidth < 560 ? "" : esc(S.role === "host" ? L(["Gastgeber", "Host"]) : L(["Gast", "Guest"])) + " · ") /* W34 Online: schmal → kurz */ + esc(ping) +
       (S.role === "guest" && p2 ? " · " + esc((Z.koop.CH && Z.koop.CH[p2.ch] ? Z.koop.CH[p2.ch].n : "")) + " ❤ " + Math.max(0, Math.round(p2.hp)) + "/" + Math.round(p2.hpMax) : "") +
-      (S.st === "lost" ? " · " + esc(L(["getrennt – ", "disconnected – "])) + lostT + " s" : "") + (S.role === "host" && S.gPaused ? " · " + esc(L(["Gast pausiert", "guest paused"])) : "") + (S.role === "guest" && S.hostPaused ? " · " + esc(L(["Pause", "paused"])) : "");
+      (S.st === "lost" ? " · " + esc(L(["getrennt – ", "disconnected – "])) + lostT + " s" : "") + (S.role === "host" && S.gPaused ? " · " + esc(L(["Gast pausiert", "guest paused"])) : "") + (S.role === "guest" && S.hostPaused ? " · " + esc(L(["Pause", "paused"])) : "") + (S.role === "guest" && S.hostAway && S.st === "play" ? " · " + esc(L(["Gastgeber im Hintergrund", "host away"])) : "") /* W33 Online */;
     chipEl.hidden = false;
+    chipPlace();
+  }
+  /* W34 Online: Streifen nicht über HUD-Teile legen (Lebensleiste, P2-Leiste, Karte, Knöpfe – v. a. Handy hoch/klein):
+     oben mittig beginnen und unter verdeckte Elemente rutschen (Rechteck-Vergleich mit den sichtbaren HUD-Teilen) */
+  function chipPlace() {
+    const c = chipEl; if (!c || c.hidden) return;
+    const W = innerWidth, H = innerHeight, big = W * H * 0.3, rs = [];
+    for (const e of document.querySelectorAll("#hud > *, #hud > * > *, #koop-hl, #touch button, #w31-padhinweis")) {
+      if (e.offsetParent === null && getComputedStyle(e).position !== "fixed") continue;
+      const r = e.getBoundingClientRect(); if (r.width < 2 || r.height < 2 || r.width * r.height > big || r.bottom <= 0 || r.top >= H) continue;
+      const s = getComputedStyle(e); if (s.visibility === "hidden" || +s.opacity < 0.05) continue;
+      rs.push(r);
+    }
+    const hit = () => { const b = c.getBoundingClientRect(); let lo = 0, ri = 0; for (const r of rs) if (Math.min(b.right, r.right) - Math.max(b.left, r.left) > 2 && Math.min(b.bottom, r.bottom) - Math.max(b.top, r.top) > 2) { lo = Math.max(lo, r.bottom); ri = Math.max(ri, r.right); } return lo ? { lo, ri } : null; };
+    const at = (x, y) => { c.style.top = y + "px"; if (x == null) { c.style.left = ""; c.style.transform = ""; } else { c.style.left = x + "px"; c.style.transform = "none"; } };
+    let y = 6; at(null, y);
+    for (let n = 0; n < 8; n++) {
+      const h = hit(); if (!h) return;
+      /* erst rechts neben die verdeckten Teile (gleiche Höhe), sonst darunter */
+      const w = c.getBoundingClientRect().width, x = Math.ceil(h.ri + 8);
+      if (x + w < W - 6) { at(x, y); if (!hit()) return; }
+      y = Math.ceil(h.lo + 4); if (y > H * 0.5) break; at(null, y);
+    }
+    at(null, 6); /* kein freier Platz oben: wie bisher */
   }
 
   /* W32 Online: Aussehen (warme Töne, kein Blau) */
@@ -948,7 +1002,7 @@
     ".zso .zso-tasten{display:grid;grid-template-columns:repeat(11,1fr);gap:3px;margin:8px 0}.zso .zso-tasten button{padding:4px 0;min-width:0;font-family:ui-monospace,monospace}" +
     ".zso textarea{width:100%;box-sizing:border-box;background:#1a1214;color:#e8dcc0;border:1px solid #6a4a3a;border-radius:6px;font:12px ui-monospace,monospace;word-break:break-all}" +
     ".zso .zso-klein{font-size:.78em;color:#a99a8b;line-height:1.35}.zso .zso-gut{color:#9ad070;font-weight:700}" +
-    "#zso-chip{position:fixed;top:6px;left:50%;transform:translateX(-50%);z-index:35;padding:3px 10px;border-radius:12px;background:rgba(20,12,14,.72);color:#e8dcc0;font:600 12px system-ui,sans-serif;pointer-events:none;border:1px solid rgba(255,210,122,.35)}" +
+    "#zso-chip{position:fixed;top:6px;left:50%;transform:translateX(-50%);z-index:35;padding:3px 10px;border-radius:12px;background:rgba(20,12,14,.72);color:#e8dcc0;font:600 12px system-ui,sans-serif;pointer-events:none;border:1px solid rgba(255,210,122,.35);max-width:calc(100vw - 16px);box-sizing:border-box;text-align:center}" + /* W34 Online: max-width */
     "body.zso-gast #hud .hb,body.zso-gast #prompt{display:none!important}#zso-chip b{color:#ffd27a}#zso-chip.lahm{border-color:#e8a040}#zso-chip.weg{border-color:#ff6a4a;color:#ffb0a0}";
     document.head.appendChild(st); }
 
@@ -979,5 +1033,7 @@
     if (m) { ui.scr = "manual"; ui.manualIn = "ZS1z" + m[1]; setTimeout(() => { if (!Z.level) O.open(true); }, 900); }
   }
   fromHash();
+  /* W33 Online: Einladungslink in einen schon offenen Spiel-Tab eingefügt (nur der Teil nach # ändert sich → kein Neuladen) */
+  window.addEventListener("hashchange", () => { if (!S.role && !Z.level) fromHash(); });
   O.test = { reg, enc, dec, tileHash, normCode, pack, unpack, newCode, S, sim: o => (S.sim = o || null) };
 })();

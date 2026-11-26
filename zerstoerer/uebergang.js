@@ -378,7 +378,7 @@
   function hudHide(v) {
     if (!hudEl || hudHidden === !!v) return; hudHidden = !!v; ui.verdeckt = !!v;
     /* HUD, Meldungen und Weltschilder warten, solange die Seite über dem Bild liegt */
-    for (const el of [hudEl, document.getElementById("meldungen"), document.getElementById("welt"), promptEl, cardEl]) if (el) /* W24 Auflösung: Fundkarte/Hinweis lagen über der Kapitelseite (kleine Schirme: halbe Seite verdeckt) */ { el.style.transition = "opacity .3s"; el.style.opacity = v ? "0" : ""; }
+    for (const el of [hudEl, document.getElementById("meldungen"), document.getElementById("welt"), promptEl, cardEl, document.getElementById("touch") /* W34 Online: Touch-Knöpfe lagen über dem Seitentext (Handy, v. a. Online-Gast bei jedem Gebietswechsel) */]) if (el) /* W24 Auflösung: Fundkarte/Hinweis lagen über der Kapitelseite (kleine Schirme: halbe Seite verdeckt) */ { el.style.transition = "opacity .3s"; el.style.opacity = v ? "0" : ""; }
   }
   function pageInfo(id, B, lv) {
     const run = Z.run;

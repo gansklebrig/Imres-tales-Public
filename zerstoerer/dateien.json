@@ -9697,8 +9697,8 @@
 "sha256":"3ab7b7816ddadc9aa1ef272db3236698570d927a2f28af60f6ead1f3ac0a9320"
 },
 "zerstoerer.html":{
-"groesse":70340,
-"sha256":"098d749be88f60949aa5805ef9e7208c9cbe8374d8b8be18bfedafcef93f474e"
+"groesse":70858,
+"sha256":"52c675a892deda1ff3402094722cb5039d2123c884e4a6e63c3186458c61e3d9"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":144658,
@@ -9825,8 +9825,8 @@
 "sha256":"473eaee12b0669f6f885228633107b37c74ec68c439516aff82a8acd52a49305"
 },
 "zerstoerer/koop.js":{
-"groesse":106082,
-"sha256":"8d1d36c6ecaed07a1240c2b4ecb30af989c71823ca929851455286219354254d"
+"groesse":106385,
+"sha256":"618b3e8284767b31d96c8889bec15aa2197a8f10cd7f5fe1edbad97d20f022fb"
 },
 "zerstoerer/lager.js":{
 "groesse":159427,
@@ -9865,8 +9865,8 @@
 "sha256":"7676a5fcbe9ba9acb7d6622564b5cd39f88e922bbfd51110db8984465c004bb9"
 },
 "zerstoerer/online.js":{
-"groesse":82069,
-"sha256":"c623a5f4a32aeb455eb4a65db45f18f41d2c85d4705eb4d6efef55847f07389f"
+"groesse":91329,
+"sha256":"46279836b5f2e15788dbe04d88d555cbfef91c41f56769a0ae467b1ac8c770ea"
 },
 "zerstoerer/parcours.js":{
 "groesse":39202,
@@ -9925,8 +9925,8 @@
 "sha256":"f400e6764ff2e31d8fbec4be20f1afb5dc9722989c370e0b9728ac4033d8d305"
 },
 "zerstoerer/uebergang.js":{
-"groesse":113643,
-"sha256":"ff5a1c70d820b34c1f4381e977315b24a453fe68250b537e685765ee4fe6fd4d"
+"groesse":113788,
+"sha256":"7c7f468ac2ef8a9c509ee7f31b42d4703fcba16cb93685a64037433d407b88b7"
 },
 "zerstoerer/ui.js":{
 "groesse":212157,
@@ -9961,5 +9961,5 @@
 "sha256":"2239cd79f01c377c38cdcecf8d827774c46b23cf9e74f4481be6463ca0b129e0"
 }
 },
-"stand":146
+"stand":147
 }

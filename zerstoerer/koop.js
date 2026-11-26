@@ -1263,7 +1263,7 @@
     if (!Q.koopDown && !Q.dead) tag(Q, "P1", "#e86a5a");
     /* Wiederbeleben */
     if (Q.koopDown) ringProg(c, Q.x + Q.w / 2, Q.y + 6, Q.revive || 0, "#ffe08a", K.reviving2 ? "" : CH[P.ch].n + ": " + L(["halte ", "hold "]) + keyLab(2, "use"));
-    if (P.down) ringProg(c, P.x + P.w / 2, P.y + 14, P.revive || 0, CH[P.ch].col, K.reviving1 ? "" : "Ezekiel: " + L(["halte ", "hold "]) + keyLab(1, "use"));
+    if (P.down) ringProg(c, P.x + P.w / 2, P.y + 14, P.revive || 0, CH[P.ch].col, K.reviving1 ? "" : Z.online && Z.online.S.role === "guest" ? L(["Warte auf Ezekiel …", "Waiting for Ezekiel …"]) /* W33 Online: Gast kann hier nichts tun */ : "Ezekiel: " + L(["halte ", "hold "]) + keyLab(1, "use"));
     /* Spieler 2 steht an einem Fund: wer nimmt? */
     if (!P.down) {
       const px = P.x + P.w / 2, py = P.y + P.h;
@@ -1348,7 +1348,7 @@
     const wt = P.waffe ? "⚔ " + L(Z.itemDef(P.waffe).n) + " · ×" + wmul(P).toFixed(2) : "⚔ ×" + wmul(P).toFixed(2) + L([" (ohne Waffe)", " (no weapon)"]);
     if (v.wt !== wt) { hudEl.querySelector(".kh-w").textContent = wt; v.wt = wt; }
     const dEl = hudEl.querySelector(".kh-down"), Q = Z.player;
-    const ds = P.down ? L(["Am Boden – Ezekiel: „Benutzen“ halten (" + keyLab(1, "use") + ")", "Down – Ezekiel: hold “Use” (" + keyLab(1, "use") + ")"]) : (Q && Q.koopDown ? L(["Ezekiel liegt am Boden – hilf ihm auf (" + keyLab(2, "use") + " halten)", "Ezekiel is down – help him up (hold " + keyLab(2, "use") + ")"]) : K.leaveT > 0.15 ? L(["Verlassen …", "Leaving…"]) + " " + Math.round(K.leaveT / 1.25 * 100) + "%" : "");
+    const ds = P.down ? (Z.online && Z.online.S.role === "guest" ? L(["Am Boden – warte, bis Ezekiel dir aufhilft", "Down – wait for Ezekiel to help you up"]) /* W33 Online */ : L(["Am Boden – Ezekiel: „Benutzen“ halten (" + keyLab(1, "use") + ")", "Down – Ezekiel: hold “Use” (" + keyLab(1, "use") + ")"])) : (Q && Q.koopDown ? L(["Ezekiel liegt am Boden – hilf ihm auf (" + keyLab(2, "use") + " halten)", "Ezekiel is down – help him up (hold " + keyLab(2, "use") + ")"]) : K.leaveT > 0.15 ? L(["Verlassen …", "Leaving…"]) + " " + Math.round(K.leaveT / 1.25 * 100) + "%" : "");
     if (v.ds !== ds) { dEl.textContent = ds; dEl.hidden = !ds; v.ds = ds; }
   }
   /* freundliche Meldung (oben Mitte; benutzt das vorhandene Meldungssystem, wenn da) */
