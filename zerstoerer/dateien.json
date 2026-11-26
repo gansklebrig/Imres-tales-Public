@@ -9689,8 +9689,8 @@
 "sha256":"3ab7b7816ddadc9aa1ef272db3236698570d927a2f28af60f6ead1f3ac0a9320"
 },
 "zerstoerer.html":{
-"groesse":69074,
-"sha256":"e2e9ab0181c7abdaebbdd5e5568410c8381e37f984d42b967b19f2baa9f2f6e7"
+"groesse":69270,
+"sha256":"2de0f960bb564efe898be1fefd69a4debe3010b3acd105639381fef099d4997b"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":144521,
@@ -9703,6 +9703,10 @@
 "zerstoerer/ausstattung.js":{
 "groesse":376609,
 "sha256":"68c124180bd0f68f8cdbddd3b27e8be9e777f265c1ddae20426cef85ee334f6a"
+},
+"zerstoerer/bericht.js":{
+"groesse":22057,
+"sha256":"bb4556e4ee2d94c923629782758b43e05d391cfb55b3629772a29b7c3db71030"
 },
 "zerstoerer/bilanz.js":{
 "groesse":35434,
@@ -9820,6 +9824,10 @@
 "groesse":8189,
 "sha256":"47ddaaf73d7974c01437465ce712829c51a19e8144caf6771e33d506793b5c23"
 },
+"zerstoerer/lerntipps.js":{
+"groesse":17562,
+"sha256":"dbd222074aa06c884ab81abc404d08f8a75270f90bb703f01317ddfa57f79e9a"
+},
 "zerstoerer/musik.js":{
 "groesse":130196,
 "sha256":"63b6d85f416eb3663021193f0730b976e6ea141bf4394decdabd210b639274d9"
@@ -9915,7 +9923,11 @@
 "zerstoerer/wunder.js":{
 "groesse":91494,
 "sha256":"bd666dd2ac70650c8a7b947c709a2c71251f4de5328a9f37e1b70d932514c922"
+},
+"zerstoerer/zugang.js":{
+"groesse":31929,
+"sha256":"b753f6210e4836421f7815ef79c12771a37d86603c170abf77ae34623d359f56"
 }
 },
-"stand":139
+"stand":140
 }
