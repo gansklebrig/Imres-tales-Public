@@ -42551,8 +42551,9 @@ if(typeof hinwHtml==='function'){const hh=hinwHtml;hinwHtml=function(k){if(k!=='
   const zeig=[];for(let j=erste;j<=i;j++)if(!SAVE.hinw['tree_e'+j])for(const x of ETAP[j].L)zeig.push((j>0&&erste>0?'<b style="color:#ffd27a">Neu:</b> ':'')+x);
   return`<div class="hinw"><ul>${zeig.map(x=>`<li>${x}</li>`).join('')}</ul><button class="btn small gold" data-act="hinw-ok" data-k="tree_bis${i}">Verstanden</button></div>`}catch(e){fErr(e);return hh.apply(this,arguments)}}}
 /* Hinweiskasten und „Wähle deinen ersten Stern“ überlappten sich: den Stern-Hinweis unter den Kasten schieben */
-function lagePruef(){const w=scr&&scr.querySelector('.tree-wrap');if(!w)return;const h=w.querySelector('.hinw'),k=w.querySelector('.spkhint');if(!h||!k)return;const m=k.offsetParent||k.parentNode;if(!m||!m.getBoundingClientRect)return;
- const hb=h.getBoundingClientRect(),kb=k.getBoundingClientRect();if(kb.top<hb.bottom&&kb.bottom>hb.top){k.style.top=Math.round(hb.bottom-m.getBoundingClientRect().top+8)+'px'}}
+function lagePruef(){const w=scr&&scr.querySelector('.tree-wrap');if(!w)return;const k=w.querySelector('.spkhint');if(!k)return;const m=k.offsetParent||k.parentNode;if(!m||!m.getBoundingClientRect)return;
+ /* Hinweiskasten und Resonanz-Zeile oben auf der Karte (kleine Fenster): Stern-Hinweis jeweils darunter */
+ for(const h of [w.querySelector('.hinw'),w.querySelector('.rsRow')]){if(!h)continue;const hb=h.getBoundingClientRect(),kb=k.getBoundingClientRect();if(hb.width>0&&kb.top<hb.bottom&&kb.bottom>hb.top&&kb.left<hb.right&&kb.right>hb.left){k.style.setProperty('top',Math.round(hb.bottom-m.getBoundingClientRect().top+6)+'px','important')}}}
 if(typeof renderTree==='function'){const rt=renderTree;renderTree=function(){const r=rt.apply(this,arguments);try{lagePruef();requestAnimationFrame(lagePruef)}catch(e){fErr(e)}return r}}
 /* „Verstanden“ für eine Etappe bestätigt alle bis dorthin */
 document.addEventListener('click',ev=>{const b=ev.target&&ev.target.closest&&ev.target.closest('[data-act="hinw-ok"]');if(!b)return;const k=b.dataset.k||'';const m=/^tree_bis(\d+)$/.exec(k);if(!m)return;
