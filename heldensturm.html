@@ -36485,7 +36485,8 @@ function zlSpiel(name){if(!AC||!SFXB)return;const D=ZK[name];if(!D)return;const 
  const s=AC.createBufferSource();s.buffer=b;const g=AC.createGain();g.gain.value=D[1]*0.6;s.connect(g);g.connect((typeof CUR!=='undefined'&&CUR)||SFXB);s.start(now);V[slot]=now+b.duration*0.85;ZL.st.klang=(ZL.st.klang|0)+1}
 for(const k in ZK)SND[k]=()=>zlSpiel(k);
 /* Im Leerlauf vorrendern (eins alle 60 ms, Start nach 4 s) */
-(()=>{const L=Object.keys(ZK);let i=0;const step=()=>{if(i>=L.length)return;try{zlRender(L[i++])}catch(e){}setTimeout(step,60)};setTimeout(step,4000)})();
+/* nicht mitten im Spiel: jedes Vorrendern ist ein Block von 10–80 ms → verpasste Bilder; im Spiel wird ein Klang bei Bedarf gerendert */
+(()=>{const L=Object.keys(ZK);let i=0;const step=()=>{if(i>=L.length)return;try{if(typeof G!=='undefined'&&G&&G.state==='play'&&!G.paused&&!G.overlay){setTimeout(step,700);return}}catch(e){}try{if(!ZKB[L[i]])zlRender(L[i])}catch(e){}i++;setTimeout(step,60)};setTimeout(step,1500)})();
 /* WAV (Hörproben/Test) */
 function zlWav(name){const d=zlRender(name);if(!d)return null;const n=d.length,B=new ArrayBuffer(44+n*2),v=new DataView(B);const w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
  w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,ZSR,true);v.setUint32(28,ZSR*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);
@@ -43725,6 +43726,29 @@ let zu=null,tA=0;
   if(an!==zu){zu=an;document.body.classList.toggle('erzEck',an)}}}catch(e){}requestAnimationFrame(lauf)})();
 }catch(e){console.error('erzlage',e);window.__hsERZLAGE={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/erzlage» */
+/* «vorbau» */
+/* ================= Paket „vorbau“: Bodenkacheln schon beim Stufenbau vorbacken – window.__hsVORBAU =================
+   Messung (1920×1080): Nach dem Stufenstart dauerte das erste Bild 100–640 ms und die nächsten 10–20 Bilder 40–200 ms,
+   weil alle sichtbaren 640-px-Bodenkacheln erst beim ersten Zeichnen entstehen (eine je Bild für die Vorausschau).
+   Das ist genau der Moment, in dem man losläuft – es ruckelt.
+   Jetzt werden die Kacheln um den Startpunkt (Sichtfeld + ein Kachelring) direkt nach dem Stufenbau gebacken, noch bevor das
+   erste Bild gezeigt wird (gleiche Arbeit, aber im ohnehin blockierten Ladeschritt statt im Spiel). Höchstens 20 Kacheln.
+   Abschaltbar: __hsVORBAU.aus=1 */
+(function(){try{if(window.__hsVORBAU||typeof kaKachel!=='function'||typeof KAT==='undefined')return;
+const VB=window.__hsVORBAU={v:1,aus:0,n:0,ms:0,MAX:20};
+let plan=false;
+function backen(){plan=false;try{if(VB.aus)return;const K=G.ka;if(!K||!K.an||G.room||!K.md||(typeof KA!=='undefined'&&KA.noTile))return;
+ const t0=performance.now();const sc=kaKachelSc();const key=G.runId+'|'+G.stage+'|'+K.v+'|'+Math.round(window.innerWidth/200)+'x'+Math.round(window.innerHeight/200);
+ if(KAT.key!==key){KAT.m.clear();KAT.key=key;KAT.sc=sc}
+ const TS=KAT.TS,z=(typeof ZOOM==='number'&&ZOOM>0)?ZOOM:1,vw=W/z,vh=H/z,C=P;if(!C)return;
+ const x0=C.x-vw/2-TS*0.6,y0=C.y-vh/2-TS*0.6,x1=C.x+vw/2+TS*0.6,y1=C.y+vh/2+TS*0.6;
+ /* nach Nähe zum Helden ordnen, die nächsten zuerst */
+ const L=[];for(let ty=Math.max(0,Math.floor(y0/TS));ty<=Math.floor(y1/TS);ty++)for(let tx=Math.max(0,Math.floor(x0/TS));tx<=Math.floor(x1/TS);tx++){if(tx*TS>WORLD||ty*TS>WORLD)continue;L.push([tx,ty,Math.hypot((tx+0.5)*TS-C.x,(ty+0.5)*TS-C.y)])}
+ L.sort((a,b)=>a[2]-b[2]);let n=0;for(const [tx,ty] of L){if(n>=VB.MAX)break;const k=tx+','+ty;if(KAT.m.has(k))continue;KAT.m.set(k,{cv:kaKachel(tx,ty,KAT.sc),u:performance.now()});n++}
+ VB.n=n;VB.ms=Math.round(performance.now()-t0)}catch(e){console.error('vorbau',e)}}
+hook('stage',()=>{if(plan||VB.aus)return;plan=true;Promise.resolve().then(backen)});
+}catch(e){console.error('vorbau',e);window.__hsVORBAU={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/vorbau» */
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
