@@ -96,6 +96,7 @@
         FX.burst(b.x, b.yF - 4, 14, { col: [Z.tileCol || "#6a5a50", "#3a3030"], sp: 140, life: 0.6, size: 3, kind: "shard", g: 700 });
         const r = { x: b.x - 14, y: b.yF - 30, w: 28, h: 30 };
         if (!P.dead && U.overlap(r, P) && !(P.iframe > 0)) Z.hurtPlayer(Math.round(P.hpMax * VARIANTEN.einsturz.dmg), { x: b.x, kb: 120, hazard: true });
+        if (Z.koopTrapHit) Z.koopTrapHit(r, VARIANTEN.einsturz.dmg, { x: b.x, kb: 120 }); /* W27 Koop: Brocken treffen auch Spieler 2 */
         for (const e of Z.enemies) if (!e.dead && !e.def.boss && U.overlap(r, e)) Z.hitEnemy(e, Math.round(e.hpMax * 0.35), { src: "trap", kb: 100, kbUp: 120 });
       }
     }

@@ -92,6 +92,7 @@
   }
   const inFluch = (x, y) => { const lv = Z.level; return !!(lv && lv._fluch && lv._fluch.size && lv._fluch.has(Math.floor(x / T / Z.CW) + "," + Math.floor(y / T / Z.CH))); };
   const pIn = () => { const P = Z.player; return P && inFluch(P.x + P.w / 2, P.y + P.h / 2); };
+  Z.haerteInFluch = inFluch; /* W27 Koop: Fluchzonen gelten auch für Spieler 2 (koop.js) */
   const la0 = Z.loadArea;
   Z.loadArea = function () { const r = la0.apply(this, arguments); try { fluchSetup(Z.level); } catch (e) { console.error("haerte", e); } return r; };
   const hp0 = Z.hurtPlayer;

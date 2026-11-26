@@ -342,6 +342,7 @@
     if (P.bear > 0) m *= 0.6;
     if (o.attacker && o.attacker.st && o.attacker.st.weak > 0) m *= 0.6;
     if (Z.mercy && Z.mercy()) m *= 0.6;
+    if (Z.haerteInFluch && Z.haerteInFluch(P.x + P.w / 2, P.y + P.h / 2)) m *= 1.25; /* Härte V: Fluchzonen */
     dmg = Math.max(1, Math.round(dmg * m));
     P.hp -= dmg; P.iframe = o.spike ? 0.8 : 0.75; P.hurtT = 0.2; P.act = null; P.chargeT = 0; P.climbing = false; P.drinkT = 0;
     const fromX = o.x != null ? o.x : P.x + P.w / 2 + P.face;
@@ -819,9 +820,110 @@
     /* Abgrund */
     const lv = Z.level;
     if (lv && P.y > lv.H * T + 40) { placeNear(P, true); hurtP2(Math.round(P.hpMax * 0.12), { force: true, kb: 0 }); }
-    /* Stacheln/Lava-Kacheln: Ezekiels Fallen prüfen nur ihn – Spieler 2 bekommt eine einfache Lavaprüfung */
-    if (W.isLiquid && lv) { try { const v = W.tile(Math.floor((P.x + P.w / 2) / T), Math.floor((P.y + P.h - 2) / T)); if (W.isLava && W.isLava(v)) hurtP2(Math.round(P.hpMax * 0.1), { kb: 0 }); } catch (_) {} }
+    try { p2Tiles(P); } catch (e) { console.error("koop kacheln", e); }
   }
+  /* Kachel-Gefahren wie bei Ezekiel (kampf.js hazards): Stacheln 14 %, Lava 15 %, Wasser 8 %, Abgrund 15 % – danach zurück an den letzten sicheren Platz */
+  function p2Tiles(P) {
+    if (P.down) return;
+    const hb = { x: P.x + 2.5, y: P.y + 4, w: P.w - 5, h: P.h - 6 }, tx0 = Math.floor(hb.x / T), tx1 = Math.floor((hb.x + hb.w) / T), tyF = Math.floor((P.y + P.h - 3) / T), tyM = Math.floor((P.y + P.h * 0.5) / T);
+    let spike = false, liquid = 0;
+    for (let tx = tx0; tx <= tx1; tx++) { const a = W.tile(tx, tyF), b = W.tile(tx, tyM); if (a === 3) spike = true; if (a === 5 || b === 5) liquid = 5; if ((a === 6 || b === 6) && !liquid) liquid = 6; }
+    const back = () => { if (P.lastSafe) { P.x = P.lastSafe.x; P.y = P.lastSafe.y; } else placeNear(P, false); P.vx = 0; P.vy = 0; P.rollT = 0; P.act = null; P.climbing = false; };
+    if (W.tile(Math.floor((P.x + P.w / 2) / T), Math.floor((P.y + P.h * 0.35) / T)) === 9) { hurtP2(Math.round(P.hpMax * 0.15), { force: true, kb: 0 }); if (!P.down) { back(); P.iframe = Math.max(P.iframe, 1.1); FX.text(P.x + P.w / 2, P.y - 10, L(["Abgestürzt!", "Fell!"]), "#ff8a6a", true); } return; }
+    if (spike && P.iframe <= 0) { hurtP2(Math.round(P.hpMax * 0.14), { kb: 0, spike: true }); if (!P.down) { back(); P.iframe = Math.max(P.iframe, 1.1); } }
+    if (liquid && P.y + P.h > Math.floor((P.y + P.h - 3) / T) * T + 6) {
+      const t = P.time || 0, skip = P._hzRT != null && t - P._hzRT >= 0 && t - P._hzRT < 1;
+      if (!skip) { P._hzRT = t; hurtP2(Math.round(P.hpMax * (liquid === 5 ? 0.15 : 0.08)), { force: true, kb: 0, eff: liquid === 5 ? { burn: 1 } : null }); }
+      if (liquid === 6) { A.play("splash", { x: P.x, y: P.y }); FX.burst(P.x + P.w / 2, P.y + P.h, 10, { col: ["#4a6a5a", "#8aa090"], sp: 90, ang: -Math.PI / 2, spread: 1.2, life: 0.5, g: 400, size: 2 }); }
+      if (!P.down) { back(); P.iframe = Math.max(P.iframe, liquid === 6 ? 0.4 : 1); }
+    }
+  }
+  /* ===== W27 Koop: Fallen-Haken (klar abgegrenzt) =====
+     Z.koopTrapHit(rect, anteil, o): Fallen anderer Module melden ein Wirkrechteck; trifft es Spieler 2, bekommt er anteil × LP-Max Schaden.
+     Rückgabe true = getroffen. Ohne Spieler 2 sofort false (Einzelspieler unverändert). */
+  Z.koopTrapHit = (r, frac, o) => {
+    const P = K.p2; if (!P || P.down || !r || !U.overlap(r, P) || P.iframe > 0) return false;
+    return hurtP2(Math.round(P.hpMax * (frac || 0.1)), Object.assign({ kb: 160, kbUp: 180 }, o || {}));
+  };
+  /* Fallen aus parcours.js / fallen.js (Pendel, Säge, Flammendüse, Stachelfalle, Steinschlag, Ballisten, Gift-/Lavaflächen …):
+     nach dem normalen Schritt ein Prüfdurchgang mit dt = 0 und Spieler 2 als Z.player – nichts bewegt sich, nur die Trefferprüfung läuft.
+     Eigener Treffer-Abstand je Falle (_p2Hit statt _pHit), damit Ezekiels Schutzzeit nicht mitverbraucht wird. */
+  let probing = false;
+  const upc0 = Z.updateParcours;
+  if (upc0) Z.updateParcours = function (dt) {
+    const r = upc0.apply(this, arguments);
+    const P = K.p2;
+    if (!P || P.down || probing || !Z.level || !(dt > 0)) return r;
+    const TR = Z.traps || [], sv = Z.player, svH = Z.hurtPlayer;
+    probing = true; K._swapP1 = sv;
+    for (const tr of TR) { tr._p1Hit = tr._pHit; tr._pHit = tr._p2Hit; }
+    const MV = Z.parcoursMovers || [], dxs = MV.map(m => m.dx);
+    Z.player = P; Z.hurtPlayer = hurtP2;
+    try { upc0.call(this, 0); } catch (e) { console.error("koop fallen", e); }
+    finally {
+      Z.player = sv; Z.hurtPlayer = svH; K._swapP1 = null; probing = false;
+      for (const tr of TR) { tr._p2Hit = tr._pHit; tr._pHit = tr._p1Hit; }
+      MV.forEach((m, i) => { m.dx = dxs[i]; });
+      if (K.pendingBoth) { K.pendingBoth = false; try { bothDown(); } catch (e) { console.error("koop", e); } }
+    }
+    return r;
+  };
+
+  /* ======================= FÄHREN (parcours.js nimmt nur Ezekiel mit) ======================= */
+  function p2Movers(P, dt) {
+    const MV = Z.parcoursMovers; if (!MV || !MV.length || P.climbing) { P.onMover = null; return; }
+    for (const m of MV) {
+      const over = P.x + P.w > m.x + 1 && P.x < m.x + m.w - 1;
+      if (P.onMover === m) {
+        if (over && P.vy >= 0 && Math.abs(P.y + P.h - m.y) < 4 && !(P.dropT > 0)) { P.x += m.dx || 0; P.y = m.y - P.h; P.vy = 0; P.onGround = true; P.airJumps = 1; }
+        else P.onMover = null;
+      } else if (over && P.vy >= 0 && P.y + P.h >= m.y - 1 && P.y + P.h - P.vy * dt <= m.y + 4 && !(P.dropT > 0)) { P.y = m.y - P.h; P.vy = 0; P.onGround = true; P.onMover = m; P.airJumps = 1; }
+    }
+  }
+
+  /* ======================= BOSSE IM KOOP: Muster, die beide fordern (nur mit 2 Spielern) =======================
+     Doppelschlag: Zonen unter BEIDEN Spielern zugleich – beide müssen gleichzeitig ausweichen.
+     Fadenband: ein Schicksalsfaden verbindet beide; wer sich zu weit entfernt, lässt ihn reißen (Schaden für beide). */
+  function koopBoss(dt) {
+    const b = Z.boss, Q = realP1(), P = K.p2;
+    const fight = b && !b.dead && !Z.bossDefeated && !(b.intro > 0) && b.hp > 0 && alive1() && alive2() && Z.level && !Z.level.hub;
+    if (!fight) { K.bt = Math.max(K.bt == null ? 9 : K.bt, 7); K.band = null; return; }
+    K.bt = (K.bt == null ? 9 : K.bt) - dt;
+    if (K.bt <= 0) {
+      K.bt = 13 + Math.random() * 6; K.bn = (K.bn || 0) + 1;
+      const dmg = Math.round(Math.max(Q.hpMax, P.hpMax) * 0.13);
+      if (K.bn % 2) {
+        for (const B of [Q, P]) { const fy = B.onGround ? B.y + B.h : (W.groundBelow ? W.groundBelow(B.x + B.w / 2, B.y + B.h, 160) : null) || B.y + B.h; Z.spawnHazard({ kind: "zone", x: B.x + B.w / 2, y: fy, w: 56, hgt: 44, warn: 1.05, active: 0.2, life: 0.25, dmg, owner: "e", warnCol: "#e05a8a", col: "rgba(224,90,138,.55)" }); }
+        note(L(["Doppelschlag – beide ausweichen!", "Twin strike – both of you dodge!"])); A.play("rune", { vol: 0.5 });
+      } else {
+        K.band = { t: 0, life: 5, warn: 1.2, tick: 0, dmg: Math.round(Math.max(Q.hpMax, P.hpMax) * 0.05) };
+        note(L(["Fadenband – bleibt zusammen!", "Fate thread – stay together!"])); A.play("web", { vol: 0.6 });
+      }
+    }
+    const F = K.band; if (!F) return;
+    F.t += dt; if (F.t > F.life) { K.band = null; return; }
+    if (F.t < F.warn) return;
+    const ax = Q.x + Q.w / 2, ay = Q.y + Q.h / 2, bx = P.x + P.w / 2, by = P.y + P.h / 2, d = Math.hypot(ax - bx, ay - by);
+    F.taut = d > 190;
+    if (F.taut) {
+      /* Faden zieht beide sanft zusammen */
+      const ux = (bx - ax) / (d || 1); Q.vx += ux * 260 * dt; P.vx -= ux * 260 * dt;
+      F.tick -= dt; if (F.tick <= 0) { F.tick = 0.5; Z.hurtPlayer(F.dmg, { kb: 0, unblockable: true, parryable: false, hazard: true }); hurtP2(F.dmg, { kb: 0 }); }
+    } else F.tick = Math.min(F.tick, 0.15);
+  }
+  function drawBand(c, t) {
+    const F = K.band, P = K.p2, Q = Z.player; if (!F || !P || !Q) return;
+    const ax = Q.x + Q.w / 2, ay = Q.y + 12, bx = P.x + P.w / 2, by = P.y + 12;
+    const k = F.t < F.warn ? F.t / F.warn : 1, fade = Math.min(1, (F.life - F.t) / 0.4);
+    c.save(); c.globalAlpha *= fade * (F.t < F.warn ? 0.35 + 0.3 * Math.sin(t * 20) : 1);
+    c.strokeStyle = F.taut ? "#ff5a6a" : "#e8a0c0"; c.lineWidth = F.taut ? 1.8 : 1;
+    c.beginPath(); c.moveTo(ax, ay);
+    const mx = (ax + bx) / 2, my = (ay + by) / 2 + (F.taut ? 0 : 14 * k) + Math.sin(t * 6) * 2;
+    c.quadraticCurveTo(mx, my, bx, by); c.stroke();
+    if (F.taut && Math.random() < 0.3) FX.burst(mx, my, 2, { col: ["#ff5a6a", "#ffd0e0"], sp: 40, life: 0.3, size: 1.4, kind: "spark", add: true });
+    c.restore();
+  }
+  K.bossInfo = () => ({ bt: K.bt, bn: K.bn || 0, band: K.band ? { t: K.band.t, taut: !!K.band.taut } : null });
 
   /* ======================= HAUPTTAKT SPIELER 2 ======================= */
   function p2Tick(dt) {
@@ -842,6 +944,8 @@
     for (const e of Z.enemies) if (!e._koopK && !e.dummy && e.def) { rescaleEnemies(); break; }
     if (P.down) { P.downT = (P.downT || 0) + dt; P.vx *= Math.pow(0.02, dt); P.vy = Math.min(P.vy + C.GRAV * dt, C.MAXFALL); Z.moveBody(P, dt); }
     else if (!(Z.ui && Z.ui.choiceActive)) { p2Move(P, dt); p2Abilities(P, dt); }
+    try { p2Movers(P, dt); } catch (e) { console.error("koop faehre", e); }
+    try { koopBoss(dt); } catch (e) { console.error("koop boss", e); }
     p2Use(P, dt);
     p2Collect(P, dt);
     p2Dangers(P, dt);
@@ -1175,7 +1279,7 @@
     let r;
     if (P.koopDown) { const d = P.dead; P.dead = true; try { r = dp0.apply(this, arguments); } finally { P.dead = d; } }
     else r = dp0.apply(this, arguments);
-    try { drawOverlay(c, t); } catch (e) { console.error("koop draw", e); }
+    try { drawBand(c, t); drawOverlay(c, t); } catch (e) { console.error("koop draw", e); }
     return r;
   };
 

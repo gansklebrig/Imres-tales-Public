@@ -344,6 +344,7 @@
           if (P.vy > 40 && P.y + P.h - (b.y - b.r) < 10) { P.vy = -330; P.onGround = false; A.play("crate", { vol: 0.4, rate: 1.3, x: b.x }); Z.achEv && Z.achEv("fass"); }
           else if (!(P.iframe > 0)) { Z.hurtPlayer(Math.round(P.hpMax * 0.07), { x: b.x, kb: 180 }); gone = true; }
         }
+        if (!gone && Z.koopTrapHit && Z.koopTrapHit({ x: b.x - b.r, y: b.y - b.r, w: b.r * 2, h: b.r * 2 }, 0.07, { x: b.x, kb: 180 })) gone = true; /* W27 Koop: rollende Fässer treffen auch Spieler 2 */
         if (gone) { ro.barrels.splice(i, 1); if (near) { A.play("break", { vol: 0.4, x: b.x }); FX.burst(b.x, b.y, 10, { col: ["#7a5432", "#5a3a20", "#9a7448"], sp: 120, life: 0.6, size: 2.5, kind: "shard", g: 700 }); } }
       }
     }

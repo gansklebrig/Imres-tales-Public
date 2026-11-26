@@ -9690,11 +9690,11 @@
 },
 "zerstoerer.html":{
 "groesse":69502,
-"sha256":"89f0865d878ac5b66c26e4e09ec3d3173854d6bc08fb86e2961ea9c1f48f53a1"
+"sha256":"4f0d4f9bee39bfd3d58ef883c08423f30f720b6f65af74e709d96e82b6c5af32"
 },
 "zerstoerer/abenteuer.js":{
-"groesse":144521,
-"sha256":"d1d5bec72f77a7f7e18abc2bea992884d4676403c995d7222b1959e042dd4c6d"
+"groesse":144658,
+"sha256":"2035dcb586c255b5327f51a5533e057971496d320012b1f09e38570c21f50174"
 },
 "zerstoerer/auftraege.js":{
 "groesse":94381,
@@ -9753,8 +9753,8 @@
 "sha256":"5eef2ba185f2e0f117d71f28f84db69e861494063024493fbbae9cc48e2ce711"
 },
 "zerstoerer/erkundung.js":{
-"groesse":66197,
-"sha256":"9a4ffdfd739dc61e6de1fb98d4178defc5c804c3ae2868bb501c2905eb7eb926"
+"groesse":66402,
+"sha256":"d8715597fe4e2a1f6270f2c2c6a9fec1a87da548870fed80e583597e96afd86a"
 },
 "zerstoerer/fallen.js":{
 "groesse":141074,
@@ -9789,8 +9789,8 @@
 "sha256":"6632fc5b5ed94e12f35a6e8926e8390ec0c657210f1dc82ff64bd91fc3845c19"
 },
 "zerstoerer/haerte.js":{
-"groesse":16475,
-"sha256":"2c39abdfe70b5365923a5b2d50668659a3cdc6f47715ba3f5c21040d0ae63e13"
+"groesse":16568,
+"sha256":"b2ce99cad733cbbc47ba276c7595e5abaec4e493661410be3ef5e478be5dd9f4"
 },
 "zerstoerer/hintergrund.js":{
 "groesse":24892,
@@ -9817,8 +9817,8 @@
 "sha256":"473eaee12b0669f6f885228633107b37c74ec68c439516aff82a8acd52a49305"
 },
 "zerstoerer/koop.js":{
-"groesse":97793,
-"sha256":"4aa84cf5187584cc510e095a1cbe0d468997b8a55b2353234e172340fc551404"
+"groesse":105463,
+"sha256":"5e488ae3f9b9348cd143481709ad8af78ca014948a6f87dc148a6b1ac3d952b0"
 },
 "zerstoerer/lager.js":{
 "groesse":159427,
@@ -9949,5 +9949,5 @@
 "sha256":"b753f6210e4836421f7815ef79c12771a37d86603c170abf77ae34623d359f56"
 }
 },
-"stand":141
+"stand":142
 }
