@@ -182,6 +182,8 @@
     belt: "#3a2a22", glow: "#ff6a1a", glowHi: "#ffc070", cloth: "#7a1414", cloth2: "#4e0c0e"
   };
   const CAPE_N = 8, CAPE_L = 3.0;
+  /* W30 Grafik: feinere Ezekiel-Animation (Landungen, Rutschen, Treffer je Richtung, Rolle, Umhang, Waffenspuren je Waffe, Leerlauf, Blick). Schalter Z.gfx.off.w30ez */
+  const w30on = () => !(Z.gfx && Z.gfx.off && Z.gfx.off.w30ez);
   function capeInit(P) { P.cape = []; for (let i = 0; i < CAPE_N; i++) P.cape.push({ x: P.x + P.w / 2, y: P.y + 6 + i * CAPE_L, ox: P.x + P.w / 2, oy: P.y + 6 + i * CAPE_L }); }
   Z.capeUpdate = function (P, dt) {
     if (!P.cape || P.cape.length !== CAPE_N) capeInit(P);
@@ -206,7 +208,10 @@
       if (jump || land) for (let i = 1; i < CAPE_N; i++) { const f = i / CAPE_N, q = pts[i]; if (jump) q.oy -= 2.2 * f; else { q.oy -= 1.6 * f; q.ox += P.face * 1.2 * f; } }
     }
     P._capeAir = airNow; P._capeVy = P.vy;
-    const damp = P.onGround ? 0.9 : 0.93;
+    const w30 = w30on(); /* W30 Grafik: träger, schwingt länger nach; beim Wenden schwingt er herum statt umzuklappen */
+    const damp = w30 ? (P.onGround ? 0.93 : 0.95) : P.onGround ? 0.9 : 0.93;
+    if (w30 && P._capeFace != null && P._capeFace !== P.face && !roll) for (let i = 1; i < CAPE_N; i++) { const f = i / CAPE_N; pts[i].ox += P.face * 2.4 * f; pts[i].oy += 0.8 * f; }
+    P._capeFace = P.face;
     /* Fahrtwind-Flattern (Welle läuft den Umhang hinunter) und Ruck beim Zurechtschütteln */
     const spd = Math.min(1, Math.abs(P.vx) / 160) + (P.onGround ? 0 : Math.min(0.6, Math.abs(P.vy) / 600));
     const kick = P.capeKick > 0 ? P.capeKick : 0;
@@ -229,6 +234,8 @@
         if (P.face < 0 && b.x < bx + 1) b.x = U.lerp(b.x, bx + 1, 0.35);
       }
       if (Z.world && Z.world.solidAt(b.x, b.y)) { b.y -= 1; }
+      /* W30 Grafik: Biegesteifigkeit – kein Abknicken, die Welle läuft weich durch */
+      if (w30 && i >= 2) { const a2 = pts[i - 2], ex = b.x - a2.x, ey = b.y - a2.y, dd = Math.hypot(ex, ey) || 1, mn = CAPE_L * 1.55; if (dd < mn) { const q = (mn - dd) / dd * 0.5; b.x += ex * q; b.y += ey * q; } }
     }
   };
   function drawCape(c, P, alpha, time, glowK) {
@@ -265,6 +272,15 @@
       for (let i = 2; i < N; i++) { const m = 0.35 + 0.25 * Math.sin(i * 1.9); c.moveTo(lp(L[i * 2 - 2], R[i * 2 - 2], m), lp(L[i * 2 - 1], R[i * 2 - 1], m)); c.lineTo(lp(L[i * 2], R[i * 2], m + 0.05), lp(L[i * 2 + 1], R[i * 2 + 1], m + 0.05)); }
       c.stroke();
     }
+    /* W30 Grafik: Saumborte und Zeichen in der Umhangfarbe (Härte-/Erfolgs-Umhänge sehen sich so ähnlicher) */
+    if (w30on() && Z.capeCol && Z.capeCol[0] && Z.capeCol[0] !== "#8a1414" && !(Z.gq && Z.gq.lean)) {
+      const trim = Z.capeCol[2] || capeTrim(col0, col1);
+      c.strokeStyle = trim; c.lineWidth = 0.9; c.beginPath();
+      for (let k = 0; k <= 6; k++) { const t = k / 6, i0 = (N - 2) * 2, i1 = (N - 1) * 2; const x = lp(lp(L[i0], L[i1], 0.75), lp(R[i0], R[i1], 0.75), t), y = lp(lp(L[i0 + 1], L[i1 + 1], 0.75), lp(R[i0 + 1], R[i1 + 1], 0.75), t); k ? c.lineTo(x, y) : c.moveTo(x, y); }
+      c.stroke();
+      const i = 4, mx = lp(L[i * 2], R[i * 2], 0.4), my = lp(L[i * 2 + 1], R[i * 2 + 1], 0.4);
+      c.fillStyle = trim; c.beginPath(); c.moveTo(mx, my - 1.5); c.lineTo(mx + 1.1, my); c.lineTo(mx, my + 1.5); c.lineTo(mx - 1.1, my); c.closePath(); c.fill();
+    }
     /* glühende Darkin-Rune auf dem Umhang */
     if (glowK > 0.05) {
       const i = 3, mx = lp(L[i * 2], R[i * 2], 0.45), my = lp(L[i * 2 + 1], R[i * 2 + 1], 0.45);
@@ -274,6 +290,16 @@
     c.restore();
   }
   const CL = new Array(32).fill(0), CR = new Array(32).fill(0);
+  /* W30 Grafik: Borte = hellere Umhangfarbe, bei hellen Umhängen die dunkle Gegenfarbe (kein Blau: Blauanteil gedeckelt) */
+  const TRIM = new Map();
+  function capeTrim(a, b) {
+    const k = a + b; let r = TRIM.get(k); if (r) return r;
+    const h = x => { const n = parseInt(String(x).slice(1), 16) || 0; return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+    const A = h(a), B = h(b), lum = A[0] * 0.3 + A[1] * 0.59 + A[2] * 0.11;
+    let c = lum > 150 ? B.map(v => v * 0.8) : A.map(v => Math.min(255, v * 1.5 + 40));
+    c[2] = Math.min(c[2], Math.max(c[0], c[1]));
+    r = "rgb(" + c.map(v => v | 0).join(",") + ")"; TRIM.set(k, r); return r;
+  }
 
   /* ---------- Posen ---------- */
   /* Geblendete Pose-Werte: Hüfte (hx,hy), Rumpfneigung, Kopfneigung, Füße (relativ zu den Füßen-Ursprung),
@@ -382,6 +408,23 @@
         T.hy += k * 5.5; T.lean += k * 0.32; T.head -= k * 0.15;
         if (!run) { T.fFx = lp(T.fFx, 4.2, k); T.fBx = lp(T.fBx, -3.8, k); setH(T, "F", lp(PI / 2 - 0.18, 0.9, k), -0.5); setH(T, "B", lp(PI / 2 + 0.2, 1.3, k), -0.2); }
       }
+      /* W30 Grafik: schwere Landung – tief in die Knie, vordere Hand stützt sich am Boden ab, dann aufrichten */
+      if (w30on() && !P.crouch && !act && (S.landV || 0) > 430 && S.landT < 0.42) {
+        const k = 1 - eio(cl(S.landT / 0.42, 0, 1)), hv = cl((S.landV - 430) / 300, 0.4, 1) * k;
+        T.key = run ? T.key : "landH"; T.blendD = 0.03;
+        T.hy = lp(T.hy, -7.2, hv); T.lean = lp(T.lean, 0.62, hv); T.head = lp(T.head, 0.15, hv);
+        if (!run) { T.fFx = lp(T.fFx, 5.6, hv); T.fBx = lp(T.fBx, -4.8, hv); T.toeB = lp(T.toeB, 0.9, hv); setH(T, "F", lp(PI / 2, 1.25, hv), lp(-0.4, 0.15, hv)); setH(T, "B", lp(PI / 2 + 0.2, PI / 2 + 1.3, hv), -0.4); }
+      }
+      /* W30 Grafik: Abbremsen beim Richtungswechsel – Füße stemmen sich, Oberkörper lehnt in die neue Richtung */
+      const hd = P === Z.player && Z.input && Z.input.held, want = hd ? (hd.right ? 1 : 0) - (hd.left ? 1 : 0) : 0;
+      if (w30on() && !act && !P.crouch && speed > 80 && want && Math.sign(want) !== Math.sign(P.vx)) {
+        const k = cl((speed - 80) / 90, 0.3, 1), back = Math.sign(P.vx) !== Math.sign(P.face || 1); /* rutscht rückwärts zur Blickrichtung */
+        T.key = "skid"; T.blendD = 0.06;
+        T.hy = -11 + (1 - k) * 1.2; T.lean = back ? 0.34 * k : -0.3 * k; T.head = back ? -0.1 : 0.05; T.hx = back ? 0.9 : -0.9;
+        T.fFx = back ? 3.2 : 6.4; T.fFy = 0; T.fBx = back ? -6.6 : -2.4; T.fBy = 0; T.toeF = back ? 0.2 : -0.5; T.toeB = back ? 0.7 : 0.2;
+        setH(T, "F", back ? 0.6 : -0.6, -0.5); setH(T, "B", back ? -2.4 : PI - 0.4, 0.3); T.tab = back ? -0.6 : 0.6;
+        if (!lowGfx() && Math.random() < (S.pdt || 0) * 26) { const fx = P.x + P.w / 2 - Math.sign(P.vx) * 3; Z.fx.p({ x: fx, y: P.y + P.h - 1, vx: P.vx * 0.3 + (Math.random() - 0.5) * 20, vy: -15 - Math.random() * 20, life: 0.35, size: 1.8, col: Z.dustCol || "#8a7a70", kind: "smoke", a: 0.55 }); if (Math.random() < 0.3) Z.fx.p({ x: fx, y: P.y + P.h - 1, vx: P.vx * 0.4, vy: -40, life: 0.2, size: 1, col: "#ffd8a0", kind: "spark", add: true, g: 300 }); }
+      }
     } else {
       /* in der Luft */
       const vy = P.vy;
@@ -441,8 +484,14 @@
     if (P.hurtT > 0 || P.grabbed) {
       const k = P.grabbed ? 0.7 + Math.sin(time * 22) * 0.3 : cl(P.hurtT / 0.2, 0, 1);
       T.key = P.grabbed ? "grabbed" : "hurt"; T.blendD = 0.03;
+      if (w30on() && !P.grabbed && S.hurtDir > 0) {
+        /* W30 Grafik: Treffer von hinten – nach vorn gestoßen, Kopf eingezogen, Arme fangen ab */
+        T.lean = lp(T.lean, 0.62, k); T.hx += 1.8 * k; T.head = lp(T.head, 0.45, k); T.hy += 1.2 * k;
+        setH(T, "F", lp(PI / 2, 0.5, k), -0.3); setH(T, "B", lp(PI / 2, -0.4, k), -0.6);
+      } else {
       T.lean = lp(T.lean, -0.42, k); T.hx -= 1.8 * k; T.head = lp(T.head, -0.55, k);
       setH(T, "F", lp(PI / 2, -2.2, k), 0.5); setH(T, "B", lp(PI / 2, PI + 0.4, k), 0.3);
+      }
       if (P.onGround) { T.fFx = lp(T.fFx, 4.5, k); T.fFy = lp(T.fFy, -2.8, k); T.hy += 0.8 * k; }
       WI.hurt = k;
     } else WI.hurt = 0;
@@ -481,9 +530,9 @@
     if (!still) { S.idleT = 0; S.gest = null; return; }
     S.idleT = (S.idleT || 0) + dt;
     if (!S.gest && S.idleT > (S.nextG || 3.4)) {
-      const list = ["shoulder", "look", "shake", "look", "shoulder", "breath"];
+      const list = w30on() ? ["shoulder", "look", "shake", "inspect", "look", "breath", "stretch", "shoulder"] : ["shoulder", "look", "shake", "look", "shoulder", "breath"]; /* W30 Grafik: + Waffe prüfen, Nacken strecken */
       S.gi = ((S.gi == null ? -1 : S.gi) + 1) % list.length;
-      S.gest = { k: list[S.gi], t: 0, d: list[S.gi] === "look" ? 3.0 : list[S.gi] === "shake" ? 1.6 : 2.6 };
+      S.gest = { k: list[S.gi], t: 0, d: list[S.gi] === "look" ? 3.0 : list[S.gi] === "shake" ? 1.6 : list[S.gi] === "stretch" ? 2.2 : 2.6 };
     }
     const G = S.gest; if (!G) return;
     G.t += dt;
@@ -514,6 +563,15 @@
       T.hy += -Math.abs(s) * 0.7; T.lean += s * 0.05; T.hx += s * 0.5;
       setH(T, "B", lp(PI / 2 + 0.22, PI / 2 + 1.1, env), -0.6 + s * 0.3);
       if (!P.capeKick || P.capeKick < 0.2) P.capeKick = 1;
+    } else if (G.k === "inspect") {
+      /* W30 Grafik: Waffe vor sich heben, drehen und die Schneide prüfen; ohne Waffe: Handschuh zurechtziehen */
+      const s2 = Math.sin(u * PI * 2) * 0.35;
+      if (WI.icon) { T.hFx = lp(T.hFx, 5.2, env); T.hFy = lp(T.hFy, -4.2, env); WI.ang = angLp(WI.ang, -0.6 + s2, env); T.head = lp(T.head, 0.12, env); T.lean = lp(T.lean, 0.06, env); WI.grip2 = null; setH(T, "B", lp(PI / 2 + 0.22, 0.4, env), lp(-0.3, -1.4, env)); }
+      else { setH(T, "F", lp(PI / 2 - 0.18, 0.9, env), -1.2 + s2 * 0.5); setH(T, "B", lp(PI / 2 + 0.22, 0.6, env), -1.6); T.head = lp(T.head, 0.25, env); }
+    } else if (G.k === "stretch") {
+      /* W30 Grafik: Nacken kreisen, Schultern rollen */
+      const a = u * TAU; T.head = lp(T.head, Math.sin(a) * 0.32, env); T.hx += Math.cos(a) * 0.4 * env; T.hy -= Math.abs(Math.sin(a)) * 0.3 * env;
+      setH(T, "B", lp(PI / 2 + 0.22, PI / 2 + 0.5 + Math.sin(a + 1) * 0.2, env), -0.3);
     } else if (G.k === "breath") {
       /* tief durchatmen: Brust hebt sich, Kopf in den Nacken */
       const s = Math.sin(u * PI);
@@ -825,6 +883,7 @@
       /* zurück in die Ruhe nach einem Angriff: weich ausschwingen statt einrasten */
       else if ((was.startsWith("melee") || was === "shot" || was === "bash" || was === "skill") && (now === "idle" || now === "run")) S.bd = Math.max(S.bd, 0.16);
       else if (was === "wall" || now === "wall") S.bd = Math.max(S.bd, 0.12);
+      else if (was === "roll") S.bd = Math.max(S.bd, 0.14); /* W30 Grafik: aus der Rolle weich aufrichten */
       /* Waffenwinkel mit überblenden (sonst springt die Klinge beim Zustandswechsel) */
       S.fromA = S.lastA; S.fromA2 = S.lastA2; S.fromIcon = S.lastIcon; S.fromIcon2 = S.lastIcon2;
       S.key = T.key; S.blending = true;
@@ -1019,6 +1078,11 @@
       S.ax = lp(S.ax, ax * P.face, 0.5);
       /* Landung: Stauchfeder mit Nachfedern; Absprung: kurzes Strecken */
       if (P.onGround && !S.pg && !P.climbing && !P.dead) S.lqv += 3 + cl(S.pvy / 520, 0, 1.2) * 13;
+      /* W30 Grafik: Landung (Wucht) und Trefferrichtung merken */
+      if (P.onGround && !S.pg && !P.climbing && !P.dead && !P.ledge) { S.landV = S.pvy; S.landT = 0; if (S.pvy > 430 && w30on()) w30Dust(P, S.pvy); }
+      S.landT = (S.landT == null ? 9 : S.landT) + dt;
+      if (P.hurtT > 0 && !(S.hurtP > 0)) S.hurtDir = Math.sign(vx || 0) * (P.face || 1) > 0 ? 1 : -1; /* +1: nach vorn gestoßen = Treffer von hinten */
+      S.hurtP = P.hurtT || 0;
       if (!P.onGround && S.pg && vy < -150) S.lqv -= 6;
       spring(S, "lq", "lqv", 0, 430, 17, dt); S.lq = cl(S.lq, -0.6, 1);
       const drag = (vx * P.face) * 0.3 + (P.onGround ? 0 : -Math.abs(vy) * 0.05);
@@ -1037,7 +1101,7 @@
       if (Z.enemies) for (const e of Z.enemies) {
         if (e.dead || !e.aware || e.hidden > 0) continue;
         const dx = (e.x + e.w / 2 - cx) * P.face, dy = e.y + e.h * 0.4 - cy;
-        if (dx < 6 || dx > 130 || Math.abs(dy) > 70) continue;
+        if (dx < 6 || dx > (e.def && e.def.boss && w30on() ? 300 : 130) || Math.abs(dy) > (e.def && e.def.boss && w30on() ? 140 : 70)) continue; /* W30 Grafik: Bosse auch von weiter weg im Blick */
         const d = dx + Math.abs(dy) * 1.5; if (d < best) { best = d; S.le = e; }
       }
     }
@@ -1061,17 +1125,18 @@
       for (let i = 1; i <= n; i++) { const k = i / (n + 1); tr.push({ hx: lp(last.hx, hx, k), hy: lp(last.hy, hy, k), ia: angLp(last.ia, s.ia, k), ir: lp(last.ir, s.ir, k), oa: angLp(last.oa, s.oa, k), or: lp(last.or, s.or, k), t: lp(last.t, time, k) }); }
     }
     tr.push(s); while (tr.length > TRAIL_MAX * 2) tr.shift();
-    S.trCls = cls;
+    S.trCls = cls; S.trIcon = icon; /* W30 Grafik: Spurstil je Waffe */
   }
   function drawTrail(c, S, time, col, alpha) {
     const tr = S.trail, cls = S.trCls || "blade";
-    const life = cls === "heavy" ? 0.15 : cls === "fist" ? 0.08 : cls === "stab" ? 0.09 : 0.11;
+    const sty = w30on() ? TSTY[S.trIcon] : null; /* W30 Grafik: eigener Schwungbogen je Waffenart */
+    const life = sty && sty.life ? sty.life : cls === "heavy" ? 0.15 : cls === "fist" ? 0.08 : cls === "stab" ? 0.09 : 0.11;
     while (tr.length && time - tr[0].t > life) tr.shift();
     const n = tr.length; if (n < 2) return;
     const pa = c.globalAlpha, po = c.globalCompositeOperation;
     c.globalCompositeOperation = "lighter";
     /* Außen- (Schneide) und Innenkante; die Innenkante zieht sich mit dem Alter zur Schneide hin zusammen → sichelförmig */
-    const wIn = cls === "heavy" ? 0.42 : cls === "blade" ? 0.55 : cls === "stab" ? 0.75 : cls === "fist" ? 0.3 : 0.85;
+    const wIn = sty && sty.wIn != null ? sty.wIn : cls === "heavy" ? 0.42 : cls === "blade" ? 0.55 : cls === "stab" ? 0.75 : cls === "fist" ? 0.3 : 0.85;
     const OX = TRX, OY = TRY, IX = TRX2, IY = TRY2;
     for (let i = 0; i < n; i++) {
       const s = tr[i], u = cl(1 - (time - s.t) / life, 0, 1);
@@ -1080,7 +1145,7 @@
       IX[i] = lp(OX[i], ix, k); IY[i] = lp(OY[i], iy, k);
     }
     /* drei Altersstufen als je eine Fläche (keine Nahtlinien zwischen Einzelvierecken) */
-    const base = (cls === "heavy" ? 0.36 : 0.3) * (cls === "fist" ? 0.8 : 1);
+    const base = sty && sty.base ? sty.base : (cls === "heavy" ? 0.36 : 0.3) * (cls === "fist" ? 0.8 : 1);
     c.fillStyle = col;
     const B = 3;
     for (let b = 0; b < B; b++) {
@@ -1100,12 +1165,34 @@
     c.beginPath(); c.moveTo(OX[0], OY[0]); for (let i = 1; i <= half + 1 && i < n; i++) c.lineTo(OX[i], OY[i]); c.stroke();
     c.globalAlpha = pa * 0.8; c.lineWidth = cls === "heavy" ? 1.5 : 0.9;
     c.beginPath(); c.moveTo(OX[half], OY[half]); for (let i = half + 1; i < n; i++) c.lineTo(OX[i], OY[i]); c.stroke();
+    /* W30 Grafik: Waffen mit eigener Kante (Zweihänder golden, Sense dunkelrot-violett, Hellebarde breit, Dolche scharf) */
+    if (sty && sty.edge && n > 3) {
+      c.strokeStyle = sty.edge; c.lineWidth = sty.ew || 1.6; c.globalAlpha = pa * (sty.ea || 0.3);
+      c.beginPath(); for (let i = half; i < n; i++) { const s = tr[i], x = OX[i] + Math.cos(s.oa) * 1.4, y = OY[i] + Math.sin(s.oa) * 1.4; if (i === half) c.moveTo(x, y); else c.lineTo(x, y); } c.stroke();
+    }
     /* Wucht-Waffen: glühender Außenrand */
-    if (cls === "heavy") {
+    if (cls === "heavy" && !(sty && sty.edge)) {
       c.strokeStyle = "#ff5a1a"; c.lineWidth = 2.4; c.globalAlpha = pa * 0.22;
       c.beginPath(); for (let i = half; i < n; i++) { const s = tr[i], x = OX[i] + Math.cos(s.oa) * 1.1, y = OY[i] + Math.sin(s.oa) * 1.1; if (i === half) c.moveTo(x, y); else c.lineTo(x, y); } c.stroke();
     }
     c.globalAlpha = pa; c.globalCompositeOperation = po;
+  }
+  /* W30 Grafik: Spurstile je Waffe (life Sekunden, wIn Sichelbreite, base Deckkraft, edge Kantenfarbe) – kein Blau */
+  const TSTY = {
+    dagger: { life: 0.065, wIn: 0.28, base: 0.26 }, knives: { life: 0.065, wIn: 0.28, base: 0.26 }, rapier: { life: 0.075, wIn: 0.22, base: 0.24, edge: "#fff0d8", ew: 0.7, ea: 0.45 },
+    scimitar: { life: 0.1, wIn: 0.5 }, sickles: { life: 0.09, wIn: 0.62, base: 0.26 }, sickle: { life: 0.09, wIn: 0.62, base: 0.26 }, claw: { life: 0.08, wIn: 0.4 }, krallen: { life: 0.08, wIn: 0.4 },
+    dawn: { life: 0.18, wIn: 0.5, base: 0.4, edge: "#ffc040", ew: 2.6, ea: 0.3 }, zweihaender: { life: 0.18, wIn: 0.5, base: 0.4, edge: "#ffb040", ew: 2.6, ea: 0.28 },
+    hammer: { life: 0.16, wIn: 0.36, base: 0.42, edge: "#ff6a1a", ew: 3, ea: 0.24 }, club: { life: 0.15, wIn: 0.4, base: 0.38 }, axe: { life: 0.15, wIn: 0.46, base: 0.38, edge: "#ff7a2a", ew: 2.2, ea: 0.24 }, anchor: { life: 0.16, wIn: 0.38, base: 0.4 },
+    scythe: { life: 0.21, wIn: 0.95, base: 0.3, edge: "#b0305a", ew: 2.4, ea: 0.32 }, hellebarde: { life: 0.17, wIn: 0.72, base: 0.34, edge: "#ffd080", ew: 1.6, ea: 0.28 },
+    spear: { life: 0.1, wIn: 0.85, base: 0.3 }, kampfstab: { life: 0.13, wIn: 0.6, base: 0.3 }, staff: { life: 0.13, wIn: 0.6, base: 0.28 }, whip: { life: 0.12, wIn: 0.9, base: 0.26 }
+  };
+  /* W30 Grafik: Staubring und Steinsplitter bei harter Landung (nicht auf Stufe 0) */
+  function w30Dust(P, v) {
+    if (lowGfx() || !Z.fx) return;
+    const x = P.x + P.w / 2, y = P.y + P.h - 1, k = Math.min(1, (v - 430) / 300), col = Z.dustCol || "#8a7a70";
+    for (const d of [-1, 1]) Z.fx.burst(x + d * 3, y, 4 + Math.round(4 * k), { col, sp: 70 + 60 * k, ang: d > 0 ? -0.25 : Math.PI + 0.25, spread: 0.5, life: 0.45, size: 2.4, kind: "smoke", g: -12 });
+    Z.fx.burst(x, y, 3 + Math.round(3 * k), { col: ["#5a4a40", "#7a6a5a"], sp: 90, ang: -Math.PI / 2, spread: 1.6, life: 0.5, size: 1.4, kind: "shard", g: 600 });
+    if (k > 0.5 && Z.fx.ring) Z.fx.ring(x, y, 18 + 10 * k, "rgba(200,180,150,.5)", 0.3, 1);
   }
   const TRX = new Float32Array(TRAIL_MAX * 2 + 8), TRY = new Float32Array(TRAIL_MAX * 2 + 8), TRX2 = new Float32Array(TRAIL_MAX * 2 + 8), TRY2 = new Float32Array(TRAIL_MAX * 2 + 8);
   /* Punkt aus dem aktuellen Zeichenraum in Weltkoordinaten (für Partikel an Hörnern/Mund) */
@@ -1175,7 +1262,15 @@
       poly(c, [3, -5.4, 6.6, -3.6, 6.2, -0.6, 3.2, -1.6], EZ.bone);
       circ(c, 5, -3.4, 0.9, "#ff8a2a"); glow(c, 5, -3.4, 4, "rgba(255,110,40,.6)", alpha);
       limb(c, -2.5, 2.5, 2.2, 3.4, 1.2, "#ff6a1a");
-      c.restore(); return;
+      c.restore();
+      /* W30 Grafik: Nachbilder hinter der Kugel (ab Stufe 1) und geduckte Haltung als Ausgangspunkt für das Aufrichten */
+      if (w30on()) {
+        if (!low && Math.abs(P.vx) > 40) { c.save(); for (let j = 1; j <= 2; j++) { c.globalAlpha = alpha * 0.16 / j; ell(c, cx - Math.sign(P.vx) * j * 5, fy - 8, 8, 7.4, (Z.capeCol && Z.capeCol[0]) || "#7a1414"); } c.restore(); }
+        if (S.cur) { Object.assign(S.cur, { hx: 0.6, hy: -7.4, lean: 0.55, head: 0.25, fFx: 4, fFy: -0.8, fBx: -2.6, fBy: 0, toeF: 0.3, toeB: 0.8, hFx: 4.4, hFy: 4.6, hBx: 3.2, hBy: 5.4, tab: 0.6 }); S.key = "roll"; S.blending = false; }
+        if (k > 0.8 && !S.rollDust && !low) { S.rollDust = 1; Z.fx.burst(cx, fy - 1, 4, { col: Z.dustCol || "#8a7a70", sp: 40, ang: -Math.PI / 2 - Math.sign(P.vx || 1) * 0.6, spread: 1.2, life: 0.35, size: 2, kind: "smoke", g: -10 }); }
+        if (k < 0.5) S.rollDust = 0;
+      }
+      return;
     }
     /* ---- Pose bestimmen und überblenden ---- */
     computePose(TG, P, time, S);
@@ -1249,7 +1344,11 @@
     if (WI.shieldBack && !P.dead) { const q = [0, 0]; toF(-4.4, -6.5, q); c.save(); c.translate(q[0], q[1]); c.rotate(p.lean + 0.2); c.scale(0.7, 0.7); weaponP(c, WI.shieldBack.icon, WI.shieldBack.col, time, 0, pps); c.restore(); }
     const bA = drawArm(c, SB[0], SB[1], hBx, hBy, T.eB, false, glowK, time, pps);
     /* hintere Hand: zweite Klinge, Bogensehne, Faust */
-    if (WI.icon2 && !WI.punchBack) { c.save(); c.translate(bA[0], bA[1]); c.rotate(WI.ang2); weaponP(c, WI.icon2, WI.col, time, 0, pps); c.restore(); }
+    if (WI.icon2 && !WI.punchBack) { c.save(); c.translate(bA[0], bA[1]); c.rotate(WI.ang2); weaponP(c, WI.icon2, WI.col, time, 0, pps);
+      /* W30 Grafik: zweite Klinge (Sicheln, Krummsäbel) zieht ihre eigene Spur */
+      if (F0 && w30on() && P.act && P.act.type === "melee" && P.act.phase === "act" && !FISTS[WI.icon2]) { const t0 = S.trail, c0 = S.trCls, i0 = S.trIcon; S.trail = S.trail2 || (S.trail2 = []); trailPush(S, F0.inverse().multiply(c.getTransform()), WI.icon2, time, "blade"); S.trail = t0; S.trCls = c0; S.trIcon = i0; }
+      c.restore(); }
+    if (F0 && S.trail2 && S.trail2.length && w30on()) { if (S.trFace !== P.face) S.trail2.length = 0; else { const t0 = S.trail, c0 = S.trCls, i0 = S.trIcon; S.trail = S.trail2; S.trCls = "blade"; S.trIcon = WI.icon2 || i0; c.save(); c.setTransform(F0); drawTrail(c, S, time, trailCol(WI.col || "#ffd8b0"), alpha * 0.8); c.restore(); S.trail = t0; S.trCls = c0; S.trIcon = i0; } }
     else if (WI.icon2 && WI.punchBack) { c.save(); c.translate(bA[0], bA[1]); c.rotate(0); weaponP(c, WI.icon2, WI.col, time, 0, pps); c.restore(); }
     if (WI.hand2Icon) { c.save(); c.translate(bA[0], bA[1]); c.rotate(Math.atan2(bA[1] - bA[3], bA[0] - bA[2]) + 0.5); weaponP(c, WI.hand2Icon, WI.hand2Col, time, 0, pps); c.restore(); }
     drawHand(c, bA[0], bA[1], false, pps > 0);

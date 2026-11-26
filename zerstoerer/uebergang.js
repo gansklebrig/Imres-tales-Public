@@ -485,6 +485,7 @@
     if (book && book.age > 0.12) { book.fast = true; if (book.mode === "hold") book.t = 99; }
     if (pan) { pan = null; }
     if (suck && !suck.done) suck.t = suck.dur;
+    w30Skip(); /* W30 Grafik: Boss-Auftritt */
   }
 
   /* ======================= EINFÜHRUNGSSCHWENK ======================= */
@@ -828,6 +829,7 @@
     if (climax) { const t = climax.t; put(1 + 0.3 * easeOut(span(t, 0, 0.22)) * (1 - easeIO(span(t, 0.85, 1.7))), climax.x, climax.y); }
     if (suck) put(1 + 0.2 * easeIn(clamp(suck.t / suck.dur, 0, 1)), suck.x, suck.y);
     if (plate && plate.e && !plate.e.dead) { const t = plate.t; put(1 + 0.09 * easeOut(span(t, 0, 0.9)) * (1 - easeIO(span(t, 1.3, 2.1))), plate.e.x + plate.e.w / 2, plate.e.y + plate.e.h * 0.4); }
+    w30Zoom(put); /* W30 Grafik: Boss-Auftritt/Phasenwechsel (Koop: alle Spieler bleiben im Bild) */
     return [z, fx, fy];
   }
   function applyZoom(c, W, H, dt) {
@@ -877,7 +879,7 @@
   /* ======================= EINGABE: blockieren nur während überspringbarer Übergänge ======================= */
   /* Gebietsseiten blockieren nicht mehr: das Spiel läuft darunter weiter, jede Aktion blättert schneller um.
      Nur die Schlussseite (Tod/Rückkehr), die Kamerafahrt und der Sog in die Tür halten die Eingabe kurz an. */
-  const blocking = () => !!((book && book.closing) || pan || (suck && !suck.done) || (suck && suck.done && suck.t < suck.doneT + 0.6));
+  const blocking = () => !!((book && book.closing) || pan || (suck && !suck.done) || (suck && suck.done && suck.t < suck.doneT + 0.6) || w30Block()); /* W30 Grafik: Boss-Auftritt hält die Welt an */
   addEventListener("keydown", e => { if (!e.repeat && blocking() && !ui.modalOpen && !inp.capture) skipReq = true; }, true);
   addEventListener("pointerdown", e => { if (blocking() && !ui.modalOpen && e.target && (e.target.id === "cv" || (e.target.closest && e.target.closest("#touch")))) skipReq = true; }, true);
   const frame0 = ui.frame;
@@ -925,11 +927,13 @@
     clock += raw;
     try {
       bookStep(adv); suckStep(adv); climaxStep(raw); goldStep(raw);
+      w30Tick(raw); /* W30 Grafik */
       hudHide(!!(book || pan));
       if (plate) { plate.t += raw; if (plate.t >= plate.dur || plate.lv !== Z.level) plate = null; }
       applyZoom(c, W, H, raw);
       drawClimaxScreen(c, W, H);
       drawInk(c, W, H, raw);
+      if (!baOff()) w30DrawScreen(c, W, H); /* W30 Grafik: Abdunkeln/Farbstimmung unter dem Namensband */
       drawPlate(c, W, H);
       drawPanScreen(c, W, H);
       drawGold(c);
@@ -1047,6 +1051,485 @@
   /* Pergament schon im Leerlauf vorbereiten (Titelbild), damit der erste Übergang nicht stockt */
   const idle = window.requestIdleCallback || (fn => setTimeout(fn, 200));
   setTimeout(() => idle(() => { try { if (rich()) { const [W, H] = canvasSize(); if (W > 1 && H > 1) parchment(W, H); } } catch (_) {} }), 1200);
+
+  /* ======================= W30 Grafik: BOSS-AUFTRITTE INSZENIEREN =======================
+     Auftritt (2–4 s, überspringbar): Kamerafahrt + Zoom auf den Boss, die Arena dunkelt in Bossfarbe ab, der Boss tritt mit
+     eigener Geste auf (stürzt aus dem Dunkel, taucht aus dem See, Lichtsäule …), beim Aufprall Lichtwechsel, Beben und das
+     Namensband (plate) rollt sich genau dann auf; Musik wird bis dahin gedämpft (Z.music.duck), danach setzt der Bosssatz ein.
+     Während der Szene steht die Spielwelt (wie bei der Kamerafahrt: blocking → Trefferstopp), darum kostet sie keine Spielzeit
+     (auch nicht die Bossrausch-Zeitwertung; dort läuft ohnehin nur die kurze Fassung).
+     Phasenwechsel (bossphasen.js e.trans): Zoom + Abdunkeln beim Aufladen, beim Ausbruch Risse im Boden (bleiben für den Kampf),
+     Trümmer von der Decke, Feuerwände an den Arenarändern (nur Feuer-Bosse, nur Optik), dauerhafte Farbstimmung je Phase
+     und eine Wut-Aura um den Boss.
+     Sieg: Abgang je Boss (Zerfall von oben nach unten mit Asche, Zusammenbruch mit Staub, Auflösen in Licht) und Beute-Fontäne.
+     Koop: Kamera und Zoom halten alle Spieler (Z.players, falls vorhanden) im Bild.
+     Einstellung Z.settings.bossAuftritt: "voll" (Standard) · "kurz" · "aus". Blitze über Z.flashK/FX.flashScreen/Z.lightFlash,
+     Zeitlupe über FX.slowmo (Z.slowK), Wackeln über FX.addShake (Z.shakeK). Stufe 0: nur Kamera + Geste (kurz), keine Leinwand-Effekte.
+     Schalter: Z.gfx.off.w30boss (alles aus). Prüfhilfe Z.w30boss. Kein Blau. */
+  const BA = {
+    glasstab: { g: "blink", col: "#c0283a", v: "zerfall" },
+    erzpriesterin: { g: "saeule", col: "#ffe0a0", v: "licht" },
+    bugbear: { g: "sprung", col: "#c87a3a", v: "sturz" },
+    nezna: { g: "schatten", col: "#b080ff", v: "zerfall" },
+    wraith: { g: "geist", col: "#c8b0d0", v: "zerfall" },
+    schmiedewaechter: { g: "runen", col: "#ff8a3a", v: "sturz", fire: 1 },
+    chasme: { g: "sturz", col: "#b8c050", v: "zerfall" },
+    ilvaraW: { g: "laub", col: "#a8c060", v: "zerfall" },
+    riese: { g: "fall", col: "#c8a070", v: "sturz", h: 150 },
+    vrock: { g: "kreisen", col: "#c0503a", v: "zerfall" },
+    demogorgon: { g: "eigen", col: "#b050a0", v: "sturz", live: 1 }, /* steigt mit eigener Animation (demogorgon.js) aus dem See: Welt läuft weiter, keine Versatz-Geste */
+    themberchaud: { g: "fall", col: "#ff6a1a", v: "sturz", fire: 1, coins: 1, h: 300 },
+    venomfang: { g: "sturz", col: "#9ac040", v: "sturz" },
+    weberin: { g: "faden", col: "#c03a5a", v: "zerfall" }
+  };
+  const baDef = e => BA[e && e.id] || { g: "geist", col: nb((e && e.def && e.def.t) || "#ffd27a"), v: "zerfall" };
+  const baOff = () => !!(Z.gfx && Z.gfx.off && Z.gfx.off.w30boss) || !!(Z.settings && Z.settings.cineOff);
+  const baMode = () => { const m = Z.settings && Z.settings.bossAuftritt; return m === "kurz" || m === "aus" ? m : "voll"; };
+  const baRausch = () => !!(Z.run && (Z.run.rausch || Z.run.w21rausch));
+  /* Koop (W27): alle lebenden Spieler; ohne Z.players nur Ezekiel */
+  function w30Players() { const a = Array.isArray(Z.players) && Z.players.length ? Z.players : [Z.player, Z.koop && Z.koop.p2]; return a.filter(p => p && !p.dead && p.w); } /* W27: Spieler 2 = Z.koop.p2 */
+  /* größter Zoom (≤ zMax) um den Bildpunkt (fx, fy), bei dem alle Spieler im Bild bleiben */
+  function w30FitZoom(zMax, fx, fy) {
+    const cm = Z.cam, S = Z.gfx.scale || 1, ps = w30Players(); if (ps.length < 2) return zMax;
+    const W = cm.w * S, H = cm.h * S, fxs = (fx - cm.x) * S, fys = (fy - cm.y) * S;
+    for (let z = zMax; z > 1.005; z -= 0.02) {
+      const x0 = fxs * (1 - 1 / z), y0 = fys * (1 - 1 / z), w = W / z, h = H / z, m = 14 * S;
+      if (ps.every(p => { const px = (p.x + p.w / 2 - cm.x) * S, py0 = (p.y - cm.y) * S, py1 = (p.y + p.h - cm.y) * S; return px > x0 + m && px < x0 + w - m && py0 > y0 + m * 0.5 && py1 < y0 + h - m * 0.5; })) return z;
+    }
+    return 1;
+  }
+
+  /* ---------- Auftritt ---------- */
+  let sc = null; /* { e, partner, d, t, D, Ti, g0, mode, cheap, hx, hy, tx, ty, done, skipT, imp } */
+  function w30Start(e) {
+    if (baOff() || !e || !e.def || baMode() === "aus" || !Z.cam || !Z.cam.bounds) return;
+    const short = baMode() === "kurz" || baRausch() || low(), d = baDef(e);
+    const cm = Z.cam, bx = e.x + e.w / 2, by = e.y + e.h * 0.5;
+    /* Ziel: Boss, aber alle Spieler im Bild halten (Koop) */
+    let tx = bx, ty = by - 10;
+    /* allein: ganz auf den Boss (Welt steht ohnehin); Koop (W27, mehrere Spieler): alle Spieler bleiben im Bild */
+    const ps = w30Players(), koop = ps.length > 1;
+    if (koop) for (const p of ps) { const px = p.x + p.w / 2, py = p.y + p.h / 2; tx = clamp(tx, px - cm.w / 2 + 30, px + cm.w / 2 - 30); ty = clamp(ty, py - cm.h / 2 + 34, py + cm.h / 2 - 34); }
+    let D = short ? 1.7 : 3.3, Ti = short ? 0.85 : 1.65, g0 = short ? 0.2 : 0.55;
+    if (d.live) { D = Math.min(D, 1.6); Ti = Math.min(Ti, 0.9); g0 = 0.15; } /* Welt läuft weiter: nie länger als die Auftritts-Schonfrist des Bosses (e.intro 1,8 s) */
+    /* die Welt steht während der Szene: ein laufendes Erscheinen (spawnT, Boden-Aufstieg) bliebe sonst halb sichtbar stehen – die Geste ersetzt es */
+    e.spawnT = 0; if (e.partner) e.partner.spawnT = 0;
+    sc = { e, partner: e.partner || null, d, t: 0, D, Ti, g0, short, cheap: low(), hx: cm.x + cm.w / 2, hy: cm.y + cm.h / 2, tx, ty, imp: false, done: false, skip: false, lv: Z.level, parts: [] };
+    if (Z.music && Z.music.duck) try { Z.music.duck(0.45, Ti); } catch (_) {}
+    A.play("shadow", { vol: 0.25, rate: 0.7 });
+    if (d.g === "auftauchen") A.play("splash", { vol: 0.4, rate: 0.6, delay: Ti * 0.6 });
+    if (d.g === "fall" || d.g === "sturz" || d.g === "kreisen") A.play("bat", { vol: 0.35, rate: 0.6, delay: Math.max(0, Ti - 0.5) });
+  }
+  /* Fortschritt der Geste 0..1 (1 = Aufprall) und Nachfedern 0..1 */
+  const scU = s => clamp((s.t - s.g0) / Math.max(0.05, s.Ti - s.g0), 0, 1);
+  const scV = s => clamp((s.t - s.Ti) / 0.45, 0, 1);
+  function w30Impact(s) {
+    s.imp = true;
+    const e = s.e, d = s.d, x = e.x + e.w / 2, fy = e.y + e.h, col = d.col;
+    const big = d.g === "fall" || d.g === "sprung" || d.g === "sturz" || d.g === "auftauchen";
+    FX.addShake(big ? 9 : 5);
+    inp.rumble && inp.rumble(big ? 0.7 : 0.35, 260);
+    A.play(big ? "quake" : "magic", { vol: big ? 0.55 : 0.4 });
+    if (Z.lightFlash) Z.lightFlash(x, e.y + e.h * 0.5, 160 + e.w, col, 0.75, 0.5);
+    FX.flashScreen(col, 0.12);
+    FX.ring(x, fy - 2, 70 + e.w, col, 0.5, 3);
+    if (!s.cheap) {
+      FX.ring(x, e.y + e.h * 0.45, 120 + e.w, "#fff2d0", 0.7, 2);
+      if (big) { FX.burst(x, fy - 2, 14, { col: [Z.dustCol || "#8a7a70", "#b8a890", "#6a5a50"], sp: 210, ang: -Math.PI / 2, spread: 2.9, life: 0.7, size: 3.2, kind: "smoke", g: 80, jit: e.w * 0.8 }); }
+      if (d.coins) FX.burst(x, fy - 6, 30, { col: ["#ffd27a", "#e8a530", "#fff0b0"], sp: 220, ang: -Math.PI / 2, spread: 1.8, life: 1.1, size: 2, kind: "spark", g: 520, add: true });
+      if (d.g === "auftauchen") FX.burst(x, fy - 4, 30, { col: ["#d8c8d8", "#9a7a9a", "#5a4a5a"], sp: 200, ang: -Math.PI / 2, spread: 1.2, life: 0.9, size: 3, kind: "drop", g: 520 });
+      if (d.g === "saeule" || d.g === "runen" || d.g === "geist" || d.g === "laub") FX.burst(x, e.y + e.h * 0.5, 30, { col: [col, "#fff2d0"], sp: 150, life: 0.8, size: 2.2, kind: "spark", add: true });
+    }
+    try { if (plate && plate.e === e && plate.t < 0) plate.t = 0.1; } catch (_) {}
+  }
+  function w30Step(raw) {
+    const s = sc; if (!s) return;
+    if (s.lv !== Z.level || !s.e || s.e.dead || s.e.hp <= 0 || Z.bossDefeated || (Z.player && Z.player.dead)) { sc = null; return; } /* Boss schon gefallen (Prüfläufe, Sofort-Sieg): Szene endet sofort */
+    if (ui.modalOpen) return;
+    s.t += raw;
+    if (!s.imp && s.t >= s.Ti) w30Impact(s);
+    /* Begleitpartikel der Geste (nur ab Stufe 1, gedrosselt) */
+    if (!s.cheap && !s.imp && s.t > s.g0 && Math.random() < raw * 30) {
+      const e = s.e, d = s.d, x = e.x + e.w / 2, o = w30Off(s, e);
+      if (d.g === "blink") FX.p({ x: x + o.dx + (Math.random() - 0.5) * e.w, y: e.y + e.h * Math.random(), vx: 0, vy: -20, life: 0.6, size: 4, col: Math.random() < 0.5 ? "#6a1420" : "#3a1018", kind: "smoke", a: 0.7 });
+      else if (d.g === "geist" || d.g === "schatten") FX.p({ x: x + (Math.random() - 0.5) * e.w * 1.6, y: e.y + e.h, vx: 0, vy: -35 - Math.random() * 30, life: 0.9, size: 3, col: d.g === "geist" ? "#8a7a90" : "#2a1a30", kind: "smoke", a: 0.55 });
+      else if (d.g === "laub") { const a = Math.random() * TAU, r = 30 + e.w * 0.6; FX.p({ x: x + Math.cos(a) * r, y: e.y + e.h * 0.5 + Math.sin(a) * r * 0.6, vx: -Math.sin(a) * 90, vy: Math.cos(a) * 50 - 10, life: 0.7, size: 2.2, col: Math.random() < 0.5 ? "#8aa040" : "#c8a040", kind: "leaf" }); }
+      else if (d.g === "runen") { const a = Math.random() * TAU, r = 40 + e.w * 0.7; FX.p({ x: x + Math.cos(a) * r, y: e.y + e.h * 0.5 + Math.sin(a) * r * 0.7, vx: -Math.cos(a) * 60, vy: -Math.sin(a) * 50, life: 0.5, size: 2, col: "#ffb060", kind: "glow", add: true }); }
+      else if (d.g === "auftauchen") FX.p({ x: x + (Math.random() - 0.5) * e.w * 1.4, y: e.y + e.h - 2, vx: (Math.random() - 0.5) * 50, vy: -90 - Math.random() * 80, life: 0.6, size: 2, col: "#b8a0b8", kind: "drop", g: 500 });
+      else if (d.g === "fall" && d.fire) FX.p({ x: x + o.dx + (Math.random() - 0.5) * e.w, y: e.y + o.dy + e.h * Math.random(), vx: (Math.random() - 0.5) * 30, vy: -80, life: 0.5, size: 2.4, col: Math.random() < 0.5 ? "#ff8a2a" : "#ffd27a", kind: "glow", add: true });
+    }
+    if (s.t >= s.D) { sc = null; }
+  }
+  function w30Skip() {
+    const s = sc; if (!s || s.skip) return;
+    if (!s.imp) { s.t = s.Ti; w30Impact(s); }
+    s.skip = true; s.t = Math.max(s.t, s.D - 0.3);
+    try { if (plate && plate.t < 0.1) plate.t = 0.1; } catch (_) {}
+  }
+  const w30Block = () => !!(sc && !sc.skip && !sc.d.live && sc.t < sc.D - 0.25);
+  /* Zeichen-Versatz des Bosses während der Geste */
+  const OFF = { dx: 0, dy: 0, a: 1, sx: 1, sy: 1, clipY: null };
+  function w30Off(s, e) {
+    const d = s.d, u = scU(s), v = scV(s), o = OFF; o.dx = 0; o.dy = 0; o.a = 1; o.sx = 1; o.sy = 1; o.clipY = null;
+    const f = e.face || 1, g = d.g;
+    if (g === "eigen") return o;
+    if (s.t < s.g0 && g !== "runen") { /* vor der Geste: noch nicht da */
+      if (g === "fall" || g === "sturz" || g === "kreisen" || g === "faden") { o.a = 0; return o; }
+      if (g === "auftauchen") { o.dy = e.h * 1.1; o.clipY = e.y + e.h; return o; }
+      if (g !== "sprung") { o.a = 0; return o; }
+    }
+    if (g === "fall") { const k = 1 - easeIn(u); o.dy = -(d.h || 220) * k; }
+    else if (g === "sturz") { const k = 1 - easeIn(u); o.dy = -200 * k; o.dx = -f * 170 * k; }
+    else if (g === "sprung") { o.dx = -f * 70 * (1 - u); o.dy = -110 * Math.sin(u * PI); }
+    else if (g === "kreisen") { const a = u * PI * 2.5, r = 110 * (1 - easeOut(u)); o.dx = Math.cos(a) * r; o.dy = -150 * (1 - easeOut(u)) + Math.sin(a) * r * 0.25; }
+    else if (g === "auftauchen") { o.dy = e.h * 1.1 * (1 - easeOut(u)); o.clipY = e.y + e.h; }
+    else if (g === "faden") { o.dy = -230 * (1 - easeOut(u)) + Math.sin(s.t * 5) * 4 * (1 - u); }
+    else if (g === "geist") { o.a = u * u; o.dy = 8 * (1 - u); o.dx = Math.sin(s.t * 23) * 2 * (1 - u); }
+    else if (g === "blink") { o.a = (Z.flashK && Z.flashK() < 0.5) || (Z.blitzArm && Z.blitzArm()) ? easeIO(u) : u > 0.85 ? 1 : (Math.sin(s.t * 40) > 0.3 ? 0.55 * u : 0.08); } /* W31: „Blitzen reduzieren“ → weiches Einblenden statt Flackern */
+    else if (g === "saeule" || g === "schatten" || g === "laub") { o.a = easeIO(u); }
+    /* Aufprall: Stauchen und Nachfedern */
+    if (s.imp && (g === "fall" || g === "sturz" || g === "sprung" || g === "kreisen")) { const q = (1 - v) * Math.sin(v * PI * 2.2) * 0.5 + (1 - v) * (1 - v) * 0.5; o.sy = 1 - 0.16 * q; o.sx = 1 + 0.12 * q; }
+    return o;
+  }
+  /* Szene im Weltbild: Lichtsäule, Faden, Schatten am Boden, Runenkreis (nach dem Licht, additiv) */
+  function w30DrawWorld(c, camR) {
+    const s = sc; if (!s || s.cheap) return;
+    const e = s.e, d = s.d, x = e.x + e.w / 2, fy = e.y + e.h, u = scU(s), t = s.t, o = w30Off(s, e);
+    c.save();
+    /* Schlagschatten am Boden wächst, während der Boss von oben kommt */
+    if (d.g === "fall" || d.g === "sturz" || d.g === "kreisen" || d.g === "faden") {
+      const k = t < s.g0 ? 0 : s.imp ? 1 - scV(s) : u;
+      if (k > 0.01) { c.globalAlpha = 0.45 * k; c.fillStyle = "#0a0505"; c.beginPath(); c.ellipse(x, fy, e.w * (0.4 + 0.6 * k), 3 + 3 * k, 0, 0, TAU); c.fill(); }
+    }
+    c.globalCompositeOperation = "lighter";
+    if (d.g === "saeule") {
+      const a = easeOut(span(t, s.g0 * 0.5, s.Ti)) * (1 - easeIO(span(t, s.Ti + 0.3, s.D)));
+      if (a > 0.01) {
+        const top = camR.y - 20, w = e.w * 0.9 + 10 + 30 * (s.imp ? scV(s) : 0);
+        const g = c.createLinearGradient(x - w, 0, x + w, 0); g.addColorStop(0, "rgba(255,224,160,0)"); g.addColorStop(0.5, rgba("#fff0c8", 0.5 * a)); g.addColorStop(1, "rgba(255,224,160,0)");
+        c.fillStyle = g; c.fillRect(x - w, top, w * 2, fy - top);
+        c.fillStyle = rgba("#fffaf0", 0.5 * a); c.fillRect(x - 1.5, top, 3, fy - top);
+        c.globalAlpha = a; c.strokeStyle = rgba("#ffe0a0", 0.6); c.lineWidth = 1.2; c.beginPath(); c.ellipse(x, fy, w * 1.1, w * 0.22, 0, 0, TAU); c.stroke(); c.globalAlpha = 1;
+      }
+    } else if (d.g === "faden") {
+      const top = camR.y - 10, by = e.y + o.dy + 2;
+      c.globalCompositeOperation = "source-over"; c.strokeStyle = "rgba(232,216,224,.75)"; c.lineWidth = 0.9;
+      c.beginPath(); c.moveTo(x + Math.sin(t * 3) * 3, top); c.lineTo(x, by); c.stroke();
+    } else if (d.g === "runen") {
+      const a = easeOut(span(t, 0.05, s.Ti)) * (1 - easeIO(span(t, s.Ti + 0.4, s.D)));
+      if (a > 0.01) {
+        const r = 36 + e.w * 0.7, cy = e.y + e.h * 0.5;
+        c.strokeStyle = rgba("#ff9a40", 0.7 * a); c.lineWidth = 1.3; c.beginPath(); c.ellipse(x, cy, r, r * 0.75, 0, 0, TAU); c.stroke();
+        c.fillStyle = rgba("#ffc070", 0.9 * a);
+        for (let i = 0; i < 8; i++) { const ang = t * 0.8 + i * TAU / 8, px = x + Math.cos(ang) * r, py = cy + Math.sin(ang) * r * 0.75, on = span(t, 0.1 + i * 0.12 * (s.Ti / 1.65), 0.3 + i * 0.12 * (s.Ti / 1.65)); if (on <= 0) continue; c.globalAlpha = on; c.beginPath(); c.moveTo(px, py - 4); c.lineTo(px + 2.4, py); c.lineTo(px, py + 4); c.lineTo(px - 2.4, py); c.closePath(); c.fill(); }
+        c.globalAlpha = 1;
+      }
+    } else if (d.g === "auftauchen" && !s.imp) {
+      const k = u; c.strokeStyle = rgba("#e0c8e0", 0.5 * k); c.lineWidth = 1.2;
+      for (let i = 0; i < 3; i++) { const r = ((t * 40 + i * 18) % 54) + e.w * 0.3; c.globalAlpha = 1 - ((t * 40 + i * 18) % 54) / 54; c.beginPath(); c.ellipse(x, fy, r, r * 0.16, 0, 0, TAU); c.stroke(); }
+      c.globalAlpha = 1;
+    }
+    /* Bossfarbiges Licht beim Aufprall */
+    if (s.imp) { const v = scV(s); if (v < 1) { const g = c.createRadialGradient(x, e.y + e.h * 0.5, 0, x, e.y + e.h * 0.5, 90 + e.w); g.addColorStop(0, rgba(d.col, 0.35 * (1 - v) * (Z.flashK ? Z.flashK("licht") : 1))); g.addColorStop(1, rgba(d.col, 0)); c.fillStyle = g; c.fillRect(x - 100 - e.w, e.y + e.h * 0.5 - 100 - e.w, 200 + 2 * e.w, 200 + 2 * e.w); } }
+    c.restore();
+  }
+  /* Bildschirm: Abdunkeln in Bossfarbe + eigene Kinobalken (das Namensband bringt später seine eigenen) */
+  function w30DrawScreen(c, W, H) {
+    const s = sc;
+    if (s && !s.cheap) {
+      const t = s.t, inA = easeIO(span(t, 0, Math.min(0.5, s.Ti * 0.5))), outA = 1 - easeIO(span(t, s.D - 0.6, s.D));
+      const dark = inA * outA * (s.imp ? lerp(1, 0.45, easeOut(scV(s))) : 1);
+      if (dark > 0.01) {
+        c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
+        const S = Z.gfx.scale || 1, cm = Z.cam, bx = (s.e.x + s.e.w / 2 - cm.x) * S, by = (s.e.y + s.e.h * 0.5 - cm.y) * S;
+        const g = c.createRadialGradient(bx, by, Math.min(W, H) * 0.12, bx, by, Math.max(W, H) * 0.75);
+        g.addColorStop(0, "rgba(10,4,4,0)"); g.addColorStop(1, rgba(mix("#0a0404", s.d.col, 0.18), 0.5 * dark));
+        c.fillStyle = g; c.fillRect(0, 0, W, H);
+        c.globalCompositeOperation = "soft-light"; c.fillStyle = rgba(s.d.col, 0.22 * dark); c.fillRect(0, 0, W, H);
+        c.globalCompositeOperation = "source-over";
+        const bar = H * 0.085 * inA * outA;
+        if (bar > 0.5) { c.fillStyle = "#0a0605"; c.fillRect(0, 0, W, bar); c.fillRect(0, H - bar, W, bar); c.fillStyle = rgba(GOLD, 0.35); c.fillRect(0, bar - 1, W, 1); c.fillRect(0, H - bar, W, 1); }
+        if (bar > H * 0.05 && !s.skip && !s.d.live) { const sz = Math.min(W, H) / 100; c.textBaseline = "middle"; c.textAlign = "right"; c.font = "italic " + (sz * 2.4).toFixed(1) + "px " + FI; c.fillStyle = "rgba(232,216,196,.6)"; c.fillText((inp.device === "pad" ? L(["Knopf: überspringen", "Button: skip"]) : inp.device === "touch" ? L(["Tippen: überspringen", "Tap: skip"]) : L(["Taste: überspringen", "Any key: skip"])) + " ▸", W - sz * 4, H - bar / 2); }
+        c.restore();
+      }
+    }
+    w30PhaseScreen(c, W, H);
+  }
+  /* Kamera: zum Boss und zurück (über dem Schwenk/Atmen aus diesem Modul) */
+  const cuW30 = cam.update;
+  cam.update = function (dt, p) {
+    const r = cuW30.apply(this, arguments);
+    const s = sc; if (!s || ui.modalOpen) return r;
+    const go = s.short ? 0.35 : 0.6, back = s.skip ? 0.25 : s.short ? 0.35 : 0.55;
+    const k = s.t < go ? easeIO(s.t / go) : s.t > s.D - back ? 1 - easeIO((s.t - (s.D - back)) / back) : 1;
+    /* Startpunkt folgt der normalen Kamera (Rückweg landet dort, wo die Kamera sonst wäre) */
+    const hx = cam.x + cam.w / 2, hy = cam.y + cam.h / 2;
+    cam.x = lerp(hx, s.tx, k) - cam.w / 2; cam.y = lerp(hy, s.ty, k) - cam.h / 2; cam.clamp();
+    return r;
+  };
+  function w30Zoom(put) {
+    const s = sc;
+    if (s && !s.cheap) {
+      const go = s.short ? 0.4 : 0.7, k = easeOut(span(s.t, 0, go)) * (1 - easeIO(span(s.t, s.D - 0.5, s.D)));
+      const fx = s.e.x + s.e.w / 2, fy = s.e.y + s.e.h * 0.45, zm = s.short ? 1.1 : 1.2;
+      if (k > 0.001) put(1 + (w30FitZoom(zm, fx, fy) - 1) * k, fx, fy);
+    }
+    const ph = phx; if (ph && ph.e && !ph.e.dead && !low()) {
+      const k = easeOut(span(ph.t, 0, 0.3)) * (1 - easeIO(span(ph.t, 0.85, 1.5)));
+      const fx = ph.e.x + ph.e.w / 2, fy = ph.e.y + ph.e.h * 0.45;
+      if (k > 0.001) put(1 + (w30FitZoom(1.1, fx, fy) - 1) * k, fx, fy);
+    }
+  }
+
+  /* ---------- Phasenwechsel ---------- */
+  let phx = null;                 /* laufender Phasenwechsel { e, t, col, fired } */
+  let scars = null;               /* Risse im Boden (bleiben bis Gebietswechsel/Boss tot) */
+  let fireW = null;               /* Feuerwände { t, x0, x1, fy, top } */
+  const phaseSeen = new WeakMap();
+  function w30PhaseWatch() {
+    const b = Z.boss; if (!b || b.dead || !b.trans || baOff()) return;
+    if (phaseSeen.get(b) === b.trans) return;
+    phaseSeen.set(b, b.trans);
+    const ph = b.def.phases && b.def.phases[b.trans.k];
+    phx = { e: b, t: 0, col: nb((ph && ph.aura) || baDef(b).col || "#ff6a3a"), fired: false, k: b.trans.k, lv: Z.level };
+  }
+  function w30PhaseStep(raw) {
+    w30PhaseWatch();
+    const p = phx;
+    if (p) {
+      if (p.lv !== Z.level || p.e.dead) phx = null;
+      else {
+        p.t += raw;
+        if (!p.fired && p.e.trans && p.e.trans.fired) { p.fired = true; w30PhaseFire(p); }
+        if (p.t > 2.2) phx = null;
+      }
+    }
+    if (fireW) { fireW.t += raw; if (fireW.t > 2.8 || fireW.lv !== Z.level) fireW = null; }
+    if (scars && (scars.lv !== Z.level)) scars = null;
+  }
+  function w30PhaseFire(p) {
+    const e = p.e, d = baDef(e), x = e.x + e.w / 2, fy = e.y + e.h, ar = (Z.bossKit && Z.bossKit.arena) ? Z.bossKit.arena() : null;
+    if (!baRausch()) FX.slowmo(0.3, 0.3); /* kurzer Zeitlupen-Moment (Z.slowK wirkt in FX.slowmo) */
+    if (low()) return;
+    /* Risse: verzweigte Linien vom Boss weg am Boden entlang */
+    if (!scars || scars.e !== e) scars = { e, lv: Z.level, list: [], t0: clock };
+    const R = Z.Rng ? Z.Rng(((e.x | 0) * 31 + p.k * 977) >>> 0) : Math.random;
+    for (const dir of [-1, 1]) {
+      let cx = x + dir * e.w * 0.3, cy = fy - 1; const n = 6 + (R() * 4 | 0), pts = [cx, cy];
+      for (let i = 0; i < n; i++) { cx += dir * (10 + R() * 16); const gy = Z.groundY ? Z.groundY(cx, cy - 10) : cy; if (Math.abs(gy - cy) > 18) break; cy = gy - 1 + (R() - 0.5) * 1.5; pts.push(cx, cy); if (R() < 0.35) scars.list.push({ pts: [cx, cy, cx + dir * (5 + R() * 8), cy - 2 - R() * 5], born: clock, col: p.col }); }
+      scars.list.push({ pts, born: clock, col: p.col });
+    }
+    if (scars.list.length > 60) scars.list.splice(0, scars.list.length - 60);
+    /* Trümmer von der Decke */
+    const cm = Z.cam;
+    for (let i = 0; i < (qLevel() >= 2 ? 16 : 7); i++) {
+      const tx = cm.x + Math.random() * cm.w;
+      FX.p({ x: tx, y: cm.y - 4, vx: (Math.random() - 0.5) * 20, vy: 40 + Math.random() * 120, life: 1.4, size: 2 + Math.random() * 3, col: Math.random() < 0.5 ? "#5a4a40" : "#7a6a5a", kind: "shard", g: 600, vr: (Math.random() - 0.5) * 10, collide: true, keep: true });
+      if (i % 3 === 0) FX.p({ x: tx, y: cm.y, vx: 0, vy: 30, life: 1, size: 5, col: "#8a7a6a", kind: "smoke", a: 0.4, g: 40 });
+    }
+    /* Feuerwände an den Arenarändern (nur Optik, nur Feuer-Bosse) */
+    if (d.fire && ar) fireW = { t: 0, x0: Math.max(ar.x0, cm.x + 6), x1: Math.min(ar.x1, cm.x + cm.w - 6), fy: ar.floor || fy, col: p.col, lv: Z.level };
+  }
+  function w30PhaseWorld(c, camR) {
+    if (low()) return;
+    const t = clock;
+    /* Risse: dunkle Kerbe mit Glut, die langsam abkühlt */
+    if (scars && scars.list.length) {
+      c.save(); c.lineCap = "round"; c.lineJoin = "round";
+      for (const sk of scars.list) {
+        const age = t - sk.born, grow = clamp(age / 0.35, 0, 1), pts = sk.pts, n = pts.length / 2, m = Math.max(2, Math.ceil(n * grow));
+        if (pts[0] < camR.x - 80 || pts[0] > camR.x + camR.w + 80) continue;
+        c.strokeStyle = "rgba(14,8,6,.85)"; c.lineWidth = 1.8; c.beginPath(); c.moveTo(pts[0], pts[1]); for (let i = 1; i < m; i++) c.lineTo(pts[i * 2], pts[i * 2 + 1]); c.stroke();
+        const heat = Math.max(0.12, 1 - age / 6);
+        c.globalCompositeOperation = "lighter"; c.strokeStyle = rgba(sk.col, 0.55 * heat); c.lineWidth = 0.8; c.stroke(); c.globalCompositeOperation = "source-over";
+      }
+      c.restore();
+    }
+    /* Feuerwände */
+    const f = fireW;
+    if (f) {
+      const a = easeOut(span(f.t, 0, 0.35)) * (1 - easeIO(span(f.t, 2.0, 2.8)));
+      if (a > 0.01) {
+        c.save(); c.globalCompositeOperation = "lighter";
+        for (const ex of [f.x0, f.x1]) {
+          const h = 90 * a;
+          const g = c.createLinearGradient(0, f.fy - h, 0, f.fy); g.addColorStop(0, "rgba(255,120,40,0)"); g.addColorStop(0.6, rgba("#ff7a2a", 0.35 * a)); g.addColorStop(1, rgba("#ffd27a", 0.55 * a));
+          c.fillStyle = g;
+          c.beginPath(); c.moveTo(ex - 14, f.fy);
+          for (let i = 0; i <= 8; i++) { const xx = ex - 14 + i * 3.5, yy = f.fy - h * (0.55 + 0.45 * Math.abs(Math.sin(t * 7 + i * 1.7 + ex))); c.lineTo(xx, yy); }
+          c.lineTo(ex + 14, f.fy); c.closePath(); c.fill();
+          if (Math.random() < 0.4) FX.p({ x: ex + (Math.random() - 0.5) * 24, y: f.fy - Math.random() * h * 0.6, vx: (Math.random() - 0.5) * 20, vy: -60 - Math.random() * 60, life: 0.6, size: 2, col: "#ffb050", kind: "glow", add: true });
+        }
+        c.restore();
+      }
+    }
+    /* Wut-Aura (ab Phase 2): züngelnde Flammenkrone in Aurafarbe um den Boss */
+    const b = Z.boss;
+    if (b && !b.dead && !(b.hidden > 0) && (b.phase || 0) >= 1 && b.def && b.def.phases && b.def.phases.length > 1 && !(sc && sc.e === b)) {
+      const col = nb(b.aura || baDef(b).col), x = b.x + b.w / 2, fy = b.y + b.h, k = Math.min(1, (b.phase || 0) / 2 + 0.4);
+      c.save(); c.globalCompositeOperation = "lighter";
+      const n = qLevel() >= 2 ? 9 : 5;
+      for (let i = 0; i < n; i++) {
+        const u = i / (n - 1), bx = x + (u - 0.5) * b.w * 1.1, hh = (b.h * 0.35 + 6) * k * (0.6 + 0.4 * Math.sin(t * 6 + i * 2.1));
+        const g = c.createLinearGradient(0, fy - hh, 0, fy); g.addColorStop(0, rgba(col, 0)); g.addColorStop(1, rgba(col, 0.22 * k));
+        c.fillStyle = g; c.beginPath(); c.moveTo(bx - 4, fy); c.quadraticCurveTo(bx - 3, fy - hh * 0.5, bx + Math.sin(t * 5 + i) * 3, fy - hh); c.quadraticCurveTo(bx + 3, fy - hh * 0.5, bx + 4, fy); c.closePath(); c.fill();
+      }
+      c.restore();
+    }
+  }
+  /* Bildschirm: Abdunkeln beim Aufladen, danach dauerhafte Farbstimmung je Phase */
+  function w30PhaseScreen(c, W, H) {
+    if (low()) return;
+    const b = Z.boss, p = phx;
+    let tint = 0, col = null;
+    if (b && !b.dead && (b.phase || 0) >= 1 && b.def && b.def.phases && b.def.phases.length > 1) { tint = Math.min(0.16, 0.07 * (b.phase || 0)); col = nb(b.aura || baDef(b).col); }
+    let dark = 0;
+    if (p && !p.e.dead) { dark = easeOut(span(p.t, 0, 0.5)) * (1 - easeIO(span(p.t, 0.8, 1.6))); col = p.col; tint = Math.max(tint, 0.25 * dark); }
+    if (!col || (tint < 0.005 && dark < 0.005)) return;
+    c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
+    if (dark > 0.01) { const S = Z.gfx.scale || 1, cm = Z.cam, bx = (p.e.x + p.e.w / 2 - cm.x) * S, by = (p.e.y + p.e.h * 0.5 - cm.y) * S; const g = c.createRadialGradient(bx, by, Math.min(W, H) * 0.15, bx, by, Math.max(W, H) * 0.7); g.addColorStop(0, "rgba(8,3,3,0)"); g.addColorStop(1, "rgba(8,3,3," + (0.5 * dark).toFixed(3) + ")"); c.fillStyle = g; c.fillRect(0, 0, W, H); }
+    c.globalCompositeOperation = "soft-light"; c.fillStyle = rgba(col, tint); c.fillRect(0, 0, W, H);
+    c.restore();
+  }
+
+  /* ---------- Sieg: Abgang und Beute-Fontäne ---------- */
+  let win = null;
+  function w30WinStart(b) {
+    if (baOff() || !b) return;
+    const d = baDef(b);
+    win = { e: b, d, t: 0, x: b.x + b.w / 2, fy: b.y + b.h, top: b.y, h: b.h, w: b.w, lv: Z.level, fount: 0, cheap: low() };
+    if (b.partner && b.partner.dead) win.p2 = b.partner;
+    scars = scars && scars.e === b ? scars : null;
+  }
+  function w30WinStep(raw) {
+    const k = win; if (!k) return;
+    if (k.lv !== Z.level) { win = null; return; }
+    k.t += raw;
+    const e = k.e, dT = e.deadT || 0;
+    /* Beute-Fontäne: Gold im Bogen, dann Lichtsäule über der Beute (ab Stufe 1) */
+    if (!k.cheap) {
+      if (k.t > 0.25 && k.t < 1.4) { const n = qLevel() >= 2 ? 3 : 1; for (let i = 0; i < n; i++) if (Math.random() < 0.8) FX.p({ x: k.x + (Math.random() - 0.5) * 8, y: k.fy - k.h * 0.4, vx: (Math.random() - 0.5) * 160, vy: -260 - Math.random() * 160, life: 1.3, size: 1.6 + Math.random(), col: Math.random() < 0.6 ? "#ffd27a" : "#fff0b0", kind: "spark", g: 620, add: true, drag: 0.995 }); }
+      if (!k.fount && k.t > 1.0) { k.fount = 1; FX.burst(k.x, k.fy - 6, 24, { col: ["#ffd27a", "#fff0c0", "#e8a530"], sp: 200, ang: -Math.PI / 2, spread: 1.1, life: 1.0, size: 2, kind: "spark", g: 420, add: true }); A.play("coin", { vol: 0.45, rate: 0.9 }); }
+      /* Abgang: Partikel je Art, gekoppelt an den Todesfortschritt des Bosses */
+      if (dT < 1.7 && Math.random() < raw * 40) {
+        const line = k.top + k.h * clamp(dT / 1.4, 0, 1);
+        if (k.d.v === "zerfall") FX.p({ x: k.x + (Math.random() - 0.5) * k.w, y: line + (Math.random() - 0.5) * 4, vx: (Math.random() - 0.5) * 30, vy: -40 - Math.random() * 50, life: 1.1, size: 1.6 + Math.random() * 1.5, col: Math.random() < 0.5 ? "#3a302c" : mix(e.def.c || "#6a5a50", "#2a2020", 0.3), kind: "smoke", a: 0.8, g: -20 });
+        else if (k.d.v === "sturz") FX.p({ x: k.x + (Math.random() - 0.5) * k.w * 1.4, y: k.fy - 2, vx: (Math.random() - 0.5) * 80, vy: -20 - Math.random() * 40, life: 0.9, size: 4, col: Z.dustCol || "#8a7a70", kind: "smoke", a: 0.6 });
+        else FX.p({ x: k.x + (Math.random() - 0.5) * k.w, y: k.top + Math.random() * k.h, vx: 0, vy: -60 - Math.random() * 60, life: 1, size: 1.6, col: Math.random() < 0.5 ? "#fff0c0" : k.d.col, kind: "glow", add: true });
+      }
+    }
+    if (k.t > 4) win = null;
+  }
+  function w30WinWorld(c, camR) {
+    const k = win; if (!k || k.cheap) return;
+    if (k.d.v === "licht") {
+      const dT = k.e.deadT || 0, a = easeOut(span(dT, 0, 0.6)) * (1 - easeIO(span(k.t, 2.2, 3.6)));
+      if (a > 0.01) {
+        c.save(); c.globalCompositeOperation = "lighter";
+        const top = camR.y - 20, w = k.w * 0.8 + 8;
+        const g = c.createLinearGradient(k.x - w, 0, k.x + w, 0); g.addColorStop(0, "rgba(255,230,170,0)"); g.addColorStop(0.5, rgba("#fff2c8", 0.45 * a)); g.addColorStop(1, "rgba(255,230,170,0)");
+        c.fillStyle = g; c.fillRect(k.x - w, top, w * 2, k.fy - top);
+        c.restore();
+      }
+    }
+  }
+  /* Abgang am Boss selbst (Zeichen-Hülle): Zerfall schneidet von oben weg, Sturz sackt zusammen, Licht überstrahlt */
+  function w30DrawDead(c, e, run) {
+    const k = win, dT = e.deadT || 0, v = k.d.v;
+    if (v === "zerfall") {
+      const line = k.top + k.h * clamp(dT / 1.4, 0, 1) - 2;
+      c.save(); c.beginPath(); c.rect(e.x - 200, line, e.w + 400, 400); c.clip();
+      const r = run(); c.restore();
+      if (!k.cheap && dT < 1.45) { c.save(); c.globalCompositeOperation = "lighter"; c.fillStyle = rgba(k.d.col, 0.55); c.fillRect(k.x - k.w * 0.6, line - 0.6, k.w * 1.2, 1.3); c.restore(); }
+      return r;
+    }
+    if (v === "sturz") {
+      const q = easeIn(clamp(dT / 1.2, 0, 1));
+      c.save(); c.translate(k.x, k.fy); c.rotate((e.face || 1) * -0.22 * q); c.scale(1 + 0.08 * q, 1 - 0.28 * q); c.translate(-k.x, -k.fy);
+      try { return run(); } finally { c.restore(); }
+    }
+    /* licht: Gestalt streckt sich leicht nach oben und überstrahlt */
+    const q = easeOut(clamp(dT / 1.2, 0, 1));
+    c.save(); c.translate(k.x, k.fy); c.scale(1 - 0.12 * q, 1 + 0.1 * q); c.translate(-k.x, -k.fy);
+    let r; try { r = run(); } finally { c.restore(); }
+    if (!k.cheap) { c.save(); c.globalCompositeOperation = "lighter"; const g = c.createRadialGradient(k.x, k.top + k.h * 0.5, 0, k.x, k.top + k.h * 0.5, k.h * 0.9 + 6); g.addColorStop(0, rgba("#fff6e0", 0.6 * q * (Z.flashK ? Z.flashK("licht") : 1))); g.addColorStop(1, "rgba(255,246,224,0)"); c.fillStyle = g; c.fillRect(k.x - k.h - 6, k.top - k.h * 0.4 - 6, 2 * k.h + 12, 1.8 * k.h + 12); c.restore(); }
+    return r;
+  }
+
+  /* ---------- Einhängen ---------- */
+  /* Boss-Zeichnung umhüllen (nach allen anderen Hüllen, darum beim Laden) */
+  function w30WrapEnemy() {
+    const de0 = Z.drawEnemy; if (!de0 || de0.w30) return;
+    const de = function (c, e) {
+      const s = sc;
+      if (s && (e === s.e || e === s.partner) && !e.dead) {
+        const o = w30Off(s, e === s.partner ? s.e : e);
+        if (o.a <= 0.01) return;
+        const x = s.e.x + s.e.w / 2, fy = s.e.y + s.e.h;
+        /* Lichtwechsel: der Boss steht während seines Auftritts im eigenen Licht (wirkt im Lichtdurchgang dieses Bildes) */
+        if (Z.addLight && e === s.e && !s.cheap) Z.addLight(x + o.dx, s.e.y + s.e.h * 0.45 + o.dy, 110 + s.e.w, s.d.col, (s.imp ? 0.75 : 0.45) * o.a);
+        c.save();
+        if (o.clipY != null) { c.beginPath(); c.rect(e.x - 300, o.clipY - 900, e.w + 600, 900 + 3); c.clip(); }
+        c.translate(o.dx, o.dy);
+        if (o.sx !== 1 || o.sy !== 1) { c.translate(x, fy); c.scale(o.sx, o.sy); c.translate(-x, -fy); }
+        if (o.a < 1) c.globalAlpha *= o.a;
+        try { return de0.apply(this, arguments); } finally { c.restore(); }
+      }
+      const k = win;
+      if (k && e.dead && (e === k.e || e === k.p2) && !baOff()) { const self = this, args = arguments; return w30DrawDead(c, e, () => de0.apply(self, args)); }
+      return de0.apply(this, arguments);
+    };
+    de.w30 = true; Z.drawEnemy = de;
+  }
+  if (document.readyState === "complete") setTimeout(w30WrapEnemy, 0); else addEventListener("load", () => setTimeout(w30WrapEnemy, 0));
+  /* Bossauftritt: nach dem Namensband dieses Moduls (plate) starten und das Band auf den Aufprall legen */
+  const biW30 = ui.bossIntro;
+  ui.bossIntro = function (e) {
+    const r = biW30.apply(this, arguments);
+    try {
+      w30WrapEnemy(); w30Start(e);
+      if (sc && plate && plate.e === e) plate.t = -(sc.Ti - 0.12);
+    } catch (err) { console.error("W30 Auftritt", err); sc = null; }
+    return r;
+  };
+  const bdW30 = ui.bossDown;
+  ui.bossDown = function (b) {
+    const r = bdW30.apply(this, arguments);
+    try { sc = null; phx = null; fireW = null; w30WinStart(b); } catch (err) { console.error("W30 Sieg", err); win = null; }
+    return r;
+  };
+  const alW30 = Z.drawAfterLight;
+  Z.drawAfterLight = function (c, camR) {
+    if (alW30) alW30.apply(this, arguments);
+    if (baOff() || !Z.level) return;
+    try { w30PhaseWorld(c, camR); w30DrawWorld(c, camR); w30WinWorld(c, camR); } catch (err) { console.error("W30 Welt", err); }
+  };
+  function w30Tick(raw) { if (baOff()) { sc = null; phx = null; return; } w30Step(raw); w30PhaseStep(raw); w30WinStep(raw); }
+  /* Einstellung „Boss-Auftritte: voll/kurz/aus“ als Zeile im Komfort-Fenster (Abschnitt „Ablauf“) – eigene Knöpfe, kein Eingriff in ui.js */
+  const komfortW30 = ui.komfort;
+  if (komfortW30) ui.komfort = function () {
+    const r = komfortW30.apply(this, arguments);
+    try {
+      const box = document.querySelector(".komfort"); if (!box || box.querySelector('[data-k="bossAuftritt"]')) return r;
+      const cur = baMode(), opts = [["voll", ["voll", "full"]], ["kurz", ["kurz", "short"]], ["aus", ["aus", "off"]]];
+      const row = document.createElement("div"); row.className = "k-zeile"; row.dataset.k = "bossAuftritt";
+      row.innerHTML = '<div class="k-text"><b>' + L(["Boss-Auftritte", "Boss entrances"]) + "</b><small>" + L(["Kamerafahrt, Geste und Namensband beim Erscheinen eines Bosses. Im Bossrausch immer kurz; die Spielzeit steht währenddessen.", "Camera move, gesture and name banner when a boss appears. Always short in the Boss Rush; game time is paused meanwhile."]) + '</small></div><div class="k-wahl" role="radiogroup">' +
+        opts.map(([v, n]) => '<button class="k-seg' + (v === cur ? " an" : "") + '" role="radio" aria-checked="' + (v === cur) + '" data-w30ba="' + v + '">' + L(n) + "</button>").join("") + "</div>";
+      const after = box.querySelector('[data-k="schnellstart"]');
+      if (after && after.parentNode) after.parentNode.insertBefore(row, after.nextSibling); else box.appendChild(row);
+      row.querySelectorAll("[data-w30ba]").forEach(btn => btn.addEventListener("click", ev => {
+        ev.stopPropagation(); Z.settings.bossAuftritt = btn.dataset.w30ba; Z.saveSettings && Z.saveSettings();
+        row.querySelectorAll(".k-seg").forEach(x => { const on = x === btn; x.classList.toggle("an", on); x.setAttribute("aria-checked", on); });
+      }));
+    } catch (err) { console.error("W30 Einstellung", err); }
+    return r;
+  };
+  Z.w30boss = {
+    state: () => ({ scene: sc ? { id: sc.e.id, t: +sc.t.toFixed(2), D: sc.D, Ti: sc.Ti, imp: sc.imp, short: sc.short, block: w30Block() } : null, phase: phx ? { t: +phx.t.toFixed(2), fired: phx.fired } : null, scars: scars ? scars.list.length : 0, fire: !!fireW, win: win ? { t: +win.t.toFixed(2), v: win.d.v } : null }),
+    start: e => w30Start(e || Z.boss), skip: w30Skip, BA,
+    /* Prüfhilfe für Bildfolgen: Szene auf Zeitpunkt t setzen */
+    seek: t => { if (!sc) return; sc.t = t; if (!sc.imp && t >= sc.Ti) w30Impact(sc); }
+  };
 
   /* Prüfhilfe */
   Z.uebergang = { bench: () => { const [W, H] = canvasSize(); parch = null; let t = performance.now(); parchment(W, H); const a = performance.now() - t; t = performance.now(); buildPage(W, H, Object.assign(pageInfo(Z.level.id, Z.biome, Z.level), { id: Z.level.id, B: Z.biome, page: grabPage() })); return [+a.toFixed(1), +(performance.now() - t).toFixed(1)]; }, state: () => ({ book: book ? { mode: book.mode, i: book.i, n: book.pages.length, t: +book.t.toFixed(2) } : null, pan: pan ? +pan.t.toFixed(2) : null, suck: !!suck, climax: climax ? +climax.t.toFixed(2) : null, plate: !!plate, gold: gold.length, zoom: +zCur.toFixed(3), calm: +breath.calm.toFixed(2) }), skip: skipAll, gold: goldAtEl, slow: v => { tScale = v > 0 ? v : 1; } };

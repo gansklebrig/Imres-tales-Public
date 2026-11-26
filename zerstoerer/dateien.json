@@ -9689,8 +9689,8 @@
 "sha256":"3ab7b7816ddadc9aa1ef272db3236698570d927a2f28af60f6ead1f3ac0a9320"
 },
 "zerstoerer.html":{
-"groesse":69502,
-"sha256":"4f0d4f9bee39bfd3d58ef883c08423f30f720b6f65af74e709d96e82b6c5af32"
+"groesse":69581,
+"sha256":"6961cd1177f7977fcd75e19f0e26144fd104b3aafe8c4bfcd5c8d412bcfb63ac"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":144658,
@@ -9761,8 +9761,8 @@
 "sha256":"2e761f3b67fc6ed08a2b3f1ecb4297c2e947eb041ecdc373515efdc3ae3dcc37"
 },
 "zerstoerer/figuren.js":{
-"groesse":337421,
-"sha256":"f1f5366e371e09c78730a105325b114b7eb694ae605728a09cc12ff030c9ff9f"
+"groesse":348574,
+"sha256":"8d1e7f9f292978da04b2d11a23a7b23bea7e782a180f8eb974d30a2b0a3be300"
 },
 "zerstoerer/fluch.js":{
 "groesse":5071,
@@ -9817,8 +9817,8 @@
 "sha256":"473eaee12b0669f6f885228633107b37c74ec68c439516aff82a8acd52a49305"
 },
 "zerstoerer/koop.js":{
-"groesse":105463,
-"sha256":"5e488ae3f9b9348cd143481709ad8af78ca014948a6f87dc148a6b1ac3d952b0"
+"groesse":105839,
+"sha256":"0987fa2ffe6118c95a6efa40587ba0e757a53e79094a9c7fcdef008dbd9b9de0"
 },
 "zerstoerer/lager.js":{
 "groesse":159427,
@@ -9847,6 +9847,10 @@
 "zerstoerer/musik.js":{
 "groesse":130196,
 "sha256":"63b6d85f416eb3663021193f0730b976e6ea141bf4394decdabd210b639274d9"
+},
+"zerstoerer/mutationen.js":{
+"groesse":35154,
+"sha256":"bb2bb7f3a3a1a4a700fbd3f5422a25e798b560366932e43a1125a49fb2fcfa39"
 },
 "zerstoerer/nemesis.js":{
 "groesse":244812,
@@ -9913,8 +9917,8 @@
 "sha256":"f400e6764ff2e31d8fbec4be20f1afb5dc9722989c370e0b9728ac4033d8d305"
 },
 "zerstoerer/uebergang.js":{
-"groesse":76769,
-"sha256":"00d128a51dd38b09b01f352a134cf37ebe3629a139e2f29c3ac7448f70ed1b3d"
+"groesse":112482,
+"sha256":"c0f62aff30906960819a405306d10c0c0cbbb49d301ea46fb1c753eca7a9685e"
 },
 "zerstoerer/ui.js":{
 "groesse":212157,
@@ -9949,5 +9953,5 @@
 "sha256":"b753f6210e4836421f7815ef79c12771a37d86603c170abf77ae34623d359f56"
 }
 },
-"stand":142
+"stand":143
 }
