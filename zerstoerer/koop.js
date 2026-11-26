@@ -742,7 +742,9 @@
     if (Z._koopFind && Z._koopInteract && !(Z.ui && (Z.ui.modalOpen || Z.ui.choiceActive))) {
       const sv = Z.player; let tg = null;
       Z.player = P; try { tg = Z._koopFind(); } catch (e) { console.error("koop", e); } finally { Z.player = sv; }
-      if (tg && !(tg.type === "pickup" && tg.p && tg.p.kind === "item")) {
+      if (tg && tg.type === "obj" && tg.o && tg.o.mutSchrein && Z.mut && Z.mut.oeffne) { /* W27 Koop: Wandlungsschrein (W29) – Spieler 2 wählt für sich */
+        try { Z.mut.oeffne(P); } catch (e) { console.error("koop mut", e); }
+      } else if (tg && !(tg.type === "pickup" && tg.p && tg.p.kind === "item")) {
         try { Z._koopInteract(tg); } catch (e) { console.error("koop", e); }
       }
     }

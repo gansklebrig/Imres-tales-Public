@@ -63,7 +63,7 @@
   const offen = g => !g.lock || g.lock();
 
   /* ---------- Spieler-Zustand ---------- */
-  const players = () => (Array.isArray(Z.players) && Z.players.length ? Z.players.filter(Boolean) : Z.player ? [Z.player] : []);
+  const players = () => { if (Array.isArray(Z.players) && Z.players.length) return Z.players.filter(Boolean); const o = Z.player ? [Z.player] : []; if (Z.koop && Z.koop.p2) o.push(Z.koop.p2); return o; }; /* W27 Koop: Spieler 2 = Z.koop.p2 */
   const of = P => (P && (P.mut || (P.mut = []))) || [];
   const st = P => P.mutS || (P.mutS = {});
   const hat = (P, id) => !!(P && P.mut && P.mut.indexOf(id) >= 0);
@@ -121,7 +121,8 @@
   const hit0 = Z.hitEnemy;
   Z.hitEnemy = function (e, dmg, o) {
     o = o || {};
-    const P = Z.player;
+    const koop = o.src === "koop" && Z.koop && Z.koop.p2, P = koop ? Z.koop.p2 : Z.player; /* Koop: Treffer von Spieler 2 nutzen SEINE Gaben */
+    const srcOrig = o.src; if (koop) o = Object.assign({}, o, { src: o.ranged || o.proj ? "ranged" : "melee" });
     if (!P || !P.mut || !P.mut.length || !e || e.dummy && !o.mutTest || typeof dmg !== "number" || o.mut || o.self || o.dot || !(o.src === "melee" || o.src === "ranged" || o.src === "skill" || (o.it && P.slots && (o.it === P.slots.s1 || o.it === P.slots.s2)))) return hit0.apply(this, arguments);
     const S = st(P); let m = 1; const t = now(), boss = !!(e.def && e.def.boss), skl = src0 => src0 === "skill" || (src0 === "ranged" && !o.it) /* Bomben/Phiolen/Türme fliegen ohne Waffe */ || !!(o.it && P.slots && (o.it === P.slots.s1 || o.it === P.slots.s2)), src = skl(o.src) ? "skill" : o.src;
     if (hat(P, "henker") && e.hp < e.hpMax * 0.3) m *= boss ? 1.3 : 1.6;
@@ -141,7 +142,7 @@
     if (hat(P, "wutstau") && S.wut > 0) { add = Math.min(S.wut, dmg * 1.5); S.wut = 0; }
     /* Deckel: alle Mutationen zusammen höchstens ×2,0 auf einen Treffer (+ Wutstau höchstens bis ×2,5) – Stapeln mit Segen/Runen bleibt im Rahmen */
     m = Math.min(m, 2); const d2 = Math.min(dmg * m + add, dmg * 2.5); MS.base += dmg; MS.mut += d2;
-    const hp0 = e.hp, r = hit0.call(this, e, d2, Object.assign({}, o, { mutM: m }));
+    const hp0 = e.hp, r = hit0.call(this, e, d2, Object.assign({}, o, { mutM: m, src: srcOrig }));
     if (e.hp < hp0) {
       e._mutSrc = src;
       if (hat(P, "ruhm") && t - (S.ruhmT || -9) > 0.12) { S.ruhm = Math.min(10, (S.ruhm || 0) + 1); S.ruhmT = t; }
@@ -264,7 +265,7 @@
       '<div class="knoepfe"><button data-act="mutZurueck">' + esc(L(["Zurück", "Back"])) + "</button></div></div>", { cls: "breit" });
   }
   Z.ui.actions.mutErsetze = alt => { const c = ctx; if (!c || !c.nimm) return; fertig(c.nimm, alt); };
-  Z.ui.actions.mutZurueck = () => { if (ctx) { ctx.nimm = null; Z.ui.close(); oeffne(); } };
+  Z.ui.actions.mutZurueck = () => { if (ctx) { const P = ctx.P; ctx.nimm = null; Z.ui.close(); oeffne(P); } }; /* W29 Mutationen: Koop – Zurück bleibt bei der wählenden Figur */
   Z.ui.actions.mutSkip = () => { const c = ctx; if (c) c.lv._mut.wahl[pIdx(c.P)] = "-"; ctx = null; Z.ui.close(); };
   function fertig(id, alt) {
     const c = ctx; if (!c) return;
