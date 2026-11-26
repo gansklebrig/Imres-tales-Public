@@ -43679,7 +43679,7 @@ const nb=oaNebel;oaNebel=function(){let C=null,a0;try{C=typeof OA!=='undefined'&
 const AT=window.__hsATEM={v:1,aus:0,FEN:1.2,n:0,gespart:0};
 const h0=hurt;hurt=function(raw){if(AT.aus||!P||!P.st||!(raw>0))return h0.apply(this,arguments);
  let f=1;try{const hard=typeof HARD==='function'&&HARD(),A=hard?0.45:0.35,B=hard?0.70:0.60,mx=P.st.maxHp||1,t=G.time;
-  const L=P._atW||(P._atW=[]);while(L.length&&t-L[0][0]>AT.FEN)L.shift();let s=0;for(const q of L)s+=q[1];const q=s/mx;
+  const L=P._atW||(P._atW=[]);while(L.length&&(t-L[0][0]>AT.FEN||t<L[0][0]))L.shift();let s=0;for(const q of L)s+=q[1];const q=s/mx;
   if(q>B)f=0.33;else if(q>A)f=0.5}catch(e){f=1}
  const hp0=P.hp;const r=h0.call(this,raw*f);
  try{const d=hp0-P.hp;if(d>0){(P._atW||(P._atW=[])).push([G.time,d]);if(f<1){AT.n++;AT.gespart+=d*(1/f-1)}}}catch(e){}
@@ -43701,7 +43701,7 @@ function ziel(e){let best=null,bd=1e9;try{const L=typeof mpL==='function'?mpL():
 const ue=updEnemy;updEnemy=function(e,dt){
  if(RU.aus||!e||e.dead||e.boss||e.guard||!(e.hitCd<=(dt||0)))return ue.apply(this,arguments);
  const q=ziel(e);if(!q)return ue.apply(this,arguments);
- const W=q._ruW||(q._ruW=[]),t=G.time;while(W.length&&t-W[0]>RU.FEN)W.shift();
+ const W=q._ruW||(q._ruW=[]),t=G.time;while(W.length&&(t-W[0]>RU.FEN||t<W[0]))W.shift();
  const N=(typeof HARD==='function'&&HARD())?6:5;
  if(W.length>=N){e.hitCd=0.15+Math.random()*0.35;RU.n.verschoben++;return ue.apply(this,arguments)}
  const a0=e.atkA;const r=ue.apply(this,arguments);
