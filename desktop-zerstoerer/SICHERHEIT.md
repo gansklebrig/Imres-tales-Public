@@ -12,6 +12,19 @@ Stand 25.11.2026. Aufbau und Härtung wie die Heldensturm-Hülle (`desktop/SICHE
 - Verweise nach außen öffnet der normale Browser (nur http(s)/mailto).
 - Electron-Fuses: kein `ELECTRON_RUN_AS_NODE`, keine NODE_OPTIONS/--inspect, Code nur aus dem geprüften app.asar.
 
+## Online-Koop (W32 Online, Stand 26.11.2026)
+- Einzige Netz-Ausnahme der Spielseite: der PeerJS-Vermittler `0.peerjs.com` – nur `https:`/`wss:`, genau dieser Host, Port 443
+  (CSP `connect-src` und `webRequest`-Filter in `main.js`, Konstante `VERMITTLER`). Alles andere bleibt gesperrt.
+- Die Bibliothek (`zerstoerer/lib/peerjs.min.js`, MIT) liegt im Spiel und wird mit SRI-Prüfsumme geladen – nichts aus dem Netz.
+- Spieldaten fließen direkt zwischen den beiden Geräten über WebRTC-**Datenkanäle** (DTLS-verschlüsselt). Keine Kamera/Mikrofon
+  (Rechte bleiben verweigert), kein TURN-Weiterleitungsserver; STUN (Cloudflare/Google) sieht nur die öffentliche Adresse.
+- „Ohne Vermittler“: Angebot/Antwort als kopierter Text – dann spricht die Spielseite mit keinem Vermittler (nur STUN).
+- Empfangene Nachrichten werden nie ausgeführt: nur JSON, höchstens 256 KB, Typ/Feldnamen/Zahlen/Listenlängen geprüft, `__proto__`,
+  `constructor`, `prototype` verworfen; Verweise auf Spieldaten nur über eine feste Tabelle (Z.ENEMIES, Z.WEAPONS …).
+- Der Gastgeber nimmt vom Gast nur Tasten-Bits (12 Aktionen) mit steigenden Folgenummern an, höchstens ~150 Nachrichten/s; Händler und
+  Gespräche bleiben dem Gastgeber vorbehalten. Der Gast deckelt Gutschriften selbst (ein manipulierter Gastgeber kann nicht mehr geben).
+- Der Mitspieler sieht die IP-Adresse (wie bei jedem direkten Online-Spiel); darauf weist das Spiel im Online-Fenster hin.
+
 ## Spiel-Updates (inhalt.js)
 - Eigene Sitzung ohne Zwischenspeicher, die **nur `https://imrestales.de`** erreichen darf; Umleitungen woandershin werden abgelehnt.
 - Liste geprüft: nur erlaubte Orte (`zerstoerer.html`, `zerstoerer/`, `tonregler.js`, `favicon.svg`, `schriften/`, `klang/`, `amb/`)

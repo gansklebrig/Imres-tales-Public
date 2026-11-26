@@ -17,6 +17,8 @@ contextBridge.exposeInMainWorld('__zsPC', {
   neuLaden: () => ipcRenderer.invoke('zs:neuLaden'),
   gpu: () => ipcRenderer.invoke('zs:gpu'),
   beenden: () => ipcRenderer.invoke('zs:beenden'),
+  /* W31: Spielbericht über den Speichern-Dialog sichern → { ok, pfad } | { ok:false, abbruch|fehler } */
+  speichern: (name, text) => ipcRenderer.invoke('zs:speichern', String(name || ''), String(text || '')),
   /* Hinweise vom Programm: {art: 'inhalt'|'programm'|'vollbild', …} */
   bei: f => { if (typeof f === 'function') hoerer.add(f); }
 });

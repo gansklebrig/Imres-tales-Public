@@ -124,9 +124,12 @@ function pfadZu(url) {
   return INH ? INH.datei(p) : null;   // zuerst Update-Ordner, sonst mitgeliefert – nie etwas außerhalb
 }
 /* Inhaltsrichtlinie: Programmcode nur aus dem Spiel (kein Nachladen von Skripten aus dem Netz), keine Rahmen, keine Plugins.
-   Das Spiel braucht kein Netz – also auch keine Verbindungen nach außen. 'unsafe-inline' braucht das Spiel für seine Skripte im Dokument. */
+   Das Spiel braucht kein Netz – also auch keine Verbindungen nach außen. 'unsafe-inline' braucht das Spiel für seine Skripte im Dokument.
+   W32 Online: einzige Ausnahme ist der PeerJS-Vermittler (VERMITTLER) für „Online spielen“ – nur https/wss zu genau diesem Host.
+   Die Spieldaten selbst laufen über WebRTC-Datenkanäle (UDP, nicht von CSP/webRequest erfasst); STUN ohne TURN, keine Medien. */
+const VERMITTLER = '0.peerjs.com';
 const CSP = ["default-src 'self' zerstoerer: data: blob:", "script-src 'self' zerstoerer: 'unsafe-inline' 'unsafe-eval' blob:", "style-src 'self' zerstoerer: 'unsafe-inline'",
-  "img-src 'self' zerstoerer: data: blob:", "media-src 'self' zerstoerer: data: blob:", "font-src 'self' zerstoerer: data:", "connect-src 'self' zerstoerer: data: blob:",
+  "img-src 'self' zerstoerer: data: blob:", "media-src 'self' zerstoerer: data: blob:", "font-src 'self' zerstoerer: data:", "connect-src 'self' zerstoerer: data: blob: https://" + VERMITTLER + " wss://" + VERMITTLER,
   "worker-src 'self' zerstoerer: blob:", "frame-src 'none'", "object-src 'none'", "base-uri 'self'", "form-action 'none'"].join('; ');
 async function liefern(req) {
   const datei = pfadZu(req.url);
@@ -208,6 +211,20 @@ ipcMain.handle('zs:neuLaden', nur(() => {
   return false;
 }));
 ipcMain.handle('zs:gpu', nur(async () => { try { const i = await app.getGPUInfo('basic'); const s = app.getGPUFeatureStatus(); return { karten: (i.gpuDevice || []).map(d => ({ aktiv: !!d.active, hersteller: d.vendorId, geraet: d.deviceId })), stand: s }; } catch (e) { return null; } }));
+/* W31 Spielbericht: Text (JSON) über den Speichern-Dialog des Systems sichern. Nur, was der Spieler im Dialog wählt;
+   nur .json/.txt, höchstens 5 MB, Vorschlag im Dokumente-Ordner. Das Spiel selbst bekommt keinen Dateizugriff. */
+ipcMain.handle('zs:speichern', nur(async (e, name, text) => {
+  try {
+    if (typeof text !== 'string' || text.length > 5 * 1024 * 1024) return { ok: false, fehler: 'zu groß' };
+    const vorschlag = String(name || 'zerstoerer-bericht.json').replace(/[^\w.\-äöüÄÖÜß]/g, '_').slice(0, 80);
+    const r = await dialog.showSaveDialog(win, { title: 'Spielbericht speichern', defaultPath: path.join(app.getPath('documents'), vorschlag),
+      filters: [{ name: 'Spielbericht (JSON)', extensions: ['json'] }, { name: 'Text', extensions: ['txt'] }] });
+    if (r.canceled || !r.filePath) return { ok: false, abbruch: true };
+    if (!/\.(json|txt)$/i.test(r.filePath)) return { ok: false, fehler: 'nur .json oder .txt' };
+    await fs.promises.writeFile(r.filePath, text, 'utf8');
+    return { ok: true, pfad: r.filePath };
+  } catch (x) { return { ok: false, fehler: String(x && x.message || x) }; }
+}));
 ipcMain.on('zs:info', e => { if (!vomSpiel(e)) { e.returnValue = {}; return; } const s = INH ? INH.status() : {}; e.returnValue = { version: app.getVersion(), plattform: process.platform, chrom: process.versions.chrome, electron: process.versions.electron, stand: s.stand || 0, ausUpdate: !!s.ausUpdate }; });
 
 /* ---------- Start ---------- */
@@ -228,7 +245,8 @@ else {
     if (ses.setDevicePermissionHandler) ses.setDevicePermissionHandler(() => false);
     /* Netz: das Spiel selbst lädt nichts von außen – nur die eigenen Spieldateien (kein http/https, kein Zugriff auf Dateien des Rechners).
        Die Updates laufen in eigenen Sitzungen (zs-inhalt nur https://imrestales.de, electron-updater nur https). */
-    ses.webRequest.onBeforeRequest((d, cb) => { let pr = ''; try { pr = new URL(d.url).protocol; } catch (e) { } cb({ cancel: !['zerstoerer:', 'data:', 'blob:', 'devtools:'].includes(pr) }); });
+    /* W32 Online: zusätzlich nur der PeerJS-Vermittler (https/wss, genau dieser Host, Standard-Port) – sonst weiterhin nichts */
+    ses.webRequest.onBeforeRequest((d, cb) => { let pr = '', ok = false; try { const u = new URL(d.url); pr = u.protocol; ok = (pr === 'https:' || pr === 'wss:') && u.hostname === VERMITTLER && (u.port === '' || u.port === '443') && !u.username && !u.password; } catch (e) { } cb({ cancel: !ok && !['zerstoerer:', 'data:', 'blob:', 'devtools:'].includes(pr) }); });
     ses.on('will-download', e => e.preventDefault());   // das Programm lädt nichts auf den Rechner – Downloads laufen über den Browser
     fenster();
     programmUpdatesEinrichten();
