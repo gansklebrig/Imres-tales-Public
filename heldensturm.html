@@ -43281,6 +43281,12 @@ if(typeof aimPoint==='function'){const ap=aimPoint;aimPoint=function(range){try{
   let t=null;try{t=typeof prioInCone==='function'&&prioInCone(a,r,0.6)}catch(e){}if(t)return{x:t.x,y:t.y};
   try{if(typeof clusterIn==='function'){const c=clusterIn(r,e=>{const da=Math.atan2(e.y-P.y,e.x-P.x)-a;return Math.abs(Math.atan2(Math.sin(da),Math.cos(da)))<0.6});if(c)return c}}catch(e){}
   return{x:P.x+Math.cos(a)*r*0.6,y:P.y+Math.sin(a)*r*0.6}}}catch(e){}return ap.apply(this,arguments)}}
+/* Einführung: Schritt „Fähigkeit“ passt, wenn noch keine Fähigkeit gelernt ist (Stufe 1: Leiste leer – „Taste 1“ täte nichts) */
+if(typeof tutText==='function'){const tt=tutText;tutText=function(i,d){const r=tt.apply(this,arguments);try{if(i===2){const leer=!(P&&P.skBtns&&P.skBtns.length);
+  if(leer){if(d==='pad')return 'Fähigkeiten lernst du im <b>Sternbild</b> (Menü → Talente) – danach liegen sie auf den Knöpfen und wirken in <b>Laufrichtung</b>, solange du nicht mit dem rechten Stick zielst.';
+   if(d==='touch')return 'Fähigkeiten lernst du im <b>Sternbild</b> (Talente, oben rechts) – danach erscheinen hier rechts Knöpfe dafür.';
+   return 'Fähigkeiten lernst du im <b>Sternbild</b> (Talente, oben rechts) – danach liegen sie auf den Tasten <b>1–4</b> unten rechts.'}
+  if(d==='pad')return r+' Ohne rechten Stick wirken sie in <b>Laufrichtung</b>.'}}catch(e){}return r}}
 /* alte, „klebende“ Zielrichtung verwerfen, sobald man ohne Zielhebel losläuft – sonst lesen manche Fähigkeiten sie direkt */
 hook('tick',()=>{try{if(frei()&&laeuft()&&P.padAim!=null)P.padAim=null}catch(e){}});
 }catch(e){console.error('padziel',e);window.__hsPADZIEL={v:1,err:[String(e&&e.stack||e)]}}})();
