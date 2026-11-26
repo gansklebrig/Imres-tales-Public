@@ -21311,9 +21311,11 @@ const KAP0={aus:KAP.aus,ein:KAP.ein};function kaParkGrenze(){const u=!!(window._
 /* Stufenwechsel: geparkte verwerfen (gehören zur alten Karte) – passiert automatisch, da K.park an G.ka hängt */
 window.__kaKAP=KAP;
 /* Zähl-Logik der Welt (Nachschub/Rückfall) muss die geparkten Gegner mitzählen, sonst schickt sie Verstärkung */
-function kaMitGeparkten(fn){return function(){const K=G.ka;if(!K||!K.park||!K.park.length)return fn.apply(this,arguments);const pk=new Set(K.park);G.enemies=G.enemies.concat(K.park);
+function kaMitGeparkten(fn,bedarf){return function(){const K=G.ka;if(!K||!K.park||!K.park.length||bedarf&&!bedarf.apply(this,arguments))return fn.apply(this,arguments);const pk=new Set(K.park);G.enemies=G.enemies.concat(K.park);
  try{return fn.apply(this,arguments)}finally{G.enemies=G.enemies.filter(e=>!pk.has(e)||!e.wlZz&&(K.park.splice(K.park.indexOf(e),1),true))}}}
-wlNachschub=kaMitGeparkten(wlNachschub);wlHinweis=kaMitGeparkten(wlHinweis);
+/* nur wenn die Zählung (einmal je Sekunde) wirklich läuft – vorher wurden in jedem Bild zweimal alle geparkten Gegner kopiert
+   (Set + zwei neue Listen je Aufruf → Rechenspitzen und Müllsammler-Ruckler). wlHinweis zählt nur wache Gegner, geparkte schlafen immer. */
+wlNachschub=kaMitGeparkten(wlNachschub,dt=>{const W=G.wl;return !!W&&W.fbT-(dt||0)<=0});
 /* Wache Gegner, die von keinem Helden aus erreichbar sind (z. B. über Lava/Wasser gedrängt), an eine erreichbare Stelle setzen –
    sonst bleiben Lager/Torwächter unbesiegbar und Bots hängen. Nur Gastgeber, einmal je Sekunde. */
 function kaGegnerRetten(dt){const K=G.ka,W=G.wl;if(!K||!K.an||G.room||G.netGuestRun||!W||!W.fl||!W.nav)return;K.grT=(K.grT||0)-dt;if(K.grT>0)return;K.grT=1;
