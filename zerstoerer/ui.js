@@ -1222,7 +1222,7 @@
     modal.querySelectorAll("[data-set]").forEach(c => c.onchange = () => { Z.settings[c.dataset.set] = c.checked; if (c.dataset.set === "vib") inp.vib = c.checked; });
     modal.querySelector("[data-textsize]").onchange = e => { Z.settings.textSize = e.target.value; Z.saveSettings(); fitText(); const sel = modal.querySelector("[data-textsize]"); if (sel) sel.focus({ preventScroll: true }); };
     modal.querySelector("[data-hint]").onchange = e => { Z.settings.hinweise = e.target.value; Z.saveSettings(); };
-    modal.querySelector("[data-lang]").onchange = e => { Z.settings.lang = e.target.value; Z.saveSettings(); closeModal(); for (const k in slotEls) slotEls[k].uid = -9; ui.settings(); };
+    modal.querySelector("[data-lang]").onchange = e => { Z.settings.lang = e.target.value; Z.saveSettings(); closeModal(); for (const k in slotEls) slotEls[k].uid = -9; touchSync() /* W36 Feinschliff: Touch-Beschriftung sofort umstellen */; ui.settings(); };
   };
 
 
@@ -1994,7 +1994,9 @@
   /* ======================= TOUCH ======================= */
   const tc = $("#touch");
   ui.touchOn = false;
-  function touchSync() { tc.hidden = !ui.touchOn || !Z.level; tc.style.setProperty("--ts", Z.settings.touchSize); }
+  function touchSync() { tc.hidden = !ui.touchOn || !Z.level; tc.style.setProperty("--ts", Z.settings.touchSize);
+    /* W36 Feinschliff: Touch-Knöpfe standen fest deutsch im HTML (EN-Modus: „Sprung/Rolle/Waffe 1/Trank“) */
+    if (tc._lang !== Z.settings.lang) { tc._lang = Z.settings.lang; const TL = { a1: ["Waffe<br>1", "Weapon<br>1"], a2: ["Waffe<br>2", "Weapon<br>2"], jump: ["Sprung", "Jump"], roll: ["Rolle", "Roll"], potion: ["Trank", "Potion"] }; tc.querySelectorAll("[data-t]").forEach(b => { const t = TL[b.dataset.t]; if (t) b.innerHTML = L(t); }); } }
   addEventListener("touchstart", () => { if (!ui.touchOn) { ui.touchOn = true; inp.device = "touch"; touchSync(); } }, { passive: true });
   /* Stick */
   const stick = $("#stick"), knob = $("#knob");

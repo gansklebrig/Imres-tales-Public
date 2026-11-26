@@ -461,6 +461,7 @@
       hb = G.skyBack = document.createElement("canvas"); hb.width = w; hb.height = h; hb.key = key; const g = hb.getContext("2d"), R = Z.Rng(4242);
       const sk = g.createLinearGradient(0, 0, 0, h); sk.addColorStop(0, B.sky[0]); sk.addColorStop(0.6, B.sky[1]); sk.addColorStop(1, B.sky[2]); g.fillStyle = sk; g.fillRect(0, 0, w, h);
       if (!G._bakeLv) for (let i = 0; i < 40; i++) { g.fillStyle = "rgba(255,240,225," + (0.15 + R() * 0.35).toFixed(2) + ")"; g.fillRect(R() * w, R() * h * 0.6, 1, 1); } /* im Weltbild (Viertelauflösung) keine Sterne – sie würden zu groß */
+      if (Z.w35SkyBake) try { Z.w35SkyBake(g, w, h, B, R, !!G._bakeLv); } catch (e) { console.error(e); } /* W35 Optik: ferne Kulisse je Gebietsart (optik2.js), nur beim Backen */
     }
     c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = 1; c.globalCompositeOperation = "copy"; c.drawImage(hb, 0, 0); c.restore();
   }
