@@ -43775,6 +43775,19 @@ hook('stage',i=>{try{const b=st();const k=BS.stufe();if(k&&gesagt!==G.stage*10+k
 if(typeof enterPortal==='function'){const ep=enterPortal;enterPortal=function(){try{const b=st();if(b[G.stage])delete b[G.stage]}catch(e){}return ep.apply(this,arguments)}}
 }catch(e){console.error('beistand',e);window.__hsBEISTAND={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/beistand» */
+/* «heldenbal» */
+/* ================= Paket „heldenbal“: Barradin holt etwas auf – window.__hsHELDENBAL =================
+   Bot-Messung (Normal, alle 26 Stufen, je Held ein Lauf, gleiche Version): Schaden je Kampfsekunde ab Stufe 12
+     Friedrich 26k–107k · Ezekiel 13k–51k · Echo 12k–31k · Barradin 4k–32k.
+   Barradin liegt durchgehend am niedrigsten, tötet langsamer, sammelt dadurch weniger Erfahrung (Stufe 20 auf Kampagnen-
+   stufe 13, die anderen 22–24) – der Abstand wächst sich selbst. Er überlebt gut (Tiefstwert Leben meist > 80 %).
+   Jetzt: Barradins Schaden (auch Trugbilder/Begleiter) +15 % – vorsichtig, weil Bots ihn als Unterstützer schlechter
+   spielen als Menschen. Abschaltbar: __hsHELDENBAL.aus=1 · Stärke: __hsHELDENBAL.barradin */
+(function(){try{if(window.__hsHELDENBAL||typeof hook!=='function')return;
+const HB=window.__hsHELDENBAL={v:1,aus:0,barradin:1.15};
+hook('dmgMul',(e,o)=>HB.aus?1:HB.barradin,'barradin');
+}catch(e){console.error('heldenbal',e);window.__hsHELDENBAL={v:1,err:[String(e&&e.stack||e)]}}})();
+/* «/heldenbal» */
 document.documentElement.lang=document.documentElement.lang||'de';runFix(SAVE);netInit();volInit();gfxMigrate();resize();MUSIK.lautstaerke(SAVE.volMus);MUSIK.schalten(SAVE.music!==false&&SAVE.volMus>0);showTitle();requestAnimationFrame(frame);setTimeout(cloudSync,600);
 
 /* ================= Erzähler-Haken =================
