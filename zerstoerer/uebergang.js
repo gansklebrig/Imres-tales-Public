@@ -587,11 +587,14 @@
     c.strokeStyle = INK2; c.lineWidth = s * 0.3; c.beginPath(); c.moveTo(x0, y0); c.quadraticCurveTo(x0 + bw / 2, y0 - s * 2.2, x0 + bw, y0); c.lineTo(x0 + bw, y0 + bh); c.quadraticCurveTo(x0 + bw / 2, y0 + bh - s * 2.2, x0, y0 + bh); c.closePath(); c.stroke();
     /* Schrift */
     c.textAlign = "center"; c.textBaseline = "alphabetic";
-    const cx = x0 + bw / 2, ny = y0 + (title ? bh * 0.55 : bh * 0.68);
+    /* W30 Grafik: schmale Schirme (Handy hochkant) – Name neben das Medaillon setzen und in den freien Platz einpassen, sonst verdeckt das Wappen den ersten Buchstaben */
+    let cx = x0 + bw / 2, tw2 = tw;
+    if (por && tw + md * 1.3 + s * 10 > bw) { const free = bw - md * 0.95 - s * 8; cx = x0 + md * 0.95 + free / 2 + s * 2; c.font = fs.toFixed(1) + "px " + FD; fs = fitFont(c, name, "$px " + FD, fs, free - s * 8, 6); tw2 = c.measureText(name).width; }
+    const ny = y0 + (title ? bh * 0.55 : bh * 0.68);
     c.font = fs.toFixed(1) + "px " + FD; c.fillStyle = INK; c.fillText(name, cx, ny);
-    c.fillStyle = RED; c.font = (fs * 1.0).toFixed(1) + "px " + FD; c.fillText(name.charAt(0), cx - tw / 2 + c.measureText(name.charAt(0)).width / 2, ny);
-    for (const k of [-1, 1]) { c.fillStyle = RED; diamond(c, cx + k * (tw / 2 + s * 4), ny - fs * 0.3, s * 1.4); c.fillStyle = GOLD; diamond(c, cx + k * (tw / 2 + s * 4), ny - fs * 0.3, s * 0.6); }
-    if (title) { c.fillStyle = "#5a2a18"; fitFont(c, title, "italic $px " + FI, s * 3.6, bw * 0.8); c.fillText(title, cx, y0 + bh * 0.83); }
+    c.fillStyle = RED; c.font = (fs * 1.0).toFixed(1) + "px " + FD; c.fillText(name.charAt(0), cx - tw2 / 2 + c.measureText(name.charAt(0)).width / 2, ny);
+    for (const k of [-1, 1]) { c.fillStyle = RED; diamond(c, cx + k * (tw2 / 2 + s * 4), ny - fs * 0.3, s * 1.4); c.fillStyle = GOLD; diamond(c, cx + k * (tw2 / 2 + s * 4), ny - fs * 0.3, s * 0.6); }
+    if (title) { c.fillStyle = "#5a2a18"; fitFont(c, title, "italic $px " + FI, s * 3.6, cx === x0 + bw / 2 ? bw * 0.8 : (x0 + bw - cx) * 1.6); c.fillText(title, cx, y0 + bh * 0.83); } /* W30 Grafik: tw2/cx */
     if (por) {
       const mx = x0 + md * 0.42, my = y0 + bh / 2;
       /* Schlagschatten auf dem Band, dann das Medaillon */
@@ -612,6 +615,8 @@
     const pw = p.pl.cv.width, ph = p.pl.cv.height, px = W / 2 - pw / 2;
     /* W24 Auflösung: Band unter die Boss-Lebensleiste (HTML, wächst mit --hud) – auf kleinen Schirmen lag sie über dem Band */
     let py = H * 0.2; try { const bb = document.getElementById("bossbar"); if (bb && bb.offsetParent) { const r = bb.getBoundingClientRect(), k = W / (innerWidth || W); if (r.height > 0) py = Math.min(Math.max(py, (r.bottom + 4) * k), H * 0.32); } } catch (_) {}
+    /* W30 Grafik: hochkant (Handy) liegen Musik-/Ton-Knöpfe (.ton-regler, ersetzt #tonplatz) rechts unter der Bossleiste – überdecken sie das Band, rutscht es darunter */
+    try { const tp = document.querySelector("#hud .ton-regler") || document.getElementById("tonplatz"); if (tp && tp.offsetParent) { const r = tp.getBoundingClientRect(), k = W / (innerWidth || W); if (r.height > 0 && r.left * k < W / 2 + pw / 2 && r.bottom * k > py) py = Math.min(Math.max(py, (r.bottom + 4) * k), H * 0.4); } } catch (_) {}
     if (open > 0.01) {
       const vis = pw * open;
       c.save(); c.beginPath(); c.rect(W / 2 - vis / 2, 0, vis, H); c.clip(); c.drawImage(p.pl.cv, px, py); c.restore();
@@ -1249,7 +1254,7 @@
         c.globalCompositeOperation = "source-over";
         const bar = H * 0.085 * inA * outA;
         if (bar > 0.5) { c.fillStyle = "#0a0605"; c.fillRect(0, 0, W, bar); c.fillRect(0, H - bar, W, bar); c.fillStyle = rgba(GOLD, 0.35); c.fillRect(0, bar - 1, W, 1); c.fillRect(0, H - bar, W, 1); }
-        if (bar > H * 0.05 && !s.skip && !s.d.live) { const sz = Math.min(W, H) / 100; c.textBaseline = "middle"; c.textAlign = "right"; c.font = "italic " + (sz * 2.4).toFixed(1) + "px " + FI; c.fillStyle = "rgba(232,216,196,.6)"; c.fillText((inp.device === "pad" ? L(["Knopf: überspringen", "Button: skip"]) : inp.device === "touch" ? L(["Tippen: überspringen", "Tap: skip"]) : L(["Taste: überspringen", "Any key: skip"])) + " ▸", W - sz * 4, H - bar / 2); }
+        if (bar > H * 0.05 && !s.skip && !s.d.live) { const sz = Math.min(W, H) / 100; c.textBaseline = "middle"; c.textAlign = "right"; c.font = "italic " + (sz * 2.4).toFixed(1) + "px " + FI; c.fillStyle = "rgba(232,216,196,.6)"; c.fillText((inp.device === "pad" ? L(["Knopf: überspringen", "Button: skip"]) : inp.device === "touch" ? L(["Tippen: überspringen", "Tap: skip"]) : L(["Taste: überspringen", "Any key: skip"])) + " ▸", W - sz * 4, H > W * 1.1 ? H - bar - H * 0.15 : H - bar / 2); } /* W30 Grafik: hochkant (Handy) über der Waffenleiste statt verdeckt im unteren Balken */
         c.restore();
       }
     }

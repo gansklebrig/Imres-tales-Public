@@ -404,8 +404,35 @@
   }
 
   /* ======================= Takt ======================= */
+  /* W31 QA: „Querformat spielt sich besser“ (#dreh, zerstoerer.html) war nur deutsch; Koop-Leiste (#koop-hl) lag im Hochformat
+     unter dem Boss-Namensband – Klasse w31-koop2 schiebt das Band dort unter die linke HUD-Spalte. */
+  let qaLang = "", qaKoop = null;
+  function qaTick() {
+    const l = Z.settings.lang;
+    if (l !== qaLang) { const d = document.getElementById("dreh"); if (d) { d.textContent = l === "en" ? "Plays better in landscape" : "Querformat spielt sich besser"; qaLang = l; } }
+    const k = !!(Z.koop && Z.koop.p2); if (k !== qaKoop && document.body) { document.body.classList.toggle("w31-koop2", k); qaKoop = k; }
+  }
+  /* W31 QA: Controller kommt dazu, während Spieler 1 auf der Tastatur spielt → einmal (Z.settings.w31padHinweis, global)
+     ein kleiner Hinweis mit Knopf „Als Spieler 2 beitreten“ (öffnet das Koop-Fenster aus koop.js; dort reicht A am Controller).
+     kern.js schaltet beim Verbinden sofort auf „pad“ – deshalb zählt das Gerät aus dem letzten Bild. */
+  let qaDev = "keys", padHinweisEl = null, padHinweisT = 0;
+  function padHinweis() {
+    const s = Z.settings;
+    if (s.w31padHinweis || qaDev !== "keys" || !Z.level || !Z.koop || Z.koop.p2 || !(Z.ui && Z.ui.actions && Z.ui.actions.koopMenu)) return;
+    s.w31padHinweis = true; try { Z.saveSettings(); } catch (_) {}
+    if (!padHinweisEl) {
+      padHinweisEl = document.createElement("div"); padHinweisEl.id = "w31-padhinweis"; padHinweisEl.className = "eisen";
+      padHinweisEl.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; padHinweisEl.hidden = true; if (b.dataset.w31 === "ja") { try { Z.ui.actions.koopMenu(); } catch (err) { console.error(err); } } });
+      document.body.appendChild(padHinweisEl);
+    }
+    padHinweisEl.innerHTML = "<b>🎮 " + esc(L(["Controller erkannt", "Controller detected"])) + "</b><span>" + esc(L(["Ezekiel spielt weiter mit der Tastatur. Mitspielen? Pause → „Koop: Spieler 2 …“", "Ezekiel keeps the keyboard. Play together? Pause → 'Co-op: player 2…'"])) + "</span>" +
+      '<div><button data-w31="ja">' + esc(L(["Als Spieler 2 beitreten", "Join as player 2"])) + '</button><button data-w31="nein">' + esc(L(["Nein danke", "No thanks"])) + "</button></div>";
+    padHinweisEl.hidden = false; padHinweisT = performance.now() + 12000;
+  }
+  addEventListener("gamepadconnected", () => { try { setTimeout(padHinweis, 0); } catch (_) {} });
   function tick() {
-    try { capTick(); ereignisTick(); } catch (e) { if (!tick.err) { tick.err = 1; console.error(e); } }
+    try { if (inp.device !== "pad") qaDev = inp.device; if (padHinweisEl && !padHinweisEl.hidden && (performance.now() > padHinweisT || (Z.koop && Z.koop.p2))) padHinweisEl.hidden = true; } catch (_) {}
+    try { capTick(); ereignisTick(); qaTick(); } catch (e) { if (!tick.err) { tick.err = 1; console.error(e); } }
     requestAnimationFrame(tick);
   }
 
@@ -415,7 +442,10 @@
     ".w31-cap{background:rgba(18,10,6,.86);border:1px solid #6e5530;border-radius:6px;padding:3px 12px;color:#f6e9c8;font:600 15px/1.3 var(--fb,sans-serif);text-shadow:0 1px 0 #000;transition:opacity .35s;white-space:nowrap}",
     ".w31-cap i{font-style:normal;color:#ffd84a;margin-right:2px}.w31-cap .w31-pf{color:#ffd84a;margin:0 4px}.w31-cap.weg{opacity:0}",
     ".w31-vorschau{padding:2px 10px}.w31-vorschau canvas{width:100%;max-width:560px;height:auto;display:block;border-radius:5px;border:1px solid #3a2a22}",
-    ".handheld .w31-cap{font-size:12px;padding:2px 8px}"
+    ".handheld .w31-cap{font-size:12px;padding:2px 8px}",
+    "#w31-padhinweis{position:fixed;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);z-index:45;max-width:min(340px,80vw);padding:8px 12px;display:flex;flex-direction:column;gap:4px;color:#f0e0c8;font-size:var(--fs-s,13px);zoom:var(--hud,1)}", /* W31 QA */
+    "#w31-padhinweis b{color:var(--gold,#e5b454)}#w31-padhinweis div{display:flex;gap:6px;margin-top:2px}#w31-padhinweis button{padding:4px 10px;font-size:var(--fs-s,13px)}",
+    "@media (max-aspect-ratio:1/1){body.w31-koop2 #bossbar{top:calc(env(safe-area-inset-top,0px) + 54px + 118px * var(--hud,1) / var(--hud,1))}}" /* W31 QA */
   ].join("\n");
   document.head.appendChild(css);
 

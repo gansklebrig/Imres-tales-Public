@@ -117,6 +117,11 @@ body:has(#minimap.gross) #card,body:has(#minimap.gross) #prompt{visibility:hidde
 #bossbar .boss-portraet{position:absolute;left:-34px;bottom:-14px;width:60px;height:60px;z-index:1;filter:drop-shadow(0 2px 5px rgba(0,0,0,.8));transition:transform .5s cubic-bezier(.3,1.6,.5,1),opacity .4s} /* W11 R26: Boss-Wappen */
 body.bossplatte #bossbar .boss-portraet{opacity:0;transform:scale(.6)} /* R27: während das Titelband das Porträt zeigt, erscheint das Wappen erst danach */
 .handheld #bossbar .boss-portraet{left:-28px;bottom:-12px;width:50px;height:50px}
+/* W30 Grafik: kleine Schirme (Handheld 640×480): das Wappen im Auftritts-Banner lag über Bossname/Untertitel der Bossleiste – dort entfällt es (die Bossleiste trägt ihr eigenes Wappen) */
+.handheld #banner .boss-portraet{display:none}
+@media (max-height:520px){#banner .boss-portraet{display:none}}
+/* W30 Grafik: Handy quer, Koop im Bosskampf – Koop-Leiste von Spieler 2 auf Kopf + Lebensbalken einklappen, Bossleiste schmaler rechts daneben (statt darüber) */
+@media (max-height:520px) and (min-aspect-ratio:1/1){body.w31-koop2.bosskampf #koop-hl .kh-ab,body.w31-koop2.bosskampf #koop-hl .kh-w{display:none}body.w31-koop2.bosskampf #koop-hl{max-width:min(210px,28vw)}body.w31-koop2.bosskampf #bossbar{left:calc(50% + 70px);width:min(300px,36vw)}}
 .bbar{position:relative;height:12px;background:linear-gradient(#0c0708,#1c1012);border:1px solid #000;border-radius:3px;overflow:hidden;margin-top:3px;box-shadow:0 0 0 1px var(--eisen3),0 0 0 2px #000,0 2px 8px rgba(0,0,0,.6),inset 0 2px 4px rgba(0,0,0,.7)}
 .bbar::after{content:"";position:absolute;left:0;right:0;top:0;height:40%;background:linear-gradient(rgba(255,230,200,.14),rgba(255,230,200,0));pointer-events:none}
 #bossfill{height:100%;background:linear-gradient(#ffa060,#d0401e 45%,#7a1210);transition:width .15s;box-shadow:inset 0 1px 0 rgba(255,220,180,.45),2px 0 6px rgba(255,120,50,.55)}
@@ -591,69 +596,69 @@ button:disabled{opacity:.45;cursor:default}
 <div id="modal" hidden></div>
 <div id="title"></div>
 <div id="fade"></div>
-<script src="tonregler.js?v=143"></script>
-<script src="zerstoerer/kern.js?v=143"></script>
-<script src="zerstoerer/platz.js?v=143"></script>
-<script src="zerstoerer/welt.js?v=143"></script>
-<script src="zerstoerer/daten.js?v=143"></script>
-<script src="zerstoerer/kampf.js?v=143"></script>
-<script src="zerstoerer/steuerung.js?v=143"></script>
-<script src="zerstoerer/geschosse.js?v=143"></script>
-<script src="zerstoerer/gegner.js?v=143"></script>
-<script src="zerstoerer/bosse.js?v=143"></script>
-<script src="zerstoerer/bossphasen.js?v=143"></script>
-<script src="zerstoerer/figuren.js?v=143"></script>
-<script src="zerstoerer/werkzeuge.js?v=143"></script>
-<script src="zerstoerer/bild.js?v=143"></script>
-<script src="zerstoerer/pracht.js?v=143"></script>
-<script src="zerstoerer/grafik.js?v=143"></script>
-<script src="zerstoerer/musik.js?v=143"></script>
-<script src="zerstoerer/klang.js?v=143"></script>
-<script src="zerstoerer/spiel.js?v=143"></script>
-<script src="zerstoerer/lager.js?v=143"></script>
-<script src="zerstoerer/parcours.js?v=143"></script>
-<script src="zerstoerer/fallen.js?v=143"></script>
-<script src="zerstoerer/bilanz.js?v=143"></script>
-<script src="zerstoerer/kampfkunst.js?v=143"></script>
-<script src="zerstoerer/hintergrund.js?v=143"></script>
-<script src="zerstoerer/bilderbuch.js?v=143"></script>
-<script src="zerstoerer/tageszeit.js?v=143"></script>
-<script src="zerstoerer/abenteuer.js?v=143"></script>
-<script src="zerstoerer/fluch.js?v=143"></script>
-<script src="zerstoerer/fluchkraft.js?v=143"></script>
-<script src="zerstoerer/ebenen.js?v=143"></script>
-<script src="zerstoerer/erkundung.js?v=143"></script>
-<script src="zerstoerer/spuren.js?v=143"></script>
-<script src="zerstoerer/effekte.js?v=143"></script>
-<script src="zerstoerer/hinterhalt.js?v=143"></script>
-<script src="zerstoerer/leben.js?v=143"></script>
-<script src="zerstoerer/gegnerkunst.js?v=143"></script>
-<script src="zerstoerer/demogorgon.js?v=143"></script>
-<script src="zerstoerer/nemesis.js?v=143"></script>
-<script src="zerstoerer/wetter.js?v=143"></script>
-<script src="zerstoerer/wunder.js?v=143"></script>
-<script src="zerstoerer/ausstattung.js?v=143"></script>
-<script src="zerstoerer/ausgleich.js?v=143"></script>
-<script src="zerstoerer/ui.js?v=143"></script>
-<script src="zerstoerer/praesentation.js?v=143"></script>
-<script src="zerstoerer/schmiede.js?v=143"></script>
-<script src="zerstoerer/runen.js?v=143"></script>
-<script src="zerstoerer/tagebuch.js?v=143"></script>
-<script src="zerstoerer/schilder.js?v=143"></script>
-<script src="zerstoerer/weltspuren.js?v=143"></script>
-<script src="zerstoerer/uebergang.js?v=143"></script>
-<script src="zerstoerer/rueckweg.js?v=143"></script>
-<script src="zerstoerer/haerte.js?v=143"></script> <!-- W9 Härte -->
-<script src="zerstoerer/weltkarte.js?v=143"></script> <!-- W21 -->
-<script src="zerstoerer/rueckblick.js?v=143"></script> <!-- W21 -->
-<script src="zerstoerer/bossrausch.js?v=143"></script> <!-- W21 -->
-<script src="zerstoerer/bericht.js?v=143"></script> <!-- W31 -->
-<script src="zerstoerer/lerntipps.js?v=143"></script> <!-- W31 -->
-<script src="zerstoerer/zugang.js?v=143"></script> <!-- W31 -->
-<script src="zerstoerer/mutationen.js?v=143"></script> <!-- W29 Mutationen -->
-<script src="zerstoerer/koop.js?v=143"></script> <!-- W27 Koop (zuletzt laden) -->
-<script src="zerstoerer/auftraege.js?v=143"></script> <!-- W28 Lager -->
-<script src="zerstoerer/lagerwelt.js?v=143"></script> <!-- W28 Lager -->
-<script src="zerstoerer/online.js?v=143"></script> <!-- W32 Online (nach koop.js) -->
+<script src="tonregler.js?v=144"></script>
+<script src="zerstoerer/kern.js?v=144"></script>
+<script src="zerstoerer/platz.js?v=144"></script>
+<script src="zerstoerer/welt.js?v=144"></script>
+<script src="zerstoerer/daten.js?v=144"></script>
+<script src="zerstoerer/kampf.js?v=144"></script>
+<script src="zerstoerer/steuerung.js?v=144"></script>
+<script src="zerstoerer/geschosse.js?v=144"></script>
+<script src="zerstoerer/gegner.js?v=144"></script>
+<script src="zerstoerer/bosse.js?v=144"></script>
+<script src="zerstoerer/bossphasen.js?v=144"></script>
+<script src="zerstoerer/figuren.js?v=144"></script>
+<script src="zerstoerer/werkzeuge.js?v=144"></script>
+<script src="zerstoerer/bild.js?v=144"></script>
+<script src="zerstoerer/pracht.js?v=144"></script>
+<script src="zerstoerer/grafik.js?v=144"></script>
+<script src="zerstoerer/musik.js?v=144"></script>
+<script src="zerstoerer/klang.js?v=144"></script>
+<script src="zerstoerer/spiel.js?v=144"></script>
+<script src="zerstoerer/lager.js?v=144"></script>
+<script src="zerstoerer/parcours.js?v=144"></script>
+<script src="zerstoerer/fallen.js?v=144"></script>
+<script src="zerstoerer/bilanz.js?v=144"></script>
+<script src="zerstoerer/kampfkunst.js?v=144"></script>
+<script src="zerstoerer/hintergrund.js?v=144"></script>
+<script src="zerstoerer/bilderbuch.js?v=144"></script>
+<script src="zerstoerer/tageszeit.js?v=144"></script>
+<script src="zerstoerer/abenteuer.js?v=144"></script>
+<script src="zerstoerer/fluch.js?v=144"></script>
+<script src="zerstoerer/fluchkraft.js?v=144"></script>
+<script src="zerstoerer/ebenen.js?v=144"></script>
+<script src="zerstoerer/erkundung.js?v=144"></script>
+<script src="zerstoerer/spuren.js?v=144"></script>
+<script src="zerstoerer/effekte.js?v=144"></script>
+<script src="zerstoerer/hinterhalt.js?v=144"></script>
+<script src="zerstoerer/leben.js?v=144"></script>
+<script src="zerstoerer/gegnerkunst.js?v=144"></script>
+<script src="zerstoerer/demogorgon.js?v=144"></script>
+<script src="zerstoerer/nemesis.js?v=144"></script>
+<script src="zerstoerer/wetter.js?v=144"></script>
+<script src="zerstoerer/wunder.js?v=144"></script>
+<script src="zerstoerer/ausstattung.js?v=144"></script>
+<script src="zerstoerer/ausgleich.js?v=144"></script>
+<script src="zerstoerer/ui.js?v=144"></script>
+<script src="zerstoerer/praesentation.js?v=144"></script>
+<script src="zerstoerer/schmiede.js?v=144"></script>
+<script src="zerstoerer/runen.js?v=144"></script>
+<script src="zerstoerer/tagebuch.js?v=144"></script>
+<script src="zerstoerer/schilder.js?v=144"></script>
+<script src="zerstoerer/weltspuren.js?v=144"></script>
+<script src="zerstoerer/uebergang.js?v=144"></script>
+<script src="zerstoerer/rueckweg.js?v=144"></script>
+<script src="zerstoerer/haerte.js?v=144"></script> <!-- W9 Härte -->
+<script src="zerstoerer/weltkarte.js?v=144"></script> <!-- W21 -->
+<script src="zerstoerer/rueckblick.js?v=144"></script> <!-- W21 -->
+<script src="zerstoerer/bossrausch.js?v=144"></script> <!-- W21 -->
+<script src="zerstoerer/bericht.js?v=144"></script> <!-- W31 -->
+<script src="zerstoerer/lerntipps.js?v=144"></script> <!-- W31 -->
+<script src="zerstoerer/zugang.js?v=144"></script> <!-- W31 -->
+<script src="zerstoerer/mutationen.js?v=144"></script> <!-- W29 Mutationen -->
+<script src="zerstoerer/koop.js?v=144"></script> <!-- W27 Koop (zuletzt laden) -->
+<script src="zerstoerer/auftraege.js?v=144"></script> <!-- W28 Lager -->
+<script src="zerstoerer/lagerwelt.js?v=144"></script> <!-- W28 Lager -->
+<script src="zerstoerer/online.js?v=144"></script> <!-- W32 Online (nach koop.js) -->
 </body>
 </html>
