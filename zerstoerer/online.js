@@ -372,6 +372,11 @@
       return up.apply(this, arguments);
     };
     /* Spieler 2 über das Netz: Händler/Gespräche öffnen Fenster beim Gastgeber – das bleibt dem Gastgeber vorbehalten */
+    /* W32 Online: Boss-Auftritt/-Fall (uebergang.js) auch beim Gast zeigen – der Gast bekommt nur den Verweis auf den Boss */
+    for (const [fn, t] of [["bossIntro", "bi"], ["bossDown", "bd"]]) { const f = Z.ui[fn]; if (typeof f !== "function") continue; Z.ui[fn] = function (e) { try { if (S.role === "host" && S.playing && S.link && e && typeof e === "object") { let id = S.ids.get(e); if (!id) { id = S.nid++; S.ids.set(e, id); } S.link.sendR({ t: t, k: "E" + id, n: S.area }); } } catch (x) { } return f.apply(this, arguments); }; }
+    /* W32 Online: Wandlungsschrein (mutationen.js) – öffnet Spieler 2 über das Netz den Schrein, erscheint die Wahl beim GAST;
+       der Gastgeber prüft die Antwort (nur angebotene Gabe, nur eigene zum Ersetzen) und trägt sie ein */
+    if (Z.mut && Z.mut.oeffne) { const mo = Z.mut.oeffne; Z.mut.oeffne = function (Pw) { const k = K(); if (S.role === "host" && S.playing && S.link && k && Pw && Pw === k.p2 && k.src && k.src.kind === "net") return mutAnGast(Pw); return mo.apply(this, arguments); }; }
     if (Z._koopInteract) { const ki = Z._koopInteract; Z._koopInteract = function (tg) { if (S.role === "host" && S.playing && Z.koop && Z.koop.src && Z.koop.src.kind === "net" && tg && (tg.type === "station" || tg.type === "npc")) { if (S.link) S.link.sendR({ t: "note", k: "station" }); return; } return ki.apply(this, arguments); }; }
     /* Schnappschüsse nach jedem Bild */
     const loop = () => { requestAnimationFrame(loop); try { hostFrame(); } catch (e) { console.warn("W32 host", e); } };
@@ -427,8 +432,25 @@
       case "ping": return onPing(m);
       case "pong": return onPong(m);
       case "req": if (m.w === "full") { S.ack = -1; S.hist.clear(); return; } if (m.w === "tiles" && Z.level && Z.level.tiles && int(m.n, 0, 1e9, -1) === S.area) S.link.sendR({ t: "tiles", n: S.area, d: b64u(Z.level.tiles) }); return;
+      case "mutw": return mutAntwort(m);
       case "bye": return endSession(L(["Der Mitspieler hat das Spiel verlassen.", "The other player left."]));
     }
+  }
+  function mutAnGast(P) {
+    const lv = Z.level, M = Z.mut; if (!lv || !lv._mut || lv._mut.wahl[1]) return;
+    lv._mut.angebot = lv._mut.angebot || {}; const ang = lv._mut.angebot[1] || (lv._mut.angebot[1] = M.angebot(P));
+    S.mutOffen = { lv, ang: ang.slice() };
+    S.link.sendR({ t: "mut", ang: ang.slice(0, 6), akt: M.of(P).slice(0, 6), max: M.MAX || 3 });
+  }
+  function mutAntwort(m) {
+    const o = S.mutOffen, k = K(), P = k && k.p2, M = Z.mut; S.mutOffen = null;
+    if (!o || !P || !M || o.lv !== Z.level || !Z.level._mut || Z.level._mut.wahl[1]) return;
+    if (m.id === "-") { Z.level._mut.wahl[1] = "-"; return; }
+    if (typeof m.id !== "string" || o.ang.indexOf(m.id) < 0) return;
+    const alt = typeof m.alt === "string" && M.of(P).indexOf(m.alt) >= 0 ? m.alt : null;
+    if (M.of(P).length >= (M.MAX || 3) && !alt) return;
+    if (alt) M.weg(P, alt);
+    if (M.gib(P, m.id)) { Z.level._mut.wahl[1] = m.id; try { Z.audio.play("holy", { vol: 0.5 }); } catch (e) { } }
   }
   function hostInput(m) {
     /* Grenze: höchstens ~150 Eingabe-Nachrichten je Sekunde, nur Bits, Folgenummern steigend */
@@ -553,6 +575,8 @@
       case "credit": return guestCredit(m);
       case "ping": return onPing(m);
       case "pong": return onPong(m);
+      case "mut": return mutFenster(m);
+      case "bi": case "bd": if (typeof m.k === "string" && /^E\d{1,9}$/.test(m.k) && int(m.n, 0, 1e9, -1) === S.areaN) S.szene = { t: m.t, k: m.k, at: now() }; return;
       case "note": if (m.k === "station") Z.toast && Z.toast(L(["Händler und Gespräche übernimmt der Gastgeber.", "The host handles merchants and talks."])); return;
       case "bye": return endSession(m.why === "voll" ? L(["Der Raum ist schon voll.", "The room is full."]) : m.why === "ver" ? L(["Unterschiedliche Spielversion – bitte beide die Seite neu laden.", "Different game versions – please both reload."]) : L(["Der Gastgeber hat das Spiel beendet.", "The host ended the game."]));
     }
@@ -589,6 +613,24 @@
     S.fading = true; setTimeout(run1, 1500);
     if (Z.ui && Z.ui.fade && Z.level && !document.hidden) { try { Z.ui.fade(run1); } catch (e) { run1(); } } else run1();
   }
+  /* Wandlungsschrein beim Gast: eigene Wahl (Daten nur aus der eigenen Gaben-Liste), Antwort an den Gastgeber */
+  function mutFenster(m) {
+    const M = Z.mut; if (!M || !Array.isArray(m.ang)) return;
+    const by = id => (typeof id === "string" ? M.liste.find(g => g.id === id) : null);
+    const ang = m.ang.filter(by).slice(0, 6), akt = (Array.isArray(m.akt) ? m.akt : []).filter(by).slice(0, 6);
+    if (!ang.length) return;
+    S.mutW = { ang, akt, voll: akt.length >= int(m.max, 1, 9, 3), neu: null };
+    mutZeichne();
+  }
+  function mutKarte(g, i, act) { const f = Z.mut.FAM[g.f] || {}; return '<button class="mut-karte" style="--fc:' + esc(f.col || "#ffd27a") + '" data-zso="' + act + '" data-h="' + esc(g.id) + '"' + (i === 0 ? " autofocus" : "") + '><span class="mut-ico">' + (f.ico || "") + "</span><b>" + esc(L(g.n)) + '</b><span class="mut-fam">' + esc(L(f.n || "")) + "</span><small>" + esc(L(g.d)) + "</small></button>"; }
+  function mutZeichne() {
+    const w = S.mutW, M = Z.mut; if (!w) return; const by = id => M.liste.find(g => g.id === id);
+    const html = w.neu
+      ? "<h2>" + esc(L(["Welche Gabe weicht?", "Which gift gives way?"])) + '</h2><div class="mut-reihe">' + w.akt.map((id, i) => mutKarte(by(id), i, "mutalt")).join("") + '</div><div class="knoepfe"><button data-zso="mutback">' + esc(L(["Zurück", "Back"])) + "</button></div>"
+      : "<h2>" + esc(L(["Wandlungsschrein", "Shrine of Change"])) + '</h2><p class="hinweis">' + esc(L(["Wähle eine Gabe für deine Figur. Höchstens drei wirken zugleich" + (w.voll ? " – deine Gaben sind voll, du ersetzt danach eine." : "."), "Choose a gift for your hero. At most three work at once" + (w.voll ? " – yours are full, you will replace one next." : ".")])) + '</p><div class="mut-reihe">' + w.ang.map((id, i) => mutKarte(by(id), i, "mutnimm")).join("") + "</div>" + (w.akt.length ? '<p class="mut-aktiv">' + esc(L(["Aktiv: ", "Active: "]) + w.akt.map(id => L(by(id).n)).join(" · ")) + "</p>" : "") + '<div class="knoepfe"><button data-zso="mutskip">' + esc(L(["Nichts nehmen", "Take nothing"])) + "</button></div>";
+    Z.ui.open('<div class="mutwahl zso-mut">' + html + "</div>", { cls: "breit", force: true });
+  }
+  function mutSende(id, alt) { const w = S.mutW; S.mutW = null; if (S.link) S.link.sendR({ t: "mutw", id, alt: alt || null }); Z.ui.close(); if (id !== "-") { const g = Z.mut.liste.find(x => x.id === id); if (g) Z.toast && Z.toast(L(["Gabe gewählt: ", "Gift chosen: "]) + "<b>" + esc(L(g.n)) + "</b>"); } }
   function guestTiles(m, full) {
     const lv = Z.level; if (!lv || !lv.tiles || int(m.n, 0, 1e9, -1) !== S.areaN) return;
     if (full) {
@@ -746,6 +788,8 @@
     /* Lauf vorbei (beide gefallen): der Gastgeber entscheidet im Todesfenster, der Gast bekommt einen Hinweis */
     const bothDown = !!(P && P.dead && kk && kk.p2 && kk.p2.down);
     if (bothDown && !S.endNote) { S.endNote = true; Z.toast && Z.toast(L(["Beide gefallen – der Gastgeber führt euch zurück ins Lager.", "Both fallen – the host leads you back to camp."])); } else if (!bothDown) S.endNote = false;
+    /* Boss-Auftritt/-Fall: sobald der Boss beim Gast existiert, dieselbe Szene zeigen (höchstens 4 s warten) */
+    if (S.szene) { const sz = S.szene, o = live.get(sz.k); if (o && o.def) { S.szene = null; try { (sz.t === "bi" ? Z.ui.bossIntro : Z.ui.bossDown).call(Z.ui, o); } catch (e) { console.warn("W32 szene", e); } } else if (now() - sz.at > 4000) S.szene = null; }
     /* 4) Weltzustand */
     const g = B.get("g");
     if (g) {
@@ -870,6 +914,10 @@
     else if (a === "mans") { const t = document.getElementById("zso-mans"); manualAccept(t ? t.value : "").catch(() => fail("fmt")); }
     else if (a === "leave") { endSession(L(["Online-Spiel beendet.", "Online game ended."])); draw(true); }
     else if (a === "close") { Z.ui.close(); }
+    else if (a === "mutnimm" && S.mutW) { const id = b.dataset.h; if (S.mutW.ang.indexOf(id) < 0) return; if (S.mutW.voll) { S.mutW.neu = id; mutZeichne(); } else mutSende(id, null); }
+    else if (a === "mutalt" && S.mutW && S.mutW.neu) { const alt = b.dataset.h; if (S.mutW.akt.indexOf(alt) >= 0) mutSende(S.mutW.neu, alt); }
+    else if (a === "mutback" && S.mutW) { S.mutW.neu = null; mutZeichne(); }
+    else if (a === "mutskip" && S.mutW) mutSende("-", null);
   }, true);
 
   /* Statusanzeige im Spiel (eigener HUD-Streifen: Rolle, Ping, eigene Lebenspunkte beim Gast) */

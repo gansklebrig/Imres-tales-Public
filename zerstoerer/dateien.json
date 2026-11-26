@@ -5152,6 +5152,14 @@
 "groesse":16245,
 "sha256":"c015cd21dffb9ec873901c6e69cc85ed5e9eac885370f61538206946d4e763e5"
 },
+"klang/bd.mp3":{
+"groesse":25965,
+"sha256":"d517b6d159baf9efa27fdbb19cc973683aa730c656b34d3cdf724f98e6c19d2d"
+},
+"klang/bdroll.mp3":{
+"groesse":41085,
+"sha256":"f1785c8f5a5c8c5f22734743d524390ac5b365bc62e6fc3ca7ce729283130ce1"
+},
 "klang/beckenroll.mp3":{
 "groesse":96907,
 "sha256":"e4a79666fcb71608a21b5be9a76d86fca399db4579a337d62d062c3aa6e6a1c8"
@@ -9690,7 +9698,7 @@
 },
 "zerstoerer.html":{
 "groesse":70340,
-"sha256":"a2e5895eb97d221b13caf5dd5c70ee8f82095bc5b20c687eea598d57275db00f"
+"sha256":"098d749be88f60949aa5805ef9e7208c9cbe8374d8b8be18bfedafcef93f474e"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":144658,
@@ -9857,8 +9865,8 @@
 "sha256":"7676a5fcbe9ba9acb7d6622564b5cd39f88e922bbfd51110db8984465c004bb9"
 },
 "zerstoerer/online.js":{
-"groesse":76423,
-"sha256":"413fab081edf1a6a1b4aa60ce1c895528672e5a42e934699b6d7c3b251a4d746"
+"groesse":82069,
+"sha256":"c623a5f4a32aeb455eb4a65db45f18f41d2c85d4705eb4d6efef55847f07389f"
 },
 "zerstoerer/parcours.js":{
 "groesse":39202,
@@ -9953,5 +9961,5 @@
 "sha256":"2239cd79f01c377c38cdcecf8d827774c46b23cf9e74f4481be6463ca0b129e0"
 }
 },
-"stand":145
+"stand":146
 }
