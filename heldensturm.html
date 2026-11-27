@@ -40531,7 +40531,9 @@ window.__hsGOLD2={v:1,kauf:0,wette:0,gew:0};
 .g2box h3{margin:0;font-variant:small-caps;color:#f0d08a;font-size:20px}.g2box p{margin:0;font-size:14px;line-height:1.35}
 .g2grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.g2grid button{min-height:34px;font-size:14px;padding:4px 6px}
 .g2grid button.an{background:#5a4320;border-color:#e5b454;color:#ffe2a0}.g2klein{font-size:12px;color:#c8b898}.g2row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
-@media (max-height:420px){.g2box{padding:6px 10px;gap:4px}.g2box h3{font-size:16px}.g2box p{font-size:12px}.g2grid button{min-height:28px;font-size:12px}}`;document.head.appendChild(css);
+@media (max-height:420px){.g2box{padding:6px 10px;gap:4px}.g2box h3{font-size:16px}.g2box p{font-size:12px}.g2grid button{min-height:28px;font-size:12px}}
+/* große Bildschirme: Hehler/Wette wachsen mit (bisher feste 560 px mit 14-px-Schrift – auf Full-HD und größer winzig) */
+@media (min-height:900px) and (min-width:1400px){.g2box{zoom:1.35}}@media (min-height:1350px) and (min-width:2200px){.g2box{zoom:1.75}}`;document.head.appendChild(css);
  let zu=null;
  function ov(html){schliessen();const d=document.createElement('div');d.className='g2ov';d.innerHTML=`<div class="g2box" role="dialog">${html}</div>`;(scr||document.body).appendChild(d);zu=d;const b=d.querySelector('button');try{b&&b.focus()}catch(e){}}
  function schliessen(){if(zu){zu.remove();zu=null}}
