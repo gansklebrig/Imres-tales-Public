@@ -21,6 +21,7 @@
 /* Menüs im Spiel: Weltschrift nicht mehr durchscheinen lassen */html.obB body:not(.imresTitel) #scr.mfhost{background-color:rgba(12,8,7,.985)}
 /* Offline-Seite auf flachen Bildschirmen: vier Karten nebeneinander statt Umbruch über die Fußzeile */@media (max-height:560px) and (min-width:600px){.offpg .offgrid.offgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:.5em}.offpg .offk{padding:.6em .7em}}
 /* Ultrawide: Ziel-Leiste nicht über die ganze Breite ziehen */@media (min-aspect-ratio:21/10) and (min-width:1800px){#hud .top>.panel.stage{max-width:1000px;width:100%;justify-self:center}}
+/* 1440p+: Zurück-Knopf mitwachsen */@media (min-width:2300px) and (min-height:1300px){html #scr .fzk.fzk,html .fzk.fzk{height:58px!important;font-size:21px!important;padding:0 22px 0 18px!important}}
 /* Großbild: Eckknöpfe des Titels mitwachsen lassen */@media (min-width:2200px) and (min-height:1300px){#imresBack{font-size:15px;padding:6px 14px}.camp-top .slbtn{font-size:20px}.mfbar .mft{font-size:17px}}@media (min-width:1900px) and (min-height:1150px){.slm>.slp{zoom:1.15;width:calc(100% / 1.15)}}@media (min-width:2300px) and (min-height:1350px){.slm>.slp{zoom:1.32;width:calc(100% / 1.32)}.slm-in>.slm-l{zoom:1.28}}@media (min-width:2200px) and (min-height:1300px){.wrap.ivg .bag.ivsz .it .ico.ico{width:clamp(20px,calc(var(--ivs) * .4),58px)!important;height:clamp(20px,calc(var(--ivs) * .4),58px)!important}}
 </style>
 <script src="tonregler.js?v=1"></script>
@@ -26679,7 +26680,7 @@ const FZK={sel:['[data-act="sl-back"]','[data-act="net-back"]','[data-act="net-c
  .fzk[data-fzk-k]:not([data-fzk-k=""])::after{font-size:10px;padding:2px 5px;margin-left:6px}}
 @media (min-width:1900px) and (min-height:900px){#scr .fzk,.fzk{height:48px!important;font-size:17px!important;padding:0 18px 0 15px!important}}
 /* Platz für den Knopf: Reiterleiste, Lager-Kopf und Kopfzeilen rücken nach links */
-#scr{--fzkw:136px}@media (max-width:760px),(max-height:520px){#scr{--fzkw:112px}}@media (min-width:1900px) and (min-height:900px){#scr{--fzkw:156px}}
+#scr{--fzkw:136px}@media (max-width:760px),(max-height:520px){#scr{--fzkw:112px}}@media (min-width:1900px) and (min-height:900px){#scr{--fzkw:156px}}@media (min-width:2300px) and (min-height:1300px){#scr{--fzkw:190px}}
 #scr.fzk-on .seg.mtabs.fzk-platz,#scr.fzk-on .fzk-platz{margin-right:var(--fzkw)!important}
 #scr.fzk-on .camp-top{padding-right:var(--fzkw)}
 #scr .fzk-dup{display:none!important}`;document.head.appendChild(st)}
