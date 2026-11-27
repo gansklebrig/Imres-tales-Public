@@ -146,7 +146,7 @@
     if (hub) {
       const l = stationen();
       if (l.length) {
-        h += "<h3>" + esc(L(["Im Lager", "In camp"])) + ' <small class="hinweis">' + esc(L(["Hingehen bringt dich direkt hin", "Go takes you straight there"])) + '</small></h3><div class="zl-weg">';
+        h += "<h3>" + esc(L(["Im Lager", "In camp"])) + ' <small class="hinweis">' + esc(L(["Hingehen bringt dich direkt hin", "'Go' takes you straight there"])) + '</small></h3><div class="zl-weg">';
         l.forEach((s, i) => { h += '<button data-act="zlGeh" data-arg="' + i + '"' + (s.neu ? ' class="neu"' : "") + ">" + (s.neu ? '<i class="zl-neu">!</i>' : "") + esc(s.lab) + "</button>"; });
         h += "</div>";
       }
@@ -246,7 +246,7 @@
     edda: { a: [["Ich hab heute drei Gänge gezeichnet. Zwei davon gab es gestern noch nicht.", "I drew three corridors today. Two of them didn't exist yesterday."], ["Nimm die linke Abzweigung. Oder die rechte. Hauptsache, du kommst wieder.", "Take the left fork. Or the right. Just come back."], ["Wenn du einen Raum ohne Ausgang findest – sag Bescheid, bevor du drin bleibst.", "If you find a room with no exit, tell me before you stay in it."]],
       n: [["Ein Kreuz im Boden? Das ist nicht von mir. Graben solltest du trotzdem.", "A cross on the floor? Not mine. You should still dig."]] },
     quirin: { a: [["Das hier blubbert. Das soll es auch. Glaube ich.", "This one bubbles. It's supposed to. I think."], ["Wenn es grün raucht, lauf. Wenn es lila raucht, lauf schneller.", "If it smokes green, run. If it smokes purple, run faster."], ["Ich nenne den Trank „Mut“. Er schmeckt nach Angst.", "I call this potion 'Courage'. It tastes like fear."]],
-      n: [["Seelenflut? Bring mir einen Splitter davon. Nur einen. Für die Wissenschaft.", "Soul tide? Bring me one shard of it. Just one. For science."]] },
+      n: [["Seelenflut? Bring mir einen Splitter davon. Nur einen. Für die Wissenschaft.", "Soul Tide? Bring me one shard of it. Just one. For science."]] },
     sigrun: { a: [["Die Runen schweigen heute. Das ist auch eine Antwort.", "The runes are silent today. That is an answer too."], ["Du gehst wieder hinein. Das wusste ich, bevor du es wusstest.", "You are going back in. I knew before you did."], ["Ein Faden reißt, ein anderer hält. So ist es immer.", "One thread snaps, another holds. It is always so."]],
       n: [["Der Sonnenstein zeigt jeden Tag dieselbe Feste. Nur du bist jeden Tag ein anderer.", "The sunstone shows the same keep every day. Only you are different each day."]] },
     wendel: { a: [["Rex hat heute zweimal geknurrt. Einmal davon war ein Kompliment.", "Rex growled twice today. Once was a compliment."], ["Bestien sind ehrlich. Sie beißen, wenn sie beißen wollen.", "Beasts are honest. They bite when they want to bite."], ["Wer ein Wolfsrudel trennt, hat schon halb gewonnen. Wer es nicht schafft – rennt.", "Split a wolf pack and you've half won. Fail – and you run."]],

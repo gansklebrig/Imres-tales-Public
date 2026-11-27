@@ -108,7 +108,7 @@
     },
     scherenspeer: {
       n: ["Krebsscherenspeer", "Crab-Claw Spear"], kind: "melee", stat: "ueber", find: "selten", tier: 1, icon: "spear", col: "#d8706a",
-      d: ["Der Speer der Kuo-Toa. Stöße durchbohren alles in einer Linie; der dritte schnappt zu und hält fest. Kritisch gegen Gegner in der Luft.", "The spear of the kuo-toa. Thrusts pierce everything in a line; the third snaps shut and holds. Crits airborne enemies."],
+      d: ["Der Speer der Kuo-Toa. Stöße durchbohren alles in einer Linie; der dritte schnappt zu und hält fest. Kritisch gegen Gegner in der Luft.", "The spear of the kuo-toa. Thrusts pierce everything in a line; the third snaps shut and holds. Crits against airborne enemies."],
       combo: [
         { pre: 0.07, act: 0.07, post: 0.12, dmg: 14, box: [4, -24, 52, 10], lunge: 80, kb: 70, sw: "spear", smear: { r: 50, a0: -0.04, a1: 0.04, th: 3, stab: true } },
         { pre: 0.07, act: 0.07, post: 0.12, dmg: 14, box: [4, -24, 52, 10], lunge: 80, kb: 70, sw: "spear", smear: { r: 50, a0: 0.04, a1: -0.04, th: 3, stab: true } },
@@ -286,8 +286,8 @@
     kritisch: { n: ["Tödlich", "Deadly"], d: ["+15 % kritische Trefferchance", "+15% crit chance"] },
     flink: { n: ["Flink", "Swift"], d: ["+18 % Angriffstempo", "+18% attack speed"] },
     zornig: { n: ["Zornig", "Wrathful"], d: ["+40 % Schaden unter 50 % Leben", "+40% damage below 50% health"] },
-    jagend: { n: ["Jagend", "Hunting"], d: ["+40 % gegen Elite und Bosse", "+40% vs elites and bosses"] },
-    gepanzert: { n: ["Gepanzert", "Armoured"], d: ["-12 % erlittener Schaden", "-12% damage taken"] },
+    jagend: { n: ["Jagend", "Hunting"], d: ["+40 % gegen Elites und Bosse", "+40% vs elites and bosses"] },
+    gepanzert: { n: ["Gepanzert", "Armoured"], d: ["−12 % erlittener Schaden", "−12% damage taken"] },
     splitternd: { n: ["Splitternd", "Shard-hungry"], d: ["+30 % Seelensplitter", "+30% soul shards"] },
     fesselnd: { n: ["Fesselnd", "Binding"], d: ["+40 % gegen Betäubte und Gefesselte", "+40% vs stunned and rooted"] },
     meuchelnd: { n: ["Meuchelnd", "Backstabbing"], d: ["Von hinten immer kritisch", "Always crit from behind"] }
@@ -409,7 +409,7 @@
       ["Finden musst du sie trotzdem selbst. Ich schmiede Glück nicht. Nur Stahl.", "You still have to find them yourself. I don't forge luck. Only steel."],
       ["Siehst du in der Feste einen glühenden Amboss: Das ist meiner. Bring Glut und Gold, dann hämmert er für dich.", "If you see a glowing anvil in the keep: that's mine. Bring embers and gold and it will hammer for you."],
       ["Bei Stufe zwei und vier frisst der Stahl eine Rune. Wähl gut – herausschlagen lässt sie sich nicht.", "At level two and four the steel swallows a rune. Choose well – you can't knock it out again."]],
-    R: [["Wuff.", "Woof."], ["Rex wedelt. Er hat einen Stock gefunden. Er hält ihn für eine legendäre Waffe.", "Rex wags. He found a stick. He thinks it's a legendary weapon."]],
+    R: [["Wuff.", "Woof."], ["Rex wedelt. Er hat einen Stock gefunden. Er hält ihn für eine legendäre Waffe.", "Rex wags his tail. He found a stick. He thinks it's a legendary weapon."]],
     C: [["Die Schädel an deinem Gürtel. Jeder einzelne macht die Feste grausamer – und die Beute besser.", "The skulls on your belt. Each one makes the keep crueller – and the loot better."]]
   };
 

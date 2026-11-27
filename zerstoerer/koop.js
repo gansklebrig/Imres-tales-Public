@@ -74,7 +74,7 @@
       const a = K.capture; K.capture = null;
       if (e.code === "Escape") return ctrlRedraw(L(["Abgebrochen.", "Cancelled."]));
       if (e.code === "Delete") { keys2[a] = null; saveStore(); return ctrlRedraw(L(["Feld geleert.", "Field cleared."])); }
-      if (p1Codes().has(e.code)) return ctrlRedraw(L(["„", "“"])[0] + inp.keyName(e.code) + L(["“ gehört schon Spieler 1 – erst dort freigeben.", "” already belongs to player 1 – free it there first."]));
+      if (p1Codes().has(e.code)) return ctrlRedraw(L(["„", "“"])[0] + inp.keyName(e.code) + L(["“ gehört schon Spieler 1 – erst dort freigeben.", "” already belongs to Player 1 – free it there first."]));
       for (const b of ACT) if (b !== a && keys2[b] === e.code) keys2[b] = keys2[a] || null;
       keys2[a] = e.code; saveStore(); A.play("uiOk", { vol: 0.4 }); return ctrlRedraw();
     }
@@ -948,7 +948,7 @@
         note(L(["Doppelschlag – beide ausweichen!", "Twin strike – both of you dodge!"])); A.play("rune", { vol: 0.5 });
       } else {
         K.band = { t: 0, life: 5, warn: 1.2, tick: 0, dmg: Math.round(Math.max(Q.hpMax, P.hpMax) * 0.05) };
-        note(L(["Fadenband – bleibt zusammen!", "Fate thread – stay together!"])); A.play("web", { vol: 0.6 });
+        note(L(["Fadenband – bleibt zusammen!", "Thread bond – stay together!"])); A.play("web", { vol: 0.6 });
       }
     }
     const F = K.band; if (!F) return;
@@ -1410,7 +1410,7 @@
 
   /* ======================= MENÜS: PAUSE & STEUERUNG ======================= */
   const acts = Z.ui && Z.ui.actions;
-  Z.koopPauseHTML = () => '<button data-act="koopMenu">' + (K.p2 ? L(["Koop: ", "Co-op: "]) + CH[K.p2.ch].n : L(["Koop: Spieler 2 …", "Co-op: player 2…"])) + "</button>";
+  Z.koopPauseHTML = () => '<button data-act="koopMenu">' + (K.p2 ? L(["Koop: ", "Co-op: "]) + CH[K.p2.ch].n : L(["Koop: Spieler 2 …", "Co-op: Player 2…"])) + "</button>";
   function koopMenu() {
     const P = K.p2;
     const padN = PADS().filter(g => g && g.connected).length;
@@ -1444,7 +1444,7 @@
     const rows = ACT.map(a => '<tr><th>' + esc(L(NAMES[a])) + '</th><td><button class="koop-beleg' + (keys2[a] ? "" : " leer") + '" data-act="koopBind" data-arg="' + a + '">' + esc(keys2[a] ? inp.keyName(keys2[a]) : "–") + "</button></td></tr>").join("");
     const m = ctrlMsg; ctrlMsg = "";
     return '<h3 id="koop-steuerung">' + L(["Spieler 2 (Koop)", "Player 2 (co-op)"]) + "</h3>" +
-      '<p class="hinweis">' + L(["Am Controller nutzt Spieler 2 dieselbe Knopfbelegung wie oben. Für die Tastatur hat Spieler 2 eine eigene Hälfte:", "On a controller player 2 uses the same button layout as above. On the keyboard player 2 has their own half:"]) + "</p>" +
+      '<p class="hinweis">' + L(["Am Controller nutzt Spieler 2 dieselbe Knopfbelegung wie oben. Für die Tastatur hat Spieler 2 eine eigene Hälfte:", "On a controller, Player 2 uses the same button layout as above. On the keyboard, Player 2 has their own half:"]) + "</p>" +
       '<div class="st-vorlagen"><span>' + L(["Vorlage:", "Preset:"]) + '</span><button class="k-seg" data-act="koopPreset" data-arg="num">' + L(["Ziffernblock", "Numpad"]) + '</button><button class="k-seg" data-act="koopPreset" data-arg="pfeil">' + L(["Pfeiltasten + , . Ö Ä", "Arrow keys + , . ; '"]) + "</button></div>" +
       (m ? '<p class="hinweis"><span class="st-msg">' + esc(m) + "</span></p>" : "") +
       '<table class="koop-tab"><tbody>' + rows + "</tbody></table>";

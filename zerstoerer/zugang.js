@@ -330,10 +330,10 @@
   function rowsNeu() {
     const s = S(), sk = skala();
     return "<h3>" + L(["Farben", "Colours"]) + "</h3>" +
-      row("farbsicht", L(["Farbenblind-Modus", "Colour-blind mode"]), L(["Echte Farbabbildung für Gefahren, Gift, Feuer, Warnungen, Gegner-Ausholen, Karte und Anzeigen – dazu Symbole für Gift ◆ und Feuer ▲.", "True palette mapping for hazards, poison, fire, warnings, enemy wind-ups, map and HUD – plus symbols for poison and fire."]), seg("farbsicht", OPT.farbsicht, s.farbsicht)) +
+      row("farbsicht", L(["Farbenblind-Modus", "Colour-blind mode"]), L(["Echte Farbabbildung für Gefahren, Gift, Feuer, Warnungen, Gegner-Ausholen, Karte und Anzeigen – dazu Symbole für Gift ◆ und Feuer ▲.", "True palette mapping for hazards, poison, fire, warnings, enemy wind-ups, map and HUD – plus symbols for poison ◆ and fire ▲."]), seg("farbsicht", OPT.farbsicht, s.farbsicht)) +
       '<div class="w31-vorschau"><canvas width="560" height="96" aria-label="' + esc(L(["Vorschau der Farben", "Colour preview"])) + '"></canvas></div>' +
       "<h3>" + L(["Schrift & Oberfläche", "Text & interface"]) + "</h3>" +
-      row("uiSkala", L(["Schriftgröße / Oberfläche", "Text size / interface"]) + ' <em data-out="uiSkala">' + sk + " %</em>", L(["Alle Fenster, Meldungen und die Anzeige wachsen mit (90–150 %). Passt sich an kleine Bildschirme an.", "All windows, messages and the HUD scale (90–150 %). Adapts to small screens."]),
+      row("uiSkala", L(["Schriftgröße / Oberfläche", "Text size / interface"]) + ' <em data-out="uiSkala">' + sk + " %</em>", L(["Alle Fenster, Meldungen und die Anzeige wachsen mit (90–150 %). Passt sich an kleine Bildschirme an.", "All windows, messages and the HUD scale (90–150%). Adapts to small screens."]),
         '<div class="k-regler"><input type="range" min="90" max="150" step="5" value="' + sk + '" data-w31skala="1" aria-label="' + esc(L(["Schriftgröße", "Text size"])) + '"></div>') +
       "<h3>" + L(["Warnungen & Untertitel", "Warnings & captions"]) + "</h3>" +
       row("warnSymbol", L(["Angriffswarnung als Symbol", "Attack warning as a symbol"]), L(["„!“ über jedem Gegner, der ausholt; Pfeil am Bildrand für Angriffe, Geschosse und Boss-Großangriffe von außerhalb.", "'!' above every enemy winding up; an arrow at the screen edge for attacks, projectiles and boss attacks from off-screen."]), b("warnSymbol")) +
@@ -425,8 +425,8 @@
       padHinweisEl.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; padHinweisEl.hidden = true; if (b.dataset.w31 === "ja") { try { Z.ui.actions.koopMenu(); } catch (err) { console.error(err); } } });
       document.body.appendChild(padHinweisEl);
     }
-    padHinweisEl.innerHTML = "<b>🎮 " + esc(L(["Controller erkannt", "Controller detected"])) + "</b><span>" + esc(L(["Ezekiel spielt weiter mit der Tastatur. Mitspielen? Pause → „Koop: Spieler 2 …“", "Ezekiel keeps the keyboard. Play together? Pause → 'Co-op: player 2…'"])) + "</span>" +
-      '<div><button data-w31="ja">' + esc(L(["Als Spieler 2 beitreten", "Join as player 2"])) + '</button><button data-w31="nein">' + esc(L(["Nein danke", "No thanks"])) + "</button></div>";
+    padHinweisEl.innerHTML = "<b>🎮 " + esc(L(["Controller erkannt", "Controller detected"])) + "</b><span>" + esc(L(["Ezekiel spielt weiter mit der Tastatur. Mitspielen? Pause → „Koop: Spieler 2 …“", "Ezekiel keeps the keyboard. Play together? Pause → 'Co-op: Player 2…'"])) + "</span>" +
+      '<div><button data-w31="ja">' + esc(L(["Als Spieler 2 beitreten", "Join as Player 2"])) + '</button><button data-w31="nein">' + esc(L(["Nein danke", "No thanks"])) + "</button></div>";
     padHinweisEl.hidden = false; padHinweisT = performance.now() + 12000;
   }
   addEventListener("gamepadconnected", () => { try { setTimeout(padHinweis, 0); } catch (_) {} });

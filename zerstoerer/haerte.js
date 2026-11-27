@@ -22,7 +22,7 @@
   const LOHN = [null, ["+10 % Splitter", "+10% shards"], ["+20 % Splitter", "+20% shards"], ["+30 % Splitter, Glut von Elites", "+30% shards, embers from elites"], ["+40 % Splitter, Glut von Elites", "+40% shards, embers from elites"], ["+50 % Splitter, Glut von Elites", "+50% shards, embers from elites"]];
   const CAPE = { 1: ["haerte1", ["Feldstein", "Fieldstone"], ["#7a6a5a", "#3a302a"]], 2: ["haerte2", ["Dürregold", "Drought Gold"], ["#c08a2a", "#5a3a0c"]], 3: ["haerte3", ["Hetzrot", "Chase Red"], ["#c0381e", "#5a1008"]],
     4: ["haerte4", ["Wachtschwarz", "Vigil Black"], ["#2a2224", "#0e0a0a"]], 5: ["haerte5", ["Fluchviolett", "Curse Violet"], ["#6a2a7a", "#2a0a30"]] };
-  const TITEL = { 1: ["der Unruhige", "the Restless"], 2: ["der Durstige Wanderer", "the Thirsty Wanderer"], 3: ["der Gehetzte", "the Hunted"], 4: ["der Wachsame", "the Vigilant"], 5: ["der Verfluchte", "the Accursed"] };
+  const TITEL = { 1: ["der Unruhige", "the Restless"], 2: ["der durstige Wanderer", "the Thirsty Wanderer"], 3: ["der Gehetzte", "the Hunted"], 4: ["der Wachsame", "the Vigilant"], 5: ["der Verfluchte", "the Accursed"] };
 
   const M = () => Z.meta;
   const stufe = () => Math.max(0, Math.min(MAXH, (Z.run && Z.run.skulls) || 0));

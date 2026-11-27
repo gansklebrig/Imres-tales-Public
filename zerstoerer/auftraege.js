@@ -105,7 +105,7 @@
     d: ["Saubere Schüsse. Rex hat nichts mehr gefunden, das zappelt.", "Clean shots. Rex found nothing still twitching."],
     r: RW(40, lore("Friedrichs erster Bogen", "Friedrich's first bow", "Den ersten Bogen hat mir mein Vater aus Eibe geschnitzt. Zu groß für mich. Ich hab ein Jahr lang nur Bäume getroffen. Dann einen Hasen. Dann hab ich geweint, weil der Hase tot war. Vater hat gesagt: Gut so. Wer nicht mehr weint, soll nicht mehr jagen.", "My father carved my first bow from yew. Too big for me. For a year I only hit trees. Then a hare. Then I cried because the hare was dead. Father said: good. Whoever stops crying should stop hunting.")) });
   q({ id: "f_falke", g: "friedrich", st: 1, ch: ["jagd", 1], ev: "dive", n: 8,
-    t: ["Erledige 8 Gegner mit Sturzangriffen.", "Finish 8 enemies with dive attacks."],
+    t: ["Erledige 8 Gegner mit Sturzangriffen.", "Finish 8 enemies with plunge attacks."],
     o: ["Von oben. Wie der Falke. Acht Stück. Der Boden fängt dich schon.", "From above. Like the falcon. Eight of them. The ground will catch you."],
     d: ["Falke. Hab ich doch gesagt.", "Falcon. Told you."],
     r: RW(45, lore("Der Falke über dem Moor", "The falcon over the moor", "Im Moor hinter Imres gab es einen Falken, der nie verfehlt hat. Ich hab drei Sommer lang zugesehen. Er wartet nicht auf die Beute. Er wartet auf den Moment, in dem die Beute vergisst, nach oben zu schauen.", "In the moor behind Imres there was a falcon that never missed. I watched it for three summers. It doesn't wait for the prey. It waits for the moment the prey forgets to look up.")) });
@@ -157,7 +157,7 @@
     o: ["Ein Baum, der heil bleibt, wächst. Verlass ein Gebiet mit vollem Leben. Ganz. Nicht fast.", "A tree that stays whole grows. Leave an area at full health. Full. Not almost."],
     d: ["Heil wie junge Rinde.", "Whole as young bark."], r: RW(30) });
   q({ id: "e_wasser", g: "echo", st: 2, ev: "kill", f: k => k.wasser, n: 12, req: () => seenGrp("wasser"),
-    t: ["Erledige 12 Kuo-Toa oder Ertrunkene.", "Finish 12 Kuo-Toa or drowned."],
+    t: ["Erledige 12 Kuo-Toa oder Ertrunkene.", "Finish 12 Kuo-toa or Drowned Ones."],
     o: ["Der Hafen stinkt nach falschem Wasser. Zwölf von den Fischköpfen, bitte. Die Frösche danken es dir.", "The harbour stinks of wrong water. Twelve of those fishheads, please. The frogs will thank you."],
     d: ["Das Wasser atmet wieder.", "The water breathes again."], r: RW(55) });
   q({ id: "e_wuchs", g: "echo", st: 3, ev: "kill", f: k => k.gewaechs, n: 10, req: () => seenGrp("gewaechs"),
@@ -527,10 +527,10 @@
     const r = x.r || {}, out = [];
     if (r.sh) out.push(r.sh + " ◆ " + L(["Seelensplitter", "soul shards"]));
     if (r.glut) out.push(r.glut + " ✦ " + L(["Glut zu Beginn des nächsten Laufs", "embers at the start of your next run"]));
-    if (r.lore) out.push("📖 " + L(["Geschichte: ", "Story: "]) + "„" + L(r.lore[0]) + "“");
+    if (r.lore) out.push("📖 " + L(["Geschichte: ", "Story: "]) + L(["„", "“"]) + L(r.lore[0]) + L(["“", "”"]));
     if (x.ch) {
       const C = CHAINS[x.ch[0]];
-      if (x.ch[1] === C.len - 1) { out.push("🏅 " + L(["Titel: ", "Title: "]) + "„" + L(C.titel) + "“"); out.push("🧥 " + L(["Umhang: ", "Cape: "]) + L(Z.CAPES[C.cape].n)); out.push("🏕 " + L(["Eine bleibende Spur im Lager", "A lasting mark on the camp"])); }
+      if (x.ch[1] === C.len - 1) { out.push("🏅 " + L(["Titel: ", "Title: "]) + L(["„", "“"]) + L(C.titel) + L(["“", "”"])); out.push("🧥 " + L(["Umhang: ", "Cape: "]) + L(Z.CAPES[C.cape].n)); out.push("🏕 " + L(["Eine bleibende Spur im Lager", "A lasting mark on the camp"])); }
       else out.push("🏕 " + L(["Das Lager wächst ein Stück (Ruhm)", "The camp grows a little (renown)"]));
     }
     return out;
@@ -591,7 +591,7 @@
     const G = GIVER[g]; if (!G) return;
     curG = g; const s = ST(), a = aktOf(g), x = a ? QI[a.id] : null, off = a ? null : offerOf(g);
     const quote = a && a.ok ? L(x.d) : a ? L(Z.R.pick(G.hi)) : off ? L(off.o) : L(Z.R.pick(G.none));
-    let h = '<div class="lg-kopf">' + portraitHTML(g) + '<div class="lg-kopftxt"><h2>' + esc(G.n) + " <small>" + esc(L(G.r)) + " · " + L(["Aufträge", "Tasks"]) + '</small></h2><p class="lg-zitat">„' + esc(quote) + '“</p></div><span class="bank">' + fmtN(M().shards || 0) + " ◆</span></div>";
+    let h = '<div class="lg-kopf">' + portraitHTML(g) + '<div class="lg-kopftxt"><h2>' + esc(G.n) + " <small>" + esc(L(G.r)) + " · " + L(["Aufträge", "Tasks"]) + '</small></h2><p class="lg-zitat">' + L(["„", "“"]) + esc(quote) + L(["“", "”"]) + '</p></div><span class="bank">' + fmtN(M().shards || 0) + " ◆</span></div>";
     if (a && a.ok) {
       h += "<h3>" + L(["Erledigt!", "Done!"]) + "</h3>" + taskHTML(x, a) + rewardHTML(x) + '<div class="knoepfe au-wahl"><button data-act="aufHol" data-arg="' + x.id + '" autofocus>🎁 ' + L(["Belohnung abholen", "Collect reward"]) + "</button></div>";
     } else if (a) {
@@ -633,7 +633,7 @@
     const G = GIVER[x.g], fin = x.ch && chainDone(x.ch[0]);
     try { if (Z.music && Z.music.stinger) Z.music.stinger("erfolg", { kat: "sammeln", gross: !!fin, stufe: fin ? "blut" : "gold" }); } catch (_) {}
     try { A.play("coin", { vol: 0.6 }); } catch (_) {}
-    let h = '<div class="au-feier"><p class="tb-kopf">' + esc(G.n) + "</p><h2>" + L(["Belohnung", "Reward"]) + "</h2>" + '<p class="lg-zitat">„' + esc(L(x.d)) + '“</p>' + rewardHTML(x);
+    let h = '<div class="au-feier"><p class="tb-kopf">' + esc(G.n) + "</p><h2>" + L(["Belohnung", "Reward"]) + "</h2>" + '<p class="lg-zitat">' + L(["„", "“"]) + esc(L(x.d)) + L(["“", "”"]) + '</p>' + rewardHTML(x);
     if (fin) h += '<p class="au-kettenende">🏅 ' + esc(L(CHAINS[x.ch[0]].n)) + " – " + L(["abgeschlossen!", "complete!"]) + "</p>";
     if (x.r && x.r.lore) h += '<div class="tagebuch au-lore-txt"><h3>' + esc(L(x.r.lore[0])) + '</h3><p class="tb-text">' + loreTxt(L(x.r.lore[1])) + "</p></div>";
     h += '<div class="knoepfe"><button data-act="aufFeierZu" data-arg="' + x.g + '" autofocus>' + L(["Danke!", "Thanks!"]) + "</button></div></div>";

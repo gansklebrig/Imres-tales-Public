@@ -464,7 +464,7 @@
     if (tmp.length) {
       const [x, y] = tmp[0]; A.play("rock", { vol: 0.35, rate: 1.6 }); FX.burst(x * T + 8, y * T + 8, 4, { col: [Z.tileCol || "#6a5a50", "#9a8a7a"], sp: 50, life: 0.5, size: 2, g: 500 });
       const now = S ? S.t : 0;
-      if (now - wuchtTip > 25) { wuchtTip = now; toast(L(["Es bröckelt nur – ein Wuchtschlag, Schildstoß oder Sturzangriff könnte es brechen.", "It only crumbles – a heavy blow, shield bash or dive attack could break it."]), 2800, { x: x * T + 8, y: y * T - 6 }, { prio: 1 }); }
+      if (now - wuchtTip > 25) { wuchtTip = now; toast(L(["Es bröckelt nur – ein Wuchtschlag, Schildstoß oder Sturzangriff könnte es brechen.", "It only crumbles – a heavy blow, shield bash or plunge attack could break it."]), 2800, { x: x * T + 8, y: y * T - 6 }, { prio: 1 }); }
     }
     return res;
   };

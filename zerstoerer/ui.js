@@ -39,7 +39,7 @@
     pause: ["Pause", "Paused"], resume: ["Weiter", "Resume"], abort: ["Lauf aufgeben", "Abandon run"], camp: ["Zurück ins Lager", "Back to camp"],
     close: ["Schließen", "Close"], back: ["Zurück", "Back"], yes: ["Ja", "Yes"], no: ["Nein", "No"],
     intro: ["Barradin erzählt:<br><br>Eines Nachts war Ezekiels Platz am Feuer leer. Nur ein Brief lag dort, versiegelt mit einer Spinne aus schwarzem Wachs: <i>„The Destroyer. Die Spinne erwartet dich.“</i><br><br>Am Horizont stand eine Feste, die am Abend noch nicht dagewesen war. Fäden spannten sich von ihren Türmen bis in die Wolken, und in ihren Hallen warteten alle, die wir je besiegt haben. Oder etwas, das so aussah.<br><br>Ezekiel ging hinein. Ohne Waffe. Natürlich.",
-      "Barradin tells:<br><br>One night Ezekiel's place by the fire was empty. Only a letter lay there, sealed with a spider of black wax: <i>'The Destroyer. The Spider awaits you.'</i><br><br>On the horizon stood a keep that had not been there that evening. Threads stretched from its towers into the clouds, and in its halls waited everyone we had ever defeated. Or something that looked like them.<br><br>Ezekiel went in. Without a weapon. Of course."],
+      "Barradin recounts:<br><br>One night Ezekiel's place by the fire was empty. Only a letter lay there, sealed with a spider of black wax: <i>'The Destroyer. The Spider awaits you.'</i><br><br>On the horizon stood a keep that had not been there that evening. Threads stretched from its towers into the clouds, and in its halls waited everyone we had ever defeated. Or something that looked like them.<br><br>Ezekiel went in. Without a weapon. Of course."],
     startRun: ["Die Feste betreten?", "Enter the keep?"], startRunTxt: ["Du nimmst mit, was du in den Händen hältst – die Waffen vom Ständer vor dem Tor. Alles, was du findest, bleibt nur für diesen Lauf. Seelensplitter, die du in Durchgängen ablieferst, bleiben.", "You take what you hold in your hands – the weapons from the rack by the gate. Everything you find lasts only for this run. Soul shards delivered at passages are kept."],
     go: ["Hinein", "Go in"],
     died: ["Gefallen", "Fallen"], diedSub: ["„Noch nicht“ war es diesmal nicht.", "This time it wasn't 'not yet'."],
@@ -149,7 +149,7 @@
       const run = Z.run, an = areaShow > 0 || bigMap;
       /* W11 R38 (Grafik): Gebietsvariante dauerhaft am Ortsnamen („Das Verlies · ☠ Unruhige Brut“), Farbe je Variante */
       const gv = Z.gebietVariante && Z.gebietVariante(), gvC = gv ? ({ gold: "#f0c860", brut: "#e87060", fallen: "#a8c890" })[gv.id] || "#e8d8b0" : "";
-      setHTML("area", esc(areaTitle()) + (gv ? '<span class="var-hud" style="color:' + gvC + '"> · <span class="var-ico">' + esc(gv.ico) + "</span> " + esc(L(gv.n)) + "</span>" : "") + (run && an ? '<small>' + fmtTime(run.time) + (run.skulls ? " · " + "☠".repeat(run.skulls) : "") + (run.gnade ? ' · <span class="gnade-hud" title="' + esc(L(["Hilfsmodus Barmherzigkeit", "Assist mode Mercy"])) + '">✚</span>' : "") + "</small>" : ""));
+      setHTML("area", esc(areaTitle()) + (gv ? '<span class="var-hud" style="color:' + gvC + '"> · <span class="var-ico">' + esc(gv.ico) + "</span> " + esc(L(gv.n)) + "</span>" : "") + (run && an ? '<small>' + fmtTime(run.time) + (run.skulls ? " · " + "☠".repeat(run.skulls) : "") + (run.gnade ? ' · <span class="gnade-hud" title="' + esc(L(["Hilfsmodus Barmherzigkeit", "Assist mode: Mercy"])) + '">✚</span>' : "") + "</small>" : ""));
       $("#area").classList.toggle("still", !an && !gv); $("#area").classList.toggle("varonly", !an && !!gv);
       $("#fps").textContent = Z.settings.fps ? (Z.fps || 0) + " fps" : "";
     }
@@ -1282,7 +1282,7 @@
       "<h3>" + L(["Ablauf", "Flow"]) + "</h3>" +
       row("schnellstart", L(["Schnellstart", "Quick start"]), L(["Kapitelseiten beim Betreten und bei der Lagerrückkehr sowie die Kamerafahrt zum Ausgang immer überspringen.", "Always skip chapter pages on arrival and on returning to camp, and the camera pan to the exit."]), b("schnellstart")) +
       "<h3>" + L(["Hilfsmodus", "Assist mode"]) + "</h3>" +
-      row("gnade", "✚ " + L(["Barmherzigkeit", "Mercy"]) + ' <span class="k-marke">' + L(["Hilfsmodus", "Assist"]) + "</span>", L(["−25 % erlittener Schaden, längere Unverwundbarkeit nach Treffern. Läufe damit werden mit ✚ gekennzeichnet; Bestzeit und neuer Schädel-Grad zählen dann nicht.", "−25 % damage taken, longer invulnerability after hits. Runs with it are marked ✚; best time and new skull tiers don't count."]), b("gnade"), "gnade") +
+      row("gnade", "✚ " + L(["Barmherzigkeit", "Mercy"]) + ' <span class="k-marke">' + L(["Hilfsmodus", "Assist"]) + "</span>", L(["−25 % erlittener Schaden, längere Unverwundbarkeit nach Treffern. Läufe damit werden mit ✚ gekennzeichnet; Bestzeit und neuer Schädel-Grad zählen dann nicht.", "−25% damage taken, longer invulnerability after hits. Runs with it are marked ✚; best time and new skull tiers don't count."]), b("gnade"), "gnade") +
       '<div class="k-schnell"><button class="steuerknopf" data-act="kpreset" data-arg="ruhig">' + L(["Alles schonend: kein Wackeln, keine Blitze, keine Zeitlupe", "Gentle preset: no shake, no flashes, no slow-motion"]) + '</button><button class="steuerknopf" data-act="kpreset" data-arg="std">' + L(["Standard wiederherstellen", "Restore defaults"]) + "</button></div>" +
       '</div><div class="knoepfe"><button data-act="komfortBack">' + esc(t("back")) + "</button></div>", { cls: "komfortfenster", onClose: () => { Z.saveSettings(); setTimeout(() => { if (!ui.modalOpen) actions.komfortBack(); }, 0); } }); /* Esc/B: zurück zu den Einstellungen */
     const r = modal.querySelector("[data-kshake]");
@@ -1891,7 +1891,7 @@
       const healPrice = Math.round(40 + 30 * Z.run.tier);
       items.push({ art: "ware", icon: "braten", col: "#c88a4a", name: L(["Pilzbraten", "Mushroom roast"]), preis: healPrice, verb: L(["essen", "eat"]),
         label: () => L(["Pilzbraten – 60 % Leben", "Mushroom roast – 60% health"]),
-        cardHTML: '<div class="ic-kopf" style="--rar:#e8c890"><b>' + L(["Pilzbraten", "Mushroom roast"]) + "</b><small>" + L(["Heilt 60 % Leben", "Heals 60% health"]) + "</small></div><p>„" + L(["Frisch aus Gracklstugh.", "Fresh from Gracklstugh."]) + "“</p>",
+        cardHTML: '<div class="ic-kopf" style="--rar:#e8c890"><b>' + L(["Pilzbraten", "Mushroom roast"]) + "</b><small>" + L(["Heilt 60 % Leben", "Heals 60% health"]) + "</small></div><p>" + L(["„", "“"]) + L(["Frisch aus Gracklstugh.", "Fresh from Gracklstugh."]) + L(["“", "”"]) + "</p>",
         kannt: () => (Z.player.gold < healPrice ? (ui.notify(t("noGold"), { prio: 3 }), false) : Z.player.hp >= Z.player.hpMax ? (ui.notify(L(["Du bist satt und heil.", "You're full and healthy."]), { prio: 3 }), false) : true),
         nimm: () => { const P2 = Z.player; P2.gold -= healPrice; Z.healPlayer(P2.hpMax * 0.6); A.play("heal"); } });
       if (P.curse > 0) { const cost = Math.max(150, P.curse * 15); items.push({ art: "ware", icon: "vial", col: "#c890ff", name: L(["Fluch brechen", "Break the curse"]), preis: cost, verb: L(["brechen", "break"]),
@@ -1916,13 +1916,13 @@
   ui.segenKugel = segenKugel;
   ui.shop = () => {
     const P = Z.player, lv = Z.level;
-    let body = '<p class="hinweis">„' + L(["Kaufen oder raus.", "Buy or get out."]) + '“</p><div class="liste">';
+    let body = '<p class="hinweis">' + L(["„", "“"]) + L(["Kaufen oder raus.", "Buy or get out."]) + L(["“", "”"]) + '</p><div class="liste">';
     (lv.shop || []).forEach((it, i) => {
       const price = Z.itemPrice(it);
       body += '<div class="zeile ware"><span class="ico" data-icon="' + Z.itemDef(it).icon + '" data-col="' + Z.itemDef(it).col + '"></span><div class="ic">' + itemCardHTML(it, true) + '</div><div class="kauf"><button data-act="buy" data-arg="' + i + '"' + (it.sold || P.gold < price ? " disabled" : "") + ">" + (it.sold ? esc(t("sold")) : U.fmt(price) + " ●") + "</button></div></div>";
     });
     const healPrice = Math.round(40 + 30 * Z.run.tier);
-    body += '<div class="zeile"><div><b>' + L(["Pilzbraten (60 % Leben)", "Mushroom roast (60% health)"]) + '</b><small>„' + L(["Frisch aus Gracklstugh.", "Fresh from Gracklstugh."]) + '“</small></div><div class="kauf"><button data-act="buyHeal"' + (P.gold < healPrice || P.hp >= P.hpMax ? " disabled" : "") + ">" + healPrice + " ●</button></div></div>";
+    body += '<div class="zeile"><div><b>' + L(["Pilzbraten (60 % Leben)", "Mushroom roast (60% health)"]) + '</b><small>' + L(["„", "“"]) + L(["Frisch aus Gracklstugh.", "Fresh from Gracklstugh."]) + L(["“", "”"]) + '</small></div><div class="kauf"><button data-act="buyHeal"' + (P.gold < healPrice || P.hp >= P.hpMax ? " disabled" : "") + ">" + healPrice + " ●</button></div></div>";
     if (P.curse > 0) body += '<div class="zeile"><div><b>' + L(["Fluch brechen", "Break the curse"]) + '</b></div><div class="kauf"><button data-act="buyCurse"' + (P.gold < Math.max(150, P.curse * 15) ? " disabled" : "") + ">" + Math.max(150, P.curse * 15) + " ●</button></div></div>";
     body += "</div>";
     openModal("<h2>" + esc(t("shop")) + ' <span class="bank">' + U.fmt(P.gold) + " ● " + esc(t("gold")) + "</span></h2>" + body + '<div class="knoepfe"><button data-act="close">' + esc(t("close")) + "</button></div>", { cls: "breit" });

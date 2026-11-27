@@ -1103,7 +1103,7 @@
   }
   function openMenu(id, keepFocus) {
     const R = RES[id], m = LM(), L0 = lvl(id), M = Z.meta; menuId = id;
-    let h = '<div class="lg-kopf"><canvas class="lg-bild" width="120" height="140" data-res="' + id + '"></canvas><div class="lg-kopftxt"><h2>' + esc(id === "lied" ? L(["Barradins Bühne", "Barradin's Stage"]) : R.n) + " <small>" + esc(id === "lied" ? L(["Lieder für den Weg", "Songs for the road"]) : L(R.r)) + '</small></h2><p class="lg-zitat">„' + esc(L(Z.R.pick(R.idle))) + '“</p></div><span class="bank">' + U.fmt(M.shards) + " ◆</span></div>";
+    let h = '<div class="lg-kopf"><canvas class="lg-bild" width="120" height="140" data-res="' + id + '"></canvas><div class="lg-kopftxt"><h2>' + esc(id === "lied" ? L(["Barradins Bühne", "Barradin's Stage"]) : R.n) + " <small>" + esc(id === "lied" ? L(["Lieder für den Weg", "Songs for the road"]) : L(R.r)) + '</small></h2><p class="lg-zitat">' + L(["„", "“"]) + esc(L(Z.R.pick(R.idle))) + L(["“", "”"]) + '</p></div><span class="bank">' + U.fmt(M.shards) + " ◆</span></div>";
     h += '<div class="lg-liste">';
     R.ups.forEach((u, i) => { h += rowHTML(id, i, L(u.n), L(u.d), i < L0, COST[id][i], i === L0, "lgUp", id); });
     for (const k in EXTRA[id] || {}) {
@@ -1200,7 +1200,7 @@
   function chronicle() {
     const M = Z.meta, m = LM(), st = stage(), r = ruhm(), nx = STAGES[st + 1];
     let h = "<h2>" + L(["Gedenkstein", "Memorial Stone"]) + ' <span class="bank">' + L(["Stufe ", "Stage "]) + (st + 1) + " · " + esc(L(STAGES[st].n)) + "</span></h2>";
-    h += '<p class="lg-zitat">„' + L(["Hier ruhen ", "Here rest "]) + (M.deaths || 0) + L([" Versuche. Ezekiel ist jedes Mal wieder aufgestanden.“", " attempts. Ezekiel got up every single time.\""]) + "</p>";
+    h += '<p class="lg-zitat">' + L(["„Hier ruhen ", "\"Here rest "]) /* W38 Text: EN begann mit „ */ + (M.deaths || 0) + L([" Versuche. Ezekiel ist jedes Mal wieder aufgestanden.“", " attempts. Ezekiel got up every single time.\""]) + "</p>";
     h += '<div class="lg-band">' + STAGES.map((s, i) => '<span class="' + (i <= st ? "an" : "") + '" title="' + esc(L(s.d)) + '">' + esc(L(s.n)) + "</span>").join("") + "</div>";
     if (nx) { const k = clamp((r - STAGES[st].at) / (nx.at - STAGES[st].at), 0, 1); h += '<div class="lg-fort"><i style="width:' + Math.round(k * 100) + '%"></i></div><p class="hinweis lg-klein">' + L(["Ruhm ", "Renown "]) + r + " / " + nx.at + L([" bis „", " until '"]) + esc(L(nx.n)) + L(["“ – Gerettete, ihre Stufen, besiegte Bosse und Enden zählen.", "' – the rescued, their stages, defeated bosses and endings count."]) + "</p>"; }
     h += '<div class="lg-leute">';

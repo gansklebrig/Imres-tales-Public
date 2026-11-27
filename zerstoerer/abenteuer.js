@@ -25,7 +25,7 @@
   const KITS = {
     sb: { n: ["Schwert & Bogen", "Sword & bow"], d: ["Kurzschwert für die Nähe, Jagdbogen für die Ferne.", "Shortsword up close, hunting bow at range."], a1: "kurzschwert", a2: "jagdbogen" },
     ss: { n: ["Schwert & Schild", "Sword & shield"], d: ["Zuschlagen und parieren – der sichere Weg.", "Strike and parry – the safe way."], a1: "kurzschwert", a2: "holzschild" },
-    sm: { n: ["Schwert & Wurfmesser", "Sword & knives"], d: ["Zuschlagen und Messer werfen – die Messer markieren mit einem Faden, das Schwert vollstreckt.", "Strike and throw knives – the knives mark with a thread, the sword executes."], a1: "kurzschwert", a2: "wurfmesser" },
+    sm: { n: ["Schwert & Wurfmesser", "Sword & throwing knives"], d: ["Zuschlagen und Messer werfen – die Messer markieren mit einem Faden, das Schwert vollstreckt.", "Strike and throw knives – the knives mark with a thread, the sword executes."], a1: "kurzschwert", a2: "wurfmesser" },
     bs: { n: ["Bogen & Schild", "Bow & shield"], d: ["Für Geübte: Abstand halten, Geschosse zurückwerfen – keine Nahkampfwaffe.", "For the skilled: keep your distance, deflect projectiles – no melee weapon."], a1: "jagdbogen", a2: "holzschild" }
   };
   Z.KITS = KITS;
@@ -160,7 +160,7 @@
     { id: "federleicht", n: ["Federleicht", "Featherlight"], d: ["Das dritte Gebiet erreichen, ohne einmal abzustürzen.", "Reach the third area without falling once."], ok: () => Z.run && (Z.run.route || []).length >= 3 && !(S().falls > 0), r: { cape: "weiss" } },
     { id: "fallen", n: ["Hinterlistig", "Devious"], d: ["10 Gegner in einem Durchgang durch Fallen oder Abgründe.", "10 enemies in one run via traps or chasms."], ok: () => (S().trapKills || 0) + (S().fallKills || 0) >= 10, r: { cape: "glut" } },
     { id: "serie", n: ["Schlachtfest", "Slaughterfest"], d: ["Eine Kill-Serie von 8.", "A kill streak of 8."], ok: () => (S().bestStreak || 0) >= 8, r: { cape: "schatten" } },
-    { id: "sturz", n: ["Meteor", "Meteor"], d: ["25 Sturzangriffe in einem Durchgang.", "25 dive attacks in one run."], ok: () => (S().dives || 0) >= 25, r: { cape: "sturm" } },
+    { id: "sturz", n: ["Meteor", "Meteor"], d: ["25 Sturzangriffe in einem Durchgang.", "25 plunge attacks in one run."], ok: () => (S().dives || 0) >= 25, r: { cape: "sturm" } },
     { id: "paarung", n: ["Paarungskundig", "Pair Savant"], d: ["5 verschiedene Paarungen entdecken.", "Discover 5 different pairings."], ok: () => Object.keys(M().syn || {}).length >= 5, r: { cape: "zwilling" } },
     { id: "pakt", n: ["Blutpakt", "Blood Pact"], d: ["Ein Ende mit mindestens 3 Pakten erreichen.", "Reach an ending with at least 3 pacts."], ok: () => false, r: { cape: "blut" } },
     { id: "ende", n: ["Ein Faden", "One Thread"], d: ["Ein Ende erreichen.", "Reach an ending."], ok: () => Object.keys(M().endings || {}).length > 0, r: { cape: "ruhm" } },
@@ -248,7 +248,7 @@
     mk("kampf", "k_parkette", ["Stahlwand", "Wall of Steel"], ["5 Paraden in Folge, ohne dazwischen getroffen zu werden.", "5 parries in a row without being hit in between."], () => (RA() || {}).parB >= 5, { cape: "kupfer" }, () => [(RA() || {}).parB || 0, 5]),
     mk("kampf", "k_rollkette", ["Windhauch", "Breath of Wind"], ["10 perfekte Ausweichrollen in Folge, ohne getroffen zu werden.", "10 perfect dodges in a row without being hit."], () => (RA() || {}).dodB >= 10, { cape: "nebel" }, () => [(RA() || {}).dodB || 0, 10]),
     mk("kampf", "k_auf", ["Himmelsstürmer", "Skystormer"], ["15 Gegner in einem Durchgang mit Aufwärtsangriffen erledigen.", "Finish 15 enemies with upward attacks in one run."], () => (RA() || {}).up >= 15, TT("Himmelsstürmer", "Skystormer"), runP("up", 15)),
-    mk("kampf", "k_sturz", ["Hammer von oben", "Hammer from Above"], ["15 Gegner in einem Durchgang mit Sturzangriffen erledigen.", "Finish 15 enemies with dive attacks in one run."], () => (RA() || {}).dive >= 15, TT("Meteor", "the Meteor"), runP("dive", 15)),
+    mk("kampf", "k_sturz", ["Hammer von oben", "Hammer from Above"], ["15 Gegner in einem Durchgang mit Sturzangriffen erledigen.", "Finish 15 enemies with plunge attacks in one run."], () => (RA() || {}).dive >= 15, TT("Meteor", "the Meteor"), runP("dive", 15)),
     mk("kampf", "k_schild", ["Schildbrecher", "Shieldbreaker"], ["10 Gegner in einem Durchgang mit Schildstößen erledigen.", "Finish 10 enemies with shield bashes in one run."], () => (RA() || {}).bash >= 10, TT("Rammbock", "the Ram"), runP("bash", 10)),
     mk("kampf", "k_konter", ["Gegenschlag", "Riposte"], ["5 Gegner in einem Durchgang durch Paraden-Konter erledigen.", "Finish 5 enemies with parry counters in one run."], () => (RA() || {}).konter >= 5, TT("Konterkünstler", "Riposte Artist"), runP("konter", 5)),
     mk("kampf", "k_umg", ["Hausrecht", "Home Advantage"], ["25 Gegner durch Fallen, Abgründe oder Wände erledigen (insgesamt).", "Finish 25 enemies with traps, chasms or walls (total)."], () => (X().umg || 0) >= 25, { cape: "asche" }, () => [X().umg || 0, 25]),
@@ -502,7 +502,7 @@
     const n = sel.pacts.length;
     const sk = Z.meta.skullSel || 0;
     ui().open("<h2>" + L(["Die Feste betreten", "Enter the keep"]) + "</h2>" +
-      "<h3>" + L(["Held", "Hero"]) + (Z.achTitel && Z.achTitel() ? ' <small class="hinweis">„' + esc(Z.achTitel()) + "“</small>" : "") + '</h3><div class="wahlen">' + heroes + "</div>" +
+      "<h3>" + L(["Held", "Hero"]) + (Z.achTitel && Z.achTitel() ? ' <small class="hinweis">' + L(["„", "“"]) + esc(Z.achTitel()) + L(["“", "”"]) + "</small>" : "") + '</h3><div class="wahlen">' + heroes + "</div>" +
       "<h3>" + L(["Ausrüstung", "Gear"]) + ' <small class="hinweis">' + L(["Was du in den Händen hältst, nimmst du mit – alles Bessere findest du unterwegs", "What you hold, you take along – anything better you find on the way"]) + "</small></h3>" + gearHTML +
       "<h3>" + L(["Umhang", "Cape"]) + ' <small class="hinweis">' + Object.keys(m.capes).length + "/" + Object.keys(CAPES).length + '</small></h3><div class="umhaenge">' + capes + "</div>" +
       "<h3>" + L(["Pakte", "Pacts"]) + ' <small class="hinweis">' + L(["Jeder Pakt: +30 % Seelensplitter, bessere Beute", "Each pact: +30% soul shards, better loot"]) + (n ? " · " + L(["aktiv: ", "active: "]) + n + " (×" + (1 + 0.3 * n).toFixed(1) + ")" : "") + '</small></h3><div class="wahlen pakte">' + pacts + "</div>" +
@@ -576,7 +576,7 @@
     }).join("");
     const runes = ["tiefe", "glut", "himmel"].map(k => (m.runes[k] ? "◆" : "◇")).join(" ");
     const tt = titelOf(m.titel);
-    ui().open("<h2>" + L(["Erfolge", "Achievements"]) + " <small>" + done + "/" + ACH.length + (tt ? " · „" + esc(tt) + "“" : "") + "</small></h2>" + tabs +
+    ui().open("<h2>" + L(["Erfolge", "Achievements"]) + " <small>" + done + "/" + ACH.length + (tt ? " · " + L(["„", "“"]) + esc(tt) + L(["“", "”"]) : "") + "</small></h2>" + tabs +
       (achTab === "erkunden" ? '<p class="hinweis">' + L(["Runen-Fragmente: ", "Rune fragments: "]) + runes + " · " + L(["versteckt in Geheimräumen der Verliese, der Schmiede und der Zinnen", "hidden in secret rooms of the dungeons, the forge and the spires"]) + "</p>" : "") +
       (achTab === "tempo" || achTab === "makellos" ? '<p class="hinweis">' + L(["Unter Barmherzigkeit zählen Tempo- und Makellos-Erfolge nicht.", "Speed and flawless achievements don't count under Mercy."]) + "</p>" : "") +
       '<div class="erfolge ach2l">' + rows + '</div><div class="knoepfe"><button data-act="abAchBack" data-arg="' + (achFrom ? "start" : "") + '">' + L(["Zurück", "Back"]) + "</button></div>", { cls: "breit" });
@@ -1173,7 +1173,7 @@
       return;
     }
     const kb = i => (inp.device === "keys" && !ui().touchOn ? "<kbd>" + (i + 1) + "</kbd> " : "");
-    ui().open("<h2>" + L(["Verfluchter Schrein", "Cursed Shrine"]) + '</h2><p class="hinweis">' + L(["Zwei Segen flackern im violetten Licht. Der Schrein nimmt ein Fünftel deines Lebens – für einen davon.", "Two blessings flicker in the violet light. The shrine takes a fifth of your life – for one of them."]) + '</p><div class="rollen">' +
+    ui().open("<h2>" + L(["Verfluchter Schrein", "Cursed Shrine"]) + '</h2><p class="hinweis">' + L(["Zwei Segen flackern im violetten Licht. Der Schrein nimmt ein Fünftel deines Lebens – für einen davon.", "Two blessings flicker in the violet light. The shrine takes a fifth of your health – for one of them."]) + '</p><div class="rollen">' +
       ids.map((b, i) => { const d = Z.BLESS[b]; return '<button data-act="abShrine" data-arg="' + b + '" data-key="' + (i + 1) + '" class="k-' + d.k + '"' + (i === 0 ? " autofocus" : "") + "><b>" + kb(i) + esc(L(d.n)) + '</b><small class="art">' + esc(L(Z.BLESS_KIND[d.k])) + "</small><small>" + esc(L(d.d)) + "</small></button>"; }).join("") +
       '</div><div class="knoepfe"><button data-act="close">' + L(["Nichts opfern", "Sacrifice nothing"]) + "</button></div>", { cls: "schmal" });
     shrineEv = ev;
@@ -1183,7 +1183,7 @@
     const P = Z.player, ev = shrineEv; shrineEv = null; ui().close(); if (!ev || ev.done || !Z.BLESS[b]) return;
     P.bless.push(b); P.hpMax = Math.max(20, Math.round(P.hpMax * 0.8)); P.hp = Math.min(P.hp, P.hpMax);
     FX.flashScreen("#a040ff", 0.4); A.play("magic", { vol: 0.7, rate: 0.6 }); FX.text(P.x + P.w / 2, P.y - 14, L(Z.BLESS[b].n), "#c890ff", true);
-    Z.toast(L(["Der Schrein nimmt ein Fünftel deines Lebens und schenkt: ", "The shrine takes a fifth of your life and grants: "]) + "<b>" + esc(L(Z.BLESS[b].n)) + "</b><br><small>" + esc(L(Z.BLESS[b].d)) + "</small>", 4200);
+    Z.toast(L(["Der Schrein nimmt ein Fünftel deines Lebens und schenkt: ", "The shrine takes a fifth of your health and grants: "]) + "<b>" + esc(L(Z.BLESS[b].n)) + "</b><br><small>" + esc(L(Z.BLESS[b].d)) + "</small>", 4200);
     finish(ev);
   }
   /* Fahrende Händlerin (Echo verkleidet?): eine Waffe mit Rabatt – oder ein Glücksbeutel mit Risiko */
@@ -1214,7 +1214,7 @@
       return;
     }
     const k = (n) => (inp.device === "keys" && !ui().touchOn ? "<kbd>" + n + "</kbd> " : "");
-    ui().open("<h2>" + L(["Fahrende Händlerin", "Wandering Trader"]) + ' <span class="bank">' + U.fmt(P.gold) + " ● " + L(["Gold", "Gold"]) + '</span></h2><p class="hinweis">„' + L(["Psst. Ein Stück, frisch aus einer Truhe, die niemandem gehört hat. Oder du greifst in den Beutel. Kein Umtausch.", "Psst. A piece fresh from a chest that belonged to no one. Or you reach into the bag. No refunds."]) + '“</p><div class="liste">' +
+    ui().open("<h2>" + L(["Fahrende Händlerin", "Wandering Trader"]) + ' <span class="bank">' + U.fmt(P.gold) + " ● " + L(["Gold", "Gold"]) + '</span></h2><p class="hinweis">' + L(["„", "“"]) + L(["Psst. Ein Stück, frisch aus einer Truhe, die niemandem gehört hat. Oder du greifst in den Beutel. Kein Umtausch.", "Psst. A piece fresh from a chest that belonged to no one. Or you reach into the bag. No refunds."]) + L(["“", "”"]) + '</p><div class="liste">' +
       (ev.it && !ev.sold ? '<div class="zeile ware"><div class="ic">' + ui().itemCardHTML(ev.it, true) + '</div><div class="kauf"><button data-act="abTrade" data-arg="buy" data-key="1" autofocus' + (P.gold < price ? " disabled" : "") + ">" + k(1) + U.fmt(price) + " ● <small>(−40 %)</small></button></div></div>" : "") +
       '<div class="zeile"><div><b>' + L(["Glücksbeutel", "Lucky bag"]) + "</b><small>" + L(["40 %: 2 Schmiedeglut · 25 %: seltene Waffe · 15 %: Schriftrolle · 20 %: ein Stein. Ein Griff pro Begegnung.", "40%: 2 forge embers · 25%: rare weapon · 15%: scroll · 20%: a rock. One grab per encounter."]) + '</small></div><div class="kauf"><button data-act="abTrade" data-arg="bag" data-key="2"' + (P.gold < bag || ev.bagUsed ? " disabled" : "") + ">" + k(2) + (ev.bagUsed ? L(["leer", "empty"]) : U.fmt(bag) + " ●") + "</button></div></div>" +
       '</div><div class="knoepfe"><button data-act="close">' + L(["Weitergehen", "Move on"]) + "</button></div>", { cls: "breit" });
@@ -1289,7 +1289,7 @@
     n: ["Die Weberin", "The Weaver"], title: ["Die die Fäden spann", "Who Spun the Threads"], shape: "spider", c: "#2a1a2a", t: "#c03a5a", w: 58, h: 30, size: 3.1, hp: 78, dmg: 1.4, spd: 70, idleT: 0.45, demon: true,
     intro: ["Acht Augen öffnen sich im Dunkel. „Du hast meine Fäden durchtrennt, Zerstörer. Alle drei. Wie … aufmerksam.“", "Eight eyes open in the dark. \"You've cut my threads, Destroyer. All three. How… thoughtful.\""],
     outro: ["Die Weberin zerfällt zu Seide und Staub. Das ganze Netz der Feste erschlafft, Faden um Faden.", "The Weaver falls apart into silk and dust. The keep's entire web goes slack, thread by thread."],
-    phases: [{ at: 1, moves: ["stampf", "strahl", "felswurf", "brut", "netzfaecher"] }, { at: 0.6, moves: ["stampf", "strahl", "runenregen", "brut", "netzfaecher", "erdbeben"], enter: e => { e.rage = true; Z.bossSay && Z.bossSay(L(["„Dann eben ohne Netz.“", "\"Then without a web.\""])); A.play("roar", { vol: 0.8 }); FX.addShake(8); } }, { at: 0.25, moves: ["strahl", "runenregen", "netzfaecher", "erdbeben", "brut", "felswurf"], enter: e => { e.rage = true; e.dmgMul *= 1.2; Z.bossSay && Z.bossSay(L(["„ICH BIN DAS NETZ.“", "\"I AM THE WEB.\""])); A.play("roar", { vol: 1 }); FX.addShake(10); FX.flashScreen("#c03a5a", 0.4); } }],
+    phases: [{ at: 1, moves: ["stampf", "strahl", "felswurf", "brut", "netzfaecher"] }, { at: 0.6, moves: ["stampf", "strahl", "runenregen", "brut", "netzfaecher", "erdbeben"], enter: e => { e.rage = true; Z.bossSay && Z.bossSay(L(["„Dann eben ohne Netz.“", "\"Then I'll do without a net.\""])); A.play("roar", { vol: 0.8 }); FX.addShake(8); } }, { at: 0.25, moves: ["strahl", "runenregen", "netzfaecher", "erdbeben", "brut", "felswurf"], enter: e => { e.rage = true; e.dmgMul *= 1.2; Z.bossSay && Z.bossSay(L(["„ICH BIN DAS NETZ.“", "\"I AM THE WEB.\""])); A.play("roar", { vol: 1 }); FX.addShake(10); FX.flashScreen("#c03a5a", 0.4); } }],
     moves: Object.assign({}, pickMv("schmiedewaechter", ["stampf", "strahl", "runenregen"]), pickMv("riese", ["felswurf", "erdbeben"]), {
       brut: { pre: 0.7, dur: 0.2, post: 0.6, sfx: "insect", cond: e => Z.enemies.filter(o => o.master === e && !o.dead).length < 4, act: e => summonSp(e, e.rage ? 4 : 3) },
       netzfaecher: { pre: 0.75, dur: 0.3, post: 0.6, sfx: "web", act: (e, P) => { const cx = e.x + e.w / 2, cy = e.y + e.h * 0.4; for (let i = -2; i <= 2; i++) { const a = Math.atan2(P.y + 10 - cy, P.x + P.w / 2 - cx) + i * 0.22; Z.spawnProj(i % 2 ? "e_netz" : "e_kugel", cx, cy, 1, { vx: Math.cos(a) * 220, vy: Math.sin(a) * 220, dmg: e.dmgMul * 0.9, owner: "e" }); } } }
