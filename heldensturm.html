@@ -2704,10 +2704,25 @@ function drawDeco(d,t){const c=cx,s=d.s;c.save();c.translate(d.x,d.y);c.scale(s,
    c.fillStyle='#3e2c1a';c.fillRect(-21,3,42,4);break;
   case'rubble':poly(c,'#4e4a44',-10,6,-6,-2,2,0,6,6);poly(c,'#5e5a54',2,6,6,-4,12,0,12,6);circ(c,-12,2,3,'#46423c');break;
   case'vine':for(let k=0;k<3;k++){c.strokeStyle='#2e5a26';c.lineWidth=2.5;c.beginPath();c.moveTo(-14+k*12,10);c.quadraticCurveTo(-20+k*14,-6,-8+k*12,-16);c.stroke();circ(c,-8+k*12,-16,3,'#3a7a2e')}break;
-  case'table':c.fillStyle='#5a3e26';c.fillRect(-18,-10,36,20);c.fillStyle='#e5b454';circ(c,-6,-2,2,'#c9a060');c.fillStyle='#ececec';c.fillRect(4,-4,4,4);break;
-  case'brokentable':c.rotate(0.6);c.fillStyle='#5a3e26';c.fillRect(-16,-6,18,12);c.rotate(-1.1);c.fillRect(2,-4,16,10);break;
-  case'chair':c.fillStyle='#4a321e';c.fillRect(-6,-6,12,12);c.fillRect(-6,-12,12,4);break;
-  case'dice':c.fillStyle='#f0ece0';c.fillRect(-4,-4,8,8);c.fillRect(4,0,7,7);circ(c,0,0,1,'#000');break;
+  case'table':/* Wirtshaustisch: Platte mit Brettfugen und Kante, Beine, Krug, Teller, Kerzenstumpf */
+   c.fillStyle='rgba(0,0,0,.28)';c.beginPath();c.ellipse(0,12,22,5,0,0,TAU);c.fill();c.fillStyle='#3e2a18';c.fillRect(-17,4,4,9);c.fillRect(13,4,4,9);
+   c.fillStyle='#4a321e';c.fillRect(-20,-2,40,7);c.fillStyle='#6a4a2c';c.fillRect(-20,-13,40,12);c.strokeStyle='rgba(40,26,14,.7)';c.lineWidth=1;c.beginPath();c.moveTo(-20,-9);c.lineTo(20,-9);c.moveTo(-20,-5);c.lineTo(20,-5);c.stroke();
+   c.fillStyle='#7e5a36';c.fillRect(-20,-13,40,1.5);c.fillStyle='#d8d0c0';c.beginPath();c.ellipse(-8,-7,5,2.6,0,0,TAU);c.fill();c.fillStyle='#8a6a44';c.fillRect(4,-14,6,8);c.fillStyle='#c8a868';c.fillRect(4,-14,6,2);c.strokeStyle='#8a6a44';c.lineWidth=1.4;c.beginPath();c.arc(11,-10,2.4,-1.2,1.2);c.stroke();
+   c.fillStyle='#e8dcc0';c.fillRect(14,-13,2.5,4);c.fillStyle='#ffd27a';c.globalAlpha=0.7+0.3*Math.sin(t*9+d.v*7);c.beginPath();c.ellipse(15.2,-14.5,1.3,2.2,0,0,TAU);c.fill();c.globalAlpha=1;break;
+  case'brokentable':/* zerbrochener Tisch: zwei Plattenhälften mit Splitterkante, umgekipptes Bein */
+   c.fillStyle='rgba(0,0,0,.25)';c.beginPath();c.ellipse(0,6,20,5,0,0,TAU);c.fill();
+   c.save();c.rotate(0.5);c.fillStyle='#5e4228';c.beginPath();c.moveTo(-16,-6);c.lineTo(2,-6);c.lineTo(-1,-2);c.lineTo(3,1);c.lineTo(0,6);c.lineTo(-16,6);c.closePath();c.fill();c.fillStyle='#7a5636';c.fillRect(-16,-6,18,1.5);c.restore();
+   c.save();c.rotate(-0.5);c.fillStyle='#563c24';c.beginPath();c.moveTo(4,-5);c.lineTo(18,-5);c.lineTo(18,5);c.lineTo(5,5);c.lineTo(7,1);c.lineTo(3,-1);c.closePath();c.fill();c.restore();
+   c.strokeStyle='#3e2a18';c.lineWidth=3;c.lineCap='round';c.beginPath();c.moveTo(-6,10);c.lineTo(6,13);c.stroke();c.lineCap='butt';
+   c.fillStyle='#8a6a44';c.fillRect(-3,-1,2,2);c.fillRect(2,4,2,1.5);break;
+  case'chair':/* Stuhl in Schrägsicht: Lehne mit Sprossen, Sitz, Beine */
+   c.fillStyle='rgba(0,0,0,.25)';c.beginPath();c.ellipse(0,8,9,3,0,0,TAU);c.fill();c.fillStyle='#3a2616';c.fillRect(-6,2,2.4,7);c.fillRect(4,2,2.4,7);
+   c.fillStyle='#5e4228';c.fillRect(-7,-2,14,5);c.fillStyle='#7a5636';c.fillRect(-7,-2,14,1.4);
+   c.fillStyle='#4a321e';c.fillRect(-7,-16,2.5,15);c.fillRect(4.5,-16,2.5,15);c.fillRect(-7,-17,14,3);c.fillRect(-7,-10,14,2);break;
+  case'dice':/* zwei Würfel mit Augen und Schattenseite, daneben ein Becher */
+   c.fillStyle='rgba(0,0,0,.25)';c.beginPath();c.ellipse(2,5,12,3,0,0,TAU);c.fill();
+   const wf=(x,y,n)=>{c.fillStyle='#c8c0ae';c.fillRect(x,y+1.5,7,7);c.fillStyle='#f2ecdc';c.fillRect(x,y,7,6);c.fillStyle='#2a2018';const P_={1:[[3.5,3]],2:[[1.8,1.5],[5.2,4.5]],3:[[1.6,1.3],[3.5,3],[5.4,4.7]],5:[[1.6,1.3],[5.4,1.3],[3.5,3],[1.6,4.7],[5.4,4.7]]}[n];for(const q of P_)c.fillRect(x+q[0]-0.6,y+q[1]-0.6,1.3,1.3)};
+   wf(-8,-4,5);wf(1,-1,3);c.fillStyle='#5a3e26';c.fillRect(10,-9,6,9);c.fillStyle='#7a5636';c.fillRect(10,-9,6,1.5);break;
   case'pillar':c.fillStyle='#4e525a';c.fillRect(-7,-24,14,30);c.fillStyle='#5e626a';c.fillRect(-9,-26,18,5);c.fillRect(-9,4,18,4);break;
   case'shelf':c.fillStyle='#3a2a1e';c.fillRect(-22,-26,44,30);c.fillStyle='#2a1e14';c.fillRect(-20,-24,40,12);c.fillRect(-20,-10,40,12);
    for(let k=0;k<5;k++){c.globalAlpha=0.85;c.fillStyle=['#7ac0a0','#c0607a','#e0cfa0','#e0c060','#80d080'][(k+Math.floor(d.v*5))%5];c.fillRect(-18+k*8,-21,5,8);c.fillRect(-17+k*8,-7,5,8)}c.globalAlpha=1;break;
@@ -2720,10 +2735,17 @@ function drawDeco(d,t){const c=cx,s=d.s;c.save();c.translate(d.x,d.y);c.scale(s,
    c.lineCap='round';c.lineJoin='round';const pf=()=>{c.beginPath();c.arc(0,0,16,0,TAU);for(const L of RG){c.moveTo(L[0],L[1]);for(let i=2;i<L.length;i+=2)c.lineTo(L[i],L[i+1])}};
    c.globalAlpha=0.5;c.strokeStyle='rgba(0,0,0,.6)';c.lineWidth=3;c.save();c.translate(0.8,1.2);pf();c.stroke();c.restore();
    c.globalAlpha=0.28+0.32*ph;c.strokeStyle=col;c.lineWidth=1.8;pf();c.stroke();c.globalAlpha=1;c.lineCap='butt';break}
-  case'anvil':poly(c,'#3a3e46',-14,-4,14,-4,10,2,4,2,4,8,-6,8,-6,2,-12,2);c.fillStyle='#f4ca75';c.globalAlpha=0.5+0.3*Math.sin(t*3);c.fillRect(-8,-6,14,2);c.globalAlpha=1;break;
+  case'anvil':/* Amboss auf Holzklotz: Horn, Bahn mit Glanzkante, glühendes Werkstück, Hammer daneben */
+   c.fillStyle='rgba(0,0,0,.3)';c.beginPath();c.ellipse(0,12,18,5,0,0,TAU);c.fill();c.fillStyle='#4a3420';c.fillRect(-9,4,18,9);c.fillStyle='#5e4228';c.fillRect(-9,4,18,2);
+   poly(c,'#2e3036',-16,-6,12,-6,16,-3,12,-1,6,-1,4,4,-6,4,-8,-1,-12,-1);poly(c,'#40434a',-16,-6,12,-6,14,-5,-14,-5);c.fillStyle='#6a6e76';c.fillRect(-12,-6,22,1.2);
+   {const gl=0.6+0.3*Math.sin(t*3+d.v*5);c.globalAlpha=gl;c.fillStyle='#ff9a40';c.fillRect(-6,-9,12,3);c.fillStyle='#ffe0a0';c.fillRect(-4,-8.5,7,1.2);c.globalAlpha=1}
+   ln(c,'#5a4028',2,10,10,18,2);c.fillStyle='#3a3c42';c.fillRect(15,-1,6,4);break;
   case'moss':ell(c,0,0,18,9,'#3a5a2a');ell(c,6,-2,8,5,'#4a6a32');break;
   case'deadtree':ln(c,'#2e2620',5,0,8,0,-16);ln(c,'#2e2620',3,0,-8,-10,-18);ln(c,'#2e2620',3,0,-12,9,-22);break;
-  case'grave':poly(c,'#5a5e66',-7,8,-7,-6,-4,-11,4,-11,7,-6,7,8);ln(c,'#3a3e46',1.5,0,-7,0,2);ln(c,'#3a3e46',1.5,-3,-4,3,-4);break;
+  case'grave':/* Grabstein mit Sockel, Moos, eingemeißeltem Kreuz und kleinem Erdhügel davor */
+   c.fillStyle='rgba(0,0,0,.25)';c.beginPath();c.ellipse(0,9,11,3,0,0,TAU);c.fill();c.fillStyle='#3e3428';c.beginPath();c.ellipse(0,13,9,4,0,0,TAU);c.fill();
+   poly(c,'#4a4e54',-9,9,9,9,8,6,-8,6);poly(c,'#5e6268',-7,6,-7,-7,-4,-12,4,-12,7,-7,7,6);poly(c,'#6e7278',-7,-7,-4,-12,0,-12,0,6,-7,6);
+   ln(c,'#3a3e46',1.6,0,-9,0,1);ln(c,'#3a3e46',1.6,-3,-5,3,-5);c.fillStyle='rgba(90,120,60,.7)';c.beginPath();c.ellipse(-5,5,3,1.6,0,0,TAU);c.ellipse(5,-8,2,1.2,0,0,TAU);c.fill();break;
   case'statue':ell(c,0,10,12,4,'rgba(0,0,0,.35)');c.fillStyle='#6a6e74';c.fillRect(-9,0,18,10);poly(c,'#7a7e84',-7,0,-8,-18,0,-26,8,-18,7,0);circ(c,0,-26,5,'#7a7e84');break;
   case'roots':c.strokeStyle='#3a2a1a';c.lineWidth=4;for(let k=0;k<4;k++){c.beginPath();c.moveTo(0,0);c.quadraticCurveTo(Math.cos(k*1.6+d.v)*18,Math.sin(k*1.6+d.v)*10,Math.cos(k*1.6+d.v)*34,Math.sin(k*1.6+d.v)*20);c.stroke()}circ(c,0,0,6,'#2a1e14');break;
   case'ash':ell(c,0,0,20,10,'rgba(30,26,24,.8)');c.fillStyle='rgba(255,90,30,.5)';c.fillRect(-4,-2,2,2);c.fillRect(6,1,2,2);break;
@@ -27543,7 +27565,10 @@ function q4Neu(fn,methode){try{if(typeof fn!=='function')return fn;const s=fn.to
  /* Amboss: wie vorher gezeichnet (inkl. der Sparregeln für vorgerenderte Kulissen), nur die Glut warm */
  try{const dd=drawDeco;drawDeco=function(d,t){if(d&&d.k==='anvil'){try{if(typeof RG2!=='undefined'&&RG2.spar&&!(typeof RGDK!=='undefined'&&RGDK.bau)&&d._rgc&&d._rgc.cv&&d._rgc.ok&&!G.room)return;
     if(typeof UL!=='undefined'&&UL.on&&UL.bgOn&&d._rgc&&ULB.ch.has(d._rgc))return;const c=cx,s=d.s||1;c.save();c.translate(d.x,d.y);c.scale(s,s);
-    poly(c,'#3a3e46',-14,-4,14,-4,10,2,4,2,4,8,-6,8,-6,2,-12,2);c.fillStyle='#ffb84a';c.globalAlpha=0.5+0.3*Math.sin(t*3);c.fillRect(-8,-6,14,2);c.globalAlpha=1;c.restore();return}catch(e){}}
+    c.fillStyle='rgba(0,0,0,.3)';c.beginPath();c.ellipse(0,12,18,5,0,0,TAU);c.fill();c.fillStyle='#4a3420';c.fillRect(-9,4,18,9);c.fillStyle='#5e4228';c.fillRect(-9,4,18,2);
+    poly(c,'#2e3036',-16,-6,12,-6,16,-3,12,-1,6,-1,4,4,-6,4,-8,-1,-12,-1);poly(c,'#40434a',-16,-6,12,-6,14,-5,-14,-5);c.fillStyle='#6a6e76';c.fillRect(-12,-6,22,1.2);
+    {const gl=0.6+0.3*Math.sin(t*3+(d.v||0)*5);c.globalAlpha=gl;c.fillStyle='#ff9a40';c.fillRect(-6,-9,12,3);c.fillStyle='#ffe0a0';c.fillRect(-4,-8.5,7,1.2);c.globalAlpha=1}
+    ln(c,'#5a4028',2,10,10,18,2);c.fillStyle='#3a3c42';c.fillRect(15,-1,6,4);c.restore();return}catch(e){}}
    return dd.apply(this,arguments)}}catch(e){}})();
 /* ---------- 1c) Erfahrungskugeln am Boden waren hellcyan (#e9d7a5, fest im Zeichencode von renderWorld/ulOrbs, beide vielfach umhüllt):
    die Kugeln werden für den Zeichenaufruf aus G.orbs herausgenommen und hier in Lindgrün gezeichnet (Spiel-Logik sieht G.orbs unverändert;
