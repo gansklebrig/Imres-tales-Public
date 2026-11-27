@@ -151,8 +151,11 @@
         h += "</div>";
       }
     }
-    h += '<div class="knoepfe"><button data-act="close"' + (sumOff && darfAbholen() ? "" : " autofocus") + ">" + esc(L(["Schließen", "Close"])) + "</button></div>";
+    h += '<div class="knoepfe"><button data-act="close">' + esc(L(["Schließen", "Close"])) + "</button></div>";
     Z.ui.open(h, { cls: "breit zlbox" });
+    /* W39 Touch: Fokus oben – Abholen, sonst erste Kachel bzw. erster Lagerweg, erst zuletzt „Schließen“; Ansicht beginnt oben */
+    const m = document.getElementById("modal"), f = m && (m.querySelector('[data-act="zlAbholen"]') || m.querySelector('.zl-s[data-act]') || m.querySelector('[data-act="zlGeh"]') || m.querySelector('[data-act="close"]'));
+    if (f) { const box = m.querySelector(".mbox"); f.focus({ preventScroll: true }); if (box) { box.scrollTop = 0; f.scrollIntoView && f.scrollIntoView({ block: "nearest" }); } }
   }
 
   /* ======================= VERKABELUNG ======================= */

@@ -11,7 +11,7 @@
 <link rel="icon" href="favicon.svg">
 <link rel="stylesheet" href="schriften/schriften.css">
 <title>Ezekiel – The Destroyer</title>
-<script src="zerstoerer/altcss.js?v=163"></script> <!-- W39 Alt (Kopie im Spielordner, damit das PC-Programm sie per Update laden darf): CSS-Ersatz für alte Engines (Chromium 77 auf Handhelds); neue Browser unberührt -->
+<script src="zerstoerer/altcss.js?v=164"></script> <!-- W39 Alt (Kopie im Spielordner, damit das PC-Programm sie per Update laden darf): CSS-Ersatz für alte Engines (Chromium 77 auf Handhelds); neue Browser unberührt -->
 <style>
 /* ======================================================================
    Stil „Pergament & Schmiedeeisen“ – EIN Stil für das ganze Spiel.
@@ -545,6 +545,7 @@ button:disabled{opacity:.45;cursor:default}
 .eisen,#prompt,#card,#choice,.meldung:not(.pergament),.wl,#hfzeile,.hfkarte{background-image:var(--eisenkorn),linear-gradient(rgba(36,22,26,.94),rgba(20,12,15,.94))}
 #title{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 300' preserveAspectRatio='none'%3E%3Cpath d='M0 300V230h60v-30h20v30h80v-60h14l6-30 6 30h14v60h120v-20h30v-50h10v-14h10v14h10v50h30v20h200v-90h16v-26l10-18 10 18v26h16v90h160v-40h40v40h220v-70h12v-40h10l8-24 8 24h10v40h12v70h260v-30h20v-20h12v20h20v30H1600V300z' fill='%23180a0c' opacity='.85'/%3E%3C/svg%3E"),radial-gradient(ellipse at 50% 72%,rgba(140,30,20,.38),rgba(0,0,0,0) 60%),linear-gradient(#0c080a,#1a0c10 70%,#2a0e10);background-repeat:no-repeat,no-repeat,no-repeat;background-position:bottom center,center,center;background-size:100% 26%,auto,auto}
  /* W39 Bedienung: Touch-Ziele in Fenstern mindestens 40 px (Zielbuch-Lagerwege 31 px, Auftrags-💬 32×25, Online-Raum 39 px); --ui-Zoom herausgerechnet */ @media (pointer:coarse){#modal button,#modal a.btn{min-height:calc(40px / var(--ui,1))} #modal button.au-mini{min-width:calc(40px / var(--ui,1))}}
+ /* W39 Touch: Trefferfläche 8 px größer als die sichtbare Form (unsichtbarer Rand), Deckkraft-Regler, Linkshänder-Spiegelung, Pause/Karte im niedrigen Querformat weiter weg von „Rolle“ (vorher 8 px Abstand) */ #touch .tb::after{content:"";position:absolute;top:calc(-8px * var(--ts,1));right:calc(-8px * var(--ts,1));bottom:calc(-8px * var(--ts,1));left:calc(-8px * var(--ts,1));border-radius:50%} #touch #t-pause::after,#touch #t-map::after{display:none} #touch .tb:not(.an){opacity:var(--ta,1)} #touch #stick.an{opacity:var(--ta,1)} #touch.spiegel{transform:scaleX(-1)} #touch.spiegel .tb{transform:scaleX(-1)} @media (pointer:coarse) and (orientation:landscape) and (max-height:520px){#touch #t-pause,#touch #t-map{top:max(calc(env(safe-area-inset-top,0px) + 8px),min(calc(170px + env(safe-area-inset-top,0px)),calc(100vh - 272px * var(--ts,1) - env(safe-area-inset-bottom,0px))))}}
 </style>
 <script>/* W23 Browser: Ladefortschritt (im <head>, damit kein Skripttext in body.textContent landet) (Skripte laden nacheinander; N = Zahl der <script src> unten, wächst notfalls mit) */
 (function () {
@@ -608,75 +609,75 @@ button:disabled{opacity:.45;cursor:default}
 <div id="modal" hidden></div>
 <div id="title"></div>
 <div id="fade"></div>
-<script src="tonregler.js?v=163"></script>
-<script src="zerstoerer/kern.js?v=163"></script>
-<script src="zerstoerer/platz.js?v=163"></script>
-<script src="zerstoerer/welt.js?v=163"></script>
-<script src="zerstoerer/daten.js?v=163"></script>
-<script src="zerstoerer/kampf.js?v=163"></script>
-<script src="zerstoerer/steuerung.js?v=163"></script>
-<script src="zerstoerer/geschosse.js?v=163"></script>
-<script src="zerstoerer/gegner.js?v=163"></script>
-<script src="zerstoerer/bosse.js?v=163"></script>
-<script src="zerstoerer/bossphasen.js?v=163"></script>
-<script src="zerstoerer/figuren.js?v=163"></script>
-<script src="zerstoerer/werkzeuge.js?v=163"></script>
-<script src="zerstoerer/bild.js?v=163"></script>
-<script src="zerstoerer/pracht.js?v=163"></script>
-<script src="zerstoerer/grafik.js?v=163"></script>
-<script src="zerstoerer/musik.js?v=163"></script>
-<script src="zerstoerer/klang.js?v=163"></script>
-<script src="zerstoerer/spiel.js?v=163"></script>
-<script src="zerstoerer/lager.js?v=163"></script>
-<script src="zerstoerer/parcours.js?v=163"></script>
-<script src="zerstoerer/fallen.js?v=163"></script>
-<script src="zerstoerer/bilanz.js?v=163"></script>
-<script src="zerstoerer/kampfkunst.js?v=163"></script>
-<script src="zerstoerer/hintergrund.js?v=163"></script>
-<script src="zerstoerer/bilderbuch.js?v=163"></script>
-<script src="zerstoerer/tageszeit.js?v=163"></script>
-<script src="zerstoerer/abenteuer.js?v=163"></script>
-<script src="zerstoerer/fluch.js?v=163"></script>
-<script src="zerstoerer/fluchkraft.js?v=163"></script>
-<script src="zerstoerer/ebenen.js?v=163"></script>
-<script src="zerstoerer/erkundung.js?v=163"></script>
-<script src="zerstoerer/spuren.js?v=163"></script>
-<script src="zerstoerer/effekte.js?v=163"></script>
-<script src="zerstoerer/hinterhalt.js?v=163"></script>
-<script src="zerstoerer/leben.js?v=163"></script>
-<script src="zerstoerer/gegnerkunst.js?v=163"></script>
-<script src="zerstoerer/demogorgon.js?v=163"></script>
-<script src="zerstoerer/nemesis.js?v=163"></script>
-<script src="zerstoerer/wetter.js?v=163"></script>
-<script src="zerstoerer/wunder.js?v=163"></script>
-<script src="zerstoerer/ausstattung.js?v=163"></script>
-<script src="zerstoerer/ausgleich.js?v=163"></script>
-<script src="zerstoerer/ui.js?v=163"></script>
-<script src="zerstoerer/praesentation.js?v=163"></script>
-<script src="zerstoerer/schmiede.js?v=163"></script>
-<script src="zerstoerer/runen.js?v=163"></script>
-<script src="zerstoerer/tagebuch.js?v=163"></script>
-<script src="zerstoerer/schilder.js?v=163"></script>
-<script src="zerstoerer/weltspuren.js?v=163"></script>
-<script src="zerstoerer/uebergang.js?v=163"></script>
-<script src="zerstoerer/rueckweg.js?v=163"></script>
-<script src="zerstoerer/haerte.js?v=163"></script> <!-- W9 Härte -->
-<script src="zerstoerer/weltkarte.js?v=163"></script> <!-- W21 -->
-<script src="zerstoerer/rueckblick.js?v=163"></script> <!-- W21 -->
-<script src="zerstoerer/bossrausch.js?v=163"></script> <!-- W21 -->
-<script src="zerstoerer/bericht.js?v=163"></script> <!-- W31 -->
-<script src="zerstoerer/lerntipps.js?v=163"></script> <!-- W31 -->
-<script src="zerstoerer/zugang.js?v=163"></script> <!-- W31 -->
-<script src="zerstoerer/mutationen.js?v=163"></script> <!-- W29 Mutationen -->
-<script src="zerstoerer/koop.js?v=163"></script> <!-- W27 Koop (zuletzt laden) -->
-<script src="zerstoerer/auftraege.js?v=163"></script> <!-- W28 Lager -->
-<script src="zerstoerer/lagerwelt.js?v=163"></script> <!-- W28 Lager -->
-<script src="zerstoerer/online.js?v=163"></script> <!-- W32 Online (nach koop.js) -->
-<script src="zerstoerer/optik2.js?v=163"></script> <!-- W35 Optik -->
-<script src="zerstoerer/randblick.js?v=163"></script> <!-- W37 Randblick -->
-<script src="zerstoerer/abwechslung.js?v=163"></script> <!-- W38 Abwechslung -->
-<script src="zerstoerer/einstieg.js?v=163"></script> <!-- W38 Einstieg -->
-<script src="zerstoerer/ziele.js?v=163"></script> <!-- W38 Meta -->
-<script src="zerstoerer/optik3.js?v=163"></script> <!-- W38 Optik -->
+<script src="tonregler.js?v=164"></script>
+<script src="zerstoerer/kern.js?v=164"></script>
+<script src="zerstoerer/platz.js?v=164"></script>
+<script src="zerstoerer/welt.js?v=164"></script>
+<script src="zerstoerer/daten.js?v=164"></script>
+<script src="zerstoerer/kampf.js?v=164"></script>
+<script src="zerstoerer/steuerung.js?v=164"></script>
+<script src="zerstoerer/geschosse.js?v=164"></script>
+<script src="zerstoerer/gegner.js?v=164"></script>
+<script src="zerstoerer/bosse.js?v=164"></script>
+<script src="zerstoerer/bossphasen.js?v=164"></script>
+<script src="zerstoerer/figuren.js?v=164"></script>
+<script src="zerstoerer/werkzeuge.js?v=164"></script>
+<script src="zerstoerer/bild.js?v=164"></script>
+<script src="zerstoerer/pracht.js?v=164"></script>
+<script src="zerstoerer/grafik.js?v=164"></script>
+<script src="zerstoerer/musik.js?v=164"></script>
+<script src="zerstoerer/klang.js?v=164"></script>
+<script src="zerstoerer/spiel.js?v=164"></script>
+<script src="zerstoerer/lager.js?v=164"></script>
+<script src="zerstoerer/parcours.js?v=164"></script>
+<script src="zerstoerer/fallen.js?v=164"></script>
+<script src="zerstoerer/bilanz.js?v=164"></script>
+<script src="zerstoerer/kampfkunst.js?v=164"></script>
+<script src="zerstoerer/hintergrund.js?v=164"></script>
+<script src="zerstoerer/bilderbuch.js?v=164"></script>
+<script src="zerstoerer/tageszeit.js?v=164"></script>
+<script src="zerstoerer/abenteuer.js?v=164"></script>
+<script src="zerstoerer/fluch.js?v=164"></script>
+<script src="zerstoerer/fluchkraft.js?v=164"></script>
+<script src="zerstoerer/ebenen.js?v=164"></script>
+<script src="zerstoerer/erkundung.js?v=164"></script>
+<script src="zerstoerer/spuren.js?v=164"></script>
+<script src="zerstoerer/effekte.js?v=164"></script>
+<script src="zerstoerer/hinterhalt.js?v=164"></script>
+<script src="zerstoerer/leben.js?v=164"></script>
+<script src="zerstoerer/gegnerkunst.js?v=164"></script>
+<script src="zerstoerer/demogorgon.js?v=164"></script>
+<script src="zerstoerer/nemesis.js?v=164"></script>
+<script src="zerstoerer/wetter.js?v=164"></script>
+<script src="zerstoerer/wunder.js?v=164"></script>
+<script src="zerstoerer/ausstattung.js?v=164"></script>
+<script src="zerstoerer/ausgleich.js?v=164"></script>
+<script src="zerstoerer/ui.js?v=164"></script>
+<script src="zerstoerer/praesentation.js?v=164"></script>
+<script src="zerstoerer/schmiede.js?v=164"></script>
+<script src="zerstoerer/runen.js?v=164"></script>
+<script src="zerstoerer/tagebuch.js?v=164"></script>
+<script src="zerstoerer/schilder.js?v=164"></script>
+<script src="zerstoerer/weltspuren.js?v=164"></script>
+<script src="zerstoerer/uebergang.js?v=164"></script>
+<script src="zerstoerer/rueckweg.js?v=164"></script>
+<script src="zerstoerer/haerte.js?v=164"></script> <!-- W9 Härte -->
+<script src="zerstoerer/weltkarte.js?v=164"></script> <!-- W21 -->
+<script src="zerstoerer/rueckblick.js?v=164"></script> <!-- W21 -->
+<script src="zerstoerer/bossrausch.js?v=164"></script> <!-- W21 -->
+<script src="zerstoerer/bericht.js?v=164"></script> <!-- W31 -->
+<script src="zerstoerer/lerntipps.js?v=164"></script> <!-- W31 -->
+<script src="zerstoerer/zugang.js?v=164"></script> <!-- W31 -->
+<script src="zerstoerer/mutationen.js?v=164"></script> <!-- W29 Mutationen -->
+<script src="zerstoerer/koop.js?v=164"></script> <!-- W27 Koop (zuletzt laden) -->
+<script src="zerstoerer/auftraege.js?v=164"></script> <!-- W28 Lager -->
+<script src="zerstoerer/lagerwelt.js?v=164"></script> <!-- W28 Lager -->
+<script src="zerstoerer/online.js?v=164"></script> <!-- W32 Online (nach koop.js) -->
+<script src="zerstoerer/optik2.js?v=164"></script> <!-- W35 Optik -->
+<script src="zerstoerer/randblick.js?v=164"></script> <!-- W37 Randblick -->
+<script src="zerstoerer/abwechslung.js?v=164"></script> <!-- W38 Abwechslung -->
+<script src="zerstoerer/einstieg.js?v=164"></script> <!-- W38 Einstieg -->
+<script src="zerstoerer/ziele.js?v=164"></script> <!-- W38 Meta -->
+<script src="zerstoerer/optik3.js?v=164"></script> <!-- W38 Optik -->
 </body>
 </html>

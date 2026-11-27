@@ -1210,6 +1210,10 @@
       sl("master", L(["Gesamtlautstärke", "Master volume"]), v.master) + sl("music", L(["Musik", "Music"]), v.music) + sl("sfx", L(["Effekte", "Effects"]), v.sfx) + sl("amb", L(["Geräuschkulisse", "Ambience"]), v.amb) +
       '<button class="steuerknopf komfortknopf" data-act="komfort">' + L(["Komfort & Barrierefreiheit", "Comfort & accessibility"]) + " <small>· " + esc(komfortSumme()) + "</small></button>" +
       '<label class="regler">' + L(["Größe der Touch-Knöpfe", "Touch button size"]) + '<input type="range" min="70" max="140" value="' + Math.round(s.touchSize * 100) + '" data-touch="1"></label>' +
+      /* W39 Touch: Deckkraft, Linkshänder, Tipp-Vibration */
+      '<label class="regler">' + L(["Deckkraft der Touch-Knöpfe", "Touch button opacity"]) + '<input type="range" min="30" max="100" value="' + Math.round((isFinite(+s.touchAlpha) && +s.touchAlpha > 0 ? +s.touchAlpha : 1) * 100) + '" data-touchalpha="1"></label>' +
+      ck("touchMirror", L(["Touch für Linkshänder (Stick rechts, Knöpfe links)", "Left-handed touch (stick right, buttons left)"]), !!s.touchMirror) +
+      ck("touchTick", L(["Kurze Vibration beim Tippen (Touch)", "Short vibration on tap (touch)"]), !!s.touchTick) +
       '<label class="schalter">' + L(["Textgröße", "Text size"]) + ' <select data-textsize="1">' + [["klein", L(["klein", "small"])], ["normal", L(["normal", "normal"])], ["gross", L(["groß", "large"])], ["riesig", L(["sehr groß", "very large"])]].map(([v, n]) => '<option value="' + v + '"' + ((s.textSize || "normal") === v ? " selected" : "") + ">" + esc(n) + "</option>").join("") + "</select></label>" +
       '<label class="schalter">' + L(["Hinweise im Spiel", "In-game hints"]) + ' <select data-hint="1">' + [["alle", L(["alle", "all"])], ["wenige", L(["wenige (nur Wichtiges)", "few (important only)"])], ["keine", L(["keine", "none"])]].map(([v, n]) => '<option value="' + v + '"' + ((s.hinweise || "alle") === v ? " selected" : "") + ">" + esc(n) + "</option>").join("") + "</select></label>" +
       ck("cinePan", L(["Kamerafahrt zum Ausgang beim Betreten", "Camera pan to the exit on arrival"]), !!s.cinePan) + ck("presentOff", L(["Fundvorführung aus", "Turn off item showcase"]), !!s.presentOff) +
@@ -1225,7 +1229,8 @@
     modal.querySelector("[data-dead]").oninput = e => { Z.settings.dead = e.target.value / 100; };
     wireVib(); /* W20 Steuerung */
     modal.querySelector("[data-touch]").oninput = e => { Z.settings.touchSize = e.target.value / 100; touchSync(); };
-    modal.querySelectorAll("[data-set]").forEach(c => c.onchange = () => { Z.settings[c.dataset.set] = c.checked; if (c.dataset.set === "vib") inp.vib = c.checked; });
+    modal.querySelector("[data-touchalpha]").oninput = e => { Z.settings.touchAlpha = e.target.value / 100; touchSync(); }; /* W39 Touch */
+    modal.querySelectorAll("[data-set]").forEach(c => c.onchange = () => { Z.settings[c.dataset.set] = c.checked; if (c.dataset.set === "vib") inp.vib = c.checked; if (c.dataset.set === "touchMirror") touchSync(); });
     modal.querySelector("[data-textsize]").onchange = e => { Z.settings.textSize = e.target.value; Z.saveSettings(); fitText(); const sel = modal.querySelector("[data-textsize]"); if (sel) sel.focus({ preventScroll: true }); };
     modal.querySelector("[data-hint]").onchange = e => { Z.settings.hinweise = e.target.value; Z.saveSettings(); };
     modal.querySelector("[data-lang]").onchange = e => { Z.settings.lang = e.target.value; Z.saveSettings(); closeModal(); for (const k in slotEls) slotEls[k].uid = -9; touchSync() /* W36 Feinschliff: Touch-Beschriftung sofort umstellen */; ui.settings(); };
@@ -2001,6 +2006,8 @@
   const tc = $("#touch");
   ui.touchOn = false;
   function touchSync() { tc.hidden = !ui.touchOn || !Z.level; tc.style.setProperty("--ts", Z.settings.touchSize);
+    /* W39 Touch: Deckkraft (30–100 %) und Linkshänder-Spiegelung (Stick rechts, Knöpfe links) */
+    { const ta = +Z.settings.touchAlpha; tc.style.setProperty("--ta", isFinite(ta) && ta > 0 ? Math.max(0.3, Math.min(1, ta)) : 1); tc.classList.toggle("spiegel", !!Z.settings.touchMirror); }
     /* W36 Feinschliff: Touch-Knöpfe standen fest deutsch im HTML (EN-Modus: „Sprung/Rolle/Waffe 1/Trank“) */
     if (tc._lang !== Z.settings.lang) { tc._lang = Z.settings.lang; const AL = { s1: ["Fähigkeit 1", "Skill 1"], s2: ["Fähigkeit 2", "Skill 2"], use: ["Benutzen", "Use"], pause: ["Pause", "Pause"], map: ["Karte", "Map"] }, TL = { a1: ["Waffe<br>1", "Weapon<br>1"], a2: ["Waffe<br>2", "Weapon<br>2"], jump: ["Sprung", "Jump"], roll: ["Rolle", "Roll"], potion: ["Trank", "Potion"] }; tc.querySelectorAll("[data-t]").forEach(b => { const t = TL[b.dataset.t]; if (t) b.innerHTML = L(t); const al = AL[b.dataset.t]; if (al) b.setAttribute("aria-label", L(al)); }); } } /* W39 Bedienung: aria-label der Symbolknöpfe in der Sprache */
   addEventListener("touchstart", () => { if (!ui.touchOn) { ui.touchOn = true; inp.device = "touch"; touchSync(); } }, { passive: true });
@@ -2008,21 +2015,37 @@
   const stick = $("#stick"), knob = $("#knob");
   let stickId = null, sx0 = 0, sy0 = 0;
   const stickArea = $("#stickzone");
-  stickArea.addEventListener("pointerdown", e => { stickId = e.pointerId; sx0 = e.clientX; sy0 = e.clientY; stick.style.left = sx0 + "px"; stick.style.top = sy0 + "px"; stick.classList.add("an"); try { stickArea.setPointerCapture(e.pointerId); } catch (_) {} moveStick(e); });
+  const mir = () => tc.classList.contains("spiegel"), vx = x => (mir() ? innerWidth - x : x); /* W39 Touch: #touch ist gespiegelt → Anzeige-Koordinate */
+  stickArea.addEventListener("pointerdown", e => { stickId = e.pointerId; sx0 = e.clientX; sy0 = e.clientY; stick.style.left = vx(sx0) + "px"; stick.style.top = sy0 + "px"; stick.classList.add("an"); try { stickArea.setPointerCapture(e.pointerId); } catch (_) {} moveStick(e); });
   stickArea.addEventListener("pointermove", e => { if (e.pointerId === stickId) moveStick(e); });
   const endStick = e => { if (e.pointerId !== stickId) return; stickId = null; stick.classList.remove("an"); knob.style.transform = ""; ["left", "right", "up", "down"].forEach(a => inp.setTouch(a, false)); };
   stickArea.addEventListener("pointerup", endStick); stickArea.addEventListener("pointercancel", endStick);
   function moveStick(e) {
-    const dx = e.clientX - sx0, dy = e.clientY - sy0, r = 46 * Z.settings.touchSize, d = Math.hypot(dx, dy), k = d > r ? r / d : 1;
-    knob.style.transform = "translate(" + dx * k + "px," + dy * k + "px)";
+    let dx = e.clientX - sx0, dy = e.clientY - sy0;
+    const r = 46 * Z.settings.touchSize, d = Math.hypot(dx, dy), k = d > r ? r / d : 1;
+    /* W39 Touch: Stick zieht nach – über den Rand hinaus wandert die Mitte mit, Umkehren braucht nur noch Rand + Totzone
+       (gemessen vorher 140 px Rückweg nach 120 px Auslenkung) */
+    if (d > r) { sx0 += dx * (1 - k); sy0 += dy * (1 - k); dx *= k; dy *= k; stick.style.left = vx(sx0) + "px"; stick.style.top = sy0 + "px"; }
+    knob.style.transform = "translate(" + (mir() ? -dx : dx) + "px," + dy + "px)";
     const th = 14;
     inp.setTouch("left", dx < -th); inp.setTouch("right", dx > th);
     inp.setTouch("up", dy < -th * 2.2 && Math.abs(dy) > Math.abs(dx) * 0.7); inp.setTouch("down", dy > th * 2.2 && Math.abs(dy) > Math.abs(dx) * 0.7);
   }
+  /* W39 Touch: Finger darf zwischen Aktionsknöpfen rutschen (z. B. von Sprung auf Waffe 1, ohne abzusetzen) – je Finger der gerade
+     gehaltene Knopf; Pause/Karte nehmen nie an einem Rutschen teil. Optional ein kurzer Vibrations-Tick beim Drücken (Einstellung). */
+  const SLIDE = new Map(), NOSLIDE = { pause: 1, map: 1 };
+  const tTick = () => { if (Z.settings.touchTick && Z.vib) Z.vib({ s: 0.4, w: 0.2, ms: 22, p: 0, gap: 0.05 }); };
   tc.querySelectorAll("[data-t]").forEach(b => {
     const a = b.dataset.t;
-    b.addEventListener("pointerdown", e => { e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch (_) {} b.classList.add("an"); if (a === "pause") { if (ui.modalOpen) { if (!ui.noEsc) closeModal(); } else if (!ui.choiceActive) ui.pause(); return; } if (a === "map") { toggleMap(); return; } inp.setTouch(a, true); A.init(); });
-    const up = () => { b.classList.remove("an"); if (a !== "pause" && a !== "map") inp.setTouch(a, false); };
+    b.addEventListener("pointerdown", e => { e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch (_) {} b.classList.add("an"); if (a === "pause") { if (ui.modalOpen) { if (!ui.noEsc) closeModal(); } else if (!ui.choiceActive) ui.pause(); return; } if (a === "map") { toggleMap(); return; } inp.setTouch(a, true); SLIDE.set(e.pointerId, b); tTick(); A.init(); });
+    b.addEventListener("pointermove", e => {
+      const cur = SLIDE.get(e.pointerId); if (!cur) return;
+      const el = document.elementFromPoint(e.clientX, e.clientY), nb = el && el.closest ? el.closest("#touch [data-t]") : null;
+      if (!nb || nb === cur || NOSLIDE[nb.dataset.t]) return;
+      cur.classList.remove("an"); inp.setTouch(cur.dataset.t, false);
+      nb.classList.add("an"); inp.setTouch(nb.dataset.t, true); SLIDE.set(e.pointerId, nb); tTick();
+    });
+    const up = e => { const cur = (e && SLIDE.get(e.pointerId)) || b; if (e) SLIDE.delete(e.pointerId); cur.classList.remove("an"); b.classList.remove("an"); if (!NOSLIDE[cur.dataset.t]) inp.setTouch(cur.dataset.t, false); };
     b.addEventListener("pointerup", up); b.addEventListener("pointercancel", up); b.addEventListener("lostpointercapture", up);
   });
 
