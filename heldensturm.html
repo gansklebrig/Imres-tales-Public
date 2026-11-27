@@ -14,7 +14,7 @@
 <meta property="og:image" content="https://imrestales.de/vorschau.jpg">
 <style>[hidden]{display:none!important}body{margin:0}
 #progTxt{text-shadow:0 0 2px #000,0 0 3px #000,0 1px 2px #000}#progBar.boss #progTxt{text-shadow:0 0 2px #000,0 1px 2px #000}
-/* Titel: Hinweise über dem Heldenbild statt über Seitenwahl und Startknopf */@media (min-width:900px) and (min-height:560px){html body.imresCamp #toast#toast,html body.imresMain #toast#toast{top:auto!important;bottom:calc(env(safe-area-inset-bottom,0px) + 92px)!important;transform:none!important;width:min(29vw,420px)!important;margin:0!important}html body.imresCamp #toast#toast{left:8vw!important;right:auto!important}html body.imresMain #toast#toast{right:7vw!important;left:auto!important}}
+/* Titel: Hinweise über dem Heldenbild statt über Seitenwahl und Startknopf */@media (min-width:900px) and (min-height:560px){html body.imresCamp #toast#toast,html body.imresMain #toast#toast{top:auto!important;bottom:calc(env(safe-area-inset-bottom,0px) + 92px)!important;transform:none!important;width:min(29vw,420px)!important;margin:0!important}html body.imresCamp #toast#toast{left:8vw!important;right:auto!important}html body.imresMain #toast#toast{right:7vw!important;left:auto!important}}@media (max-width:899px) and (orientation:landscape){html body.imresMain #toast#toast,html body.imresCamp #toast#toast{top:auto!important;bottom:calc(env(safe-area-inset-bottom,0px) + 30px)!important;transform:none!important;width:44vw!important;margin:0!important;right:8px!important;left:auto!important}html body.imresMain #toast#toast .tm,html body.imresCamp #toast#toast .tm{font-size:11.5px;padding:4px 8px}}
 /* Würfel-Ereignis: warmer Lichtschein statt flacher Fläche */html .screen.evScr{background:radial-gradient(ellipse 70% 60% at 50% 30%,rgba(90,56,30,.42),rgba(20,13,12,0) 65%),radial-gradient(ellipse 120% 90% at 50% 50%,rgba(0,0,0,0) 55%,rgba(0,0,0,.5)),#120d0c!important}
 /* Schmied: Glut von unten */html .screen.smScr{background:radial-gradient(ellipse 80% 55% at 50% 105%,rgba(150,70,24,.32),rgba(0,0,0,0) 70%),radial-gradient(ellipse 120% 90% at 50% 50%,rgba(0,0,0,0) 55%,rgba(0,0,0,.45)),#110c0b!important}
 /* Stufe geschafft: goldener Schein von oben */html .screen.cdScr{background:radial-gradient(ellipse 60% 50% at 50% 12%,rgba(229,180,84,.16),rgba(0,0,0,0) 70%),radial-gradient(ellipse 120% 90% at 50% 50%,rgba(0,0,0,0) 55%,rgba(0,0,0,.45)),#120d0e!important}
@@ -16472,7 +16472,7 @@ SND.erfolg=()=>{const ok=['harfe_79','harfe_83','harfe_86','harfe_91'].map((n,i)
 SND.erfolg_p=()=>{SND.erfolg();try{smp('glock_108',0.14,{d:0.5,len:1.6});smp('schelle1',0.14,{d:0.42,len:1})}catch(e){}};
 function erfWarten(){try{if(G.state==='play'&&G.boss&&!G.boss.dead&&G.boss.hp>0)return true;if(document.querySelector('.g2box'))return true;
  /* kleine Fenster: über Zwischen-/Lagerbildschirmen deckte die Erfolgs-Tafel den Inhalt ab – zeigen, sobald wieder gespielt wird */
- if((innerWidth<=760||innerHeight<=480)&&(G.state==='between'||G.state==='camp'||G.state==='end'))return true;
+ if((innerWidth<=760||innerHeight<=480)&&(G.state==='between'||G.state==='camp'||G.state==='end'||G.state==='title'))return true;
  /* im Spiel geöffnete Fenster (Pause, Beutel, Talente …): Tafel lag sonst über dem Fensterinhalt – zeigen, sobald es zu ist */
  if(G.state==='play'&&G.overlay)return true}catch(e){}return false}
 /* läuft eine Tafel noch, wenn im Spiel ein Fenster aufgeht (Pause, Beutel, Truhe …), wird sie bis zum Schließen ausgeblendet */
