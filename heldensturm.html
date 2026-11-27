@@ -38315,6 +38315,15 @@ if(typeof AR_PDRAW==='object'&&AR_PDRAW.ar_obelisk){const ob0=AR_PDRAW.ar_obelis
   if(p.prog>0){c.strokeStyle='#d070ff';c.lineWidth=3;c.beginPath();c.arc(x,y-20,26,-Math.PI/2,-Math.PI/2+TAU*p.prog);c.stroke()}
   const a=(G.arN||[])[p.ai];if(a&&a.s===1&&fxQ()>0){c.globalCompositeOperation='lighter';c.globalAlpha=0.3+0.2*Math.sin(t*8+x);ln(c,'#c060ff',3,x,y-62,a.x,a.y-10);c.globalCompositeOperation='source-over';c.globalAlpha=1}
   c.restore()}}
+/* Arena: Spinnengelege – Eiertraube im Netz statt einzelnem Oval; schlüpfend zittert sie und zeigt Risse */
+if(typeof AR_PDRAW==='object'&&AR_PDRAW.ar_ei){const ei0=AR_PDRAW.ar_ei;AR_PDRAW.ar_ei=function(p,t){if(p.used)return ei0.apply(this,arguments);const c=cx,sd=p.seed||0.5,wb=p.act===1?Math.sin(t*25)*2:Math.sin(t*1.5+sd*9)*0.6;c.save();
+  c.fillStyle='rgba(0,0,0,.3)';c.beginPath();c.ellipse(p.x,p.y+6,17,5,0,0,TAU);c.fill();
+  c.strokeStyle='rgba(235,230,220,.35)';c.lineWidth=0.8;for(let k=0;k<6;k++){const a=k/6*TAU+sd*3;c.beginPath();c.moveTo(p.x,p.y-4);c.lineTo(p.x+Math.cos(a)*22,p.y-2+Math.sin(a)*8);c.stroke()}
+  c.translate(p.x+wb,p.y);const E=[[-6,-3,6.5,8],[6,-4,6,7.5],[0,-11,6.5,8],[-2,1,5.5,6],[5,2,5,5.5]];
+  for(const [ex,ey,rx,ry] of E){const g=c.createRadialGradient(ex-rx*0.35,ey-ry*0.4,1,ex,ey,ry*1.1);g.addColorStop(0,'#fbf6ea');g.addColorStop(0.6,'#e2d8c4');g.addColorStop(1,'#a89c86');c.fillStyle=g;c.beginPath();c.ellipse(ex,ey,rx,ry,0,0,TAU);c.fill();c.strokeStyle='rgba(110,96,80,.55)';c.lineWidth=0.8;c.stroke()}
+  if(p.act===1){c.strokeStyle='rgba(60,40,50,.8)';c.lineWidth=1;c.beginPath();c.moveTo(-1,-15);c.lineTo(1,-11);c.lineTo(-1,-8);c.moveTo(4,-6);c.lineTo(7,-3);c.stroke();c.globalAlpha=0.55;c.fillStyle='#5a3a4a';c.beginPath();c.arc(0,-11,2.6,0,TAU);c.fill();c.globalAlpha=1}
+  c.fillStyle='rgba(255,255,255,.18)';c.beginPath();c.ellipse(-2,-14,2.2,1.2,-0.5,0,TAU);c.fill();
+  c.restore()}}
 /* Weltschriften (Namen, „Siegel“ …) liegen auf der scharfen Textebene über allem – unter der Minikarte wegradieren, damit sie nicht über der Karte stehen */
 if(typeof wlMini==='function'&&typeof render==='function'){const _wm2=wlMini;let mm=0;wlMini=function(){const r=_wm2.apply(this,arguments);mm=1;return r};const _rd2=render;render=function(){mm=0;const r=_rd2.apply(this,arguments);try{if(mm&&TXO.on&&TXO.n>0&&TXO.cv&&!TXO.cv.hidden){const B=WLMM.box;if(B){const f=DPR*TXO.k,g=TXO.g;g.save();g.setTransform(1,0,0,1,0,0);g.clearRect(Math.floor((B.x-2)*f),Math.floor((B.y-2)*f),Math.ceil((B.S+4)*f),Math.ceil((B.S+4)*f));g.restore()}}}catch(e){}return r}}
 /* ================= Paket „kartgr“: Größe der Minikarte einstellbar – window.__hsKARTGR =================
