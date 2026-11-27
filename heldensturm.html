@@ -14191,7 +14191,7 @@ function mfAnchor(h){try{if(typeof PADNAV!=='undefined'&&PADNAV.on&&PADNAV.sig){
  const a=document.activeElement;if(a&&h.contains(a)&&a!==document.body)return a;return h.querySelector('.it.sel,.node.sel,.stn.sel')}
 
 /* ---- normale Menüs (.wrap) ---- */
-function mfPinned(w){return[...w.children].filter((c,i)=>c.matches('.mtabs,.mpchips,[role=tablist],.seg')||i<4&&c.matches('.inv-head,.spread,.row')&&c.querySelector('[data-act="close"],[data-act="smith-close"],[data-act="net-close"],[data-act="net-back"]')&&c.getBoundingClientRect().height<160)}
+function mfPinned(w){return[...w.children].filter((c,i)=>c.matches('.mtabs,.mpchips,[role=tablist],.seg')||i<4&&c.matches('.inv-head,.spread,.row')&&c.querySelector('[data-act="close"],[data-act="smith-close"],[data-act="net-close"],[data-act="net-back"]')&&c.getBoundingClientRect().height/(parseFloat(getComputedStyle(w).zoom)||1)<160)}
 function mfBody(w){let B=w;for(let d=0;d<4;d++){const H=B.getBoundingClientRect().height;let best=null,bh=0;for(const c of B.children){const h=c.getBoundingClientRect().height;if(h>bh){bh=h;best=c}}
   if(!best||bh<H*0.6||best.children.length<3||best.matches(MF_ATOM)||/grid|inline/.test(getComputedStyle(best).display)&&!best.matches('.card'))break;B=best}return B}
 function menuFit(h){h=h||scr;if(!h||h.hidden||MF.busy||!h.isConnected||!h.getClientRects().length||!h.clientHeight)return;MF.busy=1;try{mfFit(h)}catch(e){console.error('menuFit',e)}finally{MF.busy=0;try{if(MF.mo)MF.mo.takeRecords()}catch(e){}}}
