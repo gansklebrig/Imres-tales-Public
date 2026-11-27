@@ -36,6 +36,7 @@
 /* Erst-Hinweise auf schmalen Feldern: Knopf unter den Text statt abgeschnitten daneben */@media (max-width:760px),(max-height:480px){.hinw{flex-direction:column;align-items:stretch;gap:6px}.hinw [data-act="hinw-ok"]{align-self:flex-end;flex:none}}
 /* Titel/Lager auf flachen Bildschirmen: höchstens ein Hinweis, oben links über dem Schriftzug statt über Seitenwahl und Inhalt */@media (max-height:520px){html body.imresTitel #toast#toast{top:calc(env(safe-area-inset-top,0px) + 4px)!important;bottom:auto!important;left:8px!important;right:auto!important;margin:0!important;transform:none!important;width:min(56vw,520px)!important;align-items:flex-start}html body.imresTitel #toast#toast>:not(:last-child){display:none!important}html body.imresTitel #toast#toast .tm{font-size:11.5px!important;padding:4px 10px!important}}
 /* Lager-Reiter neben dem Zurück-Knopf: Schrift etwas kleiner statt überlappender Beschriftungen */#scr.fzk-on .camp-panel>.seg.fzk-platz{gap:2px}#scr.fzk-on .camp-panel>.seg.fzk-platz>button{min-width:0;padding-left:2px!important;padding-right:2px!important;font-size:clamp(11px,1.6vw,14px)!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wrap.mfcolw>.mfsp{-webkit-box-decoration-break:clone;box-decoration-break:clone}
 /* Großbild: Eckknöpfe des Titels mitwachsen lassen */@media (min-width:2200px) and (min-height:1300px){#imresBack{font-size:15px;padding:6px 14px}.camp-top .slbtn{font-size:20px}.mfbar .mft{font-size:17px}}@media (min-width:1900px) and (min-height:1150px){.slm>.slp{zoom:1.15;width:calc(100% / 1.15)}}@media (min-width:2300px) and (min-height:1350px){.slm>.slp{zoom:1.32;width:calc(100% / 1.32)}.slm-in>.slm-l{zoom:1.28}}@media (min-width:2200px) and (min-height:1300px){.wrap.ivg .bag.ivsz .it .ico.ico{width:clamp(20px,calc(var(--ivs) * .4),58px)!important;height:clamp(20px,calc(var(--ivs) * .4),58px)!important}}
 </style>
 <script src="tonregler.js?v=1"></script>
@@ -14258,13 +14259,15 @@ function mfFit(h){mfReset(h);h.classList.remove('mfhost','mfd','mfgrid','mfcamp'
  if(isInv)mk({d:1,c:1,g:1});
  const sideOk=vw>=760&&vh/mz>=440;if(isInv&&sideOk)for(const g of[0,1])mk({d:1,c:1,s:1,g});
  if(!isInv)for(const c of[2,3])mk({d:1,c});
+ /* Großbild: hohe Karten (z. B. Optionen) über Spalten verteilen, damit die Schrift größer werden kann */
+ if(!isInv&&vw>=2300&&vh>=1000)for(const c of[2,3])mk({d:1,c,sp:1});
  const detTop=on=>{const d=w.querySelector(':scope>#idet2');if(!d)return;const row=[...d.children].filter(x=>x.matches('.row')).pop(),hd=d.querySelector(':scope>.sh-head');if(!row||!hd)return;
   if(on){if(!row._mfNext){row._mfNext=row.nextSibling||'end';hd.after(row);row.classList.add('mfacts')}}else if(row._mfNext){if(row._mfNext==='end')d.appendChild(row);else d.insertBefore(row,row._mfNext);row._mfNext=null;row.classList.remove('mfacts')}};
  w._mfUndo=()=>{detTop(false);unside();if(stb&&stb._mfMv){const n=stb._mfMv.n;if(n&&n.parentNode===w)w.insertBefore(stb,n);stb._mfMv=null}};
- const apply=o=>{detTop(!!o.det);h.classList.toggle('mfd',!!o.d);h.classList.toggle('mfgrid',!!o.g);w.classList.remove('mfcolw','mfdet');w.style.removeProperty('--mfc');w.style.maxWidth='';side(false);
+ const apply=o=>{w.querySelectorAll('.mfsp').forEach(x=>x.classList.remove('mfsp','mfsplit'));detTop(!!o.det);h.classList.toggle('mfd',!!o.d);h.classList.toggle('mfgrid',!!o.g);w.classList.remove('mfcolw','mfdet');w.style.removeProperty('--mfc');w.style.maxWidth='';side(false);
   if(o.s){side(true);w.style.maxWidth=Math.max(1100,Math.min(2000,vw/Math.max(zMin,1)))+'px'}
   if(o.det)w.classList.add('mfdet');
-  if(o.c>1){w.classList.add('mfcolw');w.style.setProperty('--mfc',o.c);w.style.maxWidth=(o.c*560)+'px';for(const c of mfPinned(w))c.classList.add('mfspan')}};
+  if(o.c>1){w.classList.add('mfcolw');w.style.setProperty('--mfc',o.c);w.style.maxWidth=(o.c*560)+'px';for(const c of mfPinned(w))c.classList.add('mfspan')}if(o.sp&&o.c>1)for(const c of w.children)if(c.matches('.card')&&c.children.length>=3&&!c.classList.contains('mfspan')){c.classList.add('mfsp','mfsplit');for(const k of c.children)if(k.children.length>=3&&[...k.children].every(x=>x.matches('.up')))k.classList.add('mfsp','mfsplit')}};
  const colOk=(o,z)=>o.c<2||vw/z>=o.c*380;
  let best=null;
  if(isInv&&hasDet&&!sideOk)tries.splice(0,tries.length,{d:1,c:1,g:1,det:1});
@@ -14272,7 +14275,7 @@ function mfFit(h){mfReset(h);h.classList.remove('mfhost','mfd','mfgrid','mfcamp'
  const C=MF.cfg&&MF.cfg[key];if(C&&!(isInv&&hasDet!==C.det0)){const o=tries.find(t=>JSON.stringify(t)===C.o);if(o){apply(o);const z=fitZ(Math.min(mz,C.z*1.02),zMin);if(z!=null&&z>=C.z*0.95&&colOk(o,z))best={o,z,hit:1}}}
  /* sonst: ohne Umbau, wenn kaum verkleinert werden muss; ansonsten die Aufteilung mit der größten Schrift */
  if(!best)for(const o of tries){apply(o);let z0=mz;if(o.c>1){z0=Math.min(mz,vw/(o.c*400));if(z0<zMin)continue}
-  const z=fitZ(z0,zMin);if(z!=null&&colOk(o,z)){if(!o.c||o.c===1&&!o.s&&!o.g){if(z>=Math.max(zMin,mz*0.9)-1e-3){best={o,z};break}}if(!best||z>best.z+0.03)best={o,z}}}
+  const z=fitZ(z0,zMin);if(z!=null&&colOk(o,z)&&!(o.sp&&!best&&z<mz*0.68)){if(!o.c||o.c===1&&!o.s&&!o.g){if(z>=Math.max(zMin,mz*0.9)-1e-3){best={o,z};break}}if(!best||z>best.z+0.03)best={o,z}}}
  if(best&&!best.hit){(MF.cfg||(MF.cfg={}))[key]={o:JSON.stringify(best.o),z:best.z,det0:hasDet}}
  if(best){apply(best.o);if(!fitZ(best.z,zMin))fitZ(zMin,zMin);if(mfFits(h)){mfDone(h,w);return}}
  /* Seiten */
