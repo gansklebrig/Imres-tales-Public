@@ -128,6 +128,58 @@
     Z.abw.pageLines = function (lv) { const r = pl0.apply(this, arguments) || []; const t = tf(), gn = gtn(); /* W38 Online: auch beim Gast */ if (gn && lv && Z.BIOMES[lv.id] && !lv.passage) return [L(["⬇ Tiefe ", "⬇ Depth "]) + gn].concat(r); if (t && lv && Z.BIOMES[lv.id] && !lv.passage) return [L(["⬇ Tiefe ", "⬇ Depth "]) + (lv.w38tn || t.n + 1)].concat(r); return r.length ? r : undefined; };
   }
 
+  /* W38 Endspiel: Barradin erzählt die Tiefe – je Tiefe eine Zeile auf der Kapitelseite (statt der Gebietsgeschichte),
+     1–15 fest und zunehmend düster, danach zufällig (Saat + Tiefe) aus einem Pool. Auch beim Online-Gast (Z.run.w38tn). */
+  const ERZ = [
+    ["Ein Ende? Ich hatte die Laute schon eingepackt. Na gut – noch eine Strophe.", "An ending? I'd already packed my lute. Fine – one more verse."],
+    ["Je tiefer wir steigen, desto besser klingt mein Echo. Das ist der einzige Vorteil.", "The deeper we go, the better my echo sounds. That's the only upside."],
+    ["Hier unten gibt es keine Tavernen. Ich habe gefragt. Zweimal.", "There are no taverns down here. I asked. Twice."],
+    ["Ich habe aufgehört, die Stufen zu zählen. Die Stufen zählen jetzt uns.", "I stopped counting the steps. Now the steps are counting us."],
+    ["Meine Saiten sind feucht, meine Stimme heiser, mein Mut … irgendwo weiter oben.", "My strings are damp, my voice hoarse, my courage … somewhere further up."],
+    ["Ich suche einen Reim auf „Abgrund“. Der Abgrund sucht zurück.", "I'm looking for a rhyme for 'abyss'. The abyss is looking back."],
+    ["Ezekiel summt jetzt mit. Ich habe ihm das nicht beigebracht.", "Ezekiel hums along now. I didn't teach him that."],
+    ["Die Fäden hier sind älter als Lieder. Älter als ich – und ich bin sehr alt, fragt Nundro.", "The threads here are older than songs. Older than me – and I'm very old, ask Nundro."],
+    ["Ich höre Applaus. Niemand ist da. Ich verbeuge mich trotzdem.", "I hear applause. No one is there. I bow anyway."],
+    ["Wenn ihr dieses Kapitel lest, war ich mutig. Wenn nicht, schreibt es bitte jemand anders.", "If you're reading this chapter, I was brave. If not, someone else please write it."],
+    ["Das Licht ist ein Gerücht geworden. Ich erzähle es trotzdem weiter.", "Light has become a rumour. I keep spreading it anyway."],
+    ["Ich habe eine Strophe gestrichen. Sie hat mich angesehen.", "I cut a verse. It looked at me."],
+    ["Der Fels flüstert meinen Namen. Falsch betont.", "The rock whispers my name. Wrong emphasis."],
+    ["Kein Reim mehr, kein Takt. Nur Schritte. Und etwas, das sie mitzählt.", "No rhyme left, no beat. Only footsteps. And something counting them."],
+    ["Ich bin der Erzähler. Ich entscheide, wie das endet. … Oder?", "I'm the narrator. I decide how this ends. … Don't I?"]
+  ];
+  const ERZ_POOL = [
+    ["Noch tiefer. Dafür habe ich kein Lied – also erfinde ich eins. Es ist kurz.", "Deeper still. I have no song for this – so I'm making one up. It's short."],
+    ["Ich schreibe kleiner, damit die Seiten reichen.", "I'm writing smaller so the pages last."],
+    ["Wer bis hierher gelesen hat, schuldet mir ein Bier. Ein großes.", "Whoever has read this far owes me a beer. A large one."],
+    ["Die Tinte wird dunkler. Oder meine Augen.", "The ink is getting darker. Or my eyes are."],
+    ["Irgendwo über uns ist Morgen. Ich schreibe es auf, damit wir es nicht vergessen.", "Somewhere above us it's morning. I'm writing it down so we don't forget."],
+    ["Das Dunkel hat einen Rhythmus. Leider im Siebenachteltakt.", "The dark has a rhythm. Seven-eight time, unfortunately."],
+    ["Ich habe das Ende gesucht. Es hat sich besser versteckt als ich.", "I went looking for the ending. It hides better than I do."],
+    ["Noch ein Kapitel. Ich habe aufgehört, so zu tun, als wäre es das letzte.", "Another chapter. I've stopped pretending it's the last one."]
+  ];
+  function erzaehlung(n, seed) {
+    if (!(n > 0)) return null;
+    const z = n <= ERZ.length ? ERZ[n - 1] : ERZ_POOL[Z.Rng(((seed >>> 0) ^ (n * 2246822519)) >>> 0)() * ERZ_POOL.length | 0];
+    return L(["„", "\u201c"]) + L(z) + L(["“", "\u201d"]) + " – Barradin";
+  }
+  function wireErz() {
+    const ui = Z.ui; if (!ui || !ui.onArea) return setTimeout(wireErz, 60);
+    if (ui.onArea._w38erz) return;
+    const oa = ui.onArea;
+    ui.onArea = function (id, B, lv) {
+      try {
+        const t = tf(), n = t ? (t.load | 0) : gtn();
+        if (n > 0 && B && lv && !lv.hub && !lv.passage && !lv.arena && Z.BIOMES[id]) {
+          const st = erzaehlung(n, Z.run ? Z.run.seed : 0);
+          if (st) { const B2 = Object.create(B); B2.story = [st, st]; arguments[1] = B2; return oa.apply(this, arguments); }
+        }
+      } catch (e) { console.error("W38 Endspiel", e); }
+      return oa.apply(this, arguments);
+    };
+    ui.onArea._w38erz = true;
+  }
+  wireErz();
+
   /* ======================= Abspann-Knopf und Lager-Station ======================= */
   function wireUI() {
     const ui = Z.ui; if (!ui || !ui.ending || !ui.actions || typeof ui.pause !== "function") return setTimeout(wireUI, 60);
@@ -255,5 +307,5 @@
   ].join("\n");
   document.head.appendChild(css);
 
-  Z.tiefe = { start, frei, state: () => ({ tf: tf() ? JSON.parse(JSON.stringify(tf())) : null, meta: JSON.parse(JSON.stringify(TM())) }), menu: schachtMenu, mul };
+  Z.tiefe = { erzaehlung, start, frei, state: () => ({ tf: tf() ? JSON.parse(JSON.stringify(tf())) : null, meta: JSON.parse(JSON.stringify(TM())) }), menu: schachtMenu, mul };
 })();

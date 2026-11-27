@@ -121,7 +121,7 @@
       tile: { base: "#5e4c48", light: "#9a7a6a", dark: "#2a1c1c", det: "#6e5a52", top: "ash", topCol: "#8a7a70" }, plat: "#6a4a32",
       dark: 0.3, ambCol: "#6a2a1a", bg: "spires", weather: ["ash", "wind", "embers"], hazard: "spikes",
       props: { banner: 3, gargoyle: 3, brazier: 2, chain: 2, crenel: 3, bones: 1 },
-      foes: { mane: 3, stirge: 3, harpyie: 2, nadelBlight: 2, zweigBlight: 2, drowSchuetze: 1, quasit: 2, gargoyle: 1 }, density: 1,
+      foes: { mane: 0.5, stirge: 2.5, harpyie: 2.2, nadelBlight: 2.2, zweigBlight: 0.35, drowSchuetze: 1.6, quasit: 2.2, gargoyle: 1.2 }, density: 1, /* W38 Gegner: Gewichte (vorher 3,3,2,2,2,1,2,1) – Manen-/Zweigschwärme 64 % */
       squads: [["nadelBlight", "zweigBlight", "zweigBlight"], ["drowSchuetze", "mane", "mane"]], /* W10 */
       warden: "chasme", exits: ["glut", "sturm"],
       amb: { loops: [["amb/a_heulwind.mp3", 0.5], ["amb/a_feuer1.mp3", 0.12]], one: [["e_kraehe_", 16, 7], ["n_fledermaus_", 8, 10], ["e_fernschrei_", 1, 25]] },
@@ -145,7 +145,7 @@
       tile: { base: "#4a3a34", light: "#7a5a46", dark: "#1a100c", det: "#ff7a2a", top: "soot", topCol: "#2a2220" }, plat: "#4a3a2e",
       dark: 0.5, ambCol: "#6a2a0a", bg: "embercity", weather: ["embers", "ash", "smoke"], hazard: "lava",
       props: { brazier: 3, forge: 2, chain: 2, greenfire: 3, crate: 2, pipe: 2, statueDuergar: 1, lantern: 2 },
-      foes: { duergar: 2, duergarArmbrust: 2, feuerschlucker: 2.3, glutling: 2, bewahrer: 2.3, magmaHund: 1.7, salamander: 1.8 }, density: 1.05, /* W38 Gegner: Gewichte (vorher 3,2,2,3,2,1,2) */
+      foes: { duergar: 2.2, duergarArmbrust: 2, feuerschlucker: 2.3, glutling: 2.2, bewahrer: 2.3, magmaHund: 1.7, salamander: 1.8 }, density: 1.05, /* W38 Gegner: Gewichte (vorher 3,2,2,3,2,1,2) */
       squads: [["bewahrer", "duergar", "duergar"], ["salamander", "feuerschlucker", "glutling"], ["duergarArmbrust", "duergarArmbrust", "magmaHund"], ["feuerschlucker", "glutfledermaus", "glutfledermaus", "glutfledermaus"], ["duergar", "glutfledermaus", "glutfledermaus", "glutfledermaus"]], /* W10: Glutfledermäuse nur als Schwarm im Trupp (die Gassen haben keine Flieger-Plätze für sie allein) */
       warden: "riese", exits: ["themberchaud"],
       amb: { loops: [["amb/a_esse.mp3", 0.35], ["amb/a_markt.mp3", 0.12], ["amb/a_feuer1.mp3", 0.3]], one: [["n_hammer_", 7, 4], ["e_zischen_", 2, 8], ["e_grollen_", 2, 14]] },
@@ -157,7 +157,7 @@
       tile: { base: "#4a4a3e", light: "#7a7a62", dark: "#1a1a12", det: "#5a5a48", top: "moss", topCol: "#4a6a2a" }, plat: "#5a4a2e",
       dark: 0.45, ambCol: "#2a4a1a", bg: "storm", weather: ["rain", "lightning", "fog"], hazard: "spikes",
       props: { vine: 4, bones: 2, banner: 2, crenel: 2, torch: 1, gargoyle: 2, rope: 1 },
-      foes: { zombie: 3, zombieBlaeh: 2, zweigBlight: 3, nadelBlight: 2, rankenBlight: 1, stirge: 2, saeureschnecke: 2, sturmMephit: 2 }, density: 1.05,
+      foes: { zombie: 2.4, zombieBlaeh: 2, zweigBlight: 1.1, nadelBlight: 2, rankenBlight: 2, stirge: 2, saeureschnecke: 2.2, sturmMephit: 2 }, density: 1.05, /* W38 Gegner: Gewichte (vorher 3,2,3,2,1,2,2,2) */
       squads: [["saeureschnecke", "nadelBlight", "nadelBlight"], ["rankenBlight", "zweigBlight", "zweigBlight"], ["zombieBlaeh", "zombie", "zombie"]], /* W10 */
       warden: "vrock", exits: ["venomfang"],
       amb: { loops: [["amb/a_gewitter1.mp3", 0.45], ["amb/a_regen1.mp3", 0.3]], one: [["n_donner_", 8, 11], ["e_kraehe_", 16, 12], ["n_stoehnen_", 8, 18]] },

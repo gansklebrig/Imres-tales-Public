@@ -9738,7 +9738,7 @@
 },
 "zerstoerer.html":{
 "groesse":81242,
-"sha256":"273e1079bd26b3c0feda3b4fc373afaa215688682a5fe1aa64da6c0335a9fdb2"
+"sha256":"bcf238c266acaba21150b0170de4ff57d01db4432e84b4bf389594127fb440db"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":144658,
@@ -9837,8 +9837,8 @@
 "sha256":"973b39284a7b4326e60c949d1167a763dfdcad689d31c94cbd674cc770c9d512"
 },
 "zerstoerer/gegner2.js":{
-"groesse":19465,
-"sha256":"bff4bfa8738e2fdb90e8ee5e7c941ea648e784178b5a55642d40dcd4b25007b4"
+"groesse":23092,
+"sha256":"3fa5fb109f348e54f3cc636bae30a8c3d27add800b0aa280b5862d6ae5fc4a56"
 },
 "zerstoerer/gegnerkunst.js":{
 "groesse":19050,
@@ -9997,8 +9997,8 @@
 "sha256":"f400e6764ff2e31d8fbec4be20f1afb5dc9722989c370e0b9728ac4033d8d305"
 },
 "zerstoerer/tiefe.js":{
-"groesse":20177,
-"sha256":"32a2a92d43a0705b067f958a3da5802d11235053f56c5c500544c7801c08bbce"
+"groesse":24678,
+"sha256":"0d94706bb79598bf0e2e7c2a3e794b401570c586ed79313bced9ffdf91d2ca37"
 },
 "zerstoerer/uebergang.js":{
 "groesse":113957,
@@ -10009,8 +10009,8 @@
 "sha256":"44b725ba77d3db9d6c78ba1e76341fc6d77cf91b557c84916a3d5be0d6ac838c"
 },
 "zerstoerer/welt.js":{
-"groesse":240194,
-"sha256":"04244680d0bfaf35ecbdce372b2e7ec3fa88b3807d48192271b4002591dc2ae4"
+"groesse":240356,
+"sha256":"fc0bfea28d5a497a0235f28024a479040a900dd9cebce3518ea74d6ebb346af8"
 },
 "zerstoerer/weltkarte.js":{
 "groesse":42121,
@@ -10041,5 +10041,5 @@
 "sha256":"2239cd79f01c377c38cdcecf8d827774c46b23cf9e74f4481be6463ca0b129e0"
 }
 },
-"stand":174
+"stand":175
 }

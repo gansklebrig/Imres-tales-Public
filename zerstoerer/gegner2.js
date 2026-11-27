@@ -222,6 +222,38 @@
     teleport: ["Springt durch Schatten.", "Leaps through shadows."], giftig: ["Hinterlässt Giftpfützen, Treffer vergiften.", "Leaves poison pools, hits poison."],
     eisig: ["Treffer verlangsamen.", "Hits slow you."], explosiv: ["Explodiert kurz nach dem Tod.", "Explodes shortly after death."]
   };
+  /* W38 Gegner: gemalte Symbole der neuen Eigenschaften im Fundbuch (64×64, Stufe 0 flach ohne Verläufe); unbekannt = Schattenriss */
+  function symbol(cv, k, known) {
+    const c = cv.getContext("2d"); if (!c) return; const L0 = lo();
+    c.clearRect(0, 0, 64, 64); c.save(); c.translate(32, 32); c.lineJoin = "round"; c.lineCap = "round";
+    const fill = (a, b) => { if (L0 || !known) return a; const g = c.createLinearGradient(0, -24, 0, 24); g.addColorStop(0, a); g.addColorStop(1, b); return g; };
+    const ink = known ? "#2a1810" : "#3a2a24";
+    /* Siegelgrund */
+    c.fillStyle = known ? fill("#5a2a1e", "#2a1210") : "#2a1e1a"; c.beginPath(); c.arc(0, 0, 29, 0, TAU); c.fill();
+    c.strokeStyle = known ? "#c8902a" : "#4a3a30"; c.lineWidth = 2; c.stroke();
+    const S1 = known ? fill("#fff0c8", "#c8902a") : "#4a3a32", S2 = known ? "#e5b454" : "#5a4a40";
+    if (k === "spiegelnd") {
+      c.fillStyle = S1; c.beginPath(); for (let i = 0; i < 6; i++) { const a = -Math.PI / 2 + i * TAU / 6; c.lineTo(Math.cos(a) * 18, Math.sin(a) * 18); } c.closePath(); c.fill();
+      c.strokeStyle = ink; c.lineWidth = 1.5; c.stroke();
+      c.beginPath(); for (let i = 0; i < 6; i += 2) { const a = -Math.PI / 2 + i * TAU / 6; c.moveTo(0, 0); c.lineTo(Math.cos(a) * 18, Math.sin(a) * 18); } c.stroke();
+      if (known) { c.strokeStyle = "#fff8e0"; c.lineWidth = 2; c.beginPath(); c.moveTo(-9, -6); c.lineTo(-3, -12); c.stroke(); c.fillStyle = "#c0302a"; c.beginPath(); c.moveTo(14, 12); c.lineTo(22, 6); c.lineTo(20, 16); c.closePath(); c.fill(); }
+    } else if (k === "schildwall") {
+      c.fillStyle = S1; c.beginPath(); c.moveTo(-14, -20); c.lineTo(14, -20); c.lineTo(14, 8); c.quadraticCurveTo(14, 20, 0, 24); c.quadraticCurveTo(-14, 20, -14, 8); c.closePath(); c.fill();
+      c.strokeStyle = ink; c.lineWidth = 1.6; c.stroke();
+      c.fillStyle = known ? "#8a5a2a" : "#3a2e28"; c.fillRect(-2, -18, 4, 38); c.fillRect(-12, -4, 24, 4);
+      if (known) { c.strokeStyle = "#ffd27a"; c.lineWidth = 1.5; for (const [x, y] of [[-24, -10], [-22, 2], [-25, 12]]) { c.beginPath(); c.moveTo(x, y); c.lineTo(x + 6, y - 1); c.stroke(); } }
+    } else if (k === "bannwirker") {
+      c.strokeStyle = known ? "#d8a0ff" : "#4a3a40"; c.lineWidth = 2.2; c.beginPath(); c.ellipse(0, 6, 20, 9, 0, 0, TAU); c.stroke();
+      c.fillStyle = S2; for (let i = 0; i < 6; i++) { const a = i * TAU / 6; c.fillRect(Math.cos(a) * 20 - 1.5, 6 + Math.sin(a) * 9 - 3, 3, 5); }
+      c.fillStyle = S1; c.beginPath(); c.moveTo(0, -22); c.lineTo(6, -8); c.lineTo(0, 0); c.lineTo(-6, -8); c.closePath(); c.fill(); c.strokeStyle = ink; c.lineWidth = 1.2; c.stroke();
+    } else if (k === "sprunghaft") {
+      c.strokeStyle = S2; c.lineWidth = 2.4; c.setLineDash(known && !L0 ? [4, 3] : []); c.beginPath(); c.moveTo(-18, 14); c.quadraticCurveTo(0, -30, 18, 14); c.stroke(); c.setLineDash([]);
+      c.fillStyle = known ? "#c0302a" : "#3a2e28"; c.beginPath(); c.ellipse(18, 16, 8, 3, 0, 0, TAU); c.fill();
+      c.fillStyle = S1; c.beginPath(); c.moveTo(-18, 14); c.lineTo(-24, 20); c.lineTo(-12, 20); c.closePath(); c.fill();
+      c.beginPath(); c.moveTo(18, 14); c.lineTo(13, 6); c.lineTo(23, 6); c.closePath(); c.fill();
+    }
+    c.restore();
+  }
   function wireCodex() {
     const ui = Z.ui; if (!ui || !ui.codex) return setTimeout(wireCodex, 80);
     if (ui.codex._w38g) return;
@@ -236,9 +268,10 @@
             let h = '<div class="w38-elitekunde"><h3>' + esc(L(["Elite-Eigenschaften", "Elite traits"])) + "</h3>";
             for (const k in Z.ELITE) {
               const mine = NEU[k], d = mine ? (seen[k] ? L(mine.tip) : L(["Noch nicht begegnet.", "Not met yet."])) : ALT[k] ? L(ALT[k]) : "";
-              h += '<div class="zeile' + (mine && !seen[k] ? " unbekannt" : "") + '"><div><b>' + esc(L(Z.ELITE[k])) + (mine ? ' <small class="w38-neu">' + esc(L(["neu", "new"])) + "</small>" : "") + "</b><small>" + esc(d) + "</small></div></div>";
+              h += '<div class="zeile' + (mine && !seen[k] ? " unbekannt" : "") + '">' + (mine ? '<canvas class="w38-eico" data-w38e="' + k + '" data-k="' + (seen[k] ? 1 : 0) + '" width="64" height="64"></canvas>' : "") + '<div><b>' + esc(L(Z.ELITE[k])) + (mine ? ' <small class="w38-neu">' + esc(L(["neu", "new"])) + "</small>" : "") + "</b><small>" + esc(d) + "</small></div></div>";
             }
             list.insertAdjacentHTML("beforeend", h + "</div>");
+            for (const cv of document.querySelectorAll("#modal canvas.w38-eico")) symbol(cv, cv.dataset.w38e, cv.dataset.k === "1");
           }
         }
       } catch (e) { console.error("W38 Gegner", e); }
@@ -248,7 +281,7 @@
   }
   wireCodex();
   const css = document.createElement("style");
-  css.textContent = ".w38-elitekunde{grid-column:1/-1;width:100%;margin-top:10px}.w38-elitekunde h3{color:#e5b454;margin:6px 0}.w38-elitekunde small.w38-neu{display:inline-block;width:auto;vertical-align:middle;color:#ffd27a;font-size:.8em;border:1px solid rgba(229,180,84,.5);border-radius:8px;padding:0 5px;margin-left:4px}";
+  css.textContent = ".w38-elitekunde{grid-column:1/-1;width:100%;margin-top:10px}.w38-elitekunde h3{color:#e5b454;margin:6px 0}.w38-elitekunde .zeile{display:flex;align-items:center;gap:10px}.w38-elitekunde canvas.w38-eico{width:40px;height:40px;flex:none}.w38-elitekunde small.w38-neu{display:inline-block;width:auto;vertical-align:middle;color:#ffd27a;font-size:.8em;border:1px solid rgba(229,180,84,.5);border-radius:8px;padding:0 5px;margin-left:4px}";
   document.head.appendChild(css);
 
   Z.gegner2 = {
