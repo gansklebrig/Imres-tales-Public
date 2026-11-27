@@ -6167,7 +6167,7 @@ const SETS={
   b2:'+25% Fernkampfschaden, +10% Reichweite',b4:'Treffer gegen weit entfernte Gegner verursachen 40% mehr Schaden und betäuben manchmal.',s2:s=>{s.rangedP+=0.25;s.range*=1.1}},
  g_magier:{n:'Robe des Erzmagiers',st:'Fertigkeiten',pieces:{helm:'Spitzhut des Erzmagiers',armor:'Sternenrobe',gloves:'Runenhandschuhe',ring:'Ring der Arkanen Quelle'},
   b2:'−15% Abklingzeiten, +10% Fertigkeitsschaden',b4:'Fähigkeiten (außer der ultimativen) sind mit 25% Chance sofort wieder bereit.',s2:s=>{s.cdr+=0.15;s.skill+=0.1}}};
-const SET_IDS=Object.keys(SETS),HSCOL='#5affc0';
+const SET_IDS=Object.keys(SETS),HSCOL='#c6f25a';
 const setOk=id=>{const S=SETS[id];return !!S&&(!S.hero||S.hero===P.id)};
 const setSize=id=>Object.keys(SETS[id].pieces).length;
 function pieceName(id,slot,base){const p=SETS[id].pieces[slot];return p.indexOf('%')>=0?p.replace('%',base||'Waffe'):p}
