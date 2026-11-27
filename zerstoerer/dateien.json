@@ -9738,7 +9738,7 @@
 },
 "zerstoerer.html":{
 "groesse":81309,
-"sha256":"46dca52a0cd0d75051fc21f758ada52afe6f078b3075debf3752f52c9cec8b94"
+"sha256":"448b4a7f01303e663a4c84086cc2491aed1a4797e3adb7df5f82eb423763763c"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":145807,
@@ -9833,8 +9833,8 @@
 "sha256":"86265a1cff8e2f2619cd9833e4a879e1ff4c4c9f5233f5c95473d25f9a618163"
 },
 "zerstoerer/frei.js":{
-"groesse":19912,
-"sha256":"e75afb9037774cb245aefd88455e152200b74f04d211e651e3e6f86741ca481d"
+"groesse":23695,
+"sha256":"2d0033583d62cfc48b3ba0038d70cb1948fe809c4e679c3a6cd71b1bda0c207f"
 },
 "zerstoerer/gegner.js":{
 "groesse":112989,
@@ -9925,8 +9925,8 @@
 "sha256":"95f977cfe7cfcf6c4ca55b5305551d67bf08cae54bd684adddc1623e645e2702"
 },
 "zerstoerer/online.js":{
-"groesse":97283,
-"sha256":"fba9def8bfa014d8ec50f8ae145dfd94484b9b1c7fd0abad6fceeea6075f35cd"
+"groesse":98090,
+"sha256":"5f3a01b37a4e03d4e08aec416be7e6d2334b9f3fd1c60b7840d097e2b2534fb8"
 },
 "zerstoerer/optik2.js":{
 "groesse":55026,
@@ -9961,8 +9961,8 @@
 "sha256":"212476e1884b3b24b15fa3af54f25fe69d4d7108f375dd3ea636c78f9b4dc4e7"
 },
 "zerstoerer/rueckweg.js":{
-"groesse":23678,
-"sha256":"7d9380ada815344ebc6caae261be2be9512429a3103d1c12fad0baa826e3940f"
+"groesse":23941,
+"sha256":"38f0fd36b3e4cda43b762c505aec103a03da6f6412da744dd8fac3be6e9ef8cc"
 },
 "zerstoerer/runen.js":{
 "groesse":77285,
@@ -10009,8 +10009,8 @@
 "sha256":"8ca5a8e1ca2d794cd48dda6237968282ad30cad3da811ddae8bcb090e3301846"
 },
 "zerstoerer/ui.js":{
-"groesse":217339,
-"sha256":"0ddccaa8788b9c4375ab78f6fd6e345a746fca8a01047af218da6c80b3068e4e"
+"groesse":217610,
+"sha256":"96c7d39e9f9e4dff0be23014a68462904b8fe549130c78a57487e054bf525417"
 },
 "zerstoerer/welt.js":{
 "groesse":240356,
@@ -10045,5 +10045,5 @@
 "sha256":"df0542ee684d5789758ae19d942444ead52fb2be7d26c59f6fc7916748f8bc34"
 }
 },
-"stand":181
+"stand":182
 }

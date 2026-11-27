@@ -88,6 +88,8 @@
       for (const id of ["choice", "bubble", "card", "prompt"]) { const el = document.getElementById(id); if (el) el.hidden = true; }
     } catch (_) {}
     Z.interactTarget = null;
+    /* W39 Robust: Online-Koop – der Gast erfährt Gebietswechsel nur über Z.loadArea; ohne Meldung blieb er im alten Gebiet stehen */
+    try { if (Z.online && Z.online.areaChanged) Z.online.areaChanged(); } catch (e) { console.error("rueckweg online", e); }
   }
   /* Startplatz eines Gebiets (wie Z.loadArea) */
   function startPos(lv) { const P = Z.player; return { x: lv.start.x * T + T / 2 - P.w / 2, y: (lv.start.y + 1) * T - P.h, face: 1 }; }

@@ -752,7 +752,7 @@
       '<p class="tfoot">' + L(["Ein Spiel zu Imres Tales · Kopfhörer empfohlen", "A game for Imre's Tales · headphones recommended"]) + "</p>" + pcAngebot() + "</div>";
     $("#t-play").onclick = () => { if (S && !cont) S.use(S.active(), !S.raw(S.active())); startGame(); };
     if ($("#t-slots")) $("#t-slots").onclick = () => { A.init(); ui.slots(); };
-    if ($("#t-ach")) $("#t-ach").onclick = () => { A.init(); Z.achModal(false); ui.onClose = () => { if (!Z.level) showTitle(); }; };
+    if ($("#t-ach")) $("#t-ach").onclick = () => { A.init(); Z.achModal(false); ui.onClose = () => { if (!Z.level) ui.showTitle(); }; };
     $("#t-set").onclick = () => { A.init(); ui.settings(); };
     if ($("#t-fs")) $("#t-fs").onclick = () => { A.init(); fs.toggle(); };
     if ($("#t-quit")) $("#t-quit").onclick = () => { try { Z.saveSettings && Z.saveSettings(); } catch (_) {} PC.beenden(); };
@@ -760,7 +760,7 @@
   }
   ui.showTitle = showTitle;
   /* W19 Slots: Auswahl der drei Spielstände (Fenster über dem Titelbild; Zurück/B/Esc führt zum Titelbild) */
-  const backToTitle = () => { if (!Z.level) showTitle(); };
+  const backToTitle = () => { if (!Z.level) ui.showTitle(); }; /* W39 Robust: über ui.showTitle, damit Hüllen (online.js: Sitzungsende, Knopf „Online spielen“) greifen */
   function slotCard(i, foc) {
     const g = i.gebiet ? L(i.gebiet.name) : "–";
     const body = i.leer
@@ -829,7 +829,7 @@
       ui.clearQueue(); ui.choiceActive = null;
       for (const el of [bossbar, prompt, banner, choice, card, $("#bubble"), $("#touch")]) if (el) el.hidden = true;
       Z.paused = false;
-      showTitle();
+      ui.showTitle(); /* W39 Robust: Hülle aus online.js – vorher blieb eine Online-Sitzung beim Titel weiterlaufen und der Knopf „Online spielen“ fehlte */
     });
   };
   actions.toTitle = () => {
@@ -1225,7 +1225,7 @@
       '<button class="steuerknopf" data-act="graphics">' + L(["Grafik, Leistung & Fehlerbericht", "Graphics, performance & error report"]) + " <small>· " + esc(Z.gfxName()) + "</small></button>" +
       ck("autoAim", L(["Zielhilfe für Fernkampf", "Ranged aim assist"]), s.autoAim) + ck("fps", L(["Bilder pro Sekunde anzeigen", "Show FPS"]), s.fps) +
       '<label class="schalter">' + L(["Sprache", "Language"]) + ' <select data-lang="1"><option value="de"' + (s.lang === "de" ? " selected" : "") + '>Deutsch</option><option value="en"' + (s.lang === "en" ? " selected" : "") + ">English</option></select></label>" +
-      '</div><div class="knoepfe"><button data-act="close">' + esc(t("close")) + "</button></div>", { cls: "schmal", onClose: () => { Z.saveSettings(); A.saveVol(); if (!Z.level) showTitle(); } });
+      '</div><div class="knoepfe"><button data-act="close">' + esc(t("close")) + "</button></div>", { cls: "schmal", onClose: () => { Z.saveSettings(); A.saveVol(); if (!Z.level) ui.showTitle(); } });
     modal.querySelectorAll("[data-vol]").forEach(r => r.oninput = () => { A.vol[r.dataset.vol] = r.value / 100; A.applyVol(); if (r.dataset.vol === "sfx") A.play("hitFlesh", { vol: 0.6, gap: 0.15 }); });
     modal.querySelector("[data-dead]").oninput = e => { Z.settings.dead = e.target.value / 100; };
     wireVib(); /* W20 Steuerung */
@@ -1539,7 +1539,7 @@
       '<button class="steuerknopf" data-act="benchRun">' + L(["Grafiktest: alle Stufen durchmessen (ca. 20 s)", "Graphics test: measure every level (approx. 20 s)"]) + "</button>" +
       '<button class="steuerknopf" data-act="diagNow">' + L(["Fehlerbericht jetzt anzeigen", "Show error report now"]) + "</button>" +
       (nErr ? '<button class="steuerknopf" data-act="diagClear">' + L(["Fehlerliste leeren", "Clear error list"]) + "</button>" : "") +
-      '</div><div class="knoepfe"><button data-act="graphicsBack">' + esc(t("back")) + "</button></div>", { cls: "schmal", onClose: () => { Z.saveSettings(); if (!Z.level) showTitle(); } });
+      '</div><div class="knoepfe"><button data-act="graphicsBack">' + esc(t("back")) + "</button></div>", { cls: "schmal", onClose: () => { Z.saveSettings(); if (!Z.level) ui.showTitle(); } });
     const re = () => { const f = document.activeElement && document.activeElement.dataset ? Object.entries(document.activeElement.dataset)[0] : null; ui.onClose = null; closeModal(); ui.graphics(); if (f) setTimeout(() => { const el = modal.querySelector("[data-" + f[0] + '="' + f[1] + '"]'); if (el) el.focus(); }, 40); };
     modal.querySelector("[data-preset]").onchange = e => { Z.setGfx("preset", e.target.value === "auto" || e.target.value === "custom" ? e.target.value : +e.target.value); re(); };
     modal.querySelectorAll("[data-gr]").forEach(r => { r.oninput = () => { modal.querySelector('[data-out="' + r.dataset.gr + '"]').textContent = r.value + " %"; }; r.onchange = () => { Z.setGfx(r.dataset.gr, r.value / 100); re(); }; });

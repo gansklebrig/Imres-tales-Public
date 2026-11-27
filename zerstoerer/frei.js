@@ -19,6 +19,7 @@
 
   /* ---------- 1) Namensband unter die Boss-Leiste ---------- */
   let shift = 0, bandT = 0;
+  let shiftX = 0;
   function band() {
     const bn = document.getElementById("banner"), bb = document.getElementById("bossbar");
     if (!bn) return;
@@ -26,17 +27,26 @@
     const vis = el => { if (!el || el.hidden) return false; const r = el.getBoundingClientRect(); if (!(r.height > 0 && r.width > 0)) return false; const cs = getComputedStyle(el); return cs.display !== "none" && cs.visibility !== "hidden" && +cs.opacity > 0.05; }; /* fest positionierte Elemente haben kein offsetParent */
     const hf = document.getElementById("hfzeile");
     const kh = document.getElementById("koop-hl"), gc = document.getElementById("w38gch");
-    const obs = [vis(bb) ? bb : null, hf && hf.classList.contains("an") && vis(hf) ? hf : null, vis(kh) ? kh : null, gc && !gc.hidden && vis(gc) ? gc : null].filter(Boolean); /* Boss-Leiste; hochkant die Herausforderungstafel; Koop: P2-Kasten (W38 Frei, 4. Runde) */
-    if (off() || !shown || !obs.length) { if (shift) { bn.style.transform = ""; shift = 0; } return; }
+    const hoch = innerHeight > innerWidth;
+    const ecke = [document.getElementById("t-map"), document.getElementById("t-pause")].filter(vis); /* W38 QA: Karten-/Pause-Knopf (Touch) */
+    /* senkrecht ausweichen: Boss-Leiste, Herausforderungstafel, P2-Kasten (W38 Frei 4), Gast-Ziele; hochkant auch die Eckknöpfe */
+    const obs = [vis(bb) ? bb : null, hf && hf.classList.contains("an") && vis(hf) ? hf : null, vis(kh) ? kh : null, gc && !gc.hidden && vis(gc) ? gc : null].concat(hoch ? ecke : []).filter(Boolean);
+    if (!vis(bb)) for (const m of document.querySelectorAll("#meldungen .meldung")) if (vis(m) && m.getBoundingClientRect().top < innerHeight * 0.45) obs.push(m); /* W38 QA: Meldungen beim Betreten (Lager) – Band darunter; mit Boss-Leiste regelt noten() die Reihenfolge */
+    const reset = () => { if (shift || shiftX) { bn.style.transform = ""; shift = 0; shiftX = 0; } };
+    if (off() || !shown || (!obs.length && (hoch || !ecke.length))) return reset();
     const r0 = bn.getBoundingClientRect();
     const k = r0.height / Math.max(1, bn.offsetHeight) || 1; /* CSS-zoom des Bandes */
-    const top0 = r0.top - shift * k; /* Lage ohne eigene Verschiebung */
-    let need = 0;
-    for (const el of obs) { const b = el.getBoundingClientRect(); if (b.left < r0.right && b.right > r0.left && b.top < top0 + r0.height && b.bottom > top0) need = Math.max(need, b.bottom + 6 - top0); }
-    if (need <= 0) { if (shift) { bn.style.transform = ""; shift = 0; } return; }
-    need = Math.min(need, Math.max(0, innerHeight - 8 - (top0 + r0.height))); /* nicht aus dem Bild */
-    const s = Math.round(need / k);
-    if (Math.abs(s - shift) > 1) { shift = s; bn.style.transform = "translate(-50%, calc(-50% + " + s + "px))"; }
+    const top0 = r0.top - shift * k, left0 = r0.left - shiftX * k; /* Lage ohne eigene Verschiebung */
+    let need = 0, needX = 0;
+    for (const el of obs) { const b = el.getBoundingClientRect(); if (b.left < left0 + r0.width && b.right > left0 && b.top < top0 + r0.height && b.bottom > top0) need = Math.max(need, b.bottom + 6 - top0); }
+    if (!hoch) for (const el of ecke) { /* quer: seitlich an den Eckknöpfen vorbei (Linkshänder: Knöpfe links) */
+      const b = el.getBoundingClientRect(); if (!(b.left < left0 + r0.width && b.right > left0 && b.top < top0 + r0.height && b.bottom > top0)) continue;
+      if (b.left + b.width / 2 < innerWidth / 2) needX = Math.max(needX, b.right + 6 - left0); else needX = Math.min(needX, b.left - 6 - (left0 + r0.width));
+    }
+    if (need <= 0 && !needX) return reset();
+    need = Math.min(Math.max(0, need), Math.max(0, innerHeight - 8 - (top0 + r0.height))); /* nicht aus dem Bild */
+    const sy = Math.round(need / k), sx = Math.round(needX / k);
+    if (Math.abs(sy - shift) > 1 || Math.abs(sx - shiftX) > 1) { shift = sy; shiftX = sx; bn.style.transform = "translate(calc(-50% + " + sx + "px), calc(-50% + " + sy + "px))"; }
   }
   /* Meldungen während des Boss-Auftritts (vor „bosskampf“) lagen ebenfalls auf der Leiste: knapp darunter setzen */
   function noten() {
@@ -56,7 +66,21 @@
     m.style.top = Math.round((b.bottom + 6) / hud) + "px";
   }
   const notenS = safe(noten, "noten");
-  const bandS0 = safe(band, "band"), bandS = () => { bandS0(); notenS(); };
+  /* W38 QA: Handy hochkant – Boss-Leiste ragte 24 px in die Minikarte: rechten Rand um die Überdeckung einrücken */
+  let bbFix = 0;
+  function bossKarte() {
+    const bb = document.getElementById("bossbar"), mm = document.getElementById("minimap"); if (!bb || !mm) return;
+    if (bb.hidden || off()) { if (bbFix) { bb.style.right = ""; bbFix = 0; } return; }
+    const a = bb.getBoundingClientRect(), m = mm.getBoundingClientRect(); if (!(a.width > 0 && m.width > 0)) return;
+    const ov = Math.min(a.right, m.right) - Math.max(a.left, m.left), vy = Math.min(a.bottom, m.bottom) - Math.max(a.top, m.top);
+    if (ov > 1 && vy > 1) {
+      const hud = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hud")) || 1;
+      const cur = parseFloat(getComputedStyle(bb).right) || 0; bb.style.right = Math.round((cur + ov + 6) / hud) + "px"; bbFix = 1;
+      if (getComputedStyle(bb).transform !== "none") { bb.style.left = Math.round(Math.max(8, a.left) / hud) + "px"; bb.style.transform = "none"; bb.style.width = "auto"; }
+    }
+  }
+  const bossKarteS = safe(bossKarte, "bosskarte");
+  const bandS0 = safe(band, "band"), bandS = () => { bandS0(); notenS(); bossKarteS(); };
   (function loop() { requestAnimationFrame(loop); const now = performance.now(); if (now - bandT > 120) { bandT = now; bandS(); } })();
 
   /* ---------- 5) Handy hochkant: Ezekiel nicht hinter Schnellleiste und Touch-Knöpfen ----------
@@ -75,7 +99,8 @@
       const o = p ? hochOff() : 0;
       if (!o) return u0.apply(this, arguments);
       const q = Object.create(p); q.y = p.y + o; /* Ziel tiefer → Figur höher im Bild; alle anderen Felder wie gehabt */
-      return u0.call(this, dt, q);
+      const lk = c.lock; if (lk && typeof lk.y === "number") lk.y += o; /* W38 QA: auch bei Boss-/Ereignis-Kamera (Lock) */
+      try { return u0.call(this, dt, q); } finally { if (lk && typeof lk.y === "number") lk.y -= o; }
     };
     c.update._w38f = true;
     /* Kurze Gebiete sind hochkant kaum höher als das Bild: die Kamera darf um den Versatz unter den unteren Rand schauen
@@ -85,6 +110,7 @@
       c.clamp = function () {
         const o = hochOff(), b = c.bounds;
         if (!o || !b) return k0.apply(this, arguments);
+        if (b.h <= c.h) { const r = k0.apply(this, arguments); c.y += o; return r; } /* W38 QA: kurze Arenen (ganz im Bild) – Ausschnitt um den Versatz tiefer */
         c.bounds = { x: b.x, y: b.y, w: b.w, h: b.h + o };
         try { return k0.apply(this, arguments); } finally { c.bounds = b; }
       };
@@ -187,6 +213,20 @@
     ui.pause._w38z = true;
   }
   wirePause();
+  /* W38 QA: Lange Fenster (Zielbuch, Fundbuch, Erfolge …): Knopfleiste klebt unten, wenn der Inhalt rollt – „Schließen“
+     war sonst erst nach dem Rollen zu sehen (Messung: Zielbuch 92–123 px Überlauf auf 1920/3440). */
+  function klebe() {
+    const m = document.querySelector("#modal:not([hidden]) .mbox"); if (!m || off()) return;
+    const k = m.querySelector(":scope > .knoepfe"); if (!k) return;
+    m.classList.toggle("w38-klebt", m.scrollHeight > m.clientHeight + 4);
+  }
+  function wireOpen() {
+    const md = document.getElementById("modal"); if (!md) return setTimeout(wireOpen, 120);
+    let pend = 0;
+    new MutationObserver(() => { if (pend) return; pend = setTimeout(() => { pend = 0; try { klebe(); } catch (e) { console.error("W38 QA", e); } }, 60); }).observe(md, { childList: true, subtree: true });
+    addEventListener("resize", () => { try { klebe(); } catch (_) {} });
+  }
+  wireOpen();
 
   /* ---------- 9) Breitbild: HUD wahlweise an den Bildrand (statt im 16:9-Mittelfeld) ----------
      Die Anzeige sitzt bewusst im 16:9-Bereich (--safe-x). Auf 21:9/32:9 schwebt die Lebensleiste dadurch weit im Bild;
@@ -275,6 +315,7 @@
     "#hfzeile .hc.weg.w38-verf{animation:w38verf 1.3s ease-out 1;text-decoration-color:#ff7a6a}",
     "@media (prefers-reduced-motion:reduce){#hfzeile .hc.weg.w38-verf{animation:none;color:#ff9a8a}}",
     "body.w38-hudrand{--safe-x:0px}",
+    "#modal .mbox.w38-klebt>.knoepfe{position:sticky;bottom:0;z-index:2;margin-top:8px;padding:8px 0 4px;background:linear-gradient(rgba(30,14,12,0),rgba(30,14,12,.94) 28%,rgba(30,14,12,.98))}",
     "#modal .mbox.rb21box>.knoepfe{position:sticky;bottom:0;z-index:2;margin:8px -6px 0;padding:8px 6px 4px;background:linear-gradient(rgba(30,14,12,0),rgba(30,14,12,.94) 28%,rgba(30,14,12,.98))}" /* W38 Frei: Lauf-Rückblick – „Weiter ins Lager“ auf kleinen Bildschirmen ohne Rollen sichtbar */ + "",
     "#hpbar .w38-wer{position:absolute;left:6px;top:50%;transform:translateY(-50%);font-size:calc(var(--fs-xs,11px) * .85);font-weight:800;color:#f0e2cc;text-shadow:0 1px 2px #000;opacity:.85;pointer-events:none}",
     "#koop-hl .w38-du{margin-left:auto;font-size:var(--fs-xs,11px);color:#1a1012;background:#e5b454;border-radius:6px;padding:0 6px;font-weight:800}",

@@ -141,10 +141,15 @@
       pr.on("connection", conn => {
         /* nur EIN Mitspieler; ein bekannter Gast darf nach Abbruch wieder herein */
         conn.on("open", () => {
+          /* W39 Robust: Sitzung inzwischen beendet (Titel/Spielstandwechsel; der Vermittler wird erst 300 ms später geschlossen) – ein
+             Wiederverbindungsversuch des Gastes setzte sonst den Gastgeber ohne Rolle zurück in die Lobby */
+          if (S.peer !== pr || S.role !== "host") { try { conn.close(); } catch (e) { } return; }
           const ln = peerLink(conn);
           if (!S.playing && !(S.link && S.link.open && !S.link.closed && S.st !== "lost")) return attach(ln);
           /* schon verbunden: nur derselbe Gast (Kennung aus „welcome“) darf die Leitung ersetzen – z. B. nach kurzem Netzausfall */
-          ln.onmsg = m => { if (m.t === "hello" && S.gTok && m.tok === S.gTok) { attach(ln); hostMsg(m); } else { ln.sendR({ t: "bye", why: "voll" }); setTimeout(() => ln.close(), 300); } };
+          /* W39 Robust: nur ein „hello“ entscheidet. Eingaben/Pings des wiederverbundenen Gastes kommen über den unzuverlässigen Kanal
+             oft VOR dem „hello“ an – vorher galt schon das als fremd („Der Raum ist schon voll.“, Sitzung beendet nach Netzwacklern) */
+          ln.onmsg = m => { if (!m || m.t !== "hello") return; if (S.gTok && m.tok === S.gTok) { attach(ln); hostMsg(m); } else { ln.sendR({ t: "bye", why: "voll" }); setTimeout(() => ln.close(), 300); } };
         });
       });
     }).catch(() => fail("lib"));
@@ -312,6 +317,7 @@
     chip();
   }
   O.end = endSession;
+  O.areaChanged = () => { if (S.role === "host" && S.playing && S.link) sendArea(); }; /* W39 Robust: Gebiet ohne Z.loadArea gewechselt (Rückweg-Tor) */
 
   /* ======================= WERTE KODIEREN (Gastgeber) ======================= */
   let REG = null;
