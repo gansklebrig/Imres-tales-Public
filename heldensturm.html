@@ -38254,6 +38254,17 @@ if(typeof AR_PDRAW==='object'){
   c.restore()}}
 /* Großes Banner: schwebende Weltschriften („Volltreffer!“, „Hinterhalt!“ …) liegen auf der Textebene darüber – im Bannerband abblenden, damit Titel und Untertitel frei lesbar sind */
 if(typeof drawBanner==='function'){const _dbn=drawBanner;drawBanner=function(dt){try{const b=G.banner;if(b&&TXO.on&&TXO.rend&&TXO.n>0&&TXO.cv&&b.t<b.dur&&!(typeof scr!=='undefined'&&scr&&!scr.hidden)){const inA=Math.min(1,b.t/0.35),a=Math.max(0,Math.min(inA,Math.min(1,(b.dur-b.t)/0.5)));if(a>0.02){const y=b.y||H*(b.bars?0.32:0.26),fs=Math.min(b.size||56,W*0.105),m=cx.getTransform(),k=TXO.k,g=TXO.g;g.save();g.setTransform(m.a*k,m.b*k,m.c*k,m.d*k,m.e*k,m.f*k);g.globalAlpha=1;g.globalCompositeOperation='destination-out';const gr=g.createLinearGradient(0,0,W,0);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(0.2,'rgba(0,0,0,'+(0.92*a).toFixed(3)+')');gr.addColorStop(0.8,'rgba(0,0,0,'+(0.92*a).toFixed(3)+')');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,y-fs*0.85,W,fs*(b.small?2.45:1.7));g.restore()}}}catch(e){}return _dbn.apply(this,arguments)}}
+/* Arena: Reliquiar als goldbeschlagener Schrein auf Steinsockel, mit Glasdeckel und leuchtendem Kleinod */
+if(typeof AR_PDRAW==='object'){AR_PDRAW.ar_reliquiar=function(p,t){const c=cx,x=p.x,y=p.y,pu=0.5+0.5*Math.sin(t*3);c.save();
+  c.fillStyle='rgba(0,0,0,.35)';c.beginPath();c.ellipse(x,y+12,27,8,0,0,7);c.fill();
+  /* Sockel */c.fillStyle='#4e4a44';c.fillRect(x-25,y-4,50,16);c.fillStyle='#625d56';c.fillRect(x-25,y-4,50,3);c.fillStyle='rgba(0,0,0,.25)';c.fillRect(x-25,y+8,50,4);c.strokeStyle='rgba(20,18,14,.5)';c.lineWidth=1;c.beginPath();c.moveTo(x-8,y-1);c.lineTo(x-8,y+12);c.moveTo(x+9,y-1);c.lineTo(x+9,y+12);c.stroke();
+  /* Kasten */const g=c.createLinearGradient(0,y-24,0,y-4);g.addColorStop(0,'#7a4a2a');g.addColorStop(1,'#4a2a16');c.fillStyle=g;c.fillRect(x-19,y-22,38,18);
+  c.fillStyle='rgba(255,230,160,'+(0.22+0.18*pu).toFixed(3)+')';c.fillRect(x-14,y-19,28,11);
+  c.fillStyle='#ffe9a0';c.globalAlpha=0.55+0.35*pu;c.beginPath();c.moveTo(x,y-18);c.lineTo(x+4,y-13.5);c.lineTo(x,y-9);c.lineTo(x-4,y-13.5);c.closePath();c.fill();c.globalAlpha=1;
+  c.strokeStyle='#e5b454';c.lineWidth=1.6;c.strokeRect(x-19,y-22,38,18);c.lineWidth=1;c.strokeRect(x-14,y-19,28,11);
+  /* Dach mit Kreuzblume */c.fillStyle='#c8963a';c.beginPath();c.moveTo(x-22,y-22);c.lineTo(x,y-33);c.lineTo(x+22,y-22);c.closePath();c.fill();c.fillStyle='#8a6424';c.beginPath();c.moveTo(x,y-33);c.lineTo(x+22,y-22);c.lineTo(x+16,y-22);c.closePath();c.fill();
+  c.fillStyle='#ffd870';c.beginPath();c.arc(x,y-35,2.4,0,7);c.fill();for(const o of[-19,19]){c.fillStyle='#e5b454';c.beginPath();c.arc(x+o,y-4,2,0,7);c.fill()}
+  c.restore()}}
 /* Weltschriften (Namen, „Siegel“ …) liegen auf der scharfen Textebene über allem – unter der Minikarte wegradieren, damit sie nicht über der Karte stehen */
 if(typeof wlMini==='function'&&typeof render==='function'){const _wm2=wlMini;let mm=0;wlMini=function(){const r=_wm2.apply(this,arguments);mm=1;return r};const _rd2=render;render=function(){mm=0;const r=_rd2.apply(this,arguments);try{if(mm&&TXO.on&&TXO.n>0&&TXO.cv&&!TXO.cv.hidden){const B=WLMM.box;if(B){const f=DPR*TXO.k,g=TXO.g;g.save();g.setTransform(1,0,0,1,0,0);g.clearRect(Math.floor((B.x-2)*f),Math.floor((B.y-2)*f),Math.ceil((B.S+4)*f),Math.ceil((B.S+4)*f));g.restore()}}}catch(e){}return r}}
 /* ================= Paket „kartgr“: Größe der Minikarte einstellbar – window.__hsKARTGR =================
