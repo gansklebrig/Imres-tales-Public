@@ -368,6 +368,7 @@
     return true;
   }
   function pushHist(t) { t.hist = t.hist.filter(h => Array.isArray(h) && h[0] !== t.d); t.hist.unshift([t.d, t.best, t.n]); t.hist = t.hist.slice(0, 14); }
+  /* W38 Endspiel: Abschlussmeldung über setTimeout – Z.bossLater verfällt mit dem Lauf (Z.run → null), die Meldung kam im Lager nie an */
   function finish(sieg) {
     const run = Z.run, tg = run && run.w38tag; if (!tg || tg.fertig) return;
     tg.fertig = true;
@@ -376,7 +377,7 @@
     const neu = p > t.best; if (neu) t.best = p;
     t.last = { d: tg.d, p, sieg: !!sieg, gebiet: run.area, kills: (Z.stats && Z.stats.kills) || 0 };
     pushHist(t); try { Z.saveMeta(); } catch (_) {}
-    later(() => note("<b>☀ " + esc(L(["Tagesprüfung: ", "Daily trial: "]) + p + L([" Punkte", " points"])) + "</b><br><small>" + esc(neu ? L(["Neue Tagesbestleistung!", "New best for today!"]) : L(["Heute bisher bestes: ", "Today's best so far: "]) + t.best) + "</small>", { prio: 2, art: "gold", dauer: 7000, key: "w38tag" }), 2200);
+    setTimeout(() => note("<b>☀ " + esc(L(["Tagesprüfung: ", "Daily trial: "]) + p + L([" Punkte", " points"])) + "</b><br><small>" + esc(neu ? L(["Neue Tagesbestleistung!", "New best for today!"]) : L(["Heute bisher bestes: ", "Today's best so far: "]) + t.best) + "</small>", { prio: 2, art: "gold", dauer: 7000, key: "w38tag" }), 2200);
   }
   const btc0 = Z.backToCamp;
   Z.backToCamp = function () { try { if (tag()) finish(!!Z.run.w38sieg); } catch (e) { console.error("W38 Abwechslung", e); } return btc0.apply(this, arguments); };
@@ -434,7 +435,7 @@
     if (!lv || !lv.hub) return;
     if (Z.einstieg && Z.einstieg.neu()) return; /* W38 Einstieg: Sonnenstein erst nach dem ersten Lauf */
     const base = lv.lcore && Number.isFinite(lv.lcore.stone) ? lv.lcore.stone : (lv.start ? lv.start.x - 12 : 40);
-    const x = (base + 8) * T + 8, y = 12 * T;
+    const x = (base - 18.5) * T + 8, y = 12 * T; /* W38 Endspiel: vorher base + 8 – lag auf Jori (Schmiedelehrling); jetzt zwischen Zelt und Friedrichs Trophäe */
     stone = { lv, x, y };
     (Z.interacts = Z.interacts || []).push({ x, y, r: 14, h: 34, w38: "stein", label: () => L(["Sonnenstein · Tagesprüfung", "Sunstone · daily trial"]), use: () => menu() });
   }
