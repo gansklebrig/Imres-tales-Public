@@ -43478,14 +43478,6 @@ if(typeof kaDeko==='function'){const kd=kaDeko;kaDeko=function(S){const r=kd.app
      const i=(x/Z)|0,j=(y/Z)|0;if(i<0||j<0||i>=n||j>=n||K.M[j*n+i])continue;if(!frei(x,y))continue;if(Math.hypot(x-ziel.x,y-ziel.y)<260)continue;
      G.deco.push({x,y,k:kk[nV%kk.length],s:0.7+f*0.5,v:Math.random(),wl:1,rh:6});nV++}
     RH.vorahnung=nV}}}catch(e){console.error('rhythm-vorahnung',e)}
- /* Feenring: im Wald liegt an einer offenen Stelle nahe dem Weg ein Ring aus Pilzen – wer hineintritt, findet ein paar Münzen */
- try{const W=K.ka2W;if(W&&W.length>3&&T.mas==='wald'&&K.fl&&Math.random()<0.8){const D=abst(K),n=K.n,Z=K.Z;let ok=null;
-   for(let t=0;t<400&&!ok;t++){const c=K.fl[Math.floor(Math.random()*K.fl.length)];if(D[c]<5)continue;const x=(c%n+0.5)*Z,y=(((c/n)|0)+0.5)*Z;
-    let nah=false;for(let q=0;q<W.length;q+=2){const p=W[q];const d2=(p[0]-x)*(p[0]-x)+(p[1]-y)*(p[1]-y);if(d2<400*400&&d2>190*190){nah=true;break}}if(!nah)continue;
-    if(K.tore&&K.tore.some(o=>Math.hypot(o.x-x,o.y-y)<400))continue;if(K.start&&Math.hypot(K.start.x-x,K.start.y-y)<500)continue;if(typeof blkPunkt==='function'&&blkPunkt(x,y,95))continue;ok=[x,y]}
-   if(ok){const m=11,R=66;for(let i=0;i<m;i++){const a=i/m*6.2832+Math.random()*0.2;G.deco.push({x:ok[0]+Math.cos(a)*R,y:ok[1]+Math.sin(a)*R*0.7,k:'mush',s:0.75+Math.random()*0.3,v:Math.random(),wl:1,rh:4})}
-    for(let i=0;i<4;i++)G.deco.push({x:ok[0]+(Math.random()-0.5)*50,y:ok[1]+(Math.random()-0.5)*30,k:'grass',s:0.8,v:Math.random(),wl:1,rh:4});
-    K.rhRing={x:ok[0],y:ok[1],used:0};RH.ring=1}}}catch(e){console.error('rhythm-ring',e)}
  /* Wäscheleinen: quer über schmale Gassen gespannte Leinen mit Wäsche – über den Köpfen, wiegt im Wind */
  try{if(T.lay==='gassen'&&(T.mas==='haus'||G.themeKey==='kuostadt')&&K.fl&&!T.ruin){const n=K.n,Z=K.Z,M=K.M,L=[];
    for(let t=0;t<1500&&L.length<9;t++){const c=K.fl[Math.floor(Math.random()*K.fl.length)],i=c%n,j=(c/n)|0;
@@ -43509,6 +43501,8 @@ if(typeof kaDeko==='function'){const kd=kaDeko;kaDeko=function(S){const r=kd.app
     /* nahe 0/90/180/270°: einrasten, um die Mitte gedreht, wenn die Bahn dabei im Saal bleibt */
     const sn=Math.round(ang/(Math.PI/2))*(Math.PI/2);if(Math.abs(sn-ang)<0.3){const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,h=L/2;const a2=[mx-Math.cos(sn)*h,my-Math.sin(sn)*h],b2=[mx+Math.cos(sn)*h,my+Math.sin(sn)*h];
      let g=true;for(let u=0;u<=10;u++){const x=a2[0]+(b2[0]-a2[0])*u/10,y=a2[1]+(b2[1]-a2[1])*u/10;if(!ok(x,y,3)){g=false;break}}if(g){a=a2;b=b2;ang=sn}}
+    /* schräge Läufer wirken in Hallen fremd: nur achsparallele Bahnen legen */
+    if(Math.abs(Math.round(ang/(Math.PI/2))*(Math.PI/2)-ang)>0.01)continue;
     const nS=Math.max(2,Math.floor(L/SEG)),st=L/nS,cs=Math.cos(ang),sn2=Math.sin(ang);
     for(let u=0;u<nS;u++){const t=(u+0.5)*st;G.deco.push({x:a[0]+cs*t,y:a[1]+sn2*t,k:'rh_teppich',a:ang,s:1,v:0,wl:1,rh:7,len:st+1,e0:u===0?1:0,e1:u===nS-1?1:0});nT++}nB++}
    RH.bahnen=nB;
@@ -43543,6 +43537,14 @@ function rhSonne(K){const T=K.T||{};
    let nS=0;const gew=[];for(const c of C){if(nS>=3)break;if(gew.some(g=>Math.hypot(g[0]-c[0],g[1]-c[1])<1400))continue;if(typeof blkPunkt==='function'&&blkPunkt(c[0],c[1],50))continue;
     G.deco.push({x:c[0],y:c[1],k:'rh_sonne',s:1,v:Math.random(),wl:1,rh:8});gew.push(c);nS++}
    RH.lichtungen=nS}}catch(e){console.error('rhythm-sonne',e)}
+ /* Feenring: im Wald liegt an einer offenen Stelle nahe dem Weg ein Ring aus Pilzen – wer hineintritt, findet ein paar Münzen */
+ try{const W=K.ka2W;if(W&&W.length>3&&T.mas==='wald'&&K.fl&&Math.random()<0.8){const D=abst(K),n=K.n,Z=K.Z;let ok=null;
+   for(let t=0;t<400&&!ok;t++){const c=K.fl[Math.floor(Math.random()*K.fl.length)];if(D[c]<5)continue;const x=(c%n+0.5)*Z,y=(((c/n)|0)+0.5)*Z;
+    let nah=false;for(let q=0;q<W.length;q+=2){const p=W[q];const d2=(p[0]-x)*(p[0]-x)+(p[1]-y)*(p[1]-y);if(d2<400*400&&d2>190*190){nah=true;break}}if(!nah)continue;
+    if(K.tore&&K.tore.some(o=>Math.hypot(o.x-x,o.y-y)<400))continue;if(K.start&&Math.hypot(K.start.x-x,K.start.y-y)<500)continue;if(typeof blkPunkt==='function'&&blkPunkt(x,y,95))continue;ok=[x,y]}
+   if(ok){const m=11,R=66;for(let i=0;i<m;i++){const a=i/m*6.2832+Math.random()*0.2;G.deco.push({x:ok[0]+Math.cos(a)*R,y:ok[1]+Math.sin(a)*R*0.7,k:'mush',s:0.75+Math.random()*0.3,v:Math.random(),wl:1,rh:4})}
+    for(let i=0;i<4;i++)G.deco.push({x:ok[0]+(Math.random()-0.5)*50,y:ok[1]+(Math.random()-0.5)*30,k:'grass',s:0.8,v:Math.random(),wl:1,rh:4});
+    K.rhRing={x:ok[0],y:ok[1],used:0};RH.ring=1}}}catch(e){console.error('rhythm-ring',e)}
 }
 if(typeof kaDeko==='function'){const kd2=kaDeko;kaDeko=function(S){const r=kd2.apply(this,arguments);try{const K=G.ka;if(!RH.aus&&K&&!K.rhP&&K.T&&K.T.mas==='wald'&&G.deco)rhSonne(K)}catch(e){}return r}}
 function sonneAn(){try{if(typeof wxIs!=='function')return 1;if(wxIs('regen')||wxIs('gewitter')||wxIs('schnee'))return 0;if(wxIs('nacht')||G.themeKey==='nacht')return -1;return wxIs('daemmer')?0.75:wxIs('nebel')?0.8:1}catch(e){return 1}}
