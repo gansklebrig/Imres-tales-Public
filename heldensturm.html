@@ -41910,10 +41910,15 @@ function rng(s){let x=(s>>>0)||7;return()=>{x^=x<<13;x>>>=0;x^=x>>>17;x^=x<<5;x>
 /* ---------- 1) Teiche blau, Flussbetten blau ---------- */
 try{if(typeof kaFluesse==='function'){const M={'#1e2612':'#163a58','#2e381a':'#22506e','#8e9a5a':'#7ab4d4'};let src=kaFluesse.toString(),n=0;for(const k in M){const m=src.split("'"+k+"'").length-1;n+=m;src=src.split("'"+k+"'").join("'"+M[k]+"'")}if(n){const nf=eval('('+src+')');if(typeof nf==='function')kaFluesse=nf}FL.st.fluesse=n}}catch(e){FL.err=String(e)}
 {const wb=wlBoden;wlBoden=function(t){const r=wb.apply(this,arguments);try{if(!FL.aus&&G.wl&&!G.room&&G.wl.lo&&G.cam){const c=cx,vw=W/ZOOM,vh=H/ZOOM,X0=G.cam.x-vw/2-80,Y0=G.cam.y-vh/2-80,X1=X0+vw+160,Y1=Y0+vh+160,tt=G.time||0;
-   for(const o of G.wl.lo){if(o.k!=='wasser'||o.t!=='c'||o.x+o.r<X0||o.x-o.r>X1||o.y+o.r<Y0||o.y-o.r>Y1)continue;c.save();const R=o.r*0.93;
-    const g=c.createRadialGradient(o.x-R*0.2,o.y-R*0.25,R*0.1,o.x,o.y,R);g.addColorStop(0,'#4a8ab0');g.addColorStop(0.7,'#2e6a92');g.addColorStop(1,'#2a5a74');c.globalAlpha=0.9;c.fillStyle=g;c.beginPath();c.ellipse(o.x,o.y,R,R*0.92,0,0,TAU);c.fill();
-    c.globalAlpha=0.35;c.strokeStyle='#d8ecf4';c.lineWidth=2;c.beginPath();c.ellipse(o.x,o.y,R*0.96,R*0.88,0,3.5,5.6);c.stroke();
-    c.clip();c.globalAlpha=0.25;c.strokeStyle='#e8f4fa';c.lineWidth=1.4;for(let i=0;i<4;i++){const y=o.y-R*0.6+i*R*0.38,x=o.x-R+((tt*12+i*37)%(R*2));c.beginPath();c.moveTo(x,y);c.lineTo(x+R*0.35,y);c.stroke()}c.restore()}}}catch(e){if(!FL.err)FL.err=String(e&&e.stack||e)}return r}}
+   /* Teiche: eine zusammenhängende Wasserfläche (gleiche Form wie das Ufer, 0,8 hoch) mit tiefer Mitte und flachem Rand –
+      vorher je Kreis ein eigener „Ball“ mit Glanz oben links, überlappende Kreise sahen aus wie Blasen */
+   const A=[];for(const o of G.wl.lo){if(o.k!=='wasser'||o.t!=='c'||o.x+o.r<X0||o.x-o.r>X1||o.y+o.r<Y0||o.y-o.r>Y1)continue;A.push(o)}
+   if(A.length){const E=(k,dy,a)=>{c.beginPath();for(const o of A){const R=o.r*k;c.moveTo(o.x+R,o.y+dy*o.r);c.ellipse(o.x,o.y+dy*o.r,R,R*0.8,0,0,TAU)}};c.save();
+    c.globalAlpha=0.95;c.fillStyle='#2f6d8c';E(0.96,0,1);c.fill();
+    c.globalAlpha=0.8;c.fillStyle='#285f80';E(0.74,0.04,1);c.fill();c.globalAlpha=0.7;c.fillStyle='#214f70';E(0.48,0.07,1);c.fill();c.globalAlpha=0.55;c.fillStyle='#1c4463';E(0.24,0.09,1);c.fill();
+    E(0.96,0,1);c.clip();c.globalAlpha=0.18;c.strokeStyle='#e8f4fa';c.lineWidth=1.3;
+    for(const o of A){const R=o.r*0.93;for(let i=0;i<4;i++){const y=o.y-R*0.5+i*R*0.3,x=o.x-R+((tt*12+i*37+o.v*50)%(R*2));c.beginPath();c.moveTo(x,y);c.lineTo(x+R*0.3,y);c.stroke()}}
+    c.restore()}}}catch(e){if(!FL.err)FL.err=String(e&&e.stack||e)}return r}}
 /* ---------- 2) Bach ---------- */
 let B=null;
 function segAbst(px,py,x0,y0,x1,y1){const dx=x1-x0,dy=y1-y0,L=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((px-x0)*dx+(py-y0)*dy)/L));return[Math.hypot(px-x0-dx*t,py-y0-dy*t),t]}
