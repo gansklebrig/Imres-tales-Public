@@ -2657,12 +2657,17 @@ function strasseNeu(c,R){if(!R||R.length<2)return;let D=STRN.get(R);
   let sd=(R.length*7919+Math.round(R[0][0])*31)%233280;const rnd=()=>(sd=(sd*9301+49297)%233280)/233280;const St=[];
   for(let i=1;i<R.length;i++){const a=R[i-1],b=R[i],l=Math.hypot(b[0]-a[0],b[1]-a[1]);const nx=-(b[1]-a[1])/(l||1),ny=(b[0]-a[0])/(l||1);for(let u=0;u<l;u+=12){const t=u/l,q=(rnd()-0.5)*2,w=q*Math.abs(q)*62;St.push([a[0]+(b[0]-a[0])*t+nx*w,a[1]+(b[1]-a[1])*t+ny*w,1.4+rnd()*3.2,rnd()<0.5?0:rnd()<0.6?1:2,rnd()*3.14])}}
   D={r1:off(-24),r2:off(24),St};STRN.set(R,D)}
- const pfad=L=>{c.beginPath();for(let i=0;i<L.length;i++){const p=L[i];i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1])}};
+ /* nur der sichtbare Teil: Weltausschnitt aus der aktuellen Transformation (Bild bzw. Bodenkachel) */
+ let x0=-1e9,y0=-1e9,x1=1e9,y1=1e9;try{const m=c.getTransform(),C=c.canvas;if(m&&m.a&&C){const iv=m.inverse();const P=[[0,0],[C.width,0],[0,C.height],[C.width,C.height]].map(p=>[iv.a*p[0]+iv.c*p[1]+iv.e,iv.b*p[0]+iv.d*p[1]+iv.f]);
+   x0=Math.min(P[0][0],P[1][0],P[2][0],P[3][0])-110;x1=Math.max(P[0][0],P[1][0],P[2][0],P[3][0])+110;y0=Math.min(P[0][1],P[1][1],P[2][1],P[3][1])-110;y1=Math.max(P[0][1],P[1][1],P[2][1],P[3][1])+110}}catch(e){}
+ const sicht=(a,b)=>!(Math.max(a[0],b[0])<x0||Math.min(a[0],b[0])>x1||Math.max(a[1],b[1])<y0||Math.min(a[1],b[1])>y1);
+ let any=false;for(let i=1;i<R.length;i++)if(sicht(R[i-1],R[i])){any=true;break}if(!any)return;
+ const pfad=L=>{c.beginPath();let on=false;for(let i=1;i<L.length;i++){if(!sicht(L[i-1],L[i])){on=false;continue}if(!on){c.moveTo(L[i-1][0],L[i-1][1]);on=true}c.lineTo(L[i][0],L[i][1])}};
  c.lineJoin='round';c.lineCap='round';pfad(R);
  c.strokeStyle='rgba(52,42,30,.16)';c.lineWidth=186;c.stroke();c.strokeStyle='rgba(52,42,30,.28)';c.lineWidth=166;c.stroke();
  c.strokeStyle='#40352a';c.lineWidth=150;c.stroke();c.strokeStyle='#5c4c38';c.lineWidth=120;c.stroke();
  c.strokeStyle='rgba(112,94,70,.22)';c.lineWidth=54;c.stroke();
- const F=['rgba(124,106,82,.7)','rgba(44,34,24,.62)','rgba(156,138,110,.55)'];for(let k=0;k<3;k++){c.fillStyle=F[k];c.beginPath();for(const s of D.St){if(s[3]!==k)continue;c.moveTo(s[0]+s[2],s[1]);c.ellipse(s[0],s[1],s[2],s[2]*0.7,s[4],0,6.2832)}c.fill()}
+ const F=['rgba(124,106,82,.7)','rgba(44,34,24,.62)','rgba(156,138,110,.55)'];for(let k=0;k<3;k++){c.fillStyle=F[k];c.beginPath();for(const s of D.St){if(s[3]!==k||s[0]<x0||s[0]>x1||s[1]<y0||s[1]>y1)continue;c.moveTo(s[0]+s[2],s[1]);c.ellipse(s[0],s[1],s[2],s[2]*0.7,s[4],0,6.2832)}c.fill()}
  c.strokeStyle='rgba(40,30,20,.45)';c.lineWidth=5;pfad(D.r1);c.stroke();pfad(D.r2);c.stroke();
  c.strokeStyle='rgba(130,112,86,.18)';c.lineWidth=2;c.save();c.translate(0,3);pfad(D.r1);c.stroke();pfad(D.r2);c.stroke();c.restore()}
 function makeDeco(T){const a=[],road=G.road;
@@ -43591,6 +43596,18 @@ function hoehlenBoden(){const K=G.ka;if(RH.aus||!K||!K.M||!K.fl||!K.T||!(K.T.mas
  for(let t=0;t<900&&m<90;t++){const c=K.fl[Math.floor(Math.random()*K.fl.length)];if(D[c]<2)continue;if(K.lo&&K.lo[c])continue;const x=(c%n+Math.random())*Z,y=(((c/n)|0)+Math.random())*Z;
   if(typeof blkPunkt==='function'&&blkPunkt(x,y,30))continue;if(typeof wlLoPunkt==='function'&&wlLoPunkt(x,y,40))continue;const r=Math.random();
   G.deco.push({x,y,k:'rh_fleck',art:halle?(r<0.45?4:r<0.62?2:r<0.78?0:(stroh?5:4)):r<0.38?0:r<0.6?1:r<0.82?2:(moos?3:0),s:0.7+Math.random()*0.8,v:Math.random(),wl:1,rh:11});m++}RH.boden=m}
+/* Online: Wäscheleinen liegen an der Karte (K.rhLeinen), nicht in der Deko – mit dem Stufenpaket an Gäste schicken */
+if(typeof netStagePkt==='function'){const sp=netStagePkt;netStagePkt=function(){const m=sp.apply(this,arguments);try{const K=G.ka;if(m&&m.ka&&K&&K.rhLeinen)m.ka.rhL=K.rhLeinen.map(o=>({x0:Math.round(o.x0),y0:Math.round(o.y0),x1:Math.round(o.x1),y1:Math.round(o.y1),mx:Math.round(o.mx),my:Math.round(o.my),hor:!!o.hor,v:+o.v||0}))}catch(e){}return m}}
+if(typeof netStage==='function'){const ns=netStage;netStage=function(m){const r=ns.apply(this,arguments);try{const K=G.ka;if(G.netGuestRun&&K&&m&&m.ka&&Array.isArray(m.ka.rhL))K.rhLeinen=m.ka.rhL.filter(o=>o&&typeof o==='object'&&isFinite(o.x0)&&isFinite(o.y0)&&isFinite(o.x1)&&isFinite(o.y1)).slice(0,20)}catch(e){}return r}}
+/* Schneetreiben: bisher fielen nur Flocken auf sommergrünen Boden. Jetzt liegt eine dünne Schneedecke – heller Schleier und
+   Verwehungen an festen Stellen (Weltraster, wandert nicht mit). Liegt in der Bodenebene (wird mit den Bodenkacheln gebacken). */
+if(typeof wlBoden==='function'){const wb=wlBoden;wlBoden=function(t){const r=wb.apply(this,arguments);try{if(RH.aus||G.room||typeof wxIs!=='function'||!wxIs('schnee'))return r;const V=wlSicht(),c=cx,Q=90;
+  c.save();c.globalCompositeOperation='source-over';c.fillStyle='rgba(236,238,240,.12)';c.fillRect(V.x0-20,V.y0-20,V.x1-V.x0+40,V.y1-V.y0+40);
+  const i0=Math.floor(V.x0/Q)-1,i1=Math.ceil(V.x1/Q)+1,j0=Math.floor(V.y0/Q)-1,j1=Math.ceil(V.y1/Q)+1;
+  for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){let h=(i*73856093)^(j*19349663);h=Math.imul(h^(h>>>13),1274126177)>>>0;
+   /* Schneekörner */c.fillStyle='rgba(246,248,250,.42)';for(let k=0;k<16;k++){h=Math.imul(h^(h>>>15),2246822519)>>>0;const x=(i+(h%1000)/1000)*Q,y=(j+((h>>>10)%1000)/1000)*Q,z=1.4+((h>>>20)%3);c.fillRect(x,y,z,z*0.7)}
+   /* hier und da eine kleine Verwehung */if((h%7)===0){const x=(i+0.5)*Q,y=(j+0.4)*Q,w=14+(h>>>8)%14;c.fillStyle='rgba(244,246,248,.20)';c.beginPath();c.ellipse(x,y,w,w*0.32,0,0,6.2832);c.ellipse(x+w*0.7,y+2,w*0.55,w*0.22,0,0,6.2832);c.fill()}}
+  c.restore()}catch(e){}return r}}
 /* Feuer entstehen erst nach kaDeko (Lagergruppen) – daher nach dem ganzen Stufenaufbau */
 if(typeof setupStage==='function'){const ss4=setupStage;setupStage=function(){const r=ss4.apply(this,arguments);try{lagerLeben()}catch(e){console.error('rhythm-lager',e)}try{uferRand()}catch(e){console.error('rhythm-ufer',e)}try{hoehlenBoden()}catch(e){console.error('rhythm-boden',e)}return r}}
 function sonneAn(){try{if(typeof wxIs!=='function')return 1;if(wxIs('regen')||wxIs('gewitter')||wxIs('schnee'))return 0;if(wxIs('nacht')||G.themeKey==='nacht')return -1;return wxIs('daemmer')?0.75:wxIs('nebel')?0.8:1}catch(e){return 1}}
