@@ -161,9 +161,10 @@
   /* ======================= VERKABELUNG ======================= */
   function wire() {
     const ui = Z.ui; if (!ui || !ui.actions || typeof ui.pause !== "function") return setTimeout(wire, 60);
-    ui.actions.zlOpenBuch = () => { ui.close(); setTimeout(open, 30); };
-    ui.actions.zlAbholen = () => { abholen(); ui.close(); setTimeout(open, 30); };
-    ui.actions.zlGeh = i => hingehen(i);
+    const safe = fn => function () { try { return fn.apply(this, arguments); } catch (e) { console.error("W38 Meta", e); } }; /* W38: Knopf-Aktionen abgesichert */
+    ui.actions.zlOpenBuch = safe(() => { ui.close(); setTimeout(safe(open), 30); });
+    ui.actions.zlAbholen = safe(() => { abholen(); ui.close(); setTimeout(safe(open), 30); });
+    ui.actions.zlGeh = safe(i => hingehen(i));
     ui.actions.zlOpen = i => { const x = stand()[+i]; if (!x || !x.s.open) return; ui.close(); setTimeout(() => { try { x.s.open(); } catch (e) { console.error("W38 Meta", e); } }, 30); };
     if (!ui.pause._w38z) {
       const p0 = ui.pause;

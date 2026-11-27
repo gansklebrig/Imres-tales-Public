@@ -174,7 +174,7 @@
       const [x, y] = spots[Math.floor(R() * spots.length)];
       const wx = x * T + 8, wy = (y + 1) * T;
       lg.sx = wx; lg.sy = wy;
-      const it = { x: wx, y: wy, r: 18, h: 30, w38: "schatz", ok: () => !!(Z.level === lv && lv.w38 === lg && !lg.paid), label: () => L(["Graben", "Dig"]), use: () => dig(lv, lg) };
+      const it = { x: wx, y: wy, r: 18, h: 30, w38: "schatz", ok: () => !!(Z.level === lv && lv.w38 === lg && !lg.paid), label: () => L(["Graben", "Dig"]), use: () => { try { dig(lv, lg); } catch (e) { console.error("W38 Abwechslung", e); } } };
       (Z.interacts = Z.interacts || []).push(it);
       return true;
     }
@@ -437,7 +437,7 @@
     const base = lv.lcore && Number.isFinite(lv.lcore.stone) ? lv.lcore.stone : (lv.start ? lv.start.x - 12 : 40);
     const x = (base - 18.5) * T + 8, y = 12 * T; /* W38 Endspiel: vorher base + 8 – lag auf Jori (Schmiedelehrling); jetzt zwischen Zelt und Friedrichs Trophäe */
     stone = { lv, x, y };
-    (Z.interacts = Z.interacts || []).push({ x, y, r: 14, h: 34, w38: "stein", label: () => L(["Sonnenstein · Tagesprüfung", "Sunstone · daily trial"]), use: () => menu() });
+    (Z.interacts = Z.interacts || []).push({ x, y, r: 14, h: 34, w38: "stein", label: () => L(["Sonnenstein · Tagesprüfung", "Sunstone · daily trial"]), use: () => { try { menu(); } catch (e) { console.error("W38 Abwechslung", e); } } });
   }
   function menu() {
     if (!Z.ui) return;
@@ -456,7 +456,7 @@
   }
   function wireUI() {
     if (!Z.ui || !Z.ui.actions || !Z.ui.ending) return setTimeout(wireUI, 60);
-    Z.ui.actions.w38Los = () => los();
+    Z.ui.actions.w38Los = () => { try { return los(); } catch (e) { console.error("W38 Abwechslung", e); } }; /* W38: Knopf-Aktion abgesichert */
     const end0 = Z.ui.ending;
     Z.ui.ending = function () { if (Z.run && Z.run.w38tag) Z.run.w38sieg = true; return end0.apply(this, arguments); };
     if (typeof Z.ui.pause === "function" && !Z.ui.pause._w38) {

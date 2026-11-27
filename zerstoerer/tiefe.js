@@ -118,8 +118,8 @@
   /* ======================= Abspann-Knopf und Lager-Station ======================= */
   function wireUI() {
     const ui = Z.ui; if (!ui || !ui.ending || !ui.actions || typeof ui.pause !== "function") return setTimeout(wireUI, 60);
-    ui.actions.w38Tiefe = () => start();
-    ui.actions.w38Schacht = () => schachtMenu();
+    ui.actions.w38Tiefe = () => { try { return start(); } catch (e) { console.error("W38 Endspiel", e); } }; /* W38: Knopf-Aktionen abgesichert */
+    ui.actions.w38Schacht = () => { try { schachtMenu(); } catch (e) { console.error("W38 Endspiel", e); } };
     const end0 = ui.ending;
     ui.ending = function () {
       const r = end0.apply(this, arguments);
@@ -177,7 +177,7 @@
     const base = lv.lcore && Number.isFinite(lv.lcore.stone) ? lv.lcore.stone : (lv.start ? lv.start.x - 12 : 40);
     const x = (base - 22.5) * T + 8, y = 12 * T;
     schacht = { lv, x, y };
-    (Z.interacts = Z.interacts || []).push({ x, y, r: 16, h: 30, w38: "schacht", label: () => L(["Schacht der Tiefe", "Shaft of the Depths"]) + (TM().best ? " · " + L(["Bestwert ", "best "]) + TM().best : ""), use: () => schachtMenu() });
+    (Z.interacts = Z.interacts || []).push({ x, y, r: 16, h: 30, w38: "schacht", label: () => L(["Schacht der Tiefe", "Shaft of the Depths"]) + (TM().best ? " · " + L(["Bestwert ", "best "]) + TM().best : ""), use: () => { try { schachtMenu(); } catch (e) { console.error("W38 Endspiel", e); } } });
   }
   const LOHN = [[5, ["Umhang „Abgrundsaum“", "Cape 'Abyss Hem'"]], [10, ["Umhang „Fadenschwärze“", "Cape 'Thread Black'"]], [15, ["Titel „der Unergründliche“", "Title 'the Unfathomable'"]]];
   function schachtMenu() {
