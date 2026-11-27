@@ -71,11 +71,20 @@ case "$1" in
       echo "$N Dateien haben sich geändert – der Rest wird geteilt."
       # geänderte Dateien zuerst entfernen (bricht nur den Hardlink, die alte Version bleibt heil), dann frisch auspacken
       ( cd "$DATEN/seite.neu" && xargs -0 -r rm -f -- < "$LISTE" )
+      # ohne --unlink-first: git archive liefert auch die Ordner mit, und die (nicht leeren) Ordner wollte tar damit löschen.
+      # So scheiterte jedes Teil-Update mit einer Datei in einem Unterordner, und es wurde doch alles ausgepackt (1,3 GB Platz nötig).
+      # Die geänderten Dateien sind oben schon entfernt – tar legt sie frisch an, die Hardlinks der alten Version bleiben heil.
       git -C "$G" diff --name-only --no-renames --diff-filter=AMT -z HEAD FETCH_HEAD \
-        | xargs -0 -r git -C "$G" --literal-pathspecs archive FETCH_HEAD -- | tar -x -i --unlink-first -C "$DATEN/seite.neu" \
+        | xargs -0 -r git -C "$G" --literal-pathspecs archive FETCH_HEAD -- | tar -x -i -C "$DATEN/seite.neu" \
         || { rm -rf "$DATEN/seite.neu"; TEIL=""; echo "Teil-Update ging nicht – packe alles aus …"; }
     else TEIL=""; fi
     if [ -z "$TEIL" ]; then
+      # alles auspacken braucht so viel Platz wie die ganze Seite – noch einmal messen, notfalls alte Versionen opfern
+      BRAUCHT=$(( $(du -sk --exclude=.git "$G" 2>/dev/null | cut -f1) + 51200 )); FREI=$(df -Pk "$DATEN" | awk 'NR==2{print $4}')
+      while [ -n "$FREI" ] && [ "$FREI" -lt "$BRAUCHT" ] && [ "$(ls -d "$DATEN"/seite.alt-* 2>/dev/null | wc -l)" -gt 1 ]; do
+        X=$(ls -d "$DATEN"/seite.alt-* | sort | head -1); echo "Wenig Platz – lösche alte Version $(basename "$X")"; rm -rf "$X"; FREI=$(df -Pk "$DATEN" | awk 'NR==2{print $4}')
+      done
+      if [ -n "$FREI" ] && [ "$FREI" -lt "$BRAUCHT" ]; then echo "Zu wenig Platz auf der SD-Karte für das Update ($((FREI/1024)) MB frei, $((BRAUCHT/1024)) MB nötig)."; exit 1; fi
       mkdir -p "$DATEN/seite.neu" && git -C "$G" archive FETCH_HEAD | tar -x -C "$DATEN/seite.neu" || { rm -rf "$DATEN/seite.neu"; echo "Update konnte nicht entpackt werden – Imres bleibt, wie es ist."; exit 1; }
     fi
     rm -f "$LISTE"
