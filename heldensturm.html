@@ -16413,7 +16413,9 @@ SND.erfolg=()=>{const ok=['harfe_79','harfe_83','harfe_86','harfe_91'].map((n,i)
 SND.erfolg_p=()=>{SND.erfolg();try{smp('glock_108',0.14,{d:0.5,len:1.6});smp('schelle1',0.14,{d:0.42,len:1})}catch(e){}};
 function erfWarten(){try{if(G.state==='play'&&G.boss&&!G.boss.dead&&G.boss.hp>0)return true;
  /* kleine Fenster: über Zwischen-/Lagerbildschirmen deckte die Erfolgs-Tafel den Inhalt ab – zeigen, sobald wieder gespielt wird */
- if((innerWidth<=760||innerHeight<=480)&&(G.state==='between'||G.state==='camp'||G.state==='end'||G.overlay))return true}catch(e){}return false}
+ if((innerWidth<=760||innerHeight<=480)&&(G.state==='between'||G.state==='camp'||G.state==='end'))return true;
+ /* im Spiel geöffnete Fenster (Pause, Beutel, Talente …): Tafel lag sonst über dem Fensterinhalt – zeigen, sobald es zu ist */
+ if(G.state==='play'&&G.overlay)return true}catch(e){}return false}
 function erfPump(){if(ERF.cur||!ERF.q.length)return;if(G&&G.bot){ERF.q.length=0;return}
  const now=performance.now();if(erfWarten()){if(!ERF.waitT)ERF.waitT=now;if(now-ERF.waitT<(G.state==='play'&&!G.overlay?40000:180000)){clearTimeout(ERF.pt);ERF.pt=setTimeout(erfPump,700);return}}ERF.waitT=0;
  const id=ERF.q.shift(),d=ERF_ID[id];if(!d){erfPump();return}erfZeig(d)}
