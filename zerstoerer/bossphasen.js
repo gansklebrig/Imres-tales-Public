@@ -608,7 +608,7 @@
         tick: (e, P, dt, m) => { e.vx = 0; if (R() < dt * 40) FX.p({ x: cxOf(e) + (R() - 0.5) * e.w, y: e.y + R() * e.h, vx: 0, vy: -60, life: 0.5, size: 3, col: "#ffb040", kind: "glow", add: true }); if (m.t > 1.15 && !m.boom) { m.boom = true; zone(e, cxOf(e), feet(e) + 4, 184, e.h + 50, 0, 1.4, { col: "rgba(255,140,40,.9)", eff: { burn: 1 } }); FX.ring(cxOf(e), e.y + e.h / 2, 92, "#ff8a3a", 0.4, 5); FX.addShake(10); A.play("explode", { vol: 0.9 }); FX.burst(cxOf(e), e.y + e.h / 2, 40, { col: ["#ff8a3a", "#ffd27a", "#5a4a40"], sp: 230, life: 0.6, size: 3, kind: "spark", add: true }); } } }
     },
     phases: [
-      { at: 1, name: N("Der letzte Wächter", "The Last Warden"), moves: ["stampf", "strahl", "pylone", "hammerfall"] },
+      { at: 1, name: N("Der letzte Wächter", "The Last Warden"), moves: ["stampf", "strahl", "pylone", "hammerfall", "runenregen"] }, /* W38 Boss: 4 → 5 Muster in Phase 1 (Runenregen: gut angekündigte Säulen) – Bot-Messung: Phase 1 war die eintönigste, Runenstrahl die größte Schadensquelle */
       { at: 0.66, name: N("Glühende Runen", "Glowing Runes"), quote: N("Die Runen auf seiner Brust lodern: „EINDRINGLING. SCHMIEDE SCHÜTZEN.“", "The runes on its chest blaze: 'INTRUDER. PROTECT THE FORGE.'"), aura: "#ffb040", tempo: 1.15,
         moves: ["stampf", "strahl", "pylone", "runenregen", "hammerfall", "runenkaefig"],
         enter: e => { e.nextMv = "runenkaefig"; },
@@ -851,7 +851,7 @@
         enter: e => { e.nextMv = "flammenteppich"; },
         arena: (e, dt, P, s) => { every(s, "glut", dt, 2.8, () => rubble(e, P, 2, 260, "e_glut", 0.5, "#ff8a1a")); every(s, "grube", dt, 5, () => { const a = AR(); for (const x of [16 * T, 39 * T]) if (x > a.x0 && x < a.x1) pillar(e, x, 0.9, 0.9, { w: 56, hgt: 220, col: "rgba(255,120,30,.85)", eff: { burn: 1 }, y: a.floor }); }); } },
       { at: 0.15, name: N("Der Hort schmilzt", "The Hoard Melts"), quote: N("„MEIN GOLD! MEINS! ALLES MEINS!“", "\"MY GOLD! MINE! ALL MINE!\""), aura: "#ff3a1a", tempo: 1.35, transDur: 2,
-        moves: ["hortschmelze", "odem", "sturzflug", "feuersturm", "flammenteppich"],
+        moves: ["hortschmelze", "odem", "sturzflug", "feuersturm", "flammenteppich", "goldlawine"], /* W38 Boss: Goldlawine auch in der letzten Phase (5 → 6 Muster; zwischen den Schmelzen sonst fast nur Flug/Feuer) */
         enter: e => { e.nextMv = "hortschmelze"; e.ar.lastMelt = -99; },
         arena: (e, dt, P, s) => every(s, "glut", dt, 3, () => rubble(e, P, 2, 240, "e_glut", 0.5, "#ff8a1a")) }
     ]

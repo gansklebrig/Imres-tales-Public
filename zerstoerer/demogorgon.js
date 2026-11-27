@@ -205,6 +205,8 @@
     if (hd.t > 0.6) { a.tx += Math.sin(hd.t * 30) * 2; a.ty += Math.cos(hd.t * 26) * 2; }
     const t0 = tip(a);
     P.x = t0.x - P.w / 2; P.y = t0.y - P.h * 0.55; P.vx = 0; P.vy = 0; P.onGround = false; P.rollT = 0; P.iframe = Math.max(P.iframe, 0.12);
+    /* W38 Boss: Fortschritt des Befreiens sichtbar machen (Bot-Messung: der Griff war beim schwachen Spielstil die halbe Schadensmenge) */
+    try { const need = skulls() >= 3 ? 6 : 5, k = Math.min(hd.mash, need); if (Z.ui && Z.ui.worldLabel) Z.ui.worldLabel("w38griff", { x: pcx(P), y: P.y - 6, html: '<b class="w38-griff">' + "●".repeat(k) + "○".repeat(need - k) + "</b> " + (Z.ui.key ? Z.ui.key("a1") : "") + " " + L(["Hämmern!", "Mash!"]), art: "gefahr", jetzt: true }); } catch (_) {}
     if (hd.mash >= (skulls() >= 3 ? 6 : 5)) release(e, true);
     else if (hd.t >= hd.dur) release(e, false);
   }
