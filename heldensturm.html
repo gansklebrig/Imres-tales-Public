@@ -43991,7 +43991,7 @@ body.erzEck:not(.chrAuf) .erzSub .erzWer{display:none!important}
 document.head.appendChild(css);
 /* Im Spiel: Untertitel-Kasten unten mittig nie über Trank-/Sprint-Knopf (#util) – sobald Fähigkeiten gelernt sind, rücken diese
    Knöpfe links neben die Fähigkeiten und lagen bei 1280 px Breite halb unter dem Kasten. Dann wird der Kasten links davon eingepasst. */
-const css2=document.createElement('style');css2.textContent=`@media (min-height:1250px) and (min-width:1800px){body:not(.erzEck):not(.erzRaum) .erzSub{zoom:1.22}}@media (min-height:1900px) and (min-width:2800px){body:not(.erzEck):not(.erzRaum) .erzSub{zoom:1.42}}body.erzRaum:not(.erzEck) .erzSub{left:var(--erzL)!important;transform:none!important;width:var(--erzW)!important;min-width:0!important;max-width:var(--erzW)!important}`;document.head.appendChild(css2);
+const css2=document.createElement('style');css2.textContent=`@media (min-height:1250px) and (min-width:1800px){body:not(.erzEck):not(.erzRaum) .erzSub{zoom:1.22}}@media (min-height:1900px) and (min-width:2800px){body:not(.erzEck):not(.erzRaum) .erzSub{zoom:1.42}}@media (min-height:1250px) and (min-width:2200px){body.erzEck .erzSub{zoom:1.5}}body.erzRaum:not(.erzEck) .erzSub{left:var(--erzL)!important;transform:none!important;width:var(--erzW)!important;min-width:0!important;max-width:var(--erzW)!important}`;document.head.appendChild(css2);
 let nat=null,natK='',raum=false;
 function raumPruef(){const b=document.body;const s=document.querySelector('.erzSub'),u=document.getElementById('util');
  const aus=()=>{if(raum){raum=false;b.classList.remove('erzRaum')}};
