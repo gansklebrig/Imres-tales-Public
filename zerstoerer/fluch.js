@@ -55,7 +55,8 @@
       Z.toast && Z.toast("☠ <b>" + L(["Der Fluch greift: ", "The curse takes hold: "]) + P.curse + L([" Kills ohne einen einzigen Treffer", " kills without a single hit"]) + "</b><br><small>" + L(["Jeder Treffer bis dahin ist tödlich. Danach bleibt die Waffe so stark.", "Any hit until then is fatal. Afterwards the weapon stays this strong."]) + "</small>", 4800);
     }
     /* Herzschlag-Warnung, solange der Fluch wirkt */
-    if (P.curse > 0) { P._ct = (P._ct || 0) - 1 / 120; if (P._ct <= 0) { P._ct = 1.2; Z.input.rumble && Z.input.rumble(0.08, 30); } if (Math.random() < 0.08) FX.p({ x: P.x + Math.random() * P.w, y: P.y + Math.random() * P.h, vx: 0, vy: -20, life: 0.7, size: 2, col: "#c040ff", kind: "glow", add: true }); }
+    if (!(P.curse > 0)) P._cn = 0; /* W39 Bedienung: Herzschlag-Vibration nur beim Eintritt (3 Schläge), danach alle 8 s eine leise Erinnerung statt Dauer-Puls */
+    if (P.curse > 0) { P._ct = (P._ct || 0) - 1 / 120; if (P._ct <= 0) { P._cn = (P._cn || 0) + 1; P._ct = P._cn < 3 ? 1.2 : 8; Z.input.rumble && Z.input.rumble(P._cn <= 3 ? 0.08 : 0.06, 30); } if (Math.random() < 0.08) FX.p({ x: P.x + Math.random() * P.w, y: P.y + Math.random() * P.h, vx: 0, vy: -20, life: 0.7, size: 2, col: "#c040ff", kind: "glow", add: true }); }
   };
   /* Kartentext */
   Z.curseCardHTML = function (it) {

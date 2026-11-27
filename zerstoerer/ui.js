@@ -683,7 +683,12 @@
       if (sc < bs) { bs = sc; best = el; }
     }
     if (best) focusEl(best);
-    else if (dy) moveFocus(dy); /* am Rand: der Reihe nach weiter (umlaufend) */
+    else if (dy) {
+      /* W39 Bedienung: lange Fenster mit wenigen Knöpfen (Todesfenster „Alle Werte“, Zielbuch-Text): erst den Inhalt weiterrollen, umlaufen erst am Ende */
+      const box = modal.querySelector(".mbox");
+      if (box && (dy > 0 ? box.scrollTop + box.clientHeight < box.scrollHeight - 4 : box.scrollTop > 4)) { box.scrollTop += dy * Math.max(40, box.clientHeight * 0.6); return; }
+      if (list.length > 1) moveFocus(dy); /* am Rand: der Reihe nach weiter (umlaufend); ein einziger Knopf: nicht zu ihm zurückspringen */
+    }
   }
   ui.moveDir = moveDir;
   /* Reiter wechseln (Controller LB/RB, Tastatur Fähigkeitstasten oder Bild↑/Bild↓) */
@@ -1997,7 +2002,7 @@
   ui.touchOn = false;
   function touchSync() { tc.hidden = !ui.touchOn || !Z.level; tc.style.setProperty("--ts", Z.settings.touchSize);
     /* W36 Feinschliff: Touch-Knöpfe standen fest deutsch im HTML (EN-Modus: „Sprung/Rolle/Waffe 1/Trank“) */
-    if (tc._lang !== Z.settings.lang) { tc._lang = Z.settings.lang; const TL = { a1: ["Waffe<br>1", "Weapon<br>1"], a2: ["Waffe<br>2", "Weapon<br>2"], jump: ["Sprung", "Jump"], roll: ["Rolle", "Roll"], potion: ["Trank", "Potion"] }; tc.querySelectorAll("[data-t]").forEach(b => { const t = TL[b.dataset.t]; if (t) b.innerHTML = L(t); }); } }
+    if (tc._lang !== Z.settings.lang) { tc._lang = Z.settings.lang; const AL = { s1: ["Fähigkeit 1", "Skill 1"], s2: ["Fähigkeit 2", "Skill 2"], use: ["Benutzen", "Use"], pause: ["Pause", "Pause"], map: ["Karte", "Map"] }, TL = { a1: ["Waffe<br>1", "Weapon<br>1"], a2: ["Waffe<br>2", "Weapon<br>2"], jump: ["Sprung", "Jump"], roll: ["Rolle", "Roll"], potion: ["Trank", "Potion"] }; tc.querySelectorAll("[data-t]").forEach(b => { const t = TL[b.dataset.t]; if (t) b.innerHTML = L(t); const al = AL[b.dataset.t]; if (al) b.setAttribute("aria-label", L(al)); }); } } /* W39 Bedienung: aria-label der Symbolknöpfe in der Sprache */
   addEventListener("touchstart", () => { if (!ui.touchOn) { ui.touchOn = true; inp.device = "touch"; touchSync(); } }, { passive: true });
   /* Stick */
   const stick = $("#stick"), knob = $("#knob");

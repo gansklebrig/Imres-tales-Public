@@ -84,6 +84,8 @@
       c.beginPath(); c.moveTo(sz, 0); c.lineTo(-sz * 0.7, -sz * 0.8); c.lineTo(-sz * 0.3, 0); c.lineTo(-sz * 0.7, sz * 0.8); c.closePath();
       c.fillStyle = "rgb(" + col + ")"; c.fill();
       c.lineWidth = Math.max(1, css * 1.2); c.strokeStyle = "rgba(50,16,6,.9)"; c.stroke(); /* dunkler Rand: lesbar auf hellem Grund */
+      /* W39 Bedienung: Geschoss im Anflug zusätzlich an der Form erkennbar (Doppelpfeil) – Bernstein/Glutrot allein ist bei Rot-Grün-Schwäche kaum zu trennen */
+      if (m.k) { c.beginPath(); c.moveTo(-sz * 0.55, 0); c.lineTo(-sz * 1.55, -sz * 0.6); c.lineTo(-sz * 1.25, 0); c.lineTo(-sz * 1.55, sz * 0.6); c.closePath(); c.fill(); c.stroke(); }
       c.setTransform(1, 0, 0, 1, 0, 0);
     }
     c.restore();

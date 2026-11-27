@@ -680,8 +680,8 @@
       if (!present(g)) continue;
       const all = Q.filter(y => y.g === g), d = all.filter(y => s.done[y.id]).length, ch = Object.keys(CHAINS).find(k => CHAINS[k].g === g);
       const lores = all.filter(y => y.r && y.r.lore && s.lore[y.id]);
-      h += '<div class="au-g" style="--c:' + GIVER[g].col + '"><b>' + esc(GIVER[g].n) + (Z.level && Z.level.hub ? ' <button class="au-mini" data-act="aufGeber" data-arg="' + g + '" title="' + esc(L(["Ansprechen", "Talk"])) + '">💬</button>' : "") + "</b><small>" + d + " / " + all.length + (ch ? " · " + esc(L(CHAINS[ch].n)) + " " + chainStage(ch) + "/" + CHAINS[ch].len : "") + "</small>" +
-        (lores.length ? lores.map(y => '<button class="au-mini" data-act="aufLoreL" data-arg="' + y.id + '" title="' + esc(L(y.r.lore[0])) + '">📖</button>').join("") : "") + "</div>";
+      h += '<div class="au-g" style="--c:' + GIVER[g].col + '"><b>' + esc(GIVER[g].n) + (Z.level && Z.level.hub ? ' <button class="au-mini" data-act="aufGeber" data-arg="' + g + '" title="' + esc(L(["Ansprechen", "Talk"])) + '" aria-label="' + esc(L(["Ansprechen: ", "Talk to "]) + GIVER[g].n) + '">💬</button>' : "") + "</b><small>" + d + " / " + all.length + (ch ? " · " + esc(L(CHAINS[ch].n)) + " " + chainStage(ch) + "/" + CHAINS[ch].len : "") + "</small>" +
+        (lores.length ? lores.map(y => '<button class="au-mini" data-act="aufLoreL" data-arg="' + y.id + '" title="' + esc(L(y.r.lore[0])) + '" aria-label="' + esc(L(y.r.lore[0])) + '">📖</button>').join("") : "") + "</div>";
     }
     h += '</div><div class="knoepfe"><button data-act="aufHud">' + esc(hudLabel()) + '</button><button data-act="close" autofocus>' + L(["Zurück", "Back"]) + "</button></div>";
     ui().open(h, { cls: "lager auftr breit" });
@@ -757,6 +757,7 @@
     u.pause._auftr = true;
   }
 
+  /* W39 Bedienung: 💬/📖-Knöpfe in der Auftragsliste mit Klartext für Vorleser (aria-label) */
   /* ======================= HUD ======================= */
   let hudEl = null, hudDirty = true, hudT = 0, hudKey = "";
   function hudTick(dt) {
