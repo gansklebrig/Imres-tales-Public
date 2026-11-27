@@ -17016,7 +17016,7 @@ setInterval(()=>{try{if(document.hidden||G.bot||!SAVE.slot||!SPL.in)return;const
 .slheroes{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1.2vw}
 /* Heldenkarten: in großen Fenstern Kurzbeschreibung und Äste im sonst leeren unteren Teil */
 .slhero .slbl,.slhero .slbr{display:none}
-@media (min-width:1100px) and (min-height:700px){.slhero .slbl{display:block;margin-top:.9em;max-width:26em;font-size:14px;font-size:clamp(12.5px,.8vw,16px);line-height:1.5;color:#cdbb9a;text-align:center;font-style:italic}
+@media (min-width:1100px) and (min-height:700px){.slhero .slbl{display:block;margin-top:.9em;max-width:26em;font-size:14px;font-size:clamp(12.5px,min(1.1vw,2vh),19px);line-height:1.5;color:#cdbb9a;text-align:center;font-style:italic}
  .slhero .slbr{display:flex;flex-wrap:wrap;justify-content:center;gap:.35em;margin-top:auto;padding-top:.8em}
  .slhero .slbr i{font-style:normal;font-size:clamp(11px,.7vw,13.5px);padding:.2em .6em;border-radius:1em;font-size:12px;font-size:clamp(11px,.7vw,13.5px);border:1px solid rgba(229,180,84,.35);color:#e8d8b8;border:1px solid color-mix(in srgb,var(--hc) 45%,#3d3140);color:color-mix(in srgb,var(--hc) 70%,#efe3cc);background:rgba(0,0,0,.25)}}
 .slhero{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:.35em;padding:1em .8em;border-radius:1em;border:1px solid color-mix(in srgb,var(--hc) 45%,#3d3140);background:radial-gradient(120% 70% at 50% 30%,color-mix(in srgb,var(--hc) 22%,transparent),transparent 70%),linear-gradient(#1e1721,#120e15);color:var(--text);font:inherit;min-height:0;overflow:hidden;transition:transform .15s,box-shadow .15s,border-color .15s}
