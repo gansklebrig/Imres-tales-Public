@@ -21400,9 +21400,24 @@ Object.assign(WLDRAW,{
 {const dd0=drawDeco;drawDeco=function(d,t){const c=cx;
  if(d.k==='ka_wolf'){const s=d.s||1,fl=d.a<0?-1:1;c.save();c.translate(d.x,d.y);c.scale(s*fl,s);ell(c,0,8,16,5,'rgba(0,0,0,.35)');ell(c,0,0,13,8,'#6a6460');ell(c,10,-6,7,6,'#7a7470');poly(c,'#5a5450',8,-12,10,-18,13,-11);poly(c,'#5a5450',13,-12,16,-17,16,-10);circ(c,13,-6,1.2,'#ffd04a');ln(c,'#5a5450',3,-12,0,-18,-6+Math.sin(t*3+d.v*9)*2);ln(c,'#8a7a5a',1,8,-2,-10,-14);c.restore();return}
  if(d.k==='ka_kokon'){const s=d.s||1;ell(c,d.x+3,d.y+8*s,10*s,4*s,'rgba(0,0,0,.3)');hE(c,d.x,d.y-6*s,9*s,16*s,'#e8e4ec','rgba(120,110,130,.8)',1);ln(c,'rgba(160,150,170,.7)',1,d.x-8*s,d.y-14*s,d.x+8*s,d.y-6*s);ln(c,'rgba(160,150,170,.7)',1,d.x-8*s,d.y-2*s,d.x+8*s,d.y+4*s);ln(c,'rgba(240,237,230,.4)',1,d.x,d.y-22*s,d.x,d.y-60*s);return}
- if(d.k==='ka_glaeser'){for(let i=0;i<3;i++){hE(c,d.x-10+i*10,d.y-8,4,8,'rgba(150,210,120,.45)','rgba(220,240,220,.7)',1);circ(c,d.x-10+i*10,d.y-7,2,['#c84a6a','#e8d080','#8ad04a'][i])}return}
- if(d.k==='ka_pfeile'){ln(c,'#6a4a2a',1.6,d.x,d.y,d.x+6,d.y-14);poly(c,'#e8e0d0',d.x+6,d.y-14,d.x+3,d.y-17,d.x+9,d.y-17);return}
- if(d.k==='ka_furche'){c.globalAlpha=0.35;ln(c,'#4a3a22',5,d.x-14,d.y,d.x+14,d.y);c.globalAlpha=0.5;for(let i=-1;i<=1;i++)ln(c,'#5a7a34',1.4,d.x+i*9,d.y-1,d.x+i*9+1,d.y-8);c.globalAlpha=1;return}
+ if(d.k==='ka_glaeser'){/* drei Kolben auf einem Brettchen, mit farbiger Füllung und Glanz */c.save();c.fillStyle='rgba(0,0,0,.25)';c.beginPath();c.ellipse(d.x,d.y+1,17,3.5,0,0,7);c.fill();c.fillStyle='#5a3e22';c.fillRect(d.x-16,d.y-2,32,4);c.fillStyle='#7a5630';c.fillRect(d.x-16,d.y-2,32,1.4);
+  const F=['#c84a6a','#e8c060','#8ad04a'],H=[11,8,13];for(let i=0;i<3;i++){const x=d.x-10+i*10,h=H[i],r=i===1?4.4:3.6;
+   c.fillStyle='rgba(225,215,190,.28)';c.beginPath();c.arc(x,d.y-2-r,r,0,7);c.fill();c.fillRect(x-1.3,d.y-2-r*2-h*0.45,2.6,h*0.45+1);
+   c.save();c.beginPath();c.arc(x,d.y-2-r,r-0.7,0,7);c.clip();c.fillStyle=F[i];c.globalAlpha=0.85;c.fillRect(x-r,d.y-2-r*1.15,r*2,r*2.2);c.globalAlpha=0.5;c.fillStyle='#fff';c.fillRect(x-r,d.y-2-r*1.15,r*2,0.7);c.restore();
+   c.strokeStyle='rgba(240,230,205,.55)';c.lineWidth=0.8;c.beginPath();c.arc(x,d.y-2-r,r,0,7);c.stroke();c.fillStyle='#6a4a2a';c.fillRect(x-1.6,d.y-2-r*2-h*0.45-1.4,3.2,1.8);
+   c.fillStyle='rgba(255,250,235,.7)';c.beginPath();c.arc(x-r*0.4,d.y-2-r*1.35,0.9,0,7);c.fill()}
+  c.restore();return}
+ if(d.k==='ka_pfeile'){/* zwei, drei Pfeile im Boden, mit Federn und kleinem Erdhügel */const v=(d.v!=null?d.v:((d.x*7+d.y*13)%97)/97),n=v<0.4?2:3;c.save();c.fillStyle='rgba(0,0,0,.22)';c.beginPath();c.ellipse(d.x+2,d.y+1,9,3,0,0,7);c.fill();
+  for(let i=0;i<n;i++){const ox=(i-(n-1)/2)*6+(v-0.5)*3,a=-1.25+i*0.28-(v*0.3),L=15-i*1.5,x0=d.x+ox,y0=d.y,x1=x0+Math.cos(a)*L,y1=y0+Math.sin(a)*L;
+   c.fillStyle='#4a3622';c.beginPath();c.ellipse(x0,y0,2.6,1.2,0,0,7);c.fill();
+   c.strokeStyle='#3a2a18';c.lineWidth=2.2;c.lineCap='round';c.beginPath();c.moveTo(x0,y0);c.lineTo(x1,y1);c.stroke();c.strokeStyle='#8a6438';c.lineWidth=1.1;c.beginPath();c.moveTo(x0,y0);c.lineTo(x1,y1);c.stroke();
+   const ux=Math.cos(a),uy=Math.sin(a),px=-uy,py=ux,fc=i===1?'#c8463a':'#e8dcc4';
+   for(const sd of[-1,1]){c.fillStyle=fc;c.beginPath();c.moveTo(x1-ux*1,y1-uy*1);c.lineTo(x1-ux*6+px*3.2*sd,y1-uy*6+py*3.2*sd);c.lineTo(x1-ux*7.5+px*1*sd,y1-uy*7.5+py*1*sd);c.lineTo(x1-ux*4,y1-uy*4);c.closePath();c.fill()}
+   c.fillStyle='rgba(255,240,210,.35)';c.beginPath();c.arc(x1,y1,0.9,0,7);c.fill()}
+  c.restore();return}
+ if(d.k==='ka_furche'){/* gepflügte Furche: dunkle Rinne, heller Erdwall, junge Triebe */c.save();c.fillStyle='rgba(58,42,24,.55)';c.beginPath();c.ellipse(d.x,d.y,16,3.4,0,0,7);c.fill();c.fillStyle='rgba(120,92,56,.45)';c.beginPath();c.ellipse(d.x,d.y-3,15,1.6,0,0,7);c.fill();c.fillStyle='rgba(36,26,14,.5)';c.beginPath();c.ellipse(d.x,d.y+0.6,13,1.3,0,0,7);c.fill();
+  c.lineCap='round';for(let i=-2;i<=2;i++){const x=d.x+i*6.5,h=5+((i*7+Math.round(d.x))%3+3)%3;c.strokeStyle='#4f7a2e';c.lineWidth=1.3;c.beginPath();c.moveTo(x,d.y-1);c.lineTo(x+0.5,d.y-1-h);c.stroke();c.fillStyle='#7aa844';c.beginPath();c.ellipse(x-1.6,d.y-1-h*0.7,1.8,0.9,-0.5,0,7);c.fill();c.beginPath();c.ellipse(x+2.2,d.y-1-h*0.85,1.8,0.9,0.5,0,7);c.fill()}
+  c.restore();return}
  return dd0.apply(this,arguments)}}
 /* Abgrund-Löcher in der versunkenen Siedlung zeichnen */
 {const wb0=wlBoden;wlBoden=function(t){const r=wb0.apply(this,arguments);try{if(G.wl&&!G.room){const c=cx,V=wlSicht();for(const o of G.wl.lo){if(o.k!=='ka_abgrund'||o.x<V.x0-100||o.x>V.x1+100||o.y<V.y0-100||o.y>V.y1+100)continue;hE(c,o.x,o.y,o.r+6,(o.r+6)*0.8,bT(G.theme.base,0.25));hE(c,o.x,o.y,o.r,o.r*0.8,'#050408');const g=c.createRadialGradient(o.x,o.y-o.r*0.3,o.r*0.2,o.x,o.y,o.r);g.addColorStop(0,'rgba(5,4,8,0)');g.addColorStop(1,'rgba(40,36,50,.5)');c.fillStyle=g;c.beginPath();c.ellipse(o.x,o.y,o.r,o.r*0.8,0,0,TAU);c.fill()}}}catch(er){}return r}}
