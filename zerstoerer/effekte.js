@@ -112,7 +112,7 @@
       const n = e.def && e.def.boss ? 12 : e.elite ? 6 : 3;
       for (let i = 0; i < n; i++) {
         const a = -Math.PI / 2 + (Math.random() - 0.5) * 2.4;
-        souls.push({ x: cx, y: cy, vx: Math.cos(a) * (90 + Math.random() * 90), vy: Math.sin(a) * (90 + Math.random() * 90), t: 0, delay: i * 0.05, col: e.elite ? "#ffd27a" : "#ff9a6a", sw: (Math.random() < 0.5 ? -1 : 1) * (0.7 + Math.random() * 0.6), tr: [] });
+        souls.push({ x: cx, y: cy, vx: Math.cos(a) * (90 + Math.random() * 90), vy: Math.sin(a) * (90 + Math.random() * 90), t: 0, delay: i * 0.05, col: e.elite ? "#ffd0e4" : "#f08cb8" /* W38 Frei: rosé wie die Seelensplitter statt Geschoss-Orange */, sw: (Math.random() < 0.5 ? -1 : 1) * (0.7 + Math.random() * 0.6), tr: [] });
       }
       fx.push({ k: "pop", x: cx, y: cy, t: 0, life: 0.35, r: 10 + e.w * 0.8 });
       /* Zerbrechen passend zum Material */
@@ -333,7 +333,11 @@
       const tr = s.tr, n = tr.length / 2;
       if (n > 1) {
         c.strokeStyle = s.col;
-        if (Z.gfx && Z.gfx.off && Z.gfx.off.seelenband) { for (let i = 1; i < n; i++) { const k = i / n; c.globalAlpha = k * 0.7; c.lineWidth = 0.4 + k * 2; c.beginPath(); c.moveTo(tr[i * 2 - 2], tr[i * 2 - 1]); c.lineTo(tr[i * 2], tr[i * 2 + 1]); c.stroke(); } }
+        if (!(Z.gfx && Z.gfx.off && (Z.gfx.off.seelenband || Z.gfx.off.w38frei))) { /* W38 Frei: Funkenspur statt Band – im Getümmel wirkte der Schweif wie ein anfliegendes Geschoss.
+            Jetzt: kurze Kette kleiner, weicher Lichtpunkte, die nach hinten schrumpfen und flackern; kein durchgehender Strich. */
+          c.fillStyle = s.col;
+          for (let i = 0; i < n - 1; i += 2) { const k = (i + 1) / n, fl = 0.6 + 0.4 * Math.sin(s.t * 22 + i * 1.7); c.globalAlpha = k * k * 0.55 * fl; const r = 0.5 + k * 1.1; c.beginPath(); c.arc(tr[i * 2], tr[i * 2 + 1], r, 0, TAU); c.fill(); }
+        } else if (Z.gfx && Z.gfx.off && Z.gfx.off.seelenband) { for (let i = 1; i < n; i++) { const k = i / n; c.globalAlpha = k * 0.7; c.lineWidth = 0.4 + k * 2; c.beginPath(); c.moveTo(tr[i * 2 - 2], tr[i * 2 - 1]); c.lineTo(tr[i * 2], tr[i * 2 + 1]); c.stroke(); } }
         else { /* W35 Optik: Schweif als geglättete, durchgehende Linienzüge in drei Lagen (dünn/lang → dick/kurz) statt Einzelstrichen
                   mit runden Kappen – die überlappenden Kappen addierten sich („lighter“) zu hellen Perlen an jedem Knick */
           for (let L = 0; L < 3; L++) { const s0 = Math.floor((n - 1) * L / 3); if (n - s0 < 2) continue;
@@ -342,7 +346,7 @@
             c.lineTo(tr[n * 2 - 2], tr[n * 2 - 1]); c.stroke(); } }
       }
       const pu = 0.85 + 0.15 * Math.sin(s.t * 30);
-      c.globalAlpha = 1; c.drawImage(spr(s.col), s.x - 6 * pu, s.y - 6 * pu, 12 * pu, 12 * pu);
+      c.globalAlpha = Z.gfx && Z.gfx.off && Z.gfx.off.w38frei ? 1 : 0.8; c.drawImage(spr(s.col), s.x - 6 * pu, s.y - 6 * pu, 12 * pu, 12 * pu); c.globalAlpha = 1;
       c.fillStyle = "#fff4e0"; c.beginPath(); c.arc(s.x, s.y, 1.1, 0, TAU); c.fill();
     }
     c.restore();

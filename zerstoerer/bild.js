@@ -2266,7 +2266,10 @@
       else { c.beginPath(); c.moveTo(-4, -4); c.lineTo(4, 0); c.lineTo(-4, 4); c.fill(); }
       c.restore();
       if (locked) { c.fillStyle = "#3a3434"; for (let k = -9; k <= 9; k += 4.5) c.fillRect(px + k - 0.8, py - 40, 1.6, 40); }
-      c.font = "700 7px 'Alegreya Sans',sans-serif"; c.textAlign = "center"; c.fillStyle = "rgba(0,0,0,.7)"; c.fillText(Z.areaName(d.to), px + 0.5, py - 60.5); c.fillStyle = col; c.fillText(Z.areaName(d.to), px, py - 61);
+      c.font = "700 7px 'Alegreya Sans',sans-serif"; c.textAlign = "center";
+      { const tx = Z.areaName(d.to); let lx = px, ly = py - 61; /* W38 Frei: Türschild weicht Touch-Knöpfen aus (frei.js), dann mit feiner Linie zur Tür */
+        if (Z.doorLabelPos) { const q = Z.doorLabelPos(c, px, ly, c.measureText(tx).width); if (q) { lx = q[0]; ly = q[1]; c.strokeStyle = col; c.globalAlpha = 0.45; c.lineWidth = 0.6; c.beginPath(); c.moveTo(px, py - 58); c.lineTo(lx, ly + 2); c.stroke(); c.globalAlpha = 1; } }
+        c.fillStyle = "rgba(0,0,0,.7)"; c.fillText(tx, lx + 0.5, ly + 0.5); c.fillStyle = col; c.fillText(tx, lx, ly); }
     }
   }
 

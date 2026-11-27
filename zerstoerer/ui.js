@@ -1752,7 +1752,7 @@
     if (bubble.hidden) return; bubbleT -= dt; if (bubbleT <= 0 || ui.modalOpen) { bubble.hidden = true; return; }
     const [x, y] = worldToScreen(bubbleAt[0], bubbleAt[1]), hz = hudZoom(), w = bubble.offsetWidth, h = bubble.offsetHeight;
     const vw = innerWidth / hz, m = 8;
-    const bx = Math.max(m, Math.min(vw - w - m, x / hz - w / 2)), by = Math.max(m, y / hz - h);
+    const bx = Math.max(m, Math.min(vw - w - m, x / hz - w / 2)), by = Math.max(m, Math.min(y / hz - h, (Z.freiUnten ? Z.freiUnten() : innerHeight - m) / hz - h - 2)); /* W38 Frei: nie unter die Waffenleiste/den Bildrand */
     bubble.style.transform = "translate(" + Math.round(bx) + "px," + Math.round(by) + "px)";
     bubble.style.setProperty("--zipfel", Math.round(Math.max(12, Math.min(w - 12, x / hz - bx))) + "px");
   }

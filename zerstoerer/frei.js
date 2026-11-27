@@ -7,7 +7,9 @@
    3) Schwebetext-Gedränge: Im Kampf standen bis zu sechs große Zurufe gleichzeitig („Durchschaut!“, „Unterbrochen!“,
       „Adrenalin! +25 %“, Boss-Hinweise …). Höchstens drei große Zurufe zugleich (Handheld/Stufe 0: zwei); kommt ein neuer,
       tritt der unwichtigste ältere zurück (Boss-/Lernhinweise zuletzt). Schadenszahlen, Heilung und „!“ bleiben unberührt.
-   Kein Blau. Schalter Z.gfx.off.w38frei. Prüfhilfe Z.frei.dbg(). */
+   Kein Blau. 4) (Folgeauftrag) Türschilder (bild.js) weichen am Handy den Touch-Knöpfen aus, mit feiner Linie zur Tür; Seelenfunken
+      (effekte.js) als rosé Funkenspur statt orangem Band.
+   Schalter Z.gfx.off.w38frei. Prüfhilfe Z.frei.dbg(). */
 (function () {
   "use strict";
   const Z = window.Z; if (!Z || Z.frei) return;
@@ -21,12 +23,15 @@
     const bn = document.getElementById("banner"), bb = document.getElementById("bossbar");
     if (!bn) return;
     const shown = !bn.hidden && (bn.classList.contains("an") || +getComputedStyle(bn).opacity > 0.02); /* auch beim Ausblenden nicht zurückspringen */
-    const barOn = bb && !bb.hidden && bb.offsetParent !== null && bb.getBoundingClientRect().height > 0;
-    if (off() || !shown || !barOn) { if (shift) { bn.style.transform = ""; shift = 0; } return; }
-    const r0 = bn.getBoundingClientRect(), b = bb.getBoundingClientRect();
-    const top0 = r0.top - shift * (r0.height / Math.max(1, bn.offsetHeight)); /* Lage ohne eigene Verschiebung */
+    const vis = el => { if (!el || el.hidden) return false; const r = el.getBoundingClientRect(); if (!(r.height > 0 && r.width > 0)) return false; const cs = getComputedStyle(el); return cs.display !== "none" && cs.visibility !== "hidden" && +cs.opacity > 0.05; }; /* fest positionierte Elemente haben kein offsetParent */
+    const hf = document.getElementById("hfzeile");
+    const obs = [vis(bb) ? bb : null, hf && hf.classList.contains("an") && vis(hf) ? hf : null].filter(Boolean); /* Boss-Leiste; hochkant auch die Herausforderungstafel */
+    if (off() || !shown || !obs.length) { if (shift) { bn.style.transform = ""; shift = 0; } return; }
+    const r0 = bn.getBoundingClientRect();
     const k = r0.height / Math.max(1, bn.offsetHeight) || 1; /* CSS-zoom des Bandes */
-    let need = b.bottom + 6 - top0;
+    const top0 = r0.top - shift * k; /* Lage ohne eigene Verschiebung */
+    let need = 0;
+    for (const el of obs) { const b = el.getBoundingClientRect(); if (b.left < r0.right && b.right > r0.left && b.top < top0 + r0.height && b.bottom > top0) need = Math.max(need, b.bottom + 6 - top0); }
     if (need <= 0) { if (shift) { bn.style.transform = ""; shift = 0; } return; }
     need = Math.min(need, Math.max(0, innerHeight - 8 - (top0 + r0.height))); /* nicht aus dem Bild */
     const s = Math.round(need / k);
@@ -52,6 +57,40 @@
   const notenS = safe(noten, "noten");
   const bandS0 = safe(band, "band"), bandS = () => { bandS0(); notenS(); };
   (function loop() { requestAnimationFrame(loop); const now = performance.now(); if (now - bandT > 120) { bandT = now; bandS(); } })();
+
+  /* ---------- 5) Handy hochkant: Ezekiel nicht hinter Schnellleiste und Touch-Knöpfen ----------
+     Hochkant nimmt die Knopfgruppe das untere gute Drittel ein, die Schnellleiste liegt knapp darüber – genau auf Ezekiels
+     Höhe (gemessen: Figur bei 59 % der Bildhöhe, Leiste 56–61 %). Die Kamera hält ihn hochkant bei etwa 40 %. */
+  function hochOff() {
+    const c = Z.cam; if (!c || off() || !(c.h > c.w * 1.35)) return 0;
+    const tc = document.getElementById("touch"); if (!tc || tc.hidden) return 0;
+    return c.h * 0.10;
+  }
+  function wrapCam() {
+    const c = Z.cam; if (!c || !c.update) return setTimeout(wrapCam, 100);
+    if (c.update._w38f) return;
+    const u0 = c.update;
+    c.update = function (dt, p) {
+      const o = p ? hochOff() : 0;
+      if (!o) return u0.apply(this, arguments);
+      const q = Object.create(p); q.y = p.y + o; /* Ziel tiefer → Figur höher im Bild; alle anderen Felder wie gehabt */
+      return u0.call(this, dt, q);
+    };
+    c.update._w38f = true;
+    /* Kurze Gebiete sind hochkant kaum höher als das Bild: die Kamera darf um den Versatz unter den unteren Rand schauen
+       (dort liegen ohnehin die Touch-Knöpfe) – sonst bliebe Ezekiel trotz Versatz hinter der Leiste. */
+    const k0 = c.clamp;
+    if (k0 && !k0._w38f) {
+      c.clamp = function () {
+        const o = hochOff(), b = c.bounds;
+        if (!o || !b) return k0.apply(this, arguments);
+        c.bounds = { x: b.x, y: b.y, w: b.w, h: b.h + o };
+        try { return k0.apply(this, arguments); } finally { c.bounds = b; }
+      };
+      c.clamp._w38f = true;
+    }
+  }
+  wrapCam();
 
   /* ---------- 3) Höchstens drei große Zurufe zugleich ---------- */
   const FX = Z.fx;
@@ -85,6 +124,43 @@
       return r;
     };
   }
+
+  /* ---------- 4) Türschilder weichen Touch-Knöpfen aus (bild.js ruft Z.doorLabelPos) ---------- */
+  let btnR = [], btnT = 0;
+  function buttons() {
+    const now = performance.now(); if (now - btnT < 300) return btnR; btnT = now;
+    const tc = document.getElementById("touch");
+    btnR = [];
+    if (!tc || tc.hidden || getComputedStyle(tc).display === "none") return btnR;
+    for (const b of tc.querySelectorAll("[data-t], button")) { const r = b.getBoundingClientRect(); if (r.width > 4 && r.height > 4 && +getComputedStyle(b).opacity > 0.05) btnR.push(r); }
+    return btnR;
+  }
+  let placed = [], placedF = -1;
+  Z.doorLabelPos = function (c, x, y, w) {
+    try {
+      if (off()) return null;
+      const B = buttons(); if (!B.length || !c || !c.canvas) return null;
+      const fr = (Z.gfx && Z.gfx.frame) || 0; if (fr !== placedF) { placedF = fr; placed = []; } /* andere Schilder dieses Bildes */
+      const m = c.getTransform(), cr = c.canvas.getBoundingClientRect(), k = cr.width / (c.canvas.width || 1);
+      const box = (wx, wy) => { const sx = cr.left + (m.a * wx + m.e) * k, sy = cr.top + (m.d * wy + m.f) * k, hw = (w / 2 + 3) * m.a * k, hh = 9 * m.d * k; return { l: sx - hw, r: sx + hw, t: sy - hh, b: sy + 3 * m.d * k }; };
+      const hits = q => B.some(r => q.l < r.right + 4 && q.r > r.left - 4 && q.t < r.bottom + 4 && q.b > r.top - 4) || placed.some(r => q.l < r.r + 3 && q.r > r.l - 3 && q.t < r.b + 2 && q.b > r.t - 2);
+      const q0 = box(x, y);
+      if (!hits(q0)) { placed.push(q0); return null; }
+      const tries = [[0, -14], [0, -28], [-(w / 2 + 18), 0], [-(w / 2 + 18), -14], [0, -42], [-(w + 24), -6], [-(w + 24), -20], [w / 2 + 18, -14], [0, -56]];
+      for (const [dx, dy] of tries) { const q = box(x + dx, y + dy); if (q.l < cr.left + 2 || q.r > cr.right - 2 || q.t < cr.top + 2) continue; if (!hits(q)) { placed.push(q); return [x + dx, y + dy]; } }
+      placed.push(q0); return null;
+    } catch (e) { if (!errN.tuer) { errN.tuer = 1; console.error("W38 Frei", e); } return null; }
+  };
+
+  /* ---------- 6) Untere Bildkante für Karten/Blasen: Oberkante der Waffenleiste (#hud .hb), sonst Bildrand ----------
+     Seltene-Ereignis-Banner (nemesis.js) und Sprechblasen (ui.js) lagen auf dem Handheld auf der Waffenleiste. */
+  let untenY = 0, untenT = 0;
+  Z.freiUnten = function () {
+    const now = performance.now(); if (now - untenT < 250 && untenY) return untenY; untenT = now;
+    let y = innerHeight - 6;
+    try { const hb = document.querySelector("#hud .hb"), hud = document.getElementById("hud"); if (!off() && hb && hud && !hud.hidden) { const r = hb.getBoundingClientRect(); if (r.height > 0 && r.top > innerHeight * 0.45) y = Math.min(y, r.top - 6); } } catch (_) {}
+    return (untenY = y);
+  };
 
   /* ---------- Aussehen ---------- */
   const css = document.createElement("style");

@@ -181,14 +181,27 @@
   Z.ACH = ACH; Z.CAPES = CAPES; /* W9 Härte: haerte.js ergänzt Umhänge und Erfolge je Härtegrad */
   const BONUS = { trank: ["+1 Trank zu Beginn jedes Durchgangs", "+1 potion at the start of every run"], riss: ["Ein Riss im Netz öffnet sich nach jedem Endboss", "A rift in the web opens after every final boss"], startwaffe: ["Nundro gibt dir eine zufällige gefundene Waffe mit", "Nundro gives you a random found weapon to start"], leben: ["+10 Leben", "+10 health"], glueck: ["Mehr Raum-Ereignisse", "More room events"] };
   function rewardText(r) { if (r.cape) return L(["Umhang: ", "Cape: "]) + L(CAPES[r.cape].n); if (r.hero) return L(["Neuer Held: ", "New hero: "]) + L(HEROES[r.hero].n); if (r.bonus) return L(BONUS[r.bonus]); if (r.titel) return L(["Titel: ", "Title: "]) + "„" + L(r.titel) + "“"; return ""; }
-  function grant(a) {
+  function grant(a, still) {
     const m = M(); if (!a || m.ach[a.id]) return; m.ach[a.id] = Date.now();
     if (a.r.cape) m.capes[a.r.cape] = 1; if (a.r.hero) m.heroes[a.r.hero] = 1; if (a.r.bonus) m.bonus[a.r.bonus] = 1;
+    if (still) return; /* W38 Frei: gesammelt nachgetragen (achTick) */
     Z.saveMeta(); A.play("holy", { vol: 0.6 });
     if (Z.ui && Z.ui.notify) Z.ui.notify("🏆 <b>" + L(["Erfolg: ", "Achievement: "]) + esc(L(a.n)) + "</b><br><small>" + esc(rewardText(a.r)) + '</small><i data-ach="' + a.id + '" hidden></i>', { prio: 1, art: "sieg", dauer: 3600 }); else Z.toast && Z.toast("🏆 <b>" + esc(L(a.n)) + "</b>", 4200);
   }
   let achT = 0;
-  function achTick(dt) { achT -= dt; if (achT > 0) return; achT = 1; for (const a of ACH) if (!M().ach[a.id]) { let ok = false; try { ok = a.ok(); } catch (_) {} if (ok) { grant(a); break; } } }
+  function achTick(dt) {
+    achT -= dt; if (achT > 0) return; achT = 1;
+    /* W38 Frei: Ein älterer Spielstand bekam nach einem Update 10–15 Erfolge nacheinander (je Sekunde eine Meldung) – genau
+       zum Laufbeginn. Sind drei oder mehr auf einmal fällig, werden sie gemeinsam nachgetragen: eine Meldung mit Namen. */
+    const due = [];
+    for (const a of ACH) if (!M().ach[a.id]) { let ok = false; try { ok = a.ok(); } catch (_) {} if (ok) { due.push(a); if (due.length >= 40) break; } }
+    if (!due.length) return;
+    if (due.length < 3) { grant(due[0]); return; }
+    for (const a of due) grant(a, true);
+    Z.saveMeta(); A.play("holy", { vol: 0.6 });
+    const nm = due.slice(0, 3).map(a => esc(L(a.n))).join(" · ") + (due.length > 3 ? " +" + (due.length - 3) : "");
+    if (Z.ui && Z.ui.notify) Z.ui.notify("🏆 <b>" + due.length + L([" Erfolge nachgetragen", " achievements caught up"]) + "</b><br><small>" + nm + " – " + esc(L(["Belohnungen stehen im Erfolgsbuch.", "Rewards are listed in the achievements book."])) + '</small><i data-ach="' + due[0].id + '" hidden></i>', { prio: 1, art: "sieg", dauer: 5200 });
+  }
   Z.grantAch = id => { const a = ACH.find(x => x.id === id); if (a) grant(a); };
 
   /* ======================= ERFOLGE II (W13, Nutzerwunsch): Kategorien, Fortschritt, Titel ======================= */

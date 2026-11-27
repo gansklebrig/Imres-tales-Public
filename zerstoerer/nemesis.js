@@ -187,7 +187,9 @@
     const vw = Wd / S, vh = Hd / S;
     const u = b.t < 0.45 ? U.easeOut(b.t / 0.45) : 1, a = Math.max(0, Math.min(1, (b.life - b.t) / 0.6));
     c.save(); c.setTransform(S, 0, 0, S, 0, 0); c.globalAlpha = a * Math.min(1, b.t / 0.12);
-    const k = Math.min(0.74, vw / (b.cw + 20)), x = vw / 2, y = vh * 0.66 + (1 - u) * 6;
+    const k = Math.min(0.74, vw / (b.cw + 20)), x = vw / 2;
+    let y = vh * 0.66 + (1 - u) * 6;
+    try { if (Z.freiUnten && c.canvas) { const cr = c.canvas.getBoundingClientRect(); if (cr.height > 0) { const lim = vh * (Z.freiUnten() - cr.top) / cr.height - b.ch * k - 3; if (y > lim) y = Math.max(vh * 0.3, lim); } } } catch (_) {} /* W38 Frei: über der Waffenleiste bleiben (Handheld) */
     c.translate(x, y); c.scale((0.15 + 0.85 * u) * k, k);
     c.drawImage(b.cv, -b.cw / 2, 0, b.cw, b.ch);
     c.restore();
