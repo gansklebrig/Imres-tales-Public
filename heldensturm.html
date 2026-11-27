@@ -2004,6 +2004,7 @@ function basicStd(o){const b=bTarget(P.st.range,o.meleeR||85);if(!b)return false
  const sv=P.st.dmg;if(b.melee){P.st.dmg=P.st.dmgM;const ws=wsVon(P.eq.weapon)||{};try{const R0=(o.meleeR+15||100)*P.st.area*(ws.reach||1),ar=(o.arc||1.5)*(ws.arc||1),mm=(o.mm||1.35)*(o.meleeMul?o.meleeMul():1),mo=Object.assign({basic:1,melee:1},o.mopt||{},ws.mopt||{});melee(b.a,R0,ar,mm,o.mc,mo);if(ws.doppelt){const a=b.a;later(0.11,()=>{if(P.down)return;const s2=P.st.dmg;P.st.dmg=P.st.dmgM*0.5;try{melee(a,R0,ar,mm,o.mc,mo)}finally{P.st.dmg=s2}})}}finally{P.st.dmg=sv}sfx(o.msnd||'slash');return'm'}
  if(o.ranged){P.st.dmg=P.st.dmgR;try{o.ranged(b.a,b.t)}finally{P.st.dmg=sv}}return'r'}
 
+function slKurz(t){/* Heldenkarte: nur der Einstieg der Beschreibung – ohne Äste-Klammer (stehen als Chips darunter) und ohne „Spielweise: …“ */let k=String(t).split(/\s+Spielweise:/)[0].replace(/\s*\(Äste:[^)]*\)/,'');const S=k.match(/[^.!?]+[.!?]+[“"]?/g)||[k];let o='';for(const x of S){if(o&&(o+x).length>230)break;o+=x}return o.trim()}
 const HEROES={
  barradin:{name:'Barradin',cls:'Elfischer Barde',role:'Kontrolle, Illusion & Klinge',dm:1.6,hp:122,dmg:12,rate:1.5,speed:168,range:390,sig:'b_mirror',
   blurb:'Lockt Gegner mit Trugbildern ins Verderben, hält den gefährlichsten mit einem Wort fest, verspottet ganze Horden, fesselt sie in Ranken, tanzt mit dem Rapier durch ihre Reihen oder betört sie mit Feenglanz (Äste: Verzauberung, Ranken, Illusion, Klingentanz, Glamour). Jeder Kampf ist ein Auftritt: Das Publikum liebt Abwechslung und ruft nach einer Zugabe.',
@@ -16904,6 +16905,11 @@ setInterval(()=>{try{if(document.hidden||G.bot||!SAVE.slot||!SPL.in)return;const
 .slin{flex:1 1 12em;max-width:22em;padding:.55em .8em;border-radius:.55em;border:1px solid #5a4a5e;background:#140f17;color:var(--text);font:700 1em var(--fb);user-select:text;-webkit-user-select:text;touch-action:auto}
 .slin:focus{outline:2px solid var(--gold);outline-offset:1px}
 .slheroes{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1.2vw}
+/* Heldenkarten: in großen Fenstern Kurzbeschreibung und Äste im sonst leeren unteren Teil */
+.slhero .slbl,.slhero .slbr{display:none}
+@media (min-width:1100px) and (min-height:700px){.slhero .slbl{display:block;margin-top:.9em;max-width:26em;font-size:clamp(12.5px,.8vw,16px);line-height:1.5;color:#cdbb9a;text-align:center;font-style:italic}
+ .slhero .slbr{display:flex;flex-wrap:wrap;justify-content:center;gap:.35em;margin-top:auto;padding-top:.8em}
+ .slhero .slbr i{font-style:normal;font-size:clamp(11px,.7vw,13.5px);padding:.2em .6em;border-radius:1em;border:1px solid color-mix(in srgb,var(--hc) 45%,#3d3140);color:color-mix(in srgb,var(--hc) 70%,#efe3cc);background:rgba(0,0,0,.25)}}
 .slhero{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:.35em;padding:1em .8em;border-radius:1em;border:1px solid color-mix(in srgb,var(--hc) 45%,#3d3140);background:radial-gradient(120% 70% at 50% 30%,color-mix(in srgb,var(--hc) 22%,transparent),transparent 70%),linear-gradient(#1e1721,#120e15);color:var(--text);font:inherit;min-height:0;overflow:hidden;transition:transform .15s,box-shadow .15s,border-color .15s}
 .slhero canvas{width:100%;max-width:12em;height:auto;aspect-ratio:1/1;min-height:0;flex:0 1 auto}
 .slhero .nm{font:400 1.6em/1 var(--fd);color:var(--hc)}
@@ -17005,7 +17011,7 @@ function slBarHtml(mode){const a=SPL.ask,n=SPL.sel,s=n?slSum(n):null;
 function slNewHtml(){return`<div class="slm"><div class="slp">${slHead('Neues Spiel · Schritt 1 von 4','Platz wählen','')}${slGridHtml('new')}${slBarHtml('new')}</div>${slFoot()}</div>`}
 function slLoadHtml(){return`<div class="slm"><div class="slp">${slHead('Spiel laden',`Spielstände <span style="font-size:.5em;color:var(--mute);font-family:var(--fb)">${slList().length} / ${SL_N}</span>`,'')}${slGridHtml('load')}${slBarHtml('load')}</div>${slFoot()}</div>`}
 function slHeroHtml(){const W=SPL.nw||{};return`<div class="slm"><div class="slp">${slHead(`Neues Spiel · Platz ${W.n} · Schritt 2 von 4`,'Held wählen','Mit wem ziehst du los? Im Lager kannst du später jederzeit auch die anderen Helden spielen.')}
- <div class="slheroes">${HERO_IDS.map(id=>`<button class="slhero" style="--hc:${HCOL[id]}" data-act="sl-nhero" data-id="${id}" ${W.h===id?'data-sl-def="1"':''}><canvas data-hero="${id}" width="160" height="160"></canvas><span class="nm">${esc(HEROES[id].name)}</span><span class="cl">${esc(HEROES[id].cls)}</span><span class="rl">${esc(HEROES[id].role)}</span></button>`).join('')}</div>
+ <div class="slheroes">${HERO_IDS.map(id=>`<button class="slhero" style="--hc:${HCOL[id]}" data-act="sl-nhero" data-id="${id}" ${W.h===id?'data-sl-def="1"':''}><canvas data-hero="${id}" width="160" height="160"></canvas><span class="nm">${esc(HEROES[id].name)}</span><span class="cl">${esc(HEROES[id].cls)}</span><span class="rl">${esc(HEROES[id].role)}</span><span class="slbl">${esc(slKurz(HEROES[id].blurb||''))}</span><span class="slbr">${(HEROES[id].branches||[]).map(x=>`<i>${esc(x)}</i>`).join('')}</span></button>`).join('')}</div>
  <div class="slbar"><button class="slbtn" data-act="sl-back">‹ Zurück</button></div></div>${slFoot()}</div>`}
 function slModeHtml(){const W=SPL.nw||{},acc=slAccMax(),hc=W.mode==='hard';if(okHero(W.h))G.sel=W.h;const ch=[];
  const c=(d,hd,t,dis)=>`<button class="slchip ${W.d===d&&!!W.hd===!!hd?'on':''}" data-act="sl-ndiff" data-d="${d}" ${hd?'data-h="1"':''} ${dis?'disabled':''}>${t}</button>`;
