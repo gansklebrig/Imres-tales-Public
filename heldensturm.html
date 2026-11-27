@@ -26694,7 +26694,7 @@ function fzkLauf(){try{const alt=scr.querySelectorAll('.fzk');const b=fzkSuche()
   for(const e of scr.querySelectorAll(`[data-act="${b.dataset.act}"]`))if(e!==b&&!e.classList.contains('fzk-dup'))e.classList.add('fzk-dup');
   /* Platz schaffen: Elemente oben, die der Knopf verdecken würde */
   const r=b.getBoundingClientRect();if(!r.width)return;
-  for(const t of scr.querySelectorAll('.seg.mtabs')){if(t.classList.contains('fzk-platz'))continue;const q=t.getBoundingClientRect();if(q.width&&q.right>r.left-4&&q.top<r.bottom+2&&q.bottom>r.top-2)t.classList.add('fzk-platz')}}catch(er){}}
+  for(const t of scr.querySelectorAll('.seg.mtabs,.camp-panel>.seg')){if(t.classList.contains('fzk-platz'))continue;const q=t.getBoundingClientRect();if(q.width&&q.right>r.left-4&&q.top<r.bottom+2&&q.bottom>r.top-2)t.classList.add('fzk-platz')}}catch(er){}}
 {let pend=0;const mo=new MutationObserver(()=>{if(pend)return;pend=1;requestAnimationFrame(()=>{pend=0;fzkLauf()})});
  const an=()=>{try{mo.observe(scr,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','class','disabled']})}catch(e){}};an();setInterval(()=>{try{if(FZK.el&&FZK.el.isConnected){const k=fzkTaste();if(FZK.el.getAttribute('data-fzk-k')!==k)FZK.el.setAttribute('data-fzk-k',k)}else if(!scr.hidden)fzkLauf()}catch(e){}},500);
  addEventListener('resize',()=>{try{for(const t of scr.querySelectorAll('.fzk-platz'))t.classList.remove('fzk-platz');fzkLauf()}catch(e){}})}
