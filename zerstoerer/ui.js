@@ -412,6 +412,7 @@
     noteShow(n);
     return n.el;
   };
+  ui.notifyDrop = key => { noteWait = noteWait.filter(n => n.key !== key); const n = notes.find(n => n.key === key); if (n) noteDrop(n, true); }; /* W38 Abwechslung: Meldung zu einem Schlüssel sofort entfernen (z. B. Gebietslage beim Gebietswechsel) */
   /* W11 R44 (nur Optik): Kampf in der Nähe – ein aufmerksamer Gegner nahe Ezekiel (≈ 17×10 Kacheln) – lässt Meldungen,
      Weltmeldungen („Geheimnis 1/7“), Fundkarte und Herausforderungstafel zurücktreten: kleiner, blasser, ohne Zusatzzeile,
      Weltmeldungen rücken über die Köpfe. An sofort, aus 1,2 s nach dem letzten Treffer der Prüfung. body.kampfnah. */

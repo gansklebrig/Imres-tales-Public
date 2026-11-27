@@ -65,7 +65,8 @@
     const run = Z.run, B = Z.BIOMES[id];
     if (!run || !B || run.rausch || run.w21rausch || FORCE === false) return null;
     const tier = B.tier || 0; if (tier < 1) return null;
-    if (run._var && run._var.area === id && !FORCE) return null; /* Gebietsvariante (abenteuer.js) hat Vorrang – nie beides */
+    if (run._var && run._var.area === id && !FORCE) return null;
+    if (!FORCE && !run.w38tag && Z.einstieg && Z.einstieg.neu()) return null; /* W38 Einstieg: im ersten Lauf noch keine Lagen */ /* Gebietsvariante (abenteuer.js) hat Vorrang – nie beides */
     const R = Z.Rng((((seed >>> 0) ^ 0x5bd1e995) + 3803) >>> 0);
     const tag = run.w38tag;
     let k = FORCE || (tag && tag.lage) || null;
@@ -155,6 +156,7 @@
       lg.need = Z.enemies.filter(e => e.w38 === "mark").length;
       if (!lg.need) { lv.w38 = null; return; }
     }
+    mirror(lv);
     later(() => { if (Z.level === lv && lv.w38 === lg && Z.player && !Z.player.dead) announce(lg); }, 900);
   }
   /* Vergrabener Schatz: Platz in einem fernen Seitenraum, erreichbar, Stehplatz */
@@ -162,7 +164,8 @@
     if (!lv.cells || !Z.standable) return false;
     const CWc = Z.CW, CHc = Z.CH, st = lv.start || { x: 0, y: 0 };
     const exitCells = new Set((lv.doors || []).filter(d => d.kind === "exit").map(d => Math.floor(d.x / CWc) + "," + Math.floor(d.y / CHc)));
-    const cells = Object.keys(lv.cells).map(k => lv.cells[k]).filter(c => c && c !== lv.startCell && c !== lv.endCell && c.kind !== "secret" && !exitCells.has(c.x + "," + c.y));
+    const busyCells = new Set((lv.feats || []).filter(f => f && f.cell && (f.t === "trial" || f.t === "lock" || f.t === "shrine")).map(f => f.cell)); /* W38 Abwechslung: nicht in Prüfungskammer/Schatzkammer/Schrein */
+    const cells = Object.keys(lv.cells).map(k => lv.cells[k]).filter(c => c && c !== lv.startCell && c !== lv.endCell && c.kind !== "secret" && !exitCells.has(c.x + "," + c.y) && !busyCells.has(c.x + "," + c.y));
     const scored = cells.map(c => ({ c, d: Math.hypot(c.x * CWc + CWc / 2 - st.x, c.y * CHc + CHc / 2 - st.y) + (c.kind === "side" ? 30 : 0) + (c.depth || 0) * 6 })).sort((a, b) => b.d - a.d);
     for (const o of scored.slice(0, 8).concat(scored.slice(8))) {
       const ox = o.c.x * CWc, oy = o.c.y * CHc, spots = [];
@@ -185,7 +188,7 @@
     if (!lo()) FX.burst(lg.sx, lg.sy - 2, 14, { col: ["#6a5040", "#4a3a2e", "#8a7060"], sp: 90, life: 0.7, size: 2, kind: "dot", g: 300 });
     later(() => {
       if (Z.level !== lv || lg.paid) return;
-      lg.paid = true; lg.digT = 0;
+      lg.paid = true; lg.digT = 0; mirror(lv);
       A.play("crate", { x: lg.sx, vol: 0.5 }); A.play("coin", { x: lg.sx, vol: 0.6 });
       chest(lg.sx, lg.sy); Z.dropGold(lg.sx, lg.sy - 8, 25 * goldMul()); glut(lg.sx + 12, lg.sy, 1);
       if (!lo()) FX.burst(lg.sx, lg.sy - 6, 20, { col: ["#ffd27a", "#e5b454"], sp: 130, life: 0.8, size: 1.8, kind: "spark", add: true, g: 160 });
@@ -199,6 +202,18 @@
     if (d < 3) return L(["direkt hier", "right here"]);
     const h = Math.abs(dx) > T * 3 ? (dx < 0 ? L(["links", "left"]) : L(["rechts", "right"])) : "", v = Math.abs(dy) > T * 3 ? (dy < 0 ? L(["oben", "up"]) : L(["unten", "down"])) : "";
     return L(["Gefühl: ", "Hunch: "]) + [h, v].filter(Boolean).join(L([" und ", " and "])) + " · ~" + d + L([" Schritte", " steps"]);
+  }
+  /* W38 Abwechslung (Online): Lage als einfache Level-Felder spiegeln – online.js überträgt sie mit jedem Schnappschuss (lvPrims) */
+  function mirror(lv) {
+    const lg = lv && lv.w38; if (!lg || gast()) return;
+    lv.w38k = lg.k; lv.w38paid = !!lg.paid; lv.w38got = lg.got | 0; lv.w38need = lg.need | 0;
+    if (lg.von) lv.w38von = lg.von;
+    if (lg.sx != null) { lv.w38sx = Math.round(lg.sx); lv.w38sy = Math.round(lg.sy); }
+  }
+  function lgOf(lv) {
+    if (!lv) return null; if (lv.w38) return lv.w38;
+    if (!gast() || !lv.w38k || !LAGEN[lv.w38k]) return null;
+    return { k: lv.w38k, paid: !!lv.w38paid, got: lv.w38got | 0, need: lv.w38need | 0, von: Z.BIOMES[lv.w38von] ? lv.w38von : undefined, sx: lv.w38sx, sy: lv.w38sy, gast: true };
   }
   const name = lg => L(LAGEN[lg.k].n);
   const desc = lg => L(LAGEN[lg.k].d(lg.von ? Z.areaName(lg.von) : ""));
@@ -264,7 +279,7 @@
   Z.killEnemy = function (e, o) {
     const was = !e || e.dead;
     const r = k0.apply(this, arguments);
-    try { if (!was && e && e.dead && !gast() && Z.run) onKill(e, o || {}); } catch (err) { console.error("W38 Abwechslung", err); }
+    try { if (!was && e && e.dead && !gast() && Z.run) { onKill(e, o || {}); mirror(Z.level); } } catch (err) { console.error("W38 Abwechslung", err); }
     return r;
   };
   const h0 = Z.hitEnemy;
@@ -389,6 +404,7 @@
   const la0 = Z.loadArea;
   Z.loadArea = function (id) {
     const tg = tag(), prev = Z.level;
+    try { if (Z.ui && Z.ui.notifyDrop) for (const k of ["w38lage", "w38rest", "w38stand"]) Z.ui.notifyDrop(k); } catch (_) {} /* W38 Abwechslung: alte Lagen-Meldung nicht ins nächste Gebiet tragen */
     if (tg && tg.rules.includes("eile") && prev && !prev.hub && !prev.passage && id === "passage" && Z.player && !Z.player.dead) {
       if (tg.areaT > 0 && tg.areaT < 120) { bonus(300); later(() => note("☀ " + esc(L(["Eilbote: +300 Punkte", "Courier: +300 points"])), { prio: 1, art: "gold", key: "w38eile" }), 1500); }
     }
@@ -415,6 +431,7 @@
   function placeStone(lv) {
     stone = null;
     if (!lv || !lv.hub) return;
+    if (Z.einstieg && Z.einstieg.neu()) return; /* W38 Einstieg: Sonnenstein erst nach dem ersten Lauf */
     const base = lv.lcore && Number.isFinite(lv.lcore.stone) ? lv.lcore.stone : (lv.start ? lv.start.x - 12 : 40);
     const x = (base + 8) * T + 8, y = 12 * T;
     stone = { lv, x, y };
@@ -445,11 +462,11 @@
       Z.ui.pause = function () {
         const r = p0.apply(this, arguments);
         try {
-          const lv = Z.level, lg = lv && lv.w38, tg = tag(), box = document.querySelector("#modal .knoepfe.senk") || document.querySelector("#modal .knoepfe");
+          const lv = Z.level, lg = lgOf(lv), tg = tag(), box = document.querySelector("#modal .knoepfe.senk") || document.querySelector("#modal .knoepfe");
           if (box && (lg || tg) && !document.querySelector("#modal .w38-pause")) {
             const p = document.createElement("p"); p.className = "w38-pause";
             let s = "";
-            if (lg && LAGEN[lg.k]) s += "<b>" + esc(LAGEN[lg.k].icon + " " + name(lg)) + "</b> – " + esc(desc(lg)) + (lg.k === "gezeichnet" ? " (" + (lg.got | 0) + "/" + lg.need + ")" : lg.k === "schatz" && !lg.paid ? " (" + esc(richtung(lg)) + ")" : lg.k === "besetzt" && !lg.paid ? " (" + Z.enemies.filter(e => e.w38inv && !e.dead).length + ")" : "") + (lg.paid ? " ✓" : "");
+            if (lg && LAGEN[lg.k]) s += "<b>" + esc(LAGEN[lg.k].icon + " " + name(lg)) + "</b> – " + esc(desc(lg)) + (lg.k === "gezeichnet" ? " (" + (lg.got | 0) + "/" + lg.need + ")" : lg.k === "schatz" && !lg.paid ? " (" + esc(richtung(lg)) + ")" : lg.k === "besetzt" && !lg.paid && !lg.gast ? " (" + Z.enemies.filter(e => e.w38inv && !e.dead).length + ")" : "") + (lg.paid ? " ✓" : "");
             if (tg) s += (s ? "<br>" : "") + "<b>☀ " + esc(L(["Tagesprüfung", "Daily trial"])) + "</b> – " + esc(tg.rules.map(r => L(GESETZE[r].n)).join(" · ")) + " · " + punkte(Z.run, false) + " " + esc(L(["Punkte", "points"]));
             p.innerHTML = s; box.parentNode.insertBefore(p, box);
           }
@@ -466,7 +483,7 @@
   Z.drawWorldProps = function (c, t) {
     if (wp0) wp0.apply(this, arguments);
     try { if (stone && Z.level === stone.lv && Z.level.hub) drawStone(c, stone.x, stone.y, t); } catch (e) { if (!dErr) { dErr = 1; console.error(e); } }
-    try { const lg = Z.level && Z.level.w38; if (lg && lg.k === "schatz" && lg.sx != null && !lg.paid) drawX(c, lg.sx, lg.sy, t, lg); } catch (e) { if (!dErr) { dErr = 1; console.error(e); } }
+    try { const lg = lgOf(Z.level); if (lg && lg.k === "schatz" && lg.sx != null && !lg.paid) drawX(c, lg.sx, lg.sy, t, lg); } catch (e) { if (!dErr) { dErr = 1; console.error(e); } }
   };
   let dErr = 0;
   function drawStone(c, x, y, t) {
@@ -530,7 +547,8 @@
   function drawMarks(c, cam, Wd, Hd, t) {
     const lv = Z.level; if (!lv || lv.hub || !cam) return;
     const L0 = lo(), S = (Z.gfx && Z.gfx.scale) || 2;
-    const lg = lv.w38;
+    const lg = lgOf(lv);
+    if (lg && lg.gast && !lv._w38ann && Z.player && !(Z.ui && Z.ui.verdeckt)) { lv._w38ann = true; setTimeout(() => { if (Z.level === lv) announce(lg); }, 600); } /* Gast: Spielzeit-Zeitgeber laufen dort nicht */ /* Online-Gast: Ansage, sobald die Lage im Schnappschuss ankommt */
     /* Schleier: Fluchnebel (Rand glutrot), Seelenflut (Rand blass rosé) – ab Stufe 1 */
     if (lg && !L0 && lg.k === "seelenflut" && Wd && Hd) {
       c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
