@@ -632,7 +632,8 @@
       /* steht das gemalte Schild über dem Gestell (schilder.js), braucht es keine Plakette mehr */
       if (!(Z.schilder && Z.schilder.hat("staender"))) ui.worldLabel("staender", { x: cx, y: y - 42, cls: "zwei", art: "gold", jetzt: true,
         html: L(["Waffenständer", "Weapon rack"]) + "<small>" + (ui.key("use") || "✋") + " " + L(["aufheben", "pick up"]) + (both && ui.key("a1") ? " · " + ui.key("a1") + ui.key("a2") + " " + L(["Hand wählen", "choose hand"]) : " · " + L(["zwei Hände, zwei Waffen", "two hands, two weapons"])) + "</small>" });
-      Z.pickups.forEach((p, i) => { if (p.rack && p.it && Math.abs(p.x - px) < 34) ui.worldLabel("staender" + i, { x: p.x, y: y - 28, text: Z.itemTitle(p.it), cls: "leise", jetzt: true }); });
+      { let bi = -1, bd = 34; Z.pickups.forEach((p, i) => { const d = p.rack && p.it ? Math.abs(p.x - px) : 1e9; if (d < bd) { bd = d; bi = i; } }); /* W38 Frei: nur der nächste Name – vorher überlappten zwei, drei Namen */
+        if (bi >= 0) { const p = Z.pickups[bi]; ui.worldLabel("staender" + bi, { x: p.x, y: y - 28, text: Z.itemTitle(p.it), cls: "leise", jetzt: true }); } }
     }
   }
   const wp0 = Z.drawWorldProps;

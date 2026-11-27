@@ -25,7 +25,8 @@
     const shown = !bn.hidden && (bn.classList.contains("an") || +getComputedStyle(bn).opacity > 0.02); /* auch beim Ausblenden nicht zurückspringen */
     const vis = el => { if (!el || el.hidden) return false; const r = el.getBoundingClientRect(); if (!(r.height > 0 && r.width > 0)) return false; const cs = getComputedStyle(el); return cs.display !== "none" && cs.visibility !== "hidden" && +cs.opacity > 0.05; }; /* fest positionierte Elemente haben kein offsetParent */
     const hf = document.getElementById("hfzeile");
-    const obs = [vis(bb) ? bb : null, hf && hf.classList.contains("an") && vis(hf) ? hf : null].filter(Boolean); /* Boss-Leiste; hochkant auch die Herausforderungstafel */
+    const kh = document.getElementById("koop-hl"), gc = document.getElementById("w38gch");
+    const obs = [vis(bb) ? bb : null, hf && hf.classList.contains("an") && vis(hf) ? hf : null, vis(kh) ? kh : null, gc && !gc.hidden && vis(gc) ? gc : null].filter(Boolean); /* Boss-Leiste; hochkant die Herausforderungstafel; Koop: P2-Kasten (W38 Frei, 4. Runde) */
     if (off() || !shown || !obs.length) { if (shift) { bn.style.transform = ""; shift = 0; } return; }
     const r0 = bn.getBoundingClientRect();
     const k = r0.height / Math.max(1, bn.offsetHeight) || 1; /* CSS-zoom des Bandes */
@@ -274,6 +275,7 @@
     "#hfzeile .hc.weg.w38-verf{animation:w38verf 1.3s ease-out 1;text-decoration-color:#ff7a6a}",
     "@media (prefers-reduced-motion:reduce){#hfzeile .hc.weg.w38-verf{animation:none;color:#ff9a8a}}",
     "body.w38-hudrand{--safe-x:0px}",
+    "#modal .mbox.rb21box>.knoepfe{position:sticky;bottom:0;z-index:2;margin:8px -6px 0;padding:8px 6px 4px;background:linear-gradient(rgba(30,14,12,0),rgba(30,14,12,.94) 28%,rgba(30,14,12,.98))}" /* W38 Frei: Lauf-Rückblick – „Weiter ins Lager“ auf kleinen Bildschirmen ohne Rollen sichtbar */ + "",
     "#hpbar .w38-wer{position:absolute;left:6px;top:50%;transform:translateY(-50%);font-size:calc(var(--fs-xs,11px) * .85);font-weight:800;color:#f0e2cc;text-shadow:0 1px 2px #000;opacity:.85;pointer-events:none}",
     "#koop-hl .w38-du{margin-left:auto;font-size:var(--fs-xs,11px);color:#1a1012;background:#e5b454;border-radius:6px;padding:0 6px;font-weight:800}",
     "#w38gch{margin-top:6px;max-width:min(300px,42vw);padding:3px 8px;font-size:12px;font-weight:700;line-height:1.35}#w38gch .hc{white-space:nowrap;margin-right:8px;display:inline-block}#w38gch .hc.ok{color:#ffd27a}#w38gch .hc.weg{opacity:.45;text-decoration:line-through}#w38gch .hk{color:#e5b454;margin-right:4px}",

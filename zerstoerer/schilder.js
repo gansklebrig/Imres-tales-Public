@@ -809,6 +809,9 @@
     if (s.kind === "lern") {
       if (h0 >= 3) return 0;
       const done = allKnown(s.learn);
+      if ((done || (Z.level && Z.level.hub && Z.meta && (Z.meta.runs | 0) >= 20)) && Z.meta && (Z.meta.runs | 0) >= 8 && !(Z.gfx && Z.gfx.off && Z.gfx.off.w38frei)) { /* ab 20 Läufen auch ungelernte Lagerschilder */ /* W38 Frei: Erfahrene – gelernte Schilder nur noch in der Nähe (Lager im späten Spiel war voller Lehrtafeln) */
+        const P = Z.player; return h0 >= 2 || !P || Math.abs(P.x + P.w / 2 - s.x) > 110 ? 0 : 0.42;
+      }
       if (done) return h0 >= 2 ? 0 : 0.42;
       return 1;
     }

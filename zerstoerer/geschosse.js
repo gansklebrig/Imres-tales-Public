@@ -541,7 +541,8 @@
             c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = 0.28 + 0.12 * Math.sin(time * 2.4 + p.x * 0.1); Z.draw.glow(c, 0, -10, 14, pc); c.restore();
             c.save(); c.translate(0, -13); if (p.it.type !== "skill" && d.kind !== "shield") c.rotate(-0.79); Z.drawIcon(c, d.icon, 0, 0, 21, d.col); c.restore();
             const gl = (time * 0.45 + p.x * 0.013) % 1; if (gl < 0.12) { const k = gl / 0.12; c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = Math.sin(k * Math.PI); c.fillStyle = "#fff6d8"; c.translate(-3 + k * 6, -18 + k * 14); c.rotate(0.785); c.fillRect(-0.6, -4, 1.2, 8); c.fillRect(-4, -0.6, 8, 1.2); c.restore(); }
-            if (p.it.plus) { c.font = "800 6px 'Alegreya Sans',sans-serif"; c.textAlign = "center"; c.fillStyle = "rgba(14,8,10,.8)"; c.fillRect(4, -25, 11, 7); c.fillStyle = pc; c.fillText("+" + p.it.plus, 9.5, -19.6); }
+            const P0 = Z.player, nahR = !P0 || (Z.gfx && Z.gfx.off && Z.gfx.off.w38frei) || Math.abs(P0.x + P0.w / 2 - p.x) < 24; /* W38 Frei: Schmiedestufe am Ständer nur in der Nähe – sonst neun gleiche „+2“ nebeneinander */
+            if (p.it.plus && nahR) { c.font = "800 6px 'Alegreya Sans',sans-serif"; c.textAlign = "center"; c.fillStyle = "rgba(14,8,10,.8)"; c.fillRect(4, -25, 11, 7); c.fillStyle = pc; c.fillText("+" + p.it.plus, 9.5, -19.6); }
             break;
           }
           c.translate(0, bob);

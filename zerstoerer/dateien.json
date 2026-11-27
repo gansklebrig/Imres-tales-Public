@@ -9738,7 +9738,7 @@
 },
 "zerstoerer.html":{
 "groesse":81309,
-"sha256":"c8af80e405b2f92b7c2984eeca5f646bd001ba1a98ef9f12dfac215c0dac3164"
+"sha256":"46dca52a0cd0d75051fc21f758ada52afe6f078b3075debf3752f52c9cec8b94"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":145807,
@@ -9833,8 +9833,8 @@
 "sha256":"86265a1cff8e2f2619cd9833e4a879e1ff4c4c9f5233f5c95473d25f9a618163"
 },
 "zerstoerer/frei.js":{
-"groesse":19418,
-"sha256":"e0a38fdffba420513f1a6b4e8eeeca022ebaaadff22a5c9ef03b6e4717425486"
+"groesse":19912,
+"sha256":"e75afb9037774cb245aefd88455e152200b74f04d211e651e3e6f86741ca481d"
 },
 "zerstoerer/gegner.js":{
 "groesse":112989,
@@ -9849,8 +9849,8 @@
 "sha256":"2514bd2f89f97f4c099fdd0f523dd1213dd77e33ce185a310e6852b0fbb654f0"
 },
 "zerstoerer/geschosse.js":{
-"groesse":51618,
-"sha256":"d6155b729c54c7acbfa2d11f2c094957d5b1c4cc6cb83ed482e77f893a1ff03a"
+"groesse":51861,
+"sha256":"285a6a35995348f509375ee7e3951dec24ecafa90ea012d17665f0f612aaecfd"
 },
 "zerstoerer/grafik.js":{
 "groesse":27933,
@@ -9969,12 +9969,12 @@
 "sha256":"fb265ada966d10675ef894cb61aee0f2085451de1d68b6f0cb575cb7806a9bd0"
 },
 "zerstoerer/schilder.js":{
-"groesse":83237,
-"sha256":"b2c31ee2c2f605d76773cc6acc18758ab1a27613488d8a90bd3129afa9124d47"
+"groesse":83679,
+"sha256":"09e9e978c9a1cd17b275a1141c0e0be66d8f2b0def0778bbf35d73ab41d7921e"
 },
 "zerstoerer/schmiede.js":{
-"groesse":61865,
-"sha256":"7503dcb733712edbb83ba0ccd7e5cec020b9dc10ff1a06d03c8ef81b7fcbd17d"
+"groesse":62059,
+"sha256":"97f348fadd23587011f0c5656f4245c950c53830e4d51de9097b636528352501"
 },
 "zerstoerer/sicherung.js":{
 "groesse":17906,
@@ -10045,5 +10045,5 @@
 "sha256":"df0542ee684d5789758ae19d942444ead52fb2be7d26c59f6fc7916748f8bc34"
 }
 },
-"stand":180
+"stand":181
 }
