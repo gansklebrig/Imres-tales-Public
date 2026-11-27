@@ -30943,13 +30943,13 @@ function chHeldBlock(g,R,h,x,y,w,hgt,art){const nm=CH_HN[h.i]||h.i,col=CH_HCOL[h
   let used=0;if(lab){used=chText(g,lab+' ',ox,ly,lw-(ox-lx),fs-1,CF.body,CC.ash,{wt:700,k:'rl'})+4}chText(g,val,ox+used,ly,lw-(ox-lx)-used,fs,CF.body,vc||CC.vellum,{wt:700,k:'rv'});ly+=lh};
  if(h.bw){const img=chWaffIco(h.bw.a);row('⚔',art==='breit'?'Beste Waffe':'',h.bw.n,CH_RARC[h.bw.r]||CC.vellum,img)}
  row('✶',art==='breit'?'Größte Tat':'',h.hit>0?chZahl(h.hit)+(h.hk?' · '+h.hk:''):'–');
- row('♥',art==='breit'?'Knappste Rettung':'',h.mn<100?h.mn+' %'+(h.ms&&art==='breit'?' · '+h.ms:''):'nie in Not',h.mn<15?'#ff9a7a':null);
+ row('♥',art==='breit'?(solo&&tw<480?'Rettung':'Knappste Rettung'):'',h.mn<100?h.mn+' %'+(h.ms&&art==='breit'?' · '+h.ms:''):'nie in Not',h.mn<15?'#ff9a7a':null);
  CHR.soloY=ty+50-lh*2+4;if(solo){const ly0=ly;lx=tx+tw*0.56;lw=tw*0.44;ly=CHR.soloY;CHR.soloL=[ly0]}
  const K=art==='breit'?h.kt.map(chKarteIco).filter(Boolean):[];if(K.length&&ly<=y+hgt-4){let ox=lx;chFont(g,fs,CF.sym);g.fillStyle=CC.ember;g.textAlign='left';g.fillText('✧',lx,ly);ox+=fs+6;
   if(art==='breit'){ox+=chText(g,'Schicksal ',ox,ly,lw-(ox-lx),fs-1,CF.body,CC.ash,{wt:700,k:'rl'})+4}
   const one=K.length===1&&art==='breit';for(const d of K){chFont(g,fs+1,CF.sym);const iw=g.measureText(d.ic).width+5;if(ox+iw>lx+lw)break;g.fillStyle=d.c;g.fillText(d.ic,ox,ly);chBox(ox,ly-fs*0.8,iw-5,fs,'ki');ox+=iw;if(one){chText(g,d.n,ox+2,ly,lx+lw-ox-2,fs-1,CF.body,CC.vellum,{wt:500,k:'kn'})}}ly+=lh}
  /* Einzelheld: zweite Spalte mit Kampfwerten */
- if(solo){if(K.length)CHR.soloY=ly;lx=tx+tw*0.56;lw=tw*0.44;ly=CHR.soloY;row('✷','Auf einmal',(h.mu||0)+' Gegner');row('»','Längste Serie',(h.se||0)+' in Folge');row('♛','Eliten',String(h.el||0))}}
+ if(solo){if(K.length)CHR.soloY=ly;lx=tx+tw*0.56;lw=tw*0.44;ly=CHR.soloY;const kz=tw<480;row('✷',kz?'Zugleich':'Auf einmal',(h.mu||0)+' Gegner');row('»',kz?'Serie':'Längste Serie',(h.se||0)+' in Folge');row('♛','Eliten',String(h.el||0))}}
 
 /* ---------- Ansicht (Ebene über dem Endbildschirm bzw. im Lager) ---------- */
 (()=>{try{const st=document.createElement('style');st.textContent=`
@@ -30998,13 +30998,13 @@ function chClose(still){const V=CHR.view;CHR.view=null;try{scr.querySelectorAll(
  if(!still){try{PADNAV.dirty=true;PADNAV.el=null;PADNAV.sig=''}catch(e){}if(V&&V.mode==='liste')try{const b=scr.querySelector('[data-chrl="'+V.R.id+'"]');if(b&&PADNAV.on)padMark(b,true)}catch(e){}}}
 /* Größe: logische Seite LH=520, Breite nach Platz (760…1100), Maßstab nach Höhe/Breite, scharf in Gerätepixeln */
 const CH_LH=520;
-function chMass(aw,ah){const asp=aw/Math.max(1,ah);const LW=Math.round(Math.max(760,Math.min(1100,CH_LH*asp)));const sc=Math.min(2.4,aw/LW,ah/CH_LH);return{LW,LH:CH_LH,sc}}
+function chMass(aw,ah,eng){const asp=aw/Math.max(1,ah);const LW=Math.round(Math.max(eng&&asp<0.8?650:760,Math.min(1100,CH_LH*asp)));const sc=Math.min(2.4,aw/LW,ah/CH_LH);return{LW,LH:CH_LH,sc}}
 function chZeichneView(){const V=CHR.view;if(!V||!V.el||!V.el.isConnected){if(V&&V.el&&!V.el.isConnected)CHR.view=null;return}const cv=V.el.querySelector('canvas.chrCv'),bar=V.el.querySelector('.chrBar');if(!cv)return;
  /* Erzähler-Untertitel (heldensturm-erzaehler.js): kompakt neben der Knopfleiste; nur die Höhe über der Leiste hinaus freihalten */
  const vw0=window.innerWidth||800;try{const bw=bar?bar.getBoundingClientRect().width:260;const frei=vw0-bw-28,hoch=frei<260;/* schmal (Hochformat): Untertitel über die Knopfleiste in voller Breite statt als schmale Säule daneben */document.body.classList.toggle('chrErzHoch',hoch);document.body.style.setProperty('--chrErzW',(hoch?Math.min(640,vw0-16):Math.max(160,Math.min(640,frei)))+'px')}catch(e){}
  const E=chErzPlatz();V.el.classList.toggle('erzAn',E.s>0);const bh0=bar?bar.getBoundingClientRect().height:38;const extra=E.s?(document.body.classList.contains('chrErzHoch')?E.s+4:Math.max(0,E.s-(bh0+8))):0;
  V.el.style.paddingTop=E.t?(E.t+6)+'px':'';V.el.style.paddingBottom=(E.b||extra)?(Math.max(E.b,extra)+(E.b?6:2))+'px':'';
- const vw=vw0,vh=(window.innerHeight||600)-E.t-Math.max(E.b,extra),bh=bar?bh0+12:50;const M=chMass(vw-16,vh-bh-16);const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
+ const vw=vw0,vh=(window.innerHeight||600)-E.t-Math.max(E.b,extra),bh=bar?bh0+12:50;const M=chMass(vw-16,vh-bh-16,!!(V.R&&V.R.h&&V.R.h.length===1));/* Hochformat, ein Held: schmalere Tafel, dafür größere Schrift */const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
  const cw=Math.floor(M.LW*M.sc),ch=Math.floor(M.LH*M.sc);cv.style.width=cw+'px';cv.style.height=ch+'px';const pw=Math.round(cw*dpr),ph=Math.round(ch*dpr);if(cv.width!==pw||cv.height!==ph){cv.width=pw;cv.height=ph}
  const g=cv.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,pw,ph);g.setTransform(M.sc*dpr,0,0,M.sc*dpr,0,0);CHR.dbg=window.__chDbg?[]:null;try{chMalen(g,V.R,M.LW,M.LH)}catch(e){chErr(e)}V.M=M;V.dbg=CHR.dbg;CHR.dbg=null}
 addEventListener('resize',()=>{if(CHR.view)setTimeout(chZeichneView,30)});
