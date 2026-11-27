@@ -113,9 +113,9 @@
   /* welche Vorlage entspricht der aktuellen Belegung? (für die Anzeige) */
   inp.presetOf = part => { for (const id in PRESETS) { const p = PRESETS[id];
       const kOk = ACTIONS.every(a => JSON.stringify(inp.keys[a]) === JSON.stringify(p.keys[a]));
-      const pOk = Object.keys(PAD0).every(a => (inp.pad[a] ?? null) === (a in p.pad ? p.pad[a] : null)) && ACTIONS.every(a => (inp.pad2[a] ?? null) === ((p.pad2 || {})[a] ?? null));
+      const nn = v => (v == null ? null : v); /* Koordinator: ohne ?? – alte Engines (Chromium 77/Handheld) */ const pOk = Object.keys(PAD0).every(a => nn(inp.pad[a]) === (a in p.pad ? p.pad[a] : null)) && ACTIONS.every(a => nn(inp.pad2[a]) === nn((p.pad2 || {})[a]));
       if (part === "keys" ? kOk : part === "pad" ? pOk : kOk && pOk) return id; } return null; };
-  const getSlot = (kind, a, slot) => (kind === "key" ? (inp.keys[a] || [])[slot] || null : (slot ? inp.pad2[a] : inp.pad[a]) ?? null);
+  const getSlot = (kind, a, slot) => (kind === "key" ? (inp.keys[a] || [])[slot] || null : (function (v) { return v == null ? null : v; })(slot ? inp.pad2[a] : inp.pad[a]));
   const putSlot = (kind, a, slot, v) => { if (kind === "key") inp.keys[a][slot] = v; else if (slot) { if (v == null) delete inp.pad2[a]; else inp.pad2[a] = v; } else inp.pad[a] = v; };
   inp.getSlot = getSlot;
   /* wo liegt dieser Wert schon? → { action, slot } (außer am Platz selbst) */
