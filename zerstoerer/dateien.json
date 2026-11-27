@@ -9738,7 +9738,7 @@
 },
 "zerstoerer.html":{
 "groesse":81242,
-"sha256":"7036500a857361d6bf9b0ce2b317c32acaaba5e8016265b8dccaa3075f26b988"
+"sha256":"855b0eba7672685aefee426d2c1ab39a37f92ef3acd8d08a020798bce531a636"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":144780,
@@ -9873,8 +9873,8 @@
 "sha256":"5ebb1a5185cebd64abd9330e59c92f0f573ebd859fd5e6eba7eb7c3e4c4d4f30"
 },
 "zerstoerer/kern.js":{
-"groesse":67284,
-"sha256":"5b006250b871a650b75bf0b35565d4a5ad265dfda5e7d3f48634874eff834f2e"
+"groesse":69763,
+"sha256":"bbdb5d1037214575f9a46490c584fbbb73bbaee0818fb9c10b4628360e1fd94d"
 },
 "zerstoerer/klang.js":{
 "groesse":150338,
@@ -9885,8 +9885,8 @@
 "sha256":"1c1454c9c5ce399112f8c0d0149434ee0a98db5c4d6621b3aa401538885fe795"
 },
 "zerstoerer/lager.js":{
-"groesse":159497,
-"sha256":"2b7a9af240196ba9772b730e76735e69ee6090a81fefce9eb920aff9be1312a0"
+"groesse":165257,
+"sha256":"bea705ae32c059932de6d577128a224f52f6aaac5394a521937d57e2e599e671"
 },
 "zerstoerer/lagerwelt.js":{
 "groesse":45800,
@@ -9969,8 +9969,8 @@
 "sha256":"b2c31ee2c2f605d76773cc6acc18758ab1a27613488d8a90bd3129afa9124d47"
 },
 "zerstoerer/schmiede.js":{
-"groesse":61547,
-"sha256":"f2ffcb35ae2539389ebcaa1f67128cbb7141689a2e1355a32c0ccc124c592c8c"
+"groesse":61865,
+"sha256":"7503dcb733712edbb83ba0ccd7e5cec020b9dc10ff1a06d03c8ef81b7fcbd17d"
 },
 "zerstoerer/sicherung.js":{
 "groesse":17906,
@@ -10041,5 +10041,5 @@
 "sha256":"df0542ee684d5789758ae19d942444ead52fb2be7d26c59f6fc7916748f8bc34"
 }
 },
-"stand":176
+"stand":177
 }

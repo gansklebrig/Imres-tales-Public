@@ -1732,3 +1732,79 @@
   }
   setTimeout(wire, 0);
 })();
+
+/* W39 Lager: Erstbesuch für Neulinge – sanfte Orientierung in den ersten Lagerbesuchen.
+   1) Namensschilder (Name · Aufgabe) zu Füßen der Figuren, bis man sie angesprochen hat (höchstens die ersten 5 Besuche).
+   2) Dezenter Wegweiser „Zur Feste ➜“ am Tor, sobald eine Waffe in der Hand liegt.
+   3) Splitter-Hinweis: genug Seelensplitter für einen ersten Kauf und noch nie geschmiedet → Nundro leuchtet, eine Meldung (nach den Sprechblasen).
+   Speicher: Z.meta.w39lager { n: Besuche, sp: angesprochene Figuren, tip: Splitter-Hinweise }. Kein Blau. */
+(function () {
+  "use strict";
+  const Z = window.Z; if (!Z) return;
+  const T = Z.TILE, L = v => Z.L(v);
+  const FB = "'Alegreya Sans','Trebuchet MS',sans-serif";
+  const MAXN = 5;
+  const ROLLE = {
+    B: ["Barradin", ["Fundbuch", "Ledger"]], A: ["Nundro", ["Schmiede · ◆", "Forge · ◆"]], G: ["Friedrich", ["Waldläufer · Aufträge", "Ranger · tasks"]],
+    E: ["Echo", ["Druidin · Aufträge", "Druid · tasks"]], C: [["Schädelaltar", "Skull altar"], null], F: [["Lagerfeuer", "Campfire"], ["Geschichte", "Story"]]
+  };
+  function S() { const m = Z.meta; if (!m) return null; let s = m.w39lager; if (!s || typeof s !== "object" || Array.isArray(s)) s = m.w39lager = {}; s.n = +s.n || 0; if (!s.sp || typeof s.sp !== "object") s.sp = {}; s.tip = +s.tip || 0; return s; }
+  const gast = () => !!(Z.online && Z.online.S && Z.online.S.role === "guest");
+  const lo = () => !!(Z.gq && Z.gq.level === 0);
+  const nieGeschmiedet = () => { const m = Z.meta || {}; const any = o => o && Object.keys(o).some(k => (o[k] | 0) > 0); return !any(m.wlvl) && !any(m.up) && !any(m.luck); };
+  const ersterKauf = () => { const m = Z.meta || {}; return m.found && Object.keys(m.found).length ? 18 : 40; }; /* billigstes Schärfen (ui.js lvlCost) bzw. Zähigkeit I */
+  const splitterTipp = () => { const m = Z.meta || {}; return (m.shards | 0) >= ersterKauf() && nieGeschmiedet(); };
+  let lastLv = null, tipT = 0;
+  function besuch(lv) {
+    const s = S(); if (!s) return; s.n++; try { Z.saveMeta && Z.saveMeta(); } catch (_) {}
+    if (gast() || s.tip >= 3 || !splitterTipp()) return;
+    /* nach Rückkehr-Spruch (1,4 s) und Friedrichs Ständer-Hinweis: erst wenn keine Sprechblase mehr steht */
+    let n = 0; clearTimeout(tipT);
+    const probe = () => {
+      if (Z.level !== lv || !lv.hub) return; const b = document.getElementById("bubble");
+      if (((b && !b.hidden) || (Z.ui && Z.ui.modalOpen)) && n++ < 30) { tipT = setTimeout(probe, 700); return; }
+      if (!splitterTipp()) return; const sv = S(); sv.tip++; try { Z.saveMeta && Z.saveMeta(); } catch (_) {}
+      const m = Z.meta, html = "<b>" + (m.shards | 0) + " " + L(["Seelensplitter", "soul shards"]) + "</b> " + L(["im Lager – bei <b>Nundro</b> (Schmiede) machst du Ezekiel damit dauerhaft stärker.", "in camp – <b>Nundro</b> (forge) makes Ezekiel permanently stronger with them."]);
+      if (Z.ui && Z.ui.notify) Z.ui.notify(html, { prio: 2, art: "gold", icon: "◆", dauer: 6500, key: "w39splitter" });
+    };
+    tipT = setTimeout(probe, 3200);
+  }
+  function plate(c, x, y, a, b, hi, al) {
+    c.save(); c.globalAlpha = al; c.textAlign = "center"; c.textBaseline = "middle";
+    c.font = "700 5.4px " + FB; const w1 = c.measureText(a).width; let w2 = 0; if (b) { c.font = "500 4.4px " + FB; w2 = c.measureText(b).width; }
+    const w = Math.max(w1, w2) + 7, h = b ? 12.5 : 8;
+    if (hi && !lo()) { c.globalCompositeOperation = "lighter"; Z.draw.glow(c, x, y + h / 2, 16, "rgba(255,190,80,.35)"); c.globalCompositeOperation = "source-over"; }
+    c.fillStyle = "rgba(30,16,10,.82)"; c.fillRect(x - w / 2 - 0.6, y - 0.6, w + 1.2, h + 1.2);
+    c.fillStyle = hi ? "#f0d090" : "#e6d2a8"; c.fillRect(x - w / 2, y, w, h);
+    c.fillStyle = "#3a1c0c"; c.font = "700 5.4px " + FB; c.fillText(a, x, y + 4.2);
+    if (b) { c.fillStyle = hi ? "#8a2a10" : "#6a4022"; c.font = "500 4.4px " + FB; c.fillText(b, x, y + 9.4); }
+    c.restore();
+  }
+  function draw(c, t) {
+    const lv = Z.level; if (!lv || !lv.hub) { lastLv = lv; return; }
+    if (lv !== lastLv) { lastLv = lv; besuch(lv); }
+    const s = S(); if (!s || s.n > MAXN || gast()) return;
+    const P = Z.player, pcx = P ? P.x + P.w / 2 : -1e9;
+    for (const id in ROLLE) {
+      if (s.sp[id]) continue;
+      const p = (lv.props || []).find(q => q.id === id); if (!p || p.hidden) continue;
+      const x = p.x * T + 8, y = (p.y + 1) * T + 3, r = ROLLE[id];
+      const hi = id === "A" && splitterTipp();
+      const near = Math.abs(pcx - x) < 40; /* direkt davor steht ohnehin die Benutzen-Anzeige */
+      plate(c, x, y, typeof r[0] === "string" ? r[0] : L(r[0]), r[1] ? L(r[1]) : "", hi, near ? 0.45 : 0.92);
+    }
+    /* Wegweiser zum Tor, sobald eine Waffe in der Hand liegt */
+    const g = (lv.doors || []).find(d => d.kind === "gate");
+    if (g && P && P.slots && (P.slots.a1 || P.slots.a2) && ((Z.meta && Z.meta.runs) | 0) < 4) {
+      const x = g.x * T + 8, y = (g.y + 1) * T - 52 + Math.sin(t * 2.4) * 1.5;
+      plate(c, x, y, L(["Zur Feste ➜", "To the keep ➜"]), "", true, 0.75 + 0.2 * Math.sin(t * 3));
+    }
+  }
+  function wire() {
+    const wp0 = Z.drawWorldProps; let err = 0;
+    Z.drawWorldProps = function (c, t) { const r = wp0 ? wp0.apply(this, arguments) : undefined; try { draw(c, t); } catch (e) { if (!err) { err = 1; console.error("W39 Lager", e); } } return r; };
+    const u = Z.ui; if (u && u.npc && !u.npc._w39) { const n0 = u.npc; u.npc = function (id) { try { const s = S(); if (s && ROLLE[id]) s.sp[id] = 1; } catch (_) {} return n0.apply(this, arguments); }; u.npc._w39 = true; }
+  }
+  setTimeout(() => setTimeout(wire, 0), 0); /* nach auftraege.js/lager.js-Hüllen */
+  Z.w39lager = { S, splitterTipp, ersterKauf };
+})();

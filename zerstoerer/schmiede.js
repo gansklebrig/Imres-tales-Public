@@ -573,14 +573,17 @@
   };
   function hubHints(lv) {
     const M = Z.meta;
-    if ((M.rackVisits || 0) <= 3) later(() => {
-      const P = Z.player; if (!Z.level || !Z.level.hub || !P || P.slots.a1 || P.slots.a2) return;
+    let warte = 0; /* W39 Lager: nicht über den Rückkehr-Spruch (spiel.js backToCamp, 1,4 s + 4,8 s) sprechen – erst wenn die Blase frei ist */
+    const hinweis = () => {
+      const P = Z.player; if (!Z.level || Z.level !== lv || !Z.level.hub || !P || P.slots.a1 || P.slots.a2) return;
+      const bb = document.getElementById("bubble"); if (bb && !bb.hidden && warte++ < 12) { later(hinweis, 600); return; }
       const g = Z.level.props.find(p => p.id === "G");
       const k = inp.device === "touch" ? "✋" : inp.label("use");
       /* die Taste steht auf dem Schild am Ständer – Friedrich zeigt nur hin */
       const sign = Z.schilder && Z.schilder.hat("staender");
       ui.say && g && ui.say(g.x * T + 8, g.y * T - 22, "Friedrich", sign ? L(["Der Waffenständer da drüben – nimm dir zwei Waffen mit. Lies das Schild.", "The weapon rack over there – take two weapons. Read the sign."]) : L(["Der Waffenständer da drüben – nimm dir zwei Waffen mit. Taste „" + k + "“ zum Aufheben.", "The weapon rack over there – take two weapons. Press '" + k + "' to pick up."]), 5200);
-    }, 2200);
+    };
+    if ((M.rackVisits || 0) <= 3) later(hinweis, 2200);
   }
 
   /* ======================= ZEICHNEN ======================= */

@@ -372,10 +372,37 @@
     if (A.buf[path] || A.loading[path]) return A.loading[path] || Promise.resolve(A.buf[path]);
     if (!A.ctx) return Promise.resolve(null);
     const p = fetch(path).then(r => (r.ok ? r.arrayBuffer() : Promise.reject(r.status))).then(ab => new Promise((res, rej) => A.ctx.decodeAudioData(ab, res, rej)))
-      .then(b => { A.buf[path] = b; return b; }).catch(() => { A.buf[path] = null; return null; });
+      .then(b => { A.buf[path] = b; try { b._w39l = performance.now(); } catch (_) {} return b; }).catch(() => { A.buf[path] = null; return null; }); /* W39 Dauer: Ladezeit für trimBuf */
     A.loading[path] = p; return p;
   };
   A.loadAll = list => Promise.all(list.map(A.load));
+  /* W39 Dauer: Dekodierte Klänge wurden nie freigegeben – nach 4 min Bot-Lauf lagen 976 Puffer mit 410 MB im Speicher
+     (davon 148 MB Kulissen-Schleifen Kulissen-Ordner, Dateien a_…, je bis 15 MB), der JS-Heap wuchs im 60-min-Dauertest stetig bis ~220 MB.
+     Jetzt: jede Wiedergabe stempelt ihren Puffer (Setter von AudioBufferSourceNode.buffer); alle 20 s werden über dem Budget
+     große Puffer (≥ 256 KB), die seit 90 s nicht gespielt wurden, keine laufende Schleife und kein Spielgeräusch (A.SFX) sind, entfernt
+     (älteste zuerst, bis 80 % des Budgets). Wer sie wieder braucht, lädt sie wie bisher nach (Muster „b === undefined → A.load“). */
+  (() => {
+    const P = window.AudioBufferSourceNode && AudioBufferSourceNode.prototype, d = P && Object.getOwnPropertyDescriptor(P, "buffer");
+    if (d && d.set && d.get && d.configurable) Object.defineProperty(P, "buffer", { configurable: true, enumerable: d.enumerable, get: d.get, set: function (b) { if (b) try { b._w39t = performance.now(); } catch (_) {} d.set.call(this, b); } });
+  })();
+  A.bufBudget = () => (Z.gq && Z.gq.lean ? (Z.gq.mini ? 48 : 80) : 160) * 1048576;
+  A.bufStat = () => { let by = 0, n = 0; for (const k in A.buf) { const b = A.buf[k]; if (b) { by += b.length * b.numberOfChannels * 4; n++; } } return { n, MB: Math.round(by / 1048576) }; };
+  A.trimBuf = () => {
+    if (!A.ctx) return 0;
+    const now = performance.now(), keep = new Set(), big = []; let tot = 0;
+    for (const id in A.loops) if (A.loops[id]) keep.add(A.loops[id].path);
+    if (!A._sfxSet) { A._sfxSet = new Set(); for (const k in A.SFX) for (const p of A.SFX[k] || []) A._sfxSet.add(p); } /* Spielgeräusche bleiben immer (sonst fiele der erste Ton nach dem Entfernen aus) */
+    for (const k in A.buf) {
+      const b = A.buf[k]; if (!b) continue; const by = b.length * b.numberOfChannels * 4; tot += by;
+      const t = Math.max(b._w39t || 0, b._w39l || 0);
+      if (by >= 262144 && !keep.has(k) && !A._sfxSet.has(k) && now - t > 90000) big.push([k, by, t]);
+    }
+    const max = A.bufBudget(); if (tot <= max) return 0;
+    big.sort((x, y) => x[2] - y[2]); let n = 0;
+    for (const [k, by] of big) { if (tot <= max * 0.8) break; delete A.buf[k]; delete A.loading[k]; tot -= by; n++; }
+    A.trimmed = (A.trimmed || 0) + n; return n;
+  };
+  setInterval(() => { try { A.trimBuf(); } catch (_) {} }, 20000);
   /* Benannte Geräusche: jede Rolle hat mehrere echte Aufnahmen; ausgewählt wird zufällig. */
   const K = n => "klang/" + n + ".mp3", M = n => "amb/" + n + ".mp3";
   const rng = (base, a, b) => { const o = []; for (let i = a; i <= b; i++) o.push(M(base + i)); return o; };
