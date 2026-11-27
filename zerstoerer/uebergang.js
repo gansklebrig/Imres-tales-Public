@@ -389,7 +389,7 @@
       const AR = Z.ARENAS[id] || {}, fin = !!AR.final;
       return { kind: "arena", chapter: (fin ? L(["Letztes Kapitel", "Final Chapter"]) : L(["Kapitel ", "Chapter "]) + roman(n)), title: Z.areaName(id), sub: fin ? L(["Am Ende eines Fadens", "At the end of a thread"]) : L(["Ein Kampf, von dem man noch erzählen wird", "A fight they will tell of"]), story: L((Z.BIOMES[AR.base] || {}).story || ["", ""]), hold: 0.8, pose: "stand", pageNo: n * 2 + 1 };
     }
-    return { kind: "area", chapter: L(["Kapitel ", "Chapter "]) + roman(n), title: L(B.name), sub: L(B.sub || ["", ""]), story: B.story ? L(B.story) : "", hold: 0.75, pose: "stand", pageNo: n * 2 + 1 };
+    return { kind: "area", chapter: L(["Kapitel ", "Chapter "]) + roman(n), title: L(B.name), sub: L(B.sub || ["", ""]), story: B.story ? L(B.story) : "", hold: 0.75, pose: "stand", pageNo: n * 2 + 1, lines: Z.abw && Z.abw.pageLines ? Z.abw.pageLines(lv) : undefined /* W38 Abwechslung: Gebietslage */ };
   }
   function grabPage() {
     try {
