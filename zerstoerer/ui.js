@@ -1869,6 +1869,7 @@
     if (id === "K") {
       if (lv.fountainUsed) return ui.toast(L(["Der Brunnen ist leer.", "The fountain is dry."]));
       lv.fountainUsed = true; P.potions = P.potMax; Z.healPlayer(P.hpMax * 0.25); A.play("splash", { vol: 0.6 }); A.play("heal");
+      { const P2 = Z.koop && Z.koop.p2; if (P2 && !P2.down) P2.hp = Math.min(P2.hpMax, P2.hp + Math.round(P2.hpMax * 0.25)); } /* W39 P2: der Brunnen heilt auch Spieler 2 (Tränke sind ohnehin gemeinsam) */
       const s = lv.props.find(q => q.id === "K");
       return ui.notify(L(["Heiltränke aufgefüllt", "Healing potions refilled"]), s ? { ort: "welt", x: s.x * T + 8, y: s.y * T - 8, prio: 3, art: "gold" } : { prio: 3 });
     }

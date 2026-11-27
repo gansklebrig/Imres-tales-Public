@@ -149,6 +149,17 @@
       K.held[a] = h; K.prev[a] = h; K.kTap[a] = false;
     }
   }
+  /* W39 P2: lokale Fenster auch mit dem Gerät von Spieler 2 bedienen (Steuerkreuz/Stick wählt, Sprung/Benutzen/Waffe 1 bestätigt,
+     Rolle schließt) – vorher bediente nur Spieler 1 die Fenster, auch die von Spieler 2 geöffneten (Schrein, Gespräche, Fluchtruhe) */
+  const menuP2 = () => {
+    if (!K.p2 || !Z.ui || !Z.ui.modalOpen || !K.src || K.src.kind === "net" || K.choose) return;
+    const pr = K.pressed, m = document.getElementById("modal");
+    const d = pr.up ? [0, -1] : pr.down ? [0, 1] : pr.left ? [-1, 0] : pr.right ? [1, 0] : null;
+    if (d && Z.ui.moveDir) Z.ui.moveDir(d[0], d[1]);
+    else if (pr.jump || pr.use || pr.a1) { const f = document.activeElement; if (f && m && m.contains(f) && f !== m && f.click) f.click(); else if (Z.ui.ensureFocus) Z.ui.ensureFocus(); }
+    else if (pr.roll && !Z.ui.noEsc) Z.ui.close();
+    for (const a of ["up", "down", "left", "right", "jump", "use", "a1", "roll"]) pr[a] = false;
+  };
   K.poll = pollP2Pad;
   /* ===== Schnittstelle für W32 Online =====
      K.setInputSource(fn): fn() liefert je Bild { left, right, up, down, jump, roll, a1, a2, s1, s2, use, potion, pause } (bool, „gehalten“).
@@ -188,7 +199,7 @@
   inp.pollPad = function () {
     const r = pp0.apply(this, arguments);
     try {
-      pollP2Pad();
+      pollP2Pad(); menuP2(); /* W39 P2 */
       /* Ezekiel am Boden: keine Spielaktionen (Menü, Karte, Pause bleiben) */
       const P = Z.player; if (P && P.koopDown) for (const a of ["left", "right", "up", "down", "jump", "roll", "a1", "a2", "s1", "s2", "use", "potion"]) { inp.held[a] = false; inp.pressed[a] = false; }
       /* Spieler 2 drückt Pause: Pausemenü für beide; lange halten = Gruppe verlassen */
@@ -539,9 +550,11 @@
   /* ======================= FÄHIGKEITEN ======================= */
   function wmul(P) {
     const it = P.waffe, tier = Math.max(0, (Z.run && Z.run.tier) || 0);
-    if (!it) return Z.BAL.itemMul(tier) * 0.95;
-    return Z.BAL.itemMul(Math.max(it.tier | 0, tier - 1)) * (1 + 0.08 * (it.rar | 0)) * (1 + 0.08 * Z.metaLvl(it.id));
+    if (!it) return Z.BAL.itemMul(tier) * 0.95 * segenEcho();
+    return Z.BAL.itemMul(Math.max(it.tier | 0, tier - 1)) * (1 + 0.08 * (it.rar | 0)) * (1 + 0.08 * Z.metaLvl(it.id)) * (1 + 0.15 * Math.max(0, Math.min(5, it.plus | 0))) * segenEcho(); /* W39 P2: Schmiedestufe (schmiede.js) */
   }
+  /* W39 P2: Segen wirken aufs Team – Spieler 2 schlägt je Segen Ezekiels 5 % stärker (höchstens 3 Segen = +15 %) */
+  function segenEcho() { const Q = Z.player, n = Q && Array.isArray(Q.bless) ? Math.min(3, Q.bless.length) : 0; return 1 + 0.05 * n; }
   K.wmul = wmul;
   function meleeHit(P, act, dmg, o) {
     const rw = o.w || 26, rh = o.h || 18;
@@ -750,13 +763,40 @@
     /* sonst: Tür, Truhe, Tor, Händler … über die normale Benutzen-Logik (spiel.js) */
     if (Z._koopFind && Z._koopInteract && !(Z.ui && (Z.ui.modalOpen || Z.ui.choiceActive))) {
       const sv = Z.player; let tg = null;
-      Z.player = P; try { tg = Z._koopFind(); } catch (e) { console.error("koop", e); } finally { Z.player = sv; }
-      if (tg && tg.type === "obj" && tg.o && tg.o.mutSchrein && Z.mut && Z.mut.oeffne) { /* W27 Koop: Wandlungsschrein (W29) – Spieler 2 wählt für sich */
+      Z.player = P; try { tg = Z._koopFind(); if (tg && Z.ui.proxyOf) tg = Z.ui.proxyOf(tg); /* W39 P2: Station → nächstes Stück der Auslage (vom Standort von Spieler 2) */ } catch (e) { console.error("koop", e); } finally { Z.player = sv; }
+      if (tg && tg.type === "obj" && tg.o && tg.o.auslage && p2Auslage(P, tg.o)) { /* W39 P2: Händlerware für Spieler 2 selbst */ }
+      else if (tg && tg.type === "obj" && tg.o && tg.o.mutSchrein && Z.mut && Z.mut.oeffne) { /* W27 Koop: Wandlungsschrein (W29) – Spieler 2 wählt für sich */
         try { Z.mut.oeffne(P); } catch (e) { console.error("koop mut", e); }
       } else if (tg && !(tg.type === "pickup" && tg.p && tg.p.kind === "item")) {
         try { Z._koopInteract(tg); } catch (e) { console.error("koop", e); }
       }
     }
+  }
+  /* W39 P2: Händler-Auslage – Spieler 2 kauft für sich aus dem gemeinsamen Beutel (Gold ist im Koop schon gemeinsam: P2 sammelt in
+     Ezekiels Beutel). Waffen landen in seiner Hand (alte fällt zu Boden), Pilzbraten heilt ihn; Fähigkeiten/Schilde trägt nur Ezekiel.
+     Segenskugeln und „Fluch brechen“ bleiben Team-Sachen über Ezekiel (normale Logik). Online rechnet das der Gastgeber (p2Use läuft dort). */
+  function p2Auslage(P, e) {
+    const d = e.d, g = e.g, Q = Z.player, say = (t, col) => { FX.text(P.x + P.w / 2, P.y - 14, t, col || "#c8b8a8"); };
+    if (!d || !g || !Q) return false;
+    if (d.weg || g.zu) return true;
+    const pr = d.preis != null ? d.preis : 0;
+    if (d.art === "ware" && d.it) {
+      const it = d.it, def = Z.itemDef(it); if (!def) return true;
+      if (it.type === "skill" || def.kind === "shield") { say(L(["Das trägt nur Ezekiel.", "Only Ezekiel can carry that."])); A.play("ui", { vol: 0.3, rate: 0.8 }); return true; }
+      if ((Q.gold | 0) < pr) { say(L(["Nicht genug Gold.", "Not enough gold."]), "#ff9a7a"); A.play("ui", { vol: 0.3, rate: 0.7 }); return true; }
+      Q.gold -= pr; it.sold = true; d.weg = true; if (g.o && g.o.einmal) g.zu = true; A.play("coin", { vol: 0.6 });
+      const p = Z.spawnPickup("item", e.x, e.y, { it: Object.assign({}, it, { uid: (it.uid | 0) + 100000 }), vx: 0, vy: 0, float: true });
+      if (p) takeItem(P, p);
+      K.stats && (K.stats.kauf = (K.stats.kauf | 0) + 1);
+      return true;
+    }
+    if (d.art === "ware" && d.icon === "braten") {
+      if ((Q.gold | 0) < pr) { say(L(["Nicht genug Gold.", "Not enough gold."]), "#ff9a7a"); A.play("ui", { vol: 0.3, rate: 0.7 }); return true; }
+      if (P.hp >= P.hpMax) { say(L(["Satt und heil.", "Full and healthy."])); return true; }
+      Q.gold -= pr; d.weg = true; const n = Math.round(P.hpMax * 0.6); P.hp = Math.min(P.hpMax, P.hp + n); A.play("heal"); say("+" + n, "#e8c890");
+      return true;
+    }
+    return false;
   }
   function takeItem(P, p) {
     const it = p.it, d = Z.itemDef(it);

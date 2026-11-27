@@ -205,9 +205,24 @@
     anvilNow = a; anim = null;
     renderAnvil();
   }
+  /* W39 P2: Spieler 2 (lokal oder online) schmiedet seine Waffe am selben Amboss – aus dem gemeinsamen Beutel, mit den Ambossschlägen
+     des Teams; +15 % je Stufe wirken über koop.js wmul. Runen-Gravuren wirken nur auf Ezekiels Treffer → bei Spieler 2 keine Gravurwahl. */
+  const p2Waffe = () => { const k = Z.koop, P = k && k.p2; return P && !P.down && P.waffe && isWeapon(P.waffe) ? P.waffe : null; };
+  const handIt = s => (s === "p2" ? p2Waffe() : Z.player.slots[s]);
+  /* W39 P2 online: Schnittstelle für online.js (Gastgeber rechnet, Gast wählt nur) */
+  Z.schmiede = {
+    MAXP, p2Waffe, kosten: it => costOf(it),
+    schlagP2(a) {
+      const it = p2Waffe(), P = Z.player; if (!it || !a || !P || a.used >= a.charges || (it.plus || 0) >= MAXP) return false;
+      const c = costOf(it); if (P.gold < c.gold || (P.glut || 0) < c.glut) return false;
+      P.gold -= c.gold; P.glut -= c.glut; a.used++; it.plus = (it.plus || 0) + 1; Z.stats.upgrades = (Z.stats.upgrades || 0) + 1;
+      A.play("anvil", { vol: 0.6 }); const Q = Z.koop.p2; FX.text(Q.x + Q.w / 2, Q.y - 16, Z.itemTitle(it), Z.plusCol(it.plus), true);
+      return true;
+    }
+  };
   function handRow(s) {
-    const P = Z.player, it = P.slots[s];
-    const head = '<div class="gb-hand"><div class="gb-kopf">' + keyHint(s) + " " + (s === "a1" ? L(["Hand 1", "Hand 1"]) : L(["Hand 2", "Hand 2"])) + "</div>";
+    const P = Z.player, it = handIt(s);
+    const head = '<div class="gb-hand"><div class="gb-kopf">' + (s === "p2" ? "👥 " + esc((Z.koop && Z.koop.CH && Z.koop.p2 && Z.koop.CH[Z.koop.p2.ch] && Z.koop.CH[Z.koop.p2.ch].n) || L(["Spieler 2", "Player 2"])) : keyHint(s) + " " + (s === "a1" ? L(["Hand 1", "Hand 1"]) : L(["Hand 2", "Hand 2"]))) + "</div>";
     if (!it) return head + '<p class="hinweis">' + L(["leer", "empty"]) + "</p></div>";
     const d = Z.itemDef(it), p = it.plus || 0;
     if (!isWeapon(it)) return head + "<p>" + esc(L(d.n)) + "</p></div>";
@@ -219,7 +234,7 @@
     const rows = now.map((r, i) => "<tr><th>" + esc(r[0]) + "</th><td>" + esc(r[1]) + '</td><td class="pf">→</td><td class="neu">' + esc(nx[i][1]) + "</td></tr>").join("");
     const runeNote = RUNE_AT.includes(p + 1) ? '<p class="gb-rune">ᚱ ' + L(["Bei +" + (p + 1) + " wählst du eine Runen-Gravur (1 aus 3).", "At +" + (p + 1) + " you choose a rune engraving (1 of 3)."]) + "</p>" : "";
     return head + name + pips + '<table class="werte">' + rows + "</table>" + runeNote +
-      '<button data-act="smForge" data-arg="' + s + '" data-hand="' + s + '" data-hotkey="' + s + '"' + (ok ? "" : " disabled") + ">" + keyHint(s) + " " + L(["Aufwerten auf +", "Upgrade to +"]) + (p + 1) + ' <small class="kosten"><span class="' + (P.gold >= c.gold ? "" : "fehlt") + '">' + c.gold + ' ●</span> <span class="' + ((P.glut || 0) >= c.glut ? "" : "fehlt") + '">' + c.glut + " ✦</span></small></button></div>";
+      '<button data-act="smForge" data-arg="' + s + '" data-hand="' + s + '"' + (s === "p2" ? "" : ' data-hotkey="' + s + '"') + (ok ? "" : " disabled") + ">" + (s === "p2" ? "" : keyHint(s)) + " " + L(["Aufwerten auf +", "Upgrade to +"]) + (p + 1) + ' <small class="kosten"><span class="' + (P.gold >= c.gold ? "" : "fehlt") + '">' + c.gold + ' ●</span> <span class="' + ((P.glut || 0) >= c.glut ? "" : "fehlt") + '">' + c.glut + " ✦</span></small></button></div>";
   }
   /* W9 R19 „Umschmieden“: die Hälfte des Plus (abgerundet) einer Waffe geht auf die andere über – die alte Waffe fällt dabei auf +0
      (Runen bleiben, wo sie sind). Kostet einen Ambossschlag, kein Gold, keine Glut. Hin und her lohnt nicht: jeder Schritt halbiert. */
@@ -249,7 +264,7 @@
     const left = a.charges - a.used;
     const html = '<div class="glutamboss"><h2>' + L(["Glutamboss", "Ember Anvil"]) + ' <span class="bank"><span class="gld">' + U.fmt(P.gold) + ' ●</span> <span class="glt">' + (P.glut || 0) + " ✦ " + L(["Glut", "Embers"]) + '</span></span></h2><canvas class="gb-bild" width="640" height="220"></canvas>' +
       '<p class="hinweis">' + (note || L(["Gold und Schmiedeglut machen den Stahl stärker: +15 % Schaden je Stufe, bis +5. Dieser Amboss hält noch ", "Gold and forge embers make steel stronger: +15% damage per level, up to +5. This anvil can take "]) + left + L([left === 1 ? " Schlag aus." : " Schläge aus.", left === 1 ? " more strike." : " more strikes."])) + "</p>" +
-      '<div class="gb-haende">' + handRow("a1") + handRow("a2") + '</div>' + umRow() + '<div class="knoepfe"><button data-act="close" autofocus>' + L(["Fertig", "Done"]) + "</button></div></div>";
+      '<div class="gb-haende">' + handRow("a1") + handRow("a2") + (p2Waffe() ? handRow("p2") : "") + '</div>' + umRow() + '<div class="knoepfe"><button data-act="close" autofocus>' + L(["Fertig", "Done"]) + "</button></div></div>";
     if (ui.modalOpen) { ui.onClose = null; ui.close(); }
     ui.open(html, { cls: "breit", onClose: () => { cancelAnimationFrame(raf); safeFinish(); anvilNow = null; anim = null; } });
     const first = document.querySelector('#modal [data-act="smForge"]:not([disabled])'); if (first) setTimeout(() => first.focus(), 30);
@@ -257,7 +272,7 @@
   }
   ui.actions.smForge = s => {
     const P = Z.player, a = anvilNow; if (!a || anim) return;
-    const it = P.slots[s]; if (!isWeapon(it) || (it.plus || 0) >= MAXP || a.used >= a.charges) return;
+    const it = handIt(s); if (!isWeapon(it) || (it.plus || 0) >= MAXP || a.used >= a.charges) return; /* W39 P2: auch Waffe von Spieler 2 */
     const c = costOf(it); if (P.gold < c.gold || (P.glut || 0) < c.glut) { A.play("ui", { vol: 0.3, rate: 0.6 }); return; }
     P.gold -= c.gold; P.glut -= c.glut; a.used++;
     const before = statLines(it, it.plus || 0);
@@ -270,13 +285,13 @@
   /* Fenster wird mitten in Vorführung/Runenwahl geschlossen: nichts geht verloren (Stufe kommt, Rune wird zufällig gewählt) */
   function safeFinish() {
     const an = anim;
-    if (an && !an.done) { an.done = true; an.it.plus = an.to; if (RUNE_AT.includes(an.to)) { const r = pickRunes(an.it, 1); if (r.length) { an.it.runes = (an.it.runes || []).concat(r); Z.toast && Z.toast(L(["Die Rune wählte sich selbst: ", "The rune chose itself: "]) + esc(L(Z.RUNES[r[0]].n)), 2600); } } }
+    if (an && !an.done) { an.done = true; an.it.plus = an.to; if (RUNE_AT.includes(an.to) && an.slot !== "p2") { const r = pickRunes(an.it, 1); if (r.length) { an.it.runes = (an.it.runes || []).concat(r); Z.toast && Z.toast(L(["Die Rune wählte sich selbst: ", "The rune chose itself: "]) + esc(L(Z.RUNES[r[0]].n)), 2600); } } }
     else if (runeCtx) { const c = runeCtx; runeCtx = null; c.it.runes = (c.it.runes || []).concat([c.opts[0]]); Z.toast && Z.toast(L(["Die Rune wählte sich selbst: ", "The rune chose itself: "]) + esc(L(Z.RUNES[c.opts[0]].n)), 2600); }
   }
   function finishForge() {
     const an = anim; if (!an || an.done) return; an.done = true; ui.noEsc = false;
     const it = an.it; it.plus = an.to;
-    if (RUNE_AT.includes(it.plus)) return runeChoice(it, an);
+    if (RUNE_AT.includes(it.plus) && an.slot !== "p2") return runeChoice(it, an); /* W39 P2: keine Gravur für Spieler 2 */
     showResult(it, an);
   }
   function showResult(it, an, rune) {

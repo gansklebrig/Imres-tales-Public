@@ -9738,7 +9738,7 @@
 },
 "zerstoerer.html":{
 "groesse":81170,
-"sha256":"278f41f8eda9171bb520fc48dd568314654a5e08d63802df8153ed18b923c1eb"
+"sha256":"e5c56f8d2e22dab60e59a820adc5eff54a1a2e518159de72e110c2d7f46426f4"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":144658,
@@ -9877,8 +9877,8 @@
 "sha256":"c27802650b7c6a7013b49a27c91df7e4a2c9b8a50aad66d428f2f381ffd2975b"
 },
 "zerstoerer/koop.js":{
-"groesse":107848,
-"sha256":"c18a94706b45019b74b972a0a9912d642449e6fbe2d70337aa1a2ce42667d94e"
+"groesse":111451,
+"sha256":"32622db510a440cf07920530433a5a87b0caae5d05079866404a449a4a604da6"
 },
 "zerstoerer/lager.js":{
 "groesse":159427,
@@ -9917,8 +9917,8 @@
 "sha256":"7676a5fcbe9ba9acb7d6622564b5cd39f88e922bbfd51110db8984465c004bb9"
 },
 "zerstoerer/online.js":{
-"groesse":91329,
-"sha256":"46279836b5f2e15788dbe04d88d555cbfef91c41f56769a0ae467b1ac8c770ea"
+"groesse":97112,
+"sha256":"c515e87681db37b5e80915195fea6d1f17d143de67bdc138c831e1e718b77fd9"
 },
 "zerstoerer/optik2.js":{
 "groesse":55026,
@@ -9965,8 +9965,8 @@
 "sha256":"b2c31ee2c2f605d76773cc6acc18758ab1a27613488d8a90bd3129afa9124d47"
 },
 "zerstoerer/schmiede.js":{
-"groesse":60032,
-"sha256":"b4b86902ba969ef7e7a3fd4e6567df4ff744e94ff9c87ed26b8d4b0145a2a5dd"
+"groesse":61547,
+"sha256":"f2ffcb35ae2539389ebcaa1f67128cbb7141689a2e1355a32c0ccc124c592c8c"
 },
 "zerstoerer/sicherung.js":{
 "groesse":17906,
@@ -10001,8 +10001,8 @@
 "sha256":"8ca5a8e1ca2d794cd48dda6237968282ad30cad3da811ddae8bcb090e3301846"
 },
 "zerstoerer/ui.js":{
-"groesse":216899,
-"sha256":"98cbb53b0a1d87d66a34f0287326b377dc909f19cea14190218ab9b4baa45be4"
+"groesse":217106,
+"sha256":"44b725ba77d3db9d6c78ba1e76341fc6d77cf91b557c84916a3d5be0d6ac838c"
 },
 "zerstoerer/welt.js":{
 "groesse":239911,
@@ -10037,5 +10037,5 @@
 "sha256":"2239cd79f01c377c38cdcecf8d827774c46b23cf9e74f4481be6463ca0b129e0"
 }
 },
-"stand":171
+"stand":172
 }

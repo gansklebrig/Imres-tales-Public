@@ -391,7 +391,7 @@
     /* W32 Online: Wandlungsschrein (mutationen.js) – öffnet Spieler 2 über das Netz den Schrein, erscheint die Wahl beim GAST;
        der Gastgeber prüft die Antwort (nur angebotene Gabe, nur eigene zum Ersetzen) und trägt sie ein */
     if (Z.mut && Z.mut.oeffne) { const mo = Z.mut.oeffne; Z.mut.oeffne = function (Pw) { const k = K(); if (S.role === "host" && S.playing && S.link && k && Pw && Pw === k.p2 && k.src && k.src.kind === "net") return mutAnGast(Pw); return mo.apply(this, arguments); }; }
-    if (Z._koopInteract) { const ki = Z._koopInteract; Z._koopInteract = function (tg) { if (S.role === "host" && S.playing && Z.koop && Z.koop.src && Z.koop.src.kind === "net" && tg && (tg.type === "station" || tg.type === "npc")) { if (S.link) S.link.sendR({ t: "note", k: "station" }); return; } return ki.apply(this, arguments); }; }
+    if (Z._koopInteract) { const ki = Z._koopInteract; Z._koopInteract = function (tg) { if (S.role === "host" && S.playing && Z.koop && Z.koop.src && Z.koop.src.kind === "net" && tg && ((tg.type === "station" && !(tg.s && tg.s.id === "K")) || tg.type === "npc")) { if (tg.type === "npc" && npcGast(tg)) return; if (S.link) S.link.sendR({ t: "note", k: "station" }); return; } if (S.role === "host" && S.playing && S.link && Z.koop && Z.koop.src && Z.koop.src.kind === "net" && tg && tg.type === "obj" && tg.o && tg.o.anvil && Z.schmiede && Z.schmiede.p2Waffe()) return ambossAnGast(tg.o.anvil); /* W39 P2: Amboss für den Gast */ /* W39 P2: Brunnen darf auch der Gast nutzen; Gespräche siehe npcGast */ return ki.apply(this, arguments); }; }
     /* Schnappschüsse nach jedem Bild */
     const loop = () => { requestAnimationFrame(loop); try { hostFrame(); } catch (e) { console.warn("W32 host", e); } };
     requestAnimationFrame(loop);
@@ -448,8 +448,40 @@
       case "pong": return onPong(m);
       case "req": if (m.w === "full") { S.ack = -1; S.hist.clear(); return; } if (m.w === "tiles" && Z.level && Z.level.tiles && int(m.n, 0, 1e9, -1) === S.area) S.link.sendR({ t: "tiles", n: S.area, d: b64u(Z.level.tiles) }); return;
       case "mutw": return mutAntwort(m);
+      case "ambw": return ambossAntwort(m); /* W39 P2 */
       case "bye": return endSession(L(["Der Mitspieler hat das Spiel verlassen.", "The other player left."]));
     }
+  }
+  /* W39 P2: spricht der Online-Gast eine Lagerfigur an, sagt sie ihren Satz bei beiden (Sprechblase beim Gastgeber und beim Gast).
+     Fenster, die den Spielstand ändern (Schmiede, Fundbuch, Schädel, Geschichte), gehören zum Spielstand des Gastgebers und öffnen sich
+     nicht – der Gast bekommt dazu einen kurzen Hinweis. */
+  const NPCN = { B: "Barradin", G: "Friedrich", E: "Echo", A: "Nundro", R: "Rex", C: "" };
+  function npcGast(tg) {
+    const id = tg.s && tg.s.id, lv = Z.level; if (typeof id !== "string" || !lv || !lv.hub || !S.link) return false;
+    const lines = Z.CAMP_TALK && Z.CAMP_TALK[id], s = (lv.props || []).find(q => q.id === id);
+    if (lines && lines.length && s) {
+      const pair = Z.R.pick(lines); const de = txt(Array.isArray(pair) ? pair[0] : pair, 400), en = txt(Array.isArray(pair) ? pair[1] : pair, 400);
+      try { Z.ui.say(s.x * Z.TILE + 8, s.y * Z.TILE - 22, NPCN[id] || "", L([de, en]), 4600); } catch (e) { }
+      S.link.sendR({ t: "say", id, de, en });
+    }
+    if (id === "R") try { Z.audio.play("bark"); } catch (e) { }
+    if (id === "A" || id === "B" || id === "C" || id === "F") S.link.sendR({ t: "note", k: "meta" });
+    return true;
+  }
+  /* W39 P2 online: Glutamboss – Spieler 2 (Gast) schmiedet seine Waffe. Der Gastgeber schickt Stand und Kosten, der Gast wählt
+     „Aufwerten“ oder „Fertig“, der Gastgeber prüft (gleicher Amboss/Gebiet, Schläge übrig, Waffe unverändert, Gold/Glut reichen) und rechnet. */
+  function ambossAnGast(a) {
+    const SM = Z.schmiede, it = SM && SM.p2Waffe(), P = Z.player; if (!it || !P || !S.link) return;
+    if (a.used >= a.charges) { S.link.sendR({ t: "note", k: "amboss" }); return; }
+    const c = SM.kosten(it);
+    S.ambOffen = { a, lv: Z.level, it, plus: it.plus | 0 };
+    S.link.sendR({ t: "amb", w: it.id, rar: it.rar | 0, plus: it.plus | 0, max: SM.MAXP, gold: c.gold | 0, glut: c.glut | 0, hg: P.gold | 0, hgl: P.glut | 0, left: a.charges - a.used });
+  }
+  function ambossAntwort(m) {
+    const o = S.ambOffen, SM = Z.schmiede; S.ambOffen = null;
+    if (!o || !SM || o.lv !== Z.level || m.ok !== true) return;
+    const it = SM.p2Waffe(); if (it !== o.it || (it.plus | 0) !== o.plus) return; /* Waffe oder Stufe hat sich inzwischen geändert */
+    if (SM.schlagP2(o.a) && o.a.used < o.a.charges && (it.plus | 0) < SM.MAXP) ambossAnGast(o.a); else if (S.link) S.link.sendR({ t: "ambz" });
   }
   function mutAnGast(P) {
     const lv = Z.level, M = Z.mut; if (!lv || !lv._mut || lv._mut.wahl[1]) return;
@@ -591,8 +623,16 @@
       case "ping": return onPing(m);
       case "pong": return onPong(m);
       case "mut": return mutFenster(m);
+      case "amb": return ambFenster(m); /* W39 P2 */
+      case "ambz": if (S.ambW) { S.ambW = null; Z.ui.close(); } return;
+      case "say": { /* W39 P2: Satz einer Lagerfigur beim Gast (nur bekannte Figur im eigenen Lager, Text gekürzt und entschärft) */
+        if (typeof m.id !== "string" || !/^[A-Z]$/.test(m.id) || !Z.level || !Z.level.hub) return;
+        const s = (Z.level.props || []).find(q => q.id === m.id); if (!s || !Z.ui || !Z.ui.say) return;
+        const de = txt(m.de, 400), en = txt(m.en, 400); if (!de && !en) return;
+        Z.ui.say(s.x * Z.TILE + 8, s.y * Z.TILE - 22, NPCN[m.id] || "", L([de || en, en || de]), 4600); return;
+      }
       case "bi": case "bd": if (typeof m.k === "string" && /^E\d{1,9}$/.test(m.k) && int(m.n, 0, 1e9, -1) === S.areaN) S.szene = { t: m.t, k: m.k, at: now() }; return;
-      case "note": if (m.k === "station") Z.toast && Z.toast(L(["Händler und Gespräche übernimmt der Gastgeber.", "The host handles merchants and talks."])); return;
+      case "note": if (m.k === "amboss") { Z.toast && Z.toast(L(["Die Glut im Amboss ist erloschen.", "The anvil\u2019s embers have gone cold."])); return; } if (m.k === "meta") { Z.toast && Z.toast(L(["Schmiede, Fundbuch und Schädel gehören zum Spielstand des Gastgebers.", "The forge, codex and skulls belong to the host’s save."])); return; } if (m.k === "station") Z.toast && Z.toast(L(["Gespräche und Lager-Stationen übernimmt der Gastgeber – Händlerware im Durchgang und den Brunnen kannst du selbst nutzen.", "The host handles talks and camp stations – you can buy passage wares and use the fountain yourself."])); return;
       case "bye": return endSession(m.why === "voll" ? L(["Der Raum ist schon voll.", "The room is full."]) : m.why === "ver" ? L(["Unterschiedliche Spielversion – bitte beide die Seite neu laden.", "Different game versions – please both reload."]) : L(["Der Gastgeber hat das Spiel beendet.", "The host ended the game."]));
     }
   }
@@ -629,6 +669,18 @@
     if (Z.ui && Z.ui.fade && Z.level && !document.hidden) { try { Z.ui.fade(run1); } catch (e) { run1(); } } else run1();
   }
   /* Wandlungsschrein beim Gast: eigene Wahl (Daten nur aus der eigenen Gaben-Liste), Antwort an den Gastgeber */
+  function ambFenster(m) {
+    const d = typeof m.w === "string" && okId(m.w) && Z.itemDef ? Z.itemDef({ id: m.w, type: "weapon" }) : null; if (!d) return;
+    const plus = int(m.plus, 0, 9, 0), max = int(m.max, 1, 9, 5), gold = int(m.gold, 0, 1e7, 0), glut = int(m.glut, 0, 99, 0), hg = int(m.hg, 0, 1e9, 0), hgl = int(m.hgl, 0, 999, 0), left = int(m.left, 0, 9, 0);
+    S.ambW = { w: m.w };
+    const kann = plus < max && left > 0 && hg >= gold && hgl >= glut;
+    const name = L(d.n) + (plus ? " +" + plus : "");
+    Z.ui.open('<div class="glutamboss zso-amb"><h2>' + esc(L(["Glutamboss", "Ember Anvil"])) + ' <span class="bank"><span class="gld">' + hg + ' ●</span> <span class="glt">' + hgl + " ✦</span></span></h2>" +
+      '<p class="hinweis">' + esc(L(["Deine Waffe – gemeinsamer Beutel, ", "Your weapon – shared purse, "]) + left + L([" Schläge übrig. +15 % Schaden je Stufe.", " strikes left. +15% damage per level."])) + "</p>" +
+      "<p><b>" + esc(name) + "</b></p>" + (plus >= max ? '<p class="meister">' + esc(L(["Meisterstück.", "Masterwork."])) + "</p>" : "") +
+      '<div class="knoepfe">' + (plus < max ? '<button data-zso="ambja"' + (kann ? " autofocus" : " disabled") + ">" + esc(L(["Aufwerten auf +", "Upgrade to +"]) + (plus + 1)) + " <small>· " + gold + " ● · " + glut + " ✦</small></button>" : "") +
+      '<button data-zso="ambnein"' + (kann ? "" : " autofocus") + ">" + esc(L(["Fertig", "Done"])) + "</button></div></div>", { cls: "schmal", force: true });
+  }
   function mutFenster(m) {
     const M = Z.mut; if (!M || !Array.isArray(m.ang)) return;
     const by = id => (typeof id === "string" ? M.liste.find(g => g.id === id) : null);
@@ -947,6 +999,8 @@
     else if (a === "mutalt" && S.mutW && S.mutW.neu) { const alt = b.dataset.h; if (S.mutW.akt.indexOf(alt) >= 0) mutSende(S.mutW.neu, alt); }
     else if (a === "mutback" && S.mutW) { S.mutW.neu = null; mutZeichne(); }
     else if (a === "mutskip" && S.mutW) mutSende("-", null);
+    else if (a === "ambja" && S.ambW) { S.ambW = null; if (S.link) S.link.sendR({ t: "ambw", ok: true }); Z.ui.close(); } /* W39 P2 */
+    else if (a === "ambnein" && S.ambW) { S.ambW = null; if (S.link) S.link.sendR({ t: "ambw", ok: false }); Z.ui.close(); }
   }, true);
 
   /* Statusanzeige im Spiel (eigener HUD-Streifen: Rolle, Ping, eigene Lebenspunkte beim Gast) */
