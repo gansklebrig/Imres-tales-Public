@@ -13,9 +13,15 @@
     mix: kann("color", "color-mix(in srgb, red 50%, blue)"),
     is: (function () { try { document.querySelector(":is(body)"); return true; } catch (e) { return false; } })(),
     cq: kann("width", "1cqw"),
-    dvh: kann("height", "1dvh")
+    dvh: kann("height", "1dvh"),
+    /* W39 Alt: Chromium 77 (Handheld) kennt außerdem :focus-visible (86), :has() (105) und gap in Flexbox (84) nicht – Regeln mit
+       unbekanntem Selektor fallen ganz weg (auch „button:focus“ in derselben Liste), Flex-Kinder kleben aneinander */
+    fv: sel(":focus-visible"),
+    has: sel(":has(*)"),
+    fgap: (function () { try { var d = document.createElement("div"); d.style.cssText = "display:flex;flex-direction:column;row-gap:1px;position:absolute;visibility:hidden"; d.appendChild(document.createElement("div")); d.appendChild(document.createElement("div")); document.documentElement.appendChild(d); var ok = d.scrollHeight === 1; d.parentNode.removeChild(d); return ok; } catch (e) { return true; } })()
   };
-  if (zwang) F = { clamp: false, inset: false, mix: false, is: false, cq: false, dvh: false };
+  function sel(s) { try { document.querySelector(s); return true; } catch (e) { return false; } }
+  if (zwang) F = { clamp: false, inset: false, mix: false, is: false, cq: false, dvh: false, fv: false, has: false, fgap: false };
   window.__altcss = { F: F, an: false, n: 0 };
   /* ?diag: Browserdaten anzeigen (zum Ablesen am Gerät) */
   if (/[?&]diag/.test(location.search)) {
@@ -27,7 +33,7 @@
     };
     document.addEventListener("DOMContentLoaded", zeig); addEventListener("resize", zeig);
   }
-  if (F.clamp && F.inset && F.mix && F.is && F.cq && F.dvh) return;
+  if (F.clamp && F.inset && F.mix && F.is && F.cq && F.dvh && F.fv && F.has && F.fgap) return;
   window.__altcss.an = true;
   document.documentElement.classList.add("altcss");
 
@@ -69,7 +75,44 @@
       return vor + "top:" + t + imp + ";right:" + r + imp + ";bottom:" + b + imp + ";left:" + l + imp;
     });
     if (!F.is) css = klappeIs(css);
+    if (!F.fv) css = css.replace(/:focus-visible/g, ":focus");
+    if (!F.has) css = ersetzeHas(css);
+    if (!F.fgap) css = flexGap(css);
     return css;
+  }
+  /* W39 Alt: X:has(Y) → X.altH<n>; die Klasse setzt ein Takt (4×/s) an jedes X, das ein Y enthält */
+  var HAS = [], hasKey = {};
+  function ersetzeHas(css) {
+    var aus = "", pos = 0, i;
+    while ((i = css.indexOf(":has(", pos)) >= 0) {
+      var ende = zu(css, i + 4); if (ende < 0) break;
+      var b = i; while (b > 0 && !/[\s,>+~{}]/.test(css.charAt(b - 1))) b--;
+      var basis = css.slice(b, i), innen = css.slice(i + 5, ende).trim(), k = basis + "|" + innen;
+      if (hasKey[k] == null) { hasKey[k] = HAS.length; HAS.push({ basis: basis || "*", innen: innen, kl: "altH" + HAS.length }); }
+      aus += css.slice(pos, i) + "." + HAS[hasKey[k]].kl; pos = ende + 1;
+    }
+    return aus + css.slice(pos);
+  }
+  function hasTakt() {
+    for (var n = 0; n < HAS.length; n++) {
+      var h = HAS[n], els; try { els = h.basis === "*" ? [] : document.querySelectorAll(h.basis); } catch (e) { continue; }
+      for (var j = 0; j < els.length; j++) { var an = false; try { an = !!els[j].querySelector(h.innen); } catch (e) {} if (els[j].classList.contains(h.kl) !== an) els[j].classList.toggle(h.kl, an); }
+    }
+  }
+  /* W39 Alt: gap in Flex-Regeln (display:flex und gap in derselben Regel) → Abstand per Rand am jeweils folgenden Kind
+     (Zeile: links, Spalte: oben; umbrechende Zeilen bekommen den Zeilenabstand nur näherungsweise) */
+  function flexGap(css) {
+    if (css.indexOf("/*altgap*/") >= 0) return css; /* schon umgeschrieben (Text wird nach dem Umschreiben erneut gemeldet) */
+    return "/*altgap*/" + css.replace(/([^{}@;]+)\{([^{}]*)\}/g, function (m, s, d) {
+      if (!/display\s*:\s*(inline-)?flex/.test(d)) return m;
+      var g = /(?:^|;)\s*gap\s*:\s*([^;!}]+)/.exec(d), rg = /(?:^|;)\s*row-gap\s*:\s*([^;!}]+)/.exec(d), cg = /(?:^|;)\s*column-gap\s*:\s*([^;!}]+)/.exec(d);
+      if (!g && !rg && !cg) return m;
+      var gv = g ? g[1].trim().split(/\s+/) : [], zeile = rg ? rg[1].trim() : gv[0], spalte = cg ? cg[1].trim() : gv[1] || gv[0];
+      var spaltig = /flex-direction\s*:\s*column/.test(d), w = spaltig ? zeile : spalte; if (!w || /^0(px)?$/.test(w)) return m;
+      var zus = s.split(",").map(function (x) { return x.trim() + ">*+*"; }).join(",") + "{" + (spaltig ? "margin-top:" : "margin-left:") + w + "}";
+      if (!spaltig && /flex-wrap\s*:\s*wrap/.test(d) && zeile && !/^0(px)?$/.test(zeile)) zus += s.split(",").map(function (x) { return x.trim() + ">*"; }).join(",") + "{margin-bottom:" + zeile + "}";
+      return m + zus;
+    });
   }
   /* :is(a, b) / :where(a, b) in Selektoren ausklappen (nur Selektorteile, nicht in Deklarationen) */
   function klappeIs(css) {
@@ -126,5 +169,6 @@
     });
   }).observe(document.documentElement, { childList: true, subtree: true });
   document.addEventListener("DOMContentLoaded", alle);
+  if (!F.has) { document.addEventListener("DOMContentLoaded", hasTakt); setInterval(hasTakt, 250); } /* W39 Alt */
   window.__altcss.umschreiben = umschreiben;
 })();

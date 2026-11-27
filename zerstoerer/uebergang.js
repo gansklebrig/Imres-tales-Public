@@ -411,7 +411,7 @@
   function overlay() {
     if (!ov) {
       ov = document.createElement("canvas"); ov.id = "buchcv"; ov.setAttribute("aria-hidden", "true");
-      ov.style.cssText = "position:fixed;inset:0;width:100%;height:100%;pointer-events:none;display:none";
+      ov.style.cssText = "position:fixed;top:0;left:0;inset:0;width:100%;height:100%;pointer-events:none;display:none"; /* W39 Alt: top/left für Chromium 77 (kein inset) */
       const cv = document.getElementById("cv"); if (cv && cv.parentNode) cv.parentNode.insertBefore(ov, cv.nextSibling); else document.body.appendChild(ov);
       ovc = ov.getContext("2d");
     }

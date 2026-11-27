@@ -673,16 +673,24 @@
       let ground = false;
       for (let k = 0; k < 3; k++) { const v = W.tile(tx, ty + k); if (W.solidT(v) || W.isPlat(tx, ty + k)) { ground = true; break; } if ([3, 5, 6, 9].includes(v)) break; }
       const hazard = [3, 5, 6, 9].includes(W.tile(tx, ty)) || [3, 5, 6, 9].includes(W.tile(tx, ty - 1));
+      const dir0 = dir; /* W39 KI: Laufrichtung vor dem Kanten-Halt merken – die Lückensprung-Prüfung darunter verglich mit dir = 0 und griff nie */
       if (!ground || hazard) { dir = 0; if (!e.aware) e.pDir = -(e.pDir || 1); }
       /* Lücke: wenn dahinter Boden auf gleicher Höhe liegt und der Spieler dort ist, hinüberspringen */
       if (!ground && e.aware && !hazard && e.def.ai !== "turret" && !(e.jT > 0)) {
         const P = Z.player;
-        if (P && U.sign(P.x - e.x) === dir) for (let g = 2; g <= 5; g++) { const gx = tx + dir * g; if ((W.solidT(W.tile(gx, ty)) || W.isPlat(gx, ty)) && !W.solidT(W.tile(gx, ty - 1)) && !W.solidT(W.tile(gx, ty - 2))) { e.vy = -340; e.vx = dir * Math.max(d.spd * 1.6, 120 + g * 22); e.jT = 0.9; Z.moveBody(e, dt); return; } }
+        /* W39 KI: Landeplatz auf gleicher Höhe oder bis 2 Kacheln tiefer (nur wenn der Spieler mindestens so tief steht), nicht in Gefahren */
+        if (P && dir0 && U.sign(P.x - e.x) === dir0) for (let g = 2; g <= 5; g++) for (let dd = 0; dd <= 2; dd++) {
+          if (dd && P.y + P.h < e.y + e.h + dd * T - 4) break;
+          const gx = tx + dir0 * g, gy = ty + dd;
+          if ((W.solidT(W.tile(gx, gy)) || W.isPlat(gx, gy)) && !W.solidT(W.tile(gx, gy - 1)) && !W.solidT(W.tile(gx, gy - 2)) && ![3, 5, 6, 9].includes(W.tile(gx, gy - 1))) { e.vy = -340; e.vx = dir0 * Math.max(d.spd * 1.6, 120 + g * 22); e.jT = 0.9; e.gapJ = true; e.onGround = false; Z.moveBody(e, dt); return; }
+        }
       }
       /* kleine Wand: hochspringen, wenn der Spieler oben ist */
       if (dir && W.solidT(W.tile(tx, Math.floor((e.y + e.h - 4) / T))) && !W.solidT(W.tile(tx, Math.floor((e.y + e.h - 20) / T))) && e.aware) e.vy = -300;
     }
-    e.vx = U.approach(e.vx, dir * d.spd * spd, 1400 * dt);
+    /* W39 KI: im Lückensprung den Schwung halten (sonst bremst die Laufgeschwindigkeit ihn mitten in der Luft auf Grubenbreite herunter) */
+    if (e.gapJ && (e.onGround || !(e.jT > 0))) e.gapJ = false;
+    if (!e.gapJ) e.vx = U.approach(e.vx, dir * d.spd * spd, 1400 * dt);
     e.vy += (Z.ENEMY_GRAV || 1400) * dt; if (e.vy > 620) e.vy = 620;
     if (e.jT > 0) e.jT -= dt;
     if (e.aware && e.onGround && d.ai !== "turret" && d.ai !== "jumper" && !(e.jT > 0)) climbOrDrop(e);

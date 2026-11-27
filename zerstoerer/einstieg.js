@@ -84,6 +84,7 @@
      In den ersten beiden Läufen (Z.meta.runs < 2) und solange kein Pakt gewählt ist: die acht Pakte (Erschwernisse für Erfahrene)
      eingeklappt hinter „Pakte – für Erfahrene ▸“; der Umhang-Abschnitt entfällt, solange es nur einen Umhang gibt. */
   let paktOffen = false;
+  if (Z.slots && Z.slots.onSwap) Z.slots.onSwap(() => { paktOffen = false; }); /* W38 QA: anderer Spielstand – wieder eingeklappt */
   function wrapOpen() {
     const ui = Z.ui; if (!ui || !ui.open) return setTimeout(wrapOpen, 60);
     if (ui.open._w38) return;
@@ -142,12 +143,36 @@
     if (free >= 220 * hud) { mEl.style.left = sx / hud + "px"; mEl.style.top = top2 / hud + "px"; mEl.style.width = free / hud + "px"; }
     else { const low = Math.max(...obs.filter(r => r.top < window.innerHeight * 0.4).map(r => r.bottom)) + 6; mEl.style.left = sx / hud + "px"; mEl.style.top = low / hud + "px"; mEl.style.width = (W - 2 * sx) / hud + "px"; }
   }
+  /* W38 QA: Herausforderungstafel (bilanz.js #hfzeile) rutschte bei Handy quer + großer/riesiger Schrift unter die Touch-Knöpfe
+     (Fähigkeiten/Benutzen). Liegt sie über einem Knopf: erst Zusatzzeilen weg, dann Höhe bis über den obersten Knopf begrenzen. */
+  let hfEl = null;
+  function layoutHf() {
+    hfEl = hfEl || document.getElementById("hfzeile"); if (!hfEl) return;
+    const tc = document.getElementById("touch");
+    const reset = () => { if (hfEl.classList.contains("w38-hfeng")) { hfEl.classList.remove("w38-hfeng"); hfEl.querySelectorAll("[data-w38h]").forEach(e => { e.style.display = ""; e.removeAttribute("data-w38h"); }); } };
+    if (!tc || tc.hidden || !hfEl.classList.contains("an")) return reset();
+    const btns = [...tc.querySelectorAll("[data-t], button")].map(rectOf).filter(Boolean);
+    const over = r => { const a = hfEl.getBoundingClientRect(); return btns.filter(b => a.left < b.right - 1 && a.right > b.left + 1 && a.top < b.bottom - 1 && a.bottom > b.top + 1); };
+    reset();
+    if (!over().length) return;
+    hfEl.classList.add("w38-hfeng");
+    const hit = over(); if (!hit.length) return;
+    const a = hfEl.getBoundingClientRect();
+    const top = Math.min(...btns.filter(b => a.left < b.right && a.right > b.left && b.top > a.top).map(b => b.top));
+    if (!isFinite(top)) return;
+    /* ganze Zeilen von unten ausblenden, bis die Tafel über den Knöpfen endet (nie halbe Zeilen) */
+    const rows = [...hfEl.querySelectorAll(".hz, .hc")].reverse();
+    for (const r of rows) { if (hfEl.getBoundingClientRect().bottom <= top - 4) break; r.style.display = "none"; r.setAttribute("data-w38h", "1"); }
+    const nH = hfEl.querySelectorAll("[data-w38h]").length, h4 = hfEl.querySelector("h4");
+    if (h4) h4.setAttribute("data-w38n", nH ? " +" + nH : "");
+  }
   window.addEventListener("resize", () => { lastSig = ""; setTimeout(layoutNotes, 120); });
-  setInterval(() => { try { layoutNotes(); } catch (e) { } }, 700);
+  setInterval(() => { try { layoutNotes(); layoutHf(); } catch (e) { } }, 700);
 
   const css = document.createElement("style");
   css.textContent = [
     "#modal .bilanz.w38-zu{display:none}",
+    "#hfzeile.w38-hfeng h4::after{content:attr(data-w38n);color:#c8b090;font-size:.8em}#hfzeile.w38-hfeng .hz small,#hfzeile.w38-hfeng .hw{display:none}#hfzeile.w38-hfeng h4{margin-bottom:1px}",
     "html #meldungen.w38-links{transform:none;align-items:flex-start}body.kampfnah #meldungen.w38-links{transform:scale(.82);transform-origin:0 0}",
     "#modal .w38-werte{display:block;margin:6px auto 10px;background:transparent;border:1px solid rgba(229,180,84,.45);border-radius:14px;color:#e8d8b8;padding:3px 14px;font:inherit;font-size:var(--fs-s,13px);cursor:pointer}",
     "#modal .w38-pakte{display:block;margin:10px 0 4px;background:transparent;border:1px dashed rgba(229,180,84,.4);border-radius:6px;color:#c8b090;padding:6px 12px;font:inherit;font-size:var(--fs-s,13px);cursor:pointer;width:100%;text-align:left}",
