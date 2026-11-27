@@ -286,17 +286,23 @@
   let koopMeldOn = false;
   function koopMeld() {
     const m = document.getElementById("meldungen"), k = document.getElementById("koop-hl");
-    const reset = () => { if (koopMeldOn && m) { m.style.left = m.style.width = m.style.transform = ""; } koopMeldOn = false; };
+    const reset = () => { if (koopMeldOn && m) { m.style.left = m.style.width = m.style.transform = m.style.top = ""; } koopMeldOn = false; };
     if (!m || !k || (Z.gfx && Z.gfx.off && Z.gfx.off.koopmeld) || !document.body.classList.contains("w31-koop2") || k.hidden || !k.offsetParent || document.body.classList.contains("bossplatte")) return reset();
     const kr = k.getBoundingClientRect(); if (!kr.width) return reset();
     if (!koopMeldOn) { const mr = m.getBoundingClientRect(); if (!(mr.left < kr.right && mr.right > kr.left && mr.top < kr.bottom && mr.bottom > kr.top)) return; }
     const z = parseFloat(getComputedStyle(m).zoom) || 1, mm = document.getElementById("minimap");
     const rightEdge = Math.min(innerWidth - 12, ...[mm].filter(e => e && e.offsetParent && e.getBoundingClientRect().width).map(e => e.getBoundingClientRect().left - 8));
     const x0 = kr.right + 10, w = rightEdge - x0;
-    if (w < 180) return reset(); /* zu eng: lieber wie bisher */
-    m.style.transform = "none"; m.style.left = (x0 / z) + "px"; m.style.width = (w / z) + "px"; koopMeldOn = true;
+    if (w < 180) { /* W35 Optik R4: zu eng daneben (Handy hochkant) → Meldungen unter die Koop-Leiste statt darüber */
+      if (kr.bottom > innerHeight * 0.45) return reset();
+      m.style.left = m.style.width = m.style.transform = ""; m.style.top = ((kr.bottom + 8) / z) + "px"; koopMeldOn = true; return;
+    }
+    m.style.top = ""; m.style.transform = "none"; m.style.left = (x0 / z) + "px"; m.style.width = (w / z) + "px"; koopMeldOn = true;
   }
-  setInterval(() => { try { if (!document.hidden) { meldTick(); koopMeld(); } } catch (e) { console.error(e); } }, 150);
+  /* W35 Optik R4: Bosskampf-Lesbarkeit – Welt-Schilder (Hebel, Ortswissen) treten im Bosskampf zurück (Deckkraft ×0,45),
+     damit Vorwarnungen, Geschosse und Ezekiel nicht mit Schildtext konkurrieren. Wirkt über Z.w35SchildK in schilder.js. Schalter off.schildboss. */
+  function schildBoss() { const an = document.body.classList.contains("bosskampf") && !(Z.gfx && Z.gfx.off && Z.gfx.off.schildboss); const k = Z.w35SchildK || 1, z = an ? 0.45 : 1; Z.w35SchildK = Math.abs(z - k) < 0.03 ? z : k + (z - k) * 0.35; }
+  setInterval(() => { try { if (!document.hidden) { meldTick(); koopMeld(); schildBoss(); } } catch (e) { console.error(e); } }, 150);
   Z.meldWeich = { tick: meldTick, n: () => weich.size };
 
   /* W35 Optik: Ezekiel im Getümmel lesbar halten. Rote Roben, Feuer und Funken verschwimmen sonst mit seinem roten Umhang.

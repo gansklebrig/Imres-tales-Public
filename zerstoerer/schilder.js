@@ -884,7 +884,7 @@
       const sp = s.spr, x0 = s.x - s.w / 2 + sp.ox, y0 = s.by - s.h + sp.oy;
       /* warmer Schein auf der Wand, wenn man nah ist */
       if (!low && s.n > 0.04 && s.a > 0.3) { c.save(); c.globalCompositeOperation = "lighter"; c.globalAlpha = s.n * 0.22 * s.a; Z.draw.glow(c, s.x, s.by - s.h / 2, Math.max(s.w, s.h) * 0.75, s.tone === "gefahr" ? "rgba(255,90,60,.5)" : s.tone === "rune" ? "rgba(200,140,255,.5)" : "rgba(255,190,110,.5)"); c.restore(); }
-      const base = s.a * (0.86 + 0.14 * s.n);
+      const base = s.a * (0.86 + 0.14 * s.n) * (Z.w35SchildK || 1); /* W35 Optik R4: im Bosskampf leiser (optik2.js, off.schildboss) */
       c.globalAlpha = base; c.drawImage(sp.dim, x0, y0, sp.W, sp.H);
       if (s.n > 0.01) { c.globalAlpha = base * s.n; c.drawImage(sp.hell, x0, y0, sp.W, sp.H); }
       c.globalAlpha = s.a * (0.75 + 0.25 * s.n);

@@ -9697,8 +9697,8 @@
 "sha256":"3ab7b7816ddadc9aa1ef272db3236698570d927a2f28af60f6ead1f3ac0a9320"
 },
 "zerstoerer.html":{
-"groesse":75867,
-"sha256":"99439423a9f492396236eaba24a1a5cb11805419697619500d3f3b11c61d2cd0"
+"groesse":76226,
+"sha256":"dd2d5e2f96fd3fd0c0212abc8c036af373d74d28cd282a1a031c3549c58b5cda"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":144658,
@@ -9825,8 +9825,8 @@
 "sha256":"473eaee12b0669f6f885228633107b37c74ec68c439516aff82a8acd52a49305"
 },
 "zerstoerer/koop.js":{
-"groesse":106473,
-"sha256":"8e45c96de2e0fba140f7e43c64df7d3b427e954b3c39bbd0c03bd9ce60bfd2bf"
+"groesse":106734,
+"sha256":"89934f1d46004c9605a45ce148835e0798ca95c78940b6d26156485f3c085936"
 },
 "zerstoerer/lager.js":{
 "groesse":159427,
@@ -9869,8 +9869,8 @@
 "sha256":"46279836b5f2e15788dbe04d88d555cbfef91c41f56769a0ae467b1ac8c770ea"
 },
 "zerstoerer/optik2.js":{
-"groesse":54203,
-"sha256":"430fbe00ca99810ce6d5e0a475c9a4a13b4a6e237b6f3a9da2bf71126eedcf79"
+"groesse":55026,
+"sha256":"542065ad99f29a88188370bfcecaaefd4abc85622756216c5874391f925e1187"
 },
 "zerstoerer/parcours.js":{
 "groesse":39202,
@@ -9901,8 +9901,8 @@
 "sha256":"fb265ada966d10675ef894cb61aee0f2085451de1d68b6f0cb575cb7806a9bd0"
 },
 "zerstoerer/schilder.js":{
-"groesse":83147,
-"sha256":"26a75656c2f5e9a9928e02cd31be5a912f09909f197c85fe9d97fa1bfe6e0649"
+"groesse":83237,
+"sha256":"b2c31ee2c2f605d76773cc6acc18758ab1a27613488d8a90bd3129afa9124d47"
 },
 "zerstoerer/schmiede.js":{
 "groesse":60032,
@@ -9965,5 +9965,5 @@
 "sha256":"2239cd79f01c377c38cdcecf8d827774c46b23cf9e74f4481be6463ca0b129e0"
 }
 },
-"stand":150
+"stand":151
 }

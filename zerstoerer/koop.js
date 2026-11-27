@@ -283,7 +283,7 @@
     for (const e of Z.enemies) {
       if (e.dummy || !e.def) continue;
       /* etwas mehr Eliten im Koop: neue gewöhnliche Gegner werden selten zur Elite (einmal je Gegner gewürfelt) */
-      if (sk.elite > 0 && !e._koopEl && !e.def.boss && !e.master && e.def.ai !== "turret") { e._koopEl = 1; if (!e.elite && Math.random() < sk.elite) { e.elite = true; e.hpMax *= 1.35; e.hp *= 1.35; } }
+      if (sk.elite > 0 && !e._koopEl && !e.def.boss && !e.master && e.def.ai !== "turret") { e._koopEl = 1; if (!e.elite && Math.random() < sk.elite) { const ks = Object.keys(Z.ELITE || {}); e.elite = ks.length ? ks[(Math.random() * ks.length) | 0] : true; if (e.elite === "gepanzert") e.armorUp = 0; e.hpMax *= 1.35; e.hp *= 1.35; } /* W36 Feinschliff: Elite-Eigenschaft aus Z.ELITE wie bei normalen Eliten (vorher nur true → keine Eigenschaft, kein Name) */ }
       const want = e.def.boss ? sk.boss : sk.foe, have = e._koopK || 1;
       if (Math.abs(want - have) < 1e-6) continue;
       const f = want / have; e.hpMax = e.hpMax * f; e.hp = e.dead ? e.hp : e.hp * f; e._koopK = want;
