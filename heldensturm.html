@@ -13941,7 +13941,8 @@ function wlDaecher(){const Wd=G.wl;if(!Wd||!Wd.an||G.room||!Wd.haus.length)retur
 /* ---------- Lagerfeuer, Glut ---------- */
 Object.assign(LIGHTS,{wl_feuer:[210,'255,150,60'],wl_glut:[240,'255,110,30']});
 {const dd0=drawDeco;drawDeco=function(d,t){if(d.k==='wl_glut')return;if(d.k==='wl_feuer'){const c=cx,x=d.x,y=d.y,s=d.s||1;ell(c,x,y+4,22*s,8*s,'rgba(0,0,0,.35)');for(let i=0;i<6;i++){const a=i/6*TAU;circ(c,x+Math.cos(a)*15*s,y+Math.sin(a)*7*s+2,4.2*s,'#5a5450')}
-  ln(c,'#4a3020',5*s,x-11*s,y+3,x+10*s,y-3);ln(c,'#5a3a24',5*s,x-9*s,y-4,x+11*s,y+3);const f=Math.sin(t*11+d.v*9)*2;hP(c,'#e8682a',null,0,[x-9*s,y,x-3*s+f,y-22*s,x+2*s,y-8*s,x+6*s-f,y-26*s,x+10*s,y]);hP(c,'#ffc860',null,0,[x-5*s,y,x+f*0.5,y-14*s,x+5*s,y]);
+  ln(c,'#4a3020',5*s,x-11*s,y+3,x+10*s,y-3);ln(c,'#5a3a24',5*s,x-9*s,y-4,x+11*s,y+3);const f=Math.sin(t*11+d.v*9)*2;/* Lagerfeuer: geschwungene Flammenzungen statt Zacken */const tg=(ox,w,h,col,ph)=>{const sw=Math.sin(t*8+d.v*13+ph)*1.6*s;c.fillStyle=col;c.beginPath();c.moveTo(x+(ox-w)*s,y+1);c.bezierCurveTo(x+(ox-w*1.1)*s,y-h*0.45*s,x+(ox-w*0.3)*s,y-h*0.78*s,x+ox*s+sw,y-h*s);c.bezierCurveTo(x+(ox+w*0.3)*s,y-h*0.78*s,x+(ox+w*1.1)*s,y-h*0.45*s,x+(ox+w)*s,y+1);c.closePath();c.fill()};
+  tg(0,11,22+f,'#d8501c',0);tg(-5,5.5,17-f,'#e8682a',1.1);tg(5.5,5.5,20+f*0.8,'#e8682a',2.3);tg(0,7,15+f*0.6,'#ff9a30',0.7);tg(-2,4,10+f*0.4,'#ffc860',1.9);tg(1.5,2.4,6,'#fff0c0',0.3);
   c.globalCompositeOperation='lighter';glow(x,y-10,46*s,'#ff9a40',0.4+0.1*Math.sin(t*9+d.v*5),true);c.globalCompositeOperation='source-over';c.globalAlpha=1;return}return dd0.apply(this,arguments)}}
 
 /* ---------- Schläfer: „Zz“ ---------- */
