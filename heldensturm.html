@@ -19,6 +19,7 @@
 /* Schmied: Glut von unten */html .screen.smScr{background:radial-gradient(ellipse 80% 55% at 50% 105%,rgba(150,70,24,.32),rgba(0,0,0,0) 70%),radial-gradient(ellipse 120% 90% at 50% 50%,rgba(0,0,0,0) 55%,rgba(0,0,0,.45)),#110c0b!important}
 /* Stufe geschafft: goldener Schein von oben */html .screen.cdScr{background:radial-gradient(ellipse 60% 50% at 50% 12%,rgba(229,180,84,.16),rgba(0,0,0,0) 70%),radial-gradient(ellipse 120% 90% at 50% 50%,rgba(0,0,0,0) 55%,rgba(0,0,0,.45)),#120d0e!important}
 /* Menüs im Spiel: Weltschrift nicht mehr durchscheinen lassen */html.obB body:not(.imresTitel) #scr.mfhost{background-color:rgba(12,8,7,.985)}
+/* Offline-Seite auf flachen Bildschirmen: vier Karten nebeneinander statt Umbruch über die Fußzeile */@media (max-height:560px) and (min-width:600px){.offpg .offgrid.offgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:.5em}.offpg .offk{padding:.6em .7em}}
 /* Großbild: Eckknöpfe des Titels mitwachsen lassen */@media (min-width:2200px) and (min-height:1300px){#imresBack{font-size:15px;padding:6px 14px}.camp-top .slbtn{font-size:20px}.mfbar .mft{font-size:17px}}@media (min-width:1900px) and (min-height:1150px){.slm>.slp{zoom:1.15;width:calc(100% / 1.15)}}@media (min-width:2300px) and (min-height:1350px){.slm>.slp{zoom:1.32;width:calc(100% / 1.32)}.slm-in>.slm-l{zoom:1.28}}@media (min-width:2200px) and (min-height:1300px){.wrap.ivg .bag.ivsz .it .ico.ico{width:clamp(20px,calc(var(--ivs) * .4),58px)!important;height:clamp(20px,calc(var(--ivs) * .4),58px)!important}}
 </style>
 <script src="tonregler.js?v=1"></script>
@@ -20234,7 +20235,7 @@ function offHtml(){const st=OFF.st,f=OFF.fort,z=OFF.zip;
   <div class="offgrid${apk?' off3':''}"><div class="offk"><div class="eyebrow">Handy · Handheld · PC</div><h3>${OFF.pc?'Programm für den PC':OFF.datei?'Als App speichern':'Nur den Inhalt laden'}</h3>${app}</div>${pcp}${apk}${zip}</div>
   <div style="flex:1 1 auto"></div><div class="slbar"><button class="slbtn" data-act="sl-back" ${(!OFF.ok||bereit)&&!OFF.bip?'data-sl-def="1"':''}>‹ Zurück</button></div></div>${slFoot()}</div>`}
 (function(){const st=document.createElement('style');st.textContent=`
-.offpg .offgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,19em),1fr));gap:1em;margin-top:.6em}
+.offpg .offgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(15em,1fr));grid-template-columns:repeat(auto-fit,minmax(min(100%,19em),1fr));gap:1em;margin-top:.6em}
 .offpg .offk{border:1px solid color-mix(in srgb,var(--hc,#e5b454) 35%,transparent);background:rgba(20,14,22,.72);border-radius:12px;padding:.9em 1.1em;display:flex;flex-direction:column;gap:.45em}
 .offpg .offk h3{margin:0;font-size:1.25em;color:#f3e2c0}.offpg .offk p{margin:0;font-size:.92em;line-height:1.4;color:#d9cbb4}
 .offpg .offrow{display:flex;flex-wrap:wrap;gap:.5em;align-items:center;margin-top:.2em}
