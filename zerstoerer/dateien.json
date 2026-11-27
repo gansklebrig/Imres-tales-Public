@@ -9697,8 +9697,8 @@
 "sha256":"3ab7b7816ddadc9aa1ef272db3236698570d927a2f28af60f6ead1f3ac0a9320"
 },
 "zerstoerer.html":{
-"groesse":73447,
-"sha256":"2f2ff0e63ac2ceef07c94caa6b542f07b16d670105bcad6932e9653d5fa3f48a"
+"groesse":75867,
+"sha256":"99439423a9f492396236eaba24a1a5cb11805419697619500d3f3b11c61d2cd0"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":144658,
@@ -9753,8 +9753,8 @@
 "sha256":"f308b7f8d4b725c22a2fe061be2d10d5f72ae384d266fa19a52b99c181495c36"
 },
 "zerstoerer/ebenen.js":{
-"groesse":50945,
-"sha256":"cd2478a3d43bd400febe70aa5a8b245ab04435c56e561cf12d0d09a5c4ab8684"
+"groesse":51228,
+"sha256":"58cb78e1be9001dedb8c882ee4dc99683b2e0a3a070d0d0d56282f5f51a0ea6e"
 },
 "zerstoerer/effekte.js":{
 "groesse":213382,
@@ -9769,8 +9769,8 @@
 "sha256":"2e761f3b67fc6ed08a2b3f1ecb4297c2e947eb041ecdc373515efdc3ae3dcc37"
 },
 "zerstoerer/figuren.js":{
-"groesse":348574,
-"sha256":"8d1e7f9f292978da04b2d11a23a7b23bea7e782a180f8eb974d30a2b0a3be300"
+"groesse":348681,
+"sha256":"ac56dfbcde6c7db35857d62baebf8b2b160b89c6ec8fefd4b3e4300d0362f523"
 },
 "zerstoerer/fluch.js":{
 "groesse":5071,
@@ -9781,8 +9781,8 @@
 "sha256":"2fa92b6a3cba6953a058c29a30886f36c7a4aa9c21b42f1632b652a71f6ebda3"
 },
 "zerstoerer/gegner.js":{
-"groesse":111967,
-"sha256":"917939bf849712a17d0ccb8abf84959eb1636ec6ec61f1f0335eb83e44caddb9"
+"groesse":112083,
+"sha256":"97b7bfbbdc70a8013aa552211f231d4757bd46ccd3dafaf0a39d14736cb15659"
 },
 "zerstoerer/gegnerkunst.js":{
 "groesse":19050,
@@ -9825,8 +9825,8 @@
 "sha256":"473eaee12b0669f6f885228633107b37c74ec68c439516aff82a8acd52a49305"
 },
 "zerstoerer/koop.js":{
-"groesse":106385,
-"sha256":"618b3e8284767b31d96c8889bec15aa2197a8f10cd7f5fe1edbad97d20f022fb"
+"groesse":106473,
+"sha256":"8e45c96de2e0fba140f7e43c64df7d3b427e954b3c39bbd0c03bd9ce60bfd2bf"
 },
 "zerstoerer/lager.js":{
 "groesse":159427,
@@ -9869,8 +9869,8 @@
 "sha256":"46279836b5f2e15788dbe04d88d555cbfef91c41f56769a0ae467b1ac8c770ea"
 },
 "zerstoerer/optik2.js":{
-"groesse":42795,
-"sha256":"31870e6b56d530956ee3125d905f2175fa1eaf4c2203a4dab309849e1f1e11fa"
+"groesse":54203,
+"sha256":"430fbe00ca99810ce6d5e0a475c9a4a13b4a6e237b6f3a9da2bf71126eedcf79"
 },
 "zerstoerer/parcours.js":{
 "groesse":39202,
@@ -9881,8 +9881,8 @@
 "sha256":"c75a97684bca2a09355ffb59ff85492fa02e04fa49f526de3f44198736179de3"
 },
 "zerstoerer/pracht.js":{
-"groesse":376330,
-"sha256":"edaf73e31126e821db4584f0cf9624c017e4d99f4fbe3de97826cdbd6ec78253"
+"groesse":376445,
+"sha256":"ad40529863eb66dd39dec38d29c8326ce010de92595499e07089d29e73be5c66"
 },
 "zerstoerer/praesentation.js":{
 "groesse":28390,
@@ -9965,5 +9965,5 @@
 "sha256":"2239cd79f01c377c38cdcecf8d827774c46b23cf9e74f4481be6463ca0b129e0"
 }
 },
-"stand":149
+"stand":150
 }

@@ -1251,7 +1251,7 @@
   const keyLab = (who, a) => {
     if (who === 1) return inp.label(a) || "✋";
     /* W27 Koop / W32 Online: Netz-Spieler 2 – beim Gast stehen dort seine eigenen Tasten/Pad-Knöpfe (lokale Belegung), beim Gastgeber ein Netz-Zeichen */
-    if (K.src && K.src.kind === "net") { let guest = false; try { guest = !!(Z.online && Z.online.S && Z.online.S.role === "guest"); } catch (_) {} return guest ? inp.label(a) || (a === "use" ? "✋" : "") : "🌐"; }
+    if (K.src && K.src.kind === "net") { let guest = false; try { guest = !!(Z.online && Z.online.S && Z.online.S.role === "guest"); } catch (_) {} return guest ? inp.label(a) || (a === "use" ? "✋" : "") : "⇄"; } /* W35 Optik: Netz-Zeichen als Schriftzeichen in Leistenfarbe statt blauem 🌐-Emoji */
     if (K.src && K.src.kind === "pad") return inp.padButtonName(inp.padOf(a));
     return inp.keyName(keys2[a]);
   };

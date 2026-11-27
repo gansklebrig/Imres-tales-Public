@@ -1958,7 +1958,7 @@
       c.fillStyle = "rgba(0,0,0,.6)"; c.fillRect(x - 0.5, y - 0.5, w + 1, 3);
       c.fillStyle = e.elite ? "#ff8a3a" : "#e0545a"; c.fillRect(x, y, w * Math.max(0, e.hp / e.hpMax), 2);
       if (e.elite) {
-        const lab = Z.L(Z.ELITE[e.elite]) + " · " + Z.L(d.n);
+        const lab = Z.L(Z.ELITE[e.elite] || ["Elite", "Elite"]) + " · " + Z.L(d.n); /* W35 Optik: Koop-Eliten (koop.js e.elite = true) zeigten „undefined · …“ */
         if (!(sprPs > 0 && txtSpr(c, lab, "700 6px 'Alegreya Sans',sans-serif", 6, "#ffb070", null, 0, cx, y - 2))) { c.font = "700 6px 'Alegreya Sans',sans-serif"; c.textAlign = "center"; c.fillStyle = "#ffb070"; c.fillText(lab, cx, y - 2); }
       }
     }

@@ -33,6 +33,8 @@
       let ok = true; for (let y = y0; y <= y0 + 2; y++) if (lv.get(x, y) !== 0) ok = false;
       if (!W.solidT(lv.get(x, y0 + 3)) && !W.isPlat(x, y0 + 3)) ok = false;
       if (lv.doors.some(d => Math.abs(d.x - x) < 3 && Math.abs(d.y - (y0 + 2)) < 3)) ok = false;
+      /* W36 Feinschliff: keine Tür in einen dort stehenden Gegner bauen (Söldner steckte im Hafen im Türblatt fest) */
+      if (ok && (Z.enemies || []).some(e => !e.dead && e.x < (x + 1) * T + 2 && e.x + e.w > x * T - 2 && e.y < (y0 + 3) * T && e.y + e.h > y0 * T)) ok = false;
       if (!ok) continue;
       for (let y = y0; y <= y0 + 2; y++) lv.set(x, y, 12);
       doors.push({ x, y0, open: 0, opening: false, cells: [c.x + "," + c.y, r.x + "," + r.y] });

@@ -2819,7 +2819,7 @@
       const hz = g.createLinearGradient(0, 0, 0, TH); hz.addColorStop(0, "rgba(20,10,8,.6)"); hz.addColorStop(1, "rgba(80,30,10,.25)"); g.fillStyle = hz; g.fillRect(0, 0, TW, TH); }
   };
   PAINT.embercity = PAINT.forge; PAINT.spires = null;
-  function spr(bg) { let cv = SPR.get(bg); if (cv !== undefined) return cv; const P = PAINT[bg]; if (!P) { SPR.set(bg, null); return null; } cv = document.createElement("canvas"); cv.width = TW * RS; cv.height = TH * RS; const g = cv.getContext("2d"); g.scale(RS, RS); try { P(g, rnd(bg.length * 977 + 5)); } catch (e) { console.error(e); } SPR.set(bg, cv); return cv; }
+  function spr(bg) { let cv = SPR.get(bg); if (cv !== undefined) return cv; const P = PAINT[bg]; if (!P) { SPR.set(bg, null); return null; } cv = document.createElement("canvas"); cv.width = TW * RS; cv.height = TH * RS; const g = cv.getContext("2d"); g.scale(RS, RS); try { P(g, rnd(bg.length * 977 + 5)); if (Z.w35MidPaint) Z.w35MidPaint(bg, g, TW, TH); /* W35 Optik: Fernbild anreichern (optik2.js), nur beim Backen */ } catch (e) { console.error(e); } SPR.set(bg, cv); return cv; }
   /* gezeichnet vor dem übrigen Mittelgrund-Leben, nur in Gewölbe- und Höhlenöffnungen (dort malt der Chunk sonst ein
      dunkles Inneres), halbtransparent und mit eigener, langsamer Parallaxe */
   const mid0 = Z.drawMidLife;

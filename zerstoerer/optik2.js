@@ -281,8 +281,48 @@
     for (const e of now) e.classList.add("w35-weich");
     weich.clear(); for (const e of now) weich.add(e);
   }
-  setInterval(() => { try { if (!document.hidden) meldTick(); } catch (e) { console.error(e); } }, 150);
+  /* W35 Optik: Koop auf kleinen Schirmen – die Leiste von Spieler 2 (#koop-hl, links oben) lag über den Meldungen.
+     Überlappen sie, rücken die Meldungen in den freien Streifen zwischen Koop-Leiste und Karte/Gebietsname. Schalter off.koopmeld. */
+  let koopMeldOn = false;
+  function koopMeld() {
+    const m = document.getElementById("meldungen"), k = document.getElementById("koop-hl");
+    const reset = () => { if (koopMeldOn && m) { m.style.left = m.style.width = m.style.transform = ""; } koopMeldOn = false; };
+    if (!m || !k || (Z.gfx && Z.gfx.off && Z.gfx.off.koopmeld) || !document.body.classList.contains("w31-koop2") || k.hidden || !k.offsetParent || document.body.classList.contains("bossplatte")) return reset();
+    const kr = k.getBoundingClientRect(); if (!kr.width) return reset();
+    if (!koopMeldOn) { const mr = m.getBoundingClientRect(); if (!(mr.left < kr.right && mr.right > kr.left && mr.top < kr.bottom && mr.bottom > kr.top)) return; }
+    const z = parseFloat(getComputedStyle(m).zoom) || 1, mm = document.getElementById("minimap");
+    const rightEdge = Math.min(innerWidth - 12, ...[mm].filter(e => e && e.offsetParent && e.getBoundingClientRect().width).map(e => e.getBoundingClientRect().left - 8));
+    const x0 = kr.right + 10, w = rightEdge - x0;
+    if (w < 180) return reset(); /* zu eng: lieber wie bisher */
+    m.style.transform = "none"; m.style.left = (x0 / z) + "px"; m.style.width = (w / z) + "px"; koopMeldOn = true;
+  }
+  setInterval(() => { try { if (!document.hidden) { meldTick(); koopMeld(); } } catch (e) { console.error(e); } }, 150);
   Z.meldWeich = { tick: meldTick, n: () => weich.size };
+
+  /* W35 Optik: Ezekiel im Getümmel lesbar halten. Rote Roben, Feuer und Funken verschwimmen sonst mit seinem roten Umhang.
+     Steht ein Gegner direkt an/in ihm, blendet weich eine warme Standmarke unter den Füßen und ein schwacher Rückenschein ein
+     (2 gecachte Sprites, nur Stufe ≥ 1, aus nach ~0,3 s ohne Gedränge). Schalter off.getuemmel. */
+  const sprG = {}; const spriteG = (k, rgb) => { if (sprG[k]) return sprG[k]; const S = 64, cv2 = mk(S, S), g = cv2.getContext("2d"), q = g.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2); q.addColorStop(0, "rgba(" + rgb + ",1)"); q.addColorStop(0.45, "rgba(" + rgb + ",.45)"); q.addColorStop(1, "rgba(" + rgb + ",0)"); g.fillStyle = q; g.fillRect(0, 0, S, S); return (sprG[k] = cv2); };
+  let gK = 0, gT = 0;
+  const dp0 = Z.drawPlayer;
+  if (dp0) Z.drawPlayer = function (c, P, t) {
+    try {
+      if (P && P === Z.player && c && c.canvas && c.canvas.id === "cv" && Z.level && !(Z.gfx && Z.gfx.off && Z.gfx.off.getuemmel) && Z.gq && !Z.gq.lean && !Z.gq.mini && Z.gq.level !== 0 && !P.dead) {
+        const now = performance.now() / 1000, dt = Math.min(0.1, gT ? now - gT : 0.016); gT = now;
+        let near = false; const cx = P.x + P.w / 2;
+        for (const e of Z.enemies || []) { if (e.dead || (e.def && e.def.boss && e.w > 60)) continue; if (Math.abs(e.x + e.w / 2 - cx) < (e.w + P.w) / 2 + 10 && e.y < P.y + P.h + 4 && e.y + e.h > P.y - 4) { near = true; break; } }
+        gK += ((near ? 1 : 0) - gK) * Math.min(1, dt * (near ? 9 : 3.5));
+        if (gK > 0.02) {
+          const fy = P.y + P.h; c.save(); c.globalCompositeOperation = "lighter";
+          c.globalAlpha = 0.75 * gK; c.drawImage(spriteG("fuss", "255,205,120"), cx - 22, fy - 5, 44, 10);
+          c.globalAlpha = 0.24 * gK; c.drawImage(spriteG("ruecken", "255,215,170"), cx - 24, P.y + P.h * 0.45 - 24, 48, 48);
+          c.restore();
+        }
+      }
+    } catch (e) { }
+    return dp0.apply(this, arguments);
+  };
+  Z.getuemmelK = () => gK;
 
   /* 3) W35 Optik: Ferne hinter Fensterbögen auf Stufe 0. Dort wird der Gebietshintergrund einmal je Gebiet in
      Weltgröße (≤ Viertelauflösung) gebacken und in die leeren Flächen der Kachel-Chunks gemalt (bild.js lvBackFor/skyBack)
@@ -349,9 +389,50 @@
       });
     }
   };
+  /* W35 Optik: Fernbild der Öffnungen (pracht.js PAINT, 512×288, einmal gebacken) für Keller/Verlies/Glockenturm/See
+     mit Blickfängen versehen: Lichtpfützen, Laternen, Fackeln, Lichtbahnen, Glocken, Flechten, Glanz auf dem Wasser.
+     Vorher kaum Kontrast – in den Öffnungen sah man nur Dunst. Schalter off.w35fernbild (wirkt beim nächsten Backen). */
+  Z.w35MidPaint = function (bg, g, TW, TH) {
+    if (Z.gfx && Z.gfx.off && Z.gfx.off.w35fernbild) return;
+    if (!{ cellar: 1, dungeon: 1, belltower: 1, lake: 1 }[bg]) return;
+    let sd = 911 + bg.length * 37; const R = () => { sd = (sd * 16807) % 2147483647; return (sd - 1) / 2147483646; };
+    const glow = (x, y, r, rgb, a) => { const q = g.createRadialGradient(x, y, 0, x, y, r); q.addColorStop(0, "rgba(" + rgb + "," + a + ")"); q.addColorStop(1, "rgba(" + rgb + ",0)"); g.fillStyle = q; g.fillRect(x - r, y - r, r * 2, r * 2); };
+    const shaft = (x, w, len, rgb, a, lean) => { g.save(); g.globalCompositeOperation = "lighter"; const q = g.createLinearGradient(0, 0, 0, len); q.addColorStop(0, "rgba(" + rgb + "," + a + ")"); q.addColorStop(1, "rgba(" + rgb + ",0)"); g.fillStyle = q; g.beginPath(); g.moveTo(x - w / 2, 0); g.lineTo(x + w / 2, 0); g.lineTo(x + w / 2 + lean + w, len); g.lineTo(x - w / 2 + lean - w, len); g.closePath(); g.fill(); g.restore(); };
+    const dark = "rgba(12,8,6,.92)";
+    if (bg === "cellar") {
+      for (let i = 0; i < 4; i++) { const x = 40 + i * 128 + R() * 40, y = TH * (0.3 + R() * 0.12);
+        g.strokeStyle = dark; g.lineWidth = 1; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, y); g.stroke();
+        glow(x, y + 6, 46, "255,170,80", 0.42); glow(x, TH * 0.9, 70, "255,150,70", 0.18);
+        g.fillStyle = dark; g.fillRect(x - 4, y - 1, 8, 2); g.fillStyle = "rgba(255,205,130,.95)"; g.fillRect(x - 3, y + 1, 6, 8); g.fillStyle = dark; g.fillRect(x - 0.5, y + 1, 1, 8); g.fillRect(x - 3.5, y + 9, 7, 1.5); }
+      shaft(TW * 0.62, 10, TH, "255,210,150", 0.12, 30);
+    } else if (bg === "dungeon") {
+      shaft(TW * 0.3, 14, TH * 0.95, "230,220,180", 0.13, 24); shaft(TW * 0.78, 10, TH * 0.9, "230,220,180", 0.1, 18);
+      for (const x of [TW * 0.3 + 30, TW * 0.78 + 22]) { g.fillStyle = "rgba(230,220,180,.06)"; g.beginPath(); g.ellipse(x, TH * 0.9, 34, 6, 0, 0, TAU); g.fill(); }
+      for (let i = 0; i < 3; i++) { const x = 90 + i * 160 + R() * 30, y = TH * 0.45; glow(x, y - 4, 40, "255,150,60", 0.42); g.fillStyle = "rgba(255,200,100,.95)"; g.beginPath(); g.moveTo(x - 3, y); g.quadraticCurveTo(x, y - 12, x + 3, y); g.fill(); g.fillStyle = dark; g.fillRect(x - 1.2, y, 2.4, 9); }
+      /* Käfig an einer Kette */
+      const cx = TW * 0.55, cy = TH * 0.42; g.strokeStyle = dark; g.lineWidth = 1.2; g.beginPath(); g.moveTo(cx, 0); g.lineTo(cx, cy - 14); g.stroke();
+      g.beginPath(); g.ellipse(cx, cy - 10, 12, 4, 0, Math.PI, 0); g.stroke(); for (let k = -2; k <= 2; k++) { g.beginPath(); g.moveTo(cx + k * 5, cy - 11); g.lineTo(cx + k * 5, cy + 16); g.stroke(); } g.beginPath(); g.moveTo(cx - 12, cy + 16); g.lineTo(cx + 12, cy + 16); g.stroke();
+    } else if (bg === "belltower") {
+      /* Rosenfenster mit Abendlicht und schräger Staubbahn */
+      const rx = TW * 0.7, ry = TH * 0.24; glow(rx, ry, 70, "255,170,90", 0.35); g.fillStyle = "rgba(255,190,120,.55)"; g.beginPath(); g.arc(rx, ry, 22, 0, TAU); g.fill();
+      g.strokeStyle = dark; g.lineWidth = 2; g.beginPath(); g.arc(rx, ry, 22, 0, TAU); g.stroke(); for (let k = 0; k < 8; k++) { const a = k / 8 * TAU; g.beginPath(); g.moveTo(rx, ry); g.lineTo(rx + Math.cos(a) * 22, ry + Math.sin(a) * 22); g.stroke(); } g.beginPath(); g.arc(rx, ry, 8, 0, TAU); g.stroke();
+      g.save(); g.globalCompositeOperation = "lighter"; const q = g.createLinearGradient(rx, ry, rx - 140, TH); q.addColorStop(0, "rgba(255,190,120,.2)"); q.addColorStop(1, "rgba(255,190,120,0)"); g.fillStyle = q; g.beginPath(); g.moveTo(rx - 16, ry + 8); g.lineTo(rx + 16, ry + 12); g.lineTo(rx - 80, TH); g.lineTo(rx - 190, TH); g.closePath(); g.fill(); g.restore();
+      /* Glockenränder fangen Licht */
+      g.fillStyle = "rgba(255,200,130,.25)"; for (let k = 0; k < 4; k++) { const x = 60 + k * 120 + 15; g.fillRect(x - 12, TH * 0.6, 24, 1.5); }
+    } else if (bg === "lake") {
+      for (let i = 0; i < 3; i++) shaft(80 + i * 170 + R() * 40, 8, TH * 0.72, "190,235,195", 0.16, 14);
+      for (let i = 0; i < 26; i++) { const x = R() * TW, y = TH * (0.12 + R() * 0.5); glow(x, y, 4 + R() * 7, R() < 0.25 ? "230,210,130" : "130,235,165", 0.55); }
+      /* ferne Ruine mit Licht am Ufer */
+      const rx = TW * 0.36, base = TH * 0.72; g.fillStyle = "#08120c"; g.fillRect(rx - 26, base - 40, 52, 40); g.beginPath(); g.moveTo(rx - 30, base - 40); g.lineTo(rx, base - 62); g.lineTo(rx + 30, base - 40); g.fill();
+      glow(rx, base - 22, 30, "255,190,110", 0.35); g.fillStyle = "rgba(255,210,140,.9)"; g.fillRect(rx - 3, base - 28, 6, 9);
+      for (let k = 0; k < 6; k++) { g.fillStyle = "rgba(255,200,130," + (0.3 - k * 0.045) + ")"; g.fillRect(rx - 5 + R() * 4, base + 3 + k * 4, 8 + R() * 6, 1); }
+      g.fillStyle = "rgba(170,235,190,.22)"; g.fillRect(0, base, TW, 1);
+    }
+  };
+
   /* W35 Optik: Öffnungen in diesen Gebieten zeigen das pracht.js-Fernbild nur noch zu ~60 % – die angereicherte Parallaxe
      (Laternen, Fackeln, Glocken, Flechten) scheint durch. Nur ein Faktor auf globalAlpha, keine Bildkosten. */
-  const MIDK = { cellar: 0.6, dungeon: 0.6, belltower: 0.62, lake: 0.55 };
+  const MIDK = { cellar: 0.85, dungeon: 0.85, belltower: 0.85, lake: 0.8 }; /* Runde 3: Fernbild selbst angereichert → wieder deckender */
   Z.w35MidK = bg => (Z.gfx && Z.gfx.off && Z.gfx.off.w35ferne) || !Z.gq || Z.gq.layers === false ? 1 : (MIDK[bg] || 1);
 
   /* W35 Optik: Laufbilanz (Tod/Umkehr/Sieg) – Kacheln ausgewogen verteilen statt einer einzelnen Kachel in der letzten
@@ -370,6 +451,33 @@
   }
   { const md = document.getElementById("modal"); if (md) new MutationObserver(() => { try { raster(); } catch (e) { console.error(e); } }).observe(md, { childList: true, subtree: true }); window.addEventListener("resize", () => { try { raster(); } catch (e) { } }); }
   Z.w35Raster = raster;
+
+  /* W35 Optik: Ausrüstungskarten (Pause → Ausrüstung) zeigen das Symbol der Waffe/Fähigkeit im Kopf – vorher nur Text.
+     Gemalt mit Z.drawIcon (wie Fundbuch/HUD), Rahmen in Seltenheitsfarbe (--rar). Schalter off.agicon. */
+  const css4 = document.createElement("style");
+  css4.textContent = ".ag-karte .w35-ico{float:left;width:42px;height:42px;margin:1px 10px 2px 0;border-radius:7px;border:1px solid color-mix(in srgb,var(--rar,#a0968a) 55%,#2a1c18);background:radial-gradient(circle at 50% 58%,color-mix(in srgb,var(--rar,#a0968a) 26%,transparent),rgba(0,0,0,0) 72%),rgba(10,6,8,.35);box-shadow:inset 0 1px 0 rgba(255,230,190,.08)}.ag-karte .ag-innen{clear:both}@media (max-height:520px){.ag-karte .w35-ico{width:32px;height:32px;margin-right:7px}}";
+  document.head.appendChild(css4);
+  /* W35 Optik: Auftragsfenster – Belohnung als goldene Marke statt Spiegelstrich-Liste, „Annehmen“ als Hauptknopf hervorgehoben */
+  const css5 = document.createElement("style");
+  css5.textContent = ".mbox.auftr .au-lohn{list-style:none;margin:4px 0 8px;padding:0;display:flex;flex-wrap:wrap;gap:6px}.mbox.auftr .au-lohn li{margin:0;padding:3px 10px;border:1px solid rgba(229,180,84,.45);border-radius:999px;background:linear-gradient(rgba(229,180,84,.12),rgba(229,180,84,.04));box-shadow:inset 0 1px 0 rgba(255,230,170,.12)}" +
+    ".mbox.auftr .au-wahl button[data-act='aufAn']{color:var(--gold2,#ffd27a)}";
+  document.head.appendChild(css5);
+  function agIcons() {
+    if ((Z.gfx && Z.gfx.off && Z.gfx.off.agicon) || !Z.drawIcon || !Z.itemDef) return;
+    const P = Z.player; if (!P || !P.slots) return;
+    const items = ["a1", "a2", "s1", "s2"].map(k => P.slots[k]).filter(Boolean);
+    document.querySelectorAll("#modal .ag-karte").forEach(card => {
+      if (card.querySelector(".w35-ico")) return;
+      const kopf = card.querySelector(".ic-kopf"), nm = kopf && kopf.querySelector("b"); if (!nm) return;
+      const name = nm.textContent.trim();
+      const it = items.find(x => { try { const d = Z.itemDef(x); return (Z.itemTitle ? Z.itemTitle(x) : "") === name || Z.L(d.n) === name; } catch (e) { return false; } });
+      if (!it) return; const d = Z.itemDef(it); if (!d || !d.icon) return;
+      const cv = document.createElement("canvas"); cv.className = "w35-ico"; cv.width = 84; cv.height = 84;
+      const c = cv.getContext("2d"); c.scale(84 / 32, 84 / 32); Z.drawIcon(c, d.icon, 16, 17, 22, d.col || (Z.RARITY[it.rar] || {}).col);
+      kopf.parentNode.insertBefore(cv, kopf);
+    });
+  }
+  { const md = document.getElementById("modal"); if (md) new MutationObserver(() => { try { agIcons(); } catch (e) { console.error(e); } }).observe(md, { childList: true, subtree: true }); }
 
   Z.w35SkyBake = function (g, w, h, B, R, world) {
     if (!B || !B.sky || (Z.gfx && Z.gfx.off && Z.gfx.off.w35fern)) return;
