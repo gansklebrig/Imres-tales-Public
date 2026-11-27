@@ -16485,6 +16485,8 @@ function erfWarten(){try{if(G.state==='play'&&G.boss&&!G.boss.dead&&G.boss.hp>0)
  /* im Spiel geöffnete Fenster (Pause, Beutel, Talente …): Tafel lag sonst über dem Fensterinhalt – zeigen, sobald es zu ist */
  if(G.state==='play'&&G.overlay)return true}catch(e){}return false}
 /* läuft eine Tafel noch, wenn im Spiel ein Fenster aufgeht (Pause, Beutel, Truhe …), wird sie bis zum Schließen ausgeblendet */
+/* Offene Dialoge (Hehler, Wette …): Steuerkreuz und Pfeiltasten bleiben im Dialog */
+if(typeof padEls==='function'){const pe0=padEls;padEls=function(){const L=pe0.apply(this,arguments);try{const box=scr&&scr.querySelector('.g2ov');if(box){const F=L.filter(e=>box.contains(e));if(F.length)return F}}catch(e){}return L}}
 /* Tastatur: Pfeiltasten wandern in Menüs wie das Steuerkreuz von Knopf zu Knopf (Enter löst aus) */
 addEventListener('keydown',ev=>{try{if(ev.defaultPrevented||ev.ctrlKey||ev.metaKey||ev.altKey)return;const D={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[ev.code];if(!D)return;
  if(!scr||scr.hidden||(G.state==='play'&&!G.overlay))return;const t=ev.target;if(t&&/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))return;if(typeof stKbCont==='function'&&stKbCont())return;
