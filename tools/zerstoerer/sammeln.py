@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 WURZEL = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 MANIFEST = 'zerstoerer/dateien.json'
 
-FEST = ['zerstoerer.html', 'tonregler.js', 'altcss.js', 'favicon.svg']  # W39 Alt: altcss.js (CSS-Ersatz für alte Engines) lädt zerstoerer.html
+FEST = ['zerstoerer.html', 'tonregler.js', 'favicon.svg']  # altcss.js liegt für das Spiel als zerstoerer/altcss.js im erlaubten Spielordner
 MUSTER = ['zerstoerer/**/*', 'schriften/**/*']
 TON = ['klang', 'amb']
 LIZENZEN = ['klang/LIZENZ.txt']
