@@ -14270,7 +14270,7 @@ function mfFit(h){mfReset(h);h.classList.remove('mfhost','mfd','mfgrid','mfcamp'
  const sideOk=vw>=760&&vh/mz>=440;if(isInv&&sideOk)for(const g of[0,1])mk({d:1,c:1,s:1,g});
  if(!isInv)for(const c of[2,3])mk({d:1,c});
  /* Großbild: hohe Karten (z. B. Optionen) über Spalten verteilen, damit die Schrift größer werden kann */
- if(!isInv&&vw>=2300&&vh>=1000)for(const c of[2,3])mk({d:1,c,sp:1});
+ if(!isInv&&vw>=2300&&vh>=1000&&w.classList.contains("slw")&&!w.classList.contains("cpw"))for(const c of[2,3])mk({d:1,c,sp:1});
  const detTop=on=>{const d=w.querySelector(':scope>#idet2');if(!d)return;const row=[...d.children].filter(x=>x.matches('.row')).pop(),hd=d.querySelector(':scope>.sh-head');if(!row||!hd)return;
   if(on){if(!row._mfNext){row._mfNext=row.nextSibling||'end';hd.after(row);row.classList.add('mfacts')}}else if(row._mfNext){if(row._mfNext==='end')d.appendChild(row);else d.insertBefore(row,row._mfNext);row._mfNext=null;row.classList.remove('mfacts')}};
  w._mfUndo=()=>{detTop(false);unside();if(stb&&stb._mfMv){const n=stb._mfMv.n;if(n&&n.parentNode===w)w.insertBefore(stb,n);stb._mfMv=null}};
