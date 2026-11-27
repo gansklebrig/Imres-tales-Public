@@ -588,9 +588,17 @@
           m.x0 = e.face > 0 ? cxOf(e) : Math.max(a.x0, cxOf(e) - 400); m.x1 = e.face > 0 ? Math.min(a.x1, cxOf(e) + 400) : cxOf(e);
           tele({ k: "band", x0: m.x0, x1: m.x1, y: m.yb, h: 14, dur: PRE(e, 1.0), col: "#ffb040", arrow: e.face });
           FX.text(cxOf(e), e.y - 12, m.high ? L(["Ducken!", "Duck!"]) : L(["Springen!", "Jump!"]), "#ffb040", true);
+          /* W38 Boss: Hinweis auch direkt über Ezekiel (dort schaut man hin), mit Richtungspfeil */
+          if (P && !P.dead && pcx(P) > m.x0 - 40 && pcx(P) < m.x1 + 40 && Math.abs(P.y + P.h - m.fy) < 70) FX.text(pcx(P), P.y - 16, m.high ? "↓ " + L(["Ducken!", "Duck!"]) : "↑ " + L(["Springen!", "Jump!"]), "#ffd27a", true);
+          m.hp0 = P ? P.hp : 0;
         },
         preTick: (e, P, dt) => { e.vx = U.approach(e.vx, 0, 900 * dt); },
-        act: (e, P, m) => { zone(e, (m.x0 + m.x1) / 2, m.yb, m.x1 - m.x0, 14, 0, 1.2, { col: "rgba(255,170,60,.9)", active: 0.15, life: 0.4 }); FX.addShake(3); A.play("zap", { vol: 0.6 }); } },
+        act: (e, P, m) => { zone(e, (m.x0 + m.x1) / 2, m.yb, m.x1 - m.x0, 14, 0, 1.2, { col: "rgba(255,170,60,.9)", active: 0.15, life: 0.4 }); FX.addShake(3); A.play("zap", { vol: 0.6 });
+          /* W38 Boss: Lerntipp nach dem ersten Treffer durch den Runenstrahl (einmal je Spielstand) */
+          const hp0 = P ? P.hp : 0, high = m.high;
+          later(0.45, () => { const Q = Z.player, M = Z.meta; if (!Q || Q.dead || !M || M.w38strahl || !(Q.hp < hp0 - 0.5) || !Z.ui || !Z.ui.notify) return; M.w38strahl = 1; try { Z.saveMeta(); } catch (_) {}
+            const kd = Z.ui.key ? Z.ui.key("down") : "", kj = Z.ui.key ? Z.ui.key("jump") : "";
+            Z.ui.notify("<b>" + L(["Runenstrahl", "Rune Beam"]) + "</b><br><small>" + (high ? L(["Hoher Strahl (Band auf Brusthöhe): ducken ", "High beam (band at chest height): duck "]) + kd : L(["Tiefer Strahl (Band am Boden): springen ", "Low beam (band at the floor): jump "]) + kj) + L([" – das leuchtende Band zeigt die Höhe schon beim Ausholen.", " – the glowing band shows its height during the wind-up."]) + "</small>", { prio: 2, art: "gefahr", key: "w38strahl", dauer: 7000 }); }); } },
       hammerfall: leapSlam({ name: N("Hammerfall", "Hammerfall"), r: 46, pre: 0.65, jump: 520, waves: true, m: 1.35, col: "#ffb040",
         land: (e, P, fy) => Z.spawnHazard({ kind: "fire", x: cxOf(e), y: fy, w: 44, life: 1.6, dmg: dmg(e, 0.25), owner: "e", eff: { burn: 1 } }) }),
       /* Runenkäfig: zwei Säulen sperren ein, dann schlägt es in der Mitte ein – an den Gitterstäben ist Platz */
