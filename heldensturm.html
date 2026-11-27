@@ -16485,6 +16485,8 @@ function erfWarten(){try{if(G.state==='play'&&G.boss&&!G.boss.dead&&G.boss.hp>0)
  /* im Spiel geöffnete Fenster (Pause, Beutel, Talente …): Tafel lag sonst über dem Fensterinhalt – zeigen, sobald es zu ist */
  if(G.state==='play'&&G.overlay)return true}catch(e){}return false}
 /* läuft eine Tafel noch, wenn im Spiel ein Fenster aufgeht (Pause, Beutel, Truhe …), wird sie bis zum Schließen ausgeblendet */
+/* Kleine Bildschirme: Einführungs-Hinweis über die Erzählerzeile heben, wenn diese unten spricht */
+setInterval(()=>{try{const de=document.documentElement;let v=6;if(innerHeight<=520){const e=document.querySelector('.erzSub');if(e&&e.classList.contains('an')&&!e.classList.contains('oben')&&e.getClientRects().length){const r=e.getBoundingClientRect();if(r.height>8&&r.top<innerHeight)v=Math.round(innerHeight-r.top+6)}}const s=v+'px';if(de.style.getPropertyValue('--tutb')!==s)de.style.setProperty('--tutb',s)}catch(er){}},250);
 /* Offene Dialoge (Hehler, Wette …): Steuerkreuz und Pfeiltasten bleiben im Dialog */
 if(typeof padEls==='function'){const pe0=padEls;padEls=function(){const L=pe0.apply(this,arguments);try{const box=scr&&scr.querySelector('.g2ov');if(box){const F=L.filter(e=>box.contains(e));if(F.length)return F}}catch(e){}return L}}
 /* Tastatur: Pfeiltasten wandern in Menüs wie das Steuerkreuz von Knopf zu Knopf (Enter löst aus) */
@@ -26803,7 +26805,7 @@ html.opmenu #qa2lane{display:none}
  html:not(.opmenu) #toast#toast .tm{font-size:12px;line-height:1.3;padding:4px 10px}
  #qa2lane{width:min(94vw,600px);bottom:calc(env(safe-area-inset-bottom,0px) + var(--qa2tb,8px))}
  #qa2lane .tm{font-size:12px;line-height:1.3;padding:4px 10px}
- .tutk{top:auto!important;bottom:calc(env(safe-area-inset-bottom,0px) + 6px)!important;padding:6px 12px 5px!important;font-size:13px!important}
+ .tutk{top:auto!important;bottom:calc(env(safe-area-inset-bottom,0px) + var(--tutb,6px))!important;padding:6px 12px 5px!important;font-size:13px!important}
  .tutk .tutf{margin-top:2px}
 }
 /* 2) Einführung nur im laufenden Spiel */
