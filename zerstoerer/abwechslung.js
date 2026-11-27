@@ -204,9 +204,10 @@
     return L(["Gefühl: ", "Hunch: "]) + [h, v].filter(Boolean).join(L([" und ", " and "])) + " · ~" + d + L([" Schritte", " steps"]);
   }
   /* W38 Abwechslung (Online): Lage als einfache Level-Felder spiegeln – online.js überträgt sie mit jedem Schnappschuss (lvPrims) */
+  const gastAnn = new Set();
   function mirror(lv) {
     const lg = lv && lv.w38; if (!lg || gast()) return;
-    lv.w38k = lg.k; lv.w38paid = !!lg.paid; lv.w38got = lg.got | 0; lv.w38need = lg.need | 0;
+    lv.w38k = lg.k; lv.w38id = lg.seed >>> 0; lv.w38paid = !!lg.paid; lv.w38got = lg.got | 0; lv.w38need = lg.need | 0;
     if (lg.von) lv.w38von = lg.von;
     if (lg.sx != null) { lv.w38sx = Math.round(lg.sx); lv.w38sy = Math.round(lg.sy); }
   }
@@ -548,7 +549,7 @@
     const lv = Z.level; if (!lv || lv.hub || !cam) return;
     const L0 = lo(), S = (Z.gfx && Z.gfx.scale) || 2;
     const lg = lgOf(lv);
-    if (lg && lg.gast && !lv._w38ann && Z.player && !(Z.ui && Z.ui.verdeckt)) { lv._w38ann = true; setTimeout(() => { if (Z.level === lv) announce(lg); }, 600); } /* Gast: Spielzeit-Zeitgeber laufen dort nicht */ /* Online-Gast: Ansage, sobald die Lage im Schnappschuss ankommt */
+    if (lg && lg.gast && !lv._w38ann && Z.player && !(Z.ui && Z.ui.verdeckt)) { lv._w38ann = true; const aid = lv.w38k + ":" + (lv.w38id || 0); if (!gastAnn.has(aid)) { if (gastAnn.size > 40) gastAnn.clear(); gastAnn.add(aid); setTimeout(() => { if (Z.level === lv) announce(lg); }, 600); } } /* W38 QA: nach Rückweg-Tor bekommt der Gast ein neues Level-Objekt – Ansage nur einmal je Lage */ /* Gast: Spielzeit-Zeitgeber laufen dort nicht */ /* Online-Gast: Ansage, sobald die Lage im Schnappschuss ankommt */
     /* Schleier: Fluchnebel (Rand glutrot), Seelenflut (Rand blass rosé) – ab Stufe 1 */
     if (lg && !L0 && lg.k === "seelenflut" && Wd && Hd) {
       c.save(); c.setTransform(1, 0, 0, 1, 0, 0);

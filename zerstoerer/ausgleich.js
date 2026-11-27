@@ -46,6 +46,13 @@
   WTUNE("kampfstab", d => d.combo.forEach((c, i) => { c.dmg = [12, 12, 13, 13, 24][i]; })); /* 8/8/9/9/16 → 12/12/13/13/24 */
   WTUNE("anker", d => d.combo.forEach((c, i) => { c.dmg = [38, 34][i]; }));                 /* 30/26 → 38/34 */
   WTUNE("steinfaust", d => d.combo.forEach((c, i) => { c.dmg = [17, 17, 28][i]; }));        /* 13/13/22 → 17/17/28 */
+  /* W38 Balance (Kampfprüfstand kampf38.py: 4 Gegner, Stufe 3 Söldner / Stufe 5 Rüstungen, gleiche Ausrüstung +0, je 2 Wiederholungen;
+     Median aller Waffen 3,3 s / 5,0 s): Feuerbuch war in beiden Prüfungen am schnellsten (2,0 / 3,0 s) – und das aus sicherer Entfernung;
+     Netzdrüse, Kobold-Schleuder und Ezekiels Bogen lagen weit hinten (5,7 / 25,7 s; 6,6 / 15,0 s; 4,5 / 11,8 s). Vorsichtig, je ≤ 15 %. */
+  WTUNE("feuerkugel", d => { if (d.shoot) d.shoot.dmg = 23; });                              /* 26 → 23 (−12 %) */
+  WTUNE("netzdruese", d => { if (d.shoot) d.shoot.dmg = 4.6; });                             /* 4 → 4,6 (+15 %; Kontrollwaffe, Fesseln + Markierung bleiben ihr Hauptnutzen) */
+  WTUNE("schleuder", d => { if (d.shoot) d.shoot.dmg = 10; });                               /* 9 → 10 (+11 %) */
+  WTUNE("bogen", d => { if (d.shoot) { d.shoot.dmg = 11; d.shoot.dmgFull = 36; } });           /* 10/32 → 11/36 (+10 % / +12,5 %) */
   /* W9: Lebensraub wirkt gegen Bosse und Mini-Bosse gedrosselt (halbe Wirkung, höchstens ~1,2 % Leben/s; bossphasen.js Abschnitt 6) – in den Beschreibungen vermerken */
   const LSN = [" (gegen Bosse gedrosselt)", " (dampened against bosses)"];
   const addNote = d => { if (d && Array.isArray(d) && !String(d[0]).includes("Bosse")) { d[0] += LSN[0]; d[1] += LSN[1]; } };

@@ -225,6 +225,7 @@
     const r = la0.apply(this, arguments);
     try {
       const lv = Z.level;
+      if (lv && lv.hub) try { stimmen(); } catch (e) { }
       if (lv && lv.hub && !rausch() && !gast()) {
         const l = offen();
         if (l.length) setTimeout(() => { if (Z.level !== lv || !Z.ui || !Z.ui.notify) return; Z.ui.notify("<b>🎯 " + L(["Meilensteine bereit: +", "Milestones ready: +"]) + l.reduce((s, o) => s + o.r, 0) + " ◆</b><br><small>" + L(["Pause → Ziele → Abholen", "Pause → Goals → Collect"]) + "</small>", { prio: 1, art: "gold", key: "w38zielhinweis", dauer: 6000 }); }, 4200);
@@ -232,6 +233,41 @@
     } catch (e) { console.error("W38 Meta", e); }
     return r;
   };
+
+  /* ======================= W38 Lager-Stimmen: mehr Sätze der Bewohner =======================
+     Befund: je Bewohner nur 3–4 Lagersätze (Z.R.pick) – nach 10+ Läufen hört man denselben Satz ständig. Je Bewohner kommen drei
+     allgemeine Sätze dazu (in der Stimme der Figur) und ab dem zweiten Lauf ein Satz zu den neuen Inhalten (Lagen, Tagesprüfung,
+     Zielbuch). Nur Ergänzung der Listen in Z.lager.RES[id].idle – nichts wird ersetzt. */
+  const STIMMEN = {
+    edda: { a: [["Ich hab heute drei Gänge gezeichnet. Zwei davon gab es gestern noch nicht.", "I drew three corridors today. Two of them didn't exist yesterday."], ["Nimm die linke Abzweigung. Oder die rechte. Hauptsache, du kommst wieder.", "Take the left fork. Or the right. Just come back."], ["Wenn du einen Raum ohne Ausgang findest – sag Bescheid, bevor du drin bleibst.", "If you find a room with no exit, tell me before you stay in it."]],
+      n: [["Ein Kreuz im Boden? Das ist nicht von mir. Graben solltest du trotzdem.", "A cross on the floor? Not mine. You should still dig."]] },
+    quirin: { a: [["Das hier blubbert. Das soll es auch. Glaube ich.", "This one bubbles. It's supposed to. I think."], ["Wenn es grün raucht, lauf. Wenn es lila raucht, lauf schneller.", "If it smokes green, run. If it smokes purple, run faster."], ["Ich nenne den Trank „Mut“. Er schmeckt nach Angst.", "I call this potion 'Courage'. It tastes like fear."]],
+      n: [["Seelenflut? Bring mir einen Splitter davon. Nur einen. Für die Wissenschaft.", "Soul tide? Bring me one shard of it. Just one. For science."]] },
+    sigrun: { a: [["Die Runen schweigen heute. Das ist auch eine Antwort.", "The runes are silent today. That is an answer too."], ["Du gehst wieder hinein. Das wusste ich, bevor du es wusstest.", "You are going back in. I knew before you did."], ["Ein Faden reißt, ein anderer hält. So ist es immer.", "One thread snaps, another holds. It is always so."]],
+      n: [["Der Sonnenstein zeigt jeden Tag dieselbe Feste. Nur du bist jeden Tag ein anderer.", "The sunstone shows the same keep every day. Only you are different each day."]] },
+    wendel: { a: [["Rex hat heute zweimal geknurrt. Einmal davon war ein Kompliment.", "Rex growled twice today. Once was a compliment."], ["Bestien sind ehrlich. Sie beißen, wenn sie beißen wollen.", "Beasts are honest. They bite when they want to bite."], ["Wer ein Wolfsrudel trennt, hat schon halb gewonnen. Wer es nicht schafft – rennt.", "Split a wolf pack and you've half won. Fail – and you run."]],
+      n: [["Fremde Rudel in fremden Revieren – wenn das Verlies besetzt ist, stimmt die Ordnung nicht mehr.", "Strange packs in strange territory – when the dungeon is occupied, the order is broken."]] },
+    jori: { a: [["Ich hab ein Schwert geschärft. Es ist jetzt kürzer. Ist das schlimm?", "I sharpened a sword. It's shorter now. Is that bad?"], ["Nundro hat genickt. Einmal. Ich glaube, das war Lob.", "Nundro nodded. Once. I think that was praise."], ["Der Amboss ist heiß. Ich weiß das jetzt sehr genau.", "The anvil is hot. I know that very precisely now."]],
+      n: [["Hast du schon ins Zielbuch geschaut? Ich hab meins verloren. Also, ich hatte nie eins.", "Have you checked your book of goals? I lost mine. Well, I never had one."]] },
+    lied: { a: [["Ein Held zog aus, ein Held kam heim, mal ohne Arm, doch nie allein.", "A hero went out, a hero came back, sometimes an arm short, but never off track."], ["Applaus ist auch eine Währung. Ich nehme ihn gern im Voraus.", "Applause is a currency too. I gladly take it in advance."], ["Heute singe ich leise. Das Publikum ist bewaffnet.", "I'll sing quietly today. The audience is armed."]],
+      n: [["Der Zahlmeister zahlt, die Klinge mahnt – wer ihn erwischt, ist reich und erahnt.", "The paymaster pays, the blade reminds – who catches him, riches finds."]] },
+    alwin: { a: [["Kapitel einundvierzig: Ezekiel kommt zurück. Schon wieder. Ich brauche mehr Tinte.", "Chapter forty-one: Ezekiel returns. Again. I need more ink."], ["Die Bosse lesen meine Bücher nicht. Das ist ihr Fehler.", "The bosses don't read my books. That's their mistake."], ["Ein guter Bericht braucht ein Ende. Du lieferst mir ständig Anfänge.", "A good chronicle needs an ending. You keep giving me beginnings."]],
+      n: [["Ich führe jetzt Buch über deine Tagesprüfungen. Der Leser liebt Wiederholungen. Behauptet der Verleger.", "I now keep a record of your daily trials. Readers love repetition. Says the publisher."]] },
+    lotte: { a: [["Alles hat seinen Preis. Manches hat zwei.", "Everything has a price. Some things have two."], ["Gold riecht nicht. Echo riecht es trotzdem.", "Gold doesn't smell. Echo smells it anyway."], ["Ich verkaufe keine Hoffnung. Die ist zu schwer zu liefern.", "I don't sell hope. Too hard to deliver."]],
+      n: [["Eine Kriegskasse ganz für dich allein? Wenn du teilen willst – ich habe eine Tasche frei.", "A war chest all to yourself? If you feel like sharing – I've a bag free."]] },
+    mira: { a: [["Ich zeichne die Feste jeden Abend neu. Sie zeichnet mich zurück.", "I redraw the keep every evening. It draws me back."], ["Du hast meine Seiten gefunden. Lies sie nicht laut vor. Bitte.", "You found my pages. Don't read them aloud. Please."], ["Die Fäden zittern, wenn du gehst. Das ist kein schlechtes Zeichen.", "The threads tremble when you leave. That's not a bad sign."]],
+      n: [["Gezeichnete tragen das Fadenzeichen. Ich kenne es. Ich trug es auch.", "The marked bear the thread sign. I know it. I wore it too."]] }
+  };
+  function stimmen() {
+    const R = Z.lager && Z.lager.RES; if (!R) return;
+    const neuOk = (M().runs | 0) >= 2;
+    for (const k in STIMMEN) {
+      const r = R[k]; if (!r || !Array.isArray(r.idle)) continue;
+      if (!r._w38a) { r._w38a = 1; for (const x of STIMMEN[k].a) r.idle.push(x); }
+      if (neuOk && !r._w38n) { r._w38n = 1; for (const x of STIMMEN[k].n) r.idle.push(x); }
+    }
+  }
+  try { stimmen(); } catch (e) { console.error("W38 Meta", e); }
 
   const css = document.createElement("style");
   css.textContent = [
