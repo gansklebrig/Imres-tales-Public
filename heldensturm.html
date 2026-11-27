@@ -8141,6 +8141,7 @@ function bestKill(e){const id=e.def.id;if(!id||G.bot)return;SAVE.best=SAVE.best|
 const bestMul=e=>e.def.id&&G.mode!=='taeglich'&&bestTier(e.def.id)>=3?1.1:1;
 function renderBestiary(){if(G.bestSub)return rolleBestHtml()+rollenHtml();const L=bestList(),B=bestBonus();const grp={foe:'Gegner',spec:'Besonderheiten',guard:'Wächter',boss:'Bosse'};
  let h=rolleBestHtml()+`<div class="muted" style="font-size:13px">Jede erforschte Stufe stärkt alle Helden: <b style="color:var(--text)">+${f1(B.v*100)}% Schaden und Leben</b> (${B.tiers} / ${B.max}). Erzfeinde erleiden 10% mehr Schaden.</div>`;
+ if(!B.tiers)h+=`<div class="muted" style="font-size:13px;margin-top:10px;padding:12px 14px;border:1px dashed rgba(229,180,84,.3);border-radius:10px;text-align:center">Noch kein Wesen eingetragen. Jeder besiegte Gegner landet hier – mit Bild und Geschichte; je öfter ihr ihn besiegt, desto stärker werden alle Helden. Die Seiten unten zeigen Gegner, Wächter und Bosse.</div>`;
  for(const g of ['foe','spec','guard','boss']){h+=`<div class="eyebrow" style="margin-top:6px">${grp[g]}</div><div class="bestg">`;
   for(const e of L.filter(x=>x.g===g)){const n=(SAVE.best&&SAVE.best[e.id])||0,t=bestTier(e.id,e.g),T=BEST_T[e.g];const known=n>0;
    h+=`<details class="beste ${known?'':'unk'}"><summary><canvas data-foe="${e.id}" width="64" height="64" aria-hidden="true"></canvas><span class="bn">${known?esc(e.def.n):'???'}</span><span class="bt">${'●'.repeat(t)}${'○'.repeat(3-t)}</span></summary>
