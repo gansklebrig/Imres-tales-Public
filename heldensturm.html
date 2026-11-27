@@ -5226,7 +5226,7 @@ function showTitle(keep){unseedRng();if(CLOUD.pend&&!$('cloudAsk'))setTimeout(()
 }
 function drawStage(){heroPicks(0);const c=stageCv;if(!c||!c.isConnected)return;const w=c.clientWidth,h=c.clientHeight;if(!w||!h)return;const SD=SWR?DPR:Math.max(DPR,Math.min(2,window.devicePixelRatio||1)),pw=Math.round(w*SD),ph=Math.round(h*SD);if(c.width!==pw||c.height!==ph){c.width=pw;c.height=ph}
  const g=c.getContext('2d'),id=G.sel||'barradin',col=HCOL[id],t=(performance.now()-stageT0)/1000;g.setTransform(SD,0,0,SD,0,0);g.clearRect(0,0,w,h);
- const x0=w*0.4,gy=h*0.86,s=Math.min(3,h/74);
+ const x0=w*0.4,gy=h*0.86,s=Math.min(3*(c.parentElement&&c.parentElement.classList.contains('slm-r')?Math.max(1,Math.min(2.2,innerHeight/760)):Math.max(1,Math.min(1.5,innerHeight/960))),h/74,w/40);
  g.setTransform(1,0,0,1,0,0);g.drawImage(stageBg(w,h,col,x0,gy,s,SD),0,0);g.setTransform(SD,0,0,SD,0,0);
  g.strokeStyle=col+'70';g.lineWidth=1.5;g.beginPath();g.ellipse(x0,gy,34*s,7*s,0,0,TAU);g.stroke();g.globalAlpha=0.5;g.beginPath();g.ellipse(x0,gy,26*s,5*s,0,0,TAU);g.stroke();g.globalAlpha=1;
  for(let i=0;i<26;i++){const q=(t*0.12+i/26)%1;const x=x0+Math.sin(i*12.9898)*w*0.48;g.globalAlpha=(1-q)*0.7;circ(g,x,gy-q*h*0.95,1+(i%3)*0.7,col)}g.globalAlpha=1;
