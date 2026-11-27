@@ -43553,6 +43553,18 @@ function rhSonne(K){const T=K.T||{};
     K.rhRing={x:ok[0],y:ok[1],used:0};RH.ring=1}}}catch(e){console.error('rhythm-ring',e)}
 }
 if(typeof kaDeko==='function'){const kd2=kaDeko;kaDeko=function(S){const r=kd2.apply(this,arguments);try{const K=G.ka;if(!RH.aus&&K&&!K.rhP&&K.T&&K.T.mas==='wald'&&G.deco)rhSonne(K)}catch(e){}return r}}
+/* Straße frei: Bäume, Büsche, Steine, Pilze … lagen als Deko mitten auf der gezeichneten Straße (je Karte 20–100 Stück) – man lief
+   „durch“ Bäume. Die vorhandene Freiräumung prüfte nur Wegpunkte (lange Teilstücke dazwischen blieben belegt) und nur Hindernisse.
+   Jetzt: Abstand zur Straßenlinie je Teilstück; Pflanzen/Steine rücken an den Rand, Hindernisse gleicher Art entfallen. */
+const WEG_VEG=new Set(['tree','bush','rock','mush','grass','stake','reeds','rubble','bones','deadtree','herbs','moss','roots','pine','fern','flowers']);
+function wegFrei(){const R=G.road;if(RH.aus||!R||R.length<2||!G.deco)return;const K=G.ka;if(K&&K._rhWeg)return;if(K)K._rhWeg=1;
+ const nP=(x,y)=>{let m=1e18,px=0,py=0;for(let i=1;i<R.length;i++){const a=R[i-1],b=R[i];const dx=b[0]-a[0],dy=b[1]-a[1],l=dx*dx+dy*dy||1;let t=((x-a[0])*dx+(y-a[1])*dy)/l;t=t<0?0:t>1?1:t;const qx=a[0]+dx*t,qy=a[1]+dy*t,d=(qx-x)*(qx-x)+(qy-y)*(qy-y);if(d<m){m=d;px=qx;py=qy}}return[Math.sqrt(m),px,py]};
+ let mv=0;for(const d of G.deco){if(!WEG_VEG.has(d.k)||d.edge)continue;const rr=d.k==='tree'||d.k==='deadtree'||d.k==='pine'?34*(d.s||1):14*(d.s||1);const [dd,px,py]=nP(d.x,d.y);if(dd>=75+rr*0.6)continue;
+  let ux=d.x-px,uy=d.y-py;const l=Math.hypot(ux,uy);if(l<1){ux=Math.random()<0.5?1:-1;uy=0.3}else{ux/=l;uy/=l}const ziel=84+rr*0.7+Math.random()*26;d.x=px+ux*ziel;d.y=py+uy*ziel;mv++}
+ RH.wegDeko=mv;
+ if(G.blk&&typeof KA2_WEGFREI!=='undefined'){const n0=G.blk.length;G.blk=G.blk.filter(b=>{if(!(b.wl===1&&!b.kaPf&&b.kaTor==null&&!b.kaM&&KA2_WEGFREI.has(b.k)))return true;const x=b.t==='c'?b.x:b.x+b.w/2,y=b.t==='c'?b.y:b.y+b.h/2,r=b.t==='c'?(b.r||20):Math.max(b.w,b.h)/2;return nP(x,y)[0]>=r+60});
+  RH.wegBlk=n0-G.blk.length;if(RH.wegBlk&&typeof blkRaster==='function')try{blkRaster()}catch(e){}}}
+if(typeof kaDeko==='function'){const kd3=kaDeko;kaDeko=function(S){const r=kd3.apply(this,arguments);try{wegFrei()}catch(e){console.error('rhythm-weg',e)}return r}}
 function sonneAn(){try{if(typeof wxIs!=='function')return 1;if(wxIs('regen')||wxIs('gewitter')||wxIs('schnee'))return 0;if(wxIs('nacht')||G.themeKey==='nacht')return -1;return wxIs('daemmer')?0.75:wxIs('nebel')?0.8:1}catch(e){return 1}}
 if(typeof drawDeco==='function'){const dd=drawDeco;drawDeco=function(d,t){if(d&&d.k==='rh_sonne'){const st=sonneAn();if(!st)return;const c=cx;
  /* Nacht: Mondlichtung – fahler Lichtfleck und Glühwürmchen statt Sonnenbahnen */
