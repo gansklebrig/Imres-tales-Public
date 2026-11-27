@@ -24035,7 +24035,7 @@ function npDingArt(c,p,t,leicht){const x=p.x,y=p.y,w=p.type;
  else if(w==='feuer'){ell(c,x,y+6,28,8,'rgba(0,0,0,.3)');npArt(c,{m:NP_REISENDE[0]},x-38,y-4,t,0.88,1,11);npArt(c,{m:NP_REISENDE[1]},x+38,y-6,t,0.88,-1,23);
   for(let i=0;i<7;i++){const a=i/7*TAU;hC(c,x+Math.cos(a)*14,y+2+Math.sin(a)*5.5,4,i%2?'#6e6864':'#5e5854',HOL,0.7)}
   ln(c,HOL,4.4,x-11,y+3,x+11,y-2);ln(c,'#6a4424',3,x-11,y+3,x+11,y-2);ln(c,HOL,4.4,x-11,y-2,x+11,y+3);ln(c,'#7a5230',3,x-11,y-2,x+11,y+3);
-  const fl=leicht?0:Math.sin(t*9+p.seed)*2;hP(c,'#ff8a2a',null,0,[x-8,y+1,x+8,y+1,x+fl,y-19]);hP(c,'#ffd060',null,0,[x-4,y+1,x+4,y+1,x+fl*0.6,y-10]);
+  const fl=leicht?0:Math.sin(t*9+p.seed)*2;{const tg=(ox,w,h,col,ph)=>{const sw=leicht?0:Math.sin(t*8+(p.seed||0)*5+ph)*1.4;c.fillStyle=col;c.beginPath();c.moveTo(x+ox-w,y+1);c.bezierCurveTo(x+ox-w*1.1,y-h*0.45,x+ox-w*0.3,y-h*0.78,x+ox+sw,y-h);c.bezierCurveTo(x+ox+w*0.3,y-h*0.78,x+ox+w*1.1,y-h*0.45,x+ox+w,y+1);c.closePath();c.fill()};tg(0,8.5,19+fl,'#e8602a',0);tg(-3.5,4,13-fl,'#ff8a2a',1.2);tg(3.5,4,15+fl*0.7,'#ff8a2a',2.4);tg(0,4.5,10+fl*0.5,'#ffd060',0.8);tg(0,1.8,4.5,'#fff0c0',0)}
   if(!leicht){c.globalCompositeOperation='lighter';glow(x,y-6,54,'#ff9a3a',0.3+0.08*Math.sin(t*7),true);c.globalCompositeOperation='source-over';c.globalAlpha=1}}
  else if(w==='brunnen'){if(p.ax==null){hC(c,x,y,12,'#6e6864',HOL,1);hC(c,x,y,8,'#14161a')}}
  else if(w==='quelle'){ell(c,x,y+4,22,8,'rgba(0,0,0,.25)');for(let i=0;i<8;i++){const a=i/8*TAU;hC(c,x+Math.cos(a)*16,y+Math.sin(a)*7,4.2,i%2?'#76706a':'#66605a',HOL,0.7)}
