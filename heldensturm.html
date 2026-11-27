@@ -16410,9 +16410,11 @@ ${rim}<circle cx="32" cy="32" r="${d.r==='p'?22.5:21.5}" fill="url(#${gid}b)" st
 SND.erfolg=()=>{const ok=['harfe_79','harfe_83','harfe_86','harfe_91'].map((n,i)=>smp(n,0.22,{d:i*0.07,len:1.2}))[0];smp('glock_96',0.16,{d:0.22,len:1.4});smp('glock_103',0.1,{d:0.3,len:1.2});
  if(!ok)[659,784,988,1319].forEach((f,i)=>tone(f,0.3,'triangle',0.035,null,i*0.07));try{pad([392,493.9,587.3,784],1.6,0.025,0.04,2400)}catch(e){}};
 SND.erfolg_p=()=>{SND.erfolg();try{smp('glock_108',0.14,{d:0.5,len:1.6});smp('schelle1',0.14,{d:0.42,len:1})}catch(e){}};
-function erfWarten(){try{if(G.state==='play'&&G.boss&&!G.boss.dead&&G.boss.hp>0)return true}catch(e){}return false}
+function erfWarten(){try{if(G.state==='play'&&G.boss&&!G.boss.dead&&G.boss.hp>0)return true;
+ /* kleine Fenster: über Zwischen-/Lagerbildschirmen deckte die Erfolgs-Tafel den Inhalt ab – zeigen, sobald wieder gespielt wird */
+ if((innerWidth<=760||innerHeight<=480)&&(G.state==='between'||G.state==='camp'||G.state==='end'||G.overlay))return true}catch(e){}return false}
 function erfPump(){if(ERF.cur||!ERF.q.length)return;if(G&&G.bot){ERF.q.length=0;return}
- const now=performance.now();if(erfWarten()){if(!ERF.waitT)ERF.waitT=now;if(now-ERF.waitT<40000){clearTimeout(ERF.pt);ERF.pt=setTimeout(erfPump,700);return}}ERF.waitT=0;
+ const now=performance.now();if(erfWarten()){if(!ERF.waitT)ERF.waitT=now;if(now-ERF.waitT<(G.state==='play'&&!G.overlay?40000:180000)){clearTimeout(ERF.pt);ERF.pt=setTimeout(erfPump,700);return}}ERF.waitT=0;
  const id=ERF.q.shift(),d=ERF_ID[id];if(!d){erfPump();return}erfZeig(d)}
 function erfZeig(d,dur){const R=ERF_RAR[d.r];let el=document.getElementById('erfPop');if(el)el.remove();el=document.createElement('div');el.id='erfPop';el.className='r-'+d.r;el.setAttribute('role','status');el.setAttribute('aria-live','polite');
  dur=dur||(d.r==='p'?6500:5200);el.style.setProperty('--ec',R.c);el.style.setProperty('--edur',dur/1000+'s');
@@ -43897,6 +43899,11 @@ body.erzEck:not(.chrAuf) .erzSub,body.erzEck:not(.chrAuf) .erzSub.oben{left:auto
 body.erzEck:not(.chrAuf) .erzSub .erzBild{width:26px!important;height:26px!important}
 body.erzEck:not(.chrAuf) .erzSub .erzZeile{font-size:12.5px!important;line-height:1.18!important}
 body.erzEck:not(.chrAuf) .erzSub .erzWer{display:none!important}
+@media (max-width:760px),(max-height:480px){body.erzEck #erfPop{top:4px!important;bottom:auto!important;padding:4px 12px!important;gap:8px!important;min-height:0!important;width:auto!important;max-width:min(80vw,420px)!important;left:50%!important;right:auto!important;margin-left:0!important;transform:translateX(-50%)!important}
+ body.erzEck #erfPop .erf-pi,body.erzEck #erfPop .erf-pd{display:none!important}
+ body.erzEck #erfPop .erf-pe{display:none!important}
+ body.erzEck #erfPop .erf-pn{font-size:13px!important;margin:0!important;white-space:nowrap}
+ body.erzEck #erfPop .erf-pn::before{content:'Erfolg: ';font-size:11px;color:var(--ec);font-family:inherit}}
 @media (max-width:760px),(max-height:480px){body.erzEck:not(.chrAuf) .erzSub,body.erzEck:not(.chrAuf) .erzSub.oben{max-width:240px!important;right:4px!important;bottom:4px!important}}`;
 document.head.appendChild(css);
 /* Im Spiel: Untertitel-Kasten unten mittig nie über Trank-/Sprint-Knopf (#util) – sobald Fähigkeiten gelernt sind, rücken diese
