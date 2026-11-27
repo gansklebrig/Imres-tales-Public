@@ -10515,7 +10515,7 @@ function dmPauseHtml(){const L=mpL().filter(Boolean);if(!L.length||G.state!=='pl
  <div class="dmGrid">${L.map((q,i)=>dmCard(q,q.dmR,'ganzer Lauf',i)).join('')}</div>
  ${st?`<details class="dmSub"><summary class="muted">Nur diese Stufe</summary><div class="dmGrid">${L.map((q,i)=>dmCard(q,q.dmS,'diese Stufe',i)).join('')}</div></details>`:''}</details>`}
 function dmGuestHtml(me){try{if(!me)return'';const D=dmUnpack(me.dmN);if(!D)return'';return`<details class="card dmDet" ${DMUI.open?'open':''}><summary><span class="eyebrow" style="margin:0">Deine Schadensquellen</span></summary><div class="dmGrid">${dmCard(me,D,'ganzer Lauf')}</div></details>`}catch(e){return''}}
-const DMUI={open:false};document.addEventListener('toggle',ev=>{const t=ev.target;if(t&&t.classList&&t.classList.contains('dmDet'))DMUI.open=t.open},true);
+const DMUI={open:true};document.addEventListener('toggle',ev=>{const t=ev.target;if(t&&t.classList&&t.classList.contains('dmDet'))DMUI.open=t.open},true);
 /* Für Bots/Tests: Lauf + Stufen eines Spielers */
 function dmSum(q){q=q||P;return{run:q.dmR||{},stage:q.dmS||{},hist:q.dmH||{},ult:q.hero.tree.filter(n=>n.ult).map(n=>n.id)}}
 for(const k of ['dmR','dmS','dmH','dmNT','dmSi'])NETPBL.add(k);
