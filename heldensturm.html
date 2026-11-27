@@ -38324,6 +38324,22 @@ if(typeof AR_PDRAW==='object'&&AR_PDRAW.ar_ei){const ei0=AR_PDRAW.ar_ei;AR_PDRAW
   if(p.act===1){c.strokeStyle='rgba(60,40,50,.8)';c.lineWidth=1;c.beginPath();c.moveTo(-1,-15);c.lineTo(1,-11);c.lineTo(-1,-8);c.moveTo(4,-6);c.lineTo(7,-3);c.stroke();c.globalAlpha=0.55;c.fillStyle='#5a3a4a';c.beginPath();c.arc(0,-11,2.6,0,TAU);c.fill();c.globalAlpha=1}
   c.fillStyle='rgba(255,255,255,.18)';c.beginPath();c.ellipse(-2,-14,2.2,1.2,-0.5,0,TAU);c.fill();
   c.restore()}}
+/* Arena: Prüfungs- und Opferaltar mit Stufen, Quadern, Zierkante und Schale (Prüfung: schwebende Lichtkugel; Opfer: Blutrinnen) */
+if(typeof AR_PDRAW==='object'&&AR_PDRAW.ar_altar){AR_PDRAW.ar_altar=function(p,t){const c=cx,x=p.x,y=p.y,op=p.fv===1,base=(G.theme&&G.theme.base)||'#333';c.save();
+  c.fillStyle='rgba(0,0,0,.35)';c.beginPath();c.ellipse(x,y+11,32,10,0,0,TAU);c.fill();
+  const st=op?'#2a1c1e':bT(base,0.3),st2=op?'#3a2428':bT(base,0.45),st3=op?'#4a2c30':bT(base,0.6);
+  c.fillStyle=st;c.fillRect(x-31,y+2,62,9);c.fillStyle=st2;c.fillRect(x-31,y+2,62,2);
+  c.fillStyle=st2;c.fillRect(x-24,y-16,48,19);c.strokeStyle='rgba(0,0,0,.45)';c.lineWidth=1;c.beginPath();c.moveTo(x-24,y-7);c.lineTo(x+24,y-7);c.moveTo(x-8,y-16);c.lineTo(x-8,y-7);c.moveTo(x+8,y-16);c.lineTo(x+8,y-7);c.moveTo(x,y-7);c.lineTo(x,y+3);c.stroke();
+  c.fillStyle='rgba(255,245,225,.07)';c.fillRect(x-24,y-16,6,19);c.fillStyle='rgba(0,0,0,.22)';c.fillRect(x+18,y-16,6,19);
+  c.fillStyle=st3;c.fillRect(x-29,y-22,58,7);c.fillStyle='rgba(255,240,210,.12)';c.fillRect(x-29,y-22,58,1.6);c.fillStyle=op?'#8a2a2a':'#c8963a';c.fillRect(x-29,y-16,58,1.4);
+  c.strokeStyle='rgba(0,0,0,.7)';c.lineWidth=1.2;c.strokeRect(x-29,y-22,58,7);
+  if(op){c.fillStyle='#2a1012';c.beginPath();c.ellipse(x,y-22,12,4,0,0,TAU);c.fill();c.fillStyle='#8a1424';c.beginPath();c.ellipse(x,y-22,9,2.8,0,0,TAU);c.fill();c.fillStyle='rgba(255,120,130,.35)';c.beginPath();c.ellipse(x-2,y-23,4,1,0,0,TAU);c.fill();
+   for(let i=0;i<3;i++){const xx=x-14+i*14,l=6+((i*5)%4)+Math.max(0,Math.sin(t*0.8+i))*2;c.strokeStyle='#6a0c18';c.lineWidth=2;c.beginPath();c.moveTo(xx,y-15);c.lineTo(xx,y-15+l);c.stroke();c.fillStyle='#8a1424';c.beginPath();c.arc(xx,y-15+l,1.4,0,TAU);c.fill()}}
+  else{const a=(G.arN||[])[p.ai],act=a&&a.s===1,b=Math.sin(t*2)*2,cy=y-34+b;c.fillStyle='#5a4a30';c.beginPath();c.ellipse(x,y-22,9,3,0,0,TAU);c.fill();
+   c.globalCompositeOperation='lighter';c.globalAlpha=0.35+0.15*Math.sin(t*3);c.fillStyle=act?'#ffe9a0':'#f2d24c';c.beginPath();c.arc(x,cy,12,0,TAU);c.fill();c.globalAlpha=1;c.globalCompositeOperation='source-over';
+   c.fillStyle=act?'#ffe9a0':'#f2d24c';c.beginPath();c.arc(x,cy,6.5,0,TAU);c.fill();c.globalAlpha=0.6+0.3*Math.sin(t*3);c.fillStyle='#fff8d0';c.beginPath();c.arc(x-1.5,cy-1.5,2.8,0,TAU);c.fill();c.globalAlpha=1}
+  if(p.prog>0){c.strokeStyle=op?'#ff5a6a':'#ffd36a';c.lineWidth=4;c.beginPath();c.arc(x,y-4,34,-Math.PI/2,-Math.PI/2+TAU*p.prog);c.stroke()}
+  c.restore()}}
 /* Weltschriften (Namen, „Siegel“ …) liegen auf der scharfen Textebene über allem – unter der Minikarte wegradieren, damit sie nicht über der Karte stehen */
 if(typeof wlMini==='function'&&typeof render==='function'){const _wm2=wlMini;let mm=0;wlMini=function(){const r=_wm2.apply(this,arguments);mm=1;return r};const _rd2=render;render=function(){mm=0;const r=_rd2.apply(this,arguments);try{if(mm&&TXO.on&&TXO.n>0&&TXO.cv&&!TXO.cv.hidden){const B=WLMM.box;if(B){const f=DPR*TXO.k,g=TXO.g;g.save();g.setTransform(1,0,0,1,0,0);g.clearRect(Math.floor((B.x-2)*f),Math.floor((B.y-2)*f),Math.ceil((B.S+4)*f),Math.ceil((B.S+4)*f));g.restore()}}}catch(e){}return r}}
 /* ================= Paket „kartgr“: Größe der Minikarte einstellbar – window.__hsKARTGR =================
