@@ -16467,7 +16467,7 @@ ${rim}<circle cx="32" cy="32" r="${d.r==='p'?22.5:21.5}" fill="url(#${gid}b)" st
 SND.erfolg=()=>{const ok=['harfe_79','harfe_83','harfe_86','harfe_91'].map((n,i)=>smp(n,0.22,{d:i*0.07,len:1.2}))[0];smp('glock_96',0.16,{d:0.22,len:1.4});smp('glock_103',0.1,{d:0.3,len:1.2});
  if(!ok)[659,784,988,1319].forEach((f,i)=>tone(f,0.3,'triangle',0.035,null,i*0.07));try{pad([392,493.9,587.3,784],1.6,0.025,0.04,2400)}catch(e){}};
 SND.erfolg_p=()=>{SND.erfolg();try{smp('glock_108',0.14,{d:0.5,len:1.6});smp('schelle1',0.14,{d:0.42,len:1})}catch(e){}};
-function erfWarten(){try{if(G.state==='play'&&G.boss&&!G.boss.dead&&G.boss.hp>0)return true;
+function erfWarten(){try{if(G.state==='play'&&G.boss&&!G.boss.dead&&G.boss.hp>0)return true;if(document.querySelector('.g2box'))return true;
  /* kleine Fenster: über Zwischen-/Lagerbildschirmen deckte die Erfolgs-Tafel den Inhalt ab – zeigen, sobald wieder gespielt wird */
  if((innerWidth<=760||innerHeight<=480)&&(G.state==='between'||G.state==='camp'||G.state==='end'))return true;
  /* im Spiel geöffnete Fenster (Pause, Beutel, Talente …): Tafel lag sonst über dem Fensterinhalt – zeigen, sobald es zu ist */
