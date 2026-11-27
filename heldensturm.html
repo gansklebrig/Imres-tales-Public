@@ -64,6 +64,7 @@
 /* Spielmodus-Seite auf kleinen Handys: Karten nicht zusammendrücken (Schwierigkeit lag sonst über „Hardcore“); das Heldenbild gibt Platz ab */.slp>.slmodes,.slp>.slrow,.slp>.slnote,.slp>.slp-h{flex-shrink:0}
 /* Schmale Handys: Einstellungszeilen mit drei oder mehr Knöpfen – Knöpfe unter den Text statt den Text in eine Wortsäule zu drücken */@media (max-width:480px){.up:has(>.row>button:nth-child(3)){grid-template-columns:minmax(0,1fr)!important}.up:has(>.row>button:nth-child(3))>.row{justify-content:flex-end;flex-wrap:wrap!important}}
 /* Hochformat-Handy im Spiel: Hinweisspur nicht auf halbe Breite (sechs Zeilen à drei Wörter), sondern links bis vor die runden Knöpfe */@media (max-width:600px) and (orientation:portrait){html:not(.opmenu) body:not(.imresTitel) #qa2lane{left:8px;right:auto;margin:0;width:calc((100vw - 112px) / var(--hz,1))}}
+/* Touch: Zoomknöpfe des Sternbilds stehen oben rechts – die Resonanzen-Zeile oben links hält davon Abstand */@media (pointer:coarse){.stmap .rsMap{max-width:calc(100% - 140px)!important}.stmap .spkhint.spkhint{left:8px!important;transform:none!important;max-width:calc(100% - 150px)!important}}
 /* Großbild: Eckknöpfe des Titels mitwachsen lassen */@media (min-width:2200px) and (min-height:1300px){#imresBack{font-size:15px;padding:6px 14px}.camp-top .slbtn{font-size:20px}.mfbar .mft{font-size:17px}}@media (min-width:1900px) and (min-height:1000px){.slm>.slp{zoom:1.15;width:calc(100% / 1.15)}}@media (min-width:2300px) and (min-height:1350px){.slm>.slp{zoom:1.32;width:calc(100% / 1.32)}.slm-in>.slm-l{zoom:1.28}}@media (min-width:2200px) and (min-height:1300px){.wrap.ivg .bag.ivsz .it .ico.ico{width:clamp(20px,calc(var(--ivs) * .4),58px)!important;height:clamp(20px,calc(var(--ivs) * .4),58px)!important}}
 </style>
 <script src="tonregler.js?v=1"></script>
@@ -19233,7 +19234,7 @@ function tdZoom(el){let z=1;for(let e=el;e&&e.nodeType===1;e=e.parentElement){co
  st.setProperty=function(k,v,pr){try{
   if(k==='--stsw'){const H=parseFloat(st.height)||999,W=parseFloat(st.maxWidth)||999;if(h.classList.contains('stfrow')&&H<480){h.classList.add('tdlow');v=Math.round(W*0.5)+'px'}}
   else if(k==='--stmh'){const W=parseFloat(st.maxWidth)||999,g=w.querySelector('.stgrid'),z=parseFloat(st.zoom)||1,gh=g?g.getBoundingClientRect().height/z:0;
-   if(W<620&&gh){h.classList.add('tdph');v=Math.round(Math.max(150,Math.min(parseFloat(v)||999,gh-465)))+'px'}}}catch(e){}
+   if(W<620&&gh){h.classList.add('tdph');v=Math.round(Math.max(150,Math.min(parseFloat(v)||999,gh-420)))+'px'}}}catch(e){}
   return sp.call(this,k,v,pr)};
  try{return _fit.apply(this,arguments)}finally{delete st.setProperty;
   /* zweiter Durchgang: die Aufteilung steht jetzt fest */
