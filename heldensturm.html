@@ -26909,7 +26909,7 @@ const qa2Menu=()=>!scr.hidden;
 {const t1=toast;toast=function(msg,col,o){const n0=toastEl.children.length,last=toastEl.lastElementChild;const r=t1.apply(this,arguments);
  try{const d=toastEl.lastElementChild,neu=d&&d!==last&&toastEl.children.length>=Math.min(n0+1,MOBIL?2:4);if(neu)d.dataset.q2m=qa2Menu()?'1':'0';
   if(neu&&!qa2Menu()&&!qa2Klein()){const txt=d.textContent||'';
-   if(txt.length>110){const L=qa2Lane();L.appendChild(d);while(L.children.length>2)L.firstChild.remove()}}}catch(e){}return r}}
+   /* kleine Fenster (unter 1100×650): schon ab 70 Zeichen nach unten – zwei mittlere Karten deckten sonst den Helden zu */const lim=(innerWidth<1100||innerHeight<650)?70:110;if(txt.length>lim){const L=qa2Lane();L.appendChild(d);while(L.children.length>2)L.firstChild.remove()}}}catch(e){}return r}}
 /* lange Spiel-Hinweise (Spielweise u. Ä.) nicht als große Karte über ein gerade geöffnetes Fenster legen */
 function qa2MenuPutz(){if(!qa2Menu())return;for(const d of [...toastEl.children])if(d.dataset&&d.dataset.q2m==='0'&&(d.textContent||'').length>110)d.remove()}
 /* Abstände: Menü-Meldungen über der Startleiste des Lagers; Handheld-Meldungen über der Einführung */
