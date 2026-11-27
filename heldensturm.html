@@ -12,7 +12,9 @@
 <meta property="og:title" content="Heldensturm">
 <meta property="og:description" content="Das Roguelike zu Imres Tales: 15 Orte der Kampagne, Wetter und Tageszeiten, Wächter, Bosse, Beute und Talente – allein, zu viert am selben Bildschirm oder online.">
 <meta property="og:image" content="https://imrestales.de/vorschau.jpg">
-<style>[hidden]{display:none!important}body{margin:0}</style>
+<style>[hidden]{display:none!important}body{margin:0}
+/* Großbild: Eckknöpfe des Titels mitwachsen lassen */@media (min-width:2200px) and (min-height:1300px){#imresBack{font-size:15px;padding:6px 14px}.camp-top .slbtn{font-size:20px}.mfbar .mft{font-size:17px}}
+</style>
 <script src="tonregler.js?v=1"></script>
 <script src="heldensturm-ton.js?v=1" defer></script>
 <title>Heldensturm</title>
@@ -2735,7 +2737,7 @@ function drawDeco(d,t){const c=cx,s=d.s;c.save();c.translate(d.x,d.y);c.scale(s,
     const col=['#5a7a3a','#7a8a3a','#6a5a7a'][k];for(let j=-2;j<=2;j++){c.strokeStyle=col;c.lineWidth=1.6;c.beginPath();c.moveTo(x+sw*0.3,-12);c.lineTo(x+j*2+sw,-1-Math.abs(j));c.stroke()}
     c.fillStyle=col;c.beginPath();c.ellipse(x+sw*0.8,-4,3.4,4.5,0,0,TAU);c.fill();c.fillStyle='#8a6a44';c.fillRect(x-1.5+sw*0.3,-13,3,2)}break;
   case'web':c.strokeStyle='rgba(240,237,230,.32)';c.lineWidth=1;for(let k=0;k<8;k++){const a=k/8*TAU;c.beginPath();c.moveTo(0,0);c.lineTo(Math.cos(a)*30,Math.sin(a)*30);c.stroke()}for(let r=8;r<=28;r+=7){c.beginPath();for(let k=0;k<=8;k++){const a=k/8*TAU;k?c.lineTo(Math.cos(a)*r,Math.sin(a)*r):c.moveTo(Math.cos(a)*r,Math.sin(a)*r)}c.stroke()}break;
-  case'abyss':ell(c,0,0,46,26,'#08070b');c.strokeStyle='rgba(0,0,0,.6)';c.lineWidth=6;c.beginPath();c.ellipse(0,0,48,28,0,0,TAU);c.stroke();break;
+  case'abyss':c.strokeStyle='rgba(0,0,0,.45)';c.lineWidth=8;c.beginPath();c.ellipse(0,1,49,29,0,0,TAU);c.stroke();ell(c,0,0,46,26,'#3a332e');ell(c,0,1.5,44,24,'#1e1a18');ell(c,0,3,41,21,'#0e0c0e');ell(c,0,5,36,17,'#060508');c.strokeStyle='#4a423a';c.lineWidth=1.2;c.beginPath();c.ellipse(0,0,46,26,0,3.3,6.1);c.stroke();for(let k=0;k<9;k++){const a=k/9*TAU+d.v*3,r=0.92+((k*37)%5)*0.03;poly(c,k&1?'#4a443e':'#3e3934',Math.cos(a)*46*r-3,Math.sin(a)*26*r,Math.cos(a)*46*r,Math.sin(a)*26*r-3,Math.cos(a)*46*r+3,Math.sin(a)*26*r+1)}break;
   case'rune':{/* eingravierte Bodenrune: je Stein eine eigene Glyphe, leiser Schimmer – wirkt nicht mehr wie ein anklickbares Zeichen */
    const RG=RUNE_GL[Math.floor(d.v*RUNE_GL.length)%RUNE_GL.length],ph=0.5+0.5*Math.sin(t*1.6+d.v*6),col=G.theme.rune||'#f4ca75';
    c.lineCap='round';c.lineJoin='round';const pf=()=>{c.beginPath();c.arc(0,0,16,0,TAU);for(const L of RG){c.moveTo(L[0],L[1]);for(let i=2;i<L.length;i+=2)c.lineTo(L[i],L[i+1])}};
