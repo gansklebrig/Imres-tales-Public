@@ -145,7 +145,10 @@
   function tipp(k) {
     const m = Z.meta; if (!m || seenTip.has(k)) return; seenTip.add(k);
     const s = m.w38elite = (m.w38elite && typeof m.w38elite === "object") ? m.w38elite : {};
-    if (s[k]) return; s[k] = 1; try { Z.saveMeta(); } catch (_) {}
+    if (s[k]) return; s[k] = 1;
+    const OS = Z.online && Z.online.S; /* W38 Online: Gast spielt auf einer Kopie – im echten Spielstand mitmerken, gespeichert nach der Sitzung */
+    if (OS && OS.metaReal && OS.metaReal !== m) { const r = OS.metaReal; r.w38elite = (r.w38elite && typeof r.w38elite === "object") ? r.w38elite : {}; r.w38elite[k] = 1; }
+    try { Z.saveMeta(); } catch (_) {}
     if (Z.ui && Z.ui.notify) Z.ui.notify("<b>" + esc(L(["Neue Elite: ", "New elite: "]) + L(NEU[k].n)) + "</b><br><small>" + esc(L(NEU[k].tip)) + "</small>", { prio: 2, art: "gefahr", key: "w38elite" + k, dauer: 6500 });
   }
   const tk0 = Z.ebenenTick;
@@ -158,8 +161,13 @@
   const al0 = Z.drawAfterLight;
   const drawS = safe(draw, "draw");
   Z.drawAfterLight = function (c, cam, Wd, Hd, t) { if (al0) al0.apply(this, arguments); drawS(c, cam, t); };
+  let gTipT = 0;
   function draw(c, cam, t) {
     if (!cam || !Z.level || Z.level.hub) return;
+    if (gast() && t - gTipT > 0.5) { /* W38 Online: Erstbegegnungs-Hinweis auch beim Gast (Weltschritt läuft dort nicht) */
+      gTipT = t; const P = Z.player;
+      if (P) for (const e of Z.enemies) if (!e.dead && MEINE.has(e.elite) && Math.abs(e.x - P.x) < 360 && Math.abs(e.y - P.y) < 220) tipp(e.elite);
+    }
     let any = false; for (const e of Z.enemies) if (!e.dead && MEINE.has(e.elite)) { any = true; break; }
     if (!any) for (const h of Z.hazards || []) if (h.w38bann) { any = true; break; }
     if (!any) return;

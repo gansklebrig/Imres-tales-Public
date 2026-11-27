@@ -11,7 +11,7 @@
       (bild.js G.lava-Läufe), dazu vereinzelt Glutfäden.
    Grafikstufen: Stufe 0/Handheld (lean): nur wenige Tropfen beim Eintauchen, keine Ringe, kein Atem, kein Flimmern.
    Stufe 1: Spritzer + Ringe, Atem. Stufe ≥ 2: alles. Kein Blau (Wasser grünlich-grau wie im Bestand).
-   Schalter: Z.gfx.off.w38optik = true (alles aus), .w38tauch, .w38atem, .w38hitze. Prüfhilfe Z.optik3.splash(x,y,"lava"|"wasser"). */
+   Schalter: Z.gfx.off.w38optik = true (alles aus), .w38tauch, .w38atem, .w38hitze, .w38glut. Prüfhilfe Z.optik3.splash(x,y,"lava"|"wasser"). */
 (function () {
   "use strict";
   const Z = window.Z; if (!Z || Z.optik3) return;
@@ -165,8 +165,39 @@
   const al0 = Z.drawAfterLight;
   Z.drawAfterLight = function (c, cam, Wd, Hd, t) {
     if (al0) al0.apply(this, arguments);
-    try { hitze(c, cam, t); } catch (e) { if (!errN++) console.error("W38 Optik", e); }
+    try { hitze(c, cam, t); glutluft(c, cam, Wd, Hd, t); } catch (e) { if (!errN++) console.error("W38 Optik", e); }
   };
+  /* W38 Optik (späte Gebiete): GLUTLUFT – Glutgassen wirkten wie ein brauner Kerker; jetzt treiben glimmende Funken durch die
+     Luft (Glut 28, Runenschmiede 12 goldene Essenfunken), dazu ein warmer Hitzeschleier vom unteren Bildrand. Ohne Partikel-
+     Anlage: Lage je Funke aus Index + Zeit berechnet (stabil, keine Speicherlast). Stufe 0: aus; Stufe 1: halbe Zahl, kein Schleier. */
+  const GLUT = { glut: { n: 28, col: [255, 150, 60], haze: 0.10 }, schmiede: { n: 12, col: [255, 200, 110], haze: 0.05 } };
+  function glutluft(c, cam, Wd, Hd, t) {
+    const lv = Z.level; if (!lv || lv.hub || !cam || off("w38glut")) return;
+    const cfg = GLUT[lv.biome] || GLUT[lv.id]; if (!cfg) return;
+    const L1 = lvl(); if (L1 < 1) return;
+    const g = G(), S = g.scale || 2, now = g.time || t || 0, n = L1 >= 2 ? cfg.n : cfg.n >> 1, col = cfg.col;
+    c.save();
+    if (L1 >= 2 && Wd && Hd) { /* Hitzeschleier (Bildschirmraum) */
+      c.setTransform(1, 0, 0, 1, 0, 0);
+      const gr = c.createLinearGradient(0, Hd, 0, Hd * 0.55), k = cfg.haze * (0.85 + 0.15 * Math.sin(now * 0.7));
+      gr.addColorStop(0, "rgba(" + col[0] + "," + (col[1] - 40) + "," + col[2] + "," + k.toFixed(3) + ")"); gr.addColorStop(1, "rgba(" + col[0] + "," + col[1] + "," + col[2] + ",0)");
+      c.globalCompositeOperation = "lighter"; c.fillStyle = gr; c.fillRect(0, Hd * 0.55, Wd, Hd * 0.45);
+    }
+    c.setTransform(S, 0, 0, S, -cam.x * S, -cam.y * S);
+    c.globalCompositeOperation = L1 >= 2 ? "lighter" : "source-over";
+    for (let i = 0; i < n; i++) {
+      const sd = (i * 0.618034) % 1, sp = 14 + (i * 7 % 11) * 2.2, per = (cam.h + 40) / sp, u = ((now / per) + sd) % 1;
+      const x = cam.x + (((sd * 9301 + i * 0.37) % 1) * (cam.w + 60)) - 30 + Math.sin(now * 0.9 + i * 1.7) * 10 + u * 18;
+      const y = cam.y + cam.h + 20 - u * (cam.h + 40);
+      const fl = 0.55 + 0.45 * Math.sin(now * (5 + i % 4) + i), a = Math.sin(u * Math.PI) * fl * (L1 >= 2 ? 0.8 : 0.6);
+      if (a < 0.04) continue;
+      const r = i % 5 === 0 ? 1.3 : 0.8;
+      c.fillStyle = "rgba(" + col[0] + "," + col[1] + "," + col[2] + "," + a.toFixed(3) + ")";
+      c.fillRect(x - r / 2, y - r / 2, r, r);
+      if (L1 >= 2 && i % 5 === 0) { c.fillStyle = "rgba(" + col[0] + "," + col[1] + "," + col[2] + "," + (a * 0.18).toFixed(3) + ")"; c.fillRect(x - 2, y - 2, 4, 4); }
+    }
+    c.restore();
+  }
   function hitze(c, cam, t) {
     if (off("w38hitze") || lvl() < 2) return;
     const g = G(), LA = g.lava, n = g.lavaN | 0; if (!LA || !n || !cam) return;

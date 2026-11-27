@@ -97,7 +97,7 @@
       tile: { base: "#3e3446", light: "#6a5a72", dark: "#160f1a", det: "#4e4258", top: "web", topCol: "#c8c0d0" }, plat: "#d8d0dc",
       dark: 0.72, ambCol: "#3a1a4a", bg: "chasm", weather: ["spores", "dust"], hazard: "spikes", webPlat: true,
       props: { web: 5, mushroom: 5, cocoon: 3, bones: 2, crystal: 1, skull: 1 },
-      foes: { riesenspinne: 3, netzspinne: 3, ettercap: 2, spinnchen: 3, schatten: 1, brutsack: 1, myconid: 2, drider: 1 }, density: 1.05,
+      foes: { riesenspinne: 2.5, netzspinne: 2.5, ettercap: 2.5, spinnchen: 0.85, schatten: 1, brutsack: 1, myconid: 2.2, drider: 1.2, stirge: 0.7 }, density: 1.05, /* W38 Gegner: Gewichte (vorher 3,3,2,3,1,1,2,1); Stirge hinten angehängt – Schatten war der einzige Flieger (21 % aller Gegner) */
       squads: [["drider", "netzspinne"], ["myconid", "riesenspinne", "ettercap"], ["ettercap", "netzspinne", "riesenspinne"]], /* W10 */
       warden: "wraith", exits: ["see", "glut"],
       amb: { loops: [["amb/a_tropfstein.mp3", 0.3], ["amb/a_fluestern.mp3", 0.2], ["amb/a_geisterhauch.mp3", 0.15]], one: [["e_spinne_", 4, 6], ["e_insekt_", 6, 10], ["n_zischen_", 4, 14]] },
@@ -109,7 +109,7 @@
       tile: { base: "#4a4040", light: "#7a6a60", dark: "#1e1818", det: "#c88a2a", top: "rune", topCol: "#e5a43a" }, plat: "#5a4a3a",
       dark: 0.55, ambCol: "#5a3010", bg: "forge", weather: ["embers", "sparks"], hazard: "lava",
       props: { anvil: 3, forge: 2, rune: 4, chain: 2, armor: 2, weapons: 2, pipe: 2, brazier: 2 },
-      foes: { ruestung: 3, runenfunke: 3, runenwaechter: 1, duergar: 2, duergarArmbrust: 2, schmiedegeist: 1, rostmonster: 1 }, density: 1,
+      foes: { ruestung: 1.6, runenfunke: 1.5, runenwaechter: 1.5, duergar: 1.6, duergarArmbrust: 0.5, schmiedegeist: 1.8, rostmonster: 1.4 }, density: 1, /* W38 Gegner: Gewichte (vorher 3,3,1,2,2,1,1) */
       squads: [["ruestung", "duergarArmbrust", "duergarArmbrust"], ["rostmonster", "duergar", "duergarArmbrust"], ["runenwaechter", "duergarArmbrust"]], /* W10 */
       warden: "schmiedewaechter", exits: ["see", "glut", "sturm"],
       amb: { loops: [["amb/a_esse.mp3", 0.35], ["amb/a_feuer1.mp3", 0.25], ["amb/a_grabesdroehnen.mp3", 0.15]], one: [["n_hammer_", 7, 3], ["e_blasebalg_", 2, 9], ["e_erz_", 6, 12]] },
@@ -145,7 +145,7 @@
       tile: { base: "#4a3a34", light: "#7a5a46", dark: "#1a100c", det: "#ff7a2a", top: "soot", topCol: "#2a2220" }, plat: "#4a3a2e",
       dark: 0.5, ambCol: "#6a2a0a", bg: "embercity", weather: ["embers", "ash", "smoke"], hazard: "lava",
       props: { brazier: 3, forge: 2, chain: 2, greenfire: 3, crate: 2, pipe: 2, statueDuergar: 1, lantern: 2 },
-      foes: { duergar: 3, duergarArmbrust: 2, feuerschlucker: 2, glutling: 3, bewahrer: 2, magmaHund: 1, salamander: 2 }, density: 1.05,
+      foes: { duergar: 2, duergarArmbrust: 2, feuerschlucker: 2.3, glutling: 2, bewahrer: 2.3, magmaHund: 1.7, salamander: 1.8 }, density: 1.05, /* W38 Gegner: Gewichte (vorher 3,2,2,3,2,1,2) */
       squads: [["bewahrer", "duergar", "duergar"], ["salamander", "feuerschlucker", "glutling"], ["duergarArmbrust", "duergarArmbrust", "magmaHund"], ["feuerschlucker", "glutfledermaus", "glutfledermaus", "glutfledermaus"], ["duergar", "glutfledermaus", "glutfledermaus", "glutfledermaus"]], /* W10: Glutfledermäuse nur als Schwarm im Trupp (die Gassen haben keine Flieger-Plätze für sie allein) */
       warden: "riese", exits: ["themberchaud"],
       amb: { loops: [["amb/a_esse.mp3", 0.35], ["amb/a_markt.mp3", 0.12], ["amb/a_feuer1.mp3", 0.3]], one: [["n_hammer_", 7, 4], ["e_zischen_", 2, 8], ["e_grollen_", 2, 14]] },

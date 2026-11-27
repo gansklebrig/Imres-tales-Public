@@ -32,6 +32,9 @@
     return enden >= 2 || (h.siege && (h.siege[3] || h.siege[4] || h.siege[5])) || (h.max | 0) >= 4 || TM().best > 0;
   }
   const tf = () => (Z.run && Z.run.w38tiefe) || null;
+  /* W38 Online: Gast kennt die Tiefe aus der Gebietsnachricht (online.js runInfo → Z.run.w38tn) */
+  const gtn = () => (gast() && Z.run && Z.run.w38tn > 0 ? Z.run.w38tn | 0 : 0);
+  let gastMax = 0;
   const mul = n => ({ hp: 1 + HP_K * n, dmg: 1 + DMG_K * n });
 
   /* Gebietsauswahl: alle Gebiete außer Torhof, tiefere häufiger, nie dasselbe wie die letzten beiden */
@@ -87,6 +90,16 @@
         }
       }
       if (lv && lv.hub) placeSchacht(lv);
+      if (gast() && lv) { /* W38 Online: Anzeigen beim Gast */
+        const n = gtn();
+        if (n > 0 && !lv.hub && !lv.passage && Z.BIOMES[lv.id]) {
+          lv.w38tn = n;
+          if (n > gastMax) { gastMax = n; setTimeout(() => { if (Z.level === lv && Z.ui && Z.ui.notify) { const k = mul(n); Z.ui.notify("<b>⬇ " + esc(L(["Tiefe ", "Depth "]) + n) + "</b><br><small>" + esc(L(["Gegner +", "Foes +"]) + Math.round((k.hp - 1) * 100) + L([" % Leben, +", "% health, +"]) + Math.round((k.dmg - 1) * 100) + L([" % Schaden", "% damage"])) + "</small>", { prio: 2, art: "gefahr", key: "w38tiefe", dauer: 5000 }); } }, 1500); }
+        } else if (lv.hub && gastMax > 0) {
+          const n2 = gastMax; gastMax = 0;
+          setTimeout(() => { if (Z.ui && Z.ui.notify) Z.ui.notify("<b>⬇ " + esc(L(["Tiefe ", "Depth "]) + n2 + L([" erreicht", " reached"])) + "</b><br><small>" + esc(L(["Gemeinsamer Abstieg mit dem Gastgeber", "Shared descent with the host"])) + "</small>", { prio: 2, art: "gold", key: "w38tiefende", dauer: 6500 }); }, 2400);
+        }
+      }
     } catch (e) { console.error("W38 Endspiel", e); }
     return r;
   };
@@ -112,7 +125,7 @@
   /* Kapitelseite: Tiefe zusätzlich zur Lage */
   if (Z.abw && Z.abw.pageLines) {
     const pl0 = Z.abw.pageLines;
-    Z.abw.pageLines = function (lv) { const r = pl0.apply(this, arguments) || []; const t = tf(); if (t && lv && Z.BIOMES[lv.id] && !lv.passage) return [L(["⬇ Tiefe ", "⬇ Depth "]) + (lv.w38tn || t.n + 1)].concat(r); return r.length ? r : undefined; };
+    Z.abw.pageLines = function (lv) { const r = pl0.apply(this, arguments) || []; const t = tf(), gn = gtn(); /* W38 Online: auch beim Gast */ if (gn && lv && Z.BIOMES[lv.id] && !lv.passage) return [L(["⬇ Tiefe ", "⬇ Depth "]) + gn].concat(r); if (t && lv && Z.BIOMES[lv.id] && !lv.passage) return [L(["⬇ Tiefe ", "⬇ Depth "]) + (lv.w38tn || t.n + 1)].concat(r); return r.length ? r : undefined; };
   }
 
   /* ======================= Abspann-Knopf und Lager-Station ======================= */
@@ -147,9 +160,10 @@
         const r = p0.apply(this, arguments);
         try {
           const t = tf(), box = document.querySelector("#modal .knoepfe.senk") || document.querySelector("#modal .knoepfe");
-          if (t && box && !document.querySelector("#modal .w38-tiefpause")) {
-            const k = mul(t.n), p = document.createElement("p"); p.className = "w38-pause w38-tiefpause";
-            p.innerHTML = "<b>⬇ " + esc(L(["Tiefe ", "Depth "]) + t.n) + "</b> – " + esc(L(["Gegner +", "foes +"]) + Math.round((k.hp - 1) * 100) + L([" % Leben, +", "% health, +"]) + Math.round((k.dmg - 1) * 100) + L([" % Schaden · Bestwert ", "% damage · best "]) + TM().best);
+          const gn = !t && gast() && Z.level && !Z.level.hub ? (Z.level.w38tn | 0) || gastMax : 0; /* W38 Online: Pausenzeile beim Gast */
+          if ((t || gn) && box && !document.querySelector("#modal .w38-tiefpause")) {
+            const n = t ? t.n : gn, k = mul(n), p = document.createElement("p"); p.className = "w38-pause w38-tiefpause";
+            p.innerHTML = "<b>⬇ " + esc(L(["Tiefe ", "Depth "]) + n) + "</b> – " + esc(L(["Gegner +", "foes +"]) + Math.round((k.hp - 1) * 100) + L([" % Leben, +", "% health, +"]) + Math.round((k.dmg - 1) * 100) + (t ? L([" % Schaden · Bestwert ", "% damage · best "]) + TM().best : L([" % Schaden · Abstieg des Gastgebers", "% damage · host's descent"])));
             box.parentNode.insertBefore(p, box);
           }
         } catch (e) { console.error("W38 Endspiel", e); }

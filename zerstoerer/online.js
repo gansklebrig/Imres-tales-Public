@@ -417,7 +417,7 @@
   function tileHash(lv) { let h = 2166136261 >>> 0; const t = lv.tiles; for (let i = 0; i < t.length; i++) { h ^= t[i]; h = Math.imul(h, 16777619) >>> 0; } return (h ^ lv.W * 31 ^ lv.H) >>> 0; }
   function runInfo() {
     const r = Z.run; if (!r) return null;
-    return { seed: r.seed >>> 0, route: (r.route || []).slice(0, 64).filter(okId), tier: r.tier | 0, skulls: r.skulls | 0, area: r.area, doorsOpen: !!r.doorsOpen, fromHub: !!r.fromHub, firstWeaponGiven: !!r.firstWeaponGiven, bossesBeaten: (r.bossesBeaten || []).filter(okId).slice(0, 32) };
+    return { seed: r.seed >>> 0, route: (r.route || []).slice(0, 64).filter(okId), tier: r.tier | 0, skulls: r.skulls | 0, area: r.area, doorsOpen: !!r.doorsOpen, fromHub: !!r.fromHub, firstWeaponGiven: !!r.firstWeaponGiven, bossesBeaten: (r.bossesBeaten || []).filter(okId).slice(0, 32), w38tn: r.w38tiefe ? (r.w38tiefe.load || r.w38tiefe.n) | 0 : 0 }; /* W38 Online: Tiefe für Kapitelseite/Pause des Gasts */
   }
   function sendArea() {
     const lv = Z.level; if (!lv || !S.link) return;
@@ -644,7 +644,7 @@
     const r = isObj(m.run) ? m.run : null;
     if (id !== "lager" && r) {
       const run = Z.run && Z.run.seed === (r.seed >>> 0) ? Z.run : { t0: now(), time: 0, shardsBank: 0 };
-      Object.assign(run, { seed: num(r.seed, 0, 4294967295, 1) >>> 0, route: Array.isArray(r.route) ? r.route.filter(okId).slice(0, 64) : [id], tier: int(r.tier, 0, 99, 0), skulls: int(r.skulls, 0, 9, 0), area: id, doorsOpen: !!r.doorsOpen, fromHub: !!r.fromHub, firstWeaponGiven: !!r.firstWeaponGiven, bossesBeaten: Array.isArray(r.bossesBeaten) ? r.bossesBeaten.filter(okId) : [] });
+      Object.assign(run, { seed: num(r.seed, 0, 4294967295, 1) >>> 0, route: Array.isArray(r.route) ? r.route.filter(okId).slice(0, 64) : [id], tier: int(r.tier, 0, 99, 0), skulls: int(r.skulls, 0, 9, 0), area: id, doorsOpen: !!r.doorsOpen, fromHub: !!r.fromHub, firstWeaponGiven: !!r.firstWeaponGiven, bossesBeaten: Array.isArray(r.bossesBeaten) ? r.bossesBeaten.filter(okId) : [], w38tn: int(r.w38tn, 0, 999, 0) /* W38 Online */ });
       Z.run = run; Z.stats = Z.stats || { kills: 0, gold: 0, parries: 0, secrets: 0 };
     }
     if (!Z.player) Z.player = Z.newPlayer();
