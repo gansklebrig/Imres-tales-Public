@@ -2683,7 +2683,10 @@ function drawDeco(d,t){const c=cx,s=d.s;c.save();c.translate(d.x,d.y);c.scale(s,
   case'grass':for(let k=-3;k<=3;k++)ln(c,'#3a5a34',1.4,k*2.5,4,k*3.2,-6-(k&1)*3);break;
   case'rock':poly(c,'#4a4a4a',-12,6,-9,-6,2,-10,12,-3,11,7);poly(c,'#5e5e5e',-9,-6,2,-10,6,-4,-4,-1);break;
   case'mush':ln(c,'#e8dcc0',3,0,6,0,-2);ell(c,0,-3,7,4,d.v>0.5?'#b23a2a':'#8a5ab0');circ(c,-2,-4,1.2,'#fff');circ(c,3,-3,1,'#fff');break;
-  case'stake':ln(c,'#5a4028',3,0,8,0,-12);c.strokeStyle='#8a7a5a';c.lineWidth=1.2;c.beginPath();c.moveTo(0,-8);c.quadraticCurveTo(14,-4,20,6);c.stroke();break;
+  case'stake':/* Pflock mit angespitztem Kopf, Seilwicklung und gerissenem Strick am Boden */
+   c.fillStyle='rgba(0,0,0,.25)';c.beginPath();c.ellipse(0,8,6,2,0,0,TAU);c.fill();c.fillStyle='#4a3420';c.fillRect(-2.5,-12,5,20);c.fillStyle='#6a4c30';c.fillRect(-2.5,-12,2,20);
+   poly(c,'#5a4028',-2.5,-12,2.5,-12,0,-16);c.fillStyle='#a89068';c.fillRect(-3,-7,6,1.6);c.fillRect(-3,-4.5,6,1.6);
+   c.strokeStyle='#8a7a5a';c.lineWidth=1.3;c.beginPath();c.moveTo(2,-5);c.quadraticCurveTo(12,-2,16,6);c.quadraticCurveTo(19,9,23,7);c.stroke();c.strokeStyle='#a89068';c.lineWidth=0.8;c.beginPath();c.moveTo(23,7);c.lineTo(25,5);c.moveTo(23,7);c.lineTo(25,8.5);c.stroke();break;
   case'cart':c.rotate(0.4);c.fillStyle='#3a2a1a';c.fillRect(-26,-14,52,28);c.fillStyle='#1a1410';c.fillRect(-26,-14,30,28);ln(c,'#5a4028',3,26,0,44,0);circ(c,-14,16,8,'#2a2018');circ(c,14,16,8,'#2a2018');circ(c,14,16,3,'#5a4028');c.globalAlpha=0.5;circ(c,-12,-6,10,'#2a2a2a');c.globalAlpha=1;break;
   case'stalag':poly(c,'#4a4440',-10,8,-3,-22,4,8);poly(c,'#5a5450',2,8,8,-12,12,8);break;
   case'bones':ln(c,'#d8d2c0',2.5,-8,2,8,-2);ln(c,'#d8d2c0',2.5,-6,-4,6,4);circ(c,-9,3,2,'#d8d2c0');circ(c,9,-3,2,'#d8d2c0');break;
@@ -2727,7 +2730,10 @@ function drawDeco(d,t){const c=cx,s=d.s;c.save();c.translate(d.x,d.y);c.scale(s,
   case'shelf':c.fillStyle='#3a2a1e';c.fillRect(-22,-26,44,30);c.fillStyle='#2a1e14';c.fillRect(-20,-24,40,12);c.fillRect(-20,-10,40,12);
    for(let k=0;k<5;k++){c.globalAlpha=0.85;c.fillStyle=['#7ac0a0','#c0607a','#e0cfa0','#e0c060','#80d080'][(k+Math.floor(d.v*5))%5];c.fillRect(-18+k*8,-21,5,8);c.fillRect(-17+k*8,-7,5,8)}c.globalAlpha=1;break;
   case'brazier':ln(c,'#3a3a3e',3,-6,10,0,0,6,10);ell(c,0,-2,10,4,'#2a2a2e');{const f=Math.sin(t*12+d.v*7)*2;poly(c,'#ff7a2a',-8,-3,0,-20-f,8,-3);poly(c,'#ffd06a',-4,-3,0,-12-f,4,-3)}break;
-  case'herbs':ln(c,'#4a6a3a',2,-8,-14,-8,6);ln(c,'#6a8a3a',2,0,-16,0,4);ln(c,'#5a7a4a',2,8,-12,8,6);ln(c,'#3a2a1e',2,-12,-16,12,-16);break;
+  case'herbs':/* Kräuter zum Trocknen: Stange mit drei kopfüber gebundenen Büscheln, leise schwingend */
+   ln(c,'#3a2a1e',2.4,-14,-16,14,-16);for(let k=0;k<3;k++){const x=-8+k*8,sw=Math.sin(t*1.3+k*1.7+d.v*5)*1.2;ln(c,'#c8b088',1,x,-16,x+sw*0.3,-12);
+    const col=['#5a7a3a','#7a8a3a','#6a5a7a'][k];for(let j=-2;j<=2;j++){c.strokeStyle=col;c.lineWidth=1.6;c.beginPath();c.moveTo(x+sw*0.3,-12);c.lineTo(x+j*2+sw,-1-Math.abs(j));c.stroke()}
+    c.fillStyle=col;c.beginPath();c.ellipse(x+sw*0.8,-4,3.4,4.5,0,0,TAU);c.fill();c.fillStyle='#8a6a44';c.fillRect(x-1.5+sw*0.3,-13,3,2)}break;
   case'web':c.strokeStyle='rgba(240,237,230,.32)';c.lineWidth=1;for(let k=0;k<8;k++){const a=k/8*TAU;c.beginPath();c.moveTo(0,0);c.lineTo(Math.cos(a)*30,Math.sin(a)*30);c.stroke()}for(let r=8;r<=28;r+=7){c.beginPath();for(let k=0;k<=8;k++){const a=k/8*TAU;k?c.lineTo(Math.cos(a)*r,Math.sin(a)*r):c.moveTo(Math.cos(a)*r,Math.sin(a)*r)}c.stroke()}break;
   case'abyss':ell(c,0,0,46,26,'#08070b');c.strokeStyle='rgba(0,0,0,.6)';c.lineWidth=6;c.beginPath();c.ellipse(0,0,48,28,0,0,TAU);c.stroke();break;
   case'rune':{/* eingravierte Bodenrune: je Stein eine eigene Glyphe, leiser Schimmer – wirkt nicht mehr wie ein anklickbares Zeichen */
@@ -2750,7 +2756,10 @@ function drawDeco(d,t){const c=cx,s=d.s;c.save();c.translate(d.x,d.y);c.scale(s,
   case'roots':c.strokeStyle='#3a2a1a';c.lineWidth=4;for(let k=0;k<4;k++){c.beginPath();c.moveTo(0,0);c.quadraticCurveTo(Math.cos(k*1.6+d.v)*18,Math.sin(k*1.6+d.v)*10,Math.cos(k*1.6+d.v)*34,Math.sin(k*1.6+d.v)*20);c.stroke()}circ(c,0,0,6,'#2a1e14');break;
   case'ash':ell(c,0,0,20,10,'rgba(30,26,24,.8)');c.fillStyle='rgba(255,90,30,.5)';c.fillRect(-4,-2,2,2);c.fillRect(6,1,2,2);break;
   case'cell':c.fillStyle='rgba(10,8,12,.6)';c.fillRect(-30,-20,60,40);for(let k=-28;k<=28;k+=8)ln(c,'#5a5a62',2.4,k,-22,k,20);ln(c,'#5a5a62',3,-30,-22,30,-22);break;
-  case'chain':ln(c,'#6a6a72',2,0,-24,0,6);circ(c,0,8,3,'#6a6a72');break;
+  case'chain':/* Kette aus einzelnen Gliedern mit Haken und Eisenring am Ende, leise pendelnd */
+   {const sw=Math.sin(t*1.1+d.v*6)*1.5;c.fillStyle='#3a3c42';c.fillRect(-3,-27,6,3);c.strokeStyle='#7a7a82';c.lineWidth=1.4;
+    for(let k=0;k<7;k++){const y=-23+k*4.2,x=sw*(k/7);c.beginPath();if(k%2)c.ellipse(x,y,1.1,2.4,0,0,TAU);else c.ellipse(x,y,2.2,2.4,0,0,TAU);c.stroke()}
+    c.strokeStyle='#8a8a92';c.lineWidth=1.8;c.beginPath();c.arc(sw,8,3.4,0,TAU);c.stroke()}break;
   case'spiderstatue':ell(c,0,10,16,5,'rgba(0,0,0,.35)');for(let k=0;k<4;k++){ln(c,'#5a5a62',2.5,0,-2,-16,-8+k*5,-20,4+k*4);ln(c,'#5a5a62',2.5,0,-2,16,-8+k*5,20,4+k*4)}ell(c,0,0,10,9,'#6a6a72');circ(c,0,-10,6,'#6a6a72');ln(c,'#d84a8a',1.5,-4,-8,4,-6);break;
   case'glowshroom':{const p=0.6+0.3*Math.sin(t*2+d.v*8);ln(c,'#e0dac8',3,0,6,0,-4);c.globalAlpha=p;ell(c,0,-5,9,5,d.v>0.5?'#b6e86a':'#e8d5a1');c.globalAlpha=1;circ(c,-3,-6,1.2,'#fff')}break;
   case'river':c.globalAlpha=0.7;ell(c,0,0,50,14,'#1a5a3f');c.globalAlpha=0.5;for(let k=0;k<3;k++){const q=(t*0.4+k/3+d.v)%1;c.fillStyle='#f2e8cc';c.fillRect(-40+q*80,-4+k*4,4,1.5)}c.globalAlpha=1;break;
