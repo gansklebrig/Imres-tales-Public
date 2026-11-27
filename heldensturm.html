@@ -2615,7 +2615,7 @@ const THEMES={
  tunnel:{base:'#3a2f23',blot:['#46392b','#2e251c','#4e3f2e'],deco:['beam','rubble','rock','torch','rubble'],dark:0.65},
  schloss:{base:'#33303a',blot:['#3c3944','#2a2730'],tiles:1,deco:['vine','table','barrel','torch','pillar','dice'],dark:0.45},
  labor:{base:'#2d2a34',blot:['#36323e','#25222b'],tiles:1,deco:['shelf','shelf','brazier','table','vine','herbs'],dark:0.5},
- nacht:{base:'#18241f',blot:['#1f2d26','#142019','#23332a'],deco:['bush','bush','tree','rock','grass'],dark:0.5,tint:'rgba(40,140,98,.2)'},
+ nacht:{base:'#18241f',blot:['#1f2d26','#142019','#23332a'],deco:['bush','bush','tree','rock','grass'],dark:0.5,tint:'rgba(58,122,62,.2)'},
  wachhaus:{base:'#34312c',blot:['#3d3a34','#2b2924'],tiles:1,deco:['pillar','torch','crate','table','chair'],dark:0.5},
  mine:{base:'#28282c',blot:['#303035','#1f1f23','#36363b'],deco:['stalag','rock','bones','beam','abyss','rock','torch'],dark:0.65},
  minenetz:{base:'#25252a',blot:['#2d2d33','#1d1d21'],deco:['web','web','stalag','bones','rock','abyss'],dark:0.7},
@@ -6197,7 +6197,7 @@ const WETTER={
  sporen:{n:'Sporennebel',ic:'🍄',d:'Gift und Blutungen wirken 30% stärker',dark:0.15,tint:'rgba(80,140,60,.10)',under:1},
  beben:{n:'Erdbeben',ic:'🪨',d:'Felsbrocken stürzen herab – auf Freund und Feind',dark:0,under:1},
  still:{n:'Stille Tiefe',ic:'◌',d:'',dark:0,under:1}};
-const ZEITEN={tag:{n:'Tag',ic:'☀',d:'',dark:0},daemmer:{n:'Dämmerung',ic:'🌇',d:'Mehr Glück bei der Beute (+15%)',dark:0.2,tint:'rgba(255,120,40,.08)'},nacht:{n:'Nacht',ic:'🌙',d:'Untote und Dämonen sind stärker, Elite-Rudel häufiger, mehr Beute (+30% Glück)',dark:0.45,tint:'rgba(22,78,55,.14)'}};
+const ZEITEN={tag:{n:'Tag',ic:'☀',d:'',dark:0},daemmer:{n:'Dämmerung',ic:'🌇',d:'Mehr Glück bei der Beute (+15%)',dark:0.2,tint:'rgba(255,120,40,.08)'},nacht:{n:'Nacht',ic:'🌙',d:'Untote und Dämonen sind stärker, Elite-Rudel häufiger, mehr Beute (+30% Glück)',dark:0.45,tint:'rgba(34,72,40,.14)'}};
 function wxRand(i,k){if(G.mode==='taeglich'&&G.daily){const x=Math.sin((G.daily.seed||1)*12.9898+i*78.233+k*37.719)*43758.5453;return x-Math.floor(x)}return Math.random()}
 function wxRoll(i){const S=STAGES[i];if(!S)return{w:'klar',z:'tag'};const out=OUTDOOR.has(S.theme);let w,z='tag';
  if(out){const r=wxRand(i,1);w=r<0.42?'klar':r<0.62?'regen':r<0.74?'gewitter':r<0.88?'nebel':'schnee';const q=wxRand(i,2);z=S.theme==='nacht'||S.theme==='geisterdorf'?'nacht':q<0.5?'tag':q<0.75?'daemmer':'nacht';if(i<1){w='klar';z='tag'}}
