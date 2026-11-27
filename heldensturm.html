@@ -17073,7 +17073,7 @@ function slCardHtml(n,o){o=o||{};const s=slSum(n);if(!s)return`<button class="sl
   <span class="ln"><b>${esc(HEROES[s.h].name)}</b> · Stufe ${s.lv} · ${esc(s.kap)}</span>
   <span class="ln">${esc(s.ortN)}</span>
   <span class="ln">${esc(slZeit(s.m.pt))} · ${esc(slDatum(s.m.t||s.m.c))}</span></span></button>`}
-function slFoot(){return`<footer class="slm-foot"><span>Spielversion ${esc(HS_VERSION)}</span><span class="k"><b>A</b>/<b>⏎</b> wählen <b>B</b>/<b>Esc</b> zurück</span></footer>`}
+function slFoot(){return`<footer class="slm-foot"><span>Spielversion ${esc(HS_VERSION)}</span><span class="k"><b>✛</b>/<b>↑↓</b> wandern <b>A</b>/<b>⏎</b> wählen <b>B</b>/<b>Esc</b> zurück</span></footer>`}
 function slHead(eye,t,p){return`<div class="slp-h"><div><div class="eye">${eye}</div><h2>${t}</h2>${p?`<p>${p}</p>`:''}</div></div>`}
 
 function slMainHtml(){const last=SAVE.slot||slLatest(),s=last?slSum(last):null,n=slList().length;
