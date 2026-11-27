@@ -30938,8 +30938,8 @@ const CH_LH=520;
 function chMass(aw,ah){const asp=aw/Math.max(1,ah);const LW=Math.round(Math.max(760,Math.min(1100,CH_LH*asp)));const sc=Math.min(2.4,aw/LW,ah/CH_LH);return{LW,LH:CH_LH,sc}}
 function chZeichneView(){const V=CHR.view;if(!V||!V.el||!V.el.isConnected){if(V&&V.el&&!V.el.isConnected)CHR.view=null;return}const cv=V.el.querySelector('canvas.chrCv'),bar=V.el.querySelector('.chrBar');if(!cv)return;
  /* Erzähler-Untertitel (heldensturm-erzaehler.js): kompakt neben der Knopfleiste; nur die Höhe über der Leiste hinaus freihalten */
- const vw0=window.innerWidth||800;try{const bw=bar?bar.getBoundingClientRect().width:260;document.body.style.setProperty('--chrErzW',Math.max(160,Math.min(640,vw0-bw-28))+'px')}catch(e){}
- const E=chErzPlatz();V.el.classList.toggle('erzAn',E.s>0);const bh0=bar?bar.getBoundingClientRect().height:38;const extra=E.s?Math.max(0,E.s-(bh0+8)):0;
+ const vw0=window.innerWidth||800;try{const bw=bar?bar.getBoundingClientRect().width:260;const frei=vw0-bw-28,hoch=frei<260;/* schmal (Hochformat): Untertitel über die Knopfleiste in voller Breite statt als schmale Säule daneben */document.body.classList.toggle('chrErzHoch',hoch);document.body.style.setProperty('--chrErzW',(hoch?Math.min(640,vw0-16):Math.max(160,Math.min(640,frei)))+'px')}catch(e){}
+ const E=chErzPlatz();V.el.classList.toggle('erzAn',E.s>0);const bh0=bar?bar.getBoundingClientRect().height:38;const extra=E.s?(document.body.classList.contains('chrErzHoch')?E.s+4:Math.max(0,E.s-(bh0+8))):0;
  V.el.style.paddingTop=E.t?(E.t+6)+'px':'';V.el.style.paddingBottom=(E.b||extra)?(Math.max(E.b,extra)+(E.b?6:2))+'px':'';
  const vw=vw0,vh=(window.innerHeight||600)-E.t-Math.max(E.b,extra),bh=bar?bh0+12:50;const M=chMass(vw-16,vh-bh-16);const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
  const cw=Math.floor(M.LW*M.sc),ch=Math.floor(M.LH*M.sc);cv.style.width=cw+'px';cv.style.height=ch+'px';const pw=Math.round(cw*dpr),ph=Math.round(ch*dpr);if(cv.width!==pw||cv.height!==ph){cv.width=pw;cv.height=ph}
