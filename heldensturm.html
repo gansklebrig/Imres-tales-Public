@@ -339,8 +339,8 @@ details.stats .stat{padding:0 12px 12px}
 .beste summary{display:flex;align-items:center;gap:8px;padding:6px 8px;cursor:pointer;list-style:none}
 .beste summary::-webkit-details-marker{display:none}
 .beste canvas{width:42px;height:42px;flex:0 0 auto}
-.beste .bn{flex:1;font-weight:800;font-size:13px;line-height:1.2}
-.beste .bt{color:var(--gold);font-size:11px;letter-spacing:1px;white-space:nowrap}
+.beste .bn{flex:1;min-width:0;font-weight:800;font-size:13px;line-height:1.2;hyphens:auto;-webkit-hyphens:auto}.beste summary{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:8px;row-gap:1px;align-items:center;padding:6px 8px}.beste summary canvas{grid-row:1/3}.beste summary .bn{align-self:end}.beste summary .bt{align-self:start;font-size:10px;letter-spacing:1px}
+.beste .bt{color:var(--gold);font-size:11px;letter-spacing:0;white-space:nowrap;flex:none}
 .beste.unk .bn{color:var(--mute)}
 .beste .bl{padding:0 12px 12px;font-size:14px;line-height:1.45}
 .modes{display:flex;flex-direction:column;gap:6px;flex:1 1 100%;min-width:0}
