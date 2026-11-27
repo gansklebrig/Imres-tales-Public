@@ -38183,6 +38183,30 @@ knoten('echo','e_charge');knoten('barradin','b_k_fleche');
 if(typeof emAnsturm==='function')emAnsturm=mitLauf(emAnsturm);
 if(typeof zdGriff==='function')zdGriff=mitLauf(zdGriff);
 }catch(e){console.error('laufri',e);window.__hsLAUFRI.err=String(e&&e.stack||e)}})();
+/* Arena: Heilschrein und Hebel neu gezeichnet (gemauerter Schrein mit Nische, Hebel mit Eisenbeschlag) */
+if(typeof AR_PDRAW==='object'){
+ AR_PDRAW.ar_schrein=function(p,t){const c=cx,x=p.x,y=p.y,on=!p.used,col=on?'#cfe8a0':'#6a7a6a';c.save();
+  c.fillStyle='rgba(0,0,0,.35)';c.beginPath();c.ellipse(x,y+9,24,7,0,0,7);c.fill();
+  /* Stufe */c.fillStyle='#4a4c46';c.fillRect(x-19,y+1,38,7);c.fillStyle='#62645c';c.fillRect(x-19,y+1,38,2);
+  /* Körper aus Quadern */c.fillStyle='#5a5c54';c.fillRect(x-14,y-30,28,32);c.strokeStyle='rgba(20,18,14,.45)';c.lineWidth=1;
+  for(let r=0;r<4;r++){const yy=y-30+r*8;c.beginPath();c.moveTo(x-14,yy);c.lineTo(x+14,yy);c.stroke();const o=r%2?0:7;for(let q=-14+o;q<14;q+=14){c.beginPath();c.moveTo(x+q,yy);c.lineTo(x+q,yy+8);c.stroke()}}
+  c.fillStyle='rgba(255,250,230,.08)';c.fillRect(x-14,y-30,4,32);c.fillStyle='rgba(0,0,0,.18)';c.fillRect(x+10,y-30,4,32);
+  /* Nische */c.fillStyle='#2a2a26';c.beginPath();c.moveTo(x-7,y-4);c.lineTo(x-7,y-20);c.arc(x,y-20,7,Math.PI,0);c.lineTo(x+7,y-4);c.closePath();c.fill();
+  /* Dach */hP(c,'#6e6458',null,0,[x-19,y-29,x,y-46,x+19,y-29]);hP(c,'#5a5046',null,0,[x,y-46,x+19,y-29,x+15,y-29]);c.fillStyle='#4e463c';c.fillRect(x-20,y-30,40,3);
+  c.fillStyle='#8a7a58';c.beginPath();c.arc(x,y-38,2.2,0,7);c.fill();
+  /* Kugel in der Nische */const pu=on?0.5+0.3*Math.sin(t*3):0;c.fillStyle=col;c.beginPath();c.arc(x,y-12,5.5,0,7);c.fill();
+  if(on){c.globalAlpha=0.35+0.25*pu;c.fillStyle='#f4ffd8';c.beginPath();c.arc(x,y-12,8.5,0,7);c.fill();c.globalAlpha=0.6+0.3*pu;c.fillStyle='#fff';c.beginPath();c.arc(x-1.5,y-13.5,2,0,7);c.fill();c.globalAlpha=1}
+  /* Moos */c.fillStyle='rgba(90,120,52,.75)';c.beginPath();c.ellipse(x-12,y+1,5,2,0,0,7);c.fill();c.beginPath();c.ellipse(x+13,y-29,4,1.6,0,0,7);c.fill();
+  c.restore()};
+ AR_PDRAW.ar_hebel=function(p,t){const c=cx,x=p.x,y=p.y,on=p.used;c.save();
+  c.fillStyle='rgba(0,0,0,.35)';c.beginPath();c.ellipse(x,y+7,17,6,0,0,7);c.fill();
+  /* Steinsockel */c.fillStyle='#55534c';c.fillRect(x-12,y-6,24,12);c.fillStyle='#6c6a62';c.fillRect(x-12,y-6,24,3);c.strokeStyle='rgba(0,0,0,.55)';c.lineWidth=1;c.strokeRect(x-12,y-6,24,12);
+  /* Eisenschiene mit Nieten */c.fillStyle='#3a3836';c.fillRect(x-8,y-4,16,4);c.fillStyle='#8a8478';for(const q of[-6,6]){c.beginPath();c.arc(x+q,y-2,1.1,0,7);c.fill()}
+  /* Griff */const a=on?0.75:-0.75,ex=x+Math.sin(a)*22,ey=y-2-Math.cos(a)*22;c.lineCap='round';c.strokeStyle='#3a2a1a';c.lineWidth=4.2;c.beginPath();c.moveTo(x,y-2);c.lineTo(ex,ey);c.stroke();c.strokeStyle='#8a6438';c.lineWidth=2.2;c.beginPath();c.moveTo(x,y-2);c.lineTo(ex,ey);c.stroke();
+  c.fillStyle='#2e2c2a';c.beginPath();c.arc(x,y-2,3,0,7);c.fill();
+  /* Knauf: rot = bereit, grün = umgelegt */const kc=on?'#8fd36a':'#c8402a';c.fillStyle='rgba(0,0,0,.5)';c.beginPath();c.arc(ex,ey,5,0,7);c.fill();c.fillStyle=kc;c.beginPath();c.arc(ex,ey,4,0,7);c.fill();c.fillStyle='rgba(255,255,255,.55)';c.beginPath();c.arc(ex-1.3,ey-1.3,1.3,0,7);c.fill();
+  if(!on){c.globalAlpha=0.25+0.2*Math.sin(t*4);c.fillStyle='#ffb060';c.beginPath();c.arc(ex,ey,7.5,0,7);c.fill();c.globalAlpha=1}
+  c.restore()}}
 /* Weltschriften (Namen, „Siegel“ …) liegen auf der scharfen Textebene über allem – unter der Minikarte wegradieren, damit sie nicht über der Karte stehen */
 if(typeof wlMini==='function'&&typeof render==='function'){const _wm2=wlMini;let mm=0;wlMini=function(){const r=_wm2.apply(this,arguments);mm=1;return r};const _rd2=render;render=function(){mm=0;const r=_rd2.apply(this,arguments);try{if(mm&&TXO.on&&TXO.n>0&&TXO.cv&&!TXO.cv.hidden){const B=WLMM.box;if(B){const f=DPR*TXO.k,g=TXO.g;g.save();g.setTransform(1,0,0,1,0,0);g.clearRect(Math.floor((B.x-2)*f),Math.floor((B.y-2)*f),Math.ceil((B.S+4)*f),Math.ceil((B.S+4)*f));g.restore()}}}catch(e){}return r}}
 /* ================= Paket „kartgr“: Größe der Minikarte einstellbar – window.__hsKARTGR =================
