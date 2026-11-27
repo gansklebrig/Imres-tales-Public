@@ -43956,12 +43956,13 @@ function zeichne(){const a=Math.min(1,KANAME.t/0.6,(3.4-KANAME.t)/0.4);if(!(a>0)
  g.font=`700 ${fs}px "Alegreya SC","Alegreya Sans",Georgia,serif`;const tw=g.measureText(KANAME.txt).width;
  const hS=sub?(klein?11:13)*k:0,hT=fs+(sub?hS+8*k:12*k);
  const gr=g.createLinearGradient(W/2-tw/2-60*k,0,W/2+tw/2+60*k,0);gr.addColorStop(0,'rgba(12,9,8,0)');gr.addColorStop(0.2,'rgba(12,9,8,.62)');gr.addColorStop(0.8,'rgba(12,9,8,.62)');gr.addColorStop(1,'rgba(12,9,8,0)');
+ if(ov){/* darunterliegende Weltschriften (Zahlen, Rufe) unter der Tafel abblenden */const ge=g.createLinearGradient(W/2-tw/2-60*k,0,W/2+tw/2+60*k,0);ge.addColorStop(0,'rgba(0,0,0,0)');ge.addColorStop(0.2,'rgba(0,0,0,.9)');ge.addColorStop(0.8,'rgba(0,0,0,.9)');ge.addColorStop(1,'rgba(0,0,0,0)');g.globalCompositeOperation='destination-out';g.fillStyle=ge;g.fillRect(W/2-tw/2-60*k,top,tw+120*k,hT);g.globalCompositeOperation='source-over'}
  g.fillStyle=gr;g.fillRect(W/2-tw/2-60*k,top,tw+120*k,hT);
  g.lineWidth=3*k;g.lineJoin='round';g.strokeStyle='rgba(0,0,0,.8)';g.strokeText(KANAME.txt,W/2,top+fs+2*k);g.fillStyle='#ecd9b0';g.fillText(KANAME.txt,W/2,top+fs+2*k);
  let unten=top+hT;
  if(sub){g.font=`600 ${hS}px "Alegreya Sans",sans-serif`;g.fillStyle='#c8b490';g.fillText(sub,W/2,top+fs+2*k+hS+3*k)}
  if(z){const zs=(klein?11:13.5)*k,y=unten+zs+4*k;g.globalAlpha=a*0.95;g.font=`italic 500 ${zs}px "Alegreya","Alegreya Sans",Georgia,serif`;const zw=Math.min(W-20,g.measureText(z).width);
-  g.fillStyle='rgba(12,9,8,.5)';g.fillRect(W/2-zw/2-14*k,y-zs-1*k,zw+28*k,zs+7*k);g.fillStyle='#d8c4a0';g.fillText(z,W/2,y,W-24);unten=y+6*k}
+  if(ov){g.globalCompositeOperation='destination-out';g.fillStyle='rgba(0,0,0,.85)';g.fillRect(W/2-zw/2-14*k,y-zs-1*k,zw+28*k,zs+7*k);g.globalCompositeOperation='source-over'}g.fillStyle='rgba(12,9,8,.5)';g.fillRect(W/2-zw/2-14*k,y-zs-1*k,zw+28*k,zs+7*k);g.fillStyle='#d8c4a0';g.fillText(z,W/2,y,W-24);unten=y+6*k}
  g.restore();KANAME.unten=unten;KN.n++;
  if(ov){try{TXO.n++;if(TXO.cv.hidden)TXO.cv.hidden=false}catch(e){}}}
 const kn0=kaNameZeigen;kaNameZeigen=function(){if(KN.aus)return kn0.apply(this,arguments);
