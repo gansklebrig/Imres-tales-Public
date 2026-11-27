@@ -295,5 +295,83 @@
   ].join("\n");
   document.head.appendChild(css);
 
-  Z.ziele = { stand: () => stand().map(x => [x.s.id, x.a, x.b]), offen: () => offen().map(o => [o.key, o.r]), naechste: () => naechste().map(x => [x.a.id, x.cur, x.max]), open, abholen, stationen: () => stationen().map(s => [Math.round(s.o.x / T), s.lab, s.neu]), hingehen };
+  /* ======================= W38 Erfolge: für Gebietslagen, Tagesprüfung, Zielbuch und neue Bossmuster =======================
+     Zählung nur beim Gastgeber/Einzelspieler, an einmaligen Ereignissen festgemacht (Lage-Lohn hängt am Level-Objekt, Rückweg
+     zählt nichts doppelt; Tagesprüfung wird beim Laufende genau einmal gewertet). Zustand: Z.meta.w38erf (neuer Schlüssel).
+     Zustandsbasierte Erfolge (Tagesverlauf, Meilensteine, Sammlung) vergibt abenteuer.js rückwirkend von selbst (achTick). */
+  function EM() { const m = M(); let e = m.w38erf; if (!e || typeof e !== "object" || Array.isArray(e)) e = m.w38erf = {}; for (const k of ["lagen", "ges"]) if (!e[k] || typeof e[k] !== "object" || Array.isArray(e[k])) e[k] = {}; for (const k of ["schatz", "marks", "zahlRein"]) e[k] = +e[k] || 0; return e; }
+  const TM = () => { const t = M().w38tag; return t && typeof t === "object" ? t : {}; };
+  const tagDays = () => { const t = TM(), d = new Set((Array.isArray(t.hist) ? t.hist : []).filter(h => Array.isArray(h) && h[1] > 0 || Array.isArray(h) && h[2] > 0).map(h => h[0])); if (t.d && t.last) d.add(t.d); return d.size; };
+  const tagBest = () => { const t = TM(); let b = +t.best || 0; for (const h of Array.isArray(t.hist) ? t.hist : []) if (Array.isArray(h)) b = Math.max(b, +h[1] || 0); return b; };
+  const LAGEN4 = ["besetzt", "zahlmeister", "gezeichnet", "schatz"];
+  const GES = ["glas", "gold", "durst", "blut", "eile", "besetzt", "schatz", "gezeichnet", "zahlmeister"];
+  if (Z.CAPES) Object.assign(Z.CAPES, {
+    lagekarte: Z.CAPES.lagekarte || { n: ["Lagekarte", "Situation Map"], c: ["#8a6a2a", "#2a1a10"] },
+    sonnenstein: Z.CAPES.sonnenstein || { n: ["Sonnenstein", "Sunstone"], c: ["#e5b454", "#8a1a14"] },
+    meilenstein: Z.CAPES.meilenstein || { n: ["Meilenstein", "Milestone"], c: ["#6a5a4a", "#c8902a"] }
+  });
+  const ERF = [
+    { id: "w38_lage1", c: "erkunden", n: ["Lagekundig", "Situation Aware"], d: ["Den Lohn einer Gebietslage einstreichen (Kriegskasse, Soldkasse, Hort oder Schatz).", "Claim the reward of an area situation (war chest, payroll, hoard or treasure)."], ok: () => Object.keys(EM().lagen).length >= 1, r: { titel: ["der Lagekundige", "the Situation-Aware"] }, motiv: "karte", stufe: "silber" },
+    { id: "w38_lagen", c: "erkunden", n: ["Herr der Lagen", "Master of Situations"], d: ["Jede der vier Lagen mit Ziel einmal meistern: Besetzt, Zahlmeister, Gezeichnete, Vergrabener Schatz.", "Master each of the four goal situations once: Occupied, Paymaster, Marked, Buried Treasure."], ok: () => LAGEN4.every(k => EM().lagen[k]), p: () => [LAGEN4.filter(k => EM().lagen[k]).length, 4], r: { cape: "lagekarte" }, motiv: "krone", stufe: "gold" },
+    { id: "w38_schatz10", c: "erkunden", n: ["Schatzgräber", "Treasure Digger"], d: ["10 vergrabene Schätze ausgraben (insgesamt).", "Dig up 10 buried treasures (total)."], ok: () => EM().schatz >= 10, p: () => [EM().schatz, 10], r: { titel: ["Schatzgräber", "the Digger"] }, motiv: "truhe", stufe: "silber" },
+    { id: "w38_zahlrein", c: "makellos", n: ["Sauber kassiert", "Clean Collection"], d: ["Die Soldkasse eines Zahlmeisters holen, ohne in diesem Gebiet vorher getroffen worden zu sein.", "Take a paymaster's payroll without having been hit in that area."], ok: () => EM().zahlRein >= 1, r: { titel: ["der Zahlmeister", "the Paymaster"] }, motiv: "muenze", stufe: "gold" },
+    { id: "w38_tag1", c: "sammeln", n: ["Sonnenaufgang", "Sunrise"], d: ["Eine Tagesprüfung bis zur Wertung spielen.", "Play a daily trial until it is scored."], ok: () => tagDays() >= 1, p: () => [Math.min(1, tagDays()), 1], r: { titel: ["Frühaufsteher", "the Early Riser"] }, motiv: "stern", stufe: "silber" },
+    { id: "w38_tag7", c: "sammeln", n: ["Sieben Sonnen", "Seven Suns"], d: ["An 7 verschiedenen Tagen eine Tagesprüfung werten lassen.", "Have a daily trial scored on 7 different days."], ok: () => tagDays() >= 7, p: () => [tagDays(), 7], r: { cape: "sonnenstein" }, motiv: "sanduhr", stufe: "gold" },
+    { id: "w38_tag3000", c: "sammeln", n: ["Glanzleistung", "Shining Feat"], d: ["In einer Tagesprüfung 3.000 Punkte erreichen.", "Score 3,000 points in a daily trial."], ok: () => tagBest() >= 3000, p: () => [Math.min(tagBest(), 3000), 3000], r: { titel: ["der Strahlende", "the Radiant"] }, motiv: "sieg", stufe: "gold" },
+    { id: "w38_gesetze", c: "sammeln", n: ["Gesetzeskundig", "Learned in Law"], d: ["Unter jedem der neun Tagesgesetze mindestens einmal gewertet werden.", "Be scored at least once under each of the nine laws of the day."], ok: () => GES.every(g => EM().ges[g]), p: () => [GES.filter(g => EM().ges[g]).length, GES.length], r: { titel: ["Gesetzeskundig", "Learned in Law"] }, motiv: "rune", stufe: "blut", selten: true },
+    { id: "w38_voll", c: "sammeln", n: ["Vollständig", "Complete"], d: ["Eine Sammlung im Zielbuch (ab 8 Einträgen) vollständig machen.", "Complete a collection in the book of goals (8 entries or more)."], ok: () => stand().some(x => x.b >= 8 && x.a >= x.b), p: () => { const l = stand().filter(x => x.b >= 8); const b = l.sort((u, v) => v.a / v.b - u.a / u.b)[0]; return b ? [b.a, b.b] : [0, 1]; }, r: { titel: ["der Gründliche", "the Thorough"] }, motiv: "stern", stufe: "gold" },
+    { id: "w38_meilen10", c: "sammeln", n: ["Meilensteinsammler", "Milestone Collector"], d: ["10 Meilensteine im Zielbuch abholen.", "Collect 10 milestones in the book of goals."], ok: () => n0(ZM().got) >= 10, p: () => [n0(ZM().got), 10], r: { cape: "meilenstein" }, motiv: "truhe", stufe: "gold" },
+    { id: "w38_strahl", c: "bosse", n: ["Unter dem Strahl", "Beneath the Beam"], d: ["Den Wächter der Schmiede besiegen, ohne vom Runenstrahl getroffen zu werden.", "Defeat the Forge Warden without being hit by the Rune Beam."], ok: () => false, r: { titel: ["Runenducker", "the Rune Dodger"] }, motiv: "rune", stufe: "silber" },
+    { id: "w38_hort", c: "bosse", n: ["Kühler Kopf", "Cool Head"], d: ["Themberchaud besiegen, ohne in der letzten Phase („Der Hort schmilzt“) getroffen zu werden.", "Defeat Themberchaud without being hit in the final phase ('The Hoard Melts')."], ok: () => false, r: { titel: ["Hortbrecher", "Hoardbreaker"] }, motiv: "flamme", stufe: "gold", selten: true }
+  ];
+  for (const a of ERF) { a.kat = a.c; a.siegel = { motiv: a.motiv, stufe: a.stufe, band: true }; }
+  function addErf() { if (!Z.ACH) return; for (const a of ERF) if (!Z.ACH.some(x => x.id === a.id)) Z.ACH.push(a); }
+  addErf();
+  /* Zählung: Lage-Lohn (einmal je Level-Objekt), Gezeichnete, saubere Soldkasse */
+  const hu0 = Z.hurtPlayer;
+  let bossF = null;
+  Z.hurtPlayer = function (d, o) {
+    const P = Z.player, hp0 = P ? P.hp : 0;
+    const r = hu0.apply(this, arguments);
+    try {
+      if (P && P.hp < hp0 - 0.01 && !gast() && !rausch()) {
+        const lv = Z.level, lg = lv && lv.w38; if (lg && lg.k === "zahlmeister" && !lg.paid) lg.w38hurt = true;
+        const b = Z.boss; if (b && !b.dead && bossF && bossF.b === b) { if (b.id === "schmiedewaechter" && b.mv && b.mv.id === "strahl") bossF.strahl = true; if (b.id === "themberchaud" && (b.phase | 0) >= 3) bossF.hort = true; }
+      }
+    } catch (e) { console.error("W38 Erfolge", e); }
+    return r;
+  };
+  function erfTick() {
+    if (gast() || rausch() || !Z.run) return;
+    const lv = Z.level, lg = lv && lv.w38, E = EM();
+    if (lg) {
+      if (lg.k === "gezeichnet") { const g = lg.got | 0, done = lg.w38gotZ | 0; if (g > done) { E.marks += g - done; lg.w38gotZ = g; Z.saveMeta(); } }
+      if (lg.paid && !lg.w38erf) {
+        lg.w38erf = true; E.lagen[lg.k] = (E.lagen[lg.k] | 0) + 1;
+        if (lg.k === "schatz") E.schatz++;
+        if (lg.k === "zahlmeister" && !lg.w38hurt) E.zahlRein++;
+        Z.saveMeta();
+      }
+    }
+    const b = Z.boss;
+    if (b && (b.id === "schmiedewaechter" || b.id === "themberchaud") && (!bossF || bossF.b !== b)) bossF = { b, strahl: false, hort: false };
+    if (bossF && bossF.b === b && (b.dead || Z.bossDefeated) && !bossF.done) {
+      bossF.done = true;
+      const fair = !(Z.run.gnade || (Z.run._a && Z.run._a.gnade));
+      if (fair && b.id === "schmiedewaechter" && !bossF.strahl && Z.grantAch) Z.grantAch("w38_strahl");
+      if (fair && b.id === "themberchaud" && !bossF.hort && Z.grantAch) Z.grantAch("w38_hort");
+    }
+  }
+  /* Tagesgesetze beim Laufende vermerken (abwechslung.js wertet in Z.backToCamp genau einmal) */
+  const btc0 = Z.backToCamp;
+  Z.backToCamp = function () {
+    const tg = Z.run && Z.run.w38tag;
+    const r = btc0.apply(this, arguments);
+    try { if (tg && tg.fertig && !tg.w38ges && !gast()) { tg.w38ges = true; const E = EM(); for (const g of tg.rules || []) if (GES.includes(g)) E.ges[g] = 1; Z.saveMeta(); } } catch (e) { console.error("W38 Erfolge", e); }
+    return r;
+  };
+  const etk0 = Z.ebenenTick;
+  Z.ebenenTick = function (dt) { if (etk0) etk0.apply(this, arguments); try { erfTick(); } catch (e) { console.error("W38 Erfolge", e); } };
+
+  Z.ziele = { erfolge: () => ERF.map(a => [a.id, !!(M().ach || {})[a.id]]), erfStand: () => JSON.parse(JSON.stringify(EM())), stand: () => stand().map(x => [x.s.id, x.a, x.b]), offen: () => offen().map(o => [o.key, o.r]), naechste: () => naechste().map(x => [x.a.id, x.cur, x.max]), open, abholen, stationen: () => stationen().map(s => [Math.round(s.o.x / T), s.lab, s.neu]), hingehen };
 })();
