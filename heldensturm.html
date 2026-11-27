@@ -12537,7 +12537,7 @@ hook('tick',dt=>{const q=P;
  if(mv>0.6||q.dash||q.down||q.form){q.fmStill=Math.min(0,q.fmStill||0);fmTarnAus(q,mv>0.6&&q.fmTarn)}
  else{q.fmStill=(q.fmStill||0)+dt;const th=q.fmDeck?FM_TARN_DECK:FM_TARN_OFFEN;q.fmTarnK=Math.max(0,Math.min(1,q.fmStill/th));
   if(!q.fmTarn&&q.fmStill>=th){q.fmTarn=1;q.ruhe=Math.max(q.ruhe||0,0.9);if(fxOk()){for(let i=0;i<5;i++)G.fxs.push({k:'fm_blatt',x:q.x+rnd(-16,16),y:q.y-rnd(20,40),vx:rnd(-20,20),a:rnd(TAU),c:i%2?'#5a8a32':'#8ab84a',t:0,life:rnd(0.8,1.2)})}sfx('tuch');
-   if(!G.bot&&!SAVE.fmTarnTip&&NET.role!=='guest'){SAVE.fmTarnTip=1;later(0.3,()=>toast('<b>Getarnt!</b> Wer reglos bleibt, verschmilzt mit dem Wald – im Gras und an Büschen und Bäumen schneller. Ferne Gegner verlieren dich aus den Augen, dein nächster Schuss ist ein Hinterhalt (Volltreffer mit sicherem Krit).','#9ac85a'))}}}
+   if(!G.bot&&!SAVE.fmTarnTip&&NET.role!=='guest'){SAVE.fmTarnTip=1;later(0.3,()=>toast('<b>Getarnt!</b> Wer reglos bleibt, verschmilzt mit '+((G.ka&&G.ka.T&&G.ka.T.mas==='wald')?'dem Wald':'der Umgebung')+' – im Gras und an Büschen und Bäumen schneller. Ferne Gegner verlieren dich aus den Augen, dein nächster Schuss ist ein Hinterhalt (Volltreffer mit sicherem Krit).','#9ac85a'))}}}
  if(q.fmStill<=0)q.fmTarnK=0;
  /* Bot: Rückwärtssalto, wenn ihm etwas zu nah kommt */
  if(G.bot&&!q.dash&&(q.rollCd||0)<G.time&&q.stam>ROLL_KOST+25){q.fmBotT=(q.fmBotT||0)-dt;if(q.fmBotT<=0){q.fmBotT=0.25;const e=nearest(q.x,q.y,70);if(e&&!e.boss&&Math.random()<0.5)rollTry(0,0)}}
@@ -43577,9 +43577,21 @@ function lagerLeben(){const K=G.ka;if(RH.aus||!K||!K.M||!G.deco||K._rhLager||(ty
    if(zu(x,y)||(typeof blkPunkt==='function'&&blkPunkt(x,y,26))||(typeof wlLoPunkt==='function'&&wlLoPunkt(x,y,30)))continue;
    if(G.deco.some(d=>d.k==='rh_lager'&&Math.abs(d.x-x)<46&&Math.abs(d.y-y)<34))continue;
    G.deco.push({x,y,k:'rh_lager',s:1,v:Math.random(),a:Math.atan2(f.y-y,f.x-x),art:v===0?(Math.random()<0.5?0:1):2,wl:1,rh:9});v++;m++}}RH.lager=m}
+/* Flussufer: die Flussbänder hatten schnurgerade Kanten – jetzt brechen Schlammbuchten, Grasbüschel und Kiesel die Uferlinie auf */
+function uferRand(){const K=G.ka;if(RH.aus||!K||!K.tore||!G.deco||K._rhUfer||(typeof NET!=='undefined'&&NET.role==='guest'))return;K._rhUfer=1;let m=0;
+ for(const t of K.tore){if(!t.loL||!t.fl||t.fl.k!=='wasser')continue;for(const o of t.loL){if(o.t!=='r')continue;const hor=o.w>=o.h;const L=hor?o.w:o.h;if(L<120)continue;
+   for(const sg of [0,1]){for(let u=30;u<L-30;u+=34+Math.random()*22){const x=hor?o.x+u:(sg?o.x+o.w:o.x),y=hor?(sg?o.y+o.h:o.y):o.y+u;
+     G.deco.push({x,y,k:'rh_ufer',s:0.8+Math.random()*0.5,v:Math.random(),hor:hor?1:0,sg,wl:1,rh:10});m++}}}}RH.ufer=m}
 /* Feuer entstehen erst nach kaDeko (Lagergruppen) – daher nach dem ganzen Stufenaufbau */
-if(typeof setupStage==='function'){const ss4=setupStage;setupStage=function(){const r=ss4.apply(this,arguments);try{lagerLeben()}catch(e){console.error('rhythm-lager',e)}return r}}
+if(typeof setupStage==='function'){const ss4=setupStage;setupStage=function(){const r=ss4.apply(this,arguments);try{lagerLeben()}catch(e){console.error('rhythm-lager',e)}try{uferRand()}catch(e){console.error('rhythm-ufer',e)}return r}}
 function sonneAn(){try{if(typeof wxIs!=='function')return 1;if(wxIs('regen')||wxIs('gewitter')||wxIs('schnee'))return 0;if(wxIs('nacht')||G.themeKey==='nacht')return -1;return wxIs('daemmer')?0.75:wxIs('nebel')?0.8:1}catch(e){return 1}}
+if(typeof drawDeco==='function'){const ddU=drawDeco;drawDeco=function(d,t){if(d&&d.k==='rh_ufer'){const c=cx;try{c.save();c.translate(d.x,d.y);const s=d.s||1,o=d.sg?1:-1;
+  /* lx,ly: Richtung zur Landseite; Ellipsen liegen längs der Uferlinie */const lx=d.hor?0:o,ly=d.hor?o:0,ax=d.hor?15:6,ay=d.hor?5:13,j=(d.v-0.5);
+  c.fillStyle='rgba(48,42,28,.78)';c.beginPath();c.ellipse(-lx*2,-ly*2,(d.hor?ax:ax+j*4)*s,(d.hor?ay+j*4:ay)*s,0,0,6.2832);c.fill();
+  c.fillStyle='rgba(66,82,40,.85)';c.beginPath();c.ellipse(lx*6*s+(d.hor?j*10:0),ly*5*s+(d.hor?0:j*10),(d.hor?10+d.v*8:5)*s,(d.hor?4.5:9+d.v*6)*s,0,0,6.2832);c.fill();
+  if(d.v>0.45){c.strokeStyle='#5e7a34';c.lineWidth=1.4;c.lineCap='round';c.beginPath();const bx=lx*6*s,by=ly*5*s;for(let i=-1;i<=1;i++){c.moveTo(bx+i*3,by+2);c.lineTo(bx+i*4.5,by+2-(9+(i+1)*2)*s)}c.stroke()}
+  if(d.v<0.35){c.fillStyle='#7a7260';c.beginPath();c.ellipse(lx*3-ly*6,ly*3-lx*6,2.6,1.8,0,0,6.2832);c.ellipse(lx*2+ly*5,ly*2+lx*5,2,1.4,0,0,6.2832);c.fill()}
+  }finally{c.restore()}return}return ddU.apply(this,arguments)}}
 if(typeof drawDeco==='function'){const ddL=drawDeco;drawDeco=function(d,t){if(d&&d.k==='rh_lager'){const c=cx;try{c.save();c.translate(d.x,d.y);
   if(d.art===0){/* Kochtopf auf dem Dreibein */c.fillStyle='rgba(0,0,0,.3)';c.beginPath();c.ellipse(0,6,18,6,0,0,6.2832);c.fill();c.strokeStyle='#5a4028';c.lineWidth=2.4;c.lineCap='round';c.beginPath();c.moveTo(-14,8);c.lineTo(0,-22);c.lineTo(14,8);c.moveTo(0,-22);c.lineTo(3,10);c.stroke();
    c.strokeStyle='#2a2420';c.lineWidth=1.2;c.beginPath();c.moveTo(0,-20);c.lineTo(0,-10);c.stroke();c.fillStyle='#262220';c.beginPath();c.ellipse(0,-4,9,7,0,0,6.2832);c.fill();c.fillStyle='#3a342e';c.beginPath();c.ellipse(0,-9,8,2.4,0,0,6.2832);c.fill();
