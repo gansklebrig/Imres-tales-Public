@@ -359,8 +359,15 @@
     return true;
   }
   K.hurt = hurtP2;
+  K.rumble = (s, w, ms) => padRumble(s, w, ms); /* W39 Haptik: für Boss-Einschläge/Phasen (steuerung.js) */
+  /* W39 Haptik: Drossel wie Z.vib (kern.js) – je 0,06 s höchstens ein Impuls, je Sekunde höchstens 700 ms Brummen (Starkes ab 0,9 geht immer),
+     sonst wurde Spieler 2 bei Treffer-Serien/Mehrfachtreffern zum Dauerbrummer */
+  const pr2 = { last: 0, win: [] };
   function padRumble(s, w, ms) {
     try {
+      const t = performance.now() / 1000; if (t - pr2.last < 0.06) return;
+      pr2.win = pr2.win.filter(x => t - x[0] < 1); const used = pr2.win.reduce((n, x) => n + x[1], 0);
+      if (s < 0.9 && used + ms > 700) return; pr2.last = t; pr2.win.push([t, ms]);
       const k = Z.settings && typeof Z.settings.vibK === "number" ? Z.settings.vibK : 0.8; if (k <= 0) return;
       const g = K.padObj, va = g && g.vibrationActuator; if (va && va.playEffect && K.src && K.src.kind === "pad") va.playEffect("dual-rumble", { duration: ms, strongMagnitude: Math.min(1, s * k), weakMagnitude: Math.min(1, w * k) }).catch(() => {});
     } catch (_) {}
@@ -522,6 +529,7 @@
     P.vy = Math.min(P.vy + g * dt, C.MAXFALL);
     const wasAir = !P.onGround, vy0 = P.vy;
     Z.moveBody(P, dt);
+    if (P.onGround && wasAir && vy0 > 330) padRumble(Math.min(0.24, 0.06 + (vy0 - 330) / 900), Math.min(0.17, 0.04 + (vy0 - 330) / 1300), Math.round(45 + Math.min(40, (vy0 - 330) / 6))); /* W39 Haptik: schwere Landung wie bei Ezekiel (steuerung.js) */
     if (P.onGround && wasAir && vy0 > 200) { A.play("land", { vol: 0.25 }); FX.burst(P.x + P.w / 2, P.y + P.h, 5, { col: "#a99a8b", sp: 40, life: 0.3, size: 2, kind: "smoke" }); P.anim.land = 0.15; }
     if (P.anim.land > 0) P.anim.land -= dt;
     P.anim.run += Math.abs(P.vx) * dt / 9;

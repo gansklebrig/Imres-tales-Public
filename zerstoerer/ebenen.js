@@ -377,7 +377,7 @@
       if (a && e.act.phase === "pre" && ["leap", "lunge", "charge"].includes(a.k) && !e.act.gcheck) {
         e.act.gcheck = true;
         const dist = a.k === "leap" ? Math.min(140, (a.jump ? a.jump[0] : 240) * 0.55) : a.k === "charge" ? 90 : Math.min(90, (a.lunge || 200) * (a.act || 0.15) * 0.7);
-        if (!groundAhead(e, dist)) { e.act = null; e.cd = 0.4; }
+        if (!groundAhead(e, dist)) { e.act = null; e.cd = 0.4; e.rushBlk = (e.anim || 0) + 2.2; } /* W39 KI: danach 2,2 s kein Sprung/Ausfall/Sturm (gegner.js tryAttack) – sonst alle 0,4 s neues Ausholen samt Telegrafie-Klang an der Kante */
       }
       /* Fallschaden für Gegner (z. B. vom Spieler in einen Schacht gestoßen) */
       if (e.onGround) { if (e._air && e.peakY != null && e.y - e.peakY > 9 * T) { const n = Math.round(e.hpMax * Math.min(0.6, (e.y - e.peakY - 9 * T) / (T * 20))); Z.hitEnemy(e, n, { src: "fall", fx: true, heavy: true }); FX.burst(e.x + e.w / 2, e.y + e.h, 10, { col: Z.dustCol || "#8a7a70", sp: 90, ang: -Math.PI / 2, spread: 2.6, life: 0.4, size: 2.5, kind: "smoke" }); } e.peakY = e.y; e._air = false; }

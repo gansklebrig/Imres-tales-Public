@@ -282,7 +282,7 @@
   inp.VIB = VIB;
   const vibK = () => { const v = Z.settings && Z.settings.vibK; return typeof v === "number" && isFinite(v) ? Math.max(0, Math.min(1, v)) : 0.8; };
   const vs = { last: {}, busyT: 0, busyP: -1, win: [] };
-  const freshPad = () => { const p = inp.lastPad; if (!p) return null; try { const g = navigator.getGamepads && navigator.getGamepads()[p.index]; return g && g.connected ? g : p; } catch (_) { return p; } };
+  const freshPad = () => { const p = inp.lastPad; if (!p) return null; try { const g = navigator.getGamepads && navigator.getGamepads()[p.index]; if (g && Z.koopSkipPad && Z.koopSkipPad(g)) return null; /* W39 Haptik: Ezekiels Vibration nie auf dem Controller von Spieler 2 */ return g && g.connected ? g : p; } catch (_) { return p; } };
   function motor(s, w, ms) {
     const k = vibK(); if (k <= 0) return false;
     const st = Math.min(1, s * k), wk = Math.min(1, w * k); ms = Math.round(ms);

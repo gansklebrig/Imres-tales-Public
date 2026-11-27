@@ -739,6 +739,7 @@
       if (a.once && e.uses[a.k]) continue;
       if (a.own && e.ocd && e.ocd[a.k] > 0) continue;
       if (rooted && ["lunge", "leap", "charge", "dive", "teleport"].includes(a.k)) continue;
+      if (e.rushBlk > (e.anim || 0) && (a.k === "leap" || a.k === "lunge" || a.k === "charge")) continue; /* W39 KI: nach Kanten-Abbruch (ebenen.js) gesperrt */
       if (adx < a.r[0] || adx > a.r[1]) continue;
       const maxDy = a.dy != null ? a.dy : a.k === "leap" ? 90 : a.k === "dive" ? 200 : ["shoot", "lob", "mark", "summon", "heal", "shield", "teleport", "grow", "invis", "beam", "volley", "web", "pull", "drum", "flare", "brace", "shell", "smoke", "spores", "thread", "toll", "gust"].includes(a.k) ? 160 : 28;
       if (Math.abs(dy) > maxDy && !(d.fly && a.k !== "hit")) continue;

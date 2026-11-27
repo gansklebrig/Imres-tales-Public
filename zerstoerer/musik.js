@@ -1270,7 +1270,10 @@
     const t = o && o.at > now ? o.at : Math.max(q16(), now + 0.03);
     M.lastSting = M.lastSting || {};
     if (kind === "erfolg") M.lastSting.erfolg = 0; /* jede Freischaltung bekommt ihre Fanfare */
-    const gap = { kampf: 6, ruhe: 8, kette: 0.2, truhe: 1, seite: 2, elite: 10, beute: 1.5, geschafft: 3 }[kind] || 1.5;
+    /* W39 Musik: zwei volle Fanfaren im selben Moment (Erfolg + Auftrag beim Bosssieg, gemessen: 2× „erfolg“ in derselben Millisekunde)
+       stapelten sich – die zweite wird zum kurzen Nachschlag (R13-Form) */
+    if (kind === "erfolg") { if (now - (M._erfT || -9) < 0.4 && !(o && o.kurz)) o = Object.assign({}, o || {}, { kurz: true, n: 1 }); M._erfT = now; }
+    const gap = { kampf: 6, ruhe: 8, kette: 0.2, truhe: 1, seite: 2, elite: 10, beute: 1.5, geschafft: 3, schrein: 6, gabe: 1, bestwert: 5, tagesende: 5 }[kind] || 1.5; /* W39 Musik: neue Stinger */
     if (M.lastSting[kind] && now - M.lastSting[kind] < gap) return;
     M.lastSting[kind] = now; M.stats.stingers[kind] = (M.stats.stingers[kind] || 0) + 1;
     const ch = M.chord || 0, tn = (i, base, c2) => deg(p.scale, (c2 == null ? ch : c2) + [0, 2, 4, 7][i], base), B = M.busSt;
@@ -1468,6 +1471,25 @@
       if (lvl >= 4) { hit("crash", tq + beat, 0.12, 1.05, B); playNote(p.brass || "blech", deg(p.scale, 4, p.root), tq + beat, 0.1, beat * 3, B, 1); }
       if (lvl >= 5) [0, 2, 4].forEach(d => playNote("aah", deg(p.scale, d, p.root + 12), tq + beat, 0.07, beat * 6, B, 1));
       M.heat = Math.max(M.heat, 0.5 + lvl * 0.06);
+    },
+    /* W39 Musik: neue Ereignisse (dezent, über die Stinger-Schiene, in Tonart und Takt) */
+    schrein: ({ p, t, B }) => { /* Wandlungsschrein öffnet: Psalter-Schimmer auf Grundton und Quinte, darunter ein offener Chorklang */
+      [0, 7, 12].forEach((d, i) => playNote("hglo", p.root + 24 + d, t + i * 0.16, 0.06, 2.4, B, 1));
+      playNote("ooh", p.root + 12, t, 0.05, 3, B, 1); playNote("ooh", p.root + 19, t + 0.1, 0.04, 3, B, 1);
+    },
+    gabe: ({ p, t, B, o }) => { /* Gabe gewählt: Harfe steigt in der Tonart, Glocke krönt; je Familie (mutationen.js FAM) ein anderer Schluss-Ton */
+      for (let i = 0; i < 5; i++) playNote("harfe", deg(p.scale, i * 2, p.root + 12), t + i * 0.06, 0.08, 1.4, B, 1);
+      const top = { glas: 7, tank: 12, cc: 14, fern: 9, skill: 4 }[o.fam]; if (top == null) { playNote("glock", p.root + 43, t + 0.32, 0.08, 2, B, 1); return; }
+      playNote("glock", p.root + 36 + top, t + 0.32, 0.08, 2, B, 1);
+    },
+    bestwert: ({ p, t, beat, B }) => { /* Tagesprüfung mit neuer Bestleistung: kurze Dur-Fanfare 1-3-5-8 mit Glockenkrone */
+      const tq = grid(2), r = p.root + 12;
+      [0, 4, 7, 12].forEach((d, i) => playNote("trpst", r + d, tq + i * beat * 0.5, 0.09, beat * (i === 3 ? 3 : 0.6), B, 1));
+      playNote("glock", p.root + 36 + 12, tq + beat * 1.6, 0.08, 2.2, B, 1); hit("crash", tq + beat * 1.5, 0.08, 1.15, B);
+      duck(0.25, tq, beat * 4);
+    },
+    tagesende: ({ p, t, B }) => { /* Tagesprüfung beendet (ohne Bestwert): zwei ruhige Celesta-Töne, Grundton und Quinte abwärts */
+      playNote("cel", p.root + 31, t, 0.08, 1.6, B, 1); playNote("cel", p.root + 24, t + 0.3, 0.08, 2.2, B, 1);
     }
   };
   M.STINGERS = Object.keys(STINGERS);

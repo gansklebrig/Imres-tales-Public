@@ -1770,10 +1770,35 @@
       else if (mp !== KL.mapPing) { KL.mapPing = mp; KL.karteOffen = !KL.karteOffen; if (A.ok && !Z.quiet) {
         shot(AM("e_papier_" + (1 + ((Math.random() * 3) | 0))), { vol: 0.12, rate: KL.karteOffen ? 1.1 : 0.95, verb: 0.15, gap: 0.2, tag: "karte", must: true });
         tuned("kal", KL.karteOffen ? 4 : 2, 2, 0.05, 0.06, "karte2"); KL.stats.karte = (KL.stats.karte || 0) + 1; } } } catch (_) {}
+    try { w39Sting(); } catch (_) {} /* W39 Musik: Schrein, Gabe, Tagesprüfung */
     klAcc += dt || 0;
     if (!(Z.gq && Z.gq.lean) || klAcc >= 0.1) { const d = klAcc; klAcc = 0; try { KL.tick(d); } catch (e) { if (!KL.err) { KL.err = 1; console.error(e); } } }
     return r;
   };
+
+  /* W39 Musik: Stinger für neue Ereignisse, nur beobachtet (läuft auch bei offenem Fenster):
+     Wandlungsschrein-Fenster geht auf („schrein“), Gabe gewählt („gabe“, Schluss-Ton je Familie),
+     Tagesprüfung beendet (abwechslung.js schreibt Z.meta.w38tag.last) – neue Tagesbestleistung „bestwert“, sonst leise „tagesende“ */
+  const WS = { offen: false, wahl: null, last: undefined };
+  function w39Sting() {
+    if (!A.ok || Z.quiet || !M.stinger) return;
+    const lv = Z.level, mu = lv && lv._mut;
+    const auf = !!(mu && Z.ui && Z.ui.modalOpen && document.querySelector("#modal .mutwahl:not(.mutliste)"));
+    if (auf && !WS.offen) M.stinger("schrein");
+    WS.offen = auf;
+    if (mu) {
+      const w = mu.wahl || {}, ks = Object.keys(w).filter(k => w[k] && w[k] !== "-"), key = lv.id + "|" + ks.map(k => k + w[k]).join(",");
+      if (WS.wahl && WS.wahl.lv === lv && key !== WS.wahl.key && ks.length > WS.wahl.n) {
+        const id = w[ks[ks.length - 1]], g = Z.mut && Z.mut.liste && Z.mut.liste.find && Z.mut.liste.find(x => x.id === id);
+        M.stinger("gabe", { fam: g && g.f });
+      }
+      WS.wahl = { lv, key, n: ks.length };
+    }
+    const t = Z.meta && Z.meta.w38tag, last = t && t.last, lk = last ? [last.d, last.p, last.kills, last.gebiet].join("|") : "";
+    if (WS.last === undefined) WS.last = lk;
+    else if (lk && lk !== WS.last) { WS.last = lk; const neu = last.p > 0 && last.p >= (t.best || 0); if (Z.level && Z.level.hub) later(2.4, () => M.stinger(neu ? "bestwert" : "tagesende")); }
+  }
+  if (Z.slots && Z.slots.onSwap) Z.slots.onSwap(() => { WS.last = undefined; WS.wahl = null; }); /* Spielstand gewechselt: kein Stinger für fremde Werte */
 
   /* W39 Klang: Jahreszeiten-Wetter im Lager (lagerwelt.js W28) war bisher nur zu sehen – jetzt eine leise Kulissenschicht je Wetter
      über Lagerfeuer und Nacht (Kulissen-Bus, also unter Regler „Kulisse“ und Effekte-Schalter). Kurze Schleifen (≤ 28 s) wegen Speicher;

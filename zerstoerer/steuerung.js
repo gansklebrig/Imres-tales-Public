@@ -18,12 +18,12 @@
   const bossAlive = () => { const P = Z.player; if (!P || !Z.enemies) return false; for (const e of Z.enemies) if (e && !e.dead && e.def && e.def.boss && Math.abs(e.x - P.x) < 520) return true; return false; };
   {
     const sh0 = FX.addShake;
-    FX.addShake = function (v, cap) { try { if (!inPlayer && +v >= 6 && Z.level && !Z.paused && bossAlive()) Z.vib && Z.vib("boss"); } catch (_) {} return sh0.apply(this, arguments); };
+    FX.addShake = function (v, cap) { try { if (!inPlayer && +v >= 6 && Z.level && !Z.paused && bossAlive()) { Z.vib && Z.vib("boss"); if (Z.koop && Z.koop.p2 && Z.koop.rumble) Z.koop.rumble(1, 0.7, 240); } /* W39 Haptik: auch Spieler 2 */ } catch (_) {} return sh0.apply(this, arguments); };
   }
   const phSeen = new WeakMap();
   function bossWatch() {
     if (!Z.enemies) return;
-    for (const e of Z.enemies) { if (!e || !e.def || !e.def.boss) continue; const ph = e.phase || 0, was = phSeen.get(e); phSeen.set(e, ph); if (was != null && ph > was && !e.dead) Z.vib && Z.vib("phase"); }
+    for (const e of Z.enemies) { if (!e || !e.def || !e.def.boss) continue; const ph = e.phase || 0, was = phSeen.get(e); phSeen.set(e, ph); if (was != null && ph > was && !e.dead) { Z.vib && Z.vib("phase"); if (Z.koop && Z.koop.p2 && Z.koop.rumble) Z.koop.rumble(0.9, 1, 300); } /* W39 Haptik: auch Spieler 2 */ }
   }
   let skidT = 0;
   /* W9 Treppen: Figur um P.stepOff versetzt zeichnen (Stufe hinauf/hinab weich nachgezogen, siehe stepUp/stickDown in kampf.js).
