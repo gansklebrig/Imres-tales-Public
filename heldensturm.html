@@ -26809,7 +26809,7 @@ function qa2Abst(){try{qa2MenuPutz();const de=document.documentElement;let sb=46
    if(top<innerHeight)sb=Math.max(sb,Math.round(innerHeight-top+8));sb=Math.min(sb,Math.round(innerHeight*0.45))}
   const v=sb+'px';if(de.style.getPropertyValue('--qa2sb')!==v)de.style.setProperty('--qa2sb',v);
   let tb=8;const t=TUT&&TUT.el;if(t&&qa2Klein()&&t.style.display!=='none'&&t.getClientRects().length){const r=t.getBoundingClientRect();if(r.height>0)tb=Math.round(innerHeight-r.top+6)}
-  const v2=tb+'px';if(de.style.getPropertyValue('--qa2tb')!==v2)de.style.setProperty('--qa2tb',v2);
+  tb=Math.max(tb,window.__qa2eb||0);const v2=tb+'px';if(de.style.getPropertyValue('--qa2tb')!==v2)de.style.setProperty('--qa2tb',v2);
   /* 2) Einführung: im Menü/Pause/Fenster ausblenden (tutTick läuft dort nicht immer) */
   if(t){const spielt=G.state==='play'&&!G.paused&&!G.overlay&&!qa2Menu();if(!spielt&&t.style.display!=='none')t.style.display='none';
    /* große Einblendung (Stufenname, Ziel) oben: Einführung solange zurückhalten (Desktop: gleiche Höhe) */
@@ -43429,9 +43429,9 @@ function lage(){const t=el();if(!t)return;if(basis===null){basis=parseFloat(getC
 /* (beide Prüfungen gedrosselt: Lage ≤ 8×/s, Spur ≤ 7×/s – Layout-Abfragen kosten in jedem Bild Zeit) */
 /* Hinweisspur unten (lange Hinweise) nicht unter die Erzähler-/Heldenzeile legen: Spur rückt darüber */
 let laneZ=-1;const DE=document.documentElement;
-function spur(){const nw=performance.now();if(nw-spurT<150)return;spurT=nw;const ln=document.getElementById('qa2lane');if(!ln||!ln.firstElementChild&&laneZ<=0)return;const erz=document.querySelector('.erzSub');let ziel=0;
+function spur(){const nw=performance.now();if(nw-spurT<150)return;spurT=nw;const ln=document.getElementById('qa2lane');const hatT=typeof toastEl!=='undefined'&&toastEl&&toastEl.firstElementChild;if((!ln||!ln.firstElementChild)&&!hatT&&laneZ<=0)return;const erz=document.querySelector('.erzSub');let ziel=0;
  if(!ME.aus&&erz&&erz.isConnected&&erz.classList.contains('an')&&!erz.classList.contains('oben')&&!erz.classList.contains('pz')){const r=erz.getBoundingClientRect();if(r.height>8&&r.top<innerHeight){const hz=parseFloat(DE.style.getPropertyValue('--hz'))||1;ziel=Math.round((innerHeight-r.top+8)/hz)}}
- if(ziel!==laneZ){laneZ=ziel;if(ziel){DE.style.setProperty('--qa2lb',ziel+'px');DE.style.setProperty('--qa2tb',ziel+'px')}else{DE.style.removeProperty('--qa2lb');DE.style.removeProperty('--qa2tb')}}}
+ window.__qa2eb=ziel;if(ziel!==laneZ){laneZ=ziel;if(ziel){DE.style.setProperty('--qa2lb',ziel+'px');DE.style.setProperty('--qa2tb',ziel+'px')}else{DE.style.removeProperty('--qa2lb');DE.style.removeProperty('--qa2tb')}}}
 (function schleife(){try{lage()}catch(e){}try{spur()}catch(e){}requestAnimationFrame(schleife)})();
 /* Banner nicht über den Abschnittsnamen legen: Banner rückt unter ihn */
 function kaUnten(){try{if(typeof KANAME!=='undefined'&&KANAME.t>0&&KANAME.unten>0)return KANAME.unten+12}catch(e){}try{if(typeof KANAME!=='undefined'&&KANAME.t>0){let top=70;const h=document.querySelector('#hud .top');if(h){const r=h.getBoundingClientRect();if(r.height>0)top=r.bottom+(W<700?58:14)}const fs=W<700?15:19;return top+fs+(KANAME.sub?40:22)}}catch(e){}return 0}
