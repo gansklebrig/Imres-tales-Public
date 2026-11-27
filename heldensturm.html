@@ -6862,7 +6862,7 @@ function padFrame(){let L=[];try{L=navigator.getGamepads?[...navigator.getGamepa
   PADS.st[gp.index]={i:gp.index,b,pr:b.map((v,i)=>v&&!pv[i]),lx:ax[0]||0,ly:ax[1]||0,rx:ax[2]||0,ry:ax[3]||0};if(b.some(Boolean)||Math.hypot(ax[0]||0,ax[1]||0)>0.3||Math.hypot(ax[2]||0,ax[3]||0)>0.3)PADS.t=performance.now()}
  for(const k in PADS.st)if(!live[k])delete PADS.st[k]}
 const padIdx=d=>d&&d.indexOf('pad:')===0?+d.slice(4):-1;
-const devName=d=>d==='kb'?'Tastatur & Maus':d&&d.indexOf('pad:')===0?'Controller '+(padIdx(d)+1):netIs(d)?'Online':'?';
+const devName=d=>d==='kb'?((typeof MOBIL!=='undefined'&&MOBIL)||(window.matchMedia&&matchMedia('(pointer:coarse)').matches)?'Touch':'Tastatur & Maus'):d&&d.indexOf('pad:')===0?'Controller '+(padIdx(d)+1):netIs(d)?'Online':'?';
 function padsOf(p){if(p.dev&&p.dev.indexOf('pad:')===0){const s=PADS.st[padIdx(p.dev)];return s?[s]:[]}
  if(G.mp&&p.pad2!==undefined&&(!p.dev||p.dev==='kb')){const s=PADS.st[p.pad2];return s?[s]:[]}
  if(!G.mp)return Object.values(PADS.st);/* allein: jeder Controller steuert mit; gemeinsam steigen freie Controller per A ein */
