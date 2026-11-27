@@ -43470,7 +43470,7 @@ function lage(){const t=el();if(!t)return;if(basis===null){basis=parseFloat(getC
 /* Hinweisspur unten (lange Hinweise) nicht unter die Erzähler-/Heldenzeile legen: Spur rückt darüber */
 let laneZ=-1;const DE=document.documentElement;
 function spur(){const nw=performance.now();if(nw-spurT<150)return;spurT=nw;const ln=document.getElementById('qa2lane');const hatT=typeof toastEl!=='undefined'&&toastEl&&toastEl.firstElementChild;if((!ln||!ln.firstElementChild)&&!hatT&&laneZ<=0)return;const erz=document.querySelector('.erzSub');let ziel=0;
- if(!ME.aus&&erz&&erz.isConnected&&erz.classList.contains('an')&&!erz.classList.contains('oben')&&!erz.classList.contains('pz')){const r=erz.getBoundingClientRect();if(r.height>8&&r.top<innerHeight){const hz=parseFloat(DE.style.getPropertyValue('--hz'))||1;ziel=Math.round((innerHeight-r.top+8)/hz)}}
+ if(!ME.aus&&erz&&erz.isConnected&&(erz.classList.contains('an')||parseFloat(getComputedStyle(erz).opacity)>0.05)&&!erz.classList.contains('oben')&&!erz.classList.contains('pz')){const r=erz.getBoundingClientRect();if(r.height>8&&r.top<innerHeight){const hz=parseFloat(DE.style.getPropertyValue('--hz'))||1;ziel=Math.round((innerHeight-r.top+8)/hz)}}
  window.__qa2eb=ziel;if(ziel!==laneZ){laneZ=ziel;if(ziel){DE.style.setProperty('--qa2lb',ziel+'px');DE.style.setProperty('--qa2tb',ziel+'px')}else{DE.style.removeProperty('--qa2lb');DE.style.removeProperty('--qa2tb')}}}
 (function schleife(){try{lage()}catch(e){}try{spur()}catch(e){}requestAnimationFrame(schleife)})();
 /* Banner nicht über den Abschnittsnamen legen: Banner rückt unter ihn */
