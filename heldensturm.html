@@ -26909,7 +26909,8 @@ const qa2Menu=()=>!scr.hidden;
 function qa2MenuPutz(){if(!qa2Menu())return;for(const d of [...toastEl.children])if(d.dataset&&d.dataset.q2m==='0'&&(d.textContent||'').length>110)d.remove()}
 /* Abstände: Menü-Meldungen über der Startleiste des Lagers; Handheld-Meldungen über der Einführung */
 function qa2Abst(){try{qa2MenuPutz();const de=document.documentElement;let sb=46;if(qa2Menu()){/* über Startleiste, Seitenleiste und Hauptknöpfen im unteren Bereich bleiben */let top=innerHeight;
-   for(const b of scr.querySelectorAll('.startbar,.mfbar,.btn-main,button[data-act="fire-go"],button[data-act="next-stage"],button[data-act="stage-go"]')){if(!b.getClientRects().length)continue;const r=b.getBoundingClientRect();if(r.height>0&&r.top>innerHeight*0.55&&r.top<top)top=r.top}
+   let tl=0,tr=innerWidth;try{const tr0=toastEl&&toastEl.getBoundingClientRect();if(tr0&&tr0.width>40&&!document.body.classList.contains('imresTitel')){tl=tr0.left;tr=tr0.right}}catch(e){}
+   for(const b of scr.querySelectorAll('.startbar,.mfbar,.btn-main,button[data-act="fire-go"],button[data-act="next-stage"],button[data-act="stage-go"],.g2bar')){if(!b.getClientRects().length)continue;const r=b.getBoundingClientRect();/* nur Knöpfe, die unter der Hinweisspalte liegen */if(r.height>0&&r.top>innerHeight*0.55&&r.top<top&&r.right>tl+4&&r.left<tr-4)top=r.top}
    if(top<innerHeight)sb=Math.max(sb,Math.round(innerHeight-top+8));sb=Math.min(sb,Math.round(innerHeight*0.45))}
   if(qa2Menu())sb=Math.max(sb,window.__qa2eb||0);const v=sb+'px';if(de.style.getPropertyValue('--qa2sb')!==v)de.style.setProperty('--qa2sb',v);
   let tb=8;const t=TUT&&TUT.el;if(t&&qa2Klein()&&t.style.display!=='none'&&t.getClientRects().length){const r=t.getBoundingClientRect();if(r.height>0)tb=Math.round(innerHeight-r.top+6)}
