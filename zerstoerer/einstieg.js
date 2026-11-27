@@ -137,8 +137,12 @@
     if (!hits) return;
     /* erst versuchen: mittig bleiben, nur unter die Lebensleiste rücken */
     if (hl) { const t1 = hl.bottom + 6, b1 = t1 + 130 * hud; if (!obs.some(r => r !== hl && r.left < r0 && r.right > l0 && r.top < b1 && r.bottom > t1) && !(hl.left < r0 && hl.right > l0 && hl.bottom > t1)) { mEl.style.top = t1 / hud + "px"; return; } }
-    const sx = 8, rightEdge = right.length ? Math.min(...right.filter(r => r.top < (hl ? hl.bottom : 60) + 140 * hud).map(r => r.left).concat([W])) - 8 : W - 8;
-    const free = rightEdge - sx, top2 = (hl ? hl.bottom : 50) + 6;
+    const top2 = (hl ? hl.bottom : 50) + 6, bandB = top2 + 130 * hud;
+    /* W38 QA: Linkshänder-Touch legt Karten-/Pause-Knopf nach links – auch linke Hindernisse im Band beachten */
+    const leftObs = obs.filter(r => r !== hl && r.right < W * 0.55 && r.top < bandB && r.bottom > top2);
+    const sx = leftObs.length ? Math.max(...leftObs.map(r => r.right)) + 8 : 8;
+    const rightEdge = right.length ? Math.min(...right.filter(r => r.top < (hl ? hl.bottom : 60) + 140 * hud).map(r => r.left).concat([W])) - 8 : W - 8;
+    const free = rightEdge - sx;
     mEl.classList.add("w38-links");
     if (free >= 220 * hud) { mEl.style.left = sx / hud + "px"; mEl.style.top = top2 / hud + "px"; mEl.style.width = free / hud + "px"; }
     else { const low = Math.max(...obs.filter(r => r.top < window.innerHeight * 0.4).map(r => r.bottom)) + 6; mEl.style.left = sx / hud + "px"; mEl.style.top = low / hud + "px"; mEl.style.width = (W - 2 * sx) / hud + "px"; }

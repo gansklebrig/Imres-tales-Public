@@ -9738,7 +9738,7 @@
 },
 "zerstoerer.html":{
 "groesse":81098,
-"sha256":"8faea1aaf18f4e08d327ef6cb73213401e8665bf1b8cc7970b14e009f3c2e3d2"
+"sha256":"17a08850ec7bfa51d5f39babcc28bc38fc2daa8f57ad336ee8e7d1e0cd11b683"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":144658,
@@ -9809,8 +9809,8 @@
 "sha256":"ef79c43632adba8bd50d034ed5d07774b21fff923e56183e4b24c63a39cc7a50"
 },
 "zerstoerer/einstieg.js":{
-"groesse":13178,
-"sha256":"2b1f1d0ec29e57958470ba5a482554af0434ff96f16f88e95c334167350d12a2"
+"groesse":13508,
+"sha256":"0dc0c4f52ddb4afca9be62c1349899e1f5dc48e657c9655f7823b3e785c8aeab"
 },
 "zerstoerer/erkundung.js":{
 "groesse":66402,
@@ -10033,5 +10033,5 @@
 "sha256":"2239cd79f01c377c38cdcecf8d827774c46b23cf9e74f4481be6463ca0b129e0"
 }
 },
-"stand":169
+"stand":170
 }
