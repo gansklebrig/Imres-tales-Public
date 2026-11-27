@@ -43601,6 +43601,16 @@ if(typeof netStagePkt==='function'){const sp=netStagePkt;netStagePkt=function(){
 if(typeof netStage==='function'){const ns=netStage;netStage=function(m){const r=ns.apply(this,arguments);try{const K=G.ka;if(G.netGuestRun&&K&&m&&m.ka&&Array.isArray(m.ka.rhL))K.rhLeinen=m.ka.rhL.filter(o=>o&&typeof o==='object'&&isFinite(o.x0)&&isFinite(o.y0)&&isFinite(o.x1)&&isFinite(o.y1)).slice(0,20)}catch(e){}return r}}
 /* Schneetreiben: bisher fielen nur Flocken auf sommergrünen Boden. Jetzt liegt eine dünne Schneedecke – heller Schleier und
    Verwehungen an festen Stellen (Weltraster, wandert nicht mit). Liegt in der Bodenebene (wird mit den Bodenkacheln gebacken). */
+/* Regen/Gewitter: nasser Boden – etwas dunkler, Pfützen mit hellem Rand an festen Stellen (Bodenebene, gebacken) */
+if(typeof wlBoden==='function'){const wr=wlBoden;wlBoden=function(t){const r=wr.apply(this,arguments);try{if(RH.aus||G.room||typeof wxIs!=='function'||!(wxIs('regen')||wxIs('gewitter')))return r;const V=wlSicht(),c=cx,Q=170;
+  c.save();c.fillStyle='rgba(10,12,10,.10)';c.fillRect(V.x0-20,V.y0-20,V.x1-V.x0+40,V.y1-V.y0+40);
+  const i0=Math.floor(V.x0/Q)-1,i1=Math.ceil(V.x1/Q)+1,j0=Math.floor(V.y0/Q)-1,j1=Math.ceil(V.y1/Q)+1;
+  for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){let h=(i*83492791)^(j*2654435761);h=Math.imul(h^(h>>>13),1274126177)>>>0;if(h%3)continue;
+   const x=(i+(h%1000)/1000)*Q,y=(j+((h>>>10)%1000)/1000)*Q,w=12+((h>>>20)%22);if(typeof blkPunkt==='function'&&blkPunkt(x,y,w))continue;
+   c.fillStyle='rgba(14,16,14,.42)';c.beginPath();c.ellipse(x,y,w,w*0.42,0,0,6.2832);c.ellipse(x+w*0.6,y+w*0.12,w*0.6,w*0.28,0,0,6.2832);c.fill();
+   c.fillStyle='rgba(150,158,152,.13)';c.beginPath();c.ellipse(x-w*0.1,y-w*0.05,w*0.62,w*0.2,0,0,6.2832);c.fill();
+   c.strokeStyle='rgba(214,220,214,.28)';c.lineWidth=1.3;c.beginPath();c.ellipse(x-w*0.15,y-w*0.06,w*0.7,w*0.22,0,3.5,5.9);c.stroke()}
+  c.restore()}catch(e){}return r}}
 if(typeof wlBoden==='function'){const wb=wlBoden;wlBoden=function(t){const r=wb.apply(this,arguments);try{if(RH.aus||G.room||typeof wxIs!=='function'||!wxIs('schnee'))return r;const V=wlSicht(),c=cx,Q=90;
   c.save();c.globalCompositeOperation='source-over';c.fillStyle='rgba(236,238,240,.12)';c.fillRect(V.x0-20,V.y0-20,V.x1-V.x0+40,V.y1-V.y0+40);
   const i0=Math.floor(V.x0/Q)-1,i1=Math.ceil(V.x1/Q)+1,j0=Math.floor(V.y0/Q)-1,j1=Math.ceil(V.y1/Q)+1;
