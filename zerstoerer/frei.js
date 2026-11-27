@@ -162,12 +162,122 @@
     return (untenY = y);
   };
 
+  /* ---------- 7) Breitbild: Lichtkreis um Ezekiel wächst ab 16:9 mit dem Seitenverhältnis (bild.js cutHoles) ----------
+     Gemessen (Torhof, Stufe 3): Randhelligkeit/Mitte bei 1920×1080 ≈ 0,5, bei 3440×1440 ≈ 0,3 – die Seiten lagen im Schwarz. */
+  Z.uwLicht = function () {
+    const c = Z.cam; if (off() || !c || !c.h) return 1;
+    const a = c.w / c.h; if (a <= 1.8) return 1;
+    return Math.pow(Math.min(a / 1.78, 1.6), 0.75);
+  };
+
+  /* ---------- 8) Breitbild: Pausenmenü zweispaltig, wenn die Knopfliste nicht ins Fenster passt ---------- */
+  function pauseSpalten() {
+    const sp = document.querySelector("#modal .p-spalten"), box = document.querySelector("#modal .mbox"); if (!sp || !box || off()) return;
+    const kn = sp.querySelector(".knoepfe.senk"); if (!kn) return;
+    if (innerWidth / innerHeight < 1.7 || innerWidth < 1280) return; /* nur breite Bildschirme (ab 16:9, Desktop) */
+    if (box.scrollHeight <= box.clientHeight + 4) return;
+    sp.classList.add("w38-zwei");
+  }
+  function wirePause() {
+    const ui = Z.ui; if (!ui || typeof ui.pause !== "function") return setTimeout(wirePause, 80);
+    if (ui.pause._w38z) return;
+    const p0 = ui.pause;
+    ui.pause = function () { const r = p0.apply(this, arguments); try { pauseSpalten(); } catch (e) { console.error("W38 Frei", e); } return r; };
+    ui.pause._w38z = true;
+  }
+  wirePause();
+
+  /* ---------- 9) Breitbild: HUD wahlweise an den Bildrand (statt im 16:9-Mittelfeld) ----------
+     Die Anzeige sitzt bewusst im 16:9-Bereich (--safe-x). Auf 21:9/32:9 schwebt die Lebensleiste dadurch weit im Bild;
+     neue Einstellung „Anzeige an den Bildrand“ (nur auf Breitbild angeboten), gilt für Lebensleiste, Karte, Boss-Leiste. */
+  const hudRand = () => { try { document.body.classList.toggle("w38-hudrand", !!(Z.settings && Z.settings.w38hudRand) && !off()); } catch (_) {} };
+  function wireSet() {
+    const ui = Z.ui; if (!ui || typeof ui.settings !== "function" || !document.body) return setTimeout(wireSet, 80);
+    hudRand();
+    if (ui.settings._w38h) return;
+    const s0 = ui.settings;
+    ui.settings = function () {
+      const r = s0.apply(this, arguments);
+      try {
+        if (innerWidth / innerHeight > 1.85 && !document.querySelector('#modal [data-w38h]')) {
+          const ref = document.querySelector('#modal [data-set="autoAim"]'), lab = ref && ref.closest("label");
+          if (lab) {
+            const el = document.createElement("label"); el.className = "schalter";
+            el.innerHTML = '<input type="checkbox" data-w38h="1"' + (Z.settings.w38hudRand ? " checked" : "") + "> " + Z.L(["Breitbild: Anzeige an den Bildrand", "Ultrawide: HUD at the screen edges"]);
+            lab.parentNode.insertBefore(el, lab);
+            el.querySelector("input").onchange = e => { Z.settings.w38hudRand = e.target.checked; try { Z.saveSettings && Z.saveSettings(); } catch (_) {} hudRand(); };
+          }
+        }
+      } catch (e) { console.error("W38 Frei", e); }
+      return r;
+    };
+    ui.settings._w38h = true;
+  }
+  wireSet();
+
+  /* ---------- 10) Online-Gast: wer ist wer, und die Herausforderungen des Gebiets ----------
+     Probelauf (Gastgeber Desktop, Gast Handy quer, 4 Gebiete): Beim Gast zeigt die große Lebensleiste Ezekiel (Gastgeber),
+     die eigene steht klein im P2-Kasten – ohne Hinweis. Und die Herausforderungstafel fehlte beim Gast ganz.
+     Gast: „Ezekiel“ an der großen Leiste, „du“ am P2-Kasten. Gastgeber schreibt die Ziele in Gebietsfelder (lv.w38c0–2,
+     über die Schnappschüsse gespiegelt), der Gast zeigt sie kompakt unter der Karte (in seiner Sprache). */
+  const OS = () => Z.online && Z.online.S;
+  const istGast = () => { const s = OS(); return !!(s && s.role === "guest" && s.playing); };
+  const istHost = () => { const s = OS(); return !!(s && s.role === "host" && s.playing); };
+  let chT = 0;
+  function chHost() {
+    const lv = Z.level, C = Z.chState && Z.chState(); if (!lv) return;
+    for (let i = 0; i < 3; i++) {
+      const x = C && C.list && C.list[i]; let v = "";
+      if (x && x.h && x.h.id) {
+        let pr = "";
+        try {
+          if (x.h.art === "zeit" && x.lim != null && Z.run) { const sec = Math.max(0, Math.ceil(x.lim - (Z.run.time - C.t0))); pr = Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0"); }
+          else if (x.h.prog) { C.need = x.need; pr = Math.min(x.h.prog(C), x.need || 1e9) + (x.need ? "/" + x.need : ""); }
+        } catch (_) {}
+        v = (x.h.id + "|" + pr + "|" + (x.state === "ok" ? "ok" : x.state === "weg" ? "weg" : "")).slice(0, 60);
+      }
+      if (lv["w38c" + i] !== v) lv["w38c" + i] = v;
+    }
+  }
+  let gEl = null;
+  function chGast() {
+    const lv = Z.level, hl = document.querySelector("#hud .hl"); if (!lv || !hl) return;
+    if (!gEl) { gEl = document.createElement("div"); gEl.id = "w38gch"; gEl.className = "eisen"; }
+    const kh = document.getElementById("koop-hl"); /* links unter dem P2-Kasten: rechts liegen am Handy Karte/Pause-Knöpfe */
+    if (kh && kh.parentNode === hl) { if (gEl.previousSibling !== kh) hl.insertBefore(gEl, kh.nextSibling); } else if (gEl.parentNode !== hl) hl.appendChild(gEl);
+    let h = "";
+    for (let i = 0; i < 3; i++) {
+      const v = lv["w38c" + i]; if (!v || typeof v !== "string") continue;
+      const [id, pr, st] = v.split("|"), d = (Z.CHALLENGES || []).find(c => c.id === id); if (!d) continue;
+      h += '<span class="hc ' + (st || "") + '">' + d.ico + " " + Z.U.esc(Z.L(d.n)) + (st === "ok" ? " ✓" : pr ? " " + Z.U.esc(pr) : "") + "</span>";
+    }
+    gEl.hidden = !h || !!lv.hub; if (gEl.dataset.h !== h) { gEl.dataset.h = h; gEl.innerHTML = h ? '<span class="hk">✦</span>' + h : ""; }
+  }
+  function werIstWer() {
+    const g = istGast() && !off();
+    document.body.classList.toggle("w38-gast", g);
+    const bar = document.getElementById("hpbar");
+    if (bar) { let t = bar.querySelector(".w38-wer"); if (g && !t) { t = document.createElement("span"); t.className = "w38-wer"; t.textContent = "Ezekiel"; bar.appendChild(t); } if (!g && t) t.remove(); }
+    const kk = document.querySelector("#koop-hl .kh-kopf");
+    if (kk) { let t = kk.querySelector(".w38-du"); if (g && !t) { t = document.createElement("span"); t.className = "w38-du"; t.textContent = Z.L(["du", "you"]); kk.appendChild(t); } if (!g && t) t.remove(); }
+    if (!g && gEl && !gEl.hidden) gEl.hidden = true;
+  }
+  (function gl() {
+    setTimeout(gl, 250);
+    try { werIstWer(); if (off()) return; if (istHost()) chHost(); else if (istGast()) chGast(); } catch (e) { if (!errN.gast) { errN.gast = 1; console.error("W38 Frei", e); } }
+  })();
+
   /* ---------- Aussehen ---------- */
   const css = document.createElement("style");
   css.textContent = [
     "@keyframes w38verf{0%{color:#ff7a6a;opacity:1;transform:translateX(0)}15%{transform:translateX(-3px)}30%{transform:translateX(3px)}45%{transform:translateX(-2px)}60%{transform:translateX(0);color:#ff7a6a;opacity:1}100%{color:inherit;opacity:.45}}",
     "#hfzeile .hc.weg.w38-verf{animation:w38verf 1.3s ease-out 1;text-decoration-color:#ff7a6a}",
-    "@media (prefers-reduced-motion:reduce){#hfzeile .hc.weg.w38-verf{animation:none;color:#ff9a8a}}"
+    "@media (prefers-reduced-motion:reduce){#hfzeile .hc.weg.w38-verf{animation:none;color:#ff9a8a}}",
+    "body.w38-hudrand{--safe-x:0px}",
+    "#hpbar .w38-wer{position:absolute;left:6px;top:50%;transform:translateY(-50%);font-size:calc(var(--fs-xs,11px) * .85);font-weight:800;color:#f0e2cc;text-shadow:0 1px 2px #000;opacity:.85;pointer-events:none}",
+    "#koop-hl .w38-du{margin-left:auto;font-size:var(--fs-xs,11px);color:#1a1012;background:#e5b454;border-radius:6px;padding:0 6px;font-weight:800}",
+    "#w38gch{margin-top:6px;max-width:min(300px,42vw);padding:3px 8px;font-size:12px;font-weight:700;line-height:1.35}#w38gch .hc{white-space:nowrap;margin-right:8px;display:inline-block}#w38gch .hc.ok{color:#ffd27a}#w38gch .hc.weg{opacity:.45;text-decoration:line-through}#w38gch .hk{color:#e5b454;margin-right:4px}",
+    "#modal .p-spalten.w38-zwei{grid-template-columns:minmax(420px,560px) 1fr}#modal .p-spalten.w38-zwei .knoepfe.senk{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:stretch}#modal .p-spalten.w38-zwei .knoepfe.senk>*{margin:0;width:auto}"
   ].join("\n");
   document.head.appendChild(css);
 

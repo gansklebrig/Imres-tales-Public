@@ -58,7 +58,7 @@
     P.hp = Math.min(P.hpMax, P.hp + P.hpMax * 0.5); P.potions = P.potMax;
     Z.run.doorsOpen = true;
     const id0 = Z.level ? Z.level.id : "glut", from = Z.ARENAS[id0] && Z.ARENAS[id0].base ? Z.ARENAS[id0].base : (Z.BIOMES[id0] ? id0 : "glut");
-    Z.ui.fade(() => { Z.loadArea("passage", { from, to: t.next }); });
+    Z.ui.fade(() => { if (Z.run !== run || !Z.player || Z.player.dead) return; Z.loadArea("passage", { from, to: t.next }); }); /* W39 Robust: Lauf in der Überblendung beendet → nicht laden */
     return true;
   }
 

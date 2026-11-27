@@ -364,7 +364,7 @@
     Z.recalcPlayer(); applyPots(); P.hp = P.hpMax;
     const t = TM(); if (t.d !== day.d) { if (t.d && t.best) pushHist(t); t.d = day.d; t.best = 0; t.n = 0; } t.n++; Z.saveMeta();
     A.play("gong", { vol: 0.5 });
-    Z.ui.fade(() => { Z.loadArea("torhof"); });
+    Z.ui.fade(() => { if (Z.run !== run || !Z.player) return; Z.loadArea("torhof"); }); /* W39 Robust: Lauf in der Überblendung beendet → nicht laden */
     return true;
   }
   function pushHist(t) { t.hist = t.hist.filter(h => Array.isArray(h) && h[0] !== t.d); t.hist.unshift([t.d, t.best, t.n]); t.hist = t.hist.slice(0, 14); }

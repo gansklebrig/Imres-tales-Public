@@ -92,7 +92,8 @@
     regArenen(stages);
     Z.newRun(); Z.run.w21rausch = true; Z.run.skulls = 0; Z.run.rausch = true;
     A && A.play && A.play("horn", { vol: 0.6 });
-    const go = () => { try { Z.loadArea(stages[0].area); } catch (e) { console.error("bossrausch", e); abbruchStill(); } };
+    const run = Z.run;
+    const go = () => { if (Z.run !== run || !Z.player) { abbruchStill(); return; } /* W39 Robust: in der Überblendung beendet (Titel/Spielstandwechsel) → still abbrechen, Spielstand zurück */ try { Z.loadArea(stages[0].area); } catch (e) { console.error("bossrausch", e); abbruchStill(); } };
     if (Z.ui && Z.ui.fade) Z.ui.fade(go); else go();
     return true;
   }

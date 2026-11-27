@@ -2473,6 +2473,7 @@
     if (P) {
       let r = Z.darkness > 0 ? 70 : 150 + 70 * sanftV; /* R39: größerer Lichtkreis bei sanfter Abdunkelung */
       if ((P.slots.a1 && P.slots.a1.id === "dawnbringer") || (P.slots.a2 && P.slots.a2.id === "dawnbringer")) r += 70;
+      if (!(Z.darkness > 0) && Z.uwLicht) r *= Z.uwLicht(); /* W38 Frei: Breitbild (21:9) – Lichtkreis wächst mit, sonst bleiben die Seiten schwarz */
       hole0(P.x + P.w / 2, P.y + 10, r, 0.95);
     }
     if (Z.darkness > 0) return;
