@@ -16416,6 +16416,8 @@ function erfWarten(){try{if(G.state==='play'&&G.boss&&!G.boss.dead&&G.boss.hp>0)
  if((innerWidth<=760||innerHeight<=480)&&(G.state==='between'||G.state==='camp'||G.state==='end'))return true;
  /* im Spiel geöffnete Fenster (Pause, Beutel, Talente …): Tafel lag sonst über dem Fensterinhalt – zeigen, sobald es zu ist */
  if(G.state==='play'&&G.overlay)return true}catch(e){}return false}
+/* läuft eine Tafel noch, wenn im Spiel ein Fenster aufgeht (Pause, Beutel, Truhe …), wird sie bis zum Schließen ausgeblendet */
+setInterval(()=>{try{const el=ERF.cur;if(!el)return;const weg=G.state==='play'&&!!G.overlay;const v=weg?'hidden':'';if(el.style.visibility!==v)el.style.visibility=v}catch(e){}},200);
 function erfPump(){if(ERF.cur||!ERF.q.length)return;if(G&&G.bot){ERF.q.length=0;return}
  const now=performance.now();if(erfWarten()){if(!ERF.waitT)ERF.waitT=now;if(now-ERF.waitT<(G.state==='play'&&!G.overlay?40000:180000)){clearTimeout(ERF.pt);ERF.pt=setTimeout(erfPump,700);return}}ERF.waitT=0;
  const id=ERF.q.shift(),d=ERF_ID[id];if(!d){erfPump();return}erfZeig(d)}
@@ -43380,6 +43382,9 @@ function spur(){const nw=performance.now();if(nw-spurT<150)return;spurT=nw;const
 function kaUnten(){try{if(typeof KANAME!=='undefined'&&KANAME.t>0&&KANAME.unten>0)return KANAME.unten+12}catch(e){}try{if(typeof KANAME!=='undefined'&&KANAME.t>0){let top=70;const h=document.querySelector('#hud .top');if(h){const r=h.getBoundingClientRect();if(r.height>0)top=r.bottom+(W<700?58:14)}const fs=W<700?15:19;return top+fs+(KANAME.sub?40:22)}}catch(e){}return 0}
 /* Banner nie über HUD-Leiste/Karte: Unterkante der oberen HUD-Zeile (gemessen, gedrosselt) – wichtig auf kleinen Fenstern */
 let huT=0,huV=0;function hudUnten(){const nw=performance.now();if(nw-huT<300)return huV;huT=nw;huV=0;try{const el=document.querySelector('#hud .top');if(el&&!hud.hidden){const r=el.getBoundingClientRect();if(r.height>0)huV=r.bottom+6}}catch(e){}return huV}
+/* bei geöffnetem Fenster (Pause, Beutel, Truhe …) keine Banner/Abschnittsnamen hinter dem Fenster – schienen als Geisterschrift durch */
+if(typeof drawBanner==='function'){const dbF=drawBanner;drawBanner=function(){try{if(G.overlay&&G.state==='play')return}catch(e){}return dbF.apply(this,arguments)}}
+if(typeof kaNameZeigen==='function'){const knF=kaNameZeigen;kaNameZeigen=function(){try{if(G.overlay&&G.state==='play'){if(typeof KANAME!=='undefined')KANAME.unten=0;return}}catch(e){}return knF.apply(this,arguments)}}
 if(typeof drawBanner==='function'){const db=drawBanner;drawBanner=function(){const b=G&&G.banner;try{if(!ME.aus&&b){const k=Math.max(kaUnten(),hudUnten());if(k){const fs=Math.min(b.size||56,W*0.105),by=b.y||H*(b.bars?0.32:0.26);if(by-fs*0.8<k)b.y=k+fs*0.8}}}catch(e){}
  /* kleine Fenster: liegt das Banner auf Höhe der Minikarte, wird es links davon eingepasst (Breite bis zur Karte) */
  try{const B=typeof WLMM!=='undefined'&&WLMM.box;if(b&&!b.bars&&B&&W<900&&!hud.hidden&&G.state==='play'&&!G.room&&SAVE.wlMini!==false){const fs=Math.min(b.size||56,W*0.105),by=b.y||H*0.26;
