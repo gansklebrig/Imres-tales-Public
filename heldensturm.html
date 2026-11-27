@@ -2682,7 +2682,7 @@ function makeDeco(T){const a=[],road=G.road;
 function drawDeco(d,t){const c=cx,s=d.s;c.save();c.translate(d.x,d.y);c.scale(s,s);
  switch(d.k){
   case'tree':ell(c,0,8,22,8,'rgba(0,0,0,.3)');ln(c,'#3a2a1a',6,0,8,0,-6);circ(c,-8,-14,14,'#1e3a1c');circ(c,9,-12,13,'#22421f');circ(c,0,-24,15,'#28502a');circ(c,-4,-27,6,'rgba(120,180,90,.18)');break;
-  case'bush':circ(c,-6,0,8,'#2a4a22');circ(c,6,1,9,'#24401e');circ(c,0,-5,8,'#305a28');break;
+  case'bush':ell(c,0,8,15,4,'rgba(0,0,0,.28)');circ(c,-6,0,8,'#2a4a22');circ(c,6,1,9,'#24401e');circ(c,0,-5,8,'#305a28');circ(c,-3,-7,4,'#3a6a30');circ(c,5,-3,3.4,'#36642e');circ(c,-8,-2,3,'#34602c');if(d.v>0.75){circ(c,4,2,1.4,'#b8323a');circ(c,-4,1,1.3,'#b8323a');circ(c,1,-2,1.2,'#c8424a')}break;
   case'grass':{const sw=0;for(let k=-3;k<=3;k++)ln(c,(k&1)?'#466a3c':'#3a5a34',1.4,k*2.5,4,k*3.2+sw,-6-(k&1)*3);if(d.v>0.7){circ(c,2.6+sw,-9,1.3,'#d8c86a');circ(c,-5+sw,-7,1.1,'#e8e0d0')}}break;
   case'rock':ell(c,0,7,13,3.4,'rgba(0,0,0,.28)');poly(c,'#4a4a4a',-12,6,-9,-6,2,-10,12,-3,11,7);poly(c,'#3e3e3e',6,-4,12,-3,11,7,4,7);poly(c,'#5e5e5e',-9,-6,2,-10,6,-4,-4,-1);ln(c,'#6c6c6c',0.9,-8,-5,1,-9);ln(c,'#383838',0.8,-2,0,1,5);if(d.v>0.5)ell(c,-7,4,3.5,1.5,'#3e5a32');break;
   case'mush':ln(c,'#e8dcc0',3,0,6,0,-2);ell(c,0,-3,7,4,d.v>0.5?'#b23a2a':'#8a5ab0');circ(c,-2,-4,1.2,'#fff');circ(c,3,-3,1,'#fff');break;
@@ -13983,7 +13983,7 @@ window.__hsQA={QAMP,qaSplitSnap,qaTutToast,mpHudR,toast:(...a)=>toast(...a)};
 
 /* ---------- Neue Stufenart beim ersten Mal erklären (gleiches Fenster wie die Helden-Einführung: 1 s halten schließt, Stufe startet erst danach) ---------- */
 const LVI={
- welt:{c:'#e5b454',n:'Erkundung',d:'Die Gegner lauern überall auf der Karte – in Lagern, auf Streife, schlafend oder im Hinterhalt hinter Mauern und in Häusern. Besiegt genug von ihnen (Zähler oben), dann erscheint der Wächter der Stufe; der rote Pfeil führt euch zu ihm. Die Karte oben rechts (Taste M) zeigt, was ihr schon erkundet habt.'},
+ welt:{c:'#e5b454',n:'Erkundung',d:'Die Gegner lauern überall auf der Karte – in Lagern, auf Streife, schlafend oder im Hinterhalt hinter Mauern und in Häusern. Besiegt genug von ihnen (Zähler oben), dann erscheint der Wächter der Stufe; der rote Pfeil führt euch zu ihm. Die Karte oben rechts zeigt, was ihr schon erkundet habt.'},
  eskorte:{c:'#e5b454',n:'Geleit: Der Vorratskarren',d:'Der Karren rollt nur, wenn ihr bei ihm seid. Hinterhalte kommen zu zufälligen Zeiten von vorn oder hinten – Gegner am Karren halten ihn auf. Bringt ihn heil bis zum Lager.'},
  steine:{c:'#e8c070',n:'Verteidigung: Die Schutzsteine',d:'Drei Schutzsteine müssen das Ritual überstehen. Gegner greifen sie in Wellen an – steht zwischen ihnen und den Steinen, bis das Ritual vollendet ist.'},
  gefangene:{c:'#8ff08a',n:'Befreiung: Die Gefangenen',d:'Drei Gefangene sitzen in Käfigen, bewacht von ruhenden Wachen. Stellt euch kurz an einen Käfig, um ihn zu öffnen – Befreite kämpfen danach an eurer Seite.'},
@@ -21270,7 +21270,7 @@ function kaBotWeg(tg){const W=G.wl,N=W.nav,n=N.n;const c=wlZelle(N,tg.x,tg.y);co
  if(best<0)return null;const tx=(best%n+0.5)*N.Z,ty=(((best/n)|0)+0.5)*N.Z,dx=tx-P.x,dy=ty-P.y,l=Math.hypot(dx,dy)||1;return{x:dx/l,y:dy/l}}
 
 /* ================= Texte ================= */
-try{LVI.welt={c:'#e5b454',n:'Erkundung',d:'Die Stufe besteht aus mehreren Abschnitten, verbunden durch Engstellen: Brücken, Tore, Fallgitter, Barrikaden. Manche öffnen sich erst, wenn ihr einen Hebel findet, den Torwächter besiegt, ein Lager räumt, ein Pulverfass zündet, Siegel aktiviert oder den Fährmann bezahlt. Das nächste Zwischenziel steht immer oben. Am Ende wartet der Wächter auf seinem Kampfplatz – oder der Boss in seiner eigenen Arena. Wer 80 % der Gegner besiegt, bekommt eine Extra-Truhe. Karte oben rechts: Taste M.'};
+try{LVI.welt={c:'#e5b454',n:'Erkundung',d:'Die Stufe besteht aus mehreren Abschnitten, verbunden durch Engstellen: Brücken, Tore, Fallgitter, Barrikaden. Manche öffnen sich erst, wenn ihr einen Hebel findet, den Torwächter besiegt, ein Lager räumt, ein Pulverfass zündet, Siegel aktiviert oder den Fährmann bezahlt. Das nächste Zwischenziel steht immer oben. Am Ende wartet der Wächter auf seinem Kampfplatz – oder der Boss in seiner eigenen Arena. Wer 80 % der Gegner besiegt, bekommt eine Extra-Truhe. Die Karte oben rechts zeigt, was ihr schon erkundet habt.'};
  LVI.eskorte.d='Der Karren rollt nur, wenn ihr bei ihm seid – den ganzen Weg durch die Abschnitte bis zum Kampfplatz. Vor geschlossenen Toren wartet er, bis ihr sie öffnet. Hinterhalte kommen unvorhersehbar.';
  LVI.steine.d='Die drei Schutzsteine stehen am Kampfplatz im letzten Abschnitt. Sobald ihr dort ankommt, beginnt das Ritual – haltet die Angreifer fern, bis es vollendet ist.';
  LVI.halten.d='Der leuchtende Kreis liegt am Kampfplatz im letzten Abschnitt. Bleibt darin, bis die Verstärkung eintrifft – dann stellt sich der Wächter.';
