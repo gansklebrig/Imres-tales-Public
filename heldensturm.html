@@ -32,6 +32,7 @@
 /* Kleine Beutelkacheln: Stufenzahl nicht unter die Vergleichsplakette quetschen */@media (max-width:760px),(max-height:520px){.bag .it:has(.ua) .lv{display:none}}
 /* Hehler/Wette-Knöpfe auch in Spaltenansicht mit Abstand nebeneinander */.wrap.mfcolw>.g2bar.g2bar{display:flex!important;gap:8px;justify-content:center;flex-wrap:wrap}
 /* Lagerfeuer: Abstand vor „Als Nächstes“ */.fire-wrap .tx-weiter.fire-next{margin-top:10px}
+/* Mehrspieler-Karten: Symbol vor dem Titel */.slmode .t .slmi{font-style:normal;display:inline-block;width:1.4em;margin-right:.25em;color:#e5b454;text-align:center;font-family:var(--fb);font-size:.8em;vertical-align:.08em;opacity:.9}@media (max-width:760px),(max-height:480px){.slmode .t .slmi{display:none}}
 /* Großbild: Eckknöpfe des Titels mitwachsen lassen */@media (min-width:2200px) and (min-height:1300px){#imresBack{font-size:15px;padding:6px 14px}.camp-top .slbtn{font-size:20px}.mfbar .mft{font-size:17px}}@media (min-width:1900px) and (min-height:1150px){.slm>.slp{zoom:1.15;width:calc(100% / 1.15)}}@media (min-width:2300px) and (min-height:1350px){.slm>.slp{zoom:1.32;width:calc(100% / 1.32)}.slm-in>.slm-l{zoom:1.28}}@media (min-width:2200px) and (min-height:1300px){.wrap.ivg .bag.ivsz .it .ico.ico{width:clamp(20px,calc(var(--ivs) * .4),58px)!important;height:clamp(20px,calc(var(--ivs) * .4),58px)!important}}
 </style>
 <script src="tonregler.js?v=1"></script>
@@ -17119,9 +17120,9 @@ function slMpHtml(){const s=SAVE.slot?slSum(SAVE.slot):null;const dis=s?'':'disa
  return`<div class="slm"><div class="slp">${slHead('Mehrspieler','Gemeinsam in den Sturm','Alle spielen mit ihren eigenen Spielständen: Lokal wählen Spieler 2–4 im Lager einen Platz oder spielen als Gast-Held, online bringt jeder Gast seinen geladenen Platz mit.')}
  <div class="slrow"><span class="lbl">Dein Spielstand</span>${s?`<div style="flex:1 1 20em;max-width:32em">${slCardHtml(SAVE.slot,{act:'sl-go',cur:false})}</div>`:'<span class="slnote">Noch kein Spielstand geladen.</span>'}<button class="slbtn" data-act="sl-go" data-v="load" ${slList().length?'':'disabled'}>Platz wechseln</button>${s?'':'<button class="slbtn gold" data-act="sl-go" data-v="new">Neues Spiel</button>'}</div>
  <div class="slmp">
-  <button class="slmode" data-act="sl-mp" data-v="lokal" ${dis} ${s?'data-sl-def="1"':''}><span class="t">An diesem Gerät</span><p>2–4 Spieler mit Controllern oder Tastatur – geteilter Bildschirm oder gemeinsame Sicht.</p></button>
-  <button class="slmode" data-act="sl-mp" data-v="host" ${dis}><span class="t">Online-Raum eröffnen</span><p>Freunde treten über einen Einladungslink von ihrem eigenen Gerät bei.</p></button>
-  <button class="slmode" data-act="sl-mp" data-v="join" ${dis}><span class="t">Online beitreten</span><p>Mit dem Raumcode eines Freundes mitspielen – mit deinem geladenen Spielstand.</p></button>
+  <button class="slmode" data-act="sl-mp" data-v="lokal" ${dis} ${s?'data-sl-def="1"':''}><span class="t"><i class="slmi" aria-hidden="true">⚔</i>An diesem Gerät</span><p>2–4 Spieler mit Controllern oder Tastatur – geteilter Bildschirm oder gemeinsame Sicht.</p></button>
+  <button class="slmode" data-act="sl-mp" data-v="host" ${dis}><span class="t"><i class="slmi" aria-hidden="true">✦</i>Online-Raum eröffnen</span><p>Freunde treten über einen Einladungslink von ihrem eigenen Gerät bei.</p></button>
+  <button class="slmode" data-act="sl-mp" data-v="join" ${dis}><span class="t"><i class="slmi" aria-hidden="true">❖</i>Online beitreten</span><p>Mit dem Raumcode eines Freundes mitspielen – mit deinem geladenen Spielstand.</p></button>
  </div>${s?'':'<p class="slnote">Lade zuerst einen Spielstand oder beginne ein neues Spiel.</p>'}
  <div style="flex:1 1 auto"></div><div class="slbar"><button class="slbtn" data-act="sl-back">‹ Zurück</button></div></div>${slFoot()}</div>`}
 function slOptHtml(){return`<div class="wrap narrow slw"><div class="spread mfspan"><h2 style="margin:0">Optionen</h2><button class="btn" data-act="sl-back">‹ Zurück</button></div>
