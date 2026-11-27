@@ -38153,7 +38153,9 @@ const hz=()=>{try{return typeof txtHz==='function'?txtHz():1}catch(e){return 1}}
 const fak=()=>{const v=SAVE.kartGr||'n';const s=STU.find(x=>x[0]===v);if(!s)return 1;return s[2]>1?s[2]*hz():s[2]*Math.max(1,Math.min(1.5,hz()/1.26))};
 {const mo=wlMiniOrt;wlMiniOrt=function(){const b=mo.apply(this,arguments);try{if(!b||b.__kgr)return b;const f=fak();
   const S2=Math.round(Math.max(60,Math.min(b.S*f,W*0.34,H*0.5)));const nb={x:b.x+b.S-S2,y:b.y,S:S2,__kgr:1};
-  if(nb.y+S2>H-60)nb.y=Math.max(8,H-60-S2);WLMM.box=nb;return nb}catch(e){return b}}}
+  if(nb.y+S2>H-60)nb.y=Math.max(8,H-60-S2);
+  {const now=performance.now();if(!wlMiniOrt._st||now-wlMiniOrt._st>1000){wlMiniOrt._st=now;let t=1e9;try{const k=document.getElementById('skills');if(k&&k.getClientRects().length){for(const e of k.children){const r=e.getBoundingClientRect();if(r.height>0&&r.right>W-S2-20&&r.top<t)t=r.top}}}catch(e){}wlMiniOrt._sk=t}const t=wlMiniOrt._sk;if(t<1e9&&nb.y+nb.S>t-8){const S3=Math.max(60,Math.round(t-8-nb.y));if(S3<nb.S){nb.x+=nb.S-S3;nb.S=S3}}}
+  WLMM.box=nb;return nb}catch(e){return b}}}
 const zeile=()=>{const v=SAVE.kartGr||'n';return`<div class="row" data-kgr-row style="margin-top:6px;align-items:center"><span class="muted" style="margin-right:4px">Karte:</span>${STU.map(s=>`<button class="btn small ${v===s[0]?'gold':''}" data-act="kgr" data-v="${s[0]}" title="Größe der Karte oben rechts (M blendet sie ein/aus)">${s[1]}</button>`).join('')}</div>`};
 let plan=false;
 function einsetzen(){plan=false;try{for(const box of document.querySelectorAll('#gfxBox')){const alt=box.querySelector('[data-kgr-row]');if(alt){alt.outerHTML=zeile();continue}
