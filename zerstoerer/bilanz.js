@@ -265,7 +265,7 @@
       else if (x.h.art === "zeit") p = fmtCT(Math.max(0, x.lim - now));
       else if (x.h.prog) p = progOf(x) + "/" + x.need;
       const knapp = x.state === "laeuft" && x.h.art === "zeit" && x.lim - now < 15;
-      h += '<span class="hc ' + (x.state === "ok" ? "ok" : x.state === "weg" ? "weg" : knapp ? "knapp" : "") + '" title="' + esc(textOf(x, arena)) + '">' + x.h.ico + " " + esc(L(x.h.n)) + (x.state === "ok" ? " ✓" : p ? " " + p : "") + "</span>";
+      h += '<span class="hc ' + (x.state === "ok" ? "ok" : x.state === "weg" ? "weg" + (x.w38vT && performance.now() - x.w38vT < 1300 ? " w38-verf" : "") /* W38 Frei */ : knapp ? "knapp" : "") + '" title="' + esc(textOf(x, arena)) + '">' + x.h.ico + " " + esc(L(x.h.n)) + (x.state === "ok" ? " ✓" : p ? " " + p : "") + "</span>";
       key += x.state + (x.h.art === "zeit" ? (knapp ? "k" : "") : p) + "|";
     }
     return [h, key];
@@ -280,8 +280,17 @@
   }
   function fail(x) {
     if (x.state !== "laeuft") return; x.state = "weg";
-    pulse(2.4);
-    if (Z.ui && Z.ui.notify) Z.ui.notify("<b>" + L(["Verfehlt: ", "Missed: "]) + esc(L(x.h.n)) + "</b>", { prio: 1, art: "gefahr", icon: "✧", dauer: 2200 });
+    /* W38 Frei: Die Tafel zeigt das Ziel schon durchgestrichen – dort kurz rot aufflackern lassen statt einer roten Meldung.
+       Die Meldung kommt nur noch, wenn die Tafel nicht zu sehen ist (z. B. Zeile unter Touch-Knöpfen ausgeblendet). */
+    x.w38vT = performance.now(); pulse(2.4); /* neu zeichnen, jetzt mit Aufflackern (compactHTML) */
+    const idx = C.list.indexOf(x);
+    setTimeout(() => {
+      try {
+        const sp = zeile.querySelectorAll(".hc")[idx]; /* jetzt gezeigtes Element (die Tafel zeichnet sich neu) */
+        const vis = zeile.isConnected && zeile.classList.contains("an") && !zeile.classList.contains("leise") && sp && sp.isConnected && sp.style.display !== "none" && sp.getBoundingClientRect().width > 0;
+        if (!vis && Z.ui && Z.ui.notify) Z.ui.notify("<b>" + L(["Verfehlt: ", "Missed: "]) + esc(L(x.h.n)) + "</b>", { prio: 1, art: "gefahr", icon: "✧", dauer: 2200 });
+      } catch (e) { console.error("W38 Frei", e); }
+    }, 80);
     Z.audio.play("ui", { vol: 0.25, rate: 0.6 });
   }
   /* je Schritt: Fortschritt prüfen */
