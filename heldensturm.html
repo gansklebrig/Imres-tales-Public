@@ -16481,6 +16481,8 @@ function erfWarten(){try{if(G.state==='play'&&G.boss&&!G.boss.dead&&G.boss.hp>0)
  /* im Spiel geöffnete Fenster (Pause, Beutel, Talente …): Tafel lag sonst über dem Fensterinhalt – zeigen, sobald es zu ist */
  if(G.state==='play'&&G.overlay)return true}catch(e){}return false}
 /* läuft eine Tafel noch, wenn im Spiel ein Fenster aufgeht (Pause, Beutel, Truhe …), wird sie bis zum Schließen ausgeblendet */
+/* Mehrspieler: Erzählerzeile über die Mitspieler-Karten unten heben (die Karten zeichnet die Leinwand) */
+setInterval(()=>{try{const e=document.querySelector('.erzSub');if(!e)return;const an=G&&G.state==='play'&&G.mp&&PL&&PL.length>1&&innerWidth>=700&&!document.body.classList.contains('erzEck')&&!e.classList.contains('oben');if(an){const z=parseFloat(getComputedStyle(e).zoom)||1;const v=Math.round(112/z)+'px';if(e.style.getPropertyValue('bottom')!==v)e.style.setProperty('bottom',v,'important')}else if(e.style.getPropertyValue('bottom'))e.style.removeProperty('bottom')}catch(er){}},300);
 setInterval(()=>{try{const t=document.getElementById('txtov');if(t){const v=(typeof scr!=='undefined'&&scr&&!scr.hidden)?'hidden':'';if(t.style.visibility!==v)t.style.visibility=v}}catch(e){}},150);
 setInterval(()=>{try{const el=ERF.cur;if(!el)return;const weg=G.state==='play'&&!!G.overlay;const v=weg?'hidden':'';if(el.style.visibility!==v)el.style.visibility=v}catch(e){}},200);
 function erfPump(){if(ERF.cur||!ERF.q.length)return;if(G&&G.bot){ERF.q.length=0;return}
