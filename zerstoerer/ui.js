@@ -1212,6 +1212,7 @@
       '<label class="regler">' + L(["Größe der Touch-Knöpfe", "Touch button size"]) + '<input type="range" min="70" max="140" value="' + Math.round(s.touchSize * 100) + '" data-touch="1"></label>' +
       /* W39 Touch: Deckkraft, Linkshänder, Tipp-Vibration */
       '<label class="regler">' + L(["Deckkraft der Touch-Knöpfe", "Touch button opacity"]) + '<input type="range" min="30" max="100" value="' + Math.round((isFinite(+s.touchAlpha) && +s.touchAlpha > 0 ? +s.touchAlpha : 1) * 100) + '" data-touchalpha="1"></label>' +
+      '<label class="regler">' + L(["Stick-Totzone (Touch)", "Stick dead zone (touch)"]) + '<input type="range" min="6" max="30" value="' + Math.round(+s.touchDead || 14) + '" data-touchdead="1"></label>' +
       ck("touchMirror", L(["Touch für Linkshänder (Stick rechts, Knöpfe links)", "Left-handed touch (stick right, buttons left)"]), !!s.touchMirror) +
       ck("touchTick", L(["Kurze Vibration beim Tippen (Touch)", "Short vibration on tap (touch)"]), !!s.touchTick) +
       '<label class="schalter">' + L(["Textgröße", "Text size"]) + ' <select data-textsize="1">' + [["klein", L(["klein", "small"])], ["normal", L(["normal", "normal"])], ["gross", L(["groß", "large"])], ["riesig", L(["sehr groß", "very large"])]].map(([v, n]) => '<option value="' + v + '"' + ((s.textSize || "normal") === v ? " selected" : "") + ">" + esc(n) + "</option>").join("") + "</select></label>" +
@@ -1230,6 +1231,7 @@
     wireVib(); /* W20 Steuerung */
     modal.querySelector("[data-touch]").oninput = e => { Z.settings.touchSize = e.target.value / 100; touchSync(); };
     modal.querySelector("[data-touchalpha]").oninput = e => { Z.settings.touchAlpha = e.target.value / 100; touchSync(); }; /* W39 Touch */
+    modal.querySelector("[data-touchdead]").oninput = e => { Z.settings.touchDead = +e.target.value; }; /* W39 Touch */
     modal.querySelectorAll("[data-set]").forEach(c => c.onchange = () => { Z.settings[c.dataset.set] = c.checked; if (c.dataset.set === "vib") inp.vib = c.checked; if (c.dataset.set === "touchMirror") touchSync(); });
     modal.querySelector("[data-textsize]").onchange = e => { Z.settings.textSize = e.target.value; Z.saveSettings(); fitText(); const sel = modal.querySelector("[data-textsize]"); if (sel) sel.focus({ preventScroll: true }); };
     modal.querySelector("[data-hint]").onchange = e => { Z.settings.hinweise = e.target.value; Z.saveSettings(); };
@@ -2007,7 +2009,7 @@
   ui.touchOn = false;
   function touchSync() { tc.hidden = !ui.touchOn || !Z.level; tc.style.setProperty("--ts", Z.settings.touchSize);
     /* W39 Touch: Deckkraft (30–100 %) und Linkshänder-Spiegelung (Stick rechts, Knöpfe links) */
-    { const ta = +Z.settings.touchAlpha; tc.style.setProperty("--ta", isFinite(ta) && ta > 0 ? Math.max(0.3, Math.min(1, ta)) : 1); tc.classList.toggle("spiegel", !!Z.settings.touchMirror); }
+    { const ta = +Z.settings.touchAlpha; tc.style.setProperty("--ta", isFinite(ta) && ta > 0 ? Math.max(0.3, Math.min(1, ta)) : 1); tc.classList.toggle("spiegel", !!Z.settings.touchMirror); document.body.classList.toggle("touchspiegel", !!Z.settings.touchMirror && ui.touchOn); }
     /* W36 Feinschliff: Touch-Knöpfe standen fest deutsch im HTML (EN-Modus: „Sprung/Rolle/Waffe 1/Trank“) */
     if (tc._lang !== Z.settings.lang) { tc._lang = Z.settings.lang; const AL = { s1: ["Fähigkeit 1", "Skill 1"], s2: ["Fähigkeit 2", "Skill 2"], use: ["Benutzen", "Use"], pause: ["Pause", "Pause"], map: ["Karte", "Map"] }, TL = { a1: ["Waffe<br>1", "Weapon<br>1"], a2: ["Waffe<br>2", "Weapon<br>2"], jump: ["Sprung", "Jump"], roll: ["Rolle", "Roll"], potion: ["Trank", "Potion"] }; tc.querySelectorAll("[data-t]").forEach(b => { const t = TL[b.dataset.t]; if (t) b.innerHTML = L(t); const al = AL[b.dataset.t]; if (al) b.setAttribute("aria-label", L(al)); }); } } /* W39 Bedienung: aria-label der Symbolknöpfe in der Sprache */
   addEventListener("touchstart", () => { if (!ui.touchOn) { ui.touchOn = true; inp.device = "touch"; touchSync(); } }, { passive: true });
@@ -2027,7 +2029,7 @@
        (gemessen vorher 140 px Rückweg nach 120 px Auslenkung) */
     if (d > r) { sx0 += dx * (1 - k); sy0 += dy * (1 - k); dx *= k; dy *= k; stick.style.left = vx(sx0) + "px"; stick.style.top = sy0 + "px"; }
     knob.style.transform = "translate(" + (mir() ? -dx : dx) + "px," + dy + "px)";
-    const th = 14;
+    const th = Math.max(6, Math.min(30, +Z.settings.touchDead || 14)); /* W39 Touch: Totzone einstellbar (Standard 14 px wie bisher) */
     inp.setTouch("left", dx < -th); inp.setTouch("right", dx > th);
     inp.setTouch("up", dy < -th * 2.2 && Math.abs(dy) > Math.abs(dx) * 0.7); inp.setTouch("down", dy > th * 2.2 && Math.abs(dy) > Math.abs(dx) * 0.7);
   }
