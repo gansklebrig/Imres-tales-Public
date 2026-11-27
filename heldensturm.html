@@ -2539,7 +2539,7 @@ let W=0,H=0,DPR=1,ZOOM=1;
    Legendär (Kennzeichen „leg“) ist für starke Grafikkarten: volle Bildschirmauflösung ohne Obergrenze, Licht und Lichtschatten in voller Auflösung,
    feinerer Leuchtschein, deutlich mehr Funken, Schwebeteilchen und Kampfspuren. Die Automatik wählt sie nur im PC-Programm (window.__hsPC). */
 /* Die Auflösung bleibt immer scharf – gespart wird bei Licht, Partikeln, Spuren und Leichen. */
-const HS_VERSION='27.11.2026 · Legendär';
+const HS_VERSION='28.11.2026 · Legendär';
 const GFX=[{n:'Minimal',px:1.6e6,dpr:1.5,q:1,lr:0.25,parts:120,corpse:0,lite:1,nodec:1,noamb:1},{n:'Niedrig',px:2.2e6,dpr:1.75,q:1,lr:0.3,parts:260,corpse:6,nodec:1},{n:'Mittel',px:3.2e6,dpr:2,q:2,lr:0.4,parts:600,corpse:18},{n:'Hoch',px:5e6,dpr:2,q:2,lr:0.5,parts:900,corpse:35},{n:'Episch',px:8e6,dpr:2.5,q:3,lr:0.6,parts:1500,corpse:60},{n:'Legendär',px:3.4e7,dpr:3,q:3,lr:1,parts:4000,corpse:150,leg:1}];
 let GAUTO=3,GCEIL=3,FPSNOW=60,RSC=1,RSLOW=0,RSOK=0;
 /* feste Render-Auflösung (Anteil der Bildschirmauflösung) oder null = automatisch */
@@ -16548,7 +16548,7 @@ addEventListener('keydown',ev=>{try{if(ev.defaultPrevented||ev.ctrlKey||ev.metaK
 /* Mehrspieler auf kleinen Bildschirmen: Aushänge-Leiste links ausblenden – dort liegen die Mitspieler-Karten */
 setInterval(()=>{try{const z=document.getElementById('zlHud');if(!z)return;const weg=G&&G.state==='play'&&G.mp&&PL&&PL.length>1&&innerWidth<700;const v=weg?'hidden':'';if(z.style.visibility!==v)z.style.visibility=v}catch(er){}},400);
 /* Mehrspieler: Erzählerzeile über die Mitspieler-Karten unten heben (die Karten zeichnet die Leinwand) */
-setInterval(()=>{try{const e=document.querySelector('.erzSub');if(!e)return;const an=G&&G.state==='play'&&G.mp&&PL&&PL.length>1&&innerWidth>=700&&!document.body.classList.contains('erzEck')&&!e.classList.contains('oben');if(an){const z=parseFloat(getComputedStyle(e).zoom)||1;const v=Math.round(112*Math.max(1,Math.min(1.7,innerHeight/900))/z)+'px';if(e.style.getPropertyValue('bottom')!==v)e.style.setProperty('bottom',v,'important')}else if(e.style.getPropertyValue('bottom'))e.style.removeProperty('bottom')}catch(er){}},300);
+setInterval(()=>{try{const e=document.querySelector('.erzSub');if(!e)return;const an=G&&G.state==='play'&&G.mp&&PL&&PL.length>1&&innerWidth>=700&&!document.body.classList.contains('erzEck')&&!e.classList.contains('oben');if(an){const z=parseFloat(getComputedStyle(e).zoom)||1;const v=Math.round(112*Math.max(1,Math.min(1.7,innerHeight/900))/z)+'px';if(e.style.getPropertyValue('bottom')!==v)e.style.setProperty('bottom',v,'important')}else if(e.style.getPropertyValue('bottom')&&!e.dataset.ecke)e.style.removeProperty('bottom')}catch(er){}},300);
 setInterval(()=>{try{const t=document.getElementById('txtov');if(t){const v=(typeof scr!=='undefined'&&scr&&!scr.hidden)?'hidden':'';if(t.style.visibility!==v)t.style.visibility=v}}catch(e){}},150);
 setInterval(()=>{try{const el=ERF.cur;if(!el)return;const weg=G.state==='play'&&!!G.overlay;const v=weg?'hidden':'';if(el.style.visibility!==v)el.style.visibility=v}catch(e){}},200);
 function erfPump(){if(ERF.cur||!ERF.q.length)return;if(G&&G.bot){ERF.q.length=0;return}
@@ -38347,6 +38347,24 @@ if(typeof AR_PDRAW==='object'&&AR_PDRAW.ar_altar){AR_PDRAW.ar_altar=function(p,t
    c.fillStyle=act?'#ffe9a0':'#f2d24c';c.beginPath();c.arc(x,cy,6.5,0,TAU);c.fill();c.globalAlpha=0.6+0.3*Math.sin(t*3);c.fillStyle='#fff8d0';c.beginPath();c.arc(x-1.5,cy-1.5,2.8,0,TAU);c.fill();c.globalAlpha=1}
   if(p.prog>0){c.strokeStyle=op?'#ff5a6a':'#ffd36a';c.lineWidth=4;c.beginPath();c.arc(x,y-4,34,-Math.PI/2,-Math.PI/2+TAU*p.prog);c.stroke()}
   c.restore()}}
+/* Niedrige Querformat-Bildschirme: steht die Erzählerzeile in Zwischenbildschirmen (Lagerfeuer, Lager …) über Überschrift oder Text, rückt sie in die erste freie Ecke */
+(function(){let key='',pos=0;const P_=['left','top','right','bottom','transform','width','max-width','margin'];
+ const clr=e=>{for(const p of P_)e.style.removeProperty(p);delete e.dataset.ecke};
+ setInterval(()=>{try{const e=document.querySelector('.erzSub'),s=document.getElementById('scr'),b=document.body;if(!e||!s)return;
+  if(!e.classList.contains('an')&&pos&&!s.hidden)return;/* beim Ausblenden an Ort und Stelle bleiben */
+  const ak=!s.hidden&&innerHeight<=520&&innerWidth>innerHeight&&!b.classList.contains('chrAuf')&&!b.classList.contains('erzEck')&&e.classList.contains('an')&&!e.classList.contains('pz')&&s.querySelector('.wrap');
+  if(!ak){if(pos){clr(e);pos=0}key='';return}
+  const k=(e.textContent||'').slice(0,60)+'|'+s.childElementCount+'|'+(s.firstElementChild?s.firstElementChild.className:'')+'|'+innerWidth+'x'+innerHeight;if(k===key)return;key=k;if(pos){clr(e);pos=0}
+  const r=e.getBoundingClientRect(),w=r.width,h=r.height;if(w<20||h<10)return;const ob=[],rg=document.createRange();
+  for(const x of s.querySelectorAll('*')){const tn=x.tagName;if(tn==='CANVAS')continue;if(tn==='BUTTON'||tn==='IMG'||tn==='INPUT'){const q=x.getBoundingClientRect();if(q.width>1&&q.height>1)ob.push(q);continue}
+   for(const n of x.childNodes){if(n.nodeType!==3||!n.textContent.trim())continue;rg.selectNodeContents(n);for(const q of rg.getClientRects())if(q.width>1)ob.push(q)}}
+  const hit=(L,T)=>ob.some(q=>q.left<L+w+4&&q.right>L-4&&q.top<T+h+4&&q.bottom>T-4);if(!hit(r.left,r.top))return;
+  const m=8,W_=innerWidth,H_=innerHeight,set=(L,T,ww)=>{e.style.setProperty('left',L+'px','important');e.style.setProperty('top',T+'px','important');e.style.setProperty('right','auto','important');e.style.setProperty('bottom','auto','important');e.style.setProperty('transform','none','important');e.style.setProperty('width',Math.ceil(ww)+'px','important');e.style.setProperty('max-width','none','important');e.style.setProperty('margin','0','important');e.dataset.ecke='1';pos=1};
+  for(const ww of [w,Math.min(w,240),Math.min(w,210),Math.min(w,185)]){set(m,m,ww);const r2=e.getBoundingClientRect(),hh=r2.height,aw=r2.width;
+   const hit2=(L,T)=>ob.some(q=>q.left<L+aw+4&&q.right>L-4&&q.top<T+hh+4&&q.bottom>T-4);
+   for(const c of [[m,m],[W_-aw-m,m],[m,H_-hh-m],[W_-aw-m,H_-hh-m]])if(!hit2(c[0],c[1])){set(c[0],c[1],ww);return}}
+  clr(e);pos=0;
+ }catch(er){}},350)})();
 /* Weltschriften (Namen, „Siegel“ …) liegen auf der scharfen Textebene über allem – unter der Minikarte wegradieren, damit sie nicht über der Karte stehen */
 if(typeof wlMini==='function'&&typeof render==='function'){const _wm2=wlMini;let mm=0;wlMini=function(){const r=_wm2.apply(this,arguments);mm=1;return r};const _rd2=render;render=function(){mm=0;const r=_rd2.apply(this,arguments);try{if(mm&&TXO.on&&TXO.n>0&&TXO.cv&&!TXO.cv.hidden){const B=WLMM.box;if(B){const f=DPR*TXO.k,g=TXO.g;g.save();g.setTransform(1,0,0,1,0,0);g.clearRect(Math.floor((B.x-2)*f),Math.floor((B.y-2)*f),Math.ceil((B.S+4)*f),Math.ceil((B.S+4)*f));g.restore()}}}catch(e){}return r}}
 /* Weltschriften (Namen über Fässern, Schadenszahlen …) nicht durch oder über die HUD-Tafeln oben scheinen lassen: unter Heldentafel, Zielleiste, Knopfreihe und Aushängen wegradieren */
