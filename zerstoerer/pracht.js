@@ -2840,7 +2840,7 @@
         if (any) {
           c.clip();
           const sc = Math.max(1, (cam.h * 0.9) / TH), w = TW * sc, h = TH * sc, ox = cam.x - ((cam.x * 0.15) % w + w) % w, y = cam.y + (cam.h - h) * 0.5 - cam.y * 0.03 % 30;
-          c.globalAlpha = Math.min(0.7, 0.5 + area / 240); for (let x = ox; x < cam.x + cam.w; x += w) c.drawImage(cv, x, y, w + 0.5, h);
+          c.globalAlpha = Math.min(0.7, 0.5 + area / 240) * (Z.w35MidK ? Z.w35MidK(B.bg) : 1); /* W35 Optik: Ferne der Parallaxe durchscheinen lassen */ for (let x = ox; x < cam.x + cam.w; x += w) c.drawImage(cv, x, y, w + 0.5, h);
         }
         c.restore();
       }

@@ -9697,8 +9697,8 @@
 "sha256":"3ab7b7816ddadc9aa1ef272db3236698570d927a2f28af60f6ead1f3ac0a9320"
 },
 "zerstoerer.html":{
-"groesse":72152,
-"sha256":"e649cb58d91f203638f5766d28c6d1a39887812b1b2c46ef6f3212261d221214"
+"groesse":73447,
+"sha256":"2f2ff0e63ac2ceef07c94caa6b542f07b16d670105bcad6932e9653d5fa3f48a"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":144658,
@@ -9725,8 +9725,8 @@
 "sha256":"e89d55b8525c759c23e29c53397e72dc269a23bb3a5f86071d14854ded497e3a"
 },
 "zerstoerer/bild.js":{
-"groesse":279331,
-"sha256":"952c580292a9db40b7a27210185771ba59d8f9fa20a1e25678fc185cde79edee"
+"groesse":279646,
+"sha256":"a2875b9003424a88dd3536dee3575a65e0535c2d8f857825459c97f34d596870"
 },
 "zerstoerer/bilderbuch.js":{
 "groesse":228083,
@@ -9757,8 +9757,8 @@
 "sha256":"cd2478a3d43bd400febe70aa5a8b245ab04435c56e561cf12d0d09a5c4ab8684"
 },
 "zerstoerer/effekte.js":{
-"groesse":212552,
-"sha256":"5eef2ba185f2e0f117d71f28f84db69e861494063024493fbbae9cc48e2ce711"
+"groesse":213382,
+"sha256":"ef79c43632adba8bd50d034ed5d07774b21fff923e56183e4b24c63a39cc7a50"
 },
 "zerstoerer/erkundung.js":{
 "groesse":66402,
@@ -9781,8 +9781,8 @@
 "sha256":"2fa92b6a3cba6953a058c29a30886f36c7a4aa9c21b42f1632b652a71f6ebda3"
 },
 "zerstoerer/gegner.js":{
-"groesse":111382,
-"sha256":"58e8f160b1171882056da70bb2efc241757706869bd6e46ca79b34e61f210f34"
+"groesse":111967,
+"sha256":"917939bf849712a17d0ccb8abf84959eb1636ec6ec61f1f0335eb83e44caddb9"
 },
 "zerstoerer/gegnerkunst.js":{
 "groesse":19050,
@@ -9869,8 +9869,8 @@
 "sha256":"46279836b5f2e15788dbe04d88d555cbfef91c41f56769a0ae467b1ac8c770ea"
 },
 "zerstoerer/optik2.js":{
-"groesse":34139,
-"sha256":"09c3acbea4cdadb8d104e444d019a4c392b459cbfbf38851a0de48620eaea6fa"
+"groesse":42795,
+"sha256":"31870e6b56d530956ee3125d905f2175fa1eaf4c2203a4dab309849e1f1e11fa"
 },
 "zerstoerer/parcours.js":{
 "groesse":39202,
@@ -9881,8 +9881,8 @@
 "sha256":"c75a97684bca2a09355ffb59ff85492fa02e04fa49f526de3f44198736179de3"
 },
 "zerstoerer/pracht.js":{
-"groesse":376236,
-"sha256":"f4c5203599ca02d089a97c88ba3732743de534007db26e936e885687bfbb9cf9"
+"groesse":376330,
+"sha256":"edaf73e31126e821db4584f0cf9624c017e4d99f4fbe3de97826cdbd6ec78253"
 },
 "zerstoerer/praesentation.js":{
 "groesse":28390,
@@ -9965,5 +9965,5 @@
 "sha256":"2239cd79f01c377c38cdcecf8d827774c46b23cf9e74f4481be6463ca0b129e0"
 }
 },
-"stand":148
+"stand":149
 }

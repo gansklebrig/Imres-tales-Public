@@ -333,7 +333,13 @@
       const tr = s.tr, n = tr.length / 2;
       if (n > 1) {
         c.strokeStyle = s.col;
-        for (let i = 1; i < n; i++) { const k = i / n; c.globalAlpha = k * 0.7; c.lineWidth = 0.4 + k * 2; c.beginPath(); c.moveTo(tr[i * 2 - 2], tr[i * 2 - 1]); c.lineTo(tr[i * 2], tr[i * 2 + 1]); c.stroke(); }
+        if (Z.gfx && Z.gfx.off && Z.gfx.off.seelenband) { for (let i = 1; i < n; i++) { const k = i / n; c.globalAlpha = k * 0.7; c.lineWidth = 0.4 + k * 2; c.beginPath(); c.moveTo(tr[i * 2 - 2], tr[i * 2 - 1]); c.lineTo(tr[i * 2], tr[i * 2 + 1]); c.stroke(); } }
+        else { /* W35 Optik: Schweif als geglättete, durchgehende Linienzüge in drei Lagen (dünn/lang → dick/kurz) statt Einzelstrichen
+                  mit runden Kappen – die überlappenden Kappen addierten sich („lighter“) zu hellen Perlen an jedem Knick */
+          for (let L = 0; L < 3; L++) { const s0 = Math.floor((n - 1) * L / 3); if (n - s0 < 2) continue;
+            c.globalAlpha = [0.22, 0.32, 0.45][L]; c.lineWidth = [0.8, 1.6, 2.6][L]; c.beginPath(); c.moveTo(tr[s0 * 2], tr[s0 * 2 + 1]);
+            for (let i = s0 + 1; i < n - 1; i++) { const mx = (tr[i * 2] + tr[i * 2 + 2]) / 2, my = (tr[i * 2 + 1] + tr[i * 2 + 3]) / 2; c.quadraticCurveTo(tr[i * 2], tr[i * 2 + 1], mx, my); }
+            c.lineTo(tr[n * 2 - 2], tr[n * 2 - 1]); c.stroke(); } }
       }
       const pu = 0.85 + 0.15 * Math.sin(s.t * 30);
       c.globalAlpha = 1; c.drawImage(spr(s.col), s.x - 6 * pu, s.y - 6 * pu, 12 * pu, 12 * pu);

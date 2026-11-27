@@ -45,6 +45,7 @@
     const ak = lv && lv.arena ? Z.ARENAS[lv.arena].kind : null;
     const kind = ak === "hoard" ? "hoardbg" : ak === "lab" ? "labbg" : ak === "lakeboss" ? "lake" : ak === "towertop" ? "storm" : ak === "pier" ? "harbour" : ak === "tower" ? "ramparts" : B.bg;
     paintBg(kind, far.c, mid.c, H, R);
+    if (Z.w35LayerBake) try { Z.w35LayerBake(kind, far.c, mid.c, LW, H, B, R); } catch (e) { console.error(e); } /* W35 Optik: Ferne anreichern (optik2.js), nur beim Backen */
     G.layers = { far, mid, H };
   };
   function repeatDraw(c, fn) { for (const o of [-LW, 0, LW]) { c.save(); c.translate(o, 0); fn(); c.restore(); } }
@@ -443,7 +444,7 @@
     const A = lv.arena && Z.ARENAS ? Z.ARENAS[lv.arena] : null;
     const mode = lv.hub ? (G.off && G.off.lagerhimmel ? null : "hub") : A ? (A.kind === "lakeboss" || (G.off && G.off.arenahimmel) ? null : "arena") : (B.open || lv.out) && B.sky && !(G.off && G.off.fensterhimmel) ? "sky" : null;
     if (!mode) return null;
-    const LWp = lv.W * T, LHp = lv.H * T, k = mode === "sky" ? Math.min(0.25, 1200 / LWp, 450 / LHp) : Math.min(0.5, 2400 / LWp, 900 / LHp), /* R34: Himmelsverlauf ist weich – Viertelauflösung reicht (Backzeit/Speicher großer offener Gebiete) */ key = mode + "|" + lv.W + "x" + lv.H + "|" + (B.name ? B.name[0] : "") + "|" + (lv.arena || "");
+    const LWp = lv.W * T, LHp = lv.H * T, k = mode === "sky" && (!Z.w35SkyBake || (G.off && G.off.w35fernhalb)) ? Math.min(0.25, 1200 / LWp, 450 / LHp) : Math.min(0.5, 2400 / LWp, 900 / LHp), /* W35 Optik: mit gemalter Ferne halbe Auflösung (schärfer), off.w35fernhalb = alt */ /* R34: Himmelsverlauf ist weich – Viertelauflösung reicht (Backzeit/Speicher großer offener Gebiete) */ key = mode + "|" + lv.W + "x" + lv.H + "|" + (B.name ? B.name[0] : "") + "|" + (lv.arena || "");
     if (G.lvBack && G.lvBack.key === key && G.lvBack.lvRef === lv) return G.lvBack;
     const t = document.createElement("canvas"); t.width = Math.max(32, Math.ceil(LWp * k)); t.height = Math.max(24, Math.ceil(LHp * k));
     const tc = t.getContext("2d"), cam = Z.cam;

@@ -12,7 +12,7 @@
   const TAU = Math.PI * 2;
   const off = () => !!(Z.gfx && Z.gfx.off && Z.gfx.off.titelszene);
   const still = () => !!((Z.gq && (Z.gq.level === 0 || Z.gq.mini)) || (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches));
-  let cv = null, ctx = null, W = 0, H = 0, dpr = 1, raf = 0, t0 = 0, lastT = 0, layers = null, embers = [], fogs = [], wins = [], threads = [], st = { frames: 0, ms: 0 };
+  let lastStill = null, cv = null, ctx = null, W = 0, H = 0, dpr = 1, raf = 0, t0 = 0, lastT = 0, layers = null, embers = [], fogs = [], wins = [], threads = [], st = { frames: 0, ms: 0 };
   /* gesäter Zufall: die Szene sieht bei jedem Aufbau gleich aus */
   let seed = 7; const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
   const mk = (w, h) => { const c = document.createElement("canvas"); c.width = Math.max(1, w | 0); c.height = Math.max(1, h | 0); return c; };
@@ -225,8 +225,9 @@
   function size() {
     const r = cv.parentNode ? cv.parentNode.getBoundingClientRect() : { width: innerWidth, height: innerHeight };
     const nd = Math.min(still() ? 1 : 1.5, window.devicePixelRatio || 1), nw = Math.max(1, Math.round(r.width)), nh = Math.max(1, Math.round(r.height));
-    if (nw === W && nh === H && nd === dpr && layers) return false;
-    W = nw; H = nh; dpr = nd; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); build(); return true;
+    const sl = still(); /* W35 Optik: Stufenwechsel (z. B. Automatik 0 → 2) baut neu – sonst fehlte die Glut */
+    if (nw === W && nh === H && nd === dpr && layers && sl === lastStill) return false;
+    W = nw; H = nh; dpr = nd; lastStill = sl; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); build(); return true;
   }
   function frame(now) {
     raf = 0; const title = document.getElementById("title");
@@ -292,6 +293,84 @@
      Kein Blau. Schalter Z.gfx.off.w35fern. */
   const hx = h => { h = (h || "#000").replace("#", ""); if (h.length === 3) h = h.replace(/./g, "$&$&"); const n = parseInt(h, 16) || 0; return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
   const mixC = (a, b, t, al) => { const A = hx(a), Bc = hx(b); return "rgba(" + A.map((v, i) => Math.round(v + (Bc[i] - v) * t)).join(",") + "," + (al == null ? 1 : al) + ")"; };
+  /* 4) W35 Optik: Parallaxe-Ferne (Stufe ≥1) für die schwächsten Innen-/Höhlengebiete anreichern – einmal je Gebiet in
+     die ferne Ebene gebacken (bild.js G.buildLayers, eine Hakenzeile), Kosten je Bild 0.
+     Keller: Weinregale, Laternen an Ketten, Lichtpfützen. Verlies: Fackeln an den Pfeilern, Fesseln an Ketten, Moos am Grund.
+     Glockenturm: Glocken an Seilen in den Nischen, schräge Staub-Lichtbahnen. See: Nebelband über dem Wasser,
+     leuchtende Flechten an den Felssäulen, Lichtfäden aus Deckenrissen, Glanz auf dem Wasser. Schalter Z.gfx.off.w35ferne. */
+  Z.w35LayerBake = function (kind, f, m, LW, H, B, R0) {
+    if (Z.gfx && Z.gfx.off && Z.gfx.off.w35ferne) return;
+    let sd = 4711 + (kind || "").length * 131; const R = () => { sd = (sd * 16807) % 2147483647; return (sd - 1) / 2147483646; };
+    const rep = fn => { for (const o of [-LW, 0, LW]) { f.save(); f.translate(o, 0); fn(); f.restore(); } };
+    const glow = (c, x, y, r, rgb, a) => { const gg = c.createRadialGradient(x, y, 0, x, y, r); gg.addColorStop(0, "rgba(" + rgb + "," + a + ")"); gg.addColorStop(1, "rgba(" + rgb + ",0)"); c.fillStyle = gg; c.fillRect(x - r, y - r, r * 2, r * 2); };
+    const dark = "rgba(14,10,8,.9)";
+    const chain = (c, x, y0, y1) => { c.strokeStyle = "rgba(20,16,14,.9)"; c.lineWidth = 0.9; for (let y = y0; y < y1; y += 3) { c.beginPath(); if (((y - y0) / 3) & 1) { c.moveTo(x, y); c.lineTo(x, y + 3); } else { c.moveTo(x - 0.9, y + 1.5); c.lineTo(x + 0.9, y + 1.5); } c.stroke(); } };
+    const lantern = (c, x, y) => { glow(c, x, y + 4, 26, "255,170,80", 0.32); c.fillStyle = dark; c.fillRect(x - 3.5, y - 1, 7, 2); c.fillRect(x - 3, y + 8, 6, 1.6); c.fillStyle = "rgba(255,200,120,.9)"; c.fillRect(x - 2.4, y + 1, 4.8, 7); c.fillStyle = dark; c.fillRect(x - 0.4, y + 1, 0.8, 7); };
+    const torch = (c, x, y) => { glow(c, x, y - 4, 34, "255,150,60", 0.3); c.fillStyle = dark; c.fillRect(x - 1.2, y - 2, 2.4, 9); c.fillRect(x - 3, y - 2, 6, 1.6); c.fillStyle = "rgba(255,190,90,.95)"; c.beginPath(); c.moveTo(x - 2.4, y - 2); c.quadraticCurveTo(x, y - 11, x + 2.4, y - 2); c.fill(); c.fillStyle = "rgba(255,240,190,.9)"; c.beginPath(); c.moveTo(x - 1, y - 2); c.quadraticCurveTo(x, y - 6, x + 1, y - 2); c.fill(); };
+    if (kind === "cellar" || kind === "dungeon" || kind === "belltower") {
+      rep(() => {
+        for (let i = 0; i < 5; i++) {
+          const x = i * 128, cx = x + 64, fl = H * 0.9;
+          /* Lichtpfütze am Nischengrund – die Nische bekommt Tiefe */
+          if (kind !== "dungeon" || i % 2 === 0) glow(f, cx, fl, 54, kind === "dungeon" ? "120,170,90" : "255,160,80", kind === "dungeon" ? 0.1 : 0.13);
+          if (kind === "cellar") {
+            if (i % 2 === 1) { /* Weinregal: Raster mit Flaschenböden */
+              const rx = cx - 30, ry = H * 0.52; f.fillStyle = "rgba(30,20,14,.95)"; f.fillRect(rx - 2, ry - 2, 64, 54);
+              for (let a = 0; a < 5; a++) for (let b = 0; b < 4; b++) { const bx = rx + 6 + a * 12.5, by = ry + 6 + b * 12.5; f.fillStyle = "rgba(10,6,4,.95)"; f.beginPath(); f.arc(bx, by, 4.4, 0, TAU); f.fill(); if (R() < 0.72) { f.fillStyle = R() < 0.5 ? "rgba(70,90,40,.9)" : "rgba(90,30,30,.9)"; f.beginPath(); f.arc(bx, by, 3.2, 0, TAU); f.fill(); f.fillStyle = "rgba(255,220,180,.25)"; f.fillRect(bx - 1.6, by - 1.8, 1.2, 1.2); } }
+            } else { chain(f, cx, H * 0.14, H * 0.42); lantern(f, cx, H * 0.42); }
+          } else if (kind === "dungeon") {
+            torch(f, x, H * 0.46);
+            if (i % 2 === 1) { for (const dx of [-14, 14]) { chain(f, cx + dx, H * 0.3, H * 0.52); f.strokeStyle = "rgba(20,16,14,.9)"; f.lineWidth = 1.1; f.beginPath(); f.arc(cx + dx, H * 0.52 + 3, 3, 0, TAU); f.stroke(); } }
+            const mg = f.createLinearGradient(0, H * 0.82, 0, H); mg.addColorStop(0, "rgba(60,90,40,0)"); mg.addColorStop(1, "rgba(60,90,40,.28)"); f.fillStyle = mg; f.fillRect(x + 18, H * 0.82, 92, H * 0.18);
+          } else { /* Glockenturm */
+            if (i % 2 === 0) { const by = H * (0.36 + (i % 3) * 0.04); f.strokeStyle = "rgba(30,22,16,.9)"; f.lineWidth = 1; f.beginPath(); f.moveTo(cx, H * 0.1); f.lineTo(cx, by - 14); f.stroke();
+              const s = 0.8 + (i % 3) * 0.15; f.fillStyle = "rgba(58,40,24,.95)"; f.beginPath(); f.moveTo(cx - 15 * s, by + 8 * s); f.quadraticCurveTo(cx - 13 * s, by - 14 * s, cx, by - 14 * s); f.quadraticCurveTo(cx + 13 * s, by - 14 * s, cx + 15 * s, by + 8 * s); f.closePath(); f.fill();
+              f.fillStyle = "rgba(40,28,16,.95)"; f.fillRect(cx - 16 * s, by + 6 * s, 32 * s, 3 * s); f.fillStyle = "rgba(255,200,130,.22)"; f.fillRect(cx - 9 * s, by - 10 * s, 2.2 * s, 16 * s); }
+            f.save(); f.globalCompositeOperation = "lighter"; const lg = f.createLinearGradient(cx, H * 0.15, cx + 40, H); lg.addColorStop(0, "rgba(255,190,120,.10)"); lg.addColorStop(1, "rgba(255,190,120,0)"); f.fillStyle = lg;
+            f.beginPath(); f.moveTo(cx - 24, H * 0.18); f.lineTo(cx - 12, H * 0.18); f.lineTo(cx + 46, H); f.lineTo(cx + 22, H); f.closePath(); f.fill(); f.restore();
+          }
+        }
+      });
+    } else if (kind === "lake") {
+      rep(() => {
+        const wy = H * 0.68;
+        /* Nebelband über dem Wasser */
+        const ng = f.createLinearGradient(0, wy - 40, 0, wy + 10); ng.addColorStop(0, "rgba(110,160,130,0)"); ng.addColorStop(0.75, "rgba(110,160,130,.14)"); ng.addColorStop(1, "rgba(110,160,130,0)"); f.fillStyle = ng; f.fillRect(0, wy - 40, LW, 50);
+        /* Lichtfäden aus Deckenrissen */
+        f.save(); f.globalCompositeOperation = "lighter";
+        for (let i = 0; i < 4; i++) { const x = 60 + i * 160 + R() * 40, lg = f.createLinearGradient(0, 0, 0, wy); lg.addColorStop(0, "rgba(190,230,190,.12)"); lg.addColorStop(1, "rgba(190,230,190,0)"); f.fillStyle = lg; f.beginPath(); f.moveTo(x - 3, 0); f.lineTo(x + 3, 0); f.lineTo(x + 18, wy); f.lineTo(x - 6, wy); f.closePath(); f.fill();
+          glow(f, x + 6, wy + 2, 22, "170,230,180", 0.16); }
+        /* leuchtende Flechten an den Säulen (Säulen bei 90 + i*210) */
+        for (let i = 0; i < 3; i++) { const x = 90 + i * 210 + R() * 40; for (let k = 0; k < 7; k++) { const px = x + (R() - 0.5) * 30, py = H * (0.2 + R() * 0.45); glow(f, px, py, 5 + R() * 5, R() < 0.25 ? "220,200,120" : "130,230,160", 0.5); } }
+        /* Glanz auf dem Wasser */
+        for (let i = 0; i < 26; i++) { f.fillStyle = "rgba(170,230,190," + (0.08 + R() * 0.16).toFixed(2) + ")"; f.fillRect(R() * LW, wy + 3 + R() * (H - wy) * 0.7, 6 + R() * 22, 1); }
+        f.fillStyle = "rgba(170,230,190,.16)"; f.fillRect(0, wy, LW, 1);
+        f.restore();
+      });
+    }
+  };
+  /* W35 Optik: Öffnungen in diesen Gebieten zeigen das pracht.js-Fernbild nur noch zu ~60 % – die angereicherte Parallaxe
+     (Laternen, Fackeln, Glocken, Flechten) scheint durch. Nur ein Faktor auf globalAlpha, keine Bildkosten. */
+  const MIDK = { cellar: 0.6, dungeon: 0.6, belltower: 0.62, lake: 0.55 };
+  Z.w35MidK = bg => (Z.gfx && Z.gfx.off && Z.gfx.off.w35ferne) || !Z.gq || Z.gq.layers === false ? 1 : (MIDK[bg] || 1);
+
+  /* W35 Optik: Laufbilanz (Tod/Umkehr/Sieg) – Kacheln ausgewogen verteilen statt einer einzelnen Kachel in der letzten
+     Zeile: Spaltenzahl so wählen, dass alle Zeilen fast gleich voll sind, letzte Zeile mittig. Schalter off.bilanzraster. */
+  const css3 = document.createElement("style");
+  css3.textContent = ".bilanz.w35-raster{display:flex;flex-wrap:wrap;justify-content:center}.bilanz.w35-raster>.bk{flex:0 0 calc((100% - (var(--w35c) - 1) * 6px) / var(--w35c));box-sizing:border-box;min-width:0}";
+  document.head.appendChild(css3);
+  function raster() {
+    if (Z.gfx && Z.gfx.off && Z.gfx.off.bilanzraster) return;
+    document.querySelectorAll("#modal .bilanz").forEach(bl => {
+      const n = bl.querySelectorAll(":scope > .bk").length; if (!n) return;
+      bl.classList.remove("w35-raster"); /* Spaltenzahl des ursprünglichen Rasters (auto-fill) übernehmen */
+      const fit = Math.max(1, (getComputedStyle(bl).gridTemplateColumns || "").split(" ").filter(Boolean).length), rows = Math.ceil(n / fit), cols = Math.ceil(n / rows);
+      bl.style.setProperty("--w35c", cols); bl.classList.add("w35-raster");
+    });
+  }
+  { const md = document.getElementById("modal"); if (md) new MutationObserver(() => { try { raster(); } catch (e) { console.error(e); } }).observe(md, { childList: true, subtree: true }); window.addEventListener("resize", () => { try { raster(); } catch (e) { } }); }
+  Z.w35Raster = raster;
+
   Z.w35SkyBake = function (g, w, h, B, R, world) {
     if (!B || !B.sky || (Z.gfx && Z.gfx.off && Z.gfx.off.w35fern)) return;
     const lv = Z.level, k = world && lv ? w / (lv.W * 16) : h / 270; /* Bildpunkte je Welt-Pixel */

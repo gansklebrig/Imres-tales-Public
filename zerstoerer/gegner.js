@@ -327,6 +327,11 @@
       /* Handheld: auch wache Gegner ruhen, wenn sie weit außerhalb des Bildes sind (über 1,5 Bildbreiten) – wie in Dead Cells */
       e._rest = far && !e.def.boss && (!e.aware || (lean && (Math.abs(e.x - P.x) > 760 || Math.abs(e.y - P.y) > 480)));
       if (e._rest) continue;
+      /* W36 Feinschliff: Sicherheitsnetz – Bodengegner, die ≥ 1 s in festem Fels stecken (selten, z. B. Kuo-toa in Bruchwand, Hafen), herausschieben */
+      if (!e.def.fly && !e.def.ghost && !e.ghost && !e.def.boss && !e.ceil && !(e.hidden > 0) && !(e.latchT > 0) && e.def.spd) {
+        e._wsT = (e._wsT || 0) + dt;
+        if (e._wsT > 0.5) { e._wsT = 0; if (!Z.PJ.bodyFree(e.x + 1, e.y + 1, e.w - 2, e.h - 2)) { e._wsN = (e._wsN | 0) + 1; if (e._wsN >= 2) { e._wsN = 0; Z.unstick(e); Z.diag && Z.diag.note && Z.diag.note("w36-unstick " + e.id); } } else e._wsN = 0; }
+      }
       /* W9 5. Runde (Handheld-Messung: updateEnemies bis 11 ms bei Gruppen): auf lean werden Gegner außerhalb des Bildes (mit Rand),
          die nicht kämpfen, nur jedes dritte Bild mit der gesammelten Zeit gerechnet. Im Bild und im Kampf (wach, Angriff, Rückstoß,
          Status) läuft alles wie bisher jedes Bild. */
