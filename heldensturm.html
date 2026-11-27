@@ -16912,9 +16912,9 @@ setInterval(()=>{try{if(document.hidden||G.bot||!SAVE.slot||!SPL.in)return;const
 .slheroes{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1.2vw}
 /* Heldenkarten: in großen Fenstern Kurzbeschreibung und Äste im sonst leeren unteren Teil */
 .slhero .slbl,.slhero .slbr{display:none}
-@media (min-width:1100px) and (min-height:700px){.slhero .slbl{display:block;margin-top:.9em;max-width:26em;font-size:clamp(12.5px,.8vw,16px);line-height:1.5;color:#cdbb9a;text-align:center;font-style:italic}
+@media (min-width:1100px) and (min-height:700px){.slhero .slbl{display:block;margin-top:.9em;max-width:26em;font-size:14px;font-size:clamp(12.5px,.8vw,16px);line-height:1.5;color:#cdbb9a;text-align:center;font-style:italic}
  .slhero .slbr{display:flex;flex-wrap:wrap;justify-content:center;gap:.35em;margin-top:auto;padding-top:.8em}
- .slhero .slbr i{font-style:normal;font-size:clamp(11px,.7vw,13.5px);padding:.2em .6em;border-radius:1em;border:1px solid color-mix(in srgb,var(--hc) 45%,#3d3140);color:color-mix(in srgb,var(--hc) 70%,#efe3cc);background:rgba(0,0,0,.25)}}
+ .slhero .slbr i{font-style:normal;font-size:clamp(11px,.7vw,13.5px);padding:.2em .6em;border-radius:1em;font-size:12px;font-size:clamp(11px,.7vw,13.5px);border:1px solid rgba(229,180,84,.35);color:#e8d8b8;border:1px solid color-mix(in srgb,var(--hc) 45%,#3d3140);color:color-mix(in srgb,var(--hc) 70%,#efe3cc);background:rgba(0,0,0,.25)}}
 .slhero{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:.35em;padding:1em .8em;border-radius:1em;border:1px solid color-mix(in srgb,var(--hc) 45%,#3d3140);background:radial-gradient(120% 70% at 50% 30%,color-mix(in srgb,var(--hc) 22%,transparent),transparent 70%),linear-gradient(#1e1721,#120e15);color:var(--text);font:inherit;min-height:0;overflow:hidden;transition:transform .15s,box-shadow .15s,border-color .15s}
 .slhero canvas{width:100%;max-width:12em;height:auto;aspect-ratio:1/1;min-height:0;flex:0 1 auto}
 .slhero .nm{font:400 1.6em/1 var(--fd);color:var(--hc)}
@@ -43358,6 +43358,9 @@ function kaUnten(){try{if(typeof KANAME!=='undefined'&&KANAME.t>0&&KANAME.unten>
 /* Banner nie über HUD-Leiste/Karte: Unterkante der oberen HUD-Zeile (gemessen, gedrosselt) – wichtig auf kleinen Fenstern */
 let huT=0,huV=0;function hudUnten(){const nw=performance.now();if(nw-huT<300)return huV;huT=nw;huV=0;try{const el=document.querySelector('#hud .top');if(el&&!hud.hidden){const r=el.getBoundingClientRect();if(r.height>0)huV=r.bottom+6}}catch(e){}return huV}
 if(typeof drawBanner==='function'){const db=drawBanner;drawBanner=function(){const b=G&&G.banner;try{if(!ME.aus&&b){const k=Math.max(kaUnten(),hudUnten());if(k){const fs=Math.min(b.size||56,W*0.105),by=b.y||H*(b.bars?0.32:0.26);if(by-fs*0.8<k)b.y=k+fs*0.8}}}catch(e){}
+ /* kleine Fenster: liegt das Banner auf Höhe der Minikarte, wird es links davon eingepasst (Breite bis zur Karte) */
+ try{const B=typeof WLMM!=='undefined'&&WLMM.box;if(b&&!b.bars&&B&&W<900&&!hud.hidden&&G.state==='play'&&!G.room&&SAVE.wlMini!==false){const fs=Math.min(b.size||56,W*0.105),by=b.y||H*0.26;
+   if(by-fs*0.8<B.y+B.S+6&&by+fs*1.4>B.y-4&&B.x>W*0.5){const W0=W;W=B.x-10;try{return db.apply(this,arguments)}finally{W=W0}}}}catch(e){}
  return db.apply(this,arguments)}}  /* einmal verschoben, bleibt das Banner dort – kein Springen */
 /* doppelte Hinweise und Weltwörter */
 const zeit=()=>performance.now();
