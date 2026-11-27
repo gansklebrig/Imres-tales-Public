@@ -38,8 +38,20 @@
   }
   function put(src, x, y, k) {
     let m = marks.get(src);
-    if (!m) { m = { x, y, a: 0, on: true, k, seen: 0 }; marks.set(src, m); }
+    if (!m) { m = { x, y, a: 0, on: true, k, seen: 0 }; marks.set(src, m); randKlang(x, k); }
     m.x = x; m.y = y; m.on = true; m.k = k; m.seen = lastN;
+  }
+  /* W39 Klang: Die Randwarnung war stumm – Ausholen ertönt in gegner.js nur im Bild (±30), Geschosse fliegen lautlos heran.
+     Neuer Pfeil → leiser Warnklang zur Seite des Angreifers (Ausholen: Klinge wird gezogen, Geschoss: Luftzug), Warnklang (immer durch,
+     wie R19), je Art höchstens alle 0,3 s; mit Untertiteln (zugang.js) zusätzlich „Fernangriff“ mit Richtung. Effekte-Regler/stumm gelten (A.play). */
+  function randKlang(x, k) {
+    try {
+      const A = Z.audio, P = Z.player; if (!A || !A.ok || !A.play || !Z.cam || !P) return;
+      const pan = Math.max(-0.85, Math.min(0.85, (x - (Z.cam.x + Z.cam.w / 2)) / (Z.cam.w * 0.6)));
+      if (k) A.play("swing", { vol: 0.16, rate: 1.35, pan, tag: "rb1", gap: 0.3, verb: 0.15, must: true });
+      else A.play("unsheathe", { vol: 0.17, rate: 1.3, pan, tag: "rb0", gap: 0.3, verb: 0.2, must: true });
+      if (!k && Z.zugang && Z.zugang.untertitel && Z.settings && Z.settings.untertitel) Z.zugang.untertitel(Z.L(["Fernangriff", "Ranged attack"]), "➶", x < P.x + P.w / 2 ? -1 : 1);
+    } catch (_) {}
   }
   function draw(c, cm, W, H, dt) {
     const S = Z.gfx.scale || 1, css = W / Math.max(1, window.innerWidth || W); /* Gerätepixel je CSS-Pixel */

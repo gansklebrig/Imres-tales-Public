@@ -2554,9 +2554,13 @@
     /* W13 R7: Ausgänge zuerst – solange eine Tür nur per Maximalsprung erreichbar ist, die Kante wählen, die ihr am nächsten führt
        (vorher konnte das Steg-Budget an anderer Stelle aufgebraucht sein: 1 von 390 Karten); dafür etwas mehr Budget */
     const exitsP = lv.doors.filter(d => d.kind === "exit");
+    /* W39 Leistung: Reichweite (bequem) und Kantengraph gelten bis zum nächsten gesetzten Steg – ohne neuen Steg ist die Karte
+       unverändert (Versuchsstege werden zurückgenommen), nach einem Steg liefern die Prüfungen des Erfolgsfalls genau diese Werte */
+    let rcC = null, edC = null;
     for (let it = 0; it < 40 && lv.eased.length < 20; it++) { /* W13 R23: mehr Budget, solange ein Ausgang nur per Maximalsprung erreichbar ist (mehr, kürzere Zweige) */
-      const c = { W, H, get: g, start: lv.start, doors: lv.doors, cells: lv.cells }; validate(c, null, true); const rc = c.reach;
-      const f = { W, H, get: g, start: lv.start, doors: lv.doors, cells: lv.cells, _wantEdges: true }; validate(f); const [ea, eb] = f._edges;
+      if (!rcC) { const c = { W, H, get: g, start: lv.start, doors: lv.doors, cells: lv.cells }; validate(c, null, true); rcC = c.reach; }
+      if (!edC) { const f = { W, H, get: g, start: lv.start, doors: lv.doors, cells: lv.cells, _wantEdges: true }; validate(f); edC = f._edges; }
+      const rc = rcC, [ea, eb] = edC;
       const openEx = exitsP.filter(d => !rc[d.y * W + d.x]);
       if (!openEx.length && (lv.eased.length >= 10 || it >= 16)) break; /* wie bisher; nur für Türen mehr Budget */
       if (!openEx.length && lv.eased.length >= 13) break;
@@ -2579,7 +2583,9 @@
           if (!okPlank(mx - 1, mx + 1, row)) continue;
           for (let x = mx - 1; x <= mx + 1; x++) lv.set(x, row, 2);
           const c2 = { W, H, get: g, start: lv.start, doors: lv.doors, cells: lv.cells }; validate(c2, null, true);
-          if (c2.reach[Bt] && validate(lv)) { lv.eased.push([mx - 1, mx + 1, row]); done = true; if (forceT && lv.traps) lv.traps = lv.traps.filter(o => !(o.x >= mx - 2 && o.x <= mx + 2 && Math.abs(o.y - (row - 1)) < 2)); break; }
+          const we0 = lv._wantEdges, ed0 = lv._edges; lv._wantEdges = true; /* W39 Leistung: Kanten des neuen Stands gleich mitnehmen */
+          const okV = c2.reach[Bt] && validate(lv), edN = lv._edges; if (we0 === undefined) delete lv._wantEdges; else lv._wantEdges = we0; if (ed0 === undefined) delete lv._edges; else lv._edges = ed0;
+          if (okV) { rcC = c2.reach; edC = edN; lv.eased.push([mx - 1, mx + 1, row]); done = true; if (forceT && lv.traps) lv.traps = lv.traps.filter(o => !(o.x >= mx - 2 && o.x <= mx + 2 && Math.abs(o.y - (row - 1)) < 2)); break; }
           for (let x = mx - 1; x <= mx + 1; x++) lv.set(x, row, 0);
         }
         if (done) break;
@@ -3285,7 +3291,7 @@
       if (g(x, y + 1) === 4) { let yy = y + 1; while (g(x, yy) === 4) { push(x, yy); yy++; } push(x, fall(x, yy - 1)); }
       if (g(x, y) === 4 && g(x, y + 1) === 4) { let yy = y + 1; while (g(x, yy) === 4) { push(x, yy); yy++; } push(x, fall(x, yy - 1)); }
       /* Laufen und von Kanten fallen (mit etwas Steuerung in der Luft, aber nicht durch Wände) */
-      for (const d of [-1, 1]) {
+      for (let d = -1; d <= 1; d += 2) { /* W39 Leistung: ohne Array je Knoten */
         const nx = x + d;
         if (!passable(g(nx, y)) || !passable(g(nx, y - 1))) continue;
         if (canStand(nx, y)) { push(nx, y); continue; }
@@ -3307,7 +3313,7 @@
         for (let dx = -maxDx; dx <= maxDx; dx++) {
           const tx = x + dx, ty = y - dy;
           if (!canStand(tx, ty)) continue;
-          let ok = true; const s = U.sign(dx);
+          let ok = true; const s = dx > 0 ? 1 : dx < 0 ? -1 : 0;
           for (let k = s; k !== dx; k += s) { const a = g(x + k, ty - 1), b = g(x + k, ty); if ((!air(a) && a !== 2) || (!air(b) && b !== 2)) { ok = false; break; } }
           if (ok) push(tx, ty);
         }
@@ -3315,7 +3321,7 @@
       /* weite Sprünge auf gleicher Höhe / nach unten: über die Lücke in Kopfhöhe, dann senkrecht hinab */
       for (let dx = -WIDE; dx <= WIDE; dx++) {
         if (!dx) continue;
-        const s = U.sign(dx); let ok = true;
+        const s = dx > 0 ? 1 : -1; let ok = true;
         for (let k = s; k !== dx + s; k += s) if (!air(g(x + k, y - 1)) || !air(g(x + k, y - 2)) && Math.abs(k) > 1) { ok = false; break; }
         if (!ok) continue;
         const tx = x + dx;

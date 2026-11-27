@@ -21,7 +21,10 @@
   const SFX = { wKatze: [1, 2, 3, 4, 5, 6].map(i => AM("e_katze_" + i)), wSchnurr: [AM("a_schnurren")], wEule: [1, 2, 3, 4].map(i => AM("e_eule_" + i)), wVogel: [3, 5, 7, 9, 12, 15, 18, 21].map(i => AM("e_vogel_" + i)),
     wFluegel: [1, 2, 3].map(i => AM("e_fluegelschlag_" + i)), wGlocklein: [1, 2, 3].map(i => AM("e_glocklein_" + i)), wSchellen: [1, 2].map(i => AM("e_schellen_" + i)), wWal: [1, 2, 3].map(i => AM("e_wal_" + i)),
     wDrache: [AM("e_drachenbruellen_5")], wChor: [AM("a_geisterchor")], wSpuk: [2, 4].map(i => AM("e_spuk_" + i)), wSchale: [AM("a_klangschale")], wSpinne: [AM("e_spinne_1")] };
-  if (A && A.SFX) for (const k in SFX) A.SFX[k] = SFX[k];
+  /* W39 Leistung: Rollen, die ihr Wunder beim Start selbst vorlädt und erst Sekunden später (oder nie: wChor, wSpuk) spielt, nicht beim
+     Spielstart dekodieren (~28 MB PCM); wSchale (0,5 s nach Vorladen) und die sofort gespielten Glöckchen/Flügel bleiben vorab geladen */
+  const LAZY = { wKatze: 1, wSchnurr: 1, wWal: 1, wVogel: 1, wDrache: 1, wChor: 1, wSpuk: 1 };
+  if (A && A.SFX) for (const k in SFX) { A.SFX[k] = SFX[k]; if (A.lazy && LAZY[k]) A.lazy[k] = 1; }
   const preload = k => { if (!A || !A.ok || !A.SFX[k]) return; for (const p of A.SFX[k]) if (A.buf && A.buf[p] === undefined && A.load) A.load(p); };
   const snd = (k, o) => { try { A.play(k, o); } catch (_) {} };
   /* kleine Melodie in der Tonart des Gebiets (Moll-Dreiklänge passen zu allen Gebietsskalen) */

@@ -320,6 +320,13 @@
 
   /* ---------------- Ton ---------------- */
   const A = (Z.audio = { ctx: null, buf: {}, loading: {}, vol: { master: 0.9, music: 0.55, sfx: 0.9, amb: 0.7 }, ok: false, loops: {}, lastPlay: {} });
+  /* W39 Klang/Leistung: A.live = Effekte, deren Endzeit noch nicht erreicht ist (Lesen wie bisher; Schreiben wird ignoriert) */
+  const liveEnd = []; let liveCtx = null;
+  function liveAdd(end) { if (liveCtx !== A.ctx) { liveEnd.length = 0; liveCtx = A.ctx; } if (isFinite(end)) liveEnd.push(end); }
+  Object.defineProperty(A, "live", { configurable: true, enumerable: true, set(_) {}, get() {
+    if (!A.ctx || liveCtx !== A.ctx) return 0;
+    const now = A.ctx.currentTime; let j = 0; for (let i = 0; i < liveEnd.length; i++) if (liveEnd[i] > now) liveEnd[j++] = liveEnd[i];
+    liveEnd.length = j; return j; } });
   try { const v = JSON.parse(localStorage.getItem("imres-zerstoerer-ton") || "null"); if (v && typeof v === "object") for (const k in A.vol) if (typeof v[k] === "number" && isFinite(v[k])) A.vol[k] = Math.max(0, Math.min(1, v[k])); } catch (_) {}
   /* Ton-Schalter (tonregler.js): Musik bzw. Effekte (samt Kulisse) schnell stumm, die Regler bleiben wie eingestellt */
   A.musAn = () => !window.TonRegler || TonRegler.musik("zerstoerer");
@@ -450,7 +457,10 @@
     uiOk: [K("glock_91")],
     crit: [K("fx_0_swordhit_13a"), K("fx_0_swordhit_13b")]
   };
-  A.allSfxPaths = () => { const s = new Set(); for (const k in A.SFX) A.SFX[k].forEach(p => s.add(p)); return [...s]; };
+  /* W39 Leistung: Rollen in A.lazy (z. B. Wunder-Ereignisse, die ihre Klänge beim Start selbst vorladen) nicht beim Spielstart dekodieren –
+     sparte ~40 MB dekodiertes PCM (von 182 MB) und ~90 gleichzeitige Dekodierungen in der ersten Sekunde */
+  A.lazy = A.lazy || {};
+  A.allSfxPaths = () => { const s = new Set(); for (const k in A.SFX) if (!A.lazy[k]) A.SFX[k].forEach(p => s.add(p)); return [...s]; };
   /* spielt ein benanntes Geräusch: vol, rate (Tonhöhe), pan, verb (Hallanteil), wo (Weltposition für Stereo/Lautstärke) */
   A.play = (name, o) => {
     if (!A.ok || Z.quiet) return;
@@ -510,9 +520,11 @@
       if (A.bundleVerb != null ? A.bundleVerb : q.mini) g.connect(verbSend(vv));
       else { const vg = A.ctx.createGain(); vg.gain.value = vv; g.connect(vg); vg.connect((o.bus === A.amb ? A.verbA : o.bus === A.mus ? A.verbM : A.verbS) || A.verb); }
     }
-    A.live = (A.live || 0) + 1; s.onended = () => { A.live--; };
-    const t0 = now + (isFinite(o.delay) ? Math.max(0, o.delay) : 0);
-    s.start(t0, isFinite(o.offset) ? Math.max(0, o.offset) : 0);
+    const t0 = now + (isFinite(o.delay) ? Math.max(0, o.delay) : 0), off0 = isFinite(o.offset) ? Math.max(0, o.offset) : 0;
+    /* W39 Klang/Leistung: Zahl klingender Effekte aus den Endzeiten statt aus onended – im 22-min-Lauf (mit erzwungener Speicherbereinigung)
+       gingen Ende-Ereignisse verloren und A.live kroch auf 16 (Ruhe!): Handheld-Grenze 10 hätte alle normalen Effekte gesperrt, Fader −4 dB */
+    liveAdd(o.dur && isFinite(o.dur) ? t0 + o.dur + 0.02 : t0 + Math.max(0, b.duration - off0) / rate);
+    s.start(t0, off0);
     /* Länge begrenzen (ausblenden) – erst nach start(), sonst wirft stop() einen Fehler; relativ zum Einsatz */
     if (o.dur && isFinite(o.dur)) { g.gain.setValueAtTime(vol, t0 + o.dur * 0.7); g.gain.linearRampToValueAtTime(0, t0 + o.dur); s.stop(t0 + o.dur + 0.02); }
     return s;

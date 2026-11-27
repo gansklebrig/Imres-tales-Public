@@ -258,6 +258,7 @@
     const P = K.p2; if (!P) return;
     const name = CH[P.ch].n;
     FX.burst(P.x + P.w / 2, P.y + 14, 18, { col: ["#a99a8b", "#5a4a40"], sp: 70, life: 0.6, size: 3, kind: "smoke" });
+    try { A.play("roll", { vol: 0.3, rate: 0.85 }); A.play("ui", { vol: 0.25, rate: 0.75, delay: 0.12 }); } catch (_) {} /* W39 Klang: Aussteigen war stumm (Einsteigen: Bellen/Zauber) – Rüstzeug raschelt, Ton abwärts */
     K.p2 = null; K.src = null; K.rex = null; K.fx.length = 0;
     for (const e of Z.enemies) if (e._kz) e._kz = null;
     rescaleEnemies();

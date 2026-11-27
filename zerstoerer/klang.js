@@ -568,11 +568,12 @@
   const STEPS = {
     stein: RA("n_steinschritte_", 8).concat(RA("g_stein_", 5)), holz: RA("n_holzschritte_", 24).concat(RA("g_holz_", 5)), nass: RA("g_nass_", 3),
     gras: RA("g_gras_", 5).concat(RA("n_laubschritt_", 9)), kies: RA("n_kies_", 8).concat(RA("e_kies_", 2)), teppich: RA("n_erdschritte_", 17),
-    metall: RA("n_steinschritte_", 8), knochen: RA("n_steinschritte_", 8)
+    metall: RA("n_steinschritte_", 8), knochen: RA("n_steinschritte_", 8),
+    schnee: RA("e_schnee_", 8).concat(RA("g_schnee_", 4)) /* W39 Klang: Winter im Lager (lagerwelt.js) – Schritte knirschen im Schnee */
   };
   /* Zusatzschicht je Untergrund: [Liste, Lautstärke, Rate, Dauer, Wahrscheinlichkeit] */
   const STEPL = { metall: [RA("g_metallhieb_", 7), 0.09, 2.4, 0.12, 1], knochen: [RA("g_untot_", 6).concat([AM("n_knochen_1")]), 0.12, 1.5, 0.25, 0.5], nass: [RA("n_platsch_", 10), 0.1, 1.5, 0.3, 0.55] };
-  const STEPV = { stein: 1, holz: 1, nass: 1.15, gras: 1.05, kies: 0.85, teppich: 0.75, metall: 1, knochen: 1 };
+  const STEPV = { stein: 1, holz: 1, nass: 1.15, gras: 1.05, kies: 0.85, teppich: 0.75, metall: 1, knochen: 1, schnee: 0.9 };
   const OUT_BIOME = { torhof: 1, wehrgang: 1, sturm: 1, zinnen: 1 };
   KL.untergrund = () => {
     const P = Z.player, lv = Z.level; if (!P || !lv || !lv.get) return "stein";
@@ -580,7 +581,11 @@
     const vin = lv.get(tx, tyIn), vb = lv.get(tx, tyB), bi = lv.biome, top = (Z.biome && Z.biome.tile && Z.biome.tile.top) || "";
     if (vin === 6 || vb === 6) return "nass";
     if (vb === 2 || vb === 8 || vb === 4) return bi === "schmiede" || bi === "glut" ? "metall" : "holz";
-    if (lv.hub) return "gras";
+    if (lv.hub) { /* W39 Klang: Jahreszeit im Lager – Schnee knirscht, Nieselregen macht das Gras zuweilen nass */
+      const lw = Z.lagerwelt && Z.lagerwelt.state && Z.lagerwelt.state();
+      if (lw && lw.lv === lv) { if (lw.se === "winter") return "schnee"; if (lw.wx === "niesel" && Math.random() < 0.35) return "nass"; }
+      return "gras";
+    }
     if (lv.passage) return "teppich";
     const r = Z.raumTypAt && Z.raumTypAt(tx, tyIn), fn = r && r.id;
     if (fn === "gebeinhaus" || fn === "beutelager" || fn === "brutkammer") return "knochen";
@@ -1744,6 +1749,7 @@
     try { rueckTick(dt); } catch (e) { if (!KL.err8) { KL.err8 = 1; console.error(e); } }
     try { tplTick(dt); } catch (e) { if (!KL.err9) { KL.err9 = 1; console.error(e); } }
     try { bewegTick(dt); } catch (e) { if (!KL.err10) { KL.err10 = 1; console.error(e); } }
+    try { lwTick(); } catch (e) { if (!KL.err39) { KL.err39 = 1; console.error(e); } } /* W39 Klang: Lager-Wetter */
     try { hookEnde(); if (ER.n < 0 && Z.meta && Z.meta.ach) ER.n = Object.keys(Z.meta.ach).length; } catch (e) { if (!KL.err12) { KL.err12 = 1; console.error(e); } }
     try { hookStimmen(); if (!VS.pre && M.prof) { VS.pre = M.prof.root; for (const [i, o] of [["kal", 2], ["glock", 3]]) for (let d = 0; d < 7; d++) { const pr = M.probe(i, M.ton(d, M.prof.root + 12 * o)); if (pr) A.load(pr.path); } } else if (M.prof && VS.pre !== M.prof.root) VS.pre = null; } catch (e) { if (!KL.err11) { KL.err11 = 1; console.error(e); } }
     /* Effekte-Dichte reiten (kern.js A.ride): ab 4 gleichzeitigen Effekten sachte zurück, bei 10+ etwa −4 dB; schnell runter, langsam wieder hoch */
@@ -1768,4 +1774,20 @@
     if (!(Z.gq && Z.gq.lean) || klAcc >= 0.1) { const d = klAcc; klAcc = 0; try { KL.tick(d); } catch (e) { if (!KL.err) { KL.err = 1; console.error(e); } } }
     return r;
   };
+
+  /* W39 Klang: Jahreszeiten-Wetter im Lager (lagerwelt.js W28) war bisher nur zu sehen – jetzt eine leise Kulissenschicht je Wetter
+     über Lagerfeuer und Nacht (Kulissen-Bus, also unter Regler „Kulisse“ und Effekte-Schalter). Kurze Schleifen (≤ 28 s) wegen Speicher;
+     „Handheld minimal“ ohne Schicht. Verlässt man das Lager, blendet AMB.set die Schicht mit allen Schleifen aus. */
+  const LWX = { laub: ["a_laub", 0.22], niesel: ["a_leichtregen_n1", 0.3], gluehen: ["a_grillen_n1", 0.22], schwuel: ["a_grillen_n1", 0.26],
+    blueten: ["a_sommerwiese_n1", 0.2], sturm: ["a_heulwind_n1", 0.26], schnee: ["a_wind_n1", 0.14], flocken: ["a_wind_n1", 0.08], frost: ["a_wind_n1", 0.07], nebel: ["a_wind_n1", 0.07] };
+  KL.lagerWx = { cur: null, n: 0 };
+  function lwTick() {
+    const S = KL.lagerWx, lv = Z.level;
+    const lw = lv && lv.hub && Z.lagerwelt && Z.lagerwelt.state && Z.lagerwelt.state();
+    if (lw && lw.lv === lv && lw.se === "winter" && !S.pre) { S.pre = 1; preload(STEPS.schnee); } /* erste Schritte sonst stumm (Laden bei Bedarf) */
+    const d = lw && lw.lv === lv && !(Z.gq && Z.gq.mini) ? LWX[lw.wx] : null, id = "lw_wx";
+    if (!d) { if (A.loops[id]) A.stopLoop(id, 1); S.cur = null; return; }
+    const path = AM(d[0]);
+    if (!A.loops[id] || A.loops[id].path !== path) { A.loop(id, path, d[1], A.amb); S.cur = lw.wx; S.n++; }
+  }
 })();

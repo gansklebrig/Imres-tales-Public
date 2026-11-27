@@ -449,7 +449,15 @@
   let curInst = "";
   /* Testhilfe: belegte Stimmen nach Instrument (k = Kern, f = Schmuck, s = Stinger) */
   M._voc = () => { const o = {}; for (const v of VOC) if (!v.freed) { const k = (v.st ? "s:" : v.fig ? "f:" : "k:") + v.i; o[k] = (o[k] || 0) + 1; } return o; };
+  /* W39 Klang/Leistung: wie bei Z.audio.live (kern.js) können Ende-Ereignisse verloren gehen – dann blieben Stimme samt Knoten in VOC
+     (Speicher) und M.live kröche Richtung Stimmengrenze (Handheld 14). Alle 64 Noten: Stimmen 2 s nach ihrem geplanten Ende austragen */
+  let sweepN = 0;
+  function sweepVoc() {
+    const now = A.ctx.currentTime;
+    for (const v of VOC) if (v.end && now > v.end + 2) { if (!v.freed) { v.freed = true; M.live--; } VOC.delete(v); M.stats.verloren = (M.stats.verloren || 0) + 1; try { v.s.disconnect(); v.g.disconnect(); } catch (_) {} }
+  }
   function track(s, g, st, end, fig, when) {
+    if ((++sweepN & 63) === 0) { try { sweepVoc(); } catch (_) {} }
     M.live++; M.stats.notes++;
     const v = { s, g, st, end: end || 0, fig: !!fig, i: curInst, t0: A.ctx.currentTime, w: when || 0 }; VOC.add(v);
     s.onended = () => { if (!v.freed) M.live--; VOC.delete(v); try { s.disconnect(); g.disconnect(); } catch (_) {} };
