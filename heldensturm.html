@@ -9907,7 +9907,7 @@ function pickBg(id,pw,ph){const key=id+pw+'x'+ph;let b=PKBG[key];if(b)return b;b
 function heroPick(cv,t){if(!cv||!cv.isConnected)return;const dpr=Math.min(3,window.devicePixelRatio||1),W=cv.clientWidth||64,H=cv.clientHeight||64,pw=Math.round(W*dpr),ph=Math.round(H*dpr);
  if(cv.width!==pw||cv.height!==ph){cv.width=pw;cv.height=ph}const g=cv.getContext('2d'),id=cv.dataset.hero;if(!HEROES[id])return;
  g.setTransform(1,0,0,1,0,0);g.globalCompositeOperation='source-over';g.globalAlpha=1;g.clearRect(0,0,pw,ph);g.drawImage(pickBg(id,pw,ph),0,0);
- g.setTransform(dpr,0,0,dpr,0,0);const s=W/49;heroLit(g,id,W*0.47,H*0.88,s,{t,flip:1},{lx:-0.8,ra:0.95,rim2:'#ffe8c8',ra2:0.25,ha:0.3,sh:0.7});
+ g.setTransform(dpr,0,0,dpr,0,0);const kl=W<=48,s=kl?W/30:W/49;heroLit(g,id,W*0.47,kl?H*1.0:H*0.88,s,{t,flip:1},{lx:-0.8,ra:0.95,rim2:'#ffe8c8',ra2:0.25,ha:0.3,sh:0.7});
  g.setTransform(1,0,0,1,0,0);g.globalCompositeOperation='destination-in';g.drawImage(pickMask(pw,ph),0,0);g.globalCompositeOperation='source-over'}
 function pickMask(pw,ph){const key='m'+pw+'x'+ph;let b=PKBG[key];if(b)return b;b=PKBG[key]=document.createElement('canvas');b.width=pw;b.height=ph;const g=b.getContext('2d');
  const rg=g.createRadialGradient(pw*0.5,ph*0.44,0,pw*0.5,ph*0.44,pw*0.5);rg.addColorStop(0,'#000');rg.addColorStop(0.62,'#000');rg.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=rg;g.fillRect(0,0,pw,ph);return b}
