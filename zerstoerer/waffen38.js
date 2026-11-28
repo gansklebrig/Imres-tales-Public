@@ -266,5 +266,41 @@
     });
   };
 
+  /* ---------- W46 Optik (nur Bild, keine Werte) ----------
+     Laternenstab: Glut sah man nur an kleinen Punkten über dem Kopf – jetzt glimmt die Laterne in der Hand selbst heller
+     (Hülle um Z.drawPlayer merkt sich die Glut des gerade gezeichneten Spielers; Symbole im Inventar bleiben unverändert). Ladeschild: der Kern glühte nur bei voller Ladung – jetzt wächst ein schwacher Schein mit
+     jeder Ladung. Wurfschild (werkzeuge.js, runder Schild): Drehung war unsichtbar, weil der Kreis symmetrisch ist – zwei
+     helle Bögen außen am Rand drehen mit (der Schild wird danach gezeichnet), dazu ein kurzer Wischer hinter dem Flug. Alles aus bei Z.gfx.off.w38waffen; Funken
+     und Wischer nicht in der sparsamen Grafikstufe. */
+  let glut46 = 0;
+  const dpl0 = Z.drawPlayer;
+  if (dpl0) Z.drawPlayer = function (c, P) { glut46 = (P && P.w38glut) || 0; try { return dpl0.apply(this, arguments); } finally { glut46 = 0; } };
+  const li0 = Z.WICON.laterne;
+  Z.WICON.laterne = function (c, col, t) {
+    li0(c, col, t);
+    if (glut46 > 0 && !offFx()) { const f = 0.85 + Math.sin((t || 0) * 9) * 0.15; glow(c, 21, 1, 7 + glut46 * 3.5 * f, "rgba(255,205,110," + (0.2 + glut46 * 0.14).toFixed(2) + ")"); circ(c, 21, 1.3, 1.2 + glut46 * 0.4, glut46 >= 3 ? "#fffbe8" : "#fff4c8"); }
+  };
+  const leanQ = () => !!(Z.gq && (Z.gq.lean || Z.gq.mini || Z.gq.level === 0));
+  const dp1 = Z.drawProjs;
+  Z.drawProjs = function (c) {
+    if (dp1) dp1.apply(this, arguments);
+    if (offFx()) return;
+    safe("bild46", () => {
+      const t = (Z.gfx && Z.gfx.time) || 0, lo = leanQ();
+      for (const P of players()) {
+        const n = P.w38lad || 0;
+        if (n > 0 && n < LMAX && holds(P, "ladeschild")) glow(c, P.x + P.w / 2 + P.face * 8, P.y + 14, 4 + n * 1.6, "rgba(255,200,100," + (0.12 + n * 0.06).toFixed(2) + ")");
+      }
+      for (const g of Z.gadgets || []) {
+        if (g.k !== "boomerang" || !g.it || g.it.id !== "wurfschild") continue;
+        const sp = Math.hypot(g.vx || 0, g.vy || 0) || 1;
+        if (!lo) { c.save(); c.globalCompositeOperation = "lighter"; c.strokeStyle = "rgba(232,212,170,.35)"; c.lineWidth = 2.2; c.lineCap = "round"; c.beginPath(); c.moveTo(g.x - g.vx / sp * 4, g.y - g.vy / sp * 4); c.lineTo(g.x - g.vx / sp * 16, g.y - g.vy / sp * 16); c.stroke(); c.restore(); }
+        c.save(); c.translate(g.x, g.y); c.rotate(g.rot || 0);
+        c.strokeStyle = "#f4e4bc"; c.lineWidth = 1.2; c.beginPath(); c.arc(0, 0, 6.6, -0.55, 0.55); c.stroke(); c.beginPath(); c.arc(0, 0, 6.6, Math.PI - 0.55, Math.PI + 0.55); c.stroke();
+        c.restore();
+      }
+    });
+  };
+
   Z.w38waffen = { ids: ["laternenstab", "ladeschild", "kettensichel"] };
 })();

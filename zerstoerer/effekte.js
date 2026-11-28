@@ -1290,11 +1290,32 @@
       } else if (!lo && ph < 4.5 && rnd() < 0.012) Z.fx.p({ x: ex + dx, y: my + 2, vx: 0, vy: 10, g: 300, life: 0.5, size: 1.2, col: "#a8d0b8", kind: "drop" }); /* Tropfen bei Ebbe */
     }
     /* Strudel über dem Ablauf beim Fallen */
+    /* W46 Optik: Der Strudel war kaum zu sehen (drei feine Bögen, 2–7 px). Jetzt: eingesenkte Mulde, die zur Mitte
+       dunkler wird, zwei einlaufende Spiralarme mit ruhiger Drehung, Schaumflocken auf dem Außenring und darunter ein
+       schwacher dunkler Trichter bis zum Becken­grund. Stufe 0/lean: ohne Verläufe und mit weniger Flocken. */
     if (td.drain && fDr > 0.02 && h > 0.5) {
-      const dxp = td.drain[0] * T + 8, dyp = top + 0.6, sp = t * 7;
-      c.strokeStyle = "rgba(210,236,214," + (0.6 * fDr).toFixed(2) + ")"; c.lineWidth = 1;
-      for (let k = 0; k < 3; k++) { const r0 = (2 + k * 2.6) * (0.5 + 0.5 * fDr); c.beginPath(); c.ellipse(dxp, dyp + k * 0.3, r0, r0 * 0.28, 0, sp + k * 2.1, sp + k * 2.1 + 3.6); c.stroke(); }
-      c.fillStyle = "rgba(14,30,24," + (0.55 * fDr).toFixed(2) + ")"; c.beginPath(); c.ellipse(dxp, dyp + 0.6, 1.8, 0.7, 0, 0, TAU); c.fill();
+      const dxp = td.drain[0] * T + 8, dyp = top + 0.6, sp = t * 3.2, sz = Math.min(1, 0.45 + h / 14), R = (6 + 7 * fDr) * sz, fl = 0.3;
+      if (!lo) {
+        /* Trichter unter dem Spiegel: zum Abfluss hin enger und dunkler */
+        const by = td.yw * T + 4, fg = c.createLinearGradient(0, dyp, 0, by); fg.addColorStop(0, "rgba(8,22,18,0)"); fg.addColorStop(1, "rgba(8,22,18," + (0.55 * fDr).toFixed(2) + ")");
+        c.fillStyle = fg; c.beginPath(); c.moveTo(dxp - R * 0.55, dyp + 1); c.quadraticCurveTo(dxp - 1.5, dyp + 3, dxp - 1.2, by); c.lineTo(dxp + 1.2, by); c.quadraticCurveTo(dxp + 1.5, dyp + 3, dxp + R * 0.55, dyp + 1); c.closePath(); c.fill();
+        /* Mulde: radialer Verlauf, flachgedrückt */
+        c.save(); c.translate(dxp, dyp + 0.4); c.scale(1, fl);
+        const mg = c.createRadialGradient(0, 0, 0, 0, 0, R); mg.addColorStop(0, "rgba(6,18,14," + (0.7 * fDr).toFixed(2) + ")"); mg.addColorStop(0.55, "rgba(16,38,30," + (0.35 * fDr).toFixed(2) + ")"); mg.addColorStop(1, "rgba(16,38,30,0)");
+        c.fillStyle = mg; c.beginPath(); c.arc(0, 0, R, 0, TAU); c.fill(); c.restore();
+      } else { c.fillStyle = "rgba(10,26,20," + (0.4 * fDr).toFixed(2) + ")"; c.beginPath(); c.ellipse(dxp, dyp + 0.4, R * 0.7, R * 0.7 * fl, 0, 0, TAU); c.fill(); }
+      /* zwei Spiralarme, laufen nach innen ein und sinken dabei leicht ab */
+      for (let arm = 0; arm < 2; arm++) {
+        c.strokeStyle = "rgba(214,238,220," + ((arm ? 0.38 : 0.62) * fDr).toFixed(2) + ")"; c.lineWidth = arm ? 0.8 : 1.1; c.beginPath();
+        const n = lo ? 6 : 12;
+        for (let k = 0; k <= n; k++) { const u = k / n, an = sp + arm * Math.PI + u * 4.4, rr = R * (1 - u * 0.86), xx = dxp + Math.cos(an) * rr, yy = dyp + Math.sin(an) * rr * fl + u * 1.4; k ? c.lineTo(xx, yy) : c.moveTo(xx, yy); }
+        c.stroke();
+      }
+      /* Schaumflocken auf dem Außenring (drehen langsamer als die Arme) */
+      c.fillStyle = "rgba(232,246,236," + (0.7 * fDr).toFixed(2) + ")";
+      for (let k = 0, n = lo ? 3 : 7; k < n; k++) { const an = sp * 0.7 + k * TAU / n + Math.sin(k * 3.1) * 0.4, rr = R * (0.85 + 0.2 * Math.sin(k * 1.7 + t)); c.fillRect(dxp + Math.cos(an) * rr - 0.6, dyp + Math.sin(an) * rr * fl - 0.4, 1.3, 0.9); }
+      /* Auge */
+      c.fillStyle = "rgba(6,16,12," + (0.75 * fDr).toFixed(2) + ")"; c.beginPath(); c.ellipse(dxp, dyp + 1.3, 1.9, 0.8, 0, 0, TAU); c.fill();
     }
     /* Überlauf an den Kanten */
     for (const ov of td.over || []) {

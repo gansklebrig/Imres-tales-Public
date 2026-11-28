@@ -248,19 +248,31 @@
     c.save(); c.translate(x, y);
     const pulse = 0.5 + 0.5 * Math.sin(t * 2.2);
     for (let i = 0; i < 7; i++) { const a = i / 7 * Math.PI * 2, rx = Math.cos(a) * 22, ry = Math.sin(a) * 3; ell(c, rx, ry, 3, 2, "#c8b8a0"); ell(c, rx, ry - 1.4, 3.4, 1.6, "#a0506a"); }
-    limb(c, -1.5, -10, -2, 0, 3, "#d8ccb4"); limb(c, 1.5, -10, 2, 0, 3, "#d8ccb4");
-    poly(c, [-4, -8, 4, -8, 3, -20, -3, -20], "#e0d4bc");
-    limb(c, -3, -16, -7, -10 + Math.sin(t * 1.4) * 1, 1.4, "#d8ccb4"); limb(c, 3, -16, 7, -10 - Math.sin(t * 1.4) * 1, 1.4, "#d8ccb4");
-    ell(c, 0, -22, 11, 5.5, "#a0506a"); ell(c, 0, -23.5, 9, 3.4, "#c06a84");
-    for (const [a, b] of [[-5, -24], [3, -25], [6, -22], [-2, -21]]) circ(c, a, b, 1, "#f0d8e0");
-    circ(c, -1.6, -17, 0.8, "#2a1a20"); circ(c, 1.6, -17, 0.8, "#2a1a20");
+    /* W46 Optik: Stiel war reinweiß und flach (wirkte im dunklen Keller wie ausgeschnitten) – jetzt gedecktes Pilzbein mit
+       Schattenseite, Lamellen unter dem Hut, Hut mit Schattenkante; Augen glimmen schwach. */
+    c.save(); c.globalAlpha *= 0.3; ell(c, 0, 0.5, 9, 1.5, "#000"); c.restore();
+    limb(c, -1.5, -10, -2, 0, 3, "#a8987c"); limb(c, 1.5, -10, 2, 0, 3, "#8e7f66");
+    poly(c, [-4, -8, 4, -8, 3, -20, -3, -20], "#bcae92"); poly(c, [1, -8, 4, -8, 3, -20, 0.6, -20], "#9c8d72");
+    limb(c, -3.4, -11, 3.4, -11, 0.5, "rgba(80,60,50,.45)"); /* Ring am Stiel */
+    limb(c, -3, -16, -7, -10 + Math.sin(t * 1.4) * 1, 1.4, "#ad9e82"); limb(c, 3, -16, 7, -10 - Math.sin(t * 1.4) * 1, 1.4, "#94856a");
+    ell(c, 0, -20.6, 10, 2.6, "#5a3440"); /* Lamellen */
+    c.strokeStyle = "rgba(160,110,110,.55)"; c.lineWidth = 0.5; c.beginPath(); for (let i = -4; i <= 4; i++) { c.moveTo(i * 1.9, -20.2); c.lineTo(i * 1.2, -21.8); } c.stroke();
+    ell(c, 0, -22.4, 11, 5, "#8a4058"); ell(c, -0.6, -23.6, 9, 3.4, "#b05a76"); ell(c, -2.4, -24.6, 4.2, 1.4, "rgba(240,190,200,.35)");
+    for (const [a, b] of [[-5, -24], [3, -25], [6, -22.6], [-2, -22.4]]) circ(c, a, b, 1, "#e8ccd2");
+    const ey = st === "weg" ? 0.4 : 0.75 + 0.25 * pulse; circ(c, -1.6, -17, 0.8, "rgba(210,250,140," + ey.toFixed(2) + ")"); circ(c, 1.6, -17, 0.8, "rgba(210,250,140," + ey.toFixed(2) + ")");
     if (st !== "weg") glow(c, 0, -20, 16 + pulse * 6, "rgba(200,240,110," + (0.25 + 0.2 * pulse).toFixed(2) + ")");
     c.restore();
   }
   function drawSpore(c, o, t) {
     const b = Math.sin(t * 3 + o.x) * 2;
-    glow(c, o.x, o.y + b, 10, "rgba(220,255,140,.55)"); circ(c, o.x, o.y + b, 2.2, "#e8ff9a"); circ(c, o.x - 0.6, o.y + b - 0.6, 0.8, "#ffffff");
-    if (Z.addLight) Z.addLight(o.x, o.y, 40, "#d8f080", 0.4);
+    /* W46 Optik: Sporen waren in dunklen Gebieten nur ein matter Punkt – größerer Schein, zwei kreisende Pünktchen und
+       ein langsamer Lockring, damit man sie aus der Raummitte findet (ohne Pfeil oder Bildschirmrand-Hinweis). */
+    const pu = (t * 0.8 + o.x * 0.013) % 1;
+    glow(c, o.x, o.y + b, 15 + Math.sin(t * 4 + o.x) * 2, "rgba(220,255,140,.6)");
+    if (!off()) { c.strokeStyle = "rgba(220,255,150," + (0.45 * (1 - pu)).toFixed(2) + ")"; c.lineWidth = 1; c.beginPath(); c.arc(o.x, o.y + b, 4 + pu * 14, 0, 6.283); c.stroke(); }
+    for (let i = 0; i < 2; i++) { const a = t * 2.4 + i * Math.PI + o.x; circ(c, o.x + Math.cos(a) * 5, o.y + b + Math.sin(a) * 2.2, 0.7, "#f0ffc0"); }
+    circ(c, o.x, o.y + b, 2.6, "#e8ff9a"); circ(c, o.x - 0.7, o.y + b - 0.7, 0.9, "#ffffff");
+    if (Z.addLight) Z.addLight(o.x, o.y, 56, "#d8f080", 0.55);
   }
   function drawSpiegel(c, x, y, t, st) {
     c.save(); c.translate(x, y);
@@ -317,6 +329,18 @@
       const cx = e.x + e.w / 2, hy = e.y + 6, f = px.face;
       circ(c, cx + f * 2, hy, 0.9, "#ff4a5a"); circ(c, cx + f * 4.2, hy, 0.9, "#ff4a5a");
       if (!off()) { c.save(); c.globalCompositeOperation = "lighter"; glow(c, cx, e.y + e.h / 2, 20, "rgba(150,70,170,.38)"); c.restore(); }
+      /* W46 Optik: Vorwarnung des Bogen-Schattens war nur ein kleines, wegfliegendes „!“ (FX.text) – jetzt zusätzlich ein
+         festes, dunkel umrandetes violettes „!“ über dem Kopf und ein Glimmen an der Sehne, solange er zielt (letzte 0,45 s).
+         Schild-Schatten: kurzer violetter Schildbogen auf der Seite, die den Treffer abgefangen hat. */
+      if (schattenArt(e) === "ranged" && e.w38cd != null && e.w38cd > 0 && e.w38cd < 0.45 && Z.player) {
+        const ad = Math.abs(Z.player.x + Z.player.w / 2 - cx);
+        if (ad > 50 && ad < 280) {
+          const k = 1 - e.w38cd / 0.45, yy = e.y - 13 - k * 2;
+          c.save(); glow(c, cx, yy - 5, 9, "rgba(170,90,220,.55)"); c.font = "900 15px 'Alegreya Sans',sans-serif"; c.textAlign = "center"; c.lineWidth = 3; c.strokeStyle = "rgba(20,8,24,.85)"; c.strokeText("!", cx, yy); c.fillStyle = "#d8a8ff"; c.fillText("!", cx, yy); c.restore();
+          glow(c, cx + f * 7, e.y + 11, 6 + k * 6, "rgba(200,140,255,.7)");
+        }
+      }
+      if (e.w38blkT > 0) { const k = e.w38blkT / 0.22, bd = e.w38blkD || f; c.save(); c.globalCompositeOperation = "lighter"; c.strokeStyle = "rgba(200,144,255," + (0.8 * k).toFixed(2) + ")"; c.lineWidth = 2; c.beginPath(); c.arc(cx + bd * 3, e.y + e.h / 2, 13 + (1 - k) * 4, bd > 0 ? -1.1 : Math.PI - 1.1, bd > 0 ? 1.1 : Math.PI + 1.1); c.stroke(); c.restore(); e.w38blkT -= 1 / 60; }
       ok = true;
     });
     if (!ok) return de0.apply(this, arguments);
@@ -359,7 +383,7 @@
     if (tag && tag._w38blk) return he0.apply(this, arguments);
     if (e && e.w38schatten && !e.dead && typeof dmg === "number" && schattenArt(e) === "shield" && !e.act && !(o && (o.dot || o.fx))) {
       const dir = (o && o.dir) || (Z.player ? U.sign(e.x - Z.player.x) : 0);
-      if (dir && (e.face || 1) === -dir) { dmg *= 0.6; safe("block", () => { A.play("block", { vol: 0.4, rate: 0.9 }); FX.burst(e.x + e.w / 2 - dir * 6, e.y + 12, 5, { col: ["#c890ff", "#e8e0d8"], sp: 70, life: 0.2, size: 1.4, kind: "spark", add: true }); }); }
+      if (dir && (e.face || 1) === -dir) { dmg *= 0.6; e.w38blkT = 0.22; e.w38blkD = -dir; /* W46 Optik: Schildbogen (Zeichnen oben) */ safe("block", () => { A.play("block", { vol: 0.4, rate: 0.9 }); FX.burst(e.x + e.w / 2 - dir * 6, e.y + 12, 5, { col: ["#c890ff", "#e8e0d8"], sp: 70, life: 0.2, size: 1.4, kind: "spark", add: true }); }); }
     }
     const args = Array.prototype.slice.call(arguments); args[1] = dmg; /* strict: arguments folgt dmg nicht */
     if (!tag) return he0.apply(this, args);
