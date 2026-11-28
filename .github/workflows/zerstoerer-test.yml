@@ -42,8 +42,6 @@ jobs:
       ZS_PORT: "9230"
       ZS_PEER_PORT: "9431"
       ZS_BILDER: ${{ github.workspace }}/testbilder
-      ACORN_PFAD: ${{ runner.temp }}/werkzeug
-      ZS_PEER_MODUL: ${{ runner.temp }}/werkzeug/node_modules/peer
       PYTHONDONTWRITEBYTECODE: "1"
     steps:
       - uses: actions/checkout@v4
@@ -70,7 +68,10 @@ jobs:
 
       # acorn (ES2019-Prüfung) und peer (lokaler Vermittler für die Online-Tests) außerhalb des Repos
       - name: Prüfwerkzeuge holen
-        run: npm install --no-save --no-audit --no-fund --prefix "$RUNNER_TEMP/werkzeug" acorn@8 peer@1.0.2
+        run: |
+          echo "ACORN_PFAD=$RUNNER_TEMP/werkzeug" >> "$GITHUB_ENV"
+          echo "ZS_PEER_MODUL=$RUNNER_TEMP/werkzeug/node_modules/peer" >> "$GITHUB_ENV"
+          npm install --no-save --no-audit --no-fund --prefix "$RUNNER_TEMP/werkzeug" acorn@8 peer@1.0.2
 
       - name: Schnelltests (Syntax, ES2019, Dateiliste, Update-Logik)
         run: python tools/zerstoerer/tests/schnell.py
