@@ -761,6 +761,9 @@
       if (a.k === "heal" && !Z.enemies.some(o => !o.dead && o !== e && !o.def.boss && o.hp < o.hpMax * 0.7 && U.dist(o.x, o.y, e.x, e.y) < 260)) continue;
       /* W8: kein Angriff ohne Sichtlinie (gecacht aus der Wahrnehmung) – außer Beschwören/Heilen/Schild/Wachsen/Unsichtbar */
       if (!NOLOS[a.k] && !hasLos(e, P)) continue;
+      /* W52 Fairness: Fernangriffe (Schuss, Wurf, Salve, Netz, Strahl …) erst, wenn der Schütze im Bild steht (8 Einheiten Rand) – vorher
+         kamen ~5 % aller Treffer in Gebieten von Schützen außerhalb des Bildes. Bosse und Türme ausgenommen (feste Arenen/Plätze). */
+      if (FERN_W52[a.k] && !d.boss && d.ai !== "turret" && !imBildW52(e, P)) continue;
       opts.push(a);
     }
     if (!opts.length) return false;
@@ -770,6 +773,10 @@
     startAct(e, pick, P);
     return true;
   }
+  /* W52 Fairness: Sichtprüfung für Fernangriffe (Ausschnitt aus fairness.js: echte Kamera, ohne frische Kamera bzw. für den
+     Online-Gast ein gleich großer, an den Gebietsrand geklemmter Ausschnitt um das Ziel). */
+  const FERN_W52 = { shoot: 1, lob: 1, volley: 1, web: 1, beam: 1, spray: 1, thread: 1, pull: 1 };
+  function imBildW52(e, P) { return Z.fairSicht ? Z.fairSicht(e.x + e.w / 2, e.y + e.h * 0.4, P, 8) : true; }
   const NOLOS = { summon: 1, heal: 1, shield: 1, grow: 1, invis: 1, drum: 1, brace: 1, shell: 1, smoke: 1, evade: 1 };
   /* W9 (Abuse-Bot „sichere Stelle“): Wer hoch über reinen Nahkämpfern steht, die nicht hinaufkommen, und von dort schießt, war
      in ~1/4 der Fälle völlig ungefährdet. Jetzt: steht ein wacher Nahkämpfer 1,6 s ratlos darunter (Spieler ≥ 2,5 Kacheln höher,
@@ -1136,7 +1143,7 @@
     const d = e.def, tg = tgOf(a);
     let min = tg === 0 || d.boss ? 0 : AREA[a.k] ? 0.4 : MINPRE[tg];
     if (a.counter) min = 0.36;
-    if (tg === 1 && d.group && (d.hp || 1) < 0.6) min = 0.22;
+    if (tg === 1 && d.group && (d.hp || 1) < 0.6) min = 0.3; /* W52 Fairness: war 0,22 s – Ratten-Sprung traf mit 0,23 s Vorwarnung (1,6 % aller Gebietstreffer); jetzt wie alle Nahangriffe ≥ 0,3 s */
     ac.fast = ac.fast || 1;
     ac.pf = a.pre > 0 ? Math.max(ac.fast, min / a.pre) : ac.fast;
     if (tg && !d.boss && !(e.hidden > 0) && Z.cam) {

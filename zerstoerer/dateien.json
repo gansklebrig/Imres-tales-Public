@@ -9737,8 +9737,8 @@
 "sha256":"3ab7b7816ddadc9aa1ef272db3236698570d927a2f28af60f6ead1f3ac0a9320"
 },
 "zerstoerer.html":{
-"groesse":83828,
-"sha256":"4cae2673f8a5936484c74ff36de7df8a624b8d61b641638b262908b21a36b86e"
+"groesse":84035,
+"sha256":"ee684a8fb96254b420c0caff36ad3aca2ce7788ee01642accf1b1742746082bc"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":145504,
@@ -9820,6 +9820,10 @@
 "groesse":66476,
 "sha256":"320aae5f5b858479582d82daec61edc943877573b14f369fb0d277ebfc1cfd81"
 },
+"zerstoerer/fairness.js":{
+"groesse":10758,
+"sha256":"19b8b660d9aec3472bd7551e1e76c3a261d221e705ce0a76118649083382c041"
+},
 "zerstoerer/fallen.js":{
 "groesse":141074,
 "sha256":"2e761f3b67fc6ed08a2b3f1ecb4297c2e947eb041ecdc373515efdc3ae3dcc37"
@@ -9841,8 +9845,8 @@
 "sha256":"f4fd106407e5463901364f8cbe92a9c1494cb693e3628f3209f2ccd6f130c54e"
 },
 "zerstoerer/gegner.js":{
-"groesse":113894,
-"sha256":"b6f5f6c0eebdb791453f077c3918170049eef80762a3a09d222fa6428450e505"
+"groesse":114838,
+"sha256":"b8fea8a0c415d3be2e9ab27662af0f81c2bcaa4446528ccc7d8e61d47ac1a61e"
 },
 "zerstoerer/gegner2.js":{
 "groesse":23092,
@@ -10073,5 +10077,5 @@
 "sha256":"1437181731d4ecd8f93e72f72ee85ac181a09073b5a665fe44870f9a652104c0"
 }
 },
-"stand":201
+"stand":202
 }
