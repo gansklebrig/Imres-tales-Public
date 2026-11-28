@@ -21468,6 +21468,7 @@ function kaKleinkram(K,T,th,dec,DK,frei){const KK=window.__hsKK;if(KK.aus)return
 function kaKleinZusatz(K,T,th,DK,frei){const KK=window.__hsKK;if(KK.aus)return;const n=K.n,fl=K.fl;const put=(x,y,k,s)=>{if(frei(x,y,5)){DK(x,y,k,s||rnd(0.85,1.1));KK.n[k]=(KK.n[k]||0)+1}};
  const wald=T.mas==='wald',hoehle=T.mas==='fels',tot=th==='geisterdorf'||th==='wurzeldorf';
  for(const b of G.blk){if(!b.wl&&!b.kaPf)continue;
+  if(b.k==='baum'&&(b.art==='laub'||b.art==='weide'||!b.art)&&!tot&&Math.random()<0.35){const a=rnd(TAU);put(b.x+Math.cos(a)*rnd(8,26),b.y+Math.abs(Math.sin(a))*14+10,'kk_laub',rnd(1,1.4))}
   if(b.k==='baum'&&Math.random()<0.4){const a=rnd(TAU),d=b.r+rnd(14,30);put(b.x+Math.cos(a)*d,b.y+Math.abs(Math.sin(a))*d*0.6+10,tot?'ash':pick(['kk_farn','kk_farn','mush','kk_stumpf','grass']))}
   else if(b.k==='fels'&&Math.random()<0.35){const a=rnd(TAU),d=b.r+rnd(6,18);put(b.x+Math.cos(a)*d,b.y+Math.abs(Math.sin(a))*d*0.5+8,wald?pick(['moss','grass','kk_farn']):'kk_kiesel')}
   else if(b.k==='stalag'&&hoehle&&th!=='glutgang'&&th!=='hort'&&Math.random()<0.22)put(b.x+rnd(-6,6),b.y+b.r+8,'kk_pfuetze',rnd(0.8,1.2))
@@ -21478,6 +21479,8 @@ function kaKleinZusatz(K,T,th,DK,frei){const KK=window.__hsKK;if(KK.aus)return;c
  /* Lichtungen: Blumen in offenen Wiesenzellen */
  if(wald&&!tot)for(let q=0,m=Math.round(fl.length/220);q<m;q++){const c=fl[(Math.random()*fl.length)|0],x=kaW(c%n),y=kaW((c/n)|0);if(K.tore.some(t=>Math.hypot(t.x-x,t.y-y)<120))continue;for(let r=0,k=ri(3,6);r<k;r++)put(x+rnd(-40,40),y+rnd(-26,26),r%3===2?'grass':'kk_blumen')}
  if(hoehle&&th!=='glutgang'&&th!=='hort')for(let q=0,m=Math.round(fl.length/300);q<m;q++){const c=fl[(Math.random()*fl.length)|0];put(kaW(c%n)+rnd(-12,12),kaW((c/n)|0)+rnd(-12,12),'kk_kiesel')}
+ /* Hexenring: ein Pilzkreis auf einer ruhigen Lichtung (selten) */
+ if(wald&&!tot&&Math.random()<0.7)for(let t=0;t<40;t++){const c=fl[(Math.random()*fl.length)|0];const x=kaW(c%n),y=kaW((c/n)|0);if(K.tore.some(q=>Math.hypot(q.x-x,q.y-y)<300)||!frei(x,y,70))continue;const m=ri(9,13),R=rnd(42,56);for(let q=0;q<m;q++){const a=q/m*TAU+rnd(-0.08,0.08);put(x+Math.cos(a)*R,y+Math.sin(a)*R*0.62,'mush',rnd(0.7,0.95))}put(x,y,'kk_blumen',1);KK.hexe=(KK.hexe||0)+1;break}
  /* Wegweiser vor den Haupttoren draußen und in Dörfern */
  if(T.mas==='wald'||T.mas==='haus')for(const t of K.tore){if(!t.main||Math.random()<0.35)continue;const u=kaRichtung(t),sx=t.hor?0:1,sy=t.hor?1:0,sg=Math.random()<0.5?1:-1;const x=t.x+u.x*95+sx*sg*(t.w/2+26),y=t.y+u.y*95+sy*sg*(t.w/2+26);if(frei(x,y,12)){DK(x,y,'kk_schild',1);G.deco[G.deco.length-1].a=Math.atan2(u.y,u.x)}}
  /* Ufer: Schilf und Steine am Wasser, Asche und Schlacke an der Lava */
@@ -21516,6 +21519,7 @@ function kaKleinZusatz(K,T,th,DK,frei){const KK=window.__hsKK;if(KK.aus)return;c
   case'kk_gleis':{c.rotate(d.a||0);for(const x of [-9,1,11]){c.fillStyle='#3e2e20';c.fillRect(x-2.6,-9,5.2,18);c.fillStyle='#4e3a28';c.fillRect(x-2.6,-9,5.2,3)}c.fillStyle='rgba(0,0,0,.3)';c.fillRect(-15,-6,30,2.4);c.fillRect(-15,5,30,2.4);c.fillStyle='#5a5652';c.fillRect(-15,-7,30,2);c.fillRect(-15,4,30,2);c.fillStyle='rgba(220,210,190,.22)';c.fillRect(-15,-7,30,0.7);c.fillRect(-15,4,30,0.7);if(v>0.7){ell(c,4,9,2,1,'#5e5850')}}break;
   case'kk_schild':{ell(c,0,10,7,2.2,'rgba(0,0,0,.3)');ln(c,'#3e2c1c',3,0,10,0,-20);ln(c,'#5a4028',1,-0.8,9,-0.8,-19);const dx=Math.cos(d.a||0)>=0?1:-1;
    const brett=(y,r)=>{c.save();c.translate(0,y);c.scale(r,1);poly(c,'#6a4c30',-2,-3.5,13,-3.5,17,0,13,3.5,-2,3.5);poly(c,'#7a5a38',-2,-3.5,13,-3.5,15,-1.5,-2,-1.5);ln(c,'#4a3420',0.6,1,0,11,0);c.restore()};brett(-16,dx);brett(-8,-dx*0.85);circ(c,0,-16,0.9,'#3a3a3e');circ(c,0,-8,0.9,'#3a3a3e')}break;
+  case'kk_laub':{const F=['#8a5a24','#a8742c','#6e4a22','#b88a3a','#7a3a1e'];for(let q=0;q<9;q++){const x=((q*31+v*80)%28)-14,y=((q*17+v*44)%10)-5,a=q*1.3+v*5;c.save();c.translate(x,y);c.rotate(a);ell(c,0,0,2.4,1.2,F[(q+((v*7)|0))%5]);c.restore()}}break;
   case'kk_stroh':ell(c,0,4,15,4.5,'#8a7a3a');ell(c,-1,2.5,12,3.4,'#a8964a');for(let q=0;q<9;q++){const x=-12+q*3,a=((q*31+v*50)%10)/10-0.5;ln(c,q%2?'#c8b460':'#b8a250',0.8,x,4,x+a*8,0)}break;
  }}finally{c.restore()}}}
 
