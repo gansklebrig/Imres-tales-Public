@@ -14268,7 +14268,7 @@ const MF={busy:0,cache:{},swipe:null};
 .startbar.mfsbo .mfsbt{flex-basis:100%}
 `;document.head.appendChild(st)}catch(e){}})();
 
-function mfMob(){try{return matchMedia('(pointer:coarse)').matches||innerWidth<700}catch(e){return false}}
+let MFMQ=null;function mfMob(){try{/* Abfrage einmal anlegen statt in jedem Bild neu (matchMedia legt sonst jedes Mal ein Objekt an) */if(!MFMQ)MFMQ=matchMedia('(pointer:coarse)');return MFMQ.matches||innerWidth<700}catch(e){return false}}
 /* Untergrenze des Zooms: Grundtext 12 px am PC, 11 px am Handy (Fließtext ist 13–15 px) */
 function mfZMin(){return mfMob()?0.9:1}
 function mfHosts(){const L=[scr];try{for(const g of LM.panes)if(g.vm&&g.vm.el&&g.vm.el.isConnected)L.push(g.vm.el)}catch(e){}return L.filter(h=>h&&!h.hidden)}
@@ -23016,6 +23016,13 @@ function ulUmschalten(on){
  try{document.documentElement.classList.toggle('ultra',on)}catch(e){}
  ULS.m.clear();ULP.gen++;ULB.cv=null;ULB.key='';ULN.m.clear();try{KAT.key=''}catch(e){}try{PFH.m.clear()}catch(e){}try{RGDK.clear()}catch(e){}
  try{if(G)G.ultra=on}catch(e){}}
+/* Schwache Geräte im Browser: Bleibt das Spiel trotz „Minimal“ und kleinster Auflösung dauerhaft unter ≈ 28 Bildern je Sekunde
+   (gemessen im Spiel, mehrere Prüfungen hintereinander), schaltet die Automatik „Ultra leicht“ für diese Sitzung zu – das rechnet
+   nur noch ein Drittel so viel (Messung bei vierfach gebremster CPU: 21 statt 7 ms Rechenzeit je Bild). Nur bei Grafik „Auto“ und wenn
+   „Ultra leicht“ nicht ausdrücklich abgeschaltet ist; einmalig mit Hinweis. */
+{let ulN=0;const _uw=ulWunsch;ulWunsch=function(){const r=_uw.apply(this,arguments);if(r)return r;try{if(RG2.ulAuto&&SAVE.ultra!==false&&(SAVE.gfx==='auto'||SAVE.gfx===undefined)&&!/[?&]ultraaus\b/.test(location.search||''))return true}catch(e){}return r};
+ const _fw=fpsWatch;fpsWatch=function(){const t0=FW.t;const r=_fw.apply(this,arguments);try{if(FW.t===0&&t0>0&&!UL.on&&!RG2.ulAuto&&!G.bot&&G.state==='play'&&!G.paused&&!document.hidden&&(SAVE.gfx==='auto'||SAVE.gfx===undefined)&&SAVE.ultra!==false){
+   const minR=MOBIL?0.55:0.5;if(GAUTO===0&&RSC<=minR+0.01&&FPSNOW<28){if(++ulN>=4){RG2.ulAuto=true;ulCalc();resize();try{toast('Das Gerät kommt nicht hinterher – „Ultra leicht“ ist für diese Sitzung an (Optionen → Grafik).','#e9d7a5')}catch(e){}}}else ulN=0}}catch(e){}return r}}
 /* Grafikstufe: Ultra schaltet Spargrafik und Minimal mit ein */
 {const _a=rgSparAn;rgSparAn=function(){return UL.on||_a.apply(this,arguments)}}
 {const _ss=rgSparSet;rgSparSet=function(){try{ulCalc()}catch(e){}return _ss.apply(this,arguments)}}
