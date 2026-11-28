@@ -2122,9 +2122,9 @@
         const txt = dx().patzt(erName(), ep.n);
         g.globalAlpha = a; g.font = "italic 600 " + (14 * dpr) + "px Georgia, serif"; g.textAlign = "center";
         const tb = g.measureText(txt).width + 22 * dpr;
-        g.fillStyle = "rgba(16,14,21,.82)"; g.strokeStyle = "rgba(127,178,255,.55)"; g.lineWidth = 1 * dpr;
+        g.fillStyle = "rgba(16,14,21,.82)"; g.strokeStyle = "rgba(52,199,138,.55)"; g.lineWidth = 1 * dpr;
         g.beginPath(); g.roundRect ? g.roundRect(w / 2 - tb / 2, 31 * dpr, tb, 22 * dpr, 11 * dpr) : g.rect(w / 2 - tb / 2, 31 * dpr, tb, 22 * dpr); g.fill(); g.stroke();
-        g.fillStyle = "#7fb2ff"; g.textBaseline = "middle"; g.fillText(txt, w / 2, 42 * dpr); g.textBaseline = "alphabetic"; g.globalAlpha = 1;
+        g.fillStyle = "#34c78a"; g.textBaseline = "middle"; g.fillText(txt, w / 2, 42 * dpr); g.textBaseline = "alphabetic"; g.globalAlpha = 1;
       }
     }
     if (!spiel.pause && jetzt > spiel.daten.ende) { beenden(); return; }
@@ -3118,7 +3118,7 @@
     const eigen = canvas(); if (eigen && eigen.offsetHeight && Math.abs(c.offsetHeight - eigen.offsetHeight) > 1) c.style.height = eigen.offsetHeight + "px";
     const { w, h, dpr } = maße(c), g = c.getContext("2d"), jetzt = jetztIch - ER_VERZUG, e = duell.erSpur || { status: new Map(), fehl: [] };
     g.clearRect(0, 0, w, h);
-    const bahn = w / 3, y = h * .82, flug = spiel.st.flug, liste = duell.vor.daten.liste, blau = "127,178,255";
+    const bahn = w / 3, y = h * .82, flug = spiel.st.flug, liste = duell.vor.daten.liste, gruen = "52,199,138";
     /* Patzer des Gegners: verpasste Note oder Fehlgriff – kurz rot, ein dumpfer Ton und ein Hinweis auf der eigenen Bühne */
     e.gemeldet = e.gemeldet || new Set(); e.patzer = e.patzer || [];
     const patzer = (schluessel, spur) => { if (e.gemeldet.has(schluessel)) return; e.gemeldet.add(schluessel); if (jetztIch < 0) return;
@@ -3129,16 +3129,16 @@
     if (e.patzer.length > 20) e.patzer.splice(0, e.patzer.length - 20);
     const blitz = [0, 0, 0];
     for (let i = 0; i < 3; i++) {
-      const grad = g.createLinearGradient(0, 0, 0, h); grad.addColorStop(0, "rgba(" + blau + ",0.02)"); grad.addColorStop(1, "rgba(" + blau + ",0.07)");
+      const grad = g.createLinearGradient(0, 0, 0, h); grad.addColorStop(0, "rgba(" + gruen + ",0.02)"); grad.addColorStop(1, "rgba(" + gruen + ",0.07)");
       g.fillStyle = grad; g.fillRect(i * bahn + 2 * dpr, 0, bahn - 4 * dpr, h);
     }
     /* Treffer-Leuchten und Fehlgriffe der letzten Augenblicke */
     liste.forEach((n, i) => { const st = e.status.get(i); if (st && st.art) { const dt = jetzt - n.zeit; if (dt >= 0 && dt < .3) blitz[n.spur] = Math.max(blitz[n.spur], 1 - dt / .3); } });
     blitz.forEach((b, i) => { if (b > 0) { g.fillStyle = "rgba(255,210,122," + (.22 * b) + ")"; g.fillRect(i * bahn + 2 * dpr, 0, bahn - 4 * dpr, h); } });
     e.patzer.forEach(f => { const dt = jetzt - f.t; if (dt >= 0 && dt < .45) { g.fillStyle = "rgba(196,86,74," + (.38 * (1 - dt / .45)) + ")"; g.fillRect(f.spur * bahn + 2 * dpr, 0, bahn - 4 * dpr, h); } });
-    g.strokeStyle = "rgba(" + blau + ",.9)"; g.lineWidth = 3 * dpr; g.shadowColor = "rgba(" + blau + ",.8)"; g.shadowBlur = 10 * dpr;
+    g.strokeStyle = "rgba(" + gruen + ",.9)"; g.lineWidth = 3 * dpr; g.shadowColor = "rgba(" + gruen + ",.8)"; g.shadowBlur = 10 * dpr;
     g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); g.shadowBlur = 0;
-    for (let i = 0; i < 3; i++) { g.strokeStyle = "rgba(" + blau + ",.5)"; g.lineWidth = 2 * dpr; g.beginPath(); g.arc(i * bahn + bahn / 2, y, 16 * dpr, 0, Math.PI * 2); g.stroke(); }
+    for (let i = 0; i < 3; i++) { g.strokeStyle = "rgba(" + gruen + ",.5)"; g.lineWidth = 2 * dpr; g.beginPath(); g.arc(i * bahn + bahn / 2, y, 16 * dpr, 0, Math.PI * 2); g.stroke(); }
     const r = Math.min(17 * dpr, bahn * .22);
     liste.forEach((n, i) => {
       const st = e.status.get(i) || {}, vorbei = n.zeit < jetzt - FENSTER.knapp - .25;
@@ -3168,7 +3168,7 @@
       g.fillStyle = letzt.art === "perfekt" ? "#ffd27a" : "#ebe2cc"; g.fillText(t().urteil[letzt.art], letzt.n.spur * bahn + bahn / 2, y - 36 * dpr - (1 - a) * 16 * dpr); g.globalAlpha = 1;
     }
     const er = duell.er.stand;
-    g.fillStyle = "rgba(" + blau + ",1)"; g.textAlign = "left"; g.font = "600 " + (14 * dpr) + "px Georgia, serif";
+    g.fillStyle = "rgba(" + gruen + ",1)"; g.textAlign = "left"; g.font = "600 " + (14 * dpr) + "px Georgia, serif";
     g.fillText(erName(), 10 * dpr, 22 * dpr);
     g.fillStyle = "#ebe2cc"; g.font = (13 * dpr) + "px Georgia, serif";
     if (er) { g.fillText(er.p + " " + t().punkte, 10 * dpr, 40 * dpr); if (er.s >= 5) { g.textAlign = "right"; g.fillStyle = "#e0a046"; g.fillText(t().serie(er.s), w - 10 * dpr, 22 * dpr); } }
@@ -3223,7 +3223,7 @@
 .at-zwei { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: .5rem; max-width: 62.5rem; width: 100%; margin: 0 auto; align-items: start; }
 .at-zwei .at-buehne { max-width: none; margin: 0; }
 .at-er { min-width: 0; }
-.at-canvas-er { display: block; width: 100%; height: clamp(300px, 52vw, 400px); background: radial-gradient(ellipse at 50% 90%, rgba(127,178,255,.1), transparent 70%), rgba(16,14,21,.7); border: 1px solid rgba(127,178,255,.4); pointer-events: none; }
+.at-canvas-er { display: block; width: 100%; height: clamp(300px, 52vw, 400px); background: radial-gradient(ellipse at 50% 90%, rgba(52,199,138,.1), transparent 70%), rgba(16,14,21,.7); border: 1px solid rgba(52,199,138,.4); pointer-events: none; }
 @media (min-width: 900px) { .at-zwei { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 .auftritt.at-im-duell .at-duell-bar { max-width: 62.5rem; }
 .at-duell-text { margin: 0; flex-basis: 100%; text-align: center; font-family: var(--name); font-size: 1.05rem; color: var(--vellum); }
@@ -3234,7 +3234,7 @@
 .at-db { padding: .3rem .55rem; border: 1px solid var(--line); background: rgba(16,14,21,.7); color: var(--ash); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .at-db b { color: var(--vellum); font-weight: 600; }
 .at-db.ich { border-color: rgba(224,160,70,.55); }
-.at-db.er { border-color: rgba(127,178,255,.5); text-align: right; }
+.at-db.er { border-color: rgba(52,199,138,.5); text-align: right; }
 .at-db em { font-style: normal; color: var(--ember); }
 .at-db .at-db-serie { color: #ffd27a; }
 .at-db .at-db-pause { color: #e08a7e; }
