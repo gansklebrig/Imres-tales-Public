@@ -792,6 +792,207 @@
       wetter: ["tropfen", "nebel", "klar"],
       licht: [{ o: [20, 40, 30, 0.12], u: [60, 120, 40, 0.1] }, { o: [40, 20, 50, 0.16], u: [90, 60, 120, 0.12] }],
       lagen: { form: "stein", rand: "rgba(156,255,90,.18)", farben: ["#16121a", "#100d14", "#0a080d"] }
+    },
+    /* Kapitel XIII: das Dorf der Riesen am Rand von Gracklstugh – Steinbruch, riesige Hütten, Hgraams leuchtender Kristall */
+    riesendorf: {
+      partikel: "staub", unten: true,
+      varianten: r => ({ kristall: r() < 0.5 ? 128 : 272, kran: r() < 0.5 ? 1 : -1, risse: [0, 1, 2, 3].map(() => 70 + r() * 260), fenster: [0, 1, 2].map(() => r() < 0.7) }),
+      fern(x, r) {
+        himmel(x, [[0, "#070605"], [0.4, "#16110d"], [0.7, "#2a1d14"], [1, "#0e0a08"]]);
+        hoehlenDecke(x, r, "#050404", 50);
+        /* hohe Bruchwand mit Abbaustufen */
+        for (let k = 0; k < 4; k++) {
+          const y0 = 100 + k * 44; x.fillStyle = ["#1e1712", "#231a14", "#281e16", "#2c2118"][k];
+          x.beginPath(); x.moveTo(0, y0 + 8); for (let px = 0; px <= W; px += 26) x.lineTo(px, y0 + (r() - 0.5) * 8); x.lineTo(W, H); x.lineTo(0, H); x.fill();
+          x.strokeStyle = "rgba(255,190,120,.07)"; x.lineWidth = 1; x.beginPath(); x.moveTo(0, y0); x.lineTo(W, y0 + (r() - 0.5) * 6); x.stroke();
+        }
+        /* Meißelspuren und Erzadern */
+        for (let i = 0; i < 40; i++) { x.strokeStyle = "rgba(0,0,0,.25)"; x.lineWidth = 1; const px = r() * W, py = 110 + r() * 160; x.beginPath(); x.moveTo(px, py); x.lineTo(px + 4, py + 8); x.stroke(); }
+        for (let i = 0; i < 6; i++) { const px = r() * W, py = 120 + r() * 140; x.strokeStyle = "rgba(90,200,170,.14)"; x.lineWidth = 1.2; x.beginPath(); x.moveTo(px, py); x.lineTo(px + 10, py + 6); x.lineTo(px + 16, py + 3); x.stroke(); }
+        glow(x, 200, 260, 220, "rgba(255,150,70,.1)");
+      },
+      mitte(x, r, v) {
+        /* riesige Steinhütten: Türen so hoch wie drei Zwerge */
+        const huette = (px, py, w, h, dunkel, fenster) => {
+          x.fillStyle = dunkel; x.fillRect(px - w / 2, py - h, w, h);
+          x.beginPath(); x.moveTo(px - w / 2 - 8, py - h); x.lineTo(px, py - h - h * 0.35); x.lineTo(px + w / 2 + 8, py - h); x.closePath(); x.fill();
+          x.strokeStyle = "rgba(0,0,0,.4)"; x.lineWidth = 1;
+          for (let yy = py - h + 8; yy < py; yy += 12) for (let xx = px - w / 2 + ((yy / 12) % 2) * 9; xx < px + w / 2; xx += 18) x.strokeRect(xx, yy, 18, 12);
+          x.fillStyle = "#0a0807"; x.beginPath(); x.moveTo(px - w * 0.16, py); x.lineTo(px - w * 0.16, py - h * 0.55); x.quadraticCurveTo(px, py - h * 0.7, px + w * 0.16, py - h * 0.55); x.lineTo(px + w * 0.16, py); x.fill();
+          if (fenster) { x.fillStyle = "rgba(255,160,70,.75)"; x.fillRect(px + w * 0.25, py - h * 0.7, 8, 10); }
+        };
+        huette(70, 262, 92, 92, "#1e1813", v.fenster[0]);
+        huette(330, 266, 98, 100, "#1c1612", v.fenster[1]);
+        huette(200, 226, 70, 66, "#16110d", v.fenster[2]);
+        /* Kran aus Baumstämmen mit Seil und Steinblock */
+        const kx = v.kran > 0 ? 262 : 138;
+        x.strokeStyle = "#2a1e14"; x.lineWidth = 6; x.beginPath(); x.moveTo(kx, 290); x.lineTo(kx, 140); x.lineTo(kx + v.kran * 70, 150); x.stroke();
+        x.lineWidth = 3; x.beginPath(); x.moveTo(kx, 170); x.lineTo(kx + v.kran * 40, 150); x.stroke();
+        /* gestapelte Quader */
+        [[24, 290, 34, 20], [56, 292, 28, 18], [36, 272, 26, 18], [360, 292, 34, 20], [378, 274, 22, 16]].forEach(([px, py, w, h]) => {
+          x.fillStyle = "#2e251d"; x.fillRect(px - w / 2, py - h, w, h); x.fillStyle = "rgba(255,255,255,.05)"; x.fillRect(px - w / 2, py - h, w, 3);
+        });
+        /* Riesenspitzhacke an der Wand */
+        x.strokeStyle = "#3a2a1c"; x.lineWidth = 5; x.beginPath(); x.moveTo(150, 290); x.lineTo(176, 214); x.stroke();
+        x.fillStyle = "#5a5652"; x.beginPath(); x.moveTo(160, 212); x.quadraticCurveTo(178, 200, 200, 210); x.lineTo(196, 214); x.quadraticCurveTo(178, 208, 164, 218); x.closePath(); x.fill();
+        /* Hgraams Steinsprecher-Kristall in einer Nische */
+        x.fillStyle = "#0c0908"; x.beginPath(); x.arc(v.kristall, 150, 16, Math.PI, 0); x.lineTo(v.kristall + 16, 174); x.lineTo(v.kristall - 16, 174); x.fill();
+        x.fillStyle = "#ffb060"; x.beginPath(); x.moveTo(v.kristall, 143); x.lineTo(v.kristall + 6, 156); x.lineTo(v.kristall, 170); x.lineTo(v.kristall - 6, 156); x.closePath(); x.fill();
+        /* Schienen für die Erzwagen */
+        x.strokeStyle = "#2a2018"; x.lineWidth = 2; x.beginPath(); x.moveTo(0, 292); x.lineTo(W, 288); x.moveTo(0, 298); x.lineTo(W, 294); x.stroke();
+      },
+      deko(x, t, u) {
+        const v = u.v;
+        /* Kristall glimmt warm (Hgraams Geschenk) */
+        glow(x, v.kristall, 156, 30 + Math.sin(t * 1.3) * 4, "rgba(255,160,70," + (0.3 + 0.12 * Math.sin(t * 1.3)).toFixed(3) + ")");
+        /* Steinblock am Kran pendelt */
+        const kx = v.kran > 0 ? 262 : 138, ax = kx + v.kran * 66, w = Math.sin(t * 0.8) * 0.12, ex = ax + Math.sin(w) * 60, ey = 150 + Math.cos(w) * 60;
+        x.strokeStyle = "#4a3a28"; x.lineWidth = 1.2; x.beginPath(); x.moveTo(ax, 150); x.lineTo(ex, ey); x.stroke();
+        x.fillStyle = "#2e251d"; x.fillRect(ex - 12, ey, 24, 16); x.fillStyle = "rgba(255,255,255,.06)"; x.fillRect(ex - 12, ey, 24, 3);
+        /* der Boden zittert: Staub rieselt von der Decke, wenn ein Riese vorbeistapft */
+        const schritt = (t * 0.5) % 1;
+        if (schritt < 0.08) for (let i = 0; i < 4; i++) { const px = (i * 97 + Math.floor(t * 0.5) * 53) % W; x.fillStyle = "rgba(168,150,130,.5)"; x.fillRect(px, 50 + schritt * 300, 1.5, 4); }
+        /* Fenster der Riesenhütten flackern */
+        [[70 + 92 * 0.25 + 4, 262 - 92 * 0.7 + 5, 0], [330 + 98 * 0.25 + 4, 266 - 100 * 0.7 + 5, 1], [200 + 70 * 0.25 + 4, 226 - 66 * 0.7 + 5, 2]].forEach(([px, py, i]) => { if (v.fenster[i]) glow(x, px, py, 18, "rgba(255,150,60," + (0.18 + 0.08 * Math.sin(t * 5 + i)).toFixed(3) + ")"); });
+        /* ein ferner Riese schiebt einen Wagen hinten vorbei (Silhouette) */
+        const g = (t * 0.03) % 1, gx = -80 + g * 560, gy = 232;
+        x.fillStyle = "rgba(10,8,7,.75)";
+        x.beginPath(); x.ellipse(gx, gy - 46, 12, 22, 0.2, 0, PI2); x.fill(); x.beginPath(); x.arc(gx - 6, gy - 74, 8, 0, PI2); x.fill();
+        x.fillRect(gx - 50, gy - 26, 32, 16); x.beginPath(); x.arc(gx - 44, gy - 8, 5, 0, PI2); x.arc(gx - 24, gy - 8, 5, 0, PI2); x.fill();
+        x.fillRect(gx - 8 + Math.sin(t * 4) * 3, gy - 26, 6, 26); x.fillRect(gx + 4 - Math.sin(t * 4) * 3, gy - 26, 6, 26);
+        /* Risse im Fels glühen, wenn der Stein schreit */
+        if (u.welle) v.risse.forEach((px, i) => { const a = Math.max(0, Math.sin(t * 2 + i * 1.7)) ** 3; if (a > 0.05) { x.strokeStyle = "rgba(255,120,60," + (0.5 * a).toFixed(2) + ")"; x.lineWidth = 1.5; x.beginPath(); x.moveTo(px, 120 + i * 30); x.lineTo(px + 6, 132 + i * 30); x.lineTo(px + 2, 144 + i * 30); x.stroke(); } });
+        haenger(x, v.h, t, u.wind);
+      },
+      haenger: r => { const l = []; for (let i = 0; i < 2; i++) l.push({ x: 110 + i * 180 + r() * 30, y: 30 + r() * 20, l: 34 + r() * 30, art: "laterne", f: 0.7 + r(), ph: r() * 6 }); return l; },
+      wetter: ["staubfall", "klar", "staubfall"],
+      licht: [{ o: [90, 60, 30, 0.06], u: [60, 30, 10, 0.08] }, { o: [120, 40, 20, 0.1], u: [90, 30, 10, 0.12] }],
+      lagen: { form: "stein", rand: "rgba(255,190,120,.14)", farben: ["#231b15", "#1b1510", "#130f0b"] }
+    },
+    /* Kapitel XIV: hinter dem großen Stein der Gang der Bewahrer – mit jedem Schritt heißer, Lava in Rinnen, Flammenbecken */
+    flammenweg: {
+      partikel: "glut", unten: true,
+      varianten: r => ({ becken: [70, 200, 330].map(px => px + (r() - 0.5) * 20), zeichen: r() < 0.5 ? 120 : 280, banner: zuf(r, ["#7a1a10", "#8a2216", "#6a140c"]) }),
+      fern(x, r) {
+        himmel(x, [[0, "#0a0403"], [0.4, "#24100a"], [0.65, "#4a1c0c"], [1, "#1a0a06"]]);
+        hoehlenDecke(x, r, "#060302", 44);
+        /* gewaltiger Torbogen, der tiefer hinab führt */
+        x.fillStyle = "#140a06";
+        x.beginPath(); x.moveTo(90, 300); x.lineTo(90, 150); x.quadraticCurveTo(200, 50, 310, 150); x.lineTo(310, 300); x.fill();
+        const g = x.createRadialGradient(200, 250, 10, 200, 230, 140); g.addColorStop(0, "rgba(255,190,90,.7)"); g.addColorStop(0.5, "rgba(255,100,40,.35)"); g.addColorStop(1, "rgba(80,20,10,0)");
+        x.fillStyle = g; x.beginPath(); x.moveTo(120, 300); x.lineTo(120, 165); x.quadraticCurveTo(200, 90, 280, 165); x.lineTo(280, 300); x.fill();
+        /* Treppenstufen ins Glühen */
+        for (let k = 0; k < 7; k++) { x.fillStyle = "rgba(20,8,4," + (0.85 - k * 0.1).toFixed(2) + ")"; x.fillRect(130 + k * 6, 286 - k * 12, 140 - k * 12, 5); }
+        /* Säulen mit Drachenköpfen */
+        [40, 360].forEach(px => {
+          x.fillStyle = "#1a0d08"; x.fillRect(px - 16, 90, 32, 210);
+          x.beginPath(); x.moveTo(px - 22, 92); x.lineTo(px + 22, 92); x.lineTo(px + 16, 80); x.lineTo(px - 16, 80); x.fill();
+          x.fillStyle = "#2a140c"; x.beginPath(); x.moveTo(px - 12, 100); x.quadraticCurveTo(px, 84, px + 12, 100); x.lineTo(px + 6, 116); x.lineTo(px - 6, 116); x.fill();
+        });
+      },
+      mitte(x, r, v) {
+        /* Lavarinne quer über den Boden hinten */
+        const lg = x.createLinearGradient(0, 284, 0, 298); lg.addColorStop(0, "#ffd890"); lg.addColorStop(0.35, "#ff8a30"); lg.addColorStop(1, "#6a180a");
+        x.fillStyle = lg; x.fillRect(0, 288, W, 10);
+        x.fillStyle = "rgba(40,12,6,.75)"; for (let i = 0; i < 16; i++) x.fillRect(r() * W, 289 + r() * 6, 6 + r() * 16, 2);
+        /* Flammenbecken auf Steinsockeln */
+        v.becken.forEach(px => {
+          x.fillStyle = "#1e100a"; x.fillRect(px - 8, 248, 16, 36); x.fillRect(px - 14, 280, 28, 6);
+          x.fillStyle = "#3a2214"; x.beginPath(); x.moveTo(px - 18, 248); x.lineTo(px + 18, 248); x.lineTo(px + 12, 258); x.lineTo(px - 12, 258); x.closePath(); x.fill();
+        });
+        /* Banner der Bewahrer mit goldenem Zeichen */
+        [60, 340].forEach(px => {
+          x.fillStyle = v.banner; x.beginPath(); x.moveTo(px - 14, 130); x.lineTo(px + 14, 130); x.lineTo(px + 14, 200); x.lineTo(px, 190); x.lineTo(px - 14, 200); x.closePath(); x.fill();
+          x.strokeStyle = "rgba(224,178,74,.8)"; x.lineWidth = 1.4; x.beginPath(); x.arc(px, 158, 7, 0, PI2); x.stroke();
+          x.beginPath(); x.moveTo(px, 165); x.quadraticCurveTo(px - 5, 158, px, 151); x.quadraticCurveTo(px + 5, 158, px, 165); x.stroke();
+        });
+        /* der große Stein, hinter dem der geheime Eingang lag – zur Seite gerollt */
+        const sx = v.zeichen;
+        x.fillStyle = "#24160e"; x.beginPath(); x.ellipse(sx, 272, 34, 24, 0.1, 0, PI2); x.fill();
+        x.fillStyle = "rgba(255,255,255,.05)"; x.beginPath(); x.ellipse(sx - 8, 262, 16, 8, 0.1, 0, PI2); x.fill();
+      },
+      deko(x, t, u) {
+        const v = u.v;
+        /* Flammen in den Becken */
+        v.becken.forEach((px, i) => feuer(x, px, 248, 0.9, t + i, u.wind * 0.2));
+        /* Lava blubbert in der Rinne */
+        glow(x, 200, 292, 220, "rgba(255,120,40," + (0.12 + 0.05 * Math.sin(t * 1.6)).toFixed(3) + ")");
+        for (let i = 0; i < 7; i++) { const ph = (t * 0.5 + i / 7) % 1, px = (i * 61 + 23) % W; x.fillStyle = "rgba(255,210,120," + (0.85 * (1 - ph)).toFixed(2) + ")"; x.beginPath(); x.arc(px, 291 - ph * 8, 1.4 + ph * 2.4, 0, 7); x.fill(); }
+        /* Hitzeflimmern über allem */
+        x.save(); x.globalAlpha = 0.03;
+        for (let k = 0; k < 6; k++) { const yy = 170 + k * 22, off = Math.sin(t * 3 + k) * 3; x.fillStyle = "#ffb070"; x.fillRect(0, yy + off, W, 1.5); }
+        x.restore();
+        /* Glut aus dem Tor zieht nach oben */
+        for (let i = 0; i < 5; i++) { const ph = (t * 0.35 + i / 5) % 1; x.fillStyle = "rgba(255,180,90," + (0.6 * (1 - ph)).toFixed(2) + ")"; x.fillRect(180 + Math.sin(t + i * 2) * 30, 260 - ph * 180, 2, 2); }
+        if (u.welle) glow(x, 200, 200, 200, "rgba(255,80,30," + (0.05 + 0.04 * Math.max(0, Math.sin(t * 2))).toFixed(3) + ")");
+        haenger(x, v.h, t, u.wind);
+      },
+      haenger: r => { const l = []; for (let i = 0; i < 2; i++) l.push({ x: 140 + i * 120 + r() * 20, y: 24 + r() * 10, l: 40 + r() * 20, art: "kette", f: 0.8 + r(), ph: r() * 6 }); return l; },
+      wetter: ["klar", "staubfall", "klar"],
+      licht: [{ o: [255, 120, 40, 0.08], u: [120, 30, 10, 0.1] }, { o: [255, 80, 30, 0.12], u: [140, 30, 10, 0.16] }],
+      lagen: { form: "stein", rand: "rgba(255,140,60,.22)", farben: ["#2a120a", "#200d07", "#160905"] }
+    },
+    /* Kapitel XV: Themberchauds Halle – quadratisch, Lavaströme an allen Wänden, in der Mitte ein Berg aus Gold */
+    drachenhort: {
+      partikel: "glut", unten: true,
+      varianten: r => ({ hund: r() < 0.5 ? 150 : 250, kelch: r() < 0.5 ? 176 : 228, edel: [0, 1, 2, 3, 4, 5].map(() => [140 + r() * 120, 200 + r() * 70, zuf(r, ["#ff5a4a", "#7ae6c8", "#c88aff", "#ffe08a"])]) }),
+      fern(x, r) {
+        himmel(x, [[0, "#0c0402"], [0.35, "#2a0c06"], [0.65, "#5a1a08"], [1, "#1e0804"]]);
+        hoehlenDecke(x, r, "#070202", 36);
+        /* Lavafälle an der Rückwand */
+        [[34, 22], [366, 26], [120, 12], [282, 14]].forEach(([px, w]) => {
+          const g = x.createLinearGradient(0, 40, 0, 300); g.addColorStop(0, "rgba(255,120,40,.15)"); g.addColorStop(0.5, "rgba(255,140,50,.55)"); g.addColorStop(1, "rgba(255,200,100,.8)");
+          x.fillStyle = g; x.beginPath(); x.moveTo(px - w / 2, 40); x.quadraticCurveTo(px - w, 170, px - w / 2 - 4, 300); x.lineTo(px + w / 2 + 4, 300); x.quadraticCurveTo(px + w, 170, px + w / 2, 40); x.fill();
+          glow(x, px, 260, 70, "rgba(255,120,40,.22)");
+        });
+        glow(x, 200, 230, 240, "rgba(255,160,60,.12)");
+      },
+      mitte(x, r, v) {
+        /* der Berg aus Gold: Münzen über Münzen */
+        const berg = (cx, by, bw, bh) => {
+          const g = x.createLinearGradient(0, by - bh, 0, by); g.addColorStop(0, "#f0c060"); g.addColorStop(0.5, "#c08a30"); g.addColorStop(1, "#5a3a10");
+          x.fillStyle = g; x.beginPath(); x.moveTo(cx - bw, by); x.quadraticCurveTo(cx - bw * 0.4, by - bh * 0.9, cx, by - bh); x.quadraticCurveTo(cx + bw * 0.4, by - bh * 0.9, cx + bw, by); x.closePath(); x.fill();
+          for (let i = 0; i < 90; i++) { const k = r(), px = cx + (r() - 0.5) * bw * 2 * (1 - k * 0.8), py = by - k * bh * 0.95 + r() * 6; x.fillStyle = r() < 0.5 ? "rgba(255,230,150,.55)" : "rgba(120,70,20,.5)"; x.beginPath(); x.ellipse(px, py, 3, 1.4, 0, 0, PI2); x.fill(); }
+        };
+        berg(200, 296, 150, 120); berg(70, 296, 60, 40); berg(340, 296, 66, 46);
+        /* goldene Tiere, halb versunken – auch ein goldener Hund */
+        x.fillStyle = "#d8a040";
+        const hx = v.hund, hy = 232; x.beginPath(); x.ellipse(hx, hy, 14, 8, 0, 0, PI2); x.fill(); x.beginPath(); x.arc(hx - 13, hy - 8, 6, 0, PI2); x.fill(); x.fillRect(hx - 18, hy - 6, 8, 4);
+        x.beginPath(); x.moveTo(hx - 15, hy - 13); x.lineTo(hx - 12, hy - 18); x.lineTo(hx - 9, hy - 12); x.fill(); x.fillRect(hx + 10, hy - 12, 3, 8);
+        /* Kelch, Krone, Schild */
+        x.fillStyle = "#e8b850"; x.fillRect(v.kelch - 2, 214, 4, 12); x.beginPath(); x.moveTo(v.kelch - 8, 206); x.lineTo(v.kelch + 8, 206); x.lineTo(v.kelch + 3, 216); x.lineTo(v.kelch - 3, 216); x.fill();
+        x.beginPath(); x.moveTo(120, 262); x.lineTo(124, 252); x.lineTo(128, 258); x.lineTo(132, 250); x.lineTo(136, 258); x.lineTo(140, 252); x.lineTo(144, 262); x.fill();
+        x.fillStyle = "#b08030"; x.beginPath(); x.ellipse(286, 262, 14, 18, 0.3, 0, PI2); x.fill();
+        /* Edelsteine im Gold */
+        v.edel.forEach(([px, py, f]) => { x.fillStyle = f; x.beginPath(); x.moveTo(px, py - 3); x.lineTo(px + 2.5, py); x.lineTo(px, py + 3); x.lineTo(px - 2.5, py); x.fill(); });
+        /* Lavaströme rund um die Halle (vorn eine Rinne) */
+        const lg = x.createLinearGradient(0, 286, 0, 300); lg.addColorStop(0, "#ffe0a0"); lg.addColorStop(0.35, "#ff9030"); lg.addColorStop(1, "#701a08");
+        x.fillStyle = lg; x.fillRect(0, 290, W, 10);
+      },
+      deko(x, t, u) {
+        const v = u.v;
+        /* Gold glitzert */
+        for (let i = 0; i < 14; i++) { const a = Math.max(0, Math.sin(t * 2.2 + i * 2.3)) ** 6, px = 70 + ((i * 53) % 260), py = 200 + ((i * 37) % 80); if (a > 0.05) { x.fillStyle = "rgba(255,240,180," + a.toFixed(2) + ")"; x.fillRect(px - 2 * a, py, 4 * a + 1, 1); x.fillRect(px, py - 2 * a, 1, 4 * a + 1); } }
+        v.edel.forEach(([px, py], i) => { const a = 0.2 + 0.2 * Math.sin(t * 1.5 + i); glow(x, px, py, 8, "rgba(255,230,170," + a.toFixed(2) + ")"); });
+        /* der goldene Hund blinzelt fast (nur das Glitzern) */
+        const hb = Math.max(0, Math.sin(t * 0.9)) ** 12; if (hb > 0.05) glow(x, v.hund - 13, 224, 8, "rgba(255,240,190," + (0.9 * hb).toFixed(2) + ")");
+        /* Münzen rutschen in kleinen Kaskaden den Berg hinunter */
+        for (let i = 0; i < 3; i++) { const ph = (t * 0.4 + i / 3) % 1, s = i % 2 ? 1 : -1, px = 200 + s * (20 + ph * 110), py = 186 + ph * 100 - Math.abs(Math.sin(ph * 18)) * 4; x.fillStyle = "rgba(240,192,96," + (1 - ph * 0.6).toFixed(2) + ")"; x.beginPath(); x.ellipse(px, py, 2.6 * Math.abs(Math.cos(ph * 22)) + 0.6, 2.6, 0, 0, PI2); x.fill(); }
+        /* Lava blubbert, Glut steigt */
+        glow(x, 200, 294, 230, "rgba(255,130,40," + (0.13 + 0.05 * Math.sin(t * 1.3)).toFixed(3) + ")");
+        for (let i = 0; i < 8; i++) { const ph = (t * 0.55 + i / 8) % 1, px = (i * 53 + 11) % W; x.fillStyle = "rgba(255,220,140," + (0.85 * (1 - ph)).toFixed(2) + ")"; x.beginPath(); x.arc(px, 293 - ph * 9, 1.3 + ph * 2.6, 0, 7); x.fill(); }
+        /* Lavafälle fließen */
+        [[34, 22], [366, 26], [120, 12], [282, 14]].forEach(([px, w], i) => { for (let k = 0; k < 3; k++) { const ph = (t * 0.6 + k / 3 + i * 0.2) % 1; x.fillStyle = "rgba(255,230,150," + (0.5 * (1 - ph)).toFixed(2) + ")"; x.fillRect(px - w * 0.3 + Math.sin(ph * 6 + i) * w * 0.2, 40 + ph * 250, 2, 6); } });
+        /* Hitzeflimmern */
+        x.save(); x.globalAlpha = 0.025; for (let k = 0; k < 7; k++) { const yy = 120 + k * 26, off = Math.sin(t * 3.2 + k * 1.3) * 3; x.fillStyle = "#ffc080"; x.fillRect(0, yy + off, W, 1.5); } x.restore();
+        /* großer Schatten zieht über die Decke, wenn der Meister naht */
+        const sch = (t * 0.06) % 1; if (sch < 0.3) { const a = Math.sin(sch / 0.3 * Math.PI) * 0.35, px = -100 + sch / 0.3 * 600; x.fillStyle = "rgba(0,0,0," + a.toFixed(2) + ")"; x.beginPath(); x.moveTo(px, 70); x.quadraticCurveTo(px + 60, 40, px + 120, 74); x.quadraticCurveTo(px + 60, 60, px, 70); x.moveTo(px - 60, 60); x.quadraticCurveTo(px, 30, px + 40, 66); x.fill(); }
+        haenger(x, v.h, t, u.wind);
+      },
+      haenger: r => { const l = []; for (let i = 0; i < 2; i++) l.push({ x: 80 + i * 240 + r() * 20, y: 20 + r() * 10, l: 30 + r() * 30, art: "kette", f: 0.7 + r(), ph: r() * 6 }); return l; },
+      wetter: ["klar", "klar", "staubfall"],
+      licht: [{ o: [255, 150, 50, 0.08], u: [140, 40, 10, 0.1] }, { o: [255, 90, 30, 0.14], u: [160, 30, 10, 0.18] }],
+      lagen: { form: "stein", rand: "rgba(255,190,90,.25)", farben: ["#2a140a", "#1f0e07", "#150a05"] }
     }
   };
 

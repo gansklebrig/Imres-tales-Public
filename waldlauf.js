@@ -34,7 +34,7 @@
   const TX = {
     de: {
       label: "Waldläufer-Probe", titel: "Friedrichs Jagd",
-      text: "Friedrich erzählt eure Kampagne nach: vom Hinterhalt auf der Straße bis hinunter ins Labor der Duergar. Spann den Bogen, halte die Gegner vom Lager fern und hör auf Rex: Er wittert sie zuerst.",
+      text: "Friedrich erzählt eure Kampagne nach: vom Hinterhalt auf der Straße bis hinunter ins Labor der Duergar und vor den Goldberg des Drachen Themberchaud. Spann den Bogen, halte die Gegner vom Lager fern und hör auf Rex: Er wittert sie zuerst.",
       steuerung: "Irgendwo ins Bild tippen, zurückziehen, zielen, loslassen. Je weiter du ziehst, desto kräftiger der Schuss. Der Wind treibt die Pfeile ab. Rex antippen (oder R): Rex springt los.",
       steuerungKreuz: "Fadenkreuz: Einfach auf die Stelle klicken oder tippen, die der Pfeil treffen soll. Gedrückt halten schießt weiter. Der Wind treibt die Pfeile ab – halte etwas dagegen. R (oder Rex antippen): Rex springt los.",
       zielTitel: "Zielen", zielArten: { ziehen: "🏹 Bogen ziehen", kreuz: "⌖ Fadenkreuz" },
@@ -55,15 +55,18 @@
         { titel: "Der unterirdische See", text: "Ploopploopeen bittet uns um Hilfe gegen die Anhänger eines falschen Gottes. In der Stadt der Kuo-Toa bricht Chaos aus. Dann steigt Demogorgon aus dem See. Haltet durch, bis das Boot ablegt. Oder boxt ihn diesmal wirklich.", wellen: ["Chaos in der Stadt", "Demogorgon erwacht"] },
         { titel: "Gracklstugh", text: "Kardal, der Späher, ist in Wahrheit ein Prinz. Wir dürfen in der Stadt bleiben, doch etwas stimmt hier nicht: Stimmen in den Köpfen. Besessene Duergar greifen an, und dann rast ein Riese durch die Gassen. Betäuben, nicht töten.", wellen: ["Stimmen in den Köpfen", "Der rasende Riese"] },
         { titel: "Die Grauen Geister", text: "Echo hat sogar den Drachen gefragt, ob er Gundren kennt. Themberchaud hat uns trotzdem leben lassen und uns einen Auftrag gegeben: Jemand hat ein Drachenei gestohlen. Die Spur führt in die Slums ganz unten, zu den Grauen Geistern. Die kommen aus der Dunkelheit, also schießt, solange ihr sie seht. Und trefft die Glutkäfer, wenn Diebe in der Nähe sind. Am Ende wartet Drokey, und so einer hat immer einen Fluchtweg.", wellen: ["Schatten in den Gassen", "Drokeys Versteck"] },
-        { titel: "Das Ei des Drachen", text: "Kardal kann uns nicht helfen, und Buppido will uns ständig seinen Altar zeigen. Also suchen wir selbst: durch einen Erztunnel in eine Höhle voller Leichen. Die Skelette stehen wieder auf, aber Echo ruft den Blitz herab, und der trifft, wen er will. Hinter dem Pilzgang liegt das Labor der Duergar. Trefft die Alchemisten, dann zerspringen ihre Flaschen auf den Nachbarn. Und der Vorarbeiter kann verschwinden und wachsen. Schießt, solange ihr ihn seht.", wellen: ["Die Leichenhöhle", "Das Labor der Duergar"] }
+        { titel: "Das Ei des Drachen", text: "Kardal kann uns nicht helfen, und Buppido will uns ständig seinen Altar zeigen. Also suchen wir selbst: durch einen Erztunnel in eine Höhle voller Leichen. Die Skelette stehen wieder auf, aber Echo ruft den Blitz herab, und der trifft, wen er will. Hinter dem Pilzgang liegt das Labor der Duergar. Trefft die Alchemisten, dann zerspringen ihre Flaschen auf den Nachbarn. Und der Vorarbeiter kann verschwinden und wachsen. Schießt, solange ihr ihn seht.", wellen: ["Die Leichenhöhle", "Das Labor der Duergar"] },
+        { titel: "Große Leute", text: "Noch einmal zurück nach Gracklstugh, kurz nach dem rasenden Riesen. Sein Vetter führt uns ins Dorf der Riesen: Sie schieben Erzwagen wie Schubkarren, und jeder Schritt lässt den Boden zittern. Schießt nie auf die Wagen! Ratten wimmeln aus dem Geröll, und dann fängt der Stein an zu schreien. Holt die Schreisteine aus der Luft, bevor sie mit Kieseln werfen. Hgraam will wissen, wovor wir uns fürchten, und Barradin zeigt es ihm mit seiner Flöte: Demogorgon, in voller Größe. Nur eine Illusion. Hoffentlich.", wellen: ["Steinbruch der Riesen", "Der Stein schreit"] },
+        { titel: "Die Bewahrer der Flamme", text: "Zwei Priester in roten Roben holen uns aus der Schenke: Der Meister der Flammen will uns sehen. Hinter einem großen Stein führt ein Gang hinab, und mit jedem Schritt wird es heißer. Die Bewahrer werfen Feuerbälle: Schießt sie ab, bevor sie das Lager treffen. Kleine Magmins kriechen aus der Lava und platzen, wenn sie fallen. Am Ende wartet Gartokkar, der Hohepriester, die Hände hinter dem Rücken, mit einem sehr dünnen Lächeln. Erst wer seine Prüfung besteht, darf vor den Meister treten.", wellen: ["Hitze von unten", "Gartokkars Prüfung"] },
+        { titel: "Der Meister der Flammen", text: "Eine quadratische Halle, Lava an allen Wänden und in der Mitte ein Berg aus Gold. Echo rechnet schon. Dann landet Themberchaud auf seinem Schatz: „Oh. Das Abendessen ist da.“ Barradin tritt vor und singt, und über der Lava tanzen seine Bilder: Schießt bloß nicht auf sie, das Publikum ist empfindlich! Holt der Drache Luft, braucht es drei schnelle Treffer, sonst brennt das Lager. Rollende Münzen bringen Punkte. Wir müssen ihn nicht besiegen. Nur beeindrucken.", wellen: ["Ein Berg aus Gold", "Ein Lied für den Gastgeber"] }
       ],
       endlos: { titel: "Endlose Nacht", text: "Im Labor der Duergar wird noch gekämpft, das Ei bleibt verschollen, und hier endet unsere Chronik. Vorerst. Doch die Stimmen werden lauter, und von überall her kommen sie zurück: Goblins, Dämonen, Diebe. Wie lange hält das Lager?", unter: "Die Stimmen werden lauter" },
       wind: "Wind", windLage: ["Kaum ein Lüftchen", "Leichter Wind", "Kräftiger Wind", "Sturmböen!"],
       rexKnopf: "Rex, fass! (Taste R)", rexLos: ["Fass, Rex!", "Hol ihn dir!", "Rex, Attacke!"], rexNichts: "Rex schnüffelt … nichts da.", rexUm: "Umgerissen!", rexBoss: "Rex verbeißt sich!", rexTipp: "Rex antippen oder R: „Fass!“",
       schwach: "Schwachstelle! ×3", schwachHinweis: "Der leuchtende Punkt ist seine Schwachstelle!",
       wuff: "Wuff!", grr: "Grrr!", entkommen: "Entkommen!", doppel: "Doppeltreffer!", dreifach: "Dreifachtreffer!",
-      bossFaellt: { demogorgon: "Demogorgon fällt!", anfuehrer: "Der Anführer fällt!", glasstab: "Glasstab ist gestellt!", neznaBoss: "Nezna fällt!", venomfang: "Venomfang stürzt ab!", ilvara: "Ilvara ist besiegt!", wraith: "Der Wraith zerfällt!", riese: "Betäubt und gefesselt!", drokey: "Drokey ist gestellt!", laborMeister: "Der Vorarbeiter liegt!" },
-      bossRuft: { demogorgon: "Demogorgon!", anfuehrer: "Ein Bugbear-Anführer!", glasstab: "Glasstab!", neznaBoss: "Nezna, schon wieder!", venomfang: "Venomfang greift an!", ilvara: "Die Druidin …?", wraith: "Ein Wraith erhebt sich!", riese: "Ein rasender Riese!", drokey: "Drokey, der Graue Geist!", laborMeister: "Der Duergar-Vorarbeiter!" },
+      bossFaellt: { floetenillusion: "Die Illusion zerfällt!", gartokkar: "Prüfung bestanden!", themberchaud: "Themberchaud ist beeindruckt!", demogorgon: "Demogorgon fällt!", anfuehrer: "Der Anführer fällt!", glasstab: "Glasstab ist gestellt!", neznaBoss: "Nezna fällt!", venomfang: "Venomfang stürzt ab!", ilvara: "Ilvara ist besiegt!", wraith: "Der Wraith zerfällt!", riese: "Betäubt und gefesselt!", drokey: "Drokey ist gestellt!", laborMeister: "Der Vorarbeiter liegt!" },
+      bossRuft: { floetenillusion: "Barradins Flöte: Demogorgon in voller Größe!", gartokkar: "Gartokkar, Hohepriester der Bewahrer!", themberchaud: "Themberchaud landet auf seinem Gold!", demogorgon: "Demogorgon!", anfuehrer: "Ein Bugbear-Anführer!", glasstab: "Glasstab!", neznaBoss: "Nezna, schon wieder!", venomfang: "Venomfang greift an!", ilvara: "Die Druidin …?", wraith: "Ein Wraith erhebt sich!", riese: "Ein rasender Riese!", drokey: "Drokey, der Graue Geist!", laborMeister: "Der Duergar-Vorarbeiter!" },
       rauch: "Rauchbombe! Drokey ist weg …", spur: "… doch die Spur führt weiter.", geistHinweis: "Graue Geister! Schießt, solange ihr sie seht.", glutPlatzt: "Glut!", flasche: "Flasche zerspringt!", waechst: "Er wächst!", echoBlitz: "Echos Blitz!",
       flieht: { glasstab: "Glasstab flieht zum Geheimgang!", ilvara: "Ilvara springt zum Abgrund!", nezna: "Nezna wird zur Fledermaus!" },
       entwischt: { glasstab: "Glasstab ist entwischt!", ilvara: "„Die Spinne wird euch alle kriegen!“", nezna: "Nezna entkommt … vorerst." },
@@ -71,8 +74,16 @@
       neznaGestellt: "Nezna gestellt!", enttarnt: "Ilvara zeigt ihr wahres Gesicht!",
       odemLaden: "Venomfang holt Luft!", odem: "Giftodem!", unterbrochen: "Unterbrochen!", rasen: "Der Riese rast!",
       wolfHinweis: "Ein Wolf! Nicht schießen.", wolfFrei: "Wolf befreit!", wolfAua: "Doch nicht den Wolf!",
+      freund: {
+        riesenwagen: { hinweis: "Ein Riesenwagen! Nicht schießen.", frei: "Wagen durch!", aua: "Au! Der Riese guckt böse." },
+        bild: { hinweis: "Barradins Bilder! Nicht schießen!", frei: "Applaus!", aua: "Buh! Das war Barradins Bild!" }
+      },
+      odemLadenTyp: { themberchaud: "Themberchaud holt Luft!" }, odemTyp: { themberchaud: "Feuerodem!" },
+      schrei: "Der Stein schreit!", kiesel: "Kiesel!", kieselWeg: "Abgefangen!", feuerball: "Feuerball!", feuerballWeg: "Gelöscht!",
+      illusion: "Rex klemmt den Schwanz ein.", illusionTeilt: "Die Illusion flackert …", priesterHeilt: "Die Flamme stärkt!",
+      lava: "Lava spritzt!", lavaPfeil: "Verglüht!", sprecher: { barradin: "Barradin", echo: "Echo", ezekiel: "Ezekiel", friedrich: "Friedrich", rex: "Rex", gundren: "Gundren", kardal: "Kardal", riese: "Der Riese", hgraam: "Hgraam", priester: "Ein Bewahrer", gartokkar: "Gartokkar", themberchaud: "Themberchaud", buppido: "Buppido" },
       wieder: "Es steht wieder auf …", boot: s => "⛵ Boot legt ab: " + s, geflohen: "Ins Boot – geflohen!", geboxt: "Diesmal wirklich geboxt!", krit: "NAT 20!",
-      bonus: { hase: "Fliehender Hase", blatt: "Blatt im Wind", stimme: "Stimme gebannt" }, bonusDa: { hase: "Ein Hase! Schnell!", blatt: "Ein Blatt im Wind …", stimme: "Eine Stimme flüstert …" },
+      bonus: { hase: "Fliehender Hase", blatt: "Blatt im Wind", stimme: "Stimme gebannt", muenze: "Goldmünze" }, bonusDa: { muenze: "Münzen rollen vom Goldberg!", hase: "Ein Hase! Schnell!", blatt: "Ein Blatt im Wind …", stimme: "Eine Stimme flüstert …" },
       stufenTitel: "Schwierigkeit", stufen: { lehrling: "🌱 Lehrling", waldlaeufer: "🏹 Waldläufer", legende: "🐉 Legende" },
       stufenText: { lehrling: "Langsamere Gegner, 7 Leben.", waldlaeufer: "Die Jagd, wie Friedrich sie kennt. 5 Leben.", legende: "Schnell, gnadenlos, 4 Leben." },
       bestenliste: "🏆 Bestenliste", nurHier: "Noch nur auf diesem Gerät gespeichert.", leer: "Noch niemand – sei die erste Legende!",
@@ -119,7 +130,7 @@
     },
     en: {
       label: "Ranger check", titel: "Friedrich's Hunt",
-      text: "Friedrich retells your campaign: from the ambush on the road all the way down to the duergar laboratory. Draw your bow, keep the enemies away from the camp and listen to Rex: he smells them first.",
+      text: "Friedrich retells your campaign: from the ambush on the road all the way down to the duergar laboratory and up to the golden hoard of the dragon Themberchaud. Draw your bow, keep the enemies away from the camp and listen to Rex: he smells them first.",
       steuerung: "Touch anywhere in the picture, pull back, aim, let go. The further you pull, the stronger the shot. The wind pushes your arrows. Tap Rex (or press R): he pounces.",
       steuerungKreuz: "Crosshair: just click or tap the spot the arrow should hit. Hold to keep shooting. The wind pushes your arrows – aim a little against it. R (or tap Rex): Rex pounces.",
       zielTitel: "Aiming", zielArten: { ziehen: "🏹 Draw the bow", kreuz: "⌖ Crosshair" },
@@ -140,15 +151,18 @@
         { titel: "The Underground Lake", text: "Ploopploopeen asks for help against the followers of a false god. Chaos breaks out in the city of the kuo-toa. Then Demogorgon rises from the lake. Hold on until the boat casts off. Or punch him for real this time.", wellen: ["Chaos in the city", "Demogorgon awakens"] },
         { titel: "Gracklstugh", text: "Kardal the scout is actually a prince. We may stay in the city, but something is wrong here: voices in people's heads. Possessed duergar attack, and then a giant rampages through the alleys. Stun him, don't kill him.", wellen: ["Voices in their heads", "The raging giant"] },
         { titel: "The Grey Ghosts", text: "Echo even asked the dragon whether he knows Gundren. Themberchaud let us live anyway and gave us a job: someone has stolen a dragon egg. The trail leads down into the slums at the very bottom, to the Grey Ghosts. They come out of the dark, so shoot while you can see them. And hit the ember beetles when thieves are close by. At the end waits Drokey, and his kind always has a way out.", wellen: ["Shadows in the alleys", "Drokey's hideout"] },
-        { titel: "The Dragon's Egg", text: "Kardal can't help us, and Buppido keeps wanting to show us his altar. So we search on our own: through an ore tunnel into a cave full of corpses. The skeletons get back up, but Echo calls down the lightning, and it strikes whoever it likes. Beyond the mushroom passage lies the duergar laboratory. Hit the alchemists and their flasks shatter on whoever stands next to them. And the foreman can vanish and grow. Shoot while you can see him.", wellen: ["The corpse cave", "The duergar laboratory"] }
+        { titel: "The Dragon's Egg", text: "Kardal can't help us, and Buppido keeps wanting to show us his altar. So we search on our own: through an ore tunnel into a cave full of corpses. The skeletons get back up, but Echo calls down the lightning, and it strikes whoever it likes. Beyond the mushroom passage lies the duergar laboratory. Hit the alchemists and their flasks shatter on whoever stands next to them. And the foreman can vanish and grow. Shoot while you can see him.", wellen: ["The corpse cave", "The duergar laboratory"] },
+        { titel: "Big Folk", text: "Back to Gracklstugh once more, right after the raging giant. His cousin leads us into the village of the giants: they push ore carts like wheelbarrows, and every step makes the ground tremble. Never shoot the carts! Rats swarm out of the rubble, and then the stone starts to scream. Knock the screaming stones out of the air before they throw pebbles. Hgraam wants to know what we fear, and Barradin shows him with his flute: Demogorgon, full size. Just an illusion. Hopefully.", wellen: ["The giants' quarry", "The stone screams"] },
+        { titel: "The Keepers of the Flame", text: "Two priests in red robes fetch us from the tavern: the Master of Flames wishes to see us. Behind a great stone a passage leads down, and with every step it gets hotter. The Keepers throw fireballs: shoot them down before they hit the camp. Little magmins crawl out of the lava and burst when they fall. At the end waits Gartokkar, the high priest, hands behind his back, with a very thin smile. Only those who pass his test may stand before the master.", wellen: ["Heat from below", "Gartokkar's test"] },
+        { titel: "The Master of Flames", text: "A square hall, lava along every wall and a mountain of gold in the middle. Echo is already counting. Then Themberchaud lands on his treasure: “Oh. Dinner has arrived.” Barradin steps forward and sings, and his pictures dance above the lava: don't you dare shoot them, the audience is sensitive! When the dragon draws breath, it takes three quick hits or the camp burns. Rolling coins are worth points. We don't have to defeat him. Just impress him.", wellen: ["A mountain of gold", "A song for the host"] }
       ],
       endlos: { titel: "Endless Night", text: "The fight in the duergar lab is still raging, the egg is still missing, and this is where our chronicle ends. For now. But the voices grow louder, and from everywhere they come back: goblins, demons, thieves. How long will the camp hold?", unter: "The voices grow louder" },
       wind: "Wind", windLage: ["Barely a breeze", "Light wind", "Strong wind", "Gale gusts!"],
       rexKnopf: "Get him, Rex! (key R)", rexLos: ["Get him, Rex!", "Fetch!", "Rex, attack!"], rexNichts: "Rex sniffs around … nothing.", rexUm: "Knocked over!", rexBoss: "Rex bites down hard!", rexTipp: "Tap Rex or press R: “Get him!”",
       schwach: "Weak spot! ×3", schwachHinweis: "The glowing spot is its weak point!",
       wuff: "Woof!", grr: "Grrr!", entkommen: "Escaped!", doppel: "Double hit!", dreifach: "Triple hit!",
-      bossFaellt: { demogorgon: "Demogorgon falls!", anfuehrer: "The leader falls!", glasstab: "Glasstaff is caught!", neznaBoss: "Nezna falls!", venomfang: "Venomfang crashes down!", ilvara: "Ilvara is defeated!", wraith: "The wraith crumbles!", riese: "Stunned and tied up!", drokey: "Drokey is caught!", laborMeister: "The foreman is down!" },
-      bossRuft: { demogorgon: "Demogorgon!", anfuehrer: "A bugbear leader!", glasstab: "Glasstaff!", neznaBoss: "Nezna, again!", venomfang: "Venomfang attacks!", ilvara: "The druid …?", wraith: "A wraith rises!", riese: "A raging giant!", drokey: "Drokey, the Grey Ghost!", laborMeister: "The duergar foreman!" },
+      bossFaellt: { floetenillusion: "The illusion falls apart!", gartokkar: "Test passed!", themberchaud: "Themberchaud is impressed!", demogorgon: "Demogorgon falls!", anfuehrer: "The leader falls!", glasstab: "Glasstaff is caught!", neznaBoss: "Nezna falls!", venomfang: "Venomfang crashes down!", ilvara: "Ilvara is defeated!", wraith: "The wraith crumbles!", riese: "Stunned and tied up!", drokey: "Drokey is caught!", laborMeister: "The foreman is down!" },
+      bossRuft: { floetenillusion: "Barradin's flute: Demogorgon, full size!", gartokkar: "Gartokkar, high priest of the Keepers!", themberchaud: "Themberchaud lands on his gold!", demogorgon: "Demogorgon!", anfuehrer: "A bugbear leader!", glasstab: "Glasstaff!", neznaBoss: "Nezna, again!", venomfang: "Venomfang attacks!", ilvara: "The druid …?", wraith: "A wraith rises!", riese: "A raging giant!", drokey: "Drokey, the Grey Ghost!", laborMeister: "The duergar foreman!" },
       rauch: "Smoke bomb! Drokey is gone …", spur: "… but the trail goes on.", geistHinweis: "Grey Ghosts! Shoot while you can see them.", glutPlatzt: "Embers!", flasche: "The flask shatters!", waechst: "He's growing!", echoBlitz: "Echo's lightning!",
       flieht: { glasstab: "Glasstaff runs for the secret passage!", ilvara: "Ilvara leaps for the abyss!", nezna: "Nezna turns into a bat!" },
       entwischt: { glasstab: "Glasstaff got away!", ilvara: "“The Spider will get you all!”", nezna: "Nezna escapes … for now." },
@@ -156,8 +170,16 @@
       neznaGestellt: "Nezna caught!", enttarnt: "Ilvara shows her true face!",
       odemLaden: "Venomfang draws breath!", odem: "Poison breath!", unterbrochen: "Interrupted!", rasen: "The giant rages!",
       wolfHinweis: "A wolf! Don't shoot.", wolfFrei: "Wolf freed!", wolfAua: "Not the wolf!",
+      freund: {
+        riesenwagen: { hinweis: "A giant's cart! Don't shoot.", frei: "Cart through!", aua: "Ouch! The giant glares." },
+        bild: { hinweis: "Barradin's pictures! Don't shoot!", frei: "Applause!", aua: "Boo! That was Barradin's picture!" }
+      },
+      odemLadenTyp: { themberchaud: "Themberchaud draws breath!" }, odemTyp: { themberchaud: "Fire breath!" },
+      schrei: "The stone screams!", kiesel: "Pebbles!", kieselWeg: "Caught!", feuerball: "Fireball!", feuerballWeg: "Snuffed out!",
+      illusion: "Rex tucks his tail between his legs.", illusionTeilt: "The illusion flickers …", priesterHeilt: "The flame grants strength!",
+      lava: "Lava splashes!", lavaPfeil: "Burnt up!", sprecher: { barradin: "Barradin", echo: "Echo", ezekiel: "Ezekiel", friedrich: "Friedrich", rex: "Rex", gundren: "Gundren", kardal: "Kardal", riese: "The giant", hgraam: "Hgraam", priester: "A Keeper", gartokkar: "Gartokkar", themberchaud: "Themberchaud", buppido: "Buppido" },
       wieder: "It gets back up …", boot: s => "⛵ Boat leaves in: " + s, geflohen: "Into the boat – escaped!", geboxt: "Punched for real this time!", krit: "NAT 20!",
-      bonus: { hase: "Fleeing hare", blatt: "Leaf in the wind", stimme: "Voice banished" }, bonusDa: { hase: "A hare! Quick!", blatt: "A leaf in the wind …", stimme: "A voice whispers …" },
+      bonus: { hase: "Fleeing hare", blatt: "Leaf in the wind", stimme: "Voice banished", muenze: "Gold coin" }, bonusDa: { muenze: "Coins roll down the gold mountain!", hase: "A hare! Quick!", blatt: "A leaf in the wind …", stimme: "A voice whispers …" },
       stufenTitel: "Difficulty", stufen: { lehrling: "🌱 Apprentice", waldlaeufer: "🏹 Ranger", legende: "🐉 Legend" },
       stufenText: { lehrling: "Slower enemies, 7 lives.", waldlaeufer: "The hunt as Friedrich knows it. 5 lives.", legende: "Fast, merciless, 4 lives." },
       bestenliste: "🏆 Leaderboard", nurHier: "Only saved on this device for now.", leer: "Nobody yet – be the first legend!",
@@ -243,13 +265,23 @@
     /* Kapitel XII – nur hinten anhängen */
     { thema: "labor", bild: "gracklstugh.jpg", wellen: [
       { abstand: 1.1, gegner: { skelett: 11, stirge: 3 } },
-      { abstand: 1.4, gegner: { duergar: 5, alchemist: 4 }, boss: "laborMeister" }] }
+      { abstand: 1.4, gegner: { duergar: 5, alchemist: 4 }, boss: "laborMeister" }] },
+    /* Kapitel XIII–XV (Rückblende: vom Riesendorf bis vor Themberchaud) – nur hinten anhängen */
+    { thema: "riesendorf", bild: "riese.webp", wellen: [
+      { abstand: 1.1, gegner: { grubenratte: 10, schreistein: 4, riesenwagen: 3, duergar: 3 } },
+      { abstand: 1.45, gegner: { schreistein: 4, grubenratte: 4, riesenwagen: 1 }, boss: "floetenillusion" }] },
+    { thema: "flammenweg", bild: "themberchaud-halle.jpg", wellen: [
+      { abstand: 1.1, gegner: { flammenpriester: 6, magmin: 7, glutkaefer: 4 } },
+      { abstand: 1.45, gegner: { flammenpriester: 3, magmin: 3 }, boss: "gartokkar" }] },
+    { thema: "drachenhort", bild: "themberchaud.webp", wellen: [
+      { abstand: 1.05, gegner: { flammenpriester: 5, magmin: 6, glutkaefer: 5, bild: 4 } },
+      { abstand: 1.7, gegner: { glutkaefer: 3, bild: 3 }, boss: "themberchaud" }] }
   ];
   const PLAN = [];
   KAPITEL.forEach((k, ki) => k.wellen.forEach((w, wi) => PLAN.push({ kap: ki, w: wi })));
   const ENDLOS_BILD = "siegesfeier.jpg";
-  const ENDLOS_GEGNER = ["goblin", "bandit", "soeldner", "robe", "drowwache", "skelett", "zombie", "spinne", "ettercap", "kuotoa", "duergar", "stirge", "blight", "bugbear", "vrock", "chasme", "graugeist", "glutkaefer", "alchemist"];
-  const ENDLOS_BOSSE = ["anfuehrer", "glasstab", "venomfang", "neznaBoss", "ilvara", "wraith", "riese", "demogorgon", "drokey", "laborMeister"];
+  const ENDLOS_GEGNER = ["goblin", "bandit", "soeldner", "robe", "drowwache", "skelett", "zombie", "spinne", "ettercap", "kuotoa", "duergar", "stirge", "blight", "bugbear", "vrock", "chasme", "graugeist", "glutkaefer", "alchemist", "grubenratte", "schreistein", "flammenpriester", "magmin"];
+  const ENDLOS_BOSSE = ["anfuehrer", "glasstab", "venomfang", "neznaBoss", "ilvara", "wraith", "riese", "demogorgon", "drokey", "laborMeister", "floetenillusion", "gartokkar", "themberchaud"];
 
   /* ---------- Welt ---------- */
   const W = 400, H = 500, G = 520;
@@ -286,6 +318,14 @@
     wolf:      { malen: ["wolf"], hoehe: 46, hp: 1, tempo: 95, punkte: 25, art: "freund", splitter: ["#9a9aa2", "#55555c", "#c9c9cc"] },
     graugeist: { malen: ["graugeist"], hoehe: 82, hp: 2, tempo: 50, punkte: 20, art: "boden", schatten: true, hell: 1.15, splitter: ["#8a8794", "#3e3b46", "#dfe8ff"] },
     alchemist: { malen: ["duergar", "alchemist"], hoehe: 68, hp: 2, tempo: 44, punkte: 24, art: "boden", platzt: true, flasche: true, splitter: ["#9cff5a", "#7a7c84", "#c88aff"] },
+    grubenratte: { malen: ["ratte"], hoehe: 30, hp: 1, tempo: 104, punkte: 10, art: "boden", huschen: true, splitter: ["#7a6a5c", "#3a302a", "#c99a8a"] },
+    schreistein: { malen: ["schreistein"], hoehe: 42, hp: 2, tempo: 44, punkte: 22, art: "flug", schrei: true, stimme: true, glut: "rgba(255,130,60,.55)", splitter: ["#8a7a6c", "#4a3e36", "#ffb04a"] },
+    riesenwagen: { malen: ["riesenwagen"], hoehe: 186, hp: 1, tempo: 30, punkte: 25, art: "freund", bahnFest: 0, splitter: ["#a89488", "#6a564c", "#7ae6c8"] },
+    flammenpriester: { malen: ["priester"], hoehe: 84, hp: 3, tempo: 36, punkte: 26, art: "boden", feuerball: true, splitter: ["#9b2a1e", "#e0b24a", "#ff8a3a"] },
+    magmin:    { malen: ["magmin"], hoehe: 50, hp: 2, tempo: 58, punkte: 18, art: "boden", platzt: true, glut: "rgba(255,140,60,.7)", splitter: ["#ffb04a", "#c4401e", "#2e1810"] },
+    /* Barradins Bilder über der Lava (Kapitel XV): Illusionen aus seinem Lied – nicht schießen! */
+    bild:      { sprite: "chasme", bilder: ["chasme", "vrock", "ilvara", "illusion"], hoehe: 58, hp: 1, tempo: 64, punkte: 25, art: "freund", flug: true, illusion: true, splitter: ["#ffcf7a", "#fff0b0", "#e0a046"] },
+    miniIllusion: { sprite: "illusion", hoehe: 40, hp: 1, tempo: 80, punkte: 12, art: "flug", illusion: true, splitter: ["#ffcf7a", "#c98a3a", "#fff0b0"] },
     glutkaefer:{ malen: ["glutkaefer"], hoehe: 34, hp: 1, tempo: 84, punkte: 14, art: "flug", platzt: true, glut: "rgba(255,140,60,.7)", splitter: ["#ffb04a", "#c4401e", "#fff0b0"] },
     // Höhepunkte
     anfuehrer: { sprite: "bugbear", hoehe: 140, hp: 12, tempo: 21, punkte: 150, art: "boss", mini: true, verlust: 2, glut: "rgba(224,160,70,.5)", eskorte: ["goblin", "goblin", "bandit"], splitter: ["#9b3a2f", "#a8783e", "#e0a046"] },
@@ -297,10 +337,14 @@
     demogorgon:{ bild: "demogorgon.webp", hoehe: 196, hp: 28, tempo: 15, punkte: 400, art: "boss", verlust: 3, glut: "rgba(196,86,74,.55)", eskorte: ["blight", "goblin", "chasme"], splitter: ["#e0a046", "#9b3a2f", "#c98a3a"] },
     drokey:    { malen: ["drokey"], hoehe: 112, hp: 16, tempo: 30, punkte: 280, art: "boss", mini: true, teleport: 2.6, rauch: 0.25, verlust: 2, glut: "rgba(223,232,255,.45)", eskorte: ["graugeist", "glutkaefer", "graugeist"], splitter: ["#8a8794", "#e0a046", "#3a3742"] },
     laborMeister: { malen: ["duergar", "meister"], hoehe: 104, hp: 22, tempo: 22, punkte: 320, art: "boss", phasen: true, rasen: true, wachsen: true, verlust: 2, glut: "rgba(200,138,255,.5)", eskorte: ["duergar", "alchemist", "skelett"], splitter: ["#7a7c84", "#c88aff", "#e0a046"] },
+    floetenillusion: { sprite: "demogorgon", hoehe: 176, hp: 20, tempo: 15, punkte: 360, art: "boss", illusion: true, verschont: true, verlust: 2, glut: "rgba(255,207,122,.6)", eskorte: ["schreistein", "grubenratte", "schreistein"], splitter: ["#ffcf7a", "#fff0b0", "#c98a3a"] },
+    gartokkar: { malen: ["gartokkar"], hoehe: 122, hp: 20, tempo: 24, punkte: 340, art: "boss", mini: true, teleport: 3.1, feuerball: true, verschont: true, verlust: 2, glut: "rgba(255,150,60,.55)", eskorte: ["flammenpriester", "magmin", "flammenpriester"], splitter: ["#b02e1e", "#e0b24a", "#ff8a3a"] },
+    themberchaud: { bild: "themberchaud-frei.webp", ohneRand: true, hoehe: 180, hp: 40, tempo: 26, punkte: 480, art: "boss", drache: true, feuerOdem: true, verschont: true, verlust: 0, glut: "rgba(255,140,50,.55)", eskorte: ["glutkaefer", "flammenpriester", "magmin"], splitter: ["#c4401e", "#e0a046", "#ffcf7a"] },
     riese:     { bild: "riese-frei.webp", ohneRand: true, hoehe: 172, hp: 26, tempo: 15, punkte: 350, art: "boss", rasen: true, verlust: 3, glut: "rgba(255,150,80,.45)", eskorte: ["duergar"], splitter: ["#c9a08a", "#7a5a4a", "#e0a046"] },
     // Bonusziele
     hase:      { malen: ["hase"], hoehe: 34, hp: 1, tempo: 165, punkte: 60, art: "bonus", splitter: ["#8a6a4a", "#ebe2cc", "#5a4430"] },
     blatt:     { malen: ["blatt"], hoehe: 30, hp: 1, tempo: 0, punkte: 90, art: "bonus", splitter: ["#e0a046", "#ffcf7a", "#c4564a"] },
+    muenze:    { malen: ["muenze"], hoehe: 22, hp: 1, tempo: 150, punkte: 70, art: "bonus", splitter: ["#ffcf7a", "#fff0b0", "#8a5a20"] },
     stimme:    { malen: ["stimme"], hoehe: 26, hp: 1, tempo: 0, punkte: 40, art: "bonus", splitter: ["#c88aff", "#ffffff", "#7a3cc8"] }
   };
   const STUFEN = {
@@ -351,7 +395,7 @@
       if (a.blick === undefined) a.blick = -1;
       if (a.sprite) return;
       if (a.malen) { SPRITES[k] = vorbereiten(FIG.malen(a.malen[0], a.malen[1]), null, 280, a.hell || 1, true); return; }
-      const maxH = k === "demogorgon" ? 440 : k === "riese" ? 360 : 300;
+      const maxH = k === "demogorgon" ? 440 : k === "riese" || k === "themberchaud" ? 380 : 300;
       laden(a.bild, img => {
         const quelle = a.freistellen ? FIG.freistellen(img, a.freistellen) : img;
         SPRITES[k] = vorbereiten(quelle, a.quelle, maxH, a.hell || 1.15, a.ohneRand);
@@ -361,6 +405,7 @@
     SPRITES.illusion = vorbereiten(FIG.malen("illusion"), null, 200, 1, true);
     laden("ilvara-wahr.webp", img => { SPRITES.ilvara_wahr = vorbereiten(img, null, 300, 1.15, true); });
     laden("rex-guckt.webp", img => { rexBild = img; });
+    koepfeLaden();
   }
 
   /* ---------- Klang (eigene Synthese, keine Dateien) ---------- */
@@ -417,6 +462,7 @@
     odem: () => { knistern(1.1, 0.24, "bandpass", 600); ton("sawtooth", 160, 60, 0.9, 0.1, 0, ["lowpass", 700, 1]); },
     jaulen: () => ton("sine", 950, 520, 0.45, 0.12),
     blitz: () => knistern(0.16, 0.22, "highpass", 3200),
+    schrei: () => { ton("sawtooth", 520, 760, 0.35, 0.05, 0, ["bandpass", 1400, 3]); knistern(0.4, 0.1, "bandpass", 2200); },
     licht: () => [523, 784, 1046, 1568].forEach((f, i) => ton("triangle", f, f, 0.4, 0.07, i * 0.05)),
     floete: () => [784, 988, 1175, 988].forEach((f, i) => ton("sine", f, f, 0.16, 0.08, i * 0.12)),
     krit: () => [659, 988].forEach((f, i) => ton("square", f, f, 0.12, 0.05, i * 0.06)),
@@ -589,17 +635,18 @@
     e.sp = spKey; e.h = hoehe * e.s; e.w = e.h * (sp ? sp.verh : 0.8);
   }
   function spawnen(e) {
-    const a = ARTEN[e.typ], key = a.sprite || e.typ;
+    const a = ARTEN[e.typ], key = a.bilder ? zufall(a.bilder.filter(b => SPRITES[b])) || a.sprite : a.sprite || e.typ;
     let y, s = 1, bahn = -1, bew = "boden", x = e.dir === 1 ? -40 : W + 40;
-    if (a.art === "boden" || a.art === "freund" || e.typ === "hase") {
-      bahn = e.bahn !== undefined ? e.bahn : e.typ === "hase" ? 1 + Math.floor(Math.random() * 2) : Math.floor(Math.random() * 3);
+    const huepft = e.typ === "hase" || e.typ === "muenze";
+    if ((a.art === "boden" || a.art === "freund" || huepft) && !a.flug) {
+      bahn = e.bahn !== undefined ? e.bahn : a.bahnFest !== undefined ? a.bahnFest : huepft ? 1 + Math.floor(Math.random() * 2) : Math.floor(Math.random() * 3);
       y = BAHNEN[bahn].y; s = BAHNEN[bahn].s;
       if (a.seil) { bew = "seil"; x = 50 + Math.random() * 300; }
-      if (e.typ === "hase") bew = "hase";
-    } else if (a.art === "flug") { y = 120 + Math.random() * 150; s = 0.72 + (y - 120) / 150 * 0.28; bew = "flug"; }
+      if (huepft) bew = "hase";
+    } else if (a.art === "flug" || a.flug) { y = 120 + Math.random() * 150; s = 0.72 + (y - 120) / 150 * 0.28; bew = "flug"; }
     else if (e.typ === "blatt") { y = 60; bew = "blatt"; x = 70 + Math.random() * 260; }
     else if (e.typ === "stimme") { y = e.y || 320; bew = "wisp"; x = e.x || 80 + Math.random() * 240; }
-    else if (a.drache) { y = 150; bew = "drache"; }
+    else if (a.drache) { y = a.hoehe > 150 ? 206 : 150; bew = "drache"; }
     else if (a.schwebt) { y = 222; bew = "schwebe"; }
     else { bahn = 1; y = BAHNEN[1].y + 10; bew = "boss"; }
     const g = { typ: e.typ, a, sp: key, x, basisX: x, y: bew === "seil" ? -10 : y, basisY: y, s, h: 0, w: 0, dir: e.dir, bahn, bew,
@@ -620,12 +667,17 @@
     if (a.art === "boss" && e.typ === "demogorgon" && S.fluchtT > 0) { g.bleibt = true; S.fluchtLaeuft = true; }
     S.gegner.push(g);
     if (a.art === "boss") {
+      sprechenBoss();
       KLANG.bruellen(); S.beben = a.mini ? 0.4 : 0.7; S.bossRufT = 4; S.eskorteT = 3; S.eskorte2T = 7; textAuf(W / 2, 200, t().bossRuft[e.typ], a.mini ? "#e0a046" : "#c4564a", 26, 1.6);
       if (SCHWACH[key] && !S.schwachGezeigt) { S.schwachGezeigt = true; textAuf(W / 2, 236, t().schwachHinweis, "#ffcf7a", 18, 3.2); }
     }
-    if (a.art === "bonus" && e.typ !== "stimme") { textAuf(W / 2, 92, t().bonusDa[e.typ], "#ebe2cc", 19, 1.6); KLANG.glocke(); if (e.typ === "hase") S.rex.hops = 0.35; }
+    if (a.art === "bonus" && e.typ !== "stimme" && !e.still) { textAuf(W / 2, 92, t().bonusDa[e.typ], "#ebe2cc", 19, 1.6); KLANG.glocke(); if (e.typ === "hase") S.rex.hops = 0.35; }
+    if (e.typ === "floetenillusion") { textAuf(W / 2, 236, t().illusion, "#ebe2cc", 17, 2.6); S.rex.hops = 0; }
     if (a.schatten && !S.geistHinweis) { S.geistHinweis = true; textAuf(W / 2, 150, t().geistHinweis, "#dfe8ff", 20, 2.6); }
-    if (a.art === "freund" && !S.wolfHinweis) { S.wolfHinweis = true; textAuf(W / 2, 150, t().wolfHinweis, "#ebe2cc", 22, 2.4); }
+    if (a.art === "freund") {
+      S.freundHinweis = S.freundHinweis || {};
+      if (!S.freundHinweis[e.typ]) { S.freundHinweis[e.typ] = true; const fx = t().freund[e.typ]; textAuf(W / 2, 150, fx ? fx.hinweis : t().wolfHinweis, "#ebe2cc", fx ? 19 : 22, 2.6); }
+    }
   }
 
   /* ---------- Schießen ---------- */
@@ -698,7 +750,7 @@
     if (e.tot || e.weg || e.liegt > 0) return false;
     const tx = t(), m = mitte(e);
     if (e.a.art === "freund") {
-      if (pfeil && !e.aua) { e.aua = true; e.tempo *= 1.8; S.punkte = Math.max(0, S.punkte - 20); S.combo = 0; textAuf(m.x, m.y - 16, tx.wolfAua + " −20", "#c4564a", 19, 1.3); KLANG.jaulen(); }
+      if (pfeil && !e.aua) { e.aua = true; e.tempo *= 1.8; S.punkte = Math.max(0, S.punkte - 20); S.combo = 0; textAuf(m.x, m.y - 16, (tx.freund[e.typ] ? tx.freund[e.typ].aua : tx.wolfAua) + " −20", "#c4564a", 19, 1.3); if (e.typ === "wolf") KLANG.jaulen(); else KLANG.entkommen(); }
       return false;
     }
     if (pfeil && e.mal) dmg += 1;
@@ -709,6 +761,10 @@
       if (e.unterbrechung >= 3) { e.laedt = false; e.odemT = 8; textAuf(m.x, m.y - 40, tx.unterbrochen, "#b4ff6a", 22, 1.2); KLANG.puff(); }
     }
     if (e.a.rauch && e.hp / e.maxHp <= e.a.rauch) { rauchbombe(e); return true; }
+    if (e.typ === "floetenillusion" && e.hp > 0 && Math.random() < 0.32 && S.gegner.filter(o => o.typ === "miniIllusion" && !o.tot).length < 3) {
+      spawnen({ typ: "miniIllusion", dir: Math.random() < 0.5 ? 1 : -1, posX: e.x + (Math.random() - 0.5) * 60 });
+      if (!S.illusionGeteilt) { S.illusionGeteilt = true; textAuf(W / 2, 150, tx.illusionTeilt, "#ffcf7a", 19, 1.8); }
+    }
     if (e.a.maske && !e.enttarnt) {
       e.enttarnt = true; puff(m.x, m.y, ["#6b5ca8", "#c88aff", "#1d1828"], 30);
       groesseSetzen(e, SPRITES.ilvara_wahr ? "ilvara_wahr" : e.sp, e.a.hoehe);
@@ -765,6 +821,7 @@
     if (e.a.art === "boss") {
       S.beben = e.a.mini ? 0.6 : 1; KLANG.bruellen(); zeitlupeStarten(m.x, m.y);
       textAuf(W / 2, 180, tx.bossFaellt[e.typ], "#e0a046", 30, 2.2);
+      sprechenEnde();
       if (e.bleibt) { S.punkte += 500; textAuf(W / 2, 214, tx.geboxt + " +500", "#ffcf7a", 22, 2.4); S.fluchtT = 0; }
     }
     return true;
@@ -804,7 +861,9 @@
     demogorgon: [[0.3, 0.22], [0.62, 0.36]],    // Schlund, Brust
     drokey: [[0.15, 0.1], [0.8, 0.4]],          // Amulett, Diebessack
     riese: [[0.9, 0.1], [0.72, 0.36]],          // Kopf, die Kette um den Hals
-    laborMeister: [[0.48, 0.2], [0.52, 0.47]]   // Helm, Amulett
+    laborMeister: [[0.48, 0.2], [0.52, 0.47]],  // Helm, Amulett
+    gartokkar: [[0.38, 0.08], [0.53, 0.64]],     // Bommel an der Kapuze, das goldene Zeichen
+    themberchaud: [[0.27, 0.37], [0.5, 0.78]]    // Auge, die hellgelbe Kehle
   };
   const SCHWACH_TAKT = 4.5;
   function schwachPunkt(e) {
@@ -1056,9 +1115,38 @@
   }
 
   /* ---------- Besondere Fähigkeiten der normalen Gegner ---------- */
+  /* Geschoss im Bogen aufs Lager (Speer, Kiesel, Feuerball): T = Flugzeit, g = Schwere */
+  function werfen(von, art, zx, T, g) {
+    const zy = 432;
+    S.speere.push({ x: von.x, y: von.y, vx: (zx - von.x) / T, vy: (zy - von.y - 0.5 * g * T * T) / T, t: 0, art, g });
+  }
   function faehigkeiten(e, dt) {
-    if (e.bann > 0 || e.gehalten || e.liegt > 0 || e.bew !== "boden") return;
+    if (e.bann > 0 || e.gehalten || e.liegt > 0 || e.tot) return;
     const drin = e.x > 50 && e.x < W - 50, tx = t();
+    if (e.a.schrei) {
+      e.schreiT = (e.schreiT == null ? 2.5 + Math.random() * 2.5 : e.schreiT) - dt;
+      if (e.schreiT <= 0 && drin) {
+        e.schreiT = 5 + Math.random() * 3; e.schreit = 0.6;
+        S.beben = Math.max(S.beben, 0.22); KLANG.schrei();
+        if (!S.schreiGezeigt) { S.schreiGezeigt = true; textAuf(W / 2, 140, tx.schrei, "#ffb04a", 21, 1.8); }
+        if (S.speere.length < 3) { werfen(mitte(e), "kiesel", 150 + Math.random() * 100, 1.9, 140); textAuf(mitte(e).x, mitte(e).y - 24, tx.kiesel, "#d8c8b0", 15, 0.9); }
+      }
+      if (e.schreit > 0) e.schreit -= dt;
+    }
+    if (e.a.feuerball && e.bew !== "seil") {
+      const boss = e.a.art === "boss";
+      e.feuerT = (e.feuerT == null ? (boss ? 4 : 2 + Math.random() * 3) : e.feuerT) - dt;
+      if (e.feuerT <= 0 && drin && !e.tele) {
+        e.feuerT = boss ? 5.5 + Math.random() * 1.5 : 6 + Math.random() * 3;
+        const m = mitte(e), n = boss ? 3 : 1;
+        if (S.speere.length < (boss ? 5 : 3)) {
+          for (let i = 0; i < n; i++) werfen({ x: m.x + (i - 1) * 14, y: m.y - 10 }, "feuer", n > 1 ? 130 + i * 70 + (Math.random() - 0.5) * 20 : 165 + Math.random() * 70, 2.3 + i * 0.25, 110);
+          glut(m.x, m.y - 10, ruhig ? 4 : 12, ["#ffb04a", "#fff0b0", "#c4401e"]); KLANG.feuer();
+          textAuf(m.x, m.y - e.h * 0.5 - 6, tx.feuerball, "#ffb04a", 16, 0.9);
+        }
+      }
+    }
+    if (e.bew !== "boden") return;
     if (e.typ === "bandit" && e.duck <= 0) {
       e.duckT -= dt;
       if (e.duckT <= 0 && drin) { e.duck = 1.1; e.duckT = 3 + Math.random() * 3; }
@@ -1098,10 +1186,12 @@
   function speereUndNetze(dt) {
     const tx = t();
     S.speere.forEach(sp => {
-      sp.t += dt; sp.vy += 120 * dt; sp.x += sp.vx * dt; sp.y += sp.vy * dt;
+      sp.t += dt; sp.vy += (sp.g || 120) * dt; sp.x += sp.vx * dt; sp.y += sp.vy * dt;
+      if (sp.art === "feuer" && !ruhig && Math.random() < 0.7) S.teilchen.push({ x: sp.x, y: sp.y, vx: (Math.random() - 0.5) * 30, vy: -30 - Math.random() * 20, leben: 0.35, max: 0.35, farbe: zufall(["#ffb04a", "#ff7a2a", "#fff0b0"]), gr: 2 + Math.random() * 2, schwer: -0.1, leuchten: true });
       if (sp.y >= 425) {
         sp.weg = true; S.leben = Math.max(0, S.leben - 1); S.combo = 0; S.beben = 0.4;
-        textAuf(sp.x, 400, tx.speer, "#c4564a", 20, 1.2); KLANG.entkommen();
+        textAuf(sp.x, 400, sp.art === "feuer" ? tx.feuerball : sp.art === "kiesel" ? tx.kiesel : tx.speer, "#c4564a", 20, 1.2); KLANG.entkommen();
+        if (sp.art === "feuer") glut(sp.x, 420, ruhig ? 6 : 20, ["#ffb04a", "#fff0b0", "#c4401e"]);
       }
     });
     S.speere = S.speere.filter(sp => !sp.weg);
@@ -1112,10 +1202,11 @@
   /* trifft ein Pfeil einen Speer oder ein Netz? true = Pfeil ist verbraucht */
   function pfeilHindernis(p) {
     const tx = t();
+    if (S.lava && S.lava.length && lavaTrifft(p)) return true;
     for (const sp of S.speere) {
       if (Math.hypot(p.x - sp.x, p.y - sp.y) < 14) {
-        sp.weg = true; S.punkte += 5; funken(sp.x, sp.y, ["#5a4430", "#bdb9ad", "#3a5a52"], 10); KLANG.treffer();
-        textAuf(sp.x, sp.y - 14, tx.speerWeg + " +5", "#ebe2cc", 15, 0.9);
+        sp.weg = true; S.punkte += 5; funken(sp.x, sp.y, sp.art === "feuer" ? ["#ffb04a", "#fff0b0", "#c4401e"] : sp.art === "kiesel" ? ["#8a7a6c", "#c9b8a0", "#4a3e36"] : ["#5a4430", "#bdb9ad", "#3a5a52"], 10); KLANG.treffer();
+        textAuf(sp.x, sp.y - 14, (sp.art === "feuer" ? tx.feuerballWeg : sp.art === "kiesel" ? tx.kieselWeg : tx.speerWeg) + " +5", "#ebe2cc", 15, 0.9);
         const salve = S.salvenOffen[p.salve]; if (salve) salve.treffer++;
         return true;
       }
@@ -1144,8 +1235,146 @@
     see: ["🐚", "Ploopploopeens Muschel", "Ploopploopeen's shell"],
     gracklstugh: ["🥄", "Die zweite Schöpfkelle", "The second ladle"],
     slums: ["🪙", "Eine Münze aus dem Drachenhort", "A coin from the dragon's hoard"],
-    labor: ["💍", "Der Ring am Arm", "The ring on the arm"]
+    labor: ["💍", "Der Ring am Arm", "The ring on the arm"],
+    riesendorf: ["💎", "Hgraams Steinsprecher-Kristall", "Hgraam's stone-speaker crystal"],
+    flammenweg: ["🧶", "Ein Bommel von Gartokkars Kapuze", "A tassel from Gartokkar's hood"],
+    drachenhort: ["🐕", "Der goldene Hund", "The golden dog"]
   };
+  /* ---------- Gefährten sprechen (Zitate aus der Chronik) ----------
+     Je Kapitel ein paar Sätze, so wie sie am Spieltisch gefallen sind. "start" kommt kurz nach Beginn des Kapitels, "boss" fällt,
+     wenn der Höhepunkt erscheint, "ende", wenn er fällt; "w1"/"w2" nur in der ersten/zweiten Welle, die übrigen der Reihe nach. */
+  const SPRUECHE = {
+    strasse: [["ezekiel", "Links. Im Unterholz.", "Left. In the undergrowth.", "start"], ["friedrich", "Rex! Hinter mich!", "Rex! Behind me!"], ["echo", "Der Große gehört mir!", "The big one's mine!"], ["echo", "Ein Bett. Aus Münzen. Wie ein Drache.", "A bed. Made of coins. Like a dragon."]],
+    hoehle: [["echo", "Wo horten die kleinen Biester ihre Beute?", "Where do the little beasts hoard their loot?", "start"], ["ezekiel", "Sag's ihm. Oder sag nie wieder was.", "Tell him. Or never say anything again."], ["friedrich", "Danke fürs Testen.", "Thanks for testing."], ["echo", "Hätt ich dir sagen können.", "Could've told you."]],
+    schloss: [["echo", "Ich zünd das Tor an.", "I'll set the gate on fire.", "start"], ["friedrich", "Rex! Raus da!", "Rex! Out of there!"], ["friedrich", "Wenn einer fragt: Das ist unser Wachhund.", "If anyone asks: that's our guard dog."], ["ezekiel", "Genau. Letztlich bluten sie alle gleich.", "Exactly. In the end they all bleed the same.", "boss"]],
+    wachturm: [["echo", "Dann soll sie kommen. Spinnen brennen gut.", "Then let it come. Spiders burn nicely.", "start"], ["ezekiel", "Jetzt.", "Now."], ["echo", "Du räudiger Bettvorleger!", "You mangy bedside rug!", "boss"], ["ezekiel", "Bleib liegen.", "Stay down."], ["echo", "Nur ein Kratzer.", "Just a scratch."]],
+    mine: [["echo", "Was ist so eine Schmiede wert?", "What's a forge like that worth?", "start"], ["gundren", "Ha! Ich wusste, dass ihr die Richtigen seid!", "Ha! I knew you were the right ones!"]],
+    donnerbaum: [["friedrich", "Kein Rauch aus den Kaminen. Keine Hühner. Hier stimmt was nicht.", "No smoke from the chimneys. No chickens. Something's not right here.", "start"], ["echo", "Vorsicht! Das ist ein Venomfang!", "Watch out! That's a Venomfang!", "boss"], ["friedrich", "Rex! ... Barradin! Mach irgendwas!", "Rex! ... Barradin! Do something!", "w1"], ["echo", "Du ... stinkende ... Eidechse!", "You ... stinking ... lizard!", "w1"], ["barradin", "Verdammt guter Schuss, Ezekiel.", "Damn good shot, Ezekiel.", "ende"], ["friedrich", "Spinnen. Natürlich Spinnen.", "Spiders. Of course, spiders.", "w2"], ["echo", "Kaminholz!", "Firewood!", "w2"]],
+    gefaengnis: [["friedrich", "Rex? Rex, bist du da?", "Rex? Rex, are you there?", "start"], ["echo", "Eine Chasme! Ein Dämon! Weg von dem Stachel!", "A chasme! A demon! Get away from the sting!", "w2"], ["friedrich", "Die zwei links.", "The two on the left."], ["friedrich", "Einer davon war eine Wespe.", "One of them was a wasp.", "ende"]],
+    spinnweben: [["friedrich", "Nicht auf die dicken Fäden treten. Die zittern bis zum Nest.", "Don't step on the thick threads. They tremble all the way to the nest.", "start"], ["echo", "Acht Beine. Wozu braucht irgendwer acht Beine?", "Eight legs. What does anyone need eight legs for?"], ["echo", "Fasst die Pilze nicht an. Die Hälfte davon frisst euch.", "Don't touch the mushrooms. Half of them eat you."], ["echo", "Lasst euch nicht berühren! Der saugt euch das Leben aus!", "Don't let it touch you! It'll suck the life right out of you!", "boss"], ["barradin", "Ezekiel! Fang!", "Ezekiel! Catch!", "w2"]],
+    see: [["echo", "Endlich!", "Finally!", "start"], ["echo", "Fliegende Fische. Natürlich. Warum auch nicht.", "Flying fish. Of course. Why not.", "w2"], ["echo", "Weg hier! Zum Hafen!", "Out of here! To the harbour!", "boss"]],
+    gracklstugh: [["kardal", "Seht ihr die Lichter? Das ist Gracklstugh.", "See the lights? That's Gracklstugh.", "start"], ["echo", "Noch mehr Stein.", "More stone."], ["riese", "ZERSCHLAGEN! ALLES ZERSCHLAGEN!", "SMASH! SMASH EVERYTHING!", "boss"], ["echo", "Ist ja nur Gift.", "It's only poison.", "w2"], ["friedrich", "Wie im Grab.", "Like in the tomb.", "ende"]],
+    slums: [["gartokkar", "Jemand hat ein Drachenei gestohlen.", "Someone has stolen a dragon egg.", "start"], ["echo", "Respekt.", "Respect."], ["barradin", "Ein Ei ist fort, ein Drache grollt, und keiner weiß, wer's klauen wollt'.", "An egg is gone, a dragon fumes, and no one knows who robbed his rooms.", "boss"]],
+    labor: [["buppido", "Gäste! Gäste! Ich bin Buppido. Wollt ihr meinen Altar sehen?", "Guests! Guests! I'm Buppido. Do you want to see my altar?", "start"], ["echo", "Gewitter. Unter der Erde. Bitte sehr.", "Thunderstorm. Underground. You're welcome.", "w1"], ["echo", "Hm. Passt.", "Hm. Fits.", "w2"], ["barradin", "Guten Tag! Ich komme wegen der Anzeige: Arm gefunden, Besitzer gesucht!", "Good day! I'm here about the notice: arm found, owner wanted!", "boss"]],
+    riesendorf: [["echo", "Gundren! Zwerg! Schwarzer Bart! Ungefähr knöchelhoch!", "Gundren! Dwarf! Black beard! About ankle-high!", "start"], ["riese", "… Nein.", "… No.", "w1"], ["riese", "Guter … kleiner … Hund.", "Good ... little ... dog.", "w1"], ["hgraam", "Der Stein … schreit.", "The stone ... screams.", "w2"], ["hgraam", "Braucht ihr Hilfe … helfen Riesen.", "Need help ... giants help.", "ende"]],
+    flammenweg: [["priester", "Wir sind die Bewahrer der Flamme. Wir dienen dem Meister der Flammen. Er will euch sehen.", "We are the Keepers of the Flame. We serve the Master of Flames. He wishes to see you.", "start"], ["gartokkar", "Der Meister empfängt euch. Sprecht nur, wenn er euch fragt.", "The Master will receive you. Speak only when he asks you.", "boss"], ["echo", "Das schafft der Barde nie.", "The bard will never manage that.", "w2"]],
+    drachenhort: [["ezekiel", "Da kommt was.", "Something's coming.", "start"], ["themberchaud", "Oh. Das Abendessen ist da.", "Oh. Dinner has arrived.", "boss"], ["friedrich", "Barradin. Was machst du da?", "Barradin. What are you doing?", "w2"], ["barradin", "Meine Arbeit.", "My job.", "w2"], ["echo", "Sag mal, Drache. Kennst du zufällig Gundren? Zwerg. Schwarzer Bart.", "Say, dragon. You don't happen to know Gundren? Dwarf. Black beard.", "w2"], ["themberchaud", "Versagt, und ihr seid Nachtisch.", "Fail, and you are dessert.", "w2"], ["barradin", "Er hatte Hunger. Auf Kunst.", "He was hungry. For art.", "ende"]]
+  };
+  /* Porträts: Bild und Kopfausschnitt [Mitte x, Mitte y, Radius] als Anteil von Breite/Höhe/Höhe */
+  const KOPF = {
+    barradin: ["barradin-frei.webp", 0.54, 0.17, 0.15], echo: ["echo-frei.webp", 0.48, 0.27, 0.14], ezekiel: ["ezekiel-frei.webp", 0.47, 0.14, 0.11],
+    friedrich: ["friedrich-frei.webp", 0.49, 0.13, 0.1], rex: ["rex-frei.webp", 0.45, 0.27, 0.19], gundren: ["gundren-frei.webp", 0.57, 0.2, 0.12],
+    riese: ["riese-frei.webp", 0.86, 0.14, 0.11], themberchaud: ["themberchaud-frei.webp", 0.3, 0.36, 0.16]
+  };
+  const KOPF_FARBE = { kardal: "#7a7c84", hgraam: "#8a7a6c", priester: "#9b2a1e", gartokkar: "#b02e1e", buppido: "#5a6a4a" };
+  const KOPFBILD = {};
+  function koepfeLaden() { Object.keys(KOPF).forEach(k => laden(KOPF[k][0], img => { KOPFBILD[k] = img; })); }
+  const themaJetzt = () => weltName ? weltName.split(":")[0] : (welt && welt.name);
+  function sagen(eintrag) {
+    if (!eintrag || !S) return;
+    const en = sprache() === "en";
+    S.spr = { wer: eintrag[0], text: eintrag[en ? 2 : 1], t: 0, dauer: Math.min(6.5, 2.6 + eintrag[en ? 2 : 1].length * 0.045) };
+    S.sprT = 9 + Math.random() * 7;
+  }
+  function sprechenUpdate(dt) {
+    if (!S) return;
+    if (S.spr) { S.spr.t += dt; if (S.spr.t > S.spr.dauer) S.spr = null; }
+    if (zustand !== "spiel" || S.welle > PLAN.length) return;
+    const th = themaJetzt(), l = SPRUECHE[th]; if (!l) return;
+    S.sprGesagt = S.sprGesagt || {};
+    const g = S.sprGesagt[th] = S.sprGesagt[th] || [];
+    S.sprT = (S.sprT == null ? 4 : S.sprT) - dt;
+    if (S.spr || S.sprT > 0 || S.banner) return;
+    const w = S.welleImKap === 1 ? "w2" : "w1";
+    let i = l.findIndex((z, k) => z[3] === "start" && !g.includes(k));
+    if (i < 0) i = l.findIndex((z, k) => (!z[3] || z[3] === w) && !g.includes(k));
+    if (i < 0) { S.sprT = 99; return; }
+    g.push(i); sagen(l[i]);
+  }
+  function sprechenBoss() {
+    const th = themaJetzt(), l = SPRUECHE[th]; if (!l || !S || S.welle > PLAN.length) return;
+    S.sprGesagt = S.sprGesagt || {};
+    const g = S.sprGesagt[th] = S.sprGesagt[th] || [];
+    const i = l.findIndex((z, k) => z[3] === "boss" && !g.includes(k));
+    if (i >= 0) { g.push(i); S.spr = null; sagen(l[i]); S.spr.t = -1.4; } /* kurz nach dem Brüllen */
+  }
+  function sprechenEnde() {
+    const th = themaJetzt(), l = SPRUECHE[th]; if (!l || !S || S.welle > PLAN.length) return;
+    S.sprGesagt = S.sprGesagt || {};
+    const g = S.sprGesagt[th] = S.sprGesagt[th] || [];
+    const i = l.findIndex((z, k) => z[3] === "ende" && !g.includes(k));
+    if (i >= 0) { g.push(i); S.spr = null; sagen(l[i]); S.spr.t = -0.6; }
+  }
+  function sprechenZeichnen() {
+    const sp = S && S.spr; if (!sp || sp.t < 0) return;
+    const a = Math.min(1, sp.t / 0.25, (sp.dauer - sp.t) / 0.4);
+    if (a <= 0) return;
+    const name = (t().sprecher || {})[sp.wer] || sp.wer, x0 = 8, y0 = 60, r = 17;
+    ctx.save(); ctx.globalAlpha = a;
+    ctx.font = "600 15px " + FONT_H;
+    /* Zeilen umbrechen (höchstens drei) */
+    const maxB = 236, woerter = sp.text.split(" "), zeilen = [];
+    let z = "";
+    woerter.forEach(w => { const neu = z ? z + " " + w : w; if (ctx.measureText(neu).width > maxB && z) { zeilen.push(z); z = w; } else z = neu; });
+    if (z) zeilen.push(z);
+    if (zeilen.length > 3) { zeilen.length = 3; zeilen[2] += " …"; }
+    const breite = Math.max(...zeilen.map(q => ctx.measureText(q).width), 60) + 2 * r + 26, hoehe = 22 + zeilen.length * 16;
+    ctx.fillStyle = "rgba(14,11,18,.78)"; ctx.strokeStyle = "rgba(224,160,70,.55)"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x0 + 6, y0); ctx.lineTo(x0 + breite - 6, y0); ctx.quadraticCurveTo(x0 + breite, y0, x0 + breite, y0 + 6); ctx.lineTo(x0 + breite, y0 + hoehe - 6); ctx.quadraticCurveTo(x0 + breite, y0 + hoehe, x0 + breite - 6, y0 + hoehe);
+    ctx.lineTo(x0 + 6, y0 + hoehe); ctx.quadraticCurveTo(x0, y0 + hoehe, x0, y0 + hoehe - 6); ctx.lineTo(x0, y0 + 6); ctx.quadraticCurveTo(x0, y0, x0 + 6, y0); ctx.fill(); ctx.stroke();
+    /* Porträt im Kreis */
+    const cx = x0 + 6 + r, cy = y0 + 6 + r, k = KOPF[sp.wer], img = KOPFBILD[sp.wer];
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.clip();
+    ctx.fillStyle = "#241c18"; ctx.fillRect(cx - r, cy - r, 2 * r, 2 * r);
+    if (k && img && img.naturalWidth) {
+      const iw = img.naturalWidth, ih = img.naturalHeight, rr = k[3] * ih;
+      ctx.drawImage(img, k[1] * iw - rr, k[2] * ih - rr, rr * 2, rr * 2, cx - r, cy - r, 2 * r, 2 * r);
+    } else {
+      ctx.fillStyle = KOPF_FARBE[sp.wer] || "#5a4a3a"; ctx.fillRect(cx - r, cy - r, 2 * r, 2 * r);
+      ctx.fillStyle = "#ebe2cc"; ctx.font = "18px " + FONT_D; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(name.replace(/^(Der|Ein|The|A) /, "").charAt(0), cx, cy + 1);
+    }
+    ctx.restore();
+    ctx.strokeStyle = "#e0a046"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+    ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+    ctx.fillStyle = "#e0a046"; ctx.font = "12px " + FONT_D; ctx.fillText(name, cx + r + 8, y0 + 15);
+    ctx.fillStyle = "#ebe2cc"; ctx.font = "600 15px " + FONT_H;
+    zeilen.forEach((q, i) => ctx.fillText(q, cx + r + 8, y0 + 31 + i * 16));
+    ctx.restore();
+  }
+
+  /* ---------- Lava spritzt (Gang der Bewahrer, Themberchauds Halle) ----------
+     Erst glüht die Rinne auf, dann schießt eine Säule hoch: Pfeile, die hindurchfliegen, verglühen. */
+  function lavaUpdate(dt) {
+    if (!S) return;
+    S.lava = (S.lava || []).filter(l => (l.t += dt) < l.warn + l.dauer);
+    const th = themaJetzt();
+    if ((th !== "flammenweg" && th !== "drachenhort") || zustand !== "spiel") return;
+    S.lavaT = (S.lavaT == null ? 6 : S.lavaT) - dt;
+    if (S.lavaT > 0) return;
+    S.lavaT = (th === "drachenhort" ? 6 : 8) + Math.random() * 5;
+    S.lava.push({ x: 50 + Math.random() * 300, t: 0, warn: 1.1, dauer: 1.6, h: 120 + Math.random() * 60, gemeldet: false });
+  }
+  function lavaSaeule(l) { const k = l.t - l.warn; if (k < 0) return 0; return Math.min(1, k / 0.25) * Math.min(1, (l.dauer - k) / 0.35); }
+  function lavaZeichnen() {
+    (S && S.lava || []).forEach(l => {
+      if (l.t < l.warn) { const p = l.t / l.warn; const g = ctx.createRadialGradient(l.x, 294, 0, l.x, 294, 26); g.addColorStop(0, "rgba(255,220,140," + (0.5 + 0.4 * Math.sin(l.t * 30)) * p + ")"); g.addColorStop(1, "rgba(255,120,40,0)"); ctx.fillStyle = g; ctx.fillRect(l.x - 26, 268, 52, 52); return; }
+      const k = lavaSaeule(l), top = 296 - l.h * k;
+      const g = ctx.createLinearGradient(0, top, 0, 296); g.addColorStop(0, "rgba(255,240,176,.9)"); g.addColorStop(0.4, "rgba(255,150,50,.85)"); g.addColorStop(1, "rgba(160,40,12,.9)");
+      ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(l.x - 9, 296); ctx.quadraticCurveTo(l.x - 12, top + 20, l.x, top); ctx.quadraticCurveTo(l.x + 12, top + 20, l.x + 9, 296); ctx.fill();
+      if (!ruhig && Math.random() < 0.6) S.teilchen.push({ x: l.x + (Math.random() - 0.5) * 14, y: top + 6, vx: (Math.random() - 0.5) * 90, vy: -60 - Math.random() * 70, leben: 0.7, max: 0.7, farbe: zufall(["#ffb04a", "#fff0b0", "#ff7a2a"]), gr: 2 + Math.random() * 2, schwer: 0.6, leuchten: true });
+    });
+  }
+  function lavaTrifft(p) {
+    for (const l of (S.lava || [])) {
+      const k = lavaSaeule(l); if (k < 0.2) continue;
+      if (Math.abs(p.x - l.x) < 11 && p.y < 298 && p.y > 296 - l.h * k) {
+        glut(p.x, p.y, ruhig ? 4 : 10, ["#ffb04a", "#fff0b0", "#c4401e"]);
+        if (!l.gemeldet) { l.gemeldet = true; textAuf(p.x, p.y - 16, t().lavaPfeil, "#ffb04a", 16, 0.9); }
+        return true;
+      }
+    }
+    return false;
+  }
   const geheimGefunden = () => { try { return JSON.parse(lies("imres-waldlauf-geheim", "[]")) || []; } catch (_) { return []; } };
   /* Kapitel XII: Echo ruft den Blitz herab – alle paar Sekunden schlägt er in einen Gegner ein (nie in Bosse, nie in Freunde) */
   function echoBlitzUpdate(dt, tx) {
@@ -1201,6 +1430,8 @@
   function update(dt) {
     const tx = t();
     geheimUpdate(dt);
+    sprechenUpdate(dt);
+    lavaUpdate(dt);
     echoBlitzUpdate(dt, tx);
     if (S.banner) { S.banner.t += dt; if (S.banner.t > S.banner.dauer) S.banner = null; }
     S.beben = Math.max(0, S.beben - dt);
@@ -1264,7 +1495,11 @@
       S.bonusT -= dt;
       if (S.bonusT <= 0 && !S.gegner.some(e => e.a.art === "bonus")) {
         S.bonusT = 13 + Math.random() * 9;
-        if (welt && welt.unten) { spawnen({ typ: "stimme", dir: 1, x: 70 + Math.random() * 260, y: 330 }); textAuf(W / 2, 92, tx.bonusDa.stimme, "#ebe2cc", 19, 1.6); KLANG.glocke(); }
+        const thB = weltName ? weltName.split(":")[0] : (welt && welt.name);
+        if (thB === "drachenhort") {
+          const d = Math.random() < 0.5 ? 1 : -1, b = 1 + Math.floor(Math.random() * 2);
+          for (let i = 0; i < 3; i++) spawnen({ typ: "muenze", dir: d, bahn: b, versatz: i * 26, still: i > 0 });
+        } else if (welt && welt.unten) { spawnen({ typ: "stimme", dir: 1, x: 70 + Math.random() * 260, y: 330 }); textAuf(W / 2, 92, tx.bonusDa.stimme, "#ebe2cc", 19, 1.6); KLANG.glocke(); }
         else spawnen({ typ: Math.random() < 0.55 ? "hase" : "blatt", dir: Math.random() < 0.5 ? 1 : -1 });
       }
     }
@@ -1291,6 +1526,7 @@
       if (e.bann > 0 || e.gehalten || e.duck > 0 || e.schreck > 0) f = 0;
       if (e.eis > 0) f *= 1 - e.eisK;
       if (e.a.schatten && e.unsichtbar) f *= 1.7; // im Dunkeln huschen sie schneller
+      if (e.a.huschen) f *= 0.35 + 1.2 * Math.max(0, Math.sin(e.t * 3.4 + e.phase)); // Ratten: losrennen, stehen bleiben, schnuppern
       const zurueck = e.angst > 0 && e.a.art !== "boss";
       if (zurueck) f *= -0.8;
       const schritt = e.dir * e.tempo * f * dt;
@@ -1313,12 +1549,13 @@
           e.y = e.basisY + Math.sin(e.t * 1.4) * 18;
           if (e.bann <= 0) {
             e.odemT -= dt;
-            if (e.odemT <= 2.2 && !e.laedt && e.odemT > 0) { e.laedt = true; e.unterbrechung = 0; textAuf(W / 2, 96, tx.odemLaden, "#b4ff6a", 22, 1.6); }
+            if (e.odemT <= 2.2 && !e.laedt && e.odemT > 0) { e.laedt = true; e.unterbrechung = 0; textAuf(W / 2, 96, tx.odemLadenTyp[e.typ] || tx.odemLaden, e.a.feuerOdem ? "#ffb04a" : "#b4ff6a", 22, 1.6); }
             if (e.odemT <= 0) {
               if (e.laedt) {
                 e.laedt = false; S.leben = Math.max(0, S.leben - 1); S.combo = 0; S.beben = 0.7; KLANG.odem();
-                textAuf(W / 2, 230, tx.odem, "#b4ff6a", 28, 1.5);
-                for (let i = 0; i < (ruhig ? 10 : 40); i++) S.teilchen.push({ x: e.x - e.dir * 50 + (Math.random() - 0.5) * 30, y: e.y - e.h * 0.4, vx: (Math.random() - 0.5) * 160, vy: 120 + Math.random() * 200, leben: 1 + Math.random() * 0.6, max: 1.6, farbe: zufall(["#8ad84a", "#b4ff6a", "#3e7a3a"]), gr: 3 + Math.random() * 4, schwer: 0.3, leuchten: true });
+                textAuf(W / 2, 230, tx.odemTyp[e.typ] || tx.odem, e.a.feuerOdem ? "#ffb04a" : "#b4ff6a", 28, 1.5);
+                const mx = e.a.feuerOdem ? e.x + e.dir * e.w * 0.36 : e.x - e.dir * 50, my = e.a.feuerOdem ? e.y - e.h * 0.62 : e.y - e.h * 0.4;
+                for (let i = 0; i < (ruhig ? 10 : e.a.feuerOdem ? 60 : 40); i++) S.teilchen.push({ x: mx + (Math.random() - 0.5) * 30, y: my, vx: (Math.random() - 0.5) * 160 + (e.a.feuerOdem ? (200 - mx) * 0.6 : 0), vy: 120 + Math.random() * 200, leben: 1 + Math.random() * 0.6, max: 1.6, farbe: zufall(e.a.feuerOdem ? ["#ffb04a", "#fff0b0", "#c4401e", "#ff7a2a"] : ["#8ad84a", "#b4ff6a", "#3e7a3a"]), gr: 3 + Math.random() * 4, schwer: 0.3, leuchten: true });
               }
               e.odemT = 8;
             }
@@ -1380,7 +1617,7 @@
         if (S.rex.ziel === e) { S.rex.zustand = "zurueck"; S.rex.ziel = null; }
         const rx = e.dir === 1 ? W - 70 : 70, ry = Math.min(e.y - e.h / 2, 420);
         if (e.a.art === "bonus") return;
-        if (e.a.art === "freund") { if (!e.aua) { S.punkte += e.a.punkte; textAuf(rx, ry, tx.wolfFrei + " +" + e.a.punkte, "#ebe2cc", 18, 1.3); KLANG.glocke(); } return; }
+        if (e.a.art === "freund") { if (!e.aua) { S.punkte += e.a.punkte; textAuf(rx, ry, (tx.freund[e.typ] ? tx.freund[e.typ].frei : tx.wolfFrei) + " +" + e.a.punkte, "#ebe2cc", 18, 1.3); KLANG.glocke(); } return; }
         if (e.verwandelt || (e.flieht && tx.entwischt[e.typ])) textAuf(W / 2, 180, tx.entwischt[e.verwandelt ? "nezna" : e.typ], "#c88aff", 20, 2);
         if (e.verlust > 0) {
           S.leben = Math.max(0, S.leben - e.verlust); S.combo = 0; S.beben = Math.max(S.beben, 0.35);
@@ -1501,7 +1738,8 @@
   function gegnerZeichnen(e) {
     const sp = SPRITES[e.sp];
     let alpha = 1, dy = 0, dreh = 0;
-    if (e.tot) { const k = e.tot / 0.5; alpha = 1 - k; dy = k * 18; dreh = e.dir * k * 0.5; }
+    if (e.tot) { const k = e.tot / 0.5; alpha = 1 - k; dy = k * 18; dreh = e.dir * k * 0.5; if (e.a.verschont) { dy = -k * 46; dreh = 0; } }
+    if (e.a.illusion) alpha *= (e.a.art === "boss" ? 0.8 : 0.62) + (e.a.art === "boss" ? 0.12 : 0.2) * Math.sin(e.t * 8 + e.phase) + (Math.random() < 0.04 ? -0.25 : 0);
     if (e.bew === "boden" && e.t < 0.35 && !e.a.seil) dy += (1 - e.t / 0.35) * e.h * 0.6;
     if (e.duck > 0) dy += Math.min(1, (1.1 - e.duck) / 0.15, e.duck / 0.15) * e.h * 0.62;
     if (e.unsichtbar && e.duck <= 0) alpha *= 0.12;
@@ -1526,7 +1764,8 @@
       let schatten = e.a.glut || (e.a.art === "bonus" ? "rgba(255,207,122,.8)" : "rgba(235,226,204,.38)");
       if (e.gift) schatten = "rgba(140,230,70,.9)";
       if (e.eis > 0) schatten = "rgba(150,220,255,.95)";
-      if (e.laedt) schatten = "rgba(180,255,90," + (0.6 + 0.4 * Math.sin(e.t * 20)).toFixed(2) + ")";
+      if (e.laedt) schatten = (e.a.feuerOdem ? "rgba(255,170,60," : "rgba(180,255,90,") + (0.6 + 0.4 * Math.sin(e.t * 20)).toFixed(2) + ")";
+      if (e.a.illusion && !e.laedt) schatten = "rgba(255,214,130," + (0.6 + 0.3 * Math.sin(e.t * 7 + e.phase)).toFixed(2) + ")";
       ctx.shadowColor = schatten; ctx.shadowBlur = e.a.art === "boss" || e.laedt ? 20 : e.a.art === "bonus" || e.eis > 0 || e.gift ? 14 : 9;
       ctx.drawImage(img, -e.w / 2, -e.h, e.w, e.h);
       ctx.shadowBlur = 0;
@@ -1780,6 +2019,7 @@
     if (zl >= 0 && !ruhig) { const f = 1 + 0.13 * Math.sin(zl * Math.PI), zx = S.zeitlupe.x, zy = S.zeitlupe.y; ctx.translate(zx, zy); ctx.scale(f, f); ctx.translate(-zx, -zy); }
     welt.hinten(ctx, s, dtB, u);
     geheimZeichnen();
+    if (S) lavaZeichnen();
     ambientZeichnen(welt.partikel, jetzt);
     const gg = S ? S.gegner : [];
     gg.forEach(e => { if (e.bahn < 0 && (e.bew === "drache" || e.bew === "schwebe")) gegnerZeichnen(e); });
@@ -1812,6 +2052,18 @@
         ctx.restore();
       });
       S.speere.forEach(sp => {
+        if (sp.art === "feuer") {
+          const r = 6 + Math.sin(sp.t * 30) * 1;
+          const g = ctx.createRadialGradient(sp.x, sp.y, 0, sp.x, sp.y, r * 2.6); g.addColorStop(0, "rgba(255,240,176,1)"); g.addColorStop(0.35, "rgba(255,150,60,.9)"); g.addColorStop(1, "rgba(196,64,30,0)");
+          ctx.fillStyle = g; ctx.beginPath(); ctx.arc(sp.x, sp.y, r * 2.6, 0, Math.PI * 2); ctx.fill();
+          return;
+        }
+        if (sp.art === "kiesel") {
+          ctx.save(); ctx.translate(sp.x, sp.y); ctx.rotate(sp.t * 9);
+          ctx.fillStyle = "#7a6c5e"; ctx.beginPath(); ctx.moveTo(-6, -3); ctx.lineTo(1, -6); ctx.lineTo(6, -1); ctx.lineTo(3, 5); ctx.lineTo(-4, 5); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = "rgba(255,255,255,.15)"; ctx.fillRect(-3, -4, 4, 2); ctx.restore();
+          return;
+        }
         const w = Math.atan2(sp.vy, sp.vx);
         ctx.save(); ctx.translate(sp.x, sp.y); ctx.rotate(w);
         ctx.strokeStyle = "#6a5038"; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(-22, 0); ctx.lineTo(10, 0); ctx.stroke();
@@ -1864,6 +2116,7 @@
     }
     ctx.restore();
     if (S && zustand !== "start" && zustand !== "geschichte") hudZeichnen();
+    if (S && (zustand === "spiel" || zustand === "pause" || zustand === "wahl")) sprechenZeichnen();
     if (S && zustand === "spiel") bannerZeichnen();
     if (pano) pano.zeichnen(s, dtB);
   }
@@ -2478,6 +2731,7 @@ html.wl-ohne-scroll, html.wl-ohne-scroll body { overflow: hidden; }
     },
     themen: () => WELT.namen.slice(),
     spiel: () => S,
+    welle: n => { if (S && n >= 1) { welleStarten(n); return true; } return false; }, /* direkt zu einer Welle springen (Tests) */
     schwach: e => schwachPunkt(e)
   };
 })();

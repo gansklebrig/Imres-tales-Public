@@ -617,6 +617,201 @@
       linie(x, "#c98a3a", 5, [[34, 74], [30, 88]]); linie(x, "#c98a3a", 5, [[46, 74], [50, 88]]);
       leuchtAuge(x, 28, 25, 1.8, 1.8, "#ff5a4a", 5); leuchtAuge(x, 52, 25, 1.8, 1.8, "#ff5a4a", 5);
       return c;
+    },
+
+    /* ---------- Kapitel XIII–XV: Riesendorf, Bewahrer der Flamme, Themberchauds Halle ---------- */
+
+    /* Grubenratte aus dem Steinbruch der Riesen: struppig, langer nackter Schwanz, Erzstaub im Fell */
+    ratte() {
+      const [c, x] = grund(140, 70);
+      // Schwanz (nach rechts hinten, geschwungen)
+      x.strokeStyle = verlauf(x, 90, 40, 138, 30, [[0, "#9a6a62"], [1, "#c99a8a"]]); x.lineWidth = 4;
+      x.beginPath(); x.moveTo(96, 44); x.bezierCurveTo(116, 54, 124, 26, 138, 34); x.stroke();
+      x.lineWidth = 2; x.beginPath(); x.moveTo(128, 30); x.lineTo(138, 34); x.stroke();
+      // Hinterbein
+      linie(x, "#3a2e28", 5, [[84, 48], [92, 60], [86, 64]]);
+      // Körper
+      x.fillStyle = verlauf(x, 30, 20, 100, 60, [[0, "#7a6a5c"], [1, "#3a302a"]]);
+      x.beginPath(); x.moveTo(34, 40); x.quadraticCurveTo(50, 16, 82, 22); x.quadraticCurveTo(104, 30, 98, 48); x.quadraticCurveTo(70, 60, 40, 52); x.closePath(); x.fill();
+      // struppiges Fell, Erzglitzer
+      x.strokeStyle = "rgba(30,24,20,.7)"; x.lineWidth = 1.2;
+      for (let i = 0; i < 9; i++) { const px = 48 + i * 5.5; x.beginPath(); x.moveTo(px, 24 + Math.abs(i - 4)); x.lineTo(px + 3, 18 + Math.abs(i - 4)); x.stroke(); }
+      x.fillStyle = "rgba(120,200,190,.7)"; [[60, 34], [74, 30], [86, 38]].forEach(([px, py]) => oval(x, px, py, 1.1, 1.1));
+      // Vorderbein
+      linie(x, "#3a2e28", 4.5, [[44, 48], [40, 60], [34, 62]]);
+      // Kopf, spitze Schnauze, Ohr, Nagezähne
+      x.fillStyle = "#6a5a4c"; x.beginPath(); x.moveTo(40, 30); x.quadraticCurveTo(22, 30, 8, 42); x.quadraticCurveTo(22, 50, 42, 48); x.closePath(); x.fill();
+      x.fillStyle = "#c99a8a"; oval(x, 9, 42, 3, 2.4);
+      x.fillStyle = "#8a6a62"; oval(x, 40, 26, 7, 8, -0.3); x.fillStyle = "#c99a8a"; oval(x, 40, 27, 4, 5, -0.3);
+      x.fillStyle = "#f1e7cf"; x.fillRect(12, 45, 2, 4);
+      leuchtAuge(x, 26, 37, 2.2, 2, "#ff7a5a", 6);
+      linie(x, "rgba(235,226,204,.5)", 0.8, [[12, 40], [2, 36]]); linie(x, "rgba(235,226,204,.5)", 0.8, [[12, 43], [1, 44]]);
+      return c;
+    },
+
+    /* Schreistein: ein Felsbrocken, aus dessen Riss ein glühender Mund schreit (Hgraam: „Der Stein schreit.“) */
+    schreistein() {
+      const [c, x] = grund(110, 110);
+      x.save(); x.shadowColor = "rgba(255,120,60,.8)"; x.shadowBlur = 14;
+      x.fillStyle = verlauf(x, 20, 16, 90, 96, [[0, "#8a7a6c"], [0.6, "#4a3e36"], [1, "#2a221e"]]);
+      poly(x, [[30, 14], [70, 8], [96, 34], [98, 70], [74, 98], [34, 100], [12, 74], [10, 38]]);
+      x.restore();
+      // Kanten und Flechten
+      x.fillStyle = "rgba(255,255,255,.08)"; poly(x, [[30, 14], [70, 8], [60, 24], [32, 30]]);
+      x.fillStyle = "rgba(0,0,0,.25)"; poly(x, [[74, 98], [98, 70], [84, 66], [66, 88]]);
+      x.fillStyle = "rgba(140,160,90,.35)"; oval(x, 80, 26, 6, 3, 0.4); oval(x, 22, 70, 5, 3, -0.6);
+      // Risse
+      linie(x, "rgba(20,14,12,.9)", 2, [[50, 10], [48, 28], [56, 40]]);
+      linie(x, "rgba(20,14,12,.9)", 2, [[96, 52], [80, 54], [74, 64]]);
+      // leere, glühende Augen
+      leuchtAuge(x, 36, 44, 5, 3.5, "#ffb04a", 12); leuchtAuge(x, 60, 42, 4.5, 3.2, "#ffb04a", 12);
+      x.fillStyle = "#3a1408"; oval(x, 36, 44, 2, 1.4); oval(x, 60, 42, 1.8, 1.3);
+      // aufgerissener Mund
+      x.save(); x.shadowColor = "#ff7a2a"; x.shadowBlur = 16;
+      const g = x.createRadialGradient(46, 72, 2, 46, 72, 20); g.addColorStop(0, "#fff0b0"); g.addColorStop(0.45, "#ff8a3a"); g.addColorStop(1, "#7a1e0c");
+      x.fillStyle = g; x.beginPath(); x.moveTo(26, 66); x.quadraticCurveTo(44, 58, 66, 64); x.quadraticCurveTo(62, 88, 46, 92); x.quadraticCurveTo(28, 86, 26, 66); x.fill();
+      x.restore();
+      x.fillStyle = "#4a3e36"; poly(x, [[32, 64], [36, 72], [40, 63]]); poly(x, [[50, 61], [54, 70], [58, 62]]);
+      return c;
+    },
+
+    /* Riesenwagen: ein Riese schiebt einen Erzwagen wie eine Schubkarre – nicht schießen! */
+    riesenwagen() {
+      const [c, x] = grund(230, 200);
+      // Wagen (links vorn, er wird nach links geschoben)
+      x.fillStyle = "#3a2a1c"; x.beginPath(); x.moveTo(8, 112); x.lineTo(120, 112); x.lineTo(112, 160); x.lineTo(16, 160); x.closePath(); x.fill();
+      x.strokeStyle = "#1e140c"; x.lineWidth = 3; [40, 64, 88].forEach(px => { x.beginPath(); x.moveTo(px, 114); x.lineTo(px - 2, 158); x.stroke(); });
+      x.strokeStyle = "#6a5a4a"; x.lineWidth = 4; x.beginPath(); x.moveTo(8, 112); x.lineTo(120, 112); x.stroke();
+      // Ladung: Gestein und leuchtendes Erz
+      [[26, 104, 16], [48, 96, 20], [74, 100, 18], [98, 104, 14], [62, 84, 14], [40, 86, 11]].forEach(([px, py, r], i) => {
+        x.fillStyle = i % 2 ? "#5a4e46" : "#6e6258"; oval(x, px, py, r, r * 0.75);
+      });
+      x.save(); x.shadowColor = "#5ad2b4"; x.shadowBlur = 10; x.fillStyle = "#7ae6c8"; [[52, 92], [80, 98], [36, 100]].forEach(([px, py]) => poly(x, [[px, py - 5], [px + 4, py], [px, py + 5], [px - 4, py]])); x.restore();
+      // Räder
+      [[30, 166], [98, 166]].forEach(([px, py]) => { x.fillStyle = "#2a1e14"; oval(x, px, py, 17, 17); x.fillStyle = "#4a3a28"; oval(x, px, py, 6, 6); x.strokeStyle = "#1a120c"; x.lineWidth = 2; for (let k = 0; k < 4; k++) { const a = k * Math.PI / 4; x.beginPath(); x.moveTo(px + Math.cos(a) * 15, py + Math.sin(a) * 15); x.lineTo(px - Math.cos(a) * 15, py - Math.sin(a) * 15); x.stroke(); } });
+      // Griffe
+      linie(x, "#4a3a28", 6, [[118, 128], [150, 108]]);
+      // der Riese (rechts, vorgebeugt): Granithaut, Ohrring, Steinkette
+      linie(x, "#4a3a32", 22, [[176, 150], [184, 176], [182, 198]]);
+      linie(x, "#3e302a", 22, [[160, 150], [150, 176], [146, 198]]);
+      x.fillStyle = "#2a201c"; oval(x, 186, 198, 16, 6); oval(x, 142, 198, 16, 6);
+      x.fillStyle = verlauf(x, 140, 60, 220, 160, [[0, "#8a7262"], [1, "#4e3c32"]]);
+      x.beginPath(); x.moveTo(150, 70); x.quadraticCurveTo(196, 56, 214, 90); x.quadraticCurveTo(222, 130, 196, 156); x.lineTo(148, 156); x.quadraticCurveTo(136, 112, 150, 70); x.fill();
+      x.fillStyle = "rgba(160,90,80,.25)"; oval(x, 180, 104, 14, 8); oval(x, 160, 132, 9, 6);
+      x.fillStyle = "#4a3a30"; x.fillRect(146, 136, 70, 12);
+      // Arme zum Griff
+      linie(x, "#7e685a", 16, [[160, 84], [150, 104], [150, 110]]);
+      linie(x, "#6e5a4e", 15, [[176, 90], [160, 108], [152, 110]]);
+      // Kopf: kahl, vorgebeugt
+      x.fillStyle = "#8a7262"; oval(x, 150, 52, 22, 22);
+      x.fillStyle = "rgba(255,255,255,.12)"; oval(x, 156, 40, 8, 5);
+      x.fillStyle = "#3a2e28"; oval(x, 140, 54, 2.6, 2); linie(x, "#3a2e28", 2, [[134, 64], [146, 66]]);
+      x.strokeStyle = "#c9a040"; x.lineWidth = 2.5; x.beginPath(); x.arc(164, 62, 5, 0, Math.PI * 2); x.stroke();
+      // Kette aus Steinen um den Hals
+      [[146, 76], [156, 82], [168, 84], [180, 80]].forEach(([px, py], i) => { x.fillStyle = i % 2 ? "#6a5e54" : "#8a7e70"; oval(x, px, py, 5, 4); });
+      return c;
+    },
+
+    /* Bewahrer der Flamme: Duergar-Priester in roter Robe, Glutschale in der Hand */
+    priester() {
+      const [c, x] = grund(130, 170);
+      // Robe
+      x.fillStyle = verlauf(x, 40, 50, 100, 168, [[0, "#9b2a1e"], [1, "#4a120c"]]);
+      x.beginPath(); x.moveTo(46, 58); x.lineTo(90, 56); x.quadraticCurveTo(108, 110, 106, 164); x.lineTo(28, 164); x.quadraticCurveTo(30, 108, 46, 58); x.fill();
+      x.strokeStyle = "#c9a040"; x.lineWidth = 2; x.beginPath(); x.moveTo(28, 160); x.lineTo(106, 160); x.stroke();
+      x.beginPath(); x.moveTo(68, 62); x.lineTo(66, 160); x.stroke();
+      // goldener Flammen-Saum
+      x.fillStyle = "#c9a040"; for (let i = 0; i < 6; i++) { const px = 34 + i * 12; poly(x, [[px, 160], [px + 4, 150], [px + 8, 160]]); }
+      // Kopf in roter Kapuze, grauer Bart
+      x.fillStyle = "#7a1e14"; x.beginPath(); x.arc(64, 38, 22, Math.PI * 0.9, Math.PI * 2.1); x.lineTo(84, 60); x.lineTo(44, 60); x.closePath(); x.fill();
+      x.fillStyle = "#8a8682"; oval(x, 60, 42, 14, 15);
+      x.fillStyle = "#4a4642"; x.beginPath(); x.moveTo(46, 48); x.quadraticCurveTo(46, 84, 60, 92); x.quadraticCurveTo(74, 84, 74, 50); x.quadraticCurveTo(60, 56, 46, 48); x.fill();
+      leuchtAuge(x, 52, 40, 2.6, 1.6, "#ffb04a", 8); leuchtAuge(x, 62, 40, 2.2, 1.4, "#ffb04a", 8);
+      // Arm mit Glutschale
+      linie(x, "#7a1e14", 11, [[48, 70], [32, 86], [24, 80]]);
+      x.fillStyle = "#8a8682"; oval(x, 24, 80, 5, 5);
+      x.fillStyle = "#4a3a2a"; x.beginPath(); x.moveTo(8, 70); x.lineTo(36, 70); x.lineTo(30, 78); x.lineTo(14, 78); x.closePath(); x.fill();
+      x.save(); x.shadowColor = "#ff8a3a"; x.shadowBlur = 16;
+      const g = x.createRadialGradient(22, 62, 1, 22, 64, 14); g.addColorStop(0, "#fff0b0"); g.addColorStop(0.5, "#ff9a3a"); g.addColorStop(1, "rgba(196,64,30,0)");
+      x.fillStyle = g; poly(x, [[10, 70], [14, 58], [18, 64], [22, 50], [26, 62], [30, 56], [34, 70]]); x.restore();
+      // goldenes Flammenzeichen auf der Brust
+      x.strokeStyle = "#e0b24a"; x.lineWidth = 1.6; x.beginPath(); x.arc(70, 104, 7, 0, Math.PI * 2); x.stroke();
+      x.beginPath(); x.moveTo(70, 112); x.quadraticCurveTo(64, 102, 70, 96); x.quadraticCurveTo(76, 102, 70, 112); x.stroke();
+      return c;
+    },
+
+    /* Magmin: kleines Feuerwesen aus der Lava, glüht und platzt, wenn es fällt */
+    magmin() {
+      const [c, x] = grund(110, 130);
+      x.save(); x.shadowColor = "#ff7a2a"; x.shadowBlur = 18;
+      // Beine aus erkalteter Lava
+      linie(x, "#3a1e14", 10, [[64, 92], [70, 112], [68, 124]]); linie(x, "#3a1e14", 10, [[44, 92], [38, 112], [40, 124]]);
+      // Körper: Krustenplatten mit glühenden Spalten
+      const g = x.createRadialGradient(54, 70, 4, 54, 72, 36); g.addColorStop(0, "#fff0b0"); g.addColorStop(0.35, "#ffb04a"); g.addColorStop(0.8, "#c4401e"); g.addColorStop(1, "#5a1a0c");
+      x.fillStyle = g; oval(x, 54, 72, 30, 28);
+      x.restore();
+      x.fillStyle = "#2e1810"; [[38, 58, 12, 8, -0.3], [66, 56, 11, 8, 0.4], [48, 88, 12, 7, 0.1], [72, 82, 8, 6, -0.4], [32, 78, 7, 6, 0.6]].forEach(([px, py, rx, ry, r]) => oval(x, px, py, rx, ry, r));
+      // Arme
+      linie(x, "#ff8a3a", 7, [[30, 66], [14, 56], [10, 44]]); linie(x, "#c4401e", 7, [[78, 66], [94, 58], [98, 46]]);
+      // Kopf: Flammenschopf
+      x.save(); x.shadowColor = "#ffcf7a"; x.shadowBlur = 14;
+      x.fillStyle = "#ffcf7a"; poly(x, [[36, 46], [40, 22], [46, 34], [52, 10], [58, 30], [66, 16], [70, 46]]);
+      x.fillStyle = "#ff8a3a"; poly(x, [[40, 46], [46, 28], [52, 38], [58, 24], [64, 46]]);
+      x.restore();
+      x.fillStyle = "#2e1810"; oval(x, 44, 50, 4, 3); oval(x, 60, 50, 4, 3);
+      x.fillStyle = "#fff0b0"; oval(x, 44, 50, 1.6, 1.4); oval(x, 60, 50, 1.6, 1.4);
+      x.fillStyle = "#2e1810"; x.beginPath(); x.moveTo(42, 60); x.quadraticCurveTo(52, 66, 62, 60); x.quadraticCurveTo(52, 62, 42, 60); x.fill();
+      return c;
+    },
+
+    /* Gartokkar, Hohepriester der Bewahrer: rote Robe mit Goldborten, Bommel an der Kapuze, Hände hinter dem Rücken, dünnes Lächeln */
+    gartokkar() {
+      const [c, x] = grund(150, 220);
+      // lange Robe, nach unten weit
+      x.fillStyle = verlauf(x, 40, 60, 120, 218, [[0, "#b02e1e"], [0.6, "#7a1a10"], [1, "#3e0c08"]]);
+      x.beginPath(); x.moveTo(52, 70); x.lineTo(104, 68); x.quadraticCurveTo(128, 140, 130, 214); x.lineTo(24, 214); x.quadraticCurveTo(28, 140, 52, 70); x.fill();
+      // Goldborten
+      x.strokeStyle = "#e0b24a"; x.lineWidth = 3;
+      x.beginPath(); x.moveTo(24, 208); x.lineTo(130, 208); x.stroke();
+      x.lineWidth = 2.2; x.beginPath(); x.moveTo(78, 74); x.lineTo(76, 208); x.stroke();
+      x.lineWidth = 1.4; [[36, 190, 120, 190], [44, 160, 114, 160]].forEach(([a, b, c2, d]) => { x.beginPath(); x.moveTo(a, b); x.quadraticCurveTo(78, b + 6, c2, d); x.stroke(); });
+      x.fillStyle = "#e0b24a"; for (let i = 0; i < 9; i++) oval(x, 30 + i * 12, 212, 2.2, 2.2);
+      // Schultern, Arme hinter dem Rücken (nur angedeutet)
+      x.fillStyle = "#8e2216"; x.beginPath(); x.moveTo(46, 76); x.quadraticCurveTo(78, 62, 112, 76); x.lineTo(116, 110); x.quadraticCurveTo(80, 100, 44, 110); x.closePath(); x.fill();
+      linie(x, "rgba(30,8,4,.55)", 3, [[50, 104], [60, 124]]); linie(x, "rgba(30,8,4,.55)", 3, [[110, 104], [100, 124]]);
+      // Kapuze mit Bommeln
+      x.fillStyle = "#9b2618"; x.beginPath(); x.arc(76, 46, 26, Math.PI * 0.95, Math.PI * 2.05); x.lineTo(100, 76); x.lineTo(52, 76); x.closePath(); x.fill();
+      x.strokeStyle = "#e0b24a"; x.lineWidth = 2; x.beginPath(); x.arc(76, 46, 26, Math.PI * 1.05, Math.PI * 1.95); x.stroke();
+      [[52, 34], [62, 22], [76, 18], [90, 22], [100, 34]].forEach(([px, py], i) => {
+        linie(x, "#c9a040", 1, [[px, py], [px - 2, py - 8 - (i % 2) * 3]]);
+        x.fillStyle = "#e0b24a"; oval(x, px - 2, py - 10 - (i % 2) * 3, 3, 3);
+      });
+      // Gesicht: dunkle Haut, schmaler Bart, dünnes Lächeln
+      x.fillStyle = "#4a3a36"; oval(x, 72, 52, 15, 17);
+      x.fillStyle = "rgba(255,255,255,.1)"; oval(x, 78, 44, 6, 3);
+      x.fillStyle = "#2a201e"; x.beginPath(); x.moveTo(62, 62); x.quadraticCurveTo(66, 80, 72, 84); x.quadraticCurveTo(78, 80, 82, 62); x.quadraticCurveTo(72, 68, 62, 62); x.fill();
+      linie(x, "#1a1210", 1.6, [[62, 64], [70, 66], [76, 63]]);
+      leuchtAuge(x, 64, 49, 2.6, 1.5, "#ffcf7a", 8); leuchtAuge(x, 76, 49, 2.4, 1.4, "#ffcf7a", 8);
+      linie(x, "#1a1210", 1.4, [[60, 45], [67, 46]]);
+      // großes goldenes Zeichen auf der Brust (das, was Barradin nur kurz sah)
+      x.save(); x.shadowColor = "#ffcf7a"; x.shadowBlur = 10;
+      x.strokeStyle = "#e0b24a"; x.lineWidth = 2.5; x.beginPath(); x.arc(80, 140, 12, 0, Math.PI * 2); x.stroke();
+      x.beginPath(); x.moveTo(80, 152); x.quadraticCurveTo(70, 138, 80, 128); x.quadraticCurveTo(90, 138, 80, 152); x.stroke();
+      x.beginPath(); x.moveTo(68, 128); x.lineTo(80, 120); x.lineTo(92, 128); x.stroke();
+      x.restore();
+      return c;
+    },
+
+    /* Goldmünze aus Themberchauds Hort (rollt über den Boden) */
+    muenze() {
+      const [c, x] = grund(60, 60);
+      x.save(); x.shadowColor = "rgba(255,220,130,.9)"; x.shadowBlur = 12;
+      const g = x.createRadialGradient(24, 22, 2, 30, 30, 26); g.addColorStop(0, "#fff0b0"); g.addColorStop(0.55, "#e0a046"); g.addColorStop(1, "#8a5a20");
+      x.fillStyle = g; oval(x, 30, 30, 24, 24); x.restore();
+      x.strokeStyle = "#8a5a20"; x.lineWidth = 2; x.beginPath(); x.arc(30, 30, 19, 0, Math.PI * 2); x.stroke();
+      x.fillStyle = "#8a5a20"; poly(x, [[38, 22], [28, 20], [18, 30], [26, 32], [20, 38], [30, 38], [38, 32], [44, 18]]);
+      x.fillStyle = "#fff0b0"; oval(x, 26, 26, 1.6, 1.6);
+      return c;
     }
   };
 

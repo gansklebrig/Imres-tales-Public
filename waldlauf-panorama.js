@@ -556,6 +556,80 @@
     }
   };
 
+  /* XIII · Das Dorf der Riesen: Steinbruchwände, riesige Stiefel, ein Riese schiebt seinen Wagen, Hgraams Kristall */
+  MALER.riesendorf = function (x, info) {
+    const t = info.t, r = zuf(141);
+    stalaktiten(x, -info.L, 0, info.oben, "#0a0806", r, 10, 60); stalaktiten(x, info.W, info.W + info.R, info.oben, "#0a0806", r, 10, 60);
+    [-1, 1].forEach(s => {
+      // Abbaustufen im Fels
+      for (let k = 0; k < 5; k++) { const a = seitenX(info, s, 1.02), b = seitenX(info, s, 0.02), y0 = info.oben + 80 + k * 60; x.fillStyle = ["#17120e", "#1b1510", "#1f1812", "#231b14", "#271e16"][k]; x.fillRect(Math.min(a, b), y0, Math.abs(a - b), 64); x.strokeStyle = "rgba(255,190,120,.06)"; x.beginPath(); x.moveTo(Math.min(a, b), y0); x.lineTo(Math.max(a, b), y0 + 4); x.stroke(); }
+      // gestapelte Riesenquader
+      for (let k = 0; k < 4; k++) { const px = seitenX(info, s, 0.25 + k * 0.17), w = 46 + (k % 2) * 18, h = 30 + (k % 3) * 8, py = info.unten - 30 - (k % 2) * 34; x.fillStyle = "#2a2119"; x.fillRect(px - w / 2, py - h, w, h); x.fillStyle = "rgba(255,255,255,.05)"; x.fillRect(px - w / 2, py - h, w, 4); }
+    });
+    // ein riesiger Stiefel ragt ins Bild (links) – der Boden zittert, wenn er auftritt
+    const st = takt(t, 7, 1.2, 0), hub = st >= 0 ? Math.sin(st * Math.PI) * 26 : 0, sx = seitenX(info, -1, 0.55), sy = info.unten - 20 - hub;
+    x.fillStyle = "#1e1610"; x.beginPath(); x.moveTo(sx - 70, sy); x.lineTo(sx + 40, sy); x.quadraticCurveTo(sx + 60, sy - 10, sx + 46, sy - 40); x.lineTo(sx + 10, sy - 46); x.lineTo(sx + 6, sy - 170); x.lineTo(sx - 40, sy - 170); x.lineTo(sx - 46, sy - 50); x.quadraticCurveTo(sx - 74, sy - 30, sx - 70, sy); x.fill();
+    x.strokeStyle = "rgba(120,90,60,.4)"; x.lineWidth = 3; x.beginPath(); x.moveTo(sx - 44, sy - 120); x.lineTo(sx + 8, sy - 118); x.stroke();
+    if (st >= 0 && st > 0.85) for (let i = 0; i < 10; i++) { x.fillStyle = "rgba(168,150,130,.5)"; x.fillRect(sx - 60 + i * 12, info.unten - 14 - Math.random() * 10, 2, 2); }
+    // rechts: Riese schiebt einen Erzwagen vorbei (Silhouette, selten)
+    const wg = takt(t, 31, 12, 6);
+    if (wg >= 0) { const px = seitenX(info, 1, 1 - wg), py = info.unten - 30; x.fillStyle = "rgba(14,11,9,.92)"; x.fillRect(px - 70, py - 40, 60, 30); x.beginPath(); x.arc(px - 58, py - 6, 9, 0, PI2); x.arc(px - 22, py - 6, 9, 0, PI2); x.fill(); x.beginPath(); x.ellipse(px + 14, py - 90, 22, 46, 0.25, 0, PI2); x.fill(); x.beginPath(); x.arc(px + 2, py - 146, 15, 0, PI2); x.fill(); x.fillRect(px + 4 + Math.sin(t * 4) * 5, py - 50, 12, 50); x.fillRect(px + 22 - Math.sin(t * 4) * 5, py - 50, 12, 50); x.fillStyle = "#7ae6c8"; for (let k = 0; k < 3; k++) { x.beginPath(); x.arc(px - 60 + k * 18, py - 44, 4, 0, PI2); x.fill(); } }
+    // Hgraams Kristall in einer Nische (rechts oben)
+    const kx = seitenX(info, 1, 0.3), ky = info.oben + 150;
+    x.fillStyle = "#0a0807"; x.beginPath(); x.arc(kx, ky, 22, Math.PI, 0); x.lineTo(kx + 22, ky + 30); x.lineTo(kx - 22, ky + 30); x.fill();
+    glow(x, kx, ky + 8, 50, "rgba(255,160,70," + (0.3 + 0.12 * Math.sin(t * 1.3)).toFixed(3) + ")");
+    x.fillStyle = "#ffb060"; x.beginPath(); x.moveTo(kx, ky - 6); x.lineTo(kx + 8, ky + 8); x.lineTo(kx, ky + 24); x.lineTo(kx - 8, ky + 8); x.closePath(); x.fill();
+    funken(x, info, 24, "rgba(200,180,150,1)", 142, false);
+  };
+  /* XIV · Gang der Bewahrer: Flammenbecken, rote Banner, Lavarinnen, ein Bewahrer wacht mit Glutschale */
+  MALER.flammenweg = function (x, info) {
+    const t = info.t, r = zuf(151);
+    stalaktiten(x, -info.L, 0, info.oben, "#0a0402", r, 12, 70); stalaktiten(x, info.W, info.W + info.R, info.oben, "#0a0402", r, 12, 70);
+    [-1, 1].forEach(s => {
+      // Lavarinne an der Wand herab
+      const lx = seitenX(info, s, 0.82), g = x.createLinearGradient(0, info.oben, 0, info.unten); g.addColorStop(0, "rgba(255,90,30,0)"); g.addColorStop(0.5, "rgba(255,120,40,.55)"); g.addColorStop(1, "rgba(255,190,80,.8)");
+      x.fillStyle = g; x.fillRect(lx - 7, info.oben, 14, info.unten - info.oben);
+      glow(x, lx, info.unten - 40, 90, "rgba(255,110,40,.22)");
+      // Banner der Bewahrer
+      const bx = seitenX(info, s, 0.5), by = info.oben + 90;
+      x.fillStyle = "#7a1a10"; x.beginPath(); x.moveTo(bx - 20, by); x.lineTo(bx + 20, by); x.lineTo(bx + 20, by + 110); x.lineTo(bx, by + 96); x.lineTo(bx - 20, by + 110); x.closePath(); x.fill();
+      x.strokeStyle = "rgba(224,178,74,.85)"; x.lineWidth = 1.8; x.beginPath(); x.arc(bx, by + 44, 10, 0, PI2); x.stroke(); x.beginPath(); x.moveTo(bx, by + 54); x.quadraticCurveTo(bx - 7, by + 44, bx, by + 34); x.quadraticCurveTo(bx + 7, by + 44, bx, by + 54); x.stroke();
+      // Flammenbecken
+      const fx = seitenX(info, s, 0.2), fy = info.unten - 70;
+      x.fillStyle = "#1e100a"; x.fillRect(fx - 10, fy, 20, 70); x.fillStyle = "#3a2214"; x.beginPath(); x.moveTo(fx - 24, fy); x.lineTo(fx + 24, fy); x.lineTo(fx + 16, fy + 12); x.lineTo(fx - 16, fy + 12); x.closePath(); x.fill();
+      flamme(x, fx, fy, 1.6, t + s); glow(x, fx, fy - 10, 60, "rgba(255,150,60,.3)");
+    });
+    // ein Bewahrer wacht links und hebt seine Glutschale (selten)
+    const pw = takt(t, 23, 8, 4);
+    if (pw >= 0) { const px = seitenX(info, -1, 0.36), py = info.unten - 30, o = Math.sin(pw * Math.PI); x.fillStyle = "rgba(40,8,4,.95)"; x.beginPath(); x.moveTo(px - 18, py); x.lineTo(px - 12, py - 70); x.quadraticCurveTo(px, py - 92, px + 12, py - 70); x.lineTo(px + 18, py); x.fill(); flamme(x, px - 20, py - 60 - o * 16, 0.8 * o + 0.3, t); }
+    funken(x, info, 40, "rgba(255,160,70,1)", 152, true);
+  };
+  /* XV · Themberchauds Halle: Lavafälle, Goldberge, goldene Tiere, und manchmal öffnet sich ein Auge */
+  MALER.drachenhort = function (x, info) {
+    const t = info.t, r = zuf(161);
+    stalaktiten(x, -info.L, 0, info.oben, "#0c0302", r, 10, 60); stalaktiten(x, info.W, info.W + info.R, info.oben, "#0c0302", r, 10, 60);
+    [-1, 1].forEach(s => {
+      for (let k = 0; k < 2; k++) {
+        const lx = seitenX(info, s, 0.7 + k * 0.22), w = 18 + k * 8, g = x.createLinearGradient(0, info.oben, 0, info.unten); g.addColorStop(0, "rgba(255,110,40,.12)"); g.addColorStop(0.5, "rgba(255,140,50,.55)"); g.addColorStop(1, "rgba(255,210,110,.85)");
+        x.fillStyle = g; x.fillRect(lx - w / 2, info.oben, w, info.unten - info.oben);
+        for (let j = 0; j < 4; j++) { const ph = (t * 0.6 + j / 4 + k * 0.3) % 1; x.fillStyle = "rgba(255,235,160," + (0.55 * (1 - ph)).toFixed(2) + ")"; x.fillRect(lx - w * 0.3 + Math.sin(ph * 6) * 4, info.oben + ph * (info.unten - info.oben), 2, 8); }
+      }
+      const px = seitenX(info, s, 0.35), py = info.unten - 26;
+      x.fillStyle = "#5a3a10"; x.beginPath(); x.moveTo(px - 90, py); x.quadraticCurveTo(px, py - 130, px + 90, py); x.fill();
+      x.fillStyle = "#8a6020"; x.beginPath(); x.moveTo(px - 64, py); x.quadraticCurveTo(px, py - 96, px + 64, py); x.fill();
+      for (let k = 0; k < 14; k++) { const a = Math.max(0, Math.sin(t * 2.4 + k * 1.7 + s)), qx = px - 55 + r() * 110, qy = py - r() * 70; x.fillStyle = "rgba(255,235,160," + (a * 0.95).toFixed(2) + ")"; x.fillRect(qx - a * 2, qy, 1 + a * 4, 1); x.fillRect(qx, qy - a * 2, 1, 1 + a * 4); }
+    });
+    // goldene Tiere: ein Hirsch links, eine Eule rechts (der goldene Hund liegt in der Mitte der Halle)
+    const hx = seitenX(info, -1, 0.42), hy = info.unten - 92; x.fillStyle = "#d8a040";
+    x.beginPath(); x.ellipse(hx, hy, 18, 9, 0, 0, PI2); x.fill(); x.fillRect(hx - 22, hy - 16, 6, 14); x.beginPath(); x.arc(hx - 20, hy - 18, 5, 0, PI2); x.fill();
+    x.strokeStyle = "#d8a040"; x.lineWidth = 2; x.beginPath(); x.moveTo(hx - 20, hy - 22); x.lineTo(hx - 26, hy - 34); x.moveTo(hx - 24, hy - 28); x.lineTo(hx - 32, hy - 30); x.moveTo(hx - 18, hy - 22); x.lineTo(hx - 14, hy - 34); x.stroke();
+    const ex = seitenX(info, 1, 0.4), ey = info.unten - 98; x.fillStyle = "#e0b050"; x.beginPath(); x.ellipse(ex, ey, 9, 13, 0, 0, PI2); x.fill(); x.fillStyle = "#3a2008"; x.beginPath(); x.arc(ex - 3.5, ey - 5, 2, 0, PI2); x.arc(ex + 3.5, ey - 5, 2, 0, PI2); x.fill();
+    // ein riesiges Auge öffnet sich in der Dunkelheit (selten)
+    const au = takt(t, 41, 6, 14);
+    if (au >= 0) { const px = seitenX(info, 1, 0.75), py = info.oben + 120, o = Math.sin(au * Math.PI); glow(x, px, py, 60, "rgba(255,160,40," + (0.35 * o).toFixed(3) + ")"); x.fillStyle = "rgba(255,200,70," + o.toFixed(2) + ")"; x.beginPath(); x.ellipse(px, py, 26, 11 * o + 0.5, 0, 0, PI2); x.fill(); x.fillStyle = "rgba(20,6,2," + o.toFixed(2) + ")"; x.fillRect(px - 2, py - 10 * o, 4, 20 * o); }
+    funken(x, info, 46, "rgba(255,180,80,1)", 162, true);
+  };
+
   /* fremde oder unbekannte Kulissen: allgemeiner Wald bzw. allgemeine Höhle */
   function allgemein(x, info, w, u) { (w && w.unten ? MALER.mine : MALER.wachturm)(x, info, w, u); }
 
