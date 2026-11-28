@@ -346,11 +346,17 @@
     const sp = nachKey(k.dataset.key); if (!sp) return;
     klingen(sp);
     const v = k.querySelector(".sk-clip");
-    if (v) { if (!v.dataset.geladen) { v.innerHTML = quellen(v.dataset.clip); v.dataset.geladen = "1"; v.load(); } v.currentTime = 0; const pr = v.play(); if (pr && pr.then) pr.then(() => k.classList.add("spielt")).catch(() => {}); else k.classList.add("spielt"); }
+    if (v) {
+      if (!v.dataset.geladen) { v.innerHTML = quellen(v.dataset.clip); v.dataset.geladen = "1"; v.load(); }
+      /* Beim Abspielen schrumpft der Text zu einer schmalen Leiste unten; das Video bekommt
+         die ganze Fläche darüber und wird vollständig gezeigt (nicht beschnitten, nicht verdeckt). */
+      const an = () => { k.classList.add("kompakt"); const tx = k.querySelector(".sk-text"); if (tx) k.style.setProperty("--leiste", tx.offsetHeight + "px"); k.classList.add("spielt"); };
+      v.currentTime = 0; const pr = v.play(); if (pr && pr.then) pr.then(an).catch(() => {}); else an();
+    }
   });
   saal.addEventListener("pointerout", e => {
     const k = kachelVon(e); if (!k || (e.relatedTarget && k.contains(e.relatedTarget))) return;
-    k.classList.remove("spielt"); k.style.removeProperty("--rx"); k.style.removeProperty("--ry");
+    k.classList.remove("spielt", "kompakt"); k.style.removeProperty("--rx"); k.style.removeProperty("--ry");
     const v = k.querySelector(".sk-clip"); if (v) setTimeout(() => { if (!k.classList.contains("spielt")) v.pause(); }, 350);
   });
   /* Wer ein Spiel öffnet, hat es „gesehen“ – das Neu-Abzeichen verschwindet */
@@ -714,6 +720,19 @@
 .saal-kachel:hover .sk-bild img { transform: scale(1.08); filter: saturate(1.2) brightness(.95); }
 .sk-clip { opacity: 0; transition: opacity .45s; }
 .saal-kachel.spielt .sk-clip { opacity: 1; }
+/* Während der Vorschau-Clip läuft: Video ganz zeigen, oberhalb einer schmalen Titelleiste */
+.saal-kachel.spielt .sk-clip { top: .45rem; left: .45rem; right: .45rem; width: calc(100% - .9rem); height: calc(100% - var(--leiste, 34%) - .9rem); object-fit: contain;
+  filter: drop-shadow(0 8px 18px rgba(0,0,0,.7)); }
+.saal-kachel.spielt .sk-bild img { transform: scale(1.15); filter: blur(10px) saturate(.9) brightness(.38); }
+.saal-kachel.spielt .sk-bild::after { background: linear-gradient(180deg, rgba(12,9,14,0) calc(100% - var(--leiste, 34%) - 2rem), rgba(12,9,14,.96) calc(100% - var(--leiste, 34%) + .2rem)); }
+.saal-kachel.spielt .sk-glanz { opacity: 0; }
+.saal-kachel.kompakt .sk-spruch, .saal-kachel.kompakt .sk-stand { display: none; }
+.saal-kachel.kompakt .sk-text { gap: .25rem; padding-top: .55rem; padding-bottom: .65rem; }
+.saal-kachel.gross.kompakt .sk-text { padding-top: .7rem; padding-bottom: .8rem; }
+.saal-kachel.kompakt .sk-text b { font-size: clamp(1.05rem, 1.9vw, 1.35rem); }
+.saal-kachel.gross.kompakt .sk-text b { font-size: clamp(1.3rem, 2.6vw, 1.9rem); }
+.saal-kachel.kompakt .sk-aktionen { margin-top: .1rem; }
+.saal-kachel.kompakt .sk-los, .saal-kachel.kompakt .sk-mehr { white-space: nowrap; }
 .sk-bild::after { content: ""; position: absolute; inset: 0; background:
   linear-gradient(180deg, rgba(12,9,14,0) 30%, color-mix(in srgb, var(--farbe) 14%, rgba(12,9,14,.7)) 62%, rgba(12,9,14,.97) 100%),
   linear-gradient(0deg, color-mix(in srgb, var(--farbe) 22%, transparent), transparent 40%); }
