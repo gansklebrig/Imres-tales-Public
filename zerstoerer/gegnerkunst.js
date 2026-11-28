@@ -108,8 +108,37 @@
   };
 
   /* ---------- Zeichnen: Namen der Techniken, Elite-Auren ---------- */
+  /* W41 Leistung: „?“-Blase und Technik-Namen als fertige Bildchen (Schrift zeichnen ist auf schwachen Geräten teuer; bei
+     vollen Kämpfen standen hier je Bild Dutzende fillText/measureText). Auflösung = aktueller Bildmaßstab (scharf wie vorher);
+     solange die Schrift noch lädt, wird wie bisher direkt gezeichnet (sonst bliebe die Ersatzschrift im Bildchen). */
+  const fontsOk = () => !document.fonts || document.fonts.status === "loaded";
+  const W41 = { q: {}, lab: new Map() };
+  function qSpr(ps) {
+    let cv = W41.q[ps]; if (cv) return cv;
+    cv = document.createElement("canvas"); cv.width = Math.ceil(10 * ps); cv.height = Math.ceil(11 * ps);
+    const g = cv.getContext("2d"); g.setTransform(ps, 0, 0, ps, 5 * ps, 10 * ps);
+    g.fillStyle = "rgba(20,14,12,.8)"; g.beginPath(); g.ellipse(0, -4, 4.2, 4.6, 0, 0, TAU); g.fill();
+    g.fillStyle = "#f4ead8"; g.beginPath(); g.ellipse(0, -4, 3.4, 3.8, 0, 0, TAU); g.fill();
+    g.fillStyle = "#b8742a"; g.font = "700 6px 'Alegreya Sans',sans-serif"; g.textAlign = "center"; g.fillText("?", 0, -1.8);
+    return (W41.q[ps] = cv);
+  }
+  function labSpr(c, s, col, ps) {
+    const key = ps + "|" + col + "|" + s; let o = W41.lab.get(key); if (o) return o;
+    if (W41.lab.size > 160) W41.lab.clear();
+    c.font = "italic 700 7px 'Alegreya Sans',sans-serif"; const w = c.measureText(s).width + 8;
+    const cv = document.createElement("canvas"); cv.width = Math.ceil(w * ps); cv.height = Math.ceil(9 * ps);
+    const g = cv.getContext("2d"); g.setTransform(ps, 0, 0, ps, (w / 2) * ps, 7 * ps);
+    g.fillStyle = "rgba(20,8,10,.75)"; g.fillRect(-w / 2, -7, w, 9);
+    g.font = "italic 700 7px 'Alegreya Sans',sans-serif"; g.textAlign = "center"; g.fillStyle = col; g.fillText(s, 0, 0);
+    o = { cv, w }; W41.lab.set(key, o); return o;
+  }
+  let w41ps = 0;
   function qBubble(c, x, y, age, left) {
     const pop = age < 0.18 ? 0.4 + 0.6 * (age / 0.18) : 1, a = Math.min(1, left / 0.5);
+    if (w41ps > 0) { /* W41 Leistung */
+      const a0 = c.globalAlpha, yy = y - (age < 0.18 ? (1 - age / 0.18) * 3 : 0) + Math.sin(age * 5) * 0.4;
+      c.globalAlpha = a; c.drawImage(qSpr(w41ps), x - 5 * pop, yy - 10 * pop, 10 * pop, 11 * pop); c.globalAlpha = a0; return;
+    }
     c.save(); c.globalAlpha = a; c.translate(x, y - (age < 0.18 ? (1 - age / 0.18) * 3 : 0) + Math.sin(age * 5) * 0.4); c.scale(pop, pop);
     c.fillStyle = "rgba(20,14,12,.8)"; c.beginPath(); c.ellipse(0, -4, 4.2, 4.6, 0, 0, TAU); c.fill();
     c.fillStyle = "#f4ead8"; c.beginPath(); c.ellipse(0, -4, 3.4, 3.8, 0, 0, TAU); c.fill();
@@ -121,17 +150,20 @@
     if (dp0) dp0.apply(this, arguments);
     const t = Z.gfx.time || 0, cam = Z.cam;
     c.save();
+    { const m = c.getTransform(); w41ps = !Z.w41aus && fontsOk() && !m.b && !m.c && m.a > 0 ? Math.min(8, Math.ceil(m.a * 2) / 2) : 0; } /* W41 Leistung */
     for (const e of Z.enemies) {
       if (e.dead || e.x < cam.x - 60 || e.x > cam.x + cam.w + 60 || e.y < cam.y - 60 || e.y > cam.y + cam.h + 60) continue;
       const cx = e.x + e.w / 2, fy = e.y + e.h, cy = e.y + e.h / 2;
       const ac = e.act;
       if (ac && ac.a && ac.a.name && ac.phase !== "post" && !(e.hidden > 0)) {
         const u = ac.phase === "pre" ? Math.min(1, ac.t / 0.15) : 1;
-        c.globalAlpha = u; c.font = "italic 700 7px 'Alegreya Sans',sans-serif"; c.textAlign = "center";
+        c.globalAlpha = u;
+        if (w41ps > 0) { const lb = labSpr(c, L(ac.a.name), ac.a.unblockable ? "#ff6a8a" : "#ffcf8a", w41ps), y = e.y - (e.elite ? 22 : 14); c.drawImage(lb.cv, cx - lb.w / 2, y - 7, lb.w, 9); c.globalAlpha = 1; } else { /* W41 Leistung: Bildchen statt Schrift */
+        c.font = "italic 700 7px 'Alegreya Sans',sans-serif"; c.textAlign = "center";
         const s = L(ac.a.name), w = c.measureText(s).width + 8, y = e.y - (e.elite ? 22 : 14);
         c.fillStyle = "rgba(20,8,10,.75)"; c.fillRect(cx - w / 2, y - 7, w, 9);
         c.fillStyle = ac.a.unblockable ? "#ff6a8a" : "#ffcf8a"; c.fillText(s, cx, y);
-        c.globalAlpha = 1;
+        c.globalAlpha = 1; }
       }
       /* W8: misstrauisch – kleines „?“ über dem Kopf (hat etwas gehört/gesehen, sucht) */
       if (e.sus > 0 && !e.aware && !e.sleep && !e.disguise && !(e.hidden > 0)) qBubble(c, cx + (e.face || 1) * e.w * 0.3, e.y - 3, e.qPop || 0, e.sus);

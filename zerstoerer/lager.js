@@ -1769,7 +1769,31 @@
     };
     tipT = setTimeout(probe, 3200);
   }
+  /* W41 Leistung: Namensschilder als fertige Bildchen (je Text, Hervorhebung und Bildmaßstab) – vorher je Bild und Figur
+     zweimal measureText + fillText. Solange die Schrift lädt, wie bisher direkt zeichnen. */
+  const plSpr = new Map();
+  function plateImg(c, a, b, hi) {
+    const m = c.getTransform(); if (m.b || m.c || !(m.a > 0) || Z.w41aus || (document.fonts && document.fonts.status !== "loaded")) return null;
+    const ps = Math.min(8, Math.ceil(m.a * 2) / 2), key = ps + "|" + (hi ? 1 : 0) + "|" + a + "|" + b;
+    let o = plSpr.get(key); if (o) return o;
+    if (plSpr.size > 80) plSpr.clear();
+    c.save(); c.font = "700 5.4px " + FB; const w1 = c.measureText(a).width; let w2 = 0; if (b) { c.font = "500 4.4px " + FB; w2 = c.measureText(b).width; } c.restore();
+    const w = Math.max(w1, w2) + 7, h = b ? 12.5 : 8, W = w + 1.2, H = h + 1.2;
+    const cv = document.createElement("canvas"); cv.width = Math.ceil(W * ps); cv.height = Math.ceil(H * ps);
+    const g = cv.getContext("2d"); g.setTransform(ps, 0, 0, ps, (W / 2) * ps, 0.6 * ps); g.textAlign = "center"; g.textBaseline = "middle";
+    g.fillStyle = "rgba(30,16,10,.82)"; g.fillRect(-w / 2 - 0.6, -0.6, w + 1.2, h + 1.2);
+    g.fillStyle = hi ? "#f0d090" : "#e6d2a8"; g.fillRect(-w / 2, 0, w, h);
+    g.fillStyle = "#3a1c0c"; g.font = "700 5.4px " + FB; g.fillText(a, 0, 4.2);
+    if (b) { g.fillStyle = hi ? "#8a2a10" : "#6a4022"; g.font = "500 4.4px " + FB; g.fillText(b, 0, 9.4); }
+    o = { cv, W, H, h }; plSpr.set(key, o); return o;
+  }
   function plate(c, x, y, a, b, hi, al) {
+    const im = plateImg(c, a, b, hi);
+    if (im) { /* W41 Leistung */
+      const a0 = c.globalAlpha; c.globalAlpha = al;
+      if (hi && !lo()) { c.globalCompositeOperation = "lighter"; Z.draw.glow(c, x, y + im.h / 2, 16, "rgba(255,190,80,.35)"); c.globalCompositeOperation = "source-over"; }
+      c.drawImage(im.cv, x - im.W / 2, y - 0.6, im.W, im.H); c.globalAlpha = a0; return;
+    }
     c.save(); c.globalAlpha = al; c.textAlign = "center"; c.textBaseline = "middle";
     c.font = "700 5.4px " + FB; const w1 = c.measureText(a).width; let w2 = 0; if (b) { c.font = "500 4.4px " + FB; w2 = c.measureText(b).width; }
     const w = Math.max(w1, w2) + 7, h = b ? 12.5 : 8;

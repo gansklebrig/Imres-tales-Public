@@ -592,10 +592,17 @@
   const FX = (Z.fx = { parts: [], texts: [], shake: 0, shakeX: 0, shakeY: 0, hitstop: 0, flash: 0, flashCol: "#fff", slow: 0, slowT: 0, zoom: 1, zoomT: 1, rings: [], smears: [] });
   const MAXP = 1400;
   /* p: x,y,vx,vy,life,size,col,g(gravity),drag,kind ('dot','spark','smoke','ember','shard','glow','ring','bubble','leaf','drop'),add(blend) */
+  /* W41 Leistung: Partikel-Obergrenze bei Last. FX.update misst die echte Bilddauer (gleitend); dauern Bilder länger als
+     ~28 ms (unter ~36 fps), sinkt FX.loadK stufenlos bis 0,35, ab ~20 ms steigt er wieder auf 1. Wirkung: Obergrenze
+     MAXP × Stufe × loadK, und oberhalb der halben Grenze wird jeder neue (nicht „keep“) Partikel nur mit Wahrscheinlichkeit
+     loadK angelegt – so verschwinden keine laufenden Rauchwolken schlagartig (splice der ältesten bleibt nur Notbremse). */
+  FX.loadK = 1; let fxLast = 0, fxEma = 1 / 60;
   FX.p = o => {
     const q = Z.gq && Z.gq.part != null ? Z.gq.part : 1;
     if (q < 1 && !o.keep && Math.random() > q) return o;
-    if (FX.parts.length > MAXP * Math.max(0.3, q)) FX.parts.splice(0, 80);
+    const lim = MAXP * Math.max(0.3, q) * FX.loadK;
+    if (FX.loadK < 1 && !o.keep && FX.parts.length > lim * 0.5 && Math.random() > FX.loadK) return o; /* W41 Leistung */
+    if (FX.parts.length > lim) FX.parts.splice(0, 80);
     o.t = 0; o.life = o.life || 0.5; o.size = o.size || 2; o.g = o.g || 0; o.drag = o.drag == null ? 0.9 : o.drag; o.kind = o.kind || "dot"; o.a = o.a == null ? 1 : o.a;
     o.rot = o.rot || 0; o.vr = o.vr || 0; FX.parts.push(o); return o;
   };
@@ -625,13 +632,22 @@
     FX.slow = f; FX.slowT = t;
   };
   FX.update = dt => {
-    for (let i = FX.parts.length - 1; i >= 0; i--) {
-      const p = FX.parts[i]; p.t += dt;
-      if (p.t >= p.life) { FX.parts.splice(i, 1); continue; }
+    /* W41 Leistung: Lastmesser für die Partikel-Obergrenze (echte Zeit zwischen zwei Bildern, Ausreißer > 0,25 s zählen nicht) */
+    { const now = performance.now(), iv = fxLast ? (now - fxLast) / 1000 : 0; fxLast = now;
+      if (iv > 0 && iv < 0.25) { fxEma += (iv - fxEma) * 0.08; const gq = Z.gq || {}, capT = gq.fpsCap || gq.autoCap ? 1 / (gq.fpsCap || gq.autoCap) : 1 / 60; /* gewollte Bildratengrenze (z. B. 30-fps-Gleichtakt) ist keine Last */
+        const want = fxEma > capT * 2.4 ? 0.35 : fxEma > capT * 1.7 ? 0.6 : fxEma < capT * 1.2 ? 1 : FX.loadK; FX.loadK += (want - FX.loadK) * (want < FX.loadK ? 0.05 : 0.02); if (FX.loadK > 0.995 || Z.w41aus || (Z.diag && Z.diag.busy === "bench")) FX.loadK = 1; /* Grafiktest: gleiche Effektlast für alle Stufen */ } }
+    /* W41 Leistung: abgelaufene Partikel durch Zusammenschieben entfernen (Reihenfolge bleibt) statt splice je Partikel –
+       bei 1000 Partikeln und vielen Abgängen pro Bild war das quadratisch */
+    const PS = FX.parts; let w = 0;
+    for (let i = 0; i < PS.length; i++) {
+      const p = PS[i]; p.t += dt;
+      if (p.t >= p.life) continue;
       p.vy += p.g * dt; const dr = Math.pow(p.drag, dt * 60); p.vx *= dr; p.vy *= dr;
       p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt;
-      if (p.collide && Z.world && Z.world.solidAt(p.x, p.y)) { p.y -= p.vy * dt; p.vy *= -0.3; p.vx *= 0.6; if (p.kind === "drop") { p.t = p.life; FX.burst(p.x, p.y - 1, 2, { sp: 30, col: p.col, life: 0.25, size: 1, g: 300 }); } }
+      if (p.collide && Z.world && Z.world.solidAt(p.x, p.y)) { p.y -= p.vy * dt; p.vy *= -0.3; p.vx *= 0.6; if (p.kind === "drop") { p.t = p.life; FX.burst(p.x, p.y - 1, 2, { sp: 30, col: p.col, life: 0.25, size: 1, g: 300 }); continue; } }
+      PS[w++] = p;
     }
+    PS.length = w; /* während der Schleife angehängte Partikel (FX.burst oben) liegen hinter i und wurden mit übernommen */
     for (let i = FX.texts.length - 1; i >= 0; i--) { const t = FX.texts[i]; t.t += dt; t.y += t.vy * dt; t.vy *= Math.pow(0.9, dt * 60); if (t.t > t.life) FX.texts.splice(i, 1); }
     for (let i = FX.rings.length - 1; i >= 0; i--) { const r = FX.rings[i]; r.t += dt; if (r.t > r.life) FX.rings.splice(i, 1); }
     for (let i = FX.smears.length - 1; i >= 0; i--) { const s = FX.smears[i]; s.t += dt; if (s.t > s.life) FX.smears.splice(i, 1); }
@@ -641,13 +657,19 @@
     FX.flash = Math.max(0, FX.flash - dt * 3);
     if (FX.slowT > 0) { FX.slowT -= dt; if (FX.slowT <= 0) FX.slow = 0; }
   };
+  /* W41 Leistung: FX.draw zeichnet nur Partikel im Kamerabild (Rand 80 px + Größe) und setzt Mischmodus/Farbe nur bei Wechsel –
+     gleiches Bild, deutlich weniger Zustandswechsel und Zeichenaufrufe bei vollen Kämpfen */
   FX.draw = (c, front) => {
+    const off = !!Z.w41aus, cm = Z.cam, cx0 = off ? -1e9 : cm.x - 80, cx1 = off ? 1e9 : cm.x + cm.w + 80, cy0 = off ? -1e9 : cm.y - 80, cy1 = off ? 1e9 : cm.y + cm.h + 80; /* Z.w41aus: Vergleichsschalter für Messungen */
+    let add = false, fs = null;
+    c.globalCompositeOperation = "source-over";
     for (const p of FX.parts) {
       if (!!p.front !== !!front) continue;
+      const m = p.size * 3; if (p.x < cx0 - m || p.x > cx1 + m || p.y < cy0 - m || p.y > cy1 + m) continue;
       const k = 1 - p.t / p.life, a = p.a * (p.fade === false ? 1 : k);
       c.globalAlpha = a;
-      if (p.add) c.globalCompositeOperation = "lighter";
-      c.fillStyle = p.col;
+      if (!!p.add !== add || off) { add = !!p.add; c.globalCompositeOperation = add ? "lighter" : "source-over"; }
+      if (p.col !== fs || off) { fs = p.col; c.fillStyle = fs; }
       switch (p.kind) {
         case "spark": {
           c.strokeStyle = p.col; c.lineWidth = p.size * 0.6; c.beginPath(); c.moveTo(p.x, p.y); c.lineTo(p.x - p.vx * 0.03, p.y - p.vy * 0.03); c.stroke(); break;
@@ -661,8 +683,8 @@
         case "rain": { c.strokeStyle = p.col; c.lineWidth = 0.7; c.beginPath(); c.moveTo(p.x, p.y); c.lineTo(p.x - p.vx * 0.02, p.y - p.vy * 0.02); c.stroke(); break; }
         default: { const s = p.size * (p.shrink === false ? 1 : 0.4 + k * 0.6); c.fillRect(p.x - s / 2, p.y - s / 2, s, s); }
       }
-      if (p.add) c.globalCompositeOperation = "source-over";
     }
+    if (add) c.globalCompositeOperation = "source-over";
     c.globalAlpha = 1;
     if (!front) return;
     for (const r of FX.rings) {

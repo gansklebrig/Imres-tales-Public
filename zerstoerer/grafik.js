@@ -248,7 +248,9 @@
         return;
       }
       S.gfx = { preset: phases[pi], fpsCap: 0 }; Z.applyGfx();
-      ph = { lvl: phases[pi], iv: [], lt: 0, t0: now(), warm: 700, dur: 3600 };
+      /* W41 Leistung: längeres Aufwärmen (Stufenwechsel baut Sprite-/Kachel-Zwischenspeicher und Leinwände neu auf – die
+         erste Stufe und der Wechsel auf die schlanken Stufen wurden sonst mit Aufbau-Spitzen bestraft) */
+      ph = { lvl: phases[pi], iv: [], lt: 0, t0: now(), warm: pi === 0 ? 2200 : 1500, dur: 3600 };
     };
     next();
     const loop = t => {
@@ -267,9 +269,18 @@
     requestAnimationFrame(loop);
     return true;
   };
+  /* W41 Leistung: Empfehlung gewichtet die schlechtesten 1 % und das längste Bild stark. Vorher genügten Ø 55 fps und 1 % ≥ 38 fps –
+     ein 111-Hz-Schirm mit Ultra 100 fps Ø, aber 1 % 43,8 fps und 27-ms-Bildern bekam „Ultra“ empfohlen (spürbares Ruckeln).
+     Ziel jetzt: 1 % ≥ min(60, 0,8 × Bildschirm-Hz) (mind. 45), Ø ≥ min(55, 0,9 × Hz), längstes Bild ≤ 2 Bilder der Ziel-1-%-Rate.
+     Schafft das keine Stufe, gewinnt die mit den besten 1 % (bei Gleichstand die schlankere). */
   function benchPick(res) {
-    const ok = res.filter(r => r.s.fps >= 55 && r.s.low >= 38).sort((a, b) => b.lvl - a.lvl)[0];
-    return ok ? ok.lvl : 0;
+    if (!res || !res.length) return 0;
+    const hz = Math.max(30, Math.min(240, res.reduce((a, r) => Math.max(a, r.s.hz || 0), 0) || 60));
+    const lowT = Math.max(45, Math.min(60, 0.8 * hz)), avgT = Math.min(55, 0.9 * hz), maxT = 2000 / lowT;
+    const ok = res.filter(r => r.s.fps >= avgT && r.s.low >= lowT && r.s.max <= maxT).sort((a, b) => b.lvl - a.lvl)[0];
+    if (ok) return ok.lvl;
+    const best = res.slice().sort((a, b) => b.s.low - a.s.low || a.lvl - b.lvl)[0];
+    return best ? best.lvl : 0;
   }
 
   /* ======================= BERICHT ======================= */
