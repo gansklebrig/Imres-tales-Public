@@ -3609,7 +3609,26 @@ function ulEBody(e,t,c,d,k,rise,sq){c.save();{const rk=e.recT?Math.max(0,1-(G.ti
   case'spider':for(let i=0;i<4;i++){const yy=-4+i*3,g=Math.sin(t*14+i+e.seed)*2;ln(c,trim,1.6,0,yy,-12,yy-5+g,-16,yy+4);ln(c,trim,1.6,0,yy,12,yy-5-g,16,yy+4)}ell(c,-3,2,8,7,body);circ(c,6,-1,5,body);
    if(d.statue){ln(c,'#d84a8a',1.4,-6,0,0,4);ln(c,'#d84a8a',1.4,4,-3,8,-1);circ(c,8,-3,1.6,'#ff60b0')}else{circ(c,8,-2,1.2,'#ff3030');circ(c,9.6,0,1.2,'#ff3030')}break;
   case'ettercap':ln(c,trim,2,-3,6,-3+lg,13);ln(c,trim,2,3,6,3-lg,13);ell(c,0,2,9,10,body);circ(c,2,-9,6,body);for(let i=0;i<3;i++){circ(c,4,-11+i*2.2,1,'#ff3030')}ln(c,trim,2,6,-6,10,-3);ln(c,trim,2,-6,-2,-14,-8);ln(c,trim,2,6,-2,14,-8);ell(c,-3,6,5,6,'#2a2a2a');break;
-  case'golem':ln(c,trim,4,-4,7,-4+lg*0.5,13);ln(c,trim,4,4,7,4-lg*0.5,13);c.fillStyle=body;c.fillRect(-10,-6,20,15);c.fillRect(-14,-6,5,12);c.fillRect(9,-6,5,12);c.fillRect(-6,-16,12,10);c.globalAlpha=0.6+0.3*Math.sin(t*3+e.seed);c.fillStyle=d.t;c.fillRect(-3,-12,2,2);c.fillRect(2,-12,2,2);c.fillRect(-1,-2,2,8);c.fillRect(-5,1,10,2);c.globalAlpha=1;break;
+  case'golem':{const pulse=0.6+0.3*Math.sin(t*3+e.seed),dk=W_||'#1c1a20',hell=W_||'rgba(255,255,255,.22)',sch=W_||'rgba(0,0,0,.28)';
+   if(d.t==='#3a3e48'||(!W_&&d.t&&parseInt(d.t.slice(1,3),16)<0x80)){/* Belebte Rüstung: Beinschienen, Brustpanzer, Schulterstücke, Topfhelm mit Sehschlitz – leer und glimmend */
+    ln(c,trim,4.2,-4,7,-4+lg*0.5,13);ln(c,trim,4.2,4,7,4-lg*0.5,13);c.fillStyle=body;c.fillRect(-7,11.5+lg*0.25,6,2.2);c.fillRect(1,11.5-lg*0.25,6,2.2);
+    poly(c,body,-9,-6,9,-6,7,8,0,10,-7,8);poly(c,hell,-8,-5,-1,-5,-1,9,-6,7.5);poly(c,sch,3,-5,8,-5,6.5,7.5,1,9.4);ln(c,dk,1,0,-5,0,9.5);ln(c,dk,1.2,-7.5,2,7.5,2);
+    c.fillStyle=trim;c.fillRect(-8,3,16,2.4);circ(c,0,4.2,1.4,W_||'#a89878');
+    ell(c,-11,-5,5.2,4.4,body);ell(c,11,-5,5.2,4.4,body);ell(c,-11.6,-6.2,3.4,2.2,hell);ell(c,10.4,-6.2,3.4,2.2,hell);
+    ln(c,body,3.6,-12.5,-2,-13.5+wob*0.6,6);ln(c,body,3.6,12.5,-2,13.5-wob*0.6,6);circ(c,-13.6+wob*0.6,7,2.6,trim);circ(c,13.6-wob*0.6,7,2.6,trim);
+    c.fillStyle=body;c.beginPath();c.moveTo(-6,-6);c.lineTo(-6.5,-15);c.quadraticCurveTo(0,-20,6.5,-15);c.lineTo(6,-6);c.closePath();c.fill();poly(c,hell,-5.6,-7,-5.9,-14.5,-1.5,-17.4,-1.5,-7);
+    c.fillStyle=dk;c.fillRect(-5,-12.6,10,2.2);c.fillRect(-0.9,-12.6,1.8,5.4);c.globalAlpha=pulse;c.fillStyle=W_||'#e8c070';c.fillRect(-4,-12,3,1.1);c.fillRect(1,-12,3,1.1);c.globalAlpha=1;
+    if(!W_){c.globalAlpha=0.18*pulse;circ(c,0,-11.5,6,'#e8c070');c.globalAlpha=1}}
+   else{/* Runenwächter: behauener Steinkoloss mit Rissen und glühenden Runen */
+    const st=body,stH=W_||'rgba(255,255,255,.16)',stS=W_||'rgba(0,0,0,.32)';
+    poly(c,st,-8,6,-4,6,-4.5,13+lg*0.25,-9,13+lg*0.25);poly(c,st,4,6,8,6,9,13-lg*0.25,4.5,13-lg*0.25);
+    poly(c,st,-11,-7,-4,-9,5,-9,11,-6,10,8,3,10,-4,10,-10,7);poly(c,stH,-11,-7,-4,-9,-3,9.6,-10,7);poly(c,stS,5,-9,11,-6,10,8,4,9.8);
+    ln(c,stS,0.9,-6,-4,-3,0);ln(c,stS,0.9,-3,0,-5,4);ln(c,stS,0.9,6,-3,8,2);
+    poly(c,st,-16,-8,-10,-9,-9,-2,-11,9+wob*0.6,-16.5,8+wob*0.6,-17,-2);poly(c,st,16,-8,10,-9,9,-2,11,9-wob*0.6,16.5,8-wob*0.6,17,-2);poly(c,stH,-16,-8,-12,-8.6,-13,8.6+wob*0.6,-16.5,8);
+    poly(c,st,-6,-9,-6.5,-17,-2,-19,4,-18.5,6.5,-15,6,-9);poly(c,stH,-6,-9,-6.5,-17,-2,-19,-2.5,-9);
+    c.globalAlpha=pulse;c.strokeStyle=trim;c.lineWidth=1.1;c.lineCap='round';c.beginPath();c.moveTo(-1,-6);c.lineTo(-1,4);c.moveTo(-1,-3);c.lineTo(2.4,-5.4);c.moveTo(-1,0);c.lineTo(2.4,2.4);c.moveTo(-14.5,-4);c.lineTo(-13,1);c.lineTo(-14.5,5);c.moveTo(14,-4);c.lineTo(14,5);c.moveTo(14,0.5);c.lineTo(12,-2);c.stroke();
+    c.fillStyle=trim;c.fillRect(-4,-14.4,2.4,1.8);c.fillRect(1.6,-14.4,2.4,1.8);if(!W_){c.globalAlpha=0.22*pulse;circ(c,0,-1,9,trim);circ(c,0,-13.6,5,trim)}c.globalAlpha=1}}
+   break;
   case'pylon':poly(c,body,-7,10,-5,-16,0,-22,5,-16,7,10);c.globalAlpha=0.5+0.4*Math.sin(t*5+e.seed);c.fillStyle=d.t;c.fillRect(-1,-14,2,18);circ(c,0,-18,3,d.t);c.globalAlpha=1;break;
   case'blight':ln(c,body,2.5,-3,6,-4+lg,13);ln(c,body,2.5,3,6,4-lg,13);ln(c,body,4,0,8,0,-8);ln(c,body,2,0,-2,-9,-8,-12,-14);ln(c,body,2,0,-2,9,-6,13,-12);ln(c,body,1.5,0,-8,-4,-15);ln(c,body,1.5,0,-8,5,-16);circ(c,0,-9,5,body);circ(c,1.6,-10,1.4,trim);circ(c,-1.6,-10,1.4,trim);if(d.needle)for(let i=0;i<5;i++)ln(c,'#b8d060',1,-4+i*2,-14,-5+i*2.5,-18);break;
   case'demon':poly(c,trim,-6,-2,-20,-12,-14,2);ell(c,0,2,10,11,body);circ(c,1,-9,7,body);poly(c,trim,-4,-14,-8,-23,-1,-15);poly(c,trim,4,-14,8,-23,1,-15);circ(c,4,-9,1.6,'#ffd040');ln(c,trim,2,9,4,14,10);break;
@@ -10325,15 +10344,31 @@ KGS.blight={box:[-15,-20,15,9],body(g,P,d,v,R){const b=d.c,tr=d.t,lt=kgSh(b,0.25
  legs(c,e,t,L){kgLimbs(c,e.def.c,2.5,[[-3,6,-4+L.lg,13],[3,6,4-L.lg,13]],L.W)}};
 
 /* Belebte Rüstung, Runenwächter: Platten mit Kanten und Nieten, Visier; Runen glimmen live */
-KGS.golem={box:[-15,-19,15,10],body(g,P,d,v,R){const b=d.c,tr=d.t,lt=kgSh(b,0.22),dk=kgSh(b,-0.3);
-  const bev=(x,y,w,h)=>{kR(g,x,y,w,h,b);kR(g,x,y,w,1.2,lt);kR(g,x,y,1,h,kgSh(b,0.1));kR(g,x,y+h-1.2,w,1.2,dk);kR(g,x+w-1,y,1,h,dk)};
-  bev(-14,-6,5,12);bev(9,-6,5,12);bev(-10,-6,20,15);bev(-6,-16,12,10);
-  kR(g,-6,-1,12,1,dk);kR(g,-6,3.5,12,1,dk);for(const x of[-8,8])for(const y of[-4,7])kC(g,x,y,0.6,lt);
-  if(v===1)kL(g,dk,0.6,[-8,1,-5,4,-6,7]);if(v===2){kL(g,lt,0.6,[-12,-4,-10,4]);kR(g,-3,-18,6,2,dk)}
-  P.shade();
-  kR(g,-4.5,-12.6,9,1.8,'#14141a')},
- post(c,e,t,L){if(L.W)return;const tr=e.def.t,glow=kgLum(tr)>0.35?tr:'#eee0b9',ga=c.globalAlpha;c.globalAlpha=ga*(0.6+0.3*Math.sin(t*3+e.seed));c.fillStyle=glow;c.fillRect(-3,-12.4,2,1.4);c.fillRect(2,-12.4,2,1.4);if(kgLum(tr)>0.35){c.fillRect(-1,-2,2,8);c.fillRect(-5,1,10,2)}c.globalAlpha=ga},
- legs(c,e,t,L){kgLimbs(c,e.def.t,4,[[-4,7,-4+L.lg*0.5,13],[4,7,4-L.lg*0.5,13]],L.W)}};
+KGS.golem={box:[-19,-22,19,11],body(g,P,d,v,R){const b=d.c,tr=d.t,lt=kgSh(b,0.22),dk=kgSh(b,-0.3),stein=kgLum(tr)>0.35;
+  if(!stein){/* Belebte Rüstung: Brustpanzer mit Grat, gewölbte Schulterstücke, Armschienen, Topfhelm mit Kreuzschlitz */
+   const hm=kgSh(b,0.08);
+   kL(g,dk,3.6,[-12.5,-2,-13.5,6]);kL(g,dk,3.6,[12.5,-2,13.5,6]);kC(g,-13.6,7.4,2.7,kgSh(tr,0.1));kC(g,13.6,7.4,2.7,kgSh(tr,0.1));
+   kP(g,b,[-9,-6,9,-6,7.5,8,0,10.5,-7.5,8]);kP(g,lt,[-8.4,-5.4,-0.6,-5.4,-0.6,9.6,-6.8,7.6]);kP(g,dk,[2.4,-5.4,8.4,-5.4,6.8,7.6,0.6,9.8]);kL(g,kgSh(b,0.4),0.7,[0,-5.6,0,9.8]);
+   kR(g,-8,2.6,16,2.4,tr);kC(g,0,3.8,1.3,'#b8a070');kR(g,-7,6.4,14,1,dk);
+   kE(g,-11.2,-5,5.4,4.6,b);kE(g,11.2,-5,5.4,4.6,b);kE(g,-12,-6.4,3.4,2.2,lt);kE(g,10.6,-6.4,3.2,2,lt);kL(g,dk,0.6,[-15.6,-3.6,-6.8,-3.6]);kL(g,dk,0.6,[6.8,-3.6,15.6,-3.6]);
+   for(const x of[-13,9.4])kC(g,x,-4.6,0.6,'#d8d0b8');
+   kP(g,hm,[-6.2,-6,-6.6,-15.4,-3.6,-18.6,3.6,-18.6,6.6,-15.4,6.2,-6]);kP(g,kgSh(b,0.3),[-5.8,-7,-6.1,-15,-3.4,-17.8,-1.2,-17.8,-1.2,-7]);kR(g,-6.6,-7.6,13.2,1.6,dk);
+   kR(g,-5,-12.9,10,2.3,'#141218');kR(g,-0.9,-12.9,1.8,5.6,'#141218');
+   if(v===1)kL(g,dk,0.6,[-6,1,-4,4]);if(v===2)kL(g,lt,0.6,[5,-15,3,-17.5]);
+   P.shade()}
+  else{/* Runenwächter: behauener Steinkoloss mit Rissen, Steinkopf, Runenrinnen */
+   kP(g,b,[-11,-7,-4,-9.4,5,-9.4,11.4,-6.4,10.4,8,3,10.4,-4,10.4,-10.4,7.4]);kP(g,lt,[-11,-7,-4,-9.4,-3,10,-10.4,7.4]);kP(g,dk,[5,-9.4,11.4,-6.4,10.4,8,4,10.2]);
+   kL(g,dk,0.8,[-7,-5,-4,-1,-6,3]);kL(g,dk,0.8,[6,-4,8,1,7,4]);
+   kP(g,b,[-17,-8,-10.4,-9.4,-9.4,-2,-11,9,-16.6,8.4,-17.6,-2]);kP(g,b,[17,-8,10.4,-9.4,9.4,-2,11,9,16.6,8.4,17.6,-2]);kP(g,lt,[-17,-8,-12.6,-9,-13.4,8.8,-16.6,8.4,-17.6,-2]);kP(g,dk,[13,-8.6,17,-8,17.6,-2,16.6,8.4,13.4,8.8]);
+   kP(g,b,[-6.4,-9,-6.8,-17,-2,-19.6,4,-19,6.8,-15.4,6.2,-9]);kP(g,lt,[-6.4,-9,-6.8,-17,-2,-19.6,-2.4,-9]);kP(g,dk,[2.6,-18.8,4,-19,6.8,-15.4,6.2,-9,2.6,-9]);
+   kR(g,-4.6,-14.8,3,2.2,'#141218');kR(g,1.6,-14.8,3,2.2,'#141218');
+   kL(g,'#141218',0.9,[-1,-6,-1,4]);kL(g,'#141218',0.9,[-1,-3,2.4,-5.4]);kL(g,'#141218',0.9,[-1,0,2.4,2.4]);kL(g,'#141218',0.9,[-14.6,-4,-13.2,1,-14.6,5]);kL(g,'#141218',0.9,[14.2,-4,14.2,5]);kL(g,'#141218',0.9,[14.2,0.5,12.2,-2]);
+   if(v===1)kC(g,7,-14,0.9,kgSh(b,-0.2));if(v===2)kL(g,kgSh(b,0.3),0.6,[-9,5,-6,8]);
+   P.shade()}},
+ post(c,e,t,L){if(L.W)return;const tr=e.def.t,stein=kgLum(tr)>0.35,ga=c.globalAlpha,p=0.6+0.3*Math.sin(t*3+e.seed);c.globalAlpha=ga*p;
+  if(stein){c.fillStyle=tr;c.fillRect(-4,-14.4,2.4,1.6);c.fillRect(2,-14.4,2.4,1.6);c.strokeStyle=tr;c.lineWidth=0.9;c.lineCap='round';c.beginPath();c.moveTo(-1,-6);c.lineTo(-1,4);c.moveTo(-1,-3);c.lineTo(2.4,-5.4);c.moveTo(-1,0);c.lineTo(2.4,2.4);c.moveTo(-14.6,-4);c.lineTo(-13.2,1);c.lineTo(-14.6,5);c.moveTo(14.2,-4);c.lineTo(14.2,5);c.moveTo(14.2,0.5);c.lineTo(12.2,-2);c.stroke()}
+  else{c.fillStyle='#e8c070';c.fillRect(-4.2,-12.4,3,1.2);c.fillRect(1.2,-12.4,3,1.2)}c.globalAlpha=ga},
+ legs(c,e,t,L){const tr=e.def.t,col=kgLum(tr)>0.35?kgSh(e.def.c,-0.12):kgSh(e.def.c,-0.32);kgLimbs(c,col,kgLum(tr)>0.35?5:4,[[-4.5,7,-4.5+L.lg*0.5,13],[4.5,7,4.5-L.lg*0.5,13]],L.W)}};
 
 /* Runenstein */
 KGS.pylon={box:[-8,-23,8,11],body(g,P,d,v,R){const b=d.c;kP(g,b,[-7,10,-5,-16,0,-22,5,-16,7,10]);kP(g,kgSh(b,0.18),[-5,-16,0,-22,0,10,-7,10]);kL(g,kgSh(b,-0.3),0.5,[-3,0,-1,4]);P.shade();kR(g,-7,8,14,2,kgSh(b,-0.3))},
