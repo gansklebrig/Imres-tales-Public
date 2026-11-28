@@ -43901,14 +43901,14 @@ hook('stats',s=>{try{if(E2.aus||!P||P.id!=='echo')return;const lv=Math.max(1,P.l
    Viele Treffer kurz hintereinander (eingekreist von einer Horde) werden ab dem dritten Treffer innerhalb von 0,6 s
    schrittweise schwächer (bis auf 60 %; ergänzt „atem“, das nach Schadensmenge im 1,2-s-Fenster bremst). Einzelne harte Treffer bleiben unverändert – nur das „Zerfleischtwerden
    in einer Sekunde“ wird abgefedert. Bot-Messung 28.11.: Fernkämpfer starben auf Schwer fast nur im Nahkampfgedränge.
-   v2: Einzeltreffer normaler Gegner höchstens 30 % des Lebens (Messung: Ghule, Brocken, Duergar, Magmin trafen oft mit 40–80 %).
+   v2: Einzeltreffer normaler Gegner höchstens 30 % (Schwer 40 %) des Lebens; Gedränge auf Schwer nur bis 70 % (Messung: Ghule, Brocken, Duergar, Magmin trafen oft mit 40–80 %).
    Abschaltbar: __hsGDR.aus=1 */
-(function(){try{if(window.__hsGDR)return;const GD=window.__hsGDR={v:2,aus:0,F:0.6,S:0.1,MIN:0.6,CAP:0.3,n:0,cap:0,src:null};
+(function(){try{if(window.__hsGDR)return;const GD=window.__hsGDR={v:2,aus:0,F:0.6,S:0.1,MIN:0.6,MINH:0.7,CAP:0.3,CAPH:0.4,n:0,cap:0,src:null};
  hook('hurtMul',raw=>{if(GD.aus||!P)return 1;let m=1;
   /* kein normaler Gegner nimmt mit einem Schlag mehr als ein knappes Drittel des Lebens (Bosse, Wächter, Gefolge ausgenommen) */
-  const S=GD.src;if(S&&!S.boss&&!S.guard&&!S.add&&raw>0){const est=raw*(1-armorRed(P.st.armor)),cap=GD.CAP*P.st.maxHp;if(est>cap){m*=cap/est;GD.cap++}}
+  const S=GD.src;if(S&&!S.boss&&!S.guard&&!S.add&&raw>0){const est=raw*(1-armorRed(P.st.armor)),cap=(HARD()?GD.CAPH:GD.CAP)*P.st.maxHp;if(est>cap){m*=cap/est;GD.cap++}}
   const now=G.time;const L=P._gdL||(P._gdL=[]);while(L.length&&now-L[0]>GD.F)L.shift();const k=L.length;L.push(now);if(L.length>24)L.shift();
-  if(k<2)return m;GD.n++;return m*Math.max(GD.MIN,1-GD.S*(k-1))});
+  if(k<2)return m;GD.n++;return m*Math.max(HARD()?GD.MINH:GD.MIN,1-GD.S*(k-1))});
  {const ue=updEnemy;updEnemy=function(e){const o=GD.src;GD.src=e;try{return ue.apply(this,arguments)}finally{GD.src=o}}}
  /* Geschosse merken sich ihren Schützen – so gilt die Obergrenze auch für Wurfsteine, Pfeile und Zauber normaler Gegner */
  {const es=eShot;eShot=function(){const n0=G.projs.length;const r=es.apply(this,arguments);try{if(GD.src&&G.projs.length>n0){const p=G.projs[G.projs.length-1];if(p&&p.team==='e')p.gdS=GD.src}}catch(e){}return r}}
