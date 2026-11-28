@@ -29,7 +29,8 @@
     const d = {
       art: "lauf", kind: kind || "tod", held: istHeld(run.hero) ? HELD[run.hero] : "Ezekiel", heldId: istHeld(run.hero) ? run.hero : "Z",
       gebiet: run.area === "passage" && (run.route || []).length ? run.route[run.route.length - 1] : run.area, imDurchgang: run.area === "passage", stufe: run.tier | 0, gebiete: (run.route || []).length, zeit: run.time || 0, kills: st.kills | 0,
-      bosse: (run.bossesBeaten || []).slice(0, 6), datum: heute(), gnade: !!run.gnade
+      bosse: (run.bossesBeaten || []).slice(0, 6), datum: heute(), gnade: !!run.gnade,
+      hilfen: Array.isArray(run.hilfen) ? run.hilfen.slice(0, 6) : [] /* W39 Zugang: faire Kennzeichnung */
     };
     if (tg) {
       const t = m.w38tag || {}, last = t.last && t.last.d === tg.d ? t.last : null;
@@ -83,7 +84,8 @@
     if (d.bosse && d.bosse.length) { c.font = "600 22px " + FB; c.fillStyle = "#6a4022"; c.fillText(L(["Bosse", "Bosses"]), X, y); c.font = "24px " + FI; c.fillStyle = "#2a1408"; c.fillText(d.bosse.map(bossName).join(" · ").slice(0, 60), X + 230, y); y += 40; }
     if (d.gesetze && d.gesetze.length && Z.abw && Z.abw.GESETZE) { c.font = "600 22px " + FB; c.fillStyle = "#6a4022"; c.fillText(L(["Tagesgesetze", "Daily laws"]), X, y); c.font = "24px " + FI; c.fillStyle = "#2a1408"; c.fillText(d.gesetze.filter(k => Z.abw.GESETZE[k]).map(k => L(Z.abw.GESETZE[k].n)).join(" · ").slice(0, 60), X + 230, y); y += 40; }
     /* Fuß */
-    c.font = "600 20px " + FB; c.fillStyle = "#6a4022"; c.fillText(datumTxt(d.datum) + (d.gnade ? " · " + L(["mit Barmherzigkeit", "with mercy"]) : ""), X, H - 62);
+    const hl = d.hilfen && d.hilfen.length && Z.hilfen ? Z.hilfen.hilfeText(d.hilfen) : "";
+    c.font = "600 20px " + FB; c.fillStyle = "#6a4022"; c.fillText(datumTxt(d.datum) + (d.gnade ? " · " + L(["mit Barmherzigkeit", "with mercy"]) : "") + (hl ? " · ✚ " + hl : ""), X, H - 62);
     c.textAlign = "right"; c.font = "26px " + FD; c.fillStyle = "#8a2a14"; c.fillText("imrestales.de", W - 70, H - 60); c.textAlign = "left";
     return cv;
   }
@@ -92,6 +94,7 @@
       : d.art === "tiefe" ? L(["⬇ Neuer Tiefe-Bestwert: ", "⬇ New depth record: "]) + d.tiefe
       : (d.kind === "sieg" ? L(["Die Feste ist gefallen! ", "The keep has fallen! "]) : "") + L(["Erreicht: ", "Reached: "]) + name(d.gebiet);
     let t = "Ezekiel – The Destroyer · " + tl + " · " + d.held + " · " + fmtZeit(d.zeit) + " · " + (d.kills | 0) + " Kills";
+    if (d.hilfen && d.hilfen.length && Z.hilfen) t += " · ✚ " + Z.hilfen.hilfeText(d.hilfen);
     if (d.art === "tag") t += "\n" + L(["Vergleich am Sonnenstein: ", "Compare at the Sunstone: "]) + code(d);
     return t + "\nimrestales.de";
   }
@@ -103,7 +106,7 @@
   const unb64u = s => decodeURIComponent(escape(atob(s.replace(/-/g, "+").replace(/_/g, "/"))));
   const pruef = s => { let h = 7; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return (h % 46656).toString(36).padStart(3, "0"); }; /* nur gegen Tippfehler */
   function code(d) {
-    const o = { d: d.tag, p: d.punkte | 0, h: istHeld(d.heldId) ? d.heldId : "Z", k: Math.min(999999, d.kills | 0), z: Math.min(359999, Math.round(d.zeit || 0)) };
+    const o = { d: d.tag, p: d.punkte | 0, h: istHeld(d.heldId) ? d.heldId : "Z", k: Math.min(999999, d.kills | 0), z: Math.min(359999, Math.round(d.zeit || 0)), a: d.hilfen && d.hilfen.length ? 1 : 0 };
     const body = b64u(JSON.stringify(o)); return "ZT1-" + body + "-" + pruef(body);
   }
   function lies(s) {
@@ -111,8 +114,8 @@
     const m = /(?:^|\s)ZT1-([A-Za-z0-9_-]{8,200})-([0-9a-z]{3})(?:\s|$)/.exec(s); if (!m || pruef(m[1]) !== m[2]) return null;
     let o; try { o = JSON.parse(unb64u(m[1])); } catch (_) { return null; }
     if (!o || typeof o !== "object" || Array.isArray(o)) return null;
-    const r = { d: okDay(o.d) ? o.d : null, p: int(o.p, 0, 10000000), h: istHeld(o.h) ? o.h : null, k: int(o.k, 0, 999999), z: int(o.z, 0, 359999) };
-    if (!r.d || r.p == null || !r.h || r.k == null || r.z == null) return null;
+    const r = { d: okDay(o.d) ? o.d : null, p: int(o.p, 0, 10000000), h: istHeld(o.h) ? o.h : null, k: int(o.k, 0, 999999), z: int(o.z, 0, 359999), a: o.a === undefined ? 0 : int(o.a, 0, 1) };
+    if (!r.d || r.p == null || !r.h || r.k == null || r.z == null || r.a == null) return null;
     return r;
   }
   function vergleich(f) {
@@ -120,9 +123,10 @@
     if (t.d === f.d) mein = t.best | 0; else if (Array.isArray(t.hist)) { const h = t.hist.find(x => Array.isArray(x) && x[0] === f.d); if (h) mein = h[1] | 0; }
     let h = "<h2>☀ " + esc(L(["Vergleich", "Comparison"])) + "<small>" + esc(L(["Tagesprüfung ", "Daily trial "]) + datumTxt(f.d)) + "</small></h2>";
     h += '<table class="zt-vgl"><tr><th></th><th>' + esc(L(["Du", "You"])) + "</th><th>" + esc(L(["Freund", "Friend"])) + "</th></tr>";
-    h += "<tr><td>" + esc(L(["Punkte", "Points"])) + "</td><td>" + (mein == null ? "–" : mein) + "</td><td>" + f.p + "</td></tr>";
+    h += "<tr><td>" + esc(L(["Punkte", "Points"])) + "</td><td>" + (mein == null ? "–" : mein) + "</td><td>" + f.p + (f.a ? " ✚" : "") + "</td></tr>";
     h += "<tr><td>" + esc(L(["Held", "Hero"])) + "</td><td></td><td>" + esc(HELD[f.h]) + "</td></tr><tr><td>" + esc(L(["Zeit · Kills", "Time · Kills"])) + "</td><td></td><td>" + fmtZeit(f.z) + " · " + f.k + "</td></tr></table>";
     h += '<p class="hinweis">' + esc(mein == null ? L(["Du hast diesen Tag noch nicht gespielt.", "You haven't played this day yet."]) : mein > f.p ? L(["Du liegst vorn.", "You're ahead."]) : mein < f.p ? L(["Dein Freund liegt vorn.", "Your friend is ahead."]) : L(["Gleichstand.", "A tie."])) + "</p>";
+    if (f.a) h += '<p class="hinweis">✚ ' + esc(L(["Dein Freund hat mit Spielhilfen gespielt.", "Your friend played with assists."])) + "</p>";
     h += '<div class="knoepfe"><button data-act="close" autofocus>' + esc(L(["Schließen", "Close"])) + "</button></div>";
     Z.ui.open(h, { cls: "schmal" });
   }
@@ -140,7 +144,7 @@
     h += '<p class="zt-text">' + esc(text(d)).replace(/\n/g, "<br>") + "</p>";
     const kann = !pc() && navigator.canShare && window.File;
     h += '<div class="knoepfe">' + (kann ? '<button data-act="ztShare" autofocus>📤 ' + esc(L(["Teilen …", "Share …"])) + "</button>" : "") +
-      (pc() ? '<button data-act="ztPC"' + (kann ? "" : " autofocus") + ">💾 " + esc(L(["Text speichern + Bild kopieren", "Save text + copy image"])) + "</button>" : '<button data-act="ztLaden"' + (kann ? "" : " autofocus") + ">⬇ " + esc(L(["Bild laden + Text kopieren", "Download image + copy text"])) + "</button>") +
+      (pc() ? '<button data-act="ztPC"' + (kann ? "" : " autofocus") + ">💾 " + esc(window.__zsPC && typeof window.__zsPC.speichernBild === "function" ? L(["Bild speichern + Text kopieren", "Save image + copy text"]) : L(["Text speichern + Bild kopieren", "Save text + copy image"])) + "</button>" : '<button data-act="ztLaden"' + (kann ? "" : " autofocus") + ">⬇ " + esc(L(["Bild laden + Text kopieren", "Download image + copy text"])) + "</button>") +
       (d.art === "tag" ? '<button data-act="ztCode">' + esc(L(["Vergleichscode kopieren", "Copy comparison code"])) + "</button>" : "") +
       '<button data-act="ztZurueck">' + esc(L(["Zuklappen", "Collapse"])) + "</button></div>";
     const m = document.getElementById("modal"), k = m && !m.hidden ? m.querySelector('[data-act="ztOpen"]') : null, anker = k ? k.closest(".knoepfe") : null;
@@ -171,6 +175,15 @@
       const ok = await kopiere(text(cur.d)); toast((b ? L(["Bild geladen", "Image downloaded"]) + " · " : "") + (ok ? L(["Text kopiert", "Text copied"]) : L(["Text bitte von Hand kopieren", "Please copy the text by hand"])));
     };
     a.ztPC = async () => {
+      const PC = window.__zsPC;
+      if (PC && typeof PC.speichernBild === "function") { /* W39 Teilen: PNG über den Speichern-Dialog des Programms */
+        try {
+          const b = await blob(); const r = b ? await PC.speichernBild(dateiName(), await b.arrayBuffer()) : null;
+          if (r && r.abbruch) return;
+          const ok = await kopiere(text(cur.d));
+          if (r && r.ok) { toast(L(["Bild gespeichert", "Image saved"]) + (ok ? " · " + L(["Text kopiert", "text copied"]) : ""), 3600); return; }
+        } catch (_) {}
+      }
       let bildOk = false;
       try { const b = await blob(); if (b && window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) { await navigator.clipboard.write([new window.ClipboardItem({ "image/png": b })]); bildOk = true; } } catch (_) {}
       try { const r = await window.__zsPC.speichern(dateiName().replace(/\.png$/, ".txt"), text(cur.d)); if (r && r.ok) { toast(L(["Gespeichert", "Saved"]) + (bildOk ? " · " + L(["Bild in der Zwischenablage", "image on the clipboard"]) : ""), 3200); return; } if (r && r.abbruch) return; } catch (_) {}

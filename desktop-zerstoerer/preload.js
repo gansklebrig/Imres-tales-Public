@@ -19,6 +19,8 @@ contextBridge.exposeInMainWorld('__zsPC', {
   beenden: () => ipcRenderer.invoke('zs:beenden'),
   /* W31: Spielbericht über den Speichern-Dialog sichern → { ok, pfad } | { ok:false, abbruch|fehler } */
   speichern: (name, text) => ipcRenderer.invoke('zs:speichern', String(name || ''), String(text || '')),
+  /* W39 Teilen: Ergebniskarte als PNG (ArrayBuffer/Uint8Array, ≤ 4 MB, PNG-Signatur wird im Programm geprüft) → { ok, pfad } | { ok:false, … } */
+  speichernBild: (name, daten) => ipcRenderer.invoke('zs:speichernBild', String(name || ''), (daten instanceof ArrayBuffer || daten instanceof Uint8Array) ? daten : null),
   /* Hinweise vom Programm: {art: 'inhalt'|'programm'|'vollbild', …} */
   bei: f => { if (typeof f === 'function') hoerer.add(f); }
 });

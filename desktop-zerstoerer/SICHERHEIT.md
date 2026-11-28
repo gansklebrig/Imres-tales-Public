@@ -5,12 +5,20 @@ Stand 25.11.2026. Aufbau und Härtung wie die Heldensturm-Hülle (`desktop/SICHE
 ## Was das Programm kann – und was nicht
 - Es zeigt nur die Spieldateien (`zerstoerer://spiel/…`, mitgeliefert oder aus dem geprüften Update-Ordner). Die Spielseite hat
   **keinen** Zugriff auf Node, das Dateisystem oder andere Programme (Sandbox, contextIsolation, kein nodeIntegration, kein webview).
-- Brücke `window.__zsPC`: Version lesen, Vollbild, Grafikkarten-Info, Update-Prüfung, Neu laden, Beenden. Nur von der Spielseite im Hauptfenster.
+- Brücke `window.__zsPC`: Version lesen, Vollbild, Grafikkarten-Info, Update-Prüfung, Neu laden, Beenden, Speichern-Dialog für Bericht/Ergebniskarte (siehe unten). Nur von der Spielseite im Hauptfenster.
 - Kein offener Netzwerk-Port; Fernsteuer-Schalter (`--remote-debugging-port` usw.) werden im fertigen Programm verworfen.
 - Die Spielseite selbst hat **kein Netz** (das Spiel braucht keins): nur `zerstoerer:`, `data:`, `blob:`. Kein http/https, kein `file://`.
 - CSP: Skripte nur aus dem Spiel, keine Rahmen, keine Plugins. Rechte nur Vollbild/Zeigersperre/Zwischenablage; Downloads gesperrt.
 - Verweise nach außen öffnet der normale Browser (nur http(s)/mailto).
 - Electron-Fuses: kein `ELECTRON_RUN_AS_NODE`, keine NODE_OPTIONS/--inspect, Code nur aus dem geprüften app.asar.
+
+## Dateien speichern (W31 Spielbericht, W39 Teilen, Stand 28.11.2026)
+- `__zsPC.speichern(name, text)`: Text über den Speichern-Dialog des Systems, nur `.json`/`.txt`, höchstens 5 MB.
+- `__zsPC.speichernBild(name, daten)`: Ergebniskarte als PNG. Nur `ArrayBuffer`/`Uint8Array` (andere Typen → abgelehnt), 64 B bis 4 MB,
+  die ersten 8 Bytes müssen die PNG-Signatur sein; Dialog nur mit Filter `.png`, gewählter Pfad muss auf `.png` enden.
+  Namensvorschlag bereinigt (nur Buchstaben/Ziffern/`._-`, keine führenden Punkte), Vorschlag im Bilder-Ordner.
+- In beiden Fällen bestimmt allein der Spieler im System-Dialog den Ort; die Spielseite bekommt keinen Pfad- oder Dateizugriff
+  (nur `{ ok, pfad }` zur Anzeige) und kann nichts lesen. Nur von der Spielseite im Hauptfenster (`vomSpiel`).
 
 ## Online-Koop (W32 Online, Stand 26.11.2026)
 - Einzige Netz-Ausnahme der Spielseite: der PeerJS-Vermittler `0.peerjs.com` – nur `https:`/`wss:`, genau dieser Host, Port 443

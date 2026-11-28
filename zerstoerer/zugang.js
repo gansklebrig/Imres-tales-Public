@@ -168,7 +168,7 @@
   const istGift = h => /poison|gift|acid|saeure/i.test(h.kind || "") || h.poison || h.elem === "gift" || h.elem === "poison";
   const istFeuer = h => /fire|flame|breath|ember|feuer|lava/i.test(h.kind || "") || h.burn || h.elem === "feuer" || h.elem === "fire";
   function overlay(c, cam, t) {
-    const s = S(), cvd = MODE !== "aus", warn = s.warnSymbol;
+    const s = S(), cvd = MODE !== "aus", warn = s.warnSymbol || s.warnGross; /* W39 Zugang: große Vorwarnung (hilfen.js) */
     if ((!cvd && !warn) || !Z.level || !cam || Z.level.hub) return;
     const FX = Z.fx, Sc = Z.gfx.scale || 1, ox = Math.round((-cam.x + (FX.shakeX || 0)) * Sc) / Sc, oy = Math.round((-cam.y + (FX.shakeY || 0)) * Sc) / Sc;
     const x0 = cam.x, x1 = cam.x + cam.w, y0 = cam.y, y1 = cam.y + cam.h;
@@ -195,7 +195,7 @@
       for (const e of Z.enemies || []) {
         if (e.dead || e.hidden || e.dummy || !istVor(e)) continue;
         const cx = e.x + e.w / 2;
-        if (inV(cx, e.y, 0)) { if (!Z.dangerHi()) bang(c, cx, e.y - 11 - 2 * pulse, 5.5); }
+        if (inV(cx, e.y, 0)) { if (s.warnGross) bang(c, cx, e.y - 17 - 3 * pulse, 10); else if (!Z.dangerHi()) bang(c, cx, e.y - 11 - 2 * pulse, 5.5); }
         else if (P && Math.hypot(cx - P.x, e.y - P.y) < 420) rand.push([cx, e.y + e.h / 2, 1]);
       }
       for (const p of Z.projs || []) if (p.owner === "e" && !p.dead && !inV(p.x, p.y, 0) && P && Math.hypot(p.x - P.x, p.y - P.y) < 380 && ((p.vx || 0) * (P.x - p.x) + (p.vy || 0) * (P.y - p.y)) > 0) rand.push([p.x, p.y, 0]);

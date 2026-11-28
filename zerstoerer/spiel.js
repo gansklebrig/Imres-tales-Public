@@ -522,7 +522,7 @@
     inp.pollPad();
     if (Z.ui) Z.ui.frame(dt);
     if (Z.level && !Z.paused) {
-      let sdt = dt * (FX.slow > 0 ? FX.slow : 1) * (Z.ui && Z.ui.choiceActive ? 0.12 : 1);
+      let sdt = dt * (FX.slow > 0 ? FX.slow : 1) * (Z.ui && Z.ui.choiceActive ? 0.12 : 1) * (Z.tempoK ? Z.tempoK() : 1); /* W39 Zugang: Spieltempo-Hilfe (hilfen.js) */
       if (FX.hitstop > 0) { FX.hitstop -= dt; sdt = 0; }
       /* Bildgenau rechnen: so viele gleich lange Teilschritte (≤ 1/120 s), wie das Bild dauert –
          ergibt auf 60-, 90-, 120- und 144-Hz-Schirmen gleich weiche Bewegung ohne Ruckeln. */

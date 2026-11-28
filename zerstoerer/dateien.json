@@ -9737,8 +9737,8 @@
 "sha256":"3ab7b7816ddadc9aa1ef272db3236698570d927a2f28af60f6ead1f3ac0a9320"
 },
 "zerstoerer.html":{
-"groesse":81672,
-"sha256":"bc1ffcfb9b8e4fd03ab57f60ce0b88c6d68ff610bcf509ecfd90adcad803e52f"
+"groesse":81795,
+"sha256":"b590ada6ca8554795067801810f7f66534ebb2c03d305d7b531620feb07239d7"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":145807,
@@ -9863,6 +9863,10 @@
 "zerstoerer/haerte.js":{
 "groesse":16568,
 "sha256":"17d6f7da25a5bb03c247065288399eae19158116fd55bdfce69523e454c9e009"
+},
+"zerstoerer/hilfen.js":{
+"groesse":10605,
+"sha256":"15f6a62999497dd1a474daf5ba652037156cd60152f0ccc21bb4e0b7a555209b"
 },
 "zerstoerer/hintergrund.js":{
 "groesse":24892,
@@ -9989,8 +9993,8 @@
 "sha256":"a08122c7fe222c96cf8555326dd2c86411b9facfa17f917b5a5096e8aa7f3991"
 },
 "zerstoerer/spiel.js":{
-"groesse":48144,
-"sha256":"f5f5a876aa424fb25e470124e342f2a1da1871d7ee301867157152e3bacf5746"
+"groesse":48221,
+"sha256":"01ef9f4858dc907cfdf88765d7201f85a237511d1ea2500a5cd3f37b78c499ef"
 },
 "zerstoerer/spuren.js":{
 "groesse":70897,
@@ -10009,8 +10013,8 @@
 "sha256":"f400e6764ff2e31d8fbec4be20f1afb5dc9722989c370e0b9728ac4033d8d305"
 },
 "zerstoerer/teilen.js":{
-"groesse":20097,
-"sha256":"4e62f6bc48c998a287dcfdfd833cb2218a0ad9e9978e4ed11457b9d2261b6d34"
+"groesse":21374,
+"sha256":"8a84f3e7bb3c0902e2a4561beda199d630182428d38235a2f23434278c88639b"
 },
 "zerstoerer/tiefe.js":{
 "groesse":24803,
@@ -10057,9 +10061,9 @@
 "sha256":"1267e10c465d964ae45519baad2d993c3a0acc99e0495ce45dbc9a921977dd1a"
 },
 "zerstoerer/zugang.js":{
-"groesse":35208,
-"sha256":"df0542ee684d5789758ae19d942444ead52fb2be7d26c59f6fc7916748f8bc34"
+"groesse":35332,
+"sha256":"1437181731d4ecd8f93e72f72ee85ac181a09073b5a665fe44870f9a652104c0"
 }
 },
-"stand":189
+"stand":190
 }

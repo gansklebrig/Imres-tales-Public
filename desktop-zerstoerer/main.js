@@ -225,6 +225,26 @@ ipcMain.handle('zs:speichern', nur(async (e, name, text) => {
     return { ok: true, pfad: r.filePath };
   } catch (x) { return { ok: false, fehler: String(x && x.message || x) }; }
 }));
+/* W39 Teilen: Ergebniskarte als PNG über den Speichern-Dialog. Nur .png, höchstens 4 MB, Daten als ArrayBuffer/Uint8Array,
+   die mit der PNG-Signatur beginnen müssen. Ziel wählt der Spieler im Dialog (Vorschlag: Bilder-Ordner). */
+const PNG_SIG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+ipcMain.handle('zs:speichernBild', nur(async (e, name, daten) => {
+  try {
+    let buf = null;
+    if (daten instanceof ArrayBuffer) buf = Buffer.from(daten);
+    else if (ArrayBuffer.isView(daten) && daten instanceof Uint8Array) buf = Buffer.from(daten.buffer, daten.byteOffset, daten.byteLength);
+    if (!buf) return { ok: false, fehler: 'falscher Typ' };
+    if (buf.length < 64 || buf.length > 4 * 1024 * 1024) return { ok: false, fehler: 'Größe' };
+    if (!buf.subarray(0, 8).equals(PNG_SIG)) return { ok: false, fehler: 'kein PNG' };
+    const vorschlag = (String(name || 'ezekiel.png').replace(/[^\w.\-äöüÄÖÜß]/g, '_').replace(/\.png$/i, '').replace(/^\.+/, '').slice(0, 76) || 'ezekiel') + '.png';
+    let ordner; try { ordner = app.getPath('pictures'); } catch (x) { ordner = app.getPath('documents'); }
+    const r = await dialog.showSaveDialog(win, { title: 'Ergebniskarte speichern', defaultPath: path.join(ordner, vorschlag), filters: [{ name: 'Bild (PNG)', extensions: ['png'] }] });
+    if (r.canceled || !r.filePath) return { ok: false, abbruch: true };
+    if (!/\.png$/i.test(r.filePath)) return { ok: false, fehler: 'nur .png' };
+    await fs.promises.writeFile(r.filePath, buf);
+    return { ok: true, pfad: r.filePath };
+  } catch (x) { return { ok: false, fehler: String(x && x.message || x) }; }
+}));
 ipcMain.on('zs:info', e => { if (!vomSpiel(e)) { e.returnValue = {}; return; } const s = INH ? INH.status() : {}; e.returnValue = { version: app.getVersion(), plattform: process.platform, chrom: process.versions.chrome, electron: process.versions.electron, stand: s.stand || 0, ausUpdate: !!s.ausUpdate }; });
 
 /* ---------- Start ---------- */
