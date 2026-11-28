@@ -52,18 +52,33 @@
   function noten() {
     const m = document.getElementById("meldungen"), bb = document.getElementById("bossbar"); if (!m) return;
     const barOn = !off() && bb && !bb.hidden && bb.offsetParent !== null && bb.getBoundingClientRect().height > 0;
-    if (!barOn) { if (m.dataset.w38f) { m.style.top = ""; delete m.dataset.w38f; } return; }
-    if (m.style.left) return; /* einstieg.js hat sie gerade selbst ausgerichtet */
-    const b0 = bb.getBoundingClientRect(), hud = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hud")) || 1;
-    let lim = b0.bottom; /* liegt das Namensband (noch sichtbar) im Weg, auch darunter */
-    const bn = document.getElementById("banner");
-    if (bn && !bn.hidden && +getComputedStyle(bn).opacity > 0.12) { const r = bn.getBoundingClientRect(); if (r.height > 0 && r.bottom < innerHeight * 0.6) lim = Math.max(lim, r.bottom); }
-    const b = { bottom: lim };
+    /* W38 Frei: Herausforderungstafel (#hfzeile) als Hindernis – im Bosskampf (Meldungen bei 150 px) lag auf Handheld/Handy quer
+       eine Meldung auf der Tafel (37–127 px, gemessen beim Tod). Nur wenn eine Meldung die Tafel waagrecht trifft. */
     const top0 = m.dataset.w38f ? +m.dataset.w38f0 : m.getBoundingClientRect().top;
-    if (!m.dataset.w38f && top0 >= b.bottom + 4) return;
+    const boss = !off() && document.body.classList.contains("bosskampf");
+    if ((!barOn && !boss) || m.style.left) { if (m.dataset.w38f && !m.style.left) { m.style.top = ""; delete m.dataset.w38f; } return; } /* sonst ordnet einstieg.js (layoutNotes) die Meldungen */
+    const hud = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hud")) || 1;
+    let y = top0;
+    if (barOn) { /* liegt das Namensband (noch sichtbar) im Weg, auch darunter */
+      let lim = bb.getBoundingClientRect().bottom;
+      const bn = document.getElementById("banner");
+      if (bn && !bn.hidden && +getComputedStyle(bn).opacity > 0.12) { const r = bn.getBoundingClientRect(); if (r.height > 0 && r.bottom < innerHeight * 0.6) lim = Math.max(lim, r.bottom); }
+      if (top0 < lim + 4) y = lim + 6;
+    }
+    if (boss) { /* Herausforderungstafel, hochkant Karten-/Pause-Knopf: beim Tod auf Handheld/Handy quer lag eine Meldung auf der Tafel (37–127 px);
+                   wiederholt prüfen, damit der Stapel nach dem Ausweichen nicht ins nächste Hindernis rutscht */
+      const hf = document.getElementById("hfzeile"), mt = m.getBoundingClientRect().top;
+      const R = [hf && hf.classList.contains("an") ? hf : null, document.getElementById("t-map"), document.getElementById("t-pause")].filter(Boolean).map(el => {
+        const h = el.getBoundingClientRect(), cs = getComputedStyle(el);
+        return h.height > 0 && h.width > 0 && cs.display !== "none" && cs.visibility !== "hidden" && +cs.opacity > 0.05 && h.bottom < innerHeight * 0.6 ? h : null; }).filter(Boolean);
+      const M = Array.from(m.querySelectorAll(".meldung")).map(e => e.getBoundingClientRect()).filter(r => r.width > 2).map(r => [r.left, r.right, r.top - mt, r.bottom - mt]);
+      for (let it = 0; it < 4; it++) { let ch = false;
+        for (const h of R) if (h.bottom + 6 > y && M.some(q => q[0] < h.right - 4 && q[1] > h.left + 4 && y + q[2] < h.bottom && y + q[3] > h.top + 4)) { y = h.bottom + 6; ch = true; }
+        if (!ch) break; }
+    }
+    if (y <= top0 + 1) { if (m.dataset.w38f) { m.style.top = ""; delete m.dataset.w38f; } return; }
     if (!m.dataset.w38f) { m.dataset.w38f = "1"; m.dataset.w38f0 = String(top0); }
-    if (top0 >= b.bottom + 4) { m.style.top = ""; delete m.dataset.w38f; return; }
-    m.style.top = Math.round((b.bottom + 6) / hud) + "px";
+    const nt = Math.round(y / hud) + "px"; if (m.style.top !== nt) m.style.top = nt;
   }
   const notenS = safe(noten, "noten");
   /* W38 QA: Handy hochkant – Boss-Leiste ragte 24 px in die Minikarte: rechten Rand um die Überdeckung einrücken */
@@ -205,11 +220,19 @@
     if (box.scrollHeight <= box.clientHeight + 4) return;
     sp.classList.add("w38-zwei");
   }
+  /* W38 Frei: niedrige Bildschirme (Handheld 640×480, Handy quer): die 15 Knöpfe des Pausenmenüs standen untereinander
+     (Messung: 351–454 px Überlauf; Tablet 1180×820: 191 px). Dort Knöpfe als Raster über die ganze Breite, „Weiter“ zuerst, Lauf-Infos darunter. */
+  function pauseFlach() {
+    const sp = document.querySelector("#modal:not([hidden]) .p-spalten"), box = sp && sp.closest(".mbox"); if (!sp || !box) return;
+    if (off() || sp.classList.contains("w38-zwei") || innerWidth < 540 || innerHeight > innerWidth) { sp.classList.remove("w38-flach"); return; } /* auch Tablet quer (1180×820: „Zur Taverne“ lag unter dem Rand) */
+    if (sp.classList.contains("w38-flach") || box.scrollHeight <= box.clientHeight + 4) return;
+    sp.classList.add("w38-flach");
+  }
   function wirePause() {
     const ui = Z.ui; if (!ui || typeof ui.pause !== "function") return setTimeout(wirePause, 80);
     if (ui.pause._w38z) return;
     const p0 = ui.pause;
-    ui.pause = function () { const r = p0.apply(this, arguments); try { pauseSpalten(); } catch (e) { console.error("W38 Frei", e); } return r; };
+    ui.pause = function () { const r = p0.apply(this, arguments); try { pauseSpalten(); pauseFlach(); } catch (e) { console.error("W38 Frei", e); } return r; };
     ui.pause._w38z = true;
   }
   wirePause();
@@ -223,7 +246,7 @@
   function wireOpen() {
     const md = document.getElementById("modal"); if (!md) return setTimeout(wireOpen, 120);
     let pend = 0;
-    new MutationObserver(() => { if (pend) return; pend = setTimeout(() => { pend = 0; try { klebe(); } catch (e) { console.error("W38 QA", e); } }, 60); }).observe(md, { childList: true, subtree: true });
+    new MutationObserver(() => { if (pend) return; pend = setTimeout(() => { pend = 0; try { pauseFlach(); klebe(); } catch (e) { console.error("W38 QA", e); } }, 60); }).observe(md, { childList: true, subtree: true });
     addEventListener("resize", () => { try { klebe(); } catch (_) {} });
   }
   wireOpen();
@@ -320,6 +343,7 @@
     "#hpbar .w38-wer{position:absolute;left:6px;top:50%;transform:translateY(-50%);font-size:calc(var(--fs-xs,11px) * .85);font-weight:800;color:#f0e2cc;text-shadow:0 1px 2px #000;opacity:.85;pointer-events:none}",
     "#koop-hl .w38-du{margin-left:auto;font-size:var(--fs-xs,11px);color:#1a1012;background:#e5b454;border-radius:6px;padding:0 6px;font-weight:800}",
     "#w38gch{margin-top:6px;max-width:min(300px,42vw);padding:3px 8px;font-size:12px;font-weight:700;line-height:1.35}#w38gch .hc{white-space:nowrap;margin-right:8px;display:inline-block}#w38gch .hc.ok{color:#ffd27a}#w38gch .hc.weg{opacity:.45;text-decoration:line-through}#w38gch .hk{color:#e5b454;margin-right:4px}",
+    "#modal .p-spalten.w38-flach{grid-template-columns:1fr;gap:8px}#modal .p-spalten.w38-flach .knoepfe.senk{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:5px}#modal .p-spalten.w38-flach .knoepfe.senk>*{margin:0;width:auto;min-height:0;padding-top:5px;padding-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#modal .p-spalten.w38-flach .knoepfe.senk>[data-act=close]{font-weight:800}", /* W38 Frei: Pausenmenü auf niedrigen Bildschirmen */
     "#modal .p-spalten.w38-zwei{grid-template-columns:minmax(420px,560px) 1fr}#modal .p-spalten.w38-zwei .knoepfe.senk{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:stretch}#modal .p-spalten.w38-zwei .knoepfe.senk>*{margin:0;width:auto}"
   ].join("\n");
   document.head.appendChild(css);

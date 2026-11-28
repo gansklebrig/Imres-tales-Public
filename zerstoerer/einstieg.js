@@ -117,7 +117,7 @@
      Befund meldrect.py: hochkant 360–412 px lagen die Meldungen über Minimap, Ton- und Kartenknopf (bei HUD 140 % auch quer/Tablet).
      Liegt der mittige Kasten über einem Hindernis, rückt er nach links unter die Lebensleiste (so breit wie frei) –
      ist dort zu wenig Platz, unter alle Hindernisse. Sonst bleibt alles wie gehabt (keine Inline-Stile). */
-  const OBST = ["#hud .hl", "#hud .hr", "#t-map", "#t-pause"];
+  const OBST = ["#hud .hl", "#hud .hr", "#t-map", "#t-pause", "#hfzeile.an"]; /* W38 Frei: Herausforderungstafel (hochkant fest bei 222 px, außerhalb von .hr) */
   let mEl = null, lastSig = "";
   function rectOf(e) { if (!e) return null; const r = e.getBoundingClientRect(); if (!(r.width > 0 && r.height > 0)) return null; const cs = getComputedStyle(e); if (cs.visibility === "hidden" || cs.display === "none" || +cs.opacity < 0.05) return null; return r; }
   function layoutNotes() {
@@ -129,19 +129,19 @@
     const W = window.innerWidth, obs = OBST.map(q => rectOf(document.querySelector(q))).filter(Boolean);
     const hl = rectOf(document.querySelector("#hud .hl")), right = obs.filter(r => r !== hl && r.left > W * 0.45);
     /* mittiger Standardkasten: Breite min(480, 92vw) bzw. handheld; oben laut CSS – nachgebildet über die tatsächliche Breite */
-    const sig = [W, window.innerHeight, hud, obs.map(r => Math.round(r.left) + "," + Math.round(r.bottom)).join(";")].join("|");
+    const sig = [W, window.innerHeight, hud, mEl.childElementCount, obs.map(r => Math.round(r.left) + "," + Math.round(r.bottom)).join(";")].join("|");
     if (sig === lastSig) return; lastSig = sig;
     mEl.classList.remove("w38-links"); mEl.style.left = mEl.style.top = mEl.style.width = "";
-    const m = mEl.getBoundingClientRect(), top = m.top, wBox = Math.max(m.width, 260 * hud), l0 = (W - wBox) / 2, r0 = l0 + wBox, b0 = top + 130 * hud;
+    const m = mEl.getBoundingClientRect(), top = m.top, wBox = Math.max(m.width, 260 * hud), l0 = (W - wBox) / 2, r0 = l0 + wBox, hB = Math.max(130 * hud, m.height), b0 = top + hB; /* W38 Frei: tatsächliche Stapelhöhe (3 Meldungen hochkant: dritte lag auf der Tafel, 50×27 px) */
     const hits = obs.some(r => r.left < r0 && r.right > l0 && r.top < b0 && r.bottom > top);
     if (!hits) return;
     /* erst versuchen: mittig bleiben, nur unter die Lebensleiste rücken */
-    if (hl) { const t1 = hl.bottom + 6, b1 = t1 + 130 * hud; if (!obs.some(r => r !== hl && r.left < r0 && r.right > l0 && r.top < b1 && r.bottom > t1) && !(hl.left < r0 && hl.right > l0 && hl.bottom > t1)) { mEl.style.top = t1 / hud + "px"; return; } }
-    const top2 = (hl ? hl.bottom : 50) + 6, bandB = top2 + 130 * hud;
+    if (hl) { const t1 = hl.bottom + 6, b1 = t1 + hB; if (!obs.some(r => r !== hl && r.left < r0 && r.right > l0 && r.top < b1 && r.bottom > t1) && !(hl.left < r0 && hl.right > l0 && hl.bottom > t1)) { mEl.style.top = t1 / hud + "px"; return; } }
+    const top2 = (hl ? hl.bottom : 50) + 6, bandB = top2 + hB;
     /* W38 QA: Linkshänder-Touch legt Karten-/Pause-Knopf nach links – auch linke Hindernisse im Band beachten */
     const leftObs = obs.filter(r => r !== hl && r.right < W * 0.55 && r.top < bandB && r.bottom > top2);
     const sx = leftObs.length ? Math.max(...leftObs.map(r => r.right)) + 8 : 8;
-    const rightEdge = right.length ? Math.min(...right.filter(r => r.top < (hl ? hl.bottom : 60) + 140 * hud).map(r => r.left).concat([W])) - 8 : W - 8;
+    const rightEdge = right.length ? Math.min(...right.filter(r => r.top < Math.max((hl ? hl.bottom : 60) + 140 * hud, bandB)).map(r => r.left).concat([W])) - 8 : W - 8;
     const free = rightEdge - sx;
     mEl.classList.add("w38-links");
     if (free >= 220 * hud) { mEl.style.left = sx / hud + "px"; mEl.style.top = top2 / hud + "px"; mEl.style.width = free / hud + "px"; }

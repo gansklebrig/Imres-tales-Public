@@ -85,7 +85,7 @@
       if (typeof d !== "string" || d.length > MAXIN) { S.stats.bad++; return; }
       let m; try { m = JSON.parse(d); } catch (e) { S.stats.bad++; return; }
       if (!isObj(m) || typeof m.t !== "string" || m.t.length > 8) { S.stats.bad++; return; }
-      S.stats.rx++; S.lastRx = now();
+      S.stats.rx++; S.lastRx = now(); ln.rx = (ln.rx | 0) + 1; /* W39 Robust: je Leitung zählen */
       if (ln.onmsg) try { ln.onmsg(m); } catch (e) { S.stats.bad++; console.warn("W32 online msg", m.t, e); }
     };
     ln.recv = recv;
@@ -252,6 +252,7 @@
     S.link = ln; ln.open = true; S.lastRx = now();
     ln.onmsg = S.role === "host" ? hostMsg : guestMsg;
     if (S.role === "guest") { ln.sendR({ t: "hello", v: PROTO, ver: String(Z.VERSION || ""), name: txt(S.gName, 16), hero: S.hero, re: S.playing ? 1 : 0, tok: S.tok || "" }); }
+    if (S.role === "guest" && S.st === "lost") { S.reAt = now(); ln.rx = 0; } /* W39 Robust: Wiederverbindung prüfen (pingLoop) */
     if (S.st === "lost") { setSt(S.playing ? "play" : "lobby", ""); Z.toast && Z.toast(L(["Verbindung wieder da.", "Connection restored."])); }
     else if (S.role === "host") setSt(S.playing ? "play" : "lobby", "");
     pingLoop();
@@ -293,6 +294,9 @@
       const ln = S.link; if (!S.role) return clearInterval(pingI);
       if (ln && ln.open && !ln.closed) ln.sendR({ t: "ping", c: Math.round(now()) });
       if (S.st !== "lost" && S.st !== "end" && S.lastRx && now() - S.lastRx > T_LOST && (S.st === "play" || S.st === "lobby")) lost();
+      /* W39 Robust: Gast in den ersten 12 s nach einer Wiederverbindung – 3 s Funkstille heißt, die neue Leitung ist drüben schon wieder
+         weg (t_drop: Gastgeber „lost“, Gast stand bis T_LOST = 9 s „verbunden“ auf toter Leitung) → gleich neu versuchen */
+      if (S.role === "guest" && S.reAt && S.st === "play") { if (now() - S.reAt > 12000) S.reAt = 0; else if (now() - S.lastRx > 3000) { S.reAt = 0; const l = S.link; try { if (l && !l.closed) l.close(); } catch (e) { } if (S.st !== "lost") lost(); } }
       if (S.st === "lost" && now() - S.lostAt > T_GIVEUP) endSession(L(["Die Verbindung ist abgerissen.", "The connection dropped."]));
       if (S.role === "host" && S.playing) sendCredit();
       /* Wächter beim Gast: kommt 3 s lang kein brauchbarer Schnappschuss an (fehlender Bezugsstand o. Ä.), vollen Stand anfordern */
