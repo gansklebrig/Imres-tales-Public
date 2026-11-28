@@ -108,6 +108,8 @@
                 progE: [[0, 5, 3, 6], [0, 2, 5, 3], [0, 6, 3, 5], [0, 3, 2, 5]], progC: [[0, 5, 6, 4], [0, 0, 5, 6], [0, 3, 6, 4]] },
     glut:     { root: 45, bpm: 114, scale: "harm", drone: "vc", pad: "aah", mel: "shanai", col: "sitar", ost: "spic", bass: "tuba", brass: "blech", dr: ["taiko_48", "riese3", "darb_2"], tick: 6000 },
     sturm:    { root: 47, bpm: 110, scale: "moll", drone: "vctrem", pad: "aah", mel: "eh", col: "harfe", ost: "spic", bass: "kb", brass: "hornst", dr: ["timp1", "taiko_36", "snare2"], tick: 9500 },
+    /* W49 Kapitel: Buppidos Stollen – Spieluhr und Kalimba über zitterndem Bordun (ein kichernder Mörder wohnt hier) */
+    stollen:  { root: 42, bpm: 84, scale: "phryg", drone: "vctrem", pad: "ooh", mel: "kal", col: "spiel", ost: "pizz", bass: "kb", brass: "pos", dr: ["riese2", "bodh2", "schlitz1"], tick: 4200 },
     boss1:    { root: 45, bpm: 126, scale: "harm", drone: "vctrem", pad: "aah", mel: "blech", col: "glock", ost: "spic", bass: "tuba", brass: "hornst", dr: ["taiko_36", "riese1", "snare1"], boss: true, tick: 7000 },
     final:    { root: 41, bpm: 132, scale: "harm", drone: "vctrem", pad: "aah", mel: "horn", col: "rgl", ost: "spic", bass: "tuba", brass: "blech", dr: ["riese1", "taiko_36", "snare2"], boss: true, tick: 6000 }
   };

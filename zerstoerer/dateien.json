@@ -9737,8 +9737,8 @@
 "sha256":"3ab7b7816ddadc9aa1ef272db3236698570d927a2f28af60f6ead1f3ac0a9320"
 },
 "zerstoerer.html":{
-"groesse":83623,
-"sha256":"418ca65d7e617a4f7867aa2c28b15b411af972847441698e0d3aa57aab1cee6c"
+"groesse":83763,
+"sha256":"c281d7594662f7d27ccbad1e0cb6ad28d930b528c9af4a95767daa916a927667"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":145807,
@@ -9921,8 +9921,8 @@
 "sha256":"ad5d8870d1e389914f9cba8d35be313c4327c69ee0a221e482e9bf7621136fe5"
 },
 "zerstoerer/musik.js":{
-"groesse":132958,
-"sha256":"17aec67706b7188b191f81d39b2f977b15c056e0309884f18c79fc1f9be6e4ae"
+"groesse":133279,
+"sha256":"71d6e34d67c10abef32743164c526557b0b256fc2e9a8de559321bfb62e036eb"
 },
 "zerstoerer/mutationen.js":{
 "groesse":35616,
@@ -10004,6 +10004,10 @@
 "groesse":4494,
 "sha256":"238eab7f9149d479ac21855832665ca6ad29ced2811e0c5ee6a91343049d4181"
 },
+"zerstoerer/stollen.js":{
+"groesse":42583,
+"sha256":"72a120c597bec5e9e0f5d0f6502c3a40f1620e378e23980efc564cee37a73611"
+},
 "zerstoerer/tagebuch.js":{
 "groesse":29141,
 "sha256":"4248c9839ab8d859f42f8b74a09c3a6df22dc3bf3f4985257f4a8b7b3cd025a3"
@@ -10033,12 +10037,12 @@
 "sha256":"2542f0e80014a813c5c1e41be3474425a84fe90e8a752c34331565ad13b854e9"
 },
 "zerstoerer/welt.js":{
-"groesse":245824,
-"sha256":"9f545cd73131c5ccc4c69c12b0504846a3cc9f792d0af403a779ada44b07876c"
+"groesse":247727,
+"sha256":"23dfab506d2bd78049bec43a33aeea3d7db6a392f9e7795eb08ba0ee5da00a61"
 },
 "zerstoerer/weltkarte.js":{
-"groesse":42121,
-"sha256":"d83c61b1d09be8ebc5eb0f732fe039d231131ff14b6ca0cc1885a6f046d4b160"
+"groesse":42220,
+"sha256":"15148c6e7923b9861677242d2bf492513889e72a5602120d4bf992a405a6c650"
 },
 "zerstoerer/weltspuren.js":{
 "groesse":80007,
@@ -10065,5 +10069,5 @@
 "sha256":"1437181731d4ecd8f93e72f72ee85ac181a09073b5a665fe44870f9a652104c0"
 }
 },
-"stand":198
+"stand":199
 }

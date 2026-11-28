@@ -147,7 +147,7 @@
       props: { brazier: 3, forge: 2, chain: 2, greenfire: 3, crate: 2, pipe: 2, statueDuergar: 1, lantern: 2 },
       foes: { duergar: 2.2, duergarArmbrust: 2, feuerschlucker: 2.3, glutling: 2.2, bewahrer: 2.3, magmaHund: 1.7, salamander: 1.8 }, density: 1.05, /* W38 Gegner: Gewichte (vorher 3,2,2,3,2,1,2) */
       squads: [["bewahrer", "duergar", "duergar"], ["salamander", "feuerschlucker", "glutling"], ["duergarArmbrust", "duergarArmbrust", "magmaHund"], ["feuerschlucker", "glutfledermaus", "glutfledermaus", "glutfledermaus"], ["duergar", "glutfledermaus", "glutfledermaus", "glutfledermaus"]], /* W10: Glutfledermäuse nur als Schwarm im Trupp (die Gassen haben keine Flieger-Plätze für sie allein) */
-      warden: "riese", exits: ["themberchaud"],
+      warden: "riese", exits: ["themberchaud", "stollen"], /* W49 Kapitel: Abstieg in Buppidos Stollen */
       amb: { loops: [["amb/a_esse.mp3", 0.35], ["amb/a_markt.mp3", 0.12], ["amb/a_feuer1.mp3", 0.3]], one: [["n_hammer_", 7, 4], ["e_zischen_", 2, 8], ["e_grollen_", 2, 14]] },
       music: "glut", story: ["Hier hämmert es Tag und Nacht. Wenn es hier Tage gäbe.", "Hammering day and night. If there were days down here."]
     },
@@ -162,7 +162,21 @@
       warden: "vrock", exits: ["venomfang"],
       amb: { loops: [["amb/a_gewitter1.mp3", 0.45], ["amb/a_regen1.mp3", 0.3]], one: [["n_donner_", 8, 11], ["e_kraehe_", 16, 12], ["n_stoehnen_", 8, 18]] },
       music: "sturm", story: ["Der Regen schmeckt nach Gift. Ganz oben schläft etwas Grünes.", "The rain tastes of poison. At the very top, something green sleeps."]
-    }
+    },
+    /* ---- W49 Kapitel: Buppidos Stollen (Sitzung „Das Ei des Drachen“) – Tunnel unter Gracklstugh mit leuchtenden Erzadern,
+       Glühpilzen, Leichenbergen; Gegner, Wächter Buppido, Schrumpf-/Wachspilze und Kulisse in stollen.js ---- */
+    stollen: {
+      tier: 5, open: "cave", flow: "down", grid: [3, 5], name: ["Buppidos Stollen", "Buppido's Tunnels"], sub: ["Erzadern, Glühpilze und Berge von Toten unter Gracklstugh", "Ore veins, glowing mushrooms and mountains of the dead beneath Gracklstugh"],
+      sky: ["#0a0810", "#160e1c", "#21142a"], wall: "#221c26", brick: "#15111a",
+      tile: { base: "#3c3640", light: "#68606c", dark: "#151018", det: "#6ae0a8", top: "drip", topCol: "#3a5a48" }, plat: "#4e4034",
+      dark: 0.7, ambCol: "#2a1a3a", bg: "chasm", weather: ["spores", "drip", "dust"], hazard: "spikes",
+      props: { mushroom: 5, bones: 4, skull: 3, crystal: 3, chain: 1, lantern: 1, candle: 2, pot: 1 },
+      foes: { leichenskelett: 2.6, skelett: 1, duergarAlchemist: 2.2, duergarAxt: 1.6, duergar: 1.2, ghul: 1.2, myconid: 0.8, ratte: 0.8 }, density: 1.05,
+      squads: [["duergarAxt", "duergarAlchemist", "duergar"], ["duergarAlchemist", "duergarAlchemist", "duergarAxt"], ["ghul", "leichenskelett", "leichenskelett"]],
+      warden: "buppido", exits: ["themberchaud"],
+      amb: { loops: [["amb/a_tropfstein.mp3", 0.4], ["amb/a_grabesdroehnen.mp3", 0.25], ["amb/a_fluestern.mp3", 0.15]], one: [["n_tropfen_", 1, 6], ["n_ratte_", 6, 10], ["n_stoehnen_", 8, 16]] },
+      music: "stollen", story: ["Unter den Glutgassen kichert jemand. Und es riecht nach sehr vielen Toten.", "Beneath the Ember Alleys someone is giggling. And it smells of a great many dead."]
+    } /* ---- Ende W49 Kapitel ---- */
   });
   /* Arenen der Bosse (handgebaut) */
   const ARENAS = (Z.ARENAS = {
@@ -1304,7 +1318,8 @@
     zinnen: { grid: [6, 6], fill: 0.82, arm: 4, lat: 1, ex: [0.55, 0.85] },
     see: { grid: [6, 7], fill: 0.85, arm: 5, lat: 2 },
     glut: { grid: [9, 4], fill: 0.85, arm: 5, wig: 0.3 },
-    sturm: { grid: [6, 7], fill: 0.85, arm: 5, lat: 2 }
+    sturm: { grid: [6, 7], fill: 0.85, arm: 5, lat: 2 },
+    stollen: { grid: [6, 6], fill: 0.84, arm: 4, lat: 1 } /* W49 Kapitel */
   });
   for (const id in LAYOUT) if (BIOMES[id]) { BIOMES[id].grid0 = BIOMES[id].grid; BIOMES[id].grid = LAYOUT[id].grid; }
 
@@ -3160,7 +3175,7 @@
        alles andere auf mittlerer Höhe und möglichst weit vom Eingang. */
     const exits = opts.exits || B.exits || [];
     const VDIR = { keller: 1, verlies: 1, schlund: 1, see: 1, hafen: 0.6, labor: 1, glut: 0.5, demogorgon: 1, themberchaud: 0.5,
-      wehrgang: -1, glocken: -1, zinnen: -1, sturm: -1, wachturm: -1, venomfang: -1, erzpriesterin: 0.3, hallen: 0, schmiede: 0 };
+      wehrgang: -1, glocken: -1, zinnen: -1, sturm: -1, wachturm: -1, venomfang: -1, erzpriesterin: 0.3, hallen: 0, schmiede: 0, stollen: 1 /* W49 Kapitel */ };
     const gh = lv.gh, sc = lv.startCell;
     const cellsAll = Object.keys(lv.cells).map(k => lv.cells[k]).filter(c => c.kind !== "secret");
     const used = [], chosen = [];

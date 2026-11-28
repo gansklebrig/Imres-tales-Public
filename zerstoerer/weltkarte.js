@@ -22,7 +22,7 @@
   /* ======================= Gebiete, Wege, Stufen ======================= */
   /* Zeile: 0 höher, 1 hindurch, 2 tiefer */
   const ROW = { lager: 1, torhof: 1, keller: 2, hallen: 1, wehrgang: 0, verlies: 2, hafen: 1, glocken: 0, labor: 2, erzpriesterin: 1, wachturm: 0,
-    schlund: 2, schmiede: 1, zinnen: 0, see: 2, glut: 1, sturm: 0, demogorgon: 2, themberchaud: 1, venomfang: 0, herz: 1 };
+    schlund: 2, schmiede: 1, zinnen: 0, see: 2, glut: 1, sturm: 0, demogorgon: 2, themberchaud: 1, venomfang: 0, herz: 1, stollen: 1.5 /* W49 Kapitel: zwischen Glutgassen und See */ };
   const IDS = Object.keys(ROW).filter(id => id === "lager" || Z.BIOMES[id] || Z.ARENAS[id]);
   const AREAS = IDS.filter(id => id !== "lager");
   const def = id => Z.BIOMES[id] || Z.ARENAS[id] || null;
@@ -45,7 +45,7 @@
   /* Farbe je Gebiet (Erd-, Rost-, Glut-, Moos- und Violetttöne) */
   const COL = { lager: "#8a5a2a", torhof: "#6b4a3a", keller: "#6a5032", hallen: "#7a3a2a", wehrgang: "#6a5e3a", verlies: "#4e3a46", hafen: "#4a5a34", glocken: "#8a6a24",
     labor: "#5a3a6a", erzpriesterin: "#7a2a3a", wachturm: "#5e4a2a", schlund: "#3e2a2a", schmiede: "#a0441a", zinnen: "#7a6a44", see: "#2e4a34", glut: "#b0381a",
-    sturm: "#5a5a50", demogorgon: "#4a1a3a", themberchaud: "#8a2a10", venomfang: "#3e5a1a", herz: "#3a1a2e" };
+    sturm: "#5a5a50", demogorgon: "#4a1a3a", themberchaud: "#8a2a10", venomfang: "#3e5a1a", herz: "#3a1a2e", stollen: "#4a3a52" /* W49 Kapitel */ };
 
   /* ======================= Speicher ======================= */
   function WK() {
