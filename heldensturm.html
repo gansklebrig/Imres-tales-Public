@@ -75,6 +75,7 @@
 /* Namenszeile beim neuen Spiel: Würfel neben dem Eingabefeld statt allein in der nächsten Zeile */.slrow:has(>#slName){flex-wrap:nowrap}.slrow>#slName{flex:1 1 auto;min-width:0;width:auto}@media (max-width:420px){.slrow:has(>#slName)>.lbl{min-width:0}}
 /* Handy hochkant: Hauptknopf am Lauf-Ende („Zurück ins Lager“) mittig statt links */@media (max-width:600px) and (orientation:portrait){#scr .wrap.narrow>div:has(>.btn-main:only-child){text-align:center}}
 /* Schicksalskarten: Beschreibung bis zu vier Zeilen statt nach zwei abgeschnitten (die Karten haben unten Platz) */@media (min-height:471px){.fkD{max-height:5.2em!important}}@media (max-width:480px){.fkN{font-size:clamp(13px,4.4vw,19px)!important;overflow-wrap:anywhere;hyphens:auto}.fkRs .rsTag{white-space:normal!important;text-align:center;line-height:1.2}}
+/* 4K bei 100 % Skalierung (≥3200×1900): Titelmenü, Unterseiten, Lager-Kopf und Erzähler eine Stufe größer */@media (min-width:3200px) and (min-height:1900px){.slm>.slp{zoom:1.75!important;width:calc(100% / 1.75)!important}.slm-in>.slm-l{zoom:1.7!important}body:not(.erzEck):not(.erzRaum) .erzSub{zoom:2!important}body.erzEck .erzSub{zoom:2!important}#imresBack{zoom:1.4}}
 /* Großbild: Eckknöpfe des Titels mitwachsen lassen */@media (min-width:2200px) and (min-height:1300px){#imresBack{font-size:15px;padding:6px 14px}.camp-top .slbtn{font-size:20px}.mfbar .mft{font-size:17px}}@media (min-width:1900px) and (min-height:1000px){.slm>.slp{zoom:1.15;width:calc(100% / 1.15)}}@media (min-width:2300px) and (min-height:1350px){.slm>.slp{zoom:1.32;width:calc(100% / 1.32)}.slm-in>.slm-l{zoom:1.28}}@media (min-width:2200px) and (min-height:1300px){.wrap.ivg .bag.ivsz .it .ico.ico{width:clamp(20px,calc(var(--ivs) * .4),58px)!important;height:clamp(20px,calc(var(--ivs) * .4),58px)!important}}
 </style>
 <script src="tonregler.js?v=1"></script>
@@ -8871,7 +8872,7 @@ function hurtFb(a){const q=a/Math.max(1,P.st.maxHp),lok=!netIs(P.dev);
 (()=>{try{const st=document.createElement('style');st.textContent=`.wsl{color:#e8d8b0}`;document.head.appendChild(st)}catch(e){}})();
 
 /* Menüs wachsen am PC mit dem Fenster mit (Rand bleibt frei): Faktor 1 bis 1,8 je nach Breite und Höhe */
-function menuZoom(){let z=1,hz=1;try{const fein=matchMedia('(hover:hover) and (pointer:fine)').matches,w=innerWidth,h=innerHeight,breit=w>=2200&&h>=1200;if(fein&&w>1150)z=Math.max(1,Math.min(breit?2.3:1.8,w/1100,h/680));if(breit)hz=Math.max(1,Math.min(1.7,h/880))}catch(e){}document.documentElement.style.setProperty('--mz',z.toFixed(3));document.documentElement.style.setProperty('--hz',hz.toFixed(3))}
+function menuZoom(){let z=1,hz=1;try{const fein=matchMedia('(hover:hover) and (pointer:fine)').matches,w=innerWidth,h=innerHeight,breit=w>=2200&&h>=1200;if(fein&&w>1150)z=Math.max(1,Math.min(breit?(h>=1900&&w>=3200?3:2.3):1.8,w/1100,h/680));if(breit)hz=Math.max(1,Math.min(1.7,h/880))}catch(e){}document.documentElement.style.setProperty('--mz',z.toFixed(3));document.documentElement.style.setProperty('--hz',hz.toFixed(3))}
 menuZoom();
 (()=>{try{const st=document.createElement('style');st.textContent=`#scr .wrap{zoom:var(--mz,1)}#scr .wrap .lead,#scr .wrap p{line-height:1.5}#hud>*,#feed,#toast{zoom:var(--hz,1)}`;document.head.appendChild(st)}catch(e){}})();
 
