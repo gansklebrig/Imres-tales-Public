@@ -335,11 +335,14 @@
     return { d, seed: (seed ^ 0x51ed27) >>> 0, rules, kit, lage: (rules.map(r => GESETZE[r].lage).find(Boolean)) || null };
   }
   const tag = () => (Z.run && Z.run.w38tag) || null;
+  /* W40 Balance: ✚-Markierung für Wertungen aus Läufen mit Spielhilfen (Z.run.hilfen) */
+  const mitHilfen = run => !!(run && Array.isArray(run.hilfen) && run.hilfen.length);
+  const plus = () => '<span class="w40-hilfe" title="' + esc(L(["Mit Hilfen gespielt", "Played with assists"])) + '">✚</span>';
   function TM() {
     const m = Z.meta; let t = m.w38tag;
     if (!t || typeof t !== "object" || Array.isArray(t)) t = m.w38tag = {};
     if (!Array.isArray(t.hist)) t.hist = [];
-    if (typeof t.d !== "string") t.d = ""; t.best = +t.best || 0; t.n = +t.n || 0;
+    if (typeof t.d !== "string") t.d = ""; t.best = +t.best || 0; t.n = +t.n || 0; t.bestH = t.bestH ? 1 : 0;
     return t;
   }
   function punkte(run, sieg) {
@@ -362,22 +365,23 @@
     const P = Z.player;
     if (day.kit && Z.makeItem) { const mk = (id, n) => Z.makeItem(id, 0, 1, Z.Rng(day.seed + n * 131)); P.slots.a1 = mk(day.kit[0], 1); P.slots.a2 = mk(day.kit[1], 2); P.slots.s1 = mk(day.kit[2], 3); P.slots.s2 = mk(day.kit[3], 4); }
     Z.recalcPlayer(); applyPots(); P.hp = P.hpMax;
-    const t = TM(); if (t.d !== day.d) { if (t.d && t.best) pushHist(t); t.d = day.d; t.best = 0; t.n = 0; } t.n++; Z.saveMeta();
+    const t = TM(); if (t.d !== day.d) { if (t.d && t.best) pushHist(t); t.d = day.d; t.best = 0; t.n = 0; t.bestH = 0; } t.n++; Z.saveMeta();
     A.play("gong", { vol: 0.5 });
     Z.ui.fade(() => { if (Z.run !== run || !Z.player) return; Z.loadArea("torhof"); }); /* W39 Robust: Lauf in der Überblendung beendet → nicht laden */
     return true;
   }
-  function pushHist(t) { t.hist = t.hist.filter(h => Array.isArray(h) && h[0] !== t.d); t.hist.unshift([t.d, t.best, t.n]); t.hist = t.hist.slice(0, 14); }
+  function pushHist(t) { t.hist = t.hist.filter(h => Array.isArray(h) && h[0] !== t.d); t.hist.unshift(t.bestH ? [t.d, t.best, t.n, 1] : [t.d, t.best, t.n]) /* W40 Balance: 4. Feld = Bestwert mit Hilfen */; t.hist = t.hist.slice(0, 14); }
   /* W38 Endspiel: Abschlussmeldung über setTimeout – Z.bossLater verfällt mit dem Lauf (Z.run → null), die Meldung kam im Lager nie an */
   function finish(sieg) {
     const run = Z.run, tg = run && run.w38tag; if (!tg || tg.fertig) return;
     tg.fertig = true;
     const p = punkte(run, sieg), t = TM();
-    if (t.d !== tg.d) { if (t.d && t.best) pushHist(t); t.d = tg.d; t.best = 0; t.n = Math.max(1, t.n); }
-    const neu = p > t.best; if (neu) t.best = p;
-    t.last = { d: tg.d, p, sieg: !!sieg, gebiet: run.area, kills: (Z.stats && Z.stats.kills) || 0 };
+    if (t.d !== tg.d) { if (t.d && t.best) pushHist(t); t.d = tg.d; t.best = 0; t.n = Math.max(1, t.n); t.bestH = 0; }
+    const hl = mitHilfen(run); /* W40 Balance: faire Kennzeichnung wie im Todes-/Endfenster (hilfen.js) */
+    const neu = p > t.best; if (neu) { t.best = p; t.bestH = hl ? 1 : 0; }
+    t.last = { d: tg.d, p, sieg: !!sieg, gebiet: run.area, kills: (Z.stats && Z.stats.kills) || 0, hilfen: hl ? 1 : 0 };
     pushHist(t); try { Z.saveMeta(); } catch (_) {}
-    setTimeout(() => note("<b>☀ " + esc(L(["Tagesprüfung: ", "Daily trial: "]) + p + L([" Punkte", " points"])) + "</b><br><small>" + esc(neu ? L(["Neue Tagesbestleistung!", "New best for today!"]) : L(["Heute bisher bestes: ", "Today's best so far: "]) + t.best) + "</small>", { prio: 2, art: "gold", dauer: 7000, key: "w38tag" }), 2200);
+    setTimeout(() => note("<b>☀ " + esc(L(["Tagesprüfung: ", "Daily trial: "]) + p + L([" Punkte", " points"])) + (hl ? " " + plus() : "") + "</b><br><small>" + esc(neu ? L(["Neue Tagesbestleistung!", "New best for today!"]) : L(["Heute bisher bestes: ", "Today's best so far: "]) + t.best) + "</small>", { prio: 2, art: "gold", dauer: 7000, key: "w38tag" }), 2200);
   }
   const btc0 = Z.backToCamp;
   Z.backToCamp = function () { try { if (tag()) finish(!!Z.run.w38sieg); } catch (e) { console.error("W38 Abwechslung", e); } return btc0.apply(this, arguments); };
@@ -446,9 +450,9 @@
     h += '<p class="w38-unter">' + esc(L(["Heute dieselbe Feste für alle: gleiche Karten, gleiche Ausrüstung, zwei Tagesgesetze. Splitter und Funde zählen wie sonst – gewertet wird am Ende des Laufs.", "The same keep for everyone today: same maps, same gear, two laws of the day. Shards and finds count as usual – the score is taken when the run ends."])) + "</p>";
     h += '<ul class="w38-ges">' + day.rules.map(r => "<li><b>" + esc(L(GESETZE[r].n)) + "</b> – " + esc(L(GESETZE[r].d)) + "</li>").join("") + "</ul>";
     if (day.kit) h += '<p class="w38-kit">' + esc(L(["Ausrüstung: ", "Gear: "])) + day.kit.map(id => { const d = Z.WEAPONS[id] || Z.SKILLS[id]; return "<b>" + esc(d ? L(d.n) : id) + "</b>"; }).join(" · ") + "</p>";
-    h += '<p class="w38-best">' + esc(L(["Heute: ", "Today: "])) + (today && t.best ? "<b>" + t.best + "</b> " + esc(L(["Punkte", "points"])) : "–") + (today && t.n ? " · " + esc(L(["Versuche ", "attempts "]) + t.n) : "") + "</p>";
+    h += '<p class="w38-best">' + esc(L(["Heute: ", "Today: "])) + (today && t.best ? "<b>" + t.best + "</b> " + esc(L(["Punkte", "points"])) + (t.bestH ? " " + plus() + ' <small class="w40-hilfe">' + esc(L(["mit Hilfen gespielt", "played with assists"])) + "</small>" : "") : "–") + (today && t.n ? " · " + esc(L(["Versuche ", "attempts "]) + t.n) : "") + "</p>";
     const hist = t.hist.filter(x => Array.isArray(x) && x[0] !== day.d).slice(0, 6);
-    if (hist.length) h += '<p class="w38-hist">' + hist.map(x => "<span>" + esc(String(x[0]).slice(5)) + " <b>" + (x[1] | 0) + "</b></span>").join("") + "</p>";
+    if (hist.length) h += '<p class="w38-hist">' + hist.map(x => "<span>" + esc(String(x[0]).slice(5)) + " <b>" + (x[1] | 0) + "</b>" + (x[3] ? " " + plus() : "") + "</span>").join("") + "</p>";
     const busy = Z.bossrausch && Z.bossrausch.aktiv && Z.bossrausch.aktiv();
     h += '<div class="knoepfe"><button data-act="w38Los" autofocus' + (busy || gast() ? " disabled" : "") + ">☀ " + esc(L(["Antreten", "Begin"])) + '</button><button data-act="close">' + esc(L(["Zurück", "Back"])) + "</button></div>";
     stoneFx = 1.2;
@@ -469,7 +473,7 @@
             const p = document.createElement("p"); p.className = "w38-pause";
             let s = "";
             if (lg && LAGEN[lg.k]) s += "<b>" + esc(LAGEN[lg.k].icon + " " + name(lg)) + "</b> – " + esc(desc(lg)) + (lg.k === "gezeichnet" ? " (" + (lg.got | 0) + "/" + lg.need + ")" : lg.k === "schatz" && !lg.paid ? " (" + esc(richtung(lg)) + ")" : lg.k === "besetzt" && !lg.paid && !lg.gast ? " (" + Z.enemies.filter(e => e.w38inv && !e.dead).length + ")" : "") + (lg.paid ? " ✓" : "");
-            if (tg) s += (s ? "<br>" : "") + "<b>☀ " + esc(L(["Tagesprüfung", "Daily trial"])) + "</b> – " + esc(tg.rules.map(r => L(GESETZE[r].n)).join(" · ")) + " · " + punkte(Z.run, false) + " " + esc(L(["Punkte", "points"]));
+            if (tg) s += (s ? "<br>" : "") + "<b>☀ " + esc(L(["Tagesprüfung", "Daily trial"])) + "</b> – " + esc(tg.rules.map(r => L(GESETZE[r].n)).join(" · ")) + " · " + punkte(Z.run, false) + " " + esc(L(["Punkte", "points"])) + (mitHilfen(Z.run) ? " " + plus() : "");
             p.innerHTML = s; box.parentNode.insertBefore(p, box);
           }
         } catch (e) { console.error("W38 Abwechslung", e); }
@@ -603,6 +607,7 @@
   const css = document.createElement("style");
   css.textContent = [
     ".w38-unter{color:#c8b090}.w38-ges{margin:6px 0 8px 18px;padding:0;color:#f0dcb0}.w38-ges b{color:#ffd27a}",
+    ".w40-hilfe{color:#c8b89a;font-weight:normal;opacity:.85}", /* W40 Balance: dezent, warm */
     ".w38-kit{color:#d8c8a8}.w38-kit b{color:#e8d8b8}.w38-best{color:#d8c8a8}.w38-best b{color:#ffd27a;font-size:1.15em}",
     ".w38-hist{display:flex;flex-wrap:wrap;gap:4px 8px}.w38-hist span{background:rgba(200,144,42,.12);border:1px solid rgba(200,144,42,.4);border-radius:10px;padding:1px 9px;font-size:var(--fs-s,13px);color:#e8d8b8}.w38-hist b{color:#ffd27a}",
     ".w38-pause{margin:6px 0 8px;padding:5px 9px;border-left:3px solid #a0241a;background:rgba(60,14,10,.35);color:#e8d8b8;font-size:var(--fs-s,13px);line-height:1.4}.w38-pause b{color:#ffd27a}",

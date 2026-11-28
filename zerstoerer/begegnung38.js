@@ -353,12 +353,18 @@
   function wrapHit() {
     const he0 = Z.hitEnemy; if (!he0 || he0._w38s) return;
     const f = function (e, dmg, o) {
+    /* W40 Balance: wird Z.hitEnemy später von einem anderen Modul umhüllt, hüllt der Takt erneut ein – dann lagen zwei dieser
+       Schichten übereinander und der Frontschutz wirkte doppelt (0,6 × 0,6 → −64 %). Pro Treffer nur einmal abziehen. */
+    const tag = e && e.w38schatten ? e : null;
+    if (tag && tag._w38blk) return he0.apply(this, arguments);
     if (e && e.w38schatten && !e.dead && typeof dmg === "number" && schattenArt(e) === "shield" && !e.act && !(o && (o.dot || o.fx))) {
       const dir = (o && o.dir) || (Z.player ? U.sign(e.x - Z.player.x) : 0);
       if (dir && (e.face || 1) === -dir) { dmg *= 0.6; safe("block", () => { A.play("block", { vol: 0.4, rate: 0.9 }); FX.burst(e.x + e.w / 2 - dir * 6, e.y + 12, 5, { col: ["#c890ff", "#e8e0d8"], sp: 70, life: 0.2, size: 1.4, kind: "spark", add: true }); }); }
     }
     const args = Array.prototype.slice.call(arguments); args[1] = dmg; /* strict: arguments folgt dmg nicht */
-    return he0.apply(this, args);
+    if (!tag) return he0.apply(this, args);
+    tag._w38blk = true;
+    try { return he0.apply(this, args); } finally { tag._w38blk = false; }
     };
     f._w38s = true; Z.hitEnemy = f;
   }

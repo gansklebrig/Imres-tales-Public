@@ -140,7 +140,7 @@
         if (g.ret && P) { const a = Math.atan2(P.y + 12 - g.y, P.x + P.w / 2 - g.x); g.vx = U.approach(g.vx, Math.cos(a) * g.sp, 2400 * dt); g.vy = U.approach(g.vy, Math.sin(a) * g.sp, 2400 * dt); if (U.dist(g.x, g.y, P.x + P.w / 2, P.y + 12) < 14 || g.t > 3) { if (g.onCatch) g.onCatch(); return false; } }
         g.x += g.vx * dt; g.y += g.vy * dt; g.rot += dt * 22;
         if (!g.ret && W.solidAt(g.x, g.y)) { g.ret = true; g.hits = new Set(); A.play("hitMetal", { vol: 0.4 }); }
-        for (const e of Z.enemies) if (alive(e) && !g.hits.has(e) && U.overlap({ x: g.x - g.r, y: g.y - g.r, w: g.r * 2, h: g.r * 2 }, e)) { g.hits.add(e); Z.hitEnemy(e, g.dmg, { src: g.src || "skill", it: g.it, kb: 60, eff: g.eff, dir: U.sign(g.vx) || 1 }); if (g.onHit) g.onHit(e); }
+        for (const e of Z.enemies) if (alive(e) && !g.hits.has(e) && U.overlap({ x: g.x - g.r, y: g.y - g.r, w: g.r * 2, h: g.r * 2 }, e)) { g.hits.add(e); Z.hitEnemy(e, g.ret && g.retMul ? g.dmg * g.retMul : g.dmg, { src: g.src || "skill", it: g.it, kb: 60, eff: g.eff, dir: U.sign(g.vx) || 1 }); if (g.onHit) g.onHit(e); } /* W40 Balance: retMul = Schaden auf dem Rückweg */
         return true;
       }
       case "hook": {
@@ -549,7 +549,7 @@
       shield: { block: 0.75, parry: 0.2, bash: 13, parryStun: 1.0 }, tags: ["Fernkampf", "Gruppe"], master: ["Meisterschaft: Der Wurfschild betäubt jeden Getroffenen.", "Mastery: the throwing shield stuns everyone it hits."] },
     lavaschild: { n: ["Glutschild", "Ember Shield"], kind: "shield", stat: "brut", find: "selten", tier: 2, only: ["glut", "schmiede", "schlund"], icon: "lavashield", col: "#ff6a1a",
       d: ["Unter der Kruste glüht es noch. Wer gegen ihn schlägt, fängt Feuer; der Stoß hinterlässt brennenden Boden.", "Beneath the crust it still glows. Whoever strikes it catches fire; the bash leaves burning ground."],
-      shield: { block: 0.85, parry: 0.18, bash: 11, parryStun: 1.0, bashEff: { burn: 1 } }, tags: ["Brand", "Dornen"], master: ["Meisterschaft: Paraden lösen eine Feuerwelle aus.", "Mastery: parries release a wave of fire."] },
+      shield: { block: 0.85, parry: 0.18, bash: 11, parryStun: 1.0 } /* W40 Balance: Stoß zündet nicht mehr direkt (bashEff burn entfernt) */, tags: ["Brand", "Dornen"], master: ["Meisterschaft: Paraden lösen eine Feuerwelle aus.", "Mastery: parries release a wave of fire."] },
     panzerschild: { n: ["Panzer der Seeschildkröte", "Sea Turtle Shell"], kind: "shield", stat: "ueber", find: "rar", tier: 1, only: ["hafen", "see"], icon: "turtle", col: "#6a8a5a",
       d: ["Ein ganzer Panzer auf dem Rücken: Blockt von vorn UND hinten, und mit ihm läufst du beim Blocken fast normal schnell. Kleines Paradefenster.", "A whole shell on your back: blocks from the front AND behind, and you walk almost at full speed while blocking. Small parry window."],
       shield: { block: 0.9, parry: 0.12, bash: 9, parryStun: 0.8, allround: true, move: 0.75 }, tags: ["Panzer"], master: ["Meisterschaft: Jeder Block heilt 1 % Leben.", "Mastery: every block heals 1% health."] }
@@ -564,7 +564,7 @@
       if (o.it && o.it.id === "wurfschild") {
         if (P.shieldOut) return false;
         const h = hand(P), it = o.it;
-        const g = { k: "boomerang", x: h.x, y: h.y, vx: P.face * 420, vy: 0, sp: 440, out: 0.38, r: 8, t: 0, rot: 0, hits: new Set(), dmg: Z.dmgOf(P, it, 11) /* W38 Balance: 13 → 11 (−15 %, schild.py 8×: 2537 gegen Median 482) */, it, src: "melee", eff: lvl("wurfschild") >= 3 ? { stun: 0.8 } : { stun: 0.2 },
+        const g = { k: "boomerang", x: h.x, y: h.y, vx: P.face * 420, vy: 0, sp: 440, out: 0.38, r: 8, t: 0, rot: 0, hits: new Set(), dmg: Z.dmgOf(P, it, 11) /* W38 Balance: 13 → 11 (−15 %, schild.py 8×: 2537 gegen Median 482) */, it, src: "melee", eff: lvl("wurfschild") >= 3 ? { stun: 0.8 } : { stun: 0.1 }, retMul: 0.6 /* W40 Balance: Betäubung 0,2 → 0,1 s, Rückweg trifft noch mit 60 % (Durchschlag bleibt) */,
           draw: c => { circ(c, 0, 0, 6, "#8a6a40"); circ(c, 0, 0, 4.4, "#b89a6a"); circ(c, 0, 0, 1.6, "#e0c890"); }, onCatch: () => { P.shieldOut = null; A.play("block", { vol: 0.4, rate: 1.3 }); } };
         G.push(g); P.shieldOut = { slot: o.slot, g }; A.play("swingHeavy", { vol: 0.5, rate: 1.2 });
         return false;
@@ -575,7 +575,7 @@
       const a = o.a, e = o.e;
       if (id === "glockenschild" && !a.rang) { a.rang = true; A.play("anvil", { vol: 0.8, rate: 0.55 }); FX.ring(e.x + e.w / 2, e.y + e.h / 2, 64, "#d8a040", 0.45, 4); for (const x of Z.enemies) if (alive(x) && x !== e && U.dist(x.x, x.y, e.x, e.y) < 64) { Z.addStatus(x, "stun", 0.9); Z.hitEnemy(x, o.dmg * 0.5, { src: "skill", kb: 80 }); if (lvl(id) >= 3) Z.addStatus(x, "mark", 4); } if (lvl(id) >= 3) Z.addStatus(e, "mark", 4); }
       if (id === "funkenschild" && !a.zapped) { a.zapped = true; Z.chainLightning(P, e.x + e.w / 2, e.y + e.h / 2, o.dmg * 0.6, 2, { stun: 0.3 }, act.it); }
-      if (id === "lavaschild" && !a.lit) { a.lit = true; const gy = groundAt(e.x + e.w / 2, e.y + e.h - 4, 40); if (gy != null) Z.spawnHazard({ kind: "fire", x: e.x + e.w / 2, y: gy, w: 50, life: 3, dmg: Z.dmgOf(P, act.it, 2.55) /* W38 Balance: 3 → 2,55 (−15 %) */, owner: "p", eff: { burn: 1 } }); }
+      if (id === "lavaschild" && !a.lit) { a.lit = true; const gy = groundAt(e.x + e.w / 2, e.y + e.h - 4, 40); if (gy != null) Z.spawnHazard({ kind: "fire", x: e.x + e.w / 2, y: gy, w: 40, life: 2 /* W40 Balance: Lavaboden 3 → 2 s, Breite 50 → 40 */, dmg: Z.dmgOf(P, act.it, 2.55) /* W38 Balance: 3 → 2,55 (−15 %) */, owner: "p", noBurn: true /* W40 Balance: der Boden brennt (Schaden), zündet aber nicht mehr – Brand kommt nur noch von Schlägen gegen den Schild */ }); }
       if (id === "frostschild" && lvl(id) >= 3) { Z.addStatus(e, "stun", 1.5); e.frozenT = e.st.stun; }
       if (id === "fassdeckel" && lvl(id) >= 3) e.slamStun = 2;
       return;
@@ -594,7 +594,7 @@
       const at = o.attacker, sh = act.d.shield;
       if (id === "spiegelschild" && o.proj) { const p = o.proj; p.owner = "p"; p.vx *= -1.2; p.vy *= -0.4; p.dmg = Z.dmgOf(P, act.it, 10) * sh.reflectMul; p.hits = new Set(); p.reflected = true; if (lvl(id) >= 3) p.pierce = true; FX.text(cx, P.y - 8, L(["Gespiegelt!", "Reflected!"]), "#e8e0d8"); return "reflect"; }
       if (id === "frostschild" && at && !at.dead) Z.addStatus(at, "slow", 2);
-      if (id === "lavaschild" && at && !at.dead && o.melee !== false) Z.addStatus(at, "burn", 2);
+      if (id === "lavaschild" && at && !at.dead && o.melee !== false) Z.addStatus(at, "burn", 1) /* W40 Balance: Block-Brand Stufe 2 → 1 (der Dauerbrand war der Hauptanteil) */;
       if (id === "blutschild") { P.rally += dmg * sh.block * 0.8; P.rallyT = 2.5; }
       if (id === "funkenschild" && lvl(id) >= 3) Z.chainLightning(P, cx + P.face * 8, cy, Z.dmgOf(P, act.it, 8), 1, { stun: 0.2 }, act.it);
       if (id === "panzerschild" && lvl(id) >= 3) Z.healPlayer(P.hpMax * 0.01);

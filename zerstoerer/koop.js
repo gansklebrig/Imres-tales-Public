@@ -184,7 +184,9 @@
     return o;
   };
   K.apply = s => {
-    if (!s) return; if (!K.p2 || K.p2.ch !== s.ch) { if (K.p2) { K.p2 = null; K.rex = null; } join(s.ch, { kind: "net" }); }
+    if (!s) return;
+    if (s.ch !== "G" && s.ch !== "E") { s = Object.assign({}, s); if (K.p2 && CH[K.p2.ch]) s.ch = K.p2.ch; else s.ch = "G"; } /* W40 Balance (Robust): ch fehlt/ungültig → Figur behalten */
+    if (!K.p2 || K.p2.ch !== s.ch) { if (K.p2) { K.p2 = null; K.rex = null; } join(s.ch, { kind: "net" }); }
     const P = K.p2; if (!P) return;
     for (const k of SER) if (k in s) P[k] = s[k];
     if (s.anim) Object.assign(P.anim, s.anim); if (s.cd) Object.assign(P.cd, s.cd); if (s.cdMax) Object.assign(P.cdMax, s.cdMax);
@@ -250,6 +252,8 @@
   }
   function join(id, src) {
     if (K.p2 || !Z.level || !Z.player) return;
+    id = id === "E" ? "E" : "G"; /* W40 Balance (Robust): ungültige Figur (fehlendes/fremdes ch, z. B. aus einem Netz-Schnappschuss) ergab
+       einen Spieler 2 ohne Eintrag in CH – danach warf jeder Namenszugriff „reading 'n'“ (auch leave(), P2 kam nicht mehr raus) */
     const P = mkP2(id);
     K.p2 = P; K.src = src; K.lastChar = id; saveStore();
     for (const a of ACT) { K.held[a] = false; K.pressed[a] = false; K.prev[a] = true; K.kHeld[a] = false; }
@@ -267,7 +271,7 @@
   }
   function leave(msg) {
     const P = K.p2; if (!P) return;
-    const name = CH[P.ch].n;
+    const name = (CH[P.ch] || CH.G).n; /* W40 Balance (Robust) */
     FX.burst(P.x + P.w / 2, P.y + 14, 18, { col: ["#a99a8b", "#5a4a40"], sp: 70, life: 0.6, size: 3, kind: "smoke" });
     try { A.play("roll", { vol: 0.3, rate: 0.85 }); A.play("ui", { vol: 0.25, rate: 0.75, delay: 0.12 }); } catch (_) {} /* W39 Klang: Aussteigen war stumm (Einsteigen: Bellen/Zauber) – Rüstzeug raschelt, Ton abwärts */
     K.p2 = null; K.src = null; K.rex = null; K.fx.length = 0;
@@ -1478,7 +1482,7 @@
     };
   }
   function addSummary() {
-    const s = K.summary(); if (!s || !s.figur) return;
+    const s = K.summary(); if (!s || !s.figur || !CH[s.figur]) return; /* W40 Balance (Robust) */
     setTimeout(() => {
       const box = document.querySelector("#modal .mbox"); if (!box || box.querySelector(".koop-rb")) return;
       const d = document.createElement("p"); d.className = "hinweis koop-rb";

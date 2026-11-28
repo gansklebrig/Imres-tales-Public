@@ -326,7 +326,7 @@
           if (e.dead || !U.overlap(r, e)) continue;
           if (once && h.hits.has(e)) continue; h.hits.add(e);
           Z.hitEnemy(e, h.dmg, { eff: h.eff, kb: h.kbUp ? 20 : 0, kbUp: h.kbUp || 0, src: "skill", dot: !once && h.kind !== "breath", col: h.kind === "fire" ? "#ff8a3a" : "#9ad04a" });
-          if (h.kind === "fire") Z.addStatus(e, "burn", 1);
+          if (h.kind === "fire" && !h.noBurn) Z.addStatus(e, "burn", 1); /* W40 Balance: noBurn = Boden ohne Zünden */
         }
       } else if (P && !P.dead && U.overlap(r, P)) {
         if (h.kind === "sleep") { Z.addStatus(P, "slow", 0.3, true); continue; }

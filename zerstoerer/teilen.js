@@ -119,11 +119,11 @@
     return r;
   }
   function vergleich(f) {
-    const t = (Z.meta && Z.meta.w38tag) || {}; let mein = null;
-    if (t.d === f.d) mein = t.best | 0; else if (Array.isArray(t.hist)) { const h = t.hist.find(x => Array.isArray(x) && x[0] === f.d); if (h) mein = h[1] | 0; }
+    const t = (Z.meta && Z.meta.w38tag) || {}; let mein = null, meinH = false;
+    if (t.d === f.d) { mein = t.best | 0; meinH = !!t.bestH; } else if (Array.isArray(t.hist)) { const h = t.hist.find(x => Array.isArray(x) && x[0] === f.d); if (h) { mein = h[1] | 0; meinH = !!h[3]; } } /* W40 Balance: eigene ✚-Markierung */
     let h = "<h2>☀ " + esc(L(["Vergleich", "Comparison"])) + "<small>" + esc(L(["Tagesprüfung ", "Daily trial "]) + datumTxt(f.d)) + "</small></h2>";
     h += '<table class="zt-vgl"><tr><th></th><th>' + esc(L(["Du", "You"])) + "</th><th>" + esc(L(["Freund", "Friend"])) + "</th></tr>";
-    h += "<tr><td>" + esc(L(["Punkte", "Points"])) + "</td><td>" + (mein == null ? "–" : mein) + "</td><td>" + f.p + (f.a ? " ✚" : "") + "</td></tr>";
+    h += "<tr><td>" + esc(L(["Punkte", "Points"])) + "</td><td>" + (mein == null ? "–" : mein + (meinH ? " ✚" : "")) + "</td><td>" + f.p + (f.a ? " ✚" : "") + "</td></tr>";
     h += "<tr><td>" + esc(L(["Held", "Hero"])) + "</td><td></td><td>" + esc(HELD[f.h]) + "</td></tr><tr><td>" + esc(L(["Zeit · Kills", "Time · Kills"])) + "</td><td></td><td>" + fmtZeit(f.z) + " · " + f.k + "</td></tr></table>";
     h += '<p class="hinweis">' + esc(mein == null ? L(["Du hast diesen Tag noch nicht gespielt.", "You haven't played this day yet."]) : mein > f.p ? L(["Du liegst vorn.", "You're ahead."]) : mein < f.p ? L(["Dein Freund liegt vorn.", "Your friend is ahead."]) : L(["Gleichstand.", "A tie."])) + "</p>";
     if (f.a) h += '<p class="hinweis">✚ ' + esc(L(["Dein Freund hat mit Spielhilfen gespielt.", "Your friend played with assists."])) + "</p>";
