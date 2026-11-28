@@ -94,4 +94,66 @@
     } catch (err) { console.error("w51", err); }
     return e;
   };
+
+  /* ---------- W54 Balance: Stufe 4 entlasten, Boss-Reihenfolge, Ausreißer bei Waffen/Fähigkeiten/Mutationen ----------
+     Prüfstände /home/claude/test/w54_balance: s4bank.py (Start direkt in Schlund/Runenschmiede/Zinnen, frische Ausrüstung +1,
+     165 LP, 3 Tränke, 36 Läufe), bossstark.py (Stufe-6-Bosse und Weberin mit starkem Build), waffen54.py (gleiche Bedingungen je
+     Waffe/Fähigkeit/Mutation). Vorher Stufe 4: Todesrate 0,83 (30/36); Tode fast nur beim Wächter (Wraith, Schmiedewächter samt
+     Runenfunken, Chasme). Je Wert höchstens ±25 %. */
+  W51_GEBIET.schlund = Object.assign(W51_GEBIET.schlund || {}, { dmg: 0.92 }); /* Stufe-4-Gegnerschaden −8 % (Vorschaden vor dem Wächter 2–3× LP-max) */
+  W51_GEBIET.zinnen = Object.assign(W51_GEBIET.zinnen || {}, { dmg: 0.92 });
+  W51_GEBIET.schmiede = Object.assign(W51_GEBIET.schmiede || {}, { dmg: 0.85 }); /* Runenschmiede 0,92 → 0,85: höchster Vorschaden (1,8–2,0× LP-max), Todesrate nach Schritt 2 noch 1,0 */
+  W51_ART.runenfunke = { dmg: 0.6 };   /* 0,8 → 0,6 (2 Schritte, 0,68 brachte nichts): im Schmiedewächter-Kampf 6 von 10 letzten Treffern */
+  /* Wächter der Stufe 4: frische Ausrüstung erreicht sie mit 1–2× LP-max Vorschaden und nimmt im Kampf 2,5–3,3× LP-max.
+     1. Schritt (nur Schaden ×0,88, Chasme-Leben 1,3) änderte die Todesrate nicht (0,83 → 0,83, je 36 Läufe) – die Kämpfe sind
+     zu lang: daher kürzer (Leben) und dazu die beschworenen Helfer (Schatten, Runenfunken, Manen) schwächer. */
+  BOSS_F.wraith = 1.0;                 /* 1,25 → 1,0 (−20 %) */
+  BOSS_F.schmiedewaechter = 0.92;      /* 1,15 → 0,92 (−20 %) */
+  BOSS_F.chasme = 1.2;                 /* 1,5 → 1,2 (−20 %); 7 von 11 Toden in den Zinnen */
+  const W54_BOSS = {                   /* dmg: Wächter selbst; add: Gegner, die erscheinen, während er kämpft */
+    wraith: { dmg: 0.85, add: 0.8 },   /* Schlund: 6 von 9 Toden beim Wächter, Grabeshände/Sog/Schatten */
+    schmiedewaechter: { dmg: 0.75, add: 1 }, /* 3. Schritt 0,85 → 0,75: nach Schritt 2 weiter 12/12 Tode, Wächter meist bei 35–100 % */
+    chasme: { dmg: 0.85, add: 0.8 },
+    /* Bosse mit STARKEM Build (bossstark.py: Waffen +4/+3, 363 LP, 4 Tränke, 3 Mutationen, Fähigkeit +3; je 8 Kämpfe, 4 Stile):
+       vorher Demogorgon 6/8 Siege, Themberchaud 4/8, Venomfang 0/8 (Rest 10–57 % Leben), Weberin 8/8 mit 3,8 von 4 Tränken übrig
+       und halb so viel Schaden wie bei den Stufe-6-Bossen – das Ende war leichter als der Weg dorthin. */
+    venomfang: { dmg: 0.72 },          /* 3 Schritte 0,9 → 0,8 → 0,72: Schritt 1 weiter 0/8 (Rest 9–56 %), Schritt 2 2/12; dazu Leben 1,4 → 0,95 (unten) */
+    themberchaud: { dmg: 0.92 },       /* 4/8: knapp; nur der Schaden */
+    weberin: { dmg: 1.65 }             /* Stufe 7 soll fordern. Vorher 8/8 Siege mit 3,8 von 4 Tränken übrig. Schritt 1 (Schaden 1,15, Leben 1,25): 6/8;
+                                          Schritt 2 (1,3 / 1,45) und 3 (Schaden 1,42): in gültigen Kämpfen nie verloren (24/24, 2,9 Tränke übrig) → Schritt 4: 1,42 → 1,65 */
+  };
+  BOSS_F.venomfang = 0.85;             /* 1,4 → 1,1 → 0,95 → 0,85 (je ≤ 25 %); nach Schritt 3 noch 4/24 Siege, Rest meist 6–47 % */
+  BOSS_F.weberin = 1.45;               /* 1 → 1,25 → 1,45 */
+  Z.BAL.w54 = { boss: W54_BOSS };
+  if (Z.haken) Z.haken.nach("spawnBoss", "w54boss", function (e) {
+    try {
+      const f = e && !e._w54 && W54_BOSS[e.id];
+      if (f) { e._w54 = 1; if (f.dmg) e.dmgMul *= f.dmg; if (f.hp) { e.hpMax = Math.max(1, Math.round(e.hpMax * f.hp)); e.hp = Math.max(1, Math.round(e.hp * f.hp)); } }
+    } catch (err) { console.error("w54", err); }
+  });
+  /* W54 Waffen (waffen54.py: je Waffe +PL, keine Werte/Runen; Index = Wurzel aus Einzel-DPS gegen einen zurückschlagenden Söldner mit
+     4000 LP und Räumzeit gegen 4 Gegner, je relativ zum Median; Mittel aus Stufe 3/+1 Söldner, 4/+2 Rüstungen, 5/+3 Rüstungen, je 3 Wdh.).
+     Vorher oben: Kettenpeitsche 1,57, Krummsäbel 1,48 (rar), Feuerbuch 1,41, Kettensichel 1,37; unten: Ettercap-Drüse 0,34,
+     Kobold-Schleuder 0,56, Fagas' Armbrust 0,66, Morgenstern 0,67, Eiszapfenstab 0,73, Kriegshammer 0,77, Mönchsstab 0,79.
+     Startwaffen (Kurzschwert 0,49, Jagdbogen 0,65) bleiben bewusst schwach. Je ≤ 20 %. Später geladene Waffen (waffen38.js) beim Laden. */
+  const W54_WAFFEN = function () {
+    WTUNE("kettenpeitsche", d => { d.critMul = 1.6; });                                   /* Spitzen-Krit ×1,8 → ×1,6 */
+    WTUNE("feuerkugel", d => { if (d.shoot) d.shoot.dmg = 21; });                         /* 23 → 21 (−9 %; sicher aus der Ferne) */
+    WTUNE("kettensichel", d => { if (d.shoot) d.shoot.dmg = 9; });                        /* Wurf 10 → 9 (Zug-Hieb unverändert) */
+    WTUNE("netzdruese", d => { if (d.shoot) d.shoot.dmg = 5.5; });                        /* 4,6 → 5,5 (+20 %) */
+    WTUNE("schleuder", d => { if (d.shoot) d.shoot.dmg = 12; });                          /* 10 → 12 (+20 %) */
+    WTUNE("armbrust", d => { if (d.shoot) d.shoot.dmg = 19; });                           /* 16 → 19 (+19 %) */
+    WTUNE("flegel", d => d.combo.forEach((c, i) => { c.dmg = [29, 40][i]; }));            /* 25/35 → 29/40 (+15 %) */
+    WTUNE("eiszapfen", d => { if (d.shoot) d.shoot.dmg = 8; });                           /* 7 → 8 (+14 %) */
+    WTUNE("kriegshammer", d => { d.critMul = 1.8; });                                     /* Krit ×1,6 → ×1,8 (W6 hatte ×2,2 → ×1,6) */
+    WTUNE("kampfstab", d => d.combo.forEach((c, i) => { c.dmg = [13, 13, 14, 14, 27][i]; })); /* 12/12/13/13/24 → 13/13/14/14/27 (+9 %) */
+  };
+  W54_WAFFEN();
+  if (document.readyState === "complete") W54_WAFFEN(); else window.addEventListener("load", W54_WAFFEN);
+  if (Z.haken) Z.haken.nach("spawnEnemy", "w54helfer", function (e) {
+    try {
+      const b = Z.boss, f = b && !b.dead && b !== e && b.box && b.box.warden && W54_BOSS[b.id];
+      if (f && f.add && f.add !== 1 && e && !e._w54 && e.def && !e.def.boss) { e._w54 = 1; e.dmgMul *= f.add; }
+    } catch (err) { console.error("w54", err); }
+  });
 })();

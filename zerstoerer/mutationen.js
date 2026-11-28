@@ -39,7 +39,7 @@
     { id: "letzterstand", f: "tank", n: ["Letzter Stand", "Last Stand"], d: ["Unter 25 % Leben: 40 % weniger erlittener Schaden.", "Below 25% health: 40% less damage taken."], lock: () => achOk("zaeh"), lockTxt: ["Erfolg „Unverwüstlich“ (10-mal gefallen)", "Achievement 'Relentless' (fallen 10 times)"] },
     { id: "eisengriff", f: "cc", n: ["Eisengriff", "Iron Grip"], d: ["Treffer auf betäubte oder gefesselte Gegner verlängern das um 0,4 s (bis +1,2 s).", "Hits on stunned or rooted enemies extend it by 0.4 s (up to +1.2 s)."] },
     { id: "frostbiss", f: "cc", n: ["Frostbiss", "Frostbite"], d: ["Jeder 3. Treffer auf denselben Gegner verlangsamt ihn 2 s (−45 % Tempo).", "Every 3rd hit on the same enemy slows it for 2 s (−45% speed)."] },
-    { id: "kettenstoss", f: "cc", n: ["Kettenstoß", "Chain Shove"], d: ["+50 % Rückstoß; Gegner im Rückstoß nehmen +40 % Schaden.", "+50% knockback; enemies being knocked back take +40% damage."] },
+    { id: "kettenstoss", f: "cc", n: ["Kettenstoß", "Chain Shove"], d: ["+50 % Rückstoß; Gegner im Rückstoß nehmen +60 % Schaden.", "+50% knockback; enemies being knocked back take +60% damage."] }, /* W54 Balance: +40 → +60 % (waffen54.py, Kurzschwert +2: Einzel-DPS −13 %, Räumen −12 % – der Rückstoß schob Gegner aus der Reichweite) */
     { id: "schrecken", f: "cc", n: ["Schrecken", "Dread"], d: ["Jeder Kill lässt Gegner im Umkreis (120 px) 1,5 s fliehen.", "Each kill makes enemies nearby (120 px) flee for 1.5 s."], lock: () => hSiege(3), lockTxt: ["Ein Ende auf Härte III erreichen", "Reach an ending on Hardness III"] },
     { id: "scharfschuetze", f: "fern", n: ["Scharfschütze", "Marksman"], d: ["Fernkampftreffer aus mehr als 7 Schritt (110 px): +35 % Schaden.", "Ranged hits from more than 7 paces (110 px): +35% damage."] },
     { id: "querschlaeger", f: "fern", n: ["Querschläger", "Ricochet"], d: ["Jeder 4. Fernkampftreffer springt auf einen zweiten Gegner (120 px, 50 % Schaden).", "Every 4th ranged hit jumps to a second enemy (120 px, 50% damage)."] },
@@ -129,7 +129,7 @@
     if (hat(P, "ruhm")) m *= 1 + 0.03 * (S.ruhm || 0);
     if (hat(P, "blutzoll")) m *= 1 + 0.01 * Math.min(30, S.zoll || 0);
     if (hat(P, "gegenstoss") && S.konter) { m *= 2; S.konter = 0; Z.addStatus(e, "stun", 0.5); MS.ctrl += 0.5; }
-    if (hat(P, "kettenstoss")) { if (e.kbT > 0) m *= 1.4; if (o.kb) o = Object.assign({}, o, { kb: o.kb * 1.5 }); }
+    if (hat(P, "kettenstoss")) { if (e.kbT > 0) m *= 1.6; if (o.kb) o = Object.assign({}, o, { kb: o.kb * 1.5 }); }
     if (hat(P, "scharfschuetze") && src === "ranged" && Math.abs(pcx(P) - (e.x + e.w / 2)) > 110) m *= 1.35;
     if (hat(P, "markierung")) { if (src === "ranged") e._mutMark = t + 4; else if (src === "melee" && e._mutMark > t) { m *= 1.4; e._mutMark = 0; } }
     if (hat(P, "koecher") && src === "ranged" && S.koecher > 0) { m *= 1.3; S.koecher--; }

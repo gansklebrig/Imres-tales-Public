@@ -109,8 +109,31 @@
     const b = Z.boss && !Z.boss.dead ? Z.boss : null;
     h._w52s = e ? { n: nameGegner(e), a: nameAngriff(e) } : b ? { n: nameGegner(b), a: nameAngriff(b) } : { n: "", a: "" };
   });
+  /* W54 Balance: Explosionen von Gegnern (Bombenwurf, Selbstsprenger, Eliten-Todesbombe) trafen ohne Angreifer und ohne Geschoss –
+     Anzeige „Unbekannt“ (W51: Treffer ohne Verursacher). Vorwarnung haben alle drei (Flugbahn, „!!“-Ausholen, Glutring 0,9 s);
+     es fehlte nur die Quelle: Explosion merken, solange sie Schaden austeilt. Ebenso Festhalte-/Saugtreffer (Griff, Blutsauger). */
+  let explo = null;
+  H.aussen("explode", "w54quelle", function (a, weiter) {
+    if (a[4] === "p") return weiter(a);
+    const x = a[0] || 0, y = a[1] || 0; let n = "";
+    for (const q of Z.projs || []) if (q.owner === "e" && q._w52s && q._w52s.n && Math.hypot(q.x - x, q.y - y) < 40) { n = q._w52s.n; break; }
+    if (!n) { const e = nahe(x, y); if (e) n = nameGegner(e); }
+    const alt = explo; explo = { n: n };
+    try { return weiter(a); } finally { explo = alt; }
+  });
   function quelle(o, P) {
     o = o || {};
+    if (explo && !o.attacker && !o.proj && !o.hazard && !o.trap) return { n: explo.n, a: L(["Explosion", "Explosion"]), zeigen: true };
+    if (!o.attacker && !o.proj && o.unblockable === false && o.kb === 220 && !o.hazard && !o.trap) { /* Bombe, die geschosse.js intern zündet */
+      let n = "";
+      for (const q of Z.projs || []) if (q.owner === "e" && q.kind === "e_bombe" && Math.abs(q.x - (o.x || 0)) < 60) { n = (q._w52s && q._w52s.n) || ""; break; }
+      return { n: n, a: L(["Explosion", "Explosion"]), zeigen: true };
+    }
+    if (!o.attacker && o.force && o.unblockable && !o.hazard && P) { /* Griff/Ansaugen: der festhaltende Gegner sitzt am Spieler */
+      let e = P.grabbed && !P.grabbed.dead ? P.grabbed : null;
+      if (!e) for (const q of Z.enemies || []) if (!q.dead && q.latchT > 0) { e = q; break; }
+      if (e) return { n: nameGegner(e), a: P.grabbed === e ? (nameAngriff(e) || L(["Griff", "Grab"])) : L(["Blutsauger", "Bloodsucker"]), zeigen: true };
+    }
     if (o.attacker) {
       const e = o.attacker, cx = e.x + e.w / 2, cy = e.y + e.h / 2;
       return { n: nameGegner(e), a: nameAngriff(e), zeigen: !Z.fairSicht(cx, cy, P, -6) };
