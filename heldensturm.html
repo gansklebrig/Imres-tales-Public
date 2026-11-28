@@ -21474,7 +21474,6 @@ function kaKleinZusatz(K,T,th,DK,frei){const KK=window.__hsKK;if(KK.aus)return;c
   else if(b.k==='brunnen'&&Math.random()<0.8)put(b.x+b.r+12,b.y+10,'kk_eimer',1)
   else if(b.k==='zelt'&&Math.random()<0.6)put(b.x+rnd(-1,1)*b.r*1.2,b.y+b.r+6,pick(['kk_sack','crate','kk_holz']))
   else if(b.k==='kisten'&&Math.random()<0.4)put(b.x+b.w+10,b.y+b.h-6,pick(['kk_sack','barrel']))}
- for(const d of G.deco.slice()){if(d.k!=='wl_feuer')continue;const m=ri(2,3),a0=rnd(TAU);for(let q=0;q<m;q++){const a=a0+q/m*TAU;put(d.x+Math.cos(a)*46,d.y+Math.sin(a)*32+4,'kk_sitz',1)}}
  if(th==='kerker')for(const d of G.deco.slice())if(d.k==='cell'&&Math.random()<0.5)put(d.x+rnd(-18,18),d.y+6,'kk_stroh',0.9);
  /* Lichtungen: Blumen in offenen Wiesenzellen */
  if(wald&&!tot)for(let q=0,m=Math.round(fl.length/220);q<m;q++){const c=fl[(Math.random()*fl.length)|0],x=kaW(c%n),y=kaW((c/n)|0);if(K.tore.some(t=>Math.hypot(t.x-x,t.y-y)<120))continue;for(let r=0,k=ri(3,6);r<k;r++)put(x+rnd(-40,40),y+rnd(-26,26),r%3===2?'grass':'kk_blumen')}
@@ -43894,10 +43893,15 @@ hook('stats',s=>{try{if(E2.aus||!P||P.id!=='echo')return;const lv=Math.max(1,P.l
    Viele Treffer kurz hintereinander (eingekreist von einer Horde) werden ab dem dritten Treffer innerhalb von 0,6 s
    schrittweise schwächer (bis auf die Hälfte). Einzelne harte Treffer bleiben unverändert – nur das „Zerfleischtwerden
    in einer Sekunde“ wird abgefedert. Bot-Messung 28.11.: Fernkämpfer starben auf Schwer fast nur im Nahkampfgedränge.
+   v2: Einzeltreffer normaler Gegner höchstens 30 % des Lebens (Messung: Ghule, Brocken, Duergar, Magmin trafen oft mit 40–80 %).
    Abschaltbar: __hsGDR.aus=1 */
-(function(){try{if(window.__hsGDR)return;const GD=window.__hsGDR={v:1,aus:0,F:0.6,S:0.12,MIN:0.5,n:0};
- hook('hurtMul',()=>{if(GD.aus||!P)return 1;const now=G.time;const L=P._gdL||(P._gdL=[]);while(L.length&&now-L[0]>GD.F)L.shift();const k=L.length;L.push(now);if(L.length>24)L.shift();
-  if(k<2)return 1;GD.n++;return Math.max(GD.MIN,1-GD.S*(k-1))});
+(function(){try{if(window.__hsGDR)return;const GD=window.__hsGDR={v:2,aus:0,F:0.6,S:0.12,MIN:0.5,CAP:0.3,n:0,cap:0,src:null};
+ hook('hurtMul',raw=>{if(GD.aus||!P)return 1;let m=1;
+  /* kein normaler Gegner nimmt mit einem Schlag mehr als ein knappes Drittel des Lebens (Bosse, Wächter, Gefolge ausgenommen) */
+  const S=GD.src;if(S&&!S.boss&&!S.guard&&!S.add&&raw>0){const est=raw*(1-armorRed(P.st.armor)),cap=GD.CAP*P.st.maxHp;if(est>cap){m*=cap/est;GD.cap++}}
+  const now=G.time;const L=P._gdL||(P._gdL=[]);while(L.length&&now-L[0]>GD.F)L.shift();const k=L.length;L.push(now);if(L.length>24)L.shift();
+  if(k<2)return m;GD.n++;return m*Math.max(GD.MIN,1-GD.S*(k-1))});
+ {const ue=updEnemy;updEnemy=function(e){const o=GD.src;GD.src=e;try{return ue.apply(this,arguments)}finally{GD.src=o}}}
 }catch(e){console.error('gedraenge',e);window.__hsGDR={v:1,err:[String(e&&e.stack||e)]}}})();
 /* Weltordnung, Teil 2: lose Fässergruppen (auch Sprengfässer) rücken an die nächste Wand – wie abgestellt statt mitten im Weg */
 (function(){try{const ss=setupStage;setupStage=function(){const r=ss.apply(this,arguments);try{const KK=window.__hsKK,K=G.ka;if(!KK||KK.aus||!K||!K.an||G.room||G.netGuestRun)return r;const n=K.n,Z=K.Z,M=K.M;
@@ -43907,7 +43911,10 @@ hook('stats',s=>{try{if(E2.aus||!P||P.id!=='echo')return;const lv=Math.max(1,P.l
    for(let b=-6;b<=6;b++)for(let a=-6;a<=6;a++){const i=i0+a,j=j0+b;if(istM(i,j)||!istM(i,j-1)||istM(i,j+1))continue;const d=a*a+b*b;if(d<bd){bd=d;best=[i,j]}}
    if(!best)continue;const bx=kaW(best[0]),by=best[1]*Z+18;g.sort((p,q)=>p.x-q.x);let ok=true;const pos=g.map((p,k)=>({x:bx+(k-(g.length-1)/2)*26,y:by+(k%2)*4}));
    for(const q of pos)if(blkPunkt(q.x,q.y,11)||wlLoPunkt(q.x,q.y,14))ok=false;if(!ok)continue;g.forEach((p,k)=>{p.x=pos[k].x;p.y=pos[k].y;p.kkW=1});mv++}
-  KK.fass=mv}catch(e){window.__hsKK.err3=String(e&&e.stack||e)}return r}}catch(e){console.error('kkFass',e)}})();
+  KK.fass=mv;
+  /* Lagerfeuer: zwei, drei Sitzstämme drumherum (auch an den später gesetzten Feuern der Gegnerlager) */
+  let sz=0;for(const d of G.deco.slice()){if(d.k!=='wl_feuer'||d.kkS)continue;d.kkS=1;const m=ri(2,3),a0=rnd(TAU);for(let q=0;q<m;q++){const a=a0+q/m*TAU,x=d.x+Math.cos(a)*46*(d.s||1),y=d.y+Math.sin(a)*32*(d.s||1)+4;if(blkPunkt(x,y,10)||wlLoPunkt(x,y,10))continue;G.deco.push({x,y,k:'kk_sitz',s:1,v:Math.random(),wl:1});sz++}}
+  if(sz)G.deco.sort((p,q)=>p.y-q.y);KK.sitz=sz}catch(e){window.__hsKK.err3=String(e&&e.stack||e)}return r}}catch(e){console.error('kkFass',e)}})();
 /* «/echo2» */
 /* «padziel» */
 /* ================= Paket „padziel“: Controller – Fähigkeiten in Laufrichtung – window.__hsPADZIEL =================
