@@ -2737,7 +2737,9 @@ function strasseNeu(c,R){if(!R||R.length<2)return;let D=STRN.get(R);
  c.strokeStyle='rgba(130,112,86,.18)';c.lineWidth=2;c.save();c.translate(0,3);pfad(D.r1);c.stroke();pfad(D.r2);c.stroke();c.restore()}
 function makeDeco(T){const a=[],road=G.road;
  const nearRoad=(x,y)=>road&&road.some(p=>Math.abs(p[0]-x)<90&&Math.abs(p[1]-y)<110);
- for(let i=0;i<280;i++){const x=rnd(WORLD),y=rnd(WORLD);if(Math.hypot(x-WORLD/2,y-WORLD/2)<180||nearRoad(x,y))continue;a.push({x,y,k:pick(T.deco),s:rnd(0.8,1.3),v:Math.random()})}
+ let kkN=null;try{if(!(window.__hsKK&&__hsKK.aus))kkN=T.deco.filter(k=>KK_NATUR.has(k))}catch(e){kkN=null}
+ if(kkN){/* Natur in Büscheln; Bauten, Möbel und Brunnen nicht mehr wahllos über die Karte */for(let i=0;i<70&&kkN.length;i++){const x=rnd(WORLD),y=rnd(WORLD);if(Math.hypot(x-WORLD/2,y-WORLD/2)<180||nearRoad(x,y))continue;const k=pick(kkN),fam=KK_FAM[k]||[k];for(let q=0,c=ri(2,6);q<c;q++){const r=q?Math.abs(rnd(-1,1)+rnd(-1,1))*36:0,b=rnd(TAU),px=x+Math.cos(b)*r,py=y+Math.sin(b)*r*0.75;if(nearRoad(px,py))continue;a.push({x:px,y:py,k:q?pick(fam):k,s:rnd(0.8,1.25),v:Math.random()})}}}
+ else for(let i=0;i<280;i++){const x=rnd(WORLD),y=rnd(WORLD);if(Math.hypot(x-WORLD/2,y-WORLD/2)<180||nearRoad(x,y))continue;a.push({x,y,k:pick(T.deco),s:rnd(0.8,1.3),v:Math.random()})}
  for(let i=0;i<100;i++){const side=i%4;const x=side<2?rnd(WORLD):side===2?-30:WORLD+30,y=side===0?-30:side===1?WORLD+30:rnd(WORLD);a.push({x,y,k:T.deco[0],s:rnd(1.3,1.9),v:Math.random(),edge:1})}
  if(T.cart)a.push({x:WORLD/2+120,y:(road?road[Math.round((WORLD/2+220)/100)][1]:WORLD/2),k:'cart',s:1.3,v:0.5});
  a.sort((p,q)=>p.y-q.y);return a}
@@ -5957,7 +5959,7 @@ function barrelBoom(p){const R=115;explodeFx(p.x,p.y-6,R*0.75,'#ff8a2a',{shake:4
 function useShrine(p){p.used=true;const S=SHRINES[p.type];P.shrine={k:p.type,t:dmod('schreine')?45:30};recalc();
  G.fxs.push({k:'pillar',x:p.x,y:p.y+10,w:70,h:340,c:S.c,t:0,life:1});G.fxs.push({k:'shock',x:p.x,y:p.y,r:180,c:S.c,t:0,life:0.6});light(p.x,p.y,320,S.c,1,1);sparks(p.x,p.y,S.c,20,420,1);
  banner(S.n,S.d,S.c,{dur:2,size:38,y:H*0.3});sfx('segen');sfx('magic');musAk('segen');say('shrine')}
-function openChest(p){p.open=true;if(p.mimic){p.dead=true;const e=spawnEnemy(MIMIC,p.x,p.y,{});e.mimic=1;e.hp*=1+0.04*SL();e.maxHp=e.hp;e.stun=0.5;word(p.x,p.y-30,'Ein Mimic!','#ff8a5a');sfx('mimic');sfx('roar');G.shake+=5;chunks(p.x,p.y,'#7a4a24',8,200);say('mimic');return}
+function openChest(p){p.open=true;if(p.mimic){p.dead=true;const e=spawnEnemy(MIMIC,p.x,p.y,{});e.mimic=1;e.hp*=1+0.04*SL();e.maxHp=e.hp;e.stun=0.8;if(p.nest&&p.wakeN){e.stun=1.1+0.15*p.wakeN;e.dmg*=0.75}/* Nest-Erwachen: gestaffelt und etwas sanfter – sonst bissen acht Mimics gleichzeitig zu */word(p.x,p.y-30,'Ein Mimic!','#ff8a5a');sfx('mimic');sfx('roar');G.shake+=5;chunks(p.x,p.y,'#7a4a24',8,200);say('mimic');return}
  const il=scale().il;sfx('truhe');sfx('legend');G.fxs.push({k:'pillar',x:p.x,y:p.y+8,w:60,h:240,c:'#ffd04a',t:0,life:0.9});light(p.x,p.y,260,'#ffd04a',0.8,1);sparks(p.x,p.y,'#ffd04a',18,380,1);
  const n=ri(2,3)+(p.rich||0);for(let i=0;i<n;i++){const a=-Math.PI/2+(i-(n-1)/2)*(p.rich?0.6:0.9);dropItem(p.x+Math.cos(a)*70,p.y+Math.sin(a)*50+30,randomItem(il+1+(p.rich||0),0.5+0.02*SL()+0.4*(p.rich||0),i===0?(p.rich?Math.min(4,2+p.rich):Math.random()<0.5?2:1):(p.rich?2:1)))}
  for(let i=0;i<ri(5,9);i++)orb(p.x+rnd(-30,30),p.y+rnd(-10,30),'gold',Math.max(1,Math.round(ri(2,4)*P.st.gold*dMult().gold*(1+0.05*SL()))));
@@ -7853,7 +7855,7 @@ function nestRaum(S,cx0,cy0){S.txt='Finde die zwei echten Truhen';const idx=[...
  later(2.9,()=>{if(G.room&&G.room.type==='mimicnest')toast('Achte auf Atmen, Sabbern, Zucken – oder eine Zunge. Wer drei Mimics weckt, weckt das ganze Nest.','#ff9a5a')})}
 function nestTick(S){if(S.wake===1&&roomAlive()===0&&S.t>(S.wakeT||0)+2){S.wake=2;roomLock(0);S.txt='Das Nest ist still';roomChest(WORLD/2,WORLD/2+30,2)}
  const good=S.nest.filter(p=>p.open&&!p.mimic).length,bad=S.nest.filter(p=>p.open&&p.mimic).length;
- if(bad!==S.bad){S.bad=bad;if(bad>=3&&!S.wake){S.wake=1;S.wakeT=S.t;roomLock(1);G.shake+=8;sfx('roar');banner('Das Nest erwacht!','Alle Mimics greifen an','#ff5a3a',{dur:2.6,size:44,y:H*0.3});for(const p of S.nest)if(!p.open){later(rnd(0.1,0.9),()=>{if(G.room&&!p.open){if(p.mimic)openChest(p);}})}S.txt='Das Nest ist wach!'}}
+ if(bad!==S.bad){S.bad=bad;if(bad>=3&&!S.wake){S.wake=1;S.wakeT=S.t;roomLock(1);G.shake+=8;sfx('roar');banner('Das Nest erwacht!','Alle Mimics greifen an','#ff5a3a',{dur:2.6,size:44,y:H*0.3});{let wn=0;for(const p of S.nest)if(!p.open&&p.mimic){const n=++wn;p.wakeN=n;later(0.25+0.35*n+rnd(0,0.2),()=>{if(G.room&&!p.open)openChest(p)})}}S.txt='Das Nest ist wach!'}}
  if(good!==S.good){S.good=good;if(good>=2&&!S.done){S.done=1;if(!S.wake){S.txt='Beide echten Truhen gefunden!';banner('Meisterhaft!','Beide echten Truhen – die Mimics schlafen weiter','#ffd04a',{dur:2.8,size:40,y:H*0.3});for(let i=0;i<4;i++)G.props.push({k:'goldpile',prop:1,x:WORLD/2+rnd(-300,300),y:WORLD/2+rnd(40,140),r:16});dropGem(WORLD/2,WORLD/2+60);dropGem(WORLD/2+30,WORLD/2+60)}}}}
 /* ---------- Der Goldene Teich: das geheime Level ---------- */
 function gansRaum(S,cx0,cy0){roomLock(1);S.wave=0;S.wT=0;S.txt='Etwas schnattert im Schilf …';const L=G.room;G.deco=[];
@@ -13670,7 +13672,14 @@ function wlBau(S){const W={an:0,haus:[],lo:[],platz:[],box:[],gr:[],hin:[],t:0,v
   if(o.ruin){const mine=G.blk.filter(b=>b.hs===id);for(let i=0,k=ri(1,2);i<k&&mine.length>4;i++){const b=mine.splice(ri(0,mine.length-1),1)[0];G.blk.splice(G.blk.indexOf(b),1);
     C_(b.x+b.w/2+rnd(-14,14),b.y+b.h/2+rnd(-10,10),rnd(10,15),'schutt')}}
   return H};
- const einrichten=(H,arten)=>{const ix=H.x+H.d+24,iy=H.y+H.d+30,iw=H.w-2*H.d-48,ih=H.h-2*H.d-50;if(iw<20||ih<20)return;for(let i=0,k=ri(2,4);i<k;i++)DK(ix+rnd(iw),iy+rnd(ih),pick(arten),rnd(0.8,1))};
+ const einrichten=(H,arten)=>{const ix=H.x+H.d+24,iy=H.y+H.d+30,iw=H.w-2*H.d-48,ih=H.h-2*H.d-50;if(iw<20||ih<20)return;
+  if(window.__hsKK&&__hsKK.aus){for(let i=0,k=ri(2,4);i<k;i++)DK(ix+rnd(iw),iy+rnd(ih),pick(arten),rnd(0.8,1));return}
+  /* eingerichtet statt verstreut: Wandmöbel an die Rückwand, Tisch mit Stühlen in die Mitte, Kleinkram in die Ecken */
+  const WANDM=new Set(['shelf','barrel','crate','anvil','herbs','brazier','torch','statue','beam','forge','chain','cell','coral','shellhut','pillar','grave']);const wa=arten.filter(k=>WANDM.has(k)),re=arten.filter(k=>!WANDM.has(k)&&k!=='table'&&k!=='chair');
+  const yW=H.y+H.d+16;let x=ix+rnd(0,20);for(let i=0,k=ri(1,3);i<k&&wa.length&&x<ix+iw;i++){const kk=pick(wa);DK(x,yW,kk,rnd(0.9,1));x+=kk==='shelf'?52:kk==='barrel'||kk==='crate'?24:46;if(Math.random()<0.4)x+=rnd(30,70)}
+  const mx=ix+iw/2+rnd(-20,20),my=iy+ih*0.55;if(arten.includes('table')){DK(mx,my,'table',1);if(arten.includes('chair')){DK(mx-30,my+4,'chair',0.95);if(Math.random()<0.6)DK(mx+30,my+4,'chair',0.95)}}
+  else if(re.length)DK(mx,my,pick(re),rnd(0.9,1.05));
+  for(const [cx2,cy2] of [[ix,iy+ih],[ix+iw,iy+ih]])if(re.length&&Math.random()<0.5)DK(cx2+rnd(-6,6),cy2+rnd(-6,4),pick(re),rnd(0.8,1))};
  /* ---- Natur ---- */
  const hain=(x,y,n,art)=>{const k=n||ri(3,6);let m=0;for(let j=0;j<k;j++){const a=j/k*TAU+rnd(-0.5,0.5),d=j?rnd(55,105):0,px=x+Math.cos(a)*d,py=y+Math.sin(a)*d;if(Math.hypot(px-C,py-C)<420||!frei(px-22,py-22,px+22,py+22,0,0))continue;C_(px,py,rnd(16,20),'baum',{s:rnd(1.2,1.7),art});m++;
    if(Math.random()<0.6){const b=rnd(TAU);DK(px+Math.cos(b)*rnd(30,48),py+Math.sin(b)*rnd(20,34)+8,T.deco.includes('bush')?'bush':pick(T.deco))}}if(m)belege(x-130,y-130,x+130,y+130);return m};
@@ -13757,7 +13766,10 @@ function wlBau(S){const W={an:0,haus:[],lo:[],platz:[],box:[],gr:[],hin:[],t:0,v
   /* Felskammern: Räume aus Fels mit zwei Durchgängen */
   viele(N_(2,3),()=>{const w=rnd(260,340),h=rnd(240,300);try_(w,h,60,(x,y)=>{const H=haus(x,y,w,h,'stein',0,{d:34,tuer:110,nT:2,wk:'felswand',ruin:Math.random()<0.4,boden:'fels'});einrichten(H,th==='mine'?['beam','rubble','torch']:['bones','rock','torch','rubble'])},true,520)})}
  /* mehr Kleinkram am Boden (nicht blockierend) */
- for(let i=0;i<Math.round(110*dicht);i++){const x=rnd(60,WORLD-60),y=rnd(60,WORLD-60);if(Math.hypot(x-C,y-C)<200)continue;G.deco.push({x,y,k:pick(T.deco),s:rnd(0.8,1.25),v:Math.random()})}
+ {let kkAn=!(window.__hsKK&&__hsKK.aus),nat=T.deco;try{if(kkAn)nat=T.deco.filter(k=>KK_NATUR.has(k))}catch(e){kkAn=false}
+  /* Natur in Büscheln (Wandnahes und Bauten nicht mehr wahllos aufs Feld) */
+  if(kkAn){for(let i=0,m=Math.round(110*dicht/4);i<m&&nat.length;i++){const x=rnd(60,WORLD-60),y=rnd(60,WORLD-60);if(Math.hypot(x-C,y-C)<200)continue;const k=pick(nat),fam=KK_FAM[k]||[k];for(let q=0,c=ri(2,6);q<c;q++){const r=q?Math.abs(rnd(-1,1)+rnd(-1,1))*34:0,a=rnd(TAU);G.deco.push({x:x+Math.cos(a)*r,y:y+Math.sin(a)*r*0.75,k:q?pick(fam):k,s:rnd(0.8,1.15),v:Math.random()})}}}
+  else for(let i=0;i<Math.round(110*dicht);i++){const x=rnd(60,WORLD-60),y=rnd(60,WORLD-60);if(Math.hypot(x-C,y-C)<200)continue;G.deco.push({x,y,k:pick(T.deco),s:rnd(0.8,1.25),v:Math.random()})}}
  blkRaster();wlLoRaster();
  /* Deko unter Hindernissen, im Wasser oder in Häusern (außer Einrichtung) entfernen */
  const inHaus=(x,y)=>W.haus.some(H=>x>H.x-6&&x<H.x+H.w+6&&y>H.y-6&&y<H.y+H.h+14);
@@ -21374,11 +21386,122 @@ function kaPropDraw(p,t){const c=cx,k=p.k;
 {const de0=drawEnemy;drawEnemy=function(e,t){const r=de0.apply(this,arguments);try{if(e&&e.kaKey!=null&&!e.dead){const c=cx;c.save();c.translate(e.x+e.r*0.9,e.y-e.r*2.2);c.strokeStyle='#ffd04a';c.lineWidth=2.4;c.beginPath();c.arc(-5,0,4,0,TAU);c.moveTo(-1,0);c.lineTo(9,0);c.moveTo(7,0);c.lineTo(7,4);c.stroke();c.restore()}}catch(er){}return r}}
 
 /* ================= Zusätzliche Ausgestaltung je Thema und Stimmung ================= */
+/* ================= Weltordnung: Bodenkleinkram mit Sinn (statt wahllos über den Boden gestreut) =================
+   Wandnahes steht an Wänden (Kisten in Stapeln, Zellen in Reihen, Fackeln mit Abstand), Natur wächst in Büscheln,
+   bevorzugt am Wandfuß und um Bäume, Einzelstücke (Brunnen, Statuen, Gräber) sind selten und haben ihren Platz.
+   Abschalten: window.__hsKK.aus=1 */
+window.__hsKK={v:1,aus:0,n:{}};
+const KK_NATUR=new Set(['tree','bush','grass','rock','mush','moss','roots','deadtree','ash','reeds','glowshroom','stalag','web','rubble','bones','coral','vine','stake','goldhaufen','lava','water']);
+const KK_WAND=new Set(['crate','barrel','beam','shelf','chain','cell','torch','lantern','herbs','anvil','forge','block','erzwagen','brazier','pillar','cart']);
+const KK_BAU=new Set(['house','ruinhouse','huette','shellhut']);
+/* Familien: was in einer Gruppe zusammen steht */
+const KK_FAM={crate:['crate','crate','barrel','kk_sack'],barrel:['barrel','barrel','crate'],cell:['cell'],chain:['chain'],shelf:['shelf','shelf','herbs'],herbs:['herbs','shelf'],
+ beam:['beam'],forge:['forge','anvil','barrel'],anvil:['anvil','barrel','crate'],block:['block','block','erzwagen'],erzwagen:['erzwagen','block'],pillar:['pillar'],
+ grass:['grass','grass','bush','kk_blumen'],bush:['bush','bush','grass','kk_farn'],rock:['rock','rock','kk_kiesel','rubble'],rubble:['rubble','rubble','rock','kk_kiesel'],
+ mush:['mush','mush','mush','kk_farn'],glowshroom:['glowshroom','glowshroom','mush'],bones:['bones','bones','rubble'],moss:['moss','moss','rock'],roots:['roots','roots','ash'],
+ ash:['ash','ash','rubble'],stalag:['stalag','stalag','rock','kk_pfuetze'],web:['web'],reeds:['reeds','reeds','grass'],coral:['coral','coral','rock'],deadtree:['deadtree','bush','grass'],
+ tree:['tree','bush','kk_stumpf','kk_farn'],goldhaufen:['goldhaufen','goldhaufen','crate'],vine:['vine','moss'],stake:['stake'],lava:['lava'],water:['water','reeds']};
+/* wie dicht in der Reihe (Pixel) und wie viele je Gruppe */
+const KK_REIHE={crate:[22,2,4],barrel:[22,2,4],cell:[66,2,4],chain:[46,2,3],shelf:[46,1,3],herbs:[40,1,2],beam:[160,1,2],forge:[44,2,3],anvil:[36,1,3],block:[40,2,3],erzwagen:[60,1,2],
+ pillar:[120,2,4],torch:[0,1,1],lantern:[0,1,1],brazier:[0,1,1],cart:[0,1,1]};
+/* Mindestabstand zwischen Gruppen derselben Art */
+const KK_ABST={torch:300,lantern:340,brazier:380,cell:260,chain:220,beam:260,crate:200,barrel:200,shelf:200,herbs:220,forge:600,anvil:420,block:260,erzwagen:420,pillar:300,cart:700,
+ well:1100,holz:260,statue:520,spiderstatue:700,schreistein:700,grave:900,abyss:340,table:420,brokentable:420,chair:420,dice:600,rune:480,house:0,ruinhouse:0,huette:0,shellhut:0};
+function kaKleinkram(K,T,th,dec,DK,frei){const KK=window.__hsKK;if(KK.aus)return false;const n=K.n,Z=K.Z,M=K.M,fl=K.fl;if(!fl||!fl.length)return false;
+ const istM=(i,j)=>i<0||j<0||i>=n||j>=n||!!M[j*n+i];
+ /* Wandzellen: Boden mit Masse daneben; Gewicht nach Lage (Wand oben wirkt am natürlichsten) */
+ const wz=[],wzW=[];let wSum=0;for(const c of fl){const i=c%n,j=(c/n)|0;let d=null,w=0;
+  if(istM(i,j-1)){d=[0,-1];w=3}else if(istM(i-1,j)){d=[-1,0];w=1.4}else if(istM(i+1,j)){d=[1,0];w=1.4}else if(istM(i,j+1)){d=[0,1];w=0.5}
+  if(d){wz.push([c,d]);wSum+=w;wzW.push(wSum)}}
+ const wandZ=()=>{if(!wz.length)return null;const r=Math.random()*wSum;let a=0,b=wzW.length-1;while(a<b){const m=(a+b)>>1;if(wzW[m]<r)a=m+1;else b=m}return wz[a]};
+ const offen=c=>{const i=c%n,j=(c/n)|0;for(let b=-2;b<=2;b++)for(let a=-2;a<=2;a++)if(istM(i+a,j+b))return false;return true};
+ const lage=(c,d,off)=>({x:kaW(c%n)+d[0]*(Z/2-off),y:kaW((c/n)|0)+d[1]*(Z/2-off)});
+ const PL={};const nah=(k,x,y)=>{const m=KK_ABST[k]||0;if(!m)return false;const L=PL[k];if(!L)return false;for(const p of L)if((p[0]-x)*(p[0]-x)+(p[1]-y)*(p[1]-y)<m*m)return true;return false};
+ const merk=(k,x,y)=>{(PL[k]=PL[k]||[]).push([x,y])};
+ const torNah=(x,y,m)=>K.tore.some(t=>Math.hypot(t.x-x,t.y-y)<m)||Math.hypot(K.start.x-x,K.start.y-y)<200;
+ let gesetzt=0;const put=(x,y,k,s,o)=>{DK(x,y,k,s);if(o){const d=G.deco[G.deco.length-1];Object.assign(d,o)}gesetzt++;KK.n[k]=(KK.n[k]||0)+1};
+ /* Anteile je Art aus der Themenliste */
+ const N=Math.round(fl.length*0.075),zaehl={};for(const k of dec)zaehl[k]=(zaehl[k]||0)+1;
+ const gassen=T.mas==='haus';
+ /* ---- an der Wand ---- */
+ const wandGruppe=(k)=>{for(let t=0;t<14;t++){const w=wandZ();if(!w)return 0;const [c,d]=w;const R=KK_REIHE[k]||[30,1,2];const off=k==='cell'?22:k==='shelf'?14:12;
+   const p0=lage(c,d,off);if(torNah(p0.x,p0.y,120)||nah(k,p0.x,p0.y)||!frei(p0.x,p0.y,8))continue;
+   const tx=d[1]!==0?1:0,ty=d[0]!==0?1:0,sg=Math.random()<0.5?1:-1;const cnt=ri(R[1],R[2]);const fam=KK_FAM[k]||[k];let m=0;
+   for(let q=0;q<cnt;q++){const x=p0.x+tx*sg*q*R[0]+rnd(-2,2),y=p0.y+ty*sg*q*R[0]+rnd(-2,2);const ci=Math.floor(x/Z),cj=Math.floor(y/Z);
+    /* die Reihe folgt der Wand: Nachbarzelle muss dieselbe Wand haben */if(istM(ci,cj)||!istM(ci+d[0],cj+d[1]))break;if(!frei(x,y,6))break;
+    const kk=q===0?k:pick(fam);const st=(kk==='crate'||kk==='barrel')&&q>0&&Math.random()<0.25;
+    put(x,y-(st?12:0),kk,kk==='cell'?1:rnd(0.9,1.1));m++}
+   if(m){merk(k,p0.x,p0.y);return m}}return 0};
+ /* ---- Bauten (Buden, Hütten) nur an Wänden oben, in Reihen; in Gassen sind die Häuser schon die Wände ---- */
+ const bauGruppe=(k)=>{if(gassen&&k==='house')return 0;for(let t=0;t<20;t++){const w=wandZ();if(!w||w[1][1]!==-1)continue;const c=w[0];const p0=lage(c,w[1],-4);if(torNah(p0.x,p0.y,200)||!frei(p0.x,p0.y+10,20))continue;
+   if((PL.bau||[]).some(p=>Math.abs(p[0]-p0.x)<90&&Math.abs(p[1]-p0.y)<120))continue;let m=0;
+   for(let q=0;q<ri(1,3);q++){const x=p0.x+q*76,ci=Math.floor(x/Z),cj=Math.floor(p0.y/Z);if(istM(ci,cj)||!istM(ci,cj-1)||!frei(x,p0.y+10,18))break;put(x,p0.y+18,k,rnd(0.95,1.1));(PL.bau=PL.bau||[]).push([x,p0.y]);m++}
+   if(m)return m}return 0};
+ /* ---- Natur in Büscheln ---- */
+ const natur=(k)=>{for(let t=0;t<10;t++){let x,y;if(Math.random()<0.55){const w=wandZ();if(!w)continue;const p=lage(w[0],w[1],10);x=p.x;y=p.y}else{const c=fl[(Math.random()*fl.length)|0];x=kaW(c%n);y=kaW((c/n)|0)}
+   if(torNah(x,y,90))continue;const fam=KK_FAM[k]||[k];const cnt=k==='web'||k==='lava'||k==='water'||k==='stake'?ri(1,2):k==='tree'?ri(2,4):ri(3,6);const sp=k==='tree'?60:k==='grass'||k==='mush'?28:38;let m=0;
+   for(let q=0;q<cnt;q++){const a=rnd(TAU),r=q?Math.abs(rnd(-1,1)+rnd(-1,1))*sp:0,px=x+Math.cos(a)*r,py=y+Math.sin(a)*r*0.75;if(!frei(px,py,6))continue;const kk=q===0?k:pick(fam);put(px,py,kk,kk==='web'?rnd(1.2,1.7):rnd(0.8,1.15));m++}
+   if(m)return m}return 0};
+ /* ---- Einzelstücke mit Ort ---- */
+ const solo=(k)=>{for(let t=0;t<24;t++){const c=fl[(Math.random()*fl.length)|0];const sid=K.sid[c];const x=kaW(c%n)+rnd(-8,8),y=kaW((c/n)|0)+rnd(-8,8);
+   if(torNah(x,y,220)||nah(k,x,y))continue;
+   if(k==='well'){if(!offen(c))continue;if(!frei(x,y,40))continue;put(x,y,'well',1.1);put(x+26,y+14,'kk_eimer',1);merk(k,x,y);return 2}
+   if(k==='grave'){if(!offen(c))continue;let m=0;const cols=ri(2,3),rows=ri(1,2);for(let r=0;r<rows;r++)for(let q=0;q<cols;q++){const gx=x+(q-(cols-1)/2)*54+rnd(-4,4),gy=y+r*58;if(frei(gx,gy,14)){put(gx,gy,'grave',rnd(0.9,1.05));m++}}if(m){merk(k,x,y);if(Math.random()<0.6)put(x+rnd(-30,30),y+rows*58,'kk_kerze',1);return m}continue}
+   if(k==='table'||k==='brokentable'||k==='chair'||k==='dice'){if(!frei(x,y,34))continue;const kaputt=k==='brokentable';put(x,y,kaputt?'brokentable':'table',1);
+     if(!kaputt){if(frei(x-30,y+4,8))put(x-30,y+4,'chair',0.95);if(Math.random()<0.7&&frei(x+30,y+4,8))put(x+30,y+4,'chair',0.95);if(k==='dice'||Math.random()<0.3)put(x+rnd(-14,14),y+24,'dice',1)}
+     else if(frei(x+28,y+10,8))put(x+28,y+10,'chair',0.9);merk('table',x,y);return 3}
+   if(k==='rune'){if(!offen(c))continue;const m=ri(3,5),R=rnd(46,64);for(let q=0;q<m;q++){const a=q/m*TAU;put(x+Math.cos(a)*R,y+Math.sin(a)*R*0.7,'rune',0.9)}merk(k,x,y);return m}
+   if(k==='abyss'){if(!offen(c)||!frei(x,y,52))continue;put(x,y,k,rnd(0.8,1.1));merk(k,x,y);return 1}
+   /* Statuen: an einer Wand oben, im Abschnitt höchstens eine */
+   if(k==='statue'||k==='spiderstatue'||k==='schreistein'){const w=wandZ();if(!w||w[1][1]!==-1)continue;const p=lage(w[0],w[1],18);if(nah(k,p.x,p.y)||torNah(p.x,p.y,200)||!frei(p.x,p.y,14))continue;put(p.x,p.y,k,1);if(Math.random()<0.5&&k==='statue')put(p.x+rnd(-16,16),p.y+22,'kk_kerze',1);merk(k,p.x,p.y);return 1}
+   if(!frei(x,y,20))continue;put(x,y,k,1);merk(k,x,y);return 1}return 0};
+ for(const k in zaehl){let soll=Math.round(N*zaehl[k]/dec.length);if(KK_BAU.has(k))soll=Math.min(soll,gassen?0:Math.round(fl.length/260));
+  if(k==='well')soll=Math.min(soll,Math.max(1,Math.round(K.sec.length/3)));if(k==='torch'||k==='lantern'||k==='brazier')soll=Math.min(soll,Math.round(fl.length/120));
+  if(k==='cell')soll=Math.min(soll,Math.round(fl.length/50));
+  let fehl=0;while(soll>0&&fehl<8){const m=KK_BAU.has(k)?bauGruppe(k):KK_WAND.has(k)?wandGruppe(k):KK_NATUR.has(k)?natur(k):solo(k);if(m){soll-=m;fehl=0}else fehl++}}
+ /* Nachbarschaften: Kisten bekommen hier und da Säcke; Gassen: Holzstapel an Hauswänden */
+ const holz=th==='dorf'||th==='slums'||th==='markt'||th==='geisterdorf'||th==='wurzeldorf'||th==='strasse'||th==='wald'||th==='nacht';
+ if(holz)for(let q=0,m=Math.round(fl.length/380);q<m;q++){const w=wandZ();if(!w||w[1][1]!==-1)continue;const p=lage(w[0],w[1],12);if(nah('holz',p.x,p.y)||torNah(p.x,p.y,140)||!frei(p.x,p.y,10))continue;put(p.x,p.y,'kk_holz',rnd(0.9,1.1));merk('holz',p.x,p.y)}
+ KK.zuletzt={th,N,gesetzt};return true}
+/* Kleinigkeiten, die zu etwas gehören: Farn und Stümpfe an Bäumen, Sitzstämme ums Lagerfeuer, Eimer am Brunnen, Pfützen unter Tropfsteinen, Blumen auf Lichtungen */
+function kaKleinZusatz(K,T,th,DK,frei){const KK=window.__hsKK;if(KK.aus)return;const n=K.n,fl=K.fl;const put=(x,y,k,s)=>{if(frei(x,y,5)){DK(x,y,k,s||rnd(0.85,1.1));KK.n[k]=(KK.n[k]||0)+1}};
+ const wald=T.mas==='wald',hoehle=T.mas==='fels',tot=th==='geisterdorf'||th==='wurzeldorf';
+ for(const b of G.blk){if(!b.wl&&!b.kaPf)continue;
+  if(b.k==='baum'&&Math.random()<0.4){const a=rnd(TAU),d=b.r+rnd(14,30);put(b.x+Math.cos(a)*d,b.y+Math.abs(Math.sin(a))*d*0.6+10,tot?'ash':pick(['kk_farn','kk_farn','mush','kk_stumpf','grass']))}
+  else if(b.k==='fels'&&Math.random()<0.35){const a=rnd(TAU),d=b.r+rnd(6,18);put(b.x+Math.cos(a)*d,b.y+Math.abs(Math.sin(a))*d*0.5+8,wald?pick(['moss','grass','kk_farn']):'kk_kiesel')}
+  else if(b.k==='stalag'&&hoehle&&th!=='glutgang'&&th!=='hort'&&Math.random()<0.22)put(b.x+rnd(-6,6),b.y+b.r+8,'kk_pfuetze',rnd(0.8,1.2))
+  else if(b.k==='brunnen'&&Math.random()<0.8)put(b.x+b.r+12,b.y+10,'kk_eimer',1)
+  else if(b.k==='zelt'&&Math.random()<0.6)put(b.x+rnd(-1,1)*b.r*1.2,b.y+b.r+6,pick(['kk_sack','crate','kk_holz']))
+  else if(b.k==='kisten'&&Math.random()<0.4)put(b.x+b.w+10,b.y+b.h-6,pick(['kk_sack','barrel']))}
+ for(const d of G.deco.slice()){if(d.k!=='wl_feuer')continue;const m=ri(2,3),a0=rnd(TAU);for(let q=0;q<m;q++){const a=a0+q/m*TAU;put(d.x+Math.cos(a)*46,d.y+Math.sin(a)*32+4,'kk_sitz',1)}}
+ if(th==='kerker')for(const d of G.deco.slice())if(d.k==='cell'&&Math.random()<0.5)put(d.x+rnd(-18,18),d.y+6,'kk_stroh',0.9);
+ /* Lichtungen: Blumen in offenen Wiesenzellen */
+ if(wald&&!tot)for(let q=0,m=Math.round(fl.length/220);q<m;q++){const c=fl[(Math.random()*fl.length)|0],x=kaW(c%n),y=kaW((c/n)|0);if(K.tore.some(t=>Math.hypot(t.x-x,t.y-y)<120))continue;for(let r=0,k=ri(3,6);r<k;r++)put(x+rnd(-40,40),y+rnd(-26,26),r%3===2?'grass':'kk_blumen')}
+ if(hoehle&&th!=='glutgang'&&th!=='hort')for(let q=0,m=Math.round(fl.length/300);q<m;q++){const c=fl[(Math.random()*fl.length)|0];put(kaW(c%n)+rnd(-12,12),kaW((c/n)|0)+rnd(-12,12),'kk_kiesel')}}
+{const dd0=drawDeco;drawDeco=function(d,t){const k=d.k;if(typeof k!=='string'||k.charCodeAt(0)!==107||k.charCodeAt(1)!==107||k.charCodeAt(2)!==95)return dd0.apply(this,arguments);
+ const c=cx,s=d.s||1,v=d.v||0;c.save();c.translate(d.x,d.y);c.scale(s,s);
+ try{switch(k){
+  case'kk_sack':ell(c,1,8,10,3,'rgba(0,0,0,.28)');poly(c,'#7e6948',-8,7,-9,-1,-5,-7,5,-7,9,-1,8,7);poly(c,'#8e7752',-8,7,-9,-1,-5,-7,0,-7,-1,7);ln(c,'#5e4c32',1.4,-4,-7,4,-7);ln(c,'#6a5638',1.2,-1,-7,-2,-11,1,-12,2,-8);ln(c,'#5e4c32',0.7,-5,0,5,1);if(v>0.5){circ(c,3,-2,0.8,'#5e4c32');circ(c,-2,3,0.8,'#5e4c32')}break;
+  case'kk_blumen':{const F=['#e8c850','#ece4d0','#c84a4a','#a86ab8','#e89a48'],f1=F[(v*5)|0],f2=F[((v*13)|0)%5];for(let q=0;q<6;q++){const x=((q*37+v*90)%22)-11,y=((q*23+v*50)%10)-3,h=4+((q*7)%4);ln(c,'#3e6234',1,x,y+4,x+0.6,y+4-h);const f=q%2?f1:f2;circ(c,x+0.6-1.3,y+4-h,1.2,f);circ(c,x+0.6+1.3,y+4-h,1.2,f);circ(c,x+0.6,y+4-h-1.2,1.2,f);circ(c,x+0.6,y+4-h+1.2,1.2,f);circ(c,x+0.6,y+4-h,0.8,'#f4e070')}}break;
+  case'kk_farn':ell(c,0,6,12,3,'rgba(0,0,0,.22)');for(let q=0;q<6;q++){const a=-Math.PI/2+(q-2.5)*0.42,L=11+(q%3)*2,ex=Math.cos(a)*L,ey=Math.sin(a)*L*0.8+5;c.strokeStyle=q%2?'#3c6a30':'#4a7a3a';c.lineWidth=1.3;c.beginPath();c.moveTo(0,5);c.quadraticCurveTo(ex*0.5,ey*0.7-3,ex,ey);c.stroke();for(let u=0.3;u<0.95;u+=0.18){const px=ex*u,py=5+(ey-5)*u-(1-u)*u*5;ln(c,'#4e8040',0.9,px,py,px-Math.sin(a)*3,py+Math.cos(a)*1.5);ln(c,'#467838',0.9,px,py,px+Math.sin(a)*3,py-Math.cos(a)*1.5)}}break;
+  case'kk_kiesel':for(let q=0;q<6;q++){const x=((q*29+v*70)%22)-11,y=((q*17+v*40)%10)-4,r=1.6+((q*5)%3)*0.7;ell(c,x+0.6,y+1,r,r*0.6,'rgba(0,0,0,.25)');ell(c,x,y,r,r*0.7,q%2?'#6a645c':'#7a7268');ell(c,x-r*0.3,y-r*0.25,r*0.4,r*0.25,'rgba(255,255,255,.18)')}break;
+  case'kk_pfuetze':ell(c,0,1,18,7,'rgba(0,0,0,.3)');ell(c,0,0,16,6,'#1c1b1a');ell(c,-1,-0.5,13,4.4,'#24231f');ell(c,-5,-1.5,5,1.2,'rgba(220,214,200,.16)');ell(c,6,1,3,0.8,'rgba(220,214,200,.1)');break;
+  case'kk_stumpf':ell(c,1,8,13,4,'rgba(0,0,0,.3)');ln(c,'#3e2c1c',2.4,-9,7,-13,9);ln(c,'#3e2c1c',2.2,8,7,12,10);c.fillStyle='#4a3424';c.fillRect(-8,-4,16,11);c.fillStyle='#5a4030';c.fillRect(-8,-4,5,11);ln(c,'#3a2818',0.8,2,-3,2,7);ln(c,'#3a2818',0.8,-4,-2,-4,6);ell(c,0,-4,8,3.2,'#b89468');ell(c,0,-4,5.6,2.2,'#a8845a');c.strokeStyle='#8a6a46';c.lineWidth=0.6;c.beginPath();c.ellipse(0,-4,3.2,1.3,0,0,TAU);c.stroke();circ(c,0,-4,0.8,'#8a6a46');if(v>0.6)ell(c,-6,6,4,1.6,'#3e5a32');break;
+  case'kk_eimer':ell(c,0,6,6,2,'rgba(0,0,0,.28)');poly(c,'#5a4028',-5,-4,5,-4,4,5,-4,5);poly(c,'#6a4c30',-5,-4,-1,-4,-1,5,-4,5);ln(c,'#3a3a3e',1.1,-5,-1.5,5,-1.5);ln(c,'#3a3a3e',1.1,-4.6,3,4.6,3);ell(c,0,-4,5,1.6,'#2a2218');ell(c,0,-3.8,3.8,1,'#3a3630');c.strokeStyle='#4a4a50';c.lineWidth=0.8;c.beginPath();c.arc(0,-4,5,Math.PI,TAU);c.stroke();break;
+  case'kk_kerze':{ell(c,0,4,9,2.4,'rgba(0,0,0,.25)');const H=[[-5,1,7],[0,3,10],[5,2,5]];for(const [x,y,h] of H){c.fillStyle='#e8dcc0';c.fillRect(x-1.6,y-h,3.2,h);c.fillStyle='#cfc2a4';c.fillRect(x+0.4,y-h,1.2,h);ell(c,x,y,2.6,0.9,'#d8ccae')}
+   for(const [x,y,h] of H){const f=Math.sin(t*12+x+v*9)*0.6;ell(c,x,y-h-2.4,1.3,2.4+f*0.5,'#ffb848');ell(c,x,y-h-1.8,0.7,1.3,'#fff0c0')}
+   if(!(typeof spLeicht==='function'&&spLeicht())){glow(0,-10,18,'#ffc070',0.35+0.06*Math.sin(t*9+v*5),true);c.globalAlpha=1}}break;
+  case'kk_holz':ell(c,0,9,19,4,'rgba(0,0,0,.3)');c.fillStyle='#4a3424';c.fillRect(-17,-10,34,18);for(let r=0;r<3;r++)for(let q=0;q<5-r;q++){const x=-13+q*6.5+r*3.2,y=5-r*6;circ(c,x,y,3.4,'#6a4c30');circ(c,x,y,2.3,'#b8946a');circ(c,x,y,0.8,'#8a6a46')}ln(c,'#3a2818',1.6,-18,8,-18,-8);ln(c,'#3a2818',1.6,18,8,18,-8);break;
+  case'kk_sitz':ell(c,0,6,16,3.4,'rgba(0,0,0,.3)');c.fillStyle='#4e3826';c.beginPath();c.moveTo(-14,-3);c.lineTo(14,-3);c.lineTo(14,5);c.lineTo(-14,5);c.closePath();c.fill();c.fillStyle='#5e4430';c.fillRect(-14,-3,28,3);ln(c,'#3a2818',0.7,-8,0,6,0);ln(c,'#3a2818',0.7,-3,3,9,3);ell(c,14,1,2.6,4,'#b08c62');ell(c,14,1,1.4,2.4,'#9a7650');ell(c,-14,1,2.6,4,'#a8845a');break;
+  case'kk_stroh':ell(c,0,4,15,4.5,'#8a7a3a');ell(c,-1,2.5,12,3.4,'#a8964a');for(let q=0;q<9;q++){const x=-12+q*3,a=((q*31+v*50)%10)/10-0.5;ln(c,q%2?'#c8b460':'#b8a250',0.8,x,4,x+a*8,0)}break;
+ }}finally{c.restore()}}}
+
 function kaDeko(S){const K=G.ka,T=K.T,th=G.themeKey,n=K.n,dec=G.theme.deco||['rock'];const DK=(x,y,k,s)=>G.deco.push({x,y,k,s:s||rnd(0.85,1.2),v:Math.random(),wl:1});
  const frei=(x,y,r)=>!blkPunkt(x,y,r)&&!wlLoPunkt(x,y,r+6);const zelle=s=>{for(let t=0;t<30;t++){const c=K.fl[Math.floor(Math.random()*K.fl.length)];if(s!=null&&K.sid[c]!==s)continue;return{x:kaW(c%n)+rnd(-14,14),y:kaW((c/n)|0)+rnd(-14,14),c}}return null};
- /* Bodenkleinkram überall */for(let q=0;q<Math.round(K.fl.length*0.09);q++){const p=zelle();if(p&&frei(p.x,p.y,8))DK(p.x,p.y,pick(dec),rnd(0.8,1.2))}
+ /* Überbleibsel der alten Zufallsstreuung (ohne Ort) entfernen */if(!window.__hsKK.aus)G.deco=G.deco.filter(d=>d.wl||d.edge||d.ar||!dec.includes(d.k));
+ /* Bodenkleinkram: mit Sinn verteilt (Weltordnung), sonst wie früher überall */let kkOk=false;try{kkOk=kaKleinkram(K,T,th,dec,DK,frei)}catch(er){window.__hsKK.err=String(er&&er.stack||er)}if(!kkOk)for(let q=0;q<Math.round(K.fl.length*0.09);q++){const p=zelle();if(p&&frei(p.x,p.y,8))DK(p.x,p.y,pick(dec),rnd(0.8,1.2))}
  /* Wandnahes: Fackeln an Mauern/Fels in dunklen Orten */
- if((G.theme.dark||0)>=0.4||T.mas==='mauer'){let m=0;for(let t=0;t<900&&m<Math.round(K.fl.length/45);t++){const c=K.fl[Math.floor(Math.random()*K.fl.length)],i=c%n,j=(c/n)|0;if(!K.M[(j-1)*n+i])continue;const x=kaW(i),y=j*K.Z+8;if(!frei(x,y+10,10))continue;DK(x,y,T.glut?'brazier':'torch',1);m++}}
+ if((G.theme.dark||0)>=0.4||T.mas==='mauer'){let m=0;const FK=[];for(let t=0;t<900&&m<Math.round(K.fl.length/45);t++){const c=K.fl[Math.floor(Math.random()*K.fl.length)],i=c%n,j=(c/n)|0;if(!K.M[(j-1)*n+i])continue;const x=kaW(i),y=j*K.Z+8;if(!frei(x,y+10,10))continue;/* Wandfackeln mit Abstand statt in Klumpen */if(!window.__hsKK.aus&&FK.some(q=>Math.abs(q[0]-x)<230&&Math.abs(q[1]-y)<230))continue;FK.push([x,y]);DK(x,y,T.glut?'brazier':'torch',1);m++}}
  /* Stimmungen der Abschnitte */
  for(const s of K.sec){const many=(k,cnt,sz)=>{for(let q=0;q<cnt;q++){const p=zelle(s.k);if(p&&frei(p.x,p.y,10))DK(p.x,p.y,k,sz||rnd(0.9,1.3))}};const f=s.f;
   if(f==='pilze')many(th==='pilze'?'glowshroom':'mush',22);
@@ -21399,7 +21522,8 @@ function kaDeko(S){const K=G.ka,T=K.T,th=G.themeKey,n=K.n,dec=G.theme.deco||['ro
  /* Hindernisse je Grundriss, damit die Abschnitte nicht leer wirken (Abstand zu Toren und Start) */
  const torNah=(x,y,m)=>K.tore.some(t=>Math.hypot(t.ax-x,t.ay-y)<m||Math.hypot(t.bx-x,t.by-y)<m||Math.hypot(t.x-x,t.y-y)<m)||Math.hypot(K.start.x-x,K.start.y-y)<300||K.kampfP&&Math.hypot(K.kampfP.x-x,K.kampfP.y-y)<300;
  const B_=(o)=>{o.v=Math.random();o.wl=1;G.blk.push(o)};
- for(const s of K.sec){if(s.art==='arena')continue;const nn=Math.round(s.fz/(T.lay==='gassen'?90:55));for(let q=0;q<nn;q++){const p=zelle(s.k);if(!p||torNah(p.x,p.y,170)||!frei(p.x,p.y,62))continue;const x=p.x,y=p.y,r=Math.random();
+ /* Gassen: Kisten, Stände und Fässer stehen an den Hauswänden, nicht mitten auf der Straße */const wandPos=sk=>{for(let t=0;t<40;t++){const c=K.fl[Math.floor(Math.random()*K.fl.length)];if(K.sid[c]!==sk)continue;const i=c%n,j=(c/n)|0;if(K.M[(j-1)*n+i]&&!K.M[(j+1)*n+i]&&!K.M[(j+2)*n+i])return{x:kaW(i)+rnd(-8,8),y:j*K.Z+34,w:1}}return null};
+ for(const s of K.sec){if(s.art==='arena')continue;const nn=Math.round(s.fz/(T.lay==='gassen'?90:55));for(let q=0;q<nn;q++){const hw=T.mas==='haus'&&!window.__hsKK.aus;const p=(hw&&wandPos(s.k))||zelle(s.k);if(!p||torNah(p.x,p.y,170)||!frei(p.x,p.y,p.w?30:62))continue;const x=p.x,y=p.y,r=Math.random();
    if(T.mas==='wald'){if(r<0.55){const m=ri(2,4);for(let j=0;j<m;j++){const a=j/m*TAU+rnd(0.5),d=j?rnd(45,80):0,px=x+Math.cos(a)*d,py=y+Math.sin(a)*d;if(frei(px,py,24))B_({t:'c',x:px,y:py,r:rnd(16,20),k:'baum',s:rnd(1.2,1.7),art:th==='nacht'?'tanne':th==='geisterdorf'||th==='wurzeldorf'?'tot':th==='teich'&&Math.random()<0.4?'weide':'laub'});if(Math.random()<0.6)DK(px+rnd(-30,30),py+rnd(10,26),'bush')}}
      else if(r<0.8){B_({t:'c',x,y,r:rnd(28,40),k:'fels'});if(frei(x+50,y+20,20))B_({t:'c',x:x+50,y:y+20,r:rnd(12,18),k:'fels'})}else{const hor=Math.random()<0.5,len=rnd(120,180);if(frei(x+(hor?len:0),y+(hor?0:len),20))B_({t:'r',x:x-(hor?len/2:12),y:y-(hor?12:len/2),w:hor?len:24,h:hor?24:len,k:'stamm'})}}
    else if(T.mas==='fels'){if(r<0.5){B_({t:'c',x,y,r:rnd(30,44),k:'fels'});for(let j=0;j<ri(1,2);j++){const a=rnd(TAU),px=x+Math.cos(a)*rnd(55,80),py=y+Math.sin(a)*rnd(45,70);if(frei(px,py,22))B_({t:'c',x:px,y:py,r:rnd(14,22),k:'fels'})}}
@@ -21408,11 +21532,12 @@ function kaDeko(S){const K=G.ka,T=K.T,th=G.themeKey,n=K.n,dec=G.theme.deco||['ro
    else if(T.mas==='mauer'){if(r<0.4){const hor=Math.random()<0.5,n2=ri(2,3);for(let j=0;j<n2;j++){const px=x+(hor?j*90-(n2-1)*45:0),py=y+(hor?0:j*90-(n2-1)*45);if(frei(px,py,26))B_({t:'c',x:px,y:py,r:18,k:'saeule'})}}
      else if(r<0.7){const hor=Math.random()<0.5,len=rnd(140,230);let ok=true;for(let u=0;u<=1;u+=0.25)if(!frei(hor?x-len/2+len*u:x,hor?y:y-len/2+len*u,30))ok=false;if(ok)B_({t:'r',x:hor?x-len/2:x-13,y:hor?y-13:y-len/2,w:hor?len:26,h:hor?26:len,k:'wand',m:'stein'})}
      else if(r<0.85)B_({t:'r',x:x-25,y:y-17,w:50,h:34,k:'kisten'});else if(th==='grab'||th==='ruine')B_({t:'r',x:x-35,y:y-17,w:70,h:34,k:'sarg'});else B_({t:'c',x,y,r:19,k:'statue'})}
-   else{if(r<0.35)B_({t:'r',x:x-25,y:y-17,w:50,h:34,k:'kisten'});else if(r<0.6&&th==='markt'||r<0.45)B_({t:'r',x:x-42,y:y-17,w:84,h:34,k:'stand'});else if(r<0.7)B_({t:'c',x,y,r:20,k:'brunnen'});else DK(x,y,pick(['barrel','crate','lantern']),1)}}}
+   else{if(r<0.35)B_({t:'r',x:x-25,y:y-17,w:50,h:34,k:'kisten'});else if(r<0.6&&th==='markt'||r<0.45)B_({t:'r',x:x-42,y:y-17,w:84,h:34,k:'stand'});else if(r<0.7&&(window.__hsKK.aus||!G.blk.some(b=>b.k==='brunnen'&&Math.hypot(b.x-x,b.y-y)<1100)))B_({t:'c',x,y,r:20,k:'brunnen'});else if(window.__hsKK.aus)DK(x,y,pick(['barrel','crate','lantern']),1);else if(frei(x,y,40)){B_({t:'r',x:x-25,y:y-17,w:50,h:34,k:'kisten'});DK(x+34,y+8,pick(['barrel','kk_sack']),1)}}}}
  /* Fackeln/Laternen an den Engstellen (Orientierung im Dunkeln) */
  for(const t of K.tore){if(!t.main)continue;const u=kaRichtung(t),sx=t.hor?0:1,sy=t.hor?1:0;for(const sg of [-1,1]){const x=t.x+u.x*70+sx*sg*(t.w/2-16),y=t.y+u.y*70+sy*sg*(t.w/2-16);G.deco.push({x,y,k:T.lay==='gassen'?'lantern':T.glut?'brazier':'torch',s:1.1,v:Math.random(),wl:1})}}
  /* Stufen in Durchgängen von Hallen/Gassen (Höhenwirkung) */
  if(T.lay==='hallen'||T.lay==='gassen')for(const t of K.tore){if(!t.main||t.fl)continue;const u=kaRichtung(t);for(let q=0;q<3;q++)G.deco.push({x:t.x+u.x*(60+q*14),y:t.y+u.y*(60+q*14),k:'ka_stufe',s:1,v:t.hor?1:0,w:t.w,wl:1})}
+ try{kaKleinZusatz(K,T,th,DK,frei)}catch(er){window.__hsKK.err2=String(er&&er.stack||er)}
  kaArenaBau()}
 {const dd0=drawDeco;drawDeco=function(d,t){if(d.k==='ka_stufe'){const c=cx,w=(d.w||160)-12;c.fillStyle='rgba(0,0,0,.22)';if(d.v)c.fillRect(d.x-3,d.y-w/2,6,w);else c.fillRect(d.x-w/2,d.y-3,w,6);c.fillStyle='rgba(255,255,255,.07)';if(d.v)c.fillRect(d.x-5,d.y-w/2,2,w);else c.fillRect(d.x-w/2,d.y-5,w,2);return}return dd0.apply(this,arguments)}}
 
@@ -41586,10 +41711,10 @@ RG.gestalten=gestalten;
    Champions/Elite multiplizieren wie bisher darauf. Bosse/Wächter unverändert (haben eigenes Mindestleben).
    Etwas mehr Schaden der Gegner ab Stufe 4 (Normal +12 %, Schwer +18 %). Etwas mehr Erfahrung je Kill bei hochgezogenem Leben.
    Präfix zh. Abschalten: window.__hsZAEH.aus=1 */
-window.__hsZAEH={v:1,aus:0,T:4,st:{n:0,mul:0}};
+window.__hsZAEH={v:2,aus:0,T:4,st:{n:0,mul:0},HK:{ezekiel:0.85,barradin:0.9}};/* v2 (Bot-Messung 28.11.): Ezekiel und Barradin brauchten pro Gegner 3–5 s statt ~2,5 s – Mindestleben für sie etwas kleiner */
 (function(){try{
 const ZH=window.__hsZAEH;
-function boden(){let s=0;for(const q of mpL()){if(!q||!q.st||q.netGone)continue;const d=dpsOf(q.st);s=Math.max(s,Math.max(d.m,d.r)*(GUARD_HK[q.id]||1.5))}return s}
+function boden(){let s=0;for(const q of mpL()){if(!q||!q.st||q.netGone)continue;const d=dpsOf(q.st);s=Math.max(s,Math.max(d.m,d.r)*(GUARD_HK[q.id]||1.5)*((ZH.HK&&ZH.HK[q.id])||1))}return s}
 const sp=spawnEnemy;spawnEnemy=function(def,x,y,o){const e=sp.apply(this,arguments);try{o=o||{};if(!e||ZH.aus||o.boss||o.guard||o.add||o.summon||e.boss||G.room&&G.room.type==='training')return e;
   const ref=boden();if(!(ref>0))return e;const hf=def&&def.hp||1;const ziel=ref*ZH.T*Math.max(0.45,hf)*(HARD()?hartMix(1.05,1.35):1)*(G.stage<2?0.7:1);
   if(e.maxHp<ziel){const m=Math.min(14,ziel/e.maxHp);e.hp*=m;e.maxHp*=m;e.zhM=m;ZH.st.n++;ZH.st.mul+=m}
@@ -43745,6 +43870,15 @@ if(typeof scale==='function'){const sc=scale;scale=function(){const r=sc.apply(t
 const E2=window.__hsECHO2={v:2,aus:0,DMG0:0.4,BIS:20,HP:0.25};/* v2 (Messung 28.11.: Echo starb als Einzige auf Normal am Boss von Stufe 12 und auf Schwer schon in Stufe 2; Höchstleben ⅔ der anderen) */
 hook('stats',s=>{try{if(E2.aus||!P||P.id!=='echo')return;const lv=Math.max(1,P.level|0);const f=Math.max(0,1-(lv-1)/(E2.BIS-1));s.dmgP=(s.dmgP||0)+E2.DMG0*f;s.hpP=(s.hpP||0)+E2.HP}catch(e){}});
 }catch(e){console.error('echo2',e);window.__hsECHO2={v:1,err:[String(e&&e.stack||e)]}}})();
+/* ================= Paket „gedraenge“: faires Gedränge – window.__hsGDR =================
+   Viele Treffer kurz hintereinander (eingekreist von einer Horde) werden ab dem dritten Treffer innerhalb von 0,6 s
+   schrittweise schwächer (bis auf die Hälfte). Einzelne harte Treffer bleiben unverändert – nur das „Zerfleischtwerden
+   in einer Sekunde“ wird abgefedert. Bot-Messung 28.11.: Fernkämpfer starben auf Schwer fast nur im Nahkampfgedränge.
+   Abschaltbar: __hsGDR.aus=1 */
+(function(){try{if(window.__hsGDR)return;const GD=window.__hsGDR={v:1,aus:0,F:0.6,S:0.12,MIN:0.5,n:0};
+ hook('hurtMul',()=>{if(GD.aus||!P)return 1;const now=G.time;const L=P._gdL||(P._gdL=[]);while(L.length&&now-L[0]>GD.F)L.shift();const k=L.length;L.push(now);if(L.length>24)L.shift();
+  if(k<2)return 1;GD.n++;return Math.max(GD.MIN,1-GD.S*(k-1))});
+}catch(e){console.error('gedraenge',e);window.__hsGDR={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/echo2» */
 /* «padziel» */
 /* ================= Paket „padziel“: Controller – Fähigkeiten in Laufrichtung – window.__hsPADZIEL =================
