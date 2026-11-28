@@ -4118,7 +4118,7 @@ function dropItem(x,y,it){it=ancRoll(it);if(G.portal&&d2({x,y},G.portal)<100*100
 /* ================= Spieler ================= */
 const keys={};let joy=null;
 function absorb(a){if(P.shieldHp>0){const t=Math.min(P.shieldHp,a);P.shieldHp-=t;a-=t;if(P.shieldHp<=0)burst(P.x,P.y,'#ecdcb2',12,140)}return a}
-function hurt(raw){G.kampfT=G.time;if(P.inv>0||P.down||G.state!=='play')return;if(P.id==='friedrich'&&Math.random()<0.125){if(!P.dgT||G.time-P.dgT>0.6){P.dgT=G.time;word(P.x,P.y-34,'ausgewichen','#cfe8b0')}return}let a=raw*hookMul('hurtMul',raw)*(P.buffs.roarG>0?0.85:1)*mpGuard()*setHurtMul()*curseHurtMul()*(1-armorRed(P.st.armor))*(LP('demohaut')?0.85:1)*(shrineOn('schutz')?0.5:1)*(1+modSum('edmg'))*(G.stage===0&&NORM()?0.8:1)*(G.stage===0&&HARD()&&G.mode==='kampagne'?0.9:1);a=absorb(a);a=Math.min(a,P.st.maxHp*(G.mode==='abstieg'?0.7:0.75));/* kein Ein-Treffer-Tod aus vollem Leben */if(LP('demohaut')&&Math.random()<0.2){aoe(P.x,P.y,110*P.st.area,sk(2),{knock:200});G.fxs.push({k:'tentacle',x:P.x,y:P.y-60,x2:P.x+rnd(-60,60),y2:P.y+rnd(-30,30),t:0,life:0.35})}if(a<=0)return;P.hp-=a;rumble(P,Math.min(1,0.15+a/P.st.maxHp*2.5),Math.min(300,90+a/P.st.maxHp*600));P.hurtT=0.18;P.hurtA=G.time;hurtFx(a);try{hurtFb(a)}catch(e){}G.shake=Math.min(G.shake+2.5,12);num(P.x,P.y-26,a,false,true);sfx('hurt');skHurt();if(P.hp<=0)die()}
+function hurt(raw){G.kampfT=G.time;if(P.inv>0||P.down||G.state!=='play')return;if(P.id==='friedrich'&&Math.random()<0.125){if(!P.dgT||G.time-P.dgT>0.6){P.dgT=G.time;word(P.x,P.y-34,'ausgewichen','#cfe8b0')}return}let a=raw*hookMul('hurtMul',raw)*(P.buffs.roarG>0?0.85:1)*mpGuard()*setHurtMul()*curseHurtMul()*(1-armorRed(P.st.armor))*(LP('demohaut')?0.85:1)*(shrineOn('schutz')?0.5:1)*(1+modSum('edmg'))*(G.stage===0&&NORM()?0.8:1)*(HARD()&&G.mode==='kampagne'?(G.stage===0?0.8:G.stage===1?0.9:1):1);a=absorb(a);a=Math.min(a,P.st.maxHp*(G.mode==='abstieg'?0.7:0.75));/* kein Ein-Treffer-Tod aus vollem Leben */if(LP('demohaut')&&Math.random()<0.2){aoe(P.x,P.y,110*P.st.area,sk(2),{knock:200});G.fxs.push({k:'tentacle',x:P.x,y:P.y-60,x2:P.x+rnd(-60,60),y2:P.y+rnd(-30,30),t:0,life:0.35})}if(a<=0)return;P.hp-=a;rumble(P,Math.min(1,0.15+a/P.st.maxHp*2.5),Math.min(300,90+a/P.st.maxHp*600));P.hurtT=0.18;P.hurtA=G.time;hurtFx(a);try{hurtFb(a)}catch(e){}G.shake=Math.min(G.shake+2.5,12);num(P.x,P.y-26,a,false,true);sfx('hurt');skHurt();if(P.hp<=0)die()}
 function hurtDot(a){if(P.inv>0||P.down||G.state!=='play')return;a=a*setHurtMul()*curseHurtMul()*(1-armorRed(P.st.armor))*(LP('demohaut')?0.85:1)*(shrineOn('schutz')?0.5:1)*(1+modSum('edmg'));a=absorb(a);if(a<=0)return;P.hp-=a;P.dotAcc=(P.dotAcc||0)+a;if(P.dotAcc>P.st.maxHp*0.03){num(P.x+rnd(-8,8),P.y-26,P.dotAcc,false,true);P.dotAcc=0}if(P.hp<=0)die()}
 function die(){if(pactSave())return;if(LP('fledermaus')&&!P.batUsed){P.batUsed=1;P.hp=1;P.inv=2;P.batT=2;smoke(P.x,P.y);toast('Neznas Flucht! Du wirst zur Fledermaus.','#c48cff');later(2,()=>{heal(P.st.maxHp*0.3);smoke(P.x,P.y)});sfx('blink');return}
  if(P.revives>0){P.revives--;P.hp=P.st.maxHp*0.6;P.inv=2.5;aoe(P.x,P.y,280,sk(2),{knock:600,stun:1.5});ring(P.x,P.y,280,'#e5b454',0.8,8);toast('Zweite Chance! Du erhebst dich erneut.','#e5b454');sfx('level');return}
@@ -21478,6 +21478,8 @@ function kaKleinZusatz(K,T,th,DK,frei){const KK=window.__hsKK;if(KK.aus)return;c
  /* Lichtungen: Blumen in offenen Wiesenzellen */
  if(wald&&!tot)for(let q=0,m=Math.round(fl.length/220);q<m;q++){const c=fl[(Math.random()*fl.length)|0],x=kaW(c%n),y=kaW((c/n)|0);if(K.tore.some(t=>Math.hypot(t.x-x,t.y-y)<120))continue;for(let r=0,k=ri(3,6);r<k;r++)put(x+rnd(-40,40),y+rnd(-26,26),r%3===2?'grass':'kk_blumen')}
  if(hoehle&&th!=='glutgang'&&th!=='hort')for(let q=0,m=Math.round(fl.length/300);q<m;q++){const c=fl[(Math.random()*fl.length)|0];put(kaW(c%n)+rnd(-12,12),kaW((c/n)|0)+rnd(-12,12),'kk_kiesel')}
+ /* Wegweiser vor den Haupttoren draußen und in Dörfern */
+ if(T.mas==='wald'||T.mas==='haus')for(const t of K.tore){if(!t.main||Math.random()<0.35)continue;const u=kaRichtung(t),sx=t.hor?0:1,sy=t.hor?1:0,sg=Math.random()<0.5?1:-1;const x=t.x+u.x*95+sx*sg*(t.w/2+26),y=t.y+u.y*95+sy*sg*(t.w/2+26);if(frei(x,y,12)){DK(x,y,'kk_schild',1);G.deco[G.deco.length-1].a=Math.atan2(u.y,u.x)}}
  /* Ufer: Schilf und Steine am Wasser, Asche und Schlacke an der Lava */
  {const LO=((G.wl&&G.wl.lo)||[]);for(const o of LO){const wa=/wasser/.test(o.k||''),la=/lava/.test(o.k||'');if(!wa&&!la)continue;const kinds=wa?(G.theme.dark>0.4?['kk_kiesel','rock','reeds']:['reeds','reeds','grass','kk_kiesel']):['ash','kk_kiesel','rubble'];
    const pts=[];if(o.t==='c'){const m=Math.max(3,Math.round(o.r/18));for(let q=0;q<m;q++){const a=q/m*TAU+rnd(-0.2,0.2);pts.push([o.x+Math.cos(a)*(o.r+15),o.y+Math.sin(a)*(o.r+14)])}}
@@ -21512,6 +21514,8 @@ function kaKleinZusatz(K,T,th,DK,frei){const KK=window.__hsKK;if(KK.aus)return;c
   case'kk_sitz':ell(c,0,6,16,3.4,'rgba(0,0,0,.3)');c.fillStyle='#4e3826';c.beginPath();c.moveTo(-14,-3);c.lineTo(14,-3);c.lineTo(14,5);c.lineTo(-14,5);c.closePath();c.fill();c.fillStyle='#5e4430';c.fillRect(-14,-3,28,3);ln(c,'#3a2818',0.7,-8,0,6,0);ln(c,'#3a2818',0.7,-3,3,9,3);ell(c,14,1,2.6,4,'#b08c62');ell(c,14,1,1.4,2.4,'#9a7650');ell(c,-14,1,2.6,4,'#a8845a');break;
   case'kk_pfad':{c.rotate(d.a||0);ell(c,0,0,15,6.5,'rgba(62,46,30,.34)');ell(c,-3,-1,9,3.6,'rgba(84,64,42,.26)');if(v>0.6){ell(c,6,1,1.4,0.9,'#6a645c');ell(c,-7,2,1.1,0.7,'#5e5850')}if(v<0.25)ln(c,'rgba(40,30,20,.35)',0.8,-10,1.5,8,1.8)}break;
   case'kk_gleis':{c.rotate(d.a||0);for(const x of [-9,1,11]){c.fillStyle='#3e2e20';c.fillRect(x-2.6,-9,5.2,18);c.fillStyle='#4e3a28';c.fillRect(x-2.6,-9,5.2,3)}c.fillStyle='rgba(0,0,0,.3)';c.fillRect(-15,-6,30,2.4);c.fillRect(-15,5,30,2.4);c.fillStyle='#5a5652';c.fillRect(-15,-7,30,2);c.fillRect(-15,4,30,2);c.fillStyle='rgba(220,210,190,.22)';c.fillRect(-15,-7,30,0.7);c.fillRect(-15,4,30,0.7);if(v>0.7){ell(c,4,9,2,1,'#5e5850')}}break;
+  case'kk_schild':{ell(c,0,10,7,2.2,'rgba(0,0,0,.3)');ln(c,'#3e2c1c',3,0,10,0,-20);ln(c,'#5a4028',1,-0.8,9,-0.8,-19);const dx=Math.cos(d.a||0)>=0?1:-1;
+   const brett=(y,r)=>{c.save();c.translate(0,y);c.scale(r,1);poly(c,'#6a4c30',-2,-3.5,13,-3.5,17,0,13,3.5,-2,3.5);poly(c,'#7a5a38',-2,-3.5,13,-3.5,15,-1.5,-2,-1.5);ln(c,'#4a3420',0.6,1,0,11,0);c.restore()};brett(-16,dx);brett(-8,-dx*0.85);circ(c,0,-16,0.9,'#3a3a3e');circ(c,0,-8,0.9,'#3a3a3e')}break;
   case'kk_stroh':ell(c,0,4,15,4.5,'#8a7a3a');ell(c,-1,2.5,12,3.4,'#a8964a');for(let q=0;q<9;q++){const x=-12+q*3,a=((q*31+v*50)%10)/10-0.5;ln(c,q%2?'#c8b460':'#b8a250',0.8,x,4,x+a*8,0)}break;
  }}finally{c.restore()}}}
 
@@ -43891,17 +43895,20 @@ hook('stats',s=>{try{if(E2.aus||!P||P.id!=='echo')return;const lv=Math.max(1,P.l
 }catch(e){console.error('echo2',e);window.__hsECHO2={v:1,err:[String(e&&e.stack||e)]}}})();
 /* ================= Paket „gedraenge“: faires Gedränge – window.__hsGDR =================
    Viele Treffer kurz hintereinander (eingekreist von einer Horde) werden ab dem dritten Treffer innerhalb von 0,6 s
-   schrittweise schwächer (bis auf die Hälfte). Einzelne harte Treffer bleiben unverändert – nur das „Zerfleischtwerden
+   schrittweise schwächer (bis auf 60 %; ergänzt „atem“, das nach Schadensmenge im 1,2-s-Fenster bremst). Einzelne harte Treffer bleiben unverändert – nur das „Zerfleischtwerden
    in einer Sekunde“ wird abgefedert. Bot-Messung 28.11.: Fernkämpfer starben auf Schwer fast nur im Nahkampfgedränge.
    v2: Einzeltreffer normaler Gegner höchstens 30 % des Lebens (Messung: Ghule, Brocken, Duergar, Magmin trafen oft mit 40–80 %).
    Abschaltbar: __hsGDR.aus=1 */
-(function(){try{if(window.__hsGDR)return;const GD=window.__hsGDR={v:2,aus:0,F:0.6,S:0.12,MIN:0.5,CAP:0.3,n:0,cap:0,src:null};
+(function(){try{if(window.__hsGDR)return;const GD=window.__hsGDR={v:2,aus:0,F:0.6,S:0.1,MIN:0.6,CAP:0.3,n:0,cap:0,src:null};
  hook('hurtMul',raw=>{if(GD.aus||!P)return 1;let m=1;
   /* kein normaler Gegner nimmt mit einem Schlag mehr als ein knappes Drittel des Lebens (Bosse, Wächter, Gefolge ausgenommen) */
   const S=GD.src;if(S&&!S.boss&&!S.guard&&!S.add&&raw>0){const est=raw*(1-armorRed(P.st.armor)),cap=GD.CAP*P.st.maxHp;if(est>cap){m*=cap/est;GD.cap++}}
   const now=G.time;const L=P._gdL||(P._gdL=[]);while(L.length&&now-L[0]>GD.F)L.shift();const k=L.length;L.push(now);if(L.length>24)L.shift();
   if(k<2)return m;GD.n++;return m*Math.max(GD.MIN,1-GD.S*(k-1))});
  {const ue=updEnemy;updEnemy=function(e){const o=GD.src;GD.src=e;try{return ue.apply(this,arguments)}finally{GD.src=o}}}
+ /* Geschosse merken sich ihren Schützen – so gilt die Obergrenze auch für Wurfsteine, Pfeile und Zauber normaler Gegner */
+ {const es=eShot;eShot=function(){const n0=G.projs.length;const r=es.apply(this,arguments);try{if(GD.src&&G.projs.length>n0){const p=G.projs[G.projs.length-1];if(p&&p.team==='e')p.gdS=GD.src}}catch(e){}return r}}
+ {const h0=hurt;hurt=function(raw,src){if(src&&src.gdS&&!GD.src){GD.src=src.gdS;try{return h0.apply(this,arguments)}finally{GD.src=null}}return h0.apply(this,arguments)}}
 }catch(e){console.error('gedraenge',e);window.__hsGDR={v:1,err:[String(e&&e.stack||e)]}}})();
 /* Weltordnung, Teil 2: lose Fässergruppen (auch Sprengfässer) rücken an die nächste Wand – wie abgestellt statt mitten im Weg */
 (function(){try{const ss=setupStage;setupStage=function(){const r=ss.apply(this,arguments);try{const KK=window.__hsKK,K=G.ka;if(!KK||KK.aus||!K||!K.an||G.room||G.netGuestRun)return r;const n=K.n,Z=K.Z,M=K.M;
@@ -44480,7 +44487,7 @@ const h0=hurt;hurt=function(raw){if(AT.aus||!P||!P.st||!(raw>0))return h0.apply(
  let f=1;try{const hard=typeof HARD==='function'&&HARD(),A=hard?0.45:0.35,B=hard?0.70:0.60,mx=P.st.maxHp||1,t=G.time;
   const L=P._atW||(P._atW=[]);while(L.length&&(t-L[0][0]>AT.FEN||t<L[0][0]))L.shift();let s=0;for(const q of L)s+=q[1];const q=s/mx;
   if(q>B)f=0.33;else if(q>A)f=0.5}catch(e){f=1}
- const hp0=P.hp;const r=h0.call(this,raw*f);
+ const hp0=P.hp;const r=h0.call(this,raw*f,arguments[1]);
  try{const d=hp0-P.hp;if(d>0){(P._atW||(P._atW=[])).push([G.time,d]);if(f<1){AT.n++;AT.gespart+=d*(1/f-1)}}}catch(e){}
  return r};
 }catch(e){console.error('atem',e);window.__hsATEM={v:1,err:[String(e&&e.stack||e)]}}})();
