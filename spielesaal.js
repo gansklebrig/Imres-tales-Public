@@ -23,18 +23,18 @@
 
   /* ---------- Die Spiele ---------- */
   const SPIELE = [
-    { key: "heldensturm", karte: "heldensturm", extern: "heldensturm.html", held: "barradin.jpg", bilder: [B("heldensturm-1"), B("heldensturm-2"), B("heldensturm-3")], gross: true,
-      plakat: B("plakat-heldensturm"), pos: "center 45%", farbe: "#ff7a3d", clip: "vorschau/heldensturm-clip.mp4?v=4", ton: "timp1.mp3", art: "neu", stand: "2026-10-26" },
+    { key: "heldensturm", karte: "heldensturm", extern: "heldensturm.html", held: "barradin.jpg", bilder: ["vorschau/heldensturm-1.webp?v=5", "vorschau/heldensturm-2.webp?v=5", "vorschau/heldensturm-3.webp?v=5"], gross: true,
+      plakat: B("plakat-heldensturm"), pos: "center 45%", farbe: "#ff7a3d", clip: "vorschau/heldensturm-clip.mp4?v=5", ton: "timp1.mp3", art: "neu", stand: "2026-10-26" },
+    { key: "zerstoerer", karte: "zerstoerer", extern: "zerstoerer.html", held: "ezekiel.jpg", bilder: ["vorschau/zerstoerer-1.webp?v=2", "vorschau/zerstoerer-2.webp?v=2", "vorschau/zerstoerer-3.webp?v=2"], gross: true,
+      plakat: "vorschau/plakat-zerstoerer.webp?v=2", pos: "65% 40%", farbe: "#ff3a2a", clip: "vorschau/zerstoerer-clip.mp4?v=2", ton: "timp1.mp3", art: "update", stand: "2026-11-28" },
     { key: "jagd", karte: "waldlauf", held: "friedrich.jpg", bilder: [B("jagd-1"), B("jagd-2"), B("jagd-3")],
       plakat: B("plakat-jagd"), pos: "center 22%", farbe: "#8fd36b", clip: "vorschau/jagd-clip.mp4?v=5", ton: "bogen.mp3", art: "update", stand: "2026-11-22" },
-    { key: "nacht", karte: "diebesnacht", held: "ezekiel.jpg", bilder: [B("nacht-1"), B("nacht-2"), B("nacht-3")],
-      plakat: B("plakat-nacht"), pos: "center 28%", farbe: "#ff5a4e", clip: "vorschau/nacht-clip.mp4?v=5", ton: "shake.mp3", art: "update", stand: "2026-11-22" },
-    { key: "zerstoerer", karte: "zerstoerer", extern: "zerstoerer.html", held: "ezekiel.jpg", bilder: ["vorschau/zerstoerer-1.webp?v=1", "vorschau/zerstoerer-2.webp?v=1", "vorschau/zerstoerer-3.webp?v=1"],
-      plakat: "vorschau/plakat-zerstoerer.webp?v=1", pos: "62% 30%", farbe: "#ff3a2a", clip: "vorschau/zerstoerer-clip.mp4?v=1", ton: "timp1.mp3", art: "update", stand: "2026-11-28" },
     { key: "hort", karte: "echohort", held: "echo.jpg", bilder: [B("hort-1"), B("hort-2"), B("hort-3")],
       plakat: B("plakat-hort"), pos: "52% center", farbe: "#5fd6b8", clip: "vorschau/hort-clip.mp4?v=5", ton: "harfe_76.mp3", art: "update", stand: "2026-11-22" },
     { key: "auftritt", karte: "auftritt", held: "barradin.jpg", bilder: [B("auftritt-1"), B("auftritt-2"), B("auftritt-3")],
-      plakat: B("plakat-auftritt"), pos: "center 20%", farbe: "#ffc24a", clip: "vorschau/auftritt-clip.mp4?v=5", ton: "gitarre_63.mp3", art: "update", stand: "2026-11-22" },
+      plakat: B("plakat-auftritt"), pos: "center 20%", farbe: "#ffc24a", clip: "vorschau/auftritt-clip.mp4?v=6", ton: "gitarre_63.mp3", art: "update", stand: "2026-11-22" },
+    { key: "nacht", karte: "diebesnacht", held: "ezekiel.jpg", bilder: [B("nacht-1"), B("nacht-2"), B("nacht-3")],
+      plakat: B("plakat-nacht"), pos: "center 28%", farbe: "#ff5a4e", clip: "vorschau/nacht-clip.mp4?v=5", ton: "shake.mp3", art: "update", stand: "2026-11-22" },
     { key: "probe", karte: "barden-probe", held: "barradin.jpg", bilder: ["vorschau/probe-3.webp?v=1", "vorschau/probe-4.webp?v=1", "vorschau/probe-5.webp?v=1"],
       plakat: B("plakat-probe"), pos: "30% 35%", farbe: "#d39bff", clip: "vorschau/probe-clip.mp4?v=2", direkt: true, ton: "holz1.mp3", art: "update", stand: "2026-11-07" },
     { key: "memory", karte: "memory-karte", held: "demogorgon.webp", bilder: ["vorschau/memory-2.webp?v=1", "vorschau/memory-3.webp?v=1", "vorschau/memory-4.webp?v=1"],
@@ -696,6 +696,13 @@
   box-shadow: 0 10px 28px rgba(0,0,0,.45);
 }
 .saal-kachel.gross { grid-column: span 2; }
+/* W50 Taverne: Heldensturm und Glut und Asche – die zwei großen Spiele – als Hauptkarten oben nebeneinander, höher und mit Glutrahmen */
+.saal-kachel.gross { min-height: clamp(320px, 38vw, 470px); border-color: color-mix(in srgb, var(--farbe) 60%, var(--line));
+  box-shadow: 0 14px 36px rgba(0,0,0,.5), 0 0 30px color-mix(in srgb, var(--farbe) 18%, transparent); }
+.saal-kachel.gross::before { content: ""; position: absolute; inset: 6px; z-index: 1; pointer-events: none; border: 1px solid color-mix(in srgb, var(--farbe) 30%, transparent); }
+.saal-kachel.gross .sk-text { padding: 1.3rem 1.4rem 1.35rem; gap: .38rem; }
+.saal-kachel.gross .sk-genre { font-size: .7rem; padding: .16rem .6rem; }
+.saal-kachel.gross .sk-los { padding: .55rem 1.15rem; font-size: .95rem; }
 @keyframes saalEin { from { opacity: 0; transform: translateY(26px) scale(.97); } }
 .saal-kachel:hover, .saal-kachel:focus-within {
   transform: rotateX(var(--rx)) rotateY(var(--ry)) translateY(-6px); border-color: var(--farbe);
@@ -738,7 +745,10 @@
 }
 @media (max-width: 560px) {
   .saal-kachel { min-height: 255px; }
-  .saal-kachel.gross { min-height: 230px; }
+  .saal-kachel.gross { min-height: clamp(290px, 80vw, 360px); }
+  .saal-kachel.gross .sk-text { padding: .9rem .9rem .95rem; }
+  .saal-kachel.gross .sk-text b { font-size: 1.6rem; }
+  .saal-kachel.gross .sk-spruch { font-size: .84rem; -webkit-line-clamp: 2; }
   .sk-text { padding: .7rem .7rem .75rem; gap: .22rem; }
   .sk-text b { font-size: 1.12rem; }
   .sk-spruch { font-size: .74rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
@@ -909,7 +919,7 @@ html.saal-dialog-offen { overflow: hidden; }
   .sk-heute-mehr { font-size: .74rem; padding: .25rem; white-space: nowrap; }
   .saal { gap: .6rem; }
   .saal-kachel, .saal-kachel.gross { min-height: clamp(150px, calc(100vh - 110px), 230px); }
-  .sk-text { padding: .55rem .6rem .6rem; gap: .18rem; }
+  .sk-text, .saal-kachel.gross .sk-text { padding: .55rem .6rem .6rem; gap: .18rem; }
   .sk-text b, .saal-kachel.gross .sk-text b { font-size: 1.08rem; }
   .sk-spruch, .saal-kachel.gross .sk-spruch { font-size: .72rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .sk-stand { font-size: .66rem; }
