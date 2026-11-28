@@ -700,7 +700,7 @@
       "########################",
       "########################",
       "########################"] },
-    { n: "zisterne", bio: ["keller", "verlies"], pk: true, r: [
+    { n: "zisterne", bio: ["keller", "verlies"], pk: true, r: [ /* W43 Gezeiten: Beckenmauern (Spalte 4/19, 2 über dem Wasser) halten die Flut – vorher lief sie über die Gehwege */
       "########################",
       "#......................#",
       "#.........F............#",
@@ -710,10 +710,10 @@
       "#..........--..........#",
       "#......................#",
       "........................",
-      "........................",
-      "..E..................E..",
-      "####qqq#qqq#qqq#qqqq####",
-      "####qqq#qqq#qqq#qqqq####",
+      "....#..............#....",
+      "..E.#..............#.E..",
+      "#####qq#qqq#qqq#qqq#####",
+      "#####qq#qqq#qqq#qqq#####",
       "########################"] },
     { n: "zweigalerie", bio: ["hallen"], r: [
       "##########....##########",
@@ -910,7 +910,7 @@
       "######mmmmmmmmmmmm######",
       "######~~~~~~~~~~~~######",
       "########################"] },
-    { n: "stelzensteg", bio: ["hafen", "see"], r: [
+    { n: "stelzensteg", bio: ["hafen", "see"], r: [ /* W43 Gezeiten: Beckenrand (Spalte 4/19, 1 über dem Gehweg) hält 2 Reihen Flut */
       "########################",
       "#......................#",
       "#......................#",
@@ -921,9 +921,9 @@
       "#........---...........#",
       "........................",
       "........................",
-      "..E.................E...",
-      "####--.--.--.--.--.-####",
-      "####qqqqqqqqqqqqqqqq####",
+      "..E.#..............#E...",
+      "#####-.--.--.--.--.#####",
+      "#####qqqqqqqqqqqqqq#####",
       "########################"] },
     { n: "korallengrotte", bio: ["see", "schlund"], r: [
       "########################",
@@ -1085,10 +1085,10 @@
       "#..........--..........#",
       "#......................#",
       "........................",
-      "........................",
-      "..E..................E..",
-      "####qqq#qqq#qqq#qqqq####",
-      "####qqq#qqq#qqq#qqqq####",
+      "....#..............#....",
+      "..E.#..............#.E..",
+      "#####qq#qqq#qqq#qqq#####",
+      "#####qq#qqq#qqq#qqq#####",
       "########################"] },
     { n: "zweigalerie_u", bio: ["hallen"], r: [
       "##########....##########",
@@ -1176,9 +1176,9 @@
       "#........---...........#",
       "........................",
       "........................",
-      "..E.................E...",
-      "####--.--.--.--.--.-####",
-      "####qqqqqqqqqqqqqqqq####",
+      "..E.#..............#E...",
+      "#####-.--.--.--.--.#####",
+      "#####qqqqqqqqqqqqqq#####",
       "########################"] },
     { n: "korallengrotte_o", bio: ["see", "schlund"], r: [
       "##########....##########",
@@ -1668,7 +1668,7 @@
     let best = null, bs = 1e9;
     for (let attempt = 0; attempt < 40; attempt++) {
       const lv = tryGen(biomeId, (seed + attempt * 7919) >>> 0, opts);
-      if (lv && validate(lv)) { lv.attempts = attempt + 1; if (Z.run) { const u = (Z.run._tplUse = Z.run._tplUse || {}); for (const k in lv.cells) { const t = lv.cells[k].tpl; if (t) u[t] = (u[t] || 0) + 1; } } if (!Z.noEase) ease(lv); settle(lv); plan(lv); specials(lv); if (!Z.noRuneGates) runeGates(lv); cracks(lv); tides(lv); if (!Z.noFaehrAbsatz) faehrLeitern(lv); if (!Z.noAbkuerzung) abkuerzungen(lv); unwall(lv); assignRooms(lv); if (attempt < 30 && !Z.noEase && !comfyAusgaenge(lv)) continue; /* W13 R23: Ausgang nur per Maximalsprung → nächster Versuch */
+      if (lv && validate(lv)) { lv.attempts = attempt + 1; if (Z.run) { const u = (Z.run._tplUse = Z.run._tplUse || {}); for (const k in lv.cells) { const t = lv.cells[k].tpl; if (t) u[t] = (u[t] || 0) + 1; } } if (!Z.noEase) ease(lv); settle(lv); plan(lv); specials(lv); if (!Z.noRuneGates) runeGates(lv); cracks(lv); tides(lv); if (!Z.noFaehrAbsatz) faehrLeitern(lv); if (!Z.noAbkuerzung) abkuerzungen(lv); unwall(lv); tideRecheck(lv); /* W43 Gezeiten */ assignRooms(lv); if (attempt < 30 && !Z.noEase && !comfyAusgaenge(lv)) continue; /* W13 R23: Ausgang nur per Maximalsprung → nächster Versuch */
         if (attempt < 30 && !Z.noFaehrPruef && !faehrSicher(lv)) continue; /* W13 R25: Fährstrecke von unten nicht betretbar – sonst Grube ohne Ausweg → nächster Versuch */ return lv; }
       /* Notfall: die beste Karte merken (alle Ausgänge erreichbar, möglichst wenige Festsitz-Stellen) */
       const sc = lv && lv.stuck ? lv.stuck.length : 1e8;
@@ -2290,6 +2290,7 @@
         break;
       }
       if (kind === "flut") {
+        if ([a, b].some(c => /^(zisterne|stelzensteg)/.test(c.tpl || ""))) continue; /* W43 Gezeiten: die Beckenmauer würde sonst zur Kammerwand – Wasser stünde als Wand neben dem Becken */
         const bx = (a.x + 1) * CW, top = a.y * CH + 7, bot = a.y * CH + CH - 1, x0 = bx - 5, x1 = bx + 4;
         let ok = true; const wt = [];
         for (let x = x0; x <= x1 && ok; x++) {
@@ -2506,19 +2507,68 @@
      Grafik): erkundung.js zeichnet das Wasser darüber und setzt wer hineingerät sicher zurück. Der Prüfer kennt nur die Ebbe –
      die Flut ist reines Weg-Timing.
      lv.tides: [{cell, rows: [[x, y, stufe]], safe: [[x, y]]}] (stufe 1 = erste Reihe über dem Wasser, 2 = zweite). */
+  /* W43 Gezeiten: Flutbereich per Flutfüllung statt „alle Luft in 2 Reihen über dem Becken“. Das Wasser steigt auf Stufe L
+     (Oberfläche yw - L) und füllt nur Kacheln, die von der Wasserfläche aus seitlich/unten verbunden sind und unter dieser Höhe
+     liegen. Fände es dabei einen Weg ins Freie (aus der Beckenbreite xa..xb oder dem Raum hinaus, nach unten in Luft oder in
+     einen Abgrund), läuft es dort über – die höchste Stufe ohne Ausweg ist die Flut (0–2). Die Ausweg-Stellen der nächsten
+     Stufe sind die Überlaufkanten: Dort zeichnet effekte.js bei voller Flut ein Rinnsal über den Rand bis zum Boden darunter.
+     Rückgabe: {lmax, rows: [[x, y, stufe]], over: [{x0, x, y, dx, y1}], inlet: [x, y, dx] | null, drain: [x, y] | null}. */
+  const tideBlock = v => v === 1 || v === 7 || v === 12;
+  function tideFill(lv, c, ts) {
+    const W = lv.W, g = lv.get, yw = Math.min(...ts.map(t => t[1])), xa = Math.min(...ts.map(t => t[0])), xb = Math.max(...ts.map(t => t[0]));
+    const rx0 = c.x * CW, rx1 = rx0 + CW - 1, ry0 = c.y * CH;
+    const fill = L => {
+      const reg = new Map(), leaks = [], st = [];
+      for (const [x, y] of ts) if (y === yw && !tideBlock(g(x, y - 1)) && g(x, y - 1) !== 6) { const i = (y - 1) * W + x; if (!reg.has(i)) { reg.set(i, [x, y - 1]); st.push([x, y - 1]); } }
+      while (st.length) {
+        const [x, y] = st.pop();
+        for (const [dx, dy] of [[-1, 0], [1, 0], [0, 1], [0, -1]]) {
+          const nx = x + dx, ny = y + dy; if (ny < yw - L) continue;
+          const v = g(nx, ny); if (tideBlock(v)) continue;
+          if (ny >= yw) { if (v === 6) continue; leaks.push({ x: nx, y: ny, fx: x, dx: 0 }); continue; } /* nach unten in Luft: läuft aus */
+          if (nx < xa || nx > xb || nx < rx0 || nx > rx1 || ny < ry0 || v === 9) { leaks.push({ x: nx, y: ny, fx: x, dx }); continue; }
+          const i = ny * W + nx; if (reg.has(i) || v === 6) continue;
+          reg.set(i, [nx, ny]); st.push([nx, ny]);
+        }
+      }
+      return { reg, leaks };
+    };
+    let lmax = 0, rows = [], over = [];
+    for (let L = 1; L <= 3; L++) {
+      const f = fill(L);
+      if (f.leaks.length || L === 3) {
+        /* Überlaufkanten: seitliche Auswege dieser Stufe, höchstens eine je Seite */
+        for (const lk of f.leaks) {
+          if (!lk.dx || over.some(o => o.dx === lk.dx)) continue;
+          /* über die Mauerkrone (x0 …) bis zur ersten Spalte ohne Boden darunter, dort hinab bis zum nächsten Boden (y1) */
+          let fx = lk.x, k = 0; while (k < 4 && tideBlock(g(fx, lk.y + 1)) && !tideBlock(g(fx + lk.dx, lk.y))) { fx += lk.dx; k++; }
+          if (tideBlock(g(fx, lk.y + 1)) || tideBlock(g(fx, lk.y))) continue;
+          let y1 = lk.y; while (y1 < lv.H - 1 && !tideBlock(g(fx, y1 + 1)) && g(fx, y1 + 1) !== 6 && g(fx, y1 + 1) !== 2 && y1 - lk.y < 30) y1++;
+          over.push({ x0: lk.x, x: fx, y: lk.y, dx: lk.dx, y1 });
+        }
+        break;
+      }
+      lmax = L; rows = [...f.reg.values()].map(([x, y]) => [x, y, yw - y]);
+    }
+    if (!lmax) return { lmax: 0, rows: [], over: [], yw, xa, xb };
+    /* Zulauf (Rohr in der Beckenwand, knapp über der Ebbe-Linie) und Ablauf (Strudel) auf der anderen Seite */
+    const s1 = rows.filter(r => r[2] === 1), side = (dx) => { for (const [x, y] of dx > 0 ? s1.slice().sort((a, b) => a[0] - b[0]) : s1.slice().sort((a, b) => b[0] - a[0])) if (tideBlock(g(x - dx, y))) return [x - dx, y, dx]; return null; };
+    const inlet = side(1) || side(-1);
+    let drain = null; if (inlet) { const far = s1.slice().sort((a, b) => inlet[2] > 0 ? b[0] - a[0] : a[0] - b[0]).find(r => g(r[0], r[1] + 1) === 6); if (far) drain = [far[0] - inlet[2], far[1] + 1]; }
+    return { lmax, rows, over, inlet, drain, yw, xa, xb };
+  }
+  Z._tideFill = tideFill;
   function tides(lv) {
     lv.tides = [];
     const q = lv.qTiles || []; if (!q.length) return;
-    const W = lv.W, g = lv.get;
+    const W = lv.W;
     lv.flood = lv.flood || new Set(); for (const i of q) lv.flood.add(i);
     const byCell = new Map();
     for (const i of q) { const x = i % W, y = (i / W) | 0, k = Math.floor(x / CW) + "," + Math.floor(y / CH); if (!byCell.has(k)) byCell.set(k, []); byCell.get(k).push([x, y]); }
     for (const [k, ts] of byCell) {
       const c = lv.cells[k]; if (!c || !/^(zisterne|stelzensteg)/.test(c.tpl || "")) continue;
-      /* über die ganze Beckenbreite: 1–2 Reihen über der Wasseroberfläche (Stege/Steine ragen heraus, das Wasser steht drumherum) */
-      const yw = Math.min(...ts.map(t => t[1])), xa = Math.min(...ts.map(t => t[0])), xb = Math.max(...ts.map(t => t[0]));
-      const rows = [];
-      for (let s2 = 1; s2 <= 2; s2++) for (let x = xa; x <= xb; x++) if (g(x, yw - s2) === 0) rows.push([x, yw - s2, s2]);
+      /* W43 Gezeiten: nur so hoch, wie das Becken hält (Stege/Steine ragen heraus, das Wasser steht drumherum) */
+      const tf = tideFill(lv, c, ts), rows = tf.rows, { yw, xa, xb } = tf;
       if (!rows.length) continue;
       const tideSet = new Set(rows.map(([x, y]) => y * W + x));
       /* trockene Plätze im Raum (für das Zurücksetzen bei Flut): erreichbar, nicht unter/neben steigendem Wasser */
@@ -2528,9 +2578,24 @@
       const wet = (x, y) => tideSet.has(Math.floor(y) * W + Math.floor(x)) || tideSet.has((Math.floor(y) + 1) * W + Math.floor(x));
       lv.spawns = lv.spawns.filter(o => o.fly || !wet(o.x, o.y));
       let si = 0; for (const o of (lv.loot || []).concat(lv.rewards || [])) if (wet(o.x, o.y)) { const p2 = safe[si++ % safe.length]; o.x = p2[0]; o.y = p2[1]; }
-      if (lv.tides.length < 2) lv.tides.push({ cell: k, rows, safe, xa, xb, yw }); /* höchstens 2 je Karte (das Wasser ohne Gezeiten bleibt) */
+      /* W43 Gezeiten: Boden-Deko (Fass, Topf, Kohlebecken …) nicht in den Flutbereich stellen – sie stünde bei Flut im Wasser */
+      if (lv.tides.length < 2) { const floorWet = d => tideSet.has(d.y * W + d.x) && (tideBlock(lv.get(d.x, d.y + 1)) || lv.get(d.x, d.y + 1) === 2); if (lv.decor) lv.decor = lv.decor.filter(d => !floorWet(d)); if (lv.lights) lv.lights = lv.lights.filter(d => !floorWet(d)); }
+      if (lv.tides.length < 2) lv.tides.push({ cell: k, rows, safe, xa, xb, yw, lmax: tf.lmax, over: tf.over, inlet: tf.inlet, drain: tf.drain, ts }); /* höchstens 2 je Karte (das Wasser ohne Gezeiten bleibt) */
     }
   }
+  /* W43 Gezeiten: Nach den späteren Umbauten (Fähr-Absätze, Abkürzungsschächte) noch einmal füllen – hält das Becken
+     jetzt weniger, schrumpft die Flut mit (nie mehr Kacheln als vorher, die Gegner-/Beute-Verschiebung bleibt gültig). */
+  function tideRecheck(lv) {
+    if (!lv.tides || !lv.tides.length) return;
+    lv.tides = lv.tides.filter(td => {
+      const c = lv.cells[td.cell]; if (!c) return false;
+      const tf = tideFill(lv, c, td.ts), old = new Set(td.rows.map(r => r[1] * lv.W + r[0]));
+      if (tf.rows.length === td.rows.length && tf.rows.every(r => old.has(r[1] * lv.W + r[0]))) { td.over = tf.over; td.inlet = tf.inlet; td.drain = tf.drain; return true; }
+      if (!tf.lmax || tf.rows.some(r => !old.has(r[1] * lv.W + r[0]))) return false; /* neue Luft im Becken: lieber keine Gezeiten */
+      td.rows = tf.rows; td.lmax = tf.lmax; td.over = tf.over; td.inlet = tf.inlet; td.drain = tf.drain; return true;
+    });
+  }
+  Z._tideRecheck = tideRecheck;
   Z._tides = tides;
   /* W13 Runde 2: BEQUEME WEGE. Der Prüfer rechnet mit Maximalsprüngen (6 hoch, 7 weit); für echte Spieler (und Handheld)
      ist das grenzwertig. Jede Stelle, die nur mit einem solchen Sprung erreichbar ist, bekommt einen Zwischensteg

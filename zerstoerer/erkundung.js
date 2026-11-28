@@ -392,7 +392,7 @@
     for (const o of S.tides) {
       o.ph = (o.ph + dt) % 15;
       /* Wasserhöhe über der Ebbe-Linie in Pixeln: Ebbe 0–6 s, steigen 6–8 s, Flut 8–13 s, fallen 13–15 s */
-      const ph = o.ph, h = ph < 6 ? 0 : ph < 8 ? (ph - 6) / 2 * 2 * T : ph < 13 ? 2 * T : (15 - ph) / 2 * 2 * T;
+      const ph = o.ph, hm = (o.td.lmax || 2) * T, h = ph < 6 ? 0 : ph < 8 ? (ph - 6) / 2 * hm : ph < 13 ? hm : (15 - ph) / 2 * hm; /* W43 Gezeiten: nur so hoch, wie das Becken hält */
       o.h = h;
       const td = o.td, [cx, cy] = td.cell.split(",").map(Number), near = Math.abs(cx * CW * T + CW * T / 2 - P.x) < 700 && Math.abs(cy * CH * T + CH * T / 2 - P.y) < 400;
       if (!near) continue;

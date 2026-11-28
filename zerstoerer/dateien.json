@@ -9738,7 +9738,7 @@
 },
 "zerstoerer.html":{
 "groesse":82519,
-"sha256":"e3b07e1cddaf6c82e7aa1b1f8f6b1dd27258d0d03e6be9326cdc140a1c4c4bb0"
+"sha256":"d553aad9e2c9639c7854236af2d9bc2224942f6287b7a93b30040ae8a9ba1d5a"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":145807,
@@ -9809,16 +9809,16 @@
 "sha256":"93f2ecf5c7d0060be616885330fad80124e591fac6338a976c20d825f29d1da0"
 },
 "zerstoerer/effekte.js":{
-"groesse":214120,
-"sha256":"aa8f7ec69d4c5ab5fbf3cf11d9dbe4213158ec8064c97026699045a771763b26"
+"groesse":220730,
+"sha256":"5ad53f0cc2b399d7bbadf8620a7993327a79707f2a0ec9c3a827be6b47679aa9"
 },
 "zerstoerer/einstieg.js":{
 "groesse":13765,
 "sha256":"3643198d0813294928757bc1293f2bd09f2f9f0aad9df3b0a172b4be7a8e73fa"
 },
 "zerstoerer/erkundung.js":{
-"groesse":66404,
-"sha256":"74bad95096cb122d89c1e4f02a2158bce1a7d645059f1ef380c05e400eece050"
+"groesse":66476,
+"sha256":"320aae5f5b858479582d82daec61edc943877573b14f369fb0d277ebfc1cfd81"
 },
 "zerstoerer/fallen.js":{
 "groesse":141074,
@@ -10033,8 +10033,8 @@
 "sha256":"aae3519343edaa87b98e957abffdb531aa630e06dc2755a2f1e39d84588f0611"
 },
 "zerstoerer/welt.js":{
-"groesse":240356,
-"sha256":"fc0bfea28d5a497a0235f28024a479040a900dd9cebce3518ea74d6ebb346af8"
+"groesse":245824,
+"sha256":"9f545cd73131c5ccc4c69c12b0504846a3cc9f792d0af403a779ada44b07876c"
 },
 "zerstoerer/weltkarte.js":{
 "groesse":42121,
@@ -10065,5 +10065,5 @@
 "sha256":"1437181731d4ecd8f93e72f72ee85ac181a09073b5a665fe44870f9a652104c0"
 }
 },
-"stand":194
+"stand":195
 }

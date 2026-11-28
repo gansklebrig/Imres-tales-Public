@@ -1249,6 +1249,74 @@
     }
     c.restore();
   }
+  /* W43 Gezeiten: Das Wasser läuft. Zulauf: Bronzerohr mit Gitter in der Beckenwand knapp über der Ebbe-Linie – es gurgelt,
+     dann schießt beim Steigen ein Strahl heraus (unter Wasser: aufwallender Quellring), bei Flut speist es schwächer weiter.
+     Überlauf: bei voller Flut läuft das Becken an der tiefsten Kante über (welt.js td.over) – dünner Film über die
+     Mauerkrone, Rinnsal an der Außenseite hinab, Spritzer und nasser Fleck auf dem Boden darunter. Ablauf: beim Fallen
+     dreht sich am anderen Ende ein Strudel. Stärken aus der Phase (erkundung.js: Ebbe 0–6 s, steigen 6–8, Flut 8–13, fallen 13–15). */
+  function tideFlow(c, o, t, lv) {
+    const td = o.td, ph = o.ph || 0, h = o.h || 0, hm = (td.lmax || 2) * T, top = td.yw * T - h, lo = lean();
+    const cl = v => v < 0 ? 0 : v > 1 ? 1 : v;
+    const fIn = ph < 4.5 ? 0 : ph < 6 ? (ph - 4.5) / 1.5 * 0.55 : ph < 8 ? 1 : ph < 13 ? 0.3 : 0;
+    const fOv = ph >= 7.6 && ph < 13.25 ? cl((h - (hm - 3)) / 3) * (ph < 8.4 ? cl((ph - 7.6) / 0.8) : 1) : 0;
+    const fDr = ph >= 13 ? cl((ph - 13) / 0.4) : ph < 1 ? 1 - ph : 0;
+    o.wet = Math.max((o.wet || 0) - 0.004, fOv); /* nasser Fleck unter dem Überlauf trocknet langsam */
+    const rnd = Math.random;
+    if (td.inlet) {
+      const [ix, iy, dx] = td.inlet, mx = dx > 0 ? (ix + 1) * T : ix * T, my = iy * T + 9, ex = mx + dx * 5;
+      /* Rohr: Stutzen, Ring, Grünspan, Gitter */
+      c.fillStyle = "#3e3222"; c.fillRect(Math.min(mx, ex), my - 4.5, 5, 9);
+      c.fillStyle = "#8a6a3c"; c.fillRect(Math.min(mx, ex), my - 4.5, 5, 1.4); c.fillRect(ex - (dx > 0 ? 1.6 : 0), my - 5, 1.6, 10);
+      c.fillStyle = "rgba(96,140,104,.7)"; c.fillRect(Math.min(mx, ex) + 1, my + 2.5, 2, 1.2);
+      c.fillStyle = "#140e0a"; c.beginPath(); c.ellipse(ex, my, 1.4, 3.6, 0, 0, TAU); c.fill();
+      c.strokeStyle = "#6a5a3c"; c.lineWidth = 0.7; c.beginPath(); c.moveTo(ex, my - 3.4); c.lineTo(ex, my + 3.4); c.moveTo(ex - 1, my - 1.2); c.lineTo(ex + 1, my - 1.2); c.moveTo(ex - 1, my + 1.2); c.lineTo(ex + 1, my + 1.2); c.stroke();
+      if (fIn > 0.02) {
+        if (top < my - 2) {
+          /* Mündung unter Wasser: Quellring an der Oberfläche */
+          const rr = 3 + ((t * 1.8) % 1) * 7 * fIn; c.strokeStyle = "rgba(215,240,222," + (0.5 * fIn * (1 - ((t * 1.8) % 1))).toFixed(2) + ")"; c.lineWidth = 1;
+          c.beginPath(); c.ellipse(ex + dx * 7, top + 0.5, rr, rr * 0.25, 0, 0, TAU); c.stroke();
+          if (!lo && rnd() < 0.25 * fIn) Z.fx.p({ x: ex + dx * (2 + rnd() * 6), y: my, vx: dx * 10, vy: -40, life: 0.5, size: 1.3, col: "#c8e8d4", kind: "bubble" });
+        } else {
+          /* Strahl im Bogen bis zur Oberfläche */
+          const v0 = 22 + 40 * fIn, gg = 260, fall = Math.max(2, top - my), tt = Math.sqrt(2 * fall / gg), w = 1 + 2.4 * fIn;
+          c.strokeStyle = "rgba(120,180,150," + (0.45 + 0.35 * fIn).toFixed(2) + ")"; c.lineWidth = w; c.lineCap = "round"; c.beginPath();
+          for (let k = 0; k <= 8; k++) { const u = tt * k / 8, xx = ex + dx * v0 * u, yy = my + 0.5 * gg * u * u + Math.sin(t * 20 + k) * 0.3; k ? c.lineTo(xx, yy) : c.moveTo(xx, yy); } c.stroke();
+          c.strokeStyle = "rgba(220,242,228," + (0.35 + 0.3 * fIn).toFixed(2) + ")"; c.lineWidth = Math.max(0.6, w * 0.35); c.beginPath();
+          for (let k = 0; k <= 8; k++) { const u = tt * k / 8, xx = ex + dx * v0 * u, yy = my - w * 0.2 + 0.5 * gg * u * u; k ? c.lineTo(xx, yy) : c.moveTo(xx, yy); } c.stroke(); c.lineCap = "butt";
+          const hx = ex + dx * v0 * tt;
+          if (!lo && rnd() < 0.5 * fIn) Z.fx.p({ x: hx + (rnd() - 0.5) * 4, y: top, vx: (rnd() - 0.5) * 50, vy: -50 - rnd() * 50, g: 380, life: 0.4, size: 1.3, col: rnd() < 0.5 ? "#d8f0e0" : "#8ac0a8", kind: "dot" });
+          c.fillStyle = "rgba(225,244,230," + (0.4 * fIn).toFixed(2) + ")"; c.beginPath(); c.ellipse(hx, top + 0.5, 3 + 3 * fIn, 1.1, 0, 0, TAU); c.fill();
+        }
+      } else if (!lo && ph < 4.5 && rnd() < 0.012) Z.fx.p({ x: ex + dx, y: my + 2, vx: 0, vy: 10, g: 300, life: 0.5, size: 1.2, col: "#a8d0b8", kind: "drop" }); /* Tropfen bei Ebbe */
+    }
+    /* Strudel über dem Ablauf beim Fallen */
+    if (td.drain && fDr > 0.02 && h > 0.5) {
+      const dxp = td.drain[0] * T + 8, dyp = top + 0.6, sp = t * 7;
+      c.strokeStyle = "rgba(210,236,214," + (0.6 * fDr).toFixed(2) + ")"; c.lineWidth = 1;
+      for (let k = 0; k < 3; k++) { const r0 = (2 + k * 2.6) * (0.5 + 0.5 * fDr); c.beginPath(); c.ellipse(dxp, dyp + k * 0.3, r0, r0 * 0.28, 0, sp + k * 2.1, sp + k * 2.1 + 3.6); c.stroke(); }
+      c.fillStyle = "rgba(14,30,24," + (0.55 * fDr).toFixed(2) + ")"; c.beginPath(); c.ellipse(dxp, dyp + 0.6, 1.8, 0.7, 0, 0, TAU); c.fill();
+    }
+    /* Überlauf an den Kanten */
+    for (const ov of td.over || []) {
+      const dx = ov.dx, ry = (ov.y + 1) * T, xs = dx > 0 ? ov.x0 * T : (ov.x0 + 1) * T, xf = dx > 0 ? ov.x * T : (ov.x + 1) * T, yb = (ov.y1 + 1) * T;
+      if (o.wet > 0.02) { c.fillStyle = "rgba(20,40,32," + (0.35 * o.wet).toFixed(2) + ")"; c.beginPath(); c.ellipse(xf + dx * 4, yb - 0.5, 9, 1.6, 0, 0, TAU); c.fill(); }
+      if (fOv < 0.02) continue;
+      const a = (0.5 + 0.3 * fOv).toFixed(2), w = 1 + 2.6 * fOv;
+      /* Film über der Mauerkrone */
+      c.fillStyle = "rgba(120,180,150," + a + ")"; c.fillRect(Math.min(xs, xf), ry - 1.2 - fOv, Math.abs(xf - xs), 1.2 + fOv);
+      c.fillStyle = "rgba(220,242,228," + (0.5 * fOv).toFixed(2) + ")"; c.fillRect(Math.min(xs, xf), ry - 1.4 - fOv, Math.abs(xf - xs), 0.7);
+      /* Rinnsal an der Außenseite hinab (leichter Bogen von der Kante weg, dann senkrecht) */
+      c.strokeStyle = "rgba(120,180,150," + a + ")"; c.lineWidth = w; c.beginPath(); c.moveTo(xf - dx, ry - 1);
+      c.quadraticCurveTo(xf + dx * (1.5 + 2 * fOv), ry + 2, xf + dx * (1.5 + 2 * fOv), Math.min(yb, ry + 8));
+      for (let y = ry + 10; y < yb; y += 4) c.lineTo(xf + dx * (1.5 + 2 * fOv) + Math.sin(t * 14 + y * 0.5) * 0.5, y); c.lineTo(xf + dx * (1.5 + 2 * fOv), yb); c.stroke();
+      c.strokeStyle = "rgba(225,244,230," + (0.45 * fOv).toFixed(2) + ")"; c.lineWidth = 0.7; c.beginPath();
+      for (let y = ry + 2 + ((t * 60) % 6); y < yb - 1; y += 6) { c.moveTo(xf + dx * (1.5 + 2 * fOv), y); c.lineTo(xf + dx * (1.5 + 2 * fOv), y + 2.5); } c.stroke();
+      /* Aufprall: Schaum und Spritzer */
+      const bx = xf + dx * (1.5 + 2 * fOv);
+      c.fillStyle = "rgba(225,244,230," + (0.5 * fOv).toFixed(2) + ")"; c.beginPath(); c.ellipse(bx, yb - 0.6, 2.5 + 2.5 * fOv, 1.2, 0, 0, TAU); c.fill();
+      if (!lo && rnd() < 0.45 * fOv) Z.fx.p({ x: bx + (rnd() - 0.5) * 3, y: yb - 1, vx: (rnd() - 0.5) * 60, vy: -30 - rnd() * 50, g: 420, life: 0.35, size: 1.2, col: rnd() < 0.5 ? "#d8f0e0" : "#8ac0a8", kind: "dot" });
+    }
+  }
   function tides(c, o, t) {
     const lv = Z.level, cols = new Map(); let maxRow = 1e9;
     for (const [x, y, s2] of o.td.rows) { if (s2 === 2) maxRow = Math.min(maxRow, y); if (lv.get(x, y) === 6) { const v = cols.get(x); if (v == null || y < v) cols.set(x, y); } }
@@ -1257,19 +1325,19 @@
     /* R25: steigende Flut ohne kantige Spaltenstufen. erkundung.js füllt nur Luftkacheln; Leiter-/Stegspalten
        blieben trocken und der Spiegel zerfiel in Stücke. Hier (nur Bild) dieselbe Wasserfarbe in diesen Spalten und
        ein durchgehender, über die Spalten interpolierter Wasserspiegel; nur massive Kacheln unterbrechen ihn. */
+    /* W43 Gezeiten: Wasser nur in den gefluteten Kacheln (welt.js tideFill: verbunden mit dem Becken, unter der Überlaufkante) –
+       vorher über die ganze Beckenbreite, auch dort, wo seitlich nichts das Wasser hielt. Zweite, deckendere Schicht mit
+       Tiefenverlauf (R26) und durchgehender Spiegel je zusammenhängendem Stück (R25) bleiben. */
     { const h = o.h || 0, td = o.td;
       if (h >= 0.5) {
-        const top = td.yw * T - h, solid = v => v === 1 || v === 7 || v === 12, inRows = new Set(td.rows.map(r => r[0] + "," + r[1]));
-        c.fillStyle = "rgba(48,96,82,.62)";
-        for (let x = td.xa; x <= td.xb; x++) for (let s2 = 1; s2 <= 2; s2++) { const y = td.yw - s2; if (inRows.has(x + "," + y) || solid(lv.get(x, y))) continue; const y0 = Math.max(y * T, top), y1 = (y + 1) * T; if (y1 > y0) c.fillRect(x * T, y0, T, y1 - y0); }
-        /* R26: zweite, deckendere Wasserschicht mit Tiefenverlauf über allen gefluteten Kacheln – so scheinen helle
-           Himmels- und dunkle Mauerspalten kaum noch unterschiedlich durch (vorher 62 % Deckung, jetzt rund 80 %) */
+        const top = td.yw * T - h, inRows = new Set(td.rows.map(r => r[0] + "," + r[1]));
         { const dg = c.createLinearGradient(0, top, 0, td.yw * T); dg.addColorStop(0, "rgba(44,92,76,.34)"); dg.addColorStop(1, "rgba(22,52,44,.5)"); c.fillStyle = dg;
-          for (let x = td.xa; x <= td.xb; x++) for (let s2 = 1; s2 <= 2; s2++) { const y = td.yw - s2; if (!inRows.has(x + "," + y) && solid(lv.get(x, y))) continue; const y0 = Math.max(y * T, top), y1 = (y + 1) * T; if (y1 > y0) c.fillRect(x * T, y0, T, y1 - y0); } }
+          for (const [x, y] of td.rows) { const y0 = Math.max(y * T, top), y1 = (y + 1) * T; if (y1 > y0) c.fillRect(x * T, y0, T, y1 - y0); } }
+        /* Naht zur Ebbe-Linie schließen: das Vorlagen-Wasser zeichnet seinen Spiegel einige Pixel unter der Kachelkante */
+        c.fillStyle = "rgba(30,66,54," + Math.min(0.85, h / 5).toFixed(2) + ")"; for (const [x, y, s2] of td.rows) if (s2 === 1 && lv.get(x, y + 1) === 6) c.fillRect(x * T, (y + 1) * T, T, 7);
         const ty = Math.floor((top + 1) / T), wy = x => top + Math.sin(x * 0.11 + t * 2.4) * 0.9 + Math.sin(x * 0.037 - t * 1.3) * 0.6;
-        /* Spiegelband (heller Saum unter der Linie) und Linie als ein Pfad je zusammenhängendem Stück */
         let run = null; const segs = [];
-        for (let x = td.xa; x <= td.xb + 1; x++) { const ok = x <= td.xb && !solid(lv.get(x, ty)); if (ok && !run) run = [x, x]; else if (ok) run[1] = x; else if (run) { segs.push(run); run = null; } }
+        for (let x = td.xa; x <= td.xb + 1; x++) { const ok = x <= td.xb && inRows.has(x + "," + ty); if (ok && !run) run = [x, x]; else if (ok) run[1] = x; else if (run) { segs.push(run); run = null; } }
         for (const [a0, a1] of segs) {
           const x0 = a0 * T, x1 = (a1 + 1) * T;
           const gr = c.createLinearGradient(0, top - 1, 0, top + 7); gr.addColorStop(0, "rgba(150,205,175,.28)"); gr.addColorStop(1, "rgba(150,205,175,0)");
@@ -1277,6 +1345,7 @@
           c.strokeStyle = "rgba(210,236,214,.75)"; c.lineWidth = 1.2; c.beginPath(); c.moveTo(x0, wy(x0)); for (let x = x0 + 3; x < x1; x += 3) c.lineTo(x, wy(x)); c.lineTo(x1, wy(x1)); c.stroke();
         }
       }
+      tideFlow(c, o, t, lv);
     }
     /* Schaumlinie */
     c.strokeStyle = "rgba(220,236,220,.7)"; c.lineWidth = 1;
