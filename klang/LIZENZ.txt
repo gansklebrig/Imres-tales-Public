@@ -1423,3 +1423,40 @@ CC BY 3.0/4.0 https://creativecommons.org/licenses/by/4.0/ · CC BY-SA 3.0/4.0 h
   n_ziege_5: stephan – gemeinfrei (PDsounds.org) – „Herd of goats bleating.ogg“ – https://commons.wikimedia.org/wiki/File:Herd_of_goats_bleating.ogg
   n_ziege_6: stephan – gemeinfrei (PDsounds.org) – „Herd of goats bleating.ogg“ – https://commons.wikimedia.org/wiki/File:Herd_of_goats_bleating.ogg
   n_zischen_5: natalie – gemeinfrei (PDsounds.org) – „Water vaporizing on hot stones.ogg“ – https://commons.wikimedia.org/wiki/File:Water_vaporizing_on_hot_stones.ogg
+
+Raumklänge der Spielorte von Tales never End (amb/o_*.mp3, November 2026) – Aufnahmen von Wikimedia Commons,
+für Imres Tales ausgeschnitten, gefiltert, in Mono umgewandelt, im Pegel angeglichen und als MP3 neu kodiert:
+  o_kuehlschrank: Work With Sounds / Werstas – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:WWS_Floralrefrigerator.ogg – CC BY 4.0
+  o_raum: stephan – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Inside_of_refrigerator.ogg – Public domain
+  o_wasserkocher_1, o_heizung: thore – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Electric_kettle_and_a_gastherme.ogg – Public domain
+  o_wasserkocher_2: Destemona05 – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Wasserkocher_Aufnahme.ogg – CC BY-SA 4.0
+  o_aufgiessen: cori – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Boiling_water_being_poured_into_a_mug_for_tea.ogg – Public domain
+  o_zug: TheFrog001 – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Northern_Trains_323239_DMSO_A,_on_the_Crewe_to_Manchester_line,_Jan_2022.ogg – CC0
+  o_zugdurchsage: Robot8A & MVG driver – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:N%C3%A4chster_halt_Hauptbahnhof.ogg – Public domain
+  o_tram: DrTrumpet – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:2023-Mai-20_14h_Wien_innerer_Lerchenfelder_G%C3%BCrtel_Thaliagasse_rumpeln_der_Stra%C3%9Fenbahn_46.wav – CC BY-SA 4.0
+  o_strasse: cori – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Sunday_in_the_city_street_noise1.ogg – Public domain
+  o_klingel: unbekannt – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Doorbell-classic-dingdong.ogg – Public domain
+  o_ladenklingel: Manfred Heyde . – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Ladenklingel.ogg – CC BY-SA 3.0
+  o_waschmaschine: ezwa – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Washing_machine_mid_program.ogg – Public domain
+  o_messe: Work With Sounds / Werstas – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:WWS_TheStationHallOfTheTampereStation.ogg – CC BY 4.0
+  o_kneipe: stephan – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Restaurant_ambience.ogg – Public domain
+  o_durchsage: Jcornelius – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:De-U-Bahnhof_Ohlsdorf_Ansage.oga – CC BY-SA 2.0 de
+  o_flasche_1: Mathieu Kappler – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Bottle_cap_falling_to_parquet_floor.ogg – CC BY-SA 4.0
+  o_flasche_2: Work With Sounds / Technical Museum of Slovenia – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:WWS_Sparklingwineopeningpouringandmakingatoast.ogg – CC BY 4.0
+  o_festival, o_jubelfern: stephan – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Festival_concert_people_crowd.ogg – Public domain
+  o_lachen_1: Ch0cchi – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Small_group_laughter.ogg – CC BY 3.0
+  o_lachen_2, o_lachen_3: lonemonk on freesound.org – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:72843_lonemonk_approx-800-laughter-only-1.wav – CC BY 3.0
+  o_bleistift: gypsygirl – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Pencil_scratchings.ogg – Public domain
+  o_seite: planish – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Turning_a_page.ogg – Public domain
+  o_besteck_1: thore – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Cutlery_on_table.ogg – Public domain
+  o_besteck_2, o_besteck_3: Gravity Sound – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Rustling_cutlery_4_(Gravity_Sound).wav – CC BY 4.0
+  o_stuhl: chocoholic – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Creaky_wooden_swivel_chair.ogg – Public domain
+  o_muecke: Yesthatbruce – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Mosquito_attack.ogg – CC0
+  o_kaffee: hugh – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Espresso_machine.ogg – Public domain
+  o_mikrowelle: stephan – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Microwave_oven.ogg – Public domain
+  o_kellertuer: PantheraLeo1359531 – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Ger%C3%A4usch_einer_T%C3%BCr%C3%B6ffnung_eines_Folterkellers_im_Rathaus_20250307_C1193.wav – CC BY 4.0
+  o_schnurren: Parrot of Doom – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Cat_in_front_of_open_fire_purring.ogg – CC BY-SA 3.0
+  o_fensterregen: cori – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Rain_against_the_window.ogg – Public domain
+  o_verandaregen: ezwa – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Rain_on_a_veranda_and_t.ogg – Public domain
+  o_windspiel: stephan – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Windchime.ogg – Public domain
+  o_pfeifkessel: Luisalvaz – Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Tea_kettle_whistle.ogg – CC BY-SA 4.0

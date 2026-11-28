@@ -376,7 +376,7 @@
     const r = rng(seed);
     const zeit = zeitWunsch || (r() < .58 ? "tag" : r() < .55 ? "abend" : "nacht");
     const id = neueId("s");
-    const f = SZENEN[szene] || SZENEN.wald;
+    const f = SZENEN[szene] || (window.TNE_ORTSBILD && window.TNE_ORTSBILD.SZENEN[szene]) || SZENEN.wald;
     return `<svg viewBox="0 0 400 130" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${f(r, zeit, id)}<rect width="400" height="130" fill="url(#${id}v)"/><defs><radialGradient id="${id}v" cx=".5" cy=".45" r=".75"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#2b1d12" stop-opacity=".45"/></radialGradient></defs></svg>`;
   }
 
@@ -450,13 +450,16 @@
     const W = Math.max(320, Math.round(z.W)), H = Math.max(240, Math.round(z.H));
     const r = rng(z.seed), id = neueId("t");
     let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true"><defs><radialGradient id="glut"><stop offset="0" stop-color="#ffd27a" stop-opacity=".55"/><stop offset="1" stop-color="#ff7a3a" stop-opacity="0"/></radialGradient><radialGradient id="glut2"><stop offset="0" stop-color="#ffd27a" stop-opacity=".35"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient><radialGradient id="bossglut"><stop offset="0" stop-color="#e0442a" stop-opacity=".5"/><stop offset="1" stop-color="#e0442a" stop-opacity="0"/></radialGradient></defs>`;
-    s += holz(W, H, r, id);
+    const OB = window.TNE_ORTSBILD, ortT = z.ort && OB ? OB.tischOrt(W, H, r, id, z.ort, z.zustand) : null;
+    s += (ortT && ortT.flaeche) || holz(W, H, r, id);
     // Ablageflächen: links/rechts der Karte, oben/unten
     const k = z.karte; const links = Math.max(40, k.x), rechts = Math.max(40, W - k.x - k.w);
     const sc = Math.max(.42, Math.min(1, Math.min(links, rechts) / 230 + .25));
     const L = (fx, fy) => [Math.max(10, k.x - links * fx), H * fy];
     const R = (fx, fy) => [Math.min(W - 10, k.x + k.w + rechts * fx), H * fy];
     const B = z.balken, plaetze = [];
+    // Kleinkram des Spielorts liegt ganz unten (Teekanne, Bierdeckel, Fahrkarte …)
+    if (ortT) { const pos = [L(.16, .07), R(.86, .07), L(.86, .44), R(.14, .68), L(.6, .95), R(.6, .97)]; ortT.deko.forEach((art, i) => { if (OB.DEKO[art] && pos[i]) plaetze.push(["_" + art, pos[i][0], pos[i][1], .85, (r() - .5) * 40, {}]); }); }
     // Kerze
     plaetze.push(["kerze", ...L(.55, .18), 1.1, 0, { rest: 1 - z.fortschritt }]);
     // Charakterbögen der Spieler neben der Karte
@@ -494,8 +497,11 @@
     for (let i = 0; i < 7; i++) plaetze.push(["wuerfel", ...(i % 2 ? L(.2 + r() * .6, .25 + r() * .6) : R(.2 + r() * .6, .2 + r() * .6)), 1, r() * 360, { farbe: i % 3 ? set.farbe : ["#a83a32", "#5f7a3a", "#c58a2c"][i % 3], rand: i % 3 ? set.rand : "#2b1d12", zahl: 1 + Math.floor(r() * 20) }]);
     // Spielleiterschirm hinter der Karte (oben sichtbar)
     plaetze.push(["schirm", k.x + k.w / 2, Math.max(30, k.y - 18), Math.min(1, k.w / 380), 0, { boss: z.boss }]);
-    for (const [art, x, y, sk, rot, p] of plaetze) s += `<g class="tding" style="--d:${f1(r() * .4)}s">` + G(x, y, sk * sc, rot, DING[art](p)) + "</g>";
-    s += `<rect width="${W}" height="${H}" fill="url(#${id}k)"/><rect width="${W}" height="${H}" fill="url(#${id}v)"/>`;
+    for (const [art, x, y, sk, rot, p] of plaetze) s += `<g class="tding" style="--d:${f1(r() * .4)}s">` + G(x, y, sk * sc, rot, art[0] === "_" ? OB.DEKO[art.slice(1)](p) : DING[art](p)) + "</g>";
+    if (ortT) {
+      s += OB.lichtSchicht(W, H, id, ortT.licht, z.zustand, ortT.dunkel) + OB.wetterSchicht(W, H, id, z.zustand, z.ort) + (ortT.laub && z.zustand && z.zustand.wetter !== "schnee" ? OB.laubSchicht(W, H, z.zustand) : "");
+      s += `<defs><radialGradient id="${id}v2" cx=".5" cy=".5" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="${z.zustand && z.zustand.zeit === "nacht" ? .7 : .55}"/></radialGradient></defs><rect width="${W}" height="${H}" fill="url(#${id}v2)"/>`;
+    } else s += `<rect width="${W}" height="${H}" fill="url(#${id}k)"/><rect width="${W}" height="${H}" fill="url(#${id}v)"/>`;
     if (z.boss) s += `<rect width="${W}" height="${H}" fill="#a8302a" opacity=".12"/>`;
     return s + "</svg>";
   }

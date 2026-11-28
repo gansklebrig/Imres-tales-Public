@@ -160,7 +160,12 @@
     { k: "katze", ic: "🐈", name: "Würfelfresser", text: "Die Tischkatze hat einen Würfel verschluckt." },
     { k: "geist", ic: "👻", name: "Der Geist am Tisch", text: "Ein toter Held spukt weiter." },
     { k: "frieden", ic: "🕊️", name: "Pazifisten", text: "Die Gruppe löst den Endkampf ohne Gewalt." },
-    { k: "nachfahre", ic: "🌳", name: "Erbe", text: "Ein Spieler spielt den Nachfahren einer Legende." }
+    { k: "nachfahre", ic: "🌳", name: "Erbe", text: "Ein Spieler spielt den Nachfahren einer Legende." },
+    { k: "umzug1", ic: "📦", name: "Umzugshelfer", text: "Die Runde zieht an einen neuen Spielort." },
+    { k: "orte5", ic: "🗺️", name: "Weltenbummler", text: "Spielt an fünf verschiedenen Orten." },
+    { k: "ausflug3", ic: "🎒", name: "Auf Achse", text: "Macht drei verschiedene Ausflüge mit der Runde." },
+    { k: "nebenstory", ic: "📖", name: "Mehr als ein Spieltisch", text: "Erlebe eine Nebengeschichte an einem Spielort bis zum Ende." },
+    { k: "nebenstory5", ic: "🏘️", name: "Die Nachbarschaft", text: "Erlebe fünf Nebengeschichten bis zum Ende." }
   ];
 
   /* =====================================================================
@@ -231,7 +236,7 @@
       k.brauchtSp = /\{(name|held|klasse|volk|eigen|stufe|altheld|altkampagne|tode|nat1|nat20|kampagnen|krise|[Ee]r|[Ss]ein\w*|[Ii]hn|[Ii]hm|h_\w+)\}/.test([k.text, ...k.opt.flatMap(o => [o.label, o.folge])].join(" "));
       const SCHWER_OPS = /^(tod2?|tpk|geht|pause=\d+|krise=\w+|bez=(ex|weg|spannung)|sieg|frieden|ende)$/;
       k.schwer = k.schwer || !!k.eile || k.opt.some(o => { const ops = o.w.ok.concat(o.w.nein || []); return ops.some(x => SCHWER_OPS.test(x)) || ops.reduce((a, x) => { const m = x.match(/^[mlst]([+-]\d+)$/); return a + (m ? Math.abs(+m[1]) : 0); }, 0) >= 24; });
-      k.folgekarte = k.wenn.some(b => /^[a-z][a-z_]*$/.test(b) && !["legende", "gefallen", "ruhig"].includes(b));
+      k.folgekarte = k.wenn.some(b => /^[a-z][a-z_]*$/.test(b) && !["legende", "gefallen", "ruhig", "nsfrei", "nacht", "tag", "wirt"].includes(b));
       if (!k.id) k.id = quelle + "_" + KARTEN.length;
       if (KARTE[k.id]) { console.warn("Doppelte Karten-ID:", k.id); k.id += "_" + KARTEN.length; }
       KARTEN.push(k); KARTE[k.id] = k;
@@ -244,7 +249,7 @@
      SPEICHER
      ===================================================================== */
   const metaNeu = () => ({ v: 1, xp: 0, stufe: 1, erfolge: {}, gesehen: {}, enden: {}, stats: { karten: 0, sessions: 0, kampagnen: 0, helden: 0, tode: 0, wuerfe: 0, nat20: 0, nat1: 0, pizza: 0, spieler: 0, runden: 0, legenden: 0, besteKarten: 0, zoneFolge: 0, bosse: 0, ziele: 0, bez: 0, krisen: 0, selten: 0 },
-    welt: { jahr: 1, chronik: [], legenden: [], gefallene: [], schurken: [] }, tages: {}, wuerfel: { pergament: 1 }, wuerfelAktiv: "pergament", selten: {}, einst: { atmo: 0.55, fx: 0.8, vib: false, auto: false, ruhig: false } });
+    welt: { jahr: 1, chronik: [], legenden: [], gefallene: [], schurken: [] }, tages: {}, wuerfel: { pergament: 1 }, wuerfelAktiv: "pergament", selten: {}, einst: { atmo: 0.6, box: 0.6, fx: 0.8, vib: false, auto: false, ruhig: false } });
   let META = lade("tne-meta", null) || metaNeu();
   META.einst = Object.assign(metaNeu().einst, META.einst || {});
   META.stats = Object.assign(metaNeu().stats, META.stats || {});
@@ -259,64 +264,209 @@
      TON – echte Aufnahmen aus amb/
      ===================================================================== */
   const Ton = (() => {
-    let ctx = null, fxGain = null, atmoGain = null, aktiv = null, puffer = {};
+    /* Drei Wege:
+       · raum – der echte Ort, an dem die Runde sitzt (Grundteppich + zufällige Geräusche), Regler „Raumklang“
+       · box  – die kleine Bluetooth-Box des Spielleiters mit Fantasy-Klängen zur Szene (gefiltert,
+                leiser, verklingt nach einer Weile wieder), Regler „Spielleiter-Box“
+       · fx   – Effekte zu Entscheidungen, Würfeln, Katze … */
+    let ctx = null, fxGain = null, raumGain = null, boxGain = null, boxEin = null, puffer = {};
     const V = window.TNE_VARIANTEN || {}, A = new Set(window.TNE_ATMO || []);
+    const raum = { def: null, z: null, schichten: {}, uhr: null, letzt: [] };
+    const box = { name: null, q: null, g: null, aus: null };
     function start() {
       if (ctx) { if (ctx.state === "suspended") ctx.resume(); return; }
       const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
-      ctx = new AC(); fxGain = ctx.createGain(); atmoGain = ctx.createGain();
-      fxGain.connect(ctx.destination); atmoGain.connect(ctx.destination); lautstaerke();
+      ctx = new AC(); fxGain = ctx.createGain(); raumGain = ctx.createGain(); boxGain = ctx.createGain();
+      // Box: kleiner Lautsprecher – kaum Bass, keine Höhen, etwas Mitten, leicht komprimiert
+      const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 230; hp.Q.value = .8;
+      const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 4600; lp.Q.value = .7;
+      const mitte = ctx.createBiquadFilter(); mitte.type = "peaking"; mitte.frequency.value = 1400; mitte.gain.value = 3; mitte.Q.value = .9;
+      const komp = ctx.createDynamicsCompressor(); komp.threshold.value = -26; komp.ratio.value = 3;
+      boxEin = hp; hp.connect(mitte); mitte.connect(lp); lp.connect(komp); komp.connect(boxGain);
+      fxGain.connect(ctx.destination); raumGain.connect(ctx.destination); boxGain.connect(ctx.destination); lautstaerke();
+      if (raum.def) { const d = raum.def, z = raum.z; raum.def = null; ort(d, z); }
     }
     /* Ton-Schalter (tonregler.js): Atmosphäre („Musik“) und Effekte schnell stumm, Regler bleiben wie eingestellt */
     const tonM = () => !window.TonRegler || TonRegler.musik("tne"), tonE = () => !window.TonRegler || TonRegler.effekte("tne");
     if (window.TonRegler) TonRegler.anmelden("tne", { aendern: () => lautstaerke() });
-    function lautstaerke() { if (!ctx) return; fxGain.gain.value = tonE() ? META.einst.fx : 0; atmoGain.gain.value = tonM() ? META.einst.atmo * 0.55 : 0; }
+    function lautstaerke() {
+      if (!ctx) return;
+      fxGain.gain.value = tonE() ? META.einst.fx : 0;
+      raumGain.gain.value = tonM() ? META.einst.atmo * .9 : 0;
+      boxGain.gain.value = tonM() ? META.einst.box * .5 : 0;
+    }
     function datei(name) {
       if (A.has(name)) return "amb/" + name + ".mp3";
       if (V[name]) return "amb/" + name + "_" + (1 + Math.floor(Math.random() * V[name])) + ".mp3";
-      if (/^(fx_|k_|timp|gong|gloeckchen|triangel|harfe|glock_|swell|crash|shake|bogen|holz)/.test(name)) return "klang/" + name + ".mp3";
+      if (/^(fx_|k_|timp|gong|gloeckchen|triangel|harfe|glock_|swell|crash|shake|bogen|holz)/.test(name)) return "klang/" + name + (/^fx_ca_dice_(throw|shake)$/.test(name) ? "_" + (1 + Math.floor(Math.random() * 3)) : "") + ".mp3";
       return null;
     }
+    const gibt = name => !!datei(name);
     function laden(url) {
       if (!puffer[url]) puffer[url] = fetch(url).then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status)).then(b => new Promise((ok, f) => ctx.decodeAudioData(b, ok, f))).catch(() => null);
       return puffer[url];
     }
-    function spiel(name, vol = 1, verz = 0) {
-      if (!ctx || !name || META.einst.fx <= 0) return;
+    /* opt: { bus: "raum"|"fx", pan: -1..1, fern: true (gedämpft, wie aus dem Nebenraum), max: Sekunden } */
+    function spiel(name, vol = 1, verz = 0, opt) {
+      opt = opt || {};
+      if (!ctx || !name) return;
+      if (opt.bus !== "raum" && META.einst.fx <= 0) return;
       const url = datei(name); if (!url) return;
       laden(url).then(buf => {
         if (!buf) return;
         const q = ctx.createBufferSource(), g = ctx.createGain(); q.buffer = buf;
-        const dauer = Math.min(buf.duration, 4.5);
-        g.gain.setValueAtTime(vol, ctx.currentTime + verz);
-        g.gain.setValueAtTime(vol, ctx.currentTime + verz + dauer - 0.4);
-        g.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + verz + dauer);
-        q.connect(g); g.connect(fxGain); q.start(ctx.currentTime + verz); q.stop(ctx.currentTime + verz + dauer + 0.05);
+        const dauer = Math.min(buf.duration, opt.max || 4.5), t0 = ctx.currentTime + verz;
+        g.gain.setValueAtTime(vol, t0);
+        g.gain.setValueAtTime(vol, t0 + Math.max(.05, dauer - 0.4));
+        g.gain.linearRampToValueAtTime(0.0001, t0 + dauer);
+        let kette = q;
+        if (opt.fern) { const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 1700; kette.connect(lp); kette = lp; }
+        kette.connect(g); kette = g;
+        if (opt.pan && ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = opt.pan; kette.connect(p); kette = p; }
+        kette.connect(opt.bus === "raum" ? raumGain : fxGain);
+        q.start(t0); q.stop(t0 + dauer + 0.05);
       });
     }
-    function atmo(name) {
-      if (!ctx) return;
-      if (aktiv && aktiv.name === name) return;
-      const alt = aktiv; aktiv = { name };
-      if (alt && alt.g) { const g = alt.g; g.gain.cancelScheduledValues(ctx.currentTime); g.gain.setValueAtTime(g.gain.value, ctx.currentTime); g.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 2.5); setTimeout(() => { try { alt.q.stop(); } catch (e) { /* schon aus */ } }, 2700); }
-      if (!name) return;
-      const url = datei(name); if (!url) return;
-      const ich = aktiv;
-      laden(url).then(buf => {
-        if (!buf || aktiv !== ich) return;
+    /* ---------- Raumklang ---------- */
+    const passt = (o, z) => !o || ((!o.nacht || z.nacht) && (!o.tag || !z.nacht) && (!o.wetter || o.wetter === z.wetter) && (!o.flag || (z.flags && z.flags[o.flag])));
+    function ort(def, z) {
+      if (!def) return;
+      z = z || {};
+      const schonDa = raum.def === def && raum.z && raum.z.wetter === z.wetter && raum.z.nacht === z.nacht && JSON.stringify(raum.z.flags || {}) === JSON.stringify(z.flags || {});
+      raum.def = def; raum.z = z;
+      if (!ctx || schonDa) return;
+      const soll = {};
+      for (const [name, vol, o] of def.klang.bett) if (passt(o, z) && gibt(name)) soll[name + "|" + vol] = [name, vol, o || {}];
+      for (const key in raum.schichten) if (!soll[key]) { const sch = raum.schichten[key]; delete raum.schichten[key]; ausblenden(sch, 3.5); }
+      for (const key in soll) if (!raum.schichten[key]) {
+        const [name, vol, o] = soll[key], sch = { name };
+        raum.schichten[key] = sch;
+        laden(datei(name)).then(buf => {
+          if (!buf || raum.schichten[key] !== sch) return;
+          const q = ctx.createBufferSource(), g = ctx.createGain(); q.buffer = buf; q.loop = true;
+          let kette = q;
+          const tp = ctx.createBiquadFilter(); tp.type = "lowpass"; tp.frequency.value = o.tp || 9000; kette.connect(tp); kette = tp;
+          if (o.hp) { const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = o.hp; kette.connect(hp); kette = hp; }
+          g.gain.setValueAtTime(0.0001, ctx.currentTime); g.gain.linearRampToValueAtTime(vol, ctx.currentTime + 4);
+          kette.connect(g); g.connect(raumGain);
+          q.start(0, Math.random() * Math.max(0, buf.duration - 1));
+          sch.q = q; sch.g = g;
+        });
+      }
+      if (!raum.uhr) naechstes(2 + Math.random() * 4);
+    }
+    function ausblenden(sch, s) {
+      if (!sch || !sch.g) return;
+      const g = sch.g; g.gain.cancelScheduledValues(ctx.currentTime); g.gain.setValueAtTime(g.gain.value, ctx.currentTime); g.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + s);
+      setTimeout(() => { try { sch.q.stop(); } catch (e) { /* schon aus */ } }, s * 1000 + 200);
+    }
+    function naechstes(sek) {
+      clearTimeout(raum.uhr);
+      raum.uhr = setTimeout(() => {
+        raum.uhr = null;
+        const d = raum.def, z = raum.z || {};
+        if (!d || !ctx) return;
+        if (document.hidden || ctx.state !== "running") { naechstes(6); return; }
+        const pool = d.klang.zufall.filter(([n, v, g, o]) => passt(o, z) && gibt(n) && !raum.letzt.includes(n));
+        let summe = pool.reduce((a, x) => a + x[2], 0), r = Math.random() * summe, wahl = null;
+        for (const x of pool) { r -= x[2]; if (r <= 0) { wahl = x; break; } }
+        if (wahl) {
+          const [n, v, , o] = wahl;
+          spiel(n, v * (.75 + Math.random() * .4), 0, { bus: "raum", pan: (Math.random() - .5) * 1.3, fern: o && o.fern, max: (o && o.max) || 7 });
+          raum.letzt.push(n); if (raum.letzt.length > 3) raum.letzt.shift();
+        }
+        const [a, b] = d.klang.abstand || [6, 15];
+        naechstes(a + Math.random() * (b - a));
+      }, sek * 1000);
+    }
+    function raumAus() { clearTimeout(raum.uhr); raum.uhr = null; if (ctx) for (const key in raum.schichten) ausblenden(raum.schichten[key], 2.5); raum.schichten = {}; raum.def = null; }
+    /* ---------- Spielleiter-Box ---------- */
+    function boxSpiel(name, sek) {
+      if (!ctx || !name || !gibt(name)) return;
+      clearTimeout(box.aus);
+      box.aus = setTimeout(() => boxStopp(4), (sek || 38) * 1000);
+      if (box.name === name && box.g) return;
+      boxStopp(2.5);
+      box.name = name;
+      const ich = {};
+      box.ich = ich;
+      laden(datei(name)).then(buf => {
+        if (!buf || box.ich !== ich) return;
         const q = ctx.createBufferSource(), g = ctx.createGain(); q.buffer = buf; q.loop = true;
-        g.gain.setValueAtTime(0.0001, ctx.currentTime); g.gain.linearRampToValueAtTime(1, ctx.currentTime + 3);
-        q.connect(g); g.connect(atmoGain); q.start(0, Math.random() * Math.max(0, buf.duration - 1));
-        ich.q = q; ich.g = g;
+        g.gain.setValueAtTime(0.0001, ctx.currentTime); g.gain.linearRampToValueAtTime(1, ctx.currentTime + 2.5);
+        q.connect(g); g.connect(boxEin);
+        q.start(0, Math.random() * Math.max(0, buf.duration - 1));
+        box.q = q; box.g = g;
       });
     }
-    return { start, spiel, atmo, lautstaerke };
+    function boxStopp(s) { if (box.g) ausblenden({ q: box.q, g: box.g }, s || 2.5); box.q = box.g = null; box.name = null; box.ich = null; }
+    return { start, spiel, ort, raumAus, box: boxSpiel, boxStopp, lautstaerke, gibt };
   })();
   if (window.TonRegler) { const kopf = document.querySelector(".kopf"), log = document.getElementById("knopf-log"); if (kopf) kopf.insertBefore(TonRegler.knoepfe("tne"), log || null); }
   const vib = ms => { if (META.einst.vib && navigator.vibrate) try { navigator.vibrate(ms); } catch (e) { /* egal */ } };
 
   /* Atmosphäre je Ort */
   const ATMO = { taverne: "a_gaeste", wald: "a_voegel1", dungeon: "a_tropfstein", hoehle: "a_tropfstein_n1", stadt: "a_markt", see: "a_wellen1", meer: "a_brandung", sturm: "a_gewitter1", regen: "a_regen1", nacht: "a_grillen", kampf: "a_schlacht", friedhof: "a_friedhof", berg: "a_wind1", schloss: "a_halle", sumpf: "a_fliegenschwarm", feuer: "a_lagerfeuer", lager: "a_lagerfeuer_n1", schnee: "a_schneesturm", wueste: "a_heulwind", tempel: "a_klangschale", geister: "a_geisterhauch", hof: "a_hof", tisch: "a_feuer1", markt: "a_markt_n1", hafen: "a_hafen", fluss: "a_fluss", schmiede: "a_feuer1", kueche: "a_kochen", wiese: "a_sommerwiese", krieg: "a_kriegstrommeln", ruine: "a_ruinenwind", unterwasser: "a_unterwasser", zelt: "a_zelt", muehle: "a_muehle" };
+
+  /* =====================================================================
+     SPIELORTE – wo die Runde sitzt (Daten und Bilder in tne-orte.js)
+     ===================================================================== */
+  const OD = window.TNE_ORTE || { ORTE: {}, HEIME: ["wohnzimmer"], TREFFS: [], AUSFLUEGE: [], LEUTE: {} };
+  const ORT = k => OD.ORTE[k] || OD.ORTE.wohnzimmer || { k: "wohnzimmer", name: "Wohnzimmer", ic: "🛋️", art: "heim", wo: "im Wohnzimmer", kurz: "Wohnzimmer", text: "", klang: { bett: [], zufall: [] }, tisch: {} };
+  const TAG = 864e5;
+  const WOCHENTAG = ["So.", "Mo.", "Di.", "Mi.", "Do.", "Fr.", "Sa."], MONAT = ["Jan.", "Feb.", "März", "Apr.", "Mai", "Juni", "Juli", "Aug.", "Sep.", "Okt.", "Nov.", "Dez."];
+  const datumText = t => { const d = new Date(t); return WOCHENTAG[d.getDay()] + ", " + d.getDate() + ". " + MONAT[d.getMonth()]; };
+  function naechsterTag(t, wt, stunde) { const d = new Date(t); d.setHours(stunde, 0, 0, 0); while (d.getDay() !== wt || d.getTime() <= t) d.setDate(d.getDate() + 1); return d.getTime(); }
+  const jahreszeit = () => { const m = new Date(RUN && RUN.datum || Date.now()).getMonth(); return m <= 1 || m === 11 ? "winter" : m <= 4 ? "fruehling" : m <= 7 ? "sommer" : "herbst"; };
+  function wetterNeu() {
+    const j = jahreszeit(), r = zz(), d = ORT(RUN.ort);
+    RUN.wetter = j === "winter" ? (r < .24 ? "schnee" : r < .52 ? "regen" : "klar") : j === "sommer" ? (r < .14 ? "gewitter" : r < .3 ? "regen" : "klar") : (r < .36 ? "regen" : r < .43 ? "gewitter" : "klar");
+    if (d.art === "ausflug" && ["zelt", "see"].includes(d.k) && RUN.wetter === "schnee") RUN.wetter = "klar";
+  }
+  const wirtSp = () => { const w = RUN && RUN.spieler[RUN.wirt]; return w && !w.weg ? w : null; };
+  const wirtName = () => { const w = RUN && RUN.spieler[RUN.wirt]; return w ? w.name : "dir"; };
+  const ortWo = k => ORT(k || RUN.ort).wo.replace("{wirt}", wirtName());
+  function ortZaehlen(k) {
+    META.orte = META.orte || {};
+    const m = META.orte[k] = META.orte[k] || { n: 0, kap: 0 };
+    m.n++;
+    RUN.orteBesucht = RUN.orteBesucht || {}; RUN.orteBesucht[k] = (RUN.orteBesucht[k] || 0) + 1;
+    if (Object.keys(META.orte).length >= 5) erfolg("orte5");
+    if (Object.keys(META.orte).filter(x => ORT(x).art === "ausflug").length >= 3) erfolg("ausflug3");
+  }
+  function ortStart() {
+    RUN.heim = RUN.spieler.length && zz() < .55 ? "wohnzimmer" : wahl(OD.HEIME);
+    const a = aktiveSpieler(); RUN.wirt = a.length ? idx(wahl(a)) : 0;
+    RUN.ort = RUN.heim; RUN.ausflug = null; RUN.umzug = null;
+    RUN.datum = naechsterTag(Date.now() - TAG, 4, 19);
+    wetterNeu(); RUN.ortNeu = true; ortZaehlen(RUN.ort);
+  }
+  function ortNaechsteSession() {
+    const war = RUN.ort;
+    if (RUN.umzug) { RUN.heim = RUN.umzug.k; if (RUN.umzug.wirt != null) RUN.wirt = RUN.umzug.wirt; RUN.umzug = null; erfolg("umzug1"); }
+    if (RUN.ausflug) { RUN.ort = RUN.ausflug; RUN.ausflug = null; RUN.datum = naechsterTag(RUN.datum, 6, 15); }
+    else { RUN.ort = RUN.heim; RUN.datum = naechsterTag(RUN.datum, 4, 19); }
+    wetterNeu();
+    const def = ORT(RUN.heim);
+    if (RUN.ort === RUN.heim && def.gastgeber && !wirtSp()) RUN.ortSuche = true;
+    RUN.ortNeu = RUN.ort !== war || !!RUN.ortSuche;
+    ortZaehlen(RUN.ort);
+  }
+  function nachtJetzt() {
+    if (!RUN || !RUN.k) return false;
+    const fort = RUN.k.karte / Math.max(1, RUN.k.laenge), d = ORT(RUN.ort), j = jahreszeit();
+    const ab = d.art === "ausflug" ? (j === "sommer" ? .7 : j === "winter" ? .3 : .5) : (j === "sommer" ? .5 : j === "winter" ? 0 : .2);
+    return fort >= ab;
+  }
+  const ortZustand = () => ({ wetter: RUN.wetter, nacht: nachtJetzt(), zeit: nachtJetzt() ? "nacht" : ORT(RUN.ort).art === "ausflug" && RUN.k.karte / Math.max(1, RUN.k.laenge) < .35 ? "tag" : "abend", flags: { strom: !!RUN.k.flags.stromweg, katze: !!RUN.k.flags.katze_da } });
+  function ortKlang() { if (RUN && RUN.ort) Ton.ort(ORT(RUN.ort), ortZustand()); }
+  function zufallsOrt(liste, ohne) {
+    const j = jahreszeit();
+    let k = liste.filter(x => !ohne.includes(x) && !(["zelt", "see", "laube"].includes(x) && j === "winter"));
+    const neu = k.filter(x => !(RUN.orteBesucht || {})[x]);
+    if (neu.length && zz() < .7) k = neu;
+    return k.length ? wahl(k) : liste[0];
+  }
 
   /* =====================================================================
      VISUALISIERUNG – kleine Effekte nach jeder Wahl
@@ -680,6 +830,8 @@
   function neueSession(erste) {
     const k = RUN.k;
     k.session++; k.karte = 0; k.laenge = sessionLaenge(); k.wzSession = {};
+    delete k.flags.stromweg;
+    if (RUN.spieler && RUN.spieler.length) { if (!RUN.heim) ortStart(); else ortNaechsteSession(); if (ORT(RUN.ort).art === "ausflug") k.laenge += 3; }
     k.akt = k.session <= Math.ceil(k.sessions / 3) ? 1 : k.session < k.sessions ? 2 : 3;
     if (k.session >= k.sessions) k.laenge += 4;
     if (erste) k.werkzeug = {};
@@ -718,6 +870,16 @@
       else if ((m = b.match(/^krise:(\w+)$/))) { if (!ctx.sp || !ctx.sp.krise || (m[1] !== "alle" && ctx.sp.krise.art !== m[1])) return false; }
       else if (b === "ruhig") { if (RUN.spieler.some(s => !s.weg && (s.krise || s.pause))) return false; }
       else if ((m = b.match(/^bezhat:(\w+)$/))) { if (!ctx.sp || !bezVon(ctx.sp).some(x => x.z.typ === m[1] && anwesend(x.ander))) return false; }
+      else if ((m = b.match(/^(bei|nichtbei):([\w|]+)$/))) { const d = ORT(RUN.ort), treffer = m[2].split("|").some(x => x === d.k || x === d.art || (x === "zuhause" && d.art !== "ausflug") || (x === "drinnen" && !["laube", "zelt", "see"].includes(d.k)) || (x === "draussen" && ["laube", "zelt", "see"].includes(d.k))); if (treffer !== (m[1] === "bei")) return false; }
+      else if ((m = b.match(/^heim:([\w|]+)$/))) { if (!m[1].split("|").includes(RUN.heim)) return false; }
+      else if ((m = b.match(/^wetter:([\w|]+)$/))) { if (!m[1].split("|").includes(RUN.wetter)) return false; }
+      else if ((m = b.match(/^jz:([\w|]+)$/))) { if (!m[1].split("|").includes(jahreszeit())) return false; }
+      else if (b === "plan:nein") { if (RUN.ausflug || RUN.umzug || ORT(RUN.ort).art === "ausflug") return false; }
+      else if (b === "nacht") { if (!nachtJetzt()) return false; }
+      else if (b === "tag") { if (nachtJetzt()) return false; }
+      else if (b === "wirt") { if (!wirtSp() || !anwesend(wirtSp())) return false; }
+      else if (b === "nsfrei") { const n = RUN.k.nsSess === RUN.k.session ? (RUN.k.nsZahl || 0) : 0; if (n >= (ORT(RUN.ort).art === "ausflug" ? 2 : 1)) return false; }
+      else if ((m = b.match(/^kap:(\w+)([<>=])(\d+)$/))) { const v = ((META.orte || {})[m[1]] || {}).kap || 0, z = +m[3]; if (!(m[2] === "<" ? v < z : m[2] === ">" ? v > z : v === z)) return false; }
       else if (b === "legende") { if (!META.welt.legenden.length) return false; }
       else if (b === "gefallen") { if (!META.welt.gefallene.length) return false; }
       else if ((m = b.match(/^hr:(\w+)$/))) { if (!hr(m[1])) return false; }
@@ -741,6 +903,7 @@
       return { sp: a, sp2: b, bez: z };
     }
     if (k.wer === "pausiert") { const p = pausierte(); return p.length ? { sp: wahl(p), chat: true } : null; }
+    if (k.wer === "wirt") { const w = wirtSp(); return w && anwesend(w) ? { sp: w } : null; }
     if (k.krise && k.krisenwer) { const kand = aktiveSpieler().filter(s => s.typ === k.krisenwer); if (kand.length) return { sp: wahl(kand) }; }
     if (TYPEN[k.wer]) { const kand = aktiveSpieler().filter(s => s.typ === k.wer); return kand.length ? { sp: wahl(kand) } : null; }
     if (k.wer === "spieler") { const a = aktiveSpieler(); return a.length ? { sp: wahl(a) } : null; }
@@ -765,6 +928,7 @@
       p2: anderer ? anderer.name : "", p2held: anderer ? anderer.held.name : "", bez: ctx.bez ? BEZ[ctx.bez.typ].name : "",
       altheld: erin ? erin.held : "Grimbold", altkampagne: erin ? erin.kampagne : "der letzten Kampagne", tode: ctx.sp ? ctx.sp.tode : 0, kampagnen: mem ? mem.kampagnen : 0,
       damals: mem && mem.groll && mem.groll.length ? mem.groll[mem.groll.length - 1].wahl : "das mit dem Oger", damalsheld: mem && mem.groll && mem.groll.length && mem.groll[mem.groll.length - 1].held ? mem.groll[mem.groll.length - 1].held : (erin ? erin.held : "Grimbold"), dankfuer: mem && mem.dank && mem.dank.length ? mem.dank[mem.dank.length - 1].wahl : "die Szene am Lagerfeuer",
+      wirt: RUN.heim ? wirtName() : "", ortname: RUN.ort ? ORT(RUN.ort).name : "", wo: RUN.ort ? ortWo() : "",
       nat1: mem ? mem.nat1 : 0, nat20: mem ? mem.nat20 : 0, wochen: zi(2, 6), monate: zi(2, 5), krise: ctx.sp && ctx.sp.krise ? KRISEN[ctx.sp.krise.art].name : ""
     };
     pronomen(f, ctx.sp && spG(ctx.sp) === "w", "");
@@ -815,7 +979,9 @@
     // 1) Sonderfälle: Spieler will gehen / Neuer am Tisch
     const genervt = aktiveSpieler().find(s => s.laune <= 0);
     if (genervt) return sonderGehen(genervt);
-    if (RUN.k.karte === 0 && RUN.k.nachrueck) { RUN.k.nachrueck = false; return sonderNeu(); }
+    if (RUN.ortSuche && (RUN.k.karte === 0 || RUN.ortSofort)) { RUN.ortSuche = false; return sonderOrtSuche(); }
+    if (RUN.ortNeu && (RUN.k.karte === 0 || RUN.ortSofort)) { RUN.ortNeu = false; RUN.ortSofort = false; return sonderAnkunft(); }
+    if (RUN.k.karte <= 1 && RUN.k.nachrueck) { RUN.k.nachrueck = false; return sonderNeu(); }
     // 2) Kette
     for (let i = 0; i < RUN.queue.length; i++) {
       const q = RUN.queue[i];
@@ -831,7 +997,7 @@
         if (ctx && k.bez && !ctx.bez) ctx = null;
         if (ctx && !ctx.sp && (TYPEN[k.wer] || k.wer === "spieler" || k.wer === "pausiert" || k.brauchtSp)) ctx = null;
         if (ctx && k.wer === "pausiert") ctx.chat = true;
-        if (ctx && !TYPEN[k.wer] && !["spieler", "pausiert"].includes(k.wer) && !k.bez) ctx.sym = k.wer;
+        if (ctx && !TYPEN[k.wer] && !["spieler", "pausiert", "wirt"].includes(k.wer) && !k.bez) ctx.sym = k.wer;
         if (ctx && (!k.wenn.length || pruefe(k.wenn, ctx))) return { k, ctx };
         break;
       }
@@ -850,6 +1016,27 @@
       { label: "Bitte bleib!", w: parseWirkung("W13 laune+40 ? : geht s-4"), folge: "{name} seufzt und bleibt. „Na gut. Aber nur wegen der Snacks.“ :: Die Tür fällt ins Schloss. Ein Stuhl bleibt leer." },
       { label: "Lass gehen", w: parseWirkung("geht s+2 t+3"), folge: "{name} geht. Ehrlich gesagt ist die Stimmung danach etwas entspannter." }] };
     return { k, ctx: { sp } };
+  }
+  function sonderAnkunft() {
+    const d = ORT(RUN.ort), aus = d.art === "ausflug", erst = (META.orte && META.orte[d.k] && META.orte[d.k].n) === 1;
+    const vor = aus ? "Ausflug! " : RUN.k.session === 1 && RUN.k.nr === 1 && RUN.karten === 0 ? "" : erst || (RUN.orteBesucht || {})[d.k] === 1 ? "Neuer Spielort! " : "Zurück am alten Platz. ";
+    const k = { id: "_ort_" + d.k, wer: "ortbild", sonder: true, text: vor + d.text.replace(/\{wirt\}/g, wirtName()), opt: (d.ankunft || [["Ankommen", "s+2", "Ihr macht es euch gemütlich."], ["Loslegen", "t+3", "Würfel raus, los."]]).map(([l, w, f]) => ({ label: l, w: parseWirkung(w), folge: f.replace(/\{wirt\}/g, wirtName()) })) };
+    const a = aktiveSpieler();
+    return { k, ctx: { sym: "ortbild", sp: wirtSp() && anwesend(wirtSp()) ? wirtSp() : a[0] } };
+  }
+  function sonderOrtSuche() {
+    const alt = RUN.spieler[RUN.wirt], altOrt = ORT(RUN.heim);
+    const a = aktiveSpieler();
+    const gast = a.length ? wahl(a) : null;
+    const heimNeu = zufallsOrt(OD.HEIME, [RUN.heim]), treffNeu = zufallsOrt(OD.TREFFS, [RUN.heim]);
+    const h = ORT(heimNeu), t = ORT(treffNeu);
+    const k = { id: "_ortsuche", wer: "ortbild", sonder: true,
+      text: (alt ? alt.name + " spielt nicht mehr mit – und damit fällt auch der Spielort weg: " + altOrt.name + ". " : "Der alte Spielort fällt weg. ") + "Wo trefft ihr euch ab jetzt?",
+      opt: [
+        { label: gast ? "Zu " + gast.name + " (" + h.kurz + ")" : h.kurz, w: parseWirkung("wirt=" + (gast ? idx(gast) : 0) + " umzugjetzt=" + heimNeu + " alle+2"), folge: gast ? gast.name + " sagt sofort ja. „Ich räum nur kurz auf.“ Es dauert drei Tage." : "Ihr findet ein neues Zuhause für die Runde." },
+        { label: t.kurz, w: parseWirkung("umzugjetzt=" + treffNeu + " l+2"), folge: "Ihr sucht euch einen Ort außer Haus: " + ORT(treffNeu).wo.replace(/^im |^in der |^in /, "") + ". Neutraler Boden, sagt {name}." }
+      ] };
+    return { k, ctx: { sym: "ortbild", sp: gast || a[0] } };
   }
   function sonderNeu() {
     const sp = neuerSpieler();
@@ -889,9 +1076,14 @@
     wuerfelPruefen();
     zeigeKarte();
     if (x.k.selten) { Viz.zeige("funkeln"); Ton.spiel("gloeckchen", .7); }
-    if (x.k.wer === "katze" || zz() < .02) setTimeout(katzeLauf, 700);
-    if (x.k.ort && ATMO[x.k.ort]) Ton.atmo(ATMO[x.k.ort]);
-    else if (RUN.k.karte === 0) Ton.atmo(ATMO[RUN.k.platz === "wueste" ? "wueste" : RUN.k.platz] || ATMO.tisch);
+    if (x.k.wer === "katze" || (zz() < .02 && ORT(RUN.ort).art !== "ausflug")) setTimeout(katzeLauf, 700);
+    ortKlang();
+    // Die Spielleiter-Box spielt zur Szene – leise, gefiltert, und nur eine Weile. Ohne Strom keine Box.
+    if (!RUN.k.flags.stromweg) {
+      if (imBoss() && RUN.k.karte === bossAb(RUN.k)) Ton.box("a_schlacht", 50);
+      else if (x.k.ort && ATMO[x.k.ort] && x.k.ort !== "tisch") Ton.box(ATMO[x.k.ort], 40);
+      else if (RUN.k.karte === 1) Ton.box(ATMO[RUN.k.platz] || ATMO.wald, 45);
+    } else Ton.boxStopp(1.5);
     speichern();
   }
 
@@ -952,6 +1144,20 @@
       else if (op === "geht") { if (ctx.sp) ereignisse.push(...spielerGeht(ctx.sp)); }
       else if (op === "neu") RUN.k.nachrueck = true;
       else if (op === "aufnehmen") { if (RUN.kandidat) { const kd = RUN.kandidat, mit = kd.mit; delete kd.mit; kd.mem.seit = RUN.karten; RUN.spieler.push(kd); if (mit && RUN.spieler[mit.i] && anwesend(RUN.spieler[mit.i])) bezNeu(kd, RUN.spieler[mit.i], mit.typ, zi(60, 82)); if (kd.ahn) erfolg("nachfahre"); if (RUN.k.zs) RUN.k.zs.neu++; ereignisse.push({ t: kd.name + " ist dabei!", c: "gut" }); RUN.kandidat = null; } }
+      else if ((m = op.match(/^wirt=(\w+)$/))) { if (m[1] === "ich") { if (ctx.sp) RUN.wirtNeu = idx(ctx.sp); } else if (m[1] === "anderer") { const x = ctx.sp2 || aktiveSpieler().find(q => q !== ctx.sp); if (x) RUN.wirtNeu = idx(x); } else RUN.wirtNeu = +m[1]; }
+      else if ((m = op.match(/^(umzug|umzugjetzt)=(\w+)$/))) {
+        let ziel = m[2];
+        if (ziel === "heim") ziel = zufallsOrt(OD.HEIME, [RUN.heim]); else if (ziel === "treff") ziel = zufallsOrt(OD.TREFFS, [RUN.heim]);
+        const neuWirt = RUN.wirtNeu != null ? RUN.wirtNeu : (ORT(ziel).gastgeber && ctx.sp ? idx(ctx.sp) : null); RUN.wirtNeu = null;
+        if (m[1] === "umzug") { RUN.umzug = { k: ziel, wirt: neuWirt }; ereignisse.push({ t: "Ab nächster Session spielt ihr woanders: " + ORT(ziel).ic + " " + ORT(ziel).name, c: "gut" }); }
+        else { RUN.heim = ziel; RUN.ort = ziel; if (neuWirt != null) RUN.wirt = neuWirt; RUN.ortNeu = true; RUN.ortSofort = true; wetterNeu(); ortZaehlen(ziel); erfolg("umzug1"); }
+      }
+      else if ((m = op.match(/^ausflug=(\w+)$/))) { const ziel = m[1] === "zufall" ? zufallsOrt(OD.AUSFLUEGE, [RUN.ort]) : m[1]; RUN.ausflug = ziel; ereignisse.push({ t: "Nächste Session: " + ORT(ziel).ic + " " + ORT(ziel).name + "!", c: "gut" }); }
+      else if ((m = op.match(/^kap=(\w+):(\d+)$/))) {
+        META.orte = META.orte || {}; const mo = META.orte[m[1]] = META.orte[m[1]] || { n: 0, kap: 0 };
+        if (RUN.k.nsSess !== RUN.k.session) { RUN.k.nsSess = RUN.k.session; RUN.k.nsZahl = 0; } RUN.k.nsZahl++;
+        if (+m[2] > (mo.kap || 0)) { mo.kap = +m[2]; const st = ORT(m[1]).story; if (st && mo.kap >= st.kapitel) { META.stats.nebenstory = (META.stats.nebenstory || 0) + 1; erfolg("nebenstory"); if (META.stats.nebenstory >= 5) erfolg("nebenstory5"); setTimeout(() => toast("📖 Nebengeschichte erlebt: <b>" + esc(st.titel) + "</b>"), 900); } }
+      }
       else if (op === "ende") RUN.k.karte = RUN.k.laenge - 2;
       else if (op === "sieg") RUN.k.sieg = true;
       else if (op === "frieden") { RUN.k.sieg = true; erfolg("frieden"); }
@@ -1392,9 +1598,10 @@
       balken: { m: q(RUN.b.m), l: q(RUN.b.l), s: q(RUN.b.s), t: q(RUN.b.t) }, fortschritt: Math.round(Math.min(1, k.karte / k.laenge) * 10) / 10,
       spieler: aktiveSpieler().map(s => ({ name: s.held.name, farbe: TYPEN[s.typ].farbe, handy: haltung(s) === "handy" })),
       seed: k.nr * 97 + k.session * 13 + RUN.spieler.length, boss: imBoss() || (istLetzteSession() && k.karte >= k.laenge - 1), katze: !!(k.flags.katze_da || (k.nr + k.session) % 4 === 0),
-      wuerfelSet: wuerfelSet()
+      wuerfelSet: wuerfelSet(), ort: RUN.ort ? ORT(RUN.ort) : null, zustand: RUN.ort ? ortZustand() : null
     };
-    const key = JSON.stringify([Math.round(z.W), Math.round(z.H), Math.round(z.karte.x), Math.round(z.karte.y), z.balken, z.fortschritt, z.spieler, z.seed, z.boss, z.katze, z.wuerfelSet.k]);
+    if (z.ort && z.ort.art === "ausflug") z.katze = false;
+    const key = JSON.stringify([Math.round(z.W), Math.round(z.H), Math.round(z.karte.x), Math.round(z.karte.y), z.balken, z.fortschritt, z.spieler, z.seed, z.boss, z.katze, z.wuerfelSet.k, RUN.ort, z.zustand && z.zustand.wetter, z.zustand && z.zustand.zeit]);
     if (key === tischKey) return;
     tischKey = key;
     box.innerHTML = GR.tisch(z);
@@ -1414,7 +1621,9 @@
     if (!RUN) return;
     const k = RUN.k;
     $("#zaehler").innerHTML = "<b>" + esc(k.titel) + "</b><br>Kampagne " + k.nr + " · Session " + k.session + "/" + k.sessions + " · Karte " + Math.min(k.karte + 1, k.laenge) + "/" + k.laenge + " · gesamt " + RUN.karten;
-    $("#kopfunter").textContent = "Jahr " + META.welt.jahr + " der Chronik";
+    const ku = $("#kopfunter");
+    ku.textContent = RUN.ort ? ORT(RUN.ort).ic + " " + ORT(RUN.ort).kurz + " · " + datumText(RUN.datum) + ({ regen: " 🌧", gewitter: " ⛈", schnee: " ❄" }[RUN.wetter] || "") : "Jahr " + META.welt.jahr + " der Chronik";
+    ku.title = "Jahr " + META.welt.jahr + " der Chronik" + (RUN.ort ? " · " + ortWo() : "");
     const wz = WERKZEUGE.filter(w => !w.passiv && hatWerkzeug(w.k));
     $("#werkzeuge").innerHTML = (k.ziel ? '<button class="wz ziel" data-ziel title="Geheimes Ziel dieser Kampagne" aria-label="Geheimes Ziel">🎯</button>' : "") + wz.map(w => { const r = werkzeugRest(w.k); return '<button class="wz" data-wz="' + w.k + '" title="' + esc(w.name + ": " + w.text) + '" aria-label="' + esc(w.name) + '"' + (r ? "" : " disabled") + ">" + w.ic + (r ? "<i>" + r + "</i>" : "") + "</button>"; }).join("");
   }
@@ -1427,6 +1636,15 @@
       return { name: ctx.sp.name, rolle, svg: GR.figur(memo(ctx.sp), null, { rand: TYPEN[ctx.sp.typ].farbe }) };
     }
     const s = ctx.sym || k.wer;
+    if (s === "ort") {
+      const name = String(k.name || "Jemand").replace(/_/g, " "), look = OD.LEUTE[name];
+      const person = { name, typ: "nsc", laune: 72, aussehen: look ? Object.assign({ haut: 0, haar: 0, frisur: "kurz", hemd: 0, sommersprossen: false, brille: false, bart: "", ohrring: false, kopf: 0 }, look) : undefined };
+      return { name, rolle: String(k.rolle || ORT(RUN.ort).name).replace(/_/g, " "), svg: GR.figur(person, null, { rand: "#8a5a30" }) };
+    }
+    if (s === "ortbild") {
+      const d = ORT(RUN.ort);
+      return { name: d.name, rolle: (d.art === "ausflug" ? "Ausflug · " : "Spielort · ") + datumText(RUN.datum), svg: '<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" fill="#efe0c0" stroke="#8a5a30" stroke-width="3"/><text x="50" y="66" font-size="44" text-anchor="middle">' + d.ic + "</text></svg>" };
+    }
     const namen = { sl: ["Deine innere Stimme", "Spielleiter"], npc: [aktuelle.f.npc, "Nichtspielercharakter"], schurke: [aktuelle.f.schurke, imBoss() ? "Der Endgegner" : "Der Schurke"], tisch: ["Am Tisch", "Das echte Leben"], welt: ["Die Welt", "Ereignis"], wuerfel: ["Die Würfel", "Schicksal"], gast: ["Besuch", "An der Tür"], katze: ["Würfelfresser", "Die Tischkatze"], regelbuch: ["Das Regelbuch", "Seite " + aktuelle.f.zahl * 13], geist: [aktuelle.f.tot, "Ein Geist"], gott: [aktuelle.f.gott, "Eine Gottheit"] };
     const n = namen[s] || ["?", ""];
     return { name: grossAnfang(n[0]), rolle: n[1], svg: portraitSymbol(s) };
@@ -1458,7 +1676,8 @@
   function kartenTyp(ctx, k) { if (imBoss() || k.phase === "boss" || k.phase === "bossstart") return "boss"; if (ctx.chat) return "tisch"; return ctx.sym || (ctx.sp ? "spieler" : k.wer); }
   function bannerFuer(ctx, k, text) {
     const boss = imBoss() || k.phase === "boss" || k.phase === "bossstart";
-    const szene = ctx.chat ? "chat" : GR.szeneFuer(k, text, ctx.sym || (ctx.sp ? "spieler" : k.wer), RUN.k.platz, boss);
+    let szene = ctx.chat ? "chat" : GR.szeneFuer(k, text, ctx.sym || (ctx.sp ? "spieler" : k.wer), RUN.k.platz, boss);
+    if (!boss && RUN.ort && (szene === "tisch" || ["ort", "ortbild", "wirt"].includes(ctx.sym || k.wer) || k.wenn.some(b => /^bei:/.test(b)))) { szene = "o_" + RUN.ort; return GR.banner(szene, GR.hash(k.id) ^ (RUN.karten * 2654435761), ortZustand().zeit); }
     const fort = RUN.k.karte / Math.max(1, RUN.k.laenge), r = zz();
     const zeit = szene === "tisch" ? (fort > .5 ? "nacht" : "abend") : r < .25 ? null : fort < .4 ? "tag" : fort < .75 ? "abend" : "nacht";
     return GR.banner(szene, GR.hash(k.id) ^ (RUN.karten * 2654435761), zeit);
@@ -1715,7 +1934,8 @@
     const k = RUN.k;
     const zeilen = k.log.filter(x => x.sess === k.session).slice(-5).map(x => "<li>" + esc(x.t) + "</li>").join("");
     Ton.spiel("e_fernglocken", .6);
-    const f = fenster('<h2>Session ' + k.session + ' ist vorbei</h2><p class="leise">Es ist ' + zi(23, 25) % 24 + ":" + String(zi(0, 59)).padStart(2, "0") + " Uhr. " + wahl(["Alle packen die Würfel ein.", "Die Pizza ist kalt, die Stimmung warm.", "Jemand sucht noch seinen Autoschlüssel.", "Die Kerze ist heruntergebrannt.", "„Gleiche Zeit nächste Woche?“"]) + '</p><h3>Was heute geschah</h3><ul class="liste">' + zeilen + '</ul><p>' + s.imZiel + ' von 4 Balken im grünen Bereich · <b>+' + s.xp + ' Erfahrung</b></p><div class="reihe"><button class="knopf" data-los>▶ Nächste Session</button></div>', { zu: false });
+    const naechst = RUN.ausflug ? "<b>" + datumText(naechsterTag(RUN.datum, 6, 15)) + ":</b> Ausflug – " + ORT(RUN.ausflug).ic + " " + esc(ORT(RUN.ausflug).name) + "!" : RUN.umzug ? "<b>" + datumText(naechsterTag(RUN.datum, 4, 19)) + ":</b> zum ersten Mal " + esc(ortWo(RUN.umzug.k).replace(wirtName(), RUN.umzug.wirt != null && RUN.spieler[RUN.umzug.wirt] ? RUN.spieler[RUN.umzug.wirt].name : wirtName())) + " 📦" : "<b>" + datumText(naechsterTag(RUN.datum, 4, 19)) + ":</b> wieder " + esc(ortWo(RUN.heim));
+    const f = fenster('<h2>Session ' + k.session + ' ist vorbei</h2><p class="leise">Es ist ' + zi(23, 25) % 24 + ":" + String(zi(0, 59)).padStart(2, "0") + " Uhr. " + wahl(["Alle packen die Würfel ein.", "Die Pizza ist kalt, die Stimmung warm.", "Jemand sucht noch seinen Autoschlüssel.", "Die Kerze ist heruntergebrannt.", "„Gleiche Zeit nächste Woche?“"]) + '</p><p class="naechst">📅 Nächstes Mal – ' + naechst + '</p><h3>Was heute geschah</h3><ul class="liste">' + zeilen + '</ul><p>' + s.imZiel + ' von 4 Balken im grünen Bereich · <b>+' + s.xp + ' Erfahrung</b></p><div class="reihe"><button class="knopf" data-los>▶ Nächste Session</button></div>', { zu: false });
     f.querySelector("[data-los]").addEventListener("click", () => { f.remove(); neueSession(); naechsteKarte(); });
     speichern();
   }
@@ -1728,7 +1948,7 @@
     speichern();
   }
   function zeigeEnde(info) {
-    Ton.atmo(null); Ton.spiel("n_tod", .7); Viz.zeige(info.grund === "s1" ? "lachen" : info.grund === "m0" ? "federn" : info.grund === "t0" ? "zzz" : "schaedel");
+    Ton.boxStopp(2); Ton.raumAus(); Ton.spiel("n_tod", .7); Viz.zeige(info.grund === "s1" ? "lachen" : info.grund === "m0" ? "federn" : info.grund === "t0" ? "zzz" : "schaedel");
     const f = fenster('<div class="ende-bild">' + info.E.bild + '</div><h2 style="text-align:center">' + esc(info.E.titel) + '</h2><p class="ende-text">' + esc(info.text) + '</p><h3>Deine Runde</h3><ul class="liste"><li>' + info.karten + ' Karten gespielt · ' + info.kampagnen + ' Kampagnen beendet · ' + info.tote + ' Helden gestorben</li><li>Zuletzt: „' + esc(info.titel) + '“, Session ' + info.sessions + '</li><li><b>+' + info.xp + ' Spielleiter-Erfahrung</b>' + (info.nachher > info.vorher ? " · Stufe " + info.nachher + "!" : "") + '</li><li>Bester Lauf bisher: ' + META.stats.besteKarten + ' Karten</li></ul><p class="leise">Die Welt dreht sich weiter. Deine Legenden und Gefallenen bleiben in der Chronik – und tauchen in neuen Runden wieder auf.</p><div class="reihe"><button class="knopf" data-neu>▶ Neue Runde</button><button class="knopf zweit" data-titel>Hauptmenü</button></div>', { zu: false });
     f.querySelector("[data-neu]").addEventListener("click", () => { f.remove(); neueRundeFenster(); });
     f.querySelector("[data-titel]").addEventListener("click", () => { f.remove(); titelbild(); });
@@ -1770,9 +1990,15 @@
       karten: '<p>Entdeckte Karten: <b>' + gesehen + " / " + gesamt + '</b></p><div class="fort"><i style="width:' + Math.round(gesehen / gesamt * 100) + '%"></i></div><p class="leise">Jede Runde mischt den Stapel neu. Seltene Karten erscheinen nur unter bestimmten Bedingungen – bei bestimmten Spielertypen, Balkenständen, in späten Kampagnen oder nach früheren Entscheidungen.</p><h3>Enden</h3><div class="gitter">' + Object.entries(ENDEN).map(([k, e]) => '<div class="kachel' + (META.enden[k] ? "" : " gesperrt") + '"><span class="ic">' + (META.enden[k] ? e.bild : "❔") + "</span><b>" + (META.enden[k] ? esc(e.titel) : "???") + "</b>" + (META.enden[k] ? META.enden[k] + "× erlebt" : "noch nicht erlebt") + "</div>").join("") + "</div>",
       wuerfel: '<p>Würfelsets: <b>' + Object.keys(META.wuerfel).length + " / " + GR.WUERFEL.length + '</b> – tippe ein Set an, um damit zu würfeln.</p><div class="gitter wgitter">' + GR.WUERFEL.map(w => { const hat = META.wuerfel[w.k]; return '<button class="kachel wkachel' + (hat ? "" : " gesperrt") + (META.wuerfelAktiv === w.k ? " aktiv" : "") + '" data-set="' + w.k + '"' + (hat ? "" : " disabled") + ">" + GR.wuerfelSvg(hat ? w : { k: "zu", farbe: "#4a3a2c", rand: "#2b1d12", zahl: "#8a7a62" }, hat ? 20 : "?") + "<b>" + (hat ? esc(w.name) : "???") + "</b><small>" + esc(hat ? w.text : "🔒 " + FREI_TEXT[w.frei]) + "</small></button>"; }).join("") + "</div>" +
         '<h3>Seltene Karten</h3><p>' + Object.keys(META.selten).length + " von " + KARTEN.filter(k => k.selten).length + ' entdeckt. Seltene Karten haben einen goldenen Rand und eine dritte Wahl (nach oben wischen oder ↑).</p><div class="gitter">' + KARTEN.filter(k => k.selten).map(k => '<div class="kachel' + (META.selten[k.id] ? " goldkachel" : " gesperrt") + '"><span class="ic">' + (META.selten[k.id] ? "✦" : "❔") + "</span>" + (META.selten[k.id] ? esc(k.titel || k.text.replace(/\{\w+\}/g, "…").slice(0, 60) + "…") : "noch nicht gezogen") + "</div>").join("") + "</div>",
+      orte: (() => {
+        const mo = META.orte || {}, alle = Object.keys(OD.ORTE);
+        const art = { heim: "Zuhause bei jemandem", treff: "Treffpunkt außer Haus", ausflug: "Ausflug (eine Session)" };
+        return '<p>Spielorte entdeckt: <b>' + Object.keys(mo).length + " / " + alle.length + '</b> · Nebengeschichten erlebt: <b>' + alle.filter(k => mo[k] && OD.ORTE[k].story && mo[k].kap >= OD.ORTE[k].story.kapitel).length + " / " + alle.length + '</b></p><p class="leise">Wo die Runde spielt, ändert alles: den Klang im Raum, den Tisch, die Leute drumherum. Manchmal zieht ihr um, manchmal plant ihr einen Ausflug – und an jedem Ort wartet eine kleine Geschichte neben dem Spiel.</p><div class="gitter">' +
+          alle.map(k => { const d = OD.ORTE[k], m = mo[k], st = d.story; return '<div class="kachel' + (m ? "" : " gesperrt") + '"><span class="ic">' + (m ? d.ic : "❔") + "</span><b>" + (m ? esc(d.name) : "???") + "</b>" + esc(art[d.art]) + (m ? '<br><small class="leise">' + m.n + (m.n === 1 ? " Session" : " Sessions") + "</small>" + (st ? '<br><small>📖 ' + esc(st.titel) + " – " + (m.kap >= st.kapitel ? "erlebt ✓" : m.kap + " / " + st.kapitel) + "</small>" : "") : "") + "</div>"; }).join("") + "</div>";
+      })(),
       stats: '<ul class="liste">' + [["Karten gespielt", META.stats.karten], ["Bester Lauf", META.stats.besteKarten + " Karten"], ["Runden", META.stats.runden], ["Sessions", META.stats.sessions], ["Kampagnen beendet", META.stats.kampagnen], ["Helden erschaffen", META.stats.helden], ["Helden gestorben", META.stats.tode], ["Legenden", META.stats.legenden], ["Würfe", META.stats.wuerfe], ["Natürliche 20", META.stats.nat20], ["Natürliche 1", META.stats.nat1], ["Notfall-Pizzen", META.stats.pizza], ["Spieler kennengelernt", META.stats.spieler], ["Endgegner besiegt", META.stats.bosse], ["Geheime Ziele erreicht", META.stats.ziele], ["Echte Krisen am Tisch", META.stats.krisen], ["Seltene Karten gezogen", META.stats.selten]].map(([a, b]) => "<li>" + a + ": <b>" + b + "</b></li>").join("") + "</ul>"
     };
-    const f = fenster('<h2>Spielleiter-Buch</h2><div class="tabs" role="tablist">' + [["stufe", "Stufe & Werkzeuge"], ["erfolge", "Erfolge"], ["karten", "Karten & Enden"], ["wuerfel", "Würfel & Seltenes"], ["stats", "Statistik"]].map(([k, n]) => '<button role="tab" data-tab="' + k + '" aria-selected="' + (k === tab) + '">' + n + "</button>").join("") + "</div>" + inhalt[tab]);
+    const f = fenster('<h2>Spielleiter-Buch</h2><div class="tabs" role="tablist">' + [["stufe", "Stufe & Werkzeuge"], ["erfolge", "Erfolge"], ["karten", "Karten & Enden"], ["wuerfel", "Würfel & Seltenes"], ["orte", "Spielorte"], ["stats", "Statistik"]].map(([k, n]) => '<button role="tab" data-tab="' + k + '" aria-selected="' + (k === tab) + '">' + n + "</button>").join("") + "</div>" + inhalt[tab]);
     f.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => { f.remove(); spielleiterBuch(b.dataset.tab); }));
     f.querySelectorAll("[data-set]").forEach(b => b.addEventListener("click", () => { META.wuerfelAktiv = b.dataset.set; speichern(); Ton.start(); const w = GR.WUERFEL.find(x => x.k === b.dataset.set); Ton.spiel("fx_ca_dice_throw_" + zi(1, 3), .8); if (w && w.ton) Ton.spiel(w.tonN ? w.ton + zi(1, w.tonN) : w.ton, .5, .3); tischKey = ""; f.remove(); spielleiterBuch("wuerfel"); }));
   }
@@ -1799,11 +2025,11 @@
   }
 
   function regelFenster() {
-    fenster('<h2>So wird gespielt</h2><p>Du bist die Spielleitung. Jede Karte ist ein Moment am Spieltisch. <b>Wische nach links oder rechts</b> (oder tippe auf die Knöpfe, am PC: ← / →), um zu entscheiden.</p><h3>Die vier Balken</h3><p><b>Macht</b> (mickrig ↔ OP), <b>Realismus</b> (Schwachsinn ↔ Bürokratie), <b>Spaß</b> (Pain ↔ Albern-Kollaps), <b>Tempo</b> (zäh ↔ gehetzt). Der grüne Bereich liegt etwa zwischen der Mitte und drei Vierteln. Läuft ein Balken <b>ganz leer oder ganz voll</b>, kippt die Runde – Spielende.</p><p>Beim Zielen zeigen Punkte über den Balken, welche sich bewegen (groß = viel). Ab Spielleiter-Stufe 2 siehst du auch die Richtung.</p><h3>Die Spieler</h3><p>Jeder Spielertyp mag andere Balkenstände. Ist ein Balken lange außerhalb ihres Geschmacks, sinkt die Laune – bei null wollen sie gehen. Unter zwei Spielern ist die Runde vorbei.</p><h3>Würfel</h3><p>Manche Wahl verlangt eine Probe (🎲 12 = mindestens 12 auf dem W20). Eine 20 gelingt immer, eine 1 nie. Im Spielleiter-Buch sammelst du Würfelsets – jedes klingt und sieht anders aus.</p><h3>Die Menschen am Tisch</h3><p>Manche Spieler sind befreundet, Geschwister, ein Paar oder können sich gerade nicht leiden. Das färbt die Laune beider. Spieler merken sich, was ihnen passiert ist: gefallene Helden, Pech beim Würfeln, wie lange sie schon dabei sind. Und manchmal kommt das echte Leben dazwischen – ein Umzug, ein neuer Job, eine Trennung. Dann pausiert jemand und meldet sich im Gruppenchat.</p><h3>Schwere Entscheidungen</h3><p>Wenn du eine Wahl antippst oder die Karte anziehst, siehst du an den Gesichtern am Tisch, wer sich freut (▲), wer sauer wird (▼) und wessen Held in Gefahr ist (💀). Karten mit rotem ⚖-Siegel sind schwer: Du wirst gefragt, ob du das wirklich willst, und siehst, was auf dem Spiel steht. Manchmal brennt oben eine Lunte – wer zu lange zögert, lässt die Zeit entscheiden. Spieler merken sich deine Entscheidungen: Wer sich übergangen fühlt, verliert das Vertrauen in dich, nimmt Rückschläge schwerer und spricht dich irgendwann darauf an.</p><h3>Bosskampf & Ziele</h3><p>In der letzten Session jeder Kampagne wartet der Endgegner. Jeder Treffer im Bosskampf macht das Finale leichter. Jede Kampagne hat außerdem ein <b>geheimes Ziel</b> (🎯 unten rechts). <b>Seltene Karten</b> glänzen golden und haben eine dritte Wahl: nach oben wischen oder ↑.</p><h3>Für immer</h3><p>Sessions werden zu Kampagnen, Kampagnen zur Welt-Chronik. Überlebende Helden werden Legenden, Schurken kehren zurück. Deine Spielleiter-Stufe, Werkzeuge, Hausregeln und Erfolge bleiben auch nach dem Ende einer Runde.</p><p class="leise">Tastatur: ← / → oder A / D wählen, ↑ / W für die dritte Wahl, Leertaste weiter, M Menü.</p>');
+    fenster('<h2>So wird gespielt</h2><p>Du bist die Spielleitung. Jede Karte ist ein Moment am Spieltisch. <b>Wische nach links oder rechts</b> (oder tippe auf die Knöpfe, am PC: ← / →), um zu entscheiden.</p><h3>Die vier Balken</h3><p><b>Macht</b> (mickrig ↔ OP), <b>Realismus</b> (Schwachsinn ↔ Bürokratie), <b>Spaß</b> (Pain ↔ Albern-Kollaps), <b>Tempo</b> (zäh ↔ gehetzt). Der grüne Bereich liegt etwa zwischen der Mitte und drei Vierteln. Läuft ein Balken <b>ganz leer oder ganz voll</b>, kippt die Runde – Spielende.</p><p>Beim Zielen zeigen Punkte über den Balken, welche sich bewegen (groß = viel). Ab Spielleiter-Stufe 2 siehst du auch die Richtung.</p><h3>Die Spieler</h3><p>Jeder Spielertyp mag andere Balkenstände. Ist ein Balken lange außerhalb ihres Geschmacks, sinkt die Laune – bei null wollen sie gehen. Unter zwei Spielern ist die Runde vorbei.</p><h3>Würfel</h3><p>Manche Wahl verlangt eine Probe (🎲 12 = mindestens 12 auf dem W20). Eine 20 gelingt immer, eine 1 nie. Im Spielleiter-Buch sammelst du Würfelsets – jedes klingt und sieht anders aus.</p><h3>Die Menschen am Tisch</h3><p>Manche Spieler sind befreundet, Geschwister, ein Paar oder können sich gerade nicht leiden. Das färbt die Laune beider. Spieler merken sich, was ihnen passiert ist: gefallene Helden, Pech beim Würfeln, wie lange sie schon dabei sind. Und manchmal kommt das echte Leben dazwischen – ein Umzug, ein neuer Job, eine Trennung. Dann pausiert jemand und meldet sich im Gruppenchat.</p><h3>Wo ihr spielt</h3><p>Die Runde trifft sich jeden Donnerstag – im Wohnzimmer, in einer WG-Küche, im Hobbykeller, unterm Dach, im Hinterzimmer eines Spieleladens, in einer Kneipe oder im Schrebergarten. Manchmal zieht ihr um, und manchmal plant ihr einen <b>Ausflug</b>: ein Wochenende in einer Hütte im Wald, eine Burg-Herberge, eine Convention, eine lange Zugfahrt, ein Zeltlager oder das Bootshaus am See. Jeder Ort klingt und sieht anders aus, hat Wetter und Jahreszeiten und eigene Leute – und an jedem wartet eine kleine <b>Nebengeschichte</b>, die Kapitel für Kapitel weitergeht, auch über viele Runden hinweg. Im Spielleiter-Buch unter „Spielorte“ siehst du, was du schon erlebt hast.</p><h3>Klang</h3><p>Du hörst den Raum, in dem ihr sitzt: Uhr, Regen am Fenster, Kühlschrank, Stammtisch, Zug, Lagerfeuer. Dazu spielt die kleine <b>Spielleiter-Box</b> leise Fantasy-Klänge zur Szene und verstummt nach einer Weile wieder. Beides lässt sich in den Einstellungen getrennt regeln.</p><h3>Schwere Entscheidungen</h3><p>Wenn du eine Wahl antippst oder die Karte anziehst, siehst du an den Gesichtern am Tisch, wer sich freut (▲), wer sauer wird (▼) und wessen Held in Gefahr ist (💀). Karten mit rotem ⚖-Siegel sind schwer: Du wirst gefragt, ob du das wirklich willst, und siehst, was auf dem Spiel steht. Manchmal brennt oben eine Lunte – wer zu lange zögert, lässt die Zeit entscheiden. Spieler merken sich deine Entscheidungen: Wer sich übergangen fühlt, verliert das Vertrauen in dich, nimmt Rückschläge schwerer und spricht dich irgendwann darauf an.</p><h3>Bosskampf & Ziele</h3><p>In der letzten Session jeder Kampagne wartet der Endgegner. Jeder Treffer im Bosskampf macht das Finale leichter. Jede Kampagne hat außerdem ein <b>geheimes Ziel</b> (🎯 unten rechts). <b>Seltene Karten</b> glänzen golden und haben eine dritte Wahl: nach oben wischen oder ↑.</p><h3>Für immer</h3><p>Sessions werden zu Kampagnen, Kampagnen zur Welt-Chronik. Überlebende Helden werden Legenden, Schurken kehren zurück. Deine Spielleiter-Stufe, Werkzeuge, Hausregeln und Erfolge bleiben auch nach dem Ende einer Runde.</p><p class="leise">Tastatur: ← / → oder A / D wählen, ↑ / W für die dritte Wahl, Leertaste weiter, M Menü.</p>');
   }
   function einstellungen() {
     const e = META.einst;
-    const f = fenster('<h2>Einstellungen</h2><div class="schalter"><span>Atmosphäre (Hintergrundklang)</span><input type="range" min="0" max="1" step="0.05" value="' + e.atmo + '" data-e="atmo"></div><div class="schalter"><span>Effekte</span><input type="range" min="0" max="1" step="0.05" value="' + e.fx + '" data-e="fx"></div><div class="schalter"><span>Schwere Entscheidungen ohne Rückfrage</span><input type="checkbox" data-e="schnell"' + (e.schnell ? " checked" : "") + '></div><div class="schalter"><span>Ohne Zeitdruck (keine ablaufende Lunte)</span><input type="checkbox" data-e="keineEile"' + (e.keineEile ? " checked" : "") + '></div><div class="schalter"><span>Vibration</span><input type="checkbox" data-e="vib"' + (e.vib ? " checked" : "") + '></div><div class="schalter"><span>Automatisch weiterblättern</span><input type="checkbox" data-e="auto"' + (e.auto ? " checked" : "") + '></div><div class="schalter"><span>Weniger Bewegung</span><input type="checkbox" data-e="ruhig"' + (e.ruhig ? " checked" : "") + '></div><h3>Spielstand</h3><p class="leise">Alles wird nur in diesem Browser gespeichert.</p><div class="reihe"><button class="knopf zweit" data-loesch>Alles zurücksetzen</button></div><p class="leise">Klänge: echte Aufnahmen aus der Bühne von imrestales.de (freie Lizenzen, siehe amb/).</p>');
+    const f = fenster('<h2>Einstellungen</h2><div class="schalter"><span>Raumklang (der Ort, an dem ihr spielt)</span><input type="range" min="0" max="1" step="0.05" value="' + e.atmo + '" data-e="atmo"></div><div class="schalter"><span>Spielleiter-Box (Fantasy-Klänge zur Szene)</span><input type="range" min="0" max="1" step="0.05" value="' + e.box + '" data-e="box"></div><div class="schalter"><span>Effekte</span><input type="range" min="0" max="1" step="0.05" value="' + e.fx + '" data-e="fx"></div><div class="schalter"><span>Schwere Entscheidungen ohne Rückfrage</span><input type="checkbox" data-e="schnell"' + (e.schnell ? " checked" : "") + '></div><div class="schalter"><span>Ohne Zeitdruck (keine ablaufende Lunte)</span><input type="checkbox" data-e="keineEile"' + (e.keineEile ? " checked" : "") + '></div><div class="schalter"><span>Vibration</span><input type="checkbox" data-e="vib"' + (e.vib ? " checked" : "") + '></div><div class="schalter"><span>Automatisch weiterblättern</span><input type="checkbox" data-e="auto"' + (e.auto ? " checked" : "") + '></div><div class="schalter"><span>Weniger Bewegung</span><input type="checkbox" data-e="ruhig"' + (e.ruhig ? " checked" : "") + '></div><h3>Spielstand</h3><p class="leise">Alles wird nur in diesem Browser gespeichert.</p><div class="reihe"><button class="knopf zweit" data-loesch>Alles zurücksetzen</button></div><p class="leise">Klänge: echte Aufnahmen aus der Bühne von imrestales.de (freie Lizenzen, siehe amb/).</p>');
     f.addEventListener("input", ev => { const i = ev.target.closest("[data-e]"); if (!i) return; e[i.dataset.e] = i.type === "checkbox" ? i.checked : +i.value; Ton.start(); Ton.lautstaerke(); document.body.classList.toggle("ruhig", e.ruhig); speichern(); });
     f.querySelector("[data-loesch]").addEventListener("click", () => confirmFenster("Wirklich alles löschen – Stufe, Erfolge, Chronik?", () => { META = metaNeu(); RUN = null; speichern(); location.reload(); }));
   }
@@ -1844,6 +2070,7 @@
   }
   function fortsetzen() {
     Z.s = RUN.z || Z.s;
+    if (!RUN.heim) { ortStart(); RUN.ortNeu = false; }
     if (!aktuelle) naechsteKarte(); else zeigeKarte();
   }
 
@@ -1919,12 +2146,19 @@
     const ctx = sprecherFinden(k) || { sp: aktiveSpieler()[0] };
     if (opt.sp != null) ctx.sp = RUN.spieler[opt.sp];
     if (opt.sp2 != null) { ctx.sp2 = RUN.spieler[opt.sp2]; const z = bezZwischen(ctx.sp, ctx.sp2); if (z) ctx.bez = z; }
-    if (!TYPEN[k.wer] && !["spieler", "pausiert"].includes(k.wer) && !k.bez) ctx.sym = k.wer;
+    if (!TYPEN[k.wer] && !["spieler", "pausiert", "wirt"].includes(k.wer) && !k.bez) ctx.sym = k.wer;
     if (k.wer === "pausiert") ctx.chat = true;
     const f = fuelle(ctx);
     aktuelle = { k, ctx, f, text: ersetze(k.text, f) };
     if (k.selten) { Viz.zeige("funkeln"); }
     zeigeKarte();
   }
-  window.TNE = { sim, testKarte, zeichneTischbild, katzeLauf, staerke: v => { STAERKE = v; }, KARTEN, ZIEHBAR, META: () => META, RUN: () => RUN, akt: () => aktuelle, vorschau: vorschauFuer, Viz, stichwort, parseWirkung };
+  /* Test: TNE.ort("huette", "regen", "nacht") – Spielort sofort wechseln und neu zeichnen */
+  function testOrt(k, wetter, zeit) {
+    if (!RUN) return;
+    RUN.ort = k; if (OD.ORTE[k] && OD.ORTE[k].art !== "ausflug") RUN.heim = k; if (wetter) RUN.wetter = wetter;
+    if (zeit) RUN.k.karte = zeit === "nacht" ? RUN.k.laenge - 2 : 0;
+    tischKey = ""; aktuelle.banner = null; zeigeKarte(); ortKlang();
+  }
+  window.TNE = { sim, testKarte, ort: testOrt, ortZustand: () => ortZustand(), zeichneTischbild, katzeLauf, staerke: v => { STAERKE = v; }, KARTEN, ZIEHBAR, META: () => META, RUN: () => RUN, akt: () => aktuelle, vorschau: vorschauFuer, Viz, stichwort, parseWirkung };
 })();

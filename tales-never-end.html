@@ -245,6 +245,29 @@ a{color:var(--gold)}
 #tischbild{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 #tischbild svg{position:absolute;inset:0;width:100%;height:100%;display:block}
 #tischbild .tding{animation:tding .6s ease-out both;animation-delay:var(--d)}
+/* Spielorte: Licht, Wetter und Kleinkram bewegen sich sanft */
+#tischbild .flacker{animation:tneFlacker 2.6s ease-in-out infinite alternate}
+@keyframes tneFlacker{0%{opacity:1}35%{opacity:.82}55%{opacity:.95}80%{opacity:.78}100%{opacity:.92}}
+#tischbild .schwingt{transform-origin:50% -20%;animation:tneSchwingt 7s ease-in-out infinite alternate}
+@keyframes tneSchwingt{from{transform:translateX(-14px)}to{transform:translateX(14px)}}
+#tischbild .funkel{animation:tneFunkel 3.2s ease-in-out infinite alternate}
+@keyframes tneFunkel{50%{opacity:.45}}
+#tischbild .zuglicht{animation:tneZug 4.8s linear infinite}
+@keyframes tneZug{from{transform:translateX(0)}to{transform:translateX(180%)}}
+#tischbild .motte{animation:tneMotte 5s linear infinite;transform-box:view-box}
+@keyframes tneMotte{0%{transform:translate(calc(var(--mx) - 40px),calc(var(--my) - 10px)) rotate(0)}25%{transform:translate(calc(var(--mx) + 10px),calc(var(--my) - 50px)) rotate(80deg)}50%{transform:translate(calc(var(--mx) + 45px),calc(var(--my) + 5px)) rotate(170deg)}75%{transform:translate(calc(var(--mx) - 5px),calc(var(--my) + 40px)) rotate(260deg)}100%{transform:translate(calc(var(--mx) - 40px),calc(var(--my) - 10px)) rotate(360deg)}}
+#tischbild .tropfspur{animation:tneTropfen linear infinite}
+@keyframes tneTropfen{from{transform:translateY(0);opacity:0}15%{opacity:1}to{transform:translateY(38vh);opacity:0}}
+#tischbild .flocke{animation:tneFlocke linear infinite}
+@keyframes tneFlocke{from{transform:translate(0,0);opacity:0}15%{opacity:1}to{transform:translate(30px,40vh);opacity:0}}
+#tischbild .regenring{transform-box:fill-box;transform-origin:center;animation:tneRing 2.4s ease-out infinite}
+@keyframes tneRing{from{transform:scale(.2);opacity:.6}to{transform:scale(3.5);opacity:0}}
+#tischbild .wetterleuchten{animation:tneLeuchten 11s linear infinite}
+@keyframes tneLeuchten{0%,88%,100%{opacity:0}89%{opacity:.16}90%{opacity:0}91.5%{opacity:.1}93%{opacity:0}}
+#tischbild .laubflug{animation:tneLaub linear infinite}
+@keyframes tneLaub{from{transform:translate(-40px,var(--ly)) rotate(0)}50%{transform:translate(50vw,calc(var(--ly) + 30px)) rotate(200deg)}to{transform:translate(110vw,calc(var(--ly) - 10px)) rotate(420deg)}}
+body.ruhig #tischbild *{animation:none!important}
+.naechst{background:rgba(232,177,78,.1);border:1px solid rgba(232,177,78,.3);border-radius:10px;padding:.5rem .7rem}
 @keyframes tding{from{opacity:0}}
 .balken{position:relative}
 .balken::before{content:"";position:absolute;inset:-4px 0 -2px;background:radial-gradient(ellipse 60% 100% at 50% 50%,rgba(15,9,5,.62),rgba(15,9,5,0) 85%);z-index:-1;pointer-events:none}
@@ -427,8 +450,10 @@ body.ruhig *{animation-duration:.01ms!important;transition-duration:.01ms!import
 <script src="tne-karten-9.js?v=3"></script>
 <script src="tne-karten-10.js?v=2"></script>
 <script src="tne-karten-11.js?v=1"></script>
-<script src="tne-grafik.js?v=1"></script>
+<script src="tne-karten-12.js?v=1"></script>
+<script src="tne-orte.js?v=1"></script>
+<script src="tne-grafik.js?v=2"></script>
 <script src="tonregler.js?v=1"></script>
-<script src="tne.js?v=8"></script>
+<script src="tne.js?v=9"></script>
 </body>
 </html>
