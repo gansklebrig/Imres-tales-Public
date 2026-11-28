@@ -173,18 +173,36 @@
     for (const k of WRAP) { const o = Z[k]; if (typeof o !== "function") continue; M.orig[k] = o; Z[k] = function () { const a = now(); try { return o.apply(this, arguments); } finally { M.logic += now() - a; } }; }
     const r = Z.gfx.render; M.orig.render = r; Z.gfx.render = function () { const a = now(); try { return r.apply(this, arguments); } finally { M.draw += now() - a; } };
     const uf = Z.ui && Z.ui.frame; if (uf) { M.orig.uiframe = uf; Z.ui.frame = function () { const a = now(); try { return uf.apply(this, arguments); } finally { M.uiT += now() - a; } }; }
-    try { if (window.PerformanceObserver) { M.obs = new PerformanceObserver(l => { for (const e of l.getEntries()) if (M && M.longs.length < 300) M.longs.push(e.duration); }); M.obs.observe({ entryTypes: ["longtask"] }); } } catch (_) { M.obs = null; }
+    try { if (window.PerformanceObserver) { M.obs = new PerformanceObserver(l => { for (const e of l.getEntries()) if (M && M.longs.length < 300) { M.longs.push(e.duration); M.longAt.push([e.startTime, e.duration, M.prof ? 1 : 0, playing() ? 1 : 0]); } }); M.obs.observe({ entryTypes: ["longtask"] }); } } catch (_) { M.obs = null; }
+    /* W44 Feinschliff: Ursachen langer Aufgaben zuordnen – Kachel-Chunk-Bau (bild.js schreibt Z.gfx.chunkLog), Speichern, Gebietswechsel */
+    Z.gfx.chunkLog = [];
+    try { const si = Storage.prototype.setItem; M.orig.setItem = si; Storage.prototype.setItem = function () { const a = now(); try { return si.apply(this, arguments); } finally { if (M && M.marks.length < 600) M.marks.push(["speichern", a, now() - a]); } }; } catch (_) {}
+    const la = Z.loadArea; if (typeof la === "function") { M.orig.loadArea = la; Z.loadArea = M.laW = function () { const a = now(); try { return la.apply(this, arguments); } finally { if (M && M.marks.length < 600) M.marks.push(["gebiet", a, now() - a]); } }; }
+  }
+  /* lange Aufgaben nach Ursache: Abgleich (letzte 25 % – liest die Grafikkarte zurück und bremst dadurch selbst), Kachelbau, Speichern, Gebietswechsel, ohne Spiel (Pause/Menü), sonst */
+  function longCauses(m) {
+    const cl = (Z.gfx && Z.gfx.chunkLog) || [], out = { abgleich: 0, kacheln: 0, speichern: 0, gebiet: 0, pause: 0, sonst: 0 }, main = [];
+    for (const [s, d, pf, pl] of m.longAt || []) {
+      const e = s + d, hit = k => m.marks.some(x => x[0] === k && x[1] < e && x[1] + x[2] > s);
+      let ch = false; for (let i = 0; i < cl.length; i += 2) if (cl[i] < e && cl[i] + cl[i + 1] > s && cl[i + 1] > 8) { ch = true; break; }
+      const k = hit("gebiet") ? "gebiet" : pf ? "abgleich" : !pl ? "pause" : ch ? "kacheln" : hit("speichern") ? "speichern" : "sonst";
+      out[k]++; if (k !== "abgleich" && k !== "pause") main.push(d);
+    }
+    let cn = 0, cms = 0, cmax = 0; for (let i = 0; i < cl.length; i += 2) { cn++; cms += cl[i + 1]; if (cl[i + 1] > cmax) cmax = cl[i + 1]; }
+    return { out, main, cn, cms, cmax };
   }
   function unwrapAll() {
     if (!M || !M.orig) return;
     for (const k of WRAP) if (M.orig[k]) Z[k] = M.orig[k];
     if (M.orig.render) Z.gfx.render = M.orig.render;
     if (M.orig.uiframe) Z.ui.frame = M.orig.uiframe;
+    try { if (M.orig.setItem) Storage.prototype.setItem = M.orig.setItem; } catch (_) {}
+    if (M.orig.loadArea && Z.loadArea === M.laW) Z.loadArea = M.orig.loadArea;
     try { if (M.obs) M.obs.disconnect(); } catch (_) {}
     Z.prof = null;
   }
   const playing = () => !!(Z.level && !Z.paused && !(Z.ui && Z.ui.modalOpen) && !document.hidden);
-  function newM(kind) { return { kind, iv: [], active: 0, logic: 0, draw: 0, uiT: 0, frames: 0, longs: [], lt: 0, prof: null, t0: now(), parts: 0, partsN: 0 }; }
+  function newM(kind) { return { kind, iv: [], active: 0, logic: 0, draw: 0, uiT: 0, frames: 0, longs: [], longAt: [], marks: [], lt: 0, prof: null, t0: now(), parts: 0, partsN: 0 }; }
   function stats(iv) {
     const n = iv.length; if (!n) return { n: 0, fps: 0, low: 0, max: 0, miss: 0 };
     const sum = iv.reduce((a, b) => a + b, 0), s = iv.slice().sort((a, b) => a - b), w = Math.max(1, Math.ceil(n * 0.01));
@@ -222,11 +240,12 @@
     requestAnimationFrame(loop);
     return true;
   };
-  D.cancel = function () { unwrapAll(); M = null; D.busy = false; hint(""); };
+  D.cancel = function () { unwrapAll(); M = null; D.busy = false; hint(""); if (Z.gfx) Z.gfx.chunkLog = null; };
   function finishDiag() {
     const m = M; unwrapAll(); M = null; D.busy = false; hint("");
     const main = m.iv.slice(0, m.profStart || m.iv.length), st = stats(main), n = Math.max(1, m.iv.length);
-    const r = { st, logic: m.logic / n, draw: m.draw / n, ui: m.uiT / n, longs: m.longs, prof: m.prof, profN: Math.max(1, m.iv.length - (m.profStart || 0)), parts: m.partsN ? m.parts / m.partsN : 0, sec: m.active / 1000 };
+    let lc = null; try { lc = longCauses(m); } catch (_) {} if (Z.gfx) Z.gfx.chunkLog = null;
+    const r = { st, logic: m.logic / n, draw: m.draw / n, ui: m.uiT / n, longs: m.longs, lc, prof: m.prof, profN: Math.max(1, m.iv.length - (m.profStart || 0)), parts: m.partsN ? m.parts / m.partsN : 0, sec: m.active / 1000 };
     D.last = report("diag", r);
     Z.ui && Z.ui.showReport && Z.ui.showReport(D.last, L(["Diagnosebericht", "Diagnosis report"]));
   }
@@ -319,6 +338,8 @@
       out.push("Zeit je Bild: Spiel-Logik " + f1(r.logic) + " ms · Zeichnen " + f1(r.draw) + " ms · Oberfläche " + f1(r.ui) + " ms · Browser/Grafikkarte/Warten " + f1(Math.max(0, all - r.logic - r.draw - r.ui)) + " ms");
       if (r.prof) out.push("Zeichenbereiche (mit Abgleich): " + Object.entries(r.prof).map(([k, v]) => (PROFN[k] || k) + " " + f1(v / r.profN)).join(" · ") + " ms");
       out.push("Lange Aufgaben (>50 ms): " + r.longs.length + (r.longs.length ? " (max " + f0(Math.max.apply(null, r.longs)) + " ms)" : "") + (window.PerformanceObserver ? "" : " (nicht messbar)"));
+      if (r.lc && r.longs.length) { const o = r.lc.out; out.push("  davon: im Spiel " + r.lc.main.length + (r.lc.main.length ? " (max " + f0(Math.max.apply(null, r.lc.main)) + " ms)" : "") + " · Grafik-Abgleich " + o.abgleich + " · Kachelbau " + o.kacheln + " · Speichern " + o.speichern + " · Gebietswechsel " + o.gebiet + " · Pause/Menü " + o.pause + " · sonst " + o.sonst); }
+      if (r.lc) out.push("Kachel-Chunks gebaut: " + r.lc.cn + (r.lc.cn ? " (Ø " + f1(r.lc.cms / r.lc.cn) + " ms, max " + f0(r.lc.cmax) + " ms)" : ""));
       try { const m = performance.memory; if (m) out.push("Speicher: " + Math.round(m.usedJSHeapSize / 1048576) + " / " + Math.round(m.jsHeapSizeLimit / 1048576) + " MB"); } catch (_) {}
     } else if (kind === "bench" && Array.isArray(r.res)) {
       out.push("Ergebnis je Stufe (Ø fps / schlechteste 1 % / längstes Bild):");

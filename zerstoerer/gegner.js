@@ -356,13 +356,27 @@
       think(e, edt, P);
     }
     /* Trennung, damit sich Gegner nicht stapeln */
+    const sepFree = (e, dx) => {
+      const x = e.x + dx;
+      for (let ty = Math.floor(e.y / T); ty <= Math.floor((e.y + e.h - 0.01) / T); ty++)
+        for (let tx = Math.floor((x + 0.01) / T); tx <= Math.floor((x + e.w - 0.01) / T); tx++) if (W.solidT(W.tile(tx, ty))) return false;
+      return true;
+    };
     for (let i = 0; i < Z.enemies.length; i++) {
       const a = Z.enemies[i]; if (a.dead || a.def.fly || a.def.boss || a._rest) continue;
       for (let j = i + 1; j < Z.enemies.length; j++) {
         const b = Z.enemies[j]; if (b.dead || b.def.fly || b.def.boss || b._rest) continue;
         if (Math.abs(a.y - b.y) > 10) continue;
         const dx = (b.x + b.w / 2) - (a.x + a.w / 2), min = (a.w + b.w) * 0.42;
-        if (Math.abs(dx) < min) { const push = (min - Math.abs(dx)) * 0.5 * (U.sign(dx) || 1); if (!a.act) a.x -= push * 0.5; if (!b.act) b.x += push * 0.5; }
+        if (Math.abs(dx) < min) {
+          /* W44 Feinschliff: Schieben nur in freien Raum – vorher drückte die Trennung Gegner, die sich an einer Wand drängen
+             (v. a. Rattenrudel in Keller/Verlies), ohne Kachelprüfung um bis zu 6 px in den Fels; das Sicherheitsnetz (Z.unstick)
+             schob sie dann alle 0,2 s wieder heraus – endlose „w36-unstick“-Hinweise. Kann einer nicht weichen, weicht der andere. */
+          const push = (min - Math.abs(dx)) * 0.5 * (U.sign(dx) || 1), half = push * 0.5;
+          const ma = !a.act && sepFree(a, -half), mb = !b.act && sepFree(b, half);
+          if (ma) a.x -= !mb && sepFree(a, -push) ? push : half;
+          if (mb) b.x += !ma && sepFree(b, push) ? push : half;
+        }
       }
     }
   };

@@ -1519,13 +1519,18 @@
     if (ch) { G.chunks.delete(key); G.chunks.set(key, ch); return ch; }
     const s = chunkScale(), cw = Math.ceil(CH_W * T * s), chh = Math.ceil(CH_H * T * s);
     let cv = null;
-    if (G.chunks.size > (chunkDevOK() ? 16 : 20)) { const k0 = G.chunks.keys().next().value, old = G.chunks.get(k0); G.chunks.delete(k0); if (old && !old.dev && old.cv.width === cw && old.cv.height === chh) cv = old.cv; }
+    /* W44 Feinschliff: Obergrenze nach sichtbarer Chunk-Zahl (+ Ring für die Vorausschau) statt fest 16/20 – bei 3440×1440 sind
+       mit Ring über 16 Chunks im Spiel, der Speicher warf dann beim Hin- und Herlaufen ständig Chunks weg und baute sie neu (lange Aufgaben).
+       Verworfene vergrößerte Fassungen kommen in einen kleinen Vorrat und werden von chunkDev wiederverwendet statt neu angelegt. */
+    if (G.chunks.size > Math.max(chunkDevOK() ? 16 : 20, chMax)) { const k0 = G.chunks.keys().next().value, old = G.chunks.get(k0); G.chunks.delete(k0); if (old && !old.dev && old.cv.width === cw && old.cv.height === chh) cv = old.cv; else if (old && old.dev && devPool.length < 4) devPool.push(old.cv); }
     if (!cv) { cv = document.createElement("canvas"); cv.width = cw; cv.height = chh; }
     const c = cv.getContext("2d"); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = 1; c.globalCompositeOperation = "source-over"; c.clearRect(0, 0, cw, chh); c.scale(s, s); c.translate(-cx * CH_W * T, -cy * CH_H * T);
+    const pt0 = performance.now(); /* W44: Bauzähler für Diagnose/Tests (G.chunkN, G.chunkMs, G.chunkMax) */
     try { paintTiles(c, cx * CH_W, cy * CH_H, CH_W, CH_H); } catch (e) { console.error(e); }
     /* R33: Hintergrund hinter die fertigen Kacheln backen (lean): „destination-over“ füllt nur, was frei geblieben ist
        (Himmel, Fenster, Lücken – die Kacheln stanzen diese Stellen selbst aus) */
     { const lb = lvBackFor(); if (lb) { const wx = cx * CH_W * T, wy = cy * CH_H * T; c.save(); c.globalCompositeOperation = "destination-over"; c.drawImage(lb, wx * lb.k, wy * lb.k, CH_W * T * lb.k, CH_H * T * lb.k, wx, wy, CH_W * T, CH_H * T); c.restore(); } }
+    { const d = performance.now() - pt0; G.chunkN = (G.chunkN || 0) + 1; G.chunkMs = (G.chunkMs || 0) + d; if (!(G.chunkMax >= d)) G.chunkMax = d; if (G.chunkLog && G.chunkLog.length < 400) G.chunkLog.push(pt0, d); }
     ch = { cv }; G.chunks.set(key, ch); return ch;
   }
   /* Chunks in Bildschirmauflösung (ab Stufe „Hoch“): Ein Chunk wird mit 3× gemalt und bisher jedes Bild auf den
@@ -1534,7 +1539,7 @@
      Vergrößerung, ausgerichtet auf die ganzzahligen Bildschirmpixel der Welt – und danach pixelgenau kopiert.
      Danach braucht es nur noch die vergrößerte Fassung (die kleine wird freigegeben). */
   const chunkDevOK = () => lq() >= 2 && G.scale > chunkScale() + 0.01 && G.scale <= 4.6;
-  let chDevFrame = -1, chDevMade = 0;
+  let chDevFrame = -1, chDevMade = 0, chMax = 0; const devPool = [];
   function chunkDev(ch, cx, cy, S) {
     if (chDevFrame !== G.frame) { chDevFrame = G.frame; chDevMade = 0; }
     if (chDevMade >= 1) return null;
@@ -1542,7 +1547,9 @@
     const s = chunkScale();
     const wx = cx * CH_W * T * S, wy = cy * CH_H * T * S, gx = Math.round(wx), gy = Math.round(wy);
     const w = Math.round((cx + 1) * CH_W * T * S) - gx, h = Math.round((cy + 1) * CH_H * T * S) - gy;
-    const d = document.createElement("canvas"); d.width = w; d.height = h; const g = d.getContext("2d");
+    let d = null; for (let i = 0; i < devPool.length; i++) if (devPool[i].width === w && devPool[i].height === h) { d = devPool.splice(i, 1)[0]; break; }
+    if (!d) { d = document.createElement("canvas"); d.width = w; d.height = h; }
+    const g = d.getContext("2d"); g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = "source-over"; g.clearRect(0, 0, w, h);
     g.imageSmoothingEnabled = true; g.setTransform(S / s, 0, 0, S / s, wx - gx, wy - gy); g.drawImage(ch.cv, 0, 0);
     ch.cv = d; ch.dev = { S, gx, gy };
     return ch.dev;
@@ -1555,6 +1562,7 @@
     const cx0 = Math.floor(cam.x / (CH_W * T)), cx1 = Math.floor((cam.x + cam.w) / (CH_W * T));
     const cy0 = Math.floor(cam.y / (CH_H * T)), cy1 = Math.floor((cam.y + cam.h) / (CH_H * T));
     let built = 0;
+    chMax = (cx1 - cx0 + 3) * (cy1 - cy0 + 3) + 2;
     for (let cy = cy0; cy <= cy1; cy++) for (let cx = cx0; cx <= cx1; cx++) {
       if (cx < 0 || cy < 0 || cx * CH_W >= lv.W || cy * CH_H >= lv.H) continue;
       if (!G.chunks.has(cx + "," + cy)) built++;
