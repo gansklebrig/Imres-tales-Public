@@ -9738,7 +9738,7 @@
 },
 "zerstoerer.html":{
 "groesse":81795,
-"sha256":"081fbfb3dd095f4cf1bd4d49afa7e8ce1aefbc8d50f700d84ee6881260bfe3f0"
+"sha256":"08df55e7f004a9fb556c83fe52b9613ed41ec57b91e41fcb0801707146df28a6"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":145807,
@@ -10025,8 +10025,8 @@
 "sha256":"8ca5a8e1ca2d794cd48dda6237968282ad30cad3da811ddae8bcb090e3301846"
 },
 "zerstoerer/ui.js":{
-"groesse":219221,
-"sha256":"498d682676f286055fcf0be3748ce5f2ae3eeeb3bc6fe8fb8c2241b77256723a"
+"groesse":223582,
+"sha256":"1613077533373cbaa15a21a3d7078be23b0dab7b918814d75b598f5c9b115d36"
 },
 "zerstoerer/waffen38.js":{
 "groesse":21321,
@@ -10065,5 +10065,5 @@
 "sha256":"1437181731d4ecd8f93e72f72ee85ac181a09073b5a665fe44870f9a652104c0"
 }
 },
-"stand":191
+"stand":192
 }

@@ -1749,8 +1749,40 @@
         const hp = 14 + (s === "ueber" ? 14 : 0);
         const ben = g.length ? g.map(x => esc(Z.itemTitle ? Z.itemTitle(x) : L(Z.itemDef(x).n)) + " +" + Math.round(12 / (1 + 0.12 * n)) + " %").join(", ") : L(["Nichts Getragenes in dieser Farbe", "Nothing you carry in this colour"]);
         return '<button data-act="stat" data-arg="' + s + '" data-key="' + (i + 1) + '" style="--c:' + Z.STATS[s].col + '"' + (i === 0 ? " autofocus" : "") + "><b>" + kb(i) + esc(L(Z.STATS[s].n)) + " " + n + " → " + (n + 1) + "</b><small>" + esc(L(Z.STATS[s].d)) + '</small><small class="nutzen">' + L(["Jetzt: ", "Now: "]) + ben + " · +" + hp + L([" Leben", " health"]) + "</small></button>"; }).join("") +
-      "</div>", { cls: "schmal rollenwahl", noEsc: true });
+      "</div>" + ausrLeiste(P), { cls: "schmal rollenwahl", noEsc: true });
+    /* W42 Rollen: Ausrüstungsleiste unter der Wahl – Symbole zeichnen; Fokus/Zeigen auf eine Rolle hebt die passenden Teile hervor */
+    const mw = document.querySelector("#modal .rollenwahl"); if (!mw) return; /* noch in der Warteschlange */
+    mw.querySelectorAll(".ausr-k .ico[data-icon]").forEach(el => { if (el.firstChild) return; const cv = document.createElement("canvas"); cv.width = 64; cv.height = 64; const c = cv.getContext("2d"); c.scale(2, 2); Z.drawIcon(c, el.dataset.icon, 16, 17, 22, el.dataset.col); el.appendChild(cv); });
+    document.querySelectorAll("#modal .rollen button[data-arg]").forEach(b => {
+      const an = () => { if (!mw) return; mw.classList.remove("hl-brut", "hl-takt", "hl-ueber"); mw.classList.add("hl-" + b.dataset.arg); };
+      b.addEventListener("focus", an); b.addEventListener("mouseenter", an);
+    });
+    const f0 = document.querySelector("#modal .rollen button[autofocus]"); if (f0 && mw) mw.classList.add("hl-" + f0.dataset.arg);
   };
+  /* W42 Rollen: getragene Waffen und Fähigkeiten mit Farbkennung, zu welcher Schriftrolle sie gehören */
+  function ausrLeiste(P) {
+    if (!document.getElementById("w42-rollen-css")) { const st = document.createElement("style"); st.id = "w42-rollen-css";
+      st.textContent = ".ausr-leiste{margin-top:10px;border-top:1px solid #4a3a34;padding-top:8px}" +
+        ".ausr-leiste h3{margin:0 0 6px;font-size:var(--fs-xs,12px);color:var(--mute,#b8a890);font-weight:normal;letter-spacing:.04em}" +
+        ".ausr-reihe{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}" +
+        ".ausr-k{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 3px 4px;border:1px solid var(--c);border-bottom-width:4px;border-radius:7px;background:linear-gradient(#24171a,#170f12);min-width:0;transition:opacity .15s,transform .15s,box-shadow .15s}" +
+        ".ausr-k .ico{width:32px;height:32px}.ausr-k .ico canvas{width:32px;height:32px}" +
+        ".ausr-k b{font-size:11px;line-height:1.15;color:#efe2c8;text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}" +
+        ".ausr-k small{font-size:10px;line-height:1.1;color:var(--c);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}" +
+        ".ausr-k.leer{border-color:#3d3140;opacity:.5}.ausr-k.leer small{color:#8a7a70}" +
+        ".hl-brut .ausr-k:not(.s-brut),.hl-takt .ausr-k:not(.s-takt),.hl-ueber .ausr-k:not(.s-ueber){opacity:.32}" +
+        ".hl-brut .ausr-k.s-brut,.hl-takt .ausr-k.s-takt,.hl-ueber .ausr-k.s-ueber{box-shadow:0 0 0 1px var(--c),0 0 12px var(--c);transform:translateY(-2px)}" +
+        "@media (max-height:430px){.rollenwahl .rollen{gap:5px;margin-top:4px}.rollenwahl .rollen button{padding:5px 10px}.rollenwahl .rollen button small:not(.nutzen){display:none}.ausr-leiste{margin-top:6px;padding-top:5px}.ausr-leiste h3{display:none}.ausr-k{flex-direction:row;gap:4px;padding:3px 4px}.ausr-k .ico,.ausr-k .ico canvas{width:22px;height:22px;flex:none}.ausr-k small{display:none}.ausr-k b{text-align:left}}" +
+        "@media (prefers-reduced-motion:reduce){.ausr-k{transition:none}.hl-brut .ausr-k.s-brut,.hl-takt .ausr-k.s-takt,.hl-ueber .ausr-k.s-ueber{transform:none}}";
+      document.head.appendChild(st); }
+    const ORT = { a1: ["Waffe 1", "Weapon 1"], a2: ["Waffe 2", "Weapon 2"], s1: ["Fähigkeit 1", "Skill 1"], s2: ["Fähigkeit 2", "Skill 2"] };
+    const kach = ["a1", "a2", "s1", "s2"].map(k => {
+      const it = P.slots[k]; if (!it) return '<div class="ausr-k leer" style="--c:#3d3140"><span class="ico"></span><b>' + esc(L(ORT[k])) + "</b><small>" + L(["leer", "empty"]) + "</small></div>";
+      const d = Z.itemDef(it), st = Z.itemStat(it), S = Z.STATS[st], name = Z.itemTitle ? Z.itemTitle(it) : L(d.n);
+      return '<div class="ausr-k s-' + (S ? st : "x") + '" style="--c:' + (S ? S.col : "#8a7a70") + '" title="' + esc(name) + '"><span class="ico" data-icon="' + d.icon + '" data-col="' + d.col + '"></span><b>' + esc(name) + "</b><small>" + (S ? "● " + esc(L(S.n)) : esc(L(ORT[k]))) + "</small></div>";
+    }).join("");
+    return '<div class="ausr-leiste"><h3>' + L(["Deine Ausrüstung – die Farbe zeigt, welche Rolle sie stärkt", "Your gear – the colour shows which scroll boosts it"]) + '</h3><div class="ausr-reihe">' + kach + "</div></div>";
+  }
   actions.stat = s => { const P = Z.player; P.stats[s]++; const before = P.hpMax, hp0 = P.hp; Z.recalcPlayer(); P.hp = Math.min(P.hpMax, hp0 + Math.max(0, P.hpMax - before)); /* W26 Erstspieler: recalcPlayer skaliert schon mit – vorher 128/114 */ closeModal(); A.play("holy", { vol: 0.5 }); Z.fx.text(P.x + P.w / 2, P.y - 14, L(Z.STATS[s].n) + " +1", Z.STATS[s].col, true); Z.fx.burst(P.x + P.w / 2, P.y + 10, 20, { col: Z.STATS[s].col, sp: 60, up: 60, life: 0.8, size: 2.5, kind: "glow", add: true }); };
 
   /* ---------- Lager: Figuren ---------- */
