@@ -8970,8 +8970,10 @@ function tutTick(dt){if(!P||G.bot||NET.role==='guest'&&!NET.mine)return;const sp
   if(TUT.i<5){TUT.t+=dt;const min=TUT.t>2.6;let fertig=false;
    if(TUT.i===0)fertig=min&&Math.hypot(P.x-TUT.x0,P.y-TUT.y0)>160||TUT.t>12;else if(TUT.i===1)fertig=TUT.t>6;else if(TUT.i===2)fertig=min&&JSON.stringify(P.use||{})!==TUT.u0||TUT.t>14;else if(TUT.i===3)fertig=min&&(P.rollCd||0)>G.time||TUT.t>11;else fertig=TUT.t>7;
    if(fertig){TUT.i++;TUT.t=0;if(TUT.i<5)tutZeig(tutText(TUT.i,TUT.d),(TUT.i+1)+' / 5');else{SAVE.tutDone=1;persist();if(TUT.el){TUT.el.remove();TUT.el=null}}}}}
- if(!SAVE.tipLv&&P.level>=2&&P.sp>0){SAVE.tipLv=1;persist();toast(`Stufe aufgestiegen! Mit <b>${tutGeraet()==='kb'?'T':'„Talente“ oben'}</b> lernst du eine neue Fähigkeit.`,'#ffd04a')}
- if(!SAVE.tipBag&&P.bag&&P.bag.length>0){SAVE.tipBag=1;persist();toast(`Beute im Beutel! <b>${tutGeraet()==='kb'?'I':'„Beutel“ oben'}</b> öffnet ihn – grüne +% sind besser als deine Ausrüstung.`,'#e9d7a5')}}
+ if(!SAVE.tipLv&&P.level>=2&&G.overlay==='tree'){SAVE.tipLv=1;persist()}
+ if(!SAVE.tipLv&&P.level>=2&&P.sp>0&&!G.overlay){SAVE.tipLv=1;persist();toast(`Stufe aufgestiegen! Mit <b>${tutGeraet()==='kb'?'T':'„Talente“ oben'}</b> lernst du eine neue Fähigkeit.`,'#ffd04a')}
+ if(!SAVE.tipBag&&P.bag&&P.bag.length>0&&G.overlay==='inv'){SAVE.tipBag=1;persist()}/* Beutel schon offen: Hinweis überflüssig */
+ if(!SAVE.tipBag&&P.bag&&P.bag.length>0&&!G.overlay){SAVE.tipBag=1;persist();toast(`Beute im Beutel! <b>${tutGeraet()==='kb'?'I':'„Beutel“ oben'}</b> öffnet ihn – grüne +% sind besser als deine Ausrüstung.`,'#e9d7a5')}}
 const HINW={inv:['<b>Angelegt</b> ist, was dein Held trägt – darunter liegt dein Beutel.','Grüne <b>+%</b> heißt: besser als deine Ausrüstung. Antippen zeigt den Vergleich und „Anlegen“.','Schrott wird beim Aufsammeln automatisch zu Gold.'],
  tree:['Jede Stufe bringt einen <b>Talentpunkt</b>.','<b>Aktive</b> Fähigkeiten kommen in die Leiste (1–6), <b>passive</b> wirken immer.','Drei Äste – ab 8 Punkten in einem Ast gibt es eine <b>Meisterschaft</b>. „Vorschlag?“ hilft beim Wählen.'],
  truhe:['Die Truhe bleibt über <b>alle Läufe</b> erhalten.','Lege gute Teile hinein, um sie in späteren Läufen zu nutzen.']};
