@@ -23,7 +23,7 @@ const NETZ = 'https://imrestales.de/';
 const SPIEL = app.isPackaged ? path.join(process.resourcesPath, 'spiel') : path.join(__dirname, 'spiel');
 const ARG = n => process.argv.some(a => a === '--' + n);
 const ENTW = !app.isPackaged || ARG('entwickler');   // Entwicklerwerkzeuge nur beim Entwickeln oder mit --entwickler
-const NAME = 'Ezekiel – The Destroyer';
+const NAME = 'Glut und Asche';
 
 /* Programmspeicher mit festem, einfachem Namen (Windows %APPDATA%\Zerstoerer, Linux ~/.config/Zerstoerer) – vor allem anderen setzen */
 app.setPath('userData', path.join(app.getPath('appData'), 'Zerstoerer'));

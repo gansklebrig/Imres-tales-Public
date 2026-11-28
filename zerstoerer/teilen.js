@@ -68,7 +68,7 @@
     /* Text rechts */
     const X = 470; let y = 112;
     c.fillStyle = "#3a1408"; c.textBaseline = "alphabetic";
-    c.font = "40px " + FD; c.fillText("Ezekiel – The Destroyer", X, y); y += 44;
+    c.font = "40px " + FD; c.fillText("Glut und Asche", X, y); y += 44;
     c.font = "italic 26px " + FI; c.fillStyle = "#7a2a10";
     const kopf = d.art === "tag" ? "☀ " + L(["Tagesprüfung", "Daily Trial"]) + " · " + datumTxt(d.tag)
       : d.art === "tiefe" ? "⬇ " + L(["Neuer Tiefe-Bestwert", "New depth record"])
@@ -93,7 +93,7 @@
     const tl = d.art === "tag" ? L(["☀ Tagesprüfung ", "☀ Daily trial "]) + datumTxt(d.tag) + ": " + (d.punkte | 0) + L([" Punkte", " points"])
       : d.art === "tiefe" ? L(["⬇ Neuer Tiefe-Bestwert: ", "⬇ New depth record: "]) + d.tiefe
       : (d.kind === "sieg" ? L(["Die Feste ist gefallen! ", "The keep has fallen! "]) : "") + L(["Erreicht: ", "Reached: "]) + name(d.gebiet);
-    let t = "Ezekiel – The Destroyer · " + tl + " · " + d.held + " · " + fmtZeit(d.zeit) + " · " + (d.kills | 0) + " Kills";
+    let t = "Glut und Asche · " + tl + " · " + d.held + " · " + fmtZeit(d.zeit) + " · " + (d.kills | 0) + " Kills";
     if (d.hilfen && d.hilfen.length && Z.hilfen) t += " · ✚ " + Z.hilfen.hilfeText(d.hilfen);
     if (d.art === "tag") t += "\n" + L(["Vergleich am Sonnenstein: ", "Compare at the Sunstone: "]) + code(d);
     return t + "\nimrestales.de";
@@ -166,7 +166,7 @@
     a.ztZurueck = () => { const b = document.querySelector("#modal .zt-box"); if (b && document.querySelector('#modal [data-act="ztOpen"]')) { b.remove(); const k = document.querySelector('#modal [data-act="ztOpen"]'); if (k) k.focus(); } else u.close(); };
     a.ztShare = async () => {
       const b = await blob(); const t = text(cur.d);
-      try { const f = new File([b], dateiName(), { type: "image/png" }); if (b && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], text: t, title: "Ezekiel – The Destroyer" }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
+      try { const f = new File([b], dateiName(), { type: "image/png" }); if (b && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], text: t, title: "Glut und Asche" }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
       a.ztLaden();
     };
     a.ztLaden = async () => {

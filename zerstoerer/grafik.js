@@ -319,7 +319,7 @@
   const PROFN = { layers: "Hintergrund", tiles: "Kacheln", decor: "Deko", misc: "Objekte/Böden", enemies: "Figuren", fx: "Effekte", light: "Licht", post: "Nachbearb." };
   function report(kind, r) {
     const q = Z.gq, P = Z.player, cv = document.getElementById("cv"), out = [];
-    out.push("Ezekiel – The Destroyer · " + (kind === "bench" ? "Grafiktest" : "Diagnosebericht"));
+    out.push("Glut und Asche · " + (kind === "bench" ? "Grafiktest" : "Diagnosebericht"));
     out.push(VERSION + " · " + new Date().toLocaleString("de-DE"));
     out.push("Gerät: " + browser() + " · " + (navigator.hardwareConcurrency || "?") + " Kerne" + (navigator.deviceMemory ? " · " + navigator.deviceMemory + " GB" : "") + " · " + gpu());
     out.push("Bildschirm: " + innerWidth + "×" + innerHeight + " @" + (devicePixelRatio || 1).toFixed(2) + " · Zeichenfläche " + (cv ? cv.width + "×" + cv.height : "?") + (document.fullscreenElement ? " · Vollbild" : ""));

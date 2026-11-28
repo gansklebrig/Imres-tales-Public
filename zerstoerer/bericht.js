@@ -222,7 +222,7 @@
     const list = lesen(), z = zusammenfassung(list), slot = Z.slots && Z.slots.active ? Z.slots.active() : 1, jetzt = new Date();
     const kopf = {
       format: FORMAT,
-      titel: "Ezekiel – The Destroyer · Spielbericht",
+      titel: "Glut und Asche · Spielbericht",
       hinweis: [
         "Diese Datei wurde von Hand aus dem Spiel exportiert. Sie bleibt auf deinem Gerät, bis du sie selbst weitergibst.",
         "Inhalt: nur Spielwerte je Lauf (Gebiete, Zeiten, Todesursachen, Schaden, Waffen, Kills). Keine Namen, keine Kennungen, keine Gerätedaten außer grob Desktop/Handy/Handheld.",

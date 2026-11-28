@@ -1000,7 +1000,7 @@
     else if (a === "ready") { S.gReady = !S.gReady; if (S.link) S.link.sendR({ t: "ready", r: S.gReady ? 1 : 0 }); draw(true); }
     else if (a === "start") { if (S.role === "host" && S.gReady && S.link) { Z.ui.close(); hostStart(); } }
     else if (a === "copy") copy(S.code);
-    else if (a === "copyl") { const u = link(); if (navigator.share && /Android|iPhone|iPad/i.test(navigator.userAgent)) navigator.share({ title: "Ezekiel – The Destroyer", url: u }).catch(() => copy(u)); else copy(u); }
+    else if (a === "copyl") { const u = link(); if (navigator.share && /Android|iPhone|iPad/i.test(navigator.userAgent)) navigator.share({ title: "Glut und Asche", url: u }).catch(() => copy(u)); else copy(u); }
     else if (a === "mcopy") { const t = document.getElementById("zso-mout"); if (t) copy(t.value); }
     else if (a === "mhost") { S.role = "host"; S.hReady = true; manualHost().catch(() => fail("fmt")); }
     else if (a === "mguest") { const t = document.getElementById("zso-min"); S.role = "guest"; S.gHero = S.hero; manualGuest(t ? t.value : "").catch(e => { S.role = null; fail(e && e.message === "alt" ? "alt" : "fmt"); }); } /* W33 Online: alt */

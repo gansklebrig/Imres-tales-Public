@@ -83,7 +83,7 @@
   const FEHLER = {
     fmt: ["Das ist keine lesbare Spielstand-Datei bzw. kein gültiger Code.", "This is not a readable save file or a valid code."],
     gross: ["Die Datei ist zu groß oder zu verschachtelt (Schutz vor kaputten Dateien).", "The file is too large or too deeply nested (protection against broken files)."],
-    fremd: ["Das ist kein Spielstand von Ezekiel – The Destroyer.", "This is not an Ezekiel – The Destroyer save."],
+    fremd: ["Das ist kein Spielstand von Glut und Asche.", "This is not a save from Ember & Ash."],
     neu: ["Dieser Spielstand stammt aus einer neueren Spielversion – bitte das Spiel aktualisieren.", "This save comes from a newer game version – please update the game."],
     alt: ["Dieser Browser kann gepackte Codes nicht entpacken – bitte stattdessen die Datei verwenden.", "This browser cannot unpack compressed codes – please use the file instead."]
   };

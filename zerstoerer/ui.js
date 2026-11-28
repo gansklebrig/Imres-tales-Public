@@ -34,7 +34,7 @@
 
   /* ======================= TEXTE ======================= */
   const TX = {
-    title: ["Ezekiel", "Ezekiel"], sub: ["The Destroyer · Die Feste der Fäden", "The Destroyer · The Keep of Threads"],
+    title: ["Glut und Asche", "Ember & Ash"], sub: ["Ezekiel · Die Feste der Fäden", "Ezekiel · The Keep of Threads"],
     play: ["Ins Lager", "To the camp"], cont: ["Weiter", "Continue"], settings: ["Einstellungen", "Settings"], tavern: ["Zur Taverne", "Back to the tavern"],
     pause: ["Pause", "Paused"], resume: ["Weiter", "Resume"], abort: ["Lauf aufgeben", "Abandon run"], camp: ["Zurück ins Lager", "Back to camp"],
     close: ["Schließen", "Close"], back: ["Zurück", "Back"], yes: ["Ja", "Yes"], no: ["Nein", "No"],
@@ -1581,7 +1581,7 @@
     const fallback = () => { const ta = modal.querySelector(".bericht"); if (ta) { ta.removeAttribute("readonly"); ta.select(); try { document.execCommand("copy"); done(); } catch (_) { ui.toast(L(["Bitte den Text markieren und kopieren.", "Please select the text and copy it."]), 3000); } ta.setAttribute("readonly", ""); } };
     try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(reportText).then(done, fallback); else fallback(); } catch (_) { fallback(); }
   };
-  actions.repShare = () => { try { navigator.share({ title: "Ezekiel – The Destroyer · Bericht", text: reportText }).catch(() => {}); } catch (_) {} };
+  actions.repShare = () => { try { navigator.share({ title: "Glut und Asche · Bericht", text: reportText }).catch(() => {}); } catch (_) {} };
   actions.repApply = () => { if (reportRec != null) { Z.setGfx("preset", reportRec); ui.toast(L(["Grafik: ", "Graphics: "]) + "<b>" + esc(Z.gfxName()) + "</b>", 2200); } closeModal(); };
   /* bei einem Fehler einmal pro Sitzung leise Bescheid geben */
   let errHinted = false;

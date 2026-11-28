@@ -9737,8 +9737,8 @@
 "sha256":"3ab7b7816ddadc9aa1ef272db3236698570d927a2f28af60f6ead1f3ac0a9320"
 },
 "zerstoerer.html":{
-"groesse":83861,
-"sha256":"57c9512fa56581c410fb8cddf6a74c61130e942dfe89242ebcae111a33d4e161"
+"groesse":83828,
+"sha256":"4cae2673f8a5936484c74ff36de7df8a624b8d61b641638b262908b21a36b86e"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":145504,
@@ -9769,8 +9769,8 @@
 "sha256":"5d4f17b0e2b81894205e22af2c99007db2bf23ac9b86c413b081457601eeed67"
 },
 "zerstoerer/bericht.js":{
-"groesse":22057,
-"sha256":"bb4556e4ee2d94c923629782758b43e05d391cfb55b3629772a29b7c3db71030"
+"groesse":22046,
+"sha256":"ee898baabf0c4bec1af26e7d833fa778bd27965789a1a37168428cf584628021"
 },
 "zerstoerer/bilanz.js":{
 "groesse":36319,
@@ -9857,8 +9857,8 @@
 "sha256":"18f5800c8c638ad32f6ab303c41cce7fd235f79dc00aeefd559feee91bf1be95"
 },
 "zerstoerer/grafik.js":{
-"groesse":31771,
-"sha256":"030450545897f24f605f09eab2595732dd4c2397f38843cc6aca44a160973c4c"
+"groesse":31760,
+"sha256":"2d03dd85c4fed704c166ba534c9937d40103fa3c5ed3f28ffb832222531c2b4f"
 },
 "zerstoerer/haerte.js":{
 "groesse":16550,
@@ -9937,8 +9937,8 @@
 "sha256":"2d43be7d7bb36b37a5f8293a3f04823d3ac2971b1264bf1ccddfdc13356f2728"
 },
 "zerstoerer/online.js":{
-"groesse":99099,
-"sha256":"2481401df87c3c38751cef5766b9df86535fc2b1624a5f5eb3dbaa09452ca8a1"
+"groesse":99088,
+"sha256":"5966c1d08e9f8041073d12d517b3860c38c455fc6d7883f7a6902a0a6cc50a55"
 },
 "zerstoerer/optik2.js":{
 "groesse":55026,
@@ -9993,8 +9993,8 @@
 "sha256":"97f348fadd23587011f0c5656f4245c950c53830e4d51de9097b636528352501"
 },
 "zerstoerer/sicherung.js":{
-"groesse":17906,
-"sha256":"a08122c7fe222c96cf8555326dd2c86411b9facfa17f917b5a5096e8aa7f3991"
+"groesse":17885,
+"sha256":"fba01b33298280531b493893b7605277366fd51ba9c9b41d3919aa8450231f59"
 },
 "zerstoerer/spiel.js":{
 "groesse":48212,
@@ -10021,8 +10021,8 @@
 "sha256":"e20b56500cd0f53df1b36bf6417c0178f5953df485fce3859ed7e7170a7cfa7a"
 },
 "zerstoerer/teilen.js":{
-"groesse":21497,
-"sha256":"dc71dfba43486c30003f859cf342a4a2c8e1ae2699310e0253e3bfd6e4851861"
+"groesse":21464,
+"sha256":"8ed26313ff21f351042403ec677b250322b0103d0394a07f9112381ff8402a10"
 },
 "zerstoerer/tiefe.js":{
 "groesse":24792,
@@ -10033,8 +10033,8 @@
 "sha256":"8ca5a8e1ca2d794cd48dda6237968282ad30cad3da811ddae8bcb090e3301846"
 },
 "zerstoerer/ui.js":{
-"groesse":223559,
-"sha256":"33755bd631436fb59f7bf11076c2e0eddc8656b43c27b0b1b62cc849d62e8163"
+"groesse":223547,
+"sha256":"2ebfd81d7fdbd08c9ed4197aaf94a9c6be1aa2c9175ef72e3b01b3f1ad11f413"
 },
 "zerstoerer/waffen38.js":{
 "groesse":23924,
@@ -10073,5 +10073,5 @@
 "sha256":"1437181731d4ecd8f93e72f72ee85ac181a09073b5a665fe44870f9a652104c0"
 }
 },
-"stand":200
+"stand":201
 }
