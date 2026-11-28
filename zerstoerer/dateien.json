@@ -9738,7 +9738,7 @@
 },
 "zerstoerer.html":{
 "groesse":83623,
-"sha256":"504aa1117878c2dbea138c9be3452644b459293b16016ee475c917cab53c75c9"
+"sha256":"418ca65d7e617a4f7867aa2c28b15b411af972847441698e0d3aa57aab1cee6c"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":145807,
@@ -9805,8 +9805,8 @@
 "sha256":"9caf248cde9605668296502e16e0c126a92395fac10255d21974fa797dea596b"
 },
 "zerstoerer/ebenen.js":{
-"groesse":51407,
-"sha256":"93f2ecf5c7d0060be616885330fad80124e591fac6338a976c20d825f29d1da0"
+"groesse":51757,
+"sha256":"0b8bfc13f1c8ad1ff9c4f15a2c8ff853cd0ec1ea149c06b6e3265498a33eea3f"
 },
 "zerstoerer/effekte.js":{
 "groesse":222972,
@@ -9885,8 +9885,8 @@
 "sha256":"5ebb1a5185cebd64abd9330e59c92f0f573ebd859fd5e6eba7eb7c3e4c4d4f30"
 },
 "zerstoerer/kern.js":{
-"groesse":72324,
-"sha256":"0d95eb16e8e0c4452f4c2d6c8623053114ac2e967b8bff1ae5c210b014f6eff6"
+"groesse":73808,
+"sha256":"628246fa8abbbdcfe3c65bc2375f41e4240c466404ae1174405571f6469faf90"
 },
 "zerstoerer/klang.js":{
 "groesse":150338,
@@ -10065,5 +10065,5 @@
 "sha256":"1437181731d4ecd8f93e72f72ee85ac181a09073b5a665fe44870f9a652104c0"
 }
 },
-"stand":197
+"stand":198
 }

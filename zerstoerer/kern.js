@@ -372,7 +372,7 @@
     if (A.buf[path] || A.loading[path]) return A.loading[path] || Promise.resolve(A.buf[path]);
     if (!A.ctx) return Promise.resolve(null);
     const p = fetch(path).then(r => (r.ok ? r.arrayBuffer() : Promise.reject(r.status))).then(ab => new Promise((res, rej) => A.ctx.decodeAudioData(ab, res, rej)))
-      .then(b => { A.buf[path] = b; try { b._w39l = performance.now(); } catch (_) {} return b; }).catch(() => { A.buf[path] = null; return null; }); /* W39 Dauer: Ladezeit für trimBuf */
+      .then(b => { A.buf[path] = b; try { const t = performance.now(), w = A._w45weg && A._w45weg.get(path); b._w39l = w && t - w < 60000 ? t + 60000 : t; if (w && t - w < 60000) A.nachgeladen = (A.nachgeladen | 0) + 1; } catch (_) {} return b; }).catch(() => { A.buf[path] = null; return null; }); /* W39 Dauer: Ladezeit für trimBuf (W45: kurz nach dem Entfernen neu geladen → 60 s länger frisch) */
     A.loading[path] = p; return p;
   };
   A.loadAll = list => Promise.all(list.map(A.load));
@@ -387,22 +387,34 @@
   })();
   A.bufBudget = () => (Z.gq && Z.gq.lean ? (Z.gq.mini ? 48 : 80) : 160) * 1048576;
   A.bufStat = () => { let by = 0, n = 0; for (const k in A.buf) { const b = A.buf[k]; if (b) { by += b.length * b.numberOfChannels * 4; n++; } } return { n, MB: Math.round(by / 1048576) }; };
+  /* W45 Dauer: Im 22-min-Dauertest (Fuzz, häufige Gebietswechsel) lagen trotz trimBuf dauerhaft 520–580 MB dekodierte Klänge im
+     Speicher (Budget 160 MB): entfernt wurde nur, was ≥ 256 KB groß UND 90 s unbenutzt war – nach jedem Gebietswechsel war fast alles
+     frisch geladen (Musik-Proben, Kulisse, Gegnergeräusche), kleine Puffer blieben nie stehen. Der Prozess wuchs auf > 1,6 GB
+     (vermutlich das gelegentliche „Page crashed“). Jetzt in Stufen, bis 80 % des Budgets erreicht sind:
+     1) wie bisher (≥ 256 KB, 90 s unbenutzt), 2) jede Größe ≥ 16 KB, 30 s unbenutzt, 3) nur wenn noch über 150 %:
+     seit 15 s nicht gespielt. Schleifen und Spielgeräusche (A.SFX) bleiben immer. Prüfung alle 10 s statt 20 s.
+     Gegen Hin und Her (entfernen → sofort wieder vorladen → dekodieren): wird ein entfernter Klang binnen 60 s neu geladen,
+     gilt er danach 60 s als frisch. */
   A.trimBuf = () => {
     if (!A.ctx) return 0;
-    const now = performance.now(), keep = new Set(), big = []; let tot = 0;
+    const now = performance.now(), keep = new Set(), cand = []; let tot = 0;
     for (const id in A.loops) if (A.loops[id]) keep.add(A.loops[id].path);
     if (!A._sfxSet) { A._sfxSet = new Set(); for (const k in A.SFX) for (const p of A.SFX[k] || []) A._sfxSet.add(p); } /* Spielgeräusche bleiben immer (sonst fiele der erste Ton nach dem Entfernen aus) */
     for (const k in A.buf) {
       const b = A.buf[k]; if (!b) continue; const by = b.length * b.numberOfChannels * 4; tot += by;
       const t = Math.max(b._w39t || 0, b._w39l || 0);
-      if (by >= 262144 && !keep.has(k) && !A._sfxSet.has(k) && now - t > 90000) big.push([k, by, t]);
+      if (by >= 16384 && !keep.has(k) && !A._sfxSet.has(k) && now - t > 15000) cand.push([k, by, t]);
     }
     const max = A.bufBudget(); if (tot <= max) return 0;
-    big.sort((x, y) => x[2] - y[2]); let n = 0;
-    for (const [k, by] of big) { if (tot <= max * 0.8) break; delete A.buf[k]; delete A.loading[k]; tot -= by; n++; }
+    cand.sort((x, y) => x[2] - y[2]); let n = 0;
+    const weg = A._w45weg || (A._w45weg = new Map()); if (weg.size > 3000) weg.clear();
+    const stufe = (ok, ziel) => { for (const c of cand) { if (tot <= ziel) break; if (!c[0] || !ok(c)) continue; delete A.buf[c[0]]; delete A.loading[c[0]]; weg.set(c[0], now); tot -= c[1]; c[0] = null; n++; } };
+    stufe(c => c[1] >= 262144 && now - c[2] > 90000, max * 0.8);
+    stufe(c => now - c[2] > 30000, max * 0.8);
+    if (tot > max * 1.5) stufe(() => true, max * 1.2);
     A.trimmed = (A.trimmed || 0) + n; return n;
   };
-  setInterval(() => { try { A.trimBuf(); } catch (_) {} }, 20000);
+  setInterval(() => { try { A.trimBuf(); } catch (_) {} }, 10000);
   /* Benannte Geräusche: jede Rolle hat mehrere echte Aufnahmen; ausgewählt wird zufällig. */
   const K = n => "klang/" + n + ".mp3", M = n => "amb/" + n + ".mp3";
   const rng = (base, a, b) => { const o = []; for (let i = a; i <= b; i++) o.push(M(base + i)); return o; };

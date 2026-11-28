@@ -79,6 +79,8 @@
     if (entered.has(k)) return; entered.add(k);
     const c = lv.cells[k]; if (!c || !c.fn || !Z.roomFnDef) return;
     const d = Z.roomFnDef(lv.biome, c.fn); if (!d || !Z.ui || !Z.ui.notify) return;
+    /* W47 Hinweis: steht eine wartende Begegnung (Gnom, Pilzkreis, Spiegel) gleich daneben, bleibt der Raumname still – er verdeckte sonst ihren Bedienhinweis */
+    { const bg = Z.begegnung && Z.begegnung.ev ? Z.begegnung.ev() : null; if (bg && bg.st === "warte" && Math.abs(bg.x - (P.x + P.w / 2)) < 160 && Math.abs(bg.y - P.y) < 120) return; }
     Z.ui.notify(U.esc ? U.esc(L(d.n)) : L(d.n), { prio: 0, ort: "welt", x: P.x + P.w / 2, y: P.y - 4, art: "pergament", dauer: 2200, key: "raum" + k });
   }
   /* Kartenzeichen werden gesammelt, wenn sich Gesehenes ändert (spätestens alle 0,3 s für Kartennebel und Tore),
