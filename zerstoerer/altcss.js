@@ -18,7 +18,9 @@
        unbekanntem Selektor fallen ganz weg (auch „button:focus“ in derselben Liste), Flex-Kinder kleben aneinander */
     fv: sel(":focus-visible"),
     has: sel(":has(*)"),
-    fgap: (function () { try { var d = document.createElement("div"); d.style.cssText = "display:flex;flex-direction:column;row-gap:1px;position:absolute;visibility:hidden"; d.appendChild(document.createElement("div")); d.appendChild(document.createElement("div")); document.documentElement.appendChild(d); var ok = d.scrollHeight === 1; d.parentNode.removeChild(d); return ok; } catch (e) { return true; } })()
+    /* W48 Ordnung: Wer :has() kennt, kennt auch gap in Flexbox (Chromium 105+/Safari 15.4+/Firefox 121+ ⊃ 84+/14.1+/63+) –
+       dann entfällt die Messung, die beim Laden ein Layout erzwingt (Ergebnis gleich). */
+    fgap: sel(":has(*)") || (function () { try { var d = document.createElement("div"); d.style.cssText = "display:flex;flex-direction:column;row-gap:1px;position:absolute;visibility:hidden"; d.appendChild(document.createElement("div")); d.appendChild(document.createElement("div")); document.documentElement.appendChild(d); var ok = d.scrollHeight === 1; d.parentNode.removeChild(d); return ok; } catch (e) { return true; } })()
   };
   function sel(s) { try { document.querySelector(s); return true; } catch (e) { return false; } }
   if (zwang) F = { clamp: false, inset: false, mix: false, is: false, cq: false, dvh: false, fv: false, has: false, fgap: false };

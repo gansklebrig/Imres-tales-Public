@@ -15,6 +15,7 @@ on:
     paths:
       - "desktop-zerstoerer/**"
       - "tools/zerstoerer/**"
+      - "!tools/zerstoerer/tests/**"   # Tests allein lösen keinen Neubau aus (W48)
       - ".github/workflows/zerstoerer-pc.yml"
   workflow_dispatch:
 

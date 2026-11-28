@@ -122,7 +122,6 @@
   }
 
   /* ======================= Takt ======================= */
-  let lastNow = 0;
   const tk0 = Z.ebenenTick;
   Z.ebenenTick = function (dt) {
     if (tk0) tk0.apply(this, arguments);

@@ -5,7 +5,7 @@
   "use strict";
   /* Verzögerungen in Spielzeit (Pause/Zeitlupe/Gebietswechsel-sicher), sonst Rückfall auf setTimeout */
   const later = (fn, ms) => (Z.bossLater ? Z.bossLater(fn, ms) : window.setTimeout(fn, ms));
-  const Z = window.Z, U = Z.U, FX = Z.fx, A = Z.audio, W = Z.world, T = Z.TILE, L = v => Z.L(v);
+  const Z = window.Z, U = Z.U, FX = Z.fx, A = Z.audio, L = v => Z.L(v);
   const { glow, circ, poly, limb, ell } = Z.draw;
   const alive = e => e && !e.dead && !(e.intro > 0);
   const K = it => [0, 1, 1.4, 2][it.cursed || 1];

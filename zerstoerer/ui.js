@@ -80,7 +80,7 @@
   const t = k => L(TX[k]);
 
   /* ======================= DOM ======================= */
-  const hud = $("#hud"), modal = $("#modal"), toastEl = $("#toast"), banner = $("#banner"), prompt = $("#prompt"), bossbar = $("#bossbar"), choice = $("#choice"), fadeEl = $("#fade"), title = $("#title"), card = $("#card");
+  const hud = $("#hud"), modal = $("#modal"), banner = $("#banner"), prompt = $("#prompt"), bossbar = $("#bossbar"), choice = $("#choice"), fadeEl = $("#fade"), title = $("#title"), card = $("#card");
   /* Symbol-Leinwände für die vier Plätze */
   const slotEls = {};
   ["a1", "a2", "s1", "s2"].forEach(s => { const el = $("#slot-" + s); slotEls[s] = { el, cv: el.querySelector("canvas"), cd: el.querySelector(".cd"), uid: -1, n: el.querySelector(".n"), k: el.querySelector(".k") }; });

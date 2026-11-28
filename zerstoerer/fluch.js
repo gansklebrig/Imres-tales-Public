@@ -43,7 +43,6 @@
   Z.itemMul = it => mul0(it) * (it && it.cursed ? CURSE[it.cursed].mul : 1);
 
   /* Anlegen = Fluch annehmen */
-  let warned = new WeakSet();
   Z.fluchTick = function () {
     const P = Z.player; if (!P || P.dead) return;
     for (const s of ["a1", "a2", "s1", "s2"]) {

@@ -16,7 +16,7 @@
    Farbregel: kein Blau. */
 (function () {
   "use strict";
-  const Z = window.Z, T = Z.TILE, A = Z.audio, L = v => Z.L(v), FX = Z.fx;
+  const Z = window.Z, T = Z.TILE, A = Z.audio, L = v => Z.L(v);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const lo = () => !!(Z.gq && Z.gq.level === 0);
   const fmt = s => (Z.weltkarte ? Z.weltkarte.fmt(s) : Math.round(s || 0) + " s");

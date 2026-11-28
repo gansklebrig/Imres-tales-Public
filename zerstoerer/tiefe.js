@@ -16,7 +16,7 @@
 (function () {
   "use strict";
   const Z = window.Z; if (!Z || Z.tiefe) return;
-  const T = Z.TILE, A = Z.audio, FX = Z.fx, L = v => Z.L(v), TAU = Math.PI * 2;
+  const T = Z.TILE, A = Z.audio, L = v => Z.L(v), TAU = Math.PI * 2;
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const M = () => Z.meta || {};
   const gast = () => { const s = Z.online && Z.online.S; return !!(s && s.role === "guest" && s.playing); };

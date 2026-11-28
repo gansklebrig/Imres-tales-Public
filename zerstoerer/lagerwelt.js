@@ -11,7 +11,7 @@
    Speicher: Z.meta.lagerwelt (je Spielstand: zuletzt gesehene Jahreszeit, gesehene Trophäen/Spuren). Farben: kein Blau. */
 (function () {
   "use strict";
-  const Z = window.Z, T = Z.TILE, L = v => Z.L(v), A = Z.audio, FX = Z.fx;
+  const Z = window.Z, T = Z.TILE, L = v => Z.L(v), FX = Z.fx;
   const { limb, circ, poly, ell, glow } = Z.draw;
   const TAU = Math.PI * 2;
   const lo = () => !!(Z.gq && Z.gq.level === 0);
@@ -40,8 +40,6 @@
   };
   const ORDER0 = ["spaetherbst", "winter", "fruehling", "sommer", "herbst"], CYCLE = ["winter", "fruehling", "sommer", "herbst"];
   const AT = [0, 4, 12, 22, 34], STEP = 10;
-  const WXN = { laub: ["Laubfall", "Falling leaves"], nebel: ["Nebel über dem Lager", "Fog over the camp"], klar: null, schnee: ["Schneefall", "Snowfall"], flocken: ["Leiser Schnee", "Soft snow"], frost: ["Klirrender Frost", "Biting frost"],
-    blueten: ["Blütenwind", "Blossom wind"], niesel: ["Nieselregen", "Drizzle"], gluehen: ["Glühwürmchen", "Fireflies"], schwuel: ["Schwüle Nacht", "Sultry night"], sturm: ["Herbststurm", "Autumn gale"] };
   function trophyIds() { return Object.keys(Z.BOSSDEF || {}).filter(id => id !== "nezna" && !Z.BOSSDEF[id].minion); }
   const won = id => !!((M().bosses || {})[id] && M().bosses[id].won > 0);
   function chainsDone() { const C = Z.auftr && Z.auftr.CHAINS; return C ? Object.keys(C).filter(k => Z.auftr.chainDone(k)) : []; }

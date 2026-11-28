@@ -16,7 +16,7 @@
 (function () {
   "use strict";
   const Z = window.Z; if (!Z || !Z.WEAPONS || Z.WEAPONS.laternenstab) return;
-  const U = Z.U, FX = Z.fx, A = Z.audio, W = Z.world, L = v => Z.L(v);
+  const U = Z.U, FX = Z.fx, A = Z.audio, L = v => Z.L(v);
   const { limb, circ, poly, ell, glow } = Z.draw;
   const offFx = () => !!(Z.gfx && Z.gfx.off && Z.gfx.off.w38waffen);
   const lvl = id => (Z.metaLvl ? Z.metaLvl(id) : 0);

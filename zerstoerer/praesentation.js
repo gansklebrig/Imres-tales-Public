@@ -11,7 +11,6 @@
   const Z = window.Z, FX = Z.fx, A = Z.audio, L = v => Z.L(v), inp = Z.input, ui = Z.ui;
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const TAU = Math.PI * 2;
-  const ease = u => (u <= 0 ? 0 : u >= 1 ? 1 : 1 - Math.pow(1 - u, 3));
   const easeIO = u => (u <= 0 ? 0 : u >= 1 ? 1 : u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const span = (u, a, b) => clamp((u - a) / (b - a), 0, 1);

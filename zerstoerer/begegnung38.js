@@ -354,7 +354,6 @@
     const r = ue1.apply(this, arguments);
     safe("schattenKI", () => {
       if (gast()) return;
-      if (!Z.hitEnemy._w38s && Z.enemies.some(e => e.w38schatten && !e.dead)) wrapHit();
       for (const e of Z.enemies) {
         if (!e.w38schatten || e.dead || schattenArt(e) !== "ranged") continue;
         const P = Z.player; if (!P || P.dead) continue;
@@ -373,26 +372,22 @@
     });
     return r;
   };
-  /* außen anhängen – manche Module setzen Z.hitEnemy erst später neu; darum im Takt prüfen und ggf. erneut umhüllen */
-  function wrapHit() {
-    const he0 = Z.hitEnemy; if (!he0 || he0._w38s) return;
-    const f = function (e, dmg, o) {
-    /* W40 Balance: wird Z.hitEnemy später von einem anderen Modul umhüllt, hüllt der Takt erneut ein – dann lagen zwei dieser
-       Schichten übereinander und der Frontschutz wirkte doppelt (0,6 × 0,6 → −64 %). Pro Treffer nur einmal abziehen. */
+  /* Schattenblock als Außenschicht von Z.hitEnemy (W48 Ordnung: Z.haken, haken.js). Früher hüllte der Takt Z.hitEnemy neu
+     ein, wenn ein späteres Modul (Lager, Bossphasen …) darübergelegt hatte; zwei Schichten wirkten dann doppelt (W40).
+     Z.haken hält die Schicht außen und lässt sie je Aufruf genau einmal wirken. Der Schutz je Schatten (_w38blk) bleibt:
+     ein Treffer, der innerhalb der Kette denselben Schatten noch einmal trifft, wird wie bisher nicht erneut geblockt. */
+  if (Z.haken) Z.haken.aussen("hitEnemy", "w38schatten", function (a, weiter) {
+    const e = a[0], o = a[2]; let dmg = a[1];
     const tag = e && e.w38schatten ? e : null;
-    if (tag && tag._w38blk) return he0.apply(this, arguments);
-    if (e && e.w38schatten && !e.dead && typeof dmg === "number" && schattenArt(e) === "shield" && !e.act && !(o && (o.dot || o.fx))) {
+    if (!tag || tag._w38blk) return weiter(a);
+    if (!e.dead && typeof dmg === "number" && schattenArt(e) === "shield" && !e.act && !(o && (o.dot || o.fx))) {
       const dir = (o && o.dir) || (Z.player ? U.sign(e.x - Z.player.x) : 0);
       if (dir && (e.face || 1) === -dir) { dmg *= 0.6; e.w38blkT = 0.22; e.w38blkD = -dir; /* W46 Optik: Schildbogen (Zeichnen oben) */ safe("block", () => { A.play("block", { vol: 0.4, rate: 0.9 }); FX.burst(e.x + e.w / 2 - dir * 6, e.y + 12, 5, { col: ["#c890ff", "#e8e0d8"], sp: 70, life: 0.2, size: 1.4, kind: "spark", add: true }); }); }
     }
-    const args = Array.prototype.slice.call(arguments); args[1] = dmg; /* strict: arguments folgt dmg nicht */
-    if (!tag) return he0.apply(this, args);
+    a[1] = dmg;
     tag._w38blk = true;
-    try { return he0.apply(this, args); } finally { tag._w38blk = false; }
-    };
-    f._w38s = true; Z.hitEnemy = f;
-  }
-  wrapHit();
+    try { return weiter(a); } finally { tag._w38blk = false; }
+  });
 
   /* Prüfhilfe */
   Z.begegnung = { force: k => { setup(Z.level, k); return ev && { k: ev.k, x: ev.x, y: ev.y }; }, ev: () => ev, NAME, p2Use, netGast, netHost };

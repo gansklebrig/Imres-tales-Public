@@ -2175,7 +2175,6 @@
     if (o.size) { d.size = o.size; d.w = Math.round(d.w * o.size); d.h = Math.round(d.h * o.size); }
     Z.ENEMIES["mb_" + id] = d; MBD[id] = o;
   }
-  const P2 = (e, f) => (e.nmP === 2 ? f : 1);
   /* ---------- eigene Angriffe ---------- */
   NMACT.wuehlen = {
     start(e, ac) { const P = Z.player; e.hidden = 2; e.invuln = 2; ac.mk = { x: P.x + P.w / 2, y: P.y + P.h, lock: false }; A.play("rock", { x: e.x, vol: 0.6 }); FX.burst(e.x + e.w / 2, e.y + e.h, 18, { col: [Z.dustCol || "#8a7a70", "#5a4a3a"], sp: 100, ang: -PI / 2, spread: 2, life: 0.6, size: 3, kind: "smoke" }); },

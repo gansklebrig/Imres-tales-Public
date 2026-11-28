@@ -5,7 +5,7 @@
    – Wer Ezekiel entdeckt, ruft: Kameraden in der Nähe kommen dazu. */
 (function () {
   "use strict";
-  const Z = window.Z, T = Z.TILE, L = v => Z.L(v), A = Z.audio, FX = Z.fx, U = Z.U;
+  const Z = window.Z, L = v => Z.L(v), A = Z.audio, FX = Z.fx, U = Z.U;
   let lvRef = null;
   function setup(lv) {
     lvRef = lv;

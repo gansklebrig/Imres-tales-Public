@@ -502,7 +502,7 @@
     ctxCheck("sichtbar"); if (away > 20000 && Z.cachesNeu) Z.cachesNeu("hintergrund");
   });
   for (const ev of ["fullscreenchange", "webkitfullscreenchange"]) document.addEventListener(ev, () => setTimeout(() => ctxCheck("vollbild"), 300));
-  let last = performance.now(), acc = 0, fpsT = 0, fpsN = 0;
+  let last = performance.now(), fpsT = 0, fpsN = 0;
   const STEP = 1 / 120;
   Z.paused = false;
   /* W25 Leistung: typische Bilddauer (gleitend). Nach einem einzelnen Hänger (lange Aufgabe, Laden, Tab zurück) läuft das

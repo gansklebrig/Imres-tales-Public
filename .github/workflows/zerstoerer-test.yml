@@ -1,0 +1,95 @@
+# Automatische Tests für „Ezekiel – The Destroyer“ bei jedem Push und Pull-Request auf main (nur wenn sich das Spiel,
+# das PC-Programm oder die Werkzeuge ändern). Ändert nichts im Repo, veröffentlicht nichts.
+#  1. Schnelltests (Sekunden): Syntax, ES2019 für alte Handheld-Browser, Update-Dateiliste, Update-Logik des PC-Programms
+#  2. Browser-Tests (Chromium über Playwright): Gesamtprobe, Werkzeuge, Spielstände, ganzer Lauf, Rollenwahl, Online-Koop
+# Bei Fehlern liegen Bildschirmfotos als Artefakt „testbilder“ am Lauf. Anleitung: tools/zerstoerer/tests/LIESMICH.md
+name: Zerstörer testen
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - zerstoerer.html
+      - "zerstoerer/**"
+      - "!zerstoerer/dateien.json"
+      - "desktop-zerstoerer/**"
+      - "tools/zerstoerer/**"
+      - tonregler.js
+      - ".github/workflows/zerstoerer-test.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - zerstoerer.html
+      - "zerstoerer/**"
+      - "desktop-zerstoerer/**"
+      - "tools/zerstoerer/**"
+      - tonregler.js
+      - ".github/workflows/zerstoerer-test.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: zerstoerer-test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  testen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ZS_PORT: "9230"
+      ZS_PEER_PORT: "9431"
+      ZS_BILDER: ${{ github.workspace }}/testbilder
+      ACORN_PFAD: ${{ runner.temp }}/werkzeug
+      ZS_PEER_MODUL: ${{ runner.temp }}/werkzeug/node_modules/peer
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /desktop-zerstoerer/
+            /tools/zerstoerer/
+            /zerstoerer.html
+            /zerstoerer/
+            /tonregler.js
+            /favicon.svg
+            /schriften/
+            /klang/
+            /amb/
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # acorn (ES2019-Prüfung) und peer (lokaler Vermittler für die Online-Tests) außerhalb des Repos
+      - name: Prüfwerkzeuge holen
+        run: npm install --no-save --no-audit --no-fund --prefix "$RUNNER_TEMP/werkzeug" acorn@8 peer@1.0.2
+
+      - name: Schnelltests (Syntax, ES2019, Dateiliste, Update-Logik)
+        run: python tools/zerstoerer/tests/schnell.py
+
+      - name: Playwright und Chromium holen
+        if: ${{ !cancelled() }}
+        run: |
+          pip install --quiet playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Browser-Tests
+        if: ${{ !cancelled() }}
+        run: python tools/zerstoerer/tests/alle.py
+
+      - name: Bildschirmfotos bei Fehlern sichern
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: testbilder
+          path: testbilder/
+          retention-days: 7
+          if-no-files-found: ignore

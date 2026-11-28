@@ -455,11 +455,8 @@
     harbour: ["14,10,6", "236,232,214", "48,58,36", 1], belltower: ["12,8,6", "240,224,200", "40,30,20", 0.9], chasm: ["10,4,14", "226,206,240", "40,20,50", 1],
     lake: ["4,12,8", "206,236,214", "30,66,44", 1.1], embercity: ["14,4,2", "255,190,120", "80,24,8", 1], forge: ["12,6,4", "255,206,150", "60,24,10", 1]
   };
-  const rgbOf = h => { const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
   let tmp = null;
   function tmpCv(w, h) { if (!tmp) tmp = document.createElement("canvas"); if (tmp.width !== w || tmp.height !== h) { tmp.width = w; tmp.height = h; } return tmp; }
-  /* Pfad aller Wandkacheln (bzw. Felskacheln) des Ausschnitts für einen Clip */
-  function tilePath(H, pick, x0, y0, x1, y1) { const c = H.c, T = H.T; c.beginPath(); let any = false; for (let y = y0; y < y1; y++) { let s = -1; for (let x = x0; x <= x1; x++) { const on = x < x1 && pick(x, y); if (on && s < 0) s = x; else if (!on && s >= 0) { c.rect(s * T, y * T, (x - s) * T, T); any = true; s = -1; } } } return any; }
   /* großflächige Patina: weiche Farbwolken in Weltkoordinaten (8-px-Zellen, weich vergrößert) */
   function patina(H, rock) {
     const { c, x0, y0, x1, y1, T, B, vnoise, lv, PR } = H, P = PAT[B.bg] || PAT.castle, K = 4;

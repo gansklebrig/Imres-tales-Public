@@ -26,7 +26,7 @@
   "use strict";
   const Z = window.Z, T = Z.TILE, FX = Z.fx, A = Z.audio, W = Z.world, L = v => Z.L(v);
   const TAU = Math.PI * 2;
-  const GRACE_S = 25, OPEN_S = 1.4, CLOSE_S = 0.9, ROOMS = 2, ALARM_R = 220;
+  const GRACE_S = 25, OPEN_S = 1.4, CLOSE_S = 0.9, ROOMS = 2;
   const hooks = () => Z.rueckHooks || [];
   const KEEP = ["enemies", "pickups", "propsLive", "stuck", "allies", "hazards", "gadgets"]; /* bleiben, wie sie waren */
   const DROP = ["projs", "bolts"]; /* Geschosse im Flug: nicht zurückholen */

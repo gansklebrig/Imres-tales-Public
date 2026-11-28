@@ -6,7 +6,7 @@
       Promise.any, WeakRef, AbortSignal.timeout, replaceChildren, randomUUID …), wenn sie ohne erkennbare Absicherung vorkommen.
    acorn fehlt → Hinweis und Ausgang 0 (sauber übersprungen). Suche: normales require, dann ACORN_PFAD (Ordner mit node_modules).
    Aufruf:  node tools/zerstoerer/es2019check.js [--streng]   (--streng: Hinweise zählen als Fehler)
-   Nicht in Workflows eingebunden – nur zum Prüfen von Hand. */
+   Läuft in den Schnelltests (tools/zerstoerer/tests/schnell.py, Workflow zerstoerer-test.yml); fehlt acorn dort, ist das ein Fehler. */
 "use strict";
 const fs = require("fs"), path = require("path");
 const WURZEL = path.resolve(__dirname, "..", "..");

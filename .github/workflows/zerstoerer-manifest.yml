@@ -18,6 +18,7 @@ on:
       - "klang/**"
       - "amb/**"
       - "tools/zerstoerer/**"
+      - "!tools/zerstoerer/tests/**"   # Tests allein lösen keinen Neubau aus (W48)
   workflow_dispatch:
 
 permissions:

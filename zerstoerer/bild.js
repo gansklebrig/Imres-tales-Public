@@ -9,7 +9,6 @@
   /* Farbe aufhellen/abdunkeln (#rrggbb) */
   function shade(hex, f) { const n = parseInt(hex.slice(1), 16); let r = n >> 16, g = (n >> 8) & 255, b = n & 255; if (f > 0) { r += (255 - r) * f; g += (255 - g) * f; b += (255 - b) * f; } else { r *= 1 + f; g *= 1 + f; b *= 1 + f; } return "rgb(" + (r | 0) + "," + (g | 0) + "," + (b | 0) + ")"; }
   function rgbaS(hex, a) { const n = parseInt(hex.slice(1), 16); return "rgba(" + (n >> 16) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")"; }
-  function mix(a, b, t) { const A = parseInt(a.slice(1), 16), Bb = parseInt(b.slice(1), 16); const r = ((A >> 16) * (1 - t) + (Bb >> 16) * t) | 0, g = (((A >> 8) & 255) * (1 - t) + ((Bb >> 8) & 255) * t) | 0, bl = ((A & 255) * (1 - t) + (Bb & 255) * t) | 0; return "rgb(" + r + "," + g + "," + bl + ")"; }
   Z.shade = shade;
   /* Pseudozufall aus Koordinaten (stabil) */
   const hash = (x, y) => { let h = (x * 374761393 + y * 668265263) ^ 0x5bd1e995; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
@@ -49,12 +48,6 @@
     G.layers = { far, mid, H };
   };
   function repeatDraw(c, fn) { for (const o of [-LW, 0, LW]) { c.save(); c.translate(o, 0); fn(); c.restore(); } }
-  function silTower(c, x, base, w, h, col, win, R) {
-    c.fillStyle = col; c.fillRect(x, base - h, w, h);
-    for (let i = 0; i < w; i += 6) c.fillRect(x + i, base - h - 4, 3, 4);
-    if (R.chance(0.5)) { c.beginPath(); c.moveTo(x - 3, base - h); c.lineTo(x + w / 2, base - h - w * 1.2); c.lineTo(x + w + 3, base - h); c.fill(); }
-    if (win) for (let k = 0; k < 3; k++) if (R.chance(0.6)) { c.fillStyle = win; c.fillRect(x + w / 2 - 1.5, base - h + 10 + k * 14, 3, 5); c.fillStyle = col; }
-  }
   /* Mauerfugen in Silhouetten: deutet Steinlagen an, ohne die Ferne unruhig zu machen */
   function bgCourses(c, x, y, w, h, a, rh) {
     rh = rh || 6; c.fillStyle = "rgba(0,0,0," + a + ")";

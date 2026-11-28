@@ -536,7 +536,6 @@
     c.fill(); c.fillRect(x - 0.45, base - h * 0.15, 0.9, h * 0.15);
     if (lit) { c.fillStyle = lit; c.beginPath(); for (let k = 0; k < 5; k++) { const ty = base - h + k * h * 0.16, bw = w * (0.3 + k * 0.18), th = h * 0.27; c.moveTo(x, ty); c.lineTo(x - bw, ty + th); c.lineTo(x - bw * 0.35, ty + th * 0.78); c.closePath(); } c.fill(); }
   }
-  function cypress(o, x, base, h, col, lit) { const c = o.c; c.fillStyle = col; c.beginPath(); c.ellipse(x, base - h * 0.5, h * 0.13, h * 0.5, 0, 0, TAU); c.fill(); if (lit) { c.fillStyle = lit; c.beginPath(); c.ellipse(x - h * 0.04, base - h * 0.55, h * 0.06, h * 0.4, 0, 0, TAU); c.fill(); } }
   function deadTree(o, x, base, h, col) {
     const { c, R } = o; c.strokeStyle = col; c.lineCap = "round";
     const br = (x0, y0, a, len, w, d) => { const x1 = x0 + Math.cos(a) * len, y1 = y0 + Math.sin(a) * len; c.lineWidth = w; c.beginPath(); c.moveTo(x0, y0); c.quadraticCurveTo((x0 + x1) / 2 + (R() - 0.5) * len * 0.3, (y0 + y1) / 2, x1, y1); c.stroke(); if (d > 0) { const n = 2 + (R() < 0.4 ? 1 : 0); for (let i = 0; i < n; i++) br(x1, y1, a + (i - (n - 1) / 2) * 0.7 + (R() - 0.5) * 0.5, len * (0.55 + R() * 0.2), w * 0.62, d - 1); } };

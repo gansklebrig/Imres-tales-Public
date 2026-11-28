@@ -15,7 +15,7 @@
   const Z = window.Z, G = Z.gfx;
   const TAU = Math.PI * 2, PI = Math.PI;
   const LW = 640; /* Kachelbreite der fernen Ebene (bild.js) */
-  const PFX = 0.12, PFY = 0.08, PMX = 0.32; /* Parallaxe der fernen Ebene wie in bild.js */
+  const PFX = 0.12, PFY = 0.08; /* Parallaxe der fernen Ebene wie in bild.js */
   const OUT = { castle: 1, camp: 1, ramparts: 1, spires: 1, storm: 1, harbour: 1 };
 
   /* ======================= FARBEN ======================= */

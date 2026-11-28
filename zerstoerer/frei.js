@@ -296,7 +296,6 @@
   const OS = () => Z.online && Z.online.S;
   const istGast = () => { const s = OS(); return !!(s && s.role === "guest" && s.playing); };
   const istHost = () => { const s = OS(); return !!(s && s.role === "host" && s.playing); };
-  let chT = 0;
   function chHost() {
     const lv = Z.level, C = Z.chState && Z.chState(); if (!lv) return;
     for (let i = 0; i < 3; i++) {

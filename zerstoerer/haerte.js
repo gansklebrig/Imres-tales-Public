@@ -99,7 +99,6 @@
   Z.hurtPlayer = function (d, o) { if (typeof d === "number" && d > 0 && pIn()) d *= 1.25; return hp0.call(this, d, o); };
   const hl0 = Z.healPlayer;
   if (hl0) Z.healPlayer = function (n) { if (typeof n === "number" && n > 0 && pIn()) n *= 0.5; return hl0.call(this, n); };
-  let fluchT = 0;
   const up0 = Z.updatePickups;
   Z.updatePickups = function (dt) {
     const r = up0.apply(this, arguments);

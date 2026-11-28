@@ -10,10 +10,8 @@
   "use strict";
   const Z = window.Z, T = Z.TILE, A = Z.audio, FX = Z.fx, L = v => Z.L(v), TAU = Math.PI * 2, PI = Math.PI;
   const rnd = (a, b) => a + Math.random() * (b - a), pick = l => l[(Math.random() * l.length) | 0], clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
-  const ease = u => u * u * (3 - 2 * u);
   const mixHex = (a, b, t) => { const A = parseInt(a.slice(1), 16), B2 = parseInt(b.slice(1), 16), m = (x, y) => Math.round(x + (y - x) * t); return "rgb(" + m(A >> 16, B2 >> 16) + "," + m((A >> 8) & 255, (B2 >> 8) & 255) + "," + m(A & 255, B2 & 255) + ")"; };
   const on = () => { const q = Z.gq; if (!q) return true; if (q.lean) return false; return q.level === -1 ? q.layers !== false : q.level >= 1; };
-  const rich = () => { const q = Z.gq; return !q || (q.level === -1 ? q.layers !== false : q.level >= 2); };
   const meta = () => (Z.meta.wunder = Z.meta.wunder || {});
 
   /* ---------- Klänge (Tierlaute, Glöckchen) ---------- */
@@ -72,7 +70,7 @@
     if (n < 6 || best < 0) return null;
     return { n, x: sx / n, y: sy / n, x0, x1, y0, y1, rx, ry, run: rr };
   }
-  const P = () => Z.player, pc = () => { const p = Z.player; return { x: p.x + p.w / 2, y: p.y + p.h / 2 }; };
+  const pc = () => { const p = Z.player; return { x: p.x + p.w / 2, y: p.y + p.h / 2 }; };
   const inCam = (x, y, m) => { const c = Z.cam; m = m || 0; return x > c.x - m && x < c.x + c.w + m && y > c.y - m && y < c.y + c.h + m; };
   const glowSpr = col => Z.glowSprite(col);
   function glow(c, x, y, r, col, a) { if (a <= 0.01 || r <= 0) return; const ga = c.globalAlpha; c.globalAlpha = ga * Math.min(1, a); c.drawImage(glowSpr(col), x - r, y - r, r * 2, r * 2); c.globalAlpha = ga; }

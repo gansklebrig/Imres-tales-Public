@@ -8,7 +8,6 @@
 (function () {
   "use strict";
   const Z = window.Z, FX = Z.fx, A = Z.audio, L = v => Z.L(v), T = Z.TILE;
-  const TAU = Math.PI * 2;
   const MOODS = {
     torhof: [["klar", 3], ["niesel", 2], ["regen", 2], ["gewitter", 1], ["nebel", 2], ["boeen", 1]],
     wehrgang: [["klar", 2], ["regen", 2], ["gewitter", 2], ["boeen", 3], ["nebel", 1]],

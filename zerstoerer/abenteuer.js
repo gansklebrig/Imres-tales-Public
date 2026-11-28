@@ -726,7 +726,6 @@
 
   /* ======================= RAUM-EREIGNISSE ======================= */
   let evs = [];
-  const EVN = { haendler: ["Fahrende Händlerin", "Wandering Trader"], schrein: ["Verfluchter Schrein", "Cursed Shrine"], brunnen: ["Wunschbrunnen", "Wishing Well"], wette: ["Barradins Wette", "Barradin's Bet"], kaefig: ["Gefangener im Käfig", "Caged Prisoner"], dieb: ["Goldgoblin", "Gold Goblin"] };
   /* R19: Plätze von Hebeln, Schreinen, Schlüsseln, Ambossen und Truhen der Karte (welt.js feats/rewards) – dort nichts Benutzbares dazustellen */
   const belegt = (lv, x, y) => (lv.feats || []).some(f => f.t !== "mouth" && Math.abs(f.x - x) <= 2 && Math.abs((f.y != null ? f.y : f.y0) - y) <= 3) || (lv.rewards || []).some(r => Math.abs(r.x - x) <= 2 && Math.abs(r.y - y) <= 2);
   function spotFar(lv, from, n) {

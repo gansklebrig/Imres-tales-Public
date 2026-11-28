@@ -58,7 +58,6 @@
       ico: { a1: "🌿", a2: "🐻", s1: "🌱", s2: "🌸" } }
   };
   K.CH = CH;
-  const P1 = () => Z.player;
   const alive2 = () => !!(K.p2 && !K.p2.down);
   /* während der Spieler-2-Gegnergruppe ist Z.player vorübergehend Spieler 2 – realP1() liefert immer Ezekiel */
   const realP1 = () => K._swapP1 || Z.player;

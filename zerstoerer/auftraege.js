@@ -12,7 +12,7 @@
    Speicher: Z.meta.auftr (je Spielstand; fehlt bei alten Ständen und wird leer angelegt). Farben: kein Blau. */
 (function () {
   "use strict";
-  const Z = window.Z, A = Z.audio, L = v => Z.L(v), inp = Z.input;
+  const Z = window.Z, A = Z.audio, L = v => Z.L(v);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const M = () => Z.meta;
   const S = () => Z.stats || {};

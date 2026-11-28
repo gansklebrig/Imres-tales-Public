@@ -19,7 +19,6 @@
   const ui = () => Z.ui || {};
   const lo = () => !!(Z.gq && Z.gq.level === 0);
   const notify = (html, ms, art, prio) => { const u = ui(); if (u.notify) { try { return u.notify(html, { prio: prio == null ? 2 : prio, art: art || "gold", dauer: ms }); } catch (_) {} } if (Z.toast) Z.toast(html, ms); };
-  const useKey = () => (inp.device === "touch" ? "✋" : inp.label("use"));
   const hash = (a, b) => { let h = (a * 374761393 + b * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
   const strHash = s => { let h = 7; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return h >>> 0; };
 
@@ -1538,33 +1537,35 @@
     save();
   }
   function wireEffects() {
+    /* W48 Ordnung: Die Hüllen hängen über Z.haken (haken.js) als Außenschichten – sie bleiben außen, auch wenn ein Modul die
+       Funktion später noch einmal einhüllt, und wirken je Aufruf genau einmal. Angebracht wie bisher erst nach dem Laden
+       aller Module (wire), damit die Reihenfolge der Schichten gleich bleibt. Ohne haken.js: alte Hüllen wie zuvor. */
+    const H = Z.haken || { aussen: (name, id, fn) => { const f0 = Z[name]; if (typeof f0 !== "function") return false; Z[name] = function () { return fn.call(this, Array.prototype.slice.call(arguments), a => f0.apply(this, a)); }; return true; } };
     /* Laufstart */
-    const nr0 = Z.newRun; Z.newRun = function () { const r = nr0.apply(this, arguments); try { onNewRun(); } catch (err) { console.error(err); } return r; };
+    H.aussen("newRun", "lager", function (a, weiter) { const r = weiter(a); try { onNewRun(); } catch (err) { console.error(err); } return r; });
     /* Quirin: Trank-Ende erkennen */
-    const up0 = Z.updatePlayer;
-    Z.updatePlayer = function (P) {
+    H.aussen("updatePlayer", "lager", function (a, weiter) {
+      const P = a[0];
       const before = P && P.drinkT > 0;
-      const r = up0.apply(this, arguments);
+      const r = weiter(a);
       if (before && P.drinkT <= 0 && Z.run && !P.dead) {
         const L0 = lvl("quirin");
         if (L0 >= 1) { Z.healPlayer(P.hpMax * 0.15); }
         if (L0 >= 2) { P.lgSud = 4; FX.ring && FX.ring(P.x + P.w / 2, P.y + 12, 16, "#9ad04a", 0.4, 2); FX.text(P.x + P.w / 2, P.y - 18, L(["Nachglühen", "Afterglow"]), "#c8e070"); }
       }
       return r;
-    };
+    });
     /* Quirin (Schaden mindern), Wendel (Rex hilft), Mira (Faden) */
-    const hurt0 = Z.hurtPlayer;
-    Z.hurtPlayer = function (dmg, o) {
-      const P = Z.player;
+    H.aussen("hurtPlayer", "lager", function (a, weiter) {
+      const P = Z.player; let dmg = a[0];
       if (P && P.lgSud > 0 && typeof dmg === "number") dmg *= 0.65;
-      const r = hurt0.call(this, dmg, o);
+      const r = weiter([dmg, a[1]]); /* wie bisher nur (dmg, o) weiterreichen */
       if (r && P && !P.dead && Z.run && P.hp > 0 && P.hp <= P.hpMax * 0.3 && lvl("wendel") >= 3 && Z.level && !Z.level.lgRex && Z.spawnAlly) {
         Z.level.lgRex = true; Z.spawnAlly("rex", P.x, P.y + P.h - 14, { dmg: 10, life: 10 }); A.play("bark"); FX.text(P.x + P.w / 2, P.y - 20, L(["Rex!", "Rex!"]), "#ffd27a", true);
       }
       return r;
-    };
-    const death0 = Z.onPlayerDeath;
-    Z.onPlayerDeath = function (o) {
+    });
+    H.aussen("onPlayerDeath", "lager", function (a, weiter) {
       const P = Z.player, L0 = lvl("mira");
       if (P && !P.dead && Z.run && L0 >= 1 && !Z.run.lgMira) {
         Z.run.lgMira = 1;
@@ -1575,14 +1576,14 @@
         if (L0 >= 2) for (const e of Z.enemies) if (!e.dead && Math.abs(e.x - P.x) < 120 && Math.abs(e.y - P.y) < 80) { e.vx = Math.sign(e.x - P.x || 1) * 280; e.vy = -160; if (Z.addStatus) Z.addStatus(e, "stun", 1.2); }
         return;
       }
-      const r = death0.apply(this, arguments);
+      const r = weiter(a);
       try { records("death"); } catch (err) { console.error(err); }
       return r;
-    };
+    });
     if (Z.ui && Z.ui.ending) { const end0 = Z.ui.ending; Z.ui.ending = function () { try { records("end"); } catch (_) {} return end0.apply(this, arguments); }; }
     /* Alwin: Kenne deinen Feind */
-    const hit0 = Z.hitEnemy;
-    Z.hitEnemy = function (e, dmg, o) {
+    H.aussen("hitEnemy", "lager", function (a, weiter) {
+      const e = a[0]; let dmg = a[1];
       const L0 = lvl("alwin");
       if (L0 && e && !e.dummy && Z.run && typeof dmg === "number") {
         const n = (Z.meta.seen || {})[e.id] || 0; let f = 1;
@@ -1590,23 +1591,22 @@
         else if (L0 >= 2) f = n >= 100 ? 1.15 : n >= 30 ? 1.1 : 1; else f = n >= 15 ? 1.08 : 1; /* W9 R14: Stufe 1 war kaum spürbar (+6 % ab 30) */
         dmg *= f;
       }
-      return hit0.call(this, e, dmg, o);
-    };
+      return weiter([e, dmg, a[2]]); /* wie bisher nur (e, dmg, o) weiterreichen */
+    });
     /* Wendel: Rex! beißt stärker */
-    const ally0 = Z.spawnAlly;
-    if (ally0) Z.spawnAlly = function (kind, x, y, o) { const a = ally0.apply(this, arguments); if (a && kind === "rex" && lvl("wendel") >= 1 && !a.lgDig) { a.dmg = (a.dmg || 10) * 1.5; a.life = (a.life || 10) + 4; } return a; };
+    if (Z.spawnAlly) H.aussen("spawnAlly", "lager", function (a, weiter) { const kind = a[0]; const r = weiter(a); if (r && kind === "rex" && lvl("wendel") >= 1 && !r.lgDig) { r.dmg = (r.dmg || 10) * 1.5; r.life = (r.life || 10) + 4; } return r; });
     /* Bosse */
-    const bd0 = Z.onBossDown;
-    Z.onBossDown = function (b) { const r = bd0 ? bd0.apply(this, arguments) : undefined; try { bossHook(b); } catch (err) { console.error(err); } return r; };
+    if (typeof Z.onBossDown === "function") H.aussen("onBossDown", "lager", function (a, weiter) { const r = weiter(a); try { bossHook(a[0]); } catch (err) { console.error(err); } return r; });
+    else Z.onBossDown = function (b) { try { bossHook(b); } catch (err) { console.error(err); } };
     /* Jori: Waffenständer – Versatz des Kerns und Fundstücke */
     if (Z.setupRack) {
-      const rk0 = Z.setupRack;
-      Z.setupRack = function (lv) {
+      H.aussen("setupRack", "lager", function (a, weiter) {
+        const lv = a[0];
         const n0 = Z.pickups.length;
-        const r = rk0.apply(this, arguments);
+        const r = weiter(a);
         try { rackExtend(lv, Z.pickups.slice(n0)); } catch (err) { console.error(err); }
         return r;
-      };
+      });
     }
   }
   function rackExtend(lv, fresh) {
