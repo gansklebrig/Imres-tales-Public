@@ -748,6 +748,7 @@
       if (P.revive >= 1) reviveP2();
     } else if (P.down) P.revive = Math.max(0, (P.revive || 0) - dt * 0.5);
     if (P.down || !K.pressed.use) return;
+    if (Z.begegnung && Z.begegnung.p2Use) { let r = false; try { r = Z.begegnung.p2Use(P); } catch (e) { console.error("koop beg", e); } if (r) return; } /* W38 Begegnung: Spieler 2 löst Begegnungen aus (online prüft der Gastgeber) */
     /* Gegenstände: wer „Benutzen“ drückt, nimmt */
     const px = P.x + P.w / 2, py = P.y + P.h;
     let best = null, bd = 26;

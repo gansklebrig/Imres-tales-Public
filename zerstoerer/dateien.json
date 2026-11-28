@@ -9738,7 +9738,7 @@
 },
 "zerstoerer.html":{
 "groesse":81795,
-"sha256":"b590ada6ca8554795067801810f7f66534ebb2c03d305d7b531620feb07239d7"
+"sha256":"081fbfb3dd095f4cf1bd4d49afa7e8ce1aefbc8d50f700d84ee6881260bfe3f0"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":145807,
@@ -9765,8 +9765,8 @@
 "sha256":"68c124180bd0f68f8cdbddd3b27e8be9e777f265c1ddae20426cef85ee334f6a"
 },
 "zerstoerer/begegnung38.js":{
-"groesse":20869,
-"sha256":"9c20ea2341d32ec1c47b7ee6f53d8cadd044f823e6ee1b72582f0baf2c0531f2"
+"groesse":25763,
+"sha256":"dd95f991d560f7fbc53d03bd2390db145e7d1e1c6a86e1215f662e9192345380"
 },
 "zerstoerer/bericht.js":{
 "groesse":22057,
@@ -9893,8 +9893,8 @@
 "sha256":"c27802650b7c6a7013b49a27c91df7e4a2c9b8a50aad66d428f2f381ffd2975b"
 },
 "zerstoerer/koop.js":{
-"groesse":111453,
-"sha256":"1c1454c9c5ce399112f8c0d0149434ee0a98db5c4d6621b3aa401538885fe795"
+"groesse":111690,
+"sha256":"087bbc9b84e30398d52ab88215ed0b0bb911a15e3da6d103fab536376c598e2f"
 },
 "zerstoerer/lager.js":{
 "groesse":165257,
@@ -9933,8 +9933,8 @@
 "sha256":"95f977cfe7cfcf6c4ca55b5305551d67bf08cae54bd684adddc1623e645e2702"
 },
 "zerstoerer/online.js":{
-"groesse":98814,
-"sha256":"c6a545dbbb15f65e6564e9b3c70c06248fee275dde6059673faeae7f2092800e"
+"groesse":99099,
+"sha256":"2481401df87c3c38751cef5766b9df86535fc2b1624a5f5eb3dbaa09452ca8a1"
 },
 "zerstoerer/optik2.js":{
 "groesse":55026,
@@ -10045,8 +10045,8 @@
 "sha256":"5491773cf8677da1ba914cd7096c083ab4e1f7b8e2ee8036ab992dd95553114e"
 },
 "zerstoerer/werkzeuge.js":{
-"groesse":64873,
-"sha256":"1b2f8d2975608d8fcb615fd1385e3f482bd0d5b5849bf48bfd79d50051bce10c"
+"groesse":64993,
+"sha256":"8718ec7eac53b4371bc35d833784c7f696938f3dd2cc06723fa11ea04faae935"
 },
 "zerstoerer/wetter.js":{
 "groesse":15358,
@@ -10065,5 +10065,5 @@
 "sha256":"1437181731d4ecd8f93e72f72ee85ac181a09073b5a665fe44870f9a652104c0"
 }
 },
-"stand":190
+"stand":191
 }

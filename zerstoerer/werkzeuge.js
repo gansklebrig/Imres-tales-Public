@@ -564,7 +564,7 @@
       if (o.it && o.it.id === "wurfschild") {
         if (P.shieldOut) return false;
         const h = hand(P), it = o.it;
-        const g = { k: "boomerang", x: h.x, y: h.y, vx: P.face * 420, vy: 0, sp: 440, out: 0.38, r: 8, t: 0, rot: 0, hits: new Set(), dmg: Z.dmgOf(P, it, 13), it, src: "melee", eff: lvl("wurfschild") >= 3 ? { stun: 0.8 } : { stun: 0.2 },
+        const g = { k: "boomerang", x: h.x, y: h.y, vx: P.face * 420, vy: 0, sp: 440, out: 0.38, r: 8, t: 0, rot: 0, hits: new Set(), dmg: Z.dmgOf(P, it, 11) /* W38 Balance: 13 → 11 (−15 %, schild.py 8×: 2537 gegen Median 482) */, it, src: "melee", eff: lvl("wurfschild") >= 3 ? { stun: 0.8 } : { stun: 0.2 },
           draw: c => { circ(c, 0, 0, 6, "#8a6a40"); circ(c, 0, 0, 4.4, "#b89a6a"); circ(c, 0, 0, 1.6, "#e0c890"); }, onCatch: () => { P.shieldOut = null; A.play("block", { vol: 0.4, rate: 1.3 }); } };
         G.push(g); P.shieldOut = { slot: o.slot, g }; A.play("swingHeavy", { vol: 0.5, rate: 1.2 });
         return false;
@@ -575,7 +575,7 @@
       const a = o.a, e = o.e;
       if (id === "glockenschild" && !a.rang) { a.rang = true; A.play("anvil", { vol: 0.8, rate: 0.55 }); FX.ring(e.x + e.w / 2, e.y + e.h / 2, 64, "#d8a040", 0.45, 4); for (const x of Z.enemies) if (alive(x) && x !== e && U.dist(x.x, x.y, e.x, e.y) < 64) { Z.addStatus(x, "stun", 0.9); Z.hitEnemy(x, o.dmg * 0.5, { src: "skill", kb: 80 }); if (lvl(id) >= 3) Z.addStatus(x, "mark", 4); } if (lvl(id) >= 3) Z.addStatus(e, "mark", 4); }
       if (id === "funkenschild" && !a.zapped) { a.zapped = true; Z.chainLightning(P, e.x + e.w / 2, e.y + e.h / 2, o.dmg * 0.6, 2, { stun: 0.3 }, act.it); }
-      if (id === "lavaschild" && !a.lit) { a.lit = true; const gy = groundAt(e.x + e.w / 2, e.y + e.h - 4, 40); if (gy != null) Z.spawnHazard({ kind: "fire", x: e.x + e.w / 2, y: gy, w: 50, life: 3, dmg: Z.dmgOf(P, act.it, 3), owner: "p", eff: { burn: 1 } }); }
+      if (id === "lavaschild" && !a.lit) { a.lit = true; const gy = groundAt(e.x + e.w / 2, e.y + e.h - 4, 40); if (gy != null) Z.spawnHazard({ kind: "fire", x: e.x + e.w / 2, y: gy, w: 50, life: 3, dmg: Z.dmgOf(P, act.it, 2.55) /* W38 Balance: 3 → 2,55 (−15 %) */, owner: "p", eff: { burn: 1 } }); }
       if (id === "frostschild" && lvl(id) >= 3) { Z.addStatus(e, "stun", 1.5); e.frozenT = e.st.stun; }
       if (id === "fassdeckel" && lvl(id) >= 3) e.slamStun = 2;
       return;

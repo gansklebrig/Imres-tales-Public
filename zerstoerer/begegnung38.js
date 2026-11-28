@@ -7,7 +7,8 @@
    2) Myconid-Kreis: ein Pilzältester bittet um drei verstreute Leuchtsporen (45 s). Gelingt es: volle Heilung,
       +1 Trank (bis zum Höchstwert) und Splitter. Scheitern kostet nichts, der Kreis verstummt.
    3) Schattenspiegel: ein schwarzer Spiegel in einem Seitenraum. Wer ihn berührt, ruft Ezekiels Schatten hervor –
-      seine Gestalt, seine Waffe, zäher als ein Söldner. Wer ihn besiegt, bekommt eine Elite-Beute und Splitter.
+      seine Gestalt, seine Waffe, zäher als ein Söldner (mit Fernwaffe schießt er, mit Schild fängt er Treffer von vorn ab).
+      Wer ihn besiegt, bekommt eine Elite-Beute und Splitter.
    Seltenheit: höchstens eine Begegnung je Gebiet, nicht im Lager/Durchgang/Arena, nicht im ersten Gebiet eines Laufs;
    Grundchance 9 % je Gebiet, „Mitleid“ nach 6 Gebieten ohne. Jede einmal pro Auftauchen (missbrauchsfest: kein
    Wiederholen über Rückweg, Lohn nur einmal, Schatten zählt nur durch Sieg). Online: Zustand als kurzes Gebietsfeld
@@ -41,7 +42,10 @@
     }
     return null;
   }
-  function near(o, d) { const P = Z.player; return P && !P.dead && Math.abs(P.x + P.w / 2 - o.x) < (d || 24) && Math.abs(P.y + P.h - o.y) < 28; }
+  function near(o, d, Pq) { const P = Pq || Z.player; return !!(P && !P.dead && !P.down && Math.abs(P.x + P.w / 2 - o.x) < (d || 24) && Math.abs(P.y + P.h - o.y) < 28); }
+  const K = () => Z.koop;
+  const spieler = () => [Z.player, K() && K().p2].filter(P => P && !P.dead && !P.down);
+  const netP2 = P => { const k = K(); return !!(k && P && P === k.p2 && k.src && k.src.kind === "net"); };
 
   /* ---------- Einrichten beim Gebietswechsel ---------- */
   function setup(lv, force) {
@@ -82,28 +86,39 @@
   function done(st) { ev.st = st; ev.t = 0; M().done[ev.k] = (M().done[ev.k] || 0) + (st === "dank" || st === "frei" ? 1 : 0); if (Z.run) Z.run.events = (Z.run.events || 0) + 1; try { Z.saveMeta(); } catch (_) {} sync(); }
 
   /* 1) Tiefgnom: Wahl im Fenster */
-  function gnomFenster() {
-    const P = Z.player, pot = P.potions > 0, gold = (P.gold || 0) >= 60;
+  function gnomFenster(o) {
+    const P = Z.player, pot = o ? !!o.pot : P.potions > 0, gold = o ? !!o.gold : (P.gold || 0) >= 60, pf = o ? "w38gnomGast" : "w38gnom";
     const b = (act, lab, sub, dis) => '<button class="wahl" data-act="' + act + '"' + (dis ? " disabled" : "") + "><b>" + esc(lab) + "</b><small>" + esc(sub) + "</small></button>";
     Z.ui.open("<h2>" + L(["Ein verletzter Tiefgnom", "A wounded deep gnome"]) + "</h2>" +
       "<p><i>" + L(["„Drow-Pfeile. Zwei Stück. Ich bin Nebbelfin aus Blingdenstone, und ich handle mit allem außer meinem Leben.“", "\"Drow arrows. Two of them. I'm Nebbelfin of Blingdenstone, and I trade in everything except my life.\""]) + "</i></p>" +
       '<div class="wahlen">' +
-      b("w38gnomTrank", L(["Heiltrank geben", "Give a healing potion"]), pot ? L(["Er gibt dir sein bestes Stück dafür.", "He gives you his finest piece for it."]) : L(["Du hast keinen Trank.", "You have no potion."]), !pot) +
-      b("w38gnomGold", L(["60 Gold für Verband", "60 gold for bandages"]), gold ? L(["Er zahlt in Seelensplittern zurück.", "He repays you in soul shards."]) : L(["Zu wenig Gold.", "Not enough gold."]), !gold) +
-      b("w38gnomGeh", L(["Weitergehen", "Walk on"]), L(["Er wird es schon schaffen. Vielleicht.", "He'll make it. Probably."]), false) +
+      b(pf + "Trank", L(["Heiltrank geben", "Give a healing potion"]), pot ? L(["Er gibt dir sein bestes Stück dafür.", "He gives you his finest piece for it."]) : L(["Du hast keinen Trank.", "You have no potion."]), !pot) +
+      b(pf + "Gold", L(["60 Gold für Verband", "60 gold for bandages"]), gold ? L(["Er zahlt in Seelensplittern zurück.", "He repays you in soul shards."]) : L(["Zu wenig Gold.", "Not enough gold."]), !gold) +
+      b(pf + "Geh", L(["Weitergehen", "Walk on"]), L(["Er wird es schon schaffen. Vielleicht.", "He'll make it. Probably."]), false) +
       "</div>", { cls: "breit" });
   }
   const act = () => Z.ui && Z.ui.actions;
-  function wire() {
-    const a = act(); if (!a) return setTimeout(wire, 100);
-    a.w38gnomTrank = () => { const P = Z.player; if (!ev || ev.k !== "gnom" || ev.st !== "warte" || !(P.potions > 0)) return Z.ui.close(); P.potions--; Z.ui.close();
+  /* Wahl am Gnom – lokal aus dem Fenster oder online geprüft vom Gastgeber (wahl() prüft alles selbst) */
+  function wahl(w) {
+    const Q = Z.player; if (!ev || ev.k !== "gnom" || ev.st !== "warte" || !Q) return false;
+    if (w === "trank") { if (!(Q.potions > 0)) return false; Q.potions--;
       A.play("potion", { vol: 0.6 }); A.play("coin", { vol: 0.5 }); Z.dropItem(ev.x, ev.y - 6, { boss: true });
       FX.burst(ev.x, ev.y - 10, 14, { col: ["#ffd27a", "#c8c0b8"], sp: 90, up: 50, life: 0.6, size: 2, kind: "spark", add: true });
-      lohnText(L(["Nebbelfin: „Ein Leben für ein Leben. Das hier hätte ich niemandem sonst gegeben.“", "Nebbelfin: \"A life for a life. I wouldn't have given this to anyone else.\""])); done("dank"); };
-    a.w38gnomGold = () => { const P = Z.player; if (!ev || ev.k !== "gnom" || ev.st !== "warte" || (P.gold || 0) < 60) return Z.ui.close(); P.gold -= 60; Z.ui.close();
+      lohnText(L(["Nebbelfin: „Ein Leben für ein Leben. Das hier hätte ich niemandem sonst gegeben.“", "Nebbelfin: \"A life for a life. I wouldn't have given this to anyone else.\""])); done("dank"); return true; }
+    if (w === "gold") { if ((Q.gold || 0) < 60) return false; Q.gold -= 60;
       A.play("coin", { vol: 0.6 }); Z.dropShards(ev.x, ev.y - 8, 45);
-      lohnText(L(["Nebbelfin: „Gutes Tuch. Hier – Splitter aus der Tiefe, die mag dein Schmied.“", "Nebbelfin: \"Good cloth. Here – shards from the deep, your smith will like them.\""])); done("dank"); };
-    a.w38gnomGeh = () => { Z.ui.close(); if (ev && ev.k === "gnom" && ev.st === "warte") { lohnText(L(["Nebbelfin murmelt etwas über Goliaths und Herzen aus Stein.", "Nebbelfin mutters something about goliaths and hearts of stone."])); done("weg"); } };
+      lohnText(L(["Nebbelfin: „Gutes Tuch. Hier – Splitter aus der Tiefe, die mag dein Schmied.“", "Nebbelfin: \"Good cloth. Here – shards from the deep, your smith will like them.\""])); done("dank"); return true; }
+    if (w === "geh") { lohnText(L(["Nebbelfin murmelt etwas über Goliaths und Herzen aus Stein.", "Nebbelfin mutters something about goliaths and hearts of stone."])); done("weg"); return true; }
+    return false;
+  }
+  function wire() {
+    const a = act(); if (!a) return setTimeout(wire, 100);
+    a.w38gnomTrank = () => { Z.ui.close(); wahl("trank"); };
+    a.w38gnomGold = () => { Z.ui.close(); wahl("gold"); };
+    a.w38gnomGeh = () => { Z.ui.close(); wahl("geh"); };
+    /* Online-Gast: seine Wahl geht an den Gastgeber, der prüft */
+    const sende = w => () => { Z.ui.close(); const S = Z.online && Z.online.S; if (S && S.link && gast()) S.link.sendR({ t: "w38begw", w }); };
+    a.w38gnomGastTrank = sende("trank"); a.w38gnomGastGold = sende("gold"); a.w38gnomGastGeh = sende("geh");
   }
   wire();
 
@@ -123,13 +138,13 @@
   }
   function pilzTick(dt) {
     const P = Z.player; if (!P) return;
-    for (const o of ev.sporen) if (!o.got && Math.abs(P.x + P.w / 2 - o.x) < 14 && Math.abs(P.y + P.h / 2 - o.y) < 22) {
+    for (const Pq of spieler()) for (const o of ev.sporen) if (!o.got && Math.abs(Pq.x + Pq.w / 2 - o.x) < 14 && Math.abs(Pq.y + Pq.h / 2 - o.y) < 22) { /* Spieler 2 sammelt mit */
       o.got = true; A.play("gem", { vol: 0.5, rate: 1.3 }); FX.burst(o.x, o.y, 10, { col: ["#e8ff9a", "#a0e050"], sp: 60, life: 0.5, size: 1.8, kind: "glow", add: true });
       const n = ev.sporen.filter(q => q.got).length; FX.text(o.x, o.y - 10, n + "/3", "#d8f080", true); sync();
     }
     ev.left -= dt; if (Math.ceil(ev.left) !== Math.ceil(ev.left + dt)) sync();
     const alle = ev.sporen.every(o => o.got);
-    if (alle && near(ev, 40)) {
+    if (alle && spieler().some(Pq => near(ev, 40, Pq))) {
       P.hp = P.hpMax; P.potions = Math.min(P.potMax || 0, (P.potions || 0) + 1); Z.dropShards(ev.x, ev.y - 8, 30);
       A.play("heal", { vol: 0.7 }); FX.ring(ev.x, ev.y - 10, 40, "#c8f070", 0.6, 3); FX.burst(ev.x, ev.y - 10, 26, { col: ["#e8ff9a", "#a0e050", "#fff"], sp: 90, up: 70, life: 0.9, size: 2, kind: "glow", add: true });
       lohnText(L(["Der Kreis summt. Deine Wunden schließen sich, und eine Flasche füllt sich mit leuchtendem Saft.", "The circle hums. Your wounds close, and a flask fills with glowing sap."])); done("dank");
@@ -137,8 +152,8 @@
   }
 
   /* 3) Schattenspiegel: Ezekiels Schatten tritt heraus */
-  function spiegelStart() {
-    const P = Z.player, tier = (Z.run && Z.run.tier) || 1;
+  function spiegelStart(Pw) {
+    const P = Pw || Z.player, tier = (Z.run && Z.run.tier) || 1;
     const e = Z.spawnEnemy("soeldner", ev.x + (P.x < ev.x ? 18 : -18), ev.y, { tier });
     if (!e) { done("weg"); return; }
     e.w38schatten = 1; e.hpMax = e.hp = Math.round(e.hpMax * 2.4); e.dmgMul = (e.dmgMul || 1) * 1.2; e.aware = true; e.spawnT = 0; e.noLoot = true;
@@ -157,6 +172,34 @@
     } else if (ev.lv !== Z.level) done("weg");
   }
 
+  /* Auslösen durch Ezekiel oder Spieler 2 (koop.js p2Use ruft Z.begegnung.p2Use) */
+  function ausloesen(P) {
+    if (ev.k === "gnom") { if (netP2(P)) anGast(); else gnomFenster(); }
+    else if (ev.k === "pilz") pilzStart(); else spiegelStart(P);
+  }
+  function p2Use(P) {
+    if (!ev || ev.lv !== Z.level || ev.st !== "warte" || gast() || !near(ev, 26, P) || (Z.ui && (Z.ui.modalOpen || Z.ui.choiceActive))) return false;
+    ausloesen(P); return true;
+  }
+  /* Online: Angebot an den Gast → Fenster beim Gast → Antwort prüft der Gastgeber (wie Wandlungsschrein/Amboss) */
+  let offen = null;
+  function anGast() {
+    const S = Z.online && Z.online.S, Q = Z.player; if (!S || !S.link || !Q) return;
+    offen = { lv: Z.level, ev, t: performance.now() };
+    S.link.sendR({ t: "w38beg", k: "gnom", pot: Q.potions > 0, gold: (Q.gold | 0) >= 60 });
+    FX.text(ev.x, ev.y - 30, L(["Spieler 2 verhandelt …", "Player 2 is bargaining …"]), "#c8b8a8");
+  }
+  function netGast(m) { /* beim Gast */
+    if (!gast() || !m || m.k !== "gnom" || !Z.ui || Z.ui.modalOpen) return;
+    gnomFenster({ pot: m.pot === true, gold: m.gold === true });
+  }
+  function netHost(m) { /* beim Gastgeber */
+    const o = offen; offen = null;
+    if (!o || !m || typeof m.w !== "string" || o.lv !== Z.level || o.ev !== ev || performance.now() - o.t > 120000) return;
+    if (["trank", "gold", "geh"].indexOf(m.w) < 0) return;
+    wahl(m.w);
+  }
+
   /* ---------- Takt ---------- */
   const ue0 = Z.updateEnemies;
   Z.updateEnemies = function (dt) {
@@ -167,7 +210,7 @@
       const use = inp.pressed.use && !Z.interactTarget && !(Z.ui && (Z.ui.modalOpen || Z.ui.choiceActive));
       if (ev.st === "warte" && near(ev, 26) && use) {
         inp.consume && inp.consume("use");
-        if (ev.k === "gnom") gnomFenster(); else if (ev.k === "pilz") pilzStart(); else spiegelStart();
+        ausloesen(Z.player);
       } else if (ev.st === "lauf") { if (ev.k === "pilz") pilzTick(dt); else if (ev.k === "spiegel") spiegelTick(); }
     });
     return r;
@@ -238,7 +281,7 @@
     c.restore();
   }
   function label(c, o, txt) {
-    const P = Z.player; if (!P || o.st !== "warte" || !near(o, 60)) return;
+    if (o.st !== "warte" || !spieler().some(Pq => near(o, 60, Pq))) return; /* auch Spieler 2 / Online-Gast sieht den Hinweis */
     const k = inp.label ? inp.label("use") : ""; const s = (k ? "[" + k + "] " : "✋ ") + txt;
     c.save(); c.font = "700 7px 'Alegreya Sans',sans-serif"; c.textAlign = "center";
     const w = c.measureText(s).width + 8, y0 = o.y - (o.k === "pilz" ? 36 : o.k === "gnom" ? 26 : 46); /* Gnom sitzt: Schild knapp über ihm, nicht im Ortsnamen */
@@ -279,6 +322,48 @@
     if (!ok) return de0.apply(this, arguments);
   };
 
+  /* Schatten-Verhalten nach Ezekiels Waffe (dezent): Fernwaffe → schießt mit Vorwarnung aus der Distanz, Schild → blockt
+     Treffer von vorn ab (−40 %), solange er nicht selbst angreift. Nahkampf: Söldner-Verhalten wie gehabt. */
+  const schattenArt = e => { const d = Z.WEAPONS[e.w38w]; return d ? d.kind : "melee"; };
+  const ue1 = Z.updateEnemies;
+  Z.updateEnemies = function (dt) {
+    const r = ue1.apply(this, arguments);
+    safe("schattenKI", () => {
+      if (gast()) return;
+      if (!Z.hitEnemy._w38s && Z.enemies.some(e => e.w38schatten && !e.dead)) wrapHit();
+      for (const e of Z.enemies) {
+        if (!e.w38schatten || e.dead || schattenArt(e) !== "ranged") continue;
+        const P = Z.player; if (!P || P.dead) continue;
+        e.w38cd = (e.w38cd == null ? 1.2 : e.w38cd) - dt;
+        const cx = e.x + e.w / 2, cy = e.y + 10, dx = P.x + P.w / 2 - cx, ad = Math.abs(dx);
+        if (e.w38cd <= 0.35 && e.w38cd + dt > 0.35 && ad > 50 && ad < 280) FX.text(cx, e.y - 8, "!", "#c890ff"); /* Vorwarnung */
+        if (e.w38cd <= 0) {
+          e.w38cd = 1.7 + Math.random() * 0.6;
+          if (ad > 50 && ad < 280 && !(e.st && (e.st.stun > 0 || e.st.root > 0)) && (!Z.world.los || Z.world.los(cx, cy, P.x + P.w / 2, P.y + 12))) {
+            e.face = dx > 0 ? 1 : -1;
+            Z.aimProj("e_pfeil", cx + e.face * 6, cy, P.x + P.w / 2, P.y + 12, { dmg: (e.dmgMul || 10) * 0.8 });
+            A.play("bow", { vol: 0.4, rate: 0.85 });
+          }
+        }
+      }
+    });
+    return r;
+  };
+  /* außen anhängen – manche Module setzen Z.hitEnemy erst später neu; darum im Takt prüfen und ggf. erneut umhüllen */
+  function wrapHit() {
+    const he0 = Z.hitEnemy; if (!he0 || he0._w38s) return;
+    const f = function (e, dmg, o) {
+    if (e && e.w38schatten && !e.dead && typeof dmg === "number" && schattenArt(e) === "shield" && !e.act && !(o && (o.dot || o.fx))) {
+      const dir = (o && o.dir) || (Z.player ? U.sign(e.x - Z.player.x) : 0);
+      if (dir && (e.face || 1) === -dir) { dmg *= 0.6; safe("block", () => { A.play("block", { vol: 0.4, rate: 0.9 }); FX.burst(e.x + e.w / 2 - dir * 6, e.y + 12, 5, { col: ["#c890ff", "#e8e0d8"], sp: 70, life: 0.2, size: 1.4, kind: "spark", add: true }); }); }
+    }
+    const args = Array.prototype.slice.call(arguments); args[1] = dmg; /* strict: arguments folgt dmg nicht */
+    return he0.apply(this, args);
+    };
+    f._w38s = true; Z.hitEnemy = f;
+  }
+  wrapHit();
+
   /* Prüfhilfe */
-  Z.begegnung = { force: k => { setup(Z.level, k); return ev && { k: ev.k, x: ev.x, y: ev.y }; }, ev: () => ev, NAME };
+  Z.begegnung = { force: k => { setup(Z.level, k); return ev && { k: ev.k, x: ev.x, y: ev.y }; }, ev: () => ev, NAME, p2Use, netGast, netHost };
 })();

@@ -459,6 +459,7 @@
       case "req": if (m.w === "full") { S.ack = -1; S.hist.clear(); return; } if (m.w === "tiles" && Z.level && Z.level.tiles && int(m.n, 0, 1e9, -1) === S.area) S.link.sendR({ t: "tiles", n: S.area, d: b64u(Z.level.tiles) }); return;
       case "mutw": return mutAntwort(m);
       case "ambw": return ambossAntwort(m); /* W39 P2 */
+      case "w38begw": if (Z.begegnung && Z.begegnung.netHost) Z.begegnung.netHost(m); return; /* W38 Begegnung: Wahl des Gasts – Gastgeber prüft */
       case "bye": return endSession(L(["Der Mitspieler hat das Spiel verlassen.", "The other player left."]));
     }
   }
@@ -634,6 +635,7 @@
       case "pong": return onPong(m);
       case "mut": return mutFenster(m);
       case "amb": return ambFenster(m); /* W39 P2 */
+      case "w38beg": if (Z.begegnung && Z.begegnung.netGast) Z.begegnung.netGast(m); return; /* W38 Begegnung: Angebot an den Gast */
       case "ambz": if (S.ambW) { S.ambW = null; Z.ui.close(); } return;
       case "say": { /* W39 P2: Satz einer Lagerfigur beim Gast (nur bekannte Figur im eigenen Lager, Text gekürzt und entschärft) */
         if (typeof m.id !== "string" || !/^[A-Z]$/.test(m.id) || !Z.level || !Z.level.hub) return;
