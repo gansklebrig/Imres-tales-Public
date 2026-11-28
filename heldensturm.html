@@ -3851,11 +3851,11 @@ function slash(x,y,a,arc,r,c,life,big){G.fxs.push({k:'slash',x,y,a,arc,r,c,t:0,l
 
 /* ================= Gegner ================= */
 const effStage=()=>SL()+diffStages(G.diff);
-/* Frühe Stufen auf Normal etwas zäher: Bonus verblasst bis Stufenlevel 14 */
+/* Frühe Stufen auf Normal etwas zäher: Bonus verblasst bis Stufenlevel 14 (28.11.: Leben +60 % statt +80 %, Schaden +50 % statt +75 % – die erste Stufe war für Friedrich die gefährlichste des ganzen Spiels) */
 const EB=()=>G&&G.diff===0?Math.max(0,1-SL()/14):0;
 /* Ab sehr hohen Stufen wachsen Gegner langsamer, damit Hölle und darüber schwer, aber schaffbar bleiben */
 const softE=(E,k)=>E<=30?E:30+(E-30)*k;
-function scale(){const E=effStage(),prog=Math.min(1,(G.need?G.stageKills/G.need:1)),eb=EB(),an=1+0.15*(1-anlauf().lv);return{hp:an*28*Math.pow(1.14,softE(E,0.55))*(1+0.35*prog)*(1+0.8*eb)*mpHp()*(HARD()?hartMix(1.08,1.35):1),dmg:an*9.2*Math.pow(1.122,softE(E,0.42))*(1+0.3*prog)*(1+0.75*eb)*(NORM()&&G.mode==='kampagne'?0.8:1)*(HARD()?hartMix(0.8,1.2):1),il:Math.max(1,Math.round(1+1.1*E+prog*2))+(HARD()?2:0)}}
+function scale(){const E=effStage(),prog=Math.min(1,(G.need?G.stageKills/G.need:1)),eb=EB(),an=1+0.15*(1-anlauf().lv);return{hp:an*28*Math.pow(1.14,softE(E,0.55))*(1+0.35*prog)*(1+0.6*eb)*mpHp()*(HARD()?hartMix(1.08,1.35):1),dmg:an*9.2*Math.pow(1.122,softE(E,0.42))*(1+0.3*prog)*(1+0.5*eb)*(NORM()&&G.mode==='kampagne'?0.8:1)*(HARD()?hartMix(0.8,1.2):1),il:Math.max(1,Math.round(1+1.1*E+prog*2))+(HARD()?2:0)}}
 function spawnEnemy(def,x,y,o){o=o||{};const sc=scale();const big=o.boss||o.guard||o.add;const elite=false;
  const sz=(big?(def.size||2):(def.size||1)*(elite?1.35:1))*(dmod('riesen')&&!big?1.3:1);
  const hp=sc.hp*(def.hp||1)*(dmod('riesen')?1.5:1)*(dmod('goldrausch')?1.25:1)*wxUndead(def)*(elite?4.5:1)*(o.boss?(40+SL()*1.5):o.guard?(8+Math.min(6,SL()*0.5)):o.add?10:1);
@@ -21477,7 +21477,19 @@ function kaKleinZusatz(K,T,th,DK,frei){const KK=window.__hsKK;if(KK.aus)return;c
  if(th==='kerker')for(const d of G.deco.slice())if(d.k==='cell'&&Math.random()<0.5)put(d.x+rnd(-18,18),d.y+6,'kk_stroh',0.9);
  /* Lichtungen: Blumen in offenen Wiesenzellen */
  if(wald&&!tot)for(let q=0,m=Math.round(fl.length/220);q<m;q++){const c=fl[(Math.random()*fl.length)|0],x=kaW(c%n),y=kaW((c/n)|0);if(K.tore.some(t=>Math.hypot(t.x-x,t.y-y)<120))continue;for(let r=0,k=ri(3,6);r<k;r++)put(x+rnd(-40,40),y+rnd(-26,26),r%3===2?'grass':'kk_blumen')}
- if(hoehle&&th!=='glutgang'&&th!=='hort')for(let q=0,m=Math.round(fl.length/300);q<m;q++){const c=fl[(Math.random()*fl.length)|0];put(kaW(c%n)+rnd(-12,12),kaW((c/n)|0)+rnd(-12,12),'kk_kiesel')}}
+ if(hoehle&&th!=='glutgang'&&th!=='hort')for(let q=0,m=Math.round(fl.length/300);q<m;q++){const c=fl[(Math.random()*fl.length)|0];put(kaW(c%n)+rnd(-12,12),kaW((c/n)|0)+rnd(-12,12),'kk_kiesel')}
+ /* Trampelpfad durch den Wald (ohne Straße) bzw. Grubengleis durch die Mine entlang der Hauptroute */
+ const pfadArt=wald&&!G.road?'kk_pfad':(th==='mine'||th==='minenetz'||th==='tunnel')?'kk_gleis':null;
+ if(pfadArt){const pts=[[K.start.x,K.start.y]];for(const t of K.tore){if(!t.main)continue;pts.push([t.ax,t.ay],[t.x,t.y],[t.bx,t.by]);const sb=K.sec[t.b];if(sb&&sb.art!=='arena')pts.push([sb.cx,sb.cy])}
+  const P2=kaGlattPfad(pts),st=pfadArt==='kk_gleis'?30:26;let rest=0,lauf=0;for(let q=0;q<P2.length-1;q++){const a0=P2[q],b0=P2[q+1],L=Math.hypot(b0[0]-a0[0],b0[1]-a0[1]);if(L<1)continue;const an=Math.atan2(b0[1]-a0[1],b0[0]-a0[0]);
+   for(let u=rest;u<L;u+=st){const x=a0[0]+(b0[0]-a0[0])*u/L,y=a0[1]+(b0[1]-a0[1])*u/L;lauf++;
+    /* Gleis nur abschnittweise (alte, teils abgebaute Strecke), Pfad durchgehend, nie über Hindernisse */
+    if(pfadArt==='kk_gleis'&&((lauf/14)|0)%3===2)continue;if(blkPunkt(x,y,pfadArt==='kk_gleis'?14:8)||wlLoPunkt(x,y,10))continue;
+    G.deco.push({x:x+(pfadArt==='kk_pfad'?rnd(-5,5):0),y:y+(pfadArt==='kk_pfad'?rnd(-4,4):0),k:pfadArt,s:1,v:Math.random(),a:an,wl:1,boden:1})}
+   rest=(rest-L)%st;if(rest<0)rest+=st}
+  /* auf dem Pfad wächst nichts: Kleinkram direkt darauf entfernen */
+  const PM=new Set();for(const d of G.deco)if(d.k===pfadArt)PM.add(Math.floor(d.x/24)+','+Math.floor(d.y/24));
+  G.deco=G.deco.filter(d=>{if(d.k===pfadArt||!(KK_NATUR.has(d.k)||/^kk_(farn|blumen|kiesel|stumpf)$/.test(d.k)))return true;return!PM.has(Math.floor(d.x/24)+','+Math.floor(d.y/24))})}}
 {const dd0=drawDeco;drawDeco=function(d,t){const k=d.k;if(typeof k!=='string'||k.charCodeAt(0)!==107||k.charCodeAt(1)!==107||k.charCodeAt(2)!==95)return dd0.apply(this,arguments);
  const c=cx,s=d.s||1,v=d.v||0;c.save();c.translate(d.x,d.y);c.scale(s,s);
  try{switch(k){
@@ -21493,6 +21505,8 @@ function kaKleinZusatz(K,T,th,DK,frei){const KK=window.__hsKK;if(KK.aus)return;c
    if(!(typeof spLeicht==='function'&&spLeicht())){glow(0,-10,18,'#ffc070',0.35+0.06*Math.sin(t*9+v*5),true);c.globalAlpha=1}}break;
   case'kk_holz':ell(c,0,9,19,4,'rgba(0,0,0,.3)');c.fillStyle='#4a3424';c.fillRect(-17,-10,34,18);for(let r=0;r<3;r++)for(let q=0;q<5-r;q++){const x=-13+q*6.5+r*3.2,y=5-r*6;circ(c,x,y,3.4,'#6a4c30');circ(c,x,y,2.3,'#b8946a');circ(c,x,y,0.8,'#8a6a46')}ln(c,'#3a2818',1.6,-18,8,-18,-8);ln(c,'#3a2818',1.6,18,8,18,-8);break;
   case'kk_sitz':ell(c,0,6,16,3.4,'rgba(0,0,0,.3)');c.fillStyle='#4e3826';c.beginPath();c.moveTo(-14,-3);c.lineTo(14,-3);c.lineTo(14,5);c.lineTo(-14,5);c.closePath();c.fill();c.fillStyle='#5e4430';c.fillRect(-14,-3,28,3);ln(c,'#3a2818',0.7,-8,0,6,0);ln(c,'#3a2818',0.7,-3,3,9,3);ell(c,14,1,2.6,4,'#b08c62');ell(c,14,1,1.4,2.4,'#9a7650');ell(c,-14,1,2.6,4,'#a8845a');break;
+  case'kk_pfad':{c.rotate(d.a||0);ell(c,0,0,15,6.5,'rgba(62,46,30,.34)');ell(c,-3,-1,9,3.6,'rgba(84,64,42,.26)');if(v>0.6){ell(c,6,1,1.4,0.9,'#6a645c');ell(c,-7,2,1.1,0.7,'#5e5850')}if(v<0.25)ln(c,'rgba(40,30,20,.35)',0.8,-10,1.5,8,1.8)}break;
+  case'kk_gleis':{c.rotate(d.a||0);for(const x of [-9,1,11]){c.fillStyle='#3e2e20';c.fillRect(x-2.6,-9,5.2,18);c.fillStyle='#4e3a28';c.fillRect(x-2.6,-9,5.2,3)}c.fillStyle='rgba(0,0,0,.3)';c.fillRect(-15,-6,30,2.4);c.fillRect(-15,5,30,2.4);c.fillStyle='#5a5652';c.fillRect(-15,-7,30,2);c.fillRect(-15,4,30,2);c.fillStyle='rgba(220,210,190,.22)';c.fillRect(-15,-7,30,0.7);c.fillRect(-15,4,30,0.7);if(v>0.7){ell(c,4,9,2,1,'#5e5850')}}break;
   case'kk_stroh':ell(c,0,4,15,4.5,'#8a7a3a');ell(c,-1,2.5,12,3.4,'#a8964a');for(let q=0;q<9;q++){const x=-12+q*3,a=((q*31+v*50)%10)/10-0.5;ln(c,q%2?'#c8b460':'#b8a250',0.8,x,4,x+a*8,0)}break;
  }}finally{c.restore()}}}
 
@@ -43879,6 +43893,15 @@ hook('stats',s=>{try{if(E2.aus||!P||P.id!=='echo')return;const lv=Math.max(1,P.l
  hook('hurtMul',()=>{if(GD.aus||!P)return 1;const now=G.time;const L=P._gdL||(P._gdL=[]);while(L.length&&now-L[0]>GD.F)L.shift();const k=L.length;L.push(now);if(L.length>24)L.shift();
   if(k<2)return 1;GD.n++;return Math.max(GD.MIN,1-GD.S*(k-1))});
 }catch(e){console.error('gedraenge',e);window.__hsGDR={v:1,err:[String(e&&e.stack||e)]}}})();
+/* Weltordnung, Teil 2: lose Fässergruppen (auch Sprengfässer) rücken an die nächste Wand – wie abgestellt statt mitten im Weg */
+(function(){try{const ss=setupStage;setupStage=function(){const r=ss.apply(this,arguments);try{const KK=window.__hsKK,K=G.ka;if(!KK||KK.aus||!K||!K.an||G.room||G.netGuestRun)return r;const n=K.n,Z=K.Z,M=K.M;
+  const istM=(i,j)=>i<0||j<0||i>=n||j>=n||!!M[j*n+i];const L=G.props.filter(p=>p.k==='barrel'&&!p.kkW&&!p.fb);const gr=[];
+  for(const p of L){let g=gr.find(g=>g.some(q=>Math.abs(q.x-p.x)<70&&Math.abs(q.y-p.y)<40));if(!g)gr.push(g=[]);g.push(p)}
+  let mv=0;for(const g of gr){const cx0=g.reduce((s,p)=>s+p.x,0)/g.length,cy0=g.reduce((s,p)=>s+p.y,0)/g.length,i0=Math.floor(cx0/Z),j0=Math.floor(cy0/Z);let best=null,bd=1e9;
+   for(let b=-6;b<=6;b++)for(let a=-6;a<=6;a++){const i=i0+a,j=j0+b;if(istM(i,j)||!istM(i,j-1)||istM(i,j+1))continue;const d=a*a+b*b;if(d<bd){bd=d;best=[i,j]}}
+   if(!best)continue;const bx=kaW(best[0]),by=best[1]*Z+18;g.sort((p,q)=>p.x-q.x);let ok=true;const pos=g.map((p,k)=>({x:bx+(k-(g.length-1)/2)*26,y:by+(k%2)*4}));
+   for(const q of pos)if(blkPunkt(q.x,q.y,11)||wlLoPunkt(q.x,q.y,14))ok=false;if(!ok)continue;g.forEach((p,k)=>{p.x=pos[k].x;p.y=pos[k].y;p.kkW=1});mv++}
+  KK.fass=mv}catch(e){window.__hsKK.err3=String(e&&e.stack||e)}return r}}catch(e){console.error('kkFass',e)}})();
 /* «/echo2» */
 /* «padziel» */
 /* ================= Paket „padziel“: Controller – Fähigkeiten in Laufrichtung – window.__hsPADZIEL =================
