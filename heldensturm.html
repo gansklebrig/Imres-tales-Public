@@ -43735,7 +43735,7 @@ if(typeof scale==='function'){const sc=scale;scale=function(){const r=sc.apply(t
      · +12 % Leben dauerhaft (Echo ist sonst der zerbrechlichste Held)
    Abschaltbar: __hsECHO2.aus=1 */
 (function(){try{if(window.__hsECHO2)return;
-const E2=window.__hsECHO2={v:1,aus:0,DMG0:0.4,BIS:15,HP:0.12};
+const E2=window.__hsECHO2={v:2,aus:0,DMG0:0.4,BIS:20,HP:0.25};/* v2 (Messung 28.11.: Echo starb als Einzige auf Normal am Boss von Stufe 12 und auf Schwer schon in Stufe 2; Höchstleben ⅔ der anderen) */
 hook('stats',s=>{try{if(E2.aus||!P||P.id!=='echo')return;const lv=Math.max(1,P.level|0);const f=Math.max(0,1-(lv-1)/(E2.BIS-1));s.dmgP=(s.dmgP||0)+E2.DMG0*f;s.hpP=(s.hpP||0)+E2.HP}catch(e){}});
 }catch(e){console.error('echo2',e);window.__hsECHO2={v:1,err:[String(e&&e.stack||e)]}}})();
 /* «/echo2» */
