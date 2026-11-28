@@ -452,6 +452,11 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
   const N = 64, EIN = new Float32Array(N), AUS = new Float32Array(N);
   for (let i = 0; i < N; i++) { EIN[i] = Math.sin(i / (N - 1) * Math.PI / 2); AUS[i] = Math.cos(i / (N - 1) * Math.PI / 2); }
   let aktiv = null;
+  /* Rauschende Teppiche (Wind, Regen, Wasser, Brandung) liegen standardmäßig leiser unter der Kulisse – wer mehr will, zieht den Regler bis 150 % hoch.
+     Wo das Rauschen selbst das Thema ist (Regen, Küste, Wasserfall …), wird es nur leicht zurückgenommen. */
+  const RAUSCH_BETT = /^[al]_(wind|orkan|heulwind|ruinenwind|schneesturm|baumwind|laub|regen|leichtregen|starkregen|waldregen|fensterregen|zelt|gewitter|wasserfall|wildwasser|strom|fluss|bach|rinnsal|brandung|wellen|klippen|brunnen|unterwasser|schilf|kochen)/;
+  const RAUSCH_THEMA = /^(_wetter|zelt|kueste|meer|fluss|wasserfall|unterwasser|ufer|schiff|gebirge|regen|gewitter|sturm|wind|schnee|niesel)$/;
+  const rauschD = (name, thema) => RAUSCH_BETT.test(name || "") ? (RAUSCH_THEMA.test(thema || "") ? .8 : .62) : 1;
   const trimVon = w => w ? Math.pow(10, (TRIM[w.id] || 0) / 20) : 1;
   /* Teppiche weit vorausplanen: der nächste Ausschnitt steht schon, sobald der jetzige beginnt –
      so übersteht der Ton auch Sekunden, in denen das iPad das Skript anhält (Sperre, Speicherbereinigung) */
@@ -465,7 +470,7 @@ select{height:42px;border-radius:9px;border:1px solid var(--line);background:var
     else { b.out.connect(trocken); const s = ctx.createGain(); s.gain.value = .25; b.out.connect(s); s.connect(hallEin); }
     /* auf gleiche Lautheit bringen – aber nie so weit, dass knackende Spitzen (Feuer, Tropfen) übersteuern;
        dazu der Ausgleich je Klangwelt (TRIM in daten.js, nach Spitzenpegel begrenzt), damit alle Welten etwa gleich laut sind */
-    b.grund = staerke * Math.min(1.15, .055 / (LAUTHEIT[name] || .05)) * trimVon(welt);
+    b.grund = staerke * Math.min(1.15, .055 / (LAUTHEIT[name] || .05)) * trimVon(welt) * rauschD(name, welt && welt.id);
     b.p = laden(name).then(buf => {
       if (!buf || b.aus) return;
       b.buf = buf; b.naechst = ctx.currentTime + .05;
