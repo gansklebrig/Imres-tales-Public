@@ -9738,7 +9738,7 @@
 },
 "zerstoerer.html":{
 "groesse":84035,
-"sha256":"ee684a8fb96254b420c0caff36ad3aca2ce7788ee01642accf1b1742746082bc"
+"sha256":"f5d76c33de8750a45015c862f5aea50d8a8209d282480059c703a1185b58e8ca"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":145504,
@@ -9757,8 +9757,8 @@
 "sha256":"fc0db68edcad3a79a34210c7ef1efeff0c7ce6066dea7495d1dc02bac816d800"
 },
 "zerstoerer/ausgleich.js":{
-"groesse":7203,
-"sha256":"766134066b3bafab416e4477387d779d1931c10ce25bbdd82adc53d850ffd9f3"
+"groesse":9430,
+"sha256":"50e2fcd572b8ff6ca04a53abf8520e2d180efb93adbc598dde7c5eefee243fdd"
 },
 "zerstoerer/ausstattung.js":{
 "groesse":376452,
@@ -9785,8 +9785,8 @@
 "sha256":"fd1e30811ee461b41beb222b9d79836201d6c99bb5fd36ccbd5baf23a34ad9f2"
 },
 "zerstoerer/bosse.js":{
-"groesse":45149,
-"sha256":"9086177a2506d2e42371fcf3933453c9f00de79d172c9f9de353d5693f2c3783"
+"groesse":45378,
+"sha256":"b7205b7c83eb92e5a243a077ead6b7478f08f7805cc23017de3cd119ef6bfec2"
 },
 "zerstoerer/bossphasen.js":{
 "groesse":160381,
@@ -10077,5 +10077,5 @@
 "sha256":"1437181731d4ecd8f93e72f72ee85ac181a09073b5a665fe44870f9a652104c0"
 }
 },
-"stand":202
+"stand":203
 }

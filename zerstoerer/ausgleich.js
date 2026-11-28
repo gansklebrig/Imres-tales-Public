@@ -17,7 +17,7 @@
   /* Feinabgleich je Boss nach Prüfstand (kampf.py, Standardausrüstung, Bot-Zeit nach ×2,0): Ziel Bot 40–90 s (Spieler länger).
      Themberchaud (fliegt, lange Phasen) lag schon bei 120–137 s, Riese/Ilvara/Chasme bei 20–35 s. In echten Läufen (schwächere Ausrüstung) Riese/Chasme dann zu zäh → 1,3/1,2. */
   /* W9-Nacharbeit (Abuse-Bot): Glasstab 28–39 s und Venomfang 40–66 s zu kurz → 1,25 / 1,2→1,4 */
-  const BOSS_F = { wraith: 1.45, schmiedewaechter: 1.3 /* W9 5. Runde: Wächter < 60 s (K9: Wraith 25–70, Schmiedewächter 20–40, Riese 20–105) */, vrock: 1.5 /* 5. Runde: K9/K10 25–32 s */ /* W9-Nacharbeit 3: nach Erreichbarkeits-Fix 22–25 s (Bot) */, glasstab: 1.25, riese: 1.9, ilvaraW: 1.6, chasme: 1.5 /* W9 4. Runde: Raum-Gegner weichen, Schaden ×1,15 → mehr Leben */, demogorgon: 1.3, venomfang: 1.4, themberchaud: 0.75, bugbear: 2.1 /* Kontrollläufe: Wachturm noch 20 s */, erzpriesterin: 1.15 /* 4. Runde K8: 198–298 s → 1,15 */ /* W9-Kontrollläufe K5: Erzpriesterin 19–61 s (Vrock-Wächter 21 s in Läufen, mit ×2,0 im Prüfstand aber > 600 s, ×1 dort 104 s – stark streuend, daher unverändert) */ /* W9 3. Runde (K6/K7): Riese-Wächter 25–71 s → 1,55; Wachturm 25–39 s → 2,1; Erzpriesterin 103–160 s → 1,45 */ };
+  const BOSS_F = { wraith: 1.25 /* W51 Balance: 1,45 → 1,25 (Bot, frische Ausrüstung: 0 Siege in 7 Kämpfen, Stufe-4-Todesrate 1,0 gegen 0,2–0,3 auf Stufe 3) */, schmiedewaechter: 1.15 /* W51 Balance: 1,3 → 1,15 (0 Siege in 9 Kämpfen) */ /* W9 5. Runde: Wächter < 60 s (K9: Wraith 25–70, Schmiedewächter 20–40, Riese 20–105) */, vrock: 1.5 /* 5. Runde: K9/K10 25–32 s */ /* W9-Nacharbeit 3: nach Erreichbarkeits-Fix 22–25 s (Bot) */, glasstab: 1.25, riese: 1.9, ilvaraW: 1.6, chasme: 1.5 /* W9 4. Runde: Raum-Gegner weichen, Schaden ×1,15 → mehr Leben */, demogorgon: 1.3, venomfang: 1.4, themberchaud: 0.75, bugbear: 1.75 /* W51 Balance: 2,1 → 1,75 (Bot 24 Läufe: TTK Median 98 s und 5,5× LP-max Schaden, die anderen Stufe-3-Bosse 53–62 s / 2,1×) */ /* Kontrollläufe: Wachturm noch 20 s */, erzpriesterin: 1.15 /* 4. Runde K8: 198–298 s → 1,15 */ /* W9-Kontrollläufe K5: Erzpriesterin 19–61 s (Vrock-Wächter 21 s in Läufen, mit ×2,0 im Prüfstand aber > 600 s, ×1 dort 104 s – stark streuend, daher unverändert) */ /* W9 3. Runde (K6/K7): Riese-Wächter 25–71 s → 1,55; Wachturm 25–39 s → 2,1; Erzpriesterin 103–160 s → 1,45 */ };
   /* W9 (Spielermeldung „zäh, aber zu leicht“): Grundfaktor 2,0 → 1,75. Dafür mehr Gefahr statt mehr Leben: Angriffsfenster
      (1,5-facher Schaden), Kombos, Wut unter 20 %, Anti-Cheese, Lebensraub-Deckel und Signatur-Techniken (bossphasen.js, Abschnitt 6).
      Prüfstand /home/claude/test/w9_boss (kampf.py, Stil „stark“ = Speer +5): vorher Stufe-3-Bosse 22–48 s, Wächter 13–90 s. */
@@ -64,4 +64,34 @@
   Z.parryScale = () => 1 / (1 + 0.14 * depth());
   Z.blockLeak = () => Math.min(0.35, 0.07 * depth());
   Z.ENEMY_GRAV = 1850;
+
+  /* ---------- W51 Balance: Ausreißer der Schwierigkeitskurve glätten ----------
+     Prüfstand /home/claude/test/w51_balance (balbot.js, je Serie 8–24 Läufe über 6 Routen, alle 14 Gebiete; theorie.py).
+     Nur gewöhnliche Gegner (keine Bosse/Wächter/Mini-Bosse); wirkt beim Erscheinen, also auch für spät geladene Arten
+     (Stollen, gegner2) und vor der Koop-Skalierung (koop.js rechnet relativ weiter). Je Wert höchstens ±25 %. */
+  const W51_GEBIET = {
+    hallen: { hp: 0.85 },   /* Ø Gegnerleben 81 gegen 56/57 in Keller/Wehrgang; Bot: 2,25× LP-max Schaden gegen 0,64/1,15 */
+    glocken: { dmg: 0.88 }, /* Stufe 2: 2,07× LP-max und Todesrate 0,43 gegen 0,98/0,77 in Verlies/Hafen (Schützen-lastig) */
+    schmiede: { hp: 0.8 }   /* Stufe 4: Ø Gegnerleben 315 gegen 167/245 (Zinnen/Schlund), Todesrate 1,0 */
+  };
+  const W51_ART = {
+    runenfunke: { dmg: 0.8 },   /* zielsuchende Dreiersalve; im Schmiedewächter-Kampf der häufigste letzte Treffer */
+    drowSchuetze: { dmg: 0.85 }, /* Härte-3-Reihe: meiste Tode durch einen Normalgegner */
+    goblinBogen: { dmg: 0.9 }    /* größter Einzelanteil am Schaden gewöhnlicher Gegner (Torhof bis Glockenturm) */
+  };
+  Z.BAL.w51 = { gebiet: W51_GEBIET, art: W51_ART };
+  const sp51 = Z.spawnEnemy;
+  Z.spawnEnemy = function (id, x, y, o) {
+    const e = sp51.apply(this, arguments);
+    try {
+      if (e && e.def && !e.def.boss && !/^mb_/.test(e.id || id) && !e._w51) {
+        e._w51 = 1;
+        const g = (Z.level && W51_GEBIET[Z.level.id]) || null, a = W51_ART[e.id || id] || null;
+        const hp = (g && g.hp || 1) * (a && a.hp || 1), dm = (g && g.dmg || 1) * (a && a.dmg || 1);
+        if (hp !== 1) { e.hpMax = Math.max(1, Math.round(e.hpMax * hp)); e.hp = Math.max(1, Math.round(e.hp * hp)); }
+        if (dm !== 1) e.dmgMul *= dm;
+      }
+    } catch (err) { console.error("w51", err); }
+    return e;
+  };
 })();

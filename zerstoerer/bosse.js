@@ -123,7 +123,7 @@
 
   /* ---------- Bugbear & Nezna ---------- */
   B.bugbear = base({
-    n: ["Der Bugbear", "The Bugbear"], title: ["Wächter des Wachturms", "Keeper of the Watchtower"], shape: "bugbear", c: "#b08a4a", t: "#5a3a1a", w: 22, h: 40, size: 1.12, hp: 36, dmg: 1.35, spd: 80, idleT: 0.5,
+    n: ["Der Bugbear", "The Bugbear"], title: ["Wächter des Wachturms", "Keeper of the Watchtower"], shape: "bugbear", c: "#b08a4a", t: "#5a3a1a", w: 22, h: 40, size: 1.12, hp: 36, dmg: 1.2 /* W51 Balance: 1,35 → 1,2 (mit Nezna zusammen 5,5–6,3× LP-max Schaden, Glasstab/Erzpriesterin 2,1–3,2×) */, spd: 80, idleT: 0.5,
     intro: ["Ein Bugbear richtet sich zu voller Größe auf – und neben ihm zieht eine Drow ihren Krummsäbel. Nezna.", "A bugbear rises to its full height – and beside it a drow draws her scimitar. Nezna."],
     outro: ["Der Bugbear schlägt so schwer auf, dass der Steinboden bebt. Nezna ist als Fledermaus entwischt. Natürlich.", "The bugbear hits the ground so hard the stone trembles. Nezna has escaped as a bat. Of course."],
     init: e => { e.partner = null; },
@@ -166,7 +166,7 @@
 
   /* ---------- Schmiedewächter ---------- */
   B.schmiedewaechter = base({
-    n: ["Der Wächter der Schmiede", "The Forge Warden"], title: ["Letzter Hüter der Runen", "Last Keeper of the Runes"], shape: "golem", c: "#4a5060", t: "#ffb040", w: 26, h: 44, size: 1.42, hp: 32, dmg: 1.35, spd: 45, armor: 0.1, metal: true, idleT: 0.6, immune: ["bleed", "poison"],
+    n: ["Der Wächter der Schmiede", "The Forge Warden"], title: ["Letzter Hüter der Runen", "Last Keeper of the Runes"], shape: "golem", c: "#4a5060", t: "#ffb040", w: 26, h: 44, size: 1.42, hp: 32, dmg: 1.15 /* W51 Balance: 1,35 → 1,15 (Bot: 0 Siege in 9 Kämpfen, alle Tode durch Strahl/Runenregen im Wächterkampf) */, spd: 45, armor: 0.1, metal: true, idleT: 0.6, immune: ["bleed", "poison"],
     intro: ["Die Runen an den Wänden glimmen auf. Der letzte Wächter der Schmiede erwacht.", "The runes on the walls begin to glow. The forge's last warden awakens."],
     outro: ["Der Wächter zerfällt in glühende Brocken. Die Runen verlöschen eine nach der anderen.", "The warden crumbles into glowing chunks. The runes go dark one by one."],
     phases: [{ at: 1, moves: ["stampf", "strahl", "pylone"] }, { at: 0.5, moves: ["stampf", "strahl", "pylone", "runenregen"], enter: e => { roar(e); e.rage = true; } }],
