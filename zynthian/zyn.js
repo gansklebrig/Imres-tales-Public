@@ -273,7 +273,8 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (art === "einschlag") return sichtbare("[data-aus]")[i] || $$("[data-aus]")[i] || null;
     return null;
   }
-  const kurzName = el => (el && (el.getAttribute("title") || el.innerText || el.textContent || "").trim().replace(/\s+/g, " ").slice(0, 40)) || "";
+  /* textContent statt innerText: innerText zwingt den Browser, die ganze Seite neu zu vermessen (auf dem Pi spürbar) */
+  const kurzName = el => (el && (el.getAttribute("title") || el.textContent || "").trim().replace(/\s+/g, " ").slice(0, 40)) || "";
   function waehle(art, i) {
     if (art === "stimmung") { const k = platz(art, i); if (k) { pultKlick("data-vorlage", k); zeige("🎵 " + stimmName(k)); } return; }
     if (art === "kulisse") { const k = platz(art, i); if (k) { ortWaehlen(k); zeige("🌲 " + kulName(k)); } return; }
@@ -1407,7 +1408,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
       const gruppiert = (sel, sym, attr, standard) => { const m = new Map();
         $$(sel).forEach(el => { const gr = el.closest(".gruppe, .weltgruppe, section, details"); const h = gr && gr.querySelector("h3, h2, summary"); let t = standard; if (h) { const hh = h.cloneNode(true); hh.querySelectorAll("small, button, .knopf").forEach(x => x.remove()); t = hh.textContent.trim().replace(/\s+/g, " ") || standard; }
           let sy, nm; const s1 = el.querySelector(".sym"), n1 = el.querySelector(".nm");
-          if (s1 && n1) { sy = s1.textContent.trim(); nm = n1.textContent.trim(); } else [sy, nm] = teil((el.innerText || el.textContent || el.title || "").split("⏳")[0].replace(/\s+/g, " "), sym);
+          if (s1 && n1) { sy = s1.textContent.trim(); nm = n1.textContent.trim(); } else [sy, nm] = teil((el.textContent || el.title || "").split("⏳")[0].replace(/\s+/g, " "), sym);
           if (!m.has(t)) m.set(t, []);
           const an = el.getAttribute("aria-pressed") === "true" || el.classList.contains("an"), tx = attr === "szene" ? el.querySelector(".tx") : null;
           /* Szenen: Dauer bzw. Restzeit und Fortschritt (die Kachel füllt sich, bis die Szene zu Ende ist) */
@@ -3372,7 +3373,8 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     PULS.bd = tp.bd; PULS.t = j;
     /* Phase nachstellen: alle Takt-Animationen auf „so weit im Schlag sind wir gerade“ setzen */
     const ms = tp.ph * tp.bd * 1000;
-    try { zpEl.getAnimations({ subtree: true }).forEach(a => { if (a.animationName && /^zpt(glow|eq)$/.test(a.animationName)) a.currentTime = ms; }); } catch (_) {}
+    /* über eine negative Verzögerung statt getAnimations() – das ging jedes Mal durch alle Elemente des Pults */
+    zpEl.style.setProperty("--ph", (-ms / 1000).toFixed(3) + "s");
   }
   setInterval(() => pulsSync(false), 2000);
   /* ===================== 👋 Begrüßung beim ersten Start ===================== */
@@ -3645,7 +3647,7 @@ html.zyn-hinter .lw-buehne, html.zyn-hinter .lw-karte, html.zyn-hinter svg { vis
     if (SEITE === "welten") {
       const a = $(".welt.an"); titel = a ? kurzName(a.querySelector(".nm") || a) : W("Stille", "Silence"); const sy = a && a.querySelector(".sym");
       unter = (sy ? sy.textContent : "🌿") + " " + W("Klangwelt", "Soundscape");
-      quellen = $$("[data-szene][aria-pressed=true], [data-ger].an").slice(0, 8).map(el => '<span class="q"><b>' + esc2(teil((el.innerText || el.textContent || "").split("⏳")[0].replace(/\s+/g, " "), "")[0] || "✦") + "</b>" + esc2(teil((el.innerText || el.textContent || "").split("⏳")[0].replace(/\s+/g, " "), "")[1]) + "</span>").join("");
+      quellen = $$("[data-szene][aria-pressed=true], [data-ger].an").slice(0, 8).map(el => '<span class="q"><b>' + esc2(teil((el.textContent || "").split("⏳")[0].replace(/\s+/g, " "), "")[0] || "✦") + "</b>" + esc2(teil((el.textContent || "").split("⏳")[0].replace(/\s+/g, " "), "")[1]) + "</span>").join("");
     } else {
       titel = z.laeuft && L ? teil(L.namen.st[z.stimmung] || "", "")[1] : W("Die Bühne wartet", "The stage is waiting");
       unter = z.kulLaeuft && L && z.kulisse && z.kulisse !== "keine" ? L.namen.kul[z.kulisse] || "" : W("kein Hintergrund", "no backdrop");
@@ -3813,16 +3815,16 @@ html.zyn-ruhe .zp-ruhe { display: block; }
 .zp-k.an .zp-med { box-shadow: inset 0 0 0 2px #fff4dc, 0 0 12px color-mix(in srgb, var(--k) 70%, transparent); }
 /* Takt-Leuchten (nur Deckkraft/Größe – das rechnet der Grafikteil, nicht das Skript) */
 .zp.takt .zp-mitte .zp-k.an::after, .zp.atem .zp-mitte .zp-k.an::after { content: ""; position: absolute; inset: -3px; border-radius: 16px; border: 2px solid var(--k, var(--f)); box-shadow: 0 0 18px var(--k, var(--f)); opacity: 0; pointer-events: none; }
-.zp.takt .zp-mitte .zp-k.an::after { animation: zptglow var(--bd, .5s) ease-out infinite; }
+.zp.takt .zp-mitte .zp-k.an::after { animation: zptglow var(--bd, .5s) ease-out var(--ph, 0s) infinite; }
 .zp.atem .zp-mitte .zp-k.an::after { animation: zptatem 4.8s ease-in-out infinite; }
 @keyframes zptglow { 0% { opacity: .9; } 55%, 100% { opacity: 0; } }
 @keyframes zptatem { 0%, 100% { opacity: 0; } 50% { opacity: .55; } }
 .zp-eq { position: absolute; left: 9px; bottom: 8px; display: flex; gap: 2px; align-items: flex-end; height: 15px; pointer-events: none; }
 .zp-eq i { width: 3px; height: 15px; background: var(--k, var(--f)); border-radius: 1px; transform-origin: 50% 100%; transform: scaleY(.3); opacity: .9; }
-.zp.takt .zp-eq i { animation: zpteq var(--bd, .5s) ease-out infinite; }
+.zp.takt .zp-eq i { animation: zpteq var(--bd, .5s) ease-out var(--ph, 0s) infinite; }
 .zp.takt .zp-eq i:nth-child(2) { animation-duration: calc(var(--bd, .5s) * 2); } .zp.takt .zp-eq i:nth-child(3) { animation-duration: calc(var(--bd, .5s) / 2); }
 @keyframes zpteq { 0% { transform: scaleY(1); } 75%, 100% { transform: scaleY(.25); } }
-.zp.takt .zp-bank::after { content: ""; display: inline-block; width: 7px; height: 7px; margin-left: 6px; border-radius: 50%; background: #ffc830; vertical-align: middle; opacity: .15; animation: zptglow var(--bd, .5s) ease-out infinite; }
+.zp.takt .zp-bank::after { content: ""; display: inline-block; width: 7px; height: 7px; margin-left: 6px; border-radius: 50%; background: #ffc830; vertical-align: middle; opacity: .15; animation: zptglow var(--bd, .5s) ease-out var(--ph, 0s) infinite; }
 /* Begrüßung */
 .zp-tour { position: fixed; left: 50%; bottom: 44px; transform: translateX(-50%); z-index: 2147482700; width: 470px; max-width: 94vw; background: #1d1626; border: 2px solid #ffc830; border-radius: 16px; padding: 12px 16px 10px; color: #f4ead4; font: 600 15px/1.3 system-ui, sans-serif; box-shadow: 0 10px 34px rgba(0, 0, 0, .65); }
 .zp-tour b { color: #ffc830; } .zp-tour .zt-t { font-size: 18px; } .zp-tour .zt-u { color: #cbbfa8; font-size: 13.5px; margin-top: 3px; }

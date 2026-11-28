@@ -2174,6 +2174,12 @@ registerProcessor("imres-loop-rec", ImresLoopRec);`;
     this.n = 8; this.len = Z.map(z => Math.max(2, Math.round(z * sr))); this.buf = this.len.map(l => new Float32Array(l)); this.pos = new Int32Array(8);
     this.lp = new Float32Array(8); this.lp2 = new Float32Array(8); this.fb = new Float32Array(Z.map(z => Math.pow(10, -3 * z / rt)));
     this.a = 1 - Math.exp(-2 * Math.PI * (p.hell || 4000) / sr); this.pegel = p.pegel == null ? 1 : p.pegel; this.ruhig = 0; this.tail = Math.round(rt * sr * 1.2);
+    this.Z = Z;
+    /* Raum wechseln ohne neuen Knoten: Nachhallzeit, Helligkeit und Pegel live nachstellen (der Nachhall klingt weich um) */
+    this.port.onmessage = e => { const q = e.data || {};
+      if (q.rt60) { const r = Math.max(.2, q.rt60); for (let k = 0; k < 8; k++) this.fb[k] = Math.pow(10, -3 * this.Z[k] / r); this.tail = Math.round(r * sampleRate * 1.2); }
+      if (q.hell) this.a = 1 - Math.exp(-2 * Math.PI * q.hell / sampleRate);
+      if (q.pegel != null) this.pegel = q.pegel; this.ruhig = 0; };
   }
   process(ins, outs) {
     const inp = ins[0], out = outs[0]; if (!out || !out.length) return true;
@@ -2202,11 +2208,16 @@ registerProcessor("imres-raum", ImresRaum);
   }
   /* ein Raum: Eingang sofort nutzbar, der Hall hängt sich an, sobald das Worklet geladen ist */
   function raumWerk([rt60, hell, pegel], ziel) {
-    const ein = ctx.createGain(); let n = null, weg = false;
+    const ein = ctx.createGain(); let n = null, weg = false, warte = null;
     const p = raumModulLaden();
-    if (p) p.then(ok => { if (!ok || weg) return; try { n = new AudioWorkletNode(ctx, "imres-raum", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [2], processorOptions: { rt60, hell, pegel } }); ein.connect(n); n.connect(ziel); } catch (_) {} });
-    return { ein, trennen: () => { weg = true; try { ein.disconnect(); } catch (_) {} if (n) try { n.disconnect(); } catch (_) {} } };
+    if (p) p.then(ok => { if (!ok || weg) return; try { n = new AudioWorkletNode(ctx, "imres-raum", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [2], processorOptions: warte ? { rt60: warte[0], hell: warte[1], pegel: warte[2] } : { rt60, hell, pegel } }); ein.connect(n); n.connect(ziel); } catch (_) {} });
+    return { ein, trennen: () => { weg = true; try { ein.disconnect(); } catch (_) {} if (n) try { n.disconnect(); } catch (_) {} },
+      setzen: ([r, h, g]) => { if (n) n.port.postMessage({ rt60: r, hell: h, pegel: g }); else warte = [r, h, g]; } };
   }
+  /* Haupt-Hall auf dem Zynthian: dieselben fünf Räume wie die Faltungshalle, als EIN Worklet, das beim Raumwechsel nur
+     umgestellt wird. Eine Faltungshalle wurde bei jedem Stimmungswechsel neu aufgebaut (bis 6,5 s Impulsantwort) – das ließ
+     den Pi kurz hängen. Nachhallzeit (T30 der Impulsantwort) und Pegel mit Rauschen gegen die Faltung gemessen. */
+  const RAUM_HALL = { stube: [.82, 7500, .126], taverne: [1.62, 5500, .151], kapelle: [3.57, 4200, .185], palast: [5.02, 6200, .195], hoehle: [7.87, 2600, .186] };
   /* Nachhallzeit (fürs Worklet), Helligkeit, Pegel – entspricht raumAntwort() bzw. echoBild() */
   const RAUM_FDN = { holz: [.6, 6500, .165], stein: [2.65, 4500, .31], weit: [3.8, 3500, .4], wald: [1, 3000, .31] }, ECHO_FDN = [5.6, 5000, .29];
   function fdnHall(rt60, hell) {
@@ -2247,6 +2258,17 @@ registerProcessor("imres-raum", ImresRaum);
       hallNode = neu; sparAktiv = false; sparAusgang();
       hallFilter.frequency.setTargetAtTime(r.hell, ctx.currentTime, .05);
       sparHallIn.gain.setTargetAtTime(hallPegel() * SPAR_HALL, ctx.currentTime, .08);
+      return;
+    }
+    if (zynGeraet && ctx.audioWorklet && RAUM_HALL[S.raum]) {
+      const pr = RAUM_HALL[S.raum];
+      if (hallNode && hallNode.setzen) hallNode.setzen(pr);
+      else {
+        if (hallNode) { try { hallFilter.disconnect(hallNode); hallNode.disconnect(); } catch (_) {} }
+        hallNode = raumWerk(pr, hallNass); hallFilter.connect(hallNode.ein);
+      }
+      if (hallNass) hallNass.gain.setTargetAtTime(hallPegel(), ctx.currentTime, .08);
+      hallFilter.frequency.setTargetAtTime(RAEUME[S.raum].hell, ctx.currentTime, .05);
       return;
     }
     const neu = ctx.createConvolver();
@@ -2644,15 +2666,23 @@ registerProcessor("imres-raum", ImresRaum);
       ambGroesse -= ambBytes(ambBuf.get(n)); ambBuf.delete(n); ambLaedt.delete(n); ambZuletzt.delete(n);
     }
   }
-  function ambLaden(name) {
+  const ambSchlange = []; let ambAktiv = 0; const AMB_MAX = 2;
+  const ambPlatz = vorne => new Promise(r => { if (ambAktiv < AMB_MAX) { ambAktiv++; r(); } else if (vorne) ambSchlange.unshift(r); else ambSchlange.push(r); });
+  const ambFrei = () => { const n = ambSchlange.shift(); if (n) setTimeout(n, 0); else ambAktiv = Math.max(0, ambAktiv - 1); };
+  /* von einem Geräusch mit vielen Fassungen erst drei zufällige holen; die übrigen kommen beim Abspielen nach und nach dazu */
+  const ambEinige = f => f.slice(0).sort(() => Math.random() - .5).slice(0, 3).forEach(n => ambLaden(n));
+  function ambLaden(name, vorne) {
     if (name === "amboss" || name.startsWith("fx_") || name.startsWith("stimme_")) return sampleLaden(name);
     if (ambBuf.has(name)) { ambZuletzt.set(name, performance.now()); return Promise.resolve(ambBuf.get(name)); }
     if (ambLaedt.has(name)) return ambLaedt.get(name);
     if (!ctx) return Promise.resolve(null);
     const c = ctx;
-    const pr = fetch(ambBasis + encodeURIComponent(name) + ".mp3").then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status))
+    /* Kulissen bringen hunderte kleine Geräusche mit: höchstens zwei gleichzeitig holen, statt alle auf einmal –
+       sonst hängt die Oberfläche beim Stimmungs- oder Menüwechsel eine halbe Sekunde (gleiches Ergebnis, nur verteilt) */
+    let frei = false; const freigeben = x => { if (!frei) { frei = true; ambFrei(); } return x; };
+    const pr = ambPlatz(vorne).then(() => fetch(ambBasis + encodeURIComponent(name) + ".mp3")).then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status))
       .then(ab => new Promise((res, rej) => { const x = c.decodeAudioData(ab, res, rej); if (x && x.catch) x.catch(rej); }))
-      .then(b => { ambMerken(name, b); return b; }).catch(() => { ambLaedt.delete(name); return null; });
+      .then(b => { freigeben(); ambMerken(name, b); return b; }).catch(() => { freigeben(); ambLaedt.delete(name); return null; });
     ambLaedt.set(name, pr); return pr;
   }
   const ambPuffer = n => { if (n === "amboss" || n.startsWith("fx_") || n.startsWith("stimme_")) return sampleBuf.get(n); const b = ambBuf.get(n); if (b) ambZuletzt.set(n, performance.now()); return b; };
@@ -2712,7 +2742,7 @@ registerProcessor("imres-raum", ImresRaum);
       kulSchleife("gemurmel", 22050, 1.1 * staerke * (k.wlaut || 1), out); return b;
     }
     b.grund = WELT_GRUND * (k.wlaut || 1) * staerke * Math.min(1.15, .055 / (AMB_LAUT[name] || .05)) * (BETT_GLEICH[name] || 1) * rauschD(urname, k.zusatz ? "_wetter" : k.art);
-    ambLaden(name).then(buf => {
+    ambLaden(name, 1).then(buf => { /* Klangbett zuerst */
       if (!buf || (k.zusatz ? k.aus : kul !== k)) return;
       b.buf = buf; b.naechst = ctx.currentTime + .05; b.bereitAb = ctx.currentTime + 3.1;
       out.gain.setValueAtTime(0, ctx.currentTime); out.gain.linearRampToValueAtTime(bettZiel(b), ctx.currentTime + 3);
@@ -2819,7 +2849,7 @@ registerProcessor("imres-raum", ImresRaum);
     if (KUL_FX[art]) { kulFx(KUL_FX[art], o.sofort ? ctx.currentTime + .05 : zynSchlag(ctx.currentTime + .05, o), laut * 1.3, weit || o.dumpf ? { tief: o.dumpf ? zz(450, 800) : zz(900, 2600) } : o.kf && o.kf < 16000 ? { tief: o.kf } : {}, k); return true; }
     const e = AMB_EV[art]; if (!e) return true;
     /* Aufnahme noch nicht geladen: nachladen und gleich nochmal versuchen, statt das Geräusch still zu verschlucken */
-    if (!e.f.some(n => ambPuffer(n))) { e.f.forEach(ambLaden); return false; }
+    if (!e.f.some(n => ambPuffer(n))) { ambEinige(e.f); return false; }
     const n = e.folge ? Math.round(zz(e.folge[0], e.folge[1])) : 1, j = o.sofort ? ctx.currentTime + .05 : zynSchlag(ctx.currentTime + .05, o);
     const dauer = e.folge ? n * (e.folge[2] + e.folge[3]) / 2 + 1.5 : 5;
     const g = ctx.createGain(); g.gain.value = laut * WELT_GRUND; let letzter = g;
@@ -3062,7 +3092,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     const j = ctx.currentTime + .03, zu = AMB_EV.tuerzu;
     if (tuerZu) { const n = zu && zufall(zu.f), b = n && ambPuffer(n);
       if (b && sfxBus) { const q = ctx.createBufferSource(), g = ctx.createGain(); q.buffer = b; g.gain.value = .9; q.connect(g); g.connect(sfxBus); q.start(j, b._start || 0); }
-      else if (zu) zu.f.forEach(ambLaden);
+      else if (zu) ambEinige(zu.f);
       aussenAnwenden(.12, .25);
     } else {
       if (!(sfxBus && echtSpielen("tuer", sfxBus, j, .8))) { const n = zu && zufall(zu.f), b = n && ambPuffer(n); if (b && sfxBus) { const q = ctx.createBufferSource(); q.buffer = b; q.playbackRate.value = 1.15; q.connect(sfxBus); q.start(j, b._start || 0); } }
@@ -3151,7 +3181,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     k.phase = 1; k.wlaut = WELT_PEGEL[k.art] || 1;
     const betten = k.betten = w.betten.slice(0, spar ? 2 : 9).map((x, i) => weltBett(k, x, i));
     /* Einzelgeräusche schon vorladen, damit das erste gleich zu hören ist */
-    w.ev.forEach(([art]) => { if (AMB_EV[art]) AMB_EV[art].f.forEach(ambLaden); else if (KUL_FX[art] && ECHT[KUL_FX[art]]) echtVorladen(); });
+    w.ev.forEach(([art]) => { if (AMB_EV[art]) ambEinige(AMB_EV[art].f); else if (KUL_FX[art] && ECHT[KUL_FX[art]]) echtVorladen(); });
     k.timer = setInterval(() => {
       if (k.zusatz ? k.aus : kul !== k) return;
       const jetzt = ctx.currentTime;
@@ -3248,7 +3278,7 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
     if (!kulBus) { kulBus = ctx.createGain(); kulBus.gain.value = .38; kulBus.connect(kulKompRef || kompRef || master); }
     g.connect(aussenWeg());
     const send = ctx.createGain(); send.gain.value = art === "hoehle" ? .9 : .3; g.connect(send); send.connect(hallEin);
-    if (AMB_EV.tuerzu) AMB_EV.tuerzu.f.forEach(ambLaden);
+    if (AMB_EV.tuerzu) ambEinige(AMB_EV.tuerzu.f);
     /* Durchgang für übernommene Schichten: sofort auf vollem Pegel, ohne das Einblenden der neuen Kulisse */
     const gd = ctx.createGain(); gd.gain.value = kulPegel(); gd.connect(aussenWeg()); gd.connect(send);
     kul = { art, g, gd, send, knoten: [], naechst: {}, schichten: [], phase: 1, phaseNaechst: 0, allein: !!sofort, erben };
@@ -5575,7 +5605,9 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
   /* Bass: gezupfte tiefe Saite mit vollem Körper – Grundton, kräftige Obertöne (hörbar auch auf kleinen
      Lautsprechern), Anschlag mit leichtem Tonhöhen-Ruck, dazu ein weicher Daumen-„Plopp". Fest auf gleiche Spitze gebracht. */
   function bassSaite(freq) {
-    const sr = ctx.sampleRate, n = Math.round(sr * 1.9), buf = ctx.createBuffer(1, n, sr), d = buf.getChannelData(0);
+    /* mit halber Abtastrate rechnen: der Bass reicht kaum über 1,5 kHz (8 Obertöne, Daumen-Plopp bei 400 Hz) –
+       klingt gleich, kostet aber nur die Hälfte (der Abspieler rechnet die Puffer-Rate selbst um) */
+    const sr = Math.max(22050, Math.round(ctx.sampleRate / 2)), n = Math.round(sr * 1.9), buf = ctx.createBuffer(1, n, sr), d = buf.getChannelData(0);
     const AMP = [1, .62, .42, .26, .16, .1, .06, .035], pos = .2;
     AMP.forEach((a0, k) => {
       const h = k + 1, fh = freq * h * (1 + .0002 * (h * h - 1)); /* Grundton exakt, nur die Obertöne leicht gespreizt */
@@ -6973,7 +7005,8 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
         const d = b.getChannelData(0), STUECK = 65536; let m = 0, i = 0, spitze = 0;
         for (let k0 = 0; k0 < d.length; k0 += STUECK) {
           const k1 = Math.min(d.length, k0 + STUECK);
-          for (let k = k0; k < k1; k++) { const a = d[k] < 0 ? -d[k] : d[k]; if (a > m) { m = a; spitze = k; } }
+          /* jede vierte Probe reicht (Spitze auf 0,1 ms genau) – viermal weniger Rechnen beim Laden */
+          for (let k = k0; k < k1; k += 4) { const a = d[k] < 0 ? -d[k] : d[k]; if (a > m) { m = a; spitze = k; } }
           if (k1 < d.length) await new Promise(r => setTimeout(r, 0));
         }
         const schwelle = m * .02; while (i < d.length && (d[i] < 0 ? -d[i] : d[i]) < schwelle) i++;
@@ -11701,13 +11734,15 @@ Object.assign(ZUS_ICON, {"hexe": ["M2.5 19h19M6 19L11.2 3.5l3 7.5 3.8 1.2-1.5 6.
   });
   /* beim ersten Besuch startet die Einführung, sobald das Pult zu sehen ist */
   function introBeobachten() {
-    if (!introNeu() || hoerer || !("IntersectionObserver" in window)) return;
+    if (!introNeu() || hoerer || document.documentElement.classList.contains("zyn-pult") || !("IntersectionObserver" in window)) return;
     const ziel = root.querySelector(".lw-einfach"); if (!ziel) return;
     const io = new IntersectionObserver(es => { if (es.some(x => x.isIntersecting && x.intersectionRatio > .25)) { io.disconnect(); setTimeout(() => { if (einfach && S.pult && root.querySelector(".lw-einfach")) introStart(false); }, 900); } }, { threshold: [.25] });
     io.observe(ziel);
   }
   let zuKopf = false;
   function kopfKleben() {
+    /* am Zynthian gibt es nichts zu scrollen – das Nachmessen (erzwingt ein Neu-Anordnen der Seite) sparen wir uns */
+    if (document.documentElement.classList.contains("zyn-pult")) return;
     const k = root.querySelector(".lw-ekopf"); if (!k || k.classList.contains("lw-ekopf-frei")) return;
     /* alle Momente offen: der Kopf ist dann länger als der Bildschirm – nicht anheften, sonst springt beim Scrollen alles */
     k.classList.toggle("lw-frei", momAlle);
