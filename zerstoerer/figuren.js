@@ -168,11 +168,11 @@
   }
   Z.drawWeapon = weapon;
   /* Waffengattungen für die Haltung */
-  const W2H = { dawn: 1, hammer: 1, scythe: 1, club: 1, anchor: 1, axe: 1, zweihaender: 1, kampfstab: 1, hellebarde: 1, spear: 1, staff: 1, eiszapfen: 1 };
+  const W2H = { dawn: 1, hammer: 1, scythe: 1, club: 1, anchor: 1, axe: 1, zweihaender: 1, kampfstab: 1, hellebarde: 1, spear: 1, staff: 1, eiszapfen: 1, laterne: 1 }; /* W38 Waffen: Laternenstab beidhändig */
   const DUAL = { sickles: 1, sickle: 1, scimitar: 1, fist: 1, stonefist: 1, krallen: 1 };
   const FISTS = { fist: 1, stonefist: 1, krallen: 1 };
   /* Wo liegt der zweite Griff entlang der Waffe (für die hintere Hand)? */
-  const GRIP2 = { spear: -7, hellebarde: -7, kampfstab: -6, scythe: -5, staff: -6, eiszapfen: -6, dawn: -3, zweihaender: -3, hammer: -4, club: -3, anchor: -2, axe: -3 };
+  const GRIP2 = { laterne: -6 /* W38 Waffen */, spear: -7, hellebarde: -7, kampfstab: -6, scythe: -5, staff: -6, eiszapfen: -6, dawn: -3, zweihaender: -3, hammer: -4, club: -3, anchor: -2, axe: -3 };
 
   /* ======================= EZEKIEL ======================= */
   /* Farben der Rüstung (bewusst warm: Schwarzrot, Knochen, Glut) */

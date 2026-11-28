@@ -9737,8 +9737,8 @@
 "sha256":"3ab7b7816ddadc9aa1ef272db3236698570d927a2f28af60f6ead1f3ac0a9320"
 },
 "zerstoerer.html":{
-"groesse":81418,
-"sha256":"37e39b869ddafcdfbef871a0dd92460494c49ffe8bdc68c5db5dd17ba0d89687"
+"groesse":81491,
+"sha256":"482bb42f6e504f9574e1e34063a8bc0d0853d97085dbd15cdbae57838549298b"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":145807,
@@ -9821,8 +9821,8 @@
 "sha256":"2e761f3b67fc6ed08a2b3f1ecb4297c2e947eb041ecdc373515efdc3ae3dcc37"
 },
 "zerstoerer/figuren.js":{
-"groesse":348681,
-"sha256":"ac56dfbcde6c7db35857d62baebf8b2b160b89c6ec8fefd4b3e4300d0362f523"
+"groesse":348766,
+"sha256":"6fb89a033ccd4c453957a600a1d81f6aba9bbb514ab603bdebca8fd5cd0ca3d3"
 },
 "zerstoerer/fluch.js":{
 "groesse":5297,
@@ -10016,6 +10016,10 @@
 "groesse":219221,
 "sha256":"498d682676f286055fcf0be3748ce5f2ae3eeeb3bc6fe8fb8c2241b77256723a"
 },
+"zerstoerer/waffen38.js":{
+"groesse":21086,
+"sha256":"ad10e53814c8cbd7a51221f7d0344bfc98992493ca5eae10e5bf8e0669839abe"
+},
 "zerstoerer/welt.js":{
 "groesse":240356,
 "sha256":"fc0bfea28d5a497a0235f28024a479040a900dd9cebce3518ea74d6ebb346af8"
@@ -10049,5 +10053,5 @@
 "sha256":"df0542ee684d5789758ae19d942444ead52fb2be7d26c59f6fc7916748f8bc34"
 }
 },
-"stand":186
+"stand":187
 }
