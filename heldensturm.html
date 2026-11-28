@@ -38484,8 +38484,8 @@ function wsTxt(c,t,x,y,col){const f=typeof wsFaktor==='function'?wsFaktor(c,0.95
  if(t2<r.bottom+2||b2>innerHeight-6){sc.style.removeProperty('padding-top');/* zu wenig Platz: Erzähler kompakter (ohne Namenszeile) und noch einmal versuchen */if(!b.classList.contains('erzKompakt')){b.classList.add('erzKompakt');return}}done=true}catch(er){}},400)})();
 /* Handy hochkant: Titel-Unterseiten mit wenig Inhalt (Mehrspieler, Offline …) etwas größer, statt die untere Hälfte leer zu lassen */
 (function(){let key='';setInterval(()=>{try{const s=document.getElementById('scr');if(!s||s.hidden)return;const p=s.querySelector('.slm>.slp');
- if(!p||!(innerWidth<=600&&innerHeight>innerWidth*1.5)||!document.body.classList.contains('imresTitel')){if(p&&p.style.zoom){p.style.zoom='';key=''}return}
- const k=innerWidth+'x'+innerHeight+'|'+p.childElementCount+'|'+(p.textContent||'').length;if(k===key)return;key=k;p.style.zoom='';
+ if(!p||!(innerWidth<=600&&innerHeight>innerWidth*1.5)||!document.body.classList.contains('imresTitel')){if(p&&p.style.zoom){p.style.zoom='';p._pzk=''}return}
+ const k=innerWidth+'x'+innerHeight+'|'+p.childElementCount+'|'+(p.textContent||'').length;if(p._pzk===k)return;p._pzk=k;p.style.zoom='';
  const mess=()=>{const t=p.getBoundingClientRect().top;let b=0;for(const e of p.querySelectorAll('*')){if(e.closest('.slbar'))continue;if(!(e.tagName==='BUTTON'||e.tagName==='CANVAS'||[...e.childNodes].some(n=>n.nodeType===3&&n.textContent.trim())))continue;const cs=getComputedStyle(e);if(cs.position==='fixed'||cs.position==='absolute')continue;const r=e.getBoundingClientRect();if(r.height>0)b=Math.max(b,r.bottom)}return{t,b}};
  const m=mess(),frei=innerHeight-60;if(m.b<=0||m.b>frei*0.86)return;let z=Math.min(1.3,Math.max(1,(frei-m.t)/(m.b-m.t)*0.94));if(z<1.05)return;
  for(let i=0;i<4;i++){p.style.zoom=String(z);const m2=mess();if(m2.b<=frei)return;z-=0.06;if(z<1.05){p.style.zoom='';return}}p.style.zoom=''}catch(e){}},400)})();
