@@ -26,7 +26,7 @@
     { key: "heldensturm", karte: "heldensturm", extern: "heldensturm.html", held: "barradin.jpg", bilder: ["vorschau/heldensturm-1.webp?v=5", "vorschau/heldensturm-2.webp?v=5", "vorschau/heldensturm-3.webp?v=5"], gross: true,
       plakat: B("plakat-heldensturm"), pos: "center 45%", farbe: "#ff7a3d", clip: "vorschau/heldensturm-clip.mp4?v=5", ton: "timp1.mp3", art: "neu", stand: "2026-10-26" },
     { key: "zerstoerer", karte: "zerstoerer", extern: "zerstoerer.html", held: "ezekiel.jpg", bilder: ["vorschau/zerstoerer-1.webp?v=2", "vorschau/zerstoerer-2.webp?v=2", "vorschau/zerstoerer-3.webp?v=2"], gross: true,
-      plakat: "vorschau/plakat-zerstoerer.webp?v=2", pos: "65% 40%", farbe: "#ff3a2a", clip: "vorschau/zerstoerer-clip.mp4?v=2", ton: "timp1.mp3", art: "update", stand: "2026-11-28" },
+      plakat: "vorschau/plakat-zerstoerer.webp?v=2", pos: "65% 40%", farbe: "#ff3a2a", clip: "vorschau/zerstoerer-clip.mp4?v=3", ton: "timp1.mp3", art: "update", stand: "2026-11-28" },
     { key: "jagd", karte: "waldlauf", held: "friedrich.jpg", bilder: ["vorschau/jagd-1.webp?v=5", "vorschau/jagd-2.webp?v=5", "vorschau/jagd-3.webp?v=5"],
       plakat: B("plakat-jagd"), pos: "center 22%", farbe: "#8fd36b", clip: "vorschau/jagd-clip.mp4?v=6", ton: "bogen.mp3", art: "update", stand: "2026-11-28" },
     { key: "hort", karte: "echohort", held: "echo.jpg", bilder: [B("hort-1"), B("hort-2"), B("hort-3")],
