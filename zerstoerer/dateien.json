@@ -9737,8 +9737,8 @@
 "sha256":"3ab7b7816ddadc9aa1ef272db3236698570d927a2f28af60f6ead1f3ac0a9320"
 },
 "zerstoerer.html":{
-"groesse":81593,
-"sha256":"bc9aeb2722c261f618def8260fdfe7ca704f9c370e94f09397324e5a53142cf8"
+"groesse":81672,
+"sha256":"bc1ffcfb9b8e4fd03ab57f60ce0b88c6d68ff610bcf509ecfd90adcad803e52f"
 },
 "zerstoerer/abenteuer.js":{
 "groesse":145807,
@@ -9763,6 +9763,10 @@
 "zerstoerer/ausstattung.js":{
 "groesse":376609,
 "sha256":"68c124180bd0f68f8cdbddd3b27e8be9e777f265c1ddae20426cef85ee334f6a"
+},
+"zerstoerer/begegnung38.js":{
+"groesse":20869,
+"sha256":"9c20ea2341d32ec1c47b7ee6f53d8cadd044f823e6ee1b72582f0baf2c0531f2"
 },
 "zerstoerer/bericht.js":{
 "groesse":22057,
@@ -9821,8 +9825,8 @@
 "sha256":"2e761f3b67fc6ed08a2b3f1ecb4297c2e947eb041ecdc373515efdc3ae3dcc37"
 },
 "zerstoerer/figuren.js":{
-"groesse":348766,
-"sha256":"6fb89a033ccd4c453957a600a1d81f6aba9bbb514ab603bdebca8fd5cd0ca3d3"
+"groesse":348904,
+"sha256":"e0ee0674e70cf1c90fb0beb259fc41bedea61c8b64c96204136e146e8ff9b327"
 },
 "zerstoerer/fluch.js":{
 "groesse":5297,
@@ -10021,8 +10025,8 @@
 "sha256":"498d682676f286055fcf0be3748ce5f2ae3eeeb3bc6fe8fb8c2241b77256723a"
 },
 "zerstoerer/waffen38.js":{
-"groesse":21086,
-"sha256":"ad10e53814c8cbd7a51221f7d0344bfc98992493ca5eae10e5bf8e0669839abe"
+"groesse":21321,
+"sha256":"aae3519343edaa87b98e957abffdb531aa630e06dc2755a2f1e39d84588f0611"
 },
 "zerstoerer/welt.js":{
 "groesse":240356,
@@ -10057,5 +10061,5 @@
 "sha256":"df0542ee684d5789758ae19d942444ead52fb2be7d26c59f6fc7916748f8bc34"
 }
 },
-"stand":188
+"stand":189
 }

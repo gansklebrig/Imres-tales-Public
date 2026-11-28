@@ -1964,7 +1964,7 @@
     }
     /* Statussymbole */
     const icons = [];
-    /* Betäubung zeigen die kreisenden Sterne */ if (e.st.root > 0) icons.push(["⌇", "#9ad04a"]); if (e.st.weak > 0) icons.push(["♪", "#ffc24a"]); if (e.st.mark > 0) icons.push(["◎", "#c88a4a"]); if (e.st.fear > 0) icons.push(["?", "#ffc24a"]);
+    /* Betäubung zeigen die kreisenden Sterne */ if (e.st.root > 0) icons.push(["⌇", "#9ad04a"]); if (e.st.weak > 0) icons.push(e.w38blind > 0 && e.st.weak <= e.w38blind + 0.05 ? ["☼", "#fff0b0"] : ["♪", "#ffc24a"]); /* W38 Waffen: vom Laternenstab geblendet → Sonne statt Note */ if (e.st.mark > 0) icons.push(["◎", "#c88a4a"]); if (e.st.fear > 0) icons.push(["?", "#ffc24a"]);
     if (icons.length && !dead) { c.font = "700 7px sans-serif"; c.textAlign = "center"; icons.forEach((ic, i) => { const ix = cx - (icons.length - 1) * 4 + i * 8 + (ic[0] === "✦" ? Math.sin(time * 8) * 2 : 0); if (!(sprPs > 0 && txtSpr(c, ic[0], "700 7px sans-serif", 7, ic[1], null, 0, ix, e.y - 12))) { c.font = "700 7px sans-serif"; c.textAlign = "center"; c.fillStyle = ic[1]; c.fillText(ic[0], ix, e.y - 12); } }); }
   };
   /* alter Schwungwert (−1 Ausholen … +1 Schlag), stetig statt sprunghaft */

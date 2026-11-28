@@ -67,7 +67,7 @@
     const eff = { weak: full ? 4 : 2.5 }; if (full) eff.stun = 0.9;
     const p = Z.spawnProj("w38licht", P.x + P.w / 2 + P.face * 10, P.y + 12, P.face, { dmg: dm, it, eff, life: full ? 0.32 : 0.22 });
     p.w38g = g;
-    if (lvl("laternenstab") >= 3) p.onHitE = (q, e) => { if (e.def && (e.def.undead || e.def.demon)) Z.addStatus(e, "burn", 3); };
+    p.onHitE = (q, e) => { e.w38blind = e.st.weak || 0; /* Statussymbol „geblendet“ (figuren.js); ohne Unterstrich → auch beim Online-Gast */ if (lvl("laternenstab") >= 3 && e.def && (e.def.undead || e.def.demon)) Z.addStatus(e, "burn", 3); };
     if (full) P.w38glut = 0; /* nur die volle Laterne leert sich – sonst wird jede zweite Kette zum großen Blitz */
     A.play("holy", { vol: full ? 0.6 : 0.4, rate: full ? 1 : 1.25 }); if (full) A.play("magic", { vol: 0.35, rate: 1.4 });
     if (!offFx()) { FX.ring(P.x + P.w / 2 + P.face * 14, P.y + 10, full ? 34 : 22, "#ffe8a0", 0.25, 3); FX.burst(P.x + P.w / 2 + P.face * 16, P.y + 10, full ? 18 : 9, { col: ["#fff4c8", "#ffcf6a"], sp: 160, ang: P.face > 0 ? 0 : Math.PI, spread: 0.9, life: 0.3, size: 2, kind: "spark", add: true }); }
@@ -84,7 +84,7 @@
   function entladen(P, it) {
     const n = P.w38lad || 0; if (n <= 0) return;
     P.w38lad = 0; P.w38ladT = 0;
-    const dm = Z.dmgOf(P, it, 8 + 8 * n);
+    const dm = Z.dmgOf(P, it, 8 + 7 * n); /* W38 Waffen R2: 8+8·n → 8+7·n (Schildvergleich 20 s gegen 2 Söldner: 675 Schaden, Median der Schilde 564) */
     const p = Z.spawnProj("w38ladung", P.x + P.w / 2 + P.face * 8, P.y + 14, P.face, { dmg: dm, it, eff: { stun: 0.25 + 0.15 * n }, life: 0.14 + 0.05 * n });
     p.w38n = n; p.onHitE = (q, e) => { if (!(e.def && (e.def.boss || e.def.heavy))) { e.vx = q.dir * (180 + 50 * n); e.vy = -60 - 20 * n; } };
     A.play("quake", { vol: 0.3 + 0.08 * n, rate: 1.3 - n * 0.06 }); A.play("hitHeavy", { vol: 0.5 });
