@@ -243,10 +243,19 @@
     const k = m.querySelector(":scope > .knoepfe"); if (!k) return;
     m.classList.toggle("w38-klebt", m.scrollHeight > m.clientHeight + 4);
   }
+  /* W38 Frei (Pad-Probelauf, neuer Spielstand): Am Tor mit leeren Händen lag der Fokus auf „Los!“ – wer mit dem Pad
+     A drückt, zog unbewaffnet in die Feste. Sind beide Hände leer, steht der Fokus jetzt auf der ersten Schnellwahl
+     (Nundro reicht die Waffen); danach setzt abenteuer.js ihn selbst wieder auf „Los!“. Maus/Touch merken davon nichts. */
+  function torFokus() {
+    const w = document.querySelector("#modal:not([hidden]) .mbox p.warnung"); if (!w || w.dataset.w38f || off()) return;
+    const go = document.querySelector('#modal [data-act="abGo"]'), kit = document.querySelector('#modal [data-act="abKit"]'); if (!go || !kit) return;
+    w.dataset.w38f = "1";
+    if (!document.activeElement || document.activeElement === go || document.activeElement === document.body) kit.focus();
+  }
   function wireOpen() {
     const md = document.getElementById("modal"); if (!md) return setTimeout(wireOpen, 120);
     let pend = 0;
-    new MutationObserver(() => { if (pend) return; pend = setTimeout(() => { pend = 0; try { pauseFlach(); klebe(); } catch (e) { console.error("W38 QA", e); } }, 60); }).observe(md, { childList: true, subtree: true });
+    new MutationObserver(() => { if (pend) return; pend = setTimeout(() => { pend = 0; try { pauseFlach(); klebe(); torFokus(); } catch (e) { console.error("W38 QA", e); } }, 60); }).observe(md, { childList: true, subtree: true });
     addEventListener("resize", () => { try { klebe(); } catch (_) {} });
   }
   wireOpen();

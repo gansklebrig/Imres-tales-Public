@@ -147,10 +147,12 @@
       c.fillStyle = "rgba(10,4,2,.55)"; c.beginPath(); c.arc(mx + 0.2, cy + 0.8, r, 0, TAU); c.fill();
       c.fillStyle = "#241a1e"; c.beginPath(); c.arc(mx, cy, r, 0, TAU); c.fill();
       c.strokeStyle = "#c8a050"; c.lineWidth = 0.5; c.beginPath(); c.arc(mx, cy, r - 0.3, 0, TAU); c.stroke();
-      c.fillStyle = "#4a3c40"; c.beginPath(); c.arc(mx, cy, r * 0.42, 0, TAU); c.fill();
-      c.fillStyle = "#ffd27a";
-      const tri = (ax, ay, dx, dy) => { c.beginPath(); c.moveTo(ax + dx * 1.9, ay + dy * 1.9); c.lineTo(ax - dy * 1.5, ay + dx * 1.5); c.lineTo(ax + dy * 1.5, ay - dx * 1.5); c.closePath(); c.fill(); };
-      if (k.s === "▲") tri(mx, cy - 1.6, 0, -1); else if (k.s === "▼") tri(mx, cy + 1.6, 0, 1); else { tri(mx - 2, cy, -1, 0); tri(mx + 2, cy, 1, 0); }
+      /* W38 Frei: Stick-Richtung gut lesbar – vorher ein Dreieck von ~2 px auf dunklem Mittelpunkt (Holzsteg: „[↓] + A“ unlesbar).
+         Jetzt kräftiges goldenes Dreieck mit dunkler Kontur über fast den ganzen Knopf, Stickkappe nur als Ring angedeutet. */
+      c.strokeStyle = "rgba(200,160,80,.45)"; c.lineWidth = 0.4; c.beginPath(); c.arc(mx, cy, r * 0.5, 0, TAU); c.stroke();
+      c.fillStyle = "#ffd27a"; c.strokeStyle = "#1a1012"; c.lineWidth = 0.55; c.lineJoin = "round";
+      const tri = (ax, ay, dx, dy, s) => { c.beginPath(); c.moveTo(ax + dx * s, ay + dy * s); c.lineTo(ax - dx * s * 0.55 - dy * s * 0.95, ay - dy * s * 0.55 + dx * s * 0.95); c.lineTo(ax - dx * s * 0.55 + dy * s * 0.95, ay - dy * s * 0.55 - dx * s * 0.95); c.closePath(); c.stroke(); c.fill(); };
+      if (k.s === "▲") tri(mx, cy + 0.3, 0, -1, 3.1); else if (k.s === "▼") tri(mx, cy - 0.3, 0, 1, 3.1); else { tri(mx - 1.9, cy, -1, 0, 1.9); tri(mx + 1.9, cy, 1, 0, 1.9); }
     } else {
       c.fillStyle = "rgba(10,4,2,.55)"; rr(c, x + 0.2, y + 0.9, w, KH, 2.6); c.fill();
       const g = c.createLinearGradient(0, y, 0, y + KH); g.addColorStop(0, "#40343a"); g.addColorStop(1, "#1e161a");

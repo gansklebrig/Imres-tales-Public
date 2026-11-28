@@ -670,6 +670,7 @@
     if (!cur || !list.includes(cur)) { focusEl(ensureFocus()); return; }
     const r0 = cur.getBoundingClientRect(), cx = r0.left + r0.width / 2, cy = r0.top + r0.height / 2;
     let best = null, bs = Infinity;
+    const C = []; /* W39 Robust: Kandidaten für die Zeilen-/Spalten-Wahl unten */
     for (const el of list) {
       if (el === cur) continue;
       const r = el.getBoundingClientRect(), ex = r.left + r.width / 2, ey = r.top + r.height / 2;
@@ -681,6 +682,18 @@
          waagrecht: in der Zeile bleiben */
       const sc = Math.max(0, edge) + ortho * (dy ? 0.6 : 2.5) + Math.abs(px) * 0.05;
       if (sc < bs) { bs = sc; best = el; }
+      C.push({ el, edge: Math.max(0, edge), ov: dx ? Math.min(r.bottom, r0.bottom) - Math.max(r.top, r0.top) : Math.min(r.right, r0.right) - Math.max(r.left, r0.left), off: dx ? Math.abs(ey - cy) : Math.abs(ex - cx) });
+    }
+    /* W39 Robust: Raster (Pausenmenü aus frei.js, Laden, Einstellungen) – in die direkt benachbarte Zelle statt schräg/weit:
+       waagrecht zuerst, was in derselben Zeile liegt (Überdeckung), davon die nächste; sonst und senkrecht die nächste Zeile/Spalte
+       (Kantenabstand + Toleranz), darin die mit der größten Überdeckung, bei Gleichstand die mit der nächsten Mitte.
+       Gilt nur zwischen Geschwistern eines CSS-Rasters (display: grid); sonst bleibt die Wertung oben. */
+    const gp = cur.parentElement, grid = !!(gp && /grid/.test(getComputedStyle(gp).display));
+    const Cg = grid ? C.filter(c => c.el.parentElement === gp) : [];
+    if (Cg.length) { /* nur innerhalb eines CSS-Rasters; Listen/Einstellungen und der Weg aus dem Raster heraus bleiben wie bisher */
+      const C = Cg; const pickBand = arr => { const near = Math.min(...arr.map(c => c.edge)), tol = Math.max(8, (dy ? r0.height : r0.width) * 0.5); const band = arr.filter(c => c.edge <= near + tol); band.sort((p, q) => (q.ov > 4 ? q.ov : 0) - (p.ov > 4 ? p.ov : 0) || p.off - q.off || p.edge - q.edge); return band[0].el; };
+      const same = dx ? C.filter(c => c.ov > Math.min(r0.height, 12) * 0.5) : [];
+      best = same.length ? same.sort((p, q) => p.edge - q.edge || p.off - q.off)[0].el : pickBand(C);
     }
     if (best) focusEl(best);
     else if (dy) {
