@@ -67,7 +67,7 @@
 /* Touch: Zoomknöpfe des Sternbilds stehen oben rechts – die Resonanzen-Zeile oben links hält davon Abstand */@media (pointer:coarse){.stmap .rsMap{max-width:calc(100% - 140px)!important}.stmap .spkhint.spkhint{left:8px!important;transform:none!important;max-width:calc(100% - 150px)!important}}
 /* Offline-Seite auf sehr flachen Fenstern: Kartentext lesbar (statt 8 px), Zusatzhinweise (Installationswarnungen) dafür weg */@media (max-height:430px) and (min-width:600px){.offpg p{font-size:10.5px!important;line-height:1.3}.offpg .offk .slbtn{font-size:10.5px}.offpg .offk p.offh{display:none}.offpg .offgrid.offgrid:not(:has(>.offk:nth-child(4))){grid-template-columns:repeat(3,minmax(0,1fr))}.offpg .offk .slbtn{max-width:100%;white-space:normal;box-sizing:border-box}}
 /* Kleine Handys hochkant: Namen der Ausrüstungsplätze größer (lange Namen werden gekürzt: Nah, Fern, Rüst., Hände) */@media (max-width:480px){#scr .it>span.sl{font-size:9.5px!important}}
-/* Handy hochkant, Zwischenbildschirm ohne Platz: Erzählerzeile kompakt */body.erzKompakt .erzSub .erzWer{display:none!important}body.erzKompakt .erzSub .erzBild{width:30px!important;height:30px!important}body.erzKompakt .erzSub{padding-top:4px!important;padding-bottom:4px!important}
+/* Handy hochkant, Zwischenbildschirm ohne Platz: Erzählerzeile kompakt */body.erzKompakt .erzSub .erzWer,body.erzKompaktQ .erzSub .erzWer{display:none!important}body.erzKompakt .erzSub .erzBild,body.erzKompaktQ .erzSub .erzBild{width:30px!important;height:30px!important}body.erzKompakt .erzSub,body.erzKompaktQ .erzSub{padding-top:4px!important;padding-bottom:4px!important}
 /* Großbild: Eckknöpfe des Titels mitwachsen lassen */@media (min-width:2200px) and (min-height:1300px){#imresBack{font-size:15px;padding:6px 14px}.camp-top .slbtn{font-size:20px}.mfbar .mft{font-size:17px}}@media (min-width:1900px) and (min-height:1000px){.slm>.slp{zoom:1.15;width:calc(100% / 1.15)}}@media (min-width:2300px) and (min-height:1350px){.slm>.slp{zoom:1.32;width:calc(100% / 1.32)}.slm-in>.slm-l{zoom:1.28}}@media (min-width:2200px) and (min-height:1300px){.wrap.ivg .bag.ivsz .it .ico.ico{width:clamp(20px,calc(var(--ivs) * .4),58px)!important;height:clamp(20px,calc(var(--ivs) * .4),58px)!important}}
 </style>
 <script src="tonregler.js?v=1"></script>
@@ -38359,17 +38359,17 @@ if(typeof AR_PDRAW==='object'&&AR_PDRAW.ar_altar){AR_PDRAW.ar_altar=function(p,t
  setInterval(()=>{try{const e=document.querySelector('.erzSub'),s=document.getElementById('scr'),b=document.body;if(!e||!s)return;
   if(!e.classList.contains('an')&&pos&&!s.hidden)return;/* beim Ausblenden an Ort und Stelle bleiben */
   const ak=!s.hidden&&innerHeight<=520&&innerWidth>innerHeight&&!b.classList.contains('chrAuf')&&!b.classList.contains('erzEck')&&e.classList.contains('an')&&!e.classList.contains('pz')&&s.querySelector('.wrap');
-  if(!ak){if(pos){clr(e);pos=0}key='';return}
-  const k=(e.textContent||'').slice(0,60)+'|'+s.childElementCount+'|'+(s.firstElementChild?s.firstElementChild.className:'')+'|'+innerWidth+'x'+innerHeight;if(k===key)return;key=k;if(pos){clr(e);pos=0}
+  if(!ak){if(pos){clr(e);pos=0}key='';if(b.classList.contains('erzKompaktQ'))b.classList.remove('erzKompaktQ');return}
+  const k=(e.textContent||'').slice(0,60)+'|'+s.childElementCount+'|'+(s.firstElementChild?s.firstElementChild.className:'')+'|'+innerWidth+'x'+innerHeight;if(k===key)return;if(key&&key.split('|').slice(1).join('|')!==k.split('|').slice(1).join('|'))b.classList.remove('erzKompaktQ');key=k;if(pos){clr(e);pos=0}
   const r=e.getBoundingClientRect(),w=r.width,h=r.height;if(w<20||h<10)return;const ob=[],rg=document.createRange();
-  for(const x of s.querySelectorAll('*')){const tn=x.tagName;if(tn==='CANVAS')continue;if(tn==='BUTTON'||tn==='IMG'||tn==='INPUT'){const q=x.getBoundingClientRect();if(q.width>1&&q.height>1)ob.push(q);continue}
+  for(const x of (s.querySelector('.g2ov')||s).querySelectorAll('*')){const tn=x.tagName;if(tn==='CANVAS')continue;if(x.classList.contains('g2box')){ob.push(x.getBoundingClientRect());continue}if(tn==='BUTTON'||tn==='IMG'||tn==='INPUT'){const q=x.getBoundingClientRect();if(q.width>1&&q.height>1)ob.push(q);continue}
    for(const n of x.childNodes){if(n.nodeType!==3||!n.textContent.trim())continue;rg.selectNodeContents(n);for(const q of rg.getClientRects())if(q.width>1)ob.push(q)}}
   const hit=(L,T)=>ob.some(q=>q.left<L+w+4&&q.right>L-4&&q.top<T+h+4&&q.bottom>T-4);if(!hit(r.left,r.top))return;
   const m=8,W_=innerWidth,H_=innerHeight,set=(L,T,ww)=>{e.style.setProperty('left',L+'px','important');e.style.setProperty('top',T+'px','important');e.style.setProperty('right','auto','important');e.style.setProperty('bottom','auto','important');e.style.setProperty('transform','none','important');e.style.setProperty('width',Math.ceil(ww)+'px','important');e.style.setProperty('max-width','none','important');e.style.setProperty('margin','0','important');e.dataset.ecke='1';pos=1};
   for(const ww of [w,Math.min(w,240),Math.min(w,210),Math.min(w,185)]){set(m,m,ww);const r2=e.getBoundingClientRect(),hh=r2.height,aw=r2.width;
    const hit2=(L,T)=>ob.some(q=>q.left<L+aw+4&&q.right>L-4&&q.top<T+hh+4&&q.bottom>T-4);
    for(const c of [[m,m],[W_-aw-m,m],[m,H_-hh-m],[W_-aw-m,H_-hh-m]])if(!hit2(c[0],c[1])){set(c[0],c[1],ww);return}}
-  clr(e);pos=0;
+  clr(e);pos=0;if(!b.classList.contains('erzKompaktQ')){b.classList.add('erzKompaktQ');key=''}
  }catch(er){}},350)})();
 /* Kleine Bildschirme: Sprechblasen und Ortsnamen über Zielobjekten wachsen mit, wenn die Welt stark verkleinert gezeigt wird (sonst 6–7 px Schrift) */
 function wsFaktor(c,min){try{const m=c.getTransform(),r=c.canvas.width/Math.max(1,innerWidth),s=Math.hypot(m.a,m.b)/r;if(s>0&&s<min)return Math.min(1.9,min/s)}catch(e){}return 1}
